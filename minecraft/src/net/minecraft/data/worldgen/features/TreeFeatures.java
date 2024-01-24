@@ -8,7 +8,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.data.worldgen.BootstapContext;
+import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.random.SimpleWeightedRandomList;
@@ -157,8 +157,8 @@ public class TreeFeatures {
 			.ignoreVines();
 	}
 
-	public static void bootstrap(BootstapContext<ConfiguredFeature<?, ?>> bootstapContext) {
-		HolderGetter<Block> holderGetter = bootstapContext.lookup(Registries.BLOCK);
+	public static void bootstrap(BootstrapContext<ConfiguredFeature<?, ?>> bootstrapContext) {
+		HolderGetter<Block> holderGetter = bootstrapContext.lookup(Registries.BLOCK);
 		BlockPredicate blockPredicate = BlockPredicate.matchesBlocks(
 			Blocks.OAK_SAPLING,
 			Blocks.SPRUCE_SAPLING,
@@ -219,7 +219,7 @@ public class TreeFeatures {
 			Blocks.SMALL_DRIPLEAF
 		);
 		FeatureUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			CRIMSON_FUNGUS,
 			Feature.HUGE_FUNGUS,
 			new HugeFungusConfiguration(
@@ -232,7 +232,7 @@ public class TreeFeatures {
 			)
 		);
 		FeatureUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			CRIMSON_FUNGUS_PLANTED,
 			Feature.HUGE_FUNGUS,
 			new HugeFungusConfiguration(
@@ -245,7 +245,7 @@ public class TreeFeatures {
 			)
 		);
 		FeatureUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			WARPED_FUNGUS,
 			Feature.HUGE_FUNGUS,
 			new HugeFungusConfiguration(
@@ -258,7 +258,7 @@ public class TreeFeatures {
 			)
 		);
 		FeatureUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			WARPED_FUNGUS_PLANTED,
 			Feature.HUGE_FUNGUS,
 			new HugeFungusConfiguration(
@@ -271,7 +271,7 @@ public class TreeFeatures {
 			)
 		);
 		FeatureUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			HUGE_BROWN_MUSHROOM,
 			Feature.HUGE_BROWN_MUSHROOM,
 			new HugeMushroomFeatureConfiguration(
@@ -288,7 +288,7 @@ public class TreeFeatures {
 			)
 		);
 		FeatureUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			HUGE_RED_MUSHROOM,
 			Feature.HUGE_RED_MUSHROOM,
 			new HugeMushroomFeatureConfiguration(
@@ -304,9 +304,9 @@ public class TreeFeatures {
 		BeehiveDecorator beehiveDecorator3 = new BeehiveDecorator(0.02F);
 		BeehiveDecorator beehiveDecorator4 = new BeehiveDecorator(0.05F);
 		BeehiveDecorator beehiveDecorator5 = new BeehiveDecorator(1.0F);
-		FeatureUtils.register(bootstapContext, OAK, Feature.TREE, createOak().build());
+		FeatureUtils.register(bootstrapContext, OAK, Feature.TREE, createOak().build());
 		FeatureUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			DARK_OAK,
 			Feature.TREE,
 			new TreeConfiguration.TreeConfigurationBuilder(
@@ -319,9 +319,9 @@ public class TreeFeatures {
 				.ignoreVines()
 				.build()
 		);
-		FeatureUtils.register(bootstapContext, BIRCH, Feature.TREE, createBirch().build());
+		FeatureUtils.register(bootstrapContext, BIRCH, Feature.TREE, createBirch().build());
 		FeatureUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			ACACIA,
 			Feature.TREE,
 			new TreeConfiguration.TreeConfigurationBuilder(
@@ -334,10 +334,10 @@ public class TreeFeatures {
 				.ignoreVines()
 				.build()
 		);
-		FeatureUtils.register(bootstapContext, CHERRY, Feature.TREE, cherry().build());
-		FeatureUtils.register(bootstapContext, CHERRY_BEES_005, Feature.TREE, cherry().decorators(List.of(beehiveDecorator4)).build());
+		FeatureUtils.register(bootstrapContext, CHERRY, Feature.TREE, cherry().build());
+		FeatureUtils.register(bootstrapContext, CHERRY_BEES_005, Feature.TREE, cherry().decorators(List.of(beehiveDecorator4)).build());
 		FeatureUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			SPRUCE,
 			Feature.TREE,
 			new TreeConfiguration.TreeConfigurationBuilder(
@@ -351,7 +351,7 @@ public class TreeFeatures {
 				.build()
 		);
 		FeatureUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			PINE,
 			Feature.TREE,
 			new TreeConfiguration.TreeConfigurationBuilder(
@@ -365,15 +365,15 @@ public class TreeFeatures {
 				.build()
 		);
 		FeatureUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			JUNGLE_TREE,
 			Feature.TREE,
 			createJungleTree().decorators(ImmutableList.of(new CocoaDecorator(0.2F), TrunkVineDecorator.INSTANCE, new LeaveVineDecorator(0.25F))).ignoreVines().build()
 		);
-		FeatureUtils.register(bootstapContext, FANCY_OAK, Feature.TREE, createFancyOak().build());
-		FeatureUtils.register(bootstapContext, JUNGLE_TREE_NO_VINE, Feature.TREE, createJungleTree().ignoreVines().build());
+		FeatureUtils.register(bootstrapContext, FANCY_OAK, Feature.TREE, createFancyOak().build());
+		FeatureUtils.register(bootstrapContext, JUNGLE_TREE_NO_VINE, Feature.TREE, createJungleTree().ignoreVines().build());
 		FeatureUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			MEGA_JUNGLE_TREE,
 			Feature.TREE,
 			new TreeConfiguration.TreeConfigurationBuilder(
@@ -387,7 +387,7 @@ public class TreeFeatures {
 				.build()
 		);
 		FeatureUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			MEGA_SPRUCE,
 			Feature.TREE,
 			new TreeConfiguration.TreeConfigurationBuilder(
@@ -401,7 +401,7 @@ public class TreeFeatures {
 				.build()
 		);
 		FeatureUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			MEGA_PINE,
 			Feature.TREE,
 			new TreeConfiguration.TreeConfigurationBuilder(
@@ -414,16 +414,16 @@ public class TreeFeatures {
 				.decorators(ImmutableList.of(new AlterGroundDecorator(BlockStateProvider.simple(Blocks.PODZOL))))
 				.build()
 		);
-		FeatureUtils.register(bootstapContext, SUPER_BIRCH_BEES_0002, Feature.TREE, createSuperBirch().decorators(ImmutableList.of(beehiveDecorator)).build());
-		FeatureUtils.register(bootstapContext, SUPER_BIRCH_BEES, Feature.TREE, createSuperBirch().decorators(ImmutableList.of(beehiveDecorator5)).build());
+		FeatureUtils.register(bootstrapContext, SUPER_BIRCH_BEES_0002, Feature.TREE, createSuperBirch().decorators(ImmutableList.of(beehiveDecorator)).build());
+		FeatureUtils.register(bootstrapContext, SUPER_BIRCH_BEES, Feature.TREE, createSuperBirch().decorators(ImmutableList.of(beehiveDecorator5)).build());
 		FeatureUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			SWAMP_OAK,
 			Feature.TREE,
 			createStraightBlobTree(Blocks.OAK_LOG, Blocks.OAK_LEAVES, 5, 3, 0, 3).decorators(ImmutableList.of(new LeaveVineDecorator(0.25F))).build()
 		);
 		FeatureUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			JUNGLE_BUSH,
 			Feature.TREE,
 			new TreeConfiguration.TreeConfigurationBuilder(
@@ -436,7 +436,7 @@ public class TreeFeatures {
 				.build()
 		);
 		FeatureUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			AZALEA_TREE,
 			Feature.TREE,
 			new TreeConfiguration.TreeConfigurationBuilder(
@@ -455,7 +455,7 @@ public class TreeFeatures {
 				.build()
 		);
 		FeatureUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			MANGROVE,
 			Feature.TREE,
 			new TreeConfiguration.TreeConfigurationBuilder(
@@ -502,7 +502,7 @@ public class TreeFeatures {
 				.build()
 		);
 		FeatureUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			TALL_MANGROVE,
 			Feature.TREE,
 			new TreeConfiguration.TreeConfigurationBuilder(
@@ -548,15 +548,15 @@ public class TreeFeatures {
 				.ignoreVines()
 				.build()
 		);
-		FeatureUtils.register(bootstapContext, OAK_BEES_0002, Feature.TREE, createOak().decorators(List.of(beehiveDecorator)).build());
-		FeatureUtils.register(bootstapContext, OAK_BEES_002, Feature.TREE, createOak().decorators(List.of(beehiveDecorator3)).build());
-		FeatureUtils.register(bootstapContext, OAK_BEES_005, Feature.TREE, createOak().decorators(List.of(beehiveDecorator4)).build());
-		FeatureUtils.register(bootstapContext, BIRCH_BEES_0002, Feature.TREE, createBirch().decorators(List.of(beehiveDecorator)).build());
-		FeatureUtils.register(bootstapContext, BIRCH_BEES_002, Feature.TREE, createBirch().decorators(List.of(beehiveDecorator3)).build());
-		FeatureUtils.register(bootstapContext, BIRCH_BEES_005, Feature.TREE, createBirch().decorators(List.of(beehiveDecorator4)).build());
-		FeatureUtils.register(bootstapContext, FANCY_OAK_BEES_0002, Feature.TREE, createFancyOak().decorators(List.of(beehiveDecorator)).build());
-		FeatureUtils.register(bootstapContext, FANCY_OAK_BEES_002, Feature.TREE, createFancyOak().decorators(List.of(beehiveDecorator3)).build());
-		FeatureUtils.register(bootstapContext, FANCY_OAK_BEES_005, Feature.TREE, createFancyOak().decorators(List.of(beehiveDecorator4)).build());
-		FeatureUtils.register(bootstapContext, FANCY_OAK_BEES, Feature.TREE, createFancyOak().decorators(List.of(beehiveDecorator5)).build());
+		FeatureUtils.register(bootstrapContext, OAK_BEES_0002, Feature.TREE, createOak().decorators(List.of(beehiveDecorator)).build());
+		FeatureUtils.register(bootstrapContext, OAK_BEES_002, Feature.TREE, createOak().decorators(List.of(beehiveDecorator3)).build());
+		FeatureUtils.register(bootstrapContext, OAK_BEES_005, Feature.TREE, createOak().decorators(List.of(beehiveDecorator4)).build());
+		FeatureUtils.register(bootstrapContext, BIRCH_BEES_0002, Feature.TREE, createBirch().decorators(List.of(beehiveDecorator)).build());
+		FeatureUtils.register(bootstrapContext, BIRCH_BEES_002, Feature.TREE, createBirch().decorators(List.of(beehiveDecorator3)).build());
+		FeatureUtils.register(bootstrapContext, BIRCH_BEES_005, Feature.TREE, createBirch().decorators(List.of(beehiveDecorator4)).build());
+		FeatureUtils.register(bootstrapContext, FANCY_OAK_BEES_0002, Feature.TREE, createFancyOak().decorators(List.of(beehiveDecorator)).build());
+		FeatureUtils.register(bootstrapContext, FANCY_OAK_BEES_002, Feature.TREE, createFancyOak().decorators(List.of(beehiveDecorator3)).build());
+		FeatureUtils.register(bootstrapContext, FANCY_OAK_BEES_005, Feature.TREE, createFancyOak().decorators(List.of(beehiveDecorator4)).build());
+		FeatureUtils.register(bootstrapContext, FANCY_OAK_BEES, Feature.TREE, createFancyOak().decorators(List.of(beehiveDecorator5)).build());
 	}
 }

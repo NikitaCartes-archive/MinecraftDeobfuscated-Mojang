@@ -16,7 +16,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
-import net.minecraft.data.worldgen.BootstapContext;
+import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -198,8 +198,8 @@ public class RegistrySetBuilder {
 			return new RegistrySetBuilder.BuildState(compositeOwner, universalLookup, builder.build(), new HashMap(), list);
 		}
 
-		public <T> BootstapContext<T> bootstapContext() {
-			return new BootstapContext<T>() {
+		public <T> BootstrapContext<T> bootstrapContext() {
+			return new BootstrapContext<T>() {
 				@Override
 				public Holder.Reference<T> register(ResourceKey<T> resourceKey, T object, Lifecycle lifecycle) {
 					RegistrySetBuilder.RegisteredValue<?> registeredValue = (RegistrySetBuilder.RegisteredValue<?>)BuildState.this.registeredValues
@@ -304,7 +304,7 @@ public class RegistrySetBuilder {
 
 	@FunctionalInterface
 	public interface RegistryBootstrap<T> {
-		void run(BootstapContext<T> bootstapContext);
+		void run(BootstrapContext<T> bootstrapContext);
 	}
 
 	static record RegistryContents<T>(
@@ -335,7 +335,7 @@ public class RegistrySetBuilder {
 
 	static record RegistryStub<T>(ResourceKey<? extends Registry<T>> key, Lifecycle lifecycle, RegistrySetBuilder.RegistryBootstrap<T> bootstrap) {
 		void apply(RegistrySetBuilder.BuildState buildState) {
-			this.bootstrap.run(buildState.bootstapContext());
+			this.bootstrap.run(buildState.bootstrapContext());
 		}
 
 		public RegistrySetBuilder.RegistryContents<T> collectRegisteredValues(RegistrySetBuilder.BuildState buildState) {

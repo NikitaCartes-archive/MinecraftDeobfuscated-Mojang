@@ -35,7 +35,7 @@ public class WorldCreationUiState {
 	private WorldCreationUiState.SelectedGameMode gameMode = WorldCreationUiState.SelectedGameMode.SURVIVAL;
 	private Difficulty difficulty = Difficulty.NORMAL;
 	@Nullable
-	private Boolean allowCheats;
+	private Boolean allowCommands;
 	private String seed;
 	private boolean generateStructures;
 	private boolean bonusChest;
@@ -128,18 +128,18 @@ public class WorldCreationUiState {
 		return this.getGameMode() == WorldCreationUiState.SelectedGameMode.HARDCORE;
 	}
 
-	public void setAllowCheats(boolean bl) {
-		this.allowCheats = bl;
+	public void setAllowCommands(boolean bl) {
+		this.allowCommands = bl;
 		this.onChanged();
 	}
 
-	public boolean isAllowCheats() {
+	public boolean isAllowCommands() {
 		if (this.isDebug()) {
 			return true;
 		} else if (this.isHardcore()) {
 			return false;
 		} else {
-			return this.allowCheats == null ? this.getGameMode() == WorldCreationUiState.SelectedGameMode.CREATIVE : this.allowCheats;
+			return this.allowCommands == null ? this.getGameMode() == WorldCreationUiState.SelectedGameMode.CREATIVE : this.allowCommands;
 		}
 	}
 

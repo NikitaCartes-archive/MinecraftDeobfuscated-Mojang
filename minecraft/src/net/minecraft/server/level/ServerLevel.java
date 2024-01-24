@@ -76,6 +76,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.ProgressListener;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.Unit;
+import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.util.valueproviders.IntProvider;
 import net.minecraft.util.valueproviders.UniformInt;
@@ -128,6 +129,7 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.storage.EntityStorage;
+import net.minecraft.world.level.chunk.storage.SimpleRegionStorage;
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.dimension.end.EndDragonFight;
@@ -232,7 +234,9 @@ public class ServerLevel extends Level implements WorldGenLevel {
 		boolean bl3 = minecraftServer.forceSynchronousWrites();
 		DataFixer dataFixer = minecraftServer.getFixerUpper();
 		EntityPersistentStorage<Entity> entityPersistentStorage = new EntityStorage(
-			this, levelStorageAccess.getDimensionPath(resourceKey).resolve("entities"), dataFixer, bl3, minecraftServer
+			new SimpleRegionStorage(levelStorageAccess.getDimensionPath(resourceKey).resolve("entities"), dataFixer, bl3, "entities", DataFixTypes.ENTITY_CHUNK),
+			this,
+			minecraftServer
 		);
 		this.entityManager = new PersistentEntitySectionManager<>(Entity.class, new ServerLevel.EntityCallbacks(), entityPersistentStorage);
 		this.chunkSource = new ServerChunkCache(

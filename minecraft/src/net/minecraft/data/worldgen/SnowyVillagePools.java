@@ -16,19 +16,19 @@ public class SnowyVillagePools {
 	public static final ResourceKey<StructureTemplatePool> START = Pools.createKey("village/snowy/town_centers");
 	private static final ResourceKey<StructureTemplatePool> TERMINATORS_KEY = Pools.createKey("village/snowy/terminators");
 
-	public static void bootstrap(BootstapContext<StructureTemplatePool> bootstapContext) {
-		HolderGetter<PlacedFeature> holderGetter = bootstapContext.lookup(Registries.PLACED_FEATURE);
+	public static void bootstrap(BootstrapContext<StructureTemplatePool> bootstrapContext) {
+		HolderGetter<PlacedFeature> holderGetter = bootstrapContext.lookup(Registries.PLACED_FEATURE);
 		Holder<PlacedFeature> holder = holderGetter.getOrThrow(VillagePlacements.SPRUCE_VILLAGE);
 		Holder<PlacedFeature> holder2 = holderGetter.getOrThrow(VillagePlacements.PILE_SNOW_VILLAGE);
 		Holder<PlacedFeature> holder3 = holderGetter.getOrThrow(VillagePlacements.PILE_ICE_VILLAGE);
-		HolderGetter<StructureProcessorList> holderGetter2 = bootstapContext.lookup(Registries.PROCESSOR_LIST);
+		HolderGetter<StructureProcessorList> holderGetter2 = bootstrapContext.lookup(Registries.PROCESSOR_LIST);
 		Holder<StructureProcessorList> holder4 = holderGetter2.getOrThrow(ProcessorLists.STREET_SNOWY_OR_TAIGA);
 		Holder<StructureProcessorList> holder5 = holderGetter2.getOrThrow(ProcessorLists.FARM_SNOWY);
 		Holder<StructureProcessorList> holder6 = holderGetter2.getOrThrow(ProcessorLists.ZOMBIE_SNOWY);
-		HolderGetter<StructureTemplatePool> holderGetter3 = bootstapContext.lookup(Registries.TEMPLATE_POOL);
+		HolderGetter<StructureTemplatePool> holderGetter3 = bootstrapContext.lookup(Registries.TEMPLATE_POOL);
 		Holder<StructureTemplatePool> holder7 = holderGetter3.getOrThrow(Pools.EMPTY);
 		Holder<StructureTemplatePool> holder8 = holderGetter3.getOrThrow(TERMINATORS_KEY);
-		bootstapContext.register(
+		bootstrapContext.register(
 			START,
 			new StructureTemplatePool(
 				holder7,
@@ -44,7 +44,7 @@ public class SnowyVillagePools {
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"village/snowy/streets",
 			new StructureTemplatePool(
 				holder8,
@@ -70,7 +70,7 @@ public class SnowyVillagePools {
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"village/snowy/zombie/streets",
 			new StructureTemplatePool(
 				holder8,
@@ -96,7 +96,7 @@ public class SnowyVillagePools {
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"village/snowy/houses",
 			new StructureTemplatePool(
 				holder8,
@@ -137,7 +137,7 @@ public class SnowyVillagePools {
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"village/snowy/zombie/houses",
 			new StructureTemplatePool(
 				holder8,
@@ -177,7 +177,7 @@ public class SnowyVillagePools {
 				StructureTemplatePool.Projection.RIGID
 			)
 		);
-		bootstapContext.register(
+		bootstrapContext.register(
 			TERMINATORS_KEY,
 			new StructureTemplatePool(
 				holder7,
@@ -191,12 +191,12 @@ public class SnowyVillagePools {
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"village/snowy/trees",
 			new StructureTemplatePool(holder7, ImmutableList.of(Pair.of(StructurePoolElement.feature(holder), 1)), StructureTemplatePool.Projection.RIGID)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"village/snowy/decor",
 			new StructureTemplatePool(
 				holder7,
@@ -213,7 +213,7 @@ public class SnowyVillagePools {
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"village/snowy/zombie/decor",
 			new StructureTemplatePool(
 				holder7,
@@ -230,7 +230,7 @@ public class SnowyVillagePools {
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"village/snowy/villagers",
 			new StructureTemplatePool(
 				holder7,
@@ -243,7 +243,7 @@ public class SnowyVillagePools {
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"village/snowy/zombie/villagers",
 			new StructureTemplatePool(
 				holder7,

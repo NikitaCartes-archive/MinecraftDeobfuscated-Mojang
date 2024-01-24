@@ -14,7 +14,6 @@ import net.minecraft.world.entity.animal.Cat;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.CustomSpawner;
 import net.minecraft.world.level.GameRules;
-import net.minecraft.world.level.NaturalSpawner;
 import net.minecraft.world.phys.AABB;
 
 public class CatSpawner implements CustomSpawner {
@@ -41,7 +40,7 @@ public class CatSpawner implements CustomSpawner {
 					if (!serverLevel.hasChunksAt(blockPos.getX() - 10, blockPos.getZ() - 10, blockPos.getX() + 10, blockPos.getZ() + 10)) {
 						return 0;
 					} else {
-						if (NaturalSpawner.isSpawnPositionOk(SpawnPlacements.Type.ON_GROUND, serverLevel, blockPos, EntityType.CAT)) {
+						if (SpawnPlacements.isSpawnPositionOk(EntityType.CAT, serverLevel, blockPos)) {
 							if (serverLevel.isCloseToVillage(blockPos, 2)) {
 								return this.spawnInVillage(serverLevel, blockPos);
 							}

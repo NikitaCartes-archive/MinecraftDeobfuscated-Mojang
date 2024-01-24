@@ -20,9 +20,9 @@ public class UpdateOneTwentyOneProcessorLists {
 		Registries.PROCESSOR_LIST, new ResourceLocation("trial_chambers_copper_bulb_degradation")
 	);
 
-	public static void bootstrap(BootstapContext<StructureProcessorList> bootstapContext) {
+	public static void bootstrap(BootstrapContext<StructureProcessorList> bootstrapContext) {
 		register(
-			bootstapContext,
+			bootstrapContext,
 			TRIAL_CHAMBERS_COPPER_BULB_DEGRADATION,
 			List.of(
 				new RuleProcessor(
@@ -50,8 +50,8 @@ public class UpdateOneTwentyOneProcessorLists {
 	}
 
 	private static void register(
-		BootstapContext<StructureProcessorList> bootstapContext, ResourceKey<StructureProcessorList> resourceKey, List<StructureProcessor> list
+		BootstrapContext<StructureProcessorList> bootstrapContext, ResourceKey<StructureProcessorList> resourceKey, List<StructureProcessor> list
 	) {
-		bootstapContext.register(resourceKey, new StructureProcessorList(list));
+		bootstrapContext.register(resourceKey, new StructureProcessorList(list));
 	}
 }

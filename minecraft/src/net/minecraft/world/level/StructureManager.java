@@ -26,6 +26,7 @@ import net.minecraft.world.level.levelgen.structure.StructureCheck;
 import net.minecraft.world.level.levelgen.structure.StructureCheckResult;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
+import net.minecraft.world.level.levelgen.structure.placement.StructurePlacement;
 
 public class StructureManager {
 	private final LevelAccessor level;
@@ -158,8 +159,8 @@ public class StructureManager {
 		return this.level.getChunk(sectionPos.x(), sectionPos.z(), ChunkStatus.STRUCTURE_REFERENCES).getAllReferences();
 	}
 
-	public StructureCheckResult checkStructurePresence(ChunkPos chunkPos, Structure structure, boolean bl) {
-		return this.structureCheck.checkStart(chunkPos, structure, bl);
+	public StructureCheckResult checkStructurePresence(ChunkPos chunkPos, Structure structure, StructurePlacement structurePlacement, boolean bl) {
+		return this.structureCheck.checkStart(chunkPos, structure, structurePlacement, bl);
 	}
 
 	public void addReference(StructureStart structureStart) {

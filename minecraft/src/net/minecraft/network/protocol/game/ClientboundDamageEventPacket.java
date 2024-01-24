@@ -4,6 +4,8 @@ import java.util.Optional;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketType;
@@ -13,29 +15,32 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
-public record ClientboundDamageEventPacket(int entityId, int sourceTypeId, int sourceCauseId, int sourceDirectId, Optional<Vec3> sourcePosition)
+public record ClientboundDamageEventPacket(int entityId, Holder<DamageType> sourceType, int sourceCauseId, int sourceDirectId, Optional<Vec3> sourcePosition)
 	implements Packet<ClientGamePacketListener> {
-	public static final StreamCodec<FriendlyByteBuf, ClientboundDamageEventPacket> STREAM_CODEC = Packet.codec(
+	public static final StreamCodec<RegistryFriendlyByteBuf, ClientboundDamageEventPacket> STREAM_CODEC = Packet.codec(
 		ClientboundDamageEventPacket::write, ClientboundDamageEventPacket::new
+	);
+	private static final StreamCodec<RegistryFriendlyByteBuf, Holder<DamageType>> DAMAGE_TYPE_ID_STREAM_CODEC = ByteBufCodecs.holderRegistry(
+		Registries.DAMAGE_TYPE
 	);
 
 	public ClientboundDamageEventPacket(Entity entity, DamageSource damageSource) {
 		this(
 			entity.getId(),
-			entity.level().registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getId(damageSource.type()),
+			damageSource.typeHolder(),
 			damageSource.getEntity() != null ? damageSource.getEntity().getId() : -1,
 			damageSource.getDirectEntity() != null ? damageSource.getDirectEntity().getId() : -1,
 			Optional.ofNullable(damageSource.sourcePositionRaw())
 		);
 	}
 
-	private ClientboundDamageEventPacket(FriendlyByteBuf friendlyByteBuf) {
+	private ClientboundDamageEventPacket(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
 		this(
-			friendlyByteBuf.readVarInt(),
-			friendlyByteBuf.readVarInt(),
-			readOptionalEntityId(friendlyByteBuf),
-			readOptionalEntityId(friendlyByteBuf),
-			friendlyByteBuf.readOptional(friendlyByteBufx -> new Vec3(friendlyByteBufx.readDouble(), friendlyByteBufx.readDouble(), friendlyByteBufx.readDouble()))
+			registryFriendlyByteBuf.readVarInt(),
+			DAMAGE_TYPE_ID_STREAM_CODEC.decode(registryFriendlyByteBuf),
+			readOptionalEntityId(registryFriendlyByteBuf),
+			readOptionalEntityId(registryFriendlyByteBuf),
+			registryFriendlyByteBuf.readOptional(friendlyByteBuf -> new Vec3(friendlyByteBuf.readDouble(), friendlyByteBuf.readDouble(), friendlyByteBuf.readDouble()))
 		);
 	}
 
@@ -47,15 +52,15 @@ public record ClientboundDamageEventPacket(int entityId, int sourceTypeId, int s
 		return friendlyByteBuf.readVarInt() - 1;
 	}
 
-	private void write(FriendlyByteBuf friendlyByteBuf) {
-		friendlyByteBuf.writeVarInt(this.entityId);
-		friendlyByteBuf.writeVarInt(this.sourceTypeId);
-		writeOptionalEntityId(friendlyByteBuf, this.sourceCauseId);
-		writeOptionalEntityId(friendlyByteBuf, this.sourceDirectId);
-		friendlyByteBuf.writeOptional(this.sourcePosition, (friendlyByteBufx, vec3) -> {
-			friendlyByteBufx.writeDouble(vec3.x());
-			friendlyByteBufx.writeDouble(vec3.y());
-			friendlyByteBufx.writeDouble(vec3.z());
+	private void write(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
+		registryFriendlyByteBuf.writeVarInt(this.entityId);
+		DAMAGE_TYPE_ID_STREAM_CODEC.encode(registryFriendlyByteBuf, this.sourceType);
+		writeOptionalEntityId(registryFriendlyByteBuf, this.sourceCauseId);
+		writeOptionalEntityId(registryFriendlyByteBuf, this.sourceDirectId);
+		registryFriendlyByteBuf.writeOptional(this.sourcePosition, (friendlyByteBuf, vec3) -> {
+			friendlyByteBuf.writeDouble(vec3.x());
+			friendlyByteBuf.writeDouble(vec3.y());
+			friendlyByteBuf.writeDouble(vec3.z());
 		});
 	}
 
@@ -69,13 +74,12 @@ public record ClientboundDamageEventPacket(int entityId, int sourceTypeId, int s
 	}
 
 	public DamageSource getSource(Level level) {
-		Holder<DamageType> holder = (Holder<DamageType>)level.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolder(this.sourceTypeId).get();
 		if (this.sourcePosition.isPresent()) {
-			return new DamageSource(holder, (Vec3)this.sourcePosition.get());
+			return new DamageSource(this.sourceType, (Vec3)this.sourcePosition.get());
 		} else {
 			Entity entity = level.getEntity(this.sourceCauseId);
 			Entity entity2 = level.getEntity(this.sourceDirectId);
-			return new DamageSource(holder, entity2, entity);
+			return new DamageSource(this.sourceType, entity2, entity);
 		}
 	}
 }

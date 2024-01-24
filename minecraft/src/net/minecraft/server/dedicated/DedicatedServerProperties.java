@@ -85,6 +85,7 @@ public class DedicatedServerProperties extends Settings<DedicatedServerPropertie
 	public final boolean broadcastConsoleToOps = this.get("broadcast-console-to-ops", true);
 	public final int maxWorldSize = this.get("max-world-size", integer -> Mth.clamp(integer, 1, 29999984), 29999984);
 	public final boolean syncChunkWrites = this.get("sync-chunk-writes", true);
+	public final String regionFileComression = this.get("region-file-compression", "deflate");
 	public final boolean enableJmxMonitoring = this.get("enable-jmx-monitoring", false);
 	public final boolean enableStatus = this.get("enable-status", true);
 	public final boolean hideOnlinePlayers = this.get("hide-online-players", false);

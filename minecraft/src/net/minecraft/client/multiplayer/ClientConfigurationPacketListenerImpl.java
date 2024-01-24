@@ -11,6 +11,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.TickablePacketListener;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.PacketUtils;
+import net.minecraft.network.protocol.common.ClientboundUpdateTagsPacket;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.network.protocol.configuration.ClientConfigurationPacketListener;
 import net.minecraft.network.protocol.configuration.ClientboundFinishConfigurationPacket;
@@ -26,8 +27,9 @@ import org.slf4j.Logger;
 public class ClientConfigurationPacketListenerImpl extends ClientCommonPacketListenerImpl implements TickablePacketListener, ClientConfigurationPacketListener {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private final GameProfile localGameProfile;
-	private RegistryAccess.Frozen receivedRegistries;
 	private FeatureFlagSet enabledFeatures;
+	private final RegistryAccess.Frozen receivedRegistries;
+	private final RegistryDataCollector registryDataCollector = new RegistryDataCollector();
 
 	public ClientConfigurationPacketListenerImpl(Minecraft minecraft, Connection connection, CommonListenerCookie commonListenerCookie) {
 		super(minecraft, connection, commonListenerCookie);
@@ -42,11 +44,6 @@ public class ClientConfigurationPacketListenerImpl extends ClientCommonPacketLis
 	}
 
 	@Override
-	protected RegistryAccess.Frozen registryAccess() {
-		return this.receivedRegistries;
-	}
-
-	@Override
 	protected void handleCustomPayload(CustomPacketPayload customPacketPayload) {
 		this.handleUnknownCustomPayload(customPacketPayload);
 	}
@@ -58,14 +55,13 @@ public class ClientConfigurationPacketListenerImpl extends ClientCommonPacketLis
 	@Override
 	public void handleRegistryData(ClientboundRegistryDataPacket clientboundRegistryDataPacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundRegistryDataPacket, this, this.minecraft);
-		RegistryAccess.Frozen frozen = ClientRegistryLayer.createRegistryAccess()
-			.replaceFrom(ClientRegistryLayer.REMOTE, clientboundRegistryDataPacket.registryHolder())
-			.compositeAccess();
-		if (!this.connection.isMemoryConnection()) {
-			frozen.registries().forEach(registryEntry -> registryEntry.value().resetTags());
-		}
+		this.registryDataCollector.appendContents(clientboundRegistryDataPacket.registry(), clientboundRegistryDataPacket.entries());
+	}
 
-		this.receivedRegistries = frozen;
+	@Override
+	public void handleUpdateTags(ClientboundUpdateTagsPacket clientboundUpdateTagsPacket) {
+		PacketUtils.ensureRunningOnSameThread(clientboundUpdateTagsPacket, this, this.minecraft);
+		this.registryDataCollector.appendTags(clientboundUpdateTagsPacket.getTags());
 	}
 
 	@Override
@@ -76,16 +72,17 @@ public class ClientConfigurationPacketListenerImpl extends ClientCommonPacketLis
 	@Override
 	public void handleConfigurationFinished(ClientboundFinishConfigurationPacket clientboundFinishConfigurationPacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundFinishConfigurationPacket, this, this.minecraft);
+		RegistryAccess.Frozen frozen = this.registryDataCollector.collectGameRegistries(this.receivedRegistries, this.connection.isMemoryConnection());
 		this.connection
 			.setupInboundProtocol(
-				GameProtocols.CLIENTBOUND.bind(RegistryFriendlyByteBuf.decorator(this.receivedRegistries)),
+				GameProtocols.CLIENTBOUND.bind(RegistryFriendlyByteBuf.decorator(frozen)),
 				new ClientPacketListener(
 					this.minecraft,
 					this.connection,
 					new CommonListenerCookie(
 						this.localGameProfile,
 						this.telemetryManager,
-						this.receivedRegistries,
+						frozen,
 						this.enabledFeatures,
 						this.serverBrand,
 						this.serverData,
@@ -95,7 +92,7 @@ public class ClientConfigurationPacketListenerImpl extends ClientCommonPacketLis
 				)
 			);
 		this.connection.send(ServerboundFinishConfigurationPacket.INSTANCE);
-		this.connection.setupOutboundProtocol(GameProtocols.SERVERBOUND.bind(RegistryFriendlyByteBuf.decorator(this.receivedRegistries)));
+		this.connection.setupOutboundProtocol(GameProtocols.SERVERBOUND.bind(RegistryFriendlyByteBuf.decorator(frozen)));
 	}
 
 	@Override

@@ -2527,16 +2527,17 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource, S
 					.orElse(null);
 			}
 		} else {
-			BlockPos blockPos;
+			BlockPos blockPos = bl2 ? ServerLevel.END_SPAWN_POINT : serverLevel.getSharedSpawnPos();
+			serverLevel.getChunkSource().addRegionTicket(TicketType.PORTAL, new ChunkPos(blockPos), 3, blockPos);
+			int i;
 			if (bl2) {
-				blockPos = ServerLevel.END_SPAWN_POINT;
+				i = blockPos.getY();
 			} else {
-				blockPos = serverLevel.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, serverLevel.getSharedSpawnPos());
+				i = serverLevel.getChunkAt(blockPos).getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, blockPos.getX(), blockPos.getZ()) + 1;
 			}
 
-			serverLevel.getChunkSource().addRegionTicket(TicketType.PORTAL, new ChunkPos(blockPos), 3, blockPos);
 			return new PortalInfo(
-				new Vec3((double)blockPos.getX() + 0.5, (double)blockPos.getY(), (double)blockPos.getZ() + 0.5), this.getDeltaMovement(), this.getYRot(), this.getXRot()
+				new Vec3((double)blockPos.getX() + 0.5, (double)i, (double)blockPos.getZ() + 0.5), this.getDeltaMovement(), this.getYRot(), this.getXRot()
 			);
 		}
 	}

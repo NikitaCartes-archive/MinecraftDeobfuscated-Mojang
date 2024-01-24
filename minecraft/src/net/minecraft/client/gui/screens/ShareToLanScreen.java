@@ -20,7 +20,7 @@ import net.minecraft.world.level.GameType;
 public class ShareToLanScreen extends Screen {
 	private static final int PORT_LOWER_BOUND = 1024;
 	private static final int PORT_HIGHER_BOUND = 65535;
-	private static final Component ALLOW_COMMANDS_LABEL = Component.translatable("selectWorld.allowCommands");
+	private static final Component ALLOW_COMMANDS_LABEL = Component.translatable("selectWorld.allowCommands.new");
 	private static final Component GAME_MODE_LABEL = Component.translatable("selectWorld.gameMode");
 	private static final Component INFO_TEXT = Component.translatable("lanServer.otherPlayers");
 	private static final Component PORT_INFO_TEXT = Component.translatable("lanServer.port");
@@ -43,7 +43,7 @@ public class ShareToLanScreen extends Screen {
 	protected void init() {
 		IntegratedServer integratedServer = this.minecraft.getSingleplayerServer();
 		this.gameMode = integratedServer.getDefaultGameType();
-		this.commands = integratedServer.getWorldData().getAllowCommands();
+		this.commands = integratedServer.getWorldData().isAllowCommands();
 		this.addRenderableWidget(
 			CycleButton.<GameType>builder(GameType::getShortDisplayName)
 				.withValues(GameType.SURVIVAL, GameType.SPECTATOR, GameType.CREATIVE, GameType.ADVENTURE)

@@ -1,12 +1,9 @@
 package net.minecraft.world.level.chunk.storage;
 
 import com.google.common.collect.ImmutableList;
-import com.mojang.datafixers.DataFixer;
 import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
-import java.io.IOException;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -16,7 +13,6 @@ import net.minecraft.nbt.IntArrayTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.util.thread.ProcessorMailbox;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -30,23 +26,21 @@ public class EntityStorage implements EntityPersistentStorage<Entity> {
 	private static final String ENTITIES_TAG = "Entities";
 	private static final String POSITION_TAG = "Position";
 	private final ServerLevel level;
-	private final IOWorker worker;
+	private final SimpleRegionStorage simpleRegionStorage;
 	private final LongSet emptyChunks = new LongOpenHashSet();
 	private final ProcessorMailbox<Runnable> entityDeserializerQueue;
-	protected final DataFixer fixerUpper;
 
-	public EntityStorage(ServerLevel serverLevel, Path path, DataFixer dataFixer, boolean bl, Executor executor) {
+	public EntityStorage(SimpleRegionStorage simpleRegionStorage, ServerLevel serverLevel, Executor executor) {
+		this.simpleRegionStorage = simpleRegionStorage;
 		this.level = serverLevel;
-		this.fixerUpper = dataFixer;
 		this.entityDeserializerQueue = ProcessorMailbox.create(executor, "entity-deserializer");
-		this.worker = new IOWorker(path, bl, "entities");
 	}
 
 	@Override
 	public CompletableFuture<ChunkEntities<Entity>> loadEntities(ChunkPos chunkPos) {
 		return this.emptyChunks.contains(chunkPos.toLong())
 			? CompletableFuture.completedFuture(emptyChunk(chunkPos))
-			: this.worker.loadAsync(chunkPos).thenApplyAsync(optional -> {
+			: this.simpleRegionStorage.read(chunkPos).thenApplyAsync(optional -> {
 				if (optional.isEmpty()) {
 					this.emptyChunks.add(chunkPos.toLong());
 					return emptyChunk(chunkPos);
@@ -60,7 +54,7 @@ public class EntityStorage implements EntityPersistentStorage<Entity> {
 						LOGGER.warn("Failed to parse chunk {} position info", chunkPos, var6);
 					}
 
-					CompoundTag compoundTag = this.upgradeChunkTag((CompoundTag)optional.get());
+					CompoundTag compoundTag = this.simpleRegionStorage.upgradeChunkTag((CompoundTag)optional.get(), -1);
 					ListTag listTag = compoundTag.getList("Entities", 10);
 					List<Entity> list = (List<Entity>)EntityType.loadEntitiesRecursive(listTag, this.level).collect(ImmutableList.toImmutableList());
 					return new ChunkEntities(chunkPos, list);
@@ -86,7 +80,7 @@ public class EntityStorage implements EntityPersistentStorage<Entity> {
 		ChunkPos chunkPos = chunkEntities.getPos();
 		if (chunkEntities.isEmpty()) {
 			if (this.emptyChunks.add(chunkPos.toLong())) {
-				this.worker.store(chunkPos, null);
+				this.simpleRegionStorage.write(chunkPos, null);
 			}
 		} else {
 			ListTag listTag = new ListTag();
@@ -99,7 +93,7 @@ public class EntityStorage implements EntityPersistentStorage<Entity> {
 			CompoundTag compoundTag = NbtUtils.addCurrentDataVersion(new CompoundTag());
 			compoundTag.put("Entities", listTag);
 			writeChunkPos(compoundTag, chunkPos);
-			this.worker.store(chunkPos, compoundTag).exceptionally(throwable -> {
+			this.simpleRegionStorage.write(chunkPos, compoundTag).exceptionally(throwable -> {
 				LOGGER.error("Failed to store chunk {}", chunkPos, throwable);
 				return null;
 			});
@@ -109,17 +103,7 @@ public class EntityStorage implements EntityPersistentStorage<Entity> {
 
 	@Override
 	public void flush(boolean bl) {
-		this.worker.synchronize(bl).join();
+		this.simpleRegionStorage.synchronize(bl).join();
 		this.entityDeserializerQueue.runAll();
-	}
-
-	private CompoundTag upgradeChunkTag(CompoundTag compoundTag) {
-		int i = NbtUtils.getDataVersion(compoundTag, -1);
-		return DataFixTypes.ENTITY_CHUNK.updateToCurrentVersion(this.fixerUpper, compoundTag, i);
-	}
-
-	@Override
-	public void close() throws IOException {
-		this.worker.close();
 	}
 }

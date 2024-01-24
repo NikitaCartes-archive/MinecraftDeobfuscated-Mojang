@@ -34,6 +34,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.storage.SectionStorage;
+import net.minecraft.world.level.chunk.storage.SimpleRegionStorage;
 
 public class PoiManager extends SectionStorage<PoiSection> {
 	public static final int MAX_VILLAGE_DISTANCE = 6;
@@ -42,7 +43,7 @@ public class PoiManager extends SectionStorage<PoiSection> {
 	private final LongSet loadedChunks = new LongOpenHashSet();
 
 	public PoiManager(Path path, DataFixer dataFixer, boolean bl, RegistryAccess registryAccess, LevelHeightAccessor levelHeightAccessor) {
-		super(path, PoiSection::codec, PoiSection::new, dataFixer, DataFixTypes.POI_CHUNK, bl, registryAccess, levelHeightAccessor);
+		super(new SimpleRegionStorage(path, dataFixer, bl, "poi", DataFixTypes.POI_CHUNK), PoiSection::codec, PoiSection::new, registryAccess, levelHeightAccessor);
 		this.distanceTracker = new PoiManager.DistanceTracker();
 	}
 

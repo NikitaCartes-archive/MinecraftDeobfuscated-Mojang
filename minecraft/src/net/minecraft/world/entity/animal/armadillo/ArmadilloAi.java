@@ -196,7 +196,7 @@ public class ArmadilloAi {
 
 	public static class ArmadilloPanic extends AnimalPanic {
 		public ArmadilloPanic(float f) {
-			super(f);
+			super(f, pathfinderMob -> pathfinderMob.isFreezing() || pathfinderMob.isOnFire());
 		}
 
 		@Override

@@ -5,8 +5,10 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Optional;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.InclusiveRange;
 import net.minecraft.util.random.SimpleWeightedRandomList;
@@ -66,6 +68,11 @@ public record SpawnData(CompoundTag entityToSpawn, Optional<SpawnData.CustomSpaw
 
 		private static MapCodec<InclusiveRange<Integer>> lightLimit(String string) {
 			return ExtraCodecs.validate(InclusiveRange.INT.optionalFieldOf(string, LIGHT_RANGE), SpawnData.CustomSpawnRules::checkLightBoundaries);
+		}
+
+		public boolean isValidPosition(BlockPos blockPos, ServerLevel serverLevel) {
+			return this.blockLightLimit.isValueInRange(serverLevel.getBrightness(LightLayer.BLOCK, blockPos))
+				&& this.skyLightLimit.isValueInRange(serverLevel.getBrightness(LightLayer.SKY, blockPos));
 		}
 	}
 }

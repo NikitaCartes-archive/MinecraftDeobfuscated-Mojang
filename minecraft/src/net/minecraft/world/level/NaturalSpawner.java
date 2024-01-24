@@ -18,7 +18,6 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.VisibleForDebug;
@@ -43,7 +42,6 @@ import net.minecraft.world.level.levelgen.structure.BuiltinStructures;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.structures.NetherFortressStructure;
 import net.minecraft.world.level.material.FluidState;
-import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.Vec3;
 import org.slf4j.Logger;
 
@@ -238,17 +236,14 @@ public final class NaturalSpawner {
 			)
 		 {
 			return false;
-		} else if (entityType.canSummon() && canSpawnMobAt(serverLevel, structureManager, chunkGenerator, mobCategory, spawnerData, mutableBlockPos)) {
-			SpawnPlacements.Type type = SpawnPlacements.getPlacementType(entityType);
-			if (!isSpawnPositionOk(type, serverLevel, mutableBlockPos, entityType)) {
-				return false;
-			} else {
-				return !SpawnPlacements.checkSpawnRules(entityType, serverLevel, MobSpawnType.NATURAL, mutableBlockPos, serverLevel.random)
-					? false
-					: serverLevel.noCollision(entityType.getAABB((double)mutableBlockPos.getX() + 0.5, (double)mutableBlockPos.getY(), (double)mutableBlockPos.getZ() + 0.5));
-			}
-		} else {
+		} else if (!entityType.canSummon() || !canSpawnMobAt(serverLevel, structureManager, chunkGenerator, mobCategory, spawnerData, mutableBlockPos)) {
 			return false;
+		} else if (!SpawnPlacements.isSpawnPositionOk(entityType, serverLevel, mutableBlockPos)) {
+			return false;
+		} else {
+			return !SpawnPlacements.checkSpawnRules(entityType, serverLevel, MobSpawnType.NATURAL, mutableBlockPos, serverLevel.random)
+				? false
+				: serverLevel.noCollision(entityType.getAABB((double)mutableBlockPos.getX() + 0.5, (double)mutableBlockPos.getY(), (double)mutableBlockPos.getZ() + 0.5));
 		}
 	}
 
@@ -344,32 +339,6 @@ public final class NaturalSpawner {
 		}
 	}
 
-	public static boolean isSpawnPositionOk(SpawnPlacements.Type type, LevelReader levelReader, BlockPos blockPos, @Nullable EntityType<?> entityType) {
-		if (type == SpawnPlacements.Type.NO_RESTRICTIONS) {
-			return true;
-		} else if (entityType != null && levelReader.getWorldBorder().isWithinBounds(blockPos)) {
-			BlockState blockState = levelReader.getBlockState(blockPos);
-			FluidState fluidState = levelReader.getFluidState(blockPos);
-			BlockPos blockPos2 = blockPos.above();
-			BlockPos blockPos3 = blockPos.below();
-			switch (type) {
-				case IN_WATER:
-					return fluidState.is(FluidTags.WATER) && !levelReader.getBlockState(blockPos2).isRedstoneConductor(levelReader, blockPos2);
-				case IN_LAVA:
-					return fluidState.is(FluidTags.LAVA);
-				case ON_GROUND:
-				default:
-					BlockState blockState2 = levelReader.getBlockState(blockPos3);
-					return !blockState2.isValidSpawn(levelReader, blockPos3, entityType)
-						? false
-						: isValidEmptySpawnBlock(levelReader, blockPos, blockState, fluidState, entityType)
-							&& isValidEmptySpawnBlock(levelReader, blockPos2, levelReader.getBlockState(blockPos2), levelReader.getFluidState(blockPos2), entityType);
-			}
-		} else {
-			return false;
-		}
-	}
-
 	public static void spawnMobsForChunkGeneration(ServerLevelAccessor serverLevelAccessor, Holder<Biome> holder, ChunkPos chunkPos, RandomSource randomSource) {
 		MobSpawnSettings mobSpawnSettings = holder.value().getMobSettings();
 		WeightedRandomList<MobSpawnSettings.SpawnerData> weightedRandomList = mobSpawnSettings.getMobs(MobCategory.CREATURE);
@@ -393,8 +362,7 @@ public final class NaturalSpawner {
 
 						for (int q = 0; !bl && q < 4; q++) {
 							BlockPos blockPos = getTopNonCollidingPos(serverLevelAccessor, spawnerData.type, l, m);
-							if (spawnerData.type.canSummon()
-								&& isSpawnPositionOk(SpawnPlacements.getPlacementType(spawnerData.type), serverLevelAccessor, blockPos, spawnerData.type)) {
+							if (spawnerData.type.canSummon() && SpawnPlacements.isSpawnPositionOk(spawnerData.type, serverLevelAccessor, blockPos)) {
 								float f = spawnerData.type.getWidth();
 								double d = Mth.clamp((double)l, (double)i + (double)f, (double)i + 16.0 - (double)f);
 								double e = Mth.clamp((double)m, (double)j + (double)f, (double)j + 16.0 - (double)f);
@@ -461,14 +429,7 @@ public final class NaturalSpawner {
 			} while (levelReader.getBlockState(mutableBlockPos).isAir() && mutableBlockPos.getY() > levelReader.getMinBuildHeight());
 		}
 
-		if (SpawnPlacements.getPlacementType(entityType) == SpawnPlacements.Type.ON_GROUND) {
-			BlockPos blockPos = mutableBlockPos.below();
-			if (levelReader.getBlockState(blockPos).isPathfindable(levelReader, blockPos, PathComputationType.LAND)) {
-				return blockPos;
-			}
-		}
-
-		return mutableBlockPos.immutable();
+		return SpawnPlacements.getPlacementType(entityType).adjustSpawnPosition(levelReader, mutableBlockPos.immutable());
 	}
 
 	@FunctionalInterface

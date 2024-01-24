@@ -2,12 +2,14 @@ package net.minecraft.server.network;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.logging.LogUtils;
+import com.mojang.serialization.DynamicOps;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import javax.annotation.Nullable;
 import net.minecraft.core.LayeredRegistryAccess;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.RegistrySynchronization;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.TickablePacketListener;
@@ -24,6 +26,7 @@ import net.minecraft.network.protocol.configuration.ClientboundUpdateEnabledFeat
 import net.minecraft.network.protocol.configuration.ServerConfigurationPacketListener;
 import net.minecraft.network.protocol.configuration.ServerboundFinishConfigurationPacket;
 import net.minecraft.network.protocol.game.GameProtocols;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.RegistryLayer;
 import net.minecraft.server.level.ClientInformation;
@@ -70,8 +73,11 @@ public class ServerConfigurationPacketListenerImpl extends ServerCommonPacketLis
 		this.send(new ClientboundCustomPayloadPacket(new BrandPayload(this.server.getServerModName())));
 		LayeredRegistryAccess<RegistryLayer> layeredRegistryAccess = this.server.registries();
 		this.send(new ClientboundUpdateEnabledFeaturesPacket(FeatureFlags.REGISTRY.toNames(this.server.getWorldData().enabledFeatures())));
-		this.send(
-			new ClientboundRegistryDataPacket(new RegistryAccess.ImmutableRegistryAccess(RegistrySynchronization.networkedRegistries(layeredRegistryAccess)).freeze())
+		DynamicOps<Tag> dynamicOps = RegistryOps.create(NbtOps.INSTANCE, layeredRegistryAccess.compositeAccess());
+		RegistrySynchronization.packRegistries(
+			dynamicOps,
+			layeredRegistryAccess.getAccessFrom(RegistryLayer.WORLDGEN),
+			(resourceKey, list) -> this.send(new ClientboundRegistryDataPacket(resourceKey, list))
 		);
 		this.send(new ClientboundUpdateTagsPacket(TagNetworkSerialization.serializeTagsToNetwork(layeredRegistryAccess)));
 		this.addOptionalTasks();

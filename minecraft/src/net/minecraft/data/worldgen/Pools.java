@@ -15,18 +15,18 @@ public class Pools {
 		return ResourceKey.create(Registries.TEMPLATE_POOL, new ResourceLocation(string));
 	}
 
-	public static void register(BootstapContext<StructureTemplatePool> bootstapContext, String string, StructureTemplatePool structureTemplatePool) {
-		bootstapContext.register(createKey(string), structureTemplatePool);
+	public static void register(BootstrapContext<StructureTemplatePool> bootstrapContext, String string, StructureTemplatePool structureTemplatePool) {
+		bootstrapContext.register(createKey(string), structureTemplatePool);
 	}
 
-	public static void bootstrap(BootstapContext<StructureTemplatePool> bootstapContext) {
-		HolderGetter<StructureTemplatePool> holderGetter = bootstapContext.lookup(Registries.TEMPLATE_POOL);
+	public static void bootstrap(BootstrapContext<StructureTemplatePool> bootstrapContext) {
+		HolderGetter<StructureTemplatePool> holderGetter = bootstrapContext.lookup(Registries.TEMPLATE_POOL);
 		Holder<StructureTemplatePool> holder = holderGetter.getOrThrow(EMPTY);
-		bootstapContext.register(EMPTY, new StructureTemplatePool(holder, ImmutableList.of(), StructureTemplatePool.Projection.RIGID));
-		BastionPieces.bootstrap(bootstapContext);
-		PillagerOutpostPools.bootstrap(bootstapContext);
-		VillagePools.bootstrap(bootstapContext);
-		AncientCityStructurePieces.bootstrap(bootstapContext);
-		TrailRuinsStructurePools.bootstrap(bootstapContext);
+		bootstrapContext.register(EMPTY, new StructureTemplatePool(holder, ImmutableList.of(), StructureTemplatePool.Projection.RIGID));
+		BastionPieces.bootstrap(bootstrapContext);
+		PillagerOutpostPools.bootstrap(bootstrapContext);
+		VillagePools.bootstrap(bootstrapContext);
+		AncientCityStructurePieces.bootstrap(bootstrapContext);
+		TrailRuinsStructurePools.bootstrap(bootstrapContext);
 	}
 }

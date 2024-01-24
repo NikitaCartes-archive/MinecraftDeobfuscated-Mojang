@@ -30,7 +30,7 @@ public class RealmsSelectFileToUploadScreen extends RealmsScreen {
 	private static final Component UNABLE_TO_LOAD_WORLD = Component.translatable("selectWorld.unable_to_load");
 	static final Component WORLD_TEXT = Component.translatable("selectWorld.world");
 	static final Component HARDCORE_TEXT = Component.translatable("mco.upload.hardcore").withColor(-65536);
-	static final Component CHEATS_TEXT = Component.translatable("selectWorld.cheats");
+	static final Component COMMANDS_TEXT = Component.translatable("selectWorld.commands");
 	private static final DateFormat DATE_FORMAT = new SimpleDateFormat();
 	@Nullable
 	private final RealmCreationTask realmCreationTask;
@@ -141,8 +141,8 @@ public class RealmsSelectFileToUploadScreen extends RealmsScreen {
 				component = RealmsSelectFileToUploadScreen.gameModeName(levelSummary);
 			}
 
-			if (levelSummary.hasCheats()) {
-				component = Component.translatable("mco.upload.entry.cheats", component.getString(), RealmsSelectFileToUploadScreen.CHEATS_TEXT);
+			if (levelSummary.hasCommands()) {
+				component = Component.translatable("mco.upload.entry.commands", component.getString(), RealmsSelectFileToUploadScreen.COMMANDS_TEXT);
 			}
 
 			this.info = component;

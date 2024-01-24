@@ -57,7 +57,7 @@ import net.minecraft.network.protocol.status.ClientStatusPacketListener;
 import net.minecraft.network.protocol.status.StatusProtocols;
 import net.minecraft.server.RunningOnDifferentThreadException;
 import net.minecraft.util.Mth;
-import net.minecraft.util.SampleLogger;
+import net.minecraft.util.debugchart.SampleLogger;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.Marker;

@@ -93,7 +93,7 @@ public class CreateWorldScreen extends Screen {
 	static final Component GAME_MODEL_LABEL = Component.translatable("selectWorld.gameMode");
 	static final Component NAME_LABEL = Component.translatable("selectWorld.enterName");
 	static final Component EXPERIMENTS_LABEL = Component.translatable("selectWorld.experiments");
-	static final Component ALLOW_CHEATS_INFO = Component.translatable("selectWorld.allowCommands.info");
+	static final Component ALLOW_COMMANDS_INFO = Component.translatable("selectWorld.allowCommands.info");
 	private static final Component PREPARING_WORLD_DATA = Component.translatable("createWorld.preparing");
 	private static final int HORIZONTAL_BUTTON_SPACING = 10;
 	private static final int VERTICAL_BUTTON_SPACING = 8;
@@ -155,7 +155,7 @@ public class CreateWorldScreen extends Screen {
 		);
 		createWorldScreen.recreated = true;
 		createWorldScreen.uiState.setName(levelSettings.levelName());
-		createWorldScreen.uiState.setAllowCheats(levelSettings.allowCommands());
+		createWorldScreen.uiState.setAllowCommands(levelSettings.allowCommands());
 		createWorldScreen.uiState.setDifficulty(levelSettings.difficulty());
 		createWorldScreen.uiState.getGameRules().assignFrom(levelSettings.gameRules(), null);
 		if (levelSettings.hardcore()) {
@@ -272,7 +272,7 @@ public class CreateWorldScreen extends Screen {
 				this.uiState.getGameMode().gameType,
 				this.uiState.isHardcore(),
 				this.uiState.getDifficulty(),
-				this.uiState.isAllowCheats(),
+				this.uiState.isAllowCommands(),
 				this.uiState.getGameRules(),
 				this.uiState.getSettings().dataConfiguration()
 			);
@@ -620,7 +620,7 @@ public class CreateWorldScreen extends Screen {
 	@Environment(EnvType.CLIENT)
 	class GameTab extends GridLayoutTab {
 		private static final Component TITLE = Component.translatable("createWorld.tab.game.title");
-		private static final Component ALLOW_CHEATS = Component.translatable("selectWorld.allowCommands");
+		private static final Component ALLOW_COMMANDS = Component.translatable("selectWorld.allowCommands.new");
 		private final EditBox nameEdit;
 
 		GameTab() {
@@ -672,11 +672,11 @@ public class CreateWorldScreen extends Screen {
 			});
 			CycleButton<Boolean> cycleButton3 = rowHelper.addChild(
 				CycleButton.onOffBuilder()
-					.withTooltip(boolean_ -> Tooltip.create(CreateWorldScreen.ALLOW_CHEATS_INFO))
-					.create(0, 0, 210, 20, ALLOW_CHEATS, (cycleButtonx, boolean_) -> CreateWorldScreen.this.uiState.setAllowCheats(boolean_))
+					.withTooltip(boolean_ -> Tooltip.create(CreateWorldScreen.ALLOW_COMMANDS_INFO))
+					.create(0, 0, 210, 20, ALLOW_COMMANDS, (cycleButtonx, boolean_) -> CreateWorldScreen.this.uiState.setAllowCommands(boolean_))
 			);
 			CreateWorldScreen.this.uiState.addListener(worldCreationUiState -> {
-				cycleButton3.setValue(CreateWorldScreen.this.uiState.isAllowCheats());
+				cycleButton3.setValue(CreateWorldScreen.this.uiState.isAllowCommands());
 				cycleButton3.active = !CreateWorldScreen.this.uiState.isDebug() && !CreateWorldScreen.this.uiState.isHardcore();
 			});
 			if (!SharedConstants.getCurrentVersion().isStable()) {

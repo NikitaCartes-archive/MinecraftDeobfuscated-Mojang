@@ -28,9 +28,9 @@ public class Carvers {
 		return ResourceKey.create(Registries.CONFIGURED_CARVER, new ResourceLocation(string));
 	}
 
-	public static void bootstrap(BootstapContext<ConfiguredWorldCarver<?>> bootstapContext) {
-		HolderGetter<Block> holderGetter = bootstapContext.lookup(Registries.BLOCK);
-		bootstapContext.register(
+	public static void bootstrap(BootstrapContext<ConfiguredWorldCarver<?>> bootstrapContext) {
+		HolderGetter<Block> holderGetter = bootstrapContext.lookup(Registries.BLOCK);
+		bootstrapContext.register(
 			CAVE,
 			WorldCarver.CAVE
 				.configured(
@@ -47,7 +47,7 @@ public class Carvers {
 					)
 				)
 		);
-		bootstapContext.register(
+		bootstrapContext.register(
 			CAVE_EXTRA_UNDERGROUND,
 			WorldCarver.CAVE
 				.configured(
@@ -64,7 +64,7 @@ public class Carvers {
 					)
 				)
 		);
-		bootstapContext.register(
+		bootstrapContext.register(
 			CANYON,
 			WorldCarver.CANYON
 				.configured(
@@ -82,7 +82,7 @@ public class Carvers {
 					)
 				)
 		);
-		bootstapContext.register(
+		bootstrapContext.register(
 			NETHER_CAVE,
 			WorldCarver.NETHER_CAVE
 				.configured(

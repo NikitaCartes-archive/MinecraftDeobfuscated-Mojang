@@ -26,12 +26,12 @@ import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelHeightAccessor;
-import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.chunk.storage.ChunkScanAccess;
 import net.minecraft.world.level.chunk.storage.ChunkStorage;
 import net.minecraft.world.level.levelgen.RandomState;
+import net.minecraft.world.level.levelgen.structure.placement.StructurePlacement;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
 import org.slf4j.Logger;
 
@@ -40,8 +40,6 @@ public class StructureCheck {
 	private static final int NO_STRUCTURE = -1;
 	private final ChunkScanAccess storageAccess;
 	private final RegistryAccess registryAccess;
-	private final Registry<Biome> biomes;
-	private final Registry<Structure> structureConfigs;
 	private final StructureTemplateManager structureTemplateManager;
 	private final ResourceKey<Level> dimension;
 	private final ChunkGenerator chunkGenerator;
@@ -75,11 +73,9 @@ public class StructureCheck {
 		this.biomeSource = biomeSource;
 		this.seed = l;
 		this.fixerUpper = dataFixer;
-		this.biomes = registryAccess.registryOrThrow(Registries.BIOME);
-		this.structureConfigs = registryAccess.registryOrThrow(Registries.STRUCTURE);
 	}
 
-	public StructureCheckResult checkStart(ChunkPos chunkPos, Structure structure, boolean bl) {
+	public StructureCheckResult checkStart(ChunkPos chunkPos, Structure structure, StructurePlacement structurePlacement, boolean bl) {
 		long l = chunkPos.toLong();
 		Object2IntMap<Structure> object2IntMap = this.loadedChunks.get(l);
 		if (object2IntMap != null) {
@@ -88,6 +84,8 @@ public class StructureCheck {
 			StructureCheckResult structureCheckResult = this.tryLoadFromStorage(chunkPos, structure, bl, l);
 			if (structureCheckResult != null) {
 				return structureCheckResult;
+			} else if (!structurePlacement.applyAdditionalChunkRestrictions(chunkPos.x, chunkPos.z, this.seed)) {
+				return StructureCheckResult.START_NOT_PRESENT;
 			} else {
 				boolean bl2 = ((Long2BooleanMap)this.featureChecks.computeIfAbsent(structure, structurex -> new Long2BooleanOpenHashMap()))
 					.computeIfAbsent(l, (Long2BooleanFunction)(lx -> this.canCreateStructure(chunkPos, structure)));

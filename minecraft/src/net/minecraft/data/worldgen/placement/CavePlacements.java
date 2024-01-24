@@ -4,7 +4,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.data.worldgen.BootstapContext;
+import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.data.worldgen.features.CaveFeatures;
 import net.minecraft.data.worldgen.features.VegetationFeatures;
 import net.minecraft.resources.ResourceKey;
@@ -47,8 +47,8 @@ public class CavePlacements {
 	public static final ResourceKey<PlacedFeature> SCULK_PATCH_ANCIENT_CITY = PlacementUtils.createKey("sculk_patch_ancient_city");
 	public static final ResourceKey<PlacedFeature> SCULK_VEIN = PlacementUtils.createKey("sculk_vein");
 
-	public static void bootstrap(BootstapContext<PlacedFeature> bootstapContext) {
-		HolderGetter<ConfiguredFeature<?, ?>> holderGetter = bootstapContext.lookup(Registries.CONFIGURED_FEATURE);
+	public static void bootstrap(BootstrapContext<PlacedFeature> bootstrapContext) {
+		HolderGetter<ConfiguredFeature<?, ?>> holderGetter = bootstrapContext.lookup(Registries.CONFIGURED_FEATURE);
 		Holder<ConfiguredFeature<?, ?>> holder = holderGetter.getOrThrow(CaveFeatures.MONSTER_ROOM);
 		Holder<ConfiguredFeature<?, ?>> holder2 = holderGetter.getOrThrow(CaveFeatures.FOSSIL_COAL);
 		Holder<ConfiguredFeature<?, ?>> holder3 = holderGetter.getOrThrow(CaveFeatures.FOSSIL_DIAMONDS);
@@ -69,7 +69,7 @@ public class CavePlacements {
 		Holder<ConfiguredFeature<?, ?>> holder18 = holderGetter.getOrThrow(CaveFeatures.SCULK_PATCH_ANCIENT_CITY);
 		Holder<ConfiguredFeature<?, ?>> holder19 = holderGetter.getOrThrow(CaveFeatures.SCULK_VEIN);
 		PlacementUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			MONSTER_ROOM,
 			holder,
 			CountPlacement.of(10),
@@ -78,7 +78,7 @@ public class CavePlacements {
 			BiomeFilter.biome()
 		);
 		PlacementUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			MONSTER_ROOM_DEEP,
 			holder,
 			CountPlacement.of(4),
@@ -87,7 +87,7 @@ public class CavePlacements {
 			BiomeFilter.biome()
 		);
 		PlacementUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			FOSSIL_UPPER,
 			holder2,
 			RarityFilter.onAverageOnceEvery(64),
@@ -96,7 +96,7 @@ public class CavePlacements {
 			BiomeFilter.biome()
 		);
 		PlacementUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			FOSSIL_LOWER,
 			holder3,
 			RarityFilter.onAverageOnceEvery(64),
@@ -105,7 +105,7 @@ public class CavePlacements {
 			BiomeFilter.biome()
 		);
 		PlacementUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			DRIPSTONE_CLUSTER,
 			holder4,
 			CountPlacement.of(UniformInt.of(48, 96)),
@@ -114,7 +114,7 @@ public class CavePlacements {
 			BiomeFilter.biome()
 		);
 		PlacementUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			LARGE_DRIPSTONE,
 			holder5,
 			CountPlacement.of(UniformInt.of(10, 48)),
@@ -123,7 +123,7 @@ public class CavePlacements {
 			BiomeFilter.biome()
 		);
 		PlacementUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			POINTED_DRIPSTONE,
 			holder6,
 			CountPlacement.of(UniformInt.of(192, 256)),
@@ -134,7 +134,7 @@ public class CavePlacements {
 			BiomeFilter.biome()
 		);
 		PlacementUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			UNDERWATER_MAGMA,
 			holder7,
 			CountPlacement.of(UniformInt.of(44, 52)),
@@ -144,7 +144,7 @@ public class CavePlacements {
 			BiomeFilter.biome()
 		);
 		PlacementUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			GLOW_LICHEN,
 			holder8,
 			CountPlacement.of(UniformInt.of(104, 157)),
@@ -154,7 +154,7 @@ public class CavePlacements {
 			BiomeFilter.biome()
 		);
 		PlacementUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			ROOTED_AZALEA_TREE,
 			holder9,
 			CountPlacement.of(UniformInt.of(1, 2)),
@@ -165,7 +165,7 @@ public class CavePlacements {
 			BiomeFilter.biome()
 		);
 		PlacementUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			CAVE_VINES,
 			holder10,
 			CountPlacement.of(188),
@@ -176,7 +176,7 @@ public class CavePlacements {
 			BiomeFilter.biome()
 		);
 		PlacementUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			LUSH_CAVES_VEGETATION,
 			holder11,
 			CountPlacement.of(125),
@@ -187,7 +187,7 @@ public class CavePlacements {
 			BiomeFilter.biome()
 		);
 		PlacementUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			LUSH_CAVES_CLAY,
 			holder12,
 			CountPlacement.of(62),
@@ -198,7 +198,7 @@ public class CavePlacements {
 			BiomeFilter.biome()
 		);
 		PlacementUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			LUSH_CAVES_CEILING_VEGETATION,
 			holder13,
 			CountPlacement.of(125),
@@ -209,7 +209,7 @@ public class CavePlacements {
 			BiomeFilter.biome()
 		);
 		PlacementUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			SPORE_BLOSSOM,
 			holder14,
 			CountPlacement.of(25),
@@ -220,7 +220,7 @@ public class CavePlacements {
 			BiomeFilter.biome()
 		);
 		PlacementUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			CLASSIC_VINES,
 			holder15,
 			CountPlacement.of(256),
@@ -229,7 +229,7 @@ public class CavePlacements {
 			BiomeFilter.biome()
 		);
 		PlacementUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			AMETHYST_GEODE,
 			holder16,
 			RarityFilter.onAverageOnceEvery(24),
@@ -238,7 +238,7 @@ public class CavePlacements {
 			BiomeFilter.biome()
 		);
 		PlacementUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			SCULK_PATCH_DEEP_DARK,
 			holder17,
 			CountPlacement.of(ConstantInt.of(256)),
@@ -246,9 +246,9 @@ public class CavePlacements {
 			PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT,
 			BiomeFilter.biome()
 		);
-		PlacementUtils.register(bootstapContext, SCULK_PATCH_ANCIENT_CITY, holder18);
+		PlacementUtils.register(bootstrapContext, SCULK_PATCH_ANCIENT_CITY, holder18);
 		PlacementUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			SCULK_VEIN,
 			holder19,
 			CountPlacement.of(UniformInt.of(204, 250)),

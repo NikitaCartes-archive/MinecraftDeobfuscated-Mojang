@@ -106,10 +106,6 @@ public interface ContainerEventHandler extends GuiEventListener {
 		return guiEventListener != null ? ComponentPath.path(this, guiEventListener.getCurrentFocusPath()) : null;
 	}
 
-	default void magicalSpecialHackyFocus(@Nullable GuiEventListener guiEventListener) {
-		this.setFocused(guiEventListener);
-	}
-
 	@Nullable
 	@Override
 	default ComponentPath nextFocusPath(FocusNavigationEvent focusNavigationEvent) {

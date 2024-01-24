@@ -1,25 +1,25 @@
 package net.minecraft.network.protocol.game;
 
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketType;
 
 public record ClientboundRespawnPacket(CommonPlayerSpawnInfo commonPlayerSpawnInfo, byte dataToKeep) implements Packet<ClientGamePacketListener> {
-	public static final StreamCodec<FriendlyByteBuf, ClientboundRespawnPacket> STREAM_CODEC = Packet.codec(
+	public static final StreamCodec<RegistryFriendlyByteBuf, ClientboundRespawnPacket> STREAM_CODEC = Packet.codec(
 		ClientboundRespawnPacket::write, ClientboundRespawnPacket::new
 	);
 	public static final byte KEEP_ATTRIBUTES = 1;
 	public static final byte KEEP_ENTITY_DATA = 2;
 	public static final byte KEEP_ALL_DATA = 3;
 
-	private ClientboundRespawnPacket(FriendlyByteBuf friendlyByteBuf) {
-		this(new CommonPlayerSpawnInfo(friendlyByteBuf), friendlyByteBuf.readByte());
+	private ClientboundRespawnPacket(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
+		this(new CommonPlayerSpawnInfo(registryFriendlyByteBuf), registryFriendlyByteBuf.readByte());
 	}
 
-	private void write(FriendlyByteBuf friendlyByteBuf) {
-		this.commonPlayerSpawnInfo.write(friendlyByteBuf);
-		friendlyByteBuf.writeByte(this.dataToKeep);
+	private void write(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
+		this.commonPlayerSpawnInfo.write(registryFriendlyByteBuf);
+		registryFriendlyByteBuf.writeByte(this.dataToKeep);
 	}
 
 	@Override

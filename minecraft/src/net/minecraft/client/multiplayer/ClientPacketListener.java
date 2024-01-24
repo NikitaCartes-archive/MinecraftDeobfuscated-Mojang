@@ -64,14 +64,13 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.ArgumentSignatures;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.TickablePacketListener;
-import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.LastSeenMessagesTracker;
 import net.minecraft.network.chat.LocalChatSession;
@@ -237,6 +236,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stat;
 import net.minecraft.stats.StatsCounter;
+import net.minecraft.tags.TagNetworkSerialization;
 import net.minecraft.util.Crypt;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
@@ -384,7 +384,7 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 		Collections.shuffle(list);
 		this.levels = Sets.<ResourceKey<Level>>newLinkedHashSet(list);
 		ResourceKey<Level> resourceKey = commonPlayerSpawnInfo.dimension();
-		Holder<DimensionType> holder = this.registryAccess.registryOrThrow(Registries.DIMENSION_TYPE).getHolderOrThrow(commonPlayerSpawnInfo.dimensionType());
+		Holder<DimensionType> holder = commonPlayerSpawnInfo.dimensionType();
 		this.serverChunkRadius = clientboundLoginPacket.chunkRadius();
 		this.serverSimulationDistance = clientboundLoginPacket.simulationDistance();
 		boolean bl = commonPlayerSpawnInfo.isDebug();
@@ -879,14 +879,15 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 	public void handlePlayerChat(ClientboundPlayerChatPacket clientboundPlayerChatPacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundPlayerChatPacket, this, this.minecraft);
 		Optional<SignedMessageBody> optional = clientboundPlayerChatPacket.body().unpack(this.messageSignatureCache);
-		Optional<ChatType.Bound> optional2 = clientboundPlayerChatPacket.chatType().resolve(this.registryAccess);
-		if (!optional.isEmpty() && !optional2.isEmpty()) {
+		if (optional.isEmpty()) {
+			this.connection.disconnect(INVALID_PACKET);
+		} else {
 			this.messageSignatureCache.push((SignedMessageBody)optional.get(), clientboundPlayerChatPacket.signature());
 			UUID uUID = clientboundPlayerChatPacket.sender();
 			PlayerInfo playerInfo = this.getPlayerInfo(uUID);
 			if (playerInfo == null) {
 				LOGGER.error("Received player chat packet for unknown player with ID: {}", uUID);
-				this.minecraft.getChatListener().handleChatMessageError(uUID, (ChatType.Bound)optional2.get());
+				this.minecraft.getChatListener().handleChatMessageError(uUID, clientboundPlayerChatPacket.chatType());
 			} else {
 				RemoteChatSession remoteChatSession = playerInfo.getChatSession();
 				SignedMessageLink signedMessageLink;
@@ -905,25 +906,18 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 				);
 				playerChatMessage = playerInfo.getMessageValidator().updateAndValidate(playerChatMessage);
 				if (playerChatMessage != null) {
-					this.minecraft.getChatListener().handlePlayerChatMessage(playerChatMessage, playerInfo.getProfile(), (ChatType.Bound)optional2.get());
+					this.minecraft.getChatListener().handlePlayerChatMessage(playerChatMessage, playerInfo.getProfile(), clientboundPlayerChatPacket.chatType());
 				} else {
-					this.minecraft.getChatListener().handleChatMessageError(uUID, (ChatType.Bound)optional2.get());
+					this.minecraft.getChatListener().handleChatMessageError(uUID, clientboundPlayerChatPacket.chatType());
 				}
 			}
-		} else {
-			this.connection.disconnect(INVALID_PACKET);
 		}
 	}
 
 	@Override
 	public void handleDisguisedChat(ClientboundDisguisedChatPacket clientboundDisguisedChatPacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundDisguisedChatPacket, this, this.minecraft);
-		Optional<ChatType.Bound> optional = clientboundDisguisedChatPacket.chatType().resolve(this.registryAccess);
-		if (optional.isEmpty()) {
-			this.connection.disconnect(INVALID_PACKET);
-		} else {
-			this.minecraft.getChatListener().handleDisguisedChatMessage(clientboundDisguisedChatPacket.message(), (ChatType.Bound)optional.get());
-		}
+		this.minecraft.getChatListener().handleDisguisedChatMessage(clientboundDisguisedChatPacket.message(), clientboundDisguisedChatPacket.chatType());
 	}
 
 	@Override
@@ -1095,7 +1089,7 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 		PacketUtils.ensureRunningOnSameThread(clientboundRespawnPacket, this, this.minecraft);
 		CommonPlayerSpawnInfo commonPlayerSpawnInfo = clientboundRespawnPacket.commonPlayerSpawnInfo();
 		ResourceKey<Level> resourceKey = commonPlayerSpawnInfo.dimension();
-		Holder<DimensionType> holder = this.registryAccess.registryOrThrow(Registries.DIMENSION_TYPE).getHolderOrThrow(commonPlayerSpawnInfo.dimensionType());
+		Holder<DimensionType> holder = commonPlayerSpawnInfo.dimensionType();
 		LocalPlayer localPlayer = this.minecraft.player;
 		if (resourceKey != localPlayer.level().dimension()) {
 			Map<String, MapItemSavedData> map = this.level.getAllMapData();
@@ -1590,8 +1584,14 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 
 	@Override
 	public void handleUpdateTags(ClientboundUpdateTagsPacket clientboundUpdateTagsPacket) {
-		super.handleUpdateTags(clientboundUpdateTagsPacket);
+		PacketUtils.ensureRunningOnSameThread(clientboundUpdateTagsPacket, this, this.minecraft);
+		clientboundUpdateTagsPacket.getTags().forEach(this::updateTagsForRegistry);
 		this.refreshTagDependentData();
+	}
+
+	private <T> void updateTagsForRegistry(ResourceKey<? extends Registry<? extends T>> resourceKey, TagNetworkSerialization.NetworkPayload networkPayload) {
+		Registry<T> registry = this.registryAccess.registryOrThrow(resourceKey);
+		networkPayload.applyToRegistry(registry);
 	}
 
 	private void refreshTagDependentData() {
@@ -2394,7 +2394,6 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 		return this.levels;
 	}
 
-	@Override
 	public RegistryAccess.Frozen registryAccess() {
 		return this.registryAccess;
 	}

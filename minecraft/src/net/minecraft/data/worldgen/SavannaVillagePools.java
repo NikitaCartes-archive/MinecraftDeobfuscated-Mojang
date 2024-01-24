@@ -17,20 +17,20 @@ public class SavannaVillagePools {
 	private static final ResourceKey<StructureTemplatePool> TERMINATORS_KEY = Pools.createKey("village/savanna/terminators");
 	private static final ResourceKey<StructureTemplatePool> ZOMBIE_TERMINATORS_KEY = Pools.createKey("village/savanna/zombie/terminators");
 
-	public static void bootstrap(BootstapContext<StructureTemplatePool> bootstapContext) {
-		HolderGetter<PlacedFeature> holderGetter = bootstapContext.lookup(Registries.PLACED_FEATURE);
+	public static void bootstrap(BootstrapContext<StructureTemplatePool> bootstrapContext) {
+		HolderGetter<PlacedFeature> holderGetter = bootstrapContext.lookup(Registries.PLACED_FEATURE);
 		Holder<PlacedFeature> holder = holderGetter.getOrThrow(VillagePlacements.ACACIA_VILLAGE);
 		Holder<PlacedFeature> holder2 = holderGetter.getOrThrow(VillagePlacements.PILE_HAY_VILLAGE);
 		Holder<PlacedFeature> holder3 = holderGetter.getOrThrow(VillagePlacements.PILE_MELON_VILLAGE);
-		HolderGetter<StructureProcessorList> holderGetter2 = bootstapContext.lookup(Registries.PROCESSOR_LIST);
+		HolderGetter<StructureProcessorList> holderGetter2 = bootstrapContext.lookup(Registries.PROCESSOR_LIST);
 		Holder<StructureProcessorList> holder4 = holderGetter2.getOrThrow(ProcessorLists.ZOMBIE_SAVANNA);
 		Holder<StructureProcessorList> holder5 = holderGetter2.getOrThrow(ProcessorLists.STREET_SAVANNA);
 		Holder<StructureProcessorList> holder6 = holderGetter2.getOrThrow(ProcessorLists.FARM_SAVANNA);
-		HolderGetter<StructureTemplatePool> holderGetter3 = bootstapContext.lookup(Registries.TEMPLATE_POOL);
+		HolderGetter<StructureTemplatePool> holderGetter3 = bootstrapContext.lookup(Registries.TEMPLATE_POOL);
 		Holder<StructureTemplatePool> holder7 = holderGetter3.getOrThrow(Pools.EMPTY);
 		Holder<StructureTemplatePool> holder8 = holderGetter3.getOrThrow(TERMINATORS_KEY);
 		Holder<StructureTemplatePool> holder9 = holderGetter3.getOrThrow(ZOMBIE_TERMINATORS_KEY);
-		bootstapContext.register(
+		bootstrapContext.register(
 			START,
 			new StructureTemplatePool(
 				holder7,
@@ -48,7 +48,7 @@ public class SavannaVillagePools {
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"village/savanna/streets",
 			new StructureTemplatePool(
 				holder8,
@@ -77,7 +77,7 @@ public class SavannaVillagePools {
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"village/savanna/zombie/streets",
 			new StructureTemplatePool(
 				holder9,
@@ -106,7 +106,7 @@ public class SavannaVillagePools {
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"village/savanna/houses",
 			new StructureTemplatePool(
 				holder8,
@@ -148,7 +148,7 @@ public class SavannaVillagePools {
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"village/savanna/zombie/houses",
 			new StructureTemplatePool(
 				holder9,
@@ -189,7 +189,7 @@ public class SavannaVillagePools {
 				StructureTemplatePool.Projection.RIGID
 			)
 		);
-		bootstapContext.register(
+		bootstrapContext.register(
 			TERMINATORS_KEY,
 			new StructureTemplatePool(
 				holder7,
@@ -203,7 +203,7 @@ public class SavannaVillagePools {
 				StructureTemplatePool.Projection.TERRAIN_MATCHING
 			)
 		);
-		bootstapContext.register(
+		bootstrapContext.register(
 			ZOMBIE_TERMINATORS_KEY,
 			new StructureTemplatePool(
 				holder7,
@@ -218,12 +218,12 @@ public class SavannaVillagePools {
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"village/savanna/trees",
 			new StructureTemplatePool(holder7, ImmutableList.of(Pair.of(StructurePoolElement.feature(holder), 1)), StructureTemplatePool.Projection.RIGID)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"village/savanna/decor",
 			new StructureTemplatePool(
 				holder7,
@@ -238,7 +238,7 @@ public class SavannaVillagePools {
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"village/savanna/zombie/decor",
 			new StructureTemplatePool(
 				holder7,
@@ -253,7 +253,7 @@ public class SavannaVillagePools {
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"village/savanna/villagers",
 			new StructureTemplatePool(
 				holder7,
@@ -266,7 +266,7 @@ public class SavannaVillagePools {
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"village/savanna/zombie/villagers",
 			new StructureTemplatePool(
 				holder7,

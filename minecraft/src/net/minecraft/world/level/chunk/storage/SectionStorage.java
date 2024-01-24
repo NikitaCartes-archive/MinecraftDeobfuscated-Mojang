@@ -2,7 +2,6 @@ package net.minecraft.world.level.chunk.storage;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
-import com.mojang.datafixers.DataFixer;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
@@ -13,7 +12,6 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongLinkedOpenHashSet;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -29,7 +27,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.RegistryOps;
-import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelHeightAccessor;
 import org.slf4j.Logger;
@@ -37,33 +34,26 @@ import org.slf4j.Logger;
 public class SectionStorage<R> implements AutoCloseable {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final String SECTIONS_TAG = "Sections";
-	private final IOWorker worker;
+	private final SimpleRegionStorage simpleRegionStorage;
 	private final Long2ObjectMap<Optional<R>> storage = new Long2ObjectOpenHashMap<>();
 	private final LongLinkedOpenHashSet dirty = new LongLinkedOpenHashSet();
 	private final Function<Runnable, Codec<R>> codec;
 	private final Function<Runnable, R> factory;
-	private final DataFixer fixerUpper;
-	private final DataFixTypes type;
 	private final RegistryAccess registryAccess;
 	protected final LevelHeightAccessor levelHeightAccessor;
 
 	public SectionStorage(
-		Path path,
+		SimpleRegionStorage simpleRegionStorage,
 		Function<Runnable, Codec<R>> function,
 		Function<Runnable, R> function2,
-		DataFixer dataFixer,
-		DataFixTypes dataFixTypes,
-		boolean bl,
 		RegistryAccess registryAccess,
 		LevelHeightAccessor levelHeightAccessor
 	) {
+		this.simpleRegionStorage = simpleRegionStorage;
 		this.codec = function;
 		this.factory = function2;
-		this.fixerUpper = dataFixer;
-		this.type = dataFixTypes;
 		this.registryAccess = registryAccess;
 		this.levelHeightAccessor = levelHeightAccessor;
-		this.worker = new IOWorker(path, bl, path.getFileName().toString());
 	}
 
 	protected void tick(BooleanSupplier booleanSupplier) {
@@ -124,11 +114,11 @@ public class SectionStorage<R> implements AutoCloseable {
 	private void readColumn(ChunkPos chunkPos) {
 		Optional<CompoundTag> optional = (Optional<CompoundTag>)this.tryRead(chunkPos).join();
 		RegistryOps<Tag> registryOps = RegistryOps.create(NbtOps.INSTANCE, this.registryAccess);
-		this.readColumn(chunkPos, registryOps, (Tag)optional.orElse(null));
+		this.readColumn(chunkPos, registryOps, (CompoundTag)optional.orElse(null));
 	}
 
 	private CompletableFuture<Optional<CompoundTag>> tryRead(ChunkPos chunkPos) {
-		return this.worker.loadAsync(chunkPos).exceptionally(throwable -> {
+		return this.simpleRegionStorage.read(chunkPos).exceptionally(throwable -> {
 			if (throwable instanceof IOException iOException) {
 				LOGGER.error("Error reading chunk {} data from disk", chunkPos, iOException);
 				return Optional.empty();
@@ -138,18 +128,18 @@ public class SectionStorage<R> implements AutoCloseable {
 		});
 	}
 
-	private <T> void readColumn(ChunkPos chunkPos, DynamicOps<T> dynamicOps, @Nullable T object) {
-		if (object == null) {
+	private void readColumn(ChunkPos chunkPos, RegistryOps<Tag> registryOps, @Nullable CompoundTag compoundTag) {
+		if (compoundTag == null) {
 			for (int i = this.levelHeightAccessor.getMinSection(); i < this.levelHeightAccessor.getMaxSection(); i++) {
 				this.storage.put(getKey(chunkPos, i), Optional.empty());
 			}
 		} else {
-			Dynamic<T> dynamic = new Dynamic<>(dynamicOps, object);
+			Dynamic<Tag> dynamic = new Dynamic<>(registryOps, compoundTag);
 			int j = getVersion(dynamic);
 			int k = SharedConstants.getCurrentVersion().getDataVersion().getVersion();
 			boolean bl = j != k;
-			Dynamic<T> dynamic2 = this.type.update(this.fixerUpper, dynamic, j, k);
-			OptionalDynamic<T> optionalDynamic = dynamic2.get("Sections");
+			Dynamic<Tag> dynamic2 = this.simpleRegionStorage.upgradeChunkTag(dynamic, j);
+			OptionalDynamic<Tag> optionalDynamic = dynamic2.get("Sections");
 
 			for (int l = this.levelHeightAccessor.getMinSection(); l < this.levelHeightAccessor.getMaxSection(); l++) {
 				long m = getKey(chunkPos, l);
@@ -157,7 +147,7 @@ public class SectionStorage<R> implements AutoCloseable {
 					.result()
 					.flatMap(dynamicx -> ((Codec)this.codec.apply((Runnable)() -> this.setDirty(m))).parse(dynamicx).resultOrPartial(LOGGER::error));
 				this.storage.put(m, optional);
-				optional.ifPresent(objectx -> {
+				optional.ifPresent(object -> {
 					this.onSectionLoad(m);
 					if (bl) {
 						this.setDirty(m);
@@ -172,7 +162,7 @@ public class SectionStorage<R> implements AutoCloseable {
 		Dynamic<Tag> dynamic = this.writeColumn(chunkPos, registryOps);
 		Tag tag = dynamic.getValue();
 		if (tag instanceof CompoundTag) {
-			this.worker.store(chunkPos, (CompoundTag)tag);
+			this.simpleRegionStorage.write(chunkPos, (CompoundTag)tag);
 		} else {
 			LOGGER.error("Expected compound tag, got {}", tag);
 		}
@@ -238,6 +228,6 @@ public class SectionStorage<R> implements AutoCloseable {
 	}
 
 	public void close() throws IOException {
-		this.worker.close();
+		this.simpleRegionStorage.close();
 	}
 }

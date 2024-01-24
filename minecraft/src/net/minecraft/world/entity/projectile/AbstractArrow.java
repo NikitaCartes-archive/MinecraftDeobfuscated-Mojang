@@ -179,7 +179,7 @@ public abstract class AbstractArrow extends Projectile {
 				vec32 = hitResult.getLocation();
 			}
 
-			while (!this.isRemoved()) {
+			while (!this.isRemoved() && !this.isDeflected) {
 				EntityHitResult entityHitResult = this.findHitEntity(vec33, vec32);
 				if (entityHitResult != null) {
 					hitResult = entityHitResult;
@@ -206,6 +206,7 @@ public abstract class AbstractArrow extends Projectile {
 				hitResult = null;
 			}
 
+			this.isDeflected = false;
 			vec3 = this.getDeltaMovement();
 			double e = vec3.x;
 			double f = vec3.y;

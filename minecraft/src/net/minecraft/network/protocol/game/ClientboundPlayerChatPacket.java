@@ -3,6 +3,7 @@ package net.minecraft.network.protocol.game;
 import java.util.UUID;
 import javax.annotation.Nullable;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FilterMask;
@@ -19,32 +20,32 @@ public record ClientboundPlayerChatPacket(
 	SignedMessageBody.Packed body,
 	@Nullable Component unsignedContent,
 	FilterMask filterMask,
-	ChatType.BoundNetwork chatType
+	ChatType.Bound chatType
 ) implements Packet<ClientGamePacketListener> {
-	public static final StreamCodec<FriendlyByteBuf, ClientboundPlayerChatPacket> STREAM_CODEC = Packet.codec(
+	public static final StreamCodec<RegistryFriendlyByteBuf, ClientboundPlayerChatPacket> STREAM_CODEC = Packet.codec(
 		ClientboundPlayerChatPacket::write, ClientboundPlayerChatPacket::new
 	);
 
-	private ClientboundPlayerChatPacket(FriendlyByteBuf friendlyByteBuf) {
+	private ClientboundPlayerChatPacket(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
 		this(
-			friendlyByteBuf.readUUID(),
-			friendlyByteBuf.readVarInt(),
-			friendlyByteBuf.readNullable(MessageSignature::read),
-			new SignedMessageBody.Packed(friendlyByteBuf),
-			friendlyByteBuf.readNullable(FriendlyByteBuf::readComponentTrusted),
-			FilterMask.read(friendlyByteBuf),
-			new ChatType.BoundNetwork(friendlyByteBuf)
+			registryFriendlyByteBuf.readUUID(),
+			registryFriendlyByteBuf.readVarInt(),
+			registryFriendlyByteBuf.readNullable(MessageSignature::read),
+			new SignedMessageBody.Packed(registryFriendlyByteBuf),
+			registryFriendlyByteBuf.readNullable(FriendlyByteBuf::readComponentTrusted),
+			FilterMask.read(registryFriendlyByteBuf),
+			ChatType.Bound.STREAM_CODEC.decode(registryFriendlyByteBuf)
 		);
 	}
 
-	private void write(FriendlyByteBuf friendlyByteBuf) {
-		friendlyByteBuf.writeUUID(this.sender);
-		friendlyByteBuf.writeVarInt(this.index);
-		friendlyByteBuf.writeNullable(this.signature, MessageSignature::write);
-		this.body.write(friendlyByteBuf);
-		friendlyByteBuf.writeNullable(this.unsignedContent, FriendlyByteBuf::writeComponent);
-		FilterMask.write(friendlyByteBuf, this.filterMask);
-		this.chatType.write(friendlyByteBuf);
+	private void write(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
+		registryFriendlyByteBuf.writeUUID(this.sender);
+		registryFriendlyByteBuf.writeVarInt(this.index);
+		registryFriendlyByteBuf.writeNullable(this.signature, MessageSignature::write);
+		this.body.write(registryFriendlyByteBuf);
+		registryFriendlyByteBuf.writeNullable(this.unsignedContent, FriendlyByteBuf::writeComponent);
+		FilterMask.write(registryFriendlyByteBuf, this.filterMask);
+		ChatType.Bound.STREAM_CODEC.encode(registryFriendlyByteBuf, this.chatType);
 	}
 
 	@Override

@@ -13,12 +13,12 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProc
 public class BastionPieces {
 	public static final ResourceKey<StructureTemplatePool> START = Pools.createKey("bastion/starts");
 
-	public static void bootstrap(BootstapContext<StructureTemplatePool> bootstapContext) {
-		HolderGetter<StructureProcessorList> holderGetter = bootstapContext.lookup(Registries.PROCESSOR_LIST);
+	public static void bootstrap(BootstrapContext<StructureTemplatePool> bootstrapContext) {
+		HolderGetter<StructureProcessorList> holderGetter = bootstrapContext.lookup(Registries.PROCESSOR_LIST);
 		Holder<StructureProcessorList> holder = holderGetter.getOrThrow(ProcessorLists.BASTION_GENERIC_DEGRADATION);
-		HolderGetter<StructureTemplatePool> holderGetter2 = bootstapContext.lookup(Registries.TEMPLATE_POOL);
+		HolderGetter<StructureTemplatePool> holderGetter2 = bootstrapContext.lookup(Registries.TEMPLATE_POOL);
 		Holder<StructureTemplatePool> holder2 = holderGetter2.getOrThrow(Pools.EMPTY);
-		bootstapContext.register(
+		bootstrapContext.register(
 			START,
 			new StructureTemplatePool(
 				holder2,
@@ -31,10 +31,10 @@ public class BastionPieces {
 				StructureTemplatePool.Projection.RIGID
 			)
 		);
-		BastionHousingUnitsPools.bootstrap(bootstapContext);
-		BastionHoglinStablePools.bootstrap(bootstapContext);
-		BastionTreasureRoomPools.bootstrap(bootstapContext);
-		BastionBridgePools.bootstrap(bootstapContext);
-		BastionSharedPools.bootstrap(bootstapContext);
+		BastionHousingUnitsPools.bootstrap(bootstrapContext);
+		BastionHoglinStablePools.bootstrap(bootstrapContext);
+		BastionTreasureRoomPools.bootstrap(bootstrapContext);
+		BastionBridgePools.bootstrap(bootstrapContext);
+		BastionSharedPools.bootstrap(bootstrapContext);
 	}
 }

@@ -18,5 +18,9 @@ public class UpdateOneTwentyOneEntityTypeTagsProvider extends IntrinsicHolderTag
 		this.tag(EntityTypeTags.DEFLECTS_PROJECTILES).add(EntityType.BREEZE);
 		this.tag(EntityTypeTags.CAN_TURN_IN_BOATS).add(EntityType.BREEZE);
 		this.tag(EntityTypeTags.IMPACT_PROJECTILES).add(EntityType.WIND_CHARGE);
+		this.tag(EntityTypeTags.NO_ANGER_FROM_WIND_CHARGE)
+			.add(
+				EntityType.BREEZE, EntityType.SKELETON, EntityType.STRAY, EntityType.ZOMBIE, EntityType.HUSK, EntityType.SPIDER, EntityType.CAVE_SPIDER, EntityType.SLIME
+			);
 	}
 }

@@ -9,6 +9,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.SpawnPlacementType;
 import net.minecraft.world.entity.SpawnPlacements;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.entity.ai.village.poi.PoiTypes;
@@ -18,7 +19,6 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.CustomSpawner;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.NaturalSpawner;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.storage.ServerLevelData;
 
@@ -131,13 +131,14 @@ public class WanderingTraderSpawner implements CustomSpawner {
 	@Nullable
 	private BlockPos findSpawnPositionNear(LevelReader levelReader, BlockPos blockPos, int i) {
 		BlockPos blockPos2 = null;
+		SpawnPlacementType spawnPlacementType = SpawnPlacements.getPlacementType(EntityType.WANDERING_TRADER);
 
 		for (int j = 0; j < 10; j++) {
 			int k = blockPos.getX() + this.random.nextInt(i * 2) - i;
 			int l = blockPos.getZ() + this.random.nextInt(i * 2) - i;
 			int m = levelReader.getHeight(Heightmap.Types.WORLD_SURFACE, k, l);
 			BlockPos blockPos3 = new BlockPos(k, m, l);
-			if (NaturalSpawner.isSpawnPositionOk(SpawnPlacements.Type.ON_GROUND, levelReader, blockPos3, EntityType.WANDERING_TRADER)) {
+			if (spawnPlacementType.isSpawnPositionOk(levelReader, blockPos3, EntityType.WANDERING_TRADER)) {
 				blockPos2 = blockPos3;
 				break;
 			}

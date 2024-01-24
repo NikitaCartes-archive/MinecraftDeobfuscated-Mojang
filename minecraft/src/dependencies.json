@@ -408,6 +408,11 @@
 		"url": "https://libraries.minecraft.net/org/lwjgl/lwjgl-tinyfd/3.3.2/lwjgl-tinyfd-3.3.2-natives-windows-x86.jar"
 	},
 	{
+		"sha1sum": "4b986a99445e49ea5fbf5d149c4b63f6ed6c6780",
+		"name": "lz4-java-1.8.0.jar",
+		"url": "https://libraries.minecraft.net/org/lz4/lz4-java/1.8.0/lz4-java-1.8.0.jar"
+	},
+	{
 		"sha1sum": "f8f3d8644afa5e6e1a40a3a6aeb9d9aa970ecb4f",
 		"name": "netty-buffer-4.1.97.Final.jar",
 		"url": "https://libraries.minecraft.net/io/netty/netty-buffer/4.1.97.Final/netty-buffer-4.1.97.Final.jar"

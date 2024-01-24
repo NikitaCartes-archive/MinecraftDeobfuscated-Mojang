@@ -17,18 +17,18 @@ public class DesertVillagePools {
 	private static final ResourceKey<StructureTemplatePool> TERMINATORS_KEY = Pools.createKey("village/desert/terminators");
 	private static final ResourceKey<StructureTemplatePool> ZOMBIE_TERMINATORS_KEY = Pools.createKey("village/desert/zombie/terminators");
 
-	public static void bootstrap(BootstapContext<StructureTemplatePool> bootstapContext) {
-		HolderGetter<PlacedFeature> holderGetter = bootstapContext.lookup(Registries.PLACED_FEATURE);
+	public static void bootstrap(BootstrapContext<StructureTemplatePool> bootstrapContext) {
+		HolderGetter<PlacedFeature> holderGetter = bootstrapContext.lookup(Registries.PLACED_FEATURE);
 		Holder<PlacedFeature> holder = holderGetter.getOrThrow(VillagePlacements.PATCH_CACTUS_VILLAGE);
 		Holder<PlacedFeature> holder2 = holderGetter.getOrThrow(VillagePlacements.PILE_HAY_VILLAGE);
-		HolderGetter<StructureProcessorList> holderGetter2 = bootstapContext.lookup(Registries.PROCESSOR_LIST);
+		HolderGetter<StructureProcessorList> holderGetter2 = bootstrapContext.lookup(Registries.PROCESSOR_LIST);
 		Holder<StructureProcessorList> holder3 = holderGetter2.getOrThrow(ProcessorLists.ZOMBIE_DESERT);
 		Holder<StructureProcessorList> holder4 = holderGetter2.getOrThrow(ProcessorLists.FARM_DESERT);
-		HolderGetter<StructureTemplatePool> holderGetter3 = bootstapContext.lookup(Registries.TEMPLATE_POOL);
+		HolderGetter<StructureTemplatePool> holderGetter3 = bootstrapContext.lookup(Registries.TEMPLATE_POOL);
 		Holder<StructureTemplatePool> holder5 = holderGetter3.getOrThrow(Pools.EMPTY);
 		Holder<StructureTemplatePool> holder6 = holderGetter3.getOrThrow(TERMINATORS_KEY);
 		Holder<StructureTemplatePool> holder7 = holderGetter3.getOrThrow(ZOMBIE_TERMINATORS_KEY);
-		bootstapContext.register(
+		bootstrapContext.register(
 			START,
 			new StructureTemplatePool(
 				holder5,
@@ -44,7 +44,7 @@ public class DesertVillagePools {
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"village/desert/streets",
 			new StructureTemplatePool(
 				holder6,
@@ -65,7 +65,7 @@ public class DesertVillagePools {
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"village/desert/zombie/streets",
 			new StructureTemplatePool(
 				holder7,
@@ -86,7 +86,7 @@ public class DesertVillagePools {
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"village/desert/houses",
 			new StructureTemplatePool(
 				holder6,
@@ -125,7 +125,7 @@ public class DesertVillagePools {
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"village/desert/zombie/houses",
 			new StructureTemplatePool(
 				holder7,
@@ -163,7 +163,7 @@ public class DesertVillagePools {
 				StructureTemplatePool.Projection.RIGID
 			)
 		);
-		bootstapContext.register(
+		bootstrapContext.register(
 			TERMINATORS_KEY,
 			new StructureTemplatePool(
 				holder5,
@@ -174,7 +174,7 @@ public class DesertVillagePools {
 				StructureTemplatePool.Projection.TERRAIN_MATCHING
 			)
 		);
-		bootstapContext.register(
+		bootstrapContext.register(
 			ZOMBIE_TERMINATORS_KEY,
 			new StructureTemplatePool(
 				holder5,
@@ -186,7 +186,7 @@ public class DesertVillagePools {
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"village/desert/decor",
 			new StructureTemplatePool(
 				holder5,
@@ -200,7 +200,7 @@ public class DesertVillagePools {
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"village/desert/zombie/decor",
 			new StructureTemplatePool(
 				holder5,
@@ -214,7 +214,7 @@ public class DesertVillagePools {
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"village/desert/villagers",
 			new StructureTemplatePool(
 				holder5,
@@ -227,14 +227,14 @@ public class DesertVillagePools {
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"village/desert/camel",
 			new StructureTemplatePool(
 				holder5, ImmutableList.of(Pair.of(StructurePoolElement.legacy("village/desert/camel_spawn"), 1)), StructureTemplatePool.Projection.RIGID
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"village/desert/zombie/villagers",
 			new StructureTemplatePool(
 				holder5,

@@ -21,6 +21,7 @@ import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.ProjectileDeflection;
@@ -81,11 +82,6 @@ public class Breeze extends Monster {
 	@Override
 	protected Brain.Provider<Breeze> brainProvider() {
 		return Brain.provider(BreezeAi.MEMORY_TYPES, BreezeAi.SENSOR_TYPES);
-	}
-
-	@Override
-	public boolean canAttack(LivingEntity livingEntity) {
-		return livingEntity.getType() != EntityType.BREEZE && super.canAttack(livingEntity);
 	}
 
 	@Override
@@ -215,6 +211,14 @@ public class Breeze extends Monster {
 		return this.onGround() ? SoundEvents.BREEZE_IDLE_GROUND : SoundEvents.BREEZE_IDLE_AIR;
 	}
 
+	public Optional<LivingEntity> getHurtBy() {
+		return this.getBrain()
+			.getMemory(MemoryModuleType.HURT_BY)
+			.map(DamageSource::getEntity)
+			.filter(entity -> entity instanceof LivingEntity)
+			.map(entity -> (LivingEntity)entity);
+	}
+
 	public boolean withinInnerCircleRange(Vec3 vec3) {
 		Vec3 vec32 = this.blockPosition().getCenter();
 		return vec3.closerThan(vec32, 4.0, 10.0);
@@ -239,7 +243,7 @@ public class Breeze extends Monster {
 
 	@Override
 	public boolean canAttackType(EntityType<?> entityType) {
-		return entityType == EntityType.PLAYER;
+		return entityType == EntityType.PLAYER || entityType == EntityType.IRON_GOLEM;
 	}
 
 	@Override

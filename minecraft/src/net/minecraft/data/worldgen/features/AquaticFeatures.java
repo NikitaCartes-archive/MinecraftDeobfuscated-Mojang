@@ -1,7 +1,7 @@
 package net.minecraft.data.worldgen.features;
 
 import net.minecraft.core.HolderSet;
-import net.minecraft.data.worldgen.BootstapContext;
+import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.data.worldgen.placement.PlacementUtils;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.block.Blocks;
@@ -24,16 +24,16 @@ public class AquaticFeatures {
 	public static final ResourceKey<ConfiguredFeature<?, ?>> KELP = FeatureUtils.createKey("kelp");
 	public static final ResourceKey<ConfiguredFeature<?, ?>> WARM_OCEAN_VEGETATION = FeatureUtils.createKey("warm_ocean_vegetation");
 
-	public static void bootstrap(BootstapContext<ConfiguredFeature<?, ?>> bootstapContext) {
-		FeatureUtils.register(bootstapContext, SEAGRASS_SHORT, Feature.SEAGRASS, new ProbabilityFeatureConfiguration(0.3F));
-		FeatureUtils.register(bootstapContext, SEAGRASS_SLIGHTLY_LESS_SHORT, Feature.SEAGRASS, new ProbabilityFeatureConfiguration(0.4F));
-		FeatureUtils.register(bootstapContext, SEAGRASS_MID, Feature.SEAGRASS, new ProbabilityFeatureConfiguration(0.6F));
-		FeatureUtils.register(bootstapContext, SEAGRASS_TALL, Feature.SEAGRASS, new ProbabilityFeatureConfiguration(0.8F));
-		FeatureUtils.register(bootstapContext, SEA_PICKLE, Feature.SEA_PICKLE, new CountConfiguration(20));
-		FeatureUtils.register(bootstapContext, SEAGRASS_SIMPLE, Feature.SIMPLE_BLOCK, new SimpleBlockConfiguration(BlockStateProvider.simple(Blocks.SEAGRASS)));
-		FeatureUtils.register(bootstapContext, KELP, Feature.KELP);
+	public static void bootstrap(BootstrapContext<ConfiguredFeature<?, ?>> bootstrapContext) {
+		FeatureUtils.register(bootstrapContext, SEAGRASS_SHORT, Feature.SEAGRASS, new ProbabilityFeatureConfiguration(0.3F));
+		FeatureUtils.register(bootstrapContext, SEAGRASS_SLIGHTLY_LESS_SHORT, Feature.SEAGRASS, new ProbabilityFeatureConfiguration(0.4F));
+		FeatureUtils.register(bootstrapContext, SEAGRASS_MID, Feature.SEAGRASS, new ProbabilityFeatureConfiguration(0.6F));
+		FeatureUtils.register(bootstrapContext, SEAGRASS_TALL, Feature.SEAGRASS, new ProbabilityFeatureConfiguration(0.8F));
+		FeatureUtils.register(bootstrapContext, SEA_PICKLE, Feature.SEA_PICKLE, new CountConfiguration(20));
+		FeatureUtils.register(bootstrapContext, SEAGRASS_SIMPLE, Feature.SIMPLE_BLOCK, new SimpleBlockConfiguration(BlockStateProvider.simple(Blocks.SEAGRASS)));
+		FeatureUtils.register(bootstrapContext, KELP, Feature.KELP);
 		FeatureUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			WARM_OCEAN_VEGETATION,
 			Feature.SIMPLE_RANDOM_SELECTOR,
 			new SimpleRandomFeatureConfiguration(

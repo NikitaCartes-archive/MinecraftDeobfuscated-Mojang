@@ -123,6 +123,7 @@ import net.minecraft.server.commands.TellRawCommand;
 import net.minecraft.server.commands.TickCommand;
 import net.minecraft.server.commands.TimeCommand;
 import net.minecraft.server.commands.TitleCommand;
+import net.minecraft.server.commands.TransferCommand;
 import net.minecraft.server.commands.TriggerCommand;
 import net.minecraft.server.commands.WardenSpawnTrackerCommand;
 import net.minecraft.server.commands.WeatherCommand;
@@ -239,6 +240,7 @@ public class Commands {
 			SaveOnCommand.register(this.dispatcher);
 			SetPlayerIdleTimeoutCommand.register(this.dispatcher);
 			StopCommand.register(this.dispatcher);
+			TransferCommand.register(this.dispatcher);
 			WhitelistCommand.register(this.dispatcher);
 		}
 

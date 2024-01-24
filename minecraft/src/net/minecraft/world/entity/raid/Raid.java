@@ -42,6 +42,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.SpawnPlacementType;
 import net.minecraft.world.entity.SpawnPlacements;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
@@ -49,7 +50,6 @@ import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.NaturalSpawner;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BannerPattern;
 import net.minecraft.world.level.block.entity.BannerPatterns;
@@ -619,6 +619,7 @@ public class Raid {
 	private BlockPos findRandomSpawnPos(int i, int j) {
 		int k = i == 0 ? 2 : 2 - i;
 		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
+		SpawnPlacementType spawnPlacementType = SpawnPlacements.getPlacementType(EntityType.RAVAGER);
 
 		for (int l = 0; l < j; l++) {
 			float f = this.level.random.nextFloat() * (float) (Math.PI * 2);
@@ -631,7 +632,7 @@ public class Raid {
 				if (this.level.hasChunksAt(mutableBlockPos.getX() - 10, mutableBlockPos.getZ() - 10, mutableBlockPos.getX() + 10, mutableBlockPos.getZ() + 10)
 					&& this.level.isPositionEntityTicking(mutableBlockPos)
 					&& (
-						NaturalSpawner.isSpawnPositionOk(SpawnPlacements.Type.ON_GROUND, this.level, mutableBlockPos, EntityType.RAVAGER)
+						spawnPlacementType.isSpawnPositionOk(this.level, mutableBlockPos, EntityType.RAVAGER)
 							|| this.level.getBlockState(mutableBlockPos.below()).is(Blocks.SNOW) && this.level.getBlockState(mutableBlockPos).isAir()
 					)) {
 					return mutableBlockPos;

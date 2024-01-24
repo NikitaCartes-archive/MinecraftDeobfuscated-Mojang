@@ -59,7 +59,6 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.NaturalSpawner;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -298,8 +297,7 @@ public class Zombie extends Monster {
 					int o = k + Mth.nextInt(this.random, 7, 40) * Mth.nextInt(this.random, -1, 1);
 					BlockPos blockPos = new BlockPos(m, n, o);
 					EntityType<?> entityType = zombie.getType();
-					SpawnPlacements.Type type = SpawnPlacements.getPlacementType(entityType);
-					if (NaturalSpawner.isSpawnPositionOk(type, this.level(), blockPos, entityType)
+					if (SpawnPlacements.isSpawnPositionOk(entityType, this.level(), blockPos)
 						&& SpawnPlacements.checkSpawnRules(entityType, serverLevel, MobSpawnType.REINFORCEMENT, blockPos, this.level().random)) {
 						zombie.setPos((double)m, (double)n, (double)o);
 						if (!this.level().hasNearbyAlivePlayer((double)m, (double)n, (double)o, 7.0)

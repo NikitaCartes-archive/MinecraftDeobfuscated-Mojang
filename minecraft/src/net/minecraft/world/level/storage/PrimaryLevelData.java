@@ -402,7 +402,7 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 	}
 
 	@Override
-	public boolean getAllowCommands() {
+	public boolean isAllowCommands() {
 		return this.settings.allowCommands();
 	}
 

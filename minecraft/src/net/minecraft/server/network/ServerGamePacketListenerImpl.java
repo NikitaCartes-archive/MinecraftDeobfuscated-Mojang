@@ -1422,14 +1422,14 @@ public class ServerGamePacketListenerImpl
 				playerChatMessage.signedBody().pack(this.messageSignatureCache),
 				playerChatMessage.unsignedContent(),
 				playerChatMessage.filterMask(),
-				bound.toNetwork(this.player.level().registryAccess())
+				bound
 			)
 		);
 		this.addPendingMessage(playerChatMessage);
 	}
 
 	public void sendDisguisedChatMessage(Component component, ChatType.Bound bound) {
-		this.send(new ClientboundDisguisedChatPacket(component, bound.toNetwork(this.player.level().registryAccess())));
+		this.send(new ClientboundDisguisedChatPacket(component, bound));
 	}
 
 	public SocketAddress getRemoteAddress() {

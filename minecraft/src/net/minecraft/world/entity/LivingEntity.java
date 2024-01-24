@@ -63,6 +63,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.CombatRules;
 import net.minecraft.world.damagesource.CombatTracker;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffectUtil;
@@ -1150,7 +1151,9 @@ public abstract class LivingEntity extends Entity implements Attackable {
 
 			Entity entity2 = damageSource.getEntity();
 			if (entity2 != null) {
-				if (entity2 instanceof LivingEntity livingEntity2 && !damageSource.is(DamageTypeTags.NO_ANGER)) {
+				if (entity2 instanceof LivingEntity livingEntity2
+					&& !damageSource.is(DamageTypeTags.NO_ANGER)
+					&& (!damageSource.is(DamageTypes.WIND_CHARGE) || !this.getType().is(EntityTypeTags.NO_ANGER_FROM_WIND_CHARGE))) {
 					this.setLastHurtByMob(livingEntity2);
 				}
 

@@ -24,7 +24,7 @@ public class TagNetworkSerialization {
 	) {
 		return (Map<ResourceKey<? extends Registry<?>>, TagNetworkSerialization.NetworkPayload>)RegistrySynchronization.networkSafeRegistries(layeredRegistryAccess)
 			.map(registryEntry -> Pair.of(registryEntry.key(), serializeToNetwork(registryEntry.value())))
-			.filter(pair -> !((TagNetworkSerialization.NetworkPayload)pair.getSecond()).isEmpty())
+			.filter(pair -> ((TagNetworkSerialization.NetworkPayload)pair.getSecond()).size() > 0)
 			.collect(Collectors.toMap(Pair::getFirst, Pair::getSecond));
 	}
 
@@ -47,7 +47,7 @@ public class TagNetworkSerialization {
 		return new TagNetworkSerialization.NetworkPayload(map);
 	}
 
-	public static <T> void deserializeTagsFromNetwork(
+	static <T> void deserializeTagsFromNetwork(
 		ResourceKey<? extends Registry<T>> resourceKey,
 		Registry<T> registry,
 		TagNetworkSerialization.NetworkPayload networkPayload,
@@ -75,8 +75,16 @@ public class TagNetworkSerialization {
 			return new TagNetworkSerialization.NetworkPayload(friendlyByteBuf.readMap(FriendlyByteBuf::readResourceLocation, FriendlyByteBuf::readIntIdList));
 		}
 
-		public boolean isEmpty() {
-			return this.tags.isEmpty();
+		public int size() {
+			return this.tags.size();
+		}
+
+		public <T> void applyToRegistry(Registry<T> registry) {
+			if (this.size() != 0) {
+				Map<TagKey<T>, List<Holder<T>>> map = new HashMap(this.size());
+				TagNetworkSerialization.deserializeTagsFromNetwork(registry.key(), registry, this, map::put);
+				registry.bindTags(map);
+			}
 		}
 	}
 

@@ -7,7 +7,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -31,9 +30,6 @@ import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
 import net.minecraft.client.multiplayer.resolver.ServerAddress;
 import net.minecraft.client.resources.server.DownloadedPackSource;
 import net.minecraft.client.telemetry.WorldSessionTelemetryManager;
-import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.Connection;
 import net.minecraft.network.ServerboundPacketListener;
 import net.minecraft.network.chat.CommonComponents;
@@ -49,7 +45,6 @@ import net.minecraft.network.protocol.common.ClientboundResourcePackPopPacket;
 import net.minecraft.network.protocol.common.ClientboundResourcePackPushPacket;
 import net.minecraft.network.protocol.common.ClientboundStoreCookiePacket;
 import net.minecraft.network.protocol.common.ClientboundTransferPacket;
-import net.minecraft.network.protocol.common.ClientboundUpdateTagsPacket;
 import net.minecraft.network.protocol.common.ServerboundKeepAlivePacket;
 import net.minecraft.network.protocol.common.ServerboundPongPacket;
 import net.minecraft.network.protocol.common.ServerboundResourcePackPacket;
@@ -59,10 +54,7 @@ import net.minecraft.network.protocol.common.custom.DiscardedPayload;
 import net.minecraft.network.protocol.cookie.ClientboundCookieRequestPacket;
 import net.minecraft.network.protocol.cookie.ServerboundCookieResponsePacket;
 import net.minecraft.realms.DisconnectedRealmsScreen;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagKey;
-import net.minecraft.tags.TagNetworkSerialization;
 import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
@@ -118,8 +110,6 @@ public abstract class ClientCommonPacketListenerImpl implements ClientCommonPack
 	}
 
 	protected abstract void handleCustomPayload(CustomPacketPayload customPacketPayload);
-
-	protected abstract RegistryAccess.Frozen registryAccess();
 
 	@Override
 	public void handleResourcePackPush(ClientboundResourcePackPushPacket clientboundResourcePackPushPacket) {
@@ -194,23 +184,6 @@ public abstract class ClientCommonPacketListenerImpl implements ClientCommonPack
 				false,
 				new TransferState(this.serverCookies)
 			);
-		}
-	}
-
-	@Override
-	public void handleUpdateTags(ClientboundUpdateTagsPacket clientboundUpdateTagsPacket) {
-		PacketUtils.ensureRunningOnSameThread(clientboundUpdateTagsPacket, this, this.minecraft);
-		clientboundUpdateTagsPacket.getTags().forEach(this::updateTagsForRegistry);
-	}
-
-	private <T> void updateTagsForRegistry(ResourceKey<? extends Registry<? extends T>> resourceKey, TagNetworkSerialization.NetworkPayload networkPayload) {
-		if (!networkPayload.isEmpty()) {
-			Registry<T> registry = (Registry<T>)this.registryAccess()
-				.registry(resourceKey)
-				.orElseThrow(() -> new IllegalStateException("Unknown registry " + resourceKey));
-			Map<TagKey<T>, List<Holder<T>>> map = new HashMap();
-			TagNetworkSerialization.deserializeTagsFromNetwork(resourceKey, registry, networkPayload, map::put);
-			registry.bindTags(map);
 		}
 	}
 

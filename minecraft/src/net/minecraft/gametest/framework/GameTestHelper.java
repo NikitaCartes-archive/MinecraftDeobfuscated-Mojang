@@ -847,6 +847,12 @@ public class GameTestHelper {
 		}
 	}
 
+	public <N extends Number> void assertValueEqual(N number, N number2, String string) {
+		if (!number.equals(number2)) {
+			throw new GameTestAssertException("Expected " + string + " to be " + number2 + ", but was " + number);
+		}
+	}
+
 	public void assertFalse(boolean bl, String string) {
 		if (bl) {
 			throw new GameTestAssertException(string);

@@ -5,7 +5,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.data.worldgen.BootstapContext;
+import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.data.worldgen.SurfaceRuleData;
 import net.minecraft.resources.RegistryFileCodec;
 import net.minecraft.resources.ResourceKey;
@@ -63,22 +63,22 @@ public record NoiseGeneratorSettings(
 		return this.useLegacyRandomSource ? WorldgenRandom.Algorithm.LEGACY : WorldgenRandom.Algorithm.XOROSHIRO;
 	}
 
-	public static void bootstrap(BootstapContext<NoiseGeneratorSettings> bootstapContext) {
-		bootstapContext.register(OVERWORLD, overworld(bootstapContext, false, false));
-		bootstapContext.register(LARGE_BIOMES, overworld(bootstapContext, false, true));
-		bootstapContext.register(AMPLIFIED, overworld(bootstapContext, true, false));
-		bootstapContext.register(NETHER, nether(bootstapContext));
-		bootstapContext.register(END, end(bootstapContext));
-		bootstapContext.register(CAVES, caves(bootstapContext));
-		bootstapContext.register(FLOATING_ISLANDS, floatingIslands(bootstapContext));
+	public static void bootstrap(BootstrapContext<NoiseGeneratorSettings> bootstrapContext) {
+		bootstrapContext.register(OVERWORLD, overworld(bootstrapContext, false, false));
+		bootstrapContext.register(LARGE_BIOMES, overworld(bootstrapContext, false, true));
+		bootstrapContext.register(AMPLIFIED, overworld(bootstrapContext, true, false));
+		bootstrapContext.register(NETHER, nether(bootstrapContext));
+		bootstrapContext.register(END, end(bootstrapContext));
+		bootstrapContext.register(CAVES, caves(bootstrapContext));
+		bootstrapContext.register(FLOATING_ISLANDS, floatingIslands(bootstrapContext));
 	}
 
-	private static NoiseGeneratorSettings end(BootstapContext<?> bootstapContext) {
+	private static NoiseGeneratorSettings end(BootstrapContext<?> bootstrapContext) {
 		return new NoiseGeneratorSettings(
 			NoiseSettings.END_NOISE_SETTINGS,
 			Blocks.END_STONE.defaultBlockState(),
 			Blocks.AIR.defaultBlockState(),
-			NoiseRouterData.end(bootstapContext.lookup(Registries.DENSITY_FUNCTION)),
+			NoiseRouterData.end(bootstrapContext.lookup(Registries.DENSITY_FUNCTION)),
 			SurfaceRuleData.end(),
 			List.of(),
 			0,
@@ -89,12 +89,12 @@ public record NoiseGeneratorSettings(
 		);
 	}
 
-	private static NoiseGeneratorSettings nether(BootstapContext<?> bootstapContext) {
+	private static NoiseGeneratorSettings nether(BootstrapContext<?> bootstrapContext) {
 		return new NoiseGeneratorSettings(
 			NoiseSettings.NETHER_NOISE_SETTINGS,
 			Blocks.NETHERRACK.defaultBlockState(),
 			Blocks.LAVA.defaultBlockState(),
-			NoiseRouterData.nether(bootstapContext.lookup(Registries.DENSITY_FUNCTION), bootstapContext.lookup(Registries.NOISE)),
+			NoiseRouterData.nether(bootstrapContext.lookup(Registries.DENSITY_FUNCTION), bootstrapContext.lookup(Registries.NOISE)),
 			SurfaceRuleData.nether(),
 			List.of(),
 			32,
@@ -105,12 +105,12 @@ public record NoiseGeneratorSettings(
 		);
 	}
 
-	private static NoiseGeneratorSettings overworld(BootstapContext<?> bootstapContext, boolean bl, boolean bl2) {
+	private static NoiseGeneratorSettings overworld(BootstrapContext<?> bootstrapContext, boolean bl, boolean bl2) {
 		return new NoiseGeneratorSettings(
 			NoiseSettings.OVERWORLD_NOISE_SETTINGS,
 			Blocks.STONE.defaultBlockState(),
 			Blocks.WATER.defaultBlockState(),
-			NoiseRouterData.overworld(bootstapContext.lookup(Registries.DENSITY_FUNCTION), bootstapContext.lookup(Registries.NOISE), bl2, bl),
+			NoiseRouterData.overworld(bootstrapContext.lookup(Registries.DENSITY_FUNCTION), bootstrapContext.lookup(Registries.NOISE), bl2, bl),
 			SurfaceRuleData.overworld(),
 			new OverworldBiomeBuilder().spawnTarget(),
 			63,
@@ -121,12 +121,12 @@ public record NoiseGeneratorSettings(
 		);
 	}
 
-	private static NoiseGeneratorSettings caves(BootstapContext<?> bootstapContext) {
+	private static NoiseGeneratorSettings caves(BootstrapContext<?> bootstrapContext) {
 		return new NoiseGeneratorSettings(
 			NoiseSettings.CAVES_NOISE_SETTINGS,
 			Blocks.STONE.defaultBlockState(),
 			Blocks.WATER.defaultBlockState(),
-			NoiseRouterData.caves(bootstapContext.lookup(Registries.DENSITY_FUNCTION), bootstapContext.lookup(Registries.NOISE)),
+			NoiseRouterData.caves(bootstrapContext.lookup(Registries.DENSITY_FUNCTION), bootstrapContext.lookup(Registries.NOISE)),
 			SurfaceRuleData.overworldLike(false, true, true),
 			List.of(),
 			32,
@@ -137,12 +137,12 @@ public record NoiseGeneratorSettings(
 		);
 	}
 
-	private static NoiseGeneratorSettings floatingIslands(BootstapContext<?> bootstapContext) {
+	private static NoiseGeneratorSettings floatingIslands(BootstrapContext<?> bootstrapContext) {
 		return new NoiseGeneratorSettings(
 			NoiseSettings.FLOATING_ISLANDS_NOISE_SETTINGS,
 			Blocks.STONE.defaultBlockState(),
 			Blocks.WATER.defaultBlockState(),
-			NoiseRouterData.floatingIslands(bootstapContext.lookup(Registries.DENSITY_FUNCTION), bootstapContext.lookup(Registries.NOISE)),
+			NoiseRouterData.floatingIslands(bootstrapContext.lookup(Registries.DENSITY_FUNCTION), bootstrapContext.lookup(Registries.NOISE)),
 			SurfaceRuleData.overworldLike(false, false, false),
 			List.of(),
 			-64,

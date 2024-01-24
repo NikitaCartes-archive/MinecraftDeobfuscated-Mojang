@@ -6,7 +6,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.data.worldgen.BootstapContext;
+import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -32,23 +32,23 @@ public class TrimPatterns {
 	public static final ResourceKey<TrimPattern> RAISER = registryKey("raiser");
 	public static final ResourceKey<TrimPattern> HOST = registryKey("host");
 
-	public static void bootstrap(BootstapContext<TrimPattern> bootstapContext) {
-		register(bootstapContext, Items.SENTRY_ARMOR_TRIM_SMITHING_TEMPLATE, SENTRY);
-		register(bootstapContext, Items.DUNE_ARMOR_TRIM_SMITHING_TEMPLATE, DUNE);
-		register(bootstapContext, Items.COAST_ARMOR_TRIM_SMITHING_TEMPLATE, COAST);
-		register(bootstapContext, Items.WILD_ARMOR_TRIM_SMITHING_TEMPLATE, WILD);
-		register(bootstapContext, Items.WARD_ARMOR_TRIM_SMITHING_TEMPLATE, WARD);
-		register(bootstapContext, Items.EYE_ARMOR_TRIM_SMITHING_TEMPLATE, EYE);
-		register(bootstapContext, Items.VEX_ARMOR_TRIM_SMITHING_TEMPLATE, VEX);
-		register(bootstapContext, Items.TIDE_ARMOR_TRIM_SMITHING_TEMPLATE, TIDE);
-		register(bootstapContext, Items.SNOUT_ARMOR_TRIM_SMITHING_TEMPLATE, SNOUT);
-		register(bootstapContext, Items.RIB_ARMOR_TRIM_SMITHING_TEMPLATE, RIB);
-		register(bootstapContext, Items.SPIRE_ARMOR_TRIM_SMITHING_TEMPLATE, SPIRE);
-		register(bootstapContext, Items.WAYFINDER_ARMOR_TRIM_SMITHING_TEMPLATE, WAYFINDER);
-		register(bootstapContext, Items.SHAPER_ARMOR_TRIM_SMITHING_TEMPLATE, SHAPER);
-		register(bootstapContext, Items.SILENCE_ARMOR_TRIM_SMITHING_TEMPLATE, SILENCE);
-		register(bootstapContext, Items.RAISER_ARMOR_TRIM_SMITHING_TEMPLATE, RAISER);
-		register(bootstapContext, Items.HOST_ARMOR_TRIM_SMITHING_TEMPLATE, HOST);
+	public static void bootstrap(BootstrapContext<TrimPattern> bootstrapContext) {
+		register(bootstrapContext, Items.SENTRY_ARMOR_TRIM_SMITHING_TEMPLATE, SENTRY);
+		register(bootstrapContext, Items.DUNE_ARMOR_TRIM_SMITHING_TEMPLATE, DUNE);
+		register(bootstrapContext, Items.COAST_ARMOR_TRIM_SMITHING_TEMPLATE, COAST);
+		register(bootstrapContext, Items.WILD_ARMOR_TRIM_SMITHING_TEMPLATE, WILD);
+		register(bootstrapContext, Items.WARD_ARMOR_TRIM_SMITHING_TEMPLATE, WARD);
+		register(bootstrapContext, Items.EYE_ARMOR_TRIM_SMITHING_TEMPLATE, EYE);
+		register(bootstrapContext, Items.VEX_ARMOR_TRIM_SMITHING_TEMPLATE, VEX);
+		register(bootstrapContext, Items.TIDE_ARMOR_TRIM_SMITHING_TEMPLATE, TIDE);
+		register(bootstrapContext, Items.SNOUT_ARMOR_TRIM_SMITHING_TEMPLATE, SNOUT);
+		register(bootstrapContext, Items.RIB_ARMOR_TRIM_SMITHING_TEMPLATE, RIB);
+		register(bootstrapContext, Items.SPIRE_ARMOR_TRIM_SMITHING_TEMPLATE, SPIRE);
+		register(bootstrapContext, Items.WAYFINDER_ARMOR_TRIM_SMITHING_TEMPLATE, WAYFINDER);
+		register(bootstrapContext, Items.SHAPER_ARMOR_TRIM_SMITHING_TEMPLATE, SHAPER);
+		register(bootstrapContext, Items.SILENCE_ARMOR_TRIM_SMITHING_TEMPLATE, SILENCE);
+		register(bootstrapContext, Items.RAISER_ARMOR_TRIM_SMITHING_TEMPLATE, RAISER);
+		register(bootstrapContext, Items.HOST_ARMOR_TRIM_SMITHING_TEMPLATE, HOST);
 	}
 
 	public static Optional<Holder.Reference<TrimPattern>> getFromTemplate(RegistryAccess registryAccess, ItemStack itemStack) {
@@ -58,14 +58,14 @@ public class TrimPatterns {
 			.findFirst();
 	}
 
-	private static void register(BootstapContext<TrimPattern> bootstapContext, Item item, ResourceKey<TrimPattern> resourceKey) {
+	private static void register(BootstrapContext<TrimPattern> bootstrapContext, Item item, ResourceKey<TrimPattern> resourceKey) {
 		TrimPattern trimPattern = new TrimPattern(
 			resourceKey.location(),
 			BuiltInRegistries.ITEM.wrapAsHolder(item),
 			Component.translatable(Util.makeDescriptionId("trim_pattern", resourceKey.location())),
 			false
 		);
-		bootstapContext.register(resourceKey, trimPattern);
+		bootstrapContext.register(resourceKey, trimPattern);
 	}
 
 	private static ResourceKey<TrimPattern> registryKey(String string) {

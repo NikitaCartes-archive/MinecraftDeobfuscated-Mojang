@@ -76,13 +76,18 @@ public abstract class StructurePlacement {
 	}
 
 	public boolean isStructureChunk(ChunkGeneratorStructureState chunkGeneratorStructureState, int i, int j) {
-		if (!this.isPlacementChunk(chunkGeneratorStructureState, i, j)) {
-			return false;
-		} else {
-			return this.frequency < 1.0F && !this.frequencyReductionMethod.shouldGenerate(chunkGeneratorStructureState.getLevelSeed(), this.salt, i, j, this.frequency)
-				? false
-				: !this.exclusionZone.isPresent() || !((StructurePlacement.ExclusionZone)this.exclusionZone.get()).isPlacementForbidden(chunkGeneratorStructureState, i, j);
-		}
+		return this.isPlacementChunk(chunkGeneratorStructureState, i, j)
+			&& this.applyAdditionalChunkRestrictions(i, j, chunkGeneratorStructureState.getLevelSeed())
+			&& this.applyInteractionsWithOtherStructures(chunkGeneratorStructureState, i, j);
+	}
+
+	public boolean applyAdditionalChunkRestrictions(int i, int j, long l) {
+		return !(this.frequency < 1.0F) || this.frequencyReductionMethod.shouldGenerate(l, this.salt, i, j, this.frequency);
+	}
+
+	public boolean applyInteractionsWithOtherStructures(ChunkGeneratorStructureState chunkGeneratorStructureState, int i, int j) {
+		return !this.exclusionZone.isPresent()
+			|| !((StructurePlacement.ExclusionZone)this.exclusionZone.get()).isPlacementForbidden(chunkGeneratorStructureState, i, j);
 	}
 
 	protected abstract boolean isPlacementChunk(ChunkGeneratorStructureState chunkGeneratorStructureState, int i, int j);

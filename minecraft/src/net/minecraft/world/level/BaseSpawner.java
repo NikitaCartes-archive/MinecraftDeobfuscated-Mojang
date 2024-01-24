@@ -113,8 +113,7 @@ public abstract class BaseSpawner {
 							}
 
 							SpawnData.CustomSpawnRules customSpawnRules = (SpawnData.CustomSpawnRules)spawnData.getCustomSpawnRules().get();
-							if (!customSpawnRules.blockLightLimit().isValueInRange(serverLevel.getBrightness(LightLayer.BLOCK, blockPos2))
-								|| !customSpawnRules.skyLightLimit().isValueInRange(serverLevel.getBrightness(LightLayer.SKY, blockPos2))) {
+							if (!customSpawnRules.isValidPosition(blockPos2, serverLevel)) {
 								continue;
 							}
 						} else if (!SpawnPlacements.checkSpawnRules((EntityType)optional.get(), serverLevel, MobSpawnType.SPAWNER, blockPos2, serverLevel.getRandom())) {

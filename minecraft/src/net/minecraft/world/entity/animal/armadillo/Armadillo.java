@@ -34,6 +34,7 @@ import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.BodyRotationControl;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -204,6 +205,8 @@ public class Armadillo extends Animal {
 			return false;
 		} else if (livingEntity.getType().is(EntityTypeTags.UNDEAD)) {
 			return true;
+		} else if (this.getLastHurtByMob() == livingEntity) {
+			return true;
 		} else if (livingEntity instanceof Player player) {
 			return player.isSpectator() ? false : player.isSprinting() || player.isPassenger();
 		} else {
@@ -242,9 +245,25 @@ public class Armadillo extends Animal {
 	}
 
 	@Override
+	public boolean hurt(DamageSource damageSource, float f) {
+		if (this.isScared()) {
+			f = (f - 1.0F) / 2.0F;
+		}
+
+		return super.hurt(damageSource, f);
+	}
+
+	@Override
 	protected void actuallyHurt(DamageSource damageSource, float f) {
-		this.rollOut();
 		super.actuallyHurt(damageSource, f);
+		if (damageSource.getEntity() instanceof LivingEntity) {
+			this.getBrain().setMemoryWithExpiry(MemoryModuleType.DANGER_DETECTED_RECENTLY, true, 60L);
+			if (this.canStayRolledUp()) {
+				this.rollUp();
+			}
+		} else {
+			this.rollOut();
+		}
 	}
 
 	@Override
@@ -300,7 +319,7 @@ public class Armadillo extends Animal {
 
 	@Override
 	protected SoundEvent getHurtSound(DamageSource damageSource) {
-		return SoundEvents.ARMADILLO_HURT;
+		return this.isScared() ? SoundEvents.ARMADILLO_HURT_REDUCED : SoundEvents.ARMADILLO_HURT;
 	}
 
 	@Override

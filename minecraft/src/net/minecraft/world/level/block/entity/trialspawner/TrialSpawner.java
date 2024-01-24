@@ -130,6 +130,13 @@ public final class TrialSpawner {
 					if (!SpawnPlacements.checkSpawnRules((EntityType)optional.get(), serverLevel, MobSpawnType.TRIAL_SPAWNER, blockPos2, serverLevel.getRandom())) {
 						return Optional.empty();
 					} else {
+						if (spawnData.getCustomSpawnRules().isPresent()) {
+							SpawnData.CustomSpawnRules customSpawnRules = (SpawnData.CustomSpawnRules)spawnData.getCustomSpawnRules().get();
+							if (!customSpawnRules.isValidPosition(blockPos2, serverLevel)) {
+								return Optional.empty();
+							}
+						}
+
 						Entity entity = EntityType.loadEntityRecursive(compoundTag, serverLevel, entityx -> {
 							entityx.moveTo(d, e, f, randomSource.nextFloat() * 360.0F, 0.0F);
 							return entityx;

@@ -3,7 +3,7 @@ package net.minecraft.data.worldgen.placement;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.data.worldgen.BootstapContext;
+import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.data.worldgen.features.PileFeatures;
 import net.minecraft.data.worldgen.features.TreeFeatures;
 import net.minecraft.data.worldgen.features.VegetationFeatures;
@@ -27,8 +27,8 @@ public class VillagePlacements {
 	public static final ResourceKey<PlacedFeature> PATCH_TAIGA_GRASS_VILLAGE = PlacementUtils.createKey("patch_taiga_grass");
 	public static final ResourceKey<PlacedFeature> PATCH_BERRY_BUSH_VILLAGE = PlacementUtils.createKey("patch_berry_bush");
 
-	public static void bootstrap(BootstapContext<PlacedFeature> bootstapContext) {
-		HolderGetter<ConfiguredFeature<?, ?>> holderGetter = bootstapContext.lookup(Registries.CONFIGURED_FEATURE);
+	public static void bootstrap(BootstrapContext<PlacedFeature> bootstrapContext) {
+		HolderGetter<ConfiguredFeature<?, ?>> holderGetter = bootstrapContext.lookup(Registries.CONFIGURED_FEATURE);
 		Holder<ConfiguredFeature<?, ?>> holder = holderGetter.getOrThrow(PileFeatures.PILE_HAY);
 		Holder<ConfiguredFeature<?, ?>> holder2 = holderGetter.getOrThrow(PileFeatures.PILE_MELON);
 		Holder<ConfiguredFeature<?, ?>> holder3 = holderGetter.getOrThrow(PileFeatures.PILE_SNOW);
@@ -42,18 +42,18 @@ public class VillagePlacements {
 		Holder<ConfiguredFeature<?, ?>> holder11 = holderGetter.getOrThrow(VegetationFeatures.FLOWER_PLAIN);
 		Holder<ConfiguredFeature<?, ?>> holder12 = holderGetter.getOrThrow(VegetationFeatures.PATCH_TAIGA_GRASS);
 		Holder<ConfiguredFeature<?, ?>> holder13 = holderGetter.getOrThrow(VegetationFeatures.PATCH_BERRY_BUSH);
-		PlacementUtils.register(bootstapContext, PILE_HAY_VILLAGE, holder);
-		PlacementUtils.register(bootstapContext, PILE_MELON_VILLAGE, holder2);
-		PlacementUtils.register(bootstapContext, PILE_SNOW_VILLAGE, holder3);
-		PlacementUtils.register(bootstapContext, PILE_ICE_VILLAGE, holder4);
-		PlacementUtils.register(bootstapContext, PILE_PUMPKIN_VILLAGE, holder5);
-		PlacementUtils.register(bootstapContext, OAK_VILLAGE, holder6, PlacementUtils.filteredByBlockSurvival(Blocks.OAK_SAPLING));
-		PlacementUtils.register(bootstapContext, ACACIA_VILLAGE, holder7, PlacementUtils.filteredByBlockSurvival(Blocks.ACACIA_SAPLING));
-		PlacementUtils.register(bootstapContext, SPRUCE_VILLAGE, holder8, PlacementUtils.filteredByBlockSurvival(Blocks.SPRUCE_SAPLING));
-		PlacementUtils.register(bootstapContext, PINE_VILLAGE, holder9, PlacementUtils.filteredByBlockSurvival(Blocks.SPRUCE_SAPLING));
-		PlacementUtils.register(bootstapContext, PATCH_CACTUS_VILLAGE, holder10);
-		PlacementUtils.register(bootstapContext, FLOWER_PLAIN_VILLAGE, holder11);
-		PlacementUtils.register(bootstapContext, PATCH_TAIGA_GRASS_VILLAGE, holder12);
-		PlacementUtils.register(bootstapContext, PATCH_BERRY_BUSH_VILLAGE, holder13);
+		PlacementUtils.register(bootstrapContext, PILE_HAY_VILLAGE, holder);
+		PlacementUtils.register(bootstrapContext, PILE_MELON_VILLAGE, holder2);
+		PlacementUtils.register(bootstrapContext, PILE_SNOW_VILLAGE, holder3);
+		PlacementUtils.register(bootstrapContext, PILE_ICE_VILLAGE, holder4);
+		PlacementUtils.register(bootstrapContext, PILE_PUMPKIN_VILLAGE, holder5);
+		PlacementUtils.register(bootstrapContext, OAK_VILLAGE, holder6, PlacementUtils.filteredByBlockSurvival(Blocks.OAK_SAPLING));
+		PlacementUtils.register(bootstrapContext, ACACIA_VILLAGE, holder7, PlacementUtils.filteredByBlockSurvival(Blocks.ACACIA_SAPLING));
+		PlacementUtils.register(bootstrapContext, SPRUCE_VILLAGE, holder8, PlacementUtils.filteredByBlockSurvival(Blocks.SPRUCE_SAPLING));
+		PlacementUtils.register(bootstrapContext, PINE_VILLAGE, holder9, PlacementUtils.filteredByBlockSurvival(Blocks.SPRUCE_SAPLING));
+		PlacementUtils.register(bootstrapContext, PATCH_CACTUS_VILLAGE, holder10);
+		PlacementUtils.register(bootstrapContext, FLOWER_PLAIN_VILLAGE, holder11);
+		PlacementUtils.register(bootstrapContext, PATCH_TAIGA_GRASS_VILLAGE, holder12);
+		PlacementUtils.register(bootstrapContext, PATCH_BERRY_BUSH_VILLAGE, holder13);
 	}
 }

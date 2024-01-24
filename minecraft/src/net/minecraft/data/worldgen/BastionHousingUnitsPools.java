@@ -10,13 +10,13 @@ import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorList;
 
 public class BastionHousingUnitsPools {
-	public static void bootstrap(BootstapContext<StructureTemplatePool> bootstapContext) {
-		HolderGetter<StructureProcessorList> holderGetter = bootstapContext.lookup(Registries.PROCESSOR_LIST);
+	public static void bootstrap(BootstrapContext<StructureTemplatePool> bootstrapContext) {
+		HolderGetter<StructureProcessorList> holderGetter = bootstrapContext.lookup(Registries.PROCESSOR_LIST);
 		Holder<StructureProcessorList> holder = holderGetter.getOrThrow(ProcessorLists.HOUSING);
-		HolderGetter<StructureTemplatePool> holderGetter2 = bootstapContext.lookup(Registries.TEMPLATE_POOL);
+		HolderGetter<StructureTemplatePool> holderGetter2 = bootstrapContext.lookup(Registries.TEMPLATE_POOL);
 		Holder<StructureTemplatePool> holder2 = holderGetter2.getOrThrow(Pools.EMPTY);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"bastion/units/center_pieces",
 			new StructureTemplatePool(
 				holder2,
@@ -29,7 +29,7 @@ public class BastionHousingUnitsPools {
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"bastion/units/pathways",
 			new StructureTemplatePool(
 				holder2,
@@ -41,7 +41,7 @@ public class BastionHousingUnitsPools {
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"bastion/units/walls/wall_bases",
 			new StructureTemplatePool(
 				holder2,
@@ -53,7 +53,7 @@ public class BastionHousingUnitsPools {
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"bastion/units/stages/stage_0",
 			new StructureTemplatePool(
 				holder2,
@@ -67,7 +67,7 @@ public class BastionHousingUnitsPools {
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"bastion/units/stages/stage_1",
 			new StructureTemplatePool(
 				holder2,
@@ -81,14 +81,14 @@ public class BastionHousingUnitsPools {
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"bastion/units/stages/rot/stage_1",
 			new StructureTemplatePool(
 				holder2, ImmutableList.of(Pair.of(StructurePoolElement.single("bastion/units/stages/rot/stage_1_0", holder), 1)), StructureTemplatePool.Projection.RIGID
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"bastion/units/stages/stage_2",
 			new StructureTemplatePool(
 				holder2,
@@ -100,7 +100,7 @@ public class BastionHousingUnitsPools {
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"bastion/units/stages/stage_3",
 			new StructureTemplatePool(
 				holder2,
@@ -114,35 +114,35 @@ public class BastionHousingUnitsPools {
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"bastion/units/fillers/stage_0",
 			new StructureTemplatePool(
 				holder2, ImmutableList.of(Pair.of(StructurePoolElement.single("bastion/units/fillers/stage_0", holder), 1)), StructureTemplatePool.Projection.RIGID
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"bastion/units/edges",
 			new StructureTemplatePool(
 				holder2, ImmutableList.of(Pair.of(StructurePoolElement.single("bastion/units/edges/edge_0", holder), 1)), StructureTemplatePool.Projection.RIGID
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"bastion/units/wall_units",
 			new StructureTemplatePool(
 				holder2, ImmutableList.of(Pair.of(StructurePoolElement.single("bastion/units/wall_units/unit_0", holder), 1)), StructureTemplatePool.Projection.RIGID
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"bastion/units/edge_wall_units",
 			new StructureTemplatePool(
 				holder2, ImmutableList.of(Pair.of(StructurePoolElement.single("bastion/units/wall_units/edge_0_large", holder), 1)), StructureTemplatePool.Projection.RIGID
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"bastion/units/ramparts",
 			new StructureTemplatePool(
 				holder2,
@@ -155,14 +155,14 @@ public class BastionHousingUnitsPools {
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"bastion/units/large_ramparts",
 			new StructureTemplatePool(
 				holder2, ImmutableList.of(Pair.of(StructurePoolElement.single("bastion/units/ramparts/ramparts_0", holder), 1)), StructureTemplatePool.Projection.RIGID
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"bastion/units/rampart_plates",
 			new StructureTemplatePool(
 				holder2, ImmutableList.of(Pair.of(StructurePoolElement.single("bastion/units/rampart_plates/plate_0", holder), 1)), StructureTemplatePool.Projection.RIGID

@@ -78,7 +78,7 @@ public class OptimizeWorldScreen extends Screen {
 	) {
 		super(Component.translatable("optimizeWorld.title", levelSettings.levelName()));
 		this.callback = booleanConsumer;
-		this.upgrader = new WorldUpgrader(levelStorageAccess, dataFixer, registry, bl);
+		this.upgrader = new WorldUpgrader(levelStorageAccess, dataFixer, registry, bl, false);
 	}
 
 	@Override

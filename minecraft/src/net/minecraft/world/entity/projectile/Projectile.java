@@ -31,6 +31,7 @@ public abstract class Projectile extends Entity implements TraceableEntity {
 	private Entity cachedOwner;
 	private boolean leftOwner;
 	private boolean hasBeenShot;
+	protected boolean isDeflected;
 
 	Projectile(EntityType<? extends Projectile> entityType, Level level) {
 		super(entityType, level);
@@ -150,10 +151,13 @@ public abstract class Projectile extends Entity implements TraceableEntity {
 		HitResult.Type type = hitResult.getType();
 		if (type == HitResult.Type.ENTITY) {
 			EntityHitResult entityHitResult = (EntityHitResult)hitResult;
-			ProjectileDeflection projectileDeflection = entityHitResult.getEntity().deflection(this);
-			if (projectileDeflection != ProjectileDeflection.NONE) {
-				projectileDeflection.deflect(this, entityHitResult.getEntity(), this.random);
-				return;
+			if (!this.isDeflected) {
+				ProjectileDeflection projectileDeflection = entityHitResult.getEntity().deflection(this);
+				if (projectileDeflection != ProjectileDeflection.NONE) {
+					projectileDeflection.deflect(this, entityHitResult.getEntity(), this.random);
+					this.isDeflected = true;
+					return;
+				}
 			}
 
 			this.onHitEntity(entityHitResult);

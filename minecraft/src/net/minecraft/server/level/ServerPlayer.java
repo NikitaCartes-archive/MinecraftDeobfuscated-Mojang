@@ -1812,7 +1812,7 @@ public class ServerPlayer extends Player {
 
 	public CommonPlayerSpawnInfo createCommonSpawnInfo(ServerLevel serverLevel) {
 		return new CommonPlayerSpawnInfo(
-			serverLevel.dimensionTypeId(),
+			serverLevel.dimensionTypeRegistration(),
 			serverLevel.dimension(),
 			BiomeManager.obfuscateSeed(serverLevel.getSeed()),
 			this.gameMode.getGameModeForPlayer(),

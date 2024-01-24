@@ -6,7 +6,7 @@ import net.minecraft.core.HolderGetter;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 
-public interface BootstapContext<T> {
+public interface BootstrapContext<T> {
 	Holder.Reference<T> register(ResourceKey<T> resourceKey, T object, Lifecycle lifecycle);
 
 	default Holder.Reference<T> register(ResourceKey<T> resourceKey, T object) {

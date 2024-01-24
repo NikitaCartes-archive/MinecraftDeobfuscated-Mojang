@@ -4,7 +4,6 @@ import com.google.common.collect.Maps;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Map;
-import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -54,11 +53,6 @@ public class FlowerPotBlock extends Block {
 	}
 
 	@Override
-	protected RenderShape getRenderShape(BlockState blockState) {
-		return RenderShape.MODEL;
-	}
-
-	@Override
 	protected ItemInteractionResult useItemOn(
 		ItemStack itemStack, BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
 	) {
@@ -88,14 +82,10 @@ public class FlowerPotBlock extends Block {
 			return InteractionResult.CONSUME;
 		} else {
 			ItemStack itemStack = new ItemStack(this.potted);
-			Stream.of(InteractionHand.MAIN_HAND, InteractionHand.OFF_HAND)
-				.filter(interactionHand -> player.getItemInHand(interactionHand).isEmpty())
-				.findFirst()
-				.ifPresentOrElse(interactionHand -> player.setItemInHand(interactionHand, itemStack), () -> {
-					if (!player.addItem(itemStack)) {
-						player.drop(itemStack, false);
-					}
-				});
+			if (!player.addItem(itemStack)) {
+				player.drop(itemStack, false);
+			}
+
 			level.setBlock(blockPos, Blocks.FLOWER_POT.defaultBlockState(), 3);
 			level.gameEvent(player, GameEvent.BLOCK_CHANGE, blockPos);
 			return InteractionResult.sidedSuccess(level.isClientSide);

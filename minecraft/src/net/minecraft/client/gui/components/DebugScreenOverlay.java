@@ -47,7 +47,8 @@ import net.minecraft.server.ServerTickRateManager;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
-import net.minecraft.util.SampleLogger;
+import net.minecraft.util.debugchart.SampleLogger;
+import net.minecraft.util.debugchart.TpsDebugDimensions;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.TickRateManager;
 import net.minecraft.world.entity.Entity;
@@ -99,10 +100,10 @@ public class DebugScreenOverlay {
 	private boolean renderProfilerChart;
 	private boolean renderFpsCharts;
 	private boolean renderNetworkCharts;
-	private final SampleLogger frameTimeLogger = new SampleLogger();
-	private final SampleLogger tickTimeLogger = new SampleLogger();
-	private final SampleLogger pingLogger = new SampleLogger();
-	private final SampleLogger bandwidthLogger = new SampleLogger();
+	private final SampleLogger frameTimeLogger = new SampleLogger(1);
+	private final SampleLogger tickTimeLogger = new SampleLogger(TpsDebugDimensions.values().length);
+	private final SampleLogger pingLogger = new SampleLogger(1);
+	private final SampleLogger bandwidthLogger = new SampleLogger(1);
 	private final FpsDebugChart fpsChart;
 	private final TpsDebugChart tpsChart;
 	private final PingDebugChart pingChart;
@@ -597,8 +598,8 @@ public class DebugScreenOverlay {
 		this.frameTimeLogger.logSample(l);
 	}
 
-	public void logTickDuration(long l) {
-		this.tickTimeLogger.logSample(l);
+	public SampleLogger getTickTimeLogger() {
+		return this.tickTimeLogger;
 	}
 
 	public SampleLogger getPingLogger() {

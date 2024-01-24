@@ -75,7 +75,7 @@ public interface WorldData {
 
 	void setGameType(GameType gameType);
 
-	boolean getAllowCommands();
+	boolean isAllowCommands();
 
 	Difficulty getDifficulty();
 

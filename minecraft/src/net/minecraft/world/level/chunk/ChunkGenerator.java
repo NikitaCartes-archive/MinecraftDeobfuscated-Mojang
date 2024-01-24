@@ -278,7 +278,7 @@ public abstract class ChunkGenerator {
 		Set<Holder<Structure>> set, LevelReader levelReader, StructureManager structureManager, boolean bl, StructurePlacement structurePlacement, ChunkPos chunkPos
 	) {
 		for (Holder<Structure> holder : set) {
-			StructureCheckResult structureCheckResult = structureManager.checkStructurePresence(chunkPos, holder.value(), bl);
+			StructureCheckResult structureCheckResult = structureManager.checkStructurePresence(chunkPos, holder.value(), structurePlacement, bl);
 			if (structureCheckResult != StructureCheckResult.START_NOT_PRESENT) {
 				if (!bl && structureCheckResult == StructureCheckResult.START_PRESENT) {
 					return Pair.of(structurePlacement.getLocatePos(chunkPos), holder);

@@ -5,7 +5,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.network.protocol.ping.ClientboundPongResponsePacket;
 import net.minecraft.network.protocol.ping.ServerboundPingRequestPacket;
-import net.minecraft.util.SampleLogger;
+import net.minecraft.util.debugchart.SampleLogger;
 
 @Environment(EnvType.CLIENT)
 public class PingDebugMonitor {

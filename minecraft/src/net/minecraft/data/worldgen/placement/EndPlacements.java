@@ -3,7 +3,7 @@ package net.minecraft.data.worldgen.placement;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.data.worldgen.BootstapContext;
+import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.data.worldgen.features.EndFeatures;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.valueproviders.UniformInt;
@@ -23,15 +23,15 @@ public class EndPlacements {
 	public static final ResourceKey<PlacedFeature> CHORUS_PLANT = PlacementUtils.createKey("chorus_plant");
 	public static final ResourceKey<PlacedFeature> END_ISLAND_DECORATED = PlacementUtils.createKey("end_island_decorated");
 
-	public static void bootstrap(BootstapContext<PlacedFeature> bootstapContext) {
-		HolderGetter<ConfiguredFeature<?, ?>> holderGetter = bootstapContext.lookup(Registries.CONFIGURED_FEATURE);
+	public static void bootstrap(BootstrapContext<PlacedFeature> bootstrapContext) {
+		HolderGetter<ConfiguredFeature<?, ?>> holderGetter = bootstrapContext.lookup(Registries.CONFIGURED_FEATURE);
 		Holder<ConfiguredFeature<?, ?>> holder = holderGetter.getOrThrow(EndFeatures.END_SPIKE);
 		Holder<ConfiguredFeature<?, ?>> holder2 = holderGetter.getOrThrow(EndFeatures.END_GATEWAY_RETURN);
 		Holder<ConfiguredFeature<?, ?>> holder3 = holderGetter.getOrThrow(EndFeatures.CHORUS_PLANT);
 		Holder<ConfiguredFeature<?, ?>> holder4 = holderGetter.getOrThrow(EndFeatures.END_ISLAND);
-		PlacementUtils.register(bootstapContext, END_SPIKE, holder, BiomeFilter.biome());
+		PlacementUtils.register(bootstrapContext, END_SPIKE, holder, BiomeFilter.biome());
 		PlacementUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			END_GATEWAY_RETURN,
 			holder2,
 			RarityFilter.onAverageOnceEvery(700),
@@ -41,10 +41,10 @@ public class EndPlacements {
 			BiomeFilter.biome()
 		);
 		PlacementUtils.register(
-			bootstapContext, CHORUS_PLANT, holder3, CountPlacement.of(UniformInt.of(0, 4)), InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP, BiomeFilter.biome()
+			bootstrapContext, CHORUS_PLANT, holder3, CountPlacement.of(UniformInt.of(0, 4)), InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP, BiomeFilter.biome()
 		);
 		PlacementUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			END_ISLAND_DECORATED,
 			holder4,
 			RarityFilter.onAverageOnceEvery(14),

@@ -12,11 +12,11 @@ public class UpdateOneTwentyOnePools {
 		return ResourceKey.create(Registries.TEMPLATE_POOL, new ResourceLocation(string));
 	}
 
-	public static void register(BootstapContext<StructureTemplatePool> bootstapContext, String string, StructureTemplatePool structureTemplatePool) {
-		Pools.register(bootstapContext, string, structureTemplatePool);
+	public static void register(BootstrapContext<StructureTemplatePool> bootstrapContext, String string, StructureTemplatePool structureTemplatePool) {
+		Pools.register(bootstrapContext, string, structureTemplatePool);
 	}
 
-	public static void bootstrap(BootstapContext<StructureTemplatePool> bootstapContext) {
-		TrialChambersStructurePools.bootstrap(bootstapContext);
+	public static void bootstrap(BootstrapContext<StructureTemplatePool> bootstrapContext) {
+		TrialChambersStructurePools.bootstrap(bootstrapContext);
 	}
 }

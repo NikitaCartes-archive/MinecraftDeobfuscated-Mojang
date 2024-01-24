@@ -21,10 +21,10 @@ import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
 import net.minecraft.world.level.levelgen.structure.structures.JigsawStructure;
 
 public class UpdateOneTwentyOneStructures {
-	public static void bootstrap(BootstapContext<Structure> bootstapContext) {
-		HolderGetter<Biome> holderGetter = bootstapContext.lookup(Registries.BIOME);
-		HolderGetter<StructureTemplatePool> holderGetter2 = bootstapContext.lookup(Registries.TEMPLATE_POOL);
-		bootstapContext.register(
+	public static void bootstrap(BootstrapContext<Structure> bootstrapContext) {
+		HolderGetter<Biome> holderGetter = bootstrapContext.lookup(Registries.BIOME);
+		HolderGetter<StructureTemplatePool> holderGetter2 = bootstrapContext.lookup(Registries.TEMPLATE_POOL);
+		bootstrapContext.register(
 			BuiltinStructures.TRIAL_CHAMBERS,
 			new JigsawStructure(
 				Structures.structure(

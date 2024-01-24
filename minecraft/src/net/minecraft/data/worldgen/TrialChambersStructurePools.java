@@ -66,14 +66,14 @@ public class TrialChambersStructurePools {
 		return "trial_chambers/spawner/" + string;
 	}
 
-	public static void bootstrap(BootstapContext<StructureTemplatePool> bootstapContext) {
-		HolderGetter<StructureTemplatePool> holderGetter = bootstapContext.lookup(Registries.TEMPLATE_POOL);
+	public static void bootstrap(BootstrapContext<StructureTemplatePool> bootstrapContext) {
+		HolderGetter<StructureTemplatePool> holderGetter = bootstrapContext.lookup(Registries.TEMPLATE_POOL);
 		Holder<StructureTemplatePool> holder = holderGetter.getOrThrow(Pools.EMPTY);
 		Holder<StructureTemplatePool> holder2 = holderGetter.getOrThrow(HALLWAY_FALLBACK);
 		Holder<StructureTemplatePool> holder3 = holderGetter.getOrThrow(CHAMBER_CAP_FALLBACK);
-		HolderGetter<StructureProcessorList> holderGetter2 = bootstapContext.lookup(Registries.PROCESSOR_LIST);
+		HolderGetter<StructureProcessorList> holderGetter2 = bootstrapContext.lookup(Registries.PROCESSOR_LIST);
 		Holder<StructureProcessorList> holder4 = holderGetter2.getOrThrow(UpdateOneTwentyOneProcessorLists.TRIAL_CHAMBERS_COPPER_BULB_DEGRADATION);
-		bootstapContext.register(
+		bootstrapContext.register(
 			START,
 			new StructureTemplatePool(
 				holder,
@@ -85,14 +85,14 @@ public class TrialChambersStructurePools {
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"trial_chambers/chamber/entrance_cap",
 			new StructureTemplatePool(
 				holder3, List.of(Pair.of(StructurePoolElement.single("trial_chambers/chamber/entrance_cap", holder4), 1)), StructureTemplatePool.Projection.RIGID
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"trial_chambers/chambers/end",
 			new StructureTemplatePool(
 				holder2,
@@ -106,7 +106,7 @@ public class TrialChambersStructurePools {
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"trial_chambers/chamber/addon",
 			new StructureTemplatePool(
 				holder,
@@ -143,7 +143,7 @@ public class TrialChambersStructurePools {
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"trial_chambers/chamber/addon/c6",
 			new StructureTemplatePool(
 				holder,
@@ -169,7 +169,7 @@ public class TrialChambersStructurePools {
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"trial_chambers/corridor/second",
 			new StructureTemplatePool(
 				holder,
@@ -182,7 +182,7 @@ public class TrialChambersStructurePools {
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"trial_chambers/corridor/first",
 			new StructureTemplatePool(
 				holder,
@@ -194,14 +194,14 @@ public class TrialChambersStructurePools {
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"trial_chambers/corridor/first/straight",
 			new StructureTemplatePool(
 				holder, List.of(Pair.of(StructurePoolElement.single("trial_chambers/corridor/first_plate"), 1)), StructureTemplatePool.Projection.RIGID
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"trial_chambers/corridor",
 			new StructureTemplatePool(
 				holder,
@@ -218,7 +218,7 @@ public class TrialChambersStructurePools {
 				StructureTemplatePool.Projection.RIGID
 			)
 		);
-		bootstapContext.register(
+		bootstrapContext.register(
 			HALLWAY_FALLBACK,
 			new StructureTemplatePool(
 				holder,
@@ -232,7 +232,7 @@ public class TrialChambersStructurePools {
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"trial_chambers/hallway",
 			new StructureTemplatePool(
 				holder2,
@@ -266,7 +266,7 @@ public class TrialChambersStructurePools {
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"trial_chambers/corridors/addon/lower",
 			new StructureTemplatePool(
 				holder,
@@ -282,7 +282,7 @@ public class TrialChambersStructurePools {
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"trial_chambers/corridors/addon/middle",
 			new StructureTemplatePool(
 				holder,
@@ -295,7 +295,7 @@ public class TrialChambersStructurePools {
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"trial_chambers/corridors/addon/middle_upper",
 			new StructureTemplatePool(
 				holder,
@@ -311,7 +311,7 @@ public class TrialChambersStructurePools {
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"trial_chambers/decor",
 			new StructureTemplatePool(
 				holder,
@@ -330,7 +330,7 @@ public class TrialChambersStructurePools {
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"trial_chambers/decor_chamber",
 			new StructureTemplatePool(
 				holder,
@@ -339,66 +339,66 @@ public class TrialChambersStructurePools {
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"trial_chambers/reward/all",
 			new StructureTemplatePool(
 				holder, List.of(Pair.of(StructurePoolElement.single("trial_chambers/reward/connectors/default"), 1)), StructureTemplatePool.Projection.RIGID
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"trial_chambers/reward/contents/default",
 			new StructureTemplatePool(holder, List.of(Pair.of(StructurePoolElement.single("trial_chambers/reward/default"), 1)), StructureTemplatePool.Projection.RIGID)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"trial_chambers/chests/supply",
 			new StructureTemplatePool(
 				holder, List.of(Pair.of(StructurePoolElement.single("trial_chambers/chests/connectors/supply"), 1)), StructureTemplatePool.Projection.RIGID
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"trial_chambers/chests/contents/supply",
 			new StructureTemplatePool(holder, List.of(Pair.of(StructurePoolElement.single("trial_chambers/chests/supply"), 1)), StructureTemplatePool.Projection.RIGID)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"trial_chambers/spawner/ranged",
 			new StructureTemplatePool(
 				holder, List.of(Pair.of(StructurePoolElement.single("trial_chambers/spawner/connectors/ranged"), 1)), StructureTemplatePool.Projection.RIGID
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"trial_chambers/spawner/slow_ranged",
 			new StructureTemplatePool(
 				holder, List.of(Pair.of(StructurePoolElement.single("trial_chambers/spawner/connectors/slow_ranged"), 1)), StructureTemplatePool.Projection.RIGID
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"trial_chambers/spawner/melee",
 			new StructureTemplatePool(
 				holder, List.of(Pair.of(StructurePoolElement.single("trial_chambers/spawner/connectors/melee"), 1)), StructureTemplatePool.Projection.RIGID
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"trial_chambers/spawner/small_melee",
 			new StructureTemplatePool(
 				holder, List.of(Pair.of(StructurePoolElement.single("trial_chambers/spawner/connectors/small_melee"), 1)), StructureTemplatePool.Projection.RIGID
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"trial_chambers/spawner/breeze",
 			new StructureTemplatePool(
 				holder, List.of(Pair.of(StructurePoolElement.single("trial_chambers/spawner/connectors/breeze"), 1)), StructureTemplatePool.Projection.RIGID
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"trial_chambers/spawner/all",
 			new StructureTemplatePool(
 				holder,
@@ -412,14 +412,14 @@ public class TrialChambersStructurePools {
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"trial_chambers/spawner/contents/breeze",
 			new StructureTemplatePool(
 				holder, List.of(Pair.of(StructurePoolElement.single("trial_chambers/spawner/breeze/breeze"), 1)), StructureTemplatePool.Projection.RIGID
 			)
 		);
 		Pools.register(
-			bootstapContext,
+			bootstrapContext,
 			"trial_chambers/dispensers/chamber",
 			new StructureTemplatePool(
 				holder,
@@ -427,6 +427,6 @@ public class TrialChambersStructurePools {
 				StructureTemplatePool.Projection.RIGID
 			)
 		);
-		PoolAliasBindings.registerTargetsAsPools(bootstapContext, holder, ALIAS_BINDINGS);
+		PoolAliasBindings.registerTargetsAsPools(bootstrapContext, holder, ALIAS_BINDINGS);
 	}
 }

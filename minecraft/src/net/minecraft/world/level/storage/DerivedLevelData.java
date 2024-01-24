@@ -117,8 +117,8 @@ public class DerivedLevelData implements ServerLevelData {
 	}
 
 	@Override
-	public boolean getAllowCommands() {
-		return this.worldData.getAllowCommands();
+	public boolean isAllowCommands() {
+		return this.worldData.isAllowCommands();
 	}
 
 	@Override

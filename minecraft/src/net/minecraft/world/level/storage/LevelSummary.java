@@ -79,7 +79,7 @@ public class LevelSummary implements Comparable<LevelSummary> {
 		return this.settings.hardcore();
 	}
 
-	public boolean hasCheats() {
+	public boolean hasCommands() {
 		return this.settings.allowCommands();
 	}
 
@@ -143,8 +143,8 @@ public class LevelSummary implements Comparable<LevelSummary> {
 			MutableComponent mutableComponent = this.isHardcore()
 				? Component.empty().append(Component.translatable("gameMode.hardcore").withColor(-65536))
 				: Component.translatable("gameMode." + this.getGameMode().getName());
-			if (this.hasCheats()) {
-				mutableComponent.append(", ").append(Component.translatable("selectWorld.cheats"));
+			if (this.hasCommands()) {
+				mutableComponent.append(", ").append(Component.translatable("selectWorld.commands"));
 			}
 
 			if (this.isExperimental()) {

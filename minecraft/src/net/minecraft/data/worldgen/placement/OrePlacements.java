@@ -4,7 +4,7 @@ import java.util.List;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.data.worldgen.BootstapContext;
+import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.data.worldgen.features.OreFeatures;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.valueproviders.UniformInt;
@@ -72,8 +72,8 @@ public class OrePlacements {
 		return orePlacement(RarityFilter.onAverageOnceEvery(i), placementModifier);
 	}
 
-	public static void bootstrap(BootstapContext<PlacedFeature> bootstapContext) {
-		HolderGetter<ConfiguredFeature<?, ?>> holderGetter = bootstapContext.lookup(Registries.CONFIGURED_FEATURE);
+	public static void bootstrap(BootstrapContext<PlacedFeature> bootstrapContext) {
+		HolderGetter<ConfiguredFeature<?, ?>> holderGetter = bootstrapContext.lookup(Registries.CONFIGURED_FEATURE);
 		Holder<ConfiguredFeature<?, ?>> holder = holderGetter.getOrThrow(OreFeatures.ORE_MAGMA);
 		Holder<ConfiguredFeature<?, ?>> holder2 = holderGetter.getOrThrow(OreFeatures.ORE_SOUL_SAND);
 		Holder<ConfiguredFeature<?, ?>> holder3 = holderGetter.getOrThrow(OreFeatures.ORE_NETHER_GOLD);
@@ -107,138 +107,141 @@ public class OrePlacements {
 		Holder<ConfiguredFeature<?, ?>> holder31 = holderGetter.getOrThrow(OreFeatures.ORE_COPPER_LARGE);
 		Holder<ConfiguredFeature<?, ?>> holder32 = holderGetter.getOrThrow(OreFeatures.ORE_CLAY);
 		PlacementUtils.register(
-			bootstapContext, ORE_MAGMA, holder, commonOrePlacement(4, HeightRangePlacement.uniform(VerticalAnchor.absolute(27), VerticalAnchor.absolute(36)))
+			bootstrapContext, ORE_MAGMA, holder, commonOrePlacement(4, HeightRangePlacement.uniform(VerticalAnchor.absolute(27), VerticalAnchor.absolute(36)))
 		);
 		PlacementUtils.register(
-			bootstapContext, ORE_SOUL_SAND, holder2, commonOrePlacement(12, HeightRangePlacement.uniform(VerticalAnchor.bottom(), VerticalAnchor.absolute(31)))
+			bootstrapContext, ORE_SOUL_SAND, holder2, commonOrePlacement(12, HeightRangePlacement.uniform(VerticalAnchor.bottom(), VerticalAnchor.absolute(31)))
 		);
-		PlacementUtils.register(bootstapContext, ORE_GOLD_DELTAS, holder3, commonOrePlacement(20, PlacementUtils.RANGE_10_10));
-		PlacementUtils.register(bootstapContext, ORE_QUARTZ_DELTAS, holder4, commonOrePlacement(32, PlacementUtils.RANGE_10_10));
-		PlacementUtils.register(bootstapContext, ORE_GOLD_NETHER, holder3, commonOrePlacement(10, PlacementUtils.RANGE_10_10));
-		PlacementUtils.register(bootstapContext, ORE_QUARTZ_NETHER, holder4, commonOrePlacement(16, PlacementUtils.RANGE_10_10));
+		PlacementUtils.register(bootstrapContext, ORE_GOLD_DELTAS, holder3, commonOrePlacement(20, PlacementUtils.RANGE_10_10));
+		PlacementUtils.register(bootstrapContext, ORE_QUARTZ_DELTAS, holder4, commonOrePlacement(32, PlacementUtils.RANGE_10_10));
+		PlacementUtils.register(bootstrapContext, ORE_GOLD_NETHER, holder3, commonOrePlacement(10, PlacementUtils.RANGE_10_10));
+		PlacementUtils.register(bootstrapContext, ORE_QUARTZ_NETHER, holder4, commonOrePlacement(16, PlacementUtils.RANGE_10_10));
 		PlacementUtils.register(
-			bootstapContext, ORE_GRAVEL_NETHER, holder5, commonOrePlacement(2, HeightRangePlacement.uniform(VerticalAnchor.absolute(5), VerticalAnchor.absolute(41)))
-		);
-		PlacementUtils.register(
-			bootstapContext, ORE_BLACKSTONE, holder6, commonOrePlacement(2, HeightRangePlacement.uniform(VerticalAnchor.absolute(5), VerticalAnchor.absolute(31)))
+			bootstrapContext, ORE_GRAVEL_NETHER, holder5, commonOrePlacement(2, HeightRangePlacement.uniform(VerticalAnchor.absolute(5), VerticalAnchor.absolute(41)))
 		);
 		PlacementUtils.register(
-			bootstapContext, ORE_DIRT, holder7, commonOrePlacement(7, HeightRangePlacement.uniform(VerticalAnchor.absolute(0), VerticalAnchor.absolute(160)))
+			bootstrapContext, ORE_BLACKSTONE, holder6, commonOrePlacement(2, HeightRangePlacement.uniform(VerticalAnchor.absolute(5), VerticalAnchor.absolute(31)))
 		);
 		PlacementUtils.register(
-			bootstapContext, ORE_GRAVEL, holder8, commonOrePlacement(14, HeightRangePlacement.uniform(VerticalAnchor.bottom(), VerticalAnchor.top()))
+			bootstrapContext, ORE_DIRT, holder7, commonOrePlacement(7, HeightRangePlacement.uniform(VerticalAnchor.absolute(0), VerticalAnchor.absolute(160)))
 		);
 		PlacementUtils.register(
-			bootstapContext, ORE_GRANITE_UPPER, holder9, rareOrePlacement(6, HeightRangePlacement.uniform(VerticalAnchor.absolute(64), VerticalAnchor.absolute(128)))
+			bootstrapContext, ORE_GRAVEL, holder8, commonOrePlacement(14, HeightRangePlacement.uniform(VerticalAnchor.bottom(), VerticalAnchor.top()))
 		);
 		PlacementUtils.register(
-			bootstapContext, ORE_GRANITE_LOWER, holder9, commonOrePlacement(2, HeightRangePlacement.uniform(VerticalAnchor.absolute(0), VerticalAnchor.absolute(60)))
+			bootstrapContext, ORE_GRANITE_UPPER, holder9, rareOrePlacement(6, HeightRangePlacement.uniform(VerticalAnchor.absolute(64), VerticalAnchor.absolute(128)))
 		);
 		PlacementUtils.register(
-			bootstapContext, ORE_DIORITE_UPPER, holder10, rareOrePlacement(6, HeightRangePlacement.uniform(VerticalAnchor.absolute(64), VerticalAnchor.absolute(128)))
+			bootstrapContext, ORE_GRANITE_LOWER, holder9, commonOrePlacement(2, HeightRangePlacement.uniform(VerticalAnchor.absolute(0), VerticalAnchor.absolute(60)))
 		);
 		PlacementUtils.register(
-			bootstapContext, ORE_DIORITE_LOWER, holder10, commonOrePlacement(2, HeightRangePlacement.uniform(VerticalAnchor.absolute(0), VerticalAnchor.absolute(60)))
+			bootstrapContext, ORE_DIORITE_UPPER, holder10, rareOrePlacement(6, HeightRangePlacement.uniform(VerticalAnchor.absolute(64), VerticalAnchor.absolute(128)))
 		);
 		PlacementUtils.register(
-			bootstapContext, ORE_ANDESITE_UPPER, holder11, rareOrePlacement(6, HeightRangePlacement.uniform(VerticalAnchor.absolute(64), VerticalAnchor.absolute(128)))
+			bootstrapContext, ORE_DIORITE_LOWER, holder10, commonOrePlacement(2, HeightRangePlacement.uniform(VerticalAnchor.absolute(0), VerticalAnchor.absolute(60)))
 		);
 		PlacementUtils.register(
-			bootstapContext, ORE_ANDESITE_LOWER, holder11, commonOrePlacement(2, HeightRangePlacement.uniform(VerticalAnchor.absolute(0), VerticalAnchor.absolute(60)))
+			bootstrapContext, ORE_ANDESITE_UPPER, holder11, rareOrePlacement(6, HeightRangePlacement.uniform(VerticalAnchor.absolute(64), VerticalAnchor.absolute(128)))
 		);
 		PlacementUtils.register(
-			bootstapContext, ORE_TUFF, holder12, commonOrePlacement(2, HeightRangePlacement.uniform(VerticalAnchor.bottom(), VerticalAnchor.absolute(0)))
+			bootstrapContext, ORE_ANDESITE_LOWER, holder11, commonOrePlacement(2, HeightRangePlacement.uniform(VerticalAnchor.absolute(0), VerticalAnchor.absolute(60)))
 		);
 		PlacementUtils.register(
-			bootstapContext, ORE_COAL_UPPER, holder13, commonOrePlacement(30, HeightRangePlacement.uniform(VerticalAnchor.absolute(136), VerticalAnchor.top()))
+			bootstrapContext, ORE_TUFF, holder12, commonOrePlacement(2, HeightRangePlacement.uniform(VerticalAnchor.bottom(), VerticalAnchor.absolute(0)))
 		);
 		PlacementUtils.register(
-			bootstapContext, ORE_COAL_LOWER, holder14, commonOrePlacement(20, HeightRangePlacement.triangle(VerticalAnchor.absolute(0), VerticalAnchor.absolute(192)))
+			bootstrapContext, ORE_COAL_UPPER, holder13, commonOrePlacement(30, HeightRangePlacement.uniform(VerticalAnchor.absolute(136), VerticalAnchor.top()))
 		);
 		PlacementUtils.register(
-			bootstapContext, ORE_IRON_UPPER, holder15, commonOrePlacement(90, HeightRangePlacement.triangle(VerticalAnchor.absolute(80), VerticalAnchor.absolute(384)))
+			bootstrapContext, ORE_COAL_LOWER, holder14, commonOrePlacement(20, HeightRangePlacement.triangle(VerticalAnchor.absolute(0), VerticalAnchor.absolute(192)))
 		);
 		PlacementUtils.register(
-			bootstapContext, ORE_IRON_MIDDLE, holder15, commonOrePlacement(10, HeightRangePlacement.triangle(VerticalAnchor.absolute(-24), VerticalAnchor.absolute(56)))
+			bootstrapContext, ORE_IRON_UPPER, holder15, commonOrePlacement(90, HeightRangePlacement.triangle(VerticalAnchor.absolute(80), VerticalAnchor.absolute(384)))
 		);
 		PlacementUtils.register(
-			bootstapContext, ORE_IRON_SMALL, holder16, commonOrePlacement(10, HeightRangePlacement.uniform(VerticalAnchor.bottom(), VerticalAnchor.absolute(72)))
+			bootstrapContext,
+			ORE_IRON_MIDDLE,
+			holder15,
+			commonOrePlacement(10, HeightRangePlacement.triangle(VerticalAnchor.absolute(-24), VerticalAnchor.absolute(56)))
 		);
 		PlacementUtils.register(
-			bootstapContext, ORE_GOLD_EXTRA, holder17, commonOrePlacement(50, HeightRangePlacement.uniform(VerticalAnchor.absolute(32), VerticalAnchor.absolute(256)))
+			bootstrapContext, ORE_IRON_SMALL, holder16, commonOrePlacement(10, HeightRangePlacement.uniform(VerticalAnchor.bottom(), VerticalAnchor.absolute(72)))
 		);
 		PlacementUtils.register(
-			bootstapContext, ORE_GOLD, holder18, commonOrePlacement(4, HeightRangePlacement.triangle(VerticalAnchor.absolute(-64), VerticalAnchor.absolute(32)))
+			bootstrapContext, ORE_GOLD_EXTRA, holder17, commonOrePlacement(50, HeightRangePlacement.uniform(VerticalAnchor.absolute(32), VerticalAnchor.absolute(256)))
 		);
 		PlacementUtils.register(
-			bootstapContext,
+			bootstrapContext, ORE_GOLD, holder18, commonOrePlacement(4, HeightRangePlacement.triangle(VerticalAnchor.absolute(-64), VerticalAnchor.absolute(32)))
+		);
+		PlacementUtils.register(
+			bootstrapContext,
 			ORE_GOLD_LOWER,
 			holder18,
 			orePlacement(CountPlacement.of(UniformInt.of(0, 1)), HeightRangePlacement.uniform(VerticalAnchor.absolute(-64), VerticalAnchor.absolute(-48)))
 		);
 		PlacementUtils.register(
-			bootstapContext, ORE_REDSTONE, holder19, commonOrePlacement(4, HeightRangePlacement.uniform(VerticalAnchor.bottom(), VerticalAnchor.absolute(15)))
+			bootstrapContext, ORE_REDSTONE, holder19, commonOrePlacement(4, HeightRangePlacement.uniform(VerticalAnchor.bottom(), VerticalAnchor.absolute(15)))
 		);
 		PlacementUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			ORE_REDSTONE_LOWER,
 			holder19,
 			commonOrePlacement(8, HeightRangePlacement.triangle(VerticalAnchor.aboveBottom(-32), VerticalAnchor.aboveBottom(32)))
 		);
 		PlacementUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			ORE_DIAMOND,
 			holder20,
 			commonOrePlacement(7, HeightRangePlacement.triangle(VerticalAnchor.aboveBottom(-80), VerticalAnchor.aboveBottom(80)))
 		);
 		PlacementUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			ORE_DIAMOND_MEDIUM,
 			holder21,
 			commonOrePlacement(2, HeightRangePlacement.uniform(VerticalAnchor.absolute(-64), VerticalAnchor.absolute(-4)))
 		);
 		PlacementUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			ORE_DIAMOND_LARGE,
 			holder22,
 			rareOrePlacement(9, HeightRangePlacement.triangle(VerticalAnchor.aboveBottom(-80), VerticalAnchor.aboveBottom(80)))
 		);
 		PlacementUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			ORE_DIAMOND_BURIED,
 			holder23,
 			commonOrePlacement(4, HeightRangePlacement.triangle(VerticalAnchor.aboveBottom(-80), VerticalAnchor.aboveBottom(80)))
 		);
 		PlacementUtils.register(
-			bootstapContext, ORE_LAPIS, holder24, commonOrePlacement(2, HeightRangePlacement.triangle(VerticalAnchor.absolute(-32), VerticalAnchor.absolute(32)))
+			bootstrapContext, ORE_LAPIS, holder24, commonOrePlacement(2, HeightRangePlacement.triangle(VerticalAnchor.absolute(-32), VerticalAnchor.absolute(32)))
 		);
 		PlacementUtils.register(
-			bootstapContext, ORE_LAPIS_BURIED, holder25, commonOrePlacement(4, HeightRangePlacement.uniform(VerticalAnchor.bottom(), VerticalAnchor.absolute(64)))
+			bootstrapContext, ORE_LAPIS_BURIED, holder25, commonOrePlacement(4, HeightRangePlacement.uniform(VerticalAnchor.bottom(), VerticalAnchor.absolute(64)))
 		);
 		PlacementUtils.register(
-			bootstapContext, ORE_INFESTED, holder26, commonOrePlacement(14, HeightRangePlacement.uniform(VerticalAnchor.bottom(), VerticalAnchor.absolute(63)))
+			bootstrapContext, ORE_INFESTED, holder26, commonOrePlacement(14, HeightRangePlacement.uniform(VerticalAnchor.bottom(), VerticalAnchor.absolute(63)))
 		);
 		PlacementUtils.register(
-			bootstapContext, ORE_EMERALD, holder27, commonOrePlacement(100, HeightRangePlacement.triangle(VerticalAnchor.absolute(-16), VerticalAnchor.absolute(480)))
+			bootstrapContext, ORE_EMERALD, holder27, commonOrePlacement(100, HeightRangePlacement.triangle(VerticalAnchor.absolute(-16), VerticalAnchor.absolute(480)))
 		);
 		PlacementUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			ORE_ANCIENT_DEBRIS_LARGE,
 			holder28,
 			InSquarePlacement.spread(),
 			HeightRangePlacement.triangle(VerticalAnchor.absolute(8), VerticalAnchor.absolute(24)),
 			BiomeFilter.biome()
 		);
-		PlacementUtils.register(bootstapContext, ORE_ANCIENT_DEBRIS_SMALL, holder29, InSquarePlacement.spread(), PlacementUtils.RANGE_8_8, BiomeFilter.biome());
+		PlacementUtils.register(bootstrapContext, ORE_ANCIENT_DEBRIS_SMALL, holder29, InSquarePlacement.spread(), PlacementUtils.RANGE_8_8, BiomeFilter.biome());
 		PlacementUtils.register(
-			bootstapContext, ORE_COPPER, holder30, commonOrePlacement(16, HeightRangePlacement.triangle(VerticalAnchor.absolute(-16), VerticalAnchor.absolute(112)))
+			bootstrapContext, ORE_COPPER, holder30, commonOrePlacement(16, HeightRangePlacement.triangle(VerticalAnchor.absolute(-16), VerticalAnchor.absolute(112)))
 		);
 		PlacementUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			ORE_COPPER_LARGE,
 			holder31,
 			commonOrePlacement(16, HeightRangePlacement.triangle(VerticalAnchor.absolute(-16), VerticalAnchor.absolute(112)))
 		);
-		PlacementUtils.register(bootstapContext, ORE_CLAY, holder32, commonOrePlacement(46, PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT));
+		PlacementUtils.register(bootstrapContext, ORE_CLAY, holder32, commonOrePlacement(46, PlacementUtils.RANGE_BOTTOM_TO_MAX_TERRAIN_HEIGHT));
 	}
 }

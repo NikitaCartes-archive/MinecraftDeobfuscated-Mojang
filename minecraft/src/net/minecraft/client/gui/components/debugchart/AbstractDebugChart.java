@@ -7,7 +7,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
-import net.minecraft.util.SampleLogger;
+import net.minecraft.util.debugchart.SampleLogger;
 
 @Environment(EnvType.CLIENT)
 public abstract class AbstractDebugChart {
@@ -37,13 +37,12 @@ public abstract class AbstractDebugChart {
 
 		for (int q = 0; q < p; q++) {
 			int r = i + q + 1;
-			long s = this.logger.get(o + q);
-			m = Math.min(m, s);
-			n = Math.max(n, s);
-			l += s;
-			int t = this.getSampleHeight((double)s);
-			int u = this.getSampleColor(s);
-			guiGraphics.fill(RenderType.guiOverlay(), r, k - t, r + 1, k, u);
+			int s = o + q;
+			long t = this.getValueForAggregation(s);
+			m = Math.min(m, t);
+			n = Math.max(n, t);
+			l += t;
+			this.drawDimensions(guiGraphics, k, r, s);
 		}
 
 		guiGraphics.hLine(RenderType.guiOverlay(), i, i + j - 1, k - 60, -1);
@@ -62,6 +61,25 @@ public abstract class AbstractDebugChart {
 		this.renderAdditionalLinesAndLabels(guiGraphics, i, j, k);
 	}
 
+	protected void drawDimensions(GuiGraphics guiGraphics, int i, int j, int k) {
+		this.drawMainDimension(guiGraphics, i, j, k);
+		this.drawAdditionalDimensions(guiGraphics, i, j, k);
+	}
+
+	protected void drawMainDimension(GuiGraphics guiGraphics, int i, int j, int k) {
+		long l = this.logger.get(k);
+		int m = this.getSampleHeight((double)l);
+		int n = this.getSampleColor(l);
+		guiGraphics.fill(RenderType.guiOverlay(), j, i - m, j + 1, i, n);
+	}
+
+	protected void drawAdditionalDimensions(GuiGraphics guiGraphics, int i, int j, int k) {
+	}
+
+	protected long getValueForAggregation(int i) {
+		return this.logger.get(i);
+	}
+
 	protected void renderAdditionalLinesAndLabels(GuiGraphics guiGraphics, int i, int j, int k) {
 	}
 
@@ -78,6 +96,6 @@ public abstract class AbstractDebugChart {
 
 	protected int getSampleColor(double d, double e, int i, double f, int j, double g, int k) {
 		d = Mth.clamp(d, e, g);
-		return d < f ? FastColor.ARGB32.lerp((float)(d / (f - e)), i, j) : FastColor.ARGB32.lerp((float)((d - f) / (g - f)), j, k);
+		return d < f ? FastColor.ARGB32.lerp((float)((d - e) / (f - e)), i, j) : FastColor.ARGB32.lerp((float)((d - f) / (g - f)), j, k);
 	}
 }

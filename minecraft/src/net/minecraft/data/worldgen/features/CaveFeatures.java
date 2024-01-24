@@ -6,7 +6,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.data.worldgen.BootstapContext;
+import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.data.worldgen.ProcessorLists;
 import net.minecraft.data.worldgen.placement.PlacementUtils;
 import net.minecraft.resources.ResourceKey;
@@ -117,10 +117,10 @@ public class CaveFeatures {
 		);
 	}
 
-	public static void bootstrap(BootstapContext<ConfiguredFeature<?, ?>> bootstapContext) {
-		HolderGetter<ConfiguredFeature<?, ?>> holderGetter = bootstapContext.lookup(Registries.CONFIGURED_FEATURE);
-		HolderGetter<StructureProcessorList> holderGetter2 = bootstapContext.lookup(Registries.PROCESSOR_LIST);
-		FeatureUtils.register(bootstapContext, MONSTER_ROOM, Feature.MONSTER_ROOM);
+	public static void bootstrap(BootstrapContext<ConfiguredFeature<?, ?>> bootstrapContext) {
+		HolderGetter<ConfiguredFeature<?, ?>> holderGetter = bootstrapContext.lookup(Registries.CONFIGURED_FEATURE);
+		HolderGetter<StructureProcessorList> holderGetter2 = bootstrapContext.lookup(Registries.PROCESSOR_LIST);
+		FeatureUtils.register(bootstrapContext, MONSTER_ROOM, Feature.MONSTER_ROOM);
 		List<ResourceLocation> list = List.of(
 			new ResourceLocation("fossil/spine_1"),
 			new ResourceLocation("fossil/spine_2"),
@@ -143,16 +143,16 @@ public class CaveFeatures {
 		);
 		Holder<StructureProcessorList> holder = holderGetter2.getOrThrow(ProcessorLists.FOSSIL_ROT);
 		FeatureUtils.register(
-			bootstapContext, FOSSIL_COAL, Feature.FOSSIL, new FossilFeatureConfiguration(list, list2, holder, holderGetter2.getOrThrow(ProcessorLists.FOSSIL_COAL), 4)
+			bootstrapContext, FOSSIL_COAL, Feature.FOSSIL, new FossilFeatureConfiguration(list, list2, holder, holderGetter2.getOrThrow(ProcessorLists.FOSSIL_COAL), 4)
 		);
 		FeatureUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			FOSSIL_DIAMONDS,
 			Feature.FOSSIL,
 			new FossilFeatureConfiguration(list, list2, holder, holderGetter2.getOrThrow(ProcessorLists.FOSSIL_DIAMONDS), 4)
 		);
 		FeatureUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			DRIPSTONE_CLUSTER,
 			Feature.DRIPSTONE_CLUSTER,
 			new DripstoneClusterConfiguration(
@@ -170,7 +170,7 @@ public class CaveFeatures {
 			)
 		);
 		FeatureUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			LARGE_DRIPSTONE,
 			Feature.LARGE_DRIPSTONE,
 			new LargeDripstoneConfiguration(
@@ -186,7 +186,7 @@ public class CaveFeatures {
 			)
 		);
 		FeatureUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			POINTED_DRIPSTONE,
 			Feature.SIMPLE_RANDOM_SELECTOR,
 			new SimpleRandomFeatureConfiguration(
@@ -206,10 +206,10 @@ public class CaveFeatures {
 				)
 			)
 		);
-		FeatureUtils.register(bootstapContext, UNDERWATER_MAGMA, Feature.UNDERWATER_MAGMA, new UnderwaterMagmaConfiguration(5, 1, 0.5F));
+		FeatureUtils.register(bootstrapContext, UNDERWATER_MAGMA, Feature.UNDERWATER_MAGMA, new UnderwaterMagmaConfiguration(5, 1, 0.5F));
 		MultifaceBlock multifaceBlock = (MultifaceBlock)Blocks.GLOW_LICHEN;
 		FeatureUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			GLOW_LICHEN,
 			Feature.MULTIFACE_GROWTH,
 			new MultifaceGrowthConfiguration(
@@ -233,7 +233,7 @@ public class CaveFeatures {
 			)
 		);
 		FeatureUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			ROOTED_AZALEA_TREE,
 			Feature.ROOT_SYSTEM,
 			new RootSystemConfiguration(
@@ -272,7 +272,7 @@ public class CaveFeatures {
 			UniformInt.of(23, 25)
 		);
 		FeatureUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			CAVE_VINE,
 			Feature.BLOCK_COLUMN,
 			new BlockColumnConfiguration(
@@ -291,7 +291,7 @@ public class CaveFeatures {
 			)
 		);
 		FeatureUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			CAVE_VINE_IN_MOSS,
 			Feature.BLOCK_COLUMN,
 			new BlockColumnConfiguration(
@@ -308,7 +308,7 @@ public class CaveFeatures {
 			)
 		);
 		FeatureUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			MOSS_VEGETATION,
 			Feature.SIMPLE_BLOCK,
 			new SimpleBlockConfiguration(
@@ -323,7 +323,7 @@ public class CaveFeatures {
 			)
 		);
 		FeatureUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			MOSS_PATCH,
 			Feature.VEGETATION_PATCH,
 			new VegetationPatchConfiguration(
@@ -340,7 +340,7 @@ public class CaveFeatures {
 			)
 		);
 		FeatureUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			MOSS_PATCH_BONEMEAL,
 			Feature.VEGETATION_PATCH,
 			new VegetationPatchConfiguration(
@@ -357,7 +357,7 @@ public class CaveFeatures {
 			)
 		);
 		FeatureUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			DRIPLEAF,
 			Feature.SIMPLE_RANDOM_SELECTOR,
 			new SimpleRandomFeatureConfiguration(
@@ -367,7 +367,7 @@ public class CaveFeatures {
 			)
 		);
 		FeatureUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			CLAY_WITH_DRIPLEAVES,
 			Feature.VEGETATION_PATCH,
 			new VegetationPatchConfiguration(
@@ -384,7 +384,7 @@ public class CaveFeatures {
 			)
 		);
 		FeatureUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			CLAY_POOL_WITH_DRIPLEAVES,
 			Feature.WATERLOGGED_VEGETATION_PATCH,
 			new VegetationPatchConfiguration(
@@ -401,7 +401,7 @@ public class CaveFeatures {
 			)
 		);
 		FeatureUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			LUSH_CAVES_CLAY,
 			Feature.RANDOM_BOOLEAN_SELECTOR,
 			new RandomBooleanFeatureConfiguration(
@@ -409,7 +409,7 @@ public class CaveFeatures {
 			)
 		);
 		FeatureUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			MOSS_PATCH_CEILING,
 			Feature.VEGETATION_PATCH,
 			new VegetationPatchConfiguration(
@@ -425,9 +425,9 @@ public class CaveFeatures {
 				0.3F
 			)
 		);
-		FeatureUtils.register(bootstapContext, SPORE_BLOSSOM, Feature.SIMPLE_BLOCK, new SimpleBlockConfiguration(BlockStateProvider.simple(Blocks.SPORE_BLOSSOM)));
+		FeatureUtils.register(bootstrapContext, SPORE_BLOSSOM, Feature.SIMPLE_BLOCK, new SimpleBlockConfiguration(BlockStateProvider.simple(Blocks.SPORE_BLOSSOM)));
 		FeatureUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			AMETHYST_GEODE,
 			Feature.GEODE,
 			new GeodeConfiguration(
@@ -460,13 +460,13 @@ public class CaveFeatures {
 				1
 			)
 		);
-		FeatureUtils.register(bootstapContext, SCULK_PATCH_DEEP_DARK, Feature.SCULK_PATCH, new SculkPatchConfiguration(10, 32, 64, 0, 1, ConstantInt.of(0), 0.5F));
+		FeatureUtils.register(bootstrapContext, SCULK_PATCH_DEEP_DARK, Feature.SCULK_PATCH, new SculkPatchConfiguration(10, 32, 64, 0, 1, ConstantInt.of(0), 0.5F));
 		FeatureUtils.register(
-			bootstapContext, SCULK_PATCH_ANCIENT_CITY, Feature.SCULK_PATCH, new SculkPatchConfiguration(10, 32, 64, 0, 1, UniformInt.of(1, 3), 0.5F)
+			bootstrapContext, SCULK_PATCH_ANCIENT_CITY, Feature.SCULK_PATCH, new SculkPatchConfiguration(10, 32, 64, 0, 1, UniformInt.of(1, 3), 0.5F)
 		);
 		MultifaceBlock multifaceBlock2 = (MultifaceBlock)Blocks.SCULK_VEIN;
 		FeatureUtils.register(
-			bootstapContext,
+			bootstrapContext,
 			SCULK_VEIN,
 			Feature.MULTIFACE_GROWTH,
 			new MultifaceGrowthConfiguration(
