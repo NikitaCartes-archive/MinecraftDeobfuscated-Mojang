@@ -178,6 +178,7 @@ public class ModelTemplates {
 	public static final ModelTemplate SCULK_SHRIEKER = create(
 		"template_sculk_shrieker", TextureSlot.BOTTOM, TextureSlot.SIDE, TextureSlot.TOP, TextureSlot.PARTICLE, TextureSlot.INNER_TOP
 	);
+	public static final ModelTemplate VAULT = create("template_vault", TextureSlot.TOP, TextureSlot.BOTTOM, TextureSlot.SIDE, TextureSlot.FRONT);
 
 	private static ModelTemplate create(TextureSlot... textureSlots) {
 		return new ModelTemplate(Optional.empty(), Optional.empty(), textureSlots);

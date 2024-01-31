@@ -36,6 +36,7 @@ import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.MapItem;
+import net.minecraft.world.level.saveddata.maps.MapId;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.minecraft.world.phys.Vec3;
 import org.slf4j.Logger;
@@ -93,12 +94,12 @@ public class ServerEntity {
 		if (this.entity instanceof ItemFrame itemFrame && this.tickCount % 10 == 0) {
 			ItemStack itemStack = itemFrame.getItem();
 			if (itemStack.getItem() instanceof MapItem) {
-				Integer integer = MapItem.getMapId(itemStack);
-				MapItemSavedData mapItemSavedData = MapItem.getSavedData(integer, this.level);
+				MapId mapId = MapItem.getMapId(itemStack);
+				MapItemSavedData mapItemSavedData = MapItem.getSavedData(mapId, this.level);
 				if (mapItemSavedData != null) {
 					for (ServerPlayer serverPlayer : this.level.players()) {
 						mapItemSavedData.tickCarriedBy(serverPlayer, itemStack);
-						Packet<?> packet = mapItemSavedData.getUpdatePacket(integer, serverPlayer);
+						Packet<?> packet = mapItemSavedData.getUpdatePacket(mapId, serverPlayer);
 						if (packet != null) {
 							serverPlayer.connection.send(packet);
 						}

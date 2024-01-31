@@ -17,6 +17,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.saveddata.maps.MapDecoration;
+import net.minecraft.world.level.saveddata.maps.MapId;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.joml.Matrix4f;
 
@@ -33,16 +34,16 @@ public class MapRenderer implements AutoCloseable {
 		this.textureManager = textureManager;
 	}
 
-	public void update(int i, MapItemSavedData mapItemSavedData) {
-		this.getOrCreateMapInstance(i, mapItemSavedData).forceUpload();
+	public void update(MapId mapId, MapItemSavedData mapItemSavedData) {
+		this.getOrCreateMapInstance(mapId, mapItemSavedData).forceUpload();
 	}
 
-	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, MapItemSavedData mapItemSavedData, boolean bl, int j) {
-		this.getOrCreateMapInstance(i, mapItemSavedData).draw(poseStack, multiBufferSource, bl, j);
+	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, MapId mapId, MapItemSavedData mapItemSavedData, boolean bl, int i) {
+		this.getOrCreateMapInstance(mapId, mapItemSavedData).draw(poseStack, multiBufferSource, bl, i);
 	}
 
-	private MapRenderer.MapInstance getOrCreateMapInstance(int i, MapItemSavedData mapItemSavedData) {
-		return this.maps.compute(i, (integer, mapInstance) -> {
+	private MapRenderer.MapInstance getOrCreateMapInstance(MapId mapId, MapItemSavedData mapItemSavedData) {
+		return this.maps.compute(mapId.id(), (integer, mapInstance) -> {
 			if (mapInstance == null) {
 				return new MapRenderer.MapInstance(integer, mapItemSavedData);
 			} else {
@@ -136,9 +137,9 @@ public class MapRenderer implements AutoCloseable {
 					vertexConsumer2.vertex(matrix4f2, 1.0F, -1.0F, (float)l * -0.001F).color(255, 255, 255, 255).uv(m, n).uv2(i).endVertex();
 					vertexConsumer2.vertex(matrix4f2, -1.0F, -1.0F, (float)l * -0.001F).color(255, 255, 255, 255).uv(g, n).uv2(i).endVertex();
 					poseStack.popPose();
-					if (mapDecoration.name() != null) {
+					if (mapDecoration.name().isPresent()) {
 						Font font = Minecraft.getInstance().font;
-						Component component = mapDecoration.name();
+						Component component = (Component)mapDecoration.name().get();
 						float p = (float)font.width(component);
 						float q = Mth.clamp(25.0F / p, 0.0F, 6.0F / 9.0F);
 						poseStack.pushPose();

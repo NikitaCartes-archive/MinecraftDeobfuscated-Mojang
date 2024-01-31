@@ -28,7 +28,7 @@ public class ItemColors {
 	public static ItemColors createDefault(BlockColors blockColors) {
 		ItemColors itemColors = new ItemColors();
 		itemColors.register(
-			(itemStack, i) -> i > 0 ? -1 : ((DyeableLeatherItem)itemStack.getItem()).getColor(itemStack),
+			(itemStack, i) -> i > 0 ? -1 : DyeableLeatherItem.getColor(itemStack),
 			Items.LEATHER_HELMET,
 			Items.LEATHER_CHESTPLATE,
 			Items.LEATHER_LEGGINGS,

@@ -17,6 +17,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.StructureTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
@@ -26,7 +27,6 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.DyeItem;
-import net.minecraft.world.item.DyeableArmorItem;
 import net.minecraft.world.item.DyeableLeatherItem;
 import net.minecraft.world.item.EnchantedBookItem;
 import net.minecraft.world.item.Item;
@@ -1225,7 +1225,7 @@ public class VillagerTrades {
 		public MerchantOffer getOffer(Entity entity, RandomSource randomSource) {
 			ItemStack itemStack = new ItemStack(Items.EMERALD, this.value);
 			ItemStack itemStack2 = new ItemStack(this.item);
-			if (this.item instanceof DyeableArmorItem) {
+			if (itemStack2.is(ItemTags.DYEABLE)) {
 				List<DyeItem> list = Lists.<DyeItem>newArrayList();
 				list.add(getRandomDye(randomSource));
 				if (randomSource.nextFloat() > 0.7F) {

@@ -101,7 +101,7 @@ public class PatrolSpawner implements CustomSpawner {
 				}
 
 				patrollingMonster.setPos((double)blockPos.getX(), (double)blockPos.getY(), (double)blockPos.getZ());
-				patrollingMonster.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(blockPos), MobSpawnType.PATROL, null, null);
+				patrollingMonster.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(blockPos), MobSpawnType.PATROL, null);
 				serverLevel.addFreshEntityWithPassengers(patrollingMonster);
 				return true;
 			} else {

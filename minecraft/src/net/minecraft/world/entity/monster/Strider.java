@@ -458,14 +458,10 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
 	@Nullable
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		ServerLevelAccessor serverLevelAccessor,
-		DifficultyInstance difficultyInstance,
-		MobSpawnType mobSpawnType,
-		@Nullable SpawnGroupData spawnGroupData,
-		@Nullable CompoundTag compoundTag
+		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData
 	) {
 		if (this.isBaby()) {
-			return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+			return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData);
 		} else {
 			RandomSource randomSource = serverLevelAccessor.getRandom();
 			if (randomSource.nextInt(30) == 0) {
@@ -485,7 +481,7 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
 				spawnGroupData = new AgeableMob.AgeableMobGroupData(0.5F);
 			}
 
-			return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+			return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData);
 		}
 	}
 
@@ -493,7 +489,7 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
 		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, Mob mob, @Nullable SpawnGroupData spawnGroupData
 	) {
 		mob.moveTo(this.getX(), this.getY(), this.getZ(), this.getYRot(), 0.0F);
-		mob.finalizeSpawn(serverLevelAccessor, difficultyInstance, MobSpawnType.JOCKEY, spawnGroupData, null);
+		mob.finalizeSpawn(serverLevelAccessor, difficultyInstance, MobSpawnType.JOCKEY, spawnGroupData);
 		mob.startRiding(this, true);
 		return new AgeableMob.AgeableMobGroupData(0.0F);
 	}

@@ -7,7 +7,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
-import net.minecraft.util.debugchart.SampleLogger;
+import net.minecraft.util.debugchart.SampleStorage;
 
 @Environment(EnvType.CLIENT)
 public abstract class AbstractDebugChart {
@@ -15,15 +15,15 @@ public abstract class AbstractDebugChart {
 	protected static final int CHART_HEIGHT = 60;
 	protected static final int LINE_WIDTH = 1;
 	protected final Font font;
-	protected final SampleLogger logger;
+	protected final SampleStorage sampleStorage;
 
-	protected AbstractDebugChart(Font font, SampleLogger sampleLogger) {
+	protected AbstractDebugChart(Font font, SampleStorage sampleStorage) {
 		this.font = font;
-		this.logger = sampleLogger;
+		this.sampleStorage = sampleStorage;
 	}
 
 	public int getWidth(int i) {
-		return Math.min(this.logger.capacity() + 2, i);
+		return Math.min(this.sampleStorage.capacity() + 2, i);
 	}
 
 	public void drawChart(GuiGraphics guiGraphics, int i, int j) {
@@ -32,8 +32,8 @@ public abstract class AbstractDebugChart {
 		long l = 0L;
 		long m = 2147483647L;
 		long n = -2147483648L;
-		int o = Math.max(0, this.logger.capacity() - (j - 2));
-		int p = this.logger.size() - o;
+		int o = Math.max(0, this.sampleStorage.capacity() - (j - 2));
+		int p = this.sampleStorage.size() - o;
 
 		for (int q = 0; q < p; q++) {
 			int r = i + q + 1;
@@ -67,7 +67,7 @@ public abstract class AbstractDebugChart {
 	}
 
 	protected void drawMainDimension(GuiGraphics guiGraphics, int i, int j, int k) {
-		long l = this.logger.get(k);
+		long l = this.sampleStorage.get(k);
 		int m = this.getSampleHeight((double)l);
 		int n = this.getSampleColor(l);
 		guiGraphics.fill(RenderType.guiOverlay(), j, i - m, j + 1, i, n);
@@ -77,7 +77,7 @@ public abstract class AbstractDebugChart {
 	}
 
 	protected long getValueForAggregation(int i) {
-		return this.logger.get(i);
+		return this.sampleStorage.get(i);
 	}
 
 	protected void renderAdditionalLinesAndLabels(GuiGraphics guiGraphics, int i, int j, int k) {

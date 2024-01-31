@@ -17,6 +17,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.IdMapper;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -469,7 +470,9 @@ public class Block extends BlockBehaviour implements ItemLike {
 		return "Block{" + BuiltInRegistries.BLOCK.getKey(this) + "}";
 	}
 
-	public void appendHoverText(ItemStack itemStack, @Nullable BlockGetter blockGetter, List<Component> list, TooltipFlag tooltipFlag) {
+	public void appendHoverText(
+		ItemStack itemStack, @Nullable BlockGetter blockGetter, List<Component> list, TooltipFlag tooltipFlag, @Nullable RegistryAccess registryAccess
+	) {
 	}
 
 	@Override

@@ -5,6 +5,7 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import java.util.Collection;
 import java.util.function.Function;
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.ComponentArgument;
@@ -21,7 +22,7 @@ import net.minecraft.network.protocol.game.ClientboundSetTitlesAnimationPacket;
 import net.minecraft.server.level.ServerPlayer;
 
 public class TitleCommand {
-	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
+	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher, CommandBuildContext commandBuildContext) {
 		commandDispatcher.register(
 			Commands.literal("title")
 				.requires(commandSourceStack -> commandSourceStack.hasPermission(2))
@@ -32,7 +33,7 @@ public class TitleCommand {
 						.then(
 							Commands.literal("title")
 								.then(
-									Commands.argument("title", ComponentArgument.textComponent())
+									Commands.argument("title", ComponentArgument.textComponent(commandBuildContext))
 										.executes(
 											commandContext -> showTitle(
 													commandContext.getSource(),
@@ -47,7 +48,7 @@ public class TitleCommand {
 						.then(
 							Commands.literal("subtitle")
 								.then(
-									Commands.argument("title", ComponentArgument.textComponent())
+									Commands.argument("title", ComponentArgument.textComponent(commandBuildContext))
 										.executes(
 											commandContext -> showTitle(
 													commandContext.getSource(),
@@ -62,7 +63,7 @@ public class TitleCommand {
 						.then(
 							Commands.literal("actionbar")
 								.then(
-									Commands.argument("title", ComponentArgument.textComponent())
+									Commands.argument("title", ComponentArgument.textComponent(commandBuildContext))
 										.executes(
 											commandContext -> showTitle(
 													commandContext.getSource(),

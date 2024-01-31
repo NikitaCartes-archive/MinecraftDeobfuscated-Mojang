@@ -12,6 +12,7 @@ import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -221,8 +222,8 @@ public abstract class AbstractFurnaceBlockEntity extends BaseContainerBlockEntit
 	}
 
 	@Override
-	public void load(CompoundTag compoundTag) {
-		super.load(compoundTag);
+	public void load(CompoundTag compoundTag, HolderLookup.Provider provider) {
+		super.load(compoundTag, provider);
 		this.items = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
 		ContainerHelper.loadAllItems(compoundTag, this.items);
 		this.litTime = compoundTag.getShort("BurnTime");
@@ -237,8 +238,8 @@ public abstract class AbstractFurnaceBlockEntity extends BaseContainerBlockEntit
 	}
 
 	@Override
-	protected void saveAdditional(CompoundTag compoundTag) {
-		super.saveAdditional(compoundTag);
+	protected void saveAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
+		super.saveAdditional(compoundTag, provider);
 		compoundTag.putShort("BurnTime", (short)this.litTime);
 		compoundTag.putShort("CookTime", (short)this.cookingProgress);
 		compoundTag.putShort("CookTimeTotal", (short)this.cookingTotalTime);

@@ -1,6 +1,8 @@
 package net.minecraft.network.protocol.common;
 
+import io.netty.buffer.ByteBuf;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketType;
@@ -10,15 +12,16 @@ public record ClientboundStoreCookiePacket(ResourceLocation key, byte[] payload)
 	public static final StreamCodec<FriendlyByteBuf, ClientboundStoreCookiePacket> STREAM_CODEC = Packet.codec(
 		ClientboundStoreCookiePacket::write, ClientboundStoreCookiePacket::new
 	);
-	public static final int MAX_PAYLOAD_SIZE = 5120;
+	private static final int MAX_PAYLOAD_SIZE = 5120;
+	public static final StreamCodec<ByteBuf, byte[]> PAYLOAD_STREAM_CODEC = ByteBufCodecs.byteArray(5120);
 
 	private ClientboundStoreCookiePacket(FriendlyByteBuf friendlyByteBuf) {
-		this(friendlyByteBuf.readResourceLocation(), friendlyByteBuf.readByteArray(5120));
+		this(friendlyByteBuf.readResourceLocation(), PAYLOAD_STREAM_CODEC.decode(friendlyByteBuf));
 	}
 
 	private void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeResourceLocation(this.key);
-		friendlyByteBuf.writeByteArray(this.payload);
+		PAYLOAD_STREAM_CODEC.encode(friendlyByteBuf, this.payload);
 	}
 
 	@Override

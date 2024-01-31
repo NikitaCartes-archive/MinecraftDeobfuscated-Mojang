@@ -14,8 +14,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import org.joml.Matrix3f;
-import org.joml.Matrix4f;
 
 @Environment(EnvType.CLIENT)
 public class BeeStingerLayer<T extends LivingEntity, M extends PlayerModel<T>> extends StuckInBodyLayer<T, M> {
@@ -51,22 +49,20 @@ public class BeeStingerLayer<T extends LivingEntity, M extends PlayerModel<T>> e
 		for (int s = 0; s < 4; s++) {
 			poseStack.mulPose(Axis.XP.rotationDegrees(90.0F));
 			PoseStack.Pose pose = poseStack.last();
-			Matrix4f matrix4f = pose.pose();
-			Matrix3f matrix3f = pose.normal();
-			vertex(vertexConsumer, matrix4f, matrix3f, -4.5F, -1, 0.0F, 0.0F, i);
-			vertex(vertexConsumer, matrix4f, matrix3f, 4.5F, -1, 0.125F, 0.0F, i);
-			vertex(vertexConsumer, matrix4f, matrix3f, 4.5F, 1, 0.125F, 0.0625F, i);
-			vertex(vertexConsumer, matrix4f, matrix3f, -4.5F, 1, 0.0F, 0.0625F, i);
+			vertex(vertexConsumer, pose, -4.5F, -1, 0.0F, 0.0F, i);
+			vertex(vertexConsumer, pose, 4.5F, -1, 0.125F, 0.0F, i);
+			vertex(vertexConsumer, pose, 4.5F, 1, 0.125F, 0.0625F, i);
+			vertex(vertexConsumer, pose, -4.5F, 1, 0.0F, 0.0625F, i);
 		}
 	}
 
-	private static void vertex(VertexConsumer vertexConsumer, Matrix4f matrix4f, Matrix3f matrix3f, float f, int i, float g, float h, int j) {
-		vertexConsumer.vertex(matrix4f, f, (float)i, 0.0F)
+	private static void vertex(VertexConsumer vertexConsumer, PoseStack.Pose pose, float f, int i, float g, float h, int j) {
+		vertexConsumer.vertex(pose, f, (float)i, 0.0F)
 			.color(255, 255, 255, 255)
 			.uv(g, h)
 			.overlayCoords(OverlayTexture.NO_OVERLAY)
 			.uv2(j)
-			.normal(matrix3f, 0.0F, 1.0F, 0.0F)
+			.normal(pose, 0.0F, 1.0F, 0.0F)
 			.endVertex();
 	}
 }

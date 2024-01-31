@@ -150,6 +150,7 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemp
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.portal.PortalForcer;
+import net.minecraft.world.level.saveddata.maps.MapId;
 import net.minecraft.world.level.saveddata.maps.MapIndex;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
@@ -1265,17 +1266,17 @@ public class ServerLevel extends Level implements WorldGenLevel {
 
 	@Nullable
 	@Override
-	public MapItemSavedData getMapData(String string) {
-		return this.getServer().overworld().getDataStorage().get(MapItemSavedData.factory(), string);
+	public MapItemSavedData getMapData(MapId mapId) {
+		return this.getServer().overworld().getDataStorage().get(MapItemSavedData.factory(), mapId.key());
 	}
 
 	@Override
-	public void setMapData(String string, MapItemSavedData mapItemSavedData) {
-		this.getServer().overworld().getDataStorage().set(string, mapItemSavedData);
+	public void setMapData(MapId mapId, MapItemSavedData mapItemSavedData) {
+		this.getServer().overworld().getDataStorage().set(mapId.key(), mapItemSavedData);
 	}
 
 	@Override
-	public int getFreeMapId() {
+	public MapId getFreeMapId() {
 		return this.getServer().overworld().getDataStorage().computeIfAbsent(MapIndex.factory(), "idcounts").getFreeAuxValueForMap();
 	}
 

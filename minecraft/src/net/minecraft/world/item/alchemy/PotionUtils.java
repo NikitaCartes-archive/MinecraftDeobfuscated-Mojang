@@ -143,7 +143,7 @@ public class PotionUtils {
 			ListTag listTag = compoundTag.getList("custom_potion_effects", 9);
 
 			for (MobEffectInstance mobEffectInstance : collection) {
-				listTag.add(mobEffectInstance.save(new CompoundTag()));
+				listTag.add(mobEffectInstance.save());
 			}
 
 			compoundTag.put("custom_potion_effects", listTag);

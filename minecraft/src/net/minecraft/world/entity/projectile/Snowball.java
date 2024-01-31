@@ -33,8 +33,10 @@ public class Snowball extends ThrowableItemProjectile {
 	}
 
 	private ParticleOptions getParticle() {
-		ItemStack itemStack = this.getItemRaw();
-		return (ParticleOptions)(itemStack.isEmpty() ? ParticleTypes.ITEM_SNOWBALL : new ItemParticleOption(ParticleTypes.ITEM, itemStack));
+		ItemStack itemStack = this.getItem();
+		return (ParticleOptions)(!itemStack.isEmpty() && !itemStack.is(this.getDefaultItem())
+			? new ItemParticleOption(ParticleTypes.ITEM, itemStack)
+			: ParticleTypes.ITEM_SNOWBALL);
 	}
 
 	@Override

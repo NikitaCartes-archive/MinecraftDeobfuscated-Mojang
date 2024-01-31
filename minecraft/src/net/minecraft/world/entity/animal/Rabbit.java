@@ -369,11 +369,7 @@ public class Rabbit extends Animal implements VariantHolder<Rabbit.Variant> {
 	@Nullable
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		ServerLevelAccessor serverLevelAccessor,
-		DifficultyInstance difficultyInstance,
-		MobSpawnType mobSpawnType,
-		@Nullable SpawnGroupData spawnGroupData,
-		@Nullable CompoundTag compoundTag
+		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData
 	) {
 		Rabbit.Variant variant = getRandomRabbitVariant(serverLevelAccessor, this.blockPosition());
 		if (spawnGroupData instanceof Rabbit.RabbitGroupData) {
@@ -383,7 +379,7 @@ public class Rabbit extends Animal implements VariantHolder<Rabbit.Variant> {
 		}
 
 		this.setVariant(variant);
-		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData);
 	}
 
 	private static Rabbit.Variant getRandomRabbitVariant(LevelAccessor levelAccessor, BlockPos blockPos) {

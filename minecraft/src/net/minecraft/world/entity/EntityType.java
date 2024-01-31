@@ -825,17 +825,14 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 		ServerLevel serverLevel, @Nullable ItemStack itemStack, @Nullable Player player, BlockPos blockPos, MobSpawnType mobSpawnType, boolean bl, boolean bl2
 	) {
 		Consumer<T> consumer;
-		CompoundTag compoundTag;
 		if (itemStack != null) {
-			compoundTag = itemStack.getTag();
 			consumer = createDefaultStackConfig(serverLevel, itemStack, player);
 		} else {
 			consumer = entity -> {
 			};
-			compoundTag = null;
 		}
 
-		return this.spawn(serverLevel, compoundTag, consumer, blockPos, mobSpawnType, bl, bl2);
+		return this.spawn(serverLevel, consumer, blockPos, mobSpawnType, bl, bl2);
 	}
 
 	public static <T extends Entity> Consumer<T> createDefaultStackConfig(ServerLevel serverLevel, ItemStack itemStack, @Nullable Player player) {
@@ -862,20 +859,12 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 
 	@Nullable
 	public T spawn(ServerLevel serverLevel, BlockPos blockPos, MobSpawnType mobSpawnType) {
-		return this.spawn(serverLevel, (CompoundTag)null, null, blockPos, mobSpawnType, false, false);
+		return this.spawn(serverLevel, null, blockPos, mobSpawnType, false, false);
 	}
 
 	@Nullable
-	public T spawn(
-		ServerLevel serverLevel,
-		@Nullable CompoundTag compoundTag,
-		@Nullable Consumer<T> consumer,
-		BlockPos blockPos,
-		MobSpawnType mobSpawnType,
-		boolean bl,
-		boolean bl2
-	) {
-		T entity = this.create(serverLevel, compoundTag, consumer, blockPos, mobSpawnType, bl, bl2);
+	public T spawn(ServerLevel serverLevel, @Nullable Consumer<T> consumer, BlockPos blockPos, MobSpawnType mobSpawnType, boolean bl, boolean bl2) {
+		T entity = this.create(serverLevel, consumer, blockPos, mobSpawnType, bl, bl2);
 		if (entity != null) {
 			serverLevel.addFreshEntityWithPassengers(entity);
 		}
@@ -884,15 +873,7 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 	}
 
 	@Nullable
-	public T create(
-		ServerLevel serverLevel,
-		@Nullable CompoundTag compoundTag,
-		@Nullable Consumer<T> consumer,
-		BlockPos blockPos,
-		MobSpawnType mobSpawnType,
-		boolean bl,
-		boolean bl2
-	) {
+	public T create(ServerLevel serverLevel, @Nullable Consumer<T> consumer, BlockPos blockPos, MobSpawnType mobSpawnType, boolean bl, boolean bl2) {
 		T entity = this.create(serverLevel);
 		if (entity == null) {
 			return null;
@@ -911,7 +892,7 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 			if (entity instanceof Mob mob) {
 				mob.yHeadRot = mob.getYRot();
 				mob.yBodyRot = mob.getYRot();
-				mob.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(mob.blockPosition()), mobSpawnType, null, compoundTag);
+				mob.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(mob.blockPosition()), mobSpawnType, null);
 				mob.playAmbientSound();
 			}
 

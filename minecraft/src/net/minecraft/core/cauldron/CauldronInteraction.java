@@ -10,6 +10,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.ItemInteractionResult;
@@ -64,12 +65,7 @@ public interface CauldronInteraction {
 			return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
 		} else {
 			if (!level.isClientSide) {
-				ItemStack itemStack2 = new ItemStack(Blocks.SHULKER_BOX);
-				if (itemStack.hasTag()) {
-					itemStack2.setTag(itemStack.getTag().copy());
-				}
-
-				player.setItemInHand(interactionHand, itemStack2);
+				player.setItemInHand(interactionHand, itemStack.transmuteCopy(Blocks.SHULKER_BOX, 1));
 				player.awardStat(Stats.CLEAN_SHULKER_BOX);
 				LayeredCauldronBlock.lowerFillLevel(blockState, level, blockPos);
 			}
@@ -104,13 +100,13 @@ public interface CauldronInteraction {
 		}
 	};
 	CauldronInteraction DYED_ITEM = (blockState, level, blockPos, player, interactionHand, itemStack) -> {
-		if (!(itemStack.getItem() instanceof DyeableLeatherItem dyeableLeatherItem)) {
+		if (!itemStack.is(ItemTags.DYEABLE)) {
 			return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
-		} else if (!dyeableLeatherItem.hasCustomColor(itemStack)) {
+		} else if (!DyeableLeatherItem.hasCustomColor(itemStack)) {
 			return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
 		} else {
 			if (!level.isClientSide) {
-				dyeableLeatherItem.clearColor(itemStack);
+				DyeableLeatherItem.clearColor(itemStack);
 				player.awardStat(Stats.CLEAN_ARMOR);
 				LayeredCauldronBlock.lowerFillLevel(blockState, level, blockPos);
 			}

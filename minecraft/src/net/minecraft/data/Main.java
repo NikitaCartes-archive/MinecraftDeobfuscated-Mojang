@@ -123,8 +123,8 @@ public class Main {
 		DataGenerator.PackGenerator packGenerator3 = dataGenerator.getVanillaPack(bl2);
 		packGenerator3.addProvider(bindRegistries(RegistriesDatapackGenerator::new, completableFuture));
 		packGenerator3.addProvider(bindRegistries(VanillaAdvancementProvider::create, completableFuture));
-		packGenerator3.addProvider(VanillaLootTableProvider::create);
-		packGenerator3.addProvider(VanillaRecipeProvider::new);
+		packGenerator3.addProvider(bindRegistries(VanillaLootTableProvider::create, completableFuture));
+		packGenerator3.addProvider(bindRegistries(VanillaRecipeProvider::new, completableFuture));
 		TagsProvider<Block> tagsProvider = packGenerator3.addProvider(bindRegistries(VanillaBlockTagsProvider::new, completableFuture));
 		TagsProvider<Item> tagsProvider2 = packGenerator3.addProvider(
 			packOutput -> new VanillaItemTagsProvider(packOutput, completableFuture, tagsProvider.contentsGetter())
@@ -150,7 +150,7 @@ public class Main {
 		packGenerator3.addProvider(bindRegistries(CommandsReport::new, completableFuture));
 		packGenerator3.addProvider(RegistryDumpReport::new);
 		packGenerator3 = dataGenerator.getBuiltinDatapack(bl2, "bundle");
-		packGenerator3.addProvider(BundleRecipeProvider::new);
+		packGenerator3.addProvider(bindRegistries(BundleRecipeProvider::new, completableFuture));
 		packGenerator3.addProvider(
 			packOutput -> PackMetadataGenerator.forFeaturePack(packOutput, Component.translatable("dataPack.bundle.description"), FeatureFlagSet.of(FeatureFlags.BUNDLE))
 		);
@@ -160,13 +160,13 @@ public class Main {
 					packOutput, Component.translatable("dataPack.trade_rebalance.description"), FeatureFlagSet.of(FeatureFlags.TRADE_REBALANCE)
 				)
 		);
-		packGenerator3.addProvider(TradeRebalanceLootTableProvider::create);
+		packGenerator3.addProvider(bindRegistries(TradeRebalanceLootTableProvider::create, completableFuture));
 		packGenerator3.addProvider(bindRegistries(TradeRebalanceStructureTagsProvider::new, completableFuture));
 		CompletableFuture<RegistrySetBuilder.PatchedRegistries> completableFuture2 = UpdateOneTwentyOneRegistries.createLookup(completableFuture);
 		CompletableFuture<HolderLookup.Provider> completableFuture3 = completableFuture2.thenApply(RegistrySetBuilder.PatchedRegistries::full);
 		CompletableFuture<HolderLookup.Provider> completableFuture4 = completableFuture2.thenApply(RegistrySetBuilder.PatchedRegistries::patches);
 		DataGenerator.PackGenerator packGenerator4 = dataGenerator.getBuiltinDatapack(bl2, "update_1_21");
-		packGenerator4.addProvider(UpdateOneTwentyOneRecipeProvider::new);
+		packGenerator4.addProvider(bindRegistries(UpdateOneTwentyOneRecipeProvider::new, completableFuture4));
 		TagsProvider<Block> tagsProvider4 = packGenerator4.addProvider(
 			packOutput -> new UpdateOneTwentyOneBlockTagsProvider(packOutput, completableFuture4, tagsProvider.contentsGetter())
 		);
@@ -174,7 +174,7 @@ public class Main {
 			packOutput -> new UpdateOneTwentyOneItemTagsProvider(packOutput, completableFuture4, tagsProvider2.contentsGetter(), tagsProvider4.contentsGetter())
 		);
 		packGenerator4.addProvider(packOutput -> new UpdateOneTwentyOneBiomeTagsProvider(packOutput, completableFuture4, tagsProvider3.contentsGetter()));
-		packGenerator4.addProvider(UpdateOneTwentyOneLootTableProvider::create);
+		packGenerator4.addProvider(bindRegistries(UpdateOneTwentyOneLootTableProvider::create, completableFuture4));
 		packGenerator4.addProvider(bindRegistries(RegistriesDatapackGenerator::new, completableFuture4));
 		packGenerator4.addProvider(
 			packOutput -> PackMetadataGenerator.forFeaturePack(

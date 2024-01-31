@@ -1,28 +1,16 @@
 package net.minecraft.network.protocol.game;
 
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketType;
 
-public class ClientboundSetTitleTextPacket implements Packet<ClientGamePacketListener> {
-	public static final StreamCodec<FriendlyByteBuf, ClientboundSetTitleTextPacket> STREAM_CODEC = Packet.codec(
-		ClientboundSetTitleTextPacket::write, ClientboundSetTitleTextPacket::new
+public record ClientboundSetTitleTextPacket(Component text) implements Packet<ClientGamePacketListener> {
+	public static final StreamCodec<RegistryFriendlyByteBuf, ClientboundSetTitleTextPacket> STREAM_CODEC = StreamCodec.composite(
+		ComponentSerialization.STREAM_CODEC, ClientboundSetTitleTextPacket::text, ClientboundSetTitleTextPacket::new
 	);
-	private final Component text;
-
-	public ClientboundSetTitleTextPacket(Component component) {
-		this.text = component;
-	}
-
-	private ClientboundSetTitleTextPacket(FriendlyByteBuf friendlyByteBuf) {
-		this.text = friendlyByteBuf.readComponentTrusted();
-	}
-
-	private void write(FriendlyByteBuf friendlyByteBuf) {
-		friendlyByteBuf.writeComponent(this.text);
-	}
 
 	@Override
 	public PacketType<ClientboundSetTitleTextPacket> type() {
@@ -31,9 +19,5 @@ public class ClientboundSetTitleTextPacket implements Packet<ClientGamePacketLis
 
 	public void handle(ClientGamePacketListener clientGamePacketListener) {
 		clientGamePacketListener.setTitleText(this);
-	}
-
-	public Component getText() {
-		return this.text;
 	}
 }

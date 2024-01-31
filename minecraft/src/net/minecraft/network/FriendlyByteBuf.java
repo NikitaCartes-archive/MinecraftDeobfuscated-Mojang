@@ -56,10 +56,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.EndTag;
 import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NbtIo;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.codec.StreamDecoder;
 import net.minecraft.network.codec.StreamEncoder;
 import net.minecraft.resources.ResourceKey;
@@ -242,15 +239,24 @@ public class FriendlyByteBuf extends ByteBuf {
 
 	@Nullable
 	public <T> T readNullable(StreamDecoder<? super FriendlyByteBuf, T> streamDecoder) {
-		return this.readBoolean() ? streamDecoder.decode(this) : null;
+		return readNullable(this, streamDecoder);
+	}
+
+	@Nullable
+	public static <T, B extends ByteBuf> T readNullable(B byteBuf, StreamDecoder<? super B, T> streamDecoder) {
+		return byteBuf.readBoolean() ? streamDecoder.decode(byteBuf) : null;
 	}
 
 	public <T> void writeNullable(@Nullable T object, StreamEncoder<? super FriendlyByteBuf, T> streamEncoder) {
+		writeNullable(this, object, streamEncoder);
+	}
+
+	public static <T, B extends ByteBuf> void writeNullable(B byteBuf, @Nullable T object, StreamEncoder<? super B, T> streamEncoder) {
 		if (object != null) {
-			this.writeBoolean(true);
-			streamEncoder.encode(this, object);
+			byteBuf.writeBoolean(true);
+			streamEncoder.encode(byteBuf, object);
 		} else {
-			this.writeBoolean(false);
+			byteBuf.writeBoolean(false);
 		}
 	}
 
@@ -271,22 +277,34 @@ public class FriendlyByteBuf extends ByteBuf {
 	}
 
 	public byte[] readByteArray() {
-		return this.readByteArray(this.readableBytes());
+		return readByteArray(this);
+	}
+
+	public static byte[] readByteArray(ByteBuf byteBuf) {
+		return readByteArray(byteBuf, byteBuf.readableBytes());
 	}
 
 	public FriendlyByteBuf writeByteArray(byte[] bs) {
-		this.writeVarInt(bs.length);
-		this.writeBytes(bs);
+		writeByteArray(this, bs);
 		return this;
 	}
 
+	public static void writeByteArray(ByteBuf byteBuf, byte[] bs) {
+		VarInt.write(byteBuf, bs.length);
+		byteBuf.writeBytes(bs);
+	}
+
 	public byte[] readByteArray(int i) {
-		int j = this.readVarInt();
+		return readByteArray(this, i);
+	}
+
+	public static byte[] readByteArray(ByteBuf byteBuf, int i) {
+		int j = VarInt.read(byteBuf);
 		if (j > i) {
 			throw new DecoderException("ByteArray with size " + j + " is bigger than allowed " + i);
 		} else {
 			byte[] bs = new byte[j];
-			this.readBytes(bs);
+			byteBuf.readBytes(bs);
 			return bs;
 		}
 	}
@@ -446,18 +464,6 @@ public class FriendlyByteBuf extends ByteBuf {
 		this.writeDouble(vec3.x());
 		this.writeDouble(vec3.y());
 		this.writeDouble(vec3.z());
-	}
-
-	public Component readComponent() {
-		return this.readWithCodec(NbtOps.INSTANCE, ComponentSerialization.CODEC, NbtAccounter.create(2097152L));
-	}
-
-	public Component readComponentTrusted() {
-		return this.readWithCodecTrusted(NbtOps.INSTANCE, ComponentSerialization.CODEC);
-	}
-
-	public FriendlyByteBuf writeComponent(Component component) {
-		return this.writeWithCodec(NbtOps.INSTANCE, ComponentSerialization.CODEC, component);
 	}
 
 	public <T extends Enum<T>> T readEnum(Class<T> class_) {

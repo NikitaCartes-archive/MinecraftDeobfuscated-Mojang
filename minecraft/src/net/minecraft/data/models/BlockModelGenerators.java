@@ -54,6 +54,7 @@ import net.minecraft.world.level.block.LayeredCauldronBlock;
 import net.minecraft.world.level.block.MangrovePropaguleBlock;
 import net.minecraft.world.level.block.PitcherCropBlock;
 import net.minecraft.world.level.block.SnifferEggBlock;
+import net.minecraft.world.level.block.VaultBlock;
 import net.minecraft.world.level.block.state.properties.AttachFace;
 import net.minecraft.world.level.block.state.properties.BambooLeaves;
 import net.minecraft.world.level.block.state.properties.BellAttachType;
@@ -3400,6 +3401,30 @@ public class BlockModelGenerators {
 			})));
 	}
 
+	private void createVault() {
+		Block block = Blocks.VAULT;
+		TextureMapping textureMapping = TextureMapping.vault(block, "_front_off", "_side_off", "_top_off", "_bottom");
+		TextureMapping textureMapping2 = TextureMapping.vault(block, "_front_on", "_side_on", "_top_on", "_bottom");
+		TextureMapping textureMapping3 = TextureMapping.vault(block, "_front_ejecting", "_side_on", "_top_on", "_bottom");
+		TextureMapping textureMapping4 = TextureMapping.vault(block, "_front_ejecting", "_side_on", "_top_ejecting", "_bottom");
+		ResourceLocation resourceLocation = ModelTemplates.VAULT.create(block, textureMapping, this.modelOutput);
+		ResourceLocation resourceLocation2 = ModelTemplates.VAULT.createWithSuffix(block, "_active", textureMapping2, this.modelOutput);
+		ResourceLocation resourceLocation3 = ModelTemplates.VAULT.createWithSuffix(block, "_unlocking", textureMapping3, this.modelOutput);
+		ResourceLocation resourceLocation4 = ModelTemplates.VAULT.createWithSuffix(block, "_ejecting_reward", textureMapping4, this.modelOutput);
+		this.delegateItemModel(block, resourceLocation);
+		this.blockStateOutput
+			.accept(
+				MultiVariantGenerator.multiVariant(block).with(createHorizontalFacingDispatch()).with(PropertyDispatch.property(VaultBlock.STATE).generate(vaultState -> {
+					return switch (vaultState) {
+						case INACTIVE -> Variant.variant().with(VariantProperties.MODEL, resourceLocation);
+						case ACTIVE -> Variant.variant().with(VariantProperties.MODEL, resourceLocation2);
+						case UNLOCKING -> Variant.variant().with(VariantProperties.MODEL, resourceLocation3);
+						case EJECTING -> Variant.variant().with(VariantProperties.MODEL, resourceLocation4);
+					};
+				}))
+			);
+	}
+
 	private void createSculkSensor() {
 		ResourceLocation resourceLocation = ModelLocationUtils.getModelLocation(Blocks.SCULK_SENSOR, "_inactive");
 		ResourceLocation resourceLocation2 = ModelLocationUtils.getModelLocation(Blocks.SCULK_SENSOR, "_active");
@@ -4435,6 +4460,7 @@ public class BlockModelGenerators {
 		this.createMangrovePropagule();
 		this.createMuddyMangroveRoots();
 		this.createTrialSpawner();
+		this.createVault();
 		this.createNonTemplateHorizontalBlock(Blocks.LADDER);
 		this.createSimpleFlatItemModel(Blocks.LADDER);
 		this.createNonTemplateHorizontalBlock(Blocks.LECTERN);

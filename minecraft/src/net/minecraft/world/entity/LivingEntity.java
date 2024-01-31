@@ -3,6 +3,7 @@ package net.minecraft.world.entity;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.mojang.datafixers.util.Pair;
@@ -134,6 +135,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	public static final int ARMOR_SLOTS = 4;
 	public static final int EQUIPMENT_SLOT_OFFSET = 98;
 	public static final int ARMOR_SLOT_OFFSET = 100;
+	public static final int BODY_ARMOR_OFFSET = 105;
 	public static final int SWING_DURATION = 6;
 	public static final int PLAYER_HURT_EXPERIENCE_TIME = 100;
 	private static final int DAMAGE_SOURCE_TIMEOUT = 40;
@@ -166,6 +168,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	private final Map<Holder<MobEffect>, MobEffectInstance> activeEffects = Maps.<Holder<MobEffect>, MobEffectInstance>newHashMap();
 	private final NonNullList<ItemStack> lastHandItemStacks = NonNullList.withSize(2, ItemStack.EMPTY);
 	private final NonNullList<ItemStack> lastArmorItemStacks = NonNullList.withSize(4, ItemStack.EMPTY);
+	private ItemStack lastBodyItemStack = ItemStack.EMPTY;
 	public boolean swinging;
 	private boolean discardFriction = false;
 	public InteractionHand swingingArm;
@@ -683,7 +686,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
 			Equipable equipable = Equipable.get(itemStack2);
 			if (!this.level().isClientSide() && !this.isSpectator()) {
 				if (!this.isSilent() && equipable != null && equipable.getEquipmentSlot() == equipmentSlot) {
-					this.level().playSound(null, this.getX(), this.getY(), this.getZ(), equipable.getEquipSound(), this.getSoundSource(), 1.0F, 1.0F);
+					this.level()
+						.playSeededSound(null, this.getX(), this.getY(), this.getZ(), equipable.getEquipSound(), this.getSoundSource(), 1.0F, 1.0F, this.random.nextLong());
 				}
 
 				if (this.doesEmitEquipEvent(equipmentSlot)) {
@@ -711,7 +715,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 			ListTag listTag = new ListTag();
 
 			for (MobEffectInstance mobEffectInstance : this.activeEffects.values()) {
-				listTag.add(mobEffectInstance.save(new CompoundTag()));
+				listTag.add(mobEffectInstance.save());
 			}
 
 			compoundTag.put("active_effects", listTag);
@@ -1627,7 +1631,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 			} else if (damageSource.is(DamageTypeTags.BYPASSES_ENCHANTMENTS)) {
 				return f;
 			} else {
-				int i = EnchantmentHelper.getDamageProtection(this.getArmorSlots(), damageSource);
+				int i = EnchantmentHelper.getDamageProtection(this.getArmorAndBodyArmorSlots(), damageSource);
 				if (i > 0) {
 					f = CombatRules.getDamageAfterMagicAbsorb(f, (float)i);
 				}
@@ -1899,13 +1903,23 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		return !this.getItemBySlot(equipmentSlot).isEmpty();
 	}
 
-	@Override
 	public abstract Iterable<ItemStack> getArmorSlots();
 
 	public abstract ItemStack getItemBySlot(EquipmentSlot equipmentSlot);
 
-	@Override
 	public abstract void setItemSlot(EquipmentSlot equipmentSlot, ItemStack itemStack);
+
+	public Iterable<ItemStack> getHandSlots() {
+		return List.of();
+	}
+
+	public Iterable<ItemStack> getArmorAndBodyArmorSlots() {
+		return this.getArmorSlots();
+	}
+
+	public Iterable<ItemStack> getAllSlots() {
+		return Iterables.concat(this.getHandSlots(), this.getArmorAndBodyArmorSlots());
+	}
 
 	protected void verifyEquippedItem(ItemStack itemStack) {
 		CompoundTag compoundTag = itemStack.getTag();
@@ -2390,18 +2404,11 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		Map<EquipmentSlot, ItemStack> map = null;
 
 		for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
-			ItemStack itemStack;
-			switch (equipmentSlot.getType()) {
-				case HAND:
-					itemStack = this.getLastHandItem(equipmentSlot);
-					break;
-				case ARMOR:
-					itemStack = this.getLastArmorItem(equipmentSlot);
-					break;
-				default:
-					continue;
-			}
-
+			ItemStack itemStack = switch (equipmentSlot.getType()) {
+				case HAND -> this.getLastHandItem(equipmentSlot);
+				case ARMOR -> this.getLastArmorItem(equipmentSlot);
+				case BODY -> this.lastBodyItemStack;
+			};
 			ItemStack itemStack2 = this.getItemBySlot(equipmentSlot);
 			if (this.equipmentHasChanged(itemStack, itemStack2)) {
 				if (map == null) {
@@ -2452,6 +2459,9 @@ public abstract class LivingEntity extends Entity implements Attackable {
 					break;
 				case ARMOR:
 					this.setLastArmorItem(equipmentSlot, itemStack2);
+					break;
+				case BODY:
+					this.lastBodyItemStack = itemStack2;
 			}
 		});
 		((ServerLevel)this.level()).getChunkSource().broadcast(this, new ClientboundSetEquipmentPacket(this.getId(), list));
@@ -3356,8 +3366,10 @@ public abstract class LivingEntity extends Entity implements Attackable {
 			return EquipmentSlot.FEET;
 		} else if (i == 98) {
 			return EquipmentSlot.MAINHAND;
+		} else if (i == 99) {
+			return EquipmentSlot.OFFHAND;
 		} else {
-			return i == 99 ? EquipmentSlot.OFFHAND : null;
+			return i == 105 ? EquipmentSlot.BODY : null;
 		}
 	}
 

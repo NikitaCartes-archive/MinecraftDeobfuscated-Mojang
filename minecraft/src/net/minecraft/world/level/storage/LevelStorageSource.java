@@ -151,7 +151,7 @@ public class LevelStorageSource {
 	public static LevelDataAndDimensions getLevelDataAndDimensions(
 		Dynamic<?> dynamic, WorldDataConfiguration worldDataConfiguration, Registry<LevelStem> registry, RegistryAccess.Frozen frozen
 	) {
-		Dynamic<?> dynamic2 = wrapWithRegistryOps(dynamic, frozen);
+		Dynamic<?> dynamic2 = RegistryOps.injectRegistryContext(dynamic, frozen);
 		Dynamic<?> dynamic3 = dynamic2.get("WorldGenSettings").orElseEmptyMap();
 		WorldGenSettings worldGenSettings = WorldGenSettings.CODEC.parse(dynamic3).getOrThrow(false, Util.prefix("WorldGenSettings: ", LOGGER::error));
 		LevelSettings levelSettings = LevelSettings.parse(dynamic2, worldDataConfiguration);
@@ -159,11 +159,6 @@ public class LevelStorageSource {
 		Lifecycle lifecycle = complete.lifecycle().add(frozen.allRegistriesLifecycle());
 		PrimaryLevelData primaryLevelData = PrimaryLevelData.parse(dynamic2, levelSettings, complete.specialWorldProperty(), worldGenSettings.options(), lifecycle);
 		return new LevelDataAndDimensions(primaryLevelData, complete);
-	}
-
-	private static <T> Dynamic<T> wrapWithRegistryOps(Dynamic<T> dynamic, RegistryAccess.Frozen frozen) {
-		RegistryOps<T> registryOps = RegistryOps.create(dynamic.getOps(), frozen);
-		return new Dynamic<>(registryOps, dynamic.getValue());
 	}
 
 	public String getName() {

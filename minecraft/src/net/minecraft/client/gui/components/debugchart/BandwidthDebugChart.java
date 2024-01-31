@@ -7,7 +7,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.util.Mth;
-import net.minecraft.util.debugchart.SampleLogger;
+import net.minecraft.util.debugchart.SampleStorage;
 
 @Environment(EnvType.CLIENT)
 public class BandwidthDebugChart extends AbstractDebugChart {
@@ -18,8 +18,8 @@ public class BandwidthDebugChart extends AbstractDebugChart {
 	private static final int MEGABYTE = 1048576;
 	private static final int CHART_TOP_VALUE = 1048576;
 
-	public BandwidthDebugChart(Font font, SampleLogger sampleLogger) {
-		super(font, sampleLogger);
+	public BandwidthDebugChart(Font font, SampleStorage sampleStorage) {
+		super(font, sampleStorage);
 	}
 
 	@Override

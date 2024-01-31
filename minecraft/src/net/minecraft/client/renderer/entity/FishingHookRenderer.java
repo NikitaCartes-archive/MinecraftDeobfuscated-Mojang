@@ -17,8 +17,6 @@ import net.minecraft.world.entity.projectile.FishingHook;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Matrix3f;
-import org.joml.Matrix4f;
 
 @Environment(EnvType.CLIENT)
 public class FishingHookRenderer extends EntityRenderer<FishingHook> {
@@ -39,13 +37,11 @@ public class FishingHookRenderer extends EntityRenderer<FishingHook> {
 			poseStack.mulPose(this.entityRenderDispatcher.cameraOrientation());
 			poseStack.mulPose(Axis.YP.rotationDegrees(180.0F));
 			PoseStack.Pose pose = poseStack.last();
-			Matrix4f matrix4f = pose.pose();
-			Matrix3f matrix3f = pose.normal();
 			VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RENDER_TYPE);
-			vertex(vertexConsumer, matrix4f, matrix3f, i, 0.0F, 0, 0, 1);
-			vertex(vertexConsumer, matrix4f, matrix3f, i, 1.0F, 0, 1, 1);
-			vertex(vertexConsumer, matrix4f, matrix3f, i, 1.0F, 1, 1, 0);
-			vertex(vertexConsumer, matrix4f, matrix3f, i, 0.0F, 1, 0, 0);
+			vertex(vertexConsumer, pose, i, 0.0F, 0, 0, 1);
+			vertex(vertexConsumer, pose, i, 1.0F, 0, 1, 1);
+			vertex(vertexConsumer, pose, i, 1.0F, 1, 1, 0);
+			vertex(vertexConsumer, pose, i, 0.0F, 1, 0, 0);
 			poseStack.popPose();
 			int j = player.getMainArm() == HumanoidArm.RIGHT ? 1 : -1;
 			ItemStack itemStack = player.getMainHandItem();
@@ -105,13 +101,13 @@ public class FishingHookRenderer extends EntityRenderer<FishingHook> {
 		return (float)i / (float)j;
 	}
 
-	private static void vertex(VertexConsumer vertexConsumer, Matrix4f matrix4f, Matrix3f matrix3f, int i, float f, int j, int k, int l) {
-		vertexConsumer.vertex(matrix4f, f - 0.5F, (float)j - 0.5F, 0.0F)
+	private static void vertex(VertexConsumer vertexConsumer, PoseStack.Pose pose, int i, float f, int j, int k, int l) {
+		vertexConsumer.vertex(pose, f - 0.5F, (float)j - 0.5F, 0.0F)
 			.color(255, 255, 255, 255)
 			.uv((float)k, (float)l)
 			.overlayCoords(OverlayTexture.NO_OVERLAY)
 			.uv2(i)
-			.normal(matrix3f, 0.0F, 1.0F, 0.0F)
+			.normal(pose, 0.0F, 1.0F, 0.0F)
 			.endVertex();
 	}
 
@@ -126,7 +122,7 @@ public class FishingHookRenderer extends EntityRenderer<FishingHook> {
 		n /= q;
 		o /= q;
 		p /= q;
-		vertexConsumer.vertex(pose.pose(), k, l, m).color(0, 0, 0, 255).normal(pose.normal(), n, o, p).endVertex();
+		vertexConsumer.vertex(pose, k, l, m).color(0, 0, 0, 255).normal(pose, n, o, p).endVertex();
 	}
 
 	public ResourceLocation getTextureLocation(FishingHook fishingHook) {

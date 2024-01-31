@@ -2,6 +2,7 @@ package net.minecraft.world.level.block.entity;
 
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
@@ -36,14 +37,14 @@ public class SpawnerBlockEntity extends BlockEntity implements Spawner {
 	}
 
 	@Override
-	public void load(CompoundTag compoundTag) {
-		super.load(compoundTag);
+	public void load(CompoundTag compoundTag, HolderLookup.Provider provider) {
+		super.load(compoundTag, provider);
 		this.spawner.load(this.level, this.worldPosition, compoundTag);
 	}
 
 	@Override
-	protected void saveAdditional(CompoundTag compoundTag) {
-		super.saveAdditional(compoundTag);
+	protected void saveAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
+		super.saveAdditional(compoundTag, provider);
 		this.spawner.save(compoundTag);
 	}
 
@@ -60,8 +61,8 @@ public class SpawnerBlockEntity extends BlockEntity implements Spawner {
 	}
 
 	@Override
-	public CompoundTag getUpdateTag() {
-		CompoundTag compoundTag = this.saveWithoutMetadata();
+	public CompoundTag getUpdateTag(HolderLookup.Provider provider) {
+		CompoundTag compoundTag = this.saveWithoutMetadata(provider);
 		compoundTag.remove("SpawnPotentials");
 		return compoundTag;
 	}

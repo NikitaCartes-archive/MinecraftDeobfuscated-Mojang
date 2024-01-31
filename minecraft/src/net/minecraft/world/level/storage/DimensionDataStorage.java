@@ -9,9 +9,10 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PushbackInputStream;
 import java.util.Map;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 import javax.annotation.Nullable;
 import net.minecraft.SharedConstants;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NbtIo;
@@ -24,11 +25,13 @@ public class DimensionDataStorage {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private final Map<String, SavedData> cache = Maps.<String, SavedData>newHashMap();
 	private final DataFixer fixerUpper;
+	private final HolderLookup.Provider registries;
 	private final File dataFolder;
 
-	public DimensionDataStorage(File file, DataFixer dataFixer) {
+	public DimensionDataStorage(File file, DataFixer dataFixer, HolderLookup.Provider provider) {
 		this.fixerUpper = dataFixer;
 		this.dataFolder = file;
+		this.registries = provider;
 	}
 
 	private File getDataFile(String string) {
@@ -58,12 +61,12 @@ public class DimensionDataStorage {
 	}
 
 	@Nullable
-	private <T extends SavedData> T readSavedData(Function<CompoundTag, T> function, DataFixTypes dataFixTypes, String string) {
+	private <T extends SavedData> T readSavedData(BiFunction<CompoundTag, HolderLookup.Provider, T> biFunction, DataFixTypes dataFixTypes, String string) {
 		try {
 			File file = this.getDataFile(string);
 			if (file.exists()) {
 				CompoundTag compoundTag = this.readTagFromDisk(string, dataFixTypes, SharedConstants.getCurrentVersion().getDataVersion().getVersion());
-				return (T)function.apply(compoundTag.getCompound("data"));
+				return (T)biFunction.apply(compoundTag.getCompound("data"), this.registries);
 			}
 		} catch (Exception var6) {
 			LOGGER.error("Error loading saved data: {}", string, var6);
@@ -154,7 +157,7 @@ public class DimensionDataStorage {
 	public void save() {
 		this.cache.forEach((string, savedData) -> {
 			if (savedData != null) {
-				savedData.save(this.getDataFile(string));
+				savedData.save(this.getDataFile(string), this.registries);
 			}
 		});
 	}

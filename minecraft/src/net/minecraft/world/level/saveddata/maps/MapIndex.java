@@ -3,6 +3,7 @@ package net.minecraft.world.level.saveddata.maps;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap.Entry;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.level.saveddata.SavedData;
@@ -19,7 +20,7 @@ public class MapIndex extends SavedData {
 		this.usedAuxIds.defaultReturnValue(-1);
 	}
 
-	public static MapIndex load(CompoundTag compoundTag) {
+	public static MapIndex load(CompoundTag compoundTag, HolderLookup.Provider provider) {
 		MapIndex mapIndex = new MapIndex();
 
 		for (String string : compoundTag.getAllKeys()) {
@@ -32,7 +33,7 @@ public class MapIndex extends SavedData {
 	}
 
 	@Override
-	public CompoundTag save(CompoundTag compoundTag) {
+	public CompoundTag save(CompoundTag compoundTag, HolderLookup.Provider provider) {
 		for (Entry<String> entry : this.usedAuxIds.object2IntEntrySet()) {
 			compoundTag.putInt((String)entry.getKey(), entry.getIntValue());
 		}
@@ -40,10 +41,10 @@ public class MapIndex extends SavedData {
 		return compoundTag;
 	}
 
-	public int getFreeAuxValueForMap() {
+	public MapId getFreeAuxValueForMap() {
 		int i = this.usedAuxIds.getInt("map") + 1;
 		this.usedAuxIds.put("map", i);
 		this.setDirty();
-		return i;
+		return new MapId(i);
 	}
 }

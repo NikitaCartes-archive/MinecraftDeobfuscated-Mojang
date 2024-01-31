@@ -26,39 +26,36 @@ public abstract class Fireball extends AbstractHurtingProjectile implements Item
 	}
 
 	public void setItem(ItemStack itemStack) {
-		if (!itemStack.is(Items.FIRE_CHARGE) || itemStack.hasTag()) {
-			this.getEntityData().set(DATA_ITEM_STACK, itemStack.copyWithCount(1));
-		}
-	}
-
-	protected ItemStack getItemRaw() {
-		return this.getEntityData().get(DATA_ITEM_STACK);
+		this.getEntityData().set(DATA_ITEM_STACK, itemStack.copyWithCount(1));
 	}
 
 	@Override
 	public ItemStack getItem() {
-		ItemStack itemStack = this.getItemRaw();
-		return itemStack.isEmpty() ? new ItemStack(Items.FIRE_CHARGE) : itemStack;
+		return this.getEntityData().get(DATA_ITEM_STACK);
 	}
 
 	@Override
 	protected void defineSynchedData() {
-		this.getEntityData().define(DATA_ITEM_STACK, ItemStack.EMPTY);
+		this.getEntityData().define(DATA_ITEM_STACK, this.getDefaultItem());
 	}
 
 	@Override
 	public void addAdditionalSaveData(CompoundTag compoundTag) {
 		super.addAdditionalSaveData(compoundTag);
-		ItemStack itemStack = this.getItemRaw();
-		if (!itemStack.isEmpty()) {
-			compoundTag.put("Item", itemStack.save(new CompoundTag()));
-		}
+		compoundTag.put("Item", this.getItem().save(new CompoundTag()));
 	}
 
 	@Override
 	public void readAdditionalSaveData(CompoundTag compoundTag) {
 		super.readAdditionalSaveData(compoundTag);
-		ItemStack itemStack = ItemStack.of(compoundTag.getCompound("Item"));
-		this.setItem(itemStack);
+		if (compoundTag.contains("Item", 10)) {
+			this.setItem(ItemStack.of(compoundTag.getCompound("Item")));
+		} else {
+			this.setItem(this.getDefaultItem());
+		}
+	}
+
+	private ItemStack getDefaultItem() {
+		return new ItemStack(Items.FIRE_CHARGE);
 	}
 }

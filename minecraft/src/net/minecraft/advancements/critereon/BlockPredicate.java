@@ -47,7 +47,7 @@ public record BlockPredicate(
 			} else {
 				if (this.nbt.isPresent()) {
 					BlockEntity blockEntity = serverLevel.getBlockEntity(blockPos);
-					if (blockEntity == null || !((NbtPredicate)this.nbt.get()).matches(blockEntity.saveWithFullMetadata())) {
+					if (blockEntity == null || !((NbtPredicate)this.nbt.get()).matches(blockEntity.saveWithFullMetadata(serverLevel.registryAccess()))) {
 						return false;
 					}
 				}

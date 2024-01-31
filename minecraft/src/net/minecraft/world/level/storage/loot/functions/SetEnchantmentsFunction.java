@@ -12,12 +12,10 @@ import java.util.Set;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.util.ExtraCodecs;
-import net.minecraft.world.item.EnchantedBookItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
-import net.minecraft.world.item.enchantment.EnchantmentInstance;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
@@ -63,9 +61,9 @@ public class SetEnchantmentsFunction extends LootItemConditionalFunction {
 	public ItemStack run(ItemStack itemStack, LootContext lootContext) {
 		Object2IntMap<Enchantment> object2IntMap = new Object2IntOpenHashMap<>();
 		this.enchantments.forEach((holder, numberProvider) -> object2IntMap.put((Enchantment)holder.value(), numberProvider.getInt(lootContext)));
-		if (itemStack.getItem() == Items.BOOK) {
+		if (itemStack.is(Items.BOOK)) {
 			ItemStack itemStack2 = new ItemStack(Items.ENCHANTED_BOOK);
-			object2IntMap.forEach((enchantment, integer) -> EnchantedBookItem.addEnchantment(itemStack2, new EnchantmentInstance(enchantment, integer)));
+			object2IntMap.forEach(itemStack2::enchant);
 			return itemStack2;
 		} else {
 			Map<Enchantment, Integer> map = EnchantmentHelper.getEnchantments(itemStack);

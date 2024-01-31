@@ -68,5 +68,6 @@ public class UpdateOneTwentyOneBlockLoot extends BlockLootSubProvider {
 		this.dropSelf(Blocks.WAXED_WEATHERED_COPPER_BULB);
 		this.dropSelf(Blocks.WAXED_OXIDIZED_COPPER_BULB);
 		this.add(Blocks.TRIAL_SPAWNER, noDrop());
+		this.add(Blocks.VAULT, noDrop());
 	}
 }

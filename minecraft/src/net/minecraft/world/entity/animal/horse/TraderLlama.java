@@ -103,11 +103,7 @@ public class TraderLlama extends Llama {
 	@Nullable
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		ServerLevelAccessor serverLevelAccessor,
-		DifficultyInstance difficultyInstance,
-		MobSpawnType mobSpawnType,
-		@Nullable SpawnGroupData spawnGroupData,
-		@Nullable CompoundTag compoundTag
+		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData
 	) {
 		if (mobSpawnType == MobSpawnType.EVENT) {
 			this.setAge(0);
@@ -117,7 +113,7 @@ public class TraderLlama extends Llama {
 			spawnGroupData = new AgeableMob.AgeableMobGroupData(false);
 		}
 
-		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData);
 	}
 
 	protected static class TraderLlamaDefendWanderingTraderGoal extends TargetGoal {

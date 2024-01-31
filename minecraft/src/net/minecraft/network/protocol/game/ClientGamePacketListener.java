@@ -223,4 +223,6 @@ public interface ClientGamePacketListener extends ClientPongPacketListener, Clie
 	void handleChunkBatchStart(ClientboundChunkBatchStartPacket clientboundChunkBatchStartPacket);
 
 	void handleChunkBatchFinished(ClientboundChunkBatchFinishedPacket clientboundChunkBatchFinishedPacket);
+
+	void handleDebugSample(ClientboundDebugSamplePacket clientboundDebugSamplePacket);
 }

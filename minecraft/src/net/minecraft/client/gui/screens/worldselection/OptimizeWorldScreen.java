@@ -13,9 +13,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
@@ -26,7 +24,6 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.worldupdate.WorldUpgrader;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelSettings;
-import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.WorldData;
 import org.slf4j.Logger;
@@ -56,9 +53,7 @@ public class OptimizeWorldScreen extends Screen {
 				WorldData worldData = worldStem.worldData();
 				RegistryAccess.Frozen frozen = worldStem.registries().compositeAccess();
 				levelStorageAccess.saveDataTag(frozen, worldData);
-				var10 = new OptimizeWorldScreen(
-					booleanConsumer, dataFixer, levelStorageAccess, worldData.getLevelSettings(), bl, frozen.registryOrThrow(Registries.LEVEL_STEM)
-				);
+				var10 = new OptimizeWorldScreen(booleanConsumer, dataFixer, levelStorageAccess, worldData.getLevelSettings(), bl, frozen);
 			}
 
 			return var10;
@@ -74,11 +69,11 @@ public class OptimizeWorldScreen extends Screen {
 		LevelStorageSource.LevelStorageAccess levelStorageAccess,
 		LevelSettings levelSettings,
 		boolean bl,
-		Registry<LevelStem> registry
+		RegistryAccess registryAccess
 	) {
 		super(Component.translatable("optimizeWorld.title", levelSettings.levelName()));
 		this.callback = booleanConsumer;
-		this.upgrader = new WorldUpgrader(levelStorageAccess, dataFixer, registry, bl, false);
+		this.upgrader = new WorldUpgrader(levelStorageAccess, dataFixer, registryAccess, bl, false);
 	}
 
 	@Override

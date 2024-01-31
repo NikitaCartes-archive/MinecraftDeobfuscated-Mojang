@@ -8,7 +8,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.util.TimeUtil;
-import net.minecraft.util.debugchart.SampleLogger;
+import net.minecraft.util.debugchart.SampleStorage;
 import net.minecraft.util.debugchart.TpsDebugDimensions;
 
 @Environment(EnvType.CLIENT)
@@ -21,8 +21,8 @@ public class TpsDebugChart extends AbstractDebugChart {
 	private static final int OTHER_COLOR = -10547572;
 	private final Supplier<Float> msptSupplier;
 
-	public TpsDebugChart(Font font, SampleLogger sampleLogger, Supplier<Float> supplier) {
-		super(font, sampleLogger);
+	public TpsDebugChart(Font font, SampleStorage sampleStorage, Supplier<Float> supplier) {
+		super(font, sampleStorage);
 		this.msptSupplier = supplier;
 	}
 
@@ -34,20 +34,20 @@ public class TpsDebugChart extends AbstractDebugChart {
 
 	@Override
 	protected void drawAdditionalDimensions(GuiGraphics guiGraphics, int i, int j, int k) {
-		long l = this.logger.get(k, TpsDebugDimensions.TICK_SERVER_METHOD.ordinal());
+		long l = this.sampleStorage.get(k, TpsDebugDimensions.TICK_SERVER_METHOD.ordinal());
 		int m = this.getSampleHeight((double)l);
 		guiGraphics.fill(RenderType.guiOverlay(), j, i - m, j + 1, i, -6745839);
-		long n = this.logger.get(k, TpsDebugDimensions.SCHEDULED_TASKS.ordinal());
+		long n = this.sampleStorage.get(k, TpsDebugDimensions.SCHEDULED_TASKS.ordinal());
 		int o = this.getSampleHeight((double)n);
 		guiGraphics.fill(RenderType.guiOverlay(), j, i - m - o, j + 1, i - m, -4548257);
-		long p = this.logger.get(k) - this.logger.get(k, TpsDebugDimensions.IDLE.ordinal()) - l - n;
+		long p = this.sampleStorage.get(k) - this.sampleStorage.get(k, TpsDebugDimensions.IDLE.ordinal()) - l - n;
 		int q = this.getSampleHeight((double)p);
 		guiGraphics.fill(RenderType.guiOverlay(), j, i - q - o - m, j + 1, i - o - m, -10547572);
 	}
 
 	@Override
 	protected long getValueForAggregation(int i) {
-		return this.logger.get(i) - this.logger.get(i, TpsDebugDimensions.IDLE.ordinal());
+		return this.sampleStorage.get(i) - this.sampleStorage.get(i, TpsDebugDimensions.IDLE.ordinal());
 	}
 
 	@Override

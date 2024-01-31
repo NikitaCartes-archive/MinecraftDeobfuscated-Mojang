@@ -29,7 +29,6 @@ import com.mojang.blaze3d.systems.TimerQuery;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexSorting;
@@ -171,6 +170,7 @@ import net.minecraft.client.tutorial.Tutorial;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -252,6 +252,7 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import org.apache.commons.io.FileUtils;
 import org.joml.Matrix4f;
+import org.joml.Matrix4fStack;
 import org.lwjgl.util.tinyfd.TinyFileDialogs;
 import org.slf4j.Logger;
 
@@ -1541,10 +1542,9 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		RenderSystem.setShader(GameRenderer::getPositionColorShader);
 		Matrix4f matrix4f = new Matrix4f().setOrtho(0.0F, (float)this.window.getWidth(), (float)this.window.getHeight(), 0.0F, 1000.0F, 3000.0F);
 		RenderSystem.setProjectionMatrix(matrix4f, VertexSorting.ORTHOGRAPHIC_Z);
-		PoseStack poseStack = RenderSystem.getModelViewStack();
-		poseStack.pushPose();
-		poseStack.setIdentity();
-		poseStack.translate(0.0F, 0.0F, -2000.0F);
+		Matrix4fStack matrix4fStack = RenderSystem.getModelViewStack();
+		matrix4fStack.pushMatrix();
+		matrix4fStack.translation(0.0F, 0.0F, -2000.0F);
 		RenderSystem.applyModelViewMatrix();
 		RenderSystem.lineWidth(1.0F);
 		Tesselator tesselator = Tesselator.getInstance();
@@ -1631,7 +1631,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			guiGraphics.drawString(this.font, string3, j + 160 - this.font.width(string3), k + 80 + r * 8 + 20, resultField3.getColor());
 		}
 
-		poseStack.popPose();
+		matrix4fStack.popMatrix();
 		RenderSystem.applyModelViewMatrix();
 	}
 
@@ -2365,7 +2365,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			} else {
 				Inventory inventory = this.player.getInventory();
 				if (blockEntity != null) {
-					this.addCustomNbtData(itemStack, blockEntity);
+					this.addCustomNbtData(itemStack, blockEntity, this.level.registryAccess());
 				}
 
 				int i = inventory.findSlotMatchingItem(itemStack);
@@ -2383,8 +2383,8 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		}
 	}
 
-	private void addCustomNbtData(ItemStack itemStack, BlockEntity blockEntity) {
-		CompoundTag compoundTag = blockEntity.saveWithFullMetadata();
+	private void addCustomNbtData(ItemStack itemStack, BlockEntity blockEntity, RegistryAccess registryAccess) {
+		CompoundTag compoundTag = blockEntity.saveWithFullMetadata(registryAccess);
 		BlockItem.setBlockEntityData(itemStack, blockEntity.getType(), compoundTag);
 		if (itemStack.getItem() instanceof PlayerHeadItem && compoundTag.contains("SkullOwner")) {
 			CompoundTag compoundTag2 = compoundTag.getCompound("SkullOwner");
@@ -2794,7 +2794,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 				this.player.yRotO = this.player.getYRot();
 				this.player.xRotO = this.player.getXRot();
 				renderTarget.bindWrite(true);
-				this.gameRenderer.renderLevel(1.0F, 0L, new PoseStack());
+				this.gameRenderer.renderLevel(1.0F, 0L);
 
 				try {
 					Thread.sleep(10L);

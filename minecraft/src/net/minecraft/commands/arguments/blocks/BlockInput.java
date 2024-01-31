@@ -48,7 +48,7 @@ public class BlockInput implements Predicate<BlockInWorld> {
 				return true;
 			} else {
 				BlockEntity blockEntity = blockInWorld.getEntity();
-				return blockEntity != null && NbtUtils.compareNbt(this.tag, blockEntity.saveWithFullMetadata(), true);
+				return blockEntity != null && NbtUtils.compareNbt(this.tag, blockEntity.saveWithFullMetadata(blockInWorld.getLevel().registryAccess()), true);
 			}
 		}
 	}
@@ -69,7 +69,7 @@ public class BlockInput implements Predicate<BlockInWorld> {
 			if (this.tag != null) {
 				BlockEntity blockEntity = serverLevel.getBlockEntity(blockPos);
 				if (blockEntity != null) {
-					blockEntity.load(this.tag);
+					blockEntity.load(this.tag, serverLevel.registryAccess());
 				}
 			}
 

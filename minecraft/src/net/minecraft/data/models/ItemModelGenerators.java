@@ -8,6 +8,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.models.model.ModelLocationUtils;
 import net.minecraft.data.models.model.ModelTemplate;
@@ -81,7 +82,7 @@ public class ItemModelGenerators {
 		return resourceLocation.withSuffix("_" + string + "_trim");
 	}
 
-	private JsonObject generateBaseArmorTrimTemplate(ResourceLocation resourceLocation, Map<TextureSlot, ResourceLocation> map, ArmorMaterial armorMaterial) {
+	private JsonObject generateBaseArmorTrimTemplate(ResourceLocation resourceLocation, Map<TextureSlot, ResourceLocation> map, Holder<ArmorMaterial> holder) {
 		JsonObject jsonObject = ModelTemplates.TWO_LAYERED_ITEM.createBaseTemplate(resourceLocation, map);
 		JsonArray jsonArray = new JsonArray();
 
@@ -90,7 +91,7 @@ public class ItemModelGenerators {
 			JsonObject jsonObject3 = new JsonObject();
 			jsonObject3.addProperty(TRIM_TYPE_PREDICATE_ID.getPath(), trimModelData.itemModelIndex());
 			jsonObject2.add("predicate", jsonObject3);
-			jsonObject2.addProperty("model", this.getItemModelForTrimMaterial(resourceLocation, trimModelData.name(armorMaterial)).toString());
+			jsonObject2.addProperty("model", this.getItemModelForTrimMaterial(resourceLocation, trimModelData.name(holder)).toString());
 			jsonArray.add(jsonObject2);
 		}
 
@@ -99,36 +100,38 @@ public class ItemModelGenerators {
 	}
 
 	private void generateArmorTrims(ArmorItem armorItem) {
-		ResourceLocation resourceLocation = ModelLocationUtils.getModelLocation(armorItem);
-		ResourceLocation resourceLocation2 = TextureMapping.getItemTexture(armorItem);
-		ResourceLocation resourceLocation3 = TextureMapping.getItemTexture(armorItem, "_overlay");
-		if (armorItem.getMaterial() == ArmorMaterials.LEATHER) {
-			ModelTemplates.TWO_LAYERED_ITEM
-				.create(
-					resourceLocation,
-					TextureMapping.layered(resourceLocation2, resourceLocation3),
-					this.output,
-					(resourceLocationx, map) -> this.generateBaseArmorTrimTemplate(resourceLocationx, map, armorItem.getMaterial())
-				);
-		} else {
-			ModelTemplates.FLAT_ITEM
-				.create(
-					resourceLocation,
-					TextureMapping.layer0(resourceLocation2),
-					this.output,
-					(resourceLocationx, map) -> this.generateBaseArmorTrimTemplate(resourceLocationx, map, armorItem.getMaterial())
-				);
-		}
-
-		for (ItemModelGenerators.TrimModelData trimModelData : GENERATED_TRIM_MODELS) {
-			String string = trimModelData.name(armorItem.getMaterial());
-			ResourceLocation resourceLocation4 = this.getItemModelForTrimMaterial(resourceLocation, string);
-			String string2 = armorItem.getType().getName() + "_trim_" + string;
-			ResourceLocation resourceLocation5 = new ResourceLocation(string2).withPrefix("trims/items/");
-			if (armorItem.getMaterial() == ArmorMaterials.LEATHER) {
-				this.generateLayeredItem(resourceLocation4, resourceLocation2, resourceLocation3, resourceLocation5);
+		if (armorItem.getType().hasTrims()) {
+			ResourceLocation resourceLocation = ModelLocationUtils.getModelLocation(armorItem);
+			ResourceLocation resourceLocation2 = TextureMapping.getItemTexture(armorItem);
+			ResourceLocation resourceLocation3 = TextureMapping.getItemTexture(armorItem, "_overlay");
+			if (armorItem.getMaterial().is(ArmorMaterials.LEATHER)) {
+				ModelTemplates.TWO_LAYERED_ITEM
+					.create(
+						resourceLocation,
+						TextureMapping.layered(resourceLocation2, resourceLocation3),
+						this.output,
+						(resourceLocationx, map) -> this.generateBaseArmorTrimTemplate(resourceLocationx, map, armorItem.getMaterial())
+					);
 			} else {
-				this.generateLayeredItem(resourceLocation4, resourceLocation2, resourceLocation5);
+				ModelTemplates.FLAT_ITEM
+					.create(
+						resourceLocation,
+						TextureMapping.layer0(resourceLocation2),
+						this.output,
+						(resourceLocationx, map) -> this.generateBaseArmorTrimTemplate(resourceLocationx, map, armorItem.getMaterial())
+					);
+			}
+
+			for (ItemModelGenerators.TrimModelData trimModelData : GENERATED_TRIM_MODELS) {
+				String string = trimModelData.name(armorItem.getMaterial());
+				ResourceLocation resourceLocation4 = this.getItemModelForTrimMaterial(resourceLocation, string);
+				String string2 = armorItem.getType().getName() + "_trim_" + string;
+				ResourceLocation resourceLocation5 = new ResourceLocation(string2).withPrefix("trims/items/");
+				if (armorItem.getMaterial().is(ArmorMaterials.LEATHER)) {
+					this.generateLayeredItem(resourceLocation4, resourceLocation2, resourceLocation3, resourceLocation5);
+				} else {
+					this.generateLayeredItem(resourceLocation4, resourceLocation2, resourceLocation5);
+				}
 			}
 		}
 	}
@@ -415,9 +418,9 @@ public class ItemModelGenerators {
 		this.generateFlatItem(Items.TRIAL_KEY, ModelTemplates.FLAT_ITEM);
 	}
 
-	static record TrimModelData(String name, float itemModelIndex, Map<ArmorMaterial, String> overrideArmorMaterials) {
-		public String name(ArmorMaterial armorMaterial) {
-			return (String)this.overrideArmorMaterials.getOrDefault(armorMaterial, this.name);
+	static record TrimModelData(String name, float itemModelIndex, Map<Holder<ArmorMaterial>, String> overrideArmorMaterials) {
+		public String name(Holder<ArmorMaterial> holder) {
+			return (String)this.overrideArmorMaterials.getOrDefault(holder, this.name);
 		}
 	}
 }

@@ -332,9 +332,9 @@ public class JavaOps implements DynamicOps<Object> {
 		if (object instanceof Map<?, ?> map) {
 			Map<Object, Object> map2 = new LinkedHashMap(map);
 			map2.remove(string);
-			return DataResult.success(Map.copyOf(map2));
+			return Map.copyOf(map2);
 		} else {
-			return DataResult.error(() -> "Not a map: " + object);
+			return object;
 		}
 	}
 

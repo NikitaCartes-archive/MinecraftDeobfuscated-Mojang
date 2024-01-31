@@ -544,11 +544,7 @@ public class Panda extends Animal {
 	@Nullable
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		ServerLevelAccessor serverLevelAccessor,
-		DifficultyInstance difficultyInstance,
-		MobSpawnType mobSpawnType,
-		@Nullable SpawnGroupData spawnGroupData,
-		@Nullable CompoundTag compoundTag
+		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData
 	) {
 		RandomSource randomSource = serverLevelAccessor.getRandom();
 		this.setMainGene(Panda.Gene.getRandom(randomSource));
@@ -558,7 +554,7 @@ public class Panda extends Animal {
 			spawnGroupData = new AgeableMob.AgeableMobGroupData(0.2F);
 		}
 
-		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData);
 	}
 
 	public void setGeneFromParents(Panda panda, @Nullable Panda panda2) {

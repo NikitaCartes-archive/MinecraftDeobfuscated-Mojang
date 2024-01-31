@@ -8,6 +8,7 @@ import javax.annotation.Nullable;
 import net.minecraft.ResourceLocationException;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
@@ -57,8 +58,8 @@ public class StructureBlockEntity extends BlockEntity {
 	}
 
 	@Override
-	protected void saveAdditional(CompoundTag compoundTag) {
-		super.saveAdditional(compoundTag);
+	protected void saveAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
+		super.saveAdditional(compoundTag, provider);
 		compoundTag.putString("name", this.getStructureName());
 		compoundTag.putString("author", this.author);
 		compoundTag.putString("metadata", this.metaData);
@@ -80,8 +81,8 @@ public class StructureBlockEntity extends BlockEntity {
 	}
 
 	@Override
-	public void load(CompoundTag compoundTag) {
-		super.load(compoundTag);
+	public void load(CompoundTag compoundTag, HolderLookup.Provider provider) {
+		super.load(compoundTag, provider);
 		this.setStructureName(compoundTag.getString("name"));
 		this.author = compoundTag.getString("author");
 		this.metaData = compoundTag.getString("metadata");
@@ -96,19 +97,19 @@ public class StructureBlockEntity extends BlockEntity {
 
 		try {
 			this.rotation = Rotation.valueOf(compoundTag.getString("rotation"));
-		} catch (IllegalArgumentException var11) {
+		} catch (IllegalArgumentException var12) {
 			this.rotation = Rotation.NONE;
 		}
 
 		try {
 			this.mirror = Mirror.valueOf(compoundTag.getString("mirror"));
-		} catch (IllegalArgumentException var10) {
+		} catch (IllegalArgumentException var11) {
 			this.mirror = Mirror.NONE;
 		}
 
 		try {
 			this.mode = StructureMode.valueOf(compoundTag.getString("mode"));
-		} catch (IllegalArgumentException var9) {
+		} catch (IllegalArgumentException var10) {
 			this.mode = StructureMode.DATA;
 		}
 
@@ -141,8 +142,8 @@ public class StructureBlockEntity extends BlockEntity {
 	}
 
 	@Override
-	public CompoundTag getUpdateTag() {
-		return this.saveWithoutMetadata();
+	public CompoundTag getUpdateTag(HolderLookup.Provider provider) {
+		return this.saveWithoutMetadata(provider);
 	}
 
 	public boolean usedBy(Player player) {

@@ -3,11 +3,11 @@ package net.minecraft.network.chat;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import io.netty.buffer.ByteBuf;
 import java.util.Objects;
 import java.util.Optional;
 import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
@@ -482,6 +482,6 @@ public class Style {
 					.apply(instance, Style::create)
 		);
 		public static final Codec<Style> CODEC = MAP_CODEC.codec();
-		public static final StreamCodec<ByteBuf, Style> STREAM_CODEC = ByteBufCodecs.fromCodec(CODEC);
+		public static final StreamCodec<RegistryFriendlyByteBuf, Style> STREAM_CODEC = ByteBufCodecs.fromCodecWithRegistries(CODEC);
 	}
 }

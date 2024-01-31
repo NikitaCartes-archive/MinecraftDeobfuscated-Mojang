@@ -5,6 +5,7 @@ import com.mojang.serialization.Dynamic;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.server.level.ServerLevel;
@@ -40,8 +41,8 @@ public class SculkSensorBlockEntity extends BlockEntity implements GameEventList
 	}
 
 	@Override
-	public void load(CompoundTag compoundTag) {
-		super.load(compoundTag);
+	public void load(CompoundTag compoundTag, HolderLookup.Provider provider) {
+		super.load(compoundTag, provider);
 		this.lastVibrationFrequency = compoundTag.getInt("last_vibration_frequency");
 		if (compoundTag.contains("listener", 10)) {
 			VibrationSystem.Data.CODEC
@@ -52,8 +53,8 @@ public class SculkSensorBlockEntity extends BlockEntity implements GameEventList
 	}
 
 	@Override
-	protected void saveAdditional(CompoundTag compoundTag) {
-		super.saveAdditional(compoundTag);
+	protected void saveAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
+		super.saveAdditional(compoundTag, provider);
 		compoundTag.putInt("last_vibration_frequency", this.lastVibrationFrequency);
 		VibrationSystem.Data.CODEC.encodeStart(NbtOps.INSTANCE, this.vibrationData).resultOrPartial(LOGGER::error).ifPresent(tag -> compoundTag.put("listener", tag));
 	}

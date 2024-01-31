@@ -1,53 +1,47 @@
 package net.minecraft.network.protocol.game;
 
+import com.mojang.brigadier.Message;
 import com.mojang.brigadier.context.StringRange;
 import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.suggestion.Suggestions;
 import java.util.List;
-import net.minecraft.network.FriendlyByteBuf;
+import java.util.Optional;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.chat.ComponentUtils;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketType;
 
-public class ClientboundCommandSuggestionsPacket implements Packet<ClientGamePacketListener> {
-	public static final StreamCodec<FriendlyByteBuf, ClientboundCommandSuggestionsPacket> STREAM_CODEC = Packet.codec(
-		ClientboundCommandSuggestionsPacket::write, ClientboundCommandSuggestionsPacket::new
+public record ClientboundCommandSuggestionsPacket(int id, int start, int length, List<ClientboundCommandSuggestionsPacket.Entry> suggestions)
+	implements Packet<ClientGamePacketListener> {
+	public static final StreamCodec<RegistryFriendlyByteBuf, ClientboundCommandSuggestionsPacket> STREAM_CODEC = StreamCodec.composite(
+		ByteBufCodecs.VAR_INT,
+		ClientboundCommandSuggestionsPacket::id,
+		ByteBufCodecs.VAR_INT,
+		ClientboundCommandSuggestionsPacket::start,
+		ByteBufCodecs.VAR_INT,
+		ClientboundCommandSuggestionsPacket::length,
+		ClientboundCommandSuggestionsPacket.Entry.STREAM_CODEC.apply(ByteBufCodecs.list()),
+		ClientboundCommandSuggestionsPacket::suggestions,
+		ClientboundCommandSuggestionsPacket::new
 	);
-	private final int id;
-	private final Suggestions suggestions;
 
 	public ClientboundCommandSuggestionsPacket(int i, Suggestions suggestions) {
-		this.id = i;
-		this.suggestions = suggestions;
-	}
-
-	private ClientboundCommandSuggestionsPacket(FriendlyByteBuf friendlyByteBuf) {
-		this.id = friendlyByteBuf.readVarInt();
-		int i = friendlyByteBuf.readVarInt();
-		int j = friendlyByteBuf.readVarInt();
-		StringRange stringRange = StringRange.between(i, i + j);
-		List<Suggestion> list = friendlyByteBuf.readList(friendlyByteBufx -> {
-			String string = friendlyByteBufx.readUtf();
-			Component component = friendlyByteBufx.readNullable(FriendlyByteBuf::readComponentTrusted);
-			return new Suggestion(stringRange, string, component);
-		});
-		this.suggestions = new Suggestions(stringRange, list);
-	}
-
-	private void write(FriendlyByteBuf friendlyByteBuf) {
-		friendlyByteBuf.writeVarInt(this.id);
-		friendlyByteBuf.writeVarInt(this.suggestions.getRange().getStart());
-		friendlyByteBuf.writeVarInt(this.suggestions.getRange().getLength());
-		friendlyByteBuf.writeCollection(
-			this.suggestions.getList(),
-			(friendlyByteBufx, suggestion) -> {
-				friendlyByteBufx.writeUtf(suggestion.getText());
-				friendlyByteBufx.writeNullable(
-					suggestion.getTooltip(), (friendlyByteBufxx, message) -> friendlyByteBufxx.writeComponent(ComponentUtils.fromMessage(message))
-				);
-			}
+		this(
+			i,
+			suggestions.getRange().getStart(),
+			suggestions.getRange().getLength(),
+			suggestions.getList()
+				.stream()
+				.map(
+					suggestion -> new ClientboundCommandSuggestionsPacket.Entry(
+							suggestion.getText(), Optional.ofNullable(suggestion.getTooltip()).map(ComponentUtils::fromMessage)
+						)
+				)
+				.toList()
 		);
 	}
 
@@ -60,11 +54,20 @@ public class ClientboundCommandSuggestionsPacket implements Packet<ClientGamePac
 		clientGamePacketListener.handleCommandSuggestions(this);
 	}
 
-	public int getId() {
-		return this.id;
+	public Suggestions toSuggestions() {
+		StringRange stringRange = StringRange.between(this.start, this.start + this.length);
+		return new Suggestions(
+			stringRange, this.suggestions.stream().map(entry -> new Suggestion(stringRange, entry.text(), (Message)entry.tooltip().orElse(null))).toList()
+		);
 	}
 
-	public Suggestions getSuggestions() {
-		return this.suggestions;
+	public static record Entry(String text, Optional<Component> tooltip) {
+		public static final StreamCodec<RegistryFriendlyByteBuf, ClientboundCommandSuggestionsPacket.Entry> STREAM_CODEC = StreamCodec.composite(
+			ByteBufCodecs.STRING_UTF8,
+			ClientboundCommandSuggestionsPacket.Entry::text,
+			ComponentSerialization.OPTIONAL_STREAM_CODEC,
+			ClientboundCommandSuggestionsPacket.Entry::tooltip,
+			ClientboundCommandSuggestionsPacket.Entry::new
+		);
 	}
 }

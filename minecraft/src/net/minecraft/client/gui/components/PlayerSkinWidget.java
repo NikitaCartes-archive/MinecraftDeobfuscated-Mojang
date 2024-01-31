@@ -19,7 +19,6 @@ import net.minecraft.client.resources.PlayerSkin;
 import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.util.Mth;
-import org.joml.Matrix4f;
 
 @Environment(EnvType.CLIENT)
 public class PlayerSkinWidget extends AbstractWidget {
@@ -48,10 +47,13 @@ public class PlayerSkinWidget extends AbstractWidget {
 		float g = (float)this.getHeight() / 2.125F;
 		guiGraphics.pose().scale(g, g, g);
 		guiGraphics.pose().translate(0.0F, -0.0625F, 0.0F);
-		Matrix4f matrix4f = guiGraphics.pose().last().pose();
-		matrix4f.rotateAround(Axis.XP.rotationDegrees(this.rotationX), 0.0F, -1.0625F, 0.0F);
+		guiGraphics.pose().rotateAround(Axis.XP.rotationDegrees(this.rotationX), 0.0F, -1.0625F, 0.0F);
 		guiGraphics.pose().mulPose(Axis.YP.rotationDegrees(this.rotationY));
+		guiGraphics.flush();
+		Lighting.setupForEntityInInventory(Axis.XP.rotationDegrees(this.rotationX));
 		this.model.render(guiGraphics, (PlayerSkin)this.skin.get());
+		guiGraphics.flush();
+		Lighting.setupFor3DItems();
 		guiGraphics.pose().popPose();
 	}
 
@@ -91,17 +93,13 @@ public class PlayerSkinWidget extends AbstractWidget {
 		}
 
 		public void render(GuiGraphics guiGraphics, PlayerSkin playerSkin) {
-			guiGraphics.flush();
-			Lighting.setupForEntityInInventory();
 			guiGraphics.pose().pushPose();
-			guiGraphics.pose().mulPoseMatrix(new Matrix4f().scaling(1.0F, 1.0F, -1.0F));
+			guiGraphics.pose().scale(1.0F, 1.0F, -1.0F);
 			guiGraphics.pose().translate(0.0F, -1.5F, 0.0F);
 			PlayerModel<?> playerModel = playerSkin.model() == PlayerSkin.Model.SLIM ? this.slimModel : this.wideModel;
 			RenderType renderType = playerModel.renderType(playerSkin.texture());
 			playerModel.renderToBuffer(guiGraphics.pose(), guiGraphics.bufferSource().getBuffer(renderType), 15728880, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
 			guiGraphics.pose().popPose();
-			guiGraphics.flush();
-			Lighting.setupFor3DItems();
 		}
 	}
 }

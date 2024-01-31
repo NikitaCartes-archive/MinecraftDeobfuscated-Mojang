@@ -113,8 +113,8 @@ public class TrialSpawnerData {
 		return Math.max(0, this.detectedPlayers.size() - 1);
 	}
 
-	public void tryDetectPlayers(ServerLevel serverLevel, BlockPos blockPos, PlayerDetector playerDetector, int i) {
-		List<UUID> list = playerDetector.detect(serverLevel, blockPos, i);
+	public void tryDetectPlayers(ServerLevel serverLevel, BlockPos blockPos, PlayerDetector playerDetector, PlayerDetector.EntitySelector entitySelector, int i) {
+		List<UUID> list = playerDetector.detect(serverLevel, entitySelector, blockPos, (double)i);
 		boolean bl = this.detectedPlayers.addAll(list);
 		if (bl) {
 			this.nextMobSpawnsAt = Math.max(serverLevel.getGameTime() + 40L, this.nextMobSpawnsAt);

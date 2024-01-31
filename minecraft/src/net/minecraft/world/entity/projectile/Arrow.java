@@ -150,7 +150,7 @@ public class Arrow extends AbstractArrow {
 			ListTag listTag = new ListTag();
 
 			for (MobEffectInstance mobEffectInstance : this.effects) {
-				listTag.add(mobEffectInstance.save(new CompoundTag()));
+				listTag.add(mobEffectInstance.save());
 			}
 
 			compoundTag.put("custom_potion_effects", listTag);

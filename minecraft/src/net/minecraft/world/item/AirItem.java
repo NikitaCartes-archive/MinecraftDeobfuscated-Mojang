@@ -22,6 +22,6 @@ public class AirItem extends Item {
 	@Override
 	public void appendHoverText(ItemStack itemStack, @Nullable Level level, List<Component> list, TooltipFlag tooltipFlag) {
 		super.appendHoverText(itemStack, level, list, tooltipFlag);
-		this.block.appendHoverText(itemStack, level, list, tooltipFlag);
+		this.block.appendHoverText(itemStack, level, list, tooltipFlag, level != null ? level.registryAccess() : null);
 	}
 }

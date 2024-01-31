@@ -4,6 +4,7 @@ import com.google.common.annotations.VisibleForTesting;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -109,8 +110,8 @@ public class CrafterBlockEntity extends RandomizableContainerBlockEntity impleme
 	}
 
 	@Override
-	public void load(CompoundTag compoundTag) {
-		super.load(compoundTag);
+	public void load(CompoundTag compoundTag, HolderLookup.Provider provider) {
+		super.load(compoundTag, provider);
 		this.craftingTicksRemaining = compoundTag.getInt("crafting_ticks_remaining");
 		this.items = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
 		if (!this.tryLoadLootTable(compoundTag)) {
@@ -133,8 +134,8 @@ public class CrafterBlockEntity extends RandomizableContainerBlockEntity impleme
 	}
 
 	@Override
-	protected void saveAdditional(CompoundTag compoundTag) {
-		super.saveAdditional(compoundTag);
+	protected void saveAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
+		super.saveAdditional(compoundTag, provider);
 		compoundTag.putInt("crafting_ticks_remaining", this.craftingTicksRemaining);
 		if (!this.trySaveLootTable(compoundTag)) {
 			ContainerHelper.saveAllItems(compoundTag, this.items);

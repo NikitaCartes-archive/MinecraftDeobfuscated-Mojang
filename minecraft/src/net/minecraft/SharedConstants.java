@@ -15,7 +15,7 @@ public class SharedConstants {
 	@Deprecated
 	public static final boolean SNAPSHOT = true;
 	@Deprecated
-	public static final int WORLD_VERSION = 3806;
+	public static final int WORLD_VERSION = 3809;
 	@Deprecated
 	public static final String SERIES = "main";
 	@Deprecated
@@ -28,9 +28,9 @@ public class SharedConstants {
 	private static final int SNAPSHOT_PROTOCOL_BIT = 30;
 	public static final boolean THROW_ON_TASK_FAILURE = true;
 	@Deprecated
-	public static final int RESOURCE_PACK_FORMAT = 24;
+	public static final int RESOURCE_PACK_FORMAT = 25;
 	@Deprecated
-	public static final int DATA_PACK_FORMAT = 29;
+	public static final int DATA_PACK_FORMAT = 30;
 	@Deprecated
 	public static final int LANGUAGE_FORMAT = 1;
 	public static final int REPORT_FORMAT_VERSION = 1;
@@ -86,6 +86,7 @@ public class SharedConstants {
 	public static final boolean DEBUG_UNLOCK_ALL_TRADES = false;
 	public static final boolean DEBUG_BREEZE_MOB = false;
 	public static final boolean DEBUG_TRIAL_SPAWNER_DETECTS_SHEEP_AS_PLAYERS = false;
+	public static final boolean DEBUG_VAULT_DETECTS_SHEEP_AS_PLAYERS = false;
 	public static final boolean DEBUG_FORCE_ONBOARDING_SCREEN = false;
 	public static final boolean DEBUG_IGNORE_LOCAL_MOB_CAP = false;
 	public static final boolean DEBUG_DISABLE_LIQUID_SPREADING = false;

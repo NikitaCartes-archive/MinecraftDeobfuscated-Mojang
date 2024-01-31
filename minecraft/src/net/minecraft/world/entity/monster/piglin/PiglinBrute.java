@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Dynamic;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -70,15 +69,11 @@ public class PiglinBrute extends AbstractPiglin {
 	@Nullable
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		ServerLevelAccessor serverLevelAccessor,
-		DifficultyInstance difficultyInstance,
-		MobSpawnType mobSpawnType,
-		@Nullable SpawnGroupData spawnGroupData,
-		@Nullable CompoundTag compoundTag
+		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData
 	) {
 		PiglinBruteAi.initMemories(this);
 		this.populateDefaultEquipmentSlots(serverLevelAccessor.getRandom(), difficultyInstance);
-		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData);
 	}
 
 	@Override

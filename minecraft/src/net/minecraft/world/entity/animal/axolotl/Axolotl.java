@@ -150,11 +150,7 @@ public class Axolotl extends Animal implements LerpingModel, VariantHolder<Axolo
 
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		ServerLevelAccessor serverLevelAccessor,
-		DifficultyInstance difficultyInstance,
-		MobSpawnType mobSpawnType,
-		@Nullable SpawnGroupData spawnGroupData,
-		@Nullable CompoundTag compoundTag
+		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData
 	) {
 		boolean bl = false;
 		if (mobSpawnType == MobSpawnType.BUCKET) {
@@ -174,7 +170,7 @@ public class Axolotl extends Animal implements LerpingModel, VariantHolder<Axolo
 				this.setAge(-24000);
 			}
 
-			return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+			return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData);
 		}
 	}
 

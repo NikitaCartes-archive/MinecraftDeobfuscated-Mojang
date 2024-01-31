@@ -101,7 +101,7 @@ public class StructureTemplate {
 					BlockEntity blockEntity = level.getBlockEntity(blockPos5);
 					StructureTemplate.StructureBlockInfo structureBlockInfo;
 					if (blockEntity != null) {
-						structureBlockInfo = new StructureTemplate.StructureBlockInfo(blockPos6, blockState, blockEntity.saveWithId());
+						structureBlockInfo = new StructureTemplate.StructureBlockInfo(blockPos6, blockState, blockEntity.saveWithId(level.registryAccess()));
 					} else {
 						structureBlockInfo = new StructureTemplate.StructureBlockInfo(blockPos6, blockState, null);
 					}
@@ -262,7 +262,7 @@ public class StructureTemplate {
 										structureBlockInfo.nbt.putLong("LootTableSeed", randomSource.nextLong());
 									}
 
-									blockEntity.load(structureBlockInfo.nbt);
+									blockEntity.load(structureBlockInfo.nbt, serverLevelAccessor.registryAccess());
 								}
 							}
 
@@ -440,20 +440,16 @@ public class StructureTemplate {
 				listTag.add(DoubleTag.valueOf(vec32.z));
 				compoundTag.put("Pos", listTag);
 				compoundTag.remove("UUID");
-				createEntityIgnoreException(serverLevelAccessor, compoundTag)
-					.ifPresent(
-						entity -> {
-							float f = entity.rotate(rotation);
-							f += entity.mirror(mirror) - entity.getYRot();
-							entity.moveTo(vec32.x, vec32.y, vec32.z, f, entity.getXRot());
-							if (bl && entity instanceof Mob) {
-								((Mob)entity)
-									.finalizeSpawn(serverLevelAccessor, serverLevelAccessor.getCurrentDifficultyAt(BlockPos.containing(vec32)), MobSpawnType.STRUCTURE, null, compoundTag);
-							}
+				createEntityIgnoreException(serverLevelAccessor, compoundTag).ifPresent(entity -> {
+					float f = entity.rotate(rotation);
+					f += entity.mirror(mirror) - entity.getYRot();
+					entity.moveTo(vec32.x, vec32.y, vec32.z, f, entity.getXRot());
+					if (bl && entity instanceof Mob) {
+						((Mob)entity).finalizeSpawn(serverLevelAccessor, serverLevelAccessor.getCurrentDifficultyAt(BlockPos.containing(vec32)), MobSpawnType.STRUCTURE, null);
+					}
 
-							serverLevelAccessor.addFreshEntityWithPassengers(entity);
-						}
-					);
+					serverLevelAccessor.addFreshEntityWithPassengers(entity);
+				});
 			}
 		}
 	}

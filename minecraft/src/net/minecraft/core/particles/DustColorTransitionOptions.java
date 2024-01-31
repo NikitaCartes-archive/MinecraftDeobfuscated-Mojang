@@ -5,6 +5,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Locale;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -36,7 +37,9 @@ public class DustColorTransitionOptions extends DustParticleOptionsBase {
 		DustColorTransitionOptions::new
 	);
 	public static final ParticleOptions.Deserializer<DustColorTransitionOptions> DESERIALIZER = new ParticleOptions.Deserializer<DustColorTransitionOptions>() {
-		public DustColorTransitionOptions fromCommand(ParticleType<DustColorTransitionOptions> particleType, StringReader stringReader) throws CommandSyntaxException {
+		public DustColorTransitionOptions fromCommand(
+			ParticleType<DustColorTransitionOptions> particleType, StringReader stringReader, HolderLookup.Provider provider
+		) throws CommandSyntaxException {
 			Vector3f vector3f = DustParticleOptionsBase.readVector3f(stringReader);
 			stringReader.expect(' ');
 			float f = stringReader.readFloat();
@@ -60,7 +63,7 @@ public class DustColorTransitionOptions extends DustParticleOptionsBase {
 	}
 
 	@Override
-	public String writeToString() {
+	public String writeToString(HolderLookup.Provider provider) {
 		return String.format(
 			Locale.ROOT,
 			"%s %.2f %.2f %.2f %.2f %.2f %.2f %.2f",

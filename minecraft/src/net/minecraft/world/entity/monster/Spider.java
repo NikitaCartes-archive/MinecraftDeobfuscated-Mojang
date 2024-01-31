@@ -3,7 +3,6 @@ package net.minecraft.world.entity.monster;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -143,19 +142,15 @@ public class Spider extends Monster {
 	@Nullable
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		ServerLevelAccessor serverLevelAccessor,
-		DifficultyInstance difficultyInstance,
-		MobSpawnType mobSpawnType,
-		@Nullable SpawnGroupData spawnGroupData,
-		@Nullable CompoundTag compoundTag
+		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData
 	) {
-		spawnGroupData = super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+		spawnGroupData = super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData);
 		RandomSource randomSource = serverLevelAccessor.getRandom();
 		if (randomSource.nextInt(100) == 0) {
 			Skeleton skeleton = EntityType.SKELETON.create(this.level());
 			if (skeleton != null) {
 				skeleton.moveTo(this.getX(), this.getY(), this.getZ(), this.getYRot(), 0.0F);
-				skeleton.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, null, null);
+				skeleton.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, null);
 				skeleton.startRiding(this);
 			}
 		}

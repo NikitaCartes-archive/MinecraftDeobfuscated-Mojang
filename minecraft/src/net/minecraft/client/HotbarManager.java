@@ -2,13 +2,17 @@ package net.minecraft.client;
 
 import com.mojang.datafixers.DataFixer;
 import com.mojang.logging.LogUtils;
+import com.mojang.serialization.DataResult;
 import java.nio.file.Path;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Util;
 import net.minecraft.client.player.inventory.Hotbar;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.nbt.Tag;
 import net.minecraft.util.datafix.DataFixTypes;
 import org.slf4j.Logger;
 
@@ -41,7 +45,10 @@ public class HotbarManager {
 			compoundTag = DataFixTypes.HOTBAR.updateToCurrentVersion(this.fixerUpper, compoundTag, i);
 
 			for (int j = 0; j < 9; j++) {
-				this.hotbars[j].fromTag(compoundTag.getList(String.valueOf(j), 10));
+				this.hotbars[j] = (Hotbar)Hotbar.CODEC
+					.parse(NbtOps.INSTANCE, compoundTag.get(String.valueOf(j)))
+					.resultOrPartial(string -> LOGGER.warn("Failed to parse hotbar: {}", string))
+					.orElseGet(Hotbar::new);
 			}
 		} catch (Exception var4) {
 			LOGGER.error("Failed to load creative mode options", (Throwable)var4);
@@ -53,12 +60,14 @@ public class HotbarManager {
 			CompoundTag compoundTag = NbtUtils.addCurrentDataVersion(new CompoundTag());
 
 			for (int i = 0; i < 9; i++) {
-				compoundTag.put(String.valueOf(i), this.get(i).createTag());
+				Hotbar hotbar = this.get(i);
+				DataResult<Tag> dataResult = Hotbar.CODEC.encodeStart(NbtOps.INSTANCE, hotbar);
+				compoundTag.put(String.valueOf(i), Util.getOrThrow(dataResult, IllegalStateException::new));
 			}
 
 			NbtIo.write(compoundTag, this.optionsFile);
-		} catch (Exception var3) {
-			LOGGER.error("Failed to save creative mode options", (Throwable)var3);
+		} catch (Exception var5) {
+			LOGGER.error("Failed to save creative mode options", (Throwable)var5);
 		}
 	}
 

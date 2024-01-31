@@ -7,7 +7,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.util.debugchart.SampleLogger;
+import net.minecraft.util.debugchart.SampleStorage;
 
 @Environment(EnvType.CLIENT)
 public class FpsDebugChart extends AbstractDebugChart {
@@ -17,8 +17,8 @@ public class FpsDebugChart extends AbstractDebugChart {
 	private static final int CHART_TOP_FPS = 30;
 	private static final double CHART_TOP_VALUE = 33.333333333333336;
 
-	public FpsDebugChart(Font font, SampleLogger sampleLogger) {
-		super(font, sampleLogger);
+	public FpsDebugChart(Font font, SampleStorage sampleStorage) {
+		super(font, sampleStorage);
 	}
 
 	@Override

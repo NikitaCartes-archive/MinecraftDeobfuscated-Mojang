@@ -1,8 +1,6 @@
 package net.minecraft.world.entity.monster;
 
-import com.google.common.collect.Maps;
 import java.util.EnumSet;
-import java.util.Map;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.minecraft.nbt.CompoundTag;
@@ -39,8 +37,6 @@ import net.minecraft.world.entity.raid.Raid;
 import net.minecraft.world.entity.raid.Raider;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
@@ -123,13 +119,9 @@ public class Vindicator extends AbstractIllager {
 	@Nullable
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		ServerLevelAccessor serverLevelAccessor,
-		DifficultyInstance difficultyInstance,
-		MobSpawnType mobSpawnType,
-		@Nullable SpawnGroupData spawnGroupData,
-		@Nullable CompoundTag compoundTag
+		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData
 	) {
-		SpawnGroupData spawnGroupData2 = super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+		SpawnGroupData spawnGroupData2 = super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData);
 		((GroundPathNavigation)this.getNavigation()).setCanOpenDoors(true);
 		RandomSource randomSource = serverLevelAccessor.getRandom();
 		this.populateDefaultEquipmentSlots(randomSource, difficultyInstance);
@@ -178,9 +170,7 @@ public class Vindicator extends AbstractIllager {
 
 		boolean bl2 = this.random.nextFloat() <= raid.getEnchantOdds();
 		if (bl2) {
-			Map<Enchantment, Integer> map = Maps.<Enchantment, Integer>newHashMap();
-			map.put(Enchantments.SHARPNESS, j);
-			EnchantmentHelper.setEnchantments(map, itemStack);
+			itemStack.enchant(Enchantments.SHARPNESS, j);
 		}
 
 		this.setItemSlot(EquipmentSlot.MAINHAND, itemStack);

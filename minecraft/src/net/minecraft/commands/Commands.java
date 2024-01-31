@@ -22,6 +22,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
 import net.minecraft.SharedConstants;
@@ -150,7 +151,7 @@ public class Commands {
 		AdvancementCommands.register(this.dispatcher);
 		AttributeCommand.register(this.dispatcher, commandBuildContext);
 		ExecuteCommand.register(this.dispatcher, commandBuildContext);
-		BossBarCommands.register(this.dispatcher);
+		BossBarCommands.register(this.dispatcher, commandBuildContext);
 		ClearInventoryCommands.register(this.dispatcher, commandBuildContext);
 		CloneCommands.register(this.dispatcher, commandBuildContext);
 		DamageCommand.register(this.dispatcher, commandBuildContext);
@@ -188,7 +189,7 @@ public class Commands {
 		RideCommand.register(this.dispatcher);
 		SayCommand.register(this.dispatcher);
 		ScheduleCommand.register(this.dispatcher);
-		ScoreboardCommand.register(this.dispatcher);
+		ScoreboardCommand.register(this.dispatcher, commandBuildContext);
 		SeedCommand.register(this.dispatcher, commandSelection != Commands.CommandSelection.INTEGRATED);
 		SetBlockCommand.register(this.dispatcher, commandBuildContext);
 		SetSpawnCommand.register(this.dispatcher);
@@ -198,13 +199,13 @@ public class Commands {
 		StopSoundCommand.register(this.dispatcher);
 		SummonCommand.register(this.dispatcher, commandBuildContext);
 		TagCommand.register(this.dispatcher);
-		TeamCommand.register(this.dispatcher);
+		TeamCommand.register(this.dispatcher, commandBuildContext);
 		TeamMsgCommand.register(this.dispatcher);
 		TeleportCommand.register(this.dispatcher);
-		TellRawCommand.register(this.dispatcher);
+		TellRawCommand.register(this.dispatcher, commandBuildContext);
 		TickCommand.register(this.dispatcher);
 		TimeCommand.register(this.dispatcher);
-		TitleCommand.register(this.dispatcher);
+		TitleCommand.register(this.dispatcher, commandBuildContext);
 		TriggerCommand.register(this.dispatcher);
 		WeatherCommand.register(this.dispatcher);
 		WorldBorderCommand.register(this.dispatcher);
@@ -215,7 +216,7 @@ public class Commands {
 		if (SharedConstants.IS_RUNNING_IN_IDE) {
 			TestCommand.register(this.dispatcher);
 			ResetChunksCommand.register(this.dispatcher);
-			RaidCommand.register(this.dispatcher);
+			RaidCommand.register(this.dispatcher, commandBuildContext);
 			DebugPathCommand.register(this.dispatcher);
 			DebugMobSpawningCommand.register(this.dispatcher);
 			WardenSpawnTrackerCommand.register(this.dispatcher);
@@ -444,9 +445,22 @@ public class Commands {
 	public static CommandBuildContext createValidationContext(HolderLookup.Provider provider) {
 		return new CommandBuildContext() {
 			@Override
-			public <T> HolderLookup<T> holderLookup(ResourceKey<? extends Registry<T>> resourceKey) {
-				final HolderLookup.RegistryLookup<T> registryLookup = provider.lookupOrThrow(resourceKey);
-				return new HolderLookup.Delegate<T>(registryLookup) {
+			public Stream<ResourceKey<? extends Registry<?>>> listRegistries() {
+				return provider.listRegistries();
+			}
+
+			@Override
+			public <T> Optional<HolderLookup.RegistryLookup<T>> lookup(ResourceKey<? extends Registry<? extends T>> resourceKey) {
+				return provider.lookup(resourceKey).map(this::createLookup);
+			}
+
+			private <T> HolderLookup.RegistryLookup.Delegate<T> createLookup(HolderLookup.RegistryLookup<T> registryLookup) {
+				return new HolderLookup.RegistryLookup.Delegate<T>() {
+					@Override
+					protected HolderLookup.RegistryLookup<T> parent() {
+						return registryLookup;
+					}
+
 					@Override
 					public Optional<HolderSet.Named<T>> get(TagKey<T> tagKey) {
 						return Optional.of(this.getOrThrow(tagKey));
@@ -454,8 +468,8 @@ public class Commands {
 
 					@Override
 					public HolderSet.Named<T> getOrThrow(TagKey<T> tagKey) {
-						Optional<HolderSet.Named<T>> optional = registryLookup.get(tagKey);
-						return (HolderSet.Named<T>)optional.orElseGet(() -> HolderSet.emptyNamed(registryLookup, tagKey));
+						Optional<HolderSet.Named<T>> optional = this.parent().get(tagKey);
+						return (HolderSet.Named<T>)optional.orElseGet(() -> HolderSet.emptyNamed(this.parent(), tagKey));
 					}
 				};
 			}

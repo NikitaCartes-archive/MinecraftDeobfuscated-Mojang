@@ -7,7 +7,6 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Queues;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
@@ -38,7 +37,6 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.texture.SpriteLoader;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -125,7 +123,7 @@ public class ParticleEngine implements PreparableReloadListener {
 		this.register(ParticleTypes.EFFECT, SpellParticle.Provider::new);
 		this.register(ParticleTypes.ELDER_GUARDIAN, new MobAppearanceParticle.Provider());
 		this.register(ParticleTypes.ENCHANTED_HIT, CritParticle.MagicProvider::new);
-		this.register(ParticleTypes.ENCHANT, EnchantmentTableParticle.Provider::new);
+		this.register(ParticleTypes.ENCHANT, FlyTowardsPositionParticle.EnchantProvider::new);
 		this.register(ParticleTypes.END_ROD, EndRodParticle.Provider::new);
 		this.register(ParticleTypes.ENTITY_EFFECT, SpellParticle.MobProvider::new);
 		this.register(ParticleTypes.EXPLOSION_EMITTER, new HugeExplosionSeedParticle.Provider());
@@ -152,7 +150,7 @@ public class ParticleEngine implements PreparableReloadListener {
 		this.register(ParticleTypes.LARGE_SMOKE, LargeSmokeParticle.Provider::new);
 		this.register(ParticleTypes.LAVA, LavaParticle.Provider::new);
 		this.register(ParticleTypes.MYCELIUM, SuspendedTownParticle.Provider::new);
-		this.register(ParticleTypes.NAUTILUS, EnchantmentTableParticle.NautilusProvider::new);
+		this.register(ParticleTypes.NAUTILUS, FlyTowardsPositionParticle.NautilusProvider::new);
 		this.register(ParticleTypes.NOTE, NoteParticle.Provider::new);
 		this.register(ParticleTypes.POOF, ExplodeParticle.Provider::new);
 		this.register(ParticleTypes.PORTAL, PortalParticle.Provider::new);
@@ -201,6 +199,7 @@ public class ParticleEngine implements PreparableReloadListener {
 		this.register(ParticleTypes.EGG_CRACK, SuspendedTownParticle.EggCrackProvider::new);
 		this.register(ParticleTypes.DUST_PLUME, DustPlumeParticle.Provider::new);
 		this.register(ParticleTypes.TRIAL_SPAWNER_DETECTION, TrialSpawnerDetectionParticle.Provider::new);
+		this.register(ParticleTypes.VAULT_CONNECTION, FlyTowardsPositionParticle.VaultConnectionProvider::new);
 	}
 
 	private <T extends ParticleOptions> void register(ParticleType<T> particleType, ParticleProvider<T> particleProvider) {
@@ -431,13 +430,9 @@ public class ParticleEngine implements PreparableReloadListener {
 		}
 	}
 
-	public void render(PoseStack poseStack, MultiBufferSource.BufferSource bufferSource, LightTexture lightTexture, Camera camera, float f) {
+	public void render(LightTexture lightTexture, Camera camera, float f) {
 		lightTexture.turnOnLightLayer();
 		RenderSystem.enableDepthTest();
-		PoseStack poseStack2 = RenderSystem.getModelViewStack();
-		poseStack2.pushPose();
-		poseStack2.mulPoseMatrix(poseStack.last().pose());
-		RenderSystem.applyModelViewMatrix();
 
 		for (ParticleRenderType particleRenderType : RENDER_ORDER) {
 			Iterable<Particle> iterable = (Iterable<Particle>)this.particles.get(particleRenderType);
@@ -450,8 +445,8 @@ public class ParticleEngine implements PreparableReloadListener {
 				for (Particle particle : iterable) {
 					try {
 						particle.render(bufferBuilder, camera, f);
-					} catch (Throwable var17) {
-						CrashReport crashReport = CrashReport.forThrowable(var17, "Rendering Particle");
+					} catch (Throwable var14) {
+						CrashReport crashReport = CrashReport.forThrowable(var14, "Rendering Particle");
 						CrashReportCategory crashReportCategory = crashReport.addCategory("Particle being rendered");
 						crashReportCategory.setDetail("Particle", particle::toString);
 						crashReportCategory.setDetail("Particle Type", particleRenderType::toString);
@@ -463,8 +458,6 @@ public class ParticleEngine implements PreparableReloadListener {
 			}
 		}
 
-		poseStack2.popPose();
-		RenderSystem.applyModelViewMatrix();
 		RenderSystem.depthMask(true);
 		RenderSystem.disableBlend();
 		lightTexture.turnOffLightLayer();

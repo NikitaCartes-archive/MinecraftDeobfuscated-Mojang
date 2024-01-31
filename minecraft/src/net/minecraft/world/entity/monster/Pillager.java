@@ -1,7 +1,5 @@
 package net.minecraft.world.entity.monster;
 
-import com.google.common.collect.Maps;
-import java.util.Map;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -42,8 +40,6 @@ import net.minecraft.world.item.BannerItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ProjectileWeaponItem;
-import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
@@ -145,16 +141,12 @@ public class Pillager extends AbstractIllager implements CrossbowAttackMob, Inve
 	@Nullable
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		ServerLevelAccessor serverLevelAccessor,
-		DifficultyInstance difficultyInstance,
-		MobSpawnType mobSpawnType,
-		@Nullable SpawnGroupData spawnGroupData,
-		@Nullable CompoundTag compoundTag
+		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData
 	) {
 		RandomSource randomSource = serverLevelAccessor.getRandom();
 		this.populateDefaultEquipmentSlots(randomSource, difficultyInstance);
 		this.populateDefaultEquipmentEnchantments(randomSource, difficultyInstance);
-		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData);
 	}
 
 	@Override
@@ -168,9 +160,7 @@ public class Pillager extends AbstractIllager implements CrossbowAttackMob, Inve
 		if (randomSource.nextInt(300) == 0) {
 			ItemStack itemStack = this.getMainHandItem();
 			if (itemStack.is(Items.CROSSBOW)) {
-				Map<Enchantment, Integer> map = EnchantmentHelper.getEnchantments(itemStack);
-				map.putIfAbsent(Enchantments.PIERCING, 1);
-				EnchantmentHelper.setEnchantments(map, itemStack);
+				itemStack.enchant(Enchantments.PIERCING, 1);
 				this.setItemSlot(EquipmentSlot.MAINHAND, itemStack);
 			}
 		}
@@ -238,15 +228,13 @@ public class Pillager extends AbstractIllager implements CrossbowAttackMob, Inve
 		boolean bl2 = this.random.nextFloat() <= raid.getEnchantOdds();
 		if (bl2) {
 			ItemStack itemStack = new ItemStack(Items.CROSSBOW);
-			Map<Enchantment, Integer> map = Maps.<Enchantment, Integer>newHashMap();
 			if (i > raid.getNumGroups(Difficulty.NORMAL)) {
-				map.put(Enchantments.QUICK_CHARGE, 2);
+				itemStack.enchant(Enchantments.QUICK_CHARGE, 2);
 			} else if (i > raid.getNumGroups(Difficulty.EASY)) {
-				map.put(Enchantments.QUICK_CHARGE, 1);
+				itemStack.enchant(Enchantments.QUICK_CHARGE, 1);
 			}
 
-			map.put(Enchantments.MULTISHOT, 1);
-			EnchantmentHelper.setEnchantments(map, itemStack);
+			itemStack.enchant(Enchantments.MULTISHOT, 1);
 			this.setItemSlot(EquipmentSlot.MAINHAND, itemStack);
 		}
 	}

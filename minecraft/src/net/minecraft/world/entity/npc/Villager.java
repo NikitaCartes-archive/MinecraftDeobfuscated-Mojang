@@ -6,7 +6,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
-import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Dynamic;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import java.util.List;
@@ -507,12 +506,10 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 	public void readAdditionalSaveData(CompoundTag compoundTag) {
 		super.readAdditionalSaveData(compoundTag);
 		if (compoundTag.contains("VillagerData", 10)) {
-			DataResult<VillagerData> dataResult = VillagerData.CODEC.parse(new Dynamic<>(NbtOps.INSTANCE, compoundTag.get("VillagerData")));
-			dataResult.resultOrPartial(LOGGER::error).ifPresent(this::setVillagerData);
-		}
-
-		if (compoundTag.contains("Offers", 10)) {
-			this.offers = new MerchantOffers(compoundTag.getCompound("Offers"));
+			VillagerData.CODEC
+				.parse(NbtOps.INSTANCE, compoundTag.get("VillagerData"))
+				.resultOrPartial(LOGGER::error)
+				.ifPresent(villagerData -> this.entityData.set(DATA_VILLAGER_DATA, villagerData));
 		}
 
 		if (compoundTag.contains("FoodLevel", 1)) {
@@ -749,11 +746,7 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 	@Nullable
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		ServerLevelAccessor serverLevelAccessor,
-		DifficultyInstance difficultyInstance,
-		MobSpawnType mobSpawnType,
-		@Nullable SpawnGroupData spawnGroupData,
-		@Nullable CompoundTag compoundTag
+		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData
 	) {
 		if (mobSpawnType == MobSpawnType.BREEDING) {
 			this.setVillagerData(this.getVillagerData().setProfession(VillagerProfession.NONE));
@@ -770,7 +763,7 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 			this.assignProfessionWhenSpawned = true;
 		}
 
-		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData);
 	}
 
 	@Nullable
@@ -786,7 +779,7 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 		}
 
 		Villager villager = new Villager(EntityType.VILLAGER, serverLevel, villagerType);
-		villager.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(villager.blockPosition()), MobSpawnType.BREEDING, null, null);
+		villager.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(villager.blockPosition()), MobSpawnType.BREEDING, null);
 		return villager;
 	}
 
@@ -797,7 +790,7 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 			Witch witch = EntityType.WITCH.create(serverLevel);
 			if (witch != null) {
 				witch.moveTo(this.getX(), this.getY(), this.getZ(), this.getYRot(), this.getXRot());
-				witch.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(witch.blockPosition()), MobSpawnType.CONVERSION, null, null);
+				witch.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(witch.blockPosition()), MobSpawnType.CONVERSION, null);
 				witch.setNoAi(this.isNoAi());
 				if (this.hasCustomName()) {
 					witch.setCustomName(this.getCustomName());

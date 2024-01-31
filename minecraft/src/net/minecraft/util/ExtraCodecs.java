@@ -387,6 +387,10 @@ public class ExtraCodecs {
 		return new ExtraCodecs.RecursiveCodec<>(string, function);
 	}
 
+	public static <T> MapCodec<T> recursiveMap(Function<Codec<T>, MapCodec<T>> function) {
+		return new ExtraCodecs.RecursiveMapCodec<>(function);
+	}
+
 	public static <A> Codec<A> lazyInitializedCodec(Supplier<Codec<A>> supplier) {
 		return new ExtraCodecs.RecursiveCodec<>(supplier.toString(), codec -> (Codec)supplier.get());
 	}
@@ -601,6 +605,33 @@ public class ExtraCodecs {
 
 		public String toString() {
 			return "RecursiveCodec[" + this.name + "]";
+		}
+	}
+
+	static class RecursiveMapCodec<T> extends MapCodec<T> {
+		private final Supplier<MapCodec<T>> wrapped;
+
+		RecursiveMapCodec(Function<Codec<T>, MapCodec<T>> function) {
+			this.wrapped = Suppliers.memoize(() -> (MapCodec<T>)function.apply(this.codec()));
+		}
+
+		@Override
+		public <S> RecordBuilder<S> encode(T object, DynamicOps<S> dynamicOps, RecordBuilder<S> recordBuilder) {
+			return ((MapCodec)this.wrapped.get()).encode(object, dynamicOps, recordBuilder);
+		}
+
+		@Override
+		public <S> DataResult<T> decode(DynamicOps<S> dynamicOps, MapLike<S> mapLike) {
+			return ((MapCodec)this.wrapped.get()).decode(dynamicOps, mapLike);
+		}
+
+		@Override
+		public <S> Stream<S> keys(DynamicOps<S> dynamicOps) {
+			return ((MapCodec)this.wrapped.get()).keys(dynamicOps);
+		}
+
+		public String toString() {
+			return "RecursiveMapCodec[" + this.wrapped + "]";
 		}
 	}
 

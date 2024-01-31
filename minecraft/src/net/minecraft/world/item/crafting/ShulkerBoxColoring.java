@@ -57,12 +57,8 @@ public class ShulkerBoxColoring extends CustomRecipe {
 			}
 		}
 
-		ItemStack itemStack3 = ShulkerBoxBlock.getColoredItemStack(dyeItem.getDyeColor());
-		if (itemStack.hasTag()) {
-			itemStack3.setTag(itemStack.getTag().copy());
-		}
-
-		return itemStack3;
+		Block block = ShulkerBoxBlock.getBlockByColor(dyeItem.getDyeColor());
+		return itemStack.transmuteCopy(block, 1);
 	}
 
 	@Override

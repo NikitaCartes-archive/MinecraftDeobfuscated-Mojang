@@ -2,13 +2,14 @@ package net.minecraft.world.level.storage.loot.predicates;
 
 import com.mojang.serialization.Codec;
 import java.util.List;
+import net.minecraft.Util;
 
 public class AllOfCondition extends CompositeLootItemCondition {
 	public static final Codec<AllOfCondition> CODEC = createCodec(AllOfCondition::new);
 	public static final Codec<AllOfCondition> INLINE_CODEC = createInlineCodec(AllOfCondition::new);
 
 	AllOfCondition(List<LootItemCondition> list) {
-		super(list, LootItemConditions.andConditions(list));
+		super(list, Util.allOf(list));
 	}
 
 	public static AllOfCondition allOf(List<LootItemCondition> list) {

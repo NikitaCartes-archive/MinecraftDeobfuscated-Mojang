@@ -17,7 +17,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.Slot;
-import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
@@ -136,7 +135,7 @@ public class InventoryScreen extends EffectRenderingInventoryScreen<InventoryMen
 	) {
 		guiGraphics.pose().pushPose();
 		guiGraphics.pose().translate((double)f, (double)g, 50.0);
-		guiGraphics.pose().mulPoseMatrix(new Matrix4f().scaling(h, h, -h));
+		guiGraphics.pose().scale(h, h, -h);
 		guiGraphics.pose().translate(vector3f.x, vector3f.y, vector3f.z);
 		guiGraphics.pose().mulPose(quaternionf);
 		Lighting.setupForEntityInInventory();

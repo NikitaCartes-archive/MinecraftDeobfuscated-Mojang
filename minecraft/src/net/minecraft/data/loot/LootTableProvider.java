@@ -13,6 +13,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
@@ -34,15 +35,23 @@ public class LootTableProvider implements DataProvider {
 	private final PackOutput.PathProvider pathProvider;
 	private final Set<ResourceLocation> requiredTables;
 	private final List<LootTableProvider.SubProviderEntry> subProviders;
+	private final CompletableFuture<HolderLookup.Provider> registries;
 
-	public LootTableProvider(PackOutput packOutput, Set<ResourceLocation> set, List<LootTableProvider.SubProviderEntry> list) {
+	public LootTableProvider(
+		PackOutput packOutput, Set<ResourceLocation> set, List<LootTableProvider.SubProviderEntry> list, CompletableFuture<HolderLookup.Provider> completableFuture
+	) {
 		this.pathProvider = packOutput.createPathProvider(PackOutput.Target.DATA_PACK, "loot_tables");
 		this.subProviders = list;
 		this.requiredTables = set;
+		this.registries = completableFuture;
 	}
 
 	@Override
 	public CompletableFuture<?> run(CachedOutput cachedOutput) {
+		return this.registries.thenCompose(provider -> this.run(cachedOutput, provider));
+	}
+
+	private CompletableFuture<?> run(CachedOutput cachedOutput, HolderLookup.Provider provider) {
 		final Map<ResourceLocation, LootTable> map = Maps.<ResourceLocation, LootTable>newHashMap();
 		Map<RandomSupport.Seed128bit, ResourceLocation> map2 = new Object2ObjectOpenHashMap<>();
 		this.subProviders.forEach(subProviderEntry -> ((LootTableSubProvider)subProviderEntry.provider().get()).generate((resourceLocationx, builder) -> {
@@ -83,7 +92,7 @@ public class LootTableProvider implements DataProvider {
 				ResourceLocation resourceLocationx = (ResourceLocation)entry.getKey();
 				LootTable lootTable = (LootTable)entry.getValue();
 				Path path = this.pathProvider.json(resourceLocationx);
-				return DataProvider.saveStable(cachedOutput, LootTable.CODEC, lootTable, path);
+				return DataProvider.saveStable(cachedOutput, provider, LootTable.CODEC, lootTable, path);
 			}).toArray(CompletableFuture[]::new));
 		}
 	}

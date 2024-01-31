@@ -636,9 +636,9 @@ public class PiglinAi {
 	}
 
 	public static boolean isWearingGold(LivingEntity livingEntity) {
-		for (ItemStack itemStack : livingEntity.getArmorSlots()) {
+		for (ItemStack itemStack : livingEntity.getArmorAndBodyArmorSlots()) {
 			Item item = itemStack.getItem();
-			if (item instanceof ArmorItem && ((ArmorItem)item).getMaterial() == ArmorMaterials.GOLD) {
+			if (item instanceof ArmorItem && ((ArmorItem)item).getMaterial().is(ArmorMaterials.GOLD)) {
 				return true;
 			}
 		}

@@ -125,7 +125,7 @@ public abstract class ClientCommonPacketListenerImpl implements ClientCommonPack
 			if (serverPackStatus != ServerData.ServerPackStatus.PROMPT && (!bl || serverPackStatus != ServerData.ServerPackStatus.DISABLED)) {
 				this.minecraft.getDownloadedPackSource().pushPack(uUID, uRL, string);
 			} else {
-				this.minecraft.setScreen(this.addOrUpdatePackPrompt(uUID, uRL, string, bl, clientboundResourcePackPushPacket.prompt()));
+				this.minecraft.setScreen(this.addOrUpdatePackPrompt(uUID, uRL, string, bl, (Component)clientboundResourcePackPushPacket.prompt().orElse(null)));
 			}
 		}
 	}
@@ -189,7 +189,7 @@ public abstract class ClientCommonPacketListenerImpl implements ClientCommonPack
 
 	@Override
 	public void handleDisconnect(ClientboundDisconnectPacket clientboundDisconnectPacket) {
-		this.connection.disconnect(clientboundDisconnectPacket.getReason());
+		this.connection.disconnect(clientboundDisconnectPacket.reason());
 	}
 
 	protected void sendDeferredPackets() {

@@ -39,7 +39,7 @@ public class HorseInventoryScreen extends AbstractContainerScreen<HorseInventory
 			guiGraphics.blitSprite(SADDLE_SLOT_SPRITE, k + 7, l + 35 - 18, 18, 18);
 		}
 
-		if (this.horse.canWearArmor()) {
+		if (this.horse.canWearBodyArmor()) {
 			if (this.horse instanceof Llama) {
 				guiGraphics.blitSprite(LLAMA_ARMOR_SLOT_SPRITE, k + 7, l + 35, 18, 18);
 			} else {

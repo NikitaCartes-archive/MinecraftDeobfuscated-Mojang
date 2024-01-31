@@ -13,8 +13,10 @@ import com.mojang.serialization.RecordBuilder;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.netty.buffer.ByteBuf;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.contents.KeybindContents;
 import net.minecraft.network.chat.contents.NbtContents;
 import net.minecraft.network.chat.contents.PlainTextContents;
@@ -28,7 +30,9 @@ import net.minecraft.util.StringRepresentable;
 
 public class ComponentSerialization {
 	public static final Codec<Component> CODEC = ExtraCodecs.recursive("Component", ComponentSerialization::createCodec);
-	public static final StreamCodec<ByteBuf, Component> STREAM_CODEC = ByteBufCodecs.fromCodec(CODEC);
+	public static final StreamCodec<RegistryFriendlyByteBuf, Component> STREAM_CODEC = ByteBufCodecs.fromCodecWithRegistries(CODEC);
+	public static final StreamCodec<RegistryFriendlyByteBuf, Optional<Component>> OPTIONAL_STREAM_CODEC = STREAM_CODEC.apply(ByteBufCodecs::optional);
+	public static final StreamCodec<ByteBuf, Component> CONTEXT_FREE_STREAM_CODEC = ByteBufCodecs.fromCodec(CODEC);
 	public static final Codec<Component> FLAT_CODEC = ExtraCodecs.FLAT_JSON
 		.flatXmap(jsonElement -> CODEC.parse(JsonOps.INSTANCE, jsonElement), component -> CODEC.encodeStart(JsonOps.INSTANCE, component));
 

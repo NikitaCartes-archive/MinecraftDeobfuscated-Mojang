@@ -1,8 +1,6 @@
 package net.minecraft.world.level.storage.loot.predicates;
 
 import com.mojang.serialization.Codec;
-import java.util.List;
-import java.util.function.Predicate;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -36,43 +34,5 @@ public class LootItemConditions {
 
 	private static LootItemConditionType register(String string, Codec<? extends LootItemCondition> codec) {
 		return Registry.register(BuiltInRegistries.LOOT_CONDITION_TYPE, new ResourceLocation(string), new LootItemConditionType(codec));
-	}
-
-	public static <T> Predicate<T> andConditions(List<? extends Predicate<T>> list) {
-		List<Predicate<T>> list2 = List.copyOf(list);
-
-		return switch (list2.size()) {
-			case 0 -> object -> true;
-			case 1 -> (Predicate)list2.get(0);
-			case 2 -> ((Predicate)list2.get(0)).and((Predicate)list2.get(1));
-			default -> object -> {
-			for (Predicate<T> predicate : list2) {
-				if (!predicate.test(object)) {
-					return false;
-				}
-			}
-
-			return true;
-		};
-		};
-	}
-
-	public static <T> Predicate<T> orConditions(List<? extends Predicate<T>> list) {
-		List<Predicate<T>> list2 = List.copyOf(list);
-
-		return switch (list2.size()) {
-			case 0 -> object -> false;
-			case 1 -> (Predicate)list2.get(0);
-			case 2 -> ((Predicate)list2.get(0)).or((Predicate)list2.get(1));
-			default -> object -> {
-			for (Predicate<T> predicate : list2) {
-				if (predicate.test(object)) {
-					return true;
-				}
-			}
-
-			return false;
-		};
-		};
 	}
 }

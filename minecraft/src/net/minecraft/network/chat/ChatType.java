@@ -77,7 +77,7 @@ public record ChatType(ChatTypeDecoration chat, ChatTypeDecoration narration) {
 			ChatType.Bound::chatType,
 			ComponentSerialization.STREAM_CODEC,
 			ChatType.Bound::name,
-			ComponentSerialization.STREAM_CODEC.apply(ByteBufCodecs::optional),
+			ComponentSerialization.OPTIONAL_STREAM_CODEC,
 			ChatType.Bound::targetName,
 			ChatType.Bound::new
 		);

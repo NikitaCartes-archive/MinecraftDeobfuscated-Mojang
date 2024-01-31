@@ -3,11 +3,9 @@ package net.minecraft.client.renderer;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexSorting;
-import com.mojang.math.Axis;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import net.fabricmc.api.EnvType;
@@ -16,6 +14,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.ResourceLocation;
 import org.joml.Matrix4f;
+import org.joml.Matrix4fStack;
 
 @Environment(EnvType.CLIENT)
 public class CubeMap {
@@ -35,11 +34,9 @@ public class CubeMap {
 			.setPerspective(1.4835298F, (float)minecraft.getWindow().getWidth() / (float)minecraft.getWindow().getHeight(), 0.05F, 10.0F);
 		RenderSystem.backupProjectionMatrix();
 		RenderSystem.setProjectionMatrix(matrix4f, VertexSorting.DISTANCE_TO_ORIGIN);
-		PoseStack poseStack = RenderSystem.getModelViewStack();
-		poseStack.pushPose();
-		poseStack.setIdentity();
-		poseStack.mulPose(Axis.XP.rotationDegrees(180.0F));
-		RenderSystem.applyModelViewMatrix();
+		Matrix4fStack matrix4fStack = RenderSystem.getModelViewStack();
+		matrix4fStack.pushMatrix();
+		matrix4fStack.rotationX((float) Math.PI);
 		RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
 		RenderSystem.enableBlend();
 		RenderSystem.disableCull();
@@ -47,13 +44,13 @@ public class CubeMap {
 		int i = 2;
 
 		for (int j = 0; j < 4; j++) {
-			poseStack.pushPose();
+			matrix4fStack.pushMatrix();
 			float k = ((float)(j % 2) / 2.0F - 0.5F) / 256.0F;
 			float l = ((float)(j / 2) / 2.0F - 0.5F) / 256.0F;
 			float m = 0.0F;
-			poseStack.translate(k, l, 0.0F);
-			poseStack.mulPose(Axis.XP.rotationDegrees(f));
-			poseStack.mulPose(Axis.YP.rotationDegrees(g));
+			matrix4fStack.translate(k, l, 0.0F);
+			matrix4fStack.rotateX(f * (float) (Math.PI / 180.0));
+			matrix4fStack.rotateY(g * (float) (Math.PI / 180.0));
 			RenderSystem.applyModelViewMatrix();
 
 			for (int n = 0; n < 6; n++) {
@@ -105,14 +102,13 @@ public class CubeMap {
 				tesselator.end();
 			}
 
-			poseStack.popPose();
-			RenderSystem.applyModelViewMatrix();
+			matrix4fStack.popMatrix();
 			RenderSystem.colorMask(true, true, true, false);
 		}
 
 		RenderSystem.colorMask(true, true, true, true);
 		RenderSystem.restoreProjectionMatrix();
-		poseStack.popPose();
+		matrix4fStack.popMatrix();
 		RenderSystem.applyModelViewMatrix();
 		RenderSystem.depthMask(true);
 		RenderSystem.enableCull();

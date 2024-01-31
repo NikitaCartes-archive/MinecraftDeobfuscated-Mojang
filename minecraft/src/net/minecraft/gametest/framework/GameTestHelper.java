@@ -41,6 +41,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -208,7 +209,7 @@ public class GameTestHelper {
 	}
 
 	public void useBlock(BlockPos blockPos) {
-		this.useBlock(blockPos, this.makeMockPlayer());
+		this.useBlock(blockPos, this.makeMockPlayer(GameType.CREATIVE));
 	}
 
 	public void useBlock(BlockPos blockPos, Player player) {
@@ -238,35 +239,21 @@ public class GameTestHelper {
 		return livingEntity;
 	}
 
-	public Player makeMockSurvivalPlayer() {
-		return new Player(this.getLevel(), BlockPos.ZERO, 0.0F, new GameProfile(UUID.randomUUID(), "test-mock-player")) {
-			@Override
-			public boolean isSpectator() {
-				return false;
-			}
-
-			@Override
-			public boolean isCreative() {
-				return false;
-			}
-		};
-	}
-
 	public LivingEntity withLowHealth(LivingEntity livingEntity) {
 		livingEntity.setHealth(0.25F);
 		return livingEntity;
 	}
 
-	public Player makeMockPlayer() {
+	public Player makeMockPlayer(GameType gameType) {
 		return new Player(this.getLevel(), BlockPos.ZERO, 0.0F, new GameProfile(UUID.randomUUID(), "test-mock-player")) {
 			@Override
 			public boolean isSpectator() {
-				return false;
+				return gameType == GameType.SPECTATOR;
 			}
 
 			@Override
 			public boolean isCreative() {
-				return true;
+				return gameType.isCreative();
 			}
 
 			@Override
@@ -847,9 +834,9 @@ public class GameTestHelper {
 		}
 	}
 
-	public <N extends Number> void assertValueEqual(N number, N number2, String string) {
-		if (!number.equals(number2)) {
-			throw new GameTestAssertException("Expected " + string + " to be " + number2 + ", but was " + number);
+	public <N> void assertValueEqual(N object, N object2, String string) {
+		if (!object.equals(object2)) {
+			throw new GameTestAssertException("Expected " + string + " to be " + object2 + ", but was " + object);
 		}
 	}
 

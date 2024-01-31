@@ -60,8 +60,6 @@ public class ShaderInstance implements Shader, AutoCloseable {
 	private final String name;
 	private boolean dirty;
 	private final BlendMode blend;
-	private final List<Integer> attributes;
-	private final List<String> attributeNames;
 	private final Program vertexProgram;
 	private final Program fragmentProgram;
 	private final VertexFormat vertexFormat;
@@ -69,8 +67,6 @@ public class ShaderInstance implements Shader, AutoCloseable {
 	public final Uniform MODEL_VIEW_MATRIX;
 	@Nullable
 	public final Uniform PROJECTION_MATRIX;
-	@Nullable
-	public final Uniform INVERSE_VIEW_ROTATION_MATRIX;
 	@Nullable
 	public final Uniform TEXTURE_MATRIX;
 	@Nullable
@@ -117,8 +113,8 @@ public class ShaderInstance implements Shader, AutoCloseable {
 					for (JsonElement jsonElement : jsonArray) {
 						try {
 							this.parseSamplerNode(jsonElement);
-						} catch (Exception var20) {
-							ChainedJsonException chainedJsonException = ChainedJsonException.forException(var20);
+						} catch (Exception var18) {
+							ChainedJsonException chainedJsonException = ChainedJsonException.forException(var18);
 							chainedJsonException.prependJsonKey("samplers[" + i + "]");
 							throw chainedJsonException;
 						}
@@ -127,42 +123,20 @@ public class ShaderInstance implements Shader, AutoCloseable {
 					}
 				}
 
-				JsonArray jsonArray2 = GsonHelper.getAsJsonArray(jsonObject, "attributes", null);
+				JsonArray jsonArray2 = GsonHelper.getAsJsonArray(jsonObject, "uniforms", null);
 				if (jsonArray2 != null) {
 					int j = 0;
-					this.attributes = Lists.<Integer>newArrayListWithCapacity(jsonArray2.size());
-					this.attributeNames = Lists.<String>newArrayListWithCapacity(jsonArray2.size());
 
 					for (JsonElement jsonElement2 : jsonArray2) {
 						try {
-							this.attributeNames.add(GsonHelper.convertToString(jsonElement2, "attribute"));
-						} catch (Exception var19) {
-							ChainedJsonException chainedJsonException2 = ChainedJsonException.forException(var19);
-							chainedJsonException2.prependJsonKey("attributes[" + j + "]");
+							this.parseUniformNode(jsonElement2);
+						} catch (Exception var17) {
+							ChainedJsonException chainedJsonException2 = ChainedJsonException.forException(var17);
+							chainedJsonException2.prependJsonKey("uniforms[" + j + "]");
 							throw chainedJsonException2;
 						}
 
 						j++;
-					}
-				} else {
-					this.attributes = null;
-					this.attributeNames = null;
-				}
-
-				JsonArray jsonArray3 = GsonHelper.getAsJsonArray(jsonObject, "uniforms", null);
-				if (jsonArray3 != null) {
-					int k = 0;
-
-					for (JsonElement jsonElement3 : jsonArray3) {
-						try {
-							this.parseUniformNode(jsonElement3);
-						} catch (Exception var18) {
-							ChainedJsonException chainedJsonException3 = ChainedJsonException.forException(var18);
-							chainedJsonException3.prependJsonKey("uniforms[" + k + "]");
-							throw chainedJsonException3;
-						}
-
-						k++;
 					}
 				}
 
@@ -170,43 +144,39 @@ public class ShaderInstance implements Shader, AutoCloseable {
 				this.vertexProgram = getOrCreate(resourceProvider, Program.Type.VERTEX, string2);
 				this.fragmentProgram = getOrCreate(resourceProvider, Program.Type.FRAGMENT, string3);
 				this.programId = ProgramManager.createProgram();
-				if (this.attributeNames != null) {
-					int k = 0;
+				int j = 0;
 
-					for (String string4 : vertexFormat.getElementAttributeNames()) {
-						Uniform.glBindAttribLocation(this.programId, k, string4);
-						this.attributes.add(k);
-						k++;
-					}
+				for (String string4 : vertexFormat.getElementAttributeNames()) {
+					Uniform.glBindAttribLocation(this.programId, j, string4);
+					j++;
 				}
 
 				ProgramManager.linkShader(this);
 				this.updateLocations();
-			} catch (Throwable var21) {
+			} catch (Throwable var19) {
 				if (reader != null) {
 					try {
 						reader.close();
-					} catch (Throwable var17) {
-						var21.addSuppressed(var17);
+					} catch (Throwable var16) {
+						var19.addSuppressed(var16);
 					}
 				}
 
-				throw var21;
+				throw var19;
 			}
 
 			if (reader != null) {
 				reader.close();
 			}
-		} catch (Exception var22) {
-			ChainedJsonException chainedJsonException4 = ChainedJsonException.forException(var22);
-			chainedJsonException4.setFilenameAndFlush(resourceLocation.getPath());
-			throw chainedJsonException4;
+		} catch (Exception var20) {
+			ChainedJsonException chainedJsonException3 = ChainedJsonException.forException(var20);
+			chainedJsonException3.setFilenameAndFlush(resourceLocation.getPath());
+			throw chainedJsonException3;
 		}
 
 		this.markDirty();
 		this.MODEL_VIEW_MATRIX = this.getUniform("ModelViewMat");
 		this.PROJECTION_MATRIX = this.getUniform("ProjMat");
-		this.INVERSE_VIEW_ROTATION_MATRIX = this.getUniform("IViewRotMat");
 		this.TEXTURE_MATRIX = this.getUniform("TextureMat");
 		this.SCREEN_SIZE = this.getUniform("ScreenSize");
 		this.COLOR_MODULATOR = this.getUniform("ColorModulator");

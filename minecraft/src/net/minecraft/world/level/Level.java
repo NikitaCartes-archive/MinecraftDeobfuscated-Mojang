@@ -67,6 +67,7 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.redstone.CollectingNeighborUpdater;
 import net.minecraft.world.level.redstone.NeighborUpdater;
+import net.minecraft.world.level.saveddata.maps.MapId;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.level.storage.WritableLevelData;
@@ -856,11 +857,11 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 	}
 
 	@Nullable
-	public abstract MapItemSavedData getMapData(String string);
+	public abstract MapItemSavedData getMapData(MapId mapId);
 
-	public abstract void setMapData(String string, MapItemSavedData mapItemSavedData);
+	public abstract void setMapData(MapId mapId, MapItemSavedData mapItemSavedData);
 
-	public abstract int getFreeMapId();
+	public abstract MapId getFreeMapId();
 
 	public void globalLevelEvent(int i, BlockPos blockPos, int j) {
 	}

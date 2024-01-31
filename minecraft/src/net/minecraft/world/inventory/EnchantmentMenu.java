@@ -6,7 +6,6 @@ import net.minecraft.Util;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -17,7 +16,6 @@ import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.EnchantedBookItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
@@ -154,23 +152,13 @@ public class EnchantmentMenu extends AbstractContainerMenu {
 					List<EnchantmentInstance> list = this.getEnchantmentList(itemStack, i, this.costs[i]);
 					if (!list.isEmpty()) {
 						player.onEnchantmentPerformed(itemStack, j);
-						boolean bl = itemStack.is(Items.BOOK);
-						if (bl) {
-							itemStack3 = new ItemStack(Items.ENCHANTED_BOOK);
-							CompoundTag compoundTag = itemStack.getTag();
-							if (compoundTag != null) {
-								itemStack3.setTag(compoundTag.copy());
-							}
-
+						if (itemStack.is(Items.BOOK)) {
+							itemStack3 = itemStack.transmuteCopy(Items.ENCHANTED_BOOK, 1);
 							this.enchantSlots.setItem(0, itemStack3);
 						}
 
 						for (EnchantmentInstance enchantmentInstance : list) {
-							if (bl) {
-								EnchantedBookItem.addEnchantment(itemStack3, enchantmentInstance);
-							} else {
-								itemStack3.enchant(enchantmentInstance.enchantment, enchantmentInstance.level);
-							}
+							itemStack3.enchant(enchantmentInstance.enchantment, enchantmentInstance.level);
 						}
 
 						if (!player.getAbilities().instabuild) {

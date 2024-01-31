@@ -7,6 +7,7 @@ import java.util.stream.IntStream;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -42,8 +43,8 @@ public class HopperBlockEntity extends RandomizableContainerBlockEntity implemen
 	}
 
 	@Override
-	public void load(CompoundTag compoundTag) {
-		super.load(compoundTag);
+	public void load(CompoundTag compoundTag, HolderLookup.Provider provider) {
+		super.load(compoundTag, provider);
 		this.items = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
 		if (!this.tryLoadLootTable(compoundTag)) {
 			ContainerHelper.loadAllItems(compoundTag, this.items);
@@ -53,8 +54,8 @@ public class HopperBlockEntity extends RandomizableContainerBlockEntity implemen
 	}
 
 	@Override
-	protected void saveAdditional(CompoundTag compoundTag) {
-		super.saveAdditional(compoundTag);
+	protected void saveAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
+		super.saveAdditional(compoundTag, provider);
 		if (!this.trySaveLootTable(compoundTag)) {
 			ContainerHelper.saveAllItems(compoundTag, this.items);
 		}

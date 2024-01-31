@@ -96,6 +96,7 @@ public class ItemBlockRenderTypes {
 		hashMap.put(Blocks.SOUL_FIRE, renderType3);
 		hashMap.put(Blocks.SPAWNER, renderType3);
 		hashMap.put(Blocks.TRIAL_SPAWNER, renderType3);
+		hashMap.put(Blocks.VAULT, renderType3);
 		hashMap.put(Blocks.REDSTONE_WIRE, renderType3);
 		hashMap.put(Blocks.WHEAT, renderType3);
 		hashMap.put(Blocks.OAK_DOOR, renderType3);

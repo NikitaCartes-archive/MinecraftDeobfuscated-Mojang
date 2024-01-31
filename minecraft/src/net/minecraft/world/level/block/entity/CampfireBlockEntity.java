@@ -4,6 +4,7 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -112,8 +113,8 @@ public class CampfireBlockEntity extends BlockEntity implements Clearable {
 	}
 
 	@Override
-	public void load(CompoundTag compoundTag) {
-		super.load(compoundTag);
+	public void load(CompoundTag compoundTag, HolderLookup.Provider provider) {
+		super.load(compoundTag, provider);
 		this.items.clear();
 		ContainerHelper.loadAllItems(compoundTag, this.items);
 		if (compoundTag.contains("CookingTimes", 11)) {
@@ -128,8 +129,8 @@ public class CampfireBlockEntity extends BlockEntity implements Clearable {
 	}
 
 	@Override
-	protected void saveAdditional(CompoundTag compoundTag) {
-		super.saveAdditional(compoundTag);
+	protected void saveAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
+		super.saveAdditional(compoundTag, provider);
 		ContainerHelper.saveAllItems(compoundTag, this.items, true);
 		compoundTag.putIntArray("CookingTimes", this.cookingProgress);
 		compoundTag.putIntArray("CookingTotalTimes", this.cookingTime);
@@ -140,7 +141,7 @@ public class CampfireBlockEntity extends BlockEntity implements Clearable {
 	}
 
 	@Override
-	public CompoundTag getUpdateTag() {
+	public CompoundTag getUpdateTag(HolderLookup.Provider provider) {
 		CompoundTag compoundTag = new CompoundTag();
 		ContainerHelper.saveAllItems(compoundTag, this.items, true);
 		return compoundTag;

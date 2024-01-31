@@ -5,6 +5,7 @@ import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.FrontAndTop;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
@@ -96,8 +97,8 @@ public class JigsawBlockEntity extends BlockEntity {
 	}
 
 	@Override
-	protected void saveAdditional(CompoundTag compoundTag) {
-		super.saveAdditional(compoundTag);
+	protected void saveAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
+		super.saveAdditional(compoundTag, provider);
 		compoundTag.putString("name", this.name.toString());
 		compoundTag.putString("target", this.target.toString());
 		compoundTag.putString("pool", this.pool.location().toString());
@@ -108,8 +109,8 @@ public class JigsawBlockEntity extends BlockEntity {
 	}
 
 	@Override
-	public void load(CompoundTag compoundTag) {
-		super.load(compoundTag);
+	public void load(CompoundTag compoundTag, HolderLookup.Provider provider) {
+		super.load(compoundTag, provider);
 		this.name = new ResourceLocation(compoundTag.getString("name"));
 		this.target = new ResourceLocation(compoundTag.getString("target"));
 		this.pool = ResourceKey.create(Registries.TEMPLATE_POOL, new ResourceLocation(compoundTag.getString("pool")));
@@ -129,8 +130,8 @@ public class JigsawBlockEntity extends BlockEntity {
 	}
 
 	@Override
-	public CompoundTag getUpdateTag() {
-		return this.saveWithoutMetadata();
+	public CompoundTag getUpdateTag(HolderLookup.Provider provider) {
+		return this.saveWithoutMetadata(provider);
 	}
 
 	public void generate(ServerLevel serverLevel, int i, boolean bl) {

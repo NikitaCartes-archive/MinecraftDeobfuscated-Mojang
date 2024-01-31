@@ -168,14 +168,14 @@ public class FallingBlockEntity extends Entity {
 									if (this.blockData != null && this.blockState.hasBlockEntity()) {
 										BlockEntity blockEntity = this.level().getBlockEntity(blockPos);
 										if (blockEntity != null) {
-											CompoundTag compoundTag = blockEntity.saveWithoutMetadata();
+											CompoundTag compoundTag = blockEntity.saveWithoutMetadata(this.level().registryAccess());
 
 											for (String string : this.blockData.getAllKeys()) {
 												compoundTag.put(string, this.blockData.get(string).copy());
 											}
 
 											try {
-												blockEntity.load(compoundTag);
+												blockEntity.load(compoundTag, this.level().registryAccess());
 											} catch (Exception var15) {
 												LOGGER.error("Failed to load block entity from falling block", (Throwable)var15);
 											}

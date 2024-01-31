@@ -2,45 +2,44 @@ package net.minecraft.world.item;
 
 import java.util.List;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.tags.ItemTags;
 
 public interface DyeableLeatherItem {
 	String TAG_COLOR = "color";
 	String TAG_DISPLAY = "display";
 	int DEFAULT_LEATHER_COLOR = 10511680;
 
-	default boolean hasCustomColor(ItemStack itemStack) {
+	static boolean hasCustomColor(ItemStack itemStack) {
 		CompoundTag compoundTag = itemStack.getTagElement("display");
 		return compoundTag != null && compoundTag.contains("color", 99);
 	}
 
-	default int getColor(ItemStack itemStack) {
+	static int getColor(ItemStack itemStack) {
 		CompoundTag compoundTag = itemStack.getTagElement("display");
 		return compoundTag != null && compoundTag.contains("color", 99) ? compoundTag.getInt("color") : 10511680;
 	}
 
-	default void clearColor(ItemStack itemStack) {
+	static void clearColor(ItemStack itemStack) {
 		CompoundTag compoundTag = itemStack.getTagElement("display");
 		if (compoundTag != null && compoundTag.contains("color")) {
 			compoundTag.remove("color");
 		}
 	}
 
-	default void setColor(ItemStack itemStack, int i) {
+	static void setColor(ItemStack itemStack, int i) {
 		itemStack.getOrCreateTagElement("display").putInt("color", i);
 	}
 
 	static ItemStack dyeArmor(ItemStack itemStack, List<DyeItem> list) {
-		ItemStack itemStack2 = ItemStack.EMPTY;
-		int[] is = new int[3];
-		int i = 0;
-		int j = 0;
-		DyeableLeatherItem dyeableLeatherItem = null;
-		Item item = itemStack.getItem();
-		if (item instanceof DyeableLeatherItem) {
-			dyeableLeatherItem = (DyeableLeatherItem)item;
-			itemStack2 = itemStack.copyWithCount(1);
-			if (dyeableLeatherItem.hasCustomColor(itemStack)) {
-				int k = dyeableLeatherItem.getColor(itemStack2);
+		if (!itemStack.is(ItemTags.DYEABLE)) {
+			return ItemStack.EMPTY;
+		} else {
+			int[] is = new int[3];
+			int i = 0;
+			int j = 0;
+			ItemStack itemStack2 = itemStack.copyWithCount(1);
+			if (hasCustomColor(itemStack)) {
+				int k = getColor(itemStack2);
 				float f = (float)(k >> 16 & 0xFF) / 255.0F;
 				float g = (float)(k >> 8 & 0xFF) / 255.0F;
 				float h = (float)(k & 0xFF) / 255.0F;
@@ -62,11 +61,7 @@ public interface DyeableLeatherItem {
 				is[2] += n;
 				j++;
 			}
-		}
 
-		if (dyeableLeatherItem == null) {
-			return ItemStack.EMPTY;
-		} else {
 			int k = is[0] / j;
 			int o = is[1] / j;
 			int p = is[2] / j;
@@ -75,9 +70,9 @@ public interface DyeableLeatherItem {
 			k = (int)((float)k * h / q);
 			o = (int)((float)o * h / q);
 			p = (int)((float)p * h / q);
-			int var26 = (k << 8) + o;
-			var26 = (var26 << 8) + p;
-			dyeableLeatherItem.setColor(itemStack2, var26);
+			int var24 = (k << 8) + o;
+			var24 = (var24 << 8) + p;
+			setColor(itemStack2, var24);
 			return itemStack2;
 		}
 	}

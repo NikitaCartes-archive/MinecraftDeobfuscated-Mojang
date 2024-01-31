@@ -10,16 +10,13 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 import net.minecraft.commands.CommandBuildContext;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.world.item.Item;
 
 public class ItemArgument implements ArgumentType<ItemInput> {
 	private static final Collection<String> EXAMPLES = Arrays.asList("stick", "minecraft:stick", "stick{foo=bar}");
-	private final HolderLookup<Item> items;
+	private final ItemParser parser;
 
 	public ItemArgument(CommandBuildContext commandBuildContext) {
-		this.items = commandBuildContext.holderLookup(Registries.ITEM);
+		this.parser = new ItemParser(commandBuildContext);
 	}
 
 	public static ItemArgument item(CommandBuildContext commandBuildContext) {
@@ -27,7 +24,7 @@ public class ItemArgument implements ArgumentType<ItemInput> {
 	}
 
 	public ItemInput parse(StringReader stringReader) throws CommandSyntaxException {
-		ItemParser.ItemResult itemResult = ItemParser.parseForItem(this.items, stringReader);
+		ItemParser.ItemResult itemResult = this.parser.parse(stringReader);
 		return new ItemInput(itemResult.item(), itemResult.nbt());
 	}
 
@@ -37,7 +34,7 @@ public class ItemArgument implements ArgumentType<ItemInput> {
 
 	@Override
 	public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> commandContext, SuggestionsBuilder suggestionsBuilder) {
-		return ItemParser.fillSuggestions(this.items, suggestionsBuilder, false);
+		return this.parser.fillSuggestions(suggestionsBuilder);
 	}
 
 	@Override

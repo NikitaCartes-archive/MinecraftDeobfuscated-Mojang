@@ -21,7 +21,6 @@ import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.ArmorMaterial;
-import net.minecraft.world.item.ArmorMaterials;
 import net.minecraft.world.item.ItemStack;
 import org.slf4j.Logger;
 
@@ -38,27 +37,28 @@ public class ArmorTrim {
 		.withStyle(ChatFormatting.GRAY);
 	private final Holder<TrimMaterial> material;
 	private final Holder<TrimPattern> pattern;
-	private final Function<ArmorMaterial, ResourceLocation> innerTexture;
-	private final Function<ArmorMaterial, ResourceLocation> outerTexture;
+	private final Function<Holder<ArmorMaterial>, ResourceLocation> innerTexture;
+	private final Function<Holder<ArmorMaterial>, ResourceLocation> outerTexture;
 
 	public ArmorTrim(Holder<TrimMaterial> holder, Holder<TrimPattern> holder2) {
 		this.material = holder;
 		this.pattern = holder2;
-		this.innerTexture = Util.memoize((Function<ArmorMaterial, ResourceLocation>)(armorMaterial -> {
+		this.innerTexture = Util.memoize((Function<Holder<ArmorMaterial>, ResourceLocation>)(holder2x -> {
 			ResourceLocation resourceLocation = holder2.value().assetId();
-			String string = this.getColorPaletteSuffix(armorMaterial);
+			String string = this.getColorPaletteSuffix(holder2x);
 			return resourceLocation.withPath((UnaryOperator<String>)(string2 -> "trims/models/armor/" + string2 + "_leggings_" + string));
 		}));
-		this.outerTexture = Util.memoize((Function<ArmorMaterial, ResourceLocation>)(armorMaterial -> {
+		this.outerTexture = Util.memoize((Function<Holder<ArmorMaterial>, ResourceLocation>)(holder2x -> {
 			ResourceLocation resourceLocation = holder2.value().assetId();
-			String string = this.getColorPaletteSuffix(armorMaterial);
+			String string = this.getColorPaletteSuffix(holder2x);
 			return resourceLocation.withPath((UnaryOperator<String>)(string2 -> "trims/models/armor/" + string2 + "_" + string));
 		}));
 	}
 
-	private String getColorPaletteSuffix(ArmorMaterial armorMaterial) {
-		Map<ArmorMaterials, String> map = this.material.value().overrideArmorMaterials();
-		return armorMaterial instanceof ArmorMaterials && map.containsKey(armorMaterial) ? (String)map.get(armorMaterial) : this.material.value().assetName();
+	private String getColorPaletteSuffix(Holder<ArmorMaterial> holder) {
+		Map<Holder<ArmorMaterial>, String> map = this.material.value().overrideArmorMaterials();
+		String string = (String)map.get(holder);
+		return string != null ? string : this.material.value().assetName();
 	}
 
 	public boolean hasPatternAndMaterial(Holder<TrimPattern> holder, Holder<TrimMaterial> holder2) {
@@ -73,12 +73,12 @@ public class ArmorTrim {
 		return this.material;
 	}
 
-	public ResourceLocation innerTexture(ArmorMaterial armorMaterial) {
-		return (ResourceLocation)this.innerTexture.apply(armorMaterial);
+	public ResourceLocation innerTexture(Holder<ArmorMaterial> holder) {
+		return (ResourceLocation)this.innerTexture.apply(holder);
 	}
 
-	public ResourceLocation outerTexture(ArmorMaterial armorMaterial) {
-		return (ResourceLocation)this.outerTexture.apply(armorMaterial);
+	public ResourceLocation outerTexture(Holder<ArmorMaterial> holder) {
+		return (ResourceLocation)this.outerTexture.apply(holder);
 	}
 
 	public boolean equals(Object object) {

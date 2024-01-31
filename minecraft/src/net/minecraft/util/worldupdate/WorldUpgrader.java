@@ -26,6 +26,7 @@ import net.minecraft.ReportedException;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -75,13 +76,13 @@ public class WorldUpgrader {
 	static final Pattern REGEX = Pattern.compile("^r\\.(-?[0-9]+)\\.(-?[0-9]+)\\.mca$");
 	final DimensionDataStorage overworldDataStorage;
 
-	public WorldUpgrader(LevelStorageSource.LevelStorageAccess levelStorageAccess, DataFixer dataFixer, Registry<LevelStem> registry, boolean bl, boolean bl2) {
-		this.dimensions = registry;
-		this.levels = (Set<ResourceKey<Level>>)registry.registryKeySet().stream().map(Registries::levelStemToLevel).collect(Collectors.toUnmodifiableSet());
+	public WorldUpgrader(LevelStorageSource.LevelStorageAccess levelStorageAccess, DataFixer dataFixer, RegistryAccess registryAccess, boolean bl, boolean bl2) {
+		this.dimensions = registryAccess.registryOrThrow(Registries.LEVEL_STEM);
+		this.levels = (Set<ResourceKey<Level>>)this.dimensions.registryKeySet().stream().map(Registries::levelStemToLevel).collect(Collectors.toUnmodifiableSet());
 		this.eraseCache = bl;
 		this.dataFixer = dataFixer;
 		this.levelStorage = levelStorageAccess;
-		this.overworldDataStorage = new DimensionDataStorage(this.levelStorage.getDimensionPath(Level.OVERWORLD).resolve("data").toFile(), dataFixer);
+		this.overworldDataStorage = new DimensionDataStorage(this.levelStorage.getDimensionPath(Level.OVERWORLD).resolve("data").toFile(), dataFixer, registryAccess);
 		this.recreateRegionFiles = bl2;
 		this.thread = THREAD_FACTORY.newThread(this::work);
 		this.thread.setUncaughtExceptionHandler((thread, throwable) -> {

@@ -27,10 +27,10 @@ public class ParticleArgument implements ArgumentType<ParticleOptions> {
 	public static final DynamicCommandExceptionType ERROR_UNKNOWN_PARTICLE = new DynamicCommandExceptionType(
 		object -> Component.translatableEscape("particle.notFound", object)
 	);
-	private final HolderLookup<ParticleType<?>> particles;
+	private final HolderLookup.Provider registries;
 
 	public ParticleArgument(CommandBuildContext commandBuildContext) {
-		this.particles = commandBuildContext.holderLookup(Registries.PARTICLE_TYPE);
+		this.registries = commandBuildContext;
 	}
 
 	public static ParticleArgument particle(CommandBuildContext commandBuildContext) {
@@ -42,7 +42,7 @@ public class ParticleArgument implements ArgumentType<ParticleOptions> {
 	}
 
 	public ParticleOptions parse(StringReader stringReader) throws CommandSyntaxException {
-		return readParticle(stringReader, this.particles);
+		return readParticle(stringReader, this.registries);
 	}
 
 	@Override
@@ -50,9 +50,9 @@ public class ParticleArgument implements ArgumentType<ParticleOptions> {
 		return EXAMPLES;
 	}
 
-	public static ParticleOptions readParticle(StringReader stringReader, HolderLookup<ParticleType<?>> holderLookup) throws CommandSyntaxException {
-		ParticleType<?> particleType = readParticleType(stringReader, holderLookup);
-		return readParticle(stringReader, (ParticleType<ParticleOptions>)particleType);
+	public static ParticleOptions readParticle(StringReader stringReader, HolderLookup.Provider provider) throws CommandSyntaxException {
+		ParticleType<?> particleType = readParticleType(stringReader, provider.lookupOrThrow(Registries.PARTICLE_TYPE));
+		return readParticle(stringReader, (ParticleType<ParticleOptions>)particleType, provider);
 	}
 
 	private static ParticleType<?> readParticleType(StringReader stringReader, HolderLookup<ParticleType<?>> holderLookup) throws CommandSyntaxException {
@@ -61,12 +61,13 @@ public class ParticleArgument implements ArgumentType<ParticleOptions> {
 		return (ParticleType<?>)((Holder.Reference)holderLookup.get(resourceKey).orElseThrow(() -> ERROR_UNKNOWN_PARTICLE.create(resourceLocation))).value();
 	}
 
-	private static <T extends ParticleOptions> T readParticle(StringReader stringReader, ParticleType<T> particleType) throws CommandSyntaxException {
-		return particleType.getDeserializer().fromCommand(particleType, stringReader);
+	private static <T extends ParticleOptions> T readParticle(StringReader stringReader, ParticleType<T> particleType, HolderLookup.Provider provider) throws CommandSyntaxException {
+		return particleType.getDeserializer().fromCommand(particleType, stringReader, provider);
 	}
 
 	@Override
 	public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> commandContext, SuggestionsBuilder suggestionsBuilder) {
-		return SharedSuggestionProvider.suggestResource(this.particles.listElementIds().map(ResourceKey::location), suggestionsBuilder);
+		HolderLookup.RegistryLookup<ParticleType<?>> registryLookup = this.registries.lookupOrThrow(Registries.PARTICLE_TYPE);
+		return SharedSuggestionProvider.suggestResource(registryLookup.listElementIds().map(ResourceKey::location), suggestionsBuilder);
 	}
 }

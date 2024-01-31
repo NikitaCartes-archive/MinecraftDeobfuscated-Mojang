@@ -102,7 +102,7 @@ public class SwampHutPiece extends ScatteredFeaturePiece {
 					if (witch != null) {
 						witch.setPersistenceRequired();
 						witch.moveTo((double)blockPos2.getX() + 0.5, (double)blockPos2.getY(), (double)blockPos2.getZ() + 0.5, 0.0F, 0.0F);
-						witch.finalizeSpawn(worldGenLevel, worldGenLevel.getCurrentDifficultyAt(blockPos2), MobSpawnType.STRUCTURE, null, null);
+						witch.finalizeSpawn(worldGenLevel, worldGenLevel.getCurrentDifficultyAt(blockPos2), MobSpawnType.STRUCTURE, null);
 						worldGenLevel.addFreshEntityWithPassengers(witch);
 					}
 				}
@@ -121,7 +121,7 @@ public class SwampHutPiece extends ScatteredFeaturePiece {
 				if (cat != null) {
 					cat.setPersistenceRequired();
 					cat.moveTo((double)blockPos.getX() + 0.5, (double)blockPos.getY(), (double)blockPos.getZ() + 0.5, 0.0F, 0.0F);
-					cat.finalizeSpawn(serverLevelAccessor, serverLevelAccessor.getCurrentDifficultyAt(blockPos), MobSpawnType.STRUCTURE, null, null);
+					cat.finalizeSpawn(serverLevelAccessor, serverLevelAccessor.getCurrentDifficultyAt(blockPos), MobSpawnType.STRUCTURE, null);
 					serverLevelAccessor.addFreshEntityWithPassengers(cat);
 				}
 			}

@@ -1,22 +1,61 @@
 package net.minecraft.world.item;
 
+import com.mojang.serialization.Codec;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.item.crafting.Ingredient;
 
-public interface ArmorMaterial {
-	int getDurabilityForType(ArmorItem.Type type);
+public record ArmorMaterial(
+	Map<ArmorItem.Type, Integer> defense,
+	int enchantmentValue,
+	Holder<SoundEvent> equipSound,
+	Supplier<Ingredient> repairIngredient,
+	List<ArmorMaterial.Layer> layers,
+	float toughness,
+	float knockbackResistance
+) {
+	public static final Codec<Holder<ArmorMaterial>> CODEC = BuiltInRegistries.ARMOR_MATERIAL.holderByNameCodec();
 
-	int getDefenseForType(ArmorItem.Type type);
+	public int getDefense(ArmorItem.Type type) {
+		return (Integer)this.defense.getOrDefault(type, 0);
+	}
 
-	int getEnchantmentValue();
+	public static final class Layer {
+		private final ResourceLocation assetName;
+		private final String suffix;
+		private final boolean dyeable;
+		private final ResourceLocation innerTexture;
+		private final ResourceLocation outerTexture;
 
-	SoundEvent getEquipSound();
+		public Layer(ResourceLocation resourceLocation, String string, boolean bl) {
+			this.assetName = resourceLocation;
+			this.suffix = string;
+			this.dyeable = bl;
+			this.innerTexture = this.resolveTexture(true);
+			this.outerTexture = this.resolveTexture(false);
+		}
 
-	Ingredient getRepairIngredient();
+		public Layer(ResourceLocation resourceLocation) {
+			this(resourceLocation, "", false);
+		}
 
-	String getName();
+		private ResourceLocation resolveTexture(boolean bl) {
+			return this.assetName
+				.withPath((UnaryOperator<String>)(string -> "textures/models/armor/" + this.assetName.getPath() + "_layer_" + (bl ? 2 : 1) + this.suffix + ".png"));
+		}
 
-	float getToughness();
+		public ResourceLocation texture(boolean bl) {
+			return bl ? this.innerTexture : this.outerTexture;
+		}
 
-	float getKnockbackResistance();
+		public boolean dyeable() {
+			return this.dyeable;
+		}
+	}
 }

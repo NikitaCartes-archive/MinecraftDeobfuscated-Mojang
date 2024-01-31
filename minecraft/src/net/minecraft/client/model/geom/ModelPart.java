@@ -11,11 +11,9 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
-import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
-import org.joml.Vector4f;
 
 @Environment(EnvType.CLIENT)
 public final class ModelPart {
@@ -272,20 +270,20 @@ public final class ModelPart {
 
 		public void compile(PoseStack.Pose pose, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h, float k) {
 			Matrix4f matrix4f = pose.pose();
-			Matrix3f matrix3f = pose.normal();
+			Vector3f vector3f = new Vector3f();
 
 			for (ModelPart.Polygon polygon : this.polygons) {
-				Vector3f vector3f = matrix3f.transform(new Vector3f(polygon.normal));
-				float l = vector3f.x();
-				float m = vector3f.y();
-				float n = vector3f.z();
+				Vector3f vector3f2 = pose.transformNormal(polygon.normal, vector3f);
+				float l = vector3f2.x();
+				float m = vector3f2.y();
+				float n = vector3f2.z();
 
 				for (ModelPart.Vertex vertex : polygon.vertices) {
 					float o = vertex.pos.x() / 16.0F;
 					float p = vertex.pos.y() / 16.0F;
 					float q = vertex.pos.z() / 16.0F;
-					Vector4f vector4f = matrix4f.transform(new Vector4f(o, p, q, 1.0F));
-					vertexConsumer.vertex(vector4f.x(), vector4f.y(), vector4f.z(), f, g, h, k, vertex.u, vertex.v, j, i, l, m, n);
+					Vector3f vector3f3 = matrix4f.transformPosition(o, p, q, vector3f);
+					vertexConsumer.vertex(vector3f3.x(), vector3f3.y(), vector3f3.z(), f, g, h, k, vertex.u, vertex.v, j, i, l, m, n);
 				}
 			}
 		}

@@ -1,81 +1,39 @@
 package net.minecraft.network.protocol.game;
 
-import com.google.common.collect.Lists;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import javax.annotation.Nullable;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketType;
 import net.minecraft.world.level.saveddata.maps.MapDecoration;
+import net.minecraft.world.level.saveddata.maps.MapId;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 
-public class ClientboundMapItemDataPacket implements Packet<ClientGamePacketListener> {
-	public static final StreamCodec<FriendlyByteBuf, ClientboundMapItemDataPacket> STREAM_CODEC = Packet.codec(
-		ClientboundMapItemDataPacket::write, ClientboundMapItemDataPacket::new
+public record ClientboundMapItemDataPacket(
+	MapId mapId, byte scale, boolean locked, Optional<List<MapDecoration>> decorations, Optional<MapItemSavedData.MapPatch> colorPatch
+) implements Packet<ClientGamePacketListener> {
+	public static final StreamCodec<RegistryFriendlyByteBuf, ClientboundMapItemDataPacket> STREAM_CODEC = StreamCodec.composite(
+		MapId.STREAM_CODEC,
+		ClientboundMapItemDataPacket::mapId,
+		ByteBufCodecs.BYTE,
+		ClientboundMapItemDataPacket::scale,
+		ByteBufCodecs.BOOL,
+		ClientboundMapItemDataPacket::locked,
+		MapDecoration.STREAM_CODEC.apply(ByteBufCodecs.list()).apply(ByteBufCodecs::optional),
+		ClientboundMapItemDataPacket::decorations,
+		MapItemSavedData.MapPatch.STREAM_CODEC,
+		ClientboundMapItemDataPacket::colorPatch,
+		ClientboundMapItemDataPacket::new
 	);
-	private final int mapId;
-	private final byte scale;
-	private final boolean locked;
-	@Nullable
-	private final List<MapDecoration> decorations;
-	@Nullable
-	private final MapItemSavedData.MapPatch colorPatch;
 
-	public ClientboundMapItemDataPacket(int i, byte b, boolean bl, @Nullable Collection<MapDecoration> collection, @Nullable MapItemSavedData.MapPatch mapPatch) {
-		this.mapId = i;
-		this.scale = b;
-		this.locked = bl;
-		this.decorations = collection != null ? Lists.<MapDecoration>newArrayList(collection) : null;
-		this.colorPatch = mapPatch;
-	}
-
-	private ClientboundMapItemDataPacket(FriendlyByteBuf friendlyByteBuf) {
-		this.mapId = friendlyByteBuf.readVarInt();
-		this.scale = friendlyByteBuf.readByte();
-		this.locked = friendlyByteBuf.readBoolean();
-		this.decorations = friendlyByteBuf.readNullable(friendlyByteBufx -> friendlyByteBufx.readList(friendlyByteBufxx -> {
-				MapDecoration.Type type = friendlyByteBufxx.readEnum(MapDecoration.Type.class);
-				byte b = friendlyByteBufxx.readByte();
-				byte c = friendlyByteBufxx.readByte();
-				byte d = (byte)(friendlyByteBufxx.readByte() & 15);
-				Component component = friendlyByteBufxx.readNullable(FriendlyByteBuf::readComponentTrusted);
-				return new MapDecoration(type, b, c, d, component);
-			}));
-		int i = friendlyByteBuf.readUnsignedByte();
-		if (i > 0) {
-			int j = friendlyByteBuf.readUnsignedByte();
-			int k = friendlyByteBuf.readUnsignedByte();
-			int l = friendlyByteBuf.readUnsignedByte();
-			byte[] bs = friendlyByteBuf.readByteArray();
-			this.colorPatch = new MapItemSavedData.MapPatch(k, l, i, j, bs);
-		} else {
-			this.colorPatch = null;
-		}
-	}
-
-	private void write(FriendlyByteBuf friendlyByteBuf) {
-		friendlyByteBuf.writeVarInt(this.mapId);
-		friendlyByteBuf.writeByte(this.scale);
-		friendlyByteBuf.writeBoolean(this.locked);
-		friendlyByteBuf.writeNullable(this.decorations, (friendlyByteBufx, list) -> friendlyByteBufx.writeCollection(list, (friendlyByteBufxx, mapDecoration) -> {
-				friendlyByteBufxx.writeEnum(mapDecoration.type());
-				friendlyByteBufxx.writeByte(mapDecoration.x());
-				friendlyByteBufxx.writeByte(mapDecoration.y());
-				friendlyByteBufxx.writeByte(mapDecoration.rot() & 15);
-				friendlyByteBufxx.writeNullable(mapDecoration.name(), FriendlyByteBuf::writeComponent);
-			}));
-		if (this.colorPatch != null) {
-			friendlyByteBuf.writeByte(this.colorPatch.width);
-			friendlyByteBuf.writeByte(this.colorPatch.height);
-			friendlyByteBuf.writeByte(this.colorPatch.startX);
-			friendlyByteBuf.writeByte(this.colorPatch.startY);
-			friendlyByteBuf.writeByteArray(this.colorPatch.mapColors);
-		} else {
-			friendlyByteBuf.writeByte(0);
-		}
+	public ClientboundMapItemDataPacket(
+		MapId mapId, byte b, boolean bl, @Nullable Collection<MapDecoration> collection, @Nullable MapItemSavedData.MapPatch mapPatch
+	) {
+		this(mapId, b, bl, collection != null ? Optional.of(List.copyOf(collection)) : Optional.empty(), Optional.ofNullable(mapPatch));
 	}
 
 	@Override
@@ -87,25 +45,8 @@ public class ClientboundMapItemDataPacket implements Packet<ClientGamePacketList
 		clientGamePacketListener.handleMapItemData(this);
 	}
 
-	public int getMapId() {
-		return this.mapId;
-	}
-
 	public void applyToMap(MapItemSavedData mapItemSavedData) {
-		if (this.decorations != null) {
-			mapItemSavedData.addClientSideDecorations(this.decorations);
-		}
-
-		if (this.colorPatch != null) {
-			this.colorPatch.applyToMap(mapItemSavedData);
-		}
-	}
-
-	public byte getScale() {
-		return this.scale;
-	}
-
-	public boolean isLocked() {
-		return this.locked;
+		this.decorations.ifPresent(mapItemSavedData::addClientSideDecorations);
+		this.colorPatch.ifPresent(mapPatch -> mapPatch.applyToMap(mapItemSavedData));
 	}
 }

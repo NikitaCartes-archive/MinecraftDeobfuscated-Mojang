@@ -211,7 +211,7 @@ public interface DispenseItemBehavior {
 				BlockPos blockPos = blockSource.pos().relative(direction);
 				ServerLevel serverLevel = blockSource.level();
 				Consumer<ArmorStand> consumer = EntityType.appendDefaultStackConfig(armorStandx -> armorStandx.setYRot(direction.toYRot()), serverLevel, itemStack, null);
-				ArmorStand armorStand = EntityType.ARMOR_STAND.spawn(serverLevel, itemStack.getTag(), consumer, blockPos, MobSpawnType.DISPENSER, false, false);
+				ArmorStand armorStand = EntityType.ARMOR_STAND.spawn(serverLevel, consumer, blockPos, MobSpawnType.DISPENSER, false, false);
 				if (armorStand != null) {
 					itemStack.shrink(1);
 				}
@@ -248,9 +248,9 @@ public interface DispenseItemBehavior {
 				BlockPos blockPos = blockSource.pos().relative(blockSource.state().getValue(DispenserBlock.FACING));
 
 				for (AbstractHorse abstractHorse : blockSource.level()
-					.getEntitiesOfClass(AbstractHorse.class, new AABB(blockPos), abstractHorsex -> abstractHorsex.isAlive() && abstractHorsex.canWearArmor())) {
-					if (abstractHorse.isArmor(itemStack) && !abstractHorse.isWearingArmor() && abstractHorse.isTamed()) {
-						abstractHorse.getSlot(401).set(itemStack.split(1));
+					.getEntitiesOfClass(AbstractHorse.class, new AABB(blockPos), abstractHorsex -> abstractHorsex.isAlive() && abstractHorsex.canWearBodyArmor())) {
+					if (abstractHorse.isBodyArmorItem(itemStack) && !abstractHorse.isWearingBodyArmor() && abstractHorse.isTamed()) {
+						abstractHorse.setBodyArmorItem(itemStack.split(1));
 						this.setSuccess(true);
 						return itemStack;
 					}

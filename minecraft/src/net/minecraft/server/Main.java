@@ -230,7 +230,7 @@ public class Main {
 			RegistryAccess.Frozen frozen = worldStem.registries().compositeAccess();
 			boolean bl2 = optionSet.has(optionSpec7);
 			if (optionSet.has(optionSpec5) || bl2) {
-				forceUpgrade(levelStorageAccess, DataFixers.getDataFixer(), optionSet.has(optionSpec6), () -> true, frozen.registryOrThrow(Registries.LEVEL_STEM), bl2);
+				forceUpgrade(levelStorageAccess, DataFixers.getDataFixer(), optionSet.has(optionSpec6), () -> true, frozen, bl2);
 			}
 
 			WorldData worldData = worldStem.worldData();
@@ -302,11 +302,11 @@ public class Main {
 		DataFixer dataFixer,
 		boolean bl,
 		BooleanSupplier booleanSupplier,
-		Registry<LevelStem> registry,
+		RegistryAccess registryAccess,
 		boolean bl2
 	) {
 		LOGGER.info("Forcing world upgrade!");
-		WorldUpgrader worldUpgrader = new WorldUpgrader(levelStorageAccess, dataFixer, registry, bl, bl2);
+		WorldUpgrader worldUpgrader = new WorldUpgrader(levelStorageAccess, dataFixer, registryAccess, bl, bl2);
 		Component component = null;
 
 		while (!worldUpgrader.isFinished()) {

@@ -25,6 +25,7 @@ import net.minecraft.client.searchtree.SearchRegistry;
 import net.minecraft.client.searchtree.SearchTree;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -514,7 +515,7 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 						}
 					}
 				} else {
-					this.menu.items.addAll(hotbar);
+					this.menu.items.addAll(hotbar.load(this.minecraft.level.registryAccess()));
 				}
 			}
 		} else if (selectedTab.getType() == CreativeModeTab.Type.CATEGORY) {
@@ -784,22 +785,21 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 
 	public static void handleHotbarLoadOrSave(Minecraft minecraft, int i, boolean bl, boolean bl2) {
 		LocalPlayer localPlayer = minecraft.player;
+		RegistryAccess registryAccess = localPlayer.level().registryAccess();
 		HotbarManager hotbarManager = minecraft.getHotbarManager();
 		Hotbar hotbar = hotbarManager.get(i);
 		if (bl) {
+			List<ItemStack> list = hotbar.load(registryAccess);
+
 			for (int j = 0; j < Inventory.getSelectionSize(); j++) {
-				ItemStack itemStack = hotbar.get(j);
-				ItemStack itemStack2 = itemStack.isItemEnabled(localPlayer.level().enabledFeatures()) ? itemStack.copy() : ItemStack.EMPTY;
-				localPlayer.getInventory().setItem(j, itemStack2);
-				minecraft.gameMode.handleCreativeModeItemAdd(itemStack2, 36 + j);
+				ItemStack itemStack = (ItemStack)list.get(j);
+				localPlayer.getInventory().setItem(j, itemStack);
+				minecraft.gameMode.handleCreativeModeItemAdd(itemStack, 36 + j);
 			}
 
 			localPlayer.inventoryMenu.broadcastChanges();
 		} else if (bl2) {
-			for (int j = 0; j < Inventory.getSelectionSize(); j++) {
-				hotbar.set(j, localPlayer.getInventory().getItem(j).copy());
-			}
-
+			hotbar.storeFrom(localPlayer.getInventory(), registryAccess);
 			Component component = minecraft.options.keyHotbarSlots[i].getTranslatedKeyMessage();
 			Component component2 = minecraft.options.keyLoadHotbarActivator.getTranslatedKeyMessage();
 			Component component3 = Component.translatable("inventory.hotbarSaved", component2, component);

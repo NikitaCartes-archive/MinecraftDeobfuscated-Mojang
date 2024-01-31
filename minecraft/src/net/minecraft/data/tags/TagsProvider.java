@@ -1,9 +1,7 @@
 package net.minecraft.data.tags;
 
 import com.google.common.collect.Maps;
-import com.google.gson.JsonElement;
 import com.mojang.logging.LogUtils;
-import com.mojang.serialization.JsonOps;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Locale;
@@ -98,9 +96,8 @@ public abstract class TagsProvider<T> implements DataProvider {
 											)
 										);
 									} else {
-										JsonElement jsonElement = TagFile.CODEC.encodeStart(JsonOps.INSTANCE, new TagFile(list, false)).getOrThrow(false, LOGGER::error);
 										Path path = this.pathProvider.json(resourceLocation);
-										return DataProvider.saveStable(cachedOutput, jsonElement, path);
+										return DataProvider.saveStable(cachedOutput, arg.contents, TagFile.CODEC, new TagFile(list, false), path);
 									}
 								}
 							)

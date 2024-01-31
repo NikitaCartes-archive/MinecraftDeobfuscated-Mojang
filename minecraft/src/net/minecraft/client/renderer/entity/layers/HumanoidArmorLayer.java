@@ -4,7 +4,6 @@ import com.google.common.collect.Maps;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import java.util.Map;
-import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.HumanoidModel;
@@ -16,12 +15,15 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.ModelManager;
+import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.util.FastColor;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ArmorMaterial;
-import net.minecraft.world.item.DyeableArmorItem;
+import net.minecraft.world.item.DyeableLeatherItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.armortrim.ArmorTrim;
 
@@ -53,15 +55,24 @@ public class HumanoidArmorLayer<T extends LivingEntity, M extends HumanoidModel<
 				this.getParentModel().copyPropertiesTo(humanoidModel);
 				this.setPartVisibility(humanoidModel, equipmentSlot);
 				boolean bl = this.usesInnerModel(equipmentSlot);
-				if (armorItem instanceof DyeableArmorItem dyeableArmorItem) {
-					int j = dyeableArmorItem.getColor(itemStack);
-					float f = (float)(j >> 16 & 0xFF) / 255.0F;
-					float g = (float)(j >> 8 & 0xFF) / 255.0F;
-					float h = (float)(j & 0xFF) / 255.0F;
-					this.renderModel(poseStack, multiBufferSource, i, armorItem, humanoidModel, bl, f, g, h, null);
-					this.renderModel(poseStack, multiBufferSource, i, armorItem, humanoidModel, bl, 1.0F, 1.0F, 1.0F, "overlay");
-				} else {
-					this.renderModel(poseStack, multiBufferSource, i, armorItem, humanoidModel, bl, 1.0F, 1.0F, 1.0F, null);
+				ArmorMaterial armorMaterial = armorItem.getMaterial().value();
+				int j = itemStack.is(ItemTags.DYEABLE) ? DyeableLeatherItem.getColor(itemStack) : -1;
+
+				for (ArmorMaterial.Layer layer : armorMaterial.layers()) {
+					float f;
+					float g;
+					float h;
+					if (layer.dyeable() && j != -1) {
+						f = (float)FastColor.ARGB32.red(j) / 255.0F;
+						g = (float)FastColor.ARGB32.green(j) / 255.0F;
+						h = (float)FastColor.ARGB32.blue(j) / 255.0F;
+					} else {
+						f = 1.0F;
+						g = 1.0F;
+						h = 1.0F;
+					}
+
+					this.renderModel(poseStack, multiBufferSource, i, humanoidModel, f, g, h, layer.texture(bl));
 				}
 
 				ArmorTrim.getTrim(livingEntity.level().registryAccess(), itemStack, true)
@@ -97,25 +108,16 @@ public class HumanoidArmorLayer<T extends LivingEntity, M extends HumanoidModel<
 	}
 
 	private void renderModel(
-		PoseStack poseStack,
-		MultiBufferSource multiBufferSource,
-		int i,
-		ArmorItem armorItem,
-		A humanoidModel,
-		boolean bl,
-		float f,
-		float g,
-		float h,
-		@Nullable String string
+		PoseStack poseStack, MultiBufferSource multiBufferSource, int i, A humanoidModel, float f, float g, float h, ResourceLocation resourceLocation
 	) {
-		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.armorCutoutNoCull(this.getArmorLocation(armorItem, bl, string)));
+		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.armorCutoutNoCull(resourceLocation));
 		humanoidModel.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, f, g, h, 1.0F);
 	}
 
 	private void renderTrim(
-		ArmorMaterial armorMaterial, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, ArmorTrim armorTrim, A humanoidModel, boolean bl
+		Holder<ArmorMaterial> holder, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, ArmorTrim armorTrim, A humanoidModel, boolean bl
 	) {
-		TextureAtlasSprite textureAtlasSprite = this.armorTrimAtlas.getSprite(bl ? armorTrim.innerTexture(armorMaterial) : armorTrim.outerTexture(armorMaterial));
+		TextureAtlasSprite textureAtlasSprite = this.armorTrimAtlas.getSprite(bl ? armorTrim.innerTexture(holder) : armorTrim.outerTexture(holder));
 		VertexConsumer vertexConsumer = textureAtlasSprite.wrap(multiBufferSource.getBuffer(Sheets.armorTrimsSheet(armorTrim.pattern().value().decal())));
 		humanoidModel.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
 	}
@@ -130,10 +132,5 @@ public class HumanoidArmorLayer<T extends LivingEntity, M extends HumanoidModel<
 
 	private boolean usesInnerModel(EquipmentSlot equipmentSlot) {
 		return equipmentSlot == EquipmentSlot.LEGS;
-	}
-
-	private ResourceLocation getArmorLocation(ArmorItem armorItem, boolean bl, @Nullable String string) {
-		String string2 = "textures/models/armor/" + armorItem.getMaterial().getName() + "_layer_" + (bl ? 2 : 1) + (string == null ? "" : "_" + string) + ".png";
-		return (ResourceLocation)ARMOR_LOCATION_CACHE.computeIfAbsent(string2, ResourceLocation::new);
 	}
 }

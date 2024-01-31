@@ -300,6 +300,44 @@ public class Util {
 		} : supplier;
 	}
 
+	public static <T> Predicate<T> allOf(List<? extends Predicate<T>> list) {
+		List<Predicate<T>> list2 = List.copyOf(list);
+
+		return switch (list2.size()) {
+			case 0 -> object -> true;
+			case 1 -> (Predicate)list2.get(0);
+			case 2 -> ((Predicate)list2.get(0)).and((Predicate)list2.get(1));
+			default -> object -> {
+			for (Predicate<T> predicate : list2) {
+				if (!predicate.test(object)) {
+					return false;
+				}
+			}
+
+			return true;
+		};
+		};
+	}
+
+	public static <T> Predicate<T> anyOf(List<? extends Predicate<T>> list) {
+		List<Predicate<T>> list2 = List.copyOf(list);
+
+		return switch (list2.size()) {
+			case 0 -> object -> false;
+			case 1 -> (Predicate)list2.get(0);
+			case 2 -> ((Predicate)list2.get(0)).or((Predicate)list2.get(1));
+			default -> object -> {
+			for (Predicate<T> predicate : list2) {
+				if (predicate.test(object)) {
+					return true;
+				}
+			}
+
+			return false;
+		};
+		};
+	}
+
 	public static Util.OS getPlatform() {
 		String string = System.getProperty("os.name").toLowerCase(Locale.ROOT);
 		if (string.contains("win")) {

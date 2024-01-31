@@ -9,6 +9,7 @@ import javax.annotation.Nullable;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.chat.ClickEvent;
@@ -85,16 +86,16 @@ public class SignBlockEntity extends BlockEntity {
 	}
 
 	@Override
-	protected void saveAdditional(CompoundTag compoundTag) {
-		super.saveAdditional(compoundTag);
+	protected void saveAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
+		super.saveAdditional(compoundTag, provider);
 		SignText.DIRECT_CODEC.encodeStart(NbtOps.INSTANCE, this.frontText).resultOrPartial(LOGGER::error).ifPresent(tag -> compoundTag.put("front_text", tag));
 		SignText.DIRECT_CODEC.encodeStart(NbtOps.INSTANCE, this.backText).resultOrPartial(LOGGER::error).ifPresent(tag -> compoundTag.put("back_text", tag));
 		compoundTag.putBoolean("is_waxed", this.isWaxed);
 	}
 
 	@Override
-	public void load(CompoundTag compoundTag) {
-		super.load(compoundTag);
+	public void load(CompoundTag compoundTag, HolderLookup.Provider provider) {
+		super.load(compoundTag, provider);
 		if (compoundTag.contains("front_text")) {
 			SignText.DIRECT_CODEC
 				.parse(NbtOps.INSTANCE, compoundTag.getCompound("front_text"))
@@ -216,8 +217,8 @@ public class SignBlockEntity extends BlockEntity {
 	}
 
 	@Override
-	public CompoundTag getUpdateTag() {
-		return this.saveWithoutMetadata();
+	public CompoundTag getUpdateTag(HolderLookup.Provider provider) {
+		return this.saveWithoutMetadata(provider);
 	}
 
 	@Override

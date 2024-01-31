@@ -61,7 +61,7 @@ public abstract class AbstractChestedHorse extends AbstractHorse {
 
 	@Override
 	protected int getInventorySize() {
-		return this.hasChest() ? 17 : super.getInventorySize();
+		return this.hasChest() ? 16 : super.getInventorySize();
 	}
 
 	@Override
@@ -88,11 +88,11 @@ public abstract class AbstractChestedHorse extends AbstractHorse {
 		if (this.hasChest()) {
 			ListTag listTag = new ListTag();
 
-			for (int i = 2; i < this.inventory.getContainerSize(); i++) {
+			for (int i = 1; i < this.inventory.getContainerSize(); i++) {
 				ItemStack itemStack = this.inventory.getItem(i);
 				if (!itemStack.isEmpty()) {
 					CompoundTag compoundTag2 = new CompoundTag();
-					compoundTag2.putByte("Slot", (byte)i);
+					compoundTag2.putByte("Slot", (byte)(i - 1));
 					itemStack.save(compoundTag2);
 					listTag.add(compoundTag2);
 				}
@@ -113,13 +113,13 @@ public abstract class AbstractChestedHorse extends AbstractHorse {
 			for (int i = 0; i < listTag.size(); i++) {
 				CompoundTag compoundTag2 = listTag.getCompound(i);
 				int j = compoundTag2.getByte("Slot") & 255;
-				if (j >= 2 && j < this.inventory.getContainerSize()) {
-					this.inventory.setItem(j, ItemStack.of(compoundTag2));
+				if (j < this.inventory.getContainerSize() - 1) {
+					this.inventory.setItem(j + 1, ItemStack.of(compoundTag2));
 				}
 			}
 		}
 
-		this.updateContainerEquipment();
+		this.syncSaddleToClients();
 	}
 
 	@Override

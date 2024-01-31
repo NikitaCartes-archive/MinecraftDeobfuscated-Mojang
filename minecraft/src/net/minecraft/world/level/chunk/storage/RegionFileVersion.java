@@ -39,7 +39,7 @@ public class RegionFileVersion {
 			outputStream -> new BufferedOutputStream(new DeflaterOutputStream(outputStream))
 		)
 	);
-	public static final RegionFileVersion VERSION_NONE = register(new RegionFileVersion(3, null, inputStream -> inputStream, outputStream -> outputStream));
+	public static final RegionFileVersion VERSION_NONE = register(new RegionFileVersion(3, "none", FastBufferedInputStream::new, BufferedOutputStream::new));
 	public static final RegionFileVersion VERSION_LZ4 = register(
 		new RegionFileVersion(
 			4,
@@ -48,6 +48,11 @@ public class RegionFileVersion {
 			outputStream -> new BufferedOutputStream(new LZ4BlockOutputStream(outputStream))
 		)
 	);
+	public static final RegionFileVersion VERSION_CUSTOM = register(new RegionFileVersion(127, null, inputStream -> {
+		throw new UnsupportedOperationException();
+	}, outputStream -> {
+		throw new UnsupportedOperationException();
+	}));
 	public static final RegionFileVersion DEFAULT = VERSION_DEFLATE;
 	private static volatile RegionFileVersion selected = DEFAULT;
 	private final int id;

@@ -7,6 +7,7 @@ import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -220,8 +221,10 @@ public class DecoratedPotBlock extends BaseEntityBlock implements SimpleWaterlog
 	}
 
 	@Override
-	public void appendHoverText(ItemStack itemStack, @Nullable BlockGetter blockGetter, List<Component> list, TooltipFlag tooltipFlag) {
-		super.appendHoverText(itemStack, blockGetter, list, tooltipFlag);
+	public void appendHoverText(
+		ItemStack itemStack, @Nullable BlockGetter blockGetter, List<Component> list, TooltipFlag tooltipFlag, @Nullable RegistryAccess registryAccess
+	) {
+		super.appendHoverText(itemStack, blockGetter, list, tooltipFlag, registryAccess);
 		DecoratedPotBlockEntity.Decorations decorations = DecoratedPotBlockEntity.Decorations.load(BlockItem.getBlockEntityData(itemStack));
 		if (!decorations.equals(DecoratedPotBlockEntity.Decorations.EMPTY)) {
 			list.add(CommonComponents.EMPTY);

@@ -2,7 +2,6 @@ package net.minecraft.world.item.crafting;
 
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -37,7 +36,7 @@ public class BookCloningRecipe extends CustomRecipe {
 			}
 		}
 
-		return !itemStack.isEmpty() && itemStack.hasTag() && i > 0;
+		return !itemStack.isEmpty() && i > 0;
 	}
 
 	public ItemStack assemble(CraftingContainer craftingContainer, RegistryAccess registryAccess) {
@@ -63,11 +62,9 @@ public class BookCloningRecipe extends CustomRecipe {
 			}
 		}
 
-		if (!itemStack.isEmpty() && itemStack.hasTag() && i >= 1 && WrittenBookItem.getGeneration(itemStack) < 2) {
-			ItemStack itemStack3 = new ItemStack(Items.WRITTEN_BOOK, i);
-			CompoundTag compoundTag = itemStack.getTag().copy();
-			compoundTag.putInt("generation", WrittenBookItem.getGeneration(itemStack) + 1);
-			itemStack3.setTag(compoundTag);
+		if (!itemStack.isEmpty() && i >= 1 && WrittenBookItem.getGeneration(itemStack) < 2) {
+			ItemStack itemStack3 = itemStack.copyWithCount(i);
+			itemStack3.getOrCreateTag().putInt("generation", WrittenBookItem.getGeneration(itemStack) + 1);
 			return itemStack3;
 		} else {
 			return ItemStack.EMPTY;

@@ -7,7 +7,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.core.Vec3i;
 import net.minecraft.util.FastColor;
-import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
@@ -69,7 +68,7 @@ public interface VertexConsumer {
 		int[] ks = bakedQuad.getVertices();
 		Vec3i vec3i = bakedQuad.getDirection().getNormal();
 		Matrix4f matrix4f = pose.pose();
-		Vector3f vector3f = pose.normal().transform(new Vector3f((float)vec3i.getX(), (float)vec3i.getY(), (float)vec3i.getZ()));
+		Vector3f vector3f = pose.transformNormal((float)vec3i.getX(), (float)vec3i.getY(), (float)vec3i.getZ(), new Vector3f());
 		int j = 8;
 		int k = ks.length / 8;
 
@@ -108,13 +107,17 @@ public interface VertexConsumer {
 		}
 	}
 
-	default VertexConsumer vertex(Matrix4f matrix4f, float f, float g, float h) {
-		Vector4f vector4f = matrix4f.transform(new Vector4f(f, g, h, 1.0F));
-		return this.vertex((double)vector4f.x(), (double)vector4f.y(), (double)vector4f.z());
+	default VertexConsumer vertex(PoseStack.Pose pose, float f, float g, float h) {
+		return this.vertex(pose.pose(), f, g, h);
 	}
 
-	default VertexConsumer normal(Matrix3f matrix3f, float f, float g, float h) {
-		Vector3f vector3f = matrix3f.transform(new Vector3f(f, g, h));
+	default VertexConsumer vertex(Matrix4f matrix4f, float f, float g, float h) {
+		Vector3f vector3f = matrix4f.transformPosition(f, g, h, new Vector3f());
+		return this.vertex((double)vector3f.x(), (double)vector3f.y(), (double)vector3f.z());
+	}
+
+	default VertexConsumer normal(PoseStack.Pose pose, float f, float g, float h) {
+		Vector3f vector3f = pose.transformNormal(f, g, h, new Vector3f());
 		return this.normal(vector3f.x(), vector3f.y(), vector3f.z());
 	}
 }

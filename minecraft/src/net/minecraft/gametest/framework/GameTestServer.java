@@ -32,6 +32,8 @@ import net.minecraft.server.level.progress.LoggerChunkProgressListener;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.util.datafix.DataFixers;
+import net.minecraft.util.debugchart.LocalSampleLogger;
+import net.minecraft.util.debugchart.SampleLogger;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.level.DataPackConfig;
@@ -52,6 +54,7 @@ public class GameTestServer extends MinecraftServer {
 	private static final int PROGRESS_REPORT_INTERVAL = 20;
 	private static final int TEST_POSITION_RANGE = 14999992;
 	private static final Services NO_SERVICES = new Services(null, ServicesKeySet.EMPTY, null, null);
+	private final LocalSampleLogger sampleLogger = new LocalSampleLogger(4);
 	private List<GameTestBatch> testBatches = new ArrayList();
 	private final List<TestFunction> testFunctions;
 	private final BlockPos spawnPos;
@@ -184,6 +187,16 @@ public class GameTestServer extends MinecraftServer {
 
 			LOGGER.info("====================================================");
 		}
+	}
+
+	@Override
+	public SampleLogger getTickTimeLogger() {
+		return this.sampleLogger;
+	}
+
+	@Override
+	public boolean isTickTimeLoggingEnabled() {
+		return false;
 	}
 
 	@Override

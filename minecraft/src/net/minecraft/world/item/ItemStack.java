@@ -14,6 +14,7 @@ import java.text.DecimalFormatSymbols;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Map.Entry;
@@ -82,6 +83,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
+import net.minecraft.world.level.saveddata.maps.MapId;
 import org.slf4j.Logger;
 
 public final class ItemStack {
@@ -483,6 +485,19 @@ public final class ItemStack {
 		}
 	}
 
+	public ItemStack transmuteCopy(ItemLike itemLike, int i) {
+		return this.isEmpty() ? EMPTY : this.transmuteCopyIgnoreEmpty(itemLike, i);
+	}
+
+	public ItemStack transmuteCopyIgnoreEmpty(ItemLike itemLike, int i) {
+		ItemStack itemStack = new ItemStack(itemLike, i);
+		if (this.tag != null) {
+			itemStack.setTag(this.tag.copy());
+		}
+
+		return itemStack;
+	}
+
 	public static boolean matches(ItemStack itemStack, ItemStack itemStack2) {
 		if (itemStack == itemStack2) {
 			return true;
@@ -501,6 +516,11 @@ public final class ItemStack {
 		} else {
 			return itemStack.isEmpty() && itemStack2.isEmpty() ? true : Objects.equals(itemStack.tag, itemStack2.tag);
 		}
+	}
+
+	public static MapCodec<ItemStack> optionalFieldOf(String string) {
+		return CODEC.optionalFieldOf(string)
+			.xmap(optional -> (ItemStack)optional.orElse(EMPTY), itemStack -> itemStack.isEmpty() ? Optional.empty() : Optional.of(itemStack));
 	}
 
 	public String getDescriptionId() {
@@ -659,8 +679,8 @@ public final class ItemStack {
 
 		list.add(mutableComponent);
 		if (!tooltipFlag.isAdvanced() && !this.hasCustomHoverName() && this.is(Items.FILLED_MAP)) {
-			Integer integer = MapItem.getMapId(this);
-			if (integer != null) {
+			MapId mapId = MapItem.getMapId(this);
+			if (mapId != null) {
 				list.add(MapItem.getTooltipForId(this));
 			}
 		}
@@ -668,41 +688,40 @@ public final class ItemStack {
 		int i = this.getHideFlags();
 		if (shouldShowInTooltip(i, ItemStack.TooltipPart.ADDITIONAL)) {
 			this.getItem().appendHoverText(this, player == null ? null : player.level(), list, tooltipFlag);
+			appendEnchantmentNames(list, EnchantedBookItem.getEnchantments(this));
 		}
 
-		if (this.hasTag()) {
-			if (shouldShowInTooltip(i, ItemStack.TooltipPart.UPGRADES) && player != null) {
-				ArmorTrim.appendUpgradeHoverText(this, player.level().registryAccess(), list);
-			}
+		if (shouldShowInTooltip(i, ItemStack.TooltipPart.UPGRADES) && player != null) {
+			ArmorTrim.appendUpgradeHoverText(this, player.level().registryAccess(), list);
+		}
 
-			if (shouldShowInTooltip(i, ItemStack.TooltipPart.ENCHANTMENTS)) {
-				appendEnchantmentNames(list, this.getEnchantmentTags());
-			}
+		if (shouldShowInTooltip(i, ItemStack.TooltipPart.ENCHANTMENTS)) {
+			appendEnchantmentNames(list, this.getEnchantmentTags());
+		}
 
-			if (this.tag.contains("display", 10)) {
-				CompoundTag compoundTag = this.tag.getCompound("display");
-				if (shouldShowInTooltip(i, ItemStack.TooltipPart.DYE) && compoundTag.contains("color", 99)) {
-					if (tooltipFlag.isAdvanced()) {
-						list.add(Component.translatable("item.color", String.format(Locale.ROOT, "#%06X", compoundTag.getInt("color"))).withStyle(ChatFormatting.GRAY));
-					} else {
-						list.add(Component.translatable("item.dyed").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
-					}
+		if (this.tag != null && this.tag.contains("display", 10)) {
+			CompoundTag compoundTag = this.tag.getCompound("display");
+			if (shouldShowInTooltip(i, ItemStack.TooltipPart.DYE) && compoundTag.contains("color", 99)) {
+				if (tooltipFlag.isAdvanced()) {
+					list.add(Component.translatable("item.color", String.format(Locale.ROOT, "#%06X", compoundTag.getInt("color"))).withStyle(ChatFormatting.GRAY));
+				} else {
+					list.add(Component.translatable("item.dyed").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
 				}
+			}
 
-				if (compoundTag.getTagType("Lore") == 9) {
-					ListTag listTag = compoundTag.getList("Lore", 8);
+			if (compoundTag.getTagType("Lore") == 9) {
+				ListTag listTag = compoundTag.getList("Lore", 8);
 
-					for (int j = 0; j < listTag.size(); j++) {
-						String string = listTag.getString(j);
+				for (int j = 0; j < listTag.size(); j++) {
+					String string = listTag.getString(j);
 
-						try {
-							MutableComponent mutableComponent2 = Component.Serializer.fromJson(string);
-							if (mutableComponent2 != null) {
-								list.add(ComponentUtils.mergeStyles(mutableComponent2, LORE_STYLE));
-							}
-						} catch (Exception var19) {
-							compoundTag.remove("Lore");
+					try {
+						MutableComponent mutableComponent2 = Component.Serializer.fromJson(string);
+						if (mutableComponent2 != null) {
+							list.add(ComponentUtils.mergeStyles(mutableComponent2, LORE_STYLE));
 						}
+					} catch (Exception var19) {
+						compoundTag.remove("Lore");
 					}
 				}
 			}
@@ -777,32 +796,30 @@ public final class ItemStack {
 			}
 		}
 
-		if (this.hasTag()) {
-			if (shouldShowInTooltip(i, ItemStack.TooltipPart.UNBREAKABLE) && this.tag.getBoolean("Unbreakable")) {
-				list.add(Component.translatable("item.unbreakable").withStyle(ChatFormatting.BLUE));
-			}
+		if (shouldShowInTooltip(i, ItemStack.TooltipPart.UNBREAKABLE) && this.tag != null && this.tag.getBoolean("Unbreakable")) {
+			list.add(Component.translatable("item.unbreakable").withStyle(ChatFormatting.BLUE));
+		}
 
-			if (shouldShowInTooltip(i, ItemStack.TooltipPart.CAN_DESTROY) && this.tag.contains("CanDestroy", 9)) {
-				ListTag listTag2 = this.tag.getList("CanDestroy", 8);
-				if (!listTag2.isEmpty()) {
-					list.add(CommonComponents.EMPTY);
-					list.add(Component.translatable("item.canBreak").withStyle(ChatFormatting.GRAY));
+		if (shouldShowInTooltip(i, ItemStack.TooltipPart.CAN_DESTROY) && this.tag != null && this.tag.contains("CanDestroy", 9)) {
+			ListTag listTag2 = this.tag.getList("CanDestroy", 8);
+			if (!listTag2.isEmpty()) {
+				list.add(CommonComponents.EMPTY);
+				list.add(Component.translatable("item.canBreak").withStyle(ChatFormatting.GRAY));
 
-					for (int k = 0; k < listTag2.size(); k++) {
-						list.addAll(expandBlockState(listTag2.getString(k)));
-					}
+				for (int k = 0; k < listTag2.size(); k++) {
+					list.addAll(expandBlockState(listTag2.getString(k)));
 				}
 			}
+		}
 
-			if (shouldShowInTooltip(i, ItemStack.TooltipPart.CAN_PLACE) && this.tag.contains("CanPlaceOn", 9)) {
-				ListTag listTag2 = this.tag.getList("CanPlaceOn", 8);
-				if (!listTag2.isEmpty()) {
-					list.add(CommonComponents.EMPTY);
-					list.add(Component.translatable("item.canPlace").withStyle(ChatFormatting.GRAY));
+		if (shouldShowInTooltip(i, ItemStack.TooltipPart.CAN_PLACE) && this.tag != null && this.tag.contains("CanPlaceOn", 9)) {
+			ListTag listTag2 = this.tag.getList("CanPlaceOn", 8);
+			if (!listTag2.isEmpty()) {
+				list.add(CommonComponents.EMPTY);
+				list.add(Component.translatable("item.canPlace").withStyle(ChatFormatting.GRAY));
 
-					for (int k = 0; k < listTag2.size(); k++) {
-						list.addAll(expandBlockState(listTag2.getString(k)));
-					}
+				for (int k = 0; k < listTag2.size(); k++) {
+					list.addAll(expandBlockState(listTag2.getString(k)));
 				}
 			}
 		}
@@ -875,13 +892,12 @@ public final class ItemStack {
 	}
 
 	public void enchant(Enchantment enchantment, int i) {
-		this.getOrCreateTag();
-		if (!this.tag.contains("Enchantments", 9)) {
-			this.tag.put("Enchantments", new ListTag());
+		Map<Enchantment, Integer> map = EnchantmentHelper.getEnchantments(this);
+		if (i != 0) {
+			map.merge(enchantment, i, Integer::max);
 		}
 
-		ListTag listTag = this.tag.getList("Enchantments", 10);
-		listTag.add(EnchantmentHelper.storeEnchantment(EnchantmentHelper.getEnchantmentId(enchantment), (byte)i));
+		EnchantmentHelper.setEnchantments(map, this);
 	}
 
 	public boolean isEnchanted() {

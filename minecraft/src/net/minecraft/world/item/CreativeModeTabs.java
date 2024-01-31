@@ -1101,6 +1101,7 @@ public class CreativeModeTabs {
 						output.accept(Items.DRAGON_EGG);
 						output.accept(Items.END_PORTAL_FRAME);
 						output.accept(Items.ENDER_EYE);
+						output.accept(Items.VAULT);
 						output.accept(Items.INFESTED_STONE);
 						output.accept(Items.INFESTED_COBBLESTONE);
 						output.accept(Items.INFESTED_STONE_BRICKS);

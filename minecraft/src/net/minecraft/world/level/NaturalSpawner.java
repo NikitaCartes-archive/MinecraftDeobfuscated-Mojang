@@ -186,7 +186,7 @@ public final class NaturalSpawner {
 
 								mob.moveTo(d, (double)i, e, serverLevel.random.nextFloat() * 360.0F, 0.0F);
 								if (isValidPositionForMob(serverLevel, mob, f)) {
-									spawnGroupData = mob.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(mob.blockPosition()), MobSpawnType.NATURAL, spawnGroupData, null);
+									spawnGroupData = mob.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(mob.blockPosition()), MobSpawnType.NATURAL, spawnGroupData);
 									j++;
 									p++;
 									serverLevel.addFreshEntityWithPassengers(mob);
@@ -394,7 +394,7 @@ public final class NaturalSpawner {
 									&& mob.checkSpawnRules(serverLevelAccessor, MobSpawnType.CHUNK_GENERATION)
 									&& mob.checkSpawnObstruction(serverLevelAccessor)) {
 									spawnGroupData = mob.finalizeSpawn(
-										serverLevelAccessor, serverLevelAccessor.getCurrentDifficultyAt(mob.blockPosition()), MobSpawnType.CHUNK_GENERATION, spawnGroupData, null
+										serverLevelAccessor, serverLevelAccessor.getCurrentDifficultyAt(mob.blockPosition()), MobSpawnType.CHUNK_GENERATION, spawnGroupData
 									);
 									serverLevelAccessor.addFreshEntityWithPassengers(mob);
 									bl = true;

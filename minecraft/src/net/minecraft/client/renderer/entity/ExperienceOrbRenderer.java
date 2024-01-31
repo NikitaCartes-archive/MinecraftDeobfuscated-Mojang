@@ -12,8 +12,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.ExperienceOrb;
-import org.joml.Matrix3f;
-import org.joml.Matrix4f;
 
 @Environment(EnvType.CLIENT)
 public class ExperienceOrbRenderer extends EntityRenderer<ExperienceOrb> {
@@ -52,23 +50,21 @@ public class ExperienceOrbRenderer extends EntityRenderer<ExperienceOrb> {
 		poseStack.scale(0.3F, 0.3F, 0.3F);
 		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RENDER_TYPE);
 		PoseStack.Pose pose = poseStack.last();
-		Matrix4f matrix4f = pose.pose();
-		Matrix3f matrix3f = pose.normal();
-		vertex(vertexConsumer, matrix4f, matrix3f, -0.5F, -0.25F, s, 255, u, h, m, i);
-		vertex(vertexConsumer, matrix4f, matrix3f, 0.5F, -0.25F, s, 255, u, k, m, i);
-		vertex(vertexConsumer, matrix4f, matrix3f, 0.5F, 0.75F, s, 255, u, k, l, i);
-		vertex(vertexConsumer, matrix4f, matrix3f, -0.5F, 0.75F, s, 255, u, h, l, i);
+		vertex(vertexConsumer, pose, -0.5F, -0.25F, s, 255, u, h, m, i);
+		vertex(vertexConsumer, pose, 0.5F, -0.25F, s, 255, u, k, m, i);
+		vertex(vertexConsumer, pose, 0.5F, 0.75F, s, 255, u, k, l, i);
+		vertex(vertexConsumer, pose, -0.5F, 0.75F, s, 255, u, h, l, i);
 		poseStack.popPose();
 		super.render(experienceOrb, f, g, poseStack, multiBufferSource, i);
 	}
 
-	private static void vertex(VertexConsumer vertexConsumer, Matrix4f matrix4f, Matrix3f matrix3f, float f, float g, int i, int j, int k, float h, float l, int m) {
-		vertexConsumer.vertex(matrix4f, f, g, 0.0F)
+	private static void vertex(VertexConsumer vertexConsumer, PoseStack.Pose pose, float f, float g, int i, int j, int k, float h, float l, int m) {
+		vertexConsumer.vertex(pose, f, g, 0.0F)
 			.color(i, j, k, 128)
 			.uv(h, l)
 			.overlayCoords(OverlayTexture.NO_OVERLAY)
 			.uv2(m)
-			.normal(matrix3f, 0.0F, 1.0F, 0.0F)
+			.normal(pose, 0.0F, 1.0F, 0.0F)
 			.endVertex();
 	}
 

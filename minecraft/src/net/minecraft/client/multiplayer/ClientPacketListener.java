@@ -132,6 +132,7 @@ import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraft.network.protocol.game.ClientboundCooldownPacket;
 import net.minecraft.network.protocol.game.ClientboundCustomChatCompletionsPacket;
 import net.minecraft.network.protocol.game.ClientboundDamageEventPacket;
+import net.minecraft.network.protocol.game.ClientboundDebugSamplePacket;
 import net.minecraft.network.protocol.game.ClientboundDeleteChatPacket;
 import net.minecraft.network.protocol.game.ClientboundDisguisedChatPacket;
 import net.minecraft.network.protocol.game.ClientboundEntityEventPacket;
@@ -276,7 +277,6 @@ import net.minecraft.world.inventory.MerchantMenu;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.MapItem;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Explosion;
@@ -294,6 +294,7 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.lighting.LevelLightEngine;
+import net.minecraft.world.level.saveddata.maps.MapId;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.Objective;
@@ -326,7 +327,7 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 	private int serverSimulationDistance = 3;
 	private final RandomSource random = RandomSource.createThreadSafe();
 	private CommandDispatcher<SharedSuggestionProvider> commands = new CommandDispatcher<>();
-	private final RecipeManager recipeManager = new RecipeManager();
+	private final RecipeManager recipeManager;
 	private final UUID id = UUID.randomUUID();
 	private Set<ResourceKey<Level>> levels;
 	private final RegistryAccess.Frozen registryAccess;
@@ -338,6 +339,7 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 	private MessageSignatureCache messageSignatureCache = MessageSignatureCache.createDefault();
 	private final ChunkBatchSizeCalculator chunkBatchSizeCalculator = new ChunkBatchSizeCalculator();
 	private final PingDebugMonitor pingDebugMonitor;
+	private final DebugSampleSubscriber debugSampleSubscriber;
 	@Nullable
 	private LevelLoadStatusManager levelLoadStatusManager;
 	private boolean serverEnforcesSecureChat;
@@ -353,6 +355,8 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 		this.advancements = new ClientAdvancements(minecraft, this.telemetryManager);
 		this.suggestionsProvider = new ClientSuggestionProvider(this, minecraft);
 		this.pingDebugMonitor = new PingDebugMonitor(this, minecraft.getDebugOverlay().getPingLogger());
+		this.recipeManager = new RecipeManager(this.registryAccess);
+		this.debugSampleSubscriber = new DebugSampleSubscriber(this, minecraft.getDebugOverlay());
 	}
 
 	public ClientSuggestionProvider getSuggestionsProvider() {
@@ -1092,7 +1096,7 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 		Holder<DimensionType> holder = commonPlayerSpawnInfo.dimensionType();
 		LocalPlayer localPlayer = this.minecraft.player;
 		if (resourceKey != localPlayer.level().dimension()) {
-			Map<String, MapItemSavedData> map = this.level.getAllMapData();
+			Map<MapId, MapItemSavedData> map = this.level.getAllMapData();
 			boolean bl = commonPlayerSpawnInfo.isDebug();
 			boolean bl2 = commonPlayerSpawnInfo.isFlat();
 			ClientLevel.ClientLevelData clientLevelData = new ClientLevel.ClientLevelData(this.levelData.getDifficulty(), this.levelData.isHardcore(), bl2);
@@ -1286,7 +1290,7 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 		this.minecraft.level.getBlockEntity(blockPos, clientboundBlockEntityDataPacket.getType()).ifPresent(blockEntity -> {
 			CompoundTag compoundTag = clientboundBlockEntityDataPacket.getTag();
 			if (!compoundTag.isEmpty()) {
-				blockEntity.load(compoundTag);
+				blockEntity.load(compoundTag, this.registryAccess);
 			}
 
 			if (blockEntity instanceof CommandBlockEntity && this.minecraft.screen instanceof CommandBlockEditScreen) {
@@ -1307,9 +1311,8 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 	@Override
 	public void handleSetEquipment(ClientboundSetEquipmentPacket clientboundSetEquipmentPacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundSetEquipmentPacket, this, this.minecraft);
-		Entity entity = this.level.getEntity(clientboundSetEquipmentPacket.getEntity());
-		if (entity != null) {
-			clientboundSetEquipmentPacket.getSlots().forEach(pair -> entity.setItemSlot((EquipmentSlot)pair.getFirst(), (ItemStack)pair.getSecond()));
+		if (this.level.getEntity(clientboundSetEquipmentPacket.getEntity()) instanceof LivingEntity livingEntity) {
+			clientboundSetEquipmentPacket.getSlots().forEach(pair -> livingEntity.setItemSlot((EquipmentSlot)pair.getFirst(), (ItemStack)pair.getSecond()));
 		}
 	}
 
@@ -1419,18 +1422,17 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 	public void handleMapItemData(ClientboundMapItemDataPacket clientboundMapItemDataPacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundMapItemDataPacket, this, this.minecraft);
 		MapRenderer mapRenderer = this.minecraft.gameRenderer.getMapRenderer();
-		int i = clientboundMapItemDataPacket.getMapId();
-		String string = MapItem.makeKey(i);
-		MapItemSavedData mapItemSavedData = this.minecraft.level.getMapData(string);
+		MapId mapId = clientboundMapItemDataPacket.mapId();
+		MapItemSavedData mapItemSavedData = this.minecraft.level.getMapData(mapId);
 		if (mapItemSavedData == null) {
 			mapItemSavedData = MapItemSavedData.createForClient(
-				clientboundMapItemDataPacket.getScale(), clientboundMapItemDataPacket.isLocked(), this.minecraft.level.dimension()
+				clientboundMapItemDataPacket.scale(), clientboundMapItemDataPacket.locked(), this.minecraft.level.dimension()
 			);
-			this.minecraft.level.overrideMapData(string, mapItemSavedData);
+			this.minecraft.level.overrideMapData(mapId, mapItemSavedData);
 		}
 
 		clientboundMapItemDataPacket.applyToMap(mapItemSavedData);
-		mapRenderer.update(i, mapItemSavedData);
+		mapRenderer.update(mapId, mapItemSavedData);
 	}
 
 	@Override
@@ -1476,7 +1478,7 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 	@Override
 	public void handleCommandSuggestions(ClientboundCommandSuggestionsPacket clientboundCommandSuggestionsPacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundCommandSuggestionsPacket, this, this.minecraft);
-		this.suggestionsProvider.completeCustomSuggestions(clientboundCommandSuggestionsPacket.getId(), clientboundCommandSuggestionsPacket.getSuggestions());
+		this.suggestionsProvider.completeCustomSuggestions(clientboundCommandSuggestionsPacket.id(), clientboundCommandSuggestionsPacket.toSuggestions());
 	}
 
 	@Override
@@ -1614,10 +1616,10 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 	@Override
 	public void handlePlayerCombatKill(ClientboundPlayerCombatKillPacket clientboundPlayerCombatKillPacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundPlayerCombatKillPacket, this, this.minecraft);
-		Entity entity = this.level.getEntity(clientboundPlayerCombatKillPacket.getPlayerId());
+		Entity entity = this.level.getEntity(clientboundPlayerCombatKillPacket.playerId());
 		if (entity == this.minecraft.player) {
 			if (this.minecraft.player.shouldShowDeathScreen()) {
-				this.minecraft.setScreen(new DeathScreen(clientboundPlayerCombatKillPacket.getMessage(), this.level.getLevelData().isHardcore()));
+				this.minecraft.setScreen(new DeathScreen(clientboundPlayerCombatKillPacket.message(), this.level.getLevelData().isHardcore()));
 			} else {
 				this.minecraft.player.respawn();
 			}
@@ -1704,8 +1706,8 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 	public void handleServerData(ClientboundServerDataPacket clientboundServerDataPacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundServerDataPacket, this, this.minecraft);
 		if (this.serverData != null) {
-			this.serverData.motd = clientboundServerDataPacket.getMotd();
-			clientboundServerDataPacket.getIconBytes().map(ServerData::validateIcon).ifPresent(this.serverData::setIconBytes);
+			this.serverData.motd = clientboundServerDataPacket.motd();
+			clientboundServerDataPacket.iconBytes().map(ServerData::validateIcon).ifPresent(this.serverData::setIconBytes);
 			ServerList.saveSingleServer(this.serverData);
 		}
 	}
@@ -1719,19 +1721,19 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 	@Override
 	public void setActionBarText(ClientboundSetActionBarTextPacket clientboundSetActionBarTextPacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundSetActionBarTextPacket, this, this.minecraft);
-		this.minecraft.gui.setOverlayMessage(clientboundSetActionBarTextPacket.getText(), false);
+		this.minecraft.gui.setOverlayMessage(clientboundSetActionBarTextPacket.text(), false);
 	}
 
 	@Override
 	public void setTitleText(ClientboundSetTitleTextPacket clientboundSetTitleTextPacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundSetTitleTextPacket, this, this.minecraft);
-		this.minecraft.gui.setTitle(clientboundSetTitleTextPacket.getText());
+		this.minecraft.gui.setTitle(clientboundSetTitleTextPacket.text());
 	}
 
 	@Override
 	public void setSubtitleText(ClientboundSetSubtitleTextPacket clientboundSetSubtitleTextPacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundSetSubtitleTextPacket, this, this.minecraft);
-		this.minecraft.gui.setSubtitle(clientboundSetSubtitleTextPacket.getText());
+		this.minecraft.gui.setSubtitle(clientboundSetSubtitleTextPacket.text());
 	}
 
 	@Override
@@ -1745,8 +1747,8 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 	@Override
 	public void handleTabListCustomisation(ClientboundTabListPacket clientboundTabListPacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundTabListPacket, this, this.minecraft);
-		this.minecraft.gui.getTabList().setHeader(clientboundTabListPacket.getHeader().getString().isEmpty() ? null : clientboundTabListPacket.getHeader());
-		this.minecraft.gui.getTabList().setFooter(clientboundTabListPacket.getFooter().getString().isEmpty() ? null : clientboundTabListPacket.getFooter());
+		this.minecraft.gui.getTabList().setHeader(clientboundTabListPacket.header().getString().isEmpty() ? null : clientboundTabListPacket.header());
+		this.minecraft.gui.getTabList().setFooter(clientboundTabListPacket.footer().getString().isEmpty() ? null : clientboundTabListPacket.footer());
 	}
 
 	@Override
@@ -2051,7 +2053,7 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 		if (objective != null) {
 			ScoreAccess scoreAccess = this.scoreboard.getOrCreatePlayerScore(scoreHolder, objective, true);
 			scoreAccess.set(clientboundSetScorePacket.score());
-			scoreAccess.display(clientboundSetScorePacket.display());
+			scoreAccess.display((Component)clientboundSetScorePacket.display().orElse(null));
 			scoreAccess.numberFormatOverride((NumberFormat)clientboundSetScorePacket.numberFormat().orElse(null));
 		} else {
 			LOGGER.warn("Received packet for unknown scoreboard objective: {}", string);
@@ -2313,6 +2315,11 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 	}
 
 	@Override
+	public void handleDebugSample(ClientboundDebugSamplePacket clientboundDebugSamplePacket) {
+		this.minecraft.getDebugOverlay().logRemoteSample(clientboundDebugSamplePacket.sample(), clientboundDebugSamplePacket.debugSampleType());
+	}
+
+	@Override
 	public void handlePongResponse(ClientboundPongResponsePacket clientboundPongResponsePacket) {
 		this.pingDebugMonitor.onPongReceived(clientboundPongResponsePacket);
 	}
@@ -2459,6 +2466,7 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 			this.pingDebugMonitor.tick();
 		}
 
+		this.debugSampleSubscriber.tick();
 		this.telemetryManager.tick();
 		if (this.levelLoadStatusManager != null) {
 			this.levelLoadStatusManager.tick();

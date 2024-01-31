@@ -8,6 +8,7 @@ import javax.annotation.Nullable;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.protocol.game.ClientboundEntityEventPacket;
@@ -34,7 +35,7 @@ public class Raids extends SavedData {
 	private int tick;
 
 	public static SavedData.Factory<Raids> factory(ServerLevel serverLevel) {
-		return new SavedData.Factory<>(() -> new Raids(serverLevel), compoundTag -> load(serverLevel, compoundTag), DataFixTypes.SAVED_DATA_RAIDS);
+		return new SavedData.Factory<>(() -> new Raids(serverLevel), (compoundTag, provider) -> load(serverLevel, compoundTag), DataFixTypes.SAVED_DATA_RAIDS);
 	}
 
 	public Raids(ServerLevel serverLevel) {
@@ -162,7 +163,7 @@ public class Raids extends SavedData {
 	}
 
 	@Override
-	public CompoundTag save(CompoundTag compoundTag) {
+	public CompoundTag save(CompoundTag compoundTag, HolderLookup.Provider provider) {
 		compoundTag.putInt("NextAvailableID", this.nextAvailableID);
 		compoundTag.putInt("Tick", this.tick);
 		ListTag listTag = new ListTag();

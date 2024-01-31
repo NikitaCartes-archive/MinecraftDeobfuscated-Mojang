@@ -16,6 +16,7 @@ import net.minecraft.CrashReportCategory;
 import net.minecraft.CrashReportDetail;
 import net.minecraft.ReportedException;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
@@ -392,10 +393,10 @@ public class LevelChunk extends ChunkAccess {
 
 	@Nullable
 	@Override
-	public CompoundTag getBlockEntityNbtForSaving(BlockPos blockPos) {
+	public CompoundTag getBlockEntityNbtForSaving(BlockPos blockPos, HolderLookup.Provider provider) {
 		BlockEntity blockEntity = this.getBlockEntity(blockPos);
 		if (blockEntity != null && !blockEntity.isRemoved()) {
-			CompoundTag compoundTag = blockEntity.saveWithFullMetadata();
+			CompoundTag compoundTag = blockEntity.saveWithFullMetadata(this.level.registryAccess());
 			compoundTag.putBoolean("keepPacked", false);
 			return compoundTag;
 		} else {
@@ -480,7 +481,7 @@ public class LevelChunk extends ChunkAccess {
 		consumer.accept((ClientboundLevelChunkPacketData.BlockEntityTagOutput)(blockPos, blockEntityType, compoundTagx) -> {
 			BlockEntity blockEntity = this.getBlockEntity(blockPos, LevelChunk.EntityCreationType.IMMEDIATE);
 			if (blockEntity != null && compoundTagx != null && blockEntity.getType() == blockEntityType) {
-				blockEntity.load(compoundTagx);
+				blockEntity.load(compoundTagx, this.level.registryAccess());
 			}
 		});
 	}
@@ -546,7 +547,7 @@ public class LevelChunk extends ChunkAccess {
 				LOGGER.warn("Tried to load a DUMMY block entity @ {} but found not block entity block {} at location", blockPos, blockState);
 			}
 		} else {
-			blockEntity = BlockEntity.loadStatic(blockPos, blockState, compoundTag);
+			blockEntity = BlockEntity.loadStatic(blockPos, blockState, compoundTag, this.level.registryAccess());
 		}
 
 		if (blockEntity != null) {

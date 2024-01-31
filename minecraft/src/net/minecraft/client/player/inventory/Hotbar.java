@@ -1,50 +1,86 @@
 package net.minecraft.client.player.inventory;
 
-import com.google.common.collect.ForwardingList;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
+import com.mojang.logging.LogUtils;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.Dynamic;
+import com.mojang.serialization.DynamicOps;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.core.NonNullList;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
+import net.minecraft.Util;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
+import net.minecraft.resources.RegistryOps;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
+import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
-public class Hotbar extends ForwardingList<ItemStack> {
-	private final NonNullList<ItemStack> items = NonNullList.withSize(Inventory.getSelectionSize(), ItemStack.EMPTY);
+public class Hotbar {
+	private static final Logger LOGGER = LogUtils.getLogger();
+	private static final int SIZE = Inventory.getSelectionSize();
+	public static final Codec<Hotbar> CODEC = ExtraCodecs.<List<Dynamic<?>>>validate(Codec.PASSTHROUGH.listOf(), list -> Util.fixedSize(list, SIZE))
+		.xmap(Hotbar::new, hotbar -> hotbar.items);
+	private static final DynamicOps<Tag> DEFAULT_OPS = NbtOps.INSTANCE;
+	private static final Dynamic<?> EMPTY_STACK = new Dynamic<>(
+		DEFAULT_OPS, Util.getOrThrow(ItemStack.CODEC.encodeStart(DEFAULT_OPS, ItemStack.EMPTY), IllegalStateException::new)
+	);
+	private List<Dynamic<?>> items;
 
-	@Override
-	protected List<ItemStack> delegate() {
-		return this.items;
+	private Hotbar(List<Dynamic<?>> list) {
+		this.items = list;
 	}
 
-	public ListTag createTag() {
-		ListTag listTag = new ListTag();
+	public Hotbar() {
+		this(Collections.nCopies(SIZE, EMPTY_STACK));
+	}
 
-		for (ItemStack itemStack : this.delegate()) {
-			listTag.add(itemStack.save(new CompoundTag()));
+	public List<ItemStack> load(HolderLookup.Provider provider) {
+		return this.items
+			.stream()
+			.map(
+				dynamic -> (ItemStack)ItemStack.CODEC
+						.parse(RegistryOps.injectRegistryContext(dynamic, provider))
+						.resultOrPartial(string -> LOGGER.warn("Could not parse hotbar item: {}", string))
+						.orElse(ItemStack.EMPTY)
+			)
+			.toList();
+	}
+
+	public void storeFrom(Inventory inventory, RegistryAccess registryAccess) {
+		RegistryOps<Tag> registryOps = RegistryOps.create(DEFAULT_OPS, registryAccess);
+		Builder<Dynamic<?>> builder = ImmutableList.builderWithExpectedSize(SIZE);
+
+		for (int i = 0; i < SIZE; i++) {
+			ItemStack itemStack = inventory.getItem(i);
+			Optional<Dynamic<?>> optional = ItemStack.CODEC
+				.encodeStart(registryOps, itemStack)
+				.resultOrPartial(string -> LOGGER.warn("Could not encode hotbar item: {}", string))
+				.map(tag -> new Dynamic<>(DEFAULT_OPS, tag));
+			builder.add((Dynamic<?>)optional.orElse(EMPTY_STACK));
 		}
 
-		return listTag;
+		this.items = builder.build();
 	}
 
-	public void fromTag(ListTag listTag) {
-		List<ItemStack> list = this.delegate();
-
-		for (int i = 0; i < list.size(); i++) {
-			list.set(i, ItemStack.of(listTag.getCompound(i)));
-		}
-	}
-
-	@Override
 	public boolean isEmpty() {
-		for (ItemStack itemStack : this.delegate()) {
-			if (!itemStack.isEmpty()) {
+		for (Dynamic<?> dynamic : this.items) {
+			if (!isEmpty(dynamic)) {
 				return false;
 			}
 		}
 
 		return true;
+	}
+
+	private static boolean isEmpty(Dynamic<?> dynamic) {
+		return EMPTY_STACK.equals(dynamic);
 	}
 }

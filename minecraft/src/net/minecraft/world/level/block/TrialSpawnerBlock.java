@@ -4,6 +4,7 @@ import com.mojang.serialization.MapCodec;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
@@ -69,8 +70,10 @@ public class TrialSpawnerBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public void appendHoverText(ItemStack itemStack, @Nullable BlockGetter blockGetter, List<Component> list, TooltipFlag tooltipFlag) {
-		super.appendHoverText(itemStack, blockGetter, list, tooltipFlag);
+	public void appendHoverText(
+		ItemStack itemStack, @Nullable BlockGetter blockGetter, List<Component> list, TooltipFlag tooltipFlag, @Nullable RegistryAccess registryAccess
+	) {
+		super.appendHoverText(itemStack, blockGetter, list, tooltipFlag, registryAccess);
 		Spawner.appendHoverText(itemStack, list, "spawn_data");
 	}
 }

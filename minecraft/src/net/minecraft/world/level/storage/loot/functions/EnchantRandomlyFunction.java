@@ -13,11 +13,9 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.item.EnchantedBookItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.item.enchantment.EnchantmentInstance;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import org.slf4j.Logger;
@@ -73,11 +71,9 @@ public class EnchantRandomlyFunction extends LootItemConditionalFunction {
 		int i = Mth.nextInt(randomSource, enchantment.getMinLevel(), enchantment.getMaxLevel());
 		if (itemStack.is(Items.BOOK)) {
 			itemStack = new ItemStack(Items.ENCHANTED_BOOK);
-			EnchantedBookItem.addEnchantment(itemStack, new EnchantmentInstance(enchantment, i));
-		} else {
-			itemStack.enchant(enchantment, i);
 		}
 
+		itemStack.enchant(enchantment, i);
 		return itemStack;
 	}
 

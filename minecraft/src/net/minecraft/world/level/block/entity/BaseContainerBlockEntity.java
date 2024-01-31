@@ -2,6 +2,7 @@ package net.minecraft.world.level.block.entity;
 
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
@@ -25,8 +26,8 @@ public abstract class BaseContainerBlockEntity extends BlockEntity implements Co
 	}
 
 	@Override
-	public void load(CompoundTag compoundTag) {
-		super.load(compoundTag);
+	public void load(CompoundTag compoundTag, HolderLookup.Provider provider) {
+		super.load(compoundTag, provider);
 		this.lockKey = LockCode.fromTag(compoundTag);
 		if (compoundTag.contains("CustomName", 8)) {
 			this.name = Component.Serializer.fromJson(compoundTag.getString("CustomName"));
@@ -34,8 +35,8 @@ public abstract class BaseContainerBlockEntity extends BlockEntity implements Co
 	}
 
 	@Override
-	protected void saveAdditional(CompoundTag compoundTag) {
-		super.saveAdditional(compoundTag);
+	protected void saveAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
+		super.saveAdditional(compoundTag, provider);
 		this.lockKey.addToTag(compoundTag);
 		if (this.name != null) {
 			compoundTag.putString("CustomName", Component.Serializer.toJson(this.name));

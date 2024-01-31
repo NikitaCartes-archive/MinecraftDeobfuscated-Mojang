@@ -340,7 +340,7 @@ public class ChunkSerializer {
 		ListTag listTag2 = new ListTag();
 
 		for (BlockPos blockPos : chunkAccess.getBlockEntitiesPos()) {
-			CompoundTag compoundTag3 = chunkAccess.getBlockEntityNbtForSaving(blockPos);
+			CompoundTag compoundTag3 = chunkAccess.getBlockEntityNbtForSaving(blockPos, serverLevel.registryAccess());
 			if (compoundTag3 != null) {
 				listTag2.add(compoundTag3);
 			}
@@ -409,7 +409,7 @@ public class ChunkSerializer {
 						levelChunk.setBlockEntityNbt(compoundTagx);
 					} else {
 						BlockPos blockPos = BlockEntity.getPosFromTag(compoundTagx);
-						BlockEntity blockEntity = BlockEntity.loadStatic(blockPos, levelChunk.getBlockState(blockPos), compoundTagx);
+						BlockEntity blockEntity = BlockEntity.loadStatic(blockPos, levelChunk.getBlockState(blockPos), compoundTagx, serverLevel.registryAccess());
 						if (blockEntity != null) {
 							levelChunk.setBlockEntity(blockEntity);
 						}

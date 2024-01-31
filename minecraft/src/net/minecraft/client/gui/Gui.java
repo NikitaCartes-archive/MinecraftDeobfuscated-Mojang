@@ -5,8 +5,6 @@ import com.google.common.collect.Ordering;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Axis;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
@@ -67,6 +65,7 @@ import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.PlayerScoreEntry;
 import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.Scoreboard;
+import org.joml.Matrix4fStack;
 
 @Environment(EnvType.CLIENT)
 public class Gui {
@@ -366,16 +365,16 @@ public class Gui {
 				RenderSystem.enableBlend();
 				if (this.debugOverlay.showDebugScreen() && !this.minecraft.player.isReducedDebugInfo() && !options.reducedDebugInfo().get()) {
 					Camera camera = this.minecraft.gameRenderer.getMainCamera();
-					PoseStack poseStack = RenderSystem.getModelViewStack();
-					poseStack.pushPose();
-					poseStack.mulPoseMatrix(guiGraphics.pose().last().pose());
-					poseStack.translate((float)(guiGraphics.guiWidth() / 2), (float)(guiGraphics.guiHeight() / 2), 0.0F);
-					poseStack.mulPose(Axis.XN.rotationDegrees(camera.getXRot()));
-					poseStack.mulPose(Axis.YP.rotationDegrees(camera.getYRot()));
-					poseStack.scale(-1.0F, -1.0F, -1.0F);
+					Matrix4fStack matrix4fStack = RenderSystem.getModelViewStack();
+					matrix4fStack.pushMatrix();
+					matrix4fStack.mul(guiGraphics.pose().last().pose());
+					matrix4fStack.translate((float)(guiGraphics.guiWidth() / 2), (float)(guiGraphics.guiHeight() / 2), 0.0F);
+					matrix4fStack.rotateX(-camera.getXRot() * (float) (Math.PI / 180.0));
+					matrix4fStack.rotateY(camera.getYRot() * (float) (Math.PI / 180.0));
+					matrix4fStack.scale(-1.0F, -1.0F, -1.0F);
 					RenderSystem.applyModelViewMatrix();
 					RenderSystem.renderCrosshair(10);
-					poseStack.popPose();
+					matrix4fStack.popMatrix();
 					RenderSystem.applyModelViewMatrix();
 				} else {
 					RenderSystem.blendFuncSeparate(

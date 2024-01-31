@@ -60,7 +60,7 @@ public class PhantomSpawner implements CustomSpawner {
 												Phantom phantom = EntityType.PHANTOM.create(serverLevel);
 												if (phantom != null) {
 													phantom.moveTo(blockPos2, 0.0F, 0.0F);
-													spawnGroupData = phantom.finalizeSpawn(serverLevel, difficultyInstance, MobSpawnType.NATURAL, spawnGroupData, null);
+													spawnGroupData = phantom.finalizeSpawn(serverLevel, difficultyInstance, MobSpawnType.NATURAL, spawnGroupData);
 													serverLevel.addFreshEntityWithPassengers(phantom);
 													i++;
 												}

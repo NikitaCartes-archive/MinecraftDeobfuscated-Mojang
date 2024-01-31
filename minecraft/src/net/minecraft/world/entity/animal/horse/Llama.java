@@ -26,6 +26,7 @@ import net.minecraft.world.entity.EntityAttachment;
 import net.minecraft.world.entity.EntityAttachments;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.Pose;
@@ -67,7 +68,6 @@ public class Llama extends AbstractChestedHorse implements VariantHolder<Llama.V
 	private static final int MAX_STRENGTH = 5;
 	private static final Ingredient FOOD_ITEMS = Ingredient.of(Items.WHEAT, Blocks.HAY_BLOCK.asItem());
 	private static final EntityDataAccessor<Integer> DATA_STRENGTH_ID = SynchedEntityData.defineId(Llama.class, EntityDataSerializers.INT);
-	private static final EntityDataAccessor<Integer> DATA_SWAG_ID = SynchedEntityData.defineId(Llama.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Integer> DATA_VARIANT_ID = SynchedEntityData.defineId(Llama.class, EntityDataSerializers.INT);
 	private static final EntityDimensions BABY_DIMENSIONS = EntityType.LLAMA
 		.getDimensions()
@@ -105,9 +105,6 @@ public class Llama extends AbstractChestedHorse implements VariantHolder<Llama.V
 		super.addAdditionalSaveData(compoundTag);
 		compoundTag.putInt("Variant", this.getVariant().id);
 		compoundTag.putInt("Strength", this.getStrength());
-		if (!this.inventory.getItem(1).isEmpty()) {
-			compoundTag.put("DecorItem", this.inventory.getItem(1).save(new CompoundTag()));
-		}
 	}
 
 	@Override
@@ -115,11 +112,6 @@ public class Llama extends AbstractChestedHorse implements VariantHolder<Llama.V
 		this.setStrength(compoundTag.getInt("Strength"));
 		super.readAdditionalSaveData(compoundTag);
 		this.setVariant(Llama.Variant.byId(compoundTag.getInt("Variant")));
-		if (compoundTag.contains("DecorItem", 10)) {
-			this.inventory.setItem(1, ItemStack.of(compoundTag.getCompound("DecorItem")));
-		}
-
-		this.updateContainerEquipment();
 	}
 
 	@Override
@@ -147,7 +139,6 @@ public class Llama extends AbstractChestedHorse implements VariantHolder<Llama.V
 	protected void defineSynchedData() {
 		super.defineSynchedData();
 		this.entityData.define(DATA_STRENGTH_ID, 0);
-		this.entityData.define(DATA_SWAG_ID, -1);
 		this.entityData.define(DATA_VARIANT_ID, 0);
 	}
 
@@ -161,7 +152,7 @@ public class Llama extends AbstractChestedHorse implements VariantHolder<Llama.V
 
 	@Override
 	protected int getInventorySize() {
-		return this.hasChest() ? 2 + 3 * this.getInventoryColumns() : super.getInventorySize();
+		return this.hasChest() ? 1 + 3 * this.getInventoryColumns() : super.getInventorySize();
 	}
 
 	@Override
@@ -238,11 +229,7 @@ public class Llama extends AbstractChestedHorse implements VariantHolder<Llama.V
 	@Nullable
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		ServerLevelAccessor serverLevelAccessor,
-		DifficultyInstance difficultyInstance,
-		MobSpawnType mobSpawnType,
-		@Nullable SpawnGroupData spawnGroupData,
-		@Nullable CompoundTag compoundTag
+		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData
 	) {
 		RandomSource randomSource = serverLevelAccessor.getRandom();
 		this.setRandomStrength(randomSource);
@@ -255,7 +242,7 @@ public class Llama extends AbstractChestedHorse implements VariantHolder<Llama.V
 		}
 
 		this.setVariant(variant);
-		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData);
 	}
 
 	@Override
@@ -305,17 +292,12 @@ public class Llama extends AbstractChestedHorse implements VariantHolder<Llama.V
 	}
 
 	@Override
-	public boolean canWearArmor() {
+	public boolean canWearBodyArmor() {
 		return true;
 	}
 
 	@Override
-	public boolean isWearingArmor() {
-		return !this.inventory.getItem(1).isEmpty();
-	}
-
-	@Override
-	public boolean isArmor(ItemStack itemStack) {
+	public boolean isBodyArmorItem(ItemStack itemStack) {
 		return itemStack.is(ItemTags.WOOL_CARPETS);
 	}
 
@@ -334,18 +316,6 @@ public class Llama extends AbstractChestedHorse implements VariantHolder<Llama.V
 		}
 	}
 
-	@Override
-	protected void updateContainerEquipment() {
-		if (!this.level().isClientSide) {
-			super.updateContainerEquipment();
-			this.setSwag(getDyeColor(this.inventory.getItem(1)));
-		}
-	}
-
-	private void setSwag(@Nullable DyeColor dyeColor) {
-		this.entityData.set(DATA_SWAG_ID, dyeColor == null ? -1 : dyeColor.getId());
-	}
-
 	@Nullable
 	private static DyeColor getDyeColor(ItemStack itemStack) {
 		Block block = Block.byItem(itemStack.getItem());
@@ -354,8 +324,7 @@ public class Llama extends AbstractChestedHorse implements VariantHolder<Llama.V
 
 	@Nullable
 	public DyeColor getSwag() {
-		int i = this.entityData.get(DATA_SWAG_ID);
-		return i == -1 ? null : DyeColor.byId(i);
+		return getDyeColor(this.getItemBySlot(EquipmentSlot.BODY));
 	}
 
 	@Override

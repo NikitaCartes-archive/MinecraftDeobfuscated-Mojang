@@ -7,6 +7,7 @@ import javax.annotation.Nullable;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceLocation;
@@ -191,8 +192,8 @@ public class BrushableBlockEntity extends BlockEntity {
 	}
 
 	@Override
-	public CompoundTag getUpdateTag() {
-		CompoundTag compoundTag = super.getUpdateTag();
+	public CompoundTag getUpdateTag(HolderLookup.Provider provider) {
+		CompoundTag compoundTag = super.getUpdateTag(provider);
 		if (this.hitDirection != null) {
 			compoundTag.putInt("hit_direction", this.hitDirection.ordinal());
 		}
@@ -206,7 +207,7 @@ public class BrushableBlockEntity extends BlockEntity {
 	}
 
 	@Override
-	public void load(CompoundTag compoundTag) {
+	public void load(CompoundTag compoundTag, HolderLookup.Provider provider) {
 		if (!this.tryLoadLootTable(compoundTag) && compoundTag.contains("item")) {
 			this.item = ItemStack.of(compoundTag.getCompound("item"));
 		}
@@ -217,7 +218,7 @@ public class BrushableBlockEntity extends BlockEntity {
 	}
 
 	@Override
-	protected void saveAdditional(CompoundTag compoundTag) {
+	protected void saveAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
 		if (!this.trySaveLootTable(compoundTag)) {
 			compoundTag.put("item", this.item.save(new CompoundTag()));
 		}

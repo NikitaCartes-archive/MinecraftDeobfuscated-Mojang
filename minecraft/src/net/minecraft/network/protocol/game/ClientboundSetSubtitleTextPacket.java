@@ -1,28 +1,16 @@
 package net.minecraft.network.protocol.game;
 
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketType;
 
-public class ClientboundSetSubtitleTextPacket implements Packet<ClientGamePacketListener> {
-	public static final StreamCodec<FriendlyByteBuf, ClientboundSetSubtitleTextPacket> STREAM_CODEC = Packet.codec(
-		ClientboundSetSubtitleTextPacket::write, ClientboundSetSubtitleTextPacket::new
+public record ClientboundSetSubtitleTextPacket(Component text) implements Packet<ClientGamePacketListener> {
+	public static final StreamCodec<RegistryFriendlyByteBuf, ClientboundSetSubtitleTextPacket> STREAM_CODEC = StreamCodec.composite(
+		ComponentSerialization.STREAM_CODEC, ClientboundSetSubtitleTextPacket::text, ClientboundSetSubtitleTextPacket::new
 	);
-	private final Component text;
-
-	public ClientboundSetSubtitleTextPacket(Component component) {
-		this.text = component;
-	}
-
-	private ClientboundSetSubtitleTextPacket(FriendlyByteBuf friendlyByteBuf) {
-		this.text = friendlyByteBuf.readComponentTrusted();
-	}
-
-	private void write(FriendlyByteBuf friendlyByteBuf) {
-		friendlyByteBuf.writeComponent(this.text);
-	}
 
 	@Override
 	public PacketType<ClientboundSetSubtitleTextPacket> type() {
@@ -31,9 +19,5 @@ public class ClientboundSetSubtitleTextPacket implements Packet<ClientGamePacket
 
 	public void handle(ClientGamePacketListener clientGamePacketListener) {
 		clientGamePacketListener.setSubtitleText(this);
-	}
-
-	public Component getText() {
-		return this.text;
 	}
 }

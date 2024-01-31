@@ -3,6 +3,7 @@ package net.minecraft.world.level.storage;
 import com.google.common.collect.Maps;
 import java.util.Map;
 import java.util.stream.Stream;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.datafix.DataFixTypes;
@@ -25,7 +26,7 @@ public class CommandStorage {
 
 	private SavedData.Factory<CommandStorage.Container> factory(String string) {
 		return new SavedData.Factory<>(
-			() -> this.newStorage(string), compoundTag -> this.newStorage(string).load(compoundTag), DataFixTypes.SAVED_DATA_COMMAND_STORAGE
+			() -> this.newStorage(string), (compoundTag, provider) -> this.newStorage(string).load(compoundTag), DataFixTypes.SAVED_DATA_COMMAND_STORAGE
 		);
 	}
 
@@ -63,7 +64,7 @@ public class CommandStorage {
 		}
 
 		@Override
-		public CompoundTag save(CompoundTag compoundTag) {
+		public CompoundTag save(CompoundTag compoundTag, HolderLookup.Provider provider) {
 			CompoundTag compoundTag2 = new CompoundTag();
 			this.storage.forEach((string, compoundTag2x) -> compoundTag2.put(string, compoundTag2x.copy()));
 			compoundTag.put("contents", compoundTag2);

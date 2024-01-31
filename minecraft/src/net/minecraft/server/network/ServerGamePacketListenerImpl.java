@@ -86,6 +86,7 @@ import net.minecraft.network.protocol.game.ServerboundContainerButtonClickPacket
 import net.minecraft.network.protocol.game.ServerboundContainerClickPacket;
 import net.minecraft.network.protocol.game.ServerboundContainerClosePacket;
 import net.minecraft.network.protocol.game.ServerboundContainerSlotStateChangedPacket;
+import net.minecraft.network.protocol.game.ServerboundDebugSampleSubscriptionPacket;
 import net.minecraft.network.protocol.game.ServerboundEditBookPacket;
 import net.minecraft.network.protocol.game.ServerboundEntityTagQueryPacket;
 import net.minecraft.network.protocol.game.ServerboundInteractPacket;
@@ -741,12 +742,12 @@ public class ServerGamePacketListenerImpl
 
 	@Override
 	public void handleEditBook(ServerboundEditBookPacket serverboundEditBookPacket) {
-		int i = serverboundEditBookPacket.getSlot();
+		int i = serverboundEditBookPacket.slot();
 		if (Inventory.isHotbarSlot(i) || i == 40) {
 			List<String> list = Lists.<String>newArrayList();
-			Optional<String> optional = serverboundEditBookPacket.getTitle();
+			Optional<String> optional = serverboundEditBookPacket.title();
 			optional.ifPresent(list::add);
-			serverboundEditBookPacket.getPages().stream().limit(100L).forEach(list::add);
+			serverboundEditBookPacket.pages().stream().limit(100L).forEach(list::add);
 			Consumer<List<FilteredText>> consumer = optional.isPresent()
 				? listx -> this.signBook((FilteredText)listx.get(0), listx.subList(1, listx.size()), i)
 				: listx -> this.updateBookContents(listx, i);
@@ -764,12 +765,7 @@ public class ServerGamePacketListenerImpl
 	private void signBook(FilteredText filteredText, List<FilteredText> list, int i) {
 		ItemStack itemStack = this.player.getInventory().getItem(i);
 		if (itemStack.is(Items.WRITABLE_BOOK)) {
-			ItemStack itemStack2 = new ItemStack(Items.WRITTEN_BOOK);
-			CompoundTag compoundTag = itemStack.getTag();
-			if (compoundTag != null) {
-				itemStack2.setTag(compoundTag.copy());
-			}
-
+			ItemStack itemStack2 = itemStack.transmuteCopy(Items.WRITTEN_BOOK, 1);
 			itemStack2.addTagElement("author", StringTag.valueOf(this.player.getName().getString()));
 			if (this.player.isTextFilteringEnabled()) {
 				itemStack2.addTagElement("title", StringTag.valueOf(filteredText.filteredOrEmpty()));
@@ -835,7 +831,7 @@ public class ServerGamePacketListenerImpl
 		PacketUtils.ensureRunningOnSameThread(serverboundBlockEntityTagQueryPacket, this, this.player.serverLevel());
 		if (this.player.hasPermissions(2)) {
 			BlockEntity blockEntity = this.player.level().getBlockEntity(serverboundBlockEntityTagQueryPacket.getPos());
-			CompoundTag compoundTag = blockEntity != null ? blockEntity.saveWithoutMetadata() : null;
+			CompoundTag compoundTag = blockEntity != null ? blockEntity.saveWithoutMetadata(this.player.registryAccess()) : null;
 			this.player.connection.send(new ClientboundTagQueryPacket(serverboundBlockEntityTagQueryPacket.getTransactionId(), compoundTag));
 		}
 	}
@@ -1629,7 +1625,7 @@ public class ServerGamePacketListenerImpl
 				if (this.player.level().isLoaded(blockPos)) {
 					BlockEntity blockEntity = this.player.level().getBlockEntity(blockPos);
 					if (blockEntity != null) {
-						blockEntity.saveToItem(itemStack);
+						blockEntity.saveToItem(itemStack, this.player.level().registryAccess());
 					}
 				}
 			}
@@ -1736,6 +1732,12 @@ public class ServerGamePacketListenerImpl
 	public void handleChunkBatchReceived(ServerboundChunkBatchReceivedPacket serverboundChunkBatchReceivedPacket) {
 		PacketUtils.ensureRunningOnSameThread(serverboundChunkBatchReceivedPacket, this, this.player.serverLevel());
 		this.chunkSender.onChunkBatchReceivedByClient(serverboundChunkBatchReceivedPacket.desiredChunksPerTick());
+	}
+
+	@Override
+	public void handleDebugSampleSubscription(ServerboundDebugSampleSubscriptionPacket serverboundDebugSampleSubscriptionPacket) {
+		PacketUtils.ensureRunningOnSameThread(serverboundDebugSampleSubscriptionPacket, this, this.player.serverLevel());
+		this.server.subscribeToDebugSample(this.player, serverboundDebugSampleSubscriptionPacket.sampleType());
 	}
 
 	private void resetPlayerChatState(RemoteChatSession remoteChatSession) {

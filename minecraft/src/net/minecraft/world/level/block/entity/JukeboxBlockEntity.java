@@ -3,6 +3,7 @@ package net.minecraft.world.level.block.entity;
 import com.google.common.annotations.VisibleForTesting;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
@@ -21,7 +22,7 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.ticks.ContainerSingleItem;
 
-public class JukeboxBlockEntity extends BlockEntity implements Clearable, ContainerSingleItem {
+public class JukeboxBlockEntity extends BlockEntity implements Clearable, ContainerSingleItem.BlockContainerSingleItem {
 	private static final int SONG_END_PADDING = 20;
 	private ItemStack item = ItemStack.EMPTY;
 	private int ticksSinceLastEvent;
@@ -34,8 +35,8 @@ public class JukeboxBlockEntity extends BlockEntity implements Clearable, Contai
 	}
 
 	@Override
-	public void load(CompoundTag compoundTag) {
-		super.load(compoundTag);
+	public void load(CompoundTag compoundTag, HolderLookup.Provider provider) {
+		super.load(compoundTag, provider);
 		if (compoundTag.contains("RecordItem", 10)) {
 			this.item = ItemStack.of(compoundTag.getCompound("RecordItem"));
 		}
@@ -46,8 +47,8 @@ public class JukeboxBlockEntity extends BlockEntity implements Clearable, Contai
 	}
 
 	@Override
-	protected void saveAdditional(CompoundTag compoundTag) {
-		super.saveAdditional(compoundTag);
+	protected void saveAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
+		super.saveAdditional(compoundTag, provider);
 		if (!this.getTheItem().isEmpty()) {
 			compoundTag.put("RecordItem", this.getTheItem().save(new CompoundTag()));
 		}

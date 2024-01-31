@@ -10,7 +10,9 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 import net.minecraft.Optionull;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.chat.RemoteChatSession;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
@@ -19,7 +21,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.GameType;
 
 public class ClientboundPlayerInfoUpdatePacket implements Packet<ClientGamePacketListener> {
-	public static final StreamCodec<FriendlyByteBuf, ClientboundPlayerInfoUpdatePacket> STREAM_CODEC = Packet.codec(
+	public static final StreamCodec<RegistryFriendlyByteBuf, ClientboundPlayerInfoUpdatePacket> STREAM_CODEC = Packet.codec(
 		ClientboundPlayerInfoUpdatePacket::write, ClientboundPlayerInfoUpdatePacket::new
 	);
 	private final EnumSet<ClientboundPlayerInfoUpdatePacket.Action> actions;
@@ -47,26 +49,26 @@ public class ClientboundPlayerInfoUpdatePacket implements Packet<ClientGamePacke
 		return new ClientboundPlayerInfoUpdatePacket(enumSet, collection);
 	}
 
-	private ClientboundPlayerInfoUpdatePacket(FriendlyByteBuf friendlyByteBuf) {
-		this.actions = friendlyByteBuf.readEnumSet(ClientboundPlayerInfoUpdatePacket.Action.class);
-		this.entries = friendlyByteBuf.readList(friendlyByteBufx -> {
-			ClientboundPlayerInfoUpdatePacket.EntryBuilder entryBuilder = new ClientboundPlayerInfoUpdatePacket.EntryBuilder(friendlyByteBufx.readUUID());
+	private ClientboundPlayerInfoUpdatePacket(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
+		this.actions = registryFriendlyByteBuf.readEnumSet(ClientboundPlayerInfoUpdatePacket.Action.class);
+		this.entries = registryFriendlyByteBuf.readList(friendlyByteBuf -> {
+			ClientboundPlayerInfoUpdatePacket.EntryBuilder entryBuilder = new ClientboundPlayerInfoUpdatePacket.EntryBuilder(friendlyByteBuf.readUUID());
 
 			for (ClientboundPlayerInfoUpdatePacket.Action action : this.actions) {
-				action.reader.read(entryBuilder, friendlyByteBufx);
+				action.reader.read(entryBuilder, (RegistryFriendlyByteBuf)friendlyByteBuf);
 			}
 
 			return entryBuilder.build();
 		});
 	}
 
-	private void write(FriendlyByteBuf friendlyByteBuf) {
-		friendlyByteBuf.writeEnumSet(this.actions, ClientboundPlayerInfoUpdatePacket.Action.class);
-		friendlyByteBuf.writeCollection(this.entries, (friendlyByteBufx, entry) -> {
-			friendlyByteBufx.writeUUID(entry.profileId());
+	private void write(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
+		registryFriendlyByteBuf.writeEnumSet(this.actions, ClientboundPlayerInfoUpdatePacket.Action.class);
+		registryFriendlyByteBuf.writeCollection(this.entries, (friendlyByteBuf, entry) -> {
+			friendlyByteBuf.writeUUID(entry.profileId());
 
 			for (ClientboundPlayerInfoUpdatePacket.Action action : this.actions) {
-				action.writer.write(friendlyByteBufx, entry);
+				action.writer.write((RegistryFriendlyByteBuf)friendlyByteBuf, entry);
 			}
 		});
 	}
@@ -97,34 +99,36 @@ public class ClientboundPlayerInfoUpdatePacket implements Packet<ClientGamePacke
 	}
 
 	public static enum Action {
-		ADD_PLAYER((entryBuilder, friendlyByteBuf) -> {
-			GameProfile gameProfile = new GameProfile(entryBuilder.profileId, friendlyByteBuf.readUtf(16));
-			gameProfile.getProperties().putAll(friendlyByteBuf.readGameProfileProperties());
+		ADD_PLAYER((entryBuilder, registryFriendlyByteBuf) -> {
+			GameProfile gameProfile = new GameProfile(entryBuilder.profileId, registryFriendlyByteBuf.readUtf(16));
+			gameProfile.getProperties().putAll(registryFriendlyByteBuf.readGameProfileProperties());
 			entryBuilder.profile = gameProfile;
-		}, (friendlyByteBuf, entry) -> {
+		}, (registryFriendlyByteBuf, entry) -> {
 			GameProfile gameProfile = (GameProfile)Objects.requireNonNull(entry.profile());
-			friendlyByteBuf.writeUtf(gameProfile.getName(), 16);
-			friendlyByteBuf.writeGameProfileProperties(gameProfile.getProperties());
+			registryFriendlyByteBuf.writeUtf(gameProfile.getName(), 16);
+			registryFriendlyByteBuf.writeGameProfileProperties(gameProfile.getProperties());
 		}),
 		INITIALIZE_CHAT(
-			(entryBuilder, friendlyByteBuf) -> entryBuilder.chatSession = friendlyByteBuf.readNullable(RemoteChatSession.Data::read),
-			(friendlyByteBuf, entry) -> friendlyByteBuf.writeNullable(entry.chatSession, RemoteChatSession.Data::write)
+			(entryBuilder, registryFriendlyByteBuf) -> entryBuilder.chatSession = registryFriendlyByteBuf.readNullable(RemoteChatSession.Data::read),
+			(registryFriendlyByteBuf, entry) -> registryFriendlyByteBuf.writeNullable(entry.chatSession, RemoteChatSession.Data::write)
 		),
 		UPDATE_GAME_MODE(
-			(entryBuilder, friendlyByteBuf) -> entryBuilder.gameMode = GameType.byId(friendlyByteBuf.readVarInt()),
-			(friendlyByteBuf, entry) -> friendlyByteBuf.writeVarInt(entry.gameMode().getId())
+			(entryBuilder, registryFriendlyByteBuf) -> entryBuilder.gameMode = GameType.byId(registryFriendlyByteBuf.readVarInt()),
+			(registryFriendlyByteBuf, entry) -> registryFriendlyByteBuf.writeVarInt(entry.gameMode().getId())
 		),
 		UPDATE_LISTED(
-			(entryBuilder, friendlyByteBuf) -> entryBuilder.listed = friendlyByteBuf.readBoolean(),
-			(friendlyByteBuf, entry) -> friendlyByteBuf.writeBoolean(entry.listed())
+			(entryBuilder, registryFriendlyByteBuf) -> entryBuilder.listed = registryFriendlyByteBuf.readBoolean(),
+			(registryFriendlyByteBuf, entry) -> registryFriendlyByteBuf.writeBoolean(entry.listed())
 		),
 		UPDATE_LATENCY(
-			(entryBuilder, friendlyByteBuf) -> entryBuilder.latency = friendlyByteBuf.readVarInt(),
-			(friendlyByteBuf, entry) -> friendlyByteBuf.writeVarInt(entry.latency())
+			(entryBuilder, registryFriendlyByteBuf) -> entryBuilder.latency = registryFriendlyByteBuf.readVarInt(),
+			(registryFriendlyByteBuf, entry) -> registryFriendlyByteBuf.writeVarInt(entry.latency())
 		),
 		UPDATE_DISPLAY_NAME(
-			(entryBuilder, friendlyByteBuf) -> entryBuilder.displayName = friendlyByteBuf.readNullable(FriendlyByteBuf::readComponentTrusted),
-			(friendlyByteBuf, entry) -> friendlyByteBuf.writeNullable(entry.displayName(), FriendlyByteBuf::writeComponent)
+			(entryBuilder, registryFriendlyByteBuf) -> entryBuilder.displayName = FriendlyByteBuf.readNullable(
+					registryFriendlyByteBuf, ComponentSerialization.STREAM_CODEC
+				),
+			(registryFriendlyByteBuf, entry) -> FriendlyByteBuf.writeNullable(registryFriendlyByteBuf, entry.displayName(), ComponentSerialization.STREAM_CODEC)
 		);
 
 		final ClientboundPlayerInfoUpdatePacket.Action.Reader reader;
@@ -136,11 +140,11 @@ public class ClientboundPlayerInfoUpdatePacket implements Packet<ClientGamePacke
 		}
 
 		public interface Reader {
-			void read(ClientboundPlayerInfoUpdatePacket.EntryBuilder entryBuilder, FriendlyByteBuf friendlyByteBuf);
+			void read(ClientboundPlayerInfoUpdatePacket.EntryBuilder entryBuilder, RegistryFriendlyByteBuf registryFriendlyByteBuf);
 		}
 
 		public interface Writer {
-			void write(FriendlyByteBuf friendlyByteBuf, ClientboundPlayerInfoUpdatePacket.Entry entry);
+			void write(RegistryFriendlyByteBuf registryFriendlyByteBuf, ClientboundPlayerInfoUpdatePacket.Entry entry);
 		}
 	}
 

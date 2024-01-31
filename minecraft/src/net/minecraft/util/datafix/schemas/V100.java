@@ -14,7 +14,14 @@ public class V100 extends Schema {
 	}
 
 	protected static TypeTemplate equipment(Schema schema) {
-		return DSL.optionalFields("ArmorItems", DSL.list(References.ITEM_STACK.in(schema)), "HandItems", DSL.list(References.ITEM_STACK.in(schema)));
+		return DSL.optionalFields(
+			"ArmorItems",
+			DSL.list(References.ITEM_STACK.in(schema)),
+			"HandItems",
+			DSL.list(References.ITEM_STACK.in(schema)),
+			"body_armor_item",
+			References.ITEM_STACK.in(schema)
+		);
 	}
 
 	protected static void registerMob(Schema schema, Map<String, Supplier<TypeTemplate>> map, String string) {

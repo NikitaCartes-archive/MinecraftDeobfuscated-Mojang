@@ -34,7 +34,6 @@ import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.HasCustomInventoryScreen;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
@@ -76,6 +75,7 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.ticks.ContainerSingleItem;
 
 public abstract class AbstractHorse extends Animal implements ContainerListener, HasCustomInventoryScreen, OwnableEntity, PlayerRideableJumping, Saddleable {
 	public static final int EQUIPMENT_SLOT_OFFSET = 400;
@@ -104,8 +104,7 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 	private static final int FLAG_STANDING = 32;
 	private static final int FLAG_OPEN_MOUTH = 64;
 	public static final int INV_SLOT_SADDLE = 0;
-	public static final int INV_SLOT_ARMOR = 1;
-	public static final int INV_BASE_COUNT = 2;
+	public static final int INV_BASE_COUNT = 1;
 	private int eatingCounter;
 	private int mouthCounter;
 	private int standCounter;
@@ -126,6 +125,26 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 	protected int gallopSoundCounter;
 	@Nullable
 	private UUID owner;
+	private final Container bodyArmorAccess = new ContainerSingleItem() {
+		@Override
+		public ItemStack getTheItem() {
+			return AbstractHorse.this.getBodyArmorItem();
+		}
+
+		@Override
+		public void setTheItem(ItemStack itemStack) {
+			AbstractHorse.this.setBodyArmorItem(itemStack);
+		}
+
+		@Override
+		public void setChanged() {
+		}
+
+		@Override
+		public boolean stillValid(Player player) {
+			return player.getVehicle() == AbstractHorse.this || player.canInteractWithEntity(AbstractHorse.this, 4.0);
+		}
+	};
 
 	protected AbstractHorse(EntityType<? extends AbstractHorse> entityType, Level level) {
 		super(entityType, level);
@@ -231,9 +250,9 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 		this.inventory.setItem(0, new ItemStack(Items.SADDLE));
 	}
 
-	public void equipArmor(Player player, ItemStack itemStack) {
-		if (this.isArmor(itemStack)) {
-			this.inventory.setItem(1, itemStack.copyWithCount(1));
+	public void equipBodyArmor(Player player, ItemStack itemStack) {
+		if (this.isBodyArmorItem(itemStack)) {
+			this.setBodyArmorItem(itemStack.copyWithCount(1));
 			if (!player.getAbilities().instabuild) {
 				itemStack.shrink(1);
 			}
@@ -305,7 +324,7 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 	}
 
 	protected int getInventorySize() {
-		return 2;
+		return 1;
 	}
 
 	protected void createInventory() {
@@ -324,10 +343,10 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 		}
 
 		this.inventory.addListener(this);
-		this.updateContainerEquipment();
+		this.syncSaddleToClients();
 	}
 
-	protected void updateContainerEquipment() {
+	protected void syncSaddleToClients() {
 		if (!this.level().isClientSide) {
 			this.setFlag(4, !this.inventory.getItem(0).isEmpty());
 		}
@@ -336,7 +355,7 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 	@Override
 	public void containerChanged(Container container) {
 		boolean bl = this.isSaddled();
-		this.updateContainerEquipment();
+		this.syncSaddleToClients();
 		if (this.tickCount > 20 && !bl && this.isSaddled()) {
 			this.playSound(this.getSaddleSoundEvent(), 0.5F, 1.0F);
 		}
@@ -680,8 +699,8 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 					return interactionResult;
 				}
 
-				if (this.canWearArmor() && this.isArmor(itemStack) && !this.isWearingArmor()) {
-					this.equipArmor(player, itemStack);
+				if (this.canWearBodyArmor() && this.isBodyArmorItem(itemStack) && !this.isWearingBodyArmor()) {
+					this.equipBodyArmor(player, itemStack);
 					return InteractionResult.sidedSuccess(this.level().isClientSide);
 				}
 			}
@@ -846,7 +865,7 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 			}
 		}
 
-		this.updateContainerEquipment();
+		this.syncSaddleToClients();
 	}
 
 	@Override
@@ -991,57 +1010,31 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 		return false;
 	}
 
-	public boolean canWearArmor() {
-		return false;
-	}
-
-	public boolean isWearingArmor() {
-		return !this.getItemBySlot(EquipmentSlot.CHEST).isEmpty();
-	}
-
-	public boolean isArmor(ItemStack itemStack) {
-		return false;
-	}
-
-	private SlotAccess createEquipmentSlotAccess(int i, Predicate<ItemStack> predicate) {
-		return new SlotAccess() {
-			@Override
-			public ItemStack get() {
-				return AbstractHorse.this.inventory.getItem(i);
-			}
-
-			@Override
-			public boolean set(ItemStack itemStack) {
-				if (!predicate.test(itemStack)) {
-					return false;
-				} else {
-					AbstractHorse.this.inventory.setItem(i, itemStack);
-					AbstractHorse.this.updateContainerEquipment();
-					return true;
-				}
-			}
-		};
-	}
-
 	@Override
 	public SlotAccess getSlot(int i) {
 		int j = i - 400;
-		if (j >= 0 && j < 2 && j < this.inventory.getContainerSize()) {
-			if (j == 0) {
-				return this.createEquipmentSlotAccess(j, itemStack -> itemStack.isEmpty() || itemStack.is(Items.SADDLE));
-			}
-
-			if (j == 1) {
-				if (!this.canWearArmor()) {
-					return SlotAccess.NULL;
+		if (j == 0) {
+			return new SlotAccess() {
+				@Override
+				public ItemStack get() {
+					return AbstractHorse.this.inventory.getItem(0);
 				}
 
-				return this.createEquipmentSlotAccess(j, itemStack -> itemStack.isEmpty() || this.isArmor(itemStack));
-			}
+				@Override
+				public boolean set(ItemStack itemStack) {
+					if (!itemStack.isEmpty() && !itemStack.is(Items.SADDLE)) {
+						return false;
+					} else {
+						AbstractHorse.this.inventory.setItem(0, itemStack);
+						AbstractHorse.this.syncSaddleToClients();
+						return true;
+					}
+				}
+			};
+		} else {
+			int k = i - 500 + 1;
+			return k >= 1 && k < this.inventory.getContainerSize() ? SlotAccess.forContainer(this.inventory, k) : super.getSlot(i);
 		}
-
-		int k = i - 500 + 2;
-		return k >= 2 && k < this.inventory.getContainerSize() ? SlotAccess.forContainer(this.inventory, k) : super.getSlot(i);
 	}
 
 	@Nullable
@@ -1113,18 +1106,14 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 	@Nullable
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		ServerLevelAccessor serverLevelAccessor,
-		DifficultyInstance difficultyInstance,
-		MobSpawnType mobSpawnType,
-		@Nullable SpawnGroupData spawnGroupData,
-		@Nullable CompoundTag compoundTag
+		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData
 	) {
 		if (spawnGroupData == null) {
 			spawnGroupData = new AgeableMob.AgeableMobGroupData(0.2F);
 		}
 
 		this.randomizeAttributes(serverLevelAccessor.getRandom());
-		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData);
 	}
 
 	public boolean hasInventoryChanged(Container container) {
@@ -1139,5 +1128,9 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 	protected Vec3 getPassengerAttachmentPoint(Entity entity, EntityDimensions entityDimensions, float f) {
 		return super.getPassengerAttachmentPoint(entity, entityDimensions, f)
 			.add(new Vec3(0.0, 0.15 * (double)this.standAnimO * (double)f, -0.7 * (double)this.standAnimO * (double)f).yRot(-this.getYRot() * (float) (Math.PI / 180.0)));
+	}
+
+	public final Container getBodyArmorAccess() {
+		return this.bodyArmorAccess;
 	}
 }

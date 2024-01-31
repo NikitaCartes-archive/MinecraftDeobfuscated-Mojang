@@ -99,14 +99,12 @@ public class CompassItem extends Item {
 			if (bl) {
 				this.addLodestoneTags(level.dimension(), blockPos, itemStack.getOrCreateTag());
 			} else {
-				ItemStack itemStack2 = new ItemStack(Items.COMPASS, 1);
-				CompoundTag compoundTag = itemStack.hasTag() ? itemStack.getTag().copy() : new CompoundTag();
-				itemStack2.setTag(compoundTag);
+				ItemStack itemStack2 = itemStack.transmuteCopy(Items.COMPASS, 1);
 				if (!player.getAbilities().instabuild) {
 					itemStack.shrink(1);
 				}
 
-				this.addLodestoneTags(level.dimension(), blockPos, compoundTag);
+				this.addLodestoneTags(level.dimension(), blockPos, itemStack2.getOrCreateTag());
 				if (!player.getInventory().add(itemStack2)) {
 					player.drop(itemStack2, false);
 				}

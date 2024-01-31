@@ -11,6 +11,7 @@ import net.minecraft.Util;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
@@ -33,8 +34,8 @@ import net.minecraft.world.item.armortrim.TrimPatterns;
 import net.minecraft.world.level.Level;
 
 public class SpawnArmorTrimsCommand {
-	private static final Map<Pair<ArmorMaterial, EquipmentSlot>, Item> MATERIAL_AND_SLOT_TO_ITEM = Util.make(
-		Maps.<Pair<ArmorMaterial, EquipmentSlot>, Item>newHashMap(), hashMap -> {
+	private static final Map<Pair<Holder<ArmorMaterial>, EquipmentSlot>, Item> MATERIAL_AND_SLOT_TO_ITEM = Util.make(
+		Maps.<Pair<Holder<ArmorMaterial>, EquipmentSlot>, Item>newHashMap(), hashMap -> {
 			hashMap.put(Pair.of(ArmorMaterials.CHAIN, EquipmentSlot.HEAD), Items.CHAINMAIL_HELMET);
 			hashMap.put(Pair.of(ArmorMaterials.CHAIN, EquipmentSlot.CHEST), Items.CHAINMAIL_CHESTPLATE);
 			hashMap.put(Pair.of(ArmorMaterials.CHAIN, EquipmentSlot.LEGS), Items.CHAINMAIL_LEGGINGS);
@@ -112,14 +113,15 @@ public class SpawnArmorTrimsCommand {
 						.forEachOrdered(trimMaterial -> nonNullList.add(new ArmorTrim(registry2.wrapAsHolder(trimMaterial), registry.wrapAsHolder(trimPattern))))
 			);
 		BlockPos blockPos = player.blockPosition().relative(player.getDirection(), 5);
-		int i = ArmorMaterials.values().length - 1;
+		Registry<ArmorMaterial> registry3 = commandSourceStack.registryAccess().registryOrThrow(Registries.ARMOR_MATERIAL);
+		int i = registry3.size() - 1;
 		double d = 3.0;
 		int j = 0;
 		int k = 0;
 
 		for (ArmorTrim armorTrim : nonNullList) {
-			for (ArmorMaterial armorMaterial : ArmorMaterials.values()) {
-				if (armorMaterial != ArmorMaterials.LEATHER) {
+			for (ArmorMaterial armorMaterial : registry3) {
+				if (armorMaterial != ArmorMaterials.LEATHER.value()) {
 					double e = (double)blockPos.getX() + 0.5 - (double)(j % registry2.size()) * 3.0;
 					double f = (double)blockPos.getY() + 0.5 + (double)(k % i) * 3.0;
 					double g = (double)blockPos.getZ() + 0.5 + (double)(j / registry2.size() * 10);
@@ -135,7 +137,7 @@ public class SpawnArmorTrimsCommand {
 							armorStand.setItemSlot(equipmentSlot, itemStack);
 							if (item instanceof ArmorItem) {
 								ArmorItem armorItem = (ArmorItem)item;
-								if (armorItem.getMaterial() == ArmorMaterials.TURTLE) {
+								if (armorItem.getMaterial().is(ArmorMaterials.TURTLE)) {
 									armorStand.setCustomName(
 										armorTrim.pattern().value().copyWithStyle(armorTrim.material()).copy().append(" ").append(armorTrim.material().value().description())
 									);

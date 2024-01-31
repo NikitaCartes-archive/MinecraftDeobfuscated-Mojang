@@ -1,15 +1,21 @@
 package net.minecraft.world.item.trading;
 
+import com.mojang.serialization.Codec;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.function.Function;
 import javax.annotation.Nullable;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
 
 public class MerchantOffers extends ArrayList<MerchantOffer> {
+	public static final Codec<MerchantOffers> CODEC = MerchantOffer.CODEC
+		.listOf()
+		.fieldOf("Recipes")
+		.<MerchantOffers>xmap(MerchantOffers::new, Function.identity())
+		.codec();
 	public static final StreamCodec<RegistryFriendlyByteBuf, MerchantOffers> STREAM_CODEC = MerchantOffer.STREAM_CODEC
 		.apply(ByteBufCodecs.collection(MerchantOffers::new));
 
@@ -20,12 +26,8 @@ public class MerchantOffers extends ArrayList<MerchantOffer> {
 		super(i);
 	}
 
-	public MerchantOffers(CompoundTag compoundTag) {
-		ListTag listTag = compoundTag.getList("Recipes", 10);
-
-		for (int i = 0; i < listTag.size(); i++) {
-			this.add(new MerchantOffer(listTag.getCompound(i)));
-		}
+	private MerchantOffers(Collection<MerchantOffer> collection) {
+		super(collection);
 	}
 
 	@Nullable
@@ -43,19 +45,6 @@ public class MerchantOffers extends ArrayList<MerchantOffer> {
 
 			return null;
 		}
-	}
-
-	public CompoundTag createTag() {
-		CompoundTag compoundTag = new CompoundTag();
-		ListTag listTag = new ListTag();
-
-		for (int i = 0; i < this.size(); i++) {
-			MerchantOffer merchantOffer = (MerchantOffer)this.get(i);
-			listTag.add(merchantOffer.createTag());
-		}
-
-		compoundTag.put("Recipes", listTag);
-		return compoundTag;
 	}
 
 	public MerchantOffers copy() {

@@ -6,6 +6,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.chat.FilterMask;
 import net.minecraft.network.chat.MessageSignature;
 import net.minecraft.network.chat.SignedMessageBody;
@@ -32,7 +33,7 @@ public record ClientboundPlayerChatPacket(
 			registryFriendlyByteBuf.readVarInt(),
 			registryFriendlyByteBuf.readNullable(MessageSignature::read),
 			new SignedMessageBody.Packed(registryFriendlyByteBuf),
-			registryFriendlyByteBuf.readNullable(FriendlyByteBuf::readComponentTrusted),
+			FriendlyByteBuf.readNullable(registryFriendlyByteBuf, ComponentSerialization.STREAM_CODEC),
 			FilterMask.read(registryFriendlyByteBuf),
 			ChatType.Bound.STREAM_CODEC.decode(registryFriendlyByteBuf)
 		);
@@ -43,7 +44,7 @@ public record ClientboundPlayerChatPacket(
 		registryFriendlyByteBuf.writeVarInt(this.index);
 		registryFriendlyByteBuf.writeNullable(this.signature, MessageSignature::write);
 		this.body.write(registryFriendlyByteBuf);
-		registryFriendlyByteBuf.writeNullable(this.unsignedContent, FriendlyByteBuf::writeComponent);
+		FriendlyByteBuf.writeNullable(registryFriendlyByteBuf, this.unsignedContent, ComponentSerialization.STREAM_CODEC);
 		FilterMask.write(registryFriendlyByteBuf, this.filterMask);
 		ChatType.Bound.STREAM_CODEC.encode(registryFriendlyByteBuf, this.chatType);
 	}

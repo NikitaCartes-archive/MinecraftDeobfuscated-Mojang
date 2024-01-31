@@ -52,8 +52,7 @@ public abstract class DisplayRenderer<T extends Display, S> extends EntityRender
 				poseStack.pushPose();
 				poseStack.mulPose(this.calculateOrientation(renderState, display, g, new Quaternionf()));
 				Transformation transformation = renderState.transformation().get(h);
-				poseStack.mulPoseMatrix(transformation.getMatrix());
-				poseStack.last().normal().rotate(transformation.getLeftRotation()).rotate(transformation.getRightRotation());
+				poseStack.mulPose(transformation.getMatrix());
 				this.renderInner(display, object, poseStack, multiBufferSource, k, h);
 				poseStack.popPose();
 			}

@@ -47,27 +47,38 @@ public final class TrialSpawner {
 	private final TrialSpawnerData data;
 	private final TrialSpawner.StateAccessor stateAccessor;
 	private PlayerDetector playerDetector;
+	private final PlayerDetector.EntitySelector entitySelector;
 	private boolean overridePeacefulAndMobSpawnRule;
 
 	public Codec<TrialSpawner> codec() {
 		return RecordCodecBuilder.create(
 			instance -> instance.group(TrialSpawnerConfig.MAP_CODEC.forGetter(TrialSpawner::getConfig), TrialSpawnerData.MAP_CODEC.forGetter(TrialSpawner::getData))
-					.apply(instance, (trialSpawnerConfig, trialSpawnerData) -> new TrialSpawner(trialSpawnerConfig, trialSpawnerData, this.stateAccessor, this.playerDetector))
+					.apply(
+						instance,
+						(trialSpawnerConfig, trialSpawnerData) -> new TrialSpawner(
+								trialSpawnerConfig, trialSpawnerData, this.stateAccessor, this.playerDetector, this.entitySelector
+							)
+					)
 		);
 	}
 
-	public TrialSpawner(TrialSpawner.StateAccessor stateAccessor, PlayerDetector playerDetector) {
-		this(TrialSpawnerConfig.DEFAULT, new TrialSpawnerData(), stateAccessor, playerDetector);
+	public TrialSpawner(TrialSpawner.StateAccessor stateAccessor, PlayerDetector playerDetector, PlayerDetector.EntitySelector entitySelector) {
+		this(TrialSpawnerConfig.DEFAULT, new TrialSpawnerData(), stateAccessor, playerDetector, entitySelector);
 	}
 
 	public TrialSpawner(
-		TrialSpawnerConfig trialSpawnerConfig, TrialSpawnerData trialSpawnerData, TrialSpawner.StateAccessor stateAccessor, PlayerDetector playerDetector
+		TrialSpawnerConfig trialSpawnerConfig,
+		TrialSpawnerData trialSpawnerData,
+		TrialSpawner.StateAccessor stateAccessor,
+		PlayerDetector playerDetector,
+		PlayerDetector.EntitySelector entitySelector
 	) {
 		this.config = trialSpawnerConfig;
 		this.data = trialSpawnerData;
 		this.data.setSpawnPotentialsFromConfig(trialSpawnerConfig);
 		this.stateAccessor = stateAccessor;
 		this.playerDetector = playerDetector;
+		this.entitySelector = entitySelector;
 	}
 
 	public TrialSpawnerConfig getConfig() {
@@ -92,6 +103,10 @@ public final class TrialSpawner {
 
 	public PlayerDetector getPlayerDetector() {
 		return this.playerDetector;
+	}
+
+	public PlayerDetector.EntitySelector getEntitySelector() {
+		return this.entitySelector;
 	}
 
 	public boolean canSpawnInLevel(Level level) {
@@ -151,7 +166,7 @@ public final class TrialSpawner {
 
 								boolean bl = spawnData.getEntityToSpawn().size() == 1 && spawnData.getEntityToSpawn().contains("id", 8);
 								if (bl) {
-									mob.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(mob.blockPosition()), MobSpawnType.TRIAL_SPAWNER, null, null);
+									mob.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(mob.blockPosition()), MobSpawnType.TRIAL_SPAWNER, null);
 								}
 
 								mob.setPersistenceRequired();

@@ -20,7 +20,7 @@ public class BlockStateArgument implements ArgumentType<BlockInput> {
 	private final HolderLookup<Block> blocks;
 
 	public BlockStateArgument(CommandBuildContext commandBuildContext) {
-		this.blocks = commandBuildContext.holderLookup(Registries.BLOCK);
+		this.blocks = commandBuildContext.lookupOrThrow(Registries.BLOCK);
 	}
 
 	public static BlockStateArgument block(CommandBuildContext commandBuildContext) {

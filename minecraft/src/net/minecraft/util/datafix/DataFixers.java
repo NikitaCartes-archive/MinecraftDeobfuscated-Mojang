@@ -49,6 +49,7 @@ import net.minecraft.util.datafix.fixes.BlockStateStructureTemplateFix;
 import net.minecraft.util.datafix.fixes.CatTypeFix;
 import net.minecraft.util.datafix.fixes.CauldronRenameFix;
 import net.minecraft.util.datafix.fixes.CavesAndCliffsRenames;
+import net.minecraft.util.datafix.fixes.ChestedHorsesInventoryZeroIndexingFix;
 import net.minecraft.util.datafix.fixes.ChunkBedBlockEntityInjecterFix;
 import net.minecraft.util.datafix.fixes.ChunkBiomeFix;
 import net.minecraft.util.datafix.fixes.ChunkDeleteIgnoredLightDataFix;
@@ -112,6 +113,7 @@ import net.minecraft.util.datafix.fixes.FurnaceRecipeFix;
 import net.minecraft.util.datafix.fixes.GoatHornIdFix;
 import net.minecraft.util.datafix.fixes.GossipUUIDFix;
 import net.minecraft.util.datafix.fixes.HeightmapRenamingFix;
+import net.minecraft.util.datafix.fixes.HorseBodyArmorItemFix;
 import net.minecraft.util.datafix.fixes.IglooMetadataRemovalFix;
 import net.minecraft.util.datafix.fixes.ItemBannerColorFix;
 import net.minecraft.util.datafix.fixes.ItemCustomNameToComponentFix;
@@ -267,6 +269,9 @@ import net.minecraft.util.datafix.schemas.V3683;
 import net.minecraft.util.datafix.schemas.V3685;
 import net.minecraft.util.datafix.schemas.V3689;
 import net.minecraft.util.datafix.schemas.V3799;
+import net.minecraft.util.datafix.schemas.V3807;
+import net.minecraft.util.datafix.schemas.V3808;
+import net.minecraft.util.datafix.schemas.V3808_1;
 import net.minecraft.util.datafix.schemas.V501;
 import net.minecraft.util.datafix.schemas.V700;
 import net.minecraft.util.datafix.schemas.V701;
@@ -1198,6 +1203,14 @@ public class DataFixers {
 		dataFixerBuilder.addFixer(
 			new RenameEnchantmentsFix(schema201, "Rename sweeping enchant to sweeping_edge", Map.of("minecraft:sweeping", "minecraft:sweeping_edge"))
 		);
+		Schema schema202 = dataFixerBuilder.addSchema(3807, V3807::new);
+		dataFixerBuilder.addFixer(new AddNewChoices(schema202, "Added Vault", References.BLOCK_ENTITY));
+		Schema schema203 = dataFixerBuilder.addSchema(3808, V3808::new);
+		dataFixerBuilder.addFixer(new HorseBodyArmorItemFix(schema203, "minecraft:horse", "ArmorItem"));
+		Schema schema204 = dataFixerBuilder.addSchema(3808, 1, V3808_1::new);
+		dataFixerBuilder.addFixer(new HorseBodyArmorItemFix(schema204, "minecraft:llama", "DecorItem"));
+		Schema schema205 = dataFixerBuilder.addSchema(3809, SAME_NAMESPACED);
+		dataFixerBuilder.addFixer(new ChestedHorsesInventoryZeroIndexingFix(schema205));
 	}
 
 	private static UnaryOperator<String> createRenamer(Map<String, String> map) {

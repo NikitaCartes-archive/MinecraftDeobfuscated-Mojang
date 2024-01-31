@@ -14,6 +14,7 @@ import java.util.function.BooleanSupplier;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
@@ -84,8 +85,8 @@ public class SkullBlockEntity extends BlockEntity {
 	}
 
 	@Override
-	protected void saveAdditional(CompoundTag compoundTag) {
-		super.saveAdditional(compoundTag);
+	protected void saveAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
+		super.saveAdditional(compoundTag, provider);
 		if (this.owner != null) {
 			CompoundTag compoundTag2 = new CompoundTag();
 			NbtUtils.writeGameProfile(compoundTag2, this.owner);
@@ -98,8 +99,8 @@ public class SkullBlockEntity extends BlockEntity {
 	}
 
 	@Override
-	public void load(CompoundTag compoundTag) {
-		super.load(compoundTag);
+	public void load(CompoundTag compoundTag, HolderLookup.Provider provider) {
+		super.load(compoundTag, provider);
 		if (compoundTag.contains("SkullOwner", 10)) {
 			this.setOwner(NbtUtils.readGameProfile(compoundTag.getCompound("SkullOwner")));
 		} else if (compoundTag.contains("ExtraType", 8)) {
@@ -142,8 +143,8 @@ public class SkullBlockEntity extends BlockEntity {
 	}
 
 	@Override
-	public CompoundTag getUpdateTag() {
-		return this.saveWithoutMetadata();
+	public CompoundTag getUpdateTag(HolderLookup.Provider provider) {
+		return this.saveWithoutMetadata(provider);
 	}
 
 	public void setOwner(@Nullable GameProfile gameProfile) {

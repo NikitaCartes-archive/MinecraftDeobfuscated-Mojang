@@ -1,6 +1,7 @@
 package net.minecraft.world.item.trading;
 
-import net.minecraft.nbt.CompoundTag;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -8,6 +9,22 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 
 public class MerchantOffer {
+	public static final Codec<MerchantOffer> CODEC = RecordCodecBuilder.create(
+		instance -> instance.group(
+					ItemStack.CODEC.optionalFieldOf("buy", ItemStack.EMPTY).forGetter(merchantOffer -> merchantOffer.baseCostA),
+					ItemStack.CODEC.optionalFieldOf("buyB", ItemStack.EMPTY).forGetter(merchantOffer -> merchantOffer.costB),
+					ItemStack.CODEC.optionalFieldOf("sell", ItemStack.EMPTY).forGetter(merchantOffer -> merchantOffer.result),
+					Codec.INT.optionalFieldOf("uses", Integer.valueOf(0)).forGetter(merchantOffer -> merchantOffer.uses),
+					Codec.INT.optionalFieldOf("maxUses", Integer.valueOf(4)).forGetter(merchantOffer -> merchantOffer.maxUses),
+					Codec.BOOL.optionalFieldOf("rewardExp", Boolean.valueOf(true)).forGetter(merchantOffer -> merchantOffer.rewardExp),
+					Codec.INT.optionalFieldOf("specialPrice", Integer.valueOf(0)).forGetter(merchantOffer -> merchantOffer.specialPriceDiff),
+					Codec.INT.optionalFieldOf("demand", Integer.valueOf(0)).forGetter(merchantOffer -> merchantOffer.demand),
+					Codec.FLOAT.optionalFieldOf("priceMultiplier", Float.valueOf(0.0F)).forGetter(merchantOffer -> merchantOffer.priceMultiplier),
+					Codec.INT.optionalFieldOf("xp", Integer.valueOf(1)).forGetter(merchantOffer -> merchantOffer.xp),
+					Codec.BOOL.optionalFieldOf("ignore_tags", Boolean.valueOf(false)).forGetter(merchantOffer -> merchantOffer.ignoreTags)
+				)
+				.apply(instance, MerchantOffer::new)
+	);
 	public static final StreamCodec<RegistryFriendlyByteBuf, MerchantOffer> STREAM_CODEC = StreamCodec.of(
 		MerchantOffer::writeToStream, MerchantOffer::createFromStream
 	);
@@ -16,39 +33,25 @@ public class MerchantOffer {
 	private final ItemStack result;
 	private int uses;
 	private final int maxUses;
-	private boolean rewardExp = true;
+	private final boolean rewardExp;
 	private int specialPriceDiff;
 	private int demand;
-	private float priceMultiplier;
-	private int xp = 1;
+	private final float priceMultiplier;
+	private final int xp;
 	private final boolean ignoreTags;
 
-	public MerchantOffer(CompoundTag compoundTag) {
-		this.baseCostA = ItemStack.of(compoundTag.getCompound("buy"));
-		this.costB = ItemStack.of(compoundTag.getCompound("buyB"));
-		this.result = ItemStack.of(compoundTag.getCompound("sell"));
-		this.uses = compoundTag.getInt("uses");
-		if (compoundTag.contains("maxUses", 99)) {
-			this.maxUses = compoundTag.getInt("maxUses");
-		} else {
-			this.maxUses = 4;
-		}
-
-		if (compoundTag.contains("rewardExp", 1)) {
-			this.rewardExp = compoundTag.getBoolean("rewardExp");
-		}
-
-		if (compoundTag.contains("xp", 3)) {
-			this.xp = compoundTag.getInt("xp");
-		}
-
-		if (compoundTag.contains("priceMultiplier", 5)) {
-			this.priceMultiplier = compoundTag.getFloat("priceMultiplier");
-		}
-
-		this.specialPriceDiff = compoundTag.getInt("specialPrice");
-		this.demand = compoundTag.getInt("demand");
-		this.ignoreTags = compoundTag.getBoolean("ignore_tags");
+	private MerchantOffer(ItemStack itemStack, ItemStack itemStack2, ItemStack itemStack3, int i, int j, boolean bl, int k, int l, float f, int m, boolean bl2) {
+		this.baseCostA = itemStack;
+		this.costB = itemStack2;
+		this.result = itemStack3;
+		this.uses = i;
+		this.maxUses = j;
+		this.rewardExp = bl;
+		this.specialPriceDiff = k;
+		this.demand = l;
+		this.priceMultiplier = f;
+		this.xp = m;
+		this.ignoreTags = bl2;
 	}
 
 	public MerchantOffer(ItemStack itemStack, ItemStack itemStack2, int i, int j, float f) {
@@ -64,33 +67,27 @@ public class MerchantOffer {
 	}
 
 	public MerchantOffer(ItemStack itemStack, ItemStack itemStack2, ItemStack itemStack3, int i, int j, int k, float f, int l) {
-		this(itemStack, itemStack2, itemStack3, i, j, k, f, l, false);
+		this(itemStack, itemStack2, itemStack3, i, j, true, 0, l, f, k, false);
 	}
 
 	public MerchantOffer(ItemStack itemStack, ItemStack itemStack2, ItemStack itemStack3, int i, int j, int k, float f, int l, boolean bl) {
-		this.baseCostA = itemStack;
-		this.costB = itemStack2;
-		this.result = itemStack3;
-		this.uses = i;
-		this.maxUses = j;
-		this.xp = k;
-		this.priceMultiplier = f;
-		this.demand = l;
-		this.ignoreTags = bl;
+		this(itemStack, itemStack2, itemStack3, i, j, true, 0, l, f, k, bl);
 	}
 
 	private MerchantOffer(MerchantOffer merchantOffer) {
-		this.baseCostA = merchantOffer.baseCostA.copy();
-		this.costB = merchantOffer.costB.copy();
-		this.result = merchantOffer.result.copy();
-		this.uses = merchantOffer.uses;
-		this.maxUses = merchantOffer.maxUses;
-		this.rewardExp = merchantOffer.rewardExp;
-		this.specialPriceDiff = merchantOffer.specialPriceDiff;
-		this.demand = merchantOffer.demand;
-		this.priceMultiplier = merchantOffer.priceMultiplier;
-		this.xp = merchantOffer.xp;
-		this.ignoreTags = merchantOffer.ignoreTags;
+		this(
+			merchantOffer.baseCostA.copy(),
+			merchantOffer.costB.copy(),
+			merchantOffer.result.copy(),
+			merchantOffer.uses,
+			merchantOffer.maxUses,
+			merchantOffer.rewardExp,
+			merchantOffer.specialPriceDiff,
+			merchantOffer.demand,
+			merchantOffer.priceMultiplier,
+			merchantOffer.xp,
+			merchantOffer.ignoreTags
+		);
 	}
 
 	public ItemStack getBaseCostA() {
@@ -185,22 +182,6 @@ public class MerchantOffer {
 
 	public boolean shouldRewardExp() {
 		return this.rewardExp;
-	}
-
-	public CompoundTag createTag() {
-		CompoundTag compoundTag = new CompoundTag();
-		compoundTag.put("buy", this.baseCostA.save(new CompoundTag()));
-		compoundTag.put("sell", this.result.save(new CompoundTag()));
-		compoundTag.put("buyB", this.costB.save(new CompoundTag()));
-		compoundTag.putInt("uses", this.uses);
-		compoundTag.putInt("maxUses", this.maxUses);
-		compoundTag.putBoolean("rewardExp", this.rewardExp);
-		compoundTag.putInt("xp", this.xp);
-		compoundTag.putFloat("priceMultiplier", this.priceMultiplier);
-		compoundTag.putInt("specialPrice", this.specialPriceDiff);
-		compoundTag.putInt("demand", this.demand);
-		compoundTag.putBoolean("ignore_tags", this.ignoreTags);
-		return compoundTag;
 	}
 
 	public boolean satisfiedBy(ItemStack itemStack, ItemStack itemStack2) {

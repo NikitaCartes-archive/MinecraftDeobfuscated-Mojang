@@ -75,4 +75,7 @@ public class LevelEvent {
 	public static final int PARTICLES_TRIAL_SPAWNER_SPAWN_MOB_AT = 3012;
 	public static final int PARTICLES_TRIAL_SPAWNER_DETECT_PLAYER = 3013;
 	public static final int ANIMATION_TRIAL_SPAWNER_EJECT_ITEM = 3014;
+	public static final int ANIMATION_VAULT_ACTIVATE = 3015;
+	public static final int ANIMATION_VAULT_DEACTIVATE = 3016;
+	public static final int ANIMATION_VAULT_EJECT_ITEM = 3017;
 }

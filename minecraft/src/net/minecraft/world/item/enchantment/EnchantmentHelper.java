@@ -315,11 +315,7 @@ public class EnchantmentHelper {
 		}
 
 		for (EnchantmentInstance enchantmentInstance : list) {
-			if (bl2) {
-				EnchantedBookItem.addEnchantment(itemStack, enchantmentInstance);
-			} else {
-				itemStack.enchant(enchantmentInstance.enchantment, enchantmentInstance.level);
-			}
+			itemStack.enchant(enchantmentInstance.enchantment, enchantmentInstance.level);
 		}
 
 		return itemStack;

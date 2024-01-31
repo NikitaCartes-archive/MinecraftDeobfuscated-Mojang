@@ -4,6 +4,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import javax.annotation.Nullable;
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.ComponentArgument;
@@ -24,7 +25,7 @@ import net.minecraft.world.entity.raid.Raids;
 import net.minecraft.world.phys.Vec3;
 
 public class RaidCommand {
-	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
+	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher, CommandBuildContext commandBuildContext) {
 		commandDispatcher.register(
 			Commands.literal("raid")
 				.requires(commandSourceStack -> commandSourceStack.hasPermission(3))
@@ -40,7 +41,7 @@ public class RaidCommand {
 				.then(
 					Commands.literal("sound")
 						.then(
-							Commands.argument("type", ComponentArgument.textComponent())
+							Commands.argument("type", ComponentArgument.textComponent(commandBuildContext))
 								.executes(commandContext -> playSound(commandContext.getSource(), ComponentArgument.getComponent(commandContext, "type")))
 						)
 				)
@@ -99,7 +100,6 @@ public class RaidCommand {
 				commandSourceStack.getLevel(),
 				commandSourceStack.getLevel().getCurrentDifficultyAt(BlockPos.containing(commandSourceStack.getPosition())),
 				MobSpawnType.COMMAND,
-				null,
 				null
 			);
 			commandSourceStack.getLevel().addFreshEntityWithPassengers(raider);

@@ -80,6 +80,7 @@ import net.minecraft.world.level.entity.TransientEntitySectionManager;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.saveddata.maps.MapId;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.minecraft.world.level.storage.WritableLevelData;
 import net.minecraft.world.phys.Vec3;
@@ -104,7 +105,7 @@ public class ClientLevel extends Level {
 	private final TickRateManager tickRateManager;
 	private final Minecraft minecraft = Minecraft.getInstance();
 	final List<AbstractClientPlayer> players = Lists.<AbstractClientPlayer>newArrayList();
-	private final Map<String, MapItemSavedData> mapData = Maps.<String, MapItemSavedData>newHashMap();
+	private final Map<MapId, MapItemSavedData> mapData = Maps.<MapId, MapItemSavedData>newHashMap();
 	private static final long CLOUD_COLOR = 16777215L;
 	private int skyFlashTime;
 	private final Object2ObjectArrayMap<ColorResolver, BlockTintCache> tintCaches = Util.make(
@@ -552,21 +553,21 @@ public class ClientLevel extends Level {
 
 	@Nullable
 	@Override
-	public MapItemSavedData getMapData(String string) {
-		return (MapItemSavedData)this.mapData.get(string);
+	public MapItemSavedData getMapData(MapId mapId) {
+		return (MapItemSavedData)this.mapData.get(mapId);
 	}
 
-	public void overrideMapData(String string, MapItemSavedData mapItemSavedData) {
-		this.mapData.put(string, mapItemSavedData);
-	}
-
-	@Override
-	public void setMapData(String string, MapItemSavedData mapItemSavedData) {
+	public void overrideMapData(MapId mapId, MapItemSavedData mapItemSavedData) {
+		this.mapData.put(mapId, mapItemSavedData);
 	}
 
 	@Override
-	public int getFreeMapId() {
-		return 0;
+	public void setMapData(MapId mapId, MapItemSavedData mapItemSavedData) {
+	}
+
+	@Override
+	public MapId getFreeMapId() {
+		return new MapId(0);
 	}
 
 	@Override
@@ -813,11 +814,11 @@ public class ClientLevel extends Level {
 	public void gameEvent(Holder<GameEvent> holder, Vec3 vec3, GameEvent.Context context) {
 	}
 
-	protected Map<String, MapItemSavedData> getAllMapData() {
+	protected Map<MapId, MapItemSavedData> getAllMapData() {
 		return ImmutableMap.copyOf(this.mapData);
 	}
 
-	protected void addMapData(Map<String, MapItemSavedData> map) {
+	protected void addMapData(Map<MapId, MapItemSavedData> map) {
 		this.mapData.putAll(map);
 	}
 

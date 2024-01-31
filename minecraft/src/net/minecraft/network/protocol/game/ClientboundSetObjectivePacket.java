@@ -4,6 +4,7 @@ import java.util.Optional;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.chat.numbers.NumberFormat;
 import net.minecraft.network.chat.numbers.NumberFormatTypes;
 import net.minecraft.network.codec.StreamCodec;
@@ -41,7 +42,7 @@ public class ClientboundSetObjectivePacket implements Packet<ClientGamePacketLis
 			this.renderType = ObjectiveCriteria.RenderType.INTEGER;
 			this.numberFormat = Optional.empty();
 		} else {
-			this.displayName = registryFriendlyByteBuf.readComponentTrusted();
+			this.displayName = ComponentSerialization.STREAM_CODEC.decode(registryFriendlyByteBuf);
 			this.renderType = registryFriendlyByteBuf.readEnum(ObjectiveCriteria.RenderType.class);
 			this.numberFormat = NumberFormatTypes.OPTIONAL_STREAM_CODEC.decode(registryFriendlyByteBuf);
 		}
@@ -51,7 +52,7 @@ public class ClientboundSetObjectivePacket implements Packet<ClientGamePacketLis
 		registryFriendlyByteBuf.writeUtf(this.objectiveName);
 		registryFriendlyByteBuf.writeByte(this.method);
 		if (this.method == 0 || this.method == 2) {
-			registryFriendlyByteBuf.writeComponent(this.displayName);
+			ComponentSerialization.STREAM_CODEC.encode(registryFriendlyByteBuf, this.displayName);
 			registryFriendlyByteBuf.writeEnum(this.renderType);
 			NumberFormatTypes.OPTIONAL_STREAM_CODEC.encode(registryFriendlyByteBuf, this.numberFormat);
 		}

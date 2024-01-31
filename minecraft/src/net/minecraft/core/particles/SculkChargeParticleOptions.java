@@ -5,6 +5,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Locale;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -19,7 +20,9 @@ public record SculkChargeParticleOptions(float roll) implements ParticleOptions 
 		ByteBufCodecs.FLOAT, sculkChargeParticleOptions -> sculkChargeParticleOptions.roll, SculkChargeParticleOptions::new
 	);
 	public static final ParticleOptions.Deserializer<SculkChargeParticleOptions> DESERIALIZER = new ParticleOptions.Deserializer<SculkChargeParticleOptions>() {
-		public SculkChargeParticleOptions fromCommand(ParticleType<SculkChargeParticleOptions> particleType, StringReader stringReader) throws CommandSyntaxException {
+		public SculkChargeParticleOptions fromCommand(
+			ParticleType<SculkChargeParticleOptions> particleType, StringReader stringReader, HolderLookup.Provider provider
+		) throws CommandSyntaxException {
 			stringReader.expect(' ');
 			float f = stringReader.readFloat();
 			return new SculkChargeParticleOptions(f);
@@ -32,7 +35,7 @@ public record SculkChargeParticleOptions(float roll) implements ParticleOptions 
 	}
 
 	@Override
-	public String writeToString() {
+	public String writeToString(HolderLookup.Provider provider) {
 		return String.format(Locale.ROOT, "%s %.2f", BuiltInRegistries.PARTICLE_TYPE.getKey(this.getType()), this.roll);
 	}
 }

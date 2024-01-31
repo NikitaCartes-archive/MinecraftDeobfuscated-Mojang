@@ -48,8 +48,6 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import org.joml.Matrix3f;
-import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
@@ -237,15 +235,11 @@ public class EntityRenderDispatcher implements ResourceManagerReloadListener {
 		}
 
 		Vec3 vec32 = entity.getViewVector(f);
-		Matrix4f matrix4f = poseStack.last().pose();
-		Matrix3f matrix3f = poseStack.last().normal();
-		vertexConsumer.vertex(matrix4f, 0.0F, entity.getEyeHeight(), 0.0F)
+		PoseStack.Pose pose = poseStack.last();
+		vertexConsumer.vertex(pose, 0.0F, entity.getEyeHeight(), 0.0F).color(0, 0, 255, 255).normal(pose, (float)vec32.x, (float)vec32.y, (float)vec32.z).endVertex();
+		vertexConsumer.vertex(pose, (float)(vec32.x * 2.0), (float)((double)entity.getEyeHeight() + vec32.y * 2.0), (float)(vec32.z * 2.0))
 			.color(0, 0, 255, 255)
-			.normal(matrix3f, (float)vec32.x, (float)vec32.y, (float)vec32.z)
-			.endVertex();
-		vertexConsumer.vertex(matrix4f, (float)(vec32.x * 2.0), (float)((double)entity.getEyeHeight() + vec32.y * 2.0), (float)(vec32.z * 2.0))
-			.color(0, 0, 255, 255)
-			.normal(matrix3f, (float)vec32.x, (float)vec32.y, (float)vec32.z)
+			.normal(pose, (float)vec32.x, (float)vec32.y, (float)vec32.z)
 			.endVertex();
 	}
 
@@ -291,13 +285,7 @@ public class EntityRenderDispatcher implements ResourceManagerReloadListener {
 	}
 
 	private static void fireVertex(PoseStack.Pose pose, VertexConsumer vertexConsumer, float f, float g, float h, float i, float j) {
-		vertexConsumer.vertex(pose.pose(), f, g, h)
-			.color(255, 255, 255, 255)
-			.uv(i, j)
-			.overlayCoords(0, 10)
-			.uv2(240)
-			.normal(pose.normal(), 0.0F, 1.0F, 0.0F)
-			.endVertex();
+		vertexConsumer.vertex(pose, f, g, h).color(255, 255, 255, 255).uv(i, j).overlayCoords(0, 10).uv2(240).normal(pose, 0.0F, 1.0F, 0.0F).endVertex();
 	}
 
 	private static void renderShadow(PoseStack poseStack, MultiBufferSource multiBufferSource, Entity entity, float f, float g, LevelReader levelReader, float h) {

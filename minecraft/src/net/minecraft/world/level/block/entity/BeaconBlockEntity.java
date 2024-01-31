@@ -12,6 +12,7 @@ import javax.annotation.Nullable;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -270,8 +271,8 @@ public class BeaconBlockEntity extends BlockEntity implements MenuProvider, Name
 	}
 
 	@Override
-	public CompoundTag getUpdateTag() {
-		return this.saveWithoutMetadata();
+	public CompoundTag getUpdateTag(HolderLookup.Provider provider) {
+		return this.saveWithoutMetadata(provider);
 	}
 
 	private static void storeEffect(CompoundTag compoundTag, String string, @Nullable Holder<MobEffect> holder) {
@@ -291,8 +292,8 @@ public class BeaconBlockEntity extends BlockEntity implements MenuProvider, Name
 	}
 
 	@Override
-	public void load(CompoundTag compoundTag) {
-		super.load(compoundTag);
+	public void load(CompoundTag compoundTag, HolderLookup.Provider provider) {
+		super.load(compoundTag, provider);
 		this.primaryPower = loadEffect(compoundTag, "primary_effect");
 		this.secondaryPower = loadEffect(compoundTag, "secondary_effect");
 		if (compoundTag.contains("CustomName", 8)) {
@@ -303,8 +304,8 @@ public class BeaconBlockEntity extends BlockEntity implements MenuProvider, Name
 	}
 
 	@Override
-	protected void saveAdditional(CompoundTag compoundTag) {
-		super.saveAdditional(compoundTag);
+	protected void saveAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
+		super.saveAdditional(compoundTag, provider);
 		storeEffect(compoundTag, "primary_effect", this.primaryPower);
 		storeEffect(compoundTag, "secondary_effect", this.secondaryPower);
 		compoundTag.putInt("Levels", this.levels);

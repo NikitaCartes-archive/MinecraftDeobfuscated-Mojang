@@ -46,9 +46,9 @@ public class FireworkRocketEntity extends Projectile implements ItemSupplier {
 		super(EntityType.FIREWORK_ROCKET, level);
 		this.life = 0;
 		this.setPos(d, e, f);
+		this.entityData.set(DATA_ID_FIREWORKS_ITEM, itemStack.copy());
 		int i = 1;
 		if (!itemStack.isEmpty() && itemStack.hasTag()) {
-			this.entityData.set(DATA_ID_FIREWORKS_ITEM, itemStack.copy());
 			i += itemStack.getOrCreateTagElement("Fireworks").getByte("Flight");
 		}
 
@@ -79,7 +79,7 @@ public class FireworkRocketEntity extends Projectile implements ItemSupplier {
 
 	@Override
 	protected void defineSynchedData() {
-		this.entityData.define(DATA_ID_FIREWORKS_ITEM, ItemStack.EMPTY);
+		this.entityData.define(DATA_ID_FIREWORKS_ITEM, new ItemStack(Items.FIREWORK_ROCKET));
 		this.entityData.define(DATA_ATTACHED_TO_TARGET, OptionalInt.empty());
 		this.entityData.define(DATA_SHOT_AT_ANGLE, false);
 	}
@@ -271,11 +271,7 @@ public class FireworkRocketEntity extends Projectile implements ItemSupplier {
 		super.addAdditionalSaveData(compoundTag);
 		compoundTag.putInt("Life", this.life);
 		compoundTag.putInt("LifeTime", this.lifetime);
-		ItemStack itemStack = this.entityData.get(DATA_ID_FIREWORKS_ITEM);
-		if (!itemStack.isEmpty()) {
-			compoundTag.put("FireworksItem", itemStack.save(new CompoundTag()));
-		}
-
+		compoundTag.put("FireworksItem", this.getItem().save(new CompoundTag()));
 		compoundTag.putBoolean("ShotAtAngle", this.entityData.get(DATA_SHOT_AT_ANGLE));
 	}
 
@@ -284,9 +280,11 @@ public class FireworkRocketEntity extends Projectile implements ItemSupplier {
 		super.readAdditionalSaveData(compoundTag);
 		this.life = compoundTag.getInt("Life");
 		this.lifetime = compoundTag.getInt("LifeTime");
-		ItemStack itemStack = ItemStack.of(compoundTag.getCompound("FireworksItem"));
-		if (!itemStack.isEmpty()) {
-			this.entityData.set(DATA_ID_FIREWORKS_ITEM, itemStack);
+		if (compoundTag.contains("FireworksItem", 10)) {
+			ItemStack itemStack = ItemStack.of(compoundTag.getCompound("FireworksItem"));
+			if (!itemStack.isEmpty()) {
+				this.entityData.set(DATA_ID_FIREWORKS_ITEM, itemStack);
+			}
 		}
 
 		if (compoundTag.contains("ShotAtAngle")) {
@@ -296,8 +294,7 @@ public class FireworkRocketEntity extends Projectile implements ItemSupplier {
 
 	@Override
 	public ItemStack getItem() {
-		ItemStack itemStack = this.entityData.get(DATA_ID_FIREWORKS_ITEM);
-		return itemStack.isEmpty() ? new ItemStack(Items.FIREWORK_ROCKET) : itemStack;
+		return this.entityData.get(DATA_ID_FIREWORKS_ITEM);
 	}
 
 	@Override

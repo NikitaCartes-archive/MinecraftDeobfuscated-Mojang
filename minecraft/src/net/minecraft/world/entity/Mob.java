@@ -1,8 +1,10 @@
 package net.minecraft.world.entity;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -27,6 +29,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
@@ -104,6 +107,8 @@ public abstract class Mob extends LivingEntity implements Targeting {
 	protected final float[] handDropChances = new float[2];
 	private final NonNullList<ItemStack> armorItems = NonNullList.withSize(4, ItemStack.EMPTY);
 	protected final float[] armorDropChances = new float[4];
+	private ItemStack bodyArmorItem = ItemStack.EMPTY;
+	protected float bodyArmorDropChance;
 	private boolean canPickUpLoot;
 	private boolean persistenceRequired;
 	private final Map<BlockPathTypes, Float> pathfindingMalus = Maps.newEnumMap(BlockPathTypes.class);
@@ -130,6 +135,7 @@ public abstract class Mob extends LivingEntity implements Targeting {
 		this.sensing = new Sensing(this);
 		Arrays.fill(this.armorDropChances, 0.085F);
 		Arrays.fill(this.handDropChances, 0.085F);
+		this.bodyArmorDropChance = 0.085F;
 		if (level != null && !level.isClientSide) {
 			this.registerGoals();
 		}
@@ -286,6 +292,10 @@ public abstract class Mob extends LivingEntity implements Targeting {
 				}
 			}
 
+			if (!this.bodyArmorItem.isEmpty() && this.bodyArmorDropChance <= 1.0F) {
+				i += 1 + this.random.nextInt(3);
+			}
+
 			return i;
 		} else {
 			return this.xpReward;
@@ -364,23 +374,23 @@ public abstract class Mob extends LivingEntity implements Targeting {
 		compoundTag.put("ArmorItems", listTag);
 		ListTag listTag2 = new ListTag();
 
+		for (float f : this.armorDropChances) {
+			listTag2.add(FloatTag.valueOf(f));
+		}
+
+		compoundTag.put("ArmorDropChances", listTag2);
+		ListTag listTag3 = new ListTag();
+
 		for (ItemStack itemStack2 : this.handItems) {
 			CompoundTag compoundTag3 = new CompoundTag();
 			if (!itemStack2.isEmpty()) {
 				itemStack2.save(compoundTag3);
 			}
 
-			listTag2.add(compoundTag3);
+			listTag3.add(compoundTag3);
 		}
 
-		compoundTag.put("HandItems", listTag2);
-		ListTag listTag3 = new ListTag();
-
-		for (float f : this.armorDropChances) {
-			listTag3.add(FloatTag.valueOf(f));
-		}
-
-		compoundTag.put("ArmorDropChances", listTag3);
+		compoundTag.put("HandItems", listTag3);
 		ListTag listTag4 = new ListTag();
 
 		for (float g : this.handDropChances) {
@@ -388,19 +398,24 @@ public abstract class Mob extends LivingEntity implements Targeting {
 		}
 
 		compoundTag.put("HandDropChances", listTag4);
+		if (!this.bodyArmorItem.isEmpty()) {
+			compoundTag.put("body_armor_item", this.bodyArmorItem.save(new CompoundTag()));
+			compoundTag.putFloat("body_armor_drop_chance", this.bodyArmorDropChance);
+		}
+
 		if (this.leashHolder != null) {
-			CompoundTag compoundTag3 = new CompoundTag();
+			CompoundTag compoundTag4 = new CompoundTag();
 			if (this.leashHolder instanceof LivingEntity) {
 				UUID uUID = this.leashHolder.getUUID();
-				compoundTag3.putUUID("UUID", uUID);
+				compoundTag4.putUUID("UUID", uUID);
 			} else if (this.leashHolder instanceof HangingEntity) {
 				BlockPos blockPos = ((HangingEntity)this.leashHolder).getPos();
-				compoundTag3.putInt("X", blockPos.getX());
-				compoundTag3.putInt("Y", blockPos.getY());
-				compoundTag3.putInt("Z", blockPos.getZ());
+				compoundTag4.putInt("X", blockPos.getX());
+				compoundTag4.putInt("Y", blockPos.getY());
+				compoundTag4.putInt("Z", blockPos.getZ());
 			}
 
-			compoundTag.put("Leash", compoundTag3);
+			compoundTag.put("Leash", compoundTag4);
 		} else if (this.leashInfoTag != null) {
 			compoundTag.put("Leash", this.leashInfoTag.copy());
 		}
@@ -434,19 +449,19 @@ public abstract class Mob extends LivingEntity implements Targeting {
 			}
 		}
 
-		if (compoundTag.contains("HandItems", 9)) {
-			ListTag listTag = compoundTag.getList("HandItems", 10);
-
-			for (int i = 0; i < this.handItems.size(); i++) {
-				this.handItems.set(i, ItemStack.of(listTag.getCompound(i)));
-			}
-		}
-
 		if (compoundTag.contains("ArmorDropChances", 9)) {
 			ListTag listTag = compoundTag.getList("ArmorDropChances", 5);
 
 			for (int i = 0; i < listTag.size(); i++) {
 				this.armorDropChances[i] = listTag.getFloat(i);
+			}
+		}
+
+		if (compoundTag.contains("HandItems", 9)) {
+			ListTag listTag = compoundTag.getList("HandItems", 10);
+
+			for (int i = 0; i < this.handItems.size(); i++) {
+				this.handItems.set(i, ItemStack.of(listTag.getCompound(i)));
 			}
 		}
 
@@ -456,6 +471,11 @@ public abstract class Mob extends LivingEntity implements Targeting {
 			for (int i = 0; i < listTag.size(); i++) {
 				this.handDropChances[i] = listTag.getFloat(i);
 			}
+		}
+
+		if (compoundTag.contains("body_armor_item", 10)) {
+			this.bodyArmorItem = ItemStack.of(compoundTag.getCompound("body_armor_item"));
+			this.bodyArmorDropChance = compoundTag.getFloat("body_armor_drop_chance");
 		}
 
 		if (compoundTag.contains("Leash", 10)) {
@@ -593,6 +613,9 @@ public abstract class Mob extends LivingEntity implements Targeting {
 				break;
 			case ARMOR:
 				this.armorDropChances[equipmentSlot.getIndex()] = 2.0F;
+				break;
+			case BODY:
+				this.bodyArmorDropChance = 2.0F;
 		}
 	}
 
@@ -707,41 +730,42 @@ public abstract class Mob extends LivingEntity implements Targeting {
 	@Override
 	protected final void serverAiStep() {
 		this.noActionTime++;
-		this.level().getProfiler().push("sensing");
+		ProfilerFiller profilerFiller = this.level().getProfiler();
+		profilerFiller.push("sensing");
 		this.sensing.tick();
-		this.level().getProfiler().pop();
+		profilerFiller.pop();
 		int i = this.level().getServer().getTickCount() + this.getId();
 		if (i % 2 != 0 && this.tickCount > 1) {
-			this.level().getProfiler().push("targetSelector");
+			profilerFiller.push("targetSelector");
 			this.targetSelector.tickRunningGoals(false);
-			this.level().getProfiler().pop();
-			this.level().getProfiler().push("goalSelector");
+			profilerFiller.pop();
+			profilerFiller.push("goalSelector");
 			this.goalSelector.tickRunningGoals(false);
-			this.level().getProfiler().pop();
+			profilerFiller.pop();
 		} else {
-			this.level().getProfiler().push("targetSelector");
+			profilerFiller.push("targetSelector");
 			this.targetSelector.tick();
-			this.level().getProfiler().pop();
-			this.level().getProfiler().push("goalSelector");
+			profilerFiller.pop();
+			profilerFiller.push("goalSelector");
 			this.goalSelector.tick();
-			this.level().getProfiler().pop();
+			profilerFiller.pop();
 		}
 
-		this.level().getProfiler().push("navigation");
+		profilerFiller.push("navigation");
 		this.navigation.tick();
-		this.level().getProfiler().pop();
-		this.level().getProfiler().push("mob tick");
+		profilerFiller.pop();
+		profilerFiller.push("mob tick");
 		this.customServerAiStep();
-		this.level().getProfiler().pop();
-		this.level().getProfiler().push("controls");
-		this.level().getProfiler().push("move");
+		profilerFiller.pop();
+		profilerFiller.push("controls");
+		profilerFiller.push("move");
 		this.moveControl.tick();
-		this.level().getProfiler().popPush("look");
+		profilerFiller.popPush("look");
 		this.lookControl.tick();
-		this.level().getProfiler().popPush("jump");
+		profilerFiller.popPush("jump");
 		this.jumpControl.tick();
-		this.level().getProfiler().pop();
-		this.level().getProfiler().pop();
+		profilerFiller.pop();
+		profilerFiller.pop();
 		this.sendDebugPackets();
 	}
 
@@ -851,16 +875,38 @@ public abstract class Mob extends LivingEntity implements Targeting {
 		return this.armorItems;
 	}
 
+	public ItemStack getBodyArmorItem() {
+		return this.bodyArmorItem;
+	}
+
+	public boolean canWearBodyArmor() {
+		return false;
+	}
+
+	public boolean isWearingBodyArmor() {
+		return !this.getItemBySlot(EquipmentSlot.BODY).isEmpty();
+	}
+
+	public boolean isBodyArmorItem(ItemStack itemStack) {
+		return false;
+	}
+
+	public void setBodyArmorItem(ItemStack itemStack) {
+		this.setItemSlotAndDropWhenKilled(EquipmentSlot.BODY, itemStack);
+	}
+
+	@Override
+	public Iterable<ItemStack> getArmorAndBodyArmorSlots() {
+		return (Iterable<ItemStack>)(this.bodyArmorItem.isEmpty() ? this.armorItems : Iterables.concat(this.armorItems, List.of(this.bodyArmorItem)));
+	}
+
 	@Override
 	public ItemStack getItemBySlot(EquipmentSlot equipmentSlot) {
-		switch (equipmentSlot.getType()) {
-			case HAND:
-				return this.handItems.get(equipmentSlot.getIndex());
-			case ARMOR:
-				return this.armorItems.get(equipmentSlot.getIndex());
-			default:
-				return ItemStack.EMPTY;
-		}
+		return switch (equipmentSlot.getType()) {
+			case HAND -> (ItemStack)this.handItems.get(equipmentSlot.getIndex());
+			case ARMOR -> (ItemStack)this.armorItems.get(equipmentSlot.getIndex());
+			case BODY -> this.bodyArmorItem;
+		};
 	}
 
 	@Override
@@ -872,6 +918,11 @@ public abstract class Mob extends LivingEntity implements Targeting {
 				break;
 			case ARMOR:
 				this.onEquipItem(equipmentSlot, this.armorItems.set(equipmentSlot.getIndex(), itemStack), itemStack);
+				break;
+			case BODY:
+				ItemStack itemStack2 = this.bodyArmorItem;
+				this.bodyArmorItem = itemStack;
+				this.onEquipItem(equipmentSlot, itemStack2, itemStack);
 		}
 	}
 
@@ -900,7 +951,7 @@ public abstract class Mob extends LivingEntity implements Targeting {
 		return switch (equipmentSlot.getType()) {
 			case HAND -> this.handDropChances[equipmentSlot.getIndex()];
 			case ARMOR -> this.armorDropChances[equipmentSlot.getIndex()];
-			default -> 0.0F;
+			case BODY -> this.bodyArmorDropChance;
 		};
 	}
 
@@ -1025,23 +1076,14 @@ public abstract class Mob extends LivingEntity implements Targeting {
 
 	@Nullable
 	public SpawnGroupData finalizeSpawn(
-		ServerLevelAccessor serverLevelAccessor,
-		DifficultyInstance difficultyInstance,
-		MobSpawnType mobSpawnType,
-		@Nullable SpawnGroupData spawnGroupData,
-		@Nullable CompoundTag compoundTag
+		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData
 	) {
 		RandomSource randomSource = serverLevelAccessor.getRandom();
 		this.getAttribute(Attributes.FOLLOW_RANGE)
 			.addPermanentModifier(
 				new AttributeModifier("Random spawn bonus", randomSource.triangle(0.0, 0.11485000000000001), AttributeModifier.Operation.MULTIPLY_BASE)
 			);
-		if (randomSource.nextFloat() < 0.05F) {
-			this.setLeftHanded(true);
-		} else {
-			this.setLeftHanded(false);
-		}
-
+		this.setLeftHanded(randomSource.nextFloat() < 0.05F);
 		return spawnGroupData;
 	}
 
@@ -1056,6 +1098,9 @@ public abstract class Mob extends LivingEntity implements Targeting {
 				break;
 			case ARMOR:
 				this.armorDropChances[equipmentSlot.getIndex()] = f;
+				break;
+			case BODY:
+				this.bodyArmorDropChance = f;
 		}
 	}
 

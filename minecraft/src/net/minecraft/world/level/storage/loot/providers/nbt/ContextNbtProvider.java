@@ -19,7 +19,7 @@ public class ContextNbtProvider implements NbtProvider {
 		@Override
 		public Tag get(LootContext lootContext) {
 			BlockEntity blockEntity = lootContext.getParamOrNull(LootContextParams.BLOCK_ENTITY);
-			return blockEntity != null ? blockEntity.saveWithFullMetadata() : null;
+			return blockEntity != null ? blockEntity.saveWithFullMetadata(blockEntity.getLevel().registryAccess()) : null;
 		}
 
 		@Override

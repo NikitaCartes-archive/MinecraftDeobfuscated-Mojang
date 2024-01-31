@@ -201,11 +201,7 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob, Invento
 	@Nullable
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		ServerLevelAccessor serverLevelAccessor,
-		DifficultyInstance difficultyInstance,
-		MobSpawnType mobSpawnType,
-		@Nullable SpawnGroupData spawnGroupData,
-		@Nullable CompoundTag compoundTag
+		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData
 	) {
 		RandomSource randomSource = serverLevelAccessor.getRandom();
 		if (mobSpawnType != MobSpawnType.STRUCTURE) {
@@ -219,7 +215,7 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob, Invento
 		PiglinAi.initMemories(this, serverLevelAccessor.getRandom());
 		this.populateDefaultEquipmentSlots(randomSource, difficultyInstance);
 		this.populateDefaultEquipmentEnchantments(randomSource, difficultyInstance);
-		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData);
 	}
 
 	@Override

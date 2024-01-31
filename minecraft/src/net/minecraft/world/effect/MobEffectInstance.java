@@ -2,13 +2,19 @@ package net.minecraft.world.effect;
 
 import com.google.common.collect.ComparisonChain;
 import com.mojang.logging.LogUtils;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.ints.Int2IntFunction;
+import java.util.Optional;
 import javax.annotation.Nullable;
+import net.minecraft.Util;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import org.slf4j.Logger;
@@ -16,13 +22,13 @@ import org.slf4j.Logger;
 public class MobEffectInstance implements Comparable<MobEffectInstance> {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	public static final int INFINITE_DURATION = -1;
-	private static final String TAG_ID = "id";
-	private static final String TAG_AMBIENT = "ambient";
-	private static final String TAG_HIDDEN_EFFECT = "hidden_effect";
-	private static final String TAG_AMPLIFIER = "amplifier";
-	private static final String TAG_DURATION = "duration";
-	private static final String TAG_SHOW_PARTICLES = "show_particles";
-	private static final String TAG_SHOW_ICON = "show_icon";
+	public static final Codec<MobEffectInstance> CODEC = RecordCodecBuilder.create(
+		instance -> instance.group(
+					BuiltInRegistries.MOB_EFFECT.holderByNameCodec().fieldOf("id").forGetter(MobEffectInstance::getEffect),
+					MobEffectInstance.Details.MAP_CODEC.forGetter(MobEffectInstance::asDetails)
+				)
+				.apply(instance, MobEffectInstance::new)
+	);
 	private final Holder<MobEffect> effect;
 	private int duration;
 	private int amplifier;
@@ -66,6 +72,29 @@ public class MobEffectInstance implements Comparable<MobEffectInstance> {
 	public MobEffectInstance(MobEffectInstance mobEffectInstance) {
 		this.effect = mobEffectInstance.effect;
 		this.setDetailsFrom(mobEffectInstance);
+	}
+
+	private MobEffectInstance(Holder<MobEffect> holder, MobEffectInstance.Details details) {
+		this(
+			holder,
+			details.duration(),
+			details.amplifier(),
+			details.ambient(),
+			details.showParticles(),
+			details.showIcon(),
+			(MobEffectInstance)details.hiddenEffect().map(detailsx -> new MobEffectInstance(holder, detailsx)).orElse(null)
+		);
+	}
+
+	private MobEffectInstance.Details asDetails() {
+		return new MobEffectInstance.Details(
+			this.getAmplifier(),
+			this.getDuration(),
+			this.isAmbient(),
+			this.isVisible(),
+			this.showIcon(),
+			Optional.ofNullable(this.hiddenEffect).map(MobEffectInstance::asDetails)
+		);
 	}
 
 	public float getBlendFactor(LivingEntity livingEntity, float f) {
@@ -247,54 +276,13 @@ public class MobEffectInstance implements Comparable<MobEffectInstance> {
 		return 31 * i + (this.ambient ? 1 : 0);
 	}
 
-	public CompoundTag save(CompoundTag compoundTag) {
-		ResourceLocation resourceLocation = ((ResourceKey)this.effect.unwrapKey().orElseThrow()).location();
-		compoundTag.putString("id", resourceLocation.toString());
-		this.writeDetailsTo(compoundTag);
-		return compoundTag;
-	}
-
-	private void writeDetailsTo(CompoundTag compoundTag) {
-		compoundTag.putByte("amplifier", (byte)this.getAmplifier());
-		compoundTag.putInt("duration", this.getDuration());
-		compoundTag.putBoolean("ambient", this.isAmbient());
-		compoundTag.putBoolean("show_particles", this.isVisible());
-		compoundTag.putBoolean("show_icon", this.showIcon());
-		if (this.hiddenEffect != null) {
-			CompoundTag compoundTag2 = new CompoundTag();
-			this.hiddenEffect.save(compoundTag2);
-			compoundTag.put("hidden_effect", compoundTag2);
-		}
+	public Tag save() {
+		return Util.getOrThrow(CODEC.encodeStart(NbtOps.INSTANCE, this), IllegalStateException::new);
 	}
 
 	@Nullable
 	public static MobEffectInstance load(CompoundTag compoundTag) {
-		ResourceLocation resourceLocation = ResourceLocation.tryParse(compoundTag.getString("id"));
-		return resourceLocation == null
-			? null
-			: (MobEffectInstance)BuiltInRegistries.MOB_EFFECT.getHolder(resourceLocation).map(reference -> loadSpecifiedEffect(reference, compoundTag)).orElse(null);
-	}
-
-	private static MobEffectInstance loadSpecifiedEffect(Holder<MobEffect> holder, CompoundTag compoundTag) {
-		int i = compoundTag.getByte("amplifier");
-		int j = compoundTag.getInt("duration");
-		boolean bl = compoundTag.getBoolean("ambient");
-		boolean bl2 = true;
-		if (compoundTag.contains("show_particles", 1)) {
-			bl2 = compoundTag.getBoolean("show_particles");
-		}
-
-		boolean bl3 = bl2;
-		if (compoundTag.contains("show_icon", 1)) {
-			bl3 = compoundTag.getBoolean("show_icon");
-		}
-
-		MobEffectInstance mobEffectInstance = null;
-		if (compoundTag.contains("hidden_effect", 10)) {
-			mobEffectInstance = loadSpecifiedEffect(holder, compoundTag.getCompound("hidden_effect"));
-		}
-
-		return new MobEffectInstance(holder, j, Math.max(i, 0), bl, bl2, bl3, mobEffectInstance);
+		return (MobEffectInstance)CODEC.parse(NbtOps.INSTANCE, compoundTag).resultOrPartial(LOGGER::error).orElse(null);
 	}
 
 	public int compareTo(MobEffectInstance mobEffectInstance) {
@@ -367,6 +355,29 @@ public class MobEffectInstance implements Comparable<MobEffectInstance> {
 			}
 
 			return Mth.lerp(f, this.factorPreviousFrame, this.factor);
+		}
+	}
+
+	static record Details(int amplifier, int duration, boolean ambient, boolean showParticles, boolean showIcon, Optional<MobEffectInstance.Details> hiddenEffect) {
+		private static final Codec<Integer> AMPLIFIER_CODEC = ExtraCodecs.validate(Codec.BYTE.xmap(Byte::intValue, Integer::byteValue), Codec.checkRange(0, 127));
+		public static final MapCodec<MobEffectInstance.Details> MAP_CODEC = ExtraCodecs.recursiveMap(
+			codec -> RecordCodecBuilder.mapCodec(
+					instance -> instance.group(
+								ExtraCodecs.strictOptionalField(AMPLIFIER_CODEC, "amplifier", 0).forGetter(MobEffectInstance.Details::amplifier),
+								ExtraCodecs.strictOptionalField(Codec.INT, "duration", 0).forGetter(MobEffectInstance.Details::duration),
+								ExtraCodecs.strictOptionalField(Codec.BOOL, "ambient", false).forGetter(MobEffectInstance.Details::ambient),
+								ExtraCodecs.strictOptionalField(Codec.BOOL, "show_particles", true).forGetter(MobEffectInstance.Details::showParticles),
+								ExtraCodecs.strictOptionalField(Codec.BOOL, "show_icon").forGetter(details -> Optional.of(details.showIcon())),
+								ExtraCodecs.strictOptionalField(codec, "hidden_effect").forGetter(MobEffectInstance.Details::hiddenEffect)
+							)
+							.apply(instance, MobEffectInstance.Details::create)
+				)
+		);
+
+		private static MobEffectInstance.Details create(
+			int i, int j, boolean bl, boolean bl2, Optional<Boolean> optional, Optional<MobEffectInstance.Details> optional2
+		) {
+			return new MobEffectInstance.Details(i, j, bl, bl2, (Boolean)optional.orElse(bl2), optional2);
 		}
 	}
 }

@@ -1,10 +1,9 @@
 package net.minecraft.world.level.storage.loot;
 
-import com.google.gson.JsonElement;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
-import com.mojang.serialization.JsonOps;
+import com.mojang.serialization.DynamicOps;
 import java.util.Optional;
 import java.util.stream.Stream;
 import net.minecraft.resources.ResourceLocation;
@@ -37,8 +36,8 @@ public class LootDataType<T> {
 		this.validator.run(validationContext, lootDataId, object);
 	}
 
-	public Optional<T> deserialize(ResourceLocation resourceLocation, JsonElement jsonElement) {
-		DataResult<T> dataResult = this.codec.parse(JsonOps.INSTANCE, jsonElement);
+	public <V> Optional<T> deserialize(ResourceLocation resourceLocation, DynamicOps<V> dynamicOps, V object) {
+		DataResult<T> dataResult = this.codec.parse(dynamicOps, object);
 		dataResult.error().ifPresent(partialResult -> LOGGER.error("Couldn't parse element {}:{} - {}", this.directory, resourceLocation, partialResult.message()));
 		return dataResult.result();
 	}

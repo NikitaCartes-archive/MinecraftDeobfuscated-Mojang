@@ -1,7 +1,6 @@
 package net.minecraft.world.entity;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.collect.ImmutableList.Builder;
@@ -9,7 +8,6 @@ import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.objects.Object2DoubleArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -35,6 +33,7 @@ import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
@@ -130,7 +129,6 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource, S
 	public static final String ID_TAG = "id";
 	public static final String PASSENGERS_TAG = "Passengers";
 	private static final AtomicInteger ENTITY_COUNTER = new AtomicInteger();
-	private static final List<ItemStack> EMPTY_LIST = Collections.emptyList();
 	public static final int BOARDING_COOLDOWN = 60;
 	public static final int TOTAL_AIR_SUPPLY = 300;
 	public static final int MAX_ENTITY_TAG_COUNT = 1024;
@@ -2089,21 +2087,6 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource, S
 	public void animateHurt(float f) {
 	}
 
-	public Iterable<ItemStack> getHandSlots() {
-		return EMPTY_LIST;
-	}
-
-	public Iterable<ItemStack> getArmorSlots() {
-		return EMPTY_LIST;
-	}
-
-	public Iterable<ItemStack> getAllSlots() {
-		return Iterables.concat(this.getHandSlots(), this.getArmorSlots());
-	}
-
-	public void setItemSlot(EquipmentSlot equipmentSlot, ItemStack itemStack) {
-	}
-
 	public boolean isOnFire() {
 		boolean bl = this.level() != null && this.level().isClientSide;
 		return !this.fireImmune() && (this.remainingFireTicks > 0 || bl && this.getSharedFlag(0));
@@ -3391,6 +3374,10 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource, S
 
 	public DamageSources damageSources() {
 		return this.level().damageSources();
+	}
+
+	public RegistryAccess registryAccess() {
+		return this.level().registryAccess();
 	}
 
 	protected void lerpPositionAndRotationStep(int i, double d, double e, double f, double g, double h) {

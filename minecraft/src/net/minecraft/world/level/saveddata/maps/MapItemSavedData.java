@@ -4,18 +4,24 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Dynamic;
+import io.netty.buffer.ByteBuf;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundMapItemDataPacket;
 import net.minecraft.resources.ResourceKey;
@@ -84,7 +90,7 @@ public class MapItemSavedData extends SavedData {
 		return new MapItemSavedData(0, 0, b, false, false, bl, resourceKey);
 	}
 
-	public static MapItemSavedData load(CompoundTag compoundTag) {
+	public static MapItemSavedData load(CompoundTag compoundTag, HolderLookup.Provider provider) {
 		ResourceKey<Level> resourceKey = (ResourceKey<Level>)DimensionType.parseLegacy(new Dynamic<>(NbtOps.INSTANCE, compoundTag.get("dimension")))
 			.resultOrPartial(LOGGER::error)
 			.orElseThrow(() -> new IllegalArgumentException("Invalid map dimension: " + compoundTag.get("dimension")));
@@ -100,20 +106,27 @@ public class MapItemSavedData extends SavedData {
 			mapItemSavedData.colors = bs;
 		}
 
-		ListTag listTag = compoundTag.getList("banners", 10);
-
-		for (int k = 0; k < listTag.size(); k++) {
-			MapBanner mapBanner = MapBanner.load(listTag.getCompound(k));
+		for (MapBanner mapBanner : (List)MapBanner.CODEC
+			.listOf()
+			.parse(NbtOps.INSTANCE, compoundTag.get("banners"))
+			.resultOrPartial(string -> LOGGER.warn("Failed to parse map banner: '{}'", string))
+			.orElse(List.of())) {
 			mapItemSavedData.bannerMarkers.put(mapBanner.getId(), mapBanner);
 			mapItemSavedData.addDecoration(
-				mapBanner.getDecoration(), null, mapBanner.getId(), (double)mapBanner.getPos().getX(), (double)mapBanner.getPos().getZ(), 180.0, mapBanner.getName()
+				mapBanner.getDecoration(),
+				null,
+				mapBanner.getId(),
+				(double)mapBanner.pos().getX(),
+				(double)mapBanner.pos().getZ(),
+				180.0,
+				(Component)mapBanner.name().orElse(null)
 			);
 		}
 
-		ListTag listTag2 = compoundTag.getList("frames", 10);
+		ListTag listTag = compoundTag.getList("frames", 10);
 
-		for (int l = 0; l < listTag2.size(); l++) {
-			MapFrame mapFrame = MapFrame.load(listTag2.getCompound(l));
+		for (int k = 0; k < listTag.size(); k++) {
+			MapFrame mapFrame = MapFrame.load(listTag.getCompound(k));
 			mapItemSavedData.frameMarkers.put(mapFrame.getId(), mapFrame);
 			mapItemSavedData.addDecoration(
 				MapDecoration.Type.FRAME,
@@ -130,7 +143,7 @@ public class MapItemSavedData extends SavedData {
 	}
 
 	@Override
-	public CompoundTag save(CompoundTag compoundTag) {
+	public CompoundTag save(CompoundTag compoundTag, HolderLookup.Provider provider) {
 		ResourceLocation.CODEC
 			.encodeStart(NbtOps.INSTANCE, this.dimension.location())
 			.resultOrPartial(LOGGER::error)
@@ -142,20 +155,16 @@ public class MapItemSavedData extends SavedData {
 		compoundTag.putBoolean("trackingPosition", this.trackingPosition);
 		compoundTag.putBoolean("unlimitedTracking", this.unlimitedTracking);
 		compoundTag.putBoolean("locked", this.locked);
+		compoundTag.put(
+			"banners", Util.getOrThrow(MapBanner.LIST_CODEC.encodeStart(NbtOps.INSTANCE, List.copyOf(this.bannerMarkers.values())), IllegalStateException::new)
+		);
 		ListTag listTag = new ListTag();
 
-		for (MapBanner mapBanner : this.bannerMarkers.values()) {
-			listTag.add(mapBanner.save());
-		}
-
-		compoundTag.put("banners", listTag);
-		ListTag listTag2 = new ListTag();
-
 		for (MapFrame mapFrame : this.frameMarkers.values()) {
-			listTag2.add(mapFrame.save());
+			listTag.add(mapFrame.save());
 		}
 
-		compoundTag.put("frames", listTag2);
+		compoundTag.put("frames", listTag);
 		return compoundTag;
 	}
 
@@ -178,8 +187,8 @@ public class MapItemSavedData extends SavedData {
 	}
 
 	private static Predicate<ItemStack> mapMatcher(ItemStack itemStack) {
-		Integer integer = MapItem.getMapId(itemStack);
-		return itemStack2 -> itemStack2 == itemStack ? true : itemStack2.is(itemStack.getItem()) && Objects.equals(integer, MapItem.getMapId(itemStack2));
+		MapId mapId = MapItem.getMapId(itemStack);
+		return itemStack2 -> itemStack2 == itemStack ? true : itemStack2.is(itemStack.getItem()) && Objects.equals(mapId, MapItem.getMapId(itemStack2));
 	}
 
 	public void tickCarriedBy(Player player, ItemStack itemStack) {
@@ -342,7 +351,7 @@ public class MapItemSavedData extends SavedData {
 			}
 		}
 
-		MapDecoration mapDecoration = new MapDecoration(type, b, c, k, component);
+		MapDecoration mapDecoration = new MapDecoration(type, b, c, k, Optional.ofNullable(component));
 		MapDecoration mapDecoration2 = (MapDecoration)this.decorations.put(string, mapDecoration);
 		if (!mapDecoration.equals(mapDecoration2)) {
 			if (mapDecoration2 != null && mapDecoration2.type().shouldTrackCount()) {
@@ -358,9 +367,9 @@ public class MapItemSavedData extends SavedData {
 	}
 
 	@Nullable
-	public Packet<?> getUpdatePacket(int i, Player player) {
+	public Packet<?> getUpdatePacket(MapId mapId, Player player) {
 		MapItemSavedData.HoldingPlayer holdingPlayer = (MapItemSavedData.HoldingPlayer)this.carriedByPlayers.get(player);
-		return holdingPlayer == null ? null : holdingPlayer.nextUpdatePacket(i);
+		return holdingPlayer == null ? null : holdingPlayer.nextUpdatePacket(mapId);
 	}
 
 	private void setColorsDirty(int i, int j) {
@@ -407,7 +416,7 @@ public class MapItemSavedData extends SavedData {
 
 			if (!this.isTrackedCountOverLimit(256)) {
 				this.bannerMarkers.put(mapBanner.getId(), mapBanner);
-				this.addDecoration(mapBanner.getDecoration(), levelAccessor, mapBanner.getId(), d, e, 180.0, mapBanner.getName());
+				this.addDecoration(mapBanner.getDecoration(), levelAccessor, mapBanner.getId(), d, e, 180.0, (Component)mapBanner.name().orElse(null));
 				return true;
 			}
 		}
@@ -420,8 +429,8 @@ public class MapItemSavedData extends SavedData {
 
 		while (iterator.hasNext()) {
 			MapBanner mapBanner = (MapBanner)iterator.next();
-			if (mapBanner.getPos().getX() == i && mapBanner.getPos().getZ() == j) {
-				MapBanner mapBanner2 = MapBanner.fromWorld(blockGetter, mapBanner.getPos());
+			if (mapBanner.pos().getX() == i && mapBanner.pos().getZ() == j) {
+				MapBanner mapBanner2 = MapBanner.fromWorld(blockGetter, mapBanner.pos());
 				if (!mapBanner.equals(mapBanner2)) {
 					iterator.remove();
 					this.removeDecoration(mapBanner.getId());
@@ -517,7 +526,7 @@ public class MapItemSavedData extends SavedData {
 		}
 
 		@Nullable
-		Packet<?> nextUpdatePacket(int i) {
+		Packet<?> nextUpdatePacket(MapId mapId) {
 			MapItemSavedData.MapPatch mapPatch;
 			if (this.dirtyData) {
 				this.dirtyData = false;
@@ -536,7 +545,7 @@ public class MapItemSavedData extends SavedData {
 
 			return collection == null && mapPatch == null
 				? null
-				: new ClientboundMapItemDataPacket(i, MapItemSavedData.this.scale, MapItemSavedData.this.locked, collection, mapPatch);
+				: new ClientboundMapItemDataPacket(mapId, MapItemSavedData.this.scale, MapItemSavedData.this.locked, collection, mapPatch);
 		}
 
 		void markColorsDirty(int i, int j) {
@@ -559,19 +568,35 @@ public class MapItemSavedData extends SavedData {
 		}
 	}
 
-	public static class MapPatch {
-		public final int startX;
-		public final int startY;
-		public final int width;
-		public final int height;
-		public final byte[] mapColors;
+	public static record MapPatch(int startX, int startY, int width, int height, byte[] mapColors) {
+		public static final StreamCodec<ByteBuf, Optional<MapItemSavedData.MapPatch>> STREAM_CODEC = StreamCodec.of(
+			MapItemSavedData.MapPatch::write, MapItemSavedData.MapPatch::read
+		);
 
-		public MapPatch(int i, int j, int k, int l, byte[] bs) {
-			this.startX = i;
-			this.startY = j;
-			this.width = k;
-			this.height = l;
-			this.mapColors = bs;
+		private static void write(ByteBuf byteBuf, Optional<MapItemSavedData.MapPatch> optional) {
+			if (optional.isPresent()) {
+				MapItemSavedData.MapPatch mapPatch = (MapItemSavedData.MapPatch)optional.get();
+				byteBuf.writeByte(mapPatch.width);
+				byteBuf.writeByte(mapPatch.height);
+				byteBuf.writeByte(mapPatch.startX);
+				byteBuf.writeByte(mapPatch.startY);
+				FriendlyByteBuf.writeByteArray(byteBuf, mapPatch.mapColors);
+			} else {
+				byteBuf.writeByte(0);
+			}
+		}
+
+		private static Optional<MapItemSavedData.MapPatch> read(ByteBuf byteBuf) {
+			int i = byteBuf.readUnsignedByte();
+			if (i > 0) {
+				int j = byteBuf.readUnsignedByte();
+				int k = byteBuf.readUnsignedByte();
+				int l = byteBuf.readUnsignedByte();
+				byte[] bs = FriendlyByteBuf.readByteArray(byteBuf);
+				return Optional.of(new MapItemSavedData.MapPatch(k, l, i, j, bs));
+			} else {
+				return Optional.empty();
+			}
 		}
 
 		public void applyToMap(MapItemSavedData mapItemSavedData) {

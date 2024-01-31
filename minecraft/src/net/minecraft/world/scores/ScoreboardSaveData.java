@@ -2,6 +2,7 @@ package net.minecraft.world.scores;
 
 import com.mojang.logging.LogUtils;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
@@ -132,7 +133,7 @@ public class ScoreboardSaveData extends SavedData {
 	}
 
 	@Override
-	public CompoundTag save(CompoundTag compoundTag) {
+	public CompoundTag save(CompoundTag compoundTag, HolderLookup.Provider provider) {
 		compoundTag.put("Objectives", this.saveObjectives());
 		compoundTag.put("PlayerScores", this.scoreboard.savePlayerScores());
 		compoundTag.put("Teams", this.saveTeams());

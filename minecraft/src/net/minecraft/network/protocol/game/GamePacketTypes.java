@@ -32,6 +32,7 @@ public class GamePacketTypes {
 	public static final PacketType<ClientboundCooldownPacket> CLIENTBOUND_COOLDOWN = createClientbound("cooldown");
 	public static final PacketType<ClientboundCustomChatCompletionsPacket> CLIENTBOUND_CUSTOM_CHAT_COMPLETIONS = createClientbound("custom_chat_completions");
 	public static final PacketType<ClientboundDamageEventPacket> CLIENTBOUND_DAMAGE_EVENT = createClientbound("damage_event");
+	public static final PacketType<ClientboundDebugSamplePacket> CLIENTBOUND_DEBUG_SAMPLE = createClientbound("debug_sample");
 	public static final PacketType<ClientboundDeleteChatPacket> CLIENTBOUND_DELETE_CHAT = createClientbound("delete_chat");
 	public static final PacketType<ClientboundDisguisedChatPacket> CLIENTBOUND_DISGUISED_CHAT = createClientbound("disguised_chat");
 	public static final PacketType<ClientboundEntityEventPacket> CLIENTBOUND_ENTITY_EVENT = createClientbound("entity_event");
@@ -136,6 +137,7 @@ public class GamePacketTypes {
 	public static final PacketType<ServerboundContainerSlotStateChangedPacket> SERVERBOUND_CONTAINER_SLOT_STATE_CHANGED = createServerbound(
 		"container_slot_state_changed"
 	);
+	public static final PacketType<ServerboundDebugSampleSubscriptionPacket> SERVERBOUND_DEBUG_SAMPLE_SUBSCRIPTION = createServerbound("debug_sample_subscription");
 	public static final PacketType<ServerboundEditBookPacket> SERVERBOUND_EDIT_BOOK = createServerbound("edit_book");
 	public static final PacketType<ServerboundEntityTagQueryPacket> SERVERBOUND_ENTITY_TAG_QUERY = createServerbound("entity_tag_query");
 	public static final PacketType<ServerboundInteractPacket> SERVERBOUND_INTERACT = createServerbound("interact");

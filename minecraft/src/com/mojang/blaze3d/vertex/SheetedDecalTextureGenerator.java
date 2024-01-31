@@ -24,10 +24,10 @@ public class SheetedDecalTextureGenerator extends DefaultedVertexConsumer {
 	private float ny;
 	private float nz;
 
-	public SheetedDecalTextureGenerator(VertexConsumer vertexConsumer, Matrix4f matrix4f, Matrix3f matrix3f, float f) {
+	public SheetedDecalTextureGenerator(VertexConsumer vertexConsumer, PoseStack.Pose pose, float f) {
 		this.delegate = vertexConsumer;
-		this.cameraInversePose = new Matrix4f(matrix4f).invert();
-		this.normalInversePose = new Matrix3f(matrix3f).invert();
+		this.cameraInversePose = new Matrix4f(pose.pose()).invert();
+		this.normalInversePose = new Matrix3f(pose.normal()).invert();
 		this.textureScale = f;
 		this.resetState();
 	}

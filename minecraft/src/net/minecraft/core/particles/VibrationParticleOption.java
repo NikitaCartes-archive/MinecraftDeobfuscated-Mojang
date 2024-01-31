@@ -6,6 +6,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Locale;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -30,7 +31,7 @@ public class VibrationParticleOption implements ParticleOptions {
 		VibrationParticleOption::new
 	);
 	public static final ParticleOptions.Deserializer<VibrationParticleOption> DESERIALIZER = new ParticleOptions.Deserializer<VibrationParticleOption>() {
-		public VibrationParticleOption fromCommand(ParticleType<VibrationParticleOption> particleType, StringReader stringReader) throws CommandSyntaxException {
+		public VibrationParticleOption fromCommand(ParticleType<VibrationParticleOption> particleType, StringReader stringReader, HolderLookup.Provider provider) throws CommandSyntaxException {
 			stringReader.expect(' ');
 			float f = (float)stringReader.readDouble();
 			stringReader.expect(' ');
@@ -52,7 +53,7 @@ public class VibrationParticleOption implements ParticleOptions {
 	}
 
 	@Override
-	public String writeToString() {
+	public String writeToString(HolderLookup.Provider provider) {
 		Vec3 vec3 = (Vec3)this.destination.getPosition(null).get();
 		double d = vec3.x();
 		double e = vec3.y();

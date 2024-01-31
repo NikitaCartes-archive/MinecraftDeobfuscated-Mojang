@@ -55,8 +55,8 @@ public class SlotArgument implements ArgumentType<Integer> {
 		hashMap.put("armor.chest", EquipmentSlot.CHEST.getIndex(100));
 		hashMap.put("armor.legs", EquipmentSlot.LEGS.getIndex(100));
 		hashMap.put("armor.feet", EquipmentSlot.FEET.getIndex(100));
+		hashMap.put("armor.body", EquipmentSlot.BODY.getIndex(105));
 		hashMap.put("horse.saddle", 400);
-		hashMap.put("horse.armor", 401);
 		hashMap.put("horse.chest", 499);
 	});
 

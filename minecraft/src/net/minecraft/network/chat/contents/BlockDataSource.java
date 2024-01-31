@@ -42,7 +42,7 @@ public record BlockDataSource(String posPattern, @Nullable Coordinates compiledP
 			if (serverLevel.isLoaded(blockPos)) {
 				BlockEntity blockEntity = serverLevel.getBlockEntity(blockPos);
 				if (blockEntity != null) {
-					return Stream.of(blockEntity.saveWithFullMetadata());
+					return Stream.of(blockEntity.saveWithFullMetadata(commandSourceStack.registryAccess()));
 				}
 			}
 		}

@@ -24,6 +24,7 @@ import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.MapItem;
+import net.minecraft.world.level.saveddata.maps.MapId;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.joml.Matrix4f;
 
@@ -220,8 +221,8 @@ public class ItemInHandRenderer {
 		poseStack.scale(0.38F, 0.38F, 0.38F);
 		poseStack.translate(-0.5F, -0.5F, 0.0F);
 		poseStack.scale(0.0078125F, 0.0078125F, 0.0078125F);
-		Integer integer = MapItem.getMapId(itemStack);
-		MapItemSavedData mapItemSavedData = MapItem.getSavedData(integer, this.minecraft.level);
+		MapId mapId = MapItem.getMapId(itemStack);
+		MapItemSavedData mapItemSavedData = MapItem.getSavedData(mapId, this.minecraft.level);
 		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(mapItemSavedData == null ? MAP_BACKGROUND : MAP_BACKGROUND_CHECKERBOARD);
 		Matrix4f matrix4f = poseStack.last().pose();
 		vertexConsumer.vertex(matrix4f, -7.0F, 135.0F, 0.0F).color(255, 255, 255, 255).uv(0.0F, 1.0F).uv2(i).endVertex();
@@ -229,7 +230,7 @@ public class ItemInHandRenderer {
 		vertexConsumer.vertex(matrix4f, 135.0F, -7.0F, 0.0F).color(255, 255, 255, 255).uv(1.0F, 0.0F).uv2(i).endVertex();
 		vertexConsumer.vertex(matrix4f, -7.0F, -7.0F, 0.0F).color(255, 255, 255, 255).uv(0.0F, 0.0F).uv2(i).endVertex();
 		if (mapItemSavedData != null) {
-			this.minecraft.gameRenderer.getMapRenderer().render(poseStack, multiBufferSource, integer, mapItemSavedData, false, i);
+			this.minecraft.gameRenderer.getMapRenderer().render(poseStack, multiBufferSource, mapId, mapItemSavedData, false, i);
 		}
 	}
 

@@ -1,5 +1,6 @@
 package net.minecraft.world.item;
 
+import net.minecraft.core.Holder;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionHand;
@@ -30,7 +31,7 @@ public class ElytraItem extends Item implements Equipable {
 	}
 
 	@Override
-	public SoundEvent getEquipSound() {
+	public Holder<SoundEvent> getEquipSound() {
 		return SoundEvents.ARMOR_EQUIP_ELYTRA;
 	}
 

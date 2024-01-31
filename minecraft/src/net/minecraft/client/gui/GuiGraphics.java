@@ -546,8 +546,7 @@ public class GuiGraphics {
 			this.pose.translate((float)(i + 8), (float)(j + 8), (float)(150 + (bakedModel.isGui3d() ? l : 0)));
 
 			try {
-				this.pose.mulPoseMatrix(new Matrix4f().scaling(1.0F, -1.0F, 1.0F));
-				this.pose.scale(16.0F, 16.0F, 16.0F);
+				this.pose.scale(16.0F, -16.0F, 16.0F);
 				boolean bl = !bakedModel.usesBlockLight();
 				if (bl) {
 					Lighting.setupForFlatItems();

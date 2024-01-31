@@ -78,8 +78,8 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Matrix3f;
 import org.joml.Matrix4f;
+import org.joml.Matrix4fStack;
 import org.joml.Vector3f;
 import org.slf4j.Logger;
 
@@ -170,10 +170,6 @@ public class GameRenderer implements AutoCloseable {
 	@Nullable
 	private static ShaderInstance positionColorTexLightmapShader;
 	@Nullable
-	private static ShaderInstance positionTexColorNormalShader;
-	@Nullable
-	private static ShaderInstance positionTexLightmapColorShader;
-	@Nullable
 	private static ShaderInstance rendertypeSolidShader;
 	@Nullable
 	private static ShaderInstance rendertypeCutoutMippedShader;
@@ -259,6 +255,8 @@ public class GameRenderer implements AutoCloseable {
 	private static ShaderInstance rendertypeEndPortalShader;
 	@Nullable
 	private static ShaderInstance rendertypeEndGatewayShader;
+	@Nullable
+	private static ShaderInstance rendertypeCloudsShader;
 	@Nullable
 	private static ShaderInstance rendertypeLinesShader;
 	@Nullable
@@ -511,18 +509,6 @@ public class GameRenderer implements AutoCloseable {
 				)
 			);
 			list2.add(
-				Pair.of(
-					new ShaderInstance(resourceProvider, "position_tex_color_normal", DefaultVertexFormat.POSITION_TEX_COLOR_NORMAL),
-					shaderInstance -> positionTexColorNormalShader = shaderInstance
-				)
-			);
-			list2.add(
-				Pair.of(
-					new ShaderInstance(resourceProvider, "position_tex_lightmap_color", DefaultVertexFormat.POSITION_TEX_LIGHTMAP_COLOR),
-					shaderInstance -> positionTexLightmapColorShader = shaderInstance
-				)
-			);
-			list2.add(
 				Pair.of(new ShaderInstance(resourceProvider, "rendertype_solid", DefaultVertexFormat.BLOCK), shaderInstance -> rendertypeSolidShader = shaderInstance)
 			);
 			list2.add(
@@ -759,6 +745,12 @@ public class GameRenderer implements AutoCloseable {
 			);
 			list2.add(
 				Pair.of(
+					new ShaderInstance(resourceProvider, "rendertype_clouds", DefaultVertexFormat.POSITION_TEX_COLOR_NORMAL),
+					shaderInstance -> rendertypeCloudsShader = shaderInstance
+				)
+			);
+			list2.add(
+				Pair.of(
 					new ShaderInstance(resourceProvider, "rendertype_lines", DefaultVertexFormat.POSITION_COLOR_NORMAL),
 					shaderInstance -> rendertypeLinesShader = shaderInstance
 				)
@@ -991,14 +983,14 @@ public class GameRenderer implements AutoCloseable {
 		this.zoomY = h;
 		this.setRenderBlockOutline(false);
 		this.setRenderHand(false);
-		this.renderLevel(1.0F, 0L, new PoseStack());
+		this.renderLevel(1.0F, 0L);
 		this.zoom = 1.0F;
 	}
 
-	private void renderItemInHand(PoseStack poseStack, Camera camera, float f) {
+	private void renderItemInHand(Camera camera, float f) {
 		if (!this.panoramicMode) {
 			this.resetProjectionMatrix(this.getProjectionMatrix(this.getFov(camera, f, false)));
-			poseStack.setIdentity();
+			PoseStack poseStack = new PoseStack();
 			poseStack.pushPose();
 			this.bobHurt(poseStack, f);
 			if (this.minecraft.options.bobView().get()) {
@@ -1025,11 +1017,6 @@ public class GameRenderer implements AutoCloseable {
 			poseStack.popPose();
 			if (this.minecraft.options.getCameraType().isFirstPerson() && !bl) {
 				ScreenEffectRenderer.renderScreenEffect(this.minecraft, poseStack);
-				this.bobHurt(poseStack, f);
-			}
-
-			if (this.minecraft.options.bobView().get()) {
-				this.bobView(poseStack, f);
 			}
 		}
 	}
@@ -1039,25 +1026,18 @@ public class GameRenderer implements AutoCloseable {
 	}
 
 	public Matrix4f getProjectionMatrix(double d) {
-		PoseStack poseStack = new PoseStack();
-		poseStack.last().pose().identity();
+		Matrix4f matrix4f = new Matrix4f();
 		if (this.zoom != 1.0F) {
-			poseStack.translate(this.zoomX, -this.zoomY, 0.0F);
-			poseStack.scale(this.zoom, this.zoom, 1.0F);
+			matrix4f.translate(this.zoomX, -this.zoomY, 0.0F);
+			matrix4f.scale(this.zoom, this.zoom, 1.0F);
 		}
 
-		poseStack.last()
-			.pose()
-			.mul(
-				new Matrix4f()
-					.setPerspective(
-						(float)(d * (float) (Math.PI / 180.0)),
-						(float)this.minecraft.getWindow().getWidth() / (float)this.minecraft.getWindow().getHeight(),
-						0.05F,
-						this.getDepthFar()
-					)
-			);
-		return poseStack.last().pose();
+		return matrix4f.perspective(
+			(float)(d * (float) (Math.PI / 180.0)),
+			(float)this.minecraft.getWindow().getWidth() / (float)this.minecraft.getWindow().getHeight(),
+			0.05F,
+			this.getDepthFar()
+		);
 	}
 
 	public float getDepthFar() {
@@ -1092,7 +1072,7 @@ public class GameRenderer implements AutoCloseable {
 			RenderSystem.viewport(0, 0, this.minecraft.getWindow().getWidth(), this.minecraft.getWindow().getHeight());
 			if (bl2 && bl && this.minecraft.level != null) {
 				this.minecraft.getProfiler().push("level");
-				this.renderLevel(f, l, new PoseStack());
+				this.renderLevel(f, l);
 				this.tryTakeScreenshotIfNeeded();
 				this.minecraft.levelRenderer.doEntityOutline();
 				if (this.postEffect != null && this.effectActive) {
@@ -1112,10 +1092,9 @@ public class GameRenderer implements AutoCloseable {
 					0.0F, (float)((double)window.getWidth() / window.getGuiScale()), (float)((double)window.getHeight() / window.getGuiScale()), 0.0F, 1000.0F, 21000.0F
 				);
 			RenderSystem.setProjectionMatrix(matrix4f, VertexSorting.ORTHOGRAPHIC_Z);
-			PoseStack poseStack = RenderSystem.getModelViewStack();
-			poseStack.pushPose();
-			poseStack.setIdentity();
-			poseStack.translate(0.0F, 0.0F, -11000.0F);
+			Matrix4fStack matrix4fStack = RenderSystem.getModelViewStack();
+			matrix4fStack.pushMatrix();
+			matrix4fStack.translation(0.0F, 0.0F, -11000.0F);
 			RenderSystem.applyModelViewMatrix();
 			Lighting.setupFor3DItems();
 			GuiGraphics guiGraphics = new GuiGraphics(this.minecraft, this.renderBuffers.bufferSource());
@@ -1194,7 +1173,7 @@ public class GameRenderer implements AutoCloseable {
 			}
 
 			guiGraphics.flush();
-			poseStack.popPose();
+			matrix4fStack.popMatrix();
 			RenderSystem.applyModelViewMatrix();
 		}
 	}
@@ -1273,7 +1252,7 @@ public class GameRenderer implements AutoCloseable {
 		}
 	}
 
-	public void renderLevel(float f, long l, PoseStack poseStack) {
+	public void renderLevel(float f, long l) {
 		this.lightTexture.updateLightTexture(f);
 		if (this.minecraft.getCameraEntity() == null) {
 			this.minecraft.setCameraEntity(this.minecraft.player);
@@ -1293,41 +1272,39 @@ public class GameRenderer implements AutoCloseable {
 			this.minecraft.level.tickRateManager().isEntityFrozen(entity) ? 1.0F : f
 		);
 		this.renderDistance = (float)(this.minecraft.options.getEffectiveRenderDistance() * 16);
-		PoseStack poseStack2 = new PoseStack();
 		double d = this.getFov(camera, f, true);
-		poseStack2.mulPoseMatrix(this.getProjectionMatrix(d));
-		this.bobHurt(poseStack2, camera.getPartialTickTime());
+		Matrix4f matrix4f = this.getProjectionMatrix(d);
+		PoseStack poseStack = new PoseStack();
+		this.bobHurt(poseStack, camera.getPartialTickTime());
 		if (this.minecraft.options.bobView().get()) {
-			this.bobView(poseStack2, camera.getPartialTickTime());
+			this.bobView(poseStack, camera.getPartialTickTime());
 		}
 
+		matrix4f.mul(poseStack.last().pose());
 		float g = this.minecraft.options.screenEffectScale().get().floatValue();
 		float h = Mth.lerp(f, this.minecraft.player.oSpinningEffectIntensity, this.minecraft.player.spinningEffectIntensity) * g * g;
 		if (h > 0.0F) {
 			int i = this.minecraft.player.hasEffect(MobEffects.CONFUSION) ? 7 : 20;
 			float j = 5.0F / (h * h + 5.0F) - h * 0.04F;
 			j *= j;
-			Axis axis = Axis.of(new Vector3f(0.0F, Mth.SQRT_OF_TWO / 2.0F, Mth.SQRT_OF_TWO / 2.0F));
-			poseStack2.mulPose(axis.rotationDegrees(((float)this.confusionAnimationTick + f) * (float)i));
-			poseStack2.scale(1.0F / j, 1.0F, 1.0F);
-			float k = -((float)this.confusionAnimationTick + f) * (float)i;
-			poseStack2.mulPose(axis.rotationDegrees(k));
+			Vector3f vector3f = new Vector3f(0.0F, Mth.SQRT_OF_TWO / 2.0F, Mth.SQRT_OF_TWO / 2.0F);
+			float k = ((float)this.confusionAnimationTick + f) * (float)i * (float) (Math.PI / 180.0);
+			matrix4f.rotate(k, vector3f);
+			matrix4f.scale(1.0F / j, 1.0F, 1.0F);
+			matrix4f.rotate(-k, vector3f);
 		}
 
-		Matrix4f matrix4f = poseStack2.last().pose();
 		this.resetProjectionMatrix(matrix4f);
-		poseStack.mulPose(Axis.XP.rotationDegrees(camera.getXRot()));
-		poseStack.mulPose(Axis.YP.rotationDegrees(camera.getYRot() + 180.0F));
-		Matrix3f matrix3f = new Matrix3f(poseStack.last().normal()).invert();
-		RenderSystem.setInverseViewRotationMatrix(matrix3f);
+		Matrix4f matrix4f2 = new Matrix4f()
+			.rotationXYZ(camera.getXRot() * (float) (Math.PI / 180.0), camera.getYRot() * (float) (Math.PI / 180.0) + (float) Math.PI, 0.0F);
 		this.minecraft
 			.levelRenderer
-			.prepareCullFrustum(poseStack, camera.getPosition(), this.getProjectionMatrix(Math.max(d, (double)this.minecraft.options.fov().get().intValue())));
-		this.minecraft.levelRenderer.renderLevel(poseStack, f, l, bl, camera, this, this.lightTexture, matrix4f);
+			.prepareCullFrustum(camera.getPosition(), matrix4f2, this.getProjectionMatrix(Math.max(d, (double)this.minecraft.options.fov().get().intValue())));
+		this.minecraft.levelRenderer.renderLevel(f, l, bl, camera, this, this.lightTexture, matrix4f2, matrix4f);
 		this.minecraft.getProfiler().popPush("hand");
 		if (this.renderHand) {
 			RenderSystem.clear(256, Minecraft.ON_OSX);
-			this.renderItemInHand(poseStack, camera, f);
+			this.renderItemInHand(camera, f);
 		}
 
 		this.minecraft.getProfiler().pop();
@@ -1469,16 +1446,6 @@ public class GameRenderer implements AutoCloseable {
 	@Nullable
 	public static ShaderInstance getPositionColorTexLightmapShader() {
 		return positionColorTexLightmapShader;
-	}
-
-	@Nullable
-	public static ShaderInstance getPositionTexColorNormalShader() {
-		return positionTexColorNormalShader;
-	}
-
-	@Nullable
-	public static ShaderInstance getPositionTexLightmapColorShader() {
-		return positionTexLightmapColorShader;
 	}
 
 	@Nullable
@@ -1694,6 +1661,11 @@ public class GameRenderer implements AutoCloseable {
 	@Nullable
 	public static ShaderInstance getRendertypeEndGatewayShader() {
 		return rendertypeEndGatewayShader;
+	}
+
+	@Nullable
+	public static ShaderInstance getRendertypeCloudsShader() {
+		return rendertypeCloudsShader;
 	}
 
 	@Nullable

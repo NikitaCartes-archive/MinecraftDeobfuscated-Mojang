@@ -105,8 +105,8 @@ public class DisplayInfo {
 	}
 
 	private void serializeToNetwork(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
-		registryFriendlyByteBuf.writeComponent(this.title);
-		registryFriendlyByteBuf.writeComponent(this.description);
+		ComponentSerialization.STREAM_CODEC.encode(registryFriendlyByteBuf, this.title);
+		ComponentSerialization.STREAM_CODEC.encode(registryFriendlyByteBuf, this.description);
 		ItemStack.STREAM_CODEC.encode(registryFriendlyByteBuf, this.icon);
 		registryFriendlyByteBuf.writeEnum(this.type);
 		int i = 0;
@@ -129,8 +129,8 @@ public class DisplayInfo {
 	}
 
 	private static DisplayInfo fromNetwork(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
-		Component component = registryFriendlyByteBuf.readComponentTrusted();
-		Component component2 = registryFriendlyByteBuf.readComponentTrusted();
+		Component component = ComponentSerialization.STREAM_CODEC.decode(registryFriendlyByteBuf);
+		Component component2 = ComponentSerialization.STREAM_CODEC.decode(registryFriendlyByteBuf);
 		ItemStack itemStack = ItemStack.STREAM_CODEC.decode(registryFriendlyByteBuf);
 		AdvancementType advancementType = registryFriendlyByteBuf.readEnum(AdvancementType.class);
 		int i = registryFriendlyByteBuf.readInt();

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import javax.annotation.Nullable;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundResetScorePacket;
@@ -42,7 +43,7 @@ public class ServerScoreboard extends Scoreboard {
 				.getPlayerList()
 				.broadcastAll(
 					new ClientboundSetScorePacket(
-						scoreHolder.getScoreboardName(), objective.getName(), score.value(), score.display(), Optional.ofNullable(score.numberFormat())
+						scoreHolder.getScoreboardName(), objective.getName(), score.value(), Optional.ofNullable(score.display()), Optional.ofNullable(score.numberFormat())
 					)
 				);
 		}
@@ -187,7 +188,7 @@ public class ServerScoreboard extends Scoreboard {
 					playerScoreEntry.owner(),
 					objective.getName(),
 					playerScoreEntry.value(),
-					playerScoreEntry.display(),
+					Optional.ofNullable(playerScoreEntry.display()),
 					Optional.ofNullable(playerScoreEntry.numberFormatOverride())
 				)
 			);
@@ -255,7 +256,7 @@ public class ServerScoreboard extends Scoreboard {
 		return scoreboardSaveData;
 	}
 
-	private ScoreboardSaveData createData(CompoundTag compoundTag) {
+	private ScoreboardSaveData createData(CompoundTag compoundTag, HolderLookup.Provider provider) {
 		return this.createData().load(compoundTag);
 	}
 

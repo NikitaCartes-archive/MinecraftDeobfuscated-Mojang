@@ -7,6 +7,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
@@ -308,8 +309,8 @@ public class BeehiveBlockEntity extends BlockEntity {
 	}
 
 	@Override
-	public void load(CompoundTag compoundTag) {
-		super.load(compoundTag);
+	public void load(CompoundTag compoundTag, HolderLookup.Provider provider) {
+		super.load(compoundTag, provider);
 		this.stored.clear();
 		ListTag listTag = compoundTag.getList("Bees", 10);
 
@@ -328,8 +329,8 @@ public class BeehiveBlockEntity extends BlockEntity {
 	}
 
 	@Override
-	protected void saveAdditional(CompoundTag compoundTag) {
-		super.saveAdditional(compoundTag);
+	protected void saveAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
+		super.saveAdditional(compoundTag, provider);
 		compoundTag.put("Bees", this.writeBees());
 		if (this.hasSavedFlowerPos()) {
 			compoundTag.put("FlowerPos", NbtUtils.writeBlockPos(this.savedFlowerPos));

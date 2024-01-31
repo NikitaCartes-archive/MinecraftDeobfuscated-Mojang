@@ -225,6 +225,7 @@ public class BlockTypes {
 		Registry.register(registry, "turtle_egg", TurtleEggBlock.CODEC);
 		Registry.register(registry, "twisting_vines_plant", TwistingVinesPlantBlock.CODEC);
 		Registry.register(registry, "twisting_vines", TwistingVinesBlock.CODEC);
+		Registry.register(registry, "vault", VaultBlock.CODEC);
 		Registry.register(registry, "vine", VineBlock.CODEC);
 		Registry.register(registry, "wall_banner", WallBannerBlock.CODEC);
 		Registry.register(registry, "wall_hanging_sign", WallHangingSignBlock.CODEC);

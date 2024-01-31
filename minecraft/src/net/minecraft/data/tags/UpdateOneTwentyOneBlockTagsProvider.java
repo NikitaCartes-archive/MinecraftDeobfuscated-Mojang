@@ -124,7 +124,7 @@ public class UpdateOneTwentyOneBlockTagsProvider extends IntrinsicHolderTagsProv
 				Blocks.WAXED_WEATHERED_COPPER_DOOR,
 				Blocks.WAXED_OXIDIZED_COPPER_DOOR
 			);
-		this.tag(BlockTags.FEATURES_CANNOT_REPLACE).add(Blocks.TRIAL_SPAWNER);
+		this.tag(BlockTags.FEATURES_CANNOT_REPLACE).add(Blocks.TRIAL_SPAWNER).add(Blocks.VAULT);
 		this.tag(BlockTags.LAVA_POOL_STONE_CANNOT_REPLACE).addTag(BlockTags.FEATURES_CANNOT_REPLACE);
 		this.tag(BlockTags.TRAPDOORS)
 			.add(

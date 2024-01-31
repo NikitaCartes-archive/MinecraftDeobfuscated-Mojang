@@ -20,6 +20,7 @@ import net.minecraft.advancements.critereon.EnterBlockTrigger;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
 import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.advancements.critereon.MinMaxBounds;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.BlockFamilies;
 import net.minecraft.data.BlockFamily;
@@ -47,6 +48,7 @@ import net.minecraft.world.level.block.Blocks;
 public abstract class RecipeProvider implements DataProvider {
 	final PackOutput.PathProvider recipePathProvider;
 	final PackOutput.PathProvider advancementPathProvider;
+	private final CompletableFuture<HolderLookup.Provider> registries;
 	private static final Map<BlockFamily.Variant, BiFunction<ItemLike, ItemLike, RecipeBuilder>> SHAPE_BUILDERS = ImmutableMap.<BlockFamily.Variant, BiFunction<ItemLike, ItemLike, RecipeBuilder>>builder()
 		.put(BlockFamily.Variant.BUTTON, (itemLike, itemLike2) -> buttonBuilder(itemLike, Ingredient.of(itemLike2)))
 		.put(BlockFamily.Variant.CHISELED, (itemLike, itemLike2) -> chiseledBuilder(RecipeCategory.BUILDING_BLOCKS, itemLike, Ingredient.of(itemLike2)))
@@ -65,13 +67,18 @@ public abstract class RecipeProvider implements DataProvider {
 		.put(BlockFamily.Variant.WALL, (itemLike, itemLike2) -> wallBuilder(RecipeCategory.DECORATIONS, itemLike, Ingredient.of(itemLike2)))
 		.build();
 
-	public RecipeProvider(PackOutput packOutput) {
+	public RecipeProvider(PackOutput packOutput, CompletableFuture<HolderLookup.Provider> completableFuture) {
 		this.recipePathProvider = packOutput.createPathProvider(PackOutput.Target.DATA_PACK, "recipes");
 		this.advancementPathProvider = packOutput.createPathProvider(PackOutput.Target.DATA_PACK, "advancements");
+		this.registries = completableFuture;
 	}
 
 	@Override
-	public CompletableFuture<?> run(CachedOutput cachedOutput) {
+	public final CompletableFuture<?> run(CachedOutput cachedOutput) {
+		return this.registries.thenCompose(provider -> this.run(cachedOutput, provider));
+	}
+
+	protected CompletableFuture<?> run(CachedOutput cachedOutput, HolderLookup.Provider provider) {
 		final Set<ResourceLocation> set = Sets.<ResourceLocation>newHashSet();
 		final List<CompletableFuture<?>> list = new ArrayList();
 		this.buildRecipes(
@@ -81,11 +88,11 @@ public abstract class RecipeProvider implements DataProvider {
 					if (!set.add(resourceLocation)) {
 						throw new IllegalStateException("Duplicate recipe " + resourceLocation);
 					} else {
-						list.add(DataProvider.saveStable(cachedOutput, Recipe.CODEC, recipe, RecipeProvider.this.recipePathProvider.json(resourceLocation)));
+						list.add(DataProvider.saveStable(cachedOutput, provider, Recipe.CODEC, recipe, RecipeProvider.this.recipePathProvider.json(resourceLocation)));
 						if (advancementHolder != null) {
 							list.add(
 								DataProvider.saveStable(
-									cachedOutput, Advancement.CODEC, advancementHolder.value(), RecipeProvider.this.advancementPathProvider.json(advancementHolder.id())
+									cachedOutput, provider, Advancement.CODEC, advancementHolder.value(), RecipeProvider.this.advancementPathProvider.json(advancementHolder.id())
 								)
 							);
 						}
@@ -101,8 +108,10 @@ public abstract class RecipeProvider implements DataProvider {
 		return CompletableFuture.allOf((CompletableFuture[])list.toArray(CompletableFuture[]::new));
 	}
 
-	protected CompletableFuture<?> buildAdvancement(CachedOutput cachedOutput, AdvancementHolder advancementHolder) {
-		return DataProvider.saveStable(cachedOutput, Advancement.CODEC, advancementHolder.value(), this.advancementPathProvider.json(advancementHolder.id()));
+	protected CompletableFuture<?> buildAdvancement(CachedOutput cachedOutput, HolderLookup.Provider provider, AdvancementHolder advancementHolder) {
+		return DataProvider.saveStable(
+			cachedOutput, provider, Advancement.CODEC, advancementHolder.value(), this.advancementPathProvider.json(advancementHolder.id())
+		);
 	}
 
 	protected abstract void buildRecipes(RecipeOutput recipeOutput);

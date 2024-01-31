@@ -14,7 +14,6 @@ import net.minecraft.commands.arguments.ParticleArgument;
 import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -352,7 +351,7 @@ public class AreaEffectCloud extends Entity implements TraceableEntity {
 
 		if (compoundTag.contains("Particle", 8)) {
 			try {
-				this.setParticle(ParticleArgument.readParticle(new StringReader(compoundTag.getString("Particle")), BuiltInRegistries.PARTICLE_TYPE.asLookup()));
+				this.setParticle(ParticleArgument.readParticle(new StringReader(compoundTag.getString("Particle")), this.registryAccess()));
 			} catch (CommandSyntaxException var5) {
 				LOGGER.warn("Couldn't load custom particle {}", compoundTag.getString("Particle"), var5);
 			}
@@ -389,7 +388,7 @@ public class AreaEffectCloud extends Entity implements TraceableEntity {
 		compoundTag.putFloat("RadiusOnUse", this.radiusOnUse);
 		compoundTag.putFloat("RadiusPerTick", this.radiusPerTick);
 		compoundTag.putFloat("Radius", this.getRadius());
-		compoundTag.putString("Particle", this.getParticle().writeToString());
+		compoundTag.putString("Particle", this.getParticle().writeToString(this.registryAccess()));
 		if (this.ownerUUID != null) {
 			compoundTag.putUUID("Owner", this.ownerUUID);
 		}
@@ -407,7 +406,7 @@ public class AreaEffectCloud extends Entity implements TraceableEntity {
 			ListTag listTag = new ListTag();
 
 			for (MobEffectInstance mobEffectInstance : this.effects) {
-				listTag.add(mobEffectInstance.save(new CompoundTag()));
+				listTag.add(mobEffectInstance.save());
 			}
 
 			compoundTag.put("effects", listTag);

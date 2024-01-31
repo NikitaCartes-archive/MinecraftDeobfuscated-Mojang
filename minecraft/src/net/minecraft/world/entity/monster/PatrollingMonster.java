@@ -67,11 +67,7 @@ public abstract class PatrollingMonster extends Monster {
 	@Nullable
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		ServerLevelAccessor serverLevelAccessor,
-		DifficultyInstance difficultyInstance,
-		MobSpawnType mobSpawnType,
-		@Nullable SpawnGroupData spawnGroupData,
-		@Nullable CompoundTag compoundTag
+		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData
 	) {
 		if (mobSpawnType != MobSpawnType.PATROL
 			&& mobSpawnType != MobSpawnType.EVENT
@@ -90,7 +86,7 @@ public abstract class PatrollingMonster extends Monster {
 			this.patrolling = true;
 		}
 
-		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData);
 	}
 
 	public static boolean checkPatrollingMonsterSpawnRules(

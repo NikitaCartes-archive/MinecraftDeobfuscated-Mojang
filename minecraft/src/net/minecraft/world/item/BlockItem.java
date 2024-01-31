@@ -169,11 +169,11 @@ public class BlockItem extends Item {
 						return false;
 					}
 
-					CompoundTag compoundTag2 = blockEntity.saveWithoutMetadata();
+					CompoundTag compoundTag2 = blockEntity.saveWithoutMetadata(level.registryAccess());
 					CompoundTag compoundTag3 = compoundTag2.copy();
 					compoundTag2.merge(compoundTag);
 					if (!compoundTag2.equals(compoundTag3)) {
-						blockEntity.load(compoundTag2);
+						blockEntity.load(compoundTag2, level.registryAccess());
 						blockEntity.setChanged();
 						return true;
 					}
@@ -192,7 +192,7 @@ public class BlockItem extends Item {
 	@Override
 	public void appendHoverText(ItemStack itemStack, @Nullable Level level, List<Component> list, TooltipFlag tooltipFlag) {
 		super.appendHoverText(itemStack, level, list, tooltipFlag);
-		this.getBlock().appendHoverText(itemStack, level, list, tooltipFlag);
+		this.getBlock().appendHoverText(itemStack, level, list, tooltipFlag, level != null ? level.registryAccess() : null);
 	}
 
 	public Block getBlock() {

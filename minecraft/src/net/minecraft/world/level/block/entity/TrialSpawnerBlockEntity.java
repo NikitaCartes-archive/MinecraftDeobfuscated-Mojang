@@ -2,6 +2,7 @@ package net.minecraft.world.level.block.entity;
 
 import com.mojang.logging.LogUtils;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
@@ -23,13 +24,14 @@ public class TrialSpawnerBlockEntity extends BlockEntity implements Spawner, Tri
 
 	public TrialSpawnerBlockEntity(BlockPos blockPos, BlockState blockState) {
 		super(BlockEntityType.TRIAL_SPAWNER, blockPos, blockState);
-		PlayerDetector playerDetector = PlayerDetector.PLAYERS;
-		this.trialSpawner = new TrialSpawner(this, playerDetector);
+		PlayerDetector playerDetector = PlayerDetector.NO_CREATIVE_PLAYERS;
+		PlayerDetector.EntitySelector entitySelector = PlayerDetector.EntitySelector.SELECT_FROM_LEVEL;
+		this.trialSpawner = new TrialSpawner(this, playerDetector, entitySelector);
 	}
 
 	@Override
-	public void load(CompoundTag compoundTag) {
-		super.load(compoundTag);
+	public void load(CompoundTag compoundTag, HolderLookup.Provider provider) {
+		super.load(compoundTag, provider);
 		this.trialSpawner.codec().parse(NbtOps.INSTANCE, compoundTag).resultOrPartial(LOGGER::error).ifPresent(trialSpawner -> this.trialSpawner = trialSpawner);
 		if (this.level != null) {
 			this.markUpdated();
@@ -37,8 +39,8 @@ public class TrialSpawnerBlockEntity extends BlockEntity implements Spawner, Tri
 	}
 
 	@Override
-	protected void saveAdditional(CompoundTag compoundTag) {
-		super.saveAdditional(compoundTag);
+	protected void saveAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
+		super.saveAdditional(compoundTag, provider);
 		this.trialSpawner
 			.codec()
 			.encodeStart(NbtOps.INSTANCE, this.trialSpawner)
@@ -52,7 +54,7 @@ public class TrialSpawnerBlockEntity extends BlockEntity implements Spawner, Tri
 	}
 
 	@Override
-	public CompoundTag getUpdateTag() {
+	public CompoundTag getUpdateTag(HolderLookup.Provider provider) {
 		return this.trialSpawner.getData().getUpdateTag(this.getBlockState().getValue(TrialSpawnerBlock.STATE));
 	}
 

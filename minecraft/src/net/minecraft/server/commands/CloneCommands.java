@@ -255,7 +255,7 @@ public class CloneCommands {
 							if (predicate.test(blockInWorld)) {
 								BlockEntity blockEntity = serverLevel.getBlockEntity(blockPos6);
 								if (blockEntity != null) {
-									CompoundTag compoundTag = blockEntity.saveWithoutMetadata();
+									CompoundTag compoundTag = blockEntity.saveWithoutMetadata(commandSourceStack.registryAccess());
 									list2.add(new CloneCommands.CloneBlockInfo(blockPos7, blockState, compoundTag));
 									deque.addLast(blockPos6);
 								} else if (!blockState.isSolidRender(serverLevel, blockPos6) && !blockState.isCollisionShapeFullBlock(serverLevel, blockPos6)) {
@@ -305,7 +305,7 @@ public class CloneCommands {
 				for (CloneCommands.CloneBlockInfo cloneBlockInfo2x : list2) {
 					BlockEntity blockEntity4 = serverLevel2.getBlockEntity(cloneBlockInfo2x.pos);
 					if (cloneBlockInfo2x.tag != null && blockEntity4 != null) {
-						blockEntity4.load(cloneBlockInfo2x.tag);
+						blockEntity4.load(cloneBlockInfo2x.tag, serverLevel2.registryAccess());
 						blockEntity4.setChanged();
 					}
 

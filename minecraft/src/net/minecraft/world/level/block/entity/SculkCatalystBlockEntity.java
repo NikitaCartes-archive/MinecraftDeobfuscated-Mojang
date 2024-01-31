@@ -5,6 +5,7 @@ import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
@@ -37,14 +38,14 @@ public class SculkCatalystBlockEntity extends BlockEntity implements GameEventLi
 	}
 
 	@Override
-	public void load(CompoundTag compoundTag) {
+	public void load(CompoundTag compoundTag, HolderLookup.Provider provider) {
 		this.catalystListener.sculkSpreader.load(compoundTag);
 	}
 
 	@Override
-	protected void saveAdditional(CompoundTag compoundTag) {
+	protected void saveAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
 		this.catalystListener.sculkSpreader.save(compoundTag);
-		super.saveAdditional(compoundTag);
+		super.saveAdditional(compoundTag, provider);
 	}
 
 	public SculkCatalystBlockEntity.CatalystListener getListener() {

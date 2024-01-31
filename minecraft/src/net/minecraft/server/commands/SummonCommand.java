@@ -91,9 +91,7 @@ public class SummonCommand {
 			} else {
 				if (bl && entity instanceof Mob) {
 					((Mob)entity)
-						.finalizeSpawn(
-							commandSourceStack.getLevel(), commandSourceStack.getLevel().getCurrentDifficultyAt(entity.blockPosition()), MobSpawnType.COMMAND, null, null
-						);
+						.finalizeSpawn(commandSourceStack.getLevel(), commandSourceStack.getLevel().getCurrentDifficultyAt(entity.blockPosition()), MobSpawnType.COMMAND, null);
 				}
 
 				if (!serverLevel.tryAddFreshEntityWithPassengers(entity)) {

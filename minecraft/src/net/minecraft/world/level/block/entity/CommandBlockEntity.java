@@ -3,6 +3,7 @@ package net.minecraft.world.level.block.entity;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.BaseCommandBlock;
@@ -67,8 +68,8 @@ public class CommandBlockEntity extends BlockEntity {
 	}
 
 	@Override
-	protected void saveAdditional(CompoundTag compoundTag) {
-		super.saveAdditional(compoundTag);
+	protected void saveAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
+		super.saveAdditional(compoundTag, provider);
 		this.commandBlock.save(compoundTag);
 		compoundTag.putBoolean("powered", this.isPowered());
 		compoundTag.putBoolean("conditionMet", this.wasConditionMet());
@@ -76,8 +77,8 @@ public class CommandBlockEntity extends BlockEntity {
 	}
 
 	@Override
-	public void load(CompoundTag compoundTag) {
-		super.load(compoundTag);
+	public void load(CompoundTag compoundTag, HolderLookup.Provider provider) {
+		super.load(compoundTag, provider);
 		this.commandBlock.load(compoundTag);
 		this.powered = compoundTag.getBoolean("powered");
 		this.conditionMet = compoundTag.getBoolean("conditionMet");

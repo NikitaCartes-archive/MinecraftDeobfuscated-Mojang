@@ -4,7 +4,6 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.stream.Stream;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.Container;
@@ -31,13 +30,7 @@ public class SmithingTransformRecipe implements SmithingRecipe {
 
 	@Override
 	public ItemStack assemble(Container container, RegistryAccess registryAccess) {
-		ItemStack itemStack = this.result.copy();
-		CompoundTag compoundTag = container.getItem(1).getTag();
-		if (compoundTag != null) {
-			itemStack.setTag(compoundTag.copy());
-		}
-
-		return itemStack;
+		return container.getItem(1).transmuteCopy(this.result.getItem(), this.result.getCount());
 	}
 
 	@Override

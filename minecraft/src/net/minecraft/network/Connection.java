@@ -57,7 +57,7 @@ import net.minecraft.network.protocol.status.ClientStatusPacketListener;
 import net.minecraft.network.protocol.status.StatusProtocols;
 import net.minecraft.server.RunningOnDifferentThreadException;
 import net.minecraft.util.Mth;
-import net.minecraft.util.debugchart.SampleLogger;
+import net.minecraft.util.debugchart.LocalSampleLogger;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.Marker;
@@ -418,10 +418,10 @@ public class Connection extends SimpleChannelInboundHandler<Packet<?>> {
 		return this.receiving.getOpposite();
 	}
 
-	public static Connection connectToServer(InetSocketAddress inetSocketAddress, boolean bl, @Nullable SampleLogger sampleLogger) {
+	public static Connection connectToServer(InetSocketAddress inetSocketAddress, boolean bl, @Nullable LocalSampleLogger localSampleLogger) {
 		Connection connection = new Connection(PacketFlow.CLIENTBOUND);
-		if (sampleLogger != null) {
-			connection.setBandwidthLogger(sampleLogger);
+		if (localSampleLogger != null) {
+			connection.setBandwidthLogger(localSampleLogger);
 		}
 
 		ChannelFuture channelFuture = connect(inetSocketAddress, bl, connection);
@@ -584,7 +584,7 @@ public class Connection extends SimpleChannelInboundHandler<Packet<?>> {
 		return this.averageSentPackets;
 	}
 
-	public void setBandwidthLogger(SampleLogger sampleLogger) {
-		this.bandwidthDebugMonitor = new BandwidthDebugMonitor(sampleLogger);
+	public void setBandwidthLogger(LocalSampleLogger localSampleLogger) {
+		this.bandwidthDebugMonitor = new BandwidthDebugMonitor(localSampleLogger);
 	}
 }

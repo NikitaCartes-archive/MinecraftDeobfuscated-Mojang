@@ -5,6 +5,7 @@ import javax.annotation.Nullable;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.CrashReportDetail;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
@@ -48,27 +49,27 @@ public abstract class BlockEntity {
 		return this.level != null;
 	}
 
-	public void load(CompoundTag compoundTag) {
+	public void load(CompoundTag compoundTag, HolderLookup.Provider provider) {
 	}
 
-	protected void saveAdditional(CompoundTag compoundTag) {
+	protected void saveAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
 	}
 
-	public final CompoundTag saveWithFullMetadata() {
-		CompoundTag compoundTag = this.saveWithoutMetadata();
+	public final CompoundTag saveWithFullMetadata(HolderLookup.Provider provider) {
+		CompoundTag compoundTag = this.saveWithoutMetadata(provider);
 		this.saveMetadata(compoundTag);
 		return compoundTag;
 	}
 
-	public final CompoundTag saveWithId() {
-		CompoundTag compoundTag = this.saveWithoutMetadata();
+	public final CompoundTag saveWithId(HolderLookup.Provider provider) {
+		CompoundTag compoundTag = this.saveWithoutMetadata(provider);
 		this.saveId(compoundTag);
 		return compoundTag;
 	}
 
-	public final CompoundTag saveWithoutMetadata() {
+	public final CompoundTag saveWithoutMetadata(HolderLookup.Provider provider) {
 		CompoundTag compoundTag = new CompoundTag();
-		this.saveAdditional(compoundTag);
+		this.saveAdditional(compoundTag, provider);
 		return compoundTag;
 	}
 
@@ -85,8 +86,8 @@ public abstract class BlockEntity {
 		compoundTag.putString("id", BlockEntityType.getKey(blockEntityType).toString());
 	}
 
-	public void saveToItem(ItemStack itemStack) {
-		BlockItem.setBlockEntityData(itemStack, this.getType(), this.saveWithoutMetadata());
+	public void saveToItem(ItemStack itemStack, HolderLookup.Provider provider) {
+		BlockItem.setBlockEntityData(itemStack, this.getType(), this.saveWithoutMetadata(provider));
 	}
 
 	private void saveMetadata(CompoundTag compoundTag) {
@@ -97,7 +98,7 @@ public abstract class BlockEntity {
 	}
 
 	@Nullable
-	public static BlockEntity loadStatic(BlockPos blockPos, BlockState blockState, CompoundTag compoundTag) {
+	public static BlockEntity loadStatic(BlockPos blockPos, BlockState blockState, CompoundTag compoundTag, HolderLookup.Provider provider) {
 		String string = compoundTag.getString("id");
 		ResourceLocation resourceLocation = ResourceLocation.tryParse(string);
 		if (resourceLocation == null) {
@@ -107,16 +108,16 @@ public abstract class BlockEntity {
 			return (BlockEntity)BuiltInRegistries.BLOCK_ENTITY_TYPE.getOptional(resourceLocation).map(blockEntityType -> {
 				try {
 					return blockEntityType.create(blockPos, blockState);
-				} catch (Throwable var5) {
-					LOGGER.error("Failed to create block entity {}", string, var5);
+				} catch (Throwable var5x) {
+					LOGGER.error("Failed to create block entity {}", string, var5x);
 					return null;
 				}
 			}).map(blockEntity -> {
 				try {
-					blockEntity.load(compoundTag);
+					blockEntity.load(compoundTag, provider);
 					return blockEntity;
-				} catch (Throwable var4x) {
-					LOGGER.error("Failed to load data for block entity {}", string, var4x);
+				} catch (Throwable var5x) {
+					LOGGER.error("Failed to load data for block entity {}", string, var5x);
 					return null;
 				}
 			}).orElseGet(() -> {
@@ -152,7 +153,7 @@ public abstract class BlockEntity {
 		return null;
 	}
 
-	public CompoundTag getUpdateTag() {
+	public CompoundTag getUpdateTag(HolderLookup.Provider provider) {
 		return new CompoundTag();
 	}
 

@@ -5,6 +5,7 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Dynamic;
 import java.util.UUID;
 import javax.annotation.Nullable;
+import net.minecraft.Util;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -62,7 +63,7 @@ public class ZombieVillager extends Zombie implements VillagerDataHolder {
 	@Nullable
 	private Tag gossips;
 	@Nullable
-	private CompoundTag tradeOffers;
+	private MerchantOffers tradeOffers;
 	private int villagerXp;
 
 	public ZombieVillager(EntityType<? extends ZombieVillager> entityType, Level level) {
@@ -84,7 +85,7 @@ public class ZombieVillager extends Zombie implements VillagerDataHolder {
 		super.addAdditionalSaveData(compoundTag);
 		VillagerData.CODEC.encodeStart(NbtOps.INSTANCE, this.getVillagerData()).resultOrPartial(LOGGER::error).ifPresent(tag -> compoundTag.put("VillagerData", tag));
 		if (this.tradeOffers != null) {
-			compoundTag.put("Offers", this.tradeOffers);
+			compoundTag.put("Offers", Util.getOrThrow(MerchantOffers.CODEC.encodeStart(NbtOps.INSTANCE, this.tradeOffers), IllegalStateException::new));
 		}
 
 		if (this.gossips != null) {
@@ -107,8 +108,11 @@ public class ZombieVillager extends Zombie implements VillagerDataHolder {
 			dataResult.resultOrPartial(LOGGER::error).ifPresent(this::setVillagerData);
 		}
 
-		if (compoundTag.contains("Offers", 10)) {
-			this.tradeOffers = compoundTag.getCompound("Offers");
+		if (compoundTag.contains("Offers")) {
+			MerchantOffers.CODEC
+				.parse(NbtOps.INSTANCE, compoundTag.get("Offers"))
+				.resultOrPartial(Util.prefix("Failed to load offers: ", LOGGER::warn))
+				.ifPresent(merchantOffers -> this.tradeOffers = merchantOffers);
 		}
 
 		if (compoundTag.contains("Gossips", 9)) {
@@ -226,11 +230,11 @@ public class ZombieVillager extends Zombie implements VillagerDataHolder {
 		}
 
 		if (this.tradeOffers != null) {
-			villager.setOffers(new MerchantOffers(this.tradeOffers));
+			villager.setOffers(this.tradeOffers.copy());
 		}
 
 		villager.setVillagerXp(this.villagerXp);
-		villager.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(villager.blockPosition()), MobSpawnType.CONVERSION, null, null);
+		villager.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(villager.blockPosition()), MobSpawnType.CONVERSION, null);
 		villager.refreshBrain(serverLevel);
 		if (this.conversionStarter != null) {
 			Player player = serverLevel.getPlayerByUUID(this.conversionStarter);
@@ -301,8 +305,8 @@ public class ZombieVillager extends Zombie implements VillagerDataHolder {
 		return ItemStack.EMPTY;
 	}
 
-	public void setTradeOffers(CompoundTag compoundTag) {
-		this.tradeOffers = compoundTag;
+	public void setTradeOffers(MerchantOffers merchantOffers) {
+		this.tradeOffers = merchantOffers;
 	}
 
 	public void setGossips(Tag tag) {
@@ -312,14 +316,10 @@ public class ZombieVillager extends Zombie implements VillagerDataHolder {
 	@Nullable
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		ServerLevelAccessor serverLevelAccessor,
-		DifficultyInstance difficultyInstance,
-		MobSpawnType mobSpawnType,
-		@Nullable SpawnGroupData spawnGroupData,
-		@Nullable CompoundTag compoundTag
+		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData
 	) {
 		this.setVillagerData(this.getVillagerData().setType(VillagerType.byBiome(serverLevelAccessor.getBiome(this.blockPosition()))));
-		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData);
 	}
 
 	@Override

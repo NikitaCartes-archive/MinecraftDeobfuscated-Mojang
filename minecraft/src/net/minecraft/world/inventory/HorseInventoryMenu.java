@@ -10,11 +10,15 @@ import net.minecraft.world.item.Items;
 
 public class HorseInventoryMenu extends AbstractContainerMenu {
 	private final Container horseContainer;
+	private final Container armorContainer;
 	private final AbstractHorse horse;
+	private static final int SLOT_BODY_ARMOR = 1;
+	private static final int SLOT_HORSE_INVENTORY_START = 2;
 
 	public HorseInventoryMenu(int i, Inventory inventory, Container container, AbstractHorse abstractHorse) {
 		super(null, i);
 		this.horseContainer = container;
+		this.armorContainer = abstractHorse.getBodyArmorAccess();
 		this.horse = abstractHorse;
 		int j = 3;
 		container.startOpen(inventory.player);
@@ -30,15 +34,15 @@ public class HorseInventoryMenu extends AbstractContainerMenu {
 				return abstractHorse.isSaddleable();
 			}
 		});
-		this.addSlot(new Slot(container, 1, 8, 36) {
+		this.addSlot(new Slot(this.armorContainer, 0, 8, 36) {
 			@Override
 			public boolean mayPlace(ItemStack itemStack) {
-				return abstractHorse.isArmor(itemStack);
+				return abstractHorse.isBodyArmorItem(itemStack);
 			}
 
 			@Override
 			public boolean isActive() {
-				return abstractHorse.canWearArmor();
+				return abstractHorse.canWearBodyArmor();
 			}
 
 			@Override
@@ -49,7 +53,7 @@ public class HorseInventoryMenu extends AbstractContainerMenu {
 		if (this.hasChest(abstractHorse)) {
 			for (int l = 0; l < 3; l++) {
 				for (int m = 0; m < ((AbstractChestedHorse)abstractHorse).getInventoryColumns(); m++) {
-					this.addSlot(new Slot(container, 2 + m + l * ((AbstractChestedHorse)abstractHorse).getInventoryColumns(), 80 + m * 18, 18 + l * 18));
+					this.addSlot(new Slot(container, 1 + m + l * ((AbstractChestedHorse)abstractHorse).getInventoryColumns(), 80 + m * 18, 18 + l * 18));
 				}
 			}
 		}
@@ -69,12 +73,17 @@ public class HorseInventoryMenu extends AbstractContainerMenu {
 	public boolean stillValid(Player player) {
 		return !this.horse.hasInventoryChanged(this.horseContainer)
 			&& this.horseContainer.stillValid(player)
+			&& this.armorContainer.stillValid(player)
 			&& this.horse.isAlive()
 			&& player.canInteractWithEntity(this.horse, 4.0);
 	}
 
 	private boolean hasChest(AbstractHorse abstractHorse) {
-		return abstractHorse instanceof AbstractChestedHorse && ((AbstractChestedHorse)abstractHorse).hasChest();
+		if (abstractHorse instanceof AbstractChestedHorse abstractChestedHorse && abstractChestedHorse.hasChest()) {
+			return true;
+		}
+
+		return false;
 	}
 
 	@Override
@@ -84,7 +93,7 @@ public class HorseInventoryMenu extends AbstractContainerMenu {
 		if (slot != null && slot.hasItem()) {
 			ItemStack itemStack2 = slot.getItem();
 			itemStack = itemStack2.copy();
-			int j = this.horseContainer.getContainerSize();
+			int j = this.horseContainer.getContainerSize() + 1;
 			if (i < j) {
 				if (!this.moveItemStackTo(itemStack2, j, this.slots.size(), true)) {
 					return ItemStack.EMPTY;
@@ -97,7 +106,7 @@ public class HorseInventoryMenu extends AbstractContainerMenu {
 				if (!this.moveItemStackTo(itemStack2, 0, 1, false)) {
 					return ItemStack.EMPTY;
 				}
-			} else if (j <= 2 || !this.moveItemStackTo(itemStack2, 2, j, false)) {
+			} else if (j <= 1 || !this.moveItemStackTo(itemStack2, 2, j, false)) {
 				int l = j + 27;
 				int n = l + 9;
 				if (i >= l && i < n) {

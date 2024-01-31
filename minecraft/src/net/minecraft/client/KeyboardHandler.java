@@ -38,6 +38,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.NativeModuleLister;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
@@ -264,7 +265,8 @@ public class KeyboardHandler {
 			switch (hitResult.getType()) {
 				case BLOCK:
 					BlockPos blockPos = ((BlockHitResult)hitResult).getBlockPos();
-					BlockState blockState = this.minecraft.player.level().getBlockState(blockPos);
+					Level level = this.minecraft.player.level();
+					BlockState blockState = level.getBlockState(blockPos);
 					if (bl) {
 						if (bl2) {
 							this.minecraft.player.connection.getDebugQueryHandler().queryBlockEntityTag(blockPos, compoundTagx -> {
@@ -272,8 +274,8 @@ public class KeyboardHandler {
 								this.debugFeedbackTranslated("debug.inspect.server.block");
 							});
 						} else {
-							BlockEntity blockEntity = this.minecraft.player.level().getBlockEntity(blockPos);
-							CompoundTag compoundTag = blockEntity != null ? blockEntity.saveWithoutMetadata() : null;
+							BlockEntity blockEntity = level.getBlockEntity(blockPos);
+							CompoundTag compoundTag = blockEntity != null ? blockEntity.saveWithoutMetadata(level.registryAccess()) : null;
 							this.copyCreateBlockCommand(blockState, blockPos, compoundTag);
 							this.debugFeedbackTranslated("debug.inspect.client.block");
 						}

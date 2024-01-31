@@ -18,8 +18,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.Guardian;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Matrix3f;
-import org.joml.Matrix4f;
 
 @Environment(EnvType.CLIENT)
 public class GuardianRenderer extends MobRenderer<Guardian, GuardianModel> {
@@ -108,38 +106,34 @@ public class GuardianRenderer extends MobRenderer<Guardian, GuardianModel> {
 			float ar = m * 2.5F + aq;
 			VertexConsumer vertexConsumer = multiBufferSource.getBuffer(BEAM_RENDER_TYPE);
 			PoseStack.Pose pose = poseStack.last();
-			Matrix4f matrix4f = pose.pose();
-			Matrix3f matrix3f = pose.normal();
-			vertex(vertexConsumer, matrix4f, matrix3f, af, m, ag, s, t, u, 0.4999F, ar);
-			vertex(vertexConsumer, matrix4f, matrix3f, af, 0.0F, ag, s, t, u, 0.4999F, aq);
-			vertex(vertexConsumer, matrix4f, matrix3f, ah, 0.0F, ai, s, t, u, 0.0F, aq);
-			vertex(vertexConsumer, matrix4f, matrix3f, ah, m, ai, s, t, u, 0.0F, ar);
-			vertex(vertexConsumer, matrix4f, matrix3f, aj, m, ak, s, t, u, 0.4999F, ar);
-			vertex(vertexConsumer, matrix4f, matrix3f, aj, 0.0F, ak, s, t, u, 0.4999F, aq);
-			vertex(vertexConsumer, matrix4f, matrix3f, al, 0.0F, am, s, t, u, 0.0F, aq);
-			vertex(vertexConsumer, matrix4f, matrix3f, al, m, am, s, t, u, 0.0F, ar);
+			vertex(vertexConsumer, pose, af, m, ag, s, t, u, 0.4999F, ar);
+			vertex(vertexConsumer, pose, af, 0.0F, ag, s, t, u, 0.4999F, aq);
+			vertex(vertexConsumer, pose, ah, 0.0F, ai, s, t, u, 0.0F, aq);
+			vertex(vertexConsumer, pose, ah, m, ai, s, t, u, 0.0F, ar);
+			vertex(vertexConsumer, pose, aj, m, ak, s, t, u, 0.4999F, ar);
+			vertex(vertexConsumer, pose, aj, 0.0F, ak, s, t, u, 0.4999F, aq);
+			vertex(vertexConsumer, pose, al, 0.0F, am, s, t, u, 0.0F, aq);
+			vertex(vertexConsumer, pose, al, m, am, s, t, u, 0.0F, ar);
 			float as = 0.0F;
 			if (guardian.tickCount % 2 == 0) {
 				as = 0.5F;
 			}
 
-			vertex(vertexConsumer, matrix4f, matrix3f, x, m, y, s, t, u, 0.5F, as + 0.5F);
-			vertex(vertexConsumer, matrix4f, matrix3f, z, m, aa, s, t, u, 1.0F, as + 0.5F);
-			vertex(vertexConsumer, matrix4f, matrix3f, ad, m, ae, s, t, u, 1.0F, as);
-			vertex(vertexConsumer, matrix4f, matrix3f, ab, m, ac, s, t, u, 0.5F, as);
+			vertex(vertexConsumer, pose, x, m, y, s, t, u, 0.5F, as + 0.5F);
+			vertex(vertexConsumer, pose, z, m, aa, s, t, u, 1.0F, as + 0.5F);
+			vertex(vertexConsumer, pose, ad, m, ae, s, t, u, 1.0F, as);
+			vertex(vertexConsumer, pose, ab, m, ac, s, t, u, 0.5F, as);
 			poseStack.popPose();
 		}
 	}
 
-	private static void vertex(
-		VertexConsumer vertexConsumer, Matrix4f matrix4f, Matrix3f matrix3f, float f, float g, float h, int i, int j, int k, float l, float m
-	) {
-		vertexConsumer.vertex(matrix4f, f, g, h)
+	private static void vertex(VertexConsumer vertexConsumer, PoseStack.Pose pose, float f, float g, float h, int i, int j, int k, float l, float m) {
+		vertexConsumer.vertex(pose, f, g, h)
 			.color(i, j, k, 255)
 			.uv(l, m)
 			.overlayCoords(OverlayTexture.NO_OVERLAY)
 			.uv2(15728880)
-			.normal(matrix3f, 0.0F, 1.0F, 0.0F)
+			.normal(pose, 0.0F, 1.0F, 0.0F)
 			.endVertex();
 	}
 

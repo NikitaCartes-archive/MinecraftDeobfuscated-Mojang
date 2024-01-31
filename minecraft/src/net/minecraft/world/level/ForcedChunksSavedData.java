@@ -2,6 +2,7 @@ package net.minecraft.world.level;
 
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.level.saveddata.SavedData;
@@ -23,12 +24,12 @@ public class ForcedChunksSavedData extends SavedData {
 		this(new LongOpenHashSet());
 	}
 
-	public static ForcedChunksSavedData load(CompoundTag compoundTag) {
+	public static ForcedChunksSavedData load(CompoundTag compoundTag, HolderLookup.Provider provider) {
 		return new ForcedChunksSavedData(new LongOpenHashSet(compoundTag.getLongArray("Forced")));
 	}
 
 	@Override
-	public CompoundTag save(CompoundTag compoundTag) {
+	public CompoundTag save(CompoundTag compoundTag, HolderLookup.Provider provider) {
 		compoundTag.putLongArray("Forced", this.chunks.toLongArray());
 		return compoundTag;
 	}

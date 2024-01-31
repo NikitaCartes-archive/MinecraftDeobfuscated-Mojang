@@ -312,11 +312,7 @@ public class Fox extends Animal implements VariantHolder<Fox.Type> {
 	@Nullable
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		ServerLevelAccessor serverLevelAccessor,
-		DifficultyInstance difficultyInstance,
-		MobSpawnType mobSpawnType,
-		@Nullable SpawnGroupData spawnGroupData,
-		@Nullable CompoundTag compoundTag
+		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData
 	) {
 		Holder<Biome> holder = serverLevelAccessor.getBiome(this.blockPosition());
 		Fox.Type type = Fox.Type.byBiome(holder);
@@ -340,7 +336,7 @@ public class Fox extends Animal implements VariantHolder<Fox.Type> {
 		}
 
 		this.populateDefaultEquipmentSlots(serverLevelAccessor.getRandom(), difficultyInstance);
-		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData);
 	}
 
 	private void setTargetGoals() {

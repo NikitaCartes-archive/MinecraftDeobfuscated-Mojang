@@ -25,7 +25,7 @@ public class SpawnUtil {
 			int n = Mth.randomBetweenInclusive(serverLevel.random, -j, j);
 			mutableBlockPos.setWithOffset(blockPos, m, k, n);
 			if (serverLevel.getWorldBorder().isWithinBounds(mutableBlockPos) && moveToPossibleSpawnPosition(serverLevel, k, mutableBlockPos, strategy)) {
-				T mob = (T)entityType.create(serverLevel, null, null, mutableBlockPos, mobSpawnType, false, false);
+				T mob = (T)entityType.create(serverLevel, null, mutableBlockPos, mobSpawnType, false, false);
 				if (mob != null) {
 					if (mob.checkSpawnRules(serverLevel, mobSpawnType) && mob.checkSpawnObstruction(serverLevel)) {
 						serverLevel.addFreshEntityWithPassengers(mob);

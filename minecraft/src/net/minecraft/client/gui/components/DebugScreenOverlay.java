@@ -47,7 +47,8 @@ import net.minecraft.server.ServerTickRateManager;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
-import net.minecraft.util.debugchart.SampleLogger;
+import net.minecraft.util.debugchart.LocalSampleLogger;
+import net.minecraft.util.debugchart.RemoteDebugSampleType;
 import net.minecraft.util.debugchart.TpsDebugDimensions;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.TickRateManager;
@@ -100,10 +101,11 @@ public class DebugScreenOverlay {
 	private boolean renderProfilerChart;
 	private boolean renderFpsCharts;
 	private boolean renderNetworkCharts;
-	private final SampleLogger frameTimeLogger = new SampleLogger(1);
-	private final SampleLogger tickTimeLogger = new SampleLogger(TpsDebugDimensions.values().length);
-	private final SampleLogger pingLogger = new SampleLogger(1);
-	private final SampleLogger bandwidthLogger = new SampleLogger(1);
+	private final LocalSampleLogger frameTimeLogger = new LocalSampleLogger(1);
+	private final LocalSampleLogger tickTimeLogger = new LocalSampleLogger(TpsDebugDimensions.values().length);
+	private final LocalSampleLogger pingLogger = new LocalSampleLogger(1);
+	private final LocalSampleLogger bandwidthLogger = new LocalSampleLogger(1);
+	private final Map<RemoteDebugSampleType, LocalSampleLogger> remoteSupportingLoggers = Map.of(RemoteDebugSampleType.TICK_TIME, this.tickTimeLogger);
 	private final FpsDebugChart fpsChart;
 	private final TpsDebugChart tpsChart;
 	private final PingDebugChart pingChart;
@@ -136,7 +138,7 @@ public class DebugScreenOverlay {
 				int i = guiGraphics.guiWidth();
 				int j = i / 2;
 				this.fpsChart.drawChart(guiGraphics, 0, this.fpsChart.getWidth(j));
-				if (this.minecraft.getSingleplayerServer() != null) {
+				if (this.tickTimeLogger.size() > 0) {
 					int k = this.tpsChart.getWidth(j);
 					this.tpsChart.drawChart(guiGraphics, i - k, k);
 				}
@@ -567,6 +569,10 @@ public class DebugScreenOverlay {
 		return this.showDebugScreen() && this.renderNetworkCharts;
 	}
 
+	public boolean showFpsCharts() {
+		return this.showDebugScreen() && this.renderFpsCharts;
+	}
+
 	public void toggleOverlay() {
 		this.renderDebug = !this.renderDebug;
 	}
@@ -598,16 +604,23 @@ public class DebugScreenOverlay {
 		this.frameTimeLogger.logSample(l);
 	}
 
-	public SampleLogger getTickTimeLogger() {
+	public LocalSampleLogger getTickTimeLogger() {
 		return this.tickTimeLogger;
 	}
 
-	public SampleLogger getPingLogger() {
+	public LocalSampleLogger getPingLogger() {
 		return this.pingLogger;
 	}
 
-	public SampleLogger getBandwidthLogger() {
+	public LocalSampleLogger getBandwidthLogger() {
 		return this.bandwidthLogger;
+	}
+
+	public void logRemoteSample(long[] ls, RemoteDebugSampleType remoteDebugSampleType) {
+		LocalSampleLogger localSampleLogger = (LocalSampleLogger)this.remoteSupportingLoggers.get(remoteDebugSampleType);
+		if (localSampleLogger != null) {
+			localSampleLogger.logFullSample(ls);
+		}
 	}
 
 	public void reset() {

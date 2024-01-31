@@ -6,14 +6,16 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketType;
 import net.minecraft.world.scores.PlayerTeam;
 
 public class ClientboundSetPlayerTeamPacket implements Packet<ClientGamePacketListener> {
-	public static final StreamCodec<FriendlyByteBuf, ClientboundSetPlayerTeamPacket> STREAM_CODEC = Packet.codec(
+	public static final StreamCodec<RegistryFriendlyByteBuf, ClientboundSetPlayerTeamPacket> STREAM_CODEC = Packet.codec(
 		ClientboundSetPlayerTeamPacket::write, ClientboundSetPlayerTeamPacket::new
 	);
 	private static final int METHOD_ADD = 0;
@@ -54,33 +56,33 @@ public class ClientboundSetPlayerTeamPacket implements Packet<ClientGamePacketLi
 		);
 	}
 
-	private ClientboundSetPlayerTeamPacket(FriendlyByteBuf friendlyByteBuf) {
-		this.name = friendlyByteBuf.readUtf();
-		this.method = friendlyByteBuf.readByte();
+	private ClientboundSetPlayerTeamPacket(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
+		this.name = registryFriendlyByteBuf.readUtf();
+		this.method = registryFriendlyByteBuf.readByte();
 		if (shouldHaveParameters(this.method)) {
-			this.parameters = Optional.of(new ClientboundSetPlayerTeamPacket.Parameters(friendlyByteBuf));
+			this.parameters = Optional.of(new ClientboundSetPlayerTeamPacket.Parameters(registryFriendlyByteBuf));
 		} else {
 			this.parameters = Optional.empty();
 		}
 
 		if (shouldHavePlayerList(this.method)) {
-			this.players = friendlyByteBuf.<String>readList(FriendlyByteBuf::readUtf);
+			this.players = registryFriendlyByteBuf.<String>readList(FriendlyByteBuf::readUtf);
 		} else {
 			this.players = ImmutableList.<String>of();
 		}
 	}
 
-	private void write(FriendlyByteBuf friendlyByteBuf) {
-		friendlyByteBuf.writeUtf(this.name);
-		friendlyByteBuf.writeByte(this.method);
+	private void write(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
+		registryFriendlyByteBuf.writeUtf(this.name);
+		registryFriendlyByteBuf.writeByte(this.method);
 		if (shouldHaveParameters(this.method)) {
 			((ClientboundSetPlayerTeamPacket.Parameters)this.parameters
 					.orElseThrow(() -> new IllegalStateException("Parameters not present, but method is" + this.method)))
-				.write(friendlyByteBuf);
+				.write(registryFriendlyByteBuf);
 		}
 
 		if (shouldHavePlayerList(this.method)) {
-			friendlyByteBuf.writeCollection(this.players, FriendlyByteBuf::writeUtf);
+			registryFriendlyByteBuf.writeCollection(this.players, FriendlyByteBuf::writeUtf);
 		}
 	}
 
@@ -94,29 +96,20 @@ public class ClientboundSetPlayerTeamPacket implements Packet<ClientGamePacketLi
 
 	@Nullable
 	public ClientboundSetPlayerTeamPacket.Action getPlayerAction() {
-		switch (this.method) {
-			case 0:
-			case 3:
-				return ClientboundSetPlayerTeamPacket.Action.ADD;
-			case 1:
-			case 2:
-			default:
-				return null;
-			case 4:
-				return ClientboundSetPlayerTeamPacket.Action.REMOVE;
-		}
+		return switch (this.method) {
+			case 0, 3 -> ClientboundSetPlayerTeamPacket.Action.ADD;
+			default -> null;
+			case 4 -> ClientboundSetPlayerTeamPacket.Action.REMOVE;
+		};
 	}
 
 	@Nullable
 	public ClientboundSetPlayerTeamPacket.Action getTeamAction() {
-		switch (this.method) {
-			case 0:
-				return ClientboundSetPlayerTeamPacket.Action.ADD;
-			case 1:
-				return ClientboundSetPlayerTeamPacket.Action.REMOVE;
-			default:
-				return null;
-		}
+		return switch (this.method) {
+			case 0 -> ClientboundSetPlayerTeamPacket.Action.ADD;
+			case 1 -> ClientboundSetPlayerTeamPacket.Action.REMOVE;
+			default -> null;
+		};
 	}
 
 	@Override
@@ -164,14 +157,14 @@ public class ClientboundSetPlayerTeamPacket implements Packet<ClientGamePacketLi
 			this.playerSuffix = playerTeam.getPlayerSuffix();
 		}
 
-		public Parameters(FriendlyByteBuf friendlyByteBuf) {
-			this.displayName = friendlyByteBuf.readComponentTrusted();
-			this.options = friendlyByteBuf.readByte();
-			this.nametagVisibility = friendlyByteBuf.readUtf(40);
-			this.collisionRule = friendlyByteBuf.readUtf(40);
-			this.color = friendlyByteBuf.readEnum(ChatFormatting.class);
-			this.playerPrefix = friendlyByteBuf.readComponentTrusted();
-			this.playerSuffix = friendlyByteBuf.readComponentTrusted();
+		public Parameters(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
+			this.displayName = ComponentSerialization.STREAM_CODEC.decode(registryFriendlyByteBuf);
+			this.options = registryFriendlyByteBuf.readByte();
+			this.nametagVisibility = registryFriendlyByteBuf.readUtf(40);
+			this.collisionRule = registryFriendlyByteBuf.readUtf(40);
+			this.color = registryFriendlyByteBuf.readEnum(ChatFormatting.class);
+			this.playerPrefix = ComponentSerialization.STREAM_CODEC.decode(registryFriendlyByteBuf);
+			this.playerSuffix = ComponentSerialization.STREAM_CODEC.decode(registryFriendlyByteBuf);
 		}
 
 		public Component getDisplayName() {
@@ -202,14 +195,14 @@ public class ClientboundSetPlayerTeamPacket implements Packet<ClientGamePacketLi
 			return this.playerSuffix;
 		}
 
-		public void write(FriendlyByteBuf friendlyByteBuf) {
-			friendlyByteBuf.writeComponent(this.displayName);
-			friendlyByteBuf.writeByte(this.options);
-			friendlyByteBuf.writeUtf(this.nametagVisibility);
-			friendlyByteBuf.writeUtf(this.collisionRule);
-			friendlyByteBuf.writeEnum(this.color);
-			friendlyByteBuf.writeComponent(this.playerPrefix);
-			friendlyByteBuf.writeComponent(this.playerSuffix);
+		public void write(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
+			ComponentSerialization.STREAM_CODEC.encode(registryFriendlyByteBuf, this.displayName);
+			registryFriendlyByteBuf.writeByte(this.options);
+			registryFriendlyByteBuf.writeUtf(this.nametagVisibility);
+			registryFriendlyByteBuf.writeUtf(this.collisionRule);
+			registryFriendlyByteBuf.writeEnum(this.color);
+			ComponentSerialization.STREAM_CODEC.encode(registryFriendlyByteBuf, this.playerPrefix);
+			ComponentSerialization.STREAM_CODEC.encode(registryFriendlyByteBuf, this.playerSuffix);
 		}
 	}
 }

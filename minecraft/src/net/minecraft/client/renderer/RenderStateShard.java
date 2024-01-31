@@ -3,7 +3,6 @@ package net.minecraft.client.renderer;
 import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalDouble;
@@ -17,6 +16,7 @@ import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.ResourceLocation;
 import org.apache.commons.lang3.tuple.Triple;
 import org.joml.Matrix4f;
+import org.joml.Matrix4fStack;
 
 @Environment(EnvType.CLIENT)
 public abstract class RenderStateShard {
@@ -227,6 +227,9 @@ public abstract class RenderStateShard {
 	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_END_GATEWAY_SHADER = new RenderStateShard.ShaderStateShard(
 		GameRenderer::getRendertypeEndGatewayShader
 	);
+	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_CLOUDS_SHADER = new RenderStateShard.ShaderStateShard(
+		GameRenderer::getRendertypeCloudsShader
+	);
 	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_LINES_SHADER = new RenderStateShard.ShaderStateShard(
 		GameRenderer::getRendertypeLinesShader
 	);
@@ -283,13 +286,13 @@ public abstract class RenderStateShard {
 		}
 	);
 	protected static final RenderStateShard.LayeringStateShard VIEW_OFFSET_Z_LAYERING = new RenderStateShard.LayeringStateShard("view_offset_z_layering", () -> {
-		PoseStack poseStack = RenderSystem.getModelViewStack();
-		poseStack.pushPose();
-		poseStack.scale(0.99975586F, 0.99975586F, 0.99975586F);
+		Matrix4fStack matrix4fStack = RenderSystem.getModelViewStack();
+		matrix4fStack.pushMatrix();
+		matrix4fStack.scale(0.99975586F, 0.99975586F, 0.99975586F);
 		RenderSystem.applyModelViewMatrix();
 	}, () -> {
-		PoseStack poseStack = RenderSystem.getModelViewStack();
-		poseStack.popPose();
+		Matrix4fStack matrix4fStack = RenderSystem.getModelViewStack();
+		matrix4fStack.popMatrix();
 		RenderSystem.applyModelViewMatrix();
 	});
 	protected static final RenderStateShard.OutputStateShard MAIN_TARGET = new RenderStateShard.OutputStateShard("main_target", () -> {
