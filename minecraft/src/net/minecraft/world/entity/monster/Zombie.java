@@ -305,7 +305,7 @@ public class Zombie extends Monster {
 							&& this.level().noCollision(zombie)
 							&& !this.level().containsAnyLiquid(zombie.getBoundingBox())) {
 							zombie.setTarget(livingEntity);
-							zombie.finalizeSpawn(serverLevel, this.level().getCurrentDifficultyAt(zombie.blockPosition()), MobSpawnType.REINFORCEMENT, null, null);
+							zombie.finalizeSpawn(serverLevel, this.level().getCurrentDifficultyAt(zombie.blockPosition()), MobSpawnType.REINFORCEMENT, null);
 							serverLevel.addFreshEntityWithPassengers(zombie);
 							this.getAttribute(Attributes.SPAWN_REINFORCEMENTS_CHANCE)
 								.addPermanentModifier(new AttributeModifier("Zombie reinforcement caller charge", -0.05F, AttributeModifier.Operation.ADDITION));
@@ -402,11 +402,11 @@ public class Zombie extends Monster {
 			ZombieVillager zombieVillager = villager.convertTo(EntityType.ZOMBIE_VILLAGER, false);
 			if (zombieVillager != null) {
 				zombieVillager.finalizeSpawn(
-					serverLevel, serverLevel.getCurrentDifficultyAt(zombieVillager.blockPosition()), MobSpawnType.CONVERSION, new Zombie.ZombieGroupData(false, true), null
+					serverLevel, serverLevel.getCurrentDifficultyAt(zombieVillager.blockPosition()), MobSpawnType.CONVERSION, new Zombie.ZombieGroupData(false, true)
 				);
 				zombieVillager.setVillagerData(villager.getVillagerData());
 				zombieVillager.setGossips(villager.getGossips().store(NbtOps.INSTANCE));
-				zombieVillager.setTradeOffers(villager.getOffers().createTag());
+				zombieVillager.setTradeOffers(villager.getOffers().copy());
 				zombieVillager.setVillagerXp(villager.getVillagerXp());
 				if (!this.isSilent()) {
 					serverLevel.levelEvent(null, 1026, this.blockPosition(), 0);
@@ -437,14 +437,10 @@ public class Zombie extends Monster {
 	@Nullable
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		ServerLevelAccessor serverLevelAccessor,
-		DifficultyInstance difficultyInstance,
-		MobSpawnType mobSpawnType,
-		@Nullable SpawnGroupData spawnGroupData,
-		@Nullable CompoundTag compoundTag
+		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData
 	) {
 		RandomSource randomSource = serverLevelAccessor.getRandom();
-		spawnGroupData = super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+		spawnGroupData = super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData);
 		float f = difficultyInstance.getSpecialMultiplier();
 		this.setCanPickUpLoot(randomSource.nextFloat() < 0.55F * f);
 		if (spawnGroupData == null) {
@@ -468,7 +464,7 @@ public class Zombie extends Monster {
 						Chicken chicken2 = EntityType.CHICKEN.create(this.level());
 						if (chicken2 != null) {
 							chicken2.moveTo(this.getX(), this.getY(), this.getZ(), this.getYRot(), 0.0F);
-							chicken2.finalizeSpawn(serverLevelAccessor, difficultyInstance, MobSpawnType.JOCKEY, null, null);
+							chicken2.finalizeSpawn(serverLevelAccessor, difficultyInstance, MobSpawnType.JOCKEY, null);
 							chicken2.setChickenJockey(true);
 							this.startRiding(chicken2);
 							serverLevelAccessor.addFreshEntity(chicken2);

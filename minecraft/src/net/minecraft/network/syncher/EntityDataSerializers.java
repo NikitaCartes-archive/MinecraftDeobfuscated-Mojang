@@ -44,7 +44,7 @@ public class EntityDataSerializers {
 	public static final EntityDataSerializer<String> STRING = EntityDataSerializer.forValueType(ByteBufCodecs.STRING_UTF8);
 	public static final EntityDataSerializer<Component> COMPONENT = EntityDataSerializer.forValueType(ComponentSerialization.STREAM_CODEC);
 	public static final EntityDataSerializer<Optional<Component>> OPTIONAL_COMPONENT = EntityDataSerializer.forValueType(
-		ComponentSerialization.STREAM_CODEC.apply(ByteBufCodecs::optional)
+		ComponentSerialization.OPTIONAL_STREAM_CODEC
 	);
 	public static final EntityDataSerializer<ItemStack> ITEM_STACK = new EntityDataSerializer<ItemStack>() {
 		@Override

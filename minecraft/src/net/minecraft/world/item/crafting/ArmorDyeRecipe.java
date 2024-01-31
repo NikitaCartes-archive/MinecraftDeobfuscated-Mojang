@@ -3,6 +3,7 @@ package net.minecraft.world.item.crafting;
 import com.google.common.collect.Lists;
 import java.util.List;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.DyeableLeatherItem;
@@ -22,7 +23,7 @@ public class ArmorDyeRecipe extends CustomRecipe {
 		for(int i = 0; i < craftingContainer.getContainerSize(); ++i) {
 			ItemStack itemStack2 = craftingContainer.getItem(i);
 			if (!itemStack2.isEmpty()) {
-				if (itemStack2.getItem() instanceof DyeableLeatherItem) {
+				if (itemStack2.is(ItemTags.DYEABLE)) {
 					if (!itemStack.isEmpty()) {
 						return false;
 					}
@@ -48,19 +49,20 @@ public class ArmorDyeRecipe extends CustomRecipe {
 		for(int i = 0; i < craftingContainer.getContainerSize(); ++i) {
 			ItemStack itemStack2 = craftingContainer.getItem(i);
 			if (!itemStack2.isEmpty()) {
-				Item item = itemStack2.getItem();
-				if (item instanceof DyeableLeatherItem) {
+				if (itemStack2.is(ItemTags.DYEABLE)) {
 					if (!itemStack.isEmpty()) {
 						return ItemStack.EMPTY;
 					}
 
 					itemStack = itemStack2.copy();
 				} else {
-					if (!(item instanceof DyeItem)) {
+					Item var8 = itemStack2.getItem();
+					if (!(var8 instanceof DyeItem)) {
 						return ItemStack.EMPTY;
 					}
 
-					list.add((DyeItem)item);
+					DyeItem dyeItem = (DyeItem)var8;
+					list.add(dyeItem);
 				}
 			}
 		}

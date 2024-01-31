@@ -4,6 +4,7 @@ import javax.annotation.Nullable;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -197,8 +198,8 @@ public class LecternBlockEntity extends BlockEntity implements Clearable, MenuPr
 	}
 
 	@Override
-	public void load(CompoundTag compoundTag) {
-		super.load(compoundTag);
+	public void load(CompoundTag compoundTag, HolderLookup.Provider provider) {
+		super.load(compoundTag, provider);
 		if (compoundTag.contains("Book", 10)) {
 			this.book = this.resolveBook(ItemStack.of(compoundTag.getCompound("Book")), null);
 		} else {
@@ -210,8 +211,8 @@ public class LecternBlockEntity extends BlockEntity implements Clearable, MenuPr
 	}
 
 	@Override
-	protected void saveAdditional(CompoundTag compoundTag) {
-		super.saveAdditional(compoundTag);
+	protected void saveAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
+		super.saveAdditional(compoundTag, provider);
 		if (!this.getBook().isEmpty()) {
 			compoundTag.put("Book", this.getBook().save(new CompoundTag()));
 			compoundTag.putInt("Page", this.page);

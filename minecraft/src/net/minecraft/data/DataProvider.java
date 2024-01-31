@@ -17,6 +17,8 @@ import java.util.Comparator;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.ToIntFunction;
 import net.minecraft.Util;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.util.GsonHelper;
 import org.slf4j.Logger;
 
@@ -33,8 +35,9 @@ public interface DataProvider {
 
 	String getName();
 
-	static <T> CompletableFuture<?> saveStable(CachedOutput cachedOutput, Codec<T> codec, T object, Path path) {
-		JsonElement jsonElement = Util.getOrThrow(codec.encodeStart(JsonOps.INSTANCE, object), IllegalStateException::new);
+	static <T> CompletableFuture<?> saveStable(CachedOutput cachedOutput, HolderLookup.Provider provider, Codec<T> codec, T object, Path path) {
+		RegistryOps<JsonElement> registryOps = RegistryOps.create(JsonOps.INSTANCE, provider);
+		JsonElement jsonElement = Util.getOrThrow(codec.encodeStart(registryOps, object), IllegalStateException::new);
 		return saveStable(cachedOutput, jsonElement, path);
 	}
 

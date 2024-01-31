@@ -1,11 +1,14 @@
 package net.minecraft.world.entity.npc;
 
 import com.google.common.collect.Lists;
+import com.mojang.logging.LogUtils;
 import java.util.ArrayList;
 import javax.annotation.Nullable;
+import net.minecraft.Util;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -32,9 +35,11 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.Vec3;
+import org.slf4j.Logger;
 
 public abstract class AbstractVillager extends AgeableMob implements InventoryCarrier, Npc, Merchant {
 	private static final EntityDataAccessor<Integer> DATA_UNHAPPY_COUNTER = SynchedEntityData.defineId(AbstractVillager.class, EntityDataSerializers.INT);
+	private static final Logger LOGGER = LogUtils.getLogger();
 	public static final int VILLAGER_SLOT_OFFSET = 300;
 	private static final int VILLAGER_INVENTORY_SIZE = 8;
 	@Nullable
@@ -51,17 +56,13 @@ public abstract class AbstractVillager extends AgeableMob implements InventoryCa
 
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		ServerLevelAccessor serverLevelAccessor,
-		DifficultyInstance difficultyInstance,
-		MobSpawnType mobSpawnType,
-		@Nullable SpawnGroupData spawnGroupData,
-		@Nullable CompoundTag compoundTag
+		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData
 	) {
 		if (spawnGroupData == null) {
 			spawnGroupData = new AgeableMob.AgeableMobGroupData(false);
 		}
 
-		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData);
 	}
 
 	public int getUnhappyCounter() {
@@ -159,7 +160,7 @@ public abstract class AbstractVillager extends AgeableMob implements InventoryCa
 		super.addAdditionalSaveData(compoundTag);
 		MerchantOffers merchantOffers = this.getOffers();
 		if (!merchantOffers.isEmpty()) {
-			compoundTag.put("Offers", merchantOffers.createTag());
+			compoundTag.put("Offers", Util.getOrThrow(MerchantOffers.CODEC.encodeStart(NbtOps.INSTANCE, merchantOffers), IllegalStateException::new));
 		}
 
 		this.writeInventoryToTag(compoundTag);
@@ -168,8 +169,11 @@ public abstract class AbstractVillager extends AgeableMob implements InventoryCa
 	@Override
 	public void readAdditionalSaveData(CompoundTag compoundTag) {
 		super.readAdditionalSaveData(compoundTag);
-		if (compoundTag.contains("Offers", 10)) {
-			this.offers = new MerchantOffers(compoundTag.getCompound("Offers"));
+		if (compoundTag.contains("Offers")) {
+			MerchantOffers.CODEC
+				.parse(NbtOps.INSTANCE, compoundTag.get("Offers"))
+				.resultOrPartial(Util.prefix("Failed to load offers: ", LOGGER::warn))
+				.ifPresent(merchantOffers -> this.offers = merchantOffers);
 		}
 
 		this.readInventoryFromTag(compoundTag);

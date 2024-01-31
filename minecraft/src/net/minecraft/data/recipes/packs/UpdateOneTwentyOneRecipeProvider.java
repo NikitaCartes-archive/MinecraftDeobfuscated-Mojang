@@ -1,5 +1,7 @@
 package net.minecraft.data.recipes.packs;
 
+import java.util.concurrent.CompletableFuture;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.RecipeOutput;
@@ -11,8 +13,8 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 
 public class UpdateOneTwentyOneRecipeProvider extends RecipeProvider {
-	public UpdateOneTwentyOneRecipeProvider(PackOutput packOutput) {
-		super(packOutput);
+	public UpdateOneTwentyOneRecipeProvider(PackOutput packOutput, CompletableFuture<HolderLookup.Provider> completableFuture) {
+		super(packOutput, completableFuture);
 	}
 
 	@Override

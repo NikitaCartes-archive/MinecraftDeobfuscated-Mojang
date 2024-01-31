@@ -31,6 +31,7 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.MapColor;
+import net.minecraft.world.level.saveddata.maps.MapId;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 
 public class MapItem extends ComplexItem {
@@ -52,40 +53,36 @@ public class MapItem extends ComplexItem {
 	}
 
 	@Nullable
-	public static MapItemSavedData getSavedData(@Nullable Integer integer, Level level) {
-		return integer == null ? null : level.getMapData(makeKey(integer));
+	public static MapItemSavedData getSavedData(@Nullable MapId mapId, Level level) {
+		return mapId == null ? null : level.getMapData(mapId);
 	}
 
 	@Nullable
 	public static MapItemSavedData getSavedData(ItemStack itemStack, Level level) {
-		Integer integer = getMapId(itemStack);
-		return getSavedData(integer, level);
+		MapId mapId = getMapId(itemStack);
+		return getSavedData(mapId, level);
 	}
 
 	@Nullable
-	public static Integer getMapId(ItemStack itemStack) {
+	public static MapId getMapId(ItemStack itemStack) {
 		CompoundTag compoundTag = itemStack.getTag();
-		return compoundTag != null && compoundTag.contains("map", 99) ? compoundTag.getInt("map") : null;
+		return compoundTag != null && compoundTag.contains("map", 99) ? new MapId(compoundTag.getInt("map")) : null;
 	}
 
-	private static int createNewSavedData(Level level, int i, int j, int k, boolean bl, boolean bl2, ResourceKey<Level> resourceKey) {
+	private static MapId createNewSavedData(Level level, int i, int j, int k, boolean bl, boolean bl2, ResourceKey<Level> resourceKey) {
 		MapItemSavedData mapItemSavedData = MapItemSavedData.createFresh((double)i, (double)j, (byte)k, bl, bl2, resourceKey);
-		int l = level.getFreeMapId();
-		level.setMapData(makeKey(l), mapItemSavedData);
-		return l;
+		MapId mapId = level.getFreeMapId();
+		level.setMapData(mapId, mapItemSavedData);
+		return mapId;
 	}
 
-	private static void storeMapData(ItemStack itemStack, int i) {
-		itemStack.getOrCreateTag().putInt("map", i);
+	private static void storeMapData(ItemStack itemStack, MapId mapId) {
+		itemStack.getOrCreateTag().putInt("map", mapId.id());
 	}
 
 	private static void createAndStoreSavedData(ItemStack itemStack, Level level, int i, int j, int k, boolean bl, boolean bl2, ResourceKey<Level> resourceKey) {
-		int l = createNewSavedData(level, i, j, k, bl, bl2, resourceKey);
-		storeMapData(itemStack, l);
-	}
-
-	public static String makeKey(int i) {
-		return "map_" + i;
+		MapId mapId = createNewSavedData(level, i, j, k, bl, bl2, resourceKey);
+		storeMapData(itemStack, mapId);
 	}
 
 	public void update(Level level, Entity entity, MapItemSavedData mapItemSavedData) {
@@ -306,9 +303,9 @@ public class MapItem extends ComplexItem {
 	@Nullable
 	@Override
 	public Packet<?> getUpdatePacket(ItemStack itemStack, Level level, Player player) {
-		Integer integer = getMapId(itemStack);
-		MapItemSavedData mapItemSavedData = getSavedData(integer, level);
-		return mapItemSavedData != null ? mapItemSavedData.getUpdatePacket(integer, player) : null;
+		MapId mapId = getMapId(itemStack);
+		MapItemSavedData mapItemSavedData = getSavedData(mapId, level);
+		return mapItemSavedData != null ? mapItemSavedData.getUpdatePacket(mapId, player) : null;
 	}
 
 	@Override
@@ -326,27 +323,26 @@ public class MapItem extends ComplexItem {
 	private static void scaleMap(ItemStack itemStack, Level level, int i) {
 		MapItemSavedData mapItemSavedData = getSavedData(itemStack, level);
 		if (mapItemSavedData != null) {
-			int j = level.getFreeMapId();
-			level.setMapData(makeKey(j), mapItemSavedData.scaled(i));
-			storeMapData(itemStack, j);
+			MapId mapId = level.getFreeMapId();
+			level.setMapData(mapId, mapItemSavedData.scaled(i));
+			storeMapData(itemStack, mapId);
 		}
 	}
 
 	public static void lockMap(Level level, ItemStack itemStack) {
 		MapItemSavedData mapItemSavedData = getSavedData(itemStack, level);
 		if (mapItemSavedData != null) {
-			int i = level.getFreeMapId();
-			String string = makeKey(i);
+			MapId mapId = level.getFreeMapId();
 			MapItemSavedData mapItemSavedData2 = mapItemSavedData.locked();
-			level.setMapData(string, mapItemSavedData2);
-			storeMapData(itemStack, i);
+			level.setMapData(mapId, mapItemSavedData2);
+			storeMapData(itemStack, mapId);
 		}
 	}
 
 	@Override
 	public void appendHoverText(ItemStack itemStack, @Nullable Level level, List<Component> list, TooltipFlag tooltipFlag) {
-		Integer integer = getMapId(itemStack);
-		MapItemSavedData mapItemSavedData = level == null ? null : getSavedData(integer, level);
+		MapId mapId = getMapId(itemStack);
+		MapItemSavedData mapItemSavedData = level == null ? null : getSavedData(mapId, level);
 		CompoundTag compoundTag = itemStack.getTag();
 		boolean bl;
 		byte b;
@@ -359,13 +355,13 @@ public class MapItem extends ComplexItem {
 		}
 
 		if (mapItemSavedData != null && (mapItemSavedData.locked || bl)) {
-			list.add(Component.translatable("filled_map.locked", integer).withStyle(ChatFormatting.GRAY));
+			list.add(Component.translatable("filled_map.locked", mapId.id()).withStyle(ChatFormatting.GRAY));
 		}
 
 		if (tooltipFlag.isAdvanced()) {
 			if (mapItemSavedData != null) {
 				if (!bl && b == 0) {
-					list.add(getTooltipForId(integer));
+					list.add(getTooltipForId(mapId));
 				}
 
 				int i = Math.min(mapItemSavedData.scale + b, 4);
@@ -377,8 +373,8 @@ public class MapItem extends ComplexItem {
 		}
 	}
 
-	private static Component getTooltipForId(int i) {
-		return Component.translatable("filled_map.id", i).withStyle(ChatFormatting.GRAY);
+	private static Component getTooltipForId(MapId mapId) {
+		return Component.translatable("filled_map.id", mapId.id()).withStyle(ChatFormatting.GRAY);
 	}
 
 	public static Component getTooltipForId(ItemStack itemStack) {

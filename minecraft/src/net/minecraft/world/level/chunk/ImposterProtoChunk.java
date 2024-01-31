@@ -8,6 +8,7 @@ import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.Entity;
@@ -207,8 +208,8 @@ public class ImposterProtoChunk extends ProtoChunk {
 
 	@Nullable
 	@Override
-	public CompoundTag getBlockEntityNbtForSaving(BlockPos blockPos) {
-		return this.wrapped.getBlockEntityNbtForSaving(blockPos);
+	public CompoundTag getBlockEntityNbtForSaving(BlockPos blockPos, HolderLookup.Provider provider) {
+		return this.wrapped.getBlockEntityNbtForSaving(blockPos, provider);
 	}
 
 	@Override

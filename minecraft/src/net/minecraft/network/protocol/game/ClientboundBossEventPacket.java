@@ -1,16 +1,17 @@
 package net.minecraft.network.protocol.game;
 
 import java.util.UUID;
-import java.util.function.Function;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.codec.StreamDecoder;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketType;
 import net.minecraft.world.BossEvent;
 
 public class ClientboundBossEventPacket implements Packet<ClientGamePacketListener> {
-	public static final StreamCodec<FriendlyByteBuf, ClientboundBossEventPacket> STREAM_CODEC = Packet.codec(
+	public static final StreamCodec<RegistryFriendlyByteBuf, ClientboundBossEventPacket> STREAM_CODEC = Packet.codec(
 		ClientboundBossEventPacket::write, ClientboundBossEventPacket::new
 	);
 	private static final int FLAG_DARKEN = 1;
@@ -30,7 +31,7 @@ public class ClientboundBossEventPacket implements Packet<ClientGamePacketListen
 		}
 
 		@Override
-		public void write(FriendlyByteBuf friendlyByteBuf) {
+		public void write(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
 		}
 	};
 
@@ -39,10 +40,10 @@ public class ClientboundBossEventPacket implements Packet<ClientGamePacketListen
 		this.operation = operation;
 	}
 
-	private ClientboundBossEventPacket(FriendlyByteBuf friendlyByteBuf) {
-		this.id = friendlyByteBuf.readUUID();
-		ClientboundBossEventPacket.OperationType operationType = friendlyByteBuf.readEnum(ClientboundBossEventPacket.OperationType.class);
-		this.operation = (ClientboundBossEventPacket.Operation)operationType.reader.apply(friendlyByteBuf);
+	private ClientboundBossEventPacket(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
+		this.id = registryFriendlyByteBuf.readUUID();
+		ClientboundBossEventPacket.OperationType operationType = registryFriendlyByteBuf.readEnum(ClientboundBossEventPacket.OperationType.class);
+		this.operation = operationType.reader.decode(registryFriendlyByteBuf);
 	}
 
 	public static ClientboundBossEventPacket createAddPacket(BossEvent bossEvent) {
@@ -72,10 +73,10 @@ public class ClientboundBossEventPacket implements Packet<ClientGamePacketListen
 		);
 	}
 
-	private void write(FriendlyByteBuf friendlyByteBuf) {
-		friendlyByteBuf.writeUUID(this.id);
-		friendlyByteBuf.writeEnum(this.operation.getType());
-		this.operation.write(friendlyByteBuf);
+	private void write(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
+		registryFriendlyByteBuf.writeUUID(this.id);
+		registryFriendlyByteBuf.writeEnum(this.operation.getType());
+		this.operation.write(registryFriendlyByteBuf);
 	}
 
 	static int encodeProperties(boolean bl, boolean bl2, boolean bl3) {
@@ -127,12 +128,12 @@ public class ClientboundBossEventPacket implements Packet<ClientGamePacketListen
 			this.createWorldFog = bossEvent.shouldCreateWorldFog();
 		}
 
-		private AddOperation(FriendlyByteBuf friendlyByteBuf) {
-			this.name = friendlyByteBuf.readComponentTrusted();
-			this.progress = friendlyByteBuf.readFloat();
-			this.color = friendlyByteBuf.readEnum(BossEvent.BossBarColor.class);
-			this.overlay = friendlyByteBuf.readEnum(BossEvent.BossBarOverlay.class);
-			int i = friendlyByteBuf.readUnsignedByte();
+		private AddOperation(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
+			this.name = ComponentSerialization.STREAM_CODEC.decode(registryFriendlyByteBuf);
+			this.progress = registryFriendlyByteBuf.readFloat();
+			this.color = registryFriendlyByteBuf.readEnum(BossEvent.BossBarColor.class);
+			this.overlay = registryFriendlyByteBuf.readEnum(BossEvent.BossBarOverlay.class);
+			int i = registryFriendlyByteBuf.readUnsignedByte();
 			this.darkenScreen = (i & 1) > 0;
 			this.playMusic = (i & 2) > 0;
 			this.createWorldFog = (i & 4) > 0;
@@ -149,12 +150,12 @@ public class ClientboundBossEventPacket implements Packet<ClientGamePacketListen
 		}
 
 		@Override
-		public void write(FriendlyByteBuf friendlyByteBuf) {
-			friendlyByteBuf.writeComponent(this.name);
-			friendlyByteBuf.writeFloat(this.progress);
-			friendlyByteBuf.writeEnum(this.color);
-			friendlyByteBuf.writeEnum(this.overlay);
-			friendlyByteBuf.writeByte(ClientboundBossEventPacket.encodeProperties(this.darkenScreen, this.playMusic, this.createWorldFog));
+		public void write(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
+			ComponentSerialization.STREAM_CODEC.encode(registryFriendlyByteBuf, this.name);
+			registryFriendlyByteBuf.writeFloat(this.progress);
+			registryFriendlyByteBuf.writeEnum(this.color);
+			registryFriendlyByteBuf.writeEnum(this.overlay);
+			registryFriendlyByteBuf.writeByte(ClientboundBossEventPacket.encodeProperties(this.darkenScreen, this.playMusic, this.createWorldFog));
 		}
 	}
 
@@ -185,33 +186,27 @@ public class ClientboundBossEventPacket implements Packet<ClientGamePacketListen
 
 		void dispatch(UUID uUID, ClientboundBossEventPacket.Handler handler);
 
-		void write(FriendlyByteBuf friendlyByteBuf);
+		void write(RegistryFriendlyByteBuf registryFriendlyByteBuf);
 	}
 
 	static enum OperationType {
 		ADD(ClientboundBossEventPacket.AddOperation::new),
-		REMOVE(friendlyByteBuf -> ClientboundBossEventPacket.REMOVE_OPERATION),
+		REMOVE(registryFriendlyByteBuf -> ClientboundBossEventPacket.REMOVE_OPERATION),
 		UPDATE_PROGRESS(ClientboundBossEventPacket.UpdateProgressOperation::new),
 		UPDATE_NAME(ClientboundBossEventPacket.UpdateNameOperation::new),
 		UPDATE_STYLE(ClientboundBossEventPacket.UpdateStyleOperation::new),
 		UPDATE_PROPERTIES(ClientboundBossEventPacket.UpdatePropertiesOperation::new);
 
-		final Function<FriendlyByteBuf, ClientboundBossEventPacket.Operation> reader;
+		final StreamDecoder<RegistryFriendlyByteBuf, ClientboundBossEventPacket.Operation> reader;
 
-		private OperationType(Function<FriendlyByteBuf, ClientboundBossEventPacket.Operation> function) {
-			this.reader = function;
+		private OperationType(StreamDecoder<RegistryFriendlyByteBuf, ClientboundBossEventPacket.Operation> streamDecoder) {
+			this.reader = streamDecoder;
 		}
 	}
 
-	static class UpdateNameOperation implements ClientboundBossEventPacket.Operation {
-		private final Component name;
-
-		UpdateNameOperation(Component component) {
-			this.name = component;
-		}
-
-		private UpdateNameOperation(FriendlyByteBuf friendlyByteBuf) {
-			this.name = friendlyByteBuf.readComponentTrusted();
+	static record UpdateNameOperation(Component name) implements ClientboundBossEventPacket.Operation {
+		private UpdateNameOperation(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
+			this(ComponentSerialization.STREAM_CODEC.decode(registryFriendlyByteBuf));
 		}
 
 		@Override
@@ -225,20 +220,14 @@ public class ClientboundBossEventPacket implements Packet<ClientGamePacketListen
 		}
 
 		@Override
-		public void write(FriendlyByteBuf friendlyByteBuf) {
-			friendlyByteBuf.writeComponent(this.name);
+		public void write(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
+			ComponentSerialization.STREAM_CODEC.encode(registryFriendlyByteBuf, this.name);
 		}
 	}
 
-	static class UpdateProgressOperation implements ClientboundBossEventPacket.Operation {
-		private final float progress;
-
-		UpdateProgressOperation(float f) {
-			this.progress = f;
-		}
-
-		private UpdateProgressOperation(FriendlyByteBuf friendlyByteBuf) {
-			this.progress = friendlyByteBuf.readFloat();
+	static record UpdateProgressOperation(float progress) implements ClientboundBossEventPacket.Operation {
+		private UpdateProgressOperation(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
+			this(registryFriendlyByteBuf.readFloat());
 		}
 
 		@Override
@@ -252,8 +241,8 @@ public class ClientboundBossEventPacket implements Packet<ClientGamePacketListen
 		}
 
 		@Override
-		public void write(FriendlyByteBuf friendlyByteBuf) {
-			friendlyByteBuf.writeFloat(this.progress);
+		public void write(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
+			registryFriendlyByteBuf.writeFloat(this.progress);
 		}
 	}
 
@@ -268,8 +257,8 @@ public class ClientboundBossEventPacket implements Packet<ClientGamePacketListen
 			this.createWorldFog = bl3;
 		}
 
-		private UpdatePropertiesOperation(FriendlyByteBuf friendlyByteBuf) {
-			int i = friendlyByteBuf.readUnsignedByte();
+		private UpdatePropertiesOperation(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
+			int i = registryFriendlyByteBuf.readUnsignedByte();
 			this.darkenScreen = (i & 1) > 0;
 			this.playMusic = (i & 2) > 0;
 			this.createWorldFog = (i & 4) > 0;
@@ -286,8 +275,8 @@ public class ClientboundBossEventPacket implements Packet<ClientGamePacketListen
 		}
 
 		@Override
-		public void write(FriendlyByteBuf friendlyByteBuf) {
-			friendlyByteBuf.writeByte(ClientboundBossEventPacket.encodeProperties(this.darkenScreen, this.playMusic, this.createWorldFog));
+		public void write(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
+			registryFriendlyByteBuf.writeByte(ClientboundBossEventPacket.encodeProperties(this.darkenScreen, this.playMusic, this.createWorldFog));
 		}
 	}
 
@@ -300,9 +289,9 @@ public class ClientboundBossEventPacket implements Packet<ClientGamePacketListen
 			this.overlay = bossBarOverlay;
 		}
 
-		private UpdateStyleOperation(FriendlyByteBuf friendlyByteBuf) {
-			this.color = friendlyByteBuf.readEnum(BossEvent.BossBarColor.class);
-			this.overlay = friendlyByteBuf.readEnum(BossEvent.BossBarOverlay.class);
+		private UpdateStyleOperation(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
+			this.color = registryFriendlyByteBuf.readEnum(BossEvent.BossBarColor.class);
+			this.overlay = registryFriendlyByteBuf.readEnum(BossEvent.BossBarOverlay.class);
 		}
 
 		@Override
@@ -316,9 +305,9 @@ public class ClientboundBossEventPacket implements Packet<ClientGamePacketListen
 		}
 
 		@Override
-		public void write(FriendlyByteBuf friendlyByteBuf) {
-			friendlyByteBuf.writeEnum(this.color);
-			friendlyByteBuf.writeEnum(this.overlay);
+		public void write(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
+			registryFriendlyByteBuf.writeEnum(this.color);
+			registryFriendlyByteBuf.writeEnum(this.overlay);
 		}
 	}
 }

@@ -20,7 +20,6 @@ import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Matrix4f;
 
 @Environment(EnvType.CLIENT)
 public class DebugRenderer {
@@ -185,7 +184,7 @@ public class DebugRenderer {
 			double l = camera.getPosition().z;
 			poseStack.pushPose();
 			poseStack.translate((float)(d - j), (float)(e - k) + 0.07F, (float)(f - l));
-			poseStack.mulPoseMatrix(new Matrix4f().rotation(camera.rotation()));
+			poseStack.mulPose(camera.rotation());
 			poseStack.scale(-g, -g, g);
 			float m = bl ? (float)(-font.width(string)) / 2.0F : 0.0F;
 			m -= h / g;

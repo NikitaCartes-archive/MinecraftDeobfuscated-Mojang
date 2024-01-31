@@ -167,40 +167,39 @@ public class TropicalFish extends AbstractSchoolingFish implements VariantHolder
 		return SoundEvents.TROPICAL_FISH_FLOP;
 	}
 
+	@Override
+	public void loadFromBucketTag(CompoundTag compoundTag) {
+		super.loadFromBucketTag(compoundTag);
+		if (compoundTag.contains("BucketVariantTag", 3)) {
+			this.setPackedVariant(compoundTag.getInt("BucketVariantTag"));
+		}
+	}
+
 	@Nullable
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		ServerLevelAccessor serverLevelAccessor,
-		DifficultyInstance difficultyInstance,
-		MobSpawnType mobSpawnType,
-		@Nullable SpawnGroupData spawnGroupData,
-		@Nullable CompoundTag compoundTag
+		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData
 	) {
-		spawnGroupData = super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
-		if (mobSpawnType == MobSpawnType.BUCKET && compoundTag != null && compoundTag.contains("BucketVariantTag", 3)) {
-			this.setPackedVariant(compoundTag.getInt("BucketVariantTag"));
-			return spawnGroupData;
+		spawnGroupData = super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData);
+		RandomSource randomSource = serverLevelAccessor.getRandom();
+		TropicalFish.Variant variant;
+		if (spawnGroupData instanceof TropicalFish.TropicalFishGroupData tropicalFishGroupData) {
+			variant = tropicalFishGroupData.variant;
+		} else if ((double)randomSource.nextFloat() < 0.9) {
+			variant = Util.getRandom(COMMON_VARIANTS, randomSource);
+			spawnGroupData = new TropicalFish.TropicalFishGroupData(this, variant);
 		} else {
-			RandomSource randomSource = serverLevelAccessor.getRandom();
-			TropicalFish.Variant variant;
-			if (spawnGroupData instanceof TropicalFish.TropicalFishGroupData tropicalFishGroupData) {
-				variant = tropicalFishGroupData.variant;
-			} else if ((double)randomSource.nextFloat() < 0.9) {
-				variant = Util.getRandom(COMMON_VARIANTS, randomSource);
-				spawnGroupData = new TropicalFish.TropicalFishGroupData(this, variant);
-			} else {
-				this.isSchool = false;
-				TropicalFish.Pattern[] patterns = TropicalFish.Pattern.values();
-				DyeColor[] dyeColors = DyeColor.values();
-				TropicalFish.Pattern pattern = Util.getRandom(patterns, randomSource);
-				DyeColor dyeColor = Util.getRandom(dyeColors, randomSource);
-				DyeColor dyeColor2 = Util.getRandom(dyeColors, randomSource);
-				variant = new TropicalFish.Variant(pattern, dyeColor, dyeColor2);
-			}
-
-			this.setPackedVariant(variant.getPackedId());
-			return spawnGroupData;
+			this.isSchool = false;
+			TropicalFish.Pattern[] patterns = TropicalFish.Pattern.values();
+			DyeColor[] dyeColors = DyeColor.values();
+			TropicalFish.Pattern pattern = Util.getRandom(patterns, randomSource);
+			DyeColor dyeColor = Util.getRandom(dyeColors, randomSource);
+			DyeColor dyeColor2 = Util.getRandom(dyeColors, randomSource);
+			variant = new TropicalFish.Variant(pattern, dyeColor, dyeColor2);
 		}
+
+		this.setPackedVariant(variant.getPackedId());
+		return spawnGroupData;
 	}
 
 	public static boolean checkTropicalFishSpawnRules(

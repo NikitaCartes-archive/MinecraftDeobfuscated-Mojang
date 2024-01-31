@@ -7,6 +7,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder.Mu;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import net.minecraft.Util;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;
@@ -21,7 +22,7 @@ public abstract class LootItemConditionalFunction implements LootItemFunction {
 
 	protected LootItemConditionalFunction(List<LootItemCondition> list) {
 		this.predicates = list;
-		this.compositePredicates = LootItemConditions.andConditions(list);
+		this.compositePredicates = Util.allOf(list);
 	}
 
 	protected static <T extends LootItemConditionalFunction> P1<Mu<T>, List<LootItemCondition>> commonFields(Instance<T> instance) {

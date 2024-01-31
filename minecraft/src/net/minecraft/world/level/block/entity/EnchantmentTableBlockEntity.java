@@ -2,6 +2,7 @@ package net.minecraft.world.level.block.entity;
 
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
@@ -30,16 +31,16 @@ public class EnchantmentTableBlockEntity extends BlockEntity implements Nameable
 	}
 
 	@Override
-	protected void saveAdditional(CompoundTag compoundTag) {
-		super.saveAdditional(compoundTag);
+	protected void saveAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
+		super.saveAdditional(compoundTag, provider);
 		if (this.hasCustomName()) {
 			compoundTag.putString("CustomName", Component.Serializer.toJson(this.name));
 		}
 	}
 
 	@Override
-	public void load(CompoundTag compoundTag) {
-		super.load(compoundTag);
+	public void load(CompoundTag compoundTag, HolderLookup.Provider provider) {
+		super.load(compoundTag, provider);
 		if (compoundTag.contains("CustomName", 8)) {
 			this.name = Component.Serializer.fromJson(compoundTag.getString("CustomName"));
 		}

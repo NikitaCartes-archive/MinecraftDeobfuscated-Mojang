@@ -1,17 +1,21 @@
 package net.minecraft.network.protocol.game;
 
 import com.google.common.collect.Lists;
+import io.netty.buffer.ByteBuf;
 import java.util.BitSet;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.core.SectionPos;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.chunk.DataLayer;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 
 public class ClientboundLightUpdatePacketData {
+	private static final StreamCodec<ByteBuf, byte[]> DATA_LAYER_STREAM_CODEC = ByteBufCodecs.byteArray(2048);
 	private final BitSet skyYMask;
 	private final BitSet blockYMask;
 	private final BitSet emptySkyYMask;
@@ -43,8 +47,8 @@ public class ClientboundLightUpdatePacketData {
 		this.blockYMask = friendlyByteBuf.readBitSet();
 		this.emptySkyYMask = friendlyByteBuf.readBitSet();
 		this.emptyBlockYMask = friendlyByteBuf.readBitSet();
-		this.skyUpdates = friendlyByteBuf.readList(friendlyByteBufx -> friendlyByteBufx.readByteArray(2048));
-		this.blockUpdates = friendlyByteBuf.readList(friendlyByteBufx -> friendlyByteBufx.readByteArray(2048));
+		this.skyUpdates = friendlyByteBuf.readList(DATA_LAYER_STREAM_CODEC);
+		this.blockUpdates = friendlyByteBuf.readList(DATA_LAYER_STREAM_CODEC);
 	}
 
 	public void write(FriendlyByteBuf friendlyByteBuf) {
@@ -52,8 +56,8 @@ public class ClientboundLightUpdatePacketData {
 		friendlyByteBuf.writeBitSet(this.blockYMask);
 		friendlyByteBuf.writeBitSet(this.emptySkyYMask);
 		friendlyByteBuf.writeBitSet(this.emptyBlockYMask);
-		friendlyByteBuf.writeCollection(this.skyUpdates, FriendlyByteBuf::writeByteArray);
-		friendlyByteBuf.writeCollection(this.blockUpdates, FriendlyByteBuf::writeByteArray);
+		friendlyByteBuf.writeCollection(this.skyUpdates, DATA_LAYER_STREAM_CODEC);
+		friendlyByteBuf.writeCollection(this.blockUpdates, DATA_LAYER_STREAM_CODEC);
 	}
 
 	private void prepareSectionData(

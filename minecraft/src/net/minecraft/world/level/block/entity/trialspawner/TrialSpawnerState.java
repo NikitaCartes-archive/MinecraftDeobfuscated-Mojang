@@ -45,6 +45,7 @@ public enum TrialSpawnerState implements StringRepresentable {
 		TrialSpawnerData trialSpawnerData = trialSpawner.getData();
 		TrialSpawnerConfig trialSpawnerConfig = trialSpawner.getConfig();
 		PlayerDetector playerDetector = trialSpawner.getPlayerDetector();
+		PlayerDetector.EntitySelector entitySelector = trialSpawner.getEntitySelector();
 		TrialSpawnerState var10000;
 		switch(this) {
 			case INACTIVE:
@@ -54,7 +55,7 @@ public enum TrialSpawnerState implements StringRepresentable {
 				if (!trialSpawnerData.hasMobToSpawn()) {
 					var10000 = INACTIVE;
 				} else {
-					trialSpawnerData.tryDetectPlayers(serverLevel, blockPos, playerDetector, trialSpawnerConfig.requiredPlayerRange());
+					trialSpawnerData.tryDetectPlayers(serverLevel, blockPos, playerDetector, entitySelector, trialSpawnerConfig.requiredPlayerRange());
 					var10000 = trialSpawnerData.detectedPlayers.isEmpty() ? this : ACTIVE;
 				}
 				break;
@@ -63,7 +64,7 @@ public enum TrialSpawnerState implements StringRepresentable {
 					var10000 = INACTIVE;
 				} else {
 					int i = trialSpawnerData.countAdditionalPlayers(blockPos);
-					trialSpawnerData.tryDetectPlayers(serverLevel, blockPos, playerDetector, trialSpawnerConfig.requiredPlayerRange());
+					trialSpawnerData.tryDetectPlayers(serverLevel, blockPos, playerDetector, entitySelector, trialSpawnerConfig.requiredPlayerRange());
 					if (trialSpawnerData.hasFinishedSpawningAllMobs(trialSpawnerConfig, i)) {
 						if (trialSpawnerData.haveAllCurrentMobsDied()) {
 							trialSpawnerData.cooldownEndsAt = serverLevel.getGameTime() + (long)trialSpawnerConfig.targetCooldownLength();

@@ -136,6 +136,7 @@ public class ParticleTypes {
 	public static final SimpleParticleType EGG_CRACK = register("egg_crack", false);
 	public static final SimpleParticleType DUST_PLUME = register("dust_plume", false);
 	public static final SimpleParticleType TRIAL_SPAWNER_DETECTION = register("trial_spawner_detection", true);
+	public static final SimpleParticleType VAULT_CONNECTION = register("vault_connection", true);
 	public static final Codec<ParticleOptions> CODEC = BuiltInRegistries.PARTICLE_TYPE
 		.byNameCodec()
 		.dispatch("type", ParticleOptions::getType, ParticleType::codec);

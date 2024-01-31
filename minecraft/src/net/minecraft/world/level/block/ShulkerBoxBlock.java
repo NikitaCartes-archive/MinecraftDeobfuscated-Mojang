@@ -15,6 +15,7 @@ import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -153,7 +154,7 @@ public class ShulkerBoxBlock extends BaseEntityBlock {
 		if (blockEntity instanceof ShulkerBoxBlockEntity shulkerBoxBlockEntity) {
 			if (!level.isClientSide && player.isCreative() && !shulkerBoxBlockEntity.isEmpty()) {
 				ItemStack itemStack = getColoredItemStack(this.getColor());
-				blockEntity.saveToItem(itemStack);
+				blockEntity.saveToItem(itemStack, level.registryAccess());
 				if (shulkerBoxBlockEntity.hasCustomName()) {
 					itemStack.setHoverName(shulkerBoxBlockEntity.getCustomName());
 				}
@@ -206,8 +207,10 @@ public class ShulkerBoxBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public void appendHoverText(ItemStack itemStack, @Nullable BlockGetter blockGetter, List<Component> list, TooltipFlag tooltipFlag) {
-		super.appendHoverText(itemStack, blockGetter, list, tooltipFlag);
+	public void appendHoverText(
+		ItemStack itemStack, @Nullable BlockGetter blockGetter, List<Component> list, TooltipFlag tooltipFlag, @Nullable RegistryAccess registryAccess
+	) {
+		super.appendHoverText(itemStack, blockGetter, list, tooltipFlag, registryAccess);
 		CompoundTag compoundTag = BlockItem.getBlockEntityData(itemStack);
 		if (compoundTag != null) {
 			if (compoundTag.contains("LootTable", 8)) {
@@ -266,7 +269,8 @@ public class ShulkerBoxBlock extends BaseEntityBlock {
 	@Override
 	public ItemStack getCloneItemStack(LevelReader levelReader, BlockPos blockPos, BlockState blockState) {
 		ItemStack itemStack = super.getCloneItemStack(levelReader, blockPos, blockState);
-		levelReader.getBlockEntity(blockPos, BlockEntityType.SHULKER_BOX).ifPresent(shulkerBoxBlockEntity -> shulkerBoxBlockEntity.saveToItem(itemStack));
+		levelReader.getBlockEntity(blockPos, BlockEntityType.SHULKER_BOX)
+			.ifPresent(shulkerBoxBlockEntity -> shulkerBoxBlockEntity.saveToItem(itemStack, levelReader.registryAccess()));
 		return itemStack;
 	}
 

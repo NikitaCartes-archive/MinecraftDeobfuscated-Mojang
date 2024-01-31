@@ -30,8 +30,7 @@ public class FoodOnAStickItem<T extends Entity & ItemSteerable> extends Item {
 			if (player.isPassenger() && entity instanceof ItemSteerable itemSteerable && entity.getType() == this.canInteractWith && itemSteerable.boost()) {
 				itemStack.hurtAndBreak(this.consumeItemDamage, player, LivingEntity.getSlotForHand(interactionHand));
 				if (itemStack.isEmpty()) {
-					ItemStack itemStack2 = new ItemStack(Items.FISHING_ROD);
-					itemStack2.setTag(itemStack.getTag());
+					ItemStack itemStack2 = itemStack.transmuteCopyIgnoreEmpty(Items.FISHING_ROD, 1);
 					return InteractionResultHolder.success(itemStack2);
 				}
 

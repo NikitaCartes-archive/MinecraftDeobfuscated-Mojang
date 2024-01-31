@@ -3,8 +3,9 @@ package net.minecraft.world.level.saveddata;
 import com.mojang.logging.LogUtils;
 import java.io.File;
 import java.io.IOException;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 import java.util.function.Supplier;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtUtils;
@@ -15,7 +16,7 @@ public abstract class SavedData {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private boolean dirty;
 
-	public abstract CompoundTag save(CompoundTag compoundTag);
+	public abstract CompoundTag save(CompoundTag compoundTag, HolderLookup.Provider provider);
 
 	public void setDirty() {
 		this.setDirty(true);
@@ -29,22 +30,22 @@ public abstract class SavedData {
 		return this.dirty;
 	}
 
-	public void save(File file) {
+	public void save(File file, HolderLookup.Provider provider) {
 		if (this.isDirty()) {
 			CompoundTag compoundTag = new CompoundTag();
-			compoundTag.put("data", this.save(new CompoundTag()));
+			compoundTag.put("data", this.save(new CompoundTag(), provider));
 			NbtUtils.addCurrentDataVersion(compoundTag);
 
 			try {
 				NbtIo.writeCompressed(compoundTag, file.toPath());
-			} catch (IOException var4) {
-				LOGGER.error("Could not save data {}", this, var4);
+			} catch (IOException var5) {
+				LOGGER.error("Could not save data {}", this, var5);
 			}
 
 			this.setDirty(false);
 		}
 	}
 
-	public static record Factory<T extends SavedData>(Supplier<T> constructor, Function<CompoundTag, T> deserializer, DataFixTypes type) {
+	public static record Factory<T extends SavedData>(Supplier<T> constructor, BiFunction<CompoundTag, HolderLookup.Provider, T> deserializer, DataFixTypes type) {
 	}
 }

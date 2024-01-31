@@ -7,6 +7,7 @@ import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.features.EndFeatures;
@@ -52,8 +53,8 @@ public class TheEndGatewayBlockEntity extends TheEndPortalBlockEntity {
 	}
 
 	@Override
-	protected void saveAdditional(CompoundTag compoundTag) {
-		super.saveAdditional(compoundTag);
+	protected void saveAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
+		super.saveAdditional(compoundTag, provider);
 		compoundTag.putLong("Age", this.age);
 		if (this.exitPortal != null) {
 			compoundTag.put("ExitPortal", NbtUtils.writeBlockPos(this.exitPortal));
@@ -65,8 +66,8 @@ public class TheEndGatewayBlockEntity extends TheEndPortalBlockEntity {
 	}
 
 	@Override
-	public void load(CompoundTag compoundTag) {
-		super.load(compoundTag);
+	public void load(CompoundTag compoundTag, HolderLookup.Provider provider) {
+		super.load(compoundTag, provider);
 		this.age = compoundTag.getLong("Age");
 		if (compoundTag.contains("ExitPortal", 10)) {
 			BlockPos blockPos = NbtUtils.readBlockPos(compoundTag.getCompound("ExitPortal"));
@@ -132,8 +133,8 @@ public class TheEndGatewayBlockEntity extends TheEndPortalBlockEntity {
 	}
 
 	@Override
-	public CompoundTag getUpdateTag() {
-		return this.saveWithoutMetadata();
+	public CompoundTag getUpdateTag(HolderLookup.Provider provider) {
+		return this.saveWithoutMetadata(provider);
 	}
 
 	private static void triggerCooldown(Level level, BlockPos blockPos, BlockState blockState, TheEndGatewayBlockEntity theEndGatewayBlockEntity) {

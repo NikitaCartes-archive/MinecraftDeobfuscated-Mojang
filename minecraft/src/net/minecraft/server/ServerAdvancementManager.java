@@ -20,6 +20,8 @@ import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.advancements.AdvancementNode;
 import net.minecraft.advancements.AdvancementTree;
 import net.minecraft.advancements.TreeNodePosition;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
@@ -33,22 +35,25 @@ public class ServerAdvancementManager extends SimpleJsonResourceReloadListener {
 	private static final Gson GSON = new GsonBuilder().create();
 	private Map<ResourceLocation, AdvancementHolder> advancements = Map.of();
 	private AdvancementTree tree = new AdvancementTree();
+	private final HolderLookup.Provider registries;
 	private final LootDataManager lootData;
 
-	public ServerAdvancementManager(LootDataManager lootDataManager) {
+	public ServerAdvancementManager(HolderLookup.Provider provider, LootDataManager lootDataManager) {
 		super(GSON, "advancements");
+		this.registries = provider;
 		this.lootData = lootDataManager;
 	}
 
 	protected void apply(Map<ResourceLocation, JsonElement> map, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
+		RegistryOps<JsonElement> registryOps = RegistryOps.create(JsonOps.INSTANCE, this.registries);
 		Builder<ResourceLocation, AdvancementHolder> builder = ImmutableMap.builder();
 		map.forEach((resourceLocation, jsonElement) -> {
 			try {
-				Advancement advancement = Util.getOrThrow(Advancement.CODEC.parse(JsonOps.INSTANCE, jsonElement), JsonParseException::new);
+				Advancement advancement = Util.getOrThrow(Advancement.CODEC.parse(registryOps, jsonElement), JsonParseException::new);
 				this.validate(resourceLocation, advancement);
 				builder.put(resourceLocation, new AdvancementHolder(resourceLocation, advancement));
-			} catch (Exception var5xx) {
-				LOGGER.error("Parsing error loading custom advancement {}: {}", resourceLocation, var5xx.getMessage());
+			} catch (Exception var6xx) {
+				LOGGER.error("Parsing error loading custom advancement {}: {}", resourceLocation, var6xx.getMessage());
 			}
 		});
 		this.advancements = builder.buildOrThrow();

@@ -4,6 +4,7 @@ import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -20,7 +21,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.ticks.ContainerSingleItem;
 
-public class DecoratedPotBlockEntity extends BlockEntity implements RandomizableContainer, ContainerSingleItem {
+public class DecoratedPotBlockEntity extends BlockEntity implements RandomizableContainer, ContainerSingleItem.BlockContainerSingleItem {
 	public static final String TAG_SHERDS = "sherds";
 	public static final String TAG_ITEM = "item";
 	public static final int EVENT_POT_WOBBLES = 1;
@@ -39,8 +40,8 @@ public class DecoratedPotBlockEntity extends BlockEntity implements Randomizable
 	}
 
 	@Override
-	protected void saveAdditional(CompoundTag compoundTag) {
-		super.saveAdditional(compoundTag);
+	protected void saveAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
+		super.saveAdditional(compoundTag, provider);
 		this.decorations.save(compoundTag);
 		if (!this.trySaveLootTable(compoundTag) && !this.item.isEmpty()) {
 			compoundTag.put("item", this.item.save(new CompoundTag()));
@@ -48,8 +49,8 @@ public class DecoratedPotBlockEntity extends BlockEntity implements Randomizable
 	}
 
 	@Override
-	public void load(CompoundTag compoundTag) {
-		super.load(compoundTag);
+	public void load(CompoundTag compoundTag, HolderLookup.Provider provider) {
+		super.load(compoundTag, provider);
 		this.decorations = DecoratedPotBlockEntity.Decorations.load(compoundTag);
 		if (!this.tryLoadLootTable(compoundTag)) {
 			if (compoundTag.contains("item", 10)) {
@@ -65,8 +66,8 @@ public class DecoratedPotBlockEntity extends BlockEntity implements Randomizable
 	}
 
 	@Override
-	public CompoundTag getUpdateTag() {
-		return this.saveWithoutMetadata();
+	public CompoundTag getUpdateTag(HolderLookup.Provider provider) {
+		return this.saveWithoutMetadata(provider);
 	}
 
 	public Direction getDirection() {

@@ -6,6 +6,7 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiConsumer;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
@@ -25,7 +26,7 @@ public class RandomSequences extends SavedData {
 	private final Map<ResourceLocation, RandomSequence> sequences = new Object2ObjectOpenHashMap<>();
 
 	public static SavedData.Factory<RandomSequences> factory(long l) {
-		return new SavedData.Factory<>(() -> new RandomSequences(l), compoundTag -> load(l, compoundTag), DataFixTypes.SAVED_DATA_RANDOM_SEQUENCES);
+		return new SavedData.Factory<>(() -> new RandomSequences(l), (compoundTag, provider) -> load(l, compoundTag), DataFixTypes.SAVED_DATA_RANDOM_SEQUENCES);
 	}
 
 	public RandomSequences(long l) {
@@ -57,7 +58,7 @@ public class RandomSequences extends SavedData {
 	}
 
 	@Override
-	public CompoundTag save(CompoundTag compoundTag) {
+	public CompoundTag save(CompoundTag compoundTag, HolderLookup.Provider provider) {
 		compoundTag.putInt("salt", this.salt);
 		compoundTag.putBoolean("include_world_seed", this.includeWorldSeed);
 		compoundTag.putBoolean("include_sequence_id", this.includeSequenceId);

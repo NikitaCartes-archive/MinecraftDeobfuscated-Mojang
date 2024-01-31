@@ -84,7 +84,7 @@ public class ServerChunkCache extends ChunkSource {
 		this.mainThread = Thread.currentThread();
 		File file = levelStorageAccess.getDimensionPath(serverLevel.dimension()).resolve("data").toFile();
 		file.mkdirs();
-		this.dataStorage = new DimensionDataStorage(file, dataFixer);
+		this.dataStorage = new DimensionDataStorage(file, dataFixer, serverLevel.registryAccess());
 		this.chunkMap = new ChunkMap(
 			serverLevel,
 			levelStorageAccess,

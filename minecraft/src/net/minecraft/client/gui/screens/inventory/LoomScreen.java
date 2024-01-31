@@ -117,10 +117,10 @@ public class LoomScreen extends AbstractContainerScreen<LoomMenu> {
 		if (this.resultBannerPatterns != null && !this.hasMaxPatterns) {
 			guiGraphics.pose().pushPose();
 			guiGraphics.pose().translate((float)(k + 139), (float)(l + 52), 0.0F);
-			guiGraphics.pose().scale(24.0F, -24.0F, 1.0F);
-			guiGraphics.pose().translate(0.5F, 0.5F, 0.5F);
+			guiGraphics.pose().scale(24.0F, 24.0F, 1.0F);
+			guiGraphics.pose().translate(0.5F, -0.5F, 0.5F);
 			float g = 0.6666667F;
-			guiGraphics.pose().scale(0.6666667F, -0.6666667F, -0.6666667F);
+			guiGraphics.pose().scale(0.6666667F, 0.6666667F, -0.6666667F);
 			this.flag.xRot = 0.0F;
 			this.flag.y = -32.0F;
 			BannerRenderer.renderPatterns(

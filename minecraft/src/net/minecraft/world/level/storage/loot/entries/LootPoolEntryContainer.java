@@ -6,6 +6,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
 import com.mojang.serialization.codecs.RecordCodecBuilder.Mu;
 import java.util.List;
 import java.util.function.Predicate;
+import net.minecraft.Util;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.ValidationContext;
@@ -19,7 +20,7 @@ public abstract class LootPoolEntryContainer implements ComposableEntryContainer
 
 	protected LootPoolEntryContainer(List<LootItemCondition> list) {
 		this.conditions = list;
-		this.compositeCondition = LootItemConditions.andConditions(list);
+		this.compositeCondition = Util.allOf(list);
 	}
 
 	protected static <T extends LootPoolEntryContainer> P1<Mu<T>, List<LootItemCondition>> commonFields(Instance<T> instance) {

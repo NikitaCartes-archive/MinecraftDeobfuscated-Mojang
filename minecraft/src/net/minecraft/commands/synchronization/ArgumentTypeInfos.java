@@ -91,8 +91,8 @@ public class ArgumentTypeInfos {
 		register(registry, "item_stack", ItemArgument.class, SingletonArgumentInfo.contextAware(ItemArgument::item));
 		register(registry, "item_predicate", ItemPredicateArgument.class, SingletonArgumentInfo.contextAware(ItemPredicateArgument::itemPredicate));
 		register(registry, "color", ColorArgument.class, SingletonArgumentInfo.contextFree(ColorArgument::color));
-		register(registry, "component", ComponentArgument.class, SingletonArgumentInfo.contextFree(ComponentArgument::textComponent));
-		register(registry, "style", StyleArgument.class, SingletonArgumentInfo.contextFree(StyleArgument::style));
+		register(registry, "component", ComponentArgument.class, SingletonArgumentInfo.contextAware(ComponentArgument::textComponent));
+		register(registry, "style", StyleArgument.class, SingletonArgumentInfo.contextAware(StyleArgument::style));
 		register(registry, "message", MessageArgument.class, SingletonArgumentInfo.contextFree(MessageArgument::message));
 		register(registry, "nbt_compound_tag", CompoundTagArgument.class, SingletonArgumentInfo.contextFree(CompoundTagArgument::compoundTag));
 		register(registry, "nbt_tag", NbtTagArgument.class, SingletonArgumentInfo.contextFree(NbtTagArgument::nbtTag));

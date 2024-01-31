@@ -26,7 +26,7 @@ import net.minecraft.server.level.progress.ChunkProgressListenerFactory;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.ModCheck;
-import net.minecraft.util.debugchart.SampleLogger;
+import net.minecraft.util.debugchart.LocalSampleLogger;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.entity.player.ProfileKeyPair;
 import net.minecraft.world.level.GameType;
@@ -119,10 +119,13 @@ public class IntegratedServer extends MinecraftServer {
 		}
 	}
 
-	@Nullable
-	@Override
-	public SampleLogger getTickTimeLogger() {
+	protected LocalSampleLogger getTickTimeLogger() {
 		return this.minecraft.getDebugOverlay().getTickTimeLogger();
+	}
+
+	@Override
+	public boolean isTickTimeLoggingEnabled() {
+		return true;
 	}
 
 	private void tickPaused() {

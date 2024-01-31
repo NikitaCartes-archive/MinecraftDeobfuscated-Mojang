@@ -8,11 +8,11 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 public interface ContainerSingleItem extends Container {
 	ItemStack getTheItem();
 
-	ItemStack splitTheItem(int i);
+	default ItemStack splitTheItem(int i) {
+		return this.getTheItem().split(i);
+	}
 
 	void setTheItem(ItemStack itemStack);
-
-	BlockEntity getContainerBlockEntity();
 
 	default ItemStack removeTheItem() {
 		return this.splitTheItem(this.getMaxStackSize());
@@ -55,8 +55,12 @@ public interface ContainerSingleItem extends Container {
 		}
 	}
 
-	@Override
-	default boolean stillValid(Player player) {
-		return Container.stillValidBlockEntity(this.getContainerBlockEntity(), player);
+	public interface BlockContainerSingleItem extends ContainerSingleItem {
+		BlockEntity getContainerBlockEntity();
+
+		@Override
+		default boolean stillValid(Player player) {
+			return Container.stillValidBlockEntity(this.getContainerBlockEntity(), player);
+		}
 	}
 }

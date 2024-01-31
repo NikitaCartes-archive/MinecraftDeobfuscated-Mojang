@@ -1,24 +1,21 @@
 package net.minecraft.network.protocol.game;
 
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentSerialization;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketType;
 
 public record ClientboundSystemChatPacket(Component content, boolean overlay) implements Packet<ClientGamePacketListener> {
-	public static final StreamCodec<FriendlyByteBuf, ClientboundSystemChatPacket> STREAM_CODEC = Packet.codec(
-		ClientboundSystemChatPacket::write, ClientboundSystemChatPacket::new
+	public static final StreamCodec<RegistryFriendlyByteBuf, ClientboundSystemChatPacket> STREAM_CODEC = StreamCodec.composite(
+		ComponentSerialization.STREAM_CODEC,
+		ClientboundSystemChatPacket::content,
+		ByteBufCodecs.BOOL,
+		ClientboundSystemChatPacket::overlay,
+		ClientboundSystemChatPacket::new
 	);
-
-	private ClientboundSystemChatPacket(FriendlyByteBuf friendlyByteBuf) {
-		this(friendlyByteBuf.readComponentTrusted(), friendlyByteBuf.readBoolean());
-	}
-
-	private void write(FriendlyByteBuf friendlyByteBuf) {
-		friendlyByteBuf.writeComponent(this.content);
-		friendlyByteBuf.writeBoolean(this.overlay);
-	}
 
 	@Override
 	public PacketType<ClientboundSystemChatPacket> type() {

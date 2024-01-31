@@ -29,6 +29,7 @@ import net.minecraft.world.entity.npc.VillagerType;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.entity.schedule.Schedule;
 import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.item.ArmorMaterial;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Instrument;
 import net.minecraft.world.item.Item;
@@ -164,6 +165,7 @@ public class Registries {
 	public static final ResourceKey<Registry<VillagerType>> VILLAGER_TYPE = createRegistryKey("villager_type");
 	public static final ResourceKey<Registry<String>> DECORATED_POT_PATTERNS = createRegistryKey("decorated_pot_patterns");
 	public static final ResourceKey<Registry<NumberFormatType<?>>> NUMBER_FORMAT_TYPE = createRegistryKey("number_format_type");
+	public static final ResourceKey<Registry<ArmorMaterial>> ARMOR_MATERIAL = createRegistryKey("armor_material");
 	public static final ResourceKey<Registry<Biome>> BIOME = createRegistryKey("worldgen/biome");
 	public static final ResourceKey<Registry<ChatType>> CHAT_TYPE = createRegistryKey("chat_type");
 	public static final ResourceKey<Registry<ConfiguredWorldCarver<?>>> CONFIGURED_CARVER = createRegistryKey("worldgen/configured_carver");

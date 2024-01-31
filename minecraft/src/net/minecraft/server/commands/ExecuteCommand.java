@@ -67,6 +67,7 @@ import net.minecraft.commands.functions.InstantiatedFunction;
 import net.minecraft.commands.synchronization.SuggestionProviders;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.ByteTag;
@@ -815,6 +816,7 @@ public class ExecuteCommand {
 		if (i > 32768) {
 			throw ERROR_AREA_TOO_LARGE.create(32768, i);
 		} else {
+			RegistryAccess registryAccess = serverLevel.registryAccess();
 			int j = 0;
 
 			for(int k = boundingBox.minZ(); k <= boundingBox.maxZ(); ++k) {
@@ -839,8 +841,8 @@ public class ExecuteCommand {
 									return OptionalInt.empty();
 								}
 
-								CompoundTag compoundTag = blockEntity.saveWithoutMetadata();
-								CompoundTag compoundTag2 = blockEntity2.saveWithoutMetadata();
+								CompoundTag compoundTag = blockEntity.saveWithoutMetadata(registryAccess);
+								CompoundTag compoundTag2 = blockEntity2.saveWithoutMetadata(registryAccess);
 								if (!compoundTag.equals(compoundTag2)) {
 									return OptionalInt.empty();
 								}

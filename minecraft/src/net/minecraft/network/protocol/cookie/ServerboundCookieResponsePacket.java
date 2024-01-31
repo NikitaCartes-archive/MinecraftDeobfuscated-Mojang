@@ -5,6 +5,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketType;
+import net.minecraft.network.protocol.common.ClientboundStoreCookiePacket;
 import net.minecraft.resources.ResourceLocation;
 
 public record ServerboundCookieResponsePacket(ResourceLocation key, @Nullable byte[] payload) implements Packet<ServerCookiePacketListener> {
@@ -13,12 +14,12 @@ public record ServerboundCookieResponsePacket(ResourceLocation key, @Nullable by
 	);
 
 	private ServerboundCookieResponsePacket(FriendlyByteBuf friendlyByteBuf) {
-		this(friendlyByteBuf.readResourceLocation(), friendlyByteBuf.readNullable(friendlyByteBufx -> friendlyByteBufx.readByteArray(5120)));
+		this(friendlyByteBuf.readResourceLocation(), friendlyByteBuf.readNullable(ClientboundStoreCookiePacket.PAYLOAD_STREAM_CODEC));
 	}
 
 	private void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeResourceLocation(this.key);
-		friendlyByteBuf.writeNullable(this.payload, FriendlyByteBuf::writeByteArray);
+		friendlyByteBuf.writeNullable(this.payload, ClientboundStoreCookiePacket.PAYLOAD_STREAM_CODEC);
 	}
 
 	@Override

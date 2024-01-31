@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import javax.annotation.Nullable;
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -66,7 +67,7 @@ public class ScoreboardCommand {
 		(object, object2) -> Component.translatableEscape("commands.scoreboard.players.get.null", object, object2)
 	);
 
-	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
+	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher, CommandBuildContext commandBuildContext) {
 		commandDispatcher.register(
 			Commands.literal("scoreboard")
 				.requires(commandSourceStack -> commandSourceStack.hasPermission(2))
@@ -88,7 +89,7 @@ public class ScoreboardCommand {
 														)
 												)
 												.then(
-													Commands.argument("displayName", ComponentArgument.textComponent())
+													Commands.argument("displayName", ComponentArgument.textComponent(commandBuildContext))
 														.executes(
 															commandContext -> addObjective(
 																	commandContext.getSource(),
@@ -108,7 +109,7 @@ public class ScoreboardCommand {
 													.then(
 														Commands.literal("displayname")
 															.then(
-																Commands.argument("displayName", ComponentArgument.textComponent())
+																Commands.argument("displayName", ComponentArgument.textComponent(commandBuildContext))
 																	.executes(
 																		commandContext -> setDisplayName(
 																				commandContext.getSource(),
@@ -132,6 +133,7 @@ public class ScoreboardCommand {
 											))
 										.then(
 											addNumberFormats(
+												commandBuildContext,
 												Commands.literal("numberformat"),
 												(commandContext, numberFormat) -> setObjectiveFormat(
 														commandContext.getSource(), ObjectiveArgument.getObjective(commandContext, "objective"), numberFormat
@@ -304,7 +306,7 @@ public class ScoreboardCommand {
 												.then(
 													Commands.argument("objective", ObjectiveArgument.objective())
 														.then(
-															Commands.argument("name", ComponentArgument.textComponent())
+															Commands.argument("name", ComponentArgument.textComponent(commandBuildContext))
 																.executes(
 																	commandContext -> setScoreDisplay(
 																			commandContext.getSource(),
@@ -332,6 +334,7 @@ public class ScoreboardCommand {
 												.suggests(ScoreHolderArgument.SUGGEST_SCORE_HOLDERS)
 												.then(
 													addNumberFormats(
+														commandBuildContext,
 														Commands.argument("objective", ObjectiveArgument.objective()),
 														(commandContext, numberFormat) -> setScoreNumberFormat(
 																commandContext.getSource(),
@@ -379,14 +382,16 @@ public class ScoreboardCommand {
 	}
 
 	private static ArgumentBuilder<CommandSourceStack, ?> addNumberFormats(
-		ArgumentBuilder<CommandSourceStack, ?> argumentBuilder, ScoreboardCommand.NumberFormatCommandExecutor numberFormatCommandExecutor
+		CommandBuildContext commandBuildContext,
+		ArgumentBuilder<CommandSourceStack, ?> argumentBuilder,
+		ScoreboardCommand.NumberFormatCommandExecutor numberFormatCommandExecutor
 	) {
 		return argumentBuilder.then(Commands.literal("blank").executes(commandContext -> numberFormatCommandExecutor.run(commandContext, BlankFormat.INSTANCE)))
-			.then(Commands.literal("fixed").then(Commands.argument("contents", ComponentArgument.textComponent()).executes(commandContext -> {
+			.then(Commands.literal("fixed").then(Commands.argument("contents", ComponentArgument.textComponent(commandBuildContext)).executes(commandContext -> {
 				Component component = ComponentArgument.getComponent(commandContext, "contents");
 				return numberFormatCommandExecutor.run(commandContext, new FixedFormat(component));
 			})))
-			.then(Commands.literal("styled").then(Commands.argument("style", StyleArgument.style()).executes(commandContext -> {
+			.then(Commands.literal("styled").then(Commands.argument("style", StyleArgument.style(commandBuildContext)).executes(commandContext -> {
 				Style style = StyleArgument.getStyle(commandContext, "style");
 				return numberFormatCommandExecutor.run(commandContext, new StyledFormat(style));
 			})))

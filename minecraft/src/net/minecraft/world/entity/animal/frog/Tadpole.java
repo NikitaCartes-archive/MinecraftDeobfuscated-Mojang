@@ -229,7 +229,7 @@ public class Tadpole extends AbstractFish {
 			Frog frogx = EntityType.FROG.create(this.level());
 			if (frogx != null) {
 				frogx.moveTo(this.getX(), this.getY(), this.getZ(), this.getYRot(), this.getXRot());
-				frogx.finalizeSpawn(serverLevel, this.level().getCurrentDifficultyAt(frogx.blockPosition()), MobSpawnType.CONVERSION, null, null);
+				frogx.finalizeSpawn(serverLevel, this.level().getCurrentDifficultyAt(frogx.blockPosition()), MobSpawnType.CONVERSION, null);
 				frogx.setNoAi(this.isNoAi());
 				if (this.hasCustomName()) {
 					frogx.setCustomName(this.getCustomName());

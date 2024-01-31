@@ -34,24 +34,17 @@ public class EyeOfEnder extends Entity implements ItemSupplier {
 	}
 
 	public void setItem(ItemStack itemStack) {
-		if (!itemStack.is(Items.ENDER_EYE) || itemStack.hasTag()) {
-			this.getEntityData().set(DATA_ITEM_STACK, itemStack.copyWithCount(1));
-		}
-	}
-
-	private ItemStack getItemRaw() {
-		return this.getEntityData().get(DATA_ITEM_STACK);
+		this.getEntityData().set(DATA_ITEM_STACK, itemStack.copyWithCount(1));
 	}
 
 	@Override
 	public ItemStack getItem() {
-		ItemStack itemStack = this.getItemRaw();
-		return itemStack.isEmpty() ? new ItemStack(Items.ENDER_EYE) : itemStack;
+		return this.getEntityData().get(DATA_ITEM_STACK);
 	}
 
 	@Override
 	protected void defineSynchedData() {
-		this.getEntityData().define(DATA_ITEM_STACK, ItemStack.EMPTY);
+		this.getEntityData().define(DATA_ITEM_STACK, this.getDefaultItem());
 	}
 
 	@Override
@@ -162,16 +155,20 @@ public class EyeOfEnder extends Entity implements ItemSupplier {
 
 	@Override
 	public void addAdditionalSaveData(CompoundTag compoundTag) {
-		ItemStack itemStack = this.getItemRaw();
-		if (!itemStack.isEmpty()) {
-			compoundTag.put("Item", itemStack.save(new CompoundTag()));
-		}
+		compoundTag.put("Item", this.getItem().save(new CompoundTag()));
 	}
 
 	@Override
 	public void readAdditionalSaveData(CompoundTag compoundTag) {
-		ItemStack itemStack = ItemStack.of(compoundTag.getCompound("Item"));
-		this.setItem(itemStack);
+		if (compoundTag.contains("Item", 10)) {
+			this.setItem(ItemStack.of(compoundTag.getCompound("Item")));
+		} else {
+			this.setItem(this.getDefaultItem());
+		}
+	}
+
+	private ItemStack getDefaultItem() {
+		return new ItemStack(Items.ENDER_EYE);
 	}
 
 	@Override

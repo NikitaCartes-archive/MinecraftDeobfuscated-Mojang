@@ -2,7 +2,6 @@ package net.minecraft.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
-import java.util.OptionalInt;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -23,6 +22,7 @@ import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.MapItem;
+import net.minecraft.world.level.saveddata.maps.MapId;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.minecraft.world.phys.Vec3;
 
@@ -83,25 +83,25 @@ public class ItemFrameRenderer<T extends ItemFrame> extends EntityRenderer<T> {
 		}
 
 		if (!itemStack.isEmpty()) {
-			OptionalInt optionalInt = itemFrame.getFramedMapId();
+			MapId mapId = itemFrame.getFramedMapId();
 			if (bl) {
 				poseStack.translate(0.0F, 0.0F, 0.5F);
 			} else {
 				poseStack.translate(0.0F, 0.0F, 0.4375F);
 			}
 
-			int j = optionalInt.isPresent() ? itemFrame.getRotation() % 4 * 2 : itemFrame.getRotation();
+			int j = mapId != null ? itemFrame.getRotation() % 4 * 2 : itemFrame.getRotation();
 			poseStack.mulPose(Axis.ZP.rotationDegrees((float)j * 360.0F / 8.0F));
-			if (optionalInt.isPresent()) {
+			if (mapId != null) {
 				poseStack.mulPose(Axis.ZP.rotationDegrees(180.0F));
 				float h = 0.0078125F;
 				poseStack.scale(0.0078125F, 0.0078125F, 0.0078125F);
 				poseStack.translate(-64.0F, -64.0F, 0.0F);
-				MapItemSavedData mapItemSavedData = MapItem.getSavedData(optionalInt.getAsInt(), itemFrame.level());
+				MapItemSavedData mapItemSavedData = MapItem.getSavedData(mapId, itemFrame.level());
 				poseStack.translate(0.0F, 0.0F, -1.0F);
 				if (mapItemSavedData != null) {
 					int k = this.getLightVal(itemFrame, 15728850, i);
-					Minecraft.getInstance().gameRenderer.getMapRenderer().render(poseStack, multiBufferSource, optionalInt.getAsInt(), mapItemSavedData, true, k);
+					Minecraft.getInstance().gameRenderer.getMapRenderer().render(poseStack, multiBufferSource, mapId, mapItemSavedData, true, k);
 				}
 			} else {
 				int l = this.getLightVal(itemFrame, 15728880, i);

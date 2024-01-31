@@ -25,6 +25,7 @@ import net.minecraft.ReportedException;
 import net.minecraft.SharedConstants;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.QuartPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.SectionPos;
@@ -305,7 +306,7 @@ public abstract class ChunkAccess implements BlockGetter, BiomeManager.NoiseBiom
 	}
 
 	@Nullable
-	public abstract CompoundTag getBlockEntityNbtForSaving(BlockPos blockPos);
+	public abstract CompoundTag getBlockEntityNbtForSaving(BlockPos blockPos, HolderLookup.Provider provider);
 
 	@Override
 	public final void findBlockLightSources(BiConsumer<BlockPos, BlockState> biConsumer) {

@@ -24,48 +24,6 @@ public interface HolderLookup<T> extends HolderGetter<T> {
 		return this.listTags().map(HolderSet.Named::key);
 	}
 
-	default HolderLookup<T> filterElements(Predicate<T> predicate) {
-		return new HolderLookup.Delegate<T>(this) {
-			@Override
-			public Optional<Holder.Reference<T>> get(ResourceKey<T> resourceKey) {
-				return this.parent.get(resourceKey).filter(reference -> predicate.test(reference.value()));
-			}
-
-			@Override
-			public Stream<Holder.Reference<T>> listElements() {
-				return this.parent.listElements().filter(reference -> predicate.test(reference.value()));
-			}
-		};
-	}
-
-	public static class Delegate<T> implements HolderLookup<T> {
-		protected final HolderLookup<T> parent;
-
-		public Delegate(HolderLookup<T> holderLookup) {
-			this.parent = holderLookup;
-		}
-
-		@Override
-		public Optional<Holder.Reference<T>> get(ResourceKey<T> resourceKey) {
-			return this.parent.get(resourceKey);
-		}
-
-		@Override
-		public Stream<Holder.Reference<T>> listElements() {
-			return this.parent.listElements();
-		}
-
-		@Override
-		public Optional<HolderSet.Named<T>> get(TagKey<T> tagKey) {
-			return this.parent.get(tagKey);
-		}
-
-		@Override
-		public Stream<HolderSet.Named<T>> listTags() {
-			return this.parent.listTags();
-		}
-	}
-
 	public interface Provider {
 		Stream<ResourceKey<? extends Registry<?>>> listRegistries();
 
@@ -108,10 +66,27 @@ public interface HolderLookup<T> extends HolderGetter<T> {
 
 		Lifecycle registryLifecycle();
 
-		default HolderLookup<T> filterFeatures(FeatureFlagSet featureFlagSet) {
-			return (HolderLookup<T>)(FeatureElement.FILTERED_REGISTRIES.contains(this.key())
-				? this.filterElements(object -> ((FeatureElement)object).isEnabled(featureFlagSet))
-				: this);
+		default HolderLookup.RegistryLookup<T> filterFeatures(FeatureFlagSet featureFlagSet) {
+			return FeatureElement.FILTERED_REGISTRIES.contains(this.key()) ? this.filterElements(object -> ((FeatureElement)object).isEnabled(featureFlagSet)) : this;
+		}
+
+		default HolderLookup.RegistryLookup<T> filterElements(Predicate<T> predicate) {
+			return new HolderLookup.RegistryLookup.Delegate<T>() {
+				@Override
+				protected HolderLookup.RegistryLookup<T> parent() {
+					return RegistryLookup.this;
+				}
+
+				@Override
+				public Optional<Holder.Reference<T>> get(ResourceKey<T> resourceKey) {
+					return this.parent().get(resourceKey).filter(reference -> predicate.test(reference.value()));
+				}
+
+				@Override
+				public Stream<Holder.Reference<T>> listElements() {
+					return this.parent().listElements().filter(reference -> predicate.test(reference.value()));
+				}
+			};
 		}
 
 		public abstract static class Delegate<T> implements HolderLookup.RegistryLookup<T> {

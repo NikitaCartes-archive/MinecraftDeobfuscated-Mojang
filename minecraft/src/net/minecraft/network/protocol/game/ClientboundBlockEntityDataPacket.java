@@ -1,7 +1,8 @@
 package net.minecraft.network.protocol.game;
 
-import java.util.function.Function;
+import java.util.function.BiFunction;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -26,8 +27,9 @@ public class ClientboundBlockEntityDataPacket implements Packet<ClientGamePacket
 	private final BlockEntityType<?> type;
 	private final CompoundTag tag;
 
-	public static ClientboundBlockEntityDataPacket create(BlockEntity blockEntity, Function<BlockEntity, CompoundTag> function) {
-		return new ClientboundBlockEntityDataPacket(blockEntity.getBlockPos(), blockEntity.getType(), (CompoundTag)function.apply(blockEntity));
+	public static ClientboundBlockEntityDataPacket create(BlockEntity blockEntity, BiFunction<BlockEntity, RegistryAccess, CompoundTag> biFunction) {
+		RegistryAccess registryAccess = blockEntity.getLevel().registryAccess();
+		return new ClientboundBlockEntityDataPacket(blockEntity.getBlockPos(), blockEntity.getType(), (CompoundTag)biFunction.apply(blockEntity, registryAccess));
 	}
 
 	public static ClientboundBlockEntityDataPacket create(BlockEntity blockEntity) {

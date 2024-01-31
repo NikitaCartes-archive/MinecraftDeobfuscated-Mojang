@@ -27,6 +27,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.Utf8String;
 import net.minecraft.network.VarInt;
 import net.minecraft.network.VarLong;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
@@ -95,6 +96,15 @@ public interface ByteBufCodecs {
 			byteBuf.writeDouble(double_);
 		}
 	};
+	StreamCodec<ByteBuf, byte[]> BYTE_ARRAY = new StreamCodec<ByteBuf, byte[]>() {
+		public byte[] decode(ByteBuf byteBuf) {
+			return FriendlyByteBuf.readByteArray(byteBuf);
+		}
+
+		public void encode(ByteBuf byteBuf, byte[] bs) {
+			FriendlyByteBuf.writeByteArray(byteBuf, bs);
+		}
+	};
 	StreamCodec<ByteBuf, String> STRING_UTF8 = stringUtf8(32767);
 	StreamCodec<ByteBuf, Tag> TAG = tagCodec(NbtAccounter::unlimitedHeap);
 	StreamCodec<ByteBuf, CompoundTag> COMPOUND_TAG = tagCodec(NbtAccounter::unlimitedHeap).map(tag -> {
@@ -131,6 +141,22 @@ public interface ByteBufCodecs {
 			FriendlyByteBuf.writeQuaternion(byteBuf, quaternionf);
 		}
 	};
+
+	static StreamCodec<ByteBuf, byte[]> byteArray(int i) {
+		return new StreamCodec<ByteBuf, byte[]>() {
+			public byte[] decode(ByteBuf byteBuf) {
+				return FriendlyByteBuf.readByteArray(byteBuf, i);
+			}
+
+			public void encode(ByteBuf byteBuf, byte[] bs) {
+				if (bs.length > i) {
+					throw new EncoderException("ByteArray with size " + bs.length + " is bigger than allowed " + i);
+				} else {
+					FriendlyByteBuf.writeByteArray(byteBuf, bs);
+				}
+			}
+		};
+	}
 
 	static StreamCodec<ByteBuf, String> stringUtf8(int i) {
 		return new StreamCodec<ByteBuf, String>() {
@@ -170,6 +196,22 @@ public interface ByteBufCodecs {
 			tag -> Util.getOrThrow(codec.parse(NbtOps.INSTANCE, tag), string -> new DecoderException("Failed to decode: " + string + " " + tag)),
 			object -> Util.getOrThrow(codec.encodeStart(NbtOps.INSTANCE, (T)object), string -> new EncoderException("Failed to encode: " + string + " " + object))
 		);
+	}
+
+	static <T> StreamCodec<RegistryFriendlyByteBuf, T> fromCodecWithRegistries(Codec<T> codec) {
+		return new StreamCodec<RegistryFriendlyByteBuf, T>() {
+			public T decode(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
+				Tag tag = ByteBufCodecs.TAG.decode(registryFriendlyByteBuf);
+				RegistryOps<Tag> registryOps = RegistryOps.create(NbtOps.INSTANCE, registryFriendlyByteBuf.registryAccess());
+				return Util.getOrThrow(codec.parse(registryOps, tag), string -> new DecoderException("Failed to decode: " + string + " " + tag));
+			}
+
+			public void encode(RegistryFriendlyByteBuf registryFriendlyByteBuf, T object) {
+				RegistryOps<Tag> registryOps = RegistryOps.create(NbtOps.INSTANCE, registryFriendlyByteBuf.registryAccess());
+				Tag tag = Util.getOrThrow(codec.encodeStart(registryOps, object), string -> new EncoderException("Failed to encode: " + string + " " + object));
+				ByteBufCodecs.TAG.encode(registryFriendlyByteBuf, tag);
+			}
+		};
 	}
 
 	static <B extends ByteBuf, V> StreamCodec<B, Optional<V>> optional(StreamCodec<B, V> streamCodec) {

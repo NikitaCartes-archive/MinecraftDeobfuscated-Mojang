@@ -25,6 +25,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.ShulkerBoxBlockEntity;
 import net.minecraft.world.level.block.entity.trialspawner.TrialSpawnerState;
+import net.minecraft.world.level.block.entity.vault.VaultState;
 import net.minecraft.world.level.block.grower.TreeGrower;
 import net.minecraft.world.level.block.piston.MovingPistonBlock;
 import net.minecraft.world.level.block.piston.PistonBaseBlock;
@@ -7032,6 +7033,21 @@ public class Blocks {
 				.sound(SoundType.TRIAL_SPAWNER)
 				.isViewBlocking(Blocks::never)
 				.noOcclusion()
+				.requiredFeatures(FeatureFlags.UPDATE_1_21)
+		)
+	);
+	public static final Block VAULT = register(
+		"vault",
+		new VaultBlock(
+			BlockBehaviour.Properties.of()
+				.mapColor(MapColor.STONE)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.noOcclusion()
+				.requiresCorrectToolForDrops()
+				.sound(SoundType.VAULT)
+				.lightLevel(blockStatex -> ((VaultState)blockStatex.getValue(VaultBlock.STATE)).lightLevel())
+				.strength(50.0F)
+				.isViewBlocking(Blocks::never)
 				.requiredFeatures(FeatureFlags.UPDATE_1_21)
 		)
 	);

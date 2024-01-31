@@ -11,6 +11,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ArmorMaterial;
 import net.minecraft.world.item.ArmorMaterials;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -53,7 +54,12 @@ public class TrimMaterials {
 	}
 
 	private static void register(
-		BootstrapContext<TrimMaterial> bootstrapContext, ResourceKey<TrimMaterial> resourceKey, Item item, Style style, float f, Map<ArmorMaterials, String> map
+		BootstrapContext<TrimMaterial> bootstrapContext,
+		ResourceKey<TrimMaterial> resourceKey,
+		Item item,
+		Style style,
+		float f,
+		Map<Holder<ArmorMaterial>, String> map
 	) {
 		TrimMaterial trimMaterial = TrimMaterial.create(
 			resourceKey.location().getPath(), item, f, Component.translatable(Util.makeDescriptionId("trim_material", resourceKey.location())).withStyle(style), map

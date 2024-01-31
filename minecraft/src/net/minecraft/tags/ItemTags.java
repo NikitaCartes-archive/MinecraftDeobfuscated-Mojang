@@ -109,6 +109,7 @@ public final class ItemTags {
 	public static final TagKey<Item> TOOLS = bind("tools");
 	public static final TagKey<Item> BREAKS_DECORATED_POTS = bind("breaks_decorated_pots");
 	public static final TagKey<Item> VILLAGER_PLANTABLE_SEEDS = bind("villager_plantable_seeds");
+	public static final TagKey<Item> DYEABLE = bind("dyeable");
 	public static final TagKey<Item> FOOT_ARMOR_ENCHANTABLE = bind("enchantable/foot_armor");
 	public static final TagKey<Item> LEG_ARMOR_ENCHANTABLE = bind("enchantable/leg_armor");
 	public static final TagKey<Item> CHEST_ARMOR_ENCHANTABLE = bind("enchantable/chest_armor");

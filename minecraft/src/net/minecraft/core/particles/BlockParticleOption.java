@@ -4,6 +4,7 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import net.minecraft.commands.arguments.blocks.BlockStateParser;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -13,7 +14,7 @@ import net.minecraft.world.level.block.state.BlockState;
 
 public class BlockParticleOption implements ParticleOptions {
 	public static final ParticleOptions.Deserializer<BlockParticleOption> DESERIALIZER = new ParticleOptions.Deserializer<BlockParticleOption>() {
-		public BlockParticleOption fromCommand(ParticleType<BlockParticleOption> particleType, StringReader stringReader) throws CommandSyntaxException {
+		public BlockParticleOption fromCommand(ParticleType<BlockParticleOption> particleType, StringReader stringReader, HolderLookup.Provider provider) throws CommandSyntaxException {
 			stringReader.expect(' ');
 			return new BlockParticleOption(particleType, BlockStateParser.parseForBlock(BuiltInRegistries.BLOCK.asLookup(), stringReader, false).blockState());
 		}
@@ -36,7 +37,7 @@ public class BlockParticleOption implements ParticleOptions {
 	}
 
 	@Override
-	public String writeToString() {
+	public String writeToString(HolderLookup.Provider provider) {
 		return BuiltInRegistries.PARTICLE_TYPE.getKey(this.getType()) + " " + BlockStateParser.serialize(this.state);
 	}
 

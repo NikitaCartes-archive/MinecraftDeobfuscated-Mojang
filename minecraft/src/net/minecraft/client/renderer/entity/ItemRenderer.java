@@ -139,8 +139,7 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 				RenderType renderType = ItemBlockRenderTypes.getRenderType(itemStack, bl3);
 				VertexConsumer vertexConsumer;
 				if (hasAnimatedTexture(itemStack) && itemStack.hasFoil()) {
-					poseStack.pushPose();
-					PoseStack.Pose pose = poseStack.last();
+					PoseStack.Pose pose = poseStack.last().copy();
 					if (itemDisplayContext == ItemDisplayContext.GUI) {
 						MatrixUtil.mulComponentWise(pose.pose(), 0.5F);
 					} else if (itemDisplayContext.firstPerson()) {
@@ -152,8 +151,6 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 					} else {
 						vertexConsumer = getCompassFoilBuffer(multiBufferSource, renderType, pose);
 					}
-
-					poseStack.popPose();
 				} else if (bl3) {
 					vertexConsumer = getFoilBufferDirect(multiBufferSource, renderType, true, itemStack.hasFoil());
 				} else {
@@ -183,15 +180,13 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 
 	public static VertexConsumer getCompassFoilBuffer(MultiBufferSource multiBufferSource, RenderType renderType, PoseStack.Pose pose) {
 		return VertexMultiConsumer.create(
-			new SheetedDecalTextureGenerator(multiBufferSource.getBuffer(RenderType.glint()), pose.pose(), pose.normal(), 0.0078125F),
-			multiBufferSource.getBuffer(renderType)
+			new SheetedDecalTextureGenerator(multiBufferSource.getBuffer(RenderType.glint()), pose, 0.0078125F), multiBufferSource.getBuffer(renderType)
 		);
 	}
 
 	public static VertexConsumer getCompassFoilBufferDirect(MultiBufferSource multiBufferSource, RenderType renderType, PoseStack.Pose pose) {
 		return VertexMultiConsumer.create(
-			new SheetedDecalTextureGenerator(multiBufferSource.getBuffer(RenderType.glintDirect()), pose.pose(), pose.normal(), 0.0078125F),
-			multiBufferSource.getBuffer(renderType)
+			new SheetedDecalTextureGenerator(multiBufferSource.getBuffer(RenderType.glintDirect()), pose, 0.0078125F), multiBufferSource.getBuffer(renderType)
 		);
 	}
 

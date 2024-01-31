@@ -230,7 +230,7 @@ public class WorldGenRegion implements WorldGenLevel {
 
 					blockEntity = ((EntityBlock)blockState.getBlock()).newBlockEntity(blockPos, blockState);
 				} else {
-					blockEntity = BlockEntity.loadStatic(blockPos, blockState, compoundTag);
+					blockEntity = BlockEntity.loadStatic(blockPos, blockState, compoundTag, this.level.registryAccess());
 				}
 
 				if (blockEntity != null) {

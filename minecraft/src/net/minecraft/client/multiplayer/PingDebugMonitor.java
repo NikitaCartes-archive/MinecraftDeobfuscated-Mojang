@@ -5,16 +5,16 @@ import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.network.protocol.ping.ClientboundPongResponsePacket;
 import net.minecraft.network.protocol.ping.ServerboundPingRequestPacket;
-import net.minecraft.util.debugchart.SampleLogger;
+import net.minecraft.util.debugchart.LocalSampleLogger;
 
 @Environment(EnvType.CLIENT)
 public class PingDebugMonitor {
 	private final ClientPacketListener connection;
-	private final SampleLogger delayTimer;
+	private final LocalSampleLogger delayTimer;
 
-	public PingDebugMonitor(ClientPacketListener clientPacketListener, SampleLogger sampleLogger) {
+	public PingDebugMonitor(ClientPacketListener clientPacketListener, LocalSampleLogger localSampleLogger) {
 		this.connection = clientPacketListener;
-		this.delayTimer = sampleLogger;
+		this.delayTimer = localSampleLogger;
 	}
 
 	public void tick() {

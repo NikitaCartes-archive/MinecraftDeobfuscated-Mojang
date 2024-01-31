@@ -1,7 +1,6 @@
 package net.minecraft.world.entity.decoration;
 
 import com.mojang.logging.LogUtils;
-import java.util.OptionalInt;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -33,6 +32,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.DiodeBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.saveddata.maps.MapId;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -237,13 +237,15 @@ public class ItemFrame extends HangingEntity {
 	}
 
 	private void removeFramedMap(ItemStack itemStack) {
-		this.getFramedMapId().ifPresent(i -> {
-			MapItemSavedData mapItemSavedData = MapItem.getSavedData(i, this.level());
+		MapId mapId = this.getFramedMapId();
+		if (mapId != null) {
+			MapItemSavedData mapItemSavedData = MapItem.getSavedData(mapId, this.level());
 			if (mapItemSavedData != null) {
 				mapItemSavedData.removedFromFrame(this.pos, this.getId());
 				mapItemSavedData.setDirty(true);
 			}
-		});
+		}
+
 		itemStack.setEntityRepresentation(null);
 	}
 
@@ -251,20 +253,13 @@ public class ItemFrame extends HangingEntity {
 		return this.getEntityData().get(DATA_ITEM);
 	}
 
-	public OptionalInt getFramedMapId() {
-		ItemStack itemStack = this.getItem();
-		if (itemStack.is(Items.FILLED_MAP)) {
-			Integer integer = MapItem.getMapId(itemStack);
-			if (integer != null) {
-				return OptionalInt.of(integer);
-			}
-		}
-
-		return OptionalInt.empty();
+	@Nullable
+	public MapId getFramedMapId() {
+		return MapItem.getMapId(this.getItem());
 	}
 
 	public boolean hasFramedMap() {
-		return this.getFramedMapId().isPresent();
+		return this.getFramedMapId() != null;
 	}
 
 	public void setItem(ItemStack itemStack) {

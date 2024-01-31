@@ -101,4 +101,6 @@ public interface ServerGamePacketListener extends ServerPingPacketListener, Serv
 	void handleConfigurationAcknowledged(ServerboundConfigurationAcknowledgedPacket serverboundConfigurationAcknowledgedPacket);
 
 	void handleChunkBatchReceived(ServerboundChunkBatchReceivedPacket serverboundChunkBatchReceivedPacket);
+
+	void handleDebugSampleSubscription(ServerboundDebugSampleSubscriptionPacket serverboundDebugSampleSubscriptionPacket);
 }

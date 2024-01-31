@@ -32,7 +32,7 @@ public class BlockPredicateArgument implements ArgumentType<BlockPredicateArgume
 	private final HolderLookup<Block> blocks;
 
 	public BlockPredicateArgument(CommandBuildContext commandBuildContext) {
-		this.blocks = commandBuildContext.holderLookup(Registries.BLOCK);
+		this.blocks = commandBuildContext.lookupOrThrow(Registries.BLOCK);
 	}
 
 	public static BlockPredicateArgument blockPredicate(CommandBuildContext commandBuildContext) {
@@ -92,7 +92,7 @@ public class BlockPredicateArgument implements ArgumentType<BlockPredicateArgume
 					return true;
 				} else {
 					BlockEntity blockEntity = blockInWorld.getEntity();
-					return blockEntity != null && NbtUtils.compareNbt(this.nbt, blockEntity.saveWithFullMetadata(), true);
+					return blockEntity != null && NbtUtils.compareNbt(this.nbt, blockEntity.saveWithFullMetadata(blockInWorld.getLevel().registryAccess()), true);
 				}
 			}
 		}
@@ -144,7 +144,7 @@ public class BlockPredicateArgument implements ArgumentType<BlockPredicateArgume
 					return true;
 				} else {
 					BlockEntity blockEntity = blockInWorld.getEntity();
-					return blockEntity != null && NbtUtils.compareNbt(this.nbt, blockEntity.saveWithFullMetadata(), true);
+					return blockEntity != null && NbtUtils.compareNbt(this.nbt, blockEntity.saveWithFullMetadata(blockInWorld.getLevel().registryAccess()), true);
 				}
 			}
 		}

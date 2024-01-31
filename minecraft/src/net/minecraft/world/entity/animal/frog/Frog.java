@@ -264,11 +264,7 @@ public class Frog extends Animal implements VariantHolder<FrogVariant> {
 
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		ServerLevelAccessor serverLevelAccessor,
-		DifficultyInstance difficultyInstance,
-		MobSpawnType mobSpawnType,
-		@Nullable SpawnGroupData spawnGroupData,
-		@Nullable CompoundTag compoundTag
+		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData
 	) {
 		Holder<Biome> holder = serverLevelAccessor.getBiome(this.blockPosition());
 		if (holder.is(BiomeTags.SPAWNS_COLD_VARIANT_FROGS)) {
@@ -280,7 +276,7 @@ public class Frog extends Animal implements VariantHolder<FrogVariant> {
 		}
 
 		FrogAi.initMemories(this, serverLevelAccessor.getRandom());
-		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData, compoundTag);
+		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData);
 	}
 
 	public static AttributeSupplier.Builder createAttributes() {

@@ -48,7 +48,7 @@ public class ResourceArgument<T> implements ArgumentType<Holder.Reference<T>> {
 
 	public ResourceArgument(CommandBuildContext commandBuildContext, ResourceKey<? extends Registry<T>> resourceKey) {
 		this.registryKey = resourceKey;
-		this.registryLookup = commandBuildContext.holderLookup(resourceKey);
+		this.registryLookup = commandBuildContext.lookupOrThrow(resourceKey);
 	}
 
 	public static <T> ResourceArgument<T> resource(CommandBuildContext commandBuildContext, ResourceKey<? extends Registry<T>> resourceKey) {

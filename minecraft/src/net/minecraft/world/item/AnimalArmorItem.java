@@ -1,40 +1,36 @@
 package net.minecraft.world.item;
 
 import java.util.function.Function;
-import javax.annotation.Nullable;
+import java.util.function.UnaryOperator;
+import net.minecraft.core.Holder;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 
-public class AnimalArmorItem extends Item {
-	private final int protection;
+public class AnimalArmorItem extends ArmorItem {
 	private final ResourceLocation textureLocation;
-	private final AnimalArmorItem.Type type;
+	private final AnimalArmorItem.BodyType bodyType;
 
-	public AnimalArmorItem(int i, AnimalArmorItem.Type type, @Nullable String string, Item.Properties properties) {
-		super(properties);
-		this.protection = i;
-		this.type = type;
-		this.textureLocation = (ResourceLocation)type.textureLocator.apply(string);
+	public AnimalArmorItem(Holder<ArmorMaterial> holder, AnimalArmorItem.BodyType bodyType, Item.Properties properties) {
+		super(holder, ArmorItem.Type.BODY, properties);
+		this.bodyType = bodyType;
+		this.textureLocation = (ResourceLocation)bodyType.textureLocator.apply(((ResourceKey)holder.unwrapKey().orElseThrow()).location());
 	}
 
 	public ResourceLocation getTexture() {
 		return this.textureLocation;
 	}
 
-	public int getProtection() {
-		return this.protection;
+	public AnimalArmorItem.BodyType getBodyType() {
+		return this.bodyType;
 	}
 
-	public AnimalArmorItem.Type getType() {
-		return this.type;
-	}
+	public static enum BodyType {
+		EQUESTRIAN(resourceLocation -> resourceLocation.withPath((UnaryOperator<String>)(string -> "textures/entity/horse/armor/horse_armor_" + string + ".png"))),
+		CANINE(resourceLocation -> resourceLocation.withPath("textures/entity/wolf/wolf_armor.png"));
 
-	public static enum Type {
-		EQUESTRIAN(string -> new ResourceLocation("textures/entity/horse/armor/horse_armor_" + string + ".png")),
-		CANINE(string -> new ResourceLocation("textures/entity/wolf/wolf_armor.png"));
+		final Function<ResourceLocation, ResourceLocation> textureLocator;
 
-		final Function<String, ResourceLocation> textureLocator;
-
-		private Type(Function<String, ResourceLocation> function) {
+		private BodyType(Function<ResourceLocation, ResourceLocation> function) {
 			this.textureLocator = function;
 		}
 	}

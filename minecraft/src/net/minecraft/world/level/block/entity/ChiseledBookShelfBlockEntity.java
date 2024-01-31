@@ -4,6 +4,7 @@ import com.mojang.logging.LogUtils;
 import java.util.Objects;
 import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.tags.ItemTags;
@@ -47,14 +48,14 @@ public class ChiseledBookShelfBlockEntity extends BlockEntity implements Contain
 	}
 
 	@Override
-	public void load(CompoundTag compoundTag) {
+	public void load(CompoundTag compoundTag, HolderLookup.Provider provider) {
 		this.items.clear();
 		ContainerHelper.loadAllItems(compoundTag, this.items);
 		this.lastInteractedSlot = compoundTag.getInt("last_interacted_slot");
 	}
 
 	@Override
-	protected void saveAdditional(CompoundTag compoundTag) {
+	protected void saveAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
 		ContainerHelper.saveAllItems(compoundTag, this.items, true);
 		compoundTag.putInt("last_interacted_slot", this.lastInteractedSlot);
 	}

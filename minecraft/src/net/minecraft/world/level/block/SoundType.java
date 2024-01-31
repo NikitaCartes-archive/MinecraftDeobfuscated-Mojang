@@ -692,6 +692,9 @@ public class SoundType {
 	public static final SoundType WET_SPONGE = new SoundType(
 		1.0F, 1.0F, SoundEvents.WET_SPONGE_BREAK, SoundEvents.WET_SPONGE_STEP, SoundEvents.WET_SPONGE_PLACE, SoundEvents.WET_SPONGE_HIT, SoundEvents.WET_SPONGE_FALL
 	);
+	public static final SoundType VAULT = new SoundType(
+		1.0F, 1.0F, SoundEvents.VAULT_BREAK, SoundEvents.VAULT_STEP, SoundEvents.VAULT_PLACE, SoundEvents.VAULT_HIT, SoundEvents.VAULT_FALL
+	);
 	public final float volume;
 	public final float pitch;
 	private final SoundEvent breakSound;

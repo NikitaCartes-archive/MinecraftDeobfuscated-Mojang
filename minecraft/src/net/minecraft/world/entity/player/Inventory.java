@@ -183,15 +183,10 @@ public class Inventory implements Container, Nameable {
 	}
 
 	private int addResource(int i, ItemStack itemStack) {
-		Item item = itemStack.getItem();
 		int j = itemStack.getCount();
 		ItemStack itemStack2 = this.getItem(i);
 		if (itemStack2.isEmpty()) {
-			itemStack2 = new ItemStack(item, 0);
-			if (itemStack.hasTag()) {
-				itemStack2.setTag(itemStack.getTag().copy());
-			}
-
+			itemStack2 = itemStack.copyWithCount(0);
 			this.setItem(i, itemStack2);
 		}
 

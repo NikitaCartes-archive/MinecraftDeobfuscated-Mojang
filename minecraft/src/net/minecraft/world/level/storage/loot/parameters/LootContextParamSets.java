@@ -45,6 +45,9 @@ public class LootContextParamSets {
 	);
 	public static final LootContextParamSet GIFT = register("gift", builder -> builder.required(LootContextParams.ORIGIN).required(LootContextParams.THIS_ENTITY));
 	public static final LootContextParamSet PIGLIN_BARTER = register("barter", builder -> builder.required(LootContextParams.THIS_ENTITY));
+	public static final LootContextParamSet VAULT = register(
+		"vault", builder -> builder.required(LootContextParams.ORIGIN).optional(LootContextParams.THIS_ENTITY)
+	);
 	public static final LootContextParamSet ADVANCEMENT_REWARD = register(
 		"advancement_reward", builder -> builder.required(LootContextParams.THIS_ENTITY).required(LootContextParams.ORIGIN)
 	);

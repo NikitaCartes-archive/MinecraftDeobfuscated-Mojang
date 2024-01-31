@@ -48,7 +48,8 @@ public class WrittenBookItem extends Item {
 	}
 
 	public static int getGeneration(ItemStack itemStack) {
-		return itemStack.getTag().getInt("generation");
+		CompoundTag compoundTag = itemStack.getTag();
+		return compoundTag != null ? compoundTag.getInt("generation") : 0;
 	}
 
 	public static int getPageCount(ItemStack itemStack) {

@@ -9,6 +9,8 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import java.lang.reflect.Field;
 import net.minecraft.Util;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.resources.RegistryOps;
 
 public class ParserUtils {
 	private static final Field JSON_READER_POS = Util.make(() -> {
@@ -38,20 +40,20 @@ public class ParserUtils {
 		}
 	}
 
-	public static <T> T parseJson(StringReader stringReader, Codec<T> codec) {
+	public static <T> T parseJson(HolderLookup.Provider provider, StringReader stringReader, Codec<T> codec) {
 		JsonReader jsonReader = new JsonReader(new java.io.StringReader(stringReader.getRemaining()));
 		jsonReader.setLenient(false);
 
-		Object var4;
+		Object var5;
 		try {
 			JsonElement jsonElement = Streams.parse(jsonReader);
-			var4 = Util.getOrThrow(codec.parse(JsonOps.INSTANCE, jsonElement), JsonParseException::new);
-		} catch (StackOverflowError var8) {
-			throw new JsonParseException(var8);
+			var5 = Util.getOrThrow(codec.parse(RegistryOps.create(JsonOps.INSTANCE, provider), jsonElement), JsonParseException::new);
+		} catch (StackOverflowError var9) {
+			throw new JsonParseException(var9);
 		} finally {
 			stringReader.setCursor(stringReader.getCursor() + getPos(jsonReader));
 		}
 
-		return (T)var4;
+		return (T)var5;
 	}
 }

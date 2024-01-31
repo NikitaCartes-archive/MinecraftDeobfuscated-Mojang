@@ -11,6 +11,7 @@ import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import java.util.Collection;
 import java.util.Collections;
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -61,7 +62,7 @@ public class BossBarCommands {
 			commandContext.getSource().getServer().getCustomBossEvents().getIds(), suggestionsBuilder
 		);
 
-	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
+	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher, CommandBuildContext commandBuildContext) {
 		commandDispatcher.register(
 			Commands.literal("bossbar")
 				.requires(commandSourceStack -> commandSourceStack.hasPermission(2))
@@ -70,7 +71,7 @@ public class BossBarCommands {
 						.then(
 							Commands.argument("id", ResourceLocationArgument.id())
 								.then(
-									Commands.argument("name", ComponentArgument.textComponent())
+									Commands.argument("name", ComponentArgument.textComponent(commandBuildContext))
 										.executes(
 											commandContext -> createBar(
 													commandContext.getSource(), ResourceLocationArgument.getId(commandContext, "id"), ComponentArgument.getComponent(commandContext, "name")
@@ -96,7 +97,7 @@ public class BossBarCommands {
 								.then(
 									Commands.literal("name")
 										.then(
-											Commands.argument("name", ComponentArgument.textComponent())
+											Commands.argument("name", ComponentArgument.textComponent(commandBuildContext))
 												.executes(
 													commandContext -> setName(commandContext.getSource(), getBossBar(commandContext), ComponentArgument.getComponent(commandContext, "name"))
 												)

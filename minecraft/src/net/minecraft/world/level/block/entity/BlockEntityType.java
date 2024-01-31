@@ -15,6 +15,7 @@ import net.minecraft.util.datafix.fixes.References;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.vault.VaultBlockEntity;
 import net.minecraft.world.level.block.piston.PistonMovingBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.slf4j.Logger;
@@ -265,6 +266,7 @@ public class BlockEntityType<T extends BlockEntity> {
 	public static final BlockEntityType<TrialSpawnerBlockEntity> TRIAL_SPAWNER = register(
 		"trial_spawner", BlockEntityType.Builder.of(TrialSpawnerBlockEntity::new, Blocks.TRIAL_SPAWNER)
 	);
+	public static final BlockEntityType<VaultBlockEntity> VAULT = register("vault", BlockEntityType.Builder.of(VaultBlockEntity::new, Blocks.VAULT));
 	private final BlockEntityType.BlockEntitySupplier<? extends T> factory;
 	private final Set<Block> validBlocks;
 	private final Type<?> dataType;

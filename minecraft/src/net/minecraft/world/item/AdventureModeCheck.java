@@ -6,6 +6,7 @@ import java.util.Objects;
 import javax.annotation.Nullable;
 import net.minecraft.commands.arguments.blocks.BlockPredicateArgument;
 import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.world.level.block.Block;
@@ -29,10 +30,11 @@ public class AdventureModeCheck {
 			return true;
 		} else if (blockInWorld.getEntity() == null && blockInWorld2.getEntity() == null) {
 			return true;
+		} else if (blockInWorld.getEntity() != null && blockInWorld2.getEntity() != null) {
+			RegistryAccess registryAccess = blockInWorld.getLevel().registryAccess();
+			return Objects.equals(blockInWorld.getEntity().saveWithId(registryAccess), blockInWorld2.getEntity().saveWithId(registryAccess));
 		} else {
-			return blockInWorld.getEntity() != null && blockInWorld2.getEntity() != null
-				? Objects.equals(blockInWorld.getEntity().saveWithId(), blockInWorld2.getEntity().saveWithId())
-				: false;
+			return false;
 		}
 	}
 

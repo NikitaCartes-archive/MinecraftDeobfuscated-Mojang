@@ -11,6 +11,7 @@ import net.minecraft.advancements.critereon.ImpossibleTrigger;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.advancements.critereon.PlayerTrigger;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.RecipeBuilder;
@@ -61,16 +62,17 @@ public class VanillaRecipeProvider extends RecipeProvider {
 	private static final ImmutableList<ItemLike> REDSTONE_SMELTABLES = ImmutableList.of(Items.REDSTONE_ORE, Items.DEEPSLATE_REDSTONE_ORE);
 	private static final ImmutableList<ItemLike> EMERALD_SMELTABLES = ImmutableList.of(Items.EMERALD_ORE, Items.DEEPSLATE_EMERALD_ORE);
 
-	public VanillaRecipeProvider(PackOutput packOutput) {
-		super(packOutput);
+	public VanillaRecipeProvider(PackOutput packOutput, CompletableFuture<HolderLookup.Provider> completableFuture) {
+		super(packOutput, completableFuture);
 	}
 
 	@Override
-	public CompletableFuture<?> run(CachedOutput cachedOutput) {
+	public CompletableFuture<?> run(CachedOutput cachedOutput, HolderLookup.Provider provider) {
 		return CompletableFuture.allOf(
-			super.run(cachedOutput),
+			super.run(cachedOutput, provider),
 			this.buildAdvancement(
 				cachedOutput,
+				provider,
 				Advancement.Builder.recipeAdvancement()
 					.addCriterion("impossible", CriteriaTriggers.IMPOSSIBLE.createCriterion(new ImpossibleTrigger.TriggerInstance()))
 					.build(RecipeBuilder.ROOT_RECIPE_ADVANCEMENT)

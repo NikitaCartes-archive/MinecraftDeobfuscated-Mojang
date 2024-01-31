@@ -1,6 +1,7 @@
 package net.minecraft.world.item;
 
 import javax.annotation.Nullable;
+import net.minecraft.core.Holder;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.stats.Stats;
@@ -16,7 +17,7 @@ import net.minecraft.world.level.block.Block;
 public interface Equipable {
 	EquipmentSlot getEquipmentSlot();
 
-	default SoundEvent getEquipSound() {
+	default Holder<SoundEvent> getEquipSound() {
 		return SoundEvents.ARMOR_EQUIP_GENERIC;
 	}
 

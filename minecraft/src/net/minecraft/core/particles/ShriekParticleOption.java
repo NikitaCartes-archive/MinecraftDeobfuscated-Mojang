@@ -6,6 +6,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
 import java.util.Locale;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -20,7 +21,7 @@ public class ShriekParticleOption implements ParticleOptions {
 		ByteBufCodecs.VAR_INT, shriekParticleOption -> shriekParticleOption.delay, ShriekParticleOption::new
 	);
 	public static final ParticleOptions.Deserializer<ShriekParticleOption> DESERIALIZER = new ParticleOptions.Deserializer<ShriekParticleOption>() {
-		public ShriekParticleOption fromCommand(ParticleType<ShriekParticleOption> particleType, StringReader stringReader) throws CommandSyntaxException {
+		public ShriekParticleOption fromCommand(ParticleType<ShriekParticleOption> particleType, StringReader stringReader, HolderLookup.Provider provider) throws CommandSyntaxException {
 			stringReader.expect(' ');
 			int i = stringReader.readInt();
 			return new ShriekParticleOption(i);
@@ -33,7 +34,7 @@ public class ShriekParticleOption implements ParticleOptions {
 	}
 
 	@Override
-	public String writeToString() {
+	public String writeToString(HolderLookup.Provider provider) {
 		return String.format(Locale.ROOT, "%s %d", BuiltInRegistries.PARTICLE_TYPE.getKey(this.getType()), this.delay);
 	}
 

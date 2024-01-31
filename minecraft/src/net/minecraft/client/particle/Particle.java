@@ -239,4 +239,22 @@ public abstract class Particle {
 	public Optional<ParticleGroup> getParticleGroup() {
 		return Optional.empty();
 	}
+
+	@Environment(EnvType.CLIENT)
+	public static record LifetimeAlpha(float startAlpha, float endAlpha, float startAtNormalizedAge, float endAtNormalizedAge) {
+		public static final Particle.LifetimeAlpha ALWAYS_OPAQUE = new Particle.LifetimeAlpha(1.0F, 1.0F, 0.0F, 1.0F);
+
+		public boolean isOpaque() {
+			return this.startAlpha >= 1.0F && this.endAlpha >= 1.0F;
+		}
+
+		public float currentAlphaForAge(int i, int j, float f) {
+			if (Mth.equal(this.startAlpha, this.endAlpha)) {
+				return this.startAlpha;
+			} else {
+				float g = Mth.inverseLerp(((float)i + f) / (float)j, this.startAtNormalizedAge, this.endAtNormalizedAge);
+				return Mth.clampedLerp(this.startAlpha, this.endAlpha, g);
+			}
+		}
+	}
 }

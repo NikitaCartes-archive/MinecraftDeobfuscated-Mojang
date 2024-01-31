@@ -42,7 +42,7 @@ public class ResourceOrTagArgument<T> implements ArgumentType<ResourceOrTagArgum
 
 	public ResourceOrTagArgument(CommandBuildContext commandBuildContext, ResourceKey<? extends Registry<T>> resourceKey) {
 		this.registryKey = resourceKey;
-		this.registryLookup = commandBuildContext.holderLookup(resourceKey);
+		this.registryLookup = commandBuildContext.lookupOrThrow(resourceKey);
 	}
 
 	public static <T> ResourceOrTagArgument<T> resourceOrTag(CommandBuildContext commandBuildContext, ResourceKey<? extends Registry<T>> resourceKey) {

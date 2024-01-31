@@ -11,6 +11,7 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import java.util.Collection;
 import java.util.Collections;
 import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.ColorArgument;
@@ -59,7 +60,7 @@ public class TeamCommand {
 		Component.translatable("commands.team.option.collisionRule.unchanged")
 	);
 
-	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
+	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher, CommandBuildContext commandBuildContext) {
 		commandDispatcher.register(
 			Commands.literal("team")
 				.requires(commandSourceStack -> commandSourceStack.hasPermission(2))
@@ -77,7 +78,7 @@ public class TeamCommand {
 							((RequiredArgumentBuilder)Commands.argument("team", StringArgumentType.word())
 									.executes(commandContext -> createTeam((CommandSourceStack)commandContext.getSource(), StringArgumentType.getString(commandContext, "team"))))
 								.then(
-									Commands.argument("displayName", ComponentArgument.textComponent())
+									Commands.argument("displayName", ComponentArgument.textComponent(commandBuildContext))
 										.executes(
 											commandContext -> createTeam(
 													commandContext.getSource(), StringArgumentType.getString(commandContext, "team"), ComponentArgument.getComponent(commandContext, "displayName")
@@ -141,7 +142,7 @@ public class TeamCommand {
 																.then(
 																	Commands.literal("displayName")
 																		.then(
-																			Commands.argument("displayName", ComponentArgument.textComponent())
+																			Commands.argument("displayName", ComponentArgument.textComponent(commandBuildContext))
 																				.executes(
 																					commandContext -> setDisplayName(
 																							commandContext.getSource(), TeamArgument.getTeam(commandContext, "team"), ComponentArgument.getComponent(commandContext, "displayName")
@@ -270,7 +271,7 @@ public class TeamCommand {
 									.then(
 										Commands.literal("prefix")
 											.then(
-												Commands.argument("prefix", ComponentArgument.textComponent())
+												Commands.argument("prefix", ComponentArgument.textComponent(commandBuildContext))
 													.executes(
 														commandContext -> setPrefix(
 																commandContext.getSource(), TeamArgument.getTeam(commandContext, "team"), ComponentArgument.getComponent(commandContext, "prefix")
@@ -281,7 +282,7 @@ public class TeamCommand {
 								.then(
 									Commands.literal("suffix")
 										.then(
-											Commands.argument("suffix", ComponentArgument.textComponent())
+											Commands.argument("suffix", ComponentArgument.textComponent(commandBuildContext))
 												.executes(
 													commandContext -> setSuffix(
 															commandContext.getSource(), TeamArgument.getTeam(commandContext, "team"), ComponentArgument.getComponent(commandContext, "suffix")
