@@ -20,14 +20,14 @@ public class ClientboundUpdateMobEffectPacket implements Packet<ClientGamePacket
 	private static final int FLAG_BLEND = 8;
 	private final int entityId;
 	private final Holder<MobEffect> effect;
-	private final byte effectAmplifier;
+	private final int effectAmplifier;
 	private final int effectDurationTicks;
 	private final byte flags;
 
 	public ClientboundUpdateMobEffectPacket(int i, MobEffectInstance mobEffectInstance, boolean bl) {
 		this.entityId = i;
 		this.effect = mobEffectInstance.getEffect();
-		this.effectAmplifier = (byte)(mobEffectInstance.getAmplifier() & 0xFF);
+		this.effectAmplifier = mobEffectInstance.getAmplifier();
 		this.effectDurationTicks = mobEffectInstance.getDuration();
 		byte b = 0;
 		if (mobEffectInstance.isAmbient()) {
@@ -52,7 +52,7 @@ public class ClientboundUpdateMobEffectPacket implements Packet<ClientGamePacket
 	private ClientboundUpdateMobEffectPacket(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
 		this.entityId = registryFriendlyByteBuf.readVarInt();
 		this.effect = ByteBufCodecs.holderRegistry(Registries.MOB_EFFECT).decode(registryFriendlyByteBuf);
-		this.effectAmplifier = registryFriendlyByteBuf.readByte();
+		this.effectAmplifier = registryFriendlyByteBuf.readVarInt();
 		this.effectDurationTicks = registryFriendlyByteBuf.readVarInt();
 		this.flags = registryFriendlyByteBuf.readByte();
 	}
@@ -60,7 +60,7 @@ public class ClientboundUpdateMobEffectPacket implements Packet<ClientGamePacket
 	private void write(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
 		registryFriendlyByteBuf.writeVarInt(this.entityId);
 		ByteBufCodecs.holderRegistry(Registries.MOB_EFFECT).encode(registryFriendlyByteBuf, this.effect);
-		registryFriendlyByteBuf.writeByte(this.effectAmplifier);
+		registryFriendlyByteBuf.writeVarInt(this.effectAmplifier);
 		registryFriendlyByteBuf.writeVarInt(this.effectDurationTicks);
 		registryFriendlyByteBuf.writeByte(this.flags);
 	}
@@ -82,7 +82,7 @@ public class ClientboundUpdateMobEffectPacket implements Packet<ClientGamePacket
 		return this.effect;
 	}
 
-	public byte getEffectAmplifier() {
+	public int getEffectAmplifier() {
 		return this.effectAmplifier;
 	}
 

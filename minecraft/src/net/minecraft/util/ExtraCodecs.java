@@ -5,6 +5,7 @@ import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
+import com.google.common.primitives.UnsignedBytes;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
@@ -118,6 +119,11 @@ public class ExtraCodecs {
 
 		return floatList;
 	});
+	public static final Codec<Integer> UNSIGNED_BYTE = Codec.BYTE
+		.flatComapMap(
+			UnsignedBytes::toInt,
+			integer -> integer > 255 ? DataResult.error(() -> "Unsigned byte was too large: " + integer + " > 255") : DataResult.success(integer.byteValue())
+		);
 	public static final Codec<Integer> NON_NEGATIVE_INT = intRangeWithMessage(0, Integer.MAX_VALUE, integer -> "Value must be non-negative: " + integer);
 	public static final Codec<Integer> POSITIVE_INT = intRangeWithMessage(1, Integer.MAX_VALUE, integer -> "Value must be positive: " + integer);
 	public static final Codec<Float> POSITIVE_FLOAT = floatRangeMinExclusiveWithMessage(0.0F, Float.MAX_VALUE, float_ -> "Value must be positive: " + float_);
@@ -387,8 +393,8 @@ public class ExtraCodecs {
 		return new ExtraCodecs.RecursiveCodec<>(string, function);
 	}
 
-	public static <T> MapCodec<T> recursiveMap(Function<Codec<T>, MapCodec<T>> function) {
-		return new ExtraCodecs.RecursiveMapCodec<>(function);
+	public static <T> MapCodec<T> recursiveMap(String string, Function<Codec<T>, MapCodec<T>> function) {
+		return new ExtraCodecs.RecursiveMapCodec<>(string, function);
 	}
 
 	public static <A> Codec<A> lazyInitializedCodec(Supplier<Codec<A>> supplier) {
@@ -609,9 +615,11 @@ public class ExtraCodecs {
 	}
 
 	static class RecursiveMapCodec<T> extends MapCodec<T> {
+		private final String name;
 		private final Supplier<MapCodec<T>> wrapped;
 
-		RecursiveMapCodec(Function<Codec<T>, MapCodec<T>> function) {
+		RecursiveMapCodec(String string, Function<Codec<T>, MapCodec<T>> function) {
+			this.name = string;
 			this.wrapped = Suppliers.memoize(() -> (MapCodec<T>)function.apply(this.codec()));
 		}
 
@@ -631,7 +639,7 @@ public class ExtraCodecs {
 		}
 
 		public String toString() {
-			return "RecursiveMapCodec[" + this.wrapped + "]";
+			return "RecursiveMapCodec[" + this.name + "]";
 		}
 	}
 

@@ -22,6 +22,8 @@ import org.slf4j.Logger;
 public class MobEffectInstance implements Comparable<MobEffectInstance> {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	public static final int INFINITE_DURATION = -1;
+	public static final int MIN_AMPLIFIER = 0;
+	public static final int MAX_AMPLIFIER = 127;
 	public static final Codec<MobEffectInstance> CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
 					BuiltInRegistries.MOB_EFFECT.holderByNameCodec().fieldOf("id").forGetter(MobEffectInstance::getEffect),
@@ -62,7 +64,7 @@ public class MobEffectInstance implements Comparable<MobEffectInstance> {
 	public MobEffectInstance(Holder<MobEffect> holder, int i, int j, boolean bl, boolean bl2, boolean bl3, @Nullable MobEffectInstance mobEffectInstance) {
 		this.effect = holder;
 		this.duration = i;
-		this.amplifier = j;
+		this.amplifier = Mth.clamp(j, 0, 127);
 		this.ambient = bl;
 		this.visible = bl2;
 		this.showIcon = bl3;
@@ -359,11 +361,11 @@ public class MobEffectInstance implements Comparable<MobEffectInstance> {
 	}
 
 	static record Details(int amplifier, int duration, boolean ambient, boolean showParticles, boolean showIcon, Optional<MobEffectInstance.Details> hiddenEffect) {
-		private static final Codec<Integer> AMPLIFIER_CODEC = ExtraCodecs.validate(Codec.BYTE.xmap(Byte::intValue, Integer::byteValue), Codec.checkRange(0, 127));
 		public static final MapCodec<MobEffectInstance.Details> MAP_CODEC = ExtraCodecs.recursiveMap(
+			"MobEffectInstance.Details",
 			codec -> RecordCodecBuilder.mapCodec(
 					instance -> instance.group(
-								ExtraCodecs.strictOptionalField(AMPLIFIER_CODEC, "amplifier", 0).forGetter(MobEffectInstance.Details::amplifier),
+								ExtraCodecs.strictOptionalField(ExtraCodecs.UNSIGNED_BYTE, "amplifier", 0).forGetter(MobEffectInstance.Details::amplifier),
 								ExtraCodecs.strictOptionalField(Codec.INT, "duration", 0).forGetter(MobEffectInstance.Details::duration),
 								ExtraCodecs.strictOptionalField(Codec.BOOL, "ambient", false).forGetter(MobEffectInstance.Details::ambient),
 								ExtraCodecs.strictOptionalField(Codec.BOOL, "show_particles", true).forGetter(MobEffectInstance.Details::showParticles),
