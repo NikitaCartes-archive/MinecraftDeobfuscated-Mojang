@@ -46,6 +46,7 @@ public interface CommandFunction<T> {
 					stringBuilder.deleteCharAt(stringBuilder.length() - 1);
 					String string2 = ((String)list.get(i)).trim();
 					stringBuilder.append(string2);
+					checkCommandLineLength(stringBuilder);
 				} while (shouldConcatenateNextLine(stringBuilder));
 
 				string3 = stringBuilder.toString();
@@ -53,6 +54,7 @@ public interface CommandFunction<T> {
 				string3 = string;
 			}
 
+			checkCommandLineLength(string3);
 			StringReader stringReader = new StringReader(string3);
 			if (stringReader.canRead() && stringReader.peek() != '#') {
 				if (stringReader.peek() == '/') {
@@ -80,6 +82,13 @@ public interface CommandFunction<T> {
 		}
 
 		return functionBuilder.build(resourceLocation);
+	}
+
+	static void checkCommandLineLength(CharSequence charSequence) {
+		if (charSequence.length() > 2000000) {
+			CharSequence charSequence2 = charSequence.subSequence(0, Math.min(512, 2000000));
+			throw new IllegalStateException("Command too long: " + charSequence.length() + " characters, contents: " + charSequence2 + "...");
+		}
 	}
 
 	static <T extends ExecutionCommandSource<T>> UnboundEntryAction<T> parseCommand(

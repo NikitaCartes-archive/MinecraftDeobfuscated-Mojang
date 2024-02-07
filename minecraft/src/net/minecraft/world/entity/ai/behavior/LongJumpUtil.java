@@ -18,14 +18,14 @@ public final class LongJumpUtil {
 		double e = vec35.subtract(0.0, vec35.y, 0.0).lengthSqr();
 		double h = Math.sqrt(e);
 		double j = vec35.y;
-		double k = 0.08;
+		double k = mob.getGravity();
 		double l = Math.sin((double)(2.0F * g));
 		double m = Math.pow(Math.cos((double)g), 2.0);
 		double n = Math.sin((double)g);
 		double o = Math.cos((double)g);
 		double p = Math.sin(d);
 		double q = Math.cos(d);
-		double r = e * 0.08 / (h * l - 2.0 * j * m);
+		double r = e * k / (h * l - 2.0 * j * m);
 		if (r < 0.0) {
 			return Optional.empty();
 		} else {
@@ -43,7 +43,7 @@ public final class LongJumpUtil {
 
 					for (int x = 0; x < v - 1; x++) {
 						w += h / (double)v;
-						double y = n / o * w - Math.pow(w, 2.0) * 0.08 / (2.0 * r * Math.pow(o, 2.0));
+						double y = n / o * w - Math.pow(w, 2.0) * k / (2.0 * r * Math.pow(o, 2.0));
 						double z = w * q;
 						double aa = w * p;
 						Vec3 vec37 = new Vec3(vec32.x + z, vec32.y + y, vec32.z + aa);

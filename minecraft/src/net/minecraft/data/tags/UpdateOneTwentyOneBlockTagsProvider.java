@@ -148,5 +148,6 @@ public class UpdateOneTwentyOneBlockTagsProvider extends IntrinsicHolderTagsProv
 				Blocks.WAXED_WEATHERED_COPPER_DOOR,
 				Blocks.WAXED_OXIDIZED_COPPER_DOOR
 			);
+		this.tag(BlockTags.BLOCKS_WIND_CHARGE_EXPLOSIONS).add(Blocks.BARRIER, Blocks.BEDROCK);
 	}
 }

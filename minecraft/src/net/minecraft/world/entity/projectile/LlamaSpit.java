@@ -2,6 +2,7 @@ package net.minecraft.world.entity.projectile;
 
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -29,6 +30,11 @@ public class LlamaSpit extends Projectile {
 	}
 
 	@Override
+	protected double getDefaultGravity() {
+		return 0.06;
+	}
+
+	@Override
 	public void tick() {
 		super.tick();
 		Vec3 vec3 = this.getDeltaMovement();
@@ -39,17 +45,13 @@ public class LlamaSpit extends Projectile {
 		double f = this.getZ() + vec3.z;
 		this.updateRotation();
 		float g = 0.99F;
-		float h = 0.06F;
 		if (this.level().getBlockStates(this.getBoundingBox()).noneMatch(BlockBehaviour.BlockStateBase::isAir)) {
 			this.discard();
 		} else if (this.isInWaterOrBubble()) {
 			this.discard();
 		} else {
 			this.setDeltaMovement(vec3.scale(0.99F));
-			if (!this.isNoGravity()) {
-				this.setDeltaMovement(this.getDeltaMovement().add(0.0, -0.06F, 0.0));
-			}
-
+			this.applyGravity();
 			this.setPos(d, e, f);
 		}
 	}
@@ -71,7 +73,7 @@ public class LlamaSpit extends Projectile {
 	}
 
 	@Override
-	protected void defineSynchedData() {
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
 	}
 
 	@Override

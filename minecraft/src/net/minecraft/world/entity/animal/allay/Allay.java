@@ -158,10 +158,10 @@ public class Allay extends PathfinderMob implements InventoryCarrier, VibrationS
 	}
 
 	@Override
-	protected void defineSynchedData() {
-		super.defineSynchedData();
-		this.entityData.define(DATA_DANCING, false);
-		this.entityData.define(DATA_CAN_DUPLICATE, true);
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		super.defineSynchedData(builder);
+		builder.define(DATA_DANCING, false);
+		builder.define(DATA_CAN_DUPLICATE, true);
 	}
 
 	@Override
@@ -528,9 +528,7 @@ public class Allay extends PathfinderMob implements InventoryCarrier, VibrationS
 	}
 
 	private void removeInteractionItem(Player player, ItemStack itemStack) {
-		if (!player.getAbilities().instabuild) {
-			itemStack.shrink(1);
-		}
+		itemStack.consume(1, player);
 	}
 
 	@Override

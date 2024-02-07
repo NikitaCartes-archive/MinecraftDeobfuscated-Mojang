@@ -342,6 +342,10 @@ public class ExtraCodecs {
 		});
 	}
 
+	public static <E> Codec<E> overrideLifecycle(Codec<E> codec, Function<E, Lifecycle> function) {
+		return overrideLifecycle(codec, function, function);
+	}
+
 	public static <F, S> ExtraCodecs.EitherCodec<F, S> either(Codec<F> codec, Codec<S> codec2) {
 		return new ExtraCodecs.EitherCodec<>(codec, codec2);
 	}

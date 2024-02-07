@@ -242,10 +242,7 @@ public class Parrot extends ShoulderRidingEntity implements VariantHolder<Parrot
 	public InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
 		if (!this.isTame() && TAME_FOOD.contains(itemStack.getItem())) {
-			if (!player.getAbilities().instabuild) {
-				itemStack.shrink(1);
-			}
-
+			itemStack.consume(1, player);
 			if (!this.isSilent()) {
 				this.level()
 					.playSound(
@@ -270,25 +267,24 @@ public class Parrot extends ShoulderRidingEntity implements VariantHolder<Parrot
 			}
 
 			return InteractionResult.sidedSuccess(this.level().isClientSide);
-		} else if (itemStack.is(POISONOUS_FOOD)) {
-			if (!player.getAbilities().instabuild) {
-				itemStack.shrink(1);
-			}
+		} else if (!itemStack.is(POISONOUS_FOOD)) {
+			if (!this.isFlying() && this.isTame() && this.isOwnedBy(player)) {
+				if (!this.level().isClientSide) {
+					this.setOrderedToSit(!this.isOrderedToSit());
+				}
 
+				return InteractionResult.sidedSuccess(this.level().isClientSide);
+			} else {
+				return super.mobInteract(player, interactionHand);
+			}
+		} else {
+			itemStack.consume(1, player);
 			this.addEffect(new MobEffectInstance(MobEffects.POISON, 900));
 			if (player.isCreative() || !this.isInvulnerable()) {
 				this.hurt(this.damageSources().playerAttack(player), Float.MAX_VALUE);
 			}
 
 			return InteractionResult.sidedSuccess(this.level().isClientSide);
-		} else if (!this.isFlying() && this.isTame() && this.isOwnedBy(player)) {
-			if (!this.level().isClientSide) {
-				this.setOrderedToSit(!this.isOrderedToSit());
-			}
-
-			return InteractionResult.sidedSuccess(this.level().isClientSide);
-		} else {
-			return super.mobInteract(player, interactionHand);
 		}
 	}
 
@@ -416,9 +412,9 @@ public class Parrot extends ShoulderRidingEntity implements VariantHolder<Parrot
 	}
 
 	@Override
-	protected void defineSynchedData() {
-		super.defineSynchedData();
-		this.entityData.define(DATA_VARIANT_ID, 0);
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		super.defineSynchedData(builder);
+		builder.define(DATA_VARIANT_ID, 0);
 	}
 
 	@Override

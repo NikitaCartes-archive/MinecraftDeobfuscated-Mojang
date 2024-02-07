@@ -1284,6 +1284,7 @@ public class CreativeModeTabs {
 						output.accept(Items.SPYGLASS);
 						output.accept(Items.MAP);
 						output.accept(Items.WRITABLE_BOOK);
+						output.accept(Items.WIND_CHARGE);
 						output.accept(Items.ENDER_PEARL);
 						output.accept(Items.ENDER_EYE);
 						output.accept(Items.ELYTRA);
@@ -1402,6 +1403,7 @@ public class CreativeModeTabs {
 						output.accept(Items.END_CRYSTAL);
 						output.accept(Items.SNOWBALL);
 						output.accept(Items.EGG);
+						output.accept(Items.WIND_CHARGE);
 						output.accept(Items.BOW);
 						output.accept(Items.CROSSBOW);
 						generateFireworksAllDurations(output, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);

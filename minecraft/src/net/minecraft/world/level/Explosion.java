@@ -254,7 +254,7 @@ public class Explosion {
 							entity.hurt(this.damageSource, this.damageCalculator.getEntityDamageAmount(this, entity));
 						}
 
-						double aa = (1.0 - v) * (double)getSeenPercent(vec3, entity);
+						double aa = (1.0 - v) * (double)getSeenPercent(vec3, entity) * (double)this.damageCalculator.getKnockbackMultiplier();
 						double ab;
 						if (entity instanceof LivingEntity livingEntity) {
 							ab = ProtectionEnchantment.getExplosionKnockbackAfterDampener(livingEntity, aa);
@@ -273,6 +273,8 @@ public class Explosion {
 								this.hitPlayers.put(player, vec32);
 							}
 						}
+
+						entity.onExplosionHit(this.source);
 					}
 				}
 			}

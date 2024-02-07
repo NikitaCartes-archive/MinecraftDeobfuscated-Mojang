@@ -29,7 +29,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 
 public class BeehiveBlockEntity extends BlockEntity {
-	public static final String TAG_FLOWER_POS = "FlowerPos";
+	public static final String TAG_FLOWER_POS = "flower_pos";
 	public static final String MIN_OCCUPATION_TICKS = "MinOccupationTicks";
 	public static final String ENTITY_DATA = "EntityData";
 	public static final String TICKS_IN_HIVE = "TicksInHive";
@@ -59,9 +59,9 @@ public class BeehiveBlockEntity extends BlockEntity {
 		"CannotEnterHiveTicks",
 		"TicksSincePollination",
 		"CropsGrownSincePollination",
-		"HivePos",
+		"hive_pos",
 		"Passengers",
-		"Leash",
+		"leash",
 		"UUID"
 	);
 	public static final int MAX_OCCUPANTS = 3;
@@ -194,7 +194,7 @@ public class BeehiveBlockEntity extends BlockEntity {
 		} else {
 			CompoundTag compoundTag = beeData.entityData.copy();
 			removeIgnoredBeeTags(compoundTag);
-			compoundTag.put("HivePos", NbtUtils.writeBlockPos(blockPos));
+			compoundTag.put("hive_pos", NbtUtils.writeBlockPos(blockPos));
 			compoundTag.putBoolean("NoGravity", true);
 			Direction direction = blockState.getValue(BeehiveBlock.FACING);
 			BlockPos blockPos3 = blockPos.relative(direction);
@@ -322,10 +322,7 @@ public class BeehiveBlockEntity extends BlockEntity {
 			this.stored.add(beeData);
 		}
 
-		this.savedFlowerPos = null;
-		if (compoundTag.contains("FlowerPos")) {
-			this.savedFlowerPos = NbtUtils.readBlockPos(compoundTag.getCompound("FlowerPos"));
-		}
+		this.savedFlowerPos = (BlockPos)NbtUtils.readBlockPos(compoundTag, "flower_pos").orElse(null);
 	}
 
 	@Override
@@ -333,7 +330,7 @@ public class BeehiveBlockEntity extends BlockEntity {
 		super.saveAdditional(compoundTag, provider);
 		compoundTag.put("Bees", this.writeBees());
 		if (this.hasSavedFlowerPos()) {
-			compoundTag.put("FlowerPos", NbtUtils.writeBlockPos(this.savedFlowerPos));
+			compoundTag.put("flower_pos", NbtUtils.writeBlockPos(this.savedFlowerPos));
 		}
 	}
 

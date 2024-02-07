@@ -83,15 +83,12 @@ public abstract class ThrowableProjectile extends Projectile {
 		}
 
 		this.setDeltaMovement(vec3.scale((double)h));
-		if (!this.isNoGravity()) {
-			Vec3 vec32 = this.getDeltaMovement();
-			this.setDeltaMovement(vec32.x, vec32.y - (double)this.getGravity(), vec32.z);
-		}
-
+		this.applyGravity();
 		this.setPos(d, e, f);
 	}
 
-	protected float getGravity() {
-		return 0.03F;
+	@Override
+	protected double getDefaultGravity() {
+		return 0.03;
 	}
 }

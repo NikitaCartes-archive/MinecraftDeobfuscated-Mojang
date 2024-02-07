@@ -97,10 +97,10 @@ public class Guardian extends Monster {
 	}
 
 	@Override
-	protected void defineSynchedData() {
-		super.defineSynchedData();
-		this.entityData.define(DATA_ID_MOVING, false);
-		this.entityData.define(DATA_ID_ATTACK_TARGET, 0);
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		super.defineSynchedData(builder);
+		builder.define(DATA_ID_MOVING, false);
+		builder.define(DATA_ID_ATTACK_TARGET, 0);
 	}
 
 	public boolean isMoving() {

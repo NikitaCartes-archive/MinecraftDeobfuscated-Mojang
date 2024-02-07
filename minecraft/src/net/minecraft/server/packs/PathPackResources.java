@@ -30,8 +30,8 @@ public class PathPackResources extends AbstractPackResources {
 	private static final Joiner PATH_JOINER = Joiner.on("/");
 	private final Path root;
 
-	public PathPackResources(String string, Path path, boolean bl) {
-		super(string, bl);
+	public PathPackResources(PackLocationInfo packLocationInfo, Path path) {
+		super(packLocationInfo);
 		this.root = path;
 	}
 
@@ -160,30 +160,28 @@ public class PathPackResources extends AbstractPackResources {
 
 	public static class PathResourcesSupplier implements Pack.ResourcesSupplier {
 		private final Path content;
-		private final boolean isBuiltin;
 
-		public PathResourcesSupplier(Path path, boolean bl) {
+		public PathResourcesSupplier(Path path) {
 			this.content = path;
-			this.isBuiltin = bl;
 		}
 
 		@Override
-		public PackResources openPrimary(String string) {
-			return new PathPackResources(string, this.content, this.isBuiltin);
+		public PackResources openPrimary(PackLocationInfo packLocationInfo) {
+			return new PathPackResources(packLocationInfo, this.content);
 		}
 
 		@Override
-		public PackResources openFull(String string, Pack.Info info) {
-			PackResources packResources = this.openPrimary(string);
-			List<String> list = info.overlays();
+		public PackResources openFull(PackLocationInfo packLocationInfo, Pack.Metadata metadata) {
+			PackResources packResources = this.openPrimary(packLocationInfo);
+			List<String> list = metadata.overlays();
 			if (list.isEmpty()) {
 				return packResources;
 			} else {
 				List<PackResources> list2 = new ArrayList(list.size());
 
-				for (String string2 : list) {
-					Path path = this.content.resolve(string2);
-					list2.add(new PathPackResources(string, path, this.isBuiltin));
+				for (String string : list) {
+					Path path = this.content.resolve(string);
+					list2.add(new PathPackResources(packLocationInfo, path));
 				}
 
 				return new CompositePackResources(packResources, list2);

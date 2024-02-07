@@ -47,8 +47,8 @@ public class Painting extends HangingEntity implements VariantHolder<Holder<Pain
 	}
 
 	@Override
-	protected void defineSynchedData() {
-		this.entityData.define(DATA_PAINTING_VARIANT_ID, getDefaultVariant());
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		builder.define(DATA_PAINTING_VARIANT_ID, getDefaultVariant());
 	}
 
 	@Override
@@ -149,7 +149,7 @@ public class Painting extends HangingEntity implements VariantHolder<Holder<Pain
 	public void dropItem(@Nullable Entity entity) {
 		if (this.level().getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
 			this.playSound(SoundEvents.PAINTING_BREAK, 1.0F, 1.0F);
-			if (entity instanceof Player player && player.getAbilities().instabuild) {
+			if (entity instanceof Player player && player.hasInfiniteMaterials()) {
 				return;
 			}
 

@@ -109,8 +109,8 @@ public class Bee extends Animal implements NeutralMob, FlyingAnimal {
 	public static final String TAG_TICKS_SINCE_POLLINATION = "TicksSincePollination";
 	public static final String TAG_HAS_STUNG = "HasStung";
 	public static final String TAG_HAS_NECTAR = "HasNectar";
-	public static final String TAG_FLOWER_POS = "FlowerPos";
-	public static final String TAG_HIVE_POS = "HivePos";
+	public static final String TAG_FLOWER_POS = "flower_pos";
+	public static final String TAG_HIVE_POS = "hive_pos";
 	private static final UniformInt PERSISTENT_ANGER_TIME = TimeUtil.rangeOfSeconds(20, 39);
 	@Nullable
 	private UUID persistentAngerTarget;
@@ -145,10 +145,10 @@ public class Bee extends Animal implements NeutralMob, FlyingAnimal {
 	}
 
 	@Override
-	protected void defineSynchedData() {
-		super.defineSynchedData();
-		this.entityData.define(DATA_FLAGS_ID, (byte)0);
-		this.entityData.define(DATA_REMAINING_ANGER_TIME, 0);
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		super.defineSynchedData(builder);
+		builder.define(DATA_FLAGS_ID, (byte)0);
+		builder.define(DATA_REMAINING_ANGER_TIME, 0);
 	}
 
 	@Override
@@ -182,11 +182,11 @@ public class Bee extends Animal implements NeutralMob, FlyingAnimal {
 	public void addAdditionalSaveData(CompoundTag compoundTag) {
 		super.addAdditionalSaveData(compoundTag);
 		if (this.hasHive()) {
-			compoundTag.put("HivePos", NbtUtils.writeBlockPos(this.getHivePos()));
+			compoundTag.put("hive_pos", NbtUtils.writeBlockPos(this.getHivePos()));
 		}
 
 		if (this.hasSavedFlowerPos()) {
-			compoundTag.put("FlowerPos", NbtUtils.writeBlockPos(this.getSavedFlowerPos()));
+			compoundTag.put("flower_pos", NbtUtils.writeBlockPos(this.getSavedFlowerPos()));
 		}
 
 		compoundTag.putBoolean("HasNectar", this.hasNectar());
@@ -199,16 +199,8 @@ public class Bee extends Animal implements NeutralMob, FlyingAnimal {
 
 	@Override
 	public void readAdditionalSaveData(CompoundTag compoundTag) {
-		this.hivePos = null;
-		if (compoundTag.contains("HivePos")) {
-			this.hivePos = NbtUtils.readBlockPos(compoundTag.getCompound("HivePos"));
-		}
-
-		this.savedFlowerPos = null;
-		if (compoundTag.contains("FlowerPos")) {
-			this.savedFlowerPos = NbtUtils.readBlockPos(compoundTag.getCompound("FlowerPos"));
-		}
-
+		this.hivePos = (BlockPos)NbtUtils.readBlockPos(compoundTag, "hive_pos").orElse(null);
+		this.savedFlowerPos = (BlockPos)NbtUtils.readBlockPos(compoundTag, "flower_pos").orElse(null);
 		super.readAdditionalSaveData(compoundTag);
 		this.setHasNectar(compoundTag.getBoolean("HasNectar"));
 		this.setHasStung(compoundTag.getBoolean("HasStung"));

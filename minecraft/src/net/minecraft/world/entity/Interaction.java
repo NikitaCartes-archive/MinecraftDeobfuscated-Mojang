@@ -43,10 +43,10 @@ public class Interaction extends Entity implements Attackable, Targeting {
 	}
 
 	@Override
-	protected void defineSynchedData() {
-		this.entityData.define(DATA_WIDTH_ID, 1.0F);
-		this.entityData.define(DATA_HEIGHT_ID, 1.0F);
-		this.entityData.define(DATA_RESPONSE_ID, false);
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		builder.define(DATA_WIDTH_ID, 1.0F);
+		builder.define(DATA_HEIGHT_ID, 1.0F);
+		builder.define(DATA_RESPONSE_ID, false);
 	}
 
 	@Override

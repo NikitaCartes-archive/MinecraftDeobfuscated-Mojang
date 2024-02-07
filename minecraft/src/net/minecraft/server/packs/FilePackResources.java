@@ -26,10 +26,10 @@ public class FilePackResources extends AbstractPackResources {
 	private final FilePackResources.SharedZipFileAccess zipFileAccess;
 	private final String prefix;
 
-	FilePackResources(String string, FilePackResources.SharedZipFileAccess sharedZipFileAccess, boolean bl, String string2) {
-		super(string, bl);
+	FilePackResources(PackLocationInfo packLocationInfo, FilePackResources.SharedZipFileAccess sharedZipFileAccess, String string) {
+		super(packLocationInfo);
 		this.zipFileAccess = sharedZipFileAccess;
-		this.prefix = string2;
+		this.prefix = string;
 	}
 
 	private static String getPathFromLocation(PackType packType, ResourceLocation resourceLocation) {
@@ -133,35 +133,33 @@ public class FilePackResources extends AbstractPackResources {
 
 	public static class FileResourcesSupplier implements Pack.ResourcesSupplier {
 		private final File content;
-		private final boolean isBuiltin;
 
-		public FileResourcesSupplier(Path path, boolean bl) {
-			this(path.toFile(), bl);
+		public FileResourcesSupplier(Path path) {
+			this(path.toFile());
 		}
 
-		public FileResourcesSupplier(File file, boolean bl) {
-			this.isBuiltin = bl;
+		public FileResourcesSupplier(File file) {
 			this.content = file;
 		}
 
 		@Override
-		public PackResources openPrimary(String string) {
+		public PackResources openPrimary(PackLocationInfo packLocationInfo) {
 			FilePackResources.SharedZipFileAccess sharedZipFileAccess = new FilePackResources.SharedZipFileAccess(this.content);
-			return new FilePackResources(string, sharedZipFileAccess, this.isBuiltin, "");
+			return new FilePackResources(packLocationInfo, sharedZipFileAccess, "");
 		}
 
 		@Override
-		public PackResources openFull(String string, Pack.Info info) {
+		public PackResources openFull(PackLocationInfo packLocationInfo, Pack.Metadata metadata) {
 			FilePackResources.SharedZipFileAccess sharedZipFileAccess = new FilePackResources.SharedZipFileAccess(this.content);
-			PackResources packResources = new FilePackResources(string, sharedZipFileAccess, this.isBuiltin, "");
-			List<String> list = info.overlays();
+			PackResources packResources = new FilePackResources(packLocationInfo, sharedZipFileAccess, "");
+			List<String> list = metadata.overlays();
 			if (list.isEmpty()) {
 				return packResources;
 			} else {
 				List<PackResources> list2 = new ArrayList(list.size());
 
-				for (String string2 : list) {
-					list2.add(new FilePackResources(string, sharedZipFileAccess, this.isBuiltin, string2));
+				for (String string : list) {
+					list2.add(new FilePackResources(packLocationInfo, sharedZipFileAccess, string));
 				}
 
 				return new CompositePackResources(packResources, list2);

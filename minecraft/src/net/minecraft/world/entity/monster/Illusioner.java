@@ -84,11 +84,6 @@ public class Illusioner extends SpellcasterIllager implements RangedAttackMob {
 	}
 
 	@Override
-	protected void defineSynchedData() {
-		super.defineSynchedData();
-	}
-
-	@Override
 	public AABB getBoundingBoxForCulling() {
 		return this.getBoundingBox().inflate(3.0, 0.0, 3.0);
 	}

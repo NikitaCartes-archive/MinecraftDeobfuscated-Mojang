@@ -2,7 +2,6 @@ package net.minecraft.world.level.block.state;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSortedMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -11,6 +10,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.Decoder;
 import com.mojang.serialization.Encoder;
 import com.mojang.serialization.MapCodec;
+import it.unimi.dsi.fastutil.objects.Reference2ObjectArrayMap;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -54,15 +54,17 @@ public class StateDefinition<O, S extends StateHolder<O, S>> {
 				}));
 		}
 
-		stream.forEach(
-			list2 -> {
-				ImmutableMap<Property<?>, Comparable<?>> immutableMap = (ImmutableMap<Property<?>, Comparable<?>>)list2.stream()
-					.collect(ImmutableMap.toImmutableMap(Pair::getFirst, Pair::getSecond));
-				S stateHolderx = factory.create(object, immutableMap, mapCodec2);
-				map2.put(immutableMap, stateHolderx);
-				list.add(stateHolderx);
+		stream.forEach(list2 -> {
+			Reference2ObjectArrayMap<Property<?>, Comparable<?>> reference2ObjectArrayMap = new Reference2ObjectArrayMap<>(list2.size());
+
+			for (Pair<Property<?>, Comparable<?>> pair : list2) {
+				reference2ObjectArrayMap.put(pair.getFirst(), pair.getSecond());
 			}
-		);
+
+			S stateHolderx = factory.create(object, reference2ObjectArrayMap, mapCodec2);
+			map2.put(reference2ObjectArrayMap, stateHolderx);
+			list.add(stateHolderx);
+		});
 
 		for (S stateHolder : list) {
 			stateHolder.populateNeighbours(map2);
@@ -156,6 +158,6 @@ public class StateDefinition<O, S extends StateHolder<O, S>> {
 	}
 
 	public interface Factory<O, S> {
-		S create(O object, ImmutableMap<Property<?>, Comparable<?>> immutableMap, MapCodec<S> mapCodec);
+		S create(O object, Reference2ObjectArrayMap<Property<?>, Comparable<?>> reference2ObjectArrayMap, MapCodec<S> mapCodec);
 	}
 }

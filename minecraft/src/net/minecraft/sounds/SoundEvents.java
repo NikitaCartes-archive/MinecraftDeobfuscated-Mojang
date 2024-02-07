@@ -71,7 +71,9 @@ public class SoundEvents {
 	public static final SoundEvent ARMADILLO_ROLL = register("entity.armadillo.roll");
 	public static final SoundEvent ARMADILLO_LAND = register("entity.armadillo.land");
 	public static final SoundEvent ARMADILLO_SCUTE_DROP = register("entity.armadillo.scute_drop");
-	public static final SoundEvent ARMADILLO_UNROLL = register("entity.armadillo.unroll");
+	public static final SoundEvent ARMADILLO_UNROLL_FINISH = register("entity.armadillo.unroll_finish");
+	public static final SoundEvent ARMADILLO_PEEK = register("entity.armadillo.peek");
+	public static final SoundEvent ARMADILLO_UNROLL_START = register("entity.armadillo.unroll_start");
 	public static final SoundEvent ARMADILLO_BRUSH = register("entity.armadillo.brush");
 	public static final Holder<SoundEvent> ARMOR_EQUIP_CHAIN = registerForHolder("item.armor.equip_chain");
 	public static final Holder<SoundEvent> ARMOR_EQUIP_DIAMOND = registerForHolder("item.armor.equip_diamond");
@@ -199,6 +201,7 @@ public class SoundEvents {
 	public static final SoundEvent BREEZE_DEATH = register("entity.breeze.death");
 	public static final SoundEvent BREEZE_HURT = register("entity.breeze.hurt");
 	public static final SoundEvent BREEZE_WHIRL = register("entity.breeze.whirl");
+	public static final Holder.Reference<SoundEvent> BREEZE_WIND_CHARGE_BURST = registerForHolder("entity.breeze.wind_burst");
 	public static final SoundEvent BREWING_STAND_BREW = register("block.brewing_stand.brew");
 	public static final SoundEvent BRUSH_GENERIC = register("item.brush.brushing.generic");
 	public static final SoundEvent BRUSH_SAND = register("item.brush.brushing.sand");
@@ -1497,7 +1500,8 @@ public class SoundEvents {
 	public static final SoundEvent WET_SPONGE_HIT = register("block.wet_sponge.hit");
 	public static final SoundEvent WET_SPONGE_PLACE = register("block.wet_sponge.place");
 	public static final SoundEvent WET_SPONGE_STEP = register("block.wet_sponge.step");
-	public static final Holder.Reference<SoundEvent> WIND_BURST = registerForHolder("entity.generic.wind_burst");
+	public static final Holder.Reference<SoundEvent> WIND_CHARGE_BURST = registerForHolder("entity.wind_charge.wind_burst");
+	public static final SoundEvent WIND_CHARGE_THROW = register("entity.wind_charge.throw");
 	public static final SoundEvent WITCH_AMBIENT = register("entity.witch.ambient");
 	public static final SoundEvent WITCH_CELEBRATE = register("entity.witch.celebrate");
 	public static final SoundEvent WITCH_DEATH = register("entity.witch.death");

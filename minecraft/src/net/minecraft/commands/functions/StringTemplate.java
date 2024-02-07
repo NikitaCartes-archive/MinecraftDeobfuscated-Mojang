@@ -60,12 +60,14 @@ public record StringTemplate(List<String> segments, List<String> variables) {
 
 		for (int i = 0; i < this.variables.size(); i++) {
 			stringBuilder.append((String)this.segments.get(i)).append((String)list.get(i));
+			CommandFunction.checkCommandLineLength(stringBuilder);
 		}
 
 		if (this.segments.size() > this.variables.size()) {
 			stringBuilder.append((String)this.segments.get(this.segments.size() - 1));
 		}
 
+		CommandFunction.checkCommandLineLength(stringBuilder);
 		return stringBuilder.toString();
 	}
 }

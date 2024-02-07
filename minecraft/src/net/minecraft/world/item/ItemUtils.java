@@ -14,7 +14,7 @@ public class ItemUtils {
 	}
 
 	public static ItemStack createFilledResult(ItemStack itemStack, Player player, ItemStack itemStack2, boolean bl) {
-		boolean bl2 = player.getAbilities().instabuild;
+		boolean bl2 = player.hasInfiniteMaterials();
 		if (bl && bl2) {
 			if (!player.getInventory().contains(itemStack2)) {
 				player.getInventory().add(itemStack2);
@@ -22,10 +22,7 @@ public class ItemUtils {
 
 			return itemStack;
 		} else {
-			if (!bl2) {
-				itemStack.shrink(1);
-			}
-
+			itemStack.consume(1, player);
 			if (itemStack.isEmpty()) {
 				return itemStack2;
 			} else {

@@ -26,32 +26,30 @@ public interface Registry<T> extends Keyable, IdMap<T> {
 	ResourceKey<? extends Registry<T>> key();
 
 	default Codec<T> byNameCodec() {
-		Codec<T> codec = ResourceLocation.CODEC
-			.flatXmap(
-				resourceLocation -> (DataResult)Optional.ofNullable(this.get(resourceLocation))
-						.map(DataResult::success)
-						.orElseGet(() -> DataResult.error(() -> "Unknown registry key in " + this.key() + ": " + resourceLocation)),
-				object -> (DataResult)this.getResourceKey((T)object)
-						.map(ResourceKey::location)
-						.map(DataResult::success)
-						.orElseGet(() -> DataResult.error(() -> "Unknown registry element in " + this.key() + ":" + object))
-			);
-		Codec<T> codec2 = ExtraCodecs.idResolverCodec(object -> this.getResourceKey((T)object).isPresent() ? this.getId((T)object) : -1, this::byId, -1);
-		return ExtraCodecs.overrideLifecycle(ExtraCodecs.orCompressed(codec, codec2), this::lifecycle, this::lifecycle);
+		return this.referenceHolderWithLifecycle().flatComapMap(Holder.Reference::value, object -> this.safeCastToReference(this.wrapAsHolder((T)object)));
 	}
 
 	default Codec<Holder<T>> holderByNameCodec() {
-		Codec<Holder<T>> codec = ResourceLocation.CODEC
-			.flatXmap(
+		return this.referenceHolderWithLifecycle().flatComapMap(reference -> reference, this::safeCastToReference);
+	}
+
+	private Codec<Holder.Reference<T>> referenceHolderWithLifecycle() {
+		Codec<Holder.Reference<T>> codec = ResourceLocation.CODEC
+			.comapFlatMap(
 				resourceLocation -> (DataResult)this.getHolder(resourceLocation)
 						.map(DataResult::success)
 						.orElseGet(() -> DataResult.error(() -> "Unknown registry key in " + this.key() + ": " + resourceLocation)),
-				holder -> (DataResult)holder.unwrapKey()
-						.map(ResourceKey::location)
-						.map(DataResult::success)
-						.orElseGet(() -> DataResult.error(() -> "Unknown registry element in " + this.key() + ":" + holder))
+				reference -> reference.key().location()
 			);
-		return ExtraCodecs.overrideLifecycle(codec, holder -> this.lifecycle((T)holder.value()), holder -> this.lifecycle((T)holder.value()));
+		return ExtraCodecs.overrideLifecycle(
+			codec, reference -> (Lifecycle)this.registrationInfo(reference.key()).map(RegistrationInfo::lifecycle).orElse(Lifecycle.experimental())
+		);
+	}
+
+	private DataResult<Holder.Reference<T>> safeCastToReference(Holder<T> holder) {
+		return holder instanceof Holder.Reference<T> reference
+			? DataResult.success(reference)
+			: DataResult.error(() -> "Unregistered holder in " + this.key() + ": " + holder);
 	}
 
 	@Override
@@ -73,7 +71,7 @@ public interface Registry<T> extends Keyable, IdMap<T> {
 	@Nullable
 	T get(@Nullable ResourceLocation resourceLocation);
 
-	Lifecycle lifecycle(T object);
+	Optional<RegistrationInfo> registrationInfo(ResourceKey<T> resourceKey);
 
 	Lifecycle registryLifecycle();
 
@@ -119,12 +117,12 @@ public interface Registry<T> extends Keyable, IdMap<T> {
 	}
 
 	static <V, T extends V> T register(Registry<V> registry, ResourceKey<V> resourceKey, T object) {
-		((WritableRegistry)registry).register(resourceKey, (V)object, Lifecycle.stable());
+		((WritableRegistry)registry).register(resourceKey, (V)object, RegistrationInfo.BUILT_IN);
 		return object;
 	}
 
 	static <T> Holder.Reference<T> registerForHolder(Registry<T> registry, ResourceKey<T> resourceKey, T object) {
-		return ((WritableRegistry)registry).register(resourceKey, object, Lifecycle.stable());
+		return ((WritableRegistry)registry).register(resourceKey, object, RegistrationInfo.BUILT_IN);
 	}
 
 	static <T> Holder.Reference<T> registerForHolder(Registry<T> registry, ResourceLocation resourceLocation, T object) {

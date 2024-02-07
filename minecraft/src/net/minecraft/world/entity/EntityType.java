@@ -135,8 +135,9 @@ import net.minecraft.world.entity.projectile.ThrownEnderpearl;
 import net.minecraft.world.entity.projectile.ThrownExperienceBottle;
 import net.minecraft.world.entity.projectile.ThrownPotion;
 import net.minecraft.world.entity.projectile.ThrownTrident;
-import net.minecraft.world.entity.projectile.WindCharge;
 import net.minecraft.world.entity.projectile.WitherSkull;
+import net.minecraft.world.entity.projectile.windcharge.BreezeWindCharge;
+import net.minecraft.world.entity.projectile.windcharge.WindCharge;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.entity.vehicle.ChestBoat;
 import net.minecraft.world.entity.vehicle.Minecart;
@@ -215,6 +216,15 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 			.sized(0.6F, 1.77F)
 			.eyeHeight(1.3452F)
 			.clientTrackingRange(10)
+			.requiredFeatures(FeatureFlags.UPDATE_1_21)
+	);
+	public static final EntityType<BreezeWindCharge> BREEZE_WIND_CHARGE = register(
+		"breeze_wind_charge",
+		EntityType.Builder.<BreezeWindCharge>of(BreezeWindCharge::new, MobCategory.MISC)
+			.sized(0.3125F, 0.3125F)
+			.eyeHeight(0.0F)
+			.clientTrackingRange(4)
+			.updateInterval(10)
 			.requiredFeatures(FeatureFlags.UPDATE_1_21)
 	);
 	public static final EntityType<Camel> CAMEL = register(

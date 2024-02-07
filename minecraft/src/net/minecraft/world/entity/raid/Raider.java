@@ -67,9 +67,9 @@ public abstract class Raider extends PatrollingMonster {
 	}
 
 	@Override
-	protected void defineSynchedData() {
-		super.defineSynchedData();
-		this.entityData.define(IS_CELEBRATING, false);
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		super.defineSynchedData(builder);
+		builder.define(IS_CELEBRATING, false);
 	}
 
 	public abstract void applyRaidBuffs(int i, boolean bl);

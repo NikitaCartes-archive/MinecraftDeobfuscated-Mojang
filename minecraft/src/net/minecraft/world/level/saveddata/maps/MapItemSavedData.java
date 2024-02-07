@@ -106,8 +106,7 @@ public class MapItemSavedData extends SavedData {
 			mapItemSavedData.colors = bs;
 		}
 
-		for (MapBanner mapBanner : (List)MapBanner.CODEC
-			.listOf()
+		for (MapBanner mapBanner : (List)MapBanner.LIST_CODEC
 			.parse(NbtOps.INSTANCE, compoundTag.get("banners"))
 			.resultOrPartial(string -> LOGGER.warn("Failed to parse map banner: '{}'", string))
 			.orElse(List.of())) {
@@ -127,16 +126,18 @@ public class MapItemSavedData extends SavedData {
 
 		for (int k = 0; k < listTag.size(); k++) {
 			MapFrame mapFrame = MapFrame.load(listTag.getCompound(k));
-			mapItemSavedData.frameMarkers.put(mapFrame.getId(), mapFrame);
-			mapItemSavedData.addDecoration(
-				MapDecoration.Type.FRAME,
-				null,
-				"frame-" + mapFrame.getEntityId(),
-				(double)mapFrame.getPos().getX(),
-				(double)mapFrame.getPos().getZ(),
-				(double)mapFrame.getRotation(),
-				null
-			);
+			if (mapFrame != null) {
+				mapItemSavedData.frameMarkers.put(mapFrame.getId(), mapFrame);
+				mapItemSavedData.addDecoration(
+					MapDecoration.Type.FRAME,
+					null,
+					"frame-" + mapFrame.getEntityId(),
+					(double)mapFrame.getPos().getX(),
+					(double)mapFrame.getPos().getZ(),
+					(double)mapFrame.getRotation(),
+					null
+				);
+			}
 		}
 
 		return mapItemSavedData;

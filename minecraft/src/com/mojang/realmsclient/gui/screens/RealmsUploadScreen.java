@@ -297,7 +297,14 @@ public class RealmsUploadScreen extends RealmsScreen {
 									} else if (this.verify(file)) {
 										this.status = Component.translatable("mco.upload.uploading", this.selectedLevel.getLevelName());
 										FileUpload fileUpload = new FileUpload(
-											file, this.realmId, this.slotId, uploadInfo, this.minecraft.getUser(), SharedConstants.getCurrentVersion().getName(), this.uploadStatus
+											file,
+											this.realmId,
+											this.slotId,
+											uploadInfo,
+											this.minecraft.getUser(),
+											SharedConstants.getCurrentVersion().getName(),
+											this.selectedLevel.levelVersion().minecraftVersionName(),
+											this.uploadStatus
 										);
 										fileUpload.upload(uploadResult -> {
 											if (uploadResult.statusCode >= 200 && uploadResult.statusCode < 300) {

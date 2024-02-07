@@ -292,11 +292,11 @@ public class Goat extends Animal {
 	}
 
 	@Override
-	protected void defineSynchedData() {
-		super.defineSynchedData();
-		this.entityData.define(DATA_IS_SCREAMING_GOAT, false);
-		this.entityData.define(DATA_HAS_LEFT_HORN, true);
-		this.entityData.define(DATA_HAS_RIGHT_HORN, true);
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		super.defineSynchedData(builder);
+		builder.define(DATA_IS_SCREAMING_GOAT, false);
+		builder.define(DATA_HAS_LEFT_HORN, true);
+		builder.define(DATA_HAS_RIGHT_HORN, true);
 	}
 
 	public boolean hasLeftHorn() {

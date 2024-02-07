@@ -114,11 +114,11 @@ public class Dolphin extends WaterAnimal {
 	}
 
 	@Override
-	protected void defineSynchedData() {
-		super.defineSynchedData();
-		this.entityData.define(TREASURE_POS, BlockPos.ZERO);
-		this.entityData.define(GOT_FISH, false);
-		this.entityData.define(MOISTNESS_LEVEL, 2400);
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		super.defineSynchedData(builder);
+		builder.define(TREASURE_POS, BlockPos.ZERO);
+		builder.define(GOT_FISH, false);
+		builder.define(MOISTNESS_LEVEL, 2400);
 	}
 
 	@Override
@@ -295,10 +295,7 @@ public class Dolphin extends WaterAnimal {
 			}
 
 			this.setGotFish(true);
-			if (!player.getAbilities().instabuild) {
-				itemStack.shrink(1);
-			}
-
+			itemStack.consume(1, player);
 			return InteractionResult.sidedSuccess(this.level().isClientSide);
 		} else {
 			return super.mobInteract(player, interactionHand);

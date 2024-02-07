@@ -361,6 +361,7 @@ public class ItemModelGenerators {
 		this.generateFlatItem(Items.WATER_BUCKET, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.WHEAT, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.WHITE_DYE, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.WIND_CHARGE, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.WOODEN_AXE, ModelTemplates.FLAT_HANDHELD_ITEM);
 		this.generateFlatItem(Items.WOODEN_HOE, ModelTemplates.FLAT_HANDHELD_ITEM);
 		this.generateFlatItem(Items.WOODEN_PICKAXE, ModelTemplates.FLAT_HANDHELD_ITEM);

@@ -131,12 +131,12 @@ public class Fox extends Animal implements VariantHolder<Fox.Type> {
 	}
 
 	@Override
-	protected void defineSynchedData() {
-		super.defineSynchedData();
-		this.entityData.define(DATA_TRUSTED_ID_0, Optional.empty());
-		this.entityData.define(DATA_TRUSTED_ID_1, Optional.empty());
-		this.entityData.define(DATA_TYPE_ID, 0);
-		this.entityData.define(DATA_FLAGS_ID, (byte)0);
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		super.defineSynchedData(builder);
+		builder.define(DATA_TRUSTED_ID_0, Optional.empty());
+		builder.define(DATA_TRUSTED_ID_1, Optional.empty());
+		builder.define(DATA_TYPE_ID, 0);
+		builder.define(DATA_FLAGS_ID, (byte)0);
 	}
 
 	@Override

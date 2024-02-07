@@ -24,6 +24,10 @@ public class ExplosionDamageCalculator {
 		return true;
 	}
 
+	public float getKnockbackMultiplier() {
+		return 1.0F;
+	}
+
 	public float getEntityDamageAmount(Explosion explosion, Entity entity) {
 		float f = explosion.radius() * 2.0F;
 		Vec3 vec3 = explosion.center();

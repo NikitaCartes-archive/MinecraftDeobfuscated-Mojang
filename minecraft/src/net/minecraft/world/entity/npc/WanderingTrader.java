@@ -161,7 +161,7 @@ public class WanderingTrader extends AbstractVillager {
 		super.addAdditionalSaveData(compoundTag);
 		compoundTag.putInt("DespawnDelay", this.despawnDelay);
 		if (this.wanderTarget != null) {
-			compoundTag.put("WanderTarget", NbtUtils.writeBlockPos(this.wanderTarget));
+			compoundTag.put("wander_target", NbtUtils.writeBlockPos(this.wanderTarget));
 		}
 	}
 
@@ -172,10 +172,7 @@ public class WanderingTrader extends AbstractVillager {
 			this.despawnDelay = compoundTag.getInt("DespawnDelay");
 		}
 
-		if (compoundTag.contains("WanderTarget")) {
-			this.wanderTarget = NbtUtils.readBlockPos(compoundTag.getCompound("WanderTarget"));
-		}
-
+		NbtUtils.readBlockPos(compoundTag, "wander_target").ifPresent(blockPos -> this.wanderTarget = blockPos);
 		this.setAge(Math.max(0, this.getAge()));
 	}
 

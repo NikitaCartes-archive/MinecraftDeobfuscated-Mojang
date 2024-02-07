@@ -118,15 +118,15 @@ public class ArmorStand extends LivingEntity {
 	}
 
 	@Override
-	protected void defineSynchedData() {
-		super.defineSynchedData();
-		this.entityData.define(DATA_CLIENT_FLAGS, (byte)0);
-		this.entityData.define(DATA_HEAD_POSE, DEFAULT_HEAD_POSE);
-		this.entityData.define(DATA_BODY_POSE, DEFAULT_BODY_POSE);
-		this.entityData.define(DATA_LEFT_ARM_POSE, DEFAULT_LEFT_ARM_POSE);
-		this.entityData.define(DATA_RIGHT_ARM_POSE, DEFAULT_RIGHT_ARM_POSE);
-		this.entityData.define(DATA_LEFT_LEG_POSE, DEFAULT_LEFT_LEG_POSE);
-		this.entityData.define(DATA_RIGHT_LEG_POSE, DEFAULT_RIGHT_LEG_POSE);
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		super.defineSynchedData(builder);
+		builder.define(DATA_CLIENT_FLAGS, (byte)0);
+		builder.define(DATA_HEAD_POSE, DEFAULT_HEAD_POSE);
+		builder.define(DATA_BODY_POSE, DEFAULT_BODY_POSE);
+		builder.define(DATA_LEFT_ARM_POSE, DEFAULT_LEFT_ARM_POSE);
+		builder.define(DATA_RIGHT_ARM_POSE, DEFAULT_RIGHT_ARM_POSE);
+		builder.define(DATA_LEFT_LEG_POSE, DEFAULT_LEFT_LEG_POSE);
+		builder.define(DATA_RIGHT_LEG_POSE, DEFAULT_RIGHT_LEG_POSE);
 	}
 
 	@Override
@@ -149,6 +149,11 @@ public class ArmorStand extends LivingEntity {
 			default:
 				return ItemStack.EMPTY;
 		}
+	}
+
+	@Override
+	public boolean canUseSlot(EquipmentSlot equipmentSlot) {
+		return equipmentSlot != EquipmentSlot.BODY;
 	}
 
 	@Override
@@ -365,7 +370,7 @@ public class ArmorStand extends LivingEntity {
 			return false;
 		} else if (itemStack2.isEmpty() && (this.disabledSlots & 1 << equipmentSlot.getFilterFlag() + 16) != 0) {
 			return false;
-		} else if (player.getAbilities().instabuild && itemStack2.isEmpty() && !itemStack.isEmpty()) {
+		} else if (player.hasInfiniteMaterials() && itemStack2.isEmpty() && !itemStack.isEmpty()) {
 			this.setItemSlot(equipmentSlot, itemStack.copyWithCount(1));
 			return true;
 		} else if (itemStack.isEmpty() || itemStack.getCount() <= 1) {

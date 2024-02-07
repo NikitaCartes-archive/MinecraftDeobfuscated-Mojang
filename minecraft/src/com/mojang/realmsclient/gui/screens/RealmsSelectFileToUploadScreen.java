@@ -29,8 +29,8 @@ public class RealmsSelectFileToUploadScreen extends RealmsScreen {
 	public static final Component TITLE = Component.translatable("mco.upload.select.world.title");
 	private static final Component UNABLE_TO_LOAD_WORLD = Component.translatable("selectWorld.unable_to_load");
 	static final Component WORLD_TEXT = Component.translatable("selectWorld.world");
-	static final Component HARDCORE_TEXT = Component.translatable("mco.upload.hardcore").withColor(-65536);
-	static final Component COMMANDS_TEXT = Component.translatable("selectWorld.commands");
+	private static final Component HARDCORE_TEXT = Component.translatable("mco.upload.hardcore").withColor(-65536);
+	private static final Component COMMANDS_TEXT = Component.translatable("selectWorld.commands");
 	private static final DateFormat DATE_FORMAT = new SimpleDateFormat();
 	@Nullable
 	private final RealmCreationTask realmCreationTask;
@@ -134,18 +134,7 @@ public class RealmsSelectFileToUploadScreen extends RealmsScreen {
 			this.levelSummary = levelSummary;
 			this.name = levelSummary.getLevelName();
 			this.id = Component.translatable("mco.upload.entry.id", levelSummary.getLevelId(), RealmsSelectFileToUploadScreen.formatLastPlayed(levelSummary));
-			Component component;
-			if (levelSummary.isHardcore()) {
-				component = RealmsSelectFileToUploadScreen.HARDCORE_TEXT;
-			} else {
-				component = RealmsSelectFileToUploadScreen.gameModeName(levelSummary);
-			}
-
-			if (levelSummary.hasCommands()) {
-				component = Component.translatable("mco.upload.entry.commands", component.getString(), RealmsSelectFileToUploadScreen.COMMANDS_TEXT);
-			}
-
-			this.info = component;
+			this.info = levelSummary.getInfo();
 		}
 
 		@Override

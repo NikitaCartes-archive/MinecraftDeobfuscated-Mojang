@@ -35,6 +35,7 @@ import net.minecraft.world.entity.projectile.SpectralArrow;
 import net.minecraft.world.entity.projectile.ThrownEgg;
 import net.minecraft.world.entity.projectile.ThrownExperienceBottle;
 import net.minecraft.world.entity.projectile.ThrownPotion;
+import net.minecraft.world.entity.projectile.windcharge.WindCharge;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.BoneMealItem;
@@ -342,6 +343,33 @@ public interface DispenseItemBehavior {
 				blockSource.level().levelEvent(1018, blockSource.pos(), 0);
 			}
 		});
+		DispenserBlock.registerBehavior(
+			Items.WIND_CHARGE,
+			new DefaultDispenseItemBehavior() {
+				@Override
+				public ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
+					Direction direction = blockSource.state().getValue(DispenserBlock.FACING);
+					Position position = DispenserBlock.getDispensePosition(blockSource);
+					Level level = blockSource.level();
+					RandomSource randomSource = level.random;
+					double d = randomSource.triangle((double)direction.getStepX(), 0.11485000000000001);
+					double e = randomSource.triangle((double)direction.getStepY(), 0.11485000000000001);
+					double f = randomSource.triangle((double)direction.getStepZ(), 0.11485000000000001);
+					WindCharge windCharge = new WindCharge(
+						level,
+						position.x() + (double)((float)direction.getStepX() * 0.3F),
+						position.y() + (double)((float)direction.getStepY() * 0.3F),
+						position.z() + (double)((float)direction.getStepZ() * 0.3F),
+						d,
+						e,
+						f
+					);
+					level.addFreshEntity(windCharge);
+					itemStack.shrink(1);
+					return itemStack;
+				}
+			}
+		);
 		DispenserBlock.registerBehavior(Items.OAK_BOAT, new BoatDispenseItemBehavior(Boat.Type.OAK));
 		DispenserBlock.registerBehavior(Items.SPRUCE_BOAT, new BoatDispenseItemBehavior(Boat.Type.SPRUCE));
 		DispenserBlock.registerBehavior(Items.BIRCH_BOAT, new BoatDispenseItemBehavior(Boat.Type.BIRCH));

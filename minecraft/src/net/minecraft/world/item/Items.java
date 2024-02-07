@@ -1330,6 +1330,7 @@ public class Items {
 	);
 	public static final Item EXPERIENCE_BOTTLE = registerItem("experience_bottle", new ExperienceBottleItem(new Item.Properties().rarity(Rarity.UNCOMMON)));
 	public static final Item FIRE_CHARGE = registerItem("fire_charge", new FireChargeItem(new Item.Properties()));
+	public static final Item WIND_CHARGE = registerItem("wind_charge", new WindChargeItem(new Item.Properties().requiredFeatures(FeatureFlags.UPDATE_1_21)));
 	public static final Item WRITABLE_BOOK = registerItem("writable_book", new WritableBookItem(new Item.Properties().stacksTo(1)));
 	public static final Item WRITTEN_BOOK = registerItem("written_book", new WrittenBookItem(new Item.Properties().stacksTo(16)));
 	public static final Item ITEM_FRAME = registerItem("item_frame", new ItemFrameItem(EntityType.ITEM_FRAME, new Item.Properties()));

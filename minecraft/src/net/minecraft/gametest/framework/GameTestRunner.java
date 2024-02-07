@@ -123,6 +123,10 @@ public class GameTestRunner {
 
 	private void runScheduledRerunTests() {
 		if (!this.scheduledForRerun.isEmpty()) {
+			LOGGER.info(
+				"Starting re-run of tests: {}",
+				this.scheduledForRerun.stream().map(gameTestInfo -> gameTestInfo.getTestFunction().testName()).collect(Collectors.joining(", "))
+			);
 			this.batches = ImmutableList.copyOf(this.testBatcher.batch(this.scheduledForRerun));
 			this.scheduledForRerun.clear();
 			this.stopped = false;
@@ -138,7 +142,7 @@ public class GameTestRunner {
 	}
 
 	private Collection<GameTestInfo> createStructuresForBatch(Collection<GameTestInfo> collection) {
-		return (Collection<GameTestInfo>)collection.stream().map(this::spawn).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
+		return collection.stream().map(this::spawn).flatMap(Optional::stream).toList();
 	}
 
 	private Optional<GameTestInfo> spawn(GameTestInfo gameTestInfo) {

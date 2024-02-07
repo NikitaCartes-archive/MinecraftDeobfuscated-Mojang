@@ -40,10 +40,7 @@ public class ExperienceBottleItem extends Item {
 		}
 
 		player.awardStat(Stats.ITEM_USED.get(this));
-		if (!player.getAbilities().instabuild) {
-			itemStack.shrink(1);
-		}
-
+		itemStack.consume(1, player);
 		return InteractionResultHolder.sidedSuccess(itemStack, level.isClientSide());
 	}
 }

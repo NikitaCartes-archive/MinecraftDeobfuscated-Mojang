@@ -60,14 +60,14 @@ public abstract class Display extends Entity {
 	private static final EntityDataAccessor<Float> DATA_HEIGHT_ID = SynchedEntityData.defineId(Display.class, EntityDataSerializers.FLOAT);
 	private static final EntityDataAccessor<Integer> DATA_GLOW_COLOR_OVERRIDE_ID = SynchedEntityData.defineId(Display.class, EntityDataSerializers.INT);
 	private static final IntSet RENDER_STATE_IDS = IntSet.of(
-		DATA_TRANSLATION_ID.getId(),
-		DATA_SCALE_ID.getId(),
-		DATA_LEFT_ROTATION_ID.getId(),
-		DATA_RIGHT_ROTATION_ID.getId(),
-		DATA_BILLBOARD_RENDER_CONSTRAINTS_ID.getId(),
-		DATA_BRIGHTNESS_OVERRIDE_ID.getId(),
-		DATA_SHADOW_RADIUS_ID.getId(),
-		DATA_SHADOW_STRENGTH_ID.getId()
+		DATA_TRANSLATION_ID.id(),
+		DATA_SCALE_ID.id(),
+		DATA_LEFT_ROTATION_ID.id(),
+		DATA_RIGHT_ROTATION_ID.id(),
+		DATA_BILLBOARD_RENDER_CONSTRAINTS_ID.id(),
+		DATA_BRIGHTNESS_OVERRIDE_ID.id(),
+		DATA_SHADOW_RADIUS_ID.id(),
+		DATA_SHADOW_STRENGTH_ID.id()
 	);
 	private static final float INITIAL_SHADOW_RADIUS = 0.0F;
 	private static final float INITIAL_SHADOW_STRENGTH = 1.0F;
@@ -118,7 +118,7 @@ public abstract class Display extends Entity {
 			this.updateInterpolationDuration = true;
 		}
 
-		if (RENDER_STATE_IDS.contains(entityDataAccessor.getId())) {
+		if (RENDER_STATE_IDS.contains(entityDataAccessor.id())) {
 			this.updateRenderState = true;
 		}
 	}
@@ -181,22 +181,22 @@ public abstract class Display extends Entity {
 	protected abstract void updateRenderSubState(boolean bl, float f);
 
 	@Override
-	protected void defineSynchedData() {
-		this.entityData.define(DATA_POS_ROT_INTERPOLATION_DURATION_ID, 0);
-		this.entityData.define(DATA_TRANSFORMATION_INTERPOLATION_START_DELTA_TICKS_ID, 0);
-		this.entityData.define(DATA_TRANSFORMATION_INTERPOLATION_DURATION_ID, 0);
-		this.entityData.define(DATA_TRANSLATION_ID, new Vector3f());
-		this.entityData.define(DATA_SCALE_ID, new Vector3f(1.0F, 1.0F, 1.0F));
-		this.entityData.define(DATA_RIGHT_ROTATION_ID, new Quaternionf());
-		this.entityData.define(DATA_LEFT_ROTATION_ID, new Quaternionf());
-		this.entityData.define(DATA_BILLBOARD_RENDER_CONSTRAINTS_ID, Display.BillboardConstraints.FIXED.getId());
-		this.entityData.define(DATA_BRIGHTNESS_OVERRIDE_ID, -1);
-		this.entityData.define(DATA_VIEW_RANGE_ID, 1.0F);
-		this.entityData.define(DATA_SHADOW_RADIUS_ID, 0.0F);
-		this.entityData.define(DATA_SHADOW_STRENGTH_ID, 1.0F);
-		this.entityData.define(DATA_WIDTH_ID, 0.0F);
-		this.entityData.define(DATA_HEIGHT_ID, 0.0F);
-		this.entityData.define(DATA_GLOW_COLOR_OVERRIDE_ID, -1);
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		builder.define(DATA_POS_ROT_INTERPOLATION_DURATION_ID, 0);
+		builder.define(DATA_TRANSFORMATION_INTERPOLATION_START_DELTA_TICKS_ID, 0);
+		builder.define(DATA_TRANSFORMATION_INTERPOLATION_DURATION_ID, 0);
+		builder.define(DATA_TRANSLATION_ID, new Vector3f());
+		builder.define(DATA_SCALE_ID, new Vector3f(1.0F, 1.0F, 1.0F));
+		builder.define(DATA_RIGHT_ROTATION_ID, new Quaternionf());
+		builder.define(DATA_LEFT_ROTATION_ID, new Quaternionf());
+		builder.define(DATA_BILLBOARD_RENDER_CONSTRAINTS_ID, Display.BillboardConstraints.FIXED.getId());
+		builder.define(DATA_BRIGHTNESS_OVERRIDE_ID, -1);
+		builder.define(DATA_VIEW_RANGE_ID, 1.0F);
+		builder.define(DATA_SHADOW_RADIUS_ID, 0.0F);
+		builder.define(DATA_SHADOW_STRENGTH_ID, 1.0F);
+		builder.define(DATA_WIDTH_ID, 0.0F);
+		builder.define(DATA_HEIGHT_ID, 0.0F);
+		builder.define(DATA_GLOW_COLOR_OVERRIDE_ID, -1);
 	}
 
 	@Override
@@ -548,9 +548,9 @@ public abstract class Display extends Entity {
 		}
 
 		@Override
-		protected void defineSynchedData() {
-			super.defineSynchedData();
-			this.entityData.define(DATA_BLOCK_STATE_ID, Blocks.AIR.defaultBlockState());
+		protected void defineSynchedData(SynchedEntityData.Builder builder) {
+			super.defineSynchedData(builder);
+			builder.define(DATA_BLOCK_STATE_ID, Blocks.AIR.defaultBlockState());
 		}
 
 		@Override
@@ -656,10 +656,10 @@ public abstract class Display extends Entity {
 		}
 
 		@Override
-		protected void defineSynchedData() {
-			super.defineSynchedData();
-			this.entityData.define(DATA_ITEM_STACK_ID, ItemStack.EMPTY);
-			this.entityData.define(DATA_ITEM_DISPLAY_ID, ItemDisplayContext.NONE.getId());
+		protected void defineSynchedData(SynchedEntityData.Builder builder) {
+			super.defineSynchedData(builder);
+			builder.define(DATA_ITEM_STACK_ID, ItemStack.EMPTY);
+			builder.define(DATA_ITEM_DISPLAY_ID, ItemDisplayContext.NONE.getId());
 		}
 
 		@Override
@@ -799,7 +799,7 @@ public abstract class Display extends Entity {
 		private static final EntityDataAccessor<Byte> DATA_TEXT_OPACITY_ID = SynchedEntityData.defineId(Display.TextDisplay.class, EntityDataSerializers.BYTE);
 		private static final EntityDataAccessor<Byte> DATA_STYLE_FLAGS_ID = SynchedEntityData.defineId(Display.TextDisplay.class, EntityDataSerializers.BYTE);
 		private static final IntSet TEXT_RENDER_STATE_IDS = IntSet.of(
-			DATA_TEXT_ID.getId(), DATA_LINE_WIDTH_ID.getId(), DATA_BACKGROUND_COLOR_ID.getId(), DATA_TEXT_OPACITY_ID.getId(), DATA_STYLE_FLAGS_ID.getId()
+			DATA_TEXT_ID.id(), DATA_LINE_WIDTH_ID.id(), DATA_BACKGROUND_COLOR_ID.id(), DATA_TEXT_OPACITY_ID.id(), DATA_STYLE_FLAGS_ID.id()
 		);
 		@Nullable
 		private Display.TextDisplay.CachedInfo clientDisplayCache;
@@ -811,19 +811,19 @@ public abstract class Display extends Entity {
 		}
 
 		@Override
-		protected void defineSynchedData() {
-			super.defineSynchedData();
-			this.entityData.define(DATA_TEXT_ID, Component.empty());
-			this.entityData.define(DATA_LINE_WIDTH_ID, 200);
-			this.entityData.define(DATA_BACKGROUND_COLOR_ID, 1073741824);
-			this.entityData.define(DATA_TEXT_OPACITY_ID, (byte)-1);
-			this.entityData.define(DATA_STYLE_FLAGS_ID, (byte)0);
+		protected void defineSynchedData(SynchedEntityData.Builder builder) {
+			super.defineSynchedData(builder);
+			builder.define(DATA_TEXT_ID, Component.empty());
+			builder.define(DATA_LINE_WIDTH_ID, 200);
+			builder.define(DATA_BACKGROUND_COLOR_ID, 1073741824);
+			builder.define(DATA_TEXT_OPACITY_ID, (byte)-1);
+			builder.define(DATA_STYLE_FLAGS_ID, (byte)0);
 		}
 
 		@Override
 		public void onSyncedDataUpdated(EntityDataAccessor<?> entityDataAccessor) {
 			super.onSyncedDataUpdated(entityDataAccessor);
-			if (TEXT_RENDER_STATE_IDS.contains(entityDataAccessor.getId())) {
+			if (TEXT_RENDER_STATE_IDS.contains(entityDataAccessor.id())) {
 				this.updateRenderState = true;
 			}
 		}

@@ -17,6 +17,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Stream;
 import net.minecraft.Util;
+import net.minecraft.util.datafix.ExtraDataFixUtils;
 import net.minecraft.util.datafix.schemas.NamespacedSchema;
 
 public class MobEffectIdFix extends DataFix {
@@ -67,21 +68,9 @@ public class MobEffectIdFix extends DataFix {
 		return dynamic.get(string).asNumber().result().map(number -> ID_MAP.get(number.intValue())).map(dynamic::createString);
 	}
 
-	private static <T> Dynamic<T> setFieldIfPresent(Dynamic<T> dynamic, String string, Optional<Dynamic<T>> optional) {
-		return optional.isEmpty() ? dynamic : dynamic.set(string, (Dynamic<?>)optional.get());
-	}
-
-	private static <T> Dynamic<T> replaceField(Dynamic<T> dynamic, String string, String string2, Optional<Dynamic<T>> optional) {
-		return setFieldIfPresent(dynamic.remove(string), string2, optional);
-	}
-
-	private static <T> Dynamic<T> renameField(Dynamic<T> dynamic, String string, String string2) {
-		return setFieldIfPresent(dynamic.remove(string), string2, dynamic.get(string).result());
-	}
-
 	private static <T> Dynamic<T> updateMobEffectIdField(Dynamic<T> dynamic, String string, Dynamic<T> dynamic2, String string2) {
 		Optional<Dynamic<T>> optional = getAndConvertMobEffectId(dynamic, string);
-		return replaceField(dynamic2, string, string2, optional);
+		return ExtraDataFixUtils.replaceField(dynamic2, string, string2, optional);
 	}
 
 	private static <T> Dynamic<T> updateMobEffectIdField(Dynamic<T> dynamic, String string, String string2) {
@@ -90,13 +79,13 @@ public class MobEffectIdFix extends DataFix {
 
 	private static <T> Dynamic<T> updateMobEffectInstance(Dynamic<T> dynamic) {
 		dynamic = updateMobEffectIdField(dynamic, "Id", "id");
-		dynamic = renameField(dynamic, "Ambient", "ambient");
-		dynamic = renameField(dynamic, "Amplifier", "amplifier");
-		dynamic = renameField(dynamic, "Duration", "duration");
-		dynamic = renameField(dynamic, "ShowParticles", "show_particles");
-		dynamic = renameField(dynamic, "ShowIcon", "show_icon");
+		dynamic = ExtraDataFixUtils.renameField(dynamic, "Ambient", "ambient");
+		dynamic = ExtraDataFixUtils.renameField(dynamic, "Amplifier", "amplifier");
+		dynamic = ExtraDataFixUtils.renameField(dynamic, "Duration", "duration");
+		dynamic = ExtraDataFixUtils.renameField(dynamic, "ShowParticles", "show_particles");
+		dynamic = ExtraDataFixUtils.renameField(dynamic, "ShowIcon", "show_icon");
 		Optional<Dynamic<T>> optional = dynamic.get("HiddenEffect").result().map(MobEffectIdFix::updateMobEffectInstance);
-		return replaceField(dynamic, "HiddenEffect", "hidden_effect", optional);
+		return ExtraDataFixUtils.replaceField(dynamic, "HiddenEffect", "hidden_effect", optional);
 	}
 
 	private static <T> Dynamic<T> updateMobEffectInstanceList(Dynamic<T> dynamic, String string, String string2) {
@@ -104,13 +93,13 @@ public class MobEffectIdFix extends DataFix {
 			.asStreamOpt()
 			.result()
 			.map(stream -> dynamic.createList(stream.map(MobEffectIdFix::updateMobEffectInstance)));
-		return replaceField(dynamic, string, string2, optional);
+		return ExtraDataFixUtils.replaceField(dynamic, string, string2, optional);
 	}
 
 	private static <T> Dynamic<T> updateSuspiciousStewEntry(Dynamic<T> dynamic, Dynamic<T> dynamic2) {
 		dynamic2 = updateMobEffectIdField(dynamic, "EffectId", dynamic2, "id");
 		Optional<Dynamic<T>> optional = dynamic.get("EffectDuration").result();
-		return replaceField(dynamic2, "EffectDuration", "duration", optional);
+		return ExtraDataFixUtils.replaceField(dynamic2, "EffectDuration", "duration", optional);
 	}
 
 	private static <T> Dynamic<T> updateSuspiciousStewEntry(Dynamic<T> dynamic) {
@@ -175,7 +164,7 @@ public class MobEffectIdFix extends DataFix {
 			.asStreamOpt()
 			.result()
 			.map(stream -> dynamic.createList(stream.map(MobEffectIdFix::updateSuspiciousStewEntry)));
-		return replaceField(dynamic, "Effects", "effects", optional);
+		return ExtraDataFixUtils.replaceField(dynamic, "Effects", "effects", optional);
 	}
 
 	private TypeRewriteRule itemStackFixer() {

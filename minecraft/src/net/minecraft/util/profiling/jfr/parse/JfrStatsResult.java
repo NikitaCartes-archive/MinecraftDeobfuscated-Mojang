@@ -10,10 +10,12 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.minecraft.util.profiling.jfr.serialize.JfrResultJsonSerializer;
 import net.minecraft.util.profiling.jfr.stats.ChunkGenStat;
+import net.minecraft.util.profiling.jfr.stats.ChunkIdentification;
 import net.minecraft.util.profiling.jfr.stats.CpuLoadStat;
 import net.minecraft.util.profiling.jfr.stats.FileIOStat;
 import net.minecraft.util.profiling.jfr.stats.GcHeapStat;
-import net.minecraft.util.profiling.jfr.stats.NetworkPacketSummary;
+import net.minecraft.util.profiling.jfr.stats.IoSummary;
+import net.minecraft.util.profiling.jfr.stats.PacketIdentification;
 import net.minecraft.util.profiling.jfr.stats.ThreadAllocationStat;
 import net.minecraft.util.profiling.jfr.stats.TickTimeStat;
 import net.minecraft.util.profiling.jfr.stats.TimedStatSummary;
@@ -28,8 +30,10 @@ public record JfrStatsResult(
 	List<CpuLoadStat> cpuLoadStats,
 	GcHeapStat.Summary heapSummary,
 	ThreadAllocationStat.Summary threadAllocationSummary,
-	NetworkPacketSummary receivedPacketsSummary,
-	NetworkPacketSummary sentPacketsSummary,
+	IoSummary<PacketIdentification> receivedPacketsSummary,
+	IoSummary<PacketIdentification> sentPacketsSummary,
+	IoSummary<ChunkIdentification> writtenChunks,
+	IoSummary<ChunkIdentification> readChunks,
 	FileIOStat.Summary fileWrites,
 	FileIOStat.Summary fileReads,
 	List<ChunkGenStat> chunkGenStats

@@ -274,9 +274,9 @@ public class Hoglin extends Animal implements Enemy, HoglinBase {
 	}
 
 	@Override
-	protected void defineSynchedData() {
-		super.defineSynchedData();
-		this.entityData.define(DATA_IMMUNE_TO_ZOMBIFICATION, false);
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		super.defineSynchedData(builder);
+		builder.define(DATA_IMMUNE_TO_ZOMBIFICATION, false);
 	}
 
 	@Override

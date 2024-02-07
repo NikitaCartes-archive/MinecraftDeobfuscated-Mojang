@@ -44,6 +44,7 @@ import net.minecraft.util.datafix.fixes.BlockEntitySignDoubleSidedEditableTextFi
 import net.minecraft.util.datafix.fixes.BlockEntitySignTextStrictJsonFix;
 import net.minecraft.util.datafix.fixes.BlockEntityUUIDFix;
 import net.minecraft.util.datafix.fixes.BlockNameFlatteningFix;
+import net.minecraft.util.datafix.fixes.BlockPosFormatAndRenamesFix;
 import net.minecraft.util.datafix.fixes.BlockRenameFix;
 import net.minecraft.util.datafix.fixes.BlockStateStructureTemplateFix;
 import net.minecraft.util.datafix.fixes.CatTypeFix;
@@ -139,6 +140,7 @@ import net.minecraft.util.datafix.fixes.LevelDataGeneratorOptionsFix;
 import net.minecraft.util.datafix.fixes.LevelFlatGeneratorInfoFix;
 import net.minecraft.util.datafix.fixes.LevelLegacyWorldGenSettingsFix;
 import net.minecraft.util.datafix.fixes.LevelUUIDFix;
+import net.minecraft.util.datafix.fixes.MapBannerBlockPosFormatFix;
 import net.minecraft.util.datafix.fixes.MapIdFix;
 import net.minecraft.util.datafix.fixes.MemoryExpiryDataFix;
 import net.minecraft.util.datafix.fixes.MissingDimensionFix;
@@ -745,7 +747,34 @@ public class DataFixers {
 		Schema schema111 = dataFixerBuilder.addSchema(2522, V2522::new);
 		dataFixerBuilder.addFixer(new AddNewChoices(schema111, "Added Zoglin", References.ENTITY));
 		Schema schema112 = dataFixerBuilder.addSchema(2523, SAME_NAMESPACED);
-		dataFixerBuilder.addFixer(new AttributesRename(schema112));
+		dataFixerBuilder.addFixer(
+			new AttributesRename(
+				schema112,
+				"Attribute renames",
+				createRenamer(
+					ImmutableMap.<String, String>builder()
+						.put("generic.maxHealth", "generic.max_health")
+						.put("Max Health", "generic.max_health")
+						.put("zombie.spawnReinforcements", "zombie.spawn_reinforcements")
+						.put("Spawn Reinforcements Chance", "zombie.spawn_reinforcements")
+						.put("horse.jumpStrength", "horse.jump_strength")
+						.put("Jump Strength", "horse.jump_strength")
+						.put("generic.followRange", "generic.follow_range")
+						.put("Follow Range", "generic.follow_range")
+						.put("generic.knockbackResistance", "generic.knockback_resistance")
+						.put("Knockback Resistance", "generic.knockback_resistance")
+						.put("generic.movementSpeed", "generic.movement_speed")
+						.put("Movement Speed", "generic.movement_speed")
+						.put("generic.flyingSpeed", "generic.flying_speed")
+						.put("Flying Speed", "generic.flying_speed")
+						.put("generic.attackDamage", "generic.attack_damage")
+						.put("generic.attackKnockback", "generic.attack_knockback")
+						.put("generic.attackSpeed", "generic.attack_speed")
+						.put("generic.armorToughness", "generic.armor_toughness")
+						.build()
+				)
+			)
+		);
 		Schema schema113 = dataFixerBuilder.addSchema(2527, SAME_NAMESPACED);
 		dataFixerBuilder.addFixer(new BitStorageAlignFix(schema113));
 		Schema schema114 = dataFixerBuilder.addSchema(2528, SAME_NAMESPACED);
@@ -1205,12 +1234,22 @@ public class DataFixers {
 		);
 		Schema schema202 = dataFixerBuilder.addSchema(3807, V3807::new);
 		dataFixerBuilder.addFixer(new AddNewChoices(schema202, "Added Vault", References.BLOCK_ENTITY));
-		Schema schema203 = dataFixerBuilder.addSchema(3808, V3808::new);
-		dataFixerBuilder.addFixer(new HorseBodyArmorItemFix(schema203, "minecraft:horse", "ArmorItem"));
-		Schema schema204 = dataFixerBuilder.addSchema(3808, 1, V3808_1::new);
-		dataFixerBuilder.addFixer(new HorseBodyArmorItemFix(schema204, "minecraft:llama", "DecorItem"));
-		Schema schema205 = dataFixerBuilder.addSchema(3809, SAME_NAMESPACED);
-		dataFixerBuilder.addFixer(new ChestedHorsesInventoryZeroIndexingFix(schema205));
+		Schema schema203 = dataFixerBuilder.addSchema(3807, 1, SAME_NAMESPACED);
+		dataFixerBuilder.addFixer(new MapBannerBlockPosFormatFix(schema203));
+		Schema schema204 = dataFixerBuilder.addSchema(3808, V3808::new);
+		dataFixerBuilder.addFixer(new HorseBodyArmorItemFix(schema204, "minecraft:horse", "ArmorItem"));
+		Schema schema205 = dataFixerBuilder.addSchema(3808, 1, V3808_1::new);
+		dataFixerBuilder.addFixer(new HorseBodyArmorItemFix(schema205, "minecraft:llama", "DecorItem"));
+		Schema schema206 = dataFixerBuilder.addSchema(3809, SAME_NAMESPACED);
+		dataFixerBuilder.addFixer(new ChestedHorsesInventoryZeroIndexingFix(schema206));
+		Schema schema207 = dataFixerBuilder.addSchema(3812, SAME_NAMESPACED);
+		dataFixerBuilder.addFixer(new FixWolfHealth(schema207));
+		Schema schema208 = dataFixerBuilder.addSchema(3813, SAME_NAMESPACED);
+		dataFixerBuilder.addFixer(new BlockPosFormatAndRenamesFix(schema208));
+		Schema schema209 = dataFixerBuilder.addSchema(3814, SAME_NAMESPACED);
+		dataFixerBuilder.addFixer(
+			new AttributesRename(schema209, "Rename jump strength attribute", createRenamer("minecraft:horse.jump_strength", "minecraft:generic.jump_strength"))
+		);
 	}
 
 	private static UnaryOperator<String> createRenamer(Map<String, String> map) {

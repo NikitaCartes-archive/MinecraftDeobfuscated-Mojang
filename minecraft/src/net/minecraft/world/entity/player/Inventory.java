@@ -253,7 +253,7 @@ public class Inventory implements Container, Nameable {
 						this.items.set(i, itemStack.copyAndClear());
 						this.items.get(i).setPopTime(5);
 						return true;
-					} else if (this.player.getAbilities().instabuild) {
+					} else if (this.player.hasInfiniteMaterials()) {
 						itemStack.setCount(0);
 						return true;
 					} else {
@@ -270,7 +270,7 @@ public class Inventory implements Container, Nameable {
 						}
 					} while (!itemStack.isEmpty() && itemStack.getCount() < j);
 
-					if (itemStack.getCount() == j && this.player.getAbilities().instabuild) {
+					if (itemStack.getCount() == j && this.player.hasInfiniteMaterials()) {
 						itemStack.setCount(0);
 						return true;
 					} else {

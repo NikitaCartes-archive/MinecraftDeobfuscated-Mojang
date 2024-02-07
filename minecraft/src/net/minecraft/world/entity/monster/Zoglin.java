@@ -141,9 +141,9 @@ public class Zoglin extends Monster implements Enemy, HoglinBase {
 	}
 
 	@Override
-	protected void defineSynchedData() {
-		super.defineSynchedData();
-		this.entityData.define(DATA_BABY_ID, false);
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		super.defineSynchedData(builder);
+		builder.define(DATA_BABY_ID, false);
 	}
 
 	@Override

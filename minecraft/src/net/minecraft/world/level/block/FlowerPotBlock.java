@@ -68,10 +68,7 @@ public class FlowerPotBlock extends Block {
 			level.setBlock(blockPos, blockState2, 3);
 			level.gameEvent(player, GameEvent.BLOCK_CHANGE, blockPos);
 			player.awardStat(Stats.POT_FLOWER);
-			if (!player.getAbilities().instabuild) {
-				itemStack.shrink(1);
-			}
-
+			itemStack.consume(1, player);
 			return ItemInteractionResult.sidedSuccess(level.isClientSide);
 		}
 	}

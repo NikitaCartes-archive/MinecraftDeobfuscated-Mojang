@@ -73,9 +73,9 @@ public class Witch extends Raider implements RangedAttackMob {
 	}
 
 	@Override
-	protected void defineSynchedData() {
-		super.defineSynchedData();
-		this.getEntityData().define(DATA_USING_ITEM, false);
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		super.defineSynchedData(builder);
+		builder.define(DATA_USING_ITEM, false);
 	}
 
 	@Override

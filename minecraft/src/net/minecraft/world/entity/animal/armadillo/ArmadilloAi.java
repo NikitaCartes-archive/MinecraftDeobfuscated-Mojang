@@ -7,10 +7,10 @@ import java.util.Map;
 import java.util.Set;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.TimeUtil;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.AnimalMakeLove;
 import net.minecraft.world.entity.ai.behavior.AnimalPanic;
@@ -148,7 +148,7 @@ public class ArmadilloAi {
 		brain.addActivityWithConditions(
 			Activity.PANIC,
 			ImmutableList.of(Pair.of(0, new ArmadilloAi.ArmadilloBallUp())),
-			Set.of(Pair.of(MemoryModuleType.DANGER_DETECTED_RECENTLY, MemoryStatus.VALUE_PRESENT))
+			Set.of(Pair.of(MemoryModuleType.DANGER_DETECTED_RECENTLY, MemoryStatus.VALUE_PRESENT), Pair.of(MemoryModuleType.IS_PANICKING, MemoryStatus.VALUE_ABSENT))
 		);
 	}
 
@@ -161,18 +161,54 @@ public class ArmadilloAi {
 	}
 
 	public static class ArmadilloBallUp extends Behavior<Armadillo> {
+		static final int BALL_UP_STAY_IN_STATE = 5 * TimeUtil.SECONDS_PER_MINUTE * 20;
+		static final int TICKS_DELAY_TO_DETERMINE_IF_DANGER_IS_STILL_AROUND = 5;
+		static final int DANGER_DETECTED_RECENTLY_DANGER_THRESHOLD = 75;
+		int nextPeekTimer = 0;
+		boolean dangerWasAround;
+
 		public ArmadilloBallUp() {
-			super(Map.of());
+			super(Map.of(), BALL_UP_STAY_IN_STATE);
 		}
 
 		protected void tick(ServerLevel serverLevel, Armadillo armadillo, long l) {
 			super.tick(serverLevel, armadillo, l);
+			if (this.nextPeekTimer > 0) {
+				this.nextPeekTimer--;
+			}
+
 			if (armadillo.shouldSwitchToScaredState()) {
 				armadillo.switchToState(Armadillo.ArmadilloState.SCARED);
 				if (armadillo.onGround()) {
 					armadillo.playSound(SoundEvents.ARMADILLO_LAND);
 				}
+			} else {
+				Armadillo.ArmadilloState armadilloState = armadillo.getState();
+				long m = armadillo.getBrain().getTimeUntilExpiry(MemoryModuleType.DANGER_DETECTED_RECENTLY);
+				boolean bl = m > 75L;
+				if (bl != this.dangerWasAround) {
+					this.nextPeekTimer = this.pickNextPeekTimer(armadillo);
+				}
+
+				this.dangerWasAround = bl;
+				if (armadilloState == Armadillo.ArmadilloState.SCARED) {
+					if (this.nextPeekTimer == 0 && armadillo.onGround() && bl) {
+						serverLevel.broadcastEntityEvent(armadillo, (byte)64);
+						this.nextPeekTimer = this.pickNextPeekTimer(armadillo);
+					}
+
+					if (m < (long)Armadillo.ArmadilloState.UNROLLING.animationDuration()) {
+						armadillo.playSound(SoundEvents.ARMADILLO_UNROLL_START);
+						armadillo.switchToState(Armadillo.ArmadilloState.UNROLLING);
+					}
+				} else if (armadilloState == Armadillo.ArmadilloState.UNROLLING && m > (long)Armadillo.ArmadilloState.UNROLLING.animationDuration()) {
+					armadillo.switchToState(Armadillo.ArmadilloState.SCARED);
+				}
 			}
+		}
+
+		private int pickNextPeekTimer(Armadillo armadillo) {
+			return Armadillo.ArmadilloState.SCARED.animationDuration() + armadillo.getRandom().nextIntBetweenInclusive(100, 400);
 		}
 
 		protected boolean checkExtraStartConditions(ServerLevel serverLevel, Armadillo armadillo) {
@@ -180,7 +216,7 @@ public class ArmadilloAi {
 		}
 
 		protected boolean canStillUse(ServerLevel serverLevel, Armadillo armadillo, long l) {
-			return true;
+			return armadillo.getState().isThreatened();
 		}
 
 		protected void start(ServerLevel serverLevel, Armadillo armadillo, long l) {
@@ -194,18 +230,14 @@ public class ArmadilloAi {
 		}
 	}
 
-	public static class ArmadilloPanic extends AnimalPanic {
+	public static class ArmadilloPanic extends AnimalPanic<Armadillo> {
 		public ArmadilloPanic(float f) {
-			super(f, pathfinderMob -> pathfinderMob.isFreezing() || pathfinderMob.isOnFire());
+			super(f, Armadillo::shouldPanic);
 		}
 
-		@Override
-		protected void start(ServerLevel serverLevel, PathfinderMob pathfinderMob, long l) {
-			if (pathfinderMob instanceof Armadillo armadillo) {
-				armadillo.rollOut();
-			}
-
-			super.start(serverLevel, pathfinderMob, l);
+		protected void start(ServerLevel serverLevel, Armadillo armadillo, long l) {
+			armadillo.rollOut();
+			super.start(serverLevel, armadillo, l);
 		}
 	}
 }

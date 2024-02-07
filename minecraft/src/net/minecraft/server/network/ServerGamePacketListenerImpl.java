@@ -187,6 +187,7 @@ public class ServerGamePacketListenerImpl
 	static final Logger LOGGER = LogUtils.getLogger();
 	private static final int NO_BLOCK_UPDATES_TO_ACK = -1;
 	private static final int TRACKED_MESSAGE_DISCONNECT_THRESHOLD = 4096;
+	private static final int MAXIMUM_FLYING_TICKS = 80;
 	private static final Component CHAT_VALIDATION_FAILED = Component.translatable("multiplayer.disconnect.chat_validation_failed");
 	public ServerPlayer player;
 	public final PlayerChunkSender chunkSender;
@@ -254,7 +255,7 @@ public class ServerGamePacketListenerImpl
 		this.tickCount++;
 		this.knownMovePacketCount = this.receivedMovePacketCount;
 		if (this.clientIsFloating && !this.player.isSleeping() && !this.player.isPassenger() && !this.player.isDeadOrDying()) {
-			if (++this.aboveGroundTickCount > 80) {
+			if (++this.aboveGroundTickCount > this.getMaximumFlyingTicks(this.player)) {
 				LOGGER.warn("{} was kicked for floating too long!", this.player.getName().getString());
 				this.disconnect(Component.translatable("multiplayer.disconnect.flying"));
 				return;
@@ -272,8 +273,8 @@ public class ServerGamePacketListenerImpl
 			this.vehicleLastGoodX = this.lastVehicle.getX();
 			this.vehicleLastGoodY = this.lastVehicle.getY();
 			this.vehicleLastGoodZ = this.lastVehicle.getZ();
-			if (this.clientVehicleIsFloating && this.player.getRootVehicle().getControllingPassenger() == this.player) {
-				if (++this.aboveGroundVehicleTickCount > 80) {
+			if (this.clientVehicleIsFloating && this.lastVehicle.getControllingPassenger() == this.player) {
+				if (++this.aboveGroundVehicleTickCount > this.getMaximumFlyingTicks(this.lastVehicle)) {
 					LOGGER.warn("{} was kicked for floating a vehicle too long!", this.player.getName().getString());
 					this.disconnect(Component.translatable("multiplayer.disconnect.flying"));
 					return;
@@ -302,6 +303,11 @@ public class ServerGamePacketListenerImpl
 			&& Util.getMillis() - this.player.getLastActionTime() > (long)this.server.getPlayerIdleTimeout() * 1000L * 60L) {
 			this.disconnect(Component.translatable("multiplayer.disconnect.idling"));
 		}
+	}
+
+	private int getMaximumFlyingTicks(Entity entity) {
+		double d = 0.08 / entity.getGravity();
+		return Mth.ceil(80.0 * Math.max(d, 1.0));
 	}
 
 	public void resetPosition() {
@@ -1001,6 +1007,7 @@ public class ServerGamePacketListenerImpl
 		}
 
 		this.awaitingTeleportTime = this.tickCount;
+		this.player.ignoreFallDamageAboveY = null;
 		this.player.absMoveTo(d, e, f, g, h);
 		this.player.connection.send(new ClientboundPlayerPositionPacket(d - i, e - j, f - k, g - l, h - m, set, this.awaitingTeleport));
 	}
@@ -1192,7 +1199,7 @@ public class ServerGamePacketListenerImpl
 		} else {
 			Optional<LastSeenMessages> optional = this.tryHandleChat(serverboundChatPacket.lastSeenMessages());
 			if (optional.isPresent()) {
-				this.server.submit(() -> {
+				this.server.execute(() -> {
 					PlayerChatMessage playerChatMessage;
 					try {
 						playerChatMessage = this.getSignedMessage(serverboundChatPacket, (LastSeenMessages)optional.get());
@@ -1219,7 +1226,7 @@ public class ServerGamePacketListenerImpl
 		} else {
 			Optional<LastSeenMessages> optional = this.tryHandleChat(serverboundChatCommandPacket.lastSeenMessages());
 			if (optional.isPresent()) {
-				this.server.submit(() -> {
+				this.server.execute(() -> {
 					this.performChatCommand(serverboundChatCommandPacket, (LastSeenMessages)optional.get());
 					this.detectRateSpam();
 				});
@@ -1665,6 +1672,9 @@ public class ServerGamePacketListenerImpl
 	public void handlePlayerAbilities(ServerboundPlayerAbilitiesPacket serverboundPlayerAbilitiesPacket) {
 		PacketUtils.ensureRunningOnSameThread(serverboundPlayerAbilitiesPacket, this, this.player.serverLevel());
 		this.player.getAbilities().flying = serverboundPlayerAbilitiesPacket.isFlying() && this.player.getAbilities().mayfly;
+		if (this.player.getAbilities().flying) {
+			this.player.ignoreFallDamageAboveY = null;
+		}
 	}
 
 	@Override

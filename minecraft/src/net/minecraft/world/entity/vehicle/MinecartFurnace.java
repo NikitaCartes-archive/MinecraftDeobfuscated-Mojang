@@ -42,9 +42,9 @@ public class MinecartFurnace extends AbstractMinecart {
 	}
 
 	@Override
-	protected void defineSynchedData() {
-		super.defineSynchedData();
-		this.entityData.define(DATA_ID_FUEL, false);
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		super.defineSynchedData(builder);
+		builder.define(DATA_ID_FUEL, false);
 	}
 
 	@Override
@@ -118,10 +118,7 @@ public class MinecartFurnace extends AbstractMinecart {
 	public InteractionResult interact(Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
 		if (INGREDIENT.test(itemStack) && this.fuel + 3600 <= 32000) {
-			if (!player.getAbilities().instabuild) {
-				itemStack.shrink(1);
-			}
-
+			itemStack.consume(1, player);
 			this.fuel += 3600;
 		}
 

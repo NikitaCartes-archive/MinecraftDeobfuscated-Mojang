@@ -106,12 +106,12 @@ public class Boat extends VehicleEntity implements VariantHolder<Boat.Type> {
 	}
 
 	@Override
-	protected void defineSynchedData() {
-		super.defineSynchedData();
-		this.entityData.define(DATA_ID_TYPE, Boat.Type.OAK.ordinal());
-		this.entityData.define(DATA_ID_PADDLE_LEFT, false);
-		this.entityData.define(DATA_ID_PADDLE_RIGHT, false);
-		this.entityData.define(DATA_ID_BUBBLE_TIME, 0);
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		super.defineSynchedData(builder);
+		builder.define(DATA_ID_TYPE, Boat.Type.OAK.ordinal());
+		builder.define(DATA_ID_PADDLE_LEFT, false);
+		builder.define(DATA_ID_PADDLE_RIGHT, false);
+		builder.define(DATA_ID_BUBBLE_TIME, 0);
 	}
 
 	@Override
@@ -569,10 +569,14 @@ public class Boat extends VehicleEntity implements VariantHolder<Boat.Type> {
 		return bl ? Boat.Status.UNDER_WATER : null;
 	}
 
+	@Override
+	protected double getDefaultGravity() {
+		return 0.04;
+	}
+
 	private void floatBoat() {
-		double d = -0.04F;
-		double e = this.isNoGravity() ? 0.0 : -0.04F;
-		double f = 0.0;
+		double d = -this.getGravity();
+		double e = 0.0;
 		this.invFriction = 0.05F;
 		if (this.oldStatus == Boat.Status.IN_AIR && this.status != Boat.Status.IN_AIR && this.status != Boat.Status.ON_LAND) {
 			this.waterLevel = this.getY(1.0);
@@ -582,13 +586,13 @@ public class Boat extends VehicleEntity implements VariantHolder<Boat.Type> {
 			this.status = Boat.Status.IN_WATER;
 		} else {
 			if (this.status == Boat.Status.IN_WATER) {
-				f = (this.waterLevel - this.getY()) / (double)this.getBbHeight();
+				e = (this.waterLevel - this.getY()) / (double)this.getBbHeight();
 				this.invFriction = 0.9F;
 			} else if (this.status == Boat.Status.UNDER_FLOWING_WATER) {
-				e = -7.0E-4;
+				d = -7.0E-4;
 				this.invFriction = 0.9F;
 			} else if (this.status == Boat.Status.UNDER_WATER) {
-				f = 0.01F;
+				e = 0.01F;
 				this.invFriction = 0.45F;
 			} else if (this.status == Boat.Status.IN_AIR) {
 				this.invFriction = 0.9F;
@@ -600,11 +604,11 @@ public class Boat extends VehicleEntity implements VariantHolder<Boat.Type> {
 			}
 
 			Vec3 vec3 = this.getDeltaMovement();
-			this.setDeltaMovement(vec3.x * (double)this.invFriction, vec3.y + e, vec3.z * (double)this.invFriction);
+			this.setDeltaMovement(vec3.x * (double)this.invFriction, vec3.y + d, vec3.z * (double)this.invFriction);
 			this.deltaRotation = this.deltaRotation * this.invFriction;
-			if (f > 0.0) {
+			if (e > 0.0) {
 				Vec3 vec32 = this.getDeltaMovement();
-				this.setDeltaMovement(vec32.x, (vec32.y + f * 0.06153846016296973) * 0.75, vec32.z);
+				this.setDeltaMovement(vec32.x, (vec32.y + e * (this.getDefaultGravity() / 0.65)) * 0.75, vec32.z);
 			}
 		}
 	}

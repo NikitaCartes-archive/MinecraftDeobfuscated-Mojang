@@ -131,7 +131,8 @@ public class ParticleEngine implements PreparableReloadListener {
 		this.register(ParticleTypes.SONIC_BOOM, SonicBoomParticle.Provider::new);
 		this.register(ParticleTypes.FALLING_DUST, FallingDustParticle.Provider::new);
 		this.register(ParticleTypes.GUST, GustParticle.Provider::new);
-		this.register(ParticleTypes.GUST_EMITTER, new GustSeedParticle.Provider());
+		this.register(ParticleTypes.GUST_EMITTER_LARGE, new GustSeedParticle.Provider(3.0, 7, 0));
+		this.register(ParticleTypes.GUST_EMITTER_SMALL, new GustSeedParticle.Provider(1.0, 3, 2));
 		this.register(ParticleTypes.FIREWORK, FireworkParticles.SparkProvider::new);
 		this.register(ParticleTypes.FISHING, WakeParticle.Provider::new);
 		this.register(ParticleTypes.FLAME, FlameParticle.Provider::new);

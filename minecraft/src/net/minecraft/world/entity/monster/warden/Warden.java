@@ -221,9 +221,9 @@ public class Warden extends Monster implements VibrationSystem {
 	}
 
 	@Override
-	protected void defineSynchedData() {
-		super.defineSynchedData();
-		this.entityData.define(CLIENT_ANGER_LEVEL, 0);
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		super.defineSynchedData(builder);
+		builder.define(CLIENT_ANGER_LEVEL, 0);
 	}
 
 	public int getClientAngerLevel() {

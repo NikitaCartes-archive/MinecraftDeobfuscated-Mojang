@@ -18,6 +18,7 @@ import net.minecraft.util.random.WeightedEntry;
 import net.minecraft.util.random.WeightedRandom;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
@@ -36,7 +37,7 @@ public class LongJumpToRandomPos<E extends Mob> extends Behavior<E> {
 	private final UniformInt timeBetweenLongJumps;
 	protected final int maxLongJumpHeight;
 	protected final int maxLongJumpWidth;
-	protected final float maxJumpVelocity;
+	protected final float maxJumpVelocityMultiplier;
 	protected List<LongJumpToRandomPos.PossibleJump> jumpCandidates = Lists.<LongJumpToRandomPos.PossibleJump>newArrayList();
 	protected Optional<Vec3> initialPosition = Optional.empty();
 	@Nullable
@@ -72,7 +73,7 @@ public class LongJumpToRandomPos<E extends Mob> extends Behavior<E> {
 		this.timeBetweenLongJumps = uniformInt;
 		this.maxLongJumpHeight = i;
 		this.maxLongJumpWidth = j;
-		this.maxJumpVelocity = f;
+		this.maxJumpVelocityMultiplier = f;
 		this.getJumpSound = function;
 		this.acceptableLandingSpot = biPredicate;
 	}
@@ -179,9 +180,10 @@ public class LongJumpToRandomPos<E extends Mob> extends Behavior<E> {
 	protected Vec3 calculateOptimalJumpVector(Mob mob, Vec3 vec3) {
 		List<Integer> list = Lists.<Integer>newArrayList(ALLOWED_ANGLES);
 		Collections.shuffle(list);
+		float f = (float)(mob.getAttributeValue(Attributes.JUMP_STRENGTH) * (double)this.maxJumpVelocityMultiplier);
 
 		for (int i : list) {
-			Optional<Vec3> optional = LongJumpUtil.calculateJumpVectorForAngle(mob, vec3, this.maxJumpVelocity, i, true);
+			Optional<Vec3> optional = LongJumpUtil.calculateJumpVectorForAngle(mob, vec3, f, i, true);
 			if (optional.isPresent()) {
 				return (Vec3)optional.get();
 			}

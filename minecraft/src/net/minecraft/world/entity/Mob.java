@@ -3,6 +3,7 @@ package net.minecraft.world.entity;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
+import com.mojang.datafixers.util.Either;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -86,7 +87,7 @@ public abstract class Mob extends LivingEntity implements Targeting {
 	public static final float MAX_PICKUP_LOOT_CHANCE = 0.55F;
 	public static final float MAX_ENCHANTED_ARMOR_CHANCE = 0.5F;
 	public static final float MAX_ENCHANTED_WEAPON_CHANCE = 0.25F;
-	public static final String LEASH_TAG = "Leash";
+	public static final String LEASH_TAG = "leash";
 	public static final float DEFAULT_EQUIPMENT_DROP_CHANCE = 0.085F;
 	public static final int PRESERVE_ITEM_DROP_CHANCE = 2;
 	public static final int UPDATE_GOAL_SELECTOR_EVERY_N_TICKS = 2;
@@ -119,7 +120,7 @@ public abstract class Mob extends LivingEntity implements Targeting {
 	private Entity leashHolder;
 	private int delayedLeashHolderId;
 	@Nullable
-	private CompoundTag leashInfoTag;
+	private Either<UUID, BlockPos> delayedLeashInfo;
 	private BlockPos restrictCenter = BlockPos.ZERO;
 	private float restrictRadius = -1.0F;
 
@@ -240,9 +241,9 @@ public abstract class Mob extends LivingEntity implements Targeting {
 	}
 
 	@Override
-	protected void defineSynchedData() {
-		super.defineSynchedData();
-		this.entityData.define(DATA_MOB_FLAGS_ID, (byte)0);
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		super.defineSynchedData(builder);
+		builder.define(DATA_MOB_FLAGS_ID, (byte)0);
 	}
 
 	public int getAmbientSoundInterval() {
@@ -403,21 +404,19 @@ public abstract class Mob extends LivingEntity implements Targeting {
 			compoundTag.putFloat("body_armor_drop_chance", this.bodyArmorDropChance);
 		}
 
-		if (this.leashHolder != null) {
-			CompoundTag compoundTag4 = new CompoundTag();
-			if (this.leashHolder instanceof LivingEntity) {
-				UUID uUID = this.leashHolder.getUUID();
-				compoundTag4.putUUID("UUID", uUID);
-			} else if (this.leashHolder instanceof HangingEntity) {
-				BlockPos blockPos = ((HangingEntity)this.leashHolder).getPos();
-				compoundTag4.putInt("X", blockPos.getX());
-				compoundTag4.putInt("Y", blockPos.getY());
-				compoundTag4.putInt("Z", blockPos.getZ());
-			}
+		Either<UUID, BlockPos> either = this.delayedLeashInfo;
+		if (this.leashHolder instanceof LivingEntity) {
+			either = Either.left(this.leashHolder.getUUID());
+		} else if (this.leashHolder instanceof HangingEntity hangingEntity) {
+			either = Either.right(hangingEntity.getPos());
+		}
 
-			compoundTag.put("Leash", compoundTag4);
-		} else if (this.leashInfoTag != null) {
-			compoundTag.put("Leash", this.leashInfoTag.copy());
+		if (either != null) {
+			compoundTag.put("leash", either.map(uUID -> {
+				CompoundTag compoundTagx = new CompoundTag();
+				compoundTagx.putUUID("UUID", uUID);
+				return compoundTagx;
+			}, NbtUtils::writeBlockPos));
 		}
 
 		compoundTag.putBoolean("LeftHanded", this.isLeftHanded());
@@ -478,8 +477,12 @@ public abstract class Mob extends LivingEntity implements Targeting {
 			this.bodyArmorDropChance = compoundTag.getFloat("body_armor_drop_chance");
 		}
 
-		if (compoundTag.contains("Leash", 10)) {
-			this.leashInfoTag = compoundTag.getCompound("Leash");
+		if (compoundTag.contains("leash", 10)) {
+			this.delayedLeashInfo = Either.left(compoundTag.getCompound("leash").getUUID("UUID"));
+		} else if (compoundTag.contains("leash", 11)) {
+			this.delayedLeashInfo = (Either<UUID, BlockPos>)NbtUtils.readBlockPos(compoundTag, "leash").map(Either::right).orElse(null);
+		} else {
+			this.delayedLeashInfo = null;
 		}
 
 		this.setLeftHanded(compoundTag.getBoolean("LeftHanded"));
@@ -853,7 +856,7 @@ public abstract class Mob extends LivingEntity implements Targeting {
 	@Override
 	public int getMaxFallDistance() {
 		if (this.getTarget() == null) {
-			return 3;
+			return this.getComfortableFallDistance(0.0F);
 		} else {
 			int i = (int)(this.getHealth() - this.getMaxHealth() * 0.33F);
 			i -= (3 - this.level().getDifficulty().getId()) * 4;
@@ -861,7 +864,7 @@ public abstract class Mob extends LivingEntity implements Targeting {
 				i = 0;
 			}
 
-			return i + 3;
+			return this.getComfortableFallDistance((float)i);
 		}
 	}
 
@@ -881,6 +884,11 @@ public abstract class Mob extends LivingEntity implements Targeting {
 
 	public boolean canWearBodyArmor() {
 		return false;
+	}
+
+	@Override
+	public boolean canUseSlot(EquipmentSlot equipmentSlot) {
+		return true;
 	}
 
 	public boolean isWearingBodyArmor() {
@@ -1127,7 +1135,7 @@ public abstract class Mob extends LivingEntity implements Targeting {
 		if (!this.isAlive()) {
 			return InteractionResult.PASS;
 		} else if (this.getLeashHolder() == player) {
-			this.dropLeash(true, !player.getAbilities().instabuild);
+			this.dropLeash(true, !player.hasInfiniteMaterials());
 			this.gameEvent(GameEvent.ENTITY_INTERACT, player);
 			return InteractionResult.sidedSuccess(this.level().isClientSide);
 		} else {
@@ -1262,7 +1270,7 @@ public abstract class Mob extends LivingEntity implements Targeting {
 	}
 
 	protected void tickLeash() {
-		if (this.leashInfoTag != null) {
+		if (this.delayedLeashInfo != null) {
 			this.restoreLeashFromSave();
 		}
 
@@ -1276,7 +1284,7 @@ public abstract class Mob extends LivingEntity implements Targeting {
 	public void dropLeash(boolean bl, boolean bl2) {
 		if (this.leashHolder != null) {
 			this.leashHolder = null;
-			this.leashInfoTag = null;
+			this.delayedLeashInfo = null;
 			if (!this.level().isClientSide && bl2) {
 				this.spawnAtLocation(Items.LEAD);
 			}
@@ -1306,7 +1314,7 @@ public abstract class Mob extends LivingEntity implements Targeting {
 
 	public void setLeashedTo(Entity entity, boolean bl) {
 		this.leashHolder = entity;
-		this.leashInfoTag = null;
+		this.delayedLeashInfo = null;
 		if (!this.level().isClientSide && bl && this.level() instanceof ServerLevel) {
 			((ServerLevel)this.level()).getChunkSource().broadcast(this, new ClientboundSetEntityLinkPacket(this, this.leashHolder));
 		}
@@ -1332,23 +1340,23 @@ public abstract class Mob extends LivingEntity implements Targeting {
 	}
 
 	private void restoreLeashFromSave() {
-		if (this.leashInfoTag != null && this.level() instanceof ServerLevel) {
-			if (this.leashInfoTag.hasUUID("UUID")) {
-				UUID uUID = this.leashInfoTag.getUUID("UUID");
-				Entity entity = ((ServerLevel)this.level()).getEntity(uUID);
+		if (this.delayedLeashInfo != null && this.level() instanceof ServerLevel serverLevel) {
+			Optional<UUID> optional = this.delayedLeashInfo.left();
+			Optional<BlockPos> optional2 = this.delayedLeashInfo.right();
+			if (optional.isPresent()) {
+				Entity entity = serverLevel.getEntity((UUID)optional.get());
 				if (entity != null) {
 					this.setLeashedTo(entity, true);
 					return;
 				}
-			} else if (this.leashInfoTag.contains("X", 99) && this.leashInfoTag.contains("Y", 99) && this.leashInfoTag.contains("Z", 99)) {
-				BlockPos blockPos = NbtUtils.readBlockPos(this.leashInfoTag);
-				this.setLeashedTo(LeashFenceKnotEntity.getOrCreateKnot(this.level(), blockPos), true);
+			} else if (optional2.isPresent()) {
+				this.setLeashedTo(LeashFenceKnotEntity.getOrCreateKnot(this.level(), (BlockPos)optional2.get()), true);
 				return;
 			}
 
 			if (this.tickCount > 100) {
 				this.spawnAtLocation(Items.LEAD);
-				this.leashInfoTag = null;
+				this.delayedLeashInfo = null;
 			}
 		}
 	}

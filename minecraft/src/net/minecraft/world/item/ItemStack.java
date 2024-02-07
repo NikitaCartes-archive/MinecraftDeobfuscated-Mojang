@@ -405,7 +405,11 @@ public final class ItemStack {
 	}
 
 	public void hurtAndBreak(int i, LivingEntity livingEntity, EquipmentSlot equipmentSlot) {
-		if (!livingEntity.level().isClientSide && (!(livingEntity instanceof Player) || !((Player)livingEntity).getAbilities().instabuild)) {
+		if (!livingEntity.level().isClientSide) {
+			if (livingEntity instanceof Player player && player.hasInfiniteMaterials()) {
+				return;
+			}
+
 			this.hurtAndBreak(i, livingEntity.getRandom(), livingEntity instanceof ServerPlayer serverPlayer ? serverPlayer : null, () -> {
 				livingEntity.broadcastBreakEvent(equipmentSlot);
 				Item item = this.getItem();
@@ -1038,6 +1042,12 @@ public final class ItemStack {
 
 	public void shrink(int i) {
 		this.grow(-i);
+	}
+
+	public void consume(int i, @Nullable LivingEntity livingEntity) {
+		if (livingEntity == null || !livingEntity.hasInfiniteMaterials()) {
+			this.shrink(i);
+		}
 	}
 
 	public void onUseTick(Level level, LivingEntity livingEntity, int i) {

@@ -9,7 +9,6 @@ import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.SuspiciousEffectHolder;
@@ -56,6 +55,6 @@ public class SuspiciousStewItem extends Item {
 	public ItemStack finishUsingItem(ItemStack itemStack, Level level, LivingEntity livingEntity) {
 		ItemStack itemStack2 = super.finishUsingItem(itemStack, level, livingEntity);
 		listPotionEffects(itemStack2, effectEntry -> livingEntity.addEffect(effectEntry.createEffectInstance()));
-		return livingEntity instanceof Player && ((Player)livingEntity).getAbilities().instabuild ? itemStack2 : new ItemStack(Items.BOWL);
+		return livingEntity.hasInfiniteMaterials() ? itemStack2 : new ItemStack(Items.BOWL);
 	}
 }

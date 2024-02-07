@@ -26,9 +26,9 @@ public abstract class SpellcasterIllager extends AbstractIllager {
 	}
 
 	@Override
-	protected void defineSynchedData() {
-		super.defineSynchedData();
-		this.entityData.define(DATA_SPELL_CASTING_ID, (byte)0);
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		super.defineSynchedData(builder);
+		builder.define(DATA_SPELL_CASTING_ID, (byte)0);
 	}
 
 	@Override

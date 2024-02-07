@@ -118,11 +118,11 @@ public abstract class AbstractMinecart extends VehicleEntity {
 	}
 
 	@Override
-	protected void defineSynchedData() {
-		super.defineSynchedData();
-		this.entityData.define(DATA_ID_DISPLAY_BLOCK, Block.getId(Blocks.AIR.defaultBlockState()));
-		this.entityData.define(DATA_ID_DISPLAY_OFFSET, 6);
-		this.entityData.define(DATA_ID_CUSTOM_DISPLAY, false);
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		super.defineSynchedData(builder);
+		builder.define(DATA_ID_DISPLAY_BLOCK, Block.getId(Blocks.AIR.defaultBlockState()));
+		builder.define(DATA_ID_DISPLAY_OFFSET, 6);
+		builder.define(DATA_ID_CUSTOM_DISPLAY, false);
 	}
 
 	@Override
@@ -225,6 +225,11 @@ public abstract class AbstractMinecart extends VehicleEntity {
 	}
 
 	@Override
+	protected double getDefaultGravity() {
+		return this.isInWater() ? 0.005 : 0.04;
+	}
+
+	@Override
 	public void tick() {
 		if (this.getHurtTime() > 0) {
 			this.setHurtTime(this.getHurtTime() - 1);
@@ -245,11 +250,7 @@ public abstract class AbstractMinecart extends VehicleEntity {
 				this.setRot(this.getYRot(), this.getXRot());
 			}
 		} else {
-			if (!this.isNoGravity()) {
-				double d = this.isInWater() ? -0.005 : -0.04;
-				this.setDeltaMovement(this.getDeltaMovement().add(0.0, d, 0.0));
-			}
-
+			this.applyGravity();
 			int i = Mth.floor(this.getX());
 			int j = Mth.floor(this.getY());
 			int k = Mth.floor(this.getZ());
@@ -271,17 +272,17 @@ public abstract class AbstractMinecart extends VehicleEntity {
 
 			this.checkInsideBlocks();
 			this.setXRot(0.0F);
-			double e = this.xo - this.getX();
-			double f = this.zo - this.getZ();
-			if (e * e + f * f > 0.001) {
-				this.setYRot((float)(Mth.atan2(f, e) * 180.0 / Math.PI));
+			double d = this.xo - this.getX();
+			double e = this.zo - this.getZ();
+			if (d * d + e * e > 0.001) {
+				this.setYRot((float)(Mth.atan2(e, d) * 180.0 / Math.PI));
 				if (this.flipped) {
 					this.setYRot(this.getYRot() + 180.0F);
 				}
 			}
 
-			double g = (double)Mth.wrapDegrees(this.getYRot() - this.yRotO);
-			if (g < -170.0 || g >= 170.0) {
+			double f = (double)Mth.wrapDegrees(this.getYRot() - this.yRotO);
+			if (f < -170.0 || f >= 170.0) {
 				this.setYRot(this.getYRot() + 180.0F);
 				this.flipped = !this.flipped;
 			}

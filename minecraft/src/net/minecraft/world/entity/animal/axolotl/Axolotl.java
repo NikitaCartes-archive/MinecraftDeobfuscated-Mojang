@@ -120,11 +120,11 @@ public class Axolotl extends Animal implements LerpingModel, VariantHolder<Axolo
 	}
 
 	@Override
-	protected void defineSynchedData() {
-		super.defineSynchedData();
-		this.entityData.define(DATA_VARIANT, 0);
-		this.entityData.define(DATA_PLAYING_DEAD, false);
-		this.entityData.define(FROM_BUCKET, false);
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		super.defineSynchedData(builder);
+		builder.define(DATA_VARIANT, 0);
+		builder.define(DATA_PLAYING_DEAD, false);
+		builder.define(FROM_BUCKET, false);
 	}
 
 	@Override

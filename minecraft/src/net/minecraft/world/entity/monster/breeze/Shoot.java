@@ -6,14 +6,13 @@ import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Unit;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
-import net.minecraft.world.entity.projectile.WindCharge;
+import net.minecraft.world.entity.projectile.windcharge.BreezeWindCharge;
 import net.minecraft.world.phys.Vec3;
 
 public class Shoot extends Behavior<Breeze> {
@@ -91,10 +90,10 @@ public class Shoot extends Behavior<Breeze> {
 					double d = livingEntity.getX() - breeze.getX();
 					double e = livingEntity.getY(0.3) - breeze.getY(0.5);
 					double f = livingEntity.getZ() - breeze.getZ();
-					WindCharge windCharge = new WindCharge(EntityType.WIND_CHARGE, breeze, serverLevel);
+					BreezeWindCharge breezeWindCharge = new BreezeWindCharge(breeze, serverLevel);
 					breeze.playSound(SoundEvents.BREEZE_SHOOT, 1.5F, 1.0F);
-					windCharge.shoot(d, e, f, 0.7F, (float)(5 - serverLevel.getDifficulty().getId() * 4));
-					serverLevel.addFreshEntity(windCharge);
+					breezeWindCharge.shoot(d, e, f, 0.7F, (float)(5 - serverLevel.getDifficulty().getId() * 4));
+					serverLevel.addFreshEntity(breezeWindCharge);
 				}
 			}
 		}

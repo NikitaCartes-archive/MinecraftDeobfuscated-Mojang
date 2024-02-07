@@ -1,6 +1,5 @@
 package net.minecraft.server.packs.repository;
 
-import com.google.common.base.Functions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -75,7 +74,7 @@ public class PackRepository {
 
 		for (Pack pack : this.available.values()) {
 			if (pack.isRequired() && !list.contains(pack)) {
-				pack.getDefaultPosition().insert(list, pack, Functions.identity(), false);
+				pack.getDefaultPosition().insert(list, pack, Pack::selectionConfig, false);
 			}
 		}
 

@@ -23,12 +23,14 @@ import org.slf4j.Logger;
 
 public class VanillaPackResources implements PackResources {
 	private static final Logger LOGGER = LogUtils.getLogger();
+	private final PackLocationInfo location;
 	private final BuiltInMetadata metadata;
 	private final Set<String> namespaces;
 	private final List<Path> rootPaths;
 	private final Map<PackType, List<Path>> pathsForType;
 
-	VanillaPackResources(BuiltInMetadata builtInMetadata, Set<String> set, List<Path> list, Map<PackType, List<Path>> map) {
+	VanillaPackResources(PackLocationInfo packLocationInfo, BuiltInMetadata builtInMetadata, Set<String> set, List<Path> list, Map<PackType, List<Path>> map) {
+		this.location = packLocationInfo;
 		this.metadata = builtInMetadata;
 		this.namespaces = set;
 		this.rootPaths = list;
@@ -165,13 +167,8 @@ public class VanillaPackResources implements PackResources {
 	}
 
 	@Override
-	public String packId() {
-		return "vanilla";
-	}
-
-	@Override
-	public boolean isBuiltin() {
-		return true;
+	public PackLocationInfo location() {
+		return this.location;
 	}
 
 	@Override

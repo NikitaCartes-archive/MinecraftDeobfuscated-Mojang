@@ -51,6 +51,7 @@ import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.protocol.game.VecDeltaCodec;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SyncedDataHolder;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -124,7 +125,7 @@ import net.minecraft.world.scores.ScoreHolder;
 import net.minecraft.world.scores.Team;
 import org.slf4j.Logger;
 
-public abstract class Entity implements Nameable, EntityAccess, CommandSource, ScoreHolder {
+public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess, CommandSource, ScoreHolder {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	public static final String ID_TAG = "id";
 	public static final String PASSENGERS_TAG = "Passengers";
@@ -137,6 +138,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource, S
 	public static final double DELTA_AFFECTED_BY_BLOCKS_BELOW_1_0 = 0.999999;
 	public static final int BASE_TICKS_REQUIRED_TO_FREEZE = 140;
 	public static final int FREEZE_HURT_FREQUENCY = 40;
+	public static final int BASE_SAFE_FALL_DISTANCE = 3;
 	private static final AABB INITIAL_AABB = new AABB(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
 	private static final double WATER_FLOW_SCALE = 0.014;
 	private static final double LAVA_FAST_FLOW_SCALE = 0.007;
@@ -246,16 +248,17 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource, S
 		this.position = Vec3.ZERO;
 		this.blockPosition = BlockPos.ZERO;
 		this.chunkPosition = ChunkPos.ZERO;
-		this.entityData = new SynchedEntityData(this);
-		this.entityData.define(DATA_SHARED_FLAGS_ID, (byte)0);
-		this.entityData.define(DATA_AIR_SUPPLY_ID, this.getMaxAirSupply());
-		this.entityData.define(DATA_CUSTOM_NAME_VISIBLE, false);
-		this.entityData.define(DATA_CUSTOM_NAME, Optional.empty());
-		this.entityData.define(DATA_SILENT, false);
-		this.entityData.define(DATA_NO_GRAVITY, false);
-		this.entityData.define(DATA_POSE, Pose.STANDING);
-		this.entityData.define(DATA_TICKS_FROZEN, 0);
-		this.defineSynchedData();
+		SynchedEntityData.Builder builder = new SynchedEntityData.Builder(this);
+		builder.define(DATA_SHARED_FLAGS_ID, (byte)0);
+		builder.define(DATA_AIR_SUPPLY_ID, this.getMaxAirSupply());
+		builder.define(DATA_CUSTOM_NAME_VISIBLE, false);
+		builder.define(DATA_CUSTOM_NAME, Optional.empty());
+		builder.define(DATA_SILENT, false);
+		builder.define(DATA_NO_GRAVITY, false);
+		builder.define(DATA_POSE, Pose.STANDING);
+		builder.define(DATA_TICKS_FROZEN, 0);
+		this.defineSynchedData(builder);
+		this.entityData = builder.build();
 		this.setPos(0.0, 0.0, 0.0);
 		this.eyeHeight = this.dimensions.eyeHeight();
 	}
@@ -327,7 +330,7 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource, S
 		this.remove(Entity.RemovalReason.DISCARDED);
 	}
 
-	protected abstract void defineSynchedData();
+	protected abstract void defineSynchedData(SynchedEntityData.Builder builder);
 
 	public SynchedEntityData getEntityData() {
 		return this.entityData;
@@ -1092,6 +1095,21 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource, S
 
 	public void setNoGravity(boolean bl) {
 		this.entityData.set(DATA_NO_GRAVITY, bl);
+	}
+
+	protected double getDefaultGravity() {
+		return 0.0;
+	}
+
+	public final double getGravity() {
+		return this.isNoGravity() ? 0.0 : this.getDefaultGravity();
+	}
+
+	protected void applyGravity() {
+		double d = this.getGravity();
+		if (d != 0.0) {
+			this.setDeltaMovement(this.getDeltaMovement().add(0.0, -d, 0.0));
+		}
 	}
 
 	protected Entity.MovementEmission getMovementEmission() {
@@ -2694,9 +2712,11 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource, S
 		return this.isCustomNameVisible();
 	}
 
+	@Override
 	public void onSyncedDataUpdated(List<SynchedEntityData.DataValue<?>> list) {
 	}
 
+	@Override
 	public void onSyncedDataUpdated(EntityDataAccessor<?> entityDataAccessor) {
 		if (DATA_POSE.equals(entityDataAccessor)) {
 			this.refreshDimensions();
@@ -3312,6 +3332,9 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource, S
 
 	public float maxUpStep() {
 		return 0.0F;
+	}
+
+	public void onExplosionHit(@Nullable Entity entity) {
 	}
 
 	public final boolean isRemoved() {

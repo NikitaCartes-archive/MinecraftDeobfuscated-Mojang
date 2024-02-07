@@ -140,7 +140,7 @@ public class EnchantmentMenu extends AbstractContainerMenu {
 			ItemStack itemStack = this.enchantSlots.getItem(0);
 			ItemStack itemStack2 = this.enchantSlots.getItem(1);
 			int j = i + 1;
-			if ((itemStack2.isEmpty() || itemStack2.getCount() < j) && !player.getAbilities().instabuild) {
+			if ((itemStack2.isEmpty() || itemStack2.getCount() < j) && !player.hasInfiniteMaterials()) {
 				return false;
 			} else if (this.costs[i] <= 0
 				|| itemStack.isEmpty()
@@ -161,7 +161,7 @@ public class EnchantmentMenu extends AbstractContainerMenu {
 							itemStack3.enchant(enchantmentInstance.enchantment, enchantmentInstance.level);
 						}
 
-						if (!player.getAbilities().instabuild) {
+						if (!player.hasInfiniteMaterials()) {
 							itemStack2.shrink(j);
 							if (itemStack2.isEmpty()) {
 								this.enchantSlots.setItem(1, ItemStack.EMPTY);

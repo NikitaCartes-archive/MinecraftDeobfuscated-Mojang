@@ -89,6 +89,7 @@ public class Cat extends TamableAnimal implements VariantHolder<CatVariant> {
 
 	public Cat(EntityType<? extends Cat> entityType, Level level) {
 		super(entityType, level);
+		this.reassessTameGoals();
 	}
 
 	public ResourceLocation getResourceLocation() {
@@ -148,12 +149,12 @@ public class Cat extends TamableAnimal implements VariantHolder<CatVariant> {
 	}
 
 	@Override
-	protected void defineSynchedData() {
-		super.defineSynchedData();
-		this.entityData.define(DATA_VARIANT_ID, BuiltInRegistries.CAT_VARIANT.getOrThrow(CatVariant.BLACK));
-		this.entityData.define(IS_LYING, false);
-		this.entityData.define(RELAX_STATE_ONE, false);
-		this.entityData.define(DATA_COLLAR_COLOR, DyeColor.RED.getId());
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		super.defineSynchedData(builder);
+		builder.define(DATA_VARIANT_ID, BuiltInRegistries.CAT_VARIANT.getOrThrow(CatVariant.BLACK));
+		builder.define(IS_LYING, false);
+		builder.define(RELAX_STATE_ONE, false);
+		builder.define(DATA_COLLAR_COLOR, DyeColor.RED.getId());
 	}
 
 	@Override
@@ -315,7 +316,7 @@ public class Cat extends TamableAnimal implements VariantHolder<CatVariant> {
 
 			if (this.isTame()) {
 				cat.setOwnerUUID(this.getOwnerUUID());
-				cat.setTame(true);
+				cat.setTame(true, true);
 				if (this.random.nextBoolean()) {
 					cat.setCollarColor(this.getCollarColor());
 				} else {
@@ -385,10 +386,7 @@ public class Cat extends TamableAnimal implements VariantHolder<CatVariant> {
 					DyeColor dyeColor = ((DyeItem)item).getDyeColor();
 					if (dyeColor != this.getCollarColor()) {
 						this.setCollarColor(dyeColor);
-						if (!player.getAbilities().instabuild) {
-							itemStack.shrink(1);
-						}
-
+						itemStack.consume(1, player);
 						this.setPersistenceRequired();
 						return InteractionResult.CONSUME;
 					}
@@ -427,6 +425,11 @@ public class Cat extends TamableAnimal implements VariantHolder<CatVariant> {
 	}
 
 	@Override
+	public void setTame(boolean bl, boolean bl2) {
+		super.setTame(bl, bl2);
+		this.reassessTameGoals();
+	}
+
 	protected void reassessTameGoals() {
 		if (this.avoidPlayersGoal == null) {
 			this.avoidPlayersGoal = new Cat.CatAvoidEntityGoal<>(this, Player.class, 16.0F, 0.8, 1.33);

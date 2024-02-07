@@ -1,9 +1,9 @@
 package net.minecraft.world.level.block.state;
 
-import com.google.common.collect.ImmutableMap;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import it.unimi.dsi.fastutil.objects.Reference2ObjectArrayMap;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -423,8 +423,8 @@ public abstract class BlockBehaviour implements FeatureElement {
 		private FluidState fluidState = Fluids.EMPTY.defaultFluidState();
 		private boolean isRandomlyTicking;
 
-		protected BlockStateBase(Block block, ImmutableMap<Property<?>, Comparable<?>> immutableMap, MapCodec<BlockState> mapCodec) {
-			super(block, immutableMap, mapCodec);
+		protected BlockStateBase(Block block, Reference2ObjectArrayMap<Property<?>, Comparable<?>> reference2ObjectArrayMap, MapCodec<BlockState> mapCodec) {
+			super(block, reference2ObjectArrayMap, mapCodec);
 			BlockBehaviour.Properties properties = block.properties;
 			this.lightEmission = properties.lightEmission.applyAsInt(this.asState());
 			this.useShapeForLightOcclusion = block.useShapeForLightOcclusion(this.asState());

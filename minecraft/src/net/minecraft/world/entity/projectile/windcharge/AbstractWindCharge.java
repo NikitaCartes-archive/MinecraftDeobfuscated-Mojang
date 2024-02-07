@@ -1,33 +1,40 @@
-package net.minecraft.world.entity.projectile;
+package net.minecraft.world.entity.projectile.windcharge;
 
+import java.util.Optional;
 import javax.annotation.Nullable;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
-import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.monster.breeze.Breeze;
+import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
+import net.minecraft.world.entity.projectile.ItemSupplier;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.ExplosionDamageCalculator;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 
-public class WindCharge extends AbstractHurtingProjectile implements ItemSupplier {
-	public static final WindCharge.WindChargeExplosionDamageCalculator EXPLOSION_DAMAGE_CALCULATOR = new WindCharge.WindChargeExplosionDamageCalculator();
-
-	public WindCharge(EntityType<? extends WindCharge> entityType, Level level) {
+public abstract class AbstractWindCharge extends AbstractHurtingProjectile implements ItemSupplier {
+	public AbstractWindCharge(EntityType<? extends AbstractWindCharge> entityType, Level level) {
 		super(entityType, level);
 	}
 
-	public WindCharge(EntityType<? extends WindCharge> entityType, Breeze breeze, Level level) {
-		super(entityType, breeze.getX(), breeze.getSnoutYPosition(), breeze.getZ(), level);
-		this.setOwner(breeze);
+	public AbstractWindCharge(EntityType<? extends AbstractWindCharge> entityType, Level level, Entity entity, double d, double e, double f) {
+		super(entityType, d, e, f, level);
+		this.setOwner(entity);
+	}
+
+	AbstractWindCharge(EntityType<? extends AbstractWindCharge> entityType, double d, double e, double f, double g, double h, double i, Level level) {
+		super(entityType, d, e, f, g, h, i, level);
 	}
 
 	@Override
@@ -47,12 +54,12 @@ public class WindCharge extends AbstractHurtingProjectile implements ItemSupplie
 
 	@Override
 	public boolean canCollideWith(Entity entity) {
-		return entity instanceof WindCharge ? false : super.canCollideWith(entity);
+		return entity instanceof AbstractWindCharge ? false : super.canCollideWith(entity);
 	}
 
 	@Override
 	protected boolean canHitEntity(Entity entity) {
-		return entity instanceof WindCharge ? false : super.canHitEntity(entity);
+		return entity instanceof AbstractWindCharge ? false : super.canHitEntity(entity);
 	}
 
 	@Override
@@ -64,29 +71,15 @@ public class WindCharge extends AbstractHurtingProjectile implements ItemSupplie
 		}
 	}
 
-	private void explode() {
-		this.level()
-			.explode(
-				this,
-				null,
-				EXPLOSION_DAMAGE_CALCULATOR,
-				this.getX(),
-				this.getY(),
-				this.getZ(),
-				(float)(3.0 + this.random.nextDouble()),
-				false,
-				Level.ExplosionInteraction.BLOW,
-				ParticleTypes.GUST,
-				ParticleTypes.GUST_EMITTER,
-				SoundEvents.WIND_BURST
-			);
-	}
+	protected abstract void explode();
 
 	@Override
 	protected void onHitBlock(BlockHitResult blockHitResult) {
 		super.onHitBlock(blockHitResult);
-		this.explode();
-		this.discard();
+		if (!this.level().isClientSide) {
+			this.explode();
+			this.discard();
+		}
 	}
 
 	@Override
@@ -128,10 +121,17 @@ public class WindCharge extends AbstractHurtingProjectile implements ItemSupplie
 		return ClipContext.Block.OUTLINE;
 	}
 
-	public static final class WindChargeExplosionDamageCalculator extends ExplosionDamageCalculator {
+	public static class WindChargeDamageCalculator extends ExplosionDamageCalculator {
 		@Override
 		public boolean shouldDamageEntity(Explosion explosion, Entity entity) {
 			return false;
+		}
+
+		@Override
+		public Optional<Float> getBlockExplosionResistance(
+			Explosion explosion, BlockGetter blockGetter, BlockPos blockPos, BlockState blockState, FluidState fluidState
+		) {
+			return blockState.is(BlockTags.BLOCKS_WIND_CHARGE_EXPLOSIONS) ? Optional.of(3600000.0F) : Optional.empty();
 		}
 	}
 }

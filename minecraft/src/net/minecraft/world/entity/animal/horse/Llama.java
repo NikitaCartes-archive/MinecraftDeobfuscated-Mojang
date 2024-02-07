@@ -136,10 +136,10 @@ public class Llama extends AbstractChestedHorse implements VariantHolder<Llama.V
 	}
 
 	@Override
-	protected void defineSynchedData() {
-		super.defineSynchedData();
-		this.entityData.define(DATA_STRENGTH_ID, 0);
-		this.entityData.define(DATA_VARIANT_ID, 0);
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		super.defineSynchedData(builder);
+		builder.define(DATA_STRENGTH_ID, 0);
+		builder.define(DATA_VARIANT_ID, 0);
 	}
 
 	public Llama.Variant getVariant() {

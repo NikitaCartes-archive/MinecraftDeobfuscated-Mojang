@@ -175,9 +175,9 @@ public class PolarBear extends Animal implements NeutralMob {
 	}
 
 	@Override
-	protected void defineSynchedData() {
-		super.defineSynchedData();
-		this.entityData.define(DATA_STANDING_ID, false);
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		super.defineSynchedData(builder);
+		builder.define(DATA_STANDING_ID, false);
 	}
 
 	@Override

@@ -69,11 +69,11 @@ public class AreaEffectCloud extends Entity implements TraceableEntity {
 	}
 
 	@Override
-	protected void defineSynchedData() {
-		this.getEntityData().define(DATA_COLOR, 0);
-		this.getEntityData().define(DATA_RADIUS, 3.0F);
-		this.getEntityData().define(DATA_WAITING, false);
-		this.getEntityData().define(DATA_PARTICLE, ParticleTypes.ENTITY_EFFECT);
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		builder.define(DATA_COLOR, 0);
+		builder.define(DATA_RADIUS, 3.0F);
+		builder.define(DATA_WAITING, false);
+		builder.define(DATA_PARTICLE, ParticleTypes.ENTITY_EFFECT);
 	}
 
 	public void setRadius(float f) {

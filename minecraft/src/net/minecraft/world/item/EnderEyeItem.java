@@ -94,10 +94,7 @@ public class EnderEyeItem extends Item {
 						0.4F / (level.getRandom().nextFloat() * 0.4F + 0.8F)
 					);
 					level.levelEvent(null, 1003, player.blockPosition(), 0);
-					if (!player.getAbilities().instabuild) {
-						itemStack.shrink(1);
-					}
-
+					itemStack.consume(1, player);
 					player.awardStat(Stats.ITEM_USED.get(this));
 					player.swing(interactionHand, true);
 					return InteractionResultHolder.success(itemStack);

@@ -73,9 +73,9 @@ public class Phantom extends FlyingMob implements Enemy {
 	}
 
 	@Override
-	protected void defineSynchedData() {
-		super.defineSynchedData();
-		this.entityData.define(ID_SIZE, 0);
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		super.defineSynchedData(builder);
+		builder.define(ID_SIZE, 0);
 	}
 
 	public void setPhantomSize(int i) {

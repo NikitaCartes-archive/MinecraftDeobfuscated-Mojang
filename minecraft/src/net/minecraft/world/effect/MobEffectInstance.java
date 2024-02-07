@@ -23,7 +23,7 @@ public class MobEffectInstance implements Comparable<MobEffectInstance> {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	public static final int INFINITE_DURATION = -1;
 	public static final int MIN_AMPLIFIER = 0;
-	public static final int MAX_AMPLIFIER = 127;
+	public static final int MAX_AMPLIFIER = 255;
 	public static final Codec<MobEffectInstance> CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
 					BuiltInRegistries.MOB_EFFECT.holderByNameCodec().fieldOf("id").forGetter(MobEffectInstance::getEffect),
@@ -64,7 +64,7 @@ public class MobEffectInstance implements Comparable<MobEffectInstance> {
 	public MobEffectInstance(Holder<MobEffect> holder, int i, int j, boolean bl, boolean bl2, boolean bl3, @Nullable MobEffectInstance mobEffectInstance) {
 		this.effect = holder;
 		this.duration = i;
-		this.amplifier = Mth.clamp(j, 0, 127);
+		this.amplifier = Mth.clamp(j, 0, 255);
 		this.ambient = bl;
 		this.visible = bl2;
 		this.showIcon = bl3;

@@ -12,10 +12,12 @@ public class RecreatingChunkStorage extends ChunkStorage {
 	private final IOWorker writeWorker;
 	private final Path writeFolder;
 
-	public RecreatingChunkStorage(Path path, Path path2, DataFixer dataFixer, boolean bl) {
-		super(path, dataFixer, bl);
+	public RecreatingChunkStorage(
+		RegionStorageInfo regionStorageInfo, Path path, RegionStorageInfo regionStorageInfo2, Path path2, DataFixer dataFixer, boolean bl
+	) {
+		super(regionStorageInfo, path, dataFixer, bl);
 		this.writeFolder = path2;
-		this.writeWorker = new IOWorker(path2, bl, "chunk-recreating");
+		this.writeWorker = new IOWorker(regionStorageInfo2, path2, bl);
 	}
 
 	@Override

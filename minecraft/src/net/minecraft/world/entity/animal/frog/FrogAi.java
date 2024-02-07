@@ -53,7 +53,7 @@ public class FrogAi {
 	private static final UniformInt TIME_BETWEEN_LONG_JUMPS = UniformInt.of(100, 140);
 	private static final int MAX_LONG_JUMP_HEIGHT = 2;
 	private static final int MAX_LONG_JUMP_WIDTH = 4;
-	private static final float MAX_JUMP_VELOCITY = 1.5F;
+	private static final float MAX_JUMP_VELOCITY_MULTIPLIER = 3.5714288F;
 	private static final float SPEED_MULTIPLIER_WHEN_TEMPTED = 1.25F;
 
 	protected static void initMemories(Frog frog, RandomSource randomSource) {
@@ -78,7 +78,7 @@ public class FrogAi {
 			Activity.CORE,
 			0,
 			ImmutableList.of(
-				new AnimalPanic(2.0F),
+				new AnimalPanic<>(2.0F),
 				new LookAtTargetSink(45, 90),
 				new MoveToTargetSink(),
 				new CountDownCooldownTicks(MemoryModuleType.TEMPTATION_COOLDOWN_TICKS),
@@ -173,7 +173,7 @@ public class FrogAi {
 				Pair.of(
 					1,
 					new LongJumpToPreferredBlock<>(
-						TIME_BETWEEN_LONG_JUMPS, 2, 4, 1.5F, frog -> SoundEvents.FROG_LONG_JUMP, BlockTags.FROG_PREFER_JUMP_TO, 0.5F, FrogAi::isAcceptableLandingSpot
+						TIME_BETWEEN_LONG_JUMPS, 2, 4, 3.5714288F, frog -> SoundEvents.FROG_LONG_JUMP, BlockTags.FROG_PREFER_JUMP_TO, 0.5F, FrogAi::isAcceptableLandingSpot
 					)
 				)
 			),

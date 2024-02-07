@@ -59,12 +59,10 @@ public class PotionItem extends Item {
 
 		if (player != null) {
 			player.awardStat(Stats.ITEM_USED.get(this));
-			if (!player.getAbilities().instabuild) {
-				itemStack.shrink(1);
-			}
+			itemStack.consume(1, player);
 		}
 
-		if (player == null || !player.getAbilities().instabuild) {
+		if (player == null || !player.hasInfiniteMaterials()) {
 			if (itemStack.isEmpty()) {
 				return new ItemStack(Items.GLASS_BOTTLE);
 			}

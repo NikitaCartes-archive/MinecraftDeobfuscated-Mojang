@@ -150,7 +150,7 @@ public class CreateWorldScreen extends Screen {
 			minecraft,
 			screen,
 			worldCreationContext,
-			WorldPresets.fromSettings(worldCreationContext.selectedDimensions().dimensions()),
+			WorldPresets.fromSettings(worldCreationContext.selectedDimensions()),
 			OptionalLong.of(worldCreationContext.options().seed())
 		);
 		createWorldScreen.recreated = true;

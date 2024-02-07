@@ -66,7 +66,7 @@ public class AnvilMenu extends ItemCombinerMenu {
 
 	@Override
 	protected boolean mayPickup(Player player, boolean bl) {
-		return (player.getAbilities().instabuild || player.experienceLevel >= this.cost.get()) && this.cost.get() > 0;
+		return (player.hasInfiniteMaterials() || player.experienceLevel >= this.cost.get()) && this.cost.get() > 0;
 	}
 
 	@Override
@@ -91,7 +91,7 @@ public class AnvilMenu extends ItemCombinerMenu {
 		this.cost.set(0);
 		this.access.execute((level, blockPos) -> {
 			BlockState blockState = level.getBlockState(blockPos);
-			if (!player.getAbilities().instabuild && blockState.is(BlockTags.ANVIL) && player.getRandom().nextFloat() < 0.12F) {
+			if (!player.hasInfiniteMaterials() && blockState.is(BlockTags.ANVIL) && player.getRandom().nextFloat() < 0.12F) {
 				BlockState blockState2 = AnvilBlock.damage(blockState);
 				if (blockState2 == null) {
 					level.removeBlock(blockPos, false);

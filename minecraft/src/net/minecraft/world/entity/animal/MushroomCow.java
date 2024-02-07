@@ -76,9 +76,9 @@ public class MushroomCow extends Cow implements Shearable, VariantHolder<Mushroo
 	}
 
 	@Override
-	protected void defineSynchedData() {
-		super.defineSynchedData();
-		this.entityData.define(DATA_TYPE, MushroomCow.MushroomType.RED.type);
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		super.defineSynchedData(builder);
+		builder.define(DATA_TYPE, MushroomCow.MushroomType.RED.type);
 	}
 
 	@Override
@@ -135,9 +135,7 @@ public class MushroomCow extends Cow implements Shearable, VariantHolder<Mushroo
 					return InteractionResult.PASS;
 				}
 
-				if (!player.getAbilities().instabuild) {
-					itemStack.shrink(1);
-				}
+				itemStack.consume(1, player);
 
 				for (int j = 0; j < 4; j++) {
 					this.level()

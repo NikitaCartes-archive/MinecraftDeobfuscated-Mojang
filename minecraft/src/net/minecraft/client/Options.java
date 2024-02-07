@@ -29,7 +29,9 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.Iterator;
@@ -396,13 +398,13 @@ public class Options {
 		}
 	});
 	private final OptionInstance<Boolean> entityShadows = OptionInstance.createBoolean("options.entityShadows", true);
-	private final OptionInstance<Boolean> forceUnicodeFont = OptionInstance.createBoolean("options.forceUnicodeFont", false, boolean_ -> {
-		Minecraft minecraftx = Minecraft.getInstance();
-		if (minecraftx.getWindow() != null) {
-			minecraftx.selectMainFont(boolean_);
-			minecraftx.resizeDisplay();
-		}
-	});
+	private final OptionInstance<Boolean> forceUnicodeFont = OptionInstance.createBoolean("options.forceUnicodeFont", false, boolean_ -> updateFontOptions());
+	private final OptionInstance<Boolean> japaneseGlyphVariants = OptionInstance.createBoolean(
+		"options.japaneseGlyphVariants",
+		OptionInstance.cachedConstantTooltip(Component.translatable("options.japaneseGlyphVariants.tooltip")),
+		japaneseGlyphVariantsDefault(),
+		boolean_ -> updateFontOptions()
+	);
 	private final OptionInstance<Boolean> invertYMouse = OptionInstance.createBoolean("options.invertMouse", false);
 	private final OptionInstance<Boolean> discreteMouseScroll = OptionInstance.createBoolean("options.discrete_mouse_scroll", false);
 	private final OptionInstance<Boolean> realmsNotifications = OptionInstance.createBoolean("options.realmsNotifications", true);
@@ -904,8 +906,24 @@ public class Options {
 		return this.entityShadows;
 	}
 
+	private static void updateFontOptions() {
+		Minecraft minecraft = Minecraft.getInstance();
+		if (minecraft.getWindow() != null) {
+			minecraft.updateFontOptions();
+			minecraft.resizeDisplay();
+		}
+	}
+
 	public OptionInstance<Boolean> forceUnicodeFont() {
 		return this.forceUnicodeFont;
+	}
+
+	private static boolean japaneseGlyphVariantsDefault() {
+		return Locale.getDefault().getLanguage().equalsIgnoreCase("ja");
+	}
+
+	public OptionInstance<Boolean> japaneseGlyphVariants() {
+		return this.japaneseGlyphVariants;
 	}
 
 	public OptionInstance<Boolean> invertYMouse() {
@@ -1086,24 +1104,50 @@ public class Options {
 		this.save();
 	}
 
+	private void processDumpedOptions(Options.OptionAccess optionAccess) {
+		optionAccess.process("ao", this.ambientOcclusion);
+		optionAccess.process("biomeBlendRadius", this.biomeBlendRadius);
+		optionAccess.process("enableVsync", this.enableVsync);
+		optionAccess.process("entityDistanceScaling", this.entityDistanceScaling);
+		optionAccess.process("entityShadows", this.entityShadows);
+		optionAccess.process("forceUnicodeFont", this.forceUnicodeFont);
+		optionAccess.process("japaneseGlyphVariants", this.japaneseGlyphVariants);
+		optionAccess.process("fov", this.fov);
+		optionAccess.process("fovEffectScale", this.fovEffectScale);
+		optionAccess.process("darknessEffectScale", this.darknessEffectScale);
+		optionAccess.process("glintSpeed", this.glintSpeed);
+		optionAccess.process("glintStrength", this.glintStrength);
+		optionAccess.process("prioritizeChunkUpdates", this.prioritizeChunkUpdates);
+		optionAccess.process("fullscreen", this.fullscreen);
+		optionAccess.process("gamma", this.gamma);
+		optionAccess.process("graphicsMode", this.graphicsMode);
+		optionAccess.process("guiScale", this.guiScale);
+		optionAccess.process("maxFps", this.framerateLimit);
+		optionAccess.process("mipmapLevels", this.mipmapLevels);
+		optionAccess.process("narrator", this.narrator);
+		optionAccess.process("particles", this.particles);
+		optionAccess.process("reducedDebugInfo", this.reducedDebugInfo);
+		optionAccess.process("renderClouds", this.cloudStatus);
+		optionAccess.process("renderDistance", this.renderDistance);
+		optionAccess.process("simulationDistance", this.simulationDistance);
+		optionAccess.process("screenEffectScale", this.screenEffectScale);
+		optionAccess.process("soundDevice", this.soundDevice);
+	}
+
 	private void processOptions(Options.FieldAccess fieldAccess) {
+		this.processDumpedOptions(fieldAccess);
 		fieldAccess.process("autoJump", this.autoJump);
 		fieldAccess.process("operatorItemsTab", this.operatorItemsTab);
 		fieldAccess.process("autoSuggestions", this.autoSuggestions);
 		fieldAccess.process("chatColors", this.chatColors);
 		fieldAccess.process("chatLinks", this.chatLinks);
 		fieldAccess.process("chatLinksPrompt", this.chatLinksPrompt);
-		fieldAccess.process("enableVsync", this.enableVsync);
-		fieldAccess.process("entityShadows", this.entityShadows);
-		fieldAccess.process("forceUnicodeFont", this.forceUnicodeFont);
 		fieldAccess.process("discrete_mouse_scroll", this.discreteMouseScroll);
 		fieldAccess.process("invertYMouse", this.invertYMouse);
 		fieldAccess.process("realmsNotifications", this.realmsNotifications);
-		fieldAccess.process("reducedDebugInfo", this.reducedDebugInfo);
 		fieldAccess.process("showSubtitles", this.showSubtitles);
 		fieldAccess.process("directionalAudio", this.directionalAudio);
 		fieldAccess.process("touchscreen", this.touchscreen);
-		fieldAccess.process("fullscreen", this.fullscreen);
 		fieldAccess.process("bobView", this.bobView);
 		fieldAccess.process("toggleCrouch", this.toggleCrouch);
 		fieldAccess.process("toggleSprint", this.toggleSprint);
@@ -1111,32 +1155,13 @@ public class Options {
 		fieldAccess.process("hideLightningFlashes", this.hideLightningFlash);
 		fieldAccess.process("hideSplashTexts", this.hideSplashTexts);
 		fieldAccess.process("mouseSensitivity", this.sensitivity);
-		fieldAccess.process("fov", this.fov);
-		fieldAccess.process("screenEffectScale", this.screenEffectScale);
-		fieldAccess.process("fovEffectScale", this.fovEffectScale);
-		fieldAccess.process("darknessEffectScale", this.darknessEffectScale);
-		fieldAccess.process("glintSpeed", this.glintSpeed);
-		fieldAccess.process("glintStrength", this.glintStrength);
 		fieldAccess.process("damageTiltStrength", this.damageTiltStrength);
 		fieldAccess.process("highContrast", this.highContrast);
 		fieldAccess.process("narratorHotkey", this.narratorHotkey);
-		fieldAccess.process("gamma", this.gamma);
-		fieldAccess.process("renderDistance", this.renderDistance);
-		fieldAccess.process("simulationDistance", this.simulationDistance);
-		fieldAccess.process("entityDistanceScaling", this.entityDistanceScaling);
-		fieldAccess.process("guiScale", this.guiScale);
-		fieldAccess.process("particles", this.particles);
-		fieldAccess.process("maxFps", this.framerateLimit);
-		fieldAccess.process("graphicsMode", this.graphicsMode);
-		fieldAccess.process("ao", this.ambientOcclusion);
-		fieldAccess.process("prioritizeChunkUpdates", this.prioritizeChunkUpdates);
-		fieldAccess.process("biomeBlendRadius", this.biomeBlendRadius);
-		fieldAccess.process("renderClouds", this.cloudStatus);
 		this.resourcePacks = fieldAccess.process("resourcePacks", this.resourcePacks, Options::readListOfStrings, GSON::toJson);
 		this.incompatibleResourcePacks = fieldAccess.process("incompatibleResourcePacks", this.incompatibleResourcePacks, Options::readListOfStrings, GSON::toJson);
 		this.lastMpIp = fieldAccess.process("lastServer", this.lastMpIp);
 		this.languageCode = fieldAccess.process("lang", this.languageCode);
-		fieldAccess.process("soundDevice", this.soundDevice);
 		fieldAccess.process("chatVisibility", this.chatVisibility);
 		fieldAccess.process("chatOpacity", this.chatOpacity);
 		fieldAccess.process("chatLineSpacing", this.chatLineSpacing);
@@ -1153,11 +1178,9 @@ public class Options {
 		fieldAccess.process("chatScale", this.chatScale);
 		fieldAccess.process("chatWidth", this.chatWidth);
 		fieldAccess.process("notificationDisplayTime", this.notificationDisplayTime);
-		fieldAccess.process("mipmapLevels", this.mipmapLevels);
 		this.useNativeTransport = fieldAccess.process("useNativeTransport", this.useNativeTransport);
 		fieldAccess.process("mainHand", this.mainHand);
 		fieldAccess.process("attackIndicator", this.attackIndicator);
-		fieldAccess.process("narrator", this.narrator);
 		this.tutorialStep = fieldAccess.process("tutorialStep", this.tutorialStep, TutorialSteps::getByName, TutorialSteps::getName);
 		fieldAccess.process("mouseWheelSensitivity", this.mouseWheelSensitivity);
 		fieldAccess.process("rawMouseInput", this.rawMouseInput);
@@ -1519,42 +1542,24 @@ public class Options {
 	}
 
 	public String dumpOptionsForReport() {
-		Stream<Pair<String, Object>> stream = Stream.builder()
-			.add(Pair.of("ao", this.ambientOcclusion.get()))
-			.add(Pair.of("biomeBlendRadius", this.biomeBlendRadius.get()))
-			.add(Pair.of("enableVsync", this.enableVsync.get()))
-			.add(Pair.of("entityDistanceScaling", this.entityDistanceScaling.get()))
-			.add(Pair.of("entityShadows", this.entityShadows.get()))
-			.add(Pair.of("forceUnicodeFont", this.forceUnicodeFont.get()))
-			.add(Pair.of("fov", this.fov.get()))
-			.add(Pair.of("fovEffectScale", this.fovEffectScale.get()))
-			.add(Pair.of("darknessEffectScale", this.darknessEffectScale.get()))
-			.add(Pair.of("glintSpeed", this.glintSpeed.get()))
-			.add(Pair.of("glintStrength", this.glintStrength.get()))
-			.add(Pair.of("prioritizeChunkUpdates", this.prioritizeChunkUpdates.get()))
-			.add(Pair.of("fullscreen", this.fullscreen.get()))
-			.add(Pair.of("fullscreenResolution", String.valueOf(this.fullscreenVideoModeString)))
-			.add(Pair.of("gamma", this.gamma.get()))
-			.add(Pair.of("glDebugVerbosity", this.glDebugVerbosity))
-			.add(Pair.of("graphicsMode", this.graphicsMode.get()))
-			.add(Pair.of("guiScale", this.guiScale.get()))
-			.add(Pair.of("maxFps", this.framerateLimit.get()))
-			.add(Pair.of("mipmapLevels", this.mipmapLevels.get()))
-			.add(Pair.of("narrator", this.narrator.get()))
-			.add(Pair.of("overrideHeight", this.overrideHeight))
-			.add(Pair.of("overrideWidth", this.overrideWidth))
-			.add(Pair.of("particles", this.particles.get()))
-			.add(Pair.of("reducedDebugInfo", this.reducedDebugInfo.get()))
-			.add(Pair.of("renderClouds", this.cloudStatus.get()))
-			.add(Pair.of("renderDistance", this.renderDistance.get()))
-			.add(Pair.of("simulationDistance", this.simulationDistance.get()))
-			.add(Pair.of("resourcePacks", this.resourcePacks))
-			.add(Pair.of("screenEffectScale", this.screenEffectScale.get()))
-			.add(Pair.of("syncChunkWrites", this.syncWrites))
-			.add(Pair.of("useNativeTransport", this.useNativeTransport))
-			.add(Pair.of("soundDevice", this.soundDevice.get()))
-			.build();
-		return (String)stream.map(pair -> (String)pair.getFirst() + ": " + pair.getSecond()).collect(Collectors.joining(System.lineSeparator()));
+		final List<Pair<String, Object>> list = new ArrayList();
+		this.processDumpedOptions(new Options.OptionAccess() {
+			@Override
+			public <T> void process(String string, OptionInstance<T> optionInstance) {
+				list.add(Pair.of(string, optionInstance.get()));
+			}
+		});
+		list.add(Pair.of("fullscreenResolution", String.valueOf(this.fullscreenVideoModeString)));
+		list.add(Pair.of("glDebugVerbosity", this.glDebugVerbosity));
+		list.add(Pair.of("overrideHeight", this.overrideHeight));
+		list.add(Pair.of("overrideWidth", this.overrideWidth));
+		list.add(Pair.of("syncChunkWrites", this.syncWrites));
+		list.add(Pair.of("useNativeTransport", this.useNativeTransport));
+		list.add(Pair.of("resourcePacks", this.resourcePacks));
+		return (String)list.stream()
+			.sorted(Comparator.comparing(Pair::getFirst))
+			.map(pair -> (String)pair.getFirst() + ": " + pair.getSecond())
+			.collect(Collectors.joining(System.lineSeparator()));
 	}
 
 	public void setServerRenderDistance(int i) {
@@ -1582,9 +1587,7 @@ public class Options {
 	}
 
 	@Environment(EnvType.CLIENT)
-	interface FieldAccess {
-		<T> void process(String string, OptionInstance<T> optionInstance);
-
+	interface FieldAccess extends Options.OptionAccess {
 		int process(String string, int i);
 
 		boolean process(String string, boolean bl);
@@ -1594,5 +1597,10 @@ public class Options {
 		float process(String string, float f);
 
 		<T> T process(String string, T object, Function<String, T> function, Function<T, String> function2);
+	}
+
+	@Environment(EnvType.CLIENT)
+	interface OptionAccess {
+		<T> void process(String string, OptionInstance<T> optionInstance);
 	}
 }

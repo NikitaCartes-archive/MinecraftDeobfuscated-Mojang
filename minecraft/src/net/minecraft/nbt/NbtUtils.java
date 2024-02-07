@@ -195,16 +195,13 @@ public final class NbtUtils {
 		}
 	}
 
-	public static BlockPos readBlockPos(CompoundTag compoundTag) {
-		return new BlockPos(compoundTag.getInt("X"), compoundTag.getInt("Y"), compoundTag.getInt("Z"));
+	public static Optional<BlockPos> readBlockPos(CompoundTag compoundTag, String string) {
+		int[] is = compoundTag.getIntArray(string);
+		return is.length == 3 ? Optional.of(new BlockPos(is[0], is[1], is[2])) : Optional.empty();
 	}
 
-	public static CompoundTag writeBlockPos(BlockPos blockPos) {
-		CompoundTag compoundTag = new CompoundTag();
-		compoundTag.putInt("X", blockPos.getX());
-		compoundTag.putInt("Y", blockPos.getY());
-		compoundTag.putInt("Z", blockPos.getZ());
-		return compoundTag;
+	public static Tag writeBlockPos(BlockPos blockPos) {
+		return new IntArrayTag(new int[]{blockPos.getX(), blockPos.getY(), blockPos.getZ()});
 	}
 
 	public static BlockState readBlockState(HolderGetter<Block> holderGetter, CompoundTag compoundTag) {
@@ -250,11 +247,11 @@ public final class NbtUtils {
 	public static CompoundTag writeBlockState(BlockState blockState) {
 		CompoundTag compoundTag = new CompoundTag();
 		compoundTag.putString("Name", BuiltInRegistries.BLOCK.getKey(blockState.getBlock()).toString());
-		ImmutableMap<Property<?>, Comparable<?>> immutableMap = blockState.getValues();
-		if (!immutableMap.isEmpty()) {
+		Map<Property<?>, Comparable<?>> map = blockState.getValues();
+		if (!map.isEmpty()) {
 			CompoundTag compoundTag2 = new CompoundTag();
 
-			for (Entry<Property<?>, Comparable<?>> entry : immutableMap.entrySet()) {
+			for (Entry<Property<?>, Comparable<?>> entry : map.entrySet()) {
 				Property<?> property = (Property<?>)entry.getKey();
 				compoundTag2.putString(property.getName(), getName(property, (Comparable<?>)entry.getValue()));
 			}
@@ -268,11 +265,11 @@ public final class NbtUtils {
 	public static CompoundTag writeFluidState(FluidState fluidState) {
 		CompoundTag compoundTag = new CompoundTag();
 		compoundTag.putString("Name", BuiltInRegistries.FLUID.getKey(fluidState.getType()).toString());
-		ImmutableMap<Property<?>, Comparable<?>> immutableMap = fluidState.getValues();
-		if (!immutableMap.isEmpty()) {
+		Map<Property<?>, Comparable<?>> map = fluidState.getValues();
+		if (!map.isEmpty()) {
 			CompoundTag compoundTag2 = new CompoundTag();
 
-			for (Entry<Property<?>, Comparable<?>> entry : immutableMap.entrySet()) {
+			for (Entry<Property<?>, Comparable<?>> entry : map.entrySet()) {
 				Property<?> property = (Property<?>)entry.getKey();
 				compoundTag2.putString(property.getName(), getName(property, (Comparable<?>)entry.getValue()));
 			}

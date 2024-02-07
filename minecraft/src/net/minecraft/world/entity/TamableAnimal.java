@@ -28,14 +28,13 @@ public abstract class TamableAnimal extends Animal implements OwnableEntity {
 
 	protected TamableAnimal(EntityType<? extends TamableAnimal> entityType, Level level) {
 		super(entityType, level);
-		this.reassessTameGoals();
 	}
 
 	@Override
-	protected void defineSynchedData() {
-		super.defineSynchedData();
-		this.entityData.define(DATA_FLAGS_ID, (byte)0);
-		this.entityData.define(DATA_OWNERUUID_ID, Optional.empty());
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		super.defineSynchedData(builder);
+		builder.define(DATA_FLAGS_ID, (byte)0);
+		builder.define(DATA_OWNERUUID_ID, Optional.empty());
 	}
 
 	@Override
@@ -62,9 +61,9 @@ public abstract class TamableAnimal extends Animal implements OwnableEntity {
 		if (uUID != null) {
 			try {
 				this.setOwnerUUID(uUID);
-				this.setTame(true);
+				this.setTame(true, false);
 			} catch (Throwable var4) {
-				this.setTame(false);
+				this.setTame(false, true);
 			}
 		}
 
@@ -106,7 +105,7 @@ public abstract class TamableAnimal extends Animal implements OwnableEntity {
 		return (this.entityData.get(DATA_FLAGS_ID) & 4) != 0;
 	}
 
-	public void setTame(boolean bl) {
+	public void setTame(boolean bl, boolean bl2) {
 		byte b = this.entityData.get(DATA_FLAGS_ID);
 		if (bl) {
 			this.entityData.set(DATA_FLAGS_ID, (byte)(b | 4));
@@ -114,10 +113,12 @@ public abstract class TamableAnimal extends Animal implements OwnableEntity {
 			this.entityData.set(DATA_FLAGS_ID, (byte)(b & -5));
 		}
 
-		this.reassessTameGoals();
+		if (bl2) {
+			this.applyTamingSideEffects();
+		}
 	}
 
-	protected void reassessTameGoals() {
+	protected void applyTamingSideEffects() {
 	}
 
 	public boolean isInSittingPose() {
@@ -144,7 +145,7 @@ public abstract class TamableAnimal extends Animal implements OwnableEntity {
 	}
 
 	public void tame(Player player) {
-		this.setTame(true);
+		this.setTame(true, true);
 		this.setOwnerUUID(player.getUUID());
 		if (player instanceof ServerPlayer) {
 			CriteriaTriggers.TAME_ANIMAL.trigger((ServerPlayer)player, this);

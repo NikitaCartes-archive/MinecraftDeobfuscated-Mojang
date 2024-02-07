@@ -3,20 +3,35 @@ package net.minecraft.client.gui.font.providers;
 import com.mojang.blaze3d.font.GlyphProvider;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.io.IOException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.font.FontOption;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.util.ExtraCodecs;
 
 @Environment(EnvType.CLIENT)
 public interface GlyphProviderDefinition {
-	Codec<GlyphProviderDefinition> CODEC = GlyphProviderType.CODEC
-		.dispatch(GlyphProviderDefinition::type, glyphProviderType -> glyphProviderType.mapCodec().codec());
+	MapCodec<GlyphProviderDefinition> MAP_CODEC = GlyphProviderType.CODEC
+		.dispatchMap(GlyphProviderDefinition::type, glyphProviderType -> glyphProviderType.mapCodec().codec());
 
 	GlyphProviderType type();
 
 	Either<GlyphProviderDefinition.Loader, GlyphProviderDefinition.Reference> unpack();
+
+	@Environment(EnvType.CLIENT)
+	public static record Conditional(GlyphProviderDefinition definition, FontOption.Filter filter) {
+		public static final Codec<GlyphProviderDefinition.Conditional> CODEC = RecordCodecBuilder.create(
+			instance -> instance.group(
+						GlyphProviderDefinition.MAP_CODEC.forGetter(GlyphProviderDefinition.Conditional::definition),
+						ExtraCodecs.strictOptionalField(FontOption.Filter.CODEC, "filter", FontOption.Filter.ALWAYS_PASS).forGetter(GlyphProviderDefinition.Conditional::filter)
+					)
+					.apply(instance, GlyphProviderDefinition.Conditional::new)
+		);
+	}
 
 	@Environment(EnvType.CLIENT)
 	public interface Loader {

@@ -18,8 +18,8 @@ public class DefaultedMappedRegistry<T> extends MappedRegistry<T> implements Def
 	}
 
 	@Override
-	public Holder.Reference<T> register(ResourceKey<T> resourceKey, T object, Lifecycle lifecycle) {
-		Holder.Reference<T> reference = super.register(resourceKey, object, lifecycle);
+	public Holder.Reference<T> register(ResourceKey<T> resourceKey, T object, RegistrationInfo registrationInfo) {
+		Holder.Reference<T> reference = super.register(resourceKey, object, registrationInfo);
 		if (this.defaultKey.equals(resourceKey.location())) {
 			this.defaultValue = reference;
 		}

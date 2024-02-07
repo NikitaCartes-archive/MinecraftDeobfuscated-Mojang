@@ -3,115 +3,50 @@ package net.minecraft.network.syncher;
 import com.mojang.logging.LogUtils;
 import io.netty.handler.codec.DecoderException;
 import io.netty.handler.codec.EncoderException;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import javax.annotation.Nullable;
-import net.minecraft.CrashReport;
-import net.minecraft.CrashReportCategory;
-import net.minecraft.ReportedException;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.world.entity.Entity;
+import net.minecraft.util.ClassTreeIdRegistry;
 import org.apache.commons.lang3.ObjectUtils;
 import org.slf4j.Logger;
 
 public class SynchedEntityData {
 	private static final Logger LOGGER = LogUtils.getLogger();
-	private static final Object2IntMap<Class<? extends Entity>> ENTITY_ID_POOL = new Object2IntOpenHashMap<>();
 	private static final int MAX_ID_VALUE = 254;
-	private final Entity entity;
-	private final Int2ObjectMap<SynchedEntityData.DataItem<?>> itemsById = new Int2ObjectOpenHashMap<>();
-	private final ReadWriteLock lock = new ReentrantReadWriteLock();
+	static final ClassTreeIdRegistry ID_REGISTRY = new ClassTreeIdRegistry();
+	private final SyncedDataHolder entity;
+	private final SynchedEntityData.DataItem<?>[] itemsById;
 	private boolean isDirty;
 
-	public SynchedEntityData(Entity entity) {
-		this.entity = entity;
+	SynchedEntityData(SyncedDataHolder syncedDataHolder, SynchedEntityData.DataItem<?>[] dataItems) {
+		this.entity = syncedDataHolder;
+		this.itemsById = dataItems;
 	}
 
-	public static <T> EntityDataAccessor<T> defineId(Class<? extends Entity> class_, EntityDataSerializer<T> entityDataSerializer) {
+	public static <T> EntityDataAccessor<T> defineId(Class<? extends SyncedDataHolder> class_, EntityDataSerializer<T> entityDataSerializer) {
 		if (LOGGER.isDebugEnabled()) {
 			try {
 				Class<?> class2 = Class.forName(Thread.currentThread().getStackTrace()[2].getClassName());
 				if (!class2.equals(class_)) {
 					LOGGER.debug("defineId called for: {} from {}", class_, class2, new RuntimeException());
 				}
-			} catch (ClassNotFoundException var5) {
+			} catch (ClassNotFoundException var3) {
 			}
 		}
 
-		int i;
-		if (ENTITY_ID_POOL.containsKey(class_)) {
-			i = ENTITY_ID_POOL.getInt(class_) + 1;
-		} else {
-			int j = 0;
-			Class<?> class3 = class_;
-
-			while (class3 != Entity.class) {
-				class3 = class3.getSuperclass();
-				if (ENTITY_ID_POOL.containsKey(class3)) {
-					j = ENTITY_ID_POOL.getInt(class3) + 1;
-					break;
-				}
-			}
-
-			i = j;
-		}
-
+		int i = ID_REGISTRY.define(class_);
 		if (i > 254) {
 			throw new IllegalArgumentException("Data value id is too big with " + i + "! (Max is 254)");
 		} else {
-			ENTITY_ID_POOL.put(class_, i);
 			return entityDataSerializer.createAccessor(i);
 		}
 	}
 
-	public <T> void define(EntityDataAccessor<T> entityDataAccessor, T object) {
-		int i = entityDataAccessor.getId();
-		if (i > 254) {
-			throw new IllegalArgumentException("Data value id is too big with " + i + "! (Max is 254)");
-		} else if (this.itemsById.containsKey(i)) {
-			throw new IllegalArgumentException("Duplicate id value for " + i + "!");
-		} else if (EntityDataSerializers.getSerializedId(entityDataAccessor.getSerializer()) < 0) {
-			throw new IllegalArgumentException("Unregistered serializer " + entityDataAccessor.getSerializer() + " for " + i + "!");
-		} else {
-			this.createDataItem(entityDataAccessor, object);
-		}
-	}
-
-	private <T> void createDataItem(EntityDataAccessor<T> entityDataAccessor, T object) {
-		SynchedEntityData.DataItem<T> dataItem = new SynchedEntityData.DataItem<>(entityDataAccessor, object);
-		this.lock.writeLock().lock();
-		this.itemsById.put(entityDataAccessor.getId(), dataItem);
-		this.lock.writeLock().unlock();
-	}
-
-	public <T> boolean hasItem(EntityDataAccessor<T> entityDataAccessor) {
-		return this.itemsById.containsKey(entityDataAccessor.getId());
-	}
-
 	private <T> SynchedEntityData.DataItem<T> getItem(EntityDataAccessor<T> entityDataAccessor) {
-		this.lock.readLock().lock();
-
-		SynchedEntityData.DataItem<T> dataItem;
-		try {
-			dataItem = (SynchedEntityData.DataItem<T>)this.itemsById.get(entityDataAccessor.getId());
-		} catch (Throwable var9) {
-			CrashReport crashReport = CrashReport.forThrowable(var9, "Getting synched entity data");
-			CrashReportCategory crashReportCategory = crashReport.addCategory("Synched entity data");
-			crashReportCategory.setDetail("Data ID", entityDataAccessor);
-			throw new ReportedException(crashReport);
-		} finally {
-			this.lock.readLock().unlock();
-		}
-
-		return dataItem;
+		return (SynchedEntityData.DataItem<T>)this.itemsById[entityDataAccessor.id()];
 	}
 
 	public <T> T get(EntityDataAccessor<T> entityDataAccessor) {
@@ -138,34 +73,28 @@ public class SynchedEntityData {
 
 	@Nullable
 	public List<SynchedEntityData.DataValue<?>> packDirty() {
-		List<SynchedEntityData.DataValue<?>> list = null;
-		if (this.isDirty) {
-			this.lock.readLock().lock();
+		if (!this.isDirty) {
+			return null;
+		} else {
+			this.isDirty = false;
+			List<SynchedEntityData.DataValue<?>> list = new ArrayList();
 
-			for (SynchedEntityData.DataItem<?> dataItem : this.itemsById.values()) {
+			for (SynchedEntityData.DataItem<?> dataItem : this.itemsById) {
 				if (dataItem.isDirty()) {
 					dataItem.setDirty(false);
-					if (list == null) {
-						list = new ArrayList();
-					}
-
 					list.add(dataItem.value());
 				}
 			}
 
-			this.lock.readLock().unlock();
+			return list;
 		}
-
-		this.isDirty = false;
-		return list;
 	}
 
 	@Nullable
 	public List<SynchedEntityData.DataValue<?>> getNonDefaultValues() {
 		List<SynchedEntityData.DataValue<?>> list = null;
-		this.lock.readLock().lock();
 
-		for (SynchedEntityData.DataItem<?> dataItem : this.itemsById.values()) {
+		for (SynchedEntityData.DataItem<?> dataItem : this.itemsById) {
 			if (!dataItem.isSetToDefault()) {
 				if (list == null) {
 					list = new ArrayList();
@@ -175,35 +104,26 @@ public class SynchedEntityData {
 			}
 		}
 
-		this.lock.readLock().unlock();
 		return list;
 	}
 
 	public void assignValues(List<SynchedEntityData.DataValue<?>> list) {
-		this.lock.writeLock().lock();
-
-		try {
-			for (SynchedEntityData.DataValue<?> dataValue : list) {
-				SynchedEntityData.DataItem<?> dataItem = this.itemsById.get(dataValue.id);
-				if (dataItem != null) {
-					this.assignValue(dataItem, dataValue);
-					this.entity.onSyncedDataUpdated(dataItem.getAccessor());
-				}
-			}
-		} finally {
-			this.lock.writeLock().unlock();
+		for (SynchedEntityData.DataValue<?> dataValue : list) {
+			SynchedEntityData.DataItem<?> dataItem = this.itemsById[dataValue.id];
+			this.assignValue(dataItem, dataValue);
+			this.entity.onSyncedDataUpdated(dataItem.getAccessor());
 		}
 
 		this.entity.onSyncedDataUpdated(list);
 	}
 
 	private <T> void assignValue(SynchedEntityData.DataItem<T> dataItem, SynchedEntityData.DataValue<?> dataValue) {
-		if (!Objects.equals(dataValue.serializer(), dataItem.accessor.getSerializer())) {
+		if (!Objects.equals(dataValue.serializer(), dataItem.accessor.serializer())) {
 			throw new IllegalStateException(
 				String.format(
 					Locale.ROOT,
 					"Invalid entity data item type for field %d on entity %s: old=%s(%s), new=%s(%s)",
-					dataItem.accessor.getId(),
+					dataItem.accessor.id(),
 					this.entity,
 					dataItem.value,
 					dataItem.value.getClass(),
@@ -216,8 +136,38 @@ public class SynchedEntityData {
 		}
 	}
 
-	public boolean isEmpty() {
-		return this.itemsById.isEmpty();
+	public static class Builder {
+		private final SyncedDataHolder entity;
+		private final SynchedEntityData.DataItem<?>[] itemsById;
+
+		public Builder(SyncedDataHolder syncedDataHolder) {
+			this.entity = syncedDataHolder;
+			this.itemsById = new SynchedEntityData.DataItem[SynchedEntityData.ID_REGISTRY.getCount(syncedDataHolder.getClass())];
+		}
+
+		public <T> SynchedEntityData.Builder define(EntityDataAccessor<T> entityDataAccessor, T object) {
+			int i = entityDataAccessor.id();
+			if (i > this.itemsById.length) {
+				throw new IllegalArgumentException("Data value id is too big with " + i + "! (Max is " + this.itemsById.length + ")");
+			} else if (this.itemsById[i] != null) {
+				throw new IllegalArgumentException("Duplicate id value for " + i + "!");
+			} else if (EntityDataSerializers.getSerializedId(entityDataAccessor.serializer()) < 0) {
+				throw new IllegalArgumentException("Unregistered serializer " + entityDataAccessor.serializer() + " for " + i + "!");
+			} else {
+				this.itemsById[entityDataAccessor.id()] = new SynchedEntityData.DataItem<>(entityDataAccessor, object);
+				return this;
+			}
+		}
+
+		public SynchedEntityData build() {
+			for (SynchedEntityData.DataItem<?> dataItem : this.itemsById) {
+				if (dataItem == null) {
+					throw new IllegalStateException("Entity " + this.entity + " did not have all synched data values defined");
+				}
+			}
+
+			return new SynchedEntityData(this.entity, this.itemsById);
+		}
 	}
 
 	public static class DataItem<T> {
@@ -264,8 +214,8 @@ public class SynchedEntityData {
 	public static record DataValue<T>(int id, EntityDataSerializer<T> serializer, T value) {
 
 		public static <T> SynchedEntityData.DataValue<T> create(EntityDataAccessor<T> entityDataAccessor, T object) {
-			EntityDataSerializer<T> entityDataSerializer = entityDataAccessor.getSerializer();
-			return new SynchedEntityData.DataValue<>(entityDataAccessor.getId(), entityDataSerializer, entityDataSerializer.copy(object));
+			EntityDataSerializer<T> entityDataSerializer = entityDataAccessor.serializer();
+			return new SynchedEntityData.DataValue<>(entityDataAccessor.id(), entityDataSerializer, entityDataSerializer.copy(object));
 		}
 
 		public void write(RegistryFriendlyByteBuf registryFriendlyByteBuf) {

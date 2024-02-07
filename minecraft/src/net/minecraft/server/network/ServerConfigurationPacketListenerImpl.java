@@ -2,14 +2,11 @@ package net.minecraft.server.network;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.logging.LogUtils;
-import com.mojang.serialization.DynamicOps;
+import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import javax.annotation.Nullable;
 import net.minecraft.core.LayeredRegistryAccess;
-import net.minecraft.core.RegistrySynchronization;
-import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.TickablePacketListener;
@@ -17,28 +14,27 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.PacketUtils;
 import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
 import net.minecraft.network.protocol.common.ClientboundDisconnectPacket;
-import net.minecraft.network.protocol.common.ClientboundUpdateTagsPacket;
 import net.minecraft.network.protocol.common.ServerboundClientInformationPacket;
 import net.minecraft.network.protocol.common.ServerboundResourcePackPacket;
 import net.minecraft.network.protocol.common.custom.BrandPayload;
-import net.minecraft.network.protocol.configuration.ClientboundRegistryDataPacket;
 import net.minecraft.network.protocol.configuration.ClientboundUpdateEnabledFeaturesPacket;
 import net.minecraft.network.protocol.configuration.ServerConfigurationPacketListener;
 import net.minecraft.network.protocol.configuration.ServerboundFinishConfigurationPacket;
+import net.minecraft.network.protocol.configuration.ServerboundSelectKnownPacks;
 import net.minecraft.network.protocol.game.GameProtocols;
-import net.minecraft.resources.RegistryOps;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.RegistryLayer;
 import net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.config.JoinWorldTask;
 import net.minecraft.server.network.config.ServerResourcePackConfigurationTask;
+import net.minecraft.server.network.config.SynchronizeRegistriesTask;
+import net.minecraft.server.packs.repository.KnownPack;
 import net.minecraft.server.players.PlayerList;
-import net.minecraft.tags.TagNetworkSerialization;
 import net.minecraft.world.flag.FeatureFlags;
 import org.slf4j.Logger;
 
-public class ServerConfigurationPacketListenerImpl extends ServerCommonPacketListenerImpl implements TickablePacketListener, ServerConfigurationPacketListener {
+public class ServerConfigurationPacketListenerImpl extends ServerCommonPacketListenerImpl implements ServerConfigurationPacketListener, TickablePacketListener {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final Component DISCONNECT_REASON_INVALID_DATA = Component.translatable("multiplayer.disconnect.invalid_player_data");
 	private final GameProfile gameProfile;
@@ -46,6 +42,8 @@ public class ServerConfigurationPacketListenerImpl extends ServerCommonPacketLis
 	@Nullable
 	private ConfigurationTask currentTask;
 	private ClientInformation clientInformation;
+	@Nullable
+	private SynchronizeRegistriesTask synchronizeRegistriesTask;
 
 	public ServerConfigurationPacketListenerImpl(MinecraftServer minecraftServer, Connection connection, CommonListenerCookie commonListenerCookie) {
 		super(minecraftServer, connection, commonListenerCookie);
@@ -72,14 +70,10 @@ public class ServerConfigurationPacketListenerImpl extends ServerCommonPacketLis
 	public void startConfiguration() {
 		this.send(new ClientboundCustomPayloadPacket(new BrandPayload(this.server.getServerModName())));
 		LayeredRegistryAccess<RegistryLayer> layeredRegistryAccess = this.server.registries();
+		List<KnownPack> list = this.server.getResourceManager().listPacks().flatMap(packResources -> packResources.location().knownPackInfo().stream()).toList();
 		this.send(new ClientboundUpdateEnabledFeaturesPacket(FeatureFlags.REGISTRY.toNames(this.server.getWorldData().enabledFeatures())));
-		DynamicOps<Tag> dynamicOps = RegistryOps.create(NbtOps.INSTANCE, layeredRegistryAccess.compositeAccess());
-		RegistrySynchronization.packRegistries(
-			dynamicOps,
-			layeredRegistryAccess.getAccessFrom(RegistryLayer.WORLDGEN),
-			(resourceKey, list) -> this.send(new ClientboundRegistryDataPacket(resourceKey, list))
-		);
-		this.send(new ClientboundUpdateTagsPacket(TagNetworkSerialization.serializeTagsToNetwork(layeredRegistryAccess)));
+		this.synchronizeRegistriesTask = new SynchronizeRegistriesTask(list, layeredRegistryAccess);
+		this.configurationTasks.add(this.synchronizeRegistriesTask);
 		this.addOptionalTasks();
 		this.configurationTasks.add(new JoinWorldTask());
 		this.startNextTask();
@@ -106,6 +100,17 @@ public class ServerConfigurationPacketListenerImpl extends ServerCommonPacketLis
 		super.handleResourcePackResponse(serverboundResourcePackPacket);
 		if (serverboundResourcePackPacket.action().isTerminal()) {
 			this.finishCurrentTask(ServerResourcePackConfigurationTask.TYPE);
+		}
+	}
+
+	@Override
+	public void handleSelectKnownPacks(ServerboundSelectKnownPacks serverboundSelectKnownPacks) {
+		PacketUtils.ensureRunningOnSameThread(serverboundSelectKnownPacks, this, this.server);
+		if (this.synchronizeRegistriesTask == null) {
+			throw new IllegalStateException("Unexpected response from client: received pack selection, but no negotiation ongoing");
+		} else {
+			this.synchronizeRegistriesTask.handleResponse(serverboundSelectKnownPacks.knownPacks(), this::send);
+			this.finishCurrentTask(SynchronizeRegistriesTask.TYPE);
 		}
 	}
 

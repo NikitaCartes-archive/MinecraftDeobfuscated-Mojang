@@ -4,6 +4,7 @@ import com.mojang.serialization.DynamicOps;
 import io.netty.buffer.ByteBuf;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
@@ -16,9 +17,10 @@ import net.minecraft.resources.RegistryDataLoader;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.RegistryLayer;
+import net.minecraft.server.packs.repository.KnownPack;
 
 public class RegistrySynchronization {
-	private static final Set<ResourceKey<? extends Registry<?>>> NETWORKABLE_REGISTRIES = (Set<ResourceKey<? extends Registry<?>>>)RegistryDataLoader.SYNCHRONIZED_REGISTRIES
+	public static final Set<ResourceKey<? extends Registry<?>>> NETWORKABLE_REGISTRIES = (Set<ResourceKey<? extends Registry<?>>>)RegistryDataLoader.SYNCHRONIZED_REGISTRIES
 		.stream()
 		.map(RegistryDataLoader.RegistryData::key)
 		.collect(Collectors.toUnmodifiableSet());
@@ -26,15 +28,17 @@ public class RegistrySynchronization {
 	public static void packRegistries(
 		DynamicOps<Tag> dynamicOps,
 		RegistryAccess registryAccess,
+		Set<KnownPack> set,
 		BiConsumer<ResourceKey<? extends Registry<?>>, List<RegistrySynchronization.PackedRegistryEntry>> biConsumer
 	) {
-		RegistryDataLoader.SYNCHRONIZED_REGISTRIES.forEach(registryData -> packRegistry(dynamicOps, registryData, registryAccess, biConsumer));
+		RegistryDataLoader.SYNCHRONIZED_REGISTRIES.forEach(registryData -> packRegistry(dynamicOps, registryData, registryAccess, set, biConsumer));
 	}
 
 	private static <T> void packRegistry(
 		DynamicOps<Tag> dynamicOps,
 		RegistryDataLoader.RegistryData<T> registryData,
 		RegistryAccess registryAccess,
+		Set<KnownPack> set,
 		BiConsumer<ResourceKey<? extends Registry<?>>, List<RegistrySynchronization.PackedRegistryEntry>> biConsumer
 	) {
 		registryAccess.registry(registryData.key())
@@ -44,11 +48,19 @@ public class RegistrySynchronization {
 					registry.holders()
 						.forEach(
 							reference -> {
-								Tag tag = Util.getOrThrow(
-									registryData.elementCodec().encodeStart(dynamicOps, (T)reference.value()),
-									string -> new IllegalArgumentException("Failed to serialize " + reference.key() + ": " + string)
-								);
-								list.add(new RegistrySynchronization.PackedRegistryEntry(reference.key().location(), tag));
+								boolean bl = registry.registrationInfo(reference.key()).flatMap(RegistrationInfo::knownPackInfo).filter(set::contains).isPresent();
+								Optional<Tag> optional;
+								if (bl) {
+									optional = Optional.empty();
+								} else {
+									Tag tag = Util.getOrThrow(
+										registryData.elementCodec().encodeStart(dynamicOps, (T)reference.value()),
+										string -> new IllegalArgumentException("Failed to serialize " + reference.key() + ": " + string)
+									);
+									optional = Optional.of(tag);
+								}
+
+								list.add(new RegistrySynchronization.PackedRegistryEntry(reference.key().location(), optional));
 							}
 						);
 					biConsumer.accept(registry.key(), list);
@@ -70,11 +82,11 @@ public class RegistrySynchronization {
 		return Stream.concat(stream2, stream);
 	}
 
-	public static record PackedRegistryEntry(ResourceLocation id, Tag data) {
+	public static record PackedRegistryEntry(ResourceLocation id, Optional<Tag> data) {
 		public static final StreamCodec<ByteBuf, RegistrySynchronization.PackedRegistryEntry> STREAM_CODEC = StreamCodec.composite(
 			ResourceLocation.STREAM_CODEC,
 			RegistrySynchronization.PackedRegistryEntry::id,
-			ByteBufCodecs.TAG,
+			ByteBufCodecs.TAG.apply(ByteBufCodecs::optional),
 			RegistrySynchronization.PackedRegistryEntry::data,
 			RegistrySynchronization.PackedRegistryEntry::new
 		);

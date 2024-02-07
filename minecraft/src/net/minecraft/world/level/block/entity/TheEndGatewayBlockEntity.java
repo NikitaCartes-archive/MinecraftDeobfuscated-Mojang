@@ -55,7 +55,7 @@ public class TheEndGatewayBlockEntity extends TheEndPortalBlockEntity {
 		super.saveAdditional(compoundTag, provider);
 		compoundTag.putLong("Age", this.age);
 		if (this.exitPortal != null) {
-			compoundTag.put("ExitPortal", NbtUtils.writeBlockPos(this.exitPortal));
+			compoundTag.put("exit_portal", NbtUtils.writeBlockPos(this.exitPortal));
 		}
 
 		if (this.exactTeleport) {
@@ -67,13 +67,7 @@ public class TheEndGatewayBlockEntity extends TheEndPortalBlockEntity {
 	public void load(CompoundTag compoundTag, HolderLookup.Provider provider) {
 		super.load(compoundTag, provider);
 		this.age = compoundTag.getLong("Age");
-		if (compoundTag.contains("ExitPortal", 10)) {
-			BlockPos blockPos = NbtUtils.readBlockPos(compoundTag.getCompound("ExitPortal"));
-			if (Level.isInSpawnableBounds(blockPos)) {
-				this.exitPortal = blockPos;
-			}
-		}
-
+		NbtUtils.readBlockPos(compoundTag, "exit_portal").filter(Level::isInSpawnableBounds).ifPresent(blockPos -> this.exitPortal = blockPos);
 		this.exactTeleport = compoundTag.getBoolean("ExactTeleport");
 	}
 

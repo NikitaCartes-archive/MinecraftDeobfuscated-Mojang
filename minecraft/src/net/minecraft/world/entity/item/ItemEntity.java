@@ -104,8 +104,13 @@ public class ItemEntity extends Entity implements TraceableEntity {
 	}
 
 	@Override
-	protected void defineSynchedData() {
-		this.getEntityData().define(DATA_ITEM, ItemStack.EMPTY);
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		builder.define(DATA_ITEM, ItemStack.EMPTY);
+	}
+
+	@Override
+	protected double getDefaultGravity() {
+		return 0.04;
 	}
 
 	@Override
@@ -126,8 +131,8 @@ public class ItemEntity extends Entity implements TraceableEntity {
 				this.setUnderwaterMovement();
 			} else if (this.isInLava() && this.getFluidHeight(FluidTags.LAVA) > 0.1F) {
 				this.setUnderLavaMovement();
-			} else if (!this.isNoGravity()) {
-				this.setDeltaMovement(this.getDeltaMovement().add(0.0, -0.04, 0.0));
+			} else {
+				this.applyGravity();
 			}
 
 			if (this.level().isClientSide) {

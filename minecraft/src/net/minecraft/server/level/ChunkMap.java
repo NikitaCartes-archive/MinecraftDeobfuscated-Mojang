@@ -49,10 +49,12 @@ import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
+import net.minecraft.CrashReportDetail;
 import net.minecraft.ReportedException;
 import net.minecraft.Util;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.SectionPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
@@ -83,6 +85,7 @@ import net.minecraft.world.level.chunk.ProtoChunk;
 import net.minecraft.world.level.chunk.UpgradeData;
 import net.minecraft.world.level.chunk.storage.ChunkSerializer;
 import net.minecraft.world.level.chunk.storage.ChunkStorage;
+import net.minecraft.world.level.chunk.storage.RegionStorageInfo;
 import net.minecraft.world.level.entity.ChunkStatusUpdateListener;
 import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
@@ -151,7 +154,12 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 		int i,
 		boolean bl
 	) {
-		super(levelStorageAccess.getDimensionPath(serverLevel.dimension()).resolve("region"), dataFixer, bl);
+		super(
+			new RegionStorageInfo(levelStorageAccess.getLevelId(), serverLevel.dimension(), "chunk"),
+			levelStorageAccess.getDimensionPath(serverLevel.dimension()).resolve("region"),
+			dataFixer,
+			bl
+		);
 		this.structureTemplateManager = structureTemplateManager;
 		Path path = levelStorageAccess.getDimensionPath(serverLevel.dimension());
 		this.storageName = path.getFileName().toString();
@@ -180,7 +188,9 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 		);
 		this.distanceManager = new ChunkMap.DistanceManager(executor, blockableEventLoop);
 		this.overworldDataStorage = supplier;
-		this.poiManager = new PoiManager(path.resolve("poi"), dataFixer, bl, registryAccess, serverLevel);
+		this.poiManager = new PoiManager(
+			new RegionStorageInfo(levelStorageAccess.getLevelId(), serverLevel.dimension(), "poi"), path.resolve("poi"), dataFixer, bl, registryAccess, serverLevel
+		);
 		this.setServerViewDistance(i);
 	}
 
@@ -655,6 +665,7 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 							var9.getStackTrace();
 							CrashReport crashReport = CrashReport.forThrowable(var9, "Exception generating new chunk");
 							CrashReportCategory crashReportCategory = crashReport.addCategory("Chunk to be generated");
+							crashReportCategory.setDetail("Status being generated", (CrashReportDetail<String>)(() -> BuiltInRegistries.CHUNK_STATUS.getKey(chunkStatus).toString()));
 							crashReportCategory.setDetail("Location", String.format(Locale.ROOT, "%d,%d", chunkPos.x, chunkPos.z));
 							crashReportCategory.setDetail("Position hash", ChunkPos.asLong(chunkPos.x, chunkPos.z));
 							crashReportCategory.setDetail("Generator", this.generator);

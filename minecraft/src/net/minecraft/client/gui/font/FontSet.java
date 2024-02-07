@@ -12,6 +12,7 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import net.fabricmc.api.EnvType;
@@ -31,7 +32,8 @@ public class FontSet implements AutoCloseable {
 	private final ResourceLocation name;
 	private BakedGlyph missingGlyph;
 	private BakedGlyph whiteGlyph;
-	private final List<GlyphProvider> providers = Lists.<GlyphProvider>newArrayList();
+	private List<GlyphProvider.Conditional> allProviders = List.of();
+	private List<GlyphProvider> activeProviders = List.of();
 	private final CodepointMap<BakedGlyph> glyphs = new CodepointMap<>(BakedGlyph[]::new, BakedGlyph[][]::new);
 	private final CodepointMap<FontSet.GlyphInfoFilter> glyphInfos = new CodepointMap<>(FontSet.GlyphInfoFilter[]::new, FontSet.GlyphInfoFilter[][]::new);
 	private final Int2ObjectMap<IntList> glyphsByWidth = new Int2ObjectOpenHashMap<>();
@@ -42,26 +44,43 @@ public class FontSet implements AutoCloseable {
 		this.name = resourceLocation;
 	}
 
-	public void reload(List<GlyphProvider> list) {
-		this.closeProviders();
+	public void reload(List<GlyphProvider.Conditional> list, Set<FontOption> set) {
+		this.allProviders = list;
+		this.reload(set);
+	}
+
+	public void reload(Set<FontOption> set) {
+		this.activeProviders = List.of();
+		this.resetTextures();
+		this.activeProviders = this.selectProviders(this.allProviders, set);
+	}
+
+	private void resetTextures() {
 		this.closeTextures();
 		this.glyphs.clear();
 		this.glyphInfos.clear();
 		this.glyphsByWidth.clear();
 		this.missingGlyph = SpecialGlyphs.MISSING.bake(this::stitch);
 		this.whiteGlyph = SpecialGlyphs.WHITE.bake(this::stitch);
-		IntSet intSet = new IntOpenHashSet();
+	}
 
-		for (GlyphProvider glyphProvider : list) {
-			intSet.addAll(glyphProvider.getSupportedGlyphs());
+	private List<GlyphProvider> selectProviders(List<GlyphProvider.Conditional> list, Set<FontOption> set) {
+		IntSet intSet = new IntOpenHashSet();
+		List<GlyphProvider> list2 = new ArrayList();
+
+		for (GlyphProvider.Conditional conditional : list) {
+			if (conditional.filter().apply(set)) {
+				list2.add(conditional.provider());
+				intSet.addAll(conditional.provider().getSupportedGlyphs());
+			}
 		}
 
-		Set<GlyphProvider> set = Sets.<GlyphProvider>newHashSet();
+		Set<GlyphProvider> set2 = Sets.<GlyphProvider>newHashSet();
 		intSet.forEach(i -> {
-			for (GlyphProvider glyphProviderx : list) {
-				GlyphInfo glyphInfo = glyphProviderx.getGlyph(i);
+			for (GlyphProvider glyphProvider : list2) {
+				GlyphInfo glyphInfo = glyphProvider.getGlyph(i);
 				if (glyphInfo != null) {
-					set.add(glyphProviderx);
+					set2.add(glyphProvider);
 					if (glyphInfo != SpecialGlyphs.MISSING) {
 						this.glyphsByWidth.computeIfAbsent(Mth.ceil(glyphInfo.getAdvance(false)), (Int2ObjectFunction<? extends IntList>)(ix -> new IntArrayList())).add(i);
 					}
@@ -69,20 +88,11 @@ public class FontSet implements AutoCloseable {
 				}
 			}
 		});
-		list.stream().filter(set::contains).forEach(this.providers::add);
+		return list2.stream().filter(set2::contains).toList();
 	}
 
 	public void close() {
-		this.closeProviders();
 		this.closeTextures();
-	}
-
-	private void closeProviders() {
-		for (GlyphProvider glyphProvider : this.providers) {
-			glyphProvider.close();
-		}
-
-		this.providers.clear();
 	}
 
 	private void closeTextures() {
@@ -106,7 +116,7 @@ public class FontSet implements AutoCloseable {
 	private FontSet.GlyphInfoFilter computeGlyphInfo(int i) {
 		GlyphInfo glyphInfo = null;
 
-		for (GlyphProvider glyphProvider : this.providers) {
+		for (GlyphProvider glyphProvider : this.activeProviders) {
 			GlyphInfo glyphInfo2 = glyphProvider.getGlyph(i);
 			if (glyphInfo2 != null) {
 				if (glyphInfo == null) {
@@ -127,7 +137,7 @@ public class FontSet implements AutoCloseable {
 	}
 
 	private BakedGlyph computeBakedGlyph(int i) {
-		for (GlyphProvider glyphProvider : this.providers) {
+		for (GlyphProvider glyphProvider : this.activeProviders) {
 			GlyphInfo glyphInfo = glyphProvider.getGlyph(i);
 			if (glyphInfo != null) {
 				return glyphInfo.bake(this::stitch);
@@ -164,6 +174,10 @@ public class FontSet implements AutoCloseable {
 	public BakedGlyph getRandomGlyph(GlyphInfo glyphInfo) {
 		IntList intList = this.glyphsByWidth.get(Mth.ceil(glyphInfo.getAdvance(false)));
 		return intList != null && !intList.isEmpty() ? this.getGlyph(intList.getInt(RANDOM.nextInt(intList.size()))) : this.missingGlyph;
+	}
+
+	public ResourceLocation name() {
+		return this.name;
 	}
 
 	public BakedGlyph whiteGlyph() {

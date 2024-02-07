@@ -129,6 +129,7 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.storage.EntityStorage;
+import net.minecraft.world.level.chunk.storage.RegionStorageInfo;
 import net.minecraft.world.level.chunk.storage.SimpleRegionStorage;
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import net.minecraft.world.level.dimension.LevelStem;
@@ -235,7 +236,13 @@ public class ServerLevel extends Level implements WorldGenLevel {
 		boolean bl3 = minecraftServer.forceSynchronousWrites();
 		DataFixer dataFixer = minecraftServer.getFixerUpper();
 		EntityPersistentStorage<Entity> entityPersistentStorage = new EntityStorage(
-			new SimpleRegionStorage(levelStorageAccess.getDimensionPath(resourceKey).resolve("entities"), dataFixer, bl3, "entities", DataFixTypes.ENTITY_CHUNK),
+			new SimpleRegionStorage(
+				new RegionStorageInfo(levelStorageAccess.getLevelId(), resourceKey, "entities"),
+				levelStorageAccess.getDimensionPath(resourceKey).resolve("entities"),
+				dataFixer,
+				bl3,
+				DataFixTypes.ENTITY_CHUNK
+			),
 			this,
 			minecraftServer
 		);

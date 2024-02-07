@@ -201,7 +201,7 @@ public class ChunkStatus {
 		(chunkStatus, serverLevel, structureTemplateManager, threadedLevelLightEngine, function, chunkAccess) -> lightChunk(threadedLevelLightEngine, chunkAccess)
 	);
 	public static final ChunkStatus SPAWN = registerSimple(
-		"spawn", LIGHT, 0, POST_FEATURES, ChunkStatus.ChunkType.PROTOCHUNK, (chunkStatus, serverLevel, chunkGenerator, list, chunkAccess) -> {
+		"spawn", LIGHT, 1, POST_FEATURES, ChunkStatus.ChunkType.PROTOCHUNK, (chunkStatus, serverLevel, chunkGenerator, list, chunkAccess) -> {
 			if (!chunkAccess.isUpgrading()) {
 				chunkGenerator.spawnOriginalMobs(new WorldGenRegion(serverLevel, list, chunkStatus, -1));
 			}

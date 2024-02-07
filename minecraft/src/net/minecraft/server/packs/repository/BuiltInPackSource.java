@@ -13,6 +13,7 @@ import java.util.function.Function;
 import javax.annotation.Nullable;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.PackLocationInfo;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.VanillaPackResources;
@@ -23,6 +24,7 @@ import org.slf4j.Logger;
 public abstract class BuiltInPackSource implements RepositorySource {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	public static final String VANILLA_ID = "vanilla";
+	public static final KnownPack CORE_PACK_INFO = KnownPack.vanilla("core");
 	private final PackType packType;
 	private final VanillaPackResources vanillaPack;
 	private final ResourceLocation packDir;
@@ -77,7 +79,6 @@ public abstract class BuiltInPackSource implements RepositorySource {
 				FolderRepositorySource.discoverPacks(
 					path,
 					this.validator,
-					true,
 					(pathx, resourcesSupplier) -> biConsumer.accept(
 							pathToId(pathx), (Function)string -> this.createBuiltinPack(string, resourcesSupplier, this.getPackTitle(string))
 						)
@@ -98,12 +99,12 @@ public abstract class BuiltInPackSource implements RepositorySource {
 	protected static Pack.ResourcesSupplier fixedResources(PackResources packResources) {
 		return new Pack.ResourcesSupplier() {
 			@Override
-			public PackResources openPrimary(String string) {
+			public PackResources openPrimary(PackLocationInfo packLocationInfo) {
 				return packResources;
 			}
 
 			@Override
-			public PackResources openFull(String string, Pack.Info info) {
+			public PackResources openFull(PackLocationInfo packLocationInfo, Pack.Metadata metadata) {
 				return packResources;
 			}
 		};

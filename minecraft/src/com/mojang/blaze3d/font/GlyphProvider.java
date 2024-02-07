@@ -4,6 +4,7 @@ import it.unimi.dsi.fastutil.ints.IntSet;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.font.FontOption;
 
 @Environment(EnvType.CLIENT)
 public interface GlyphProvider extends AutoCloseable {
@@ -18,4 +19,11 @@ public interface GlyphProvider extends AutoCloseable {
 	}
 
 	IntSet getSupportedGlyphs();
+
+	@Environment(EnvType.CLIENT)
+	public static record Conditional(GlyphProvider provider, FontOption.Filter filter) implements AutoCloseable {
+		public void close() {
+			this.provider.close();
+		}
+	}
 }

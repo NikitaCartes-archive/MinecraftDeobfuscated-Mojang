@@ -109,10 +109,7 @@ public class SpawnEggItem extends Item {
 				if (entity == null) {
 					return InteractionResultHolder.pass(itemStack);
 				} else {
-					if (!player.getAbilities().instabuild) {
-						itemStack.shrink(1);
-					}
-
+					itemStack.consume(1, player);
 					player.awardStat(Stats.ITEM_USED.get(this));
 					level.gameEvent(player, GameEvent.ENTITY_PLACE, entity.position());
 					return InteractionResultHolder.consume(itemStack);
@@ -182,10 +179,7 @@ public class SpawnEggItem extends Item {
 						mob2.setCustomName(itemStack.getHoverName());
 					}
 
-					if (!player.getAbilities().instabuild) {
-						itemStack.shrink(1);
-					}
-
+					itemStack.consume(1, player);
 					return Optional.of(mob2);
 				}
 			}

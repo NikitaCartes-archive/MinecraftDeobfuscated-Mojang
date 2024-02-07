@@ -8,6 +8,10 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
+import net.minecraft.CrashReport;
+import net.minecraft.CrashReportCategory;
+import net.minecraft.CrashReportDetail;
+import net.minecraft.ReportedException;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -15,6 +19,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -134,21 +139,21 @@ public class WorldGenRegion implements WorldGenLevel {
 			chunkAccess = null;
 		}
 
-		if (!bl) {
-			return null;
-		} else {
-			LOGGER.error("Requested chunk : {} {}", i, j);
-			LOGGER.error("Region bounds : {} {} | {} {}", this.firstPos.x, this.firstPos.z, this.lastPos.x, this.lastPos.z);
-			if (chunkAccess != null) {
-				throw (RuntimeException)Util.pauseInIde(
-					new RuntimeException(
-						String.format(Locale.ROOT, "Chunk is not of correct status. Expecting %s, got %s | %s %s", chunkStatus, chunkAccess.getStatus(), i, j)
-					)
-				);
-			} else {
-				throw (RuntimeException)Util.pauseInIde(new RuntimeException(String.format(Locale.ROOT, "We are asking a region for a chunk out of bound | %s %s", i, j)));
-			}
-		}
+		CrashReport crashReport = CrashReport.forThrowable(
+			new IllegalStateException("Requested chunk unavailable during world generation"), "Exception generating new chunk"
+		);
+		CrashReportCategory crashReportCategory = crashReport.addCategory("Chunk request details");
+		crashReportCategory.setDetail("Requested chunk", String.format(Locale.ROOT, "%d, %d", i, j));
+		crashReportCategory.setDetail("Requested status", (CrashReportDetail<String>)(() -> BuiltInRegistries.CHUNK_STATUS.getKey(chunkStatus).toString()));
+		crashReportCategory.setDetail(
+			"Actual status",
+			(CrashReportDetail<String>)(() -> chunkAccess == null ? "[out of region bounds]" : BuiltInRegistries.CHUNK_STATUS.getKey(chunkAccess.getStatus()).toString())
+		);
+		crashReportCategory.setDetail("loadOrGenerate", bl);
+		crashReportCategory.setDetail("Generating chunk", (CrashReportDetail<String>)(() -> this.center.getPos().toString()));
+		crashReportCategory.setDetail("Region start", this.firstPos);
+		crashReportCategory.setDetail("Region end", this.lastPos);
+		throw new ReportedException(crashReport);
 	}
 
 	@Override

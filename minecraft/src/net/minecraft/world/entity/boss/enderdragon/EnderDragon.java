@@ -138,9 +138,9 @@ public class EnderDragon extends Mob implements Enemy {
 	}
 
 	@Override
-	protected void defineSynchedData() {
-		super.defineSynchedData();
-		this.getEntityData().define(DATA_PHASE, EnderDragonPhase.HOVERING.getId());
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		super.defineSynchedData(builder);
+		builder.define(DATA_PHASE, EnderDragonPhase.HOVERING.getId());
 	}
 
 	public double[] getLatencyPos(int i, float f) {

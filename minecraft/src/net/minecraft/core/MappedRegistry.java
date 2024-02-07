@@ -41,7 +41,7 @@ public class MappedRegistry<T> implements WritableRegistry<T> {
 	private final Map<ResourceLocation, Holder.Reference<T>> byLocation = new HashMap();
 	private final Map<ResourceKey<T>, Holder.Reference<T>> byKey = new HashMap();
 	private final Map<T, Holder.Reference<T>> byValue = new IdentityHashMap();
-	private final Map<T, Lifecycle> lifecycles = new IdentityHashMap();
+	private final Map<ResourceKey<T>, RegistrationInfo> registrationInfos = new IdentityHashMap();
 	private Lifecycle registryLifecycle;
 	private volatile Map<TagKey<T>, HolderSet.Named<T>> tags = new IdentityHashMap();
 	private boolean frozen;
@@ -113,7 +113,7 @@ public class MappedRegistry<T> implements WritableRegistry<T> {
 	}
 
 	@Override
-	public Holder.Reference<T> register(ResourceKey<T> resourceKey, T object, Lifecycle lifecycle) {
+	public Holder.Reference<T> register(ResourceKey<T> resourceKey, T object, RegistrationInfo registrationInfo) {
 		this.validateWrite(resourceKey);
 		Objects.requireNonNull(resourceKey);
 		Objects.requireNonNull(object);
@@ -144,8 +144,8 @@ public class MappedRegistry<T> implements WritableRegistry<T> {
 		int i = this.byId.size();
 		this.byId.add(reference);
 		this.toId.put(object, i);
-		this.lifecycles.put(object, lifecycle);
-		this.registryLifecycle = this.registryLifecycle.add(lifecycle);
+		this.registrationInfos.put(resourceKey, registrationInfo);
+		this.registryLifecycle = this.registryLifecycle.add(registrationInfo.lifecycle());
 		return reference;
 	}
 
@@ -216,8 +216,8 @@ public class MappedRegistry<T> implements WritableRegistry<T> {
 	}
 
 	@Override
-	public Lifecycle lifecycle(T object) {
-		return (Lifecycle)this.lifecycles.get(object);
+	public Optional<RegistrationInfo> registrationInfo(ResourceKey<T> resourceKey) {
+		return Optional.ofNullable((RegistrationInfo)this.registrationInfos.get(resourceKey));
 	}
 
 	@Override

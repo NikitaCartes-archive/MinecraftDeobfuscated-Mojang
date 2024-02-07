@@ -183,6 +183,8 @@ public abstract class Player extends LivingEntity {
 	@Nullable
 	public FishingHook fishing;
 	protected float hurtDir;
+	@Nullable
+	public Double ignoreFallDamageAboveY;
 
 	public Player(Level level, BlockPos blockPos, float f, GameProfile gameProfile) {
 		super(EntityType.PLAYER, level);
@@ -215,18 +217,19 @@ public abstract class Player extends LivingEntity {
 			.add(Attributes.ATTACK_SPEED)
 			.add(Attributes.LUCK)
 			.add(Attributes.BLOCK_INTERACTION_RANGE, 4.5)
-			.add(Attributes.ENTITY_INTERACTION_RANGE, 3.0);
+			.add(Attributes.ENTITY_INTERACTION_RANGE, 3.0)
+			.add(Attributes.BLOCK_BREAK_SPEED);
 	}
 
 	@Override
-	protected void defineSynchedData() {
-		super.defineSynchedData();
-		this.entityData.define(DATA_PLAYER_ABSORPTION_ID, 0.0F);
-		this.entityData.define(DATA_SCORE_ID, 0);
-		this.entityData.define(DATA_PLAYER_MODE_CUSTOMISATION, (byte)0);
-		this.entityData.define(DATA_PLAYER_MAIN_HAND, (byte)DEFAULT_MAIN_HAND.getId());
-		this.entityData.define(DATA_SHOULDER_LEFT, new CompoundTag());
-		this.entityData.define(DATA_SHOULDER_RIGHT, new CompoundTag());
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		super.defineSynchedData(builder);
+		builder.define(DATA_PLAYER_ABSORPTION_ID, 0.0F);
+		builder.define(DATA_SCORE_ID, 0);
+		builder.define(DATA_PLAYER_MODE_CUSTOMISATION, (byte)0);
+		builder.define(DATA_PLAYER_MAIN_HAND, (byte)DEFAULT_MAIN_HAND.getId());
+		builder.define(DATA_SHOULDER_LEFT, new CompoundTag());
+		builder.define(DATA_SHOULDER_RIGHT, new CompoundTag());
 	}
 
 	@Override
@@ -741,6 +744,7 @@ public abstract class Player extends LivingEntity {
 			};
 		}
 
+		f *= (float)this.getAttributeValue(Attributes.BLOCK_BREAK_SPEED);
 		if (this.isEyeInFluid(FluidTags.WATER) && !EnchantmentHelper.hasAquaAffinity(this)) {
 			f /= 5.0F;
 		}
@@ -791,6 +795,10 @@ public abstract class Player extends LivingEntity {
 		if (compoundTag.contains("LastDeathLocation", 10)) {
 			this.setLastDeathLocation(GlobalPos.CODEC.parse(NbtOps.INSTANCE, compoundTag.get("LastDeathLocation")).resultOrPartial(LOGGER::error));
 		}
+
+		if (compoundTag.contains("ignore_fall_damage_above_y", 6)) {
+			this.ignoreFallDamageAboveY = compoundTag.getDouble("ignore_fall_damage_above_y");
+		}
 	}
 
 	@Override
@@ -819,6 +827,9 @@ public abstract class Player extends LivingEntity {
 		this.getLastDeathLocation()
 			.flatMap(globalPos -> GlobalPos.CODEC.encodeStart(NbtOps.INSTANCE, globalPos).resultOrPartial(LOGGER::error))
 			.ifPresent(tag -> compoundTag.put("LastDeathLocation", tag));
+		if (this.ignoreFallDamageAboveY != null) {
+			compoundTag.putDouble("ignore_fall_damage_above_y", this.ignoreFallDamageAboveY);
+		}
 	}
 
 	@Override
@@ -1323,6 +1334,11 @@ public abstract class Player extends LivingEntity {
 		return this.abilities;
 	}
 
+	@Override
+	public boolean hasInfiniteMaterials() {
+		return this.abilities.instabuild;
+	}
+
 	public void updateTutorialInventoryAction(ItemStack itemStack, ItemStack itemStack2, ClickAction clickAction) {
 	}
 
@@ -1482,7 +1498,13 @@ public abstract class Player extends LivingEntity {
 				this.awardStat(Stats.FALL_ONE_CM, (int)Math.round((double)f * 100.0));
 			}
 
-			return super.causeFallDamage(f, g, damageSource);
+			if (this.ignoreFallDamageAboveY != null) {
+				float h = this.ignoreFallDamageAboveY.floatValue();
+				this.ignoreFallDamageAboveY = null;
+				return (double)h < this.getY() ? false : super.causeFallDamage(h - (float)this.getY(), g, damageSource);
+			} else {
+				return super.causeFallDamage(f, g, damageSource);
+			}
 		}
 	}
 
@@ -1491,6 +1513,7 @@ public abstract class Player extends LivingEntity {
 			ItemStack itemStack = this.getItemBySlot(EquipmentSlot.CHEST);
 			if (itemStack.is(Items.ELYTRA) && ElytraItem.isFlyEnabled(itemStack)) {
 				this.startFallFlying();
+				this.ignoreFallDamageAboveY = null;
 				return true;
 			}
 		}
@@ -1728,6 +1751,11 @@ public abstract class Player extends LivingEntity {
 	@Override
 	public Iterable<ItemStack> getArmorSlots() {
 		return this.inventory.armor;
+	}
+
+	@Override
+	public boolean canUseSlot(EquipmentSlot equipmentSlot) {
+		return equipmentSlot != EquipmentSlot.BODY;
 	}
 
 	public boolean setEntityOnShoulder(CompoundTag compoundTag) {

@@ -74,10 +74,10 @@ public class ZombieVillager extends Zombie implements VillagerDataHolder {
 	}
 
 	@Override
-	protected void defineSynchedData() {
-		super.defineSynchedData();
-		this.entityData.define(DATA_CONVERTING_ID, false);
-		this.entityData.define(DATA_VILLAGER_DATA, new VillagerData(VillagerType.PLAINS, VillagerProfession.NONE, 1));
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		super.defineSynchedData(builder);
+		builder.define(DATA_CONVERTING_ID, false);
+		builder.define(DATA_VILLAGER_DATA, new VillagerData(VillagerType.PLAINS, VillagerProfession.NONE, 1));
 	}
 
 	@Override
@@ -146,10 +146,7 @@ public class ZombieVillager extends Zombie implements VillagerDataHolder {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
 		if (itemStack.is(Items.GOLDEN_APPLE)) {
 			if (this.hasEffect(MobEffects.WEAKNESS)) {
-				if (!player.getAbilities().instabuild) {
-					itemStack.shrink(1);
-				}
-
+				itemStack.consume(1, player);
 				if (!this.level().isClientSide) {
 					this.startConverting(player.getUUID(), this.random.nextInt(2401) + 3600);
 				}

@@ -2,11 +2,10 @@ package net.minecraft.world.level.block.state;
 
 import com.google.common.collect.ArrayTable;
 import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Table;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
+import it.unimi.dsi.fastutil.objects.Reference2ObjectArrayMap;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -36,13 +35,13 @@ public abstract class StateHolder<O, S> {
 		}
 	};
 	protected final O owner;
-	private final ImmutableMap<Property<?>, Comparable<?>> values;
+	private final Reference2ObjectArrayMap<Property<?>, Comparable<?>> values;
 	private Table<Property<?>, Comparable<?>, S> neighbours;
 	protected final MapCodec<S> propertiesCodec;
 
-	protected StateHolder(O object, ImmutableMap<Property<?>, Comparable<?>> immutableMap, MapCodec<S> mapCodec) {
+	protected StateHolder(O object, Reference2ObjectArrayMap<Property<?>, Comparable<?>> reference2ObjectArrayMap, MapCodec<S> mapCodec) {
 		this.owner = object;
-		this.values = immutableMap;
+		this.values = reference2ObjectArrayMap;
 		this.propertiesCodec = mapCodec;
 	}
 
@@ -151,12 +150,12 @@ public abstract class StateHolder<O, S> {
 	}
 
 	private Map<Property<?>, Comparable<?>> makeNeighbourValues(Property<?> property, Comparable<?> comparable) {
-		Map<Property<?>, Comparable<?>> map = Maps.<Property<?>, Comparable<?>>newHashMap(this.values);
+		Map<Property<?>, Comparable<?>> map = new Reference2ObjectArrayMap<>(this.values);
 		map.put(property, comparable);
 		return map;
 	}
 
-	public ImmutableMap<Property<?>, Comparable<?>> getValues() {
+	public Map<Property<?>, Comparable<?>> getValues() {
 		return this.values;
 	}
 

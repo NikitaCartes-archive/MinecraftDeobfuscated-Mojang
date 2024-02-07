@@ -107,13 +107,18 @@ public class FallingBlockEntity extends Entity {
 	}
 
 	@Override
-	protected void defineSynchedData() {
-		this.entityData.define(DATA_START_POS, BlockPos.ZERO);
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		builder.define(DATA_START_POS, BlockPos.ZERO);
 	}
 
 	@Override
 	public boolean isPickable() {
 		return !this.isRemoved();
+	}
+
+	@Override
+	protected double getDefaultGravity() {
+		return 0.04;
 	}
 
 	@Override
@@ -123,10 +128,7 @@ public class FallingBlockEntity extends Entity {
 		} else {
 			Block block = this.blockState.getBlock();
 			this.time++;
-			if (!this.isNoGravity()) {
-				this.setDeltaMovement(this.getDeltaMovement().add(0.0, -0.04, 0.0));
-			}
-
+			this.applyGravity();
 			this.move(MoverType.SELF, this.getDeltaMovement());
 			if (!this.level().isClientSide) {
 				BlockPos blockPos = this.blockPosition();

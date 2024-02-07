@@ -26,9 +26,9 @@ public class ChunkStorage implements AutoCloseable {
 	@Nullable
 	private volatile LegacyStructureDataHandler legacyStructureHandler;
 
-	public ChunkStorage(Path path, DataFixer dataFixer, boolean bl) {
+	public ChunkStorage(RegionStorageInfo regionStorageInfo, Path path, DataFixer dataFixer, boolean bl) {
 		this.fixerUpper = dataFixer;
-		this.worker = new IOWorker(path, bl, "chunk");
+		this.worker = new IOWorker(regionStorageInfo, path, bl);
 	}
 
 	public boolean isOldChunkAround(ChunkPos chunkPos, int i) {

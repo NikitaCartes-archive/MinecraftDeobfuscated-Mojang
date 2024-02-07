@@ -15,9 +15,9 @@ import net.minecraft.world.level.block.entity.BannerBlockEntity;
 public record MapBanner(BlockPos pos, DyeColor color, Optional<Component> name) {
 	public static final Codec<MapBanner> CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
-					BlockPos.CODEC.fieldOf("Pos").forGetter(MapBanner::pos),
-					DyeColor.CODEC.optionalFieldOf("Color", DyeColor.WHITE).forGetter(MapBanner::color),
-					ComponentSerialization.FLAT_CODEC.optionalFieldOf("Name").forGetter(MapBanner::name)
+					BlockPos.CODEC.fieldOf("pos").forGetter(MapBanner::pos),
+					DyeColor.CODEC.optionalFieldOf("color", DyeColor.WHITE).forGetter(MapBanner::color),
+					ComponentSerialization.FLAT_CODEC.optionalFieldOf("name").forGetter(MapBanner::name)
 				)
 				.apply(instance, MapBanner::new)
 	);

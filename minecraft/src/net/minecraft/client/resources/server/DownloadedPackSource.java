@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -36,6 +37,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.common.ServerboundResourcePackPacket;
 import net.minecraft.server.packs.DownloadQueue;
 import net.minecraft.server.packs.FilePackResources;
+import net.minecraft.server.packs.PackLocationInfo;
+import net.minecraft.server.packs.PackSelectionConfig;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackSource;
@@ -50,6 +53,7 @@ public class DownloadedPackSource implements AutoCloseable {
 	static final Logger LOGGER = LogUtils.getLogger();
 	private static final RepositorySource EMPTY_SOURCE = consumer -> {
 	};
+	private static final PackSelectionConfig DOWNLOADED_PACK_SELECTION = new PackSelectionConfig(true, Pack.Position.TOP, true);
 	private static final PackLoadFeedback LOG_ONLY_FEEDBACK = new PackLoadFeedback() {
 		@Override
 		public void reportUpdate(UUID uUID, PackLoadFeedback.Update update) {
@@ -232,15 +236,16 @@ public class DownloadedPackSource implements AutoCloseable {
 		for (PackReloadConfig.IdAndPath idAndPath : Lists.reverse(list)) {
 			String string = String.format(Locale.ROOT, "server/%08X/%s", this.packIdSerialNumber++, idAndPath.id());
 			Path path = idAndPath.path();
-			Pack.ResourcesSupplier resourcesSupplier = new FilePackResources.FileResourcesSupplier(path, false);
+			PackLocationInfo packLocationInfo = new PackLocationInfo(string, SERVER_NAME, this.packType, Optional.empty());
+			Pack.ResourcesSupplier resourcesSupplier = new FilePackResources.FileResourcesSupplier(path);
 			int i = SharedConstants.getCurrentVersion().getPackVersion(PackType.CLIENT_RESOURCES);
-			Pack.Info info = Pack.readPackInfo(string, resourcesSupplier, i);
-			if (info == null) {
+			Pack.Metadata metadata = Pack.readPackMetadata(packLocationInfo, resourcesSupplier, i);
+			if (metadata == null) {
 				LOGGER.warn("Invalid pack metadata in {}, ignoring all", path);
 				return null;
 			}
 
-			list2.add(Pack.create(string, SERVER_NAME, true, resourcesSupplier, info, Pack.Position.TOP, true, this.packType));
+			list2.add(new Pack(packLocationInfo, resourcesSupplier, metadata, DOWNLOADED_PACK_SELECTION));
 		}
 
 		return list2;

@@ -15,6 +15,7 @@ import net.minecraft.commands.synchronization.ArgumentTypeInfos;
 import net.minecraft.core.DefaultedMappedRegistry;
 import net.minecraft.core.DefaultedRegistry;
 import net.minecraft.core.MappedRegistry;
+import net.minecraft.core.RegistrationInfo;
 import net.minecraft.core.Registry;
 import net.minecraft.core.WritableRegistry;
 import net.minecraft.core.particles.ParticleType;
@@ -212,10 +213,8 @@ public class BuiltInRegistries {
 	public static final Registry<FeatureSizeType<?>> FEATURE_SIZE_TYPE = registerSimple(
 		Registries.FEATURE_SIZE_TYPE, registry -> FeatureSizeType.TWO_LAYERS_FEATURE_SIZE
 	);
-	public static final Registry<Codec<? extends BiomeSource>> BIOME_SOURCE = registerSimple(Registries.BIOME_SOURCE, Lifecycle.stable(), BiomeSources::bootstrap);
-	public static final Registry<Codec<? extends ChunkGenerator>> CHUNK_GENERATOR = registerSimple(
-		Registries.CHUNK_GENERATOR, Lifecycle.stable(), ChunkGenerators::bootstrap
-	);
+	public static final Registry<Codec<? extends BiomeSource>> BIOME_SOURCE = registerSimple(Registries.BIOME_SOURCE, BiomeSources::bootstrap);
+	public static final Registry<Codec<? extends ChunkGenerator>> CHUNK_GENERATOR = registerSimple(Registries.CHUNK_GENERATOR, ChunkGenerators::bootstrap);
 	public static final Registry<Codec<? extends SurfaceRules.ConditionSource>> MATERIAL_CONDITION = registerSimple(
 		Registries.MATERIAL_CONDITION, SurfaceRules.ConditionSource::bootstrap
 	);
@@ -247,52 +246,34 @@ public class BuiltInRegistries {
 	public static final Registry<? extends Registry<?>> REGISTRY = WRITABLE_REGISTRY;
 
 	private static <T> Registry<T> registerSimple(ResourceKey<? extends Registry<T>> resourceKey, BuiltInRegistries.RegistryBootstrap<T> registryBootstrap) {
-		return registerSimple(resourceKey, Lifecycle.stable(), registryBootstrap);
+		return internalRegister(resourceKey, new MappedRegistry<>(resourceKey, Lifecycle.stable(), false), registryBootstrap);
 	}
 
 	private static <T> Registry<T> registerSimpleWithIntrusiveHolders(
 		ResourceKey<? extends Registry<T>> resourceKey, BuiltInRegistries.RegistryBootstrap<T> registryBootstrap
 	) {
-		return internalRegister(resourceKey, new MappedRegistry<>(resourceKey, Lifecycle.stable(), true), registryBootstrap, Lifecycle.stable());
+		return internalRegister(resourceKey, new MappedRegistry<>(resourceKey, Lifecycle.stable(), true), registryBootstrap);
 	}
 
 	private static <T> DefaultedRegistry<T> registerDefaulted(
 		ResourceKey<? extends Registry<T>> resourceKey, String string, BuiltInRegistries.RegistryBootstrap<T> registryBootstrap
 	) {
-		return registerDefaulted(resourceKey, string, Lifecycle.stable(), registryBootstrap);
+		return internalRegister(resourceKey, new DefaultedMappedRegistry<>(string, resourceKey, Lifecycle.stable(), false), registryBootstrap);
 	}
 
 	private static <T> DefaultedRegistry<T> registerDefaultedWithIntrusiveHolders(
 		ResourceKey<? extends Registry<T>> resourceKey, String string, BuiltInRegistries.RegistryBootstrap<T> registryBootstrap
 	) {
-		return registerDefaultedWithIntrusiveHolders(resourceKey, string, Lifecycle.stable(), registryBootstrap);
-	}
-
-	private static <T> Registry<T> registerSimple(
-		ResourceKey<? extends Registry<T>> resourceKey, Lifecycle lifecycle, BuiltInRegistries.RegistryBootstrap<T> registryBootstrap
-	) {
-		return internalRegister(resourceKey, new MappedRegistry<>(resourceKey, lifecycle, false), registryBootstrap, lifecycle);
-	}
-
-	private static <T> DefaultedRegistry<T> registerDefaulted(
-		ResourceKey<? extends Registry<T>> resourceKey, String string, Lifecycle lifecycle, BuiltInRegistries.RegistryBootstrap<T> registryBootstrap
-	) {
-		return internalRegister(resourceKey, new DefaultedMappedRegistry<>(string, resourceKey, lifecycle, false), registryBootstrap, lifecycle);
-	}
-
-	private static <T> DefaultedRegistry<T> registerDefaultedWithIntrusiveHolders(
-		ResourceKey<? extends Registry<T>> resourceKey, String string, Lifecycle lifecycle, BuiltInRegistries.RegistryBootstrap<T> registryBootstrap
-	) {
-		return internalRegister(resourceKey, new DefaultedMappedRegistry<>(string, resourceKey, lifecycle, true), registryBootstrap, lifecycle);
+		return internalRegister(resourceKey, new DefaultedMappedRegistry<>(string, resourceKey, Lifecycle.stable(), true), registryBootstrap);
 	}
 
 	private static <T, R extends WritableRegistry<T>> R internalRegister(
-		ResourceKey<? extends Registry<T>> resourceKey, R writableRegistry, BuiltInRegistries.RegistryBootstrap<T> registryBootstrap, Lifecycle lifecycle
+		ResourceKey<? extends Registry<T>> resourceKey, R writableRegistry, BuiltInRegistries.RegistryBootstrap<T> registryBootstrap
 	) {
 		Bootstrap.checkBootstrapCalled(() -> "registry " + resourceKey);
 		ResourceLocation resourceLocation = resourceKey.location();
 		LOADERS.put(resourceLocation, (Supplier)() -> registryBootstrap.run(writableRegistry));
-		WRITABLE_REGISTRY.register((ResourceKey<WritableRegistry<?>>)resourceKey, writableRegistry, lifecycle);
+		WRITABLE_REGISTRY.register((ResourceKey<WritableRegistry<?>>)resourceKey, writableRegistry, RegistrationInfo.BUILT_IN);
 		return writableRegistry;
 	}
 

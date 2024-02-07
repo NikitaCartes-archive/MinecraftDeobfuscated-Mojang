@@ -168,7 +168,7 @@ public class VanillaPackResourcesBuilder {
 		return this;
 	}
 
-	public VanillaPackResources build() {
+	public VanillaPackResources build(PackLocationInfo packLocationInfo) {
 		Map<PackType, List<Path>> map = new EnumMap(PackType.class);
 
 		for (PackType packType : PackType.values()) {
@@ -176,7 +176,7 @@ public class VanillaPackResourcesBuilder {
 			map.put(packType, list);
 		}
 
-		return new VanillaPackResources(this.metadata, Set.copyOf(this.namespaces), copyAndReverse(this.rootPaths), map);
+		return new VanillaPackResources(packLocationInfo, this.metadata, Set.copyOf(this.namespaces), copyAndReverse(this.rootPaths), map);
 	}
 
 	private static List<Path> copyAndReverse(Collection<Path> collection) {

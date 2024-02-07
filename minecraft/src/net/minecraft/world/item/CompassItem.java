@@ -47,8 +47,10 @@ public class CompassItem extends Item {
 		if (bl && bl2) {
 			Optional<ResourceKey<Level>> optional = getLodestoneDimension(compoundTag);
 			if (optional.isPresent()) {
-				BlockPos blockPos = NbtUtils.readBlockPos(compoundTag.getCompound("LodestonePos"));
-				return GlobalPos.of((ResourceKey<Level>)optional.get(), blockPos);
+				Optional<BlockPos> optional2 = NbtUtils.readBlockPos(compoundTag, "LodestonePos");
+				if (optional2.isPresent()) {
+					return GlobalPos.of((ResourceKey<Level>)optional.get(), (BlockPos)optional2.get());
+				}
 			}
 		}
 
@@ -76,8 +78,10 @@ public class CompassItem extends Item {
 
 				Optional<ResourceKey<Level>> optional = getLodestoneDimension(compoundTag);
 				if (optional.isPresent() && optional.get() == level.dimension() && compoundTag.contains("LodestonePos")) {
-					BlockPos blockPos = NbtUtils.readBlockPos(compoundTag.getCompound("LodestonePos"));
-					if (!level.isInWorldBounds(blockPos) || !((ServerLevel)level).getPoiManager().existsAtPosition(PoiTypes.LODESTONE, blockPos)) {
+					Optional<BlockPos> optional2 = NbtUtils.readBlockPos(compoundTag, "LodestonePos");
+					if (optional2.isEmpty()
+						|| !level.isInWorldBounds((BlockPos)optional2.get())
+						|| !((ServerLevel)level).getPoiManager().existsAtPosition(PoiTypes.LODESTONE, (BlockPos)optional2.get())) {
 						compoundTag.remove("LodestonePos");
 					}
 				}
@@ -95,15 +99,12 @@ public class CompassItem extends Item {
 			level.playSound(null, blockPos, SoundEvents.LODESTONE_COMPASS_LOCK, SoundSource.PLAYERS, 1.0F, 1.0F);
 			Player player = useOnContext.getPlayer();
 			ItemStack itemStack = useOnContext.getItemInHand();
-			boolean bl = !player.getAbilities().instabuild && itemStack.getCount() == 1;
+			boolean bl = !player.hasInfiniteMaterials() && itemStack.getCount() == 1;
 			if (bl) {
 				this.addLodestoneTags(level.dimension(), blockPos, itemStack.getOrCreateTag());
 			} else {
 				ItemStack itemStack2 = itemStack.transmuteCopy(Items.COMPASS, 1);
-				if (!player.getAbilities().instabuild) {
-					itemStack.shrink(1);
-				}
-
+				itemStack.consume(1, player);
 				this.addLodestoneTags(level.dimension(), blockPos, itemStack2.getOrCreateTag());
 				if (!player.getInventory().add(itemStack2)) {
 					player.drop(itemStack2, false);

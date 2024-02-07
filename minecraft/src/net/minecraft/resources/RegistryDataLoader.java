@@ -8,6 +8,7 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Decoder;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.Lifecycle;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.StringWriter;
@@ -18,8 +19,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Map.Entry;
 import java.util.function.BiConsumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import net.minecraft.Util;
 import net.minecraft.core.MappedRegistry;
+import net.minecraft.core.RegistrationInfo;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.RegistrySynchronization;
@@ -28,8 +32,10 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.ChatType;
+import net.minecraft.server.packs.repository.KnownPack;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.server.packs.resources.ResourceProvider;
 import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.item.armortrim.TrimMaterial;
 import net.minecraft.world.item.armortrim.TrimPattern;
@@ -53,6 +59,13 @@ import org.slf4j.Logger;
 
 public class RegistryDataLoader {
 	private static final Logger LOGGER = LogUtils.getLogger();
+	private static final RegistrationInfo NETWORK_REGISTRATION_INFO = new RegistrationInfo(Optional.empty(), Lifecycle.experimental());
+	private static final Function<Optional<KnownPack>, RegistrationInfo> REGISTRATION_INFO_CACHE = Util.memoize(
+		(Function<Optional<KnownPack>, RegistrationInfo>)(optional -> {
+			Lifecycle lifecycle = (Lifecycle)optional.map(KnownPack::isVanilla).map(boolean_ -> Lifecycle.stable()).orElse(Lifecycle.experimental());
+			return new RegistrationInfo(optional, lifecycle);
+		})
+	);
 	public static final List<RegistryDataLoader.RegistryData<?>> WORLDGEN_REGISTRIES = List.of(
 		new RegistryDataLoader.RegistryData<>(Registries.DIMENSION_TYPE, DimensionType.DIRECT_CODEC),
 		new RegistryDataLoader.RegistryData<>(Registries.BIOME, Biome.DIRECT_CODEC),
@@ -87,17 +100,16 @@ public class RegistryDataLoader {
 	);
 
 	public static RegistryAccess.Frozen load(ResourceManager resourceManager, RegistryAccess registryAccess, List<RegistryDataLoader.RegistryData<?>> list) {
-		return load(
-			(RegistryDataLoader.LoadingFunction)((loader, registryInfoLookup) -> loader.loadFromResources(resourceManager, registryInfoLookup)), registryAccess, list
-		);
+		return load((loader, registryInfoLookup) -> loader.loadFromResources(resourceManager, registryInfoLookup), registryAccess, list);
 	}
 
 	public static RegistryAccess.Frozen load(
 		Map<ResourceKey<? extends Registry<?>>, List<RegistrySynchronization.PackedRegistryEntry>> map,
+		ResourceProvider resourceProvider,
 		RegistryAccess registryAccess,
 		List<RegistryDataLoader.RegistryData<?>> list
 	) {
-		return load((RegistryDataLoader.LoadingFunction)((loader, registryInfoLookup) -> loader.loadFromNetwork(map, registryInfoLookup)), registryAccess, list);
+		return load((loader, registryInfoLookup) -> loader.loadFromNetwork(map, resourceProvider, registryInfoLookup), registryAccess, list);
 	}
 
 	public static RegistryAccess.Frozen load(
@@ -171,6 +183,39 @@ public class RegistryDataLoader {
 		return resourceLocation.getPath();
 	}
 
+	private static <E> void loadElementFromResource(
+		WritableRegistry<E> writableRegistry,
+		Decoder<E> decoder,
+		RegistryOps<JsonElement> registryOps,
+		ResourceKey<E> resourceKey,
+		Resource resource,
+		RegistrationInfo registrationInfo
+	) throws IOException {
+		Reader reader = resource.openAsReader();
+
+		try {
+			JsonElement jsonElement = JsonParser.parseReader(reader);
+			DataResult<E> dataResult = decoder.parse(registryOps, jsonElement);
+			E object = dataResult.getOrThrow(false, string -> {
+			});
+			writableRegistry.register(resourceKey, object, registrationInfo);
+		} catch (Throwable var11) {
+			if (reader != null) {
+				try {
+					reader.close();
+				} catch (Throwable var10) {
+					var11.addSuppressed(var10);
+				}
+			}
+
+			throw var11;
+		}
+
+		if (reader != null) {
+			reader.close();
+		}
+	}
+
 	static <E> void loadContentsFromManager(
 		ResourceManager resourceManager,
 		RegistryOps.RegistryInfoLookup registryInfoLookup,
@@ -186,34 +231,13 @@ public class RegistryDataLoader {
 			ResourceLocation resourceLocation = (ResourceLocation)entry.getKey();
 			ResourceKey<E> resourceKey = ResourceKey.create(writableRegistry.key(), fileToIdConverter.fileToId(resourceLocation));
 			Resource resource = (Resource)entry.getValue();
+			RegistrationInfo registrationInfo = (RegistrationInfo)REGISTRATION_INFO_CACHE.apply(resource.knownPackInfo());
 
 			try {
-				Reader reader = resource.openAsReader();
-
-				try {
-					JsonElement jsonElement = JsonParser.parseReader(reader);
-					DataResult<E> dataResult = decoder.parse(registryOps, jsonElement);
-					E object = dataResult.getOrThrow(false, stringx -> {
-					});
-					writableRegistry.register(resourceKey, object, resource.isBuiltin() ? Lifecycle.stable() : dataResult.lifecycle());
-				} catch (Throwable var18) {
-					if (reader != null) {
-						try {
-							reader.close();
-						} catch (Throwable var17) {
-							var18.addSuppressed(var17);
-						}
-					}
-
-					throw var18;
-				}
-
-				if (reader != null) {
-					reader.close();
-				}
-			} catch (Exception var19) {
+				loadElementFromResource(writableRegistry, decoder, registryOps, resourceKey, resource, registrationInfo);
+			} catch (Exception var15) {
 				map.put(
-					resourceKey, new IllegalStateException(String.format(Locale.ROOT, "Failed to parse %s from pack %s", resourceLocation, resource.sourcePackId()), var19)
+					resourceKey, new IllegalStateException(String.format(Locale.ROOT, "Failed to parse %s from pack %s", resourceLocation, resource.sourcePackId()), var15)
 				);
 			}
 		}
@@ -221,6 +245,7 @@ public class RegistryDataLoader {
 
 	static <E> void loadContentsFromNetwork(
 		Map<ResourceKey<? extends Registry<?>>, List<RegistrySynchronization.PackedRegistryEntry>> map,
+		ResourceProvider resourceProvider,
 		RegistryOps.RegistryInfoLookup registryInfoLookup,
 		WritableRegistry<E> writableRegistry,
 		Decoder<E> decoder,
@@ -229,17 +254,31 @@ public class RegistryDataLoader {
 		List<RegistrySynchronization.PackedRegistryEntry> list = (List<RegistrySynchronization.PackedRegistryEntry>)map.get(writableRegistry.key());
 		if (list != null) {
 			RegistryOps<Tag> registryOps = RegistryOps.create(NbtOps.INSTANCE, registryInfoLookup);
+			RegistryOps<JsonElement> registryOps2 = RegistryOps.create(JsonOps.INSTANCE, registryInfoLookup);
+			String string = registryDirPath(writableRegistry.key().location());
+			FileToIdConverter fileToIdConverter = FileToIdConverter.json(string);
 
 			for (RegistrySynchronization.PackedRegistryEntry packedRegistryEntry : list) {
 				ResourceKey<E> resourceKey = ResourceKey.create(writableRegistry.key(), packedRegistryEntry.id());
+				Optional<Tag> optional = packedRegistryEntry.data();
+				if (optional.isPresent()) {
+					try {
+						DataResult<E> dataResult = decoder.parse(registryOps, (Tag)optional.get());
+						E object = dataResult.getOrThrow(false, stringx -> {
+						});
+						writableRegistry.register(resourceKey, object, NETWORK_REGISTRATION_INFO);
+					} catch (Exception var17) {
+						map2.put(resourceKey, new IllegalStateException(String.format(Locale.ROOT, "Failed to parse value %s from server", optional.get()), var17));
+					}
+				} else {
+					ResourceLocation resourceLocation = fileToIdConverter.idToFile(packedRegistryEntry.id());
 
-				try {
-					DataResult<E> dataResult = decoder.parse(registryOps, packedRegistryEntry.data());
-					E object = dataResult.getOrThrow(false, string -> {
-					});
-					writableRegistry.register(resourceKey, object, Lifecycle.experimental());
-				} catch (Exception var12) {
-					map2.put(resourceKey, new IllegalStateException(String.format(Locale.ROOT, "Failed to parse value %s from server", packedRegistryEntry.data()), var12));
+					try {
+						Resource resource = resourceProvider.getResourceOrThrow(resourceLocation);
+						loadElementFromResource(writableRegistry, decoder, registryOps2, resourceKey, resource, NETWORK_REGISTRATION_INFO);
+					} catch (Exception var18) {
+						map2.put(resourceKey, new IllegalStateException("Failed to parse local data", var18));
+					}
 				}
 			}
 		}
@@ -252,9 +291,11 @@ public class RegistryDataLoader {
 		}
 
 		public void loadFromNetwork(
-			Map<ResourceKey<? extends Registry<?>>, List<RegistrySynchronization.PackedRegistryEntry>> map, RegistryOps.RegistryInfoLookup registryInfoLookup
+			Map<ResourceKey<? extends Registry<?>>, List<RegistrySynchronization.PackedRegistryEntry>> map,
+			ResourceProvider resourceProvider,
+			RegistryOps.RegistryInfoLookup registryInfoLookup
 		) {
-			RegistryDataLoader.loadContentsFromNetwork(map, registryInfoLookup, this.registry, this.data.elementCodec, this.loadingErrors);
+			RegistryDataLoader.loadContentsFromNetwork(map, resourceProvider, registryInfoLookup, this.registry, this.data.elementCodec, this.loadingErrors);
 		}
 	}
 

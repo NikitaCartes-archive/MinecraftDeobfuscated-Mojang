@@ -64,7 +64,6 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.ArgumentSignatures;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -237,7 +236,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stat;
 import net.minecraft.stats.StatsCounter;
-import net.minecraft.tags.TagNetworkSerialization;
 import net.minecraft.util.Crypt;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
@@ -274,7 +272,6 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.HorseInventoryMenu;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.MerchantMenu;
-import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.RecipeManager;
@@ -283,8 +280,6 @@ import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.world.level.block.entity.CommandBlockEntity;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -381,7 +376,6 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 	@Override
 	public void handleLogin(ClientboundLoginPacket clientboundLoginPacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundLoginPacket, this, this.minecraft);
-		this.refreshTagDependentData();
 		this.minecraft.gameMode = new MultiPlayerGameMode(this.minecraft, this);
 		CommonPlayerSpawnInfo commonPlayerSpawnInfo = clientboundLoginPacket.commonPlayerSpawnInfo();
 		List<ResourceKey<Level>> list = Lists.<ResourceKey<Level>>newArrayList(clientboundLoginPacket.levels());
@@ -1587,22 +1581,9 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 	@Override
 	public void handleUpdateTags(ClientboundUpdateTagsPacket clientboundUpdateTagsPacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundUpdateTagsPacket, this, this.minecraft);
-		clientboundUpdateTagsPacket.getTags().forEach(this::updateTagsForRegistry);
-		this.refreshTagDependentData();
-	}
-
-	private <T> void updateTagsForRegistry(ResourceKey<? extends Registry<? extends T>> resourceKey, TagNetworkSerialization.NetworkPayload networkPayload) {
-		Registry<T> registry = this.registryAccess.registryOrThrow(resourceKey);
-		networkPayload.applyToRegistry(registry);
-	}
-
-	private void refreshTagDependentData() {
-		if (!this.connection.isMemoryConnection()) {
-			AbstractFurnaceBlockEntity.invalidateCache();
-			Blocks.rebuildCache();
-		}
-
-		CreativeModeTabs.searchTab().rebuildSearchTree();
+		TagCollector tagCollector = new TagCollector();
+		clientboundUpdateTagsPacket.getTags().forEach(tagCollector::append);
+		tagCollector.updateTags(this.registryAccess, this.connection.isMemoryConnection());
 	}
 
 	@Override

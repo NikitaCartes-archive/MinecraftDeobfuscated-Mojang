@@ -207,14 +207,14 @@ public class Panda extends Animal {
 	}
 
 	@Override
-	protected void defineSynchedData() {
-		super.defineSynchedData();
-		this.entityData.define(UNHAPPY_COUNTER, 0);
-		this.entityData.define(SNEEZE_COUNTER, 0);
-		this.entityData.define(MAIN_GENE_ID, (byte)0);
-		this.entityData.define(HIDDEN_GENE_ID, (byte)0);
-		this.entityData.define(DATA_ID_FLAGS, (byte)0);
-		this.entityData.define(EAT_COUNTER, 0);
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		super.defineSynchedData(builder);
+		builder.define(UNHAPPY_COUNTER, 0);
+		builder.define(SNEEZE_COUNTER, 0);
+		builder.define(MAIN_GENE_ID, (byte)0);
+		builder.define(HIDDEN_GENE_ID, (byte)0);
+		builder.define(DATA_ID_FLAGS, (byte)0);
+		builder.define(EAT_COUNTER, 0);
 	}
 
 	private boolean getFlag(int i) {
@@ -632,7 +632,7 @@ public class Panda extends Animal {
 				this.tryToSit();
 				this.eat(true);
 				ItemStack itemStack2 = this.getItemBySlot(EquipmentSlot.MAINHAND);
-				if (!itemStack2.isEmpty() && !player.getAbilities().instabuild) {
+				if (!itemStack2.isEmpty() && !player.hasInfiniteMaterials()) {
 					this.spawnAtLocation(itemStack2);
 				}
 

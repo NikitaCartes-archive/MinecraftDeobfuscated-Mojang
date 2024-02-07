@@ -13,6 +13,7 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.RegistrySynchronization;
 import net.minecraft.resources.RegistryDataLoader;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.packs.resources.ResourceProvider;
 import net.minecraft.tags.TagNetworkSerialization;
 
 @Environment(EnvType.CLIENT)
@@ -20,7 +21,7 @@ public class RegistryDataCollector {
 	@Nullable
 	private RegistryDataCollector.ContentsCollector contentsCollector;
 	@Nullable
-	private RegistryDataCollector.TagCollector tagCollector;
+	private TagCollector tagCollector;
 
 	public void appendContents(ResourceKey<? extends Registry<?>> resourceKey, List<RegistrySynchronization.PackedRegistryEntry> list) {
 		if (this.contentsCollector == null) {
@@ -32,25 +33,25 @@ public class RegistryDataCollector {
 
 	public void appendTags(Map<ResourceKey<? extends Registry<?>>, TagNetworkSerialization.NetworkPayload> map) {
 		if (this.tagCollector == null) {
-			this.tagCollector = new RegistryDataCollector.TagCollector();
+			this.tagCollector = new TagCollector();
 		}
 
 		map.forEach(this.tagCollector::append);
 	}
 
-	public RegistryAccess.Frozen collectGameRegistries(RegistryAccess registryAccess, boolean bl) {
+	public RegistryAccess.Frozen collectGameRegistries(ResourceProvider resourceProvider, RegistryAccess registryAccess, boolean bl) {
 		LayeredRegistryAccess<ClientRegistryLayer> layeredRegistryAccess = ClientRegistryLayer.createRegistryAccess();
 		RegistryAccess registryAccess2;
 		if (this.contentsCollector != null) {
-			RegistryAccess.Frozen frozen = this.contentsCollector.loadRegistries(layeredRegistryAccess.getAccessForLoading(ClientRegistryLayer.REMOTE)).freeze();
-			registryAccess2 = layeredRegistryAccess.replaceFrom(ClientRegistryLayer.REMOTE, frozen).compositeAccess();
+			RegistryAccess.Frozen frozen = layeredRegistryAccess.getAccessForLoading(ClientRegistryLayer.REMOTE);
+			RegistryAccess.Frozen frozen2 = this.contentsCollector.loadRegistries(resourceProvider, frozen).freeze();
+			registryAccess2 = layeredRegistryAccess.replaceFrom(ClientRegistryLayer.REMOTE, frozen2).compositeAccess();
 		} else {
 			registryAccess2 = registryAccess;
 		}
 
-		if (this.tagCollector != null && !bl) {
-			layeredRegistryAccess.getLayer(ClientRegistryLayer.STATIC).registries().forEach(registryEntry -> registryEntry.value().resetTags());
-			this.tagCollector.applyTags(registryAccess2);
+		if (this.tagCollector != null) {
+			this.tagCollector.updateTags(registryAccess2, bl);
 		}
 
 		return registryAccess2.freeze();
@@ -64,21 +65,8 @@ public class RegistryDataCollector {
 			((List)this.elements.computeIfAbsent(resourceKey, resourceKeyx -> new ArrayList())).addAll(list);
 		}
 
-		public RegistryAccess loadRegistries(RegistryAccess registryAccess) {
-			return RegistryDataLoader.load(this.elements, registryAccess, RegistryDataLoader.SYNCHRONIZED_REGISTRIES);
-		}
-	}
-
-	@Environment(EnvType.CLIENT)
-	static class TagCollector {
-		private final Map<ResourceKey<? extends Registry<?>>, TagNetworkSerialization.NetworkPayload> tags = new HashMap();
-
-		public void append(ResourceKey<? extends Registry<?>> resourceKey, TagNetworkSerialization.NetworkPayload networkPayload) {
-			this.tags.put(resourceKey, networkPayload);
-		}
-
-		public void applyTags(RegistryAccess registryAccess) {
-			this.tags.forEach((resourceKey, networkPayload) -> networkPayload.applyToRegistry(registryAccess.registryOrThrow(resourceKey)));
+		public RegistryAccess loadRegistries(ResourceProvider resourceProvider, RegistryAccess registryAccess) {
+			return RegistryDataLoader.load(this.elements, resourceProvider, registryAccess, RegistryDataLoader.SYNCHRONIZED_REGISTRIES);
 		}
 	}
 }

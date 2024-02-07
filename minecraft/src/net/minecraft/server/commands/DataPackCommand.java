@@ -65,7 +65,7 @@ public class DataPackCommand {
 									commandContext -> enablePack(
 											commandContext.getSource(),
 											getPack(commandContext, "name", true),
-											(list, pack) -> pack.getDefaultPosition().insert(list, pack, packx -> packx, false)
+											(list, pack) -> pack.getDefaultPosition().insert(list, pack, Pack::selectionConfig, false)
 										)
 								)
 								.then(

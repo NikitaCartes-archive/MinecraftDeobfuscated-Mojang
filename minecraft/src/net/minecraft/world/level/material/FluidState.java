@@ -1,8 +1,8 @@
 package net.minecraft.world.level.material;
 
-import com.google.common.collect.ImmutableMap;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
+import it.unimi.dsi.fastutil.objects.Reference2ObjectArrayMap;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
@@ -26,8 +26,8 @@ public final class FluidState extends StateHolder<Fluid, FluidState> {
 	public static final int AMOUNT_MAX = 9;
 	public static final int AMOUNT_FULL = 8;
 
-	public FluidState(Fluid fluid, ImmutableMap<Property<?>, Comparable<?>> immutableMap, MapCodec<FluidState> mapCodec) {
-		super(fluid, immutableMap, mapCodec);
+	public FluidState(Fluid fluid, Reference2ObjectArrayMap<Property<?>, Comparable<?>> reference2ObjectArrayMap, MapCodec<FluidState> mapCodec) {
+		super(fluid, reference2ObjectArrayMap, mapCodec);
 	}
 
 	public Fluid getType() {

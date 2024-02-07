@@ -102,9 +102,9 @@ public abstract class AbstractArrow extends Projectile {
 	}
 
 	@Override
-	protected void defineSynchedData() {
-		this.entityData.define(ID_FLAGS, (byte)0);
-		this.entityData.define(PIERCE_LEVEL, (byte)0);
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		builder.define(ID_FLAGS, (byte)0);
+		builder.define(PIERCE_LEVEL, (byte)0);
 	}
 
 	@Override
@@ -234,10 +234,9 @@ public abstract class AbstractArrow extends Projectile {
 			this.setXRot(lerpRotation(this.xRotO, this.getXRot()));
 			this.setYRot(lerpRotation(this.yRotO, this.getYRot()));
 			float m = 0.99F;
-			float n = 0.05F;
 			if (this.isInWater()) {
-				for (int o = 0; o < 4; o++) {
-					float p = 0.25F;
+				for (int n = 0; n < 4; n++) {
+					float o = 0.25F;
 					this.level().addParticle(ParticleTypes.BUBBLE, h - e * 0.25, j - f * 0.25, k - g * 0.25, e, f, g);
 				}
 
@@ -245,14 +244,18 @@ public abstract class AbstractArrow extends Projectile {
 			}
 
 			this.setDeltaMovement(vec3.scale((double)m));
-			if (!this.isNoGravity() && !bl) {
-				Vec3 vec34 = this.getDeltaMovement();
-				this.setDeltaMovement(vec34.x, vec34.y - 0.05F, vec34.z);
+			if (!bl) {
+				this.applyGravity();
 			}
 
 			this.setPos(h, j, k);
 			this.checkInsideBlocks();
 		}
+	}
+
+	@Override
+	protected double getDefaultGravity() {
+		return 0.05;
 	}
 
 	private boolean shouldFall() {
@@ -490,8 +493,8 @@ public abstract class AbstractArrow extends Projectile {
 	@Override
 	public void setOwner(@Nullable Entity entity) {
 		super.setOwner(entity);
-		if (entity instanceof Player) {
-			this.pickup = ((Player)entity).getAbilities().instabuild ? AbstractArrow.Pickup.CREATIVE_ONLY : AbstractArrow.Pickup.ALLOWED;
+		if (entity instanceof Player player) {
+			this.pickup = player.hasInfiniteMaterials() ? AbstractArrow.Pickup.CREATIVE_ONLY : AbstractArrow.Pickup.ALLOWED;
 		}
 	}
 
@@ -510,7 +513,7 @@ public abstract class AbstractArrow extends Projectile {
 			case ALLOWED:
 				return player.getInventory().add(this.getPickupItem());
 			case CREATIVE_ONLY:
-				return player.getAbilities().instabuild;
+				return player.hasInfiniteMaterials();
 			default:
 				return false;
 		}

@@ -91,11 +91,10 @@ public class SnifferAi {
 	}
 
 	private static void initCoreActivity(Brain<Sniffer> brain) {
-		brain.addActivity(Activity.CORE, 0, ImmutableList.of(new Swim(0.8F), new AnimalPanic(2.0F) {
-			@Override
-			protected void start(ServerLevel serverLevel, PathfinderMob pathfinderMob, long l) {
-				SnifferAi.resetSniffing((Sniffer)pathfinderMob);
-				super.start(serverLevel, pathfinderMob, l);
+		brain.addActivity(Activity.CORE, 0, ImmutableList.of(new Swim(0.8F), new AnimalPanic<Sniffer>(2.0F) {
+			protected void start(ServerLevel serverLevel, Sniffer sniffer, long l) {
+				SnifferAi.resetSniffing(sniffer);
+				super.start(serverLevel, sniffer, l);
 			}
 		}, new MoveToTargetSink(500, 700), new CountDownCooldownTicks(MemoryModuleType.TEMPTATION_COOLDOWN_TICKS)));
 	}

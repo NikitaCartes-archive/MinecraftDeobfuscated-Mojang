@@ -173,9 +173,9 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 	}
 
 	@Override
-	protected void defineSynchedData() {
-		super.defineSynchedData();
-		this.entityData.define(DATA_ID_FLAGS, (byte)0);
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		super.defineSynchedData(builder);
+		builder.define(DATA_ID_FLAGS, (byte)0);
 	}
 
 	protected boolean getFlag(int i) {
@@ -253,9 +253,7 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 	public void equipBodyArmor(Player player, ItemStack itemStack) {
 		if (this.isBodyArmorItem(itemStack)) {
 			this.setBodyArmorItem(itemStack.copyWithCount(1));
-			if (!player.getAbilities().instabuild) {
-				itemStack.shrink(1);
-			}
+			itemStack.consume(1, player);
 		}
 	}
 
@@ -361,10 +359,6 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 		}
 	}
 
-	public double getCustomJump() {
-		return this.getAttributeValue(Attributes.JUMP_STRENGTH);
-	}
-
 	@Override
 	public boolean hurt(DamageSource damageSource, float f) {
 		boolean bl = super.hurt(damageSource, f);
@@ -427,7 +421,7 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 
 	public static AttributeSupplier.Builder createBaseHorseAttributes() {
 		return Mob.createMobAttributes()
-			.add(Attributes.JUMP_STRENGTH)
+			.add(Attributes.JUMP_STRENGTH, 0.7)
 			.add(Attributes.MAX_HEALTH, 53.0)
 			.add(Attributes.MOVEMENT_SPEED, 0.225F)
 			.add(Attributes.STEP_HEIGHT, 1.0);
@@ -461,8 +455,8 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 
 	public InteractionResult fedFood(Player player, ItemStack itemStack) {
 		boolean bl = this.handleEating(player, itemStack);
-		if (bl & !player.getAbilities().instabuild) {
-			itemStack.shrink(1);
+		if (bl) {
+			itemStack.consume(1, player);
 		}
 
 		if (this.level().isClientSide) {
@@ -806,10 +800,9 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 	}
 
 	protected void executeRidersJump(float f, Vec3 vec3) {
-		double d = this.getCustomJump() * (double)f * (double)this.getBlockJumpFactor();
-		double e = d + (double)this.getJumpBoostPower();
+		double d = (double)this.getJumpPower(f);
 		Vec3 vec32 = this.getDeltaMovement();
-		this.setDeltaMovement(vec32.x, e, vec32.z);
+		this.setDeltaMovement(vec32.x, d, vec32.z);
 		this.setIsJumping(true);
 		this.hasImpulse = true;
 		if (vec3.z > 0.0) {

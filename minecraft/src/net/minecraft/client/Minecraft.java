@@ -1,7 +1,6 @@
 package net.minecraft.client;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Queues;
 import com.mojang.authlib.GameProfile;
@@ -508,7 +507,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		this.font = this.fontManager.createFont();
 		this.fontFilterFishy = this.fontManager.createFontFilterFishy();
 		this.resourceManager.registerReloadListener(this.fontManager);
-		this.selectMainFont(this.isEnforceUnicode());
+		this.updateFontOptions();
 		this.resourceManager.registerReloadListener(new GrassColorReloadListener());
 		this.resourceManager.registerReloadListener(new FoliageColorReloadListener());
 		this.window.setErrorSection("Startup");
@@ -818,8 +817,8 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		}
 	}
 
-	void selectMainFont(boolean bl) {
-		this.fontManager.setRenames(bl ? ImmutableMap.of(DEFAULT_FONT, UNIFORM_FONT) : ImmutableMap.of());
+	void updateFontOptions() {
+		this.fontManager.updateOptions(this.options);
 	}
 
 	private void createSearchTrees() {

@@ -91,10 +91,10 @@ public class Pig extends Animal implements ItemSteerable, Saddleable {
 	}
 
 	@Override
-	protected void defineSynchedData() {
-		super.defineSynchedData();
-		this.entityData.define(DATA_SADDLE_ID, false);
-		this.entityData.define(DATA_BOOST_TIME, 0);
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		super.defineSynchedData(builder);
+		builder.define(DATA_SADDLE_ID, false);
+		builder.define(DATA_BOOST_TIME, 0);
 	}
 
 	@Override

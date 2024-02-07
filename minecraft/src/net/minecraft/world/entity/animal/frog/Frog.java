@@ -127,10 +127,10 @@ public class Frog extends Animal implements VariantHolder<FrogVariant> {
 	}
 
 	@Override
-	protected void defineSynchedData() {
-		super.defineSynchedData();
-		this.entityData.define(DATA_VARIANT_ID, FrogVariant.TEMPERATE);
-		this.entityData.define(DATA_TONGUE_TARGET_ID, OptionalInt.empty());
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		super.defineSynchedData(builder);
+		builder.define(DATA_VARIANT_ID, FrogVariant.TEMPERATE);
+		builder.define(DATA_TONGUE_TARGET_ID, OptionalInt.empty());
 	}
 
 	public void eraseTongueTarget() {

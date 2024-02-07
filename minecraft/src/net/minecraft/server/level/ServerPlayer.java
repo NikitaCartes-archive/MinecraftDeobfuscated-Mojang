@@ -97,6 +97,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySelector;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -982,6 +983,14 @@ public class ServerPlayer extends Player {
 			this.checkSupportingBlock(bl, new Vec3(d, e, f));
 			BlockPos blockPos = this.getOnPosLegacy();
 			super.checkFallDamage(e, bl, this.level().getBlockState(blockPos), blockPos);
+		}
+	}
+
+	@Override
+	public void onExplosionHit(@Nullable Entity entity) {
+		super.onExplosionHit(entity);
+		if (entity != null && entity.getType() == EntityType.WIND_CHARGE) {
+			this.ignoreFallDamageAboveY = this.getY();
 		}
 	}
 

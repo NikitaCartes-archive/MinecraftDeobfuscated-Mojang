@@ -44,7 +44,7 @@ public class GoatAi {
 	private static final UniformInt TIME_BETWEEN_LONG_JUMPS = UniformInt.of(600, 1200);
 	public static final int MAX_LONG_JUMP_HEIGHT = 5;
 	public static final int MAX_LONG_JUMP_WIDTH = 5;
-	public static final float MAX_JUMP_VELOCITY = 1.5F;
+	public static final float MAX_JUMP_VELOCITY_MULTIPLIER = 3.5714288F;
 	private static final UniformInt TIME_BETWEEN_RAMS = UniformInt.of(600, 6000);
 	private static final UniformInt TIME_BETWEEN_RAMS_SCREAMER = UniformInt.of(100, 300);
 	private static final TargetingConditions RAM_TARGET_CONDITIONS = TargetingConditions.forCombat()
@@ -78,7 +78,7 @@ public class GoatAi {
 			0,
 			ImmutableList.of(
 				new Swim(0.8F),
-				new AnimalPanic(2.0F),
+				new AnimalPanic<>(2.0F),
 				new LookAtTargetSink(45, 90),
 				new MoveToTargetSink(),
 				new CountDownCooldownTicks(MemoryModuleType.TEMPTATION_COOLDOWN_TICKS),
@@ -115,7 +115,7 @@ public class GoatAi {
 				Pair.of(
 					1,
 					new LongJumpToRandomPos<>(
-						TIME_BETWEEN_LONG_JUMPS, 5, 5, 1.5F, goat -> goat.isScreamingGoat() ? SoundEvents.GOAT_SCREAMING_LONG_JUMP : SoundEvents.GOAT_LONG_JUMP
+						TIME_BETWEEN_LONG_JUMPS, 5, 5, 3.5714288F, goat -> goat.isScreamingGoat() ? SoundEvents.GOAT_SCREAMING_LONG_JUMP : SoundEvents.GOAT_LONG_JUMP
 					)
 				)
 			),

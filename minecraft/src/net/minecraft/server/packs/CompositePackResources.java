@@ -74,13 +74,8 @@ public class CompositePackResources implements PackResources {
 	}
 
 	@Override
-	public String packId() {
-		return this.primaryPackResources.packId();
-	}
-
-	@Override
-	public boolean isBuiltin() {
-		return this.primaryPackResources.isBuiltin();
+	public PackLocationInfo location() {
+		return this.primaryPackResources.location();
 	}
 
 	@Override

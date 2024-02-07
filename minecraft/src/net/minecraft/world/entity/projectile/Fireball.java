@@ -35,8 +35,8 @@ public abstract class Fireball extends AbstractHurtingProjectile implements Item
 	}
 
 	@Override
-	protected void defineSynchedData() {
-		this.getEntityData().define(DATA_ITEM_STACK, this.getDefaultItem());
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		builder.define(DATA_ITEM_STACK, this.getDefaultItem());
 	}
 
 	@Override

@@ -10,6 +10,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.locks.LockSupport;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
+import javax.annotation.CheckReturnValue;
 import net.minecraft.util.profiling.metrics.MetricCategory;
 import net.minecraft.util.profiling.metrics.MetricSampler;
 import net.minecraft.util.profiling.metrics.MetricsRegistry;
@@ -61,6 +62,7 @@ public abstract class BlockableEventLoop<R extends Runnable> implements Profiler
 		}, this);
 	}
 
+	@CheckReturnValue
 	public CompletableFuture<Void> submit(Runnable runnable) {
 		if (this.scheduleExecutables()) {
 			return this.submitAsync(runnable);
