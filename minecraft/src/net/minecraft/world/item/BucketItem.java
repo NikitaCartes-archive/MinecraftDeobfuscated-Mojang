@@ -88,7 +88,7 @@ public class BucketItem extends Item implements DispensibleContainerItem {
 	}
 
 	public static ItemStack getEmptySuccessItem(ItemStack itemStack, Player player) {
-		return !player.getAbilities().instabuild ? new ItemStack(Items.BUCKET) : itemStack;
+		return !player.hasInfiniteMaterials() ? new ItemStack(Items.BUCKET) : itemStack;
 	}
 
 	@Override

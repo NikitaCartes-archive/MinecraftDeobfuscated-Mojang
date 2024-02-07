@@ -111,10 +111,10 @@ public class Camel extends AbstractHorse implements PlayerRideableJumping, Saddl
 	}
 
 	@Override
-	protected void defineSynchedData() {
-		super.defineSynchedData();
-		this.entityData.define(DASH, false);
-		this.entityData.define(LAST_POSE_CHANGE_TICK, 0L);
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		super.defineSynchedData(builder);
+		builder.define(DASH, false);
+		builder.define(LAST_POSE_CHANGE_TICK, 0L);
 	}
 
 	@Override
@@ -279,7 +279,7 @@ public class Camel extends AbstractHorse implements PlayerRideableJumping, Saddl
 
 	@Override
 	protected void executeRidersJump(float f, Vec3 vec3) {
-		double d = this.getAttributeValue(Attributes.JUMP_STRENGTH) * (double)this.getBlockJumpFactor() + (double)this.getJumpBoostPower();
+		double d = (double)this.getJumpPower();
 		this.addDeltaMovement(
 			this.getLookAngle()
 				.multiply(1.0, 0.0, 1.0)

@@ -34,6 +34,8 @@ import net.minecraft.network.protocol.PacketType;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.profiling.jfr.callback.ProfiledDuration;
 import net.minecraft.util.profiling.jfr.event.ChunkGenerationEvent;
+import net.minecraft.util.profiling.jfr.event.ChunkRegionReadEvent;
+import net.minecraft.util.profiling.jfr.event.ChunkRegionWriteEvent;
 import net.minecraft.util.profiling.jfr.event.NetworkSummaryEvent;
 import net.minecraft.util.profiling.jfr.event.PacketReceivedEvent;
 import net.minecraft.util.profiling.jfr.event.PacketSentEvent;
@@ -41,6 +43,8 @@ import net.minecraft.util.profiling.jfr.event.ServerTickTimeEvent;
 import net.minecraft.util.profiling.jfr.event.WorldLoadFinishedEvent;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.chunk.storage.RegionFileVersion;
+import net.minecraft.world.level.chunk.storage.RegionStorageInfo;
 import org.slf4j.Logger;
 
 public class JfrProfiler implements JvmProfiler {
@@ -49,8 +53,11 @@ public class JfrProfiler implements JvmProfiler {
 	public static final String WORLD_GEN_CATEGORY = "World Generation";
 	public static final String TICK_CATEGORY = "Ticking";
 	public static final String NETWORK_CATEGORY = "Network";
+	public static final String STORAGE_CATEGORY = "Storage";
 	private static final List<Class<? extends Event>> CUSTOM_EVENTS = List.of(
 		ChunkGenerationEvent.class,
+		ChunkRegionReadEvent.class,
+		ChunkRegionWriteEvent.class,
 		PacketReceivedEvent.class,
 		PacketSentEvent.class,
 		NetworkSummaryEvent.class,
@@ -217,6 +224,20 @@ public class JfrProfiler implements JvmProfiler {
 
 	private NetworkSummaryEvent.SumAggregation networkStatFor(SocketAddress socketAddress) {
 		return (NetworkSummaryEvent.SumAggregation)this.networkTrafficByAddress.computeIfAbsent(socketAddress.toString(), NetworkSummaryEvent.SumAggregation::new);
+	}
+
+	@Override
+	public void onRegionFileRead(RegionStorageInfo regionStorageInfo, ChunkPos chunkPos, RegionFileVersion regionFileVersion, int i) {
+		if (ChunkRegionReadEvent.TYPE.isEnabled()) {
+			new ChunkRegionReadEvent(regionStorageInfo, chunkPos, regionFileVersion, i).commit();
+		}
+	}
+
+	@Override
+	public void onRegionFileWrite(RegionStorageInfo regionStorageInfo, ChunkPos chunkPos, RegionFileVersion regionFileVersion, int i) {
+		if (ChunkRegionWriteEvent.TYPE.isEnabled()) {
+			new ChunkRegionWriteEvent(regionStorageInfo, chunkPos, regionFileVersion, i).commit();
+		}
 	}
 
 	@Nullable

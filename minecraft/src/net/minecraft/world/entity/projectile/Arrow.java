@@ -88,9 +88,9 @@ public class Arrow extends AbstractArrow {
 	}
 
 	@Override
-	protected void defineSynchedData() {
-		super.defineSynchedData();
-		this.entityData.define(ID_EFFECT_COLOR, -1);
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		super.defineSynchedData(builder);
+		builder.define(ID_EFFECT_COLOR, -1);
 	}
 
 	@Override

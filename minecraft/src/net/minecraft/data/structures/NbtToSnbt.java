@@ -22,6 +22,7 @@ import net.minecraft.data.PackOutput;
 import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.util.FastBufferedInputStream;
 import org.slf4j.Logger;
 
 public class NbtToSnbt implements DataProvider {
@@ -99,31 +100,45 @@ public class NbtToSnbt implements DataProvider {
 		try {
 			InputStream inputStream = Files.newInputStream(path);
 
-			Path var6;
+			Path var7;
 			try {
-				Path path3 = path2.resolve(string + ".snbt");
-				writeSnbt(cachedOutput, path3, NbtUtils.structureToSnbt(NbtIo.readCompressed(inputStream, NbtAccounter.unlimitedHeap())));
-				LOGGER.info("Converted {} from NBT to SNBT", string);
-				var6 = path3;
-			} catch (Throwable var8) {
+				InputStream inputStream2 = new FastBufferedInputStream(inputStream);
+
+				try {
+					Path path3 = path2.resolve(string + ".snbt");
+					writeSnbt(cachedOutput, path3, NbtUtils.structureToSnbt(NbtIo.readCompressed(inputStream2, NbtAccounter.unlimitedHeap())));
+					LOGGER.info("Converted {} from NBT to SNBT", string);
+					var7 = path3;
+				} catch (Throwable var10) {
+					try {
+						inputStream2.close();
+					} catch (Throwable var9) {
+						var10.addSuppressed(var9);
+					}
+
+					throw var10;
+				}
+
+				inputStream2.close();
+			} catch (Throwable var11) {
 				if (inputStream != null) {
 					try {
 						inputStream.close();
-					} catch (Throwable var7) {
-						var8.addSuppressed(var7);
+					} catch (Throwable var8) {
+						var11.addSuppressed(var8);
 					}
 				}
 
-				throw var8;
+				throw var11;
 			}
 
 			if (inputStream != null) {
 				inputStream.close();
 			}
 
-			return var6;
-		} catch (IOException var9) {
-			LOGGER.error("Couldn't convert {} from NBT to SNBT at {}", string, path, var9);
+			return var7;
+		} catch (IOException var12) {
+			LOGGER.error("Couldn't convert {} from NBT to SNBT at {}", string, path, var12);
 			return null;
 		}
 	}

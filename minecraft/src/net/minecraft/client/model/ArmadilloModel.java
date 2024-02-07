@@ -129,7 +129,8 @@ public class ArmadilloModel extends AgeableHierarchicalModel<Armadillo> {
 		}
 
 		this.animateWalk(ArmadilloAnimation.ARMADILLO_WALK, f, g, 16.5F, 2.5F);
-		this.animate(armadillo.ballAnimationState, ArmadilloAnimation.ARMADILLO_BALL, h, 1.0F);
-		this.animate(armadillo.ballJumpAnimationState, ArmadilloAnimation.ARMADILLO_BALL_JUMP, h, 1.0F);
+		this.animate(armadillo.rollOutAnimationState, ArmadilloAnimation.ARMADILLO_ROLL_OUT, h, 1.0F);
+		this.animate(armadillo.rollUpAnimationState, ArmadilloAnimation.ARMADILLO_ROLL_UP, h, 1.0F);
+		this.animate(armadillo.peekAnimationState, ArmadilloAnimation.ARMADILLO_PEEK, h, 1.0F);
 	}
 }

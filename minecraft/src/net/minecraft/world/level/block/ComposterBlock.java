@@ -239,9 +239,7 @@ public class ComposterBlock extends Block implements WorldlyContainerHolder {
 				BlockState blockState2 = addItem(player, blockState, level, blockPos, itemStack);
 				level.levelEvent(1500, blockPos, blockState != blockState2 ? 1 : 0);
 				player.awardStat(Stats.ITEM_USED.get(itemStack.getItem()));
-				if (!player.getAbilities().instabuild) {
-					itemStack.shrink(1);
-				}
+				itemStack.consume(1, player);
 			}
 
 			return ItemInteractionResult.sidedSuccess(level.isClientSide);

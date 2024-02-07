@@ -19,6 +19,7 @@ import java.nio.file.StandardOpenOption;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.profiling.jfr.JvmProfiler;
 import net.minecraft.world.level.ChunkPos;
 import org.slf4j.Logger;
 
@@ -34,6 +35,7 @@ public class RegionFile implements AutoCloseable {
 	private static final int EXTERNAL_STREAM_FLAG = 128;
 	private static final int EXTERNAL_CHUNK_THRESHOLD = 256;
 	private static final int CHUNK_NOT_PRESENT = 0;
+	final RegionStorageInfo info;
 	private final Path path;
 	private final FileChannel file;
 	private final Path externalFileDir;
@@ -44,11 +46,12 @@ public class RegionFile implements AutoCloseable {
 	@VisibleForTesting
 	protected final RegionBitmap usedSectors = new RegionBitmap();
 
-	public RegionFile(Path path, Path path2, boolean bl) throws IOException {
-		this(path, path2, RegionFileVersion.getSelected(), bl);
+	public RegionFile(RegionStorageInfo regionStorageInfo, Path path, Path path2, boolean bl) throws IOException {
+		this(regionStorageInfo, path, path2, RegionFileVersion.getSelected(), bl);
 	}
 
-	public RegionFile(Path path, Path path2, RegionFileVersion regionFileVersion, boolean bl) throws IOException {
+	public RegionFile(RegionStorageInfo regionStorageInfo, Path path, Path path2, RegionFileVersion regionFileVersion, boolean bl) throws IOException {
+		this.info = regionStorageInfo;
 		this.path = path;
 		this.version = regionFileVersion;
 		if (!Files.isDirectory(path2, new LinkOption[0])) {
@@ -143,6 +146,7 @@ public class RegionFile implements AutoCloseable {
 						LOGGER.error("Declared size {} of chunk {} is negative", m, chunkPos);
 						return null;
 					} else {
+						JvmProfiler.INSTANCE.onRegionFileRead(this.info, chunkPos, this.version, n);
 						return this.createChunkInputStream(chunkPos, b, createStream(byteBuffer, n));
 					}
 				}
@@ -402,7 +406,9 @@ public class RegionFile implements AutoCloseable {
 
 		public void close() throws IOException {
 			ByteBuffer byteBuffer = ByteBuffer.wrap(this.buf, 0, this.count);
-			byteBuffer.putInt(0, this.count - 5 + 1);
+			int i = this.count - 5 + 1;
+			JvmProfiler.INSTANCE.onRegionFileWrite(RegionFile.this.info, this.pos, RegionFile.this.version, i);
+			byteBuffer.putInt(0, i);
 			RegionFile.this.write(this.pos, byteBuffer);
 		}
 	}

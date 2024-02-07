@@ -1,20 +1,25 @@
 package net.minecraft.world.level.levelgen;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableMap.Builder;
+import com.mojang.serialization.Codec;
 import com.mojang.serialization.Lifecycle;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import net.minecraft.core.Holder;
 import net.minecraft.core.MappedRegistry;
+import net.minecraft.core.RegistrationInfo;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.RegistryCodecs;
 import net.minecraft.core.WritableRegistry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
@@ -29,23 +34,27 @@ import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.storage.PrimaryLevelData;
 
-public record WorldDimensions(Registry<LevelStem> dimensions) {
+public record WorldDimensions(Map<ResourceKey<LevelStem>, LevelStem> dimensions) {
 	public static final MapCodec<WorldDimensions> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> instance.group(
-					RegistryCodecs.fullCodec(Registries.LEVEL_STEM, Lifecycle.stable(), LevelStem.CODEC).fieldOf("dimensions").forGetter(WorldDimensions::dimensions)
+					Codec.unboundedMap(ResourceKey.codec(Registries.LEVEL_STEM), LevelStem.CODEC).fieldOf("dimensions").forGetter(WorldDimensions::dimensions)
 				)
 				.apply(instance, instance.stable(WorldDimensions::new))
 	);
 	private static final Set<ResourceKey<LevelStem>> BUILTIN_ORDER = ImmutableSet.of(LevelStem.OVERWORLD, LevelStem.NETHER, LevelStem.END);
 	private static final int VANILLA_DIMENSION_COUNT = BUILTIN_ORDER.size();
 
-	public WorldDimensions(Registry<LevelStem> registry) {
-		LevelStem levelStem = (LevelStem)registry.get(LevelStem.OVERWORLD);
+	public WorldDimensions(Map<ResourceKey<LevelStem>, LevelStem> map) {
+		LevelStem levelStem = (LevelStem)map.get(LevelStem.OVERWORLD);
 		if (levelStem == null) {
 			throw new IllegalStateException("Overworld settings missing");
 		} else {
-			this.dimensions = registry;
+			this.dimensions = map;
 		}
+	}
+
+	public WorldDimensions(Registry<LevelStem> registry) {
+		this((Map<ResourceKey<LevelStem>, LevelStem>)registry.holders().collect(Collectors.toMap(Holder.Reference::key, Holder.Reference::value)));
 	}
 
 	public static Stream<ResourceKey<LevelStem>> keysInOrder(Stream<ResourceKey<LevelStem>> stream) {
@@ -54,28 +63,25 @@ public record WorldDimensions(Registry<LevelStem> dimensions) {
 
 	public WorldDimensions replaceOverworldGenerator(RegistryAccess registryAccess, ChunkGenerator chunkGenerator) {
 		Registry<DimensionType> registry = registryAccess.registryOrThrow(Registries.DIMENSION_TYPE);
-		Registry<LevelStem> registry2 = withOverworld(registry, this.dimensions, chunkGenerator);
-		return new WorldDimensions(registry2);
+		Map<ResourceKey<LevelStem>, LevelStem> map = withOverworld(registry, this.dimensions, chunkGenerator);
+		return new WorldDimensions(map);
 	}
 
-	public static Registry<LevelStem> withOverworld(Registry<DimensionType> registry, Registry<LevelStem> registry2, ChunkGenerator chunkGenerator) {
-		LevelStem levelStem = (LevelStem)registry2.get(LevelStem.OVERWORLD);
+	public static Map<ResourceKey<LevelStem>, LevelStem> withOverworld(
+		Registry<DimensionType> registry, Map<ResourceKey<LevelStem>, LevelStem> map, ChunkGenerator chunkGenerator
+	) {
+		LevelStem levelStem = (LevelStem)map.get(LevelStem.OVERWORLD);
 		Holder<DimensionType> holder = (Holder<DimensionType>)(levelStem == null ? registry.getHolderOrThrow(BuiltinDimensionTypes.OVERWORLD) : levelStem.type());
-		return withOverworld(registry2, holder, chunkGenerator);
+		return withOverworld(map, holder, chunkGenerator);
 	}
 
-	public static Registry<LevelStem> withOverworld(Registry<LevelStem> registry, Holder<DimensionType> holder, ChunkGenerator chunkGenerator) {
-		WritableRegistry<LevelStem> writableRegistry = new MappedRegistry(Registries.LEVEL_STEM, Lifecycle.experimental());
-		writableRegistry.register(LevelStem.OVERWORLD, new LevelStem(holder, chunkGenerator), Lifecycle.stable());
-
-		for(java.util.Map.Entry<ResourceKey<LevelStem>, LevelStem> entry : registry.entrySet()) {
-			ResourceKey<LevelStem> resourceKey = (ResourceKey)entry.getKey();
-			if (resourceKey != LevelStem.OVERWORLD) {
-				writableRegistry.register(resourceKey, (LevelStem)entry.getValue(), registry.lifecycle((LevelStem)entry.getValue()));
-			}
-		}
-
-		return writableRegistry.freeze();
+	public static Map<ResourceKey<LevelStem>, LevelStem> withOverworld(
+		Map<ResourceKey<LevelStem>, LevelStem> map, Holder<DimensionType> holder, ChunkGenerator chunkGenerator
+	) {
+		Builder<ResourceKey<LevelStem>, LevelStem> builder = ImmutableMap.builder();
+		builder.putAll(map);
+		builder.put(LevelStem.OVERWORLD, new LevelStem(holder, chunkGenerator));
+		return builder.buildKeepingLast();
 	}
 
 	public ChunkGenerator overworld() {
@@ -88,16 +94,11 @@ public record WorldDimensions(Registry<LevelStem> dimensions) {
 	}
 
 	public Optional<LevelStem> get(ResourceKey<LevelStem> resourceKey) {
-		return this.dimensions.getOptional(resourceKey);
+		return Optional.ofNullable((LevelStem)this.dimensions.get(resourceKey));
 	}
 
 	public ImmutableSet<ResourceKey<Level>> levels() {
-		return (ImmutableSet<ResourceKey<Level>>)this.dimensions()
-			.entrySet()
-			.stream()
-			.map(java.util.Map.Entry::getKey)
-			.map(Registries::levelStemToLevel)
-			.collect(ImmutableSet.toImmutableSet());
+		return (ImmutableSet<ResourceKey<Level>>)this.dimensions().keySet().stream().map(Registries::levelStemToLevel).collect(ImmutableSet.toImmutableSet());
 	}
 
 	public boolean isDebug() {
@@ -171,14 +172,14 @@ public record WorldDimensions(Registry<LevelStem> dimensions) {
 	}
 
 	public WorldDimensions.Complete bake(Registry<LevelStem> registry) {
-		Stream<ResourceKey<LevelStem>> stream = Stream.concat(registry.registryKeySet().stream(), this.dimensions.registryKeySet().stream()).distinct();
+		Stream<ResourceKey<LevelStem>> stream = Stream.concat(registry.registryKeySet().stream(), this.dimensions.keySet().stream()).distinct();
 
 		record Entry(ResourceKey<LevelStem> key, LevelStem value) {
 			final ResourceKey<LevelStem> key;
 			final LevelStem value;
 
-			Lifecycle lifecycle() {
-				return WorldDimensions.checkStability(this.key, this.value);
+			RegistrationInfo registrationInfo() {
+				return new RegistrationInfo(Optional.empty(), WorldDimensions.checkStability(this.key, this.value));
 			}
 		}
 
@@ -186,12 +187,12 @@ public record WorldDimensions(Registry<LevelStem> dimensions) {
 		keysInOrder(stream)
 			.forEach(
 				resourceKey -> registry.getOptional(resourceKey)
-						.or(() -> this.dimensions.getOptional(resourceKey))
+						.or(() -> Optional.ofNullable((LevelStem)this.dimensions.get(resourceKey)))
 						.ifPresent(levelStem -> list.add(new Entry(resourceKey, levelStem)))
 			);
 		Lifecycle lifecycle = list.size() == VANILLA_DIMENSION_COUNT ? Lifecycle.stable() : Lifecycle.experimental();
 		WritableRegistry<LevelStem> writableRegistry = new MappedRegistry(Registries.LEVEL_STEM, lifecycle);
-		list.forEach(arg -> writableRegistry.register(arg.key, arg.value, arg.lifecycle()));
+		list.forEach(arg -> writableRegistry.register(arg.key, arg.value, arg.registrationInfo()));
 		Registry<LevelStem> registry2 = writableRegistry.freeze();
 		PrimaryLevelData.SpecialWorldProperty specialWorldProperty = specialWorldProperty(registry2);
 		return new WorldDimensions.Complete(registry2.freeze(), specialWorldProperty);

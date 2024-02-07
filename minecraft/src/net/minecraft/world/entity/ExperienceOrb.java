@@ -7,6 +7,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundAddExperienceOrbPacket;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.FluidTags;
@@ -50,7 +51,12 @@ public class ExperienceOrb extends Entity {
 	}
 
 	@Override
-	protected void defineSynchedData() {
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+	}
+
+	@Override
+	protected double getDefaultGravity() {
+		return 0.03;
 	}
 
 	@Override
@@ -61,8 +67,8 @@ public class ExperienceOrb extends Entity {
 		this.zo = this.getZ();
 		if (this.isEyeInFluid(FluidTags.WATER)) {
 			this.setUnderwaterMovement();
-		} else if (!this.isNoGravity()) {
-			this.setDeltaMovement(this.getDeltaMovement().add(0.0, -0.03, 0.0));
+		} else {
+			this.applyGravity();
 		}
 
 		if (this.level().getFluidState(this.blockPosition()).is(FluidTags.LAVA)) {

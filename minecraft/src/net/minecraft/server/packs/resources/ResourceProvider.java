@@ -10,6 +10,8 @@ import net.minecraft.resources.ResourceLocation;
 
 @FunctionalInterface
 public interface ResourceProvider {
+	ResourceProvider EMPTY = resourceLocation -> Optional.empty();
+
 	Optional<Resource> getResource(ResourceLocation resourceLocation);
 
 	default Resource getResourceOrThrow(ResourceLocation resourceLocation) throws FileNotFoundException {

@@ -79,9 +79,9 @@ public abstract class AbstractVillager extends AgeableMob implements InventoryCa
 	}
 
 	@Override
-	protected void defineSynchedData() {
-		super.defineSynchedData();
-		this.entityData.define(DATA_UNHAPPY_COUNTER, 0);
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		super.defineSynchedData(builder);
+		builder.define(DATA_UNHAPPY_COUNTER, 0);
 	}
 
 	@Override

@@ -5,8 +5,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 import javax.annotation.Nullable;
 import net.minecraft.server.packs.PackResources;
+import net.minecraft.server.packs.repository.KnownPack;
 
 public class Resource {
 	private final PackResources source;
@@ -36,8 +38,8 @@ public class Resource {
 		return this.source.packId();
 	}
 
-	public boolean isBuiltin() {
-		return this.source.isBuiltin();
+	public Optional<KnownPack> knownPackInfo() {
+		return this.source.knownPackInfo();
 	}
 
 	public InputStream open() throws IOException {

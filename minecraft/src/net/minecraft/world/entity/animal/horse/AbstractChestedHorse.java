@@ -42,9 +42,9 @@ public abstract class AbstractChestedHorse extends AbstractHorse {
 	}
 
 	@Override
-	protected void defineSynchedData() {
-		super.defineSynchedData();
-		this.entityData.define(DATA_ID_CHEST, false);
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		super.defineSynchedData(builder);
+		builder.define(DATA_ID_CHEST, false);
 	}
 
 	public static AttributeSupplier.Builder createBaseChestedHorseAttributes() {
@@ -183,10 +183,7 @@ public abstract class AbstractChestedHorse extends AbstractHorse {
 	private void equipChest(Player player, ItemStack itemStack) {
 		this.setChest(true);
 		this.playChestEquipsSound();
-		if (!player.getAbilities().instabuild) {
-			itemStack.shrink(1);
-		}
-
+		itemStack.consume(1, player);
 		this.createInventory();
 	}
 

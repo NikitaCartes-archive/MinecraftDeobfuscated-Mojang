@@ -104,12 +104,12 @@ public class WitherBoss extends Monster implements PowerableMob, RangedAttackMob
 	}
 
 	@Override
-	protected void defineSynchedData() {
-		super.defineSynchedData();
-		this.entityData.define(DATA_TARGET_A, 0);
-		this.entityData.define(DATA_TARGET_B, 0);
-		this.entityData.define(DATA_TARGET_C, 0);
-		this.entityData.define(DATA_ID_INV, 0);
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		super.defineSynchedData(builder);
+		builder.define(DATA_TARGET_A, 0);
+		builder.define(DATA_TARGET_B, 0);
+		builder.define(DATA_TARGET_C, 0);
+		builder.define(DATA_ID_INV, 0);
 	}
 
 	@Override

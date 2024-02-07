@@ -83,9 +83,9 @@ public class IronGolem extends AbstractGolem implements NeutralMob {
 	}
 
 	@Override
-	protected void defineSynchedData() {
-		super.defineSynchedData();
-		this.entityData.define(DATA_FLAGS_ID, (byte)0);
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		super.defineSynchedData(builder);
+		builder.define(DATA_FLAGS_ID, (byte)0);
 	}
 
 	public static AttributeSupplier.Builder createAttributes() {
@@ -269,10 +269,7 @@ public class IronGolem extends AbstractGolem implements NeutralMob {
 			} else {
 				float g = 1.0F + (this.random.nextFloat() - this.random.nextFloat()) * 0.2F;
 				this.playSound(SoundEvents.IRON_GOLEM_REPAIR, 1.0F, g);
-				if (!player.getAbilities().instabuild) {
-					itemStack.shrink(1);
-				}
-
+				itemStack.consume(1, player);
 				return InteractionResult.sidedSuccess(this.level().isClientSide);
 			}
 		}

@@ -120,11 +120,11 @@ public class Zombie extends Monster {
 	}
 
 	@Override
-	protected void defineSynchedData() {
-		super.defineSynchedData();
-		this.getEntityData().define(DATA_BABY_ID, false);
-		this.getEntityData().define(DATA_SPECIAL_TYPE_ID, 0);
-		this.getEntityData().define(DATA_DROWNED_CONVERSION_ID, false);
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		super.defineSynchedData(builder);
+		builder.define(DATA_BABY_ID, false);
+		builder.define(DATA_SPECIAL_TYPE_ID, 0);
+		builder.define(DATA_DROWNED_CONVERSION_ID, false);
 	}
 
 	public boolean isUnderWaterConverting() {

@@ -9,7 +9,9 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.BuiltInMetadata;
 import net.minecraft.server.packs.FeatureFlagsMetadataSection;
+import net.minecraft.server.packs.PackLocationInfo;
 import net.minecraft.server.packs.PackResources;
+import net.minecraft.server.packs.PackSelectionConfig;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.VanillaPackResources;
 import net.minecraft.server.packs.VanillaPackResourcesBuilder;
@@ -27,16 +29,29 @@ public class ServerPacksSource extends BuiltInPackSource {
 	private static final BuiltInMetadata BUILT_IN_METADATA = BuiltInMetadata.of(
 		PackMetadataSection.TYPE, VERSION_METADATA_SECTION, FeatureFlagsMetadataSection.TYPE, FEATURE_FLAGS_METADATA_SECTION
 	);
-	private static final Component VANILLA_NAME = Component.translatable("dataPack.vanilla.name");
+	private static final PackLocationInfo VANILLA_PACK_INFO = new PackLocationInfo(
+		"vanilla", Component.translatable("dataPack.vanilla.name"), PackSource.BUILT_IN, Optional.of(CORE_PACK_INFO)
+	);
+	private static final PackSelectionConfig VANILLA_SELECTION_CONFIG = new PackSelectionConfig(false, Pack.Position.BOTTOM, false);
+	private static final PackSelectionConfig FEATURE_SELECTION_CONFIG = new PackSelectionConfig(false, Pack.Position.TOP, false);
 	private static final ResourceLocation PACKS_DIR = new ResourceLocation("minecraft", "datapacks");
 
 	public ServerPacksSource(DirectoryValidator directoryValidator) {
 		super(PackType.SERVER_DATA, createVanillaPackSource(), PACKS_DIR, directoryValidator);
 	}
 
+	private static PackLocationInfo createBuiltInPackLocation(String string, Component component) {
+		return new PackLocationInfo(string, component, PackSource.FEATURE, Optional.of(KnownPack.vanilla(string)));
+	}
+
 	@VisibleForTesting
 	public static VanillaPackResources createVanillaPackSource() {
-		return new VanillaPackResourcesBuilder().setMetadata(BUILT_IN_METADATA).exposeNamespace("minecraft").applyDevelopmentConfig().pushJarResources().build();
+		return new VanillaPackResourcesBuilder()
+			.setMetadata(BUILT_IN_METADATA)
+			.exposeNamespace("minecraft")
+			.applyDevelopmentConfig()
+			.pushJarResources()
+			.build(VANILLA_PACK_INFO);
 	}
 
 	@Override
@@ -47,13 +62,13 @@ public class ServerPacksSource extends BuiltInPackSource {
 	@Nullable
 	@Override
 	protected Pack createVanillaPack(PackResources packResources) {
-		return Pack.readMetaAndCreate("vanilla", VANILLA_NAME, false, fixedResources(packResources), PackType.SERVER_DATA, Pack.Position.BOTTOM, PackSource.BUILT_IN);
+		return Pack.readMetaAndCreate(VANILLA_PACK_INFO, fixedResources(packResources), PackType.SERVER_DATA, VANILLA_SELECTION_CONFIG);
 	}
 
 	@Nullable
 	@Override
 	protected Pack createBuiltinPack(String string, Pack.ResourcesSupplier resourcesSupplier, Component component) {
-		return Pack.readMetaAndCreate(string, component, false, resourcesSupplier, PackType.SERVER_DATA, Pack.Position.TOP, PackSource.FEATURE);
+		return Pack.readMetaAndCreate(createBuiltInPackLocation(string, component), resourcesSupplier, PackType.SERVER_DATA, FEATURE_SELECTION_CONFIG);
 	}
 
 	public static PackRepository createPackRepository(Path path, DirectoryValidator directoryValidator) {

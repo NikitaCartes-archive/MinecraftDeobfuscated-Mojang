@@ -80,10 +80,7 @@ public interface CauldronInteraction {
 			if (!level.isClientSide) {
 				ItemStack itemStack2 = itemStack.copyWithCount(1);
 				BannerBlockEntity.removeLastPattern(itemStack2);
-				if (!player.getAbilities().instabuild) {
-					itemStack.shrink(1);
-				}
-
+				itemStack.consume(1, player);
 				if (itemStack.isEmpty()) {
 					player.setItemInHand(interactionHand, itemStack2);
 				} else if (player.getInventory().add(itemStack2)) {

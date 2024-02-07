@@ -36,7 +36,11 @@ public class MobEffects {
 	);
 	public static final Holder<MobEffect> HEAL = register("instant_health", new HealOrHarmMobEffect(MobEffectCategory.BENEFICIAL, 16262179, false));
 	public static final Holder<MobEffect> HARM = register("instant_damage", new HealOrHarmMobEffect(MobEffectCategory.HARMFUL, 11101546, true));
-	public static final Holder<MobEffect> JUMP = register("jump_boost", new MobEffect(MobEffectCategory.BENEFICIAL, 16646020));
+	public static final Holder<MobEffect> JUMP = register(
+		"jump_boost",
+		new MobEffect(MobEffectCategory.BENEFICIAL, 16646020)
+			.addAttributeModifier(Attributes.SAFE_FALL_DISTANCE, "C0105BF3-AEF8-46B0-9EBC-92943757CCBE", 1.0, AttributeModifier.Operation.ADDITION)
+	);
 	public static final Holder<MobEffect> CONFUSION = register("nausea", new MobEffect(MobEffectCategory.HARMFUL, 5578058));
 	public static final Holder<MobEffect> REGENERATION = register("regeneration", new RegenerationMobEffect(MobEffectCategory.BENEFICIAL, 13458603));
 	public static final Holder<MobEffect> DAMAGE_RESISTANCE = register("resistance", new MobEffect(MobEffectCategory.BENEFICIAL, 9520880));

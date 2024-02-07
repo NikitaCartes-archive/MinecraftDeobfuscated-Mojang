@@ -54,7 +54,6 @@ import net.minecraft.world.entity.monster.AbstractSkeleton;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Ghast;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.Item;
@@ -76,7 +75,7 @@ public class Wolf extends TamableAnimal implements NeutralMob {
 		return entityType == EntityType.SHEEP || entityType == EntityType.RABBIT || entityType == EntityType.FOX;
 	};
 	private static final float START_HEALTH = 8.0F;
-	private static final float TAME_HEALTH = 20.0F;
+	private static final float TAME_HEALTH = 40.0F;
 	private float interestedAngle;
 	private float interestedAngleO;
 	private boolean isWet;
@@ -89,7 +88,7 @@ public class Wolf extends TamableAnimal implements NeutralMob {
 
 	public Wolf(EntityType<? extends Wolf> entityType, Level level) {
 		super(entityType, level);
-		this.setTame(false);
+		this.setTame(false, false);
 		this.setPathfindingMalus(BlockPathTypes.POWDER_SNOW, -1.0F);
 		this.setPathfindingMalus(BlockPathTypes.DANGER_POWDER_SNOW, -1.0F);
 	}
@@ -119,15 +118,15 @@ public class Wolf extends TamableAnimal implements NeutralMob {
 	}
 
 	public static AttributeSupplier.Builder createAttributes() {
-		return Mob.createMobAttributes().add(Attributes.MOVEMENT_SPEED, 0.3F).add(Attributes.MAX_HEALTH, 8.0).add(Attributes.ATTACK_DAMAGE, 2.0);
+		return Mob.createMobAttributes().add(Attributes.MOVEMENT_SPEED, 0.3F).add(Attributes.MAX_HEALTH, 8.0).add(Attributes.ATTACK_DAMAGE, 4.0);
 	}
 
 	@Override
-	protected void defineSynchedData() {
-		super.defineSynchedData();
-		this.entityData.define(DATA_INTERESTED_ID, false);
-		this.entityData.define(DATA_COLLAR_COLOR, DyeColor.RED.getId());
-		this.entityData.define(DATA_REMAINING_ANGER_TIME, 0);
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		super.defineSynchedData(builder);
+		builder.define(DATA_INTERESTED_ID, false);
+		builder.define(DATA_COLLAR_COLOR, DyeColor.RED.getId());
+		builder.define(DATA_REMAINING_ANGER_TIME, 0);
 	}
 
 	@Override
@@ -157,7 +156,7 @@ public class Wolf extends TamableAnimal implements NeutralMob {
 		if (this.isAngry()) {
 			return SoundEvents.WOLF_GROWL;
 		} else if (this.random.nextInt(3) == 0) {
-			return this.isTame() && this.getHealth() < 10.0F ? SoundEvents.WOLF_WHINE : SoundEvents.WOLF_PANT;
+			return this.isTame() && this.getHealth() < 20.0F ? SoundEvents.WOLF_WHINE : SoundEvents.WOLF_PANT;
 		} else {
 			return SoundEvents.WOLF_AMBIENT;
 		}
@@ -288,13 +287,8 @@ public class Wolf extends TamableAnimal implements NeutralMob {
 		if (this.isInvulnerableTo(damageSource)) {
 			return false;
 		} else {
-			Entity entity = damageSource.getEntity();
 			if (!this.level().isClientSide) {
 				this.setOrderedToSit(false);
-			}
-
-			if (entity != null && !(entity instanceof Player) && !(entity instanceof AbstractArrow)) {
-				f = (f + 1.0F) / 2.0F;
 			}
 
 			return super.hurt(damageSource, f);
@@ -312,16 +306,13 @@ public class Wolf extends TamableAnimal implements NeutralMob {
 	}
 
 	@Override
-	public void setTame(boolean bl) {
-		super.setTame(bl);
-		if (bl) {
-			this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(20.0);
-			this.setHealth(20.0F);
+	protected void applyTamingSideEffects() {
+		if (this.isTame()) {
+			this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(40.0);
+			this.setHealth(40.0F);
 		} else {
 			this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(8.0);
 		}
-
-		this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(4.0);
 	}
 
 	@Override
@@ -333,21 +324,15 @@ public class Wolf extends TamableAnimal implements NeutralMob {
 			return bl ? InteractionResult.CONSUME : InteractionResult.PASS;
 		} else if (this.isTame()) {
 			if (this.isFood(itemStack) && this.getHealth() < this.getMaxHealth()) {
-				if (!player.getAbilities().instabuild) {
-					itemStack.shrink(1);
-				}
-
-				this.heal((float)item.getFoodProperties().getNutrition());
+				itemStack.consume(1, player);
+				this.heal(2.0F * (float)item.getFoodProperties().getNutrition());
 				return InteractionResult.SUCCESS;
 			} else {
 				if (item instanceof DyeItem dyeItem && this.isOwnedBy(player)) {
 					DyeColor dyeColor = dyeItem.getDyeColor();
 					if (dyeColor != this.getCollarColor()) {
 						this.setCollarColor(dyeColor);
-						if (!player.getAbilities().instabuild) {
-							itemStack.shrink(1);
-						}
-
+						itemStack.consume(1, player);
 						return InteractionResult.SUCCESS;
 					}
 
@@ -356,16 +341,10 @@ public class Wolf extends TamableAnimal implements NeutralMob {
 
 				if (itemStack.is(Items.WOLF_ARMOR) && this.isOwnedBy(player) && !this.hasArmor() && !this.isBaby()) {
 					this.setBodyArmorItem(itemStack.copyWithCount(1));
-					if (!player.getAbilities().instabuild) {
-						itemStack.shrink(1);
-					}
-
+					itemStack.consume(1, player);
 					return InteractionResult.SUCCESS;
 				} else if (itemStack.is(Items.SHEARS) && this.isOwnedBy(player) && this.hasArmor()) {
-					if (!player.getAbilities().instabuild) {
-						itemStack.hurtAndBreak(1, player, getSlotForHand(interactionHand));
-					}
-
+					itemStack.hurtAndBreak(1, player, getSlotForHand(interactionHand));
 					this.playSound(SoundEvents.ARMOR_UNEQUIP_WOLF);
 					ItemStack itemStack2 = this.getBodyArmorItem();
 					this.setBodyArmorItem(ItemStack.EMPTY);
@@ -385,10 +364,7 @@ public class Wolf extends TamableAnimal implements NeutralMob {
 				}
 			}
 		} else if (itemStack.is(Items.BONE) && !this.isAngry()) {
-			if (!player.getAbilities().instabuild) {
-				itemStack.shrink(1);
-			}
-
+			itemStack.consume(1, player);
 			if (this.random.nextInt(3) == 0) {
 				this.tame(player);
 				this.navigation.stop();
@@ -421,8 +397,12 @@ public class Wolf extends TamableAnimal implements NeutralMob {
 	public float getTailAngle() {
 		if (this.isAngry()) {
 			return 1.5393804F;
+		} else if (this.isTame()) {
+			float f = this.getMaxHealth();
+			float g = (f - this.getHealth()) / f;
+			return (0.55F - g * 0.4F) * (float) Math.PI;
 		} else {
-			return this.isTame() ? (0.55F - (this.getMaxHealth() - this.getHealth()) * 0.02F) * (float) Math.PI : (float) (Math.PI / 5);
+			return (float) (Math.PI / 5);
 		}
 	}
 
@@ -482,7 +462,7 @@ public class Wolf extends TamableAnimal implements NeutralMob {
 			UUID uUID = this.getOwnerUUID();
 			if (uUID != null) {
 				wolf.setOwnerUUID(uUID);
-				wolf.setTame(true);
+				wolf.setTame(true, true);
 			}
 		}
 

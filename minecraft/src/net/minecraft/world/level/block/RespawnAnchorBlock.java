@@ -78,10 +78,7 @@ public class RespawnAnchorBlock extends Block {
 	) {
 		if (isRespawnFuel(itemStack) && canBeCharged(blockState)) {
 			charge(player, level, blockPos, blockState);
-			if (!player.getAbilities().instabuild) {
-				itemStack.shrink(1);
-			}
-
+			itemStack.consume(1, player);
 			return ItemInteractionResult.sidedSuccess(level.isClientSide);
 		} else {
 			return interactionHand == InteractionHand.MAIN_HAND && isRespawnFuel(player.getItemInHand(InteractionHand.OFF_HAND)) && canBeCharged(blockState)

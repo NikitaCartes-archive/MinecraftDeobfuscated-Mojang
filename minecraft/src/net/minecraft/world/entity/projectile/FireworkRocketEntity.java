@@ -78,10 +78,10 @@ public class FireworkRocketEntity extends Projectile implements ItemSupplier {
 	}
 
 	@Override
-	protected void defineSynchedData() {
-		this.entityData.define(DATA_ID_FIREWORKS_ITEM, new ItemStack(Items.FIREWORK_ROCKET));
-		this.entityData.define(DATA_ATTACHED_TO_TARGET, OptionalInt.empty());
-		this.entityData.define(DATA_SHOT_AT_ANGLE, false);
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		builder.define(DATA_ID_FIREWORKS_ITEM, new ItemStack(Items.FIREWORK_ROCKET));
+		builder.define(DATA_ATTACHED_TO_TARGET, OptionalInt.empty());
+		builder.define(DATA_SHOT_AT_ANGLE, false);
 	}
 
 	@Override

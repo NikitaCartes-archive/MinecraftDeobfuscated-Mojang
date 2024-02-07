@@ -24,18 +24,22 @@ public interface Equipable {
 	default InteractionResultHolder<ItemStack> swapWithEquipmentSlot(Item item, Level level, Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
 		EquipmentSlot equipmentSlot = Mob.getEquipmentSlotForItem(itemStack);
-		ItemStack itemStack2 = player.getItemBySlot(equipmentSlot);
-		if ((!EnchantmentHelper.hasBindingCurse(itemStack2) || player.isCreative()) && !ItemStack.matches(itemStack, itemStack2)) {
-			if (!level.isClientSide()) {
-				player.awardStat(Stats.ITEM_USED.get(item));
-			}
-
-			ItemStack itemStack3 = itemStack2.isEmpty() ? itemStack : itemStack2.copyAndClear();
-			ItemStack itemStack4 = player.isCreative() ? itemStack.copy() : itemStack.copyAndClear();
-			player.setItemSlot(equipmentSlot, itemStack4);
-			return InteractionResultHolder.sidedSuccess(itemStack3, level.isClientSide());
+		if (!player.canUseSlot(equipmentSlot)) {
+			return InteractionResultHolder.pass(itemStack);
 		} else {
-			return InteractionResultHolder.fail(itemStack);
+			ItemStack itemStack2 = player.getItemBySlot(equipmentSlot);
+			if ((!EnchantmentHelper.hasBindingCurse(itemStack2) || player.isCreative()) && !ItemStack.matches(itemStack, itemStack2)) {
+				if (!level.isClientSide()) {
+					player.awardStat(Stats.ITEM_USED.get(item));
+				}
+
+				ItemStack itemStack3 = itemStack2.isEmpty() ? itemStack : itemStack2.copyAndClear();
+				ItemStack itemStack4 = player.isCreative() ? itemStack.copy() : itemStack.copyAndClear();
+				player.setItemSlot(equipmentSlot, itemStack4);
+				return InteractionResultHolder.sidedSuccess(itemStack3, level.isClientSide());
+			} else {
+				return InteractionResultHolder.fail(itemStack);
+			}
 		}
 	}
 

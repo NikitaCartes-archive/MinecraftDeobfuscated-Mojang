@@ -104,7 +104,7 @@ public class CrossbowItem extends ProjectileWeaponItem {
 	private static boolean tryLoadProjectiles(LivingEntity livingEntity, ItemStack itemStack) {
 		int i = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.MULTISHOT, itemStack);
 		int j = i == 0 ? 1 : 3;
-		boolean bl = livingEntity instanceof Player && ((Player)livingEntity).getAbilities().instabuild;
+		boolean bl = livingEntity.hasInfiniteMaterials();
 		ItemStack itemStack2 = livingEntity.getProjectile(itemStack);
 		ItemStack itemStack3 = itemStack2.copy();
 

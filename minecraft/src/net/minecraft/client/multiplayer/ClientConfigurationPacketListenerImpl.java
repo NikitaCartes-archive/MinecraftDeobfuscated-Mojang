@@ -2,6 +2,9 @@ package net.minecraft.client.multiplayer;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.logging.LogUtils;
+import java.util.List;
+import java.util.function.Function;
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -16,9 +19,14 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.network.protocol.configuration.ClientConfigurationPacketListener;
 import net.minecraft.network.protocol.configuration.ClientboundFinishConfigurationPacket;
 import net.minecraft.network.protocol.configuration.ClientboundRegistryDataPacket;
+import net.minecraft.network.protocol.configuration.ClientboundSelectKnownPacks;
 import net.minecraft.network.protocol.configuration.ClientboundUpdateEnabledFeaturesPacket;
 import net.minecraft.network.protocol.configuration.ServerboundFinishConfigurationPacket;
+import net.minecraft.network.protocol.configuration.ServerboundSelectKnownPacks;
 import net.minecraft.network.protocol.game.GameProtocols;
+import net.minecraft.server.packs.repository.KnownPack;
+import net.minecraft.server.packs.resources.CloseableResourceManager;
+import net.minecraft.server.packs.resources.ResourceProvider;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.flag.FeatureFlags;
 import org.slf4j.Logger;
@@ -30,6 +38,8 @@ public class ClientConfigurationPacketListenerImpl extends ClientCommonPacketLis
 	private FeatureFlagSet enabledFeatures;
 	private final RegistryAccess.Frozen receivedRegistries;
 	private final RegistryDataCollector registryDataCollector = new RegistryDataCollector();
+	@Nullable
+	private KnownPacksManager knownPacks;
 
 	public ClientConfigurationPacketListenerImpl(Minecraft minecraft, Connection connection, CommonListenerCookie commonListenerCookie) {
 		super(minecraft, connection, commonListenerCookie);
@@ -70,9 +80,35 @@ public class ClientConfigurationPacketListenerImpl extends ClientCommonPacketLis
 	}
 
 	@Override
+	public void handleSelectKnownPacks(ClientboundSelectKnownPacks clientboundSelectKnownPacks) {
+		PacketUtils.ensureRunningOnSameThread(clientboundSelectKnownPacks, this, this.minecraft);
+		if (this.knownPacks == null) {
+			this.knownPacks = new KnownPacksManager();
+		}
+
+		List<KnownPack> list = this.knownPacks.trySelectingPacks(clientboundSelectKnownPacks.knownPacks());
+		this.send(new ServerboundSelectKnownPacks(list));
+	}
+
+	private <T> T runWithResources(Function<ResourceProvider, T> function) {
+		if (this.knownPacks == null) {
+			return (T)function.apply(ResourceProvider.EMPTY);
+		} else {
+			Object var3;
+			try (CloseableResourceManager closeableResourceManager = this.knownPacks.createResourceManager()) {
+				var3 = function.apply(closeableResourceManager);
+			}
+
+			return (T)var3;
+		}
+	}
+
+	@Override
 	public void handleConfigurationFinished(ClientboundFinishConfigurationPacket clientboundFinishConfigurationPacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundFinishConfigurationPacket, this, this.minecraft);
-		RegistryAccess.Frozen frozen = this.registryDataCollector.collectGameRegistries(this.receivedRegistries, this.connection.isMemoryConnection());
+		RegistryAccess.Frozen frozen = this.runWithResources(
+			resourceProvider -> this.registryDataCollector.collectGameRegistries(resourceProvider, this.receivedRegistries, this.connection.isMemoryConnection())
+		);
 		this.connection
 			.setupInboundProtocol(
 				GameProtocols.CLIENTBOUND.bind(RegistryFriendlyByteBuf.decorator(frozen)),

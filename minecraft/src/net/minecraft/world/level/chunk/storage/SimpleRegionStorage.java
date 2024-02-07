@@ -18,10 +18,10 @@ public class SimpleRegionStorage implements AutoCloseable {
 	private final DataFixer fixerUpper;
 	private final DataFixTypes dataFixType;
 
-	public SimpleRegionStorage(Path path, DataFixer dataFixer, boolean bl, String string, DataFixTypes dataFixTypes) {
+	public SimpleRegionStorage(RegionStorageInfo regionStorageInfo, Path path, DataFixer dataFixer, boolean bl, DataFixTypes dataFixTypes) {
 		this.fixerUpper = dataFixer;
 		this.dataFixType = dataFixTypes;
-		this.worker = new IOWorker(path, bl, string);
+		this.worker = new IOWorker(regionStorageInfo, path, bl);
 	}
 
 	public CompletableFuture<Optional<CompoundTag>> read(ChunkPos chunkPos) {

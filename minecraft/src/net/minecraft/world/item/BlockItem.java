@@ -85,10 +85,7 @@ public class BlockItem extends Item {
 					SoundType soundType = blockState2.getSoundType();
 					level.playSound(player, blockPos, this.getPlaceSound(blockState2), SoundSource.BLOCKS, (soundType.getVolume() + 1.0F) / 2.0F, soundType.getPitch() * 0.8F);
 					level.gameEvent(GameEvent.BLOCK_PLACE, blockPos, GameEvent.Context.of(player, blockState2));
-					if (player == null || !player.getAbilities().instabuild) {
-						itemStack.shrink(1);
-					}
-
+					itemStack.consume(1, player);
 					return InteractionResult.sidedSuccess(level.isClientSide);
 				}
 			}

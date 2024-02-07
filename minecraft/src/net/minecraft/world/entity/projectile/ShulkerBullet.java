@@ -10,6 +10,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -99,7 +100,7 @@ public class ShulkerBullet extends Projectile {
 	}
 
 	@Override
-	protected void defineSynchedData() {
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
 	}
 
 	@Nullable
@@ -193,6 +194,11 @@ public class ShulkerBullet extends Projectile {
 	}
 
 	@Override
+	protected double getDefaultGravity() {
+		return 0.04;
+	}
+
+	@Override
 	public void tick() {
 		super.tick();
 		if (!this.level().isClientSide) {
@@ -204,9 +210,7 @@ public class ShulkerBullet extends Projectile {
 			}
 
 			if (this.finalTarget == null || !this.finalTarget.isAlive() || this.finalTarget instanceof Player && this.finalTarget.isSpectator()) {
-				if (!this.isNoGravity()) {
-					this.setDeltaMovement(this.getDeltaMovement().add(0.0, -0.04, 0.0));
-				}
+				this.applyGravity();
 			} else {
 				this.targetDeltaX = Mth.clamp(this.targetDeltaX * 1.025, -1.0, 1.0);
 				this.targetDeltaY = Mth.clamp(this.targetDeltaY * 1.025, -1.0, 1.0);

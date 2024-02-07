@@ -125,7 +125,7 @@ public class Rabbit extends Animal implements VariantHolder<Rabbit.Variant> {
 			f = 0.2F;
 		}
 
-		return f + this.getJumpBoostPower();
+		return super.getJumpPower(f / 0.42F);
 	}
 
 	@Override
@@ -168,9 +168,9 @@ public class Rabbit extends Animal implements VariantHolder<Rabbit.Variant> {
 	}
 
 	@Override
-	protected void defineSynchedData() {
-		super.defineSynchedData();
-		this.entityData.define(DATA_TYPE_ID, Rabbit.Variant.BROWN.id);
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		super.defineSynchedData(builder);
+		builder.define(DATA_TYPE_ID, Rabbit.Variant.BROWN.id);
 	}
 
 	@Override

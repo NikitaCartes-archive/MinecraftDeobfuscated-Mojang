@@ -30,8 +30,8 @@ public class ThrownExperienceBottle extends ThrowableItemProjectile {
 	}
 
 	@Override
-	protected float getGravity() {
-		return 0.07F;
+	protected double getDefaultGravity() {
+		return 0.07;
 	}
 
 	@Override

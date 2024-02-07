@@ -85,12 +85,17 @@ public class Sniffer extends Animal {
 
 	public Sniffer(EntityType<? extends Animal> entityType, Level level) {
 		super(entityType, level);
-		this.entityData.define(DATA_STATE, Sniffer.State.IDLING);
-		this.entityData.define(DATA_DROP_SEED_AT_TICK, 0);
 		this.getNavigation().setCanFloat(true);
 		this.setPathfindingMalus(BlockPathTypes.WATER, -1.0F);
 		this.setPathfindingMalus(BlockPathTypes.DANGER_POWDER_SNOW, -1.0F);
 		this.setPathfindingMalus(BlockPathTypes.DAMAGE_CAUTIOUS, -1.0F);
+	}
+
+	@Override
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		super.defineSynchedData(builder);
+		builder.define(DATA_STATE, Sniffer.State.IDLING);
+		builder.define(DATA_DROP_SEED_AT_TICK, 0);
 	}
 
 	@Override
@@ -108,9 +113,7 @@ public class Sniffer extends Animal {
 
 	@Override
 	public EntityDimensions getDefaultDimensions(Pose pose) {
-		return this.entityData.hasItem(DATA_STATE) && this.getState() == Sniffer.State.DIGGING
-			? DIGGING_DIMENSIONS.scale(this.getAgeScale())
-			: super.getDefaultDimensions(pose);
+		return this.getState() == Sniffer.State.DIGGING ? DIGGING_DIMENSIONS.scale(this.getAgeScale()) : super.getDefaultDimensions(pose);
 	}
 
 	public boolean isSearching() {

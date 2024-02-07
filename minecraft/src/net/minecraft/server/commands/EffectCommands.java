@@ -80,7 +80,7 @@ public class EffectCommands {
 														)
 												)
 												.then(
-													Commands.argument("amplifier", IntegerArgumentType.integer(0, 127))
+													Commands.argument("amplifier", IntegerArgumentType.integer(0, 255))
 														.executes(
 															commandContext -> giveEffect(
 																	commandContext.getSource(),
@@ -119,7 +119,7 @@ public class EffectCommands {
 														)
 												)
 												.then(
-													Commands.argument("amplifier", IntegerArgumentType.integer(0, 127))
+													Commands.argument("amplifier", IntegerArgumentType.integer(0, 255))
 														.executes(
 															commandContext -> giveEffect(
 																	commandContext.getSource(),

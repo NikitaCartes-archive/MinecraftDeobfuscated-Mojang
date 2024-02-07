@@ -61,9 +61,9 @@ public class ItemFrame extends HangingEntity {
 	}
 
 	@Override
-	protected void defineSynchedData() {
-		this.getEntityData().define(DATA_ITEM, ItemStack.EMPTY);
-		this.getEntityData().define(DATA_ROTATION, 0);
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		builder.define(DATA_ITEM, ItemStack.EMPTY);
+		builder.define(DATA_ROTATION, 0);
 	}
 
 	@Override
@@ -216,7 +216,7 @@ public class ItemFrame extends HangingEntity {
 					this.removeFramedMap(itemStack);
 				}
 			} else {
-				if (entity instanceof Player player && player.getAbilities().instabuild) {
+				if (entity instanceof Player player && player.hasInfiniteMaterials()) {
 					this.removeFramedMap(itemStack);
 					return;
 				}
@@ -392,9 +392,7 @@ public class ItemFrame extends HangingEntity {
 
 					this.setItem(itemStack);
 					this.gameEvent(GameEvent.BLOCK_CHANGE, player);
-					if (!player.getAbilities().instabuild) {
-						itemStack.shrink(1);
-					}
+					itemStack.consume(1, player);
 				}
 			} else {
 				this.playSound(this.getRotateItemSound(), 1.0F, 1.0F);

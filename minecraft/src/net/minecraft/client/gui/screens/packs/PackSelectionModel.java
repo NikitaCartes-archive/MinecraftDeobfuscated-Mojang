@@ -163,7 +163,7 @@ public class PackSelectionModel {
 
 		protected void toggleSelection() {
 			this.getSelfList().remove(this.pack);
-			this.pack.getDefaultPosition().insert(this.getOtherList(), this.pack, Function.identity(), true);
+			this.pack.getDefaultPosition().insert(this.getOtherList(), this.pack, Pack::selectionConfig, true);
 			PackSelectionModel.this.onListChanged.run();
 			PackSelectionModel.this.updateRepoSelectedList();
 			this.updateHighContrastOptionInstance();

@@ -137,14 +137,14 @@ public class Turtle extends Animal {
 	}
 
 	@Override
-	protected void defineSynchedData() {
-		super.defineSynchedData();
-		this.entityData.define(HOME_POS, BlockPos.ZERO);
-		this.entityData.define(HAS_EGG, false);
-		this.entityData.define(TRAVEL_POS, BlockPos.ZERO);
-		this.entityData.define(GOING_HOME, false);
-		this.entityData.define(TRAVELLING, false);
-		this.entityData.define(LAYING_EGG, false);
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		super.defineSynchedData(builder);
+		builder.define(HOME_POS, BlockPos.ZERO);
+		builder.define(HAS_EGG, false);
+		builder.define(TRAVEL_POS, BlockPos.ZERO);
+		builder.define(GOING_HOME, false);
+		builder.define(TRAVELLING, false);
+		builder.define(LAYING_EGG, false);
 	}
 
 	@Override

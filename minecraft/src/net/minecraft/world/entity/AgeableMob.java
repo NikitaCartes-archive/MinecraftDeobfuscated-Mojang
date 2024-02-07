@@ -47,9 +47,9 @@ public abstract class AgeableMob extends PathfinderMob {
 	public abstract AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob);
 
 	@Override
-	protected void defineSynchedData() {
-		super.defineSynchedData();
-		this.entityData.define(DATA_BABY_ID, false);
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		super.defineSynchedData(builder);
+		builder.define(DATA_BABY_ID, false);
 	}
 
 	public boolean canBreed() {

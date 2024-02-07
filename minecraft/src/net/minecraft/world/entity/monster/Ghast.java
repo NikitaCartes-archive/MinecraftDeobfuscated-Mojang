@@ -9,6 +9,7 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.Difficulty;
@@ -72,7 +73,8 @@ public class Ghast extends FlyingMob implements Enemy {
 
 	@Override
 	public boolean isInvulnerableTo(DamageSource damageSource) {
-		return !isReflectedFireball(damageSource) && super.isInvulnerableTo(damageSource);
+		return this.isInvulnerable() && !damageSource.is(DamageTypeTags.BYPASSES_INVULNERABILITY)
+			|| !isReflectedFireball(damageSource) && super.isInvulnerableTo(damageSource);
 	}
 
 	@Override
@@ -86,9 +88,9 @@ public class Ghast extends FlyingMob implements Enemy {
 	}
 
 	@Override
-	protected void defineSynchedData() {
-		super.defineSynchedData();
-		this.entityData.define(DATA_IS_CHARGING, false);
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		super.defineSynchedData(builder);
+		builder.define(DATA_IS_CHARGING, false);
 	}
 
 	public static AttributeSupplier.Builder createAttributes() {

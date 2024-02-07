@@ -136,11 +136,11 @@ public class EnderMan extends Monster implements NeutralMob {
 	}
 
 	@Override
-	protected void defineSynchedData() {
-		super.defineSynchedData();
-		this.entityData.define(DATA_CARRY_STATE, Optional.empty());
-		this.entityData.define(DATA_CREEPY, false);
-		this.entityData.define(DATA_STARED_AT, false);
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		super.defineSynchedData(builder);
+		builder.define(DATA_CARRY_STATE, Optional.empty());
+		builder.define(DATA_CREEPY, false);
+		builder.define(DATA_STARED_AT, false);
 	}
 
 	@Override

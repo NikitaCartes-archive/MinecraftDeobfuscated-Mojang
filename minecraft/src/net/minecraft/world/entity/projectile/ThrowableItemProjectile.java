@@ -39,8 +39,8 @@ public abstract class ThrowableItemProjectile extends ThrowableProjectile implem
 	}
 
 	@Override
-	protected void defineSynchedData() {
-		this.getEntityData().define(DATA_ITEM_STACK, new ItemStack(this.getDefaultItem()));
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		builder.define(DATA_ITEM_STACK, new ItemStack(this.getDefaultItem()));
 	}
 
 	@Override

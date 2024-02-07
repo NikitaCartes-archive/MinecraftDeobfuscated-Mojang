@@ -75,7 +75,7 @@ public class Creeper extends Monster implements PowerableMob {
 
 	@Override
 	public int getMaxFallDistance() {
-		return this.getTarget() == null ? 3 : 3 + (int)(this.getHealth() - 1.0F);
+		return this.getTarget() == null ? this.getComfortableFallDistance(0.0F) : this.getComfortableFallDistance(this.getHealth() - 1.0F);
 	}
 
 	@Override
@@ -90,11 +90,11 @@ public class Creeper extends Monster implements PowerableMob {
 	}
 
 	@Override
-	protected void defineSynchedData() {
-		super.defineSynchedData();
-		this.entityData.define(DATA_SWELL_DIR, -1);
-		this.entityData.define(DATA_IS_POWERED, false);
-		this.entityData.define(DATA_IS_IGNITED, false);
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		super.defineSynchedData(builder);
+		builder.define(DATA_SWELL_DIR, -1);
+		builder.define(DATA_IS_POWERED, false);
+		builder.define(DATA_IS_IGNITED, false);
 	}
 
 	@Override

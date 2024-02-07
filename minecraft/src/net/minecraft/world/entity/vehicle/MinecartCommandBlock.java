@@ -41,10 +41,10 @@ public class MinecartCommandBlock extends AbstractMinecart {
 	}
 
 	@Override
-	protected void defineSynchedData() {
-		super.defineSynchedData();
-		this.getEntityData().define(DATA_ID_COMMAND_NAME, "");
-		this.getEntityData().define(DATA_ID_LAST_OUTPUT, CommonComponents.EMPTY);
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		super.defineSynchedData(builder);
+		builder.define(DATA_ID_COMMAND_NAME, "");
+		builder.define(DATA_ID_LAST_OUTPUT, CommonComponents.EMPTY);
 	}
 
 	@Override

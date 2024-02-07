@@ -31,26 +31,40 @@ public class NbtIo {
 	public static CompoundTag readCompressed(Path path, NbtAccounter nbtAccounter) throws IOException {
 		InputStream inputStream = Files.newInputStream(path);
 
-		CompoundTag var3;
+		CompoundTag var4;
 		try {
-			var3 = readCompressed(inputStream, nbtAccounter);
-		} catch (Throwable var6) {
+			InputStream inputStream2 = new FastBufferedInputStream(inputStream);
+
+			try {
+				var4 = readCompressed(inputStream2, nbtAccounter);
+			} catch (Throwable var8) {
+				try {
+					inputStream2.close();
+				} catch (Throwable var7) {
+					var8.addSuppressed(var7);
+				}
+
+				throw var8;
+			}
+
+			inputStream2.close();
+		} catch (Throwable var9) {
 			if (inputStream != null) {
 				try {
 					inputStream.close();
-				} catch (Throwable var5) {
-					var6.addSuppressed(var5);
+				} catch (Throwable var6) {
+					var9.addSuppressed(var6);
 				}
 			}
 
-			throw var6;
+			throw var9;
 		}
 
 		if (inputStream != null) {
 			inputStream.close();
 		}
 
-		return var3;
+		return var4;
 	}
 
 	private static DataInputStream createDecompressorStream(InputStream inputStream) throws IOException {
@@ -90,17 +104,31 @@ public class NbtIo {
 		InputStream inputStream = Files.newInputStream(path);
 
 		try {
-			parseCompressed(inputStream, streamTagVisitor, nbtAccounter);
-		} catch (Throwable var7) {
+			InputStream inputStream2 = new FastBufferedInputStream(inputStream);
+
+			try {
+				parseCompressed(inputStream2, streamTagVisitor, nbtAccounter);
+			} catch (Throwable var9) {
+				try {
+					inputStream2.close();
+				} catch (Throwable var8) {
+					var9.addSuppressed(var8);
+				}
+
+				throw var9;
+			}
+
+			inputStream2.close();
+		} catch (Throwable var10) {
 			if (inputStream != null) {
 				try {
 					inputStream.close();
-				} catch (Throwable var6) {
-					var7.addSuppressed(var6);
+				} catch (Throwable var7) {
+					var10.addSuppressed(var7);
 				}
 			}
 
-			throw var7;
+			throw var10;
 		}
 
 		if (inputStream != null) {

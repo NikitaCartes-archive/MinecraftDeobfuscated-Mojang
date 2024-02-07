@@ -91,6 +91,11 @@ public class Squid extends WaterAnimal {
 	}
 
 	@Override
+	protected double getDefaultGravity() {
+		return 0.08;
+	}
+
+	@Override
 	public void aiStep() {
 		super.aiStep();
 		this.xBodyRotO = this.xBodyRot;
@@ -143,8 +148,8 @@ public class Squid extends WaterAnimal {
 				double e = this.getDeltaMovement().y;
 				if (this.hasEffect(MobEffects.LEVITATION)) {
 					e = 0.05 * (double)(this.getEffect(MobEffects.LEVITATION).getAmplifier() + 1);
-				} else if (!this.isNoGravity()) {
-					e -= 0.08;
+				} else {
+					e -= this.getGravity();
 				}
 
 				this.setDeltaMovement(0.0, e * 0.98F, 0.0);

@@ -42,7 +42,7 @@ public abstract class PatrollingMonster extends Monster {
 	public void addAdditionalSaveData(CompoundTag compoundTag) {
 		super.addAdditionalSaveData(compoundTag);
 		if (this.patrolTarget != null) {
-			compoundTag.put("PatrolTarget", NbtUtils.writeBlockPos(this.patrolTarget));
+			compoundTag.put("patrol_target", NbtUtils.writeBlockPos(this.patrolTarget));
 		}
 
 		compoundTag.putBoolean("PatrolLeader", this.patrolLeader);
@@ -52,10 +52,7 @@ public abstract class PatrollingMonster extends Monster {
 	@Override
 	public void readAdditionalSaveData(CompoundTag compoundTag) {
 		super.readAdditionalSaveData(compoundTag);
-		if (compoundTag.contains("PatrolTarget")) {
-			this.patrolTarget = NbtUtils.readBlockPos(compoundTag.getCompound("PatrolTarget"));
-		}
-
+		NbtUtils.readBlockPos(compoundTag, "patrol_target").ifPresent(blockPos -> this.patrolTarget = blockPos);
 		this.patrolLeader = compoundTag.getBoolean("PatrolLeader");
 		this.patrolling = compoundTag.getBoolean("Patrolling");
 	}

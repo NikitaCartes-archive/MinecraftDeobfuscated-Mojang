@@ -4,7 +4,6 @@ import java.util.Map;
 import java.util.Optional;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
-import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.BootstrapContext;
@@ -47,8 +46,8 @@ public class WorldPresets {
 		return ResourceKey.create(Registries.WORLD_PRESET, new ResourceLocation(string));
 	}
 
-	public static Optional<ResourceKey<WorldPreset>> fromSettings(Registry<LevelStem> registry) {
-		return registry.getOptional(LevelStem.OVERWORLD).flatMap(levelStem -> {
+	public static Optional<ResourceKey<WorldPreset>> fromSettings(WorldDimensions worldDimensions) {
+		return worldDimensions.get(LevelStem.OVERWORLD).flatMap(levelStem -> {
 			ChunkGenerator chunkGenerator = levelStem.generator();
 			if (chunkGenerator instanceof FlatLevelSource) {
 				return Optional.of(FLAT);

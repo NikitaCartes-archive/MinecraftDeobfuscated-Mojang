@@ -477,7 +477,7 @@ public abstract class AbstractContainerMenu {
 					}
 				}
 			}
-		} else if (clickType == ClickType.CLONE && player.getAbilities().instabuild && this.getCarried().isEmpty() && i >= 0) {
+		} else if (clickType == ClickType.CLONE && player.hasInfiniteMaterials() && this.getCarried().isEmpty() && i >= 0) {
 			Slot slot3 = this.slots.get(i);
 			if (slot3.hasItem()) {
 				ItemStack itemStack2 = slot3.getItem();
@@ -678,7 +678,7 @@ public abstract class AbstractContainerMenu {
 		} else if (i == 1) {
 			return true;
 		} else {
-			return i == 2 && player.getAbilities().instabuild;
+			return i == 2 && player.hasInfiniteMaterials();
 		}
 	}
 

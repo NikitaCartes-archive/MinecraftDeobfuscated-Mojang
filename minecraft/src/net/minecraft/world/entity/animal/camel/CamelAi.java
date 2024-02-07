@@ -10,7 +10,6 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.AnimalMakeLove;
 import net.minecraft.world.entity.ai.behavior.AnimalPanic;
@@ -133,18 +132,14 @@ public class CamelAi {
 		return Camel.TEMPTATION_ITEM;
 	}
 
-	public static class CamelPanic extends AnimalPanic {
+	public static class CamelPanic extends AnimalPanic<Camel> {
 		public CamelPanic(float f) {
 			super(f);
 		}
 
-		@Override
-		protected void start(ServerLevel serverLevel, PathfinderMob pathfinderMob, long l) {
-			if (pathfinderMob instanceof Camel camel) {
-				camel.standUpInstantly();
-			}
-
-			super.start(serverLevel, pathfinderMob, l);
+		protected void start(ServerLevel serverLevel, Camel camel, long l) {
+			camel.standUpInstantly();
+			super.start(serverLevel, camel, l);
 		}
 	}
 

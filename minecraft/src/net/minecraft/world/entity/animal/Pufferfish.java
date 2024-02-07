@@ -48,9 +48,9 @@ public class Pufferfish extends AbstractFish {
 	}
 
 	@Override
-	protected void defineSynchedData() {
-		super.defineSynchedData();
-		this.entityData.define(PUFF_STATE, 0);
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		super.defineSynchedData(builder);
+		builder.define(PUFF_STATE, 0);
 	}
 
 	public int getPuffState() {

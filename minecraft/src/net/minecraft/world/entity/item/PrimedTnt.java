@@ -44,9 +44,9 @@ public class PrimedTnt extends Entity implements TraceableEntity {
 	}
 
 	@Override
-	protected void defineSynchedData() {
-		this.entityData.define(DATA_FUSE_ID, 80);
-		this.entityData.define(DATA_BLOCK_STATE_ID, Blocks.TNT.defaultBlockState());
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		builder.define(DATA_FUSE_ID, 80);
+		builder.define(DATA_BLOCK_STATE_ID, Blocks.TNT.defaultBlockState());
 	}
 
 	@Override
@@ -60,11 +60,13 @@ public class PrimedTnt extends Entity implements TraceableEntity {
 	}
 
 	@Override
-	public void tick() {
-		if (!this.isNoGravity()) {
-			this.setDeltaMovement(this.getDeltaMovement().add(0.0, -0.04, 0.0));
-		}
+	protected double getDefaultGravity() {
+		return 0.04;
+	}
 
+	@Override
+	public void tick() {
+		this.applyGravity();
 		this.move(MoverType.SELF, this.getDeltaMovement());
 		this.setDeltaMovement(this.getDeltaMovement().scale(0.98));
 		if (this.onGround()) {

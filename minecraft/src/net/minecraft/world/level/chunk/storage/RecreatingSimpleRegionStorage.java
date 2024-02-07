@@ -14,10 +14,12 @@ public class RecreatingSimpleRegionStorage extends SimpleRegionStorage {
 	private final IOWorker writeWorker;
 	private final Path writeFolder;
 
-	public RecreatingSimpleRegionStorage(Path path, Path path2, DataFixer dataFixer, boolean bl, String string, DataFixTypes dataFixTypes) {
-		super(path, dataFixer, bl, string, dataFixTypes);
+	public RecreatingSimpleRegionStorage(
+		RegionStorageInfo regionStorageInfo, Path path, RegionStorageInfo regionStorageInfo2, Path path2, DataFixer dataFixer, boolean bl, DataFixTypes dataFixTypes
+	) {
+		super(regionStorageInfo, path, dataFixer, bl, dataFixTypes);
 		this.writeFolder = path2;
-		this.writeWorker = new IOWorker(path2, bl, string + "-recreating");
+		this.writeWorker = new IOWorker(regionStorageInfo2, path2, bl);
 	}
 
 	@Override

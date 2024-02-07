@@ -29,7 +29,11 @@ public class LanguageSelectScreen extends OptionsSubScreen {
 	@Override
 	protected void init() {
 		this.packSelectionList = this.addRenderableWidget(new LanguageSelectScreen.LanguageSelectionList(this.minecraft));
-		this.addRenderableWidget(this.options.forceUnicodeFont().createButton(this.options, this.width / 2 - 155, this.height - 38, 150));
+		this.addRenderableWidget(
+			Button.builder(Component.translatable("options.font"), button -> this.minecraft.setScreen(new FontOptionsScreen(this, this.options)))
+				.bounds(this.width / 2 - 155, this.height - 38, 150, 20)
+				.build()
+		);
 		this.addRenderableWidget(
 			Button.builder(CommonComponents.GUI_DONE, button -> this.onDone()).bounds(this.width / 2 - 155 + 160, this.height - 38, 150, 20).build()
 		);

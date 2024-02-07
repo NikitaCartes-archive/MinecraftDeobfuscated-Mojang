@@ -17,6 +17,7 @@ public class V3689 extends NamespacedSchema {
 		Map<String, Supplier<TypeTemplate>> map = super.registerEntities(schema);
 		schema.register(map, "minecraft:breeze", (Supplier<TypeTemplate>)(() -> V100.equipment(schema)));
 		schema.registerSimple(map, "minecraft:wind_charge");
+		schema.registerSimple(map, "minecraft:breeze_wind_charge");
 		return map;
 	}
 

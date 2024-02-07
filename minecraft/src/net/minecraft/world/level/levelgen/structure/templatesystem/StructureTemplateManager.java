@@ -39,6 +39,7 @@ import net.minecraft.nbt.NbtUtils;
 import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.util.FastBufferedInputStream;
 import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.storage.LevelResource;
@@ -226,30 +227,44 @@ public class StructureTemplateManager {
 		try {
 			InputStream inputStream = inputStreamOpener.open();
 
-			Optional var4;
+			Optional var5;
 			try {
-				var4 = Optional.of(this.readStructure(inputStream));
-			} catch (Throwable var7) {
+				InputStream inputStream2 = new FastBufferedInputStream(inputStream);
+
+				try {
+					var5 = Optional.of(this.readStructure(inputStream2));
+				} catch (Throwable var9) {
+					try {
+						inputStream2.close();
+					} catch (Throwable var8) {
+						var9.addSuppressed(var8);
+					}
+
+					throw var9;
+				}
+
+				inputStream2.close();
+			} catch (Throwable var10) {
 				if (inputStream != null) {
 					try {
 						inputStream.close();
-					} catch (Throwable var6) {
-						var7.addSuppressed(var6);
+					} catch (Throwable var7) {
+						var10.addSuppressed(var7);
 					}
 				}
 
-				throw var7;
+				throw var10;
 			}
 
 			if (inputStream != null) {
 				inputStream.close();
 			}
 
-			return var4;
-		} catch (FileNotFoundException var8) {
+			return var5;
+		} catch (FileNotFoundException var11) {
 			return Optional.empty();
-		} catch (Throwable var9) {
-			consumer.accept(var9);
+		} catch (Throwable var12) {
+			consumer.accept(var12);
 			return Optional.empty();
 		}
 	}

@@ -64,6 +64,7 @@ public final class BlockTags {
 	public static final TagKey<Block> CANDLES = create("candles");
 	public static final TagKey<Block> DIRT = create("dirt");
 	public static final TagKey<Block> TERRACOTTA = create("terracotta");
+	public static final TagKey<Block> BADLANDS_TERRACOTTA = create("badlands_terracotta");
 	public static final TagKey<Block> CONCRETE_POWDER = create("concrete_powder");
 	public static final TagKey<Block> COMPLETES_FIND_TREE_TUTORIAL = create("completes_find_tree_tutorial");
 	public static final TagKey<Block> FLOWER_POTS = create("flower_pots");
@@ -178,6 +179,7 @@ public final class BlockTags {
 	public static final TagKey<Block> ENCHANTMENT_POWER_PROVIDER = create("enchantment_power_provider");
 	public static final TagKey<Block> ENCHANTMENT_POWER_TRANSMITTER = create("enchantment_power_transmitter");
 	public static final TagKey<Block> MAINTAINS_FARMLAND = create("maintains_farmland");
+	public static final TagKey<Block> BLOCKS_WIND_CHARGE_EXPLOSIONS = create("blocks_wind_charge_explosions");
 
 	private BlockTags() {
 	}
