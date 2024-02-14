@@ -76,8 +76,7 @@ public class SculkShriekerBlock extends BaseEntityBlock implements SimpleWaterlo
 	@Override
 	protected void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
 		if (level instanceof ServerLevel serverLevel && blockState.getValue(SHRIEKING) && !blockState.is(blockState2.getBlock())) {
-			serverLevel.getBlockEntity(blockPos, BlockEntityType.SCULK_SHRIEKER)
-				.ifPresent(sculkShriekerBlockEntity -> sculkShriekerBlockEntity.tryRespond(serverLevel));
+			serverLevel.getBlockEntity(blockPos, BlockEntityType.SCULK_SHRIEKER).ifPresent(sculkShriekerBlockEntity -> sculkShriekerBlockEntity.tryRespond(serverLevel));
 		}
 
 		super.onRemove(blockState, level, blockPos, blockState2, bl);
@@ -87,8 +86,7 @@ public class SculkShriekerBlock extends BaseEntityBlock implements SimpleWaterlo
 	protected void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
 		if (blockState.getValue(SHRIEKING)) {
 			serverLevel.setBlock(blockPos, blockState.setValue(SHRIEKING, Boolean.valueOf(false)), 3);
-			serverLevel.getBlockEntity(blockPos, BlockEntityType.SCULK_SHRIEKER)
-				.ifPresent(sculkShriekerBlockEntity -> sculkShriekerBlockEntity.tryRespond(serverLevel));
+			serverLevel.getBlockEntity(blockPos, BlockEntityType.SCULK_SHRIEKER).ifPresent(sculkShriekerBlockEntity -> sculkShriekerBlockEntity.tryRespond(serverLevel));
 		}
 	}
 

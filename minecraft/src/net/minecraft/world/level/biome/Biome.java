@@ -48,8 +48,7 @@ public final class Biome {
 					BiomeSpecialEffects.CODEC.fieldOf("effects").forGetter(biome -> biome.specialEffects)
 				)
 				.apply(
-					instance,
-					(climateSettings, biomeSpecialEffects) -> new Biome(climateSettings, biomeSpecialEffects, BiomeGenerationSettings.EMPTY, MobSpawnSettings.EMPTY)
+					instance, (climateSettings, biomeSpecialEffects) -> new Biome(climateSettings, biomeSpecialEffects, BiomeGenerationSettings.EMPTY, MobSpawnSettings.EMPTY)
 				)
 	);
 	public static final Codec<Holder<Biome>> CODEC = RegistryFileCodec.create(Registries.BIOME, DIRECT_CODEC);

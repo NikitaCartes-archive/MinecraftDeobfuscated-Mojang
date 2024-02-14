@@ -189,9 +189,7 @@ public class WoodlandMansionPieces {
 						int n = j + direction.getStepZ();
 						if (simpleGrid.get(m + direction2.getStepX(), n + direction2.getStepZ()) == 0
 							&& simpleGrid.get(m + direction2.getStepX() * 2, n + direction2.getStepZ() * 2) == 0) {
-							this.recursiveCorridor(
-								simpleGrid, i + direction.getStepX() + direction2.getStepX(), j + direction.getStepZ() + direction2.getStepZ(), direction2, k - 1
-							);
+							this.recursiveCorridor(simpleGrid, i + direction.getStepX() + direction2.getStepX(), j + direction.getStepZ() + direction2.getStepZ(), direction2, k - 1);
 							break;
 						}
 					}
@@ -497,10 +495,7 @@ public class WoodlandMansionPieces {
 							if (simpleGrid4.get(n, m + 1) == 1 || (simpleGrid3.get(n, m + 1) & 8388608) == 8388608) {
 								list.add(
 									new WoodlandMansionPieces.WoodlandMansionPiece(
-										this.structureTemplateManager,
-										string,
-										blockPos3.relative(rotation.rotate(Direction.SOUTH), 5).relative(rotation.rotate(Direction.WEST), 1),
-										rotation
+										this.structureTemplateManager, string, blockPos3.relative(rotation.rotate(Direction.SOUTH), 5).relative(rotation.rotate(Direction.WEST), 1), rotation
 									)
 								);
 							}
@@ -917,9 +912,7 @@ public class WoodlandMansionPieces {
 			if (direction2 == Direction.EAST && direction == Direction.SOUTH) {
 				BlockPos blockPos2 = blockPos.relative(rotation.rotate(Direction.EAST), 1);
 				list.add(
-					new WoodlandMansionPieces.WoodlandMansionPiece(
-						this.structureTemplateManager, floorRoomCollection.get1x2SideEntrance(this.random, bl), blockPos2, rotation
-					)
+					new WoodlandMansionPieces.WoodlandMansionPiece(this.structureTemplateManager, floorRoomCollection.get1x2SideEntrance(this.random, bl), blockPos2, rotation)
 				);
 			} else if (direction2 == Direction.EAST && direction == Direction.NORTH) {
 				BlockPos blockPos2 = blockPos.relative(rotation.rotate(Direction.EAST), 1);
@@ -1218,9 +1211,7 @@ public class WoodlandMansionPieces {
 		}
 
 		@Override
-		protected void handleDataMarker(
-			String string, BlockPos blockPos, ServerLevelAccessor serverLevelAccessor, RandomSource randomSource, BoundingBox boundingBox
-		) {
+		protected void handleDataMarker(String string, BlockPos blockPos, ServerLevelAccessor serverLevelAccessor, RandomSource randomSource, BoundingBox boundingBox) {
 			if (string.startsWith("Chest")) {
 				Rotation rotation = this.placeSettings.getRotation();
 				BlockState blockState = Blocks.CHEST.defaultBlockState();

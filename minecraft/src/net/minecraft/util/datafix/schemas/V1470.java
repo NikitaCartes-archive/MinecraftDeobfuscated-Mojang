@@ -31,9 +31,7 @@ public class V1470 extends NamespacedSchema {
 		schema.register(
 			map,
 			"minecraft:trident",
-			(Function<String, TypeTemplate>)(string -> DSL.optionalFields(
-					"inBlockState", References.BLOCK_STATE.in(schema), "Trident", References.ITEM_STACK.in(schema)
-				))
+			(Function<String, TypeTemplate>)(string -> DSL.optionalFields("inBlockState", References.BLOCK_STATE.in(schema), "Trident", References.ITEM_STACK.in(schema)))
 		);
 		return map;
 	}

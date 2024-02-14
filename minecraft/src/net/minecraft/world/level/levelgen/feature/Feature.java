@@ -81,9 +81,7 @@ public abstract class Feature<FC extends FeatureConfiguration> {
 	);
 	public static final Feature<NoneFeatureConfiguration> ICE_SPIKE = register("ice_spike", new IceSpikeFeature(NoneFeatureConfiguration.CODEC));
 	public static final Feature<NoneFeatureConfiguration> GLOWSTONE_BLOB = register("glowstone_blob", new GlowstoneFeature(NoneFeatureConfiguration.CODEC));
-	public static final Feature<NoneFeatureConfiguration> FREEZE_TOP_LAYER = register(
-		"freeze_top_layer", new SnowAndFreezeFeature(NoneFeatureConfiguration.CODEC)
-	);
+	public static final Feature<NoneFeatureConfiguration> FREEZE_TOP_LAYER = register("freeze_top_layer", new SnowAndFreezeFeature(NoneFeatureConfiguration.CODEC));
 	public static final Feature<NoneFeatureConfiguration> VINES = register("vines", new VinesFeature(NoneFeatureConfiguration.CODEC));
 	public static final Feature<BlockColumnConfiguration> BLOCK_COLUMN = register("block_column", new BlockColumnFeature(BlockColumnConfiguration.CODEC));
 	public static final Feature<VegetationPatchConfiguration> VEGETATION_PATCH = register(
@@ -123,9 +121,7 @@ public abstract class Feature<FC extends FeatureConfiguration> {
 	);
 	public static final Feature<NoneFeatureConfiguration> WEEPING_VINES = register("weeping_vines", new WeepingVinesFeature(NoneFeatureConfiguration.CODEC));
 	public static final Feature<TwistingVinesConfig> TWISTING_VINES = register("twisting_vines", new TwistingVinesFeature(TwistingVinesConfig.CODEC));
-	public static final Feature<ColumnFeatureConfiguration> BASALT_COLUMNS = register(
-		"basalt_columns", new BasaltColumnsFeature(ColumnFeatureConfiguration.CODEC)
-	);
+	public static final Feature<ColumnFeatureConfiguration> BASALT_COLUMNS = register("basalt_columns", new BasaltColumnsFeature(ColumnFeatureConfiguration.CODEC));
 	public static final Feature<DeltaFeatureConfiguration> DELTA_FEATURE = register("delta_feature", new DeltaFeature(DeltaFeatureConfiguration.CODEC));
 	public static final Feature<ReplaceSphereConfiguration> REPLACE_BLOBS = register(
 		"netherrack_replace_blobs", new ReplaceBlobsFeature(ReplaceSphereConfiguration.CODEC)

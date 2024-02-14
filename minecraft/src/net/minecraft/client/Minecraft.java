@@ -1440,15 +1440,10 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			}
 
 			this.metricsRecorder = ActiveMetricsRecorder.createStarted(
-				new ClientMetricsSamplersProvider(Util.timeSource, this.levelRenderer),
-				Util.timeSource,
-				Util.ioPool(),
-				new MetricsPersister("client"),
-				profileResults -> {
+				new ClientMetricsSamplersProvider(Util.timeSource, this.levelRenderer), Util.timeSource, Util.ioPool(), new MetricsPersister("client"), profileResults -> {
 					this.metricsRecorder = InactiveMetricsRecorder.INSTANCE;
 					consumer2.accept(profileResults);
-				},
-				consumer5
+				}, consumer5
 			);
 			return true;
 		}
@@ -2449,8 +2444,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		);
 		crashReportCategory.setDetail("High-res time", (CrashReportDetail<String>)(() -> formatSeconds((double)Util.getMillis() / 1000.0)));
 		crashReportCategory.setDetail(
-			"Client ticks",
-			(CrashReportDetail<String>)(() -> String.format(Locale.ROOT, "%d ticks / %.3fs", this.clientTickCount, (double)this.clientTickCount / 20.0))
+			"Client ticks", (CrashReportDetail<String>)(() -> String.format(Locale.ROOT, "%d ticks / %.3fs", this.clientTickCount, (double)this.clientTickCount / 20.0))
 		);
 	}
 

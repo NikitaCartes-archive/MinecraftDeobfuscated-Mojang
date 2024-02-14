@@ -39,8 +39,7 @@ public class ExplorationMapFunction extends LootItemConditionalFunction {
 						MapDecoration.Type.CODEC.optionalFieldOf("decoration", DEFAULT_DECORATION).forGetter(explorationMapFunction -> explorationMapFunction.mapDecoration),
 						ExtraCodecs.strictOptionalField(Codec.BYTE, "zoom", (byte)2).forGetter(explorationMapFunction -> explorationMapFunction.zoom),
 						ExtraCodecs.strictOptionalField(Codec.INT, "search_radius", 50).forGetter(explorationMapFunction -> explorationMapFunction.searchRadius),
-						ExtraCodecs.strictOptionalField(Codec.BOOL, "skip_existing_chunks", true)
-							.forGetter(explorationMapFunction -> explorationMapFunction.skipKnownStructures)
+						ExtraCodecs.strictOptionalField(Codec.BOOL, "skip_existing_chunks", true).forGetter(explorationMapFunction -> explorationMapFunction.skipKnownStructures)
 					)
 				)
 				.apply(instance, ExplorationMapFunction::new)

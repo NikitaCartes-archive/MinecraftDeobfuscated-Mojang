@@ -188,9 +188,7 @@ public class VanillaStoryAdvancements implements AdvancementSubProvider {
 			.addCriterion(
 				"deflected_projectile",
 				EntityHurtPlayerTrigger.TriggerInstance.entityHurtPlayer(
-					DamagePredicate.Builder.damageInstance()
-						.type(DamageSourcePredicate.Builder.damageType().tag(TagPredicate.is(DamageTypeTags.IS_PROJECTILE)))
-						.blocked(true)
+					DamagePredicate.Builder.damageInstance().type(DamageSourcePredicate.Builder.damageType().tag(TagPredicate.is(DamageTypeTags.IS_PROJECTILE))).blocked(true)
 				)
 			)
 			.save(consumer, "story/deflect_arrow");

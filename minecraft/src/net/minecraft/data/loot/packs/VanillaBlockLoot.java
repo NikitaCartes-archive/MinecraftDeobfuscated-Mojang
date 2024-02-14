@@ -1451,8 +1451,7 @@ public class VanillaBlockLoot extends BlockLootSubProvider {
 									LootItemBlockStatePropertyCondition.Builder builder2 = LootItemBlockStatePropertyCondition.hasBlockStateProperties(Blocks.PITCHER_CROP)
 										.setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(PitcherCropBlock.AGE, integer));
 									return integer == 4
-										? ((LootPoolSingletonContainer.Builder)((LootPoolSingletonContainer.Builder)LootItem.lootTableItem(Items.PITCHER_PLANT).when(builder2))
-												.when(builder))
+										? ((LootPoolSingletonContainer.Builder)((LootPoolSingletonContainer.Builder)LootItem.lootTableItem(Items.PITCHER_PLANT).when(builder2)).when(builder))
 											.apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F)))
 										: ((LootPoolSingletonContainer.Builder)((LootPoolSingletonContainer.Builder)LootItem.lootTableItem(Items.PITCHER_POD).when(builder2)).when(builder))
 											.apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F)));

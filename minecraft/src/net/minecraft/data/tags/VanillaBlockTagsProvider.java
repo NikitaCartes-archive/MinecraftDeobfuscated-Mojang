@@ -1492,12 +1492,7 @@ public class VanillaBlockTagsProvider extends IntrinsicHolderTagsProvider<Block>
 				Blocks.RED_CONCRETE_POWDER,
 				Blocks.BLACK_CONCRETE_POWDER
 			);
-		this.tag(BlockTags.AZALEA_GROWS_ON)
-			.addTag(BlockTags.DIRT)
-			.addTag(BlockTags.SAND)
-			.addTag(BlockTags.TERRACOTTA)
-			.add(Blocks.SNOW_BLOCK)
-			.add(Blocks.POWDER_SNOW);
+		this.tag(BlockTags.AZALEA_GROWS_ON).addTag(BlockTags.DIRT).addTag(BlockTags.SAND).addTag(BlockTags.TERRACOTTA).add(Blocks.SNOW_BLOCK).add(Blocks.POWDER_SNOW);
 		this.tag(BlockTags.FROG_PREFER_JUMP_TO).add(Blocks.LILY_PAD, Blocks.BIG_DRIPLEAF);
 		this.tag(BlockTags.SCULK_REPLACEABLE)
 			.addTag(BlockTags.BASE_STONE_OVERWORLD)
@@ -1611,5 +1606,6 @@ public class VanillaBlockTagsProvider extends IntrinsicHolderTagsProvider<Block>
 				Blocks.WHEAT
 			);
 		this.tag(BlockTags.CAMEL_SAND_STEP_SOUND_BLOCKS).addTag(BlockTags.SAND).addTag(BlockTags.CONCRETE_POWDER);
+		this.tag(BlockTags.DOES_NOT_BLOCK_HOPPERS).addTag(BlockTags.BEEHIVES);
 	}
 }

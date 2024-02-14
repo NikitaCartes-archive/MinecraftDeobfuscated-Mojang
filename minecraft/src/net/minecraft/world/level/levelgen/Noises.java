@@ -74,9 +74,7 @@ public class Noises {
 	}
 
 	public static NormalNoise instantiate(
-		HolderGetter<NormalNoise.NoiseParameters> holderGetter,
-		PositionalRandomFactory positionalRandomFactory,
-		ResourceKey<NormalNoise.NoiseParameters> resourceKey
+		HolderGetter<NormalNoise.NoiseParameters> holderGetter, PositionalRandomFactory positionalRandomFactory, ResourceKey<NormalNoise.NoiseParameters> resourceKey
 	) {
 		Holder<NormalNoise.NoiseParameters> holder = holderGetter.getOrThrow(resourceKey);
 		return NormalNoise.create(

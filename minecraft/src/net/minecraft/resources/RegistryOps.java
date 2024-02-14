@@ -30,18 +30,12 @@ public class RegistryOps<T> extends DelegatingOps<T> {
 	}
 
 	public static <T> RegistryOps<T> create(DynamicOps<T> dynamicOps, HolderLookup.Provider provider) {
-		return create(
-			dynamicOps,
-			memoizeLookup(
-				new RegistryOps.RegistryInfoLookup() {
-					@Override
-					public <E> Optional<RegistryOps.RegistryInfo<E>> lookup(ResourceKey<? extends Registry<? extends E>> resourceKey) {
-						return provider.lookup(resourceKey)
-							.map(registryLookup -> new RegistryOps.RegistryInfo<>(registryLookup, registryLookup, registryLookup.registryLifecycle()));
-					}
-				}
-			)
-		);
+		return create(dynamicOps, memoizeLookup(new RegistryOps.RegistryInfoLookup() {
+			@Override
+			public <E> Optional<RegistryOps.RegistryInfo<E>> lookup(ResourceKey<? extends Registry<? extends E>> resourceKey) {
+				return provider.lookup(resourceKey).map(RegistryOps.RegistryInfo::fromRegistryLookup);
+			}
+		}));
 	}
 
 	public static <T> RegistryOps<T> create(DynamicOps<T> dynamicOps, RegistryOps.RegistryInfoLookup registryInfoLookup) {
@@ -49,7 +43,7 @@ public class RegistryOps<T> extends DelegatingOps<T> {
 	}
 
 	public static <T> Dynamic<T> injectRegistryContext(Dynamic<T> dynamic, HolderLookup.Provider provider) {
-		return new Dynamic<>(create(dynamic.getOps(), provider), dynamic.getValue());
+		return new Dynamic<>(provider.createSerializationContext(dynamic.getOps()), dynamic.getValue());
 	}
 
 	private RegistryOps(DynamicOps<T> dynamicOps, RegistryOps.RegistryInfoLookup registryInfoLookup) {
@@ -92,6 +86,9 @@ public class RegistryOps<T> extends DelegatingOps<T> {
 	}
 
 	public static record RegistryInfo<T>(HolderOwner<T> owner, HolderGetter<T> getter, Lifecycle elementsLifecycle) {
+		public static <T> RegistryOps.RegistryInfo<T> fromRegistryLookup(HolderLookup.RegistryLookup<T> registryLookup) {
+			return new RegistryOps.RegistryInfo<>(registryLookup, registryLookup, registryLookup.registryLifecycle());
+		}
 	}
 
 	public interface RegistryInfoLookup {

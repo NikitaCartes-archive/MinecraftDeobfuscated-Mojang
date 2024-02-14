@@ -70,8 +70,7 @@ public abstract class RootPlacer {
 				if (randomSource.nextFloat() < aboveRootPlacement.aboveRootPlacementChance()
 					&& levelSimulatedReader.isStateAtPosition(blockPos2, BlockBehaviour.BlockStateBase::isAir)) {
 					biConsumer.accept(
-						blockPos2,
-						this.getPotentiallyWaterloggedState(levelSimulatedReader, blockPos2, aboveRootPlacement.aboveRootProvider().getState(randomSource, blockPos2))
+						blockPos2, this.getPotentiallyWaterloggedState(levelSimulatedReader, blockPos2, aboveRootPlacement.aboveRootProvider().getState(randomSource, blockPos2))
 					);
 				}
 			}

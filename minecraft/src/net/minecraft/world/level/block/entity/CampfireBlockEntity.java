@@ -97,15 +97,9 @@ public class CampfireBlockEntity extends BlockEntity implements Clearable {
 			if (!campfireBlockEntity.items.get(j).isEmpty() && randomSource.nextFloat() < 0.2F) {
 				Direction direction = Direction.from2DDataValue(Math.floorMod(j + i, 4));
 				float f = 0.3125F;
-				double d = (double)blockPos.getX()
-					+ 0.5
-					- (double)((float)direction.getStepX() * 0.3125F)
-					+ (double)((float)direction.getClockWise().getStepX() * 0.3125F);
+				double d = (double)blockPos.getX() + 0.5 - (double)((float)direction.getStepX() * 0.3125F) + (double)((float)direction.getClockWise().getStepX() * 0.3125F);
 				double e = (double)blockPos.getY() + 0.5;
-				double g = (double)blockPos.getZ()
-					+ 0.5
-					- (double)((float)direction.getStepZ() * 0.3125F)
-					+ (double)((float)direction.getClockWise().getStepZ() * 0.3125F);
+				double g = (double)blockPos.getZ() + 0.5 - (double)((float)direction.getStepZ() * 0.3125F) + (double)((float)direction.getClockWise().getStepZ() * 0.3125F);
 
 				for(int k = 0; k < 4; ++k) {
 					level.addParticle(ParticleTypes.SMOKE, d, e, g, 0.0, 5.0E-4, 0.0);

@@ -84,9 +84,7 @@ public abstract class Report {
 		public static final Report.CannotBuildReason NO_REPORTED_MESSAGES = new Report.CannotBuildReason(
 			Component.translatable("gui.chatReport.send.no_reported_messages")
 		);
-		public static final Report.CannotBuildReason TOO_MANY_MESSAGES = new Report.CannotBuildReason(
-			Component.translatable("gui.chatReport.send.too_many_messages")
-		);
+		public static final Report.CannotBuildReason TOO_MANY_MESSAGES = new Report.CannotBuildReason(Component.translatable("gui.chatReport.send.too_many_messages"));
 		public static final Report.CannotBuildReason COMMENT_TOO_LONG = new Report.CannotBuildReason(Component.translatable("gui.abuseReport.send.comment_too_long"));
 
 		public Tooltip tooltip() {

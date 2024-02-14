@@ -84,9 +84,7 @@ public interface StreamCodec<B, V> extends StreamDecoder<B, V>, StreamEncoder<B,
 		};
 	}
 
-	default <U> StreamCodec<B, U> dispatch(
-		Function<? super U, ? extends V> function, Function<? super V, ? extends StreamCodec<? super B, ? extends U>> function2
-	) {
+	default <U> StreamCodec<B, U> dispatch(Function<? super U, ? extends V> function, Function<? super V, ? extends StreamCodec<? super B, ? extends U>> function2) {
 		return new StreamCodec<B, U>() {
 			@Override
 			public U decode(B object) {

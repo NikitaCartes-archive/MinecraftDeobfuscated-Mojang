@@ -144,9 +144,7 @@ public class NoiseChunk implements DensityFunction.ContextProvider, DensityFunct
 		} else {
 			int n = SectionPos.blockToSectionCoord(j);
 			int o = SectionPos.blockToSectionCoord(k);
-			this.aquifer = Aquifer.create(
-				this, new ChunkPos(n, o), noiseRouter2, randomState.aquiferRandom(), noiseSettings.minY(), noiseSettings.height(), fluidPicker
-			);
+			this.aquifer = Aquifer.create(this, new ChunkPos(n, o), noiseRouter2, randomState.aquiferRandom(), noiseSettings.minY(), noiseSettings.height(), fluidPicker);
 		}
 
 		Builder<NoiseChunk.BlockStateFiller> builder = ImmutableList.builder();

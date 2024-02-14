@@ -194,9 +194,7 @@ public class RealmsResetWorldScreen extends RealmsScreen {
 				INSPIRATION_TITLE,
 				INSPIRATION_LOCATION,
 				button -> this.minecraft
-						.setScreen(
-							new RealmsSelectWorldTemplateScreen(INSPIRATION_TITLE, this::templateSelectionCallback, RealmsServer.WorldType.INSPIRATION, this.inspirations)
-						)
+						.setScreen(new RealmsSelectWorldTemplateScreen(INSPIRATION_TITLE, this::templateSelectionCallback, RealmsServer.WorldType.INSPIRATION, this.inspirations))
 			)
 		);
 		this.layout.addToFooter(Button.builder(CommonComponents.GUI_BACK, button -> this.onClose()).build());

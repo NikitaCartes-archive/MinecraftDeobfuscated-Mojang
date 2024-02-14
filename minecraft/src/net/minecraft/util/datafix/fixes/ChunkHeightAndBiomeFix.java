@@ -277,8 +277,7 @@ public class ChunkHeightAndBiomeFix extends DataFix {
 					String string = dynamic2.asString("");
 					if (!"empty".equals(string)) {
 						dynamic = dynamic.set(
-							"blending_data",
-							dynamic.createMap(ImmutableMap.of(dynamic.createString("old_noise"), dynamic.createBoolean(STATUS_IS_OR_AFTER_NOISE.contains(string))))
+							"blending_data", dynamic.createMap(ImmutableMap.of(dynamic.createString("old_noise"), dynamic.createBoolean(STATUS_IS_OR_AFTER_NOISE.contains(string))))
 						);
 						ChunkProtoTickListFix.PoorMansPalettedContainer poorMansPalettedContainer = (ChunkProtoTickListFix.PoorMansPalettedContainer)supplier.get();
 						if (poorMansPalettedContainer != null) {

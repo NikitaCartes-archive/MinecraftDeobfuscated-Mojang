@@ -122,9 +122,7 @@ public class ConduitRenderer implements BlockEntityRenderer<ConduitBlockEntity> 
 			float n = 1.3333334F;
 			poseStack.scale(1.3333334F, 1.3333334F, 1.3333334F);
 			this.eye
-				.render(
-					poseStack, (conduitBlockEntity.isHunting() ? OPEN_EYE_TEXTURE : CLOSED_EYE_TEXTURE).buffer(multiBufferSource, RenderType::entityCutoutNoCull), i, j
-				);
+				.render(poseStack, (conduitBlockEntity.isHunting() ? OPEN_EYE_TEXTURE : CLOSED_EYE_TEXTURE).buffer(multiBufferSource, RenderType::entityCutoutNoCull), i, j);
 			poseStack.popPose();
 		}
 	}

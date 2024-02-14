@@ -11,8 +11,7 @@ import net.minecraft.resources.ResourceLocation;
 @Environment(EnvType.CLIENT)
 public record ProviderReferenceDefinition(ResourceLocation id) implements GlyphProviderDefinition {
 	public static final MapCodec<ProviderReferenceDefinition> CODEC = RecordCodecBuilder.mapCodec(
-		instance -> instance.group(ResourceLocation.CODEC.fieldOf("id").forGetter(ProviderReferenceDefinition::id))
-				.apply(instance, ProviderReferenceDefinition::new)
+		instance -> instance.group(ResourceLocation.CODEC.fieldOf("id").forGetter(ProviderReferenceDefinition::id)).apply(instance, ProviderReferenceDefinition::new)
 	);
 
 	@Override

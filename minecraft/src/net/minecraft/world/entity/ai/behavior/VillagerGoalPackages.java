@@ -40,9 +40,7 @@ public class VillagerGoalPackages {
 			Pair.of(2, PoiCompetitorScan.create()),
 			Pair.of(3, new LookAndFollowTradingPlayerSink(f)),
 			Pair.of(5, GoToWantedItem.create(f, false, 4)),
-			Pair.of(
-				6, AcquirePoi.create(villagerProfession.acquirableJobSite(), MemoryModuleType.JOB_SITE, MemoryModuleType.POTENTIAL_JOB_SITE, true, Optional.empty())
-			),
+			Pair.of(6, AcquirePoi.create(villagerProfession.acquirableJobSite(), MemoryModuleType.JOB_SITE, MemoryModuleType.POTENTIAL_JOB_SITE, true, Optional.empty())),
 			Pair.of(7, new GoToPotentialJobSite(f)),
 			Pair.of(8, YieldJobSite.create(f)),
 			Pair.of(10, AcquirePoi.create(holder -> holder.is(PoiTypes.HOME), MemoryModuleType.HOME, false, Optional.of((byte)14))),

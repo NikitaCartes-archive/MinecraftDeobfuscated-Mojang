@@ -1,6 +1,6 @@
 package net.minecraft.world.level.pathfinder;
 
-public enum BlockPathTypes {
+public enum PathType {
 	BLOCKED(-1.0F),
 	OPEN(0.0F),
 	WALKABLE(0.0F),
@@ -30,7 +30,7 @@ public enum BlockPathTypes {
 
 	private final float malus;
 
-	private BlockPathTypes(float f) {
+	private PathType(float f) {
 		this.malus = f;
 	}
 

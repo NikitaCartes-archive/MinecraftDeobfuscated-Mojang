@@ -491,10 +491,7 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 	@Override
 	public void addAdditionalSaveData(CompoundTag compoundTag) {
 		super.addAdditionalSaveData(compoundTag);
-		VillagerData.CODEC
-			.encodeStart(NbtOps.INSTANCE, this.getVillagerData())
-			.resultOrPartial(LOGGER::error)
-			.ifPresent(tag -> compoundTag.put("VillagerData", tag));
+		VillagerData.CODEC.encodeStart(NbtOps.INSTANCE, this.getVillagerData()).resultOrPartial(LOGGER::error).ifPresent(tag -> compoundTag.put("VillagerData", tag));
 		compoundTag.putByte("FoodLevel", (byte)this.foodLevel);
 		compoundTag.put("Gossips", this.gossips.store(NbtOps.INSTANCE));
 		compoundTag.putInt("Xp", this.villagerXp);

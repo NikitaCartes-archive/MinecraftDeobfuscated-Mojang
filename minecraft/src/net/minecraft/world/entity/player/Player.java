@@ -2031,6 +2031,12 @@ public abstract class Player extends LivingEntity {
 		return false;
 	}
 
+	@Override
+	public void resetFallDistance() {
+		super.resetFallDistance();
+		this.ignoreFallDamageAboveY = null;
+	}
+
 	public Optional<GlobalPos> getLastDeathLocation() {
 		return this.lastDeathLocation;
 	}

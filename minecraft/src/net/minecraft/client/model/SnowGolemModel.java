@@ -41,14 +41,10 @@ public class SnowGolemModel<T extends Entity> extends HierarchicalModel<T> {
 		partDefinition.addOrReplaceChild("left_arm", cubeListBuilder, PartPose.offsetAndRotation(5.0F, 6.0F, 1.0F, 0.0F, 0.0F, 1.0F));
 		partDefinition.addOrReplaceChild("right_arm", cubeListBuilder, PartPose.offsetAndRotation(-5.0F, 6.0F, -1.0F, 0.0F, (float) Math.PI, -1.0F));
 		partDefinition.addOrReplaceChild(
-			"upper_body",
-			CubeListBuilder.create().texOffs(0, 16).addBox(-5.0F, -10.0F, -5.0F, 10.0F, 10.0F, 10.0F, cubeDeformation),
-			PartPose.offset(0.0F, 13.0F, 0.0F)
+			"upper_body", CubeListBuilder.create().texOffs(0, 16).addBox(-5.0F, -10.0F, -5.0F, 10.0F, 10.0F, 10.0F, cubeDeformation), PartPose.offset(0.0F, 13.0F, 0.0F)
 		);
 		partDefinition.addOrReplaceChild(
-			"lower_body",
-			CubeListBuilder.create().texOffs(0, 36).addBox(-6.0F, -12.0F, -6.0F, 12.0F, 12.0F, 12.0F, cubeDeformation),
-			PartPose.offset(0.0F, 24.0F, 0.0F)
+			"lower_body", CubeListBuilder.create().texOffs(0, 36).addBox(-6.0F, -12.0F, -6.0F, 12.0F, 12.0F, 12.0F, cubeDeformation), PartPose.offset(0.0F, 24.0F, 0.0F)
 		);
 		return LayerDefinition.create(meshDefinition, 64, 64);
 	}

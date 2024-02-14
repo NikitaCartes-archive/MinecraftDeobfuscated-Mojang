@@ -557,9 +557,7 @@ public class Dolphin extends WaterAnimal {
 						0.3F * -Mth.sin(Dolphin.this.getYRot() * (float) (Math.PI / 180.0)) * Mth.cos(Dolphin.this.getXRot() * (float) (Math.PI / 180.0)) + Mth.cos(g) * h
 					),
 					(double)(0.3F * Mth.sin(Dolphin.this.getXRot() * (float) (Math.PI / 180.0)) * 1.5F),
-					(double)(
-						0.3F * Mth.cos(Dolphin.this.getYRot() * (float) (Math.PI / 180.0)) * Mth.cos(Dolphin.this.getXRot() * (float) (Math.PI / 180.0)) + Mth.sin(g) * h
-					)
+					(double)(0.3F * Mth.cos(Dolphin.this.getYRot() * (float) (Math.PI / 180.0)) * Mth.cos(Dolphin.this.getXRot() * (float) (Math.PI / 180.0)) + Mth.sin(g) * h)
 				);
 				Dolphin.this.level().addFreshEntity(itemEntity);
 			}

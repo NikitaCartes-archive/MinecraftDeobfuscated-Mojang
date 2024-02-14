@@ -637,8 +637,7 @@ public class GameRenderer implements AutoCloseable {
 			);
 			list2.add(
 				Pair.of(
-					new ShaderInstance(resourceProvider, "rendertype_eyes", DefaultVertexFormat.NEW_ENTITY),
-					(Consumer)shaderInstance -> rendertypeEyesShader = shaderInstance
+					new ShaderInstance(resourceProvider, "rendertype_eyes", DefaultVertexFormat.NEW_ENTITY), (Consumer)shaderInstance -> rendertypeEyesShader = shaderInstance
 				)
 			);
 			list2.add(
@@ -1329,9 +1328,7 @@ public class GameRenderer implements AutoCloseable {
 			.rotationXYZ(camera.getXRot() * (float) (Math.PI / 180.0), camera.getYRot() * (float) (Math.PI / 180.0) + (float) Math.PI, 0.0F);
 		this.minecraft
 			.levelRenderer
-			.prepareCullFrustum(
-				camera.getPosition(), matrix4f2, this.getProjectionMatrix(Math.max(d, (double)((Integer)this.minecraft.options.fov().get()).intValue()))
-			);
+			.prepareCullFrustum(camera.getPosition(), matrix4f2, this.getProjectionMatrix(Math.max(d, (double)((Integer)this.minecraft.options.fov().get()).intValue())));
 		this.minecraft.levelRenderer.renderLevel(f, l, bl, camera, this, this.lightTexture, matrix4f2, matrix4f);
 		this.minecraft.getProfiler().popPush("hand");
 		if (this.renderHand) {
@@ -1405,9 +1402,7 @@ public class GameRenderer implements AutoCloseable {
 		RenderSystem.disableDepthTest();
 		RenderSystem.depthMask(false);
 		RenderSystem.enableBlend();
-		RenderSystem.blendFuncSeparate(
-			GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE
-		);
+		RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE);
 		guiGraphics.setColor(h, k, l, 1.0F);
 		guiGraphics.blit(NAUSEA_LOCATION, 0, 0, -90, 0.0F, 0.0F, i, j, i, j);
 		guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);

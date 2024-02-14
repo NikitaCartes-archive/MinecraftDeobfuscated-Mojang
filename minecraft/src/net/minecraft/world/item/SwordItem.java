@@ -25,8 +25,7 @@ public class SwordItem extends TieredItem {
 		this.attackDamage = (float)i + tier.getAttackDamageBonus();
 		Builder<Holder<Attribute>, AttributeModifier> builder = ImmutableMultimap.builder();
 		builder.put(
-			Attributes.ATTACK_DAMAGE,
-			new AttributeModifier(BASE_ATTACK_DAMAGE_UUID, "Weapon modifier", (double)this.attackDamage, AttributeModifier.Operation.ADDITION)
+			Attributes.ATTACK_DAMAGE, new AttributeModifier(BASE_ATTACK_DAMAGE_UUID, "Weapon modifier", (double)this.attackDamage, AttributeModifier.Operation.ADDITION)
 		);
 		builder.put(Attributes.ATTACK_SPEED, new AttributeModifier(BASE_ATTACK_SPEED_UUID, "Weapon modifier", (double)f, AttributeModifier.Operation.ADDITION));
 		this.defaultModifiers = builder.build();

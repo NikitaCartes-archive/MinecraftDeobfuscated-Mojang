@@ -352,10 +352,7 @@ public class VegetationFeatures {
 								Blocks.WHITE_TULIP.defaultBlockState()
 							),
 							List.of(
-								Blocks.POPPY.defaultBlockState(),
-								Blocks.AZURE_BLUET.defaultBlockState(),
-								Blocks.OXEYE_DAISY.defaultBlockState(),
-								Blocks.CORNFLOWER.defaultBlockState()
+								Blocks.POPPY.defaultBlockState(), Blocks.AZURE_BLUET.defaultBlockState(), Blocks.OXEYE_DAISY.defaultBlockState(), Blocks.CORNFLOWER.defaultBlockState()
 							)
 						)
 					)

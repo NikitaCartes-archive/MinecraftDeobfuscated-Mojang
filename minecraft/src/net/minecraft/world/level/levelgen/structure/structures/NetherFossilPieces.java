@@ -43,9 +43,7 @@ public class NetherFossilPieces {
 		StructureTemplateManager structureTemplateManager, StructurePieceAccessor structurePieceAccessor, RandomSource randomSource, BlockPos blockPos
 	) {
 		Rotation rotation = Rotation.getRandom(randomSource);
-		structurePieceAccessor.addPiece(
-			new NetherFossilPieces.NetherFossilPiece(structureTemplateManager, Util.getRandom(FOSSILS, randomSource), blockPos, rotation)
-		);
+		structurePieceAccessor.addPiece(new NetherFossilPieces.NetherFossilPiece(structureTemplateManager, Util.getRandom(FOSSILS, randomSource), blockPos, rotation));
 	}
 
 	public static class NetherFossilPiece extends TemplateStructurePiece {
@@ -70,9 +68,7 @@ public class NetherFossilPieces {
 		}
 
 		@Override
-		protected void handleDataMarker(
-			String string, BlockPos blockPos, ServerLevelAccessor serverLevelAccessor, RandomSource randomSource, BoundingBox boundingBox
-		) {
+		protected void handleDataMarker(String string, BlockPos blockPos, ServerLevelAccessor serverLevelAccessor, RandomSource randomSource, BoundingBox boundingBox) {
 		}
 
 		@Override

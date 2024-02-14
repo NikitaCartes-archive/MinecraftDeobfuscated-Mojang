@@ -210,9 +210,7 @@ public class OverlayRecipeComponent implements Renderable, GuiEventListener {
 				if (OverlayRecipeComponent.this.isFurnaceMenu) {
 					resourceLocation = this.isHoveredOrFocused() ? OverlayRecipeComponent.FURNACE_OVERLAY_HIGHLIGHTED_SPRITE : OverlayRecipeComponent.FURNACE_OVERLAY_SPRITE;
 				} else {
-					resourceLocation = this.isHoveredOrFocused()
-						? OverlayRecipeComponent.CRAFTING_OVERLAY_HIGHLIGHTED_SPRITE
-						: OverlayRecipeComponent.CRAFTING_OVERLAY_SPRITE;
+					resourceLocation = this.isHoveredOrFocused() ? OverlayRecipeComponent.CRAFTING_OVERLAY_HIGHLIGHTED_SPRITE : OverlayRecipeComponent.CRAFTING_OVERLAY_SPRITE;
 				}
 			} else if (OverlayRecipeComponent.this.isFurnaceMenu) {
 				resourceLocation = this.isHoveredOrFocused()

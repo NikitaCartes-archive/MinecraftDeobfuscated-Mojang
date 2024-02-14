@@ -343,9 +343,7 @@ public class LevelStorageSource {
 
 	@Nullable
 	private static Tag readLightweightData(Path path) throws IOException {
-		SkipFields skipFields = new SkipFields(
-			new FieldSelector("Data", CompoundTag.TYPE, "Player"), new FieldSelector("Data", CompoundTag.TYPE, "WorldGenSettings")
-		);
+		SkipFields skipFields = new SkipFields(new FieldSelector("Data", CompoundTag.TYPE, "Player"), new FieldSelector("Data", CompoundTag.TYPE, "WorldGenSettings"));
 		NbtIo.parseCompressed(path, skipFields, NbtAccounter.create(104857600L));
 		return skipFields.getResult();
 	}

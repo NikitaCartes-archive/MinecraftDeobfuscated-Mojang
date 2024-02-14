@@ -177,8 +177,7 @@ public abstract class FoliagePlacer {
 			BlockState blockState = treeConfiguration.foliageProvider.getState(randomSource, blockPos);
 			if (blockState.hasProperty(BlockStateProperties.WATERLOGGED)) {
 				blockState = blockState.setValue(
-					BlockStateProperties.WATERLOGGED,
-					Boolean.valueOf(levelSimulatedReader.isFluidAtPosition(blockPos, fluidState -> fluidState.isSourceOfType(Fluids.WATER)))
+					BlockStateProperties.WATERLOGGED, Boolean.valueOf(levelSimulatedReader.isFluidAtPosition(blockPos, fluidState -> fluidState.isSourceOfType(Fluids.WATER)))
 				);
 			}
 

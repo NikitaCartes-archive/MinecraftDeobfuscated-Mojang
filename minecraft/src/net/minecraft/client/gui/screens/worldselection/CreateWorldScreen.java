@@ -56,7 +56,6 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.RegistryLayer;
@@ -236,9 +235,7 @@ public class CreateWorldScreen extends Screen {
 		WorldDimensions.Complete complete = worldCreationContext.selectedDimensions().bake(worldCreationContext.datapackDimensions());
 		LayeredRegistryAccess<RegistryLayer> layeredRegistryAccess = worldCreationContext.worldgenRegistries()
 			.replaceFrom(RegistryLayer.DIMENSIONS, complete.dimensionsRegistryAccess());
-		Lifecycle lifecycle = FeatureFlags.isExperimental(worldCreationContext.dataConfiguration().enabledFeatures())
-			? Lifecycle.experimental()
-			: Lifecycle.stable();
+		Lifecycle lifecycle = FeatureFlags.isExperimental(worldCreationContext.dataConfiguration().enabledFeatures()) ? Lifecycle.experimental() : Lifecycle.stable();
 		Lifecycle lifecycle2 = layeredRegistryAccess.compositeAccess().allRegistriesLifecycle();
 		Lifecycle lifecycle3 = lifecycle2.add(lifecycle);
 		boolean bl = !this.recreated && lifecycle2 == Lifecycle.stable();
@@ -405,10 +402,10 @@ public class CreateWorldScreen extends Screen {
 						throw new IllegalStateException("Needs at least one biome continue");
 					} else {
 						WorldCreationContext worldCreationContext = this.uiState.getSettings();
-						DynamicOps<JsonElement> dynamicOps = RegistryOps.create(JsonOps.INSTANCE, worldCreationContext.worldgenLoadContext());
+						DynamicOps<JsonElement> dynamicOps = worldCreationContext.worldgenLoadContext().createSerializationContext(JsonOps.INSTANCE);
 						DataResult<JsonElement> dataResult = WorldGenSettings.encode(dynamicOps, worldCreationContext.options(), worldCreationContext.selectedDimensions())
 							.setLifecycle(Lifecycle.stable());
-						DynamicOps<JsonElement> dynamicOps2 = RegistryOps.create(JsonOps.INSTANCE, dataLoadContext.datapackWorldgen());
+						DynamicOps<JsonElement> dynamicOps2 = dataLoadContext.datapackWorldgen().createSerializationContext(JsonOps.INSTANCE);
 						WorldGenSettings worldGenSettings = (WorldGenSettings)dataResult.flatMap(jsonElement -> WorldGenSettings.CODEC.parse(dynamicOps2, jsonElement))
 							.getOrThrow(false, Util.prefix("Error parsing worldgen settings after loading data packs: ", LOGGER::error));
 						return new WorldLoader.DataLoadOutput(
@@ -649,9 +646,7 @@ public class CreateWorldScreen extends Screen {
 			);
 			CycleButton<WorldCreationUiState.SelectedGameMode> cycleButton = rowHelper.addChild(
 				CycleButton.builder(selectedGameMode -> selectedGameMode.displayName)
-					.withValues(
-						WorldCreationUiState.SelectedGameMode.SURVIVAL, WorldCreationUiState.SelectedGameMode.HARDCORE, WorldCreationUiState.SelectedGameMode.CREATIVE
-					)
+					.withValues(WorldCreationUiState.SelectedGameMode.SURVIVAL, WorldCreationUiState.SelectedGameMode.HARDCORE, WorldCreationUiState.SelectedGameMode.CREATIVE)
 					.create(
 						0, 0, 210, 20, CreateWorldScreen.GAME_MODEL_LABEL, (cycleButtonx, selectedGameMode) -> CreateWorldScreen.this.uiState.setGameMode(selectedGameMode)
 					),
@@ -773,9 +768,7 @@ public class CreateWorldScreen extends Screen {
 
 				cycleButton.active = CreateWorldScreen.this.uiState.getWorldType().preset() != null;
 			});
-			this.customizeTypeButton = rowHelper.addChild(
-				Button.builder(Component.translatable("selectWorld.customizeType"), button -> this.openPresetEditor()).build()
-			);
+			this.customizeTypeButton = rowHelper.addChild(Button.builder(Component.translatable("selectWorld.customizeType"), button -> this.openPresetEditor()).build());
 			CreateWorldScreen.this.uiState
 				.addListener(worldCreationUiState -> this.customizeTypeButton.active = !worldCreationUiState.isDebug() && worldCreationUiState.getPresetEditor() != null);
 			this.seedEdit = new EditBox(CreateWorldScreen.this.font, 308, 20, Component.translatable("selectWorld.enterSeed")) {

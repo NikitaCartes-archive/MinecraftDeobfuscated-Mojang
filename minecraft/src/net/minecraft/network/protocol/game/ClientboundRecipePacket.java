@@ -20,10 +20,7 @@ public class ClientboundRecipePacket implements Packet<ClientGamePacketListener>
 	private final RecipeBookSettings bookSettings;
 
 	public ClientboundRecipePacket(
-		ClientboundRecipePacket.State state,
-		Collection<ResourceLocation> collection,
-		Collection<ResourceLocation> collection2,
-		RecipeBookSettings recipeBookSettings
+		ClientboundRecipePacket.State state, Collection<ResourceLocation> collection, Collection<ResourceLocation> collection2, RecipeBookSettings recipeBookSettings
 	) {
 		this.state = state;
 		this.recipes = ImmutableList.copyOf(collection);

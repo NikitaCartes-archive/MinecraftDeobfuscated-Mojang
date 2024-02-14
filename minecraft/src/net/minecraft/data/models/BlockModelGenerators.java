@@ -660,9 +660,7 @@ public class BlockModelGenerators {
 			);
 	}
 
-	static BlockStateGenerator createStairs(
-		Block block, ResourceLocation resourceLocation, ResourceLocation resourceLocation2, ResourceLocation resourceLocation3
-	) {
+	static BlockStateGenerator createStairs(Block block, ResourceLocation resourceLocation, ResourceLocation resourceLocation2, ResourceLocation resourceLocation3) {
 		return MultiVariantGenerator.multiVariant(block)
 			.with(
 				PropertyDispatch.properties(BlockStateProperties.HORIZONTAL_FACING, BlockStateProperties.HALF, BlockStateProperties.STAIRS_SHAPE)
@@ -1215,9 +1213,7 @@ public class BlockModelGenerators {
 			.with(
 				PropertyDispatch.property(BlockStateProperties.AXIS)
 					.select(Direction.Axis.Y, Variant.variant().with(VariantProperties.MODEL, resourceLocation))
-					.select(
-						Direction.Axis.Z, Variant.variant().with(VariantProperties.MODEL, resourceLocation2).with(VariantProperties.X_ROT, VariantProperties.Rotation.R90)
-					)
+					.select(Direction.Axis.Z, Variant.variant().with(VariantProperties.MODEL, resourceLocation2).with(VariantProperties.X_ROT, VariantProperties.Rotation.R90))
 					.select(
 						Direction.Axis.X,
 						Variant.variant()
@@ -1581,12 +1577,10 @@ public class BlockModelGenerators {
 								RailShape.SOUTH_WEST, Variant.variant().with(VariantProperties.MODEL, resourceLocation2).with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90)
 							)
 							.select(
-								RailShape.NORTH_WEST,
-								Variant.variant().with(VariantProperties.MODEL, resourceLocation2).with(VariantProperties.Y_ROT, VariantProperties.Rotation.R180)
+								RailShape.NORTH_WEST, Variant.variant().with(VariantProperties.MODEL, resourceLocation2).with(VariantProperties.Y_ROT, VariantProperties.Rotation.R180)
 							)
 							.select(
-								RailShape.NORTH_EAST,
-								Variant.variant().with(VariantProperties.MODEL, resourceLocation2).with(VariantProperties.Y_ROT, VariantProperties.Rotation.R270)
+								RailShape.NORTH_EAST, Variant.variant().with(VariantProperties.MODEL, resourceLocation2).with(VariantProperties.Y_ROT, VariantProperties.Rotation.R270)
 							)
 					)
 			);
@@ -2187,9 +2181,7 @@ public class BlockModelGenerators {
 
 	private void createSmoothStoneSlab() {
 		TextureMapping textureMapping = TextureMapping.cube(Blocks.SMOOTH_STONE);
-		TextureMapping textureMapping2 = TextureMapping.column(
-			TextureMapping.getBlockTexture(Blocks.SMOOTH_STONE_SLAB, "_side"), textureMapping.get(TextureSlot.TOP)
-		);
+		TextureMapping textureMapping2 = TextureMapping.column(TextureMapping.getBlockTexture(Blocks.SMOOTH_STONE_SLAB, "_side"), textureMapping.get(TextureSlot.TOP));
 		ResourceLocation resourceLocation = ModelTemplates.SLAB_BOTTOM.create(Blocks.SMOOTH_STONE_SLAB, textureMapping2, this.modelOutput);
 		ResourceLocation resourceLocation2 = ModelTemplates.SLAB_TOP.create(Blocks.SMOOTH_STONE_SLAB, textureMapping2, this.modelOutput);
 		ResourceLocation resourceLocation3 = ModelTemplates.CUBE_COLUMN.createWithOverride(Blocks.SMOOTH_STONE_SLAB, "_double", textureMapping2, this.modelOutput);
@@ -2533,9 +2525,7 @@ public class BlockModelGenerators {
 							.select(
 								Direction.SOUTH, Variant.variant().with(VariantProperties.MODEL, resourceLocation).with(VariantProperties.Y_ROT, VariantProperties.Rotation.R180)
 							)
-							.select(
-								Direction.WEST, Variant.variant().with(VariantProperties.MODEL, resourceLocation).with(VariantProperties.Y_ROT, VariantProperties.Rotation.R270)
-							)
+							.select(Direction.WEST, Variant.variant().with(VariantProperties.MODEL, resourceLocation).with(VariantProperties.Y_ROT, VariantProperties.Rotation.R270))
 					)
 			);
 	}
@@ -3019,20 +3009,16 @@ public class BlockModelGenerators {
 					.with(
 						PropertyDispatch.property(BlockStateProperties.AGE_3)
 							.select(
-								0,
-								Variant.variant().with(VariantProperties.MODEL, this.createSuffixedVariant(Blocks.FROSTED_ICE, "_0", ModelTemplates.CUBE_ALL, TextureMapping::cube))
+								0, Variant.variant().with(VariantProperties.MODEL, this.createSuffixedVariant(Blocks.FROSTED_ICE, "_0", ModelTemplates.CUBE_ALL, TextureMapping::cube))
 							)
 							.select(
-								1,
-								Variant.variant().with(VariantProperties.MODEL, this.createSuffixedVariant(Blocks.FROSTED_ICE, "_1", ModelTemplates.CUBE_ALL, TextureMapping::cube))
+								1, Variant.variant().with(VariantProperties.MODEL, this.createSuffixedVariant(Blocks.FROSTED_ICE, "_1", ModelTemplates.CUBE_ALL, TextureMapping::cube))
 							)
 							.select(
-								2,
-								Variant.variant().with(VariantProperties.MODEL, this.createSuffixedVariant(Blocks.FROSTED_ICE, "_2", ModelTemplates.CUBE_ALL, TextureMapping::cube))
+								2, Variant.variant().with(VariantProperties.MODEL, this.createSuffixedVariant(Blocks.FROSTED_ICE, "_2", ModelTemplates.CUBE_ALL, TextureMapping::cube))
 							)
 							.select(
-								3,
-								Variant.variant().with(VariantProperties.MODEL, this.createSuffixedVariant(Blocks.FROSTED_ICE, "_3", ModelTemplates.CUBE_ALL, TextureMapping::cube))
+								3, Variant.variant().with(VariantProperties.MODEL, this.createSuffixedVariant(Blocks.FROSTED_ICE, "_3", ModelTemplates.CUBE_ALL, TextureMapping::cube))
 							)
 					)
 			);
@@ -3104,9 +3090,7 @@ public class BlockModelGenerators {
 						PropertyDispatch.property(BlockStateProperties.FACING_HOPPER)
 							.select(Direction.DOWN, Variant.variant().with(VariantProperties.MODEL, resourceLocation))
 							.select(Direction.NORTH, Variant.variant().with(VariantProperties.MODEL, resourceLocation2))
-							.select(
-								Direction.EAST, Variant.variant().with(VariantProperties.MODEL, resourceLocation2).with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90)
-							)
+							.select(Direction.EAST, Variant.variant().with(VariantProperties.MODEL, resourceLocation2).with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90))
 							.select(
 								Direction.SOUTH, Variant.variant().with(VariantProperties.MODEL, resourceLocation2).with(VariantProperties.Y_ROT, VariantProperties.Rotation.R180)
 							)
@@ -3375,8 +3359,7 @@ public class BlockModelGenerators {
 							.select(
 								false,
 								PistonType.DEFAULT,
-								Variant.variant()
-									.with(VariantProperties.MODEL, ModelTemplates.PISTON_HEAD.createWithSuffix(Blocks.PISTON, "_head", textureMapping3, this.modelOutput))
+								Variant.variant().with(VariantProperties.MODEL, ModelTemplates.PISTON_HEAD.createWithSuffix(Blocks.PISTON, "_head", textureMapping3, this.modelOutput))
 							)
 							.select(
 								false,
@@ -3792,12 +3775,7 @@ public class BlockModelGenerators {
 							)
 							.select(false, true, true, true, true, Variant.variant().with(VariantProperties.MODEL, ModelLocationUtils.getModelLocation(Blocks.TRIPWIRE, "_nsew")))
 							.select(
-								true,
-								false,
-								false,
-								false,
-								false,
-								Variant.variant().with(VariantProperties.MODEL, ModelLocationUtils.getModelLocation(Blocks.TRIPWIRE, "_attached_ns"))
+								true, false, false, false, false, Variant.variant().with(VariantProperties.MODEL, ModelLocationUtils.getModelLocation(Blocks.TRIPWIRE, "_attached_ns"))
 							)
 							.select(
 								true, false, true, false, false, Variant.variant().with(VariantProperties.MODEL, ModelLocationUtils.getModelLocation(Blocks.TRIPWIRE, "_attached_n"))
@@ -4959,8 +4937,7 @@ public class BlockModelGenerators {
 				i,
 				Variant.variant()
 					.with(
-						VariantProperties.MODEL,
-						ModelTemplates.PARTICLE_ONLY.createWithSuffix(Blocks.LIGHT, string, TextureMapping.particle(resourceLocation), this.modelOutput)
+						VariantProperties.MODEL, ModelTemplates.PARTICLE_ONLY.createWithSuffix(Blocks.LIGHT, string, TextureMapping.particle(resourceLocation), this.modelOutput)
 					)
 			);
 			ModelTemplates.FLAT_ITEM.create(ModelLocationUtils.getModelLocation(Items.LIGHT, string), TextureMapping.layer0(resourceLocation), this.modelOutput);
@@ -5260,8 +5237,7 @@ public class BlockModelGenerators {
 		public BlockModelGenerators.WoodProvider logWithHorizontal(Block block) {
 			ResourceLocation resourceLocation = ModelTemplates.CUBE_COLUMN.create(block, this.logMapping, BlockModelGenerators.this.modelOutput);
 			ResourceLocation resourceLocation2 = ModelTemplates.CUBE_COLUMN_HORIZONTAL.create(block, this.logMapping, BlockModelGenerators.this.modelOutput);
-			BlockModelGenerators.this.blockStateOutput
-				.accept(BlockModelGenerators.createRotatedPillarWithHorizontalVariant(block, resourceLocation, resourceLocation2));
+			BlockModelGenerators.this.blockStateOutput.accept(BlockModelGenerators.createRotatedPillarWithHorizontalVariant(block, resourceLocation, resourceLocation2));
 			return this;
 		}
 

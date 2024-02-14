@@ -50,9 +50,7 @@ public class DragonEggBlock extends FallingBlock {
 
 		for(int i = 0; i < 1000; ++i) {
 			BlockPos blockPos2 = blockPos.offset(
-				level.random.nextInt(16) - level.random.nextInt(16),
-				level.random.nextInt(8) - level.random.nextInt(8),
-				level.random.nextInt(16) - level.random.nextInt(16)
+				level.random.nextInt(16) - level.random.nextInt(16), level.random.nextInt(8) - level.random.nextInt(8), level.random.nextInt(16) - level.random.nextInt(16)
 			);
 			if (level.getBlockState(blockPos2).isAir() && worldBorder.isWithinBounds(blockPos2)) {
 				if (level.isClientSide) {

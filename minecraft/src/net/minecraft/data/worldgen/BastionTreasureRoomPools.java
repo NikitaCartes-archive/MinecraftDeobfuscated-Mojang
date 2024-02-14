@@ -139,9 +139,7 @@ public class BastionTreasureRoomPools {
 			bootstrapContext,
 			"bastion/treasure/entrances",
 			new StructureTemplatePool(
-				holder6,
-				ImmutableList.of(Pair.of(StructurePoolElement.single("bastion/treasure/entrances/entrance_0", holder), 1)),
-				StructureTemplatePool.Projection.RIGID
+				holder6, ImmutableList.of(Pair.of(StructurePoolElement.single("bastion/treasure/entrances/entrance_0", holder), 1)), StructureTemplatePool.Projection.RIGID
 			)
 		);
 		Pools.register(

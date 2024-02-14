@@ -202,12 +202,12 @@ public interface ByteBufCodecs {
 		return new StreamCodec<RegistryFriendlyByteBuf, T>() {
 			public T decode(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
 				Tag tag = ByteBufCodecs.TAG.decode(registryFriendlyByteBuf);
-				RegistryOps<Tag> registryOps = RegistryOps.create(NbtOps.INSTANCE, registryFriendlyByteBuf.registryAccess());
+				RegistryOps<Tag> registryOps = registryFriendlyByteBuf.registryAccess().createSerializationContext(NbtOps.INSTANCE);
 				return Util.getOrThrow(codec.parse(registryOps, tag), string -> new DecoderException("Failed to decode: " + string + " " + tag));
 			}
 
 			public void encode(RegistryFriendlyByteBuf registryFriendlyByteBuf, T object) {
-				RegistryOps<Tag> registryOps = RegistryOps.create(NbtOps.INSTANCE, registryFriendlyByteBuf.registryAccess());
+				RegistryOps<Tag> registryOps = registryFriendlyByteBuf.registryAccess().createSerializationContext(NbtOps.INSTANCE);
 				Tag tag = Util.getOrThrow(codec.encodeStart(registryOps, object), string -> new EncoderException("Failed to encode: " + string + " " + object));
 				ByteBufCodecs.TAG.encode(registryFriendlyByteBuf, tag);
 			}

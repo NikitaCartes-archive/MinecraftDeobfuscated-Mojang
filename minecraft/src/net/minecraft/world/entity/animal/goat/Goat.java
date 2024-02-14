@@ -50,7 +50,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.phys.Vec3;
 
 public class Goat extends Animal {
@@ -95,8 +95,8 @@ public class Goat extends Animal {
 	public Goat(EntityType<? extends Goat> entityType, Level level) {
 		super(entityType, level);
 		this.getNavigation().setCanFloat(true);
-		this.setPathfindingMalus(BlockPathTypes.POWDER_SNOW, -1.0F);
-		this.setPathfindingMalus(BlockPathTypes.DANGER_POWDER_SNOW, -1.0F);
+		this.setPathfindingMalus(PathType.POWDER_SNOW, -1.0F);
+		this.setPathfindingMalus(PathType.DANGER_POWDER_SNOW, -1.0F);
 	}
 
 	public ItemStack createHorn() {

@@ -36,9 +36,7 @@ public class WoodlandMansionStructure extends Structure {
 			);
 	}
 
-	private void generatePieces(
-		StructurePiecesBuilder structurePiecesBuilder, Structure.GenerationContext generationContext, BlockPos blockPos, Rotation rotation
-	) {
+	private void generatePieces(StructurePiecesBuilder structurePiecesBuilder, Structure.GenerationContext generationContext, BlockPos blockPos, Rotation rotation) {
 		List<WoodlandMansionPieces.WoodlandMansionPiece> list = Lists.<WoodlandMansionPieces.WoodlandMansionPiece>newLinkedList();
 		WoodlandMansionPieces.generateMansion(generationContext.structureTemplateManager(), blockPos, rotation, list, generationContext.random());
 		list.forEach(structurePiecesBuilder::addPiece);

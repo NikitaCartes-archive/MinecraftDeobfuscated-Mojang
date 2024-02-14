@@ -164,9 +164,7 @@ public class ServerEntity {
 					}
 				}
 
-				if ((this.trackDelta || this.entity.hasImpulse || this.entity instanceof LivingEntity && ((LivingEntity)this.entity).isFallFlying()) && this.tickCount > 0
-					)
-				 {
+				if ((this.trackDelta || this.entity.hasImpulse || this.entity instanceof LivingEntity && ((LivingEntity)this.entity).isFallFlying()) && this.tickCount > 0) {
 					Vec3 vec32 = this.entity.getDeltaMovement();
 					double d = vec32.distanceToSqr(this.ap);
 					if (d > 1.0E-7 || d > 0.0 && vec32.lengthSqr() == 0.0) {

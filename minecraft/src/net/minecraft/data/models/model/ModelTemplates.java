@@ -55,9 +55,7 @@ public class ModelTemplates {
 	public static final ModelTemplate WALL_INVENTORY = create("wall_inventory", "_inventory", TextureSlot.WALL);
 	public static final ModelTemplate CUSTOM_FENCE_GATE_CLOSED = create("template_custom_fence_gate", TextureSlot.TEXTURE, TextureSlot.PARTICLE);
 	public static final ModelTemplate CUSTOM_FENCE_GATE_OPEN = create("template_custom_fence_gate_open", "_open", TextureSlot.TEXTURE, TextureSlot.PARTICLE);
-	public static final ModelTemplate CUSTOM_FENCE_GATE_WALL_CLOSED = create(
-		"template_custom_fence_gate_wall", "_wall", TextureSlot.TEXTURE, TextureSlot.PARTICLE
-	);
+	public static final ModelTemplate CUSTOM_FENCE_GATE_WALL_CLOSED = create("template_custom_fence_gate_wall", "_wall", TextureSlot.TEXTURE, TextureSlot.PARTICLE);
 	public static final ModelTemplate CUSTOM_FENCE_GATE_WALL_OPEN = create(
 		"template_custom_fence_gate_wall_open", "_wall_open", TextureSlot.TEXTURE, TextureSlot.PARTICLE
 	);
@@ -105,9 +103,7 @@ public class ModelTemplates {
 	public static final ModelTemplate STAINED_GLASS_PANE_SIDE = create("template_glass_pane_side", "_side", TextureSlot.PANE, TextureSlot.EDGE);
 	public static final ModelTemplate STAINED_GLASS_PANE_SIDE_ALT = create("template_glass_pane_side_alt", "_side_alt", TextureSlot.PANE, TextureSlot.EDGE);
 	public static final ModelTemplate COMMAND_BLOCK = create("template_command_block", TextureSlot.FRONT, TextureSlot.BACK, TextureSlot.SIDE);
-	public static final ModelTemplate CHISELED_BOOKSHELF_SLOT_TOP_LEFT = create(
-		"template_chiseled_bookshelf_slot_top_left", "_slot_top_left", TextureSlot.TEXTURE
-	);
+	public static final ModelTemplate CHISELED_BOOKSHELF_SLOT_TOP_LEFT = create("template_chiseled_bookshelf_slot_top_left", "_slot_top_left", TextureSlot.TEXTURE);
 	public static final ModelTemplate CHISELED_BOOKSHELF_SLOT_TOP_MID = create("template_chiseled_bookshelf_slot_top_mid", "_slot_top_mid", TextureSlot.TEXTURE);
 	public static final ModelTemplate CHISELED_BOOKSHELF_SLOT_TOP_RIGHT = create(
 		"template_chiseled_bookshelf_slot_top_right", "_slot_top_right", TextureSlot.TEXTURE

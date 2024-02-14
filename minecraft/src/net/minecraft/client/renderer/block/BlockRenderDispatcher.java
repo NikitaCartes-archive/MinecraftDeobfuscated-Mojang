@@ -90,9 +90,7 @@ public class BlockRenderDispatcher implements ResourceManagerReloadListener {
 		}
 	}
 
-	public void renderLiquid(
-		BlockPos blockPos, BlockAndTintGetter blockAndTintGetter, VertexConsumer vertexConsumer, BlockState blockState, FluidState fluidState
-	) {
+	public void renderLiquid(BlockPos blockPos, BlockAndTintGetter blockAndTintGetter, VertexConsumer vertexConsumer, BlockState blockState, FluidState fluidState) {
 		try {
 			this.liquidBlockRenderer.tesselate(blockAndTintGetter, blockPos, vertexConsumer, blockState, fluidState);
 		} catch (Throwable var9) {

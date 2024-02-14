@@ -239,15 +239,7 @@ public class BlockModel implements UnbakedModel {
 		ResourceLocation resourceLocation
 	) {
 		return FACE_BAKERY.bakeQuad(
-			blockElement.from,
-			blockElement.to,
-			blockElementFace,
-			textureAtlasSprite,
-			direction,
-			modelState,
-			blockElement.rotation,
-			blockElement.shade,
-			resourceLocation
+			blockElement.from, blockElement.to, blockElementFace, textureAtlasSprite, direction, modelState, blockElement.rotation, blockElement.shade, resourceLocation
 		);
 	}
 

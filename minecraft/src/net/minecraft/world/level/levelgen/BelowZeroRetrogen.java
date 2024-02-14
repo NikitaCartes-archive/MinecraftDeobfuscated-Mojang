@@ -67,9 +67,7 @@ public final class BelowZeroRetrogen {
 	@Nullable
 	public static BelowZeroRetrogen read(CompoundTag compoundTag) {
 		ChunkStatus chunkStatus = ChunkStatus.byName(compoundTag.getString("target_status"));
-		return chunkStatus == ChunkStatus.EMPTY
-			? null
-			: new BelowZeroRetrogen(chunkStatus, Optional.of(BitSet.valueOf(compoundTag.getLongArray("missing_bedrock"))));
+		return chunkStatus == ChunkStatus.EMPTY ? null : new BelowZeroRetrogen(chunkStatus, Optional.of(BitSet.valueOf(compoundTag.getLongArray("missing_bedrock"))));
 	}
 
 	public static void replaceOldBedrock(ProtoChunk protoChunk) {

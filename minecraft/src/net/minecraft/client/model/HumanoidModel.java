@@ -84,9 +84,7 @@ public class HumanoidModel<T extends LivingEntity> extends AgeableListModel<T> i
 			PartPose.offset(5.0F, 2.0F + f, 0.0F)
 		);
 		partDefinition.addOrReplaceChild(
-			"right_leg",
-			CubeListBuilder.create().texOffs(0, 16).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 12.0F, 4.0F, cubeDeformation),
-			PartPose.offset(-1.9F, 12.0F + f, 0.0F)
+			"right_leg", CubeListBuilder.create().texOffs(0, 16).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 12.0F, 4.0F, cubeDeformation), PartPose.offset(-1.9F, 12.0F + f, 0.0F)
 		);
 		partDefinition.addOrReplaceChild(
 			"left_leg",

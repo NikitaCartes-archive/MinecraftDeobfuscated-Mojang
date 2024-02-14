@@ -59,9 +59,7 @@ public class ObjectiveArgument implements ArgumentType<String> {
 		if (object instanceof CommandSourceStack commandSourceStack) {
 			return SharedSuggestionProvider.suggest(commandSourceStack.getServer().getScoreboard().getObjectiveNames(), suggestionsBuilder);
 		} else {
-			return object instanceof SharedSuggestionProvider sharedSuggestionProvider
-				? sharedSuggestionProvider.customSuggestion(commandContext)
-				: Suggestions.empty();
+			return object instanceof SharedSuggestionProvider sharedSuggestionProvider ? sharedSuggestionProvider.customSuggestion(commandContext) : Suggestions.empty();
 		}
 	}
 

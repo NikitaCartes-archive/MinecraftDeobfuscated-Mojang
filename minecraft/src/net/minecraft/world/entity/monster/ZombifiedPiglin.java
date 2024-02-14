@@ -37,7 +37,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.phys.AABB;
 
 public class ZombifiedPiglin extends Zombie implements NeutralMob {
@@ -58,7 +58,7 @@ public class ZombifiedPiglin extends Zombie implements NeutralMob {
 
 	public ZombifiedPiglin(EntityType<? extends ZombifiedPiglin> entityType, Level level) {
 		super(entityType, level);
-		this.setPathfindingMalus(BlockPathTypes.LAVA, 8.0F);
+		this.setPathfindingMalus(PathType.LAVA, 8.0F);
 	}
 
 	@Override

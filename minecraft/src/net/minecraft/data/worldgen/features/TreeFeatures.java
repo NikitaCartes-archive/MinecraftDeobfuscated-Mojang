@@ -460,9 +460,7 @@ public class TreeFeatures {
 			Feature.TREE,
 			new TreeConfiguration.TreeConfigurationBuilder(
 					BlockStateProvider.simple(Blocks.MANGROVE_LOG),
-					new UpwardsBranchingTrunkPlacer(
-						2, 1, 4, UniformInt.of(1, 4), 0.5F, UniformInt.of(0, 1), holderGetter.getOrThrow(BlockTags.MANGROVE_LOGS_CAN_GROW_THROUGH)
-					),
+					new UpwardsBranchingTrunkPlacer(2, 1, 4, UniformInt.of(1, 4), 0.5F, UniformInt.of(0, 1), holderGetter.getOrThrow(BlockTags.MANGROVE_LOGS_CAN_GROW_THROUGH)),
 					BlockStateProvider.simple(Blocks.MANGROVE_LEAVES),
 					new RandomSpreadFoliagePlacer(ConstantInt.of(3), ConstantInt.of(0), ConstantInt.of(2), 70),
 					Optional.of(
@@ -509,9 +507,7 @@ public class TreeFeatures {
 			Feature.TREE,
 			new TreeConfiguration.TreeConfigurationBuilder(
 					BlockStateProvider.simple(Blocks.MANGROVE_LOG),
-					new UpwardsBranchingTrunkPlacer(
-						4, 1, 9, UniformInt.of(1, 6), 0.5F, UniformInt.of(0, 1), holderGetter.getOrThrow(BlockTags.MANGROVE_LOGS_CAN_GROW_THROUGH)
-					),
+					new UpwardsBranchingTrunkPlacer(4, 1, 9, UniformInt.of(1, 6), 0.5F, UniformInt.of(0, 1), holderGetter.getOrThrow(BlockTags.MANGROVE_LOGS_CAN_GROW_THROUGH)),
 					BlockStateProvider.simple(Blocks.MANGROVE_LEAVES),
 					new RandomSpreadFoliagePlacer(ConstantInt.of(3), ConstantInt.of(0), ConstantInt.of(2), 70),
 					Optional.of(

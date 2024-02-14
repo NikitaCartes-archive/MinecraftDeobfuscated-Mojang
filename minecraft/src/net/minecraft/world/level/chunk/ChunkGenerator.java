@@ -127,9 +127,7 @@ public abstract class ChunkGenerator {
 	);
 
 	@Nullable
-	public Pair<BlockPos, Holder<Structure>> findNearestMapStructure(
-		ServerLevel serverLevel, HolderSet<Structure> holderSet, BlockPos blockPos, int i, boolean bl
-	) {
+	public Pair<BlockPos, Holder<Structure>> findNearestMapStructure(ServerLevel serverLevel, HolderSet<Structure> holderSet, BlockPos blockPos, int i, boolean bl) {
 		ChunkGeneratorStructureState chunkGeneratorStructureState = serverLevel.getChunkSource().getGeneratorState();
 		Map<StructurePlacement, Set<Holder<Structure>>> map = new Object2ObjectArrayMap<>();
 

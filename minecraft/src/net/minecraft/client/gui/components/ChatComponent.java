@@ -440,9 +440,7 @@ public class ChatComponent {
 	}
 
 	public int getHeight() {
-		return getHeight(
-			this.isChatFocused() ? (Double)this.minecraft.options.chatHeightFocused().get() : (Double)this.minecraft.options.chatHeightUnfocused().get()
-		);
+		return getHeight(this.isChatFocused() ? (Double)this.minecraft.options.chatHeightFocused().get() : (Double)this.minecraft.options.chatHeightUnfocused().get());
 	}
 
 	public double getScale() {

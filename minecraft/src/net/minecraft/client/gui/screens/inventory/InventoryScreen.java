@@ -39,9 +39,7 @@ public class InventoryScreen extends EffectRenderingInventoryScreen<InventoryMen
 		if (this.minecraft.gameMode.hasInfiniteItems()) {
 			this.minecraft
 				.setScreen(
-					new CreativeModeInventoryScreen(
-						this.minecraft.player, this.minecraft.player.connection.enabledFeatures(), this.minecraft.options.operatorItemsTab().get()
-					)
+					new CreativeModeInventoryScreen(this.minecraft.player, this.minecraft.player.connection.enabledFeatures(), this.minecraft.options.operatorItemsTab().get())
 				);
 		} else {
 			this.recipeBookComponent.tick();
@@ -53,9 +51,7 @@ public class InventoryScreen extends EffectRenderingInventoryScreen<InventoryMen
 		if (this.minecraft.gameMode.hasInfiniteItems()) {
 			this.minecraft
 				.setScreen(
-					new CreativeModeInventoryScreen(
-						this.minecraft.player, this.minecraft.player.connection.enabledFeatures(), this.minecraft.options.operatorItemsTab().get()
-					)
+					new CreativeModeInventoryScreen(this.minecraft.player, this.minecraft.player.connection.enabledFeatures(), this.minecraft.options.operatorItemsTab().get())
 				);
 		} else {
 			super.init();
@@ -136,14 +132,7 @@ public class InventoryScreen extends EffectRenderingInventoryScreen<InventoryMen
 	}
 
 	public static void renderEntityInInventory(
-		GuiGraphics guiGraphics,
-		float f,
-		float g,
-		float h,
-		Vector3f vector3f,
-		Quaternionf quaternionf,
-		@Nullable Quaternionf quaternionf2,
-		LivingEntity livingEntity
+		GuiGraphics guiGraphics, float f, float g, float h, Vector3f vector3f, Quaternionf quaternionf, @Nullable Quaternionf quaternionf2, LivingEntity livingEntity
 	) {
 		guiGraphics.pose().pushPose();
 		guiGraphics.pose().translate((double)f, (double)g, 50.0);

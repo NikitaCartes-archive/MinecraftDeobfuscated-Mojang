@@ -72,9 +72,7 @@ public interface StructureSets {
 		);
 		bootstrapContext.register(
 			BuiltinStructureSets.OCEAN_MONUMENTS,
-			new StructureSet(
-				holderGetter.getOrThrow(BuiltinStructures.OCEAN_MONUMENT), new RandomSpreadStructurePlacement(32, 5, RandomSpreadType.TRIANGULAR, 10387313)
-			)
+			new StructureSet(holderGetter.getOrThrow(BuiltinStructures.OCEAN_MONUMENT), new RandomSpreadStructurePlacement(32, 5, RandomSpreadType.TRIANGULAR, 10387313))
 		);
 		bootstrapContext.register(
 			BuiltinStructureSets.WOODLAND_MANSIONS,
@@ -121,8 +119,7 @@ public interface StructureSets {
 			BuiltinStructureSets.SHIPWRECKS,
 			new StructureSet(
 				List.of(
-					StructureSet.entry(holderGetter.getOrThrow(BuiltinStructures.SHIPWRECK)),
-					StructureSet.entry(holderGetter.getOrThrow(BuiltinStructures.SHIPWRECK_BEACHED))
+					StructureSet.entry(holderGetter.getOrThrow(BuiltinStructures.SHIPWRECK)), StructureSet.entry(holderGetter.getOrThrow(BuiltinStructures.SHIPWRECK_BEACHED))
 				),
 				new RandomSpreadStructurePlacement(24, 4, RandomSpreadType.LINEAR, 165745295)
 			)

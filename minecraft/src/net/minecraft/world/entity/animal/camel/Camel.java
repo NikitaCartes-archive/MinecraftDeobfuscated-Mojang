@@ -409,14 +409,7 @@ public class Camel extends AbstractHorse implements PlayerRideableJumping, Saddl
 					if (soundEvent != null) {
 						this.level()
 							.playSound(
-								null,
-								this.getX(),
-								this.getY(),
-								this.getZ(),
-								soundEvent,
-								this.getSoundSource(),
-								1.0F,
-								1.0F + (this.random.nextFloat() - this.random.nextFloat()) * 0.2F
+								null, this.getX(), this.getY(), this.getZ(), soundEvent, this.getSoundSource(), 1.0F, 1.0F + (this.random.nextFloat() - this.random.nextFloat()) * 0.2F
 							);
 					}
 				}

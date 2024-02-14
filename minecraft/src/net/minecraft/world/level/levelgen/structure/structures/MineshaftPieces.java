@@ -135,9 +135,7 @@ public class MineshaftPieces {
 		}
 
 		@Nullable
-		public static BoundingBox findCorridorSize(
-			StructurePieceAccessor structurePieceAccessor, RandomSource randomSource, int i, int j, int k, Direction direction
-		) {
+		public static BoundingBox findCorridorSize(StructurePieceAccessor structurePieceAccessor, RandomSource randomSource, int i, int j, int k, Direction direction) {
 			for(int l = randomSource.nextInt(3) + 2; l > 0; --l) {
 				int m = l * 5;
 
@@ -347,9 +345,7 @@ public class MineshaftPieces {
 		) {
 			BlockPos blockPos = this.getWorldPos(i, j, k);
 			if (boundingBox.isInside(blockPos) && worldGenLevel.getBlockState(blockPos).isAir() && !worldGenLevel.getBlockState(blockPos.below()).isAir()) {
-				BlockState blockState = Blocks.RAIL
-					.defaultBlockState()
-					.setValue(RailBlock.SHAPE, randomSource.nextBoolean() ? RailShape.NORTH_SOUTH : RailShape.EAST_WEST);
+				BlockState blockState = Blocks.RAIL.defaultBlockState().setValue(RailBlock.SHAPE, randomSource.nextBoolean() ? RailShape.NORTH_SOUTH : RailShape.EAST_WEST);
 				this.placeBlock(worldGenLevel, blockState, i, j, k, boundingBox);
 				MinecartChest minecartChest = new MinecartChest(
 					worldGenLevel.getLevel(), (double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5
@@ -549,9 +545,9 @@ public class MineshaftPieces {
 		}
 
 		private void maybePlaceCobWeb(WorldGenLevel worldGenLevel, BoundingBox boundingBox, RandomSource randomSource, float f, int i, int j, int k) {
-			if (this.isInterior(worldGenLevel, i, j, k, boundingBox)
-				&& randomSource.nextFloat() < f
-				&& this.hasSturdyNeighbours(worldGenLevel, boundingBox, i, j, k, 2)) {
+			if (this.isInterior(worldGenLevel, i, j, k, boundingBox) && randomSource.nextFloat() < f && this.hasSturdyNeighbours(worldGenLevel, boundingBox, i, j, k, 2)
+				)
+			 {
 				this.placeBlock(worldGenLevel, Blocks.COBWEB.defaultBlockState(), i, j, k, boundingBox);
 			}
 		}

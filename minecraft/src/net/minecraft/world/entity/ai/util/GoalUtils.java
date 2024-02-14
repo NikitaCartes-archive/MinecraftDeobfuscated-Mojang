@@ -35,7 +35,7 @@ public class GoalUtils {
 	}
 
 	public static boolean hasMalus(PathfinderMob pathfinderMob, BlockPos blockPos) {
-		return pathfinderMob.getPathfindingMalus(WalkNodeEvaluator.getBlockPathTypeStatic(pathfinderMob.level(), blockPos.mutable())) != 0.0F;
+		return pathfinderMob.getPathfindingMalus(WalkNodeEvaluator.getPathTypeStatic(pathfinderMob.level(), blockPos.mutable())) != 0.0F;
 	}
 
 	public static boolean isSolid(PathfinderMob pathfinderMob, BlockPos blockPos) {

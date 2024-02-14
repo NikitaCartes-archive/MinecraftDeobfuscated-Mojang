@@ -12,9 +12,7 @@ public abstract class FloatProvider implements SampledFloat {
 	);
 	public static final Codec<FloatProvider> CODEC = CONSTANT_OR_DISPATCH_CODEC.xmap(
 		either -> either.map(ConstantFloat::of, floatProvider -> floatProvider),
-		floatProvider -> floatProvider.getType() == FloatProviderType.CONSTANT
-				? Either.left(((ConstantFloat)floatProvider).getValue())
-				: Either.right(floatProvider)
+		floatProvider -> floatProvider.getType() == FloatProviderType.CONSTANT ? Either.left(((ConstantFloat)floatProvider).getValue()) : Either.right(floatProvider)
 	);
 
 	public static Codec<FloatProvider> codec(float f, float g) {

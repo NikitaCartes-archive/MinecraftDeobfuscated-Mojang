@@ -60,9 +60,9 @@ import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.AmphibiousNodeEvaluator;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.level.pathfinder.Node;
 import net.minecraft.world.level.pathfinder.PathFinder;
+import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.phys.Vec3;
 
 public class Frog extends Animal implements VariantHolder<FrogVariant> {
@@ -106,8 +106,8 @@ public class Frog extends Animal implements VariantHolder<FrogVariant> {
 	public Frog(EntityType<? extends Animal> entityType, Level level) {
 		super(entityType, level);
 		this.lookControl = new Frog.FrogLookControl(this);
-		this.setPathfindingMalus(BlockPathTypes.WATER, 4.0F);
-		this.setPathfindingMalus(BlockPathTypes.TRAPDOOR, -1.0F);
+		this.setPathfindingMalus(PathType.WATER, 4.0F);
+		this.setPathfindingMalus(PathType.TRAPDOOR, -1.0F);
 		this.moveControl = new SmoothSwimmingMoveControl(this, 85, 10, 0.02F, 0.1F, true);
 	}
 
@@ -389,10 +389,10 @@ public class Frog extends Animal implements VariantHolder<FrogVariant> {
 		}
 
 		@Override
-		public BlockPathTypes getBlockPathType(BlockGetter blockGetter, int i, int j, int k) {
+		public PathType getPathType(BlockGetter blockGetter, int i, int j, int k) {
 			this.belowPos.set(i, j - 1, k);
 			BlockState blockState = blockGetter.getBlockState(this.belowPos);
-			return blockState.is(BlockTags.FROG_PREFER_JUMP_TO) ? BlockPathTypes.OPEN : super.getBlockPathType(blockGetter, i, j, k);
+			return blockState.is(BlockTags.FROG_PREFER_JUMP_TO) ? PathType.OPEN : super.getPathType(blockGetter, i, j, k);
 		}
 	}
 
@@ -402,8 +402,8 @@ public class Frog extends Animal implements VariantHolder<FrogVariant> {
 		}
 
 		@Override
-		public boolean canCutCorner(BlockPathTypes blockPathTypes) {
-			return blockPathTypes != BlockPathTypes.WATER_BORDER && super.canCutCorner(blockPathTypes);
+		public boolean canCutCorner(PathType pathType) {
+			return pathType != PathType.WATER_BORDER && super.canCutCorner(pathType);
 		}
 
 		@Override

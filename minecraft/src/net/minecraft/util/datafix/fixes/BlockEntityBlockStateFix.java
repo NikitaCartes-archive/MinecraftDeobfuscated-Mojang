@@ -28,8 +28,7 @@ public class BlockEntityBlockStateFix extends NamedEntityFix {
 		return typed2.set(DSL.remainderFinder(), dynamic)
 			.set(
 				opticFinder,
-				(Typed)((Pair)type2.readTyped(dynamic2).result().orElseThrow(() -> new IllegalStateException("Could not parse newly created block state tag.")))
-					.getFirst()
+				(Typed)((Pair)type2.readTyped(dynamic2).result().orElseThrow(() -> new IllegalStateException("Could not parse newly created block state tag."))).getFirst()
 			);
 	}
 }

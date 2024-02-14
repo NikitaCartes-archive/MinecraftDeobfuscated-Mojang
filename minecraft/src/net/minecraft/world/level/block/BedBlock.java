@@ -271,9 +271,7 @@ public class BedBlock extends HorizontalDirectionalBlock implements EntityBlock 
 		}
 	}
 
-	private static Optional<Vec3> findStandUpPositionAtOffset(
-		EntityType<?> entityType, CollisionGetter collisionGetter, BlockPos blockPos, int[][] is, boolean bl
-	) {
+	private static Optional<Vec3> findStandUpPositionAtOffset(EntityType<?> entityType, CollisionGetter collisionGetter, BlockPos blockPos, int[][] is, boolean bl) {
 		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 
 		for(int[] js : is) {

@@ -1120,9 +1120,7 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 	@Override
 	protected Vec3 getPassengerAttachmentPoint(Entity entity, EntityDimensions entityDimensions, float f) {
 		return super.getPassengerAttachmentPoint(entity, entityDimensions, f)
-			.add(
-				new Vec3(0.0, 0.15 * (double)this.standAnimO * (double)f, -0.7 * (double)this.standAnimO * (double)f).yRot(-this.getYRot() * (float) (Math.PI / 180.0))
-			);
+			.add(new Vec3(0.0, 0.15 * (double)this.standAnimO * (double)f, -0.7 * (double)this.standAnimO * (double)f).yRot(-this.getYRot() * (float) (Math.PI / 180.0)));
 	}
 
 	public final Container getBodyArmorAccess() {

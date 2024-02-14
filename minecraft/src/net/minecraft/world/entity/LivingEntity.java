@@ -2832,9 +2832,9 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	}
 
 	public void take(Entity entity, int i) {
-		if (!entity.isRemoved()
-			&& !this.level().isClientSide
-			&& (entity instanceof ItemEntity || entity instanceof AbstractArrow || entity instanceof ExperienceOrb)) {
+		if (!entity.isRemoved() && !this.level().isClientSide && (entity instanceof ItemEntity || entity instanceof AbstractArrow || entity instanceof ExperienceOrb)
+			)
+		 {
 			((ServerLevel)this.level()).getChunkSource().broadcast(entity, new ClientboundTakeItemEntityPacket(entity.getId(), this.getId(), i));
 		}
 	}

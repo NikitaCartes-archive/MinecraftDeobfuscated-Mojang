@@ -23,10 +23,7 @@ public class GeodeConfiguration implements FeatureConfiguration {
 						.orElse(true)
 						.forGetter(geodeConfiguration -> geodeConfiguration.placementsRequireLayer0Alternate),
 					IntProvider.codec(1, 20).fieldOf("outer_wall_distance").orElse(UniformInt.of(4, 5)).forGetter(geodeConfiguration -> geodeConfiguration.outerWallDistance),
-					IntProvider.codec(1, 20)
-						.fieldOf("distribution_points")
-						.orElse(UniformInt.of(3, 4))
-						.forGetter(geodeConfiguration -> geodeConfiguration.distributionPoints),
+					IntProvider.codec(1, 20).fieldOf("distribution_points").orElse(UniformInt.of(3, 4)).forGetter(geodeConfiguration -> geodeConfiguration.distributionPoints),
 					IntProvider.codec(0, 10).fieldOf("point_offset").orElse(UniformInt.of(1, 2)).forGetter(geodeConfiguration -> geodeConfiguration.pointOffset),
 					Codec.INT.fieldOf("min_gen_offset").orElse(-16).forGetter(geodeConfiguration -> geodeConfiguration.minGenOffset),
 					Codec.INT.fieldOf("max_gen_offset").orElse(16).forGetter(geodeConfiguration -> geodeConfiguration.maxGenOffset),

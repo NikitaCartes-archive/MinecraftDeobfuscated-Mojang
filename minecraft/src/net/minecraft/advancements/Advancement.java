@@ -208,8 +208,7 @@ public record Advancement(
 
 		public AdvancementHolder build(ResourceLocation resourceLocation) {
 			Map<String, Criterion<?>> map = this.criteria.buildOrThrow();
-			AdvancementRequirements advancementRequirements = (AdvancementRequirements)this.requirements
-				.orElseGet(() -> this.requirementsStrategy.create(map.keySet()));
+			AdvancementRequirements advancementRequirements = (AdvancementRequirements)this.requirements.orElseGet(() -> this.requirementsStrategy.create(map.keySet()));
 			return new AdvancementHolder(
 				resourceLocation, new Advancement(this.parent, this.display, this.rewards, map, advancementRequirements, this.sendsTelemetryEvent)
 			);

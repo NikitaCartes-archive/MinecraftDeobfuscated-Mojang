@@ -15,8 +15,7 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 
 public record MatchTool(Optional<ItemPredicate> predicate) implements LootItemCondition {
 	public static final Codec<MatchTool> CODEC = RecordCodecBuilder.create(
-		instance -> instance.group(ExtraCodecs.strictOptionalField(ItemPredicate.CODEC, "predicate").forGetter(MatchTool::predicate))
-				.apply(instance, MatchTool::new)
+		instance -> instance.group(ExtraCodecs.strictOptionalField(ItemPredicate.CODEC, "predicate").forGetter(MatchTool::predicate)).apply(instance, MatchTool::new)
 	);
 
 	@Override

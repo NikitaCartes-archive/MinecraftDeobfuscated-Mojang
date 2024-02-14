@@ -483,9 +483,7 @@ public class ScoreboardCommand {
 		if (collection.size() == 1) {
 			int j = i;
 			commandSourceStack.sendSuccess(
-				() -> Component.translatable(
-						"commands.scoreboard.players.operation.success.single", objective.getFormattedDisplayName(), getFirstTargetName(collection), j
-					),
+				() -> Component.translatable("commands.scoreboard.players.operation.success.single", objective.getFormattedDisplayName(), getFirstTargetName(collection), j),
 				true
 			);
 		} else {
@@ -713,9 +711,7 @@ public class ScoreboardCommand {
 		if (collection.size() == 1) {
 			int k = j;
 			commandSourceStack.sendSuccess(
-				() -> Component.translatable(
-						"commands.scoreboard.players.remove.success.single", i, objective.getFormattedDisplayName(), getFirstTargetName(collection), k
-					),
+				() -> Component.translatable("commands.scoreboard.players.remove.success.single", i, objective.getFormattedDisplayName(), getFirstTargetName(collection), k),
 				true
 			);
 		} else {

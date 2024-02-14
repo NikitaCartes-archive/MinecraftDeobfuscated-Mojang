@@ -40,11 +40,7 @@ public class LeavesBlock extends Block implements SimpleWaterloggedBlock {
 	public LeavesBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 		this.registerDefaultState(
-			this.stateDefinition
-				.any()
-				.setValue(DISTANCE, Integer.valueOf(7))
-				.setValue(PERSISTENT, Boolean.valueOf(false))
-				.setValue(WATERLOGGED, Boolean.valueOf(false))
+			this.stateDefinition.any().setValue(DISTANCE, Integer.valueOf(7)).setValue(PERSISTENT, Boolean.valueOf(false)).setValue(WATERLOGGED, Boolean.valueOf(false))
 		);
 	}
 

@@ -50,8 +50,7 @@ public class KilledTrigger extends SimpleCriterionTrigger<KilledTrigger.TriggerI
 		}
 
 		public static Criterion<KilledTrigger.TriggerInstance> playerKilledEntity(Optional<EntityPredicate> optional, Optional<DamageSourcePredicate> optional2) {
-			return CriteriaTriggers.PLAYER_KILLED_ENTITY
-				.createCriterion(new KilledTrigger.TriggerInstance(Optional.empty(), EntityPredicate.wrap(optional), optional2));
+			return CriteriaTriggers.PLAYER_KILLED_ENTITY.createCriterion(new KilledTrigger.TriggerInstance(Optional.empty(), EntityPredicate.wrap(optional), optional2));
 		}
 
 		public static Criterion<KilledTrigger.TriggerInstance> playerKilledEntity(EntityPredicate.Builder builder, Optional<DamageSourcePredicate> optional) {
@@ -89,8 +88,7 @@ public class KilledTrigger extends SimpleCriterionTrigger<KilledTrigger.TriggerI
 		}
 
 		public static Criterion<KilledTrigger.TriggerInstance> entityKilledPlayer(Optional<EntityPredicate> optional, Optional<DamageSourcePredicate> optional2) {
-			return CriteriaTriggers.ENTITY_KILLED_PLAYER
-				.createCriterion(new KilledTrigger.TriggerInstance(Optional.empty(), EntityPredicate.wrap(optional), optional2));
+			return CriteriaTriggers.ENTITY_KILLED_PLAYER.createCriterion(new KilledTrigger.TriggerInstance(Optional.empty(), EntityPredicate.wrap(optional), optional2));
 		}
 
 		public static Criterion<KilledTrigger.TriggerInstance> entityKilledPlayer(EntityPredicate.Builder builder, Optional<DamageSourcePredicate> optional) {

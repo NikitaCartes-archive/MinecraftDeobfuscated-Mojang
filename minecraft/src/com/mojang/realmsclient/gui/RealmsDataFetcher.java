@@ -44,8 +44,7 @@ public class RealmsDataFetcher {
 		this.trialAvailabilityTask = this.dataFetcher
 			.createTask("trial availablity", realmsClient::trialAvailable, Duration.ofSeconds(60L), RepeatedDelayStrategy.exponentialBackoff(60));
 		this.newsTask = this.dataFetcher.createTask("unread news", realmsClient::getNews, Duration.ofMinutes(5L), RepeatedDelayStrategy.CONSTANT);
-		this.notificationsTask = this.dataFetcher
-			.createTask("notifications", realmsClient::getNotifications, Duration.ofMinutes(5L), RepeatedDelayStrategy.CONSTANT);
+		this.notificationsTask = this.dataFetcher.createTask("notifications", realmsClient::getNotifications, Duration.ofMinutes(5L), RepeatedDelayStrategy.CONSTANT);
 		this.tasks = List.of(this.notificationsTask, this.serverListUpdateTask, this.pendingInvitesTask, this.trialAvailabilityTask, this.newsTask);
 	}
 

@@ -29,9 +29,7 @@ public class EndCityStructure extends Structure {
 			);
 	}
 
-	private void generatePieces(
-		StructurePiecesBuilder structurePiecesBuilder, BlockPos blockPos, Rotation rotation, Structure.GenerationContext generationContext
-	) {
+	private void generatePieces(StructurePiecesBuilder structurePiecesBuilder, BlockPos blockPos, Rotation rotation, Structure.GenerationContext generationContext) {
 		List<StructurePiece> list = Lists.<StructurePiece>newArrayList();
 		EndCityPieces.startHouseTower(generationContext.structureTemplateManager(), blockPos, rotation, list, generationContext.random());
 		list.forEach(structurePiecesBuilder::addPiece);

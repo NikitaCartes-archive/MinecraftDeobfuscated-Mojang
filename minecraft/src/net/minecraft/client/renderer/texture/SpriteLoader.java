@@ -122,9 +122,7 @@ public class SpriteLoader {
 		return Util.sequence(list2).thenApply(listx -> listx.stream().filter(Objects::nonNull).toList());
 	}
 
-	public CompletableFuture<SpriteLoader.Preparations> loadAndStitch(
-		ResourceManager resourceManager, ResourceLocation resourceLocation, int i, Executor executor
-	) {
+	public CompletableFuture<SpriteLoader.Preparations> loadAndStitch(ResourceManager resourceManager, ResourceLocation resourceLocation, int i, Executor executor) {
 		return this.loadAndStitch(resourceManager, resourceLocation, i, executor, DEFAULT_METADATA_SECTIONS);
 	}
 

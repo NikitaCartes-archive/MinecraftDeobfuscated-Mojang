@@ -12,8 +12,7 @@ import net.minecraft.world.phys.Vec3;
 
 public class BlockPositionSource implements PositionSource {
 	public static final Codec<BlockPositionSource> CODEC = RecordCodecBuilder.create(
-		instance -> instance.group(BlockPos.CODEC.fieldOf("pos").forGetter(blockPositionSource -> blockPositionSource.pos))
-				.apply(instance, BlockPositionSource::new)
+		instance -> instance.group(BlockPos.CODEC.fieldOf("pos").forGetter(blockPositionSource -> blockPositionSource.pos)).apply(instance, BlockPositionSource::new)
 	);
 	public static final StreamCodec<RegistryFriendlyByteBuf, BlockPositionSource> STREAM_CODEC = StreamCodec.composite(
 		BlockPos.STREAM_CODEC, blockPositionSource -> blockPositionSource.pos, BlockPositionSource::new

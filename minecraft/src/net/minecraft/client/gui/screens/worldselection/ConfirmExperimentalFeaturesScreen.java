@@ -116,9 +116,7 @@ public class ConfirmExperimentalFeaturesScreen extends Screen {
 					if (!string.isEmpty()) {
 						Component component = ComponentUtils.mergeStyles(pack.getTitle().copy(), Style.EMPTY.withBold(true));
 						Component component2 = Component.translatable("selectWorld.experimental.details.entry", string);
-						this.addEntry(
-							DetailsScreen.this.new PackListEntry(component, component2, MultiLineLabel.create(DetailsScreen.this.font, component2, this.getRowWidth()))
-						);
+						this.addEntry(DetailsScreen.this.new PackListEntry(component, component2, MultiLineLabel.create(DetailsScreen.this.font, component2, this.getRowWidth())));
 					}
 				}
 			}

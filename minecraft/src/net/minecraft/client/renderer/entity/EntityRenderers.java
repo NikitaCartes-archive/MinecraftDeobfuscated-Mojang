@@ -82,6 +82,7 @@ public class EntityRenderers {
 		register(EntityType.BLAZE, BlazeRenderer::new);
 		register(EntityType.BLOCK_DISPLAY, DisplayRenderer.BlockDisplayRenderer::new);
 		register(EntityType.BOAT, context -> new BoatRenderer(context, false));
+		register(EntityType.BOGGED, BoggedRenderer::new);
 		register(EntityType.BREEZE, BreezeRenderer::new);
 		register(EntityType.BREEZE_WIND_CHARGE, WindChargeRenderer::new);
 		register(EntityType.CAT, CatRenderer::new);
@@ -148,9 +149,7 @@ public class EntityRenderers {
 		register(EntityType.PARROT, ParrotRenderer::new);
 		register(EntityType.PHANTOM, PhantomRenderer::new);
 		register(EntityType.PIG, PigRenderer::new);
-		register(
-			EntityType.PIGLIN, context -> new PiglinRenderer(context, ModelLayers.PIGLIN, ModelLayers.PIGLIN_INNER_ARMOR, ModelLayers.PIGLIN_OUTER_ARMOR, false)
-		);
+		register(EntityType.PIGLIN, context -> new PiglinRenderer(context, ModelLayers.PIGLIN, ModelLayers.PIGLIN_INNER_ARMOR, ModelLayers.PIGLIN_OUTER_ARMOR, false));
 		register(
 			EntityType.PIGLIN_BRUTE,
 			context -> new PiglinRenderer(context, ModelLayers.PIGLIN_BRUTE, ModelLayers.PIGLIN_BRUTE_INNER_ARMOR, ModelLayers.PIGLIN_BRUTE_OUTER_ARMOR, false)

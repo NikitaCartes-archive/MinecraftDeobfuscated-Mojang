@@ -41,10 +41,7 @@ public class ClearInventoryCommands {
 							Commands.argument("item", ItemPredicateArgument.itemPredicate(commandBuildContext))
 								.executes(
 									commandContext -> clearInventory(
-											commandContext.getSource(),
-											EntityArgument.getPlayers(commandContext, "targets"),
-											ItemPredicateArgument.getItemPredicate(commandContext, "item"),
-											-1
+											commandContext.getSource(), EntityArgument.getPlayers(commandContext, "targets"), ItemPredicateArgument.getItemPredicate(commandContext, "item"), -1
 										)
 								)
 								.then(

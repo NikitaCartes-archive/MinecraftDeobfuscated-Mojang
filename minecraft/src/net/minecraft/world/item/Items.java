@@ -817,9 +817,7 @@ public class Items {
 	);
 	public static final Item TNT_MINECART = registerItem("tnt_minecart", new MinecartItem(AbstractMinecart.Type.TNT, new Item.Properties().stacksTo(1)));
 	public static final Item HOPPER_MINECART = registerItem("hopper_minecart", new MinecartItem(AbstractMinecart.Type.HOPPER, new Item.Properties().stacksTo(1)));
-	public static final Item CARROT_ON_A_STICK = registerItem(
-		"carrot_on_a_stick", new FoodOnAStickItem<>(new Item.Properties().durability(25), EntityType.PIG, 7)
-	);
+	public static final Item CARROT_ON_A_STICK = registerItem("carrot_on_a_stick", new FoodOnAStickItem<>(new Item.Properties().durability(25), EntityType.PIG, 7));
 	public static final Item WARPED_FUNGUS_ON_A_STICK = registerItem(
 		"warped_fungus_on_a_stick", new FoodOnAStickItem<>(new Item.Properties().durability(100), EntityType.STRIDER, 1)
 	);
@@ -942,8 +940,7 @@ public class Items {
 		new ArmorItem(ArmorMaterials.CHAIN, ArmorItem.Type.LEGGINGS, new Item.Properties().defaultDurability(ArmorItem.Type.LEGGINGS.getDurability(15)))
 	);
 	public static final Item CHAINMAIL_BOOTS = registerItem(
-		"chainmail_boots",
-		new ArmorItem(ArmorMaterials.CHAIN, ArmorItem.Type.BOOTS, new Item.Properties().defaultDurability(ArmorItem.Type.BOOTS.getDurability(15)))
+		"chainmail_boots", new ArmorItem(ArmorMaterials.CHAIN, ArmorItem.Type.BOOTS, new Item.Properties().defaultDurability(ArmorItem.Type.BOOTS.getDurability(15)))
 	);
 	public static final Item IRON_HELMET = registerItem(
 		"iron_helmet", new ArmorItem(ArmorMaterials.IRON, ArmorItem.Type.HELMET, new Item.Properties().defaultDurability(ArmorItem.Type.HELMET.getDurability(15)))
@@ -972,8 +969,7 @@ public class Items {
 		new ArmorItem(ArmorMaterials.DIAMOND, ArmorItem.Type.LEGGINGS, new Item.Properties().defaultDurability(ArmorItem.Type.LEGGINGS.getDurability(33)))
 	);
 	public static final Item DIAMOND_BOOTS = registerItem(
-		"diamond_boots",
-		new ArmorItem(ArmorMaterials.DIAMOND, ArmorItem.Type.BOOTS, new Item.Properties().defaultDurability(ArmorItem.Type.BOOTS.getDurability(33)))
+		"diamond_boots", new ArmorItem(ArmorMaterials.DIAMOND, ArmorItem.Type.BOOTS, new Item.Properties().defaultDurability(ArmorItem.Type.BOOTS.getDurability(33)))
 	);
 	public static final Item GOLDEN_HELMET = registerItem(
 		"golden_helmet", new ArmorItem(ArmorMaterials.GOLD, ArmorItem.Type.HELMET, new Item.Properties().defaultDurability(ArmorItem.Type.HELMET.getDurability(7)))
@@ -1009,9 +1005,7 @@ public class Items {
 	);
 	public static final Item NETHERITE_BOOTS = registerItem(
 		"netherite_boots",
-		new ArmorItem(
-			ArmorMaterials.NETHERITE, ArmorItem.Type.BOOTS, new Item.Properties().fireResistant().defaultDurability(ArmorItem.Type.BOOTS.getDurability(37))
-		)
+		new ArmorItem(ArmorMaterials.NETHERITE, ArmorItem.Type.BOOTS, new Item.Properties().fireResistant().defaultDurability(ArmorItem.Type.BOOTS.getDurability(37)))
 	);
 	public static final Item FLINT = registerItem("flint", new Item(new Item.Properties()));
 	public static final Item PORKCHOP = registerItem("porkchop", new Item(new Item.Properties().food(Foods.PORKCHOP)));
@@ -1205,21 +1199,18 @@ public class Items {
 		"armadillo_spawn_egg", new SpawnEggItem(EntityType.ARMADILLO, 11366765, 8538184, new Item.Properties())
 	);
 	public static final Item ALLAY_SPAWN_EGG = registerItem("allay_spawn_egg", new SpawnEggItem(EntityType.ALLAY, 56063, 44543, new Item.Properties()));
-	public static final Item AXOLOTL_SPAWN_EGG = registerItem(
-		"axolotl_spawn_egg", new SpawnEggItem(EntityType.AXOLOTL, 16499171, 10890612, new Item.Properties())
-	);
+	public static final Item AXOLOTL_SPAWN_EGG = registerItem("axolotl_spawn_egg", new SpawnEggItem(EntityType.AXOLOTL, 16499171, 10890612, new Item.Properties()));
 	public static final Item BAT_SPAWN_EGG = registerItem("bat_spawn_egg", new SpawnEggItem(EntityType.BAT, 4996656, 986895, new Item.Properties()));
 	public static final Item BEE_SPAWN_EGG = registerItem("bee_spawn_egg", new SpawnEggItem(EntityType.BEE, 15582019, 4400155, new Item.Properties()));
 	public static final Item BLAZE_SPAWN_EGG = registerItem("blaze_spawn_egg", new SpawnEggItem(EntityType.BLAZE, 16167425, 16775294, new Item.Properties()));
+	public static final Item BOGGED_SPAWN_EGG = registerItem("bogged_spawn_egg", new SpawnEggItem(EntityType.BOGGED, 9084018, 3231003, new Item.Properties()));
 	public static final Item BREEZE_SPAWN_EGG = registerItem("breeze_spawn_egg", new SpawnEggItem(EntityType.BREEZE, 11506911, 9529055, new Item.Properties()));
 	public static final Item CAT_SPAWN_EGG = registerItem("cat_spawn_egg", new SpawnEggItem(EntityType.CAT, 15714446, 9794134, new Item.Properties()));
 	public static final Item CAMEL_SPAWN_EGG = registerItem("camel_spawn_egg", new SpawnEggItem(EntityType.CAMEL, 16565097, 13341495, new Item.Properties()));
 	public static final Item CAVE_SPIDER_SPAWN_EGG = registerItem(
 		"cave_spider_spawn_egg", new SpawnEggItem(EntityType.CAVE_SPIDER, 803406, 11013646, new Item.Properties())
 	);
-	public static final Item CHICKEN_SPAWN_EGG = registerItem(
-		"chicken_spawn_egg", new SpawnEggItem(EntityType.CHICKEN, 10592673, 16711680, new Item.Properties())
-	);
+	public static final Item CHICKEN_SPAWN_EGG = registerItem("chicken_spawn_egg", new SpawnEggItem(EntityType.CHICKEN, 10592673, 16711680, new Item.Properties()));
 	public static final Item COD_SPAWN_EGG = registerItem("cod_spawn_egg", new SpawnEggItem(EntityType.COD, 12691306, 15058059, new Item.Properties()));
 	public static final Item COW_SPAWN_EGG = registerItem("cow_spawn_egg", new SpawnEggItem(EntityType.COW, 4470310, 10592673, new Item.Properties()));
 	public static final Item CREEPER_SPAWN_EGG = registerItem("creeper_spawn_egg", new SpawnEggItem(EntityType.CREEPER, 894731, 0, new Item.Properties()));
@@ -1448,9 +1439,7 @@ public class Items {
 	public static final Item GREEN_BANNER = registerItem(
 		"green_banner", new BannerItem(Blocks.GREEN_BANNER, Blocks.GREEN_WALL_BANNER, new Item.Properties().stacksTo(16))
 	);
-	public static final Item RED_BANNER = registerItem(
-		"red_banner", new BannerItem(Blocks.RED_BANNER, Blocks.RED_WALL_BANNER, new Item.Properties().stacksTo(16))
-	);
+	public static final Item RED_BANNER = registerItem("red_banner", new BannerItem(Blocks.RED_BANNER, Blocks.RED_WALL_BANNER, new Item.Properties().stacksTo(16)));
 	public static final Item BLACK_BANNER = registerItem(
 		"black_banner", new BannerItem(Blocks.BLACK_BANNER, Blocks.BLACK_WALL_BANNER, new Item.Properties().stacksTo(16))
 	);

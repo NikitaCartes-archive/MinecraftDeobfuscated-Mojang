@@ -50,9 +50,7 @@ public class BastionHoglinStablePools {
 			bootstrapContext,
 			"bastion/hoglin_stable/wall_bases",
 			new StructureTemplatePool(
-				holder3,
-				ImmutableList.of(Pair.of(StructurePoolElement.single("bastion/hoglin_stable/walls/wall_base", holder), 1)),
-				StructureTemplatePool.Projection.RIGID
+				holder3, ImmutableList.of(Pair.of(StructurePoolElement.single("bastion/hoglin_stable/walls/wall_base", holder), 1)), StructureTemplatePool.Projection.RIGID
 			)
 		);
 		Pools.register(

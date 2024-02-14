@@ -223,9 +223,7 @@ public class FontManager implements PreparableReloadListener, AutoCloseable {
 		}
 	}
 
-	private static List<Pair<FontManager.BuilderId, GlyphProviderDefinition.Conditional>> loadResourceStack(
-		List<Resource> list, ResourceLocation resourceLocation
-	) {
+	private static List<Pair<FontManager.BuilderId, GlyphProviderDefinition.Conditional>> loadResourceStack(List<Resource> list, ResourceLocation resourceLocation) {
 		List<Pair<FontManager.BuilderId, GlyphProviderDefinition.Conditional>> list2 = new ArrayList();
 
 		for(Resource resource : list) {
@@ -314,9 +312,7 @@ public class FontManager implements PreparableReloadListener, AutoCloseable {
 						List<GlyphProvider.Conditional> list = (List)function.apply(resourceLocation);
 						if (list == null) {
 							FontManager.LOGGER
-								.warn(
-									"Can't find font {} referenced by builder {}, either because it's missing, failed to load or is part of loading cycle", resourceLocation, this.id
-								);
+								.warn("Can't find font {} referenced by builder {}, either because it's missing, failed to load or is part of loading cycle", resourceLocation, this.id);
 							return Optional.empty();
 						} else {
 							return Optional.of(list.stream().map(this::mergeFilters).toList());

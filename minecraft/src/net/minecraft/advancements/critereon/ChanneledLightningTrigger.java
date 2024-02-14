@@ -37,8 +37,7 @@ public class ChanneledLightningTrigger extends SimpleCriterionTrigger<ChanneledL
 		);
 
 		public static Criterion<ChanneledLightningTrigger.TriggerInstance> channeledLightning(EntityPredicate.Builder... builders) {
-			return CriteriaTriggers.CHANNELED_LIGHTNING
-				.createCriterion(new ChanneledLightningTrigger.TriggerInstance(Optional.empty(), EntityPredicate.wrap(builders)));
+			return CriteriaTriggers.CHANNELED_LIGHTNING.createCriterion(new ChanneledLightningTrigger.TriggerInstance(Optional.empty(), EntityPredicate.wrap(builders)));
 		}
 
 		public boolean matches(Collection<? extends LootContext> collection) {

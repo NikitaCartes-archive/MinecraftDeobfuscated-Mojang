@@ -18,9 +18,7 @@ import net.minecraft.world.scores.ScoreAccess;
 
 public class OperationArgument implements ArgumentType<OperationArgument.Operation> {
 	private static final Collection<String> EXAMPLES = Arrays.asList("=", ">", "<");
-	private static final SimpleCommandExceptionType ERROR_INVALID_OPERATION = new SimpleCommandExceptionType(
-		Component.translatable("arguments.operation.invalid")
-	);
+	private static final SimpleCommandExceptionType ERROR_INVALID_OPERATION = new SimpleCommandExceptionType(Component.translatable("arguments.operation.invalid"));
 	private static final SimpleCommandExceptionType ERROR_DIVIDE_BY_ZERO = new SimpleCommandExceptionType(Component.translatable("arguments.operation.div0"));
 
 	public static OperationArgument operation() {

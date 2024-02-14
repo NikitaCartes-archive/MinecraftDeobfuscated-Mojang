@@ -58,10 +58,7 @@ public class SculkSensorBlockEntity extends BlockEntity implements GameEventList
 	protected void saveAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
 		super.saveAdditional(compoundTag, provider);
 		compoundTag.putInt("last_vibration_frequency", this.lastVibrationFrequency);
-		VibrationSystem.Data.CODEC
-			.encodeStart(NbtOps.INSTANCE, this.vibrationData)
-			.resultOrPartial(LOGGER::error)
-			.ifPresent(tag -> compoundTag.put("listener", tag));
+		VibrationSystem.Data.CODEC.encodeStart(NbtOps.INSTANCE, this.vibrationData).resultOrPartial(LOGGER::error).ifPresent(tag -> compoundTag.put("listener", tag));
 	}
 
 	@Override

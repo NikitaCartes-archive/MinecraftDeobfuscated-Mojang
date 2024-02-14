@@ -22,8 +22,7 @@ public class BrewedPotionTrigger extends SimpleCriterionTrigger<BrewedPotionTrig
 		this.trigger(serverPlayer, triggerInstance -> triggerInstance.matches(holder));
 	}
 
-	public static record TriggerInstance(Optional<ContextAwarePredicate> player, Optional<Holder<Potion>> potion)
-		implements SimpleCriterionTrigger.SimpleInstance {
+	public static record TriggerInstance(Optional<ContextAwarePredicate> player, Optional<Holder<Potion>> potion) implements SimpleCriterionTrigger.SimpleInstance {
 		public static final Codec<BrewedPotionTrigger.TriggerInstance> CODEC = RecordCodecBuilder.create(
 			instance -> instance.group(
 						ExtraCodecs.strictOptionalField(EntityPredicate.ADVANCEMENT_CODEC, "player").forGetter(BrewedPotionTrigger.TriggerInstance::player),

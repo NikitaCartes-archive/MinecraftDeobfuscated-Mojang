@@ -48,11 +48,7 @@ public class LootPool {
 	private final NumberProvider bonusRolls;
 
 	LootPool(
-		List<LootPoolEntryContainer> list,
-		List<LootItemCondition> list2,
-		List<LootItemFunction> list3,
-		NumberProvider numberProvider,
-		NumberProvider numberProvider2
+		List<LootPoolEntryContainer> list, List<LootItemCondition> list2, List<LootItemFunction> list3, NumberProvider numberProvider, NumberProvider numberProvider2
 	) {
 		this.entries = list;
 		this.conditions = list2;

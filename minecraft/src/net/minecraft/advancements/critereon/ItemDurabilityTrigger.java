@@ -41,8 +41,7 @@ public class ItemDurabilityTrigger extends SimpleCriterionTrigger<ItemDurability
 		public static Criterion<ItemDurabilityTrigger.TriggerInstance> changedDurability(
 			Optional<ContextAwarePredicate> optional, Optional<ItemPredicate> optional2, MinMaxBounds.Ints ints
 		) {
-			return CriteriaTriggers.ITEM_DURABILITY_CHANGED
-				.createCriterion(new ItemDurabilityTrigger.TriggerInstance(optional, optional2, ints, MinMaxBounds.Ints.ANY));
+			return CriteriaTriggers.ITEM_DURABILITY_CHANGED.createCriterion(new ItemDurabilityTrigger.TriggerInstance(optional, optional2, ints, MinMaxBounds.Ints.ANY));
 		}
 
 		public boolean matches(ItemStack itemStack, int i) {

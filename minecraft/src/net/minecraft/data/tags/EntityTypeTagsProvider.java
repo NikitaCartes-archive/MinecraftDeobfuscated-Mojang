@@ -17,13 +17,7 @@ public class EntityTypeTagsProvider extends IntrinsicHolderTagsProvider<EntityTy
 		this.tag(EntityTypeTags.SKELETONS).add(EntityType.SKELETON, EntityType.STRAY, EntityType.WITHER_SKELETON, EntityType.SKELETON_HORSE);
 		this.tag(EntityTypeTags.ZOMBIES)
 			.add(
-				EntityType.ZOMBIE_HORSE,
-				EntityType.ZOMBIE,
-				EntityType.ZOMBIE_VILLAGER,
-				EntityType.ZOMBIFIED_PIGLIN,
-				EntityType.ZOGLIN,
-				EntityType.DROWNED,
-				EntityType.HUSK
+				EntityType.ZOMBIE_HORSE, EntityType.ZOMBIE, EntityType.ZOMBIE_VILLAGER, EntityType.ZOMBIFIED_PIGLIN, EntityType.ZOGLIN, EntityType.DROWNED, EntityType.HUSK
 			);
 		this.tag(EntityTypeTags.RAIDERS)
 			.add(EntityType.EVOKER, EntityType.PILLAGER, EntityType.RAVAGER, EntityType.VINDICATOR, EntityType.ILLUSIONER, EntityType.WITCH);

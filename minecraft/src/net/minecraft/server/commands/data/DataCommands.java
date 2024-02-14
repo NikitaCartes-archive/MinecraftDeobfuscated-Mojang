@@ -86,9 +86,7 @@ public class DataCommands {
 								)
 								.then(
 									Commands.argument("path", NbtPathArgument.nbtPath())
-										.executes(
-											commandContext -> getData(commandContext.getSource(), dataProvider.access(commandContext), NbtPathArgument.getPath(commandContext, "path"))
-										)
+										.executes(commandContext -> getData(commandContext.getSource(), dataProvider.access(commandContext), NbtPathArgument.getPath(commandContext, "path")))
 										.then(
 											Commands.argument("scale", DoubleArgumentType.doubleArg())
 												.executes(
@@ -259,9 +257,7 @@ public class DataCommands {
 																				dataManipulator,
 																				stringifyTagList(
 																					resolveSourcePath(commandContext, dataProvider2),
-																					string -> substring(
-																							string, IntegerArgumentType.getInteger(commandContext, "start"), IntegerArgumentType.getInteger(commandContext, "end")
-																						)
+																					string -> substring(string, IntegerArgumentType.getInteger(commandContext, "start"), IntegerArgumentType.getInteger(commandContext, "end"))
 																				)
 																			)
 																	)

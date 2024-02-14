@@ -59,9 +59,7 @@ public class BlockPattern {
 	}
 
 	@Nullable
-	private BlockPattern.BlockPatternMatch matches(
-		BlockPos blockPos, Direction direction, Direction direction2, LoadingCache<BlockPos, BlockInWorld> loadingCache
-	) {
+	private BlockPattern.BlockPatternMatch matches(BlockPos blockPos, Direction direction, Direction direction2, LoadingCache<BlockPos, BlockInWorld> loadingCache) {
 		for(int i = 0; i < this.width; ++i) {
 			for(int j = 0; j < this.height; ++j) {
 				for(int k = 0; k < this.depth; ++k) {
@@ -138,9 +136,7 @@ public class BlockPattern {
 		private final int height;
 		private final int depth;
 
-		public BlockPatternMatch(
-			BlockPos blockPos, Direction direction, Direction direction2, LoadingCache<BlockPos, BlockInWorld> loadingCache, int i, int j, int k
-		) {
+		public BlockPatternMatch(BlockPos blockPos, Direction direction, Direction direction2, LoadingCache<BlockPos, BlockInWorld> loadingCache, int i, int j, int k) {
 			this.frontTopLeft = blockPos;
 			this.forwards = direction;
 			this.up = direction2;

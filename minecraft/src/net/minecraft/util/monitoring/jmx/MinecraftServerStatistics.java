@@ -49,8 +49,7 @@ public final class MinecraftServerStatistics implements DynamicMBean {
 
 	public static void registerJmxMonitoring(MinecraftServer minecraftServer) {
 		try {
-			ManagementFactory.getPlatformMBeanServer()
-				.registerMBean(new MinecraftServerStatistics(minecraftServer), new ObjectName("net.minecraft.server:type=Server"));
+			ManagementFactory.getPlatformMBeanServer().registerMBean(new MinecraftServerStatistics(minecraftServer), new ObjectName("net.minecraft.server:type=Server"));
 		} catch (InstanceAlreadyExistsException | MBeanRegistrationException | NotCompliantMBeanException | MalformedObjectNameException var2) {
 			LOGGER.warn("Failed to initialise server as JMX bean", var2);
 		}

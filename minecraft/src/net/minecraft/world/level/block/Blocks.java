@@ -50,9 +50,7 @@ public class Blocks {
 	public static final Block AIR = register("air", new AirBlock(BlockBehaviour.Properties.of().replaceable().noCollission().noLootTable().air()));
 	public static final Block STONE = register(
 		"stone",
-		new Block(
-			BlockBehaviour.Properties.of().mapColor(MapColor.STONE).instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(1.5F, 6.0F)
-		)
+		new Block(BlockBehaviour.Properties.of().mapColor(MapColor.STONE).instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(1.5F, 6.0F))
 	);
 	public static final Block GRANITE = register(
 		"granite",
@@ -76,15 +74,11 @@ public class Blocks {
 	);
 	public static final Block ANDESITE = register(
 		"andesite",
-		new Block(
-			BlockBehaviour.Properties.of().mapColor(MapColor.STONE).instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(1.5F, 6.0F)
-		)
+		new Block(BlockBehaviour.Properties.of().mapColor(MapColor.STONE).instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(1.5F, 6.0F))
 	);
 	public static final Block POLISHED_ANDESITE = register(
 		"polished_andesite",
-		new Block(
-			BlockBehaviour.Properties.of().mapColor(MapColor.STONE).instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(1.5F, 6.0F)
-		)
+		new Block(BlockBehaviour.Properties.of().mapColor(MapColor.STONE).instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(1.5F, 6.0F))
 	);
 	public static final Block GRASS_BLOCK = register(
 		"grass_block", new GrassBlock(BlockBehaviour.Properties.of().mapColor(MapColor.GRASS).randomTicks().strength(0.6F).sound(SoundType.GRASS))
@@ -98,9 +92,7 @@ public class Blocks {
 	);
 	public static final Block COBBLESTONE = register(
 		"cobblestone",
-		new Block(
-			BlockBehaviour.Properties.of().mapColor(MapColor.STONE).instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(2.0F, 6.0F)
-		)
+		new Block(BlockBehaviour.Properties.of().mapColor(MapColor.STONE).instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(2.0F, 6.0F))
 	);
 	public static final Block OAK_PLANKS = register(
 		"oak_planks",
@@ -422,8 +414,7 @@ public class Blocks {
 		)
 	);
 	public static final Block MUDDY_MANGROVE_ROOTS = register(
-		"muddy_mangrove_roots",
-		new RotatedPillarBlock(BlockBehaviour.Properties.of().mapColor(MapColor.PODZOL).strength(0.7F).sound(SoundType.MUDDY_MANGROVE_ROOTS))
+		"muddy_mangrove_roots", new RotatedPillarBlock(BlockBehaviour.Properties.of().mapColor(MapColor.PODZOL).strength(0.7F).sound(SoundType.MUDDY_MANGROVE_ROOTS))
 	);
 	public static final Block BAMBOO_BLOCK = register("bamboo_block", log(MapColor.COLOR_YELLOW, MapColor.PLANT, SoundType.BAMBOO_WOOD));
 	public static final Block STRIPPED_SPRUCE_LOG = register("stripped_spruce_log", log(MapColor.PODZOL, MapColor.PODZOL));
@@ -1144,9 +1135,7 @@ public class Blocks {
 	);
 	public static final Block MOSSY_COBBLESTONE = register(
 		"mossy_cobblestone",
-		new Block(
-			BlockBehaviour.Properties.of().mapColor(MapColor.STONE).instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(2.0F, 6.0F)
-		)
+		new Block(BlockBehaviour.Properties.of().mapColor(MapColor.STONE).instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(2.0F, 6.0F))
 	);
 	public static final Block OBSIDIAN = register(
 		"obsidian",
@@ -2025,9 +2014,7 @@ public class Blocks {
 	);
 	public static final Block CACTUS = register(
 		"cactus",
-		new CactusBlock(
-			BlockBehaviour.Properties.of().mapColor(MapColor.PLANT).randomTicks().strength(0.4F).sound(SoundType.WOOL).pushReaction(PushReaction.DESTROY)
-		)
+		new CactusBlock(BlockBehaviour.Properties.of().mapColor(MapColor.PLANT).randomTicks().strength(0.4F).sound(SoundType.WOOL).pushReaction(PushReaction.DESTROY))
 	);
 	public static final Block CLAY = register(
 		"clay", new Block(BlockBehaviour.Properties.of().mapColor(MapColor.CLAY).instrument(NoteBlockInstrument.FLUTE).strength(0.6F).sound(SoundType.GRAVEL))
@@ -2315,27 +2302,19 @@ public class Blocks {
 	);
 	public static final Block STONE_BRICKS = register(
 		"stone_bricks",
-		new Block(
-			BlockBehaviour.Properties.of().mapColor(MapColor.STONE).instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(1.5F, 6.0F)
-		)
+		new Block(BlockBehaviour.Properties.of().mapColor(MapColor.STONE).instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(1.5F, 6.0F))
 	);
 	public static final Block MOSSY_STONE_BRICKS = register(
 		"mossy_stone_bricks",
-		new Block(
-			BlockBehaviour.Properties.of().mapColor(MapColor.STONE).instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(1.5F, 6.0F)
-		)
+		new Block(BlockBehaviour.Properties.of().mapColor(MapColor.STONE).instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(1.5F, 6.0F))
 	);
 	public static final Block CRACKED_STONE_BRICKS = register(
 		"cracked_stone_bricks",
-		new Block(
-			BlockBehaviour.Properties.of().mapColor(MapColor.STONE).instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(1.5F, 6.0F)
-		)
+		new Block(BlockBehaviour.Properties.of().mapColor(MapColor.STONE).instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(1.5F, 6.0F))
 	);
 	public static final Block CHISELED_STONE_BRICKS = register(
 		"chiseled_stone_bricks",
-		new Block(
-			BlockBehaviour.Properties.of().mapColor(MapColor.STONE).instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(1.5F, 6.0F)
-		)
+		new Block(BlockBehaviour.Properties.of().mapColor(MapColor.STONE).instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(1.5F, 6.0F))
 	);
 	public static final Block PACKED_MUD = register(
 		"packed_mud", new Block(BlockBehaviour.Properties.ofLegacyCopy(DIRT).strength(1.0F, 3.0F).sound(SoundType.PACKED_MUD))
@@ -2566,8 +2545,7 @@ public class Blocks {
 		"lava_cauldron", new LavaCauldronBlock(BlockBehaviour.Properties.ofLegacyCopy(CAULDRON).lightLevel(blockStatex -> 15))
 	);
 	public static final Block POWDER_SNOW_CAULDRON = register(
-		"powder_snow_cauldron",
-		new LayeredCauldronBlock(Biome.Precipitation.SNOW, CauldronInteraction.POWDER_SNOW, BlockBehaviour.Properties.ofLegacyCopy(CAULDRON))
+		"powder_snow_cauldron", new LayeredCauldronBlock(Biome.Precipitation.SNOW, CauldronInteraction.POWDER_SNOW, BlockBehaviour.Properties.ofLegacyCopy(CAULDRON))
 	);
 	public static final Block END_PORTAL = register(
 		"end_portal",
@@ -2671,9 +2649,7 @@ public class Blocks {
 	public static final Block JUNGLE_STAIRS = register("jungle_stairs", legacyStair(JUNGLE_PLANKS));
 	public static final Block COMMAND_BLOCK = register(
 		"command_block",
-		new CommandBlock(
-			false, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BROWN).requiresCorrectToolForDrops().strength(-1.0F, 3600000.0F).noLootTable()
-		)
+		new CommandBlock(false, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BROWN).requiresCorrectToolForDrops().strength(-1.0F, 3600000.0F).noLootTable())
 	);
 	public static final Block BEACON = register(
 		"beacon",
@@ -4104,9 +4080,7 @@ public class Blocks {
 	);
 	public static final Block SMOOTH_STONE = register(
 		"smooth_stone",
-		new Block(
-			BlockBehaviour.Properties.of().mapColor(MapColor.STONE).instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(2.0F, 6.0F)
-		)
+		new Block(BlockBehaviour.Properties.of().mapColor(MapColor.STONE).instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(2.0F, 6.0F))
 	);
 	public static final Block SMOOTH_SANDSTONE = register(
 		"smooth_sandstone",
@@ -4865,8 +4839,7 @@ public class Blocks {
 	public static final Block LIGHT_BLUE_CONCRETE_POWDER = register(
 		"light_blue_concrete_powder",
 		new ConcretePowderBlock(
-			LIGHT_BLUE_CONCRETE,
-			BlockBehaviour.Properties.of().mapColor(DyeColor.LIGHT_BLUE).instrument(NoteBlockInstrument.SNARE).strength(0.5F).sound(SoundType.SAND)
+			LIGHT_BLUE_CONCRETE, BlockBehaviour.Properties.of().mapColor(DyeColor.LIGHT_BLUE).instrument(NoteBlockInstrument.SNARE).strength(0.5F).sound(SoundType.SAND)
 		)
 	);
 	public static final Block YELLOW_CONCRETE_POWDER = register(
@@ -4896,8 +4869,7 @@ public class Blocks {
 	public static final Block LIGHT_GRAY_CONCRETE_POWDER = register(
 		"light_gray_concrete_powder",
 		new ConcretePowderBlock(
-			LIGHT_GRAY_CONCRETE,
-			BlockBehaviour.Properties.of().mapColor(DyeColor.LIGHT_GRAY).instrument(NoteBlockInstrument.SNARE).strength(0.5F).sound(SoundType.SAND)
+			LIGHT_GRAY_CONCRETE, BlockBehaviour.Properties.of().mapColor(DyeColor.LIGHT_GRAY).instrument(NoteBlockInstrument.SNARE).strength(0.5F).sound(SoundType.SAND)
 		)
 	);
 	public static final Block CYAN_CONCRETE_POWDER = register(
@@ -5512,18 +5484,14 @@ public class Blocks {
 		"mossy_stone_brick_slab", new SlabBlock(BlockBehaviour.Properties.ofLegacyCopy(MOSSY_STONE_BRICKS))
 	);
 	public static final Block POLISHED_DIORITE_SLAB = register("polished_diorite_slab", new SlabBlock(BlockBehaviour.Properties.ofLegacyCopy(POLISHED_DIORITE)));
-	public static final Block MOSSY_COBBLESTONE_SLAB = register(
-		"mossy_cobblestone_slab", new SlabBlock(BlockBehaviour.Properties.ofLegacyCopy(MOSSY_COBBLESTONE))
-	);
+	public static final Block MOSSY_COBBLESTONE_SLAB = register("mossy_cobblestone_slab", new SlabBlock(BlockBehaviour.Properties.ofLegacyCopy(MOSSY_COBBLESTONE)));
 	public static final Block END_STONE_BRICK_SLAB = register("end_stone_brick_slab", new SlabBlock(BlockBehaviour.Properties.ofLegacyCopy(END_STONE_BRICKS)));
 	public static final Block SMOOTH_SANDSTONE_SLAB = register("smooth_sandstone_slab", new SlabBlock(BlockBehaviour.Properties.ofLegacyCopy(SMOOTH_SANDSTONE)));
 	public static final Block SMOOTH_QUARTZ_SLAB = register("smooth_quartz_slab", new SlabBlock(BlockBehaviour.Properties.ofLegacyCopy(SMOOTH_QUARTZ)));
 	public static final Block GRANITE_SLAB = register("granite_slab", new SlabBlock(BlockBehaviour.Properties.ofLegacyCopy(GRANITE)));
 	public static final Block ANDESITE_SLAB = register("andesite_slab", new SlabBlock(BlockBehaviour.Properties.ofLegacyCopy(ANDESITE)));
 	public static final Block RED_NETHER_BRICK_SLAB = register("red_nether_brick_slab", new SlabBlock(BlockBehaviour.Properties.ofLegacyCopy(RED_NETHER_BRICKS)));
-	public static final Block POLISHED_ANDESITE_SLAB = register(
-		"polished_andesite_slab", new SlabBlock(BlockBehaviour.Properties.ofLegacyCopy(POLISHED_ANDESITE))
-	);
+	public static final Block POLISHED_ANDESITE_SLAB = register("polished_andesite_slab", new SlabBlock(BlockBehaviour.Properties.ofLegacyCopy(POLISHED_ANDESITE)));
 	public static final Block DIORITE_SLAB = register("diorite_slab", new SlabBlock(BlockBehaviour.Properties.ofLegacyCopy(DIORITE)));
 	public static final Block BRICK_WALL = register("brick_wall", new WallBlock(BlockBehaviour.Properties.ofLegacyCopy(BRICKS).forceSolidOn()));
 	public static final Block PRISMARINE_WALL = register("prismarine_wall", new WallBlock(BlockBehaviour.Properties.ofLegacyCopy(PRISMARINE).forceSolidOn()));
@@ -6048,9 +6016,7 @@ public class Blocks {
 	);
 	public static final Block STRUCTURE_BLOCK = register(
 		"structure_block",
-		new StructureBlock(
-			BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_LIGHT_GRAY).requiresCorrectToolForDrops().strength(-1.0F, 3600000.0F).noLootTable()
-		)
+		new StructureBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_LIGHT_GRAY).requiresCorrectToolForDrops().strength(-1.0F, 3600000.0F).noLootTable())
 	);
 	public static final Block JIGSAW = register(
 		"jigsaw",
@@ -6141,9 +6107,7 @@ public class Blocks {
 	);
 	public static final Block BLACKSTONE_STAIRS = register("blackstone_stairs", legacyStair(BLACKSTONE));
 	public static final Block BLACKSTONE_WALL = register("blackstone_wall", new WallBlock(BlockBehaviour.Properties.ofLegacyCopy(BLACKSTONE).forceSolidOn()));
-	public static final Block BLACKSTONE_SLAB = register(
-		"blackstone_slab", new SlabBlock(BlockBehaviour.Properties.ofLegacyCopy(BLACKSTONE).strength(2.0F, 6.0F))
-	);
+	public static final Block BLACKSTONE_SLAB = register("blackstone_slab", new SlabBlock(BlockBehaviour.Properties.ofLegacyCopy(BLACKSTONE).strength(2.0F, 6.0F)));
 	public static final Block POLISHED_BLACKSTONE = register(
 		"polished_blackstone", new Block(BlockBehaviour.Properties.ofLegacyCopy(BLACKSTONE).strength(2.0F, 6.0F))
 	);
@@ -6599,9 +6563,7 @@ public class Blocks {
 	public static final Block WEATHERED_COPPER_DOOR = register(
 		"weathered_copper_door",
 		new WeatheringCopperDoorBlock(
-			BlockSetType.COPPER,
-			WeatheringCopper.WeatherState.WEATHERED,
-			BlockBehaviour.Properties.ofFullCopy(COPPER_DOOR).mapColor(WEATHERED_COPPER.defaultMapColor())
+			BlockSetType.COPPER, WeatheringCopper.WeatherState.WEATHERED, BlockBehaviour.Properties.ofFullCopy(COPPER_DOOR).mapColor(WEATHERED_COPPER.defaultMapColor())
 		)
 	);
 	public static final Block WAXED_COPPER_DOOR = register(
@@ -6633,9 +6595,7 @@ public class Blocks {
 	public static final Block EXPOSED_COPPER_TRAPDOOR = register(
 		"exposed_copper_trapdoor",
 		new WeatheringCopperTrapDoorBlock(
-			BlockSetType.COPPER,
-			WeatheringCopper.WeatherState.EXPOSED,
-			BlockBehaviour.Properties.ofFullCopy(COPPER_TRAPDOOR).mapColor(EXPOSED_COPPER.defaultMapColor())
+			BlockSetType.COPPER, WeatheringCopper.WeatherState.EXPOSED, BlockBehaviour.Properties.ofFullCopy(COPPER_TRAPDOOR).mapColor(EXPOSED_COPPER.defaultMapColor())
 		)
 	);
 	public static final Block OXIDIZED_COPPER_TRAPDOOR = register(
@@ -6925,9 +6885,7 @@ public class Blocks {
 	);
 	public static final Block COBBLED_DEEPSLATE = register("cobbled_deepslate", new Block(BlockBehaviour.Properties.ofLegacyCopy(DEEPSLATE).strength(3.5F, 6.0F)));
 	public static final Block COBBLED_DEEPSLATE_STAIRS = register("cobbled_deepslate_stairs", legacyStair(COBBLED_DEEPSLATE));
-	public static final Block COBBLED_DEEPSLATE_SLAB = register(
-		"cobbled_deepslate_slab", new SlabBlock(BlockBehaviour.Properties.ofLegacyCopy(COBBLED_DEEPSLATE))
-	);
+	public static final Block COBBLED_DEEPSLATE_SLAB = register("cobbled_deepslate_slab", new SlabBlock(BlockBehaviour.Properties.ofLegacyCopy(COBBLED_DEEPSLATE)));
 	public static final Block COBBLED_DEEPSLATE_WALL = register(
 		"cobbled_deepslate_wall", new WallBlock(BlockBehaviour.Properties.ofLegacyCopy(COBBLED_DEEPSLATE).forceSolidOn())
 	);

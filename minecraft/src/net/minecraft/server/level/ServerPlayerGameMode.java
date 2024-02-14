@@ -286,9 +286,7 @@ public class ServerPlayerGameMode {
 		}
 	}
 
-	public InteractionResult useItemOn(
-		ServerPlayer serverPlayer, Level level, ItemStack itemStack, InteractionHand interactionHand, BlockHitResult blockHitResult
-	) {
+	public InteractionResult useItemOn(ServerPlayer serverPlayer, Level level, ItemStack itemStack, InteractionHand interactionHand, BlockHitResult blockHitResult) {
 		BlockPos blockPos = blockHitResult.getBlockPos();
 		BlockState blockState = level.getBlockState(blockPos);
 		if (!blockState.getBlock().isEnabled(level.enabledFeatures())) {

@@ -289,9 +289,7 @@ public abstract class BaseSpawner {
 		if (this.nextSpawnData != null) {
 			return this.nextSpawnData;
 		} else {
-			this.setNextSpawnData(
-				level, blockPos, (SpawnData)this.spawnPotentials.getRandom(randomSource).map(WeightedEntry.Wrapper::getData).orElseGet(SpawnData::new)
-			);
+			this.setNextSpawnData(level, blockPos, (SpawnData)this.spawnPotentials.getRandom(randomSource).map(WeightedEntry.Wrapper::getData).orElseGet(SpawnData::new));
 			return this.nextSpawnData;
 		}
 	}

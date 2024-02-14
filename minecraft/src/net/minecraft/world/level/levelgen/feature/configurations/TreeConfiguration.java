@@ -95,11 +95,7 @@ public class TreeConfiguration implements FeatureConfiguration {
 		}
 
 		public TreeConfigurationBuilder(
-			BlockStateProvider blockStateProvider,
-			TrunkPlacer trunkPlacer,
-			BlockStateProvider blockStateProvider2,
-			FoliagePlacer foliagePlacer,
-			FeatureSize featureSize
+			BlockStateProvider blockStateProvider, TrunkPlacer trunkPlacer, BlockStateProvider blockStateProvider2, FoliagePlacer foliagePlacer, FeatureSize featureSize
 		) {
 			this(blockStateProvider, trunkPlacer, blockStateProvider2, foliagePlacer, Optional.empty(), featureSize);
 		}

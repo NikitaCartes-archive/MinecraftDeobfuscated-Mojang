@@ -73,7 +73,7 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.phys.AABB;
 
 public abstract class Mob extends LivingEntity implements Targeting {
@@ -112,7 +112,7 @@ public abstract class Mob extends LivingEntity implements Targeting {
 	protected float bodyArmorDropChance;
 	private boolean canPickUpLoot;
 	private boolean persistenceRequired;
-	private final Map<BlockPathTypes, Float> pathfindingMalus = Maps.newEnumMap(BlockPathTypes.class);
+	private final Map<PathType, Float> pathfindingMalus = Maps.newEnumMap(PathType.class);
 	@Nullable
 	private ResourceLocation lootTable;
 	private long lootTableSeed;
@@ -157,7 +157,7 @@ public abstract class Mob extends LivingEntity implements Targeting {
 		return false;
 	}
 
-	public float getPathfindingMalus(BlockPathTypes blockPathTypes) {
+	public float getPathfindingMalus(PathType pathType) {
 		Mob mob2;
 		label17: {
 			Entity var4 = this.getControlledVehicle();
@@ -169,12 +169,12 @@ public abstract class Mob extends LivingEntity implements Targeting {
 			mob2 = this;
 		}
 
-		Float float_ = (Float)mob2.pathfindingMalus.get(blockPathTypes);
-		return float_ == null ? blockPathTypes.getMalus() : float_;
+		Float float_ = (Float)mob2.pathfindingMalus.get(pathType);
+		return float_ == null ? pathType.getMalus() : float_;
 	}
 
-	public void setPathfindingMalus(BlockPathTypes blockPathTypes, float f) {
-		this.pathfindingMalus.put(blockPathTypes, f);
+	public void setPathfindingMalus(PathType pathType, float f) {
+		this.pathfindingMalus.put(pathType, f);
 	}
 
 	public void onPathfindingStart() {
@@ -549,9 +549,7 @@ public abstract class Mob extends LivingEntity implements Targeting {
 	public void aiStep() {
 		super.aiStep();
 		this.level().getProfiler().push("looting");
-		if (!this.level().isClientSide && this.canPickUpLoot() && this.isAlive() && !this.dead && this.level().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)
-			)
-		 {
+		if (!this.level().isClientSide && this.canPickUpLoot() && this.isAlive() && !this.dead && this.level().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
 			Vec3i vec3i = this.getPickupReach();
 
 			for(ItemEntity itemEntity : this.level()
@@ -755,7 +753,7 @@ public abstract class Mob extends LivingEntity implements Targeting {
 		profilerFiller.push("sensing");
 		this.sensing.tick();
 		profilerFiller.pop();
-		int i = this.level().getServer().getTickCount() + this.getId();
+		int i = this.tickCount + this.getId();
 		if (i % 2 != 0 && this.tickCount > 1) {
 			profilerFiller.push("targetSelector");
 			this.targetSelector.tickRunningGoals(false);
@@ -960,10 +958,9 @@ public abstract class Mob extends LivingEntity implements Targeting {
 			ItemStack itemStack = this.getItemBySlot(equipmentSlot);
 			float f = this.getEquipmentDropChance(equipmentSlot);
 			boolean bl2 = f > 1.0F;
-			if (!itemStack.isEmpty()
-				&& !EnchantmentHelper.hasVanishingCurse(itemStack)
-				&& (bl || bl2)
-				&& Math.max(this.random.nextFloat() - (float)i * 0.01F, 0.0F) < f) {
+			if (!itemStack.isEmpty() && !EnchantmentHelper.hasVanishingCurse(itemStack) && (bl || bl2) && Math.max(this.random.nextFloat() - (float)i * 0.01F, 0.0F) < f
+				)
+			 {
 				if (!bl2 && itemStack.isDamageableItem()) {
 					itemStack.setDamageValue(itemStack.getMaxDamage() - this.random.nextInt(1 + this.random.nextInt(Math.max(itemStack.getMaxDamage() - 3, 1))));
 				}
@@ -1463,9 +1460,7 @@ public abstract class Mob extends LivingEntity implements Targeting {
 		if (bl) {
 			if (g > 0.0F && entity instanceof LivingEntity) {
 				((LivingEntity)entity)
-					.knockback(
-						(double)(g * 0.5F), (double)Mth.sin(this.getYRot() * (float) (Math.PI / 180.0)), (double)(-Mth.cos(this.getYRot() * (float) (Math.PI / 180.0)))
-					);
+					.knockback((double)(g * 0.5F), (double)Mth.sin(this.getYRot() * (float) (Math.PI / 180.0)), (double)(-Mth.cos(this.getYRot() * (float) (Math.PI / 180.0))));
 				this.setDeltaMovement(this.getDeltaMovement().multiply(0.6, 1.0, 0.6));
 			}
 

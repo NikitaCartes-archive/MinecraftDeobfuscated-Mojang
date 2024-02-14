@@ -89,10 +89,7 @@ public class ShipwreckPieces {
 
 		public ShipwreckPiece(StructureTemplateManager structureTemplateManager, CompoundTag compoundTag) {
 			super(
-				StructurePieceType.SHIPWRECK_PIECE,
-				compoundTag,
-				structureTemplateManager,
-				resourceLocation -> makeSettings(Rotation.valueOf(compoundTag.getString("Rot")))
+				StructurePieceType.SHIPWRECK_PIECE, compoundTag, structureTemplateManager, resourceLocation -> makeSettings(Rotation.valueOf(compoundTag.getString("Rot")))
 			);
 			this.isBeached = compoundTag.getBoolean("isBeached");
 		}
@@ -113,9 +110,7 @@ public class ShipwreckPieces {
 		}
 
 		@Override
-		protected void handleDataMarker(
-			String string, BlockPos blockPos, ServerLevelAccessor serverLevelAccessor, RandomSource randomSource, BoundingBox boundingBox
-		) {
+		protected void handleDataMarker(String string, BlockPos blockPos, ServerLevelAccessor serverLevelAccessor, RandomSource randomSource, BoundingBox boundingBox) {
 			ResourceLocation resourceLocation = (ResourceLocation)ShipwreckPieces.MARKERS_TO_LOOT.get(string);
 			if (resourceLocation != null) {
 				RandomizableContainer.setBlockEntityLootTable(serverLevelAccessor, randomSource, blockPos.below(), resourceLocation);

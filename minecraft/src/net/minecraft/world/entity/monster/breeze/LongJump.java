@@ -101,9 +101,7 @@ public class LongJump extends Behavior<Breeze> {
 
 		breeze.setPose(Pose.INHALING);
 		serverLevel.playSound(null, breeze, SoundEvents.BREEZE_CHARGE, SoundSource.HOSTILE, 1.0F, 1.0F);
-		breeze.getBrain()
-			.getMemory(MemoryModuleType.BREEZE_JUMP_TARGET)
-			.ifPresent(blockPos -> breeze.lookAt(EntityAnchorArgument.Anchor.EYES, blockPos.getCenter()));
+		breeze.getBrain().getMemory(MemoryModuleType.BREEZE_JUMP_TARGET).ifPresent(blockPos -> breeze.lookAt(EntityAnchorArgument.Anchor.EYES, blockPos.getCenter()));
 	}
 
 	protected void tick(ServerLevel serverLevel, Breeze breeze, long l) {

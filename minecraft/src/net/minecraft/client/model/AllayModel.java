@@ -50,9 +50,7 @@ public class AllayModel extends HierarchicalModel<Allay> implements ArmedModel {
 		PartDefinition partDefinition = meshDefinition.getRoot();
 		PartDefinition partDefinition2 = partDefinition.addOrReplaceChild("root", CubeListBuilder.create(), PartPose.offset(0.0F, 23.5F, 0.0F));
 		partDefinition2.addOrReplaceChild(
-			"head",
-			CubeListBuilder.create().texOffs(0, 0).addBox(-2.5F, -5.0F, -2.5F, 5.0F, 5.0F, 5.0F, new CubeDeformation(0.0F)),
-			PartPose.offset(0.0F, -3.99F, 0.0F)
+			"head", CubeListBuilder.create().texOffs(0, 0).addBox(-2.5F, -5.0F, -2.5F, 5.0F, 5.0F, 5.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, -3.99F, 0.0F)
 		);
 		PartDefinition partDefinition3 = partDefinition2.addOrReplaceChild(
 			"body",

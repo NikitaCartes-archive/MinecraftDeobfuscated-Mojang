@@ -55,9 +55,7 @@ public record SignedMessageBody(String content, Instant timeStamp, long salt, La
 		}
 
 		public Optional<SignedMessageBody> unpack(MessageSignatureCache messageSignatureCache) {
-			return this.lastSeen
-				.unpack(messageSignatureCache)
-				.map(lastSeenMessages -> new SignedMessageBody(this.content, this.timeStamp, this.salt, lastSeenMessages));
+			return this.lastSeen.unpack(messageSignatureCache).map(lastSeenMessages -> new SignedMessageBody(this.content, this.timeStamp, this.salt, lastSeenMessages));
 		}
 	}
 }

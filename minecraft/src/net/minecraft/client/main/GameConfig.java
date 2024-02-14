@@ -21,11 +21,7 @@ public class GameConfig {
 	public final GameConfig.QuickPlayData quickPlay;
 
 	public GameConfig(
-		GameConfig.UserData userData,
-		DisplayData displayData,
-		GameConfig.FolderData folderData,
-		GameConfig.GameData gameData,
-		GameConfig.QuickPlayData quickPlayData
+		GameConfig.UserData userData, DisplayData displayData, GameConfig.FolderData folderData, GameConfig.GameData gameData, GameConfig.QuickPlayData quickPlayData
 	) {
 		this.user = userData;
 		this.display = displayData;

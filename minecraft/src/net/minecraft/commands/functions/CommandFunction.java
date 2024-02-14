@@ -60,9 +60,7 @@ public interface CommandFunction<T> {
 				if (stringReader.peek() == '/') {
 					stringReader.skip();
 					if (stringReader.peek() == '/') {
-						throw new IllegalArgumentException(
-							"Unknown or invalid command '" + string3 + "' on line " + j + " (if you intended to make a comment, use '#' not '//')"
-						);
+						throw new IllegalArgumentException("Unknown or invalid command '" + string3 + "' on line " + j + " (if you intended to make a comment, use '#' not '//')");
 					}
 
 					String string2 = stringReader.readUnquotedString();

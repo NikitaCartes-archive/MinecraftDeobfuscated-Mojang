@@ -187,9 +187,7 @@ public abstract class AbstractMinecart extends VehicleEntity {
 			for(Pose pose2 : immutableList) {
 				double g = (double)livingEntity.getDimensions(pose2).height();
 				int j = Mth.ceil(e - (double)mutableBlockPos.getY() + g);
-				double h = DismountHelper.findCeilingFrom(
-					mutableBlockPos, j, blockPosx -> this.level().getBlockState(blockPosx).getCollisionShape(this.level(), blockPosx)
-				);
+				double h = DismountHelper.findCeilingFrom(mutableBlockPos, j, blockPosx -> this.level().getBlockState(blockPosx).getCollisionShape(this.level(), blockPosx));
 				if (e + g <= h) {
 					livingEntity.setPose(pose2);
 					break;
@@ -295,9 +293,7 @@ public abstract class AbstractMinecart extends VehicleEntity {
 				List<Entity> list = this.level().getEntities(this, this.getBoundingBox().inflate(0.2F, 0.0, 0.2F), EntitySelector.pushableBy(this));
 				if (!list.isEmpty()) {
 					for(Entity entity : list) {
-						if (!(entity instanceof Player) && !(entity instanceof IronGolem) && !(entity instanceof AbstractMinecart) && !this.isVehicle() && !entity.isPassenger()
-							)
-						 {
+						if (!(entity instanceof Player) && !(entity instanceof IronGolem) && !(entity instanceof AbstractMinecart) && !this.isVehicle() && !entity.isPassenger()) {
 							entity.startRiding(this);
 						} else {
 							entity.push(this);

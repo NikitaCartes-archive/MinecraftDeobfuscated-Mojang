@@ -24,10 +24,7 @@ public final class Shapes {
 		Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY
 	);
 	private static final VoxelShape EMPTY = new ArrayVoxelShape(
-		new BitSetDiscreteVoxelShape(0, 0, 0),
-		new DoubleArrayList(new double[]{0.0}),
-		new DoubleArrayList(new double[]{0.0}),
-		new DoubleArrayList(new double[]{0.0})
+		new BitSetDiscreteVoxelShape(0, 0, 0), new DoubleArrayList(new double[]{0.0}), new DoubleArrayList(new double[]{0.0}), new DoubleArrayList(new double[]{0.0})
 	);
 
 	public static VoxelShape empty() {

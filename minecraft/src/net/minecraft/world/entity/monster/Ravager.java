@@ -35,7 +35,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
@@ -56,7 +56,7 @@ public class Ravager extends Raider {
 	public Ravager(EntityType<? extends Ravager> entityType, Level level) {
 		super(entityType, level);
 		this.xpReward = 20;
-		this.setPathfindingMalus(BlockPathTypes.LEAVES, 0.0F);
+		this.setPathfindingMalus(PathType.LEAVES, 0.0F);
 	}
 
 	@Override

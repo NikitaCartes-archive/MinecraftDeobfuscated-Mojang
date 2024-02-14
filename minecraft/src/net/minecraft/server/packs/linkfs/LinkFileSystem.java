@@ -36,9 +36,7 @@ public class LinkFileSystem extends FileSystem {
 		Object2ObjectOpenHashMap<String, LinkFSPath> object2ObjectOpenHashMap = new Object2ObjectOpenHashMap<>();
 		LinkFSPath linkFSPath2 = new LinkFSPath(linkFileSystem, string, linkFSPath, new PathContents.DirectoryContents(object2ObjectOpenHashMap));
 		directoryEntry.files
-			.forEach(
-				(stringx, path) -> object2ObjectOpenHashMap.put(stringx, new LinkFSPath(linkFileSystem, stringx, linkFSPath2, new PathContents.FileContents(path)))
-			);
+			.forEach((stringx, path) -> object2ObjectOpenHashMap.put(stringx, new LinkFSPath(linkFileSystem, stringx, linkFSPath2, new PathContents.FileContents(path))));
 		directoryEntry.children
 			.forEach((stringx, directoryEntryx) -> object2ObjectOpenHashMap.put(stringx, buildPath(directoryEntryx, linkFileSystem, stringx, linkFSPath2)));
 		object2ObjectOpenHashMap.trim();

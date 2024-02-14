@@ -94,9 +94,7 @@ public class PoiManager extends SectionStorage<PoiSection> {
 			.flatMap(optional -> ((PoiSection)optional.get()).getRecords(predicate, occupancy));
 	}
 
-	public Stream<BlockPos> findAll(
-		Predicate<Holder<PoiType>> predicate, Predicate<BlockPos> predicate2, BlockPos blockPos, int i, PoiManager.Occupancy occupancy
-	) {
+	public Stream<BlockPos> findAll(Predicate<Holder<PoiType>> predicate, Predicate<BlockPos> predicate2, BlockPos blockPos, int i, PoiManager.Occupancy occupancy) {
 		return this.getInRange(predicate, blockPos, i, occupancy).map(PoiRecord::getPos).filter(predicate2);
 	}
 

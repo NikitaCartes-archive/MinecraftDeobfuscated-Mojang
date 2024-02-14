@@ -31,9 +31,7 @@ public interface Aquifer {
 			@Nullable
 			@Override
 			public BlockState computeSubstance(DensityFunction.FunctionContext functionContext, double d) {
-				return d > 0.0
-					? null
-					: fluidPicker.computeFluid(functionContext.blockX(), functionContext.blockY(), functionContext.blockZ()).at(functionContext.blockY());
+				return d > 0.0 ? null : fluidPicker.computeFluid(functionContext.blockX(), functionContext.blockY(), functionContext.blockZ()).at(functionContext.blockY());
 			}
 
 			@Override

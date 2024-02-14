@@ -87,9 +87,7 @@ public class DemoMode extends ServerPlayerGameMode {
 	}
 
 	@Override
-	public InteractionResult useItemOn(
-		ServerPlayer serverPlayer, Level level, ItemStack itemStack, InteractionHand interactionHand, BlockHitResult blockHitResult
-	) {
+	public InteractionResult useItemOn(ServerPlayer serverPlayer, Level level, ItemStack itemStack, InteractionHand interactionHand, BlockHitResult blockHitResult) {
 		if (this.demoHasEnded) {
 			this.outputDemoReminder();
 			return InteractionResult.PASS;

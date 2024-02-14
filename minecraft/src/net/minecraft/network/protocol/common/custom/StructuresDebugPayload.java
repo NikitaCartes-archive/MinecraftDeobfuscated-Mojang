@@ -16,9 +16,7 @@ public record StructuresDebugPayload(ResourceKey<Level> dimension, BoundingBox m
 	public static final CustomPacketPayload.Type<StructuresDebugPayload> TYPE = CustomPacketPayload.createType("debug/structures");
 
 	private StructuresDebugPayload(FriendlyByteBuf friendlyByteBuf) {
-		this(
-			friendlyByteBuf.readResourceKey(Registries.DIMENSION), readBoundingBox(friendlyByteBuf), friendlyByteBuf.readList(StructuresDebugPayload.PieceInfo::new)
-		);
+		this(friendlyByteBuf.readResourceKey(Registries.DIMENSION), readBoundingBox(friendlyByteBuf), friendlyByteBuf.readList(StructuresDebugPayload.PieceInfo::new));
 	}
 
 	private void write(FriendlyByteBuf friendlyByteBuf) {

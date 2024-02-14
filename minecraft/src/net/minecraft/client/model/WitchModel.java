@@ -46,9 +46,7 @@ public class WitchModel<T extends Entity> extends VillagerModel<T> {
 		);
 		PartDefinition partDefinition6 = partDefinition2.getChild("nose");
 		partDefinition6.addOrReplaceChild(
-			"mole",
-			CubeListBuilder.create().texOffs(0, 0).addBox(0.0F, 3.0F, -6.75F, 1.0F, 1.0F, 1.0F, new CubeDeformation(-0.25F)),
-			PartPose.offset(0.0F, -2.0F, 0.0F)
+			"mole", CubeListBuilder.create().texOffs(0, 0).addBox(0.0F, 3.0F, -6.75F, 1.0F, 1.0F, 1.0F, new CubeDeformation(-0.25F)), PartPose.offset(0.0F, -2.0F, 0.0F)
 		);
 		return LayerDefinition.create(meshDefinition, 64, 128);
 	}

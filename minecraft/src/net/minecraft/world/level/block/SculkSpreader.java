@@ -199,9 +199,7 @@ public class SculkSpreader {
 		private int decayDelay;
 		@Nullable
 		private Set<Direction> facings;
-		private static final Codec<Set<Direction>> DIRECTION_SET = Direction.CODEC
-			.listOf()
-			.xmap(list -> Sets.newEnumSet(list, Direction.class), Lists::newArrayList);
+		private static final Codec<Set<Direction>> DIRECTION_SET = Direction.CODEC.listOf().xmap(list -> Sets.newEnumSet(list, Direction.class), Lists::newArrayList);
 		public static final Codec<SculkSpreader.ChargeCursor> CODEC = RecordCodecBuilder.create(
 			instance -> instance.group(
 						BlockPos.CODEC.fieldOf("pos").forGetter(SculkSpreader.ChargeCursor::getPos),

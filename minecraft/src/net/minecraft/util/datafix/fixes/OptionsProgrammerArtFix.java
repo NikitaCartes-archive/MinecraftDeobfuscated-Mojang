@@ -22,9 +22,6 @@ public class OptionsProgrammerArtFix extends DataFix {
 	}
 
 	private <T> Dynamic<T> fixList(Dynamic<T> dynamic) {
-		return (Dynamic<T>)dynamic.asString()
-			.result()
-			.map(string -> dynamic.createString(string.replace("\"programer_art\"", "\"programmer_art\"")))
-			.orElse(dynamic);
+		return (Dynamic<T>)dynamic.asString().result().map(string -> dynamic.createString(string.replace("\"programer_art\"", "\"programmer_art\""))).orElse(dynamic);
 	}
 }

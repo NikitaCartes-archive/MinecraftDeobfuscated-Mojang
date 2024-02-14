@@ -81,9 +81,7 @@ public abstract class LayerLightSectionStorage<M extends DataLayerStorageMap<M>>
 	protected int getStoredLevel(long l) {
 		long m = SectionPos.blockToSection(l);
 		DataLayer dataLayer = this.getDataLayer(m, true);
-		return dataLayer.get(
-			SectionPos.sectionRelative(BlockPos.getX(l)), SectionPos.sectionRelative(BlockPos.getY(l)), SectionPos.sectionRelative(BlockPos.getZ(l))
-		);
+		return dataLayer.get(SectionPos.sectionRelative(BlockPos.getX(l)), SectionPos.sectionRelative(BlockPos.getY(l)), SectionPos.sectionRelative(BlockPos.getZ(l)));
 	}
 
 	protected void setStoredLevel(long l, int i) {

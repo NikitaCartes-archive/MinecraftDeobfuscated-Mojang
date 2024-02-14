@@ -58,9 +58,7 @@ public class EuclideanGameEventListenerRegistry implements GameEventListenerRegi
 	}
 
 	@Override
-	public boolean visitInRangeListeners(
-		Holder<GameEvent> holder, Vec3 vec3, GameEvent.Context context, GameEventListenerRegistry.ListenerVisitor listenerVisitor
-	) {
+	public boolean visitInRangeListeners(Holder<GameEvent> holder, Vec3 vec3, GameEvent.Context context, GameEventListenerRegistry.ListenerVisitor listenerVisitor) {
 		this.processing = true;
 		boolean bl = false;
 

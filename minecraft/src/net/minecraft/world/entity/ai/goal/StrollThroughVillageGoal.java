@@ -74,9 +74,7 @@ public class StrollThroughVillageGoal extends Goal {
 		RandomSource randomSource = this.mob.getRandom();
 		BlockPos blockPos = this.mob
 			.level()
-			.getHeightmapPos(
-				Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, this.mob.blockPosition().offset(-8 + randomSource.nextInt(16), 0, -8 + randomSource.nextInt(16))
-			);
+			.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, this.mob.blockPosition().offset(-8 + randomSource.nextInt(16), 0, -8 + randomSource.nextInt(16)));
 		this.mob.getNavigation().moveTo((double)blockPos.getX(), (double)blockPos.getY(), (double)blockPos.getZ(), 1.0);
 	}
 }

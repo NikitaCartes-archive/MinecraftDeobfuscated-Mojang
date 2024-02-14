@@ -152,9 +152,7 @@ public class Main {
 		packGenerator3 = dataGenerator.getBuiltinDatapack(bl2, "bundle");
 		packGenerator3.addProvider(bindRegistries(BundleRecipeProvider::new, completableFuture));
 		packGenerator3.addProvider(
-			packOutput -> PackMetadataGenerator.forFeaturePack(
-					packOutput, Component.translatable("dataPack.bundle.description"), FeatureFlagSet.of(FeatureFlags.BUNDLE)
-				)
+			packOutput -> PackMetadataGenerator.forFeaturePack(packOutput, Component.translatable("dataPack.bundle.description"), FeatureFlagSet.of(FeatureFlags.BUNDLE))
 		);
 		packGenerator3 = dataGenerator.getBuiltinDatapack(bl2, "trade_rebalance");
 		packGenerator3.addProvider(

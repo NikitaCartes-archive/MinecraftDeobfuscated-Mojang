@@ -405,9 +405,7 @@ public class ItemInHandRenderer {
 				boolean bl2 = CrossbowItem.isCharged(itemStack);
 				boolean bl3 = humanoidArm == HumanoidArm.RIGHT;
 				int k = bl3 ? 1 : -1;
-				if (abstractClientPlayer.isUsingItem() && abstractClientPlayer.getUseItemRemainingTicks() > 0 && abstractClientPlayer.getUsedItemHand() == interactionHand
-					)
-				 {
+				if (abstractClientPlayer.isUsingItem() && abstractClientPlayer.getUseItemRemainingTicks() > 0 && abstractClientPlayer.getUsedItemHand() == interactionHand) {
 					this.applyItemArmTransform(poseStack, humanoidArm, i);
 					poseStack.translate((float)k * -0.4785682F, -0.094387F, 0.05731531F);
 					poseStack.mulPose(Axis.XP.rotationDegrees(-11.935F));
@@ -453,9 +451,7 @@ public class ItemInHandRenderer {
 				);
 			} else {
 				boolean bl2 = humanoidArm == HumanoidArm.RIGHT;
-				if (abstractClientPlayer.isUsingItem() && abstractClientPlayer.getUseItemRemainingTicks() > 0 && abstractClientPlayer.getUsedItemHand() == interactionHand
-					)
-				 {
+				if (abstractClientPlayer.isUsingItem() && abstractClientPlayer.getUseItemRemainingTicks() > 0 && abstractClientPlayer.getUsedItemHand() == interactionHand) {
 					int q = bl2 ? 1 : -1;
 					switch(itemStack.getUseAnimation()) {
 						case NONE:

@@ -405,8 +405,7 @@ public class CaveFeatures {
 			LUSH_CAVES_CLAY,
 			Feature.RANDOM_BOOLEAN_SELECTOR,
 			new RandomBooleanFeatureConfiguration(
-				PlacementUtils.inlinePlaced(holderGetter.getOrThrow(CLAY_WITH_DRIPLEAVES)),
-				PlacementUtils.inlinePlaced(holderGetter.getOrThrow(CLAY_POOL_WITH_DRIPLEAVES))
+				PlacementUtils.inlinePlaced(holderGetter.getOrThrow(CLAY_WITH_DRIPLEAVES)), PlacementUtils.inlinePlaced(holderGetter.getOrThrow(CLAY_POOL_WITH_DRIPLEAVES))
 			)
 		);
 		FeatureUtils.register(

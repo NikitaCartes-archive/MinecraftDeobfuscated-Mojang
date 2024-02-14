@@ -25,9 +25,8 @@ import org.lwjgl.util.freetype.FT_Face;
 import org.lwjgl.util.freetype.FreeType;
 
 @Environment(EnvType.CLIENT)
-public record TrueTypeGlyphProviderDefinition(
-	ResourceLocation location, float size, float oversample, TrueTypeGlyphProviderDefinition.Shift shift, String skip
-) implements GlyphProviderDefinition {
+public record TrueTypeGlyphProviderDefinition(ResourceLocation location, float size, float oversample, TrueTypeGlyphProviderDefinition.Shift shift, String skip)
+	implements GlyphProviderDefinition {
 	private static final Codec<String> SKIP_LIST_CODEC = ExtraCodecs.withAlternative(Codec.STRING, Codec.STRING.listOf(), list -> String.join("", list));
 	public static final MapCodec<TrueTypeGlyphProviderDefinition> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> instance.group(

@@ -22,8 +22,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class WallBannerBlock extends AbstractBannerBlock {
 	public static final MapCodec<WallBannerBlock> CODEC = RecordCodecBuilder.mapCodec(
-		instance -> instance.group(DyeColor.CODEC.fieldOf("color").forGetter(AbstractBannerBlock::getColor), propertiesCodec())
-				.apply(instance, WallBannerBlock::new)
+		instance -> instance.group(DyeColor.CODEC.fieldOf("color").forGetter(AbstractBannerBlock::getColor), propertiesCodec()).apply(instance, WallBannerBlock::new)
 	);
 	public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
 	private static final Map<Direction, VoxelShape> SHAPES = Maps.newEnumMap(

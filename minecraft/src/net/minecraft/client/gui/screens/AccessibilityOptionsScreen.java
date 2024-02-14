@@ -62,9 +62,7 @@ public class AccessibilityOptionsScreen extends SimpleOptionsSubScreen {
 				.build()
 		);
 		this.addRenderableWidget(
-			Button.builder(CommonComponents.GUI_DONE, button -> this.minecraft.setScreen(this.lastScreen))
-				.bounds(this.width / 2 + 5, this.height - 27, 150, 20)
-				.build()
+			Button.builder(CommonComponents.GUI_DONE, button -> this.minecraft.setScreen(this.lastScreen)).bounds(this.width / 2 + 5, this.height - 27, 150, 20).build()
 		);
 	}
 }

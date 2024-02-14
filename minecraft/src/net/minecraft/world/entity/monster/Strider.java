@@ -63,9 +63,9 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.level.pathfinder.PathFinder;
+import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.level.pathfinder.WalkNodeEvaluator;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -90,10 +90,10 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
 	public Strider(EntityType<? extends Strider> entityType, Level level) {
 		super(entityType, level);
 		this.blocksBuilding = true;
-		this.setPathfindingMalus(BlockPathTypes.WATER, -1.0F);
-		this.setPathfindingMalus(BlockPathTypes.LAVA, 0.0F);
-		this.setPathfindingMalus(BlockPathTypes.DANGER_FIRE, 0.0F);
-		this.setPathfindingMalus(BlockPathTypes.DAMAGE_FIRE, 0.0F);
+		this.setPathfindingMalus(PathType.WATER, -1.0F);
+		this.setPathfindingMalus(PathType.LAVA, 0.0F);
+		this.setPathfindingMalus(PathType.DANGER_FIRE, 0.0F);
+		this.setPathfindingMalus(PathType.DAMAGE_FIRE, 0.0F);
 	}
 
 	public static boolean checkStriderSpawnRules(
@@ -473,9 +473,7 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
 			if (randomSource.nextInt(30) == 0) {
 				Mob mob = EntityType.ZOMBIFIED_PIGLIN.create(serverLevelAccessor.getLevel());
 				if (mob != null) {
-					spawnGroupData = this.spawnJockey(
-						serverLevelAccessor, difficultyInstance, mob, new Zombie.ZombieGroupData(Zombie.getSpawnAsBabyOdds(randomSource), false)
-					);
+					spawnGroupData = this.spawnJockey(serverLevelAccessor, difficultyInstance, mob, new Zombie.ZombieGroupData(Zombie.getSpawnAsBabyOdds(randomSource), false));
 					mob.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.WARPED_FUNGUS_ON_A_STICK));
 					this.equipSaddle(null);
 				}
@@ -550,10 +548,8 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
 		}
 
 		@Override
-		protected boolean hasValidPathType(BlockPathTypes blockPathTypes) {
-			return blockPathTypes != BlockPathTypes.LAVA && blockPathTypes != BlockPathTypes.DAMAGE_FIRE && blockPathTypes != BlockPathTypes.DANGER_FIRE
-				? super.hasValidPathType(blockPathTypes)
-				: true;
+		protected boolean hasValidPathType(PathType pathType) {
+			return pathType != PathType.LAVA && pathType != PathType.DAMAGE_FIRE && pathType != PathType.DANGER_FIRE ? super.hasValidPathType(pathType) : true;
 		}
 
 		@Override

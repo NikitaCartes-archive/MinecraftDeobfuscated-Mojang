@@ -56,9 +56,7 @@ public class AccessibilityOnboardingScreen extends Screen {
 		this.narrationButton = this.options.narrator().createButton(this.options, 0, 0, 150);
 		this.narrationButton.active = this.narratorAvailable;
 		linearLayout.addChild(this.narrationButton);
-		linearLayout.addChild(
-			CommonButtons.accessibility(150, button -> this.closeAndSetScreen(new AccessibilityOptionsScreen(this, this.minecraft.options)), false)
-		);
+		linearLayout.addChild(CommonButtons.accessibility(150, button -> this.closeAndSetScreen(new AccessibilityOptionsScreen(this, this.minecraft.options)), false));
 		linearLayout.addChild(
 			CommonButtons.language(
 				150, button -> this.closeAndSetScreen(new LanguageSelectScreen(this, this.minecraft.options, this.minecraft.getLanguageManager())), false

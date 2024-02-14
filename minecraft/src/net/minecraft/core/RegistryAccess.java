@@ -100,9 +100,7 @@ public interface RegistryAccess extends HolderLookup.Provider {
 	public static record RegistryEntry<T>(ResourceKey<? extends Registry<T>> key, Registry<T> value) {
 		final Registry<T> value;
 
-		private static <T, R extends Registry<? extends T>> RegistryAccess.RegistryEntry<T> fromMapEntry(
-			Entry<? extends ResourceKey<? extends Registry<?>>, R> entry
-		) {
+		private static <T, R extends Registry<? extends T>> RegistryAccess.RegistryEntry<T> fromMapEntry(Entry<? extends ResourceKey<? extends Registry<?>>, R> entry) {
 			return fromUntyped((ResourceKey<? extends Registry<?>>)entry.getKey(), (Registry<?>)entry.getValue());
 		}
 

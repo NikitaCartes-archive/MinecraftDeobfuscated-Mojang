@@ -360,8 +360,7 @@ public class JigsawPlacement {
 												r = j + q;
 											} else {
 												if (l == -1) {
-													l = this.chunkGenerator
-														.getFirstFreeHeight(blockPos2.getX(), blockPos2.getZ(), Heightmap.Types.WORLD_SURFACE_WG, levelHeightAccessor, randomState);
+													l = this.chunkGenerator.getFirstFreeHeight(blockPos2.getX(), blockPos2.getZ(), Heightmap.Types.WORLD_SURFACE_WG, levelHeightAccessor, randomState);
 												}
 
 												r = l - p;

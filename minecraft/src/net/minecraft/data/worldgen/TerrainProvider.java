@@ -200,17 +200,7 @@ public class TerrainProvider {
 	}
 
 	public static <C, I extends ToFloatFunction<C>> CubicSpline<C, I> buildErosionOffsetSpline(
-		I toFloatFunction,
-		I toFloatFunction2,
-		float f,
-		float g,
-		float h,
-		float i,
-		float j,
-		float k,
-		boolean bl,
-		boolean bl2,
-		ToFloatFunction<Float> toFloatFunction3
+		I toFloatFunction, I toFloatFunction2, float f, float g, float h, float i, float j, float k, boolean bl, boolean bl2, ToFloatFunction<Float> toFloatFunction3
 	) {
 		float l = 0.6F;
 		float m = 0.5F;

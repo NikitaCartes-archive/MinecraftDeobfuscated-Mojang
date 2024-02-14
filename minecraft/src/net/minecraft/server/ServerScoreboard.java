@@ -111,9 +111,7 @@ public class ServerScoreboard extends Scoreboard {
 	@Override
 	public void removePlayerFromTeam(String string, PlayerTeam playerTeam) {
 		super.removePlayerFromTeam(string, playerTeam);
-		this.server
-			.getPlayerList()
-			.broadcastAll(ClientboundSetPlayerTeamPacket.createPlayerPacket(playerTeam, string, ClientboundSetPlayerTeamPacket.Action.REMOVE));
+		this.server.getPlayerList().broadcastAll(ClientboundSetPlayerTeamPacket.createPlayerPacket(playerTeam, string, ClientboundSetPlayerTeamPacket.Action.REMOVE));
 		this.setDirty();
 	}
 

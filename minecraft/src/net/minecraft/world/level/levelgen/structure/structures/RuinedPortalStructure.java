@@ -135,9 +135,7 @@ public class RuinedPortalStructure extends Structure {
 								blockPos4,
 								generationContext.chunkGenerator()
 									.getBiomeSource()
-									.getNoiseBiome(
-										QuartPos.fromBlock(blockPos4.getX()), QuartPos.fromBlock(blockPos4.getY()), QuartPos.fromBlock(blockPos4.getZ()), randomState.sampler()
-									)
+									.getNoiseBiome(QuartPos.fromBlock(blockPos4.getX()), QuartPos.fromBlock(blockPos4.getY()), QuartPos.fromBlock(blockPos4.getZ()), randomState.sampler())
 							);
 						}
 		

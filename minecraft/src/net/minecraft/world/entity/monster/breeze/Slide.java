@@ -40,9 +40,9 @@ public class Slide extends Behavior<Breeze> {
 			Vec3 vec3 = null;
 			if (bl) {
 				Vec3 vec32 = DefaultRandomPos.getPosAway(breeze, 5, 5, livingEntity.position());
-				if (vec32 != null
-					&& BreezeUtil.hasLineOfSight(breeze, vec32)
-					&& livingEntity.distanceToSqr(vec32.x, vec32.y, vec32.z) > livingEntity.distanceToSqr(breeze)) {
+				if (vec32 != null && BreezeUtil.hasLineOfSight(breeze, vec32) && livingEntity.distanceToSqr(vec32.x, vec32.y, vec32.z) > livingEntity.distanceToSqr(breeze)
+					)
+				 {
 					vec3 = vec32;
 				}
 			}

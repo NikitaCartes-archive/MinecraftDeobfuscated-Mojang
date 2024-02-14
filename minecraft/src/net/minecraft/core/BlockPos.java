@@ -363,9 +363,7 @@ public class BlockPos extends Vec3i {
 	}
 
 	public static Stream<BlockPos> betweenClosedStream(AABB aABB) {
-		return betweenClosedStream(
-			Mth.floor(aABB.minX), Mth.floor(aABB.minY), Mth.floor(aABB.minZ), Mth.floor(aABB.maxX), Mth.floor(aABB.maxY), Mth.floor(aABB.maxZ)
-		);
+		return betweenClosedStream(Mth.floor(aABB.minX), Mth.floor(aABB.minY), Mth.floor(aABB.minZ), Mth.floor(aABB.maxX), Mth.floor(aABB.maxY), Mth.floor(aABB.maxZ));
 	}
 
 	public static Stream<BlockPos> betweenClosedStream(int i, int j, int k, int l, int m, int n) {

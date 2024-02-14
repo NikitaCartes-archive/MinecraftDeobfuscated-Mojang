@@ -80,9 +80,7 @@ public class WorldGenSettingsHeightAndBiomeFix extends DataFix {
 															)
 															: dynamicxx;
 													} else if ("minecraft:flat".equals(string)) {
-														return bl2
-															? dynamicxx
-															: dynamicxx.update("settings", dynamicxxx -> dynamicxxx.update("layers", WorldGenSettingsHeightAndBiomeFix::updateLayers));
+														return bl2 ? dynamicxx : dynamicxx.update("settings", dynamicxxx -> dynamicxxx.update("layers", WorldGenSettingsHeightAndBiomeFix::updateLayers));
 													} else {
 														return dynamicxx;
 													}

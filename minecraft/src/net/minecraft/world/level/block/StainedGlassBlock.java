@@ -8,8 +8,7 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 
 public class StainedGlassBlock extends TransparentBlock implements BeaconBeamBlock {
 	public static final MapCodec<StainedGlassBlock> CODEC = RecordCodecBuilder.mapCodec(
-		instance -> instance.group(DyeColor.CODEC.fieldOf("color").forGetter(StainedGlassBlock::getColor), propertiesCodec())
-				.apply(instance, StainedGlassBlock::new)
+		instance -> instance.group(DyeColor.CODEC.fieldOf("color").forGetter(StainedGlassBlock::getColor), propertiesCodec()).apply(instance, StainedGlassBlock::new)
 	);
 	private final DyeColor color;
 

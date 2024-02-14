@@ -18,12 +18,8 @@ public class LargeDripstoneConfiguration implements FeatureConfiguration {
 					Codec.floatRange(0.1F, 1.0F)
 						.fieldOf("max_column_radius_to_cave_height_ratio")
 						.forGetter(largeDripstoneConfiguration -> largeDripstoneConfiguration.maxColumnRadiusToCaveHeightRatio),
-					FloatProvider.codec(0.1F, 10.0F)
-						.fieldOf("stalactite_bluntness")
-						.forGetter(largeDripstoneConfiguration -> largeDripstoneConfiguration.stalactiteBluntness),
-					FloatProvider.codec(0.1F, 10.0F)
-						.fieldOf("stalagmite_bluntness")
-						.forGetter(largeDripstoneConfiguration -> largeDripstoneConfiguration.stalagmiteBluntness),
+					FloatProvider.codec(0.1F, 10.0F).fieldOf("stalactite_bluntness").forGetter(largeDripstoneConfiguration -> largeDripstoneConfiguration.stalactiteBluntness),
+					FloatProvider.codec(0.1F, 10.0F).fieldOf("stalagmite_bluntness").forGetter(largeDripstoneConfiguration -> largeDripstoneConfiguration.stalagmiteBluntness),
 					FloatProvider.codec(0.0F, 2.0F).fieldOf("wind_speed").forGetter(largeDripstoneConfiguration -> largeDripstoneConfiguration.windSpeed),
 					Codec.intRange(0, 100).fieldOf("min_radius_for_wind").forGetter(largeDripstoneConfiguration -> largeDripstoneConfiguration.minRadiusForWind),
 					Codec.floatRange(0.0F, 5.0F).fieldOf("min_bluntness_for_wind").forGetter(largeDripstoneConfiguration -> largeDripstoneConfiguration.minBluntnessForWind)

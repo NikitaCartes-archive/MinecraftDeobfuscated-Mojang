@@ -53,9 +53,7 @@ public class PlayerModel<T extends LivingEntity> extends HumanoidModel<T> {
 	public static MeshDefinition createMesh(CubeDeformation cubeDeformation, boolean bl) {
 		MeshDefinition meshDefinition = HumanoidModel.createMesh(cubeDeformation, 0.0F);
 		PartDefinition partDefinition = meshDefinition.getRoot();
-		partDefinition.addOrReplaceChild(
-			"ear", CubeListBuilder.create().texOffs(24, 0).addBox(-3.0F, -6.0F, -1.0F, 6.0F, 6.0F, 1.0F, cubeDeformation), PartPose.ZERO
-		);
+		partDefinition.addOrReplaceChild("ear", CubeListBuilder.create().texOffs(24, 0).addBox(-3.0F, -6.0F, -1.0F, 6.0F, 6.0F, 1.0F, cubeDeformation), PartPose.ZERO);
 		partDefinition.addOrReplaceChild(
 			"cloak",
 			CubeListBuilder.create().texOffs(0, 0).addBox(-5.0F, 0.0F, -1.0F, 10.0F, 16.0F, 1.0F, cubeDeformation, 1.0F, 0.5F),

@@ -66,9 +66,7 @@ class ReportGameListener implements GameTestListener {
 			if (this.successes >= gameTestInfo.requiredSuccesses()) {
 				reportPassed(gameTestInfo, gameTestInfo + " passed " + this.successes + " times of " + this.attempts + " attempts.");
 			} else {
-				say(
-					gameTestInfo.getLevel(), ChatFormatting.GREEN, "Flaky test " + gameTestInfo + " succeeded, attempt: " + this.attempts + " successes: " + this.successes
-				);
+				say(gameTestInfo.getLevel(), ChatFormatting.GREEN, "Flaky test " + gameTestInfo + " succeeded, attempt: " + this.attempts + " successes: " + this.successes);
 				gameTestRunner.rerunTest(gameTestInfo);
 			}
 		}

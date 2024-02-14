@@ -35,9 +35,7 @@ public class QuadrupedModel<T extends Entity> extends AgeableListModel<T> {
 		MeshDefinition meshDefinition = new MeshDefinition();
 		PartDefinition partDefinition = meshDefinition.getRoot();
 		partDefinition.addOrReplaceChild(
-			"head",
-			CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -4.0F, -8.0F, 8.0F, 8.0F, 8.0F, cubeDeformation),
-			PartPose.offset(0.0F, (float)(18 - i), -6.0F)
+			"head", CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -4.0F, -8.0F, 8.0F, 8.0F, 8.0F, cubeDeformation), PartPose.offset(0.0F, (float)(18 - i), -6.0F)
 		);
 		partDefinition.addOrReplaceChild(
 			"body",

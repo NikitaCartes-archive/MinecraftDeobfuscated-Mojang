@@ -16,9 +16,7 @@ public class Potion {
 
 	public static Holder<Potion> byName(String string) {
 		ResourceLocation resourceLocation = ResourceLocation.tryParse(string);
-		return resourceLocation == null
-			? Potions.EMPTY
-			: (Holder)BuiltInRegistries.POTION.getHolder(resourceLocation).map(Function.identity()).orElse(Potions.EMPTY);
+		return resourceLocation == null ? Potions.EMPTY : (Holder)BuiltInRegistries.POTION.getHolder(resourceLocation).map(Function.identity()).orElse(Potions.EMPTY);
 	}
 
 	public Potion(MobEffectInstance... mobEffectInstances) {

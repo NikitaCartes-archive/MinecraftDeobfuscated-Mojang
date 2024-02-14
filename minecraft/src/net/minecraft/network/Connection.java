@@ -237,9 +237,7 @@ public class Connection extends SimpleChannelInboundHandler<Packet<?>> {
 	public void setListenerForServerboundHandshake(PacketListener packetListener) {
 		if (this.packetListener != null) {
 			throw new IllegalStateException("Listener already set");
-		} else if (this.receiving == PacketFlow.SERVERBOUND && packetListener.flow() == PacketFlow.SERVERBOUND && packetListener.protocol() == INITIAL_PROTOCOL.id()
-			)
-		 {
+		} else if (this.receiving == PacketFlow.SERVERBOUND && packetListener.flow() == PacketFlow.SERVERBOUND && packetListener.protocol() == INITIAL_PROTOCOL.id()) {
 			this.packetListener = packetListener;
 		} else {
 			throw new IllegalStateException("Invalid initial listener");

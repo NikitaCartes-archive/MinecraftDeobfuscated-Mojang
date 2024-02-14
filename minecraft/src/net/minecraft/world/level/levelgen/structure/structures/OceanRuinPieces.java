@@ -295,9 +295,7 @@ public class OceanRuinPieces {
 		}
 
 		@Override
-		protected void handleDataMarker(
-			String string, BlockPos blockPos, ServerLevelAccessor serverLevelAccessor, RandomSource randomSource, BoundingBox boundingBox
-		) {
+		protected void handleDataMarker(String string, BlockPos blockPos, ServerLevelAccessor serverLevelAccessor, RandomSource randomSource, BoundingBox boundingBox) {
 			if ("chest".equals(string)) {
 				serverLevelAccessor.setBlock(
 					blockPos,

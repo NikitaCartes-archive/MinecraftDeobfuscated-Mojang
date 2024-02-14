@@ -270,8 +270,7 @@ public class EndCityPieces {
 		StructureTemplateManager structureTemplateManager, EndCityPieces.EndCityPiece endCityPiece, BlockPos blockPos, String string, Rotation rotation, boolean bl
 	) {
 		EndCityPieces.EndCityPiece endCityPiece2 = new EndCityPieces.EndCityPiece(structureTemplateManager, string, endCityPiece.templatePosition(), rotation, bl);
-		BlockPos blockPos2 = endCityPiece.template()
-			.calculateConnectedPosition(endCityPiece.placeSettings(), blockPos, endCityPiece2.placeSettings(), BlockPos.ZERO);
+		BlockPos blockPos2 = endCityPiece.template().calculateConnectedPosition(endCityPiece.placeSettings(), blockPos, endCityPiece2.placeSettings(), BlockPos.ZERO);
 		endCityPiece2.move(blockPos2.getX(), blockPos2.getY(), blockPos2.getZ());
 		return endCityPiece2;
 	}
@@ -367,9 +366,7 @@ public class EndCityPieces {
 		}
 
 		@Override
-		protected void handleDataMarker(
-			String string, BlockPos blockPos, ServerLevelAccessor serverLevelAccessor, RandomSource randomSource, BoundingBox boundingBox
-		) {
+		protected void handleDataMarker(String string, BlockPos blockPos, ServerLevelAccessor serverLevelAccessor, RandomSource randomSource, BoundingBox boundingBox) {
 			if (string.startsWith("Chest")) {
 				BlockPos blockPos2 = blockPos.below();
 				if (boundingBox.isInside(blockPos2)) {

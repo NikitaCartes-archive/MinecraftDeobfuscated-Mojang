@@ -18,9 +18,7 @@ public interface SculkBehaviour {
 			if (collection == null) {
 				return ((SculkVeinBlock)Blocks.SCULK_VEIN).getSameSpaceSpreader().spreadAll(levelAccessor.getBlockState(blockPos), levelAccessor, blockPos, bl) > 0L;
 			} else if (!collection.isEmpty()) {
-				return !blockState.isAir() && !blockState.getFluidState().is(Fluids.WATER)
-					? false
-					: SculkVeinBlock.regrow(levelAccessor, blockPos, blockState, collection);
+				return !blockState.isAir() && !blockState.getFluidState().is(Fluids.WATER) ? false : SculkVeinBlock.regrow(levelAccessor, blockPos, blockState, collection);
 			} else {
 				return SculkBehaviour.super.attemptSpreadVein(levelAccessor, blockPos, blockState, collection, bl);
 			}

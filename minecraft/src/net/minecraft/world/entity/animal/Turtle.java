@@ -59,7 +59,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.TurtleEggBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.phys.Vec3;
 
 public class Turtle extends Animal {
@@ -80,10 +80,10 @@ public class Turtle extends Animal {
 
 	public Turtle(EntityType<? extends Turtle> entityType, Level level) {
 		super(entityType, level);
-		this.setPathfindingMalus(BlockPathTypes.WATER, 0.0F);
-		this.setPathfindingMalus(BlockPathTypes.DOOR_IRON_CLOSED, -1.0F);
-		this.setPathfindingMalus(BlockPathTypes.DOOR_WOOD_CLOSED, -1.0F);
-		this.setPathfindingMalus(BlockPathTypes.DOOR_OPEN, -1.0F);
+		this.setPathfindingMalus(PathType.WATER, 0.0F);
+		this.setPathfindingMalus(PathType.DOOR_IRON_CLOSED, -1.0F);
+		this.setPathfindingMalus(PathType.DOOR_WOOD_CLOSED, -1.0F);
+		this.setPathfindingMalus(PathType.DOOR_OPEN, -1.0F);
 		this.moveControl = new Turtle.TurtleMoveControl(this);
 	}
 

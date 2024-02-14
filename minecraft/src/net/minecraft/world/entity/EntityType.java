@@ -79,6 +79,7 @@ import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.item.PrimedTnt;
 import net.minecraft.world.entity.monster.Blaze;
+import net.minecraft.world.entity.monster.Bogged;
 import net.minecraft.world.entity.monster.CaveSpider;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Drowned;
@@ -158,7 +159,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.entity.EntityTypeTest;
-import net.minecraft.world.level.pathfinder.WalkNodeEvaluator;
+import net.minecraft.world.level.pathfinder.NodeEvaluator;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -215,6 +216,14 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 	);
 	public static final EntityType<Boat> BOAT = register(
 		"boat", EntityType.Builder.<Boat>of(Boat::new, MobCategory.MISC).sized(1.375F, 0.5625F).eyeHeight(0.5625F).clientTrackingRange(10)
+	);
+	public static final EntityType<Bogged> BOGGED = register(
+		"bogged",
+		EntityType.Builder.<Bogged>of(Bogged::new, MobCategory.MONSTER)
+			.sized(0.6F, 1.99F)
+			.eyeHeight(1.74F)
+			.clientTrackingRange(8)
+			.requiredFeatures(FeatureFlags.UPDATE_1_21)
 	);
 	public static final EntityType<Breeze> BREEZE = register(
 		"breeze",
@@ -316,8 +325,7 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 		EntityType.Builder.<EnderDragon>of(EnderDragon::new, MobCategory.MONSTER).fireImmune().sized(16.0F, 8.0F).passengerAttachments(3.0F).clientTrackingRange(10)
 	);
 	public static final EntityType<ThrownEnderpearl> ENDER_PEARL = register(
-		"ender_pearl",
-		EntityType.Builder.<ThrownEnderpearl>of(ThrownEnderpearl::new, MobCategory.MISC).sized(0.25F, 0.25F).clientTrackingRange(4).updateInterval(10)
+		"ender_pearl", EntityType.Builder.<ThrownEnderpearl>of(ThrownEnderpearl::new, MobCategory.MISC).sized(0.25F, 0.25F).clientTrackingRange(4).updateInterval(10)
 	);
 	public static final EntityType<EnderMan> ENDERMAN = register(
 		"enderman",
@@ -325,11 +333,7 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 	);
 	public static final EntityType<Endermite> ENDERMITE = register(
 		"endermite",
-		EntityType.Builder.<Endermite>of(Endermite::new, MobCategory.MONSTER)
-			.sized(0.4F, 0.3F)
-			.eyeHeight(0.13F)
-			.passengerAttachments(0.2375F)
-			.clientTrackingRange(8)
+		EntityType.Builder.<Endermite>of(Endermite::new, MobCategory.MONSTER).sized(0.4F, 0.3F).eyeHeight(0.13F).passengerAttachments(0.2375F).clientTrackingRange(8)
 	);
 	public static final EntityType<Evoker> EVOKER = register(
 		"evoker",
@@ -403,11 +407,7 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 	);
 	public static final EntityType<Guardian> GUARDIAN = register(
 		"guardian",
-		EntityType.Builder.<Guardian>of(Guardian::new, MobCategory.MONSTER)
-			.sized(0.85F, 0.85F)
-			.eyeHeight(0.425F)
-			.passengerAttachments(0.975F)
-			.clientTrackingRange(8)
+		EntityType.Builder.<Guardian>of(Guardian::new, MobCategory.MONSTER).sized(0.85F, 0.85F).eyeHeight(0.425F).passengerAttachments(0.975F).clientTrackingRange(8)
 	);
 	public static final EntityType<Hoglin> HOGLIN = register(
 		"hoglin", EntityType.Builder.<Hoglin>of(Hoglin::new, MobCategory.MONSTER).sized(1.3964844F, 1.4F).passengerAttachments(1.49375F).clientTrackingRange(8)
@@ -448,8 +448,7 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 		"iron_golem", EntityType.Builder.<IronGolem>of(IronGolem::new, MobCategory.MISC).sized(1.4F, 2.7F).clientTrackingRange(10)
 	);
 	public static final EntityType<ItemEntity> ITEM = register(
-		"item",
-		EntityType.Builder.<ItemEntity>of(ItemEntity::new, MobCategory.MISC).sized(0.25F, 0.25F).eyeHeight(0.2125F).clientTrackingRange(6).updateInterval(20)
+		"item", EntityType.Builder.<ItemEntity>of(ItemEntity::new, MobCategory.MISC).sized(0.25F, 0.25F).eyeHeight(0.2125F).clientTrackingRange(6).updateInterval(20)
 	);
 	public static final EntityType<Display.ItemDisplay> ITEM_DISPLAY = register(
 		"item_display",
@@ -495,8 +494,7 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 		"llama_spit", EntityType.Builder.<LlamaSpit>of(LlamaSpit::new, MobCategory.MISC).sized(0.25F, 0.25F).clientTrackingRange(4).updateInterval(10)
 	);
 	public static final EntityType<MagmaCube> MAGMA_CUBE = register(
-		"magma_cube",
-		EntityType.Builder.<MagmaCube>of(MagmaCube::new, MobCategory.MONSTER).fireImmune().sized(0.52F, 0.52F).eyeHeight(0.325F).clientTrackingRange(8)
+		"magma_cube", EntityType.Builder.<MagmaCube>of(MagmaCube::new, MobCategory.MONSTER).fireImmune().sized(0.52F, 0.52F).eyeHeight(0.325F).clientTrackingRange(8)
 	);
 	public static final EntityType<Marker> MARKER = register(
 		"marker", EntityType.Builder.<Marker>of(Marker::new, MobCategory.MISC).sized(0.0F, 0.0F).clientTrackingRange(0)
@@ -1102,7 +1100,7 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 	public boolean isBlockDangerous(BlockState blockState) {
 		if (this.immuneTo.contains(blockState.getBlock())) {
 			return false;
-		} else if (!this.fireImmune && WalkNodeEvaluator.isBurningBlock(blockState)) {
+		} else if (!this.fireImmune && NodeEvaluator.isBurningBlock(blockState)) {
 			return true;
 		} else {
 			return blockState.is(Blocks.WITHER_ROSE) || blockState.is(Blocks.SWEET_BERRY_BUSH) || blockState.is(Blocks.CACTUS) || blockState.is(Blocks.POWDER_SNOW);

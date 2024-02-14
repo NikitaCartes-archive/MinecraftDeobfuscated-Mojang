@@ -63,6 +63,7 @@ public class VanillaEntityLoot extends EntityLootSubProvider {
 						.when(LootItemKilledByPlayerCondition.killedByPlayer())
 				)
 		);
+		this.add(EntityType.BOGGED, LootTable.lootTable());
 		this.add(
 			EntityType.CAT,
 			LootTable.lootTable()
@@ -316,9 +317,7 @@ public class VanillaEntityLoot extends EntityLootSubProvider {
 								.apply(LootingEnchantFunction.lootingMultiplier(UniformGenerator.between(0.0F, 1.0F)))
 								.apply(SmeltItemFunction.smelted().when(LootItemEntityPropertyCondition.hasProperties(LootContext.EntityTarget.THIS, ENTITY_ON_FIRE)))
 						)
-						.add(
-							LootItem.lootTableItem(Items.PRISMARINE_CRYSTALS).setWeight(2).apply(LootingEnchantFunction.lootingMultiplier(UniformGenerator.between(0.0F, 1.0F)))
-						)
+						.add(LootItem.lootTableItem(Items.PRISMARINE_CRYSTALS).setWeight(2).apply(LootingEnchantFunction.lootingMultiplier(UniformGenerator.between(0.0F, 1.0F))))
 						.add(EmptyLootItem.emptyItem())
 				)
 				.withPool(

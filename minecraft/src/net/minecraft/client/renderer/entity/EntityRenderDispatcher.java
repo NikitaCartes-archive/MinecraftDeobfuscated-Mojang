@@ -236,10 +236,7 @@ public class EntityRenderDispatcher implements ResourceManagerReloadListener {
 
 		Vec3 vec32 = entity.getViewVector(f);
 		PoseStack.Pose pose = poseStack.last();
-		vertexConsumer.vertex(pose, 0.0F, entity.getEyeHeight(), 0.0F)
-			.color(0, 0, 255, 255)
-			.normal(pose, (float)vec32.x, (float)vec32.y, (float)vec32.z)
-			.endVertex();
+		vertexConsumer.vertex(pose, 0.0F, entity.getEyeHeight(), 0.0F).color(0, 0, 255, 255).normal(pose, (float)vec32.x, (float)vec32.y, (float)vec32.z).endVertex();
 		vertexConsumer.vertex(pose, (float)(vec32.x * 2.0), (float)((double)entity.getEyeHeight() + vec32.y * 2.0), (float)(vec32.z * 2.0))
 			.color(0, 0, 255, 255)
 			.normal(pose, (float)vec32.x, (float)vec32.y, (float)vec32.z)

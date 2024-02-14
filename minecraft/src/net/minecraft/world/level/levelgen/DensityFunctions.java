@@ -255,9 +255,8 @@ public final class DensityFunctions {
 		return add(mul(densityFunction, add(densityFunction2, constant(-d))), constant(d));
 	}
 
-	static record Ap2(
-		DensityFunctions.TwoArgumentSimpleFunction.Type type, DensityFunction argument1, DensityFunction argument2, double minValue, double maxValue
-	) implements DensityFunctions.TwoArgumentSimpleFunction {
+	static record Ap2(DensityFunctions.TwoArgumentSimpleFunction.Type type, DensityFunction argument1, DensityFunction argument2, double minValue, double maxValue)
+		implements DensityFunctions.TwoArgumentSimpleFunction {
 		@Override
 		public double compute(DensityFunction.FunctionContext functionContext) {
 			double d = this.argument1.compute(functionContext);

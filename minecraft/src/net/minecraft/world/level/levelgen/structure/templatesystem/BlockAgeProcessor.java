@@ -65,9 +65,7 @@ public class BlockAgeProcessor extends StructureProcessor {
 		if (randomSource.nextFloat() >= 0.5F) {
 			return null;
 		} else {
-			BlockState[] blockStates = new BlockState[]{
-				Blocks.CRACKED_STONE_BRICKS.defaultBlockState(), getRandomFacingStairs(randomSource, Blocks.STONE_BRICK_STAIRS)
-			};
+			BlockState[] blockStates = new BlockState[]{Blocks.CRACKED_STONE_BRICKS.defaultBlockState(), getRandomFacingStairs(randomSource, Blocks.STONE_BRICK_STAIRS)};
 			BlockState[] blockStates2 = new BlockState[]{
 				Blocks.MOSSY_STONE_BRICKS.defaultBlockState(), getRandomFacingStairs(randomSource, Blocks.MOSSY_STONE_BRICK_STAIRS)
 			};

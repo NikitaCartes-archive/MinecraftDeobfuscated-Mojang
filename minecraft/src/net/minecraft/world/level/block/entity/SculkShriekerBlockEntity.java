@@ -95,10 +95,7 @@ public class SculkShriekerBlockEntity extends BlockEntity implements GameEventLi
 	protected void saveAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
 		super.saveAdditional(compoundTag, provider);
 		compoundTag.putInt("warning_level", this.warningLevel);
-		VibrationSystem.Data.CODEC
-			.encodeStart(NbtOps.INSTANCE, this.vibrationData)
-			.resultOrPartial(LOGGER::error)
-			.ifPresent(tag -> compoundTag.put("listener", tag));
+		VibrationSystem.Data.CODEC.encodeStart(NbtOps.INSTANCE, this.vibrationData).resultOrPartial(LOGGER::error).ifPresent(tag -> compoundTag.put("listener", tag));
 	}
 
 	@Nullable

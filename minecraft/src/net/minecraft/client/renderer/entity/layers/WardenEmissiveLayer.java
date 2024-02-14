@@ -38,9 +38,7 @@ public class WardenEmissiveLayer<T extends Warden, M extends WardenModel<T>> ext
 			this.onlyDrawSelectedParts();
 			VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entityTranslucentEmissive(this.texture));
 			this.getParentModel()
-				.renderToBuffer(
-					poseStack, vertexConsumer, i, LivingEntityRenderer.getOverlayCoords(warden, 0.0F), 1.0F, 1.0F, 1.0F, this.alphaFunction.apply(warden, h, j)
-				);
+				.renderToBuffer(poseStack, vertexConsumer, i, LivingEntityRenderer.getOverlayCoords(warden, 0.0F), 1.0F, 1.0F, 1.0F, this.alphaFunction.apply(warden, h, j));
 			this.resetDrawForAllParts();
 		}
 	}

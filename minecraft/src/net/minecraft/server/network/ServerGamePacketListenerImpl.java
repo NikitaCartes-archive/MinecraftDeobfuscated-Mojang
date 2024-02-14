@@ -1523,8 +1523,7 @@ public class ServerGamePacketListenerImpl
 								}
 							} else {
 								ServerGamePacketListenerImpl.this.disconnect(Component.translatable("multiplayer.disconnect.invalid_entity_attacked"));
-								ServerGamePacketListenerImpl.LOGGER
-									.warn("Player {} tried to attack an invalid entity", ServerGamePacketListenerImpl.this.player.getName().getString());
+								ServerGamePacketListenerImpl.LOGGER.warn("Player {} tried to attack an invalid entity", ServerGamePacketListenerImpl.this.player.getName().getString());
 							}
 						}
 					}

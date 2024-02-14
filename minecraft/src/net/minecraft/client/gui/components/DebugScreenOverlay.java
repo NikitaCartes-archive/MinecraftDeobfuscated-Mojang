@@ -430,8 +430,7 @@ public class DebugScreenOverlay {
 			}
 
 			list.add(
-				this.minecraft.getSoundManager().getDebugString()
-					+ String.format(Locale.ROOT, " (Mood %d%%)", Math.round(this.minecraft.player.getCurrentMood() * 100.0F))
+				this.minecraft.getSoundManager().getDebugString() + String.format(Locale.ROOT, " (Mood %d%%)", Math.round(this.minecraft.player.getCurrentMood() * 100.0F))
 			);
 			return list;
 		}

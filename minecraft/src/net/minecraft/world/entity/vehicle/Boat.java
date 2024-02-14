@@ -176,9 +176,7 @@ public class Boat extends VehicleEntity implements VariantHolder<Boat.Type> {
 			);
 		if (this.random.nextInt(20) == 0) {
 			this.level()
-				.playLocalSound(
-					this.getX(), this.getY(), this.getZ(), this.getSwimSplashSound(), this.getSoundSource(), 1.0F, 0.8F + 0.4F * this.random.nextFloat(), false
-				);
+				.playLocalSound(this.getX(), this.getY(), this.getZ(), this.getSwimSplashSound(), this.getSoundSource(), 1.0F, 0.8F + 0.4F * this.random.nextFloat(), false);
 			this.gameEvent(GameEvent.SPLASH, this.getControllingPassenger());
 		}
 	}
@@ -497,9 +495,7 @@ public class Boat extends VehicleEntity implements VariantHolder<Boat.Type> {
 							mutableBlockPos.set(p, s, q);
 							BlockState blockState = this.level().getBlockState(mutableBlockPos);
 							if (!(blockState.getBlock() instanceof WaterlilyBlock)
-								&& Shapes.joinIsNotEmpty(blockState.getCollisionShape(this.level(), mutableBlockPos).move((double)p, (double)s, (double)q), voxelShape, BooleanOp.AND)
-								)
-							 {
+								&& Shapes.joinIsNotEmpty(blockState.getCollisionShape(this.level(), mutableBlockPos).move((double)p, (double)s, (double)q), voxelShape, BooleanOp.AND)) {
 								f += blockState.getBlock().getFriction();
 								++o;
 							}

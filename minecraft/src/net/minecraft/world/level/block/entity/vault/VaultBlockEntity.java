@@ -226,12 +226,7 @@ public class VaultBlockEntity extends BlockEntity {
 		private static final int INSERT_FAIL_SOUND_BUFFER_TICKS = 15;
 
 		public static void tick(
-			ServerLevel serverLevel,
-			BlockPos blockPos,
-			BlockState blockState,
-			VaultConfig vaultConfig,
-			VaultServerData vaultServerData,
-			VaultSharedData vaultSharedData
+			ServerLevel serverLevel, BlockPos blockPos, BlockState blockState, VaultConfig vaultConfig, VaultServerData vaultServerData, VaultSharedData vaultSharedData
 		) {
 			VaultState vaultState = blockState.getValue(VaultBlock.STATE);
 			if (shouldCycleDisplayItem(serverLevel.getGameTime(), vaultState)) {

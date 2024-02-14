@@ -88,9 +88,7 @@ public class RailState {
 	}
 
 	private boolean hasRail(BlockPos blockPos) {
-		return BaseRailBlock.isRail(this.level, blockPos)
-			|| BaseRailBlock.isRail(this.level, blockPos.above())
-			|| BaseRailBlock.isRail(this.level, blockPos.below());
+		return BaseRailBlock.isRail(this.level, blockPos) || BaseRailBlock.isRail(this.level, blockPos.above()) || BaseRailBlock.isRail(this.level, blockPos.below());
 	}
 
 	@Nullable

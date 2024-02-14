@@ -20,9 +20,7 @@ public class TntMinecartRenderer extends MinecartRenderer<MinecartTNT> {
 		this.blockRenderer = context.getBlockRenderDispatcher();
 	}
 
-	protected void renderMinecartContents(
-		MinecartTNT minecartTNT, float f, BlockState blockState, PoseStack poseStack, MultiBufferSource multiBufferSource, int i
-	) {
+	protected void renderMinecartContents(MinecartTNT minecartTNT, float f, BlockState blockState, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
 		int j = minecartTNT.getFuse();
 		if (j > -1 && (float)j - f + 1.0F < 10.0F) {
 			float g = 1.0F - ((float)j - f + 1.0F) / 10.0F;

@@ -181,9 +181,7 @@ public class BuiltInRegistries {
 	public static final Registry<LootScoreProviderType> LOOT_SCORE_PROVIDER_TYPE = registerSimple(
 		Registries.LOOT_SCORE_PROVIDER_TYPE, registry -> ScoreboardNameProviders.CONTEXT
 	);
-	public static final Registry<FloatProviderType<?>> FLOAT_PROVIDER_TYPE = registerSimple(
-		Registries.FLOAT_PROVIDER_TYPE, registry -> FloatProviderType.CONSTANT
-	);
+	public static final Registry<FloatProviderType<?>> FLOAT_PROVIDER_TYPE = registerSimple(Registries.FLOAT_PROVIDER_TYPE, registry -> FloatProviderType.CONSTANT);
 	public static final Registry<IntProviderType<?>> INT_PROVIDER_TYPE = registerSimple(Registries.INT_PROVIDER_TYPE, registry -> IntProviderType.CONSTANT);
 	public static final Registry<HeightProviderType<?>> HEIGHT_PROVIDER_TYPE = registerSimple(
 		Registries.HEIGHT_PROVIDER_TYPE, registry -> HeightProviderType.CONSTANT
@@ -208,9 +206,7 @@ public class BuiltInRegistries {
 	public static final Registry<TrunkPlacerType<?>> TRUNK_PLACER_TYPE = registerSimple(
 		Registries.TRUNK_PLACER_TYPE, registry -> TrunkPlacerType.STRAIGHT_TRUNK_PLACER
 	);
-	public static final Registry<RootPlacerType<?>> ROOT_PLACER_TYPE = registerSimple(
-		Registries.ROOT_PLACER_TYPE, registry -> RootPlacerType.MANGROVE_ROOT_PLACER
-	);
+	public static final Registry<RootPlacerType<?>> ROOT_PLACER_TYPE = registerSimple(Registries.ROOT_PLACER_TYPE, registry -> RootPlacerType.MANGROVE_ROOT_PLACER);
 	public static final Registry<TreeDecoratorType<?>> TREE_DECORATOR_TYPE = registerSimple(
 		Registries.TREE_DECORATOR_TYPE, registry -> TreeDecoratorType.LEAVE_VINE
 	);

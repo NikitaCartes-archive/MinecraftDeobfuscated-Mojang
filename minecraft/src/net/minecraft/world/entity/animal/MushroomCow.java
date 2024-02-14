@@ -202,10 +202,7 @@ public class MushroomCow extends Cow implements Shearable, VariantHolder<Mushroo
 		super.addAdditionalSaveData(compoundTag);
 		compoundTag.putString("Type", this.getVariant().getSerializedName());
 		if (this.stewEffects != null) {
-			SuspiciousEffectHolder.EffectEntry.LIST_CODEC
-				.encodeStart(NbtOps.INSTANCE, this.stewEffects)
-				.result()
-				.ifPresent(tag -> compoundTag.put("stew_effects", tag));
+			SuspiciousEffectHolder.EffectEntry.LIST_CODEC.encodeStart(NbtOps.INSTANCE, this.stewEffects).result().ifPresent(tag -> compoundTag.put("stew_effects", tag));
 		}
 	}
 

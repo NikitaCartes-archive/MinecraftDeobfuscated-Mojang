@@ -453,8 +453,7 @@ public class VanillaHusbandryAdvancements implements AdvancementSubProvider {
 			.addCriterion(
 				"make_a_sign_glow",
 				ItemUsedOnLocationTrigger.TriggerInstance.itemUsedOnBlock(
-					LocationPredicate.Builder.location().setBlock(BlockPredicate.Builder.block().of(BlockTags.ALL_SIGNS)),
-					ItemPredicate.Builder.item().of(Items.GLOW_INK_SAC)
+					LocationPredicate.Builder.location().setBlock(BlockPredicate.Builder.block().of(BlockTags.ALL_SIGNS)), ItemPredicate.Builder.item().of(Items.GLOW_INK_SAC)
 				)
 			)
 			.save(consumer, "husbandry/make_a_sign_glow");

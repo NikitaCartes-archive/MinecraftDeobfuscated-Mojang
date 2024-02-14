@@ -32,16 +32,12 @@ public class Potions {
 		"long_fire_resistance", new Potion("fire_resistance", new MobEffectInstance(MobEffects.FIRE_RESISTANCE, 9600))
 	);
 	public static final Holder<Potion> SWIFTNESS = register("swiftness", new Potion(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 3600)));
-	public static final Holder<Potion> LONG_SWIFTNESS = register(
-		"long_swiftness", new Potion("swiftness", new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 9600))
-	);
+	public static final Holder<Potion> LONG_SWIFTNESS = register("long_swiftness", new Potion("swiftness", new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 9600)));
 	public static final Holder<Potion> STRONG_SWIFTNESS = register(
 		"strong_swiftness", new Potion("swiftness", new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 1800, 1))
 	);
 	public static final Holder<Potion> SLOWNESS = register("slowness", new Potion(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 1800)));
-	public static final Holder<Potion> LONG_SLOWNESS = register(
-		"long_slowness", new Potion("slowness", new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 4800))
-	);
+	public static final Holder<Potion> LONG_SLOWNESS = register("long_slowness", new Potion("slowness", new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 4800)));
 	public static final Holder<Potion> STRONG_SLOWNESS = register(
 		"strong_slowness", new Potion("slowness", new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 400, 3))
 	);

@@ -27,8 +27,7 @@ public record StatePropertiesPredicate(List<StatePropertiesPredicate.PropertyMat
 					.stream()
 					.map(entry -> new StatePropertiesPredicate.PropertyMatcher((String)entry.getKey(), (StatePropertiesPredicate.ValueMatcher)entry.getValue()))
 					.toList(),
-			list -> (Map)list.stream()
-					.collect(Collectors.toMap(StatePropertiesPredicate.PropertyMatcher::name, StatePropertiesPredicate.PropertyMatcher::valueMatcher))
+			list -> (Map)list.stream().collect(Collectors.toMap(StatePropertiesPredicate.PropertyMatcher::name, StatePropertiesPredicate.PropertyMatcher::valueMatcher))
 		);
 	public static final Codec<StatePropertiesPredicate> CODEC = PROPERTIES_CODEC.xmap(StatePropertiesPredicate::new, StatePropertiesPredicate::properties);
 

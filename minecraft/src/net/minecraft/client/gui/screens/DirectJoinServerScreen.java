@@ -51,9 +51,7 @@ public class DirectJoinServerScreen extends Screen {
 				.build()
 		);
 		this.addRenderableWidget(
-			Button.builder(CommonComponents.GUI_CANCEL, button -> this.callback.accept(false))
-				.bounds(this.width / 2 - 100, this.height / 4 + 120 + 12, 200, 20)
-				.build()
+			Button.builder(CommonComponents.GUI_CANCEL, button -> this.callback.accept(false)).bounds(this.width / 2 - 100, this.height / 4 + 120 + 12, 200, 20).build()
 		);
 		this.updateSelectButtonStatus();
 	}

@@ -97,10 +97,7 @@ public class NetherFeatures {
 			bootstrapContext, WARPED_FOREST_VEGETATION_BONEMEAL, Feature.NETHER_FOREST_VEGETATION, new NetherForestVegetationConfig(weightedStateProvider2, 3, 1)
 		);
 		FeatureUtils.register(
-			bootstrapContext,
-			NETHER_SPROUTS,
-			Feature.NETHER_FOREST_VEGETATION,
-			new NetherForestVegetationConfig(BlockStateProvider.simple(Blocks.NETHER_SPROUTS), 8, 4)
+			bootstrapContext, NETHER_SPROUTS, Feature.NETHER_FOREST_VEGETATION, new NetherForestVegetationConfig(BlockStateProvider.simple(Blocks.NETHER_SPROUTS), 8, 4)
 		);
 		FeatureUtils.register(
 			bootstrapContext,
@@ -146,9 +143,7 @@ public class NetherFeatures {
 			bootstrapContext,
 			PATCH_FIRE,
 			Feature.RANDOM_PATCH,
-			FeatureUtils.simplePatchConfiguration(
-				Feature.SIMPLE_BLOCK, new SimpleBlockConfiguration(BlockStateProvider.simple(Blocks.FIRE)), List.of(Blocks.NETHERRACK)
-			)
+			FeatureUtils.simplePatchConfiguration(Feature.SIMPLE_BLOCK, new SimpleBlockConfiguration(BlockStateProvider.simple(Blocks.FIRE)), List.of(Blocks.NETHERRACK))
 		);
 		FeatureUtils.register(
 			bootstrapContext,

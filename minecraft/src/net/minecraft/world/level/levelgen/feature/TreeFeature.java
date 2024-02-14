@@ -169,9 +169,7 @@ public class TreeFeature extends Feature<TreeConfiguration> {
 		}
 	}
 
-	private static DiscreteVoxelShape updateLeaves(
-		LevelAccessor levelAccessor, BoundingBox boundingBox, Set<BlockPos> set, Set<BlockPos> set2, Set<BlockPos> set3
-	) {
+	private static DiscreteVoxelShape updateLeaves(LevelAccessor levelAccessor, BoundingBox boundingBox, Set<BlockPos> set, Set<BlockPos> set2, Set<BlockPos> set3) {
 		DiscreteVoxelShape discreteVoxelShape = new BitSetDiscreteVoxelShape(boundingBox.getXSpan(), boundingBox.getYSpan(), boundingBox.getZSpan());
 		int i = 7;
 		List<Set<BlockPos>> list = Lists.newArrayList();

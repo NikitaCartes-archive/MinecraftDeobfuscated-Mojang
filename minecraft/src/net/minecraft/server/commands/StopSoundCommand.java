@@ -74,9 +74,7 @@ public class StopSoundCommand {
 				commandSourceStack.sendSuccess(() -> Component.translatable("commands.stopsound.success.source.any", soundSource.getName()), true);
 			}
 		} else if (resourceLocation != null) {
-			commandSourceStack.sendSuccess(
-				() -> Component.translatable("commands.stopsound.success.sourceless.sound", Component.translationArg(resourceLocation)), true
-			);
+			commandSourceStack.sendSuccess(() -> Component.translatable("commands.stopsound.success.sourceless.sound", Component.translationArg(resourceLocation)), true);
 		} else {
 			commandSourceStack.sendSuccess(() -> Component.translatable("commands.stopsound.success.sourceless.any"), true);
 		}

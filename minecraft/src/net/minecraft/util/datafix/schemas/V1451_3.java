@@ -41,9 +41,7 @@ public class V1451_3 extends NamespacedSchema {
 			"minecraft:chest_minecart",
 			(Supplier<TypeTemplate>)(() -> DSL.optionalFields("DisplayState", References.BLOCK_STATE.in(schema), "Items", DSL.list(References.ITEM_STACK.in(schema))))
 		);
-		schema.register(
-			map, "minecraft:commandblock_minecart", (Supplier<TypeTemplate>)(() -> DSL.optionalFields("DisplayState", References.BLOCK_STATE.in(schema)))
-		);
+		schema.register(map, "minecraft:commandblock_minecart", (Supplier<TypeTemplate>)(() -> DSL.optionalFields("DisplayState", References.BLOCK_STATE.in(schema))));
 		schema.register(map, "minecraft:furnace_minecart", (Supplier<TypeTemplate>)(() -> DSL.optionalFields("DisplayState", References.BLOCK_STATE.in(schema))));
 		schema.register(
 			map,

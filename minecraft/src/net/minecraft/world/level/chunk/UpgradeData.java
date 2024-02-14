@@ -250,9 +250,7 @@ public class UpgradeData {
 	}
 
 	public interface BlockFixer {
-		BlockState updateShape(
-			BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
-		);
+		BlockState updateShape(BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2);
 
 		default void processChunk(LevelAccessor levelAccessor) {
 		}
@@ -355,14 +353,7 @@ public class UpgradeData {
 			}
 		},
 		LEAVES(
-			true,
-			Blocks.ACACIA_LEAVES,
-			Blocks.CHERRY_LEAVES,
-			Blocks.BIRCH_LEAVES,
-			Blocks.DARK_OAK_LEAVES,
-			Blocks.JUNGLE_LEAVES,
-			Blocks.OAK_LEAVES,
-			Blocks.SPRUCE_LEAVES
+			true, Blocks.ACACIA_LEAVES, Blocks.CHERRY_LEAVES, Blocks.BIRCH_LEAVES, Blocks.DARK_OAK_LEAVES, Blocks.JUNGLE_LEAVES, Blocks.OAK_LEAVES, Blocks.SPRUCE_LEAVES
 		) {
 			private final ThreadLocal<List<ObjectSet<BlockPos>>> queue = ThreadLocal.withInitial(() -> Lists.newArrayListWithCapacity(7));
 

@@ -10,9 +10,7 @@ import net.minecraft.util.Mth;
 public class DustParticleBase<T extends DustParticleOptionsBase> extends TextureSheetParticle {
 	private final SpriteSet sprites;
 
-	protected DustParticleBase(
-		ClientLevel clientLevel, double d, double e, double f, double g, double h, double i, T dustParticleOptionsBase, SpriteSet spriteSet
-	) {
+	protected DustParticleBase(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i, T dustParticleOptionsBase, SpriteSet spriteSet) {
 		super(clientLevel, d, e, f, g, h, i);
 		this.friction = 0.96F;
 		this.speedUpWhenYMotionIsBlocked = true;

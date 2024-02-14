@@ -149,9 +149,7 @@ public class ChestRenderer<T extends BlockEntity & LidBlockEntity> implements Bl
 		}
 	}
 
-	private void render(
-		PoseStack poseStack, VertexConsumer vertexConsumer, ModelPart modelPart, ModelPart modelPart2, ModelPart modelPart3, float f, int i, int j
-	) {
+	private void render(PoseStack poseStack, VertexConsumer vertexConsumer, ModelPart modelPart, ModelPart modelPart2, ModelPart modelPart3, float f, int i, int j) {
 		modelPart.xRot = -(f * (float) (Math.PI / 2));
 		modelPart2.xRot = modelPart.xRot;
 		modelPart.render(poseStack, vertexConsumer, i, j);

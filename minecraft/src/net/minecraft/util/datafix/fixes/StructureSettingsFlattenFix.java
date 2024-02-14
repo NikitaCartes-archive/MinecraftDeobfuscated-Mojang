@@ -34,9 +34,7 @@ public class StructureSettingsFlattenFix extends DataFix {
 		Dynamic<?> dynamic = pair.getSecond();
 		return Pair.of(
 			pair.getFirst(),
-			dynamic.update(
-				"generator", dynamicx -> dynamicx.update("settings", dynamicxx -> dynamicxx.update("structures", StructureSettingsFlattenFix::fixStructures))
-			)
+			dynamic.update("generator", dynamicx -> dynamicx.update("settings", dynamicxx -> dynamicxx.update("structures", StructureSettingsFlattenFix::fixStructures)))
 		);
 	}
 

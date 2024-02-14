@@ -63,8 +63,7 @@ public class OreFeatures {
 			OreConfiguration.target(ruleTest3, Blocks.DEEPSLATE_DIAMOND_ORE.defaultBlockState())
 		);
 		List<OreConfiguration.TargetBlockState> list4 = List.of(
-			OreConfiguration.target(ruleTest2, Blocks.LAPIS_ORE.defaultBlockState()),
-			OreConfiguration.target(ruleTest3, Blocks.DEEPSLATE_LAPIS_ORE.defaultBlockState())
+			OreConfiguration.target(ruleTest2, Blocks.LAPIS_ORE.defaultBlockState()), OreConfiguration.target(ruleTest3, Blocks.DEEPSLATE_LAPIS_ORE.defaultBlockState())
 		);
 		List<OreConfiguration.TargetBlockState> list5 = List.of(
 			OreConfiguration.target(ruleTest2, Blocks.COPPER_ORE.defaultBlockState()),

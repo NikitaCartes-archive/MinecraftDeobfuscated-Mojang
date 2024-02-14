@@ -640,14 +640,7 @@ public final class OverworldBiomeBuilder {
 					resourceKey3
 				);
 				this.addSurfaceBiome(
-					consumer,
-					parameter2,
-					parameter3,
-					this.nearInlandContinentalness,
-					Climate.Parameter.span(this.erosions[2], this.erosions[3]),
-					parameter,
-					0.0F,
-					resourceKey
+					consumer, parameter2, parameter3, this.nearInlandContinentalness, Climate.Parameter.span(this.erosions[2], this.erosions[3]), parameter, 0.0F, resourceKey
 				);
 				this.addSurfaceBiome(
 					consumer,

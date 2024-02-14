@@ -1104,9 +1104,7 @@ public abstract class RenderType extends RenderStateShard {
 		this.asOptional = Optional.of(this);
 	}
 
-	static RenderType.CompositeRenderType create(
-		String string, VertexFormat vertexFormat, VertexFormat.Mode mode, int i, RenderType.CompositeState compositeState
-	) {
+	static RenderType.CompositeRenderType create(String string, VertexFormat vertexFormat, VertexFormat.Mode mode, int i, RenderType.CompositeState compositeState) {
 		return create(string, vertexFormat, mode, i, false, false, compositeState);
 	}
 

@@ -14,15 +14,13 @@ import net.minecraft.world.phys.Vec3;
 
 @Environment(EnvType.CLIENT)
 public abstract class DimensionSpecialEffects {
-	private static final Object2ObjectMap<ResourceLocation, DimensionSpecialEffects> EFFECTS = Util.make(
-		new Object2ObjectArrayMap<>(), object2ObjectArrayMap -> {
-			DimensionSpecialEffects.OverworldEffects overworldEffects = new DimensionSpecialEffects.OverworldEffects();
-			object2ObjectArrayMap.defaultReturnValue(overworldEffects);
-			object2ObjectArrayMap.put(BuiltinDimensionTypes.OVERWORLD_EFFECTS, overworldEffects);
-			object2ObjectArrayMap.put(BuiltinDimensionTypes.NETHER_EFFECTS, new DimensionSpecialEffects.NetherEffects());
-			object2ObjectArrayMap.put(BuiltinDimensionTypes.END_EFFECTS, new DimensionSpecialEffects.EndEffects());
-		}
-	);
+	private static final Object2ObjectMap<ResourceLocation, DimensionSpecialEffects> EFFECTS = Util.make(new Object2ObjectArrayMap<>(), object2ObjectArrayMap -> {
+		DimensionSpecialEffects.OverworldEffects overworldEffects = new DimensionSpecialEffects.OverworldEffects();
+		object2ObjectArrayMap.defaultReturnValue(overworldEffects);
+		object2ObjectArrayMap.put(BuiltinDimensionTypes.OVERWORLD_EFFECTS, overworldEffects);
+		object2ObjectArrayMap.put(BuiltinDimensionTypes.NETHER_EFFECTS, new DimensionSpecialEffects.NetherEffects());
+		object2ObjectArrayMap.put(BuiltinDimensionTypes.END_EFFECTS, new DimensionSpecialEffects.EndEffects());
+	});
 	private final float[] sunriseCol = new float[4];
 	private final float cloudLevel;
 	private final boolean hasGround;

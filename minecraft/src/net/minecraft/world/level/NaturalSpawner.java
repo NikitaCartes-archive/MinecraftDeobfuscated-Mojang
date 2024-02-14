@@ -232,8 +232,9 @@ public final class NaturalSpawner {
 		EntityType<?> entityType = spawnerData.type;
 		if (entityType.getCategory() == MobCategory.MISC) {
 			return false;
-		} else if (!entityType.canSpawnFarFromPlayer()
-			&& d > (double)(entityType.getCategory().getDespawnDistance() * entityType.getCategory().getDespawnDistance())) {
+		} else if (!entityType.canSpawnFarFromPlayer() && d > (double)(entityType.getCategory().getDespawnDistance() * entityType.getCategory().getDespawnDistance())
+			)
+		 {
 			return false;
 		} else if (!entityType.canSummon() || !canSpawnMobAt(serverLevel, structureManager, chunkGenerator, mobCategory, spawnerData, mutableBlockPos)) {
 			return false;

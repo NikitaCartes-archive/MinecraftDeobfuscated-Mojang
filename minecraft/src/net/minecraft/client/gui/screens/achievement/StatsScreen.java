@@ -471,8 +471,9 @@ public class StatsScreen extends Screen implements StatsUpdateListener {
 			super(minecraft, StatsScreen.this.width, StatsScreen.this.height - 96, 32, 9 * 4);
 
 			for(EntityType<?> entityType : BuiltInRegistries.ENTITY_TYPE) {
-				if (StatsScreen.this.stats.getValue(Stats.ENTITY_KILLED.get(entityType)) > 0
-					|| StatsScreen.this.stats.getValue(Stats.ENTITY_KILLED_BY.get(entityType)) > 0) {
+				if (StatsScreen.this.stats.getValue(Stats.ENTITY_KILLED.get(entityType)) > 0 || StatsScreen.this.stats.getValue(Stats.ENTITY_KILLED_BY.get(entityType)) > 0
+					)
+				 {
 					this.addEntry(new StatsScreen.MobsStatisticsList.MobRow(entityType));
 				}
 			}

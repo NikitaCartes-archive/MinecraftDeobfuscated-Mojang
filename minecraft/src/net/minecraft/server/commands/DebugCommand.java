@@ -41,9 +41,7 @@ import org.slf4j.Logger;
 public class DebugCommand {
 	static final Logger LOGGER = LogUtils.getLogger();
 	private static final SimpleCommandExceptionType ERROR_NOT_RUNNING = new SimpleCommandExceptionType(Component.translatable("commands.debug.notRunning"));
-	private static final SimpleCommandExceptionType ERROR_ALREADY_RUNNING = new SimpleCommandExceptionType(
-		Component.translatable("commands.debug.alreadyRunning")
-	);
+	private static final SimpleCommandExceptionType ERROR_ALREADY_RUNNING = new SimpleCommandExceptionType(Component.translatable("commands.debug.alreadyRunning"));
 	static final SimpleCommandExceptionType NO_RECURSIVE_TRACES = new SimpleCommandExceptionType(Component.translatable("commands.debug.function.noRecursion"));
 	static final SimpleCommandExceptionType NO_RETURN_RUN = new SimpleCommandExceptionType(Component.translatable("commands.debug.function.noReturnRun"));
 
@@ -56,9 +54,7 @@ public class DebugCommand {
 				.then(
 					Commands.literal("function")
 						.requires(commandSourceStack -> commandSourceStack.hasPermission(3))
-						.then(
-							Commands.argument("name", FunctionArgument.functions()).suggests(FunctionCommand.SUGGEST_FUNCTION).executes(new DebugCommand.TraceCustomExecutor())
-						)
+						.then(Commands.argument("name", FunctionArgument.functions()).suggests(FunctionCommand.SUGGEST_FUNCTION).executes(new DebugCommand.TraceCustomExecutor()))
 				)
 		);
 	}

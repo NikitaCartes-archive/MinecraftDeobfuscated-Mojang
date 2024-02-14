@@ -243,11 +243,9 @@ public class CampfireBlock extends BaseEntityBlock implements SimpleWaterloggedB
 	@Override
 	protected void onProjectileHit(Level level, BlockState blockState, BlockHitResult blockHitResult, Projectile projectile) {
 		BlockPos blockPos = blockHitResult.getBlockPos();
-		if (!level.isClientSide
-			&& projectile.isOnFire()
-			&& projectile.mayInteract(level, blockPos)
-			&& !blockState.getValue(LIT)
-			&& !blockState.getValue(WATERLOGGED)) {
+		if (!level.isClientSide && projectile.isOnFire() && projectile.mayInteract(level, blockPos) && !blockState.getValue(LIT) && !blockState.getValue(WATERLOGGED)
+			)
+		 {
 			level.setBlock(blockPos, blockState.setValue(BlockStateProperties.LIT, Boolean.valueOf(true)), 11);
 		}
 	}

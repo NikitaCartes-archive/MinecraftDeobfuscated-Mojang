@@ -48,8 +48,8 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.level.pathfinder.Path;
+import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.phys.Vec3;
 
 public class Drowned extends Zombie implements RangedAttackMob {
@@ -61,7 +61,7 @@ public class Drowned extends Zombie implements RangedAttackMob {
 	public Drowned(EntityType<? extends Drowned> entityType, Level level) {
 		super(entityType, level);
 		this.moveControl = new Drowned.DrownedMoveControl(this);
-		this.setPathfindingMalus(BlockPathTypes.WATER, 0.0F);
+		this.setPathfindingMalus(PathType.WATER, 0.0F);
 		this.waterNavigation = new WaterBoundPathNavigation(this, level);
 		this.groundNavigation = new GroundPathNavigation(this, level);
 	}

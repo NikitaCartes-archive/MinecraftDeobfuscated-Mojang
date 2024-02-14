@@ -98,9 +98,7 @@ public class BossBarCommands {
 									Commands.literal("name")
 										.then(
 											Commands.argument("name", ComponentArgument.textComponent(commandBuildContext))
-												.executes(
-													commandContext -> setName(commandContext.getSource(), getBossBar(commandContext), ComponentArgument.getComponent(commandContext, "name"))
-												)
+												.executes(commandContext -> setName(commandContext.getSource(), getBossBar(commandContext), ComponentArgument.getComponent(commandContext, "name")))
 										)
 								)
 								.then(
@@ -115,8 +113,7 @@ public class BossBarCommands {
 											Commands.literal("red").executes(commandContext -> setColor(commandContext.getSource(), getBossBar(commandContext), BossEvent.BossBarColor.RED))
 										)
 										.then(
-											Commands.literal("green")
-												.executes(commandContext -> setColor(commandContext.getSource(), getBossBar(commandContext), BossEvent.BossBarColor.GREEN))
+											Commands.literal("green").executes(commandContext -> setColor(commandContext.getSource(), getBossBar(commandContext), BossEvent.BossBarColor.GREEN))
 										)
 										.then(
 											Commands.literal("yellow")
@@ -127,8 +124,7 @@ public class BossBarCommands {
 												.executes(commandContext -> setColor(commandContext.getSource(), getBossBar(commandContext), BossEvent.BossBarColor.PURPLE))
 										)
 										.then(
-											Commands.literal("white")
-												.executes(commandContext -> setColor(commandContext.getSource(), getBossBar(commandContext), BossEvent.BossBarColor.WHITE))
+											Commands.literal("white").executes(commandContext -> setColor(commandContext.getSource(), getBossBar(commandContext), BossEvent.BossBarColor.WHITE))
 										)
 								)
 								.then(
@@ -174,9 +170,7 @@ public class BossBarCommands {
 									Commands.literal("visible")
 										.then(
 											Commands.argument("visible", BoolArgumentType.bool())
-												.executes(
-													commandContext -> setVisible(commandContext.getSource(), getBossBar(commandContext), BoolArgumentType.getBool(commandContext, "visible"))
-												)
+												.executes(commandContext -> setVisible(commandContext.getSource(), getBossBar(commandContext), BoolArgumentType.getBool(commandContext, "visible")))
 										)
 								)
 								.then(
@@ -206,9 +200,7 @@ public class BossBarCommands {
 	}
 
 	private static int getValue(CommandSourceStack commandSourceStack, CustomBossEvent customBossEvent) {
-		commandSourceStack.sendSuccess(
-			() -> Component.translatable("commands.bossbar.get.value", customBossEvent.getDisplayName(), customBossEvent.getValue()), true
-		);
+		commandSourceStack.sendSuccess(() -> Component.translatable("commands.bossbar.get.value", customBossEvent.getDisplayName(), customBossEvent.getValue()), true);
 		return customBossEvent.getValue();
 	}
 

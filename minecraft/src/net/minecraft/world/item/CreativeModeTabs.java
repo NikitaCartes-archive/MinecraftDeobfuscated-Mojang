@@ -1412,9 +1412,7 @@ public class CreativeModeTabs {
 						output.accept(Items.SPECTRAL_ARROW);
 						itemDisplayParameters.holders()
 							.lookup(Registries.POTION)
-							.ifPresent(
-								registryLookup -> generatePotionEffectTypes(output, registryLookup, Items.TIPPED_ARROW, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS)
-							);
+							.ifPresent(registryLookup -> generatePotionEffectTypes(output, registryLookup, Items.TIPPED_ARROW, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS));
 					}
 				)
 				.build()
@@ -1658,6 +1656,7 @@ public class CreativeModeTabs {
 					output.accept(Items.BAT_SPAWN_EGG);
 					output.accept(Items.BEE_SPAWN_EGG);
 					output.accept(Items.BLAZE_SPAWN_EGG);
+					output.accept(Items.BOGGED_SPAWN_EGG);
 					output.accept(Items.BREEZE_SPAWN_EGG);
 					output.accept(Items.CAMEL_SPAWN_EGG);
 					output.accept(Items.CAT_SPAWN_EGG);

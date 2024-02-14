@@ -611,19 +611,17 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 	}
 
 	private Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure> handleChunkLoadFailure(Throwable throwable, ChunkPos chunkPos) {
-		if (throwable instanceof ReportedException reportedException) {
-			Throwable throwable2 = reportedException.getCause();
-			if (!(throwable2 instanceof IOException)) {
-				this.markPositionReplaceable(chunkPos);
-				throw reportedException;
-			}
-
+		Throwable throwable2 = throwable instanceof ReportedException reportedException ? reportedException.getCause() : throwable;
+		if (throwable2 instanceof IOException) {
 			LOGGER.error("Couldn't load chunk {}", chunkPos, throwable2);
-		} else if (throwable instanceof IOException) {
-			LOGGER.error("Couldn't load chunk {}", chunkPos, throwable);
+			return Either.left(this.createEmptyChunk(chunkPos));
+		} else {
+			CrashReport crashReport = CrashReport.forThrowable(throwable, "Exception loading chunk");
+			CrashReportCategory crashReportCategory = crashReport.addCategory("Chunk being loaded");
+			crashReportCategory.setDetail("pos", chunkPos);
+			this.markPositionReplaceable(chunkPos);
+			throw new ReportedException(crashReport);
 		}
-
-		return Either.left(this.createEmptyChunk(chunkPos));
 	}
 
 	private ChunkAccess createEmptyChunk(ChunkPos chunkPos) {
@@ -668,9 +666,7 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 							var9.getStackTrace();
 							CrashReport crashReport = CrashReport.forThrowable(var9, "Exception generating new chunk");
 							CrashReportCategory crashReportCategory = crashReport.addCategory("Chunk to be generated");
-							crashReportCategory.setDetail(
-								"Status being generated", (CrashReportDetail<String>)(() -> BuiltInRegistries.CHUNK_STATUS.getKey(chunkStatus).toString())
-							);
+							crashReportCategory.setDetail("Status being generated", (CrashReportDetail<String>)(() -> BuiltInRegistries.CHUNK_STATUS.getKey(chunkStatus).toString()));
 							crashReportCategory.setDetail("Location", String.format(Locale.ROOT, "%d,%d", chunkPos.x, chunkPos.z));
 							crashReportCategory.setDetail("Position hash", ChunkPos.asLong(chunkPos.x, chunkPos.z));
 							crashReportCategory.setDetail("Generator", this.generator);
@@ -949,9 +945,7 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 			ChunkPos chunkPos = new ChunkPos(l);
 			ChunkHolder chunkHolder = (ChunkHolder)entry.getValue();
 			Optional<ChunkAccess> optional = Optional.ofNullable(chunkHolder.getLastAvailable());
-			Optional<LevelChunk> optional2 = optional.flatMap(
-				chunkAccess -> chunkAccess instanceof LevelChunk ? Optional.of((LevelChunk)chunkAccess) : Optional.empty()
-			);
+			Optional<LevelChunk> optional2 = optional.flatMap(chunkAccess -> chunkAccess instanceof LevelChunk ? Optional.of((LevelChunk)chunkAccess) : Optional.empty());
 			csvOutput.writeRow(
 				chunkPos.x,
 				chunkPos.z,

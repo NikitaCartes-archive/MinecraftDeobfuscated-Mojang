@@ -12,8 +12,6 @@ public class FilteredSignsFix extends NamedEntityFix {
 
 	@Override
 	protected Typed<?> fix(Typed<?> typed) {
-		return typed.update(
-			DSL.remainderFinder(), dynamic -> dynamic.remove("FilteredText1").remove("FilteredText2").remove("FilteredText3").remove("FilteredText4")
-		);
+		return typed.update(DSL.remainderFinder(), dynamic -> dynamic.remove("FilteredText1").remove("FilteredText2").remove("FilteredText3").remove("FilteredText4"));
 	}
 }

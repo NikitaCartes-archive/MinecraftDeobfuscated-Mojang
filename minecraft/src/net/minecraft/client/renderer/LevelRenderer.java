@@ -1375,15 +1375,11 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 								boolean bl = renderSection.getCompiled().facesCanSeeEachother(direction2, direction3);
 								if (!bl) {
 									++i;
-									vertexConsumer.vertex(
-											matrix4f, (float)(8 + 8 * direction2.getStepX()), (float)(8 + 8 * direction2.getStepY()), (float)(8 + 8 * direction2.getStepZ())
-										)
+									vertexConsumer.vertex(matrix4f, (float)(8 + 8 * direction2.getStepX()), (float)(8 + 8 * direction2.getStepY()), (float)(8 + 8 * direction2.getStepZ()))
 										.color(255, 0, 0, 255)
 										.normal((float)direction2.getStepX(), (float)direction2.getStepY(), (float)direction2.getStepZ())
 										.endVertex();
-									vertexConsumer.vertex(
-											matrix4f, (float)(8 + 8 * direction3.getStepX()), (float)(8 + 8 * direction3.getStepY()), (float)(8 + 8 * direction3.getStepZ())
-										)
+									vertexConsumer.vertex(matrix4f, (float)(8 + 8 * direction3.getStepX()), (float)(8 + 8 * direction3.getStepY()), (float)(8 + 8 * direction3.getStepZ()))
 										.color(255, 0, 0, 255)
 										.normal((float)direction3.getStepX(), (float)direction3.getStepY(), (float)direction3.getStepZ())
 										.endVertex();
@@ -2201,9 +2197,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 		});
 	}
 
-	public static void renderLineBox(
-		VertexConsumer vertexConsumer, double d, double e, double f, double g, double h, double i, float j, float k, float l, float m
-	) {
+	public static void renderLineBox(VertexConsumer vertexConsumer, double d, double e, double f, double g, double h, double i, float j, float k, float l, float m) {
 		renderLineBox(new PoseStack(), vertexConsumer, d, e, f, g, h, i, j, k, l, m, j, k, l);
 	}
 
@@ -2562,9 +2556,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 				break;
 			case 1026:
 				this.level
-					.playLocalSound(
-						blockPos, SoundEvents.ZOMBIE_INFECT, SoundSource.HOSTILE, 2.0F, (randomSource.nextFloat() - randomSource.nextFloat()) * 0.2F + 1.0F, false
-					);
+					.playLocalSound(blockPos, SoundEvents.ZOMBIE_INFECT, SoundSource.HOSTILE, 2.0F, (randomSource.nextFloat() - randomSource.nextFloat()) * 0.2F + 1.0F, false);
 				break;
 			case 1027:
 				this.level
@@ -2799,8 +2791,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 				}
 				break;
 			case 2008:
-				this.level
-					.addParticle(ParticleTypes.EXPLOSION, (double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5, 0.0, 0.0, 0.0);
+				this.level.addParticle(ParticleTypes.EXPLOSION, (double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5, 0.0, 0.0, 0.0);
 				break;
 			case 2009:
 				for(int o = 0; o < 8; ++o) {
@@ -2986,9 +2977,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 						this.level, vaultBlockEntity.getBlockPos(), vaultBlockEntity.getBlockState(), vaultBlockEntity.getSharedData()
 					);
 					this.level
-						.playLocalSound(
-							blockPos, SoundEvents.VAULT_ACTIVATE, SoundSource.BLOCKS, 1.0F, (randomSource.nextFloat() - randomSource.nextFloat()) * 0.2F + 1.0F, true
-						);
+						.playLocalSound(blockPos, SoundEvents.VAULT_ACTIVATE, SoundSource.BLOCKS, 1.0F, (randomSource.nextFloat() - randomSource.nextFloat()) * 0.2F + 1.0F, true);
 				}
 				break;
 			case 3016:

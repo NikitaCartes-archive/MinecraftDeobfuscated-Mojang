@@ -14,10 +14,7 @@ public class ZombieRenderer extends AbstractZombieRenderer<Zombie, ZombieModel<Z
 	}
 
 	public ZombieRenderer(
-		EntityRendererProvider.Context context,
-		ModelLayerLocation modelLayerLocation,
-		ModelLayerLocation modelLayerLocation2,
-		ModelLayerLocation modelLayerLocation3
+		EntityRendererProvider.Context context, ModelLayerLocation modelLayerLocation, ModelLayerLocation modelLayerLocation2, ModelLayerLocation modelLayerLocation3
 	) {
 		super(
 			context,

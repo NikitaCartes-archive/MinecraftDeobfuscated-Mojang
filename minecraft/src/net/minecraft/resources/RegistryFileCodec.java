@@ -65,9 +65,7 @@ public final class RegistryFileCodec<E> implements Codec<Holder<E>> {
 				} else {
 					Pair<ResourceLocation, T> pair = (Pair)dataResult.result().get();
 					ResourceKey<E> resourceKey = ResourceKey.create(this.registryKey, pair.getFirst());
-					return ((DataResult)holderGetter.get(resourceKey)
-							.map(DataResult::success)
-							.orElseGet(() -> DataResult.error(() -> "Failed to get element " + resourceKey)))
+					return ((DataResult)holderGetter.get(resourceKey).map(DataResult::success).orElseGet(() -> DataResult.error(() -> "Failed to get element " + resourceKey)))
 						.<Pair<Holder<E>, T>>map(reference -> Pair.of(reference, pair.getSecond()))
 						.setLifecycle(Lifecycle.stable());
 				}

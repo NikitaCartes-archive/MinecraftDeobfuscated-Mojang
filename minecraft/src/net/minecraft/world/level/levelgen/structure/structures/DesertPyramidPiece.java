@@ -113,17 +113,7 @@ public class DesertPyramidPiece extends ScatteredFeaturePiece {
 				worldGenLevel, boundingBox, this.width - 5, 0, 0, this.width - 1, 9, 4, Blocks.SANDSTONE.defaultBlockState(), Blocks.AIR.defaultBlockState(), false
 			);
 			this.generateBox(
-				worldGenLevel,
-				boundingBox,
-				this.width - 4,
-				10,
-				1,
-				this.width - 2,
-				10,
-				3,
-				Blocks.SANDSTONE.defaultBlockState(),
-				Blocks.SANDSTONE.defaultBlockState(),
-				false
+				worldGenLevel, boundingBox, this.width - 4, 10, 1, this.width - 2, 10, 3, Blocks.SANDSTONE.defaultBlockState(), Blocks.SANDSTONE.defaultBlockState(), false
 			);
 			this.placeBlock(worldGenLevel, blockState, this.width - 3, 10, 0, boundingBox);
 			this.placeBlock(worldGenLevel, blockState2, this.width - 3, 10, 4, boundingBox);
@@ -149,9 +139,7 @@ public class DesertPyramidPiece extends ScatteredFeaturePiece {
 			this.generateBox(worldGenLevel, boundingBox, 8, 1, 8, 8, 3, 8, Blocks.CUT_SANDSTONE.defaultBlockState(), Blocks.CUT_SANDSTONE.defaultBlockState(), false);
 			this.generateBox(worldGenLevel, boundingBox, 12, 1, 8, 12, 3, 8, Blocks.CUT_SANDSTONE.defaultBlockState(), Blocks.CUT_SANDSTONE.defaultBlockState(), false);
 			this.generateBox(worldGenLevel, boundingBox, 8, 1, 12, 8, 3, 12, Blocks.CUT_SANDSTONE.defaultBlockState(), Blocks.CUT_SANDSTONE.defaultBlockState(), false);
-			this.generateBox(
-				worldGenLevel, boundingBox, 12, 1, 12, 12, 3, 12, Blocks.CUT_SANDSTONE.defaultBlockState(), Blocks.CUT_SANDSTONE.defaultBlockState(), false
-			);
+			this.generateBox(worldGenLevel, boundingBox, 12, 1, 12, 12, 3, 12, Blocks.CUT_SANDSTONE.defaultBlockState(), Blocks.CUT_SANDSTONE.defaultBlockState(), false);
 			this.generateBox(worldGenLevel, boundingBox, 1, 1, 5, 4, 4, 11, Blocks.SANDSTONE.defaultBlockState(), Blocks.SANDSTONE.defaultBlockState(), false);
 			this.generateBox(
 				worldGenLevel, boundingBox, this.width - 5, 1, 5, this.width - 2, 4, 11, Blocks.SANDSTONE.defaultBlockState(), Blocks.SANDSTONE.defaultBlockState(), false
@@ -288,9 +276,7 @@ public class DesertPyramidPiece extends ScatteredFeaturePiece {
 			this.generateBox(
 				worldGenLevel, boundingBox, 8, -10, 8, 12, -10, 12, Blocks.CHISELED_SANDSTONE.defaultBlockState(), Blocks.CHISELED_SANDSTONE.defaultBlockState(), false
 			);
-			this.generateBox(
-				worldGenLevel, boundingBox, 8, -9, 8, 12, -9, 12, Blocks.CUT_SANDSTONE.defaultBlockState(), Blocks.CUT_SANDSTONE.defaultBlockState(), false
-			);
+			this.generateBox(worldGenLevel, boundingBox, 8, -9, 8, 12, -9, 12, Blocks.CUT_SANDSTONE.defaultBlockState(), Blocks.CUT_SANDSTONE.defaultBlockState(), false);
 			this.generateBox(worldGenLevel, boundingBox, 8, -8, 8, 12, -1, 12, Blocks.SANDSTONE.defaultBlockState(), Blocks.SANDSTONE.defaultBlockState(), false);
 			this.generateBox(worldGenLevel, boundingBox, 9, -11, 9, 11, -1, 11, Blocks.AIR.defaultBlockState(), Blocks.AIR.defaultBlockState(), false);
 			this.placeBlock(worldGenLevel, Blocks.STONE_PRESSURE_PLATE.defaultBlockState(), 10, -11, 10, boundingBox);

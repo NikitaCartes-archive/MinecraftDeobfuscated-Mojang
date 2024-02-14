@@ -52,8 +52,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.level.pathfinder.Path;
+import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.LootTable;
@@ -86,9 +86,9 @@ public class Sniffer extends Animal {
 	public Sniffer(EntityType<? extends Animal> entityType, Level level) {
 		super(entityType, level);
 		this.getNavigation().setCanFloat(true);
-		this.setPathfindingMalus(BlockPathTypes.WATER, -1.0F);
-		this.setPathfindingMalus(BlockPathTypes.DANGER_POWDER_SNOW, -1.0F);
-		this.setPathfindingMalus(BlockPathTypes.DAMAGE_CAUTIOUS, -1.0F);
+		this.setPathfindingMalus(PathType.WATER, -1.0F);
+		this.setPathfindingMalus(PathType.DANGER_POWDER_SNOW, -1.0F);
+		this.setPathfindingMalus(PathType.DAMAGE_CAUTIOUS, -1.0F);
 	}
 
 	@Override
@@ -102,13 +102,13 @@ public class Sniffer extends Animal {
 	public void onPathfindingStart() {
 		super.onPathfindingStart();
 		if (this.isOnFire() || this.isInWater()) {
-			this.setPathfindingMalus(BlockPathTypes.WATER, 0.0F);
+			this.setPathfindingMalus(PathType.WATER, 0.0F);
 		}
 	}
 
 	@Override
 	public void onPathfindingDone() {
-		this.setPathfindingMalus(BlockPathTypes.WATER, -1.0F);
+		this.setPathfindingMalus(PathType.WATER, -1.0F);
 	}
 
 	@Override

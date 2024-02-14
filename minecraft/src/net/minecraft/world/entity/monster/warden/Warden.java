@@ -64,9 +64,9 @@ import net.minecraft.world.level.gameevent.EntityPositionSource;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.gameevent.PositionSource;
 import net.minecraft.world.level.gameevent.vibrations.VibrationSystem;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.level.pathfinder.Node;
 import net.minecraft.world.level.pathfinder.PathFinder;
+import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.level.pathfinder.WalkNodeEvaluator;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Contract;
@@ -118,12 +118,12 @@ public class Warden extends Monster implements VibrationSystem {
 		this.dynamicGameEventListener = new DynamicGameEventListener<>(new VibrationSystem.Listener(this));
 		this.xpReward = 5;
 		this.getNavigation().setCanFloat(true);
-		this.setPathfindingMalus(BlockPathTypes.UNPASSABLE_RAIL, 0.0F);
-		this.setPathfindingMalus(BlockPathTypes.DAMAGE_OTHER, 8.0F);
-		this.setPathfindingMalus(BlockPathTypes.POWDER_SNOW, 8.0F);
-		this.setPathfindingMalus(BlockPathTypes.LAVA, 8.0F);
-		this.setPathfindingMalus(BlockPathTypes.DAMAGE_FIRE, 0.0F);
-		this.setPathfindingMalus(BlockPathTypes.DANGER_FIRE, 0.0F);
+		this.setPathfindingMalus(PathType.UNPASSABLE_RAIL, 0.0F);
+		this.setPathfindingMalus(PathType.DAMAGE_OTHER, 8.0F);
+		this.setPathfindingMalus(PathType.POWDER_SNOW, 8.0F);
+		this.setPathfindingMalus(PathType.LAVA, 8.0F);
+		this.setPathfindingMalus(PathType.DAMAGE_FIRE, 0.0F);
+		this.setPathfindingMalus(PathType.DANGER_FIRE, 0.0F);
 	}
 
 	@Override
@@ -250,8 +250,7 @@ public class Warden extends Monster implements VibrationSystem {
 			if (this.tickCount % this.getHeartBeatDelay() == 0) {
 				this.heartAnimation = 10;
 				if (!this.isSilent()) {
-					this.level()
-						.playLocalSound(this.getX(), this.getY(), this.getZ(), SoundEvents.WARDEN_HEARTBEAT, this.getSoundSource(), 5.0F, this.getVoicePitch(), false);
+					this.level().playLocalSound(this.getX(), this.getY(), this.getZ(), SoundEvents.WARDEN_HEARTBEAT, this.getSoundSource(), 5.0F, this.getVoicePitch(), false);
 				}
 			}
 
@@ -415,10 +414,7 @@ public class Warden extends Monster implements VibrationSystem {
 			.encodeStart(NbtOps.INSTANCE, this.angerManagement)
 			.resultOrPartial(LOGGER::error)
 			.ifPresent(tag -> compoundTag.put("anger", tag));
-		VibrationSystem.Data.CODEC
-			.encodeStart(NbtOps.INSTANCE, this.vibrationData)
-			.resultOrPartial(LOGGER::error)
-			.ifPresent(tag -> compoundTag.put("listener", tag));
+		VibrationSystem.Data.CODEC.encodeStart(NbtOps.INSTANCE, this.vibrationData).resultOrPartial(LOGGER::error).ifPresent(tag -> compoundTag.put("listener", tag));
 	}
 
 	@Override

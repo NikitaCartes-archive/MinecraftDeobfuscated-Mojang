@@ -66,8 +66,7 @@ public class LocateCommand {
 							Commands.argument("structure", ResourceOrTagKeyArgument.resourceOrTagKey(Registries.STRUCTURE))
 								.executes(
 									commandContext -> locateStructure(
-											commandContext.getSource(),
-											ResourceOrTagKeyArgument.getResourceOrTagKey(commandContext, "structure", Registries.STRUCTURE, ERROR_STRUCTURE_INVALID)
+											commandContext.getSource(), ResourceOrTagKeyArgument.getResourceOrTagKey(commandContext, "structure", Registries.STRUCTURE, ERROR_STRUCTURE_INVALID)
 										)
 								)
 						)

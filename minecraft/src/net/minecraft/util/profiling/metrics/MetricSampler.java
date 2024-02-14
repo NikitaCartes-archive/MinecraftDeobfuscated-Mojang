@@ -24,11 +24,7 @@ public class MetricSampler {
 	private double currentValue;
 
 	protected MetricSampler(
-		String string,
-		MetricCategory metricCategory,
-		DoubleSupplier doubleSupplier,
-		@Nullable Runnable runnable,
-		@Nullable MetricSampler.ThresholdTest thresholdTest
+		String string, MetricCategory metricCategory, DoubleSupplier doubleSupplier, @Nullable Runnable runnable, @Nullable MetricSampler.ThresholdTest thresholdTest
 	) {
 		this.name = string;
 		this.category = metricCategory;

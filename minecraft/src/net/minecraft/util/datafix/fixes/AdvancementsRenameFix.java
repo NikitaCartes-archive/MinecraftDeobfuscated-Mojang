@@ -22,9 +22,7 @@ public class AdvancementsRenameFix extends DataFix {
 	@Override
 	protected TypeRewriteRule makeRule() {
 		return this.fixTypeEverywhereTyped(
-			this.name,
-			this.getInputSchema().getType(References.ADVANCEMENTS),
-			typed -> typed.update(DSL.remainderFinder(), dynamic -> dynamic.updateMapValues(pair -> {
+			this.name, this.getInputSchema().getType(References.ADVANCEMENTS), typed -> typed.update(DSL.remainderFinder(), dynamic -> dynamic.updateMapValues(pair -> {
 						String string = ((Dynamic)pair.getFirst()).asString("");
 						return pair.mapFirst(dynamic2 -> dynamic.createString((String)this.renamer.apply(string)));
 					}))

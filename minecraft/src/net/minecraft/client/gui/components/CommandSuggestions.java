@@ -463,11 +463,7 @@ public class CommandSuggestions {
 				}
 
 				guiGraphics.drawString(
-					CommandSuggestions.this.font,
-					suggestion.getText(),
-					this.rect.getX() + 1,
-					this.rect.getY() + 2 + 12 * n,
-					n + this.offset == this.current ? -256 : -5592406
+					CommandSuggestions.this.font, suggestion.getText(), this.rect.getX() + 1, this.rect.getY() + 2 + 12 * n, n + this.offset == this.current ? -256 : -5592406
 				);
 			}
 

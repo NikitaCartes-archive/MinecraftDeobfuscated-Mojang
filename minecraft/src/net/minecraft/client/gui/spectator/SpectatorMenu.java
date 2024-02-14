@@ -62,9 +62,7 @@ public class SpectatorMenu {
 		} else if (i == 8) {
 			return CLOSE_ITEM;
 		} else {
-			return j >= 0 && j < this.category.getItems().size()
-				? MoreObjects.firstNonNull((SpectatorMenuItem)this.category.getItems().get(j), EMPTY_SLOT)
-				: EMPTY_SLOT;
+			return j >= 0 && j < this.category.getItems().size() ? MoreObjects.firstNonNull((SpectatorMenuItem)this.category.getItems().get(j), EMPTY_SLOT) : EMPTY_SLOT;
 		}
 	}
 

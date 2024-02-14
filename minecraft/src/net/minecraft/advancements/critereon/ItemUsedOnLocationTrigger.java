@@ -86,8 +86,7 @@ public class ItemUsedOnLocationTrigger extends SimpleCriterionTrigger<ItemUsedOn
 		@Override
 		public void validate(CriterionValidator criterionValidator) {
 			SimpleCriterionTrigger.SimpleInstance.super.validate(criterionValidator);
-			this.location
-				.ifPresent(contextAwarePredicate -> criterionValidator.validate(contextAwarePredicate, LootContextParamSets.ADVANCEMENT_LOCATION, ".location"));
+			this.location.ifPresent(contextAwarePredicate -> criterionValidator.validate(contextAwarePredicate, LootContextParamSets.ADVANCEMENT_LOCATION, ".location"));
 		}
 	}
 }

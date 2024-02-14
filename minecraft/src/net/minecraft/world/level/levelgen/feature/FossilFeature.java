@@ -56,8 +56,9 @@ public class FossilFeature extends Feature<FossilFeatureConfiguration> {
 
 		int k = Math.max(j - 15 - randomSource.nextInt(10), worldGenLevel.getMinBuildHeight() + 10);
 		BlockPos blockPos3 = structureTemplate.getZeroPositionWithTransform(blockPos2.atY(k), Mirror.NONE, rotation);
-		if (countEmptyCorners(worldGenLevel, structureTemplate.getBoundingBox(structurePlaceSettings, blockPos3))
-			> fossilFeatureConfiguration.maxEmptyCornersAllowed) {
+		if (countEmptyCorners(worldGenLevel, structureTemplate.getBoundingBox(structurePlaceSettings, blockPos3)) > fossilFeatureConfiguration.maxEmptyCornersAllowed
+			)
+		 {
 			return false;
 		} else {
 			structurePlaceSettings.clearProcessors();

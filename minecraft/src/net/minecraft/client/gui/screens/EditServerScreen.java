@@ -59,9 +59,7 @@ public class EditServerScreen extends Screen {
 			Button.builder(Component.translatable("addServer.add"), button -> this.onAdd()).bounds(this.width / 2 - 100, this.height / 4 + 96 + 18, 200, 20).build()
 		);
 		this.addRenderableWidget(
-			Button.builder(CommonComponents.GUI_CANCEL, button -> this.callback.accept(false))
-				.bounds(this.width / 2 - 100, this.height / 4 + 120 + 18, 200, 20)
-				.build()
+			Button.builder(CommonComponents.GUI_CANCEL, button -> this.callback.accept(false)).bounds(this.width / 2 - 100, this.height / 4 + 120 + 18, 200, 20).build()
 		);
 		this.updateAddButtonStatus();
 	}

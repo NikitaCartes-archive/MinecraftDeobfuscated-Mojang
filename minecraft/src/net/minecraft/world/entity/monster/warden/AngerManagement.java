@@ -37,9 +37,7 @@ public class AngerManagement {
 	private int conversionDelay = Mth.randomBetweenInclusive(RandomSource.create(), 0, 2);
 	int highestAnger;
 	private static final Codec<Pair<UUID, Integer>> SUSPECT_ANGER_PAIR = RecordCodecBuilder.create(
-		instance -> instance.group(
-					UUIDUtil.CODEC.fieldOf("uuid").forGetter(Pair::getFirst), ExtraCodecs.NON_NEGATIVE_INT.fieldOf("anger").forGetter(Pair::getSecond)
-				)
+		instance -> instance.group(UUIDUtil.CODEC.fieldOf("uuid").forGetter(Pair::getFirst), ExtraCodecs.NON_NEGATIVE_INT.fieldOf("anger").forGetter(Pair::getSecond))
 				.apply(instance, Pair::of)
 	);
 	private final Predicate<Entity> filter;

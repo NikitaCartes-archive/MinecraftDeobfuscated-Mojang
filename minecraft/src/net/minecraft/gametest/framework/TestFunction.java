@@ -13,14 +13,15 @@ public record TestFunction(
 	boolean required,
 	int maxAttempts,
 	int requiredSuccesses,
+	boolean skyAccess,
 	Consumer<GameTestHelper> function
 ) {
 	public TestFunction(String string, String string2, String string3, int i, long l, boolean bl, Consumer<GameTestHelper> consumer) {
-		this(string, string2, string3, Rotation.NONE, i, l, bl, 1, 1, consumer);
+		this(string, string2, string3, Rotation.NONE, i, l, bl, 1, 1, false, consumer);
 	}
 
 	public TestFunction(String string, String string2, String string3, Rotation rotation, int i, long l, boolean bl, Consumer<GameTestHelper> consumer) {
-		this(string, string2, string3, rotation, i, l, bl, 1, 1, consumer);
+		this(string, string2, string3, rotation, i, l, bl, 1, 1, false, consumer);
 	}
 
 	public void run(GameTestHelper gameTestHelper) {

@@ -137,9 +137,7 @@ public class BeeDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 		Map<BlockPos, Set<UUID>> map = Maps.newHashMap();
 		this.beeInfosPerEntity
 			.values()
-			.forEach(
-				beeInfo -> beeInfo.blacklistedHives().forEach(blockPos -> ((Set)map.computeIfAbsent(blockPos, blockPosx -> Sets.newHashSet())).add(beeInfo.uuid()))
-			);
+			.forEach(beeInfo -> beeInfo.blacklistedHives().forEach(blockPos -> ((Set)map.computeIfAbsent(blockPos, blockPosx -> Sets.newHashSet())).add(beeInfo.uuid())));
 		return map;
 	}
 

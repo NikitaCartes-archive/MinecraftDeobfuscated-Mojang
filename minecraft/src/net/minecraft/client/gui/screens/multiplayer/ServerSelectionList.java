@@ -273,9 +273,7 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 										() -> {
 											this.serverData
 												.setState(
-													this.serverData.protocol == SharedConstants.getCurrentVersion().getProtocolVersion()
-														? ServerData.State.SUCCESSFUL
-														: ServerData.State.INCOMPATIBLE
+													this.serverData.protocol == SharedConstants.getCurrentVersion().getProtocolVersion() ? ServerData.State.SUCCESSFUL : ServerData.State.INCOMPATIBLE
 												);
 											this.minecraft.execute(this::refreshStatus);
 										}

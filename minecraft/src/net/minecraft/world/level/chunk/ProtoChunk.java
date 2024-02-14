@@ -91,9 +91,7 @@ public class ProtoChunk extends ChunkAccess {
 			return Blocks.VOID_AIR.defaultBlockState();
 		} else {
 			LevelChunkSection levelChunkSection = this.getSection(this.getSectionIndex(i));
-			return levelChunkSection.hasOnlyAir()
-				? Blocks.AIR.defaultBlockState()
-				: levelChunkSection.getBlockState(blockPos.getX() & 15, i & 15, blockPos.getZ() & 15);
+			return levelChunkSection.hasOnlyAir() ? Blocks.AIR.defaultBlockState() : levelChunkSection.getBlockState(blockPos.getX() & 15, i & 15, blockPos.getZ() & 15);
 		}
 	}
 

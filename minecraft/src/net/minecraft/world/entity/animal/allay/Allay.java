@@ -470,10 +470,7 @@ public class Allay extends PathfinderMob implements InventoryCarrier, VibrationS
 	public void addAdditionalSaveData(CompoundTag compoundTag) {
 		super.addAdditionalSaveData(compoundTag);
 		this.writeInventoryToTag(compoundTag);
-		VibrationSystem.Data.CODEC
-			.encodeStart(NbtOps.INSTANCE, this.vibrationData)
-			.resultOrPartial(LOGGER::error)
-			.ifPresent(tag -> compoundTag.put("listener", tag));
+		VibrationSystem.Data.CODEC.encodeStart(NbtOps.INSTANCE, this.vibrationData).resultOrPartial(LOGGER::error).ifPresent(tag -> compoundTag.put("listener", tag));
 		compoundTag.putLong("DuplicationCooldown", this.duplicationCooldown);
 		compoundTag.putBoolean("CanDuplicate", this.canDuplicate());
 	}

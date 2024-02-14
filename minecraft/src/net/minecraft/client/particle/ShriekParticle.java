@@ -106,9 +106,7 @@ public class ShriekParticle extends TextureSheetParticle {
 			this.sprite = spriteSet;
 		}
 
-		public Particle createParticle(
-			ShriekParticleOption shriekParticleOption, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i
-		) {
+		public Particle createParticle(ShriekParticleOption shriekParticleOption, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
 			ShriekParticle shriekParticle = new ShriekParticle(clientLevel, d, e, f, shriekParticleOption.getDelay());
 			shriekParticle.pickSprite(this.sprite);
 			shriekParticle.setAlpha(1.0F);

@@ -424,9 +424,7 @@ public class MultiPlayerGameMode {
 			}
 
 			this.connection
-				.send(
-					new ServerboundContainerClickPacket(i, abstractContainerMenu.getStateId(), j, k, clickType, abstractContainerMenu.getCarried().copy(), int2ObjectMap)
-				);
+				.send(new ServerboundContainerClickPacket(i, abstractContainerMenu.getStateId(), j, k, clickType, abstractContainerMenu.getCarried().copy(), int2ObjectMap));
 		}
 	}
 

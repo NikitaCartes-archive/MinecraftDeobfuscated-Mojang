@@ -147,9 +147,7 @@ public class WorldGenRegion implements WorldGenLevel {
 		crashReportCategory.setDetail("Requested status", (CrashReportDetail<String>)(() -> BuiltInRegistries.CHUNK_STATUS.getKey(chunkStatus).toString()));
 		crashReportCategory.setDetail(
 			"Actual status",
-			(CrashReportDetail<String>)(() -> chunkAccess == null
-					? "[out of region bounds]"
-					: BuiltInRegistries.CHUNK_STATUS.getKey(chunkAccess.getStatus()).toString())
+			(CrashReportDetail<String>)(() -> chunkAccess == null ? "[out of region bounds]" : BuiltInRegistries.CHUNK_STATUS.getKey(chunkAccess.getStatus()).toString())
 		);
 		crashReportCategory.setDetail("loadOrGenerate", bl);
 		crashReportCategory.setDetail("Generating chunk", (CrashReportDetail<String>)(() -> this.center.getPos().toString()));

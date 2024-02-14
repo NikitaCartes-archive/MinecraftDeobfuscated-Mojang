@@ -185,9 +185,7 @@ public interface ContainerEventHandler extends GuiEventListener {
 					int j = screenRectangle2.getBoundInDirection(screenDirection.getOpposite());
 					if (screenDirection.isAfter(j, i)) {
 						list.add(guiEventListener2);
-					} else if (j == i && screenDirection.isAfter(screenRectangle2.getBoundInDirection(screenDirection), screenRectangle.getBoundInDirection(screenDirection))
-						)
-					 {
+					} else if (j == i && screenDirection.isAfter(screenRectangle2.getBoundInDirection(screenDirection), screenRectangle.getBoundInDirection(screenDirection))) {
 						list.add(guiEventListener2);
 					}
 				}

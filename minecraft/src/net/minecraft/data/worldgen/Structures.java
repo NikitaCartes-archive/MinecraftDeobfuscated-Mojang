@@ -97,8 +97,7 @@ public class Structures {
 			)
 		);
 		bootstrapContext.register(
-			BuiltinStructures.WOODLAND_MANSION,
-			new WoodlandMansionStructure(structure(holderGetter.getOrThrow(BiomeTags.HAS_WOODLAND_MANSION), TerrainAdjustment.NONE))
+			BuiltinStructures.WOODLAND_MANSION, new WoodlandMansionStructure(structure(holderGetter.getOrThrow(BiomeTags.HAS_WOODLAND_MANSION), TerrainAdjustment.NONE))
 		);
 		bootstrapContext.register(
 			BuiltinStructures.JUNGLE_TEMPLE, new JungleTempleStructure(structure(holderGetter.getOrThrow(BiomeTags.HAS_JUNGLE_TEMPLE), TerrainAdjustment.NONE))

@@ -130,8 +130,7 @@ public class ExperienceOrb extends Entity {
 		}
 
 		if (this.level() instanceof ServerLevel) {
-			for(ExperienceOrb experienceOrb : this.level()
-				.getEntities(EntityTypeTest.forClass(ExperienceOrb.class), this.getBoundingBox().inflate(0.5), this::canMerge)) {
+			for(ExperienceOrb experienceOrb : this.level().getEntities(EntityTypeTest.forClass(ExperienceOrb.class), this.getBoundingBox().inflate(0.5), this::canMerge)) {
 				this.merge(experienceOrb);
 			}
 		}

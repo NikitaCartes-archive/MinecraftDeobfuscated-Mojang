@@ -81,8 +81,7 @@ public class SetSpawnCommand {
 			);
 		} else {
 			commandSourceStack.sendSuccess(
-				() -> Component.translatable("commands.spawnpoint.success.multiple", blockPos.getX(), blockPos.getY(), blockPos.getZ(), f, string, collection.size()),
-				true
+				() -> Component.translatable("commands.spawnpoint.success.multiple", blockPos.getX(), blockPos.getY(), blockPos.getZ(), f, string, collection.size()), true
 			);
 		}
 

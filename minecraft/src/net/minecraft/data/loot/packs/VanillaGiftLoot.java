@@ -8,6 +8,7 @@ import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.LootTable;
+import net.minecraft.world.level.storage.loot.entries.EmptyLootItem;
 import net.minecraft.world.level.storage.loot.entries.LootItem;
 import net.minecraft.world.level.storage.loot.functions.SetItemCountFunction;
 import net.minecraft.world.level.storage.loot.functions.SetPotionFunction;
@@ -226,6 +227,16 @@ public class VanillaGiftLoot implements LootTableSubProvider {
 						.setRolls(ConstantValue.exactly(1.0F))
 						.add(LootItem.lootTableItem(Items.TORCHFLOWER_SEEDS))
 						.add(LootItem.lootTableItem(Items.PITCHER_POD))
+				)
+		);
+		biConsumer.accept(
+			BuiltInLootTables.PANDA_SNEEZE,
+			LootTable.lootTable()
+				.withPool(
+					LootPool.lootPool()
+						.setRolls(ConstantValue.exactly(1.0F))
+						.add(LootItem.lootTableItem(Items.SLIME_BALL).setWeight(1))
+						.add(EmptyLootItem.emptyItem().setWeight(699))
 				)
 		);
 	}

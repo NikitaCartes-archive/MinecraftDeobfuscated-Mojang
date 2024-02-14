@@ -138,9 +138,7 @@ public class BastionHousingUnitsPools {
 			bootstrapContext,
 			"bastion/units/edge_wall_units",
 			new StructureTemplatePool(
-				holder2,
-				ImmutableList.of(Pair.of(StructurePoolElement.single("bastion/units/wall_units/edge_0_large", holder), 1)),
-				StructureTemplatePool.Projection.RIGID
+				holder2, ImmutableList.of(Pair.of(StructurePoolElement.single("bastion/units/wall_units/edge_0_large", holder), 1)), StructureTemplatePool.Projection.RIGID
 			)
 		);
 		Pools.register(

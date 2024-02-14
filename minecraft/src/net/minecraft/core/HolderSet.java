@@ -35,7 +35,12 @@ public interface HolderSet<T> extends Iterable<Holder<T>> {
 	@Deprecated
 	@VisibleForTesting
 	static <T> HolderSet.Named<T> emptyNamed(HolderOwner<T> holderOwner, TagKey<T> tagKey) {
-		return new HolderSet.Named<>(holderOwner, tagKey);
+		return new HolderSet.Named<T>(holderOwner, tagKey) {
+			@Override
+			protected List<Holder<T>> contents() {
+				throw new UnsupportedOperationException("Tag " + this.key() + " can't be dereferenced during construction");
+			}
+		};
 	}
 
 	@SafeVarargs

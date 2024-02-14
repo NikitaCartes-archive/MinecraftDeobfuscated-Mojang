@@ -29,9 +29,7 @@ public class RootSystemConfiguration implements FeatureConfiguration {
 					Codec.intRange(1, 256)
 						.fieldOf("hanging_root_placement_attempts")
 						.forGetter(rootSystemConfiguration -> rootSystemConfiguration.hangingRootPlacementAttempts),
-					Codec.intRange(1, 64)
-						.fieldOf("allowed_vertical_water_for_tree")
-						.forGetter(rootSystemConfiguration -> rootSystemConfiguration.allowedVerticalWaterForTree),
+					Codec.intRange(1, 64).fieldOf("allowed_vertical_water_for_tree").forGetter(rootSystemConfiguration -> rootSystemConfiguration.allowedVerticalWaterForTree),
 					BlockPredicate.CODEC.fieldOf("allowed_tree_position").forGetter(rootSystemConfiguration -> rootSystemConfiguration.allowedTreePosition)
 				)
 				.apply(instance, RootSystemConfiguration::new)

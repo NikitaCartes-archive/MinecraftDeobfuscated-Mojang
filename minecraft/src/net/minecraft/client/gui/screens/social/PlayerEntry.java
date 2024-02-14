@@ -80,9 +80,7 @@ public class PlayerEntry extends ContainerObjectSelectionList.Entry<PlayerEntry>
 	public static final int PLAYERNAME_COLOR = FastColor.ARGB32.color(255, 255, 255, 255);
 	public static final int PLAYER_STATUS_COLOR = FastColor.ARGB32.color(140, 255, 255, 255);
 
-	public PlayerEntry(
-		Minecraft minecraft, SocialInteractionsScreen socialInteractionsScreen, UUID uUID, String string, Supplier<PlayerSkin> supplier, boolean bl
-	) {
+	public PlayerEntry(Minecraft minecraft, SocialInteractionsScreen socialInteractionsScreen, UUID uUID, String string, Supplier<PlayerSkin> supplier, boolean bl) {
 		this.minecraft = minecraft;
 		this.id = uUID;
 		this.playerName = string;

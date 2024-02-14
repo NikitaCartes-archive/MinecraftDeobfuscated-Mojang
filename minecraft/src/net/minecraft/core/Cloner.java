@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
-import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.JavaOps;
 
@@ -18,8 +17,8 @@ public class Cloner<T> {
 	}
 
 	public T clone(T object, HolderLookup.Provider provider, HolderLookup.Provider provider2) {
-		DynamicOps<Object> dynamicOps = RegistryOps.create(JavaOps.INSTANCE, provider);
-		DynamicOps<Object> dynamicOps2 = RegistryOps.create(JavaOps.INSTANCE, provider2);
+		DynamicOps<Object> dynamicOps = provider.createSerializationContext(JavaOps.INSTANCE);
+		DynamicOps<Object> dynamicOps2 = provider2.createSerializationContext(JavaOps.INSTANCE);
 		Object object2 = Util.getOrThrow(this.directCodec.encodeStart(dynamicOps, object), string -> new IllegalStateException("Failed to encode: " + string));
 		return Util.getOrThrow(this.directCodec.parse(dynamicOps2, object2), string -> new IllegalStateException("Failed to decode: " + string));
 	}

@@ -57,9 +57,9 @@ public class VegetationPatchFeature extends Feature<VegetationPatchConfiguration
 				boolean bl4 = bl && bl2;
 				boolean bl5 = bl3 && !bl4;
 				if (!bl4
-					&& (
-						!bl5 || vegetationPatchConfiguration.extraEdgeColumnChance != 0.0F && !(randomSource.nextFloat() > vegetationPatchConfiguration.extraEdgeColumnChance)
-					)) {
+					&& (!bl5 || vegetationPatchConfiguration.extraEdgeColumnChance != 0.0F && !(randomSource.nextFloat() > vegetationPatchConfiguration.extraEdgeColumnChance))
+					)
+				 {
 					mutableBlockPos.setWithOffset(blockPos, k, 0, l);
 
 					for(int m = 0;

@@ -1,11 +1,13 @@
 package net.minecraft.core;
 
+import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.Lifecycle;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.flag.FeatureElement;
@@ -32,6 +34,10 @@ public interface HolderLookup<T> extends HolderGetter<T> {
 		default <T> HolderLookup.RegistryLookup<T> lookupOrThrow(ResourceKey<? extends Registry<? extends T>> resourceKey) {
 			return (HolderLookup.RegistryLookup<T>)this.lookup(resourceKey)
 				.orElseThrow(() -> new IllegalStateException("Registry " + resourceKey.location() + " not found"));
+		}
+
+		default <V> RegistryOps<V> createSerializationContext(DynamicOps<V> dynamicOps) {
+			return RegistryOps.create(dynamicOps, this);
 		}
 
 		default HolderGetter.Provider asGetterLookup() {
@@ -73,7 +79,7 @@ public interface HolderLookup<T> extends HolderGetter<T> {
 		default HolderLookup.RegistryLookup<T> filterElements(Predicate<T> predicate) {
 			return new HolderLookup.RegistryLookup.Delegate<T>() {
 				@Override
-				protected HolderLookup.RegistryLookup<T> parent() {
+				public HolderLookup.RegistryLookup<T> parent() {
 					return RegistryLookup.this;
 				}
 
@@ -89,36 +95,36 @@ public interface HolderLookup<T> extends HolderGetter<T> {
 			};
 		}
 
-		public abstract static class Delegate<T> implements HolderLookup.RegistryLookup<T> {
-			protected abstract HolderLookup.RegistryLookup<T> parent();
+		public interface Delegate<T> extends HolderLookup.RegistryLookup<T> {
+			HolderLookup.RegistryLookup<T> parent();
 
 			@Override
-			public ResourceKey<? extends Registry<? extends T>> key() {
+			default ResourceKey<? extends Registry<? extends T>> key() {
 				return this.parent().key();
 			}
 
 			@Override
-			public Lifecycle registryLifecycle() {
+			default Lifecycle registryLifecycle() {
 				return this.parent().registryLifecycle();
 			}
 
 			@Override
-			public Optional<Holder.Reference<T>> get(ResourceKey<T> resourceKey) {
+			default Optional<Holder.Reference<T>> get(ResourceKey<T> resourceKey) {
 				return this.parent().get(resourceKey);
 			}
 
 			@Override
-			public Stream<Holder.Reference<T>> listElements() {
+			default Stream<Holder.Reference<T>> listElements() {
 				return this.parent().listElements();
 			}
 
 			@Override
-			public Optional<HolderSet.Named<T>> get(TagKey<T> tagKey) {
+			default Optional<HolderSet.Named<T>> get(TagKey<T> tagKey) {
 				return this.parent().get(tagKey);
 			}
 
 			@Override
-			public Stream<HolderSet.Named<T>> listTags() {
+			default Stream<HolderSet.Named<T>> listTags() {
 				return this.parent().listTags();
 			}
 		}

@@ -152,9 +152,7 @@ public class StairBlock extends Block implements SimpleWaterloggedBlock {
 		BlockState blockState2 = blockGetter.getBlockState(blockPos.relative(direction));
 		if (isStairs(blockState2) && blockState.getValue(HALF) == blockState2.getValue(HALF)) {
 			Direction direction2 = blockState2.getValue(FACING);
-			if (direction2.getAxis() != ((Direction)blockState.getValue(FACING)).getAxis() && canTakeShape(blockState, blockGetter, blockPos, direction2.getOpposite())
-				)
-			 {
+			if (direction2.getAxis() != ((Direction)blockState.getValue(FACING)).getAxis() && canTakeShape(blockState, blockGetter, blockPos, direction2.getOpposite())) {
 				if (direction2 == direction.getCounterClockWise()) {
 					return StairsShape.OUTER_LEFT;
 				}

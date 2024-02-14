@@ -16,9 +16,7 @@ import net.minecraft.world.level.storage.PlayerDataStorage;
 public class IntegratedPlayerList extends PlayerList {
 	private CompoundTag playerData;
 
-	public IntegratedPlayerList(
-		IntegratedServer integratedServer, LayeredRegistryAccess<RegistryLayer> layeredRegistryAccess, PlayerDataStorage playerDataStorage
-	) {
+	public IntegratedPlayerList(IntegratedServer integratedServer, LayeredRegistryAccess<RegistryLayer> layeredRegistryAccess, PlayerDataStorage playerDataStorage) {
 		super(integratedServer, layeredRegistryAccess, playerDataStorage, 8);
 		this.setViewDistance(10);
 	}

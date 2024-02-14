@@ -14,8 +14,7 @@ public record VillageSectionsDebugPayload(Set<SectionPos> villageChunks, Set<Sec
 
 	private VillageSectionsDebugPayload(FriendlyByteBuf friendlyByteBuf) {
 		this(
-			friendlyByteBuf.readCollection(HashSet::new, FriendlyByteBuf::readSectionPos),
-			friendlyByteBuf.readCollection(HashSet::new, FriendlyByteBuf::readSectionPos)
+			friendlyByteBuf.readCollection(HashSet::new, FriendlyByteBuf::readSectionPos), friendlyByteBuf.readCollection(HashSet::new, FriendlyByteBuf::readSectionPos)
 		);
 	}
 

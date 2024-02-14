@@ -44,9 +44,7 @@ public class GameRules {
 	public static final GameRules.Key<GameRules.BooleanValue> RULE_DOMOBSPAWNING = register(
 		"doMobSpawning", GameRules.Category.SPAWNING, GameRules.BooleanValue.create(true)
 	);
-	public static final GameRules.Key<GameRules.BooleanValue> RULE_DOMOBLOOT = register(
-		"doMobLoot", GameRules.Category.DROPS, GameRules.BooleanValue.create(true)
-	);
+	public static final GameRules.Key<GameRules.BooleanValue> RULE_DOMOBLOOT = register("doMobLoot", GameRules.Category.DROPS, GameRules.BooleanValue.create(true));
 	public static final GameRules.Key<GameRules.BooleanValue> RULE_PROJECTILESCANBREAKBLOCKS = register(
 		"projectilesCanBreakBlocks", GameRules.Category.DROPS, GameRules.BooleanValue.create(true)
 	);

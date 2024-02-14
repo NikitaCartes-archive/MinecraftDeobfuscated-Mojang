@@ -47,10 +47,7 @@ public class EnchantCommand {
 							Commands.argument("enchantment", ResourceArgument.resource(commandBuildContext, Registries.ENCHANTMENT))
 								.executes(
 									commandContext -> enchant(
-											commandContext.getSource(),
-											EntityArgument.getEntities(commandContext, "targets"),
-											ResourceArgument.getEnchantment(commandContext, "enchantment"),
-											1
+											commandContext.getSource(), EntityArgument.getEntities(commandContext, "targets"), ResourceArgument.getEnchantment(commandContext, "enchantment"), 1
 										)
 								)
 								.then(

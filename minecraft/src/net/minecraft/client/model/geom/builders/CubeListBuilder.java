@@ -88,8 +88,7 @@ public class CubeListBuilder {
 	}
 
 	public CubeListBuilder addBox(float f, float g, float h, float i, float j, float k, CubeDeformation cubeDeformation) {
-		this.cubes
-			.add(new CubeDefinition(null, (float)this.xTexOffs, (float)this.yTexOffs, f, g, h, i, j, k, cubeDeformation, this.mirror, 1.0F, 1.0F, ALL_VISIBLE));
+		this.cubes.add(new CubeDefinition(null, (float)this.xTexOffs, (float)this.yTexOffs, f, g, h, i, j, k, cubeDeformation, this.mirror, 1.0F, 1.0F, ALL_VISIBLE));
 		return this;
 	}
 

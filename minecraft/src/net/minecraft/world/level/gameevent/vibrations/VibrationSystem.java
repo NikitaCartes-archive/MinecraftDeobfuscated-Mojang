@@ -235,9 +235,7 @@ public interface VibrationSystem {
 				.ifPresent(vec32 -> this.scheduleVibration(serverLevel, this.system.getVibrationData(), holder, context, vec3, vec32));
 		}
 
-		private void scheduleVibration(
-			ServerLevel serverLevel, VibrationSystem.Data data, Holder<GameEvent> holder, GameEvent.Context context, Vec3 vec3, Vec3 vec32
-		) {
+		private void scheduleVibration(ServerLevel serverLevel, VibrationSystem.Data data, Holder<GameEvent> holder, GameEvent.Context context, Vec3 vec3, Vec3 vec32) {
 			data.selectionStrategy.addCandidate(new VibrationInfo(holder, (float)vec3.distanceTo(vec32), vec3, context.sourceEntity()), serverLevel.getGameTime());
 		}
 

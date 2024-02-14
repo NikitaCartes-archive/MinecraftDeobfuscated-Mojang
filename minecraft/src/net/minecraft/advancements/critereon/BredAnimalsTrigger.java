@@ -63,8 +63,7 @@ public class BredAnimalsTrigger extends SimpleCriterionTrigger<BredAnimalsTrigge
 
 		public boolean matches(LootContext lootContext, LootContext lootContext2, @Nullable LootContext lootContext3) {
 			if (!this.child.isPresent() || lootContext3 != null && ((ContextAwarePredicate)this.child.get()).matches(lootContext3)) {
-				return matches(this.parent, lootContext) && matches(this.partner, lootContext2)
-					|| matches(this.parent, lootContext2) && matches(this.partner, lootContext);
+				return matches(this.parent, lootContext) && matches(this.partner, lootContext2) || matches(this.parent, lootContext2) && matches(this.partner, lootContext);
 			} else {
 				return false;
 			}

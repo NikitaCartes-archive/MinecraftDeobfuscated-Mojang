@@ -101,8 +101,7 @@ public class WitherSkullBlock extends SkullBlock {
 				.aisle("^^^", "###", "~#~")
 				.where('#', blockInWorld -> blockInWorld.getState().is(BlockTags.WITHER_SUMMON_BASE_BLOCKS))
 				.where(
-					'^',
-					BlockInWorld.hasState(BlockStatePredicate.forBlock(Blocks.WITHER_SKELETON_SKULL).or(BlockStatePredicate.forBlock(Blocks.WITHER_SKELETON_WALL_SKULL)))
+					'^', BlockInWorld.hasState(BlockStatePredicate.forBlock(Blocks.WITHER_SKELETON_SKULL).or(BlockStatePredicate.forBlock(Blocks.WITHER_SKELETON_WALL_SKULL)))
 				)
 				.where('~', blockInWorld -> blockInWorld.getState().isAir())
 				.build();
