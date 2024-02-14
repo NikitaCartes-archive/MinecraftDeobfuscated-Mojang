@@ -3,7 +3,6 @@ package net.minecraft.world.level.pathfinder;
 import it.unimi.dsi.fastutil.longs.Long2ObjectFunction;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
-import java.util.EnumSet;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
@@ -16,7 +15,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 
 public class FlyNodeEvaluator extends WalkNodeEvaluator {
-	private final Long2ObjectMap<BlockPathTypes> pathTypeByPosCache = new Long2ObjectOpenHashMap<>();
+	private final Long2ObjectMap<PathType> pathTypeByPosCache = new Long2ObjectOpenHashMap<>();
 	private static final float SMALL_MOB_INFLATED_START_NODE_BOUNDING_BOX = 1.5F;
 	private static final int MAX_START_NODE_CANDIDATES = 10;
 
@@ -62,13 +61,13 @@ public class FlyNodeEvaluator extends WalkNodeEvaluator {
 
 	@Override
 	protected boolean canStartAt(BlockPos blockPos) {
-		BlockPathTypes blockPathTypes = this.getBlockPathType(this.mob, blockPos);
-		return this.mob.getPathfindingMalus(blockPathTypes) >= 0.0F;
+		PathType pathType = this.getCachedPathType(blockPos.getX(), blockPos.getY(), blockPos.getZ());
+		return this.mob.getPathfindingMalus(pathType) >= 0.0F;
 	}
 
 	@Override
-	public Target getGoal(double d, double e, double f) {
-		return this.getTargetFromNode(this.getNode(Mth.floor(d), Mth.floor(e), Mth.floor(f)));
+	public Target getTarget(double d, double e, double f) {
+		return this.getTargetNodeAt(d, e, f);
 	}
 
 	@Override
@@ -266,13 +265,13 @@ public class FlyNodeEvaluator extends WalkNodeEvaluator {
 	@Nullable
 	protected Node findAcceptedNode(int i, int j, int k) {
 		Node node = null;
-		BlockPathTypes blockPathTypes = this.getCachedBlockPathType(i, j, k);
-		float f = this.mob.getPathfindingMalus(blockPathTypes);
+		PathType pathType = this.getCachedPathType(i, j, k);
+		float f = this.mob.getPathfindingMalus(pathType);
 		if (f >= 0.0F) {
 			node = this.getNode(i, j, k);
-			node.type = blockPathTypes;
+			node.type = pathType;
 			node.costMalus = Math.max(node.costMalus, f);
-			if (blockPathTypes == BlockPathTypes.WALKABLE) {
+			if (pathType == PathType.WALKABLE) {
 				node.costMalus++;
 			}
 		}
@@ -280,64 +279,38 @@ public class FlyNodeEvaluator extends WalkNodeEvaluator {
 		return node;
 	}
 
-	private BlockPathTypes getCachedBlockPathType(int i, int j, int k) {
+	@Override
+	protected PathType getCachedPathType(int i, int j, int k) {
 		return this.pathTypeByPosCache
-			.computeIfAbsent(BlockPos.asLong(i, j, k), (Long2ObjectFunction<? extends BlockPathTypes>)(l -> this.getBlockPathType(this.level, i, j, k, this.mob)));
+			.computeIfAbsent(BlockPos.asLong(i, j, k), (Long2ObjectFunction<? extends PathType>)(l -> this.getPathTypeOfMob(this.level, i, j, k, this.mob)));
 	}
 
 	@Override
-	public BlockPathTypes getBlockPathType(BlockGetter blockGetter, int i, int j, int k, Mob mob) {
-		EnumSet<BlockPathTypes> enumSet = EnumSet.noneOf(BlockPathTypes.class);
-		BlockPathTypes blockPathTypes = BlockPathTypes.BLOCKED;
-		BlockPos blockPos = mob.blockPosition();
-		blockPathTypes = super.getBlockPathTypes(blockGetter, i, j, k, enumSet, blockPathTypes, blockPos);
-		if (enumSet.contains(BlockPathTypes.FENCE)) {
-			return BlockPathTypes.FENCE;
-		} else {
-			BlockPathTypes blockPathTypes2 = BlockPathTypes.BLOCKED;
-
-			for (BlockPathTypes blockPathTypes3 : enumSet) {
-				if (mob.getPathfindingMalus(blockPathTypes3) < 0.0F) {
-					return blockPathTypes3;
-				}
-
-				if (mob.getPathfindingMalus(blockPathTypes3) >= mob.getPathfindingMalus(blockPathTypes2)) {
-					blockPathTypes2 = blockPathTypes3;
-				}
-			}
-
-			return blockPathTypes == BlockPathTypes.OPEN && mob.getPathfindingMalus(blockPathTypes2) == 0.0F ? BlockPathTypes.OPEN : blockPathTypes2;
-		}
-	}
-
-	@Override
-	public BlockPathTypes getBlockPathType(BlockGetter blockGetter, int i, int j, int k) {
+	public PathType getPathType(BlockGetter blockGetter, int i, int j, int k) {
 		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
-		BlockPathTypes blockPathTypes = getBlockPathTypeRaw(blockGetter, mutableBlockPos.set(i, j, k));
-		if (blockPathTypes == BlockPathTypes.OPEN && j >= blockGetter.getMinBuildHeight() + 1) {
-			BlockPathTypes blockPathTypes2 = getBlockPathTypeRaw(blockGetter, mutableBlockPos.set(i, j - 1, k));
-			if (blockPathTypes2 == BlockPathTypes.DAMAGE_FIRE || blockPathTypes2 == BlockPathTypes.LAVA) {
-				blockPathTypes = BlockPathTypes.DAMAGE_FIRE;
-			} else if (blockPathTypes2 == BlockPathTypes.DAMAGE_OTHER) {
-				blockPathTypes = BlockPathTypes.DAMAGE_OTHER;
-			} else if (blockPathTypes2 == BlockPathTypes.COCOA) {
-				blockPathTypes = BlockPathTypes.COCOA;
-			} else if (blockPathTypes2 == BlockPathTypes.FENCE) {
+		PathType pathType = getPathTypeFromState(blockGetter, mutableBlockPos.set(i, j, k));
+		if (pathType == PathType.OPEN && j >= blockGetter.getMinBuildHeight() + 1) {
+			PathType pathType2 = getPathTypeFromState(blockGetter, mutableBlockPos.set(i, j - 1, k));
+			if (pathType2 == PathType.DAMAGE_FIRE || pathType2 == PathType.LAVA) {
+				pathType = PathType.DAMAGE_FIRE;
+			} else if (pathType2 == PathType.DAMAGE_OTHER) {
+				pathType = PathType.DAMAGE_OTHER;
+			} else if (pathType2 == PathType.COCOA) {
+				pathType = PathType.COCOA;
+			} else if (pathType2 == PathType.FENCE) {
 				if (!mutableBlockPos.equals(this.mob.blockPosition())) {
-					blockPathTypes = BlockPathTypes.FENCE;
+					pathType = PathType.FENCE;
 				}
 			} else {
-				blockPathTypes = blockPathTypes2 != BlockPathTypes.WALKABLE && blockPathTypes2 != BlockPathTypes.OPEN && blockPathTypes2 != BlockPathTypes.WATER
-					? BlockPathTypes.WALKABLE
-					: BlockPathTypes.OPEN;
+				pathType = pathType2 != PathType.WALKABLE && pathType2 != PathType.OPEN && pathType2 != PathType.WATER ? PathType.WALKABLE : PathType.OPEN;
 			}
 		}
 
-		if (blockPathTypes == BlockPathTypes.WALKABLE || blockPathTypes == BlockPathTypes.OPEN) {
-			blockPathTypes = checkNeighbourBlocks(blockGetter, mutableBlockPos.set(i, j, k), blockPathTypes);
+		if (pathType == PathType.WALKABLE || pathType == PathType.OPEN) {
+			pathType = checkNeighbourBlocks(blockGetter, mutableBlockPos.set(i, j, k), pathType);
 		}
 
-		return blockPathTypes;
+		return pathType;
 	}
 
 	private Iterable<BlockPos> iteratePathfindingStartNodeCandidatePositions(Mob mob) {

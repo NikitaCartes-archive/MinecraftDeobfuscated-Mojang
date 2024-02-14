@@ -22,12 +22,12 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.level.pathfinder.PathType;
 
 public class WitherSkeleton extends AbstractSkeleton {
 	public WitherSkeleton(EntityType<? extends WitherSkeleton> entityType, Level level) {
 		super(entityType, level);
-		this.setPathfindingMalus(BlockPathTypes.LAVA, 8.0F);
+		this.setPathfindingMalus(PathType.LAVA, 8.0F);
 	}
 
 	@Override

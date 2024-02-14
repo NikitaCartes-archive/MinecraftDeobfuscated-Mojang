@@ -8,8 +8,8 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.level.pathfinder.NodeEvaluator;
+import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class MoveControl implements Control {
@@ -121,8 +121,8 @@ public class MoveControl implements Control {
 		if (pathNavigation != null) {
 			NodeEvaluator nodeEvaluator = pathNavigation.getNodeEvaluator();
 			if (nodeEvaluator != null
-				&& nodeEvaluator.getBlockPathType(this.mob.level(), Mth.floor(this.mob.getX() + (double)f), this.mob.getBlockY(), Mth.floor(this.mob.getZ() + (double)g))
-					!= BlockPathTypes.WALKABLE) {
+				&& nodeEvaluator.getPathType(this.mob.level(), Mth.floor(this.mob.getX() + (double)f), this.mob.getBlockY(), Mth.floor(this.mob.getZ() + (double)g))
+					!= PathType.WALKABLE) {
 				return false;
 			}
 		}

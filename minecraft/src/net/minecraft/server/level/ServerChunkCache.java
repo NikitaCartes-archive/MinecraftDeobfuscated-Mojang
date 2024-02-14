@@ -332,7 +332,10 @@ public class ServerChunkCache extends ChunkSource {
 	@Override
 	public void tick(BooleanSupplier booleanSupplier, boolean bl) {
 		this.level.getProfiler().push("purge");
-		this.distanceManager.purgeStaleTickets();
+		if (this.level.tickRateManager().runsNormally() || !bl) {
+			this.distanceManager.purgeStaleTickets();
+		}
+
 		this.runDistanceManagerUpdates();
 		this.level.getProfiler().popPush("chunks");
 		if (bl) {
@@ -363,7 +366,7 @@ public class ServerChunkCache extends ChunkSource {
 				}
 			}
 
-			if (this.level.getServer().tickRateManager().runsNormally()) {
+			if (this.level.tickRateManager().runsNormally()) {
 				profilerFiller.popPush("naturalSpawnCount");
 				int i = this.distanceManager.getNaturalSpawnChunkCount();
 				NaturalSpawner.SpawnState spawnState = NaturalSpawner.createState(

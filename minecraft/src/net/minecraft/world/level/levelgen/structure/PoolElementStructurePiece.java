@@ -11,7 +11,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
-import net.minecraft.resources.RegistryOps;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.StructureManager;
@@ -55,7 +54,7 @@ public class PoolElementStructurePiece extends StructurePiece {
 		this.structureTemplateManager = structurePieceSerializationContext.structureTemplateManager();
 		this.position = new BlockPos(compoundTag.getInt("PosX"), compoundTag.getInt("PosY"), compoundTag.getInt("PosZ"));
 		this.groundLevelDelta = compoundTag.getInt("ground_level_delta");
-		DynamicOps<Tag> dynamicOps = RegistryOps.create(NbtOps.INSTANCE, structurePieceSerializationContext.registryAccess());
+		DynamicOps<Tag> dynamicOps = structurePieceSerializationContext.registryAccess().createSerializationContext(NbtOps.INSTANCE);
 		this.element = (StructurePoolElement)StructurePoolElement.CODEC
 			.parse(dynamicOps, compoundTag.getCompound("pool_element"))
 			.resultOrPartial(LOGGER::error)
@@ -73,7 +72,7 @@ public class PoolElementStructurePiece extends StructurePiece {
 		compoundTag.putInt("PosY", this.position.getY());
 		compoundTag.putInt("PosZ", this.position.getZ());
 		compoundTag.putInt("ground_level_delta", this.groundLevelDelta);
-		DynamicOps<Tag> dynamicOps = RegistryOps.create(NbtOps.INSTANCE, structurePieceSerializationContext.registryAccess());
+		DynamicOps<Tag> dynamicOps = structurePieceSerializationContext.registryAccess().createSerializationContext(NbtOps.INSTANCE);
 		StructurePoolElement.CODEC.encodeStart(dynamicOps, this.element).resultOrPartial(LOGGER::error).ifPresent(tag -> compoundTag.put("pool_element", tag));
 		compoundTag.putString("rotation", this.rotation.name());
 		ListTag listTag = new ListTag();

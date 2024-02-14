@@ -17,7 +17,6 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
-import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.biome.Biome;
@@ -42,7 +41,7 @@ public class BiomeParametersDumpReport implements DataProvider {
 		return this.registries
 			.thenCompose(
 				provider -> {
-					DynamicOps<JsonElement> dynamicOps = RegistryOps.create(JsonOps.INSTANCE, provider);
+					DynamicOps<JsonElement> dynamicOps = provider.createSerializationContext(JsonOps.INSTANCE);
 					List<CompletableFuture<?>> list = new ArrayList();
 					MultiNoiseBiomeSourceParameterList.knownPresets()
 						.forEach((preset, parameterList) -> list.add(dumpValue(this.createPath(preset.id()), cachedOutput, dynamicOps, CODEC, parameterList)));

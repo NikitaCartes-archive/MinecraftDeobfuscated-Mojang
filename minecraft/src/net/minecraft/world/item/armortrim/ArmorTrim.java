@@ -17,7 +17,6 @@ import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.ArmorMaterial;
@@ -87,7 +86,7 @@ public class ArmorTrim {
 
 	public static boolean setTrim(RegistryAccess registryAccess, ItemStack itemStack, ArmorTrim armorTrim) {
 		if (itemStack.is(ItemTags.TRIMMABLE_ARMOR)) {
-			itemStack.getOrCreateTag().put("Trim", (Tag)CODEC.encodeStart(RegistryOps.create(NbtOps.INSTANCE, registryAccess), armorTrim).result().orElseThrow());
+			itemStack.getOrCreateTag().put("Trim", (Tag)CODEC.encodeStart(registryAccess.createSerializationContext(NbtOps.INSTANCE), armorTrim).result().orElseThrow());
 			return true;
 		} else {
 			return false;
@@ -97,7 +96,7 @@ public class ArmorTrim {
 	public static Optional<ArmorTrim> getTrim(RegistryAccess registryAccess, ItemStack itemStack, boolean bl) {
 		if (itemStack.is(ItemTags.TRIMMABLE_ARMOR) && itemStack.getTag() != null && itemStack.getTag().contains("Trim")) {
 			CompoundTag compoundTag = itemStack.getTagElement("Trim");
-			ArmorTrim armorTrim = (ArmorTrim)CODEC.parse(RegistryOps.create(NbtOps.INSTANCE, registryAccess), compoundTag).resultOrPartial(string -> {
+			ArmorTrim armorTrim = (ArmorTrim)CODEC.parse(registryAccess.createSerializationContext(NbtOps.INSTANCE), compoundTag).resultOrPartial(string -> {
 				if (!bl) {
 					LOGGER.warn(string);
 				}

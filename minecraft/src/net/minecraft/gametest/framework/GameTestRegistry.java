@@ -126,6 +126,7 @@ public class GameTestRegistry {
 			gameTest.required(),
 			gameTest.requiredSuccesses(),
 			gameTest.attempts(),
+			gameTest.skyAccess(),
 			(Consumer<GameTestHelper>)turnMethodIntoConsumer(method)
 		);
 	}

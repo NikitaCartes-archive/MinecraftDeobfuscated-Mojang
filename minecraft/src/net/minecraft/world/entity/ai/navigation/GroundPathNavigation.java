@@ -9,10 +9,10 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.level.pathfinder.Node;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.level.pathfinder.PathFinder;
+import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.level.pathfinder.WalkNodeEvaluator;
 import net.minecraft.world.phys.Vec3;
 
@@ -122,11 +122,11 @@ public class GroundPathNavigation extends PathNavigation {
 		}
 	}
 
-	protected boolean hasValidPathType(BlockPathTypes blockPathTypes) {
-		if (blockPathTypes == BlockPathTypes.WATER) {
+	protected boolean hasValidPathType(PathType pathType) {
+		if (pathType == PathType.WATER) {
 			return false;
 		} else {
-			return blockPathTypes == BlockPathTypes.LAVA ? false : blockPathTypes != BlockPathTypes.OPEN;
+			return pathType == PathType.LAVA ? false : pathType != PathType.OPEN;
 		}
 	}
 

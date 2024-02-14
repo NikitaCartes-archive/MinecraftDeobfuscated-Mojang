@@ -11,12 +11,12 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.level.pathfinder.PathType;
 
 public abstract class WaterAnimal extends PathfinderMob {
 	protected WaterAnimal(EntityType<? extends WaterAnimal> entityType, Level level) {
 		super(entityType, level);
-		this.setPathfindingMalus(BlockPathTypes.WATER, 0.0F);
+		this.setPathfindingMalus(PathType.WATER, 0.0F);
 	}
 
 	@Override

@@ -43,6 +43,8 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
 public abstract class AbstractSkeleton extends Monster implements RangedAttackMob {
+	private static final int HARD_ATTACK_INTERVAL = 20;
+	private static final int NORMAL_ATTACK_INTERVAL = 40;
 	private final RangedBowAttackGoal<AbstractSkeleton> bowGoal = new RangedBowAttackGoal<>(this, 1.0, 20, 15.0F);
 	private final MeleeAttackGoal meleeGoal = new MeleeAttackGoal(this, 1.2, false) {
 		@Override
@@ -157,9 +159,9 @@ public abstract class AbstractSkeleton extends Monster implements RangedAttackMo
 			this.goalSelector.removeGoal(this.bowGoal);
 			ItemStack itemStack = this.getItemInHand(ProjectileUtil.getWeaponHoldingHand(this, Items.BOW));
 			if (itemStack.is(Items.BOW)) {
-				int i = 20;
+				int i = this.getHardAttackInterval();
 				if (this.level().getDifficulty() != Difficulty.HARD) {
-					i = 40;
+					i = this.getAttackInterval();
 				}
 
 				this.bowGoal.setMinAttackInterval(i);
@@ -168,6 +170,14 @@ public abstract class AbstractSkeleton extends Monster implements RangedAttackMo
 				this.goalSelector.addGoal(4, this.meleeGoal);
 			}
 		}
+	}
+
+	protected int getHardAttackInterval() {
+		return 20;
+	}
+
+	protected int getAttackInterval() {
+		return 40;
 	}
 
 	@Override

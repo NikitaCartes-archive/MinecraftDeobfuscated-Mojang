@@ -92,13 +92,17 @@ public class GameTestHelper {
 		list.forEach(Entity::kill);
 	}
 
-	public ItemEntity spawnItem(Item item, float f, float g, float h) {
+	public ItemEntity spawnItem(Item item, Vec3 vec3) {
 		ServerLevel serverLevel = this.getLevel();
-		Vec3 vec3 = this.absoluteVec(new Vec3((double)f, (double)g, (double)h));
-		ItemEntity itemEntity = new ItemEntity(serverLevel, vec3.x, vec3.y, vec3.z, new ItemStack(item, 1));
+		Vec3 vec32 = this.absoluteVec(vec3);
+		ItemEntity itemEntity = new ItemEntity(serverLevel, vec32.x, vec32.y, vec32.z, new ItemStack(item, 1));
 		itemEntity.setDeltaMovement(0.0, 0.0, 0.0);
 		serverLevel.addFreshEntity(itemEntity);
 		return itemEntity;
+	}
+
+	public ItemEntity spawnItem(Item item, float f, float g, float h) {
+		return this.spawnItem(item, new Vec3((double)f, (double)g, (double)h));
 	}
 
 	public ItemEntity spawnItem(Item item, BlockPos blockPos) {
@@ -187,6 +191,11 @@ public class GameTestHelper {
 
 	public <E extends Mob> E spawnWithNoFreeWill(EntityType<E> entityType, float f, float g, float h) {
 		return this.spawnWithNoFreeWill(entityType, new Vec3((double)f, (double)g, (double)h));
+	}
+
+	public void moveTo(Mob mob, float f, float g, float h) {
+		Vec3 vec3 = this.absoluteVec(new Vec3((double)f, (double)g, (double)h));
+		mob.moveTo(vec3.x, vec3.y, vec3.z, mob.getYRot(), mob.getXRot());
 	}
 
 	public GameTestSequence walkTo(Mob mob, BlockPos blockPos, float f) {

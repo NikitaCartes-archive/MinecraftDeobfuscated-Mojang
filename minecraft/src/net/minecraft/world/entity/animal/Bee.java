@@ -81,8 +81,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.level.pathfinder.Path;
+import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.phys.Vec3;
 
 public class Bee extends Animal implements NeutralMob, FlyingAnimal {
@@ -137,11 +137,11 @@ public class Bee extends Animal implements NeutralMob, FlyingAnimal {
 		super(entityType, level);
 		this.moveControl = new FlyingMoveControl(this, 20, true);
 		this.lookControl = new Bee.BeeLookControl(this);
-		this.setPathfindingMalus(BlockPathTypes.DANGER_FIRE, -1.0F);
-		this.setPathfindingMalus(BlockPathTypes.WATER, -1.0F);
-		this.setPathfindingMalus(BlockPathTypes.WATER_BORDER, 16.0F);
-		this.setPathfindingMalus(BlockPathTypes.COCOA, -1.0F);
-		this.setPathfindingMalus(BlockPathTypes.FENCE, -1.0F);
+		this.setPathfindingMalus(PathType.DANGER_FIRE, -1.0F);
+		this.setPathfindingMalus(PathType.WATER, -1.0F);
+		this.setPathfindingMalus(PathType.WATER_BORDER, 16.0F);
+		this.setPathfindingMalus(PathType.COCOA, -1.0F);
+		this.setPathfindingMalus(PathType.FENCE, -1.0F);
 	}
 
 	@Override

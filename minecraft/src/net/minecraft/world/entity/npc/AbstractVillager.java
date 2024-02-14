@@ -33,7 +33,7 @@ import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.item.trading.MerchantOffers;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.phys.Vec3;
 import org.slf4j.Logger;
 
@@ -50,8 +50,8 @@ public abstract class AbstractVillager extends AgeableMob implements InventoryCa
 
 	public AbstractVillager(EntityType<? extends AbstractVillager> entityType, Level level) {
 		super(entityType, level);
-		this.setPathfindingMalus(BlockPathTypes.DANGER_FIRE, 16.0F);
-		this.setPathfindingMalus(BlockPathTypes.DAMAGE_FIRE, -1.0F);
+		this.setPathfindingMalus(PathType.DANGER_FIRE, 16.0F);
+		this.setPathfindingMalus(PathType.DAMAGE_FIRE, -1.0F);
 	}
 
 	@Override

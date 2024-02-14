@@ -263,6 +263,7 @@ public class GameTestInfo {
 		this.structureBlockEntity = StructureUtils.prepareTestStructure(this, blockPos, this.getRotation(), this.level);
 		this.structureBlockPos = this.structureBlockEntity.getBlockPos();
 		StructureUtils.addCommandBlockAndButtonToStartTest(this.structureBlockPos, new BlockPos(1, 0, -1), this.getRotation(), this.level);
+		StructureUtils.encaseStructure(this.getStructureBounds(), this.level, !this.testFunction.skyAccess());
 		this.listeners.forEach(gameTestListener -> gameTestListener.testStructureLoaded(this));
 		return this;
 	}

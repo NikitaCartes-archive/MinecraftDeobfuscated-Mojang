@@ -78,6 +78,11 @@ public class MinecartHopper extends AbstractMinecartContainer implements Hopper 
 	}
 
 	@Override
+	public boolean isGridAligned() {
+		return false;
+	}
+
+	@Override
 	public void tick() {
 		super.tick();
 		if (!this.level().isClientSide && this.isAlive() && this.isEnabled() && this.suckInItems()) {

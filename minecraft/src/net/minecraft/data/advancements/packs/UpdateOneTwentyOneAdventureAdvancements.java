@@ -16,7 +16,8 @@ public class UpdateOneTwentyOneAdventureAdvancements implements AdvancementSubPr
 		VanillaAdventureAdvancements.createMonsterHunterAdvancement(
 			advancementHolder,
 			consumer,
-			(List<EntityType<?>>)Stream.concat(VanillaAdventureAdvancements.MOBS_TO_KILL.stream(), Stream.of(EntityType.BREEZE)).collect(Collectors.toList())
+			(List<EntityType<?>>)Stream.concat(VanillaAdventureAdvancements.MOBS_TO_KILL.stream(), Stream.of(EntityType.BREEZE, EntityType.BOGGED))
+				.collect(Collectors.toList())
 		);
 	}
 }

@@ -160,7 +160,7 @@ public class PrepareRamNearestTarget<E extends PathfinderMob> extends Behavior<E
 
 	private boolean isWalkableBlock(PathfinderMob pathfinderMob, BlockPos blockPos) {
 		return pathfinderMob.getNavigation().isStableDestination(blockPos)
-			&& pathfinderMob.getPathfindingMalus(WalkNodeEvaluator.getBlockPathTypeStatic(pathfinderMob.level(), blockPos.mutable())) == 0.0F;
+			&& pathfinderMob.getPathfindingMalus(WalkNodeEvaluator.getPathTypeStatic(pathfinderMob.level(), blockPos.mutable())) == 0.0F;
 	}
 
 	private void chooseRamPosition(PathfinderMob pathfinderMob, LivingEntity livingEntity) {

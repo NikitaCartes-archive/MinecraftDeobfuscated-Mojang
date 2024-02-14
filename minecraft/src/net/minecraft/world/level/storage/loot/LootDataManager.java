@@ -61,7 +61,7 @@ public class LootDataManager implements PreparableReloadListener, LootDataResolv
 		Executor executor,
 		Map<LootDataType<?>, Map<ResourceLocation, ?>> map
 	) {
-		RegistryOps<JsonElement> registryOps = RegistryOps.create(JsonOps.INSTANCE, provider);
+		RegistryOps<JsonElement> registryOps = provider.createSerializationContext(JsonOps.INSTANCE);
 		Map<ResourceLocation, T> map2 = new HashMap();
 		map.put(lootDataType, map2);
 		return CompletableFuture.runAsync(

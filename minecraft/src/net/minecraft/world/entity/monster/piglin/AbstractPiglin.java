@@ -18,7 +18,7 @@ import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.ZombifiedPiglin;
 import net.minecraft.world.item.TieredItem;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.level.pathfinder.PathType;
 
 public abstract class AbstractPiglin extends Monster {
 	protected static final EntityDataAccessor<Boolean> DATA_IMMUNE_TO_ZOMBIFICATION = SynchedEntityData.defineId(
@@ -31,8 +31,8 @@ public abstract class AbstractPiglin extends Monster {
 		super(entityType, level);
 		this.setCanPickUpLoot(true);
 		this.applyOpenDoorsAbility();
-		this.setPathfindingMalus(BlockPathTypes.DANGER_FIRE, 16.0F);
-		this.setPathfindingMalus(BlockPathTypes.DAMAGE_FIRE, -1.0F);
+		this.setPathfindingMalus(PathType.DANGER_FIRE, 16.0F);
+		this.setPathfindingMalus(PathType.DAMAGE_FIRE, -1.0F);
 	}
 
 	private void applyOpenDoorsAbility() {

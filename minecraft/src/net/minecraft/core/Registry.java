@@ -196,7 +196,7 @@ public interface Registry<T> extends Keyable, IdMap<T> {
 	default HolderLookup.RegistryLookup<T> asTagAddingLookup() {
 		return new HolderLookup.RegistryLookup.Delegate<T>() {
 			@Override
-			protected HolderLookup.RegistryLookup<T> parent() {
+			public HolderLookup.RegistryLookup<T> parent() {
 				return Registry.this.asLookup();
 			}
 

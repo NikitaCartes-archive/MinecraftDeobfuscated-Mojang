@@ -59,7 +59,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.ServerLevelAccessor;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
 
@@ -104,7 +104,7 @@ public class Axolotl extends Animal implements LerpingModel, VariantHolder<Axolo
 
 	public Axolotl(EntityType<? extends Axolotl> entityType, Level level) {
 		super(entityType, level);
-		this.setPathfindingMalus(BlockPathTypes.WATER, 0.0F);
+		this.setPathfindingMalus(PathType.WATER, 0.0F);
 		this.moveControl = new Axolotl.AxolotlMoveControl(this);
 		this.lookControl = new Axolotl.AxolotlLookControl(this, 20);
 	}

@@ -56,7 +56,6 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
@@ -64,6 +63,11 @@ import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.storage.loot.BuiltInLootTables;
+import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.level.storage.loot.LootTable;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.Vec3;
 
 public class Panda extends Animal {
@@ -497,26 +501,35 @@ public class Panda extends Animal {
 
 	private void afterSneeze() {
 		Vec3 vec3 = this.getDeltaMovement();
-		this.level()
-			.addParticle(
-				ParticleTypes.SNEEZE,
-				this.getX() - (double)(this.getBbWidth() + 1.0F) * 0.5 * (double)Mth.sin(this.yBodyRot * (float) (Math.PI / 180.0)),
-				this.getEyeY() - 0.1F,
-				this.getZ() + (double)(this.getBbWidth() + 1.0F) * 0.5 * (double)Mth.cos(this.yBodyRot * (float) (Math.PI / 180.0)),
-				vec3.x,
-				0.0,
-				vec3.z
-			);
+		Level level = this.level();
+		level.addParticle(
+			ParticleTypes.SNEEZE,
+			this.getX() - (double)(this.getBbWidth() + 1.0F) * 0.5 * (double)Mth.sin(this.yBodyRot * (float) (Math.PI / 180.0)),
+			this.getEyeY() - 0.1F,
+			this.getZ() + (double)(this.getBbWidth() + 1.0F) * 0.5 * (double)Mth.cos(this.yBodyRot * (float) (Math.PI / 180.0)),
+			vec3.x,
+			0.0,
+			vec3.z
+		);
 		this.playSound(SoundEvents.PANDA_SNEEZE, 1.0F, 1.0F);
 
-		for (Panda panda : this.level().getEntitiesOfClass(Panda.class, this.getBoundingBox().inflate(10.0))) {
+		for (Panda panda : level.getEntitiesOfClass(Panda.class, this.getBoundingBox().inflate(10.0))) {
 			if (!panda.isBaby() && panda.onGround() && !panda.isInWater() && panda.canPerformAction()) {
 				panda.jumpFromGround();
 			}
 		}
 
-		if (!this.level().isClientSide() && this.random.nextInt(700) == 0 && this.level().getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
-			this.spawnAtLocation(Items.SLIME_BALL);
+		if (!level.isClientSide() && level.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
+			ServerLevel serverLevel = (ServerLevel)level;
+			LootTable lootTable = serverLevel.getServer().getLootData().getLootTable(BuiltInLootTables.PANDA_SNEEZE);
+			LootParams lootParams = new LootParams.Builder(serverLevel)
+				.withParameter(LootContextParams.ORIGIN, this.position())
+				.withParameter(LootContextParams.THIS_ENTITY, this)
+				.create(LootContextParamSets.GIFT);
+
+			for (ItemStack itemStack : lootTable.getRandomItems(lootParams)) {
+				this.spawnAtLocation(itemStack);
+			}
 		}
 	}
 

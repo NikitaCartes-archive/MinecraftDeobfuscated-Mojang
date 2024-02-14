@@ -54,7 +54,6 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.RegistryLayer;
@@ -402,10 +401,10 @@ public class CreateWorldScreen extends Screen {
 						throw new IllegalStateException("Needs at least one biome continue");
 					} else {
 						WorldCreationContext worldCreationContext = this.uiState.getSettings();
-						DynamicOps<JsonElement> dynamicOps = RegistryOps.create(JsonOps.INSTANCE, worldCreationContext.worldgenLoadContext());
+						DynamicOps<JsonElement> dynamicOps = worldCreationContext.worldgenLoadContext().createSerializationContext(JsonOps.INSTANCE);
 						DataResult<JsonElement> dataResult = WorldGenSettings.encode(dynamicOps, worldCreationContext.options(), worldCreationContext.selectedDimensions())
 							.setLifecycle(Lifecycle.stable());
-						DynamicOps<JsonElement> dynamicOps2 = RegistryOps.create(JsonOps.INSTANCE, dataLoadContext.datapackWorldgen());
+						DynamicOps<JsonElement> dynamicOps2 = dataLoadContext.datapackWorldgen().createSerializationContext(JsonOps.INSTANCE);
 						WorldGenSettings worldGenSettings = dataResult.<WorldGenSettings>flatMap(jsonElement -> WorldGenSettings.CODEC.parse(dynamicOps2, jsonElement))
 							.getOrThrow(false, Util.prefix("Error parsing worldgen settings after loading data packs: ", LOGGER::error));
 						return new WorldLoader.DataLoadOutput<>(

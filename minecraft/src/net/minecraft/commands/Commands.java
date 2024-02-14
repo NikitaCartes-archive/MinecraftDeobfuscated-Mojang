@@ -457,7 +457,7 @@ public class Commands {
 			private <T> HolderLookup.RegistryLookup.Delegate<T> createLookup(HolderLookup.RegistryLookup<T> registryLookup) {
 				return new HolderLookup.RegistryLookup.Delegate<T>() {
 					@Override
-					protected HolderLookup.RegistryLookup<T> parent() {
+					public HolderLookup.RegistryLookup<T> parent() {
 						return registryLookup;
 					}
 

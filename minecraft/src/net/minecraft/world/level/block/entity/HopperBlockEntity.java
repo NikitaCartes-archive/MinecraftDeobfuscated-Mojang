@@ -9,6 +9,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.WorldlyContainer;
@@ -229,7 +230,8 @@ public class HopperBlockEntity extends RandomizableContainerBlockEntity implemen
 
 			return false;
 		} else {
-			if (!blockState.isCollisionShapeFullBlock(level, blockPos)) {
+			boolean bl = hopper.isGridAligned() && blockState.isCollisionShapeFullBlock(level, blockPos) && !blockState.is(BlockTags.DOES_NOT_BLOCK_HOPPERS);
+			if (!bl) {
 				for (ItemEntity itemEntity : getItemsAtAndAbove(level, hopper)) {
 					if (addItem(hopper, itemEntity)) {
 						return true;
@@ -424,6 +426,11 @@ public class HopperBlockEntity extends RandomizableContainerBlockEntity implemen
 	@Override
 	public double getLevelZ() {
 		return (double)this.worldPosition.getZ() + 0.5;
+	}
+
+	@Override
+	public boolean isGridAligned() {
+		return true;
 	}
 
 	private void setCooldown(int i) {

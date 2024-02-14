@@ -26,6 +26,10 @@ public class ModelLayers {
 	public static final ModelLayerLocation BEE = register("bee");
 	public static final ModelLayerLocation BELL = register("bell");
 	public static final ModelLayerLocation BLAZE = register("blaze");
+	public static final ModelLayerLocation BOGGED = register("bogged");
+	public static final ModelLayerLocation BOGGED_INNER_ARMOR = registerInnerArmor("bogged");
+	public static final ModelLayerLocation BOGGED_OUTER_ARMOR = registerOuterArmor("bogged");
+	public static final ModelLayerLocation BOGGED_OUTER_LAYER = register("bogged", "outer");
 	public static final ModelLayerLocation BOOK = register("book");
 	public static final ModelLayerLocation BREEZE = register("breeze");
 	public static final ModelLayerLocation CAT = register("cat");

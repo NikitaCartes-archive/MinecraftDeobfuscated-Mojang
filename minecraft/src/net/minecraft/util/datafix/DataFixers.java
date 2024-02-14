@@ -274,6 +274,7 @@ import net.minecraft.util.datafix.schemas.V3799;
 import net.minecraft.util.datafix.schemas.V3807;
 import net.minecraft.util.datafix.schemas.V3808;
 import net.minecraft.util.datafix.schemas.V3808_1;
+import net.minecraft.util.datafix.schemas.V3816;
 import net.minecraft.util.datafix.schemas.V501;
 import net.minecraft.util.datafix.schemas.V700;
 import net.minecraft.util.datafix.schemas.V701;
@@ -677,7 +678,7 @@ public class DataFixers {
 		dataFixerBuilder.addFixer(new AddNewChoices(schema95, "Added Bee and Bee Stinger", References.ENTITY));
 		dataFixerBuilder.addFixer(new AddNewChoices(schema95, "Add beehive", References.BLOCK_ENTITY));
 		dataFixerBuilder.addFixer(
-			new NamespacedTypeRenameFix(schema95, "Rename sugar recipe", References.RECIPE, createRenamer("minecraft:sugar", "sugar_from_sugar_cane"))
+			new NamespacedTypeRenameFix(schema95, "Rename sugar recipe", References.RECIPE, createRenamer("minecraft:sugar", "minecraft:sugar_from_sugar_cane"))
 		);
 		dataFixerBuilder.addFixer(
 			new AdvancementsRenameFix(
@@ -751,26 +752,26 @@ public class DataFixers {
 			new AttributesRename(
 				schema112,
 				"Attribute renames",
-				createRenamer(
+				createRenamerNoNamespace(
 					ImmutableMap.<String, String>builder()
-						.put("generic.maxHealth", "generic.max_health")
-						.put("Max Health", "generic.max_health")
-						.put("zombie.spawnReinforcements", "zombie.spawn_reinforcements")
-						.put("Spawn Reinforcements Chance", "zombie.spawn_reinforcements")
-						.put("horse.jumpStrength", "horse.jump_strength")
-						.put("Jump Strength", "horse.jump_strength")
-						.put("generic.followRange", "generic.follow_range")
-						.put("Follow Range", "generic.follow_range")
-						.put("generic.knockbackResistance", "generic.knockback_resistance")
-						.put("Knockback Resistance", "generic.knockback_resistance")
-						.put("generic.movementSpeed", "generic.movement_speed")
-						.put("Movement Speed", "generic.movement_speed")
-						.put("generic.flyingSpeed", "generic.flying_speed")
-						.put("Flying Speed", "generic.flying_speed")
-						.put("generic.attackDamage", "generic.attack_damage")
-						.put("generic.attackKnockback", "generic.attack_knockback")
-						.put("generic.attackSpeed", "generic.attack_speed")
-						.put("generic.armorToughness", "generic.armor_toughness")
+						.put("generic.maxHealth", "minecraft:generic.max_health")
+						.put("Max Health", "minecraft:generic.max_health")
+						.put("zombie.spawnReinforcements", "minecraft:zombie.spawn_reinforcements")
+						.put("Spawn Reinforcements Chance", "minecraft:zombie.spawn_reinforcements")
+						.put("horse.jumpStrength", "minecraft:horse.jump_strength")
+						.put("Jump Strength", "minecraft:horse.jump_strength")
+						.put("generic.followRange", "minecraft:generic.follow_range")
+						.put("Follow Range", "minecraft:generic.follow_range")
+						.put("generic.knockbackResistance", "minecraft:generic.knockback_resistance")
+						.put("Knockback Resistance", "minecraft:generic.knockback_resistance")
+						.put("generic.movementSpeed", "minecraft:generic.movement_speed")
+						.put("Movement Speed", "minecraft:generic.movement_speed")
+						.put("generic.flyingSpeed", "minecraft:generic.flying_speed")
+						.put("Flying Speed", "minecraft:generic.flying_speed")
+						.put("generic.attackDamage", "minecraft:generic.attack_damage")
+						.put("generic.attackKnockback", "minecraft:generic.attack_knockback")
+						.put("generic.attackSpeed", "minecraft:generic.attack_speed")
+						.put("generic.armorToughness", "minecraft:generic.armor_toughness")
 						.build()
 				)
 			)
@@ -1250,13 +1251,19 @@ public class DataFixers {
 		dataFixerBuilder.addFixer(
 			new AttributesRename(schema209, "Rename jump strength attribute", createRenamer("minecraft:horse.jump_strength", "minecraft:generic.jump_strength"))
 		);
+		Schema schema210 = dataFixerBuilder.addSchema(3816, V3816::new);
+		dataFixerBuilder.addFixer(new AddNewChoices(schema210, "Added Bogged", References.ENTITY));
 	}
 
-	private static UnaryOperator<String> createRenamer(Map<String, String> map) {
+	private static UnaryOperator<String> createRenamerNoNamespace(Map<String, String> map) {
 		return string -> (String)map.getOrDefault(string, string);
 	}
 
+	private static UnaryOperator<String> createRenamer(Map<String, String> map) {
+		return string -> (String)map.getOrDefault(NamespacedSchema.ensureNamespaced(string), string);
+	}
+
 	private static UnaryOperator<String> createRenamer(String string, String string2) {
-		return string3 -> Objects.equals(string3, string) ? string2 : string3;
+		return string3 -> Objects.equals(NamespacedSchema.ensureNamespaced(string3), string) ? string2 : string3;
 	}
 }

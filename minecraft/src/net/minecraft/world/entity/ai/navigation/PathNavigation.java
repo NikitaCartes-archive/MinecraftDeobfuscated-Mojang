@@ -17,11 +17,11 @@ import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.PathNavigationRegion;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.level.pathfinder.Node;
 import net.minecraft.world.level.pathfinder.NodeEvaluator;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.level.pathfinder.PathFinder;
+import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.level.pathfinder.WalkNodeEvaluator;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -349,8 +349,8 @@ public abstract class PathNavigation {
 		return false;
 	}
 
-	public boolean canCutCorner(BlockPathTypes blockPathTypes) {
-		return blockPathTypes != BlockPathTypes.DANGER_FIRE && blockPathTypes != BlockPathTypes.DANGER_OTHER && blockPathTypes != BlockPathTypes.WALKABLE_DOOR;
+	public boolean canCutCorner(PathType pathType) {
+		return pathType != PathType.DANGER_FIRE && pathType != PathType.DANGER_OTHER && pathType != PathType.WALKABLE_DOOR;
 	}
 
 	protected static boolean isClearForMovementBetween(Mob mob, Vec3 vec3, Vec3 vec32, boolean bl) {

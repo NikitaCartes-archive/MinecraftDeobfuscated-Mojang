@@ -42,7 +42,7 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.level.pathfinder.WalkNodeEvaluator;
 
 public class FrogAi {
@@ -202,9 +202,9 @@ public class FrogAi {
 			BlockState blockState = level.getBlockState(blockPos);
 			BlockState blockState2 = level.getBlockState(blockPos2);
 			if (!blockState.is(BlockTags.FROG_PREFER_JUMP_TO) && !blockState2.is(BlockTags.FROG_PREFER_JUMP_TO)) {
-				BlockPathTypes blockPathTypes = WalkNodeEvaluator.getBlockPathTypeStatic(level, blockPos.mutable());
-				BlockPathTypes blockPathTypes2 = WalkNodeEvaluator.getBlockPathTypeStatic(level, blockPos2.mutable());
-				return blockPathTypes != BlockPathTypes.TRAPDOOR && (!blockState.isAir() || blockPathTypes2 != BlockPathTypes.TRAPDOOR)
+				PathType pathType = WalkNodeEvaluator.getPathTypeStatic(level, blockPos.mutable());
+				PathType pathType2 = WalkNodeEvaluator.getPathTypeStatic(level, blockPos2.mutable());
+				return pathType != PathType.TRAPDOOR && (!blockState.isAir() || pathType2 != PathType.TRAPDOOR)
 					? LongJumpToRandomPos.defaultAcceptableLandingSpot(mob, blockPos)
 					: true;
 			} else {

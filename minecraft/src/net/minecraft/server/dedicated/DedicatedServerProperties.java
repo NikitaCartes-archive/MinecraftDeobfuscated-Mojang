@@ -219,7 +219,7 @@ public class DedicatedServerProperties extends Settings<DedicatedServerPropertie
 				});
 			WorldDimensions worldDimensions = holder.value().createWorldDimensions();
 			if (holder.is(WorldPresets.FLAT)) {
-				RegistryOps<JsonElement> registryOps = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
+				RegistryOps<JsonElement> registryOps = registryAccess.createSerializationContext(JsonOps.INSTANCE);
 				Optional<FlatLevelGeneratorSettings> optional = FlatLevelGeneratorSettings.CODEC
 					.parse(new Dynamic<>(registryOps, this.generatorSettings()))
 					.resultOrPartial(DedicatedServerProperties.LOGGER::error);

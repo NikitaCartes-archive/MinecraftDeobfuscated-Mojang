@@ -63,7 +63,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.phys.Vec3;
 
 public class Wolf extends TamableAnimal implements NeutralMob {
@@ -89,8 +89,8 @@ public class Wolf extends TamableAnimal implements NeutralMob {
 	public Wolf(EntityType<? extends Wolf> entityType, Level level) {
 		super(entityType, level);
 		this.setTame(false, false);
-		this.setPathfindingMalus(BlockPathTypes.POWDER_SNOW, -1.0F);
-		this.setPathfindingMalus(BlockPathTypes.DANGER_POWDER_SNOW, -1.0F);
+		this.setPathfindingMalus(PathType.POWDER_SNOW, -1.0F);
+		this.setPathfindingMalus(PathType.DANGER_POWDER_SNOW, -1.0F);
 	}
 
 	@Override

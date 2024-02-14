@@ -1606,5 +1606,6 @@ public class VanillaBlockTagsProvider extends IntrinsicHolderTagsProvider<Block>
 				Blocks.WHEAT
 			);
 		this.tag(BlockTags.CAMEL_SAND_STEP_SOUND_BLOCKS).addTag(BlockTags.SAND).addTag(BlockTags.CONCRETE_POWDER);
+		this.tag(BlockTags.DOES_NOT_BLOCK_HOPPERS).addTag(BlockTags.BEEHIVES);
 	}
 }

@@ -55,7 +55,7 @@ public class Hotbar {
 	}
 
 	public void storeFrom(Inventory inventory, RegistryAccess registryAccess) {
-		RegistryOps<Tag> registryOps = RegistryOps.create(DEFAULT_OPS, registryAccess);
+		RegistryOps<Tag> registryOps = registryAccess.createSerializationContext(DEFAULT_OPS);
 		Builder<Dynamic<?>> builder = ImmutableList.builderWithExpectedSize(SIZE);
 
 		for (int i = 0; i < SIZE; i++) {

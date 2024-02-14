@@ -79,6 +79,7 @@ import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.item.PrimedTnt;
 import net.minecraft.world.entity.monster.Blaze;
+import net.minecraft.world.entity.monster.Bogged;
 import net.minecraft.world.entity.monster.CaveSpider;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Drowned;
@@ -158,7 +159,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.entity.EntityTypeTest;
-import net.minecraft.world.level.pathfinder.WalkNodeEvaluator;
+import net.minecraft.world.level.pathfinder.NodeEvaluator;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -209,6 +210,10 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 	);
 	public static final EntityType<Boat> BOAT = register(
 		"boat", EntityType.Builder.<Boat>of(Boat::new, MobCategory.MISC).sized(1.375F, 0.5625F).eyeHeight(0.5625F).clientTrackingRange(10)
+	);
+	public static final EntityType<Bogged> BOGGED = register(
+		"bogged",
+		EntityType.Builder.of(Bogged::new, MobCategory.MONSTER).sized(0.6F, 1.99F).eyeHeight(1.74F).clientTrackingRange(8).requiredFeatures(FeatureFlags.UPDATE_1_21)
 	);
 	public static final EntityType<Breeze> BREEZE = register(
 		"breeze",
@@ -1028,7 +1033,7 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 		if (this.immuneTo.contains(blockState.getBlock())) {
 			return false;
 		} else {
-			return !this.fireImmune && WalkNodeEvaluator.isBurningBlock(blockState)
+			return !this.fireImmune && NodeEvaluator.isBurningBlock(blockState)
 				? true
 				: blockState.is(Blocks.WITHER_ROSE) || blockState.is(Blocks.SWEET_BERRY_BUSH) || blockState.is(Blocks.CACTUS) || blockState.is(Blocks.POWDER_SNOW);
 		}

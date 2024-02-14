@@ -44,7 +44,7 @@ public class ServerAdvancementManager extends SimpleJsonResourceReloadListener {
 	}
 
 	protected void apply(Map<ResourceLocation, JsonElement> map, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
-		RegistryOps<JsonElement> registryOps = RegistryOps.create(JsonOps.INSTANCE, this.registries);
+		RegistryOps<JsonElement> registryOps = this.registries.createSerializationContext(JsonOps.INSTANCE);
 		Builder<ResourceLocation, AdvancementHolder> builder = ImmutableMap.builder();
 		map.forEach((resourceLocation, jsonElement) -> {
 			try {

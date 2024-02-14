@@ -28,7 +28,7 @@ import net.minecraft.world.entity.projectile.ProjectileDeflection;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.phys.Vec3;
 
 public class Breeze extends Monster {
@@ -64,8 +64,8 @@ public class Breeze extends Monster {
 
 	public Breeze(EntityType<? extends Monster> entityType, Level level) {
 		super(entityType, level);
-		this.setPathfindingMalus(BlockPathTypes.DANGER_TRAPDOOR, -1.0F);
-		this.setPathfindingMalus(BlockPathTypes.DAMAGE_FIRE, -1.0F);
+		this.setPathfindingMalus(PathType.DANGER_TRAPDOOR, -1.0F);
+		this.setPathfindingMalus(PathType.DAMAGE_FIRE, -1.0F);
 		this.xpReward = 10;
 	}
 
@@ -185,7 +185,7 @@ public class Breeze extends Monster {
 
 	@Override
 	public ProjectileDeflection deflection(Projectile projectile) {
-		return projectile.getType() == EntityType.WIND_CHARGE ? ProjectileDeflection.NONE : PROJECTILE_DEFLECTION;
+		return projectile.getType() == EntityType.BREEZE_WIND_CHARGE ? ProjectileDeflection.NONE : PROJECTILE_DEFLECTION;
 	}
 
 	@Override

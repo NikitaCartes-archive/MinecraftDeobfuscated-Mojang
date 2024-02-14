@@ -113,7 +113,7 @@ public class SectionStorage<R> implements AutoCloseable {
 
 	private void readColumn(ChunkPos chunkPos) {
 		Optional<CompoundTag> optional = (Optional<CompoundTag>)this.tryRead(chunkPos).join();
-		RegistryOps<Tag> registryOps = RegistryOps.create(NbtOps.INSTANCE, this.registryAccess);
+		RegistryOps<Tag> registryOps = this.registryAccess.createSerializationContext(NbtOps.INSTANCE);
 		this.readColumn(chunkPos, registryOps, (CompoundTag)optional.orElse(null));
 	}
 
@@ -158,7 +158,7 @@ public class SectionStorage<R> implements AutoCloseable {
 	}
 
 	private void writeColumn(ChunkPos chunkPos) {
-		RegistryOps<Tag> registryOps = RegistryOps.create(NbtOps.INSTANCE, this.registryAccess);
+		RegistryOps<Tag> registryOps = this.registryAccess.createSerializationContext(NbtOps.INSTANCE);
 		Dynamic<Tag> dynamic = this.writeColumn(chunkPos, registryOps);
 		Tag tag = dynamic.getValue();
 		if (tag instanceof CompoundTag) {

@@ -48,6 +48,7 @@ import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.monster.AbstractSkeleton;
 import net.minecraft.world.entity.monster.Blaze;
+import net.minecraft.world.entity.monster.Bogged;
 import net.minecraft.world.entity.monster.CaveSpider;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Drowned;
@@ -92,6 +93,7 @@ public class DefaultAttributes {
 		.put(EntityType.BAT, Bat.createAttributes().build())
 		.put(EntityType.BEE, Bee.createAttributes().build())
 		.put(EntityType.BLAZE, Blaze.createAttributes().build())
+		.put(EntityType.BOGGED, Bogged.createAttributes().build())
 		.put(EntityType.CAT, Cat.createAttributes().build())
 		.put(EntityType.CAMEL, Camel.createAttributes().build())
 		.put(EntityType.CAVE_SPIDER, CaveSpider.createCaveSpider().build())

@@ -24,7 +24,6 @@ import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.resources.RegistryOps;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.level.GameRules;
@@ -231,7 +230,7 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 		compoundTag3.putString("Series", SharedConstants.getCurrentVersion().getDataVersion().getSeries());
 		compoundTag.put("Version", compoundTag3);
 		NbtUtils.addCurrentDataVersion(compoundTag);
-		DynamicOps<Tag> dynamicOps = RegistryOps.create(NbtOps.INSTANCE, registryAccess);
+		DynamicOps<Tag> dynamicOps = registryAccess.createSerializationContext(NbtOps.INSTANCE);
 		WorldGenSettings.encode(dynamicOps, this.worldOptions, registryAccess)
 			.resultOrPartial(Util.prefix("WorldGenSettings: ", LOGGER::error))
 			.ifPresent(tag -> compoundTag.put("WorldGenSettings", tag));

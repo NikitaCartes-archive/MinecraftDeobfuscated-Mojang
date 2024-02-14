@@ -22,6 +22,7 @@ import net.minecraft.world.level.levelgen.structure.pools.alias.PoolAliasLookup;
 
 public final class JigsawStructure extends Structure {
 	public static final int MAX_TOTAL_STRUCTURE_RANGE = 128;
+	public static final int MIN_DEPTH = 0;
 	public static final int MAX_DEPTH = 20;
 	public static final Codec<JigsawStructure> CODEC = ExtraCodecs.validate(
 			RecordCodecBuilder.mapCodec(

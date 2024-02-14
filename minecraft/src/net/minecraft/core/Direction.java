@@ -517,5 +517,9 @@ public enum Direction implements StringRepresentable {
 		public List<Direction> shuffledCopy(RandomSource randomSource) {
 			return Util.shuffledCopy(this.faces, randomSource);
 		}
+
+		public int length() {
+			return this.faces.length;
+		}
 	}
 }

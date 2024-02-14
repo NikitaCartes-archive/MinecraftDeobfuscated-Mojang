@@ -84,10 +84,21 @@ public abstract class AbstractWindCharge extends AbstractHurtingProjectile imple
 
 	@Override
 	protected void onHit(HitResult hitResult) {
+		Level level = this.level();
+		if (hitResult.getType() == HitResult.Type.BLOCK) {
+			BlockPos blockPos = ((BlockHitResult)hitResult).getBlockPos();
+			BlockState blockState = level.getBlockState(blockPos);
+			if (!blockState.isCollisionShapeFullBlock(level, blockPos)) {
+				return;
+			}
+		}
+
 		super.onHit(hitResult);
-		if (!this.level().isClientSide) {
+		if (!this.level().isClientSide && !this.isDeflected) {
 			this.discard();
 		}
+
+		this.isDeflected = false;
 	}
 
 	@Override

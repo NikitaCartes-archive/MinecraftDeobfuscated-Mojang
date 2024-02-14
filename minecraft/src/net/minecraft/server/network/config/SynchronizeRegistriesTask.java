@@ -12,7 +12,6 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.common.ClientboundUpdateTagsPacket;
 import net.minecraft.network.protocol.configuration.ClientboundRegistryDataPacket;
 import net.minecraft.network.protocol.configuration.ClientboundSelectKnownPacks;
-import net.minecraft.resources.RegistryOps;
 import net.minecraft.server.RegistryLayer;
 import net.minecraft.server.network.ConfigurationTask;
 import net.minecraft.server.packs.repository.KnownPack;
@@ -34,7 +33,7 @@ public class SynchronizeRegistriesTask implements ConfigurationTask {
 	}
 
 	private void sendRegistries(Consumer<Packet<?>> consumer, Set<KnownPack> set) {
-		DynamicOps<Tag> dynamicOps = RegistryOps.create(NbtOps.INSTANCE, this.registries.compositeAccess());
+		DynamicOps<Tag> dynamicOps = this.registries.compositeAccess().createSerializationContext(NbtOps.INSTANCE);
 		RegistrySynchronization.packRegistries(
 			dynamicOps,
 			this.registries.getAccessFrom(RegistryLayer.WORLDGEN),

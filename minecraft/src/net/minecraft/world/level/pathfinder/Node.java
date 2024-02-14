@@ -20,7 +20,7 @@ public class Node {
 	public boolean closed;
 	public float walkedDistance;
 	public float costMalus;
-	public BlockPathTypes type = BlockPathTypes.BLOCKED;
+	public PathType type = PathType.BLOCKED;
 
 	public Node(int i, int j, int k) {
 		this.x = i;
@@ -140,7 +140,7 @@ public class Node {
 		node.walkedDistance = friendlyByteBuf.readFloat();
 		node.costMalus = friendlyByteBuf.readFloat();
 		node.closed = friendlyByteBuf.readBoolean();
-		node.type = friendlyByteBuf.readEnum(BlockPathTypes.class);
+		node.type = friendlyByteBuf.readEnum(PathType.class);
 		node.f = friendlyByteBuf.readFloat();
 	}
 }

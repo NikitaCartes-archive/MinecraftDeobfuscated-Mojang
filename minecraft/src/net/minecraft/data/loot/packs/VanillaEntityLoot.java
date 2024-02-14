@@ -62,6 +62,7 @@ public class VanillaEntityLoot extends EntityLootSubProvider {
 						.when(LootItemKilledByPlayerCondition.killedByPlayer())
 				)
 		);
+		this.add(EntityType.BOGGED, LootTable.lootTable());
 		this.add(
 			EntityType.CAT,
 			LootTable.lootTable()

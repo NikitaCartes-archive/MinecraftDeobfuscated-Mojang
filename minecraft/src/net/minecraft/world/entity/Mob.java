@@ -73,7 +73,7 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.phys.AABB;
 
 public abstract class Mob extends LivingEntity implements Targeting {
@@ -112,7 +112,7 @@ public abstract class Mob extends LivingEntity implements Targeting {
 	protected float bodyArmorDropChance;
 	private boolean canPickUpLoot;
 	private boolean persistenceRequired;
-	private final Map<BlockPathTypes, Float> pathfindingMalus = Maps.newEnumMap(BlockPathTypes.class);
+	private final Map<PathType, Float> pathfindingMalus = Maps.newEnumMap(PathType.class);
 	@Nullable
 	private ResourceLocation lootTable;
 	private long lootTableSeed;
@@ -157,7 +157,7 @@ public abstract class Mob extends LivingEntity implements Targeting {
 		return false;
 	}
 
-	public float getPathfindingMalus(BlockPathTypes blockPathTypes) {
+	public float getPathfindingMalus(PathType pathType) {
 		Mob mob2;
 		label17: {
 			if (this.getControlledVehicle() instanceof Mob mob && mob.shouldPassengersInheritMalus()) {
@@ -168,12 +168,12 @@ public abstract class Mob extends LivingEntity implements Targeting {
 			mob2 = this;
 		}
 
-		Float float_ = (Float)mob2.pathfindingMalus.get(blockPathTypes);
-		return float_ == null ? blockPathTypes.getMalus() : float_;
+		Float float_ = (Float)mob2.pathfindingMalus.get(pathType);
+		return float_ == null ? pathType.getMalus() : float_;
 	}
 
-	public void setPathfindingMalus(BlockPathTypes blockPathTypes, float f) {
-		this.pathfindingMalus.put(blockPathTypes, f);
+	public void setPathfindingMalus(PathType pathType, float f) {
+		this.pathfindingMalus.put(pathType, f);
 	}
 
 	public void onPathfindingStart() {
@@ -737,7 +737,7 @@ public abstract class Mob extends LivingEntity implements Targeting {
 		profilerFiller.push("sensing");
 		this.sensing.tick();
 		profilerFiller.pop();
-		int i = this.level().getServer().getTickCount() + this.getId();
+		int i = this.tickCount + this.getId();
 		if (i % 2 != 0 && this.tickCount > 1) {
 			profilerFiller.push("targetSelector");
 			this.targetSelector.tickRunningGoals(false);

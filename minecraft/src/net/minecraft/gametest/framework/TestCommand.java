@@ -15,7 +15,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -25,7 +24,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.FileUtil;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.commands.arguments.blocks.BlockInput;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.data.CachedOutput;
@@ -40,7 +38,7 @@ import net.minecraft.network.protocol.game.DebugPackets;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
-import net.minecraft.world.level.block.Block;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.StructureBlockEntity;
@@ -227,7 +225,9 @@ public class TestCommand {
 	}
 
 	private static int resetGameTestInfo(GameTestInfo gameTestInfo) {
+		gameTestInfo.getLevel().getEntities(null, gameTestInfo.getStructureBounds()).stream().forEach(entity -> entity.remove(Entity.RemovalReason.DISCARDED));
 		gameTestInfo.getStructureBlockEntity().placeStructure(gameTestInfo.getLevel());
+		StructureUtils.removeBarriers(gameTestInfo.getStructureBounds(), gameTestInfo.getLevel());
 		say(gameTestInfo.getLevel(), "Reset succeded for: " + gameTestInfo.getTestName(), ChatFormatting.GREEN);
 		return 1;
 	}
@@ -269,16 +269,9 @@ public class TestCommand {
 			ServerLevel serverLevel = commandSourceStack.getLevel();
 			BlockPos blockPos = createTestPositionAround(commandSourceStack).below();
 			StructureUtils.createNewEmptyStructureBlock(string.toLowerCase(), blockPos, new Vec3i(i, j, k), Rotation.NONE, serverLevel);
-
-			for (int l = 0; l < i; l++) {
-				for (int m = 0; m < k; m++) {
-					BlockPos blockPos2 = new BlockPos(blockPos.getX() + l, blockPos.getY() + 1, blockPos.getZ() + m);
-					Block block = Blocks.POLISHED_ANDESITE;
-					BlockInput blockInput = new BlockInput(block.defaultBlockState(), Collections.emptySet(), null);
-					blockInput.place(serverLevel, blockPos2, 2);
-				}
-			}
-
+			BlockPos blockPos2 = blockPos.above();
+			BlockPos blockPos3 = blockPos2.offset(i - 1, 0, k - 1);
+			BlockPos.betweenClosedStream(blockPos2, blockPos3).forEach(blockPosx -> serverLevel.setBlockAndUpdate(blockPosx, Blocks.BEDROCK.defaultBlockState()));
 			StructureUtils.addCommandBlockAndButtonToStartTest(blockPos, new BlockPos(1, 0, -1), Rotation.NONE, serverLevel);
 			return 0;
 		} else {

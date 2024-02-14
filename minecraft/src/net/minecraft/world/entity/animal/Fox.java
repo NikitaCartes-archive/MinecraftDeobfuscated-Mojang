@@ -89,7 +89,7 @@ import net.minecraft.world.level.block.CaveVines;
 import net.minecraft.world.level.block.SweetBerryBushBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.phys.Vec3;
 
 public class Fox extends Animal implements VariantHolder<Fox.Type> {
@@ -125,8 +125,8 @@ public class Fox extends Animal implements VariantHolder<Fox.Type> {
 		super(entityType, level);
 		this.lookControl = new Fox.FoxLookControl();
 		this.moveControl = new Fox.FoxMoveControl();
-		this.setPathfindingMalus(BlockPathTypes.DANGER_OTHER, 0.0F);
-		this.setPathfindingMalus(BlockPathTypes.DAMAGE_OTHER, 0.0F);
+		this.setPathfindingMalus(PathType.DANGER_OTHER, 0.0F);
+		this.setPathfindingMalus(PathType.DAMAGE_OTHER, 0.0F);
 		this.setCanPickUpLoot(true);
 	}
 

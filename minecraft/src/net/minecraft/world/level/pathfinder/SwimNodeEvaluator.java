@@ -18,7 +18,7 @@ import net.minecraft.world.level.material.FluidState;
 
 public class SwimNodeEvaluator extends NodeEvaluator {
 	private final boolean allowBreaching;
-	private final Long2ObjectMap<BlockPathTypes> pathTypesByPosCache = new Long2ObjectOpenHashMap<>();
+	private final Long2ObjectMap<PathType> pathTypesByPosCache = new Long2ObjectOpenHashMap<>();
 
 	public SwimNodeEvaluator(boolean bl) {
 		this.allowBreaching = bl;
@@ -42,8 +42,8 @@ public class SwimNodeEvaluator extends NodeEvaluator {
 	}
 
 	@Override
-	public Target getGoal(double d, double e, double f) {
-		return this.getTargetFromNode(this.getNode(Mth.floor(d), Mth.floor(e), Mth.floor(f)));
+	public Target getTarget(double d, double e, double f) {
+		return this.getTargetNodeAt(d, e, f);
 	}
 
 	@Override
@@ -61,9 +61,11 @@ public class SwimNodeEvaluator extends NodeEvaluator {
 
 		for (Direction direction2 : Direction.Plane.HORIZONTAL) {
 			Direction direction3 = direction2.getClockWise();
-			Node node3 = this.findAcceptedNode(node.x + direction2.getStepX() + direction3.getStepX(), node.y, node.z + direction2.getStepZ() + direction3.getStepZ());
-			if (this.isDiagonalNodeValid(node3, (Node)map.get(direction2), (Node)map.get(direction3))) {
-				nodes[i++] = node3;
+			if (hasMalus((Node)map.get(direction2)) && hasMalus((Node)map.get(direction3))) {
+				Node node3 = this.findAcceptedNode(node.x + direction2.getStepX() + direction3.getStepX(), node.y, node.z + direction2.getStepZ() + direction3.getStepZ());
+				if (this.isNodeValid(node3)) {
+					nodes[i++] = node3;
+				}
 			}
 		}
 
@@ -74,19 +76,19 @@ public class SwimNodeEvaluator extends NodeEvaluator {
 		return node != null && !node.closed;
 	}
 
-	protected boolean isDiagonalNodeValid(@Nullable Node node, @Nullable Node node2, @Nullable Node node3) {
-		return this.isNodeValid(node) && node2 != null && node2.costMalus >= 0.0F && node3 != null && node3.costMalus >= 0.0F;
+	private static boolean hasMalus(@Nullable Node node) {
+		return node != null && node.costMalus >= 0.0F;
 	}
 
 	@Nullable
 	protected Node findAcceptedNode(int i, int j, int k) {
 		Node node = null;
-		BlockPathTypes blockPathTypes = this.getCachedBlockType(i, j, k);
-		if (this.allowBreaching && blockPathTypes == BlockPathTypes.BREACH || blockPathTypes == BlockPathTypes.WATER) {
-			float f = this.mob.getPathfindingMalus(blockPathTypes);
+		PathType pathType = this.getCachedBlockType(i, j, k);
+		if (this.allowBreaching && pathType == PathType.BREACH || pathType == PathType.WATER) {
+			float f = this.mob.getPathfindingMalus(pathType);
 			if (f >= 0.0F) {
 				node = this.getNode(i, j, k);
-				node.type = blockPathTypes;
+				node.type = pathType;
 				node.costMalus = Math.max(node.costMalus, f);
 				if (this.level.getFluidState(new BlockPos(i, j, k)).isEmpty()) {
 					node.costMalus += 8.0F;
@@ -97,18 +99,18 @@ public class SwimNodeEvaluator extends NodeEvaluator {
 		return node;
 	}
 
-	protected BlockPathTypes getCachedBlockType(int i, int j, int k) {
+	protected PathType getCachedBlockType(int i, int j, int k) {
 		return this.pathTypesByPosCache
-			.computeIfAbsent(BlockPos.asLong(i, j, k), (Long2ObjectFunction<? extends BlockPathTypes>)(l -> this.getBlockPathType(this.level, i, j, k)));
+			.computeIfAbsent(BlockPos.asLong(i, j, k), (Long2ObjectFunction<? extends PathType>)(l -> this.getPathType(this.level, i, j, k)));
 	}
 
 	@Override
-	public BlockPathTypes getBlockPathType(BlockGetter blockGetter, int i, int j, int k) {
-		return this.getBlockPathType(blockGetter, i, j, k, this.mob);
+	public PathType getPathType(BlockGetter blockGetter, int i, int j, int k) {
+		return this.getPathTypeOfMob(blockGetter, i, j, k, this.mob);
 	}
 
 	@Override
-	public BlockPathTypes getBlockPathType(BlockGetter blockGetter, int i, int j, int k, Mob mob) {
+	public PathType getPathTypeOfMob(BlockGetter blockGetter, int i, int j, int k, Mob mob) {
 		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 
 		for (int l = i; l < i + this.entityWidth; l++) {
@@ -117,17 +119,17 @@ public class SwimNodeEvaluator extends NodeEvaluator {
 					FluidState fluidState = blockGetter.getFluidState(mutableBlockPos.set(l, m, n));
 					BlockState blockState = blockGetter.getBlockState(mutableBlockPos.set(l, m, n));
 					if (fluidState.isEmpty() && blockState.isPathfindable(blockGetter, mutableBlockPos.below(), PathComputationType.WATER) && blockState.isAir()) {
-						return BlockPathTypes.BREACH;
+						return PathType.BREACH;
 					}
 
 					if (!fluidState.is(FluidTags.WATER)) {
-						return BlockPathTypes.BLOCKED;
+						return PathType.BLOCKED;
 					}
 				}
 			}
 		}
 
 		BlockState blockState2 = blockGetter.getBlockState(mutableBlockPos);
-		return blockState2.isPathfindable(blockGetter, mutableBlockPos, PathComputationType.WATER) ? BlockPathTypes.WATER : BlockPathTypes.BLOCKED;
+		return blockState2.isPathfindable(blockGetter, mutableBlockPos, PathComputationType.WATER) ? PathType.WATER : PathType.BLOCKED;
 	}
 }

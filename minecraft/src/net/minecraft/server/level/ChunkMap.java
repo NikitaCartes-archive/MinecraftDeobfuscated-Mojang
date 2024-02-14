@@ -608,19 +608,17 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 	}
 
 	private Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure> handleChunkLoadFailure(Throwable throwable, ChunkPos chunkPos) {
-		if (throwable instanceof ReportedException reportedException) {
-			Throwable throwable2 = reportedException.getCause();
-			if (!(throwable2 instanceof IOException)) {
-				this.markPositionReplaceable(chunkPos);
-				throw reportedException;
-			}
-
+		Throwable throwable2 = throwable instanceof ReportedException reportedException ? reportedException.getCause() : throwable;
+		if (throwable2 instanceof IOException) {
 			LOGGER.error("Couldn't load chunk {}", chunkPos, throwable2);
-		} else if (throwable instanceof IOException) {
-			LOGGER.error("Couldn't load chunk {}", chunkPos, throwable);
+			return Either.left(this.createEmptyChunk(chunkPos));
+		} else {
+			CrashReport crashReport = CrashReport.forThrowable(throwable, "Exception loading chunk");
+			CrashReportCategory crashReportCategory = crashReport.addCategory("Chunk being loaded");
+			crashReportCategory.setDetail("pos", chunkPos);
+			this.markPositionReplaceable(chunkPos);
+			throw new ReportedException(crashReport);
 		}
-
-		return Either.left(this.createEmptyChunk(chunkPos));
 	}
 
 	private ChunkAccess createEmptyChunk(ChunkPos chunkPos) {

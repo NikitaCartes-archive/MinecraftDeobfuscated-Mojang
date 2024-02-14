@@ -101,7 +101,7 @@ public class TeleportCommand {
 																	commandContext.getSource().getLevel(),
 																	Vec3Argument.getCoordinates(commandContext, "location"),
 																	null,
-																	new TeleportCommand.LookAt(EntityArgument.getEntity(commandContext, "facingEntity"), EntityAnchorArgument.Anchor.FEET)
+																	new TeleportCommand.LookAtEntity(EntityArgument.getEntity(commandContext, "facingEntity"), EntityAnchorArgument.Anchor.FEET)
 																)
 														)
 														.then(
@@ -113,7 +113,7 @@ public class TeleportCommand {
 																			commandContext.getSource().getLevel(),
 																			Vec3Argument.getCoordinates(commandContext, "location"),
 																			null,
-																			new TeleportCommand.LookAt(
+																			new TeleportCommand.LookAtEntity(
 																				EntityArgument.getEntity(commandContext, "facingEntity"), EntityAnchorArgument.getAnchor(commandContext, "facingAnchor")
 																			)
 																		)
@@ -130,7 +130,7 @@ public class TeleportCommand {
 															commandContext.getSource().getLevel(),
 															Vec3Argument.getCoordinates(commandContext, "location"),
 															null,
-															new TeleportCommand.LookAt(Vec3Argument.getVec3(commandContext, "facingLocation"))
+															new TeleportCommand.LookAtPosition(Vec3Argument.getVec3(commandContext, "facingLocation"))
 														)
 												)
 										)
@@ -283,33 +283,26 @@ public class TeleportCommand {
 		}
 	}
 
-	static class LookAt {
-		private final Vec3 position;
-		private final Entity entity;
-		private final EntityAnchorArgument.Anchor anchor;
+	@FunctionalInterface
+	interface LookAt {
+		void perform(CommandSourceStack commandSourceStack, Entity entity);
+	}
 
-		public LookAt(Entity entity, EntityAnchorArgument.Anchor anchor) {
-			this.entity = entity;
-			this.anchor = anchor;
-			this.position = anchor.apply(entity);
-		}
-
-		public LookAt(Vec3 vec3) {
-			this.entity = null;
-			this.position = vec3;
-			this.anchor = null;
-		}
-
+	static record LookAtEntity(Entity entity, EntityAnchorArgument.Anchor anchor) implements TeleportCommand.LookAt {
+		@Override
 		public void perform(CommandSourceStack commandSourceStack, Entity entity) {
-			if (this.entity != null) {
-				if (entity instanceof ServerPlayer) {
-					((ServerPlayer)entity).lookAt(commandSourceStack.getAnchor(), this.entity, this.anchor);
-				} else {
-					entity.lookAt(commandSourceStack.getAnchor(), this.position);
-				}
+			if (entity instanceof ServerPlayer serverPlayer) {
+				serverPlayer.lookAt(commandSourceStack.getAnchor(), this.entity, this.anchor);
 			} else {
-				entity.lookAt(commandSourceStack.getAnchor(), this.position);
+				entity.lookAt(commandSourceStack.getAnchor(), this.anchor.apply(this.entity));
 			}
+		}
+	}
+
+	static record LookAtPosition(Vec3 position) implements TeleportCommand.LookAt {
+		@Override
+		public void perform(CommandSourceStack commandSourceStack, Entity entity) {
+			entity.lookAt(commandSourceStack.getAnchor(), this.position);
 		}
 	}
 }

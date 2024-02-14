@@ -64,6 +64,11 @@ public class EnderEyeItem extends Item {
 	}
 
 	@Override
+	public int getUseDuration(ItemStack itemStack) {
+		return 0;
+	}
+
+	@Override
 	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
 		BlockHitResult blockHitResult = getPlayerPOVHitResult(level, player, ClipContext.Fluid.NONE);

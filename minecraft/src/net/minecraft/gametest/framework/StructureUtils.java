@@ -125,6 +125,42 @@ public class StructureUtils {
 		return createStructureBlock(gameTestInfo, blockPos2.below(), rotation, serverLevel);
 	}
 
+	public static void encaseStructure(AABB aABB, ServerLevel serverLevel, boolean bl) {
+		BlockPos blockPos = BlockPos.containing(aABB.minX, aABB.minY, aABB.minZ).offset(-1, 1, -1);
+		BlockPos blockPos2 = BlockPos.containing(aABB.maxX, aABB.maxY, aABB.maxZ);
+		BlockPos.betweenClosedStream(blockPos, blockPos2)
+			.forEach(
+				blockPos3 -> {
+					boolean bl2 = blockPos3.getX() == blockPos.getX()
+						|| blockPos3.getX() == blockPos2.getX()
+						|| blockPos3.getZ() == blockPos.getZ()
+						|| blockPos3.getZ() == blockPos2.getZ();
+					boolean bl3 = blockPos3.getY() == blockPos2.getY();
+					if (bl2 || bl3 && bl) {
+						serverLevel.setBlockAndUpdate(blockPos3, Blocks.BARRIER.defaultBlockState());
+					}
+				}
+			);
+	}
+
+	public static void removeBarriers(AABB aABB, ServerLevel serverLevel) {
+		BlockPos blockPos = BlockPos.containing(aABB.minX, aABB.minY, aABB.minZ).offset(-1, 1, -1);
+		BlockPos blockPos2 = BlockPos.containing(aABB.maxX, aABB.maxY, aABB.maxZ);
+		BlockPos.betweenClosedStream(blockPos, blockPos2)
+			.forEach(
+				blockPos3 -> {
+					boolean bl = blockPos3.getX() == blockPos.getX()
+						|| blockPos3.getX() == blockPos2.getX()
+						|| blockPos3.getZ() == blockPos.getZ()
+						|| blockPos3.getZ() == blockPos2.getZ();
+					boolean bl2 = blockPos3.getY() == blockPos2.getY();
+					if (serverLevel.getBlockState(blockPos3).is(Blocks.BARRIER) && (bl || bl2)) {
+						serverLevel.setBlockAndUpdate(blockPos3, Blocks.AIR.defaultBlockState());
+					}
+				}
+			);
+	}
+
 	private static void forceLoadChunks(BoundingBox boundingBox, ServerLevel serverLevel) {
 		boundingBox.intersectingChunks().forEach(chunkPos -> serverLevel.setChunkForced(chunkPos.x, chunkPos.z, true));
 	}

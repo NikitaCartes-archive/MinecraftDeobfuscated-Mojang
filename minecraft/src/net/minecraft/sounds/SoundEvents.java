@@ -177,6 +177,10 @@ public class SoundEvents {
 	public static final SoundEvent BLAZE_SHOOT = register("entity.blaze.shoot");
 	public static final SoundEvent BOAT_PADDLE_LAND = register("entity.boat.paddle_land");
 	public static final SoundEvent BOAT_PADDLE_WATER = register("entity.boat.paddle_water");
+	public static final SoundEvent BOGGED_AMBIENT = register("entity.bogged.ambient");
+	public static final SoundEvent BOGGED_DEATH = register("entity.bogged.death");
+	public static final SoundEvent BOGGED_HURT = register("entity.bogged.hurt");
+	public static final SoundEvent BOGGED_STEP = register("entity.bogged.step");
 	public static final SoundEvent BONE_BLOCK_BREAK = register("block.bone_block.break");
 	public static final SoundEvent BONE_BLOCK_FALL = register("block.bone_block.fall");
 	public static final SoundEvent BONE_BLOCK_HIT = register("block.bone_block.hit");
@@ -1004,6 +1008,7 @@ public class SoundEvents {
 	public static final SoundEvent PARROT_FLY = register("entity.parrot.fly");
 	public static final SoundEvent PARROT_HURT = register("entity.parrot.hurt");
 	public static final SoundEvent PARROT_IMITATE_BLAZE = register("entity.parrot.imitate.blaze");
+	public static final SoundEvent PARROT_IMITATE_BOGGED = register("entity.parrot.imitate.bogged");
 	public static final SoundEvent PARROT_IMITATE_BREEZE = register("entity.parrot.imitate.breeze");
 	public static final SoundEvent PARROT_IMITATE_CREEPER = register("entity.parrot.imitate.creeper");
 	public static final SoundEvent PARROT_IMITATE_DROWNED = register("entity.parrot.imitate.drowned");

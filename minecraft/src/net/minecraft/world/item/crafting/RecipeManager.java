@@ -53,7 +53,7 @@ public class RecipeManager extends SimpleJsonResourceReloadListener {
 		this.hasErrors = false;
 		Map<RecipeType<?>, Builder<ResourceLocation, RecipeHolder<?>>> map2 = Maps.<RecipeType<?>, Builder<ResourceLocation, RecipeHolder<?>>>newHashMap();
 		Builder<ResourceLocation, RecipeHolder<?>> builder = ImmutableMap.builder();
-		RegistryOps<JsonElement> registryOps = RegistryOps.create(JsonOps.INSTANCE, this.registries);
+		RegistryOps<JsonElement> registryOps = this.registries.createSerializationContext(JsonOps.INSTANCE);
 
 		for (Entry<ResourceLocation, JsonElement> entry : map.entrySet()) {
 			ResourceLocation resourceLocation = (ResourceLocation)entry.getKey();
@@ -148,7 +148,7 @@ public class RecipeManager extends SimpleJsonResourceReloadListener {
 
 	@VisibleForTesting
 	protected static RecipeHolder<?> fromJson(ResourceLocation resourceLocation, JsonObject jsonObject, HolderLookup.Provider provider) {
-		Recipe<?> recipe = Util.getOrThrow(Recipe.CODEC.parse(RegistryOps.create(JsonOps.INSTANCE, provider), jsonObject), JsonParseException::new);
+		Recipe<?> recipe = Util.getOrThrow(Recipe.CODEC.parse(provider.createSerializationContext(JsonOps.INSTANCE), jsonObject), JsonParseException::new);
 		return new RecipeHolder<>(resourceLocation, recipe);
 	}
 

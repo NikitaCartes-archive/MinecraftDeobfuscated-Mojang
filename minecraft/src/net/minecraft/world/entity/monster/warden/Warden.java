@@ -63,9 +63,9 @@ import net.minecraft.world.level.gameevent.EntityPositionSource;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.gameevent.PositionSource;
 import net.minecraft.world.level.gameevent.vibrations.VibrationSystem;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.level.pathfinder.Node;
 import net.minecraft.world.level.pathfinder.PathFinder;
+import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.level.pathfinder.WalkNodeEvaluator;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Contract;
@@ -117,12 +117,12 @@ public class Warden extends Monster implements VibrationSystem {
 		this.dynamicGameEventListener = new DynamicGameEventListener<>(new VibrationSystem.Listener(this));
 		this.xpReward = 5;
 		this.getNavigation().setCanFloat(true);
-		this.setPathfindingMalus(BlockPathTypes.UNPASSABLE_RAIL, 0.0F);
-		this.setPathfindingMalus(BlockPathTypes.DAMAGE_OTHER, 8.0F);
-		this.setPathfindingMalus(BlockPathTypes.POWDER_SNOW, 8.0F);
-		this.setPathfindingMalus(BlockPathTypes.LAVA, 8.0F);
-		this.setPathfindingMalus(BlockPathTypes.DAMAGE_FIRE, 0.0F);
-		this.setPathfindingMalus(BlockPathTypes.DANGER_FIRE, 0.0F);
+		this.setPathfindingMalus(PathType.UNPASSABLE_RAIL, 0.0F);
+		this.setPathfindingMalus(PathType.DAMAGE_OTHER, 8.0F);
+		this.setPathfindingMalus(PathType.POWDER_SNOW, 8.0F);
+		this.setPathfindingMalus(PathType.LAVA, 8.0F);
+		this.setPathfindingMalus(PathType.DAMAGE_FIRE, 0.0F);
+		this.setPathfindingMalus(PathType.DANGER_FIRE, 0.0F);
 	}
 
 	@Override
