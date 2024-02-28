@@ -3,7 +3,6 @@ package net.minecraft.client.gui.components;
 import java.util.function.Consumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -12,6 +11,7 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.StringUtil;
 
 @Environment(EnvType.CLIENT)
 public class MultiLineEditBox extends AbstractScrollWidget {
@@ -87,7 +87,7 @@ public class MultiLineEditBox extends AbstractScrollWidget {
 
 	@Override
 	public boolean charTyped(char c, int i) {
-		if (this.visible && this.isFocused() && SharedConstants.isAllowedChatCharacter(c)) {
+		if (this.visible && this.isFocused() && StringUtil.isAllowedChatCharacter(c)) {
 			this.textField.insertText(Character.toString(c));
 			return true;
 		} else {

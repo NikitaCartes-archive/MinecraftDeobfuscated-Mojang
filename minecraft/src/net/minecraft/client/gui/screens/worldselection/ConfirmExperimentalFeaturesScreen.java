@@ -14,6 +14,7 @@ import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.client.gui.layouts.FrameLayout;
 import net.minecraft.client.gui.layouts.GridLayout;
+import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
 import net.minecraft.client.gui.layouts.LayoutSettings;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
@@ -79,10 +80,27 @@ public class ConfirmExperimentalFeaturesScreen extends Screen {
 
 	@Environment(EnvType.CLIENT)
 	class DetailsScreen extends Screen {
-		private ConfirmExperimentalFeaturesScreen.DetailsScreen.PackList packList;
+		private static final Component TITLE = Component.translatable("selectWorld.experimental.details.title");
+		final HeaderAndFooterLayout layout = new HeaderAndFooterLayout(this);
 
 		DetailsScreen() {
-			super(Component.translatable("selectWorld.experimental.details.title"));
+			super(TITLE);
+		}
+
+		@Override
+		protected void init() {
+			this.layout.addTitleHeader(TITLE, this.font);
+			this.layout.addToContents(new ConfirmExperimentalFeaturesScreen.DetailsScreen.PackList(this.minecraft, ConfirmExperimentalFeaturesScreen.this.enabledPacks));
+			this.layout.addToFooter(Button.builder(CommonComponents.GUI_BACK, button -> this.onClose()).build());
+			this.layout.visitWidgets(guiEventListener -> {
+				AbstractWidget var10000 = this.addRenderableWidget(guiEventListener);
+			});
+			this.repositionElements();
+		}
+
+		@Override
+		protected void repositionElements() {
+			this.layout.arrangeElements();
 		}
 
 		@Override
@@ -90,27 +108,10 @@ public class ConfirmExperimentalFeaturesScreen extends Screen {
 			this.minecraft.setScreen(ConfirmExperimentalFeaturesScreen.this);
 		}
 
-		@Override
-		protected void init() {
-			super.init();
-			this.addRenderableWidget(
-				Button.builder(CommonComponents.GUI_BACK, button -> this.onClose()).bounds(this.width / 2 - 100, this.height / 4 + 120 + 24, 200, 20).build()
-			);
-			this.packList = this.addRenderableWidget(
-				new ConfirmExperimentalFeaturesScreen.DetailsScreen.PackList(this.minecraft, ConfirmExperimentalFeaturesScreen.this.enabledPacks)
-			);
-		}
-
-		@Override
-		public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-			super.render(guiGraphics, i, j, f);
-			guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 10, 16777215);
-		}
-
 		@Environment(EnvType.CLIENT)
 		class PackList extends ObjectSelectionList<ConfirmExperimentalFeaturesScreen.DetailsScreen.PackListEntry> {
 			public PackList(Minecraft minecraft, Collection<Pack> collection) {
-				super(minecraft, DetailsScreen.this.width, DetailsScreen.this.height - 96, 32, (9 + 2) * 3);
+				super(minecraft, DetailsScreen.this.width, DetailsScreen.this.layout.getContentHeight(), DetailsScreen.this.layout.getHeaderHeight(), (9 + 2) * 3);
 
 				for (Pack pack : collection) {
 					String string = FeatureFlags.printMissingFlags(FeatureFlags.VANILLA_SET, pack.getRequestedFeatures());
@@ -142,8 +143,8 @@ public class ConfirmExperimentalFeaturesScreen extends Screen {
 
 			@Override
 			public void render(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-				guiGraphics.drawString(DetailsScreen.this.minecraft.font, this.packId, k, j, 16777215);
-				this.splitMessage.renderLeftAligned(guiGraphics, k, j + 12, 9, 16777215);
+				guiGraphics.drawString(DetailsScreen.this.minecraft.font, this.packId, k, j, -1);
+				this.splitMessage.renderLeftAligned(guiGraphics, k, j + 12, 9, -1);
 			}
 
 			@Override

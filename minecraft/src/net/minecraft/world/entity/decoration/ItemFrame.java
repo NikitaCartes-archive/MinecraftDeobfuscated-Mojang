@@ -4,6 +4,7 @@ import com.mojang.logging.LogUtils;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -255,11 +256,11 @@ public class ItemFrame extends HangingEntity {
 
 	@Nullable
 	public MapId getFramedMapId() {
-		return MapItem.getMapId(this.getItem());
+		return this.getItem().get(DataComponents.MAP_ID);
 	}
 
 	public boolean hasFramedMap() {
-		return this.getFramedMapId() != null;
+		return this.getItem().has(DataComponents.MAP_ID);
 	}
 
 	public void setItem(ItemStack itemStack) {
@@ -336,7 +337,7 @@ public class ItemFrame extends HangingEntity {
 	public void addAdditionalSaveData(CompoundTag compoundTag) {
 		super.addAdditionalSaveData(compoundTag);
 		if (!this.getItem().isEmpty()) {
-			compoundTag.put("Item", this.getItem().save(new CompoundTag()));
+			compoundTag.put("Item", this.getItem().save(this.registryAccess()));
 			compoundTag.putByte("ItemRotation", (byte)this.getRotation());
 			compoundTag.putFloat("ItemDropChance", this.dropChance);
 		}
@@ -349,19 +350,21 @@ public class ItemFrame extends HangingEntity {
 	@Override
 	public void readAdditionalSaveData(CompoundTag compoundTag) {
 		super.readAdditionalSaveData(compoundTag);
-		CompoundTag compoundTag2 = compoundTag.getCompound("Item");
-		if (compoundTag2 != null && !compoundTag2.isEmpty()) {
-			ItemStack itemStack = ItemStack.of(compoundTag2);
-			if (itemStack.isEmpty()) {
-				LOGGER.warn("Unable to load item from: {}", compoundTag2);
-			}
+		ItemStack itemStack;
+		if (compoundTag.contains("Item", 10)) {
+			CompoundTag compoundTag2 = compoundTag.getCompound("Item");
+			itemStack = (ItemStack)ItemStack.parse(this.registryAccess(), compoundTag2).orElse(ItemStack.EMPTY);
+		} else {
+			itemStack = ItemStack.EMPTY;
+		}
 
-			ItemStack itemStack2 = this.getItem();
-			if (!itemStack2.isEmpty() && !ItemStack.matches(itemStack, itemStack2)) {
-				this.removeFramedMap(itemStack2);
-			}
+		ItemStack itemStack2 = this.getItem();
+		if (!itemStack2.isEmpty() && !ItemStack.matches(itemStack, itemStack2)) {
+			this.removeFramedMap(itemStack2);
+		}
 
-			this.setItem(itemStack, false);
+		this.setItem(itemStack, false);
+		if (!itemStack.isEmpty()) {
 			this.setRotation(compoundTag.getByte("ItemRotation"), false);
 			if (compoundTag.contains("ItemDropChance", 99)) {
 				this.dropChance = compoundTag.getFloat("ItemDropChance");

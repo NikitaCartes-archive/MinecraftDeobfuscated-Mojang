@@ -46,14 +46,14 @@ public abstract class ThrowableItemProjectile extends ThrowableProjectile implem
 	@Override
 	public void addAdditionalSaveData(CompoundTag compoundTag) {
 		super.addAdditionalSaveData(compoundTag);
-		compoundTag.put("Item", this.getItem().save(new CompoundTag()));
+		compoundTag.put("Item", this.getItem().save(this.registryAccess()));
 	}
 
 	@Override
 	public void readAdditionalSaveData(CompoundTag compoundTag) {
 		super.readAdditionalSaveData(compoundTag);
 		if (compoundTag.contains("Item", 10)) {
-			this.setItem(ItemStack.of(compoundTag.getCompound("Item")));
+			this.setItem((ItemStack)ItemStack.parse(this.registryAccess(), compoundTag.getCompound("Item")).orElseGet(() -> new ItemStack(this.getDefaultItem())));
 		} else {
 			this.setItem(new ItemStack(this.getDefaultItem()));
 		}

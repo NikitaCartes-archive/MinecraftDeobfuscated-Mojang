@@ -4,7 +4,7 @@ import com.mojang.serialization.MapCodec;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -18,8 +18,8 @@ import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -108,8 +108,8 @@ public class LecternBlock extends BaseEntityBlock {
 		Player player = blockPlaceContext.getPlayer();
 		boolean bl = false;
 		if (!level.isClientSide && player != null && player.canUseGameMasterBlocks()) {
-			CompoundTag compoundTag = BlockItem.getBlockEntityData(itemStack);
-			if (compoundTag != null && compoundTag.contains("Book")) {
+			CustomData customData = itemStack.getOrDefault(DataComponents.BLOCK_ENTITY_DATA, CustomData.EMPTY);
+			if (customData.contains("Book")) {
 				bl = true;
 			}
 		}
@@ -312,7 +312,7 @@ public class LecternBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	protected boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
+	protected boolean isPathfindable(BlockState blockState, PathComputationType pathComputationType) {
 		return false;
 	}
 }

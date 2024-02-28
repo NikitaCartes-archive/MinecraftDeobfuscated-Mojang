@@ -158,13 +158,13 @@ public class ClientboundSetPlayerTeamPacket implements Packet<ClientGamePacketLi
 		}
 
 		public Parameters(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
-			this.displayName = ComponentSerialization.STREAM_CODEC.decode(registryFriendlyByteBuf);
+			this.displayName = ComponentSerialization.TRUSTED_STREAM_CODEC.decode(registryFriendlyByteBuf);
 			this.options = registryFriendlyByteBuf.readByte();
 			this.nametagVisibility = registryFriendlyByteBuf.readUtf(40);
 			this.collisionRule = registryFriendlyByteBuf.readUtf(40);
 			this.color = registryFriendlyByteBuf.readEnum(ChatFormatting.class);
-			this.playerPrefix = ComponentSerialization.STREAM_CODEC.decode(registryFriendlyByteBuf);
-			this.playerSuffix = ComponentSerialization.STREAM_CODEC.decode(registryFriendlyByteBuf);
+			this.playerPrefix = ComponentSerialization.TRUSTED_STREAM_CODEC.decode(registryFriendlyByteBuf);
+			this.playerSuffix = ComponentSerialization.TRUSTED_STREAM_CODEC.decode(registryFriendlyByteBuf);
 		}
 
 		public Component getDisplayName() {
@@ -196,13 +196,13 @@ public class ClientboundSetPlayerTeamPacket implements Packet<ClientGamePacketLi
 		}
 
 		public void write(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
-			ComponentSerialization.STREAM_CODEC.encode(registryFriendlyByteBuf, this.displayName);
+			ComponentSerialization.TRUSTED_STREAM_CODEC.encode(registryFriendlyByteBuf, this.displayName);
 			registryFriendlyByteBuf.writeByte(this.options);
 			registryFriendlyByteBuf.writeUtf(this.nametagVisibility);
 			registryFriendlyByteBuf.writeUtf(this.collisionRule);
 			registryFriendlyByteBuf.writeEnum(this.color);
-			ComponentSerialization.STREAM_CODEC.encode(registryFriendlyByteBuf, this.playerPrefix);
-			ComponentSerialization.STREAM_CODEC.encode(registryFriendlyByteBuf, this.playerSuffix);
+			ComponentSerialization.TRUSTED_STREAM_CODEC.encode(registryFriendlyByteBuf, this.playerPrefix);
+			ComponentSerialization.TRUSTED_STREAM_CODEC.encode(registryFriendlyByteBuf, this.playerSuffix);
 		}
 	}
 }

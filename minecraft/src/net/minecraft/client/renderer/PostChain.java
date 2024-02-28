@@ -23,7 +23,7 @@ import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.ChainedJsonException;
 import net.minecraft.server.packs.resources.Resource;
-import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.server.packs.resources.ResourceProvider;
 import net.minecraft.util.GsonHelper;
 import org.joml.Matrix4f;
 
@@ -31,7 +31,7 @@ import org.joml.Matrix4f;
 public class PostChain implements AutoCloseable {
 	private static final String MAIN_RENDER_TARGET = "minecraft:main";
 	private final RenderTarget screenTarget;
-	private final ResourceManager resourceManager;
+	private final ResourceProvider resourceProvider;
 	private final String name;
 	private final List<PostPass> passes = Lists.<PostPass>newArrayList();
 	private final Map<String, RenderTarget> customRenderTargets = Maps.<String, RenderTarget>newHashMap();
@@ -42,8 +42,8 @@ public class PostChain implements AutoCloseable {
 	private float time;
 	private float lastStamp;
 
-	public PostChain(TextureManager textureManager, ResourceManager resourceManager, RenderTarget renderTarget, ResourceLocation resourceLocation) throws IOException, JsonSyntaxException {
-		this.resourceManager = resourceManager;
+	public PostChain(TextureManager textureManager, ResourceProvider resourceProvider, RenderTarget renderTarget, ResourceLocation resourceLocation) throws IOException, JsonSyntaxException {
+		this.resourceProvider = resourceProvider;
 		this.screenTarget = renderTarget;
 		this.time = 0.0F;
 		this.lastStamp = 0.0F;
@@ -55,7 +55,7 @@ public class PostChain implements AutoCloseable {
 	}
 
 	private void load(TextureManager textureManager, ResourceLocation resourceLocation) throws IOException, JsonSyntaxException {
-		Resource resource = this.resourceManager.getResourceOrThrow(resourceLocation);
+		Resource resource = this.resourceProvider.getResourceOrThrow(resourceLocation);
 
 		try {
 			Reader reader = resource.openAsReader();
@@ -172,7 +172,7 @@ public class PostChain implements AutoCloseable {
 							}
 
 							ResourceLocation resourceLocation = new ResourceLocation("textures/effect/" + string6 + ".png");
-							this.resourceManager
+							this.resourceProvider
 								.getResource(resourceLocation)
 								.orElseThrow(() -> new ChainedJsonException("Render target or texture '" + string6 + "' does not exist"));
 							RenderSystem.setShaderTexture(0, resourceLocation);
@@ -291,7 +291,7 @@ public class PostChain implements AutoCloseable {
 	}
 
 	public PostPass addPass(String string, RenderTarget renderTarget, RenderTarget renderTarget2) throws IOException {
-		PostPass postPass = new PostPass(this.resourceManager, string, renderTarget, renderTarget2);
+		PostPass postPass = new PostPass(this.resourceProvider, string, renderTarget, renderTarget2);
 		this.passes.add(this.passes.size(), postPass);
 		return postPass;
 	}
@@ -330,6 +330,12 @@ public class PostChain implements AutoCloseable {
 
 		for (PostPass postPass : this.passes) {
 			postPass.process(this.time / 20.0F);
+		}
+	}
+
+	public void setUniform(String string, float f) {
+		for (PostPass postPass : this.passes) {
+			postPass.getEffect().safeGetUniform(string).set(f);
 		}
 	}
 

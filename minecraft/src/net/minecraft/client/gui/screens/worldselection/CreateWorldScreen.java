@@ -2,6 +2,7 @@ package net.minecraft.client.gui.screens.worldselection;
 
 import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonElement;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.DataResult;
@@ -39,13 +40,14 @@ import net.minecraft.client.gui.components.tabs.TabManager;
 import net.minecraft.client.gui.components.tabs.TabNavigationBar;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.layouts.CommonLayouts;
-import net.minecraft.client.gui.layouts.FrameLayout;
 import net.minecraft.client.gui.layouts.GridLayout;
+import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
 import net.minecraft.client.gui.layouts.LayoutSettings;
+import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.screens.ConfirmScreen;
-import net.minecraft.client.gui.screens.GenericDirtMessageScreen;
+import net.minecraft.client.gui.screens.GenericMessageScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.packs.PackSelectionScreen;
 import net.minecraft.commands.Commands;
@@ -60,7 +62,6 @@ import net.minecraft.server.RegistryLayer;
 import net.minecraft.server.WorldLoader;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.repository.ServerPacksSource;
-import net.minecraft.util.Mth;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.flag.FeatureFlags;
@@ -86,7 +87,6 @@ import org.slf4j.Logger;
 public class CreateWorldScreen extends Screen {
 	private static final int GROUP_BOTTOM = 1;
 	private static final int TAB_COLUMN_WIDTH = 210;
-	private static final int FOOTER_HEIGHT = 36;
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final String TEMP_WORLD_PREFIX = "mcworld-";
 	static final Component GAME_MODEL_LABEL = Component.translatable("selectWorld.gameMode");
@@ -96,9 +96,9 @@ public class CreateWorldScreen extends Screen {
 	private static final Component PREPARING_WORLD_DATA = Component.translatable("createWorld.preparing");
 	private static final int HORIZONTAL_BUTTON_SPACING = 10;
 	private static final int VERTICAL_BUTTON_SPACING = 8;
-	public static final ResourceLocation HEADER_SEPERATOR = new ResourceLocation("textures/gui/header_separator.png");
-	public static final ResourceLocation FOOTER_SEPERATOR = new ResourceLocation("textures/gui/footer_separator.png");
-	public static final ResourceLocation LIGHT_DIRT_BACKGROUND = new ResourceLocation("textures/gui/light_dirt_background.png");
+	public static final ResourceLocation HEADER_SEPARATOR = new ResourceLocation("textures/gui/header_separator.png");
+	public static final ResourceLocation FOOTER_SEPARATOR = new ResourceLocation("textures/gui/footer_separator.png");
+	private final HeaderAndFooterLayout layout = new HeaderAndFooterLayout(this);
 	final WorldCreationUiState uiState;
 	private final TabManager tabManager = new TabManager(this::addRenderableWidget, guiEventListener -> this.removeWidget(guiEventListener));
 	private boolean recreated;
@@ -109,8 +109,6 @@ public class CreateWorldScreen extends Screen {
 	private Path tempDataPackDir;
 	@Nullable
 	private PackRepository tempDataPackRepository;
-	@Nullable
-	private GridLayout bottomButtons;
 	@Nullable
 	private TabNavigationBar tabNavigationBar;
 
@@ -192,11 +190,10 @@ public class CreateWorldScreen extends Screen {
 			.addTabs(new CreateWorldScreen.GameTab(), new CreateWorldScreen.WorldTab(), new CreateWorldScreen.MoreTab())
 			.build();
 		this.addRenderableWidget(this.tabNavigationBar);
-		this.bottomButtons = new GridLayout().columnSpacing(10);
-		GridLayout.RowHelper rowHelper = this.bottomButtons.createRowHelper(2);
-		rowHelper.addChild(Button.builder(Component.translatable("selectWorld.create"), button -> this.onCreate()).build());
-		rowHelper.addChild(Button.builder(CommonComponents.GUI_CANCEL, button -> this.popScreen()).build());
-		this.bottomButtons.visitWidgets(abstractWidget -> {
+		LinearLayout linearLayout = this.layout.addToFooter(LinearLayout.horizontal().spacing(8));
+		linearLayout.addChild(Button.builder(Component.translatable("selectWorld.create"), button -> this.onCreate()).build());
+		linearLayout.addChild(Button.builder(CommonComponents.GUI_CANCEL, button -> this.popScreen()).build());
+		this.layout.visitWidgets(abstractWidget -> {
 			abstractWidget.setTabOrderGroup(1);
 			this.addRenderableWidget(abstractWidget);
 		});
@@ -211,19 +208,19 @@ public class CreateWorldScreen extends Screen {
 
 	@Override
 	public void repositionElements() {
-		if (this.tabNavigationBar != null && this.bottomButtons != null) {
+		if (this.tabNavigationBar != null) {
 			this.tabNavigationBar.setWidth(this.width);
 			this.tabNavigationBar.arrangeElements();
-			this.bottomButtons.arrangeElements();
-			FrameLayout.centerInRectangle(this.bottomButtons, 0, this.height - 36, this.width, 36);
 			int i = this.tabNavigationBar.getRectangle().bottom();
-			ScreenRectangle screenRectangle = new ScreenRectangle(0, i, this.width, this.bottomButtons.getY() - i);
+			ScreenRectangle screenRectangle = new ScreenRectangle(0, i, this.width, this.height - this.layout.getFooterHeight() - i);
 			this.tabManager.setTabArea(screenRectangle);
+			this.layout.setHeaderHeight(i);
+			this.layout.arrangeElements();
 		}
 	}
 
 	private static void queueLoadScreen(Minecraft minecraft, Component component) {
-		minecraft.forceSetScreen(new GenericDirtMessageScreen(component));
+		minecraft.forceSetScreen(new GenericMessageScreen(component));
 	}
 
 	private void onCreate() {
@@ -305,13 +302,14 @@ public class CreateWorldScreen extends Screen {
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
 		super.render(guiGraphics, i, j, f);
-		guiGraphics.blit(FOOTER_SEPERATOR, 0, Mth.roundToward(this.height - 36 - 2, 2), 0.0F, 0.0F, this.width, 2, 32, 2);
+		RenderSystem.enableBlend();
+		guiGraphics.blit(FOOTER_SEPARATOR, 0, this.height - this.layout.getFooterHeight() - 2, 0.0F, 0.0F, this.width, 2, 32, 2);
+		RenderSystem.disableBlend();
 	}
 
 	@Override
-	public void renderDirtBackground(GuiGraphics guiGraphics) {
-		int i = 32;
-		guiGraphics.blit(LIGHT_DIRT_BACKGROUND, 0, 0, 0, 0.0F, 0.0F, this.width, this.height, 32, 32);
+	protected void renderMenuBackground(GuiGraphics guiGraphics) {
+		this.renderMenuBackground(guiGraphics, 0, this.layout.getHeaderHeight(), this.width, this.height);
 	}
 
 	@Override
@@ -390,7 +388,7 @@ public class CreateWorldScreen extends Screen {
 	}
 
 	private void applyNewPackConfig(PackRepository packRepository, WorldDataConfiguration worldDataConfiguration, Consumer<WorldDataConfiguration> consumer) {
-		this.minecraft.forceSetScreen(new GenericDirtMessageScreen(Component.translatable("dataPack.validation.working")));
+		this.minecraft.forceSetScreen(new GenericMessageScreen(Component.translatable("dataPack.validation.working")));
 		WorldLoader.InitConfig initConfig = createDefaultLoadConfig(packRepository, worldDataConfiguration);
 		WorldLoader.<CreateWorldScreen.DataPackReloadCookie, WorldCreationContext>load(
 				initConfig,

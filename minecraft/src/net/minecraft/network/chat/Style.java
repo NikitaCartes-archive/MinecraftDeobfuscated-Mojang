@@ -482,6 +482,6 @@ public class Style {
 					.apply(instance, Style::create)
 		);
 		public static final Codec<Style> CODEC = MAP_CODEC.codec();
-		public static final StreamCodec<RegistryFriendlyByteBuf, Style> STREAM_CODEC = ByteBufCodecs.fromCodecWithRegistries(CODEC);
+		public static final StreamCodec<RegistryFriendlyByteBuf, Style> TRUSTED_STREAM_CODEC = ByteBufCodecs.fromCodecWithRegistriesTrusted(CODEC);
 	}
 }

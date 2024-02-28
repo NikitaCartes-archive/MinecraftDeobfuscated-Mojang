@@ -56,6 +56,7 @@ import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.biome.FeatureSorter;
 import net.minecraft.world.level.biome.MobSpawnSettings;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.LegacyRandomSource;
@@ -388,7 +389,7 @@ public abstract class ChunkGenerator {
 				worldGenLevel.setCurrentlyGenerating(null);
 			} catch (Exception var31) {
 				CrashReport crashReport3 = CrashReport.forThrowable(var31, "Biome decoration");
-				crashReport3.addCategory("Generation").setDetail("CenterX", chunkPos.x).setDetail("CenterZ", chunkPos.z).setDetail("Seed", l);
+				crashReport3.addCategory("Generation").setDetail("CenterX", chunkPos.x).setDetail("CenterZ", chunkPos.z).setDetail("Decoration Seed", l);
 				throw new ReportedException(crashReport3);
 			}
 		}

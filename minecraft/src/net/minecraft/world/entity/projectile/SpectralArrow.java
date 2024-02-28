@@ -11,11 +11,10 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 
 public class SpectralArrow extends AbstractArrow {
-	private static final ItemStack DEFAULT_ARROW_STACK = new ItemStack(Items.SPECTRAL_ARROW);
 	private int duration = 200;
 
 	public SpectralArrow(EntityType<? extends SpectralArrow> entityType, Level level) {
-		super(entityType, level, DEFAULT_ARROW_STACK);
+		super(entityType, level);
 	}
 
 	public SpectralArrow(Level level, LivingEntity livingEntity, ItemStack itemStack) {
@@ -53,5 +52,10 @@ public class SpectralArrow extends AbstractArrow {
 	public void addAdditionalSaveData(CompoundTag compoundTag) {
 		super.addAdditionalSaveData(compoundTag);
 		compoundTag.putInt("Duration", this.duration);
+	}
+
+	@Override
+	protected ItemStack getDefaultPickupItem() {
+		return new ItemStack(Items.SPECTRAL_ARROW);
 	}
 }

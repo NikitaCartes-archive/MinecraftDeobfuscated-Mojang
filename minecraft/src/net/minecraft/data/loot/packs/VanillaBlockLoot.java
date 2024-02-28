@@ -1,12 +1,12 @@
 package net.minecraft.data.loot.packs;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.advancements.critereon.StatePropertiesPredicate;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.data.loot.BlockLootSubProvider;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.flag.FeatureFlags;
@@ -44,7 +44,7 @@ import net.minecraft.world.level.storage.loot.entries.LootItem;
 import net.minecraft.world.level.storage.loot.entries.LootPoolEntryContainer;
 import net.minecraft.world.level.storage.loot.entries.LootPoolSingletonContainer;
 import net.minecraft.world.level.storage.loot.functions.ApplyBonusCount;
-import net.minecraft.world.level.storage.loot.functions.CopyNbtFunction;
+import net.minecraft.world.level.storage.loot.functions.CopyComponentsFunction;
 import net.minecraft.world.level.storage.loot.functions.LimitCount;
 import net.minecraft.world.level.storage.loot.functions.SetItemCountFunction;
 import net.minecraft.world.level.storage.loot.predicates.BonusLevelTableCondition;
@@ -53,7 +53,6 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.level.storage.loot.predicates.LootItemEntityPropertyCondition;
 import net.minecraft.world.level.storage.loot.predicates.LootItemRandomChanceCondition;
 import net.minecraft.world.level.storage.loot.predicates.MatchTool;
-import net.minecraft.world.level.storage.loot.providers.nbt.ContextNbtProvider;
 import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
 
@@ -986,9 +985,7 @@ public class VanillaBlockLoot extends BlockLootSubProvider {
 								.add(
 									LootItem.lootTableItem(block)
 										.apply(
-											CopyNbtFunction.copyData(ContextNbtProvider.BLOCK_ENTITY)
-												.copy("SkullOwner", "SkullOwner")
-												.copy("note_block_sound", String.format(Locale.ROOT, "%s.%s", "BlockEntityTag", "note_block_sound"))
+											CopyComponentsFunction.copyComponents(CopyComponentsFunction.Source.BLOCK_ENTITY).copy(DataComponents.PROFILE).copy(DataComponents.NOTE_BLOCK_SOUND)
 										)
 								)
 						)
@@ -1448,7 +1445,10 @@ public class VanillaBlockLoot extends BlockLootSubProvider {
 								LootItemBlockStatePropertyCondition.hasBlockStateProperties(block)
 									.setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(DecoratedPotBlock.CRACKED, true))
 							)
-							.otherwise(LootItem.lootTableItem(block).apply(CopyNbtFunction.copyData(ContextNbtProvider.BLOCK_ENTITY).copy("sherds", "BlockEntityTag.sherds")))
+							.otherwise(
+								LootItem.lootTableItem(block)
+									.apply(CopyComponentsFunction.copyComponents(CopyComponentsFunction.Source.BLOCK_ENTITY).copy(DataComponents.POT_DECORATIONS))
+							)
 					)
 			);
 	}

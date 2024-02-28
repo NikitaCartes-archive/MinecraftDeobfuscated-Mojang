@@ -1,22 +1,16 @@
 package net.minecraft.client.gui.screens.inventory;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableList.Builder;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Consumer;
-import java.util.function.IntFunction;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.GameNarrator;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -26,25 +20,15 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.WrittenBookItem;
+import net.minecraft.world.item.component.WritableBookContent;
+import net.minecraft.world.item.component.WrittenBookContent;
 
 @Environment(EnvType.CLIENT)
 public class BookViewScreen extends Screen {
 	public static final int PAGE_INDICATOR_TEXT_Y_OFFSET = 16;
 	public static final int PAGE_TEXT_X_OFFSET = 36;
 	public static final int PAGE_TEXT_Y_OFFSET = 30;
-	public static final BookViewScreen.BookAccess EMPTY_ACCESS = new BookViewScreen.BookAccess() {
-		@Override
-		public int getPageCount() {
-			return 0;
-		}
-
-		@Override
-		public FormattedText getPageRaw(int i) {
-			return FormattedText.EMPTY;
-		}
-	};
+	public static final BookViewScreen.BookAccess EMPTY_ACCESS = new BookViewScreen.BookAccess(List.of());
 	public static final ResourceLocation BOOK_LOCATION = new ResourceLocation("textures/gui/book.png");
 	protected static final int TEXT_WIDTH = 114;
 	protected static final int TEXT_HEIGHT = 128;
@@ -186,7 +170,7 @@ public class BookViewScreen extends Screen {
 
 	@Override
 	public void renderBackground(GuiGraphics guiGraphics, int i, int j, float f) {
-		super.renderBackground(guiGraphics, i, j, f);
+		this.renderTransparentBackground(guiGraphics);
 		guiGraphics.blit(BOOK_LOCATION, (this.width - 192) / 2, 2, 0, 0, 192, 192);
 	}
 
@@ -256,106 +240,26 @@ public class BookViewScreen extends Screen {
 		}
 	}
 
-	static List<String> loadPages(CompoundTag compoundTag) {
-		Builder<String> builder = ImmutableList.builder();
-		loadPages(compoundTag, builder::add);
-		return builder.build();
-	}
-
-	public static void loadPages(CompoundTag compoundTag, Consumer<String> consumer) {
-		ListTag listTag = compoundTag.getList("pages", 8).copy();
-		IntFunction<String> intFunction;
-		if (Minecraft.getInstance().isTextFilteringEnabled() && compoundTag.contains("filtered_pages", 10)) {
-			CompoundTag compoundTag2 = compoundTag.getCompound("filtered_pages");
-			intFunction = ix -> {
-				String string = String.valueOf(ix);
-				return compoundTag2.contains(string) ? compoundTag2.getString(string) : listTag.getString(ix);
-			};
-		} else {
-			intFunction = listTag::getString;
-		}
-
-		for (int i = 0; i < listTag.size(); i++) {
-			consumer.accept((String)intFunction.apply(i));
-		}
-	}
-
 	@Environment(EnvType.CLIENT)
-	public interface BookAccess {
-		int getPageCount();
-
-		FormattedText getPageRaw(int i);
-
-		default FormattedText getPage(int i) {
-			return i >= 0 && i < this.getPageCount() ? this.getPageRaw(i) : FormattedText.EMPTY;
+	public static record BookAccess(List<Component> pages) {
+		public int getPageCount() {
+			return this.pages.size();
 		}
 
-		static BookViewScreen.BookAccess fromItem(ItemStack itemStack) {
-			if (itemStack.is(Items.WRITTEN_BOOK)) {
-				return new BookViewScreen.WrittenBookAccess(itemStack);
+		public FormattedText getPage(int i) {
+			return i >= 0 && i < this.getPageCount() ? (FormattedText)this.pages.get(i) : FormattedText.EMPTY;
+		}
+
+		@Nullable
+		public static BookViewScreen.BookAccess fromItem(ItemStack itemStack) {
+			boolean bl = Minecraft.getInstance().isTextFilteringEnabled();
+			WrittenBookContent writtenBookContent = itemStack.get(DataComponents.WRITTEN_BOOK_CONTENT);
+			if (writtenBookContent != null) {
+				return new BookViewScreen.BookAccess(writtenBookContent.getPages(bl));
 			} else {
-				return (BookViewScreen.BookAccess)(itemStack.is(Items.WRITABLE_BOOK) ? new BookViewScreen.WritableBookAccess(itemStack) : BookViewScreen.EMPTY_ACCESS);
+				WritableBookContent writableBookContent = itemStack.get(DataComponents.WRITABLE_BOOK_CONTENT);
+				return writableBookContent != null ? new BookViewScreen.BookAccess(writableBookContent.getPages(bl).map(Component::literal).toList()) : null;
 			}
-		}
-	}
-
-	@Environment(EnvType.CLIENT)
-	public static class WritableBookAccess implements BookViewScreen.BookAccess {
-		private final List<String> pages;
-
-		public WritableBookAccess(ItemStack itemStack) {
-			this.pages = readPages(itemStack);
-		}
-
-		private static List<String> readPages(ItemStack itemStack) {
-			CompoundTag compoundTag = itemStack.getTag();
-			return (List<String>)(compoundTag != null ? BookViewScreen.loadPages(compoundTag) : ImmutableList.of());
-		}
-
-		@Override
-		public int getPageCount() {
-			return this.pages.size();
-		}
-
-		@Override
-		public FormattedText getPageRaw(int i) {
-			return FormattedText.of((String)this.pages.get(i));
-		}
-	}
-
-	@Environment(EnvType.CLIENT)
-	public static class WrittenBookAccess implements BookViewScreen.BookAccess {
-		private final List<String> pages;
-
-		public WrittenBookAccess(ItemStack itemStack) {
-			this.pages = readPages(itemStack);
-		}
-
-		private static List<String> readPages(ItemStack itemStack) {
-			CompoundTag compoundTag = itemStack.getTag();
-			return (List<String>)(compoundTag != null && WrittenBookItem.makeSureTagIsValid(compoundTag)
-				? BookViewScreen.loadPages(compoundTag)
-				: ImmutableList.of(Component.Serializer.toJson(Component.translatable("book.invalid.tag").withStyle(ChatFormatting.DARK_RED))));
-		}
-
-		@Override
-		public int getPageCount() {
-			return this.pages.size();
-		}
-
-		@Override
-		public FormattedText getPageRaw(int i) {
-			String string = (String)this.pages.get(i);
-
-			try {
-				FormattedText formattedText = Component.Serializer.fromJson(string);
-				if (formattedText != null) {
-					return formattedText;
-				}
-			} catch (Exception var4) {
-			}
-
-			return FormattedText.of(string);
 		}
 	}
 }

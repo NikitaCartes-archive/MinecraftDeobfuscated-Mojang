@@ -4,6 +4,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.logging.LogUtils;
 import java.io.File;
 import java.net.URI;
@@ -24,7 +25,6 @@ import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.CrashReportDetail;
 import net.minecraft.ReportedException;
-import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ComponentPath;
@@ -45,12 +45,15 @@ import net.minecraft.client.gui.navigation.ScreenDirection;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipPositioner;
 import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
+import net.minecraft.client.renderer.CubeMap;
+import net.minecraft.client.renderer.PanoramaRenderer;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.Music;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.util.StringUtil;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import org.slf4j.Logger;
@@ -60,7 +63,10 @@ public abstract class Screen extends AbstractContainerEventHandler implements Re
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final Set<String> ALLOWED_PROTOCOLS = Sets.<String>newHashSet("http", "https");
 	private static final Component USAGE_NARRATION = Component.translatable("narrator.screen.usage");
-	public static final ResourceLocation BACKGROUND_LOCATION = new ResourceLocation("textures/gui/options_background.png");
+	protected static final CubeMap CUBE_MAP = new CubeMap(new ResourceLocation("textures/gui/title/background/panorama"));
+	protected static final PanoramaRenderer PANORAMA = new PanoramaRenderer(CUBE_MAP);
+	protected static final ResourceLocation PANORAMA_OVERLAY = new ResourceLocation("textures/gui/title/background/panorama_overlay.png");
+	public static final ResourceLocation MENU_BACKGROUND = new ResourceLocation("textures/gui/menu_background.png");
 	protected final Component title;
 	private final List<GuiEventListener> children = Lists.<GuiEventListener>newArrayList();
 	private final List<NarratableEntry> narratables = Lists.<NarratableEntry>newArrayList();
@@ -279,9 +285,9 @@ public abstract class Screen extends AbstractContainerEventHandler implements Re
 					URI uRIx = new File(clickEvent.getValue()).toURI();
 					this.openLink(uRIx);
 				} else if (clickEvent.getAction() == ClickEvent.Action.SUGGEST_COMMAND) {
-					this.insertText(SharedConstants.filterText(clickEvent.getValue()), true);
+					this.insertText(StringUtil.filterText(clickEvent.getValue()), true);
 				} else if (clickEvent.getAction() == ClickEvent.Action.RUN_COMMAND) {
-					String string2 = SharedConstants.filterText(clickEvent.getValue());
+					String string2 = StringUtil.filterText(clickEvent.getValue());
 					if (string2.startsWith("/")) {
 						if (!this.minecraft.player.connection.sendUnsignedCommand(string2.substring(1))) {
 							LOGGER.error("Not allowed to run command with signed argument from click event: '{}'", string2);
@@ -344,22 +350,40 @@ public abstract class Screen extends AbstractContainerEventHandler implements Re
 	}
 
 	public void renderBackground(GuiGraphics guiGraphics, int i, int j, float f) {
-		if (this.minecraft.level != null) {
-			this.renderTransparentBackground(guiGraphics);
-		} else {
-			this.renderDirtBackground(guiGraphics);
+		if (this.minecraft.level == null) {
+			this.renderPanorama(guiGraphics, f);
 		}
+
+		this.renderBlurredBackground(f);
+		this.renderMenuBackground(guiGraphics);
+	}
+
+	protected void renderBlurredBackground(float f) {
+		this.minecraft.gameRenderer.processBlurEffect(f);
+		this.minecraft.getMainRenderTarget().bindWrite(false);
+	}
+
+	protected void renderPanorama(GuiGraphics guiGraphics, float f) {
+		PANORAMA.render(f);
+	}
+
+	protected void renderMenuBackground(GuiGraphics guiGraphics) {
+		this.renderMenuBackground(guiGraphics, 0, 0, this.width, this.height);
+	}
+
+	protected void renderMenuBackground(GuiGraphics guiGraphics, int i, int j, int k, int l) {
+		renderMenuBackgroundTexture(guiGraphics, i, j, k, l);
+	}
+
+	public static void renderMenuBackgroundTexture(GuiGraphics guiGraphics, int i, int j, int k, int l) {
+		int m = 32;
+		RenderSystem.enableBlend();
+		guiGraphics.blit(MENU_BACKGROUND, i, j, 0, 0.0F, 0.0F, k, l, 32, 32);
+		RenderSystem.disableBlend();
 	}
 
 	public void renderTransparentBackground(GuiGraphics guiGraphics) {
 		guiGraphics.fillGradient(0, 0, this.width, this.height, -1072689136, -804253680);
-	}
-
-	public void renderDirtBackground(GuiGraphics guiGraphics) {
-		guiGraphics.setColor(0.25F, 0.25F, 0.25F, 1.0F);
-		int i = 32;
-		guiGraphics.blit(BACKGROUND_LOCATION, 0, 0, 0, 0.0F, 0.0F, this.width, this.height, 32, 32);
-		guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
 	}
 
 	public boolean isPauseScreen() {

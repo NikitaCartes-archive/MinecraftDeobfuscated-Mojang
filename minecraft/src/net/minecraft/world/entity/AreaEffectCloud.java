@@ -7,25 +7,24 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.logging.LogUtils;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import javax.annotation.Nullable;
+import net.minecraft.Util;
 import net.minecraft.commands.arguments.ParticleArgument;
 import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.item.alchemy.Potion;
-import net.minecraft.world.item.alchemy.PotionUtils;
-import net.minecraft.world.item.alchemy.Potions;
+import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.PushReaction;
 import org.slf4j.Logger;
@@ -42,14 +41,11 @@ public class AreaEffectCloud extends Entity implements TraceableEntity {
 	private static final float DEFAULT_RADIUS = 3.0F;
 	public static final float DEFAULT_WIDTH = 6.0F;
 	public static final float HEIGHT = 0.5F;
-	private static final String TAG_EFFECTS = "effects";
-	private Holder<Potion> potion = Potions.EMPTY;
-	private final List<MobEffectInstance> effects = Lists.<MobEffectInstance>newArrayList();
+	private PotionContents potionContents = PotionContents.EMPTY;
 	private final Map<Entity, Integer> victims = Maps.<Entity, Integer>newHashMap();
 	private int duration = 600;
 	private int waitTime = 20;
 	private int reapplicationDelay = 20;
-	private boolean fixedColor;
 	private int durationOnUse;
 	private float radiusOnUse;
 	private float radiusPerTick;
@@ -95,35 +91,21 @@ public class AreaEffectCloud extends Entity implements TraceableEntity {
 		return this.getEntityData().get(DATA_RADIUS);
 	}
 
-	public void setPotion(Holder<Potion> holder) {
-		this.potion = holder;
-		if (!this.fixedColor) {
-			this.updateColor();
-		}
+	public void setPotionContents(PotionContents potionContents) {
+		this.potionContents = potionContents;
+		this.updateColor();
 	}
 
 	private void updateColor() {
-		if (this.potion.is(Potions.EMPTY) && this.effects.isEmpty()) {
-			this.getEntityData().set(DATA_COLOR, 0);
-		} else {
-			this.getEntityData().set(DATA_COLOR, PotionUtils.getColor(PotionUtils.getAllEffects(this.potion, this.effects)));
-		}
+		this.entityData.set(DATA_COLOR, this.potionContents.equals(PotionContents.EMPTY) ? 0 : this.potionContents.getColor());
 	}
 
 	public void addEffect(MobEffectInstance mobEffectInstance) {
-		this.effects.add(mobEffectInstance);
-		if (!this.fixedColor) {
-			this.updateColor();
-		}
+		this.setPotionContents(this.potionContents.withEffectAdded(mobEffectInstance));
 	}
 
 	public int getColor() {
 		return this.getEntityData().get(DATA_COLOR);
-	}
-
-	public void setFixedColor(int i) {
-		this.fixedColor = true;
-		this.getEntityData().set(DATA_COLOR, i);
 	}
 
 	public ParticleOptions getParticle() {
@@ -224,24 +206,25 @@ public class AreaEffectCloud extends Entity implements TraceableEntity {
 
 			if (this.tickCount % 5 == 0) {
 				this.victims.entrySet().removeIf(entry -> this.tickCount >= (Integer)entry.getValue());
-				List<MobEffectInstance> list = Lists.<MobEffectInstance>newArrayList();
-
-				for (MobEffectInstance mobEffectInstance : this.potion.value().getEffects()) {
-					list.add(
-						new MobEffectInstance(
-							mobEffectInstance.getEffect(),
-							mobEffectInstance.mapDuration(i -> i / 4),
-							mobEffectInstance.getAmplifier(),
-							mobEffectInstance.isAmbient(),
-							mobEffectInstance.isVisible()
-						)
-					);
-				}
-
-				list.addAll(this.effects);
-				if (list.isEmpty()) {
+				if (!this.potionContents.hasEffects()) {
 					this.victims.clear();
 				} else {
+					List<MobEffectInstance> list = Lists.<MobEffectInstance>newArrayList();
+					if (this.potionContents.potion().isPresent()) {
+						for (MobEffectInstance mobEffectInstance : ((Potion)((Holder)this.potionContents.potion().get()).value()).getEffects()) {
+							list.add(
+								new MobEffectInstance(
+									mobEffectInstance.getEffect(),
+									mobEffectInstance.mapDuration(i -> i / 4),
+									mobEffectInstance.getAmplifier(),
+									mobEffectInstance.isAmbient(),
+									mobEffectInstance.isVisible()
+								)
+							);
+						}
+					}
+
+					list.addAll(this.potionContents.customEffects());
 					List<LivingEntity> list2 = this.level().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox());
 					if (!list2.isEmpty()) {
 						for (LivingEntity livingEntity : list2) {
@@ -352,29 +335,16 @@ public class AreaEffectCloud extends Entity implements TraceableEntity {
 		if (compoundTag.contains("Particle", 8)) {
 			try {
 				this.setParticle(ParticleArgument.readParticle(new StringReader(compoundTag.getString("Particle")), this.registryAccess()));
-			} catch (CommandSyntaxException var5) {
-				LOGGER.warn("Couldn't load custom particle {}", compoundTag.getString("Particle"), var5);
+			} catch (CommandSyntaxException var3) {
+				LOGGER.warn("Couldn't load custom particle {}", compoundTag.getString("Particle"), var3);
 			}
 		}
 
-		if (compoundTag.contains("Color", 99)) {
-			this.setFixedColor(compoundTag.getInt("Color"));
-		}
-
-		if (compoundTag.contains("Potion", 8)) {
-			this.setPotion(PotionUtils.getPotion(compoundTag));
-		}
-
-		if (compoundTag.contains("effects", 9)) {
-			ListTag listTag = compoundTag.getList("effects", 10);
-			this.effects.clear();
-
-			for (int i = 0; i < listTag.size(); i++) {
-				MobEffectInstance mobEffectInstance = MobEffectInstance.load(listTag.getCompound(i));
-				if (mobEffectInstance != null) {
-					this.addEffect(mobEffectInstance);
-				}
-			}
+		if (compoundTag.contains("potion_contents")) {
+			PotionContents.CODEC
+				.parse(NbtOps.INSTANCE, compoundTag.get("potion_contents"))
+				.resultOrPartial(string -> LOGGER.warn("Failed to parse area effect cloud potions: '{}'", string))
+				.ifPresent(this::setPotionContents);
 		}
 	}
 
@@ -393,23 +363,9 @@ public class AreaEffectCloud extends Entity implements TraceableEntity {
 			compoundTag.putUUID("Owner", this.ownerUUID);
 		}
 
-		if (this.fixedColor) {
-			compoundTag.putInt("Color", this.getColor());
-		}
-
-		Optional<ResourceKey<Potion>> optional = this.potion.unwrapKey();
-		if (optional.isPresent() && !this.potion.is(Potions.EMPTY)) {
-			compoundTag.putString("Potion", ((ResourceKey)optional.get()).location().toString());
-		}
-
-		if (!this.effects.isEmpty()) {
-			ListTag listTag = new ListTag();
-
-			for (MobEffectInstance mobEffectInstance : this.effects) {
-				listTag.add(mobEffectInstance.save());
-			}
-
-			compoundTag.put("effects", listTag);
+		if (!this.potionContents.equals(PotionContents.EMPTY)) {
+			Tag tag = Util.getOrThrow(PotionContents.CODEC.encodeStart(NbtOps.INSTANCE, this.potionContents), IllegalStateException::new);
+			compoundTag.put("potion_contents", tag);
 		}
 	}
 
@@ -420,10 +376,6 @@ public class AreaEffectCloud extends Entity implements TraceableEntity {
 		}
 
 		super.onSyncedDataUpdated(entityDataAccessor);
-	}
-
-	public Holder<Potion> getPotion() {
-		return this.potion;
 	}
 
 	@Override

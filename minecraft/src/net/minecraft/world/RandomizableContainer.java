@@ -49,7 +49,12 @@ public interface RandomizableContainer extends Container {
 	default boolean tryLoadLootTable(CompoundTag compoundTag) {
 		if (compoundTag.contains("LootTable", 8)) {
 			this.setLootTable(new ResourceLocation(compoundTag.getString("LootTable")));
-			this.setLootTableSeed(compoundTag.getLong("LootTableSeed"));
+			if (compoundTag.contains("LootTableSeed", 4)) {
+				this.setLootTableSeed(compoundTag.getLong("LootTableSeed"));
+			} else {
+				this.setLootTableSeed(0L);
+			}
+
 			return true;
 		} else {
 			return false;

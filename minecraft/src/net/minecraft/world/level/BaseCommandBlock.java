@@ -9,6 +9,7 @@ import net.minecraft.CrashReportDetail;
 import net.minecraft.ReportedException;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -29,7 +30,8 @@ public abstract class BaseCommandBlock implements CommandSource {
 	@Nullable
 	private Component lastOutput;
 	private String command = "";
-	private Component name = DEFAULT_NAME;
+	@Nullable
+	private Component customName;
 
 	public int getSuccessCount() {
 		return this.successCount;
@@ -43,13 +45,16 @@ public abstract class BaseCommandBlock implements CommandSource {
 		return this.lastOutput == null ? CommonComponents.EMPTY : this.lastOutput;
 	}
 
-	public CompoundTag save(CompoundTag compoundTag) {
+	public CompoundTag save(CompoundTag compoundTag, HolderLookup.Provider provider) {
 		compoundTag.putString("Command", this.command);
 		compoundTag.putInt("SuccessCount", this.successCount);
-		compoundTag.putString("CustomName", Component.Serializer.toJson(this.name));
+		if (this.customName != null) {
+			compoundTag.putString("CustomName", Component.Serializer.toJson(this.customName, provider));
+		}
+
 		compoundTag.putBoolean("TrackOutput", this.trackOutput);
 		if (this.lastOutput != null && this.trackOutput) {
-			compoundTag.putString("LastOutput", Component.Serializer.toJson(this.lastOutput));
+			compoundTag.putString("LastOutput", Component.Serializer.toJson(this.lastOutput, provider));
 		}
 
 		compoundTag.putBoolean("UpdateLastExecution", this.updateLastExecution);
@@ -60,11 +65,13 @@ public abstract class BaseCommandBlock implements CommandSource {
 		return compoundTag;
 	}
 
-	public void load(CompoundTag compoundTag) {
+	public void load(CompoundTag compoundTag, HolderLookup.Provider provider) {
 		this.command = compoundTag.getString("Command");
 		this.successCount = compoundTag.getInt("SuccessCount");
 		if (compoundTag.contains("CustomName", 8)) {
-			this.setName(Component.Serializer.fromJson(compoundTag.getString("CustomName")));
+			this.setCustomName(Component.Serializer.fromJson(compoundTag.getString("CustomName"), provider));
+		} else {
+			this.setCustomName(null);
 		}
 
 		if (compoundTag.contains("TrackOutput", 1)) {
@@ -73,9 +80,9 @@ public abstract class BaseCommandBlock implements CommandSource {
 
 		if (compoundTag.contains("LastOutput", 8) && this.trackOutput) {
 			try {
-				this.lastOutput = Component.Serializer.fromJson(compoundTag.getString("LastOutput"));
-			} catch (Throwable var3) {
-				this.lastOutput = Component.literal(var3.getMessage());
+				this.lastOutput = Component.Serializer.fromJson(compoundTag.getString("LastOutput"), provider);
+			} catch (Throwable var4) {
+				this.lastOutput = Component.literal(var4.getMessage());
 			}
 		} else {
 			this.lastOutput = null;
@@ -140,15 +147,16 @@ public abstract class BaseCommandBlock implements CommandSource {
 	}
 
 	public Component getName() {
-		return this.name;
+		return this.customName != null ? this.customName : DEFAULT_NAME;
 	}
 
-	public void setName(@Nullable Component component) {
-		if (component != null) {
-			this.name = component;
-		} else {
-			this.name = DEFAULT_NAME;
-		}
+	@Nullable
+	public Component getCustomName() {
+		return this.customName;
+	}
+
+	public void setCustomName(@Nullable Component component) {
+		this.customName = component;
 	}
 
 	@Override

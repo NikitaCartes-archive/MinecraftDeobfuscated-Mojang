@@ -323,10 +323,10 @@ public class EntitySelectorOptions {
 				CompoundTag compoundTag = new TagParser(entitySelectorParser.getReader()).readStruct();
 				entitySelectorParser.addPredicate(entity -> {
 					CompoundTag compoundTag2 = entity.saveWithoutId(new CompoundTag());
-					if (entity instanceof ServerPlayer) {
-						ItemStack itemStack = ((ServerPlayer)entity).getInventory().getSelected();
+					if (entity instanceof ServerPlayer serverPlayer) {
+						ItemStack itemStack = serverPlayer.getInventory().getSelected();
 						if (!itemStack.isEmpty()) {
-							compoundTag2.put("SelectedItem", itemStack.save(new CompoundTag()));
+							compoundTag2.put("SelectedItem", itemStack.save(serverPlayer.registryAccess()));
 						}
 					}
 

@@ -12,11 +12,9 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.Nameable;
 import net.minecraft.world.SimpleMenuProvider;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.inventory.EnchantmentMenu;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -120,17 +118,7 @@ public class EnchantmentTableBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public void setPlacedBy(Level level, BlockPos blockPos, BlockState blockState, LivingEntity livingEntity, ItemStack itemStack) {
-		if (itemStack.hasCustomHoverName()) {
-			BlockEntity blockEntity = level.getBlockEntity(blockPos);
-			if (blockEntity instanceof EnchantmentTableBlockEntity) {
-				((EnchantmentTableBlockEntity)blockEntity).setCustomName(itemStack.getHoverName());
-			}
-		}
-	}
-
-	@Override
-	protected boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
+	protected boolean isPathfindable(BlockState blockState, PathComputationType pathComputationType) {
 		return false;
 	}
 }

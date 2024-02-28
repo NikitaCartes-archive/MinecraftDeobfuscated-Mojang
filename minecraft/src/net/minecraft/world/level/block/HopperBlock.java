@@ -8,10 +8,8 @@ import net.minecraft.stats.Stats;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -118,16 +116,6 @@ public class HopperBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public void setPlacedBy(Level level, BlockPos blockPos, BlockState blockState, LivingEntity livingEntity, ItemStack itemStack) {
-		if (itemStack.hasCustomHoverName()) {
-			BlockEntity blockEntity = level.getBlockEntity(blockPos);
-			if (blockEntity instanceof HopperBlockEntity) {
-				((HopperBlockEntity)blockEntity).setCustomName(itemStack.getHoverName());
-			}
-		}
-	}
-
-	@Override
 	protected void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
 		if (!blockState2.is(blockState.getBlock())) {
 			this.checkPoweredState(level, blockPos, blockState);
@@ -206,7 +194,7 @@ public class HopperBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	protected boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
+	protected boolean isPathfindable(BlockState blockState, PathComputationType pathComputationType) {
 		return false;
 	}
 }

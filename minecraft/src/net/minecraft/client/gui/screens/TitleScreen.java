@@ -31,13 +31,10 @@ import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
 import net.minecraft.client.gui.screens.multiplayer.SafetyScreen;
 import net.minecraft.client.gui.screens.worldselection.SelectWorldScreen;
-import net.minecraft.client.renderer.CubeMap;
-import net.minecraft.client.renderer.PanoramaRenderer;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.levelgen.WorldOptions;
@@ -49,16 +46,14 @@ import org.slf4j.Logger;
 public class TitleScreen extends Screen {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final Component TITLE = Component.translatable("narrator.screen.title");
-	public static final Component COPYRIGHT_TEXT = Component.translatable("title.credits");
-	public static final CubeMap CUBE_MAP = new CubeMap(new ResourceLocation("textures/gui/title/background/panorama"));
-	private static final ResourceLocation PANORAMA_OVERLAY = new ResourceLocation("textures/gui/title/background/panorama_overlay.png");
+	private static final Component COPYRIGHT_TEXT = Component.translatable("title.credits");
 	private static final String DEMO_LEVEL_ID = "Demo_World";
 	@Nullable
 	private SplashRenderer splash;
 	private Button resetDemoButton;
 	@Nullable
 	private RealmsNotificationsScreen realmsNotificationsScreen;
-	private final PanoramaRenderer panorama = new PanoramaRenderer(CUBE_MAP);
+	private float fade;
 	private final boolean fading;
 	private long fadeInStart;
 	@Nullable
@@ -210,7 +205,7 @@ public class TitleScreen extends Screen {
 					Component.translatable("menu.playdemo"),
 					button -> {
 						if (bl) {
-							this.minecraft.createWorldOpenFlows().checkForBackupAndLoad("Demo_World", () -> this.minecraft.setScreen(this));
+							this.minecraft.createWorldOpenFlows().openWorld("Demo_World", () -> this.minecraft.setScreen(this));
 						} else {
 							this.minecraft
 								.createWorldOpenFlows()
@@ -273,15 +268,9 @@ public class TitleScreen extends Screen {
 			this.fadeInStart = Util.getMillis();
 		}
 
-		float g = this.fading ? (float)(Util.getMillis() - this.fadeInStart) / 1000.0F : 1.0F;
-		this.panorama.render(f, Mth.clamp(g, 0.0F, 1.0F));
-		RenderSystem.enableBlend();
-		guiGraphics.setColor(1.0F, 1.0F, 1.0F, this.fading ? (float)Mth.ceil(Mth.clamp(g, 0.0F, 1.0F)) : 1.0F);
-		guiGraphics.blit(PANORAMA_OVERLAY, 0, 0, this.width, this.height, 0.0F, 0.0F, 16, 128, 16, 128);
-		guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
-		float h = this.fading ? Mth.clamp(g - 1.0F, 0.0F, 1.0F) : 1.0F;
-		this.logoRenderer.renderLogo(guiGraphics, this.width, h);
-		int k = Mth.ceil(h * 255.0F) << 24;
+		this.fade = this.fading ? (float)(Util.getMillis() - this.fadeInStart) / 1000.0F : 1.0F;
+		float g = this.fading ? Mth.clamp(this.fade - 1.0F, 0.0F, 1.0F) : 1.0F;
+		int k = Mth.ceil(g * 255.0F) << 24;
 		if ((k & -67108864) != 0) {
 			if (this.warningLabel != null) {
 				this.warningLabel.render(guiGraphics, k);
@@ -305,21 +294,29 @@ public class TitleScreen extends Screen {
 			guiGraphics.drawString(this.font, string, 2, this.height - 10, 16777215 | k);
 
 			for (GuiEventListener guiEventListener : this.children()) {
-				if (guiEventListener instanceof AbstractWidget) {
-					((AbstractWidget)guiEventListener).setAlpha(h);
+				if (guiEventListener instanceof AbstractWidget abstractWidget) {
+					abstractWidget.setAlpha(g);
 				}
 			}
 
-			super.render(guiGraphics, i, j, f);
-			if (this.realmsNotificationsEnabled() && h >= 1.0F) {
+			if (this.realmsNotificationsEnabled() && g >= 1.0F) {
 				RenderSystem.enableDepthTest();
 				this.realmsNotificationsScreen.render(guiGraphics, i, j, f);
 			}
+
+			super.render(guiGraphics, i, j, f);
+			this.logoRenderer.renderLogo(guiGraphics, this.width, g);
 		}
 	}
 
 	@Override
 	public void renderBackground(GuiGraphics guiGraphics, int i, int j, float f) {
+		this.renderPanorama(guiGraphics, f);
+	}
+
+	@Override
+	protected void renderPanorama(GuiGraphics guiGraphics, float f) {
+		PANORAMA.render(f, Mth.clamp(this.fade, 0.0F, 1.0F));
 	}
 
 	@Override

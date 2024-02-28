@@ -2,6 +2,7 @@ package net.minecraft.world.level.block.entity;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.logging.LogUtils;
+import com.mojang.serialization.DynamicOps;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.UnaryOperator;
@@ -12,6 +13,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
@@ -88,24 +90,26 @@ public class SignBlockEntity extends BlockEntity {
 	@Override
 	protected void saveAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
 		super.saveAdditional(compoundTag, provider);
-		SignText.DIRECT_CODEC.encodeStart(NbtOps.INSTANCE, this.frontText).resultOrPartial(LOGGER::error).ifPresent(tag -> compoundTag.put("front_text", tag));
-		SignText.DIRECT_CODEC.encodeStart(NbtOps.INSTANCE, this.backText).resultOrPartial(LOGGER::error).ifPresent(tag -> compoundTag.put("back_text", tag));
+		DynamicOps<Tag> dynamicOps = provider.createSerializationContext(NbtOps.INSTANCE);
+		SignText.DIRECT_CODEC.encodeStart(dynamicOps, this.frontText).resultOrPartial(LOGGER::error).ifPresent(tag -> compoundTag.put("front_text", tag));
+		SignText.DIRECT_CODEC.encodeStart(dynamicOps, this.backText).resultOrPartial(LOGGER::error).ifPresent(tag -> compoundTag.put("back_text", tag));
 		compoundTag.putBoolean("is_waxed", this.isWaxed);
 	}
 
 	@Override
 	public void load(CompoundTag compoundTag, HolderLookup.Provider provider) {
 		super.load(compoundTag, provider);
+		DynamicOps<Tag> dynamicOps = provider.createSerializationContext(NbtOps.INSTANCE);
 		if (compoundTag.contains("front_text")) {
 			SignText.DIRECT_CODEC
-				.parse(NbtOps.INSTANCE, compoundTag.getCompound("front_text"))
+				.parse(dynamicOps, compoundTag.getCompound("front_text"))
 				.resultOrPartial(LOGGER::error)
 				.ifPresent(signText -> this.frontText = this.loadLines(signText));
 		}
 
 		if (compoundTag.contains("back_text")) {
 			SignText.DIRECT_CODEC
-				.parse(NbtOps.INSTANCE, compoundTag.getCompound("back_text"))
+				.parse(dynamicOps, compoundTag.getCompound("back_text"))
 				.resultOrPartial(LOGGER::error)
 				.ifPresent(signText -> this.backText = this.loadLines(signText));
 		}

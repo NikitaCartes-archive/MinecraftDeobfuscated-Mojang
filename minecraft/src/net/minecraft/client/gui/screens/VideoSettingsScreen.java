@@ -14,8 +14,7 @@ import net.minecraft.client.GraphicsStatus;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.OptionInstance;
 import net.minecraft.client.Options;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.OptionsList;
 import net.minecraft.client.renderer.GpuWarnlistManager;
 import net.minecraft.network.chat.CommonComponents;
@@ -23,6 +22,7 @@ import net.minecraft.network.chat.Component;
 
 @Environment(EnvType.CLIENT)
 public class VideoSettingsScreen extends OptionsSubScreen {
+	private static final Component TITLE = Component.translatable("options.videoTitle");
 	private static final Component FABULOUS = Component.translatable("options.graphics.fabulous").withStyle(ChatFormatting.ITALIC);
 	private static final Component WARNING_MESSAGE = Component.translatable("options.graphics.warning.message", FABULOUS, FABULOUS);
 	private static final Component WARNING_TITLE = Component.translatable("options.graphics.warning.title").withStyle(ChatFormatting.RED);
@@ -60,7 +60,7 @@ public class VideoSettingsScreen extends OptionsSubScreen {
 	}
 
 	public VideoSettingsScreen(Screen screen, Options options) {
-		super(screen, options, Component.translatable("options.videoTitle"));
+		super(screen, options, TITLE);
 		this.gpuWarnlistManager = screen.minecraft.getGpuWarnlistManager();
 		this.gpuWarnlistManager.resetWarnings();
 		if (options.graphicsMode().get() == GraphicsStatus.FABULOUS) {
@@ -72,7 +72,7 @@ public class VideoSettingsScreen extends OptionsSubScreen {
 
 	@Override
 	protected void init() {
-		this.list = this.addRenderableWidget(new OptionsList(this.minecraft, this.width, this.height - 64, 32, 25));
+		this.list = this.addRenderableWidget(new OptionsList(this.minecraft, this.width, this.height, this));
 		int i = -1;
 		Window window = this.minecraft.getWindow();
 		Monitor monitor = window.findBestMonitor();
@@ -117,11 +117,20 @@ public class VideoSettingsScreen extends OptionsSubScreen {
 		this.list.addBig(optionInstance);
 		this.list.addBig(this.options.biomeBlendRadius());
 		this.list.addSmall(options(this.options));
-		this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> {
-			this.minecraft.options.save();
-			window.changeFullscreenVideoMode();
-			this.minecraft.setScreen(this.lastScreen);
-		}).bounds(this.width / 2 - 100, this.height - 27, 200, 20).build());
+		super.init();
+	}
+
+	@Override
+	public void onClose() {
+		this.minecraft.options.save();
+		this.minecraft.getWindow().changeFullscreenVideoMode();
+		super.onClose();
+	}
+
+	@Override
+	protected void repositionElements() {
+		super.repositionElements();
+		this.list.updateSize(this.width, this.layout);
 	}
 
 	@Override
@@ -186,12 +195,20 @@ public class VideoSettingsScreen extends OptionsSubScreen {
 	public boolean mouseScrolled(double d, double e, double f, double g) {
 		if (Screen.hasControlDown()) {
 			OptionInstance<Integer> optionInstance = this.options.guiScale();
-			int i = optionInstance.get() + (int)Math.signum(g);
-			if (i != 0) {
-				optionInstance.set(i);
-				if (optionInstance.get() == i) {
-					this.minecraft.resizeDisplay();
-					return true;
+			if (optionInstance.values() instanceof OptionInstance.ClampingLazyMaxIntRange clampingLazyMaxIntRange) {
+				int i = optionInstance.get() + (int)Math.signum(g);
+				if (i != 0 && i <= clampingLazyMaxIntRange.maxInclusive()) {
+					CycleButton<Integer> cycleButton = (CycleButton<Integer>)this.list.findOption(optionInstance);
+					if (cycleButton != null) {
+						optionInstance.set(i);
+						cycleButton.setValue(i);
+					}
+
+					if (optionInstance.get() == i) {
+						this.minecraft.resizeDisplay();
+						this.list.setScrollAmount(0.0);
+						return true;
+					}
 				}
 			}
 
@@ -199,16 +216,5 @@ public class VideoSettingsScreen extends OptionsSubScreen {
 		} else {
 			return super.mouseScrolled(d, e, f, g);
 		}
-	}
-
-	@Override
-	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-		super.render(guiGraphics, i, j, f);
-		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 20, 16777215);
-	}
-
-	@Override
-	public void renderBackground(GuiGraphics guiGraphics, int i, int j, float f) {
-		this.renderDirtBackground(guiGraphics);
 	}
 }

@@ -6,6 +6,7 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import java.util.Map;
 import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -15,19 +16,18 @@ import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.DyeableLeatherItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemUtils;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LayeredCauldronBlock;
 import net.minecraft.world.level.block.ShulkerBoxBlock;
-import net.minecraft.world.level.block.entity.BannerBlockEntity;
+import net.minecraft.world.level.block.entity.BannerPatternLayers;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 
@@ -74,12 +74,13 @@ public interface CauldronInteraction {
 		}
 	};
 	CauldronInteraction BANNER = (blockState, level, blockPos, player, interactionHand, itemStack) -> {
-		if (BannerBlockEntity.getPatternCount(itemStack) <= 0) {
+		BannerPatternLayers bannerPatternLayers = itemStack.getOrDefault(DataComponents.BANNER_PATTERNS, BannerPatternLayers.EMPTY);
+		if (bannerPatternLayers.layers().isEmpty()) {
 			return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
 		} else {
 			if (!level.isClientSide) {
 				ItemStack itemStack2 = itemStack.copyWithCount(1);
-				BannerBlockEntity.removeLastPattern(itemStack2);
+				itemStack2.set(DataComponents.BANNER_PATTERNS, bannerPatternLayers.removeLast());
 				itemStack.consume(1, player);
 				if (itemStack.isEmpty()) {
 					player.setItemInHand(interactionHand, itemStack2);
@@ -99,11 +100,11 @@ public interface CauldronInteraction {
 	CauldronInteraction DYED_ITEM = (blockState, level, blockPos, player, interactionHand, itemStack) -> {
 		if (!itemStack.is(ItemTags.DYEABLE)) {
 			return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
-		} else if (!DyeableLeatherItem.hasCustomColor(itemStack)) {
+		} else if (!itemStack.has(DataComponents.DYED_COLOR)) {
 			return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
 		} else {
 			if (!level.isClientSide) {
-				DyeableLeatherItem.clearColor(itemStack);
+				itemStack.remove(DataComponents.DYED_COLOR);
 				player.awardStat(Stats.CLEAN_ARMOR);
 				LayeredCauldronBlock.lowerFillLevel(blockState, level, blockPos);
 			}
@@ -128,9 +129,8 @@ public interface CauldronInteraction {
 		Map<Item, CauldronInteraction> map = EMPTY.map();
 		addDefaultInteractions(map);
 		map.put(Items.POTION, (CauldronInteraction)(blockState, level, blockPos, player, interactionHand, itemStack) -> {
-			if (!PotionUtils.getPotion(itemStack).is(Potions.WATER)) {
-				return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
-			} else {
+			PotionContents potionContents = itemStack.get(DataComponents.POTION_CONTENTS);
+			if (potionContents != null && potionContents.is(Potions.WATER)) {
 				if (!level.isClientSide) {
 					Item item = itemStack.getItem();
 					player.setItemInHand(interactionHand, ItemUtils.createFilledResult(itemStack, player, new ItemStack(Items.GLASS_BOTTLE)));
@@ -142,6 +142,8 @@ public interface CauldronInteraction {
 				}
 
 				return ItemInteractionResult.sidedSuccess(level.isClientSide);
+			} else {
+				return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
 			}
 		});
 		Map<Item, CauldronInteraction> map2 = WATER.map();
@@ -163,7 +165,7 @@ public interface CauldronInteraction {
 		map2.put(Items.GLASS_BOTTLE, (CauldronInteraction)(blockState, level, blockPos, player, interactionHand, itemStack) -> {
 			if (!level.isClientSide) {
 				Item item = itemStack.getItem();
-				player.setItemInHand(interactionHand, ItemUtils.createFilledResult(itemStack, player, PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.WATER)));
+				player.setItemInHand(interactionHand, ItemUtils.createFilledResult(itemStack, player, PotionContents.createItemStack(Items.POTION, Potions.WATER)));
 				player.awardStat(Stats.USE_CAULDRON);
 				player.awardStat(Stats.ITEM_USED.get(item));
 				LayeredCauldronBlock.lowerFillLevel(blockState, level, blockPos);
@@ -174,19 +176,24 @@ public interface CauldronInteraction {
 			return ItemInteractionResult.sidedSuccess(level.isClientSide);
 		});
 		map2.put(Items.POTION, (CauldronInteraction)(blockState, level, blockPos, player, interactionHand, itemStack) -> {
-			if ((Integer)blockState.getValue(LayeredCauldronBlock.LEVEL) != 3 && PotionUtils.getPotion(itemStack).is(Potions.WATER)) {
-				if (!level.isClientSide) {
-					player.setItemInHand(interactionHand, ItemUtils.createFilledResult(itemStack, player, new ItemStack(Items.GLASS_BOTTLE)));
-					player.awardStat(Stats.USE_CAULDRON);
-					player.awardStat(Stats.ITEM_USED.get(itemStack.getItem()));
-					level.setBlockAndUpdate(blockPos, blockState.cycle(LayeredCauldronBlock.LEVEL));
-					level.playSound(null, blockPos, SoundEvents.BOTTLE_EMPTY, SoundSource.BLOCKS, 1.0F, 1.0F);
-					level.gameEvent(null, GameEvent.FLUID_PLACE, blockPos);
-				}
-
-				return ItemInteractionResult.sidedSuccess(level.isClientSide);
-			} else {
+			if ((Integer)blockState.getValue(LayeredCauldronBlock.LEVEL) == 3) {
 				return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+			} else {
+				PotionContents potionContents = itemStack.get(DataComponents.POTION_CONTENTS);
+				if (potionContents != null && potionContents.is(Potions.WATER)) {
+					if (!level.isClientSide) {
+						player.setItemInHand(interactionHand, ItemUtils.createFilledResult(itemStack, player, new ItemStack(Items.GLASS_BOTTLE)));
+						player.awardStat(Stats.USE_CAULDRON);
+						player.awardStat(Stats.ITEM_USED.get(itemStack.getItem()));
+						level.setBlockAndUpdate(blockPos, blockState.cycle(LayeredCauldronBlock.LEVEL));
+						level.playSound(null, blockPos, SoundEvents.BOTTLE_EMPTY, SoundSource.BLOCKS, 1.0F, 1.0F);
+						level.gameEvent(null, GameEvent.FLUID_PLACE, blockPos);
+					}
+
+					return ItemInteractionResult.sidedSuccess(level.isClientSide);
+				} else {
+					return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+				}
 			}
 		});
 		map2.put(Items.LEATHER_BOOTS, DYED_ITEM);
@@ -194,6 +201,7 @@ public interface CauldronInteraction {
 		map2.put(Items.LEATHER_CHESTPLATE, DYED_ITEM);
 		map2.put(Items.LEATHER_HELMET, DYED_ITEM);
 		map2.put(Items.LEATHER_HORSE_ARMOR, DYED_ITEM);
+		map2.put(Items.WOLF_ARMOR, DYED_ITEM);
 		map2.put(Items.WHITE_BANNER, BANNER);
 		map2.put(Items.GRAY_BANNER, BANNER);
 		map2.put(Items.BLACK_BANNER, BANNER);

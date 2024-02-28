@@ -30,6 +30,7 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.MobEffectTextureManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.numbers.NumberFormat;
@@ -630,7 +631,7 @@ public class Gui {
 		this.minecraft.getProfiler().push("selectedItemName");
 		if (this.toolHighlightTimer > 0 && !this.lastToolHighlight.isEmpty()) {
 			MutableComponent mutableComponent = Component.empty().append(this.lastToolHighlight.getHoverName()).withStyle(this.lastToolHighlight.getRarity().color);
-			if (this.lastToolHighlight.hasCustomHoverName()) {
+			if (this.lastToolHighlight.has(DataComponents.CUSTOM_NAME)) {
 				mutableComponent.withStyle(ChatFormatting.ITALIC);
 			}
 

@@ -194,7 +194,7 @@ public class BrewingStandBlockEntity extends BaseContainerBlockEntity implements
 	public void load(CompoundTag compoundTag, HolderLookup.Provider provider) {
 		super.load(compoundTag, provider);
 		this.items = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
-		ContainerHelper.loadAllItems(compoundTag, this.items);
+		ContainerHelper.loadAllItems(compoundTag, this.items, provider);
 		this.brewTime = compoundTag.getShort("BrewTime");
 		this.fuel = compoundTag.getByte("Fuel");
 	}
@@ -203,7 +203,7 @@ public class BrewingStandBlockEntity extends BaseContainerBlockEntity implements
 	protected void saveAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
 		super.saveAdditional(compoundTag, provider);
 		compoundTag.putShort("BrewTime", (short)this.brewTime);
-		ContainerHelper.saveAllItems(compoundTag, this.items);
+		ContainerHelper.saveAllItems(compoundTag, this.items, provider);
 		compoundTag.putByte("Fuel", (byte)this.fuel);
 	}
 

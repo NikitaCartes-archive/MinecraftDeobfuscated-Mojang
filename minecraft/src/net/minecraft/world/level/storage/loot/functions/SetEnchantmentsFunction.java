@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.ItemStack;
@@ -62,28 +63,18 @@ public class SetEnchantmentsFunction extends LootItemConditionalFunction {
 		Object2IntMap<Enchantment> object2IntMap = new Object2IntOpenHashMap<>();
 		this.enchantments.forEach((holder, numberProvider) -> object2IntMap.put((Enchantment)holder.value(), numberProvider.getInt(lootContext)));
 		if (itemStack.is(Items.BOOK)) {
-			ItemStack itemStack2 = new ItemStack(Items.ENCHANTED_BOOK);
-			object2IntMap.forEach(itemStack2::enchant);
-			return itemStack2;
-		} else {
-			Map<Enchantment, Integer> map = EnchantmentHelper.getEnchantments(itemStack);
+			itemStack = itemStack.transmuteCopy(Items.ENCHANTED_BOOK, itemStack.getCount());
+			itemStack.set(DataComponents.STORED_ENCHANTMENTS, itemStack.remove(DataComponents.ENCHANTMENTS));
+		}
+
+		EnchantmentHelper.updateEnchantments(itemStack, mutable -> {
 			if (this.add) {
-				object2IntMap.forEach((enchantment, integer) -> updateEnchantment(map, enchantment, Math.max((Integer)map.getOrDefault(enchantment, 0) + integer, 0)));
+				object2IntMap.forEach((enchantment, integer) -> mutable.set(enchantment, mutable.getLevel(enchantment) + integer));
 			} else {
-				object2IntMap.forEach((enchantment, integer) -> updateEnchantment(map, enchantment, Math.max(integer, 0)));
+				object2IntMap.forEach(mutable::set);
 			}
-
-			EnchantmentHelper.setEnchantments(map, itemStack);
-			return itemStack;
-		}
-	}
-
-	private static void updateEnchantment(Map<Enchantment, Integer> map, Enchantment enchantment, int i) {
-		if (i == 0) {
-			map.remove(enchantment);
-		} else {
-			map.put(enchantment, i);
-		}
+		});
+		return itemStack;
 	}
 
 	public static class Builder extends LootItemConditionalFunction.Builder<SetEnchantmentsFunction.Builder> {

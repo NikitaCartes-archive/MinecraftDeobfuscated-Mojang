@@ -129,7 +129,7 @@ public class ClientboundBossEventPacket implements Packet<ClientGamePacketListen
 		}
 
 		private AddOperation(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
-			this.name = ComponentSerialization.STREAM_CODEC.decode(registryFriendlyByteBuf);
+			this.name = ComponentSerialization.TRUSTED_STREAM_CODEC.decode(registryFriendlyByteBuf);
 			this.progress = registryFriendlyByteBuf.readFloat();
 			this.color = registryFriendlyByteBuf.readEnum(BossEvent.BossBarColor.class);
 			this.overlay = registryFriendlyByteBuf.readEnum(BossEvent.BossBarOverlay.class);
@@ -151,7 +151,7 @@ public class ClientboundBossEventPacket implements Packet<ClientGamePacketListen
 
 		@Override
 		public void write(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
-			ComponentSerialization.STREAM_CODEC.encode(registryFriendlyByteBuf, this.name);
+			ComponentSerialization.TRUSTED_STREAM_CODEC.encode(registryFriendlyByteBuf, this.name);
 			registryFriendlyByteBuf.writeFloat(this.progress);
 			registryFriendlyByteBuf.writeEnum(this.color);
 			registryFriendlyByteBuf.writeEnum(this.overlay);
@@ -206,7 +206,7 @@ public class ClientboundBossEventPacket implements Packet<ClientGamePacketListen
 
 	static record UpdateNameOperation(Component name) implements ClientboundBossEventPacket.Operation {
 		private UpdateNameOperation(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
-			this(ComponentSerialization.STREAM_CODEC.decode(registryFriendlyByteBuf));
+			this(ComponentSerialization.TRUSTED_STREAM_CODEC.decode(registryFriendlyByteBuf));
 		}
 
 		@Override
@@ -221,7 +221,7 @@ public class ClientboundBossEventPacket implements Packet<ClientGamePacketListen
 
 		@Override
 		public void write(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
-			ComponentSerialization.STREAM_CODEC.encode(registryFriendlyByteBuf, this.name);
+			ComponentSerialization.TRUSTED_STREAM_CODEC.encode(registryFriendlyByteBuf, this.name);
 		}
 	}
 

@@ -93,8 +93,7 @@ public abstract class AbstractChestedHorse extends AbstractHorse {
 				if (!itemStack.isEmpty()) {
 					CompoundTag compoundTag2 = new CompoundTag();
 					compoundTag2.putByte("Slot", (byte)(i - 1));
-					itemStack.save(compoundTag2);
-					listTag.add(compoundTag2);
+					listTag.add(itemStack.save(this.registryAccess(), compoundTag2));
 				}
 			}
 
@@ -114,7 +113,7 @@ public abstract class AbstractChestedHorse extends AbstractHorse {
 				CompoundTag compoundTag2 = listTag.getCompound(i);
 				int j = compoundTag2.getByte("Slot") & 255;
 				if (j < this.inventory.getContainerSize() - 1) {
-					this.inventory.setItem(j + 1, ItemStack.of(compoundTag2));
+					this.inventory.setItem(j + 1, (ItemStack)ItemStack.parse(this.registryAccess(), compoundTag2).orElse(ItemStack.EMPTY));
 				}
 			}
 		}

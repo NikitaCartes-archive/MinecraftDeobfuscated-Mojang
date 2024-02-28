@@ -140,20 +140,27 @@ public final class NbtUtils {
 			return false;
 		} else if (tag instanceof CompoundTag compoundTag) {
 			CompoundTag compoundTag2 = (CompoundTag)tag2;
-
-			for (String string : compoundTag.getAllKeys()) {
-				Tag tag3 = compoundTag.get(string);
-				if (!compareNbt(tag3, compoundTag2.get(string), bl)) {
-					return false;
+			if (compoundTag2.size() < compoundTag.size()) {
+				return false;
+			} else {
+				for (String string : compoundTag.getAllKeys()) {
+					Tag tag3 = compoundTag.get(string);
+					if (!compareNbt(tag3, compoundTag2.get(string), bl)) {
+						return false;
+					}
 				}
-			}
 
-			return true;
+				return true;
+			}
 		} else {
 			if (tag instanceof ListTag listTag && bl) {
 				ListTag listTag2 = (ListTag)tag2;
 				if (listTag.isEmpty()) {
 					return listTag2.isEmpty();
+				}
+
+				if (listTag2.size() < listTag.size()) {
+					return false;
 				}
 
 				for (Tag tag4 : listTag) {

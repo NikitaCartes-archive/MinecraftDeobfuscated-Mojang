@@ -46,6 +46,11 @@ public class TelemetryEventWidget extends AbstractScrollWidget {
 		this.setScrollAmount(this.scrollAmount());
 	}
 
+	public void updateLayout() {
+		this.content = this.buildContent(Minecraft.getInstance().telemetryOptInExtra());
+		this.setScrollAmount(this.scrollAmount());
+	}
+
 	private TelemetryEventWidget.Content buildContent(boolean bl) {
 		TelemetryEventWidget.ContentBuilder contentBuilder = new TelemetryEventWidget.ContentBuilder(this.containerWidth());
 		List<TelemetryEventType> list = new ArrayList(TelemetryEventType.values());

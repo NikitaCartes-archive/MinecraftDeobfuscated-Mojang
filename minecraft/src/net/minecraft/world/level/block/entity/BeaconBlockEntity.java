@@ -13,6 +13,8 @@ import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponentMap;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -297,7 +299,7 @@ public class BeaconBlockEntity extends BlockEntity implements MenuProvider, Name
 		this.primaryPower = loadEffect(compoundTag, "primary_effect");
 		this.secondaryPower = loadEffect(compoundTag, "secondary_effect");
 		if (compoundTag.contains("CustomName", 8)) {
-			this.name = Component.Serializer.fromJson(compoundTag.getString("CustomName"));
+			this.name = Component.Serializer.fromJson(compoundTag.getString("CustomName"), provider);
 		}
 
 		this.lockKey = LockCode.fromTag(compoundTag);
@@ -310,7 +312,7 @@ public class BeaconBlockEntity extends BlockEntity implements MenuProvider, Name
 		storeEffect(compoundTag, "secondary_effect", this.secondaryPower);
 		compoundTag.putInt("Levels", this.levels);
 		if (this.name != null) {
-			compoundTag.putString("CustomName", Component.Serializer.toJson(this.name));
+			compoundTag.putString("CustomName", Component.Serializer.toJson(this.name, provider));
 		}
 
 		this.lockKey.addToTag(compoundTag);
@@ -342,6 +344,24 @@ public class BeaconBlockEntity extends BlockEntity implements MenuProvider, Name
 	@Override
 	public Component getName() {
 		return this.name != null ? this.name : DEFAULT_NAME;
+	}
+
+	@Override
+	public void applyComponents(DataComponentMap dataComponentMap) {
+		this.name = dataComponentMap.get(DataComponents.CUSTOM_NAME);
+		this.lockKey = dataComponentMap.getOrDefault(DataComponents.LOCK, LockCode.NO_LOCK);
+	}
+
+	@Override
+	public void collectComponents(DataComponentMap.Builder builder) {
+		builder.set(DataComponents.CUSTOM_NAME, this.name);
+		builder.set(DataComponents.LOCK, this.lockKey);
+	}
+
+	@Override
+	public void removeComponentsFromTag(CompoundTag compoundTag) {
+		compoundTag.remove("CustomName");
+		compoundTag.remove("Lock");
 	}
 
 	@Override

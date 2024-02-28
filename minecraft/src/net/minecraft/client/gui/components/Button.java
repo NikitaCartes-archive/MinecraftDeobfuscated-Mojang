@@ -12,6 +12,7 @@ import net.minecraft.network.chat.MutableComponent;
 public class Button extends AbstractButton {
 	public static final int SMALL_WIDTH = 120;
 	public static final int DEFAULT_WIDTH = 150;
+	public static final int BIG_WIDTH = 200;
 	public static final int DEFAULT_HEIGHT = 20;
 	public static final int DEFAULT_SPACING = 8;
 	protected static final Button.CreateNarration DEFAULT_NARRATION = supplier -> (MutableComponent)supplier.get();

@@ -1,6 +1,7 @@
 package net.minecraft.world.inventory;
 
 import javax.annotation.Nullable;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.world.SimpleContainer;
@@ -25,7 +26,7 @@ public class PlayerEnderChestContainer extends SimpleContainer {
 	}
 
 	@Override
-	public void fromTag(ListTag listTag) {
+	public void fromTag(ListTag listTag, HolderLookup.Provider provider) {
 		for (int i = 0; i < this.getContainerSize(); i++) {
 			this.setItem(i, ItemStack.EMPTY);
 		}
@@ -34,13 +35,13 @@ public class PlayerEnderChestContainer extends SimpleContainer {
 			CompoundTag compoundTag = listTag.getCompound(i);
 			int j = compoundTag.getByte("Slot") & 255;
 			if (j >= 0 && j < this.getContainerSize()) {
-				this.setItem(j, ItemStack.of(compoundTag));
+				this.setItem(j, (ItemStack)ItemStack.parse(provider, compoundTag).orElse(ItemStack.EMPTY));
 			}
 		}
 	}
 
 	@Override
-	public ListTag createTag() {
+	public ListTag createTag(HolderLookup.Provider provider) {
 		ListTag listTag = new ListTag();
 
 		for (int i = 0; i < this.getContainerSize(); i++) {
@@ -48,8 +49,7 @@ public class PlayerEnderChestContainer extends SimpleContainer {
 			if (!itemStack.isEmpty()) {
 				CompoundTag compoundTag = new CompoundTag();
 				compoundTag.putByte("Slot", (byte)i);
-				itemStack.save(compoundTag);
-				listTag.add(compoundTag);
+				listTag.add(itemStack.save(provider, compoundTag));
 			}
 		}
 

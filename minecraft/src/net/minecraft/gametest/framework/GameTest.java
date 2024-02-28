@@ -18,6 +18,8 @@ public @interface GameTest {
 
 	boolean required() default true;
 
+	boolean manualOnly() default false;
+
 	String template() default "";
 
 	long setupTicks() default 0L;

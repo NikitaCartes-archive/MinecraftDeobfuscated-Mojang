@@ -4,8 +4,8 @@ import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.StackedContents;
@@ -214,24 +214,21 @@ public class SimpleContainer implements Container, StackedContentsCompatible {
 		}
 	}
 
-	public void fromTag(ListTag listTag) {
+	public void fromTag(ListTag listTag, HolderLookup.Provider provider) {
 		this.clearContent();
 
 		for (int i = 0; i < listTag.size(); i++) {
-			ItemStack itemStack = ItemStack.of(listTag.getCompound(i));
-			if (!itemStack.isEmpty()) {
-				this.addItem(itemStack);
-			}
+			ItemStack.parse(provider, listTag.getCompound(i)).ifPresent(this::addItem);
 		}
 	}
 
-	public ListTag createTag() {
+	public ListTag createTag(HolderLookup.Provider provider) {
 		ListTag listTag = new ListTag();
 
 		for (int i = 0; i < this.getContainerSize(); i++) {
 			ItemStack itemStack = this.getItem(i);
 			if (!itemStack.isEmpty()) {
-				listTag.add(itemStack.save(new CompoundTag()));
+				listTag.add(itemStack.save(provider));
 			}
 		}
 

@@ -7,6 +7,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.component.DataComponentMap;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
@@ -23,6 +25,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ShulkerBoxMenu;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.ShulkerBoxBlock;
@@ -40,7 +43,7 @@ public class ShulkerBoxBlockEntity extends RandomizableContainerBlockEntity impl
 	public static final int OPENING_TICK_LENGTH = 10;
 	public static final float MAX_LID_HEIGHT = 0.5F;
 	public static final float MAX_LID_ROTATION = 270.0F;
-	public static final String ITEMS_TAG = "Items";
+	private static final String ITEMS_TAG = "Items";
 	private static final int[] SLOTS = IntStream.range(0, 27).toArray();
 	private NonNullList<ItemStack> itemStacks = NonNullList.withSize(27, ItemStack.EMPTY);
 	private int openCount;
@@ -195,21 +198,21 @@ public class ShulkerBoxBlockEntity extends RandomizableContainerBlockEntity impl
 	@Override
 	public void load(CompoundTag compoundTag, HolderLookup.Provider provider) {
 		super.load(compoundTag, provider);
-		this.loadFromTag(compoundTag);
+		this.loadFromTag(compoundTag, provider);
 	}
 
 	@Override
 	protected void saveAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
 		super.saveAdditional(compoundTag, provider);
 		if (!this.trySaveLootTable(compoundTag)) {
-			ContainerHelper.saveAllItems(compoundTag, this.itemStacks, false);
+			ContainerHelper.saveAllItems(compoundTag, this.itemStacks, false, provider);
 		}
 	}
 
-	public void loadFromTag(CompoundTag compoundTag) {
+	public void loadFromTag(CompoundTag compoundTag, HolderLookup.Provider provider) {
 		this.itemStacks = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
 		if (!this.tryLoadLootTable(compoundTag) && compoundTag.contains("Items", 9)) {
-			ContainerHelper.loadAllItems(compoundTag, this.itemStacks);
+			ContainerHelper.loadAllItems(compoundTag, this.itemStacks, provider);
 		}
 	}
 
@@ -254,6 +257,24 @@ public class ShulkerBoxBlockEntity extends RandomizableContainerBlockEntity impl
 
 	public boolean isClosed() {
 		return this.animationStatus == ShulkerBoxBlockEntity.AnimationStatus.CLOSED;
+	}
+
+	@Override
+	public void applyComponents(DataComponentMap dataComponentMap) {
+		super.applyComponents(dataComponentMap);
+		dataComponentMap.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY).copyInto(this.itemStacks);
+	}
+
+	@Override
+	public void collectComponents(DataComponentMap.Builder builder) {
+		super.collectComponents(builder);
+		builder.set(DataComponents.CONTAINER, ItemContainerContents.copyOf(this.itemStacks));
+	}
+
+	@Override
+	public void removeComponentsFromTag(CompoundTag compoundTag) {
+		super.removeComponentsFromTag(compoundTag);
+		compoundTag.remove("Items");
 	}
 
 	public static enum AnimationStatus {

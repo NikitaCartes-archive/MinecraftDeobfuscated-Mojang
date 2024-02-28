@@ -92,7 +92,7 @@ import net.minecraft.client.gui.screens.BanNoticeScreens;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.ConfirmLinkScreen;
 import net.minecraft.client.gui.screens.DeathScreen;
-import net.minecraft.client.gui.screens.GenericDirtMessageScreen;
+import net.minecraft.client.gui.screens.GenericMessageScreen;
 import net.minecraft.client.gui.screens.InBedChatScreen;
 import net.minecraft.client.gui.screens.LevelLoadingScreen;
 import net.minecraft.client.gui.screens.LoadingOverlay;
@@ -170,10 +170,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.CommonComponents;
@@ -235,8 +234,8 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.PlayerHeadItem;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.ItemLore;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
@@ -266,6 +265,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	public static final ResourceLocation ALT_FONT = new ResourceLocation("alt");
 	private static final ResourceLocation REGIONAL_COMPLIANCIES = new ResourceLocation("regional_compliancies.json");
 	private static final CompletableFuture<Unit> RESOURCE_RELOAD_INITIAL_TASK = CompletableFuture.completedFuture(Unit.INSTANCE);
+	private static final Component NBT_TOOLTIP = Component.literal("(+NBT)");
 	private static final Component SOCIAL_INTERACTIONS_NOT_AVAILABLE = Component.translatable("multiplayer.socialInteractions.not_available");
 	public static final String UPDATE_DRIVERS_ADVICE = "Please make sure you have up-to-date drivers (see aka.ms/mcdriver for instructions).";
 	private final long canary = Double.doubleToLongBits(Math.PI);
@@ -606,7 +606,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		this.chatListener.setMessageDelay(this.options.chatDelay().get());
 		this.reportingContext = ReportingContext.create(ReportEnvironment.local(), this.userApiService);
 		LoadingOverlay.registerTextures(this);
-		this.setScreen(new GenericDirtMessageScreen(Component.translatable("gui.loadingMinecraft")));
+		this.setScreen(new GenericMessageScreen(Component.translatable("gui.loadingMinecraft")));
 		List<PackResources> list = this.resourcePackRepository.openAllSelected();
 		this.reloadStateTracker.startReload(ResourceLoadStateTracker.ReloadReason.INITIAL, list);
 		ReloadInstance reloadInstance = this.resourceManager.createReload(Util.backgroundExecutor(), this, RESOURCE_RELOAD_INITIAL_TASK, list);
@@ -1387,7 +1387,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 				this.singleplayerServer.halt(true);
 			}
 
-			this.disconnect(new GenericDirtMessageScreen(Component.translatable("menu.savingLevel")));
+			this.disconnect(new GenericMessageScreen(Component.translatable("menu.savingLevel")));
 		} catch (Throwable var2) {
 		}
 
@@ -2384,23 +2384,10 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 
 	private void addCustomNbtData(ItemStack itemStack, BlockEntity blockEntity, RegistryAccess registryAccess) {
 		CompoundTag compoundTag = blockEntity.saveWithFullMetadata(registryAccess);
+		blockEntity.removeComponentsFromTag(compoundTag);
 		BlockItem.setBlockEntityData(itemStack, blockEntity.getType(), compoundTag);
-		if (itemStack.getItem() instanceof PlayerHeadItem && compoundTag.contains("SkullOwner")) {
-			CompoundTag compoundTag2 = compoundTag.getCompound("SkullOwner");
-			CompoundTag compoundTag3 = itemStack.getOrCreateTag();
-			compoundTag3.put("SkullOwner", compoundTag2);
-			CompoundTag compoundTag4 = compoundTag3.getCompound("BlockEntityTag");
-			compoundTag4.remove("SkullOwner");
-			compoundTag4.remove("x");
-			compoundTag4.remove("y");
-			compoundTag4.remove("z");
-		} else {
-			CompoundTag compoundTag2 = new CompoundTag();
-			ListTag listTag = new ListTag();
-			listTag.add(StringTag.valueOf("\"(+NBT)\""));
-			compoundTag2.put("Lore", listTag);
-			itemStack.addTagElement("display", compoundTag2);
-		}
+		itemStack.applyComponents(blockEntity.collectComponents());
+		itemStack.update(DataComponents.LORE, ItemLore.EMPTY, NBT_TOOLTIP, ItemLore::withLineAdded);
 	}
 
 	public CrashReport fillReport(CrashReport crashReport) {

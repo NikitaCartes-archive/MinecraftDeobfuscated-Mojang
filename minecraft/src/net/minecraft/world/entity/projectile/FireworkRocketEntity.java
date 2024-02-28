@@ -1,11 +1,12 @@
 package net.minecraft.world.entity.projectile;
 
+import java.util.List;
 import java.util.OptionalInt;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -17,6 +18,8 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.FireworkExplosion;
+import net.minecraft.world.item.component.Fireworks;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.gameevent.GameEvent;
@@ -48,8 +51,9 @@ public class FireworkRocketEntity extends Projectile implements ItemSupplier {
 		this.setPos(d, e, f);
 		this.entityData.set(DATA_ID_FIREWORKS_ITEM, itemStack.copy());
 		int i = 1;
-		if (!itemStack.isEmpty() && itemStack.hasTag()) {
-			i += itemStack.getOrCreateTagElement("Fireworks").getByte("Flight");
+		Fireworks fireworks = itemStack.get(DataComponents.FIREWORKS);
+		if (fireworks != null) {
+			i += fireworks.flightDuration();
 		}
 
 		this.setDeltaMovement(this.random.triangle(0.0, 0.002297), 0.05, this.random.triangle(0.0, 0.002297));
@@ -79,7 +83,7 @@ public class FireworkRocketEntity extends Projectile implements ItemSupplier {
 
 	@Override
 	protected void defineSynchedData(SynchedEntityData.Builder builder) {
-		builder.define(DATA_ID_FIREWORKS_ITEM, new ItemStack(Items.FIREWORK_ROCKET));
+		builder.define(DATA_ID_FIREWORKS_ITEM, getDefaultItem());
 		builder.define(DATA_ATTACHED_TO_TARGET, OptionalInt.empty());
 		builder.define(DATA_SHOT_AT_ANGLE, false);
 	}
@@ -194,24 +198,19 @@ public class FireworkRocketEntity extends Projectile implements ItemSupplier {
 	}
 
 	private boolean hasExplosion() {
-		ItemStack itemStack = this.entityData.get(DATA_ID_FIREWORKS_ITEM);
-		CompoundTag compoundTag = itemStack.isEmpty() ? null : itemStack.getTagElement("Fireworks");
-		ListTag listTag = compoundTag != null ? compoundTag.getList("Explosions", 10) : null;
-		return listTag != null && !listTag.isEmpty();
+		return !this.getExplosions().isEmpty();
 	}
 
 	private void dealExplosionDamage() {
 		float f = 0.0F;
-		ItemStack itemStack = this.entityData.get(DATA_ID_FIREWORKS_ITEM);
-		CompoundTag compoundTag = itemStack.isEmpty() ? null : itemStack.getTagElement("Fireworks");
-		ListTag listTag = compoundTag != null ? compoundTag.getList("Explosions", 10) : null;
-		if (listTag != null && !listTag.isEmpty()) {
-			f = 5.0F + (float)(listTag.size() * 2);
+		List<FireworkExplosion> list = this.getExplosions();
+		if (!list.isEmpty()) {
+			f = 5.0F + (float)(list.size() * 2);
 		}
 
 		if (f > 0.0F) {
 			if (this.attachedToEntity != null) {
-				this.attachedToEntity.hurt(this.damageSources().fireworks(this, this.getOwner()), 5.0F + (float)(listTag.size() * 2));
+				this.attachedToEntity.hurt(this.damageSources().fireworks(this, this.getOwner()), 5.0F + (float)(list.size() * 2));
 			}
 
 			double d = 5.0;
@@ -250,17 +249,8 @@ public class FireworkRocketEntity extends Projectile implements ItemSupplier {
 	@Override
 	public void handleEntityEvent(byte b) {
 		if (b == 17 && this.level().isClientSide) {
-			if (!this.hasExplosion()) {
-				for (int i = 0; i < this.random.nextInt(3) + 2; i++) {
-					this.level()
-						.addParticle(ParticleTypes.POOF, this.getX(), this.getY(), this.getZ(), this.random.nextGaussian() * 0.05, 0.005, this.random.nextGaussian() * 0.05);
-				}
-			} else {
-				ItemStack itemStack = this.entityData.get(DATA_ID_FIREWORKS_ITEM);
-				CompoundTag compoundTag = itemStack.isEmpty() ? null : itemStack.getTagElement("Fireworks");
-				Vec3 vec3 = this.getDeltaMovement();
-				this.level().createFireworks(this.getX(), this.getY(), this.getZ(), vec3.x, vec3.y, vec3.z, compoundTag);
-			}
+			Vec3 vec3 = this.getDeltaMovement();
+			this.level().createFireworks(this.getX(), this.getY(), this.getZ(), vec3.x, vec3.y, vec3.z, this.getExplosions());
 		}
 
 		super.handleEntityEvent(b);
@@ -271,7 +261,7 @@ public class FireworkRocketEntity extends Projectile implements ItemSupplier {
 		super.addAdditionalSaveData(compoundTag);
 		compoundTag.putInt("Life", this.life);
 		compoundTag.putInt("LifeTime", this.lifetime);
-		compoundTag.put("FireworksItem", this.getItem().save(new CompoundTag()));
+		compoundTag.put("FireworksItem", this.getItem().save(this.registryAccess()));
 		compoundTag.putBoolean("ShotAtAngle", this.entityData.get(DATA_SHOT_AT_ANGLE));
 	}
 
@@ -281,15 +271,24 @@ public class FireworkRocketEntity extends Projectile implements ItemSupplier {
 		this.life = compoundTag.getInt("Life");
 		this.lifetime = compoundTag.getInt("LifeTime");
 		if (compoundTag.contains("FireworksItem", 10)) {
-			ItemStack itemStack = ItemStack.of(compoundTag.getCompound("FireworksItem"));
-			if (!itemStack.isEmpty()) {
-				this.entityData.set(DATA_ID_FIREWORKS_ITEM, itemStack);
-			}
+			this.entityData
+				.set(
+					DATA_ID_FIREWORKS_ITEM,
+					(ItemStack)ItemStack.parse(this.registryAccess(), compoundTag.getCompound("FireworksItem")).orElseGet(FireworkRocketEntity::getDefaultItem)
+				);
+		} else {
+			this.entityData.set(DATA_ID_FIREWORKS_ITEM, getDefaultItem());
 		}
 
 		if (compoundTag.contains("ShotAtAngle")) {
 			this.entityData.set(DATA_SHOT_AT_ANGLE, compoundTag.getBoolean("ShotAtAngle"));
 		}
+	}
+
+	private List<FireworkExplosion> getExplosions() {
+		ItemStack itemStack = this.entityData.get(DATA_ID_FIREWORKS_ITEM);
+		Fireworks fireworks = itemStack.get(DataComponents.FIREWORKS);
+		return fireworks != null ? fireworks.explosions() : List.of();
 	}
 
 	@Override
@@ -300,5 +299,9 @@ public class FireworkRocketEntity extends Projectile implements ItemSupplier {
 	@Override
 	public boolean isAttackable() {
 		return false;
+	}
+
+	private static ItemStack getDefaultItem() {
+		return new ItemStack(Items.FIREWORK_ROCKET);
 	}
 }

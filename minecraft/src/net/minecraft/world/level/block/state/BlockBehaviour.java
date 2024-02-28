@@ -130,14 +130,14 @@ public abstract class BlockBehaviour implements FeatureElement {
 	protected void updateIndirectNeighbourShapes(BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos, int i, int j) {
 	}
 
-	protected boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
+	protected boolean isPathfindable(BlockState blockState, PathComputationType pathComputationType) {
 		switch (pathComputationType) {
 			case LAND:
-				return !blockState.isCollisionShapeFullBlock(blockGetter, blockPos);
+				return !blockState.isCollisionShapeFullBlock(EmptyBlockGetter.INSTANCE, BlockPos.ZERO);
 			case WATER:
-				return blockGetter.getFluidState(blockPos).is(FluidTags.WATER);
+				return blockState.getFluidState().is(FluidTags.WATER);
 			case AIR:
-				return !blockState.isCollisionShapeFullBlock(blockGetter, blockPos);
+				return !blockState.isCollisionShapeFullBlock(EmptyBlockGetter.INSTANCE, BlockPos.ZERO);
 			default:
 				return false;
 		}
@@ -747,8 +747,8 @@ public abstract class BlockBehaviour implements FeatureElement {
 			return this.getBlock().updateShape(this.asState(), direction, blockState, levelAccessor, blockPos, blockPos2);
 		}
 
-		public boolean isPathfindable(BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
-			return this.getBlock().isPathfindable(this.asState(), blockGetter, blockPos, pathComputationType);
+		public boolean isPathfindable(PathComputationType pathComputationType) {
+			return this.getBlock().isPathfindable(this.asState(), pathComputationType);
 		}
 
 		public boolean canBeReplaced(BlockPlaceContext blockPlaceContext) {

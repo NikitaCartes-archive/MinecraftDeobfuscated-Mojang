@@ -9,7 +9,7 @@ import net.minecraft.network.protocol.PacketType;
 
 public record ClientboundSetTitleTextPacket(Component text) implements Packet<ClientGamePacketListener> {
 	public static final StreamCodec<RegistryFriendlyByteBuf, ClientboundSetTitleTextPacket> STREAM_CODEC = StreamCodec.composite(
-		ComponentSerialization.STREAM_CODEC, ClientboundSetTitleTextPacket::text, ClientboundSetTitleTextPacket::new
+		ComponentSerialization.TRUSTED_STREAM_CODEC, ClientboundSetTitleTextPacket::text, ClientboundSetTitleTextPacket::new
 	);
 
 	@Override

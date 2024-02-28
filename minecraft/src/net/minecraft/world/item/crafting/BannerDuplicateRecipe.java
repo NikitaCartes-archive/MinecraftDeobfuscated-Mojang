@@ -2,13 +2,14 @@ package net.minecraft.world.item.crafting;
 
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.BannerItem;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.BannerBlockEntity;
+import net.minecraft.world.level.block.entity.BannerPatternLayers;
 
 public class BannerDuplicateRecipe extends CustomRecipe {
 	public BannerDuplicateRecipe(CraftingBookCategory craftingBookCategory) {
@@ -35,7 +36,7 @@ public class BannerDuplicateRecipe extends CustomRecipe {
 					return false;
 				}
 
-				int j = BannerBlockEntity.getPatternCount(itemStack3);
+				int j = itemStack3.getOrDefault(DataComponents.BANNER_PATTERNS, BannerPatternLayers.EMPTY).layers().size();
 				if (j > 6) {
 					return false;
 				}
@@ -63,7 +64,7 @@ public class BannerDuplicateRecipe extends CustomRecipe {
 		for (int i = 0; i < craftingContainer.getContainerSize(); i++) {
 			ItemStack itemStack = craftingContainer.getItem(i);
 			if (!itemStack.isEmpty()) {
-				int j = BannerBlockEntity.getPatternCount(itemStack);
+				int j = itemStack.getOrDefault(DataComponents.BANNER_PATTERNS, BannerPatternLayers.EMPTY).layers().size();
 				if (j > 0 && j <= 6) {
 					return itemStack.copyWithCount(1);
 				}
@@ -81,7 +82,7 @@ public class BannerDuplicateRecipe extends CustomRecipe {
 			if (!itemStack.isEmpty()) {
 				if (itemStack.getItem().hasCraftingRemainingItem()) {
 					nonNullList.set(i, new ItemStack(itemStack.getItem().getCraftingRemainingItem()));
-				} else if (BannerBlockEntity.getPatternCount(itemStack) > 0) {
+				} else if (!itemStack.getOrDefault(DataComponents.BANNER_PATTERNS, BannerPatternLayers.EMPTY).layers().isEmpty()) {
 					nonNullList.set(i, itemStack.copyWithCount(1));
 				}
 			}

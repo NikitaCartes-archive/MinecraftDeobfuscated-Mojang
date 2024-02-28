@@ -9,6 +9,8 @@ import net.minecraft.client.Options;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
+import net.minecraft.client.gui.components.StringWidget;
+import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.client.gui.navigation.CommonInputs;
 import net.minecraft.client.resources.language.LanguageInfo;
 import net.minecraft.client.resources.language.LanguageManager;
@@ -18,6 +20,7 @@ import net.minecraft.network.chat.Component;
 @Environment(EnvType.CLIENT)
 public class LanguageSelectScreen extends OptionsSubScreen {
 	private static final Component WARNING_LABEL = Component.translatable("options.languageAccuracyWarning").withStyle(ChatFormatting.GRAY);
+	private static final int FOOTER_HEIGHT = 53;
 	private LanguageSelectScreen.LanguageSelectionList packSelectionList;
 	final LanguageManager languageManager;
 
@@ -29,14 +32,26 @@ public class LanguageSelectScreen extends OptionsSubScreen {
 	@Override
 	protected void init() {
 		this.packSelectionList = this.addRenderableWidget(new LanguageSelectScreen.LanguageSelectionList(this.minecraft));
-		this.addRenderableWidget(
-			Button.builder(Component.translatable("options.font"), button -> this.minecraft.setScreen(new FontOptionsScreen(this, this.options)))
-				.bounds(this.width / 2 - 155, this.height - 38, 150, 20)
-				.build()
+		this.layout.setFooterHeight(53);
+		super.init();
+	}
+
+	@Override
+	protected void repositionElements() {
+		super.repositionElements();
+		this.packSelectionList.updateSize(this.width, this.layout);
+	}
+
+	@Override
+	protected void addFooter() {
+		LinearLayout linearLayout = this.layout.addToFooter(LinearLayout.vertical()).spacing(8);
+		linearLayout.defaultCellSetting().alignHorizontallyCenter();
+		linearLayout.addChild(new StringWidget(WARNING_LABEL, this.font));
+		LinearLayout linearLayout2 = linearLayout.addChild(LinearLayout.horizontal().spacing(8));
+		linearLayout2.addChild(
+			Button.builder(Component.translatable("options.font"), button -> this.minecraft.setScreen(new FontOptionsScreen(this, this.options))).build()
 		);
-		this.addRenderableWidget(
-			Button.builder(CommonComponents.GUI_DONE, button -> this.onDone()).bounds(this.width / 2 - 155 + 160, this.height - 38, 150, 20).build()
-		);
+		linearLayout2.addChild(Button.builder(CommonComponents.GUI_DONE, button -> this.onClose()).build());
 	}
 
 	void onDone() {
@@ -65,22 +80,10 @@ public class LanguageSelectScreen extends OptionsSubScreen {
 		return super.keyPressed(i, j, k);
 	}
 
-	@Override
-	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-		super.render(guiGraphics, i, j, f);
-		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 16, 16777215);
-		guiGraphics.drawCenteredString(this.font, WARNING_LABEL, this.width / 2, this.height - 56, -8355712);
-	}
-
-	@Override
-	public void renderBackground(GuiGraphics guiGraphics, int i, int j, float f) {
-		this.renderDirtBackground(guiGraphics);
-	}
-
 	@Environment(EnvType.CLIENT)
 	class LanguageSelectionList extends ObjectSelectionList<LanguageSelectScreen.LanguageSelectionList.Entry> {
 		public LanguageSelectionList(Minecraft minecraft) {
-			super(minecraft, LanguageSelectScreen.this.width, LanguageSelectScreen.this.height - 93, 32, 18);
+			super(minecraft, LanguageSelectScreen.this.width, LanguageSelectScreen.this.height - 33 - 53, 33, 18);
 			String string = LanguageSelectScreen.this.languageManager.getSelected();
 			LanguageSelectScreen.this.languageManager.getLanguages().forEach((string2, languageInfo) -> {
 				LanguageSelectScreen.LanguageSelectionList.Entry entry = new LanguageSelectScreen.LanguageSelectionList.Entry(string2, languageInfo);
@@ -92,11 +95,6 @@ public class LanguageSelectScreen extends OptionsSubScreen {
 			if (this.getSelected() != null) {
 				this.centerScrollOn(this.getSelected());
 			}
-		}
-
-		@Override
-		protected int getScrollbarPosition() {
-			return super.getScrollbarPosition() + 20;
 		}
 
 		@Override
@@ -117,7 +115,7 @@ public class LanguageSelectScreen extends OptionsSubScreen {
 
 			@Override
 			public void render(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-				guiGraphics.drawCenteredString(LanguageSelectScreen.this.font, this.language, LanguageSelectionList.this.width / 2, j + 1, 16777215);
+				guiGraphics.drawCenteredString(LanguageSelectScreen.this.font, this.language, LanguageSelectionList.this.width / 2, j + 1, -1);
 			}
 
 			@Override
@@ -128,7 +126,7 @@ public class LanguageSelectScreen extends OptionsSubScreen {
 				}
 
 				this.lastClickTime = Util.getMillis();
-				return true;
+				return super.mouseClicked(d, e, i);
 			}
 
 			void select() {

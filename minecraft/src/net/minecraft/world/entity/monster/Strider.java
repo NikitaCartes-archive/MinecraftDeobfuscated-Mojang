@@ -74,7 +74,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 public class Strider extends Animal implements ItemSteerable, Saddleable {
 	private static final UUID SUFFOCATING_MODIFIER_UUID = UUID.fromString("9e362924-01de-4ddd-a2b2-d0f7a405a174");
 	private static final AttributeModifier SUFFOCATING_MODIFIER = new AttributeModifier(
-		SUFFOCATING_MODIFIER_UUID, "Strider suffocating modifier", -0.34F, AttributeModifier.Operation.MULTIPLY_BASE
+		SUFFOCATING_MODIFIER_UUID, "Strider suffocating modifier", -0.34F, AttributeModifier.Operation.ADD_MULTIPLIED_BASE
 	);
 	private static final float SUFFOCATE_STEERING_MODIFIER = 0.35F;
 	private static final float STEERING_MODIFIER = 0.55F;
@@ -524,8 +524,7 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
 
 		@Override
 		protected boolean isValidTarget(LevelReader levelReader, BlockPos blockPos) {
-			return levelReader.getBlockState(blockPos).is(Blocks.LAVA)
-				&& levelReader.getBlockState(blockPos.above()).isPathfindable(levelReader, blockPos, PathComputationType.LAND);
+			return levelReader.getBlockState(blockPos).is(Blocks.LAVA) && levelReader.getBlockState(blockPos.above()).isPathfindable(PathComputationType.LAND);
 		}
 	}
 

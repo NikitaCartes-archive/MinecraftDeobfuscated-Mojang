@@ -121,7 +121,7 @@ public class NbtContents implements ComponentContents {
 				);
 				return (MutableComponent)stream.flatMap(string -> {
 					try {
-						MutableComponent mutableComponent = Component.Serializer.fromJson(string);
+						MutableComponent mutableComponent = Component.Serializer.fromJson(string, commandSourceStack.registryAccess());
 						return Stream.of(ComponentUtils.updateForEntity(commandSourceStack, mutableComponent, entity, i));
 					} catch (Exception var5x) {
 						LOGGER.warn("Failed to parse component: {}", string, var5x);

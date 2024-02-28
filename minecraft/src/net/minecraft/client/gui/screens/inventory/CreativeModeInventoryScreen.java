@@ -26,12 +26,14 @@ import net.minecraft.client.searchtree.SearchTree;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
+import net.minecraft.util.Unit;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
@@ -88,7 +90,6 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 		new ResourceLocation("container/creative_inventory/tab_bottom_selected_7")
 	};
 	private static final String GUI_CREATIVE_TAB_PREFIX = "textures/gui/container/creative_inventory/tab_";
-	private static final String CUSTOM_SLOT_LOCK = "CustomCreativeLock";
 	private static final int NUM_ROWS = 5;
 	private static final int NUM_COLS = 9;
 	private static final int TAB_WIDTH = 26;
@@ -505,10 +506,10 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 					for (int j = 0; j < 9; j++) {
 						if (j == i) {
 							ItemStack itemStack = new ItemStack(Items.PAPER);
-							itemStack.getOrCreateTagElement("CustomCreativeLock");
+							itemStack.set(DataComponents.CREATIVE_SLOT_LOCK, Unit.INSTANCE);
 							Component component = this.minecraft.options.keyHotbarSlots[i].getTranslatedKeyMessage();
 							Component component2 = this.minecraft.options.keySaveHotbarActivator.getTranslatedKeyMessage();
-							itemStack.setHoverName(Component.translatable("inventory.hotbarInfo", component2, component));
+							itemStack.set(DataComponents.CUSTOM_NAME, Component.translatable("inventory.hotbarInfo", component2, component));
 							this.menu.items.add(itemStack);
 						} else {
 							this.menu.items.add(ItemStack.EMPTY);
@@ -819,7 +820,7 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 		public boolean mayPickup(Player player) {
 			ItemStack itemStack = this.getItem();
 			return super.mayPickup(player) && !itemStack.isEmpty()
-				? itemStack.isItemEnabled(player.level().enabledFeatures()) && itemStack.getTagElement("CustomCreativeLock") == null
+				? itemStack.isItemEnabled(player.level().enabledFeatures()) && !itemStack.has(DataComponents.CREATIVE_SLOT_LOCK)
 				: itemStack.isEmpty();
 		}
 	}

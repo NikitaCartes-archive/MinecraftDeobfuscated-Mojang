@@ -121,7 +121,7 @@ public class MoveControl implements Control {
 		if (pathNavigation != null) {
 			NodeEvaluator nodeEvaluator = pathNavigation.getNodeEvaluator();
 			if (nodeEvaluator != null
-				&& nodeEvaluator.getPathType(this.mob.level(), Mth.floor(this.mob.getX() + (double)f), this.mob.getBlockY(), Mth.floor(this.mob.getZ() + (double)g))
+				&& nodeEvaluator.getPathType(this.mob, BlockPos.containing(this.mob.getX() + (double)f, (double)this.mob.getBlockY(), this.mob.getZ() + (double)g))
 					!= PathType.WALKABLE) {
 				return false;
 			}

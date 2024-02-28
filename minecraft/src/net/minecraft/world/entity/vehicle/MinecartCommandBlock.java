@@ -50,7 +50,7 @@ public class MinecartCommandBlock extends AbstractMinecart {
 	@Override
 	protected void readAdditionalSaveData(CompoundTag compoundTag) {
 		super.readAdditionalSaveData(compoundTag);
-		this.commandBlock.load(compoundTag);
+		this.commandBlock.load(compoundTag, this.registryAccess());
 		this.getEntityData().set(DATA_ID_COMMAND_NAME, this.getCommandBlock().getCommand());
 		this.getEntityData().set(DATA_ID_LAST_OUTPUT, this.getCommandBlock().getLastOutput());
 	}
@@ -58,7 +58,7 @@ public class MinecartCommandBlock extends AbstractMinecart {
 	@Override
 	protected void addAdditionalSaveData(CompoundTag compoundTag) {
 		super.addAdditionalSaveData(compoundTag);
-		this.commandBlock.save(compoundTag);
+		this.commandBlock.save(compoundTag, this.registryAccess());
 	}
 
 	@Override

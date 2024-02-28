@@ -5,7 +5,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.PathNavigationRegion;
 
 public class AmphibiousNodeEvaluator extends WalkNodeEvaluator {
@@ -91,12 +90,14 @@ public class AmphibiousNodeEvaluator extends WalkNodeEvaluator {
 	}
 
 	@Override
-	public PathType getPathType(BlockGetter blockGetter, int i, int j, int k) {
-		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
-		PathType pathType = getPathTypeFromState(blockGetter, mutableBlockPos.set(i, j, k));
+	public PathType getPathType(PathfindingContext pathfindingContext, int i, int j, int k) {
+		PathType pathType = pathfindingContext.getPathTypeFromState(i, j, k);
 		if (pathType == PathType.WATER) {
+			BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
+
 			for (Direction direction : Direction.values()) {
-				PathType pathType2 = getPathTypeFromState(blockGetter, mutableBlockPos.set(i, j, k).move(direction));
+				mutableBlockPos.set(i, j, k).move(direction);
+				PathType pathType2 = pathfindingContext.getPathTypeFromState(mutableBlockPos.getX(), mutableBlockPos.getY(), mutableBlockPos.getZ());
 				if (pathType2 == PathType.BLOCKED) {
 					return PathType.WATER_BORDER;
 				}
@@ -104,7 +105,7 @@ public class AmphibiousNodeEvaluator extends WalkNodeEvaluator {
 
 			return PathType.WATER;
 		} else {
-			return getPathTypeStatic(blockGetter, mutableBlockPos);
+			return super.getPathType(pathfindingContext, i, j, k);
 		}
 	}
 }

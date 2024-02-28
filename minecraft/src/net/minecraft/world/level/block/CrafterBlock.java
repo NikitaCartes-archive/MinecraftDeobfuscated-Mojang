@@ -124,10 +124,6 @@ public class CrafterBlock extends BaseEntityBlock {
 
 	@Override
 	public void setPlacedBy(Level level, BlockPos blockPos, BlockState blockState, LivingEntity livingEntity, ItemStack itemStack) {
-		if (itemStack.hasCustomHoverName() && level.getBlockEntity(blockPos) instanceof CrafterBlockEntity crafterBlockEntity) {
-			crafterBlockEntity.setCustomName(itemStack.getHoverName());
-		}
-
 		if ((Boolean)blockState.getValue(TRIGGERED)) {
 			level.scheduleTick(blockPos, this, 4);
 		}

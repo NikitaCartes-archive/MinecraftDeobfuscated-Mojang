@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
@@ -354,10 +355,10 @@ public class Scoreboard {
 		}
 	}
 
-	protected ListTag savePlayerScores() {
+	protected ListTag savePlayerScores(HolderLookup.Provider provider) {
 		ListTag listTag = new ListTag();
 		this.playerScores.forEach((string, playerScores) -> playerScores.listRawScores().forEach((objective, score) -> {
-				CompoundTag compoundTag = score.write();
+				CompoundTag compoundTag = score.write(provider);
 				compoundTag.putString("Name", string);
 				compoundTag.putString("Objective", objective.getName());
 				listTag.add(compoundTag);
@@ -365,10 +366,10 @@ public class Scoreboard {
 		return listTag;
 	}
 
-	protected void loadPlayerScores(ListTag listTag) {
+	protected void loadPlayerScores(ListTag listTag, HolderLookup.Provider provider) {
 		for (int i = 0; i < listTag.size(); i++) {
 			CompoundTag compoundTag = listTag.getCompound(i);
-			Score score = Score.read(compoundTag);
+			Score score = Score.read(compoundTag, provider);
 			String string = compoundTag.getString("Name");
 			String string2 = compoundTag.getString("Objective");
 			Objective objective = this.getObjective(string2);

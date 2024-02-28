@@ -336,7 +336,7 @@ public class CampfireBlock extends BaseEntityBlock implements SimpleWaterloggedB
 	}
 
 	@Override
-	protected boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
+	protected boolean isPathfindable(BlockState blockState, PathComputationType pathComputationType) {
 		return false;
 	}
 

@@ -12,6 +12,7 @@ import java.util.function.IntFunction;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.DebugPackets;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -56,6 +57,7 @@ import net.minecraft.world.entity.animal.Bucketable;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.ServerLevelAccessor;
@@ -347,13 +349,14 @@ public class Axolotl extends Animal implements LerpingModel, VariantHolder<Axolo
 	@Override
 	public void saveToBucketTag(ItemStack itemStack) {
 		Bucketable.saveDefaultDataToBucketTag(this, itemStack);
-		CompoundTag compoundTag = itemStack.getOrCreateTag();
-		compoundTag.putInt("Variant", this.getVariant().getId());
-		compoundTag.putInt("Age", this.getAge());
-		Brain<?> brain = this.getBrain();
-		if (brain.hasMemoryValue(MemoryModuleType.HAS_HUNTING_COOLDOWN)) {
-			compoundTag.putLong("HuntingCooldown", brain.getTimeUntilExpiry(MemoryModuleType.HAS_HUNTING_COOLDOWN));
-		}
+		CustomData.update(DataComponents.BUCKET_ENTITY_DATA, itemStack, compoundTag -> {
+			compoundTag.putInt("Variant", this.getVariant().getId());
+			compoundTag.putInt("Age", this.getAge());
+			Brain<?> brain = this.getBrain();
+			if (brain.hasMemoryValue(MemoryModuleType.HAS_HUNTING_COOLDOWN)) {
+				compoundTag.putLong("HuntingCooldown", brain.getTimeUntilExpiry(MemoryModuleType.HAS_HUNTING_COOLDOWN));
+			}
+		});
 	}
 
 	@Override

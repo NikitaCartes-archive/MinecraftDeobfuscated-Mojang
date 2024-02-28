@@ -297,7 +297,7 @@ public class ItemEntity extends Entity implements TraceableEntity {
 		}
 
 		if (!this.getItem().isEmpty()) {
-			compoundTag.put("Item", this.getItem().save(new CompoundTag()));
+			compoundTag.put("Item", this.getItem().save(this.registryAccess()));
 		}
 	}
 
@@ -318,8 +318,13 @@ public class ItemEntity extends Entity implements TraceableEntity {
 			this.cachedThrower = null;
 		}
 
-		CompoundTag compoundTag2 = compoundTag.getCompound("Item");
-		this.setItem(ItemStack.of(compoundTag2));
+		if (compoundTag.contains("Item", 10)) {
+			CompoundTag compoundTag2 = compoundTag.getCompound("Item");
+			this.setItem((ItemStack)ItemStack.parse(this.registryAccess(), compoundTag2).orElse(ItemStack.EMPTY));
+		} else {
+			this.setItem(ItemStack.EMPTY);
+		}
+
 		if (this.getItem().isEmpty()) {
 			this.discard();
 		}

@@ -160,9 +160,9 @@ public class SynchedEntityData {
 		}
 
 		public SynchedEntityData build() {
-			for (SynchedEntityData.DataItem<?> dataItem : this.itemsById) {
-				if (dataItem == null) {
-					throw new IllegalStateException("Entity " + this.entity + " did not have all synched data values defined");
+			for (int i = 0; i < this.itemsById.length; i++) {
+				if (this.itemsById[i] == null) {
+					throw new IllegalStateException("Entity " + this.entity.getClass() + " has not defined synched data value " + i);
 				}
 			}
 

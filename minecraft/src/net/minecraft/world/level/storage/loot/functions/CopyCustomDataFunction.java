@@ -11,33 +11,36 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
 import net.minecraft.commands.arguments.NbtPathArgument;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.level.storage.loot.providers.nbt.ContextNbtProvider;
 import net.minecraft.world.level.storage.loot.providers.nbt.NbtProvider;
 import net.minecraft.world.level.storage.loot.providers.nbt.NbtProviders;
+import org.apache.commons.lang3.mutable.MutableObject;
 
-public class CopyNbtFunction extends LootItemConditionalFunction {
-	public static final Codec<CopyNbtFunction> CODEC = RecordCodecBuilder.create(
+public class CopyCustomDataFunction extends LootItemConditionalFunction {
+	public static final Codec<CopyCustomDataFunction> CODEC = RecordCodecBuilder.create(
 		instance -> commonFields(instance)
-				.<NbtProvider, List<CopyNbtFunction.CopyOperation>>and(
+				.<NbtProvider, List<CopyCustomDataFunction.CopyOperation>>and(
 					instance.group(
-						NbtProviders.CODEC.fieldOf("source").forGetter(copyNbtFunction -> copyNbtFunction.source),
-						CopyNbtFunction.CopyOperation.CODEC.listOf().fieldOf("ops").forGetter(copyNbtFunction -> copyNbtFunction.operations)
+						NbtProviders.CODEC.fieldOf("source").forGetter(copyCustomDataFunction -> copyCustomDataFunction.source),
+						CopyCustomDataFunction.CopyOperation.CODEC.listOf().fieldOf("ops").forGetter(copyCustomDataFunction -> copyCustomDataFunction.operations)
 					)
 				)
-				.apply(instance, CopyNbtFunction::new)
+				.apply(instance, CopyCustomDataFunction::new)
 	);
 	private final NbtProvider source;
-	private final List<CopyNbtFunction.CopyOperation> operations;
+	private final List<CopyCustomDataFunction.CopyOperation> operations;
 
-	CopyNbtFunction(List<LootItemCondition> list, NbtProvider nbtProvider, List<CopyNbtFunction.CopyOperation> list2) {
+	CopyCustomDataFunction(List<LootItemCondition> list, NbtProvider nbtProvider, List<CopyCustomDataFunction.CopyOperation> list2) {
 		super(list);
 		this.source = nbtProvider;
 		this.operations = List.copyOf(list2);
@@ -45,7 +48,7 @@ public class CopyNbtFunction extends LootItemConditionalFunction {
 
 	@Override
 	public LootItemFunctionType getType() {
-		return LootItemFunctions.COPY_NBT;
+		return LootItemFunctions.COPY_CUSTOM_DATA;
 	}
 
 	@Override
@@ -56,60 +59,75 @@ public class CopyNbtFunction extends LootItemConditionalFunction {
 	@Override
 	public ItemStack run(ItemStack itemStack, LootContext lootContext) {
 		Tag tag = this.source.get(lootContext);
-		if (tag != null) {
-			this.operations.forEach(copyOperation -> copyOperation.apply(itemStack::getOrCreateTag, tag));
+		if (tag == null) {
+			return itemStack;
+		} else {
+			MutableObject<CompoundTag> mutableObject = new MutableObject<>();
+			Supplier<Tag> supplier = () -> {
+				if (mutableObject.getValue() == null) {
+					mutableObject.setValue(itemStack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag());
+				}
+
+				return mutableObject.getValue();
+			};
+			this.operations.forEach(copyOperation -> copyOperation.apply(supplier, tag));
+			CompoundTag compoundTag = mutableObject.getValue();
+			if (compoundTag != null) {
+				CustomData.set(DataComponents.CUSTOM_DATA, itemStack, compoundTag);
+			}
+
+			return itemStack;
 		}
-
-		return itemStack;
 	}
 
-	public static CopyNbtFunction.Builder copyData(NbtProvider nbtProvider) {
-		return new CopyNbtFunction.Builder(nbtProvider);
+	@Deprecated
+	public static CopyCustomDataFunction.Builder copyData(NbtProvider nbtProvider) {
+		return new CopyCustomDataFunction.Builder(nbtProvider);
 	}
 
-	public static CopyNbtFunction.Builder copyData(LootContext.EntityTarget entityTarget) {
-		return new CopyNbtFunction.Builder(ContextNbtProvider.forContextEntity(entityTarget));
+	public static CopyCustomDataFunction.Builder copyData(LootContext.EntityTarget entityTarget) {
+		return new CopyCustomDataFunction.Builder(ContextNbtProvider.forContextEntity(entityTarget));
 	}
 
-	public static class Builder extends LootItemConditionalFunction.Builder<CopyNbtFunction.Builder> {
+	public static class Builder extends LootItemConditionalFunction.Builder<CopyCustomDataFunction.Builder> {
 		private final NbtProvider source;
-		private final List<CopyNbtFunction.CopyOperation> ops = Lists.<CopyNbtFunction.CopyOperation>newArrayList();
+		private final List<CopyCustomDataFunction.CopyOperation> ops = Lists.<CopyCustomDataFunction.CopyOperation>newArrayList();
 
 		Builder(NbtProvider nbtProvider) {
 			this.source = nbtProvider;
 		}
 
-		public CopyNbtFunction.Builder copy(String string, String string2, CopyNbtFunction.MergeStrategy mergeStrategy) {
+		public CopyCustomDataFunction.Builder copy(String string, String string2, CopyCustomDataFunction.MergeStrategy mergeStrategy) {
 			try {
-				this.ops.add(new CopyNbtFunction.CopyOperation(CopyNbtFunction.Path.of(string), CopyNbtFunction.Path.of(string2), mergeStrategy));
+				this.ops.add(new CopyCustomDataFunction.CopyOperation(CopyCustomDataFunction.Path.of(string), CopyCustomDataFunction.Path.of(string2), mergeStrategy));
 				return this;
 			} catch (CommandSyntaxException var5) {
 				throw new IllegalArgumentException(var5);
 			}
 		}
 
-		public CopyNbtFunction.Builder copy(String string, String string2) {
-			return this.copy(string, string2, CopyNbtFunction.MergeStrategy.REPLACE);
+		public CopyCustomDataFunction.Builder copy(String string, String string2) {
+			return this.copy(string, string2, CopyCustomDataFunction.MergeStrategy.REPLACE);
 		}
 
-		protected CopyNbtFunction.Builder getThis() {
+		protected CopyCustomDataFunction.Builder getThis() {
 			return this;
 		}
 
 		@Override
 		public LootItemFunction build() {
-			return new CopyNbtFunction(this.getConditions(), this.source, this.ops);
+			return new CopyCustomDataFunction(this.getConditions(), this.source, this.ops);
 		}
 	}
 
-	static record CopyOperation(CopyNbtFunction.Path sourcePath, CopyNbtFunction.Path targetPath, CopyNbtFunction.MergeStrategy op) {
-		public static final Codec<CopyNbtFunction.CopyOperation> CODEC = RecordCodecBuilder.create(
+	static record CopyOperation(CopyCustomDataFunction.Path sourcePath, CopyCustomDataFunction.Path targetPath, CopyCustomDataFunction.MergeStrategy op) {
+		public static final Codec<CopyCustomDataFunction.CopyOperation> CODEC = RecordCodecBuilder.create(
 			instance -> instance.group(
-						CopyNbtFunction.Path.CODEC.fieldOf("source").forGetter(CopyNbtFunction.CopyOperation::sourcePath),
-						CopyNbtFunction.Path.CODEC.fieldOf("target").forGetter(CopyNbtFunction.CopyOperation::targetPath),
-						CopyNbtFunction.MergeStrategy.CODEC.fieldOf("op").forGetter(CopyNbtFunction.CopyOperation::op)
+						CopyCustomDataFunction.Path.CODEC.fieldOf("source").forGetter(CopyCustomDataFunction.CopyOperation::sourcePath),
+						CopyCustomDataFunction.Path.CODEC.fieldOf("target").forGetter(CopyCustomDataFunction.CopyOperation::targetPath),
+						CopyCustomDataFunction.MergeStrategy.CODEC.fieldOf("op").forGetter(CopyCustomDataFunction.CopyOperation::op)
 					)
-					.apply(instance, CopyNbtFunction.CopyOperation::new)
+					.apply(instance, CopyCustomDataFunction.CopyOperation::new)
 		);
 
 		public void apply(Supplier<Tag> supplier, Tag tag) {
@@ -157,7 +175,7 @@ public class CopyNbtFunction extends LootItemConditionalFunction {
 			}
 		};
 
-		public static final Codec<CopyNbtFunction.MergeStrategy> CODEC = StringRepresentable.fromEnum(CopyNbtFunction.MergeStrategy::values);
+		public static final Codec<CopyCustomDataFunction.MergeStrategy> CODEC = StringRepresentable.fromEnum(CopyCustomDataFunction.MergeStrategy::values);
 		private final String name;
 
 		public abstract void merge(Tag tag, NbtPathArgument.NbtPath nbtPath, List<Tag> list) throws CommandSyntaxException;
@@ -173,17 +191,17 @@ public class CopyNbtFunction extends LootItemConditionalFunction {
 	}
 
 	static record Path(String string, NbtPathArgument.NbtPath path) {
-		public static final Codec<CopyNbtFunction.Path> CODEC = Codec.STRING.comapFlatMap(string -> {
+		public static final Codec<CopyCustomDataFunction.Path> CODEC = Codec.STRING.comapFlatMap(string -> {
 			try {
 				return DataResult.success(of(string));
 			} catch (CommandSyntaxException var2) {
 				return DataResult.error(() -> "Failed to parse path " + string + ": " + var2.getMessage());
 			}
-		}, CopyNbtFunction.Path::string);
+		}, CopyCustomDataFunction.Path::string);
 
-		public static CopyNbtFunction.Path of(String string) throws CommandSyntaxException {
+		public static CopyCustomDataFunction.Path of(String string) throws CommandSyntaxException {
 			NbtPathArgument.NbtPath nbtPath = new NbtPathArgument().parse(new StringReader(string));
-			return new CopyNbtFunction.Path(string, nbtPath);
+			return new CopyCustomDataFunction.Path(string, nbtPath);
 		}
 	}
 }

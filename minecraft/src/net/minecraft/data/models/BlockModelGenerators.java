@@ -3403,9 +3403,9 @@ public class BlockModelGenerators {
 
 	private void createVault() {
 		Block block = Blocks.VAULT;
-		TextureMapping textureMapping = TextureMapping.vault(block, "_front_off", "_side_off", "_top_off", "_bottom");
-		TextureMapping textureMapping2 = TextureMapping.vault(block, "_front_on", "_side_on", "_top_on", "_bottom");
-		TextureMapping textureMapping3 = TextureMapping.vault(block, "_front_ejecting", "_side_on", "_top_on", "_bottom");
+		TextureMapping textureMapping = TextureMapping.vault(block, "_front_off", "_side_off", "_top", "_bottom");
+		TextureMapping textureMapping2 = TextureMapping.vault(block, "_front_on", "_side_on", "_top", "_bottom");
+		TextureMapping textureMapping3 = TextureMapping.vault(block, "_front_ejecting", "_side_on", "_top", "_bottom");
 		TextureMapping textureMapping4 = TextureMapping.vault(block, "_front_ejecting", "_side_on", "_top_ejecting", "_bottom");
 		ResourceLocation resourceLocation = ModelTemplates.VAULT.create(block, textureMapping, this.modelOutput);
 		ResourceLocation resourceLocation2 = ModelTemplates.VAULT.createWithSuffix(block, "_active", textureMapping2, this.modelOutput);
@@ -4022,18 +4022,16 @@ public class BlockModelGenerators {
 		Block block = Blocks.CHISELED_BOOKSHELF;
 		ResourceLocation resourceLocation = ModelLocationUtils.getModelLocation(block);
 		MultiPartGenerator multiPartGenerator = MultiPartGenerator.multiPart(block);
-		Map.of(
-				Direction.NORTH,
-				VariantProperties.Rotation.R0,
-				Direction.EAST,
-				VariantProperties.Rotation.R90,
-				Direction.SOUTH,
-				VariantProperties.Rotation.R180,
-				Direction.WEST,
-				VariantProperties.Rotation.R270
+		List.of(
+				Pair.of(Direction.NORTH, VariantProperties.Rotation.R0),
+				Pair.of(Direction.EAST, VariantProperties.Rotation.R90),
+				Pair.of(Direction.SOUTH, VariantProperties.Rotation.R180),
+				Pair.of(Direction.WEST, VariantProperties.Rotation.R270)
 			)
 			.forEach(
-				(direction, rotation) -> {
+				pair -> {
+					Direction direction = (Direction)pair.getFirst();
+					VariantProperties.Rotation rotation = (VariantProperties.Rotation)pair.getSecond();
 					Condition.TerminalCondition terminalCondition = Condition.condition().term(BlockStateProperties.HORIZONTAL_FACING, direction);
 					multiPartGenerator.with(
 						terminalCondition,

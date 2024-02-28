@@ -11,6 +11,7 @@ import it.unimi.dsi.fastutil.ints.IntList;
 import java.util.BitSet;
 import java.util.List;
 import javax.annotation.Nullable;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -23,7 +24,7 @@ public class StackedContents {
 	public final Int2IntMap contents = new Int2IntOpenHashMap();
 
 	public void accountSimpleStack(ItemStack itemStack) {
-		if (!itemStack.isDamaged() && !itemStack.isEnchanted() && !itemStack.hasCustomHoverName()) {
+		if (!itemStack.isDamaged() && !itemStack.isEnchanted() && !itemStack.has(DataComponents.CUSTOM_NAME)) {
 			this.accountStack(itemStack);
 		}
 	}

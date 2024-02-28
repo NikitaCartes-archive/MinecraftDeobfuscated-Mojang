@@ -14,6 +14,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.Registry;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
@@ -133,7 +134,7 @@ public class SpawnArmorTrimsCommand {
 						Item item = (Item)MATERIAL_AND_SLOT_TO_ITEM.get(Pair.of(armorMaterial, equipmentSlot));
 						if (item != null) {
 							ItemStack itemStack = new ItemStack(item);
-							ArmorTrim.setTrim(level.registryAccess(), itemStack, armorTrim);
+							itemStack.set(DataComponents.TRIM, armorTrim);
 							armorStand.setItemSlot(equipmentSlot, itemStack);
 							if (item instanceof ArmorItem) {
 								ArmorItem armorItem = (ArmorItem)item;

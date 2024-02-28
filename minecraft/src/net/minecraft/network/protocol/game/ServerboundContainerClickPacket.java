@@ -3,7 +3,6 @@ package net.minecraft.network.protocol.game;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -18,7 +17,7 @@ public class ServerboundContainerClickPacket implements Packet<ServerGamePacketL
 	);
 	private static final int MAX_SLOT_COUNT = 128;
 	private static final StreamCodec<RegistryFriendlyByteBuf, Int2ObjectMap<ItemStack>> SLOTS_STREAM_CODEC = ByteBufCodecs.map(
-		FriendlyByteBuf.limitValue(Int2ObjectOpenHashMap::new, 128), ByteBufCodecs.SHORT.map(Short::intValue, Integer::shortValue), ItemStack.STREAM_CODEC
+		Int2ObjectOpenHashMap::new, ByteBufCodecs.SHORT.map(Short::intValue, Integer::shortValue), ItemStack.OPTIONAL_STREAM_CODEC, 128
 	);
 	private final int containerId;
 	private final int stateId;
@@ -45,7 +44,7 @@ public class ServerboundContainerClickPacket implements Packet<ServerGamePacketL
 		this.buttonNum = registryFriendlyByteBuf.readByte();
 		this.clickType = registryFriendlyByteBuf.readEnum(ClickType.class);
 		this.changedSlots = Int2ObjectMaps.unmodifiable(SLOTS_STREAM_CODEC.decode(registryFriendlyByteBuf));
-		this.carriedItem = ItemStack.STREAM_CODEC.decode(registryFriendlyByteBuf);
+		this.carriedItem = ItemStack.OPTIONAL_STREAM_CODEC.decode(registryFriendlyByteBuf);
 	}
 
 	private void write(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
@@ -55,7 +54,7 @@ public class ServerboundContainerClickPacket implements Packet<ServerGamePacketL
 		registryFriendlyByteBuf.writeByte(this.buttonNum);
 		registryFriendlyByteBuf.writeEnum(this.clickType);
 		SLOTS_STREAM_CODEC.encode(registryFriendlyByteBuf, this.changedSlots);
-		ItemStack.STREAM_CODEC.encode(registryFriendlyByteBuf, this.carriedItem);
+		ItemStack.OPTIONAL_STREAM_CODEC.encode(registryFriendlyByteBuf, this.carriedItem);
 	}
 
 	@Override

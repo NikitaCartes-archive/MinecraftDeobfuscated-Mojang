@@ -8,6 +8,7 @@ import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Position;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
@@ -46,7 +47,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.SpawnEggItem;
-import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -94,7 +95,6 @@ public interface DispenseItemBehavior {
 			@Override
 			protected Projectile getProjectile(Level level, Position position, ItemStack itemStack) {
 				Arrow arrow = new Arrow(level, position.x(), position.y(), position.z(), itemStack.copyWithCount(1));
-				arrow.setEffectsFromItem(itemStack);
 				arrow.pickup = AbstractArrow.Pickup.ALLOWED;
 				return arrow;
 			}
@@ -186,7 +186,7 @@ public interface DispenseItemBehavior {
 			@Override
 			public ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
 				Direction direction = blockSource.state().getValue(DispenserBlock.FACING);
-				EntityType<?> entityType = ((SpawnEggItem)itemStack.getItem()).getType(itemStack.getTag());
+				EntityType<?> entityType = ((SpawnEggItem)itemStack.getItem()).getType(itemStack);
 
 				try {
 					entityType.spawn(blockSource.level(), itemStack, null, blockSource.pos().relative(direction), MobSpawnType.DISPENSER, direction != Direction.UP, false);
@@ -605,7 +605,7 @@ public interface DispenseItemBehavior {
 						return this.takeLiquid(blockSource, itemStack, new ItemStack(Items.HONEY_BOTTLE));
 					} else if (serverLevel.getFluidState(blockPos).is(FluidTags.WATER)) {
 						this.setSuccess(true);
-						return this.takeLiquid(blockSource, itemStack, PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.WATER));
+						return this.takeLiquid(blockSource, itemStack, PotionContents.createItemStack(Items.POTION, Potions.WATER));
 					} else {
 						return super.execute(blockSource, itemStack);
 					}
@@ -645,11 +645,17 @@ public interface DispenseItemBehavior {
 					this.setSuccess(false);
 					return itemStack;
 				} else {
-					((Armadillo)list.get(0)).brushOffScute();
-					itemStack.hurtAndBreak(16, serverLevel.getRandom(), null, () -> {
-						itemStack.shrink(1);
-						itemStack.setDamageValue(0);
-					});
+					for (Armadillo armadillo : list) {
+						if (armadillo.brushOffScute()) {
+							itemStack.hurtAndBreak(16, serverLevel.getRandom(), null, () -> {
+								itemStack.shrink(1);
+								itemStack.setDamageValue(0);
+							});
+							return itemStack;
+						}
+					}
+
+					this.setSuccess(false);
 					return itemStack;
 				}
 			}
@@ -679,7 +685,8 @@ public interface DispenseItemBehavior {
 
 				@Override
 				public ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
-					if (!PotionUtils.getPotion(itemStack).is(Potions.WATER)) {
+					PotionContents potionContents = itemStack.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY);
+					if (!potionContents.is(Potions.WATER)) {
 						return this.defaultDispenseItemBehavior.dispense(blockSource, itemStack);
 					} else {
 						ServerLevel serverLevel = blockSource.level();

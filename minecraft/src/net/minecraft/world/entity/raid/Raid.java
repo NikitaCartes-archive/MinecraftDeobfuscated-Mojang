@@ -18,6 +18,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
@@ -32,6 +33,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.Unit;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.DifficultyInstance;
@@ -45,15 +47,13 @@ import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.SpawnPlacementType;
 import net.minecraft.world.entity.SpawnPlacements;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.entity.BannerPattern;
+import net.minecraft.world.level.block.entity.BannerPatternLayers;
 import net.minecraft.world.level.block.entity.BannerPatterns;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
 
@@ -65,7 +65,7 @@ public class Raid {
 	private static final int VILLAGE_SEARCH_RADIUS = 32;
 	private static final int RAID_TIMEOUT_TICKS = 48000;
 	private static final int NUM_SPAWN_ATTEMPTS = 3;
-	private static final String OMINOUS_BANNER_PATTERN_NAME = "block.minecraft.ominous_banner";
+	private static final Component OMINOUS_BANNER_PATTERN_NAME = Component.translatable("block.minecraft.ominous_banner").withStyle(ChatFormatting.GOLD);
 	private static final String RAIDERS_REMAINING = "event.minecraft.raid.raiders_remaining";
 	public static final int VILLAGE_RADIUS_BUFFER = 16;
 	private static final int POST_RAID_TICK_LIMIT = 40;
@@ -592,21 +592,19 @@ public class Raid {
 
 	public static ItemStack getLeaderBannerInstance() {
 		ItemStack itemStack = new ItemStack(Items.WHITE_BANNER);
-		CompoundTag compoundTag = new CompoundTag();
-		ListTag listTag = new BannerPattern.Builder()
-			.addPattern(BannerPatterns.RHOMBUS_MIDDLE, DyeColor.CYAN)
-			.addPattern(BannerPatterns.STRIPE_BOTTOM, DyeColor.LIGHT_GRAY)
-			.addPattern(BannerPatterns.STRIPE_CENTER, DyeColor.GRAY)
-			.addPattern(BannerPatterns.BORDER, DyeColor.LIGHT_GRAY)
-			.addPattern(BannerPatterns.STRIPE_MIDDLE, DyeColor.BLACK)
-			.addPattern(BannerPatterns.HALF_HORIZONTAL, DyeColor.LIGHT_GRAY)
-			.addPattern(BannerPatterns.CIRCLE_MIDDLE, DyeColor.LIGHT_GRAY)
-			.addPattern(BannerPatterns.BORDER, DyeColor.BLACK)
-			.toListTag();
-		compoundTag.put("Patterns", listTag);
-		BlockItem.setBlockEntityData(itemStack, BlockEntityType.BANNER, compoundTag);
-		itemStack.hideTooltipPart(ItemStack.TooltipPart.ADDITIONAL);
-		itemStack.setHoverName(Component.translatable("block.minecraft.ominous_banner").withStyle(ChatFormatting.GOLD));
+		BannerPatternLayers bannerPatternLayers = new BannerPatternLayers.Builder()
+			.add(BannerPatterns.RHOMBUS_MIDDLE, DyeColor.CYAN)
+			.add(BannerPatterns.STRIPE_BOTTOM, DyeColor.LIGHT_GRAY)
+			.add(BannerPatterns.STRIPE_CENTER, DyeColor.GRAY)
+			.add(BannerPatterns.BORDER, DyeColor.LIGHT_GRAY)
+			.add(BannerPatterns.STRIPE_MIDDLE, DyeColor.BLACK)
+			.add(BannerPatterns.HALF_HORIZONTAL, DyeColor.LIGHT_GRAY)
+			.add(BannerPatterns.CIRCLE_MIDDLE, DyeColor.LIGHT_GRAY)
+			.add(BannerPatterns.BORDER, DyeColor.BLACK)
+			.build();
+		itemStack.set(DataComponents.BANNER_PATTERNS, bannerPatternLayers);
+		itemStack.set(DataComponents.HIDE_ADDITIONAL_TOOLTIP, Unit.INSTANCE);
+		itemStack.set(DataComponents.CUSTOM_NAME, OMINOUS_BANNER_PATTERN_NAME);
 		return itemStack;
 	}
 

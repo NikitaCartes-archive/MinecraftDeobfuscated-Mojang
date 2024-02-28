@@ -5,6 +5,7 @@ import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -20,6 +21,8 @@ import net.minecraft.world.inventory.LecternMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.WrittenBookItem;
+import net.minecraft.world.item.component.WritableBookContent;
+import net.minecraft.world.item.component.WrittenBookContent;
 import net.minecraft.world.level.block.LecternBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec2;
@@ -147,7 +150,7 @@ public class LecternBlockEntity extends BlockEntity implements Clearable, MenuPr
 	public void setBook(ItemStack itemStack, @Nullable Player player) {
 		this.book = this.resolveBook(itemStack, player);
 		this.page = 0;
-		this.pageCount = WrittenBookItem.getPageCount(this.book);
+		this.pageCount = getPageCount(this.book);
 		this.setChanged();
 	}
 
@@ -201,12 +204,12 @@ public class LecternBlockEntity extends BlockEntity implements Clearable, MenuPr
 	public void load(CompoundTag compoundTag, HolderLookup.Provider provider) {
 		super.load(compoundTag, provider);
 		if (compoundTag.contains("Book", 10)) {
-			this.book = this.resolveBook(ItemStack.of(compoundTag.getCompound("Book")), null);
+			this.book = this.resolveBook((ItemStack)ItemStack.parse(provider, compoundTag.getCompound("Book")).orElse(ItemStack.EMPTY), null);
 		} else {
 			this.book = ItemStack.EMPTY;
 		}
 
-		this.pageCount = WrittenBookItem.getPageCount(this.book);
+		this.pageCount = getPageCount(this.book);
 		this.page = Mth.clamp(compoundTag.getInt("Page"), 0, this.pageCount - 1);
 	}
 
@@ -214,7 +217,7 @@ public class LecternBlockEntity extends BlockEntity implements Clearable, MenuPr
 	protected void saveAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
 		super.saveAdditional(compoundTag, provider);
 		if (!this.getBook().isEmpty()) {
-			compoundTag.put("Book", this.getBook().save(new CompoundTag()));
+			compoundTag.put("Book", this.getBook().save(provider));
 			compoundTag.putInt("Page", this.page);
 		}
 	}
@@ -232,5 +235,15 @@ public class LecternBlockEntity extends BlockEntity implements Clearable, MenuPr
 	@Override
 	public Component getDisplayName() {
 		return Component.translatable("container.lectern");
+	}
+
+	private static int getPageCount(ItemStack itemStack) {
+		WrittenBookContent writtenBookContent = itemStack.get(DataComponents.WRITTEN_BOOK_CONTENT);
+		if (writtenBookContent != null) {
+			return writtenBookContent.pages().size();
+		} else {
+			WritableBookContent writableBookContent = itemStack.get(DataComponents.WRITABLE_BOOK_CONTENT);
+			return writableBookContent != null ? writableBookContent.pages().size() : 0;
+		}
 	}
 }

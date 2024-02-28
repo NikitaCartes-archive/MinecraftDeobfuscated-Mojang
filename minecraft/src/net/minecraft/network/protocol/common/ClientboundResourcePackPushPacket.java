@@ -23,7 +23,7 @@ public record ClientboundResourcePackPushPacket(UUID id, String url, String hash
 		ClientboundResourcePackPushPacket::hash,
 		ByteBufCodecs.BOOL,
 		ClientboundResourcePackPushPacket::required,
-		ComponentSerialization.CONTEXT_FREE_STREAM_CODEC.apply(ByteBufCodecs::optional),
+		ComponentSerialization.TRUSTED_CONTEXT_FREE_STREAM_CODEC.apply(ByteBufCodecs::optional),
 		ClientboundResourcePackPushPacket::prompt,
 		ClientboundResourcePackPushPacket::new
 	);

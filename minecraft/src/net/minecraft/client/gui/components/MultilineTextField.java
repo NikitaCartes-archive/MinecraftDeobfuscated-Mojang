@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.function.Consumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.SharedConstants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.screens.Screen;
@@ -74,7 +73,7 @@ public class MultilineTextField {
 
 	public void insertText(String string) {
 		if (!string.isEmpty() || this.hasSelection()) {
-			String string2 = this.truncateInsertionText(SharedConstants.filterText(string, true));
+			String string2 = this.truncateInsertionText(StringUtil.filterText(string, true));
 			MultilineTextField.StringView stringView = this.getSelected();
 			this.value = new StringBuilder(this.value).replace(stringView.beginIndex, stringView.endIndex, string2).toString();
 			this.cursor = stringView.beginIndex + string2.length();

@@ -14,13 +14,15 @@ import java.util.function.Function;
 import net.minecraft.Util;
 import net.minecraft.core.Holder;
 import net.minecraft.core.UUIDUtil;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
@@ -59,16 +61,23 @@ public class SetAttributesFunction extends LootItemConditionalFunction {
 
 	@Override
 	public ItemStack run(ItemStack itemStack, LootContext lootContext) {
-		RandomSource randomSource = lootContext.getRandom();
+		itemStack.update(
+			DataComponents.ATTRIBUTE_MODIFIERS,
+			ItemAttributeModifiers.EMPTY,
+			itemAttributeModifiers -> {
+				RandomSource randomSource = lootContext.getRandom();
 
-		for (SetAttributesFunction.Modifier modifier : this.modifiers) {
-			UUID uUID = (UUID)modifier.id.orElseGet(UUID::randomUUID);
-			EquipmentSlot equipmentSlot = Util.getRandom(modifier.slots, randomSource);
-			itemStack.addAttributeModifier(
-				modifier.attribute, new AttributeModifier(uUID, modifier.name, (double)modifier.amount.getFloat(lootContext), modifier.operation), equipmentSlot
-			);
-		}
+				for (SetAttributesFunction.Modifier modifier : this.modifiers) {
+					UUID uUID = (UUID)modifier.id.orElseGet(UUID::randomUUID);
+					EquipmentSlotGroup equipmentSlotGroup = Util.getRandom(modifier.slots, randomSource);
+					itemAttributeModifiers = itemAttributeModifiers.withModifierAdded(
+						modifier.attribute, new AttributeModifier(uUID, modifier.name, (double)modifier.amount.getFloat(lootContext), modifier.operation), equipmentSlotGroup
+					);
+				}
 
+				return itemAttributeModifiers;
+			}
+		);
 		return itemStack;
 	}
 
@@ -101,11 +110,11 @@ public class SetAttributesFunction extends LootItemConditionalFunction {
 	}
 
 	static record Modifier(
-		String name, Holder<Attribute> attribute, AttributeModifier.Operation operation, NumberProvider amount, List<EquipmentSlot> slots, Optional<UUID> id
+		String name, Holder<Attribute> attribute, AttributeModifier.Operation operation, NumberProvider amount, List<EquipmentSlotGroup> slots, Optional<UUID> id
 	) {
-		private static final Codec<List<EquipmentSlot>> SLOTS_CODEC = ExtraCodecs.nonEmptyList(
-			Codec.either(EquipmentSlot.CODEC, EquipmentSlot.CODEC.listOf())
-				.xmap(either -> either.map(List::of, Function.identity()), list -> list.size() == 1 ? Either.left((EquipmentSlot)list.get(0)) : Either.right(list))
+		private static final Codec<List<EquipmentSlotGroup>> SLOTS_CODEC = ExtraCodecs.nonEmptyList(
+			Codec.either(EquipmentSlotGroup.CODEC, EquipmentSlotGroup.CODEC.listOf())
+				.xmap(either -> either.map(List::of, Function.identity()), list -> list.size() == 1 ? Either.left((EquipmentSlotGroup)list.get(0)) : Either.right(list))
 		);
 		public static final Codec<SetAttributesFunction.Modifier> CODEC = RecordCodecBuilder.create(
 			instance -> instance.group(
@@ -126,7 +135,7 @@ public class SetAttributesFunction extends LootItemConditionalFunction {
 		private final AttributeModifier.Operation operation;
 		private final NumberProvider amount;
 		private Optional<UUID> id = Optional.empty();
-		private final Set<EquipmentSlot> slots = EnumSet.noneOf(EquipmentSlot.class);
+		private final Set<EquipmentSlotGroup> slots = EnumSet.noneOf(EquipmentSlotGroup.class);
 
 		public ModifierBuilder(String string, Holder<Attribute> holder, AttributeModifier.Operation operation, NumberProvider numberProvider) {
 			this.name = string;
@@ -135,8 +144,8 @@ public class SetAttributesFunction extends LootItemConditionalFunction {
 			this.amount = numberProvider;
 		}
 
-		public SetAttributesFunction.ModifierBuilder forSlot(EquipmentSlot equipmentSlot) {
-			this.slots.add(equipmentSlot);
+		public SetAttributesFunction.ModifierBuilder forSlot(EquipmentSlotGroup equipmentSlotGroup) {
+			this.slots.add(equipmentSlotGroup);
 			return this;
 		}
 

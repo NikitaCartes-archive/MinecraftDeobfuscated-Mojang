@@ -15,8 +15,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.SkullBlockRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtUtils;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.WalkAnimationState;
@@ -27,6 +26,7 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.ResolvableProfile;
 import net.minecraft.world.level.block.AbstractSkullBlock;
 import net.minecraft.world.level.block.SkullBlock;
 
@@ -76,14 +76,8 @@ public class CustomHeadLayer<T extends LivingEntity, M extends EntityModel<T> & 
 					poseStack.translate(0.0F, 0.0625F, 0.0F);
 				}
 
-				GameProfile gameProfile = null;
-				if (itemStack.hasTag()) {
-					CompoundTag compoundTag = itemStack.getTag();
-					if (compoundTag.contains("SkullOwner", 10)) {
-						gameProfile = NbtUtils.readGameProfile(compoundTag.getCompound("SkullOwner"));
-					}
-				}
-
+				ResolvableProfile resolvableProfile = itemStack.get(DataComponents.PROFILE);
+				GameProfile gameProfile = resolvableProfile != null ? resolvableProfile.gameProfile() : null;
 				poseStack.translate(-0.5, 0.0, -0.5);
 				SkullBlock.Type type = ((AbstractSkullBlock)((BlockItem)item).getBlock()).getType();
 				SkullModelBase skullModelBase = (SkullModelBase)this.skullModels.get(type);

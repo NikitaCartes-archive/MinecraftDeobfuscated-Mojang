@@ -126,11 +126,6 @@ public class CreateFlatWorldScreen extends Screen {
 			CreateFlatWorldScreen.this.updateButtonValidity();
 		}
 
-		@Override
-		protected int getScrollbarPosition() {
-			return this.width - 70;
-		}
-
 		public void resetRows() {
 			int i = this.children().indexOf(this.getSelected());
 			this.clearEntries();
@@ -193,7 +188,7 @@ public class CreateFlatWorldScreen extends Screen {
 			@Override
 			public boolean mouseClicked(double d, double e, int i) {
 				DetailsList.this.setSelected(this);
-				return true;
+				return super.mouseClicked(d, e, i);
 			}
 
 			private void blitSlot(GuiGraphics guiGraphics, int i, int j, ItemStack itemStack) {

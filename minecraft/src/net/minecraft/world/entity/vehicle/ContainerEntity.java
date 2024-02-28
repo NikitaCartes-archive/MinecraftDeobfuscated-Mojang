@@ -2,6 +2,7 @@ package net.minecraft.world.entity.vehicle;
 
 import javax.annotation.Nullable;
 import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
@@ -56,24 +57,24 @@ public interface ContainerEntity extends Container, MenuProvider {
 		return this.isChestVehicleEmpty();
 	}
 
-	default void addChestVehicleSaveData(CompoundTag compoundTag) {
+	default void addChestVehicleSaveData(CompoundTag compoundTag, HolderLookup.Provider provider) {
 		if (this.getLootTable() != null) {
 			compoundTag.putString("LootTable", this.getLootTable().toString());
 			if (this.getLootTableSeed() != 0L) {
 				compoundTag.putLong("LootTableSeed", this.getLootTableSeed());
 			}
 		} else {
-			ContainerHelper.saveAllItems(compoundTag, this.getItemStacks());
+			ContainerHelper.saveAllItems(compoundTag, this.getItemStacks(), provider);
 		}
 	}
 
-	default void readChestVehicleSaveData(CompoundTag compoundTag) {
+	default void readChestVehicleSaveData(CompoundTag compoundTag, HolderLookup.Provider provider) {
 		this.clearItemStacks();
 		if (compoundTag.contains("LootTable", 8)) {
 			this.setLootTable(new ResourceLocation(compoundTag.getString("LootTable")));
 			this.setLootTableSeed(compoundTag.getLong("LootTableSeed"));
 		} else {
-			ContainerHelper.loadAllItems(compoundTag, this.getItemStacks());
+			ContainerHelper.loadAllItems(compoundTag, this.getItemStacks(), provider);
 		}
 	}
 

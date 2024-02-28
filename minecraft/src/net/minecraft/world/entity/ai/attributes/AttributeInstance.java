@@ -144,17 +144,17 @@ public class AttributeInstance {
 	private double calculateValue() {
 		double d = this.getBaseValue();
 
-		for (AttributeModifier attributeModifier : this.getModifiersOrEmpty(AttributeModifier.Operation.ADDITION)) {
+		for (AttributeModifier attributeModifier : this.getModifiersOrEmpty(AttributeModifier.Operation.ADD_VALUE)) {
 			d += attributeModifier.getAmount();
 		}
 
 		double e = d;
 
-		for (AttributeModifier attributeModifier2 : this.getModifiersOrEmpty(AttributeModifier.Operation.MULTIPLY_BASE)) {
+		for (AttributeModifier attributeModifier2 : this.getModifiersOrEmpty(AttributeModifier.Operation.ADD_MULTIPLIED_BASE)) {
 			e += d * attributeModifier2.getAmount();
 		}
 
-		for (AttributeModifier attributeModifier2 : this.getModifiersOrEmpty(AttributeModifier.Operation.MULTIPLY_TOTAL)) {
+		for (AttributeModifier attributeModifier2 : this.getModifiersOrEmpty(AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL)) {
 			e *= 1.0 + attributeModifier2.getAmount();
 		}
 

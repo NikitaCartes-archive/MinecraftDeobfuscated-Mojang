@@ -164,10 +164,10 @@ public class ServerPlayer extends Player {
 	private static final int FLY_STAT_RECORDING_SPEED = 25;
 	public static final double INTERACTION_DISTANCE_VERIFICATION_BUFFER = 1.0;
 	private static final AttributeModifier CREATIVE_BLOCK_INTERACTION_RANGE_MODIFIER = new AttributeModifier(
-		UUID.fromString("736565d2-e1a7-403d-a3f8-1aeb3e302542"), "Creative block interaction range modifier", 0.5, AttributeModifier.Operation.ADDITION
+		UUID.fromString("736565d2-e1a7-403d-a3f8-1aeb3e302542"), "Creative block interaction range modifier", 0.5, AttributeModifier.Operation.ADD_VALUE
 	);
 	private static final AttributeModifier CREATIVE_ENTITY_INTERACTION_RANGE_MODIFIER = new AttributeModifier(
-		UUID.fromString("98491ef6-97b1-4584-ae82-71a8cc85cf73"), "Creative entity interaction range modifier", 2.0, AttributeModifier.Operation.ADDITION
+		UUID.fromString("98491ef6-97b1-4584-ae82-71a8cc85cf73"), "Creative entity interaction range modifier", 2.0, AttributeModifier.Operation.ADD_VALUE
 	);
 	public ServerGamePacketListenerImpl connection;
 	public final MinecraftServer server;

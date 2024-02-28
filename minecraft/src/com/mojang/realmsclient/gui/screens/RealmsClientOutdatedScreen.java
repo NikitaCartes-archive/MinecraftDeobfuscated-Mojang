@@ -3,8 +3,10 @@ package com.mojang.realmsclient.gui.screens;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.SharedConstants;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.MultiLineTextWidget;
+import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -12,16 +14,12 @@ import net.minecraft.realms.RealmsScreen;
 
 @Environment(EnvType.CLIENT)
 public class RealmsClientOutdatedScreen extends RealmsScreen {
-	private static final Component INCOMPATIBLE_TITLE = Component.translatable("mco.client.incompatible.title");
-	private static final Component[] INCOMPATIBLE_MESSAGES_SNAPSHOT = new Component[]{
-		Component.translatable("mco.client.incompatible.msg.line1"),
-		Component.translatable("mco.client.incompatible.msg.line2"),
-		Component.translatable("mco.client.incompatible.msg.line3")
-	};
-	private static final Component[] INCOMPATIBLE_MESSAGES = new Component[]{
-		Component.translatable("mco.client.incompatible.msg.line1"), Component.translatable("mco.client.incompatible.msg.line2")
-	};
+	private static final Component INCOMPATIBLE_TITLE = Component.translatable("mco.client.incompatible.title").withColor(-65536);
+	private static final Component INCOMPATIBLE_CLIENT_VERSION = Component.literal(SharedConstants.getCurrentVersion().getName()).withColor(-65536);
+	private static final Component UNSUPPORTED_SNAPSHOT_VERSION = Component.translatable("mco.client.unsupported.snapshot.version", INCOMPATIBLE_CLIENT_VERSION);
+	private static final Component OUTDATED_STABLE_VERSION = Component.translatable("mco.client.outdated.stable.version", INCOMPATIBLE_CLIENT_VERSION);
 	private final Screen lastScreen;
+	private final HeaderAndFooterLayout layout = new HeaderAndFooterLayout(this);
 
 	public RealmsClientOutdatedScreen(Screen screen) {
 		super(INCOMPATIBLE_TITLE);
@@ -30,33 +28,26 @@ public class RealmsClientOutdatedScreen extends RealmsScreen {
 
 	@Override
 	public void init() {
-		this.addRenderableWidget(
-			Button.builder(CommonComponents.GUI_BACK, button -> this.minecraft.setScreen(this.lastScreen)).bounds(this.width / 2 - 100, row(12), 200, 20).build()
-		);
+		this.layout.addTitleHeader(INCOMPATIBLE_TITLE, this.font);
+		this.layout.addToContents(new MultiLineTextWidget(this.getErrorMessage(), this.font).setCentered(true));
+		this.layout.addToFooter(Button.builder(CommonComponents.GUI_BACK, button -> this.onClose()).width(200).build());
+		this.layout.visitWidgets(guiEventListener -> {
+			AbstractWidget var10000 = this.addRenderableWidget(guiEventListener);
+		});
+		this.repositionElements();
 	}
 
 	@Override
-	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-		super.render(guiGraphics, i, j, f);
-		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, row(3), -65536);
-		Component[] components = this.getMessages();
-
-		for (int k = 0; k < components.length; k++) {
-			guiGraphics.drawCenteredString(this.font, components[k], this.width / 2, row(5) + k * 12, -1);
-		}
-	}
-
-	private Component[] getMessages() {
-		return SharedConstants.getCurrentVersion().isStable() ? INCOMPATIBLE_MESSAGES : INCOMPATIBLE_MESSAGES_SNAPSHOT;
+	protected void repositionElements() {
+		this.layout.arrangeElements();
 	}
 
 	@Override
-	public boolean keyPressed(int i, int j, int k) {
-		if (i != 257 && i != 335 && i != 256) {
-			return super.keyPressed(i, j, k);
-		} else {
-			this.minecraft.setScreen(this.lastScreen);
-			return true;
-		}
+	public void onClose() {
+		this.minecraft.setScreen(this.lastScreen);
+	}
+
+	private Component getErrorMessage() {
+		return SharedConstants.getCurrentVersion().isStable() ? OUTDATED_STABLE_VERSION : UNSUPPORTED_SNAPSHOT_VERSION;
 	}
 }

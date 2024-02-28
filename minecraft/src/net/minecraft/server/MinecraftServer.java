@@ -387,7 +387,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 
 		this.getPlayerList().addWorldborderListener(serverLevel);
 		if (this.worldData.getCustomBossEvents() != null) {
-			this.getCustomBossEvents().load(this.worldData.getCustomBossEvents());
+			this.getCustomBossEvents().load(this.worldData.getCustomBossEvents(), this.registryAccess());
 		}
 
 		RandomSequences randomSequences = serverLevel.getRandomSequences();
@@ -546,7 +546,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		ServerLevel serverLevel2 = this.overworld();
 		ServerLevelData serverLevelData = this.worldData.overworldData();
 		serverLevelData.setWorldBorder(serverLevel2.getWorldBorder().createSettings());
-		this.worldData.setCustomBossEvents(this.getCustomBossEvents().save());
+		this.worldData.setCustomBossEvents(this.getCustomBossEvents().save(this.registryAccess()));
 		this.storageSource.saveDataTag(this.registryAccess(), this.worldData, this.getPlayerList().getSingleplayerData());
 		if (bl2) {
 			for (ServerLevel serverLevel3 : this.getAllLevels()) {
@@ -1122,6 +1122,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 					.collect(Collectors.joining(", ")))
 		);
 		systemReport.setDetail("World Generation", (Supplier<String>)(() -> this.worldData.worldGenSettingsLifecycle().toString()));
+		systemReport.setDetail("World Seed", (Supplier<String>)(() -> String.valueOf(this.worldData.worldGenOptions().seed())));
 		if (this.serverId != null) {
 			systemReport.setDetail("Server Id", (Supplier<String>)(() -> this.serverId));
 		}
@@ -1995,6 +1996,12 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 
 	public boolean acceptsTransfers() {
 		return false;
+	}
+
+	public void reportChunkLoadFailure(ChunkPos chunkPos) {
+	}
+
+	public void reportChunkSaveFailure(ChunkPos chunkPos) {
 	}
 
 	static record ReloadableResources(CloseableResourceManager resourceManager, ReloadableServerResources managers) implements AutoCloseable {

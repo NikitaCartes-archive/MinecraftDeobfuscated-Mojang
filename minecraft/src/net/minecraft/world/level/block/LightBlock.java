@@ -4,11 +4,12 @@ import com.mojang.serialization.MapCodec;
 import java.util.function.ToIntFunction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.BlockItemStateProperties;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -101,9 +102,7 @@ public class LightBlock extends Block implements SimpleWaterloggedBlock {
 
 	public static ItemStack setLightOnStack(ItemStack itemStack, int i) {
 		if (i != 15) {
-			CompoundTag compoundTag = new CompoundTag();
-			compoundTag.putString(LEVEL.getName(), String.valueOf(i));
-			itemStack.addTagElement("BlockStateTag", compoundTag);
+			itemStack.set(DataComponents.BLOCK_STATE, BlockItemStateProperties.EMPTY.with(LEVEL, i));
 		}
 
 		return itemStack;

@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -42,19 +43,14 @@ public class SmithingTrimRecipe implements SmithingRecipe {
 			Optional<Holder.Reference<TrimMaterial>> optional = TrimMaterials.getFromIngredient(registryAccess, container.getItem(2));
 			Optional<Holder.Reference<TrimPattern>> optional2 = TrimPatterns.getFromTemplate(registryAccess, container.getItem(0));
 			if (optional.isPresent() && optional2.isPresent()) {
-				Optional<ArmorTrim> optional3 = ArmorTrim.getTrim(registryAccess, itemStack, false);
-				if (optional3.isPresent() && ((ArmorTrim)optional3.get()).hasPatternAndMaterial((Holder<TrimPattern>)optional2.get(), (Holder<TrimMaterial>)optional.get())
-					)
-				 {
+				ArmorTrim armorTrim = itemStack.get(DataComponents.TRIM);
+				if (armorTrim != null && armorTrim.hasPatternAndMaterial((Holder<TrimPattern>)optional2.get(), (Holder<TrimMaterial>)optional.get())) {
 					return ItemStack.EMPTY;
 				}
 
-				ItemStack itemStack2 = itemStack.copy();
-				itemStack2.setCount(1);
-				ArmorTrim armorTrim = new ArmorTrim((Holder<TrimMaterial>)optional.get(), (Holder<TrimPattern>)optional2.get());
-				if (ArmorTrim.setTrim(registryAccess, itemStack2, armorTrim)) {
-					return itemStack2;
-				}
+				ItemStack itemStack2 = itemStack.copyWithCount(1);
+				itemStack2.set(DataComponents.TRIM, new ArmorTrim((Holder<TrimMaterial>)optional.get(), (Holder<TrimPattern>)optional2.get()));
+				return itemStack2;
 			}
 		}
 
@@ -65,12 +61,9 @@ public class SmithingTrimRecipe implements SmithingRecipe {
 	public ItemStack getResultItem(RegistryAccess registryAccess) {
 		ItemStack itemStack = new ItemStack(Items.IRON_CHESTPLATE);
 		Optional<Holder.Reference<TrimPattern>> optional = registryAccess.registryOrThrow(Registries.TRIM_PATTERN).holders().findFirst();
-		if (optional.isPresent()) {
-			Optional<Holder.Reference<TrimMaterial>> optional2 = registryAccess.registryOrThrow(Registries.TRIM_MATERIAL).getHolder(TrimMaterials.REDSTONE);
-			if (optional2.isPresent()) {
-				ArmorTrim armorTrim = new ArmorTrim((Holder<TrimMaterial>)optional2.get(), (Holder<TrimPattern>)optional.get());
-				ArmorTrim.setTrim(registryAccess, itemStack, armorTrim);
-			}
+		Optional<Holder.Reference<TrimMaterial>> optional2 = registryAccess.registryOrThrow(Registries.TRIM_MATERIAL).getHolder(TrimMaterials.REDSTONE);
+		if (optional.isPresent() && optional2.isPresent()) {
+			itemStack.set(DataComponents.TRIM, new ArmorTrim((Holder<TrimMaterial>)optional2.get(), (Holder<TrimPattern>)optional.get()));
 		}
 
 		return itemStack;

@@ -90,7 +90,6 @@ public class Options {
 	public static final int RENDER_DISTANCE_REALLY_FAR = 16;
 	public static final int RENDER_DISTANCE_EXTREME = 32;
 	private static final Splitter OPTION_SPLITTER = Splitter.on(':').limit(2);
-	private static final float DEFAULT_VOLUME = 1.0F;
 	public static final String DEFAULT_SOUND_DEVICE = "";
 	private static final Component ACCESSIBILITY_TOOLTIP_DARK_MOJANG_BACKGROUND = Component.translatable("options.darkMojangStudiosBackgroundColor.tooltip");
 	private final OptionInstance<Boolean> darkMojangStudiosBackground = OptionInstance.createBoolean(
@@ -234,6 +233,17 @@ public class Options {
 	);
 	private final OptionInstance<Double> chatLineSpacing = new OptionInstance<>(
 		"options.chat.line_spacing", OptionInstance.noTooltip(), Options::percentValueLabel, OptionInstance.UnitDouble.INSTANCE, 0.0, double_ -> {
+		}
+	);
+	private static final Component MENU_BACKGROUND_BLURRINESS_TOOLTIP = Component.translatable("options.accessibility.menu_background_blurriness.tooltip");
+	private static final double BLURRINESS_DEFAULT_VALUE = 0.5;
+	private final OptionInstance<Double> menuBackgroundBlurriness = new OptionInstance<>(
+		"options.accessibility.menu_background_blurriness",
+		OptionInstance.cachedConstantTooltip(MENU_BACKGROUND_BLURRINESS_TOOLTIP),
+		Options::percentValueLabel,
+		OptionInstance.UnitDouble.INSTANCE,
+		0.5,
+		double_ -> {
 		}
 	);
 	private final OptionInstance<Double> textBackgroundOpacity = new OptionInstance<>(
@@ -802,6 +812,14 @@ public class Options {
 		return this.chatLineSpacing;
 	}
 
+	public OptionInstance<Double> menuBackgroundBlurriness() {
+		return this.menuBackgroundBlurriness;
+	}
+
+	public double getMenuBackgroundBlurriness() {
+		return this.menuBackgroundBlurriness().get();
+	}
+
 	public OptionInstance<Double> textBackgroundOpacity() {
 		return this.textBackgroundOpacity;
 	}
@@ -1197,6 +1215,7 @@ public class Options {
 		fieldAccess.process("panoramaScrollSpeed", this.panoramaSpeed);
 		fieldAccess.process("telemetryOptInExtra", this.telemetryOptInExtra);
 		this.onboardAccessibility = fieldAccess.process("onboardAccessibility", this.onboardAccessibility);
+		fieldAccess.process("menuBackgroundBlurriness", this.menuBackgroundBlurriness);
 
 		for (KeyMapping keyMapping : this.keyMappings) {
 			String string = keyMapping.saveString();

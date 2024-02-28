@@ -44,7 +44,7 @@ public interface SpawnPlacementTypes {
 		@Override
 		public BlockPos adjustSpawnPosition(LevelReader levelReader, BlockPos blockPos) {
 			BlockPos blockPos2 = blockPos.below();
-			return levelReader.getBlockState(blockPos2).isPathfindable(levelReader, blockPos2, PathComputationType.LAND) ? blockPos2 : blockPos;
+			return levelReader.getBlockState(blockPos2).isPathfindable(PathComputationType.LAND) ? blockPos2 : blockPos;
 		}
 	};
 }

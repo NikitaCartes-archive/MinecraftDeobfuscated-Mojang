@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.function.UnaryOperator;
 import javax.annotation.Nullable;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.chat.ComponentUtils;
@@ -75,7 +76,9 @@ public class SetNameFunction extends LootItemConditionalFunction {
 	public ItemStack run(ItemStack itemStack, LootContext lootContext) {
 		this.name
 			.ifPresent(
-				component -> itemStack.setHoverName((Component)createResolver(lootContext, (LootContext.EntityTarget)this.resolutionContext.orElse(null)).apply(component))
+				component -> itemStack.set(
+						DataComponents.CUSTOM_NAME, (Component)createResolver(lootContext, (LootContext.EntityTarget)this.resolutionContext.orElse(null)).apply(component)
+					)
 			);
 		return itemStack;
 	}

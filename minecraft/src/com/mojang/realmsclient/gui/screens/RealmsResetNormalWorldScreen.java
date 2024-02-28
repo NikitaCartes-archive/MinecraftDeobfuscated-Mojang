@@ -11,7 +11,6 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.client.gui.layouts.CommonLayouts;
 import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
 import net.minecraft.client.gui.layouts.LinearLayout;
@@ -48,7 +47,7 @@ public class RealmsResetNormalWorldScreen extends RealmsScreen {
 	public void init() {
 		this.seedEdit = new EditBox(this.font, 210, 20, Component.translatable("mco.reset.world.seed"));
 		this.seedEdit.setMaxLength(32);
-		this.layout.addToHeader(new StringWidget(this.title, this.font));
+		this.layout.addTitleHeader(this.title, this.font);
 		LinearLayout linearLayout = this.layout.addToContents(LinearLayout.vertical()).spacing(10);
 		linearLayout.addChild(CommonLayouts.labeledElement(this.font, this.seedEdit, SEED_LABEL));
 		linearLayout.addChild(

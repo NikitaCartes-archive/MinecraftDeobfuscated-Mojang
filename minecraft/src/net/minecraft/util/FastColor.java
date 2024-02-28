@@ -56,6 +56,10 @@ public class FastColor {
 			return i << 24 | j << 16 | k << 8 | l;
 		}
 
+		public static int color(int i, int j, int k) {
+			return color(255, i, j, k);
+		}
+
 		public static int multiply(int i, int j) {
 			return color(alpha(i) * alpha(j) / 255, red(i) * red(j) / 255, green(i) * green(j) / 255, blue(i) * blue(j) / 255);
 		}
@@ -66,6 +70,10 @@ public class FastColor {
 			int m = Mth.lerpInt(f, green(i), green(j));
 			int n = Mth.lerpInt(f, blue(i), blue(j));
 			return color(k, l, m, n);
+		}
+
+		public static int opaque(int i) {
+			return i | 0xFF000000;
 		}
 	}
 }

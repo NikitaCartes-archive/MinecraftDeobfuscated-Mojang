@@ -1,10 +1,6 @@
 package net.minecraft.world.entity.animal;
 
-import com.google.common.collect.ImmutableList;
-import java.util.Comparator;
-import java.util.List;
 import java.util.UUID;
-import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -19,6 +15,7 @@ import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Crackiness;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -205,17 +202,17 @@ public class IronGolem extends AbstractGolem implements NeutralMob {
 
 	@Override
 	public boolean hurt(DamageSource damageSource, float f) {
-		IronGolem.Crackiness crackiness = this.getCrackiness();
+		Crackiness.Level level = this.getCrackiness();
 		boolean bl = super.hurt(damageSource, f);
-		if (bl && this.getCrackiness() != crackiness) {
+		if (bl && this.getCrackiness() != level) {
 			this.playSound(SoundEvents.IRON_GOLEM_DAMAGE, 1.0F, 1.0F);
 		}
 
 		return bl;
 	}
 
-	public IronGolem.Crackiness getCrackiness() {
-		return IronGolem.Crackiness.byFraction(this.getHealth() / this.getMaxHealth());
+	public Crackiness.Level getCrackiness() {
+		return Crackiness.GOLEM.byFraction(this.getHealth() / this.getMaxHealth());
 	}
 
 	@Override
@@ -328,31 +325,5 @@ public class IronGolem extends AbstractGolem implements NeutralMob {
 	@Override
 	public Vec3 getLeashOffset() {
 		return new Vec3(0.0, (double)(0.875F * this.getEyeHeight()), (double)(this.getBbWidth() * 0.4F));
-	}
-
-	public static enum Crackiness {
-		NONE(1.0F),
-		LOW(0.75F),
-		MEDIUM(0.5F),
-		HIGH(0.25F);
-
-		private static final List<IronGolem.Crackiness> BY_DAMAGE = (List<IronGolem.Crackiness>)Stream.of(values())
-			.sorted(Comparator.comparingDouble(crackiness -> (double)crackiness.fraction))
-			.collect(ImmutableList.toImmutableList());
-		private final float fraction;
-
-		private Crackiness(float f) {
-			this.fraction = f;
-		}
-
-		public static IronGolem.Crackiness byFraction(float f) {
-			for (IronGolem.Crackiness crackiness : BY_DAMAGE) {
-				if (f < crackiness.fraction) {
-					return crackiness;
-				}
-			}
-
-			return NONE;
-		}
 	}
 }

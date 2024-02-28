@@ -1,19 +1,19 @@
 package net.minecraft.world.item.enchantment;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import it.unimi.dsi.fastutil.objects.Object2IntMap.Entry;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
+import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.random.WeightedRandom;
@@ -23,7 +23,6 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.EnchantedBookItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -31,101 +30,48 @@ import org.apache.commons.lang3.mutable.MutableFloat;
 import org.apache.commons.lang3.mutable.MutableInt;
 
 public class EnchantmentHelper {
-	private static final String TAG_ENCH_ID = "id";
-	private static final String TAG_ENCH_LEVEL = "lvl";
 	private static final float SWIFT_SNEAK_EXTRA_FACTOR = 0.15F;
 
-	public static CompoundTag storeEnchantment(@Nullable ResourceLocation resourceLocation, int i) {
-		CompoundTag compoundTag = new CompoundTag();
-		compoundTag.putString("id", String.valueOf(resourceLocation));
-		compoundTag.putShort("lvl", (short)i);
-		return compoundTag;
-	}
-
-	public static void setEnchantmentLevel(CompoundTag compoundTag, int i) {
-		compoundTag.putShort("lvl", (short)i);
-	}
-
-	public static int getEnchantmentLevel(CompoundTag compoundTag) {
-		return Mth.clamp(compoundTag.getInt("lvl"), 0, 255);
-	}
-
-	@Nullable
-	public static ResourceLocation getEnchantmentId(CompoundTag compoundTag) {
-		return ResourceLocation.tryParse(compoundTag.getString("id"));
-	}
-
-	@Nullable
-	public static ResourceLocation getEnchantmentId(Enchantment enchantment) {
-		return BuiltInRegistries.ENCHANTMENT.getKey(enchantment);
-	}
-
 	public static int getItemEnchantmentLevel(Enchantment enchantment, ItemStack itemStack) {
-		if (itemStack.isEmpty()) {
-			return 0;
+		ItemEnchantments itemEnchantments = itemStack.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY);
+		return itemEnchantments.getLevel(enchantment);
+	}
+
+	public static ItemEnchantments updateEnchantments(ItemStack itemStack, Consumer<ItemEnchantments.Mutable> consumer) {
+		DataComponentType<ItemEnchantments> dataComponentType = getComponentType(itemStack);
+		ItemEnchantments itemEnchantments = itemStack.get(dataComponentType);
+		if (itemEnchantments == null) {
+			return ItemEnchantments.EMPTY;
 		} else {
-			ResourceLocation resourceLocation = getEnchantmentId(enchantment);
-			ListTag listTag = itemStack.getEnchantmentTags();
-
-			for (int i = 0; i < listTag.size(); i++) {
-				CompoundTag compoundTag = listTag.getCompound(i);
-				ResourceLocation resourceLocation2 = getEnchantmentId(compoundTag);
-				if (resourceLocation2 != null && resourceLocation2.equals(resourceLocation)) {
-					return getEnchantmentLevel(compoundTag);
-				}
-			}
-
-			return 0;
+			ItemEnchantments.Mutable mutable = new ItemEnchantments.Mutable(itemEnchantments);
+			consumer.accept(mutable);
+			ItemEnchantments itemEnchantments2 = mutable.toImmutable();
+			itemStack.set(dataComponentType, itemEnchantments2);
+			return itemEnchantments2;
 		}
 	}
 
-	public static Map<Enchantment, Integer> getEnchantments(ItemStack itemStack) {
-		ListTag listTag = itemStack.is(Items.ENCHANTED_BOOK) ? EnchantedBookItem.getEnchantments(itemStack) : itemStack.getEnchantmentTags();
-		return deserializeEnchantments(listTag);
+	public static boolean canStoreEnchantments(ItemStack itemStack) {
+		return itemStack.has(getComponentType(itemStack));
 	}
 
-	public static Map<Enchantment, Integer> deserializeEnchantments(ListTag listTag) {
-		Map<Enchantment, Integer> map = Maps.<Enchantment, Integer>newLinkedHashMap();
-
-		for (int i = 0; i < listTag.size(); i++) {
-			CompoundTag compoundTag = listTag.getCompound(i);
-			BuiltInRegistries.ENCHANTMENT.getOptional(getEnchantmentId(compoundTag)).ifPresent(enchantment -> map.put(enchantment, getEnchantmentLevel(compoundTag)));
-		}
-
-		return map;
+	public static void setEnchantments(ItemStack itemStack, ItemEnchantments itemEnchantments) {
+		itemStack.set(getComponentType(itemStack), itemEnchantments);
 	}
 
-	public static void setEnchantments(Map<Enchantment, Integer> map, ItemStack itemStack) {
-		ListTag listTag = new ListTag();
+	public static ItemEnchantments getEnchantmentsForCrafting(ItemStack itemStack) {
+		return itemStack.getOrDefault(getComponentType(itemStack), ItemEnchantments.EMPTY);
+	}
 
-		for (Entry<Enchantment, Integer> entry : map.entrySet()) {
-			Enchantment enchantment = (Enchantment)entry.getKey();
-			if (enchantment != null) {
-				int i = (Integer)entry.getValue();
-				listTag.add(storeEnchantment(getEnchantmentId(enchantment), i));
-				if (itemStack.is(Items.ENCHANTED_BOOK)) {
-					EnchantedBookItem.addEnchantment(itemStack, new EnchantmentInstance(enchantment, i));
-				}
-			}
-		}
-
-		if (listTag.isEmpty()) {
-			itemStack.removeTagKey("Enchantments");
-		} else if (!itemStack.is(Items.ENCHANTED_BOOK)) {
-			itemStack.addTagElement("Enchantments", listTag);
-		}
+	private static DataComponentType<ItemEnchantments> getComponentType(ItemStack itemStack) {
+		return itemStack.is(Items.ENCHANTED_BOOK) ? DataComponents.STORED_ENCHANTMENTS : DataComponents.ENCHANTMENTS;
 	}
 
 	private static void runIterationOnItem(EnchantmentHelper.EnchantmentVisitor enchantmentVisitor, ItemStack itemStack) {
-		if (!itemStack.isEmpty()) {
-			ListTag listTag = itemStack.getEnchantmentTags();
+		ItemEnchantments itemEnchantments = itemStack.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY);
 
-			for (int i = 0; i < listTag.size(); i++) {
-				CompoundTag compoundTag = listTag.getCompound(i);
-				BuiltInRegistries.ENCHANTMENT
-					.getOptional(getEnchantmentId(compoundTag))
-					.ifPresent(enchantment -> enchantmentVisitor.accept(enchantment, getEnchantmentLevel(compoundTag)));
-			}
+		for (Entry<Holder<Enchantment>> entry : itemEnchantments.entrySet()) {
+			enchantmentVisitor.accept((Enchantment)((Holder)entry.getKey()).value(), entry.getIntValue());
 		}
 	}
 
@@ -265,26 +211,28 @@ public class EnchantmentHelper {
 	}
 
 	@Nullable
-	public static Entry<EquipmentSlot, ItemStack> getRandomItemWith(Enchantment enchantment, LivingEntity livingEntity) {
+	public static java.util.Map.Entry<EquipmentSlot, ItemStack> getRandomItemWith(Enchantment enchantment, LivingEntity livingEntity) {
 		return getRandomItemWith(enchantment, livingEntity, itemStack -> true);
 	}
 
 	@Nullable
-	public static Entry<EquipmentSlot, ItemStack> getRandomItemWith(Enchantment enchantment, LivingEntity livingEntity, Predicate<ItemStack> predicate) {
+	public static java.util.Map.Entry<EquipmentSlot, ItemStack> getRandomItemWith(
+		Enchantment enchantment, LivingEntity livingEntity, Predicate<ItemStack> predicate
+	) {
 		Map<EquipmentSlot, ItemStack> map = enchantment.getSlotItems(livingEntity);
 		if (map.isEmpty()) {
 			return null;
 		} else {
-			List<Entry<EquipmentSlot, ItemStack>> list = Lists.<Entry<EquipmentSlot, ItemStack>>newArrayList();
+			List<java.util.Map.Entry<EquipmentSlot, ItemStack>> list = Lists.<java.util.Map.Entry<EquipmentSlot, ItemStack>>newArrayList();
 
-			for (Entry<EquipmentSlot, ItemStack> entry : map.entrySet()) {
+			for (java.util.Map.Entry<EquipmentSlot, ItemStack> entry : map.entrySet()) {
 				ItemStack itemStack = (ItemStack)entry.getValue();
 				if (!itemStack.isEmpty() && getItemEnchantmentLevel(enchantment, itemStack) > 0 && predicate.test(itemStack)) {
 					list.add(entry);
 				}
 			}
 
-			return list.isEmpty() ? null : (Entry)list.get(livingEntity.getRandom().nextInt(list.size()));
+			return list.isEmpty() ? null : (java.util.Map.Entry)list.get(livingEntity.getRandom().nextInt(list.size()));
 		}
 	}
 
@@ -309,8 +257,7 @@ public class EnchantmentHelper {
 
 	public static ItemStack enchantItem(RandomSource randomSource, ItemStack itemStack, int i, boolean bl) {
 		List<EnchantmentInstance> list = selectEnchantment(randomSource, itemStack, i, bl);
-		boolean bl2 = itemStack.is(Items.BOOK);
-		if (bl2) {
+		if (itemStack.is(Items.BOOK)) {
 			itemStack = new ItemStack(Items.ENCHANTED_BOOK);
 		}
 
@@ -363,9 +310,9 @@ public class EnchantmentHelper {
 		}
 	}
 
-	public static boolean isEnchantmentCompatible(Collection<Enchantment> collection, Enchantment enchantment) {
-		for (Enchantment enchantment2 : collection) {
-			if (!enchantment2.isCompatibleWith(enchantment)) {
+	public static boolean isEnchantmentCompatible(Collection<Holder<Enchantment>> collection, Enchantment enchantment) {
+		for (Holder<Enchantment> holder : collection) {
+			if (!holder.value().isCompatibleWith(enchantment)) {
 				return false;
 			}
 		}

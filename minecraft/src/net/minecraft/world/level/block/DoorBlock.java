@@ -128,7 +128,7 @@ public class DoorBlock extends Block {
 	}
 
 	@Override
-	protected boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
+	protected boolean isPathfindable(BlockState blockState, PathComputationType pathComputationType) {
 		return switch (pathComputationType) {
 			case LAND, AIR -> blockState.getValue(OPEN);
 			case WATER -> false;

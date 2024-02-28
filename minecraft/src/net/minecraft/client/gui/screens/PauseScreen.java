@@ -70,7 +70,7 @@ public class PauseScreen extends Screen {
 			this.minecraft.setScreen(null);
 			this.minecraft.mouseHandler.grabMouse();
 		}).width(204).build(), 2, gridLayout.newCellSettings().paddingTop(50));
-		rowHelper.addChild(this.openScreenButton(ADVANCEMENTS, () -> new AdvancementsScreen(this.minecraft.player.connection.getAdvancements())));
+		rowHelper.addChild(this.openScreenButton(ADVANCEMENTS, () -> new AdvancementsScreen(this.minecraft.player.connection.getAdvancements(), this)));
 		rowHelper.addChild(this.openScreenButton(STATS, () -> new StatsScreen(this, this.minecraft.player.getStats())));
 		rowHelper.addChild(
 			this.openLinkButton(
@@ -84,7 +84,7 @@ public class PauseScreen extends Screen {
 		if (this.minecraft.hasSingleplayerServer() && !this.minecraft.getSingleplayerServer().isPublished()) {
 			rowHelper.addChild(this.openScreenButton(SHARE_TO_LAN, () -> new ShareToLanScreen(this)));
 		} else {
-			rowHelper.addChild(this.openScreenButton(PLAYER_REPORTING, SocialInteractionsScreen::new));
+			rowHelper.addChild(this.openScreenButton(PLAYER_REPORTING, () -> new SocialInteractionsScreen(this)));
 		}
 
 		Component component = this.minecraft.isLocalServer() ? RETURN_TO_MENU : CommonComponents.GUI_DISCONNECT;
@@ -102,7 +102,7 @@ public class PauseScreen extends Screen {
 		ServerData serverData = this.minecraft.getCurrentServer();
 		this.minecraft.level.disconnect();
 		if (bl) {
-			this.minecraft.disconnect(new GenericDirtMessageScreen(SAVING_LEVEL));
+			this.minecraft.disconnect(new GenericMessageScreen(SAVING_LEVEL));
 		} else {
 			this.minecraft.disconnect();
 		}

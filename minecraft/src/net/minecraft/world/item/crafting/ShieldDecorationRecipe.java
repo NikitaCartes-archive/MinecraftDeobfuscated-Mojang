@@ -1,14 +1,13 @@
 package net.minecraft.world.item.crafting;
 
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.BannerItem;
-import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.entity.BannerPatternLayers;
 
 public class ShieldDecorationRecipe extends CustomRecipe {
 	public ShieldDecorationRecipe(CraftingBookCategory craftingBookCategory) {
@@ -37,7 +36,8 @@ public class ShieldDecorationRecipe extends CustomRecipe {
 						return false;
 					}
 
-					if (BlockItem.getBlockEntityData(itemStack3) != null) {
+					BannerPatternLayers bannerPatternLayers = itemStack3.getOrDefault(DataComponents.BANNER_PATTERNS, BannerPatternLayers.EMPTY);
+					if (!bannerPatternLayers.layers().isEmpty()) {
 						return false;
 					}
 
@@ -67,10 +67,8 @@ public class ShieldDecorationRecipe extends CustomRecipe {
 		if (itemStack2.isEmpty()) {
 			return itemStack2;
 		} else {
-			CompoundTag compoundTag = BlockItem.getBlockEntityData(itemStack);
-			CompoundTag compoundTag2 = compoundTag == null ? new CompoundTag() : compoundTag.copy();
-			compoundTag2.putInt("Base", ((BannerItem)itemStack.getItem()).getColor().getId());
-			BlockItem.setBlockEntityData(itemStack2, BlockEntityType.BANNER, compoundTag2);
+			itemStack2.set(DataComponents.BANNER_PATTERNS, itemStack.get(DataComponents.BANNER_PATTERNS));
+			itemStack2.set(DataComponents.BASE_COLOR, ((BannerItem)itemStack.getItem()).getColor());
 			return itemStack2;
 		}
 	}

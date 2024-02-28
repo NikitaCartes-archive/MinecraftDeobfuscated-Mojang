@@ -312,7 +312,7 @@ public class PresetFlatWorldScreen extends Screen {
 			@Override
 			public boolean mouseClicked(double d, double e, int i) {
 				this.select();
-				return true;
+				return super.mouseClicked(d, e, i);
 			}
 
 			void select() {

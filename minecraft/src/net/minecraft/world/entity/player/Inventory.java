@@ -8,19 +8,16 @@ import net.minecraft.CrashReportCategory;
 import net.minecraft.CrashReportDetail;
 import net.minecraft.ReportedException;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.Nameable;
-import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
@@ -120,7 +117,7 @@ public class Inventory implements Container, Nameable {
 				&& ItemStack.isSameItemSameTags(itemStack, this.items.get(i))
 				&& !this.items.get(i).isDamaged()
 				&& !itemStack2.isEnchanted()
-				&& !itemStack2.hasCustomHoverName()) {
+				&& !itemStack2.has(DataComponents.CUSTOM_NAME)) {
 				return i;
 			}
 		}
@@ -387,8 +384,7 @@ public class Inventory implements Container, Nameable {
 			if (!this.items.get(i).isEmpty()) {
 				CompoundTag compoundTag = new CompoundTag();
 				compoundTag.putByte("Slot", (byte)i);
-				this.items.get(i).save(compoundTag);
-				listTag.add(compoundTag);
+				listTag.add(this.items.get(i).save(this.player.registryAccess(), compoundTag));
 			}
 		}
 
@@ -396,8 +392,7 @@ public class Inventory implements Container, Nameable {
 			if (!this.armor.get(ix).isEmpty()) {
 				CompoundTag compoundTag = new CompoundTag();
 				compoundTag.putByte("Slot", (byte)(ix + 100));
-				this.armor.get(ix).save(compoundTag);
-				listTag.add(compoundTag);
+				listTag.add(this.armor.get(ix).save(this.player.registryAccess(), compoundTag));
 			}
 		}
 
@@ -405,8 +400,7 @@ public class Inventory implements Container, Nameable {
 			if (!this.offhand.get(ixx).isEmpty()) {
 				CompoundTag compoundTag = new CompoundTag();
 				compoundTag.putByte("Slot", (byte)(ixx + 150));
-				this.offhand.get(ixx).save(compoundTag);
-				listTag.add(compoundTag);
+				listTag.add(this.offhand.get(ixx).save(this.player.registryAccess(), compoundTag));
 			}
 		}
 
@@ -421,15 +415,13 @@ public class Inventory implements Container, Nameable {
 		for (int i = 0; i < listTag.size(); i++) {
 			CompoundTag compoundTag = listTag.getCompound(i);
 			int j = compoundTag.getByte("Slot") & 255;
-			ItemStack itemStack = ItemStack.of(compoundTag);
-			if (!itemStack.isEmpty()) {
-				if (j >= 0 && j < this.items.size()) {
-					this.items.set(j, itemStack);
-				} else if (j >= 100 && j < this.armor.size() + 100) {
-					this.armor.set(j - 100, itemStack);
-				} else if (j >= 150 && j < this.offhand.size() + 150) {
-					this.offhand.set(j - 150, itemStack);
-				}
+			ItemStack itemStack = (ItemStack)ItemStack.parse(this.player.registryAccess(), compoundTag).orElse(ItemStack.EMPTY);
+			if (j >= 0 && j < this.items.size()) {
+				this.items.set(j, itemStack);
+			} else if (j >= 100 && j < this.armor.size() + 100) {
+				this.armor.set(j - 100, itemStack);
+			} else if (j >= 150 && j < this.offhand.size() + 150) {
+				this.offhand.set(j - 150, itemStack);
 			}
 		}
 	}
@@ -485,22 +477,6 @@ public class Inventory implements Container, Nameable {
 
 	public ItemStack getArmor(int i) {
 		return this.armor.get(i);
-	}
-
-	public void hurtArmor(DamageSource damageSource, float f, int[] is) {
-		if (!(f <= 0.0F)) {
-			f /= 4.0F;
-			if (f < 1.0F) {
-				f = 1.0F;
-			}
-
-			for (int i : is) {
-				ItemStack itemStack = this.armor.get(i);
-				if ((!damageSource.is(DamageTypeTags.IS_FIRE) || !itemStack.getItem().isFireResistant()) && itemStack.getItem() instanceof ArmorItem) {
-					itemStack.hurtAndBreak((int)f, this.player, EquipmentSlot.byTypeAndIndex(EquipmentSlot.Type.ARMOR, i));
-				}
-			}
-		}
 	}
 
 	public void dropAll() {

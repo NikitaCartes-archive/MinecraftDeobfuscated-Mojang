@@ -10,12 +10,13 @@ import java.util.function.Predicate;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
+import net.minecraft.Util;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -29,8 +30,9 @@ import net.minecraft.world.entity.raid.Raid;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.item.alchemy.Potion;
-import net.minecraft.world.item.alchemy.PotionUtils;
-import net.minecraft.world.item.alchemy.Potions;
+import net.minecraft.world.item.alchemy.PotionContents;
+import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.item.component.Fireworks;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentInstance;
 import net.minecraft.world.level.block.Blocks;
@@ -1208,7 +1210,7 @@ public class CreativeModeTabs {
 				.title(Component.translatable("itemGroup.search"))
 				.icon(() -> new ItemStack(Items.COMPASS))
 				.displayItems((itemDisplayParameters, output) -> {
-					Set<ItemStack> set = ItemStackLinkedSet.createTypeAndTagSet();
+					Set<ItemStack> set = ItemStackLinkedSet.createTypeAndComponentsSet();
 
 					for (CreativeModeTab creativeModeTab : registry) {
 						if (creativeModeTab.getType() != CreativeModeTab.Type.SEARCH) {
@@ -1801,10 +1803,7 @@ public class CreativeModeTabs {
 	private static void generatePotionEffectTypes(
 		CreativeModeTab.Output output, HolderLookup<Potion> holderLookup, Item item, CreativeModeTab.TabVisibility tabVisibility
 	) {
-		holderLookup.listElements()
-			.filter(reference -> !reference.is(Potions.EMPTY_ID))
-			.map(reference -> PotionUtils.setPotion(new ItemStack(item), reference))
-			.forEach(itemStack -> output.accept(itemStack, tabVisibility));
+		holderLookup.listElements().map(reference -> PotionContents.createItemStack(item, reference)).forEach(itemStack -> output.accept(itemStack, tabVisibility));
 	}
 
 	private static void generateEnchantmentBookTypesOnlyMaxLevel(
@@ -1839,11 +1838,11 @@ public class CreativeModeTabs {
 
 	private static void generateSuspiciousStews(CreativeModeTab.Output output, CreativeModeTab.TabVisibility tabVisibility) {
 		List<SuspiciousEffectHolder> list = SuspiciousEffectHolder.getAllEffectHolders();
-		Set<ItemStack> set = ItemStackLinkedSet.createTypeAndTagSet();
+		Set<ItemStack> set = ItemStackLinkedSet.createTypeAndComponentsSet();
 
 		for (SuspiciousEffectHolder suspiciousEffectHolder : list) {
 			ItemStack itemStack = new ItemStack(Items.SUSPICIOUS_STEW);
-			SuspiciousStewItem.saveMobEffects(itemStack, suspiciousEffectHolder.getSuspiciousEffects());
+			itemStack.set(DataComponents.SUSPICIOUS_STEW_EFFECTS, suspiciousEffectHolder.getSuspiciousEffects());
 			set.add(itemStack);
 		}
 
@@ -1853,7 +1852,7 @@ public class CreativeModeTabs {
 	private static void generateFireworksAllDurations(CreativeModeTab.Output output, CreativeModeTab.TabVisibility tabVisibility) {
 		for (byte b : FireworkRocketItem.CRAFTABLE_DURATIONS) {
 			ItemStack itemStack = new ItemStack(Items.FIREWORK_ROCKET);
-			FireworkRocketItem.setDuration(itemStack, b);
+			itemStack.set(DataComponents.FIREWORKS, new Fireworks(b, List.of()));
 			output.accept(itemStack, tabVisibility);
 		}
 	}
@@ -1865,9 +1864,9 @@ public class CreativeModeTabs {
 		CreativeModeTab.TabVisibility tabVisibility
 	) {
 		registryLookup.listElements().filter(predicate).sorted(PAINTING_COMPARATOR).forEach(reference -> {
+			CustomData customData = Util.getOrThrow(CustomData.EMPTY.update(Painting.VARIANT_MAP_CODEC, reference), IllegalStateException::new);
 			ItemStack itemStack = new ItemStack(Items.PAINTING);
-			CompoundTag compoundTag = itemStack.getOrCreateTagElement("EntityTag");
-			Painting.storeVariant(compoundTag, reference);
+			itemStack.set(DataComponents.ENTITY_DATA, customData);
 			output.accept(itemStack, tabVisibility);
 		});
 	}

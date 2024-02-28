@@ -6,8 +6,8 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.DyeItem;
-import net.minecraft.world.item.DyeableLeatherItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.DyedItemColor;
 import net.minecraft.world.level.Level;
 
 public class ArmorDyeRecipe extends CustomRecipe {
@@ -64,7 +64,7 @@ public class ArmorDyeRecipe extends CustomRecipe {
 			}
 		}
 
-		return !itemStack.isEmpty() && !list.isEmpty() ? DyeableLeatherItem.dyeArmor(itemStack, list) : ItemStack.EMPTY;
+		return !itemStack.isEmpty() && !list.isEmpty() ? DyedItemColor.applyDyes(itemStack, list) : ItemStack.EMPTY;
 	}
 
 	@Override

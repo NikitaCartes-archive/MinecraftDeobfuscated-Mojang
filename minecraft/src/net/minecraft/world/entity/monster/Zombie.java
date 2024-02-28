@@ -66,7 +66,7 @@ import net.minecraft.world.level.block.state.BlockState;
 public class Zombie extends Monster {
 	private static final UUID SPEED_MODIFIER_BABY_UUID = UUID.fromString("B9766B59-9566-4402-BC1F-2EE2A276D836");
 	private static final AttributeModifier SPEED_MODIFIER_BABY = new AttributeModifier(
-		SPEED_MODIFIER_BABY_UUID, "Baby speed boost", 0.5, AttributeModifier.Operation.MULTIPLY_BASE
+		SPEED_MODIFIER_BABY_UUID, "Baby speed boost", 0.5, AttributeModifier.Operation.ADD_MULTIPLIED_BASE
 	);
 	private static final EntityDataAccessor<Boolean> DATA_BABY_ID = SynchedEntityData.defineId(Zombie.class, EntityDataSerializers.BOOLEAN);
 	private static final EntityDataAccessor<Integer> DATA_SPECIAL_TYPE_ID = SynchedEntityData.defineId(Zombie.class, EntityDataSerializers.INT);
@@ -308,9 +308,9 @@ public class Zombie extends Monster {
 							zombie.finalizeSpawn(serverLevel, this.level().getCurrentDifficultyAt(zombie.blockPosition()), MobSpawnType.REINFORCEMENT, null);
 							serverLevel.addFreshEntityWithPassengers(zombie);
 							this.getAttribute(Attributes.SPAWN_REINFORCEMENTS_CHANCE)
-								.addPermanentModifier(new AttributeModifier("Zombie reinforcement caller charge", -0.05F, AttributeModifier.Operation.ADDITION));
+								.addPermanentModifier(new AttributeModifier("Zombie reinforcement caller charge", -0.05F, AttributeModifier.Operation.ADD_VALUE));
 							zombie.getAttribute(Attributes.SPAWN_REINFORCEMENTS_CHANCE)
-								.addPermanentModifier(new AttributeModifier("Zombie reinforcement callee charge", -0.05F, AttributeModifier.Operation.ADDITION));
+								.addPermanentModifier(new AttributeModifier("Zombie reinforcement callee charge", -0.05F, AttributeModifier.Operation.ADD_VALUE));
 							break;
 						}
 					}
@@ -499,18 +499,18 @@ public class Zombie extends Monster {
 	protected void handleAttributes(float f) {
 		this.randomizeReinforcementsChance();
 		this.getAttribute(Attributes.KNOCKBACK_RESISTANCE)
-			.addPermanentModifier(new AttributeModifier("Random spawn bonus", this.random.nextDouble() * 0.05F, AttributeModifier.Operation.ADDITION));
+			.addPermanentModifier(new AttributeModifier("Random spawn bonus", this.random.nextDouble() * 0.05F, AttributeModifier.Operation.ADD_VALUE));
 		double d = this.random.nextDouble() * 1.5 * (double)f;
 		if (d > 1.0) {
 			this.getAttribute(Attributes.FOLLOW_RANGE)
-				.addPermanentModifier(new AttributeModifier("Random zombie-spawn bonus", d, AttributeModifier.Operation.MULTIPLY_TOTAL));
+				.addPermanentModifier(new AttributeModifier("Random zombie-spawn bonus", d, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
 		}
 
 		if (this.random.nextFloat() < f * 0.05F) {
 			this.getAttribute(Attributes.SPAWN_REINFORCEMENTS_CHANCE)
-				.addPermanentModifier(new AttributeModifier("Leader zombie bonus", this.random.nextDouble() * 0.25 + 0.5, AttributeModifier.Operation.ADDITION));
+				.addPermanentModifier(new AttributeModifier("Leader zombie bonus", this.random.nextDouble() * 0.25 + 0.5, AttributeModifier.Operation.ADD_VALUE));
 			this.getAttribute(Attributes.MAX_HEALTH)
-				.addPermanentModifier(new AttributeModifier("Leader zombie bonus", this.random.nextDouble() * 3.0 + 1.0, AttributeModifier.Operation.MULTIPLY_TOTAL));
+				.addPermanentModifier(new AttributeModifier("Leader zombie bonus", this.random.nextDouble() * 3.0 + 1.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
 			this.setCanBreakDoors(this.supportsBreakDoorGoal());
 		}
 	}

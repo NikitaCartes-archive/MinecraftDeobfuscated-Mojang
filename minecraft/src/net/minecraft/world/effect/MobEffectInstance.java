@@ -5,15 +5,20 @@ import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import io.netty.buffer.ByteBuf;
 import it.unimi.dsi.fastutil.ints.Int2IntFunction;
 import java.util.Optional;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
@@ -30,6 +35,13 @@ public class MobEffectInstance implements Comparable<MobEffectInstance> {
 					MobEffectInstance.Details.MAP_CODEC.forGetter(MobEffectInstance::asDetails)
 				)
 				.apply(instance, MobEffectInstance::new)
+	);
+	public static final StreamCodec<RegistryFriendlyByteBuf, MobEffectInstance> STREAM_CODEC = StreamCodec.composite(
+		ByteBufCodecs.holderRegistry(Registries.MOB_EFFECT),
+		MobEffectInstance::getEffect,
+		MobEffectInstance.Details.STREAM_CODEC,
+		MobEffectInstance::asDetails,
+		MobEffectInstance::new
 	);
 	private final Holder<MobEffect> effect;
 	private int duration;
@@ -373,6 +385,23 @@ public class MobEffectInstance implements Comparable<MobEffectInstance> {
 								ExtraCodecs.strictOptionalField(codec, "hidden_effect").forGetter(MobEffectInstance.Details::hiddenEffect)
 							)
 							.apply(instance, MobEffectInstance.Details::create)
+				)
+		);
+		public static final StreamCodec<ByteBuf, MobEffectInstance.Details> STREAM_CODEC = StreamCodec.recursive(
+			streamCodec -> StreamCodec.composite(
+					ByteBufCodecs.VAR_INT,
+					MobEffectInstance.Details::amplifier,
+					ByteBufCodecs.VAR_INT,
+					MobEffectInstance.Details::duration,
+					ByteBufCodecs.BOOL,
+					MobEffectInstance.Details::ambient,
+					ByteBufCodecs.BOOL,
+					MobEffectInstance.Details::showParticles,
+					ByteBufCodecs.BOOL,
+					MobEffectInstance.Details::showIcon,
+					streamCodec.apply(ByteBufCodecs::optional),
+					MobEffectInstance.Details::hiddenEffect,
+					MobEffectInstance.Details::new
 				)
 		);
 

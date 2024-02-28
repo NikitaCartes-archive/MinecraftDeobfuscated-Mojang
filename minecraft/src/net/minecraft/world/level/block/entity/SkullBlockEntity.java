@@ -15,25 +15,27 @@ import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponentMap;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.Services;
 import net.minecraft.util.StringUtil;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.component.ResolvableProfile;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.SkullBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class SkullBlockEntity extends BlockEntity {
-	public static final String TAG_SKULL_OWNER = "SkullOwner";
-	public static final String TAG_NOTE_BLOCK_SOUND = "note_block_sound";
+	private static final String TAG_SKULL_OWNER = "SkullOwner";
+	private static final String TAG_NOTE_BLOCK_SOUND = "note_block_sound";
 	@Nullable
 	private static Executor mainThreadExecutor;
 	@Nullable
 	private static LoadingCache<String, CompletableFuture<Optional<GameProfile>>> profileCache;
-	private static final Executor CHECKED_MAIN_THREAD_EXECUTOR = runnable -> {
+	public static final Executor CHECKED_MAIN_THREAD_EXECUTOR = runnable -> {
 		Executor executor = mainThreadExecutor;
 		if (executor != null) {
 			executor.execute(runnable);
@@ -156,7 +158,7 @@ public class SkullBlockEntity extends BlockEntity {
 	}
 
 	private void updateOwnerProfile() {
-		if (this.owner != null && !Util.isBlank(this.owner.getName()) && !hasTextures(this.owner)) {
+		if (this.owner != null && !StringUtil.isBlank(this.owner.getName()) && !hasTextures(this.owner)) {
 			fetchGameProfile(this.owner.getName()).thenAcceptAsync(optional -> {
 				this.owner = (GameProfile)optional.orElse(this.owner);
 				this.setChanged();
@@ -166,45 +168,35 @@ public class SkullBlockEntity extends BlockEntity {
 		}
 	}
 
-	@Nullable
-	public static GameProfile getOrResolveGameProfile(CompoundTag compoundTag) {
-		if (compoundTag.contains("SkullOwner", 10)) {
-			return NbtUtils.readGameProfile(compoundTag.getCompound("SkullOwner"));
-		} else {
-			if (compoundTag.contains("SkullOwner", 8)) {
-				String string = compoundTag.getString("SkullOwner");
-				if (!Util.isBlank(string)) {
-					compoundTag.remove("SkullOwner");
-					resolveGameProfile(compoundTag, string);
-				}
-			}
-
-			return null;
-		}
-	}
-
-	public static void resolveGameProfile(CompoundTag compoundTag) {
-		String string = compoundTag.getString("SkullOwner");
-		if (!Util.isBlank(string)) {
-			resolveGameProfile(compoundTag, string);
-		}
-	}
-
-	private static void resolveGameProfile(CompoundTag compoundTag, String string) {
-		fetchGameProfile(string)
-			.thenAccept(
-				optional -> compoundTag.put(
-						"SkullOwner", NbtUtils.writeGameProfile(new CompoundTag(), (GameProfile)optional.orElse(new GameProfile(Util.NIL_UUID, string)))
-					)
-			);
-	}
-
-	private static CompletableFuture<Optional<GameProfile>> fetchGameProfile(String string) {
+	public static CompletableFuture<Optional<GameProfile>> fetchGameProfile(String string) {
 		LoadingCache<String, CompletableFuture<Optional<GameProfile>>> loadingCache = profileCache;
-		return loadingCache != null && Player.isValidUsername(string) ? loadingCache.getUnchecked(string) : CompletableFuture.completedFuture(Optional.empty());
+		return loadingCache != null && StringUtil.isValidPlayerName(string) ? loadingCache.getUnchecked(string) : CompletableFuture.completedFuture(Optional.empty());
 	}
 
 	private static boolean hasTextures(GameProfile gameProfile) {
 		return gameProfile.getProperties().containsKey("textures");
+	}
+
+	@Override
+	public void applyComponents(DataComponentMap dataComponentMap) {
+		ResolvableProfile resolvableProfile = dataComponentMap.get(DataComponents.PROFILE);
+		this.setOwner(resolvableProfile != null ? resolvableProfile.gameProfile() : null);
+		this.noteBlockSound = dataComponentMap.get(DataComponents.NOTE_BLOCK_SOUND);
+	}
+
+	@Override
+	public void collectComponents(DataComponentMap.Builder builder) {
+		if (this.owner != null) {
+			builder.set(DataComponents.PROFILE, new ResolvableProfile(this.owner));
+		}
+
+		builder.set(DataComponents.NOTE_BLOCK_SOUND, this.noteBlockSound);
+	}
+
+	@Override
+	public void removeComponentsFromTag(CompoundTag compoundTag) {
+		super.removeComponentsFromTag(compoundTag);
+		compoundTag.remove("SkullOwner");
+		compoundTag.remove("note_block_sound");
 	}
 }

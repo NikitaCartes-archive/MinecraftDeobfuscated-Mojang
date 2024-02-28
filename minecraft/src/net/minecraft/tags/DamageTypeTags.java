@@ -34,6 +34,7 @@ public interface DamageTypeTags {
 	TagKey<DamageType> NO_KNOCKBACK = create("no_knockback");
 	TagKey<DamageType> ALWAYS_KILLS_ARMOR_STANDS = create("always_kills_armor_stands");
 	TagKey<DamageType> CAN_BREAK_ARMOR_STAND = create("can_break_armor_stand");
+	TagKey<DamageType> BYPASSES_WOLF_ARMOR = create("bypasses_wolf_armor");
 
 	private static TagKey<DamageType> create(String string) {
 		return TagKey.create(Registries.DAMAGE_TYPE, new ResourceLocation(string));

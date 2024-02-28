@@ -32,7 +32,7 @@ import net.minecraft.world.flag.FeatureFlags;
 import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
-public class ClientConfigurationPacketListenerImpl extends ClientCommonPacketListenerImpl implements TickablePacketListener, ClientConfigurationPacketListener {
+public class ClientConfigurationPacketListenerImpl extends ClientCommonPacketListenerImpl implements ClientConfigurationPacketListener, TickablePacketListener {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private final GameProfile localGameProfile;
 	private FeatureFlagSet enabledFeatures;

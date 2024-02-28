@@ -5,12 +5,14 @@ import java.util.List;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.world.level.ChunkPos;
 
 @Environment(EnvType.CLIENT)
 public class SystemToast implements Toast {
@@ -160,6 +162,33 @@ public class SystemToast implements Toast {
 		add(minecraft.getToasts(), SystemToast.SystemToastId.PACK_COPY_FAILURE, Component.translatable("pack.copyFailure"), Component.literal(string));
 	}
 
+	public static void onLowDiskSpace(Minecraft minecraft) {
+		addOrUpdate(
+			minecraft.getToasts(),
+			SystemToast.SystemToastId.LOW_DISK_SPACE,
+			Component.translatable("chunk.toast.lowDiskSpace"),
+			Component.translatable("chunk.toast.lowDiskSpace.description")
+		);
+	}
+
+	public static void onChunkLoadFailure(Minecraft minecraft, ChunkPos chunkPos) {
+		addOrUpdate(
+			minecraft.getToasts(),
+			SystemToast.SystemToastId.CHUNK_LOAD_FAILURE,
+			Component.translatable("chunk.toast.loadFailure", chunkPos).withStyle(ChatFormatting.RED),
+			Component.translatable("chunk.toast.checkLog")
+		);
+	}
+
+	public static void onChunkSaveFailure(Minecraft minecraft, ChunkPos chunkPos) {
+		addOrUpdate(
+			minecraft.getToasts(),
+			SystemToast.SystemToastId.CHUNK_SAVE_FAILURE,
+			Component.translatable("chunk.toast.saveFailure", chunkPos).withStyle(ChatFormatting.RED),
+			Component.translatable("chunk.toast.checkLog")
+		);
+	}
+
 	@Environment(EnvType.CLIENT)
 	public static class SystemToastId {
 		public static final SystemToast.SystemToastId NARRATOR_TOGGLE = new SystemToast.SystemToastId();
@@ -168,6 +197,9 @@ public class SystemToast implements Toast {
 		public static final SystemToast.SystemToastId WORLD_ACCESS_FAILURE = new SystemToast.SystemToastId();
 		public static final SystemToast.SystemToastId PACK_COPY_FAILURE = new SystemToast.SystemToastId();
 		public static final SystemToast.SystemToastId PERIODIC_NOTIFICATION = new SystemToast.SystemToastId();
+		public static final SystemToast.SystemToastId LOW_DISK_SPACE = new SystemToast.SystemToastId(10000L);
+		public static final SystemToast.SystemToastId CHUNK_LOAD_FAILURE = new SystemToast.SystemToastId();
+		public static final SystemToast.SystemToastId CHUNK_SAVE_FAILURE = new SystemToast.SystemToastId();
 		public static final SystemToast.SystemToastId UNSECURE_SERVER_WARNING = new SystemToast.SystemToastId(10000L);
 		final long displayTime;
 

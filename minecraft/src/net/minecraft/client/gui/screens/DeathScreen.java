@@ -89,7 +89,7 @@ public class DeathScreen extends Screen {
 			this.minecraft.level.disconnect();
 		}
 
-		this.minecraft.disconnect(new GenericDirtMessageScreen(Component.translatable("menu.savingLevel")));
+		this.minecraft.disconnect(new GenericMessageScreen(Component.translatable("menu.savingLevel")));
 		this.minecraft.setScreen(new TitleScreen());
 	}
 

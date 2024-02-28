@@ -2,7 +2,6 @@ package net.minecraft.client.gui.screens.inventory;
 
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.datafixers.util.Pair;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
@@ -16,8 +15,7 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.Holder;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
@@ -26,14 +24,11 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.LoomMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.BannerItem;
-import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.level.block.entity.BannerBlockEntity;
 import net.minecraft.world.level.block.entity.BannerPattern;
+import net.minecraft.world.level.block.entity.BannerPatternLayers;
 import net.minecraft.world.level.block.entity.BannerPatterns;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 
 @Environment(EnvType.CLIENT)
 public class LoomScreen extends AbstractContainerScreen<LoomMenu> {
@@ -57,7 +52,7 @@ public class LoomScreen extends AbstractContainerScreen<LoomMenu> {
 	private static final int PATTERNS_Y = 13;
 	private ModelPart flag;
 	@Nullable
-	private List<Pair<Holder<BannerPattern>, DyeColor>> resultBannerPatterns;
+	private BannerPatternLayers resultBannerPatterns;
 	private ItemStack bannerStack = ItemStack.EMPTY;
 	private ItemStack dyeStack = ItemStack.EMPTY;
 	private ItemStack patternStack = ItemStack.EMPTY;
@@ -168,11 +163,6 @@ public class LoomScreen extends AbstractContainerScreen<LoomMenu> {
 	}
 
 	private void renderPattern(GuiGraphics guiGraphics, Holder<BannerPattern> holder, int i, int j) {
-		CompoundTag compoundTag = new CompoundTag();
-		ListTag listTag = new BannerPattern.Builder().addPattern(BannerPatterns.BASE, DyeColor.GRAY).addPattern(holder, DyeColor.WHITE).toListTag();
-		compoundTag.put("Patterns", listTag);
-		ItemStack itemStack = new ItemStack(Items.GRAY_BANNER);
-		BlockItem.setBlockEntityData(itemStack, BlockEntityType.BANNER, compoundTag);
 		PoseStack poseStack = new PoseStack();
 		poseStack.pushPose();
 		poseStack.translate((float)i + 0.5F, (float)(j + 16), 0.0F);
@@ -183,8 +173,10 @@ public class LoomScreen extends AbstractContainerScreen<LoomMenu> {
 		poseStack.scale(0.6666667F, -0.6666667F, -0.6666667F);
 		this.flag.xRot = 0.0F;
 		this.flag.y = -32.0F;
-		List<Pair<Holder<BannerPattern>, DyeColor>> list = BannerBlockEntity.createPatterns(DyeColor.GRAY, BannerBlockEntity.getItemPatterns(itemStack));
-		BannerRenderer.renderPatterns(poseStack, guiGraphics.bufferSource(), 15728880, OverlayTexture.NO_OVERLAY, this.flag, ModelBakery.BANNER_BASE, true, list);
+		BannerPatternLayers bannerPatternLayers = new BannerPatternLayers.Builder().add(BannerPatterns.BASE, DyeColor.GRAY).add(holder, DyeColor.WHITE).build();
+		BannerRenderer.renderPatterns(
+			poseStack, guiGraphics.bufferSource(), 15728880, OverlayTexture.NO_OVERLAY, this.flag, ModelBakery.BANNER_BASE, true, bannerPatternLayers
+		);
 		poseStack.popPose();
 		guiGraphics.flush();
 	}
@@ -257,14 +249,15 @@ public class LoomScreen extends AbstractContainerScreen<LoomMenu> {
 		if (itemStack.isEmpty()) {
 			this.resultBannerPatterns = null;
 		} else {
-			this.resultBannerPatterns = BannerBlockEntity.createPatterns(((BannerItem)itemStack.getItem()).getColor(), BannerBlockEntity.getItemPatterns(itemStack));
+			this.resultBannerPatterns = itemStack.getOrDefault(DataComponents.BANNER_PATTERNS, BannerPatternLayers.EMPTY)
+				.withBase(((BannerItem)itemStack.getItem()).getColor());
 		}
 
 		ItemStack itemStack2 = this.menu.getBannerSlot().getItem();
 		ItemStack itemStack3 = this.menu.getDyeSlot().getItem();
 		ItemStack itemStack4 = this.menu.getPatternSlot().getItem();
-		CompoundTag compoundTag = BlockItem.getBlockEntityData(itemStack2);
-		this.hasMaxPatterns = compoundTag != null && compoundTag.contains("Patterns", 9) && !itemStack2.isEmpty() && compoundTag.getList("Patterns", 10).size() >= 6;
+		BannerPatternLayers bannerPatternLayers = itemStack2.getOrDefault(DataComponents.BANNER_PATTERNS, BannerPatternLayers.EMPTY);
+		this.hasMaxPatterns = bannerPatternLayers.layers().size() >= 6;
 		if (this.hasMaxPatterns) {
 			this.resultBannerPatterns = null;
 		}

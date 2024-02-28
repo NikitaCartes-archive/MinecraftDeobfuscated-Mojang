@@ -7,7 +7,6 @@ import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -23,6 +22,7 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
+import net.minecraft.util.StringUtil;
 
 @Environment(EnvType.CLIENT)
 public class EditBox extends AbstractWidget implements Renderable {
@@ -120,7 +120,7 @@ public class EditBox extends AbstractWidget implements Renderable {
 		int j = Math.max(this.cursorPos, this.highlightPos);
 		int k = this.maxLength - this.value.length() - (i - j);
 		if (k > 0) {
-			String string2 = SharedConstants.filterText(string);
+			String string2 = StringUtil.filterText(string);
 			int l = string2.length();
 			if (k < l) {
 				if (Character.isHighSurrogate(string2.charAt(k - 1))) {
@@ -338,7 +338,7 @@ public class EditBox extends AbstractWidget implements Renderable {
 	public boolean charTyped(char c, int i) {
 		if (!this.canConsumeInput()) {
 			return false;
-		} else if (SharedConstants.isAllowedChatCharacter(c)) {
+		} else if (StringUtil.isAllowedChatCharacter(c)) {
 			if (this.isEditable) {
 				this.insertText(Character.toString(c));
 			}

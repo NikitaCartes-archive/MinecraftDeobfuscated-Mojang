@@ -14,7 +14,7 @@ import java.util.function.IntSupplier;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.server.packs.resources.ResourceProvider;
 import org.joml.Matrix4f;
 
 @Environment(EnvType.CLIENT)
@@ -28,8 +28,8 @@ public class PostPass implements AutoCloseable {
 	private final List<Integer> auxHeights = Lists.<Integer>newArrayList();
 	private Matrix4f shaderOrthoMatrix;
 
-	public PostPass(ResourceManager resourceManager, String string, RenderTarget renderTarget, RenderTarget renderTarget2) throws IOException {
-		this.effect = new EffectInstance(resourceManager, string);
+	public PostPass(ResourceProvider resourceProvider, String string, RenderTarget renderTarget, RenderTarget renderTarget2) throws IOException {
+		this.effect = new EffectInstance(resourceProvider, string);
 		this.inTarget = renderTarget;
 		this.outTarget = renderTarget2;
 	}

@@ -53,7 +53,6 @@ import net.minecraft.world.entity.monster.Slime;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.ServerLevelAccessor;
@@ -63,6 +62,7 @@ import net.minecraft.world.level.pathfinder.AmphibiousNodeEvaluator;
 import net.minecraft.world.level.pathfinder.Node;
 import net.minecraft.world.level.pathfinder.PathFinder;
 import net.minecraft.world.level.pathfinder.PathType;
+import net.minecraft.world.level.pathfinder.PathfindingContext;
 import net.minecraft.world.phys.Vec3;
 
 public class Frog extends Animal implements VariantHolder<FrogVariant> {
@@ -389,10 +389,10 @@ public class Frog extends Animal implements VariantHolder<FrogVariant> {
 		}
 
 		@Override
-		public PathType getPathType(BlockGetter blockGetter, int i, int j, int k) {
+		public PathType getPathType(PathfindingContext pathfindingContext, int i, int j, int k) {
 			this.belowPos.set(i, j - 1, k);
-			BlockState blockState = blockGetter.getBlockState(this.belowPos);
-			return blockState.is(BlockTags.FROG_PREFER_JUMP_TO) ? PathType.OPEN : super.getPathType(blockGetter, i, j, k);
+			BlockState blockState = pathfindingContext.getBlockState(this.belowPos);
+			return blockState.is(BlockTags.FROG_PREFER_JUMP_TO) ? PathType.OPEN : super.getPathType(pathfindingContext, i, j, k);
 		}
 	}
 

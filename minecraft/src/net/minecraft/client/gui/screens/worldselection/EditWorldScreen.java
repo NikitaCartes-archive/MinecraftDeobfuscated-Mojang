@@ -29,6 +29,7 @@ import net.minecraft.nbt.ReportedNbtException;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
+import net.minecraft.util.StringUtil;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.LevelSummary;
@@ -72,7 +73,7 @@ public class EditWorldScreen extends Screen {
 		LinearLayout linearLayout = LinearLayout.horizontal().spacing(4);
 		Button button = linearLayout.addChild(Button.builder(SAVE_BUTTON, buttonx -> this.onRename(this.nameEdit.getValue())).width(98).build());
 		linearLayout.addChild(Button.builder(CommonComponents.GUI_CANCEL, buttonx -> this.onClose()).width(98).build());
-		this.nameEdit.setResponder(stringx -> button.active = !Util.isBlank(stringx));
+		this.nameEdit.setResponder(stringx -> button.active = !StringUtil.isBlank(stringx));
 		this.layout.addChild(Button.builder(RESET_ICON_BUTTON, buttonx -> {
 			levelStorageAccess.getIconFile().ifPresent(path -> FileUtils.deleteQuietly(path.toFile()));
 			buttonx.active = false;

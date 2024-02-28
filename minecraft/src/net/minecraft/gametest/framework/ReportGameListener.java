@@ -2,16 +2,18 @@ package net.minecraft.gametest.framework;
 
 import com.google.common.base.MoreObjects;
 import java.util.Arrays;
+import java.util.List;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTag;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.DebugPackets;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.network.Filterable;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.WritableBookContent;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LecternBlock;
@@ -156,8 +158,6 @@ class ReportGameListener implements GameTestListener {
 	}
 
 	private static ItemStack createBook(String string, boolean bl, String string2) {
-		ItemStack itemStack = new ItemStack(Items.WRITABLE_BOOK);
-		ListTag listTag = new ListTag();
 		StringBuffer stringBuffer = new StringBuffer();
 		Arrays.stream(string.split("\\.")).forEach(stringx -> stringBuffer.append(stringx).append('\n'));
 		if (!bl) {
@@ -165,8 +165,8 @@ class ReportGameListener implements GameTestListener {
 		}
 
 		stringBuffer.append("-------------------\n");
-		listTag.add(StringTag.valueOf(stringBuffer + string2));
-		itemStack.addTagElement("pages", listTag);
+		ItemStack itemStack = new ItemStack(Items.WRITABLE_BOOK);
+		itemStack.set(DataComponents.WRITABLE_BOOK_CONTENT, new WritableBookContent(List.of(Filterable.passThrough(stringBuffer + string2))));
 		return itemStack;
 	}
 

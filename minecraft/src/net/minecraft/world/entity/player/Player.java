@@ -20,7 +20,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
@@ -113,7 +112,6 @@ import org.slf4j.Logger;
 
 public abstract class Player extends LivingEntity {
 	private static final Logger LOGGER = LogUtils.getLogger();
-	public static final int MAX_NAME_LENGTH = 16;
 	public static final HumanoidArm DEFAULT_MAIN_HAND = HumanoidArm.RIGHT;
 	public static final int DEFAULT_MODEL_CUSTOMIZATION = 0;
 	public static final int MAX_HEALTH = 20;
@@ -205,8 +203,7 @@ public abstract class Player extends LivingEntity {
 			return false;
 		} else {
 			ItemStack itemStack = this.getMainHandItem();
-			return itemStack.isEmpty()
-				|| !itemStack.hasAdventureModeBreakTagForBlock(level.registryAccess().registryOrThrow(Registries.BLOCK), new BlockInWorld(level, blockPos, false));
+			return itemStack.isEmpty() || !itemStack.canBreakBlockInAdventureMode(new BlockInWorld(level, blockPos, false));
 		}
 	}
 
@@ -781,7 +778,7 @@ public abstract class Player extends LivingEntity {
 		this.abilities.loadSaveData(compoundTag);
 		this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue((double)this.abilities.getWalkingSpeed());
 		if (compoundTag.contains("EnderItems", 9)) {
-			this.enderChestInventory.fromTag(compoundTag.getList("EnderItems", 10));
+			this.enderChestInventory.fromTag(compoundTag.getList("EnderItems", 10), this.registryAccess());
 		}
 
 		if (compoundTag.contains("ShoulderEntityLeft", 10)) {
@@ -815,7 +812,7 @@ public abstract class Player extends LivingEntity {
 		compoundTag.putInt("Score", this.getScore());
 		this.foodData.addAdditionalSaveData(compoundTag);
 		this.abilities.addSaveData(compoundTag);
-		compoundTag.put("EnderItems", this.enderChestInventory.createTag());
+		compoundTag.put("EnderItems", this.enderChestInventory.createTag(this.registryAccess()));
 		if (!this.getShoulderEntityLeft().isEmpty()) {
 			compoundTag.put("ShoulderEntityLeft", this.getShoulderEntityLeft());
 		}
@@ -906,12 +903,12 @@ public abstract class Player extends LivingEntity {
 
 	@Override
 	protected void hurtArmor(DamageSource damageSource, float f) {
-		this.inventory.hurtArmor(damageSource, f, Inventory.ALL_ARMOR_SLOTS);
+		this.doHurtEquipment(damageSource, f, new EquipmentSlot[]{EquipmentSlot.FEET, EquipmentSlot.LEGS, EquipmentSlot.CHEST, EquipmentSlot.HEAD});
 	}
 
 	@Override
 	protected void hurtHelmet(DamageSource damageSource, float f) {
-		this.inventory.hurtArmor(damageSource, f, Inventory.HELMET_SLOT_ONLY);
+		this.doHurtEquipment(damageSource, f, new EquipmentSlot[]{EquipmentSlot.HEAD});
 	}
 
 	@Override
@@ -1513,7 +1510,6 @@ public abstract class Player extends LivingEntity {
 			ItemStack itemStack = this.getItemBySlot(EquipmentSlot.CHEST);
 			if (itemStack.is(Items.ELYTRA) && ElytraItem.isFlyEnabled(itemStack)) {
 				this.startFallFlying();
-				this.ignoreFallDamageAboveY = null;
 				return true;
 			}
 		}
@@ -1573,6 +1569,8 @@ public abstract class Player extends LivingEntity {
 		if (!this.abilities.flying) {
 			super.makeStuckInBlock(blockState, vec3);
 		}
+
+		this.ignoreFallDamageAboveY = null;
 	}
 
 	public void giveExperiencePoints(int i) {
@@ -1670,7 +1668,7 @@ public abstract class Player extends LivingEntity {
 		} else {
 			BlockPos blockPos2 = blockPos.relative(direction.getOpposite());
 			BlockInWorld blockInWorld = new BlockInWorld(this.level(), blockPos2, false);
-			return itemStack.hasAdventureModePlaceTagForBlock(this.level().registryAccess().registryOrThrow(Registries.BLOCK), blockInWorld);
+			return itemStack.canPlaceOnBlockInAdventureMode(blockInWorld);
 		}
 	}
 
@@ -2031,12 +2029,6 @@ public abstract class Player extends LivingEntity {
 		return false;
 	}
 
-	@Override
-	public void resetFallDistance() {
-		super.resetFallDistance();
-		this.ignoreFallDamageAboveY = null;
-	}
-
 	public Optional<GlobalPos> getLastDeathLocation() {
 		return this.lastDeathLocation;
 	}
@@ -2068,10 +2060,6 @@ public abstract class Player extends LivingEntity {
 		} else {
 			return this.isSprinting() ? 0.025999999F : 0.02F;
 		}
-	}
-
-	public static boolean isValidUsername(String string) {
-		return string.length() > 16 ? false : string.chars().filter(i -> i <= 32 || i >= 127).findAny().isEmpty();
 	}
 
 	public double blockInteractionRange() {

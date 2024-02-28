@@ -2,10 +2,12 @@ package net.minecraft.world.item.crafting;
 
 import java.util.Map;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.MapItem;
+import net.minecraft.world.item.component.MapPostProcessing;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 
@@ -41,7 +43,7 @@ public class MapExtendingRecipe extends ShapedRecipe {
 	@Override
 	public ItemStack assemble(CraftingContainer craftingContainer, RegistryAccess registryAccess) {
 		ItemStack itemStack = findFilledMap(craftingContainer).copyWithCount(1);
-		itemStack.getOrCreateTag().putInt("map_scale_direction", 1);
+		itemStack.set(DataComponents.MAP_POST_PROCESSING, MapPostProcessing.SCALE);
 		return itemStack;
 	}
 

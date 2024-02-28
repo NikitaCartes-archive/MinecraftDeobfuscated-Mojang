@@ -1,11 +1,10 @@
 package net.minecraft.world.item;
 
-import com.google.common.collect.Lists;
 import com.mojang.logging.LogUtils;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
@@ -17,7 +16,6 @@ import net.minecraft.world.level.Level;
 import org.slf4j.Logger;
 
 public class KnowledgeBookItem extends Item {
-	private static final String RECIPE_TAG = "Recipes";
 	private static final Logger LOGGER = LogUtils.getLogger();
 
 	public KnowledgeBookItem(Item.Properties properties) {
@@ -27,36 +25,33 @@ public class KnowledgeBookItem extends Item {
 	@Override
 	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
-		CompoundTag compoundTag = itemStack.getTag();
 		if (!player.hasInfiniteMaterials()) {
 			player.setItemInHand(interactionHand, ItemStack.EMPTY);
 		}
 
-		if (compoundTag != null && compoundTag.contains("Recipes", 9)) {
+		List<ResourceLocation> list = itemStack.getOrDefault(DataComponents.RECIPES, List.of());
+		if (list.isEmpty()) {
+			return InteractionResultHolder.fail(itemStack);
+		} else {
 			if (!level.isClientSide) {
-				ListTag listTag = compoundTag.getList("Recipes", 8);
-				List<RecipeHolder<?>> list = Lists.<RecipeHolder<?>>newArrayList();
 				RecipeManager recipeManager = level.getServer().getRecipeManager();
+				List<RecipeHolder<?>> list2 = new ArrayList(list.size());
 
-				for (int i = 0; i < listTag.size(); i++) {
-					String string = listTag.getString(i);
-					Optional<RecipeHolder<?>> optional = recipeManager.byKey(new ResourceLocation(string));
+				for (ResourceLocation resourceLocation : list) {
+					Optional<RecipeHolder<?>> optional = recipeManager.byKey(resourceLocation);
 					if (!optional.isPresent()) {
-						LOGGER.error("Invalid recipe: {}", string);
+						LOGGER.error("Invalid recipe: {}", resourceLocation);
 						return InteractionResultHolder.fail(itemStack);
 					}
 
-					list.add((RecipeHolder)optional.get());
+					list2.add((RecipeHolder)optional.get());
 				}
 
-				player.awardRecipes(list);
+				player.awardRecipes(list2);
 				player.awardStat(Stats.ITEM_USED.get(this));
 			}
 
 			return InteractionResultHolder.sidedSuccess(itemStack, level.isClientSide());
-		} else {
-			LOGGER.error("Tag not valid: {}", compoundTag);
-			return InteractionResultHolder.fail(itemStack);
 		}
 	}
 }

@@ -13,7 +13,7 @@ import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.AreaEffectCloud;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
@@ -59,7 +59,7 @@ public class BottleItem extends Item {
 						level.playSound(player, player.getX(), player.getY(), player.getZ(), SoundEvents.BOTTLE_FILL, SoundSource.NEUTRAL, 1.0F, 1.0F);
 						level.gameEvent(player, GameEvent.FLUID_PICKUP, blockPos);
 						return InteractionResultHolder.sidedSuccess(
-							this.turnBottleIntoItem(itemStack, player, PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.WATER)), level.isClientSide()
+							this.turnBottleIntoItem(itemStack, player, PotionContents.createItemStack(Items.POTION, Potions.WATER)), level.isClientSide()
 						);
 					}
 				}

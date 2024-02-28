@@ -16,7 +16,7 @@ public class ClientboundOpenScreenPacket implements Packet<ClientGamePacketListe
 		ClientboundOpenScreenPacket::getContainerId,
 		ByteBufCodecs.registry(Registries.MENU),
 		ClientboundOpenScreenPacket::getType,
-		ComponentSerialization.STREAM_CODEC,
+		ComponentSerialization.TRUSTED_STREAM_CODEC,
 		ClientboundOpenScreenPacket::getTitle,
 		ClientboundOpenScreenPacket::new
 	);

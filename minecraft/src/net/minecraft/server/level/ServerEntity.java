@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBundlePacket;
@@ -94,7 +95,7 @@ public class ServerEntity {
 		if (this.entity instanceof ItemFrame itemFrame && this.tickCount % 10 == 0) {
 			ItemStack itemStack = itemFrame.getItem();
 			if (itemStack.getItem() instanceof MapItem) {
-				MapId mapId = MapItem.getMapId(itemStack);
+				MapId mapId = itemStack.get(DataComponents.MAP_ID);
 				MapItemSavedData mapItemSavedData = MapItem.getSavedData(mapId, this.level);
 				if (mapItemSavedData != null) {
 					for (ServerPlayer serverPlayer : this.level.players()) {

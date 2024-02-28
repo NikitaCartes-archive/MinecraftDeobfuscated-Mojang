@@ -30,7 +30,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.ChainedJsonException;
 import net.minecraft.server.packs.resources.Resource;
-import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.server.packs.resources.ResourceProvider;
 import net.minecraft.util.GsonHelper;
 import org.slf4j.Logger;
 
@@ -57,10 +57,10 @@ public class EffectInstance implements Effect, AutoCloseable {
 	private final EffectProgram vertexProgram;
 	private final EffectProgram fragmentProgram;
 
-	public EffectInstance(ResourceManager resourceManager, String string) throws IOException {
+	public EffectInstance(ResourceProvider resourceProvider, String string) throws IOException {
 		ResourceLocation resourceLocation = new ResourceLocation("shaders/program/" + string + ".json");
 		this.name = string;
-		Resource resource = resourceManager.getResourceOrThrow(resourceLocation);
+		Resource resource = resourceProvider.getResourceOrThrow(resourceLocation);
 
 		try {
 			Reader reader = resource.openAsReader();
@@ -126,8 +126,8 @@ public class EffectInstance implements Effect, AutoCloseable {
 				}
 
 				this.blend = parseBlendNode(GsonHelper.getAsJsonObject(jsonObject, "blend", null));
-				this.vertexProgram = getOrCreate(resourceManager, Program.Type.VERTEX, string2);
-				this.fragmentProgram = getOrCreate(resourceManager, Program.Type.FRAGMENT, string3);
+				this.vertexProgram = getOrCreate(resourceProvider, Program.Type.VERTEX, string2);
+				this.fragmentProgram = getOrCreate(resourceProvider, Program.Type.FRAGMENT, string3);
 				this.programId = ProgramManager.createProgram();
 				ProgramManager.linkShader(this);
 				this.updateLocations();
@@ -161,7 +161,7 @@ public class EffectInstance implements Effect, AutoCloseable {
 		this.markDirty();
 	}
 
-	public static EffectProgram getOrCreate(ResourceManager resourceManager, Program.Type type, String string) throws IOException {
+	public static EffectProgram getOrCreate(ResourceProvider resourceProvider, Program.Type type, String string) throws IOException {
 		Program program = (Program)type.getPrograms().get(string);
 		if (program != null && !(program instanceof EffectProgram)) {
 			throw new InvalidClassException("Program is not of type EffectProgram");
@@ -169,7 +169,7 @@ public class EffectInstance implements Effect, AutoCloseable {
 			EffectProgram effectProgram;
 			if (program == null) {
 				ResourceLocation resourceLocation = new ResourceLocation("shaders/program/" + string + type.getExtension());
-				Resource resource = resourceManager.getResourceOrThrow(resourceLocation);
+				Resource resource = resourceProvider.getResourceOrThrow(resourceLocation);
 				InputStream inputStream = resource.open();
 
 				try {

@@ -5,10 +5,8 @@ import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BeaconBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -51,9 +49,8 @@ public class BeaconBlock extends BaseEntityBlock implements BeaconBeamBlock {
 		if (level.isClientSide) {
 			return InteractionResult.SUCCESS;
 		} else {
-			BlockEntity blockEntity = level.getBlockEntity(blockPos);
-			if (blockEntity instanceof BeaconBlockEntity) {
-				player.openMenu((BeaconBlockEntity)blockEntity);
+			if (level.getBlockEntity(blockPos) instanceof BeaconBlockEntity beaconBlockEntity) {
+				player.openMenu(beaconBlockEntity);
 				player.awardStat(Stats.INTERACT_WITH_BEACON);
 			}
 
@@ -64,15 +61,5 @@ public class BeaconBlock extends BaseEntityBlock implements BeaconBeamBlock {
 	@Override
 	protected RenderShape getRenderShape(BlockState blockState) {
 		return RenderShape.MODEL;
-	}
-
-	@Override
-	public void setPlacedBy(Level level, BlockPos blockPos, BlockState blockState, LivingEntity livingEntity, ItemStack itemStack) {
-		if (itemStack.hasCustomHoverName()) {
-			BlockEntity blockEntity = level.getBlockEntity(blockPos);
-			if (blockEntity instanceof BeaconBlockEntity) {
-				((BeaconBlockEntity)blockEntity).setCustomName(itemStack.getHoverName());
-			}
-		}
 	}
 }

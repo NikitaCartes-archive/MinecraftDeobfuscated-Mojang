@@ -5,13 +5,10 @@ import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.FluidTags;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.block.entity.BeaconBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -85,16 +82,6 @@ public class ConduitBlock extends BaseEntityBlock implements SimpleWaterloggedBl
 		return SHAPE;
 	}
 
-	@Override
-	public void setPlacedBy(Level level, BlockPos blockPos, BlockState blockState, @Nullable LivingEntity livingEntity, ItemStack itemStack) {
-		if (itemStack.hasCustomHoverName()) {
-			BlockEntity blockEntity = level.getBlockEntity(blockPos);
-			if (blockEntity instanceof BeaconBlockEntity) {
-				((BeaconBlockEntity)blockEntity).setCustomName(itemStack.getHoverName());
-			}
-		}
-	}
-
 	@Nullable
 	@Override
 	public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
@@ -103,7 +90,7 @@ public class ConduitBlock extends BaseEntityBlock implements SimpleWaterloggedBl
 	}
 
 	@Override
-	protected boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
+	protected boolean isPathfindable(BlockState blockState, PathComputationType pathComputationType) {
 		return false;
 	}
 }

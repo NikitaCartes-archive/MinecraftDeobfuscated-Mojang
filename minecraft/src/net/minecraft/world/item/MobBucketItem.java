@@ -1,10 +1,12 @@
 package net.minecraft.world.item;
 
+import com.mojang.serialization.MapCodec;
 import java.util.List;
+import java.util.Optional;
 import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerLevel;
@@ -15,12 +17,14 @@ import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.animal.Bucketable;
 import net.minecraft.world.entity.animal.TropicalFish;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.Fluid;
 
 public class MobBucketItem extends BucketItem {
+	private static final MapCodec<TropicalFish.Variant> VARIANT_FIELD_CODEC = TropicalFish.Variant.CODEC.fieldOf("BucketVariantTag");
 	private final EntityType<?> type;
 	private final SoundEvent emptySound;
 
@@ -45,7 +49,8 @@ public class MobBucketItem extends BucketItem {
 
 	private void spawn(ServerLevel serverLevel, ItemStack itemStack, BlockPos blockPos) {
 		if (this.type.spawn(serverLevel, itemStack, null, blockPos, MobSpawnType.BUCKET, true, false) instanceof Bucketable bucketable) {
-			bucketable.loadFromBucketTag(itemStack.getOrCreateTag());
+			CustomData customData = itemStack.getOrDefault(DataComponents.BUCKET_ENTITY_DATA, CustomData.EMPTY);
+			bucketable.loadFromBucketTag(customData.copyTag());
 			bucketable.setFromBucket(true);
 		}
 	}
@@ -53,21 +58,24 @@ public class MobBucketItem extends BucketItem {
 	@Override
 	public void appendHoverText(ItemStack itemStack, @Nullable Level level, List<Component> list, TooltipFlag tooltipFlag) {
 		if (this.type == EntityType.TROPICAL_FISH) {
-			CompoundTag compoundTag = itemStack.getTag();
-			if (compoundTag != null && compoundTag.contains("BucketVariantTag", 3)) {
-				int i = compoundTag.getInt("BucketVariantTag");
-				ChatFormatting[] chatFormattings = new ChatFormatting[]{ChatFormatting.ITALIC, ChatFormatting.GRAY};
-				String string = "color.minecraft." + TropicalFish.getBaseColor(i);
-				String string2 = "color.minecraft." + TropicalFish.getPatternColor(i);
+			CustomData customData = itemStack.getOrDefault(DataComponents.BUCKET_ENTITY_DATA, CustomData.EMPTY);
+			if (customData.isEmpty()) {
+				return;
+			}
 
-				for (int j = 0; j < TropicalFish.COMMON_VARIANTS.size(); j++) {
-					if (i == ((TropicalFish.Variant)TropicalFish.COMMON_VARIANTS.get(j)).getPackedId()) {
-						list.add(Component.translatable(TropicalFish.getPredefinedName(j)).withStyle(chatFormattings));
-						return;
-					}
+			Optional<TropicalFish.Variant> optional = customData.read(VARIANT_FIELD_CODEC).result();
+			if (optional.isPresent()) {
+				TropicalFish.Variant variant = (TropicalFish.Variant)optional.get();
+				ChatFormatting[] chatFormattings = new ChatFormatting[]{ChatFormatting.ITALIC, ChatFormatting.GRAY};
+				String string = "color.minecraft." + variant.baseColor();
+				String string2 = "color.minecraft." + variant.patternColor();
+				int i = TropicalFish.COMMON_VARIANTS.indexOf(variant);
+				if (i != -1) {
+					list.add(Component.translatable(TropicalFish.getPredefinedName(i)).withStyle(chatFormattings));
+					return;
 				}
 
-				list.add(TropicalFish.getPattern(i).displayName().plainCopy().withStyle(chatFormattings));
+				list.add(variant.pattern().displayName().plainCopy().withStyle(chatFormattings));
 				MutableComponent mutableComponent = Component.translatable(string);
 				if (!string.equals(string2)) {
 					mutableComponent.append(", ").append(Component.translatable(string2));

@@ -1,6 +1,7 @@
 package net.minecraft.world.scores;
 
 import javax.annotation.Nullable;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.chat.Component;
@@ -56,31 +57,37 @@ public class Score implements ReadOnlyScoreInfo {
 		this.numberFormat = numberFormat;
 	}
 
-	public CompoundTag write() {
+	public CompoundTag write(HolderLookup.Provider provider) {
 		CompoundTag compoundTag = new CompoundTag();
 		compoundTag.putInt("Score", this.value);
 		compoundTag.putBoolean("Locked", this.locked);
 		if (this.display != null) {
-			compoundTag.putString("display", Component.Serializer.toJson(this.display));
+			compoundTag.putString("display", Component.Serializer.toJson(this.display, provider));
 		}
 
 		if (this.numberFormat != null) {
-			NumberFormatTypes.CODEC.encodeStart(NbtOps.INSTANCE, this.numberFormat).result().ifPresent(tag -> compoundTag.put("format", tag));
+			NumberFormatTypes.CODEC
+				.encodeStart(provider.createSerializationContext(NbtOps.INSTANCE), this.numberFormat)
+				.result()
+				.ifPresent(tag -> compoundTag.put("format", tag));
 		}
 
 		return compoundTag;
 	}
 
-	public static Score read(CompoundTag compoundTag) {
+	public static Score read(CompoundTag compoundTag, HolderLookup.Provider provider) {
 		Score score = new Score();
 		score.value = compoundTag.getInt("Score");
 		score.locked = compoundTag.getBoolean("Locked");
 		if (compoundTag.contains("display", 8)) {
-			score.display = Component.Serializer.fromJson(compoundTag.getString("display"));
+			score.display = Component.Serializer.fromJson(compoundTag.getString("display"), provider);
 		}
 
 		if (compoundTag.contains("format", 10)) {
-			NumberFormatTypes.CODEC.parse(NbtOps.INSTANCE, compoundTag.get("format")).result().ifPresent(numberFormat -> score.numberFormat = numberFormat);
+			NumberFormatTypes.CODEC
+				.parse(provider.createSerializationContext(NbtOps.INSTANCE), compoundTag.get("format"))
+				.result()
+				.ifPresent(numberFormat -> score.numberFormat = numberFormat);
 		}
 
 		return score;

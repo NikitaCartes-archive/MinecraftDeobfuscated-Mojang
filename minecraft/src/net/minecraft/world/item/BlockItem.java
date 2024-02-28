@@ -2,11 +2,12 @@ package net.minecraft.world.item;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -16,6 +17,9 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.flag.FeatureFlagSet;
+import net.minecraft.world.item.component.BlockItemStateProperties;
+import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
@@ -25,14 +29,10 @@ import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.StateDefinition;
-import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.shapes.CollisionContext;
 
 public class BlockItem extends Item {
-	public static final String BLOCK_ENTITY_TAG = "BlockEntityTag";
-	public static final String BLOCK_STATE_TAG = "BlockStateTag";
 	@Deprecated
 	private final Block block;
 
@@ -76,6 +76,7 @@ public class BlockItem extends Item {
 					if (blockState2.is(blockState.getBlock())) {
 						blockState2 = this.updateBlockStateFromTag(blockPos, level, itemStack, blockState2);
 						this.updateCustomBlockEntityTag(blockPos, level, player, itemStack, blockState2);
+						updateBlockEntityComponents(level, blockPos, itemStack);
 						blockState2.getBlock().setPlacedBy(level, blockPos, blockState2, player, itemStack);
 						if (player instanceof ServerPlayer) {
 							CriteriaTriggers.PLACED_BLOCK.trigger((ServerPlayer)player, blockPos, itemStack);
@@ -101,6 +102,13 @@ public class BlockItem extends Item {
 		return blockPlaceContext;
 	}
 
+	private static void updateBlockEntityComponents(Level level, BlockPos blockPos, ItemStack itemStack) {
+		BlockEntity blockEntity = level.getBlockEntity(blockPos);
+		if (blockEntity != null) {
+			blockEntity.applyComponents(itemStack.getComponents());
+		}
+	}
+
 	protected boolean updateCustomBlockEntityTag(BlockPos blockPos, Level level, @Nullable Player player, ItemStack itemStack, BlockState blockState) {
 		return updateCustomBlockEntityTag(level, player, blockPos, itemStack);
 	}
@@ -112,30 +120,17 @@ public class BlockItem extends Item {
 	}
 
 	private BlockState updateBlockStateFromTag(BlockPos blockPos, Level level, ItemStack itemStack, BlockState blockState) {
-		BlockState blockState2 = blockState;
-		CompoundTag compoundTag = itemStack.getTag();
-		if (compoundTag != null) {
-			CompoundTag compoundTag2 = compoundTag.getCompound("BlockStateTag");
-			StateDefinition<Block, BlockState> stateDefinition = blockState.getBlock().getStateDefinition();
-
-			for (String string : compoundTag2.getAllKeys()) {
-				Property<?> property = stateDefinition.getProperty(string);
-				if (property != null) {
-					String string2 = compoundTag2.get(string).getAsString();
-					blockState2 = updateState(blockState2, property, string2);
-				}
+		BlockItemStateProperties blockItemStateProperties = itemStack.getOrDefault(DataComponents.BLOCK_STATE, BlockItemStateProperties.EMPTY);
+		if (blockItemStateProperties.isEmpty()) {
+			return blockState;
+		} else {
+			BlockState blockState2 = blockItemStateProperties.apply(blockState);
+			if (blockState2 != blockState) {
+				level.setBlock(blockPos, blockState2, 2);
 			}
+
+			return blockState2;
 		}
-
-		if (blockState2 != blockState) {
-			level.setBlock(blockPos, blockState2, 2);
-		}
-
-		return blockState2;
-	}
-
-	private static <T extends Comparable<T>> BlockState updateState(BlockState blockState, Property<T> property, String string) {
-		return (BlockState)property.getValue(string).map(comparable -> blockState.setValue(property, comparable)).orElse(blockState);
 	}
 
 	protected boolean canPlace(BlockPlaceContext blockPlaceContext, BlockState blockState) {
@@ -158,22 +153,15 @@ public class BlockItem extends Item {
 		if (minecraftServer == null) {
 			return false;
 		} else {
-			CompoundTag compoundTag = getBlockEntityData(itemStack);
-			if (compoundTag != null) {
+			CustomData customData = itemStack.getOrDefault(DataComponents.BLOCK_ENTITY_DATA, CustomData.EMPTY);
+			if (!customData.isEmpty()) {
 				BlockEntity blockEntity = level.getBlockEntity(blockPos);
 				if (blockEntity != null) {
-					if (!level.isClientSide && blockEntity.onlyOpCanSetNbt() && (player == null || !player.canUseGameMasterBlocks())) {
-						return false;
+					if (level.isClientSide || !blockEntity.onlyOpCanSetNbt() || player != null && player.canUseGameMasterBlocks()) {
+						return customData.loadInto(blockEntity, level.registryAccess());
 					}
 
-					CompoundTag compoundTag2 = blockEntity.saveWithoutMetadata(level.registryAccess());
-					CompoundTag compoundTag3 = compoundTag2.copy();
-					compoundTag2.merge(compoundTag);
-					if (!compoundTag2.equals(compoundTag3)) {
-						blockEntity.load(compoundTag2, level.registryAccess());
-						blockEntity.setChanged();
-						return true;
-					}
+					return false;
 				}
 			}
 
@@ -207,27 +195,29 @@ public class BlockItem extends Item {
 
 	@Override
 	public void onDestroyed(ItemEntity itemEntity) {
-		if (this.block instanceof ShulkerBoxBlock) {
-			ItemStack itemStack = itemEntity.getItem();
-			CompoundTag compoundTag = getBlockEntityData(itemStack);
-			if (compoundTag != null && compoundTag.contains("Items", 9)) {
-				ListTag listTag = compoundTag.getList("Items", 10);
-				ItemUtils.onContainerDestroyed(itemEntity, listTag.stream().map(CompoundTag.class::cast).map(ItemStack::of));
-			}
+		ItemContainerContents itemContainerContents = itemEntity.getItem().set(DataComponents.CONTAINER, ItemContainerContents.EMPTY);
+		if (itemContainerContents != null) {
+			ItemUtils.onContainerDestroyed(itemEntity, itemContainerContents.stream());
 		}
 	}
 
-	@Nullable
-	public static CompoundTag getBlockEntityData(ItemStack itemStack) {
-		return itemStack.getTagElement("BlockEntityTag");
+	public static void updateBlockEntityData(ItemStack itemStack, BlockEntityType<?> blockEntityType, Consumer<CompoundTag> consumer) {
+		CustomData.update(DataComponents.BLOCK_ENTITY_DATA, itemStack, compoundTag -> {
+			consumer.accept(compoundTag);
+			compoundTag.remove("id");
+			if (!compoundTag.isEmpty()) {
+				BlockEntity.addEntityType(compoundTag, blockEntityType);
+			}
+		});
 	}
 
 	public static void setBlockEntityData(ItemStack itemStack, BlockEntityType<?> blockEntityType, CompoundTag compoundTag) {
+		compoundTag.remove("id");
 		if (compoundTag.isEmpty()) {
-			itemStack.removeTagKey("BlockEntityTag");
+			itemStack.remove(DataComponents.BLOCK_ENTITY_DATA);
 		} else {
 			BlockEntity.addEntityType(compoundTag, blockEntityType);
-			itemStack.addTagElement("BlockEntityTag", compoundTag);
+			itemStack.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(compoundTag));
 		}
 	}
 

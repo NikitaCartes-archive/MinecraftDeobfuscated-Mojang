@@ -31,8 +31,8 @@ public class ShovelItem extends DiggerItem {
 			.build()
 	);
 
-	public ShovelItem(Tier tier, float f, float g, Item.Properties properties) {
-		super(f, g, tier, BlockTags.MINEABLE_WITH_SHOVEL, properties);
+	public ShovelItem(Tier tier, Item.Properties properties) {
+		super(tier, BlockTags.MINEABLE_WITH_SHOVEL, properties);
 	}
 
 	@Override

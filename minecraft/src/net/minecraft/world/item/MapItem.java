@@ -11,7 +11,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.SectionPos;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.resources.ResourceKey;
@@ -22,6 +22,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.component.MapPostProcessing;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
@@ -37,10 +38,6 @@ import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 public class MapItem extends ComplexItem {
 	public static final int IMAGE_WIDTH = 128;
 	public static final int IMAGE_HEIGHT = 128;
-	private static final int DEFAULT_MAP_COLOR = -12173266;
-	private static final String TAG_MAP = "map";
-	public static final String MAP_SCALE_TAG = "map_scale_direction";
-	public static final String MAP_LOCK_TAG = "map_to_lock";
 
 	public MapItem(Item.Properties properties) {
 		super(properties);
@@ -48,7 +45,8 @@ public class MapItem extends ComplexItem {
 
 	public static ItemStack create(Level level, int i, int j, byte b, boolean bl, boolean bl2) {
 		ItemStack itemStack = new ItemStack(Items.FILLED_MAP);
-		createAndStoreSavedData(itemStack, level, i, j, b, bl, bl2, level.dimension());
+		MapId mapId = createNewSavedData(level, i, j, b, bl, bl2, level.dimension());
+		itemStack.set(DataComponents.MAP_ID, mapId);
 		return itemStack;
 	}
 
@@ -59,14 +57,8 @@ public class MapItem extends ComplexItem {
 
 	@Nullable
 	public static MapItemSavedData getSavedData(ItemStack itemStack, Level level) {
-		MapId mapId = getMapId(itemStack);
+		MapId mapId = itemStack.get(DataComponents.MAP_ID);
 		return getSavedData(mapId, level);
-	}
-
-	@Nullable
-	public static MapId getMapId(ItemStack itemStack) {
-		CompoundTag compoundTag = itemStack.getTag();
-		return compoundTag != null && compoundTag.contains("map", 99) ? new MapId(compoundTag.getInt("map")) : null;
 	}
 
 	private static MapId createNewSavedData(Level level, int i, int j, int k, boolean bl, boolean bl2, ResourceKey<Level> resourceKey) {
@@ -74,15 +66,6 @@ public class MapItem extends ComplexItem {
 		MapId mapId = level.getFreeMapId();
 		level.setMapData(mapId, mapItemSavedData);
 		return mapId;
-	}
-
-	private static void storeMapData(ItemStack itemStack, MapId mapId) {
-		itemStack.getOrCreateTag().putInt("map", mapId.id());
-	}
-
-	private static void createAndStoreSavedData(ItemStack itemStack, Level level, int i, int j, int k, boolean bl, boolean bl2, ResourceKey<Level> resourceKey) {
-		MapId mapId = createNewSavedData(level, i, j, k, bl, bl2, resourceKey);
-		storeMapData(itemStack, mapId);
 	}
 
 	public void update(Level level, Entity entity, MapItemSavedData mapItemSavedData) {
@@ -303,29 +286,31 @@ public class MapItem extends ComplexItem {
 	@Nullable
 	@Override
 	public Packet<?> getUpdatePacket(ItemStack itemStack, Level level, Player player) {
-		MapId mapId = getMapId(itemStack);
+		MapId mapId = itemStack.get(DataComponents.MAP_ID);
 		MapItemSavedData mapItemSavedData = getSavedData(mapId, level);
 		return mapItemSavedData != null ? mapItemSavedData.getUpdatePacket(mapId, player) : null;
 	}
 
 	@Override
 	public void onCraftedPostProcess(ItemStack itemStack, Level level) {
-		CompoundTag compoundTag = itemStack.getTag();
-		if (compoundTag != null && compoundTag.contains("map_scale_direction", 99)) {
-			scaleMap(itemStack, level, compoundTag.getInt("map_scale_direction"));
-			compoundTag.remove("map_scale_direction");
-		} else if (compoundTag != null && compoundTag.contains("map_to_lock", 1) && compoundTag.getBoolean("map_to_lock")) {
-			lockMap(level, itemStack);
-			compoundTag.remove("map_to_lock");
+		MapPostProcessing mapPostProcessing = itemStack.remove(DataComponents.MAP_POST_PROCESSING);
+		if (mapPostProcessing != null) {
+			switch (mapPostProcessing) {
+				case LOCK:
+					lockMap(level, itemStack);
+					break;
+				case SCALE:
+					scaleMap(itemStack, level);
+			}
 		}
 	}
 
-	private static void scaleMap(ItemStack itemStack, Level level, int i) {
+	private static void scaleMap(ItemStack itemStack, Level level) {
 		MapItemSavedData mapItemSavedData = getSavedData(itemStack, level);
 		if (mapItemSavedData != null) {
 			MapId mapId = level.getFreeMapId();
-			level.setMapData(mapId, mapItemSavedData.scaled(i));
-			storeMapData(itemStack, mapId);
+			level.setMapData(mapId, mapItemSavedData.scaled());
+			itemStack.set(DataComponents.MAP_ID, mapId);
 		}
 	}
 
@@ -335,60 +320,37 @@ public class MapItem extends ComplexItem {
 			MapId mapId = level.getFreeMapId();
 			MapItemSavedData mapItemSavedData2 = mapItemSavedData.locked();
 			level.setMapData(mapId, mapItemSavedData2);
-			storeMapData(itemStack, mapId);
+			itemStack.set(DataComponents.MAP_ID, mapId);
 		}
 	}
 
 	@Override
 	public void appendHoverText(ItemStack itemStack, @Nullable Level level, List<Component> list, TooltipFlag tooltipFlag) {
-		MapId mapId = getMapId(itemStack);
+		MapId mapId = itemStack.get(DataComponents.MAP_ID);
 		MapItemSavedData mapItemSavedData = level == null ? null : getSavedData(mapId, level);
-		CompoundTag compoundTag = itemStack.getTag();
-		boolean bl;
-		byte b;
-		if (compoundTag != null) {
-			bl = compoundTag.getBoolean("map_to_lock");
-			b = compoundTag.getByte("map_scale_direction");
-		} else {
-			bl = false;
-			b = 0;
-		}
-
-		if (mapItemSavedData != null && (mapItemSavedData.locked || bl)) {
+		MapPostProcessing mapPostProcessing = itemStack.get(DataComponents.MAP_POST_PROCESSING);
+		if (mapItemSavedData != null && (mapItemSavedData.locked || mapPostProcessing == MapPostProcessing.LOCK)) {
 			list.add(Component.translatable("filled_map.locked", mapId.id()).withStyle(ChatFormatting.GRAY));
 		}
 
 		if (tooltipFlag.isAdvanced()) {
 			if (mapItemSavedData != null) {
-				if (!bl && b == 0) {
+				if (mapPostProcessing == null) {
 					list.add(getTooltipForId(mapId));
 				}
 
-				int i = Math.min(mapItemSavedData.scale + b, 4);
-				list.add(Component.translatable("filled_map.scale", 1 << i).withStyle(ChatFormatting.GRAY));
-				list.add(Component.translatable("filled_map.level", i, 4).withStyle(ChatFormatting.GRAY));
+				int i = mapPostProcessing == MapPostProcessing.SCALE ? 1 : 0;
+				int j = Math.min(mapItemSavedData.scale + i, 4);
+				list.add(Component.translatable("filled_map.scale", 1 << j).withStyle(ChatFormatting.GRAY));
+				list.add(Component.translatable("filled_map.level", j, 4).withStyle(ChatFormatting.GRAY));
 			} else {
 				list.add(Component.translatable("filled_map.unknown").withStyle(ChatFormatting.GRAY));
 			}
 		}
 	}
 
-	private static Component getTooltipForId(MapId mapId) {
+	public static Component getTooltipForId(MapId mapId) {
 		return Component.translatable("filled_map.id", mapId.id()).withStyle(ChatFormatting.GRAY);
-	}
-
-	public static Component getTooltipForId(ItemStack itemStack) {
-		return getTooltipForId(getMapId(itemStack));
-	}
-
-	public static int getColor(ItemStack itemStack) {
-		CompoundTag compoundTag = itemStack.getTagElement("display");
-		if (compoundTag != null && compoundTag.contains("MapColor", 99)) {
-			int i = compoundTag.getInt("MapColor");
-			return 0xFF000000 | i & 16777215;
-		} else {
-			return -12173266;
-		}
 	}
 
 	@Override

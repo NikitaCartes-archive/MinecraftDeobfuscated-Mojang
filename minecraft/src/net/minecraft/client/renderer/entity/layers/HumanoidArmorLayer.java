@@ -16,6 +16,7 @@ import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.ModelManager;
 import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.FastColor;
@@ -23,9 +24,9 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ArmorMaterial;
-import net.minecraft.world.item.DyeableLeatherItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.armortrim.ArmorTrim;
+import net.minecraft.world.item.component.DyedItemColor;
 
 @Environment(EnvType.CLIENT)
 public class HumanoidArmorLayer<T extends LivingEntity, M extends HumanoidModel<T>, A extends HumanoidModel<T>> extends RenderLayer<T, M> {
@@ -56,7 +57,7 @@ public class HumanoidArmorLayer<T extends LivingEntity, M extends HumanoidModel<
 				this.setPartVisibility(humanoidModel, equipmentSlot);
 				boolean bl = this.usesInnerModel(equipmentSlot);
 				ArmorMaterial armorMaterial = armorItem.getMaterial().value();
-				int j = itemStack.is(ItemTags.DYEABLE) ? DyeableLeatherItem.getColor(itemStack) : -1;
+				int j = itemStack.is(ItemTags.DYEABLE) ? DyedItemColor.getOrDefault(itemStack, -6265536) : -1;
 
 				for (ArmorMaterial.Layer layer : armorMaterial.layers()) {
 					float f;
@@ -75,8 +76,11 @@ public class HumanoidArmorLayer<T extends LivingEntity, M extends HumanoidModel<
 					this.renderModel(poseStack, multiBufferSource, i, humanoidModel, f, g, h, layer.texture(bl));
 				}
 
-				ArmorTrim.getTrim(livingEntity.level().registryAccess(), itemStack, true)
-					.ifPresent(armorTrim -> this.renderTrim(armorItem.getMaterial(), poseStack, multiBufferSource, i, armorTrim, humanoidModel, bl));
+				ArmorTrim armorTrim = itemStack.get(DataComponents.TRIM);
+				if (armorTrim != null) {
+					this.renderTrim(armorItem.getMaterial(), poseStack, multiBufferSource, i, armorTrim, humanoidModel, bl);
+				}
+
 				if (itemStack.hasFoil()) {
 					this.renderGlint(poseStack, multiBufferSource, i, humanoidModel);
 				}

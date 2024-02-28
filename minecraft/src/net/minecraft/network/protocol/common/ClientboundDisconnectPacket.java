@@ -8,7 +8,7 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketType;
 
 public record ClientboundDisconnectPacket(Component reason) implements Packet<ClientCommonPacketListener> {
-	public static final StreamCodec<ByteBuf, ClientboundDisconnectPacket> STREAM_CODEC = ComponentSerialization.CONTEXT_FREE_STREAM_CODEC
+	public static final StreamCodec<ByteBuf, ClientboundDisconnectPacket> STREAM_CODEC = ComponentSerialization.TRUSTED_CONTEXT_FREE_STREAM_CODEC
 		.map(ClientboundDisconnectPacket::new, ClientboundDisconnectPacket::reason);
 
 	@Override

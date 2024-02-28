@@ -50,6 +50,11 @@ public class Donkey extends AbstractChestedHorse {
 		}
 	}
 
+	@Override
+	protected void playJumpSound() {
+		this.playSound(SoundEvents.DONKEY_JUMP, 0.4F, 1.0F);
+	}
+
 	@Nullable
 	@Override
 	public AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {

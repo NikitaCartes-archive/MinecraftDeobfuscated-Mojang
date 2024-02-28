@@ -11,15 +11,16 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.tags.TagKey;
-import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.StructureAccess;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.levelgen.WorldOptions;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureCheck;
@@ -110,16 +111,19 @@ public class StructureManager {
 		return StructureStart.INVALID_START;
 	}
 
-	public StructureStart getStructureWithPieceAt(BlockPos blockPos, ResourceKey<Structure> resourceKey) {
-		Structure structure = this.registryAccess().registryOrThrow(Registries.STRUCTURE).get(resourceKey);
-		return structure == null ? StructureStart.INVALID_START : this.getStructureWithPieceAt(blockPos, structure);
+	public StructureStart getStructureWithPieceAt(BlockPos blockPos, TagKey<Structure> tagKey) {
+		return this.getStructureWithPieceAt(blockPos, holder -> holder.is(tagKey));
 	}
 
-	public StructureStart getStructureWithPieceAt(BlockPos blockPos, TagKey<Structure> tagKey) {
+	public StructureStart getStructureWithPieceAt(BlockPos blockPos, HolderSet<Structure> holderSet) {
+		return this.getStructureWithPieceAt(blockPos, holderSet::contains);
+	}
+
+	public StructureStart getStructureWithPieceAt(BlockPos blockPos, Predicate<Holder<Structure>> predicate) {
 		Registry<Structure> registry = this.registryAccess().registryOrThrow(Registries.STRUCTURE);
 
 		for (StructureStart structureStart : this.startsForStructure(
-			new ChunkPos(blockPos), structure -> (Boolean)registry.getHolder(registry.getId(structure)).map(reference -> reference.is(tagKey)).orElse(false)
+			new ChunkPos(blockPos), structure -> (Boolean)registry.getHolder(registry.getId(structure)).map(predicate::test).orElse(false)
 		)) {
 			if (this.structureHasPieceAt(blockPos, structureStart)) {
 				return structureStart;

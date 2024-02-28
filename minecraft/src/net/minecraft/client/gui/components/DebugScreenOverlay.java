@@ -64,8 +64,8 @@ import net.minecraft.world.level.biome.Climate;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.RandomState;
 import net.minecraft.world.level.material.FluidState;
@@ -465,7 +465,7 @@ public class DebugScreenOverlay {
 
 			this.serverChunk = serverLevel.getChunkSource()
 				.getChunkFuture(this.lastPos.x, this.lastPos.z, ChunkStatus.FULL, false)
-				.thenApply(either -> either.map(chunkAccess -> (LevelChunk)chunkAccess, chunkLoadingFailure -> null));
+				.thenApply(chunkResult -> (LevelChunk)chunkResult.orElse(null));
 		}
 
 		return (LevelChunk)this.serverChunk.getNow(null);

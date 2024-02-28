@@ -14,6 +14,7 @@ import net.minecraft.client.resources.model.ModelManager;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
@@ -138,7 +139,7 @@ public class ItemFrameRenderer<T extends ItemFrame> extends EntityRenderer<T> {
 	protected boolean shouldShowName(T itemFrame) {
 		if (Minecraft.renderNames()
 			&& !itemFrame.getItem().isEmpty()
-			&& itemFrame.getItem().hasCustomHoverName()
+			&& itemFrame.getItem().has(DataComponents.CUSTOM_NAME)
 			&& this.entityRenderDispatcher.crosshairPickEntity == itemFrame) {
 			double d = this.entityRenderDispatcher.distanceToSqr(itemFrame);
 			float f = itemFrame.isDiscrete() ? 32.0F : 64.0F;

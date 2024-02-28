@@ -1,54 +1,51 @@
 package net.minecraft.world.item;
 
-import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-import java.util.Collection;
+import io.netty.handler.codec.DecoderException;
+import io.netty.handler.codec.EncoderException;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Map.Entry;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
+import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.advancements.CriteriaTriggers;
-import net.minecraft.commands.arguments.blocks.BlockStateParser;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.NonNullList;
-import net.minecraft.core.Registry;
+import net.minecraft.core.component.DataComponentHolder;
+import net.minecraft.core.component.DataComponentMap;
+import net.minecraft.core.component.DataComponentPatch;
+import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.component.PatchedDataComponentMap;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
-import net.minecraft.nbt.TagParser;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.Style;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.stats.Stats;
@@ -72,123 +69,129 @@ import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
-import net.minecraft.world.item.armortrim.ArmorTrim;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
+import net.minecraft.world.item.component.TooltipProvider;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.item.enchantment.DigDurabilityEnchantment;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.saveddata.maps.MapId;
+import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.slf4j.Logger;
 
-public final class ItemStack {
-	public static final Codec<ItemStack> CODEC = RecordCodecBuilder.create(
-		instance -> instance.group(
-					BuiltInRegistries.ITEM.holderByNameCodec().fieldOf("id").forGetter(ItemStack::getItemHolder),
-					Codec.INT.fieldOf("Count").forGetter(ItemStack::getCount),
-					CompoundTag.CODEC.optionalFieldOf("tag").forGetter(itemStack -> Optional.ofNullable(itemStack.getTag()))
-				)
-				.apply(instance, ItemStack::new)
+public final class ItemStack implements DataComponentHolder {
+	private static final Codec<Holder<Item>> ITEM_NON_AIR_CODEC = ExtraCodecs.validate(
+		BuiltInRegistries.ITEM.holderByNameCodec(),
+		holder -> holder.is(Items.AIR.builtInRegistryHolder()) ? DataResult.error(() -> "Item must not be minecraft:air") : DataResult.success(holder)
 	);
-	private static final Codec<Item> ITEM_NON_AIR_CODEC = ExtraCodecs.validate(
-		BuiltInRegistries.ITEM.byNameCodec(), item -> item == Items.AIR ? DataResult.error(() -> "Item must not be minecraft:air") : DataResult.success(item)
+	public static final Codec<ItemStack> CODEC = ExtraCodecs.lazyInitializedCodec(
+		() -> ExtraCodecs.validate(
+				RecordCodecBuilder.create(
+					instance -> instance.group(
+								ITEM_NON_AIR_CODEC.fieldOf("id").forGetter(ItemStack::getItemHolder),
+								ExtraCodecs.strictOptionalField(ExtraCodecs.POSITIVE_INT, "count", 1).forGetter(ItemStack::getCount),
+								ExtraCodecs.strictOptionalField(DataComponentPatch.CODEC, "components", DataComponentPatch.EMPTY)
+									.forGetter(itemStack -> itemStack.components.asPatch())
+							)
+							.apply(instance, ItemStack::new)
+				),
+				ItemStack::validate
+			)
 	);
-	public static final Codec<ItemStack> ADVANCEMENT_ICON_CODEC = RecordCodecBuilder.create(
-		instance -> instance.group(
-					BuiltInRegistries.ITEM.holderByNameCodec().fieldOf("item").forGetter(ItemStack::getItemHolder),
-					ExtraCodecs.strictOptionalField(TagParser.AS_CODEC, "nbt").forGetter(itemStack -> Optional.ofNullable(itemStack.getTag()))
-				)
-				.apply(instance, (holder, optional) -> new ItemStack(holder, 1, optional))
-	);
+	public static final Codec<ItemStack> OPTIONAL_CODEC = ExtraCodecs.optionalEmptyMap(CODEC)
+		.xmap(optional -> (ItemStack)optional.orElse(ItemStack.EMPTY), itemStack -> itemStack.isEmpty() ? Optional.empty() : Optional.of(itemStack));
+	public static final Codec<ItemStack> SIMPLE_ITEM_CODEC = ITEM_NON_AIR_CODEC.xmap(ItemStack::new, ItemStack::getItemHolder);
 	public static final Codec<ItemStack> ITEM_WITH_COUNT_CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
-					ITEM_NON_AIR_CODEC.fieldOf("item").forGetter(ItemStack::getItem),
+					ITEM_NON_AIR_CODEC.fieldOf("id").forGetter(ItemStack::getItemHolder),
 					ExtraCodecs.strictOptionalField(ExtraCodecs.POSITIVE_INT, "count", 1).forGetter(ItemStack::getCount)
 				)
 				.apply(instance, ItemStack::new)
 	);
-	public static final Codec<ItemStack> SINGLE_ITEM_CODEC = ITEM_NON_AIR_CODEC.xmap(ItemStack::new, ItemStack::getItem);
-	public static final MapCodec<ItemStack> RESULT_CODEC = RecordCodecBuilder.mapCodec(
-		instance -> instance.group(
-					BuiltInRegistries.ITEM.byNameCodec().fieldOf("result").forGetter(ItemStack::getItem), Codec.INT.fieldOf("count").forGetter(ItemStack::getCount)
-				)
-				.apply(instance, ItemStack::new)
-	);
-	public static final StreamCodec<RegistryFriendlyByteBuf, ItemStack> STREAM_CODEC = new StreamCodec<RegistryFriendlyByteBuf, ItemStack>() {
-		private static final StreamCodec<RegistryFriendlyByteBuf, Item> ITEM_STREAM_CODEC = ByteBufCodecs.registry(Registries.ITEM);
+	public static final StreamCodec<RegistryFriendlyByteBuf, ItemStack> OPTIONAL_STREAM_CODEC = new StreamCodec<RegistryFriendlyByteBuf, ItemStack>() {
+		private static final StreamCodec<RegistryFriendlyByteBuf, Holder<Item>> ITEM_STREAM_CODEC = ByteBufCodecs.holderRegistry(Registries.ITEM);
 
 		public ItemStack decode(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
-			if (!registryFriendlyByteBuf.readBoolean()) {
+			int i = registryFriendlyByteBuf.readByte();
+			if (i <= 0) {
 				return ItemStack.EMPTY;
 			} else {
-				Item item = ITEM_STREAM_CODEC.decode(registryFriendlyByteBuf);
-				int i = registryFriendlyByteBuf.readByte();
-				ItemStack itemStack = new ItemStack(item, i);
-				itemStack.setTag(FriendlyByteBuf.readNbt(registryFriendlyByteBuf));
+				Holder<Item> holder = ITEM_STREAM_CODEC.decode(registryFriendlyByteBuf);
+				DataComponentPatch dataComponentPatch = DataComponentPatch.STREAM_CODEC.decode(registryFriendlyByteBuf);
+				return new ItemStack(holder, i, dataComponentPatch);
+			}
+		}
+
+		public void encode(RegistryFriendlyByteBuf registryFriendlyByteBuf, ItemStack itemStack) {
+			if (itemStack.isEmpty()) {
+				registryFriendlyByteBuf.writeByte(0);
+			} else {
+				registryFriendlyByteBuf.writeByte(itemStack.getCount());
+				ITEM_STREAM_CODEC.encode(registryFriendlyByteBuf, itemStack.getItemHolder());
+				DataComponentPatch.STREAM_CODEC.encode(registryFriendlyByteBuf, itemStack.components.asPatch());
+			}
+		}
+	};
+	public static final StreamCodec<RegistryFriendlyByteBuf, ItemStack> STREAM_CODEC = new StreamCodec<RegistryFriendlyByteBuf, ItemStack>() {
+		public ItemStack decode(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
+			ItemStack itemStack = ItemStack.OPTIONAL_STREAM_CODEC.decode(registryFriendlyByteBuf);
+			if (itemStack.isEmpty()) {
+				throw new DecoderException("Empty ItemStack not allowed");
+			} else {
 				return itemStack;
 			}
 		}
 
 		public void encode(RegistryFriendlyByteBuf registryFriendlyByteBuf, ItemStack itemStack) {
 			if (itemStack.isEmpty()) {
-				registryFriendlyByteBuf.writeBoolean(false);
+				throw new EncoderException("Empty ItemStack not allowed");
 			} else {
-				registryFriendlyByteBuf.writeBoolean(true);
-				Item item = itemStack.getItem();
-				ITEM_STREAM_CODEC.encode(registryFriendlyByteBuf, item);
-				registryFriendlyByteBuf.writeByte(itemStack.getCount());
-				CompoundTag compoundTag = null;
-				if (item.canBeDepleted() || item.shouldOverrideMultiplayerNbt()) {
-					compoundTag = itemStack.getTag();
-				}
-
-				FriendlyByteBuf.writeNbt(registryFriendlyByteBuf, compoundTag);
+				ItemStack.OPTIONAL_STREAM_CODEC.encode(registryFriendlyByteBuf, itemStack);
 			}
 		}
 	};
+	public static final StreamCodec<RegistryFriendlyByteBuf, List<ItemStack>> OPTIONAL_LIST_STREAM_CODEC = OPTIONAL_STREAM_CODEC.apply(
+		ByteBufCodecs.collection(NonNullList::createWithCapacity)
+	);
 	public static final StreamCodec<RegistryFriendlyByteBuf, List<ItemStack>> LIST_STREAM_CODEC = STREAM_CODEC.apply(
 		ByteBufCodecs.collection(NonNullList::createWithCapacity)
 	);
 	private static final Logger LOGGER = LogUtils.getLogger();
 	public static final ItemStack EMPTY = new ItemStack((Void)null);
-	public static final DecimalFormat ATTRIBUTE_MODIFIER_FORMAT = Util.make(
-		new DecimalFormat("#.##"), decimalFormat -> decimalFormat.setDecimalFormatSymbols(DecimalFormatSymbols.getInstance(Locale.ROOT))
-	);
-	public static final String TAG_ENCH = "Enchantments";
-	public static final String TAG_DISPLAY = "display";
-	public static final String TAG_DISPLAY_NAME = "Name";
-	public static final String TAG_LORE = "Lore";
-	public static final String TAG_DAMAGE = "Damage";
-	public static final String TAG_COLOR = "color";
-	private static final String TAG_UNBREAKABLE = "Unbreakable";
-	private static final String TAG_REPAIR_COST = "RepairCost";
-	private static final String TAG_CAN_DESTROY_BLOCK_LIST = "CanDestroy";
-	private static final String TAG_CAN_PLACE_ON_BLOCK_LIST = "CanPlaceOn";
-	private static final String TAG_HIDE_FLAGS = "HideFlags";
 	private static final Component DISABLED_ITEM_TOOLTIP = Component.translatable("item.disabled").withStyle(ChatFormatting.RED);
-	private static final int DONT_HIDE_TOOLTIP = 0;
-	private static final Style LORE_STYLE = Style.EMPTY.withColor(ChatFormatting.DARK_PURPLE).withItalic(true);
 	private int count;
 	private int popTime;
 	@Deprecated
 	@Nullable
 	private final Item item;
-	@Nullable
-	private CompoundTag tag;
+	final PatchedDataComponentMap components;
 	@Nullable
 	private Entity entityRepresentation;
-	@Nullable
-	private AdventureModeCheck adventureBreakCheck;
-	@Nullable
-	private AdventureModeCheck adventurePlaceCheck;
+
+	private static DataResult<ItemStack> validate(ItemStack itemStack) {
+		return itemStack.getCount() > itemStack.getMaxStackSize()
+			? DataResult.<ItemStack>error(() -> "Item stack with stack size of " + itemStack.getCount() + " was larger than maximum: " + itemStack.getMaxStackSize())
+				.setPartial((Supplier<ItemStack>)(() -> itemStack.copyWithCount(itemStack.getMaxStackSize())))
+			: DataResult.success(itemStack);
+	}
 
 	public Optional<TooltipComponent> getTooltipImage() {
 		return this.getItem().getTooltipImage(this);
+	}
+
+	@Override
+	public DataComponentMap getComponents() {
+		return (DataComponentMap)(!this.isEmpty() ? this.components : DataComponentMap.EMPTY);
+	}
+
+	public DataComponentPatch getComponentsPatch() {
+		return !this.isEmpty() ? this.components.asPatch() : DataComponentPatch.EMPTY;
 	}
 
 	public ItemStack(ItemLike itemLike) {
@@ -199,9 +202,8 @@ public final class ItemStack {
 		this(holder.value(), 1);
 	}
 
-	public ItemStack(Holder<Item> holder, int i, Optional<CompoundTag> optional) {
-		this(holder, i);
-		optional.ifPresent(this::setTag);
+	public ItemStack(Holder<Item> holder, int i, DataComponentPatch dataComponentPatch) {
+		this(holder.value(), i, PatchedDataComponentMap.fromPatch(holder.value().components(), dataComponentPatch));
 	}
 
 	public ItemStack(Holder<Item> holder, int i) {
@@ -209,37 +211,28 @@ public final class ItemStack {
 	}
 
 	public ItemStack(ItemLike itemLike, int i) {
+		this(itemLike, i, new PatchedDataComponentMap(itemLike.asItem().components()));
+	}
+
+	private ItemStack(ItemLike itemLike, int i, PatchedDataComponentMap patchedDataComponentMap) {
 		this.item = itemLike.asItem();
 		this.count = i;
-		if (this.item.canBeDepleted()) {
-			this.setDamageValue(this.getDamageValue());
-		}
+		this.components = patchedDataComponentMap;
+		this.getItem().verifyComponentsAfterLoad(this);
 	}
 
 	private ItemStack(@Nullable Void void_) {
 		this.item = null;
+		this.components = new PatchedDataComponentMap(DataComponentMap.EMPTY);
 	}
 
-	private ItemStack(CompoundTag compoundTag) {
-		this.item = BuiltInRegistries.ITEM.get(new ResourceLocation(compoundTag.getString("id")));
-		this.count = compoundTag.getByte("Count");
-		if (compoundTag.contains("tag", 10)) {
-			this.tag = compoundTag.getCompound("tag").copy();
-			this.getItem().verifyTagAfterLoad(this.tag);
-		}
-
-		if (this.getItem().canBeDepleted()) {
-			this.setDamageValue(this.getDamageValue());
-		}
+	public static Optional<ItemStack> parse(HolderLookup.Provider provider, Tag tag) {
+		return CODEC.parse(provider.createSerializationContext(NbtOps.INSTANCE), tag)
+			.resultOrPartial(string -> LOGGER.error("Tried to load invalid item: '{}'", string));
 	}
 
-	public static ItemStack of(CompoundTag compoundTag) {
-		try {
-			return new ItemStack(compoundTag);
-		} catch (RuntimeException var2) {
-			LOGGER.debug("Tried to load invalid item: {}", compoundTag, var2);
-			return EMPTY;
-		}
+	public static ItemStack parseOptional(HolderLookup.Provider provider, CompoundTag compoundTag) {
+		return compoundTag.isEmpty() ? EMPTY : (ItemStack)parse(provider, compoundTag).orElse(EMPTY);
 	}
 
 	public boolean isEmpty() {
@@ -302,10 +295,7 @@ public final class ItemStack {
 	public InteractionResult useOn(UseOnContext useOnContext) {
 		Player player = useOnContext.getPlayer();
 		BlockPos blockPos = useOnContext.getClickedPos();
-		BlockInWorld blockInWorld = new BlockInWorld(useOnContext.getLevel(), blockPos, false);
-		if (player != null
-			&& !player.getAbilities().mayBuild
-			&& !this.hasAdventureModePlaceTagForBlock(useOnContext.getLevel().registryAccess().registryOrThrow(Registries.BLOCK), blockInWorld)) {
+		if (player != null && !player.getAbilities().mayBuild && !this.canPlaceOnBlockInAdventureMode(new BlockInWorld(useOnContext.getLevel(), blockPos, false))) {
 			return InteractionResult.PASS;
 		} else {
 			Item item = this.getItem();
@@ -330,15 +320,24 @@ public final class ItemStack {
 		return this.getItem().finishUsingItem(this, level, livingEntity);
 	}
 
-	public CompoundTag save(CompoundTag compoundTag) {
-		ResourceLocation resourceLocation = BuiltInRegistries.ITEM.getKey(this.getItem());
-		compoundTag.putString("id", resourceLocation == null ? "minecraft:air" : resourceLocation.toString());
-		compoundTag.putByte("Count", (byte)this.count);
-		if (this.tag != null) {
-			compoundTag.put("tag", this.tag.copy());
+	public Tag save(HolderLookup.Provider provider, Tag tag) {
+		if (this.isEmpty()) {
+			throw new IllegalStateException("Cannot encode empty ItemStack");
+		} else {
+			return Util.getOrThrow(CODEC.encode(this, provider.createSerializationContext(NbtOps.INSTANCE), tag), IllegalStateException::new);
 		}
+	}
 
-		return compoundTag;
+	public Tag save(HolderLookup.Provider provider) {
+		if (this.isEmpty()) {
+			throw new IllegalStateException("Cannot encode empty ItemStack");
+		} else {
+			return Util.getOrThrow(CODEC.encodeStart(provider.createSerializationContext(NbtOps.INSTANCE), this), IllegalStateException::new);
+		}
+	}
+
+	public Tag saveOptional(HolderLookup.Provider provider) {
+		return (Tag)(this.isEmpty() ? new CompoundTag() : this.save(provider, new CompoundTag()));
 	}
 
 	public int getMaxStackSize() {
@@ -350,12 +349,7 @@ public final class ItemStack {
 	}
 
 	public boolean isDamageableItem() {
-		return !this.isEmpty() && this.getItem().getMaxDamage() > 0 ? !this.isUnbreakable() : false;
-	}
-
-	public boolean isUnbreakable() {
-		CompoundTag compoundTag = this.getTag();
-		return compoundTag != null && compoundTag.getBoolean("Unbreakable");
+		return !this.isEmpty() && this.getItem().canBeDepleted() ? !this.has(DataComponents.UNBREAKABLE) && this.has(DataComponents.DAMAGE) : false;
 	}
 
 	public boolean isDamaged() {
@@ -363,11 +357,11 @@ public final class ItemStack {
 	}
 
 	public int getDamageValue() {
-		return this.tag == null ? 0 : this.tag.getInt("Damage");
+		return this.getOrDefault(DataComponents.DAMAGE, Integer.valueOf(0));
 	}
 
 	public void setDamageValue(int i) {
-		this.getOrCreateTag().putInt("Damage", Math.max(0, i));
+		this.set(DataComponents.DAMAGE, i);
 	}
 
 	public int getMaxDamage() {
@@ -469,12 +463,8 @@ public final class ItemStack {
 		if (this.isEmpty()) {
 			return EMPTY;
 		} else {
-			ItemStack itemStack = new ItemStack(this.getItem(), this.count);
+			ItemStack itemStack = new ItemStack(this.getItem(), this.count, this.components.copy());
 			itemStack.setPopTime(this.getPopTime());
-			if (this.tag != null) {
-				itemStack.tag = this.tag.copy();
-			}
-
 			return itemStack;
 		}
 	}
@@ -494,12 +484,7 @@ public final class ItemStack {
 	}
 
 	public ItemStack transmuteCopyIgnoreEmpty(ItemLike itemLike, int i) {
-		ItemStack itemStack = new ItemStack(itemLike, i);
-		if (this.tag != null) {
-			itemStack.setTag(this.tag.copy());
-		}
-
-		return itemStack;
+		return new ItemStack(itemLike.asItem().builtInRegistryHolder(), i, this.components.asPatch());
 	}
 
 	public static boolean matches(ItemStack itemStack, ItemStack itemStack2) {
@@ -507,6 +492,21 @@ public final class ItemStack {
 			return true;
 		} else {
 			return itemStack.getCount() != itemStack2.getCount() ? false : isSameItemSameTags(itemStack, itemStack2);
+		}
+	}
+
+	@Deprecated
+	public static boolean listMatches(List<ItemStack> list, List<ItemStack> list2) {
+		if (list.size() != list2.size()) {
+			return false;
+		} else {
+			for (int i = 0; i < list.size(); i++) {
+				if (!matches((ItemStack)list.get(i), (ItemStack)list2.get(i))) {
+					return false;
+				}
+			}
+
+			return true;
 		}
 	}
 
@@ -518,13 +518,33 @@ public final class ItemStack {
 		if (!itemStack.is(itemStack2.getItem())) {
 			return false;
 		} else {
-			return itemStack.isEmpty() && itemStack2.isEmpty() ? true : Objects.equals(itemStack.tag, itemStack2.tag);
+			return itemStack.isEmpty() && itemStack2.isEmpty() ? true : Objects.equals(itemStack.components, itemStack2.components);
 		}
 	}
 
 	public static MapCodec<ItemStack> optionalFieldOf(String string) {
 		return CODEC.optionalFieldOf(string)
 			.xmap(optional -> (ItemStack)optional.orElse(EMPTY), itemStack -> itemStack.isEmpty() ? Optional.empty() : Optional.of(itemStack));
+	}
+
+	public static int hashItemAndComponents(@Nullable ItemStack itemStack) {
+		if (itemStack != null) {
+			int i = 31 + itemStack.getItem().hashCode();
+			return 31 * i + itemStack.getComponents().hashCode();
+		} else {
+			return 0;
+		}
+	}
+
+	@Deprecated
+	public static int hashStackList(List<ItemStack> list) {
+		int i = 0;
+
+		for (ItemStack itemStack : list) {
+			i = i * 31 + hashItemAndComponents(itemStack);
+		}
+
+		return i;
 	}
 
 	public String getDescriptionId() {
@@ -570,262 +590,88 @@ public final class ItemStack {
 		return this.getItem().useOnRelease(this);
 	}
 
-	public boolean hasTag() {
-		return !this.isEmpty() && this.tag != null && !this.tag.isEmpty();
+	@Nullable
+	public <T> T set(DataComponentType<? super T> dataComponentType, @Nullable T object) {
+		return this.components.set(dataComponentType, object);
 	}
 
 	@Nullable
-	public CompoundTag getTag() {
-		return this.tag;
-	}
-
-	public CompoundTag getOrCreateTag() {
-		if (this.tag == null) {
-			this.setTag(new CompoundTag());
-		}
-
-		return this.tag;
-	}
-
-	public CompoundTag getOrCreateTagElement(String string) {
-		if (this.tag != null && this.tag.contains(string, 10)) {
-			return this.tag.getCompound(string);
-		} else {
-			CompoundTag compoundTag = new CompoundTag();
-			this.addTagElement(string, compoundTag);
-			return compoundTag;
-		}
+	public <T, U> T update(DataComponentType<T> dataComponentType, T object, U object2, BiFunction<T, U, T> biFunction) {
+		return this.set(dataComponentType, (T)biFunction.apply(this.getOrDefault(dataComponentType, object), object2));
 	}
 
 	@Nullable
-	public CompoundTag getTagElement(String string) {
-		return this.tag != null && this.tag.contains(string, 10) ? this.tag.getCompound(string) : null;
+	public <T> T update(DataComponentType<T> dataComponentType, T object, UnaryOperator<T> unaryOperator) {
+		T object2 = this.getOrDefault(dataComponentType, object);
+		return this.set(dataComponentType, (T)unaryOperator.apply(object2));
 	}
 
-	public void removeTagKey(String string) {
-		if (this.tag != null && this.tag.contains(string)) {
-			this.tag.remove(string);
-			if (this.tag.isEmpty()) {
-				this.tag = null;
-			}
-		}
+	@Nullable
+	public <T> T remove(DataComponentType<? extends T> dataComponentType) {
+		return this.components.remove(dataComponentType);
 	}
 
-	public ListTag getEnchantmentTags() {
-		return this.tag != null ? this.tag.getList("Enchantments", 10) : new ListTag();
+	public void applyComponents(DataComponentPatch dataComponentPatch) {
+		this.components.applyPatch(dataComponentPatch);
+		this.getItem().verifyComponentsAfterLoad(this);
 	}
 
-	public void setTag(@Nullable CompoundTag compoundTag) {
-		this.tag = compoundTag;
-		if (this.getItem().canBeDepleted()) {
-			this.setDamageValue(this.getDamageValue());
-		}
-
-		if (compoundTag != null) {
-			this.getItem().verifyTagAfterLoad(compoundTag);
-		}
+	public void applyComponents(DataComponentMap dataComponentMap) {
+		this.components.setAll(dataComponentMap);
+		this.getItem().verifyComponentsAfterLoad(this);
 	}
 
 	public Component getHoverName() {
-		CompoundTag compoundTag = this.getTagElement("display");
-		if (compoundTag != null && compoundTag.contains("Name", 8)) {
-			try {
-				Component component = Component.Serializer.fromJson(compoundTag.getString("Name"));
-				if (component != null) {
-					return component;
-				}
-
-				compoundTag.remove("Name");
-			} catch (Exception var3) {
-				compoundTag.remove("Name");
-			}
-		}
-
-		return this.getItem().getName(this);
+		Component component = this.get(DataComponents.CUSTOM_NAME);
+		return component != null ? component : this.getItem().getName(this);
 	}
 
-	public ItemStack setHoverName(@Nullable Component component) {
-		CompoundTag compoundTag = this.getOrCreateTagElement("display");
-		if (component != null) {
-			compoundTag.putString("Name", Component.Serializer.toJson(component));
-		} else {
-			compoundTag.remove("Name");
+	private <T extends TooltipProvider> void addToTooltip(DataComponentType<T> dataComponentType, Consumer<Component> consumer, TooltipFlag tooltipFlag) {
+		T tooltipProvider = (T)this.get(dataComponentType);
+		if (tooltipProvider != null) {
+			tooltipProvider.addToTooltip(consumer, tooltipFlag);
 		}
-
-		return this;
-	}
-
-	public void resetHoverName() {
-		CompoundTag compoundTag = this.getTagElement("display");
-		if (compoundTag != null) {
-			compoundTag.remove("Name");
-			if (compoundTag.isEmpty()) {
-				this.removeTagKey("display");
-			}
-		}
-
-		if (this.tag != null && this.tag.isEmpty()) {
-			this.tag = null;
-		}
-	}
-
-	public boolean hasCustomHoverName() {
-		CompoundTag compoundTag = this.getTagElement("display");
-		return compoundTag != null && compoundTag.contains("Name", 8);
 	}
 
 	public List<Component> getTooltipLines(@Nullable Player player, TooltipFlag tooltipFlag) {
 		List<Component> list = Lists.<Component>newArrayList();
 		MutableComponent mutableComponent = Component.empty().append(this.getHoverName()).withStyle(this.getRarity().color);
-		if (this.hasCustomHoverName()) {
+		if (this.has(DataComponents.CUSTOM_NAME)) {
 			mutableComponent.withStyle(ChatFormatting.ITALIC);
 		}
 
 		list.add(mutableComponent);
-		if (!tooltipFlag.isAdvanced() && !this.hasCustomHoverName() && this.is(Items.FILLED_MAP)) {
-			MapId mapId = MapItem.getMapId(this);
+		if (!tooltipFlag.isAdvanced() && !this.has(DataComponents.CUSTOM_NAME) && this.is(Items.FILLED_MAP)) {
+			MapId mapId = this.get(DataComponents.MAP_ID);
 			if (mapId != null) {
-				list.add(MapItem.getTooltipForId(this));
+				list.add(MapItem.getTooltipForId(mapId));
 			}
 		}
 
-		int i = this.getHideFlags();
-		if (shouldShowInTooltip(i, ItemStack.TooltipPart.ADDITIONAL)) {
+		Consumer<Component> consumer = list::add;
+		if (!this.has(DataComponents.HIDE_ADDITIONAL_TOOLTIP)) {
 			this.getItem().appendHoverText(this, player == null ? null : player.level(), list, tooltipFlag);
-			appendEnchantmentNames(list, EnchantedBookItem.getEnchantments(this));
 		}
 
-		if (shouldShowInTooltip(i, ItemStack.TooltipPart.UPGRADES) && player != null) {
-			ArmorTrim.appendUpgradeHoverText(this, player.level().registryAccess(), list);
+		this.addToTooltip(DataComponents.TRIM, consumer, tooltipFlag);
+		this.addToTooltip(DataComponents.STORED_ENCHANTMENTS, consumer, tooltipFlag);
+		this.addToTooltip(DataComponents.ENCHANTMENTS, consumer, tooltipFlag);
+		this.addToTooltip(DataComponents.DYED_COLOR, consumer, tooltipFlag);
+		this.addToTooltip(DataComponents.LORE, consumer, tooltipFlag);
+		this.addAttributeTooltips(consumer, player);
+		this.addToTooltip(DataComponents.UNBREAKABLE, consumer, tooltipFlag);
+		AdventureModePredicate adventureModePredicate = this.get(DataComponents.CAN_BREAK);
+		if (adventureModePredicate != null && adventureModePredicate.showInTooltip()) {
+			consumer.accept(CommonComponents.EMPTY);
+			consumer.accept(AdventureModePredicate.CAN_BREAK_HEADER);
+			adventureModePredicate.addToTooltip(consumer);
 		}
 
-		if (shouldShowInTooltip(i, ItemStack.TooltipPart.ENCHANTMENTS)) {
-			appendEnchantmentNames(list, this.getEnchantmentTags());
-		}
-
-		if (this.tag != null && this.tag.contains("display", 10)) {
-			CompoundTag compoundTag = this.tag.getCompound("display");
-			if (shouldShowInTooltip(i, ItemStack.TooltipPart.DYE) && compoundTag.contains("color", 99)) {
-				if (tooltipFlag.isAdvanced()) {
-					list.add(Component.translatable("item.color", String.format(Locale.ROOT, "#%06X", compoundTag.getInt("color"))).withStyle(ChatFormatting.GRAY));
-				} else {
-					list.add(Component.translatable("item.dyed").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
-				}
-			}
-
-			if (compoundTag.getTagType("Lore") == 9) {
-				ListTag listTag = compoundTag.getList("Lore", 8);
-
-				for (int j = 0; j < listTag.size(); j++) {
-					String string = listTag.getString(j);
-
-					try {
-						MutableComponent mutableComponent2 = Component.Serializer.fromJson(string);
-						if (mutableComponent2 != null) {
-							list.add(ComponentUtils.mergeStyles(mutableComponent2, LORE_STYLE));
-						}
-					} catch (Exception var19) {
-						compoundTag.remove("Lore");
-					}
-				}
-			}
-		}
-
-		if (shouldShowInTooltip(i, ItemStack.TooltipPart.MODIFIERS)) {
-			for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
-				Multimap<Holder<Attribute>, AttributeModifier> multimap = this.getAttributeModifiers(equipmentSlot);
-				if (!multimap.isEmpty()) {
-					list.add(CommonComponents.EMPTY);
-					list.add(Component.translatable("item.modifiers." + equipmentSlot.getName()).withStyle(ChatFormatting.GRAY));
-
-					for (Entry<Holder<Attribute>, AttributeModifier> entry : multimap.entries()) {
-						AttributeModifier attributeModifier = (AttributeModifier)entry.getValue();
-						double d = attributeModifier.getAmount();
-						boolean bl = false;
-						if (player != null) {
-							if (attributeModifier.getId() == Item.BASE_ATTACK_DAMAGE_UUID) {
-								d += player.getAttributeBaseValue(Attributes.ATTACK_DAMAGE);
-								d += (double)EnchantmentHelper.getDamageBonus(this, null);
-								bl = true;
-							} else if (attributeModifier.getId() == Item.BASE_ATTACK_SPEED_UUID) {
-								d += player.getAttributeBaseValue(Attributes.ATTACK_SPEED);
-								bl = true;
-							}
-						}
-
-						double e;
-						if (attributeModifier.getOperation() == AttributeModifier.Operation.MULTIPLY_BASE
-							|| attributeModifier.getOperation() == AttributeModifier.Operation.MULTIPLY_TOTAL) {
-							e = d * 100.0;
-						} else if (((Holder)entry.getKey()).is(Attributes.KNOCKBACK_RESISTANCE)) {
-							e = d * 10.0;
-						} else {
-							e = d;
-						}
-
-						if (bl) {
-							list.add(
-								CommonComponents.space()
-									.append(
-										Component.translatable(
-											"attribute.modifier.equals." + attributeModifier.getOperation().id(),
-											ATTRIBUTE_MODIFIER_FORMAT.format(e),
-											Component.translatable(((Attribute)((Holder)entry.getKey()).value()).getDescriptionId())
-										)
-									)
-									.withStyle(ChatFormatting.DARK_GREEN)
-							);
-						} else if (d > 0.0) {
-							list.add(
-								Component.translatable(
-										"attribute.modifier.plus." + attributeModifier.getOperation().id(),
-										ATTRIBUTE_MODIFIER_FORMAT.format(e),
-										Component.translatable(((Attribute)((Holder)entry.getKey()).value()).getDescriptionId())
-									)
-									.withStyle(ChatFormatting.BLUE)
-							);
-						} else if (d < 0.0) {
-							e *= -1.0;
-							list.add(
-								Component.translatable(
-										"attribute.modifier.take." + attributeModifier.getOperation().id(),
-										ATTRIBUTE_MODIFIER_FORMAT.format(e),
-										Component.translatable(((Attribute)((Holder)entry.getKey()).value()).getDescriptionId())
-									)
-									.withStyle(ChatFormatting.RED)
-							);
-						}
-					}
-				}
-			}
-		}
-
-		if (shouldShowInTooltip(i, ItemStack.TooltipPart.UNBREAKABLE) && this.tag != null && this.tag.getBoolean("Unbreakable")) {
-			list.add(Component.translatable("item.unbreakable").withStyle(ChatFormatting.BLUE));
-		}
-
-		if (shouldShowInTooltip(i, ItemStack.TooltipPart.CAN_DESTROY) && this.tag != null && this.tag.contains("CanDestroy", 9)) {
-			ListTag listTag2 = this.tag.getList("CanDestroy", 8);
-			if (!listTag2.isEmpty()) {
-				list.add(CommonComponents.EMPTY);
-				list.add(Component.translatable("item.canBreak").withStyle(ChatFormatting.GRAY));
-
-				for (int k = 0; k < listTag2.size(); k++) {
-					list.addAll(expandBlockState(listTag2.getString(k)));
-				}
-			}
-		}
-
-		if (shouldShowInTooltip(i, ItemStack.TooltipPart.CAN_PLACE) && this.tag != null && this.tag.contains("CanPlaceOn", 9)) {
-			ListTag listTag2 = this.tag.getList("CanPlaceOn", 8);
-			if (!listTag2.isEmpty()) {
-				list.add(CommonComponents.EMPTY);
-				list.add(Component.translatable("item.canPlace").withStyle(ChatFormatting.GRAY));
-
-				for (int k = 0; k < listTag2.size(); k++) {
-					list.addAll(expandBlockState(listTag2.getString(k)));
-				}
-			}
+		AdventureModePredicate adventureModePredicate2 = this.get(DataComponents.CAN_PLACE_ON);
+		if (adventureModePredicate2 != null && adventureModePredicate2.showInTooltip()) {
+			consumer.accept(CommonComponents.EMPTY);
+			consumer.accept(AdventureModePredicate.CAN_PLACE_HEADER);
+			adventureModePredicate2.addToTooltip(consumer);
 		}
 
 		if (tooltipFlag.isAdvanced()) {
@@ -834,8 +680,9 @@ public final class ItemStack {
 			}
 
 			list.add(Component.literal(BuiltInRegistries.ITEM.getKey(this.getItem()).toString()).withStyle(ChatFormatting.DARK_GRAY));
-			if (this.hasTag()) {
-				list.add(Component.translatable("item.nbt_tags", this.tag.getAllKeys().size()).withStyle(ChatFormatting.DARK_GRAY));
+			int i = this.components.size();
+			if (i > 0) {
+				list.add(Component.translatable("item.components", i).withStyle(ChatFormatting.DARK_GRAY));
 			}
 		}
 
@@ -846,45 +693,84 @@ public final class ItemStack {
 		return list;
 	}
 
-	private static boolean shouldShowInTooltip(int i, ItemStack.TooltipPart tooltipPart) {
-		return (i & tooltipPart.getMask()) == 0;
-	}
+	private void addAttributeTooltips(Consumer<Component> consumer, @Nullable Player player) {
+		ItemAttributeModifiers itemAttributeModifiers = this.getOrDefault(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY);
+		if (itemAttributeModifiers.showInTooltip()) {
+			for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
+				MutableBoolean mutableBoolean = new MutableBoolean(true);
+				this.forEachModifier(equipmentSlot, (holder, attributeModifier) -> {
+					if (mutableBoolean.isTrue()) {
+						consumer.accept(CommonComponents.EMPTY);
+						consumer.accept(Component.translatable("item.modifiers." + equipmentSlot.getName()).withStyle(ChatFormatting.GRAY));
+						mutableBoolean.setFalse();
+					}
 
-	private int getHideFlags() {
-		return this.hasTag() && this.tag.contains("HideFlags", 99) ? this.tag.getInt("HideFlags") : 0;
-	}
-
-	public void hideTooltipPart(ItemStack.TooltipPart tooltipPart) {
-		CompoundTag compoundTag = this.getOrCreateTag();
-		compoundTag.putInt("HideFlags", compoundTag.getInt("HideFlags") | tooltipPart.getMask());
-	}
-
-	public static void appendEnchantmentNames(List<Component> list, ListTag listTag) {
-		for (int i = 0; i < listTag.size(); i++) {
-			CompoundTag compoundTag = listTag.getCompound(i);
-			BuiltInRegistries.ENCHANTMENT
-				.getOptional(EnchantmentHelper.getEnchantmentId(compoundTag))
-				.ifPresent(enchantment -> list.add(enchantment.getFullname(EnchantmentHelper.getEnchantmentLevel(compoundTag))));
+					this.addModifierTooltip(consumer, player, holder, attributeModifier);
+				});
+			}
 		}
 	}
 
-	private static Collection<Component> expandBlockState(String string) {
-		try {
-			return BlockStateParser.parseForTesting(BuiltInRegistries.BLOCK.asLookup(), string, true)
-				.map(
-					blockResult -> Lists.<Component>newArrayList(blockResult.blockState().getBlock().getName().withStyle(ChatFormatting.DARK_GRAY)),
-					tagResult -> (List)tagResult.tag()
-							.stream()
-							.map(holder -> ((Block)holder.value()).getName().withStyle(ChatFormatting.DARK_GRAY))
-							.collect(Collectors.toList())
-				);
-		} catch (CommandSyntaxException var2) {
-			return Lists.<Component>newArrayList(Component.literal("missingno").withStyle(ChatFormatting.DARK_GRAY));
+	private void addModifierTooltip(Consumer<Component> consumer, @Nullable Player player, Holder<Attribute> holder, AttributeModifier attributeModifier) {
+		double d = attributeModifier.getAmount();
+		boolean bl = false;
+		if (player != null) {
+			if (attributeModifier.getId() == Item.BASE_ATTACK_DAMAGE_UUID) {
+				d += player.getAttributeBaseValue(Attributes.ATTACK_DAMAGE);
+				d += (double)EnchantmentHelper.getDamageBonus(this, null);
+				bl = true;
+			} else if (attributeModifier.getId() == Item.BASE_ATTACK_SPEED_UUID) {
+				d += player.getAttributeBaseValue(Attributes.ATTACK_SPEED);
+				bl = true;
+			}
+		}
+
+		double e;
+		if (attributeModifier.getOperation() == AttributeModifier.Operation.ADD_MULTIPLIED_BASE
+			|| attributeModifier.getOperation() == AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL) {
+			e = d * 100.0;
+		} else if (holder.is(Attributes.KNOCKBACK_RESISTANCE)) {
+			e = d * 10.0;
+		} else {
+			e = d;
+		}
+
+		if (bl) {
+			consumer.accept(
+				CommonComponents.space()
+					.append(
+						Component.translatable(
+							"attribute.modifier.equals." + attributeModifier.getOperation().id(),
+							ItemAttributeModifiers.ATTRIBUTE_MODIFIER_FORMAT.format(e),
+							Component.translatable(holder.value().getDescriptionId())
+						)
+					)
+					.withStyle(ChatFormatting.DARK_GREEN)
+			);
+		} else if (d > 0.0) {
+			consumer.accept(
+				Component.translatable(
+						"attribute.modifier.plus." + attributeModifier.getOperation().id(),
+						ItemAttributeModifiers.ATTRIBUTE_MODIFIER_FORMAT.format(e),
+						Component.translatable(holder.value().getDescriptionId())
+					)
+					.withStyle(ChatFormatting.BLUE)
+			);
+		} else if (d < 0.0) {
+			consumer.accept(
+				Component.translatable(
+						"attribute.modifier.take." + attributeModifier.getOperation().id(),
+						ItemAttributeModifiers.ATTRIBUTE_MODIFIER_FORMAT.format(-e),
+						Component.translatable(holder.value().getDescriptionId())
+					)
+					.withStyle(ChatFormatting.RED)
+			);
 		}
 	}
 
 	public boolean hasFoil() {
-		return this.getItem().isFoil(this);
+		Boolean boolean_ = this.get(DataComponents.ENCHANTMENT_GLINT_OVERRIDE);
+		return boolean_ != null ? boolean_ : this.getItem().isFoil(this);
 	}
 
 	public Rarity getRarity() {
@@ -892,24 +778,20 @@ public final class ItemStack {
 	}
 
 	public boolean isEnchantable() {
-		return !this.getItem().isEnchantable(this) ? false : !this.isEnchanted();
+		if (!this.getItem().isEnchantable(this)) {
+			return false;
+		} else {
+			ItemEnchantments itemEnchantments = this.get(DataComponents.ENCHANTMENTS);
+			return itemEnchantments != null && itemEnchantments.isEmpty();
+		}
 	}
 
 	public void enchant(Enchantment enchantment, int i) {
-		Map<Enchantment, Integer> map = EnchantmentHelper.getEnchantments(this);
-		if (i != 0) {
-			map.merge(enchantment, i, Integer::max);
-		}
-
-		EnchantmentHelper.setEnchantments(map, this);
+		EnchantmentHelper.updateEnchantments(this, mutable -> mutable.upgrade(enchantment, i));
 	}
 
 	public boolean isEnchanted() {
-		return this.tag != null && this.tag.contains("Enchantments", 9) ? !this.tag.getList("Enchantments", 10).isEmpty() : false;
-	}
-
-	public void addTagElement(String string, Tag tag) {
-		this.getOrCreateTag().put(string, tag);
+		return !this.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY).isEmpty();
 	}
 
 	public boolean isFramed() {
@@ -917,7 +799,9 @@ public final class ItemStack {
 	}
 
 	public void setEntityRepresentation(@Nullable Entity entity) {
-		this.entityRepresentation = entity;
+		if (!this.isEmpty()) {
+			this.entityRepresentation = entity;
+		}
 	}
 
 	@Nullable
@@ -930,68 +814,18 @@ public final class ItemStack {
 		return !this.isEmpty() ? this.entityRepresentation : null;
 	}
 
-	public int getBaseRepairCost() {
-		return this.hasTag() && this.tag.contains("RepairCost", 3) ? this.tag.getInt("RepairCost") : 0;
-	}
-
-	public void setRepairCost(int i) {
-		if (i > 0) {
-			this.getOrCreateTag().putInt("RepairCost", i);
+	public void forEachModifier(EquipmentSlot equipmentSlot, BiConsumer<Holder<Attribute>, AttributeModifier> biConsumer) {
+		ItemAttributeModifiers itemAttributeModifiers = this.getOrDefault(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY);
+		if (!itemAttributeModifiers.modifiers().isEmpty()) {
+			itemAttributeModifiers.forEach(equipmentSlot, biConsumer);
 		} else {
-			this.removeTagKey("RepairCost");
+			this.getItem().getDefaultAttributeModifiers(equipmentSlot).forEach(biConsumer);
 		}
-	}
-
-	public Multimap<Holder<Attribute>, AttributeModifier> getAttributeModifiers(EquipmentSlot equipmentSlot) {
-		Multimap<Holder<Attribute>, AttributeModifier> multimap;
-		if (this.hasTag() && this.tag.contains("AttributeModifiers", 9)) {
-			multimap = HashMultimap.create();
-			ListTag listTag = this.tag.getList("AttributeModifiers", 10);
-
-			for (int i = 0; i < listTag.size(); i++) {
-				CompoundTag compoundTag = listTag.getCompound(i);
-				if (!compoundTag.contains("Slot", 8) || compoundTag.getString("Slot").equals(equipmentSlot.getName())) {
-					ResourceLocation resourceLocation = ResourceLocation.tryParse(compoundTag.getString("AttributeName"));
-					if (resourceLocation != null) {
-						Optional<Holder.Reference<Attribute>> optional = BuiltInRegistries.ATTRIBUTE.getHolder(resourceLocation);
-						if (!optional.isEmpty()) {
-							AttributeModifier attributeModifier = AttributeModifier.load(compoundTag);
-							if (attributeModifier != null && attributeModifier.getId().getLeastSignificantBits() != 0L && attributeModifier.getId().getMostSignificantBits() != 0L) {
-								multimap.put((Holder<Attribute>)optional.get(), attributeModifier);
-							}
-						}
-					}
-				}
-			}
-		} else {
-			multimap = this.getItem().getDefaultAttributeModifiers(equipmentSlot);
-		}
-
-		return multimap;
-	}
-
-	public void addAttributeModifier(Holder<Attribute> holder, AttributeModifier attributeModifier, @Nullable EquipmentSlot equipmentSlot) {
-		this.getOrCreateTag();
-		if (!this.tag.contains("AttributeModifiers", 9)) {
-			this.tag.put("AttributeModifiers", new ListTag());
-		}
-
-		ListTag listTag = this.tag.getList("AttributeModifiers", 10);
-		CompoundTag compoundTag = attributeModifier.save();
-		compoundTag.putString(
-			"AttributeName",
-			((ResourceKey)holder.unwrapKey().orElseThrow(() -> new IllegalArgumentException("Cannot add unregistered attribute"))).location().toString()
-		);
-		if (equipmentSlot != null) {
-			compoundTag.putString("Slot", equipmentSlot.getName());
-		}
-
-		listTag.add(compoundTag);
 	}
 
 	public Component getDisplayName() {
 		MutableComponent mutableComponent = Component.empty().append(this.getHoverName());
-		if (this.hasCustomHoverName()) {
+		if (this.has(DataComponents.CUSTOM_NAME)) {
 			mutableComponent.withStyle(ChatFormatting.ITALIC);
 		}
 
@@ -1004,20 +838,14 @@ public final class ItemStack {
 		return mutableComponent2;
 	}
 
-	public boolean hasAdventureModePlaceTagForBlock(Registry<Block> registry, BlockInWorld blockInWorld) {
-		if (this.adventurePlaceCheck == null) {
-			this.adventurePlaceCheck = new AdventureModeCheck("CanPlaceOn");
-		}
-
-		return this.adventurePlaceCheck.test(this, registry, blockInWorld);
+	public boolean canPlaceOnBlockInAdventureMode(BlockInWorld blockInWorld) {
+		AdventureModePredicate adventureModePredicate = this.get(DataComponents.CAN_PLACE_ON);
+		return adventureModePredicate != null && adventureModePredicate.test(blockInWorld);
 	}
 
-	public boolean hasAdventureModeBreakTagForBlock(Registry<Block> registry, BlockInWorld blockInWorld) {
-		if (this.adventureBreakCheck == null) {
-			this.adventureBreakCheck = new AdventureModeCheck("CanDestroy");
-		}
-
-		return this.adventureBreakCheck.test(this, registry, blockInWorld);
+	public boolean canBreakBlockInAdventureMode(BlockInWorld blockInWorld) {
+		AdventureModePredicate adventureModePredicate = this.get(DataComponents.CAN_BREAK);
+		return adventureModePredicate != null && adventureModePredicate.test(blockInWorld);
 	}
 
 	public int getPopTime() {
@@ -1070,20 +898,7 @@ public final class ItemStack {
 		return this.getItem().getEatingSound();
 	}
 
-	public static enum TooltipPart {
-		ENCHANTMENTS,
-		MODIFIERS,
-		UNBREAKABLE,
-		CAN_DESTROY,
-		CAN_PLACE,
-		ADDITIONAL,
-		DYE,
-		UPGRADES;
-
-		private final int mask = 1 << this.ordinal();
-
-		public int getMask() {
-			return this.mask;
-		}
+	public SoundEvent getBreakingSound() {
+		return this.getItem().getBreakingSound();
 	}
 }

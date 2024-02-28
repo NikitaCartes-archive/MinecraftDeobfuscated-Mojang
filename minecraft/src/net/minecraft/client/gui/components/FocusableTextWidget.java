@@ -11,20 +11,29 @@ import net.minecraft.network.chat.Component;
 
 @Environment(EnvType.CLIENT)
 public class FocusableTextWidget extends MultiLineTextWidget {
-	private static final int BACKGROUND_COLOR = 1426063360;
-	private static final int PADDING = 4;
+	private static final int DEFAULT_PADDING = 4;
 	private final boolean alwaysShowBorder;
+	private final int padding;
 
 	public FocusableTextWidget(int i, Component component, Font font) {
-		this(i, component, font, true);
+		this(i, component, font, 4);
 	}
 
-	public FocusableTextWidget(int i, Component component, Font font, boolean bl) {
+	public FocusableTextWidget(int i, Component component, Font font, int j) {
+		this(i, component, font, true, j);
+	}
+
+	public FocusableTextWidget(int i, Component component, Font font, boolean bl, int j) {
 		super(component, font);
 		this.setMaxWidth(i);
 		this.setCentered(true);
 		this.active = true;
 		this.alwaysShowBorder = bl;
+		this.padding = j;
+	}
+
+	public void containWithin(int i) {
+		this.setMaxWidth(i - this.padding * 4);
 	}
 
 	@Override
@@ -35,12 +44,12 @@ public class FocusableTextWidget extends MultiLineTextWidget {
 	@Override
 	public void renderWidget(GuiGraphics guiGraphics, int i, int j, float f) {
 		if (this.isFocused() || this.alwaysShowBorder) {
-			int k = this.getX() - 4;
-			int l = this.getY() - 4;
-			int m = this.getWidth() + 8;
-			int n = this.getHeight() + 8;
+			int k = this.getX() - this.padding;
+			int l = this.getY() - this.padding;
+			int m = this.getWidth() + this.padding * 2;
+			int n = this.getHeight() + this.padding * 2;
 			int o = this.alwaysShowBorder ? (this.isFocused() ? -1 : -6250336) : -1;
-			guiGraphics.fill(k + 1, l, k + m, l + n, 1426063360);
+			guiGraphics.fill(k + 1, l, k + m, l + n, -16777216);
 			guiGraphics.renderOutline(k, l, m, n, o);
 		}
 

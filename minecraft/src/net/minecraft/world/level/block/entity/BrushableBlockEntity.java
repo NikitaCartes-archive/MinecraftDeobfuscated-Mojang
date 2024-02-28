@@ -198,7 +198,10 @@ public class BrushableBlockEntity extends BlockEntity {
 			compoundTag.putInt("hit_direction", this.hitDirection.ordinal());
 		}
 
-		compoundTag.put("item", this.item.save(new CompoundTag()));
+		if (!this.item.isEmpty()) {
+			compoundTag.put("item", this.item.save(provider));
+		}
+
 		return compoundTag;
 	}
 
@@ -209,7 +212,9 @@ public class BrushableBlockEntity extends BlockEntity {
 	@Override
 	public void load(CompoundTag compoundTag, HolderLookup.Provider provider) {
 		if (!this.tryLoadLootTable(compoundTag) && compoundTag.contains("item")) {
-			this.item = ItemStack.of(compoundTag.getCompound("item"));
+			this.item = (ItemStack)ItemStack.parse(provider, compoundTag.getCompound("item")).orElse(ItemStack.EMPTY);
+		} else {
+			this.item = ItemStack.EMPTY;
 		}
 
 		if (compoundTag.contains("hit_direction")) {
@@ -219,8 +224,8 @@ public class BrushableBlockEntity extends BlockEntity {
 
 	@Override
 	protected void saveAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
-		if (!this.trySaveLootTable(compoundTag)) {
-			compoundTag.put("item", this.item.save(new CompoundTag()));
+		if (!this.trySaveLootTable(compoundTag) && !this.item.isEmpty()) {
+			compoundTag.put("item", this.item.save(provider));
 		}
 	}
 

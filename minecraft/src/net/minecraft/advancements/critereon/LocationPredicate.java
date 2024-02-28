@@ -4,6 +4,9 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.RegistryCodecs;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
@@ -15,8 +18,8 @@ import net.minecraft.world.level.levelgen.structure.Structure;
 
 public record LocationPredicate(
 	Optional<LocationPredicate.PositionPredicate> position,
-	Optional<ResourceKey<Biome>> biome,
-	Optional<ResourceKey<Structure>> structure,
+	Optional<HolderSet<Biome>> biomes,
+	Optional<HolderSet<Structure>> structures,
 	Optional<ResourceKey<Level>> dimension,
 	Optional<Boolean> smokey,
 	Optional<LightPredicate> light,
@@ -26,8 +29,8 @@ public record LocationPredicate(
 	public static final Codec<LocationPredicate> CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
 					ExtraCodecs.strictOptionalField(LocationPredicate.PositionPredicate.CODEC, "position").forGetter(LocationPredicate::position),
-					ExtraCodecs.strictOptionalField(ResourceKey.codec(Registries.BIOME), "biome").forGetter(LocationPredicate::biome),
-					ExtraCodecs.strictOptionalField(ResourceKey.codec(Registries.STRUCTURE), "structure").forGetter(LocationPredicate::structure),
+					ExtraCodecs.strictOptionalField(RegistryCodecs.homogeneousList(Registries.BIOME), "biomes").forGetter(LocationPredicate::biomes),
+					ExtraCodecs.strictOptionalField(RegistryCodecs.homogeneousList(Registries.STRUCTURE), "structures").forGetter(LocationPredicate::structures),
 					ExtraCodecs.strictOptionalField(ResourceKey.codec(Registries.DIMENSION), "dimension").forGetter(LocationPredicate::dimension),
 					ExtraCodecs.strictOptionalField(Codec.BOOL, "smokey").forGetter(LocationPredicate::smokey),
 					ExtraCodecs.strictOptionalField(LightPredicate.CODEC, "light").forGetter(LocationPredicate::light),
@@ -37,28 +40,6 @@ public record LocationPredicate(
 				.apply(instance, LocationPredicate::new)
 	);
 
-	private static Optional<LocationPredicate> of(
-		Optional<LocationPredicate.PositionPredicate> optional,
-		Optional<ResourceKey<Biome>> optional2,
-		Optional<ResourceKey<Structure>> optional3,
-		Optional<ResourceKey<Level>> optional4,
-		Optional<Boolean> optional5,
-		Optional<LightPredicate> optional6,
-		Optional<BlockPredicate> optional7,
-		Optional<FluidPredicate> optional8
-	) {
-		return optional.isEmpty()
-				&& optional2.isEmpty()
-				&& optional3.isEmpty()
-				&& optional4.isEmpty()
-				&& optional5.isEmpty()
-				&& optional6.isEmpty()
-				&& optional7.isEmpty()
-				&& optional8.isEmpty()
-			? Optional.empty()
-			: Optional.of(new LocationPredicate(optional, optional2, optional3, optional4, optional5, optional6, optional7, optional8));
-	}
-
 	public boolean matches(ServerLevel serverLevel, double d, double e, double f) {
 		if (this.position.isPresent() && !((LocationPredicate.PositionPredicate)this.position.get()).matches(d, e, f)) {
 			return false;
@@ -67,9 +48,9 @@ public record LocationPredicate(
 		} else {
 			BlockPos blockPos = BlockPos.containing(d, e, f);
 			boolean bl = serverLevel.isLoaded(blockPos);
-			if (!this.biome.isPresent() || bl && serverLevel.getBiome(blockPos).is((ResourceKey<Biome>)this.biome.get())) {
-				if (!this.structure.isPresent()
-					|| bl && serverLevel.structureManager().getStructureWithPieceAt(blockPos, (ResourceKey<Structure>)this.structure.get()).isValid()) {
+			if (!this.biomes.isPresent() || bl && ((HolderSet)this.biomes.get()).contains(serverLevel.getBiome(blockPos))) {
+				if (!this.structures.isPresent()
+					|| bl && serverLevel.structureManager().getStructureWithPieceAt(blockPos, (HolderSet<Structure>)this.structures.get()).isValid()) {
 					if (!this.smokey.isPresent() || bl && (Boolean)this.smokey.get() == CampfireBlock.isSmokeyPos(serverLevel, blockPos)) {
 						if (this.light.isPresent() && !((LightPredicate)this.light.get()).matches(serverLevel, blockPos)) {
 							return false;
@@ -94,8 +75,8 @@ public record LocationPredicate(
 		private MinMaxBounds.Doubles x = MinMaxBounds.Doubles.ANY;
 		private MinMaxBounds.Doubles y = MinMaxBounds.Doubles.ANY;
 		private MinMaxBounds.Doubles z = MinMaxBounds.Doubles.ANY;
-		private Optional<ResourceKey<Biome>> biome = Optional.empty();
-		private Optional<ResourceKey<Structure>> structure = Optional.empty();
+		private Optional<HolderSet<Biome>> biomes = Optional.empty();
+		private Optional<HolderSet<Structure>> structures = Optional.empty();
 		private Optional<ResourceKey<Level>> dimension = Optional.empty();
 		private Optional<Boolean> smokey = Optional.empty();
 		private Optional<LightPredicate> light = Optional.empty();
@@ -106,16 +87,16 @@ public record LocationPredicate(
 			return new LocationPredicate.Builder();
 		}
 
-		public static LocationPredicate.Builder inBiome(ResourceKey<Biome> resourceKey) {
-			return location().setBiome(resourceKey);
+		public static LocationPredicate.Builder inBiome(Holder<Biome> holder) {
+			return location().setBiomes(HolderSet.direct(holder));
 		}
 
 		public static LocationPredicate.Builder inDimension(ResourceKey<Level> resourceKey) {
 			return location().setDimension(resourceKey);
 		}
 
-		public static LocationPredicate.Builder inStructure(ResourceKey<Structure> resourceKey) {
-			return location().setStructure(resourceKey);
+		public static LocationPredicate.Builder inStructure(Holder<Structure> holder) {
+			return location().setStructures(HolderSet.direct(holder));
 		}
 
 		public static LocationPredicate.Builder atYLocation(MinMaxBounds.Doubles doubles) {
@@ -137,13 +118,13 @@ public record LocationPredicate(
 			return this;
 		}
 
-		public LocationPredicate.Builder setBiome(ResourceKey<Biome> resourceKey) {
-			this.biome = Optional.of(resourceKey);
+		public LocationPredicate.Builder setBiomes(HolderSet<Biome> holderSet) {
+			this.biomes = Optional.of(holderSet);
 			return this;
 		}
 
-		public LocationPredicate.Builder setStructure(ResourceKey<Structure> resourceKey) {
-			this.structure = Optional.of(resourceKey);
+		public LocationPredicate.Builder setStructures(HolderSet<Structure> holderSet) {
+			this.structures = Optional.of(holderSet);
 			return this;
 		}
 
@@ -174,7 +155,7 @@ public record LocationPredicate(
 
 		public LocationPredicate build() {
 			Optional<LocationPredicate.PositionPredicate> optional = LocationPredicate.PositionPredicate.of(this.x, this.y, this.z);
-			return new LocationPredicate(optional, this.biome, this.structure, this.dimension, this.smokey, this.light, this.block, this.fluid);
+			return new LocationPredicate(optional, this.biomes, this.structures, this.dimension, this.smokey, this.light, this.block, this.fluid);
 		}
 	}
 

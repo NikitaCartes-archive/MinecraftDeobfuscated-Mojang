@@ -39,7 +39,7 @@ import net.minecraft.server.players.PlayerList;
 import net.minecraft.util.Crypt;
 import net.minecraft.util.CryptException;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.util.StringUtil;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 
@@ -114,7 +114,7 @@ public class ServerLoginPacketListenerImpl implements ServerLoginPacketListener,
 	@Override
 	public void handleHello(ServerboundHelloPacket serverboundHelloPacket) {
 		Validate.validState(this.state == ServerLoginPacketListenerImpl.State.HELLO, "Unexpected hello packet");
-		Validate.validState(Player.isValidUsername(serverboundHelloPacket.name()), "Invalid characters in username");
+		Validate.validState(StringUtil.isValidPlayerName(serverboundHelloPacket.name()), "Invalid characters in username");
 		this.requestedUsername = serverboundHelloPacket.name();
 		GameProfile gameProfile = this.server.getSingleplayerProfile();
 		if (gameProfile != null && this.requestedUsername.equalsIgnoreCase(gameProfile.getName())) {

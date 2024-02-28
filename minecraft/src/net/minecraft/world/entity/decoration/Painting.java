@@ -1,5 +1,7 @@
 package net.minecraft.world.entity.decoration;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -9,8 +11,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
@@ -18,7 +20,6 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.PaintingVariantTags;
 import net.minecraft.world.entity.Entity;
@@ -36,7 +37,8 @@ public class Painting extends HangingEntity implements VariantHolder<Holder<Pain
 		Painting.class, EntityDataSerializers.PAINTING_VARIANT
 	);
 	private static final ResourceKey<PaintingVariant> DEFAULT_VARIANT = PaintingVariants.KEBAB;
-	public static final String VARIANT_TAG = "variant";
+	public static final MapCodec<Holder<PaintingVariant>> VARIANT_MAP_CODEC = BuiltInRegistries.PAINTING_VARIANT.holderByNameCodec().fieldOf("variant");
+	public static final Codec<Holder<PaintingVariant>> VARIANT_CODEC = VARIANT_MAP_CODEC.codec();
 
 	private static Holder<PaintingVariant> getDefaultVariant() {
 		return BuiltInRegistries.PAINTING_VARIANT.getHolderOrThrow(DEFAULT_VARIANT);
@@ -118,7 +120,7 @@ public class Painting extends HangingEntity implements VariantHolder<Holder<Pain
 
 	@Override
 	public void readAdditionalSaveData(CompoundTag compoundTag) {
-		Holder<PaintingVariant> holder = (Holder<PaintingVariant>)loadVariant(compoundTag).orElseGet(Painting::getDefaultVariant);
+		Holder<PaintingVariant> holder = (Holder<PaintingVariant>)VARIANT_CODEC.parse(NbtOps.INSTANCE, compoundTag).result().orElseGet(Painting::getDefaultVariant);
 		this.setVariant(holder);
 		this.direction = Direction.from2DDataValue(compoundTag.getByte("facing"));
 		super.readAdditionalSaveData(compoundTag);
@@ -126,13 +128,7 @@ public class Painting extends HangingEntity implements VariantHolder<Holder<Pain
 	}
 
 	public static void storeVariant(CompoundTag compoundTag, Holder<PaintingVariant> holder) {
-		compoundTag.putString("variant", ((ResourceKey)holder.unwrapKey().orElse(DEFAULT_VARIANT)).location().toString());
-	}
-
-	public static Optional<Holder<PaintingVariant>> loadVariant(CompoundTag compoundTag) {
-		return Optional.ofNullable(ResourceLocation.tryParse(compoundTag.getString("variant")))
-			.map(resourceLocation -> ResourceKey.create(Registries.PAINTING_VARIANT, resourceLocation))
-			.flatMap(BuiltInRegistries.PAINTING_VARIANT::getHolder);
+		VARIANT_CODEC.encodeStart(NbtOps.INSTANCE, holder).result().ifPresent(tag -> compoundTag.merge((CompoundTag)tag));
 	}
 
 	@Override

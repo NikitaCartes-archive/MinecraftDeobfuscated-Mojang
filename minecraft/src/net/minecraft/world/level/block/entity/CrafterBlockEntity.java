@@ -115,7 +115,7 @@ public class CrafterBlockEntity extends RandomizableContainerBlockEntity impleme
 		this.craftingTicksRemaining = compoundTag.getInt("crafting_ticks_remaining");
 		this.items = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
 		if (!this.tryLoadLootTable(compoundTag)) {
-			ContainerHelper.loadAllItems(compoundTag, this.items);
+			ContainerHelper.loadAllItems(compoundTag, this.items, provider);
 		}
 
 		int[] is = compoundTag.getIntArray("disabled_slots");
@@ -138,7 +138,7 @@ public class CrafterBlockEntity extends RandomizableContainerBlockEntity impleme
 		super.saveAdditional(compoundTag, provider);
 		compoundTag.putInt("crafting_ticks_remaining", this.craftingTicksRemaining);
 		if (!this.trySaveLootTable(compoundTag)) {
-			ContainerHelper.saveAllItems(compoundTag, this.items);
+			ContainerHelper.saveAllItems(compoundTag, this.items, provider);
 		}
 
 		this.addDisabledSlots(compoundTag);

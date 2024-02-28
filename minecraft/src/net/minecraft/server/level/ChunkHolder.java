@@ -1,18 +1,17 @@
 package net.minecraft.server.level;
 
-import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import it.unimi.dsi.fastutil.shorts.ShortOpenHashSet;
 import it.unimi.dsi.fastutil.shorts.ShortSet;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicReferenceArray;
 import java.util.function.IntConsumer;
 import java.util.function.IntSupplier;
+import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -29,38 +28,32 @@ import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.ImposterProtoChunk;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.ProtoChunk;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 
 public class ChunkHolder {
-	public static final Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure> UNLOADED_CHUNK = Either.right(ChunkHolder.ChunkLoadingFailure.UNLOADED);
-	public static final CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>> UNLOADED_CHUNK_FUTURE = CompletableFuture.completedFuture(
-		UNLOADED_CHUNK
-	);
-	public static final Either<LevelChunk, ChunkHolder.ChunkLoadingFailure> UNLOADED_LEVEL_CHUNK = Either.right(ChunkHolder.ChunkLoadingFailure.UNLOADED);
-	private static final Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure> NOT_DONE_YET = Either.right(ChunkHolder.ChunkLoadingFailure.UNLOADED);
-	private static final CompletableFuture<Either<LevelChunk, ChunkHolder.ChunkLoadingFailure>> UNLOADED_LEVEL_CHUNK_FUTURE = CompletableFuture.completedFuture(
-		UNLOADED_LEVEL_CHUNK
-	);
+	public static final ChunkResult<ChunkAccess> UNLOADED_CHUNK = ChunkResult.error("Unloaded chunk");
+	public static final CompletableFuture<ChunkResult<ChunkAccess>> UNLOADED_CHUNK_FUTURE = CompletableFuture.completedFuture(UNLOADED_CHUNK);
+	public static final ChunkResult<LevelChunk> UNLOADED_LEVEL_CHUNK = ChunkResult.error("Unloaded level chunk");
+	public static final ChunkResult<ChunkAccess> NOT_DONE_YET = ChunkResult.error("Not done yet");
+	private static final CompletableFuture<ChunkResult<LevelChunk>> UNLOADED_LEVEL_CHUNK_FUTURE = CompletableFuture.completedFuture(UNLOADED_LEVEL_CHUNK);
 	private static final List<ChunkStatus> CHUNK_STATUSES = ChunkStatus.getStatusList();
-	private final AtomicReferenceArray<CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>>> futures = new AtomicReferenceArray(
-		CHUNK_STATUSES.size()
-	);
+	private final AtomicReferenceArray<CompletableFuture<ChunkResult<ChunkAccess>>> futures = new AtomicReferenceArray(CHUNK_STATUSES.size());
 	private final LevelHeightAccessor levelHeightAccessor;
-	private volatile CompletableFuture<Either<LevelChunk, ChunkHolder.ChunkLoadingFailure>> fullChunkFuture = UNLOADED_LEVEL_CHUNK_FUTURE;
-	private volatile CompletableFuture<Either<LevelChunk, ChunkHolder.ChunkLoadingFailure>> tickingChunkFuture = UNLOADED_LEVEL_CHUNK_FUTURE;
-	private volatile CompletableFuture<Either<LevelChunk, ChunkHolder.ChunkLoadingFailure>> entityTickingChunkFuture = UNLOADED_LEVEL_CHUNK_FUTURE;
+	private volatile CompletableFuture<ChunkResult<LevelChunk>> fullChunkFuture = UNLOADED_LEVEL_CHUNK_FUTURE;
+	private volatile CompletableFuture<ChunkResult<LevelChunk>> tickingChunkFuture = UNLOADED_LEVEL_CHUNK_FUTURE;
+	private volatile CompletableFuture<ChunkResult<LevelChunk>> entityTickingChunkFuture = UNLOADED_LEVEL_CHUNK_FUTURE;
 	private CompletableFuture<ChunkAccess> chunkToSave = CompletableFuture.completedFuture(null);
 	@Nullable
 	private final DebugBuffer<ChunkHolder.ChunkSaveDebug> chunkToSaveHistory = null;
 	private int oldTicketLevel;
 	private int ticketLevel;
 	private int queueLevel;
-	final ChunkPos pos;
+	private final ChunkPos pos;
 	private boolean hasChangedSections;
 	private final ShortSet[] changedBlocksPerSection;
 	private final BitSet blockChangedLightSectionFilter = new BitSet();
@@ -92,33 +85,30 @@ public class ChunkHolder {
 		this.changedBlocksPerSection = new ShortSet[levelHeightAccessor.getSectionsCount()];
 	}
 
-	public CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>> getFutureIfPresentUnchecked(ChunkStatus chunkStatus) {
-		CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>> completableFuture = (CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>>)this.futures
-			.get(chunkStatus.getIndex());
+	public CompletableFuture<ChunkResult<ChunkAccess>> getFutureIfPresentUnchecked(ChunkStatus chunkStatus) {
+		CompletableFuture<ChunkResult<ChunkAccess>> completableFuture = (CompletableFuture<ChunkResult<ChunkAccess>>)this.futures.get(chunkStatus.getIndex());
 		return completableFuture == null ? UNLOADED_CHUNK_FUTURE : completableFuture;
 	}
 
-	public CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>> getFutureIfPresent(ChunkStatus chunkStatus) {
+	public CompletableFuture<ChunkResult<ChunkAccess>> getFutureIfPresent(ChunkStatus chunkStatus) {
 		return ChunkLevel.generationStatus(this.ticketLevel).isOrAfter(chunkStatus) ? this.getFutureIfPresentUnchecked(chunkStatus) : UNLOADED_CHUNK_FUTURE;
 	}
 
-	public CompletableFuture<Either<LevelChunk, ChunkHolder.ChunkLoadingFailure>> getTickingChunkFuture() {
+	public CompletableFuture<ChunkResult<LevelChunk>> getTickingChunkFuture() {
 		return this.tickingChunkFuture;
 	}
 
-	public CompletableFuture<Either<LevelChunk, ChunkHolder.ChunkLoadingFailure>> getEntityTickingChunkFuture() {
+	public CompletableFuture<ChunkResult<LevelChunk>> getEntityTickingChunkFuture() {
 		return this.entityTickingChunkFuture;
 	}
 
-	public CompletableFuture<Either<LevelChunk, ChunkHolder.ChunkLoadingFailure>> getFullChunkFuture() {
+	public CompletableFuture<ChunkResult<LevelChunk>> getFullChunkFuture() {
 		return this.fullChunkFuture;
 	}
 
 	@Nullable
 	public LevelChunk getTickingChunk() {
-		CompletableFuture<Either<LevelChunk, ChunkHolder.ChunkLoadingFailure>> completableFuture = this.getTickingChunkFuture();
-		Either<LevelChunk, ChunkHolder.ChunkLoadingFailure> either = (Either<LevelChunk, ChunkHolder.ChunkLoadingFailure>)completableFuture.getNow(null);
-		return either == null ? null : (LevelChunk)either.left().orElse(null);
+		return (LevelChunk)((ChunkResult)this.getTickingChunkFuture().getNow(UNLOADED_LEVEL_CHUNK)).orElse(null);
 	}
 
 	public CompletableFuture<?> getChunkSendSyncFuture() {
@@ -131,18 +121,11 @@ public class ChunkHolder {
 	}
 
 	@Nullable
-	public LevelChunk getFullChunk() {
-		CompletableFuture<Either<LevelChunk, ChunkHolder.ChunkLoadingFailure>> completableFuture = this.getFullChunkFuture();
-		Either<LevelChunk, ChunkHolder.ChunkLoadingFailure> either = (Either<LevelChunk, ChunkHolder.ChunkLoadingFailure>)completableFuture.getNow(null);
-		return either == null ? null : (LevelChunk)either.left().orElse(null);
-	}
-
-	@Nullable
 	public ChunkStatus getLastAvailableStatus() {
 		for (int i = CHUNK_STATUSES.size() - 1; i >= 0; i--) {
 			ChunkStatus chunkStatus = (ChunkStatus)CHUNK_STATUSES.get(i);
-			CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>> completableFuture = this.getFutureIfPresentUnchecked(chunkStatus);
-			if (((Either)completableFuture.getNow(UNLOADED_CHUNK)).left().isPresent()) {
+			CompletableFuture<ChunkResult<ChunkAccess>> completableFuture = this.getFutureIfPresentUnchecked(chunkStatus);
+			if (((ChunkResult)completableFuture.getNow(UNLOADED_CHUNK)).isSuccess()) {
 				return chunkStatus;
 			}
 		}
@@ -154,11 +137,11 @@ public class ChunkHolder {
 	public ChunkAccess getLastAvailable() {
 		for (int i = CHUNK_STATUSES.size() - 1; i >= 0; i--) {
 			ChunkStatus chunkStatus = (ChunkStatus)CHUNK_STATUSES.get(i);
-			CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>> completableFuture = this.getFutureIfPresentUnchecked(chunkStatus);
+			CompletableFuture<ChunkResult<ChunkAccess>> completableFuture = this.getFutureIfPresentUnchecked(chunkStatus);
 			if (!completableFuture.isCompletedExceptionally()) {
-				Optional<ChunkAccess> optional = ((Either)completableFuture.getNow(UNLOADED_CHUNK)).left();
-				if (optional.isPresent()) {
-					return (ChunkAccess)optional.get();
+				ChunkAccess chunkAccess = (ChunkAccess)((ChunkResult)completableFuture.getNow(UNLOADED_CHUNK)).orElse(null);
+				if (chunkAccess != null) {
+					return chunkAccess;
 				}
 			}
 		}
@@ -184,25 +167,19 @@ public class ChunkHolder {
 	}
 
 	public void sectionLightChanged(LightLayer lightLayer, int i) {
-		Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure> either = (Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>)this.getFutureIfPresent(
-				ChunkStatus.INITIALIZE_LIGHT
-			)
-			.getNow(null);
-		if (either != null) {
-			ChunkAccess chunkAccess = (ChunkAccess)either.left().orElse(null);
-			if (chunkAccess != null) {
-				chunkAccess.setUnsaved(true);
-				LevelChunk levelChunk = this.getTickingChunk();
-				if (levelChunk != null) {
-					int j = this.lightEngine.getMinLightSection();
-					int k = this.lightEngine.getMaxLightSection();
-					if (i >= j && i <= k) {
-						int l = i - j;
-						if (lightLayer == LightLayer.SKY) {
-							this.skyChangedLightSectionFilter.set(l);
-						} else {
-							this.blockChangedLightSectionFilter.set(l);
-						}
+		ChunkAccess chunkAccess = (ChunkAccess)((ChunkResult)this.getFutureIfPresent(ChunkStatus.INITIALIZE_LIGHT).getNow(UNLOADED_CHUNK)).orElse(null);
+		if (chunkAccess != null) {
+			chunkAccess.setUnsaved(true);
+			LevelChunk levelChunk = this.getTickingChunk();
+			if (levelChunk != null) {
+				int j = this.lightEngine.getMinLightSection();
+				int k = this.lightEngine.getMaxLightSection();
+				if (i >= j && i <= k) {
+					int l = i - j;
+					if (lightLayer == LightLayer.SKY) {
+						this.skyChangedLightSectionFilter.set(l);
+					} else {
+						this.blockChangedLightSectionFilter.set(l);
 					}
 				}
 			}
@@ -277,24 +254,23 @@ public class ChunkHolder {
 		list.forEach(serverPlayer -> serverPlayer.connection.send(packet));
 	}
 
-	public CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>> getOrScheduleFuture(ChunkStatus chunkStatus, ChunkMap chunkMap) {
+	public CompletableFuture<ChunkResult<ChunkAccess>> getOrScheduleFuture(ChunkStatus chunkStatus, ChunkMap chunkMap) {
 		int i = chunkStatus.getIndex();
-		CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>> completableFuture = (CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>>)this.futures
-			.get(i);
+		CompletableFuture<ChunkResult<ChunkAccess>> completableFuture = (CompletableFuture<ChunkResult<ChunkAccess>>)this.futures.get(i);
 		if (completableFuture != null) {
-			Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure> either = (Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>)completableFuture.getNow(NOT_DONE_YET);
-			if (either == null) {
+			ChunkResult<ChunkAccess> chunkResult = (ChunkResult<ChunkAccess>)completableFuture.getNow(NOT_DONE_YET);
+			if (chunkResult == null) {
 				String string = "value in future for status: " + chunkStatus + " was incorrectly set to null at chunk: " + this.pos;
 				throw chunkMap.debugFuturesAndCreateReportedException(new IllegalStateException("null value previously set for chunk status"), string);
 			}
 
-			if (either == NOT_DONE_YET || either.right().isEmpty()) {
+			if (chunkResult == NOT_DONE_YET || chunkResult.isSuccess()) {
 				return completableFuture;
 			}
 		}
 
 		if (ChunkLevel.generationStatus(this.ticketLevel).isOrAfter(chunkStatus)) {
-			CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>> completableFuture2 = chunkMap.schedule(this, chunkStatus);
+			CompletableFuture<ChunkResult<ChunkAccess>> completableFuture2 = chunkMap.schedule(this, chunkStatus);
 			this.updateChunkToSave(completableFuture2, "schedule " + chunkStatus);
 			this.futures.set(i, completableFuture2);
 			return completableFuture2;
@@ -311,13 +287,12 @@ public class ChunkHolder {
 		this.chunkToSave = this.chunkToSave.thenCombine(completableFuture, (chunkAccess, object) -> chunkAccess);
 	}
 
-	private void updateChunkToSave(CompletableFuture<? extends Either<? extends ChunkAccess, ChunkHolder.ChunkLoadingFailure>> completableFuture, String string) {
+	private void updateChunkToSave(CompletableFuture<? extends ChunkResult<? extends ChunkAccess>> completableFuture, String string) {
 		if (this.chunkToSaveHistory != null) {
 			this.chunkToSaveHistory.push(new ChunkHolder.ChunkSaveDebug(Thread.currentThread(), completableFuture, string));
 		}
 
-		this.chunkToSave = this.chunkToSave
-			.thenCombine(completableFuture, (chunkAccess, either) -> either.map(chunkAccessx -> chunkAccessx, chunkLoadingFailure -> chunkAccess));
+		this.chunkToSave = this.chunkToSave.thenCombine(completableFuture, (chunkAccess, chunkResult) -> ChunkResult.orElse(chunkResult, chunkAccess));
 	}
 
 	public void addSendDependency(CompletableFuture<?> completableFuture) {
@@ -353,16 +328,13 @@ public class ChunkHolder {
 	}
 
 	private void scheduleFullChunkPromotion(
-		ChunkMap chunkMap,
-		CompletableFuture<Either<LevelChunk, ChunkHolder.ChunkLoadingFailure>> completableFuture,
-		Executor executor,
-		FullChunkStatus fullChunkStatus
+		ChunkMap chunkMap, CompletableFuture<ChunkResult<LevelChunk>> completableFuture, Executor executor, FullChunkStatus fullChunkStatus
 	) {
 		this.pendingFullStateConfirmation.cancel(false);
 		CompletableFuture<Void> completableFuture2 = new CompletableFuture();
 		completableFuture2.thenRunAsync(() -> chunkMap.onFullChunkStatusChange(this.pos, fullChunkStatus), executor);
 		this.pendingFullStateConfirmation = completableFuture2;
-		completableFuture.thenAccept(either -> either.ifLeft(levelChunk -> completableFuture2.complete(null)));
+		completableFuture.thenAccept(chunkResult -> chunkResult.ifSuccess(levelChunk -> completableFuture2.complete(null)));
 	}
 
 	private void demoteFullChunk(ChunkMap chunkMap, FullChunkStatus fullChunkStatus) {
@@ -378,17 +350,12 @@ public class ChunkHolder {
 		FullChunkStatus fullChunkStatus = ChunkLevel.fullStatus(this.oldTicketLevel);
 		FullChunkStatus fullChunkStatus2 = ChunkLevel.fullStatus(this.ticketLevel);
 		if (bl) {
-			Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure> either = Either.right(new ChunkHolder.ChunkLoadingFailure() {
-				public String toString() {
-					return "Unloaded ticket level " + ChunkHolder.this.pos;
-				}
-			});
+			ChunkResult<ChunkAccess> chunkResult = ChunkResult.error((Supplier<String>)(() -> "Unloaded ticket level " + this.pos));
 
 			for (int i = bl2 ? chunkStatus2.getIndex() + 1 : 0; i <= chunkStatus.getIndex(); i++) {
-				CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>> completableFuture = (CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>>)this.futures
-					.get(i);
+				CompletableFuture<ChunkResult<ChunkAccess>> completableFuture = (CompletableFuture<ChunkResult<ChunkAccess>>)this.futures.get(i);
 				if (completableFuture == null) {
-					this.futures.set(i, CompletableFuture.completedFuture(either));
+					this.futures.set(i, CompletableFuture.completedFuture(chunkResult));
 				}
 			}
 		}
@@ -455,21 +422,20 @@ public class ChunkHolder {
 
 	public void replaceProtoChunk(ImposterProtoChunk imposterProtoChunk) {
 		for (int i = 0; i < this.futures.length(); i++) {
-			CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>> completableFuture = (CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>>)this.futures
-				.get(i);
+			CompletableFuture<ChunkResult<ChunkAccess>> completableFuture = (CompletableFuture<ChunkResult<ChunkAccess>>)this.futures.get(i);
 			if (completableFuture != null) {
-				Optional<ChunkAccess> optional = ((Either)completableFuture.getNow(UNLOADED_CHUNK)).left();
-				if (!optional.isEmpty() && optional.get() instanceof ProtoChunk) {
-					this.futures.set(i, CompletableFuture.completedFuture(Either.left(imposterProtoChunk)));
+				ChunkAccess chunkAccess = (ChunkAccess)((ChunkResult)completableFuture.getNow(UNLOADED_CHUNK)).orElse(null);
+				if (chunkAccess instanceof ProtoChunk) {
+					this.futures.set(i, CompletableFuture.completedFuture(ChunkResult.of(imposterProtoChunk)));
 				}
 			}
 		}
 
-		this.updateChunkToSave(CompletableFuture.completedFuture(Either.left(imposterProtoChunk.getWrapped())), "replaceProto");
+		this.updateChunkToSave(CompletableFuture.completedFuture(ChunkResult.of(imposterProtoChunk.getWrapped())), "replaceProto");
 	}
 
-	public List<Pair<ChunkStatus, CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>>>> getAllFutures() {
-		List<Pair<ChunkStatus, CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>>>> list = new ArrayList();
+	public List<Pair<ChunkStatus, CompletableFuture<ChunkResult<ChunkAccess>>>> getAllFutures() {
+		List<Pair<ChunkStatus, CompletableFuture<ChunkResult<ChunkAccess>>>> list = new ArrayList();
 
 		for (int i = 0; i < CHUNK_STATUSES.size(); i++) {
 			list.add(Pair.of((ChunkStatus)CHUNK_STATUSES.get(i), (CompletableFuture)this.futures.get(i)));
@@ -478,24 +444,7 @@ public class ChunkHolder {
 		return list;
 	}
 
-	public interface ChunkLoadingFailure {
-		ChunkHolder.ChunkLoadingFailure UNLOADED = new ChunkHolder.ChunkLoadingFailure() {
-			public String toString() {
-				return "UNLOADED";
-			}
-		};
-	}
-
-	static final class ChunkSaveDebug {
-		private final Thread thread;
-		private final CompletableFuture<?> future;
-		private final String source;
-
-		ChunkSaveDebug(Thread thread, CompletableFuture<?> completableFuture, String string) {
-			this.thread = thread;
-			this.future = completableFuture;
-			this.source = string;
-		}
+	static record ChunkSaveDebug(Thread thread, CompletableFuture<?> future, String source) {
 	}
 
 	@FunctionalInterface

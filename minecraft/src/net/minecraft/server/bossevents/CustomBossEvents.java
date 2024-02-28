@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 import java.util.Collection;
 import java.util.Map;
 import javax.annotation.Nullable;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -35,20 +36,20 @@ public class CustomBossEvents {
 		return this.events.values();
 	}
 
-	public CompoundTag save() {
+	public CompoundTag save(HolderLookup.Provider provider) {
 		CompoundTag compoundTag = new CompoundTag();
 
 		for (CustomBossEvent customBossEvent : this.events.values()) {
-			compoundTag.put(customBossEvent.getTextId().toString(), customBossEvent.save());
+			compoundTag.put(customBossEvent.getTextId().toString(), customBossEvent.save(provider));
 		}
 
 		return compoundTag;
 	}
 
-	public void load(CompoundTag compoundTag) {
+	public void load(CompoundTag compoundTag, HolderLookup.Provider provider) {
 		for (String string : compoundTag.getAllKeys()) {
 			ResourceLocation resourceLocation = new ResourceLocation(string);
-			this.events.put(resourceLocation, CustomBossEvent.load(compoundTag.getCompound(string), resourceLocation));
+			this.events.put(resourceLocation, CustomBossEvent.load(compoundTag.getCompound(string), resourceLocation, provider));
 		}
 	}
 

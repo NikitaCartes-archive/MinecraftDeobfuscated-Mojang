@@ -75,9 +75,9 @@ public record ChatType(ChatTypeDecoration chat, ChatTypeDecoration narration) {
 		public static final StreamCodec<RegistryFriendlyByteBuf, ChatType.Bound> STREAM_CODEC = StreamCodec.composite(
 			ByteBufCodecs.holderRegistry(Registries.CHAT_TYPE),
 			ChatType.Bound::chatType,
-			ComponentSerialization.STREAM_CODEC,
+			ComponentSerialization.TRUSTED_STREAM_CODEC,
 			ChatType.Bound::name,
-			ComponentSerialization.OPTIONAL_STREAM_CODEC,
+			ComponentSerialization.TRUSTED_OPTIONAL_STREAM_CODEC,
 			ChatType.Bound::targetName,
 			ChatType.Bound::new
 		);

@@ -7,12 +7,9 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.GlobalPos;
-import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.data.models.ItemModelGenerators;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.HumanoidArm;
@@ -27,14 +24,16 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.armortrim.ArmorTrim;
-import net.minecraft.world.item.armortrim.TrimMaterial;
+import net.minecraft.world.item.component.BlockItemStateProperties;
+import net.minecraft.world.item.component.ChargedProjectiles;
+import net.minecraft.world.item.component.CustomModelData;
+import net.minecraft.world.item.component.LodestoneTarget;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.LightBlock;
 
 @Environment(EnvType.CLIENT)
 public class ItemProperties {
 	private static final Map<ResourceLocation, ItemPropertyFunction> GENERIC_PROPERTIES = Maps.<ResourceLocation, ItemPropertyFunction>newHashMap();
-	private static final String TAG_CUSTOM_MODEL_DATA = "CustomModelData";
 	private static final ResourceLocation DAMAGED = new ResourceLocation("damaged");
 	private static final ResourceLocation DAMAGE = new ResourceLocation("damage");
 	private static final ClampedItemPropertyFunction PROPERTY_DAMAGED = (itemStack, clientLevel, livingEntity, i) -> itemStack.isDamaged() ? 1.0F : 0.0F;
@@ -89,20 +88,13 @@ public class ItemProperties {
 					: 0.0F
 		);
 		ClampedItemPropertyFunction clampedItemPropertyFunction = (itemStack, clientLevel, livingEntity, i) -> {
-			if (!itemStack.is(ItemTags.TRIMMABLE_ARMOR)) {
-				return Float.NEGATIVE_INFINITY;
-			} else {
-				return clientLevel == null
-					? 0.0F
-					: (Float)ArmorTrim.getTrim(clientLevel.registryAccess(), itemStack, true)
-						.map(ArmorTrim::material)
-						.map(Holder::value)
-						.map(TrimMaterial::itemModelIndex)
-						.orElse(0.0F);
-			}
+			ArmorTrim armorTrim = itemStack.get(DataComponents.TRIM);
+			return armorTrim != null ? armorTrim.material().value().itemModelIndex() : Float.NEGATIVE_INFINITY;
 		};
 		registerGeneric(ItemModelGenerators.TRIM_TYPE_PREDICATE_ID, clampedItemPropertyFunction);
-		registerCustomModelData((itemStack, clientLevel, livingEntity, i) -> itemStack.hasTag() ? (float)itemStack.getTag().getInt("CustomModelData") : 0.0F);
+		registerCustomModelData(
+			(itemStack, clientLevel, livingEntity, i) -> (float)itemStack.getOrDefault(DataComponents.CUSTOM_MODEL_DATA, CustomModelData.DEFAULT).value()
+		);
 		register(Items.BOW, new ResourceLocation("pull"), (itemStack, clientLevel, livingEntity, i) -> {
 			if (livingEntity == null) {
 				return 0.0F;
@@ -167,15 +159,10 @@ public class ItemProperties {
 				return this.rotation;
 			}
 		});
-		register(
-			Items.COMPASS,
-			new ResourceLocation("angle"),
-			new CompassItemPropertyFunction(
-				(clientLevel, itemStack, entity) -> CompassItem.isLodestoneCompass(itemStack)
-						? CompassItem.getLodestonePosition(itemStack.getOrCreateTag())
-						: CompassItem.getSpawnPosition(clientLevel)
-			)
-		);
+		register(Items.COMPASS, new ResourceLocation("angle"), new CompassItemPropertyFunction((clientLevel, itemStack, entity) -> {
+			LodestoneTarget lodestoneTarget = itemStack.get(DataComponents.LODESTONE_TARGET);
+			return lodestoneTarget != null ? lodestoneTarget.pos() : CompassItem.getSpawnPosition(clientLevel);
+		}));
 		register(
 			Items.RECOVERY_COMPASS,
 			new ResourceLocation("angle"),
@@ -207,13 +194,10 @@ public class ItemProperties {
 					: 0.0F
 		);
 		register(Items.CROSSBOW, new ResourceLocation("charged"), (itemStack, clientLevel, livingEntity, i) -> CrossbowItem.isCharged(itemStack) ? 1.0F : 0.0F);
-		register(
-			Items.CROSSBOW,
-			new ResourceLocation("firework"),
-			(itemStack, clientLevel, livingEntity, i) -> CrossbowItem.isCharged(itemStack) && CrossbowItem.containsChargedProjectile(itemStack, Items.FIREWORK_ROCKET)
-					? 1.0F
-					: 0.0F
-		);
+		register(Items.CROSSBOW, new ResourceLocation("firework"), (itemStack, clientLevel, livingEntity, i) -> {
+			ChargedProjectiles chargedProjectiles = itemStack.get(DataComponents.CHARGED_PROJECTILES);
+			return chargedProjectiles != null && chargedProjectiles.contains(Items.FIREWORK_ROCKET) ? 1.0F : 0.0F;
+		});
 		register(Items.ELYTRA, new ResourceLocation("broken"), (itemStack, clientLevel, livingEntity, i) -> ElytraItem.isFlyEnabled(itemStack) ? 0.0F : 1.0F);
 		register(Items.FISHING_ROD, new ResourceLocation("cast"), (itemStack, clientLevel, livingEntity, i) -> {
 			if (livingEntity == null) {
@@ -239,19 +223,9 @@ public class ItemProperties {
 			(itemStack, clientLevel, livingEntity, i) -> livingEntity != null && livingEntity.isUsingItem() && livingEntity.getUseItem() == itemStack ? 1.0F : 0.0F
 		);
 		register(Items.LIGHT, new ResourceLocation("level"), (itemStack, clientLevel, livingEntity, i) -> {
-			CompoundTag compoundTag = itemStack.getTagElement("BlockStateTag");
-
-			try {
-				if (compoundTag != null) {
-					Tag tag = compoundTag.get(LightBlock.LEVEL.getName());
-					if (tag != null) {
-						return (float)Integer.parseInt(tag.getAsString()) / 16.0F;
-					}
-				}
-			} catch (NumberFormatException var6) {
-			}
-
-			return 1.0F;
+			BlockItemStateProperties blockItemStateProperties = itemStack.getOrDefault(DataComponents.BLOCK_STATE, BlockItemStateProperties.EMPTY);
+			Integer integer = blockItemStateProperties.get(LightBlock.LEVEL);
+			return integer != null ? (float)integer.intValue() / 16.0F : 1.0F;
 		});
 		register(
 			Items.GOAT_HORN,

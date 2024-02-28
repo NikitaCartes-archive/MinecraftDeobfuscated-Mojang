@@ -22,12 +22,10 @@ import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
-import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
-import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.advancements.CriteriaTriggers;
@@ -36,10 +34,9 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.TickablePacketListener;
 import net.minecraft.network.chat.ChatType;
@@ -156,6 +153,9 @@ import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.item.component.WritableBookContent;
+import net.minecraft.world.item.component.WrittenBookContent;
 import net.minecraft.world.level.BaseCommandBlock;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
@@ -764,7 +764,8 @@ public class ServerGamePacketListenerImpl
 	private void updateBookContents(List<FilteredText> list, int i) {
 		ItemStack itemStack = this.player.getInventory().getItem(i);
 		if (itemStack.is(Items.WRITABLE_BOOK)) {
-			this.updateBookPages(list, UnaryOperator.identity(), itemStack);
+			List<Filterable<String>> list2 = list.stream().map(this::filterableFromOutgoing).toList();
+			itemStack.set(DataComponents.WRITABLE_BOOK_CONTENT, new WritableBookContent(list2));
 		}
 	}
 
@@ -772,42 +773,17 @@ public class ServerGamePacketListenerImpl
 		ItemStack itemStack = this.player.getInventory().getItem(i);
 		if (itemStack.is(Items.WRITABLE_BOOK)) {
 			ItemStack itemStack2 = itemStack.transmuteCopy(Items.WRITTEN_BOOK, 1);
-			itemStack2.addTagElement("author", StringTag.valueOf(this.player.getName().getString()));
-			if (this.player.isTextFilteringEnabled()) {
-				itemStack2.addTagElement("title", StringTag.valueOf(filteredText.filteredOrEmpty()));
-			} else {
-				itemStack2.addTagElement("filtered_title", StringTag.valueOf(filteredText.filteredOrEmpty()));
-				itemStack2.addTagElement("title", StringTag.valueOf(filteredText.raw()));
-			}
-
-			this.updateBookPages(list, string -> Component.Serializer.toJson(Component.literal(string)), itemStack2);
+			itemStack2.remove(DataComponents.WRITABLE_BOOK_CONTENT);
+			List<Filterable<Component>> list2 = list.stream().map(filteredTextx -> this.filterableFromOutgoing(filteredTextx).map(Component::literal)).toList();
+			itemStack2.set(
+				DataComponents.WRITTEN_BOOK_CONTENT, new WrittenBookContent(this.filterableFromOutgoing(filteredText), this.player.getName().getString(), 0, list2, true)
+			);
 			this.player.getInventory().setItem(i, itemStack2);
 		}
 	}
 
-	private void updateBookPages(List<FilteredText> list, UnaryOperator<String> unaryOperator, ItemStack itemStack) {
-		ListTag listTag = new ListTag();
-		if (this.player.isTextFilteringEnabled()) {
-			list.stream().map(filteredTextx -> StringTag.valueOf((String)unaryOperator.apply(filteredTextx.filteredOrEmpty()))).forEach(listTag::add);
-		} else {
-			CompoundTag compoundTag = new CompoundTag();
-			int i = 0;
-
-			for (int j = list.size(); i < j; i++) {
-				FilteredText filteredText = (FilteredText)list.get(i);
-				String string = filteredText.raw();
-				listTag.add(StringTag.valueOf((String)unaryOperator.apply(string)));
-				if (filteredText.isFiltered()) {
-					compoundTag.putString(String.valueOf(i), (String)unaryOperator.apply(filteredText.filteredOrEmpty()));
-				}
-			}
-
-			if (!compoundTag.isEmpty()) {
-				itemStack.addTagElement("filtered_pages", compoundTag);
-			}
-		}
-
-		itemStack.addTagElement("pages", listTag);
+	private Filterable<String> filterableFromOutgoing(FilteredText filteredText) {
+		return this.player.isTextFilteringEnabled() ? Filterable.passThrough(filteredText.filteredOrEmpty()) : Filterable.from(filteredText);
 	}
 
 	@Override
@@ -891,6 +867,7 @@ public class ServerGamePacketListenerImpl
 								this.teleport(this.player.getX(), this.player.getY(), this.player.getZ(), g, h);
 							}
 						} else {
+							boolean bl = this.player.isFallFlying();
 							if (serverLevel.tickRateManager().runsNormally()) {
 								this.receivedMovePacketCount++;
 								int q = this.receivedMovePacketCount - this.knownMovePacketCount;
@@ -899,9 +876,8 @@ public class ServerGamePacketListenerImpl
 									q = 1;
 								}
 
-								if (!this.player.isChangingDimension()
-									&& (!this.player.level().getGameRules().getBoolean(GameRules.RULE_DISABLE_ELYTRA_MOVEMENT_CHECK) || !this.player.isFallFlying())) {
-									float r = this.player.isFallFlying() ? 300.0F : 100.0F;
+								if (!this.player.isChangingDimension() && (!this.player.level().getGameRules().getBoolean(GameRules.RULE_DISABLE_ELYTRA_MOVEMENT_CHECK) || !bl)) {
+									float r = bl ? 300.0F : 100.0F;
 									if (p - o > (double)(r * (float)q) && !this.isSingleplayerOwner()) {
 										LOGGER.warn("{} moved too quickly! {},{},{}", this.player.getName().getString(), l, m, n);
 										this.teleport(this.player.getX(), this.player.getY(), this.player.getZ(), this.player.getYRot(), this.player.getXRot());
@@ -914,12 +890,12 @@ public class ServerGamePacketListenerImpl
 							l = d - this.lastGoodX;
 							m = e - this.lastGoodY;
 							n = f - this.lastGoodZ;
-							boolean bl = m > 0.0;
-							if (this.player.onGround() && !serverboundMovePlayerPacket.isOnGround() && bl) {
+							boolean bl2 = m > 0.0;
+							if (this.player.onGround() && !serverboundMovePlayerPacket.isOnGround() && bl2) {
 								this.player.jumpFromGround();
 							}
 
-							boolean bl2 = this.player.verticalCollisionBelow;
+							boolean bl3 = this.player.verticalCollisionBelow;
 							this.player.move(MoverType.PLAYER, new Vec3(l, m, n));
 							l = d - this.player.getX();
 							m = e - this.player.getY();
@@ -929,28 +905,29 @@ public class ServerGamePacketListenerImpl
 
 							n = f - this.player.getZ();
 							p = l * l + m * m + n * n;
-							boolean bl3 = false;
+							boolean bl4 = false;
 							if (!this.player.isChangingDimension()
 								&& p > 0.0625
 								&& !this.player.isSleeping()
 								&& !this.player.gameMode.isCreative()
 								&& this.player.gameMode.getGameModeForPlayer() != GameType.SPECTATOR) {
-								bl3 = true;
+								bl4 = true;
 								LOGGER.warn("{} moved wrongly!", this.player.getName().getString());
 							}
 
 							if (this.player.noPhysics
 								|| this.player.isSleeping()
-								|| (!bl3 || !serverLevel.noCollision(this.player, aABB)) && !this.isPlayerCollidingWithAnythingNew(serverLevel, aABB, d, e, f)) {
+								|| (!bl4 || !serverLevel.noCollision(this.player, aABB)) && !this.isPlayerCollidingWithAnythingNew(serverLevel, aABB, d, e, f)) {
 								this.player.absMoveTo(d, e, f, g, h);
+								boolean bl5 = this.player.isAutoSpinAttack();
 								this.clientIsFloating = m >= -0.03125
-									&& !bl2
+									&& !bl3
 									&& this.player.gameMode.getGameModeForPlayer() != GameType.SPECTATOR
 									&& !this.server.isFlightAllowed()
 									&& !this.player.getAbilities().mayfly
 									&& !this.player.hasEffect(MobEffects.LEVITATION)
-									&& !this.player.isFallFlying()
-									&& !this.player.isAutoSpinAttack()
+									&& !bl
+									&& !bl5
 									&& this.noBlocksAround(this.player);
 								this.player.serverLevel().getChunkSource().move(this.player);
 								this.player.doCheckFallDamage(this.player.getX() - i, this.player.getY() - j, this.player.getZ() - k, serverboundMovePlayerPacket.isOnGround());
@@ -958,8 +935,18 @@ public class ServerGamePacketListenerImpl
 									.setOnGroundWithKnownMovement(
 										serverboundMovePlayerPacket.isOnGround(), new Vec3(this.player.getX() - i, this.player.getY() - j, this.player.getZ() - k)
 									);
-								if (bl) {
+								if (bl2) {
 									this.player.resetFallDistance();
+								}
+
+								if (serverboundMovePlayerPacket.isOnGround()
+									|| this.player.isInLiquid()
+									|| this.player.onClimbable()
+									|| this.player.isSpectator()
+									|| this.player.isCreative()
+									|| bl
+									|| bl5) {
+									this.player.ignoreFallDamageAboveY = null;
 								}
 
 								this.player.checkMovementStatistics(this.player.getX() - i, this.player.getY() - j, this.player.getZ() - k);
@@ -1305,7 +1292,7 @@ public class ServerGamePacketListenerImpl
 
 	private static boolean isChatMessageIllegal(String string) {
 		for (int i = 0; i < string.length(); i++) {
-			if (!SharedConstants.isAllowedChatCharacter(string.charAt(i))) {
+			if (!StringUtil.isAllowedChatCharacter(string.charAt(i))) {
 				return true;
 			}
 		}
@@ -1626,9 +1613,9 @@ public class ServerGamePacketListenerImpl
 				return;
 			}
 
-			CompoundTag compoundTag = BlockItem.getBlockEntityData(itemStack);
-			if (!itemStack.isEmpty() && compoundTag != null && compoundTag.contains("x") && compoundTag.contains("y") && compoundTag.contains("z")) {
-				BlockPos blockPos = BlockEntity.getPosFromTag(compoundTag);
+			CustomData customData = itemStack.getOrDefault(DataComponents.BLOCK_ENTITY_DATA, CustomData.EMPTY);
+			if (customData.contains("x") && customData.contains("y") && customData.contains("z")) {
+				BlockPos blockPos = BlockEntity.getPosFromTag(customData.getUnsafe());
 				if (this.player.level().isLoaded(blockPos)) {
 					BlockEntity blockEntity = this.player.level().getBlockEntity(blockPos);
 					if (blockEntity != null) {
@@ -1672,9 +1659,6 @@ public class ServerGamePacketListenerImpl
 	public void handlePlayerAbilities(ServerboundPlayerAbilitiesPacket serverboundPlayerAbilitiesPacket) {
 		PacketUtils.ensureRunningOnSameThread(serverboundPlayerAbilitiesPacket, this, this.player.serverLevel());
 		this.player.getAbilities().flying = serverboundPlayerAbilitiesPacket.isFlying() && this.player.getAbilities().mayfly;
-		if (this.player.getAbilities().flying) {
-			this.player.ignoreFallDamageAboveY = null;
-		}
 	}
 
 	@Override

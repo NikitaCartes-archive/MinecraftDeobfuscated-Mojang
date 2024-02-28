@@ -1,19 +1,20 @@
 package net.minecraft.world.inventory;
 
 import com.mojang.logging.LogUtils;
-import java.util.Map;
+import it.unimi.dsi.fastutil.objects.Object2IntMap.Entry;
 import javax.annotation.Nullable;
-import net.minecraft.SharedConstants;
-import net.minecraft.Util;
+import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.util.StringUtil;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.EnchantedBookItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.level.block.AnvilBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import org.slf4j.Logger;
@@ -113,17 +114,14 @@ public class AnvilMenu extends ItemCombinerMenu {
 		int i = 0;
 		int j = 0;
 		int k = 0;
-		if (itemStack.isEmpty()) {
-			this.resultSlots.setItem(0, ItemStack.EMPTY);
-			this.cost.set(0);
-		} else {
+		if (!itemStack.isEmpty() && EnchantmentHelper.canStoreEnchantments(itemStack)) {
 			ItemStack itemStack2 = itemStack.copy();
 			ItemStack itemStack3 = this.inputSlots.getItem(1);
-			Map<Enchantment, Integer> map = EnchantmentHelper.getEnchantments(itemStack2);
-			j += itemStack.getBaseRepairCost() + (itemStack3.isEmpty() ? 0 : itemStack3.getBaseRepairCost());
+			ItemEnchantments.Mutable mutable = new ItemEnchantments.Mutable(EnchantmentHelper.getEnchantmentsForCrafting(itemStack2));
+			j += itemStack.getOrDefault(DataComponents.REPAIR_COST, Integer.valueOf(0)) + itemStack3.getOrDefault(DataComponents.REPAIR_COST, Integer.valueOf(0));
 			this.repairItemCountCost = 0;
 			if (!itemStack3.isEmpty()) {
-				boolean bl = itemStack3.is(Items.ENCHANTED_BOOK) && !EnchantedBookItem.getEnchantments(itemStack3).isEmpty();
+				boolean bl = itemStack3.has(DataComponents.STORED_ENCHANTMENTS);
 				if (itemStack2.isDamageableItem() && itemStack2.getItem().isValidRepairItem(itemStack, itemStack3)) {
 					int l = Math.min(itemStack2.getDamageValue(), itemStack2.getMaxDamage() / 4);
 					if (l <= 0) {
@@ -164,59 +162,51 @@ public class AnvilMenu extends ItemCombinerMenu {
 						}
 					}
 
-					Map<Enchantment, Integer> map2 = EnchantmentHelper.getEnchantments(itemStack3);
+					ItemEnchantments itemEnchantments = EnchantmentHelper.getEnchantmentsForCrafting(itemStack3);
 					boolean bl2 = false;
 					boolean bl3 = false;
 
-					for (Enchantment enchantment : map2.keySet()) {
-						if (enchantment != null) {
-							int q = (Integer)map.getOrDefault(enchantment, 0);
-							int r = (Integer)map2.get(enchantment);
-							r = q == r ? r + 1 : Math.max(r, q);
-							boolean bl4 = enchantment.canEnchant(itemStack);
-							if (this.player.getAbilities().instabuild || itemStack.is(Items.ENCHANTED_BOOK)) {
-								bl4 = true;
+					for (Entry<Holder<Enchantment>> entry : itemEnchantments.entrySet()) {
+						Holder<Enchantment> holder = (Holder<Enchantment>)entry.getKey();
+						Enchantment enchantment = holder.value();
+						int q = mutable.getLevel(enchantment);
+						int r = entry.getIntValue();
+						r = q == r ? r + 1 : Math.max(r, q);
+						boolean bl4 = enchantment.canEnchant(itemStack);
+						if (this.player.getAbilities().instabuild || itemStack.is(Items.ENCHANTED_BOOK)) {
+							bl4 = true;
+						}
+
+						for (Holder<Enchantment> holder2 : mutable.keySet()) {
+							if (!holder2.equals(holder) && !enchantment.isCompatibleWith(holder2.value())) {
+								bl4 = false;
+								i++;
+							}
+						}
+
+						if (!bl4) {
+							bl3 = true;
+						} else {
+							bl2 = true;
+							if (r > enchantment.getMaxLevel()) {
+								r = enchantment.getMaxLevel();
 							}
 
-							for (Enchantment enchantment2 : map.keySet()) {
-								if (enchantment2 != enchantment && !enchantment.isCompatibleWith(enchantment2)) {
-									bl4 = false;
-									i++;
-								}
+							mutable.set(enchantment, r);
+
+							int s = switch (enchantment.getRarity()) {
+								case COMMON -> 1;
+								case UNCOMMON -> 2;
+								case RARE -> 4;
+								case VERY_RARE -> 8;
+							};
+							if (bl) {
+								s = Math.max(1, s / 2);
 							}
 
-							if (!bl4) {
-								bl3 = true;
-							} else {
-								bl2 = true;
-								if (r > enchantment.getMaxLevel()) {
-									r = enchantment.getMaxLevel();
-								}
-
-								map.put(enchantment, r);
-								int s = 0;
-								switch (enchantment.getRarity()) {
-									case COMMON:
-										s = 1;
-										break;
-									case UNCOMMON:
-										s = 2;
-										break;
-									case RARE:
-										s = 4;
-										break;
-									case VERY_RARE:
-										s = 8;
-								}
-
-								if (bl) {
-									s = Math.max(1, s / 2);
-								}
-
-								i += s * r;
-								if (itemStack.getCount() > 1) {
-									i = 40;
-								}
+							i += s * r;
+							if (itemStack.getCount() > 1) {
+								i = 40;
 							}
 						}
 					}
@@ -229,16 +219,16 @@ public class AnvilMenu extends ItemCombinerMenu {
 				}
 			}
 
-			if (this.itemName != null && !Util.isBlank(this.itemName)) {
+			if (this.itemName != null && !StringUtil.isBlank(this.itemName)) {
 				if (!this.itemName.equals(itemStack.getHoverName().getString())) {
 					k = 1;
 					i += k;
-					itemStack2.setHoverName(Component.literal(this.itemName));
+					itemStack2.set(DataComponents.CUSTOM_NAME, Component.literal(this.itemName));
 				}
-			} else if (itemStack.hasCustomHoverName()) {
+			} else if (itemStack.has(DataComponents.CUSTOM_NAME)) {
 				k = 1;
 				i += k;
-				itemStack2.resetHoverName();
+				itemStack2.remove(DataComponents.CUSTOM_NAME);
 			}
 
 			this.cost.set(j + i);
@@ -255,21 +245,24 @@ public class AnvilMenu extends ItemCombinerMenu {
 			}
 
 			if (!itemStack2.isEmpty()) {
-				int t = itemStack2.getBaseRepairCost();
-				if (!itemStack3.isEmpty() && t < itemStack3.getBaseRepairCost()) {
-					t = itemStack3.getBaseRepairCost();
+				int t = itemStack2.getOrDefault(DataComponents.REPAIR_COST, Integer.valueOf(0));
+				if (t < itemStack3.getOrDefault(DataComponents.REPAIR_COST, Integer.valueOf(0))) {
+					t = itemStack3.getOrDefault(DataComponents.REPAIR_COST, Integer.valueOf(0));
 				}
 
 				if (k != i || k == 0) {
 					t = calculateIncreasedRepairCost(t);
 				}
 
-				itemStack2.setRepairCost(t);
-				EnchantmentHelper.setEnchantments(map, itemStack2);
+				itemStack2.set(DataComponents.REPAIR_COST, t);
+				EnchantmentHelper.setEnchantments(itemStack2, mutable.toImmutable());
 			}
 
 			this.resultSlots.setItem(0, itemStack2);
 			this.broadcastChanges();
+		} else {
+			this.resultSlots.setItem(0, ItemStack.EMPTY);
+			this.cost.set(0);
 		}
 	}
 
@@ -283,10 +276,10 @@ public class AnvilMenu extends ItemCombinerMenu {
 			this.itemName = string2;
 			if (this.getSlot(2).hasItem()) {
 				ItemStack itemStack = this.getSlot(2).getItem();
-				if (Util.isBlank(string2)) {
-					itemStack.resetHoverName();
+				if (StringUtil.isBlank(string2)) {
+					itemStack.remove(DataComponents.CUSTOM_NAME);
 				} else {
-					itemStack.setHoverName(Component.literal(string2));
+					itemStack.set(DataComponents.CUSTOM_NAME, Component.literal(string2));
 				}
 			}
 
@@ -299,7 +292,7 @@ public class AnvilMenu extends ItemCombinerMenu {
 
 	@Nullable
 	private static String validateName(String string) {
-		String string2 = SharedConstants.filterText(string);
+		String string2 = StringUtil.filterText(string);
 		return string2.length() <= 50 ? string2 : null;
 	}
 

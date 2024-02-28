@@ -8,12 +8,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.block.BeehiveBlock;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BeehiveBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 
 public class BeehiveDecorator extends TreeDecorator {
@@ -59,9 +57,7 @@ public class BeehiveDecorator extends TreeDecorator {
 						int ix = 2 + randomSource.nextInt(2);
 
 						for (int j = 0; j < ix; j++) {
-							CompoundTag compoundTag = new CompoundTag();
-							compoundTag.putString("id", BuiltInRegistries.ENTITY_TYPE.getKey(EntityType.BEE).toString());
-							beehiveBlockEntity.storeBee(compoundTag, randomSource.nextInt(599), false);
+							beehiveBlockEntity.storeBee(BeehiveBlockEntity.Occupant.create(randomSource.nextInt(599)));
 						}
 					});
 				}

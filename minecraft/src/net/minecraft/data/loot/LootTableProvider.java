@@ -54,7 +54,7 @@ public class LootTableProvider implements DataProvider {
 	private CompletableFuture<?> run(CachedOutput cachedOutput, HolderLookup.Provider provider) {
 		final Map<ResourceLocation, LootTable> map = Maps.<ResourceLocation, LootTable>newHashMap();
 		Map<RandomSupport.Seed128bit, ResourceLocation> map2 = new Object2ObjectOpenHashMap<>();
-		this.subProviders.forEach(subProviderEntry -> ((LootTableSubProvider)subProviderEntry.provider().get()).generate((resourceLocationx, builder) -> {
+		this.subProviders.forEach(subProviderEntry -> ((LootTableSubProvider)subProviderEntry.provider().get()).generate(provider, (resourceLocationx, builder) -> {
 				ResourceLocation resourceLocation2 = (ResourceLocation)map2.put(RandomSequence.seedForKey(resourceLocationx), resourceLocationx);
 				if (resourceLocation2 != null) {
 					Util.logAndPauseIfInIde("Loot table random sequence seed collision on " + resourceLocation2 + " and " + resourceLocationx);

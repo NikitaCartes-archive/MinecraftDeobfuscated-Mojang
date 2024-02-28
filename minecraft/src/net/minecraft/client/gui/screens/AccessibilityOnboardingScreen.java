@@ -12,18 +12,17 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CommonButtons;
 import net.minecraft.client.gui.components.FocusableTextWidget;
 import net.minecraft.client.gui.components.LogoRenderer;
-import net.minecraft.client.gui.layouts.FrameLayout;
+import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
 import net.minecraft.client.gui.layouts.LinearLayout;
-import net.minecraft.client.renderer.PanoramaRenderer;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 
 @Environment(EnvType.CLIENT)
 public class AccessibilityOnboardingScreen extends Screen {
+	private static final Component TITLE = Component.translatable("accessibility.onboarding.screen.title");
 	private static final Component ONBOARDING_NARRATOR_MESSAGE = Component.translatable("accessibility.onboarding.screen.narrator");
 	private static final int PADDING = 4;
 	private static final int TITLE_PADDING = 16;
-	private final PanoramaRenderer panorama = new PanoramaRenderer(TitleScreen.CUBE_MAP);
 	private final LogoRenderer logoRenderer;
 	private final Options options;
 	private final boolean narratorAvailable;
@@ -34,9 +33,10 @@ public class AccessibilityOnboardingScreen extends Screen {
 	private FocusableTextWidget textWidget;
 	@Nullable
 	private AbstractWidget narrationButton;
+	private final HeaderAndFooterLayout layout = new HeaderAndFooterLayout(this, this.initTitleYPos(), 33);
 
 	public AccessibilityOnboardingScreen(Options options, Runnable runnable) {
-		super(Component.translatable("accessibility.onboarding.screen.title"));
+		super(TITLE);
 		this.options = options;
 		this.onClose = runnable;
 		this.logoRenderer = new LogoRenderer(true);
@@ -45,14 +45,10 @@ public class AccessibilityOnboardingScreen extends Screen {
 
 	@Override
 	public void init() {
-		int i = this.initTitleYPos();
-		FrameLayout frameLayout = new FrameLayout(this.width, this.height - i);
-		frameLayout.defaultChildLayoutSetting().alignVerticallyTop().padding(4);
-		LinearLayout linearLayout = frameLayout.addChild(LinearLayout.vertical());
-		linearLayout.defaultCellSetting().alignHorizontallyCenter().padding(2);
-		this.textWidget = new FocusableTextWidget(this.width - 16, this.title, this.font);
-		linearLayout.addChild(this.textWidget, layoutSettings -> layoutSettings.paddingBottom(16));
-		this.narrationButton = this.options.narrator().createButton(this.options, 0, 0, 150);
+		LinearLayout linearLayout = this.layout.addToContents(LinearLayout.vertical());
+		linearLayout.defaultCellSetting().alignHorizontallyCenter().padding(4);
+		this.textWidget = linearLayout.addChild(new FocusableTextWidget(this.width, this.title, this.font), layoutSettings -> layoutSettings.padding(8));
+		this.narrationButton = this.options.narrator().createButton(this.options);
 		this.narrationButton.active = this.narratorAvailable;
 		linearLayout.addChild(this.narrationButton);
 		linearLayout.addChild(CommonButtons.accessibility(150, button -> this.closeAndSetScreen(new AccessibilityOptionsScreen(this, this.minecraft.options)), false));
@@ -61,12 +57,18 @@ public class AccessibilityOnboardingScreen extends Screen {
 				150, button -> this.closeAndSetScreen(new LanguageSelectScreen(this, this.minecraft.options, this.minecraft.getLanguageManager())), false
 			)
 		);
-		frameLayout.addChild(
-			Button.builder(CommonComponents.GUI_CONTINUE, button -> this.onClose()).build(), frameLayout.newChildLayoutSettings().alignVerticallyBottom().padding(8)
-		);
-		frameLayout.arrangeElements();
-		FrameLayout.alignInRectangle(frameLayout, 0, i, this.width, this.height, 0.5F, 0.0F);
-		frameLayout.visitWidgets(this::addRenderableWidget);
+		this.layout.addToFooter(Button.builder(CommonComponents.GUI_CONTINUE, button -> this.onClose()).build());
+		this.layout.visitWidgets(this::addRenderableWidget);
+		this.repositionElements();
+	}
+
+	@Override
+	protected void repositionElements() {
+		if (this.textWidget != null) {
+			this.textWidget.containWithin(this.width);
+		}
+
+		this.layout.arrangeElements();
 	}
 
 	@Override
@@ -103,15 +105,11 @@ public class AccessibilityOnboardingScreen extends Screen {
 		super.render(guiGraphics, i, j, f);
 		this.handleInitialNarrationDelay();
 		this.logoRenderer.renderLogo(guiGraphics, this.width, 1.0F);
-		if (this.textWidget != null) {
-			this.textWidget.render(guiGraphics, i, j, f);
-		}
 	}
 
 	@Override
-	public void renderBackground(GuiGraphics guiGraphics, int i, int j, float f) {
-		this.panorama.render(0.0F, 1.0F);
-		guiGraphics.fill(0, 0, this.width, this.height, -1877995504);
+	protected void renderPanorama(GuiGraphics guiGraphics, float f) {
+		PANORAMA.render(0.0F);
 	}
 
 	private void handleInitialNarrationDelay() {

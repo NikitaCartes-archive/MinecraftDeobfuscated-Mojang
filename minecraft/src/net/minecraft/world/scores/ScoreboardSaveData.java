@@ -23,26 +23,26 @@ public class ScoreboardSaveData extends SavedData {
 		this.scoreboard = scoreboard;
 	}
 
-	public ScoreboardSaveData load(CompoundTag compoundTag) {
-		this.loadObjectives(compoundTag.getList("Objectives", 10));
-		this.scoreboard.loadPlayerScores(compoundTag.getList("PlayerScores", 10));
+	public ScoreboardSaveData load(CompoundTag compoundTag, HolderLookup.Provider provider) {
+		this.loadObjectives(compoundTag.getList("Objectives", 10), provider);
+		this.scoreboard.loadPlayerScores(compoundTag.getList("PlayerScores", 10), provider);
 		if (compoundTag.contains("DisplaySlots", 10)) {
 			this.loadDisplaySlots(compoundTag.getCompound("DisplaySlots"));
 		}
 
 		if (compoundTag.contains("Teams", 9)) {
-			this.loadTeams(compoundTag.getList("Teams", 10));
+			this.loadTeams(compoundTag.getList("Teams", 10), provider);
 		}
 
 		return this;
 	}
 
-	private void loadTeams(ListTag listTag) {
+	private void loadTeams(ListTag listTag, HolderLookup.Provider provider) {
 		for (int i = 0; i < listTag.size(); i++) {
 			CompoundTag compoundTag = listTag.getCompound(i);
 			String string = compoundTag.getString("Name");
 			PlayerTeam playerTeam = this.scoreboard.addPlayerTeam(string);
-			Component component = Component.Serializer.fromJson(compoundTag.getString("DisplayName"));
+			Component component = Component.Serializer.fromJson(compoundTag.getString("DisplayName"), provider);
 			if (component != null) {
 				playerTeam.setDisplayName(component);
 			}
@@ -60,14 +60,14 @@ public class ScoreboardSaveData extends SavedData {
 			}
 
 			if (compoundTag.contains("MemberNamePrefix", 8)) {
-				Component component2 = Component.Serializer.fromJson(compoundTag.getString("MemberNamePrefix"));
+				Component component2 = Component.Serializer.fromJson(compoundTag.getString("MemberNamePrefix"), provider);
 				if (component2 != null) {
 					playerTeam.setPlayerPrefix(component2);
 				}
 			}
 
 			if (compoundTag.contains("MemberNameSuffix", 8)) {
-				Component component2 = Component.Serializer.fromJson(compoundTag.getString("MemberNameSuffix"));
+				Component component2 = Component.Serializer.fromJson(compoundTag.getString("MemberNameSuffix"), provider);
 				if (component2 != null) {
 					playerTeam.setPlayerSuffix(component2);
 				}
@@ -115,7 +115,7 @@ public class ScoreboardSaveData extends SavedData {
 		}
 	}
 
-	private void loadObjectives(ListTag listTag) {
+	private void loadObjectives(ListTag listTag, HolderLookup.Provider provider) {
 		for (int i = 0; i < listTag.size(); i++) {
 			CompoundTag compoundTag = listTag.getCompound(i);
 			String string = compoundTag.getString("CriteriaName");
@@ -124,38 +124,41 @@ public class ScoreboardSaveData extends SavedData {
 				return ObjectiveCriteria.DUMMY;
 			});
 			String string2 = compoundTag.getString("Name");
-			Component component = Component.Serializer.fromJson(compoundTag.getString("DisplayName"));
+			Component component = Component.Serializer.fromJson(compoundTag.getString("DisplayName"), provider);
 			ObjectiveCriteria.RenderType renderType = ObjectiveCriteria.RenderType.byId(compoundTag.getString("RenderType"));
 			boolean bl = compoundTag.getBoolean("display_auto_update");
-			NumberFormat numberFormat = (NumberFormat)NumberFormatTypes.CODEC.parse(NbtOps.INSTANCE, compoundTag.get("format")).result().orElse(null);
+			NumberFormat numberFormat = (NumberFormat)NumberFormatTypes.CODEC
+				.parse(provider.createSerializationContext(NbtOps.INSTANCE), compoundTag.get("format"))
+				.result()
+				.orElse(null);
 			this.scoreboard.addObjective(string2, objectiveCriteria, component, renderType, bl, numberFormat);
 		}
 	}
 
 	@Override
 	public CompoundTag save(CompoundTag compoundTag, HolderLookup.Provider provider) {
-		compoundTag.put("Objectives", this.saveObjectives());
-		compoundTag.put("PlayerScores", this.scoreboard.savePlayerScores());
-		compoundTag.put("Teams", this.saveTeams());
+		compoundTag.put("Objectives", this.saveObjectives(provider));
+		compoundTag.put("PlayerScores", this.scoreboard.savePlayerScores(provider));
+		compoundTag.put("Teams", this.saveTeams(provider));
 		this.saveDisplaySlots(compoundTag);
 		return compoundTag;
 	}
 
-	private ListTag saveTeams() {
+	private ListTag saveTeams(HolderLookup.Provider provider) {
 		ListTag listTag = new ListTag();
 
 		for (PlayerTeam playerTeam : this.scoreboard.getPlayerTeams()) {
 			CompoundTag compoundTag = new CompoundTag();
 			compoundTag.putString("Name", playerTeam.getName());
-			compoundTag.putString("DisplayName", Component.Serializer.toJson(playerTeam.getDisplayName()));
+			compoundTag.putString("DisplayName", Component.Serializer.toJson(playerTeam.getDisplayName(), provider));
 			if (playerTeam.getColor().getId() >= 0) {
 				compoundTag.putString("TeamColor", playerTeam.getColor().getName());
 			}
 
 			compoundTag.putBoolean("AllowFriendlyFire", playerTeam.isAllowFriendlyFire());
 			compoundTag.putBoolean("SeeFriendlyInvisibles", playerTeam.canSeeFriendlyInvisibles());
-			compoundTag.putString("MemberNamePrefix", Component.Serializer.toJson(playerTeam.getPlayerPrefix()));
-			compoundTag.putString("MemberNameSuffix", Component.Serializer.toJson(playerTeam.getPlayerSuffix()));
+			compoundTag.putString("MemberNamePrefix", Component.Serializer.toJson(playerTeam.getPlayerPrefix(), provider));
+			compoundTag.putString("MemberNameSuffix", Component.Serializer.toJson(playerTeam.getPlayerSuffix(), provider));
 			compoundTag.putString("NameTagVisibility", playerTeam.getNameTagVisibility().name);
 			compoundTag.putString("DeathMessageVisibility", playerTeam.getDeathMessageVisibility().name);
 			compoundTag.putString("CollisionRule", playerTeam.getCollisionRule().name);
@@ -187,19 +190,22 @@ public class ScoreboardSaveData extends SavedData {
 		}
 	}
 
-	private ListTag saveObjectives() {
+	private ListTag saveObjectives(HolderLookup.Provider provider) {
 		ListTag listTag = new ListTag();
 
 		for (Objective objective : this.scoreboard.getObjectives()) {
 			CompoundTag compoundTag = new CompoundTag();
 			compoundTag.putString("Name", objective.getName());
 			compoundTag.putString("CriteriaName", objective.getCriteria().getName());
-			compoundTag.putString("DisplayName", Component.Serializer.toJson(objective.getDisplayName()));
+			compoundTag.putString("DisplayName", Component.Serializer.toJson(objective.getDisplayName(), provider));
 			compoundTag.putString("RenderType", objective.getRenderType().getId());
 			compoundTag.putBoolean("display_auto_update", objective.displayAutoUpdate());
 			NumberFormat numberFormat = objective.numberFormat();
 			if (numberFormat != null) {
-				NumberFormatTypes.CODEC.encodeStart(NbtOps.INSTANCE, numberFormat).result().ifPresent(tag -> compoundTag.put("format", tag));
+				NumberFormatTypes.CODEC
+					.encodeStart(provider.createSerializationContext(NbtOps.INSTANCE), numberFormat)
+					.result()
+					.ifPresent(tag -> compoundTag.put("format", tag));
 			}
 
 			listTag.add(compoundTag);

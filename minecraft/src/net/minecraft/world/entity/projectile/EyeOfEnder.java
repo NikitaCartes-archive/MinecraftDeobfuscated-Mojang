@@ -34,7 +34,11 @@ public class EyeOfEnder extends Entity implements ItemSupplier {
 	}
 
 	public void setItem(ItemStack itemStack) {
-		this.getEntityData().set(DATA_ITEM_STACK, itemStack.copyWithCount(1));
+		if (itemStack.isEmpty()) {
+			this.getEntityData().set(DATA_ITEM_STACK, this.getDefaultItem());
+		} else {
+			this.getEntityData().set(DATA_ITEM_STACK, itemStack.copyWithCount(1));
+		}
 	}
 
 	@Override
@@ -155,13 +159,13 @@ public class EyeOfEnder extends Entity implements ItemSupplier {
 
 	@Override
 	public void addAdditionalSaveData(CompoundTag compoundTag) {
-		compoundTag.put("Item", this.getItem().save(new CompoundTag()));
+		compoundTag.put("Item", this.getItem().save(this.registryAccess()));
 	}
 
 	@Override
 	public void readAdditionalSaveData(CompoundTag compoundTag) {
 		if (compoundTag.contains("Item", 10)) {
-			this.setItem(ItemStack.of(compoundTag.getCompound("Item")));
+			this.setItem((ItemStack)ItemStack.parse(this.registryAccess(), compoundTag.getCompound("Item")).orElse(this.getDefaultItem()));
 		} else {
 			this.setItem(this.getDefaultItem());
 		}

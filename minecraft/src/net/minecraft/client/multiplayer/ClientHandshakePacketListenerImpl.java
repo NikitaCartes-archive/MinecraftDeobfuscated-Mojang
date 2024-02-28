@@ -174,7 +174,7 @@ public class ClientHandshakePacketListenerImpl implements ClientLoginPacketListe
 	@Override
 	public void handleGameProfile(ClientboundGameProfilePacket clientboundGameProfilePacket) {
 		this.switchState(ClientHandshakePacketListenerImpl.State.JOINING);
-		GameProfile gameProfile = clientboundGameProfilePacket.getGameProfile();
+		GameProfile gameProfile = clientboundGameProfilePacket.gameProfile();
 		this.connection
 			.setupInboundProtocol(
 				ConfigurationProtocols.CLIENTBOUND,

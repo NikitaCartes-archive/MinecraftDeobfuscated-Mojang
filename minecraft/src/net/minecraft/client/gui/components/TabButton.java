@@ -1,5 +1,6 @@
 package net.minecraft.client.gui.components;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -37,11 +38,14 @@ public class TabButton extends AbstractWidget {
 
 	@Override
 	public void renderWidget(GuiGraphics guiGraphics, int i, int j, float f) {
+		RenderSystem.enableBlend();
 		guiGraphics.blitSprite(SPRITES.get(this.isSelected(), this.isHoveredOrFocused()), this.getX(), this.getY(), this.width, this.height);
+		RenderSystem.disableBlend();
 		Font font = Minecraft.getInstance().font;
 		int k = this.active ? -1 : -6250336;
 		this.renderString(guiGraphics, font, k);
 		if (this.isSelected()) {
+			this.renderMenuBackground(guiGraphics, this.getX() + 2, this.getY() + 2, this.getRight() - 2, this.getBottom());
 			this.renderFocusUnderline(guiGraphics, font, k);
 		}
 	}

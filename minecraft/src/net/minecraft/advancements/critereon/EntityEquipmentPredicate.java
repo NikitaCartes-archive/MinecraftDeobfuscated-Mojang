@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Optional;
 import javax.annotation.Nullable;
+import net.minecraft.core.component.DataComponentPredicate;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -31,7 +32,7 @@ public record EntityEquipmentPredicate(
 				.apply(instance, EntityEquipmentPredicate::new)
 	);
 	public static final EntityEquipmentPredicate CAPTAIN = EntityEquipmentPredicate.Builder.equipment()
-		.head(ItemPredicate.Builder.item().of(Items.WHITE_BANNER).hasNbt(Raid.getLeaderBannerInstance().getTag()))
+		.head(ItemPredicate.Builder.item().of(Items.WHITE_BANNER).hasComponents(DataComponentPredicate.allOf(Raid.getLeaderBannerInstance().getComponents())))
 		.build();
 
 	public boolean matches(@Nullable Entity entity) {

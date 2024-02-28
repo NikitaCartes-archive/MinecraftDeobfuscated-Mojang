@@ -2,6 +2,7 @@ package net.minecraft.world.entity.ai.attributes;
 
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.netty.buffer.ByteBuf;
 import java.util.Objects;
@@ -20,14 +21,26 @@ import org.slf4j.Logger;
 
 public class AttributeModifier {
 	private static final Logger LOGGER = LogUtils.getLogger();
-	public static final Codec<AttributeModifier> CODEC = RecordCodecBuilder.create(
+	public static final MapCodec<AttributeModifier> MAP_CODEC = RecordCodecBuilder.mapCodec(
 		instance -> instance.group(
-					UUIDUtil.CODEC.fieldOf("UUID").forGetter(AttributeModifier::getId),
-					Codec.STRING.fieldOf("Name").forGetter(attributeModifier -> attributeModifier.name),
-					Codec.DOUBLE.fieldOf("Amount").forGetter(AttributeModifier::getAmount),
-					AttributeModifier.Operation.CODEC.fieldOf("Operation").forGetter(AttributeModifier::getOperation)
+					UUIDUtil.CODEC.fieldOf("uuid").forGetter(AttributeModifier::getId),
+					Codec.STRING.fieldOf("name").forGetter(attributeModifier -> attributeModifier.name),
+					Codec.DOUBLE.fieldOf("amount").forGetter(AttributeModifier::getAmount),
+					AttributeModifier.Operation.CODEC.fieldOf("operation").forGetter(AttributeModifier::getOperation)
 				)
 				.apply(instance, AttributeModifier::new)
+	);
+	public static final Codec<AttributeModifier> CODEC = MAP_CODEC.codec();
+	public static final StreamCodec<ByteBuf, AttributeModifier> STREAM_CODEC = StreamCodec.composite(
+		UUIDUtil.STREAM_CODEC,
+		AttributeModifier::getId,
+		ByteBufCodecs.STRING_UTF8,
+		attributeModifier -> attributeModifier.name,
+		ByteBufCodecs.DOUBLE,
+		AttributeModifier::getAmount,
+		AttributeModifier.Operation.STREAM_CODEC,
+		AttributeModifier::getOperation,
+		AttributeModifier::new
 	);
 	private final double amount;
 	private final AttributeModifier.Operation operation;
@@ -98,9 +111,9 @@ public class AttributeModifier {
 	}
 
 	public static enum Operation implements StringRepresentable {
-		ADDITION("addition", 0),
-		MULTIPLY_BASE("multiply_base", 1),
-		MULTIPLY_TOTAL("multiply_total", 2);
+		ADD_VALUE("add_value", 0),
+		ADD_MULTIPLIED_BASE("add_multiplied_base", 1),
+		ADD_MULTIPLIED_TOTAL("add_multiplied_total", 2);
 
 		public static final IntFunction<AttributeModifier.Operation> BY_ID = ByIdMap.continuous(
 			AttributeModifier.Operation::id, values(), ByIdMap.OutOfBoundsStrategy.ZERO

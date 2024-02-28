@@ -4,13 +4,13 @@ import com.mojang.serialization.MapCodec;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.RecordItem;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -41,8 +41,8 @@ public class JukeboxBlock extends BaseEntityBlock {
 	@Override
 	public void setPlacedBy(Level level, BlockPos blockPos, BlockState blockState, @Nullable LivingEntity livingEntity, ItemStack itemStack) {
 		super.setPlacedBy(level, blockPos, blockState, livingEntity, itemStack);
-		CompoundTag compoundTag = BlockItem.getBlockEntityData(itemStack);
-		if (compoundTag != null && compoundTag.contains("RecordItem")) {
+		CustomData customData = itemStack.getOrDefault(DataComponents.BLOCK_ENTITY_DATA, CustomData.EMPTY);
+		if (customData.contains("RecordItem")) {
 			level.setBlock(blockPos, blockState.setValue(HAS_RECORD, Boolean.valueOf(true)), 2);
 		}
 	}

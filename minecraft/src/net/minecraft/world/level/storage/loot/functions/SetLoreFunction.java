@@ -7,14 +7,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.UnaryOperator;
+import java.util.stream.Stream;
 import javax.annotation.Nullable;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTag;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.ItemLore;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
@@ -54,53 +54,17 @@ public class SetLoreFunction extends LootItemConditionalFunction {
 
 	@Override
 	public ItemStack run(ItemStack itemStack, LootContext lootContext) {
-		ListTag listTag = this.getLoreTag(itemStack, !this.lore.isEmpty());
-		if (listTag != null) {
-			if (this.replace) {
-				listTag.clear();
-			}
-
-			UnaryOperator<Component> unaryOperator = SetNameFunction.createResolver(lootContext, (LootContext.EntityTarget)this.resolutionContext.orElse(null));
-			this.lore.stream().map(unaryOperator).map(Component.Serializer::toJson).map(StringTag::valueOf).forEach(listTag::add);
-		}
-
+		itemStack.update(DataComponents.LORE, ItemLore.EMPTY, itemLore -> new ItemLore(this.updateLore(itemLore, lootContext)));
 		return itemStack;
 	}
 
-	@Nullable
-	private ListTag getLoreTag(ItemStack itemStack, boolean bl) {
-		CompoundTag compoundTag;
-		if (itemStack.hasTag()) {
-			compoundTag = itemStack.getTag();
+	private List<Component> updateLore(@Nullable ItemLore itemLore, LootContext lootContext) {
+		if (itemLore == null && this.lore.isEmpty()) {
+			return List.of();
 		} else {
-			if (!bl) {
-				return null;
-			}
-
-			compoundTag = new CompoundTag();
-			itemStack.setTag(compoundTag);
-		}
-
-		CompoundTag compoundTag2;
-		if (compoundTag.contains("display", 10)) {
-			compoundTag2 = compoundTag.getCompound("display");
-		} else {
-			if (!bl) {
-				return null;
-			}
-
-			compoundTag2 = new CompoundTag();
-			compoundTag.put("display", compoundTag2);
-		}
-
-		if (compoundTag2.contains("Lore", 9)) {
-			return compoundTag2.getList("Lore", 8);
-		} else if (bl) {
-			ListTag listTag = new ListTag();
-			compoundTag2.put("Lore", listTag);
-			return listTag;
-		} else {
-			return null;
+			UnaryOperator<Component> unaryOperator = SetNameFunction.createResolver(lootContext, (LootContext.EntityTarget)this.resolutionContext.orElse(null));
+			Stream<Component> stream = this.lore.stream().map(unaryOperator);
+			return !this.replace && itemLore != null ? Stream.concat(itemLore.lines().stream(), stream).toList() : stream.toList();
 		}
 	}
 

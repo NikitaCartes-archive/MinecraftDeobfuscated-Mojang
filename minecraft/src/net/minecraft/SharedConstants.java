@@ -15,22 +15,22 @@ public class SharedConstants {
 	@Deprecated
 	public static final boolean SNAPSHOT = true;
 	@Deprecated
-	public static final int WORLD_VERSION = 3817;
+	public static final int WORLD_VERSION = 3819;
 	@Deprecated
 	public static final String SERIES = "main";
 	@Deprecated
-	public static final String VERSION_STRING = "24w07a";
+	public static final String VERSION_STRING = "24w09a";
 	@Deprecated
 	public static final int RELEASE_NETWORK_PROTOCOL_VERSION = 766;
 	@Deprecated
-	public static final int SNAPSHOT_NETWORK_PROTOCOL_VERSION = 177;
+	public static final int SNAPSHOT_NETWORK_PROTOCOL_VERSION = 178;
 	public static final int SNBT_NAG_VERSION = 3798;
 	private static final int SNAPSHOT_PROTOCOL_BIT = 30;
 	public static final boolean THROW_ON_TASK_FAILURE = true;
 	@Deprecated
-	public static final int RESOURCE_PACK_FORMAT = 26;
+	public static final int RESOURCE_PACK_FORMAT = 28;
 	@Deprecated
-	public static final int DATA_PACK_FORMAT = 32;
+	public static final int DATA_PACK_FORMAT = 33;
 	@Deprecated
 	public static final int LANGUAGE_FORMAT = 1;
 	public static final int REPORT_FORMAT_VERSION = 1;
@@ -128,6 +128,7 @@ public class SharedConstants {
 	public static final int MAX_CHAT_LENGTH = 256;
 	public static final int MAX_USER_INPUT_COMMAND_LENGTH = 32500;
 	public static final int MAX_FUNCTION_COMMAND_LENGTH = 2000000;
+	public static final int MAX_PLAYER_NAME_LENGTH = 16;
 	public static final int MAX_CHAINED_NEIGHBOR_UPDATES = 1000000;
 	public static final int MAX_RENDER_DISTANCE = 32;
 	public static final char[] ILLEGAL_FILE_CHARACTERS = new char[]{'/', '\n', '\r', '\t', '\u0000', '\f', '`', '?', '*', '\\', '<', '>', '|', '"', ':'};
@@ -141,28 +142,6 @@ public class SharedConstants {
 	public static final int WORLD_ICON_SIZE = 64;
 	@Nullable
 	private static WorldVersion CURRENT_VERSION;
-
-	public static boolean isAllowedChatCharacter(char c) {
-		return c != 167 && c >= ' ' && c != 127;
-	}
-
-	public static String filterText(String string) {
-		return filterText(string, false);
-	}
-
-	public static String filterText(String string, boolean bl) {
-		StringBuilder stringBuilder = new StringBuilder();
-
-		for (char c : string.toCharArray()) {
-			if (isAllowedChatCharacter(c)) {
-				stringBuilder.append(c);
-			} else if (bl && c == '\n') {
-				stringBuilder.append(c);
-			}
-		}
-
-		return stringBuilder.toString();
-	}
 
 	public static void setVersion(WorldVersion worldVersion) {
 		if (CURRENT_VERSION == null) {
@@ -187,7 +166,7 @@ public class SharedConstants {
 	}
 
 	public static int getProtocolVersion() {
-		return 1073742001;
+		return 1073742002;
 	}
 
 	public static boolean debugVoidTerrain(ChunkPos chunkPos) {

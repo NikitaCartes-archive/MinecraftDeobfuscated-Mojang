@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Map.Entry;
 import javax.annotation.Nullable;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
@@ -41,7 +42,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.CarvingMask;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkSource;
-import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.DataLayer;
 import net.minecraft.world.level.chunk.ImposterProtoChunk;
 import net.minecraft.world.level.chunk.LevelChunk;
@@ -50,6 +50,8 @@ import net.minecraft.world.level.chunk.PalettedContainer;
 import net.minecraft.world.level.chunk.PalettedContainerRO;
 import net.minecraft.world.level.chunk.ProtoChunk;
 import net.minecraft.world.level.chunk.UpgradeData;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
+import net.minecraft.world.level.chunk.status.ChunkType;
 import net.minecraft.world.level.levelgen.BelowZeroRetrogen;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.Heightmap;
@@ -104,18 +106,20 @@ public class ChunkSerializer {
 			if (l >= 0 && l < levelChunkSections.length) {
 				PalettedContainer<BlockState> palettedContainer;
 				if (compoundTag2.contains("block_states", 10)) {
-					palettedContainer = BLOCK_STATE_CODEC.parse(NbtOps.INSTANCE, compoundTag2.getCompound("block_states"))
-						.promotePartial(string -> logErrors(chunkPos, k, string))
-						.getOrThrow(false, LOGGER::error);
+					palettedContainer = Util.getOrThrow(
+						BLOCK_STATE_CODEC.parse(NbtOps.INSTANCE, compoundTag2.getCompound("block_states")).promotePartial(string -> logErrors(chunkPos, k, string)),
+						ChunkSerializer.ChunkReadException::new
+					);
 				} else {
 					palettedContainer = new PalettedContainer<>(Block.BLOCK_STATE_REGISTRY, Blocks.AIR.defaultBlockState(), PalettedContainer.Strategy.SECTION_STATES);
 				}
 
 				PalettedContainerRO<Holder<Biome>> palettedContainerRO;
 				if (compoundTag2.contains("biomes", 10)) {
-					palettedContainerRO = codec.parse(NbtOps.INSTANCE, compoundTag2.getCompound("biomes"))
-						.promotePartial(string -> logErrors(chunkPos, k, string))
-						.getOrThrow(false, LOGGER::error);
+					palettedContainerRO = Util.getOrThrow(
+						codec.parse(NbtOps.INSTANCE, compoundTag2.getCompound("biomes")).promotePartial(string -> logErrors(chunkPos, k, string)),
+						ChunkSerializer.ChunkReadException::new
+					);
 				} else {
 					palettedContainerRO = new PalettedContainer<>(
 						registry.asHolderIdMap(), registry.getHolderOrThrow(Biomes.PLAINS), PalettedContainer.Strategy.SECTION_BIOMES
@@ -147,7 +151,7 @@ public class ChunkSerializer {
 		}
 
 		long m = compoundTag.getLong("InhabitedTime");
-		ChunkStatus.ChunkType chunkType = getChunkTypeFromTag(compoundTag);
+		ChunkType chunkType = getChunkTypeFromTag(compoundTag);
 		BlendingData blendingData;
 		if (compoundTag.contains("blending_data", 10)) {
 			blendingData = (BlendingData)BlendingData.CODEC
@@ -159,7 +163,7 @@ public class ChunkSerializer {
 		}
 
 		ChunkAccess chunkAccess;
-		if (chunkType == ChunkStatus.ChunkType.LEVELCHUNK) {
+		if (chunkType == ChunkType.LEVELCHUNK) {
 			LevelChunkTicks<Block> levelChunkTicks = LevelChunkTicks.load(
 				compoundTag.getList("block_ticks", 10), string -> BuiltInRegistries.BLOCK.getOptional(ResourceLocation.tryParse(string)), chunkPos
 			);
@@ -232,7 +236,7 @@ public class ChunkSerializer {
 			}
 		}
 
-		if (chunkType == ChunkStatus.ChunkType.LEVELCHUNK) {
+		if (chunkType == ChunkType.LEVELCHUNK) {
 			return new ImposterProtoChunk((LevelChunk)chunkAccess, false);
 		} else {
 			ProtoChunk protoChunk2 = (ProtoChunk)chunkAccess;
@@ -347,7 +351,7 @@ public class ChunkSerializer {
 		}
 
 		compoundTag.put("block_entities", listTag2);
-		if (chunkAccess.getStatus().getChunkType() == ChunkStatus.ChunkType.PROTOCHUNK) {
+		if (chunkAccess.getStatus().getChunkType() == ChunkType.PROTOCHUNK) {
 			ProtoChunk protoChunk = (ProtoChunk)chunkAccess;
 			ListTag listTag3 = new ListTag();
 			listTag3.addAll(protoChunk.getEntities());
@@ -388,8 +392,8 @@ public class ChunkSerializer {
 		compoundTag.put("fluid_ticks", ticksToSave.fluids().save(l, fluid -> BuiltInRegistries.FLUID.getKey(fluid).toString()));
 	}
 
-	public static ChunkStatus.ChunkType getChunkTypeFromTag(@Nullable CompoundTag compoundTag) {
-		return compoundTag != null ? ChunkStatus.byName(compoundTag.getString("Status")).getChunkType() : ChunkStatus.ChunkType.PROTOCHUNK;
+	public static ChunkType getChunkTypeFromTag(@Nullable CompoundTag compoundTag) {
+		return compoundTag != null ? ChunkStatus.byName(compoundTag.getString("Status")).getChunkType() : ChunkType.PROTOCHUNK;
 	}
 
 	@Nullable
@@ -518,5 +522,11 @@ public class ChunkSerializer {
 		}
 
 		return listTag;
+	}
+
+	public static class ChunkReadException extends RuntimeException {
+		public ChunkReadException(String string) {
+			super(string);
+		}
 	}
 }

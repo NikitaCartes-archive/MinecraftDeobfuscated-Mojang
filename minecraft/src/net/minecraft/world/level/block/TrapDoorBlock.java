@@ -88,7 +88,7 @@ public class TrapDoorBlock extends HorizontalDirectionalBlock implements SimpleW
 	}
 
 	@Override
-	protected boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
+	protected boolean isPathfindable(BlockState blockState, PathComputationType pathComputationType) {
 		switch (pathComputationType) {
 			case LAND:
 				return (Boolean)blockState.getValue(OPEN);

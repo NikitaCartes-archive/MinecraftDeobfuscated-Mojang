@@ -80,11 +80,11 @@ public class ArmorItem extends Item implements Equipable {
 			float f = holder.value().toughness();
 			Builder<Holder<Attribute>, AttributeModifier> builder = ImmutableMultimap.builder();
 			UUID uUID = (UUID)ARMOR_MODIFIER_UUID_PER_TYPE.get(type);
-			builder.put(Attributes.ARMOR, new AttributeModifier(uUID, "Armor modifier", (double)i, AttributeModifier.Operation.ADDITION));
-			builder.put(Attributes.ARMOR_TOUGHNESS, new AttributeModifier(uUID, "Armor toughness", (double)f, AttributeModifier.Operation.ADDITION));
+			builder.put(Attributes.ARMOR, new AttributeModifier(uUID, "Armor modifier", (double)i, AttributeModifier.Operation.ADD_VALUE));
+			builder.put(Attributes.ARMOR_TOUGHNESS, new AttributeModifier(uUID, "Armor toughness", (double)f, AttributeModifier.Operation.ADD_VALUE));
 			float g = holder.value().knockbackResistance();
 			if (g > 0.0F) {
-				builder.put(Attributes.KNOCKBACK_RESISTANCE, new AttributeModifier(uUID, "Armor knockback resistance", (double)g, AttributeModifier.Operation.ADDITION));
+				builder.put(Attributes.KNOCKBACK_RESISTANCE, new AttributeModifier(uUID, "Armor knockback resistance", (double)g, AttributeModifier.Operation.ADD_VALUE));
 			}
 
 			return builder.build();
@@ -138,29 +138,25 @@ public class ArmorItem extends Item implements Equipable {
 	}
 
 	public static enum Type implements StringRepresentable {
-		HELMET(EquipmentSlot.HEAD, "helmet"),
-		CHESTPLATE(EquipmentSlot.CHEST, "chestplate"),
-		LEGGINGS(EquipmentSlot.LEGS, "leggings"),
-		BOOTS(EquipmentSlot.FEET, "boots"),
-		BODY(EquipmentSlot.BODY, "body");
+		HELMET(EquipmentSlot.HEAD, 11, "helmet"),
+		CHESTPLATE(EquipmentSlot.CHEST, 16, "chestplate"),
+		LEGGINGS(EquipmentSlot.LEGS, 15, "leggings"),
+		BOOTS(EquipmentSlot.FEET, 13, "boots"),
+		BODY(EquipmentSlot.BODY, 16, "body");
 
 		public static final Codec<ArmorItem.Type> CODEC = StringRepresentable.fromValues(ArmorItem.Type::values);
 		private final EquipmentSlot slot;
 		private final String name;
+		private final int durability;
 
-		private Type(EquipmentSlot equipmentSlot, String string2) {
+		private Type(EquipmentSlot equipmentSlot, int j, String string2) {
 			this.slot = equipmentSlot;
 			this.name = string2;
+			this.durability = j;
 		}
 
 		public int getDurability(int i) {
-			return switch (this) {
-				case HELMET -> 11;
-				case CHESTPLATE -> 16;
-				case LEGGINGS -> 15;
-				case BOOTS -> 13;
-				case BODY -> 20;
-			} * i;
+			return this.durability * i;
 		}
 
 		public EquipmentSlot getSlot() {

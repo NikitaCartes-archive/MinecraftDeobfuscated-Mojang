@@ -4,7 +4,7 @@ import com.google.common.collect.Maps;
 import java.util.Map;
 import java.util.Optional;
 import javax.annotation.Nullable;
-import net.minecraft.Util;
+import net.minecraft.util.StringUtil;
 import net.minecraft.world.level.block.Block;
 
 public class BlockFamily {
@@ -42,11 +42,11 @@ public class BlockFamily {
 	}
 
 	public Optional<String> getRecipeGroupPrefix() {
-		return Util.isBlank(this.recipeGroupPrefix) ? Optional.empty() : Optional.of(this.recipeGroupPrefix);
+		return StringUtil.isBlank(this.recipeGroupPrefix) ? Optional.empty() : Optional.of(this.recipeGroupPrefix);
 	}
 
 	public Optional<String> getRecipeUnlockedBy() {
-		return Util.isBlank(this.recipeUnlockedBy) ? Optional.empty() : Optional.of(this.recipeUnlockedBy);
+		return StringUtil.isBlank(this.recipeUnlockedBy) ? Optional.empty() : Optional.of(this.recipeUnlockedBy);
 	}
 
 	public static class Builder {

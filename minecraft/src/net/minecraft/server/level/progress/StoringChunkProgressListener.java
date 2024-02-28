@@ -3,7 +3,7 @@ package net.minecraft.server.level.progress;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import javax.annotation.Nullable;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 
 public class StoringChunkProgressListener implements ChunkProgressListener {
 	private final LoggerChunkProgressListener delegate;

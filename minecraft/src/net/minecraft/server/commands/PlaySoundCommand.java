@@ -7,6 +7,8 @@ import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import java.util.Collection;
+import java.util.List;
+import javax.annotation.Nullable;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
@@ -28,7 +30,19 @@ public class PlaySoundCommand {
 
 	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
 		RequiredArgumentBuilder<CommandSourceStack, ResourceLocation> requiredArgumentBuilder = Commands.argument("sound", ResourceLocationArgument.id())
-			.suggests(SuggestionProviders.AVAILABLE_SOUNDS);
+			.suggests(SuggestionProviders.AVAILABLE_SOUNDS)
+			.executes(
+				commandContext -> playSound(
+						commandContext.getSource(),
+						getCallingPlayerAsCollection(commandContext.getSource().getPlayer()),
+						ResourceLocationArgument.getId(commandContext, "sound"),
+						SoundSource.MASTER,
+						commandContext.getSource().getPosition(),
+						1.0F,
+						1.0F,
+						0.0F
+					)
+			);
 
 		for (SoundSource soundSource : SoundSource.values()) {
 			requiredArgumentBuilder.then(source(soundSource));
@@ -39,6 +53,18 @@ public class PlaySoundCommand {
 
 	private static LiteralArgumentBuilder<CommandSourceStack> source(SoundSource soundSource) {
 		return Commands.literal(soundSource.getName())
+			.executes(
+				commandContext -> playSound(
+						commandContext.getSource(),
+						getCallingPlayerAsCollection(commandContext.getSource().getPlayer()),
+						ResourceLocationArgument.getId(commandContext, "sound"),
+						soundSource,
+						commandContext.getSource().getPosition(),
+						1.0F,
+						1.0F,
+						0.0F
+					)
+			)
 			.then(
 				Commands.argument("targets", EntityArgument.players())
 					.executes(
@@ -114,6 +140,10 @@ public class PlaySoundCommand {
 							)
 					)
 			);
+	}
+
+	private static Collection<ServerPlayer> getCallingPlayerAsCollection(@Nullable ServerPlayer serverPlayer) {
+		return serverPlayer != null ? List.of(serverPlayer) : List.of();
 	}
 
 	private static int playSound(

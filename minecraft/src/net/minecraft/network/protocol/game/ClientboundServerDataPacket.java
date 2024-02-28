@@ -11,7 +11,7 @@ import net.minecraft.network.protocol.PacketType;
 
 public record ClientboundServerDataPacket(Component motd, Optional<byte[]> iconBytes) implements Packet<ClientGamePacketListener> {
 	public static final StreamCodec<ByteBuf, ClientboundServerDataPacket> STREAM_CODEC = StreamCodec.composite(
-		ComponentSerialization.CONTEXT_FREE_STREAM_CODEC,
+		ComponentSerialization.TRUSTED_CONTEXT_FREE_STREAM_CODEC,
 		ClientboundServerDataPacket::motd,
 		ByteBufCodecs.BYTE_ARRAY.apply(ByteBufCodecs::optional),
 		ClientboundServerDataPacket::iconBytes,

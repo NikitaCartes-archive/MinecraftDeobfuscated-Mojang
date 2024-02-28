@@ -50,13 +50,13 @@ public class ChiseledBookShelfBlockEntity extends BlockEntity implements Contain
 	@Override
 	public void load(CompoundTag compoundTag, HolderLookup.Provider provider) {
 		this.items.clear();
-		ContainerHelper.loadAllItems(compoundTag, this.items);
+		ContainerHelper.loadAllItems(compoundTag, this.items, provider);
 		this.lastInteractedSlot = compoundTag.getInt("last_interacted_slot");
 	}
 
 	@Override
 	protected void saveAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
-		ContainerHelper.saveAllItems(compoundTag, this.items, true);
+		ContainerHelper.saveAllItems(compoundTag, this.items, true, provider);
 		compoundTag.putInt("last_interacted_slot", this.lastInteractedSlot);
 	}
 

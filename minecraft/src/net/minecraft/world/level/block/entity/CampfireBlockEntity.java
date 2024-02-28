@@ -116,7 +116,7 @@ public class CampfireBlockEntity extends BlockEntity implements Clearable {
 	public void load(CompoundTag compoundTag, HolderLookup.Provider provider) {
 		super.load(compoundTag, provider);
 		this.items.clear();
-		ContainerHelper.loadAllItems(compoundTag, this.items);
+		ContainerHelper.loadAllItems(compoundTag, this.items, provider);
 		if (compoundTag.contains("CookingTimes", 11)) {
 			int[] is = compoundTag.getIntArray("CookingTimes");
 			System.arraycopy(is, 0, this.cookingProgress, 0, Math.min(this.cookingTime.length, is.length));
@@ -131,7 +131,7 @@ public class CampfireBlockEntity extends BlockEntity implements Clearable {
 	@Override
 	protected void saveAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
 		super.saveAdditional(compoundTag, provider);
-		ContainerHelper.saveAllItems(compoundTag, this.items, true);
+		ContainerHelper.saveAllItems(compoundTag, this.items, true, provider);
 		compoundTag.putIntArray("CookingTimes", this.cookingProgress);
 		compoundTag.putIntArray("CookingTotalTimes", this.cookingTime);
 	}
@@ -143,7 +143,7 @@ public class CampfireBlockEntity extends BlockEntity implements Clearable {
 	@Override
 	public CompoundTag getUpdateTag(HolderLookup.Provider provider) {
 		CompoundTag compoundTag = new CompoundTag();
-		ContainerHelper.saveAllItems(compoundTag, this.items, true);
+		ContainerHelper.saveAllItems(compoundTag, this.items, true, provider);
 		return compoundTag;
 	}
 

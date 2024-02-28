@@ -19,6 +19,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.GameNarrator;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.LogoRenderer;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.Music;
@@ -243,8 +244,9 @@ public class WinScreen extends Screen {
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-		this.scroll = Math.max(0.0F, this.scroll + f * this.scrollSpeed);
 		super.render(guiGraphics, i, j, f);
+		this.renderVignette(guiGraphics);
+		this.scroll = Math.max(0.0F, this.scroll + f * this.scrollSpeed);
 		int k = this.width / 2 - 128;
 		int l = this.height + 50;
 		float g = -this.scroll;
@@ -264,9 +266,9 @@ public class WinScreen extends Screen {
 			if ((float)m + g + 12.0F + 8.0F > 0.0F && (float)m + g < (float)this.height) {
 				FormattedCharSequence formattedCharSequence = (FormattedCharSequence)this.lines.get(n);
 				if (this.centeredLines.contains(n)) {
-					guiGraphics.drawCenteredString(this.font, formattedCharSequence, k + 128, m, 16777215);
+					guiGraphics.drawCenteredString(this.font, formattedCharSequence, k + 128, m, -1);
 				} else {
-					guiGraphics.drawString(this.font, formattedCharSequence, k, m, 16777215);
+					guiGraphics.drawString(this.font, formattedCharSequence, k, m, -1);
 				}
 			}
 
@@ -274,6 +276,9 @@ public class WinScreen extends Screen {
 		}
 
 		guiGraphics.pose().popPose();
+	}
+
+	private void renderVignette(GuiGraphics guiGraphics) {
 		RenderSystem.enableBlend();
 		RenderSystem.blendFunc(GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE_MINUS_SRC_COLOR);
 		guiGraphics.blit(VIGNETTE_LOCATION, 0, 0, 0, 0.0F, 0.0F, this.width, this.height, this.width, this.height);
@@ -283,26 +288,16 @@ public class WinScreen extends Screen {
 
 	@Override
 	public void renderBackground(GuiGraphics guiGraphics, int i, int j, float f) {
-		int k = this.width;
-		float g = this.scroll * 0.5F;
-		int l = 64;
-		float h = this.scroll / this.unmodifiedScrollSpeed;
-		float m = h * 0.02F;
-		float n = (float)(this.totalScrollLength + this.height + this.height + 24) / this.unmodifiedScrollSpeed;
-		float o = (n - 20.0F - h) * 0.005F;
-		if (o < m) {
-			m = o;
+		if (this.poem) {
+			guiGraphics.fillRenderType(RenderType.endPortal(), 0, 0, this.width, this.height, 0);
+		} else {
+			super.renderBackground(guiGraphics, i, j, f);
 		}
+	}
 
-		if (m > 1.0F) {
-			m = 1.0F;
-		}
-
-		m *= m;
-		m = m * 96.0F / 255.0F;
-		guiGraphics.setColor(m, m, m, 1.0F);
-		guiGraphics.blit(BACKGROUND_LOCATION, 0, 0, 0, 0.0F, g, k, this.height, 64, 64);
-		guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
+	@Override
+	public boolean isPauseScreen() {
+		return false;
 	}
 
 	@Override

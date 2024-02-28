@@ -20,14 +20,12 @@ import net.minecraft.world.Container;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.Cat;
 import net.minecraft.world.entity.monster.piglin.PiglinAi;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ChestMenu;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -229,16 +227,6 @@ public class ChestBlock extends AbstractChestBlock<ChestBlockEntity> implements 
 	}
 
 	@Override
-	public void setPlacedBy(Level level, BlockPos blockPos, BlockState blockState, LivingEntity livingEntity, ItemStack itemStack) {
-		if (itemStack.hasCustomHoverName()) {
-			BlockEntity blockEntity = level.getBlockEntity(blockPos);
-			if (blockEntity instanceof ChestBlockEntity) {
-				((ChestBlockEntity)blockEntity).setCustomName(itemStack.getHoverName());
-			}
-		}
-	}
-
-	@Override
 	protected void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
 		Containers.dropContentsOnDestroy(blockState, blockState2, level, blockPos);
 		super.onRemove(blockState, level, blockPos, blockState2, bl);
@@ -385,7 +373,7 @@ public class ChestBlock extends AbstractChestBlock<ChestBlockEntity> implements 
 	}
 
 	@Override
-	protected boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
+	protected boolean isPathfindable(BlockState blockState, PathComputationType pathComputationType) {
 		return false;
 	}
 

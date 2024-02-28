@@ -14,6 +14,8 @@ import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.Vec3i;
+import net.minecraft.core.component.DataComponentMap;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.FloatTag;
@@ -65,6 +67,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.item.SwordItem;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
@@ -364,12 +367,11 @@ public abstract class Mob extends LivingEntity implements Targeting {
 		ListTag listTag = new ListTag();
 
 		for (ItemStack itemStack : this.armorItems) {
-			CompoundTag compoundTag2 = new CompoundTag();
 			if (!itemStack.isEmpty()) {
-				itemStack.save(compoundTag2);
+				listTag.add(itemStack.save(this.registryAccess()));
+			} else {
+				listTag.add(new CompoundTag());
 			}
-
-			listTag.add(compoundTag2);
 		}
 
 		compoundTag.put("ArmorItems", listTag);
@@ -383,12 +385,11 @@ public abstract class Mob extends LivingEntity implements Targeting {
 		ListTag listTag3 = new ListTag();
 
 		for (ItemStack itemStack2 : this.handItems) {
-			CompoundTag compoundTag3 = new CompoundTag();
 			if (!itemStack2.isEmpty()) {
-				itemStack2.save(compoundTag3);
+				listTag3.add(itemStack2.save(this.registryAccess()));
+			} else {
+				listTag3.add(new CompoundTag());
 			}
-
-			listTag3.add(compoundTag3);
 		}
 
 		compoundTag.put("HandItems", listTag3);
@@ -400,7 +401,7 @@ public abstract class Mob extends LivingEntity implements Targeting {
 
 		compoundTag.put("HandDropChances", listTag4);
 		if (!this.bodyArmorItem.isEmpty()) {
-			compoundTag.put("body_armor_item", this.bodyArmorItem.save(new CompoundTag()));
+			compoundTag.put("body_armor_item", this.bodyArmorItem.save(this.registryAccess()));
 			compoundTag.putFloat("body_armor_drop_chance", this.bodyArmorDropChance);
 		}
 
@@ -444,7 +445,8 @@ public abstract class Mob extends LivingEntity implements Targeting {
 			ListTag listTag = compoundTag.getList("ArmorItems", 10);
 
 			for (int i = 0; i < this.armorItems.size(); i++) {
-				this.armorItems.set(i, ItemStack.of(listTag.getCompound(i)));
+				CompoundTag compoundTag2 = listTag.getCompound(i);
+				this.armorItems.set(i, ItemStack.parseOptional(this.registryAccess(), compoundTag2));
 			}
 		}
 
@@ -460,7 +462,8 @@ public abstract class Mob extends LivingEntity implements Targeting {
 			ListTag listTag = compoundTag.getList("HandItems", 10);
 
 			for (int i = 0; i < this.handItems.size(); i++) {
-				this.handItems.set(i, ItemStack.of(listTag.getCompound(i)));
+				CompoundTag compoundTag2 = listTag.getCompound(i);
+				this.handItems.set(i, ItemStack.parseOptional(this.registryAccess(), compoundTag2));
 			}
 		}
 
@@ -473,8 +476,10 @@ public abstract class Mob extends LivingEntity implements Targeting {
 		}
 
 		if (compoundTag.contains("body_armor_item", 10)) {
-			this.bodyArmorItem = ItemStack.of(compoundTag.getCompound("body_armor_item"));
+			this.bodyArmorItem = (ItemStack)ItemStack.parse(this.registryAccess(), compoundTag.getCompound("body_armor_item")).orElse(ItemStack.EMPTY);
 			this.bodyArmorDropChance = compoundTag.getFloat("body_armor_drop_chance");
+		} else {
+			this.bodyArmorItem = ItemStack.EMPTY;
 		}
 
 		if (compoundTag.contains("leash", 10)) {
@@ -629,9 +634,9 @@ public abstract class Mob extends LivingEntity implements Targeting {
 			if (!(itemStack2.getItem() instanceof SwordItem)) {
 				return true;
 			} else {
-				SwordItem swordItem = (SwordItem)itemStack.getItem();
-				SwordItem swordItem2 = (SwordItem)itemStack2.getItem();
-				return swordItem.getDamage() != swordItem2.getDamage() ? swordItem.getDamage() > swordItem2.getDamage() : this.canReplaceEqualItem(itemStack, itemStack2);
+				double d = this.getApproximateAttackDamageWithItem(itemStack);
+				double e = this.getApproximateAttackDamageWithItem(itemStack2);
+				return d != e ? d > e : this.canReplaceEqualItem(itemStack, itemStack2);
 			}
 		} else if (itemStack.getItem() instanceof BowItem && itemStack2.getItem() instanceof BowItem) {
 			return this.canReplaceEqualItem(itemStack, itemStack2);
@@ -658,10 +663,11 @@ public abstract class Mob extends LivingEntity implements Targeting {
 					return true;
 				}
 
-				if (itemStack2.getItem() instanceof DiggerItem diggerItem) {
-					DiggerItem diggerItem2 = (DiggerItem)itemStack.getItem();
-					if (diggerItem2.getAttackDamage() != diggerItem.getAttackDamage()) {
-						return diggerItem2.getAttackDamage() > diggerItem.getAttackDamage();
+				if (itemStack2.getItem() instanceof DiggerItem) {
+					double d = this.getApproximateAttackDamageWithItem(itemStack);
+					double e = this.getApproximateAttackDamageWithItem(itemStack2);
+					if (d != e) {
+						return d > e;
 					}
 
 					return this.canReplaceEqualItem(itemStack, itemStack2);
@@ -672,15 +678,19 @@ public abstract class Mob extends LivingEntity implements Targeting {
 		}
 	}
 
+	private double getApproximateAttackDamageWithItem(ItemStack itemStack) {
+		ItemAttributeModifiers itemAttributeModifiers = itemStack.getOrDefault(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY);
+		return itemAttributeModifiers.compute(this.getAttributeBaseValue(Attributes.ATTACK_DAMAGE), EquipmentSlot.MAINHAND);
+	}
+
 	public boolean canReplaceEqualItem(ItemStack itemStack, ItemStack itemStack2) {
-		if (itemStack.getDamageValue() >= itemStack2.getDamageValue() && (!itemStack.hasTag() || itemStack2.hasTag())) {
-			return itemStack.hasTag() && itemStack2.hasTag()
-				? itemStack.getTag().getAllKeys().stream().anyMatch(string -> !string.equals("Damage"))
-					&& !itemStack2.getTag().getAllKeys().stream().anyMatch(string -> !string.equals("Damage"))
-				: false;
-		} else {
-			return true;
-		}
+		return itemStack.getDamageValue() < itemStack2.getDamageValue() ? true : hasAnyComponentExceptDamage(itemStack) && !hasAnyComponentExceptDamage(itemStack2);
+	}
+
+	private static boolean hasAnyComponentExceptDamage(ItemStack itemStack) {
+		DataComponentMap dataComponentMap = itemStack.getComponents();
+		int i = dataComponentMap.size();
+		return i > 1 || i == 1 && !dataComponentMap.has(DataComponents.DAMAGE);
 	}
 
 	public boolean canHoldItem(ItemStack itemStack) {
@@ -1089,7 +1099,7 @@ public abstract class Mob extends LivingEntity implements Targeting {
 		RandomSource randomSource = serverLevelAccessor.getRandom();
 		this.getAttribute(Attributes.FOLLOW_RANGE)
 			.addPermanentModifier(
-				new AttributeModifier("Random spawn bonus", randomSource.triangle(0.0, 0.11485000000000001), AttributeModifier.Operation.MULTIPLY_BASE)
+				new AttributeModifier("Random spawn bonus", randomSource.triangle(0.0, 0.11485000000000001), AttributeModifier.Operation.ADD_MULTIPLIED_BASE)
 			);
 		this.setLeftHanded(randomSource.nextFloat() < 0.05F);
 		return spawnGroupData;

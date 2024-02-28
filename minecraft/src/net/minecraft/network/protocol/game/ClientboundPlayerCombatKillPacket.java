@@ -12,7 +12,7 @@ public record ClientboundPlayerCombatKillPacket(int playerId, Component message)
 	public static final StreamCodec<RegistryFriendlyByteBuf, ClientboundPlayerCombatKillPacket> STREAM_CODEC = StreamCodec.composite(
 		ByteBufCodecs.VAR_INT,
 		ClientboundPlayerCombatKillPacket::playerId,
-		ComponentSerialization.STREAM_CODEC,
+		ComponentSerialization.TRUSTED_STREAM_CODEC,
 		ClientboundPlayerCombatKillPacket::message,
 		ClientboundPlayerCombatKillPacket::new
 	);

@@ -39,7 +39,6 @@ import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.resources.ResourceKey;
@@ -59,6 +58,7 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.FireworkExplosion;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.ColorResolver;
@@ -518,8 +518,14 @@ public class ClientLevel extends Level {
 	}
 
 	@Override
-	public void createFireworks(double d, double e, double f, double g, double h, double i, @Nullable CompoundTag compoundTag) {
-		this.minecraft.particleEngine.add(new FireworkParticles.Starter(this, d, e, f, g, h, i, this.minecraft.particleEngine, compoundTag));
+	public void createFireworks(double d, double e, double f, double g, double h, double i, List<FireworkExplosion> list) {
+		if (list.isEmpty()) {
+			for (int j = 0; j < this.random.nextInt(3) + 2; j++) {
+				this.addParticle(ParticleTypes.POOF, d, e, f, this.random.nextGaussian() * 0.05, 0.005, this.random.nextGaussian() * 0.05);
+			}
+		} else {
+			this.minecraft.particleEngine.add(new FireworkParticles.Starter(this, d, e, f, g, h, i, this.minecraft.particleEngine, list));
+		}
 	}
 
 	@Override

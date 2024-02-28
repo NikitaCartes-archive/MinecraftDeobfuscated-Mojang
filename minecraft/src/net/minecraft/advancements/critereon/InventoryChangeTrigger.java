@@ -9,6 +9,7 @@ import java.util.stream.Stream;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.advancements.Criterion;
 import net.minecraft.core.HolderSet;
+import net.minecraft.core.component.DataComponentPredicate;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.entity.player.Inventory;
@@ -71,14 +72,14 @@ public class InventoryChangeTrigger extends SimpleCriterionTrigger<InventoryChan
 
 			for (int i = 0; i < itemLikes.length; i++) {
 				itemPredicates[i] = new ItemPredicate(
-					Optional.empty(),
 					Optional.of(HolderSet.direct(itemLikes[i].asItem().builtInRegistryHolder())),
 					MinMaxBounds.Ints.ANY,
 					MinMaxBounds.Ints.ANY,
 					List.of(),
 					List.of(),
 					Optional.empty(),
-					Optional.empty()
+					Optional.empty(),
+					DataComponentPredicate.EMPTY
 				);
 			}
 

@@ -2,7 +2,7 @@ package net.minecraft.server.level.progress;
 
 import javax.annotation.Nullable;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 
 public interface ChunkProgressListener {
 	void updateSpawnPos(ChunkPos chunkPos);

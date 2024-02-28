@@ -51,6 +51,10 @@ public class RegistryOps<T> extends DelegatingOps<T> {
 		this.lookupProvider = registryInfoLookup;
 	}
 
+	public <U> RegistryOps<U> withParent(DynamicOps<U> dynamicOps) {
+		return (RegistryOps<U>)(dynamicOps == this.delegate ? this : new RegistryOps<>(dynamicOps, this.lookupProvider));
+	}
+
 	public <E> Optional<HolderOwner<E>> owner(ResourceKey<? extends Registry<? extends E>> resourceKey) {
 		return this.lookupProvider.lookup(resourceKey).map(RegistryOps.RegistryInfo::owner);
 	}

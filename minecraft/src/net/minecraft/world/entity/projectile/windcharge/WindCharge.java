@@ -8,7 +8,7 @@ import net.minecraft.world.level.Level;
 
 public class WindCharge extends AbstractWindCharge {
 	private static final WindCharge.WindChargePlayerDamageCalculator EXPLOSION_DAMAGE_CALCULATOR = new WindCharge.WindChargePlayerDamageCalculator();
-	private static final float BASE_STRENGTH = 1.0F;
+	private static final float RADIUS = 1.2F;
 
 	public WindCharge(EntityType<? extends AbstractWindCharge> entityType, Level level) {
 		super(entityType, level);
@@ -32,7 +32,7 @@ public class WindCharge extends AbstractWindCharge {
 				this.getX(),
 				this.getY(),
 				this.getZ(),
-				1.0F + 0.3F * this.random.nextFloat(),
+				1.2F,
 				false,
 				Level.ExplosionInteraction.BLOW,
 				ParticleTypes.GUST_EMITTER_SMALL,

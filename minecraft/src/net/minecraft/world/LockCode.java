@@ -1,21 +1,23 @@
 package net.minecraft.world;
 
-import javax.annotation.concurrent.Immutable;
+import com.mojang.serialization.Codec;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 
-@Immutable
-public class LockCode {
+public record LockCode(String key) {
 	public static final LockCode NO_LOCK = new LockCode("");
+	public static final Codec<LockCode> CODEC = Codec.STRING.xmap(LockCode::new, LockCode::key);
 	public static final String TAG_LOCK = "Lock";
-	private final String key;
-
-	public LockCode(String string) {
-		this.key = string;
-	}
 
 	public boolean unlocksWith(ItemStack itemStack) {
-		return this.key.isEmpty() || !itemStack.isEmpty() && itemStack.hasCustomHoverName() && this.key.equals(itemStack.getHoverName().getString());
+		if (this.key.isEmpty()) {
+			return true;
+		} else {
+			Component component = itemStack.get(DataComponents.CUSTOM_NAME);
+			return component != null && this.key.equals(component.getString());
+		}
 	}
 
 	public void addToTag(CompoundTag compoundTag) {

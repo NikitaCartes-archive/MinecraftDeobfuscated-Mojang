@@ -2,6 +2,7 @@ package net.minecraft.client.gui.screens;
 
 import com.mojang.datafixers.util.Unit;
 import com.mojang.serialization.Codec;
+import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
@@ -13,15 +14,15 @@ import net.minecraft.client.Options;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.Difficulty;
-import org.apache.commons.compress.utils.Lists;
 
 @Environment(EnvType.CLIENT)
 public class OnlineOptionsScreen extends SimpleOptionsSubScreen {
+	private static final Component TITLE = Component.translatable("options.online.title");
 	@Nullable
 	private final OptionInstance<Unit> difficultyDisplay;
 
 	public static OnlineOptionsScreen createOnlineOptionsScreen(Minecraft minecraft, Screen screen, Options options) {
-		List<OptionInstance<?>> list = Lists.<OptionInstance<?>>newArrayList();
+		List<OptionInstance<?>> list = new ArrayList();
 		list.add(options.realmsNotifications());
 		list.add(options.allowServerListing());
 		OptionInstance<Unit> optionInstance = Optionull.map(
@@ -47,7 +48,7 @@ public class OnlineOptionsScreen extends SimpleOptionsSubScreen {
 	}
 
 	private OnlineOptionsScreen(Screen screen, Options options, OptionInstance<?>[] optionInstances, @Nullable OptionInstance<Unit> optionInstance) {
-		super(screen, options, Component.translatable("options.online.title"), optionInstances);
+		super(screen, options, TITLE, optionInstances);
 		this.difficultyDisplay = optionInstance;
 	}
 

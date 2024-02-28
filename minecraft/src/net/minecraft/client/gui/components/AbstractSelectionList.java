@@ -14,12 +14,12 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.ContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.navigation.ScreenDirection;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -29,6 +29,8 @@ import net.minecraft.util.Mth;
 public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entry<E>> extends AbstractContainerWidget {
 	protected static final int SCROLLBAR_WIDTH = 6;
 	private static final ResourceLocation SCROLLER_SPRITE = new ResourceLocation("widget/scroller");
+	private static final ResourceLocation SCROLLER_BACKGROUND_SPRITE = new ResourceLocation("widget/scroller_background");
+	private static final ResourceLocation MENU_LIST_BACKGROUND = new ResourceLocation("textures/gui/menu_list_background.png");
 	protected final Minecraft minecraft;
 	protected final int itemHeight;
 	private final List<E> children = new AbstractSelectionList.TrackedList();
@@ -39,7 +41,6 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 	private boolean scrolling;
 	@Nullable
 	private E selected;
-	private boolean renderBackground = true;
 	@Nullable
 	private E hovered;
 
@@ -72,10 +73,6 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 
 	public E getFirstElement() {
 		return (E)this.children.get(0);
-	}
-
-	public void setRenderBackground(boolean bl) {
-		this.renderBackground = bl;
 	}
 
 	@Nullable
@@ -136,9 +133,16 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 		int l = j + i;
 		int m = Mth.floor(e - (double)this.getY()) - this.headerHeight + (int)this.getScrollAmount() - 4;
 		int n = m / this.itemHeight;
-		return (E)(d < (double)this.getScrollbarPosition() && d >= (double)k && d <= (double)l && n >= 0 && m >= 0 && n < this.getItemCount()
-			? this.children().get(n)
-			: null);
+		return (E)(d >= (double)k && d <= (double)l && n >= 0 && m >= 0 && n < this.getItemCount() ? this.children().get(n) : null);
+	}
+
+	public void updateSize(int i, HeaderAndFooterLayout headerAndFooterLayout) {
+		this.updateSizeAndPosition(i, headerAndFooterLayout.getContentHeight(), headerAndFooterLayout.getHeaderHeight());
+	}
+
+	public void updateSizeAndPosition(int i, int j, int k) {
+		this.setSize(i, j);
+		this.setPosition(0, k);
 	}
 
 	protected int getMaxPosition() {
@@ -158,23 +162,7 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 	@Override
 	public void renderWidget(GuiGraphics guiGraphics, int i, int j, float f) {
 		this.hovered = this.isMouseOver((double)i, (double)j) ? this.getEntryAtPosition((double)i, (double)j) : null;
-		if (this.renderBackground) {
-			guiGraphics.setColor(0.125F, 0.125F, 0.125F, 1.0F);
-			int k = 32;
-			guiGraphics.blit(
-				Screen.BACKGROUND_LOCATION,
-				this.getX(),
-				this.getY(),
-				(float)this.getRight(),
-				(float)(this.getBottom() + (int)this.getScrollAmount()),
-				this.width,
-				this.height,
-				32,
-				32
-			);
-			guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
-		}
-
+		this.renderListBackground(guiGraphics);
 		this.enableScissor(guiGraphics);
 		if (this.renderHeader) {
 			int k = this.getRowLeft();
@@ -182,29 +170,52 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 			this.renderHeader(guiGraphics, k, l);
 		}
 
-		this.renderList(guiGraphics, i, j, f);
+		this.renderListItems(guiGraphics, i, j, f);
 		guiGraphics.disableScissor();
-		if (this.renderBackground) {
-			int k = 4;
-			guiGraphics.fillGradient(RenderType.guiOverlay(), this.getX(), this.getY(), this.getRight(), this.getY() + 4, -16777216, 0, 0);
-			guiGraphics.fillGradient(RenderType.guiOverlay(), this.getX(), this.getBottom() - 4, this.getRight(), this.getBottom(), 0, -16777216, 0);
-		}
-
-		int k = this.getMaxScroll();
-		if (k > 0) {
-			int l = this.getScrollbarPosition();
-			int m = (int)((float)(this.height * this.height) / (float)this.getMaxPosition());
-			m = Mth.clamp(m, 32, this.height - 8);
-			int n = (int)this.getScrollAmount() * (this.height - m) / k + this.getY();
-			if (n < this.getY()) {
-				n = this.getY();
+		this.renderListSeparators(guiGraphics);
+		if (this.scrollbarVisible()) {
+			int k = this.getScrollbarPosition();
+			int l = (int)((float)(this.height * this.height) / (float)this.getMaxPosition());
+			l = Mth.clamp(l, 32, this.height - 8);
+			int m = (int)this.getScrollAmount() * (this.height - l) / this.getMaxScroll() + this.getY();
+			if (m < this.getY()) {
+				m = this.getY();
 			}
 
-			guiGraphics.fill(l, this.getY(), l + 6, this.getBottom(), -16777216);
-			guiGraphics.blitSprite(SCROLLER_SPRITE, l, n, 6, m);
+			RenderSystem.enableBlend();
+			guiGraphics.blitSprite(SCROLLER_BACKGROUND_SPRITE, k, this.getY(), 6, this.getHeight());
+			guiGraphics.blitSprite(SCROLLER_SPRITE, k, m, 6, l);
+			RenderSystem.disableBlend();
 		}
 
 		this.renderDecorations(guiGraphics, i, j);
+		RenderSystem.disableBlend();
+	}
+
+	protected boolean scrollbarVisible() {
+		return this.getMaxScroll() > 0;
+	}
+
+	protected void renderListSeparators(GuiGraphics guiGraphics) {
+		RenderSystem.enableBlend();
+		guiGraphics.blit(CreateWorldScreen.HEADER_SEPARATOR, this.getX(), this.getY() - 2, 0.0F, 0.0F, this.getWidth(), 2, 32, 2);
+		guiGraphics.blit(CreateWorldScreen.FOOTER_SEPARATOR, this.getX(), this.getBottom(), 0.0F, 0.0F, this.getWidth(), 2, 32, 2);
+		RenderSystem.disableBlend();
+	}
+
+	protected void renderListBackground(GuiGraphics guiGraphics) {
+		RenderSystem.enableBlend();
+		guiGraphics.blit(
+			MENU_LIST_BACKGROUND,
+			this.getX(),
+			this.getY(),
+			(float)this.getRight(),
+			(float)(this.getBottom() + (int)this.getScrollAmount()),
+			this.getWidth(),
+			this.getHeight(),
+			32,
+			32
+		);
 		RenderSystem.disableBlend();
 	}
 
@@ -250,7 +261,15 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 	}
 
 	protected int getScrollbarPosition() {
-		return this.width / 2 + 124;
+		return this.getDefaultScrollbarPosition();
+	}
+
+	protected int getDefaultScrollbarPosition() {
+		return this.getRealRowRight() + this.getListOutlinePadding();
+	}
+
+	private int getListOutlinePadding() {
+		return 10;
 	}
 
 	protected boolean isValidMouseClick(int i) {
@@ -381,7 +400,7 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 		return e >= (double)this.getY() && e <= (double)this.getBottom() && d >= (double)this.getX() && d <= (double)this.getRight();
 	}
 
-	protected void renderList(GuiGraphics guiGraphics, int i, int j, float f) {
+	protected void renderListItems(GuiGraphics guiGraphics, int i, int j, float f) {
 		int k = this.getRowLeft();
 		int l = this.getRowWidth();
 		int m = this.itemHeight - 4;
@@ -418,8 +437,16 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 		return this.getX() + this.width / 2 - this.getRowWidth() / 2 + 2;
 	}
 
+	private int getRealRowLeft() {
+		return this.getX() + this.width / 2 - this.getRowWidth() / 2;
+	}
+
 	public int getRowRight() {
 		return this.getRowLeft() + this.getRowWidth();
+	}
+
+	private int getRealRowRight() {
+		return this.getRealRowLeft() + this.getRowWidth();
 	}
 
 	protected int getRowTop(int i) {

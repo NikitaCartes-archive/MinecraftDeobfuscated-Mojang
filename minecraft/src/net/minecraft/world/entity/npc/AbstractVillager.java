@@ -160,10 +160,15 @@ public abstract class AbstractVillager extends AgeableMob implements InventoryCa
 		super.addAdditionalSaveData(compoundTag);
 		MerchantOffers merchantOffers = this.getOffers();
 		if (!merchantOffers.isEmpty()) {
-			compoundTag.put("Offers", Util.getOrThrow(MerchantOffers.CODEC.encodeStart(NbtOps.INSTANCE, merchantOffers), IllegalStateException::new));
+			compoundTag.put(
+				"Offers",
+				Util.getOrThrow(
+					MerchantOffers.CODEC.encodeStart(this.registryAccess().createSerializationContext(NbtOps.INSTANCE), merchantOffers), IllegalStateException::new
+				)
+			);
 		}
 
-		this.writeInventoryToTag(compoundTag);
+		this.writeInventoryToTag(compoundTag, this.registryAccess());
 	}
 
 	@Override
@@ -171,12 +176,12 @@ public abstract class AbstractVillager extends AgeableMob implements InventoryCa
 		super.readAdditionalSaveData(compoundTag);
 		if (compoundTag.contains("Offers")) {
 			MerchantOffers.CODEC
-				.parse(NbtOps.INSTANCE, compoundTag.get("Offers"))
+				.parse(this.registryAccess().createSerializationContext(NbtOps.INSTANCE), compoundTag.get("Offers"))
 				.resultOrPartial(Util.prefix("Failed to load offers: ", LOGGER::warn))
 				.ifPresent(merchantOffers -> this.offers = merchantOffers);
 		}
 
-		this.readInventoryFromTag(compoundTag);
+		this.readInventoryFromTag(compoundTag, this.registryAccess());
 	}
 
 	@Nullable

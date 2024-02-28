@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.Objects;
 import javax.annotation.Nullable;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
@@ -53,7 +54,7 @@ public class CombatTracker {
 
 	private Component getMessageForAssistedFall(Entity entity, Component component, String string, String string2) {
 		ItemStack itemStack = entity instanceof LivingEntity livingEntity ? livingEntity.getMainHandItem() : ItemStack.EMPTY;
-		return !itemStack.isEmpty() && itemStack.hasCustomHoverName()
+		return !itemStack.isEmpty() && itemStack.has(DataComponents.CUSTOM_NAME)
 			? Component.translatable(string, this.mob.getDisplayName(), component, itemStack.getDisplayName())
 			: Component.translatable(string2, this.mob.getDisplayName(), component);
 	}

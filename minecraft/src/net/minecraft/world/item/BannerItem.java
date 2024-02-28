@@ -4,14 +4,12 @@ import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Holder;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.AbstractBannerBlock;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.entity.BannerPattern;
+import net.minecraft.world.level.block.entity.BannerPatternLayers;
 import org.apache.commons.lang3.Validate;
 
 public class BannerItem extends StandingAndWallBlockItem {
@@ -24,19 +22,14 @@ public class BannerItem extends StandingAndWallBlockItem {
 	}
 
 	public static void appendHoverTextFromBannerBlockEntityTag(ItemStack itemStack, List<Component> list) {
-		CompoundTag compoundTag = BlockItem.getBlockEntityData(itemStack);
-		if (compoundTag != null && compoundTag.contains("Patterns")) {
-			ListTag listTag = compoundTag.getList("Patterns", 10);
-
-			for (int i = 0; i < listTag.size() && i < 6; i++) {
-				CompoundTag compoundTag2 = listTag.getCompound(i);
-				DyeColor dyeColor = DyeColor.byId(compoundTag2.getInt("Color"));
-				Holder<BannerPattern> holder = BannerPattern.byHash(compoundTag2.getString("Pattern"));
-				if (holder != null) {
-					holder.unwrapKey()
-						.map(resourceKey -> resourceKey.location().toShortLanguageKey())
-						.ifPresent(string -> list.add(Component.translatable("block.minecraft.banner." + string + "." + dyeColor.getName()).withStyle(ChatFormatting.GRAY)));
-				}
+		BannerPatternLayers bannerPatternLayers = itemStack.get(DataComponents.BANNER_PATTERNS);
+		if (bannerPatternLayers != null) {
+			for (int i = 0; i < Math.min(bannerPatternLayers.layers().size(), 6); i++) {
+				BannerPatternLayers.Layer layer = (BannerPatternLayers.Layer)bannerPatternLayers.layers().get(i);
+				layer.pattern()
+					.unwrapKey()
+					.map(resourceKey -> resourceKey.location().toShortLanguageKey())
+					.ifPresent(string -> list.add(Component.translatable("block.minecraft.banner." + string + "." + layer.color().getName()).withStyle(ChatFormatting.GRAY)));
 			}
 		}
 	}

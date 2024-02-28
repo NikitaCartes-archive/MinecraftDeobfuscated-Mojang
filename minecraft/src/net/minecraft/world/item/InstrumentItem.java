@@ -7,12 +7,11 @@ import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
@@ -25,7 +24,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.gameevent.GameEvent;
 
 public class InstrumentItem extends Item {
-	private static final String TAG_INSTRUMENT = "instrument";
 	private final TagKey<Instrument> instruments;
 
 	public InstrumentItem(Item.Properties properties, TagKey<Instrument> tagKey) {
@@ -45,28 +43,21 @@ public class InstrumentItem extends Item {
 
 	public static ItemStack create(Item item, Holder<Instrument> holder) {
 		ItemStack itemStack = new ItemStack(item);
-		setSoundVariantId(itemStack, holder);
+		itemStack.set(DataComponents.INSTRUMENT, holder);
 		return itemStack;
 	}
 
 	public static void setRandom(ItemStack itemStack, TagKey<Instrument> tagKey, RandomSource randomSource) {
 		Optional<Holder<Instrument>> optional = BuiltInRegistries.INSTRUMENT.getRandomElementOf(tagKey, randomSource);
-		optional.ifPresent(holder -> setSoundVariantId(itemStack, holder));
-	}
-
-	private static void setSoundVariantId(ItemStack itemStack, Holder<Instrument> holder) {
-		CompoundTag compoundTag = itemStack.getOrCreateTag();
-		compoundTag.putString(
-			"instrument", ((ResourceKey)holder.unwrapKey().orElseThrow(() -> new IllegalStateException("Invalid instrument"))).location().toString()
-		);
+		optional.ifPresent(holder -> itemStack.set(DataComponents.INSTRUMENT, holder));
 	}
 
 	@Override
 	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
-		Optional<? extends Holder<Instrument>> optional = this.getInstrument(itemStack);
-		if (optional.isPresent()) {
-			Instrument instrument = (Instrument)((Holder)optional.get()).value();
+		Holder<Instrument> holder = itemStack.get(DataComponents.INSTRUMENT);
+		if (holder != null) {
+			Instrument instrument = holder.value();
 			player.startUsingItem(interactionHand);
 			play(level, player, instrument);
 			player.getCooldowns().addCooldown(this, instrument.useDuration());
@@ -79,21 +70,18 @@ public class InstrumentItem extends Item {
 
 	@Override
 	public int getUseDuration(ItemStack itemStack) {
-		Optional<? extends Holder<Instrument>> optional = this.getInstrument(itemStack);
+		Optional<Holder<Instrument>> optional = this.getInstrument(itemStack);
 		return (Integer)optional.map(holder -> ((Instrument)holder.value()).useDuration()).orElse(0);
 	}
 
-	private Optional<? extends Holder<Instrument>> getInstrument(ItemStack itemStack) {
-		CompoundTag compoundTag = itemStack.getTag();
-		if (compoundTag != null && compoundTag.contains("instrument", 8)) {
-			ResourceLocation resourceLocation = ResourceLocation.tryParse(compoundTag.getString("instrument"));
-			if (resourceLocation != null) {
-				return BuiltInRegistries.INSTRUMENT.getHolder(resourceLocation);
-			}
+	private Optional<Holder<Instrument>> getInstrument(ItemStack itemStack) {
+		Holder<Instrument> holder = itemStack.get(DataComponents.INSTRUMENT);
+		if (holder != null) {
+			return Optional.of(holder);
+		} else {
+			Iterator<Holder<Instrument>> iterator = BuiltInRegistries.INSTRUMENT.getTagOrEmpty(this.instruments).iterator();
+			return iterator.hasNext() ? Optional.of((Holder)iterator.next()) : Optional.empty();
 		}
-
-		Iterator<Holder<Instrument>> iterator = BuiltInRegistries.INSTRUMENT.getTagOrEmpty(this.instruments).iterator();
-		return iterator.hasNext() ? Optional.of((Holder)iterator.next()) : Optional.empty();
 	}
 
 	@Override

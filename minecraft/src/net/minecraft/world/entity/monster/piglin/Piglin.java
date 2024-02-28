@@ -43,7 +43,6 @@ import net.minecraft.world.entity.monster.CrossbowAttackMob;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.npc.InventoryCarrier;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ProjectileWeaponItem;
@@ -61,12 +60,11 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob, Invento
 	private static final EntityDataAccessor<Boolean> DATA_IS_DANCING = SynchedEntityData.defineId(Piglin.class, EntityDataSerializers.BOOLEAN);
 	private static final UUID SPEED_MODIFIER_BABY_UUID = UUID.fromString("766bfa64-11f3-11ea-8d71-362b9e155667");
 	private static final AttributeModifier SPEED_MODIFIER_BABY = new AttributeModifier(
-		SPEED_MODIFIER_BABY_UUID, "Baby speed boost", 0.2F, AttributeModifier.Operation.MULTIPLY_BASE
+		SPEED_MODIFIER_BABY_UUID, "Baby speed boost", 0.2F, AttributeModifier.Operation.ADD_MULTIPLIED_BASE
 	);
 	private static final int MAX_HEALTH = 16;
 	private static final float MOVEMENT_SPEED_WHEN_FIGHTING = 0.35F;
 	private static final int ATTACK_DAMAGE = 5;
-	private static final float CROSSBOW_POWER = 1.6F;
 	private static final float CHANCE_OF_WEARING_EACH_ARMOUR_ITEM = 0.1F;
 	private static final int MAX_PASSENGERS_ON_ONE_HOGLIN = 3;
 	private static final float PROBABILITY_OF_SPAWNING_AS_BABY = 0.2F;
@@ -135,7 +133,7 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob, Invento
 			compoundTag.putBoolean("CannotHunt", true);
 		}
 
-		this.writeInventoryToTag(compoundTag);
+		this.writeInventoryToTag(compoundTag, this.registryAccess());
 	}
 
 	@Override
@@ -143,7 +141,7 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob, Invento
 		super.readAdditionalSaveData(compoundTag);
 		this.setBaby(compoundTag.getBoolean("IsBaby"));
 		this.setCannotHunt(compoundTag.getBoolean("CannotHunt"));
-		this.readInventoryFromTag(compoundTag);
+		this.readInventoryFromTag(compoundTag, this.registryAccess());
 	}
 
 	@VisibleForDebug
@@ -382,11 +380,6 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob, Invento
 	@Override
 	public void performRangedAttack(LivingEntity livingEntity, float f) {
 		this.performCrossbowAttack(this, 1.6F);
-	}
-
-	@Override
-	public void shootCrossbowProjectile(LivingEntity livingEntity, ItemStack itemStack, Projectile projectile, float f) {
-		this.shootCrossbowProjectile(this, livingEntity, projectile, f, 1.6F);
 	}
 
 	@Override

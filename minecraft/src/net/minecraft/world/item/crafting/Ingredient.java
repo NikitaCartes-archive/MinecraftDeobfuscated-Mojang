@@ -144,7 +144,7 @@ public final class Ingredient implements Predicate<ItemStack> {
 
 	static record ItemValue(ItemStack item) implements Ingredient.Value {
 		static final Codec<Ingredient.ItemValue> CODEC = RecordCodecBuilder.create(
-			instance -> instance.group(ItemStack.SINGLE_ITEM_CODEC.fieldOf("item").forGetter(itemValue -> itemValue.item)).apply(instance, Ingredient.ItemValue::new)
+			instance -> instance.group(ItemStack.SIMPLE_ITEM_CODEC.fieldOf("item").forGetter(itemValue -> itemValue.item)).apply(instance, Ingredient.ItemValue::new)
 		);
 
 		public boolean equals(Object object) {

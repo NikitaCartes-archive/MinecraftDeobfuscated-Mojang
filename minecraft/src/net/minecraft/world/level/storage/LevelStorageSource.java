@@ -83,6 +83,7 @@ public class LevelStorageSource {
 	private static final PathMatcher NO_SYMLINKS_ALLOWED = path -> false;
 	public static final String ALLOWED_SYMLINKS_CONFIG_NAME = "allowed_symlinks.txt";
 	private static final int UNCOMPRESSED_NBT_QUOTA = 104857600;
+	private static final int DISK_SPACE_WARNING_THRESHOLD = 67108864;
 	private final Path baseDir;
 	private final Path backupDir;
 	final DataFixer fixerUpper;
@@ -407,6 +408,7 @@ public class LevelStorageSource {
 	}
 
 	public static record LevelDirectory(Path path) {
+
 		public String directoryName() {
 			return this.path.getFileName().toString();
 		}
@@ -450,6 +452,18 @@ public class LevelStorageSource {
 			this.levelId = string;
 			this.levelDirectory = new LevelStorageSource.LevelDirectory(path);
 			this.lock = DirectoryLock.create(path);
+		}
+
+		public long estimateDiskSpace() {
+			try {
+				return Files.getFileStore(this.levelDirectory.path).getUsableSpace();
+			} catch (Exception var2) {
+				return Long.MAX_VALUE;
+			}
+		}
+
+		public boolean checkForLowDiskSpace() {
+			return this.estimateDiskSpace() < 67108864L;
 		}
 
 		public void safeClose() {

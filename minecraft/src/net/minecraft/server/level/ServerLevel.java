@@ -150,6 +150,7 @@ import net.minecraft.world.level.levelgen.structure.StructureCheck;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.pathfinder.PathTypeCache;
 import net.minecraft.world.level.portal.PortalForcer;
 import net.minecraft.world.level.saveddata.maps.MapId;
 import net.minecraft.world.level.saveddata.maps.MapIndex;
@@ -188,6 +189,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 	private final PortalForcer portalForcer;
 	private final LevelTicks<Block> blockTicks = new LevelTicks<>(this::isPositionTickingWithEntitiesLoaded, this.getProfilerSupplier());
 	private final LevelTicks<Fluid> fluidTicks = new LevelTicks<>(this::isPositionTickingWithEntitiesLoaded, this.getProfilerSupplier());
+	private final PathTypeCache pathTypesByPosCache = new PathTypeCache();
 	final Set<Mob> navigatingMobs = new ObjectOpenHashSet<>();
 	volatile boolean isUpdatingNavigations;
 	protected final Raids raids;
@@ -1010,6 +1012,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 		}
 
 		this.getChunkSource().blockChanged(blockPos);
+		this.pathTypesByPosCache.invalidate(blockPos);
 		VoxelShape voxelShape = blockState.getCollisionShape(this, blockPos);
 		VoxelShape voxelShape2 = blockState2.getCollisionShape(this, blockPos);
 		if (Shapes.joinIsNotEmpty(voxelShape, voxelShape2, BooleanOp.NOT_SAME)) {
@@ -1681,6 +1684,10 @@ public class ServerLevel extends Level implements WorldGenLevel {
 
 	public void onStructureStartsAvailable(ChunkAccess chunkAccess) {
 		this.server.execute(() -> this.structureCheck.onStructureLoad(chunkAccess.getPos(), chunkAccess.getAllStarts()));
+	}
+
+	public PathTypeCache getPathTypeCache() {
+		return this.pathTypesByPosCache;
 	}
 
 	@Override

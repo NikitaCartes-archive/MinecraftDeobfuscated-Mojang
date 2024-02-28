@@ -1,8 +1,8 @@
 package net.minecraft.world.entity.monster;
 
-import java.util.List;
 import java.util.UUID;
 import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -12,7 +12,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -35,7 +34,7 @@ import net.minecraft.world.entity.raid.Raider;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.Potion;
-import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.gameevent.GameEvent;
@@ -44,7 +43,7 @@ import net.minecraft.world.phys.Vec3;
 public class Witch extends Raider implements RangedAttackMob {
 	private static final UUID SPEED_MODIFIER_DRINKING_UUID = UUID.fromString("5CD17E52-A79A-43D3-A529-90FDE04B181E");
 	private static final AttributeModifier SPEED_MODIFIER_DRINKING = new AttributeModifier(
-		SPEED_MODIFIER_DRINKING_UUID, "Drinking speed penalty", -0.25, AttributeModifier.Operation.ADDITION
+		SPEED_MODIFIER_DRINKING_UUID, "Drinking speed penalty", -0.25, AttributeModifier.Operation.ADD_VALUE
 	);
 	private static final EntityDataAccessor<Boolean> DATA_USING_ITEM = SynchedEntityData.defineId(Witch.class, EntityDataSerializers.BOOLEAN);
 	private int usingTime;
@@ -120,13 +119,9 @@ public class Witch extends Raider implements RangedAttackMob {
 					this.setUsingItem(false);
 					ItemStack itemStack = this.getMainHandItem();
 					this.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
-					if (itemStack.is(Items.POTION)) {
-						List<MobEffectInstance> list = PotionUtils.getMobEffects(itemStack);
-						if (list != null) {
-							for (MobEffectInstance mobEffectInstance : list) {
-								this.addEffect(new MobEffectInstance(mobEffectInstance));
-							}
-						}
+					PotionContents potionContents = itemStack.get(DataComponents.POTION_CONTENTS);
+					if (itemStack.is(Items.POTION) && potionContents != null) {
+						potionContents.forEachEffect(this::addEffect);
 					}
 
 					this.gameEvent(GameEvent.DRINK);
@@ -150,7 +145,7 @@ public class Witch extends Raider implements RangedAttackMob {
 				}
 
 				if (holder != null) {
-					this.setItemSlot(EquipmentSlot.MAINHAND, PotionUtils.setPotion(new ItemStack(Items.POTION), holder));
+					this.setItemSlot(EquipmentSlot.MAINHAND, PotionContents.createItemStack(Items.POTION, holder));
 					this.usingTime = this.getMainHandItem().getUseDuration();
 					this.setUsingItem(true);
 					if (!this.isSilent()) {
@@ -237,7 +232,7 @@ public class Witch extends Raider implements RangedAttackMob {
 			}
 
 			ThrownPotion thrownPotion = new ThrownPotion(this.level(), this);
-			thrownPotion.setItem(PotionUtils.setPotion(new ItemStack(Items.SPLASH_POTION), holder));
+			thrownPotion.setItem(PotionContents.createItemStack(Items.SPLASH_POTION, holder));
 			thrownPotion.setXRot(thrownPotion.getXRot() - -20.0F);
 			thrownPotion.shoot(d, e + h * 0.2, g, 0.75F, 8.0F);
 			if (!this.isSilent()) {

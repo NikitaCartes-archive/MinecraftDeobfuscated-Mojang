@@ -6,12 +6,14 @@ import com.mojang.datafixers.DataFixUtils;
 import com.mojang.datafixers.schemas.Schema;
 import com.mojang.datafixers.types.templates.TypeTemplate;
 import com.mojang.datafixers.types.templates.Hook.HookFunction;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.DynamicOps;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import net.minecraft.util.datafix.ExtraDataFixUtils;
 import net.minecraft.util.datafix.fixes.References;
 import org.slf4j.Logger;
 
@@ -283,17 +285,13 @@ public class V99 extends Schema {
 						"id",
 						DSL.or(DSL.constType(DSL.intType()), References.ITEM_NAME.in(schema)),
 						"tag",
-						DSL.optionalFields(
-							"EntityTag",
-							References.ENTITY_TREE.in(schema),
-							"BlockEntityTag",
-							References.BLOCK_ENTITY.in(schema),
-							"CanDestroy",
-							DSL.list(References.BLOCK_NAME.in(schema)),
-							"CanPlaceOn",
-							DSL.list(References.BLOCK_NAME.in(schema)),
-							"Items",
-							DSL.list(References.ITEM_STACK.in(schema))
+						ExtraDataFixUtils.optionalFields(
+							Pair.of("EntityTag", References.ENTITY_TREE.in(schema)),
+							Pair.of("BlockEntityTag", References.BLOCK_ENTITY.in(schema)),
+							Pair.of("CanDestroy", DSL.list(References.BLOCK_NAME.in(schema))),
+							Pair.of("CanPlaceOn", DSL.list(References.BLOCK_NAME.in(schema))),
+							Pair.of("Items", DSL.list(References.ITEM_STACK.in(schema))),
+							Pair.of("ChargedProjectiles", DSL.list(References.ITEM_STACK.in(schema)))
 						)
 					),
 					ADD_NAMES,
@@ -327,6 +325,7 @@ public class V99 extends Schema {
 		schema.registerType(false, References.POI_CHUNK, DSL::remainder);
 		schema.registerType(false, References.WORLD_GEN_SETTINGS, DSL::remainder);
 		schema.registerType(false, References.ENTITY_CHUNK, () -> DSL.optionalFields("Entities", DSL.list(References.ENTITY_TREE.in(schema))));
+		schema.registerType(true, References.DATA_COMPONENTS, DSL::remainder);
 	}
 
 	protected static <T> T addNames(Dynamic<T> dynamic, Map<String, String> map, String string) {

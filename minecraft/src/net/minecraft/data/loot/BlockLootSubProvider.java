@@ -17,6 +17,8 @@ import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.advancements.critereon.StatePropertiesPredicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.StringRepresentable;
@@ -35,10 +37,8 @@ import net.minecraft.world.level.block.DoublePlantBlock;
 import net.minecraft.world.level.block.FlowerPotBlock;
 import net.minecraft.world.level.block.MultifaceBlock;
 import net.minecraft.world.level.block.PinkPetalsBlock;
-import net.minecraft.world.level.block.ShulkerBoxBlock;
 import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.StemBlock;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.block.state.properties.SlabType;
@@ -46,18 +46,15 @@ import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.level.storage.loot.IntRange;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.LootTable;
-import net.minecraft.world.level.storage.loot.entries.DynamicLoot;
 import net.minecraft.world.level.storage.loot.entries.LootItem;
 import net.minecraft.world.level.storage.loot.entries.LootPoolEntryContainer;
 import net.minecraft.world.level.storage.loot.entries.LootPoolSingletonContainer;
 import net.minecraft.world.level.storage.loot.functions.ApplyBonusCount;
 import net.minecraft.world.level.storage.loot.functions.ApplyExplosionDecay;
 import net.minecraft.world.level.storage.loot.functions.CopyBlockState;
-import net.minecraft.world.level.storage.loot.functions.CopyNameFunction;
-import net.minecraft.world.level.storage.loot.functions.CopyNbtFunction;
+import net.minecraft.world.level.storage.loot.functions.CopyComponentsFunction;
 import net.minecraft.world.level.storage.loot.functions.FunctionUserBuilder;
 import net.minecraft.world.level.storage.loot.functions.LimitCount;
-import net.minecraft.world.level.storage.loot.functions.SetContainerContents;
 import net.minecraft.world.level.storage.loot.functions.SetItemCountFunction;
 import net.minecraft.world.level.storage.loot.predicates.BonusLevelTableCondition;
 import net.minecraft.world.level.storage.loot.predicates.ConditionUserBuilder;
@@ -67,7 +64,6 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemBlockStatePrope
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.level.storage.loot.predicates.LootItemRandomChanceCondition;
 import net.minecraft.world.level.storage.loot.predicates.MatchTool;
-import net.minecraft.world.level.storage.loot.providers.nbt.ContextNbtProvider;
 import net.minecraft.world.level.storage.loot.providers.number.BinomialDistributionGenerator;
 import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 import net.minecraft.world.level.storage.loot.providers.number.NumberProvider;
@@ -211,7 +207,9 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
 					block,
 					LootPool.lootPool()
 						.setRolls(ConstantValue.exactly(1.0F))
-						.add(LootItem.lootTableItem(block).apply(CopyNameFunction.copyName(CopyNameFunction.NameSource.BLOCK_ENTITY)))
+						.add(
+							LootItem.lootTableItem(block).apply(CopyComponentsFunction.copyComponents(CopyComponentsFunction.Source.BLOCK_ENTITY).copy(DataComponents.CUSTOM_NAME))
+						)
 				)
 			);
 	}
@@ -225,14 +223,13 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
 						.setRolls(ConstantValue.exactly(1.0F))
 						.add(
 							LootItem.lootTableItem(block)
-								.apply(CopyNameFunction.copyName(CopyNameFunction.NameSource.BLOCK_ENTITY))
 								.apply(
-									CopyNbtFunction.copyData(ContextNbtProvider.BLOCK_ENTITY)
-										.copy("Lock", "BlockEntityTag.Lock")
-										.copy("LootTable", "BlockEntityTag.LootTable")
-										.copy("LootTableSeed", "BlockEntityTag.LootTableSeed")
+									CopyComponentsFunction.copyComponents(CopyComponentsFunction.Source.BLOCK_ENTITY)
+										.copy(DataComponents.CUSTOM_NAME)
+										.copy(DataComponents.CONTAINER)
+										.copy(DataComponents.LOCK)
+										.copy(DataComponents.CONTAINER_LOOT)
 								)
-								.apply(SetContainerContents.setContents(BlockEntityType.SHULKER_BOX).withEntry(DynamicLoot.dynamicEntry(ShulkerBoxBlock.CONTENTS)))
 						)
 				)
 			);
@@ -283,8 +280,11 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
 						.setRolls(ConstantValue.exactly(1.0F))
 						.add(
 							LootItem.lootTableItem(block)
-								.apply(CopyNameFunction.copyName(CopyNameFunction.NameSource.BLOCK_ENTITY))
-								.apply(CopyNbtFunction.copyData(ContextNbtProvider.BLOCK_ENTITY).copy("Patterns", "BlockEntityTag.Patterns"))
+								.apply(
+									CopyComponentsFunction.copyComponents(CopyComponentsFunction.Source.BLOCK_ENTITY)
+										.copy(DataComponents.CUSTOM_NAME)
+										.copy(DataComponents.BANNER_PATTERNS)
+								)
 						)
 				)
 			);
@@ -298,7 +298,7 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
 					.setRolls(ConstantValue.exactly(1.0F))
 					.add(
 						LootItem.lootTableItem(block)
-							.apply(CopyNbtFunction.copyData(ContextNbtProvider.BLOCK_ENTITY).copy("Bees", "BlockEntityTag.Bees"))
+							.apply(CopyComponentsFunction.copyComponents(CopyComponentsFunction.Source.BLOCK_ENTITY).copy(DataComponents.BEES))
 							.apply(CopyBlockState.copyState(block).copy(BeehiveBlock.HONEY_LEVEL))
 					)
 			);
@@ -312,7 +312,7 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
 					.add(
 						LootItem.lootTableItem(block)
 							.when(HAS_SILK_TOUCH)
-							.apply(CopyNbtFunction.copyData(ContextNbtProvider.BLOCK_ENTITY).copy("Bees", "BlockEntityTag.Bees"))
+							.apply(CopyComponentsFunction.copyComponents(CopyComponentsFunction.Source.BLOCK_ENTITY).copy(DataComponents.BEES))
 							.apply(CopyBlockState.copyState(block).copy(BeehiveBlock.HONEY_LEVEL))
 							.otherwise(LootItem.lootTableItem(block))
 					)
@@ -589,7 +589,7 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
 	protected abstract void generate();
 
 	@Override
-	public void generate(BiConsumer<ResourceLocation, LootTable.Builder> biConsumer) {
+	public void generate(HolderLookup.Provider provider, BiConsumer<ResourceLocation, LootTable.Builder> biConsumer) {
 		this.generate();
 		Set<ResourceLocation> set = new HashSet();
 

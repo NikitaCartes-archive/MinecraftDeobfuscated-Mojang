@@ -302,9 +302,8 @@ public class Armadillo extends Animal {
 	@Override
 	public InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
-		if (itemStack.is(Items.BRUSH)) {
+		if (itemStack.is(Items.BRUSH) && this.brushOffScute()) {
 			itemStack.hurtAndBreak(16, player, getSlotForHand(interactionHand));
-			this.brushOffScute();
 			return InteractionResult.sidedSuccess(this.level().isClientSide);
 		} else {
 			return super.mobInteract(player, interactionHand);
@@ -320,10 +319,15 @@ public class Armadillo extends Animal {
 		super.ageUp(i, bl);
 	}
 
-	public void brushOffScute() {
-		this.spawnAtLocation(new ItemStack(Items.ARMADILLO_SCUTE));
-		this.gameEvent(GameEvent.ENTITY_INTERACT);
-		this.playSound(SoundEvents.ARMADILLO_BRUSH);
+	public boolean brushOffScute() {
+		if (this.isBaby()) {
+			return false;
+		} else {
+			this.spawnAtLocation(new ItemStack(Items.ARMADILLO_SCUTE));
+			this.gameEvent(GameEvent.ENTITY_INTERACT);
+			this.playSound(SoundEvents.ARMADILLO_BRUSH);
+			return true;
+		}
 	}
 
 	public boolean canStayRolledUp() {

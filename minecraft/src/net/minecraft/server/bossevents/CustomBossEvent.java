@@ -4,6 +4,7 @@ import com.google.common.collect.Sets;
 import java.util.Collection;
 import java.util.Set;
 import java.util.UUID;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
@@ -134,9 +135,9 @@ public class CustomBossEvent extends ServerBossEvent {
 		return !set.isEmpty() || !set2.isEmpty();
 	}
 
-	public CompoundTag save() {
+	public CompoundTag save(HolderLookup.Provider provider) {
 		CompoundTag compoundTag = new CompoundTag();
-		compoundTag.putString("Name", Component.Serializer.toJson(this.name));
+		compoundTag.putString("Name", Component.Serializer.toJson(this.name, provider));
 		compoundTag.putBoolean("Visible", this.isVisible());
 		compoundTag.putInt("Value", this.value);
 		compoundTag.putInt("Max", this.max);
@@ -155,8 +156,8 @@ public class CustomBossEvent extends ServerBossEvent {
 		return compoundTag;
 	}
 
-	public static CustomBossEvent load(CompoundTag compoundTag, ResourceLocation resourceLocation) {
-		CustomBossEvent customBossEvent = new CustomBossEvent(resourceLocation, Component.Serializer.fromJson(compoundTag.getString("Name")));
+	public static CustomBossEvent load(CompoundTag compoundTag, ResourceLocation resourceLocation, HolderLookup.Provider provider) {
+		CustomBossEvent customBossEvent = new CustomBossEvent(resourceLocation, Component.Serializer.fromJson(compoundTag.getString("Name"), provider));
 		customBossEvent.setVisible(compoundTag.getBoolean("Visible"));
 		customBossEvent.setValue(compoundTag.getInt("Value"));
 		customBossEvent.setMax(compoundTag.getInt("Max"));

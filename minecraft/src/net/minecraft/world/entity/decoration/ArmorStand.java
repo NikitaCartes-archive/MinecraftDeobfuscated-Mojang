@@ -5,6 +5,7 @@ import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.Rotations;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -180,24 +181,14 @@ public class ArmorStand extends LivingEntity {
 		ListTag listTag = new ListTag();
 
 		for (ItemStack itemStack : this.armorItems) {
-			CompoundTag compoundTag2 = new CompoundTag();
-			if (!itemStack.isEmpty()) {
-				itemStack.save(compoundTag2);
-			}
-
-			listTag.add(compoundTag2);
+			listTag.add(itemStack.saveOptional(this.registryAccess()));
 		}
 
 		compoundTag.put("ArmorItems", listTag);
 		ListTag listTag2 = new ListTag();
 
 		for (ItemStack itemStack2 : this.handItems) {
-			CompoundTag compoundTag3 = new CompoundTag();
-			if (!itemStack2.isEmpty()) {
-				itemStack2.save(compoundTag3);
-			}
-
-			listTag2.add(compoundTag3);
+			listTag2.add(itemStack2.saveOptional(this.registryAccess()));
 		}
 
 		compoundTag.put("HandItems", listTag2);
@@ -220,7 +211,8 @@ public class ArmorStand extends LivingEntity {
 			ListTag listTag = compoundTag.getList("ArmorItems", 10);
 
 			for (int i = 0; i < this.armorItems.size(); i++) {
-				this.armorItems.set(i, ItemStack.of(listTag.getCompound(i)));
+				CompoundTag compoundTag2 = listTag.getCompound(i);
+				this.armorItems.set(i, ItemStack.parseOptional(this.registryAccess(), compoundTag2));
 			}
 		}
 
@@ -228,7 +220,8 @@ public class ArmorStand extends LivingEntity {
 			ListTag listTag = compoundTag.getList("HandItems", 10);
 
 			for (int i = 0; i < this.handItems.size(); i++) {
-				this.handItems.set(i, ItemStack.of(listTag.getCompound(i)));
+				CompoundTag compoundTag2 = listTag.getCompound(i);
+				this.handItems.set(i, ItemStack.parseOptional(this.registryAccess(), compoundTag2));
 			}
 		}
 
@@ -239,8 +232,8 @@ public class ArmorStand extends LivingEntity {
 		this.setNoBasePlate(compoundTag.getBoolean("NoBasePlate"));
 		this.setMarker(compoundTag.getBoolean("Marker"));
 		this.noPhysics = !this.hasPhysics();
-		CompoundTag compoundTag2 = compoundTag.getCompound("Pose");
-		this.readPose(compoundTag2);
+		CompoundTag compoundTag3 = compoundTag.getCompound("Pose");
+		this.readPose(compoundTag3);
 	}
 
 	private void readPose(CompoundTag compoundTag) {
@@ -496,10 +489,7 @@ public class ArmorStand extends LivingEntity {
 
 	private void brokenByPlayer(DamageSource damageSource) {
 		ItemStack itemStack = new ItemStack(Items.ARMOR_STAND);
-		if (this.hasCustomName()) {
-			itemStack.setHoverName(this.getCustomName());
-		}
-
+		itemStack.set(DataComponents.CUSTOM_NAME, this.getCustomName());
 		Block.popResource(this.level(), this.blockPosition(), itemStack);
 		this.brokenByAnything(damageSource);
 	}

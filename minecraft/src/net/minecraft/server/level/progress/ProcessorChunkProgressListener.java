@@ -4,7 +4,7 @@ import java.util.concurrent.Executor;
 import javax.annotation.Nullable;
 import net.minecraft.util.thread.ProcessorMailbox;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 
 public class ProcessorChunkProgressListener implements ChunkProgressListener {
 	private final ChunkProgressListener delegate;

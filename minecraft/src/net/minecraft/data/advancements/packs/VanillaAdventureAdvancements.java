@@ -44,8 +44,11 @@ import net.minecraft.advancements.critereon.TradeTrigger;
 import net.minecraft.advancements.critereon.UsedTotemTrigger;
 import net.minecraft.advancements.critereon.UsingItemTrigger;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderGetter;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.HolderSet;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.advancements.AdvancementSubProvider;
 import net.minecraft.data.recipes.packs.VanillaRecipeProvider;
 import net.minecraft.network.chat.Component;
@@ -66,6 +69,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ComparatorBlock;
 import net.minecraft.world.level.block.entity.DecoratedPotBlockEntity;
+import net.minecraft.world.level.block.entity.PotDecorations;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.level.storage.loot.predicates.AllOfCondition;
 import net.minecraft.world.level.storage.loot.predicates.AnyOfCondition;
@@ -165,7 +169,7 @@ public class VanillaAdventureAdvancements implements AdvancementSubProvider {
 			)
 			.addCriterion("slept_in_bed", PlayerTrigger.TriggerInstance.sleptInBed())
 			.save(consumer, "adventure/sleep_in_bed");
-		createAdventuringTime(consumer, advancementHolder2, MultiNoiseBiomeSourceParameterList.Preset.OVERWORLD);
+		createAdventuringTime(provider, consumer, advancementHolder2, MultiNoiseBiomeSourceParameterList.Preset.OVERWORLD);
 		AdvancementHolder advancementHolder3 = Advancement.Builder.advancement()
 			.parent(advancementHolder)
 			.display(
@@ -515,7 +519,9 @@ public class VanillaAdventureAdvancements implements AdvancementSubProvider {
 			.addCriterion(
 				"play_jukebox_in_meadows",
 				ItemUsedOnLocationTrigger.TriggerInstance.itemUsedOnBlock(
-					LocationPredicate.Builder.location().setBiome(Biomes.MEADOW).setBlock(BlockPredicate.Builder.block().of(Blocks.JUKEBOX)),
+					LocationPredicate.Builder.location()
+						.setBiomes(HolderSet.direct(provider.lookupOrThrow(Registries.BIOME).getOrThrow(Biomes.MEADOW)))
+						.setBlock(BlockPredicate.Builder.block().of(Blocks.JUKEBOX)),
 					ItemPredicate.Builder.item().of(ItemTags.MUSIC_DISCS)
 				)
 			)
@@ -600,7 +606,7 @@ public class VanillaAdventureAdvancements implements AdvancementSubProvider {
 			.parent(advancementHolder11)
 			.display(
 				DecoratedPotBlockEntity.createDecoratedPotItem(
-					new DecoratedPotBlockEntity.Decorations(Items.BRICK, Items.HEART_POTTERY_SHERD, Items.BRICK, Items.EXPLORER_POTTERY_SHERD)
+					new PotDecorations(Optional.empty(), Optional.of(Items.HEART_POTTERY_SHERD), Optional.empty(), Optional.of(Items.EXPLORER_POTTERY_SHERD))
 				),
 				Component.translatable("advancements.adventure.craft_decorated_pot_using_only_sherds.title"),
 				Component.translatable("advancements.adventure.craft_decorated_pot_using_only_sherds.description"),
@@ -774,9 +780,9 @@ public class VanillaAdventureAdvancements implements AdvancementSubProvider {
 	}
 
 	protected static void createAdventuringTime(
-		Consumer<AdvancementHolder> consumer, AdvancementHolder advancementHolder, MultiNoiseBiomeSourceParameterList.Preset preset
+		HolderLookup.Provider provider, Consumer<AdvancementHolder> consumer, AdvancementHolder advancementHolder, MultiNoiseBiomeSourceParameterList.Preset preset
 	) {
-		addBiomes(Advancement.Builder.advancement(), preset.usedBiomes().toList())
+		addBiomes(Advancement.Builder.advancement(), provider, preset.usedBiomes().toList())
 			.parent(advancementHolder)
 			.display(
 				Items.DIAMOND_BOOTS,
@@ -802,9 +808,13 @@ public class VanillaAdventureAdvancements implements AdvancementSubProvider {
 		return builder;
 	}
 
-	protected static Advancement.Builder addBiomes(Advancement.Builder builder, List<ResourceKey<Biome>> list) {
+	protected static Advancement.Builder addBiomes(Advancement.Builder builder, HolderLookup.Provider provider, List<ResourceKey<Biome>> list) {
+		HolderGetter<Biome> holderGetter = provider.lookupOrThrow(Registries.BIOME);
+
 		for (ResourceKey<Biome> resourceKey : list) {
-			builder.addCriterion(resourceKey.location().toString(), PlayerTrigger.TriggerInstance.located(LocationPredicate.Builder.inBiome(resourceKey)));
+			builder.addCriterion(
+				resourceKey.location().toString(), PlayerTrigger.TriggerInstance.located(LocationPredicate.Builder.inBiome(holderGetter.getOrThrow(resourceKey)))
+			);
 		}
 
 		return builder;

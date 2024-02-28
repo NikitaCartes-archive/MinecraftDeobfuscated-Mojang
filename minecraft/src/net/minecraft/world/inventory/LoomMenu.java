@@ -3,9 +3,8 @@ package net.minecraft.world.inventory;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
 import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BannerPatternTags;
@@ -15,13 +14,12 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BannerItem;
 import net.minecraft.world.item.BannerPatternItem;
-import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BannerPattern;
-import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.entity.BannerPatternLayers;
 
 public class LoomMenu extends AbstractContainerMenu {
 	private static final int PATTERN_NOT_SET = -1;
@@ -181,8 +179,8 @@ public class LoomMenu extends AbstractContainerMenu {
 			}
 
 			if (holder != null) {
-				CompoundTag compoundTag = BlockItem.getBlockEntityData(itemStack);
-				boolean bl2 = compoundTag != null && compoundTag.contains("Patterns", 9) && !itemStack.isEmpty() && compoundTag.getList("Patterns", 10).size() >= 6;
+				BannerPatternLayers bannerPatternLayers = itemStack.getOrDefault(DataComponents.BANNER_PATTERNS, BannerPatternLayers.EMPTY);
+				boolean bl2 = bannerPatternLayers.layers().size() >= 6;
 				if (bl2) {
 					this.selectedBannerPatternIndex.set(-1);
 					this.resultSlot.set(ItemStack.EMPTY);
@@ -279,24 +277,11 @@ public class LoomMenu extends AbstractContainerMenu {
 		if (!itemStack.isEmpty() && !itemStack2.isEmpty()) {
 			itemStack3 = itemStack.copyWithCount(1);
 			DyeColor dyeColor = ((DyeItem)itemStack2.getItem()).getDyeColor();
-			CompoundTag compoundTag = BlockItem.getBlockEntityData(itemStack3);
-			ListTag listTag;
-			if (compoundTag != null && compoundTag.contains("Patterns", 9)) {
-				listTag = compoundTag.getList("Patterns", 10);
-			} else {
-				listTag = new ListTag();
-				if (compoundTag == null) {
-					compoundTag = new CompoundTag();
-				}
-
-				compoundTag.put("Patterns", listTag);
-			}
-
-			CompoundTag compoundTag2 = new CompoundTag();
-			compoundTag2.putString("Pattern", holder.value().getHashname());
-			compoundTag2.putInt("Color", dyeColor.getId());
-			listTag.add(compoundTag2);
-			BlockItem.setBlockEntityData(itemStack3, BlockEntityType.BANNER, compoundTag);
+			itemStack3.update(
+				DataComponents.BANNER_PATTERNS,
+				BannerPatternLayers.EMPTY,
+				bannerPatternLayers -> new BannerPatternLayers.Builder().addAll(bannerPatternLayers).add(holder, dyeColor).build()
+			);
 		}
 
 		if (!ItemStack.matches(itemStack3, this.resultSlot.getItem())) {

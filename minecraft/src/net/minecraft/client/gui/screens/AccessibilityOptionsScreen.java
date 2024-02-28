@@ -7,17 +7,21 @@ import net.minecraft.client.Options;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 
 @Environment(EnvType.CLIENT)
 public class AccessibilityOptionsScreen extends SimpleOptionsSubScreen {
+	public static final Component TITLE = Component.translatable("options.accessibility.title");
+
 	private static OptionInstance<?>[] options(Options options) {
 		return new OptionInstance[]{
 			options.narrator(),
 			options.showSubtitles(),
 			options.highContrast(),
 			options.autoJump(),
+			options.menuBackgroundBlurriness(),
 			options.textBackgroundOpacity(),
 			options.backgroundForChatOnly(),
 			options.chatOpacity(),
@@ -41,7 +45,7 @@ public class AccessibilityOptionsScreen extends SimpleOptionsSubScreen {
 	}
 
 	public AccessibilityOptionsScreen(Screen screen, Options options) {
-		super(screen, options, Component.translatable("options.accessibility.title"), options(options));
+		super(screen, options, TITLE, options(options));
 	}
 
 	@Override
@@ -55,14 +59,12 @@ public class AccessibilityOptionsScreen extends SimpleOptionsSubScreen {
 	}
 
 	@Override
-	protected void createFooter() {
-		this.addRenderableWidget(
+	protected void addFooter() {
+		LinearLayout linearLayout = this.layout.addToFooter(LinearLayout.horizontal().spacing(8));
+		linearLayout.addChild(
 			Button.builder(Component.translatable("options.accessibility.link"), ConfirmLinkScreen.confirmLink(this, "https://aka.ms/MinecraftJavaAccessibility"))
-				.bounds(this.width / 2 - 155, this.height - 27, 150, 20)
 				.build()
 		);
-		this.addRenderableWidget(
-			Button.builder(CommonComponents.GUI_DONE, button -> this.minecraft.setScreen(this.lastScreen)).bounds(this.width / 2 + 5, this.height - 27, 150, 20).build()
-		);
+		linearLayout.addChild(Button.builder(CommonComponents.GUI_DONE, button -> this.minecraft.setScreen(this.lastScreen)).build());
 	}
 }

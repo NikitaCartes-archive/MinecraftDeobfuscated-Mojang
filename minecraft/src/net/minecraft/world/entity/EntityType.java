@@ -5,7 +5,6 @@ import com.mojang.logging.LogUtils;
 import java.util.List;
 import java.util.Optional;
 import java.util.Spliterator;
-import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -17,6 +16,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -153,6 +153,7 @@ import net.minecraft.world.flag.FeatureFlag;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
@@ -168,7 +169,6 @@ import org.slf4j.Logger;
 
 public class EntityType<T extends Entity> implements FeatureElement, EntityTypeTest<Entity, T> {
 	private static final Logger LOGGER = LogUtils.getLogger();
-	public static final String ENTITY_TAG = "EntityTag";
 	private final Holder.Reference<EntityType<?>> builtInRegistryHolder = BuiltInRegistries.ENTITY_TYPE.createIntrusiveHolder(this);
 	private static final float MAGIC_HORSE_WIDTH = 1.3964844F;
 	private static final int DISPLAY_TRACKING_RANGE = 10;
@@ -862,14 +862,15 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 	}
 
 	public static <T extends Entity> Consumer<T> appendCustomNameConfig(Consumer<T> consumer, ItemStack itemStack) {
-		return itemStack.hasCustomHoverName() ? consumer.andThen(entity -> entity.setCustomName(itemStack.getHoverName())) : consumer;
+		Component component = itemStack.get(DataComponents.CUSTOM_NAME);
+		return component != null ? consumer.andThen(entity -> entity.setCustomName(component)) : consumer;
 	}
 
 	public static <T extends Entity> Consumer<T> appendCustomEntityStackConfig(
 		Consumer<T> consumer, ServerLevel serverLevel, ItemStack itemStack, @Nullable Player player
 	) {
-		CompoundTag compoundTag = itemStack.getTag();
-		return compoundTag != null ? consumer.andThen(entity -> updateCustomEntityTag(serverLevel, player, entity, compoundTag)) : consumer;
+		CustomData customData = itemStack.getOrDefault(DataComponents.ENTITY_DATA, CustomData.EMPTY);
+		return !customData.isEmpty() ? consumer.andThen(entity -> updateCustomEntityTag(serverLevel, player, entity, customData)) : consumer;
 	}
 
 	@Nullable
@@ -929,17 +930,11 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 		return 1.0 + Shapes.collide(Direction.Axis.Y, aABB, iterable, bl ? -2.0 : -1.0);
 	}
 
-	public static void updateCustomEntityTag(Level level, @Nullable Player player, @Nullable Entity entity, @Nullable CompoundTag compoundTag) {
-		if (compoundTag != null && compoundTag.contains("EntityTag", 10)) {
-			MinecraftServer minecraftServer = level.getServer();
-			if (minecraftServer != null && entity != null) {
-				if (level.isClientSide || !entity.onlyOpCanSetNbt() || player != null && minecraftServer.getPlayerList().isOp(player.getGameProfile())) {
-					CompoundTag compoundTag2 = entity.saveWithoutId(new CompoundTag());
-					UUID uUID = entity.getUUID();
-					compoundTag2.merge(compoundTag.getCompound("EntityTag"));
-					entity.setUUID(uUID);
-					entity.load(compoundTag2);
-				}
+	public static void updateCustomEntityTag(Level level, @Nullable Player player, @Nullable Entity entity, CustomData customData) {
+		MinecraftServer minecraftServer = level.getServer();
+		if (minecraftServer != null && entity != null) {
+			if (level.isClientSide || !entity.onlyOpCanSetNbt() || player != null && minecraftServer.getPlayerList().isOp(player.getGameProfile())) {
+				customData.loadInto(entity);
 			}
 		}
 	}

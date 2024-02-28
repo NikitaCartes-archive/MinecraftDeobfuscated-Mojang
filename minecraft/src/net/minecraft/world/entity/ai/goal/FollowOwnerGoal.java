@@ -127,7 +127,7 @@ public class FollowOwnerGoal extends Goal {
 	}
 
 	private boolean canTeleportTo(BlockPos blockPos) {
-		PathType pathType = WalkNodeEvaluator.getPathTypeStatic(this.level, blockPos.mutable());
+		PathType pathType = WalkNodeEvaluator.getPathTypeStatic(this.tamable, blockPos);
 		if (pathType != PathType.WALKABLE) {
 			return false;
 		} else {

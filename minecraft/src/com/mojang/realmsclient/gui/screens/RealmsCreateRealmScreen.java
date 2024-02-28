@@ -6,11 +6,9 @@ import com.mojang.realmsclient.util.task.CreateSnapshotRealmTask;
 import com.mojang.realmsclient.util.task.RealmCreationTask;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.Util;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.client.gui.layouts.CommonLayouts;
 import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
 import net.minecraft.client.gui.layouts.LinearLayout;
@@ -18,6 +16,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.realms.RealmsScreen;
+import net.minecraft.util.StringUtil;
 
 @Environment(EnvType.CLIENT)
 public class RealmsCreateRealmScreen extends RealmsScreen {
@@ -46,12 +45,12 @@ public class RealmsCreateRealmScreen extends RealmsScreen {
 
 	@Override
 	public void init() {
-		this.layout.addToHeader(new StringWidget(this.title, this.font));
+		this.layout.addTitleHeader(this.title, this.font);
 		LinearLayout linearLayout = this.layout.addToContents(LinearLayout.vertical()).spacing(10);
 		Button button = Button.builder(CommonComponents.GUI_CONTINUE, buttonx -> this.createWorldRunnable.run()).build();
 		button.active = false;
 		this.nameBox = new EditBox(this.font, 210, 20, NAME_LABEL);
-		this.nameBox.setResponder(string -> button.active = !Util.isBlank(string));
+		this.nameBox.setResponder(string -> button.active = !StringUtil.isBlank(string));
 		this.descriptionBox = new EditBox(this.font, 210, 20, DESCRIPTION_LABEL);
 		linearLayout.addChild(CommonLayouts.labeledElement(this.font, this.nameBox, NAME_LABEL));
 		linearLayout.addChild(CommonLayouts.labeledElement(this.font, this.descriptionBox, DESCRIPTION_LABEL));

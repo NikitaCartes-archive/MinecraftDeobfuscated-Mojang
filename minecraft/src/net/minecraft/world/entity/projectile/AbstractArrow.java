@@ -7,6 +7,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -21,6 +22,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
+import net.minecraft.util.Unit;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -63,13 +65,19 @@ public abstract class AbstractArrow extends Projectile {
 	private IntOpenHashSet piercingIgnoreEntityIds;
 	@Nullable
 	private List<Entity> piercedAndKilledEntities;
-	private ItemStack pickupItemStack;
+	private ItemStack pickupItemStack = this.getDefaultPickupItem();
+
+	protected AbstractArrow(EntityType<? extends AbstractArrow> entityType, Level level) {
+		super(entityType, level);
+	}
 
 	protected AbstractArrow(EntityType<? extends AbstractArrow> entityType, Level level, ItemStack itemStack) {
-		super(entityType, level);
+		this(entityType, level);
 		this.pickupItemStack = itemStack.copy();
-		if (itemStack.hasCustomHoverName()) {
-			this.setCustomName(itemStack.getHoverName());
+		this.setCustomName(itemStack.get(DataComponents.CUSTOM_NAME));
+		Unit unit = itemStack.remove(DataComponents.INTANGIBLE_PROJECTILE);
+		if (unit != null) {
+			this.pickup = AbstractArrow.Pickup.CREATIVE_ONLY;
 		}
 	}
 
@@ -81,9 +89,6 @@ public abstract class AbstractArrow extends Projectile {
 	protected AbstractArrow(EntityType<? extends AbstractArrow> entityType, LivingEntity livingEntity, Level level, ItemStack itemStack) {
 		this(entityType, livingEntity.getX(), livingEntity.getEyeY() - 0.1F, livingEntity.getZ(), level, itemStack);
 		this.setOwner(livingEntity);
-		if (livingEntity instanceof Player) {
-			this.pickup = AbstractArrow.Pickup.ALLOWED;
-		}
 	}
 
 	public void setSoundEvent(SoundEvent soundEvent) {
@@ -458,7 +463,7 @@ public abstract class AbstractArrow extends Projectile {
 		compoundTag.putByte("PierceLevel", this.getPierceLevel());
 		compoundTag.putString("SoundEvent", BuiltInRegistries.SOUND_EVENT.getKey(this.soundEvent).toString());
 		compoundTag.putBoolean("ShotFromCrossbow", this.shotFromCrossbow());
-		compoundTag.put("item", this.pickupItemStack.save(new CompoundTag()));
+		compoundTag.put("item", this.pickupItemStack.save(this.registryAccess()));
 	}
 
 	@Override
@@ -486,15 +491,17 @@ public abstract class AbstractArrow extends Projectile {
 
 		this.setShotFromCrossbow(compoundTag.getBoolean("ShotFromCrossbow"));
 		if (compoundTag.contains("item", 10)) {
-			this.pickupItemStack = ItemStack.of(compoundTag.getCompound("item"));
+			this.pickupItemStack = (ItemStack)ItemStack.parse(this.registryAccess(), compoundTag.getCompound("item")).orElse(this.getDefaultPickupItem());
+		} else {
+			this.pickupItemStack = this.getDefaultPickupItem();
 		}
 	}
 
 	@Override
 	public void setOwner(@Nullable Entity entity) {
 		super.setOwner(entity);
-		if (entity instanceof Player player) {
-			this.pickup = player.hasInfiniteMaterials() ? AbstractArrow.Pickup.CREATIVE_ONLY : AbstractArrow.Pickup.ALLOWED;
+		if (entity instanceof Player && this.pickup == AbstractArrow.Pickup.DISALLOWED) {
+			this.pickup = AbstractArrow.Pickup.ALLOWED;
 		}
 	}
 
@@ -509,19 +516,18 @@ public abstract class AbstractArrow extends Projectile {
 	}
 
 	protected boolean tryPickup(Player player) {
-		switch (this.pickup) {
-			case ALLOWED:
-				return player.getInventory().add(this.getPickupItem());
-			case CREATIVE_ONLY:
-				return player.hasInfiniteMaterials();
-			default:
-				return false;
-		}
+		return switch (this.pickup) {
+			case DISALLOWED -> false;
+			case ALLOWED -> player.getInventory().add(this.getPickupItem());
+			case CREATIVE_ONLY -> player.hasInfiniteMaterials();
+		};
 	}
 
 	protected ItemStack getPickupItem() {
 		return this.pickupItemStack.copy();
 	}
+
+	protected abstract ItemStack getDefaultPickupItem();
 
 	@Override
 	protected Entity.MovementEmission getMovementEmission() {
@@ -568,6 +574,10 @@ public abstract class AbstractArrow extends Projectile {
 		} else {
 			this.entityData.set(ID_FLAGS, (byte)(b & ~i));
 		}
+	}
+
+	protected void setPickupItemStack(ItemStack itemStack) {
+		this.pickupItemStack = itemStack;
 	}
 
 	public boolean isCritArrow() {

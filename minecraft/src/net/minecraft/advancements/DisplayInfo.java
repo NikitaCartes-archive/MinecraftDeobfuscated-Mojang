@@ -14,7 +14,7 @@ import net.minecraft.world.item.ItemStack;
 public class DisplayInfo {
 	public static final Codec<DisplayInfo> CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
-					ItemStack.ADVANCEMENT_ICON_CODEC.fieldOf("icon").forGetter(DisplayInfo::getIcon),
+					ItemStack.CODEC.fieldOf("icon").forGetter(DisplayInfo::getIcon),
 					ComponentSerialization.CODEC.fieldOf("title").forGetter(DisplayInfo::getTitle),
 					ComponentSerialization.CODEC.fieldOf("description").forGetter(DisplayInfo::getDescription),
 					ExtraCodecs.strictOptionalField(ResourceLocation.CODEC, "background").forGetter(DisplayInfo::getBackground),
@@ -105,8 +105,8 @@ public class DisplayInfo {
 	}
 
 	private void serializeToNetwork(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
-		ComponentSerialization.STREAM_CODEC.encode(registryFriendlyByteBuf, this.title);
-		ComponentSerialization.STREAM_CODEC.encode(registryFriendlyByteBuf, this.description);
+		ComponentSerialization.TRUSTED_STREAM_CODEC.encode(registryFriendlyByteBuf, this.title);
+		ComponentSerialization.TRUSTED_STREAM_CODEC.encode(registryFriendlyByteBuf, this.description);
 		ItemStack.STREAM_CODEC.encode(registryFriendlyByteBuf, this.icon);
 		registryFriendlyByteBuf.writeEnum(this.type);
 		int i = 0;
@@ -129,8 +129,8 @@ public class DisplayInfo {
 	}
 
 	private static DisplayInfo fromNetwork(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
-		Component component = ComponentSerialization.STREAM_CODEC.decode(registryFriendlyByteBuf);
-		Component component2 = ComponentSerialization.STREAM_CODEC.decode(registryFriendlyByteBuf);
+		Component component = ComponentSerialization.TRUSTED_STREAM_CODEC.decode(registryFriendlyByteBuf);
+		Component component2 = ComponentSerialization.TRUSTED_STREAM_CODEC.decode(registryFriendlyByteBuf);
 		ItemStack itemStack = ItemStack.STREAM_CODEC.decode(registryFriendlyByteBuf);
 		AdvancementType advancementType = registryFriendlyByteBuf.readEnum(AdvancementType.class);
 		int i = registryFriendlyByteBuf.readInt();

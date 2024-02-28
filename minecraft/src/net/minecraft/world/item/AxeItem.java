@@ -49,8 +49,8 @@ public class AxeItem extends DiggerItem {
 		.put(Blocks.BAMBOO_BLOCK, Blocks.STRIPPED_BAMBOO_BLOCK)
 		.build();
 
-	protected AxeItem(Tier tier, float f, float g, Item.Properties properties) {
-		super(f, g, tier, BlockTags.MINEABLE_WITH_AXE, properties);
+	public AxeItem(Tier tier, Item.Properties properties) {
+		super(tier, BlockTags.MINEABLE_WITH_AXE, properties);
 	}
 
 	@Override

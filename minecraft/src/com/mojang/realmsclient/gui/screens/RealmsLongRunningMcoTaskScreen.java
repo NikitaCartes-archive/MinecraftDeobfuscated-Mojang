@@ -48,6 +48,9 @@ public class RealmsLongRunningMcoTaskScreen extends RealmsScreen {
 					}
 
 					longRunningTask.run();
+					if (longRunningTask.aborted()) {
+						return;
+					}
 				}
 			};
 			Thread thread = new Thread(runnable, "Realms-long-running-task");

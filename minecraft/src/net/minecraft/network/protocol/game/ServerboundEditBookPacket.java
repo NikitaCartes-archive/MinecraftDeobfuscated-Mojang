@@ -1,6 +1,5 @@
 package net.minecraft.network.protocol.game;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import net.minecraft.network.FriendlyByteBuf;
@@ -17,7 +16,7 @@ public record ServerboundEditBookPacket(int slot, List<String> pages, Optional<S
 	public static final StreamCodec<FriendlyByteBuf, ServerboundEditBookPacket> STREAM_CODEC = StreamCodec.composite(
 		ByteBufCodecs.VAR_INT,
 		ServerboundEditBookPacket::slot,
-		ByteBufCodecs.stringUtf8(8192).apply(ByteBufCodecs.collection(FriendlyByteBuf.limitValue(ArrayList::new, 200))),
+		ByteBufCodecs.stringUtf8(8192).apply(ByteBufCodecs.list(200)),
 		ServerboundEditBookPacket::pages,
 		ByteBufCodecs.stringUtf8(128).apply(ByteBufCodecs::optional),
 		ServerboundEditBookPacket::title,

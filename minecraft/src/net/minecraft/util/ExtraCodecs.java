@@ -1,14 +1,11 @@
 package net.minecraft.util;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
 import com.google.common.primitives.UnsignedBytes;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonParser;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
@@ -47,6 +44,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalLong;
+import java.util.Map.Entry;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.IntFunction;
@@ -69,19 +67,6 @@ import org.joml.Vector3f;
 public class ExtraCodecs {
 	public static final Codec<JsonElement> JSON = converter(JsonOps.INSTANCE);
 	public static final Codec<Object> JAVA = converter(JavaOps.INSTANCE);
-	public static final Codec<JsonElement> FLAT_JSON = Codec.STRING.flatXmap(string -> {
-		try {
-			return DataResult.success(JsonParser.parseString(string));
-		} catch (JsonParseException var2) {
-			return DataResult.error(var2::getMessage);
-		}
-	}, jsonElement -> {
-		try {
-			return DataResult.success(GsonHelper.toStableString(jsonElement));
-		} catch (IllegalArgumentException var2) {
-			return DataResult.error(var2::getMessage);
-		}
-	});
 	public static final Codec<Vector3f> VECTOR3F = Codec.FLOAT
 		.listOf()
 		.comapFlatMap(
@@ -166,7 +151,6 @@ public class ExtraCodecs {
 				)
 				.apply(instance, (string, string2, optional) -> new Property(string, string2, (String)optional.orElse(null)))
 	);
-	@VisibleForTesting
 	public static final Codec<PropertyMap> PROPERTY_MAP = Codec.either(Codec.unboundedMap(Codec.STRING, Codec.STRING.listOf()), PROPERTY.listOf())
 		.xmap(either -> {
 			PropertyMap propertyMap = new PropertyMap();
@@ -181,8 +165,14 @@ public class ExtraCodecs {
 			});
 			return propertyMap;
 		}, propertyMap -> Either.right(propertyMap.values().stream().toList()));
+	public static final Codec<String> PLAYER_NAME = validate(
+		sizeLimitedString(0, 16),
+		string -> StringUtil.isValidPlayerName(string)
+				? DataResult.success(string)
+				: DataResult.error(() -> "Player name contained disallowed characters: '" + string + "'")
+	);
 	private static final MapCodec<GameProfile> GAME_PROFILE_WITHOUT_PROPERTIES = RecordCodecBuilder.mapCodec(
-		instance -> instance.group(UUIDUtil.AUTHLIB_CODEC.fieldOf("id").forGetter(GameProfile::getId), Codec.STRING.fieldOf("name").forGetter(GameProfile::getName))
+		instance -> instance.group(UUIDUtil.AUTHLIB_CODEC.fieldOf("id").forGetter(GameProfile::getId), PLAYER_NAME.fieldOf("name").forGetter(GameProfile::getName))
 				.apply(instance, GameProfile::new)
 	);
 	public static final Codec<GameProfile> GAME_PROFILE = RecordCodecBuilder.create(
@@ -501,6 +491,18 @@ public class ExtraCodecs {
 		);
 	}
 
+	public static <T> Codec<List<T>> sizeLimitedList(Codec<List<T>> codec, int i) {
+		return validate(
+			codec, list -> list.size() > i ? DataResult.error(() -> "List is too long: " + list.size() + ", expected range [0-" + i + "]") : DataResult.success(list)
+		);
+	}
+
+	public static <K, V> Codec<Map<K, V>> sizeLimitedMap(Codec<Map<K, V>> codec, int i) {
+		return validate(
+			codec, map -> map.size() > i ? DataResult.error(() -> "Map is too long: " + map.size() + ", expected range [0-" + i + "]") : DataResult.success(map)
+		);
+	}
+
 	public static <T> Codec<T> withAlternative(Codec<T> codec, Codec<? extends T> codec2) {
 		return Codec.either(codec, codec2).xmap(either -> either.map(object -> object, object -> object), Either::left);
 	}
@@ -546,6 +548,76 @@ public class ExtraCodecs {
 
 			private <T, V2 extends V> DataResult<T> encode(Codec<V2> codec, V object, DynamicOps<T> dynamicOps) {
 				return codec.encodeStart(dynamicOps, (V2)object);
+			}
+		};
+	}
+
+	public static <K, V> Codec<Map<K, V>> unboundedDispatchMap(Codec<K> codec, Function<K, Codec<? extends V>> function) {
+		return new Codec<Map<K, V>>() {
+			public <T> DataResult<T> encode(Map<K, V> map, DynamicOps<T> dynamicOps, T object) {
+				RecordBuilder<T> recordBuilder = dynamicOps.mapBuilder();
+
+				for (Entry<K, V> entry : map.entrySet()) {
+					recordBuilder.add(
+						codec.encodeStart(dynamicOps, (K)entry.getKey()), this.encodeValue((Codec)function.apply(entry.getKey()), (V)entry.getValue(), dynamicOps)
+					);
+				}
+
+				return recordBuilder.build(object);
+			}
+
+			private <T, V2 extends V> DataResult<T> encodeValue(Codec<V2> codec, V object, DynamicOps<T> dynamicOps) {
+				return codec.encodeStart(dynamicOps, (V2)object);
+			}
+
+			@Override
+			public <T> DataResult<Pair<Map<K, V>, T>> decode(DynamicOps<T> dynamicOps, T object) {
+				return dynamicOps.getMap(object)
+					.flatMap(
+						mapLike -> {
+							Builder<K, V> builder = ImmutableMap.builder();
+							java.util.stream.Stream.Builder<Pair<T, T>> builder2 = Stream.builder();
+							DataResult<com.mojang.datafixers.util.Unit> dataResult = (DataResult<com.mojang.datafixers.util.Unit>)mapLike.entries()
+								.reduce(
+									DataResult.success(com.mojang.datafixers.util.Unit.INSTANCE, Lifecycle.stable()),
+									(dataResultx, pair) -> {
+										DataResult<K> dataResult2 = codec.parse(dynamicOps, (T)pair.getFirst());
+										DataResult<V> dataResult3 = dataResult2.map(function)
+											.flatMap(codecxxxxxx -> codecxxxxxx.parse(dynamicOps, (T)pair.getSecond()).map(Function.identity()));
+										DataResult<Pair<K, V>> dataResult4 = dataResult2.apply2stable(Pair::of, dataResult3);
+										dataResult4.result().ifPresent(pairx -> builder.put((K)pairx.getFirst(), (V)pairx.getSecond()));
+										dataResult4.error().ifPresent(partialResult -> builder2.add(pair));
+										return dataResultx.apply2stable((unit, pairx) -> unit, dataResult4);
+									},
+									(dataResultx, dataResult2) -> dataResultx.apply2stable((unit, unit2) -> unit, dataResult2)
+								);
+							Map<K, V> map = builder.build();
+							T object2 = dynamicOps.createMap(builder2.build());
+							return dataResult.<Pair<Map<K, V>, T>>map(unit -> Pair.of(map, object))
+								.setPartial(Pair.of(map, object))
+								.mapError(string -> string + " missed input: " + object2);
+						}
+					);
+			}
+		};
+	}
+
+	public static <A> Codec<Optional<A>> optionalEmptyMap(Codec<A> codec) {
+		return new Codec<Optional<A>>() {
+			@Override
+			public <T> DataResult<Pair<Optional<A>, T>> decode(DynamicOps<T> dynamicOps, T object) {
+				return isEmptyMap(dynamicOps, object)
+					? DataResult.success(Pair.of(Optional.empty(), object))
+					: codec.decode(dynamicOps, object).map(pair -> pair.mapFirst(Optional::of));
+			}
+
+			private static <T> boolean isEmptyMap(DynamicOps<T> dynamicOps, T object) {
+				Optional<MapLike<T>> optional = dynamicOps.getMap(object).result();
+				return optional.isPresent() && ((MapLike)optional.get()).entries().findAny().isEmpty();
+			}
+
+			public <T> DataResult<T> encode(Optional<A> optional, DynamicOps<T> dynamicOps, T object) {
+				return optional.isEmpty() ? DataResult.success(dynamicOps.emptyMap()) : codec.encode((A)optional.get(), dynamicOps, object);
 			}
 		};
 	}

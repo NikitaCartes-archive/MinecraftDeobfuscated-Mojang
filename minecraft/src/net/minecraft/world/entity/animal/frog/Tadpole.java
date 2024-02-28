@@ -4,6 +4,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Dynamic;
 import javax.annotation.Nullable;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.DebugPackets;
@@ -32,6 +33,7 @@ import net.minecraft.world.entity.animal.Bucketable;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
 
 public class Tadpole extends AbstractFish {
@@ -170,8 +172,7 @@ public class Tadpole extends AbstractFish {
 	@Override
 	public void saveToBucketTag(ItemStack itemStack) {
 		Bucketable.saveDefaultDataToBucketTag(this, itemStack);
-		CompoundTag compoundTag = itemStack.getOrCreateTag();
-		compoundTag.putInt("Age", this.getAge());
+		CustomData.update(DataComponents.BUCKET_ENTITY_DATA, itemStack, compoundTag -> compoundTag.putInt("Age", this.getAge()));
 	}
 
 	@Override

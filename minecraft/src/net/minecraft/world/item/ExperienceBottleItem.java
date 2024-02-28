@@ -15,11 +15,6 @@ public class ExperienceBottleItem extends Item {
 	}
 
 	@Override
-	public boolean isFoil(ItemStack itemStack) {
-		return true;
-	}
-
-	@Override
 	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
 		level.playSound(

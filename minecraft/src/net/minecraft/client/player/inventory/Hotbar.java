@@ -30,7 +30,7 @@ public class Hotbar {
 		.xmap(Hotbar::new, hotbar -> hotbar.items);
 	private static final DynamicOps<Tag> DEFAULT_OPS = NbtOps.INSTANCE;
 	private static final Dynamic<?> EMPTY_STACK = new Dynamic<>(
-		DEFAULT_OPS, Util.getOrThrow(ItemStack.CODEC.encodeStart(DEFAULT_OPS, ItemStack.EMPTY), IllegalStateException::new)
+		DEFAULT_OPS, Util.getOrThrow(ItemStack.OPTIONAL_CODEC.encodeStart(DEFAULT_OPS, ItemStack.EMPTY), IllegalStateException::new)
 	);
 	private List<Dynamic<?>> items;
 
@@ -46,7 +46,7 @@ public class Hotbar {
 		return this.items
 			.stream()
 			.map(
-				dynamic -> (ItemStack)ItemStack.CODEC
+				dynamic -> (ItemStack)ItemStack.OPTIONAL_CODEC
 						.parse(RegistryOps.injectRegistryContext(dynamic, provider))
 						.resultOrPartial(string -> LOGGER.warn("Could not parse hotbar item: {}", string))
 						.orElse(ItemStack.EMPTY)
@@ -60,7 +60,7 @@ public class Hotbar {
 
 		for (int i = 0; i < SIZE; i++) {
 			ItemStack itemStack = inventory.getItem(i);
-			Optional<Dynamic<?>> optional = ItemStack.CODEC
+			Optional<Dynamic<?>> optional = ItemStack.OPTIONAL_CODEC
 				.encodeStart(registryOps, itemStack)
 				.resultOrPartial(string -> LOGGER.warn("Could not encode hotbar item: {}", string))
 				.map(tag -> new Dynamic<>(DEFAULT_OPS, tag));

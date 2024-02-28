@@ -32,7 +32,7 @@ public class TransferableSelectionList extends ObjectSelectionList<TransferableS
 	final PackSelectionScreen screen;
 
 	public TransferableSelectionList(Minecraft minecraft, PackSelectionScreen packSelectionScreen, int i, int j, Component component) {
-		super(minecraft, i, j - 83, 32, 36);
+		super(minecraft, i, j, 33, 36);
 		this.screen = packSelectionScreen;
 		this.title = component;
 		this.centerListVertically = false;
@@ -42,9 +42,7 @@ public class TransferableSelectionList extends ObjectSelectionList<TransferableS
 	@Override
 	protected void renderHeader(GuiGraphics guiGraphics, int i, int j) {
 		Component component = Component.empty().append(this.title).withStyle(ChatFormatting.UNDERLINE, ChatFormatting.BOLD);
-		guiGraphics.drawString(
-			this.minecraft.font, component, i + this.width / 2 - this.minecraft.font.width(component) / 2, Math.min(this.getY() + 3, j), 16777215, false
-		);
+		guiGraphics.drawString(this.minecraft.font, component, i + this.width / 2 - this.minecraft.font.width(component) / 2, Math.min(this.getY() + 3, j), -1, false);
 	}
 
 	@Override
@@ -55,6 +53,21 @@ public class TransferableSelectionList extends ObjectSelectionList<TransferableS
 	@Override
 	protected int getScrollbarPosition() {
 		return this.getRight() - 6;
+	}
+
+	@Override
+	protected void renderSelection(GuiGraphics guiGraphics, int i, int j, int k, int l, int m) {
+		if (this.scrollbarVisible()) {
+			int n = 2;
+			int o = this.getRowLeft() - 2;
+			int p = this.getRight() - 6 - 1;
+			int q = i - 2;
+			int r = i + k + 2;
+			guiGraphics.fill(o, q, p, r, l);
+			guiGraphics.fill(o + 1, q + 1, p - 1, r - 1, m);
+		} else {
+			super.renderSelection(guiGraphics, i, j, k, l, m);
+		}
 	}
 
 	@Override
@@ -252,7 +265,7 @@ public class TransferableSelectionList extends ObjectSelectionList<TransferableS
 				}
 			}
 
-			return false;
+			return super.mouseClicked(d, e, i);
 		}
 	}
 }

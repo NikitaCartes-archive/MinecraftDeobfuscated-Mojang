@@ -24,6 +24,7 @@ import net.minecraft.client.resources.sounds.SoundEventRegistration;
 import net.minecraft.client.resources.sounds.SoundEventRegistrationSerializer;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.client.resources.sounds.TickableSoundInstance;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
@@ -51,7 +52,7 @@ public class SoundManager extends SimplePreparableReloadListener<SoundManager.Pr
 	static final Logger LOGGER = LogUtils.getLogger();
 	private static final String SOUNDS_PATH = "sounds.json";
 	private static final Gson GSON = new GsonBuilder()
-		.registerTypeHierarchyAdapter(Component.class, new Component.SerializerAdapter())
+		.registerTypeHierarchyAdapter(Component.class, new Component.SerializerAdapter(RegistryAccess.EMPTY))
 		.registerTypeAdapter(SoundEventRegistration.class, new SoundEventRegistrationSerializer())
 		.create();
 	private static final TypeToken<Map<String, SoundEventRegistration>> SOUND_EVENT_REGISTRATION_TYPE = new TypeToken<Map<String, SoundEventRegistration>>() {

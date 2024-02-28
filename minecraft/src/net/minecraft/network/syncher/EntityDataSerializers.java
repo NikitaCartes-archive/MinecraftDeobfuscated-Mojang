@@ -42,14 +42,14 @@ public class EntityDataSerializers {
 	public static final EntityDataSerializer<Long> LONG = EntityDataSerializer.forValueType(ByteBufCodecs.VAR_LONG);
 	public static final EntityDataSerializer<Float> FLOAT = EntityDataSerializer.forValueType(ByteBufCodecs.FLOAT);
 	public static final EntityDataSerializer<String> STRING = EntityDataSerializer.forValueType(ByteBufCodecs.STRING_UTF8);
-	public static final EntityDataSerializer<Component> COMPONENT = EntityDataSerializer.forValueType(ComponentSerialization.STREAM_CODEC);
+	public static final EntityDataSerializer<Component> COMPONENT = EntityDataSerializer.forValueType(ComponentSerialization.TRUSTED_STREAM_CODEC);
 	public static final EntityDataSerializer<Optional<Component>> OPTIONAL_COMPONENT = EntityDataSerializer.forValueType(
-		ComponentSerialization.OPTIONAL_STREAM_CODEC
+		ComponentSerialization.TRUSTED_OPTIONAL_STREAM_CODEC
 	);
 	public static final EntityDataSerializer<ItemStack> ITEM_STACK = new EntityDataSerializer<ItemStack>() {
 		@Override
 		public StreamCodec<? super RegistryFriendlyByteBuf, ItemStack> codec() {
-			return ItemStack.STREAM_CODEC;
+			return ItemStack.OPTIONAL_STREAM_CODEC;
 		}
 
 		public ItemStack copy(ItemStack itemStack) {
@@ -89,7 +89,7 @@ public class EntityDataSerializers {
 	public static final EntityDataSerializer<CompoundTag> COMPOUND_TAG = new EntityDataSerializer<CompoundTag>() {
 		@Override
 		public StreamCodec<? super RegistryFriendlyByteBuf, CompoundTag> codec() {
-			return ByteBufCodecs.COMPOUND_TAG;
+			return ByteBufCodecs.TRUSTED_COMPOUND_TAG;
 		}
 
 		public CompoundTag copy(CompoundTag compoundTag) {

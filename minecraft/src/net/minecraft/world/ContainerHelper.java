@@ -2,6 +2,7 @@ package net.minecraft.world;
 
 import java.util.List;
 import java.util.function.Predicate;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -16,11 +17,11 @@ public class ContainerHelper {
 		return i >= 0 && i < list.size() ? (ItemStack)list.set(i, ItemStack.EMPTY) : ItemStack.EMPTY;
 	}
 
-	public static CompoundTag saveAllItems(CompoundTag compoundTag, NonNullList<ItemStack> nonNullList) {
-		return saveAllItems(compoundTag, nonNullList, true);
+	public static CompoundTag saveAllItems(CompoundTag compoundTag, NonNullList<ItemStack> nonNullList, HolderLookup.Provider provider) {
+		return saveAllItems(compoundTag, nonNullList, true, provider);
 	}
 
-	public static CompoundTag saveAllItems(CompoundTag compoundTag, NonNullList<ItemStack> nonNullList, boolean bl) {
+	public static CompoundTag saveAllItems(CompoundTag compoundTag, NonNullList<ItemStack> nonNullList, boolean bl, HolderLookup.Provider provider) {
 		ListTag listTag = new ListTag();
 
 		for (int i = 0; i < nonNullList.size(); i++) {
@@ -28,8 +29,7 @@ public class ContainerHelper {
 			if (!itemStack.isEmpty()) {
 				CompoundTag compoundTag2 = new CompoundTag();
 				compoundTag2.putByte("Slot", (byte)i);
-				itemStack.save(compoundTag2);
-				listTag.add(compoundTag2);
+				listTag.add(itemStack.save(provider, compoundTag2));
 			}
 		}
 
@@ -40,14 +40,14 @@ public class ContainerHelper {
 		return compoundTag;
 	}
 
-	public static void loadAllItems(CompoundTag compoundTag, NonNullList<ItemStack> nonNullList) {
+	public static void loadAllItems(CompoundTag compoundTag, NonNullList<ItemStack> nonNullList, HolderLookup.Provider provider) {
 		ListTag listTag = compoundTag.getList("Items", 10);
 
 		for (int i = 0; i < listTag.size(); i++) {
 			CompoundTag compoundTag2 = listTag.getCompound(i);
 			int j = compoundTag2.getByte("Slot") & 255;
 			if (j >= 0 && j < nonNullList.size()) {
-				nonNullList.set(j, ItemStack.of(compoundTag2));
+				nonNullList.set(j, (ItemStack)ItemStack.parse(provider, compoundTag2).orElse(ItemStack.EMPTY));
 			}
 		}
 	}

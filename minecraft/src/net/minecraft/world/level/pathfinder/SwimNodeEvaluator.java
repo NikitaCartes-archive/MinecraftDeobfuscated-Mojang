@@ -11,7 +11,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.PathNavigationRegion;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
@@ -90,7 +89,7 @@ public class SwimNodeEvaluator extends NodeEvaluator {
 				node = this.getNode(i, j, k);
 				node.type = pathType;
 				node.costMalus = Math.max(node.costMalus, f);
-				if (this.level.getFluidState(new BlockPos(i, j, k)).isEmpty()) {
+				if (this.currentContext.level().getFluidState(new BlockPos(i, j, k)).isEmpty()) {
 					node.costMalus += 8.0F;
 				}
 			}
@@ -101,24 +100,24 @@ public class SwimNodeEvaluator extends NodeEvaluator {
 
 	protected PathType getCachedBlockType(int i, int j, int k) {
 		return this.pathTypesByPosCache
-			.computeIfAbsent(BlockPos.asLong(i, j, k), (Long2ObjectFunction<? extends PathType>)(l -> this.getPathType(this.level, i, j, k)));
+			.computeIfAbsent(BlockPos.asLong(i, j, k), (Long2ObjectFunction<? extends PathType>)(l -> this.getPathType(this.currentContext, i, j, k)));
 	}
 
 	@Override
-	public PathType getPathType(BlockGetter blockGetter, int i, int j, int k) {
-		return this.getPathTypeOfMob(blockGetter, i, j, k, this.mob);
+	public PathType getPathType(PathfindingContext pathfindingContext, int i, int j, int k) {
+		return this.getPathTypeOfMob(pathfindingContext, i, j, k, this.mob);
 	}
 
 	@Override
-	public PathType getPathTypeOfMob(BlockGetter blockGetter, int i, int j, int k, Mob mob) {
+	public PathType getPathTypeOfMob(PathfindingContext pathfindingContext, int i, int j, int k, Mob mob) {
 		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 
 		for (int l = i; l < i + this.entityWidth; l++) {
 			for (int m = j; m < j + this.entityHeight; m++) {
 				for (int n = k; n < k + this.entityDepth; n++) {
-					FluidState fluidState = blockGetter.getFluidState(mutableBlockPos.set(l, m, n));
-					BlockState blockState = blockGetter.getBlockState(mutableBlockPos.set(l, m, n));
-					if (fluidState.isEmpty() && blockState.isPathfindable(blockGetter, mutableBlockPos.below(), PathComputationType.WATER) && blockState.isAir()) {
+					BlockState blockState = pathfindingContext.getBlockState(mutableBlockPos.set(l, m, n));
+					FluidState fluidState = blockState.getFluidState();
+					if (fluidState.isEmpty() && blockState.isPathfindable(PathComputationType.WATER) && blockState.isAir()) {
 						return PathType.BREACH;
 					}
 
@@ -129,7 +128,7 @@ public class SwimNodeEvaluator extends NodeEvaluator {
 			}
 		}
 
-		BlockState blockState2 = blockGetter.getBlockState(mutableBlockPos);
-		return blockState2.isPathfindable(blockGetter, mutableBlockPos, PathComputationType.WATER) ? PathType.WATER : PathType.BLOCKED;
+		BlockState blockState2 = pathfindingContext.getBlockState(mutableBlockPos);
+		return blockState2.isPathfindable(PathComputationType.WATER) ? PathType.WATER : PathType.BLOCKED;
 	}
 }

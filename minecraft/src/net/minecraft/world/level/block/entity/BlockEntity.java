@@ -6,6 +6,7 @@ import net.minecraft.CrashReportCategory;
 import net.minecraft.CrashReportDetail;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
@@ -87,7 +88,10 @@ public abstract class BlockEntity {
 	}
 
 	public void saveToItem(ItemStack itemStack, HolderLookup.Provider provider) {
-		BlockItem.setBlockEntityData(itemStack, this.getType(), this.saveWithoutMetadata(provider));
+		CompoundTag compoundTag = this.saveWithoutMetadata(provider);
+		this.removeComponentsFromTag(compoundTag);
+		BlockItem.setBlockEntityData(itemStack, this.getType(), compoundTag);
+		itemStack.applyComponents(this.collectComponents());
 	}
 
 	private void saveMetadata(CompoundTag compoundTag) {
@@ -194,5 +198,21 @@ public abstract class BlockEntity {
 	@Deprecated
 	public void setBlockState(BlockState blockState) {
 		this.blockState = blockState;
+	}
+
+	public void applyComponents(DataComponentMap dataComponentMap) {
+	}
+
+	public void collectComponents(DataComponentMap.Builder builder) {
+	}
+
+	@Deprecated
+	public void removeComponentsFromTag(CompoundTag compoundTag) {
+	}
+
+	public final DataComponentMap collectComponents() {
+		DataComponentMap.Builder builder = DataComponentMap.builder();
+		this.collectComponents(builder);
+		return builder.build();
 	}
 }

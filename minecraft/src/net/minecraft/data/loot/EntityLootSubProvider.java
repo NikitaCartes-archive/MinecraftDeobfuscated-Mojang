@@ -13,6 +13,7 @@ import net.minecraft.advancements.critereon.DamageSourcePredicate;
 import net.minecraft.advancements.critereon.EntityFlagsPredicate;
 import net.minecraft.advancements.critereon.EntityPredicate;
 import net.minecraft.advancements.critereon.EntitySubPredicate;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
@@ -24,7 +25,7 @@ import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.entries.LootItem;
-import net.minecraft.world.level.storage.loot.entries.LootTableReference;
+import net.minecraft.world.level.storage.loot.entries.NestedLootTable;
 import net.minecraft.world.level.storage.loot.predicates.DamageSourceCondition;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
@@ -50,13 +51,13 @@ public abstract class EntityLootSubProvider implements LootTableSubProvider {
 	protected static LootTable.Builder createSheepTable(ItemLike itemLike) {
 		return LootTable.lootTable()
 			.withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F)).add(LootItem.lootTableItem(itemLike)))
-			.withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F)).add(LootTableReference.lootTableReference(EntityType.SHEEP.getDefaultLootTable())));
+			.withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F)).add(NestedLootTable.lootTableReference(EntityType.SHEEP.getDefaultLootTable())));
 	}
 
 	public abstract void generate();
 
 	@Override
-	public void generate(BiConsumer<ResourceLocation, LootTable.Builder> biConsumer) {
+	public void generate(HolderLookup.Provider provider, BiConsumer<ResourceLocation, LootTable.Builder> biConsumer) {
 		this.generate();
 		Set<ResourceLocation> set = Sets.<ResourceLocation>newHashSet();
 		BuiltInRegistries.ENTITY_TYPE

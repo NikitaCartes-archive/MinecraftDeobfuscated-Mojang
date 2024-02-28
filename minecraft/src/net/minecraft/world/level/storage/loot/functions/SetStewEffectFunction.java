@@ -10,13 +10,13 @@ import java.util.List;
 import java.util.Set;
 import net.minecraft.Util;
 import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.SuspiciousStewItem;
-import net.minecraft.world.level.block.SuspiciousEffectHolder;
+import net.minecraft.world.item.component.SuspiciousStewEffects;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
@@ -72,7 +72,8 @@ public class SetStewEffectFunction extends LootItemConditionalFunction {
 				i *= 20;
 			}
 
-			SuspiciousStewItem.appendMobEffects(itemStack, List.of(new SuspiciousEffectHolder.EffectEntry(holder, i)));
+			SuspiciousStewEffects.Entry entry = new SuspiciousStewEffects.Entry(holder, i);
+			itemStack.update(DataComponents.SUSPICIOUS_STEW_EFFECTS, SuspiciousStewEffects.EMPTY, entry, SuspiciousStewEffects::withEffectAdded);
 			return itemStack;
 		} else {
 			return itemStack;

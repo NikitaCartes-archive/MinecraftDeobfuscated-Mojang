@@ -7,8 +7,12 @@ import net.fabricmc.api.Environment;
 import net.minecraft.Optionull;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
+import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
+import net.minecraft.client.gui.layouts.LinearLayout;
+import net.minecraft.client.gui.layouts.SpacerElement;
 import net.minecraft.client.gui.screens.ConfirmLinkScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.chat.report.ReportReason;
@@ -20,10 +24,8 @@ public class ReportReasonSelectionScreen extends Screen {
 	private static final Component REASON_TITLE = Component.translatable("gui.abuseReport.reason.title");
 	private static final Component REASON_DESCRIPTION = Component.translatable("gui.abuseReport.reason.description");
 	private static final Component READ_INFO_LABEL = Component.translatable("gui.abuseReport.read_info");
-	private static final int FOOTER_HEIGHT = 95;
-	private static final int BUTTON_WIDTH = 150;
-	private static final int BUTTON_HEIGHT = 20;
-	private static final int CONTENT_WIDTH = 320;
+	private static final int DESCRIPTION_BOX_WIDTH = 320;
+	private static final int DESCRIPTION_BOX_HEIGHT = 62;
 	private static final int PADDING = 4;
 	@Nullable
 	private final Screen lastScreen;
@@ -32,6 +34,7 @@ public class ReportReasonSelectionScreen extends Screen {
 	@Nullable
 	ReportReason currentlySelectedReason;
 	private final Consumer<ReportReason> onSelectedReason;
+	final HeaderAndFooterLayout layout = new HeaderAndFooterLayout(this);
 
 	public ReportReasonSelectionScreen(@Nullable Screen screen, @Nullable ReportReason reportReason, Consumer<ReportReason> consumer) {
 		super(REASON_TITLE);
@@ -42,35 +45,46 @@ public class ReportReasonSelectionScreen extends Screen {
 
 	@Override
 	protected void init() {
-		this.reasonSelectionList = this.addRenderableWidget(new ReportReasonSelectionScreen.ReasonSelectionList(this.minecraft));
+		this.layout.addTitleHeader(REASON_TITLE, this.font);
+		LinearLayout linearLayout = this.layout.addToContents(LinearLayout.vertical().spacing(4));
+		this.reasonSelectionList = linearLayout.addChild(new ReportReasonSelectionScreen.ReasonSelectionList(this.minecraft));
 		ReportReasonSelectionScreen.ReasonSelectionList.Entry entry = Optionull.map(this.currentlySelectedReason, this.reasonSelectionList::findEntry);
 		this.reasonSelectionList.setSelected(entry);
-		int i = this.width / 2 - 150 - 5;
-		this.addRenderableWidget(
-			Button.builder(READ_INFO_LABEL, ConfirmLinkScreen.confirmLink(this, "https://aka.ms/aboutjavareporting")).bounds(i, this.buttonTop(), 150, 20).build()
-		);
-		int j = this.width / 2 + 5;
-		this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> {
+		linearLayout.addChild(SpacerElement.height(this.descriptionHeight()));
+		LinearLayout linearLayout2 = this.layout.addToFooter(LinearLayout.horizontal().spacing(8));
+		linearLayout2.addChild(Button.builder(READ_INFO_LABEL, ConfirmLinkScreen.confirmLink(this, "https://aka.ms/aboutjavareporting")).build());
+		linearLayout2.addChild(Button.builder(CommonComponents.GUI_DONE, button -> {
 			ReportReasonSelectionScreen.ReasonSelectionList.Entry entryx = this.reasonSelectionList.getSelected();
 			if (entryx != null) {
 				this.onSelectedReason.accept(entryx.getReason());
 			}
 
 			this.minecraft.setScreen(this.lastScreen);
-		}).bounds(j, this.buttonTop(), 150, 20).build());
-		super.init();
+		}).build());
+		this.layout.visitWidgets(guiEventListener -> {
+			AbstractWidget var10000 = this.addRenderableWidget(guiEventListener);
+		});
+		this.repositionElements();
+	}
+
+	@Override
+	protected void repositionElements() {
+		this.layout.arrangeElements();
+		if (this.reasonSelectionList != null) {
+			this.reasonSelectionList.updateSizeAndPosition(this.width, this.listHeight(), this.layout.getHeaderHeight());
+		}
 	}
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
 		super.render(guiGraphics, i, j, f);
-		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 16, 16777215);
-		guiGraphics.fill(this.contentLeft(), this.descriptionTop(), this.contentRight(), this.descriptionBottom(), 2130706432);
-		guiGraphics.drawString(this.font, REASON_DESCRIPTION, this.contentLeft() + 4, this.descriptionTop() + 4, -8421505);
+		guiGraphics.fill(this.descriptionLeft(), this.descriptionTop(), this.descriptionRight(), this.descriptionBottom(), -16777216);
+		guiGraphics.renderOutline(this.descriptionLeft(), this.descriptionTop(), this.descriptionWidth(), this.descriptionHeight(), -1);
+		guiGraphics.drawString(this.font, REASON_DESCRIPTION, this.descriptionLeft() + 4, this.descriptionTop() + 4, -1);
 		ReportReasonSelectionScreen.ReasonSelectionList.Entry entry = this.reasonSelectionList.getSelected();
 		if (entry != null) {
-			int k = this.contentLeft() + 4 + 16;
-			int l = this.contentRight() - 4;
+			int k = this.descriptionLeft() + 4 + 16;
+			int l = this.descriptionRight() - 4;
 			int m = this.descriptionTop() + 4 + 9 + 2;
 			int n = this.descriptionBottom() - 4;
 			int o = l - k;
@@ -80,29 +94,32 @@ public class ReportReasonSelectionScreen extends Screen {
 		}
 	}
 
-	@Override
-	public void renderBackground(GuiGraphics guiGraphics, int i, int j, float f) {
-		this.renderDirtBackground(guiGraphics);
-	}
-
-	private int buttonTop() {
-		return this.height - 20 - 4;
-	}
-
-	private int contentLeft() {
+	private int descriptionLeft() {
 		return (this.width - 320) / 2;
 	}
 
-	private int contentRight() {
+	private int descriptionRight() {
 		return (this.width + 320) / 2;
 	}
 
 	private int descriptionTop() {
-		return this.height - 95 + 4;
+		return this.descriptionBottom() - this.descriptionHeight();
 	}
 
 	private int descriptionBottom() {
-		return this.buttonTop() - 4;
+		return this.height - this.layout.getFooterHeight() - 4;
+	}
+
+	private int descriptionWidth() {
+		return 320;
+	}
+
+	private int descriptionHeight() {
+		return 62;
+	}
+
+	int listHeight() {
+		return this.layout.getContentHeight() - this.descriptionHeight() - 8;
 	}
 
 	@Override
@@ -113,7 +130,13 @@ public class ReportReasonSelectionScreen extends Screen {
 	@Environment(EnvType.CLIENT)
 	public class ReasonSelectionList extends ObjectSelectionList<ReportReasonSelectionScreen.ReasonSelectionList.Entry> {
 		public ReasonSelectionList(Minecraft minecraft) {
-			super(minecraft, ReportReasonSelectionScreen.this.width, ReportReasonSelectionScreen.this.height - 95 - 40, 40, 18);
+			super(
+				minecraft,
+				ReportReasonSelectionScreen.this.width,
+				ReportReasonSelectionScreen.this.listHeight(),
+				ReportReasonSelectionScreen.this.layout.getHeaderHeight(),
+				18
+			);
 
 			for (ReportReason reportReason : ReportReason.values()) {
 				this.addEntry(new ReportReasonSelectionScreen.ReasonSelectionList.Entry(reportReason));
@@ -132,11 +155,6 @@ public class ReportReasonSelectionScreen extends Screen {
 		@Override
 		public int getRowWidth() {
 			return 320;
-		}
-
-		@Override
-		protected int getScrollbarPosition() {
-			return this.getRowRight() - 2;
 		}
 
 		public void setSelected(@Nullable ReportReasonSelectionScreen.ReasonSelectionList.Entry entry) {
@@ -167,7 +185,7 @@ public class ReportReasonSelectionScreen extends Screen {
 			@Override
 			public boolean mouseClicked(double d, double e, int i) {
 				ReasonSelectionList.this.setSelected(this);
-				return true;
+				return super.mouseClicked(d, e, i);
 			}
 
 			public ReportReason getReason() {

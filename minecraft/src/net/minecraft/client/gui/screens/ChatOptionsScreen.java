@@ -8,11 +8,13 @@ import net.minecraft.network.chat.Component;
 
 @Environment(EnvType.CLIENT)
 public class ChatOptionsScreen extends SimpleOptionsSubScreen {
+	private static final Component TITLE = Component.translatable("options.chat.title");
+
 	public ChatOptionsScreen(Screen screen, Options options) {
 		super(
 			screen,
 			options,
-			Component.translatable("options.chat.title"),
+			TITLE,
 			new OptionInstance[]{
 				options.chatVisibility(),
 				options.chatColors(),

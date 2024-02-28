@@ -1,11 +1,15 @@
 package net.minecraft.network.codec;
 
+import com.google.common.base.Suppliers;
 import com.mojang.datafixers.util.Function3;
 import com.mojang.datafixers.util.Function4;
 import com.mojang.datafixers.util.Function5;
+import com.mojang.datafixers.util.Function6;
 import io.netty.buffer.ByteBuf;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 
 public interface StreamCodec<B, V> extends StreamDecoder<B, V>, StreamEncoder<B, V> {
 	static <B, V> StreamCodec<B, V> of(StreamEncoder<B, V> streamEncoder, StreamDecoder<B, V> streamDecoder) {
@@ -230,6 +234,61 @@ public interface StreamCodec<B, V> extends StreamDecoder<B, V>, StreamEncoder<B,
 				streamCodec3.encode(object, (T3)function3.apply(object2));
 				streamCodec4.encode(object, (T4)function4.apply(object2));
 				streamCodec5.encode(object, (T5)function5.apply(object2));
+			}
+		};
+	}
+
+	static <B, C, T1, T2, T3, T4, T5, T6> StreamCodec<B, C> composite(
+		StreamCodec<? super B, T1> streamCodec,
+		Function<C, T1> function,
+		StreamCodec<? super B, T2> streamCodec2,
+		Function<C, T2> function2,
+		StreamCodec<? super B, T3> streamCodec3,
+		Function<C, T3> function3,
+		StreamCodec<? super B, T4> streamCodec4,
+		Function<C, T4> function4,
+		StreamCodec<? super B, T5> streamCodec5,
+		Function<C, T5> function5,
+		StreamCodec<? super B, T6> streamCodec6,
+		Function<C, T6> function6,
+		Function6<T1, T2, T3, T4, T5, T6, C> function62
+	) {
+		return new StreamCodec<B, C>() {
+			@Override
+			public C decode(B object) {
+				T1 object2 = streamCodec.decode(object);
+				T2 object3 = streamCodec2.decode(object);
+				T3 object4 = streamCodec3.decode(object);
+				T4 object5 = streamCodec4.decode(object);
+				T5 object6 = streamCodec5.decode(object);
+				T6 object7 = streamCodec6.decode(object);
+				return function62.apply(object2, object3, object4, object5, object6, object7);
+			}
+
+			@Override
+			public void encode(B object, C object2) {
+				streamCodec.encode(object, (T1)function.apply(object2));
+				streamCodec2.encode(object, (T2)function2.apply(object2));
+				streamCodec3.encode(object, (T3)function3.apply(object2));
+				streamCodec4.encode(object, (T4)function4.apply(object2));
+				streamCodec5.encode(object, (T5)function5.apply(object2));
+				streamCodec6.encode(object, (T6)function6.apply(object2));
+			}
+		};
+	}
+
+	static <B, T> StreamCodec<B, T> recursive(UnaryOperator<StreamCodec<B, T>> unaryOperator) {
+		return new StreamCodec<B, T>() {
+			private final Supplier<StreamCodec<B, T>> inner = Suppliers.memoize(() -> (StreamCodec<B, T>)unaryOperator.apply(this));
+
+			@Override
+			public T decode(B object) {
+				return (T)((StreamCodec)this.inner.get()).decode(object);
+			}
+
+			@Override
+			public void encode(B object, T object2) {
+				((StreamCodec)this.inner.get()).encode(object, (V)object2);
 			}
 		};
 	}

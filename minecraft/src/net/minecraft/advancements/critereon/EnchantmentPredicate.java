@@ -2,12 +2,13 @@ package net.minecraft.advancements.critereon;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.util.Map;
+import it.unimi.dsi.fastutil.objects.Object2IntMap.Entry;
 import java.util.Optional;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
 
 public record EnchantmentPredicate(Optional<Holder<Enchantment>> enchantment, MinMaxBounds.Ints level) {
 	public static final Codec<EnchantmentPredicate> CODEC = RecordCodecBuilder.create(
@@ -22,20 +23,20 @@ public record EnchantmentPredicate(Optional<Holder<Enchantment>> enchantment, Mi
 		this(Optional.of(enchantment.builtInRegistryHolder()), ints);
 	}
 
-	public boolean containedIn(Map<Enchantment, Integer> map) {
+	public boolean containedIn(ItemEnchantments itemEnchantments) {
 		if (this.enchantment.isPresent()) {
 			Enchantment enchantment = (Enchantment)((Holder)this.enchantment.get()).value();
-			if (!map.containsKey(enchantment)) {
+			int i = itemEnchantments.getLevel(enchantment);
+			if (i == 0) {
 				return false;
 			}
 
-			int i = (Integer)map.get(enchantment);
 			if (this.level != MinMaxBounds.Ints.ANY && !this.level.matches(i)) {
 				return false;
 			}
 		} else if (this.level != MinMaxBounds.Ints.ANY) {
-			for (Integer integer : map.values()) {
-				if (this.level.matches(integer)) {
+			for (Entry<Holder<Enchantment>> entry : itemEnchantments.entrySet()) {
+				if (this.level.matches(entry.getIntValue())) {
 					return true;
 				}
 			}

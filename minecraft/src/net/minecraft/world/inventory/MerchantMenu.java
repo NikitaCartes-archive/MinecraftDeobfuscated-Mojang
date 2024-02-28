@@ -8,6 +8,7 @@ import net.minecraft.world.entity.npc.ClientSideMerchant;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.trading.ItemCost;
 import net.minecraft.world.item.trading.Merchant;
 import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.item.trading.MerchantOffers;
@@ -198,31 +199,26 @@ public class MerchantMenu extends AbstractContainerMenu {
 
 			if (this.tradeContainer.getItem(0).isEmpty() && this.tradeContainer.getItem(1).isEmpty()) {
 				MerchantOffer merchantOffer = (MerchantOffer)this.getOffers().get(i);
-				boolean bl = merchantOffer.getIgnoreTags();
-				ItemStack itemStack3 = merchantOffer.getCostA();
-				this.moveFromInventoryToPaymentSlot(0, itemStack3, bl);
-				ItemStack itemStack4 = merchantOffer.getCostB();
-				this.moveFromInventoryToPaymentSlot(1, itemStack4, bl);
+				this.moveFromInventoryToPaymentSlot(0, merchantOffer.getItemCostA());
+				merchantOffer.getItemCostB().ifPresent(itemCost -> this.moveFromInventoryToPaymentSlot(1, itemCost));
 			}
 		}
 	}
 
-	private void moveFromInventoryToPaymentSlot(int i, ItemStack itemStack, boolean bl) {
-		if (!itemStack.isEmpty()) {
-			for (int j = 3; j < 39; j++) {
-				ItemStack itemStack2 = this.slots.get(j).getItem();
-				if (!itemStack2.isEmpty() && MerchantOffer.isRequiredItem(itemStack, itemStack2, bl)) {
-					ItemStack itemStack3 = this.tradeContainer.getItem(i);
-					int k = itemStack3.isEmpty() ? 0 : itemStack3.getCount();
-					int l = Math.min(itemStack.getMaxStackSize() - k, itemStack2.getCount());
-					ItemStack itemStack4 = itemStack2.copy();
-					int m = k + l;
-					itemStack2.shrink(l);
-					itemStack4.setCount(m);
-					this.tradeContainer.setItem(i, itemStack4);
-					if (m >= itemStack.getMaxStackSize()) {
-						break;
-					}
+	private void moveFromInventoryToPaymentSlot(int i, ItemCost itemCost) {
+		for (int j = 3; j < 39; j++) {
+			ItemStack itemStack = this.slots.get(j).getItem();
+			if (!itemStack.isEmpty() && itemCost.test(itemStack)) {
+				ItemStack itemStack2 = this.tradeContainer.getItem(i);
+				int k = itemStack2.isEmpty() ? 0 : itemStack2.getCount();
+				int l = Math.min(itemCost.itemStack().getMaxStackSize() - k, itemStack.getCount());
+				ItemStack itemStack3 = itemStack.copy();
+				int m = k + l;
+				itemStack.shrink(l);
+				itemStack3.setCount(m);
+				this.tradeContainer.setItem(i, itemStack3);
+				if (m >= itemCost.itemStack().getMaxStackSize()) {
+					break;
 				}
 			}
 		}

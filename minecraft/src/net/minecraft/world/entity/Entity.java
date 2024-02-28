@@ -1167,7 +1167,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 	}
 
 	private boolean isInBubbleColumn() {
-		return this.level().getBlockState(this.blockPosition()).is(Blocks.BUBBLE_COLUMN);
+		return this.getInBlockState().is(Blocks.BUBBLE_COLUMN);
 	}
 
 	public boolean isInWaterOrRain() {
@@ -1597,7 +1597,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 			compoundTag.putUUID("UUID", this.getUUID());
 			Component component = this.getCustomName();
 			if (component != null) {
-				compoundTag.putString("CustomName", Component.Serializer.toJson(component));
+				compoundTag.putString("CustomName", Component.Serializer.toJson(component, this.registryAccess()));
 			}
 
 			if (this.isCustomNameVisible()) {
@@ -1703,7 +1703,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 					String string = compoundTag.getString("CustomName");
 
 					try {
-						this.setCustomName(Component.Serializer.fromJson(string));
+						this.setCustomName(Component.Serializer.fromJson(string, this.registryAccess()));
 					} catch (Exception var16) {
 						LOGGER.warn("Failed to parse entity custom name {}", string, var16);
 					}

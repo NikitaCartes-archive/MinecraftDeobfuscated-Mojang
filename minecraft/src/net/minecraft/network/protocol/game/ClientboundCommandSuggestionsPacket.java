@@ -65,7 +65,7 @@ public record ClientboundCommandSuggestionsPacket(int id, int start, int length,
 		public static final StreamCodec<RegistryFriendlyByteBuf, ClientboundCommandSuggestionsPacket.Entry> STREAM_CODEC = StreamCodec.composite(
 			ByteBufCodecs.STRING_UTF8,
 			ClientboundCommandSuggestionsPacket.Entry::text,
-			ComponentSerialization.OPTIONAL_STREAM_CODEC,
+			ComponentSerialization.TRUSTED_OPTIONAL_STREAM_CODEC,
 			ClientboundCommandSuggestionsPacket.Entry::tooltip,
 			ClientboundCommandSuggestionsPacket.Entry::new
 		);

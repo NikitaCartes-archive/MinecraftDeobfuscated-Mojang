@@ -86,6 +86,7 @@ import org.slf4j.Logger;
 @Environment(EnvType.CLIENT)
 public class GameRenderer implements AutoCloseable {
 	private static final ResourceLocation NAUSEA_LOCATION = new ResourceLocation("textures/misc/nausea.png");
+	private static final ResourceLocation BLUR_LOCATION = new ResourceLocation("shaders/post/blur.json");
 	static final Logger LOGGER = LogUtils.getLogger();
 	private static final boolean DEPTH_BUFFER_DEBUG = false;
 	public static final float PROJECTION_Z_NEAR = 0.05F;
@@ -121,6 +122,8 @@ public class GameRenderer implements AutoCloseable {
 	private float itemActivationOffY;
 	@Nullable
 	PostChain postEffect;
+	@Nullable
+	private PostChain blurEffect;
 	static final ResourceLocation[] EFFECTS = new ResourceLocation[]{
 		new ResourceLocation("shaders/post/notch.json"),
 		new ResourceLocation("shaders/post/fxaa.json"),
@@ -140,7 +143,7 @@ public class GameRenderer implements AutoCloseable {
 		new ResourceLocation("shaders/post/bits.json"),
 		new ResourceLocation("shaders/post/desaturate.json"),
 		new ResourceLocation("shaders/post/green.json"),
-		new ResourceLocation("shaders/post/blur.json"),
+		BLUR_LOCATION,
 		new ResourceLocation("shaders/post/wobble.json"),
 		new ResourceLocation("shaders/post/blobs.json"),
 		new ResourceLocation("shaders/post/antialias.json"),
@@ -367,6 +370,30 @@ public class GameRenderer implements AutoCloseable {
 			LOGGER.warn("Failed to parse shader: {}", resourceLocation, var4);
 			this.effectIndex = EFFECT_NONE;
 			this.effectActive = false;
+		}
+	}
+
+	public void loadBlurEffect() {
+		if (this.blurEffect != null) {
+			this.blurEffect.close();
+		}
+
+		try {
+			this.blurEffect = new PostChain(this.minecraft.getTextureManager(), this.resourceManager, this.minecraft.getMainRenderTarget(), BLUR_LOCATION);
+			this.blurEffect.resize(this.minecraft.getWindow().getWidth(), this.minecraft.getWindow().getHeight());
+		} catch (IOException var2) {
+			LOGGER.warn("Failed to load shader: {}", BLUR_LOCATION, var2);
+		} catch (JsonSyntaxException var3) {
+			LOGGER.warn("Failed to parse shader: {}", BLUR_LOCATION, var3);
+		}
+	}
+
+	public void processBlurEffect(float f) {
+		if (this.blurEffect != null) {
+			this.blurEffect.setUniform("Alpha", (float)this.minecraft.options.getMenuBackgroundBlurriness());
+			RenderSystem.enableBlend();
+			this.blurEffect.process(f);
+			RenderSystem.disableBlend();
 		}
 	}
 
@@ -787,6 +814,7 @@ public class GameRenderer implements AutoCloseable {
 					shaderInstance -> rendertypeBreezeWindShader = shaderInstance
 				)
 			);
+			this.loadBlurEffect();
 		} catch (IOException var5) {
 			list2.forEach(pair -> ((ShaderInstance)pair.getFirst()).close());
 			throw new RuntimeException("could not reload shaders", var5);
@@ -850,6 +878,10 @@ public class GameRenderer implements AutoCloseable {
 	public void resize(int i, int j) {
 		if (this.postEffect != null) {
 			this.postEffect.resize(i, j);
+		}
+
+		if (this.blurEffect != null) {
+			this.blurEffect.resize(i, j);
 		}
 
 		this.minecraft.levelRenderer.resize(i, j);
@@ -1242,8 +1274,7 @@ public class GameRenderer implements AutoCloseable {
 					} else {
 						BlockInWorld blockInWorld = new BlockInWorld(this.minecraft.level, blockPos, false);
 						Registry<Block> registry = this.minecraft.level.registryAccess().registryOrThrow(Registries.BLOCK);
-						bl = !itemStack.isEmpty()
-							&& (itemStack.hasAdventureModeBreakTagForBlock(registry, blockInWorld) || itemStack.hasAdventureModePlaceTagForBlock(registry, blockInWorld));
+						bl = !itemStack.isEmpty() && (itemStack.canBreakBlockInAdventureMode(blockInWorld) || itemStack.canPlaceOnBlockInAdventureMode(blockInWorld));
 					}
 				}
 			}

@@ -1,11 +1,11 @@
 package net.minecraft.client.animation;
 
 import com.google.common.collect.Maps;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import org.apache.commons.compress.utils.Lists;
 
 @Environment(EnvType.CLIENT)
 public record AnimationDefinition(float lengthInSeconds, boolean looping, Map<String, List<AnimationChannel>> boneAnimations) {
@@ -29,7 +29,7 @@ public record AnimationDefinition(float lengthInSeconds, boolean looping, Map<St
 		}
 
 		public AnimationDefinition.Builder addAnimation(String string, AnimationChannel animationChannel) {
-			((List)this.animationByBone.computeIfAbsent(string, stringx -> Lists.newArrayList())).add(animationChannel);
+			((List)this.animationByBone.computeIfAbsent(string, stringx -> new ArrayList())).add(animationChannel);
 			return this;
 		}
 

@@ -1,8 +1,8 @@
 package net.minecraft.world.inventory;
 
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
+import it.unimi.dsi.fastutil.objects.Object2IntMap.Entry;
+import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
@@ -14,6 +14,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
@@ -89,13 +90,13 @@ public class GrindstoneMenu extends AbstractContainerMenu {
 
 			private int getExperienceFromItem(ItemStack itemStack) {
 				int i = 0;
-				Map<Enchantment, Integer> map = EnchantmentHelper.getEnchantments(itemStack);
+				ItemEnchantments itemEnchantments = EnchantmentHelper.getEnchantmentsForCrafting(itemStack);
 
-				for (Entry<Enchantment, Integer> entry : map.entrySet()) {
-					Enchantment enchantment = (Enchantment)entry.getKey();
-					Integer integer = (Integer)entry.getValue();
+				for (Entry<Holder<Enchantment>> entry : itemEnchantments.entrySet()) {
+					Enchantment enchantment = (Enchantment)((Holder)entry.getKey()).value();
+					int j = entry.getIntValue();
 					if (!enchantment.isCurse()) {
-						i += enchantment.getMinCost(integer);
+						i += enchantment.getMinCost(j);
 					}
 				}
 
@@ -177,46 +178,36 @@ public class GrindstoneMenu extends AbstractContainerMenu {
 
 	private ItemStack mergeEnchants(ItemStack itemStack, ItemStack itemStack2) {
 		ItemStack itemStack3 = itemStack.copy();
-		Map<Enchantment, Integer> map = EnchantmentHelper.getEnchantments(itemStack2);
+		EnchantmentHelper.updateEnchantments(itemStack3, mutable -> {
+			ItemEnchantments itemEnchantments = EnchantmentHelper.getEnchantmentsForCrafting(itemStack2);
 
-		for (Entry<Enchantment, Integer> entry : map.entrySet()) {
-			Enchantment enchantment = (Enchantment)entry.getKey();
-			if (!enchantment.isCurse() || EnchantmentHelper.getItemEnchantmentLevel(enchantment, itemStack3) == 0) {
-				itemStack3.enchant(enchantment, (Integer)entry.getValue());
+			for (Entry<Holder<Enchantment>> entry : itemEnchantments.entrySet()) {
+				Enchantment enchantment = (Enchantment)((Holder)entry.getKey()).value();
+				if (!enchantment.isCurse() || mutable.getLevel(enchantment) == 0) {
+					mutable.upgrade(enchantment, entry.getIntValue());
+				}
 			}
-		}
-
+		});
 		return itemStack3;
 	}
 
 	private ItemStack removeNonCurses(ItemStack itemStack, int i, int j) {
 		ItemStack itemStack2 = itemStack.copyWithCount(j);
-		itemStack2.removeTagKey("Enchantments");
-		itemStack2.removeTagKey("StoredEnchantments");
-		if (i > 0) {
-			itemStack2.setDamageValue(i);
-		} else {
-			itemStack2.removeTagKey("Damage");
+		itemStack2.setDamageValue(i);
+		ItemEnchantments itemEnchantments = EnchantmentHelper.updateEnchantments(
+			itemStack2, mutable -> mutable.removeIf(holder -> !((Enchantment)holder.value()).isCurse())
+		);
+		if (itemStack2.is(Items.ENCHANTED_BOOK) && itemEnchantments.isEmpty()) {
+			itemStack2 = itemStack2.transmuteCopy(Items.BOOK, j);
 		}
 
-		Map<Enchantment, Integer> map = (Map<Enchantment, Integer>)EnchantmentHelper.getEnchantments(itemStack)
-			.entrySet()
-			.stream()
-			.filter(entry -> ((Enchantment)entry.getKey()).isCurse())
-			.collect(Collectors.toMap(Entry::getKey, Entry::getValue));
-		EnchantmentHelper.setEnchantments(map, itemStack2);
-		itemStack2.setRepairCost(0);
-		if (itemStack2.is(Items.ENCHANTED_BOOK) && map.size() == 0) {
-			itemStack2 = new ItemStack(Items.BOOK);
-			if (itemStack.hasCustomHoverName()) {
-				itemStack2.setHoverName(itemStack.getHoverName());
-			}
+		int k = 0;
+
+		for (int l = 0; l < itemEnchantments.size(); l++) {
+			k = AnvilMenu.calculateIncreasedRepairCost(k);
 		}
 
-		for (int k = 0; k < map.size(); k++) {
-			itemStack2.setRepairCost(AnvilMenu.calculateIncreasedRepairCost(itemStack2.getBaseRepairCost()));
-		}
-
+		itemStack2.set(DataComponents.REPAIR_COST, k);
 		return itemStack2;
 	}
 

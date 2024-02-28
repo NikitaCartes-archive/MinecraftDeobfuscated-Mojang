@@ -689,7 +689,12 @@ public abstract class Display extends Entity {
 		@Override
 		protected void readAdditionalSaveData(CompoundTag compoundTag) {
 			super.readAdditionalSaveData(compoundTag);
-			this.setItemStack(ItemStack.of(compoundTag.getCompound("item")));
+			if (compoundTag.contains("item")) {
+				this.setItemStack((ItemStack)ItemStack.parse(this.registryAccess(), compoundTag.getCompound("item")).orElse(ItemStack.EMPTY));
+			} else {
+				this.setItemStack(ItemStack.EMPTY);
+			}
+
 			if (compoundTag.contains("item_display", 8)) {
 				ItemDisplayContext.CODEC
 					.decode(NbtOps.INSTANCE, compoundTag.get("item_display"))
@@ -701,7 +706,10 @@ public abstract class Display extends Entity {
 		@Override
 		protected void addAdditionalSaveData(CompoundTag compoundTag) {
 			super.addAdditionalSaveData(compoundTag);
-			compoundTag.put("item", this.getItemStack().save(new CompoundTag()));
+			if (!this.getItemStack().isEmpty()) {
+				compoundTag.put("item", this.getItemStack().save(this.registryAccess()));
+			}
+
 			ItemDisplayContext.CODEC.encodeStart(NbtOps.INSTANCE, this.getItemTransform()).result().ifPresent(tag -> compoundTag.put("item_display", tag));
 		}
 
@@ -907,7 +915,7 @@ public abstract class Display extends Entity {
 				String string = compoundTag.getString("text");
 
 				try {
-					Component component = Component.Serializer.fromJson(string);
+					Component component = Component.Serializer.fromJson(string, this.registryAccess());
 					if (component != null) {
 						CommandSourceStack commandSourceStack = this.createCommandSourceStack().withPermission(2);
 						Component component2 = ComponentUtils.updateForEntity(commandSourceStack, component, this, 0);
@@ -928,7 +936,7 @@ public abstract class Display extends Entity {
 		@Override
 		protected void addAdditionalSaveData(CompoundTag compoundTag) {
 			super.addAdditionalSaveData(compoundTag);
-			compoundTag.putString("text", Component.Serializer.toJson(this.getText()));
+			compoundTag.putString("text", Component.Serializer.toJson(this.getText(), this.registryAccess()));
 			compoundTag.putInt("line_width", this.getLineWidth());
 			compoundTag.putInt("background", this.getBackgroundColor());
 			compoundTag.putByte("text_opacity", this.getTextOpacity());

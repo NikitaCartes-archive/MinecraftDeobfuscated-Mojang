@@ -10,7 +10,6 @@ import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.ByIdMap;
-import net.minecraft.util.Mth;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.material.MapColor;
 
@@ -129,10 +128,6 @@ public record MapDecoration(MapDecoration.Type type, byte x, byte y, byte rot, O
 
 		public int getMapColor() {
 			return this.mapColor;
-		}
-
-		public static MapDecoration.Type byIcon(byte b) {
-			return values()[Mth.clamp(b, 0, values().length - 1)];
 		}
 
 		public boolean shouldTrackCount() {

@@ -3,13 +3,13 @@ package com.mojang.realmsclient.gui.screens;
 import com.mojang.realmsclient.dto.RealmsServer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.Util;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.realms.RealmsScreen;
+import net.minecraft.util.StringUtil;
 
 @Environment(EnvType.CLIENT)
 public class RealmsSettingsScreen extends RealmsScreen {
@@ -58,7 +58,7 @@ public class RealmsSettingsScreen extends RealmsScreen {
 		Button button2 = this.addRenderableWidget(
 			Button.builder(Component.translatable("mco.configure.world.buttons.done"), buttonx -> this.save()).bounds(i - 2, row(12), 106, 20).build()
 		);
-		this.nameEdit.setResponder(stringx -> button2.active = !Util.isBlank(stringx));
+		this.nameEdit.setResponder(stringx -> button2.active = !StringUtil.isBlank(stringx));
 		this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, buttonx -> this.onClose()).bounds(this.width / 2 + 2, row(12), 106, 20).build());
 	}
 

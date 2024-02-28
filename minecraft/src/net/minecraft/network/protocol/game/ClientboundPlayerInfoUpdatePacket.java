@@ -14,6 +14,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.chat.RemoteChatSession;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketType;
@@ -101,12 +102,12 @@ public class ClientboundPlayerInfoUpdatePacket implements Packet<ClientGamePacke
 	public static enum Action {
 		ADD_PLAYER((entryBuilder, registryFriendlyByteBuf) -> {
 			GameProfile gameProfile = new GameProfile(entryBuilder.profileId, registryFriendlyByteBuf.readUtf(16));
-			gameProfile.getProperties().putAll(registryFriendlyByteBuf.readGameProfileProperties());
+			gameProfile.getProperties().putAll(ByteBufCodecs.GAME_PROFILE_PROPERTIES.decode(registryFriendlyByteBuf));
 			entryBuilder.profile = gameProfile;
 		}, (registryFriendlyByteBuf, entry) -> {
 			GameProfile gameProfile = (GameProfile)Objects.requireNonNull(entry.profile());
 			registryFriendlyByteBuf.writeUtf(gameProfile.getName(), 16);
-			registryFriendlyByteBuf.writeGameProfileProperties(gameProfile.getProperties());
+			ByteBufCodecs.GAME_PROFILE_PROPERTIES.encode(registryFriendlyByteBuf, gameProfile.getProperties());
 		}),
 		INITIALIZE_CHAT(
 			(entryBuilder, registryFriendlyByteBuf) -> entryBuilder.chatSession = registryFriendlyByteBuf.readNullable(RemoteChatSession.Data::read),
@@ -126,9 +127,9 @@ public class ClientboundPlayerInfoUpdatePacket implements Packet<ClientGamePacke
 		),
 		UPDATE_DISPLAY_NAME(
 			(entryBuilder, registryFriendlyByteBuf) -> entryBuilder.displayName = FriendlyByteBuf.readNullable(
-					registryFriendlyByteBuf, ComponentSerialization.STREAM_CODEC
+					registryFriendlyByteBuf, ComponentSerialization.TRUSTED_STREAM_CODEC
 				),
-			(registryFriendlyByteBuf, entry) -> FriendlyByteBuf.writeNullable(registryFriendlyByteBuf, entry.displayName(), ComponentSerialization.STREAM_CODEC)
+			(registryFriendlyByteBuf, entry) -> FriendlyByteBuf.writeNullable(registryFriendlyByteBuf, entry.displayName(), ComponentSerialization.TRUSTED_STREAM_CODEC)
 		);
 
 		final ClientboundPlayerInfoUpdatePacket.Action.Reader reader;

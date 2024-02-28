@@ -3,6 +3,8 @@ package net.minecraft.world.level.block.entity;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponentMap;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
@@ -30,7 +32,7 @@ public abstract class BaseContainerBlockEntity extends BlockEntity implements Co
 		super.load(compoundTag, provider);
 		this.lockKey = LockCode.fromTag(compoundTag);
 		if (compoundTag.contains("CustomName", 8)) {
-			this.name = Component.Serializer.fromJson(compoundTag.getString("CustomName"));
+			this.name = Component.Serializer.fromJson(compoundTag.getString("CustomName"), provider);
 		}
 	}
 
@@ -39,12 +41,8 @@ public abstract class BaseContainerBlockEntity extends BlockEntity implements Co
 		super.saveAdditional(compoundTag, provider);
 		this.lockKey.addToTag(compoundTag);
 		if (this.name != null) {
-			compoundTag.putString("CustomName", Component.Serializer.toJson(this.name));
+			compoundTag.putString("CustomName", Component.Serializer.toJson(this.name, provider));
 		}
-	}
-
-	public void setCustomName(Component component) {
-		this.name = component;
 	}
 
 	@Override
@@ -86,4 +84,22 @@ public abstract class BaseContainerBlockEntity extends BlockEntity implements Co
 	}
 
 	protected abstract AbstractContainerMenu createMenu(int i, Inventory inventory);
+
+	@Override
+	public void applyComponents(DataComponentMap dataComponentMap) {
+		this.name = dataComponentMap.get(DataComponents.CUSTOM_NAME);
+		this.lockKey = dataComponentMap.getOrDefault(DataComponents.LOCK, LockCode.NO_LOCK);
+	}
+
+	@Override
+	public void collectComponents(DataComponentMap.Builder builder) {
+		builder.set(DataComponents.CUSTOM_NAME, this.name);
+		builder.set(DataComponents.LOCK, this.lockKey);
+	}
+
+	@Override
+	public void removeComponentsFromTag(CompoundTag compoundTag) {
+		compoundTag.remove("CustomName");
+		compoundTag.remove("Lock");
+	}
 }

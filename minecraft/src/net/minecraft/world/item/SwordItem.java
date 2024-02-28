@@ -1,38 +1,36 @@
 package net.minecraft.world.item;
 
-import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.ImmutableMultimap.Builder;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Holder;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class SwordItem extends TieredItem {
-	private final float attackDamage;
-	private final Multimap<Holder<Attribute>, AttributeModifier> defaultModifiers;
-
-	public SwordItem(Tier tier, int i, float f, Item.Properties properties) {
+	public SwordItem(Tier tier, Item.Properties properties) {
 		super(tier, properties);
-		this.attackDamage = (float)i + tier.getAttackDamageBonus();
-		Builder<Holder<Attribute>, AttributeModifier> builder = ImmutableMultimap.builder();
-		builder.put(
-			Attributes.ATTACK_DAMAGE, new AttributeModifier(BASE_ATTACK_DAMAGE_UUID, "Weapon modifier", (double)this.attackDamage, AttributeModifier.Operation.ADDITION)
-		);
-		builder.put(Attributes.ATTACK_SPEED, new AttributeModifier(BASE_ATTACK_SPEED_UUID, "Weapon modifier", (double)f, AttributeModifier.Operation.ADDITION));
-		this.defaultModifiers = builder.build();
 	}
 
-	public float getDamage() {
-		return this.attackDamage;
+	public static ItemAttributeModifiers createAttributes(Tier tier, int i, float f) {
+		return ItemAttributeModifiers.builder()
+			.add(
+				Attributes.ATTACK_DAMAGE,
+				new AttributeModifier(BASE_ATTACK_DAMAGE_UUID, "Weapon modifier", (double)((float)i + tier.getAttackDamageBonus()), AttributeModifier.Operation.ADD_VALUE),
+				EquipmentSlotGroup.MAINHAND
+			)
+			.add(
+				Attributes.ATTACK_SPEED,
+				new AttributeModifier(BASE_ATTACK_SPEED_UUID, "Weapon modifier", (double)f, AttributeModifier.Operation.ADD_VALUE),
+				EquipmentSlotGroup.MAINHAND
+			)
+			.build();
 	}
 
 	@Override
@@ -67,10 +65,5 @@ public class SwordItem extends TieredItem {
 	@Override
 	public boolean isCorrectToolForDrops(BlockState blockState) {
 		return blockState.is(Blocks.COBWEB);
-	}
-
-	@Override
-	public Multimap<Holder<Attribute>, AttributeModifier> getDefaultAttributeModifiers(EquipmentSlot equipmentSlot) {
-		return equipmentSlot == EquipmentSlot.MAINHAND ? this.defaultModifiers : super.getDefaultAttributeModifiers(equipmentSlot);
 	}
 }

@@ -38,8 +38,8 @@ public class HoeItem extends DiggerItem {
 		)
 	);
 
-	protected HoeItem(Tier tier, int i, float f, Item.Properties properties) {
-		super((float)i, f, tier, BlockTags.MINEABLE_WITH_HOE, properties);
+	public HoeItem(Tier tier, Item.Properties properties) {
+		super(tier, BlockTags.MINEABLE_WITH_HOE, properties);
 	}
 
 	@Override

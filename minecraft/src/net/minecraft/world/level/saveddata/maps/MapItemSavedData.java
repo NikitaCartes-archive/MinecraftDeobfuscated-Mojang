@@ -16,14 +16,17 @@ import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundMapItemDataPacket;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -31,7 +34,8 @@ import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.MapItem;
+import net.minecraft.world.item.component.MapDecorations;
+import net.minecraft.world.item.component.MapItemColor;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -106,8 +110,10 @@ public class MapItemSavedData extends SavedData {
 			mapItemSavedData.colors = bs;
 		}
 
+		RegistryOps<Tag> registryOps = provider.createSerializationContext(NbtOps.INSTANCE);
+
 		for (MapBanner mapBanner : (List)MapBanner.LIST_CODEC
-			.parse(NbtOps.INSTANCE, compoundTag.get("banners"))
+			.parse(registryOps, compoundTag.get("banners"))
 			.resultOrPartial(string -> LOGGER.warn("Failed to parse map banner: '{}'", string))
 			.orElse(List.of())) {
 			mapItemSavedData.bannerMarkers.put(mapBanner.getId(), mapBanner);
@@ -156,8 +162,9 @@ public class MapItemSavedData extends SavedData {
 		compoundTag.putBoolean("trackingPosition", this.trackingPosition);
 		compoundTag.putBoolean("unlimitedTracking", this.unlimitedTracking);
 		compoundTag.putBoolean("locked", this.locked);
+		RegistryOps<Tag> registryOps = provider.createSerializationContext(NbtOps.INSTANCE);
 		compoundTag.put(
-			"banners", Util.getOrThrow(MapBanner.LIST_CODEC.encodeStart(NbtOps.INSTANCE, List.copyOf(this.bannerMarkers.values())), IllegalStateException::new)
+			"banners", Util.getOrThrow(MapBanner.LIST_CODEC.encodeStart(registryOps, List.copyOf(this.bannerMarkers.values())), IllegalStateException::new)
 		);
 		ListTag listTag = new ListTag();
 
@@ -181,15 +188,15 @@ public class MapItemSavedData extends SavedData {
 		return mapItemSavedData;
 	}
 
-	public MapItemSavedData scaled(int i) {
+	public MapItemSavedData scaled() {
 		return createFresh(
-			(double)this.centerX, (double)this.centerZ, (byte)Mth.clamp(this.scale + i, 0, 4), this.trackingPosition, this.unlimitedTracking, this.dimension
+			(double)this.centerX, (double)this.centerZ, (byte)Mth.clamp(this.scale + 1, 0, 4), this.trackingPosition, this.unlimitedTracking, this.dimension
 		);
 	}
 
 	private static Predicate<ItemStack> mapMatcher(ItemStack itemStack) {
-		MapId mapId = MapItem.getMapId(itemStack);
-		return itemStack2 -> itemStack2 == itemStack ? true : itemStack2.is(itemStack.getItem()) && Objects.equals(mapId, MapItem.getMapId(itemStack2));
+		MapId mapId = itemStack.get(DataComponents.MAP_ID);
+		return itemStack2 -> itemStack2 == itemStack ? true : itemStack2.is(itemStack.getItem()) && Objects.equals(mapId, itemStack2.get(DataComponents.MAP_ID));
 	}
 
 	public void tickCarriedBy(Player player, ItemStack itemStack) {
@@ -247,24 +254,13 @@ public class MapItemSavedData extends SavedData {
 			this.frameMarkers.put(mapFrame2.getId(), mapFrame2);
 		}
 
-		CompoundTag compoundTag = itemStack.getTag();
-		if (compoundTag != null && compoundTag.contains("Decorations", 9)) {
-			ListTag listTag = compoundTag.getList("Decorations", 10);
-
-			for (int j = 0; j < listTag.size(); j++) {
-				CompoundTag compoundTag2 = listTag.getCompound(j);
-				if (!this.decorations.containsKey(compoundTag2.getString("id"))) {
-					this.addDecoration(
-						MapDecoration.Type.byIcon(compoundTag2.getByte("type")),
-						player.level(),
-						compoundTag2.getString("id"),
-						compoundTag2.getDouble("x"),
-						compoundTag2.getDouble("z"),
-						compoundTag2.getDouble("rot"),
-						null
-					);
+		MapDecorations mapDecorations = itemStack.getOrDefault(DataComponents.MAP_DECORATIONS, MapDecorations.EMPTY);
+		if (!this.decorations.keySet().containsAll(mapDecorations.decorations().keySet())) {
+			mapDecorations.decorations().forEach((string, entry) -> {
+				if (!this.decorations.containsKey(string)) {
+					this.addDecoration(entry.type(), player.level(), string, entry.x(), entry.z(), (double)entry.rotation(), null);
 				}
-			}
+			});
 		}
 	}
 
@@ -278,24 +274,10 @@ public class MapItemSavedData extends SavedData {
 	}
 
 	public static void addTargetDecoration(ItemStack itemStack, BlockPos blockPos, String string, MapDecoration.Type type) {
-		ListTag listTag;
-		if (itemStack.hasTag() && itemStack.getTag().contains("Decorations", 9)) {
-			listTag = itemStack.getTag().getList("Decorations", 10);
-		} else {
-			listTag = new ListTag();
-			itemStack.addTagElement("Decorations", listTag);
-		}
-
-		CompoundTag compoundTag = new CompoundTag();
-		compoundTag.putByte("type", type.getIcon());
-		compoundTag.putString("id", string);
-		compoundTag.putDouble("x", (double)blockPos.getX());
-		compoundTag.putDouble("z", (double)blockPos.getZ());
-		compoundTag.putDouble("rot", 180.0);
-		listTag.add(compoundTag);
+		MapDecorations.Entry entry = new MapDecorations.Entry(type, (double)blockPos.getX(), (double)blockPos.getZ(), 180.0F);
+		itemStack.update(DataComponents.MAP_DECORATIONS, MapDecorations.EMPTY, mapDecorations -> mapDecorations.withDecoration(string, entry));
 		if (type.hasMapColor()) {
-			CompoundTag compoundTag2 = itemStack.getOrCreateTagElement("display");
-			compoundTag2.putInt("MapColor", type.getMapColor());
+			itemStack.set(DataComponents.MAP_COLOR, new MapItemColor(type.getMapColor()));
 		}
 	}
 

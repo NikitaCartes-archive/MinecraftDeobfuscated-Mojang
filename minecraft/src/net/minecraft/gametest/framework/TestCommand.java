@@ -142,6 +142,21 @@ public class TestCommand {
 							)
 						)
 				)
+				.then(
+					Commands.literal("runmultiple")
+						.then(
+							Commands.argument("testName", TestFunctionArgument.testFunctionArgument())
+								.executes(commandContext -> testFinder.byArgument(commandContext, "testName").run())
+								.then(
+									Commands.argument("amount", IntegerArgumentType.integer())
+										.executes(
+											commandContext -> testFinder.createMultipleCopies(IntegerArgumentType.getInteger(commandContext, "amount"))
+													.byArgument(commandContext, "testName")
+													.run()
+										)
+								)
+						)
+				)
 				.then(runWithRetryOptionsAndBuildInfo(Commands.literal("runall").then(argumentBuilder2), testFinder::allTests))
 				.then(runWithRetryOptions(Commands.literal("runthese"), testFinder::allNearby))
 				.then(runWithRetryOptions(Commands.literal("runclosest"), testFinder::nearest))

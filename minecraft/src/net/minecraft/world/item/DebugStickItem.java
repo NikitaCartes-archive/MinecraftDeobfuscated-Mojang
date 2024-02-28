@@ -4,13 +4,14 @@ import java.util.Collection;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.component.DebugStickState;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -22,11 +23,6 @@ import net.minecraft.world.level.block.state.properties.Property;
 public class DebugStickItem extends Item {
 	public DebugStickItem(Item.Properties properties) {
 		super(properties);
-	}
-
-	@Override
-	public boolean isFoil(ItemStack itemStack) {
-		return true;
 	}
 
 	@Override
@@ -56,33 +52,34 @@ public class DebugStickItem extends Item {
 		if (!player.canUseGameMasterBlocks()) {
 			return false;
 		} else {
-			Block block = blockState.getBlock();
-			StateDefinition<Block, BlockState> stateDefinition = block.getStateDefinition();
+			Holder<Block> holder = blockState.getBlockHolder();
+			StateDefinition<Block, BlockState> stateDefinition = holder.value().getStateDefinition();
 			Collection<Property<?>> collection = stateDefinition.getProperties();
-			String string = BuiltInRegistries.BLOCK.getKey(block).toString();
 			if (collection.isEmpty()) {
-				message(player, Component.translatable(this.getDescriptionId() + ".empty", string));
+				message(player, Component.translatable(this.getDescriptionId() + ".empty", holder.getRegisteredName()));
 				return false;
 			} else {
-				CompoundTag compoundTag = itemStack.getOrCreateTagElement("DebugProperty");
-				String string2 = compoundTag.getString(string);
-				Property<?> property = stateDefinition.getProperty(string2);
-				if (bl) {
-					if (property == null) {
-						property = (Property<?>)collection.iterator().next();
+				DebugStickState debugStickState = itemStack.get(DataComponents.DEBUG_STICK_STATE);
+				if (debugStickState == null) {
+					return false;
+				} else {
+					Property<?> property = (Property<?>)debugStickState.properties().get(holder);
+					if (bl) {
+						if (property == null) {
+							property = (Property<?>)collection.iterator().next();
+						}
+
+						BlockState blockState2 = cycleState(blockState, property, player.isSecondaryUseActive());
+						levelAccessor.setBlock(blockPos, blockState2, 18);
+						message(player, Component.translatable(this.getDescriptionId() + ".update", property.getName(), getNameHelper(blockState2, property)));
+					} else {
+						property = getRelative(collection, property, player.isSecondaryUseActive());
+						itemStack.set(DataComponents.DEBUG_STICK_STATE, debugStickState.withProperty(holder, property));
+						message(player, Component.translatable(this.getDescriptionId() + ".select", property.getName(), getNameHelper(blockState, property)));
 					}
 
-					BlockState blockState2 = cycleState(blockState, property, player.isSecondaryUseActive());
-					levelAccessor.setBlock(blockPos, blockState2, 18);
-					message(player, Component.translatable(this.getDescriptionId() + ".update", property.getName(), getNameHelper(blockState2, property)));
-				} else {
-					property = getRelative(collection, property, player.isSecondaryUseActive());
-					String string3 = property.getName();
-					compoundTag.putString(string, string3);
-					message(player, Component.translatable(this.getDescriptionId() + ".select", string3, getNameHelper(blockState, property)));
+					return true;
 				}
-
-				return true;
 			}
 		}
 	}

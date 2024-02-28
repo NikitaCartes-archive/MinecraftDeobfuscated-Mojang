@@ -33,7 +33,6 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.npc.InventoryCarrier;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.raid.Raid;
 import net.minecraft.world.entity.raid.Raider;
 import net.minecraft.world.item.BannerItem;
@@ -49,7 +48,6 @@ public class Pillager extends AbstractIllager implements CrossbowAttackMob, Inve
 	private static final EntityDataAccessor<Boolean> IS_CHARGING_CROSSBOW = SynchedEntityData.defineId(Pillager.class, EntityDataSerializers.BOOLEAN);
 	private static final int INVENTORY_SIZE = 5;
 	private static final int SLOT_OFFSET = 300;
-	private static final float CROSSBOW_POWER = 1.6F;
 	private final SimpleContainer inventory = new SimpleContainer(5);
 
 	public Pillager(EntityType<? extends Pillager> entityType, Level level) {
@@ -107,7 +105,7 @@ public class Pillager extends AbstractIllager implements CrossbowAttackMob, Inve
 	@Override
 	public void addAdditionalSaveData(CompoundTag compoundTag) {
 		super.addAdditionalSaveData(compoundTag);
-		this.writeInventoryToTag(compoundTag);
+		this.writeInventoryToTag(compoundTag, this.registryAccess());
 	}
 
 	@Override
@@ -124,7 +122,7 @@ public class Pillager extends AbstractIllager implements CrossbowAttackMob, Inve
 	@Override
 	public void readAdditionalSaveData(CompoundTag compoundTag) {
 		super.readAdditionalSaveData(compoundTag);
-		this.readInventoryFromTag(compoundTag);
+		this.readInventoryFromTag(compoundTag, this.registryAccess());
 		this.setCanPickUpLoot(true);
 	}
 
@@ -184,11 +182,6 @@ public class Pillager extends AbstractIllager implements CrossbowAttackMob, Inve
 	@Override
 	public void performRangedAttack(LivingEntity livingEntity, float f) {
 		this.performCrossbowAttack(this, 1.6F);
-	}
-
-	@Override
-	public void shootCrossbowProjectile(LivingEntity livingEntity, ItemStack itemStack, Projectile projectile, float f) {
-		this.shootCrossbowProjectile(this, livingEntity, projectile, f, 1.6F);
 	}
 
 	@Override

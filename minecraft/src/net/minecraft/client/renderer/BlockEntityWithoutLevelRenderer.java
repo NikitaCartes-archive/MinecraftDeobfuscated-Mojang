@@ -3,13 +3,13 @@ package net.minecraft.client.renderer;
 import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.datafixers.util.Pair;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.ShieldModel;
 import net.minecraft.client.model.SkullModelBase;
 import net.minecraft.client.model.TridentModel;
@@ -22,8 +22,7 @@ import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Holder;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraft.world.item.BlockItem;
@@ -32,7 +31,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.ShieldItem;
+import net.minecraft.world.item.component.ResolvableProfile;
 import net.minecraft.world.level.block.AbstractBannerBlock;
 import net.minecraft.world.level.block.AbstractSkullBlock;
 import net.minecraft.world.level.block.BedBlock;
@@ -41,7 +40,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ShulkerBoxBlock;
 import net.minecraft.world.level.block.SkullBlock;
 import net.minecraft.world.level.block.entity.BannerBlockEntity;
-import net.minecraft.world.level.block.entity.BannerPattern;
+import net.minecraft.world.level.block.entity.BannerPatternLayers;
 import net.minecraft.world.level.block.entity.BedBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
@@ -49,7 +48,6 @@ import net.minecraft.world.level.block.entity.ConduitBlockEntity;
 import net.minecraft.world.level.block.entity.DecoratedPotBlockEntity;
 import net.minecraft.world.level.block.entity.EnderChestBlockEntity;
 import net.minecraft.world.level.block.entity.ShulkerBoxBlockEntity;
-import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import net.minecraft.world.level.block.entity.TrappedChestBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -90,8 +88,14 @@ public class BlockEntityWithoutLevelRenderer implements ResourceManagerReloadLis
 		if (item instanceof BlockItem) {
 			Block block = ((BlockItem)item).getBlock();
 			if (block instanceof AbstractSkullBlock abstractSkullBlock) {
-				CompoundTag compoundTag = itemStack.getTag();
-				GameProfile gameProfile = compoundTag != null ? SkullBlockEntity.getOrResolveGameProfile(compoundTag) : null;
+				ResolvableProfile resolvableProfile = itemStack.get(DataComponents.PROFILE);
+				if (resolvableProfile != null && !resolvableProfile.isResolved()) {
+					itemStack.remove(DataComponents.PROFILE);
+					resolvableProfile.resolve().thenAcceptAsync(resolvableProfilex -> itemStack.set(DataComponents.PROFILE, resolvableProfilex), Minecraft.getInstance());
+					resolvableProfile = null;
+				}
+
+				GameProfile gameProfile = resolvableProfile != null ? resolvableProfile.gameProfile() : null;
 				SkullModelBase skullModelBase = (SkullModelBase)this.skullModels.get(abstractSkullBlock.getType());
 				RenderType renderType = SkullBlockRenderer.getRenderType(abstractSkullBlock.getType(), gameProfile);
 				SkullBlockRenderer.renderSkull(null, 180.0F, 0.0F, poseStack, multiBufferSource, i, skullModelBase, renderType);
@@ -132,7 +136,9 @@ public class BlockEntityWithoutLevelRenderer implements ResourceManagerReloadLis
 			}
 		} else {
 			if (itemStack.is(Items.SHIELD)) {
-				boolean bl = BlockItem.getBlockEntityData(itemStack) != null;
+				BannerPatternLayers bannerPatternLayers = itemStack.getOrDefault(DataComponents.BANNER_PATTERNS, BannerPatternLayers.EMPTY);
+				DyeColor dyeColor2 = itemStack.get(DataComponents.BASE_COLOR);
+				boolean bl = !bannerPatternLayers.layers().isEmpty() || dyeColor2 != null;
 				poseStack.pushPose();
 				poseStack.scale(1.0F, -1.0F, -1.0F);
 				Material material = bl ? ModelBakery.SHIELD_BASE : ModelBakery.NO_PATTERN_SHIELD;
@@ -140,10 +146,8 @@ public class BlockEntityWithoutLevelRenderer implements ResourceManagerReloadLis
 					.wrap(ItemRenderer.getFoilBufferDirect(multiBufferSource, this.shieldModel.renderType(material.atlasLocation()), true, itemStack.hasFoil()));
 				this.shieldModel.handle().render(poseStack, vertexConsumer, i, j, 1.0F, 1.0F, 1.0F, 1.0F);
 				if (bl) {
-					List<Pair<Holder<BannerPattern>, DyeColor>> list = BannerBlockEntity.createPatterns(
-						ShieldItem.getColor(itemStack), BannerBlockEntity.getItemPatterns(itemStack)
-					);
-					BannerRenderer.renderPatterns(poseStack, multiBufferSource, i, j, this.shieldModel.plate(), material, false, list, itemStack.hasFoil());
+					BannerPatternLayers bannerPatternLayers2 = bannerPatternLayers.withBase((DyeColor)Objects.requireNonNullElse(dyeColor2, DyeColor.WHITE));
+					BannerRenderer.renderPatterns(poseStack, multiBufferSource, i, j, this.shieldModel.plate(), material, false, bannerPatternLayers2, itemStack.hasFoil());
 				} else {
 					this.shieldModel.plate().render(poseStack, vertexConsumer, i, j, 1.0F, 1.0F, 1.0F, 1.0F);
 				}

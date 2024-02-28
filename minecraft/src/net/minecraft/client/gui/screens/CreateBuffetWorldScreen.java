@@ -11,6 +11,9 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
+import net.minecraft.client.gui.components.StringWidget;
+import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
+import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.client.gui.screens.worldselection.WorldCreationContext;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
@@ -24,7 +27,9 @@ import net.minecraft.world.level.biome.Biomes;
 
 @Environment(EnvType.CLIENT)
 public class CreateBuffetWorldScreen extends Screen {
-	private static final Component BIOME_SELECT_INFO = Component.translatable("createWorld.customize.buffet.biome");
+	private static final Component BIOME_SELECT_INFO = Component.translatable("createWorld.customize.buffet.biome").withColor(-8355712);
+	private static final int SPACING = 8;
+	private final HeaderAndFooterLayout layout = new HeaderAndFooterLayout(this);
 	private final Screen parent;
 	private final Consumer<Holder<Biome>> applySettings;
 	final Registry<Biome> biomes;
@@ -48,34 +53,33 @@ public class CreateBuffetWorldScreen extends Screen {
 
 	@Override
 	protected void init() {
-		this.list = this.addRenderableWidget(new CreateBuffetWorldScreen.BiomeList());
-		this.doneButton = this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> {
+		LinearLayout linearLayout = this.layout.addToHeader(LinearLayout.vertical().spacing(8));
+		linearLayout.defaultCellSetting().alignHorizontallyCenter();
+		linearLayout.addChild(new StringWidget(this.getTitle(), this.font));
+		linearLayout.addChild(new StringWidget(BIOME_SELECT_INFO, this.font));
+		this.list = this.layout.addToContents(new CreateBuffetWorldScreen.BiomeList());
+		LinearLayout linearLayout2 = this.layout.addToFooter(LinearLayout.horizontal().spacing(8));
+		this.doneButton = linearLayout2.addChild(Button.builder(CommonComponents.GUI_DONE, button -> {
 			this.applySettings.accept(this.biome);
-			this.minecraft.setScreen(this.parent);
-		}).bounds(this.width / 2 - 155, this.height - 28, 150, 20).build());
-		this.addRenderableWidget(
-			Button.builder(CommonComponents.GUI_CANCEL, button -> this.minecraft.setScreen(this.parent)).bounds(this.width / 2 + 5, this.height - 28, 150, 20).build()
-		);
+			this.onClose();
+		}).build());
+		linearLayout2.addChild(Button.builder(CommonComponents.GUI_CANCEL, button -> this.onClose()).build());
 		this.list
 			.setSelected(
 				(CreateBuffetWorldScreen.BiomeList.Entry)this.list.children().stream().filter(entry -> Objects.equals(entry.biome, this.biome)).findFirst().orElse(null)
 			);
+		this.layout.visitWidgets(this::addRenderableWidget);
+		this.repositionElements();
+	}
+
+	@Override
+	protected void repositionElements() {
+		this.layout.arrangeElements();
+		this.list.updateSize(this.width, this.layout);
 	}
 
 	void updateButtonValidity() {
 		this.doneButton.active = this.list.getSelected() != null;
-	}
-
-	@Override
-	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-		super.render(guiGraphics, i, j, f);
-		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 8, 16777215);
-		guiGraphics.drawCenteredString(this.font, BIOME_SELECT_INFO, this.width / 2, 28, 10526880);
-	}
-
-	@Override
-	public void renderBackground(GuiGraphics guiGraphics, int i, int j, float f) {
-		this.renderDirtBackground(guiGraphics);
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -128,7 +132,7 @@ public class CreateBuffetWorldScreen extends Screen {
 			@Override
 			public boolean mouseClicked(double d, double e, int i) {
 				BiomeList.this.setSelected(this);
-				return true;
+				return super.mouseClicked(d, e, i);
 			}
 		}
 	}

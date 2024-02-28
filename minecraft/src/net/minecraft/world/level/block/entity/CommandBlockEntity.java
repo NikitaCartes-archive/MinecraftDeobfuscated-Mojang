@@ -4,6 +4,8 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponentMap;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.BaseCommandBlock;
@@ -70,7 +72,7 @@ public class CommandBlockEntity extends BlockEntity {
 	@Override
 	protected void saveAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
 		super.saveAdditional(compoundTag, provider);
-		this.commandBlock.save(compoundTag);
+		this.commandBlock.save(compoundTag, provider);
 		compoundTag.putBoolean("powered", this.isPowered());
 		compoundTag.putBoolean("conditionMet", this.wasConditionMet());
 		compoundTag.putBoolean("auto", this.isAutomatic());
@@ -79,7 +81,7 @@ public class CommandBlockEntity extends BlockEntity {
 	@Override
 	public void load(CompoundTag compoundTag, HolderLookup.Provider provider) {
 		super.load(compoundTag, provider);
-		this.commandBlock.load(compoundTag);
+		this.commandBlock.load(compoundTag, provider);
 		this.powered = compoundTag.getBoolean("powered");
 		this.conditionMet = compoundTag.getBoolean("conditionMet");
 		this.setAutomatic(compoundTag.getBoolean("auto"));
@@ -162,6 +164,23 @@ public class CommandBlockEntity extends BlockEntity {
 	public boolean isConditional() {
 		BlockState blockState = this.level.getBlockState(this.getBlockPos());
 		return blockState.getBlock() instanceof CommandBlock ? (Boolean)blockState.getValue(CommandBlock.CONDITIONAL) : false;
+	}
+
+	@Override
+	public void applyComponents(DataComponentMap dataComponentMap) {
+		this.commandBlock.setCustomName(dataComponentMap.get(DataComponents.CUSTOM_NAME));
+	}
+
+	@Override
+	public void collectComponents(DataComponentMap.Builder builder) {
+		super.collectComponents(builder);
+		builder.set(DataComponents.CUSTOM_NAME, this.commandBlock.getCustomName());
+	}
+
+	@Override
+	public void removeComponentsFromTag(CompoundTag compoundTag) {
+		super.removeComponentsFromTag(compoundTag);
+		compoundTag.remove("CustomName");
 	}
 
 	public static enum Mode {

@@ -57,15 +57,8 @@ public class SetContainerContents extends LootItemConditionalFunction {
 						)
 				);
 			CompoundTag compoundTag = new CompoundTag();
-			ContainerHelper.saveAllItems(compoundTag, nonNullList);
-			CompoundTag compoundTag2 = BlockItem.getBlockEntityData(itemStack);
-			if (compoundTag2 == null) {
-				compoundTag2 = compoundTag;
-			} else {
-				compoundTag2.merge(compoundTag);
-			}
-
-			BlockItem.setBlockEntityData(itemStack, this.type.value(), compoundTag2);
+			ContainerHelper.saveAllItems(compoundTag, nonNullList, lootContext.getLevel().registryAccess());
+			BlockItem.updateBlockEntityData(itemStack, this.type.value(), compoundTag2 -> compoundTag2.merge(compoundTag));
 			return itemStack;
 		}
 	}

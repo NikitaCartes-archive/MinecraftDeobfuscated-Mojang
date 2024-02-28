@@ -418,7 +418,7 @@ public class Dolphin extends WaterAnimal {
 
 				if (vec32 != null) {
 					BlockPos blockPos = BlockPos.containing(vec32);
-					if (!level.getFluidState(blockPos).is(FluidTags.WATER) || !level.getBlockState(blockPos).isPathfindable(level, blockPos, PathComputationType.WATER)) {
+					if (!level.getFluidState(blockPos).is(FluidTags.WATER) || !level.getBlockState(blockPos).isPathfindable(PathComputationType.WATER)) {
 						vec32 = DefaultRandomPos.getPosTowards(this.dolphin, 8, 5, vec3, (float) (Math.PI / 2));
 					}
 				}

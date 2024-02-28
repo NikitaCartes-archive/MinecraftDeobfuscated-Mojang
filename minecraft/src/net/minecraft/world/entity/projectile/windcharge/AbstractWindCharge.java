@@ -132,6 +132,16 @@ public abstract class AbstractWindCharge extends AbstractHurtingProjectile imple
 		return ClipContext.Block.OUTLINE;
 	}
 
+	@Override
+	public void tick() {
+		if (!this.level().isClientSide && this.getBlockY() > this.level().getMaxBuildHeight() + 30) {
+			this.explode();
+			this.discard();
+		} else {
+			super.tick();
+		}
+	}
+
 	public static class WindChargeDamageCalculator extends ExplosionDamageCalculator {
 		@Override
 		public boolean shouldDamageEntity(Explosion explosion, Entity entity) {

@@ -16,18 +16,18 @@ public class FoliageColor {
 	}
 
 	public static int getEvergreenColor() {
-		return 6396257;
+		return -10380959;
 	}
 
 	public static int getBirchColor() {
-		return 8431445;
+		return -8345771;
 	}
 
 	public static int getDefaultColor() {
-		return 4764952;
+		return -12012264;
 	}
 
 	public static int getMangroveColor() {
-		return 9619016;
+		return -7158200;
 	}
 }

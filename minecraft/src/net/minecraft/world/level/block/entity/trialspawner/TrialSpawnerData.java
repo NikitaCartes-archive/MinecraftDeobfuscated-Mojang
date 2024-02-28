@@ -88,8 +88,8 @@ public class TrialSpawnerData {
 		this.currentMobs.clear();
 	}
 
-	public boolean hasMobToSpawn() {
-		boolean bl = this.nextSpawnData.isPresent() && ((SpawnData)this.nextSpawnData.get()).getEntityToSpawn().contains("id", 8);
+	public boolean hasMobToSpawn(TrialSpawner trialSpawner, RandomSource randomSource) {
+		boolean bl = this.getOrCreateNextSpawnData(trialSpawner, randomSource).getEntityToSpawn().contains("id", 8);
 		return bl || !this.spawnPotentials.isEmpty();
 	}
 
@@ -144,9 +144,10 @@ public class TrialSpawnerData {
 		if (this.nextSpawnData.isPresent()) {
 			return (SpawnData)this.nextSpawnData.get();
 		} else {
-			this.nextSpawnData = Optional.of((SpawnData)this.spawnPotentials.getRandom(randomSource).map(WeightedEntry.Wrapper::getData).orElseGet(SpawnData::new));
+			SpawnData spawnData = (SpawnData)this.spawnPotentials.getRandom(randomSource).map(WeightedEntry.Wrapper::getData).orElseGet(SpawnData::new);
+			this.nextSpawnData = Optional.of(spawnData);
 			trialSpawner.markUpdated();
-			return (SpawnData)this.nextSpawnData.get();
+			return spawnData;
 		}
 	}
 

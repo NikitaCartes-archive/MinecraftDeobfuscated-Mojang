@@ -1,5 +1,7 @@
 package net.minecraft.world.item;
 
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
@@ -13,11 +15,12 @@ public class NameTagItem extends Item {
 
 	@Override
 	public InteractionResult interactLivingEntity(ItemStack itemStack, Player player, LivingEntity livingEntity, InteractionHand interactionHand) {
-		if (itemStack.hasCustomHoverName() && !(livingEntity instanceof Player)) {
+		Component component = itemStack.get(DataComponents.CUSTOM_NAME);
+		if (component != null && !(livingEntity instanceof Player)) {
 			if (!player.level().isClientSide && livingEntity.isAlive()) {
-				livingEntity.setCustomName(itemStack.getHoverName());
-				if (livingEntity instanceof Mob) {
-					((Mob)livingEntity).setPersistenceRequired();
+				livingEntity.setCustomName(component);
+				if (livingEntity instanceof Mob mob) {
+					mob.setPersistenceRequired();
 				}
 
 				itemStack.shrink(1);

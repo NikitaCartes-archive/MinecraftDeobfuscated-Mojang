@@ -25,6 +25,7 @@ public class References {
 	public static final TypeReference ITEM_STACK = () -> "item_stack";
 	public static final TypeReference BLOCK_STATE = () -> "block_state";
 	public static final TypeReference FLAT_BLOCK_STATE = () -> "flat_block_state";
+	public static final TypeReference DATA_COMPONENTS = () -> "data_components";
 	public static final TypeReference ENTITY_NAME = () -> "entity_name";
 	public static final TypeReference ENTITY_TREE = () -> "entity_tree";
 	public static final TypeReference ENTITY = () -> "entity";

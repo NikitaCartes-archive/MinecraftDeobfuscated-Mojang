@@ -4,10 +4,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
-import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.properties.Property;
-import com.mojang.authlib.properties.PropertyMap;
-import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
@@ -258,22 +254,6 @@ public class FriendlyByteBuf extends ByteBuf {
 		} else {
 			byteBuf.writeBoolean(false);
 		}
-	}
-
-	public <L, R> void writeEither(
-		Either<L, R> either, StreamEncoder<? super FriendlyByteBuf, L> streamEncoder, StreamEncoder<? super FriendlyByteBuf, R> streamEncoder2
-	) {
-		either.ifLeft(object -> {
-			this.writeBoolean(true);
-			streamEncoder.encode(this, (L)object);
-		}).ifRight(object -> {
-			this.writeBoolean(false);
-			streamEncoder2.encode(this, (R)object);
-		});
-	}
-
-	public <L, R> Either<L, R> readEither(StreamDecoder<? super FriendlyByteBuf, L> streamDecoder, StreamDecoder<? super FriendlyByteBuf, R> streamDecoder2) {
-		return this.readBoolean() ? Either.left(streamDecoder.decode(this)) : Either.right(streamDecoder2.decode(this));
 	}
 
 	public byte[] readByteArray() {
@@ -681,46 +661,6 @@ public class FriendlyByteBuf extends ByteBuf {
 			byte[] bs = bitSet.toByteArray();
 			this.writeBytes(Arrays.copyOf(bs, Mth.positiveCeilDiv(i, 8)));
 		}
-	}
-
-	public GameProfile readGameProfile() {
-		UUID uUID = this.readUUID();
-		String string = this.readUtf(16);
-		GameProfile gameProfile = new GameProfile(uUID, string);
-		gameProfile.getProperties().putAll(this.readGameProfileProperties());
-		return gameProfile;
-	}
-
-	public void writeGameProfile(GameProfile gameProfile) {
-		this.writeUUID(gameProfile.getId());
-		this.writeUtf(gameProfile.getName());
-		this.writeGameProfileProperties(gameProfile.getProperties());
-	}
-
-	public PropertyMap readGameProfileProperties() {
-		PropertyMap propertyMap = new PropertyMap();
-		this.readWithCount(friendlyByteBuf -> {
-			Property property = this.readProperty();
-			propertyMap.put(property.name(), property);
-		});
-		return propertyMap;
-	}
-
-	public void writeGameProfileProperties(PropertyMap propertyMap) {
-		this.writeCollection(propertyMap.values(), FriendlyByteBuf::writeProperty);
-	}
-
-	public Property readProperty() {
-		String string = this.readUtf();
-		String string2 = this.readUtf();
-		String string3 = this.readNullable(FriendlyByteBuf::readUtf);
-		return new Property(string, string2, string3);
-	}
-
-	public void writeProperty(Property property) {
-		this.writeUtf(property.name());
-		this.writeUtf(property.value());
-		this.writeNullable(property.signature(), FriendlyByteBuf::writeUtf);
 	}
 
 	@Override

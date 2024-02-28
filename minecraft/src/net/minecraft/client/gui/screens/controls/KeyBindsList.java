@@ -26,11 +26,12 @@ import org.apache.commons.lang3.ArrayUtils;
 
 @Environment(EnvType.CLIENT)
 public class KeyBindsList extends ContainerObjectSelectionList<KeyBindsList.Entry> {
+	private static final int ITEM_HEIGHT = 20;
 	final KeyBindsScreen keyBindsScreen;
-	int maxNameWidth;
+	private int maxNameWidth;
 
 	public KeyBindsList(KeyBindsScreen keyBindsScreen, Minecraft minecraft) {
-		super(minecraft, keyBindsScreen.width + 45, keyBindsScreen.height - 52, 20, 20);
+		super(minecraft, keyBindsScreen.width, keyBindsScreen.layout.getContentHeight(), keyBindsScreen.layout.getHeaderHeight(), 20);
 		this.keyBindsScreen = keyBindsScreen;
 		KeyMapping[] keyMappings = ArrayUtils.clone((KeyMapping[])minecraft.options.keyMappings);
 		Arrays.sort(keyMappings);
@@ -63,13 +64,8 @@ public class KeyBindsList extends ContainerObjectSelectionList<KeyBindsList.Entr
 	}
 
 	@Override
-	protected int getScrollbarPosition() {
-		return super.getScrollbarPosition() + 15;
-	}
-
-	@Override
 	public int getRowWidth() {
-		return super.getRowWidth() + 32;
+		return 340;
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -84,9 +80,7 @@ public class KeyBindsList extends ContainerObjectSelectionList<KeyBindsList.Entr
 
 		@Override
 		public void render(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-			guiGraphics.drawString(
-				KeyBindsList.this.minecraft.font, this.name, KeyBindsList.this.minecraft.screen.width / 2 - this.width / 2, j + m - 9 - 1, 16777215, false
-			);
+			guiGraphics.drawString(KeyBindsList.this.minecraft.font, this.name, KeyBindsList.this.width / 2 - this.width / 2, j + m - 9 - 1, -1, false);
 		}
 
 		@Nullable
@@ -127,6 +121,8 @@ public class KeyBindsList extends ContainerObjectSelectionList<KeyBindsList.Entr
 
 	@Environment(EnvType.CLIENT)
 	public class KeyEntry extends KeyBindsList.Entry {
+		private static final Component RESET_BUTTON_TITLE = Component.translatable("controls.reset");
+		private static final int PADDING = 10;
 		private final KeyMapping key;
 		private final Component name;
 		private final Button changeButton;
@@ -147,7 +143,7 @@ public class KeyBindsList extends ContainerObjectSelectionList<KeyBindsList.Entr
 							: Component.translatable("narrator.controls.bound", component, supplier.get())
 				)
 				.build();
-			this.resetButton = Button.builder(Component.translatable("controls.reset"), button -> {
+			this.resetButton = Button.builder(RESET_BUTTON_TITLE, button -> {
 				KeyBindsList.this.minecraft.options.setKey(keyMapping, keyMapping.getDefaultKey());
 				KeyBindsList.this.resetMappingAndUpdateButtons();
 			}).bounds(0, 0, 50, 20).createNarration(supplier -> Component.translatable("narrator.controls.reset", component)).build();
@@ -156,20 +152,19 @@ public class KeyBindsList extends ContainerObjectSelectionList<KeyBindsList.Entr
 
 		@Override
 		public void render(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-			int var10003 = k + 90 - KeyBindsList.this.maxNameWidth;
-			guiGraphics.drawString(KeyBindsList.this.minecraft.font, this.name, var10003, j + m / 2 - 9 / 2, 16777215, false);
-			this.resetButton.setX(k + 190);
-			this.resetButton.setY(j);
+			int p = KeyBindsList.this.getScrollbarPosition() - this.resetButton.getWidth() - 10;
+			int q = j - 2;
+			this.resetButton.setPosition(p, q);
 			this.resetButton.render(guiGraphics, n, o, f);
-			this.changeButton.setX(k + 105);
-			this.changeButton.setY(j);
-			if (this.hasCollision) {
-				int p = 3;
-				int q = this.changeButton.getX() - 6;
-				guiGraphics.fill(q, j + 2, q + 3, j + m + 2, ChatFormatting.RED.getColor() | 0xFF000000);
-			}
-
+			int r = p - 5 - this.changeButton.getWidth();
+			this.changeButton.setPosition(r, q);
 			this.changeButton.render(guiGraphics, n, o, f);
+			guiGraphics.drawString(KeyBindsList.this.minecraft.font, this.name, k, j + m / 2 - 9 / 2, -1);
+			if (this.hasCollision) {
+				int s = 3;
+				int t = this.changeButton.getX() - 6;
+				guiGraphics.fill(t, j - 1, t + 3, j + m, -65536);
+			}
 		}
 
 		@Override

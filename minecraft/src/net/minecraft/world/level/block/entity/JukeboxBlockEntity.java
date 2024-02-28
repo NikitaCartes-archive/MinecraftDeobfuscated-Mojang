@@ -38,7 +38,9 @@ public class JukeboxBlockEntity extends BlockEntity implements Clearable, Contai
 	public void load(CompoundTag compoundTag, HolderLookup.Provider provider) {
 		super.load(compoundTag, provider);
 		if (compoundTag.contains("RecordItem", 10)) {
-			this.item = ItemStack.of(compoundTag.getCompound("RecordItem"));
+			this.item = (ItemStack)ItemStack.parse(provider, compoundTag.getCompound("RecordItem")).orElse(ItemStack.EMPTY);
+		} else {
+			this.item = ItemStack.EMPTY;
 		}
 
 		this.isPlaying = compoundTag.getBoolean("IsPlaying");
@@ -50,7 +52,7 @@ public class JukeboxBlockEntity extends BlockEntity implements Clearable, Contai
 	protected void saveAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
 		super.saveAdditional(compoundTag, provider);
 		if (!this.getTheItem().isEmpty()) {
-			compoundTag.put("RecordItem", this.getTheItem().save(new CompoundTag()));
+			compoundTag.put("RecordItem", this.getTheItem().save(provider));
 		}
 
 		compoundTag.putBoolean("IsPlaying", this.isPlaying);

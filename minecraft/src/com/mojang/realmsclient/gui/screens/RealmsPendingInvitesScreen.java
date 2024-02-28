@@ -161,7 +161,7 @@ public class RealmsPendingInvitesScreen extends RealmsScreen {
 		@Override
 		public boolean mouseClicked(double d, double e, int i) {
 			RowButton.rowButtonMouseClicked(RealmsPendingInvitesScreen.this.pendingInvitationSelectionList, this, this.rowButtons, i, d, e);
-			return true;
+			return super.mouseClicked(d, e, i);
 		}
 
 		private void renderPendingInvitationItem(GuiGraphics guiGraphics, PendingInvite pendingInvite, int i, int j, int k, int l) {

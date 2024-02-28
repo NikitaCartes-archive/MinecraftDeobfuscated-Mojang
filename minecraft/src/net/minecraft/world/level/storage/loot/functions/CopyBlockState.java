@@ -8,9 +8,10 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.BlockItemStateProperties;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
@@ -59,20 +60,15 @@ public class CopyBlockState extends LootItemConditionalFunction {
 	protected ItemStack run(ItemStack itemStack, LootContext lootContext) {
 		BlockState blockState = lootContext.getParamOrNull(LootContextParams.BLOCK_STATE);
 		if (blockState != null) {
-			CompoundTag compoundTag = itemStack.getOrCreateTag();
-			CompoundTag compoundTag2;
-			if (compoundTag.contains("BlockStateTag", 10)) {
-				compoundTag2 = compoundTag.getCompound("BlockStateTag");
-			} else {
-				compoundTag2 = new CompoundTag();
-				compoundTag.put("BlockStateTag", compoundTag2);
-			}
-
-			for (Property<?> property : this.properties) {
-				if (blockState.hasProperty(property)) {
-					compoundTag2.putString(property.getName(), serialize(blockState, property));
+			itemStack.update(DataComponents.BLOCK_STATE, BlockItemStateProperties.EMPTY, blockItemStateProperties -> {
+				for (Property<?> property : this.properties) {
+					if (blockState.hasProperty(property)) {
+						blockItemStateProperties = blockItemStateProperties.with(property, blockState);
+					}
 				}
-			}
+
+				return blockItemStateProperties;
+			});
 		}
 
 		return itemStack;
@@ -80,11 +76,6 @@ public class CopyBlockState extends LootItemConditionalFunction {
 
 	public static CopyBlockState.Builder copyState(Block block) {
 		return new CopyBlockState.Builder(block);
-	}
-
-	private static <T extends Comparable<T>> String serialize(BlockState blockState, Property<T> property) {
-		T comparable = blockState.getValue(property);
-		return property.getName(comparable);
 	}
 
 	public static class Builder extends LootItemConditionalFunction.Builder<CopyBlockState.Builder> {

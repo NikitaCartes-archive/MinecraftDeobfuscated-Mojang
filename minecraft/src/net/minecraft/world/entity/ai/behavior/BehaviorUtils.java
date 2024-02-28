@@ -150,13 +150,7 @@ public class BehaviorUtils {
 		Vec3 vec3 = DefaultRandomPos.getPos(pathfinderMob, i, j);
 		int k = 0;
 
-		while (
-			vec3 != null
-				&& !pathfinderMob.level()
-					.getBlockState(BlockPos.containing(vec3))
-					.isPathfindable(pathfinderMob.level(), BlockPos.containing(vec3), PathComputationType.WATER)
-				&& k++ < 10
-		) {
+		while (vec3 != null && !pathfinderMob.level().getBlockState(BlockPos.containing(vec3)).isPathfindable(PathComputationType.WATER) && k++ < 10) {
 			vec3 = DefaultRandomPos.getPos(pathfinderMob, i, j);
 		}
 

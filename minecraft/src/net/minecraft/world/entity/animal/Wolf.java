@@ -4,6 +4,7 @@ import java.util.UUID;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -13,6 +14,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.TimeUtil;
@@ -21,8 +23,10 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgeableMob;
+import net.minecraft.world.entity.Crackiness;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
@@ -54,11 +58,14 @@ import net.minecraft.world.entity.monster.AbstractSkeleton;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Ghast;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ArmorMaterials;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
@@ -76,6 +83,7 @@ public class Wolf extends TamableAnimal implements NeutralMob {
 	};
 	private static final float START_HEALTH = 8.0F;
 	private static final float TAME_HEALTH = 40.0F;
+	private static final float ARMOR_REPAIR_UNIT = 0.125F;
 	private float interestedAngle;
 	private float interestedAngleO;
 	private boolean isWet;
@@ -164,7 +172,7 @@ public class Wolf extends TamableAnimal implements NeutralMob {
 
 	@Override
 	protected SoundEvent getHurtSound(DamageSource damageSource) {
-		return SoundEvents.WOLF_HURT;
+		return this.canArmorAbsorb(damageSource) ? SoundEvents.WOLF_ARMOR_DAMAGE : SoundEvents.WOLF_HURT;
 	}
 
 	@Override
@@ -296,6 +304,38 @@ public class Wolf extends TamableAnimal implements NeutralMob {
 	}
 
 	@Override
+	protected void actuallyHurt(DamageSource damageSource, float f) {
+		if (!this.canArmorAbsorb(damageSource)) {
+			super.actuallyHurt(damageSource, f);
+		} else {
+			ItemStack itemStack = this.getBodyArmorItem();
+			int i = itemStack.getDamageValue();
+			int j = itemStack.getMaxDamage();
+			itemStack.hurtAndBreak(Mth.ceil(f), this, EquipmentSlot.BODY);
+			if (Crackiness.WOLF_ARMOR.byDamage(i, j) != Crackiness.WOLF_ARMOR.byDamage(this.getBodyArmorItem())) {
+				this.playSound(SoundEvents.WOLF_ARMOR_CRACK);
+				if (this.level() instanceof ServerLevel serverLevel) {
+					serverLevel.sendParticles(
+						new ItemParticleOption(ParticleTypes.ITEM, Items.ARMADILLO_SCUTE.getDefaultInstance()),
+						this.getX(),
+						this.getY() + 1.0,
+						this.getZ(),
+						20,
+						0.2,
+						0.1,
+						0.2,
+						0.1
+					);
+				}
+			}
+		}
+	}
+
+	private boolean canArmorAbsorb(DamageSource damageSource) {
+		return this.hasArmor() && !damageSource.is(DamageTypeTags.BYPASSES_WOLF_ARMOR);
+	}
+
+	@Override
 	public boolean doHurtTarget(Entity entity) {
 		boolean bl = entity.hurt(this.damageSources().mobAttack(this), (float)((int)this.getAttributeValue(Attributes.ATTACK_DAMAGE)));
 		if (bl) {
@@ -313,6 +353,11 @@ public class Wolf extends TamableAnimal implements NeutralMob {
 		} else {
 			this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(8.0);
 		}
+	}
+
+	@Override
+	protected void hurtArmor(DamageSource damageSource, float f) {
+		this.doHurtEquipment(damageSource, f, new EquipmentSlot[]{EquipmentSlot.BODY});
 	}
 
 	@Override
@@ -343,12 +388,23 @@ public class Wolf extends TamableAnimal implements NeutralMob {
 					this.setBodyArmorItem(itemStack.copyWithCount(1));
 					itemStack.consume(1, player);
 					return InteractionResult.SUCCESS;
-				} else if (itemStack.is(Items.SHEARS) && this.isOwnedBy(player) && this.hasArmor()) {
+				} else if (itemStack.is(Items.SHEARS) && this.isOwnedBy(player) && this.hasArmor() && !EnchantmentHelper.hasBindingCurse(this.getBodyArmorItem())) {
 					itemStack.hurtAndBreak(1, player, getSlotForHand(interactionHand));
 					this.playSound(SoundEvents.ARMOR_UNEQUIP_WOLF);
 					ItemStack itemStack2 = this.getBodyArmorItem();
 					this.setBodyArmorItem(ItemStack.EMPTY);
 					this.spawnAtLocation(itemStack2);
+					return InteractionResult.SUCCESS;
+				} else if (((Ingredient)ArmorMaterials.ARMADILLO.value().repairIngredient().get()).test(itemStack)
+					&& this.isInSittingPose()
+					&& this.hasArmor()
+					&& this.isOwnedBy(player)
+					&& this.getBodyArmorItem().isDamaged()) {
+					itemStack.shrink(1);
+					this.playSound(SoundEvents.WOLF_ARMOR_REPAIR);
+					ItemStack itemStack2 = this.getBodyArmorItem();
+					int i = (int)((float)itemStack2.getMaxDamage() * 0.125F);
+					itemStack2.setDamageValue(Math.max(0, itemStack2.getDamageValue() - i));
 					return InteractionResult.SUCCESS;
 				} else {
 					InteractionResult interactionResult = super.mobInteract(player, interactionHand);

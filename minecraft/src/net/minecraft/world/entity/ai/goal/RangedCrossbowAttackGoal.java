@@ -1,6 +1,7 @@
 package net.minecraft.world.entity.ai.goal;
 
 import java.util.EnumSet;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.util.TimeUtil;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.entity.LivingEntity;
@@ -11,6 +12,7 @@ import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.ChargedProjectiles;
 
 public class RangedCrossbowAttackGoal<T extends Monster & RangedAttackMob & CrossbowAttackMob> extends Goal {
 	public static final UniformInt PATHFINDING_DELAY_RANGE = TimeUtil.rangeOfSeconds(1, 2);
@@ -56,7 +58,7 @@ public class RangedCrossbowAttackGoal<T extends Monster & RangedAttackMob & Cros
 		if (this.mob.isUsingItem()) {
 			this.mob.stopUsingItem();
 			this.mob.setChargingCrossbow(false);
-			CrossbowItem.setCharged(this.mob.getUseItem(), false);
+			this.mob.getUseItem().set(DataComponents.CHARGED_PROJECTILES, ChargedProjectiles.EMPTY);
 		}
 	}
 
@@ -121,8 +123,6 @@ public class RangedCrossbowAttackGoal<T extends Monster & RangedAttackMob & Cros
 				}
 			} else if (this.crossbowState == RangedCrossbowAttackGoal.CrossbowState.READY_TO_ATTACK && bl) {
 				this.mob.performRangedAttack(livingEntity, 1.0F);
-				ItemStack itemStack2 = this.mob.getItemInHand(ProjectileUtil.getWeaponHoldingHand(this.mob, Items.CROSSBOW));
-				CrossbowItem.setCharged(itemStack2, false);
 				this.crossbowState = RangedCrossbowAttackGoal.CrossbowState.UNCHARGED;
 			}
 		}

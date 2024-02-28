@@ -4,62 +4,76 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Collection;
 import java.util.Optional;
+import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderSet;
+import net.minecraft.core.RegistryCodecs;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.ExtraCodecs;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 
-public record BlockPredicate(
-	Optional<TagKey<Block>> tag, Optional<HolderSet<Block>> blocks, Optional<StatePropertiesPredicate> properties, Optional<NbtPredicate> nbt
-) {
-	private static final Codec<HolderSet<Block>> BLOCKS_CODEC = BuiltInRegistries.BLOCK
-		.holderByNameCodec()
-		.listOf()
-		.xmap(HolderSet::direct, holderSet -> holderSet.stream().toList());
+public record BlockPredicate(Optional<HolderSet<Block>> blocks, Optional<StatePropertiesPredicate> properties, Optional<NbtPredicate> nbt) {
 	public static final Codec<BlockPredicate> CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
-					ExtraCodecs.strictOptionalField(TagKey.codec(Registries.BLOCK), "tag").forGetter(BlockPredicate::tag),
-					ExtraCodecs.strictOptionalField(BLOCKS_CODEC, "blocks").forGetter(BlockPredicate::blocks),
+					ExtraCodecs.strictOptionalField(RegistryCodecs.homogeneousList(Registries.BLOCK), "blocks").forGetter(BlockPredicate::blocks),
 					ExtraCodecs.strictOptionalField(StatePropertiesPredicate.CODEC, "state").forGetter(BlockPredicate::properties),
 					ExtraCodecs.strictOptionalField(NbtPredicate.CODEC, "nbt").forGetter(BlockPredicate::nbt)
 				)
 				.apply(instance, BlockPredicate::new)
+	);
+	public static final StreamCodec<RegistryFriendlyByteBuf, BlockPredicate> STREAM_CODEC = StreamCodec.composite(
+		ByteBufCodecs.optional(ByteBufCodecs.holderSet(Registries.BLOCK)),
+		BlockPredicate::blocks,
+		ByteBufCodecs.optional(StatePropertiesPredicate.STREAM_CODEC),
+		BlockPredicate::properties,
+		ByteBufCodecs.optional(NbtPredicate.STREAM_CODEC),
+		BlockPredicate::nbt,
+		BlockPredicate::new
 	);
 
 	public boolean matches(ServerLevel serverLevel, BlockPos blockPos) {
 		if (!serverLevel.isLoaded(blockPos)) {
 			return false;
 		} else {
-			BlockState blockState = serverLevel.getBlockState(blockPos);
-			if (this.tag.isPresent() && !blockState.is((TagKey<Block>)this.tag.get())) {
-				return false;
-			} else if (this.blocks.isPresent() && !blockState.is((HolderSet<Block>)this.blocks.get())) {
-				return false;
-			} else if (this.properties.isPresent() && !((StatePropertiesPredicate)this.properties.get()).matches(blockState)) {
-				return false;
-			} else {
-				if (this.nbt.isPresent()) {
-					BlockEntity blockEntity = serverLevel.getBlockEntity(blockPos);
-					if (blockEntity == null || !((NbtPredicate)this.nbt.get()).matches(blockEntity.saveWithFullMetadata(serverLevel.registryAccess()))) {
-						return false;
-					}
-				}
-
-				return true;
-			}
+			return !this.matchesState(serverLevel.getBlockState(blockPos))
+				? false
+				: !this.nbt.isPresent() || matchesBlockEntity(serverLevel, serverLevel.getBlockEntity(blockPos), (NbtPredicate)this.nbt.get());
 		}
+	}
+
+	public boolean matches(BlockInWorld blockInWorld) {
+		return !this.matchesState(blockInWorld.getState())
+			? false
+			: !this.nbt.isPresent() || matchesBlockEntity(blockInWorld.getLevel(), blockInWorld.getEntity(), (NbtPredicate)this.nbt.get());
+	}
+
+	private boolean matchesState(BlockState blockState) {
+		return this.blocks.isPresent() && !blockState.is((HolderSet<Block>)this.blocks.get())
+			? false
+			: !this.properties.isPresent() || ((StatePropertiesPredicate)this.properties.get()).matches(blockState);
+	}
+
+	private static boolean matchesBlockEntity(LevelReader levelReader, @Nullable BlockEntity blockEntity, NbtPredicate nbtPredicate) {
+		return blockEntity != null && nbtPredicate.matches(blockEntity.saveWithFullMetadata(levelReader.registryAccess()));
+	}
+
+	public boolean requiresNbt() {
+		return this.nbt.isPresent();
 	}
 
 	public static class Builder {
 		private Optional<HolderSet<Block>> blocks = Optional.empty();
-		private Optional<TagKey<Block>> tag = Optional.empty();
 		private Optional<StatePropertiesPredicate> properties = Optional.empty();
 		private Optional<NbtPredicate> nbt = Optional.empty();
 
@@ -81,7 +95,7 @@ public record BlockPredicate(
 		}
 
 		public BlockPredicate.Builder of(TagKey<Block> tagKey) {
-			this.tag = Optional.of(tagKey);
+			this.blocks = Optional.of(BuiltInRegistries.BLOCK.getOrCreateTag(tagKey));
 			return this;
 		}
 
@@ -96,7 +110,7 @@ public record BlockPredicate(
 		}
 
 		public BlockPredicate build() {
-			return new BlockPredicate(this.tag, this.blocks, this.properties, this.nbt);
+			return new BlockPredicate(this.blocks, this.properties, this.nbt);
 		}
 	}
 }

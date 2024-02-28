@@ -367,6 +367,7 @@ public class VanillaItemTagsProvider extends ItemTagsProvider {
 			.add(Items.CARVED_PUMPKIN);
 		this.tag(ItemTags.CROSSBOW_ENCHANTABLE).add(Items.CROSSBOW);
 		this.tag(ItemTags.VANISHING_ENCHANTABLE).addTag(ItemTags.DURABILITY_ENCHANTABLE).add(Items.COMPASS).add(Items.CARVED_PUMPKIN).addTag(ItemTags.SKULLS);
-		this.tag(ItemTags.DYEABLE).add(Items.LEATHER_HELMET, Items.LEATHER_CHESTPLATE, Items.LEATHER_LEGGINGS, Items.LEATHER_BOOTS, Items.LEATHER_HORSE_ARMOR);
+		this.tag(ItemTags.DYEABLE)
+			.add(Items.LEATHER_HELMET, Items.LEATHER_CHESTPLATE, Items.LEATHER_LEGGINGS, Items.LEATHER_BOOTS, Items.LEATHER_HORSE_ARMOR, Items.WOLF_ARMOR);
 	}
 }

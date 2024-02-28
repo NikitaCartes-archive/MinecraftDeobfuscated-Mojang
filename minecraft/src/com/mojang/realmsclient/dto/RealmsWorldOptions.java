@@ -6,8 +6,8 @@ import java.util.Objects;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.Util;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.util.StringUtil;
 
 @Environment(EnvType.CLIENT)
 public class RealmsWorldOptions extends ValueObject {
@@ -105,7 +105,7 @@ public class RealmsWorldOptions extends ValueObject {
 	}
 
 	public String getSlotName(int i) {
-		if (Util.isBlank(this.slotName)) {
+		if (StringUtil.isBlank(this.slotName)) {
 			return this.empty ? I18n.get("mco.configure.world.slot.empty") : this.getDefaultSlotName(i);
 		} else {
 			return this.slotName;

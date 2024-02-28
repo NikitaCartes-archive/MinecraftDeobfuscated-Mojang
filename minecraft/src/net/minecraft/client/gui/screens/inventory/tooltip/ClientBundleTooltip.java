@@ -5,10 +5,9 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.core.NonNullList;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.inventory.tooltip.BundleTooltip;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.BundleContents;
 
 @Environment(EnvType.CLIENT)
 public class ClientBundleTooltip implements ClientTooltipComponent {
@@ -17,12 +16,10 @@ public class ClientBundleTooltip implements ClientTooltipComponent {
 	private static final int BORDER_WIDTH = 1;
 	private static final int SLOT_SIZE_X = 18;
 	private static final int SLOT_SIZE_Y = 20;
-	private final NonNullList<ItemStack> items;
-	private final int weight;
+	private final BundleContents contents;
 
-	public ClientBundleTooltip(BundleTooltip bundleTooltip) {
-		this.items = bundleTooltip.getItems();
-		this.weight = bundleTooltip.getWeight();
+	public ClientBundleTooltip(BundleContents bundleContents) {
+		this.contents = bundleContents;
 	}
 
 	@Override
@@ -48,7 +45,7 @@ public class ClientBundleTooltip implements ClientTooltipComponent {
 		int k = this.gridSizeX();
 		int l = this.gridSizeY();
 		guiGraphics.blitSprite(BACKGROUND_SPRITE, i, j, this.backgroundWidth(), this.backgroundHeight());
-		boolean bl = this.weight >= 64;
+		boolean bl = this.contents.weight() >= 64;
 		int m = 0;
 
 		for (int n = 0; n < l; n++) {
@@ -61,10 +58,10 @@ public class ClientBundleTooltip implements ClientTooltipComponent {
 	}
 
 	private void renderSlot(int i, int j, int k, boolean bl, GuiGraphics guiGraphics, Font font) {
-		if (k >= this.items.size()) {
+		if (k >= this.contents.size()) {
 			this.blit(guiGraphics, i, j, bl ? ClientBundleTooltip.Texture.BLOCKED_SLOT : ClientBundleTooltip.Texture.SLOT);
 		} else {
-			ItemStack itemStack = this.items.get(k);
+			ItemStack itemStack = this.contents.getItemUnsafe(k);
 			this.blit(guiGraphics, i, j, ClientBundleTooltip.Texture.SLOT);
 			guiGraphics.renderItem(itemStack, i + 1, j + 1, k);
 			guiGraphics.renderItemDecorations(font, itemStack, i + 1, j + 1);
@@ -79,11 +76,11 @@ public class ClientBundleTooltip implements ClientTooltipComponent {
 	}
 
 	private int gridSizeX() {
-		return Math.max(2, (int)Math.ceil(Math.sqrt((double)this.items.size() + 1.0)));
+		return Math.max(2, (int)Math.ceil(Math.sqrt((double)this.contents.size() + 1.0)));
 	}
 
 	private int gridSizeY() {
-		return (int)Math.ceil(((double)this.items.size() + 1.0) / (double)this.gridSizeX());
+		return (int)Math.ceil(((double)this.contents.size() + 1.0) / (double)this.gridSizeX());
 	}
 
 	@Environment(EnvType.CLIENT)

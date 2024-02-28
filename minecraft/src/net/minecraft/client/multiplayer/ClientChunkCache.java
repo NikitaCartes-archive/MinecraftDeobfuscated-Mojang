@@ -21,9 +21,9 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.chunk.ChunkSource;
-import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.EmptyLevelChunk;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 import org.slf4j.Logger;
 

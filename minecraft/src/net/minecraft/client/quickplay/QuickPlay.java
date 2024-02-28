@@ -9,7 +9,6 @@ import com.mojang.realmsclient.gui.screens.RealmsLongRunningMcoTaskScreen;
 import com.mojang.realmsclient.util.task.GetServerDetailsTask;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.ConnectScreen;
 import net.minecraft.client.gui.screens.DisconnectedScreen;
@@ -23,6 +22,7 @@ import net.minecraft.client.multiplayer.ServerList;
 import net.minecraft.client.multiplayer.resolver.ServerAddress;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.StringUtil;
 
 @Environment(EnvType.CLIENT)
 public class QuickPlay {
@@ -38,11 +38,11 @@ public class QuickPlay {
 		String string = quickPlayData.singleplayer();
 		String string2 = quickPlayData.multiplayer();
 		String string3 = quickPlayData.realms();
-		if (!Util.isBlank(string)) {
+		if (!StringUtil.isBlank(string)) {
 			joinSingleplayerWorld(minecraft, string);
-		} else if (!Util.isBlank(string2)) {
+		} else if (!StringUtil.isBlank(string2)) {
 			joinMultiplayerWorld(minecraft, string2);
-		} else if (!Util.isBlank(string3)) {
+		} else if (!StringUtil.isBlank(string3)) {
 			joinRealmsWorld(minecraft, realmsClient, string3);
 		}
 	}
@@ -52,7 +52,7 @@ public class QuickPlay {
 			Screen screen = new SelectWorldScreen(new TitleScreen());
 			minecraft.setScreen(new DisconnectedScreen(screen, ERROR_TITLE, INVALID_IDENTIFIER, TO_WORLD_LIST));
 		} else {
-			minecraft.createWorldOpenFlows().checkForBackupAndLoad(string, () -> minecraft.setScreen(new TitleScreen()));
+			minecraft.createWorldOpenFlows().openWorld(string, () -> minecraft.setScreen(new TitleScreen()));
 		}
 	}
 

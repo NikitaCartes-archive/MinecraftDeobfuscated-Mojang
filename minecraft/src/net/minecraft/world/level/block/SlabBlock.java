@@ -128,12 +128,12 @@ public class SlabBlock extends Block implements SimpleWaterloggedBlock {
 	}
 
 	@Override
-	protected boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
+	protected boolean isPathfindable(BlockState blockState, PathComputationType pathComputationType) {
 		switch (pathComputationType) {
 			case LAND:
 				return false;
 			case WATER:
-				return blockGetter.getFluidState(blockPos).is(FluidTags.WATER);
+				return blockState.getFluidState().is(FluidTags.WATER);
 			case AIR:
 				return false;
 			default:

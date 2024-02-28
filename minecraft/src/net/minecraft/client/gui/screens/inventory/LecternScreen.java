@@ -1,5 +1,6 @@
 package net.minecraft.client.gui.screens.inventory;
 
+import java.util.Objects;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.components.Button;
@@ -97,7 +98,7 @@ public class LecternScreen extends BookViewScreen implements MenuAccess<LecternM
 
 	void bookChanged() {
 		ItemStack itemStack = this.menu.getBook();
-		this.setBookAccess(BookViewScreen.BookAccess.fromItem(itemStack));
+		this.setBookAccess((BookViewScreen.BookAccess)Objects.requireNonNullElse(BookViewScreen.BookAccess.fromItem(itemStack), BookViewScreen.EMPTY_ACCESS));
 	}
 
 	void pageChanged() {

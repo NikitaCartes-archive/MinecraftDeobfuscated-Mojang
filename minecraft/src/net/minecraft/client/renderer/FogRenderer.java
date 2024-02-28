@@ -218,7 +218,7 @@ public class FogRenderer {
 				fogData.end = f * 0.5F;
 			} else if (entity instanceof LivingEntity && ((LivingEntity)entity).hasEffect(MobEffects.FIRE_RESISTANCE)) {
 				fogData.start = 0.0F;
-				fogData.end = 3.0F;
+				fogData.end = 5.0F;
 			} else {
 				fogData.start = 0.25F;
 				fogData.end = 1.0F;

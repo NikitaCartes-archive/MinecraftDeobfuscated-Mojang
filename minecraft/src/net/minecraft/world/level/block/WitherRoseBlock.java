@@ -2,7 +2,6 @@ package net.minecraft.world.level.block;
 
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleTypes;
@@ -13,6 +12,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.component.SuspiciousStewEffects;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -35,8 +35,8 @@ public class WitherRoseBlock extends FlowerBlock {
 		this(makeEffectList(holder, i), properties);
 	}
 
-	public WitherRoseBlock(List<SuspiciousEffectHolder.EffectEntry> list, BlockBehaviour.Properties properties) {
-		super(list, properties);
+	public WitherRoseBlock(SuspiciousStewEffects suspiciousStewEffects, BlockBehaviour.Properties properties) {
+		super(suspiciousStewEffects, properties);
 	}
 
 	@Override

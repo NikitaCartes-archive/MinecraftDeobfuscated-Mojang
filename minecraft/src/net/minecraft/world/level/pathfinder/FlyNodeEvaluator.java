@@ -8,7 +8,6 @@ import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.PathNavigationRegion;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -40,7 +39,10 @@ public class FlyNodeEvaluator extends WalkNodeEvaluator {
 			i = this.mob.getBlockY();
 			BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(this.mob.getX(), (double)i, this.mob.getZ());
 
-			for (BlockState blockState = this.level.getBlockState(mutableBlockPos); blockState.is(Blocks.WATER); blockState = this.level.getBlockState(mutableBlockPos)) {
+			for (BlockState blockState = this.currentContext.getBlockState(mutableBlockPos);
+				blockState.is(Blocks.WATER);
+				blockState = this.currentContext.getBlockState(mutableBlockPos)
+			) {
 				mutableBlockPos.set(this.mob.getX(), (double)(++i), this.mob.getZ());
 			}
 		} else {
@@ -282,15 +284,15 @@ public class FlyNodeEvaluator extends WalkNodeEvaluator {
 	@Override
 	protected PathType getCachedPathType(int i, int j, int k) {
 		return this.pathTypeByPosCache
-			.computeIfAbsent(BlockPos.asLong(i, j, k), (Long2ObjectFunction<? extends PathType>)(l -> this.getPathTypeOfMob(this.level, i, j, k, this.mob)));
+			.computeIfAbsent(BlockPos.asLong(i, j, k), (Long2ObjectFunction<? extends PathType>)(l -> this.getPathTypeOfMob(this.currentContext, i, j, k, this.mob)));
 	}
 
 	@Override
-	public PathType getPathType(BlockGetter blockGetter, int i, int j, int k) {
-		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
-		PathType pathType = getPathTypeFromState(blockGetter, mutableBlockPos.set(i, j, k));
-		if (pathType == PathType.OPEN && j >= blockGetter.getMinBuildHeight() + 1) {
-			PathType pathType2 = getPathTypeFromState(blockGetter, mutableBlockPos.set(i, j - 1, k));
+	public PathType getPathType(PathfindingContext pathfindingContext, int i, int j, int k) {
+		PathType pathType = pathfindingContext.getPathTypeFromState(i, j, k);
+		if (pathType == PathType.OPEN && j >= pathfindingContext.level().getMinBuildHeight() + 1) {
+			BlockPos blockPos = new BlockPos(i, j - 1, k);
+			PathType pathType2 = pathfindingContext.getPathTypeFromState(blockPos.getX(), blockPos.getY(), blockPos.getZ());
 			if (pathType2 == PathType.DAMAGE_FIRE || pathType2 == PathType.LAVA) {
 				pathType = PathType.DAMAGE_FIRE;
 			} else if (pathType2 == PathType.DAMAGE_OTHER) {
@@ -298,7 +300,7 @@ public class FlyNodeEvaluator extends WalkNodeEvaluator {
 			} else if (pathType2 == PathType.COCOA) {
 				pathType = PathType.COCOA;
 			} else if (pathType2 == PathType.FENCE) {
-				if (!mutableBlockPos.equals(this.mob.blockPosition())) {
+				if (!blockPos.equals(pathfindingContext.mobPosition())) {
 					pathType = PathType.FENCE;
 				}
 			} else {
@@ -307,7 +309,7 @@ public class FlyNodeEvaluator extends WalkNodeEvaluator {
 		}
 
 		if (pathType == PathType.WALKABLE || pathType == PathType.OPEN) {
-			pathType = checkNeighbourBlocks(blockGetter, mutableBlockPos.set(i, j, k), pathType);
+			pathType = checkNeighbourBlocks(pathfindingContext, i, j, k, pathType);
 		}
 
 		return pathType;

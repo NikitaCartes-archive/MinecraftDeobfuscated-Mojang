@@ -1,5 +1,9 @@
 package net.minecraft.network.codec;
 
+import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.properties.Property;
+import com.mojang.authlib.properties.PropertyMap;
+import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.DecoderException;
@@ -9,14 +13,17 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.function.Supplier;
 import java.util.function.ToIntFunction;
 import net.minecraft.Util;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
 import net.minecraft.core.IdMap;
 import net.minecraft.core.Registry;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.EndTag;
 import net.minecraft.nbt.NbtAccounter;
@@ -29,10 +36,13 @@ import net.minecraft.network.VarInt;
 import net.minecraft.network.VarLong;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 public interface ByteBufCodecs {
+	int MAX_INITIAL_COLLECTION_SIZE = 65536;
 	StreamCodec<ByteBuf, Boolean> BOOL = new StreamCodec<ByteBuf, Boolean>() {
 		public Boolean decode(ByteBuf byteBuf) {
 			return byteBuf.readBoolean();
@@ -58,6 +68,15 @@ public interface ByteBufCodecs {
 
 		public void encode(ByteBuf byteBuf, Short short_) {
 			byteBuf.writeShort(short_);
+		}
+	};
+	StreamCodec<ByteBuf, Integer> INT = new StreamCodec<ByteBuf, Integer>() {
+		public Integer decode(ByteBuf byteBuf) {
+			return byteBuf.readInt();
+		}
+
+		public void encode(ByteBuf byteBuf, Integer integer) {
+			byteBuf.writeInt(integer);
 		}
 	};
 	StreamCodec<ByteBuf, Integer> VAR_INT = new StreamCodec<ByteBuf, Integer>() {
@@ -106,14 +125,10 @@ public interface ByteBufCodecs {
 		}
 	};
 	StreamCodec<ByteBuf, String> STRING_UTF8 = stringUtf8(32767);
-	StreamCodec<ByteBuf, Tag> TAG = tagCodec(NbtAccounter::unlimitedHeap);
-	StreamCodec<ByteBuf, CompoundTag> COMPOUND_TAG = tagCodec(NbtAccounter::unlimitedHeap).map(tag -> {
-		if (tag instanceof CompoundTag) {
-			return (CompoundTag)tag;
-		} else {
-			throw new DecoderException("Not a compound tag: " + tag);
-		}
-	}, compoundTag -> compoundTag);
+	StreamCodec<ByteBuf, Tag> TAG = tagCodec(() -> NbtAccounter.create(2097152L));
+	StreamCodec<ByteBuf, Tag> TRUSTED_TAG = tagCodec(NbtAccounter::unlimitedHeap);
+	StreamCodec<ByteBuf, CompoundTag> COMPOUND_TAG = compoundTagCodec(() -> NbtAccounter.create(2097152L));
+	StreamCodec<ByteBuf, CompoundTag> TRUSTED_COMPOUND_TAG = compoundTagCodec(NbtAccounter::unlimitedHeap);
 	StreamCodec<ByteBuf, Optional<CompoundTag>> OPTIONAL_COMPOUND_TAG = new StreamCodec<ByteBuf, Optional<CompoundTag>>() {
 		public Optional<CompoundTag> decode(ByteBuf byteBuf) {
 			return Optional.ofNullable(FriendlyByteBuf.readNbt(byteBuf));
@@ -139,6 +154,52 @@ public interface ByteBufCodecs {
 
 		public void encode(ByteBuf byteBuf, Quaternionf quaternionf) {
 			FriendlyByteBuf.writeQuaternion(byteBuf, quaternionf);
+		}
+	};
+	StreamCodec<ByteBuf, PropertyMap> GAME_PROFILE_PROPERTIES = new StreamCodec<ByteBuf, PropertyMap>() {
+		private static final int MAX_PROPERTY_NAME_LENGTH = 64;
+		private static final int MAX_PROPERTY_VALUE_LENGTH = 32767;
+		private static final int MAX_PROPERTY_SIGNATURE_LENGTH = 1024;
+		private static final int MAX_PROPERTIES = 16;
+
+		public PropertyMap decode(ByteBuf byteBuf) {
+			int i = ByteBufCodecs.readCount(byteBuf, 16);
+			PropertyMap propertyMap = new PropertyMap();
+
+			for (int j = 0; j < i; j++) {
+				String string = Utf8String.read(byteBuf, 64);
+				String string2 = Utf8String.read(byteBuf, 32767);
+				String string3 = FriendlyByteBuf.readNullable(byteBuf, byteBufx -> Utf8String.read(byteBufx, 1024));
+				Property property = new Property(string, string2, string3);
+				propertyMap.put(property.name(), property);
+			}
+
+			return propertyMap;
+		}
+
+		public void encode(ByteBuf byteBuf, PropertyMap propertyMap) {
+			ByteBufCodecs.writeCount(byteBuf, propertyMap.size(), 16);
+
+			for (Property property : propertyMap.values()) {
+				Utf8String.write(byteBuf, property.name(), 64);
+				Utf8String.write(byteBuf, property.value(), 32767);
+				FriendlyByteBuf.writeNullable(byteBuf, property.signature(), (byteBufx, string) -> Utf8String.write(byteBufx, string, 1024));
+			}
+		}
+	};
+	StreamCodec<ByteBuf, GameProfile> GAME_PROFILE = new StreamCodec<ByteBuf, GameProfile>() {
+		public GameProfile decode(ByteBuf byteBuf) {
+			UUID uUID = UUIDUtil.STREAM_CODEC.decode(byteBuf);
+			String string = Utf8String.read(byteBuf, 16);
+			GameProfile gameProfile = new GameProfile(uUID, string);
+			gameProfile.getProperties().putAll(ByteBufCodecs.GAME_PROFILE_PROPERTIES.decode(byteBuf));
+			return gameProfile;
+		}
+
+		public void encode(ByteBuf byteBuf, GameProfile gameProfile) {
+			UUIDUtil.STREAM_CODEC.encode(byteBuf, gameProfile.getId());
+			Utf8String.write(byteBuf, gameProfile.getName(), 16);
+			ByteBufCodecs.GAME_PROFILE_PROPERTIES.encode(byteBuf, gameProfile.getProperties());
 		}
 	};
 
@@ -191,17 +252,45 @@ public interface ByteBufCodecs {
 		};
 	}
 
+	static StreamCodec<ByteBuf, CompoundTag> compoundTagCodec(Supplier<NbtAccounter> supplier) {
+		return tagCodec(supplier).map(tag -> {
+			if (tag instanceof CompoundTag) {
+				return (CompoundTag)tag;
+			} else {
+				throw new DecoderException("Not a compound tag: " + tag);
+			}
+		}, compoundTag -> compoundTag);
+	}
+
+	static <T> StreamCodec<ByteBuf, T> fromCodecTrusted(Codec<T> codec) {
+		return fromCodec(codec, NbtAccounter::unlimitedHeap);
+	}
+
 	static <T> StreamCodec<ByteBuf, T> fromCodec(Codec<T> codec) {
-		return TAG.map(
-			tag -> Util.getOrThrow(codec.parse(NbtOps.INSTANCE, tag), string -> new DecoderException("Failed to decode: " + string + " " + tag)),
-			object -> Util.getOrThrow(codec.encodeStart(NbtOps.INSTANCE, (T)object), string -> new EncoderException("Failed to encode: " + string + " " + object))
-		);
+		return fromCodec(codec, () -> NbtAccounter.create(2097152L));
+	}
+
+	static <T> StreamCodec<ByteBuf, T> fromCodec(Codec<T> codec, Supplier<NbtAccounter> supplier) {
+		return tagCodec(supplier)
+			.map(
+				tag -> Util.getOrThrow(codec.parse(NbtOps.INSTANCE, tag), string -> new DecoderException("Failed to decode: " + string + " " + tag)),
+				object -> Util.getOrThrow(codec.encodeStart(NbtOps.INSTANCE, (T)object), string -> new EncoderException("Failed to encode: " + string + " " + object))
+			);
+	}
+
+	static <T> StreamCodec<RegistryFriendlyByteBuf, T> fromCodecWithRegistriesTrusted(Codec<T> codec) {
+		return fromCodecWithRegistries(codec, NbtAccounter::unlimitedHeap);
 	}
 
 	static <T> StreamCodec<RegistryFriendlyByteBuf, T> fromCodecWithRegistries(Codec<T> codec) {
+		return fromCodecWithRegistries(codec, () -> NbtAccounter.create(2097152L));
+	}
+
+	static <T> StreamCodec<RegistryFriendlyByteBuf, T> fromCodecWithRegistries(Codec<T> codec, Supplier<NbtAccounter> supplier) {
+		final StreamCodec<ByteBuf, Tag> streamCodec = tagCodec(supplier);
 		return new StreamCodec<RegistryFriendlyByteBuf, T>() {
 			public T decode(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
-				Tag tag = ByteBufCodecs.TAG.decode(registryFriendlyByteBuf);
+				Tag tag = streamCodec.decode(registryFriendlyByteBuf);
 				RegistryOps<Tag> registryOps = registryFriendlyByteBuf.registryAccess().createSerializationContext(NbtOps.INSTANCE);
 				return Util.getOrThrow(codec.parse(registryOps, tag), string -> new DecoderException("Failed to decode: " + string + " " + tag));
 			}
@@ -209,7 +298,7 @@ public interface ByteBufCodecs {
 			public void encode(RegistryFriendlyByteBuf registryFriendlyByteBuf, T object) {
 				RegistryOps<Tag> registryOps = registryFriendlyByteBuf.registryAccess().createSerializationContext(NbtOps.INSTANCE);
 				Tag tag = Util.getOrThrow(codec.encodeStart(registryOps, object), string -> new EncoderException("Failed to encode: " + string + " " + object));
-				ByteBufCodecs.TAG.encode(registryFriendlyByteBuf, tag);
+				streamCodec.encode(registryFriendlyByteBuf, tag);
 			}
 		};
 	}
@@ -231,11 +320,32 @@ public interface ByteBufCodecs {
 		};
 	}
 
+	static int readCount(ByteBuf byteBuf, int i) {
+		int j = VarInt.read(byteBuf);
+		if (j > i) {
+			throw new DecoderException(j + " elements exceeded max size of: " + i);
+		} else {
+			return j;
+		}
+	}
+
+	static void writeCount(ByteBuf byteBuf, int i, int j) {
+		if (i > j) {
+			throw new EncoderException(i + " elements exceeded max size of: " + j);
+		} else {
+			VarInt.write(byteBuf, i);
+		}
+	}
+
 	static <B extends ByteBuf, V, C extends Collection<V>> StreamCodec<B, C> collection(IntFunction<C> intFunction, StreamCodec<? super B, V> streamCodec) {
+		return collection(intFunction, streamCodec, Integer.MAX_VALUE);
+	}
+
+	static <B extends ByteBuf, V, C extends Collection<V>> StreamCodec<B, C> collection(IntFunction<C> intFunction, StreamCodec<? super B, V> streamCodec, int i) {
 		return new StreamCodec<B, C>() {
 			public C decode(B byteBuf) {
-				int i = VarInt.read(byteBuf);
-				C collection = (C)intFunction.apply(i);
+				int i = ByteBufCodecs.readCount(byteBuf, i);
+				C collection = (C)intFunction.apply(Math.min(i, 65536));
 
 				for (int j = 0; j < i; j++) {
 					collection.add(streamCodec.decode(byteBuf));
@@ -245,7 +355,7 @@ public interface ByteBufCodecs {
 			}
 
 			public void encode(B byteBuf, C collection) {
-				VarInt.write(byteBuf, collection.size());
+				ByteBufCodecs.writeCount(byteBuf, collection.size(), i);
 
 				for (V object : collection) {
 					streamCodec.encode(byteBuf, object);
@@ -262,12 +372,22 @@ public interface ByteBufCodecs {
 		return streamCodec -> collection(ArrayList::new, streamCodec);
 	}
 
+	static <B extends ByteBuf, V> StreamCodec.CodecOperation<B, V, List<V>> list(int i) {
+		return streamCodec -> collection(ArrayList::new, streamCodec, i);
+	}
+
 	static <B extends ByteBuf, K, V, M extends Map<K, V>> StreamCodec<B, M> map(
 		IntFunction<? extends M> intFunction, StreamCodec<? super B, K> streamCodec, StreamCodec<? super B, V> streamCodec2
 	) {
+		return map(intFunction, streamCodec, streamCodec2, Integer.MAX_VALUE);
+	}
+
+	static <B extends ByteBuf, K, V, M extends Map<K, V>> StreamCodec<B, M> map(
+		IntFunction<? extends M> intFunction, StreamCodec<? super B, K> streamCodec, StreamCodec<? super B, V> streamCodec2, int i
+	) {
 		return new StreamCodec<B, M>() {
 			public void encode(B byteBuf, M map) {
-				VarInt.write(byteBuf, map.size());
+				ByteBufCodecs.writeCount(byteBuf, map.size(), i);
 				map.forEach((object, object2) -> {
 					streamCodec.encode(byteBuf, (K)object);
 					streamCodec2.encode(byteBuf, (V)object2);
@@ -275,8 +395,8 @@ public interface ByteBufCodecs {
 			}
 
 			public M decode(B byteBuf) {
-				int i = VarInt.read(byteBuf);
-				M map = (M)intFunction.apply(i);
+				int i = ByteBufCodecs.readCount(byteBuf, i);
+				M map = (M)intFunction.apply(Math.min(i, 65536));
 
 				for (int j = 0; j < i; j++) {
 					K object = streamCodec.decode(byteBuf);
@@ -285,6 +405,24 @@ public interface ByteBufCodecs {
 				}
 
 				return map;
+			}
+		};
+	}
+
+	static <B extends ByteBuf, L, R> StreamCodec<B, Either<L, R>> either(StreamCodec<? super B, L> streamCodec, StreamCodec<? super B, R> streamCodec2) {
+		return new StreamCodec<B, Either<L, R>>() {
+			public Either<L, R> decode(B byteBuf) {
+				return byteBuf.readBoolean() ? Either.left(streamCodec.decode(byteBuf)) : Either.right(streamCodec2.decode(byteBuf));
+			}
+
+			public void encode(B byteBuf, Either<L, R> either) {
+				either.ifLeft(object -> {
+					byteBuf.writeBoolean(true);
+					streamCodec.encode(byteBuf, (L)object);
+				}).ifRight(object -> {
+					byteBuf.writeBoolean(false);
+					streamCodec2.encode(byteBuf, (R)object);
+				});
 			}
 		};
 	}
@@ -359,6 +497,43 @@ public interface ByteBufCodecs {
 					case DIRECT:
 						VarInt.write(registryFriendlyByteBuf, 0);
 						streamCodec.encode(registryFriendlyByteBuf, holder.value());
+				}
+			}
+		};
+	}
+
+	static <T> StreamCodec<RegistryFriendlyByteBuf, HolderSet<T>> holderSet(ResourceKey<? extends Registry<T>> resourceKey) {
+		return new StreamCodec<RegistryFriendlyByteBuf, HolderSet<T>>() {
+			private static final int NAMED_SET = -1;
+			private final StreamCodec<RegistryFriendlyByteBuf, Holder<T>> holderCodec = ByteBufCodecs.holderRegistry(resourceKey);
+
+			public HolderSet<T> decode(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
+				int i = VarInt.read(registryFriendlyByteBuf) - 1;
+				if (i == -1) {
+					Registry<T> registry = registryFriendlyByteBuf.registryAccess().registryOrThrow(resourceKey);
+					return (HolderSet<T>)registry.getTag(TagKey.create(resourceKey, ResourceLocation.STREAM_CODEC.decode(registryFriendlyByteBuf))).orElseThrow();
+				} else {
+					List<Holder<T>> list = new ArrayList(Math.min(i, 65536));
+
+					for (int j = 0; j < i; j++) {
+						list.add(this.holderCodec.decode(registryFriendlyByteBuf));
+					}
+
+					return HolderSet.direct(list);
+				}
+			}
+
+			public void encode(RegistryFriendlyByteBuf registryFriendlyByteBuf, HolderSet<T> holderSet) {
+				Optional<TagKey<T>> optional = holderSet.unwrapKey();
+				if (optional.isPresent()) {
+					VarInt.write(registryFriendlyByteBuf, 0);
+					ResourceLocation.STREAM_CODEC.encode(registryFriendlyByteBuf, ((TagKey)optional.get()).location());
+				} else {
+					VarInt.write(registryFriendlyByteBuf, holderSet.size() + 1);
+
+					for (Holder<T> holder : holderSet) {
+						this.holderCodec.encode(registryFriendlyByteBuf, holder);
+					}
 				}
 			}
 		};

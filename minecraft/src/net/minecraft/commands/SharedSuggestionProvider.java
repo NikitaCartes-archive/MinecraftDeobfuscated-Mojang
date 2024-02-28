@@ -253,9 +253,16 @@ public interface SharedSuggestionProvider {
 
 	static boolean matchesSubStr(String string, String string2) {
 		for (int i = 0; !string2.startsWith(string, i); i++) {
-			i = string2.indexOf(95, i);
-			if (i < 0) {
+			int j = string2.indexOf(46, i);
+			int k = string2.indexOf(95, i);
+			if (Math.max(j, k) < 0) {
 				return false;
+			}
+
+			if (j >= 0 && k >= 0) {
+				i = Math.min(k, j);
+			} else {
+				i = j >= 0 ? j : k;
 			}
 		}
 

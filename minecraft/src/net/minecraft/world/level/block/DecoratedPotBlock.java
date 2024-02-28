@@ -8,6 +8,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -21,23 +22,23 @@ import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.ItemInteractionResult;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.DecoratedPotBlockEntity;
+import net.minecraft.world.level.block.entity.PotDecorations;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
@@ -153,14 +154,7 @@ public class DecoratedPotBlock extends BaseEntityBlock implements SimpleWaterlog
 	}
 
 	@Override
-	public void setPlacedBy(Level level, BlockPos blockPos, BlockState blockState, @Nullable LivingEntity livingEntity, ItemStack itemStack) {
-		if (level.isClientSide) {
-			level.getBlockEntity(blockPos, BlockEntityType.DECORATED_POT).ifPresent(decoratedPotBlockEntity -> decoratedPotBlockEntity.setFromItem(itemStack));
-		}
-	}
-
-	@Override
-	protected boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
+	protected boolean isPathfindable(BlockState blockState, PathComputationType pathComputationType) {
 		return false;
 	}
 
@@ -190,9 +184,11 @@ public class DecoratedPotBlock extends BaseEntityBlock implements SimpleWaterlog
 	protected List<ItemStack> getDrops(BlockState blockState, LootParams.Builder builder) {
 		BlockEntity blockEntity = builder.getOptionalParameter(LootContextParams.BLOCK_ENTITY);
 		if (blockEntity instanceof DecoratedPotBlockEntity decoratedPotBlockEntity) {
-			builder.withDynamicDrop(
-				SHERDS_DYNAMIC_DROP_ID, consumer -> decoratedPotBlockEntity.getDecorations().sorted().map(Item::getDefaultInstance).forEach(consumer)
-			);
+			builder.withDynamicDrop(SHERDS_DYNAMIC_DROP_ID, consumer -> {
+				for (Item item : decoratedPotBlockEntity.getDecorations().ordered()) {
+					consumer.accept(item.getDefaultInstance());
+				}
+			});
 		}
 
 		return super.getDrops(blockState, builder);
@@ -225,11 +221,11 @@ public class DecoratedPotBlock extends BaseEntityBlock implements SimpleWaterlog
 		ItemStack itemStack, @Nullable BlockGetter blockGetter, List<Component> list, TooltipFlag tooltipFlag, @Nullable RegistryAccess registryAccess
 	) {
 		super.appendHoverText(itemStack, blockGetter, list, tooltipFlag, registryAccess);
-		DecoratedPotBlockEntity.Decorations decorations = DecoratedPotBlockEntity.Decorations.load(BlockItem.getBlockEntityData(itemStack));
-		if (!decorations.equals(DecoratedPotBlockEntity.Decorations.EMPTY)) {
+		PotDecorations potDecorations = itemStack.getOrDefault(DataComponents.POT_DECORATIONS, PotDecorations.EMPTY);
+		if (!potDecorations.equals(PotDecorations.EMPTY)) {
 			list.add(CommonComponents.EMPTY);
-			Stream.of(decorations.front(), decorations.left(), decorations.right(), decorations.back())
-				.forEach(item -> list.add(new ItemStack(item, 1).getHoverName().plainCopy().withStyle(ChatFormatting.GRAY)));
+			Stream.of(potDecorations.front(), potDecorations.left(), potDecorations.right(), potDecorations.back())
+				.forEach(optional -> list.add(new ItemStack((ItemLike)optional.orElse(Items.BRICK), 1).getHoverName().plainCopy().withStyle(ChatFormatting.GRAY)));
 		}
 	}
 

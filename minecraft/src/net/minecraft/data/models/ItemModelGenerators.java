@@ -54,6 +54,10 @@ public class ItemModelGenerators {
 		modelTemplate.create(ModelLocationUtils.getModelLocation(item), TextureMapping.layer0(item2), this.output);
 	}
 
+	private void generateItemWithOverlay(Item item) {
+		this.generateLayeredItem(ModelLocationUtils.getModelLocation(item), TextureMapping.getItemTexture(item), TextureMapping.getItemTexture(item, "_overlay"));
+	}
+
 	private void generateCompassItem(Item item) {
 		for (int i = 0; i < 32; i++) {
 			if (i != 16) {
@@ -143,6 +147,7 @@ public class ItemModelGenerators {
 		this.generateFlatItem(Items.CHERRY_CHEST_BOAT, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.AMETHYST_SHARD, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.APPLE, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.ARMADILLO_SCUTE, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.ARMOR_STAND, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.ARROW, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.BAKED_POTATO, ModelTemplates.FLAT_ITEM);
@@ -330,8 +335,6 @@ public class ItemModelGenerators {
 		this.generateFlatItem(Items.SALMON, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.SALMON_BUCKET, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.TURTLE_SCUTE, ModelTemplates.FLAT_ITEM);
-		this.generateFlatItem(Items.ARMADILLO_SCUTE, ModelTemplates.FLAT_ITEM);
-		this.generateFlatItem(Items.WOLF_ARMOR, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.SHEARS, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.SHULKER_SHELL, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.SKULL_BANNER_PATTERN, ModelTemplates.FLAT_ITEM);
@@ -362,6 +365,7 @@ public class ItemModelGenerators {
 		this.generateFlatItem(Items.WHEAT, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.WHITE_DYE, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.WIND_CHARGE, ModelTemplates.FLAT_ITEM);
+		this.generateItemWithOverlay(Items.WOLF_ARMOR);
 		this.generateFlatItem(Items.WOODEN_AXE, ModelTemplates.FLAT_HANDHELD_ITEM);
 		this.generateFlatItem(Items.WOODEN_HOE, ModelTemplates.FLAT_HANDHELD_ITEM);
 		this.generateFlatItem(Items.WOODEN_PICKAXE, ModelTemplates.FLAT_HANDHELD_ITEM);

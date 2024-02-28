@@ -6,7 +6,7 @@ import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -19,7 +19,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.Potion;
-import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.AbstractCandleBlock;
@@ -62,13 +62,11 @@ public class ThrownPotion extends ThrowableItemProjectile implements ItemSupplie
 		super.onHitBlock(blockHitResult);
 		if (!this.level().isClientSide) {
 			ItemStack itemStack = this.getItem();
-			Holder<Potion> holder = PotionUtils.getPotion(itemStack);
-			List<MobEffectInstance> list = PotionUtils.getMobEffects(itemStack);
-			boolean bl = holder.is(Potions.WATER) && list.isEmpty();
 			Direction direction = blockHitResult.getDirection();
 			BlockPos blockPos = blockHitResult.getBlockPos();
 			BlockPos blockPos2 = blockPos.relative(direction);
-			if (bl) {
+			PotionContents potionContents = itemStack.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY);
+			if (potionContents.is(Potions.WATER)) {
 				this.dowseFire(blockPos2);
 				this.dowseFire(blockPos2.relative(direction.getOpposite()));
 
@@ -84,21 +82,19 @@ public class ThrownPotion extends ThrowableItemProjectile implements ItemSupplie
 		super.onHit(hitResult);
 		if (!this.level().isClientSide) {
 			ItemStack itemStack = this.getItem();
-			Holder<Potion> holder = PotionUtils.getPotion(itemStack);
-			List<MobEffectInstance> list = PotionUtils.getMobEffects(itemStack);
-			boolean bl = holder.is(Potions.WATER) && list.isEmpty();
-			if (bl) {
+			PotionContents potionContents = itemStack.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY);
+			if (potionContents.is(Potions.WATER)) {
 				this.applyWater();
-			} else if (!list.isEmpty()) {
+			} else if (potionContents.hasEffects()) {
 				if (this.isLingering()) {
-					this.makeAreaOfEffectCloud(itemStack, holder);
+					this.makeAreaOfEffectCloud(potionContents);
 				} else {
-					this.applySplash(list, hitResult.getType() == HitResult.Type.ENTITY ? ((EntityHitResult)hitResult).getEntity() : null);
+					this.applySplash(potionContents.getAllEffects(), hitResult.getType() == HitResult.Type.ENTITY ? ((EntityHitResult)hitResult).getEntity() : null);
 				}
 			}
 
-			int i = holder.value().hasInstantEffects() ? 2007 : 2002;
-			this.level().levelEvent(i, this.blockPosition(), PotionUtils.getColor(itemStack));
+			int i = potionContents.potion().isPresent() && ((Potion)((Holder)potionContents.potion().get()).value()).hasInstantEffects() ? 2007 : 2002;
+			this.level().levelEvent(i, this.blockPosition(), potionContents.getColor());
 			this.discard();
 		}
 	}
@@ -124,13 +120,13 @@ public class ThrownPotion extends ThrowableItemProjectile implements ItemSupplie
 		}
 	}
 
-	private void applySplash(List<MobEffectInstance> list, @Nullable Entity entity) {
+	private void applySplash(Iterable<MobEffectInstance> iterable, @Nullable Entity entity) {
 		AABB aABB = this.getBoundingBox().inflate(4.0, 2.0, 4.0);
-		List<LivingEntity> list2 = this.level().getEntitiesOfClass(LivingEntity.class, aABB);
-		if (!list2.isEmpty()) {
+		List<LivingEntity> list = this.level().getEntitiesOfClass(LivingEntity.class, aABB);
+		if (!list.isEmpty()) {
 			Entity entity2 = this.getEffectSource();
 
-			for (LivingEntity livingEntity : list2) {
+			for (LivingEntity livingEntity : list) {
 				if (livingEntity.isAffectedByPotions()) {
 					double d = this.distanceToSqr(livingEntity);
 					if (d < 16.0) {
@@ -141,7 +137,7 @@ public class ThrownPotion extends ThrowableItemProjectile implements ItemSupplie
 							e = 1.0 - Math.sqrt(d) / 4.0;
 						}
 
-						for (MobEffectInstance mobEffectInstance : list) {
+						for (MobEffectInstance mobEffectInstance : iterable) {
 							Holder<MobEffect> holder = mobEffectInstance.getEffect();
 							if (holder.value().isInstantenous()) {
 								holder.value().applyInstantenousEffect(this, this.getOwner(), livingEntity, mobEffectInstance.getAmplifier(), e);
@@ -161,7 +157,7 @@ public class ThrownPotion extends ThrowableItemProjectile implements ItemSupplie
 		}
 	}
 
-	private void makeAreaOfEffectCloud(ItemStack itemStack, Holder<Potion> holder) {
+	private void makeAreaOfEffectCloud(PotionContents potionContents) {
 		AreaEffectCloud areaEffectCloud = new AreaEffectCloud(this.level(), this.getX(), this.getY(), this.getZ());
 		if (this.getOwner() instanceof LivingEntity livingEntity) {
 			areaEffectCloud.setOwner(livingEntity);
@@ -171,17 +167,7 @@ public class ThrownPotion extends ThrowableItemProjectile implements ItemSupplie
 		areaEffectCloud.setRadiusOnUse(-0.5F);
 		areaEffectCloud.setWaitTime(10);
 		areaEffectCloud.setRadiusPerTick(-areaEffectCloud.getRadius() / (float)areaEffectCloud.getDuration());
-		areaEffectCloud.setPotion(holder);
-
-		for (MobEffectInstance mobEffectInstance : PotionUtils.getCustomEffects(itemStack)) {
-			areaEffectCloud.addEffect(new MobEffectInstance(mobEffectInstance));
-		}
-
-		CompoundTag compoundTag = itemStack.getTag();
-		if (compoundTag != null && compoundTag.contains("CustomPotionColor", 99)) {
-			areaEffectCloud.setFixedColor(compoundTag.getInt("CustomPotionColor"));
-		}
-
+		areaEffectCloud.setPotionContents(potionContents);
 		this.level().addFreshEntity(areaEffectCloud);
 	}
 

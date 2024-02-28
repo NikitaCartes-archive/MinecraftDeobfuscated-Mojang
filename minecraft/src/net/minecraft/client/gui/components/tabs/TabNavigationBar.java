@@ -1,6 +1,7 @@
 package net.minecraft.client.gui.components.tabs;
 
 import com.google.common.collect.ImmutableList;
+import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -16,7 +17,7 @@ import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.TabButton;
 import net.minecraft.client.gui.components.events.AbstractContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.gui.layouts.GridLayout;
+import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -34,7 +35,7 @@ public class TabNavigationBar extends AbstractContainerEventHandler implements R
 	private static final int HEIGHT = 24;
 	private static final int MARGIN = 14;
 	private static final Component USAGE_NARRATION = Component.translatable("narration.tab_navigation.usage");
-	private final GridLayout layout;
+	private final LinearLayout layout = LinearLayout.horizontal();
 	private int width;
 	private final TabManager tabManager;
 	private final ImmutableList<Tab> tabs;
@@ -44,13 +45,11 @@ public class TabNavigationBar extends AbstractContainerEventHandler implements R
 		this.width = i;
 		this.tabManager = tabManager;
 		this.tabs = ImmutableList.copyOf(iterable);
-		this.layout = new GridLayout(0, 0);
 		this.layout.defaultCellSetting().alignHorizontallyCenter();
 		ImmutableList.Builder<TabButton> builder = ImmutableList.builder();
-		int j = 0;
 
 		for (Tab tab : iterable) {
-			builder.add(this.layout.addChild(new TabButton(tabManager, tab, 0, 24), 0, j++));
+			builder.add(this.layout.addChild(new TabButton(tabManager, tab, 0, 24)));
 		}
 
 		this.tabButtons = builder.build();
@@ -130,8 +129,13 @@ public class TabNavigationBar extends AbstractContainerEventHandler implements R
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-		guiGraphics.fill(0, 0, this.width, 24, -16777216);
-		guiGraphics.blit(CreateWorldScreen.HEADER_SEPERATOR, 0, this.layout.getY() + this.layout.getHeight() - 2, 0.0F, 0.0F, this.width, 2, 32, 2);
+		RenderSystem.enableBlend();
+		guiGraphics.blit(
+			CreateWorldScreen.HEADER_SEPARATOR, 0, this.layout.getY() + this.layout.getHeight() - 2, 0.0F, 0.0F, ((TabButton)this.tabButtons.get(0)).getX(), 2, 32, 2
+		);
+		int k = ((TabButton)this.tabButtons.get(this.tabButtons.size() - 1)).getRight();
+		guiGraphics.blit(CreateWorldScreen.HEADER_SEPARATOR, k, this.layout.getY() + this.layout.getHeight() - 2, 0.0F, 0.0F, this.width, 2, 32, 2);
+		RenderSystem.disableBlend();
 
 		for (TabButton tabButton : this.tabButtons) {
 			tabButton.render(guiGraphics, i, j, f);

@@ -227,6 +227,10 @@ public class CycleButton<T> extends AbstractButton {
 			return this;
 		}
 
+		public CycleButton<T> create(Component component, CycleButton.OnValueChange<T> onValueChange) {
+			return this.create(0, 0, 150, 20, component, onValueChange);
+		}
+
 		public CycleButton<T> create(int i, int j, int k, int l, Component component) {
 			return this.create(i, j, k, l, component, (cycleButton, object) -> {
 			});

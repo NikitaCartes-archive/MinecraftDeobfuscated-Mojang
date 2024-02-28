@@ -248,6 +248,16 @@ public class GuiGraphics {
 		vertexConsumer.vertex(matrix4f, (float)k, (float)j, (float)m).color(g, h, p, f).endVertex();
 	}
 
+	public void fillRenderType(RenderType renderType, int i, int j, int k, int l, int m) {
+		Matrix4f matrix4f = this.pose.last().pose();
+		VertexConsumer vertexConsumer = this.bufferSource.getBuffer(renderType);
+		vertexConsumer.vertex(matrix4f, (float)i, (float)j, (float)m).endVertex();
+		vertexConsumer.vertex(matrix4f, (float)i, (float)l, (float)m).endVertex();
+		vertexConsumer.vertex(matrix4f, (float)k, (float)l, (float)m).endVertex();
+		vertexConsumer.vertex(matrix4f, (float)k, (float)j, (float)m).endVertex();
+		this.flushIfUnmanaged();
+	}
+
 	public void drawCenteredString(Font font, String string, int i, int j, int k) {
 		this.drawString(font, string, i - font.width(string) / 2, j, k);
 	}
@@ -563,8 +573,7 @@ public class GuiGraphics {
 				CrashReport crashReport = CrashReport.forThrowable(var12, "Rendering item");
 				CrashReportCategory crashReportCategory = crashReport.addCategory("Item being rendered");
 				crashReportCategory.setDetail("Item Type", (CrashReportDetail<String>)(() -> String.valueOf(itemStack.getItem())));
-				crashReportCategory.setDetail("Item Damage", (CrashReportDetail<String>)(() -> String.valueOf(itemStack.getDamageValue())));
-				crashReportCategory.setDetail("Item NBT", (CrashReportDetail<String>)(() -> String.valueOf(itemStack.getTag())));
+				crashReportCategory.setDetail("Item Components", (CrashReportDetail<String>)(() -> String.valueOf(itemStack.getComponents())));
 				crashReportCategory.setDetail("Item Foil", (CrashReportDetail<String>)(() -> String.valueOf(itemStack.hasFoil())));
 				throw new ReportedException(crashReport);
 			}

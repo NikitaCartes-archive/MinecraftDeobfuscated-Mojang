@@ -4,6 +4,8 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.layouts.Layout;
+import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -22,17 +24,22 @@ public class SafetyScreen extends WarningScreen {
 	}
 
 	@Override
-	protected void initButtons(int i) {
-		this.addRenderableWidget(Button.builder(CommonComponents.GUI_PROCEED, button -> {
+	protected Layout addFooterButtons() {
+		LinearLayout linearLayout = LinearLayout.horizontal().spacing(8);
+		linearLayout.addChild(Button.builder(CommonComponents.GUI_PROCEED, button -> {
 			if (this.stopShowing.selected()) {
 				this.minecraft.options.skipMultiplayerWarning = true;
 				this.minecraft.options.save();
 			}
 
 			this.minecraft.setScreen(new JoinMultiplayerScreen(this.previous));
-		}).bounds(this.width / 2 - 155, 100 + i, 150, 20).build());
-		this.addRenderableWidget(
-			Button.builder(CommonComponents.GUI_BACK, button -> this.minecraft.setScreen(this.previous)).bounds(this.width / 2 - 155 + 160, 100 + i, 150, 20).build()
-		);
+		}).build());
+		linearLayout.addChild(Button.builder(CommonComponents.GUI_BACK, button -> this.onClose()).build());
+		return linearLayout;
+	}
+
+	@Override
+	public void onClose() {
+		this.minecraft.setScreen(this.previous);
 	}
 }

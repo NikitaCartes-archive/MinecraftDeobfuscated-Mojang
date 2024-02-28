@@ -1,6 +1,10 @@
 package net.minecraft.network.chat;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonParser;
 import com.mojang.datafixers.util.Either;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
@@ -25,16 +29,54 @@ import net.minecraft.network.chat.contents.SelectorContents;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.util.ExtraCodecs;
+import net.minecraft.util.GsonHelper;
 import net.minecraft.util.StringRepresentable;
 
 public class ComponentSerialization {
 	public static final Codec<Component> CODEC = ExtraCodecs.recursive("Component", ComponentSerialization::createCodec);
 	public static final StreamCodec<RegistryFriendlyByteBuf, Component> STREAM_CODEC = ByteBufCodecs.fromCodecWithRegistries(CODEC);
 	public static final StreamCodec<RegistryFriendlyByteBuf, Optional<Component>> OPTIONAL_STREAM_CODEC = STREAM_CODEC.apply(ByteBufCodecs::optional);
-	public static final StreamCodec<ByteBuf, Component> CONTEXT_FREE_STREAM_CODEC = ByteBufCodecs.fromCodec(CODEC);
-	public static final Codec<Component> FLAT_CODEC = ExtraCodecs.FLAT_JSON
-		.flatXmap(jsonElement -> CODEC.parse(JsonOps.INSTANCE, jsonElement), component -> CODEC.encodeStart(JsonOps.INSTANCE, component));
+	public static final StreamCodec<RegistryFriendlyByteBuf, Component> TRUSTED_STREAM_CODEC = ByteBufCodecs.fromCodecWithRegistriesTrusted(CODEC);
+	public static final StreamCodec<RegistryFriendlyByteBuf, Optional<Component>> TRUSTED_OPTIONAL_STREAM_CODEC = TRUSTED_STREAM_CODEC.apply(
+		ByteBufCodecs::optional
+	);
+	public static final StreamCodec<ByteBuf, Component> TRUSTED_CONTEXT_FREE_STREAM_CODEC = ByteBufCodecs.fromCodecTrusted(CODEC);
+	public static final Codec<Component> FLAT_CODEC = flatCodec(Integer.MAX_VALUE);
+
+	public static Codec<Component> flatCodec(int i) {
+		final Codec<String> codec = ExtraCodecs.sizeLimitedString(0, i);
+		return new Codec<Component>() {
+			@Override
+			public <T> DataResult<Pair<Component, T>> decode(DynamicOps<T> dynamicOps, T object) {
+				DynamicOps<JsonElement> dynamicOps2 = asJsonOps(dynamicOps);
+				return codec.decode(dynamicOps, object).flatMap(pair -> {
+					try {
+						JsonElement jsonElement = JsonParser.parseString((String)pair.getFirst());
+						return ComponentSerialization.CODEC.parse(dynamicOps2, jsonElement).map(component -> Pair.of(component, pair.getSecond()));
+					} catch (JsonParseException var3x) {
+						return DataResult.error(var3x::getMessage);
+					}
+				});
+			}
+
+			public <T> DataResult<T> encode(Component component, DynamicOps<T> dynamicOps, T object) {
+				DynamicOps<JsonElement> dynamicOps2 = asJsonOps(dynamicOps);
+				return ComponentSerialization.CODEC.encodeStart(dynamicOps2, component).flatMap(jsonElement -> {
+					try {
+						return codec.encodeStart(dynamicOps, GsonHelper.toStableString(jsonElement));
+					} catch (IllegalArgumentException var4x) {
+						return DataResult.error(var4x::getMessage);
+					}
+				});
+			}
+
+			private static <T> DynamicOps<JsonElement> asJsonOps(DynamicOps<T> dynamicOps) {
+				return (DynamicOps<JsonElement>)(dynamicOps instanceof RegistryOps<T> registryOps ? registryOps.withParent(JsonOps.INSTANCE) : JsonOps.INSTANCE);
+			}
+		};
+	}
 
 	private static MutableComponent createFromList(List<Component> list) {
 		MutableComponent mutableComponent = ((Component)list.get(0)).copy();

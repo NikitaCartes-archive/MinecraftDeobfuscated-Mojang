@@ -35,6 +35,7 @@ import net.minecraft.advancements.critereon.StatePropertiesPredicate;
 import net.minecraft.advancements.critereon.SummonedEntityTrigger;
 import net.minecraft.advancements.critereon.TagPredicate;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.advancements.AdvancementSubProvider;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -130,7 +131,12 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 				true,
 				false
 			)
-			.addCriterion("fortress", PlayerTrigger.TriggerInstance.located(LocationPredicate.Builder.inStructure(BuiltinStructures.FORTRESS)))
+			.addCriterion(
+				"fortress",
+				PlayerTrigger.TriggerInstance.located(
+					LocationPredicate.Builder.inStructure(provider.lookupOrThrow(Registries.STRUCTURE).getOrThrow(BuiltinStructures.FORTRESS))
+				)
+			)
 			.save(consumer, "nether/find_fortress");
 		Advancement.Builder.advancement()
 			.parent(advancementHolder)
@@ -464,7 +470,7 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 				)
 			)
 			.save(consumer, "nether/ride_strider_in_overworld_lava");
-		VanillaAdventureAdvancements.addBiomes(Advancement.Builder.advancement(), MultiNoiseBiomeSourceParameterList.Preset.NETHER.usedBiomes().toList())
+		VanillaAdventureAdvancements.addBiomes(Advancement.Builder.advancement(), provider, MultiNoiseBiomeSourceParameterList.Preset.NETHER.usedBiomes().toList())
 			.parent(advancementHolder12)
 			.display(
 				Items.NETHERITE_BOOTS,
@@ -490,7 +496,12 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 				true,
 				false
 			)
-			.addCriterion("bastion", PlayerTrigger.TriggerInstance.located(LocationPredicate.Builder.inStructure(BuiltinStructures.BASTION_REMNANT)))
+			.addCriterion(
+				"bastion",
+				PlayerTrigger.TriggerInstance.located(
+					LocationPredicate.Builder.inStructure(provider.lookupOrThrow(Registries.STRUCTURE).getOrThrow(BuiltinStructures.BASTION_REMNANT))
+				)
+			)
 			.save(consumer, "nether/find_bastion");
 		Advancement.Builder.advancement()
 			.parent(advancementHolder13)

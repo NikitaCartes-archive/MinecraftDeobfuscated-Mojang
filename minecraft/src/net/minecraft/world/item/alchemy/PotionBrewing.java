@@ -2,8 +2,10 @@ package net.minecraft.world.item.alchemy;
 
 import com.google.common.collect.Lists;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Predicate;
 import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -75,36 +77,42 @@ public class PotionBrewing {
 	}
 
 	protected static boolean hasPotionMix(ItemStack itemStack, ItemStack itemStack2) {
-		Holder<Potion> holder = PotionUtils.getPotion(itemStack);
-
-		for (PotionBrewing.Mix<Potion> mix : POTION_MIXES) {
-			if (mix.from.is(holder) && mix.ingredient.test(itemStack2)) {
-				return true;
+		Optional<Holder<Potion>> optional = itemStack.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY).potion();
+		if (optional.isEmpty()) {
+			return false;
+		} else {
+			for (PotionBrewing.Mix<Potion> mix : POTION_MIXES) {
+				if (mix.from.is((Holder<Potion>)optional.get()) && mix.ingredient.test(itemStack2)) {
+					return true;
+				}
 			}
-		}
 
-		return false;
+			return false;
+		}
 	}
 
 	public static ItemStack mix(ItemStack itemStack, ItemStack itemStack2) {
 		if (itemStack2.isEmpty()) {
 			return itemStack2;
 		} else {
-			Holder<Potion> holder = PotionUtils.getPotion(itemStack2);
-
-			for (PotionBrewing.Mix<Item> mix : CONTAINER_MIXES) {
-				if (itemStack2.is(mix.from) && mix.ingredient.test(itemStack)) {
-					return PotionUtils.setPotion(new ItemStack(mix.to), holder);
+			Optional<Holder<Potion>> optional = itemStack2.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY).potion();
+			if (optional.isEmpty()) {
+				return itemStack2;
+			} else {
+				for (PotionBrewing.Mix<Item> mix : CONTAINER_MIXES) {
+					if (itemStack2.is(mix.from) && mix.ingredient.test(itemStack)) {
+						return PotionContents.createItemStack(mix.to.value(), (Holder<Potion>)optional.get());
+					}
 				}
-			}
 
-			for (PotionBrewing.Mix<Potion> mixx : POTION_MIXES) {
-				if (mixx.from.is(holder) && mixx.ingredient.test(itemStack)) {
-					return PotionUtils.setPotion(new ItemStack(itemStack2.getItem()), mixx.to);
+				for (PotionBrewing.Mix<Potion> mixx : POTION_MIXES) {
+					if (mixx.from.is((Holder<Potion>)optional.get()) && mixx.ingredient.test(itemStack)) {
+						return PotionContents.createItemStack(itemStack2.getItem(), mixx.to);
+					}
 				}
-			}
 
-			return itemStack2;
+				return itemStack2;
+			}
 		}
 	}
 

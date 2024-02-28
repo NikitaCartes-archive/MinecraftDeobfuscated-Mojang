@@ -47,7 +47,7 @@ public enum TrialSpawnerState implements StringRepresentable {
 		return switch (this) {
 			case INACTIVE -> trialSpawnerData.getOrCreateDisplayEntity(trialSpawner, serverLevel, WAITING_FOR_PLAYERS) == null ? this : WAITING_FOR_PLAYERS;
 			case WAITING_FOR_PLAYERS -> {
-				if (!trialSpawnerData.hasMobToSpawn()) {
+				if (!trialSpawnerData.hasMobToSpawn(trialSpawner, serverLevel.random)) {
 					yield INACTIVE;
 				} else {
 					trialSpawnerData.tryDetectPlayers(serverLevel, blockPos, playerDetector, entitySelector, trialSpawnerConfig.requiredPlayerRange());
@@ -55,7 +55,7 @@ public enum TrialSpawnerState implements StringRepresentable {
 				}
 			}
 			case ACTIVE -> {
-				if (!trialSpawnerData.hasMobToSpawn()) {
+				if (!trialSpawnerData.hasMobToSpawn(trialSpawner, serverLevel.random)) {
 					yield INACTIVE;
 				} else {
 					int i = trialSpawnerData.countAdditionalPlayers(blockPos);

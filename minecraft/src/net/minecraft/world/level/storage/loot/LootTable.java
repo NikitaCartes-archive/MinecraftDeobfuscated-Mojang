@@ -30,6 +30,7 @@ public class LootTable {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	public static final LootTable EMPTY = new LootTable(LootContextParamSets.EMPTY, Optional.empty(), List.of(), List.of());
 	public static final LootContextParamSet DEFAULT_PARAM_SET = LootContextParamSets.ALL_PARAMS;
+	public static final long RANDOMIZE_SEED = 0L;
 	public static final Codec<LootTable> CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
 					LootContextParamSets.CODEC.optionalFieldOf("type", DEFAULT_PARAM_SET).forGetter(lootTable -> lootTable.paramSet),

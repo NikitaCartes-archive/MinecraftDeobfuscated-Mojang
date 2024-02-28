@@ -9,12 +9,9 @@ import java.util.function.Consumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.MultiLineTextWidget;
-import net.minecraft.client.gui.components.StringWidget;
-import net.minecraft.client.gui.layouts.GridLayout;
 import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
 import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.client.gui.screens.Screen;
@@ -27,6 +24,7 @@ import net.minecraft.server.packs.repository.PackSource;
 
 @Environment(EnvType.CLIENT)
 public class ExperimentsScreen extends Screen {
+	private static final Component TITLE = Component.translatable("selectWorld.experiments");
 	private static final int MAIN_CONTENT_WIDTH = 310;
 	private final HeaderAndFooterLayout layout = new HeaderAndFooterLayout(this);
 	private final Screen parent;
@@ -35,7 +33,7 @@ public class ExperimentsScreen extends Screen {
 	private final Object2BooleanMap<Pack> packs = new Object2BooleanLinkedOpenHashMap<>();
 
 	public ExperimentsScreen(Screen screen, PackRepository packRepository, Consumer<PackRepository> consumer) {
-		super(Component.translatable("experiments_screen.title"));
+		super(TITLE);
 		this.parent = screen;
 		this.packRepository = packRepository;
 		this.output = consumer;
@@ -49,7 +47,7 @@ public class ExperimentsScreen extends Screen {
 
 	@Override
 	protected void init() {
-		this.layout.addToHeader(new StringWidget(Component.translatable("selectWorld.experiments"), this.font));
+		this.layout.addTitleHeader(TITLE, this.font);
 		LinearLayout linearLayout = this.layout.addToContents(LinearLayout.vertical());
 		linearLayout.addChild(
 			new MultiLineTextWidget(Component.translatable("selectWorld.experiments.info").withStyle(ChatFormatting.RED), this.font).setMaxWidth(310),
@@ -64,9 +62,9 @@ public class ExperimentsScreen extends Screen {
 						.withInfo(pack.getDescription())
 			);
 		builder.build(linearLayout::addChild);
-		GridLayout.RowHelper rowHelper = this.layout.addToFooter(new GridLayout().columnSpacing(10)).createRowHelper(2);
-		rowHelper.addChild(Button.builder(CommonComponents.GUI_DONE, button -> this.onDone()).build());
-		rowHelper.addChild(Button.builder(CommonComponents.GUI_CANCEL, button -> this.onClose()).build());
+		LinearLayout linearLayout2 = this.layout.addToFooter(LinearLayout.horizontal().spacing(8));
+		linearLayout2.addChild(Button.builder(CommonComponents.GUI_DONE, button -> this.onDone()).build());
+		linearLayout2.addChild(Button.builder(CommonComponents.GUI_CANCEL, button -> this.onClose()).build());
 		this.layout.visitWidgets(guiEventListener -> {
 			AbstractWidget var10000 = this.addRenderableWidget(guiEventListener);
 		});
@@ -100,24 +98,5 @@ public class ExperimentsScreen extends Screen {
 	@Override
 	protected void repositionElements() {
 		this.layout.arrangeElements();
-	}
-
-	@Override
-	public void renderBackground(GuiGraphics guiGraphics, int i, int j, float f) {
-		super.renderBackground(guiGraphics, i, j, f);
-		guiGraphics.setColor(0.125F, 0.125F, 0.125F, 1.0F);
-		int k = 32;
-		guiGraphics.blit(
-			BACKGROUND_LOCATION,
-			0,
-			this.layout.getHeaderHeight(),
-			0.0F,
-			0.0F,
-			this.width,
-			this.height - this.layout.getHeaderHeight() - this.layout.getFooterHeight(),
-			32,
-			32
-		);
-		guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
 	}
 }

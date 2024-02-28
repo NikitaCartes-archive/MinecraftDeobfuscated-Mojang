@@ -1,6 +1,7 @@
 package net.minecraft.world.entity.animal.horse;
 
 import javax.annotation.Nullable;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.entity.EntityType;
@@ -12,6 +13,7 @@ import net.minecraft.world.entity.monster.Skeleton;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
 
 public class SkeletonTrapGoal extends Goal {
 	private final SkeletonHorse horse;
@@ -108,7 +110,7 @@ public class SkeletonTrapGoal extends Goal {
 	}
 
 	private ItemStack disenchant(ItemStack itemStack) {
-		itemStack.removeTagKey("Enchantments");
+		itemStack.set(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY);
 		return itemStack;
 	}
 }

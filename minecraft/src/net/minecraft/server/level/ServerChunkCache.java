@@ -3,12 +3,10 @@ package net.minecraft.server.level;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.mojang.datafixers.DataFixer;
-import com.mojang.datafixers.util.Either;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.BooleanSupplier;
@@ -35,9 +33,9 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.chunk.ChunkGeneratorStructureState;
 import net.minecraft.world.level.chunk.ChunkSource;
-import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LightChunk;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.chunk.storage.ChunkScanAccess;
 import net.minecraft.world.level.entity.ChunkStatusUpdateListener;
 import net.minecraft.world.level.levelgen.RandomState;
@@ -119,7 +117,7 @@ public class ServerChunkCache extends ChunkSource {
 		return this.chunkMap.getTickingGenerated();
 	}
 
-	private void storeInCache(long l, ChunkAccess chunkAccess, ChunkStatus chunkStatus) {
+	private void storeInCache(long l, @Nullable ChunkAccess chunkAccess, ChunkStatus chunkStatus) {
 		for (int i = 3; i > 0; i--) {
 			this.lastChunkPos[i] = this.lastChunkPos[i - 1];
 			this.lastChunkStatus[i] = this.lastChunkStatus[i - 1];
@@ -151,17 +149,16 @@ public class ServerChunkCache extends ChunkSource {
 			}
 
 			profilerFiller.incrementCounter("getChunkCacheMiss");
-			CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>> completableFuture = this.getChunkFutureMainThread(i, j, chunkStatus, bl);
+			CompletableFuture<ChunkResult<ChunkAccess>> completableFuture = this.getChunkFutureMainThread(i, j, chunkStatus, bl);
 			this.mainThreadProcessor.managedBlock(completableFuture::isDone);
-			ChunkAccess chunkAccess = ((Either)completableFuture.join()).map(chunkAccessx -> chunkAccessx, chunkLoadingFailure -> {
-				if (bl) {
-					throw (IllegalStateException)Util.pauseInIde(new IllegalStateException("Chunk not there when requested: " + chunkLoadingFailure));
-				} else {
-					return null;
-				}
-			});
-			this.storeInCache(l, chunkAccess, chunkStatus);
-			return chunkAccess;
+			ChunkResult<ChunkAccess> chunkResult = (ChunkResult<ChunkAccess>)completableFuture.join();
+			ChunkAccess chunkAccess2 = chunkResult.orElse(null);
+			if (chunkAccess2 == null && bl) {
+				throw (IllegalStateException)Util.pauseInIde(new IllegalStateException("Chunk not there when requested: " + chunkResult.getError()));
+			} else {
+				this.storeInCache(l, chunkAccess2, chunkStatus);
+				return chunkAccess2;
+			}
 		}
 	}
 
@@ -185,14 +182,11 @@ public class ServerChunkCache extends ChunkSource {
 			if (chunkHolder == null) {
 				return null;
 			} else {
-				Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure> either = (Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>)chunkHolder.getFutureIfPresent(
-						ChunkStatus.FULL
-					)
-					.getNow(null);
-				if (either == null) {
+				ChunkResult<ChunkAccess> chunkResult = (ChunkResult<ChunkAccess>)chunkHolder.getFutureIfPresent(ChunkStatus.FULL).getNow(null);
+				if (chunkResult == null) {
 					return null;
 				} else {
-					ChunkAccess chunkAccess2 = (ChunkAccess)either.left().orElse(null);
+					ChunkAccess chunkAccess2 = chunkResult.orElse(null);
 					if (chunkAccess2 != null) {
 						this.storeInCache(l, chunkAccess2, ChunkStatus.FULL);
 						if (chunkAccess2 instanceof LevelChunk) {
@@ -212,9 +206,9 @@ public class ServerChunkCache extends ChunkSource {
 		Arrays.fill(this.lastChunk, null);
 	}
 
-	public CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>> getChunkFuture(int i, int j, ChunkStatus chunkStatus, boolean bl) {
+	public CompletableFuture<ChunkResult<ChunkAccess>> getChunkFuture(int i, int j, ChunkStatus chunkStatus, boolean bl) {
 		boolean bl2 = Thread.currentThread() == this.mainThread;
-		CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>> completableFuture;
+		CompletableFuture<ChunkResult<ChunkAccess>> completableFuture;
 		if (bl2) {
 			completableFuture = this.getChunkFutureMainThread(i, j, chunkStatus, bl);
 			this.mainThreadProcessor.managedBlock(completableFuture::isDone);
@@ -226,7 +220,7 @@ public class ServerChunkCache extends ChunkSource {
 		return completableFuture;
 	}
 
-	private CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>> getChunkFutureMainThread(int i, int j, ChunkStatus chunkStatus, boolean bl) {
+	private CompletableFuture<ChunkResult<ChunkAccess>> getChunkFutureMainThread(int i, int j, ChunkStatus chunkStatus, boolean bl) {
 		ChunkPos chunkPos = new ChunkPos(i, j);
 		long l = chunkPos.toLong();
 		int k = ChunkLevel.byStatus(chunkStatus);
@@ -271,9 +265,9 @@ public class ServerChunkCache extends ChunkSource {
 
 			while (true) {
 				ChunkStatus chunkStatus = (ChunkStatus)CHUNK_STATUSES.get(k);
-				Optional<ChunkAccess> optional = ((Either)chunkHolder.getFutureIfPresentUnchecked(chunkStatus).getNow(ChunkHolder.UNLOADED_CHUNK)).left();
-				if (optional.isPresent()) {
-					return (LightChunk)optional.get();
+				ChunkAccess chunkAccess = (ChunkAccess)((ChunkResult)chunkHolder.getFutureIfPresentUnchecked(chunkStatus).getNow(ChunkHolder.UNLOADED_CHUNK)).orElse(null);
+				if (chunkAccess != null) {
+					return chunkAccess;
 				}
 
 				if (chunkStatus == ChunkStatus.INITIALIZE_LIGHT.getParent()) {
@@ -308,12 +302,8 @@ public class ServerChunkCache extends ChunkSource {
 		ChunkHolder chunkHolder = this.getVisibleChunkIfPresent(l);
 		if (chunkHolder == null) {
 			return false;
-		} else if (!this.level.shouldTickBlocksAt(l)) {
-			return false;
 		} else {
-			Either<LevelChunk, ChunkHolder.ChunkLoadingFailure> either = (Either<LevelChunk, ChunkHolder.ChunkLoadingFailure>)chunkHolder.getTickingChunkFuture()
-				.getNow(null);
-			return either != null && either.left().isPresent();
+			return !this.level.shouldTickBlocksAt(l) ? false : ((ChunkResult)chunkHolder.getTickingChunkFuture().getNow(ChunkHolder.UNLOADED_LEVEL_CHUNK)).isSuccess();
 		}
 	}
 
@@ -410,7 +400,7 @@ public class ServerChunkCache extends ChunkSource {
 	private void getFullChunk(long l, Consumer<LevelChunk> consumer) {
 		ChunkHolder chunkHolder = this.getVisibleChunkIfPresent(l);
 		if (chunkHolder != null) {
-			((Either)chunkHolder.getFullChunkFuture().getNow(ChunkHolder.UNLOADED_LEVEL_CHUNK)).left().ifPresent(consumer);
+			((ChunkResult)chunkHolder.getFullChunkFuture().getNow(ChunkHolder.UNLOADED_LEVEL_CHUNK)).ifSuccess(consumer);
 		}
 	}
 

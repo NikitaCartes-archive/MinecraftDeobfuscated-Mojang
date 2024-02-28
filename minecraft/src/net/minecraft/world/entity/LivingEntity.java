@@ -85,6 +85,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.food.FoodProperties;
+import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.ElytraItem;
 import net.minecraft.world.item.Equipable;
@@ -92,7 +93,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.UseAnim;
-import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.item.enchantment.FrostWalkerEnchantment;
@@ -129,7 +130,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	private static final UUID SPEED_MODIFIER_SOUL_SPEED_UUID = UUID.fromString("87f46a96-686f-4796-b035-22e16ee9e038");
 	private static final UUID SPEED_MODIFIER_POWDER_SNOW_UUID = UUID.fromString("1eaf83ff-7207-4596-b37a-d7a07b3ec4ce");
 	private static final AttributeModifier SPEED_MODIFIER_SPRINTING = new AttributeModifier(
-		UUID.fromString("662A6B8D-DA3E-4C1C-8813-96EA6097278D"), "Sprinting speed boost", 0.3F, AttributeModifier.Operation.MULTIPLY_TOTAL
+		UUID.fromString("662A6B8D-DA3E-4C1C-8813-96EA6097278D"), "Sprinting speed boost", 0.3F, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL
 	);
 	public static final int HAND_SLOTS = 2;
 	public static final int ARMOR_SLOTS = 4;
@@ -513,7 +514,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 
 				attributeInstance.addTransientModifier(
 					new AttributeModifier(
-						SPEED_MODIFIER_SOUL_SPEED_UUID, "Soul speed boost", (double)(0.03F * (1.0F + (float)i * 0.35F)), AttributeModifier.Operation.ADDITION
+						SPEED_MODIFIER_SOUL_SPEED_UUID, "Soul speed boost", (double)(0.03F * (1.0F + (float)i * 0.35F)), AttributeModifier.Operation.ADD_VALUE
 					)
 				);
 				if (this.getRandom().nextFloat() < 0.04F) {
@@ -544,7 +545,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 
 				float f = -0.05F * this.getPercentFrozen();
 				attributeInstance.addTransientModifier(
-					new AttributeModifier(SPEED_MODIFIER_POWDER_SNOW_UUID, "Powder snow slow", (double)f, AttributeModifier.Operation.ADDITION)
+					new AttributeModifier(SPEED_MODIFIER_POWDER_SNOW_UUID, "Powder snow slow", (double)f, AttributeModifier.Operation.ADD_VALUE)
 				);
 			}
 		}
@@ -850,7 +851,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		} else {
 			Collection<MobEffectInstance> collection = this.activeEffects.values();
 			this.entityData.set(DATA_EFFECT_AMBIENCE_ID, areAllEffectsAmbient(collection));
-			this.entityData.set(DATA_EFFECT_COLOR_ID, PotionUtils.getColor(collection));
+			this.entityData.set(DATA_EFFECT_COLOR_ID, PotionContents.getColor(collection));
 			this.setInvisible(this.hasEffect(MobEffects.INVISIBILITY));
 		}
 	}
@@ -1323,7 +1324,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 			if (!this.isSilent()) {
 				this.level()
 					.playLocalSound(
-						this.getX(), this.getY(), this.getZ(), SoundEvents.ITEM_BREAK, this.getSoundSource(), 0.8F, 0.8F + this.level().random.nextFloat() * 0.4F, false
+						this.getX(), this.getY(), this.getZ(), itemStack.getBreakingSound(), this.getSoundSource(), 0.8F, 0.8F + this.level().random.nextFloat() * 0.4F, false
 					);
 			}
 
@@ -1610,6 +1611,19 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	protected void hurtCurrentlyUsedShield(float f) {
 	}
 
+	protected void doHurtEquipment(DamageSource damageSource, float f, EquipmentSlot... equipmentSlots) {
+		if (!(f <= 0.0F)) {
+			int i = (int)Math.max(1.0F, f / 4.0F);
+
+			for (EquipmentSlot equipmentSlot : equipmentSlots) {
+				ItemStack itemStack = this.getItemBySlot(equipmentSlot);
+				if ((!damageSource.is(DamageTypeTags.IS_FIRE) || !itemStack.getItem().isFireResistant()) && itemStack.getItem() instanceof ArmorItem) {
+					itemStack.hurtAndBreak(i, this, equipmentSlot);
+				}
+			}
+		}
+	}
+
 	protected float getDamageAfterArmorAbsorb(DamageSource damageSource, float f) {
 		if (!damageSource.is(DamageTypeTags.BYPASSES_ARMOR)) {
 			this.hurtArmor(damageSource, f);
@@ -1817,6 +1831,9 @@ public abstract class LivingEntity extends Entity implements Attackable {
 			case 60:
 				this.makePoofParticles();
 				break;
+			case 65:
+				this.breakItem(this.getItemBySlot(EquipmentSlot.BODY));
+				break;
 			default:
 				super.handleEntityEvent(b);
 		}
@@ -1939,10 +1956,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	}
 
 	protected void verifyEquippedItem(ItemStack itemStack) {
-		CompoundTag compoundTag = itemStack.getTag();
-		if (compoundTag != null) {
-			itemStack.getItem().verifyTagAfterLoad(compoundTag);
-		}
+		itemStack.getItem().verifyComponentsAfterLoad(itemStack);
 	}
 
 	public float getArmorCoverPercentage() {
@@ -2440,12 +2454,24 @@ public abstract class LivingEntity extends Entity implements Attackable {
 				}
 
 				map.put(equipmentSlot, itemStack2);
+				AttributeMap attributeMap = this.getAttributes();
 				if (!itemStack.isEmpty()) {
-					this.getAttributes().removeAttributeModifiers(itemStack.getAttributeModifiers(equipmentSlot));
+					itemStack.forEachModifier(equipmentSlot, (holder, attributeModifier) -> {
+						AttributeInstance attributeInstance = attributeMap.getInstance(holder);
+						if (attributeInstance != null) {
+							attributeInstance.removeModifier(attributeModifier);
+						}
+					});
 				}
 
 				if (!itemStack2.isEmpty()) {
-					this.getAttributes().addTransientAttributeModifiers(itemStack2.getAttributeModifiers(equipmentSlot));
+					itemStack2.forEachModifier(equipmentSlot, (holder, attributeModifier) -> {
+						AttributeInstance attributeInstance = attributeMap.getInstance(holder);
+						if (attributeInstance != null) {
+							attributeInstance.removeModifier(attributeModifier.getId());
+							attributeInstance.addTransientModifier(attributeModifier);
+						}
+					});
 				}
 			}
 		}
@@ -3328,22 +3354,15 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	}
 
 	private static byte entityEventForEquipmentBreak(EquipmentSlot equipmentSlot) {
-		switch (equipmentSlot) {
-			case MAINHAND:
-				return 47;
-			case OFFHAND:
-				return 48;
-			case HEAD:
-				return 49;
-			case CHEST:
-				return 50;
-			case FEET:
-				return 52;
-			case LEGS:
-				return 51;
-			default:
-				return 47;
-		}
+		return switch (equipmentSlot) {
+			case MAINHAND -> 47;
+			case OFFHAND -> 48;
+			case HEAD -> 49;
+			case CHEST -> 50;
+			case FEET -> 52;
+			case LEGS -> 51;
+			case BODY -> 65;
+		};
 	}
 
 	public void broadcastBreakEvent(EquipmentSlot equipmentSlot) {

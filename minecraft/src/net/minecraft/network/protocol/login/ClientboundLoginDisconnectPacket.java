@@ -1,5 +1,6 @@
 package net.minecraft.network.protocol.login;
 
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
@@ -17,11 +18,11 @@ public class ClientboundLoginDisconnectPacket implements Packet<ClientLoginPacke
 	}
 
 	private ClientboundLoginDisconnectPacket(FriendlyByteBuf friendlyByteBuf) {
-		this.reason = Component.Serializer.fromJsonLenient(friendlyByteBuf.readUtf(262144));
+		this.reason = Component.Serializer.fromJsonLenient(friendlyByteBuf.readUtf(262144), RegistryAccess.EMPTY);
 	}
 
 	private void write(FriendlyByteBuf friendlyByteBuf) {
-		friendlyByteBuf.writeUtf(Component.Serializer.toJson(this.reason));
+		friendlyByteBuf.writeUtf(Component.Serializer.toJson(this.reason, RegistryAccess.EMPTY));
 	}
 
 	@Override

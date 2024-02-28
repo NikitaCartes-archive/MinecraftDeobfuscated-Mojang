@@ -32,7 +32,7 @@ public class ClientboundSetEquipmentPacket implements Packet<ClientGamePacketLis
 		do {
 			i = registryFriendlyByteBuf.readByte();
 			EquipmentSlot equipmentSlot = equipmentSlots[i & 127];
-			ItemStack itemStack = ItemStack.STREAM_CODEC.decode(registryFriendlyByteBuf);
+			ItemStack itemStack = ItemStack.OPTIONAL_STREAM_CODEC.decode(registryFriendlyByteBuf);
 			this.slots.add(Pair.of(equipmentSlot, itemStack));
 		} while ((i & -128) != 0);
 	}
@@ -47,7 +47,7 @@ public class ClientboundSetEquipmentPacket implements Packet<ClientGamePacketLis
 			boolean bl = j != i - 1;
 			int k = equipmentSlot.ordinal();
 			registryFriendlyByteBuf.writeByte(bl ? k | -128 : k);
-			ItemStack.STREAM_CODEC.encode(registryFriendlyByteBuf, pair.getSecond());
+			ItemStack.OPTIONAL_STREAM_CODEC.encode(registryFriendlyByteBuf, pair.getSecond());
 		}
 	}
 

@@ -26,12 +26,11 @@ import net.minecraft.world.phys.Vec3;
 public class ThrownTrident extends AbstractArrow {
 	private static final EntityDataAccessor<Byte> ID_LOYALTY = SynchedEntityData.defineId(ThrownTrident.class, EntityDataSerializers.BYTE);
 	private static final EntityDataAccessor<Boolean> ID_FOIL = SynchedEntityData.defineId(ThrownTrident.class, EntityDataSerializers.BOOLEAN);
-	private static final ItemStack DEFAULT_ARROW_STACK = new ItemStack(Items.TRIDENT);
 	private boolean dealtDamage;
 	public int clientSideReturnTridentTickCount;
 
 	public ThrownTrident(EntityType<? extends ThrownTrident> entityType, Level level) {
-		super(entityType, level, DEFAULT_ARROW_STACK);
+		super(entityType, level);
 	}
 
 	public ThrownTrident(Level level, LivingEntity livingEntity, ItemStack itemStack) {
@@ -151,6 +150,11 @@ public class ThrownTrident extends AbstractArrow {
 	@Override
 	protected boolean tryPickup(Player player) {
 		return super.tryPickup(player) || this.isNoPhysics() && this.ownedBy(player) && player.getInventory().add(this.getPickupItem());
+	}
+
+	@Override
+	protected ItemStack getDefaultPickupItem() {
+		return new ItemStack(Items.TRIDENT);
 	}
 
 	@Override

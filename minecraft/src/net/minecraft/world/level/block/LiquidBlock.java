@@ -97,7 +97,7 @@ public class LiquidBlock extends Block implements BucketPickup {
 	}
 
 	@Override
-	protected boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
+	protected boolean isPathfindable(BlockState blockState, PathComputationType pathComputationType) {
 		return !this.fluid.is(FluidTags.LAVA);
 	}
 

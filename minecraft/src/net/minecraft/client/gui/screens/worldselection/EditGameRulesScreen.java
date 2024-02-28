@@ -15,6 +15,7 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
@@ -22,7 +23,8 @@ import net.minecraft.client.gui.components.ContainerObjectSelectionList;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.gui.layouts.GridLayout;
+import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
+import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -35,31 +37,37 @@ import net.minecraft.world.level.GameRules;
 
 @Environment(EnvType.CLIENT)
 public class EditGameRulesScreen extends Screen {
+	private static final Component TITLE = Component.translatable("editGamerule.title");
+	private static final int SPACING = 8;
+	final HeaderAndFooterLayout layout = new HeaderAndFooterLayout(this);
 	private final Consumer<Optional<GameRules>> exitCallback;
-	private EditGameRulesScreen.RuleList rules;
 	private final Set<EditGameRulesScreen.RuleEntry> invalidEntries = Sets.<EditGameRulesScreen.RuleEntry>newHashSet();
-	private Button doneButton;
 	@Nullable
-	private List<FormattedCharSequence> tooltip;
+	private Button doneButton;
 	private final GameRules gameRules;
 
 	public EditGameRulesScreen(GameRules gameRules, Consumer<Optional<GameRules>> consumer) {
-		super(Component.translatable("editGamerule.title"));
+		super(TITLE);
 		this.gameRules = gameRules;
 		this.exitCallback = consumer;
 	}
 
 	@Override
 	protected void init() {
-		this.rules = this.addRenderableWidget(new EditGameRulesScreen.RuleList(this.gameRules));
-		GridLayout.RowHelper rowHelper = new GridLayout().columnSpacing(10).createRowHelper(2);
-		this.doneButton = rowHelper.addChild(Button.builder(CommonComponents.GUI_DONE, button -> this.exitCallback.accept(Optional.of(this.gameRules))).build());
-		rowHelper.addChild(Button.builder(CommonComponents.GUI_CANCEL, button -> this.exitCallback.accept(Optional.empty())).build());
-		rowHelper.getGrid().visitWidgets(guiEventListener -> {
+		this.layout.addTitleHeader(TITLE, this.font);
+		this.layout.addToContents(new EditGameRulesScreen.RuleList(this.gameRules));
+		LinearLayout linearLayout = this.layout.addToFooter(LinearLayout.horizontal().spacing(8));
+		this.doneButton = linearLayout.addChild(Button.builder(CommonComponents.GUI_DONE, button -> this.exitCallback.accept(Optional.of(this.gameRules))).build());
+		linearLayout.addChild(Button.builder(CommonComponents.GUI_CANCEL, button -> this.onClose()).build());
+		this.layout.visitWidgets(guiEventListener -> {
 			AbstractWidget var10000 = this.addRenderableWidget(guiEventListener);
 		});
-		rowHelper.getGrid().setPosition(this.width / 2 - 155, this.height - 28);
-		rowHelper.getGrid().arrangeElements();
+		this.repositionElements();
+	}
+
+	@Override
+	protected void repositionElements() {
+		this.layout.arrangeElements();
 	}
 
 	@Override
@@ -67,15 +75,10 @@ public class EditGameRulesScreen extends Screen {
 		this.exitCallback.accept(Optional.empty());
 	}
 
-	@Override
-	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-		super.render(guiGraphics, i, j, f);
-		this.tooltip = null;
-		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 20, 16777215);
-	}
-
 	private void updateDoneButton() {
-		this.doneButton.active = this.invalidEntries.isEmpty();
+		if (this.doneButton != null) {
+			this.doneButton.active = this.invalidEntries.isEmpty();
+		}
 	}
 
 	void markInvalid(EditGameRulesScreen.RuleEntry ruleEntry) {
@@ -222,8 +225,16 @@ public class EditGameRulesScreen extends Screen {
 
 	@Environment(EnvType.CLIENT)
 	public class RuleList extends ContainerObjectSelectionList<EditGameRulesScreen.RuleEntry> {
+		private static final int ITEM_HEIGHT = 24;
+
 		public RuleList(GameRules gameRules) {
-			super(EditGameRulesScreen.this.minecraft, EditGameRulesScreen.this.width, EditGameRulesScreen.this.height - 75, 43, 24);
+			super(
+				Minecraft.getInstance(),
+				EditGameRulesScreen.this.width,
+				EditGameRulesScreen.this.layout.getContentHeight(),
+				EditGameRulesScreen.this.layout.getHeaderHeight(),
+				24
+			);
 			final Map<GameRules.Category, Map<GameRules.Key<?>, EditGameRulesScreen.RuleEntry>> map = Maps.<GameRules.Category, Map<GameRules.Key<?>, EditGameRulesScreen.RuleEntry>>newHashMap();
 			GameRules.visitGameRuleTypes(new GameRules.GameRuleTypeVisitor() {
 				@Override

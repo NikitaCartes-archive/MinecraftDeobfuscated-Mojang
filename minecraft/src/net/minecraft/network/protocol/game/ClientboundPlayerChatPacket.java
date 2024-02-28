@@ -33,7 +33,7 @@ public record ClientboundPlayerChatPacket(
 			registryFriendlyByteBuf.readVarInt(),
 			registryFriendlyByteBuf.readNullable(MessageSignature::read),
 			new SignedMessageBody.Packed(registryFriendlyByteBuf),
-			FriendlyByteBuf.readNullable(registryFriendlyByteBuf, ComponentSerialization.STREAM_CODEC),
+			FriendlyByteBuf.readNullable(registryFriendlyByteBuf, ComponentSerialization.TRUSTED_STREAM_CODEC),
 			FilterMask.read(registryFriendlyByteBuf),
 			ChatType.Bound.STREAM_CODEC.decode(registryFriendlyByteBuf)
 		);
@@ -44,7 +44,7 @@ public record ClientboundPlayerChatPacket(
 		registryFriendlyByteBuf.writeVarInt(this.index);
 		registryFriendlyByteBuf.writeNullable(this.signature, MessageSignature::write);
 		this.body.write(registryFriendlyByteBuf);
-		FriendlyByteBuf.writeNullable(registryFriendlyByteBuf, this.unsignedContent, ComponentSerialization.STREAM_CODEC);
+		FriendlyByteBuf.writeNullable(registryFriendlyByteBuf, this.unsignedContent, ComponentSerialization.TRUSTED_STREAM_CODEC);
 		FilterMask.write(registryFriendlyByteBuf, this.filterMask);
 		ChatType.Bound.STREAM_CODEC.encode(registryFriendlyByteBuf, this.chatType);
 	}

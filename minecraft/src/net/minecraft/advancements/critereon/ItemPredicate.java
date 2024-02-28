@@ -4,56 +4,51 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
+import net.minecraft.core.RegistryCodecs;
+import net.minecraft.core.component.DataComponentHolder;
+import net.minecraft.core.component.DataComponentPredicate;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.ExtraCodecs;
-import net.minecraft.world.item.EnchantedBookItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.alchemy.Potion;
-import net.minecraft.world.item.alchemy.PotionUtils;
-import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.alchemy.PotionContents;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.level.ItemLike;
 
 public record ItemPredicate(
-	Optional<TagKey<Item>> tag,
 	Optional<HolderSet<Item>> items,
 	MinMaxBounds.Ints count,
 	MinMaxBounds.Ints durability,
 	List<EnchantmentPredicate> enchantments,
 	List<EnchantmentPredicate> storedEnchantments,
-	Optional<Holder<Potion>> potion,
-	Optional<NbtPredicate> nbt
+	Optional<HolderSet<Potion>> potions,
+	Optional<NbtPredicate> customData,
+	DataComponentPredicate components
 ) {
-	private static final Codec<HolderSet<Item>> ITEMS_CODEC = BuiltInRegistries.ITEM
-		.holderByNameCodec()
-		.listOf()
-		.xmap(HolderSet::direct, holderSet -> holderSet.stream().toList());
 	public static final Codec<ItemPredicate> CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
-					ExtraCodecs.strictOptionalField(TagKey.codec(Registries.ITEM), "tag").forGetter(ItemPredicate::tag),
-					ExtraCodecs.strictOptionalField(ITEMS_CODEC, "items").forGetter(ItemPredicate::items),
+					ExtraCodecs.strictOptionalField(RegistryCodecs.homogeneousList(Registries.ITEM), "items").forGetter(ItemPredicate::items),
 					ExtraCodecs.strictOptionalField(MinMaxBounds.Ints.CODEC, "count", MinMaxBounds.Ints.ANY).forGetter(ItemPredicate::count),
 					ExtraCodecs.strictOptionalField(MinMaxBounds.Ints.CODEC, "durability", MinMaxBounds.Ints.ANY).forGetter(ItemPredicate::durability),
 					ExtraCodecs.strictOptionalField(EnchantmentPredicate.CODEC.listOf(), "enchantments", List.of()).forGetter(ItemPredicate::enchantments),
 					ExtraCodecs.strictOptionalField(EnchantmentPredicate.CODEC.listOf(), "stored_enchantments", List.of()).forGetter(ItemPredicate::storedEnchantments),
-					ExtraCodecs.strictOptionalField(BuiltInRegistries.POTION.holderByNameCodec(), "potion").forGetter(ItemPredicate::potion),
-					ExtraCodecs.strictOptionalField(NbtPredicate.CODEC, "nbt").forGetter(ItemPredicate::nbt)
+					ExtraCodecs.strictOptionalField(RegistryCodecs.homogeneousList(Registries.POTION), "potions").forGetter(ItemPredicate::potions),
+					ExtraCodecs.strictOptionalField(NbtPredicate.CODEC, "custom_data").forGetter(ItemPredicate::customData),
+					ExtraCodecs.strictOptionalField(DataComponentPredicate.CODEC, "components", DataComponentPredicate.EMPTY).forGetter(ItemPredicate::components)
 				)
 				.apply(instance, ItemPredicate::new)
 	);
 
 	public boolean matches(ItemStack itemStack) {
-		if (this.tag.isPresent() && !itemStack.is((TagKey<Item>)this.tag.get())) {
-			return false;
-		} else if (this.items.isPresent() && !itemStack.is((HolderSet<Item>)this.items.get())) {
+		if (this.items.isPresent() && !itemStack.is((HolderSet<Item>)this.items.get())) {
 			return false;
 		} else if (!this.count.matches(itemStack.getCount())) {
 			return false;
@@ -61,30 +56,37 @@ public record ItemPredicate(
 			return false;
 		} else if (!this.durability.matches(itemStack.getMaxDamage() - itemStack.getDamageValue())) {
 			return false;
-		} else if (this.nbt.isPresent() && !((NbtPredicate)this.nbt.get()).matches(itemStack)) {
+		} else if (this.customData.isPresent() && !((NbtPredicate)this.customData.get()).matches(itemStack)) {
 			return false;
 		} else {
 			if (!this.enchantments.isEmpty()) {
-				Map<Enchantment, Integer> map = EnchantmentHelper.deserializeEnchantments(itemStack.getEnchantmentTags());
+				ItemEnchantments itemEnchantments = itemStack.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY);
 
 				for (EnchantmentPredicate enchantmentPredicate : this.enchantments) {
-					if (!enchantmentPredicate.containedIn(map)) {
+					if (!enchantmentPredicate.containedIn(itemEnchantments)) {
 						return false;
 					}
 				}
 			}
 
 			if (!this.storedEnchantments.isEmpty()) {
-				Map<Enchantment, Integer> map = EnchantmentHelper.deserializeEnchantments(EnchantedBookItem.getEnchantments(itemStack));
+				ItemEnchantments itemEnchantments = itemStack.getOrDefault(DataComponents.STORED_ENCHANTMENTS, ItemEnchantments.EMPTY);
 
 				for (EnchantmentPredicate enchantmentPredicatex : this.storedEnchantments) {
-					if (!enchantmentPredicatex.containedIn(map)) {
+					if (!enchantmentPredicatex.containedIn(itemEnchantments)) {
 						return false;
 					}
 				}
 			}
 
-			return !this.potion.isPresent() || ((Holder)this.potion.get()).equals(PotionUtils.getPotion(itemStack));
+			if (this.potions.isPresent()) {
+				Optional<Holder<Potion>> optional = itemStack.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY).potion();
+				if (optional.isEmpty() || !((HolderSet)this.potions.get()).contains((Holder)optional.get())) {
+					return false;
+				}
+			}
+
+			return this.components.test((DataComponentHolder)itemStack);
 		}
 	}
 
@@ -92,11 +94,11 @@ public record ItemPredicate(
 		private final ImmutableList.Builder<EnchantmentPredicate> enchantments = ImmutableList.builder();
 		private final ImmutableList.Builder<EnchantmentPredicate> storedEnchantments = ImmutableList.builder();
 		private Optional<HolderSet<Item>> items = Optional.empty();
-		private Optional<TagKey<Item>> tag = Optional.empty();
 		private MinMaxBounds.Ints count = MinMaxBounds.Ints.ANY;
 		private MinMaxBounds.Ints durability = MinMaxBounds.Ints.ANY;
-		private Optional<Holder<Potion>> potion = Optional.empty();
-		private Optional<NbtPredicate> nbt = Optional.empty();
+		private Optional<HolderSet<Potion>> potions = Optional.empty();
+		private Optional<NbtPredicate> customData = Optional.empty();
+		private DataComponentPredicate components = DataComponentPredicate.EMPTY;
 
 		private Builder() {
 		}
@@ -111,7 +113,7 @@ public record ItemPredicate(
 		}
 
 		public ItemPredicate.Builder of(TagKey<Item> tagKey) {
-			this.tag = Optional.of(tagKey);
+			this.items = Optional.of(BuiltInRegistries.ITEM.getOrCreateTag(tagKey));
 			return this;
 		}
 
@@ -125,13 +127,13 @@ public record ItemPredicate(
 			return this;
 		}
 
-		public ItemPredicate.Builder isPotion(Holder<Potion> holder) {
-			this.potion = Optional.of(holder);
+		public ItemPredicate.Builder isPotion(HolderSet<Potion> holderSet) {
+			this.potions = Optional.of(holderSet);
 			return this;
 		}
 
-		public ItemPredicate.Builder hasNbt(CompoundTag compoundTag) {
-			this.nbt = Optional.of(new NbtPredicate(compoundTag));
+		public ItemPredicate.Builder hasCustomData(CompoundTag compoundTag) {
+			this.customData = Optional.of(new NbtPredicate(compoundTag));
 			return this;
 		}
 
@@ -145,10 +147,15 @@ public record ItemPredicate(
 			return this;
 		}
 
+		public ItemPredicate.Builder hasComponents(DataComponentPredicate dataComponentPredicate) {
+			this.components = dataComponentPredicate;
+			return this;
+		}
+
 		public ItemPredicate build() {
 			List<EnchantmentPredicate> list = this.enchantments.build();
 			List<EnchantmentPredicate> list2 = this.storedEnchantments.build();
-			return new ItemPredicate(this.tag, this.items, this.count, this.durability, list, list2, this.potion, this.nbt);
+			return new ItemPredicate(this.items, this.count, this.durability, list, list2, this.potions, this.customData, this.components);
 		}
 	}
 }

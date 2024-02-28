@@ -1,5 +1,6 @@
 package net.minecraft.world.entity.vehicle;
 
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -55,10 +56,7 @@ public abstract class VehicleEntity extends Entity {
 		this.kill();
 		if (this.level().getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
 			ItemStack itemStack = new ItemStack(item);
-			if (this.hasCustomName()) {
-				itemStack.setHoverName(this.getCustomName());
-			}
-
+			itemStack.set(DataComponents.CUSTOM_NAME, this.getCustomName());
 			this.spawnAtLocation(itemStack);
 		}
 	}

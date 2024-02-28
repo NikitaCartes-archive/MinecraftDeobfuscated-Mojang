@@ -5,6 +5,7 @@ import javax.annotation.Nullable;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -16,11 +17,10 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
-import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.alchemy.Potion;
-import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
@@ -37,7 +37,9 @@ public class PotionItem extends Item {
 
 	@Override
 	public ItemStack getDefaultInstance() {
-		return PotionUtils.setPotion(super.getDefaultInstance(), Potions.WATER);
+		ItemStack itemStack = super.getDefaultInstance();
+		itemStack.set(DataComponents.POTION_CONTENTS, new PotionContents(Potions.WATER));
+		return itemStack;
 	}
 
 	@Override
@@ -48,13 +50,14 @@ public class PotionItem extends Item {
 		}
 
 		if (!level.isClientSide) {
-			for (MobEffectInstance mobEffectInstance : PotionUtils.getMobEffects(itemStack)) {
+			PotionContents potionContents = itemStack.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY);
+			potionContents.forEachEffect(mobEffectInstance -> {
 				if (mobEffectInstance.getEffect().value().isInstantenous()) {
 					mobEffectInstance.getEffect().value().applyInstantenousEffect(player, player, livingEntity, mobEffectInstance.getAmplifier(), 1.0);
 				} else {
-					livingEntity.addEffect(new MobEffectInstance(mobEffectInstance));
+					livingEntity.addEffect(mobEffectInstance);
 				}
-			}
+			});
 		}
 
 		if (player != null) {
@@ -82,8 +85,9 @@ public class PotionItem extends Item {
 		BlockPos blockPos = useOnContext.getClickedPos();
 		Player player = useOnContext.getPlayer();
 		ItemStack itemStack = useOnContext.getItemInHand();
+		PotionContents potionContents = itemStack.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY);
 		BlockState blockState = level.getBlockState(blockPos);
-		if (useOnContext.getClickedFace() != Direction.DOWN && blockState.is(BlockTags.CONVERTABLE_TO_MUD) && PotionUtils.getPotion(itemStack).is(Potions.WATER)) {
+		if (useOnContext.getClickedFace() != Direction.DOWN && blockState.is(BlockTags.CONVERTABLE_TO_MUD) && potionContents.is(Potions.WATER)) {
 			level.playSound(null, blockPos, SoundEvents.GENERIC_SPLASH, SoundSource.BLOCKS, 1.0F, 1.0F);
 			player.setItemInHand(useOnContext.getHand(), ItemUtils.createFilledResult(itemStack, player, new ItemStack(Items.GLASS_BOTTLE)));
 			player.awardStat(Stats.ITEM_USED.get(itemStack.getItem()));
@@ -131,11 +135,14 @@ public class PotionItem extends Item {
 
 	@Override
 	public String getDescriptionId(ItemStack itemStack) {
-		return Potion.getName(PotionUtils.getPotion(itemStack), this.getDescriptionId() + ".effect.");
+		return Potion.getName(itemStack.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY).potion(), this.getDescriptionId() + ".effect.");
 	}
 
 	@Override
 	public void appendHoverText(ItemStack itemStack, @Nullable Level level, List<Component> list, TooltipFlag tooltipFlag) {
-		PotionUtils.addPotionTooltip(itemStack, list, 1.0F, level == null ? 20.0F : level.tickRateManager().tickrate());
+		PotionContents potionContents = itemStack.get(DataComponents.POTION_CONTENTS);
+		if (potionContents != null) {
+			potionContents.addPotionTooltip(list::add, 1.0F, level == null ? 20.0F : level.tickRateManager().tickrate());
+		}
 	}
 }

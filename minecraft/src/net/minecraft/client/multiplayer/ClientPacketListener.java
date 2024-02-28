@@ -36,7 +36,7 @@ import net.minecraft.client.gui.screens.DemoIntroScreen;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.gui.screens.ReceivingLevelScreen;
 import net.minecraft.client.gui.screens.WinScreen;
-import net.minecraft.client.gui.screens.achievement.StatsUpdateListener;
+import net.minecraft.client.gui.screens.achievement.StatsScreen;
 import net.minecraft.client.gui.screens.inventory.BookViewScreen;
 import net.minecraft.client.gui.screens.inventory.CommandBlockEditScreen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
@@ -1511,8 +1511,8 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 			this.minecraft.player.getStats().setValue(this.minecraft.player, stat, i);
 		}
 
-		if (this.minecraft.screen instanceof StatsUpdateListener) {
-			((StatsUpdateListener)this.minecraft.screen).onStatsUpdated();
+		if (this.minecraft.screen instanceof StatsScreen statsScreen) {
+			statsScreen.onStatsUpdated();
 		}
 	}
 
@@ -1914,8 +1914,9 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 	public void handleOpenBook(ClientboundOpenBookPacket clientboundOpenBookPacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundOpenBookPacket, this, this.minecraft);
 		ItemStack itemStack = this.minecraft.player.getItemInHand(clientboundOpenBookPacket.getHand());
-		if (itemStack.is(Items.WRITTEN_BOOK)) {
-			this.minecraft.setScreen(new BookViewScreen(new BookViewScreen.WrittenBookAccess(itemStack)));
+		BookViewScreen.BookAccess bookAccess = BookViewScreen.BookAccess.fromItem(itemStack);
+		if (bookAccess != null) {
+			this.minecraft.setScreen(new BookViewScreen(bookAccess));
 		}
 	}
 
