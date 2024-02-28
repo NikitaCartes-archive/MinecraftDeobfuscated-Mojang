@@ -18,7 +18,6 @@ import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.Util;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
@@ -26,6 +25,7 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.realms.RealmsScreen;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.StringUtil;
 import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
@@ -429,7 +429,7 @@ public class RealmsConfigureWorldScreen extends RealmsScreen {
 	}
 
 	public void saveSettings(String string, String string2) {
-		String string3 = Util.isBlank(string2) ? null : string2;
+		String string3 = StringUtil.isBlank(string2) ? null : string2;
 		RealmsClient realmsClient = RealmsClient.create();
 
 		try {

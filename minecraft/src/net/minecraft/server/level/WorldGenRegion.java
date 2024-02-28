@@ -34,7 +34,6 @@ import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelHeightAccessor;
-import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
@@ -46,7 +45,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkSource;
-import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
+import net.minecraft.world.level.chunk.status.ChunkType;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.level.gameevent.GameEvent;
@@ -76,7 +76,6 @@ public class WorldGenRegion implements WorldGenLevel {
 	private final BiomeManager biomeManager;
 	private final ChunkPos firstPos;
 	private final ChunkPos lastPos;
-	private final StructureManager structureManager;
 	private final ChunkStatus generatingStatus;
 	private final int writeRadiusCutoff;
 	@Nullable
@@ -102,7 +101,6 @@ public class WorldGenRegion implements WorldGenLevel {
 			this.biomeManager = new BiomeManager(this, BiomeManager.obfuscateSeed(this.seed));
 			this.firstPos = ((ChunkAccess)list.get(0)).getPos();
 			this.lastPos = ((ChunkAccess)list.get(list.size() - 1)).getPos();
-			this.structureManager = serverLevel.structureManager().forWorldGenRegion(this);
 		}
 	}
 
@@ -296,7 +294,7 @@ public class WorldGenRegion implements WorldGenLevel {
 			}
 
 			if (blockState.hasBlockEntity()) {
-				if (chunkAccess.getStatus().getChunkType() == ChunkStatus.ChunkType.LEVELCHUNK) {
+				if (chunkAccess.getStatus().getChunkType() == ChunkType.LEVELCHUNK) {
 					BlockEntity blockEntity = ((EntityBlock)blockState.getBlock()).newBlockEntity(blockPos, blockState);
 					if (blockEntity != null) {
 						chunkAccess.setBlockEntity(blockEntity);

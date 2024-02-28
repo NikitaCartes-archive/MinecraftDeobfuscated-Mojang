@@ -5,10 +5,10 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.entity.layers.SkeletonClothingLayer;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.monster.AbstractSkeleton;
+import net.minecraft.world.entity.monster.Stray;
 
 @Environment(EnvType.CLIENT)
-public class StrayRenderer extends SkeletonRenderer {
+public class StrayRenderer extends SkeletonRenderer<Stray> {
 	private static final ResourceLocation STRAY_SKELETON_LOCATION = new ResourceLocation("textures/entity/skeleton/stray.png");
 	private static final ResourceLocation STRAY_CLOTHES_LOCATION = new ResourceLocation("textures/entity/skeleton/stray_overlay.png");
 
@@ -17,8 +17,7 @@ public class StrayRenderer extends SkeletonRenderer {
 		this.addLayer(new SkeletonClothingLayer<>(this, context.getModelSet(), ModelLayers.STRAY_OUTER_LAYER, STRAY_CLOTHES_LOCATION));
 	}
 
-	@Override
-	public ResourceLocation getTextureLocation(AbstractSkeleton abstractSkeleton) {
+	public ResourceLocation getTextureLocation(Stray stray) {
 		return STRAY_SKELETON_LOCATION;
 	}
 }

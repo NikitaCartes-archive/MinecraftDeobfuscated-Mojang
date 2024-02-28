@@ -7,10 +7,8 @@ import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
@@ -53,16 +51,6 @@ public abstract class AbstractFurnaceBlock extends BaseEntityBlock {
 	@Override
 	public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
 		return this.defaultBlockState().setValue(FACING, blockPlaceContext.getHorizontalDirection().getOpposite());
-	}
-
-	@Override
-	public void setPlacedBy(Level level, BlockPos blockPos, BlockState blockState, LivingEntity livingEntity, ItemStack itemStack) {
-		if (itemStack.hasCustomHoverName()) {
-			BlockEntity blockEntity = level.getBlockEntity(blockPos);
-			if (blockEntity instanceof AbstractFurnaceBlockEntity) {
-				((AbstractFurnaceBlockEntity)blockEntity).setCustomName(itemStack.getHoverName());
-			}
-		}
 	}
 
 	@Override

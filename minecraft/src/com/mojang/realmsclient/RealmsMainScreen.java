@@ -221,7 +221,7 @@ public class RealmsMainScreen extends RealmsScreen {
 	@Override
 	protected void repositionElements() {
 		if (this.layout != null) {
-			this.realmSelectionList.setSize(this.width, this.height - this.layout.getFooterHeight() - this.layout.getHeaderHeight());
+			this.realmSelectionList.updateSize(this.width, this.layout);
 			this.layout.arrangeElements();
 		}
 	}
@@ -305,10 +305,10 @@ public class RealmsMainScreen extends RealmsScreen {
 	}
 
 	private LinearLayout createNoRealmsContent() {
-		LinearLayout linearLayout = LinearLayout.vertical().spacing(10);
+		LinearLayout linearLayout = LinearLayout.vertical().spacing(8);
 		linearLayout.defaultCellSetting().alignHorizontallyCenter();
 		linearLayout.addChild(ImageWidget.texture(130, 64, NO_REALMS_LOCATION, 130, 64));
-		FocusableTextWidget focusableTextWidget = new FocusableTextWidget(308, NO_REALMS_TEXT, this.font, false);
+		FocusableTextWidget focusableTextWidget = new FocusableTextWidget(308, NO_REALMS_TEXT, this.font, false, 4);
 		linearLayout.addChild(focusableTextWidget);
 		return linearLayout;
 	}
@@ -789,7 +789,7 @@ public class RealmsMainScreen extends RealmsScreen {
 		@Override
 		public boolean mouseClicked(double d, double e, int i) {
 			this.button.mouseClicked(d, e, i);
-			return true;
+			return super.mouseClicked(d, e, i);
 		}
 
 		@Override
@@ -952,7 +952,7 @@ public class RealmsMainScreen extends RealmsScreen {
 		private int notificationCount;
 
 		public NotificationButton(Component component, ResourceLocation resourceLocation, Button.OnPress onPress) {
-			super(20, 20, component, 14, 14, resourceLocation, onPress);
+			super(20, 20, component, 14, 14, resourceLocation, onPress, null);
 		}
 
 		int notificationCount() {
@@ -1059,7 +1059,7 @@ public class RealmsMainScreen extends RealmsScreen {
 				this.dismissButton.mouseClicked(d, e, i);
 			}
 
-			return true;
+			return super.mouseClicked(d, e, i);
 		}
 
 		@Override

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.function.BooleanSupplier;
 import javax.annotation.Nullable;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 
 public abstract class ChunkSource implements LightChunkGetter, AutoCloseable {

@@ -3,6 +3,7 @@ package net.minecraft.world.level.block.entity.vault;
 import com.google.common.annotations.VisibleForTesting;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DynamicOps;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -59,34 +60,35 @@ public class VaultBlockEntity extends BlockEntity {
 
 	@Override
 	public CompoundTag getUpdateTag(HolderLookup.Provider provider) {
-		return Util.make(new CompoundTag(), compoundTag -> compoundTag.put("shared_data", encode(VaultSharedData.CODEC, this.sharedData)));
+		return Util.make(new CompoundTag(), compoundTag -> compoundTag.put("shared_data", encode(VaultSharedData.CODEC, this.sharedData, provider)));
 	}
 
 	@Override
 	protected void saveAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
 		super.saveAdditional(compoundTag, provider);
-		compoundTag.put("config", encode(VaultConfig.CODEC, this.config));
-		compoundTag.put("shared_data", encode(VaultSharedData.CODEC, this.sharedData));
-		compoundTag.put("server_data", encode(VaultServerData.CODEC, this.serverData));
+		compoundTag.put("config", encode(VaultConfig.CODEC, this.config, provider));
+		compoundTag.put("shared_data", encode(VaultSharedData.CODEC, this.sharedData, provider));
+		compoundTag.put("server_data", encode(VaultServerData.CODEC, this.serverData, provider));
 	}
 
-	private static <T> Tag encode(Codec<T> codec, T object) {
-		return Util.getOrThrow(codec.encodeStart(NbtOps.INSTANCE, object), IllegalStateException::new);
+	private static <T> Tag encode(Codec<T> codec, T object, HolderLookup.Provider provider) {
+		return Util.getOrThrow(codec.encodeStart(provider.createSerializationContext(NbtOps.INSTANCE), object), IllegalStateException::new);
 	}
 
 	@Override
 	public void load(CompoundTag compoundTag, HolderLookup.Provider provider) {
 		super.load(compoundTag, provider);
+		DynamicOps<Tag> dynamicOps = provider.createSerializationContext(NbtOps.INSTANCE);
 		if (compoundTag.contains("server_data")) {
-			VaultServerData.CODEC.parse(NbtOps.INSTANCE, compoundTag.get("server_data")).resultOrPartial(LOGGER::error).ifPresent(this.serverData::set);
+			VaultServerData.CODEC.parse(dynamicOps, compoundTag.get("server_data")).resultOrPartial(LOGGER::error).ifPresent(this.serverData::set);
 		}
 
 		if (compoundTag.contains("config")) {
-			VaultConfig.CODEC.parse(NbtOps.INSTANCE, compoundTag.get("config")).resultOrPartial(LOGGER::error).ifPresent(vaultConfig -> this.config = vaultConfig);
+			VaultConfig.CODEC.parse(dynamicOps, compoundTag.get("config")).resultOrPartial(LOGGER::error).ifPresent(vaultConfig -> this.config = vaultConfig);
 		}
 
 		if (compoundTag.contains("shared_data")) {
-			VaultSharedData.CODEC.parse(NbtOps.INSTANCE, compoundTag.get("shared_data")).resultOrPartial(LOGGER::error).ifPresent(this.sharedData::set);
+			VaultSharedData.CODEC.parse(dynamicOps, compoundTag.get("shared_data")).resultOrPartial(LOGGER::error).ifPresent(this.sharedData::set);
 		}
 	}
 

@@ -124,6 +124,7 @@ public class GameTestRegistry {
 			gameTest.timeoutTicks(),
 			gameTest.setupTicks(),
 			gameTest.required(),
+			gameTest.manualOnly(),
 			gameTest.requiredSuccesses(),
 			gameTest.attempts(),
 			gameTest.skyAccess(),

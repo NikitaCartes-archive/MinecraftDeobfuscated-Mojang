@@ -14,6 +14,7 @@ import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
@@ -221,7 +222,7 @@ public class ItemInHandRenderer {
 		poseStack.scale(0.38F, 0.38F, 0.38F);
 		poseStack.translate(-0.5F, -0.5F, 0.0F);
 		poseStack.scale(0.0078125F, 0.0078125F, 0.0078125F);
-		MapId mapId = MapItem.getMapId(itemStack);
+		MapId mapId = itemStack.get(DataComponents.MAP_ID);
 		MapItemSavedData mapItemSavedData = MapItem.getSavedData(mapId, this.minecraft.level);
 		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(mapItemSavedData == null ? MAP_BACKGROUND : MAP_BACKGROUND_CHECKERBOARD);
 		Matrix4f matrix4f = poseStack.last().pose();

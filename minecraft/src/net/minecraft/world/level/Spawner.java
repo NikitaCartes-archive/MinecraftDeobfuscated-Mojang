@@ -3,6 +3,7 @@ package net.minecraft.world.level;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.CommonComponents;
@@ -10,8 +11,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
 
 public interface Spawner {
 	void setEntityId(EntityType<?> entityType, RandomSource randomSource);
@@ -29,18 +30,14 @@ public interface Spawner {
 
 	@Nullable
 	static Component getSpawnEntityDisplayName(ItemStack itemStack, String string) {
-		CompoundTag compoundTag = BlockItem.getBlockEntityData(itemStack);
-		if (compoundTag != null) {
-			ResourceLocation resourceLocation = getEntityKey(compoundTag, string);
-			if (resourceLocation != null) {
-				return (Component)BuiltInRegistries.ENTITY_TYPE
-					.getOptional(resourceLocation)
-					.map(entityType -> Component.translatable(entityType.getDescriptionId()).withStyle(ChatFormatting.GRAY))
-					.orElse(null);
-			}
-		}
-
-		return null;
+		CompoundTag compoundTag = itemStack.getOrDefault(DataComponents.BLOCK_ENTITY_DATA, CustomData.EMPTY).getUnsafe();
+		ResourceLocation resourceLocation = getEntityKey(compoundTag, string);
+		return resourceLocation != null
+			? (Component)BuiltInRegistries.ENTITY_TYPE
+				.getOptional(resourceLocation)
+				.map(entityType -> Component.translatable(entityType.getDescriptionId()).withStyle(ChatFormatting.GRAY))
+				.orElse(null)
+			: null;
 	}
 
 	@Nullable

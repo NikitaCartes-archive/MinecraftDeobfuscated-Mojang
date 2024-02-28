@@ -12,10 +12,13 @@ import net.minecraft.Util;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.HolderSet;
+import net.minecraft.core.component.DataComponentPredicate;
+import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtUtils;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
 
 public class ItemPredicateParser {
 	private final ItemSyntaxParser syntax;
@@ -26,6 +29,7 @@ public class ItemPredicateParser {
 
 	public Predicate<ItemStack> parse(StringReader stringReader) throws CommandSyntaxException {
 		final List<Predicate<ItemStack>> list = new ArrayList();
+		final DataComponentPredicate.Builder builder = DataComponentPredicate.builder();
 		this.syntax.parse(stringReader, new ItemSyntaxParser.Visitor() {
 			@Override
 			public void visitItem(Holder<Item> holder) {
@@ -38,15 +42,20 @@ public class ItemPredicateParser {
 			}
 
 			@Override
-			public void visitNbt(CompoundTag compoundTag) {
-				if (!compoundTag.isEmpty()) {
-					list.add((Predicate)itemStack -> {
-						CompoundTag compoundTag2 = itemStack.getTag();
-						return NbtUtils.compareNbt(compoundTag, compoundTag2, true);
-					});
-				}
+			public <T> void visitComponent(DataComponentType<T> dataComponentType, T object) {
+				builder.expect(dataComponentType, object);
+			}
+
+			@Override
+			public void visitCustomData(CompoundTag compoundTag) {
+				list.add(CustomData.itemMatcher(DataComponents.CUSTOM_DATA, compoundTag));
 			}
 		});
+		DataComponentPredicate dataComponentPredicate = builder.build();
+		if (!dataComponentPredicate.alwaysMatches()) {
+			list.add(dataComponentPredicate::test);
+		}
+
 		return Util.allOf(list);
 	}
 

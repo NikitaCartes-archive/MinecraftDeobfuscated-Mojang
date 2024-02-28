@@ -2,6 +2,7 @@ package net.minecraft.world.entity.animal;
 
 import java.util.Optional;
 import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
@@ -13,6 +14,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemUtils;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
 
 public interface Bucketable {
@@ -30,32 +32,30 @@ public interface Bucketable {
 
 	@Deprecated
 	static void saveDefaultDataToBucketTag(Mob mob, ItemStack itemStack) {
-		CompoundTag compoundTag = itemStack.getOrCreateTag();
-		if (mob.hasCustomName()) {
-			itemStack.setHoverName(mob.getCustomName());
-		}
+		itemStack.set(DataComponents.CUSTOM_NAME, mob.getCustomName());
+		CustomData.update(DataComponents.BUCKET_ENTITY_DATA, itemStack, compoundTag -> {
+			if (mob.isNoAi()) {
+				compoundTag.putBoolean("NoAI", mob.isNoAi());
+			}
 
-		if (mob.isNoAi()) {
-			compoundTag.putBoolean("NoAI", mob.isNoAi());
-		}
+			if (mob.isSilent()) {
+				compoundTag.putBoolean("Silent", mob.isSilent());
+			}
 
-		if (mob.isSilent()) {
-			compoundTag.putBoolean("Silent", mob.isSilent());
-		}
+			if (mob.isNoGravity()) {
+				compoundTag.putBoolean("NoGravity", mob.isNoGravity());
+			}
 
-		if (mob.isNoGravity()) {
-			compoundTag.putBoolean("NoGravity", mob.isNoGravity());
-		}
+			if (mob.hasGlowingTag()) {
+				compoundTag.putBoolean("Glowing", mob.hasGlowingTag());
+			}
 
-		if (mob.hasGlowingTag()) {
-			compoundTag.putBoolean("Glowing", mob.hasGlowingTag());
-		}
+			if (mob.isInvulnerable()) {
+				compoundTag.putBoolean("Invulnerable", mob.isInvulnerable());
+			}
 
-		if (mob.isInvulnerable()) {
-			compoundTag.putBoolean("Invulnerable", mob.isInvulnerable());
-		}
-
-		compoundTag.putFloat("Health", mob.getHealth());
+			compoundTag.putFloat("Health", mob.getHealth());
+		});
 	}
 
 	@Deprecated

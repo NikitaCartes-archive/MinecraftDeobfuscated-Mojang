@@ -31,6 +31,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.util.FastColor;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.BlockItem;
@@ -218,10 +219,11 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 				k = this.itemColors.getColor(itemStack, bakedQuad.getTintIndex());
 			}
 
-			float f = (float)(k >> 16 & 0xFF) / 255.0F;
-			float g = (float)(k >> 8 & 0xFF) / 255.0F;
-			float h = (float)(k & 0xFF) / 255.0F;
-			vertexConsumer.putBulkData(pose, bakedQuad, f, g, h, i, j);
+			float f = (float)FastColor.ARGB32.alpha(k) / 255.0F;
+			float g = (float)FastColor.ARGB32.red(k) / 255.0F;
+			float h = (float)FastColor.ARGB32.green(k) / 255.0F;
+			float l = (float)FastColor.ARGB32.blue(k) / 255.0F;
+			vertexConsumer.putBulkData(pose, bakedQuad, g, h, l, f, i, j);
 		}
 	}
 

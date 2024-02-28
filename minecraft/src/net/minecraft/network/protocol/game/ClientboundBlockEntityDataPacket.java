@@ -19,7 +19,7 @@ public class ClientboundBlockEntityDataPacket implements Packet<ClientGamePacket
 		ClientboundBlockEntityDataPacket::getPos,
 		ByteBufCodecs.registry(Registries.BLOCK_ENTITY_TYPE),
 		ClientboundBlockEntityDataPacket::getType,
-		ByteBufCodecs.COMPOUND_TAG,
+		ByteBufCodecs.TRUSTED_COMPOUND_TAG,
 		ClientboundBlockEntityDataPacket::getTag,
 		ClientboundBlockEntityDataPacket::new
 	);

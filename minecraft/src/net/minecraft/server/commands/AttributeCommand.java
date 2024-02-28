@@ -114,7 +114,7 @@ public class AttributeCommand {
 																.then(
 																	((RequiredArgumentBuilder)((RequiredArgumentBuilder)Commands.argument("value", DoubleArgumentType.doubleArg())
 																				.then(
-																					Commands.literal("add")
+																					Commands.literal("add_value")
 																						.executes(
 																							commandContext -> addModifier(
 																									commandContext.getSource(),
@@ -123,12 +123,12 @@ public class AttributeCommand {
 																									UuidArgument.getUuid(commandContext, "uuid"),
 																									StringArgumentType.getString(commandContext, "name"),
 																									DoubleArgumentType.getDouble(commandContext, "value"),
-																									AttributeModifier.Operation.ADDITION
+																									AttributeModifier.Operation.ADD_VALUE
 																								)
 																						)
 																				))
 																			.then(
-																				Commands.literal("multiply")
+																				Commands.literal("add_multiplied_base")
 																					.executes(
 																						commandContext -> addModifier(
 																								commandContext.getSource(),
@@ -137,12 +137,12 @@ public class AttributeCommand {
 																								UuidArgument.getUuid(commandContext, "uuid"),
 																								StringArgumentType.getString(commandContext, "name"),
 																								DoubleArgumentType.getDouble(commandContext, "value"),
-																								AttributeModifier.Operation.MULTIPLY_TOTAL
+																								AttributeModifier.Operation.ADD_MULTIPLIED_BASE
 																							)
 																					)
 																			))
 																		.then(
-																			Commands.literal("multiply_base")
+																			Commands.literal("add_multiplied_total")
 																				.executes(
 																					commandContext -> addModifier(
 																							commandContext.getSource(),
@@ -151,7 +151,7 @@ public class AttributeCommand {
 																							UuidArgument.getUuid(commandContext, "uuid"),
 																							StringArgumentType.getString(commandContext, "name"),
 																							DoubleArgumentType.getDouble(commandContext, "value"),
-																							AttributeModifier.Operation.MULTIPLY_BASE
+																							AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL
 																						)
 																				)
 																		)

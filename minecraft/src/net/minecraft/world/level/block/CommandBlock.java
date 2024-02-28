@@ -7,13 +7,13 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringUtil;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BaseCommandBlock;
@@ -146,12 +146,8 @@ public class CommandBlock extends BaseEntityBlock implements GameMasterBlock {
 		if (blockEntity instanceof CommandBlockEntity) {
 			CommandBlockEntity commandBlockEntity = (CommandBlockEntity)blockEntity;
 			BaseCommandBlock baseCommandBlock = commandBlockEntity.getCommandBlock();
-			if (itemStack.hasCustomHoverName()) {
-				baseCommandBlock.setName(itemStack.getHoverName());
-			}
-
 			if (!level.isClientSide) {
-				if (BlockItem.getBlockEntityData(itemStack) == null) {
+				if (!itemStack.has(DataComponents.BLOCK_ENTITY_DATA)) {
 					baseCommandBlock.setTrackOutput(level.getGameRules().getBoolean(GameRules.RULE_SENDCOMMANDFEEDBACK));
 					commandBlockEntity.setAutomatic(this.automatic);
 				}

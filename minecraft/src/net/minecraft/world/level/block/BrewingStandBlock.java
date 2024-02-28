@@ -8,10 +8,8 @@ import net.minecraft.stats.Stats;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -89,16 +87,6 @@ public class BrewingStandBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public void setPlacedBy(Level level, BlockPos blockPos, BlockState blockState, LivingEntity livingEntity, ItemStack itemStack) {
-		if (itemStack.hasCustomHoverName()) {
-			BlockEntity blockEntity = level.getBlockEntity(blockPos);
-			if (blockEntity instanceof BrewingStandBlockEntity) {
-				((BrewingStandBlockEntity)blockEntity).setCustomName(itemStack.getHoverName());
-			}
-		}
-	}
-
-	@Override
 	public void animateTick(BlockState blockState, Level level, BlockPos blockPos, RandomSource randomSource) {
 		double d = (double)blockPos.getX() + 0.4 + (double)randomSource.nextFloat() * 0.2;
 		double e = (double)blockPos.getY() + 0.7 + (double)randomSource.nextFloat() * 0.3;
@@ -128,7 +116,7 @@ public class BrewingStandBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	protected boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
+	protected boolean isPathfindable(BlockState blockState, PathComputationType pathComputationType) {
 		return false;
 	}
 }

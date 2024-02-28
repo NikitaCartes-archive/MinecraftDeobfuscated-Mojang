@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.datafix.ExtraDataFixUtils;
 import net.minecraft.util.datafix.fixes.References;
 
 public class V1451_6 extends NamespacedSchema {
@@ -98,27 +99,16 @@ public class V1451_6 extends NamespacedSchema {
 			References.STATS,
 			() -> DSL.optionalFields(
 					"stats",
-					DSL.optionalFields(
-						"minecraft:mined",
-						DSL.compoundList(References.BLOCK_NAME.in(schema), DSL.constType(DSL.intType())),
-						"minecraft:crafted",
-						(TypeTemplate)supplier.get(),
-						"minecraft:used",
-						(TypeTemplate)supplier.get(),
-						"minecraft:broken",
-						(TypeTemplate)supplier.get(),
-						"minecraft:picked_up",
-						(TypeTemplate)supplier.get(),
-						DSL.optionalFields(
-							"minecraft:dropped",
-							(TypeTemplate)supplier.get(),
-							"minecraft:killed",
-							DSL.compoundList(References.ENTITY_NAME.in(schema), DSL.constType(DSL.intType())),
-							"minecraft:killed_by",
-							DSL.compoundList(References.ENTITY_NAME.in(schema), DSL.constType(DSL.intType())),
-							"minecraft:custom",
-							DSL.compoundList(DSL.constType(namespacedString()), DSL.constType(DSL.intType()))
-						)
+					ExtraDataFixUtils.optionalFields(
+						Pair.of("minecraft:mined", DSL.compoundList(References.BLOCK_NAME.in(schema), DSL.constType(DSL.intType()))),
+						Pair.of("minecraft:crafted", (TypeTemplate)supplier.get()),
+						Pair.of("minecraft:used", (TypeTemplate)supplier.get()),
+						Pair.of("minecraft:broken", (TypeTemplate)supplier.get()),
+						Pair.of("minecraft:picked_up", (TypeTemplate)supplier.get()),
+						Pair.of("minecraft:dropped", (TypeTemplate)supplier.get()),
+						Pair.of("minecraft:killed", DSL.compoundList(References.ENTITY_NAME.in(schema), DSL.constType(DSL.intType()))),
+						Pair.of("minecraft:killed_by", DSL.compoundList(References.ENTITY_NAME.in(schema), DSL.constType(DSL.intType()))),
+						Pair.of("minecraft:custom", DSL.compoundList(DSL.constType(namespacedString()), DSL.constType(DSL.intType())))
 					)
 				)
 		);

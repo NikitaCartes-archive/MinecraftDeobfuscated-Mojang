@@ -2,6 +2,7 @@ package net.minecraft.world.damagesource;
 
 import javax.annotation.Nullable;
 import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagKey;
@@ -77,7 +78,7 @@ public class DamageSource {
 			Component component = this.causingEntity == null ? this.directEntity.getDisplayName() : this.causingEntity.getDisplayName();
 			Entity var6 = this.causingEntity;
 			ItemStack itemStack = var6 instanceof LivingEntity livingEntity2 ? livingEntity2.getMainHandItem() : ItemStack.EMPTY;
-			return !itemStack.isEmpty() && itemStack.hasCustomHoverName()
+			return !itemStack.isEmpty() && itemStack.has(DataComponents.CUSTOM_NAME)
 				? Component.translatable(string + ".item", livingEntity.getDisplayName(), component, itemStack.getDisplayName())
 				: Component.translatable(string, livingEntity.getDisplayName(), component);
 		}

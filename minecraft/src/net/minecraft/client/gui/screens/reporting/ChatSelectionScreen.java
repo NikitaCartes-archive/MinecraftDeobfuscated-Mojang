@@ -10,7 +10,6 @@ import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.ChatFormatting;
 import net.minecraft.Optionull;
 import net.minecraft.client.GuiMessageTag;
 import net.minecraft.client.Minecraft;
@@ -39,7 +38,7 @@ import net.minecraft.util.Mth;
 public class ChatSelectionScreen extends Screen {
 	static final ResourceLocation CHECKMARK_SPRITE = new ResourceLocation("icon/checkmark");
 	private static final Component TITLE = Component.translatable("gui.chatSelection.title");
-	private static final Component CONTEXT_INFO = Component.translatable("gui.chatSelection.context").withStyle(ChatFormatting.GRAY);
+	private static final Component CONTEXT_INFO = Component.translatable("gui.chatSelection.context");
 	@Nullable
 	private final Screen lastScreen;
 	private final ReportingContext reportingContext;
@@ -94,18 +93,13 @@ public class ChatSelectionScreen extends Screen {
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
 		super.render(guiGraphics, i, j, f);
-		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 16, 16777215);
+		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 10, 16777215);
 		AbuseReportLimits abuseReportLimits = this.reportingContext.sender().reportLimits();
 		int k = this.report.reportedMessages().size();
 		int l = abuseReportLimits.maxReportedMessageCount();
 		Component component = Component.translatable("gui.chatSelection.selected", k, l);
-		guiGraphics.drawCenteredString(this.font, component, this.width / 2, 16 + 9 * 3 / 2, 10526880);
+		guiGraphics.drawCenteredString(this.font, component, this.width / 2, 16 + 9 * 3 / 2, -1);
 		this.contextInfoLabel.renderCentered(guiGraphics, this.width / 2, this.chatSelectionList.getFooterTop());
-	}
-
-	@Override
-	public void renderBackground(GuiGraphics guiGraphics, int i, int j, float f) {
-		this.renderDirtBackground(guiGraphics);
 	}
 
 	@Override
@@ -167,11 +161,6 @@ public class ChatSelectionScreen extends Screen {
 			this.addEntryToTop(new ChatSelectionScreen.ChatSelectionList.DividerEntry(component));
 			this.addEntryToTop(new ChatSelectionScreen.ChatSelectionList.PaddingEntry());
 			this.previousHeading = null;
-		}
-
-		@Override
-		protected int getScrollbarPosition() {
-			return (this.width + this.getRowWidth()) / 2;
 		}
 
 		@Override
@@ -408,6 +397,7 @@ public class ChatSelectionScreen extends Screen {
 		@Environment(EnvType.CLIENT)
 		public class MessageHeadingEntry extends ChatSelectionScreen.ChatSelectionList.Entry {
 			private static final int FACE_SIZE = 12;
+			private static final int PADDING = 4;
 			private final Component heading;
 			private final Supplier<PlayerSkin> skin;
 			private final boolean canReport;
@@ -420,11 +410,11 @@ public class ChatSelectionScreen extends Screen {
 
 			@Override
 			public void render(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-				int p = k - 12 - 4;
+				int p = k - 12 + 4;
 				int q = j + (m - 12) / 2;
 				PlayerFaceRenderer.draw(guiGraphics, (PlayerSkin)this.skin.get(), p, q, 12);
 				int r = j + 1 + (m - 9) / 2;
-				guiGraphics.drawString(ChatSelectionScreen.this.font, this.heading, k, r, this.canReport ? -1 : -1593835521);
+				guiGraphics.drawString(ChatSelectionScreen.this.font, this.heading, p + 12 + 4, r, this.canReport ? -1 : -1593835521);
 			}
 		}
 

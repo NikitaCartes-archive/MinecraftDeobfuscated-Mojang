@@ -1,19 +1,21 @@
 package net.minecraft.client.gui.screens;
 
 import java.util.function.Supplier;
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.LockIconButton;
+import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.client.gui.layouts.EqualSpacingLayout;
-import net.minecraft.client.gui.layouts.FrameLayout;
 import net.minecraft.client.gui.layouts.GridLayout;
+import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
 import net.minecraft.client.gui.layouts.LayoutElement;
-import net.minecraft.client.gui.layouts.SpacerElement;
+import net.minecraft.client.gui.layouts.LayoutSettings;
+import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.client.gui.screens.controls.ControlsScreen;
 import net.minecraft.client.gui.screens.packs.PackSelectionScreen;
 import net.minecraft.client.gui.screens.telemetry.TelemetryInfoScreen;
@@ -26,6 +28,7 @@ import net.minecraft.world.Difficulty;
 
 @Environment(EnvType.CLIENT)
 public class OptionsScreen extends Screen {
+	private static final Component TITLE = Component.translatable("options.title");
 	private static final Component SKIN_CUSTOMIZATION = Component.translatable("options.skinCustomisation");
 	private static final Component SOUNDS = Component.translatable("options.sounds");
 	private static final Component VIDEO = Component.translatable("options.video");
@@ -37,25 +40,30 @@ public class OptionsScreen extends Screen {
 	private static final Component TELEMETRY = Component.translatable("options.telemetry");
 	private static final Component CREDITS_AND_ATTRIBUTION = Component.translatable("options.credits_and_attribution");
 	private static final int COLUMNS = 2;
+	private final HeaderAndFooterLayout layout = new HeaderAndFooterLayout(this, 61, 33);
 	private final Screen lastScreen;
 	private final Options options;
+	@Nullable
 	private CycleButton<Difficulty> difficultyButton;
+	@Nullable
 	private LockIconButton lockButton;
 
 	public OptionsScreen(Screen screen, Options options) {
-		super(Component.translatable("options.title"));
+		super(TITLE);
 		this.lastScreen = screen;
 		this.options = options;
 	}
 
 	@Override
 	protected void init() {
+		LinearLayout linearLayout = this.layout.addToHeader(LinearLayout.vertical().spacing(8));
+		linearLayout.addChild(new StringWidget(TITLE, this.font), LayoutSettings::alignHorizontallyCenter);
+		LinearLayout linearLayout2 = linearLayout.addChild(LinearLayout.horizontal()).spacing(8);
+		linearLayout2.addChild(this.options.fov().createButton(this.minecraft.options));
+		linearLayout2.addChild(this.createOnlineButton());
 		GridLayout gridLayout = new GridLayout();
-		gridLayout.defaultCellSetting().paddingHorizontal(5).paddingBottom(4).alignHorizontallyCenter();
+		gridLayout.defaultCellSetting().paddingHorizontal(4).paddingBottom(4).alignHorizontallyCenter();
 		GridLayout.RowHelper rowHelper = gridLayout.createRowHelper(2);
-		rowHelper.addChild(this.options.fov().createButton(this.minecraft.options, 0, 0, 150));
-		rowHelper.addChild(this.createOnlineButton());
-		rowHelper.addChild(SpacerElement.height(26), 2);
 		rowHelper.addChild(this.openScreenButton(SKIN_CUSTOMIZATION, () -> new SkinCustomizationScreen(this, this.options)));
 		rowHelper.addChild(this.openScreenButton(SOUNDS, () -> new SoundOptionsScreen(this, this.options)));
 		rowHelper.addChild(this.openScreenButton(VIDEO, () -> new VideoSettingsScreen(this, this.options)));
@@ -73,10 +81,15 @@ public class OptionsScreen extends Screen {
 		rowHelper.addChild(this.openScreenButton(ACCESSIBILITY, () -> new AccessibilityOptionsScreen(this, this.options)));
 		rowHelper.addChild(this.openScreenButton(TELEMETRY, () -> new TelemetryInfoScreen(this, this.options)));
 		rowHelper.addChild(this.openScreenButton(CREDITS_AND_ATTRIBUTION, () -> new CreditsAndAttributionScreen(this)));
-		rowHelper.addChild(Button.builder(CommonComponents.GUI_DONE, button -> this.onClose()).width(200).build(), 2, rowHelper.newCellSettings().paddingTop(6));
-		gridLayout.arrangeElements();
-		FrameLayout.alignInRectangle(gridLayout, 0, this.height / 6 - 12, this.width, this.height, 0.5F, 0.0F);
-		gridLayout.visitWidgets(this::addRenderableWidget);
+		this.layout.addToContents(gridLayout);
+		this.layout.addToFooter(Button.builder(CommonComponents.GUI_DONE, button -> this.onClose()).width(200).build());
+		this.layout.visitWidgets(this::addRenderableWidget);
+		this.repositionElements();
+	}
+
+	@Override
+	protected void repositionElements() {
+		this.layout.arrangeElements();
 	}
 
 	@Override
@@ -143,7 +156,7 @@ public class OptionsScreen extends Screen {
 
 	private void lockCallback(boolean bl) {
 		this.minecraft.setScreen(this);
-		if (bl && this.minecraft.level != null) {
+		if (bl && this.minecraft.level != null && this.lockButton != null && this.difficultyButton != null) {
 			this.minecraft.getConnection().send(new ServerboundLockDifficultyPacket(true));
 			this.lockButton.setLocked(true);
 			this.lockButton.active = false;
@@ -154,12 +167,6 @@ public class OptionsScreen extends Screen {
 	@Override
 	public void removed() {
 		this.options.save();
-	}
-
-	@Override
-	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-		super.render(guiGraphics, i, j, f);
-		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 15, 16777215);
 	}
 
 	private Button openScreenButton(Component component, Supplier<Screen> supplier) {

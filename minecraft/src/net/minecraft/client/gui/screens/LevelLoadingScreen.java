@@ -12,7 +12,7 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.progress.StoringChunkProgressListener;
 import net.minecraft.util.Mth;
-import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 
 @Environment(EnvType.CLIENT)
 public class LevelLoadingScreen extends Screen {

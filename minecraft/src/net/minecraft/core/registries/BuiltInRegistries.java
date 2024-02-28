@@ -18,6 +18,8 @@ import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.RegistrationInfo;
 import net.minecraft.core.Registry;
 import net.minecraft.core.WritableRegistry;
+import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.numbers.NumberFormatType;
@@ -74,7 +76,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.DecoratedPotPatterns;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.chunk.ChunkGenerators;
-import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.gameevent.PositionSourceType;
 import net.minecraft.world.level.levelgen.DensityFunction;
@@ -134,7 +136,7 @@ public class BuiltInRegistries {
 		Registries.ENTITY_TYPE, "pig", registry -> EntityType.PIG
 	);
 	public static final DefaultedRegistry<Item> ITEM = registerDefaultedWithIntrusiveHolders(Registries.ITEM, "air", registry -> Items.AIR);
-	public static final DefaultedRegistry<Potion> POTION = registerDefaulted(Registries.POTION, "empty", Potions::bootstrap);
+	public static final Registry<Potion> POTION = registerSimple(Registries.POTION, Potions::bootstrap);
 	public static final Registry<ParticleType<?>> PARTICLE_TYPE = registerSimple(Registries.PARTICLE_TYPE, registry -> ParticleTypes.BLOCK);
 	public static final Registry<BlockEntityType<?>> BLOCK_ENTITY_TYPE = registerSimpleWithIntrusiveHolders(
 		Registries.BLOCK_ENTITY_TYPE, registry -> BlockEntityType.FURNACE
@@ -243,6 +245,7 @@ public class BuiltInRegistries {
 	public static final Registry<CriterionTrigger<?>> TRIGGER_TYPES = registerSimple(Registries.TRIGGER_TYPE, CriteriaTriggers::bootstrap);
 	public static final Registry<NumberFormatType<?>> NUMBER_FORMAT_TYPE = registerSimple(Registries.NUMBER_FORMAT_TYPE, NumberFormatTypes::bootstrap);
 	public static final Registry<ArmorMaterial> ARMOR_MATERIAL = registerSimple(Registries.ARMOR_MATERIAL, ArmorMaterials::bootstrap);
+	public static final Registry<DataComponentType<?>> DATA_COMPONENT_TYPE = registerSimple(Registries.DATA_COMPONENT_TYPE, DataComponents::bootstrap);
 	public static final Registry<? extends Registry<?>> REGISTRY = WRITABLE_REGISTRY;
 
 	private static <T> Registry<T> registerSimple(ResourceKey<? extends Registry<T>> resourceKey, BuiltInRegistries.RegistryBootstrap<T> registryBootstrap) {

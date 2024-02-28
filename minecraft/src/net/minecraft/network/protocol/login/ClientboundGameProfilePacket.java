@@ -1,28 +1,15 @@
 package net.minecraft.network.protocol.login;
 
 import com.mojang.authlib.GameProfile;
-import net.minecraft.network.FriendlyByteBuf;
+import io.netty.buffer.ByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketType;
 
-public class ClientboundGameProfilePacket implements Packet<ClientLoginPacketListener> {
-	public static final StreamCodec<FriendlyByteBuf, ClientboundGameProfilePacket> STREAM_CODEC = Packet.codec(
-		ClientboundGameProfilePacket::write, ClientboundGameProfilePacket::new
-	);
-	private final GameProfile gameProfile;
-
-	public ClientboundGameProfilePacket(GameProfile gameProfile) {
-		this.gameProfile = gameProfile;
-	}
-
-	private ClientboundGameProfilePacket(FriendlyByteBuf friendlyByteBuf) {
-		this.gameProfile = friendlyByteBuf.readGameProfile();
-	}
-
-	private void write(FriendlyByteBuf friendlyByteBuf) {
-		friendlyByteBuf.writeGameProfile(this.gameProfile);
-	}
+public record ClientboundGameProfilePacket(GameProfile gameProfile) implements Packet<ClientLoginPacketListener> {
+	public static final StreamCodec<ByteBuf, ClientboundGameProfilePacket> STREAM_CODEC = ByteBufCodecs.GAME_PROFILE
+		.map(ClientboundGameProfilePacket::new, ClientboundGameProfilePacket::gameProfile);
 
 	@Override
 	public PacketType<ClientboundGameProfilePacket> type() {
@@ -31,10 +18,6 @@ public class ClientboundGameProfilePacket implements Packet<ClientLoginPacketLis
 
 	public void handle(ClientLoginPacketListener clientLoginPacketListener) {
 		clientLoginPacketListener.handleGameProfile(this);
-	}
-
-	public GameProfile getGameProfile() {
-		return this.gameProfile;
 	}
 
 	@Override

@@ -5,20 +5,18 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Holder;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.RegistryCodecs;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.tags.TagKey;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 
-public record FluidPredicate(Optional<TagKey<Fluid>> tag, Optional<Holder<Fluid>> fluid, Optional<StatePropertiesPredicate> properties) {
+public record FluidPredicate(Optional<HolderSet<Fluid>> fluids, Optional<StatePropertiesPredicate> properties) {
 	public static final Codec<FluidPredicate> CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
-					ExtraCodecs.strictOptionalField(TagKey.codec(Registries.FLUID), "tag").forGetter(FluidPredicate::tag),
-					ExtraCodecs.strictOptionalField(BuiltInRegistries.FLUID.holderByNameCodec(), "fluid").forGetter(FluidPredicate::fluid),
+					ExtraCodecs.strictOptionalField(RegistryCodecs.homogeneousList(Registries.FLUID), "fluids").forGetter(FluidPredicate::fluids),
 					ExtraCodecs.strictOptionalField(StatePropertiesPredicate.CODEC, "state").forGetter(FluidPredicate::properties)
 				)
 				.apply(instance, FluidPredicate::new)
@@ -29,9 +27,7 @@ public record FluidPredicate(Optional<TagKey<Fluid>> tag, Optional<Holder<Fluid>
 			return false;
 		} else {
 			FluidState fluidState = serverLevel.getFluidState(blockPos);
-			if (this.tag.isPresent() && !fluidState.is((TagKey<Fluid>)this.tag.get())) {
-				return false;
-			} else if (this.fluid.isPresent() && !fluidState.is((Fluid)((Holder)this.fluid.get()).value())) {
+			if (this.fluids.isPresent() && !fluidState.is((HolderSet<Fluid>)this.fluids.get())) {
 				return false;
 			} else {
 				return !this.properties.isPresent() || ((StatePropertiesPredicate)this.properties.get()).matches(fluidState);
@@ -40,8 +36,7 @@ public record FluidPredicate(Optional<TagKey<Fluid>> tag, Optional<Holder<Fluid>
 	}
 
 	public static class Builder {
-		private Optional<Holder<Fluid>> fluid = Optional.empty();
-		private Optional<TagKey<Fluid>> fluids = Optional.empty();
+		private Optional<HolderSet<Fluid>> fluids = Optional.empty();
 		private Optional<StatePropertiesPredicate> properties = Optional.empty();
 
 		private Builder() {
@@ -52,12 +47,12 @@ public record FluidPredicate(Optional<TagKey<Fluid>> tag, Optional<Holder<Fluid>
 		}
 
 		public FluidPredicate.Builder of(Fluid fluid) {
-			this.fluid = Optional.of(fluid.builtInRegistryHolder());
+			this.fluids = Optional.of(HolderSet.direct(fluid.builtInRegistryHolder()));
 			return this;
 		}
 
-		public FluidPredicate.Builder of(TagKey<Fluid> tagKey) {
-			this.fluids = Optional.of(tagKey);
+		public FluidPredicate.Builder of(HolderSet<Fluid> holderSet) {
+			this.fluids = Optional.of(holderSet);
 			return this;
 		}
 
@@ -67,7 +62,7 @@ public record FluidPredicate(Optional<TagKey<Fluid>> tag, Optional<Holder<Fluid>
 		}
 
 		public FluidPredicate build() {
-			return new FluidPredicate(this.fluids, this.fluid, this.properties);
+			return new FluidPredicate(this.fluids, this.properties);
 		}
 	}
 }

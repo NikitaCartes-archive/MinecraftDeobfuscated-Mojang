@@ -8,9 +8,9 @@ import java.nio.file.Path;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.Util;
 import net.minecraft.client.User;
 import net.minecraft.client.resources.IndexedAssetSource;
+import net.minecraft.util.StringUtil;
 
 @Environment(EnvType.CLIENT)
 public class GameConfig {
@@ -70,7 +70,7 @@ public class GameConfig {
 	@Environment(EnvType.CLIENT)
 	public static record QuickPlayData(@Nullable String path, @Nullable String singleplayer, @Nullable String multiplayer, @Nullable String realms) {
 		public boolean isEnabled() {
-			return !Util.isBlank(this.singleplayer) || !Util.isBlank(this.multiplayer) || !Util.isBlank(this.realms);
+			return !StringUtil.isBlank(this.singleplayer) || !StringUtil.isBlank(this.multiplayer) || !StringUtil.isBlank(this.realms);
 		}
 	}
 

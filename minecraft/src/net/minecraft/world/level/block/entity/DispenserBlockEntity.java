@@ -65,7 +65,7 @@ public class DispenserBlockEntity extends RandomizableContainerBlockEntity {
 		super.load(compoundTag, provider);
 		this.items = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
 		if (!this.tryLoadLootTable(compoundTag)) {
-			ContainerHelper.loadAllItems(compoundTag, this.items);
+			ContainerHelper.loadAllItems(compoundTag, this.items, provider);
 		}
 	}
 
@@ -73,7 +73,7 @@ public class DispenserBlockEntity extends RandomizableContainerBlockEntity {
 	protected void saveAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
 		super.saveAdditional(compoundTag, provider);
 		if (!this.trySaveLootTable(compoundTag)) {
-			ContainerHelper.saveAllItems(compoundTag, this.items);
+			ContainerHelper.saveAllItems(compoundTag, this.items, provider);
 		}
 	}
 

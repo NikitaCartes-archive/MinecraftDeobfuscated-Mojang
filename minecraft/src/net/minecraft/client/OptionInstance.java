@@ -120,6 +120,10 @@ public final class OptionInstance<T> {
 		return (component, optionEnum) -> optionEnum.getCaption();
 	}
 
+	public AbstractWidget createButton(Options options) {
+		return this.createButton(options, 0, 0, 150);
+	}
+
 	public AbstractWidget createButton(Options options, int i, int j, int k) {
 		return this.createButton(options, i, j, k, object -> {
 		});

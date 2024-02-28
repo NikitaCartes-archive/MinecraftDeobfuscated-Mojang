@@ -40,7 +40,7 @@ public class RecoverWorldDataScreen extends Screen {
 	private static final Component NO_ISSUES = Component.translatable("recover_world.issue.none").withStyle(ChatFormatting.GREEN);
 	private static final Component MISSING_FILE = Component.translatable("recover_world.issue.missing_file").withStyle(ChatFormatting.RED);
 	private final BooleanConsumer callback;
-	private final LinearLayout layout = LinearLayout.vertical().spacing(10);
+	private final LinearLayout layout = LinearLayout.vertical().spacing(8);
 	private final Component message;
 	private final MultiLineTextWidget messageWidget;
 	private final MultiLineTextWidget issuesWidget;
@@ -79,7 +79,7 @@ public class RecoverWorldDataScreen extends Screen {
 		Exception exception = this.collectIssue(this.storageAccess, false);
 		Exception exception2 = this.collectIssue(this.storageAccess, true);
 		if (exception != null && exception2 == null) {
-			minecraft.forceSetScreen(new GenericDirtMessageScreen(Component.translatable("recover_world.restoring")));
+			minecraft.forceSetScreen(new GenericMessageScreen(Component.translatable("recover_world.restoring")));
 			EditWorldScreen.makeBackupAndShowToast(this.storageAccess);
 			if (this.storageAccess.restoreLevelDataFromOld()) {
 				minecraft.setScreen(new ConfirmScreen(this.callback, DONE_TITLE, DONE_SUCCESS, CommonComponents.GUI_CONTINUE, CommonComponents.GUI_BACK));

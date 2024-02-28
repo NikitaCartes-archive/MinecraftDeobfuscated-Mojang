@@ -37,11 +37,6 @@ public class ReceivingLevelScreen extends Screen {
 	}
 
 	@Override
-	public void renderBackground(GuiGraphics guiGraphics, int i, int j, float f) {
-		this.renderDirtBackground(guiGraphics);
-	}
-
-	@Override
 	public void tick() {
 		if (this.levelReceived.getAsBoolean() || System.currentTimeMillis() > this.createdAt + 30000L) {
 			this.onClose();

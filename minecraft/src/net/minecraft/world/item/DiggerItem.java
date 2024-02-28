@@ -1,17 +1,14 @@
 package net.minecraft.world.item;
 
-import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.ImmutableMultimap.Builder;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Holder;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -19,21 +16,26 @@ import net.minecraft.world.level.block.state.BlockState;
 public class DiggerItem extends TieredItem {
 	private final TagKey<Block> blocks;
 	protected final float speed;
-	private final float attackDamageBaseline;
-	private final Multimap<Holder<Attribute>, AttributeModifier> defaultModifiers;
 
-	protected DiggerItem(float f, float g, Tier tier, TagKey<Block> tagKey, Item.Properties properties) {
+	protected DiggerItem(Tier tier, TagKey<Block> tagKey, Item.Properties properties) {
 		super(tier, properties);
 		this.blocks = tagKey;
 		this.speed = tier.getSpeed();
-		this.attackDamageBaseline = f + tier.getAttackDamageBonus();
-		Builder<Holder<Attribute>, AttributeModifier> builder = ImmutableMultimap.builder();
-		builder.put(
-			Attributes.ATTACK_DAMAGE,
-			new AttributeModifier(BASE_ATTACK_DAMAGE_UUID, "Tool modifier", (double)this.attackDamageBaseline, AttributeModifier.Operation.ADDITION)
-		);
-		builder.put(Attributes.ATTACK_SPEED, new AttributeModifier(BASE_ATTACK_SPEED_UUID, "Tool modifier", (double)g, AttributeModifier.Operation.ADDITION));
-		this.defaultModifiers = builder.build();
+	}
+
+	public static ItemAttributeModifiers createAttributes(Tier tier, float f, float g) {
+		return ItemAttributeModifiers.builder()
+			.add(
+				Attributes.ATTACK_DAMAGE,
+				new AttributeModifier(BASE_ATTACK_DAMAGE_UUID, "Tool modifier", (double)(f + tier.getAttackDamageBonus()), AttributeModifier.Operation.ADD_VALUE),
+				EquipmentSlotGroup.MAINHAND
+			)
+			.add(
+				Attributes.ATTACK_SPEED,
+				new AttributeModifier(BASE_ATTACK_SPEED_UUID, "Tool modifier", (double)g, AttributeModifier.Operation.ADD_VALUE),
+				EquipmentSlotGroup.MAINHAND
+			)
+			.build();
 	}
 
 	@Override
@@ -54,15 +56,6 @@ public class DiggerItem extends TieredItem {
 		}
 
 		return true;
-	}
-
-	@Override
-	public Multimap<Holder<Attribute>, AttributeModifier> getDefaultAttributeModifiers(EquipmentSlot equipmentSlot) {
-		return equipmentSlot == EquipmentSlot.MAINHAND ? this.defaultModifiers : super.getDefaultAttributeModifiers(equipmentSlot);
-	}
-
-	public float getAttackDamage() {
-		return this.attackDamageBaseline;
 	}
 
 	@Override

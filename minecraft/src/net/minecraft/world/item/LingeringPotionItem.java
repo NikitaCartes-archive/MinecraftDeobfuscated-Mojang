@@ -2,13 +2,14 @@ package net.minecraft.world.item;
 
 import java.util.List;
 import javax.annotation.Nullable;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.level.Level;
 
 public class LingeringPotionItem extends ThrowablePotionItem {
@@ -18,7 +19,8 @@ public class LingeringPotionItem extends ThrowablePotionItem {
 
 	@Override
 	public void appendHoverText(ItemStack itemStack, @Nullable Level level, List<Component> list, TooltipFlag tooltipFlag) {
-		PotionUtils.addPotionTooltip(itemStack, list, 0.25F, level == null ? 20.0F : level.tickRateManager().tickrate());
+		PotionContents potionContents = itemStack.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY);
+		potionContents.addPotionTooltip(list::add, 0.25F, level == null ? 20.0F : level.tickRateManager().tickrate());
 	}
 
 	@Override

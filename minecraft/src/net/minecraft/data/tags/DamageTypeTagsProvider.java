@@ -72,5 +72,20 @@ public class DamageTypeTagsProvider extends TagsProvider<DamageType> {
 		this.tag(DamageTypeTags.NO_KNOCKBACK).add(DamageTypes.EXPLOSION, DamageTypes.PLAYER_EXPLOSION, DamageTypes.BAD_RESPAWN_POINT);
 		this.tag(DamageTypeTags.ALWAYS_KILLS_ARMOR_STANDS).add(DamageTypes.ARROW, DamageTypes.TRIDENT, DamageTypes.FIREBALL, DamageTypes.WITHER_SKULL);
 		this.tag(DamageTypeTags.CAN_BREAK_ARMOR_STAND).add(DamageTypes.PLAYER_ATTACK, DamageTypes.PLAYER_EXPLOSION);
+		this.tag(DamageTypeTags.BYPASSES_WOLF_ARMOR)
+			.addTag(DamageTypeTags.BYPASSES_INVULNERABILITY)
+			.add(
+				DamageTypes.CRAMMING,
+				DamageTypes.DROWN,
+				DamageTypes.DRY_OUT,
+				DamageTypes.FREEZE,
+				DamageTypes.IN_WALL,
+				DamageTypes.INDIRECT_MAGIC,
+				DamageTypes.MAGIC,
+				DamageTypes.OUTSIDE_BORDER,
+				DamageTypes.STARVE,
+				DamageTypes.THORNS,
+				DamageTypes.WITHER
+			);
 	}
 }

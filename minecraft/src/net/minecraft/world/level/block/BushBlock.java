@@ -44,9 +44,7 @@ public abstract class BushBlock extends Block {
 	}
 
 	@Override
-	protected boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
-		return pathComputationType == PathComputationType.AIR && !this.hasCollision
-			? true
-			: super.isPathfindable(blockState, blockGetter, blockPos, pathComputationType);
+	protected boolean isPathfindable(BlockState blockState, PathComputationType pathComputationType) {
+		return pathComputationType == PathComputationType.AIR && !this.hasCollision ? true : super.isPathfindable(blockState, pathComputationType);
 	}
 }

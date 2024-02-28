@@ -1,6 +1,8 @@
 package net.minecraft.world.item;
 
 import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Interner;
+import com.google.common.collect.Interners;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.mojang.logging.LogUtils;
@@ -13,8 +15,10 @@ import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponentMap;
+import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -40,6 +44,7 @@ import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.ItemLike;
@@ -53,12 +58,13 @@ import org.slf4j.Logger;
 public class Item implements FeatureElement, ItemLike {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	public static final Map<Block, Item> BY_BLOCK = Maps.<Block, Item>newHashMap();
-	protected static final UUID BASE_ATTACK_DAMAGE_UUID = UUID.fromString("CB3F55D3-645C-4F38-A497-9C13A33DB5CF");
-	protected static final UUID BASE_ATTACK_SPEED_UUID = UUID.fromString("FA233E1C-4180-4865-B01B-BCCE9785ACA3");
+	public static final UUID BASE_ATTACK_DAMAGE_UUID = UUID.fromString("CB3F55D3-645C-4F38-A497-9C13A33DB5CF");
+	public static final UUID BASE_ATTACK_SPEED_UUID = UUID.fromString("FA233E1C-4180-4865-B01B-BCCE9785ACA3");
 	public static final int MAX_STACK_SIZE = 64;
 	public static final int EAT_DURATION = 32;
 	public static final int MAX_BAR_WIDTH = 13;
 	private final Holder.Reference<Item> builtInRegistryHolder = BuiltInRegistries.ITEM.createIntrusiveHolder(this);
+	private final DataComponentMap components;
 	private final Rarity rarity;
 	private final int maxStackSize;
 	private final int maxDamage;
@@ -85,6 +91,7 @@ public class Item implements FeatureElement, ItemLike {
 	}
 
 	public Item(Item.Properties properties) {
+		this.components = properties.buildComponents();
 		this.rarity = properties.rarity;
 		this.craftingRemainingItem = properties.craftingRemainingItem;
 		this.maxDamage = properties.maxDamage;
@@ -105,13 +112,17 @@ public class Item implements FeatureElement, ItemLike {
 		return this.builtInRegistryHolder;
 	}
 
+	public DataComponentMap components() {
+		return this.components;
+	}
+
 	public void onUseTick(Level level, LivingEntity livingEntity, ItemStack itemStack, int i) {
 	}
 
 	public void onDestroyed(ItemEntity itemEntity) {
 	}
 
-	public void verifyTagAfterLoad(CompoundTag compoundTag) {
+	public void verifyComponentsAfterLoad(ItemStack itemStack) {
 	}
 
 	public boolean canAttackBlock(BlockState blockState, Level level, BlockPos blockPos, Player player) {
@@ -222,10 +233,6 @@ public class Item implements FeatureElement, ItemLike {
 		return this.getDescriptionId();
 	}
 
-	public boolean shouldOverrideMultiplayerNbt() {
-		return true;
-	}
-
 	@Nullable
 	public final Item getCraftingRemainingItem() {
 		return this.craftingRemainingItem;
@@ -314,6 +321,7 @@ public class Item implements FeatureElement, ItemLike {
 		return false;
 	}
 
+	@Deprecated
 	public Multimap<Holder<Attribute>, AttributeModifier> getDefaultAttributeModifiers(EquipmentSlot equipmentSlot) {
 		return ImmutableMultimap.of();
 	}
@@ -343,6 +351,10 @@ public class Item implements FeatureElement, ItemLike {
 		return SoundEvents.GENERIC_EAT;
 	}
 
+	public SoundEvent getBreakingSound() {
+		return SoundEvents.ITEM_BREAK;
+	}
+
 	public boolean isFireResistant() {
 		return this.isFireResistant;
 	}
@@ -361,6 +373,9 @@ public class Item implements FeatureElement, ItemLike {
 	}
 
 	public static class Properties {
+		private static final Interner<DataComponentMap> COMPONENT_INTERNER = Interners.newStrongInterner();
+		@Nullable
+		private DataComponentMap.Builder components;
 		int maxStackSize = 64;
 		int maxDamage;
 		@Nullable
@@ -392,6 +407,7 @@ public class Item implements FeatureElement, ItemLike {
 		public Item.Properties durability(int i) {
 			this.maxDamage = i;
 			this.maxStackSize = 1;
+			this.component(DataComponents.DAMAGE, 0);
 			return this;
 		}
 
@@ -413,6 +429,23 @@ public class Item implements FeatureElement, ItemLike {
 		public Item.Properties requiredFeatures(FeatureFlag... featureFlags) {
 			this.requiredFeatures = FeatureFlags.REGISTRY.subset(featureFlags);
 			return this;
+		}
+
+		public <T> Item.Properties component(DataComponentType<T> dataComponentType, T object) {
+			if (this.components == null) {
+				this.components = DataComponentMap.builder().addAll(DataComponents.COMMON_ITEM_COMPONENTS);
+			}
+
+			this.components.set(dataComponentType, object);
+			return this;
+		}
+
+		public Item.Properties attributes(ItemAttributeModifiers itemAttributeModifiers) {
+			return this.component(DataComponents.ATTRIBUTE_MODIFIERS, itemAttributeModifiers);
+		}
+
+		DataComponentMap buildComponents() {
+			return this.components == null ? DataComponents.COMMON_ITEM_COMPONENTS : COMPONENT_INTERNER.intern(this.components.build());
 		}
 	}
 }

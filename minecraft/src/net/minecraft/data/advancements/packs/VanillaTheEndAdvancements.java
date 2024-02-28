@@ -17,6 +17,7 @@ import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.advancements.critereon.PlayerTrigger;
 import net.minecraft.advancements.critereon.SummonedEntityTrigger;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.advancements.AdvancementSubProvider;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -25,6 +26,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.structure.BuiltinStructures;
+import net.minecraft.world.level.levelgen.structure.Structure;
 
 public class VanillaTheEndAdvancements implements AdvancementSubProvider {
 	@Override
@@ -96,7 +98,12 @@ public class VanillaTheEndAdvancements implements AdvancementSubProvider {
 				true,
 				false
 			)
-			.addCriterion("in_city", PlayerTrigger.TriggerInstance.located(LocationPredicate.Builder.inStructure(BuiltinStructures.END_CITY)))
+			.addCriterion(
+				"in_city",
+				PlayerTrigger.TriggerInstance.located(
+					LocationPredicate.Builder.inStructure(provider.<Structure>lookupOrThrow(Registries.STRUCTURE).getOrThrow(BuiltinStructures.END_CITY))
+				)
+			)
 			.save(consumer, "end/find_end_city");
 		Advancement.Builder.advancement()
 			.parent(advancementHolder2)

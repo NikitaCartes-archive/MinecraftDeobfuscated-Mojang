@@ -1,5 +1,6 @@
 package net.minecraft.world.item.enchantment;
 
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -28,7 +29,7 @@ public class DigDurabilityEnchantment extends Enchantment {
 
 	@Override
 	public boolean canEnchant(ItemStack itemStack) {
-		return itemStack.isUnbreakable() ? false : super.canEnchant(itemStack);
+		return itemStack.has(DataComponents.UNBREAKABLE) ? false : super.canEnchant(itemStack);
 	}
 
 	public static boolean shouldIgnoreDurabilityDrop(ItemStack itemStack, int i, RandomSource randomSource) {

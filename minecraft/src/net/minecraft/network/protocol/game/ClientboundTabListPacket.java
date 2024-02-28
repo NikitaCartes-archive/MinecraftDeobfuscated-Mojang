@@ -9,9 +9,9 @@ import net.minecraft.network.protocol.PacketType;
 
 public record ClientboundTabListPacket(Component header, Component footer) implements Packet<ClientGamePacketListener> {
 	public static final StreamCodec<RegistryFriendlyByteBuf, ClientboundTabListPacket> STREAM_CODEC = StreamCodec.composite(
-		ComponentSerialization.STREAM_CODEC,
+		ComponentSerialization.TRUSTED_STREAM_CODEC,
 		ClientboundTabListPacket::header,
-		ComponentSerialization.STREAM_CODEC,
+		ComponentSerialization.TRUSTED_STREAM_CODEC,
 		ClientboundTabListPacket::footer,
 		ClientboundTabListPacket::new
 	);

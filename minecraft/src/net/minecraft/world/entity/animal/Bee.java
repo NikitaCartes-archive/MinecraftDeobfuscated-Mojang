@@ -639,6 +639,10 @@ public class Bee extends Animal implements NeutralMob, FlyingAnimal {
 		return blockPos.closerThan(this.blockPosition(), (double)i);
 	}
 
+	public void setHivePos(BlockPos blockPos) {
+		this.hivePos = blockPos;
+	}
+
 	abstract class BaseBeeGoal extends Goal {
 		public abstract boolean canBeeUse();
 
@@ -724,7 +728,7 @@ public class Bee extends Animal implements NeutralMob, FlyingAnimal {
 		public void start() {
 			BlockEntity blockEntity = Bee.this.level().getBlockEntity(Bee.this.hivePos);
 			if (blockEntity instanceof BeehiveBlockEntity beehiveBlockEntity) {
-				beehiveBlockEntity.addOccupant(Bee.this, Bee.this.hasNectar());
+				beehiveBlockEntity.addOccupant(Bee.this);
 			}
 		}
 	}

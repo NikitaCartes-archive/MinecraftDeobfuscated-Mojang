@@ -6,6 +6,7 @@ import java.util.function.IntFunction;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -27,6 +28,7 @@ import net.minecraft.world.entity.VariantHolder;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.ServerLevelAccessor;
@@ -138,8 +140,7 @@ public class TropicalFish extends AbstractSchoolingFish implements VariantHolder
 	@Override
 	public void saveToBucketTag(ItemStack itemStack) {
 		super.saveToBucketTag(itemStack);
-		CompoundTag compoundTag = itemStack.getOrCreateTag();
-		compoundTag.putInt("BucketVariantTag", this.getPackedVariant());
+		CustomData.update(DataComponents.BUCKET_ENTITY_DATA, itemStack, compoundTag -> compoundTag.putInt("BucketVariantTag", this.getPackedVariant()));
 	}
 
 	@Override
@@ -284,6 +285,12 @@ public class TropicalFish extends AbstractSchoolingFish implements VariantHolder
 	}
 
 	public static record Variant(TropicalFish.Pattern pattern, DyeColor baseColor, DyeColor patternColor) {
+		public static final Codec<TropicalFish.Variant> CODEC = Codec.INT.xmap(TropicalFish.Variant::new, TropicalFish.Variant::getPackedId);
+
+		public Variant(int i) {
+			this(TropicalFish.getPattern(i), TropicalFish.getBaseColor(i), TropicalFish.getPatternColor(i));
+		}
+
 		public int getPackedId() {
 			return TropicalFish.packVariant(this.pattern, this.baseColor, this.patternColor);
 		}

@@ -12,11 +12,12 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.util.FastColor;
 import net.minecraft.world.entity.animal.horse.Horse;
 import net.minecraft.world.item.AnimalArmorItem;
-import net.minecraft.world.item.DyeableLeatherItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.DyedItemColor;
 
 @Environment(EnvType.CLIENT)
 public class HorseArmorLayer extends RenderLayer<Horse, HorseModel<Horse>> {
@@ -38,10 +39,10 @@ public class HorseArmorLayer extends RenderLayer<Horse, HorseModel<Horse>> {
 			float p;
 			float nx;
 			if (itemStack.is(ItemTags.DYEABLE)) {
-				int m = DyeableLeatherItem.getColor(itemStack);
-				nx = (float)(m >> 16 & 0xFF) / 255.0F;
-				o = (float)(m >> 8 & 0xFF) / 255.0F;
-				p = (float)(m & 0xFF) / 255.0F;
+				int m = DyedItemColor.getOrDefault(itemStack, -6265536);
+				nx = (float)FastColor.ARGB32.red(m) / 255.0F;
+				o = (float)FastColor.ARGB32.green(m) / 255.0F;
+				p = (float)FastColor.ARGB32.blue(m) / 255.0F;
 			} else {
 				nx = 1.0F;
 				o = 1.0F;

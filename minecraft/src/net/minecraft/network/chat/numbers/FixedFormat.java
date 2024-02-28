@@ -11,7 +11,7 @@ public class FixedFormat implements NumberFormat {
 	public static final NumberFormatType<FixedFormat> TYPE = new NumberFormatType<FixedFormat>() {
 		private static final MapCodec<FixedFormat> CODEC = ComponentSerialization.CODEC.fieldOf("value").xmap(FixedFormat::new, fixedFormat -> fixedFormat.value);
 		private static final StreamCodec<RegistryFriendlyByteBuf, FixedFormat> STREAM_CODEC = StreamCodec.composite(
-			ComponentSerialization.STREAM_CODEC, fixedFormat -> fixedFormat.value, FixedFormat::new
+			ComponentSerialization.TRUSTED_STREAM_CODEC, fixedFormat -> fixedFormat.value, FixedFormat::new
 		);
 
 		@Override

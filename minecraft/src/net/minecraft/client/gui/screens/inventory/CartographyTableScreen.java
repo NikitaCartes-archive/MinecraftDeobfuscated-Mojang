@@ -4,6 +4,7 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
@@ -44,11 +45,10 @@ public class CartographyTableScreen extends AbstractContainerScreen<CartographyT
 		boolean bl2 = itemStack.is(Items.PAPER);
 		boolean bl3 = itemStack.is(Items.GLASS_PANE);
 		ItemStack itemStack2 = this.menu.getSlot(0).getItem();
+		MapId mapId = itemStack2.get(DataComponents.MAP_ID);
 		boolean bl4 = false;
-		MapId mapId;
 		MapItemSavedData mapItemSavedData;
-		if (itemStack2.is(Items.FILLED_MAP)) {
-			mapId = MapItem.getMapId(itemStack2);
+		if (mapId != null) {
 			mapItemSavedData = MapItem.getSavedData(mapId, this.minecraft.level);
 			if (mapItemSavedData != null) {
 				if (mapItemSavedData.locked) {
@@ -64,7 +64,6 @@ public class CartographyTableScreen extends AbstractContainerScreen<CartographyT
 				}
 			}
 		} else {
-			mapId = null;
 			mapItemSavedData = null;
 		}
 

@@ -10,7 +10,7 @@ import net.minecraft.network.protocol.PacketType;
 
 public record ClientboundDisguisedChatPacket(Component message, ChatType.Bound chatType) implements Packet<ClientGamePacketListener> {
 	public static final StreamCodec<RegistryFriendlyByteBuf, ClientboundDisguisedChatPacket> STREAM_CODEC = StreamCodec.composite(
-		ComponentSerialization.STREAM_CODEC,
+		ComponentSerialization.TRUSTED_STREAM_CODEC,
 		ClientboundDisguisedChatPacket::message,
 		ChatType.Bound.STREAM_CODEC,
 		ClientboundDisguisedChatPacket::chatType,

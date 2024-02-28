@@ -20,12 +20,12 @@ public class ServerboundSetCreativeModeSlotPacket implements Packet<ServerGamePa
 
 	private ServerboundSetCreativeModeSlotPacket(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
 		this.slotNum = registryFriendlyByteBuf.readShort();
-		this.itemStack = ItemStack.STREAM_CODEC.decode(registryFriendlyByteBuf);
+		this.itemStack = ItemStack.OPTIONAL_STREAM_CODEC.decode(registryFriendlyByteBuf);
 	}
 
 	private void write(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
 		registryFriendlyByteBuf.writeShort(this.slotNum);
-		ItemStack.STREAM_CODEC.encode(registryFriendlyByteBuf, this.itemStack);
+		ItemStack.OPTIONAL_STREAM_CODEC.encode(registryFriendlyByteBuf, this.itemStack);
 	}
 
 	@Override

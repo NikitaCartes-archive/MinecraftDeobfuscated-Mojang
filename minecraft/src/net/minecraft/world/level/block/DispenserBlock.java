@@ -16,7 +16,6 @@ import net.minecraft.stats.Stats;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.Item;
@@ -130,16 +129,6 @@ public class DispenserBlock extends BaseEntityBlock {
 	@Override
 	public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
 		return this.defaultBlockState().setValue(FACING, blockPlaceContext.getNearestLookingDirection().getOpposite());
-	}
-
-	@Override
-	public void setPlacedBy(Level level, BlockPos blockPos, BlockState blockState, LivingEntity livingEntity, ItemStack itemStack) {
-		if (itemStack.hasCustomHoverName()) {
-			BlockEntity blockEntity = level.getBlockEntity(blockPos);
-			if (blockEntity instanceof DispenserBlockEntity) {
-				((DispenserBlockEntity)blockEntity).setCustomName(itemStack.getHoverName());
-			}
-		}
 	}
 
 	@Override

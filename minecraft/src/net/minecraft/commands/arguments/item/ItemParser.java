@@ -6,11 +6,14 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-import javax.annotation.Nullable;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponentMap;
+import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.component.CustomData;
 import org.apache.commons.lang3.mutable.MutableObject;
 
 public class ItemParser {
@@ -22,7 +25,7 @@ public class ItemParser {
 
 	public ItemParser.ItemResult parse(StringReader stringReader) throws CommandSyntaxException {
 		final MutableObject<Holder<Item>> mutableObject = new MutableObject<>();
-		final MutableObject<CompoundTag> mutableObject2 = new MutableObject<>();
+		final DataComponentMap.Builder builder = DataComponentMap.builder();
 		this.syntax.parse(stringReader, new ItemSyntaxParser.Visitor() {
 			@Override
 			public void visitItem(Holder<Item> holder) {
@@ -30,17 +33,22 @@ public class ItemParser {
 			}
 
 			@Override
-			public void visitNbt(CompoundTag compoundTag) {
-				mutableObject2.setValue(compoundTag);
+			public <T> void visitComponent(DataComponentType<T> dataComponentType, T object) {
+				builder.set(dataComponentType, object);
+			}
+
+			@Override
+			public void visitCustomData(CompoundTag compoundTag) {
+				builder.set(DataComponents.CUSTOM_DATA, CustomData.of(compoundTag));
 			}
 		});
-		return new ItemParser.ItemResult((Holder<Item>)Objects.requireNonNull(mutableObject.getValue(), "Parser gave no item"), mutableObject2.getValue());
+		return new ItemParser.ItemResult((Holder<Item>)Objects.requireNonNull(mutableObject.getValue(), "Parser gave no item"), builder.build());
 	}
 
 	public CompletableFuture<Suggestions> fillSuggestions(SuggestionsBuilder suggestionsBuilder) {
 		return this.syntax.fillSuggestions(suggestionsBuilder);
 	}
 
-	public static record ItemResult(Holder<Item> item, @Nullable CompoundTag nbt) {
+	public static record ItemResult(Holder<Item> item, DataComponentMap components) {
 	}
 }

@@ -6,7 +6,6 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
-import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Unit;
 import com.mojang.logging.LogUtils;
 import java.util.List;
@@ -23,9 +22,10 @@ import net.minecraft.util.thread.ProcessorMailbox;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.ImposterProtoChunk;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
+import net.minecraft.world.level.chunk.status.WorldGenContext;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
 import org.slf4j.Logger;
@@ -92,6 +92,9 @@ public class ResetChunksCommand {
 		)) {
 			long r = System.currentTimeMillis();
 			CompletableFuture<Unit> completableFuture = CompletableFuture.supplyAsync(() -> Unit.INSTANCE, processorMailbox::tell);
+			WorldGenContext worldGenContext = new WorldGenContext(
+				serverLevel, serverChunkCache.getGenerator(), serverLevel.getStructureManager(), serverChunkCache.getLightEngine()
+			);
 
 			for(int s = chunkPos.z - i; s <= chunkPos.z + i; ++s) {
 				for(int t = chunkPos.x - i; t <= chunkPos.x + i; ++t) {
@@ -117,27 +120,15 @@ public class ResetChunksCommand {
 							}
 						}
 
-						completableFuture = completableFuture.thenComposeAsync(
-							unit -> chunkStatus.generate(
-										processorMailbox::tell,
-										serverLevel,
-										serverChunkCache.getGenerator(),
-										serverLevel.getStructureManager(),
-										serverChunkCache.getLightEngine(),
-										chunkAccessx -> {
-											throw new UnsupportedOperationException("Not creating full chunks here");
-										},
-										list
-									)
-									.thenApply(either -> {
-										if (chunkStatus == ChunkStatus.NOISE) {
-											either.left().ifPresent(chunkAccessx -> Heightmap.primeHeightmaps(chunkAccessx, ChunkStatus.POST_FEATURES));
-										}
-		
-										return Unit.INSTANCE;
-									}),
-							processorMailbox::tell
-						);
+						completableFuture = completableFuture.thenComposeAsync(unit -> chunkStatus.generate(worldGenContext, processorMailbox::tell, chunkAccessx -> {
+								throw new UnsupportedOperationException("Not creating full chunks here");
+							}, list).thenApply(chunkAccessx -> {
+								if (chunkStatus == ChunkStatus.NOISE) {
+									Heightmap.primeHeightmaps(chunkAccessx, ChunkStatus.POST_FEATURES);
+								}
+
+								return Unit.INSTANCE;
+							}), processorMailbox::tell);
 					}
 				}
 			}

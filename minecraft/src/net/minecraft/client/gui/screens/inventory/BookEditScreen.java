@@ -11,9 +11,9 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
-import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.client.GameNarrator;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.StringSplitter;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -22,17 +22,18 @@ import net.minecraft.client.gui.font.TextFieldHelper;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTag;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.protocol.game.ServerboundEditBookPacket;
+import net.minecraft.server.network.Filterable;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.util.StringUtil;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.WritableBookContent;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableInt;
@@ -84,9 +85,9 @@ public class BookEditScreen extends Screen {
 		this.owner = player;
 		this.book = itemStack;
 		this.hand = interactionHand;
-		CompoundTag compoundTag = itemStack.getTag();
-		if (compoundTag != null) {
-			BookViewScreen.loadPages(compoundTag, this.pages::add);
+		WritableBookContent writableBookContent = itemStack.get(DataComponents.WRITABLE_BOOK_CONTENT);
+		if (writableBookContent != null) {
+			writableBookContent.getPages(Minecraft.getInstance().isTextFilteringEnabled()).forEach(this.pages::add);
 		}
 
 		if (this.pages.isEmpty()) {
@@ -177,7 +178,7 @@ public class BookEditScreen extends Screen {
 		this.signButton.visible = !this.isSigning;
 		this.cancelButton.visible = this.isSigning;
 		this.finalizeButton.visible = this.isSigning;
-		this.finalizeButton.active = !Util.isBlank(this.title);
+		this.finalizeButton.active = !StringUtil.isBlank(this.title);
 	}
 
 	private void eraseEmptyTrailingPages() {
@@ -191,23 +192,14 @@ public class BookEditScreen extends Screen {
 	private void saveChanges(boolean bl) {
 		if (this.isModified) {
 			this.eraseEmptyTrailingPages();
-			this.updateLocalCopy(bl);
+			this.updateLocalCopy();
 			int i = this.hand == InteractionHand.MAIN_HAND ? this.owner.getInventory().selected : 40;
 			this.minecraft.getConnection().send(new ServerboundEditBookPacket(i, this.pages, bl ? Optional.of(this.title.trim()) : Optional.empty()));
 		}
 	}
 
-	private void updateLocalCopy(boolean bl) {
-		ListTag listTag = new ListTag();
-		this.pages.stream().map(StringTag::valueOf).forEach(listTag::add);
-		if (!this.pages.isEmpty()) {
-			this.book.addTagElement("pages", listTag);
-		}
-
-		if (bl) {
-			this.book.addTagElement("author", StringTag.valueOf(this.owner.getGameProfile().getName()));
-			this.book.addTagElement("title", StringTag.valueOf(this.title.trim()));
-		}
+	private void updateLocalCopy() {
+		this.book.set(DataComponents.WRITABLE_BOOK_CONTENT, new WritableBookContent(this.pages.stream().map(Filterable::passThrough).toList()));
 	}
 
 	private void appendPageToBook() {
@@ -247,7 +239,7 @@ public class BookEditScreen extends Screen {
 			} else {
 				return false;
 			}
-		} else if (SharedConstants.isAllowedChatCharacter(c)) {
+		} else if (StringUtil.isAllowedChatCharacter(c)) {
 			this.pageEdit.insertText(Character.toString(c));
 			this.clearDisplayCache();
 			return true;
@@ -413,7 +405,7 @@ public class BookEditScreen extends Screen {
 
 	@Override
 	public void renderBackground(GuiGraphics guiGraphics, int i, int j, float f) {
-		super.renderBackground(guiGraphics, i, j, f);
+		this.renderTransparentBackground(guiGraphics);
 		guiGraphics.blit(BookViewScreen.BOOK_LOCATION, (this.width - 192) / 2, 2, 0, 0, 192, 192);
 	}
 

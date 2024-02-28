@@ -1,5 +1,6 @@
 package net.minecraft.world.entity.npc;
 
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.Mob;
@@ -32,13 +33,13 @@ public interface InventoryCarrier {
 		}
 	}
 
-	default void readInventoryFromTag(CompoundTag compoundTag) {
+	default void readInventoryFromTag(CompoundTag compoundTag, HolderLookup.Provider provider) {
 		if (compoundTag.contains("Inventory", 9)) {
-			this.getInventory().fromTag(compoundTag.getList("Inventory", 10));
+			this.getInventory().fromTag(compoundTag.getList("Inventory", 10), provider);
 		}
 	}
 
-	default void writeInventoryToTag(CompoundTag compoundTag) {
-		compoundTag.put("Inventory", this.getInventory().createTag());
+	default void writeInventoryToTag(CompoundTag compoundTag, HolderLookup.Provider provider) {
+		compoundTag.put("Inventory", this.getInventory().createTag(provider));
 	}
 }

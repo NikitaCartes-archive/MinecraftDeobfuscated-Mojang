@@ -2,7 +2,7 @@ package net.minecraft.world.item;
 
 import java.util.List;
 import javax.annotation.Nullable;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
@@ -15,7 +15,6 @@ import net.minecraft.world.level.block.DispenserBlock;
 public class ShieldItem extends Item implements Equipable {
 	public static final int EFFECTIVE_BLOCK_DELAY = 5;
 	public static final float MINIMUM_DURABILITY_DAMAGE = 3.0F;
-	public static final String TAG_BASE_COLOR = "Base";
 
 	public ShieldItem(Item.Properties properties) {
 		super(properties);
@@ -24,7 +23,8 @@ public class ShieldItem extends Item implements Equipable {
 
 	@Override
 	public String getDescriptionId(ItemStack itemStack) {
-		return BlockItem.getBlockEntityData(itemStack) != null ? this.getDescriptionId() + "." + getColor(itemStack).getName() : super.getDescriptionId(itemStack);
+		DyeColor dyeColor = itemStack.get(DataComponents.BASE_COLOR);
+		return dyeColor != null ? this.getDescriptionId() + "." + dyeColor.getName() : super.getDescriptionId(itemStack);
 	}
 
 	@Override
@@ -52,11 +52,6 @@ public class ShieldItem extends Item implements Equipable {
 	@Override
 	public boolean isValidRepairItem(ItemStack itemStack, ItemStack itemStack2) {
 		return itemStack2.is(ItemTags.PLANKS) || super.isValidRepairItem(itemStack, itemStack2);
-	}
-
-	public static DyeColor getColor(ItemStack itemStack) {
-		CompoundTag compoundTag = BlockItem.getBlockEntityData(itemStack);
-		return compoundTag != null ? DyeColor.byId(compoundTag.getInt("Base")) : DyeColor.WHITE;
 	}
 
 	@Override

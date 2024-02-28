@@ -82,11 +82,12 @@ public class ShareToLanScreen extends Screen {
 		this.portEdit.setHint(Component.literal(this.port + "").withStyle(ChatFormatting.DARK_GRAY));
 		this.addRenderableWidget(this.portEdit);
 		this.addRenderableWidget(button);
-		this.addRenderableWidget(
-			Button.builder(CommonComponents.GUI_CANCEL, buttonx -> this.minecraft.setScreen(this.lastScreen))
-				.bounds(this.width / 2 + 5, this.height - 28, 150, 20)
-				.build()
-		);
+		this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, buttonx -> this.onClose()).bounds(this.width / 2 + 5, this.height - 28, 150, 20).build());
+	}
+
+	@Override
+	public void onClose() {
+		this.minecraft.setScreen(this.lastScreen);
 	}
 
 	@Nullable

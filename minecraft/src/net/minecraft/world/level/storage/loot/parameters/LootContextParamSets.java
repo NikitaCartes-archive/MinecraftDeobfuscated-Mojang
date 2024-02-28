@@ -86,6 +86,9 @@ public class LootContextParamSets {
 				.optional(LootContextParams.BLOCK_ENTITY)
 				.optional(LootContextParams.EXPLOSION_RADIUS)
 	);
+	public static final LootContextParamSet SHEARING = register(
+		"shearing", builder -> builder.required(LootContextParams.ORIGIN).optional(LootContextParams.THIS_ENTITY)
+	);
 
 	private static LootContextParamSet register(String string, Consumer<LootContextParamSet.Builder> consumer) {
 		LootContextParamSet.Builder builder = new LootContextParamSet.Builder();

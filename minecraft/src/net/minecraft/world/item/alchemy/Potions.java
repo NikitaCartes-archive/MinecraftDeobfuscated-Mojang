@@ -3,15 +3,11 @@ package net.minecraft.world.item.alchemy;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 
 public class Potions {
-	public static final ResourceKey<Potion> EMPTY_ID = ResourceKey.create(Registries.POTION, new ResourceLocation("empty"));
-	public static final Holder<Potion> EMPTY = register(EMPTY_ID, new Potion());
 	public static final Holder<Potion> WATER = register("water", new Potion());
 	public static final Holder<Potion> MUNDANE = register("mundane", new Potion());
 	public static final Holder<Potion> THICK = register("thick", new Potion());
@@ -88,11 +84,7 @@ public class Potions {
 		return Registry.registerForHolder(BuiltInRegistries.POTION, new ResourceLocation(string), potion);
 	}
 
-	private static Holder<Potion> register(ResourceKey<Potion> resourceKey, Potion potion) {
-		return Registry.registerForHolder(BuiltInRegistries.POTION, resourceKey, potion);
-	}
-
 	public static Holder<Potion> bootstrap(Registry<Potion> registry) {
-		return EMPTY;
+		return WATER;
 	}
 }

@@ -12,7 +12,7 @@ public class StyledFormat implements NumberFormat {
 	public static final NumberFormatType<StyledFormat> TYPE = new NumberFormatType<StyledFormat>() {
 		private static final MapCodec<StyledFormat> CODEC = Style.Serializer.MAP_CODEC.xmap(StyledFormat::new, styledFormat -> styledFormat.style);
 		private static final StreamCodec<RegistryFriendlyByteBuf, StyledFormat> STREAM_CODEC = StreamCodec.composite(
-			Style.Serializer.STREAM_CODEC, styledFormat -> styledFormat.style, StyledFormat::new
+			Style.Serializer.TRUSTED_STREAM_CODEC, styledFormat -> styledFormat.style, StyledFormat::new
 		);
 
 		@Override

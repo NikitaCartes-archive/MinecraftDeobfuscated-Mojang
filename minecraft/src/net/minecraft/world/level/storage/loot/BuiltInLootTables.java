@@ -101,6 +101,7 @@ public class BuiltInLootTables {
 	public static final ResourceLocation PIGLIN_BARTERING = register("gameplay/piglin_bartering");
 	public static final ResourceLocation SPAWNER_TRIAL_CHAMBER_KEY = register("spawners/trial_chamber/key");
 	public static final ResourceLocation SPAWNER_TRIAL_CHAMBER_CONSUMABLES = register("spawners/trial_chamber/consumables");
+	public static final ResourceLocation BOGGED_SHEAR = register("shearing/bogged");
 	public static final ResourceLocation DESERT_WELL_ARCHAEOLOGY = register("archaeology/desert_well");
 	public static final ResourceLocation DESERT_PYRAMID_ARCHAEOLOGY = register("archaeology/desert_pyramid");
 	public static final ResourceLocation TRAIL_RUINS_ARCHAEOLOGY_COMMON = register("archaeology/trail_ruins_common");

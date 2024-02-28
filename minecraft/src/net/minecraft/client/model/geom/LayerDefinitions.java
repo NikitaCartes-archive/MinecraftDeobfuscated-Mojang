@@ -16,6 +16,7 @@ import net.minecraft.client.model.BatModel;
 import net.minecraft.client.model.BeeModel;
 import net.minecraft.client.model.BlazeModel;
 import net.minecraft.client.model.BoatModel;
+import net.minecraft.client.model.BoggedModel;
 import net.minecraft.client.model.BookModel;
 import net.minecraft.client.model.BreezeModel;
 import net.minecraft.client.model.CamelModel;
@@ -149,7 +150,7 @@ public class LayerDefinitions {
 		builder.put(ModelLayers.BEE, BeeModel.createBodyLayer());
 		builder.put(ModelLayers.BELL, BellRenderer.createBodyLayer());
 		builder.put(ModelLayers.BLAZE, BlazeModel.createBodyLayer());
-		builder.put(ModelLayers.BOGGED, layerDefinition17);
+		builder.put(ModelLayers.BOGGED, BoggedModel.createBodyLayer());
 		builder.put(ModelLayers.BOGGED_INNER_ARMOR, layerDefinition4);
 		builder.put(ModelLayers.BOGGED_OUTER_ARMOR, layerDefinition2);
 		builder.put(ModelLayers.BOGGED_OUTER_LAYER, LayerDefinition.create(HumanoidModel.createMesh(new CubeDeformation(0.2F), 0.0F), 64, 32));

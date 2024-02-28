@@ -17,6 +17,7 @@ import net.minecraft.CrashReport;
 import net.minecraft.SharedConstants;
 import net.minecraft.SystemReport;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.Services;
@@ -29,6 +30,7 @@ import net.minecraft.util.ModCheck;
 import net.minecraft.util.debugchart.LocalSampleLogger;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.entity.player.ProfileKeyPair;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import org.slf4j.Logger;
@@ -291,5 +293,30 @@ public class IntegratedServer extends MinecraftServer {
 	@Override
 	public GameType getForcedGameType() {
 		return this.isPublished() ? MoreObjects.firstNonNull(this.publishedGameType, this.worldData.getGameType()) : null;
+	}
+
+	@Override
+	public boolean saveEverything(boolean bl, boolean bl2, boolean bl3) {
+		boolean bl4 = super.saveEverything(bl, bl2, bl3);
+		this.warnOnLowDiskSpace();
+		return bl4;
+	}
+
+	private void warnOnLowDiskSpace() {
+		if (this.storageSource.checkForLowDiskSpace()) {
+			SystemToast.onLowDiskSpace(this.minecraft);
+		}
+	}
+
+	@Override
+	public void reportChunkLoadFailure(ChunkPos chunkPos) {
+		this.warnOnLowDiskSpace();
+		SystemToast.onChunkLoadFailure(this.minecraft, chunkPos);
+	}
+
+	@Override
+	public void reportChunkSaveFailure(ChunkPos chunkPos) {
+		this.warnOnLowDiskSpace();
+		SystemToast.onChunkSaveFailure(this.minecraft, chunkPos);
 	}
 }

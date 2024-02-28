@@ -28,7 +28,7 @@ public class WetSpongeBlock extends Block {
 		if (level.dimensionType().ultraWarm()) {
 			level.setBlock(blockPos, Blocks.SPONGE.defaultBlockState(), 3);
 			level.levelEvent(2009, blockPos, 0);
-			level.playSound(null, blockPos, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 1.0F, (1.0F + level.getRandom().nextFloat() * 0.2F) * 0.7F);
+			level.playSound(null, blockPos, SoundEvents.WET_SPONGE_DRIES, SoundSource.BLOCKS, 1.0F, (1.0F + level.getRandom().nextFloat() * 0.2F) * 0.7F);
 		}
 	}
 

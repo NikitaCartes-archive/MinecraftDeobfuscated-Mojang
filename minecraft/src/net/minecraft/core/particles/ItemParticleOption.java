@@ -16,7 +16,7 @@ public class ItemParticleOption implements ParticleOptions {
 		public ItemParticleOption fromCommand(ParticleType<ItemParticleOption> particleType, StringReader stringReader, HolderLookup.Provider provider) throws CommandSyntaxException {
 			stringReader.expect(' ');
 			ItemParser.ItemResult itemResult = new ItemParser(provider).parse(stringReader);
-			ItemStack itemStack = new ItemInput(itemResult.item(), itemResult.nbt()).createItemStack(1, false);
+			ItemStack itemStack = new ItemInput(itemResult.item(), itemResult.components()).createItemStack(1, false);
 			return new ItemParticleOption(particleType, itemStack);
 		}
 	};
@@ -38,7 +38,8 @@ public class ItemParticleOption implements ParticleOptions {
 
 	@Override
 	public String writeToString(HolderLookup.Provider provider) {
-		return BuiltInRegistries.PARTICLE_TYPE.getKey(this.getType()) + " " + new ItemInput(this.itemStack.getItemHolder(), this.itemStack.getTag()).serialize();
+		ItemInput itemInput = new ItemInput(this.itemStack.getItemHolder(), this.itemStack.getComponents());
+		return BuiltInRegistries.PARTICLE_TYPE.getKey(this.getType()) + " " + itemInput.serialize(provider);
 	}
 
 	@Override

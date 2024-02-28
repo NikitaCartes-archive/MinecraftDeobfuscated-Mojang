@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import java.util.EnumSet;
 import java.util.Objects;
+import java.util.Optional;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -26,6 +27,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.entity.DecoratedPotBlockEntity;
 import net.minecraft.world.level.block.entity.DecoratedPotPatterns;
+import net.minecraft.world.level.block.entity.PotDecorations;
 
 @Environment(EnvType.CLIENT)
 public class DecoratedPotRenderer implements BlockEntityRenderer<DecoratedPotBlockEntity> {
@@ -90,13 +92,15 @@ public class DecoratedPotRenderer implements BlockEntityRenderer<DecoratedPotBlo
 	}
 
 	@Nullable
-	private static Material getMaterial(Item item) {
-		Material material = Sheets.getDecoratedPotMaterial(DecoratedPotPatterns.getResourceKey(item));
-		if (material == null) {
-			material = Sheets.getDecoratedPotMaterial(DecoratedPotPatterns.getResourceKey(Items.BRICK));
+	private static Material getMaterial(Optional<Item> optional) {
+		if (optional.isPresent()) {
+			Material material = Sheets.getDecoratedPotMaterial(DecoratedPotPatterns.getResourceKey((Item)optional.get()));
+			if (material != null) {
+				return material;
+			}
 		}
 
-		return material;
+		return Sheets.getDecoratedPotMaterial(DecoratedPotPatterns.getResourceKey(Items.BRICK));
 	}
 
 	public void render(DecoratedPotBlockEntity decoratedPotBlockEntity, float f, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {
@@ -128,17 +132,17 @@ public class DecoratedPotRenderer implements BlockEntityRenderer<DecoratedPotBlo
 		this.neck.render(poseStack, vertexConsumer, i, j);
 		this.top.render(poseStack, vertexConsumer, i, j);
 		this.bottom.render(poseStack, vertexConsumer, i, j);
-		DecoratedPotBlockEntity.Decorations decorations = decoratedPotBlockEntity.getDecorations();
-		this.renderSide(this.frontSide, poseStack, multiBufferSource, i, j, getMaterial(decorations.front()));
-		this.renderSide(this.backSide, poseStack, multiBufferSource, i, j, getMaterial(decorations.back()));
-		this.renderSide(this.leftSide, poseStack, multiBufferSource, i, j, getMaterial(decorations.left()));
-		this.renderSide(this.rightSide, poseStack, multiBufferSource, i, j, getMaterial(decorations.right()));
+		PotDecorations potDecorations = decoratedPotBlockEntity.getDecorations();
+		this.renderSide(this.frontSide, poseStack, multiBufferSource, i, j, getMaterial(potDecorations.front()));
+		this.renderSide(this.backSide, poseStack, multiBufferSource, i, j, getMaterial(potDecorations.back()));
+		this.renderSide(this.leftSide, poseStack, multiBufferSource, i, j, getMaterial(potDecorations.left()));
+		this.renderSide(this.rightSide, poseStack, multiBufferSource, i, j, getMaterial(potDecorations.right()));
 		poseStack.popPose();
 	}
 
 	private void renderSide(ModelPart modelPart, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j, @Nullable Material material) {
 		if (material == null) {
-			material = getMaterial(Items.BRICK);
+			material = getMaterial(Optional.empty());
 		}
 
 		if (material != null) {

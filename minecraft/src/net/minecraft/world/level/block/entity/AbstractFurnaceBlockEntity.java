@@ -225,7 +225,7 @@ public abstract class AbstractFurnaceBlockEntity extends BaseContainerBlockEntit
 	public void load(CompoundTag compoundTag, HolderLookup.Provider provider) {
 		super.load(compoundTag, provider);
 		this.items = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
-		ContainerHelper.loadAllItems(compoundTag, this.items);
+		ContainerHelper.loadAllItems(compoundTag, this.items, provider);
 		this.litTime = compoundTag.getShort("BurnTime");
 		this.cookingProgress = compoundTag.getShort("CookTime");
 		this.cookingTotalTime = compoundTag.getShort("CookTimeTotal");
@@ -243,7 +243,7 @@ public abstract class AbstractFurnaceBlockEntity extends BaseContainerBlockEntit
 		compoundTag.putShort("BurnTime", (short)this.litTime);
 		compoundTag.putShort("CookTime", (short)this.cookingProgress);
 		compoundTag.putShort("CookTimeTotal", (short)this.cookingTotalTime);
-		ContainerHelper.saveAllItems(compoundTag, this.items);
+		ContainerHelper.saveAllItems(compoundTag, this.items, provider);
 		CompoundTag compoundTag2 = new CompoundTag();
 		this.recipesUsed.forEach((resourceLocation, integer) -> compoundTag2.putInt(resourceLocation.toString(), integer));
 		compoundTag.put("RecipesUsed", compoundTag2);

@@ -131,13 +131,8 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 	}
 
 	@Override
-	protected int getScrollbarPosition() {
-		return super.getScrollbarPosition() + 30;
-	}
-
-	@Override
 	public int getRowWidth() {
-		return super.getRowWidth() + 85;
+		return 305;
 	}
 
 	public void removed() {
@@ -209,7 +204,7 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 			}
 
 			this.lastClickTime = Util.getMillis();
-			return false;
+			return super.mouseClicked(d, e, i);
 		}
 
 		public LanServer getServerData() {
@@ -489,7 +484,7 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 			}
 
 			this.lastClickTime = Util.getMillis();
-			return true;
+			return super.mouseClicked(d, e, i);
 		}
 
 		public ServerData getServerData() {

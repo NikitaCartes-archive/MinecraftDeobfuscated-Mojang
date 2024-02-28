@@ -6,7 +6,7 @@ import net.minecraft.Util;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 import org.slf4j.Logger;
 
 public class LoggerChunkProgressListener implements ChunkProgressListener {

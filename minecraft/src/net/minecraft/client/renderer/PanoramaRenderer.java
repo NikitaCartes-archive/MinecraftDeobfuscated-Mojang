@@ -23,6 +23,10 @@ public class PanoramaRenderer {
 		this.cubeMap.render(this.minecraft, 10.0F, -this.spin, g);
 	}
 
+	public void render(float f) {
+		this.render(f, 1.0F);
+	}
+
 	private static float wrap(float f, float g) {
 		return f > g ? f - g : f;
 	}

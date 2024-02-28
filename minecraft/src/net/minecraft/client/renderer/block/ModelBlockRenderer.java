@@ -206,7 +206,7 @@ public class ModelBlockRenderer {
 			r = 1.0F;
 		}
 
-		vertexConsumer.putBulkData(pose, bakedQuad, new float[]{f, g, h, i}, p, q, r, new int[]{j, k, l, m}, n, true);
+		vertexConsumer.putBulkData(pose, bakedQuad, new float[]{f, g, h, i}, p, q, r, 1.0F, new int[]{j, k, l, m}, n, true);
 	}
 
 	private void calculateShape(
@@ -330,7 +330,7 @@ public class ModelBlockRenderer {
 				m = 1.0F;
 			}
 
-			vertexConsumer.putBulkData(pose, bakedQuad, k, l, m, i, j);
+			vertexConsumer.putBulkData(pose, bakedQuad, k, l, m, 1.0F, i, j);
 		}
 	}
 

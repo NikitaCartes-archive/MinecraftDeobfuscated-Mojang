@@ -30,7 +30,7 @@ import net.minecraft.util.profiling.jfr.stats.PacketIdentification;
 import net.minecraft.util.profiling.jfr.stats.ThreadAllocationStat;
 import net.minecraft.util.profiling.jfr.stats.TickTimeStat;
 import net.minecraft.util.profiling.jfr.stats.TimedStatSummary;
-import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 
 public class JfrResultJsonSerializer {
 	private static final String BYTES_PER_SECOND = "bytesPerSecond";

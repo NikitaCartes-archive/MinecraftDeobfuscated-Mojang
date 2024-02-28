@@ -1,6 +1,6 @@
 package net.minecraft.server.level;
 
-import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 
 public class ChunkLevel {
 	private static final int FULL_CHUNK_LEVEL = 33;

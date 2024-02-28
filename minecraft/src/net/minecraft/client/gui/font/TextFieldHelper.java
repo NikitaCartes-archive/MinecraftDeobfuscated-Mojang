@@ -6,12 +6,12 @@ import java.util.function.Supplier;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
-import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.StringSplitter;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.util.Mth;
+import net.minecraft.util.StringUtil;
 
 @Environment(EnvType.CLIENT)
 public class TextFieldHelper {
@@ -51,7 +51,7 @@ public class TextFieldHelper {
 	}
 
 	public boolean charTyped(char c) {
-		if (SharedConstants.isAllowedChatCharacter(c)) {
+		if (StringUtil.isAllowedChatCharacter(c)) {
 			this.insertText((String)this.getMessageFn.get(), Character.toString(c));
 		}
 

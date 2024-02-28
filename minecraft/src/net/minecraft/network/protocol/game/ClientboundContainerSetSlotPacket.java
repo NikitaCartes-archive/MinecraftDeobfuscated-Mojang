@@ -28,14 +28,14 @@ public class ClientboundContainerSetSlotPacket implements Packet<ClientGamePacke
 		this.containerId = registryFriendlyByteBuf.readByte();
 		this.stateId = registryFriendlyByteBuf.readVarInt();
 		this.slot = registryFriendlyByteBuf.readShort();
-		this.itemStack = ItemStack.STREAM_CODEC.decode(registryFriendlyByteBuf);
+		this.itemStack = ItemStack.OPTIONAL_STREAM_CODEC.decode(registryFriendlyByteBuf);
 	}
 
 	private void write(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
 		registryFriendlyByteBuf.writeByte(this.containerId);
 		registryFriendlyByteBuf.writeVarInt(this.stateId);
 		registryFriendlyByteBuf.writeShort(this.slot);
-		ItemStack.STREAM_CODEC.encode(registryFriendlyByteBuf, this.itemStack);
+		ItemStack.OPTIONAL_STREAM_CODEC.encode(registryFriendlyByteBuf, this.itemStack);
 	}
 
 	@Override

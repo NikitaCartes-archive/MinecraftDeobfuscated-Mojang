@@ -3,6 +3,7 @@ package net.minecraft.world.entity.animal.allay;
 import com.google.common.collect.ImmutableList;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Dynamic;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.BiConsumer;
@@ -11,6 +12,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Vec3i;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
@@ -52,6 +54,7 @@ import net.minecraft.world.entity.npc.InventoryCarrier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.GameRules;
@@ -374,21 +377,9 @@ public class Allay extends PathfinderMob implements InventoryCarrier, VibrationS
 	}
 
 	private boolean hasNonMatchingPotion(ItemStack itemStack, ItemStack itemStack2) {
-		CompoundTag compoundTag = itemStack.getTag();
-		boolean bl = compoundTag != null && compoundTag.contains("Potion");
-		if (!bl) {
-			return false;
-		} else {
-			CompoundTag compoundTag2 = itemStack2.getTag();
-			boolean bl2 = compoundTag2 != null && compoundTag2.contains("Potion");
-			if (!bl2) {
-				return true;
-			} else {
-				Tag tag = compoundTag.get("Potion");
-				Tag tag2 = compoundTag2.get("Potion");
-				return tag != null && tag2 != null && !tag.equals(tag2);
-			}
-		}
+		PotionContents potionContents = itemStack.get(DataComponents.POTION_CONTENTS);
+		PotionContents potionContents2 = itemStack2.get(DataComponents.POTION_CONTENTS);
+		return !Objects.equals(potionContents, potionContents2);
 	}
 
 	@Override
@@ -469,7 +460,7 @@ public class Allay extends PathfinderMob implements InventoryCarrier, VibrationS
 	@Override
 	public void addAdditionalSaveData(CompoundTag compoundTag) {
 		super.addAdditionalSaveData(compoundTag);
-		this.writeInventoryToTag(compoundTag);
+		this.writeInventoryToTag(compoundTag, this.registryAccess());
 		VibrationSystem.Data.CODEC.encodeStart(NbtOps.INSTANCE, this.vibrationData).resultOrPartial(LOGGER::error).ifPresent(tag -> compoundTag.put("listener", tag));
 		compoundTag.putLong("DuplicationCooldown", this.duplicationCooldown);
 		compoundTag.putBoolean("CanDuplicate", this.canDuplicate());
@@ -478,7 +469,7 @@ public class Allay extends PathfinderMob implements InventoryCarrier, VibrationS
 	@Override
 	public void readAdditionalSaveData(CompoundTag compoundTag) {
 		super.readAdditionalSaveData(compoundTag);
-		this.readInventoryFromTag(compoundTag);
+		this.readInventoryFromTag(compoundTag, this.registryAccess());
 		if (compoundTag.contains("listener", 10)) {
 			VibrationSystem.Data.CODEC
 				.parse(new Dynamic<>(NbtOps.INSTANCE, compoundTag.getCompound("listener")))

@@ -4,8 +4,10 @@ import com.mojang.datafixers.DSL;
 import com.mojang.datafixers.schemas.Schema;
 import com.mojang.datafixers.types.templates.TypeTemplate;
 import com.mojang.datafixers.types.templates.Hook.HookFunction;
+import com.mojang.datafixers.util.Pair;
 import java.util.Map;
 import java.util.function.Supplier;
+import net.minecraft.util.datafix.ExtraDataFixUtils;
 import net.minecraft.util.datafix.fixes.References;
 
 public class V102 extends Schema {
@@ -24,17 +26,13 @@ public class V102 extends Schema {
 						"id",
 						References.ITEM_NAME.in(schema),
 						"tag",
-						DSL.optionalFields(
-							"EntityTag",
-							References.ENTITY_TREE.in(schema),
-							"BlockEntityTag",
-							References.BLOCK_ENTITY.in(schema),
-							"CanDestroy",
-							DSL.list(References.BLOCK_NAME.in(schema)),
-							"CanPlaceOn",
-							DSL.list(References.BLOCK_NAME.in(schema)),
-							"Items",
-							DSL.list(References.ITEM_STACK.in(schema))
+						ExtraDataFixUtils.optionalFields(
+							Pair.of("EntityTag", References.ENTITY_TREE.in(schema)),
+							Pair.of("BlockEntityTag", References.BLOCK_ENTITY.in(schema)),
+							Pair.of("CanDestroy", DSL.list(References.BLOCK_NAME.in(schema))),
+							Pair.of("CanPlaceOn", DSL.list(References.BLOCK_NAME.in(schema))),
+							Pair.of("Items", DSL.list(References.ITEM_STACK.in(schema))),
+							Pair.of("ChargedProjectiles", DSL.list(References.ITEM_STACK.in(schema)))
 						)
 					),
 					V99.ADD_NAMES,

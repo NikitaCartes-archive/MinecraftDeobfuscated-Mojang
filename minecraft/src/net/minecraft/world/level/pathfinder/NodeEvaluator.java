@@ -7,14 +7,13 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.PathNavigationRegion;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CampfireBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
 public abstract class NodeEvaluator {
-	protected PathNavigationRegion level;
+	protected PathfindingContext currentContext;
 	protected Mob mob;
 	protected final Int2ObjectMap<Node> nodes = new Int2ObjectOpenHashMap<>();
 	protected int entityWidth;
@@ -26,7 +25,7 @@ public abstract class NodeEvaluator {
 	protected boolean canWalkOverFences;
 
 	public void prepare(PathNavigationRegion pathNavigationRegion, Mob mob) {
-		this.level = pathNavigationRegion;
+		this.currentContext = new PathfindingContext(pathNavigationRegion, mob);
 		this.mob = mob;
 		this.nodes.clear();
 		this.entityWidth = Mth.floor(mob.getBbWidth() + 1.0F);
@@ -35,7 +34,7 @@ public abstract class NodeEvaluator {
 	}
 
 	public void done() {
-		this.level = null;
+		this.currentContext = null;
 		this.mob = null;
 	}
 
@@ -57,9 +56,13 @@ public abstract class NodeEvaluator {
 
 	public abstract int getNeighbors(Node[] nodes, Node node);
 
-	public abstract PathType getPathTypeOfMob(BlockGetter blockGetter, int i, int j, int k, Mob mob);
+	public abstract PathType getPathTypeOfMob(PathfindingContext pathfindingContext, int i, int j, int k, Mob mob);
 
-	public abstract PathType getPathType(BlockGetter blockGetter, int i, int j, int k);
+	public abstract PathType getPathType(PathfindingContext pathfindingContext, int i, int j, int k);
+
+	public PathType getPathType(Mob mob, BlockPos blockPos) {
+		return this.getPathType(new PathfindingContext(mob.level(), mob), blockPos.getX(), blockPos.getY(), blockPos.getZ());
+	}
 
 	public void setCanPassDoors(boolean bl) {
 		this.canPassDoors = bl;

@@ -5,9 +5,11 @@ import com.mojang.datafixers.DSL;
 import com.mojang.datafixers.schemas.Schema;
 import com.mojang.datafixers.types.templates.TypeTemplate;
 import com.mojang.datafixers.types.templates.Hook.HookFunction;
+import com.mojang.datafixers.util.Pair;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import net.minecraft.util.datafix.ExtraDataFixUtils;
 import net.minecraft.util.datafix.fixes.References;
 
 public class V1460 extends NamespacedSchema {
@@ -236,21 +238,13 @@ public class V1460 extends NamespacedSchema {
 		schema.registerType(
 			false,
 			References.PLAYER,
-			() -> DSL.optionalFields(
-					"RootVehicle",
-					DSL.optionalFields("Entity", References.ENTITY_TREE.in(schema)),
-					"Inventory",
-					DSL.list(References.ITEM_STACK.in(schema)),
-					"EnderItems",
-					DSL.list(References.ITEM_STACK.in(schema)),
-					DSL.optionalFields(
-						"ShoulderEntityLeft",
-						References.ENTITY_TREE.in(schema),
-						"ShoulderEntityRight",
-						References.ENTITY_TREE.in(schema),
-						"recipeBook",
-						DSL.optionalFields("recipes", DSL.list(References.RECIPE.in(schema)), "toBeDisplayed", DSL.list(References.RECIPE.in(schema)))
-					)
+			() -> ExtraDataFixUtils.optionalFields(
+					Pair.of("RootVehicle", DSL.optionalFields("Entity", References.ENTITY_TREE.in(schema))),
+					Pair.of("Inventory", DSL.list(References.ITEM_STACK.in(schema))),
+					Pair.of("EnderItems", DSL.list(References.ITEM_STACK.in(schema))),
+					Pair.of("ShoulderEntityLeft", References.ENTITY_TREE.in(schema)),
+					Pair.of("ShoulderEntityRight", References.ENTITY_TREE.in(schema)),
+					Pair.of("recipeBook", DSL.optionalFields("recipes", DSL.list(References.RECIPE.in(schema)), "toBeDisplayed", DSL.list(References.RECIPE.in(schema))))
 				)
 		);
 		schema.registerType(
@@ -283,17 +277,13 @@ public class V1460 extends NamespacedSchema {
 						"id",
 						References.ITEM_NAME.in(schema),
 						"tag",
-						DSL.optionalFields(
-							"EntityTag",
-							References.ENTITY_TREE.in(schema),
-							"BlockEntityTag",
-							References.BLOCK_ENTITY.in(schema),
-							"CanDestroy",
-							DSL.list(References.BLOCK_NAME.in(schema)),
-							"CanPlaceOn",
-							DSL.list(References.BLOCK_NAME.in(schema)),
-							"Items",
-							DSL.list(References.ITEM_STACK.in(schema))
+						ExtraDataFixUtils.optionalFields(
+							Pair.of("EntityTag", References.ENTITY_TREE.in(schema)),
+							Pair.of("BlockEntityTag", References.BLOCK_ENTITY.in(schema)),
+							Pair.of("CanDestroy", DSL.list(References.BLOCK_NAME.in(schema))),
+							Pair.of("CanPlaceOn", DSL.list(References.BLOCK_NAME.in(schema))),
+							Pair.of("Items", DSL.list(References.ITEM_STACK.in(schema))),
+							Pair.of("ChargedProjectiles", DSL.list(References.ITEM_STACK.in(schema)))
 						)
 					),
 					V705.ADD_NAMES,
@@ -324,27 +314,16 @@ public class V1460 extends NamespacedSchema {
 			References.STATS,
 			() -> DSL.optionalFields(
 					"stats",
-					DSL.optionalFields(
-						"minecraft:mined",
-						DSL.compoundList(References.BLOCK_NAME.in(schema), DSL.constType(DSL.intType())),
-						"minecraft:crafted",
-						(TypeTemplate)supplier.get(),
-						"minecraft:used",
-						(TypeTemplate)supplier.get(),
-						"minecraft:broken",
-						(TypeTemplate)supplier.get(),
-						"minecraft:picked_up",
-						(TypeTemplate)supplier.get(),
-						DSL.optionalFields(
-							"minecraft:dropped",
-							(TypeTemplate)supplier.get(),
-							"minecraft:killed",
-							DSL.compoundList(References.ENTITY_NAME.in(schema), DSL.constType(DSL.intType())),
-							"minecraft:killed_by",
-							DSL.compoundList(References.ENTITY_NAME.in(schema), DSL.constType(DSL.intType())),
-							"minecraft:custom",
-							DSL.compoundList(DSL.constType(namespacedString()), DSL.constType(DSL.intType()))
-						)
+					ExtraDataFixUtils.optionalFields(
+						Pair.of("minecraft:mined", DSL.compoundList(References.BLOCK_NAME.in(schema), DSL.constType(DSL.intType()))),
+						Pair.of("minecraft:crafted", (TypeTemplate)supplier.get()),
+						Pair.of("minecraft:used", (TypeTemplate)supplier.get()),
+						Pair.of("minecraft:broken", (TypeTemplate)supplier.get()),
+						Pair.of("minecraft:picked_up", (TypeTemplate)supplier.get()),
+						Pair.of("minecraft:dropped", (TypeTemplate)supplier.get()),
+						Pair.of("minecraft:killed", DSL.compoundList(References.ENTITY_NAME.in(schema), DSL.constType(DSL.intType()))),
+						Pair.of("minecraft:killed_by", DSL.compoundList(References.ENTITY_NAME.in(schema), DSL.constType(DSL.intType()))),
+						Pair.of("minecraft:custom", DSL.compoundList(DSL.constType(namespacedString()), DSL.constType(DSL.intType())))
 					)
 				)
 		);
@@ -400,5 +379,6 @@ public class V1460 extends NamespacedSchema {
 		schema.registerType(false, References.POI_CHUNK, DSL::remainder);
 		schema.registerType(false, References.WORLD_GEN_SETTINGS, DSL::remainder);
 		schema.registerType(false, References.ENTITY_CHUNK, () -> DSL.optionalFields("Entities", DSL.list(References.ENTITY_TREE.in(schema))));
+		schema.registerType(true, References.DATA_COMPONENTS, DSL::remainder);
 	}
 }

@@ -4,7 +4,6 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlUtil;
 import com.mojang.datafixers.DataFixUtils;
-import com.mojang.datafixers.util.Either;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import it.unimi.dsi.fastutil.longs.LongSets;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
@@ -46,7 +45,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.Connection;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.ServerTickRateManager;
-import net.minecraft.server.level.ChunkHolder;
+import net.minecraft.server.level.ChunkResult;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.TagKey;
@@ -67,10 +66,9 @@ import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.biome.Climate;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
-import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.RandomState;
 import net.minecraft.world.level.material.FluidState;
@@ -470,7 +468,7 @@ public class DebugScreenOverlay {
 
 			this.serverChunk = serverLevel.getChunkSource()
 				.getChunkFuture(this.lastPos.x, this.lastPos.z, ChunkStatus.FULL, false)
-				.thenApply(either -> either.map(chunkAccess -> (LevelChunk)chunkAccess, chunkLoadingFailure -> null));
+				.thenApply(chunkResult -> (LevelChunk)chunkResult.orElse(null));
 		}
 
 		return (LevelChunk)this.serverChunk.getNow(null);

@@ -5,6 +5,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ServerboundRenameItemPacket;
 import net.minecraft.resources.ResourceLocation;
@@ -72,7 +73,7 @@ public class AnvilScreen extends ItemCombinerScreen<AnvilMenu> {
 		Slot slot = this.menu.getSlot(0);
 		if (slot.hasItem()) {
 			String string2 = string;
-			if (!slot.getItem().hasCustomHoverName() && string.equals(slot.getItem().getHoverName().getString())) {
+			if (!slot.getItem().has(DataComponents.CUSTOM_NAME) && string.equals(slot.getItem().getHoverName().getString())) {
 				string2 = "";
 			}
 

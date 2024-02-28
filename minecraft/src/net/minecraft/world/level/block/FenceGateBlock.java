@@ -114,7 +114,7 @@ public class FenceGateBlock extends HorizontalDirectionalBlock {
 	}
 
 	@Override
-	protected boolean isPathfindable(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, PathComputationType pathComputationType) {
+	protected boolean isPathfindable(BlockState blockState, PathComputationType pathComputationType) {
 		switch(pathComputationType) {
 			case LAND:
 				return blockState.getValue(OPEN);

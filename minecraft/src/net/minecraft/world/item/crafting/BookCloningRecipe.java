@@ -2,10 +2,12 @@ package net.minecraft.world.item.crafting;
 
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.WrittenBookItem;
+import net.minecraft.world.item.component.WrittenBookContent;
 import net.minecraft.world.level.Level;
 
 public class BookCloningRecipe extends CustomRecipe {
@@ -62,10 +64,16 @@ public class BookCloningRecipe extends CustomRecipe {
 			}
 		}
 
-		if (!itemStack.isEmpty() && i >= 1 && WrittenBookItem.getGeneration(itemStack) < 2) {
-			ItemStack itemStack3 = itemStack.copyWithCount(i);
-			itemStack3.getOrCreateTag().putInt("generation", WrittenBookItem.getGeneration(itemStack) + 1);
-			return itemStack3;
+		WrittenBookContent writtenBookContent = itemStack.get(DataComponents.WRITTEN_BOOK_CONTENT);
+		if (!itemStack.isEmpty() && i >= 1 && writtenBookContent != null) {
+			WrittenBookContent writtenBookContent2 = writtenBookContent.tryCraftCopy();
+			if (writtenBookContent2 == null) {
+				return ItemStack.EMPTY;
+			} else {
+				ItemStack itemStack3 = itemStack.copyWithCount(i);
+				itemStack3.set(DataComponents.WRITTEN_BOOK_CONTENT, writtenBookContent2);
+				return itemStack3;
+			}
 		} else {
 			return ItemStack.EMPTY;
 		}

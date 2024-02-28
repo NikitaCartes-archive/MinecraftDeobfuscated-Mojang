@@ -10,11 +10,14 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponentPredicate;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -28,26 +31,26 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.DyeItem;
-import net.minecraft.world.item.DyeableLeatherItem;
 import net.minecraft.world.item.EnchantedBookItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.MapItem;
-import net.minecraft.world.item.SuspiciousStewItem;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.PotionBrewing;
-import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.alchemy.Potions;
+import net.minecraft.world.item.component.DyedItemColor;
+import net.minecraft.world.item.component.SuspiciousStewEffects;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.EnchantmentInstance;
 import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.item.trading.ItemCost;
 import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.SuspiciousEffectHolder;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.saveddata.maps.MapDecoration;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
@@ -895,16 +898,16 @@ public class VillagerTrades {
 							new VillagerTrades.ItemsForEmeralds(enchant(Items.CHAINMAIL_CHESTPLATE, Enchantments.MENDING, 1), 13, 1, 3, 15, 0.05F), VillagerType.SWAMP
 						),
 						VillagerTrades.TypeSpecificTrade.oneTradeInBiomes(
-							new VillagerTrades.ItemsAndEmeraldsToItems(Items.DIAMOND_BOOTS, 1, 4, Items.DIAMOND_LEGGINGS, 1, 3, 15, 0.05F, true), VillagerType.TAIGA
+							new VillagerTrades.ItemsAndEmeraldsToItems(Items.DIAMOND_BOOTS, 1, 4, Items.DIAMOND_LEGGINGS, 1, 3, 15, 0.05F), VillagerType.TAIGA
 						),
 						VillagerTrades.TypeSpecificTrade.oneTradeInBiomes(
-							new VillagerTrades.ItemsAndEmeraldsToItems(Items.DIAMOND_LEGGINGS, 1, 4, Items.DIAMOND_CHESTPLATE, 1, 3, 15, 0.05F, true), VillagerType.TAIGA
+							new VillagerTrades.ItemsAndEmeraldsToItems(Items.DIAMOND_LEGGINGS, 1, 4, Items.DIAMOND_CHESTPLATE, 1, 3, 15, 0.05F), VillagerType.TAIGA
 						),
 						VillagerTrades.TypeSpecificTrade.oneTradeInBiomes(
-							new VillagerTrades.ItemsAndEmeraldsToItems(Items.DIAMOND_HELMET, 1, 4, Items.DIAMOND_BOOTS, 1, 3, 15, 0.05F, true), VillagerType.TAIGA
+							new VillagerTrades.ItemsAndEmeraldsToItems(Items.DIAMOND_HELMET, 1, 4, Items.DIAMOND_BOOTS, 1, 3, 15, 0.05F), VillagerType.TAIGA
 						),
 						VillagerTrades.TypeSpecificTrade.oneTradeInBiomes(
-							new VillagerTrades.ItemsAndEmeraldsToItems(Items.DIAMOND_CHESTPLATE, 1, 2, Items.DIAMOND_HELMET, 1, 3, 15, 0.05F, true), VillagerType.TAIGA
+							new VillagerTrades.ItemsAndEmeraldsToItems(Items.DIAMOND_CHESTPLATE, 1, 2, Items.DIAMOND_HELMET, 1, 3, 15, 0.05F), VillagerType.TAIGA
 						)
 					}
 				)
@@ -1058,7 +1061,7 @@ public class VillagerTrades {
 		.add(
 			Pair.of(
 				new VillagerTrades.ItemListing[]{
-					new VillagerTrades.EmeraldForItems(potion(Potions.WATER), 1, 1, 1),
+					new VillagerTrades.EmeraldForItems(potionCost(Potions.WATER), 1, 1, 1),
 					new VillagerTrades.EmeraldForItems(Items.WATER_BUCKET, 1, 1, 1, 2),
 					new VillagerTrades.EmeraldForItems(Items.MILK_BUCKET, 1, 1, 1, 2),
 					new VillagerTrades.EmeraldForItems(Items.FERMENTED_SPIDER_EYE, 1, 1, 1, 3),
@@ -1197,8 +1200,12 @@ public class VillagerTrades {
 		return new Int2ObjectOpenHashMap<>(immutableMap);
 	}
 
+	private static ItemCost potionCost(Holder<Potion> holder) {
+		return new ItemCost(Items.POTION).withComponents(builder -> builder.expect(DataComponents.POTION_CONTENTS, new PotionContents(holder)));
+	}
+
 	private static ItemStack potion(Holder<Potion> holder) {
-		return PotionUtils.setPotion(new ItemStack(Items.POTION), holder);
+		return PotionContents.createItemStack(Items.POTION, holder);
 	}
 
 	private static ItemStack enchant(Item item, Enchantment enchantment, int i) {
@@ -1226,9 +1233,9 @@ public class VillagerTrades {
 
 		@Override
 		public MerchantOffer getOffer(Entity entity, RandomSource randomSource) {
-			ItemStack itemStack = new ItemStack(Items.EMERALD, this.value);
-			ItemStack itemStack2 = new ItemStack(this.item);
-			if (itemStack2.is(ItemTags.DYEABLE)) {
+			ItemCost itemCost = new ItemCost(Items.EMERALD, this.value);
+			ItemStack itemStack = new ItemStack(this.item);
+			if (itemStack.is(ItemTags.DYEABLE)) {
 				List<DyeItem> list = Lists.<DyeItem>newArrayList();
 				list.add(getRandomDye(randomSource));
 				if (randomSource.nextFloat() > 0.7F) {
@@ -1239,10 +1246,10 @@ public class VillagerTrades {
 					list.add(getRandomDye(randomSource));
 				}
 
-				itemStack2 = DyeableLeatherItem.dyeArmor(itemStack2, list);
+				itemStack = DyedItemColor.applyDyes(itemStack, list);
 			}
 
-			return new MerchantOffer(itemStack, itemStack2, this.maxUses, this.villagerXp, 0.2F);
+			return new MerchantOffer(itemCost, itemStack, this.maxUses, this.villagerXp, 0.2F);
 		}
 
 		private static DyeItem getRandomDye(RandomSource randomSource) {
@@ -1251,7 +1258,7 @@ public class VillagerTrades {
 	}
 
 	static class EmeraldForItems implements VillagerTrades.ItemListing {
-		private final ItemStack itemStack;
+		private final ItemCost itemStack;
 		private final int maxUses;
 		private final int villagerXp;
 		private final int emeraldAmount;
@@ -1262,11 +1269,11 @@ public class VillagerTrades {
 		}
 
 		public EmeraldForItems(ItemLike itemLike, int i, int j, int k, int l) {
-			this(new ItemStack(itemLike.asItem(), i), j, k, l);
+			this(new ItemCost(itemLike.asItem(), i), j, k, l);
 		}
 
-		public EmeraldForItems(ItemStack itemStack, int i, int j, int k) {
-			this.itemStack = itemStack;
+		public EmeraldForItems(ItemCost itemCost, int i, int j, int k) {
+			this.itemStack = itemCost;
 			this.maxUses = i;
 			this.villagerXp = j;
 			this.emeraldAmount = k;
@@ -1275,7 +1282,7 @@ public class VillagerTrades {
 
 		@Override
 		public MerchantOffer getOffer(Entity entity, RandomSource randomSource) {
-			return new MerchantOffer(this.itemStack.copy(), new ItemStack(Items.EMERALD, this.emeraldAmount), this.maxUses, this.villagerXp, this.priceMultiplier);
+			return new MerchantOffer(this.itemStack, new ItemStack(Items.EMERALD, this.emeraldAmount), this.maxUses, this.villagerXp, this.priceMultiplier);
 		}
 	}
 
@@ -1299,8 +1306,8 @@ public class VillagerTrades {
 		@Override
 		public MerchantOffer getOffer(Entity entity, RandomSource randomSource) {
 			if (entity instanceof VillagerDataHolder villagerDataHolder) {
-				ItemStack itemStack = new ItemStack((ItemLike)this.trades.get(villagerDataHolder.getVillagerData().getType()), this.cost);
-				return new MerchantOffer(itemStack, new ItemStack(Items.EMERALD), this.maxUses, this.villagerXp, 0.05F);
+				ItemCost itemCost = new ItemCost((ItemLike)this.trades.get(villagerDataHolder.getVillagerData().getType()), this.cost);
+				return new MerchantOffer(itemCost, new ItemStack(Items.EMERALD), this.maxUses, this.villagerXp, 0.05F);
 			} else {
 				return null;
 			}
@@ -1344,7 +1351,7 @@ public class VillagerTrades {
 				l = 64;
 			}
 
-			return new MerchantOffer(new ItemStack(Items.EMERALD, l), new ItemStack(Items.BOOK), itemStack, 12, this.villagerXp, 0.2F);
+			return new MerchantOffer(new ItemCost(Items.EMERALD, l), Optional.of(new ItemCost(Items.BOOK)), itemStack, 12, this.villagerXp, 0.2F);
 		}
 	}
 
@@ -1372,8 +1379,8 @@ public class VillagerTrades {
 			int i = 5 + randomSource.nextInt(15);
 			ItemStack itemStack = EnchantmentHelper.enchantItem(randomSource, new ItemStack(this.itemStack.getItem()), i, false);
 			int j = Math.min(this.baseEmeraldCost + i, 64);
-			ItemStack itemStack2 = new ItemStack(Items.EMERALD, j);
-			return new MerchantOffer(itemStack2, itemStack, this.maxUses, this.villagerXp, this.priceMultiplier);
+			ItemCost itemCost = new ItemCost(Items.EMERALD, j);
+			return new MerchantOffer(itemCost, itemStack, this.maxUses, this.villagerXp, this.priceMultiplier);
 		}
 	}
 
@@ -1390,49 +1397,35 @@ public class VillagerTrades {
 	}
 
 	static class ItemsAndEmeraldsToItems implements VillagerTrades.ItemListing {
-		private final ItemStack fromItem;
+		private final ItemCost fromItem;
 		private final int emeraldCost;
 		private final ItemStack toItem;
 		private final int maxUses;
 		private final int villagerXp;
 		private final float priceMultiplier;
-		private final boolean ignoreTags;
 
 		public ItemsAndEmeraldsToItems(ItemLike itemLike, int i, int j, Item item, int k, int l, int m, float f) {
-			this(itemLike, i, j, new ItemStack(item), k, l, m, f, false);
+			this(itemLike, i, j, new ItemStack(item), k, l, m, f);
 		}
 
-		public ItemsAndEmeraldsToItems(ItemLike itemLike, int i, int j, Item item, int k, int l, int m, float f, boolean bl) {
-			this(itemLike, i, j, new ItemStack(item), k, l, m, f, bl);
+		ItemsAndEmeraldsToItems(ItemLike itemLike, int i, int j, ItemStack itemStack, int k, int l, int m, float f) {
+			this(new ItemCost(itemLike, i), j, itemStack.copyWithCount(k), l, m, f);
 		}
 
-		public ItemsAndEmeraldsToItems(ItemLike itemLike, int i, int j, ItemStack itemStack, int k, int l, int m, float f) {
-			this(itemLike, i, j, itemStack, k, l, m, f, false);
-		}
-
-		private ItemsAndEmeraldsToItems(ItemLike itemLike, int i, int j, ItemStack itemStack, int k, int l, int m, float f, boolean bl) {
-			this.fromItem = new ItemStack(itemLike, i);
-			this.emeraldCost = j;
-			this.toItem = itemStack.copyWithCount(k);
-			this.maxUses = l;
-			this.villagerXp = m;
+		public ItemsAndEmeraldsToItems(ItemCost itemCost, int i, ItemStack itemStack, int j, int k, float f) {
+			this.fromItem = itemCost;
+			this.emeraldCost = i;
+			this.toItem = itemStack;
+			this.maxUses = j;
+			this.villagerXp = k;
 			this.priceMultiplier = f;
-			this.ignoreTags = bl;
 		}
 
 		@Nullable
 		@Override
 		public MerchantOffer getOffer(Entity entity, RandomSource randomSource) {
 			return new MerchantOffer(
-				new ItemStack(Items.EMERALD, this.emeraldCost),
-				this.fromItem.copy(),
-				this.toItem.copy(),
-				0,
-				this.maxUses,
-				this.villagerXp,
-				this.priceMultiplier,
-				0,
-				this.ignoreTags
+				new ItemCost(Items.EMERALD, this.emeraldCost), Optional.of(this.fromItem), this.toItem.copy(), 0, this.maxUses, this.villagerXp, this.priceMultiplier, 0
 			);
 		}
 	}
@@ -1475,21 +1468,21 @@ public class VillagerTrades {
 
 		@Override
 		public MerchantOffer getOffer(Entity entity, RandomSource randomSource) {
-			return new MerchantOffer(new ItemStack(Items.EMERALD, this.emeraldCost), this.itemStack.copy(), this.maxUses, this.villagerXp, this.priceMultiplier);
+			return new MerchantOffer(new ItemCost(Items.EMERALD, this.emeraldCost), this.itemStack.copy(), this.maxUses, this.villagerXp, this.priceMultiplier);
 		}
 	}
 
 	static class SuspiciousStewForEmerald implements VillagerTrades.ItemListing {
-		private final List<SuspiciousEffectHolder.EffectEntry> effects;
+		private final SuspiciousStewEffects effects;
 		private final int xp;
 		private final float priceMultiplier;
 
 		public SuspiciousStewForEmerald(Holder<MobEffect> holder, int i, int j) {
-			this(List.of(new SuspiciousEffectHolder.EffectEntry(holder, i)), j, 0.05F);
+			this(new SuspiciousStewEffects(List.of(new SuspiciousStewEffects.Entry(holder, i))), j, 0.05F);
 		}
 
-		public SuspiciousStewForEmerald(List<SuspiciousEffectHolder.EffectEntry> list, int i, float f) {
-			this.effects = list;
+		public SuspiciousStewForEmerald(SuspiciousStewEffects suspiciousStewEffects, int i, float f) {
+			this.effects = suspiciousStewEffects;
 			this.xp = i;
 			this.priceMultiplier = f;
 		}
@@ -1498,8 +1491,8 @@ public class VillagerTrades {
 		@Override
 		public MerchantOffer getOffer(Entity entity, RandomSource randomSource) {
 			ItemStack itemStack = new ItemStack(Items.SUSPICIOUS_STEW, 1);
-			SuspiciousStewItem.saveMobEffects(itemStack, this.effects);
-			return new MerchantOffer(new ItemStack(Items.EMERALD, 1), itemStack, 12, this.xp, this.priceMultiplier);
+			itemStack.set(DataComponents.SUSPICIOUS_STEW_EFFECTS, this.effects);
+			return new MerchantOffer(new ItemCost(Items.EMERALD), itemStack, 12, this.xp, this.priceMultiplier);
 		}
 	}
 
@@ -1526,14 +1519,15 @@ public class VillagerTrades {
 
 		@Override
 		public MerchantOffer getOffer(Entity entity, RandomSource randomSource) {
-			ItemStack itemStack = new ItemStack(Items.EMERALD, this.emeraldCost);
+			ItemCost itemCost = new ItemCost(Items.EMERALD, this.emeraldCost);
 			List<Holder<Potion>> list = (List)BuiltInRegistries.POTION
 				.holders()
 				.filter(reference -> !((Potion)reference.value()).getEffects().isEmpty() && PotionBrewing.isBrewablePotion(reference))
 				.collect(Collectors.toList());
 			Holder<Potion> holder = Util.getRandom(list, randomSource);
-			ItemStack itemStack2 = PotionUtils.setPotion(new ItemStack(this.toItem.getItem(), this.toCount), holder);
-			return new MerchantOffer(itemStack, new ItemStack(this.fromItem, this.fromCount), itemStack2, this.maxUses, this.villagerXp, this.priceMultiplier);
+			ItemStack itemStack = new ItemStack(this.toItem.getItem(), this.toCount);
+			itemStack.set(DataComponents.POTION_CONTENTS, new PotionContents(holder));
+			return new MerchantOffer(itemCost, Optional.of(new ItemCost(this.fromItem, this.fromCount)), itemStack, this.maxUses, this.villagerXp, this.priceMultiplier);
 		}
 	}
 
@@ -1566,8 +1560,10 @@ public class VillagerTrades {
 					ItemStack itemStack = MapItem.create(serverLevel, blockPos.getX(), blockPos.getZ(), (byte)2, true, true);
 					MapItem.renderBiomePreviewMap(serverLevel, itemStack);
 					MapItemSavedData.addTargetDecoration(itemStack, blockPos, "+", this.destinationType);
-					itemStack.setHoverName(Component.translatable(this.displayName));
-					return new MerchantOffer(new ItemStack(Items.EMERALD, this.emeraldCost), new ItemStack(Items.COMPASS), itemStack, this.maxUses, this.villagerXp, 0.2F);
+					itemStack.set(DataComponents.CUSTOM_NAME, Component.translatable(this.displayName));
+					return new MerchantOffer(
+						new ItemCost(Items.EMERALD, this.emeraldCost), Optional.of(new ItemCost(Items.COMPASS)), itemStack, this.maxUses, this.villagerXp, 0.2F
+					);
 				} else {
 					return null;
 				}

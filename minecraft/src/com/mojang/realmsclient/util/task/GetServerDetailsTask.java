@@ -23,7 +23,7 @@ import java.util.function.Function;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.GenericDirtMessageScreen;
+import net.minecraft.client.gui.screens.GenericMessageScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.server.DownloadedPackSource;
 import net.minecraft.network.chat.Component;
@@ -125,7 +125,7 @@ public class GetServerDetailsTask extends LongRunningTask {
 			if (!bl) {
 				setScreen(this.lastScreen);
 			} else {
-				setScreen(new GenericDirtMessageScreen(APPLYING_PACK_TEXT));
+				setScreen(new GenericMessageScreen(APPLYING_PACK_TEXT));
 				this.scheduleResourcePackDownload(realmsServerAddress, uUID)
 					.thenRun(() -> setScreen((Screen)function.apply(realmsServerAddress)))
 					.exceptionally(throwable -> {

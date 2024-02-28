@@ -3,6 +3,8 @@ package net.minecraft.world.level.block.entity;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponentMap;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
@@ -24,6 +26,7 @@ public class EnchantmentTableBlockEntity extends BlockEntity implements Nameable
 	public float oRot;
 	public float tRot;
 	private static final RandomSource RANDOM = RandomSource.create();
+	@Nullable
 	private Component name;
 
 	public EnchantmentTableBlockEntity(BlockPos blockPos, BlockState blockState) {
@@ -34,7 +37,7 @@ public class EnchantmentTableBlockEntity extends BlockEntity implements Nameable
 	protected void saveAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
 		super.saveAdditional(compoundTag, provider);
 		if (this.hasCustomName()) {
-			compoundTag.putString("CustomName", Component.Serializer.toJson(this.name));
+			compoundTag.putString("CustomName", Component.Serializer.toJson(this.name, provider));
 		}
 	}
 
@@ -42,7 +45,7 @@ public class EnchantmentTableBlockEntity extends BlockEntity implements Nameable
 	public void load(CompoundTag compoundTag, HolderLookup.Provider provider) {
 		super.load(compoundTag, provider);
 		if (compoundTag.contains("CustomName", 8)) {
-			this.name = Component.Serializer.fromJson(compoundTag.getString("CustomName"));
+			this.name = Component.Serializer.fromJson(compoundTag.getString("CustomName"), provider);
 		}
 	}
 
@@ -117,5 +120,20 @@ public class EnchantmentTableBlockEntity extends BlockEntity implements Nameable
 	@Override
 	public Component getCustomName() {
 		return this.name;
+	}
+
+	@Override
+	public void applyComponents(DataComponentMap dataComponentMap) {
+		this.name = dataComponentMap.get(DataComponents.CUSTOM_NAME);
+	}
+
+	@Override
+	public void collectComponents(DataComponentMap.Builder builder) {
+		builder.set(DataComponents.CUSTOM_NAME, this.name);
+	}
+
+	@Override
+	public void removeComponentsFromTag(CompoundTag compoundTag) {
+		compoundTag.remove("CustomName");
 	}
 }

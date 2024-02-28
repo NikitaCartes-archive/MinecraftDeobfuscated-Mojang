@@ -257,7 +257,7 @@ public class ServerScoreboard extends Scoreboard {
 	}
 
 	private ScoreboardSaveData createData(CompoundTag compoundTag, HolderLookup.Provider provider) {
-		return this.createData().load(compoundTag);
+		return this.createData().load(compoundTag, provider);
 	}
 
 	public static enum Method {

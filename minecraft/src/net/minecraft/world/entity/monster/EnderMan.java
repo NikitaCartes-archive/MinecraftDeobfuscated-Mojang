@@ -1,14 +1,13 @@
 package net.minecraft.world.entity.monster;
 
 import java.util.EnumSet;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
@@ -27,7 +26,6 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.util.TimeUtil;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -50,8 +48,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.ThrownPotion;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.alchemy.Potion;
-import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.ClipContext;
@@ -71,7 +68,7 @@ import net.minecraft.world.phys.Vec3;
 public class EnderMan extends Monster implements NeutralMob {
 	private static final UUID SPEED_MODIFIER_ATTACKING_UUID = UUID.fromString("020E0DFB-87AE-4653-9556-831010E291A0");
 	private static final AttributeModifier SPEED_MODIFIER_ATTACKING = new AttributeModifier(
-		SPEED_MODIFIER_ATTACKING_UUID, "Attacking speed boost", 0.15F, AttributeModifier.Operation.ADDITION
+		SPEED_MODIFIER_ATTACKING_UUID, "Attacking speed boost", 0.15F, AttributeModifier.Operation.ADD_VALUE
 	);
 	private static final int DELAY_BETWEEN_CREEPY_STARE_SOUND = 400;
 	private static final int MIN_DEAGGRESSION_TIME = 600;
@@ -389,10 +386,8 @@ public class EnderMan extends Monster implements NeutralMob {
 
 	private boolean hurtWithCleanWater(DamageSource damageSource, ThrownPotion thrownPotion, float f) {
 		ItemStack itemStack = thrownPotion.getItem();
-		Holder<Potion> holder = PotionUtils.getPotion(itemStack);
-		List<MobEffectInstance> list = PotionUtils.getMobEffects(itemStack);
-		boolean bl = holder.is(Potions.WATER) && list.isEmpty();
-		return bl ? super.hurt(damageSource, f) : false;
+		PotionContents potionContents = itemStack.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY);
+		return potionContents.is(Potions.WATER) ? super.hurt(damageSource, f) : false;
 	}
 
 	public boolean isCreepy() {

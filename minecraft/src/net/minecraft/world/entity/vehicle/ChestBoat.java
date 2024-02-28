@@ -55,13 +55,13 @@ public class ChestBoat extends Boat implements HasCustomInventoryScreen, Contain
 	@Override
 	protected void addAdditionalSaveData(CompoundTag compoundTag) {
 		super.addAdditionalSaveData(compoundTag);
-		this.addChestVehicleSaveData(compoundTag);
+		this.addChestVehicleSaveData(compoundTag, this.registryAccess());
 	}
 
 	@Override
 	protected void readAdditionalSaveData(CompoundTag compoundTag) {
 		super.readAdditionalSaveData(compoundTag);
-		this.readChestVehicleSaveData(compoundTag);
+		this.readChestVehicleSaveData(compoundTag, this.registryAccess());
 	}
 
 	@Override

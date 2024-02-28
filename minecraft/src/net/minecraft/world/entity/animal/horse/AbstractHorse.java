@@ -828,7 +828,7 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 		}
 
 		if (!this.inventory.getItem(0).isEmpty()) {
-			compoundTag.put("SaddleItem", this.inventory.getItem(0).save(new CompoundTag()));
+			compoundTag.put("SaddleItem", this.inventory.getItem(0).save(this.registryAccess()));
 		}
 	}
 
@@ -852,7 +852,7 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 		}
 
 		if (compoundTag.contains("SaddleItem", 10)) {
-			ItemStack itemStack = ItemStack.of(compoundTag.getCompound("SaddleItem"));
+			ItemStack itemStack = (ItemStack)ItemStack.parse(this.registryAccess(), compoundTag.getCompound("SaddleItem")).orElse(ItemStack.EMPTY);
 			if (itemStack.is(Items.SADDLE)) {
 				this.inventory.setItem(0, itemStack);
 			}

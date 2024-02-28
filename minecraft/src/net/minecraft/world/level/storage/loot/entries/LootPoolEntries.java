@@ -11,7 +11,7 @@ public class LootPoolEntries {
 		.dispatch(LootPoolEntryContainer::getType, LootPoolEntryType::codec);
 	public static final LootPoolEntryType EMPTY = register("empty", EmptyLootItem.CODEC);
 	public static final LootPoolEntryType ITEM = register("item", LootItem.CODEC);
-	public static final LootPoolEntryType REFERENCE = register("loot_table", LootTableReference.CODEC);
+	public static final LootPoolEntryType LOOT_TABLE = register("loot_table", NestedLootTable.CODEC);
 	public static final LootPoolEntryType DYNAMIC = register("dynamic", DynamicLoot.CODEC);
 	public static final LootPoolEntryType TAG = register("tag", TagEntry.CODEC);
 	public static final LootPoolEntryType ALTERNATIVES = register("alternatives", AlternativesEntry.CODEC);

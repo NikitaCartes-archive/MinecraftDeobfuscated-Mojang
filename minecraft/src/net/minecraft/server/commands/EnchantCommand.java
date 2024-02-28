@@ -77,7 +77,8 @@ public class EnchantCommand {
 				if (entity instanceof LivingEntity livingEntity) {
 					ItemStack itemStack = livingEntity.getMainHandItem();
 					if (!itemStack.isEmpty()) {
-						if (enchantment.canEnchant(itemStack) && EnchantmentHelper.isEnchantmentCompatible(EnchantmentHelper.getEnchantments(itemStack).keySet(), enchantment)) {
+						if (enchantment.canEnchant(itemStack)
+							&& EnchantmentHelper.isEnchantmentCompatible(EnchantmentHelper.getEnchantmentsForCrafting(itemStack).keySet(), enchantment)) {
 							itemStack.enchant(enchantment, i);
 							++j;
 						} else if (collection.size() == 1) {

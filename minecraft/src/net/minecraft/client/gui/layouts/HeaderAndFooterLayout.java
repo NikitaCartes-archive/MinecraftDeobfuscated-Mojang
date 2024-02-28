@@ -3,11 +3,14 @@ package net.minecraft.client.gui.layouts;
 import java.util.function.Consumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
 
 @Environment(EnvType.CLIENT)
 public class HeaderAndFooterLayout implements Layout {
-	public static final int DEFAULT_HEADER_AND_FOOTER_HEIGHT = 36;
+	public static final int DEFAULT_HEADER_AND_FOOTER_HEIGHT = 33;
 	private static final int CONTENT_MARGIN_TOP = 30;
 	private final FrameLayout headerFrame = new FrameLayout();
 	private final FrameLayout footerFrame = new FrameLayout();
@@ -17,7 +20,7 @@ public class HeaderAndFooterLayout implements Layout {
 	private int footerHeight;
 
 	public HeaderAndFooterLayout(Screen screen) {
-		this(screen, 36);
+		this(screen, 33);
 	}
 
 	public HeaderAndFooterLayout(Screen screen, int i) {
@@ -76,6 +79,10 @@ public class HeaderAndFooterLayout implements Layout {
 		return this.headerHeight;
 	}
 
+	public int getContentHeight() {
+		return this.screen.height - this.getHeaderHeight() - this.getFooterHeight();
+	}
+
 	@Override
 	public void visitChildren(Consumer<LayoutElement> consumer) {
 		this.headerFrame.visitChildren(consumer);
@@ -108,6 +115,10 @@ public class HeaderAndFooterLayout implements Layout {
 
 	public <T extends LayoutElement> T addToHeader(T layoutElement, Consumer<LayoutSettings> consumer) {
 		return this.headerFrame.addChild(layoutElement, consumer);
+	}
+
+	public void addTitleHeader(Component component, Font font) {
+		this.headerFrame.addChild(new StringWidget(component, font));
 	}
 
 	public <T extends LayoutElement> T addToFooter(T layoutElement) {

@@ -20,7 +20,7 @@ public record ClientboundSetScorePacket(String owner, String objectiveName, int 
 		ClientboundSetScorePacket::objectiveName,
 		ByteBufCodecs.VAR_INT,
 		ClientboundSetScorePacket::score,
-		ComponentSerialization.OPTIONAL_STREAM_CODEC,
+		ComponentSerialization.TRUSTED_OPTIONAL_STREAM_CODEC,
 		ClientboundSetScorePacket::display,
 		NumberFormatTypes.OPTIONAL_STREAM_CODEC,
 		ClientboundSetScorePacket::numberFormat,

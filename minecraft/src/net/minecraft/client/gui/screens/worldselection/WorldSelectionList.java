@@ -40,7 +40,7 @@ import net.minecraft.client.gui.screens.AlertScreen;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.ErrorScreen;
 import net.minecraft.client.gui.screens.FaviconTexture;
-import net.minecraft.client.gui.screens.GenericDirtMessageScreen;
+import net.minecraft.client.gui.screens.GenericMessageScreen;
 import net.minecraft.client.gui.screens.LoadingDotsText;
 import net.minecraft.client.gui.screens.NoticeWithLinkScreen;
 import net.minecraft.client.gui.screens.ProgressScreen;
@@ -224,13 +224,8 @@ public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.E
 	}
 
 	@Override
-	protected int getScrollbarPosition() {
-		return super.getScrollbarPosition() + 20;
-	}
-
-	@Override
 	public int getRowWidth() {
-		return super.getRowWidth() + 50;
+		return 270;
 	}
 
 	public void setSelected(@Nullable WorldSelectionList.Entry entry) {
@@ -434,7 +429,7 @@ public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.E
 				WorldSelectionList.this.setSelected((WorldSelectionList.Entry)this);
 				if (!(d - (double)WorldSelectionList.this.getRowLeft() <= 32.0) && Util.getMillis() - this.lastClickTime >= 250L) {
 					this.lastClickTime = Util.getMillis();
-					return true;
+					return super.mouseClicked(d, e, i);
 				} else {
 					if (this.canJoin()) {
 						this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
@@ -455,7 +450,7 @@ public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.E
 				if (this.summary instanceof LevelSummary.SymlinkLevelSummary) {
 					this.minecraft.setScreen(NoticeWithLinkScreen.createWorldSymlinkWarningScreen(() -> this.minecraft.setScreen(this.screen)));
 				} else {
-					this.minecraft.createWorldOpenFlows().checkForBackupAndLoad(this.summary.getLevelId(), () -> {
+					this.minecraft.createWorldOpenFlows().openWorld(this.summary.getLevelId(), () -> {
 						WorldSelectionList.this.reloadWorldList();
 						this.minecraft.setScreen(this.screen);
 					});
@@ -576,7 +571,7 @@ public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.E
 		}
 
 		private void queueLoadScreen() {
-			this.minecraft.forceSetScreen(new GenericDirtMessageScreen(Component.translatable("selectWorld.data_read")));
+			this.minecraft.forceSetScreen(new GenericMessageScreen(Component.translatable("selectWorld.data_read")));
 		}
 
 		private void loadIcon() {

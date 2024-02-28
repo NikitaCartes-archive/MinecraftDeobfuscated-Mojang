@@ -137,7 +137,7 @@ public class DedicatedServerProperties extends Settings<DedicatedServerPropertie
 	private static Component parseResourcePackPrompt(String string) {
 		if (!Strings.isNullOrEmpty(string)) {
 			try {
-				return Component.Serializer.fromJson(string);
+				return Component.Serializer.fromJson(string, RegistryAccess.EMPTY);
 			} catch (Exception var2) {
 				LOGGER.warn("Failed to parse resource pack prompt '{}'", string, var2);
 			}

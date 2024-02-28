@@ -30,11 +30,6 @@ public abstract class RealmsObjectSelectionList<E extends ObjectSelectionList.En
 	}
 
 	@Override
-	public int getScrollbarPosition() {
-		return this.getRowLeft() + this.getRowWidth();
-	}
-
-	@Override
 	public int getRowWidth() {
 		return (int)((double)this.width * 0.6);
 	}

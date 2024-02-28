@@ -47,7 +47,7 @@ public class HopperBlockEntity extends RandomizableContainerBlockEntity implemen
 		super.load(compoundTag, provider);
 		this.items = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
 		if (!this.tryLoadLootTable(compoundTag)) {
-			ContainerHelper.loadAllItems(compoundTag, this.items);
+			ContainerHelper.loadAllItems(compoundTag, this.items, provider);
 		}
 
 		this.cooldownTime = compoundTag.getInt("TransferCooldown");
@@ -57,7 +57,7 @@ public class HopperBlockEntity extends RandomizableContainerBlockEntity implemen
 	protected void saveAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
 		super.saveAdditional(compoundTag, provider);
 		if (!this.trySaveLootTable(compoundTag)) {
-			ContainerHelper.saveAllItems(compoundTag, this.items);
+			ContainerHelper.saveAllItems(compoundTag, this.items, provider);
 		}
 
 		compoundTag.putInt("TransferCooldown", this.cooldownTime);
