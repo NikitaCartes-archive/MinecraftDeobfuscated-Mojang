@@ -47,7 +47,7 @@ public class ObjectiveCriteriaArgument implements ArgumentType<ObjectiveCriteria
 		String string = stringReader.getString().substring(i, stringReader.getCursor());
 		return (ObjectiveCriteria)ObjectiveCriteria.byName(string).orElseThrow(() -> {
 			stringReader.setCursor(i);
-			return ERROR_INVALID_VALUE.create(string);
+			return ERROR_INVALID_VALUE.createWithContext(stringReader, string);
 		});
 	}
 

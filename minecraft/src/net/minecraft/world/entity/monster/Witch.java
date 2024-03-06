@@ -125,7 +125,7 @@ public class Witch extends Raider implements RangedAttackMob {
 					}
 
 					this.gameEvent(GameEvent.DRINK);
-					this.getAttribute(Attributes.MOVEMENT_SPEED).removeModifier(SPEED_MODIFIER_DRINKING.getId());
+					this.getAttribute(Attributes.MOVEMENT_SPEED).removeModifier(SPEED_MODIFIER_DRINKING.id());
 				}
 			} else {
 				Holder<Potion> holder = null;
@@ -154,7 +154,7 @@ public class Witch extends Raider implements RangedAttackMob {
 					}
 
 					AttributeInstance attributeInstance = this.getAttribute(Attributes.MOVEMENT_SPEED);
-					attributeInstance.removeModifier(SPEED_MODIFIER_DRINKING.getId());
+					attributeInstance.removeModifier(SPEED_MODIFIER_DRINKING.id());
 					attributeInstance.addTransientModifier(SPEED_MODIFIER_DRINKING);
 				}
 			}

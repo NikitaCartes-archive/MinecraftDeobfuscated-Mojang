@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block.entity;
 
+import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -12,6 +13,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.RandomizableContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.ticks.ContainerSingleItem;
@@ -113,17 +115,20 @@ public class DecoratedPotBlockEntity extends BlockEntity implements Randomizable
 	@Override
 	public void collectComponents(DataComponentMap.Builder builder) {
 		builder.set(DataComponents.POT_DECORATIONS, this.decorations);
+		builder.set(DataComponents.CONTAINER, ItemContainerContents.copyOf(List.of(this.item)));
 	}
 
 	@Override
 	public void applyComponents(DataComponentMap dataComponentMap) {
 		this.decorations = dataComponentMap.getOrDefault(DataComponents.POT_DECORATIONS, PotDecorations.EMPTY);
+		this.item = dataComponentMap.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY).copyOne();
 	}
 
 	@Override
 	public void removeComponentsFromTag(CompoundTag compoundTag) {
 		super.removeComponentsFromTag(compoundTag);
 		compoundTag.remove("sherds");
+		compoundTag.remove("item");
 	}
 
 	@Override

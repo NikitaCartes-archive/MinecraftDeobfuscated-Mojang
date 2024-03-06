@@ -268,7 +268,7 @@ public class MultiPlayerGameMode {
 
 	private boolean sameDestroyTarget(BlockPos blockPos) {
 		ItemStack itemStack = this.minecraft.player.getMainHandItem();
-		return blockPos.equals(this.destroyBlockPos) && ItemStack.isSameItemSameTags(itemStack, this.destroyingItem);
+		return blockPos.equals(this.destroyBlockPos) && ItemStack.isSameItemSameComponents(itemStack, this.destroyingItem);
 	}
 
 	private void ensureHasSentCarriedItem() {

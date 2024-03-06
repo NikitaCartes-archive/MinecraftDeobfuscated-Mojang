@@ -6,6 +6,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.component.DataComponentMap;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
@@ -18,6 +20,7 @@ import net.minecraft.world.Containers;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.item.crafting.CampfireCookingRecipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeManager;
@@ -181,5 +184,20 @@ public class CampfireBlockEntity extends BlockEntity implements Clearable {
 		if (this.level != null) {
 			this.markUpdated();
 		}
+	}
+
+	@Override
+	public void applyComponents(DataComponentMap dataComponentMap) {
+		dataComponentMap.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY).copyInto(this.getItems());
+	}
+
+	@Override
+	public void collectComponents(DataComponentMap.Builder builder) {
+		builder.set(DataComponents.CONTAINER, ItemContainerContents.copyOf(this.getItems()));
+	}
+
+	@Override
+	public void removeComponentsFromTag(CompoundTag compoundTag) {
+		compoundTag.remove("Items");
 	}
 }

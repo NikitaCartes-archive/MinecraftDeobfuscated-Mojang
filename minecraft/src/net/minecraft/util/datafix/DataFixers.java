@@ -145,6 +145,7 @@ import net.minecraft.util.datafix.fixes.LevelDataGeneratorOptionsFix;
 import net.minecraft.util.datafix.fixes.LevelFlatGeneratorInfoFix;
 import net.minecraft.util.datafix.fixes.LevelLegacyWorldGenSettingsFix;
 import net.minecraft.util.datafix.fixes.LevelUUIDFix;
+import net.minecraft.util.datafix.fixes.LodestoneCompassComponentFix;
 import net.minecraft.util.datafix.fixes.MapBannerBlockPosFormatFix;
 import net.minecraft.util.datafix.fixes.MapIdFix;
 import net.minecraft.util.datafix.fixes.MemoryExpiryDataFix;
@@ -168,6 +169,7 @@ import net.minecraft.util.datafix.fixes.OptionsLowerCaseLanguageFix;
 import net.minecraft.util.datafix.fixes.OptionsProgrammerArtFix;
 import net.minecraft.util.datafix.fixes.OptionsRenameFieldFix;
 import net.minecraft.util.datafix.fixes.OverreachingTickFix;
+import net.minecraft.util.datafix.fixes.PlayerHeadBlockProfileFix;
 import net.minecraft.util.datafix.fixes.PlayerUUIDFix;
 import net.minecraft.util.datafix.fixes.PoiTypeRemoveFix;
 import net.minecraft.util.datafix.fixes.PoiTypeRenameFix;
@@ -1275,6 +1277,9 @@ public class DataFixers {
 		dataFixerBuilder.addFixer(new ItemStackComponentizationFix(schema215));
 		Schema schema216 = dataFixerBuilder.addSchema(3818, 5, SAME_NAMESPACED);
 		dataFixerBuilder.addFixer(new AreaEffectCloudPotionFix(schema216));
+		Schema schema217 = dataFixerBuilder.addSchema(3820, SAME_NAMESPACED);
+		dataFixerBuilder.addFixer(new PlayerHeadBlockProfileFix(schema217));
+		dataFixerBuilder.addFixer(new LodestoneCompassComponentFix(schema217));
 	}
 
 	private static UnaryOperator<String> createRenamerNoNamespace(Map<String, String> map) {

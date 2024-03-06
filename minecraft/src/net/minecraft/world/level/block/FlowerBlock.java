@@ -6,6 +6,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
 import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.item.component.SuspiciousStewEffects;
 import net.minecraft.world.level.BlockGetter;
@@ -29,8 +30,8 @@ public class FlowerBlock extends BushBlock implements SuspiciousEffectHolder {
 		return CODEC;
 	}
 
-	public FlowerBlock(Holder<MobEffect> holder, int i, BlockBehaviour.Properties properties) {
-		this(makeEffectList(holder, i), properties);
+	public FlowerBlock(Holder<MobEffect> holder, float f, BlockBehaviour.Properties properties) {
+		this(makeEffectList(holder, f), properties);
 	}
 
 	public FlowerBlock(SuspiciousStewEffects suspiciousStewEffects, BlockBehaviour.Properties properties) {
@@ -38,8 +39,8 @@ public class FlowerBlock extends BushBlock implements SuspiciousEffectHolder {
 		this.suspiciousStewEffects = suspiciousStewEffects;
 	}
 
-	protected static SuspiciousStewEffects makeEffectList(Holder<MobEffect> holder, int i) {
-		return new SuspiciousStewEffects(List.of(new SuspiciousStewEffects.Entry(holder, i * 20)));
+	protected static SuspiciousStewEffects makeEffectList(Holder<MobEffect> holder, float f) {
+		return new SuspiciousStewEffects(List.of(new SuspiciousStewEffects.Entry(holder, Mth.floor(f * 20.0F))));
 	}
 
 	@Override

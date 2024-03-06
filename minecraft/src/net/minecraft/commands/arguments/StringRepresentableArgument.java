@@ -33,7 +33,10 @@ public class StringRepresentableArgument<T extends Enum<T> & StringRepresentable
 
 	public T parse(StringReader stringReader) throws CommandSyntaxException {
 		String string = stringReader.readUnquotedString();
-		return (T)this.codec.parse(JsonOps.INSTANCE, new JsonPrimitive(string)).result().orElseThrow(() -> ERROR_INVALID_VALUE.create(string));
+		return (T)this.codec
+			.parse(JsonOps.INSTANCE, new JsonPrimitive(string))
+			.result()
+			.orElseThrow(() -> ERROR_INVALID_VALUE.createWithContext(stringReader, string));
 	}
 
 	@Override

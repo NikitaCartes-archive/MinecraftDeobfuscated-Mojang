@@ -28,7 +28,7 @@ import net.minecraft.world.item.armortrim.TrimMaterial;
 import net.minecraft.world.item.component.BlockItemStateProperties;
 import net.minecraft.world.item.component.ChargedProjectiles;
 import net.minecraft.world.item.component.CustomModelData;
-import net.minecraft.world.item.component.LodestoneTarget;
+import net.minecraft.world.item.component.LodestoneTracker;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.LightBlock;
 
@@ -162,8 +162,8 @@ public class ItemProperties {
 			}
 		});
 		register(Items.COMPASS, new ResourceLocation("angle"), new CompassItemPropertyFunction((clientLevel, itemStack, entity) -> {
-			LodestoneTarget lodestoneTarget = itemStack.get(DataComponents.LODESTONE_TARGET);
-			return lodestoneTarget != null ? lodestoneTarget.pos() : CompassItem.getSpawnPosition(clientLevel);
+			LodestoneTracker lodestoneTracker = itemStack.get(DataComponents.LODESTONE_TRACKER);
+			return lodestoneTracker != null ? (GlobalPos)lodestoneTracker.target().orElse(null) : CompassItem.getSpawnPosition(clientLevel);
 		}));
 		register(
 			Items.RECOVERY_COMPASS,

@@ -31,7 +31,7 @@ import net.minecraft.world.item.component.Fireworks;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.item.component.ItemLore;
-import net.minecraft.world.item.component.LodestoneTarget;
+import net.minecraft.world.item.component.LodestoneTracker;
 import net.minecraft.world.item.component.MapDecorations;
 import net.minecraft.world.item.component.MapItemColor;
 import net.minecraft.world.item.component.MapPostProcessing;
@@ -138,8 +138,8 @@ public class DataComponents {
 		"instrument", builder -> builder.persistent(Instrument.CODEC).networkSynchronized(Instrument.STREAM_CODEC)
 	);
 	public static final DataComponentType<List<ResourceLocation>> RECIPES = register("recipes", builder -> builder.persistent(ResourceLocation.CODEC.listOf()));
-	public static final DataComponentType<LodestoneTarget> LODESTONE_TARGET = register(
-		"lodestone_target", builder -> builder.persistent(LodestoneTarget.CODEC).networkSynchronized(LodestoneTarget.STREAM_CODEC)
+	public static final DataComponentType<LodestoneTracker> LODESTONE_TRACKER = register(
+		"lodestone_tracker", builder -> builder.persistent(LodestoneTracker.CODEC).networkSynchronized(LodestoneTracker.STREAM_CODEC)
 	);
 	public static final DataComponentType<FireworkExplosion> FIREWORK_EXPLOSION = register(
 		"firework_explosion", builder -> builder.persistent(FireworkExplosion.CODEC).networkSynchronized(FireworkExplosion.STREAM_CODEC)

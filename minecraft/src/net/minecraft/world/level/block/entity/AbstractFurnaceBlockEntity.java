@@ -322,7 +322,7 @@ public abstract class AbstractFurnaceBlockEntity extends BaseContainerBlockEntit
 				ItemStack itemStack2 = nonNullList.get(2);
 				if (itemStack2.isEmpty()) {
 					return true;
-				} else if (!ItemStack.isSameItem(itemStack2, itemStack)) {
+				} else if (!ItemStack.isSameItemSameComponents(itemStack2, itemStack)) {
 					return false;
 				} else if (itemStack2.getCount() < i && itemStack2.getCount() < itemStack2.getMaxStackSize()) {
 					return true;
@@ -342,7 +342,7 @@ public abstract class AbstractFurnaceBlockEntity extends BaseContainerBlockEntit
 			ItemStack itemStack3 = nonNullList.get(2);
 			if (itemStack3.isEmpty()) {
 				nonNullList.set(2, itemStack2.copy());
-			} else if (itemStack3.is(itemStack2.getItem())) {
+			} else if (ItemStack.isSameItemSameComponents(itemStack3, itemStack2)) {
 				itemStack3.grow(1);
 			}
 
@@ -406,35 +406,19 @@ public abstract class AbstractFurnaceBlockEntity extends BaseContainerBlockEntit
 	}
 
 	@Override
-	public boolean isEmpty() {
-		for(ItemStack itemStack : this.items) {
-			if (!itemStack.isEmpty()) {
-				return false;
-			}
-		}
-
-		return true;
+	protected NonNullList<ItemStack> getItems() {
+		return this.items;
 	}
 
 	@Override
-	public ItemStack getItem(int i) {
-		return this.items.get(i);
-	}
-
-	@Override
-	public ItemStack removeItem(int i, int j) {
-		return ContainerHelper.removeItem(this.items, i, j);
-	}
-
-	@Override
-	public ItemStack removeItemNoUpdate(int i) {
-		return ContainerHelper.takeItem(this.items, i);
+	protected void setItems(NonNullList<ItemStack> nonNullList) {
+		this.items = nonNullList;
 	}
 
 	@Override
 	public void setItem(int i, ItemStack itemStack) {
 		ItemStack itemStack2 = this.items.get(i);
-		boolean bl = !itemStack.isEmpty() && ItemStack.isSameItemSameTags(itemStack2, itemStack);
+		boolean bl = !itemStack.isEmpty() && ItemStack.isSameItemSameComponents(itemStack2, itemStack);
 		this.items.set(i, itemStack);
 		if (itemStack.getCount() > this.getMaxStackSize()) {
 			itemStack.setCount(this.getMaxStackSize());
@@ -448,11 +432,6 @@ public abstract class AbstractFurnaceBlockEntity extends BaseContainerBlockEntit
 	}
 
 	@Override
-	public boolean stillValid(Player player) {
-		return Container.stillValidBlockEntity(this, player);
-	}
-
-	@Override
 	public boolean canPlaceItem(int i, ItemStack itemStack) {
 		if (i == 2) {
 			return false;
@@ -462,11 +441,6 @@ public abstract class AbstractFurnaceBlockEntity extends BaseContainerBlockEntit
 			ItemStack itemStack2 = this.items.get(1);
 			return isFuel(itemStack) || itemStack.is(Items.BUCKET) && !itemStack2.is(Items.BUCKET);
 		}
-	}
-
-	@Override
-	public void clearContent() {
-		this.items.clear();
 	}
 
 	@Override

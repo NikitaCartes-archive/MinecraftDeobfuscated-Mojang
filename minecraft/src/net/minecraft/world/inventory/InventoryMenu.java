@@ -17,8 +17,10 @@ public class InventoryMenu extends RecipeBookMenu<CraftingContainer> {
 	public static final int CONTAINER_ID = 0;
 	public static final int RESULT_SLOT = 0;
 	public static final int CRAFT_SLOT_START = 1;
+	public static final int CRAFT_SLOT_COUNT = 4;
 	public static final int CRAFT_SLOT_END = 5;
 	public static final int ARMOR_SLOT_START = 5;
+	public static final int ARMOR_SLOT_COUNT = 4;
 	public static final int ARMOR_SLOT_END = 9;
 	public static final int INV_SLOT_START = 9;
 	public static final int INV_SLOT_END = 36;

@@ -38,7 +38,7 @@ public class ColorArgument implements ArgumentType<ChatFormatting> {
 		if (chatFormatting != null && !chatFormatting.isFormat()) {
 			return chatFormatting;
 		} else {
-			throw ERROR_INVALID_VALUE.create(string);
+			throw ERROR_INVALID_VALUE.createWithContext(stringReader, string);
 		}
 	}
 

@@ -58,7 +58,11 @@ public abstract class AbstractWidget implements Renderable, GuiEventListener, La
 	@Override
 	public final void render(GuiGraphics guiGraphics, int i, int j, float f) {
 		if (this.visible) {
-			this.isHovered = i >= this.getX() && j >= this.getY() && i < this.getX() + this.width && j < this.getY() + this.height;
+			this.isHovered = guiGraphics.containsPointInScissor(i, j)
+				&& i >= this.getX()
+				&& j >= this.getY()
+				&& i < this.getX() + this.width
+				&& j < this.getY() + this.height;
 			this.renderWidget(guiGraphics, i, j, f);
 			this.tooltip.refreshTooltipForNextRenderPass(this.isHovered(), this.isFocused(), this.getRectangle());
 		}

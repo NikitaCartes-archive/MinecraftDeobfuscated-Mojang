@@ -58,7 +58,9 @@ public class ParticleArgument implements ArgumentType<ParticleOptions> {
 	private static ParticleType<?> readParticleType(StringReader stringReader, HolderLookup<ParticleType<?>> holderLookup) throws CommandSyntaxException {
 		ResourceLocation resourceLocation = ResourceLocation.read(stringReader);
 		ResourceKey<ParticleType<?>> resourceKey = ResourceKey.create(Registries.PARTICLE_TYPE, resourceLocation);
-		return (ParticleType<?>)((Holder.Reference)holderLookup.get(resourceKey).orElseThrow(() -> ERROR_UNKNOWN_PARTICLE.create(resourceLocation))).value();
+		return (ParticleType<?>)((Holder.Reference)holderLookup.get(resourceKey)
+				.orElseThrow(() -> ERROR_UNKNOWN_PARTICLE.createWithContext(stringReader, resourceLocation)))
+			.value();
 	}
 
 	private static <T extends ParticleOptions> T readParticle(StringReader stringReader, ParticleType<T> particleType, HolderLookup.Provider provider) throws CommandSyntaxException {

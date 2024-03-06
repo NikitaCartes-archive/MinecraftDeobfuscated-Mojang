@@ -25,6 +25,7 @@ import net.minecraft.util.CrudeIncrementalIntIdentityHashBiMap;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.animal.CatVariant;
 import net.minecraft.world.entity.animal.FrogVariant;
+import net.minecraft.world.entity.animal.WolfVariant;
 import net.minecraft.world.entity.animal.armadillo.Armadillo;
 import net.minecraft.world.entity.animal.sniffer.Sniffer;
 import net.minecraft.world.entity.decoration.PaintingVariant;
@@ -110,6 +111,9 @@ public class EntityDataSerializers {
 	public static final EntityDataSerializer<OptionalInt> OPTIONAL_UNSIGNED_INT = EntityDataSerializer.forValueType(OPTIONAL_UNSIGNED_INT_CODEC);
 	public static final EntityDataSerializer<Pose> POSE = EntityDataSerializer.forValueType(Pose.STREAM_CODEC);
 	public static final EntityDataSerializer<CatVariant> CAT_VARIANT = EntityDataSerializer.forValueType(ByteBufCodecs.registry(Registries.CAT_VARIANT));
+	public static final EntityDataSerializer<Holder<WolfVariant>> WOLF_VARIANT = EntityDataSerializer.forValueType(
+		ByteBufCodecs.holderRegistry(Registries.WOLF_VARIANT)
+	);
 	public static final EntityDataSerializer<FrogVariant> FROG_VARIANT = EntityDataSerializer.forValueType(ByteBufCodecs.registry(Registries.FROG_VARIANT));
 	public static final EntityDataSerializer<Holder<PaintingVariant>> PAINTING_VARIANT = EntityDataSerializer.forValueType(
 		ByteBufCodecs.holderRegistry(Registries.PAINTING_VARIANT)
@@ -158,6 +162,7 @@ public class EntityDataSerializers {
 		registerSerializer(OPTIONAL_UNSIGNED_INT);
 		registerSerializer(POSE);
 		registerSerializer(CAT_VARIANT);
+		registerSerializer(WOLF_VARIANT);
 		registerSerializer(FROG_VARIANT);
 		registerSerializer(OPTIONAL_GLOBAL_POS);
 		registerSerializer(PAINTING_VARIANT);

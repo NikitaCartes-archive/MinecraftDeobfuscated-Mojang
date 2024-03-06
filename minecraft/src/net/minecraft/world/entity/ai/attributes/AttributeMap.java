@@ -71,7 +71,7 @@ public class AttributeMap {
 
 	public double getModifierValue(Holder<Attribute> holder, UUID uUID) {
 		AttributeInstance attributeInstance = (AttributeInstance)this.attributes.get(holder);
-		return attributeInstance != null ? attributeInstance.getModifier(uUID).getAmount() : this.supplier.getModifierValue(holder, uUID);
+		return attributeInstance != null ? attributeInstance.getModifier(uUID).amount() : this.supplier.getModifierValue(holder, uUID);
 	}
 
 	public void assignValues(AttributeMap attributeMap) {

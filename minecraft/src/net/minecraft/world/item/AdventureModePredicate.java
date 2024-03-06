@@ -116,12 +116,19 @@ public class AdventureModePredicate {
 	public boolean equals(Object object) {
 		if (this == object) {
 			return true;
+		} else if (!(object instanceof AdventureModePredicate)) {
+			return false;
 		} else {
-			return object instanceof AdventureModePredicate adventureModePredicate ? this.predicates.equals(adventureModePredicate.predicates) : false;
+			AdventureModePredicate adventureModePredicate = (AdventureModePredicate)object;
+			return this.predicates.equals(adventureModePredicate.predicates) && this.showInTooltip == adventureModePredicate.showInTooltip;
 		}
 	}
 
 	public int hashCode() {
-		return this.predicates.hashCode();
+		return this.predicates.hashCode() * 31 + (this.showInTooltip ? 1 : 0);
+	}
+
+	public String toString() {
+		return "AdventureModePredicate{predicates=" + this.predicates + ", showInTooltip=" + this.showInTooltip + "}";
 	}
 }

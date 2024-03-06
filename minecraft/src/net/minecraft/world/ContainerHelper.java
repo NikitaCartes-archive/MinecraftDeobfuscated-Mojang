@@ -9,6 +9,8 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.world.item.ItemStack;
 
 public class ContainerHelper {
+	public static final String TAG_ITEMS = "Items";
+
 	public static ItemStack removeItem(List<ItemStack> list, int i, int j) {
 		return i >= 0 && i < list.size() && !((ItemStack)list.get(i)).isEmpty() && j > 0 ? ((ItemStack)list.get(i)).split(j) : ItemStack.EMPTY;
 	}

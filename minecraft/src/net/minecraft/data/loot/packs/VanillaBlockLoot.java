@@ -985,7 +985,10 @@ public class VanillaBlockLoot extends BlockLootSubProvider {
 								.add(
 									LootItem.lootTableItem(block)
 										.apply(
-											CopyComponentsFunction.copyComponents(CopyComponentsFunction.Source.BLOCK_ENTITY).copy(DataComponents.PROFILE).copy(DataComponents.NOTE_BLOCK_SOUND)
+											CopyComponentsFunction.copyComponents(CopyComponentsFunction.Source.BLOCK_ENTITY)
+												.copy(DataComponents.PROFILE)
+												.copy(DataComponents.NOTE_BLOCK_SOUND)
+												.copy(DataComponents.CUSTOM_NAME)
 										)
 								)
 						)

@@ -13,7 +13,7 @@ public class ItemStackLinkedSet {
 
 		public boolean equals(@Nullable ItemStack itemStack, @Nullable ItemStack itemStack2) {
 			return itemStack == itemStack2
-				|| itemStack != null && itemStack2 != null && itemStack.isEmpty() == itemStack2.isEmpty() && ItemStack.isSameItemSameTags(itemStack, itemStack2);
+				|| itemStack != null && itemStack2 != null && itemStack.isEmpty() == itemStack2.isEmpty() && ItemStack.isSameItemSameComponents(itemStack, itemStack2);
 		}
 	};
 

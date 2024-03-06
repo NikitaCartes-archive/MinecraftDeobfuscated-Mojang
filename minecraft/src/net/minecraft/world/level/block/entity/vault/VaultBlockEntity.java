@@ -347,7 +347,7 @@ public class VaultBlockEntity extends BlockEntity {
 		}
 
 		private static boolean isValidToInsert(VaultConfig vaultConfig, ItemStack itemStack) {
-			return ItemStack.isSameItemSameTags(itemStack, vaultConfig.keyItem()) && itemStack.getCount() >= vaultConfig.keyItem().getCount();
+			return ItemStack.isSameItemSameComponents(itemStack, vaultConfig.keyItem()) && itemStack.getCount() >= vaultConfig.keyItem().getCount();
 		}
 
 		private static boolean shouldCycleDisplayItem(long l, VaultState vaultState) {

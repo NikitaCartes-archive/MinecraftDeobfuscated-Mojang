@@ -103,7 +103,7 @@ public class ResourceArgument<T> implements ArgumentType<Holder.Reference<T>> {
 		ResourceKey<T> resourceKey = ResourceKey.create(this.registryKey, resourceLocation);
 		return (Holder.Reference<T>)this.registryLookup
 			.get(resourceKey)
-			.orElseThrow(() -> ERROR_UNKNOWN_RESOURCE.create(resourceLocation, this.registryKey.location()));
+			.orElseThrow(() -> ERROR_UNKNOWN_RESOURCE.createWithContext(stringReader, resourceLocation, this.registryKey.location()));
 	}
 
 	@Override

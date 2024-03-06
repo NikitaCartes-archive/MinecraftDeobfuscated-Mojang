@@ -175,7 +175,7 @@ public class Zombie extends Monster {
 		this.getEntityData().set(DATA_BABY_ID, bl);
 		if (this.level() != null && !this.level().isClientSide) {
 			AttributeInstance attributeInstance = this.getAttribute(Attributes.MOVEMENT_SPEED);
-			attributeInstance.removeModifier(SPEED_MODIFIER_BABY.getId());
+			attributeInstance.removeModifier(SPEED_MODIFIER_BABY.id());
 			if (bl) {
 				attributeInstance.addTransientModifier(SPEED_MODIFIER_BABY);
 			}

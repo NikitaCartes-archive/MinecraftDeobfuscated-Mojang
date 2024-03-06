@@ -124,8 +124,9 @@ public class BundleItem extends Item {
 	}
 
 	private static boolean dropContents(ItemStack itemStack, Player player) {
-		BundleContents bundleContents = itemStack.set(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY);
+		BundleContents bundleContents = itemStack.get(DataComponents.BUNDLE_CONTENTS);
 		if (bundleContents != null && !bundleContents.isEmpty()) {
+			itemStack.set(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY);
 			if (player instanceof ServerPlayer) {
 				bundleContents.items().forEach(itemStackx -> player.drop(itemStackx, true));
 			}
@@ -151,8 +152,9 @@ public class BundleItem extends Item {
 
 	@Override
 	public void onDestroyed(ItemEntity itemEntity) {
-		BundleContents bundleContents = itemEntity.getItem().set(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY);
+		BundleContents bundleContents = itemEntity.getItem().get(DataComponents.BUNDLE_CONTENTS);
 		if (bundleContents != null) {
+			itemEntity.getItem().set(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY);
 			ItemUtils.onContainerDestroyed(itemEntity, bundleContents.items());
 		}
 	}

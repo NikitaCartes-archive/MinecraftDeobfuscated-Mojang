@@ -70,8 +70,6 @@ import net.minecraft.world.level.biome.BiomeSources;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.BlockTypes;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.entity.BannerPattern;
-import net.minecraft.world.level.block.entity.BannerPatterns;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.DecoratedPotPatterns;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -238,7 +236,6 @@ public class BuiltInRegistries {
 	);
 	public static final Registry<CatVariant> CAT_VARIANT = registerSimple(Registries.CAT_VARIANT, CatVariant::bootstrap);
 	public static final Registry<FrogVariant> FROG_VARIANT = registerSimple(Registries.FROG_VARIANT, registry -> FrogVariant.TEMPERATE);
-	public static final Registry<BannerPattern> BANNER_PATTERN = registerSimple(Registries.BANNER_PATTERN, BannerPatterns::bootstrap);
 	public static final Registry<Instrument> INSTRUMENT = registerSimple(Registries.INSTRUMENT, Instruments::bootstrap);
 	public static final Registry<String> DECORATED_POT_PATTERNS = registerSimple(Registries.DECORATED_POT_PATTERNS, DecoratedPotPatterns::bootstrap);
 	public static final Registry<CreativeModeTab> CREATIVE_MODE_TAB = registerSimple(Registries.CREATIVE_MODE_TAB, CreativeModeTabs::bootstrap);

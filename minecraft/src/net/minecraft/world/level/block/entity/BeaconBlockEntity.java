@@ -356,7 +356,9 @@ public class BeaconBlockEntity extends BlockEntity implements MenuProvider, Name
 	@Override
 	public void collectComponents(DataComponentMap.Builder builder) {
 		builder.set(DataComponents.CUSTOM_NAME, this.name);
-		builder.set(DataComponents.LOCK, this.lockKey);
+		if (!this.lockKey.equals(LockCode.NO_LOCK)) {
+			builder.set(DataComponents.LOCK, this.lockKey);
+		}
 	}
 
 	@Override

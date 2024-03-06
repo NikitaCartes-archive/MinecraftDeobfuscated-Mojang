@@ -127,7 +127,8 @@ public class CrossbowItem extends ProjectileWeaponItem {
 
 		projectile.shoot((double)vector3f.x(), (double)vector3f.y(), (double)vector3f.z(), f, g);
 		float l = getShotPitch(livingEntity.getRandom(), i);
-		livingEntity.playSound(SoundEvents.CROSSBOW_SHOOT, 1.0F, l);
+		livingEntity.level()
+			.playSound(null, livingEntity.getX(), livingEntity.getY(), livingEntity.getZ(), SoundEvents.CROSSBOW_SHOOT, livingEntity.getSoundSource(), 1.0F, l);
 	}
 
 	private static Vector3f getProjectileShotVector(LivingEntity livingEntity, Vec3 vec3, float f) {

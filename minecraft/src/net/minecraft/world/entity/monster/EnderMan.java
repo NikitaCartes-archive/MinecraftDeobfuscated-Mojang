@@ -122,7 +122,7 @@ public class EnderMan extends Monster implements NeutralMob {
 			this.targetChangeTime = 0;
 			this.entityData.set(DATA_CREEPY, false);
 			this.entityData.set(DATA_STARED_AT, false);
-			attributeInstance.removeModifier(SPEED_MODIFIER_ATTACKING.getId());
+			attributeInstance.removeModifier(SPEED_MODIFIER_ATTACKING.id());
 		} else {
 			this.targetChangeTime = this.tickCount;
 			this.entityData.set(DATA_CREEPY, true);
