@@ -1,6 +1,5 @@
 package net.minecraft.client.renderer.entity.layers;
 
-import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import java.util.Map;
@@ -77,11 +76,10 @@ public class CustomHeadLayer<T extends LivingEntity, M extends EntityModel<T> & 
 				}
 
 				ResolvableProfile resolvableProfile = itemStack.get(DataComponents.PROFILE);
-				GameProfile gameProfile = resolvableProfile != null ? resolvableProfile.gameProfile() : null;
 				poseStack.translate(-0.5, 0.0, -0.5);
 				SkullBlock.Type type = ((AbstractSkullBlock)((BlockItem)item).getBlock()).getType();
 				SkullModelBase skullModelBase = (SkullModelBase)this.skullModels.get(type);
-				RenderType renderType = SkullBlockRenderer.getRenderType(type, gameProfile);
+				RenderType renderType = SkullBlockRenderer.getRenderType(type, resolvableProfile);
 				WalkAnimationState walkAnimationState;
 				if (livingEntity.getVehicle() instanceof LivingEntity livingEntity2) {
 					walkAnimationState = livingEntity2.walkAnimation;

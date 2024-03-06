@@ -491,9 +491,9 @@ public abstract class AbstractArrow extends Projectile {
 
 		this.setShotFromCrossbow(compoundTag.getBoolean("ShotFromCrossbow"));
 		if (compoundTag.contains("item", 10)) {
-			this.pickupItemStack = (ItemStack)ItemStack.parse(this.registryAccess(), compoundTag.getCompound("item")).orElse(this.getDefaultPickupItem());
+			this.setPickupItemStack((ItemStack)ItemStack.parse(this.registryAccess(), compoundTag.getCompound("item")).orElse(this.getDefaultPickupItem()));
 		} else {
-			this.pickupItemStack = this.getDefaultPickupItem();
+			this.setPickupItemStack(this.pickupItemStack);
 		}
 	}
 

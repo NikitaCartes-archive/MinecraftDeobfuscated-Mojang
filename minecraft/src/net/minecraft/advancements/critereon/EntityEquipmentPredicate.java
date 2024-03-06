@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Optional;
 import javax.annotation.Nullable;
+import net.minecraft.core.HolderGetter;
 import net.minecraft.core.component.DataComponentPredicate;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.entity.Entity;
@@ -11,6 +12,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.raid.Raid;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.entity.BannerPattern;
 
 public record EntityEquipmentPredicate(
 	Optional<ItemPredicate> head,
@@ -31,9 +33,14 @@ public record EntityEquipmentPredicate(
 				)
 				.apply(instance, EntityEquipmentPredicate::new)
 	);
-	public static final EntityEquipmentPredicate CAPTAIN = EntityEquipmentPredicate.Builder.equipment()
-		.head(ItemPredicate.Builder.item().of(Items.WHITE_BANNER).hasComponents(DataComponentPredicate.allOf(Raid.getLeaderBannerInstance().getComponents())))
-		.build();
+
+	public static EntityEquipmentPredicate captainPredicate(HolderGetter<BannerPattern> holderGetter) {
+		return EntityEquipmentPredicate.Builder.equipment()
+			.head(
+				ItemPredicate.Builder.item().of(Items.WHITE_BANNER).hasComponents(DataComponentPredicate.allOf(Raid.getLeaderBannerInstance(holderGetter).getComponents()))
+			)
+			.build();
+	}
 
 	public boolean matches(@Nullable Entity entity) {
 		if (entity instanceof LivingEntity livingEntity) {

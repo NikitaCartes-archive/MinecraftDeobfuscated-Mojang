@@ -1,5 +1,6 @@
 package net.minecraft.util.datafix.schemas;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.mojang.datafixers.DSL;
 import com.mojang.datafixers.schemas.Schema;
@@ -15,10 +16,94 @@ import net.minecraft.util.datafix.ExtraDataFixUtils;
 import net.minecraft.util.datafix.fixes.References;
 
 public class V705 extends NamespacedSchema {
+	static final Map<String, String> ITEM_TO_ENTITY = ImmutableMap.<String, String>builder()
+		.put("minecraft:armor_stand", "minecraft:armor_stand")
+		.put("minecraft:painting", "minecraft:painting")
+		.put("minecraft:armadillo_spawn_egg", "minecraft:armadillo")
+		.put("minecraft:allay_spawn_egg", "minecraft:allay")
+		.put("minecraft:axolotl_spawn_egg", "minecraft:axolotl")
+		.put("minecraft:bat_spawn_egg", "minecraft:bat")
+		.put("minecraft:bee_spawn_egg", "minecraft:bee")
+		.put("minecraft:blaze_spawn_egg", "minecraft:blaze")
+		.put("minecraft:bogged_spawn_egg", "minecraft:bogged")
+		.put("minecraft:breeze_spawn_egg", "minecraft:breeze")
+		.put("minecraft:cat_spawn_egg", "minecraft:cat")
+		.put("minecraft:camel_spawn_egg", "minecraft:camel")
+		.put("minecraft:cave_spider_spawn_egg", "minecraft:cave_spider")
+		.put("minecraft:chicken_spawn_egg", "minecraft:chicken")
+		.put("minecraft:cod_spawn_egg", "minecraft:cod")
+		.put("minecraft:cow_spawn_egg", "minecraft:cow")
+		.put("minecraft:creeper_spawn_egg", "minecraft:creeper")
+		.put("minecraft:dolphin_spawn_egg", "minecraft:dolphin")
+		.put("minecraft:donkey_spawn_egg", "minecraft:donkey")
+		.put("minecraft:drowned_spawn_egg", "minecraft:drowned")
+		.put("minecraft:elder_guardian_spawn_egg", "minecraft:elder_guardian")
+		.put("minecraft:ender_dragon_spawn_egg", "minecraft:ender_dragon")
+		.put("minecraft:enderman_spawn_egg", "minecraft:enderman")
+		.put("minecraft:endermite_spawn_egg", "minecraft:endermite")
+		.put("minecraft:evoker_spawn_egg", "minecraft:evoker")
+		.put("minecraft:fox_spawn_egg", "minecraft:fox")
+		.put("minecraft:frog_spawn_egg", "minecraft:frog")
+		.put("minecraft:ghast_spawn_egg", "minecraft:ghast")
+		.put("minecraft:glow_squid_spawn_egg", "minecraft:glow_squid")
+		.put("minecraft:goat_spawn_egg", "minecraft:goat")
+		.put("minecraft:guardian_spawn_egg", "minecraft:guardian")
+		.put("minecraft:hoglin_spawn_egg", "minecraft:hoglin")
+		.put("minecraft:horse_spawn_egg", "minecraft:horse")
+		.put("minecraft:husk_spawn_egg", "minecraft:husk")
+		.put("minecraft:iron_golem_spawn_egg", "minecraft:iron_golem")
+		.put("minecraft:llama_spawn_egg", "minecraft:llama")
+		.put("minecraft:magma_cube_spawn_egg", "minecraft:magma_cube")
+		.put("minecraft:mooshroom_spawn_egg", "minecraft:mooshroom")
+		.put("minecraft:mule_spawn_egg", "minecraft:mule")
+		.put("minecraft:ocelot_spawn_egg", "minecraft:ocelot")
+		.put("minecraft:panda_spawn_egg", "minecraft:panda")
+		.put("minecraft:parrot_spawn_egg", "minecraft:parrot")
+		.put("minecraft:phantom_spawn_egg", "minecraft:phantom")
+		.put("minecraft:pig_spawn_egg", "minecraft:pig")
+		.put("minecraft:piglin_spawn_egg", "minecraft:piglin")
+		.put("minecraft:piglin_brute_spawn_egg", "minecraft:piglin_brute")
+		.put("minecraft:pillager_spawn_egg", "minecraft:pillager")
+		.put("minecraft:polar_bear_spawn_egg", "minecraft:polar_bear")
+		.put("minecraft:pufferfish_spawn_egg", "minecraft:pufferfish")
+		.put("minecraft:rabbit_spawn_egg", "minecraft:rabbit")
+		.put("minecraft:ravager_spawn_egg", "minecraft:ravager")
+		.put("minecraft:salmon_spawn_egg", "minecraft:salmon")
+		.put("minecraft:sheep_spawn_egg", "minecraft:sheep")
+		.put("minecraft:shulker_spawn_egg", "minecraft:shulker")
+		.put("minecraft:silverfish_spawn_egg", "minecraft:silverfish")
+		.put("minecraft:skeleton_spawn_egg", "minecraft:skeleton")
+		.put("minecraft:skeleton_horse_spawn_egg", "minecraft:skeleton_horse")
+		.put("minecraft:slime_spawn_egg", "minecraft:slime")
+		.put("minecraft:sniffer_spawn_egg", "minecraft:sniffer")
+		.put("minecraft:snow_golem_spawn_egg", "minecraft:snow_golem")
+		.put("minecraft:spider_spawn_egg", "minecraft:spider")
+		.put("minecraft:squid_spawn_egg", "minecraft:squid")
+		.put("minecraft:stray_spawn_egg", "minecraft:stray")
+		.put("minecraft:strider_spawn_egg", "minecraft:strider")
+		.put("minecraft:tadpole_spawn_egg", "minecraft:tadpole")
+		.put("minecraft:trader_llama_spawn_egg", "minecraft:trader_llama")
+		.put("minecraft:tropical_fish_spawn_egg", "minecraft:tropical_fish")
+		.put("minecraft:turtle_spawn_egg", "minecraft:turtle")
+		.put("minecraft:vex_spawn_egg", "minecraft:vex")
+		.put("minecraft:villager_spawn_egg", "minecraft:villager")
+		.put("minecraft:vindicator_spawn_egg", "minecraft:vindicator")
+		.put("minecraft:wandering_trader_spawn_egg", "minecraft:wandering_trader")
+		.put("minecraft:warden_spawn_egg", "minecraft:warden")
+		.put("minecraft:witch_spawn_egg", "minecraft:witch")
+		.put("minecraft:wither_spawn_egg", "minecraft:wither")
+		.put("minecraft:wither_skeleton_spawn_egg", "minecraft:wither_skeleton")
+		.put("minecraft:wolf_spawn_egg", "minecraft:wolf")
+		.put("minecraft:zoglin_spawn_egg", "minecraft:zoglin")
+		.put("minecraft:zombie_spawn_egg", "minecraft:zombie")
+		.put("minecraft:zombie_horse_spawn_egg", "minecraft:zombie_horse")
+		.put("minecraft:zombie_villager_spawn_egg", "minecraft:zombie_villager")
+		.put("minecraft:zombified_piglin_spawn_egg", "minecraft:zombified_piglin")
+		.build();
 	protected static final HookFunction ADD_NAMES = new HookFunction() {
 		@Override
 		public <T> T apply(DynamicOps<T> dynamicOps, T object) {
-			return V99.addNames(new Dynamic<>(dynamicOps, object), V704.ITEM_TO_BLOCKENTITY, "minecraft:armor_stand");
+			return V99.addNames(new Dynamic<>(dynamicOps, object), V704.ITEM_TO_BLOCKENTITY, V705.ITEM_TO_ENTITY);
 		}
 	};
 

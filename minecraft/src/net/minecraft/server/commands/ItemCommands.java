@@ -44,7 +44,7 @@ public class ItemCommands {
 	static final Dynamic3CommandExceptionType ERROR_TARGET_NOT_A_CONTAINER = new Dynamic3CommandExceptionType(
 		(object, object2, object3) -> Component.translatableEscape("commands.item.target.not_a_container", object, object2, object3)
 	);
-	private static final Dynamic3CommandExceptionType ERROR_SOURCE_NOT_A_CONTAINER = new Dynamic3CommandExceptionType(
+	static final Dynamic3CommandExceptionType ERROR_SOURCE_NOT_A_CONTAINER = new Dynamic3CommandExceptionType(
 		(object, object2, object3) -> Component.translatableEscape("commands.item.source.not_a_container", object, object2, object3)
 	);
 	static final DynamicCommandExceptionType ERROR_TARGET_INAPPLICABLE_SLOT = new DynamicCommandExceptionType(
@@ -383,7 +383,7 @@ public class ItemCommands {
 		}
 	}
 
-	private static Container getContainer(CommandSourceStack commandSourceStack, BlockPos blockPos, Dynamic3CommandExceptionType dynamic3CommandExceptionType) throws CommandSyntaxException {
+	static Container getContainer(CommandSourceStack commandSourceStack, BlockPos blockPos, Dynamic3CommandExceptionType dynamic3CommandExceptionType) throws CommandSyntaxException {
 		BlockEntity blockEntity = commandSourceStack.getLevel().getBlockEntity(blockPos);
 		if (!(blockEntity instanceof Container)) {
 			throw dynamic3CommandExceptionType.create(blockPos.getX(), blockPos.getY(), blockPos.getZ());

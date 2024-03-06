@@ -39,7 +39,7 @@ public class GameProfileArgument implements ArgumentType<GameProfileArgument.Res
 			EntitySelectorParser entitySelectorParser = new EntitySelectorParser(stringReader);
 			EntitySelector entitySelector = entitySelectorParser.parse();
 			if (entitySelector.includesEntities()) {
-				throw EntityArgument.ERROR_ONLY_PLAYERS_ALLOWED.create();
+				throw EntityArgument.ERROR_ONLY_PLAYERS_ALLOWED.createWithContext(stringReader);
 			} else {
 				return new GameProfileArgument.SelectorResult(entitySelector);
 			}

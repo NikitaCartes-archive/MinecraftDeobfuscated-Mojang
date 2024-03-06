@@ -9,7 +9,9 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
+import it.unimi.dsi.fastutil.objects.ReferenceArraySet;
 import java.util.Locale;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import net.minecraft.Util;
@@ -44,6 +46,9 @@ public class ItemSyntaxParser {
 		(object, object2) -> Component.translatableEscape("arguments.item.component.malformed", object, object2)
 	);
 	static final SimpleCommandExceptionType ERROR_EXPECTED_COMPONENT = new SimpleCommandExceptionType(Component.translatable("arguments.item.component.expected"));
+	static final DynamicCommandExceptionType ERROR_REPEATED_COMPONENT = new DynamicCommandExceptionType(
+		object -> Component.translatableEscape("arguments.item.component.repeated", object)
+	);
 	private static final char SYNTAX_TAG = '#';
 	public static final char SYNTAX_START_COMPONENTS = '[';
 	public static final char SYNTAX_END_COMPONENTS = ']';
@@ -140,10 +145,15 @@ public class ItemSyntaxParser {
 		private void readComponents() throws CommandSyntaxException {
 			this.reader.expect('[');
 			this.visitor.visitSuggestions(this::suggestComponentAssignment);
+			Set<DataComponentType<?>> set = new ReferenceArraySet<>();
 
 			while (this.reader.canRead() && this.reader.peek() != ']') {
 				this.reader.skipWhitespace();
 				DataComponentType<?> dataComponentType = readComponentType(this.reader);
+				if (!set.add(dataComponentType)) {
+					throw ItemSyntaxParser.ERROR_REPEATED_COMPONENT.create(dataComponentType);
+				}
+
 				this.visitor.visitSuggestions(this::suggestAssignment);
 				this.reader.skipWhitespace();
 				this.reader.expect('=');

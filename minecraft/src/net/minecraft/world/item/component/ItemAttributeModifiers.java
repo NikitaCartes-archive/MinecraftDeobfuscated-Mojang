@@ -23,12 +23,15 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 
 public record ItemAttributeModifiers(List<ItemAttributeModifiers.Entry> modifiers, boolean showInTooltip) {
 	public static final ItemAttributeModifiers EMPTY = new ItemAttributeModifiers(List.of(), true);
-	public static final Codec<ItemAttributeModifiers> CODEC = RecordCodecBuilder.create(
+	private static final Codec<ItemAttributeModifiers> FULL_CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
 					ItemAttributeModifiers.Entry.CODEC.listOf().fieldOf("modifiers").forGetter(ItemAttributeModifiers::modifiers),
 					ExtraCodecs.strictOptionalField(Codec.BOOL, "show_in_tooltip", true).forGetter(ItemAttributeModifiers::showInTooltip)
 				)
 				.apply(instance, ItemAttributeModifiers::new)
+	);
+	public static final Codec<ItemAttributeModifiers> CODEC = ExtraCodecs.withAlternative(
+		FULL_CODEC, ItemAttributeModifiers.Entry.CODEC.listOf(), list -> new ItemAttributeModifiers(list, true)
 	);
 	public static final StreamCodec<RegistryFriendlyByteBuf, ItemAttributeModifiers> STREAM_CODEC = StreamCodec.composite(
 		ItemAttributeModifiers.Entry.STREAM_CODEC.apply(ByteBufCodecs.list()),
@@ -64,9 +67,9 @@ public record ItemAttributeModifiers(List<ItemAttributeModifiers.Entry> modifier
 
 		for (ItemAttributeModifiers.Entry entry : this.modifiers) {
 			if (entry.slot.test(equipmentSlot)) {
-				double f = entry.modifier.getAmount();
+				double f = entry.modifier.amount();
 
-				e += switch (entry.modifier.getOperation()) {
+				e += switch (entry.modifier.operation()) {
 					case ADD_VALUE -> f;
 					case ADD_MULTIPLIED_BASE -> f * d;
 					case ADD_MULTIPLIED_TOTAL -> f * e;

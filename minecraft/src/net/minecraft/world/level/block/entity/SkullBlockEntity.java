@@ -5,6 +5,7 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.yggdrasil.ProfileResult;
+import com.mojang.logging.LogUtils;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.UUID;
@@ -18,7 +19,8 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtUtils;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.Services;
@@ -27,10 +29,13 @@ import net.minecraft.world.item.component.ResolvableProfile;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.SkullBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import org.slf4j.Logger;
 
 public class SkullBlockEntity extends BlockEntity {
-	private static final String TAG_SKULL_OWNER = "SkullOwner";
+	private static final String TAG_PROFILE = "profile";
 	private static final String TAG_NOTE_BLOCK_SOUND = "note_block_sound";
+	private static final String TAG_CUSTOM_NAME = "custom_name";
+	private static final Logger LOGGER = LogUtils.getLogger();
 	@Nullable
 	private static Executor mainThreadExecutor;
 	@Nullable
@@ -42,11 +47,13 @@ public class SkullBlockEntity extends BlockEntity {
 		}
 	};
 	@Nullable
-	private GameProfile owner;
+	private ResolvableProfile owner;
 	@Nullable
 	private ResourceLocation noteBlockSound;
 	private int animationTickCount;
 	private boolean isAnimating;
+	@Nullable
+	private Component customName;
 
 	public SkullBlockEntity(BlockPos blockPos, BlockState blockState) {
 		super(BlockEntityType.SKULL, blockPos, blockState);
@@ -90,30 +97,36 @@ public class SkullBlockEntity extends BlockEntity {
 	protected void saveAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
 		super.saveAdditional(compoundTag, provider);
 		if (this.owner != null) {
-			CompoundTag compoundTag2 = new CompoundTag();
-			NbtUtils.writeGameProfile(compoundTag2, this.owner);
-			compoundTag.put("SkullOwner", compoundTag2);
+			compoundTag.put("profile", Util.getOrThrow(ResolvableProfile.CODEC.encodeStart(NbtOps.INSTANCE, this.owner), IllegalStateException::new));
 		}
 
 		if (this.noteBlockSound != null) {
 			compoundTag.putString("note_block_sound", this.noteBlockSound.toString());
+		}
+
+		if (this.customName != null) {
+			compoundTag.putString("custom_name", Component.Serializer.toJson(this.customName, provider));
 		}
 	}
 
 	@Override
 	public void load(CompoundTag compoundTag, HolderLookup.Provider provider) {
 		super.load(compoundTag, provider);
-		if (compoundTag.contains("SkullOwner", 10)) {
-			this.setOwner(NbtUtils.readGameProfile(compoundTag.getCompound("SkullOwner")));
-		} else if (compoundTag.contains("ExtraType", 8)) {
-			String string = compoundTag.getString("ExtraType");
-			if (!StringUtil.isNullOrEmpty(string)) {
-				this.setOwner(new GameProfile(Util.NIL_UUID, string));
-			}
+		if (compoundTag.contains("profile")) {
+			ResolvableProfile.CODEC
+				.parse(NbtOps.INSTANCE, compoundTag.get("profile"))
+				.resultOrPartial(string -> LOGGER.error("Failed to load profile from player head: {}", string))
+				.ifPresent(this::setOwner);
 		}
 
 		if (compoundTag.contains("note_block_sound", 8)) {
 			this.noteBlockSound = ResourceLocation.tryParse(compoundTag.getString("note_block_sound"));
+		}
+
+		if (compoundTag.contains("custom_name", 8)) {
+			this.customName = Component.Serializer.fromJson(compoundTag.getString("custom_name"), provider);
+		} else {
+			this.customName = null;
 		}
 	}
 
@@ -131,7 +144,7 @@ public class SkullBlockEntity extends BlockEntity {
 	}
 
 	@Nullable
-	public GameProfile getOwnerProfile() {
+	public ResolvableProfile getOwnerProfile() {
 		return this.owner;
 	}
 
@@ -149,18 +162,18 @@ public class SkullBlockEntity extends BlockEntity {
 		return this.saveWithoutMetadata(provider);
 	}
 
-	public void setOwner(@Nullable GameProfile gameProfile) {
+	public void setOwner(@Nullable ResolvableProfile resolvableProfile) {
 		synchronized (this) {
-			this.owner = gameProfile;
+			this.owner = resolvableProfile;
 		}
 
 		this.updateOwnerProfile();
 	}
 
 	private void updateOwnerProfile() {
-		if (this.owner != null && !StringUtil.isBlank(this.owner.getName()) && !hasTextures(this.owner)) {
-			fetchGameProfile(this.owner.getName()).thenAcceptAsync(optional -> {
-				this.owner = (GameProfile)optional.orElse(this.owner);
+		if (this.owner != null && !this.owner.isResolved()) {
+			this.owner.resolve().thenAcceptAsync(resolvableProfile -> {
+				this.owner = resolvableProfile;
 				this.setChanged();
 			}, CHECKED_MAIN_THREAD_EXECUTOR);
 		} else {
@@ -173,30 +186,25 @@ public class SkullBlockEntity extends BlockEntity {
 		return loadingCache != null && StringUtil.isValidPlayerName(string) ? loadingCache.getUnchecked(string) : CompletableFuture.completedFuture(Optional.empty());
 	}
 
-	private static boolean hasTextures(GameProfile gameProfile) {
-		return gameProfile.getProperties().containsKey("textures");
-	}
-
 	@Override
 	public void applyComponents(DataComponentMap dataComponentMap) {
-		ResolvableProfile resolvableProfile = dataComponentMap.get(DataComponents.PROFILE);
-		this.setOwner(resolvableProfile != null ? resolvableProfile.gameProfile() : null);
+		this.setOwner(dataComponentMap.get(DataComponents.PROFILE));
 		this.noteBlockSound = dataComponentMap.get(DataComponents.NOTE_BLOCK_SOUND);
+		this.customName = dataComponentMap.get(DataComponents.CUSTOM_NAME);
 	}
 
 	@Override
 	public void collectComponents(DataComponentMap.Builder builder) {
-		if (this.owner != null) {
-			builder.set(DataComponents.PROFILE, new ResolvableProfile(this.owner));
-		}
-
+		builder.set(DataComponents.PROFILE, this.owner);
 		builder.set(DataComponents.NOTE_BLOCK_SOUND, this.noteBlockSound);
+		builder.set(DataComponents.CUSTOM_NAME, this.customName);
 	}
 
 	@Override
 	public void removeComponentsFromTag(CompoundTag compoundTag) {
 		super.removeComponentsFromTag(compoundTag);
-		compoundTag.remove("SkullOwner");
+		compoundTag.remove("profile");
 		compoundTag.remove("note_block_sound");
+		compoundTag.remove("custom_name");
 	}
 }

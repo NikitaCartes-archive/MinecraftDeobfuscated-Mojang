@@ -17,8 +17,10 @@ import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderGetter;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
@@ -52,6 +54,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BannerPattern;
 import net.minecraft.world.level.block.entity.BannerPatternLayers;
 import net.minecraft.world.level.block.entity.BannerPatterns;
 import net.minecraft.world.level.levelgen.Heightmap;
@@ -590,17 +593,17 @@ public class Raid {
 		this.level.getRaids().setDirty();
 	}
 
-	public static ItemStack getLeaderBannerInstance() {
+	public static ItemStack getLeaderBannerInstance(HolderGetter<BannerPattern> holderGetter) {
 		ItemStack itemStack = new ItemStack(Items.WHITE_BANNER);
 		BannerPatternLayers bannerPatternLayers = new BannerPatternLayers.Builder()
-			.add(BannerPatterns.RHOMBUS_MIDDLE, DyeColor.CYAN)
-			.add(BannerPatterns.STRIPE_BOTTOM, DyeColor.LIGHT_GRAY)
-			.add(BannerPatterns.STRIPE_CENTER, DyeColor.GRAY)
-			.add(BannerPatterns.BORDER, DyeColor.LIGHT_GRAY)
-			.add(BannerPatterns.STRIPE_MIDDLE, DyeColor.BLACK)
-			.add(BannerPatterns.HALF_HORIZONTAL, DyeColor.LIGHT_GRAY)
-			.add(BannerPatterns.CIRCLE_MIDDLE, DyeColor.LIGHT_GRAY)
-			.add(BannerPatterns.BORDER, DyeColor.BLACK)
+			.addIfRegistered(holderGetter, BannerPatterns.RHOMBUS_MIDDLE, DyeColor.CYAN)
+			.addIfRegistered(holderGetter, BannerPatterns.STRIPE_BOTTOM, DyeColor.LIGHT_GRAY)
+			.addIfRegistered(holderGetter, BannerPatterns.STRIPE_CENTER, DyeColor.GRAY)
+			.addIfRegistered(holderGetter, BannerPatterns.BORDER, DyeColor.LIGHT_GRAY)
+			.addIfRegistered(holderGetter, BannerPatterns.STRIPE_MIDDLE, DyeColor.BLACK)
+			.addIfRegistered(holderGetter, BannerPatterns.HALF_HORIZONTAL, DyeColor.LIGHT_GRAY)
+			.addIfRegistered(holderGetter, BannerPatterns.CIRCLE_MIDDLE, DyeColor.LIGHT_GRAY)
+			.addIfRegistered(holderGetter, BannerPatterns.BORDER, DyeColor.BLACK)
 			.build();
 		itemStack.set(DataComponents.BANNER_PATTERNS, bannerPatternLayers);
 		itemStack.set(DataComponents.HIDE_ADDITIONAL_TOOLTIP, Unit.INSTANCE);
@@ -674,7 +677,7 @@ public class Raid {
 
 	public void setLeader(int i, Raider raider) {
 		this.groupToLeaderMap.put(i, raider);
-		raider.setItemSlot(EquipmentSlot.HEAD, getLeaderBannerInstance());
+		raider.setItemSlot(EquipmentSlot.HEAD, getLeaderBannerInstance(raider.registryAccess().lookupOrThrow(Registries.BANNER_PATTERN)));
 		raider.setDropChance(EquipmentSlot.HEAD, 2.0F);
 	}
 

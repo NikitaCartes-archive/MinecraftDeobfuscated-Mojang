@@ -6,12 +6,15 @@ import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.component.DataComponentMap;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.ChiseledBookShelfBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -115,7 +118,7 @@ public class ChiseledBookShelfBlockEntity extends BlockEntity implements Contain
 		return container.hasAnyMatching(
 			itemStack2 -> itemStack2.isEmpty()
 					? true
-					: ItemStack.isSameItemSameTags(itemStack, itemStack2)
+					: ItemStack.isSameItemSameComponents(itemStack, itemStack2)
 						&& itemStack2.getCount() + itemStack.getCount() <= Math.min(itemStack2.getMaxStackSize(), container.getMaxStackSize())
 		);
 	}
@@ -137,5 +140,20 @@ public class ChiseledBookShelfBlockEntity extends BlockEntity implements Contain
 
 	public int getLastInteractedSlot() {
 		return this.lastInteractedSlot;
+	}
+
+	@Override
+	public void applyComponents(DataComponentMap dataComponentMap) {
+		dataComponentMap.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY).copyInto(this.items);
+	}
+
+	@Override
+	public void collectComponents(DataComponentMap.Builder builder) {
+		builder.set(DataComponents.CONTAINER, ItemContainerContents.copyOf(this.items));
+	}
+
+	@Override
+	public void removeComponentsFromTag(CompoundTag compoundTag) {
+		compoundTag.remove("Items");
 	}
 }

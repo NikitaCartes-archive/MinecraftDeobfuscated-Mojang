@@ -1,6 +1,7 @@
 package net.minecraft.world.item;
 
 import java.util.List;
+import java.util.function.UnaryOperator;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponents;
@@ -321,7 +322,9 @@ public class Items {
 	public static final Item SMOOTH_STONE = registerBlock(Blocks.SMOOTH_STONE);
 	public static final Item BRICKS = registerBlock(Blocks.BRICKS);
 	public static final Item BOOKSHELF = registerBlock(Blocks.BOOKSHELF);
-	public static final Item CHISELED_BOOKSHELF = registerBlock(Blocks.CHISELED_BOOKSHELF);
+	public static final Item CHISELED_BOOKSHELF = registerBlock(
+		Blocks.CHISELED_BOOKSHELF, properties -> properties.component(DataComponents.CONTAINER, ItemContainerContents.EMPTY)
+	);
 	public static final Item DECORATED_POT = registerBlock(
 		new BlockItem(Blocks.DECORATED_POT, new Item.Properties().component(DataComponents.POT_DECORATIONS, PotDecorations.EMPTY))
 	);
@@ -335,10 +338,10 @@ public class Items {
 	public static final Item PURPUR_PILLAR = registerBlock(Blocks.PURPUR_PILLAR);
 	public static final Item PURPUR_STAIRS = registerBlock(Blocks.PURPUR_STAIRS);
 	public static final Item SPAWNER = registerBlock(Blocks.SPAWNER);
-	public static final Item CHEST = registerBlock(Blocks.CHEST);
+	public static final Item CHEST = registerBlock(Blocks.CHEST, properties -> properties.component(DataComponents.CONTAINER, ItemContainerContents.EMPTY));
 	public static final Item CRAFTING_TABLE = registerBlock(Blocks.CRAFTING_TABLE);
 	public static final Item FARMLAND = registerBlock(Blocks.FARMLAND);
-	public static final Item FURNACE = registerBlock(Blocks.FURNACE);
+	public static final Item FURNACE = registerBlock(Blocks.FURNACE, properties -> properties.component(DataComponents.CONTAINER, ItemContainerContents.EMPTY));
 	public static final Item LADDER = registerBlock(Blocks.LADDER);
 	public static final Item COBBLESTONE_STAIRS = registerBlock(Blocks.COBBLESTONE_STAIRS);
 	public static final Item SNOW = registerBlock(Blocks.SNOW);
@@ -419,7 +422,9 @@ public class Items {
 	public static final Item END_STONE_BRICKS = registerBlock(Blocks.END_STONE_BRICKS);
 	public static final Item DRAGON_EGG = registerBlock(new BlockItem(Blocks.DRAGON_EGG, new Item.Properties().rarity(Rarity.EPIC)));
 	public static final Item SANDSTONE_STAIRS = registerBlock(Blocks.SANDSTONE_STAIRS);
-	public static final Item ENDER_CHEST = registerBlock(Blocks.ENDER_CHEST);
+	public static final Item ENDER_CHEST = registerBlock(
+		Blocks.ENDER_CHEST, properties -> properties.component(DataComponents.CONTAINER, ItemContainerContents.EMPTY)
+	);
 	public static final Item EMERALD_BLOCK = registerBlock(Blocks.EMERALD_BLOCK);
 	public static final Item OAK_STAIRS = registerBlock(Blocks.OAK_STAIRS);
 	public static final Item SPRUCE_STAIRS = registerBlock(Blocks.SPRUCE_STAIRS);
@@ -763,9 +768,9 @@ public class Items {
 	public static final Item SLIME_BLOCK = registerBlock(Blocks.SLIME_BLOCK);
 	public static final Item HONEY_BLOCK = registerBlock(Blocks.HONEY_BLOCK);
 	public static final Item OBSERVER = registerBlock(Blocks.OBSERVER);
-	public static final Item HOPPER = registerBlock(Blocks.HOPPER);
-	public static final Item DISPENSER = registerBlock(Blocks.DISPENSER);
-	public static final Item DROPPER = registerBlock(Blocks.DROPPER);
+	public static final Item HOPPER = registerBlock(Blocks.HOPPER, properties -> properties.component(DataComponents.CONTAINER, ItemContainerContents.EMPTY));
+	public static final Item DISPENSER = registerBlock(Blocks.DISPENSER, properties -> properties.component(DataComponents.CONTAINER, ItemContainerContents.EMPTY));
+	public static final Item DROPPER = registerBlock(Blocks.DROPPER, properties -> properties.component(DataComponents.CONTAINER, ItemContainerContents.EMPTY));
 	public static final Item LECTERN = registerBlock(Blocks.LECTERN);
 	public static final Item TARGET = registerBlock(Blocks.TARGET);
 	public static final Item LEVER = registerBlock(Blocks.LEVER);
@@ -774,7 +779,9 @@ public class Items {
 	public static final Item SCULK_SENSOR = registerBlock(Blocks.SCULK_SENSOR);
 	public static final Item CALIBRATED_SCULK_SENSOR = registerBlock(Blocks.CALIBRATED_SCULK_SENSOR);
 	public static final Item TRIPWIRE_HOOK = registerBlock(Blocks.TRIPWIRE_HOOK);
-	public static final Item TRAPPED_CHEST = registerBlock(Blocks.TRAPPED_CHEST);
+	public static final Item TRAPPED_CHEST = registerBlock(
+		Blocks.TRAPPED_CHEST, properties -> properties.component(DataComponents.CONTAINER, ItemContainerContents.EMPTY)
+	);
 	public static final Item TNT = registerBlock(Blocks.TNT);
 	public static final Item REDSTONE_LAMP = registerBlock(Blocks.REDSTONE_LAMP);
 	public static final Item NOTE_BLOCK = registerBlock(Blocks.NOTE_BLOCK);
@@ -1317,7 +1324,7 @@ public class Items {
 	public static final Item RED_BED = registerBlock(new BedItem(Blocks.RED_BED, new Item.Properties().stacksTo(1)));
 	public static final Item BLACK_BED = registerBlock(new BedItem(Blocks.BLACK_BED, new Item.Properties().stacksTo(1)));
 	public static final Item COOKIE = registerItem("cookie", new Item(new Item.Properties().food(Foods.COOKIE)));
-	public static final Item CRAFTER = registerBlock(new BlockItem(Blocks.CRAFTER, new Item.Properties()));
+	public static final Item CRAFTER = registerBlock(Blocks.CRAFTER, properties -> properties.component(DataComponents.CONTAINER, ItemContainerContents.EMPTY));
 	public static final Item FILLED_MAP = registerItem(
 		"filled_map",
 		new MapItem(new Item.Properties().component(DataComponents.MAP_COLOR, MapItemColor.DEFAULT).component(DataComponents.MAP_DECORATIONS, MapDecorations.EMPTY))
@@ -1349,7 +1356,9 @@ public class Items {
 	public static final Item FERMENTED_SPIDER_EYE = registerItem("fermented_spider_eye", new Item(new Item.Properties()));
 	public static final Item BLAZE_POWDER = registerItem("blaze_powder", new Item(new Item.Properties()));
 	public static final Item MAGMA_CREAM = registerItem("magma_cream", new Item(new Item.Properties()));
-	public static final Item BREWING_STAND = registerBlock(Blocks.BREWING_STAND);
+	public static final Item BREWING_STAND = registerBlock(
+		Blocks.BREWING_STAND, properties -> properties.component(DataComponents.CONTAINER, ItemContainerContents.EMPTY)
+	);
 	public static final Item CAULDRON = registerBlock(Blocks.CAULDRON, Blocks.WATER_CAULDRON, Blocks.LAVA_CAULDRON, Blocks.POWDER_SNOW_CAULDRON);
 	public static final Item ENDER_EYE = registerItem("ender_eye", new EnderEyeItem(new Item.Properties()));
 	public static final Item GLISTERING_MELON_SLICE = registerItem("glistering_melon_slice", new Item(new Item.Properties()));
@@ -1797,9 +1806,11 @@ public class Items {
 	);
 	public static final Item GOAT_HORN = registerItem("goat_horn", new InstrumentItem(new Item.Properties().stacksTo(1), InstrumentTags.GOAT_HORNS));
 	public static final Item COMPOSTER = registerBlock(Blocks.COMPOSTER);
-	public static final Item BARREL = registerBlock(Blocks.BARREL);
-	public static final Item SMOKER = registerBlock(Blocks.SMOKER);
-	public static final Item BLAST_FURNACE = registerBlock(Blocks.BLAST_FURNACE);
+	public static final Item BARREL = registerBlock(Blocks.BARREL, properties -> properties.component(DataComponents.CONTAINER, ItemContainerContents.EMPTY));
+	public static final Item SMOKER = registerBlock(Blocks.SMOKER, properties -> properties.component(DataComponents.CONTAINER, ItemContainerContents.EMPTY));
+	public static final Item BLAST_FURNACE = registerBlock(
+		Blocks.BLAST_FURNACE, properties -> properties.component(DataComponents.CONTAINER, ItemContainerContents.EMPTY)
+	);
 	public static final Item CARTOGRAPHY_TABLE = registerBlock(Blocks.CARTOGRAPHY_TABLE);
 	public static final Item FLETCHING_TABLE = registerBlock(Blocks.FLETCHING_TABLE);
 	public static final Item GRINDSTONE = registerBlock(Blocks.GRINDSTONE);
@@ -1812,8 +1823,10 @@ public class Items {
 		"sweet_berries", new ItemNameBlockItem(Blocks.SWEET_BERRY_BUSH, new Item.Properties().food(Foods.SWEET_BERRIES))
 	);
 	public static final Item GLOW_BERRIES = registerItem("glow_berries", new ItemNameBlockItem(Blocks.CAVE_VINES, new Item.Properties().food(Foods.GLOW_BERRIES)));
-	public static final Item CAMPFIRE = registerBlock(Blocks.CAMPFIRE);
-	public static final Item SOUL_CAMPFIRE = registerBlock(Blocks.SOUL_CAMPFIRE);
+	public static final Item CAMPFIRE = registerBlock(Blocks.CAMPFIRE, properties -> properties.component(DataComponents.CONTAINER, ItemContainerContents.EMPTY));
+	public static final Item SOUL_CAMPFIRE = registerBlock(
+		Blocks.SOUL_CAMPFIRE, properties -> properties.component(DataComponents.CONTAINER, ItemContainerContents.EMPTY)
+	);
 	public static final Item SHROOMLIGHT = registerBlock(Blocks.SHROOMLIGHT);
 	public static final Item HONEYCOMB = registerItem("honeycomb", new HoneycombItem(new Item.Properties()));
 	public static final Item BEE_NEST = registerBlock(new BlockItem(Blocks.BEE_NEST, new Item.Properties().component(DataComponents.BEES, List.of())));
@@ -1958,6 +1971,10 @@ public class Items {
 
 	public static Item registerBlock(Block block) {
 		return registerBlock(new BlockItem(block, new Item.Properties()));
+	}
+
+	public static Item registerBlock(Block block, UnaryOperator<Item.Properties> unaryOperator) {
+		return registerBlock(new BlockItem(block, (Item.Properties)unaryOperator.apply(new Item.Properties())));
 	}
 
 	public static Item registerBlock(Block block, Block... blocks) {

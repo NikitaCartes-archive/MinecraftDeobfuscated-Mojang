@@ -67,11 +67,11 @@ public class ClientboundUpdateAttributesPacket implements Packet<ClientGamePacke
 	public static record AttributeSnapshot(Holder<Attribute> attribute, double base, Collection<AttributeModifier> modifiers) {
 		public static final StreamCodec<ByteBuf, AttributeModifier> MODIFIER_STREAM_CODEC = StreamCodec.composite(
 			UUIDUtil.STREAM_CODEC,
-			AttributeModifier::getId,
+			AttributeModifier::id,
 			ByteBufCodecs.DOUBLE,
-			AttributeModifier::getAmount,
+			AttributeModifier::amount,
 			AttributeModifier.Operation.STREAM_CODEC,
-			AttributeModifier::getOperation,
+			AttributeModifier::operation,
 			(uUID, double_, operation) -> new AttributeModifier(uUID, "Unknown synced attribute modifier", double_, operation)
 		);
 		public static final StreamCodec<RegistryFriendlyByteBuf, ClientboundUpdateAttributesPacket.AttributeSnapshot> STREAM_CODEC = StreamCodec.composite(

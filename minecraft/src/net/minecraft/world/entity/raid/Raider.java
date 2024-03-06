@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -46,7 +47,7 @@ public abstract class Raider extends PatrollingMonster {
 	protected static final EntityDataAccessor<Boolean> IS_CELEBRATING = SynchedEntityData.defineId(Raider.class, EntityDataSerializers.BOOLEAN);
 	static final Predicate<ItemEntity> ALLOWED_ITEMS = itemEntity -> !itemEntity.hasPickUpDelay()
 			&& itemEntity.isAlive()
-			&& ItemStack.matches(itemEntity.getItem(), Raid.getLeaderBannerInstance());
+			&& ItemStack.matches(itemEntity.getItem(), Raid.getLeaderBannerInstance(itemEntity.registryAccess().lookupOrThrow(Registries.BANNER_PATTERN)));
 	@Nullable
 	protected Raid raid;
 	private int wave;
@@ -140,7 +141,9 @@ public abstract class Raider extends PatrollingMonster {
 					}
 				}
 
-				if (!itemStack.isEmpty() && ItemStack.matches(itemStack, Raid.getLeaderBannerInstance()) && player != null) {
+				if (!itemStack.isEmpty()
+					&& ItemStack.matches(itemStack, Raid.getLeaderBannerInstance(this.registryAccess().lookupOrThrow(Registries.BANNER_PATTERN)))
+					&& player != null) {
 					MobEffectInstance mobEffectInstance = player.getEffect(MobEffects.BAD_OMEN);
 					int i = 1;
 					if (mobEffectInstance != null) {
@@ -229,7 +232,9 @@ public abstract class Raider extends PatrollingMonster {
 	protected void pickUpItem(ItemEntity itemEntity) {
 		ItemStack itemStack = itemEntity.getItem();
 		boolean bl = this.hasActiveRaid() && this.getCurrentRaid().getLeader(this.getWave()) != null;
-		if (this.hasActiveRaid() && !bl && ItemStack.matches(itemStack, Raid.getLeaderBannerInstance())) {
+		if (this.hasActiveRaid() && !bl && ItemStack.matches(itemStack, Raid.getLeaderBannerInstance(this.registryAccess().lookupOrThrow(Registries.BANNER_PATTERN)))
+			)
+		 {
 			EquipmentSlot equipmentSlot = EquipmentSlot.HEAD;
 			ItemStack itemStack2 = this.getItemBySlot(equipmentSlot);
 			double d = (double)this.getEquipmentDropChance(equipmentSlot);
@@ -368,7 +373,9 @@ public abstract class Raider extends PatrollingMonster {
 			if (this.mob.hasActiveRaid()
 				&& !this.mob.getCurrentRaid().isOver()
 				&& this.mob.canBeLeader()
-				&& !ItemStack.matches(this.mob.getItemBySlot(EquipmentSlot.HEAD), Raid.getLeaderBannerInstance())) {
+				&& !ItemStack.matches(
+					this.mob.getItemBySlot(EquipmentSlot.HEAD), Raid.getLeaderBannerInstance(this.mob.registryAccess().lookupOrThrow(Registries.BANNER_PATTERN))
+				)) {
 				Raider raider = raid.getLeader(this.mob.getWave());
 				if (raider == null || !raider.isAlive()) {
 					List<ItemEntity> list = this.mob.level().getEntitiesOfClass(ItemEntity.class, this.mob.getBoundingBox().inflate(16.0, 8.0, 16.0), Raider.ALLOWED_ITEMS);

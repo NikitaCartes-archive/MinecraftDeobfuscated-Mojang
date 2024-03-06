@@ -28,7 +28,6 @@ import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BannerPattern;
 import net.minecraft.world.level.block.entity.BannerPatternLayers;
-import net.minecraft.world.level.block.entity.BannerPatterns;
 
 @Environment(EnvType.CLIENT)
 public class LoomScreen extends AbstractContainerScreen<LoomMenu> {
@@ -118,8 +117,17 @@ public class LoomScreen extends AbstractContainerScreen<LoomMenu> {
 			guiGraphics.pose().scale(0.6666667F, 0.6666667F, -0.6666667F);
 			this.flag.xRot = 0.0F;
 			this.flag.y = -32.0F;
+			DyeColor dyeColor = ((BannerItem)slot4.getItem().getItem()).getColor();
 			BannerRenderer.renderPatterns(
-				guiGraphics.pose(), guiGraphics.bufferSource(), 15728880, OverlayTexture.NO_OVERLAY, this.flag, ModelBakery.BANNER_BASE, true, this.resultBannerPatterns
+				guiGraphics.pose(),
+				guiGraphics.bufferSource(),
+				15728880,
+				OverlayTexture.NO_OVERLAY,
+				this.flag,
+				ModelBakery.BANNER_BASE,
+				true,
+				dyeColor,
+				this.resultBannerPatterns
 			);
 			guiGraphics.pose().popPose();
 			guiGraphics.flush();
@@ -173,9 +181,9 @@ public class LoomScreen extends AbstractContainerScreen<LoomMenu> {
 		poseStack.scale(0.6666667F, -0.6666667F, -0.6666667F);
 		this.flag.xRot = 0.0F;
 		this.flag.y = -32.0F;
-		BannerPatternLayers bannerPatternLayers = new BannerPatternLayers.Builder().add(BannerPatterns.BASE, DyeColor.GRAY).add(holder, DyeColor.WHITE).build();
+		BannerPatternLayers bannerPatternLayers = new BannerPatternLayers.Builder().add(holder, DyeColor.WHITE).build();
 		BannerRenderer.renderPatterns(
-			poseStack, guiGraphics.bufferSource(), 15728880, OverlayTexture.NO_OVERLAY, this.flag, ModelBakery.BANNER_BASE, true, bannerPatternLayers
+			poseStack, guiGraphics.bufferSource(), 15728880, OverlayTexture.NO_OVERLAY, this.flag, ModelBakery.BANNER_BASE, true, DyeColor.GRAY, bannerPatternLayers
 		);
 		poseStack.popPose();
 		guiGraphics.flush();
@@ -249,8 +257,7 @@ public class LoomScreen extends AbstractContainerScreen<LoomMenu> {
 		if (itemStack.isEmpty()) {
 			this.resultBannerPatterns = null;
 		} else {
-			this.resultBannerPatterns = itemStack.getOrDefault(DataComponents.BANNER_PATTERNS, BannerPatternLayers.EMPTY)
-				.withBase(((BannerItem)itemStack.getItem()).getColor());
+			this.resultBannerPatterns = itemStack.getOrDefault(DataComponents.BANNER_PATTERNS, BannerPatternLayers.EMPTY);
 		}
 
 		ItemStack itemStack2 = this.menu.getBannerSlot().getItem();

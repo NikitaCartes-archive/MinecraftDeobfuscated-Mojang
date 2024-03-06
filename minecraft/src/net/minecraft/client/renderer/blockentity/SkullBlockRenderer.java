@@ -3,7 +3,6 @@ package net.minecraft.client.renderer.blockentity;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.ImmutableMap.Builder;
-import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import java.util.Map;
@@ -25,6 +24,7 @@ import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.client.resources.SkinManager;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.component.ResolvableProfile;
 import net.minecraft.world.level.block.AbstractSkullBlock;
 import net.minecraft.world.level.block.SkullBlock;
 import net.minecraft.world.level.block.WallSkullBlock;
@@ -99,11 +99,11 @@ public class SkullBlockRenderer implements BlockEntityRenderer<SkullBlockEntity>
 		poseStack.popPose();
 	}
 
-	public static RenderType getRenderType(SkullBlock.Type type, @Nullable GameProfile gameProfile) {
+	public static RenderType getRenderType(SkullBlock.Type type, @Nullable ResolvableProfile resolvableProfile) {
 		ResourceLocation resourceLocation = (ResourceLocation)SKIN_BY_TYPE.get(type);
-		if (type == SkullBlock.Types.PLAYER && gameProfile != null) {
+		if (type == SkullBlock.Types.PLAYER && resolvableProfile != null) {
 			SkinManager skinManager = Minecraft.getInstance().getSkinManager();
-			return RenderType.entityTranslucent(skinManager.getInsecureSkin(gameProfile).texture());
+			return RenderType.entityTranslucent(skinManager.getInsecureSkin(resolvableProfile.gameProfile()).texture());
 		} else {
 			return RenderType.entityCutoutNoCullZOffset(resourceLocation);
 		}

@@ -5,8 +5,6 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BannerPattern;
@@ -74,10 +72,6 @@ public class SetBannerPatternFunction extends LootItemConditionalFunction {
 		@Override
 		public LootItemFunction build() {
 			return new SetBannerPatternFunction(this.getConditions(), this.patterns.build(), this.append);
-		}
-
-		public SetBannerPatternFunction.Builder addPattern(ResourceKey<BannerPattern> resourceKey, DyeColor dyeColor) {
-			return this.addPattern(BuiltInRegistries.BANNER_PATTERN.getHolderOrThrow(resourceKey), dyeColor);
 		}
 
 		public SetBannerPatternFunction.Builder addPattern(Holder<BannerPattern> holder, DyeColor dyeColor) {

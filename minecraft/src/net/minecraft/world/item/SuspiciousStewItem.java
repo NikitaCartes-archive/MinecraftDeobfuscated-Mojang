@@ -35,13 +35,13 @@ public class SuspiciousStewItem extends Item {
 
 	@Override
 	public ItemStack finishUsingItem(ItemStack itemStack, Level level, LivingEntity livingEntity) {
-		ItemStack itemStack2 = super.finishUsingItem(itemStack, level, livingEntity);
 		SuspiciousStewEffects suspiciousStewEffects = itemStack.getOrDefault(DataComponents.SUSPICIOUS_STEW_EFFECTS, SuspiciousStewEffects.EMPTY);
 
 		for (SuspiciousStewEffects.Entry entry : suspiciousStewEffects.effects()) {
 			livingEntity.addEffect(entry.createEffectInstance());
 		}
 
-		return livingEntity.hasInfiniteMaterials() ? itemStack2 : new ItemStack(Items.BOWL);
+		super.finishUsingItem(itemStack, level, livingEntity);
+		return livingEntity.hasInfiniteMaterials() ? itemStack : new ItemStack(Items.BOWL);
 	}
 }

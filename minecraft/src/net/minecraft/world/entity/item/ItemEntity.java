@@ -231,7 +231,7 @@ public class ItemEntity extends Entity implements TraceableEntity {
 	}
 
 	public static boolean areMergable(ItemStack itemStack, ItemStack itemStack2) {
-		return itemStack2.getCount() + itemStack.getCount() > itemStack2.getMaxStackSize() ? false : ItemStack.isSameItemSameTags(itemStack, itemStack2);
+		return itemStack2.getCount() + itemStack.getCount() > itemStack2.getMaxStackSize() ? false : ItemStack.isSameItemSameComponents(itemStack, itemStack2);
 	}
 
 	public static ItemStack merge(ItemStack itemStack, ItemStack itemStack2, int i) {

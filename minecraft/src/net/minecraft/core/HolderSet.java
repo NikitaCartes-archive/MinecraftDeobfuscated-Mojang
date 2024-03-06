@@ -61,7 +61,7 @@ public interface HolderSet<T> extends Iterable<Holder<T>> {
 		return direct(collection.stream().map(function).toList());
 	}
 
-	public static class Direct<T> extends HolderSet.ListBacked<T> {
+	public static final class Direct<T> extends HolderSet.ListBacked<T> {
 		private final List<Holder<T>> contents;
 		@Nullable
 		private Set<Holder<T>> contentsSet;
@@ -96,6 +96,22 @@ public interface HolderSet<T> extends Iterable<Holder<T>> {
 
 		public String toString() {
 			return "DirectSet[" + this.contents + "]";
+		}
+
+		public boolean equals(Object object) {
+			if (this == object) {
+				return true;
+			} else {
+				if (object instanceof HolderSet.Direct<?> direct && this.contents.equals(direct.contents)) {
+					return true;
+				}
+
+				return false;
+			}
+		}
+
+		public int hashCode() {
+			return this.contents.hashCode();
 		}
 	}
 

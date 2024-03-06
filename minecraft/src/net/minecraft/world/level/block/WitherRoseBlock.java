@@ -31,8 +31,8 @@ public class WitherRoseBlock extends FlowerBlock {
 		return CODEC;
 	}
 
-	public WitherRoseBlock(Holder<MobEffect> holder, int i, BlockBehaviour.Properties properties) {
-		this(makeEffectList(holder, i), properties);
+	public WitherRoseBlock(Holder<MobEffect> holder, float f, BlockBehaviour.Properties properties) {
+		this(makeEffectList(holder, f), properties);
 	}
 
 	public WitherRoseBlock(SuspiciousStewEffects suspiciousStewEffects, BlockBehaviour.Properties properties) {

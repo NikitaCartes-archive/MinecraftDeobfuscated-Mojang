@@ -1,5 +1,6 @@
 package net.minecraft.world.item;
 
+import java.util.Optional;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
@@ -10,7 +11,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.component.LodestoneTarget;
+import net.minecraft.world.item.component.LodestoneTracker;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -27,15 +28,18 @@ public class CompassItem extends Item {
 
 	@Override
 	public boolean isFoil(ItemStack itemStack) {
-		return itemStack.has(DataComponents.LODESTONE_TARGET) || super.isFoil(itemStack);
+		return itemStack.has(DataComponents.LODESTONE_TRACKER) || super.isFoil(itemStack);
 	}
 
 	@Override
 	public void inventoryTick(ItemStack itemStack, Level level, Entity entity, int i, boolean bl) {
 		if (level instanceof ServerLevel serverLevel) {
-			LodestoneTarget lodestoneTarget = itemStack.get(DataComponents.LODESTONE_TARGET);
-			if (lodestoneTarget != null && lodestoneTarget.checkInvalid(serverLevel)) {
-				itemStack.remove(DataComponents.LODESTONE_TARGET);
+			LodestoneTracker lodestoneTracker = itemStack.get(DataComponents.LODESTONE_TRACKER);
+			if (lodestoneTracker != null) {
+				LodestoneTracker lodestoneTracker2 = lodestoneTracker.tick(serverLevel);
+				if (lodestoneTracker2 != lodestoneTracker) {
+					itemStack.set(DataComponents.LODESTONE_TRACKER, lodestoneTracker2);
+				}
 			}
 		}
 	}
@@ -51,13 +55,13 @@ public class CompassItem extends Item {
 			Player player = useOnContext.getPlayer();
 			ItemStack itemStack = useOnContext.getItemInHand();
 			boolean bl = !player.hasInfiniteMaterials() && itemStack.getCount() == 1;
-			LodestoneTarget lodestoneTarget = new LodestoneTarget(GlobalPos.of(level.dimension(), blockPos), true);
+			LodestoneTracker lodestoneTracker = new LodestoneTracker(Optional.of(GlobalPos.of(level.dimension(), blockPos)), true);
 			if (bl) {
-				itemStack.set(DataComponents.LODESTONE_TARGET, lodestoneTarget);
+				itemStack.set(DataComponents.LODESTONE_TRACKER, lodestoneTracker);
 			} else {
 				ItemStack itemStack2 = itemStack.transmuteCopy(Items.COMPASS, 1);
 				itemStack.consume(1, player);
-				itemStack2.set(DataComponents.LODESTONE_TARGET, lodestoneTarget);
+				itemStack2.set(DataComponents.LODESTONE_TRACKER, lodestoneTracker);
 				if (!player.getInventory().add(itemStack2)) {
 					player.drop(itemStack2, false);
 				}
@@ -69,6 +73,6 @@ public class CompassItem extends Item {
 
 	@Override
 	public String getDescriptionId(ItemStack itemStack) {
-		return itemStack.has(DataComponents.LODESTONE_TARGET) ? "item.minecraft.lodestone_compass" : super.getDescriptionId(itemStack);
+		return itemStack.has(DataComponents.LODESTONE_TRACKER) ? "item.minecraft.lodestone_compass" : super.getDescriptionId(itemStack);
 	}
 }

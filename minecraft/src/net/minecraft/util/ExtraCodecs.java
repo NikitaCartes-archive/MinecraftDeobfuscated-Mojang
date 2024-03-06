@@ -3,7 +3,6 @@ package net.minecraft.util;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMap.Builder;
 import com.google.common.primitives.UnsignedBytes;
 import com.google.gson.JsonElement;
 import com.mojang.authlib.GameProfile;
@@ -30,6 +29,7 @@ import it.unimi.dsi.fastutil.floats.FloatArrayList;
 import it.unimi.dsi.fastutil.floats.FloatList;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
@@ -53,6 +53,7 @@ import java.util.function.ToIntFunction;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import java.util.stream.Stream;
+import java.util.stream.Stream.Builder;
 import net.minecraft.Util;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.UUIDUtil;
@@ -493,7 +494,11 @@ public class ExtraCodecs {
 
 	public static <T> Codec<List<T>> sizeLimitedList(Codec<List<T>> codec, int i) {
 		return validate(
-			codec, list -> list.size() > i ? DataResult.error(() -> "List is too long: " + list.size() + ", expected range [0-" + i + "]") : DataResult.success(list)
+			codec,
+			list -> list.size() > i
+					? DataResult.error(() -> "List is too long: " + list.size() + ", expected range [0-" + i + "]")
+						.setPartial((Supplier)(() -> List.copyOf(list.subList(0, i))))
+					: DataResult.success(list)
 		);
 	}
 
@@ -575,8 +580,8 @@ public class ExtraCodecs {
 				return dynamicOps.getMap(object)
 					.flatMap(
 						mapLike -> {
-							Builder<K, V> builder = ImmutableMap.builder();
-							java.util.stream.Stream.Builder<Pair<T, T>> builder2 = Stream.builder();
+							Map<K, V> map = new Object2ObjectArrayMap<>();
+							Builder<Pair<T, T>> builder = Stream.builder();
 							DataResult<com.mojang.datafixers.util.Unit> dataResult = (DataResult<com.mojang.datafixers.util.Unit>)mapLike.entries()
 								.reduce(
 									DataResult.success(com.mojang.datafixers.util.Unit.INSTANCE, Lifecycle.stable()),
@@ -585,16 +590,28 @@ public class ExtraCodecs {
 										DataResult<V> dataResult3 = dataResult2.map(function)
 											.flatMap(codecxxxxxx -> codecxxxxxx.parse(dynamicOps, (T)pair.getSecond()).map(Function.identity()));
 										DataResult<Pair<K, V>> dataResult4 = dataResult2.apply2stable(Pair::of, dataResult3);
-										dataResult4.result().ifPresent(pairx -> builder.put((K)pairx.getFirst(), (V)pairx.getSecond()));
-										dataResult4.error().ifPresent(partialResult -> builder2.add(pair));
+										Optional<Pair<K, V>> optional = dataResult4.resultOrPartial(string -> {
+										});
+										if (optional.isPresent()) {
+											V objectxx = (V)map.putIfAbsent(((Pair)optional.get()).getFirst(), ((Pair)optional.get()).getSecond());
+											if (objectxx != null) {
+												builder.add(pair);
+												return dataResultx.apply2stable(
+													(unit, objectxxx) -> unit, DataResult.error(() -> "Duplicate entry for key: '" + ((Pair)optional.get()).getFirst() + "'")
+												);
+											}
+										} else {
+											builder.add(pair);
+										}
+
 										return dataResultx.apply2stable((unit, pairx) -> unit, dataResult4);
 									},
 									(dataResultx, dataResult2) -> dataResultx.apply2stable((unit, unit2) -> unit, dataResult2)
 								);
-							Map<K, V> map = builder.build();
-							T object2 = dynamicOps.createMap(builder2.build());
-							return dataResult.<Pair<Map<K, V>, T>>map(unit -> Pair.of(map, object))
-								.setPartial(Pair.of(map, object))
+							Map<K, V> map2 = Map.copyOf(map);
+							T object2 = dynamicOps.createMap(builder.build());
+							return dataResult.<Pair<Map<K, V>, T>>map(unit -> Pair.of(map2, object))
+								.setPartial(Pair.of(map2, object))
 								.mapError(string -> string + " missed input: " + object2);
 						}
 					);
@@ -765,7 +782,7 @@ public class ExtraCodecs {
 	public static record StrictUnboundedMapCodec<K, V>(Codec<K> keyCodec, Codec<V> elementCodec) implements Codec<Map<K, V>>, BaseMapCodec<K, V> {
 		@Override
 		public <T> DataResult<Map<K, V>> decode(DynamicOps<T> dynamicOps, MapLike<T> mapLike) {
-			Builder<K, V> builder = ImmutableMap.builder();
+			com.google.common.collect.ImmutableMap.Builder<K, V> builder = ImmutableMap.builder();
 
 			for (Pair<T, T> pair : mapLike.entries().toList()) {
 				DataResult<K> dataResult = this.keyCodec().parse(dynamicOps, pair.getFirst());

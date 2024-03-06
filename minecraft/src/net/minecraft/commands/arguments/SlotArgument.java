@@ -1,6 +1,5 @@
 package net.minecraft.commands.arguments;
 
-import com.google.common.collect.Maps;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -10,55 +9,22 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import net.minecraft.Util;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.ParserUtils;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.inventory.SlotRange;
+import net.minecraft.world.inventory.SlotRanges;
 
 public class SlotArgument implements ArgumentType<Integer> {
-	private static final Collection<String> EXAMPLES = Arrays.asList("container.5", "12", "weapon");
+	private static final Collection<String> EXAMPLES = Arrays.asList("container.5", "weapon");
 	private static final DynamicCommandExceptionType ERROR_UNKNOWN_SLOT = new DynamicCommandExceptionType(
 		object -> Component.translatableEscape("slot.unknown", object)
 	);
-	private static final Map<String, Integer> SLOTS = Util.make(Maps.<String, Integer>newHashMap(), hashMap -> {
-		for (int i = 0; i < 54; i++) {
-			hashMap.put("container." + i, i);
-		}
-
-		for (int i = 0; i < 9; i++) {
-			hashMap.put("hotbar." + i, i);
-		}
-
-		for (int i = 0; i < 27; i++) {
-			hashMap.put("inventory." + i, 9 + i);
-		}
-
-		for (int i = 0; i < 27; i++) {
-			hashMap.put("enderchest." + i, 200 + i);
-		}
-
-		for (int i = 0; i < 8; i++) {
-			hashMap.put("villager." + i, 300 + i);
-		}
-
-		for (int i = 0; i < 15; i++) {
-			hashMap.put("horse." + i, 500 + i);
-		}
-
-		hashMap.put("weapon", EquipmentSlot.MAINHAND.getIndex(98));
-		hashMap.put("weapon.mainhand", EquipmentSlot.MAINHAND.getIndex(98));
-		hashMap.put("weapon.offhand", EquipmentSlot.OFFHAND.getIndex(98));
-		hashMap.put("armor.head", EquipmentSlot.HEAD.getIndex(100));
-		hashMap.put("armor.chest", EquipmentSlot.CHEST.getIndex(100));
-		hashMap.put("armor.legs", EquipmentSlot.LEGS.getIndex(100));
-		hashMap.put("armor.feet", EquipmentSlot.FEET.getIndex(100));
-		hashMap.put("armor.body", EquipmentSlot.BODY.getIndex(105));
-		hashMap.put("horse.saddle", 400);
-		hashMap.put("horse.chest", 499);
-	});
+	private static final DynamicCommandExceptionType ERROR_ONLY_SINGLE_SLOT_ALLOWED = new DynamicCommandExceptionType(
+		object -> Component.translatableEscape("slot.only_single_allowed", object)
+	);
 
 	public static SlotArgument slot() {
 		return new SlotArgument();
@@ -69,17 +35,20 @@ public class SlotArgument implements ArgumentType<Integer> {
 	}
 
 	public Integer parse(StringReader stringReader) throws CommandSyntaxException {
-		String string = stringReader.readUnquotedString();
-		if (!SLOTS.containsKey(string)) {
-			throw ERROR_UNKNOWN_SLOT.create(string);
+		String string = ParserUtils.readWhile(stringReader, c -> c != ' ');
+		SlotRange slotRange = SlotRanges.nameToIds(string);
+		if (slotRange == null) {
+			throw ERROR_UNKNOWN_SLOT.createWithContext(stringReader, string);
+		} else if (slotRange.size() != 1) {
+			throw ERROR_ONLY_SINGLE_SLOT_ALLOWED.createWithContext(stringReader, string);
 		} else {
-			return (Integer)SLOTS.get(string);
+			return slotRange.slots().getInt(0);
 		}
 	}
 
 	@Override
 	public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> commandContext, SuggestionsBuilder suggestionsBuilder) {
-		return SharedSuggestionProvider.suggest(SLOTS.keySet(), suggestionsBuilder);
+		return SharedSuggestionProvider.suggest(SlotRanges.singleSlotNames(), suggestionsBuilder);
 	}
 
 	@Override

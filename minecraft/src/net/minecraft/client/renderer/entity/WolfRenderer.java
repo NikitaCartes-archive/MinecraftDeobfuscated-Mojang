@@ -13,10 +13,6 @@ import net.minecraft.world.entity.animal.Wolf;
 
 @Environment(EnvType.CLIENT)
 public class WolfRenderer extends MobRenderer<Wolf, WolfModel<Wolf>> {
-	private static final ResourceLocation WOLF_LOCATION = new ResourceLocation("textures/entity/wolf/wolf.png");
-	private static final ResourceLocation WOLF_TAME_LOCATION = new ResourceLocation("textures/entity/wolf/wolf_tame.png");
-	private static final ResourceLocation WOLF_ANGRY_LOCATION = new ResourceLocation("textures/entity/wolf/wolf_angry.png");
-
 	public WolfRenderer(EntityRendererProvider.Context context) {
 		super(context, new WolfModel<>(context.bakeLayer(ModelLayers.WOLF)), 0.5F);
 		this.addLayer(new WolfArmorLayer(this, context.getModelSet()));
@@ -40,10 +36,6 @@ public class WolfRenderer extends MobRenderer<Wolf, WolfModel<Wolf>> {
 	}
 
 	public ResourceLocation getTextureLocation(Wolf wolf) {
-		if (wolf.isTame()) {
-			return WOLF_TAME_LOCATION;
-		} else {
-			return wolf.isAngry() ? WOLF_ANGRY_LOCATION : WOLF_LOCATION;
-		}
+		return wolf.getTexture();
 	}
 }

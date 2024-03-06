@@ -108,6 +108,8 @@ public final class PatchedDataComponentMap implements DataComponentMap {
 			}
 		} else if (object != null) {
 			this.patch.put(dataComponentType, Optional.empty());
+		} else {
+			this.patch.remove(dataComponentType);
 		}
 	}
 

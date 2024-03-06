@@ -8,6 +8,7 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import java.lang.reflect.Field;
+import net.minecraft.CharPredicate;
 import net.minecraft.Util;
 import net.minecraft.core.HolderLookup;
 
@@ -33,7 +34,7 @@ public class ParserUtils {
 
 	private static int getPos(JsonReader jsonReader) {
 		try {
-			return JSON_READER_POS.getInt(jsonReader) - JSON_READER_LINESTART.getInt(jsonReader) + 1;
+			return JSON_READER_POS.getInt(jsonReader) - JSON_READER_LINESTART.getInt(jsonReader);
 		} catch (IllegalAccessException var2) {
 			throw new IllegalStateException("Couldn't read position of JsonReader", var2);
 		}
@@ -54,5 +55,15 @@ public class ParserUtils {
 		}
 
 		return (T)var5;
+	}
+
+	public static String readWhile(StringReader stringReader, CharPredicate charPredicate) {
+		int i = stringReader.getCursor();
+
+		while (stringReader.canRead() && charPredicate.test(stringReader.peek())) {
+			stringReader.skip();
+		}
+
+		return stringReader.getString().substring(i, stringReader.getCursor());
 	}
 }

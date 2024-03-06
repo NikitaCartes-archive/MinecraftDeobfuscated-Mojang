@@ -68,6 +68,7 @@ import net.minecraft.world.level.biome.MultiNoiseBiomeSourceParameterList;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ComparatorBlock;
+import net.minecraft.world.level.block.entity.BannerPattern;
 import net.minecraft.world.level.block.entity.DecoratedPotBlockEntity;
 import net.minecraft.world.level.block.entity.PotDecorations;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
@@ -378,10 +379,11 @@ public class VanillaAdventureAdvancements implements AdvancementSubProvider {
 			.rewards(AdvancementRewards.Builder.experience(85))
 			.addCriterion("arbalistic", KilledByCrossbowTrigger.TriggerInstance.crossbowKilled(MinMaxBounds.Ints.exactly(5)))
 			.save(consumer, "adventure/arbalistic");
+		HolderLookup.RegistryLookup<BannerPattern> registryLookup = provider.lookupOrThrow(Registries.BANNER_PATTERN);
 		AdvancementHolder advancementHolder8 = Advancement.Builder.advancement()
 			.parent(advancementHolder)
 			.display(
-				Raid.getLeaderBannerInstance(),
+				Raid.getLeaderBannerInstance(registryLookup),
 				Component.translatable("advancements.adventure.voluntary_exile.title"),
 				Component.translatable("advancements.adventure.voluntary_exile.description"),
 				null,
@@ -392,13 +394,15 @@ public class VanillaAdventureAdvancements implements AdvancementSubProvider {
 			)
 			.addCriterion(
 				"voluntary_exile",
-				KilledTrigger.TriggerInstance.playerKilledEntity(EntityPredicate.Builder.entity().of(EntityTypeTags.RAIDERS).equipment(EntityEquipmentPredicate.CAPTAIN))
+				KilledTrigger.TriggerInstance.playerKilledEntity(
+					EntityPredicate.Builder.entity().of(EntityTypeTags.RAIDERS).equipment(EntityEquipmentPredicate.captainPredicate(registryLookup))
+				)
 			)
 			.save(consumer, "adventure/voluntary_exile");
 		Advancement.Builder.advancement()
 			.parent(advancementHolder8)
 			.display(
-				Raid.getLeaderBannerInstance(),
+				Raid.getLeaderBannerInstance(registryLookup),
 				Component.translatable("advancements.adventure.hero_of_the_village.title"),
 				Component.translatable("advancements.adventure.hero_of_the_village.description"),
 				null,

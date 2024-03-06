@@ -3,9 +3,9 @@ package net.minecraft.client.renderer;
 import com.google.common.collect.ImmutableList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -14,6 +14,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.resources.model.Material;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -58,14 +59,10 @@ public class Sheets {
 		.collect(Collectors.toMap(Function.identity(), Sheets::createSignMaterial));
 	public static final Map<WoodType, Material> HANGING_SIGN_MATERIALS = (Map<WoodType, Material>)WoodType.values()
 		.collect(Collectors.toMap(Function.identity(), Sheets::createHangingSignMaterial));
-	public static final Map<ResourceKey<BannerPattern>, Material> BANNER_MATERIALS = (Map<ResourceKey<BannerPattern>, Material>)BuiltInRegistries.BANNER_PATTERN
-		.registryKeySet()
-		.stream()
-		.collect(Collectors.toMap(Function.identity(), Sheets::createBannerMaterial));
-	public static final Map<ResourceKey<BannerPattern>, Material> SHIELD_MATERIALS = (Map<ResourceKey<BannerPattern>, Material>)BuiltInRegistries.BANNER_PATTERN
-		.registryKeySet()
-		.stream()
-		.collect(Collectors.toMap(Function.identity(), Sheets::createShieldMaterial));
+	public static final Material BANNER_BASE = new Material(BANNER_SHEET, new ResourceLocation("entity/banner/base"));
+	public static final Material SHIELD_BASE = new Material(SHIELD_SHEET, new ResourceLocation("entity/shield/base"));
+	private static final Map<ResourceLocation, Material> BANNER_MATERIALS = new HashMap();
+	private static final Map<ResourceLocation, Material> SHIELD_MATERIALS = new HashMap();
 	public static final Map<ResourceKey<String>, Material> DECORATED_POT_MATERIALS = (Map<ResourceKey<String>, Material>)BuiltInRegistries.DECORATED_POT_PATTERNS
 		.registryKeySet()
 		.stream()
@@ -133,30 +130,6 @@ public class Sheets {
 		return TRANSLUCENT_CULL_BLOCK_SHEET;
 	}
 
-	public static void getAllMaterials(Consumer<Material> consumer) {
-		consumer.accept(DEFAULT_SHULKER_TEXTURE_LOCATION);
-		SHULKER_TEXTURE_LOCATION.forEach(consumer);
-		BANNER_MATERIALS.values().forEach(consumer);
-		SHIELD_MATERIALS.values().forEach(consumer);
-		SIGN_MATERIALS.values().forEach(consumer);
-		HANGING_SIGN_MATERIALS.values().forEach(consumer);
-
-		for (Material material : BED_TEXTURES) {
-			consumer.accept(material);
-		}
-
-		consumer.accept(CHEST_TRAP_LOCATION);
-		consumer.accept(CHEST_TRAP_LOCATION_LEFT);
-		consumer.accept(CHEST_TRAP_LOCATION_RIGHT);
-		consumer.accept(CHEST_XMAS_LOCATION);
-		consumer.accept(CHEST_XMAS_LOCATION_LEFT);
-		consumer.accept(CHEST_XMAS_LOCATION_RIGHT);
-		consumer.accept(CHEST_LOCATION);
-		consumer.accept(CHEST_LOCATION_LEFT);
-		consumer.accept(CHEST_LOCATION_RIGHT);
-		consumer.accept(ENDER_CHEST_LOCATION);
-	}
-
 	private static Material createSignMaterial(WoodType woodType) {
 		return new Material(SIGN_SHEET, new ResourceLocation("entity/signs/" + woodType.name()));
 	}
@@ -173,20 +146,18 @@ public class Sheets {
 		return (Material)HANGING_SIGN_MATERIALS.get(woodType);
 	}
 
-	private static Material createBannerMaterial(ResourceKey<BannerPattern> resourceKey) {
-		return new Material(BANNER_SHEET, BannerPattern.location(resourceKey, true));
+	public static Material getBannerMaterial(Holder<BannerPattern> holder) {
+		return (Material)BANNER_MATERIALS.computeIfAbsent(holder.value().assetId(), resourceLocation -> {
+			ResourceLocation resourceLocation2 = resourceLocation.withPrefix("entity/banner/");
+			return new Material(BANNER_SHEET, resourceLocation2);
+		});
 	}
 
-	public static Material getBannerMaterial(ResourceKey<BannerPattern> resourceKey) {
-		return (Material)BANNER_MATERIALS.get(resourceKey);
-	}
-
-	private static Material createShieldMaterial(ResourceKey<BannerPattern> resourceKey) {
-		return new Material(SHIELD_SHEET, BannerPattern.location(resourceKey, false));
-	}
-
-	public static Material getShieldMaterial(ResourceKey<BannerPattern> resourceKey) {
-		return (Material)SHIELD_MATERIALS.get(resourceKey);
+	public static Material getShieldMaterial(Holder<BannerPattern> holder) {
+		return (Material)SHIELD_MATERIALS.computeIfAbsent(holder.value().assetId(), resourceLocation -> {
+			ResourceLocation resourceLocation2 = resourceLocation.withPrefix("entity/shield/");
+			return new Material(SHIELD_SHEET, resourceLocation2);
+		});
 	}
 
 	private static Material chestMaterial(String string) {

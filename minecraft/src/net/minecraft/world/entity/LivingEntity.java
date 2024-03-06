@@ -57,6 +57,7 @@ import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
+import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.Difficulty;
@@ -164,6 +165,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	protected static final EntityDimensions SLEEPING_DIMENSIONS = EntityDimensions.fixed(0.2F, 0.2F).withEyeHeight(0.2F);
 	public static final float EXTRA_RENDER_CULLING_SIZE_WITH_BIG_HAT = 0.5F;
 	public static final float DEFAULT_BABY_SCALE = 0.5F;
+	private static final int NO_POTION_EFFECT_PARTICLES = -1;
 	private final AttributeMap attributes;
 	private final CombatTracker combatTracker = new CombatTracker(this);
 	private final Map<Holder<MobEffect>, MobEffectInstance> activeEffects = Maps.<Holder<MobEffect>, MobEffectInstance>newHashMap();
@@ -276,7 +278,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	@Override
 	protected void defineSynchedData(SynchedEntityData.Builder builder) {
 		builder.define(DATA_LIVING_ENTITY_FLAGS, (byte)0);
-		builder.define(DATA_EFFECT_COLOR_ID, 0);
+		builder.define(DATA_EFFECT_COLOR_ID, -1);
 		builder.define(DATA_EFFECT_AMBIENCE_ID, false);
 		builder.define(DATA_ARROW_COUNT_ID, 0);
 		builder.define(DATA_STINGER_COUNT_ID, 0);
@@ -687,7 +689,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 
 	public void onEquipItem(EquipmentSlot equipmentSlot, ItemStack itemStack, ItemStack itemStack2) {
 		boolean bl = itemStack2.isEmpty() && itemStack.isEmpty();
-		if (!bl && !ItemStack.isSameItemSameTags(itemStack, itemStack2) && !this.firstTick) {
+		if (!bl && !ItemStack.isSameItemSameComponents(itemStack, itemStack2) && !this.firstTick) {
 			Equipable equipable = Equipable.get(itemStack2);
 			if (!this.level().isClientSide() && !this.isSpectator()) {
 				if (!this.isSilent() && equipable != null && equipable.getEquipmentSlot() == equipmentSlot) {
@@ -806,7 +808,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 					this.onEffectUpdated(mobEffectInstance, false, null);
 				}
 			}
-		} catch (ConcurrentModificationException var11) {
+		} catch (ConcurrentModificationException var8) {
 		}
 
 		if (this.effectsDirty) {
@@ -820,7 +822,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 
 		int i = this.entityData.get(DATA_EFFECT_COLOR_ID);
 		boolean bl = this.entityData.get(DATA_EFFECT_AMBIENCE_ID);
-		if (i > 0) {
+		if (i != -1) {
 			boolean bl2;
 			if (this.isInvisible()) {
 				bl2 = this.random.nextInt(15) == 0;
@@ -832,13 +834,19 @@ public abstract class LivingEntity extends Entity implements Attackable {
 				bl2 &= this.random.nextInt(5) == 0;
 			}
 
-			if (bl2 && i > 0) {
-				double d = (double)(i >> 16 & 0xFF) / 255.0;
-				double e = (double)(i >> 8 & 0xFF) / 255.0;
-				double f = (double)(i >> 0 & 0xFF) / 255.0;
+			if (bl2) {
+				float f = (float)FastColor.ARGB32.red(i) / 255.0F;
+				float g = (float)FastColor.ARGB32.green(i) / 255.0F;
+				float h = (float)FastColor.ARGB32.blue(i) / 255.0F;
 				this.level()
 					.addParticle(
-						bl ? ParticleTypes.AMBIENT_ENTITY_EFFECT : ParticleTypes.ENTITY_EFFECT, this.getRandomX(0.5), this.getRandomY(), this.getRandomZ(0.5), d, e, f
+						bl ? ParticleTypes.AMBIENT_ENTITY_EFFECT : ParticleTypes.ENTITY_EFFECT,
+						this.getRandomX(0.5),
+						this.getRandomY(),
+						this.getRandomZ(0.5),
+						(double)f,
+						(double)g,
+						(double)h
 					);
 			}
 		}
@@ -850,8 +858,9 @@ public abstract class LivingEntity extends Entity implements Attackable {
 			this.setInvisible(false);
 		} else {
 			Collection<MobEffectInstance> collection = this.activeEffects.values();
+			int i = PotionContents.getColorOptional(collection);
 			this.entityData.set(DATA_EFFECT_AMBIENCE_ID, areAllEffectsAmbient(collection));
-			this.entityData.set(DATA_EFFECT_COLOR_ID, PotionContents.getColor(collection));
+			this.entityData.set(DATA_EFFECT_COLOR_ID, i != -1 ? i : -1);
 			this.setInvisible(this.hasEffect(MobEffects.INVISIBILITY));
 		}
 	}
@@ -921,7 +930,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 
 	protected void removeEffectParticles() {
 		this.entityData.set(DATA_EFFECT_AMBIENCE_ID, false);
-		this.entityData.set(DATA_EFFECT_COLOR_ID, 0);
+		this.entityData.set(DATA_EFFECT_COLOR_ID, -1);
 	}
 
 	public boolean removeAllEffects() {
@@ -1979,7 +1988,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	public void setSprinting(boolean bl) {
 		super.setSprinting(bl);
 		AttributeInstance attributeInstance = this.getAttribute(Attributes.MOVEMENT_SPEED);
-		attributeInstance.removeModifier(SPEED_MODIFIER_SPRINTING.getId());
+		attributeInstance.removeModifier(SPEED_MODIFIER_SPRINTING.id());
 		if (bl) {
 			attributeInstance.addTransientModifier(SPEED_MODIFIER_SPRINTING);
 		}
@@ -2468,7 +2477,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 					itemStack2.forEachModifier(equipmentSlot, (holder, attributeModifier) -> {
 						AttributeInstance attributeInstance = attributeMap.getInstance(holder);
 						if (attributeInstance != null) {
-							attributeInstance.removeModifier(attributeModifier.getId());
+							attributeInstance.removeModifier(attributeModifier.id());
 							attributeInstance.addTransientModifier(attributeModifier);
 						}
 					});

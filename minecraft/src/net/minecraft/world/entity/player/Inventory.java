@@ -52,7 +52,7 @@ public class Inventory implements Container, Nameable {
 
 	private boolean hasRemainingSpaceForItem(ItemStack itemStack, ItemStack itemStack2) {
 		return !itemStack.isEmpty()
-			&& ItemStack.isSameItemSameTags(itemStack, itemStack2)
+			&& ItemStack.isSameItemSameComponents(itemStack, itemStack2)
 			&& itemStack.isStackable()
 			&& itemStack.getCount() < itemStack.getMaxStackSize()
 			&& itemStack.getCount() < this.getMaxStackSize();
@@ -102,7 +102,7 @@ public class Inventory implements Container, Nameable {
 
 	public int findSlotMatchingItem(ItemStack itemStack) {
 		for (int i = 0; i < this.items.size(); i++) {
-			if (!this.items.get(i).isEmpty() && ItemStack.isSameItemSameTags(itemStack, this.items.get(i))) {
+			if (!this.items.get(i).isEmpty() && ItemStack.isSameItemSameComponents(itemStack, this.items.get(i))) {
 				return i;
 			}
 		}
@@ -114,7 +114,7 @@ public class Inventory implements Container, Nameable {
 		for (int i = 0; i < this.items.size(); i++) {
 			ItemStack itemStack2 = this.items.get(i);
 			if (!this.items.get(i).isEmpty()
-				&& ItemStack.isSameItemSameTags(itemStack, this.items.get(i))
+				&& ItemStack.isSameItemSameComponents(itemStack, this.items.get(i))
 				&& !this.items.get(i).isDamaged()
 				&& !itemStack2.isEnchanted()
 				&& !itemStack2.has(DataComponents.CUSTOM_NAME)) {
@@ -508,7 +508,7 @@ public class Inventory implements Container, Nameable {
 	public boolean contains(ItemStack itemStack) {
 		for (List<ItemStack> list : this.compartments) {
 			for (ItemStack itemStack2 : list) {
-				if (!itemStack2.isEmpty() && ItemStack.isSameItemSameTags(itemStack2, itemStack)) {
+				if (!itemStack2.isEmpty() && ItemStack.isSameItemSameComponents(itemStack2, itemStack)) {
 					return true;
 				}
 			}

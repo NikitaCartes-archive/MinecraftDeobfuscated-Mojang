@@ -47,11 +47,25 @@ public class HolderSetCodec<E> implements Codec<HolderSet<E>> {
 			Optional<HolderGetter<E>> optional = registryOps.getter(this.registryKey);
 			if (optional.isPresent()) {
 				HolderGetter<E> holderGetter = (HolderGetter<E>)optional.get();
-				return this.registryAwareCodec.decode(dynamicOps, object).map(pair -> pair.mapFirst(either -> either.map(holderGetter::getOrThrow, HolderSet::direct)));
+				return this.registryAwareCodec
+					.decode(dynamicOps, object)
+					.flatMap(
+						pair -> {
+							DataResult<HolderSet<E>> dataResult = ((Either)pair.getFirst())
+								.map(tagKey -> lookupTag(holderGetter, tagKey), list -> DataResult.success(HolderSet.direct(list)));
+							return dataResult.map(holderSet -> Pair.of(holderSet, pair.getSecond()));
+						}
+					);
 			}
 		}
 
 		return this.decodeWithoutRegistry(dynamicOps, object);
+	}
+
+	private static <E> DataResult<HolderSet<E>> lookupTag(HolderGetter<E> holderGetter, TagKey<E> tagKey) {
+		return (DataResult<HolderSet<E>>)holderGetter.get(tagKey)
+			.map(DataResult::success)
+			.orElseGet(() -> DataResult.error(() -> "Missing tag: '" + tagKey.location() + "' in '" + tagKey.registry().location() + "'"));
 	}
 
 	public <T> DataResult<T> encode(HolderSet<E> holderSet, DynamicOps<T> dynamicOps, T object) {

@@ -338,7 +338,7 @@ public class LootCommand {
 	}
 
 	private static boolean canMergeItems(ItemStack itemStack, ItemStack itemStack2) {
-		return itemStack.getCount() <= itemStack.getMaxStackSize() && ItemStack.isSameItemSameTags(itemStack, itemStack2);
+		return itemStack.getCount() <= itemStack.getMaxStackSize() && ItemStack.isSameItemSameComponents(itemStack, itemStack2);
 	}
 
 	private static int playerGive(Collection<ServerPlayer> collection, List<ItemStack> list, LootCommand.Callback callback) throws CommandSyntaxException {

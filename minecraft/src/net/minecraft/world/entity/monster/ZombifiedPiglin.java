@@ -99,7 +99,7 @@ public class ZombifiedPiglin extends Zombie implements NeutralMob {
 
 			this.maybePlayFirstAngerSound();
 		} else if (attributeInstance.hasModifier(SPEED_MODIFIER_ATTACKING)) {
-			attributeInstance.removeModifier(SPEED_MODIFIER_ATTACKING.getId());
+			attributeInstance.removeModifier(SPEED_MODIFIER_ATTACKING.id());
 		}
 
 		this.updatePersistentAnger((ServerLevel)this.level(), true);

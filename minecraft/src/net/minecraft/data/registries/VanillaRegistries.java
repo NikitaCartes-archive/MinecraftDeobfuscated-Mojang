@@ -23,10 +23,12 @@ import net.minecraft.data.worldgen.placement.PlacementUtils;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.damagesource.DamageTypes;
+import net.minecraft.world.entity.animal.WolfVariants;
 import net.minecraft.world.item.armortrim.TrimMaterials;
 import net.minecraft.world.item.armortrim.TrimPatterns;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.MultiNoiseBiomeSourceParameterLists;
+import net.minecraft.world.level.block.entity.BannerPatterns;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 import net.minecraft.world.level.levelgen.NoiseRouterData;
 import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorPresets;
@@ -54,7 +56,9 @@ public class VanillaRegistries {
 		.add(Registries.CHAT_TYPE, ChatType::bootstrap)
 		.add(Registries.TRIM_PATTERN, TrimPatterns::bootstrap)
 		.add(Registries.TRIM_MATERIAL, TrimMaterials::bootstrap)
-		.add(Registries.DAMAGE_TYPE, DamageTypes::bootstrap);
+		.add(Registries.WOLF_VARIANT, WolfVariants::bootstrap)
+		.add(Registries.DAMAGE_TYPE, DamageTypes::bootstrap)
+		.add(Registries.BANNER_PATTERN, BannerPatterns::bootstrap);
 
 	private static void validateThatAllBiomeFeaturesHaveBiomeFilter(HolderLookup.Provider provider) {
 		validateThatAllBiomeFeaturesHaveBiomeFilter(provider.lookupOrThrow(Registries.PLACED_FEATURE), provider.lookupOrThrow(Registries.BIOME));

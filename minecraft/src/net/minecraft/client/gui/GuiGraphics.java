@@ -159,6 +159,10 @@ public class GuiGraphics {
 		this.applyScissor(this.scissorStack.pop());
 	}
 
+	public boolean containsPointInScissor(int i, int j) {
+		return this.scissorStack.containsPoint(i, j);
+	}
+
 	private void applyScissor(@Nullable ScreenRectangle screenRectangle) {
 		this.flushIfManaged();
 		if (screenRectangle != null) {
@@ -738,6 +742,10 @@ public class GuiGraphics {
 				this.stack.removeLast();
 				return (ScreenRectangle)this.stack.peekLast();
 			}
+		}
+
+		public boolean containsPoint(int i, int j) {
+			return this.stack.isEmpty() ? true : ((ScreenRectangle)this.stack.peek()).containsPoint(i, j);
 		}
 	}
 }

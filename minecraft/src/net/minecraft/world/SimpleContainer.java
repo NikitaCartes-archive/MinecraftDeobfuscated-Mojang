@@ -105,7 +105,7 @@ public class SimpleContainer implements Container, StackedContentsCompatible {
 		boolean bl = false;
 
 		for (ItemStack itemStack2 : this.items) {
-			if (itemStack2.isEmpty() || ItemStack.isSameItemSameTags(itemStack2, itemStack) && itemStack2.getCount() < itemStack2.getMaxStackSize()) {
+			if (itemStack2.isEmpty() || ItemStack.isSameItemSameComponents(itemStack2, itemStack) && itemStack2.getCount() < itemStack2.getMaxStackSize()) {
 				bl = true;
 				break;
 			}
@@ -195,7 +195,7 @@ public class SimpleContainer implements Container, StackedContentsCompatible {
 	private void moveItemToOccupiedSlotsWithSameType(ItemStack itemStack) {
 		for (int i = 0; i < this.size; i++) {
 			ItemStack itemStack2 = this.getItem(i);
-			if (ItemStack.isSameItemSameTags(itemStack2, itemStack)) {
+			if (ItemStack.isSameItemSameComponents(itemStack2, itemStack)) {
 				this.moveItemsBetweenStacks(itemStack, itemStack2);
 				if (itemStack.isEmpty()) {
 					return;

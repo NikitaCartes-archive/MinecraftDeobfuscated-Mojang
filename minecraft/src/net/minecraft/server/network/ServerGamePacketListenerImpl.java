@@ -306,8 +306,13 @@ public class ServerGamePacketListenerImpl
 	}
 
 	private int getMaximumFlyingTicks(Entity entity) {
-		double d = 0.08 / entity.getGravity();
-		return Mth.ceil(80.0 * Math.max(d, 1.0));
+		double d = entity.getGravity();
+		if (d < 1.0E-5F) {
+			return Integer.MAX_VALUE;
+		} else {
+			double e = 0.08 / d;
+			return Mth.ceil(80.0 * Math.max(e, 1.0));
+		}
 	}
 
 	public void resetPosition() {

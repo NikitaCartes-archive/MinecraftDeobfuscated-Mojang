@@ -109,7 +109,7 @@ public class DecoratedPotBlock extends BaseEntityBlock implements SimpleWaterlog
 			} else {
 				ItemStack itemStack2 = decoratedPotBlockEntity.getTheItem();
 				if (!itemStack.isEmpty()
-					&& (itemStack2.isEmpty() || ItemStack.isSameItemSameTags(itemStack2, itemStack) && itemStack2.getCount() < itemStack2.getMaxStackSize())) {
+					&& (itemStack2.isEmpty() || ItemStack.isSameItemSameComponents(itemStack2, itemStack) && itemStack2.getCount() < itemStack2.getMaxStackSize())) {
 					decoratedPotBlockEntity.wobble(DecoratedPotBlockEntity.WobbleStyle.POSITIVE);
 					player.awardStat(Stats.ITEM_USED.get(itemStack.getItem()));
 					ItemStack itemStack3 = player.isCreative() ? itemStack.copyWithCount(1) : itemStack.split(1);

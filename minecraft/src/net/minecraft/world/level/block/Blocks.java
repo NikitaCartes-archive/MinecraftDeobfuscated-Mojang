@@ -863,7 +863,7 @@ public class Blocks {
 		"dandelion",
 		new FlowerBlock(
 			MobEffects.SATURATION,
-			7,
+			0.35F,
 			BlockBehaviour.Properties.of()
 				.mapColor(MapColor.PLANT)
 				.noCollission()
@@ -877,7 +877,7 @@ public class Blocks {
 		"torchflower",
 		new FlowerBlock(
 			MobEffects.NIGHT_VISION,
-			5,
+			5.0F,
 			BlockBehaviour.Properties.of()
 				.mapColor(MapColor.PLANT)
 				.noCollission()
@@ -891,7 +891,7 @@ public class Blocks {
 		"poppy",
 		new FlowerBlock(
 			MobEffects.NIGHT_VISION,
-			5,
+			5.0F,
 			BlockBehaviour.Properties.of()
 				.mapColor(MapColor.PLANT)
 				.noCollission()
@@ -905,7 +905,7 @@ public class Blocks {
 		"blue_orchid",
 		new FlowerBlock(
 			MobEffects.SATURATION,
-			7,
+			0.35F,
 			BlockBehaviour.Properties.of()
 				.mapColor(MapColor.PLANT)
 				.noCollission()
@@ -919,7 +919,7 @@ public class Blocks {
 		"allium",
 		new FlowerBlock(
 			MobEffects.FIRE_RESISTANCE,
-			4,
+			4.0F,
 			BlockBehaviour.Properties.of()
 				.mapColor(MapColor.PLANT)
 				.noCollission()
@@ -933,7 +933,7 @@ public class Blocks {
 		"azure_bluet",
 		new FlowerBlock(
 			MobEffects.BLINDNESS,
-			8,
+			8.0F,
 			BlockBehaviour.Properties.of()
 				.mapColor(MapColor.PLANT)
 				.noCollission()
@@ -947,7 +947,7 @@ public class Blocks {
 		"red_tulip",
 		new FlowerBlock(
 			MobEffects.WEAKNESS,
-			9,
+			9.0F,
 			BlockBehaviour.Properties.of()
 				.mapColor(MapColor.PLANT)
 				.noCollission()
@@ -961,7 +961,7 @@ public class Blocks {
 		"orange_tulip",
 		new FlowerBlock(
 			MobEffects.WEAKNESS,
-			9,
+			9.0F,
 			BlockBehaviour.Properties.of()
 				.mapColor(MapColor.PLANT)
 				.noCollission()
@@ -975,7 +975,7 @@ public class Blocks {
 		"white_tulip",
 		new FlowerBlock(
 			MobEffects.WEAKNESS,
-			9,
+			9.0F,
 			BlockBehaviour.Properties.of()
 				.mapColor(MapColor.PLANT)
 				.noCollission()
@@ -989,7 +989,7 @@ public class Blocks {
 		"pink_tulip",
 		new FlowerBlock(
 			MobEffects.WEAKNESS,
-			9,
+			9.0F,
 			BlockBehaviour.Properties.of()
 				.mapColor(MapColor.PLANT)
 				.noCollission()
@@ -1003,7 +1003,7 @@ public class Blocks {
 		"oxeye_daisy",
 		new FlowerBlock(
 			MobEffects.REGENERATION,
-			8,
+			8.0F,
 			BlockBehaviour.Properties.of()
 				.mapColor(MapColor.PLANT)
 				.noCollission()
@@ -1017,7 +1017,7 @@ public class Blocks {
 		"cornflower",
 		new FlowerBlock(
 			MobEffects.JUMP,
-			6,
+			6.0F,
 			BlockBehaviour.Properties.of()
 				.mapColor(MapColor.PLANT)
 				.noCollission()
@@ -1031,7 +1031,7 @@ public class Blocks {
 		"wither_rose",
 		new WitherRoseBlock(
 			MobEffects.WITHER,
-			8,
+			8.0F,
 			BlockBehaviour.Properties.of()
 				.mapColor(MapColor.PLANT)
 				.noCollission()
@@ -1045,7 +1045,7 @@ public class Blocks {
 		"lily_of_the_valley",
 		new FlowerBlock(
 			MobEffects.POISON,
-			12,
+			12.0F,
 			BlockBehaviour.Properties.of()
 				.mapColor(MapColor.PLANT)
 				.noCollission()

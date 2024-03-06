@@ -4,6 +4,7 @@ import java.util.EnumSet;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.util.RandomSource;
@@ -75,7 +76,7 @@ public abstract class PatrollingMonster extends Monster {
 		}
 
 		if (this.isPatrolLeader()) {
-			this.setItemSlot(EquipmentSlot.HEAD, Raid.getLeaderBannerInstance());
+			this.setItemSlot(EquipmentSlot.HEAD, Raid.getLeaderBannerInstance(this.registryAccess().lookupOrThrow(Registries.BANNER_PATTERN)));
 			this.setDropChance(EquipmentSlot.HEAD, 2.0F);
 		}
 

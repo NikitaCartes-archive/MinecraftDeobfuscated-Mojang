@@ -253,7 +253,7 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 					return;
 				}
 
-				if (!itemStack.isEmpty() && !itemStack2.isEmpty() && ItemStack.isSameItemSameTags(itemStack, itemStack2)) {
+				if (!itemStack.isEmpty() && !itemStack2.isEmpty() && ItemStack.isSameItemSameComponents(itemStack, itemStack2)) {
 					if (j == 0) {
 						if (bl) {
 							itemStack.setCount(itemStack.getMaxStackSize());

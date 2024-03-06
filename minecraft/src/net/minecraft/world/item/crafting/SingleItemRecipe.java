@@ -78,7 +78,7 @@ public abstract class SingleItemRecipe implements Recipe<Container> {
 				instance -> instance.group(
 							ExtraCodecs.strictOptionalField(Codec.STRING, "group", "").forGetter(singleItemRecipe -> singleItemRecipe.group),
 							Ingredient.CODEC_NONEMPTY.fieldOf("ingredient").forGetter(singleItemRecipe -> singleItemRecipe.ingredient),
-							ItemStack.ITEM_WITH_COUNT_CODEC.fieldOf("result").forGetter(singleItemRecipe -> singleItemRecipe.result)
+							ItemStack.CODEC.fieldOf("result").forGetter(singleItemRecipe -> singleItemRecipe.result)
 						)
 						.apply(instance, factory::create)
 			);

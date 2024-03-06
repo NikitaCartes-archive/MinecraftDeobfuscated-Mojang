@@ -55,10 +55,11 @@ public class V99 extends Schema {
 		hashMap.put("minecraft:end_gateway", "EndGateway");
 		hashMap.put("minecraft:shield", "Banner");
 	});
+	public static final Map<String, String> ITEM_TO_ENTITY = Map.of("minecraft:armor_stand", "ArmorStand", "minecraft:painting", "Painting");
 	protected static final HookFunction ADD_NAMES = new HookFunction() {
 		@Override
 		public <T> T apply(DynamicOps<T> dynamicOps, T object) {
-			return V99.addNames(new Dynamic<>(dynamicOps, object), V99.ITEM_TO_BLOCKENTITY, "ArmorStand");
+			return V99.addNames(new Dynamic<>(dynamicOps, object), V99.ITEM_TO_BLOCKENTITY, V99.ITEM_TO_ENTITY);
 		}
 	};
 
@@ -328,22 +329,23 @@ public class V99 extends Schema {
 		schema.registerType(true, References.DATA_COMPONENTS, DSL::remainder);
 	}
 
-	protected static <T> T addNames(Dynamic<T> dynamic, Map<String, String> map, String string) {
+	protected static <T> T addNames(Dynamic<T> dynamic, Map<String, String> map, Map<String, String> map2) {
 		return dynamic.update("tag", dynamic2 -> dynamic2.update("BlockEntityTag", dynamic2x -> {
-				String stringxx = (String)dynamic.get("id").asString().result().map(NamespacedSchema::ensureNamespaced).orElse("minecraft:air");
-				if (!"minecraft:air".equals(stringxx)) {
-					String string2 = (String)map.get(stringxx);
+				String string = (String)dynamic.get("id").asString().result().map(NamespacedSchema::ensureNamespaced).orElse("minecraft:air");
+				if (!"minecraft:air".equals(string)) {
+					String string2 = (String)map.get(string);
 					if (string2 != null) {
 						return dynamic2x.set("id", dynamic.createString(string2));
 					}
 
-					LOGGER.warn("Unable to resolve BlockEntity for ItemStack: {}", stringxx);
+					LOGGER.warn("Unable to resolve BlockEntity for ItemStack: {}", string);
 				}
 
 				return dynamic2x;
 			}).update("EntityTag", dynamic2x -> {
-				String string2 = dynamic.get("id").asString("");
-				return "minecraft:armor_stand".equals(NamespacedSchema.ensureNamespaced(string2)) ? dynamic2x.set("id", dynamic.createString(string)) : dynamic2x;
+				String string = NamespacedSchema.ensureNamespaced(dynamic.get("id").asString(""));
+				String string2 = (String)map2.get(string);
+				return string2 != null ? dynamic2x.set("id", dynamic.createString(string2)) : dynamic2x;
 			})).getValue();
 	}
 }

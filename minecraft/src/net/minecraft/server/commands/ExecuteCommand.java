@@ -17,6 +17,7 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+import it.unimi.dsi.fastutil.ints.IntList;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -26,6 +27,7 @@ import java.util.OptionalInt;
 import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.function.IntPredicate;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.advancements.critereon.MinMaxBounds;
@@ -47,12 +49,14 @@ import net.minecraft.commands.arguments.ResourceArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.commands.arguments.ResourceOrTagArgument;
 import net.minecraft.commands.arguments.ScoreHolderArgument;
+import net.minecraft.commands.arguments.SlotsArgument;
 import net.minecraft.commands.arguments.blocks.BlockPredicateArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.commands.arguments.coordinates.RotationArgument;
 import net.minecraft.commands.arguments.coordinates.SwizzleArgument;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.commands.arguments.item.FunctionArgument;
+import net.minecraft.commands.arguments.item.ItemPredicateArgument;
 import net.minecraft.commands.execution.ChainModifiers;
 import net.minecraft.commands.execution.CustomModifierExecutor;
 import net.minecraft.commands.execution.ExecutionControl;
@@ -83,13 +87,17 @@ import net.minecraft.server.commands.data.DataCommands;
 import net.minecraft.server.level.FullChunkStatus;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
+import net.minecraft.world.Container;
 import net.minecraft.world.entity.Attackable;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.OwnableEntity;
+import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.Targeting;
 import net.minecraft.world.entity.TraceableEntity;
+import net.minecraft.world.inventory.SlotRange;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -659,6 +667,81 @@ public class ExecuteCommand {
 							.suggests(FunctionCommand.SUGGEST_FUNCTION)
 							.fork(commandNode, new ExecuteCommand.ExecuteIfFunctionCustomModifier(bl))
 					)
+			)
+			.then(
+				Commands.literal("items")
+					.then(
+						Commands.literal("entity")
+							.then(
+								Commands.argument("entities", EntityArgument.entities())
+									.then(
+										Commands.argument("slots", SlotsArgument.slots())
+											.then(
+												Commands.argument("item_predicate", ItemPredicateArgument.itemPredicate(commandBuildContext))
+													.fork(
+														commandNode,
+														commandContext -> expect(
+																commandContext,
+																bl,
+																countItems(
+																		EntityArgument.getEntities(commandContext, "entities"),
+																		SlotsArgument.getSlots(commandContext, "slots"),
+																		ItemPredicateArgument.getItemPredicate(commandContext, "item_predicate")
+																	)
+																	> 0
+															)
+													)
+													.executes(
+														createNumericConditionalHandler(
+															bl,
+															commandContext -> countItems(
+																	EntityArgument.getEntities(commandContext, "entities"),
+																	SlotsArgument.getSlots(commandContext, "slots"),
+																	ItemPredicateArgument.getItemPredicate(commandContext, "item_predicate")
+																)
+														)
+													)
+											)
+									)
+							)
+					)
+					.then(
+						Commands.literal("block")
+							.then(
+								Commands.argument("pos", BlockPosArgument.blockPos())
+									.then(
+										Commands.argument("slots", SlotsArgument.slots())
+											.then(
+												Commands.argument("item_predicate", ItemPredicateArgument.itemPredicate(commandBuildContext))
+													.fork(
+														commandNode,
+														commandContext -> expect(
+																commandContext,
+																bl,
+																countItems(
+																		commandContext.getSource(),
+																		BlockPosArgument.getLoadedBlockPos(commandContext, "pos"),
+																		SlotsArgument.getSlots(commandContext, "slots"),
+																		ItemPredicateArgument.getItemPredicate(commandContext, "item_predicate")
+																	)
+																	> 0
+															)
+													)
+													.executes(
+														createNumericConditionalHandler(
+															bl,
+															commandContext -> countItems(
+																	commandContext.getSource(),
+																	BlockPosArgument.getLoadedBlockPos(commandContext, "pos"),
+																	SlotsArgument.getSlots(commandContext, "slots"),
+																	ItemPredicateArgument.getItemPredicate(commandContext, "item_predicate")
+																)
+														)
+													)
+											)
+									)
+							)
+					)
 			);
 
 		for (DataCommands.DataProvider dataProvider : DataCommands.SOURCE_PROVIDERS) {
@@ -684,6 +767,44 @@ public class ExecuteCommand {
 		}
 
 		return literalArgumentBuilder;
+	}
+
+	private static int countItems(Iterable<? extends Entity> iterable, SlotRange slotRange, Predicate<ItemStack> predicate) {
+		int i = 0;
+
+		for (Entity entity : iterable) {
+			IntList intList = slotRange.slots();
+
+			for (int j = 0; j < intList.size(); j++) {
+				int k = intList.getInt(j);
+				SlotAccess slotAccess = entity.getSlot(k);
+				ItemStack itemStack = slotAccess.get();
+				if (predicate.test(itemStack)) {
+					i += itemStack.getCount();
+				}
+			}
+		}
+
+		return i;
+	}
+
+	private static int countItems(CommandSourceStack commandSourceStack, BlockPos blockPos, SlotRange slotRange, Predicate<ItemStack> predicate) throws CommandSyntaxException {
+		int i = 0;
+		Container container = ItemCommands.getContainer(commandSourceStack, blockPos, ItemCommands.ERROR_SOURCE_NOT_A_CONTAINER);
+		int j = container.getContainerSize();
+		IntList intList = slotRange.slots();
+
+		for (int k = 0; k < intList.size(); k++) {
+			int l = intList.getInt(k);
+			if (l >= 0 && l < j) {
+				ItemStack itemStack = container.getItem(l);
+				if (predicate.test(itemStack)) {
+					i += itemStack.getCount();
+				}
+			}
+		}
+
+		return i;
 	}
 
 	private static Command<CommandSourceStack> createNumericConditionalHandler(boolean bl, ExecuteCommand.CommandNumericPredicate commandNumericPredicate) {

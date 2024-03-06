@@ -419,14 +419,14 @@ public abstract class AbstractContainerMenu {
 								slot.onTake(player, itemStackx);
 							});
 						} else if (slot.mayPlace(itemStack4)) {
-							if (ItemStack.isSameItemSameTags(itemStack, itemStack4)) {
+							if (ItemStack.isSameItemSameComponents(itemStack, itemStack4)) {
 								int q = clickAction == ClickAction.PRIMARY ? itemStack4.getCount() : 1;
 								this.setCarried(slot.safeInsert(itemStack4, q));
 							} else if (itemStack4.getCount() <= slot.getMaxStackSize(itemStack4)) {
 								this.setCarried(itemStack);
 								slot.setByPlayer(itemStack4);
 							}
-						} else if (ItemStack.isSameItemSameTags(itemStack, itemStack4)) {
+						} else if (ItemStack.isSameItemSameComponents(itemStack, itemStack4)) {
 							Optional<ItemStack> optional2 = slot.tryRemove(itemStack.getCount(), itemStack4.getMaxStackSize() - itemStack4.getCount(), player);
 							optional2.ifPresent(itemStack2x -> {
 								itemStack4.grow(itemStack2x.getCount());
@@ -600,7 +600,7 @@ public abstract class AbstractContainerMenu {
 			while (!itemStack.isEmpty() && (bl ? k >= i : k < j)) {
 				Slot slot = this.slots.get(k);
 				ItemStack itemStack2 = slot.getItem();
-				if (!itemStack2.isEmpty() && ItemStack.isSameItemSameTags(itemStack, itemStack2)) {
+				if (!itemStack2.isEmpty() && ItemStack.isSameItemSameComponents(itemStack, itemStack2)) {
 					int l = itemStack2.getCount() + itemStack.getCount();
 					if (l <= itemStack.getMaxStackSize()) {
 						itemStack.setCount(0);
@@ -683,7 +683,7 @@ public abstract class AbstractContainerMenu {
 
 	public static boolean canItemQuickReplace(@Nullable Slot slot, ItemStack itemStack, boolean bl) {
 		boolean bl2 = slot == null || !slot.hasItem();
-		return !bl2 && ItemStack.isSameItemSameTags(itemStack, slot.getItem())
+		return !bl2 && ItemStack.isSameItemSameComponents(itemStack, slot.getItem())
 			? slot.getItem().getCount() + (bl ? 0 : itemStack.getCount()) <= itemStack.getMaxStackSize()
 			: bl2;
 	}
@@ -692,7 +692,7 @@ public abstract class AbstractContainerMenu {
 		return switch (i) {
 			case 0 -> Mth.floor((float)itemStack.getCount() / (float)set.size());
 			case 1 -> 1;
-			case 2 -> itemStack.getItem().getMaxStackSize();
+			case 2 -> itemStack.getMaxStackSize();
 			default -> itemStack.getCount();
 		};
 	}

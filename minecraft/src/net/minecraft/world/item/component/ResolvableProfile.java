@@ -15,17 +15,20 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
 
-public record ResolvableProfile(String name, Optional<UUID> id, PropertyMap properties, GameProfile gameProfile) {
-	public static final Codec<ResolvableProfile> CODEC = RecordCodecBuilder.create(
+public record ResolvableProfile(Optional<String> name, Optional<UUID> id, PropertyMap properties, GameProfile gameProfile) {
+	private static final Codec<ResolvableProfile> FULL_CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
-					ExtraCodecs.PLAYER_NAME.fieldOf("name").forGetter(ResolvableProfile::name),
+					ExtraCodecs.strictOptionalField(ExtraCodecs.PLAYER_NAME, "name").forGetter(ResolvableProfile::name),
 					ExtraCodecs.strictOptionalField(UUIDUtil.CODEC, "id").forGetter(ResolvableProfile::id),
 					ExtraCodecs.strictOptionalField(ExtraCodecs.PROPERTY_MAP, "properties", new PropertyMap()).forGetter(ResolvableProfile::properties)
 				)
 				.apply(instance, ResolvableProfile::new)
 	);
+	public static final Codec<ResolvableProfile> CODEC = ExtraCodecs.withAlternative(
+		FULL_CODEC, ExtraCodecs.PLAYER_NAME, string -> new ResolvableProfile(Optional.of(string), Optional.empty(), new PropertyMap())
+	);
 	public static final StreamCodec<ByteBuf, ResolvableProfile> STREAM_CODEC = StreamCodec.composite(
-		ByteBufCodecs.stringUtf8(16),
+		ByteBufCodecs.stringUtf8(16).apply(ByteBufCodecs::optional),
 		ResolvableProfile::name,
 		UUIDUtil.STREAM_CODEC.apply(ByteBufCodecs::optional),
 		ResolvableProfile::id,
@@ -34,28 +37,30 @@ public record ResolvableProfile(String name, Optional<UUID> id, PropertyMap prop
 		ResolvableProfile::new
 	);
 
-	public ResolvableProfile(String string, Optional<UUID> optional, PropertyMap propertyMap) {
-		this(string, optional, propertyMap, createProfile(string, optional, propertyMap));
+	public ResolvableProfile(Optional<String> optional, Optional<UUID> optional2, PropertyMap propertyMap) {
+		this(optional, optional2, propertyMap, createProfile(optional, optional2, propertyMap));
 	}
 
 	public ResolvableProfile(GameProfile gameProfile) {
-		this(gameProfile.getName(), Optional.ofNullable(gameProfile.getId()), gameProfile.getProperties(), gameProfile);
+		this(Optional.of(gameProfile.getName()), Optional.of(gameProfile.getId()), gameProfile.getProperties(), gameProfile);
 	}
 
 	public CompletableFuture<ResolvableProfile> resolve() {
-		return this.isResolved() ? CompletableFuture.completedFuture(this) : SkullBlockEntity.fetchGameProfile(this.name).thenApply(optional -> {
-			GameProfile gameProfile = (GameProfile)optional.orElseGet(() -> new GameProfile(Util.NIL_UUID, this.name));
-			return new ResolvableProfile(gameProfile);
-		});
+		return this.isResolved()
+			? CompletableFuture.completedFuture(this)
+			: SkullBlockEntity.fetchGameProfile((String)this.name.orElseThrow()).thenApply(optional -> {
+				GameProfile gameProfile = (GameProfile)optional.orElseGet(() -> new GameProfile(Util.NIL_UUID, (String)this.name.get()));
+				return new ResolvableProfile(gameProfile);
+			});
 	}
 
-	private static GameProfile createProfile(String string, Optional<UUID> optional, PropertyMap propertyMap) {
-		GameProfile gameProfile = new GameProfile((UUID)optional.orElse(Util.NIL_UUID), string);
+	private static GameProfile createProfile(Optional<String> optional, Optional<UUID> optional2, PropertyMap propertyMap) {
+		GameProfile gameProfile = new GameProfile((UUID)optional2.orElse(Util.NIL_UUID), (String)optional.orElse(""));
 		gameProfile.getProperties().putAll(propertyMap);
 		return gameProfile;
 	}
 
 	public boolean isResolved() {
-		return this.id.isPresent() || !this.properties.isEmpty();
+		return this.id.isPresent() || !this.properties.isEmpty() || this.name.isEmpty();
 	}
 }

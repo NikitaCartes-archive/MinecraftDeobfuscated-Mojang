@@ -1,7 +1,7 @@
 package net.minecraft.world.level.block.entity;
 
-import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 
@@ -52,51 +52,51 @@ public class BannerPatterns {
 		return ResourceKey.create(Registries.BANNER_PATTERN, new ResourceLocation(string));
 	}
 
-	public static BannerPattern bootstrap(Registry<BannerPattern> registry) {
-		register(registry, BASE);
-		register(registry, SQUARE_BOTTOM_LEFT);
-		register(registry, SQUARE_BOTTOM_RIGHT);
-		register(registry, SQUARE_TOP_LEFT);
-		register(registry, SQUARE_TOP_RIGHT);
-		register(registry, STRIPE_BOTTOM);
-		register(registry, STRIPE_TOP);
-		register(registry, STRIPE_LEFT);
-		register(registry, STRIPE_RIGHT);
-		register(registry, STRIPE_CENTER);
-		register(registry, STRIPE_MIDDLE);
-		register(registry, STRIPE_DOWNRIGHT);
-		register(registry, STRIPE_DOWNLEFT);
-		register(registry, STRIPE_SMALL);
-		register(registry, CROSS);
-		register(registry, STRAIGHT_CROSS);
-		register(registry, TRIANGLE_BOTTOM);
-		register(registry, TRIANGLE_TOP);
-		register(registry, TRIANGLES_BOTTOM);
-		register(registry, TRIANGLES_TOP);
-		register(registry, DIAGONAL_LEFT);
-		register(registry, DIAGONAL_RIGHT);
-		register(registry, DIAGONAL_LEFT_MIRROR);
-		register(registry, DIAGONAL_RIGHT_MIRROR);
-		register(registry, CIRCLE_MIDDLE);
-		register(registry, RHOMBUS_MIDDLE);
-		register(registry, HALF_VERTICAL);
-		register(registry, HALF_HORIZONTAL);
-		register(registry, HALF_VERTICAL_MIRROR);
-		register(registry, HALF_HORIZONTAL_MIRROR);
-		register(registry, BORDER);
-		register(registry, CURLY_BORDER);
-		register(registry, GRADIENT);
-		register(registry, GRADIENT_UP);
-		register(registry, BRICKS);
-		register(registry, GLOBE);
-		register(registry, CREEPER);
-		register(registry, SKULL);
-		register(registry, FLOWER);
-		register(registry, MOJANG);
-		return register(registry, PIGLIN);
+	public static void bootstrap(BootstrapContext<BannerPattern> bootstrapContext) {
+		register(bootstrapContext, BASE);
+		register(bootstrapContext, SQUARE_BOTTOM_LEFT);
+		register(bootstrapContext, SQUARE_BOTTOM_RIGHT);
+		register(bootstrapContext, SQUARE_TOP_LEFT);
+		register(bootstrapContext, SQUARE_TOP_RIGHT);
+		register(bootstrapContext, STRIPE_BOTTOM);
+		register(bootstrapContext, STRIPE_TOP);
+		register(bootstrapContext, STRIPE_LEFT);
+		register(bootstrapContext, STRIPE_RIGHT);
+		register(bootstrapContext, STRIPE_CENTER);
+		register(bootstrapContext, STRIPE_MIDDLE);
+		register(bootstrapContext, STRIPE_DOWNRIGHT);
+		register(bootstrapContext, STRIPE_DOWNLEFT);
+		register(bootstrapContext, STRIPE_SMALL);
+		register(bootstrapContext, CROSS);
+		register(bootstrapContext, STRAIGHT_CROSS);
+		register(bootstrapContext, TRIANGLE_BOTTOM);
+		register(bootstrapContext, TRIANGLE_TOP);
+		register(bootstrapContext, TRIANGLES_BOTTOM);
+		register(bootstrapContext, TRIANGLES_TOP);
+		register(bootstrapContext, DIAGONAL_LEFT);
+		register(bootstrapContext, DIAGONAL_RIGHT);
+		register(bootstrapContext, DIAGONAL_LEFT_MIRROR);
+		register(bootstrapContext, DIAGONAL_RIGHT_MIRROR);
+		register(bootstrapContext, CIRCLE_MIDDLE);
+		register(bootstrapContext, RHOMBUS_MIDDLE);
+		register(bootstrapContext, HALF_VERTICAL);
+		register(bootstrapContext, HALF_HORIZONTAL);
+		register(bootstrapContext, HALF_VERTICAL_MIRROR);
+		register(bootstrapContext, HALF_HORIZONTAL_MIRROR);
+		register(bootstrapContext, BORDER);
+		register(bootstrapContext, CURLY_BORDER);
+		register(bootstrapContext, GRADIENT);
+		register(bootstrapContext, GRADIENT_UP);
+		register(bootstrapContext, BRICKS);
+		register(bootstrapContext, GLOBE);
+		register(bootstrapContext, CREEPER);
+		register(bootstrapContext, SKULL);
+		register(bootstrapContext, FLOWER);
+		register(bootstrapContext, MOJANG);
+		register(bootstrapContext, PIGLIN);
 	}
 
-	private static BannerPattern register(Registry<BannerPattern> registry, ResourceKey<BannerPattern> resourceKey) {
-		return Registry.register(registry, resourceKey, new BannerPattern());
+	private static void register(BootstrapContext<BannerPattern> bootstrapContext, ResourceKey<BannerPattern> resourceKey) {
+		bootstrapContext.register(resourceKey, new BannerPattern(resourceKey.location(), "block.minecraft.banner." + resourceKey.location().toShortLanguageKey()));
 	}
 }

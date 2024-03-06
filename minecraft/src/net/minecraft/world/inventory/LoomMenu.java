@@ -3,8 +3,9 @@ package net.minecraft.world.inventory;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderGetter;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BannerPatternTags;
@@ -32,6 +33,7 @@ public class LoomMenu extends AbstractContainerMenu {
 	private List<Holder<BannerPattern>> selectablePatterns = List.of();
 	Runnable slotUpdateListener = () -> {
 	};
+	private final HolderGetter<BannerPattern> patternGetter;
 	final Slot bannerSlot;
 	final Slot dyeSlot;
 	private final Slot patternSlot;
@@ -114,6 +116,7 @@ public class LoomMenu extends AbstractContainerMenu {
 		}
 
 		this.addDataSlot(this.selectedBannerPatternIndex);
+		this.patternGetter = inventory.player.registryAccess().lookupOrThrow(Registries.BANNER_PATTERN);
 	}
 
 	@Override
@@ -134,13 +137,10 @@ public class LoomMenu extends AbstractContainerMenu {
 
 	private List<Holder<BannerPattern>> getSelectablePatterns(ItemStack itemStack) {
 		if (itemStack.isEmpty()) {
-			return (List<Holder<BannerPattern>>)BuiltInRegistries.BANNER_PATTERN
-				.getTag(BannerPatternTags.NO_ITEM_REQUIRED)
-				.map(ImmutableList::copyOf)
-				.orElse(ImmutableList.of());
+			return (List<Holder<BannerPattern>>)this.patternGetter.get(BannerPatternTags.NO_ITEM_REQUIRED).map(ImmutableList::copyOf).orElse(ImmutableList.of());
 		} else {
 			return itemStack.getItem() instanceof BannerPatternItem bannerPatternItem
-				? (List)BuiltInRegistries.BANNER_PATTERN.getTag(bannerPatternItem.getBannerPattern()).map(ImmutableList::copyOf).orElse(ImmutableList.of())
+				? (List)this.patternGetter.get(bannerPatternItem.getBannerPattern()).map(ImmutableList::copyOf).orElse(ImmutableList.of())
 				: List.of();
 		}
 	}

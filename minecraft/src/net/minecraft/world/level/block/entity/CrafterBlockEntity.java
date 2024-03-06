@@ -100,7 +100,7 @@ public class CrafterBlockEntity extends RandomizableContainerBlockEntity impleme
 		for (int k = j + 1; k < 9; k++) {
 			if (!this.isSlotDisabled(k)) {
 				ItemStack itemStack2 = this.getItem(k);
-				if (itemStack2.isEmpty() || itemStack2.getCount() < i && ItemStack.isSameItemSameTags(itemStack2, itemStack)) {
+				if (itemStack2.isEmpty() || itemStack2.getCount() < i && ItemStack.isSameItemSameComponents(itemStack2, itemStack)) {
 					return true;
 				}
 			}

@@ -46,11 +46,11 @@ public class TimeArgument implements ArgumentType<Integer> {
 		String string = stringReader.readUnquotedString();
 		int i = UNITS.getOrDefault(string, 0);
 		if (i == 0) {
-			throw ERROR_INVALID_UNIT.create();
+			throw ERROR_INVALID_UNIT.createWithContext(stringReader);
 		} else {
 			int j = Math.round(f * (float)i);
 			if (j < this.minimum) {
-				throw ERROR_TICK_COUNT_TOO_LOW.create(j, this.minimum);
+				throw ERROR_TICK_COUNT_TOO_LOW.createWithContext(stringReader, j, this.minimum);
 			} else {
 				return j;
 			}

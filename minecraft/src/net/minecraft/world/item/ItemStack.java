@@ -51,6 +51,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.ExtraCodecs;
+import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -95,7 +96,7 @@ public final class ItemStack implements DataComponentHolder {
 				RecordCodecBuilder.create(
 					instance -> instance.group(
 								ITEM_NON_AIR_CODEC.fieldOf("id").forGetter(ItemStack::getItemHolder),
-								ExtraCodecs.strictOptionalField(ExtraCodecs.POSITIVE_INT, "count", 1).forGetter(ItemStack::getCount),
+								ExtraCodecs.POSITIVE_INT.fieldOf("count").orElse(1).forGetter(ItemStack::getCount),
 								ExtraCodecs.strictOptionalField(DataComponentPatch.CODEC, "components", DataComponentPatch.EMPTY)
 									.forGetter(itemStack -> itemStack.components.asPatch())
 							)
@@ -104,21 +105,27 @@ public final class ItemStack implements DataComponentHolder {
 				ItemStack::validate
 			)
 	);
+	public static final Codec<ItemStack> SINGLE_ITEM_CODEC = ExtraCodecs.lazyInitializedCodec(
+		() -> ExtraCodecs.validate(
+				RecordCodecBuilder.create(
+					instance -> instance.group(
+								ITEM_NON_AIR_CODEC.fieldOf("id").forGetter(ItemStack::getItemHolder),
+								ExtraCodecs.strictOptionalField(DataComponentPatch.CODEC, "components", DataComponentPatch.EMPTY)
+									.forGetter(itemStack -> itemStack.components.asPatch())
+							)
+							.apply(instance, (holder, dataComponentPatch) -> new ItemStack(holder, 1, dataComponentPatch))
+				),
+				ItemStack::validate
+			)
+	);
 	public static final Codec<ItemStack> OPTIONAL_CODEC = ExtraCodecs.optionalEmptyMap(CODEC)
 		.xmap(optional -> (ItemStack)optional.orElse(ItemStack.EMPTY), itemStack -> itemStack.isEmpty() ? Optional.empty() : Optional.of(itemStack));
 	public static final Codec<ItemStack> SIMPLE_ITEM_CODEC = ITEM_NON_AIR_CODEC.xmap(ItemStack::new, ItemStack::getItemHolder);
-	public static final Codec<ItemStack> ITEM_WITH_COUNT_CODEC = RecordCodecBuilder.create(
-		instance -> instance.group(
-					ITEM_NON_AIR_CODEC.fieldOf("id").forGetter(ItemStack::getItemHolder),
-					ExtraCodecs.strictOptionalField(ExtraCodecs.POSITIVE_INT, "count", 1).forGetter(ItemStack::getCount)
-				)
-				.apply(instance, ItemStack::new)
-	);
 	public static final StreamCodec<RegistryFriendlyByteBuf, ItemStack> OPTIONAL_STREAM_CODEC = new StreamCodec<RegistryFriendlyByteBuf, ItemStack>() {
 		private static final StreamCodec<RegistryFriendlyByteBuf, Holder<Item>> ITEM_STREAM_CODEC = ByteBufCodecs.holderRegistry(Registries.ITEM);
 
 		public ItemStack decode(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
-			int i = registryFriendlyByteBuf.readByte();
+			int i = registryFriendlyByteBuf.readVarInt();
 			if (i <= 0) {
 				return ItemStack.EMPTY;
 			} else {
@@ -130,9 +137,9 @@ public final class ItemStack implements DataComponentHolder {
 
 		public void encode(RegistryFriendlyByteBuf registryFriendlyByteBuf, ItemStack itemStack) {
 			if (itemStack.isEmpty()) {
-				registryFriendlyByteBuf.writeByte(0);
+				registryFriendlyByteBuf.writeVarInt(0);
 			} else {
-				registryFriendlyByteBuf.writeByte(itemStack.getCount());
+				registryFriendlyByteBuf.writeVarInt(itemStack.getCount());
 				ITEM_STREAM_CODEC.encode(registryFriendlyByteBuf, itemStack.getItemHolder());
 				DataComponentPatch.STREAM_CODEC.encode(registryFriendlyByteBuf, itemStack.components.asPatch());
 			}
@@ -357,11 +364,11 @@ public final class ItemStack implements DataComponentHolder {
 	}
 
 	public int getDamageValue() {
-		return this.getOrDefault(DataComponents.DAMAGE, Integer.valueOf(0));
+		return Mth.clamp(this.getOrDefault(DataComponents.DAMAGE, Integer.valueOf(0)), 0, this.getMaxDamage());
 	}
 
 	public void setDamageValue(int i) {
-		this.set(DataComponents.DAMAGE, i);
+		this.set(DataComponents.DAMAGE, Mth.clamp(i, 0, this.getMaxDamage()));
 	}
 
 	public int getMaxDamage() {
@@ -491,7 +498,7 @@ public final class ItemStack implements DataComponentHolder {
 		if (itemStack == itemStack2) {
 			return true;
 		} else {
-			return itemStack.getCount() != itemStack2.getCount() ? false : isSameItemSameTags(itemStack, itemStack2);
+			return itemStack.getCount() != itemStack2.getCount() ? false : isSameItemSameComponents(itemStack, itemStack2);
 		}
 	}
 
@@ -514,7 +521,7 @@ public final class ItemStack implements DataComponentHolder {
 		return itemStack.is(itemStack2.getItem());
 	}
 
-	public static boolean isSameItemSameTags(ItemStack itemStack, ItemStack itemStack2) {
+	public static boolean isSameItemSameComponents(ItemStack itemStack, ItemStack itemStack2) {
 		if (!itemStack.is(itemStack2.getItem())) {
 			return false;
 		} else {
@@ -712,22 +719,22 @@ public final class ItemStack implements DataComponentHolder {
 	}
 
 	private void addModifierTooltip(Consumer<Component> consumer, @Nullable Player player, Holder<Attribute> holder, AttributeModifier attributeModifier) {
-		double d = attributeModifier.getAmount();
+		double d = attributeModifier.amount();
 		boolean bl = false;
 		if (player != null) {
-			if (attributeModifier.getId() == Item.BASE_ATTACK_DAMAGE_UUID) {
+			if (attributeModifier.id() == Item.BASE_ATTACK_DAMAGE_UUID) {
 				d += player.getAttributeBaseValue(Attributes.ATTACK_DAMAGE);
 				d += (double)EnchantmentHelper.getDamageBonus(this, null);
 				bl = true;
-			} else if (attributeModifier.getId() == Item.BASE_ATTACK_SPEED_UUID) {
+			} else if (attributeModifier.id() == Item.BASE_ATTACK_SPEED_UUID) {
 				d += player.getAttributeBaseValue(Attributes.ATTACK_SPEED);
 				bl = true;
 			}
 		}
 
 		double e;
-		if (attributeModifier.getOperation() == AttributeModifier.Operation.ADD_MULTIPLIED_BASE
-			|| attributeModifier.getOperation() == AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL) {
+		if (attributeModifier.operation() == AttributeModifier.Operation.ADD_MULTIPLIED_BASE
+			|| attributeModifier.operation() == AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL) {
 			e = d * 100.0;
 		} else if (holder.is(Attributes.KNOCKBACK_RESISTANCE)) {
 			e = d * 10.0;
@@ -740,7 +747,7 @@ public final class ItemStack implements DataComponentHolder {
 				CommonComponents.space()
 					.append(
 						Component.translatable(
-							"attribute.modifier.equals." + attributeModifier.getOperation().id(),
+							"attribute.modifier.equals." + attributeModifier.operation().id(),
 							ItemAttributeModifiers.ATTRIBUTE_MODIFIER_FORMAT.format(e),
 							Component.translatable(holder.value().getDescriptionId())
 						)
@@ -750,7 +757,7 @@ public final class ItemStack implements DataComponentHolder {
 		} else if (d > 0.0) {
 			consumer.accept(
 				Component.translatable(
-						"attribute.modifier.plus." + attributeModifier.getOperation().id(),
+						"attribute.modifier.plus." + attributeModifier.operation().id(),
 						ItemAttributeModifiers.ATTRIBUTE_MODIFIER_FORMAT.format(e),
 						Component.translatable(holder.value().getDescriptionId())
 					)
@@ -759,7 +766,7 @@ public final class ItemStack implements DataComponentHolder {
 		} else if (d < 0.0) {
 			consumer.accept(
 				Component.translatable(
-						"attribute.modifier.take." + attributeModifier.getOperation().id(),
+						"attribute.modifier.take." + attributeModifier.operation().id(),
 						ItemAttributeModifiers.ATTRIBUTE_MODIFIER_FORMAT.format(-e),
 						Component.translatable(holder.value().getDescriptionId())
 					)

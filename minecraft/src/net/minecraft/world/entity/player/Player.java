@@ -118,6 +118,8 @@ public abstract class Player extends LivingEntity {
 	public static final int SLEEP_DURATION = 100;
 	public static final int WAKE_UP_DURATION = 10;
 	public static final int ENDER_SLOT_OFFSET = 200;
+	public static final int HELD_ITEM_SLOT = 499;
+	public static final int CRAFTING_SLOT_OFFSET = 500;
 	public static final float DEFAULT_BLOCK_INTERACTION_RANGE = 4.5F;
 	public static final float DEFAULT_ENTITY_INTERACTION_RANGE = 3.0F;
 	public static final float CROUCH_BB_HEIGHT = 1.5F;
@@ -149,7 +151,7 @@ public abstract class Player extends LivingEntity {
 	protected static final EntityDataAccessor<CompoundTag> DATA_SHOULDER_LEFT = SynchedEntityData.defineId(Player.class, EntityDataSerializers.COMPOUND_TAG);
 	protected static final EntityDataAccessor<CompoundTag> DATA_SHOULDER_RIGHT = SynchedEntityData.defineId(Player.class, EntityDataSerializers.COMPOUND_TAG);
 	private long timeEntitySatOnShoulder;
-	private final Inventory inventory = new Inventory(this);
+	final Inventory inventory = new Inventory(this);
 	protected PlayerEnderChestContainer enderChestInventory = new PlayerEnderChestContainer();
 	public final InventoryMenu inventoryMenu;
 	public AbstractContainerMenu containerMenu;
@@ -1854,11 +1856,41 @@ public abstract class Player extends LivingEntity {
 
 	@Override
 	public SlotAccess getSlot(int i) {
-		if (i >= 0 && i < this.inventory.items.size()) {
-			return SlotAccess.forContainer(this.inventory, i);
+		if (i == 499) {
+			return new SlotAccess() {
+				@Override
+				public ItemStack get() {
+					return Player.this.containerMenu.getCarried();
+				}
+
+				@Override
+				public boolean set(ItemStack itemStack) {
+					Player.this.containerMenu.setCarried(itemStack);
+					return true;
+				}
+			};
 		} else {
-			int j = i - 200;
-			return j >= 0 && j < this.enderChestInventory.getContainerSize() ? SlotAccess.forContainer(this.enderChestInventory, j) : super.getSlot(i);
+			final int j = i - 500;
+			if (j >= 0 && j < 4) {
+				return new SlotAccess() {
+					@Override
+					public ItemStack get() {
+						return Player.this.inventoryMenu.getCraftSlots().getItem(j);
+					}
+
+					@Override
+					public boolean set(ItemStack itemStack) {
+						Player.this.inventoryMenu.getCraftSlots().setItem(j, itemStack);
+						Player.this.inventoryMenu.slotsChanged(Player.this.inventory);
+						return true;
+					}
+				};
+			} else if (i >= 0 && i < this.inventory.items.size()) {
+				return SlotAccess.forContainer(this.inventory, i);
+			} else {
+				int k = i - 200;
+				return k >= 0 && k < this.enderChestInventory.getContainerSize() ? SlotAccess.forContainer(this.enderChestInventory, k) : super.getSlot(i);
+			}
 		}
 	}
 

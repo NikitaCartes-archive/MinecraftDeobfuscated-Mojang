@@ -48,13 +48,13 @@ public class GrindstoneMenu extends AbstractContainerMenu {
 		this.addSlot(new Slot(this.repairSlots, 0, 49, 19) {
 			@Override
 			public boolean mayPlace(ItemStack itemStack) {
-				return itemStack.isDamageableItem() || itemStack.is(Items.ENCHANTED_BOOK) || itemStack.isEnchanted();
+				return itemStack.isDamageableItem() || EnchantmentHelper.hasAnyEnchantments(itemStack);
 			}
 		});
 		this.addSlot(new Slot(this.repairSlots, 1, 49, 40) {
 			@Override
 			public boolean mayPlace(ItemStack itemStack) {
-				return itemStack.isDamageableItem() || itemStack.is(Items.ENCHANTED_BOOK) || itemStack.isEnchanted();
+				return itemStack.isDamageableItem() || EnchantmentHelper.hasAnyEnchantments(itemStack);
 			}
 		});
 		this.addSlot(new Slot(this.resultSlots, 2, 129, 34) {
@@ -124,61 +124,57 @@ public class GrindstoneMenu extends AbstractContainerMenu {
 	}
 
 	private void createResult() {
-		ItemStack itemStack = this.repairSlots.getItem(0);
-		ItemStack itemStack2 = this.repairSlots.getItem(1);
-		boolean bl = !itemStack.isEmpty() || !itemStack2.isEmpty();
-		boolean bl2 = !itemStack.isEmpty() && !itemStack2.isEmpty();
-		if (!bl) {
-			this.resultSlots.setItem(0, ItemStack.EMPTY);
-		} else {
-			boolean bl3 = !itemStack.isEmpty() && !itemStack.is(Items.ENCHANTED_BOOK) && !itemStack.isEnchanted()
-				|| !itemStack2.isEmpty() && !itemStack2.is(Items.ENCHANTED_BOOK) && !itemStack2.isEnchanted();
-			if (itemStack.getCount() > 1 || itemStack2.getCount() > 1 || !bl2 && bl3) {
-				this.resultSlots.setItem(0, ItemStack.EMPTY);
-				this.broadcastChanges();
-				return;
-			}
-
-			int i = 1;
-			int m;
-			ItemStack itemStack3;
-			if (bl2) {
-				if (!itemStack.is(itemStack2.getItem())) {
-					this.resultSlots.setItem(0, ItemStack.EMPTY);
-					this.broadcastChanges();
-					return;
-				}
-
-				Item item = itemStack.getItem();
-				int j = item.getMaxDamage() - itemStack.getDamageValue();
-				int k = item.getMaxDamage() - itemStack2.getDamageValue();
-				int l = j + k + item.getMaxDamage() * 5 / 100;
-				m = Math.max(item.getMaxDamage() - l, 0);
-				itemStack3 = this.mergeEnchants(itemStack, itemStack2);
-				if (!itemStack3.isDamageableItem()) {
-					if (!ItemStack.matches(itemStack, itemStack2)) {
-						this.resultSlots.setItem(0, ItemStack.EMPTY);
-						this.broadcastChanges();
-						return;
-					}
-
-					i = 2;
-				}
-			} else {
-				boolean bl4 = !itemStack.isEmpty();
-				m = bl4 ? itemStack.getDamageValue() : itemStack2.getDamageValue();
-				itemStack3 = bl4 ? itemStack : itemStack2;
-			}
-
-			this.resultSlots.setItem(0, this.removeNonCurses(itemStack3, m, i));
-		}
-
+		this.resultSlots.setItem(0, this.computeResult(this.repairSlots.getItem(0), this.repairSlots.getItem(1)));
 		this.broadcastChanges();
 	}
 
-	private ItemStack mergeEnchants(ItemStack itemStack, ItemStack itemStack2) {
-		ItemStack itemStack3 = itemStack.copy();
-		EnchantmentHelper.updateEnchantments(itemStack3, mutable -> {
+	private ItemStack computeResult(ItemStack itemStack, ItemStack itemStack2) {
+		boolean bl = !itemStack.isEmpty() || !itemStack2.isEmpty();
+		if (!bl) {
+			return ItemStack.EMPTY;
+		} else if (itemStack.getCount() <= 1 && itemStack2.getCount() <= 1) {
+			boolean bl2 = !itemStack.isEmpty() && !itemStack2.isEmpty();
+			if (!bl2) {
+				ItemStack itemStack3 = !itemStack.isEmpty() ? itemStack : itemStack2;
+				return !EnchantmentHelper.hasAnyEnchantments(itemStack3) ? ItemStack.EMPTY : this.removeNonCursesFrom(itemStack3.copy());
+			} else {
+				return this.mergeItems(itemStack, itemStack2);
+			}
+		} else {
+			return ItemStack.EMPTY;
+		}
+	}
+
+	private ItemStack mergeItems(ItemStack itemStack, ItemStack itemStack2) {
+		if (!itemStack.is(itemStack2.getItem())) {
+			return ItemStack.EMPTY;
+		} else {
+			Item item = itemStack.getItem();
+			int i = item.getMaxDamage() - itemStack.getDamageValue();
+			int j = item.getMaxDamage() - itemStack2.getDamageValue();
+			int k = i + j + item.getMaxDamage() * 5 / 100;
+			int l = Math.max(item.getMaxDamage() - k, 0);
+			int m = 1;
+			if (!itemStack.isDamageableItem()) {
+				if (itemStack.getMaxStackSize() < 2 || !ItemStack.matches(itemStack, itemStack2)) {
+					return ItemStack.EMPTY;
+				}
+
+				m = 2;
+			}
+
+			ItemStack itemStack3 = itemStack.copyWithCount(m);
+			if (itemStack3.isDamageableItem()) {
+				itemStack3.setDamageValue(l);
+			}
+
+			this.mergeEnchantsFrom(itemStack, itemStack2);
+			return this.removeNonCursesFrom(itemStack3);
+		}
+	}
+
+	private void mergeEnchantsFrom(ItemStack itemStack, ItemStack itemStack2) {
+		EnchantmentHelper.updateEnchantments(itemStack, mutable -> {
 			ItemEnchantments itemEnchantments = EnchantmentHelper.getEnchantmentsForCrafting(itemStack2);
 
 			for (Entry<Holder<Enchantment>> entry : itemEnchantments.entrySet()) {
@@ -188,27 +184,24 @@ public class GrindstoneMenu extends AbstractContainerMenu {
 				}
 			}
 		});
-		return itemStack3;
 	}
 
-	private ItemStack removeNonCurses(ItemStack itemStack, int i, int j) {
-		ItemStack itemStack2 = itemStack.copyWithCount(j);
-		itemStack2.setDamageValue(i);
+	private ItemStack removeNonCursesFrom(ItemStack itemStack) {
 		ItemEnchantments itemEnchantments = EnchantmentHelper.updateEnchantments(
-			itemStack2, mutable -> mutable.removeIf(holder -> !((Enchantment)holder.value()).isCurse())
+			itemStack, mutable -> mutable.removeIf(holder -> !((Enchantment)holder.value()).isCurse())
 		);
-		if (itemStack2.is(Items.ENCHANTED_BOOK) && itemEnchantments.isEmpty()) {
-			itemStack2 = itemStack2.transmuteCopy(Items.BOOK, j);
+		if (itemStack.is(Items.ENCHANTED_BOOK) && itemEnchantments.isEmpty()) {
+			itemStack = itemStack.transmuteCopy(Items.BOOK, itemStack.getCount());
 		}
 
-		int k = 0;
+		int i = 0;
 
-		for (int l = 0; l < itemEnchantments.size(); l++) {
-			k = AnvilMenu.calculateIncreasedRepairCost(k);
+		for (int j = 0; j < itemEnchantments.size(); j++) {
+			i = AnvilMenu.calculateIncreasedRepairCost(i);
 		}
 
-		itemStack2.set(DataComponents.REPAIR_COST, k);
-		return itemStack2;
+		itemStack.set(DataComponents.REPAIR_COST, i);
+		return itemStack;
 	}
 
 	@Override

@@ -75,7 +75,7 @@ public class RecipeCache {
 				return false;
 			} else {
 				for (int i = 0; i < this.key.size(); i++) {
-					if (!ItemStack.isSameItemSameTags(this.key.get(i), (ItemStack)list.get(i))) {
+					if (!ItemStack.isSameItemSameComponents(this.key.get(i), (ItemStack)list.get(i))) {
 						return false;
 					}
 				}

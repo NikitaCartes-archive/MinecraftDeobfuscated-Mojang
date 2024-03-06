@@ -5,7 +5,6 @@ import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
@@ -22,7 +21,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.minecraft.SharedConstants;
-import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
@@ -60,72 +58,6 @@ public final class NbtUtils {
 	private static final int NOT_FOUND = -1;
 
 	private NbtUtils() {
-	}
-
-	@Nullable
-	public static GameProfile readGameProfile(CompoundTag compoundTag) {
-		UUID uUID = compoundTag.hasUUID("Id") ? compoundTag.getUUID("Id") : Util.NIL_UUID;
-		String string = compoundTag.getString("Name");
-
-		try {
-			GameProfile gameProfile = new GameProfile(uUID, string);
-			if (compoundTag.contains("Properties", 10)) {
-				CompoundTag compoundTag2 = compoundTag.getCompound("Properties");
-
-				for (String string2 : compoundTag2.getAllKeys()) {
-					ListTag listTag = compoundTag2.getList(string2, 10);
-
-					for (int i = 0; i < listTag.size(); i++) {
-						CompoundTag compoundTag3 = listTag.getCompound(i);
-						String string3 = compoundTag3.getString("Value");
-						if (compoundTag3.contains("Signature", 8)) {
-							gameProfile.getProperties().put(string2, new com.mojang.authlib.properties.Property(string2, string3, compoundTag3.getString("Signature")));
-						} else {
-							gameProfile.getProperties().put(string2, new com.mojang.authlib.properties.Property(string2, string3));
-						}
-					}
-				}
-			}
-
-			return gameProfile;
-		} catch (Throwable var11) {
-			return null;
-		}
-	}
-
-	public static CompoundTag writeGameProfile(CompoundTag compoundTag, GameProfile gameProfile) {
-		if (!gameProfile.getName().isEmpty()) {
-			compoundTag.putString("Name", gameProfile.getName());
-		}
-
-		if (!gameProfile.getId().equals(Util.NIL_UUID)) {
-			compoundTag.putUUID("Id", gameProfile.getId());
-		}
-
-		if (!gameProfile.getProperties().isEmpty()) {
-			CompoundTag compoundTag2 = new CompoundTag();
-
-			for (String string : gameProfile.getProperties().keySet()) {
-				ListTag listTag = new ListTag();
-
-				for (com.mojang.authlib.properties.Property property : gameProfile.getProperties().get(string)) {
-					CompoundTag compoundTag3 = new CompoundTag();
-					compoundTag3.putString("Value", property.value());
-					String string2 = property.signature();
-					if (string2 != null) {
-						compoundTag3.putString("Signature", string2);
-					}
-
-					listTag.add(compoundTag3);
-				}
-
-				compoundTag2.put(string, listTag);
-			}
-
-			compoundTag.put("Properties", compoundTag2);
-		}
-
-		return compoundTag;
 	}
 
 	@VisibleForTesting

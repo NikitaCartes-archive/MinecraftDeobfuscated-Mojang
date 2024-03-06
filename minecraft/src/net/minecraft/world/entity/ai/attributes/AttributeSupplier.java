@@ -36,7 +36,7 @@ public class AttributeSupplier {
 		if (attributeModifier == null) {
 			throw new IllegalArgumentException("Can't find modifier " + uUID + " on attribute " + holder.getRegisteredName());
 		} else {
-			return attributeModifier.getAmount();
+			return attributeModifier.amount();
 		}
 	}
 

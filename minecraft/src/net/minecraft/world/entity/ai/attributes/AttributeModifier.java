@@ -5,7 +5,6 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.netty.buffer.ByteBuf;
-import java.util.Objects;
 import java.util.UUID;
 import java.util.function.IntFunction;
 import javax.annotation.Nullable;
@@ -19,74 +18,32 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringRepresentable;
 import org.slf4j.Logger;
 
-public class AttributeModifier {
+public record AttributeModifier(UUID id, String name, double amount, AttributeModifier.Operation operation) {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	public static final MapCodec<AttributeModifier> MAP_CODEC = RecordCodecBuilder.mapCodec(
 		instance -> instance.group(
-					UUIDUtil.CODEC.fieldOf("uuid").forGetter(AttributeModifier::getId),
+					UUIDUtil.CODEC.fieldOf("uuid").forGetter(AttributeModifier::id),
 					Codec.STRING.fieldOf("name").forGetter(attributeModifier -> attributeModifier.name),
-					Codec.DOUBLE.fieldOf("amount").forGetter(AttributeModifier::getAmount),
-					AttributeModifier.Operation.CODEC.fieldOf("operation").forGetter(AttributeModifier::getOperation)
+					Codec.DOUBLE.fieldOf("amount").forGetter(AttributeModifier::amount),
+					AttributeModifier.Operation.CODEC.fieldOf("operation").forGetter(AttributeModifier::operation)
 				)
 				.apply(instance, AttributeModifier::new)
 	);
 	public static final Codec<AttributeModifier> CODEC = MAP_CODEC.codec();
 	public static final StreamCodec<ByteBuf, AttributeModifier> STREAM_CODEC = StreamCodec.composite(
 		UUIDUtil.STREAM_CODEC,
-		AttributeModifier::getId,
+		AttributeModifier::id,
 		ByteBufCodecs.STRING_UTF8,
 		attributeModifier -> attributeModifier.name,
 		ByteBufCodecs.DOUBLE,
-		AttributeModifier::getAmount,
+		AttributeModifier::amount,
 		AttributeModifier.Operation.STREAM_CODEC,
-		AttributeModifier::getOperation,
+		AttributeModifier::operation,
 		AttributeModifier::new
 	);
-	private final double amount;
-	private final AttributeModifier.Operation operation;
-	private final String name;
-	private final UUID id;
 
 	public AttributeModifier(String string, double d, AttributeModifier.Operation operation) {
 		this(Mth.createInsecureUUID(RandomSource.createNewThreadLocalInstance()), string, d, operation);
-	}
-
-	public AttributeModifier(UUID uUID, String string, double d, AttributeModifier.Operation operation) {
-		this.id = uUID;
-		this.name = string;
-		this.amount = d;
-		this.operation = operation;
-	}
-
-	public UUID getId() {
-		return this.id;
-	}
-
-	public AttributeModifier.Operation getOperation() {
-		return this.operation;
-	}
-
-	public double getAmount() {
-		return this.amount;
-	}
-
-	public boolean equals(Object object) {
-		if (this == object) {
-			return true;
-		} else if (object != null && this.getClass() == object.getClass()) {
-			AttributeModifier attributeModifier = (AttributeModifier)object;
-			return Objects.equals(this.id, attributeModifier.id);
-		} else {
-			return false;
-		}
-	}
-
-	public int hashCode() {
-		return this.id.hashCode();
-	}
-
-	public String toString() {
-		return "AttributeModifier{amount=" + this.amount + ", operation=" + this.operation + ", name='" + this.name + "', id=" + this.id + "}";
 	}
 
 	public CompoundTag save() {

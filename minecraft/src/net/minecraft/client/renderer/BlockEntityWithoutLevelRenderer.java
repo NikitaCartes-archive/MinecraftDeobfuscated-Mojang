@@ -1,6 +1,5 @@
 package net.minecraft.client.renderer;
 
-import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import java.util.Arrays;
@@ -95,9 +94,8 @@ public class BlockEntityWithoutLevelRenderer implements ResourceManagerReloadLis
 					resolvableProfile = null;
 				}
 
-				GameProfile gameProfile = resolvableProfile != null ? resolvableProfile.gameProfile() : null;
 				SkullModelBase skullModelBase = (SkullModelBase)this.skullModels.get(abstractSkullBlock.getType());
-				RenderType renderType = SkullBlockRenderer.getRenderType(abstractSkullBlock.getType(), gameProfile);
+				RenderType renderType = SkullBlockRenderer.getRenderType(abstractSkullBlock.getType(), resolvableProfile);
 				SkullBlockRenderer.renderSkull(null, 180.0F, 0.0F, poseStack, multiBufferSource, i, skullModelBase, renderType);
 			} else {
 				BlockState blockState = block.defaultBlockState();
@@ -146,8 +144,18 @@ public class BlockEntityWithoutLevelRenderer implements ResourceManagerReloadLis
 					.wrap(ItemRenderer.getFoilBufferDirect(multiBufferSource, this.shieldModel.renderType(material.atlasLocation()), true, itemStack.hasFoil()));
 				this.shieldModel.handle().render(poseStack, vertexConsumer, i, j, 1.0F, 1.0F, 1.0F, 1.0F);
 				if (bl) {
-					BannerPatternLayers bannerPatternLayers2 = bannerPatternLayers.withBase((DyeColor)Objects.requireNonNullElse(dyeColor2, DyeColor.WHITE));
-					BannerRenderer.renderPatterns(poseStack, multiBufferSource, i, j, this.shieldModel.plate(), material, false, bannerPatternLayers2, itemStack.hasFoil());
+					BannerRenderer.renderPatterns(
+						poseStack,
+						multiBufferSource,
+						i,
+						j,
+						this.shieldModel.plate(),
+						material,
+						false,
+						(DyeColor)Objects.requireNonNullElse(dyeColor2, DyeColor.WHITE),
+						bannerPatternLayers,
+						itemStack.hasFoil()
+					);
 				} else {
 					this.shieldModel.plate().render(poseStack, vertexConsumer, i, j, 1.0F, 1.0F, 1.0F, 1.0F);
 				}

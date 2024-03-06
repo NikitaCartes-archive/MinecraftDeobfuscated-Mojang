@@ -24,6 +24,7 @@ import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.entity.animal.CatVariant;
 import net.minecraft.world.entity.animal.FrogVariant;
+import net.minecraft.world.entity.animal.WolfVariant;
 import net.minecraft.world.entity.decoration.PaintingVariant;
 import net.minecraft.world.entity.npc.VillagerProfession;
 import net.minecraft.world.entity.npc.VillagerType;
@@ -107,6 +108,7 @@ public class Registries {
 	public static final ResourceKey<Registry<BlockStateProviderType<?>>> BLOCK_STATE_PROVIDER_TYPE = createRegistryKey("worldgen/block_state_provider_type");
 	public static final ResourceKey<Registry<WorldCarver<?>>> CARVER = createRegistryKey("worldgen/carver");
 	public static final ResourceKey<Registry<CatVariant>> CAT_VARIANT = createRegistryKey("cat_variant");
+	public static final ResourceKey<Registry<WolfVariant>> WOLF_VARIANT = createRegistryKey("wolf_variant");
 	public static final ResourceKey<Registry<Codec<? extends ChunkGenerator>>> CHUNK_GENERATOR = createRegistryKey("worldgen/chunk_generator");
 	public static final ResourceKey<Registry<ChunkStatus>> CHUNK_STATUS = createRegistryKey("chunk_status");
 	public static final ResourceKey<Registry<ArgumentTypeInfo<?, ?>>> COMMAND_ARGUMENT_TYPE = createRegistryKey("command_argument_type");

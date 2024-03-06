@@ -86,7 +86,7 @@ public class ScoreHolderArgument implements ArgumentType<ScoreHolderArgument.Res
 			EntitySelectorParser entitySelectorParser = new EntitySelectorParser(stringReader);
 			EntitySelector entitySelector = entitySelectorParser.parse();
 			if (!this.multiple && entitySelector.getMaxResults() > 1) {
-				throw EntityArgument.ERROR_NOT_SINGLE_ENTITY.create();
+				throw EntityArgument.ERROR_NOT_SINGLE_ENTITY.createWithContext(stringReader);
 			} else {
 				return new ScoreHolderArgument.SelectorResult(entitySelector);
 			}

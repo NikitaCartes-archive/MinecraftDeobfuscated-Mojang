@@ -73,7 +73,7 @@ public class ResourceOrTagArgument<T> implements ArgumentType<ResourceOrTagArgum
 				TagKey<T> tagKey = TagKey.create(this.registryKey, resourceLocation);
 				HolderSet.Named<T> named = (HolderSet.Named<T>)this.registryLookup
 					.get(tagKey)
-					.orElseThrow(() -> ERROR_UNKNOWN_TAG.create(resourceLocation, this.registryKey.location()));
+					.orElseThrow(() -> ERROR_UNKNOWN_TAG.createWithContext(stringReader, resourceLocation, this.registryKey.location()));
 				return new ResourceOrTagArgument.TagResult<>(named);
 			} catch (CommandSyntaxException var6) {
 				stringReader.setCursor(i);
@@ -84,7 +84,7 @@ public class ResourceOrTagArgument<T> implements ArgumentType<ResourceOrTagArgum
 			ResourceKey<T> resourceKey = ResourceKey.create(this.registryKey, resourceLocation2);
 			Holder.Reference<T> reference = (Holder.Reference<T>)this.registryLookup
 				.get(resourceKey)
-				.orElseThrow(() -> ResourceArgument.ERROR_UNKNOWN_RESOURCE.create(resourceLocation2, this.registryKey.location()));
+				.orElseThrow(() -> ResourceArgument.ERROR_UNKNOWN_RESOURCE.createWithContext(stringReader, resourceLocation2, this.registryKey.location()));
 			return new ResourceOrTagArgument.ResourceResult<>(reference);
 		}
 	}

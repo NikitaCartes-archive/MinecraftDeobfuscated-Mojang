@@ -97,6 +97,10 @@ public final class ItemContainerContents implements Iterable<ItemStack> {
 		}
 	}
 
+	public ItemStack copyOne() {
+		return this.items.isEmpty() ? ItemStack.EMPTY : this.items.get(0).copy();
+	}
+
 	public Stream<ItemStack> stream() {
 		return this.items.stream().filter(itemStack -> !itemStack.isEmpty()).map(ItemStack::copy);
 	}

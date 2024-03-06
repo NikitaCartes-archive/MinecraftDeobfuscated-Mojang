@@ -20,6 +20,7 @@ import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.BannerBlock;
 import net.minecraft.world.level.block.WallBannerBlock;
 import net.minecraft.world.level.block.entity.BannerBlockEntity;
@@ -56,7 +57,6 @@ public class BannerRenderer implements BlockEntityRenderer<BannerBlockEntity> {
 	}
 
 	public void render(BannerBlockEntity bannerBlockEntity, float f, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {
-		BannerPatternLayers bannerPatternLayers = bannerBlockEntity.getPatternsWithBase();
 		float g = 0.6666667F;
 		boolean bl = bannerBlockEntity.getLevel() == null;
 		poseStack.pushPose();
@@ -91,7 +91,9 @@ public class BannerRenderer implements BlockEntityRenderer<BannerBlockEntity> {
 		float k = ((float)Math.floorMod((long)(blockPos.getX() * 7 + blockPos.getY() * 9 + blockPos.getZ() * 13) + l, 100L) + f) / 100.0F;
 		this.flag.xRot = (-0.0125F + 0.01F * Mth.cos((float) (Math.PI * 2) * k)) * (float) Math.PI;
 		this.flag.y = -32.0F;
-		renderPatterns(poseStack, multiBufferSource, i, j, this.flag, ModelBakery.BANNER_BASE, true, bannerPatternLayers);
+		renderPatterns(
+			poseStack, multiBufferSource, i, j, this.flag, ModelBakery.BANNER_BASE, true, bannerBlockEntity.getBaseColor(), bannerBlockEntity.getPatterns()
+		);
 		poseStack.popPose();
 		poseStack.popPose();
 	}
@@ -104,9 +106,10 @@ public class BannerRenderer implements BlockEntityRenderer<BannerBlockEntity> {
 		ModelPart modelPart,
 		Material material,
 		boolean bl,
+		DyeColor dyeColor,
 		BannerPatternLayers bannerPatternLayers
 	) {
-		renderPatterns(poseStack, multiBufferSource, i, j, modelPart, material, bl, bannerPatternLayers, false);
+		renderPatterns(poseStack, multiBufferSource, i, j, modelPart, material, bl, dyeColor, bannerPatternLayers, false);
 	}
 
 	public static void renderPatterns(
@@ -117,18 +120,24 @@ public class BannerRenderer implements BlockEntityRenderer<BannerBlockEntity> {
 		ModelPart modelPart,
 		Material material,
 		boolean bl,
+		DyeColor dyeColor,
 		BannerPatternLayers bannerPatternLayers,
 		boolean bl2
 	) {
 		modelPart.render(poseStack, material.buffer(multiBufferSource, RenderType::entitySolid, bl2), i, j);
+		renderPatternLayer(poseStack, multiBufferSource, i, j, modelPart, bl ? Sheets.BANNER_BASE : Sheets.SHIELD_BASE, dyeColor);
 
-		for (int k = 0; k < 17 && k < bannerPatternLayers.layers().size(); k++) {
+		for (int k = 0; k < 16 && k < bannerPatternLayers.layers().size(); k++) {
 			BannerPatternLayers.Layer layer = (BannerPatternLayers.Layer)bannerPatternLayers.layers().get(k);
-			float[] fs = layer.color().getTextureDiffuseColors();
-			layer.pattern()
-				.unwrapKey()
-				.map(resourceKey -> bl ? Sheets.getBannerMaterial(resourceKey) : Sheets.getShieldMaterial(resourceKey))
-				.ifPresent(materialx -> modelPart.render(poseStack, materialx.buffer(multiBufferSource, RenderType::entityNoOutline), i, j, fs[0], fs[1], fs[2], 1.0F));
+			Material material2 = bl ? Sheets.getBannerMaterial(layer.pattern()) : Sheets.getShieldMaterial(layer.pattern());
+			renderPatternLayer(poseStack, multiBufferSource, i, j, modelPart, material2, layer.color());
 		}
+	}
+
+	private static void renderPatternLayer(
+		PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j, ModelPart modelPart, Material material, DyeColor dyeColor
+	) {
+		float[] fs = dyeColor.getTextureDiffuseColors();
+		modelPart.render(poseStack, material.buffer(multiBufferSource, RenderType::entityNoOutline), i, j, fs[0], fs[1], fs[2], 1.0F);
 	}
 }

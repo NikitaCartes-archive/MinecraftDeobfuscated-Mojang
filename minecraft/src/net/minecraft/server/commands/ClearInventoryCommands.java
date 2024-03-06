@@ -29,18 +29,16 @@ public class ClearInventoryCommands {
 			Commands.literal("clear")
 				.requires(commandSourceStack -> commandSourceStack.hasPermission(2))
 				.executes(
-					commandContext -> clearInventory(
-							commandContext.getSource(), Collections.singleton(commandContext.getSource().getPlayerOrException()), itemStack -> true, -1
-						)
+					commandContext -> clearUnlimited(commandContext.getSource(), Collections.singleton(commandContext.getSource().getPlayerOrException()), itemStack -> true)
 				)
 				.then(
 					Commands.argument("targets", EntityArgument.players())
-						.executes(commandContext -> clearInventory(commandContext.getSource(), EntityArgument.getPlayers(commandContext, "targets"), itemStack -> true, -1))
+						.executes(commandContext -> clearUnlimited(commandContext.getSource(), EntityArgument.getPlayers(commandContext, "targets"), itemStack -> true))
 						.then(
 							Commands.argument("item", ItemPredicateArgument.itemPredicate(commandBuildContext))
 								.executes(
-									commandContext -> clearInventory(
-											commandContext.getSource(), EntityArgument.getPlayers(commandContext, "targets"), ItemPredicateArgument.getItemPredicate(commandContext, "item"), -1
+									commandContext -> clearUnlimited(
+											commandContext.getSource(), EntityArgument.getPlayers(commandContext, "targets"), ItemPredicateArgument.getItemPredicate(commandContext, "item")
 										)
 								)
 								.then(
@@ -57,6 +55,10 @@ public class ClearInventoryCommands {
 						)
 				)
 		);
+	}
+
+	private static int clearUnlimited(CommandSourceStack commandSourceStack, Collection<ServerPlayer> collection, Predicate<ItemStack> predicate) throws CommandSyntaxException {
+		return clearInventory(commandSourceStack, collection, predicate, -1);
 	}
 
 	private static int clearInventory(CommandSourceStack commandSourceStack, Collection<ServerPlayer> collection, Predicate<ItemStack> predicate, int i) throws CommandSyntaxException {

@@ -2,7 +2,6 @@ package net.minecraft.world.item.crafting;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.ExtraCodecs;
@@ -20,11 +19,7 @@ public class SimpleCookingSerializer<T extends AbstractCookingRecipe> implements
 						ExtraCodecs.strictOptionalField(Codec.STRING, "group", "").forGetter(abstractCookingRecipe -> abstractCookingRecipe.group),
 						CookingBookCategory.CODEC.fieldOf("category").orElse(CookingBookCategory.MISC).forGetter(abstractCookingRecipe -> abstractCookingRecipe.category),
 						Ingredient.CODEC_NONEMPTY.fieldOf("ingredient").forGetter(abstractCookingRecipe -> abstractCookingRecipe.ingredient),
-						BuiltInRegistries.ITEM
-							.byNameCodec()
-							.xmap(ItemStack::new, ItemStack::getItem)
-							.fieldOf("result")
-							.forGetter(abstractCookingRecipe -> abstractCookingRecipe.result),
+						ItemStack.SINGLE_ITEM_CODEC.fieldOf("result").forGetter(abstractCookingRecipe -> abstractCookingRecipe.result),
 						Codec.FLOAT.fieldOf("experience").orElse(0.0F).forGetter(abstractCookingRecipe -> abstractCookingRecipe.experience),
 						Codec.INT.fieldOf("cookingtime").orElse(i).forGetter(abstractCookingRecipe -> abstractCookingRecipe.cookingTime)
 					)

@@ -19,13 +19,14 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 
 public record DyedItemColor(int rgb, boolean showInTooltip) implements TooltipProvider {
-	public static final Codec<DyedItemColor> CODEC = RecordCodecBuilder.create(
+	private static final Codec<DyedItemColor> FULL_CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
 					Codec.INT.fieldOf("rgb").forGetter(DyedItemColor::rgb),
 					ExtraCodecs.strictOptionalField(Codec.BOOL, "show_in_tooltip", true).forGetter(DyedItemColor::showInTooltip)
 				)
 				.apply(instance, DyedItemColor::new)
 	);
+	public static final Codec<DyedItemColor> CODEC = ExtraCodecs.withAlternative(FULL_CODEC, Codec.INT, integer -> new DyedItemColor(integer, true));
 	public static final StreamCodec<ByteBuf, DyedItemColor> STREAM_CODEC = StreamCodec.composite(
 		ByteBufCodecs.INT, DyedItemColor::rgb, ByteBufCodecs.BOOL, DyedItemColor::showInTooltip, DyedItemColor::new
 	);

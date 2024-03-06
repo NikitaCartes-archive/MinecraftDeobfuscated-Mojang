@@ -110,7 +110,7 @@ public final class BundleContents implements TooltipComponent {
 				return -1;
 			} else {
 				for (int i = 0; i < this.items.size(); i++) {
-					if (ItemStack.isSameItemSameTags((ItemStack)this.items.get(i), itemStack)) {
+					if (ItemStack.isSameItemSameComponents((ItemStack)this.items.get(i), itemStack)) {
 						return i;
 					}
 				}

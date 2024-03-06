@@ -93,7 +93,7 @@ public class ShapedRecipe implements CraftingRecipe {
 						ExtraCodecs.strictOptionalField(Codec.STRING, "group", "").forGetter(shapedRecipe -> shapedRecipe.group),
 						CraftingBookCategory.CODEC.fieldOf("category").orElse(CraftingBookCategory.MISC).forGetter(shapedRecipe -> shapedRecipe.category),
 						ShapedRecipePattern.MAP_CODEC.forGetter(shapedRecipe -> shapedRecipe.pattern),
-						ItemStack.ITEM_WITH_COUNT_CODEC.fieldOf("result").forGetter(shapedRecipe -> shapedRecipe.result),
+						ItemStack.CODEC.fieldOf("result").forGetter(shapedRecipe -> shapedRecipe.result),
 						ExtraCodecs.strictOptionalField(Codec.BOOL, "show_notification", true).forGetter(shapedRecipe -> shapedRecipe.showNotification)
 					)
 					.apply(instance, ShapedRecipe::new)

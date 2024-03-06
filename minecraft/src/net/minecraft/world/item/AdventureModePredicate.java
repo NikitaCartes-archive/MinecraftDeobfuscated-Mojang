@@ -115,11 +115,17 @@ public class AdventureModePredicate {
 		if (this == object) {
 			return true;
 		} else {
-			return object instanceof AdventureModePredicate adventureModePredicate ? this.predicates.equals(adventureModePredicate.predicates) : false;
+			return !(object instanceof AdventureModePredicate adventureModePredicate)
+				? false
+				: this.predicates.equals(adventureModePredicate.predicates) && this.showInTooltip == adventureModePredicate.showInTooltip;
 		}
 	}
 
 	public int hashCode() {
-		return this.predicates.hashCode();
+		return this.predicates.hashCode() * 31 + (this.showInTooltip ? 1 : 0);
+	}
+
+	public String toString() {
+		return "AdventureModePredicate{predicates=" + this.predicates + ", showInTooltip=" + this.showInTooltip + "}";
 	}
 }

@@ -3,6 +3,7 @@ package net.minecraft.world.level.block.entity;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.NonNullList;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
@@ -10,12 +11,15 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Container;
+import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.LockCode;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.Nameable;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.level.block.state.BlockState;
 
 public abstract class BaseContainerBlockEntity extends BlockEntity implements Container, MenuProvider, Nameable {
@@ -77,6 +81,61 @@ public abstract class BaseContainerBlockEntity extends BlockEntity implements Co
 		}
 	}
 
+	protected abstract NonNullList<ItemStack> getItems();
+
+	protected abstract void setItems(NonNullList<ItemStack> nonNullList);
+
+	@Override
+	public boolean isEmpty() {
+		for (ItemStack itemStack : this.getItems()) {
+			if (!itemStack.isEmpty()) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	@Override
+	public ItemStack getItem(int i) {
+		return this.getItems().get(i);
+	}
+
+	@Override
+	public ItemStack removeItem(int i, int j) {
+		ItemStack itemStack = ContainerHelper.removeItem(this.getItems(), i, j);
+		if (!itemStack.isEmpty()) {
+			this.setChanged();
+		}
+
+		return itemStack;
+	}
+
+	@Override
+	public ItemStack removeItemNoUpdate(int i) {
+		return ContainerHelper.takeItem(this.getItems(), i);
+	}
+
+	@Override
+	public void setItem(int i, ItemStack itemStack) {
+		this.getItems().set(i, itemStack);
+		if (itemStack.getCount() > this.getMaxStackSize()) {
+			itemStack.setCount(this.getMaxStackSize());
+		}
+
+		this.setChanged();
+	}
+
+	@Override
+	public boolean stillValid(Player player) {
+		return Container.stillValidBlockEntity(this, player);
+	}
+
+	@Override
+	public void clearContent() {
+		this.getItems().clear();
+	}
+
 	@Nullable
 	@Override
 	public AbstractContainerMenu createMenu(int i, Inventory inventory, Player player) {
@@ -89,17 +148,23 @@ public abstract class BaseContainerBlockEntity extends BlockEntity implements Co
 	public void applyComponents(DataComponentMap dataComponentMap) {
 		this.name = dataComponentMap.get(DataComponents.CUSTOM_NAME);
 		this.lockKey = dataComponentMap.getOrDefault(DataComponents.LOCK, LockCode.NO_LOCK);
+		dataComponentMap.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY).copyInto(this.getItems());
 	}
 
 	@Override
 	public void collectComponents(DataComponentMap.Builder builder) {
 		builder.set(DataComponents.CUSTOM_NAME, this.name);
-		builder.set(DataComponents.LOCK, this.lockKey);
+		if (!this.lockKey.equals(LockCode.NO_LOCK)) {
+			builder.set(DataComponents.LOCK, this.lockKey);
+		}
+
+		builder.set(DataComponents.CONTAINER, ItemContainerContents.copyOf(this.getItems()));
 	}
 
 	@Override
 	public void removeComponentsFromTag(CompoundTag compoundTag) {
 		compoundTag.remove("CustomName");
 		compoundTag.remove("Lock");
+		compoundTag.remove("Items");
 	}
 }

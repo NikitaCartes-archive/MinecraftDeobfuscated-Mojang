@@ -6,11 +6,10 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import net.minecraft.core.Holder;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.ContainerHelper;
-import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.LootTable;
@@ -56,9 +55,7 @@ public class SetContainerContents extends LootItemConditionalFunction {
 							lootContext, lootPoolEntry -> lootPoolEntry.createItemStack(LootTable.createStackSplitter(lootContext.getLevel(), nonNullList::add), lootContext)
 						)
 				);
-			CompoundTag compoundTag = new CompoundTag();
-			ContainerHelper.saveAllItems(compoundTag, nonNullList, lootContext.getLevel().registryAccess());
-			BlockItem.updateBlockEntityData(itemStack, this.type.value(), compoundTag2 -> compoundTag2.merge(compoundTag));
+			itemStack.set(DataComponents.CONTAINER, ItemContainerContents.copyOf(nonNullList));
 			return itemStack;
 		}
 	}

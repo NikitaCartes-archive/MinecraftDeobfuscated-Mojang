@@ -2,13 +2,10 @@ package net.minecraft.world.level.block.entity;
 
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.NonNullList;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.Container;
-import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.RandomizableContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -50,63 +47,32 @@ public abstract class RandomizableContainerBlockEntity extends BaseContainerBloc
 	@Override
 	public boolean isEmpty() {
 		this.unpackLootTable(null);
-
-		for (ItemStack itemStack : this.getItems()) {
-			if (!itemStack.isEmpty()) {
-				return false;
-			}
-		}
-
-		return true;
+		return super.isEmpty();
 	}
 
 	@Override
 	public ItemStack getItem(int i) {
 		this.unpackLootTable(null);
-		return this.getItems().get(i);
+		return super.getItem(i);
 	}
 
 	@Override
 	public ItemStack removeItem(int i, int j) {
 		this.unpackLootTable(null);
-		ItemStack itemStack = ContainerHelper.removeItem(this.getItems(), i, j);
-		if (!itemStack.isEmpty()) {
-			this.setChanged();
-		}
-
-		return itemStack;
+		return super.removeItem(i, j);
 	}
 
 	@Override
 	public ItemStack removeItemNoUpdate(int i) {
 		this.unpackLootTable(null);
-		return ContainerHelper.takeItem(this.getItems(), i);
+		return super.removeItemNoUpdate(i);
 	}
 
 	@Override
 	public void setItem(int i, ItemStack itemStack) {
 		this.unpackLootTable(null);
-		this.getItems().set(i, itemStack);
-		if (itemStack.getCount() > this.getMaxStackSize()) {
-			itemStack.setCount(this.getMaxStackSize());
-		}
-
-		this.setChanged();
+		super.setItem(i, itemStack);
 	}
-
-	@Override
-	public boolean stillValid(Player player) {
-		return Container.stillValidBlockEntity(this, player);
-	}
-
-	@Override
-	public void clearContent() {
-		this.getItems().clear();
-	}
-
-	protected abstract NonNullList<ItemStack> getItems();
-
-	protected abstract void setItems(NonNullList<ItemStack> nonNullList);
 
 	@Override
 	public boolean canOpen(Player player) {

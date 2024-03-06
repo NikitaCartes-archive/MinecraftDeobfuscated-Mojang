@@ -1,15 +1,20 @@
 package net.minecraft.world.entity.animal;
 
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -19,6 +24,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.TimeUtil;
 import net.minecraft.util.valueproviders.UniformInt;
+import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
@@ -31,7 +37,9 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.NeutralMob;
+import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.TamableAnimal;
+import net.minecraft.world.entity.VariantHolder;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
@@ -68,15 +76,18 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.phys.Vec3;
 
-public class Wolf extends TamableAnimal implements NeutralMob {
+public class Wolf extends TamableAnimal implements NeutralMob, VariantHolder<Holder<WolfVariant>> {
 	private static final EntityDataAccessor<Boolean> DATA_INTERESTED_ID = SynchedEntityData.defineId(Wolf.class, EntityDataSerializers.BOOLEAN);
 	private static final EntityDataAccessor<Integer> DATA_COLLAR_COLOR = SynchedEntityData.defineId(Wolf.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Integer> DATA_REMAINING_ANGER_TIME = SynchedEntityData.defineId(Wolf.class, EntityDataSerializers.INT);
+	private static final EntityDataAccessor<Holder<WolfVariant>> DATA_VARIANT_ID = SynchedEntityData.defineId(Wolf.class, EntityDataSerializers.WOLF_VARIANT);
 	public static final Predicate<LivingEntity> PREY_SELECTOR = livingEntity -> {
 		EntityType<?> entityType = livingEntity.getType();
 		return entityType == EntityType.SHEEP || entityType == EntityType.RABBIT || entityType == EntityType.FOX;
@@ -125,6 +136,19 @@ public class Wolf extends TamableAnimal implements NeutralMob {
 		this.targetSelector.addGoal(8, new ResetUniversalAngerTargetGoal<>(this, true));
 	}
 
+	public ResourceLocation getTexture() {
+		WolfVariant wolfVariant = this.getVariant().value();
+		return this.isTame() ? wolfVariant.tameTexture() : (this.isAngry() ? wolfVariant.angryTexture() : wolfVariant.texture());
+	}
+
+	public Holder<WolfVariant> getVariant() {
+		return this.entityData.get(DATA_VARIANT_ID);
+	}
+
+	public void setVariant(Holder<WolfVariant> holder) {
+		this.entityData.set(DATA_VARIANT_ID, holder);
+	}
+
 	public static AttributeSupplier.Builder createAttributes() {
 		return Mob.createMobAttributes().add(Attributes.MOVEMENT_SPEED, 0.3F).add(Attributes.MAX_HEALTH, 8.0).add(Attributes.ATTACK_DAMAGE, 4.0);
 	}
@@ -132,6 +156,7 @@ public class Wolf extends TamableAnimal implements NeutralMob {
 	@Override
 	protected void defineSynchedData(SynchedEntityData.Builder builder) {
 		super.defineSynchedData(builder);
+		builder.define(DATA_VARIANT_ID, this.registryAccess().registryOrThrow(Registries.WOLF_VARIANT).getHolderOrThrow(WolfVariants.PALE));
 		builder.define(DATA_INTERESTED_ID, false);
 		builder.define(DATA_COLLAR_COLOR, DyeColor.RED.getId());
 		builder.define(DATA_REMAINING_ANGER_TIME, 0);
@@ -146,17 +171,40 @@ public class Wolf extends TamableAnimal implements NeutralMob {
 	public void addAdditionalSaveData(CompoundTag compoundTag) {
 		super.addAdditionalSaveData(compoundTag);
 		compoundTag.putByte("CollarColor", (byte)this.getCollarColor().getId());
+		compoundTag.putString("variant", ((ResourceKey)this.getVariant().unwrapKey().orElse(WolfVariants.PALE)).location().toString());
 		this.addPersistentAngerSaveData(compoundTag);
 	}
 
 	@Override
 	public void readAdditionalSaveData(CompoundTag compoundTag) {
 		super.readAdditionalSaveData(compoundTag);
+		Optional.ofNullable(ResourceLocation.tryParse(compoundTag.getString("variant")))
+			.map(resourceLocation -> ResourceKey.create(Registries.WOLF_VARIANT, resourceLocation))
+			.flatMap(resourceKey -> this.registryAccess().registryOrThrow(Registries.WOLF_VARIANT).getHolder(resourceKey))
+			.ifPresent(this::setVariant);
 		if (compoundTag.contains("CollarColor", 99)) {
 			this.setCollarColor(DyeColor.byId(compoundTag.getInt("CollarColor")));
 		}
 
 		this.readPersistentAngerSaveData(this.level(), compoundTag);
+	}
+
+	@Nullable
+	@Override
+	public SpawnGroupData finalizeSpawn(
+		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData
+	) {
+		Holder<Biome> holder = serverLevelAccessor.getBiome(this.blockPosition());
+		Holder<WolfVariant> holder2;
+		if (spawnGroupData instanceof Wolf.WolfPackData wolfPackData) {
+			holder2 = wolfPackData.type;
+		} else {
+			holder2 = WolfVariants.getSpawnVariant(this.registryAccess(), holder);
+			spawnGroupData = new Wolf.WolfPackData(holder2);
+		}
+
+		this.setVariant(holder2);
+		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData);
 	}
 
 	@Override
@@ -514,11 +562,21 @@ public class Wolf extends TamableAnimal implements NeutralMob {
 	@Nullable
 	public Wolf getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
 		Wolf wolf = EntityType.WOLF.create(serverLevel);
-		if (wolf != null) {
-			UUID uUID = this.getOwnerUUID();
-			if (uUID != null) {
-				wolf.setOwnerUUID(uUID);
+		if (wolf != null && ageableMob instanceof Wolf wolf2) {
+			if (this.random.nextBoolean()) {
+				wolf.setVariant(this.getVariant());
+			} else {
+				wolf.setVariant(wolf2.getVariant());
+			}
+
+			if (this.isTame()) {
+				wolf.setOwnerUUID(this.getOwnerUUID());
 				wolf.setTame(true, true);
+				if (this.random.nextBoolean()) {
+					wolf.setCollarColor(this.getCollarColor());
+				} else {
+					wolf.setCollarColor(wolf2.getCollarColor());
+				}
 			}
 		}
 
@@ -606,6 +664,15 @@ public class Wolf extends TamableAnimal implements NeutralMob {
 		public void tick() {
 			Wolf.this.setTarget(null);
 			super.tick();
+		}
+	}
+
+	public static class WolfPackData extends AgeableMob.AgeableMobGroupData {
+		public final Holder<WolfVariant> type;
+
+		public WolfPackData(Holder<WolfVariant> holder) {
+			super(false);
+			this.type = holder;
 		}
 	}
 

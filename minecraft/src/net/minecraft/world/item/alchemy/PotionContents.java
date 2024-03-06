@@ -36,7 +36,8 @@ public record PotionContents(Optional<Holder<Potion>> potion, Optional<Integer> 
 	private static final Component NO_EFFECT = Component.translatable("effect.none").withStyle(ChatFormatting.GRAY);
 	private static final int EMPTY_COLOR = 16253176;
 	private static final int BASE_POTION_COLOR = 3694022;
-	public static final Codec<PotionContents> CODEC = RecordCodecBuilder.create(
+	public static final int NO_POTION_COLOR = -1;
+	private static final Codec<PotionContents> FULL_CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
 					ExtraCodecs.strictOptionalField(BuiltInRegistries.POTION.holderByNameCodec(), "potion").forGetter(PotionContents::potion),
 					ExtraCodecs.strictOptionalField(Codec.INT, "custom_color").forGetter(PotionContents::customColor),
@@ -44,6 +45,7 @@ public record PotionContents(Optional<Holder<Potion>> potion, Optional<Integer> 
 				)
 				.apply(instance, PotionContents::new)
 	);
+	public static final Codec<PotionContents> CODEC = ExtraCodecs.withAlternative(FULL_CODEC, BuiltInRegistries.POTION.holderByNameCodec(), PotionContents::new);
 	public static final StreamCodec<RegistryFriendlyByteBuf, PotionContents> STREAM_CODEC = StreamCodec.composite(
 		ByteBufCodecs.holderRegistry(Registries.POTION).apply(ByteBufCodecs::optional),
 		PotionContents::potion,
@@ -115,23 +117,28 @@ public record PotionContents(Optional<Holder<Potion>> potion, Optional<Integer> 
 	}
 
 	public static int getColor(Iterable<MobEffectInstance> iterable) {
-		float f = 0.0F;
-		float g = 0.0F;
-		float h = 0.0F;
+		int i = getColorOptional(iterable);
+		return i == -1 ? 3694022 : i;
+	}
+
+	public static int getColorOptional(Iterable<MobEffectInstance> iterable) {
 		int i = 0;
+		int j = 0;
+		int k = 0;
+		int l = 0;
 
 		for (MobEffectInstance mobEffectInstance : iterable) {
 			if (mobEffectInstance.isVisible()) {
-				int j = mobEffectInstance.getEffect().value().getColor();
-				int k = mobEffectInstance.getAmplifier() + 1;
-				f += (float)(k * FastColor.ARGB32.red(j)) / 255.0F;
-				g += (float)(k * FastColor.ARGB32.green(j)) / 255.0F;
-				h += (float)(k * FastColor.ARGB32.blue(j)) / 255.0F;
-				i += k;
+				int m = mobEffectInstance.getEffect().value().getColor();
+				int n = mobEffectInstance.getAmplifier() + 1;
+				i += n * FastColor.ARGB32.red(m);
+				j += n * FastColor.ARGB32.green(m);
+				k += n * FastColor.ARGB32.blue(m);
+				l += n;
 			}
 		}
 
-		return i == 0 ? 3694022 : FastColor.ARGB32.color(0, (int)(f / (float)i * 255.0F), (int)(g / (float)i * 255.0F), (int)(h / (float)i * 255.0F));
+		return l == 0 ? -1 : FastColor.ARGB32.color(0, i / l, j / l, k / l);
 	}
 
 	public boolean hasEffects() {
@@ -178,19 +185,19 @@ public record PotionContents(Optional<Holder<Potion>> potion, Optional<Integer> 
 
 			for (Pair<Holder<Attribute>, AttributeModifier> pair : list) {
 				AttributeModifier attributeModifier = pair.getSecond();
-				double d = attributeModifier.getAmount();
+				double d = attributeModifier.amount();
 				double e;
-				if (attributeModifier.getOperation() != AttributeModifier.Operation.ADD_MULTIPLIED_BASE
-					&& attributeModifier.getOperation() != AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL) {
-					e = attributeModifier.getAmount();
+				if (attributeModifier.operation() != AttributeModifier.Operation.ADD_MULTIPLIED_BASE
+					&& attributeModifier.operation() != AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL) {
+					e = attributeModifier.amount();
 				} else {
-					e = attributeModifier.getAmount() * 100.0;
+					e = attributeModifier.amount() * 100.0;
 				}
 
 				if (d > 0.0) {
 					consumer.accept(
 						Component.translatable(
-								"attribute.modifier.plus." + attributeModifier.getOperation().id(),
+								"attribute.modifier.plus." + attributeModifier.operation().id(),
 								ItemAttributeModifiers.ATTRIBUTE_MODIFIER_FORMAT.format(e),
 								Component.translatable(pair.getFirst().value().getDescriptionId())
 							)
@@ -200,7 +207,7 @@ public record PotionContents(Optional<Holder<Potion>> potion, Optional<Integer> 
 					e *= -1.0;
 					consumer.accept(
 						Component.translatable(
-								"attribute.modifier.take." + attributeModifier.getOperation().id(),
+								"attribute.modifier.take." + attributeModifier.operation().id(),
 								ItemAttributeModifiers.ATTRIBUTE_MODIFIER_FORMAT.format(e),
 								Component.translatable(pair.getFirst().value().getDescriptionId())
 							)

@@ -21,7 +21,7 @@ public record ItemCost(Holder<Item> item, int count, DataComponentPredicate comp
 	public static final Codec<ItemCost> CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
 					BuiltInRegistries.ITEM.holderByNameCodec().fieldOf("id").forGetter(ItemCost::item),
-					ExtraCodecs.strictOptionalField(ExtraCodecs.POSITIVE_INT, "count", 1).forGetter(ItemCost::count),
+					ExtraCodecs.POSITIVE_INT.fieldOf("count").orElse(1).forGetter(ItemCost::count),
 					ExtraCodecs.strictOptionalField(DataComponentPredicate.CODEC, "components", DataComponentPredicate.EMPTY).forGetter(ItemCost::components)
 				)
 				.apply(instance, ItemCost::new)

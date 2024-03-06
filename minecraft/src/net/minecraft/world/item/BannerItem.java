@@ -13,8 +13,6 @@ import net.minecraft.world.level.block.entity.BannerPatternLayers;
 import org.apache.commons.lang3.Validate;
 
 public class BannerItem extends StandingAndWallBlockItem {
-	private static final String PATTERN_PREFIX = "block.minecraft.banner.";
-
 	public BannerItem(Block block, Block block2, Item.Properties properties) {
 		super(block, block2, properties, Direction.DOWN);
 		Validate.isInstanceOf(AbstractBannerBlock.class, block);
@@ -26,10 +24,7 @@ public class BannerItem extends StandingAndWallBlockItem {
 		if (bannerPatternLayers != null) {
 			for (int i = 0; i < Math.min(bannerPatternLayers.layers().size(), 6); i++) {
 				BannerPatternLayers.Layer layer = (BannerPatternLayers.Layer)bannerPatternLayers.layers().get(i);
-				layer.pattern()
-					.unwrapKey()
-					.map(resourceKey -> resourceKey.location().toShortLanguageKey())
-					.ifPresent(string -> list.add(Component.translatable("block.minecraft.banner." + string + "." + layer.color().getName()).withStyle(ChatFormatting.GRAY)));
+				list.add(layer.description().withStyle(ChatFormatting.GRAY));
 			}
 		}
 	}

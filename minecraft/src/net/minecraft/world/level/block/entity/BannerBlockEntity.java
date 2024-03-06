@@ -26,13 +26,11 @@ public class BannerBlockEntity extends BlockEntity implements Nameable {
 	@Nullable
 	private Component name;
 	private DyeColor baseColor;
-	private BannerPatternLayers itemPatterns = BannerPatternLayers.EMPTY;
-	private BannerPatternLayers patternsWithBase = BannerPatternLayers.EMPTY;
+	private BannerPatternLayers patterns = BannerPatternLayers.EMPTY;
 
 	public BannerBlockEntity(BlockPos blockPos, BlockState blockState) {
 		super(BlockEntityType.BANNER, blockPos, blockState);
 		this.baseColor = ((AbstractBannerBlock)blockState.getBlock()).getColor();
-		this.setPatterns(BannerPatternLayers.EMPTY);
 	}
 
 	public BannerBlockEntity(BlockPos blockPos, BlockState blockState, DyeColor dyeColor) {
@@ -59,8 +57,11 @@ public class BannerBlockEntity extends BlockEntity implements Nameable {
 	@Override
 	protected void saveAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
 		super.saveAdditional(compoundTag, provider);
-		if (!this.itemPatterns.equals(BannerPatternLayers.EMPTY)) {
-			compoundTag.put("patterns", Util.getOrThrow(BannerPatternLayers.CODEC.encodeStart(NbtOps.INSTANCE, this.itemPatterns), IllegalStateException::new));
+		if (!this.patterns.equals(BannerPatternLayers.EMPTY)) {
+			compoundTag.put(
+				"patterns",
+				Util.getOrThrow(BannerPatternLayers.CODEC.encodeStart(provider.createSerializationContext(NbtOps.INSTANCE), this.patterns), IllegalStateException::new)
+			);
 		}
 
 		if (this.name != null) {
@@ -77,9 +78,9 @@ public class BannerBlockEntity extends BlockEntity implements Nameable {
 
 		if (compoundTag.contains("patterns")) {
 			BannerPatternLayers.CODEC
-				.parse(NbtOps.INSTANCE, compoundTag.get("patterns"))
+				.parse(provider.createSerializationContext(NbtOps.INSTANCE), compoundTag.get("patterns"))
 				.resultOrPartial(string -> LOGGER.error("Failed to parse banner patterns: '{}'", string))
-				.ifPresent(this::setPatterns);
+				.ifPresent(bannerPatternLayers -> this.patterns = bannerPatternLayers);
 		}
 	}
 
@@ -92,8 +93,8 @@ public class BannerBlockEntity extends BlockEntity implements Nameable {
 		return this.saveWithoutMetadata(provider);
 	}
 
-	public BannerPatternLayers getPatternsWithBase() {
-		return this.patternsWithBase;
+	public BannerPatternLayers getPatterns() {
+		return this.patterns;
 	}
 
 	public ItemStack getItem() {
@@ -108,13 +109,13 @@ public class BannerBlockEntity extends BlockEntity implements Nameable {
 
 	@Override
 	public void applyComponents(DataComponentMap dataComponentMap) {
-		this.setPatterns(dataComponentMap.getOrDefault(DataComponents.BANNER_PATTERNS, BannerPatternLayers.EMPTY));
+		this.patterns = dataComponentMap.getOrDefault(DataComponents.BANNER_PATTERNS, BannerPatternLayers.EMPTY);
 		this.name = dataComponentMap.get(DataComponents.CUSTOM_NAME);
 	}
 
 	@Override
 	public void collectComponents(DataComponentMap.Builder builder) {
-		builder.set(DataComponents.BANNER_PATTERNS, this.itemPatterns);
+		builder.set(DataComponents.BANNER_PATTERNS, this.patterns);
 		builder.set(DataComponents.CUSTOM_NAME, this.name);
 	}
 
@@ -122,10 +123,5 @@ public class BannerBlockEntity extends BlockEntity implements Nameable {
 	public void removeComponentsFromTag(CompoundTag compoundTag) {
 		compoundTag.remove("patterns");
 		compoundTag.remove("CustomName");
-	}
-
-	private void setPatterns(BannerPatternLayers bannerPatternLayers) {
-		this.itemPatterns = bannerPatternLayers;
-		this.patternsWithBase = this.itemPatterns.withBase(this.baseColor);
 	}
 }

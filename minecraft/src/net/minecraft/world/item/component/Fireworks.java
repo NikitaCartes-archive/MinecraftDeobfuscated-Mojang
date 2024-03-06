@@ -14,17 +14,17 @@ import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.TooltipFlag;
 
 public record Fireworks(int flightDuration, List<FireworkExplosion> explosions) implements TooltipProvider {
-	private static final int MAX_EXPLOSIONS = 16;
+	private static final int MAX_EXPLOSIONS = 256;
 	public static final Codec<Fireworks> CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
 					ExtraCodecs.strictOptionalField(ExtraCodecs.UNSIGNED_BYTE, "flight_duration", 0).forGetter(Fireworks::flightDuration),
-					ExtraCodecs.strictOptionalField(ExtraCodecs.sizeLimitedList(FireworkExplosion.CODEC.listOf(), 16), "explosions", List.of())
+					ExtraCodecs.strictOptionalField(ExtraCodecs.sizeLimitedList(FireworkExplosion.CODEC.listOf(), 256), "explosions", List.of())
 						.forGetter(Fireworks::explosions)
 				)
 				.apply(instance, Fireworks::new)
 	);
 	public static final StreamCodec<ByteBuf, Fireworks> STREAM_CODEC = StreamCodec.composite(
-		ByteBufCodecs.VAR_INT, Fireworks::flightDuration, FireworkExplosion.STREAM_CODEC.apply(ByteBufCodecs.list(16)), Fireworks::explosions, Fireworks::new
+		ByteBufCodecs.VAR_INT, Fireworks::flightDuration, FireworkExplosion.STREAM_CODEC.apply(ByteBufCodecs.list(256)), Fireworks::explosions, Fireworks::new
 	);
 
 	@Override

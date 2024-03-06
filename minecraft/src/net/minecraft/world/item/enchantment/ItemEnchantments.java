@@ -7,6 +7,7 @@ import it.unimi.dsi.fastutil.objects.Object2IntMap.Entry;
 import java.util.Collections;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -22,14 +23,19 @@ import net.minecraft.world.item.component.TooltipProvider;
 public class ItemEnchantments implements TooltipProvider {
 	public static final ItemEnchantments EMPTY = new ItemEnchantments(new Object2IntLinkedOpenHashMap<>(), true);
 	private static final Codec<Integer> LEVEL_CODEC = Codec.intRange(0, 255);
-	public static final Codec<ItemEnchantments> CODEC = RecordCodecBuilder.create(
+	private static final Codec<Object2IntLinkedOpenHashMap<Holder<Enchantment>>> LEVELS_CODEC = Codec.unboundedMap(
+			BuiltInRegistries.ENCHANTMENT.holderByNameCodec(), LEVEL_CODEC
+		)
+		.xmap(Object2IntLinkedOpenHashMap::new, Function.identity());
+	private static final Codec<ItemEnchantments> FULL_CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
-					Codec.unboundedMap(BuiltInRegistries.ENCHANTMENT.holderByNameCodec(), LEVEL_CODEC)
-						.fieldOf("levels")
-						.forGetter(itemEnchantments -> itemEnchantments.enchantments),
+					LEVELS_CODEC.fieldOf("levels").forGetter(itemEnchantments -> itemEnchantments.enchantments),
 					ExtraCodecs.strictOptionalField(Codec.BOOL, "show_in_tooltip", true).forGetter(itemEnchantments -> itemEnchantments.showInTooltip)
 				)
-				.apply(instance, (map, boolean_) -> new ItemEnchantments(new Object2IntLinkedOpenHashMap<>(map), boolean_))
+				.apply(instance, ItemEnchantments::new)
+	);
+	public static final Codec<ItemEnchantments> CODEC = ExtraCodecs.withAlternative(
+		FULL_CODEC, LEVELS_CODEC, object2IntLinkedOpenHashMap -> new ItemEnchantments(object2IntLinkedOpenHashMap, true)
 	);
 	public static final StreamCodec<RegistryFriendlyByteBuf, ItemEnchantments> STREAM_CODEC = StreamCodec.composite(
 		ByteBufCodecs.map(Object2IntLinkedOpenHashMap::new, ByteBufCodecs.holderRegistry(Registries.ENCHANTMENT), ByteBufCodecs.VAR_INT),

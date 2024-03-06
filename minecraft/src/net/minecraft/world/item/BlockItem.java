@@ -2,7 +2,6 @@ package net.minecraft.world.item;
 
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
@@ -199,16 +198,6 @@ public class BlockItem extends Item {
 		if (itemContainerContents != null) {
 			ItemUtils.onContainerDestroyed(itemEntity, itemContainerContents.stream());
 		}
-	}
-
-	public static void updateBlockEntityData(ItemStack itemStack, BlockEntityType<?> blockEntityType, Consumer<CompoundTag> consumer) {
-		CustomData.update(DataComponents.BLOCK_ENTITY_DATA, itemStack, compoundTag -> {
-			consumer.accept(compoundTag);
-			compoundTag.remove("id");
-			if (!compoundTag.isEmpty()) {
-				BlockEntity.addEntityType(compoundTag, blockEntityType);
-			}
-		});
 	}
 
 	public static void setBlockEntityData(ItemStack itemStack, BlockEntityType<?> blockEntityType, CompoundTag compoundTag) {

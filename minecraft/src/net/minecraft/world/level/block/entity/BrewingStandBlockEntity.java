@@ -8,12 +8,10 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.Containers;
 import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.BrewingStandMenu;
 import net.minecraft.world.inventory.ContainerData;
@@ -43,14 +41,11 @@ public class BrewingStandBlockEntity extends BaseContainerBlockEntity implements
 	protected final ContainerData dataAccess = new ContainerData() {
 		@Override
 		public int get(int i) {
-			switch (i) {
-				case 0:
-					return BrewingStandBlockEntity.this.brewTime;
-				case 1:
-					return BrewingStandBlockEntity.this.fuel;
-				default:
-					return 0;
-			}
+			return switch (i) {
+				case 0 -> BrewingStandBlockEntity.this.brewTime;
+				case 1 -> BrewingStandBlockEntity.this.fuel;
+				default -> 0;
+			};
 		}
 
 		@Override
@@ -85,14 +80,13 @@ public class BrewingStandBlockEntity extends BaseContainerBlockEntity implements
 	}
 
 	@Override
-	public boolean isEmpty() {
-		for (ItemStack itemStack : this.items) {
-			if (!itemStack.isEmpty()) {
-				return false;
-			}
-		}
+	protected NonNullList<ItemStack> getItems() {
+		return this.items;
+	}
 
-		return true;
+	@Override
+	protected void setItems(NonNullList<ItemStack> nonNullList) {
+		this.items = nonNullList;
 	}
 
 	public static void serverTick(Level level, BlockPos blockPos, BlockState blockState, BrewingStandBlockEntity brewingStandBlockEntity) {
@@ -208,33 +202,6 @@ public class BrewingStandBlockEntity extends BaseContainerBlockEntity implements
 	}
 
 	@Override
-	public ItemStack getItem(int i) {
-		return i >= 0 && i < this.items.size() ? this.items.get(i) : ItemStack.EMPTY;
-	}
-
-	@Override
-	public ItemStack removeItem(int i, int j) {
-		return ContainerHelper.removeItem(this.items, i, j);
-	}
-
-	@Override
-	public ItemStack removeItemNoUpdate(int i) {
-		return ContainerHelper.takeItem(this.items, i);
-	}
-
-	@Override
-	public void setItem(int i, ItemStack itemStack) {
-		if (i >= 0 && i < this.items.size()) {
-			this.items.set(i, itemStack);
-		}
-	}
-
-	@Override
-	public boolean stillValid(Player player) {
-		return Container.stillValidBlockEntity(this, player);
-	}
-
-	@Override
 	public boolean canPlaceItem(int i, ItemStack itemStack) {
 		if (i == 3) {
 			return PotionBrewing.isIngredient(itemStack);
@@ -263,11 +230,6 @@ public class BrewingStandBlockEntity extends BaseContainerBlockEntity implements
 	@Override
 	public boolean canTakeItemThroughFace(int i, ItemStack itemStack, Direction direction) {
 		return i == 3 ? itemStack.is(Items.GLASS_BOTTLE) : true;
-	}
-
-	@Override
-	public void clearContent() {
-		this.items.clear();
 	}
 
 	@Override

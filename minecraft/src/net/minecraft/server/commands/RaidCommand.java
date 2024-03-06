@@ -9,6 +9,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.ComponentArgument;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -94,7 +95,7 @@ public class RaidCommand {
 			return 0;
 		} else {
 			raider.setPatrolLeader(true);
-			raider.setItemSlot(EquipmentSlot.HEAD, Raid.getLeaderBannerInstance());
+			raider.setItemSlot(EquipmentSlot.HEAD, Raid.getLeaderBannerInstance(commandSourceStack.registryAccess().lookupOrThrow(Registries.BANNER_PATTERN)));
 			raider.setPos(commandSourceStack.getPosition().x, commandSourceStack.getPosition().y, commandSourceStack.getPosition().z);
 			raider.finalizeSpawn(
 				commandSourceStack.getLevel(),

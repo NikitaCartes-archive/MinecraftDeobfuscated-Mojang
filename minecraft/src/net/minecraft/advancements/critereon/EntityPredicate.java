@@ -35,7 +35,8 @@ public record EntityPredicate(
 	Optional<EntityPredicate> vehicle,
 	Optional<EntityPredicate> passenger,
 	Optional<EntityPredicate> targetedEntity,
-	Optional<String> team
+	Optional<String> team,
+	Optional<SlotsPredicate> slots
 ) {
 	public static final Codec<EntityPredicate> CODEC = ExtraCodecs.recursive(
 		"EntityPredicate",
@@ -53,7 +54,8 @@ public record EntityPredicate(
 							ExtraCodecs.strictOptionalField(codec, "vehicle").forGetter(EntityPredicate::vehicle),
 							ExtraCodecs.strictOptionalField(codec, "passenger").forGetter(EntityPredicate::passenger),
 							ExtraCodecs.strictOptionalField(codec, "targeted_entity").forGetter(EntityPredicate::targetedEntity),
-							ExtraCodecs.strictOptionalField(Codec.STRING, "team").forGetter(EntityPredicate::team)
+							ExtraCodecs.strictOptionalField(Codec.STRING, "team").forGetter(EntityPredicate::team),
+							ExtraCodecs.strictOptionalField(SlotsPredicate.CODEC, "slots").forGetter(EntityPredicate::slots)
 						)
 						.apply(instance, EntityPredicate::new)
 			)
@@ -132,7 +134,7 @@ public record EntityPredicate(
 						}
 					}
 
-					return true;
+					return !this.slots.isPresent() || ((SlotsPredicate)this.slots.get()).matches(entity);
 				}
 			}
 		}
@@ -160,6 +162,7 @@ public record EntityPredicate(
 		private Optional<EntityPredicate> passenger = Optional.empty();
 		private Optional<EntityPredicate> targetedEntity = Optional.empty();
 		private Optional<String> team = Optional.empty();
+		private Optional<SlotsPredicate> slots = Optional.empty();
 
 		public static EntityPredicate.Builder entity() {
 			return new EntityPredicate.Builder();
@@ -245,6 +248,11 @@ public record EntityPredicate(
 			return this;
 		}
 
+		public EntityPredicate.Builder slots(SlotsPredicate slotsPredicate) {
+			this.slots = Optional.of(slotsPredicate);
+			return this;
+		}
+
 		public EntityPredicate build() {
 			return new EntityPredicate(
 				this.entityType,
@@ -259,7 +267,8 @@ public record EntityPredicate(
 				this.vehicle,
 				this.passenger,
 				this.targetedEntity,
-				this.team
+				this.team,
+				this.slots
 			);
 		}
 	}

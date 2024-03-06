@@ -1092,7 +1092,7 @@ public class CreativeModeTabs {
 						output.accept(Items.PURPLE_BANNER);
 						output.accept(Items.MAGENTA_BANNER);
 						output.accept(Items.PINK_BANNER);
-						output.accept(Raid.getLeaderBannerInstance());
+						output.accept(Raid.getLeaderBannerInstance(itemDisplayParameters.holders().lookupOrThrow(Registries.BANNER_PATTERN)));
 						output.accept(Items.SKELETON_SKULL);
 						output.accept(Items.WITHER_SKELETON_SKULL);
 						output.accept(Items.PLAYER_HEAD);
@@ -1863,12 +1863,18 @@ public class CreativeModeTabs {
 		Predicate<Holder<PaintingVariant>> predicate,
 		CreativeModeTab.TabVisibility tabVisibility
 	) {
-		registryLookup.listElements().filter(predicate).sorted(PAINTING_COMPARATOR).forEach(reference -> {
-			CustomData customData = Util.getOrThrow(CustomData.EMPTY.update(Painting.VARIANT_MAP_CODEC, reference), IllegalStateException::new);
-			ItemStack itemStack = new ItemStack(Items.PAINTING);
-			itemStack.set(DataComponents.ENTITY_DATA, customData);
-			output.accept(itemStack, tabVisibility);
-		});
+		registryLookup.listElements()
+			.filter(predicate)
+			.sorted(PAINTING_COMPARATOR)
+			.forEach(
+				reference -> {
+					CustomData customData = Util.getOrThrow(CustomData.EMPTY.update(Painting.VARIANT_MAP_CODEC, reference), IllegalStateException::new)
+						.update(compoundTag -> compoundTag.putString("id", "minecraft:painting"));
+					ItemStack itemStack = new ItemStack(Items.PAINTING);
+					itemStack.set(DataComponents.ENTITY_DATA, customData);
+					output.accept(itemStack, tabVisibility);
+				}
+			);
 	}
 
 	public static List<CreativeModeTab> tabs() {
