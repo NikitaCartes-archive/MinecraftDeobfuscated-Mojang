@@ -15,6 +15,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 
 public class SlotRanges {
 	private static final List<SlotRange> SLOTS = Util.make(new ArrayList(), arrayList -> {
+		addSingleSlot(arrayList, "contents", 0);
 		addSlotRange(arrayList, "container.", 0, 54);
 		addSlotRange(arrayList, "hotbar.", 0, 9);
 		addSlotRange(arrayList, "inventory.", 9, 27);
@@ -26,7 +27,7 @@ public class SlotRanges {
 		addSingleSlot(arrayList, "weapon", i);
 		addSingleSlot(arrayList, "weapon.mainhand", i);
 		addSingleSlot(arrayList, "weapon.offhand", j);
-		addSlotRange(arrayList, "weapon.*", i, j);
+		addSlots(arrayList, "weapon.*", i, j);
 		i = EquipmentSlot.HEAD.getIndex(100);
 		j = EquipmentSlot.CHEST.getIndex(100);
 		int k = EquipmentSlot.LEGS.getIndex(100);
@@ -37,7 +38,7 @@ public class SlotRanges {
 		addSingleSlot(arrayList, "armor.legs", k);
 		addSingleSlot(arrayList, "armor.feet", l);
 		addSingleSlot(arrayList, "armor.body", m);
-		addSlotRange(arrayList, "armor.*", i, j, k, l, m);
+		addSlots(arrayList, "armor.*", i, j, k, l, m);
 		addSingleSlot(arrayList, "horse.saddle", 400);
 		addSingleSlot(arrayList, "horse.chest", 499);
 		addSingleSlot(arrayList, "player.cursor", 499);
@@ -76,7 +77,7 @@ public class SlotRanges {
 		list.add(create(string + "*", intList));
 	}
 
-	private static void addSlotRange(List<SlotRange> list, String string, int... is) {
+	private static void addSlots(List<SlotRange> list, String string, int... is) {
 		list.add(create(string, is));
 	}
 

@@ -179,6 +179,7 @@ public class ModelTemplates {
 		"template_sculk_shrieker", TextureSlot.BOTTOM, TextureSlot.SIDE, TextureSlot.TOP, TextureSlot.PARTICLE, TextureSlot.INNER_TOP
 	);
 	public static final ModelTemplate VAULT = create("template_vault", TextureSlot.TOP, TextureSlot.BOTTOM, TextureSlot.SIDE, TextureSlot.FRONT);
+	public static final ModelTemplate FLAT_HANDHELD_MACE_ITEM = createItem("handheld_mace", TextureSlot.LAYER0);
 
 	private static ModelTemplate create(TextureSlot... textureSlots) {
 		return new ModelTemplate(Optional.empty(), Optional.empty(), textureSlots);

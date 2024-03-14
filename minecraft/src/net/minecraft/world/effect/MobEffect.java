@@ -5,11 +5,17 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.Map.Entry;
 import java.util.function.BiConsumer;
+import java.util.function.Function;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.core.Holder;
+import net.minecraft.core.particles.ColorParticleOption;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.FastColor;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
@@ -18,9 +24,11 @@ import net.minecraft.world.entity.ai.attributes.AttributeMap;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 
 public class MobEffect {
+	private static final int AMBIENT_ALPHA = Mth.floor(38.25F);
 	private final Map<Holder<Attribute>, MobEffect.AttributeTemplate> attributeModifiers = new Object2ObjectOpenHashMap<>();
 	private final MobEffectCategory category;
 	private final int color;
+	private final Function<MobEffectInstance, ParticleOptions> particleFactory;
 	@Nullable
 	private String descriptionId;
 	private int blendDurationTicks;
@@ -28,6 +36,16 @@ public class MobEffect {
 	protected MobEffect(MobEffectCategory mobEffectCategory, int i) {
 		this.category = mobEffectCategory;
 		this.color = i;
+		this.particleFactory = mobEffectInstance -> {
+			int j = mobEffectInstance.isAmbient() ? AMBIENT_ALPHA : 255;
+			return ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, FastColor.ARGB32.color(j, i));
+		};
+	}
+
+	protected MobEffect(MobEffectCategory mobEffectCategory, int i, ParticleOptions particleOptions) {
+		this.category = mobEffectCategory;
+		this.color = i;
+		this.particleFactory = mobEffectInstance -> particleOptions;
 	}
 
 	public int getBlendDurationTicks() {
@@ -112,6 +130,10 @@ public class MobEffect {
 
 	public boolean isBeneficial() {
 		return this.category == MobEffectCategory.BENEFICIAL;
+	}
+
+	public ParticleOptions createParticleOptions(MobEffectInstance mobEffectInstance) {
+		return (ParticleOptions)this.particleFactory.apply(mobEffectInstance);
 	}
 
 	static record AttributeTemplate(UUID id, double amount, AttributeModifier.Operation operation) {

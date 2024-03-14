@@ -1059,6 +1059,8 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 
 		if (this.screen != null) {
 			this.screen.removed();
+		} else {
+			this.setLastInputType(InputType.NONE);
 		}
 
 		if (screen == null && this.clientLevelTeardownInProgress) {

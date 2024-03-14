@@ -366,20 +366,26 @@ public class StructureTemplate {
 		}
 	}
 
+	public static void updateShapeAtEdge(LevelAccessor levelAccessor, int i, DiscreteVoxelShape discreteVoxelShape, BlockPos blockPos) {
+		updateShapeAtEdge(levelAccessor, i, discreteVoxelShape, blockPos.getX(), blockPos.getY(), blockPos.getZ());
+	}
+
 	public static void updateShapeAtEdge(LevelAccessor levelAccessor, int i, DiscreteVoxelShape discreteVoxelShape, int j, int k, int l) {
+		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
+		BlockPos.MutableBlockPos mutableBlockPos2 = new BlockPos.MutableBlockPos();
 		discreteVoxelShape.forAllFaces((direction, m, n, o) -> {
-			BlockPos blockPos = new BlockPos(j + m, k + n, l + o);
-			BlockPos blockPos2 = blockPos.relative(direction);
-			BlockState blockState = levelAccessor.getBlockState(blockPos);
-			BlockState blockState2 = levelAccessor.getBlockState(blockPos2);
-			BlockState blockState3 = blockState.updateShape(direction, blockState2, levelAccessor, blockPos, blockPos2);
+			mutableBlockPos.set(j + m, k + n, l + o);
+			mutableBlockPos2.setWithOffset(mutableBlockPos, direction);
+			BlockState blockState = levelAccessor.getBlockState(mutableBlockPos);
+			BlockState blockState2 = levelAccessor.getBlockState(mutableBlockPos2);
+			BlockState blockState3 = blockState.updateShape(direction, blockState2, levelAccessor, mutableBlockPos, mutableBlockPos2);
 			if (blockState != blockState3) {
-				levelAccessor.setBlock(blockPos, blockState3, i & -2);
+				levelAccessor.setBlock(mutableBlockPos, blockState3, i & -2);
 			}
 
-			BlockState blockState4 = blockState2.updateShape(direction.getOpposite(), blockState3, levelAccessor, blockPos2, blockPos);
+			BlockState blockState4 = blockState2.updateShape(direction.getOpposite(), blockState3, levelAccessor, mutableBlockPos2, mutableBlockPos);
 			if (blockState2 != blockState4) {
-				levelAccessor.setBlock(blockPos2, blockState4, i & -2);
+				levelAccessor.setBlock(mutableBlockPos2, blockState4, i & -2);
 			}
 		});
 	}

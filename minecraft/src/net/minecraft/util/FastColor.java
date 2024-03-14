@@ -75,5 +75,9 @@ public class FastColor {
 		public static int opaque(int i) {
 			return i | 0xFF000000;
 		}
+
+		public static int color(int i, int j) {
+			return i << 24 | j & 16777215;
+		}
 	}
 }

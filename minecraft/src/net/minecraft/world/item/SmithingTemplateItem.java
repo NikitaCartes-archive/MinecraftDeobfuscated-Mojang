@@ -8,6 +8,7 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.flag.FeatureFlag;
 import net.minecraft.world.item.armortrim.TrimPattern;
 import net.minecraft.world.level.Level;
 
@@ -81,9 +82,10 @@ public class SmithingTemplateItem extends Item {
 		Component component4,
 		Component component5,
 		List<ResourceLocation> list,
-		List<ResourceLocation> list2
+		List<ResourceLocation> list2,
+		FeatureFlag... featureFlags
 	) {
-		super(new Item.Properties());
+		super(new Item.Properties().requiredFeatures(featureFlags));
 		this.appliesTo = component;
 		this.ingredients = component2;
 		this.upgradeDescription = component3;
@@ -93,11 +95,11 @@ public class SmithingTemplateItem extends Item {
 		this.additionalSlotEmptyIcons = list2;
 	}
 
-	public static SmithingTemplateItem createArmorTrimTemplate(ResourceKey<TrimPattern> resourceKey) {
-		return createArmorTrimTemplate(resourceKey.location());
+	public static SmithingTemplateItem createArmorTrimTemplate(ResourceKey<TrimPattern> resourceKey, FeatureFlag... featureFlags) {
+		return createArmorTrimTemplate(resourceKey.location(), featureFlags);
 	}
 
-	public static SmithingTemplateItem createArmorTrimTemplate(ResourceLocation resourceLocation) {
+	public static SmithingTemplateItem createArmorTrimTemplate(ResourceLocation resourceLocation, FeatureFlag... featureFlags) {
 		return new SmithingTemplateItem(
 			ARMOR_TRIM_APPLIES_TO,
 			ARMOR_TRIM_INGREDIENTS,
@@ -105,7 +107,8 @@ public class SmithingTemplateItem extends Item {
 			ARMOR_TRIM_BASE_SLOT_DESCRIPTION,
 			ARMOR_TRIM_ADDITIONS_SLOT_DESCRIPTION,
 			createTrimmableArmorIconList(),
-			createTrimmableMaterialIconList()
+			createTrimmableMaterialIconList(),
+			featureFlags
 		);
 	}
 

@@ -223,6 +223,11 @@ public class StructureBlockEditScreen extends Screen {
 	}
 
 	@Override
+	public void renderBackground(GuiGraphics guiGraphics, int i, int j, float f) {
+		this.renderTransparentBackground(guiGraphics);
+	}
+
+	@Override
 	public void resize(Minecraft minecraft, int i, int j) {
 		String string = this.nameEdit.getValue();
 		String string2 = this.posXEdit.getValue();

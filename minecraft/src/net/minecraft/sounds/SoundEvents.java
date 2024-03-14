@@ -661,6 +661,11 @@ public class SoundEvents {
 	public static final SoundEvent HANGING_SIGN_FALL = register("block.hanging_sign.fall");
 	public static final SoundEvent HANGING_SIGN_HIT = register("block.hanging_sign.hit");
 	public static final SoundEvent HANGING_SIGN_PLACE = register("block.hanging_sign.place");
+	public static final SoundEvent HEAVY_CORE_BREAK = register("block.heavy_core.break");
+	public static final SoundEvent HEAVY_CORE_FALL = register("block.heavy_core.fall");
+	public static final SoundEvent HEAVY_CORE_HIT = register("block.heavy_core.hit");
+	public static final SoundEvent HEAVY_CORE_PLACE = register("block.heavy_core.place");
+	public static final SoundEvent HEAVY_CORE_STEP = register("block.heavy_core.step");
 	public static final SoundEvent NETHER_WOOD_HANGING_SIGN_STEP = register("block.nether_wood_hanging_sign.step");
 	public static final SoundEvent NETHER_WOOD_HANGING_SIGN_BREAK = register("block.nether_wood_hanging_sign.break");
 	public static final SoundEvent NETHER_WOOD_HANGING_SIGN_FALL = register("block.nether_wood_hanging_sign.fall");
@@ -787,6 +792,8 @@ public class SoundEvents {
 	public static final SoundEvent LODESTONE_HIT = register("block.lodestone.hit");
 	public static final SoundEvent LODESTONE_FALL = register("block.lodestone.fall");
 	public static final SoundEvent LODESTONE_COMPASS_LOCK = register("item.lodestone_compass.lock");
+	public static final SoundEvent MACE_SMASH_AIR = register("item.mace.smash_air");
+	public static final SoundEvent MACE_SMASH_GROUND = register("item.mace.smash_ground");
 	public static final SoundEvent MAGMA_CUBE_DEATH = register("entity.magma_cube.death");
 	public static final SoundEvent MAGMA_CUBE_HURT = register("entity.magma_cube.hurt");
 	public static final SoundEvent MAGMA_CUBE_HURT_SMALL = register("entity.magma_cube.hurt_small");

@@ -1,6 +1,7 @@
 package net.minecraft.network.syncher;
 
 import io.netty.buffer.ByteBuf;
+import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.UUID;
@@ -75,6 +76,9 @@ public class EntityDataSerializers {
 	public static final EntityDataSerializer<Optional<BlockState>> OPTIONAL_BLOCK_STATE = EntityDataSerializer.forValueType(OPTIONAL_BLOCK_STATE_CODEC);
 	public static final EntityDataSerializer<Boolean> BOOLEAN = EntityDataSerializer.forValueType(ByteBufCodecs.BOOL);
 	public static final EntityDataSerializer<ParticleOptions> PARTICLE = EntityDataSerializer.forValueType(ParticleTypes.STREAM_CODEC);
+	public static final EntityDataSerializer<List<ParticleOptions>> PARTICLES = EntityDataSerializer.forValueType(
+		ParticleTypes.STREAM_CODEC.apply(ByteBufCodecs.list())
+	);
 	public static final EntityDataSerializer<Rotations> ROTATIONS = EntityDataSerializer.forValueType(Rotations.STREAM_CODEC);
 	public static final EntityDataSerializer<BlockPos> BLOCK_POS = EntityDataSerializer.forValueType(BlockPos.STREAM_CODEC);
 	public static final EntityDataSerializer<Optional<BlockPos>> OPTIONAL_BLOCK_POS = EntityDataSerializer.forValueType(
@@ -158,6 +162,7 @@ public class EntityDataSerializers {
 		registerSerializer(OPTIONAL_BLOCK_STATE);
 		registerSerializer(COMPOUND_TAG);
 		registerSerializer(PARTICLE);
+		registerSerializer(PARTICLES);
 		registerSerializer(VILLAGER_DATA);
 		registerSerializer(OPTIONAL_UNSIGNED_INT);
 		registerSerializer(POSE);

@@ -17,7 +17,6 @@ import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.network.chat.Component;
@@ -118,10 +117,6 @@ public abstract class AbstractWidget implements Renderable, GuiEventListener, La
 		int k = this.getX() + i;
 		int l = this.getX() + this.getWidth() - i;
 		renderScrollingString(guiGraphics, font, this.getMessage(), k, this.getY(), l, this.getY() + this.getHeight(), j);
-	}
-
-	protected void renderMenuBackground(GuiGraphics guiGraphics, int i, int j, int k, int l) {
-		Screen.renderMenuBackgroundTexture(guiGraphics, i, j, k - i, l - j);
 	}
 
 	public void onClick(double d, double e) {

@@ -5,6 +5,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 import net.minecraft.advancements.CriteriaTriggers;
@@ -73,14 +74,7 @@ public class InventoryChangeTrigger extends SimpleCriterionTrigger<InventoryChan
 
 			for(int i = 0; i < itemLikes.length; ++i) {
 				itemPredicates[i] = new ItemPredicate(
-					Optional.of(HolderSet.direct(itemLikes[i].asItem().builtInRegistryHolder())),
-					MinMaxBounds.Ints.ANY,
-					MinMaxBounds.Ints.ANY,
-					List.of(),
-					List.of(),
-					Optional.empty(),
-					Optional.empty(),
-					DataComponentPredicate.EMPTY
+					Optional.of(HolderSet.direct(itemLikes[i].asItem().builtInRegistryHolder())), MinMaxBounds.Ints.ANY, DataComponentPredicate.EMPTY, Map.of()
 				);
 			}
 

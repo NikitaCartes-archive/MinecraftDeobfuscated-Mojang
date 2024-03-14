@@ -166,6 +166,7 @@ public class ItemModelGenerators {
 		this.generateFlatItem(Items.BOWL, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.BREAD, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.BRICK, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.BREEZE_ROD, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.BROWN_DYE, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.BUCKET, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.CARROT_ON_A_STICK, ModelTemplates.FLAT_HANDHELD_ROD_ITEM);
@@ -216,6 +217,7 @@ public class ItemModelGenerators {
 		this.generateFlatItem(Items.FIRE_CHARGE, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.FLINT, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.FLINT_AND_STEEL, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.FLOW_BANNER_PATTERN, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.FLOWER_BANNER_PATTERN, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.FURNACE_MINECART, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.GHAST_TEAR, ModelTemplates.FLAT_ITEM);
@@ -240,6 +242,7 @@ public class ItemModelGenerators {
 		this.generateFlatItem(Items.GRAY_DYE, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.GREEN_DYE, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.GUNPOWDER, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.GUSTER_BANNER_PATTERN, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.HEART_OF_THE_SEA, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.HONEYCOMB, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.HONEY_BOTTLE, ModelTemplates.FLAT_ITEM);
@@ -365,6 +368,7 @@ public class ItemModelGenerators {
 		this.generateFlatItem(Items.WHEAT, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.WHITE_DYE, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.WIND_CHARGE, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.MACE, ModelTemplates.FLAT_HANDHELD_MACE_ITEM);
 		this.generateItemWithOverlay(Items.WOLF_ARMOR);
 		this.generateFlatItem(Items.WOODEN_AXE, ModelTemplates.FLAT_HANDHELD_ITEM);
 		this.generateFlatItem(Items.WOODEN_HOE, ModelTemplates.FLAT_HANDHELD_ITEM);
@@ -391,6 +395,8 @@ public class ItemModelGenerators {
 		this.generateFlatItem(Items.SILENCE_ARMOR_TRIM_SMITHING_TEMPLATE, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.RAISER_ARMOR_TRIM_SMITHING_TEMPLATE, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.HOST_ARMOR_TRIM_SMITHING_TEMPLATE, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.FLOW_ARMOR_TRIM_SMITHING_TEMPLATE, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.BOLT_ARMOR_TRIM_SMITHING_TEMPLATE, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.DEBUG_STICK, Items.STICK, ModelTemplates.FLAT_HANDHELD_ITEM);
 		this.generateFlatItem(Items.ENCHANTED_GOLDEN_APPLE, Items.GOLDEN_APPLE, ModelTemplates.FLAT_ITEM);
 
@@ -408,7 +414,9 @@ public class ItemModelGenerators {
 		this.generateFlatItem(Items.BURN_POTTERY_SHERD, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.DANGER_POTTERY_SHERD, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.EXPLORER_POTTERY_SHERD, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.FLOW_POTTERY_SHERD, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.FRIEND_POTTERY_SHERD, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.GUSTER_POTTERY_SHERD, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.HEART_POTTERY_SHERD, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.HEARTBREAK_POTTERY_SHERD, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.HOWL_POTTERY_SHERD, ModelTemplates.FLAT_ITEM);
@@ -416,6 +424,7 @@ public class ItemModelGenerators {
 		this.generateFlatItem(Items.MOURNER_POTTERY_SHERD, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.PLENTY_POTTERY_SHERD, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.PRIZE_POTTERY_SHERD, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.SCRAPE_POTTERY_SHERD, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.SHEAF_POTTERY_SHERD, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.SHELTER_POTTERY_SHERD, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.SKULL_POTTERY_SHERD, ModelTemplates.FLAT_ITEM);

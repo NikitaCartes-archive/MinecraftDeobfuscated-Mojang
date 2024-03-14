@@ -56,7 +56,8 @@ public class VideoSettingsScreen extends OptionsSubScreen {
 			options.fovEffectScale(),
 			options.showAutosaveIndicator(),
 			options.glintSpeed(),
-			options.glintStrength()
+			options.glintStrength(),
+			options.menuBackgroundBlurriness()
 		};
 	}
 
@@ -123,7 +124,6 @@ public class VideoSettingsScreen extends OptionsSubScreen {
 
 	@Override
 	public void onClose() {
-		this.minecraft.options.save();
 		this.minecraft.getWindow().changeFullscreenVideoMode();
 		super.onClose();
 	}

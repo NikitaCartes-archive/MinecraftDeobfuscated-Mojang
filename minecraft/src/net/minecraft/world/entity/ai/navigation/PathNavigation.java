@@ -158,6 +158,10 @@ public abstract class PathNavigation {
 		return this.moveTo(this.createPath(d, e, f, 1), g);
 	}
 
+	public boolean moveTo(double d, double e, double f, int i, double g) {
+		return this.moveTo(this.createPath(d, e, f, i), g);
+	}
+
 	public boolean moveTo(Entity entity, double d) {
 		Path path = this.createPath(entity, 1);
 		return path != null && this.moveTo(path, d);

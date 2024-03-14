@@ -624,6 +624,9 @@ public class VanillaChestLoot implements LootTableSubProvider {
 				)
 		);
 		biConsumer.accept(BuiltInLootTables.TRIAL_CHAMBERS_REWARD, LootTable.lootTable());
+		biConsumer.accept(BuiltInLootTables.TRIAL_CHAMBERS_REWARD_COMMON, LootTable.lootTable());
+		biConsumer.accept(BuiltInLootTables.TRIAL_CHAMBERS_REWARD_RARE, LootTable.lootTable());
+		biConsumer.accept(BuiltInLootTables.TRIAL_CHAMBERS_REWARD_UNIQUE, LootTable.lootTable());
 		biConsumer.accept(BuiltInLootTables.TRIAL_CHAMBERS_SUPPLY, LootTable.lootTable());
 		biConsumer.accept(BuiltInLootTables.TRIAL_CHAMBERS_CORRIDOR, LootTable.lootTable());
 		biConsumer.accept(BuiltInLootTables.TRIAL_CHAMBERS_ENTRANCE, LootTable.lootTable());

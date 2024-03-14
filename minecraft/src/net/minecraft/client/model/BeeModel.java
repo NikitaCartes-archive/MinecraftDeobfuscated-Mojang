@@ -49,7 +49,6 @@ public class BeeModel<T extends Bee> extends AgeableListModel<T> {
 	}
 
 	public static LayerDefinition createBodyLayer() {
-		float f = 19.0F;
 		MeshDefinition meshDefinition = new MeshDefinition();
 		PartDefinition partDefinition = meshDefinition.getRoot();
 		PartDefinition partDefinition2 = partDefinition.addOrReplaceChild("bone", CubeListBuilder.create(), PartPose.offset(0.0F, 19.0F, 0.0F));

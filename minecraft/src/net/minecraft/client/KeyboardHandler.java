@@ -25,6 +25,7 @@ import net.minecraft.client.gui.screens.SimpleOptionsSubScreen;
 import net.minecraft.client.gui.screens.controls.KeyBindsScreen;
 import net.minecraft.client.gui.screens.debug.GameModeSwitcherScreen;
 import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.commands.arguments.blocks.BlockStateParser;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -384,32 +385,23 @@ public class KeyboardHandler {
 				}
 			}
 
-			if (this.minecraft.getNarrator().isActive() && this.minecraft.options.narratorHotkey().get()) {
-				boolean var10000;
-				label155: {
-					if (screen != null) {
-						GuiEventListener bl4 = screen.getFocused();
-						if (bl4 instanceof EditBox editBox && editBox.canConsumeInput()) {
-							var10000 = false;
-							break label155;
+			if (k != 0) {
+				boolean bl2 = screen == null || !(screen.getFocused() instanceof EditBox) || !((EditBox)screen.getFocused()).canConsumeInput();
+				if (bl2) {
+					if (Screen.hasControlDown() && i == 66 && this.minecraft.getNarrator().isActive()) {
+						boolean bl3 = this.minecraft.options.narrator().get() == NarratorStatus.OFF;
+						this.minecraft.options.narrator().set(NarratorStatus.byId(((NarratorStatus)this.minecraft.options.narrator().get()).getId() + 1));
+						this.minecraft.options.save();
+						if (screen instanceof SimpleOptionsSubScreen) {
+							((SimpleOptionsSubScreen)screen).updateNarratorButton();
+						}
+
+						if (bl3 && screen != null) {
+							screen.narrationEnabled();
 						}
 					}
 
-					var10000 = true;
-				}
-
-				boolean bl2 = var10000;
-				if (k != 0 && i == 66 && Screen.hasControlDown() && bl2) {
-					boolean bl3 = this.minecraft.options.narrator().get() == NarratorStatus.OFF;
-					this.minecraft.options.narrator().set(NarratorStatus.byId(((NarratorStatus)this.minecraft.options.narrator().get()).getId() + 1));
-					this.minecraft.options.save();
-					if (screen instanceof SimpleOptionsSubScreen) {
-						((SimpleOptionsSubScreen)screen).updateNarratorButton();
-					}
-
-					if (bl3 && screen != null) {
-						screen.narrationEnabled();
-					}
+					LocalPlayer var16 = this.minecraft.player;
 				}
 			}
 
@@ -430,25 +422,25 @@ public class KeyboardHandler {
 
 			InputConstants.Key key;
 			boolean bl3;
-			boolean var20;
+			boolean var10000;
 			label185: {
 				key = InputConstants.getKey(i, j);
 				bl3 = this.minecraft.screen == null;
-				label144:
+				label145:
 				if (!bl3) {
 					Screen var13 = this.minecraft.screen;
 					if (var13 instanceof PauseScreen pauseScreen && !pauseScreen.showsPauseMenu()) {
-						break label144;
+						break label145;
 					}
 
-					var20 = false;
+					var10000 = false;
 					break label185;
 				}
 
-				var20 = true;
+				var10000 = true;
 			}
 
-			boolean bl4 = var20;
+			boolean bl4 = var10000;
 			if (k == 0) {
 				KeyMapping.set(key, false);
 				if (bl4 && i == 292) {

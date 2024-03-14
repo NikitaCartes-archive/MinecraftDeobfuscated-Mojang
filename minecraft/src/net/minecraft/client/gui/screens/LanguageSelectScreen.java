@@ -51,7 +51,7 @@ public class LanguageSelectScreen extends OptionsSubScreen {
 		linearLayout2.addChild(
 			Button.builder(Component.translatable("options.font"), button -> this.minecraft.setScreen(new FontOptionsScreen(this, this.options))).build()
 		);
-		linearLayout2.addChild(Button.builder(CommonComponents.GUI_DONE, button -> this.onClose()).build());
+		linearLayout2.addChild(Button.builder(CommonComponents.GUI_DONE, button -> this.onDone()).build());
 	}
 
 	void onDone() {
@@ -60,24 +60,9 @@ public class LanguageSelectScreen extends OptionsSubScreen {
 			this.languageManager.setSelected(entry.code);
 			this.options.languageCode = entry.code;
 			this.minecraft.reloadResourcePacks();
-			this.options.save();
 		}
 
 		this.minecraft.setScreen(this.lastScreen);
-	}
-
-	@Override
-	public boolean keyPressed(int i, int j, int k) {
-		if (CommonInputs.selected(i)) {
-			LanguageSelectScreen.LanguageSelectionList.Entry entry = this.packSelectionList.getSelected();
-			if (entry != null) {
-				entry.select();
-				this.onDone();
-				return true;
-			}
-		}
-
-		return super.keyPressed(i, j, k);
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -119,6 +104,17 @@ public class LanguageSelectScreen extends OptionsSubScreen {
 			}
 
 			@Override
+			public boolean keyPressed(int i, int j, int k) {
+				if (CommonInputs.selected(i)) {
+					this.select();
+					LanguageSelectScreen.this.onDone();
+					return true;
+				} else {
+					return super.keyPressed(i, j, k);
+				}
+			}
+
+			@Override
 			public boolean mouseClicked(double d, double e, int i) {
 				this.select();
 				if (Util.getMillis() - this.lastClickTime < 250L) {
@@ -129,7 +125,7 @@ public class LanguageSelectScreen extends OptionsSubScreen {
 				return super.mouseClicked(d, e, i);
 			}
 
-			void select() {
+			private void select() {
 				LanguageSelectionList.this.setSelected(this);
 			}
 

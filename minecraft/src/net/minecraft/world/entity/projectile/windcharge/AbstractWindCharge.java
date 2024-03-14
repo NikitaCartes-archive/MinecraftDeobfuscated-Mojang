@@ -73,6 +73,10 @@ public abstract class AbstractWindCharge extends AbstractHurtingProjectile imple
 		}
 	}
 
+	@Override
+	public void push(double d, double e, double f) {
+	}
+
 	protected abstract void explode();
 
 	@Override

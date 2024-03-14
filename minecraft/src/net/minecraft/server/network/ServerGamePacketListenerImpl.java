@@ -54,6 +54,7 @@ import net.minecraft.network.chat.SignedMessageChain;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketUtils;
 import net.minecraft.network.protocol.common.ServerboundClientInformationPacket;
+import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 import net.minecraft.network.protocol.configuration.ConfigurationProtocols;
 import net.minecraft.network.protocol.game.ClientboundBlockChangedAckPacket;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
@@ -193,6 +194,7 @@ public class ServerGamePacketListenerImpl
 	private static final int TRACKED_MESSAGE_DISCONNECT_THRESHOLD = 4096;
 	private static final int MAXIMUM_FLYING_TICKS = 80;
 	private static final Component CHAT_VALIDATION_FAILED = Component.translatable("multiplayer.disconnect.chat_validation_failed");
+	private static final int MAX_COMMAND_SUGGESTIONS = 1000;
 	public ServerPlayer player;
 	public final PlayerChunkSender chunkSender;
 	private int tickCount;
@@ -537,7 +539,14 @@ public class ServerGamePacketListenerImpl
 			.getCommands()
 			.getDispatcher()
 			.getCompletionSuggestions(parseResults)
-			.thenAccept(suggestions -> this.send(new ClientboundCommandSuggestionsPacket(serverboundCommandSuggestionPacket.getId(), suggestions)));
+			.thenAccept(
+				suggestions -> {
+					Suggestions suggestions2 = suggestions.getList().size() <= 1000
+						? suggestions
+						: new Suggestions(suggestions.getRange(), suggestions.getList().subList(0, 1000));
+					this.send(new ClientboundCommandSuggestionsPacket(serverboundCommandSuggestionPacket.getId(), suggestions2));
+				}
+			);
 	}
 
 	@Override
@@ -1773,6 +1782,10 @@ public class ServerGamePacketListenerImpl
 						.broadcastAll(new ClientboundPlayerInfoUpdatePacket(EnumSet.of(ClientboundPlayerInfoUpdatePacket.Action.INITIALIZE_CHAT), List.of(this.player)));
 				}
 			);
+	}
+
+	@Override
+	public void handleCustomPayload(ServerboundCustomPayloadPacket serverboundCustomPayloadPacket) {
 	}
 
 	@Override

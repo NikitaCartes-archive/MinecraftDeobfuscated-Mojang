@@ -10,6 +10,10 @@ import java.util.function.Supplier;
 import net.minecraft.Util;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.advancements.CriterionTrigger;
+import net.minecraft.advancements.critereon.EntitySubPredicate;
+import net.minecraft.advancements.critereon.EntitySubPredicates;
+import net.minecraft.advancements.critereon.ItemSubPredicate;
+import net.minecraft.advancements.critereon.ItemSubPredicates;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.commands.synchronization.ArgumentTypeInfos;
 import net.minecraft.core.DefaultedMappedRegistry;
@@ -243,6 +247,12 @@ public class BuiltInRegistries {
 	public static final Registry<NumberFormatType<?>> NUMBER_FORMAT_TYPE = registerSimple(Registries.NUMBER_FORMAT_TYPE, NumberFormatTypes::bootstrap);
 	public static final Registry<ArmorMaterial> ARMOR_MATERIAL = registerSimple(Registries.ARMOR_MATERIAL, ArmorMaterials::bootstrap);
 	public static final Registry<DataComponentType<?>> DATA_COMPONENT_TYPE = registerSimple(Registries.DATA_COMPONENT_TYPE, DataComponents::bootstrap);
+	public static final Registry<MapCodec<? extends EntitySubPredicate>> ENTITY_SUB_PREDICATE_TYPE = registerSimple(
+		Registries.ENTITY_SUB_PREDICATE_TYPE, EntitySubPredicates::bootstrap
+	);
+	public static final Registry<ItemSubPredicate.Type<?>> ITEM_SUB_PREDICATE_TYPE = registerSimple(
+		Registries.ITEM_SUB_PREDICATE_TYPE, ItemSubPredicates::bootstrap
+	);
 	public static final Registry<? extends Registry<?>> REGISTRY = WRITABLE_REGISTRY;
 
 	private static <T> Registry<T> registerSimple(ResourceKey<? extends Registry<T>> resourceKey, BuiltInRegistries.RegistryBootstrap<T> registryBootstrap) {
