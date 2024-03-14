@@ -1,6 +1,7 @@
 package net.minecraft.network.protocol.common;
 
-import java.util.List;
+import com.google.common.collect.Lists;
+import net.minecraft.Util;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
@@ -13,7 +14,13 @@ public record ServerboundCustomPayloadPacket(CustomPacketPayload payload) implem
 	private static final int MAX_PAYLOAD_SIZE = 32767;
 	public static final StreamCodec<FriendlyByteBuf, ServerboundCustomPayloadPacket> STREAM_CODEC = CustomPacketPayload.<FriendlyByteBuf>codec(
 			resourceLocation -> DiscardedPayload.codec(resourceLocation, 32767),
-			List.of(new CustomPacketPayload.TypeAndCodec<>(BrandPayload.TYPE, BrandPayload.STREAM_CODEC))
+			Util.make(
+				Lists.<CustomPacketPayload.TypeAndCodec<? super FriendlyByteBuf, ?>>newArrayList(
+					new CustomPacketPayload.TypeAndCodec<>(BrandPayload.TYPE, BrandPayload.STREAM_CODEC)
+				),
+				arrayList -> {
+				}
+			)
 		)
 		.map(ServerboundCustomPayloadPacket::new, ServerboundCustomPayloadPacket::payload);
 

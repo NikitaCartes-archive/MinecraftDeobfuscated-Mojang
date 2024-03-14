@@ -110,8 +110,6 @@ public record EntityPredicate(
 
 				if (this.effects.isPresent() && !((MobEffectsPredicate)this.effects.get()).matches(entity)) {
 					return false;
-				} else if (this.nbt.isPresent() && !((NbtPredicate)this.nbt.get()).matches(entity)) {
-					return false;
 				} else if (this.flags.isPresent() && !((EntityFlagsPredicate)this.flags.get()).matches(entity)) {
 					return false;
 				} else if (this.equipment.isPresent() && !((EntityEquipmentPredicate)this.equipment.get()).matches(entity)) {
@@ -134,7 +132,9 @@ public record EntityPredicate(
 						}
 					}
 
-					return !this.slots.isPresent() || ((SlotsPredicate)this.slots.get()).matches(entity);
+					return this.nbt.isPresent() && !((NbtPredicate)this.nbt.get()).matches(entity)
+						? false
+						: !this.slots.isPresent() || ((SlotsPredicate)this.slots.get()).matches(entity);
 				}
 			}
 		}

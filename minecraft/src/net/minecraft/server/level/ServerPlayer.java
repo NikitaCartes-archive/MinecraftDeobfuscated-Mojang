@@ -27,6 +27,8 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.SectionPos;
+import net.minecraft.core.particles.BlockParticleOption;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
@@ -215,6 +217,7 @@ public class ServerPlayer extends Player {
 	private final TextFilter textFilter;
 	private boolean textFilteringEnabled;
 	private boolean allowsListing;
+	private boolean spawnExtraParticlesOnFall;
 	private WardenSpawnTracker wardenSpawnTracker = new WardenSpawnTracker(0, 0, 0);
 	private final ContainerSynchronizer containerSynchronizer = new ContainerSynchronizer() {
 		@Override
@@ -264,6 +267,8 @@ public class ServerPlayer extends Player {
 	};
 	@Nullable
 	private RemoteChatSession chatSession;
+	@Nullable
+	public final Object object;
 	private int containerCounter;
 	public boolean wonGame;
 
@@ -276,6 +281,7 @@ public class ServerPlayer extends Player {
 		this.advancements = minecraftServer.getPlayerList().getPlayerAdvancements(this);
 		this.fudgeSpawnLocation(serverLevel);
 		this.updateOptions(clientInformation);
+		this.object = null;
 	}
 
 	private void fudgeSpawnLocation(ServerLevel serverLevel) {
@@ -357,6 +363,8 @@ public class ServerPlayer extends Player {
 					.orElse(Level.OVERWORLD);
 			}
 		}
+
+		this.spawnExtraParticlesOnFall = compoundTag.getBoolean("spawn_extra_particles_on_fall");
 	}
 
 	@Override
@@ -400,6 +408,8 @@ public class ServerPlayer extends Player {
 				.resultOrPartial(LOGGER::error)
 				.ifPresent(tag -> compoundTag.put("SpawnDimension", tag));
 		}
+
+		compoundTag.putBoolean("spawn_extra_particles_on_fall", this.spawnExtraParticlesOnFall);
 	}
 
 	public void setExperiencePoints(int i) {
@@ -981,8 +991,16 @@ public class ServerPlayer extends Player {
 	public void doCheckFallDamage(double d, double e, double f, boolean bl) {
 		if (!this.touchingUnloadedChunk()) {
 			this.checkSupportingBlock(bl, new Vec3(d, e, f));
-			BlockPos blockPos = this.getOnPosLegacy();
-			super.checkFallDamage(e, bl, this.level().getBlockState(blockPos), blockPos);
+			BlockPos blockPos = this.getOnPos();
+			BlockState blockState = this.level().getBlockState(blockPos);
+			if (this.spawnExtraParticlesOnFall && bl && this.fallDistance > 0.0F) {
+				Vec3 vec3 = blockPos.getCenter().add(0.0, 0.5, 0.0);
+				int i = (int)(50.0F * this.fallDistance);
+				((ServerLevel)this.level()).sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, blockState), vec3.x, vec3.y, vec3.z, i, 0.3F, 0.3F, 0.3F, 0.15F);
+				this.spawnExtraParticlesOnFall = false;
+			}
+
+			super.checkFallDamage(e, bl, blockState, blockPos);
 		}
 	}
 
@@ -1765,6 +1783,10 @@ public class ServerPlayer extends Player {
 	@Override
 	public Optional<WardenSpawnTracker> getWardenSpawnTracker() {
 		return Optional.of(this.wardenSpawnTracker);
+	}
+
+	public void setSpawnExtraParticlesOnFall(boolean bl) {
+		this.spawnExtraParticlesOnFall = bl;
 	}
 
 	@Override

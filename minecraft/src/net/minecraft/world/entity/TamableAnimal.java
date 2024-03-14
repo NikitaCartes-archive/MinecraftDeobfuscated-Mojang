@@ -147,8 +147,8 @@ public abstract class TamableAnimal extends Animal implements OwnableEntity {
 	public void tame(Player player) {
 		this.setTame(true, true);
 		this.setOwnerUUID(player.getUUID());
-		if (player instanceof ServerPlayer) {
-			CriteriaTriggers.TAME_ANIMAL.trigger((ServerPlayer)player, this);
+		if (player instanceof ServerPlayer serverPlayer) {
+			CriteriaTriggers.TAME_ANIMAL.trigger(serverPlayer, this);
 		}
 	}
 

@@ -24,8 +24,8 @@ public record LightningBoltPredicate(MinMaxBounds.Ints blocksSetOnFire, Optional
 	}
 
 	@Override
-	public EntitySubPredicate.Type type() {
-		return EntitySubPredicate.Types.LIGHTNING;
+	public MapCodec<LightningBoltPredicate> codec() {
+		return EntitySubPredicates.LIGHTNING;
 	}
 
 	@Override

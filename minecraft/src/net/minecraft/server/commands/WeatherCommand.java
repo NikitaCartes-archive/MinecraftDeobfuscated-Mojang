@@ -44,23 +44,23 @@ public class WeatherCommand {
 	}
 
 	private static int getDuration(CommandSourceStack commandSourceStack, int i, IntProvider intProvider) {
-		return i == -1 ? intProvider.sample(commandSourceStack.getLevel().getRandom()) : i;
+		return i == -1 ? intProvider.sample(commandSourceStack.getServer().overworld().getRandom()) : i;
 	}
 
 	private static int setClear(CommandSourceStack commandSourceStack, int i) {
-		commandSourceStack.getLevel().setWeatherParameters(getDuration(commandSourceStack, i, ServerLevel.RAIN_DELAY), 0, false, false);
+		commandSourceStack.getServer().overworld().setWeatherParameters(getDuration(commandSourceStack, i, ServerLevel.RAIN_DELAY), 0, false, false);
 		commandSourceStack.sendSuccess(() -> Component.translatable("commands.weather.set.clear"), true);
 		return i;
 	}
 
 	private static int setRain(CommandSourceStack commandSourceStack, int i) {
-		commandSourceStack.getLevel().setWeatherParameters(0, getDuration(commandSourceStack, i, ServerLevel.RAIN_DURATION), true, false);
+		commandSourceStack.getServer().overworld().setWeatherParameters(0, getDuration(commandSourceStack, i, ServerLevel.RAIN_DURATION), true, false);
 		commandSourceStack.sendSuccess(() -> Component.translatable("commands.weather.set.rain"), true);
 		return i;
 	}
 
 	private static int setThunder(CommandSourceStack commandSourceStack, int i) {
-		commandSourceStack.getLevel().setWeatherParameters(0, getDuration(commandSourceStack, i, ServerLevel.THUNDER_DURATION), true, true);
+		commandSourceStack.getServer().overworld().setWeatherParameters(0, getDuration(commandSourceStack, i, ServerLevel.THUNDER_DURATION), true, true);
 		commandSourceStack.sendSuccess(() -> Component.translatable("commands.weather.set.thunder"), true);
 		return i;
 	}

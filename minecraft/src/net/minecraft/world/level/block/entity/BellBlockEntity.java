@@ -3,11 +3,11 @@ package net.minecraft.world.level.block.entity;
 import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.particles.ColorParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.EntityTypeTags;
-import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -152,10 +152,7 @@ public class BellBlockEntity extends BlockEntity {
 
 					for (int k = 0; k < j; k++) {
 						int l = mutableInt.addAndGet(5);
-						double h = (double)FastColor.ARGB32.red(l) / 255.0;
-						double m = (double)FastColor.ARGB32.green(l) / 255.0;
-						double n = (double)FastColor.ARGB32.blue(l) / 255.0;
-						level.addParticle(ParticleTypes.ENTITY_EFFECT, e, (double)((float)blockPos.getY() + 0.5F), g, h, m, n);
+						level.addParticle(ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, l), e, (double)((float)blockPos.getY() + 0.5F), g, 0.0, 0.0, 0.0);
 					}
 				}
 			);

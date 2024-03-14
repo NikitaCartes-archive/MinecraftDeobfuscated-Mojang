@@ -124,8 +124,8 @@ public record PlayerPredicate(
 	}
 
 	@Override
-	public EntitySubPredicate.Type type() {
-		return EntitySubPredicate.Types.PLAYER;
+	public MapCodec<PlayerPredicate> codec() {
+		return EntitySubPredicates.PLAYER;
 	}
 
 	static record AdvancementCriterionsPredicate(Object2BooleanMap<String> criterions) implements PlayerPredicate.AdvancementPredicate {

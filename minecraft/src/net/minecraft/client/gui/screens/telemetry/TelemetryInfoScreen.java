@@ -4,7 +4,6 @@ import java.nio.file.Path;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.OptionInstance;
@@ -24,7 +23,7 @@ import net.minecraft.network.chat.Component;
 @Environment(EnvType.CLIENT)
 public class TelemetryInfoScreen extends Screen {
 	private static final Component TITLE = Component.translatable("telemetry_info.screen.title");
-	private static final Component DESCRIPTION = Component.translatable("telemetry_info.screen.description").withStyle(ChatFormatting.GRAY);
+	private static final Component DESCRIPTION = Component.translatable("telemetry_info.screen.description").withColor(-4539718);
 	private static final Component BUTTON_PRIVACY_STATEMENT = Component.translatable("telemetry_info.button.privacy_statement");
 	private static final Component BUTTON_GIVE_FEEDBACK = Component.translatable("telemetry_info.button.give_feedback");
 	private static final Component BUTTON_VIEW_DATA = Component.translatable("telemetry_info.button.show_data");

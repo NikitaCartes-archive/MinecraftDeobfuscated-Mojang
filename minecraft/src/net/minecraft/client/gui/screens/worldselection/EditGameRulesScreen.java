@@ -42,9 +42,11 @@ public class EditGameRulesScreen extends Screen {
 	final HeaderAndFooterLayout layout = new HeaderAndFooterLayout(this);
 	private final Consumer<Optional<GameRules>> exitCallback;
 	private final Set<EditGameRulesScreen.RuleEntry> invalidEntries = Sets.<EditGameRulesScreen.RuleEntry>newHashSet();
+	private final GameRules gameRules;
+	@Nullable
+	private EditGameRulesScreen.RuleList ruleList;
 	@Nullable
 	private Button doneButton;
-	private final GameRules gameRules;
 
 	public EditGameRulesScreen(GameRules gameRules, Consumer<Optional<GameRules>> consumer) {
 		super(TITLE);
@@ -55,7 +57,7 @@ public class EditGameRulesScreen extends Screen {
 	@Override
 	protected void init() {
 		this.layout.addTitleHeader(TITLE, this.font);
-		this.layout.addToContents(new EditGameRulesScreen.RuleList(this.gameRules));
+		this.ruleList = this.layout.addToContents(new EditGameRulesScreen.RuleList(this.gameRules));
 		LinearLayout linearLayout = this.layout.addToFooter(LinearLayout.horizontal().spacing(8));
 		this.doneButton = linearLayout.addChild(Button.builder(CommonComponents.GUI_DONE, button -> this.exitCallback.accept(Optional.of(this.gameRules))).build());
 		linearLayout.addChild(Button.builder(CommonComponents.GUI_CANCEL, button -> this.onClose()).build());
@@ -68,6 +70,9 @@ public class EditGameRulesScreen extends Screen {
 	@Override
 	protected void repositionElements() {
 		this.layout.arrangeElements();
+		if (this.ruleList != null) {
+			this.ruleList.updateSize(this.width, this.layout);
+		}
 	}
 
 	@Override
@@ -124,7 +129,7 @@ public class EditGameRulesScreen extends Screen {
 
 		@Override
 		public void render(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-			guiGraphics.drawCenteredString(EditGameRulesScreen.this.minecraft.font, this.label, k + l / 2, j + 5, 16777215);
+			guiGraphics.drawCenteredString(EditGameRulesScreen.this.minecraft.font, this.label, k + l / 2, j + 5, -1);
 		}
 
 		@Override
@@ -176,10 +181,10 @@ public class EditGameRulesScreen extends Screen {
 
 		protected void renderLabel(GuiGraphics guiGraphics, int i, int j) {
 			if (this.label.size() == 1) {
-				guiGraphics.drawString(EditGameRulesScreen.this.minecraft.font, (FormattedCharSequence)this.label.get(0), j, i + 5, 16777215, false);
+				guiGraphics.drawString(EditGameRulesScreen.this.minecraft.font, (FormattedCharSequence)this.label.get(0), j, i + 5, -1, false);
 			} else if (this.label.size() >= 2) {
-				guiGraphics.drawString(EditGameRulesScreen.this.minecraft.font, (FormattedCharSequence)this.label.get(0), j, i, 16777215, false);
-				guiGraphics.drawString(EditGameRulesScreen.this.minecraft.font, (FormattedCharSequence)this.label.get(1), j, i + 10, 16777215, false);
+				guiGraphics.drawString(EditGameRulesScreen.this.minecraft.font, (FormattedCharSequence)this.label.get(0), j, i, -1, false);
+				guiGraphics.drawString(EditGameRulesScreen.this.minecraft.font, (FormattedCharSequence)this.label.get(1), j, i + 10, -1, false);
 			}
 		}
 	}
@@ -197,7 +202,7 @@ public class EditGameRulesScreen extends Screen {
 					this.input.setTextColor(14737632);
 					EditGameRulesScreen.this.clearInvalid(this);
 				} else {
-					this.input.setTextColor(16711680);
+					this.input.setTextColor(-65536);
 					EditGameRulesScreen.this.markInvalid(this);
 				}
 			});

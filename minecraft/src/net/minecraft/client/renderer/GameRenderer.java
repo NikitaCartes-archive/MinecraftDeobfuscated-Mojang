@@ -87,6 +87,7 @@ import org.slf4j.Logger;
 public class GameRenderer implements AutoCloseable {
 	private static final ResourceLocation NAUSEA_LOCATION = new ResourceLocation("textures/misc/nausea.png");
 	private static final ResourceLocation BLUR_LOCATION = new ResourceLocation("shaders/post/blur.json");
+	private static final float MAX_BLUR_RADIUS = 10.0F;
 	static final Logger LOGGER = LogUtils.getLogger();
 	private static final boolean DEPTH_BUFFER_DEBUG = false;
 	public static final float PROJECTION_Z_NEAR = 0.05F;
@@ -124,34 +125,6 @@ public class GameRenderer implements AutoCloseable {
 	PostChain postEffect;
 	@Nullable
 	private PostChain blurEffect;
-	static final ResourceLocation[] EFFECTS = new ResourceLocation[]{
-		new ResourceLocation("shaders/post/notch.json"),
-		new ResourceLocation("shaders/post/fxaa.json"),
-		new ResourceLocation("shaders/post/art.json"),
-		new ResourceLocation("shaders/post/bumpy.json"),
-		new ResourceLocation("shaders/post/blobs2.json"),
-		new ResourceLocation("shaders/post/pencil.json"),
-		new ResourceLocation("shaders/post/color_convolve.json"),
-		new ResourceLocation("shaders/post/deconverge.json"),
-		new ResourceLocation("shaders/post/flip.json"),
-		new ResourceLocation("shaders/post/invert.json"),
-		new ResourceLocation("shaders/post/ntsc.json"),
-		new ResourceLocation("shaders/post/outline.json"),
-		new ResourceLocation("shaders/post/phosphor.json"),
-		new ResourceLocation("shaders/post/scan_pincushion.json"),
-		new ResourceLocation("shaders/post/sobel.json"),
-		new ResourceLocation("shaders/post/bits.json"),
-		new ResourceLocation("shaders/post/desaturate.json"),
-		new ResourceLocation("shaders/post/green.json"),
-		BLUR_LOCATION,
-		new ResourceLocation("shaders/post/wobble.json"),
-		new ResourceLocation("shaders/post/blobs.json"),
-		new ResourceLocation("shaders/post/antialias.json"),
-		new ResourceLocation("shaders/post/creeper.json"),
-		new ResourceLocation("shaders/post/spider.json")
-	};
-	public static final int EFFECT_NONE = EFFECTS.length;
-	int effectIndex = EFFECT_NONE;
 	private boolean effectActive;
 	private final Camera mainCamera = new Camera();
 	public ShaderInstance blitShader;
@@ -316,7 +289,6 @@ public class GameRenderer implements AutoCloseable {
 		}
 
 		this.postEffect = null;
-		this.effectIndex = EFFECT_NONE;
 	}
 
 	public void togglePostEffect() {
@@ -338,22 +310,7 @@ public class GameRenderer implements AutoCloseable {
 		}
 	}
 
-	public void cycleEffect() {
-		if (this.minecraft.getCameraEntity() instanceof Player) {
-			if (this.postEffect != null) {
-				this.postEffect.close();
-			}
-
-			this.effectIndex = (this.effectIndex + 1) % (EFFECTS.length + 1);
-			if (this.effectIndex == EFFECT_NONE) {
-				this.postEffect = null;
-			} else {
-				this.loadEffect(EFFECTS[this.effectIndex]);
-			}
-		}
-	}
-
-	void loadEffect(ResourceLocation resourceLocation) {
+	private void loadEffect(ResourceLocation resourceLocation) {
 		if (this.postEffect != null) {
 			this.postEffect.close();
 		}
@@ -364,11 +321,9 @@ public class GameRenderer implements AutoCloseable {
 			this.effectActive = true;
 		} catch (IOException var3) {
 			LOGGER.warn("Failed to load shader: {}", resourceLocation, var3);
-			this.effectIndex = EFFECT_NONE;
 			this.effectActive = false;
 		} catch (JsonSyntaxException var4) {
 			LOGGER.warn("Failed to parse shader: {}", resourceLocation, var4);
-			this.effectIndex = EFFECT_NONE;
 			this.effectActive = false;
 		}
 	}
@@ -389,9 +344,11 @@ public class GameRenderer implements AutoCloseable {
 	}
 
 	public void processBlurEffect(float f) {
-		if (this.blurEffect != null) {
-			this.blurEffect.setUniform("Alpha", (float)this.minecraft.options.getMenuBackgroundBlurriness());
+		float g = (float)this.minecraft.options.getMenuBackgroundBlurriness();
+		float h = g * 10.0F;
+		if (this.blurEffect != null && h >= 1.0F) {
 			RenderSystem.enableBlend();
+			this.blurEffect.setUniform("Radius", h);
 			this.blurEffect.process(f);
 			RenderSystem.disableBlend();
 		}
@@ -447,11 +404,7 @@ public class GameRenderer implements AutoCloseable {
 				}
 
 				GameRenderer.this.postEffect = null;
-				if (GameRenderer.this.effectIndex == GameRenderer.EFFECT_NONE) {
-					GameRenderer.this.checkEntityPostEffect(GameRenderer.this.minecraft.getCameraEntity());
-				} else {
-					GameRenderer.this.loadEffect(GameRenderer.EFFECTS[GameRenderer.this.effectIndex]);
-				}
+				GameRenderer.this.checkEntityPostEffect(GameRenderer.this.minecraft.getCameraEntity());
 			}
 
 			@Override
@@ -1019,11 +972,15 @@ public class GameRenderer implements AutoCloseable {
 		this.zoom = 1.0F;
 	}
 
-	private void renderItemInHand(Camera camera, float f) {
+	private void renderItemInHand(Camera camera, float f, Matrix4f matrix4f) {
 		if (!this.panoramicMode) {
 			this.resetProjectionMatrix(this.getProjectionMatrix(this.getFov(camera, f, false)));
 			PoseStack poseStack = new PoseStack();
 			poseStack.pushPose();
+			poseStack.mulPose(matrix4f.invert(new Matrix4f()));
+			Matrix4fStack matrix4fStack = RenderSystem.getModelViewStack();
+			matrix4fStack.pushMatrix().mul(matrix4f);
+			RenderSystem.applyModelViewMatrix();
 			this.bobHurt(poseStack, f);
 			if (this.minecraft.options.bobView().get()) {
 				this.bobView(poseStack, f);
@@ -1046,6 +1003,8 @@ public class GameRenderer implements AutoCloseable {
 				this.lightTexture.turnOffLightLayer();
 			}
 
+			matrix4fStack.popMatrix();
+			RenderSystem.applyModelViewMatrix();
 			poseStack.popPose();
 			if (this.minecraft.options.getCameraType().isFirstPerson() && !bl) {
 				ScreenEffectRenderer.renderScreenEffect(this.minecraft, poseStack);
@@ -1198,6 +1157,10 @@ public class GameRenderer implements AutoCloseable {
 				}
 			}
 
+			if (bl2 && bl && this.minecraft.level != null) {
+				this.minecraft.gui.renderSavingIndicator(guiGraphics, g);
+			}
+
 			if (bl2) {
 				this.minecraft.getProfiler().push("toasts");
 				this.minecraft.getToasts().render(guiGraphics);
@@ -1335,7 +1298,7 @@ public class GameRenderer implements AutoCloseable {
 		this.minecraft.getProfiler().popPush("hand");
 		if (this.renderHand) {
 			RenderSystem.clear(256, Minecraft.ON_OSX);
-			this.renderItemInHand(camera, f);
+			this.renderItemInHand(camera, f, matrix4f2);
 		}
 
 		this.minecraft.getProfiler().pop();

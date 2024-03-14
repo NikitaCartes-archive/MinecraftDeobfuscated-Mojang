@@ -15,6 +15,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.OptionsSubScreen;
+import net.minecraft.client.gui.screens.Screen;
 
 @Environment(EnvType.CLIENT)
 public class OptionsList extends ContainerObjectSelectionList<OptionsList.Entry> {
@@ -29,17 +30,24 @@ public class OptionsList extends ContainerObjectSelectionList<OptionsList.Entry>
 	}
 
 	public void addBig(OptionInstance<?> optionInstance) {
-		this.addEntry(OptionsList.Entry.big(this.minecraft.options, optionInstance, this.screen));
+		this.addEntry(OptionsList.OptionEntry.big(this.minecraft.options, optionInstance, this.screen));
 	}
 
-	public void addSmall(OptionInstance<?> optionInstance, @Nullable OptionInstance<?> optionInstance2) {
-		this.addEntry(OptionsList.Entry.small(this.minecraft.options, optionInstance, optionInstance2, this.screen));
-	}
-
-	public void addSmall(OptionInstance<?>[] optionInstances) {
+	public void addSmall(OptionInstance<?>... optionInstances) {
 		for (int i = 0; i < optionInstances.length; i += 2) {
-			this.addSmall(optionInstances[i], i < optionInstances.length - 1 ? optionInstances[i + 1] : null);
+			OptionInstance<?> optionInstance = i < optionInstances.length - 1 ? optionInstances[i + 1] : null;
+			this.addEntry(OptionsList.OptionEntry.small(this.minecraft.options, optionInstances[i], optionInstance, this.screen));
 		}
+	}
+
+	public void addSmall(List<AbstractWidget> list) {
+		for (int i = 0; i < list.size(); i += 2) {
+			this.addSmall((AbstractWidget)list.get(i), i < list.size() - 1 ? (AbstractWidget)list.get(i + 1) : null);
+		}
+	}
+
+	public void addSmall(AbstractWidget abstractWidget, @Nullable AbstractWidget abstractWidget2) {
+		this.addEntry(OptionsList.Entry.small(abstractWidget, abstractWidget2, this.screen));
 	}
 
 	@Override
@@ -50,20 +58,22 @@ public class OptionsList extends ContainerObjectSelectionList<OptionsList.Entry>
 	@Nullable
 	public AbstractWidget findOption(OptionInstance<?> optionInstance) {
 		for (OptionsList.Entry entry : this.children()) {
-			AbstractWidget abstractWidget = (AbstractWidget)entry.options.get(optionInstance);
-			if (abstractWidget != null) {
-				return abstractWidget;
+			if (entry instanceof OptionsList.OptionEntry optionEntry) {
+				AbstractWidget abstractWidget = (AbstractWidget)optionEntry.options.get(optionInstance);
+				if (abstractWidget != null) {
+					return abstractWidget;
+				}
 			}
 		}
 
 		return null;
 	}
 
-	public Optional<AbstractWidget> getMouseOver(double d, double e) {
+	public Optional<GuiEventListener> getMouseOver(double d, double e) {
 		for (OptionsList.Entry entry : this.children()) {
-			for (AbstractWidget abstractWidget : entry.children) {
-				if (abstractWidget.isMouseOver(d, e)) {
-					return Optional.of(abstractWidget);
+			for (GuiEventListener guiEventListener : entry.children()) {
+				if (guiEventListener.isMouseOver(d, e)) {
+					return Optional.of(guiEventListener);
 				}
 			}
 		}
@@ -73,28 +83,23 @@ public class OptionsList extends ContainerObjectSelectionList<OptionsList.Entry>
 
 	@Environment(EnvType.CLIENT)
 	protected static class Entry extends ContainerObjectSelectionList.Entry<OptionsList.Entry> {
-		final Map<OptionInstance<?>, AbstractWidget> options;
-		final List<AbstractWidget> children;
-		private static final int OPTION_X_OFFSET = 160;
-		private final OptionsSubScreen screen;
+		private final List<AbstractWidget> children;
+		private final Screen screen;
+		private static final int X_OFFSET = 160;
 
-		private Entry(Map<OptionInstance<?>, AbstractWidget> map, OptionsSubScreen optionsSubScreen) {
-			this.options = map;
-			this.children = ImmutableList.copyOf(map.values());
-			this.screen = optionsSubScreen;
+		Entry(List<AbstractWidget> list, Screen screen) {
+			this.children = ImmutableList.copyOf(list);
+			this.screen = screen;
 		}
 
-		public static OptionsList.Entry big(Options options, OptionInstance<?> optionInstance, OptionsSubScreen optionsSubScreen) {
-			return new OptionsList.Entry(ImmutableMap.of(optionInstance, optionInstance.createButton(options, 0, 0, 310)), optionsSubScreen);
+		public static OptionsList.Entry big(List<AbstractWidget> list, Screen screen) {
+			return new OptionsList.Entry(list, screen);
 		}
 
-		public static OptionsList.Entry small(
-			Options options, OptionInstance<?> optionInstance, @Nullable OptionInstance<?> optionInstance2, OptionsSubScreen optionsSubScreen
-		) {
-			AbstractWidget abstractWidget = optionInstance.createButton(options);
-			return optionInstance2 == null
-				? new OptionsList.Entry(ImmutableMap.of(optionInstance, abstractWidget), optionsSubScreen)
-				: new OptionsList.Entry(ImmutableMap.of(optionInstance, abstractWidget, optionInstance2, optionInstance2.createButton(options)), optionsSubScreen);
+		public static OptionsList.Entry small(AbstractWidget abstractWidget, @Nullable AbstractWidget abstractWidget2, Screen screen) {
+			return abstractWidget2 == null
+				? new OptionsList.Entry(ImmutableList.of(abstractWidget), screen)
+				: new OptionsList.Entry(ImmutableList.of(abstractWidget, abstractWidget2), screen);
 		}
 
 		@Override
@@ -117,6 +122,29 @@ public class OptionsList extends ContainerObjectSelectionList<OptionsList.Entry>
 		@Override
 		public List<? extends NarratableEntry> narratables() {
 			return this.children;
+		}
+	}
+
+	@Environment(EnvType.CLIENT)
+	protected static class OptionEntry extends OptionsList.Entry {
+		final Map<OptionInstance<?>, AbstractWidget> options;
+
+		private OptionEntry(Map<OptionInstance<?>, AbstractWidget> map, OptionsSubScreen optionsSubScreen) {
+			super(ImmutableList.copyOf(map.values()), optionsSubScreen);
+			this.options = map;
+		}
+
+		public static OptionsList.OptionEntry big(Options options, OptionInstance<?> optionInstance, OptionsSubScreen optionsSubScreen) {
+			return new OptionsList.OptionEntry(ImmutableMap.of(optionInstance, optionInstance.createButton(options, 0, 0, 310)), optionsSubScreen);
+		}
+
+		public static OptionsList.OptionEntry small(
+			Options options, OptionInstance<?> optionInstance, @Nullable OptionInstance<?> optionInstance2, OptionsSubScreen optionsSubScreen
+		) {
+			AbstractWidget abstractWidget = optionInstance.createButton(options);
+			return optionInstance2 == null
+				? new OptionsList.OptionEntry(ImmutableMap.of(optionInstance, abstractWidget), optionsSubScreen)
+				: new OptionsList.OptionEntry(ImmutableMap.of(optionInstance, abstractWidget, optionInstance2, optionInstance2.createButton(options)), optionsSubScreen);
 		}
 	}
 }

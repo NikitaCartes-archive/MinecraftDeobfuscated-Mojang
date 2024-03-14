@@ -21,7 +21,9 @@ public class DecoratedPotPatterns {
 	private static final String BURN_NAME = "burn_pottery_pattern";
 	private static final String DANGER_NAME = "danger_pottery_pattern";
 	private static final String EXPLORER_NAME = "explorer_pottery_pattern";
+	private static final String FLOW_NAME = "flow_pottery_pattern";
 	private static final String FRIEND_NAME = "friend_pottery_pattern";
+	private static final String GUSTER_NAME = "guster_pottery_pattern";
 	private static final String HEART_NAME = "heart_pottery_pattern";
 	private static final String HEARTBREAK_NAME = "heartbreak_pottery_pattern";
 	private static final String HOWL_NAME = "howl_pottery_pattern";
@@ -29,6 +31,7 @@ public class DecoratedPotPatterns {
 	private static final String MOURNER_NAME = "mourner_pottery_pattern";
 	private static final String PLENTY_NAME = "plenty_pottery_pattern";
 	private static final String PRIZE_NAME = "prize_pottery_pattern";
+	private static final String SCRAPE_NAME = "scrape_pottery_pattern";
 	private static final String SHEAF_NAME = "sheaf_pottery_pattern";
 	private static final String SHELTER_NAME = "shelter_pottery_pattern";
 	private static final String SKULL_NAME = "skull_pottery_pattern";
@@ -42,7 +45,9 @@ public class DecoratedPotPatterns {
 	private static final ResourceKey<String> BURN = create("burn_pottery_pattern");
 	private static final ResourceKey<String> DANGER = create("danger_pottery_pattern");
 	private static final ResourceKey<String> EXPLORER = create("explorer_pottery_pattern");
+	private static final ResourceKey<String> FLOW = create("flow_pottery_pattern");
 	private static final ResourceKey<String> FRIEND = create("friend_pottery_pattern");
+	private static final ResourceKey<String> GUSTER = create("guster_pottery_pattern");
 	private static final ResourceKey<String> HEART = create("heart_pottery_pattern");
 	private static final ResourceKey<String> HEARTBREAK = create("heartbreak_pottery_pattern");
 	private static final ResourceKey<String> HOWL = create("howl_pottery_pattern");
@@ -50,6 +55,7 @@ public class DecoratedPotPatterns {
 	private static final ResourceKey<String> MOURNER = create("mourner_pottery_pattern");
 	private static final ResourceKey<String> PLENTY = create("plenty_pottery_pattern");
 	private static final ResourceKey<String> PRIZE = create("prize_pottery_pattern");
+	private static final ResourceKey<String> SCRAPE = create("scrape_pottery_pattern");
 	private static final ResourceKey<String> SHEAF = create("sheaf_pottery_pattern");
 	private static final ResourceKey<String> SHELTER = create("shelter_pottery_pattern");
 	private static final ResourceKey<String> SKULL = create("skull_pottery_pattern");
@@ -64,7 +70,9 @@ public class DecoratedPotPatterns {
 		Map.entry(Items.BURN_POTTERY_SHERD, BURN),
 		Map.entry(Items.DANGER_POTTERY_SHERD, DANGER),
 		Map.entry(Items.EXPLORER_POTTERY_SHERD, EXPLORER),
+		Map.entry(Items.FLOW_POTTERY_SHERD, FLOW),
 		Map.entry(Items.FRIEND_POTTERY_SHERD, FRIEND),
+		Map.entry(Items.GUSTER_POTTERY_SHERD, GUSTER),
 		Map.entry(Items.HEART_POTTERY_SHERD, HEART),
 		Map.entry(Items.HEARTBREAK_POTTERY_SHERD, HEARTBREAK),
 		Map.entry(Items.HOWL_POTTERY_SHERD, HOWL),
@@ -72,6 +80,7 @@ public class DecoratedPotPatterns {
 		Map.entry(Items.MOURNER_POTTERY_SHERD, MOURNER),
 		Map.entry(Items.PLENTY_POTTERY_SHERD, PLENTY),
 		Map.entry(Items.PRIZE_POTTERY_SHERD, PRIZE),
+		Map.entry(Items.SCRAPE_POTTERY_SHERD, SCRAPE),
 		Map.entry(Items.SHEAF_POTTERY_SHERD, SHEAF),
 		Map.entry(Items.SHELTER_POTTERY_SHERD, SHELTER),
 		Map.entry(Items.SKULL_POTTERY_SHERD, SKULL),
@@ -101,7 +110,9 @@ public class DecoratedPotPatterns {
 		Registry.register(registry, BURN, "burn_pottery_pattern");
 		Registry.register(registry, DANGER, "danger_pottery_pattern");
 		Registry.register(registry, EXPLORER, "explorer_pottery_pattern");
+		Registry.register(registry, FLOW, "flow_pottery_pattern");
 		Registry.register(registry, FRIEND, "friend_pottery_pattern");
+		Registry.register(registry, GUSTER, "guster_pottery_pattern");
 		Registry.register(registry, HEART, "heart_pottery_pattern");
 		Registry.register(registry, HEARTBREAK, "heartbreak_pottery_pattern");
 		Registry.register(registry, HOWL, "howl_pottery_pattern");
@@ -109,6 +120,7 @@ public class DecoratedPotPatterns {
 		Registry.register(registry, MOURNER, "mourner_pottery_pattern");
 		Registry.register(registry, PLENTY, "plenty_pottery_pattern");
 		Registry.register(registry, PRIZE, "prize_pottery_pattern");
+		Registry.register(registry, SCRAPE, "scrape_pottery_pattern");
 		Registry.register(registry, SHEAF, "sheaf_pottery_pattern");
 		Registry.register(registry, SHELTER, "shelter_pottery_pattern");
 		Registry.register(registry, SKULL, "skull_pottery_pattern");

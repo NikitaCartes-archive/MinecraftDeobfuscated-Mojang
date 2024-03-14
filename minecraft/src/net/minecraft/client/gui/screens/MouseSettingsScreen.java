@@ -41,12 +41,6 @@ public class MouseSettingsScreen extends OptionsSubScreen {
 	}
 
 	@Override
-	public void onClose() {
-		this.options.save();
-		super.onClose();
-	}
-
-	@Override
 	protected void repositionElements() {
 		super.repositionElements();
 		this.list.updateSize(this.width, this.layout);

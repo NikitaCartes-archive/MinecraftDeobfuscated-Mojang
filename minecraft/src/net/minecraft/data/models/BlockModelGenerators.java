@@ -4363,6 +4363,7 @@ public class BlockModelGenerators {
 		this.createTrivialCube(Blocks.RAW_COPPER_BLOCK);
 		this.createTrivialCube(Blocks.RAW_GOLD_BLOCK);
 		this.createRotatedMirroredVariantBlock(Blocks.SCULK);
+		this.createNonTemplateModelBlock(Blocks.HEAVY_CORE);
 		this.createPetrifiedOakSlab();
 		this.createTrivialCube(Blocks.COPPER_ORE);
 		this.createTrivialCube(Blocks.DEEPSLATE_COPPER_ORE);

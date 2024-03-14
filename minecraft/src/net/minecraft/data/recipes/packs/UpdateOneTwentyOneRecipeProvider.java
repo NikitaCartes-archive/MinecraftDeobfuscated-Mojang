@@ -1,12 +1,15 @@
 package net.minecraft.data.recipes.packs;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Stream;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
+import net.minecraft.data.recipes.ShapelessRecipeBuilder;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.item.Items;
@@ -95,6 +98,26 @@ public class UpdateOneTwentyOneRecipeProvider extends RecipeProvider {
 		stonecutterResultFromBase(recipeOutput, RecipeCategory.BUILDING_BLOCKS, Blocks.WAXED_EXPOSED_COPPER_GRATE, Blocks.WAXED_EXPOSED_COPPER, 4);
 		stonecutterResultFromBase(recipeOutput, RecipeCategory.BUILDING_BLOCKS, Blocks.WAXED_WEATHERED_COPPER_GRATE, Blocks.WAXED_WEATHERED_COPPER, 4);
 		stonecutterResultFromBase(recipeOutput, RecipeCategory.BUILDING_BLOCKS, Blocks.WAXED_OXIDIZED_COPPER_GRATE, Blocks.WAXED_OXIDIZED_COPPER, 4);
+		smithingTrims().forEach(trimTemplate -> trimSmithing(recipeOutput, trimTemplate.template(), trimTemplate.id()));
+		copySmithingTemplate(recipeOutput, Items.FLOW_ARMOR_TRIM_SMITHING_TEMPLATE, Items.BREEZE_ROD);
+		copySmithingTemplate(recipeOutput, Items.BOLT_ARMOR_TRIM_SMITHING_TEMPLATE, Items.COPPER_BLOCK);
+		ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, Items.WIND_CHARGE, 4)
+			.requires(Items.BREEZE_ROD)
+			.unlockedBy("has_breeze_rod", has(Items.BREEZE_ROD))
+			.save(recipeOutput);
+		ShapedRecipeBuilder.shaped(RecipeCategory.COMBAT, Items.MACE, 1)
+			.define('A', Items.BREEZE_ROD)
+			.define('B', Blocks.HEAVY_CORE)
+			.pattern(" B ")
+			.pattern(" A ")
+			.unlockedBy("has_breeze_rod", has(Items.BREEZE_ROD))
+			.unlockedBy("has_heavy_core", has(Blocks.HEAVY_CORE))
+			.save(recipeOutput);
 		waxRecipes(recipeOutput, FeatureFlagSet.of(FeatureFlags.UPDATE_1_21));
+	}
+
+	public static Stream<VanillaRecipeProvider.TrimTemplate> smithingTrims() {
+		return Stream.of(Items.BOLT_ARMOR_TRIM_SMITHING_TEMPLATE, Items.FLOW_ARMOR_TRIM_SMITHING_TEMPLATE)
+			.map(item -> new VanillaRecipeProvider.TrimTemplate(item, new ResourceLocation(getItemName(item) + "_smithing_trim")));
 	}
 }

@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
+import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -105,5 +106,10 @@ public class EntityStorage implements EntityPersistentStorage<Entity> {
 	public void flush(boolean bl) {
 		this.simpleRegionStorage.synchronize(bl).join();
 		this.entityDeserializerQueue.runAll();
+	}
+
+	@Override
+	public void close() throws IOException {
+		this.simpleRegionStorage.close();
 	}
 }

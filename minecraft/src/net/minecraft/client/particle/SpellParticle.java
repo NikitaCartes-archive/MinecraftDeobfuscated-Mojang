@@ -5,6 +5,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.particles.ColorParticleOption;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
@@ -61,22 +62,6 @@ public class SpellParticle extends TextureSheetParticle {
 	}
 
 	@Environment(EnvType.CLIENT)
-	public static class AmbientMobProvider implements ParticleProvider<SimpleParticleType> {
-		private final SpriteSet sprite;
-
-		public AmbientMobProvider(SpriteSet spriteSet) {
-			this.sprite = spriteSet;
-		}
-
-		public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
-			Particle particle = new SpellParticle(clientLevel, d, e, f, g, h, i, this.sprite);
-			particle.setAlpha(0.15F);
-			particle.setColor((float)g, (float)h, (float)i);
-			return particle;
-		}
-	}
-
-	@Environment(EnvType.CLIENT)
 	public static class InstantProvider implements ParticleProvider<SimpleParticleType> {
 		private final SpriteSet sprite;
 
@@ -90,16 +75,17 @@ public class SpellParticle extends TextureSheetParticle {
 	}
 
 	@Environment(EnvType.CLIENT)
-	public static class MobProvider implements ParticleProvider<SimpleParticleType> {
+	public static class MobEffectProvider implements ParticleProvider<ColorParticleOption> {
 		private final SpriteSet sprite;
 
-		public MobProvider(SpriteSet spriteSet) {
+		public MobEffectProvider(SpriteSet spriteSet) {
 			this.sprite = spriteSet;
 		}
 
-		public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+		public Particle createParticle(ColorParticleOption colorParticleOption, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
 			Particle particle = new SpellParticle(clientLevel, d, e, f, g, h, i, this.sprite);
-			particle.setColor((float)g, (float)h, (float)i);
+			particle.setColor(colorParticleOption.getRed(), colorParticleOption.getGreen(), colorParticleOption.getBlue());
+			particle.setAlpha(colorParticleOption.getAlpha());
 			return particle;
 		}
 	}

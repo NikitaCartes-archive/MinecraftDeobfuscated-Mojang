@@ -804,7 +804,7 @@ public class Bee extends Animal implements NeutralMob, FlyingAnimal {
 
 		private boolean pathfindDirectlyTowards(BlockPos blockPos) {
 			Bee.this.navigation.setMaxVisitedNodesMultiplier(10.0F);
-			Bee.this.navigation.moveTo((double)blockPos.getX(), (double)blockPos.getY(), (double)blockPos.getZ(), 1.0);
+			Bee.this.navigation.moveTo((double)blockPos.getX(), (double)blockPos.getY(), (double)blockPos.getZ(), 2, 1.0);
 			return Bee.this.navigation.getPath() != null && Bee.this.navigation.getPath().canReach();
 		}
 

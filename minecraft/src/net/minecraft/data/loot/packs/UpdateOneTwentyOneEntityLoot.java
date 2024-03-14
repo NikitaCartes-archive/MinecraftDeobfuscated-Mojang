@@ -30,9 +30,9 @@ public class UpdateOneTwentyOneEntityLoot extends EntityLootSubProvider {
 					LootPool.lootPool()
 						.setRolls(ConstantValue.exactly(1.0F))
 						.add(
-							LootItem.lootTableItem(Items.WIND_CHARGE)
-								.apply(SetItemCountFunction.setCount(UniformGenerator.between(4.0F, 6.0F)))
-								.apply(LootingEnchantFunction.lootingMultiplier(UniformGenerator.between(0.0F, 1.0F)))
+							LootItem.lootTableItem(Items.BREEZE_ROD)
+								.apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 2.0F)))
+								.apply(LootingEnchantFunction.lootingMultiplier(UniformGenerator.between(1.0F, 2.0F)))
 						)
 						.when(LootItemKilledByPlayerCondition.killedByPlayer())
 				)

@@ -254,4 +254,14 @@ public class DecoratedPotBlock extends BaseEntityBlock implements SimpleWaterlog
 	protected int getAnalogOutputSignal(BlockState blockState, Level level, BlockPos blockPos) {
 		return AbstractContainerMenu.getRedstoneSignalFromBlockEntity(level.getBlockEntity(blockPos));
 	}
+
+	@Override
+	protected BlockState rotate(BlockState blockState, Rotation rotation) {
+		return blockState.setValue(HORIZONTAL_FACING, rotation.rotate(blockState.getValue(HORIZONTAL_FACING)));
+	}
+
+	@Override
+	protected BlockState mirror(BlockState blockState, Mirror mirror) {
+		return blockState.rotate(mirror.getRotation(blockState.getValue(HORIZONTAL_FACING)));
+	}
 }

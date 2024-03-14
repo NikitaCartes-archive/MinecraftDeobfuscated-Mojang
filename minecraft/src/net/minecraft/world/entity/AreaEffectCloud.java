@@ -12,6 +12,7 @@ import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.commands.arguments.ParticleArgument;
 import net.minecraft.core.Holder;
+import net.minecraft.core.particles.ColorParticleOption;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -69,7 +70,7 @@ public class AreaEffectCloud extends Entity implements TraceableEntity {
 		builder.define(DATA_COLOR, 0);
 		builder.define(DATA_RADIUS, 3.0F);
 		builder.define(DATA_WAITING, false);
-		builder.define(DATA_PARTICLE, ParticleTypes.ENTITY_EFFECT);
+		builder.define(DATA_PARTICLE, ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, 0.0F, 0.0F, 0.0F));
 	}
 
 	public void setRadius(float f) {

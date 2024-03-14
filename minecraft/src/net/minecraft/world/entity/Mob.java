@@ -1295,6 +1295,7 @@ public abstract class Mob extends LivingEntity implements Targeting {
 		if (this.leashHolder != null) {
 			this.leashHolder = null;
 			this.delayedLeashInfo = null;
+			this.clearRestriction();
 			if (!this.level().isClientSide && bl2) {
 				this.spawnAtLocation(Items.LEAD);
 			}
@@ -1311,6 +1312,10 @@ public abstract class Mob extends LivingEntity implements Targeting {
 
 	public boolean isLeashed() {
 		return this.leashHolder != null;
+	}
+
+	public boolean mayBeLeashed() {
+		return this.isLeashed() || this.delayedLeashInfo != null;
 	}
 
 	@Nullable

@@ -1369,6 +1369,7 @@ public class CreativeModeTabs {
 						output.accept(Items.DIAMOND_AXE);
 						output.accept(Items.NETHERITE_AXE);
 						output.accept(Items.TRIDENT);
+						output.accept(Items.MACE);
 						output.accept(Items.SHIELD);
 						output.accept(Items.LEATHER_HELMET);
 						output.accept(Items.LEATHER_CHESTPLATE);
@@ -1525,6 +1526,8 @@ public class CreativeModeTabs {
 						output.accept(Items.HEART_OF_THE_SEA);
 						output.accept(Items.FIRE_CHARGE);
 						output.accept(Items.BLAZE_ROD);
+						output.accept(Items.BREEZE_ROD);
+						output.accept(Items.HEAVY_CORE);
 						output.accept(Items.NETHER_STAR);
 						output.accept(Items.ENDER_PEARL);
 						output.accept(Items.ENDER_EYE);
@@ -1578,6 +1581,8 @@ public class CreativeModeTabs {
 						output.accept(Items.MOJANG_BANNER_PATTERN);
 						output.accept(Items.GLOBE_BANNER_PATTERN);
 						output.accept(Items.PIGLIN_BANNER_PATTERN);
+						output.accept(Items.FLOW_BANNER_PATTERN);
+						output.accept(Items.GUSTER_BANNER_PATTERN);
 						output.accept(Items.ANGLER_POTTERY_SHERD);
 						output.accept(Items.ARCHER_POTTERY_SHERD);
 						output.accept(Items.ARMS_UP_POTTERY_SHERD);
@@ -1585,8 +1590,10 @@ public class CreativeModeTabs {
 						output.accept(Items.BREWER_POTTERY_SHERD);
 						output.accept(Items.BURN_POTTERY_SHERD);
 						output.accept(Items.DANGER_POTTERY_SHERD);
+						output.accept(Items.FLOW_POTTERY_SHERD);
 						output.accept(Items.EXPLORER_POTTERY_SHERD);
 						output.accept(Items.FRIEND_POTTERY_SHERD);
+						output.accept(Items.GUSTER_POTTERY_SHERD);
 						output.accept(Items.HEART_POTTERY_SHERD);
 						output.accept(Items.HEARTBREAK_POTTERY_SHERD);
 						output.accept(Items.HOWL_POTTERY_SHERD);
@@ -1594,6 +1601,7 @@ public class CreativeModeTabs {
 						output.accept(Items.MOURNER_POTTERY_SHERD);
 						output.accept(Items.PLENTY_POTTERY_SHERD);
 						output.accept(Items.PRIZE_POTTERY_SHERD);
+						output.accept(Items.SCRAPE_POTTERY_SHERD);
 						output.accept(Items.SHEAF_POTTERY_SHERD);
 						output.accept(Items.SHELTER_POTTERY_SHERD);
 						output.accept(Items.SKULL_POTTERY_SHERD);
@@ -1615,6 +1623,8 @@ public class CreativeModeTabs {
 						output.accept(Items.RIB_ARMOR_TRIM_SMITHING_TEMPLATE);
 						output.accept(Items.EYE_ARMOR_TRIM_SMITHING_TEMPLATE);
 						output.accept(Items.SPIRE_ARMOR_TRIM_SMITHING_TEMPLATE);
+						output.accept(Items.FLOW_ARMOR_TRIM_SMITHING_TEMPLATE);
+						output.accept(Items.BOLT_ARMOR_TRIM_SMITHING_TEMPLATE);
 						output.accept(Items.EXPERIENCE_BOTTLE);
 						output.accept(Items.TRIAL_KEY);
 						Set<TagKey<Item>> set = Set.of(

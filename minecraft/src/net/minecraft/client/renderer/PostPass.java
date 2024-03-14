@@ -27,11 +27,13 @@ public class PostPass implements AutoCloseable {
 	private final List<Integer> auxWidths = Lists.<Integer>newArrayList();
 	private final List<Integer> auxHeights = Lists.<Integer>newArrayList();
 	private Matrix4f shaderOrthoMatrix;
+	private final int filterMode;
 
-	public PostPass(ResourceProvider resourceProvider, String string, RenderTarget renderTarget, RenderTarget renderTarget2) throws IOException {
+	public PostPass(ResourceProvider resourceProvider, String string, RenderTarget renderTarget, RenderTarget renderTarget2, boolean bl) throws IOException {
 		this.effect = new EffectInstance(resourceProvider, string);
 		this.inTarget = renderTarget;
 		this.outTarget = renderTarget2;
+		this.filterMode = bl ? 9729 : 9728;
 	}
 
 	public void close() {
@@ -96,5 +98,9 @@ public class PostPass implements AutoCloseable {
 
 	public EffectInstance getEffect() {
 		return this.effect;
+	}
+
+	public int getFilterMode() {
+		return this.filterMode;
 	}
 }

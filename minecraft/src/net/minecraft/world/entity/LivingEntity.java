@@ -20,6 +20,7 @@ import java.util.UUID;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.minecraft.BlockUtil;
+import net.minecraft.Util;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
@@ -28,6 +29,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ItemParticleOption;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -57,7 +59,6 @@ import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
-import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.Difficulty;
@@ -94,7 +95,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.UseAnim;
-import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.item.enchantment.FrostWalkerEnchantment;
@@ -155,17 +155,19 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	protected static final int LIVING_ENTITY_FLAG_SPIN_ATTACK = 4;
 	protected static final EntityDataAccessor<Byte> DATA_LIVING_ENTITY_FLAGS = SynchedEntityData.defineId(LivingEntity.class, EntityDataSerializers.BYTE);
 	private static final EntityDataAccessor<Float> DATA_HEALTH_ID = SynchedEntityData.defineId(LivingEntity.class, EntityDataSerializers.FLOAT);
-	private static final EntityDataAccessor<Integer> DATA_EFFECT_COLOR_ID = SynchedEntityData.defineId(LivingEntity.class, EntityDataSerializers.INT);
+	private static final EntityDataAccessor<List<ParticleOptions>> DATA_EFFECT_PARTICLES = SynchedEntityData.defineId(
+		LivingEntity.class, EntityDataSerializers.PARTICLES
+	);
 	private static final EntityDataAccessor<Boolean> DATA_EFFECT_AMBIENCE_ID = SynchedEntityData.defineId(LivingEntity.class, EntityDataSerializers.BOOLEAN);
 	private static final EntityDataAccessor<Integer> DATA_ARROW_COUNT_ID = SynchedEntityData.defineId(LivingEntity.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Integer> DATA_STINGER_COUNT_ID = SynchedEntityData.defineId(LivingEntity.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Optional<BlockPos>> SLEEPING_POS_ID = SynchedEntityData.defineId(
 		LivingEntity.class, EntityDataSerializers.OPTIONAL_BLOCK_POS
 	);
+	private static final int PARTICLE_FREQUENCY_WHEN_INVISIBLE = 15;
 	protected static final EntityDimensions SLEEPING_DIMENSIONS = EntityDimensions.fixed(0.2F, 0.2F).withEyeHeight(0.2F);
 	public static final float EXTRA_RENDER_CULLING_SIZE_WITH_BIG_HAT = 0.5F;
 	public static final float DEFAULT_BABY_SCALE = 0.5F;
-	private static final int NO_POTION_EFFECT_PARTICLES = -1;
 	private final AttributeMap attributes;
 	private final CombatTracker combatTracker = new CombatTracker(this);
 	private final Map<Holder<MobEffect>, MobEffectInstance> activeEffects = Maps.<Holder<MobEffect>, MobEffectInstance>newHashMap();
@@ -278,7 +280,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	@Override
 	protected void defineSynchedData(SynchedEntityData.Builder builder) {
 		builder.define(DATA_LIVING_ENTITY_FLAGS, (byte)0);
-		builder.define(DATA_EFFECT_COLOR_ID, -1);
+		builder.define(DATA_EFFECT_PARTICLES, List.of());
 		builder.define(DATA_EFFECT_AMBIENCE_ID, false);
 		builder.define(DATA_ARROW_COUNT_ID, 0);
 		builder.define(DATA_STINGER_COUNT_ID, 0);
@@ -808,7 +810,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 					this.onEffectUpdated(mobEffectInstance, false, null);
 				}
 			}
-		} catch (ConcurrentModificationException var8) {
+		} catch (ConcurrentModificationException var6) {
 		}
 
 		if (this.effectsDirty) {
@@ -820,34 +822,13 @@ public abstract class LivingEntity extends Entity implements Attackable {
 			this.effectsDirty = false;
 		}
 
-		int i = this.entityData.get(DATA_EFFECT_COLOR_ID);
-		boolean bl = this.entityData.get(DATA_EFFECT_AMBIENCE_ID);
-		if (i != -1) {
-			boolean bl2;
-			if (this.isInvisible()) {
-				bl2 = this.random.nextInt(15) == 0;
-			} else {
-				bl2 = this.random.nextBoolean();
-			}
-
-			if (bl) {
-				bl2 &= this.random.nextInt(5) == 0;
-			}
-
-			if (bl2) {
-				float f = (float)FastColor.ARGB32.red(i) / 255.0F;
-				float g = (float)FastColor.ARGB32.green(i) / 255.0F;
-				float h = (float)FastColor.ARGB32.blue(i) / 255.0F;
-				this.level()
-					.addParticle(
-						bl ? ParticleTypes.AMBIENT_ENTITY_EFFECT : ParticleTypes.ENTITY_EFFECT,
-						this.getRandomX(0.5),
-						this.getRandomY(),
-						this.getRandomZ(0.5),
-						(double)f,
-						(double)g,
-						(double)h
-					);
+		List<ParticleOptions> list = this.entityData.get(DATA_EFFECT_PARTICLES);
+		if (!list.isEmpty()) {
+			boolean bl = this.entityData.get(DATA_EFFECT_AMBIENCE_ID);
+			int i = this.isInvisible() ? 15 : 4;
+			int j = bl ? 5 : 1;
+			if (this.random.nextInt(i * j) == 0) {
+				this.level().addParticle(Util.getRandom(list, this.random), this.getRandomX(0.5), this.getRandomY(), this.getRandomZ(0.5), 1.0, 1.0, 1.0);
 			}
 		}
 	}
@@ -857,12 +838,15 @@ public abstract class LivingEntity extends Entity implements Attackable {
 			this.removeEffectParticles();
 			this.setInvisible(false);
 		} else {
-			Collection<MobEffectInstance> collection = this.activeEffects.values();
-			int i = PotionContents.getColorOptional(collection);
-			this.entityData.set(DATA_EFFECT_AMBIENCE_ID, areAllEffectsAmbient(collection));
-			this.entityData.set(DATA_EFFECT_COLOR_ID, i != -1 ? i : -1);
 			this.setInvisible(this.hasEffect(MobEffects.INVISIBILITY));
+			this.updateSynchronizedMobEffectParticles();
 		}
+	}
+
+	private void updateSynchronizedMobEffectParticles() {
+		List<ParticleOptions> list = this.activeEffects.values().stream().filter(MobEffectInstance::isVisible).map(MobEffectInstance::getParticleOptions).toList();
+		this.entityData.set(DATA_EFFECT_PARTICLES, list);
+		this.entityData.set(DATA_EFFECT_AMBIENCE_ID, areAllEffectsAmbient(this.activeEffects.values()));
 	}
 
 	private void updateGlowingStatus() {
@@ -929,8 +913,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	}
 
 	protected void removeEffectParticles() {
-		this.entityData.set(DATA_EFFECT_AMBIENCE_ID, false);
-		this.entityData.set(DATA_EFFECT_COLOR_ID, -1);
+		this.entityData.set(DATA_EFFECT_PARTICLES, List.of());
 	}
 
 	public boolean removeAllEffects() {
@@ -2199,7 +2182,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 				if (this.shouldDiscardFriction()) {
 					this.setDeltaMovement(vec37.x, q, vec37.z);
 				} else {
-					this.setDeltaMovement(vec37.x * (double)fxx, q * 0.98F, vec37.z * (double)fxx);
+					this.setDeltaMovement(vec37.x * (double)fxx, this instanceof FlyingAnimal ? q * (double)fxx : q * 0.98F, vec37.z * (double)fxx);
 				}
 			}
 		}

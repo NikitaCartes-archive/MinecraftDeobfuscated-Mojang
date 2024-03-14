@@ -10,6 +10,7 @@ import net.minecraft.client.gui.components.tabs.Tab;
 import net.minecraft.client.gui.components.tabs.TabManager;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -48,6 +49,10 @@ public class TabButton extends AbstractWidget {
 			this.renderMenuBackground(guiGraphics, this.getX() + 2, this.getY() + 2, this.getRight() - 2, this.getBottom());
 			this.renderFocusUnderline(guiGraphics, font, k);
 		}
+	}
+
+	protected void renderMenuBackground(GuiGraphics guiGraphics, int i, int j, int k, int l) {
+		Screen.renderMenuBackgroundTexture(guiGraphics, Screen.MENU_BACKGROUND, i, j, 0.0F, 0.0F, k - i, l - j);
 	}
 
 	public void renderString(GuiGraphics guiGraphics, Font font, int i) {

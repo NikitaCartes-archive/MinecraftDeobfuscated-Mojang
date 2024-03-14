@@ -23,8 +23,8 @@ public record FishingHookPredicate(Optional<Boolean> inOpenWater) implements Ent
 	}
 
 	@Override
-	public EntitySubPredicate.Type type() {
-		return EntitySubPredicate.Types.FISHING_HOOK;
+	public MapCodec<FishingHookPredicate> codec() {
+		return EntitySubPredicates.FISHING_HOOK;
 	}
 
 	@Override

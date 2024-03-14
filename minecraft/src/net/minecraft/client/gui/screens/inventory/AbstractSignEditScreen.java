@@ -107,6 +107,11 @@ public abstract class AbstractSignEditScreen extends Screen {
 	}
 
 	@Override
+	public void renderBackground(GuiGraphics guiGraphics, int i, int j, float f) {
+		this.renderTransparentBackground(guiGraphics);
+	}
+
+	@Override
 	public void onClose() {
 		this.onDone();
 	}

@@ -31,6 +31,7 @@ import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
 import net.minecraft.client.gui.screens.multiplayer.SafetyScreen;
 import net.minecraft.client.gui.screens.worldselection.SelectWorldScreen;
+import net.minecraft.client.renderer.PanoramaRenderer;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.CommonComponents;
@@ -48,13 +49,14 @@ public class TitleScreen extends Screen {
 	private static final Component TITLE = Component.translatable("narrator.screen.title");
 	private static final Component COPYRIGHT_TEXT = Component.translatable("title.credits");
 	private static final String DEMO_LEVEL_ID = "Demo_World";
+	private static final float FADE_IN_TIME = 2000.0F;
 	@Nullable
 	private SplashRenderer splash;
 	private Button resetDemoButton;
 	@Nullable
 	private RealmsNotificationsScreen realmsNotificationsScreen;
-	private float fade;
-	private final boolean fading;
+	private float panoramaFade = 1.0F;
+	private boolean fading;
 	private long fadeInStart;
 	@Nullable
 	private TitleScreen.WarningLabel warningLabel;
@@ -91,7 +93,7 @@ public class TitleScreen extends Screen {
 		return CompletableFuture.allOf(
 			textureManager.preload(LogoRenderer.MINECRAFT_LOGO, executor),
 			textureManager.preload(LogoRenderer.MINECRAFT_EDITION, executor),
-			textureManager.preload(PANORAMA_OVERLAY, executor),
+			textureManager.preload(PanoramaRenderer.PANORAMA_OVERLAY, executor),
 			CUBE_MAP.preload(textureManager, executor)
 		);
 	}
@@ -268,10 +270,30 @@ public class TitleScreen extends Screen {
 			this.fadeInStart = Util.getMillis();
 		}
 
-		this.fade = this.fading ? (float)(Util.getMillis() - this.fadeInStart) / 1000.0F : 1.0F;
-		float g = this.fading ? Mth.clamp(this.fade - 1.0F, 0.0F, 1.0F) : 1.0F;
+		float g = 1.0F;
+		if (this.fading) {
+			float h = (float)(Util.getMillis() - this.fadeInStart) / 2000.0F;
+			if (h > 1.0F) {
+				this.fading = false;
+				this.panoramaFade = 1.0F;
+			} else {
+				h = Mth.clamp(h, 0.0F, 1.0F);
+				g = Mth.clampedMap(h, 0.5F, 1.0F, 0.0F, 1.0F);
+				this.panoramaFade = Mth.clampedMap(h, 0.0F, 0.5F, 0.0F, 1.0F);
+
+				for (GuiEventListener guiEventListener : this.children()) {
+					if (guiEventListener instanceof AbstractWidget abstractWidget) {
+						abstractWidget.setAlpha(g);
+					}
+				}
+			}
+		}
+
+		this.renderPanorama(guiGraphics, f);
 		int k = Mth.ceil(g * 255.0F) << 24;
 		if ((k & -67108864) != 0) {
+			super.render(guiGraphics, i, j, f);
+			this.logoRenderer.renderLogo(guiGraphics, this.width, g);
 			if (this.warningLabel != null) {
 				this.warningLabel.render(guiGraphics, k);
 			}
@@ -292,31 +314,20 @@ public class TitleScreen extends Screen {
 			}
 
 			guiGraphics.drawString(this.font, string, 2, this.height - 10, 16777215 | k);
-
-			for (GuiEventListener guiEventListener : this.children()) {
-				if (guiEventListener instanceof AbstractWidget abstractWidget) {
-					abstractWidget.setAlpha(g);
-				}
-			}
-
 			if (this.realmsNotificationsEnabled() && g >= 1.0F) {
 				RenderSystem.enableDepthTest();
 				this.realmsNotificationsScreen.render(guiGraphics, i, j, f);
 			}
-
-			super.render(guiGraphics, i, j, f);
-			this.logoRenderer.renderLogo(guiGraphics, this.width, g);
 		}
 	}
 
 	@Override
 	public void renderBackground(GuiGraphics guiGraphics, int i, int j, float f) {
-		this.renderPanorama(guiGraphics, f);
 	}
 
 	@Override
 	protected void renderPanorama(GuiGraphics guiGraphics, float f) {
-		PANORAMA.render(f, Mth.clamp(this.fade, 0.0F, 1.0F));
+		PANORAMA.render(guiGraphics, this.width, this.height, this.panoramaFade, f);
 	}
 
 	@Override

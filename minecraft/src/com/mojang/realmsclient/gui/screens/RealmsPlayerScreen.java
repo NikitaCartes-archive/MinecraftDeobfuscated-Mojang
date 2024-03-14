@@ -40,7 +40,7 @@ public class RealmsPlayerScreen extends RealmsScreen {
 	private final RealmsConfigureWorldScreen lastScreen;
 	final RealmsServer serverData;
 	@Nullable
-	private RealmsPlayerScreen.InvitedObjectSelectionList invitedList;
+	RealmsPlayerScreen.InvitedObjectSelectionList invitedList;
 	boolean stateChanged;
 
 	public RealmsPlayerScreen(RealmsConfigureWorldScreen realmsConfigureWorldScreen, RealmsServer realmsServer) {
@@ -188,6 +188,9 @@ public class RealmsPlayerScreen extends RealmsScreen {
 
 					RealmsPlayerScreen.this.stateChanged = true;
 					RealmsPlayerScreen.this.minecraft.setScreen(RealmsPlayerScreen.this);
+					if (RealmsPlayerScreen.this.invitedList != null) {
+						RealmsPlayerScreen.this.invitedList.children().remove(this);
+					}
 				}, RealmsPlayerScreen.QUESTION_TITLE, Component.translatable("mco.configure.world.uninvite.player", playerInfo.getName()));
 				RealmsPlayerScreen.this.minecraft.setScreen(realmsConfirmScreen);
 			}

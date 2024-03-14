@@ -18,6 +18,7 @@ import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.GlobalPos;
+import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -84,6 +85,7 @@ import net.minecraft.world.item.ElytraItem;
 import net.minecraft.world.item.ItemCooldowns;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.MaceItem;
 import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.item.crafting.RecipeHolder;
@@ -144,6 +146,8 @@ public abstract class Player extends LivingEntity {
 		)
 		.put(Pose.DYING, EntityDimensions.fixed(0.2F, 0.2F).withEyeHeight(1.62F))
 		.build();
+	private static final float SMASH_ATTACK_KNOCKBACK_RADIUS = 2.5F;
+	private static final float SMASH_ATTACK_KNOCKBACK_POWER = 0.6F;
 	private static final EntityDataAccessor<Float> DATA_PLAYER_ABSORPTION_ID = SynchedEntityData.defineId(Player.class, EntityDataSerializers.FLOAT);
 	private static final EntityDataAccessor<Integer> DATA_SCORE_ID = SynchedEntityData.defineId(Player.class, EntityDataSerializers.INT);
 	protected static final EntityDataAccessor<Byte> DATA_PLAYER_MODE_CUSTOMISATION = SynchedEntityData.defineId(Player.class, EntityDataSerializers.BYTE);
@@ -1136,43 +1140,77 @@ public abstract class Player extends LivingEntity {
 						bl2 = true;
 					}
 
-					boolean bl3 = bl
+					boolean bl3 = this.getItemInHand(InteractionHand.MAIN_HAND).getItem() instanceof MaceItem && this.fallDistance > 1.5F;
+					if (bl3) {
+						f += f * 0.5F * this.fallDistance;
+						this.level()
+							.getEntitiesOfClass(
+								LivingEntity.class,
+								entity.getBoundingBox().inflate(2.5),
+								livingEntity -> livingEntity != this
+										&& livingEntity != entity
+										&& !this.isAlliedTo(livingEntity)
+										&& (!(livingEntity instanceof ArmorStand) || !((ArmorStand)livingEntity).isMarker())
+										&& entity.distanceToSqr(livingEntity) <= Math.pow(2.5, 2.0)
+							)
+							.forEach(
+								livingEntity -> {
+									Vec3 vec3x = livingEntity.position().subtract(entity.position());
+									double dx = (2.5 - vec3x.length()) * 0.6F * (1.0 - livingEntity.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE));
+									Vec3 vec32 = vec3x.normalize().scale(dx);
+									if (dx > 0.0) {
+										livingEntity.push(vec32.x, 0.6F, vec32.z);
+										if (!this.level().isClientSide()) {
+											BlockPos blockPos = livingEntity.getOnPos();
+											Vec3 vec33 = blockPos.getCenter().add(0.0, 0.5, 0.0);
+											int ix = (int)(100.0 * dx);
+											((ServerLevel)this.level())
+												.sendParticles(
+													new BlockParticleOption(ParticleTypes.BLOCK, this.level().getBlockState(blockPos)), vec33.x, vec33.y, vec33.z, ix, 0.3F, 0.3F, 0.3F, 0.15F
+												);
+										}
+									}
+								}
+							);
+					}
+
+					boolean bl4 = bl
 						&& this.fallDistance > 0.0F
 						&& !this.onGround()
 						&& !this.onClimbable()
 						&& !this.isInWater()
 						&& !this.hasEffect(MobEffects.BLINDNESS)
 						&& !this.isPassenger()
-						&& entity instanceof LivingEntity;
-					bl3 = bl3 && !this.isSprinting();
-					if (bl3) {
+						&& entity instanceof LivingEntity
+						&& !this.isSprinting();
+					if (bl4) {
 						f *= 1.5F;
 					}
 
 					f += g;
-					boolean bl4 = false;
+					boolean bl5 = false;
 					double d = (double)(this.walkDist - this.walkDistO);
-					if (bl && !bl3 && !bl2 && this.onGround() && d < (double)this.getSpeed()) {
+					if (bl && !bl4 && !bl2 && this.onGround() && d < (double)this.getSpeed()) {
 						ItemStack itemStack = this.getItemInHand(InteractionHand.MAIN_HAND);
 						if (itemStack.getItem() instanceof SwordItem) {
-							bl4 = true;
+							bl5 = true;
 						}
 					}
 
 					float j = 0.0F;
-					boolean bl5 = false;
+					boolean bl6 = false;
 					int k = EnchantmentHelper.getFireAspect(this);
 					if (entity instanceof LivingEntity) {
 						j = ((LivingEntity)entity).getHealth();
 						if (k > 0 && !entity.isOnFire()) {
-							bl5 = true;
+							bl6 = true;
 							entity.igniteForSeconds(1);
 						}
 					}
 
 					Vec3 vec3 = entity.getDeltaMovement();
-					boolean bl6 = entity.hurt(this.damageSources().playerAttack(this), f);
-					if (bl6) {
+					boolean bl7 = entity.hurt(this.damageSources().playerAttack(this), f);
+					if (bl7) {
 						if (i > 0) {
 							if (entity instanceof LivingEntity) {
 								((LivingEntity)entity)
@@ -1193,7 +1231,7 @@ public abstract class Player extends LivingEntity {
 							this.setSprinting(false);
 						}
 
-						if (bl4) {
+						if (bl5) {
 							float l = 1.0F + EnchantmentHelper.getSweepingDamageRatio(this) * f;
 
 							for (LivingEntity livingEntity : this.level().getEntitiesOfClass(LivingEntity.class, entity.getBoundingBox().inflate(1.0, 0.25, 1.0))) {
@@ -1219,12 +1257,12 @@ public abstract class Player extends LivingEntity {
 							entity.setDeltaMovement(vec3);
 						}
 
-						if (bl3) {
+						if (bl4) {
 							this.level().playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.PLAYER_ATTACK_CRIT, this.getSoundSource(), 1.0F, 1.0F);
 							this.crit(entity);
 						}
 
-						if (!bl3 && !bl4) {
+						if (!bl4 && !bl5) {
 							if (bl) {
 								this.level().playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.PLAYER_ATTACK_STRONG, this.getSoundSource(), 1.0F, 1.0F);
 							} else {
@@ -1271,7 +1309,7 @@ public abstract class Player extends LivingEntity {
 						this.causeFoodExhaustion(0.1F);
 					} else {
 						this.level().playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.PLAYER_ATTACK_NODAMAGE, this.getSoundSource(), 1.0F, 1.0F);
-						if (bl5) {
+						if (bl6) {
 							entity.clearFire();
 						}
 					}

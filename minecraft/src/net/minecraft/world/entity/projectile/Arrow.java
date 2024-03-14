@@ -2,6 +2,7 @@ package net.minecraft.world.entity.projectile;
 
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.particles.ColorParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -86,12 +87,9 @@ public class Arrow extends AbstractArrow {
 	private void makeParticle(int i) {
 		int j = this.getColor();
 		if (j != -1 && i > 0) {
-			double d = (double)(j >> 16 & 0xFF) / 255.0;
-			double e = (double)(j >> 8 & 0xFF) / 255.0;
-			double f = (double)(j >> 0 & 0xFF) / 255.0;
-
 			for (int k = 0; k < i; k++) {
-				this.level().addParticle(ParticleTypes.ENTITY_EFFECT, this.getRandomX(0.5), this.getRandomY(), this.getRandomZ(0.5), d, e, f);
+				this.level()
+					.addParticle(ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, j), this.getRandomX(0.5), this.getRandomY(), this.getRandomZ(0.5), 0.0, 0.0, 0.0);
 			}
 		}
 	}
@@ -135,12 +133,15 @@ public class Arrow extends AbstractArrow {
 		if (b == 0) {
 			int i = this.getColor();
 			if (i != -1) {
-				double d = (double)(i >> 16 & 0xFF) / 255.0;
-				double e = (double)(i >> 8 & 0xFF) / 255.0;
-				double f = (double)(i >> 0 & 0xFF) / 255.0;
+				float f = (float)(i >> 16 & 0xFF) / 255.0F;
+				float g = (float)(i >> 8 & 0xFF) / 255.0F;
+				float h = (float)(i >> 0 & 0xFF) / 255.0F;
 
 				for (int j = 0; j < 20; j++) {
-					this.level().addParticle(ParticleTypes.ENTITY_EFFECT, this.getRandomX(0.5), this.getRandomY(), this.getRandomZ(0.5), d, e, f);
+					this.level()
+						.addParticle(
+							ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, f, g, h), this.getRandomX(0.5), this.getRandomY(), this.getRandomZ(0.5), 0.0, 0.0, 0.0
+						);
 				}
 			}
 		} else {

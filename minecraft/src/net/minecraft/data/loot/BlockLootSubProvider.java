@@ -11,7 +11,9 @@ import java.util.function.Function;
 import java.util.stream.IntStream;
 import net.minecraft.advancements.critereon.BlockPredicate;
 import net.minecraft.advancements.critereon.EnchantmentPredicate;
+import net.minecraft.advancements.critereon.ItemEnchantmentsPredicate;
 import net.minecraft.advancements.critereon.ItemPredicate;
+import net.minecraft.advancements.critereon.ItemSubPredicates;
 import net.minecraft.advancements.critereon.LocationPredicate;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.advancements.critereon.StatePropertiesPredicate;
@@ -71,7 +73,11 @@ import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
 
 public abstract class BlockLootSubProvider implements LootTableSubProvider {
 	protected static final LootItemCondition.Builder HAS_SILK_TOUCH = MatchTool.toolMatches(
-		ItemPredicate.Builder.item().hasEnchantment(new EnchantmentPredicate(Enchantments.SILK_TOUCH, MinMaxBounds.Ints.atLeast(1)))
+		ItemPredicate.Builder.item()
+			.withSubPredicate(
+				ItemSubPredicates.ENCHANTMENTS,
+				ItemEnchantmentsPredicate.enchantments(List.of(new EnchantmentPredicate(Enchantments.SILK_TOUCH, MinMaxBounds.Ints.atLeast(1))))
+			)
 	);
 	protected static final LootItemCondition.Builder HAS_NO_SILK_TOUCH = HAS_SILK_TOUCH.invert();
 	protected static final LootItemCondition.Builder HAS_SHEARS = MatchTool.toolMatches(ItemPredicate.Builder.item().of(Items.SHEARS));

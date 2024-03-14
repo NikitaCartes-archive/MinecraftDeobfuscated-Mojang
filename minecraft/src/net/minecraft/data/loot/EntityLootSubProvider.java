@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 import net.minecraft.advancements.critereon.DamageSourcePredicate;
 import net.minecraft.advancements.critereon.EntityFlagsPredicate;
 import net.minecraft.advancements.critereon.EntityPredicate;
-import net.minecraft.advancements.critereon.EntitySubPredicate;
+import net.minecraft.advancements.critereon.EntitySubPredicates;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -114,7 +114,7 @@ public abstract class EntityLootSubProvider implements LootTableSubProvider {
 	protected LootItemCondition.Builder killedByFrogVariant(FrogVariant frogVariant) {
 		return DamageSourceCondition.hasDamageSource(
 			DamageSourcePredicate.Builder.damageType()
-				.source(EntityPredicate.Builder.entity().of(EntityType.FROG).subPredicate(EntitySubPredicate.variant(frogVariant)))
+				.source(EntityPredicate.Builder.entity().of(EntityType.FROG).subPredicate(EntitySubPredicates.variant(frogVariant)))
 		);
 	}
 

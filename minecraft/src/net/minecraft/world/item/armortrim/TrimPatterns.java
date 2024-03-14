@@ -31,6 +31,8 @@ public class TrimPatterns {
 	public static final ResourceKey<TrimPattern> SILENCE = registryKey("silence");
 	public static final ResourceKey<TrimPattern> RAISER = registryKey("raiser");
 	public static final ResourceKey<TrimPattern> HOST = registryKey("host");
+	public static final ResourceKey<TrimPattern> FLOW = registryKey("flow");
+	public static final ResourceKey<TrimPattern> BOLT = registryKey("bolt");
 
 	public static void bootstrap(BootstrapContext<TrimPattern> bootstrapContext) {
 		register(bootstrapContext, Items.SENTRY_ARMOR_TRIM_SMITHING_TEMPLATE, SENTRY);
@@ -58,7 +60,7 @@ public class TrimPatterns {
 			.findFirst();
 	}
 
-	private static void register(BootstrapContext<TrimPattern> bootstrapContext, Item item, ResourceKey<TrimPattern> resourceKey) {
+	public static void register(BootstrapContext<TrimPattern> bootstrapContext, Item item, ResourceKey<TrimPattern> resourceKey) {
 		TrimPattern trimPattern = new TrimPattern(
 			resourceKey.location(),
 			BuiltInRegistries.ITEM.wrapAsHolder(item),

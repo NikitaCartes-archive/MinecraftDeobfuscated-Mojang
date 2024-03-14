@@ -24,7 +24,6 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 
@@ -131,10 +130,10 @@ public class TabNavigationBar extends AbstractContainerEventHandler implements R
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
 		RenderSystem.enableBlend();
 		guiGraphics.blit(
-			CreateWorldScreen.HEADER_SEPARATOR, 0, this.layout.getY() + this.layout.getHeight() - 2, 0.0F, 0.0F, ((TabButton)this.tabButtons.get(0)).getX(), 2, 32, 2
+			Screen.HEADER_SEPARATOR, 0, this.layout.getY() + this.layout.getHeight() - 2, 0.0F, 0.0F, ((TabButton)this.tabButtons.get(0)).getX(), 2, 32, 2
 		);
 		int k = ((TabButton)this.tabButtons.get(this.tabButtons.size() - 1)).getRight();
-		guiGraphics.blit(CreateWorldScreen.HEADER_SEPARATOR, k, this.layout.getY() + this.layout.getHeight() - 2, 0.0F, 0.0F, this.width, 2, 32, 2);
+		guiGraphics.blit(Screen.HEADER_SEPARATOR, k, this.layout.getY() + this.layout.getHeight() - 2, 0.0F, 0.0F, this.width, 2, 32, 2);
 		RenderSystem.disableBlend();
 
 		for (TabButton tabButton : this.tabButtons) {

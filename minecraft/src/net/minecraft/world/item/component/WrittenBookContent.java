@@ -20,7 +20,9 @@ import net.minecraft.server.network.Filterable;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.entity.player.Player;
 
-public record WrittenBookContent(Filterable<String> title, String author, int generation, List<Filterable<Component>> pages, boolean resolved) {
+public record WrittenBookContent(Filterable<String> title, String author, int generation, List<Filterable<Component>> pages, boolean resolved)
+	implements BookContent<Component, WrittenBookContent> {
+	public static final WrittenBookContent EMPTY = new WrittenBookContent(Filterable.passThrough(""), "", 0, List.of(), true);
 	public static final int PAGE_LENGTH = 32767;
 	public static final int MAX_PAGES = 100;
 	public static final int TITLE_LENGTH = 16;
@@ -28,7 +30,7 @@ public record WrittenBookContent(Filterable<String> title, String author, int ge
 	public static final int MAX_GENERATION = 3;
 	public static final int MAX_CRAFTABLE_GENERATION = 2;
 	private static final Codec<Filterable<Component>> PAGE_CODEC = Filterable.codec(ComponentSerialization.flatCodec(32767));
-	private static final Codec<List<Filterable<Component>>> PAGES_CODEC = ExtraCodecs.sizeLimitedList(PAGE_CODEC.listOf(), 100);
+	public static final Codec<List<Filterable<Component>>> PAGES_CODEC = ExtraCodecs.sizeLimitedList(PAGE_CODEC.listOf(), 100);
 	public static final Codec<WrittenBookContent> CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
 					Filterable.codec(ExtraCodecs.sizeLimitedString(0, 32)).fieldOf("title").forGetter(WrittenBookContent::title),
@@ -99,5 +101,9 @@ public record WrittenBookContent(Filterable<String> title, String author, int ge
 
 	public List<Component> getPages(boolean bl) {
 		return Lists.transform(this.pages, filterable -> (Component)filterable.get(bl));
+	}
+
+	public WrittenBookContent withReplacedPages(List<Filterable<Component>> list) {
+		return new WrittenBookContent(this.title, this.author, this.generation, list, false);
 	}
 }

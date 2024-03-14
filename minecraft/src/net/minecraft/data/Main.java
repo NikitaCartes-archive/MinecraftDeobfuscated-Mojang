@@ -50,6 +50,7 @@ import net.minecraft.data.tags.PoiTypeTagsProvider;
 import net.minecraft.data.tags.StructureTagsProvider;
 import net.minecraft.data.tags.TagsProvider;
 import net.minecraft.data.tags.TradeRebalanceStructureTagsProvider;
+import net.minecraft.data.tags.UpdateOneTwentyOneBannerPatternTagsProvider;
 import net.minecraft.data.tags.UpdateOneTwentyOneBiomeTagsProvider;
 import net.minecraft.data.tags.UpdateOneTwentyOneBlockTagsProvider;
 import net.minecraft.data.tags.UpdateOneTwentyOneDamageTypeTagsProvider;
@@ -65,6 +66,7 @@ import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BannerPattern;
 
 public class Main {
 	@DontObfuscate
@@ -131,7 +133,7 @@ public class Main {
 			packOutput -> new VanillaItemTagsProvider(packOutput, completableFuture, tagsProvider.contentsGetter())
 		);
 		TagsProvider<Biome> tagsProvider3 = packGenerator3.addProvider(bindRegistries(BiomeTagsProvider::new, completableFuture));
-		packGenerator3.addProvider(bindRegistries(BannerPatternTagsProvider::new, completableFuture));
+		TagsProvider<BannerPattern> tagsProvider4 = packGenerator3.addProvider(bindRegistries(BannerPatternTagsProvider::new, completableFuture));
 		packGenerator3.addProvider(bindRegistries(CatVariantTagsProvider::new, completableFuture));
 		packGenerator3.addProvider(bindRegistries(DamageTypeTagsProvider::new, completableFuture));
 		packGenerator3.addProvider(bindRegistries(EntityTypeTagsProvider::new, completableFuture));
@@ -169,11 +171,11 @@ public class Main {
 		DataGenerator.PackGenerator packGenerator4 = dataGenerator.getBuiltinDatapack(bl2, "update_1_21");
 		packGenerator4.addProvider(bindRegistries(RegistriesDatapackGenerator::new, completableFuture2.thenApply(RegistrySetBuilder.PatchedRegistries::patches)));
 		packGenerator4.addProvider(bindRegistries(UpdateOneTwentyOneRecipeProvider::new, completableFuture3));
-		TagsProvider<Block> tagsProvider4 = packGenerator4.addProvider(
+		TagsProvider<Block> tagsProvider5 = packGenerator4.addProvider(
 			packOutput -> new UpdateOneTwentyOneBlockTagsProvider(packOutput, completableFuture3, tagsProvider.contentsGetter())
 		);
 		packGenerator4.addProvider(
-			packOutput -> new UpdateOneTwentyOneItemTagsProvider(packOutput, completableFuture3, tagsProvider2.contentsGetter(), tagsProvider4.contentsGetter())
+			packOutput -> new UpdateOneTwentyOneItemTagsProvider(packOutput, completableFuture3, tagsProvider2.contentsGetter(), tagsProvider5.contentsGetter())
 		);
 		packGenerator4.addProvider(packOutput -> new UpdateOneTwentyOneBiomeTagsProvider(packOutput, completableFuture3, tagsProvider3.contentsGetter()));
 		packGenerator4.addProvider(bindRegistries(UpdateOneTwentyOneLootTableProvider::create, completableFuture3));
@@ -185,6 +187,7 @@ public class Main {
 		packGenerator4.addProvider(bindRegistries(UpdateOneTwentyOneEntityTypeTagsProvider::new, completableFuture3));
 		packGenerator4.addProvider(bindRegistries(UpdateOneTwentyOneDamageTypeTagsProvider::new, completableFuture3));
 		packGenerator4.addProvider(bindRegistries(UpdateOneTwentyOneAdvancementProvider::create, completableFuture3));
+		packGenerator4.addProvider(packOutput -> new UpdateOneTwentyOneBannerPatternTagsProvider(packOutput, completableFuture3, tagsProvider4.contentsGetter()));
 		return dataGenerator;
 	}
 }

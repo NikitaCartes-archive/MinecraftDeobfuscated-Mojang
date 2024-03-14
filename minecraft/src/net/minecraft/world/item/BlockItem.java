@@ -189,7 +189,7 @@ public class BlockItem extends Item {
 
 	@Override
 	public boolean canFitInsideContainerItems() {
-		return !(this.block instanceof ShulkerBoxBlock);
+		return !(this.getBlock() instanceof ShulkerBoxBlock);
 	}
 
 	@Override

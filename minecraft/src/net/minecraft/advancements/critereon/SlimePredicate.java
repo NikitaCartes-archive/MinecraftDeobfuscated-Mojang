@@ -25,7 +25,7 @@ public record SlimePredicate(MinMaxBounds.Ints size) implements EntitySubPredica
 	}
 
 	@Override
-	public EntitySubPredicate.Type type() {
-		return EntitySubPredicate.Types.SLIME;
+	public MapCodec<SlimePredicate> codec() {
+		return EntitySubPredicates.SLIME;
 	}
 }

@@ -14,7 +14,7 @@ import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.TooltipFlag;
 
 public record Fireworks(int flightDuration, List<FireworkExplosion> explosions) implements TooltipProvider {
-	private static final int MAX_EXPLOSIONS = 256;
+	public static final int MAX_EXPLOSIONS = 256;
 	public static final Codec<Fireworks> CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
 					ExtraCodecs.strictOptionalField(ExtraCodecs.UNSIGNED_BYTE, "flight_duration", 0).forGetter(Fireworks::flightDuration),

@@ -7007,6 +7007,18 @@ public class Blocks {
 				.requiredFeatures(FeatureFlags.UPDATE_1_21)
 		)
 	);
+	public static final Block HEAVY_CORE = register(
+		"heavy_core",
+		new HeavyCoreBlock(
+			BlockBehaviour.Properties.of()
+				.mapColor(MapColor.COLOR_BLACK)
+				.instrument(NoteBlockInstrument.SNARE)
+				.sound(SoundType.HEAVY_CORE)
+				.strength(30.0F)
+				.pushReaction(PushReaction.DESTROY)
+				.requiredFeatures(FeatureFlags.UPDATE_1_21)
+		)
+	);
 
 	private static ToIntFunction<BlockState> litBlockEmission(int i) {
 		return blockState -> blockState.getValue(BlockStateProperties.LIT) ? i : 0;

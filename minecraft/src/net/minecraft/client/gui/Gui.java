@@ -181,8 +181,7 @@ public class Gui {
 			.add(this::renderTitle)
 			.add(this::renderChat)
 			.add(this::renderTabList)
-			.add((guiGraphics, f) -> this.subtitleOverlay.render(guiGraphics))
-			.add(this::renderSavingIndicator);
+			.add((guiGraphics, f) -> this.subtitleOverlay.render(guiGraphics));
 		this.layers.add(layeredDraw, () -> !minecraft.options.hideGui).add(this::renderSleepOverlay).add(layeredDraw2, () -> !minecraft.options.hideGui);
 	}
 
@@ -1229,7 +1228,7 @@ public class Gui {
 		this.debugOverlay.clearChunkCache();
 	}
 
-	private void renderSavingIndicator(GuiGraphics guiGraphics, float f) {
+	public void renderSavingIndicator(GuiGraphics guiGraphics, float f) {
 		if (this.minecraft.options.showAutosaveIndicator().get() && (this.autosaveIndicatorValue > 0.0F || this.lastAutosaveIndicatorValue > 0.0F)) {
 			int i = Mth.floor(255.0F * Mth.clamp(Mth.lerp(this.minecraft.getFrameTime(), this.lastAutosaveIndicatorValue, this.autosaveIndicatorValue), 0.0F, 1.0F));
 			if (i > 8) {

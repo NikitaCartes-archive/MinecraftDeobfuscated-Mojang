@@ -77,6 +77,7 @@ public class Cat extends TamableAnimal implements VariantHolder<CatVariant> {
 	private static final EntityDataAccessor<Boolean> IS_LYING = SynchedEntityData.defineId(Cat.class, EntityDataSerializers.BOOLEAN);
 	private static final EntityDataAccessor<Boolean> RELAX_STATE_ONE = SynchedEntityData.defineId(Cat.class, EntityDataSerializers.BOOLEAN);
 	private static final EntityDataAccessor<Integer> DATA_COLLAR_COLOR = SynchedEntityData.defineId(Cat.class, EntityDataSerializers.INT);
+	@Nullable
 	private Cat.CatAvoidEntityGoal<Player> avoidPlayersGoal;
 	@Nullable
 	private TemptGoal temptGoal;
@@ -132,11 +133,11 @@ public class Cat extends TamableAnimal implements VariantHolder<CatVariant> {
 		return this.entityData.get(IS_LYING);
 	}
 
-	public void setRelaxStateOne(boolean bl) {
+	void setRelaxStateOne(boolean bl) {
 		this.entityData.set(RELAX_STATE_ONE, bl);
 	}
 
-	public boolean isRelaxStateOne() {
+	boolean isRelaxStateOne() {
 		return this.entityData.get(RELAX_STATE_ONE);
 	}
 
@@ -144,7 +145,7 @@ public class Cat extends TamableAnimal implements VariantHolder<CatVariant> {
 		return DyeColor.byId(this.entityData.get(DATA_COLLAR_COLOR));
 	}
 
-	public void setCollarColor(DyeColor dyeColor) {
+	private void setCollarColor(DyeColor dyeColor) {
 		this.entityData.set(DATA_COLLAR_COLOR, dyeColor.getId());
 	}
 
@@ -359,59 +360,52 @@ public class Cat extends TamableAnimal implements VariantHolder<CatVariant> {
 	public InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
 		Item item = itemStack.getItem();
-		if (this.level().isClientSide) {
-			if (this.isTame() && this.isOwnedBy(player)) {
-				return InteractionResult.SUCCESS;
-			} else {
-				return !this.isFood(itemStack) || !(this.getHealth() < this.getMaxHealth()) && this.isTame() ? InteractionResult.PASS : InteractionResult.SUCCESS;
-			}
-		} else {
-			if (this.isTame()) {
-				if (this.isOwnedBy(player)) {
-					if (!(item instanceof DyeItem)) {
-						if (item.isEdible() && this.isFood(itemStack) && this.getHealth() < this.getMaxHealth()) {
-							this.usePlayerItem(player, interactionHand, itemStack);
-							this.heal((float)item.getFoodProperties().getNutrition());
-							return InteractionResult.CONSUME;
-						}
-
-						InteractionResult interactionResult = super.mobInteract(player, interactionHand);
-						if (!interactionResult.consumesAction() || this.isBaby()) {
-							this.setOrderedToSit(!this.isOrderedToSit());
-						}
-
-						return interactionResult;
-					}
-
-					DyeColor dyeColor = ((DyeItem)item).getDyeColor();
+		if (this.isTame()) {
+			if (this.isOwnedBy(player)) {
+				if (item instanceof DyeItem dyeItem) {
+					DyeColor dyeColor = dyeItem.getDyeColor();
 					if (dyeColor != this.getCollarColor()) {
-						this.setCollarColor(dyeColor);
-						itemStack.consume(1, player);
-						this.setPersistenceRequired();
-						return InteractionResult.CONSUME;
+						if (!this.level().isClientSide()) {
+							this.setCollarColor(dyeColor);
+							itemStack.consume(1, player);
+							this.setPersistenceRequired();
+						}
+
+						return InteractionResult.sidedSuccess(this.level().isClientSide());
 					}
+				} else if (item.isEdible() && this.isFood(itemStack) && this.getHealth() < this.getMaxHealth()) {
+					if (!this.level().isClientSide()) {
+						this.usePlayerItem(player, interactionHand, itemStack);
+						this.heal((float)item.getFoodProperties().getNutrition());
+					}
+
+					return InteractionResult.sidedSuccess(this.level().isClientSide());
 				}
-			} else if (this.isFood(itemStack)) {
+
+				InteractionResult interactionResult = super.mobInteract(player, interactionHand);
+				if (!interactionResult.consumesAction()) {
+					this.setOrderedToSit(!this.isOrderedToSit());
+					return InteractionResult.sidedSuccess(this.level().isClientSide());
+				}
+
+				return interactionResult;
+			}
+		} else if (this.isFood(itemStack)) {
+			if (!this.level().isClientSide()) {
 				this.usePlayerItem(player, interactionHand, itemStack);
-				if (this.random.nextInt(3) == 0) {
-					this.tame(player);
-					this.setOrderedToSit(true);
-					this.level().broadcastEntityEvent(this, (byte)7);
-				} else {
-					this.level().broadcastEntityEvent(this, (byte)6);
-				}
-
-				this.setPersistenceRequired();
-				return InteractionResult.CONSUME;
-			}
-
-			InteractionResult interactionResult = super.mobInteract(player, interactionHand);
-			if (interactionResult.consumesAction()) {
+				this.tryToTame(player);
 				this.setPersistenceRequired();
 			}
 
-			return interactionResult;
+			return InteractionResult.sidedSuccess(this.level().isClientSide());
 		}
+
+		InteractionResult interactionResult = super.mobInteract(player, interactionHand);
+		if (interactionResult.consumesAction()) {
+			this.setPersistenceRequired();
+		}
+
+		return interactionResult;
 	}
 
 	@Override
@@ -438,6 +432,16 @@ public class Cat extends TamableAnimal implements VariantHolder<CatVariant> {
 		this.goalSelector.removeGoal(this.avoidPlayersGoal);
 		if (!this.isTame()) {
 			this.goalSelector.addGoal(4, this.avoidPlayersGoal);
+		}
+	}
+
+	private void tryToTame(Player player) {
+		if (this.random.nextInt(3) == 0) {
+			this.tame(player);
+			this.setOrderedToSit(true);
+			this.level().broadcastEntityEvent(this, (byte)7);
+		} else {
+			this.level().broadcastEntityEvent(this, (byte)6);
 		}
 	}
 

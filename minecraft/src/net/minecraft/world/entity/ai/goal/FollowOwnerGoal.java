@@ -70,7 +70,7 @@ public class FollowOwnerGoal extends Goal {
 	}
 
 	private boolean unableToMove() {
-		return this.tamable.isOrderedToSit() || this.tamable.isPassenger() || this.tamable.isLeashed();
+		return this.tamable.isOrderedToSit() || this.tamable.isPassenger() || this.tamable.mayBeLeashed();
 	}
 
 	@Override

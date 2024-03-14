@@ -3,6 +3,7 @@ package net.minecraft.world.entity.monster;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ColorParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.sounds.SoundEvent;
@@ -44,9 +45,9 @@ public class Ravager extends Raider {
 	private static final double BASE_MOVEMENT_SPEED = 0.3;
 	private static final double ATTACK_MOVEMENT_SPEED = 0.35;
 	private static final int STUNNED_COLOR = 8356754;
-	private static final double STUNNED_COLOR_BLUE = 0.5725490196078431;
-	private static final double STUNNED_COLOR_GREEN = 0.5137254901960784;
-	private static final double STUNNED_COLOR_RED = 0.4980392156862745;
+	private static final float STUNNED_COLOR_BLUE = 0.57254905F;
+	private static final float STUNNED_COLOR_GREEN = 0.5137255F;
+	private static final float STUNNED_COLOR_RED = 0.49803922F;
 	private static final int ATTACK_DURATION = 10;
 	public static final int STUN_DURATION = 40;
 	private int attackTick;
@@ -178,7 +179,7 @@ public class Ravager extends Raider {
 			double d = this.getX() - (double)this.getBbWidth() * Math.sin((double)(this.yBodyRot * (float) (Math.PI / 180.0))) + (this.random.nextDouble() * 0.6 - 0.3);
 			double e = this.getY() + (double)this.getBbHeight() - 0.3;
 			double f = this.getZ() + (double)this.getBbWidth() * Math.cos((double)(this.yBodyRot * (float) (Math.PI / 180.0))) + (this.random.nextDouble() * 0.6 - 0.3);
-			this.level().addParticle(ParticleTypes.ENTITY_EFFECT, d, e, f, 0.4980392156862745, 0.5137254901960784, 0.5725490196078431);
+			this.level().addParticle(ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, 0.49803922F, 0.5137255F, 0.57254905F), d, e, f, 0.0, 0.0, 0.0);
 		}
 	}
 

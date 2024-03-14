@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ColorParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -225,13 +226,13 @@ public class WitherBoss extends Monster implements PowerableMob, RangedAttackMob
 			if (bl && this.level().random.nextInt(4) == 0) {
 				this.level()
 					.addParticle(
-						ParticleTypes.ENTITY_EFFECT,
+						ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, 0.7F, 0.7F, 0.5F),
 						p + this.random.nextGaussian() * (double)s,
 						q + this.random.nextGaussian() * (double)s,
 						r + this.random.nextGaussian() * (double)s,
-						0.7F,
-						0.7F,
-						0.5
+						0.0,
+						0.0,
+						0.0
 					);
 			}
 		}
@@ -242,13 +243,13 @@ public class WitherBoss extends Monster implements PowerableMob, RangedAttackMob
 			for (int u = 0; u < 3; u++) {
 				this.level()
 					.addParticle(
-						ParticleTypes.ENTITY_EFFECT,
+						ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, 0.7F, 0.7F, 0.9F),
 						this.getX() + this.random.nextGaussian(),
 						this.getY() + (double)(this.random.nextFloat() * t),
 						this.getZ() + this.random.nextGaussian(),
-						0.7F,
-						0.7F,
-						0.9F
+						0.0,
+						0.0,
+						0.0
 					);
 			}
 		}

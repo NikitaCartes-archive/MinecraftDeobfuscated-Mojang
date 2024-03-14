@@ -98,6 +98,14 @@ public class BlockPos extends Vec3i {
 		return containing(position.x(), position.y(), position.z());
 	}
 
+	public static BlockPos min(BlockPos blockPos, BlockPos blockPos2) {
+		return new BlockPos(Math.min(blockPos.getX(), blockPos2.getX()), Math.min(blockPos.getY(), blockPos2.getY()), Math.min(blockPos.getZ(), blockPos2.getZ()));
+	}
+
+	public static BlockPos max(BlockPos blockPos, BlockPos blockPos2) {
+		return new BlockPos(Math.max(blockPos.getX(), blockPos2.getX()), Math.max(blockPos.getY(), blockPos2.getY()), Math.max(blockPos.getZ(), blockPos2.getZ()));
+	}
+
 	public long asLong() {
 		return asLong(this.getX(), this.getY(), this.getZ());
 	}

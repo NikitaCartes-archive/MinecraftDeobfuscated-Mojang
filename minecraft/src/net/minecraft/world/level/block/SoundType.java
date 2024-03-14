@@ -695,6 +695,9 @@ public class SoundType {
 	public static final SoundType VAULT = new SoundType(
 		1.0F, 1.0F, SoundEvents.VAULT_BREAK, SoundEvents.VAULT_STEP, SoundEvents.VAULT_PLACE, SoundEvents.VAULT_HIT, SoundEvents.VAULT_FALL
 	);
+	public static final SoundType HEAVY_CORE = new SoundType(
+		1.0F, 1.0F, SoundEvents.HEAVY_CORE_BREAK, SoundEvents.HEAVY_CORE_STEP, SoundEvents.HEAVY_CORE_PLACE, SoundEvents.HEAVY_CORE_HIT, SoundEvents.HEAVY_CORE_FALL
+	);
 	public final float volume;
 	public final float pitch;
 	private final SoundEvent breakSound;

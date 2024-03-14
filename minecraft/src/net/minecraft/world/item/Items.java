@@ -121,6 +121,7 @@ public class Items {
 	public static final Item RAW_IRON_BLOCK = registerBlock(Blocks.RAW_IRON_BLOCK);
 	public static final Item RAW_COPPER_BLOCK = registerBlock(Blocks.RAW_COPPER_BLOCK);
 	public static final Item RAW_GOLD_BLOCK = registerBlock(Blocks.RAW_GOLD_BLOCK);
+	public static final Item HEAVY_CORE = registerBlock(Blocks.HEAVY_CORE);
 	public static final Item AMETHYST_BLOCK = registerBlock(Blocks.AMETHYST_BLOCK);
 	public static final Item BUDDING_AMETHYST = registerBlock(Blocks.BUDDING_AMETHYST);
 	public static final Item IRON_BLOCK = registerBlock(Blocks.IRON_BLOCK);
@@ -1507,6 +1508,7 @@ public class Items {
 	public static final Item WRITTEN_BOOK = registerItem(
 		"written_book", new WrittenBookItem(new Item.Properties().stacksTo(16).component(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true))
 	);
+	public static final Item MACE = registerItem("mace", new MaceItem(new Item.Properties().defaultDurability(250).requiredFeatures(FeatureFlags.UPDATE_1_21)));
 	public static final Item ITEM_FRAME = registerItem("item_frame", new ItemFrameItem(EntityType.ITEM_FRAME, new Item.Properties()));
 	public static final Item GLOW_ITEM_FRAME = registerItem("glow_item_frame", new ItemFrameItem(EntityType.GLOW_ITEM_FRAME, new Item.Properties()));
 	public static final Item FLOWER_POT = registerBlock(Blocks.FLOWER_POT);
@@ -1804,6 +1806,14 @@ public class Items {
 	public static final Item PIGLIN_BANNER_PATTERN = registerItem(
 		"piglin_banner_pattern", new BannerPatternItem(BannerPatternTags.PATTERN_ITEM_PIGLIN, new Item.Properties().stacksTo(1))
 	);
+	public static final Item FLOW_BANNER_PATTERN = registerItem(
+		"flow_banner_pattern",
+		new BannerPatternItem(BannerPatternTags.PATTERN_ITEM_FLOW, new Item.Properties().stacksTo(1).requiredFeatures(FeatureFlags.UPDATE_1_21))
+	);
+	public static final Item GUSTER_BANNER_PATTERN = registerItem(
+		"guster_banner_pattern",
+		new BannerPatternItem(BannerPatternTags.PATTERN_ITEM_GUSTER, new Item.Properties().stacksTo(1).requiredFeatures(FeatureFlags.UPDATE_1_21))
+	);
 	public static final Item GOAT_HORN = registerItem("goat_horn", new InstrumentItem(new Item.Properties().stacksTo(1), InstrumentTags.GOAT_HORNS));
 	public static final Item COMPOSTER = registerBlock(Blocks.COMPOSTER);
 	public static final Item BARREL = registerBlock(Blocks.BARREL, properties -> properties.component(DataComponents.CONTAINER, ItemContainerContents.EMPTY));
@@ -1929,6 +1939,12 @@ public class Items {
 	public static final Item HOST_ARMOR_TRIM_SMITHING_TEMPLATE = registerItem(
 		"host_armor_trim_smithing_template", SmithingTemplateItem.createArmorTrimTemplate(TrimPatterns.HOST)
 	);
+	public static final Item FLOW_ARMOR_TRIM_SMITHING_TEMPLATE = registerItem(
+		"flow_armor_trim_smithing_template", SmithingTemplateItem.createArmorTrimTemplate(TrimPatterns.FLOW, FeatureFlags.UPDATE_1_21)
+	);
+	public static final Item BOLT_ARMOR_TRIM_SMITHING_TEMPLATE = registerItem(
+		"bolt_armor_trim_smithing_template", SmithingTemplateItem.createArmorTrimTemplate(TrimPatterns.BOLT, FeatureFlags.UPDATE_1_21)
+	);
 	public static final Item ANGLER_POTTERY_SHERD = registerItem("angler_pottery_sherd", new Item(new Item.Properties()));
 	public static final Item ARCHER_POTTERY_SHERD = registerItem("archer_pottery_sherd", new Item(new Item.Properties()));
 	public static final Item ARMS_UP_POTTERY_SHERD = registerItem("arms_up_pottery_sherd", new Item(new Item.Properties()));
@@ -1937,7 +1953,11 @@ public class Items {
 	public static final Item BURN_POTTERY_SHERD = registerItem("burn_pottery_sherd", new Item(new Item.Properties()));
 	public static final Item DANGER_POTTERY_SHERD = registerItem("danger_pottery_sherd", new Item(new Item.Properties()));
 	public static final Item EXPLORER_POTTERY_SHERD = registerItem("explorer_pottery_sherd", new Item(new Item.Properties()));
+	public static final Item FLOW_POTTERY_SHERD = registerItem("flow_pottery_sherd", new Item(new Item.Properties().requiredFeatures(FeatureFlags.UPDATE_1_21)));
 	public static final Item FRIEND_POTTERY_SHERD = registerItem("friend_pottery_sherd", new Item(new Item.Properties()));
+	public static final Item GUSTER_POTTERY_SHERD = registerItem(
+		"guster_pottery_sherd", new Item(new Item.Properties().requiredFeatures(FeatureFlags.UPDATE_1_21))
+	);
 	public static final Item HEART_POTTERY_SHERD = registerItem("heart_pottery_sherd", new Item(new Item.Properties()));
 	public static final Item HEARTBREAK_POTTERY_SHERD = registerItem("heartbreak_pottery_sherd", new Item(new Item.Properties()));
 	public static final Item HOWL_POTTERY_SHERD = registerItem("howl_pottery_sherd", new Item(new Item.Properties()));
@@ -1945,6 +1965,9 @@ public class Items {
 	public static final Item MOURNER_POTTERY_SHERD = registerItem("mourner_pottery_sherd", new Item(new Item.Properties()));
 	public static final Item PLENTY_POTTERY_SHERD = registerItem("plenty_pottery_sherd", new Item(new Item.Properties()));
 	public static final Item PRIZE_POTTERY_SHERD = registerItem("prize_pottery_sherd", new Item(new Item.Properties()));
+	public static final Item SCRAPE_POTTERY_SHERD = registerItem(
+		"scrape_pottery_sherd", new Item(new Item.Properties().requiredFeatures(FeatureFlags.UPDATE_1_21))
+	);
 	public static final Item SHEAF_POTTERY_SHERD = registerItem("sheaf_pottery_sherd", new Item(new Item.Properties()));
 	public static final Item SHELTER_POTTERY_SHERD = registerItem("shelter_pottery_sherd", new Item(new Item.Properties()));
 	public static final Item SKULL_POTTERY_SHERD = registerItem("skull_pottery_sherd", new Item(new Item.Properties()));
@@ -1968,6 +1991,7 @@ public class Items {
 	public static final Item TRIAL_SPAWNER = registerBlock(Blocks.TRIAL_SPAWNER);
 	public static final Item TRIAL_KEY = registerItem("trial_key", new Item(new Item.Properties().requiredFeatures(FeatureFlags.UPDATE_1_21)));
 	public static final Item VAULT = registerBlock(Blocks.VAULT);
+	public static final Item BREEZE_ROD = registerItem("breeze_rod", new Item(new Item.Properties().requiredFeatures(FeatureFlags.UPDATE_1_21)));
 
 	public static Item registerBlock(Block block) {
 		return registerBlock(new BlockItem(block, new Item.Properties()));

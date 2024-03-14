@@ -140,12 +140,13 @@ public class PostChain implements AutoCloseable {
 		String string3 = GsonHelper.getAsString(jsonObject, "outtarget");
 		RenderTarget renderTarget = this.getRenderTarget(string2);
 		RenderTarget renderTarget2 = this.getRenderTarget(string3);
+		boolean bl = GsonHelper.getAsBoolean(jsonObject, "use_linear_filter", false);
 		if (renderTarget == null) {
 			throw new ChainedJsonException("Input target '" + string2 + "' does not exist");
 		} else if (renderTarget2 == null) {
 			throw new ChainedJsonException("Output target '" + string3 + "' does not exist");
 		} else {
-			PostPass postPass = this.addPass(string, renderTarget, renderTarget2);
+			PostPass postPass = this.addPass(string, renderTarget, renderTarget2, bl);
 			JsonArray jsonArray = GsonHelper.getAsJsonArray(jsonObject, "auxtargets", null);
 			if (jsonArray != null) {
 				int i = 0;
@@ -155,19 +156,19 @@ public class PostChain implements AutoCloseable {
 						JsonObject jsonObject2 = GsonHelper.convertToJsonObject(jsonElement2, "auxtarget");
 						String string4 = GsonHelper.getAsString(jsonObject2, "name");
 						String string5 = GsonHelper.getAsString(jsonObject2, "id");
-						boolean bl;
+						boolean bl2;
 						String string6;
 						if (string5.endsWith(":depth")) {
-							bl = true;
+							bl2 = true;
 							string6 = string5.substring(0, string5.lastIndexOf(58));
 						} else {
-							bl = false;
+							bl2 = false;
 							string6 = string5;
 						}
 
 						RenderTarget renderTarget3 = this.getRenderTarget(string6);
 						if (renderTarget3 == null) {
-							if (bl) {
+							if (bl2) {
 								throw new ChainedJsonException("Render target '" + string6 + "' can't be used as depth buffer");
 							}
 
@@ -180,8 +181,8 @@ public class PostChain implements AutoCloseable {
 							AbstractTexture abstractTexture = textureManager.getTexture(resourceLocation);
 							int j = GsonHelper.getAsInt(jsonObject2, "width");
 							int k = GsonHelper.getAsInt(jsonObject2, "height");
-							boolean bl2 = GsonHelper.getAsBoolean(jsonObject2, "bilinear");
-							if (bl2) {
+							boolean bl3 = GsonHelper.getAsBoolean(jsonObject2, "bilinear");
+							if (bl3) {
 								RenderSystem.texParameter(3553, 10241, 9729);
 								RenderSystem.texParameter(3553, 10240, 9729);
 							} else {
@@ -190,13 +191,13 @@ public class PostChain implements AutoCloseable {
 							}
 
 							postPass.addAuxAsset(string4, abstractTexture::getId, j, k);
-						} else if (bl) {
+						} else if (bl2) {
 							postPass.addAuxAsset(string4, renderTarget3::getDepthTextureId, renderTarget3.width, renderTarget3.height);
 						} else {
 							postPass.addAuxAsset(string4, renderTarget3::getColorTextureId, renderTarget3.width, renderTarget3.height);
 						}
-					} catch (Exception var26) {
-						ChainedJsonException chainedJsonException = ChainedJsonException.forException(var26);
+					} catch (Exception var27) {
+						ChainedJsonException chainedJsonException = ChainedJsonException.forException(var27);
 						chainedJsonException.prependJsonKey("auxtargets[" + i + "]");
 						throw chainedJsonException;
 					}
@@ -212,8 +213,8 @@ public class PostChain implements AutoCloseable {
 				for (JsonElement jsonElement3 : jsonArray2) {
 					try {
 						this.parseUniformNode(jsonElement3);
-					} catch (Exception var25) {
-						ChainedJsonException chainedJsonException2 = ChainedJsonException.forException(var25);
+					} catch (Exception var26) {
+						ChainedJsonException chainedJsonException2 = ChainedJsonException.forException(var26);
 						chainedJsonException2.prependJsonKey("uniforms[" + l + "]");
 						throw chainedJsonException2;
 					}
@@ -290,8 +291,8 @@ public class PostChain implements AutoCloseable {
 		this.passes.clear();
 	}
 
-	public PostPass addPass(String string, RenderTarget renderTarget, RenderTarget renderTarget2) throws IOException {
-		PostPass postPass = new PostPass(this.resourceProvider, string, renderTarget, renderTarget2);
+	public PostPass addPass(String string, RenderTarget renderTarget, RenderTarget renderTarget2, boolean bl) throws IOException {
+		PostPass postPass = new PostPass(this.resourceProvider, string, renderTarget, renderTarget2, bl);
 		this.passes.add(this.passes.size(), postPass);
 		return postPass;
 	}
@@ -314,6 +315,14 @@ public class PostChain implements AutoCloseable {
 		}
 	}
 
+	private void setFilterMode(int i) {
+		this.screenTarget.setFilterMode(i);
+
+		for (RenderTarget renderTarget : this.customRenderTargets.values()) {
+			renderTarget.setFilterMode(i);
+		}
+	}
+
 	public void process(float f) {
 		if (f < this.lastStamp) {
 			this.time = this.time + (1.0F - this.lastStamp);
@@ -328,9 +337,19 @@ public class PostChain implements AutoCloseable {
 			this.time -= 20.0F;
 		}
 
+		int i = 9728;
+
 		for (PostPass postPass : this.passes) {
+			int j = postPass.getFilterMode();
+			if (i != j) {
+				this.setFilterMode(j);
+				i = j;
+			}
+
 			postPass.process(this.time / 20.0F);
 		}
+
+		this.setFilterMode(9728);
 	}
 
 	public void setUniform(String string, float f) {

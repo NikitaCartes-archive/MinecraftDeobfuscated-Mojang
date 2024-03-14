@@ -109,7 +109,7 @@ public class AccessibilityOnboardingScreen extends Screen {
 
 	@Override
 	protected void renderPanorama(GuiGraphics guiGraphics, float f) {
-		PANORAMA.render(0.0F);
+		PANORAMA.render(guiGraphics, this.width, this.height, 1.0F, 0.0F);
 	}
 
 	private void handleInitialNarrationDelay() {

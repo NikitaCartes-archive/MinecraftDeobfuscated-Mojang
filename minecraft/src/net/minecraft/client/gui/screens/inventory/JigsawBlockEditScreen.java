@@ -170,6 +170,11 @@ public class JigsawBlockEditScreen extends Screen {
 		this.setInitialFocus(this.poolEdit);
 	}
 
+	@Override
+	public void renderBackground(GuiGraphics guiGraphics, int i, int j, float f) {
+		this.renderTransparentBackground(guiGraphics);
+	}
+
 	private void updateValidity() {
 		boolean bl = ResourceLocation.isValidResourceLocation(this.nameEdit.getValue())
 			&& ResourceLocation.isValidResourceLocation(this.targetEdit.getValue())

@@ -22,6 +22,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
@@ -328,6 +329,10 @@ public enum Direction implements StringRepresentable {
 		}
 
 		return direction;
+	}
+
+	public static Direction getNearest(Vec3 vec3) {
+		return getNearest(vec3.x, vec3.y, vec3.z);
 	}
 
 	public String toString() {

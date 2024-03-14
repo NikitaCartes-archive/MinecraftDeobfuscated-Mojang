@@ -158,4 +158,9 @@ public abstract class AbstractCommandBlockEditScreen extends Screen {
 
 		this.commandSuggestions.render(guiGraphics, i, j);
 	}
+
+	@Override
+	public void renderBackground(GuiGraphics guiGraphics, int i, int j, float f) {
+		this.renderTransparentBackground(guiGraphics);
+	}
 }

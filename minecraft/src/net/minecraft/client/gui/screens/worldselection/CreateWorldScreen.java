@@ -96,8 +96,7 @@ public class CreateWorldScreen extends Screen {
 	private static final Component PREPARING_WORLD_DATA = Component.translatable("createWorld.preparing");
 	private static final int HORIZONTAL_BUTTON_SPACING = 10;
 	private static final int VERTICAL_BUTTON_SPACING = 8;
-	public static final ResourceLocation HEADER_SEPARATOR = new ResourceLocation("textures/gui/header_separator.png");
-	public static final ResourceLocation FOOTER_SEPARATOR = new ResourceLocation("textures/gui/footer_separator.png");
+	public static final ResourceLocation TAB_HEADER_BACKGROUND = new ResourceLocation("textures/gui/tab_header_background.png");
 	private final HeaderAndFooterLayout layout = new HeaderAndFooterLayout(this);
 	final WorldCreationUiState uiState;
 	private final TabManager tabManager = new TabManager(this::addRenderableWidget, guiEventListener -> this.removeWidget(guiEventListener));
@@ -303,12 +302,13 @@ public class CreateWorldScreen extends Screen {
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
 		super.render(guiGraphics, i, j, f);
 		RenderSystem.enableBlend();
-		guiGraphics.blit(FOOTER_SEPARATOR, 0, this.height - this.layout.getFooterHeight() - 2, 0.0F, 0.0F, this.width, 2, 32, 2);
+		guiGraphics.blit(Screen.FOOTER_SEPARATOR, 0, this.height - this.layout.getFooterHeight() - 2, 0.0F, 0.0F, this.width, 2, 32, 2);
 		RenderSystem.disableBlend();
 	}
 
 	@Override
 	protected void renderMenuBackground(GuiGraphics guiGraphics) {
+		guiGraphics.blit(TAB_HEADER_BACKGROUND, 0, 0, 0.0F, 0.0F, this.width, this.layout.getHeaderHeight(), 16, 16);
 		this.renderMenuBackground(guiGraphics, 0, this.layout.getHeaderHeight(), this.width, this.height);
 	}
 

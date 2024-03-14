@@ -3,6 +3,7 @@ package net.minecraft.world.entity.monster;
 import java.util.EnumSet;
 import java.util.function.IntFunction;
 import javax.annotation.Nullable;
+import net.minecraft.core.particles.ColorParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -78,16 +79,22 @@ public abstract class SpellcasterIllager extends AbstractIllager {
 		super.tick();
 		if (this.level().isClientSide && this.isCastingSpell()) {
 			SpellcasterIllager.IllagerSpell illagerSpell = this.getCurrentSpell();
-			double d = illagerSpell.spellColor[0];
-			double e = illagerSpell.spellColor[1];
-			double f = illagerSpell.spellColor[2];
-			float g = this.yBodyRot * (float) (Math.PI / 180.0) + Mth.cos((float)this.tickCount * 0.6662F) * 0.25F;
-			float h = Mth.cos(g);
-			float i = Mth.sin(g);
-			double j = 0.6 * (double)this.getScale();
-			double k = 1.8 * (double)this.getScale();
-			this.level().addParticle(ParticleTypes.ENTITY_EFFECT, this.getX() + (double)h * j, this.getY() + k, this.getZ() + (double)i * j, d, e, f);
-			this.level().addParticle(ParticleTypes.ENTITY_EFFECT, this.getX() - (double)h * j, this.getY() + k, this.getZ() - (double)i * j, d, e, f);
+			float f = (float)illagerSpell.spellColor[0];
+			float g = (float)illagerSpell.spellColor[1];
+			float h = (float)illagerSpell.spellColor[2];
+			float i = this.yBodyRot * (float) (Math.PI / 180.0) + Mth.cos((float)this.tickCount * 0.6662F) * 0.25F;
+			float j = Mth.cos(i);
+			float k = Mth.sin(i);
+			double d = 0.6 * (double)this.getScale();
+			double e = 1.8 * (double)this.getScale();
+			this.level()
+				.addParticle(
+					ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, f, g, h), this.getX() + (double)j * d, this.getY() + e, this.getZ() + (double)k * d, 0.0, 0.0, 0.0
+				);
+			this.level()
+				.addParticle(
+					ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, f, g, h), this.getX() - (double)j * d, this.getY() + e, this.getZ() - (double)k * d, 0.0, 0.0, 0.0
+				);
 		}
 	}
 

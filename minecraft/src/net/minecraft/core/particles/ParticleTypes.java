@@ -10,7 +10,6 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 
 public class ParticleTypes {
-	public static final SimpleParticleType AMBIENT_ENTITY_EFFECT = register("ambient_entity_effect", false);
 	public static final SimpleParticleType ANGRY_VILLAGER = register("angry_villager", false);
 	public static final ParticleType<BlockParticleOption> BLOCK = register(
 		"block", false, BlockParticleOption.DESERIALIZER, BlockParticleOption::codec, BlockParticleOption::streamCodec
@@ -43,7 +42,9 @@ public class ParticleTypes {
 	public static final SimpleParticleType ENCHANTED_HIT = register("enchanted_hit", false);
 	public static final SimpleParticleType ENCHANT = register("enchant", false);
 	public static final SimpleParticleType END_ROD = register("end_rod", false);
-	public static final SimpleParticleType ENTITY_EFFECT = register("entity_effect", false);
+	public static final ParticleType<ColorParticleOption> ENTITY_EFFECT = register(
+		"entity_effect", false, ColorParticleOption.DESERIALIZER, ColorParticleOption::codec, ColorParticleOption::streamCodec
+	);
 	public static final SimpleParticleType EXPLOSION_EMITTER = register("explosion_emitter", true);
 	public static final SimpleParticleType EXPLOSION = register("explosion", true);
 	public static final SimpleParticleType GUST = register("gust", true);

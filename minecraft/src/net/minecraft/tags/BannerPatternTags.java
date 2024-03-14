@@ -12,6 +12,8 @@ public class BannerPatternTags {
 	public static final TagKey<BannerPattern> PATTERN_ITEM_MOJANG = create("pattern_item/mojang");
 	public static final TagKey<BannerPattern> PATTERN_ITEM_GLOBE = create("pattern_item/globe");
 	public static final TagKey<BannerPattern> PATTERN_ITEM_PIGLIN = create("pattern_item/piglin");
+	public static final TagKey<BannerPattern> PATTERN_ITEM_FLOW = create("pattern_item/flow");
+	public static final TagKey<BannerPattern> PATTERN_ITEM_GUSTER = create("pattern_item/guster");
 
 	private BannerPatternTags() {
 	}

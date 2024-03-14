@@ -11,6 +11,7 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.core.Holder;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
@@ -113,6 +114,10 @@ public class MobEffectInstance implements Comparable<MobEffectInstance> {
 
 	public float getBlendFactor(LivingEntity livingEntity, float f) {
 		return this.blendState.getFactor(livingEntity, f);
+	}
+
+	public ParticleOptions getParticleOptions() {
+		return this.effect.value().createParticleOptions(this);
 	}
 
 	void setDetailsFrom(MobEffectInstance mobEffectInstance) {

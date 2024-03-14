@@ -15,7 +15,8 @@ import net.minecraft.world.phys.AABB;
 
 public class FlyNodeEvaluator extends WalkNodeEvaluator {
 	private final Long2ObjectMap<PathType> pathTypeByPosCache = new Long2ObjectOpenHashMap<>();
-	private static final float SMALL_MOB_INFLATED_START_NODE_BOUNDING_BOX = 1.5F;
+	private static final float SMALL_MOB_SIZE = 1.0F;
+	private static final float SMALL_MOB_INFLATED_START_NODE_BOUNDING_BOX = 1.1F;
 	private static final int MAX_START_NODE_CANDIDATES = 10;
 
 	@Override
@@ -316,7 +317,6 @@ public class FlyNodeEvaluator extends WalkNodeEvaluator {
 	}
 
 	private Iterable<BlockPos> iteratePathfindingStartNodeCandidatePositions(Mob mob) {
-		float f = 1.0F;
 		AABB aABB = mob.getBoundingBox();
 		boolean bl = aABB.getSize() < 1.0;
 		if (!bl) {
@@ -327,10 +327,10 @@ public class FlyNodeEvaluator extends WalkNodeEvaluator {
 				BlockPos.containing(aABB.maxX, (double)mob.getBlockY(), aABB.maxZ)
 			);
 		} else {
-			double d = Math.max(0.0, (1.5 - aABB.getZsize()) / 2.0);
-			double e = Math.max(0.0, (1.5 - aABB.getXsize()) / 2.0);
-			double g = Math.max(0.0, (1.5 - aABB.getYsize()) / 2.0);
-			AABB aABB2 = aABB.inflate(e, g, d);
+			double d = Math.max(0.0, 1.1F - aABB.getZsize());
+			double e = Math.max(0.0, 1.1F - aABB.getXsize());
+			double f = Math.max(0.0, 1.1F - aABB.getYsize());
+			AABB aABB2 = aABB.inflate(e, f, d);
 			return BlockPos.randomBetweenClosed(
 				mob.getRandom(),
 				10,

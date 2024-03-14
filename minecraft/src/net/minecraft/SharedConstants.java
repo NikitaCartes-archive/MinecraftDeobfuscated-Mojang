@@ -15,22 +15,22 @@ public class SharedConstants {
 	@Deprecated
 	public static final boolean SNAPSHOT = true;
 	@Deprecated
-	public static final int WORLD_VERSION = 3821;
+	public static final int WORLD_VERSION = 3823;
 	@Deprecated
 	public static final String SERIES = "main";
 	@Deprecated
-	public static final String VERSION_STRING = "24w10a";
+	public static final String VERSION_STRING = "24w11a";
 	@Deprecated
 	public static final int RELEASE_NETWORK_PROTOCOL_VERSION = 766;
 	@Deprecated
-	public static final int SNAPSHOT_NETWORK_PROTOCOL_VERSION = 179;
+	public static final int SNAPSHOT_NETWORK_PROTOCOL_VERSION = 180;
 	public static final int SNBT_NAG_VERSION = 3798;
 	private static final int SNAPSHOT_PROTOCOL_BIT = 30;
 	public static final boolean THROW_ON_TASK_FAILURE = true;
 	@Deprecated
-	public static final int RESOURCE_PACK_FORMAT = 28;
+	public static final int RESOURCE_PACK_FORMAT = 29;
 	@Deprecated
-	public static final int DATA_PACK_FORMAT = 34;
+	public static final int DATA_PACK_FORMAT = 35;
 	@Deprecated
 	public static final int LANGUAGE_FORMAT = 1;
 	public static final int REPORT_FORMAT_VERSION = 1;
@@ -121,6 +121,7 @@ public class SharedConstants {
 	public static final long MAXIMUM_TICK_TIME_NANOS = Duration.ofMillis(300L).toNanos();
 	public static final float MAXIMUM_BLOCK_EXPLOSION_RESISTANCE = 3600000.0F;
 	public static final boolean USE_WORKFLOWS_HOOKS = false;
+	public static final boolean USE_DEVONLY = false;
 	public static boolean CHECK_DATA_FIXER_SCHEMA = true;
 	public static boolean IS_RUNNING_IN_IDE;
 	public static Set<TypeReference> DATA_FIX_TYPES_TO_OPTIMIZE = Set.of();
@@ -166,7 +167,7 @@ public class SharedConstants {
 	}
 
 	public static int getProtocolVersion() {
-		return 1073742003;
+		return 1073742004;
 	}
 
 	public static boolean debugVoidTerrain(ChunkPos chunkPos) {

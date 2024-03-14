@@ -309,7 +309,7 @@ public class Item implements FeatureElement, ItemLike {
 
 	protected static BlockHitResult getPlayerPOVHitResult(Level level, Player player, ClipContext.Fluid fluid) {
 		Vec3 vec3 = player.getEyePosition();
-		Vec3 vec32 = vec3.add(player.getViewVector(1.0F).scale(player.blockInteractionRange()));
+		Vec3 vec32 = vec3.add(player.calculateViewVector(player.getXRot(), player.getYRot()).scale(player.blockInteractionRange()));
 		return level.clip(new ClipContext(vec3, vec32, ClipContext.Block.OUTLINE, fluid, player));
 	}
 

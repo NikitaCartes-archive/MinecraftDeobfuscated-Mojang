@@ -130,6 +130,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 	public static final String ID_TAG = "id";
 	public static final String PASSENGERS_TAG = "Passengers";
 	private static final AtomicInteger ENTITY_COUNTER = new AtomicInteger();
+	public static final int CONTENTS_SLOT_INDEX = 0;
 	public static final int BOARDING_COOLDOWN = 60;
 	public static final int TOTAL_AIR_SUPPLY = 300;
 	public static final int MAX_ENTITY_TAG_COUNT = 1024;
@@ -1467,6 +1468,10 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 		return this.calculateViewVector(this.getViewXRot(f), this.getViewYRot(f));
 	}
 
+	public Direction getNearestViewDirection() {
+		return Direction.getNearest(this.getViewVector(1.0F));
+	}
+
 	public float getViewXRot(float f) {
 		return f == 1.0F ? this.getXRot() : Mth.lerp(f, this.xRotO, this.getXRot());
 	}
@@ -1475,7 +1480,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 		return f == 1.0F ? this.getYRot() : Mth.lerp(f, this.yRotO, this.getYRot());
 	}
 
-	protected final Vec3 calculateViewVector(float f, float g) {
+	public final Vec3 calculateViewVector(float f, float g) {
 		float h = f * (float) (Math.PI / 180.0);
 		float i = -g * (float) (Math.PI / 180.0);
 		float j = Mth.cos(i);

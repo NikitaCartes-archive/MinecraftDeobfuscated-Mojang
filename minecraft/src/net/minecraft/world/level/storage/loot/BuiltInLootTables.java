@@ -53,6 +53,9 @@ public class BuiltInLootTables {
 	public static final ResourceLocation ANCIENT_CITY_ICE_BOX = register("chests/ancient_city_ice_box");
 	public static final ResourceLocation RUINED_PORTAL = register("chests/ruined_portal");
 	public static final ResourceLocation TRIAL_CHAMBERS_REWARD = register("chests/trial_chambers/reward");
+	public static final ResourceLocation TRIAL_CHAMBERS_REWARD_COMMON = register("chests/trial_chambers/reward_common");
+	public static final ResourceLocation TRIAL_CHAMBERS_REWARD_RARE = register("chests/trial_chambers/reward_rare");
+	public static final ResourceLocation TRIAL_CHAMBERS_REWARD_UNIQUE = register("chests/trial_chambers/reward_unique");
 	public static final ResourceLocation TRIAL_CHAMBERS_SUPPLY = register("chests/trial_chambers/supply");
 	public static final ResourceLocation TRIAL_CHAMBERS_CORRIDOR = register("chests/trial_chambers/corridor");
 	public static final ResourceLocation TRIAL_CHAMBERS_INTERSECTION = register("chests/trial_chambers/intersection");

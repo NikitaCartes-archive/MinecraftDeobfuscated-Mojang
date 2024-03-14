@@ -76,7 +76,9 @@ public class SpawnArmorTrimsCommand {
 		TrimPatterns.SHAPER,
 		TrimPatterns.SILENCE,
 		TrimPatterns.RAISER,
-		TrimPatterns.HOST
+		TrimPatterns.HOST,
+		TrimPatterns.FLOW,
+		TrimPatterns.BOLT
 	);
 	private static final List<ResourceKey<TrimMaterial>> VANILLA_TRIM_MATERIALS = List.of(
 		TrimMaterials.QUARTZ,

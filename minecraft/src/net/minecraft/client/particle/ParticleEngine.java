@@ -97,7 +97,6 @@ public class ParticleEngine implements PreparableReloadListener {
 	}
 
 	private void registerProviders() {
-		this.register(ParticleTypes.AMBIENT_ENTITY_EFFECT, SpellParticle.AmbientMobProvider::new);
 		this.register(ParticleTypes.ANGRY_VILLAGER, HeartParticle.AngryVillagerProvider::new);
 		this.register(ParticleTypes.BLOCK_MARKER, new BlockMarker.Provider());
 		this.register(ParticleTypes.BLOCK, new TerrainParticle.Provider());
@@ -125,7 +124,7 @@ public class ParticleEngine implements PreparableReloadListener {
 		this.register(ParticleTypes.ENCHANTED_HIT, CritParticle.MagicProvider::new);
 		this.register(ParticleTypes.ENCHANT, FlyTowardsPositionParticle.EnchantProvider::new);
 		this.register(ParticleTypes.END_ROD, EndRodParticle.Provider::new);
-		this.register(ParticleTypes.ENTITY_EFFECT, SpellParticle.MobProvider::new);
+		this.register(ParticleTypes.ENTITY_EFFECT, SpellParticle.MobEffectProvider::new);
 		this.register(ParticleTypes.EXPLOSION_EMITTER, new HugeExplosionSeedParticle.Provider());
 		this.register(ParticleTypes.EXPLOSION, HugeExplosionParticle.Provider::new);
 		this.register(ParticleTypes.SONIC_BOOM, SonicBoomParticle.Provider::new);

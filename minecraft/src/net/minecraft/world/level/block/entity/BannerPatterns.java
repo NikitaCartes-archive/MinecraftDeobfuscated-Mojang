@@ -47,6 +47,8 @@ public class BannerPatterns {
 	public static final ResourceKey<BannerPattern> FLOWER = create("flower");
 	public static final ResourceKey<BannerPattern> MOJANG = create("mojang");
 	public static final ResourceKey<BannerPattern> PIGLIN = create("piglin");
+	public static final ResourceKey<BannerPattern> FLOW = create("flow");
+	public static final ResourceKey<BannerPattern> GUSTER = create("guster");
 
 	private static ResourceKey<BannerPattern> create(String string) {
 		return ResourceKey.create(Registries.BANNER_PATTERN, new ResourceLocation(string));
@@ -96,7 +98,7 @@ public class BannerPatterns {
 		register(bootstrapContext, PIGLIN);
 	}
 
-	private static void register(BootstrapContext<BannerPattern> bootstrapContext, ResourceKey<BannerPattern> resourceKey) {
+	public static void register(BootstrapContext<BannerPattern> bootstrapContext, ResourceKey<BannerPattern> resourceKey) {
 		bootstrapContext.register(resourceKey, new BannerPattern(resourceKey.location(), "block.minecraft.banner." + resourceKey.location().toShortLanguageKey()));
 	}
 }

@@ -123,8 +123,9 @@ public class StatsScreen extends Screen {
 	public void onStatsUpdated() {
 		if (this.isLoading) {
 			this.initLists();
-			this.initButtons();
 			this.setActiveList(this.statsList);
+			this.initButtons();
+			this.setInitialFocus();
 			this.isLoading = false;
 		}
 	}
@@ -153,7 +154,7 @@ public class StatsScreen extends Screen {
 	@Environment(EnvType.CLIENT)
 	class GeneralStatisticsList extends ObjectSelectionList<StatsScreen.GeneralStatisticsList.Entry> {
 		public GeneralStatisticsList(Minecraft minecraft) {
-			super(minecraft, StatsScreen.this.width, StatsScreen.this.height - 33 - 58, 33, 11);
+			super(minecraft, StatsScreen.this.width, StatsScreen.this.height - 33 - 58, 33, 14);
 			ObjectArrayList<Stat<ResourceLocation>> objectArrayList = new ObjectArrayList<>(Stats.CUSTOM.iterator());
 			objectArrayList.sort(Comparator.comparing(statx -> I18n.get(StatsScreen.getTranslationKey(statx))));
 
@@ -183,9 +184,11 @@ public class StatsScreen extends Screen {
 
 			@Override
 			public void render(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-				guiGraphics.drawString(StatsScreen.this.font, this.statDisplay, k + 2, j, i % 2 == 0 ? -1 : -8355712);
+				int p = j + m / 2 - 9 / 2;
+				int q = i % 2 == 0 ? -1 : -4539718;
+				guiGraphics.drawString(StatsScreen.this.font, this.statDisplay, k + 2, p, q);
 				String string = this.getValueText();
-				guiGraphics.drawString(StatsScreen.this.font, string, k + l - StatsScreen.this.font.width(string) - 3, j, i % 2 == 0 ? -1 : -8355712);
+				guiGraphics.drawString(StatsScreen.this.font, string, k + l - StatsScreen.this.font.width(string) - 4, p, q);
 			}
 
 			@Override
@@ -416,7 +419,7 @@ public class StatsScreen extends Screen {
 
 			protected void renderStat(GuiGraphics guiGraphics, @Nullable Stat<?> stat, int i, int j, boolean bl) {
 				Component component = (Component)(stat == null ? StatsScreen.NO_VALUE_DISPLAY : Component.literal(stat.format(StatsScreen.this.stats.getValue(stat))));
-				guiGraphics.drawString(StatsScreen.this.font, component, i - StatsScreen.this.font.width(component), j, bl ? -1 : -8355712);
+				guiGraphics.drawString(StatsScreen.this.font, component, i - StatsScreen.this.font.width(component), j, bl ? -1 : -4539718);
 			}
 
 			@Override
@@ -503,8 +506,8 @@ public class StatsScreen extends Screen {
 			@Override
 			public void render(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
 				guiGraphics.drawString(StatsScreen.this.font, this.mobName, k + 2, j + 1, -1);
-				guiGraphics.drawString(StatsScreen.this.font, this.kills, k + 2 + 10, j + 1 + 9, this.hasKills ? -6250336 : -8355712);
-				guiGraphics.drawString(StatsScreen.this.font, this.killedBy, k + 2 + 10, j + 1 + 9 * 2, this.wasKilledBy ? -6250336 : -8355712);
+				guiGraphics.drawString(StatsScreen.this.font, this.kills, k + 2 + 10, j + 1 + 9, this.hasKills ? -4539718 : -8355712);
+				guiGraphics.drawString(StatsScreen.this.font, this.killedBy, k + 2 + 10, j + 1 + 9 * 2, this.wasKilledBy ? -4539718 : -8355712);
 			}
 
 			@Override

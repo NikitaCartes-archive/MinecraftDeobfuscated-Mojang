@@ -8,6 +8,8 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.BiomeTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
 
@@ -27,13 +29,18 @@ public class WolfVariants {
 	}
 
 	static void register(BootstrapContext<WolfVariant> bootstrapContext, ResourceKey<WolfVariant> resourceKey, String string, ResourceKey<Biome> resourceKey2) {
+		register(bootstrapContext, resourceKey, string, HolderSet.direct(bootstrapContext.lookup(Registries.BIOME).getOrThrow(resourceKey2)));
+	}
+
+	static void register(BootstrapContext<WolfVariant> bootstrapContext, ResourceKey<WolfVariant> resourceKey, String string, TagKey<Biome> tagKey) {
+		register(bootstrapContext, resourceKey, string, bootstrapContext.lookup(Registries.BIOME).getOrThrow(tagKey));
+	}
+
+	static void register(BootstrapContext<WolfVariant> bootstrapContext, ResourceKey<WolfVariant> resourceKey, String string, HolderSet<Biome> holderSet) {
 		ResourceLocation resourceLocation = new ResourceLocation("textures/entity/wolf/" + string + ".png");
 		ResourceLocation resourceLocation2 = new ResourceLocation("textures/entity/wolf/" + string + "_tame.png");
 		ResourceLocation resourceLocation3 = new ResourceLocation("textures/entity/wolf/" + string + "_angry.png");
-		bootstrapContext.register(
-			resourceKey,
-			new WolfVariant(resourceLocation, resourceLocation2, resourceLocation3, HolderSet.direct(bootstrapContext.lookup(Registries.BIOME).getOrThrow(resourceKey2)))
-		);
+		bootstrapContext.register(resourceKey, new WolfVariant(resourceLocation, resourceLocation2, resourceLocation3, holderSet));
 	}
 
 	public static Holder<WolfVariant> getSpawnVariant(RegistryAccess registryAccess, Holder<Biome> holder) {
@@ -46,13 +53,13 @@ public class WolfVariants {
 
 	public static void bootstrap(BootstrapContext<WolfVariant> bootstrapContext) {
 		register(bootstrapContext, PALE, "wolf", Biomes.TAIGA);
-		register(bootstrapContext, SPOTTED, "wolf_spotted", Biomes.SAVANNA_PLATEAU);
+		register(bootstrapContext, SPOTTED, "wolf_spotted", BiomeTags.IS_SAVANNA);
 		register(bootstrapContext, SNOWY, "wolf_snowy", Biomes.GROVE);
 		register(bootstrapContext, BLACK, "wolf_black", Biomes.OLD_GROWTH_PINE_TAIGA);
 		register(bootstrapContext, ASHEN, "wolf_ashen", Biomes.SNOWY_TAIGA);
-		register(bootstrapContext, RUSTY, "wolf_rusty", Biomes.SPARSE_JUNGLE);
+		register(bootstrapContext, RUSTY, "wolf_rusty", BiomeTags.IS_JUNGLE);
 		register(bootstrapContext, WOODS, "wolf_woods", Biomes.FOREST);
 		register(bootstrapContext, CHESTNUT, "wolf_chestnut", Biomes.OLD_GROWTH_SPRUCE_TAIGA);
-		register(bootstrapContext, STRIPED, "wolf_striped", Biomes.WOODED_BADLANDS);
+		register(bootstrapContext, STRIPED, "wolf_striped", BiomeTags.IS_BADLANDS);
 	}
 }

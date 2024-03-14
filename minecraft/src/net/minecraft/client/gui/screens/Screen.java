@@ -30,7 +30,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ComponentPath;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.TabOrderedElement;
 import net.minecraft.client.gui.components.Tooltip;
@@ -65,8 +64,12 @@ public abstract class Screen extends AbstractContainerEventHandler implements Re
 	private static final Component USAGE_NARRATION = Component.translatable("narrator.screen.usage");
 	protected static final CubeMap CUBE_MAP = new CubeMap(new ResourceLocation("textures/gui/title/background/panorama"));
 	protected static final PanoramaRenderer PANORAMA = new PanoramaRenderer(CUBE_MAP);
-	protected static final ResourceLocation PANORAMA_OVERLAY = new ResourceLocation("textures/gui/title/background/panorama_overlay.png");
 	public static final ResourceLocation MENU_BACKGROUND = new ResourceLocation("textures/gui/menu_background.png");
+	public static final ResourceLocation HEADER_SEPARATOR = new ResourceLocation("textures/gui/header_separator.png");
+	public static final ResourceLocation FOOTER_SEPARATOR = new ResourceLocation("textures/gui/footer_separator.png");
+	private static final ResourceLocation INWORLD_MENU_BACKGROUND = new ResourceLocation("textures/gui/inworld_menu_background.png");
+	public static final ResourceLocation INWORLD_HEADER_SEPARATOR = new ResourceLocation("textures/gui/inworld_header_separator.png");
+	public static final ResourceLocation INWORLD_FOOTER_SEPARATOR = new ResourceLocation("textures/gui/inworld_footer_separator.png");
 	protected final Component title;
 	private final List<GuiEventListener> children = Lists.<GuiEventListener>newArrayList();
 	private final List<NarratableEntry> narratables = Lists.<NarratableEntry>newArrayList();
@@ -364,7 +367,7 @@ public abstract class Screen extends AbstractContainerEventHandler implements Re
 	}
 
 	protected void renderPanorama(GuiGraphics guiGraphics, float f) {
-		PANORAMA.render(f);
+		PANORAMA.render(guiGraphics, this.width, this.height, 1.0F, f);
 	}
 
 	protected void renderMenuBackground(GuiGraphics guiGraphics) {
@@ -372,13 +375,13 @@ public abstract class Screen extends AbstractContainerEventHandler implements Re
 	}
 
 	protected void renderMenuBackground(GuiGraphics guiGraphics, int i, int j, int k, int l) {
-		renderMenuBackgroundTexture(guiGraphics, i, j, k, l);
+		renderMenuBackgroundTexture(guiGraphics, this.minecraft.level == null ? MENU_BACKGROUND : INWORLD_MENU_BACKGROUND, i, j, 0.0F, 0.0F, k, l);
 	}
 
-	public static void renderMenuBackgroundTexture(GuiGraphics guiGraphics, int i, int j, int k, int l) {
+	public static void renderMenuBackgroundTexture(GuiGraphics guiGraphics, ResourceLocation resourceLocation, int i, int j, float f, float g, int k, int l) {
 		int m = 32;
 		RenderSystem.enableBlend();
-		guiGraphics.blit(MENU_BACKGROUND, i, j, 0, 0.0F, 0.0F, k, l, 32, 32);
+		guiGraphics.blit(resourceLocation, i, j, 0, f, g, k, l, 32, 32);
 		RenderSystem.disableBlend();
 	}
 
@@ -607,12 +610,6 @@ public abstract class Screen extends AbstractContainerEventHandler implements Re
 
 	public void setTooltipForNextRenderPass(Tooltip tooltip, ClientTooltipPositioner clientTooltipPositioner, boolean bl) {
 		this.setTooltipForNextRenderPass(tooltip.toCharSequence(this.minecraft), clientTooltipPositioner, bl);
-	}
-
-	protected static void hideWidgets(AbstractWidget... abstractWidgets) {
-		for (AbstractWidget abstractWidget : abstractWidgets) {
-			abstractWidget.visible = false;
-		}
 	}
 
 	@Override

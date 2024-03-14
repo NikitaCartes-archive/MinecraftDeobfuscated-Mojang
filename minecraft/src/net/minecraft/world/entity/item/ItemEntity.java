@@ -20,6 +20,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MoverType;
+import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.TraceableEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -449,5 +450,21 @@ public class ItemEntity extends Entity implements TraceableEntity {
 	@Override
 	public float getVisualRotationYInDegrees() {
 		return 180.0F - this.getSpin(0.5F) / (float) (Math.PI * 2) * 360.0F;
+	}
+
+	@Override
+	public SlotAccess getSlot(int i) {
+		return i == 0 ? new SlotAccess() {
+			@Override
+			public ItemStack get() {
+				return ItemEntity.this.getItem();
+			}
+
+			@Override
+			public boolean set(ItemStack itemStack) {
+				ItemEntity.this.setItem(itemStack);
+				return true;
+			}
+		} : super.getSlot(i);
 	}
 }

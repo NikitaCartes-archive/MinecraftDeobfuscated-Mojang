@@ -33,7 +33,7 @@ import org.slf4j.Logger;
 @Environment(EnvType.CLIENT)
 public class WinScreen extends Screen {
 	private static final Logger LOGGER = LogUtils.getLogger();
-	private static final ResourceLocation VIGNETTE_LOCATION = new ResourceLocation("textures/misc/vignette.png");
+	private static final ResourceLocation VIGNETTE_LOCATION = new ResourceLocation("textures/misc/credits_vignette.png");
 	private static final Component SECTION_HEADING = Component.literal("============").withStyle(ChatFormatting.WHITE);
 	private static final String NAME_PREFIX = "           ";
 	private static final String OBFUSCATE_TOKEN = "" + ChatFormatting.WHITE + ChatFormatting.OBFUSCATED + ChatFormatting.GREEN + ChatFormatting.AQUA;
@@ -293,6 +293,12 @@ public class WinScreen extends Screen {
 		} else {
 			super.renderBackground(guiGraphics, i, j, f);
 		}
+	}
+
+	@Override
+	protected void renderMenuBackground(GuiGraphics guiGraphics, int i, int j, int k, int l) {
+		float f = this.scroll * 0.5F;
+		Screen.renderMenuBackgroundTexture(guiGraphics, Screen.MENU_BACKGROUND, 0, 0, 0.0F, f, k, l);
 	}
 
 	@Override

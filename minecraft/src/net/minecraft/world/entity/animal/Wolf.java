@@ -62,6 +62,7 @@ import net.minecraft.world.entity.ai.goal.target.OwnerHurtTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.ResetUniversalAngerTargetGoal;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.animal.horse.Llama;
+import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.monster.AbstractSkeleton;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Ghast;
@@ -412,76 +413,81 @@ public class Wolf extends TamableAnimal implements NeutralMob, VariantHolder<Hol
 	public InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
 		Item item = itemStack.getItem();
-		if (this.level().isClientSide) {
-			boolean bl = this.isOwnedBy(player) || this.isTame() || itemStack.is(Items.BONE) && !this.isTame() && !this.isAngry();
-			return bl ? InteractionResult.CONSUME : InteractionResult.PASS;
-		} else if (this.isTame()) {
-			if (this.isFood(itemStack) && this.getHealth() < this.getMaxHealth()) {
-				itemStack.consume(1, player);
-				this.heal(2.0F * (float)item.getFoodProperties().getNutrition());
-				return InteractionResult.SUCCESS;
-			} else {
-				if (item instanceof DyeItem dyeItem && this.isOwnedBy(player)) {
-					DyeColor dyeColor = dyeItem.getDyeColor();
-					if (dyeColor != this.getCollarColor()) {
-						this.setCollarColor(dyeColor);
+		if (!this.level().isClientSide || this.isBaby() && this.isFood(itemStack)) {
+			if (this.isTame()) {
+				if (this.isFood(itemStack) && this.getHealth() < this.getMaxHealth()) {
+					itemStack.consume(1, player);
+					this.heal(2.0F * (float)item.getFoodProperties().getNutrition());
+					return InteractionResult.sidedSuccess(this.level().isClientSide());
+				} else {
+					if (item instanceof DyeItem dyeItem && this.isOwnedBy(player)) {
+						DyeColor dyeColor = dyeItem.getDyeColor();
+						if (dyeColor != this.getCollarColor()) {
+							this.setCollarColor(dyeColor);
+							itemStack.consume(1, player);
+							return InteractionResult.SUCCESS;
+						}
+
+						return super.mobInteract(player, interactionHand);
+					}
+
+					if (itemStack.is(Items.WOLF_ARMOR) && this.isOwnedBy(player) && !this.hasArmor() && !this.isBaby()) {
+						this.setBodyArmorItem(itemStack.copyWithCount(1));
 						itemStack.consume(1, player);
 						return InteractionResult.SUCCESS;
-					}
-
-					return super.mobInteract(player, interactionHand);
-				}
-
-				if (itemStack.is(Items.WOLF_ARMOR) && this.isOwnedBy(player) && !this.hasArmor() && !this.isBaby()) {
-					this.setBodyArmorItem(itemStack.copyWithCount(1));
-					itemStack.consume(1, player);
-					return InteractionResult.SUCCESS;
-				} else if (itemStack.is(Items.SHEARS) && this.isOwnedBy(player) && this.hasArmor() && !EnchantmentHelper.hasBindingCurse(this.getBodyArmorItem())) {
-					itemStack.hurtAndBreak(1, player, getSlotForHand(interactionHand));
-					this.playSound(SoundEvents.ARMOR_UNEQUIP_WOLF);
-					ItemStack itemStack2 = this.getBodyArmorItem();
-					this.setBodyArmorItem(ItemStack.EMPTY);
-					this.spawnAtLocation(itemStack2);
-					return InteractionResult.SUCCESS;
-				} else if (((Ingredient)ArmorMaterials.ARMADILLO.value().repairIngredient().get()).test(itemStack)
-					&& this.isInSittingPose()
-					&& this.hasArmor()
-					&& this.isOwnedBy(player)
-					&& this.getBodyArmorItem().isDamaged()) {
-					itemStack.shrink(1);
-					this.playSound(SoundEvents.WOLF_ARMOR_REPAIR);
-					ItemStack itemStack2 = this.getBodyArmorItem();
-					int i = (int)((float)itemStack2.getMaxDamage() * 0.125F);
-					itemStack2.setDamageValue(Math.max(0, itemStack2.getDamageValue() - i));
-					return InteractionResult.SUCCESS;
-				} else {
-					InteractionResult interactionResult = super.mobInteract(player, interactionHand);
-					if ((!interactionResult.consumesAction() || this.isBaby()) && this.isOwnedBy(player)) {
-						this.setOrderedToSit(!this.isOrderedToSit());
-						this.jumping = false;
-						this.navigation.stop();
-						this.setTarget(null);
+					} else if (itemStack.is(Items.SHEARS) && this.isOwnedBy(player) && this.hasArmor() && !EnchantmentHelper.hasBindingCurse(this.getBodyArmorItem())) {
+						itemStack.hurtAndBreak(1, player, getSlotForHand(interactionHand));
+						this.playSound(SoundEvents.ARMOR_UNEQUIP_WOLF);
+						ItemStack itemStack2 = this.getBodyArmorItem();
+						this.setBodyArmorItem(ItemStack.EMPTY);
+						this.spawnAtLocation(itemStack2);
+						return InteractionResult.SUCCESS;
+					} else if (((Ingredient)ArmorMaterials.ARMADILLO.value().repairIngredient().get()).test(itemStack)
+						&& this.isInSittingPose()
+						&& this.hasArmor()
+						&& this.isOwnedBy(player)
+						&& this.getBodyArmorItem().isDamaged()) {
+						itemStack.shrink(1);
+						this.playSound(SoundEvents.WOLF_ARMOR_REPAIR);
+						ItemStack itemStack2 = this.getBodyArmorItem();
+						int i = (int)((float)itemStack2.getMaxDamage() * 0.125F);
+						itemStack2.setDamageValue(Math.max(0, itemStack2.getDamageValue() - i));
 						return InteractionResult.SUCCESS;
 					} else {
-						return interactionResult;
+						InteractionResult interactionResult = super.mobInteract(player, interactionHand);
+						if (!interactionResult.consumesAction() && this.isOwnedBy(player)) {
+							this.setOrderedToSit(!this.isOrderedToSit());
+							this.jumping = false;
+							this.navigation.stop();
+							this.setTarget(null);
+							return InteractionResult.SUCCESS;
+						} else {
+							return interactionResult;
+						}
 					}
 				}
-			}
-		} else if (itemStack.is(Items.BONE) && !this.isAngry()) {
-			itemStack.consume(1, player);
-			if (this.random.nextInt(3) == 0) {
-				this.tame(player);
-				this.navigation.stop();
-				this.setTarget(null);
-				this.setOrderedToSit(true);
-				this.level().broadcastEntityEvent(this, (byte)7);
+			} else if (itemStack.is(Items.BONE) && !this.isAngry()) {
+				itemStack.consume(1, player);
+				this.tryToTame(player);
+				return InteractionResult.SUCCESS;
 			} else {
-				this.level().broadcastEntityEvent(this, (byte)6);
+				return super.mobInteract(player, interactionHand);
 			}
-
-			return InteractionResult.SUCCESS;
 		} else {
-			return super.mobInteract(player, interactionHand);
+			boolean bl = this.isOwnedBy(player) || this.isTame() || itemStack.is(Items.BONE) && !this.isTame() && !this.isAngry();
+			return bl ? InteractionResult.CONSUME : InteractionResult.PASS;
+		}
+	}
+
+	private void tryToTame(Player player) {
+		if (this.random.nextInt(3) == 0) {
+			this.tame(player);
+			this.navigation.stop();
+			this.setTarget(null);
+			this.setOrderedToSit(true);
+			this.level().broadcastEntityEvent(this, (byte)7);
+		} else {
+			this.level().broadcastEntityEvent(this, (byte)6);
 		}
 	}
 
@@ -555,7 +561,7 @@ public class Wolf extends TamableAnimal implements NeutralMob, VariantHolder<Hol
 		return !this.getBodyArmorItem().isEmpty();
 	}
 
-	public void setCollarColor(DyeColor dyeColor) {
+	private void setCollarColor(DyeColor dyeColor) {
 		this.entityData.set(DATA_COLLAR_COLOR, dyeColor.getId());
 	}
 
@@ -608,16 +614,24 @@ public class Wolf extends TamableAnimal implements NeutralMob, VariantHolder<Hol
 
 	@Override
 	public boolean wantsToAttack(LivingEntity livingEntity, LivingEntity livingEntity2) {
-		if (livingEntity instanceof Creeper || livingEntity instanceof Ghast) {
+		if (livingEntity instanceof Creeper || livingEntity instanceof Ghast || livingEntity instanceof ArmorStand) {
 			return false;
 		} else if (livingEntity instanceof Wolf wolf) {
 			return !wolf.isTame() || wolf.getOwner() != livingEntity2;
-		} else if (livingEntity instanceof Player && livingEntity2 instanceof Player && !((Player)livingEntity2).canHarmPlayer((Player)livingEntity)) {
-			return false;
 		} else {
-			return livingEntity instanceof AbstractHorse && ((AbstractHorse)livingEntity).isTamed()
-				? false
-				: !(livingEntity instanceof TamableAnimal) || !((TamableAnimal)livingEntity).isTame();
+			if (livingEntity instanceof Player player && livingEntity2 instanceof Player player2 && !player2.canHarmPlayer(player)) {
+				return false;
+			}
+
+			if (livingEntity instanceof AbstractHorse abstractHorse && abstractHorse.isTamed()) {
+				return false;
+			}
+
+			if (livingEntity instanceof TamableAnimal tamableAnimal && tamableAnimal.isTame()) {
+				return false;
+			}
+
+			return true;
 		}
 	}
 
