@@ -1,6 +1,6 @@
 package net.minecraft.world.item.crafting;
 
-import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
@@ -43,7 +43,7 @@ public class DecoratedPotRecipe extends CustomRecipe {
 		}
 	}
 
-	public ItemStack assemble(CraftingContainer craftingContainer, RegistryAccess registryAccess) {
+	public ItemStack assemble(CraftingContainer craftingContainer, HolderLookup.Provider provider) {
 		PotDecorations potDecorations = new PotDecorations(
 			craftingContainer.getItem(1).getItem(),
 			craftingContainer.getItem(3).getItem(),

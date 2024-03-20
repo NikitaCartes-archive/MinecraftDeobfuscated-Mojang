@@ -51,7 +51,7 @@ public abstract class LootPoolSingletonContainer extends LootPoolEntryContainer 
 			)
 			.and(commonFields(instance).t1())
 			.and(
-				ExtraCodecs.strictOptionalField(LootItemFunctions.CODEC.listOf(), "functions", List.of())
+				ExtraCodecs.strictOptionalField(LootItemFunctions.ROOT_CODEC.listOf(), "functions", List.of())
 					.forGetter(lootPoolSingletonContainer -> lootPoolSingletonContainer.functions)
 			);
 	}

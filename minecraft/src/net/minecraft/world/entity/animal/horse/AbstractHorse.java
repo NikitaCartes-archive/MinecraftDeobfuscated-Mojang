@@ -21,6 +21,7 @@ import net.minecraft.server.players.OldUsersConverter;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.Container;
@@ -64,7 +65,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.DismountHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
@@ -93,9 +93,6 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 	private static final Predicate<LivingEntity> PARENT_HORSE_SELECTOR = livingEntity -> livingEntity instanceof AbstractHorse
 			&& ((AbstractHorse)livingEntity).isBred();
 	private static final TargetingConditions MOMMY_TARGETING = TargetingConditions.forNonCombat().range(16.0).ignoreLineOfSight().selector(PARENT_HORSE_SELECTOR);
-	private static final Ingredient FOOD_ITEMS = Ingredient.of(
-		Items.WHEAT, Items.SUGAR, Blocks.HAY_BLOCK.asItem(), Items.APPLE, Items.GOLDEN_CARROT, Items.GOLDEN_APPLE, Items.ENCHANTED_GOLDEN_APPLE
-	);
 	private static final EntityDataAccessor<Byte> DATA_ID_FLAGS = SynchedEntityData.defineId(AbstractHorse.class, EntityDataSerializers.BYTE);
 	private static final int FLAG_TAME = 2;
 	private static final int FLAG_SADDLE = 4;
@@ -169,7 +166,7 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 
 	protected void addBehaviourGoals() {
 		this.goalSelector.addGoal(0, new FloatGoal(this));
-		this.goalSelector.addGoal(3, new TemptGoal(this, 1.25, Ingredient.of(Items.GOLDEN_CARROT, Items.GOLDEN_APPLE, Items.ENCHANTED_GOLDEN_APPLE), false));
+		this.goalSelector.addGoal(3, new TemptGoal(this, 1.25, itemStack -> itemStack.is(ItemTags.HORSE_TEMPT_ITEMS), false));
 	}
 
 	@Override
@@ -547,7 +544,7 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 
 	@Override
 	public boolean isFood(ItemStack itemStack) {
-		return FOOD_ITEMS.test(itemStack);
+		return itemStack.is(ItemTags.HORSE_FOOD);
 	}
 
 	private void moveTail() {

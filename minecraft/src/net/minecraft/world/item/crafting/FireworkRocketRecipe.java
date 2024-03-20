@@ -2,7 +2,7 @@ package net.minecraft.world.item.crafting;
 
 import java.util.ArrayList;
 import java.util.List;
-import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
@@ -46,7 +46,7 @@ public class FireworkRocketRecipe extends CustomRecipe {
 		return bl && i >= 1;
 	}
 
-	public ItemStack assemble(CraftingContainer craftingContainer, RegistryAccess registryAccess) {
+	public ItemStack assemble(CraftingContainer craftingContainer, HolderLookup.Provider provider) {
 		List<FireworkExplosion> list = new ArrayList();
 		int i = 0;
 
@@ -75,7 +75,7 @@ public class FireworkRocketRecipe extends CustomRecipe {
 	}
 
 	@Override
-	public ItemStack getResultItem(RegistryAccess registryAccess) {
+	public ItemStack getResultItem(HolderLookup.Provider provider) {
 		return new ItemStack(Items.FIREWORK_ROCKET);
 	}
 

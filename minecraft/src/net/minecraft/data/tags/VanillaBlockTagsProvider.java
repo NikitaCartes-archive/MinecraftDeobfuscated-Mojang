@@ -1429,6 +1429,12 @@ public class VanillaBlockTagsProvider extends IntrinsicHolderTagsProvider<Block>
 				Blocks.WAXED_OXIDIZED_CUT_COPPER,
 				Blocks.LIGHTNING_ROD
 			);
+		this.tag(BlockTags.INCORRECT_FOR_NETHERITE_TOOL);
+		this.tag(BlockTags.INCORRECT_FOR_DIAMOND_TOOL);
+		this.tag(BlockTags.INCORRECT_FOR_IRON_TOOL).addTag(BlockTags.NEEDS_DIAMOND_TOOL);
+		this.tag(BlockTags.INCORRECT_FOR_STONE_TOOL).addTag(BlockTags.NEEDS_DIAMOND_TOOL).addTag(BlockTags.NEEDS_IRON_TOOL);
+		this.tag(BlockTags.INCORRECT_FOR_GOLD_TOOL).addTag(BlockTags.NEEDS_DIAMOND_TOOL).addTag(BlockTags.NEEDS_IRON_TOOL).addTag(BlockTags.NEEDS_STONE_TOOL);
+		this.tag(BlockTags.INCORRECT_FOR_WOODEN_TOOL).addTag(BlockTags.NEEDS_DIAMOND_TOOL).addTag(BlockTags.NEEDS_IRON_TOOL).addTag(BlockTags.NEEDS_STONE_TOOL);
 		this.tag(BlockTags.FEATURES_CANNOT_REPLACE).add(Blocks.BEDROCK, Blocks.SPAWNER, Blocks.CHEST, Blocks.END_PORTAL_FRAME, Blocks.REINFORCED_DEEPSLATE);
 		this.tag(BlockTags.LAVA_POOL_STONE_CANNOT_REPLACE).addTag(BlockTags.FEATURES_CANNOT_REPLACE).addTag(BlockTags.LEAVES).addTag(BlockTags.LOGS);
 		this.tag(BlockTags.GEODE_INVALID_BLOCKS).add(Blocks.BEDROCK, Blocks.WATER, Blocks.LAVA, Blocks.ICE, Blocks.PACKED_ICE, Blocks.BLUE_ICE);

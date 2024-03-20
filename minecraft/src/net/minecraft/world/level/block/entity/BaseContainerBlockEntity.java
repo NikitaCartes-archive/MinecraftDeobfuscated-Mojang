@@ -119,10 +119,7 @@ public abstract class BaseContainerBlockEntity extends BlockEntity implements Co
 	@Override
 	public void setItem(int i, ItemStack itemStack) {
 		this.getItems().set(i, itemStack);
-		if (itemStack.getCount() > this.getMaxStackSize()) {
-			itemStack.setCount(this.getMaxStackSize());
-		}
-
+		itemStack.limitSize(this.getMaxStackSize(itemStack));
 		this.setChanged();
 	}
 

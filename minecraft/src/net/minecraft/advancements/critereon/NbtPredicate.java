@@ -10,13 +10,16 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 
 public record NbtPredicate(CompoundTag tag) {
-	public static final Codec<NbtPredicate> CODEC = TagParser.AS_CODEC.xmap(NbtPredicate::new, NbtPredicate::tag);
+	public static final Codec<NbtPredicate> STRING_CODEC = TagParser.AS_CODEC.xmap(NbtPredicate::new, NbtPredicate::tag);
+	public static final Codec<NbtPredicate> COMPOUND_TAG_CODEC = CompoundTag.CODEC.xmap(NbtPredicate::new, NbtPredicate::tag);
+	public static final Codec<NbtPredicate> CODEC = ExtraCodecs.withAlternative(STRING_CODEC, COMPOUND_TAG_CODEC);
 	public static final StreamCodec<ByteBuf, NbtPredicate> STREAM_CODEC = ByteBufCodecs.COMPOUND_TAG.map(NbtPredicate::new, NbtPredicate::tag);
 
 	public boolean matches(ItemStack itemStack) {

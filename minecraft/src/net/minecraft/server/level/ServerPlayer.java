@@ -613,6 +613,9 @@ public class ServerPlayer extends Player {
 	public void trackStartFallingPosition() {
 		if (this.fallDistance > 0.0F && this.startingToFallPosition == null) {
 			this.startingToFallPosition = this.position();
+			if (this.currentImpulseImpactPos != null) {
+				CriteriaTriggers.FALL_AFTER_EXPLOSION.trigger(this, this.currentImpulseImpactPos, this.currentExplosionCause);
+			}
 		}
 	}
 
@@ -997,12 +1000,12 @@ public class ServerPlayer extends Player {
 	public void doCheckFallDamage(double d, double e, double f, boolean bl) {
 		if (!this.touchingUnloadedChunk()) {
 			this.checkSupportingBlock(bl, new Vec3(d, e, f));
-			BlockPos blockPos = this.getOnPos();
+			BlockPos blockPos = this.getOnPosLegacy();
 			BlockState blockState = this.level().getBlockState(blockPos);
 			if (this.spawnExtraParticlesOnFall && bl && this.fallDistance > 0.0F) {
 				Vec3 vec3 = blockPos.getCenter().add(0.0, 0.5, 0.0);
 				int i = (int)(50.0F * this.fallDistance);
-				((ServerLevel)this.level()).sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, blockState), vec3.x, vec3.y, vec3.z, i, 0.3F, 0.3F, 0.3F, 0.15F);
+				this.serverLevel().sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, blockState), vec3.x, vec3.y, vec3.z, i, 0.3F, 0.3F, 0.3F, 0.15F);
 				this.spawnExtraParticlesOnFall = false;
 			}
 
@@ -1013,9 +1016,9 @@ public class ServerPlayer extends Player {
 	@Override
 	public void onExplosionHit(@Nullable Entity entity) {
 		super.onExplosionHit(entity);
-		if (entity != null && entity.getType() == EntityType.WIND_CHARGE) {
-			this.ignoreFallDamageAboveY = this.getY();
-		}
+		this.currentImpulseImpactPos = this.position();
+		this.currentExplosionCause = entity;
+		this.ignoreFallDamageFromCurrentImpulse = entity != null && entity.getType() == EntityType.WIND_CHARGE;
 	}
 
 	@Override

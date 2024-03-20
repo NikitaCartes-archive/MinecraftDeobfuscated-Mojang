@@ -34,6 +34,7 @@ public interface EntityTypeTags {
 	TagKey<EntityType<?>> NOT_SCARY_FOR_PUFFERFISH = create("not_scary_for_pufferfish");
 	TagKey<EntityType<?>> SENSITIVE_TO_IMPALING = create("sensitive_to_impaling");
 	TagKey<EntityType<?>> SENSITIVE_TO_BANE_OF_ARTHROPODS = create("sensitive_to_bane_of_arthropods");
+	TagKey<EntityType<?>> SENSITIVE_TO_SMITE = create("sensitive_to_smite");
 	TagKey<EntityType<?>> NO_ANGER_FROM_WIND_CHARGE = create("no_anger_from_wind_charge");
 
 	private static TagKey<EntityType<?>> create(String string) {

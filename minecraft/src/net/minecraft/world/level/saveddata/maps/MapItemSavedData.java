@@ -15,6 +15,7 @@ import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
@@ -135,7 +136,7 @@ public class MapItemSavedData extends SavedData {
 			if (mapFrame != null) {
 				mapItemSavedData.frameMarkers.put(mapFrame.getId(), mapFrame);
 				mapItemSavedData.addDecoration(
-					MapDecoration.Type.FRAME,
+					MapDecorationTypes.FRAME,
 					null,
 					"frame-" + mapFrame.getEntityId(),
 					(double)mapFrame.getPos().getX(),
@@ -223,7 +224,7 @@ public class MapItemSavedData extends SavedData {
 			if (!holdingPlayer2.player.isRemoved() && (holdingPlayer2.player.getInventory().contains(predicate) || itemStack.isFramed())) {
 				if (!itemStack.isFramed() && holdingPlayer2.player.level().dimension() == this.dimension && this.trackingPosition) {
 					this.addDecoration(
-						MapDecoration.Type.PLAYER,
+						MapDecorationTypes.PLAYER,
 						holdingPlayer2.player.level(),
 						string,
 						holdingPlayer2.player.getX(),
@@ -249,7 +250,7 @@ public class MapItemSavedData extends SavedData {
 
 			MapFrame mapFrame2 = new MapFrame(blockPos, itemFrame.getDirection().get2DDataValue() * 90, itemFrame.getId());
 			this.addDecoration(
-				MapDecoration.Type.FRAME,
+				MapDecorationTypes.FRAME,
 				player.level(),
 				"frame-" + itemFrame.getId(),
 				(double)blockPos.getX(),
@@ -272,23 +273,23 @@ public class MapItemSavedData extends SavedData {
 
 	private void removeDecoration(String string) {
 		MapDecoration mapDecoration = (MapDecoration)this.decorations.remove(string);
-		if (mapDecoration != null && mapDecoration.type().shouldTrackCount()) {
+		if (mapDecoration != null && ((MapDecorationType)mapDecoration.type().value()).trackCount()) {
 			--this.trackedDecorationCount;
 		}
 
 		this.setDecorationsDirty();
 	}
 
-	public static void addTargetDecoration(ItemStack itemStack, BlockPos blockPos, String string, MapDecoration.Type type) {
-		MapDecorations.Entry entry = new MapDecorations.Entry(type, (double)blockPos.getX(), (double)blockPos.getZ(), 180.0F);
+	public static void addTargetDecoration(ItemStack itemStack, BlockPos blockPos, String string, Holder<MapDecorationType> holder) {
+		MapDecorations.Entry entry = new MapDecorations.Entry(holder, (double)blockPos.getX(), (double)blockPos.getZ(), 180.0F);
 		itemStack.update(DataComponents.MAP_DECORATIONS, MapDecorations.EMPTY, mapDecorations -> mapDecorations.withDecoration(string, entry));
-		if (type.hasMapColor()) {
-			itemStack.set(DataComponents.MAP_COLOR, new MapItemColor(type.getMapColor()));
+		if (((MapDecorationType)holder.value()).hasMapColor()) {
+			itemStack.set(DataComponents.MAP_COLOR, new MapItemColor(((MapDecorationType)holder.value()).mapColor()));
 		}
 	}
 
 	private void addDecoration(
-		MapDecoration.Type type, @Nullable LevelAccessor levelAccessor, String string, double d, double e, double f, @Nullable Component component
+		Holder<MapDecorationType> holder, @Nullable LevelAccessor levelAccessor, String string, double d, double e, double f, @Nullable Component component
 	) {
 		int i = 1 << this.scale;
 		float g = (float)(d - (double)this.centerX) / (float)i;
@@ -305,21 +306,21 @@ public class MapItemSavedData extends SavedData {
 				k = (byte)(l * l * 34187121 + l * 121 >> 15 & 15);
 			}
 		} else {
-			if (type != MapDecoration.Type.PLAYER) {
+			if (!holder.is(MapDecorationTypes.PLAYER)) {
 				this.removeDecoration(string);
 				return;
 			}
 
 			int l = 320;
 			if (Math.abs(g) < 320.0F && Math.abs(h) < 320.0F) {
-				type = MapDecoration.Type.PLAYER_OFF_MAP;
+				holder = MapDecorationTypes.PLAYER_OFF_MAP;
 			} else {
 				if (!this.unlimitedTracking) {
 					this.removeDecoration(string);
 					return;
 				}
 
-				type = MapDecoration.Type.PLAYER_OFF_LIMITS;
+				holder = MapDecorationTypes.PLAYER_OFF_LIMITS;
 			}
 
 			k = 0;
@@ -340,14 +341,14 @@ public class MapItemSavedData extends SavedData {
 			}
 		}
 
-		MapDecoration mapDecoration = new MapDecoration(type, b, c, k, Optional.ofNullable(component));
+		MapDecoration mapDecoration = new MapDecoration(holder, b, c, k, Optional.ofNullable(component));
 		MapDecoration mapDecoration2 = (MapDecoration)this.decorations.put(string, mapDecoration);
 		if (!mapDecoration.equals(mapDecoration2)) {
-			if (mapDecoration2 != null && mapDecoration2.type().shouldTrackCount()) {
+			if (mapDecoration2 != null && ((MapDecorationType)mapDecoration2.type().value()).trackCount()) {
 				--this.trackedDecorationCount;
 			}
 
-			if (type.shouldTrackCount()) {
+			if (((MapDecorationType)holder.value()).trackCount()) {
 				++this.trackedDecorationCount;
 			}
 
@@ -454,7 +455,7 @@ public class MapItemSavedData extends SavedData {
 
 	public boolean isExplorationMap() {
 		for(MapDecoration mapDecoration : this.decorations.values()) {
-			if (mapDecoration.type().isExplorationMapElement()) {
+			if (((MapDecorationType)mapDecoration.type().value()).explorationMapElement()) {
 				return true;
 			}
 		}
@@ -469,7 +470,7 @@ public class MapItemSavedData extends SavedData {
 		for(int i = 0; i < list.size(); ++i) {
 			MapDecoration mapDecoration = (MapDecoration)list.get(i);
 			this.decorations.put("icon-" + i, mapDecoration);
-			if (mapDecoration.type().shouldTrackCount()) {
+			if (((MapDecorationType)mapDecoration.type().value()).trackCount()) {
 				++this.trackedDecorationCount;
 			}
 		}

@@ -143,6 +143,12 @@ public final class BlockTags {
 	public static final TagKey<Block> NEEDS_DIAMOND_TOOL = create("needs_diamond_tool");
 	public static final TagKey<Block> NEEDS_IRON_TOOL = create("needs_iron_tool");
 	public static final TagKey<Block> NEEDS_STONE_TOOL = create("needs_stone_tool");
+	public static final TagKey<Block> INCORRECT_FOR_NETHERITE_TOOL = create("incorrect_for_netherite_tool");
+	public static final TagKey<Block> INCORRECT_FOR_DIAMOND_TOOL = create("incorrect_for_diamond_tool");
+	public static final TagKey<Block> INCORRECT_FOR_IRON_TOOL = create("incorrect_for_iron_tool");
+	public static final TagKey<Block> INCORRECT_FOR_STONE_TOOL = create("incorrect_for_stone_tool");
+	public static final TagKey<Block> INCORRECT_FOR_GOLD_TOOL = create("incorrect_for_gold_tool");
+	public static final TagKey<Block> INCORRECT_FOR_WOODEN_TOOL = create("incorrect_for_wooden_tool");
 	public static final TagKey<Block> FEATURES_CANNOT_REPLACE = create("features_cannot_replace");
 	public static final TagKey<Block> LAVA_POOL_STONE_CANNOT_REPLACE = create("lava_pool_stone_cannot_replace");
 	public static final TagKey<Block> GEODE_INVALID_BLOCKS = create("geode_invalid_blocks");

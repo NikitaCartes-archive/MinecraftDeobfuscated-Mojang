@@ -214,7 +214,7 @@ public class VanillaItemTagsProvider extends ItemTagsProvider {
 		this.tag(ItemTags.STONE_CRAFTING_MATERIALS).add(Items.COBBLESTONE, Items.BLACKSTONE, Items.COBBLED_DEEPSLATE);
 		this.tag(ItemTags.FREEZE_IMMUNE_WEARABLES)
 			.add(Items.LEATHER_BOOTS, Items.LEATHER_LEGGINGS, Items.LEATHER_CHESTPLATE, Items.LEATHER_HELMET, Items.LEATHER_HORSE_ARMOR);
-		this.tag(ItemTags.AXOLOTL_TEMPT_ITEMS).add(Items.TROPICAL_FISH_BUCKET);
+		this.tag(ItemTags.AXOLOTL_FOOD).add(Items.TROPICAL_FISH_BUCKET);
 		this.tag(ItemTags.CLUSTER_MAX_HARVESTABLES)
 			.add(Items.DIAMOND_PICKAXE, Items.GOLDEN_PICKAXE, Items.IRON_PICKAXE, Items.NETHERITE_PICKAXE, Items.STONE_PICKAXE, Items.WOODEN_PICKAXE);
 		this.tag(ItemTags.COMPASSES).add(Items.COMPASS).add(Items.RECOVERY_COMPASS);
@@ -369,5 +369,46 @@ public class VanillaItemTagsProvider extends ItemTagsProvider {
 		this.tag(ItemTags.VANISHING_ENCHANTABLE).addTag(ItemTags.DURABILITY_ENCHANTABLE).add(Items.COMPASS).add(Items.CARVED_PUMPKIN).addTag(ItemTags.SKULLS);
 		this.tag(ItemTags.DYEABLE)
 			.add(Items.LEATHER_HELMET, Items.LEATHER_CHESTPLATE, Items.LEATHER_LEGGINGS, Items.LEATHER_BOOTS, Items.LEATHER_HORSE_ARMOR, Items.WOLF_ARMOR);
+		this.tag(ItemTags.MEAT)
+			.add(
+				Items.BEEF,
+				Items.CHICKEN,
+				Items.COOKED_BEEF,
+				Items.COOKED_CHICKEN,
+				Items.COOKED_MUTTON,
+				Items.COOKED_PORKCHOP,
+				Items.COOKED_RABBIT,
+				Items.MUTTON,
+				Items.PORKCHOP,
+				Items.RABBIT,
+				Items.ROTTEN_FLESH
+			);
+		this.tag(ItemTags.WOLF_FOOD).addTag(ItemTags.MEAT);
+		this.tag(ItemTags.OCELOT_FOOD).add(Items.COD, Items.SALMON);
+		this.tag(ItemTags.CAT_FOOD).add(Items.COD, Items.SALMON);
+		this.tag(ItemTags.HORSE_FOOD)
+			.add(Items.WHEAT, Items.SUGAR, Items.HAY_BLOCK, Items.APPLE, Items.GOLDEN_CARROT, Items.GOLDEN_APPLE, Items.ENCHANTED_GOLDEN_APPLE);
+		this.tag(ItemTags.HORSE_TEMPT_ITEMS).add(Items.GOLDEN_CARROT, Items.GOLDEN_APPLE, Items.ENCHANTED_GOLDEN_APPLE);
+		this.tag(ItemTags.CAMEL_FOOD).add(Items.CACTUS);
+		this.tag(ItemTags.ARMADILLO_FOOD).add(Items.SPIDER_EYE);
+		this.tag(ItemTags.BEE_FOOD).addTag(ItemTags.FLOWERS);
+		this.tag(ItemTags.CHICKEN_FOOD)
+			.add(Items.WHEAT_SEEDS, Items.MELON_SEEDS, Items.PUMPKIN_SEEDS, Items.BEETROOT_SEEDS, Items.TORCHFLOWER_SEEDS, Items.PITCHER_POD);
+		this.tag(ItemTags.FROG_FOOD).add(Items.SLIME_BALL);
+		this.tag(ItemTags.HOGLIN_FOOD).add(Items.CRIMSON_FUNGUS);
+		this.tag(ItemTags.LLAMA_FOOD).add(Items.WHEAT, Items.HAY_BLOCK);
+		this.tag(ItemTags.LLAMA_TEMPT_ITEMS).add(Items.HAY_BLOCK);
+		this.tag(ItemTags.PANDA_FOOD).add(Items.BAMBOO);
+		this.tag(ItemTags.PIG_FOOD).add(Items.CARROT, Items.POTATO, Items.BEETROOT);
+		this.tag(ItemTags.RABBIT_FOOD).add(Items.CARROT, Items.GOLDEN_CARROT, Items.DANDELION);
+		this.tag(ItemTags.STRIDER_FOOD).add(Items.WARPED_FUNGUS);
+		this.tag(ItemTags.STRIDER_TEMPT_ITEMS).addTag(ItemTags.STRIDER_FOOD).add(Items.WARPED_FUNGUS_ON_A_STICK);
+		this.tag(ItemTags.TURTLE_FOOD).add(Items.SEAGRASS);
+		this.tag(ItemTags.PARROT_FOOD)
+			.add(Items.WHEAT_SEEDS, Items.MELON_SEEDS, Items.PUMPKIN_SEEDS, Items.BEETROOT_SEEDS, Items.TORCHFLOWER_SEEDS, Items.PITCHER_POD);
+		this.tag(ItemTags.PARROT_POISONOUS_FOOD).add(Items.CARROT);
+		this.tag(ItemTags.COW_FOOD).add(Items.WHEAT);
+		this.tag(ItemTags.SHEEP_FOOD).add(Items.WHEAT);
+		this.tag(ItemTags.GOAT_FOOD).add(Items.WHEAT);
 	}
 }

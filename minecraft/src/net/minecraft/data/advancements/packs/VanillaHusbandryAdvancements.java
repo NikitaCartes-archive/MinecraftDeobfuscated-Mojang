@@ -4,7 +4,6 @@ import com.google.common.collect.BiMap;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.Map.Entry;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 import net.minecraft.advancements.Advancement;
@@ -39,13 +38,10 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.advancements.AdvancementSubProvider;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.animal.CatVariant;
-import net.minecraft.world.entity.animal.FrogVariant;
 import net.minecraft.world.item.HoneycombItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
@@ -122,7 +118,7 @@ public class VanillaHusbandryAdvancements implements AdvancementSubProvider {
 		Items.HONEY_BOTTLE,
 		Items.GLOW_BERRIES
 	};
-	private static final Item[] WAX_SCRAPING_TOOLS = new Item[]{
+	public static final Item[] WAX_SCRAPING_TOOLS = new Item[]{
 		Items.WOODEN_AXE, Items.GOLDEN_AXE, Items.STONE_AXE, Items.IRON_AXE, Items.DIAMOND_AXE, Items.NETHERITE_AXE
 	};
 
@@ -580,9 +576,7 @@ public class VanillaHusbandryAdvancements implements AdvancementSubProvider {
 						reference.key().location().toString(),
 						PlayerInteractTrigger.TriggerInstance.itemUsedOnEntity(
 							ItemPredicate.Builder.item().of(Items.LEAD),
-							Optional.of(
-								EntityPredicate.wrap(EntityPredicate.Builder.entity().of(EntityType.FROG).subPredicate(EntitySubPredicates.variant((FrogVariant)reference.value())))
-							)
+							Optional.of(EntityPredicate.wrap(EntityPredicate.Builder.entity().of(EntityType.FROG).subPredicate(EntitySubPredicates.frogVariant(reference))))
 						)
 					)
 			);
@@ -637,13 +631,12 @@ public class VanillaHusbandryAdvancements implements AdvancementSubProvider {
 
 	private static Advancement.Builder addCatVariants(Advancement.Builder builder) {
 		BuiltInRegistries.CAT_VARIANT
-			.entrySet()
-			.stream()
-			.sorted(Entry.comparingByKey(Comparator.comparing(ResourceKey::location)))
+			.holders()
+			.sorted(Comparator.comparing(reference -> reference.key().location()))
 			.forEach(
-				entry -> builder.addCriterion(
-						((ResourceKey)entry.getKey()).location().toString(),
-						TameAnimalTrigger.TriggerInstance.tamedAnimal(EntityPredicate.Builder.entity().subPredicate(EntitySubPredicates.variant((CatVariant)entry.getValue())))
+				reference -> builder.addCriterion(
+						reference.key().location().toString(),
+						TameAnimalTrigger.TriggerInstance.tamedAnimal(EntityPredicate.Builder.entity().subPredicate(EntitySubPredicates.catVariant(reference)))
 					)
 			);
 		return builder;

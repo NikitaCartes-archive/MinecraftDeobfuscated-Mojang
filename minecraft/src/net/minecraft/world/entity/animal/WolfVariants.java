@@ -37,9 +37,9 @@ public class WolfVariants {
 	}
 
 	static void register(BootstrapContext<WolfVariant> bootstrapContext, ResourceKey<WolfVariant> resourceKey, String string, HolderSet<Biome> holderSet) {
-		ResourceLocation resourceLocation = new ResourceLocation("textures/entity/wolf/" + string + ".png");
-		ResourceLocation resourceLocation2 = new ResourceLocation("textures/entity/wolf/" + string + "_tame.png");
-		ResourceLocation resourceLocation3 = new ResourceLocation("textures/entity/wolf/" + string + "_angry.png");
+		ResourceLocation resourceLocation = new ResourceLocation("entity/wolf/" + string);
+		ResourceLocation resourceLocation2 = new ResourceLocation("entity/wolf/" + string + "_tame");
+		ResourceLocation resourceLocation3 = new ResourceLocation("entity/wolf/" + string + "_angry");
 		bootstrapContext.register(resourceKey, new WolfVariant(resourceLocation, resourceLocation2, resourceLocation3, holderSet));
 	}
 

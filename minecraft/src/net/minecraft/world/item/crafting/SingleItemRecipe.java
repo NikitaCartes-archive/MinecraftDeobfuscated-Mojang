@@ -3,8 +3,8 @@ package net.minecraft.world.item.crafting;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -43,7 +43,7 @@ public abstract class SingleItemRecipe implements Recipe<Container> {
 	}
 
 	@Override
-	public ItemStack getResultItem(RegistryAccess registryAccess) {
+	public ItemStack getResultItem(HolderLookup.Provider provider) {
 		return this.result;
 	}
 
@@ -60,7 +60,7 @@ public abstract class SingleItemRecipe implements Recipe<Container> {
 	}
 
 	@Override
-	public ItemStack assemble(Container container, RegistryAccess registryAccess) {
+	public ItemStack assemble(Container container, HolderLookup.Provider provider) {
 		return this.result.copy();
 	}
 

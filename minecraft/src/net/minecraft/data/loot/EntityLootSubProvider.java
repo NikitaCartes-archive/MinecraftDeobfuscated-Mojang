@@ -2,8 +2,8 @@ package net.minecraft.data.loot;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -16,7 +16,7 @@ import net.minecraft.advancements.critereon.EntitySubPredicates;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.animal.FrogVariant;
@@ -38,7 +38,7 @@ public abstract class EntityLootSubProvider implements LootTableSubProvider {
 	);
 	private final FeatureFlagSet allowed;
 	private final FeatureFlagSet required;
-	private final Map<EntityType<?>, Map<ResourceLocation, LootTable.Builder>> map = Maps.newHashMap();
+	private final Map<EntityType<?>, Map<ResourceKey<LootTable>, LootTable.Builder>> map = Maps.newHashMap();
 
 	protected EntityLootSubProvider(FeatureFlagSet featureFlagSet) {
 		this(featureFlagSet, featureFlagSet);
@@ -58,9 +58,9 @@ public abstract class EntityLootSubProvider implements LootTableSubProvider {
 	public abstract void generate();
 
 	@Override
-	public void generate(HolderLookup.Provider provider, BiConsumer<ResourceLocation, LootTable.Builder> biConsumer) {
+	public void generate(HolderLookup.Provider provider, BiConsumer<ResourceKey<LootTable>, LootTable.Builder> biConsumer) {
 		this.generate();
-		Set<ResourceLocation> set = Sets.<ResourceLocation>newHashSet();
+		Set<ResourceKey<LootTable>> set = new HashSet();
 		BuiltInRegistries.ENTITY_TYPE
 			.holders()
 			.forEach(
@@ -68,29 +68,29 @@ public abstract class EntityLootSubProvider implements LootTableSubProvider {
 					EntityType<?> entityType = (EntityType)reference.value();
 					if (entityType.isEnabled(this.allowed)) {
 						if (canHaveLootTable(entityType)) {
-							Map<ResourceLocation, LootTable.Builder> map = (Map)this.map.remove(entityType);
-							ResourceLocation resourceLocation = entityType.getDefaultLootTable();
-							if (!resourceLocation.equals(BuiltInLootTables.EMPTY) && entityType.isEnabled(this.required) && (map == null || !map.containsKey(resourceLocation))) {
-								throw new IllegalStateException(String.format(Locale.ROOT, "Missing loottable '%s' for '%s'", resourceLocation, reference.key().location()));
+							Map<ResourceKey<LootTable>, LootTable.Builder> map = (Map)this.map.remove(entityType);
+							ResourceKey<LootTable> resourceKey = entityType.getDefaultLootTable();
+							if (resourceKey != BuiltInLootTables.EMPTY && entityType.isEnabled(this.required) && (map == null || !map.containsKey(resourceKey))) {
+								throw new IllegalStateException(String.format(Locale.ROOT, "Missing loottable '%s' for '%s'", resourceKey, reference.key().location()));
 							}
 		
 							if (map != null) {
-								map.forEach((resourceLocationx, builder) -> {
-									if (!set.add(resourceLocationx)) {
-										throw new IllegalStateException(String.format(Locale.ROOT, "Duplicate loottable '%s' for '%s'", resourceLocationx, reference.key().location()));
+								map.forEach((resourceKeyx, builder) -> {
+									if (!set.add(resourceKeyx)) {
+										throw new IllegalStateException(String.format(Locale.ROOT, "Duplicate loottable '%s' for '%s'", resourceKeyx, reference.key().location()));
 									} else {
-										biConsumer.accept(resourceLocationx, builder);
+										biConsumer.accept(resourceKeyx, builder);
 									}
 								});
 							}
 						} else {
-							Map<ResourceLocation, LootTable.Builder> map = (Map)this.map.remove(entityType);
+							Map<ResourceKey<LootTable>, LootTable.Builder> map = (Map)this.map.remove(entityType);
 							if (map != null) {
 								throw new IllegalStateException(
 									String.format(
 										Locale.ROOT,
 										"Weird loottables '%s' for '%s', not a LivingEntity so should not have loot",
-										map.keySet().stream().map(ResourceLocation::toString).collect(Collectors.joining(",")),
+										map.keySet().stream().map(resourceKeyx -> resourceKeyx.location().toString()).collect(Collectors.joining(",")),
 										reference.key().location()
 									)
 								);
@@ -112,10 +112,14 @@ public abstract class EntityLootSubProvider implements LootTableSubProvider {
 		return DamageSourceCondition.hasDamageSource(DamageSourcePredicate.Builder.damageType().source(EntityPredicate.Builder.entity().of(EntityType.FROG)));
 	}
 
-	protected LootItemCondition.Builder killedByFrogVariant(FrogVariant frogVariant) {
+	protected LootItemCondition.Builder killedByFrogVariant(ResourceKey<FrogVariant> resourceKey) {
 		return DamageSourceCondition.hasDamageSource(
 			DamageSourcePredicate.Builder.damageType()
-				.source(EntityPredicate.Builder.entity().of(EntityType.FROG).subPredicate(EntitySubPredicates.variant(frogVariant)))
+				.source(
+					EntityPredicate.Builder.entity()
+						.of(EntityType.FROG)
+						.subPredicate(EntitySubPredicates.frogVariant(BuiltInRegistries.FROG_VARIANT.getHolderOrThrow(resourceKey)))
+				)
 		);
 	}
 
@@ -123,7 +127,7 @@ public abstract class EntityLootSubProvider implements LootTableSubProvider {
 		this.add(entityType, entityType.getDefaultLootTable(), builder);
 	}
 
-	protected void add(EntityType<?> entityType, ResourceLocation resourceLocation, LootTable.Builder builder) {
-		((Map)this.map.computeIfAbsent(entityType, entityTypex -> new HashMap())).put(resourceLocation, builder);
+	protected void add(EntityType<?> entityType, ResourceKey<LootTable> resourceKey, LootTable.Builder builder) {
+		((Map)this.map.computeIfAbsent(entityType, entityTypex -> new HashMap())).put(resourceKey, builder);
 	}
 }

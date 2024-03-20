@@ -9,13 +9,14 @@ import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.RandomizableContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.ticks.ContainerSingleItem;
 
 public class DecoratedPotBlockEntity extends BlockEntity implements RandomizableContainer, ContainerSingleItem.BlockContainerSingleItem {
@@ -28,7 +29,7 @@ public class DecoratedPotBlockEntity extends BlockEntity implements Randomizable
 	private PotDecorations decorations;
 	private ItemStack item = ItemStack.EMPTY;
 	@Nullable
-	protected ResourceLocation lootTable;
+	protected ResourceKey<LootTable> lootTable;
 	protected long lootTableSeed;
 
 	public DecoratedPotBlockEntity(BlockPos blockPos, BlockState blockState) {
@@ -93,13 +94,13 @@ public class DecoratedPotBlockEntity extends BlockEntity implements Randomizable
 
 	@Nullable
 	@Override
-	public ResourceLocation getLootTable() {
+	public ResourceKey<LootTable> getLootTable() {
 		return this.lootTable;
 	}
 
 	@Override
-	public void setLootTable(@Nullable ResourceLocation resourceLocation) {
-		this.lootTable = resourceLocation;
+	public void setLootTable(@Nullable ResourceKey<LootTable> resourceKey) {
+		this.lootTable = resourceKey;
 	}
 
 	@Override

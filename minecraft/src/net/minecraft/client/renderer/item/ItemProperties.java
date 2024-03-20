@@ -57,8 +57,8 @@ public class ItemProperties {
 	}
 
 	@Nullable
-	public static ItemPropertyFunction getProperty(Item item, ResourceLocation resourceLocation) {
-		if (item.getMaxDamage() > 0) {
+	public static ItemPropertyFunction getProperty(ItemStack itemStack, ResourceLocation resourceLocation) {
+		if (itemStack.getMaxDamage() > 0) {
 			if (DAMAGE.equals(resourceLocation)) {
 				return PROPERTY_DAMAGE;
 			}
@@ -72,7 +72,7 @@ public class ItemProperties {
 		if (itemPropertyFunction != null) {
 			return itemPropertyFunction;
 		} else {
-			Map<ResourceLocation, ItemPropertyFunction> map = (Map)PROPERTIES.get(item);
+			Map<ResourceLocation, ItemPropertyFunction> map = (Map)PROPERTIES.get(itemStack.getItem());
 			return map == null ? null : (ItemPropertyFunction)map.get(resourceLocation);
 		}
 	}

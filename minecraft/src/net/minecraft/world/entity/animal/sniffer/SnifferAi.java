@@ -8,8 +8,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Unit;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -36,8 +38,7 @@ import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.schedule.Activity;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.ItemStack;
 import org.slf4j.Logger;
 
 public class SnifferAi {
@@ -69,8 +70,8 @@ public class SnifferAi {
 	private static final float SPEED_MULTIPLIER_WHEN_SNIFFING = 1.25F;
 	private static final float SPEED_MULTIPLIER_WHEN_TEMPTED = 1.25F;
 
-	public static Ingredient getTemptations() {
-		return Ingredient.of(Items.TORCHFLOWER_SEEDS);
+	public static Predicate<ItemStack> getTemptations() {
+		return itemStack -> itemStack.is(ItemTags.SNIFFER_FOOD);
 	}
 
 	protected static Brain<?> makeBrain(Brain<Sniffer> brain) {

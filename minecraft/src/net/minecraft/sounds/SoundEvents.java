@@ -794,6 +794,7 @@ public class SoundEvents {
 	public static final SoundEvent LODESTONE_COMPASS_LOCK = register("item.lodestone_compass.lock");
 	public static final SoundEvent MACE_SMASH_AIR = register("item.mace.smash_air");
 	public static final SoundEvent MACE_SMASH_GROUND = register("item.mace.smash_ground");
+	public static final SoundEvent MACE_SMASH_GROUND_HEAVY = register("item.mace.smash_ground_heavy");
 	public static final SoundEvent MAGMA_CUBE_DEATH = register("entity.magma_cube.death");
 	public static final SoundEvent MAGMA_CUBE_HURT = register("entity.magma_cube.hurt");
 	public static final SoundEvent MAGMA_CUBE_HURT_SMALL = register("entity.magma_cube.hurt_small");

@@ -9,6 +9,7 @@ import net.minecraft.advancements.AdvancementRequirements;
 import net.minecraft.advancements.AdvancementRewards;
 import net.minecraft.advancements.Criterion;
 import net.minecraft.advancements.critereon.RecipeUnlockedTrigger;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -112,7 +113,7 @@ public class SimpleCookingRecipeBuilder implements RecipeBuilder {
 	}
 
 	private static CookingBookCategory determineSmeltingRecipeCategory(ItemLike itemLike) {
-		if (itemLike.asItem().isEdible()) {
+		if (itemLike.asItem().components().has(DataComponents.FOOD)) {
 			return CookingBookCategory.FOOD;
 		} else {
 			return itemLike.asItem() instanceof BlockItem ? CookingBookCategory.BLOCKS : CookingBookCategory.MISC;

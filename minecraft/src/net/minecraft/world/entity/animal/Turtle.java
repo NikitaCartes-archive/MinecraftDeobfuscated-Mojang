@@ -15,6 +15,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.DifficultyInstance;
@@ -48,7 +49,6 @@ import net.minecraft.world.entity.ai.util.DefaultRandomPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -69,7 +69,6 @@ public class Turtle extends Animal {
 	private static final EntityDataAccessor<BlockPos> TRAVEL_POS = SynchedEntityData.defineId(Turtle.class, EntityDataSerializers.BLOCK_POS);
 	private static final EntityDataAccessor<Boolean> GOING_HOME = SynchedEntityData.defineId(Turtle.class, EntityDataSerializers.BOOLEAN);
 	private static final EntityDataAccessor<Boolean> TRAVELLING = SynchedEntityData.defineId(Turtle.class, EntityDataSerializers.BOOLEAN);
-	public static final Ingredient FOOD_ITEMS = Ingredient.of(Blocks.SEAGRASS.asItem());
 	private static final float BABY_SCALE = 0.3F;
 	private static final EntityDimensions BABY_DIMENSIONS = EntityType.TURTLE
 		.getDimensions()
@@ -194,7 +193,7 @@ public class Turtle extends Animal {
 		this.goalSelector.addGoal(0, new Turtle.TurtlePanicGoal(this, 1.2));
 		this.goalSelector.addGoal(1, new Turtle.TurtleBreedGoal(this, 1.0));
 		this.goalSelector.addGoal(1, new Turtle.TurtleLayEggGoal(this, 1.0));
-		this.goalSelector.addGoal(2, new TemptGoal(this, 1.1, FOOD_ITEMS, false));
+		this.goalSelector.addGoal(2, new TemptGoal(this, 1.1, itemStack -> itemStack.is(ItemTags.TURTLE_FOOD), false));
 		this.goalSelector.addGoal(3, new Turtle.TurtleGoToWaterGoal(this, 1.0));
 		this.goalSelector.addGoal(4, new Turtle.TurtleGoHomeGoal(this, 1.0));
 		this.goalSelector.addGoal(7, new Turtle.TurtleTravelGoal(this, 1.0));
@@ -278,7 +277,7 @@ public class Turtle extends Animal {
 
 	@Override
 	public boolean isFood(ItemStack itemStack) {
-		return itemStack.is(Blocks.SEAGRASS.asItem());
+		return itemStack.is(ItemTags.TURTLE_FOOD);
 	}
 
 	@Override

@@ -250,7 +250,7 @@ public class GameRenderer implements AutoCloseable {
 		this.minecraft = minecraft;
 		this.resourceManager = resourceManager;
 		this.itemInHandRenderer = itemInHandRenderer;
-		this.mapRenderer = new MapRenderer(minecraft.getTextureManager());
+		this.mapRenderer = new MapRenderer(minecraft.getTextureManager(), minecraft.getMapDecorationTextures());
 		this.lightTexture = new LightTexture(this, minecraft);
 		this.renderBuffers = renderBuffers;
 		this.postEffect = null;

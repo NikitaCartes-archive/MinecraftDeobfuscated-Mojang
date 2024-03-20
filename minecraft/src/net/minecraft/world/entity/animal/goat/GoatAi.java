@@ -3,7 +3,9 @@ package net.minecraft.world.entity.animal.goat;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.mojang.datafixers.util.Pair;
+import java.util.function.Predicate;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.entity.EntityType;
@@ -30,8 +32,7 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.schedule.Activity;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.ItemStack;
 
 public class GoatAi {
 	public static final int RAM_PREPARE_TIME = 20;
@@ -169,7 +170,7 @@ public class GoatAi {
 		goat.getBrain().setActiveActivityToFirstValid(ImmutableList.of(Activity.RAM, Activity.LONG_JUMP, Activity.IDLE));
 	}
 
-	public static Ingredient getTemptations() {
-		return Ingredient.of(Items.WHEAT);
+	public static Predicate<ItemStack> getTemptations() {
+		return itemStack -> itemStack.is(ItemTags.GOAT_FOOD);
 	}
 }

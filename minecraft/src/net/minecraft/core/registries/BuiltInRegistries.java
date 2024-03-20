@@ -107,6 +107,8 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProc
 import net.minecraft.world.level.levelgen.structure.templatesystem.rule.blockentity.RuleBlockEntityModifierType;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.level.saveddata.maps.MapDecorationType;
+import net.minecraft.world.level.saveddata.maps.MapDecorationTypes;
 import net.minecraft.world.level.storage.loot.entries.LootPoolEntries;
 import net.minecraft.world.level.storage.loot.entries.LootPoolEntryType;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
@@ -239,7 +241,7 @@ public class BuiltInRegistries {
 		Registries.POOL_ALIAS_BINDING, PoolAliasBindings::bootstrap
 	);
 	public static final Registry<CatVariant> CAT_VARIANT = registerSimple(Registries.CAT_VARIANT, CatVariant::bootstrap);
-	public static final Registry<FrogVariant> FROG_VARIANT = registerSimple(Registries.FROG_VARIANT, registry -> FrogVariant.TEMPERATE);
+	public static final Registry<FrogVariant> FROG_VARIANT = registerSimple(Registries.FROG_VARIANT, FrogVariant::bootstrap);
 	public static final Registry<Instrument> INSTRUMENT = registerSimple(Registries.INSTRUMENT, Instruments::bootstrap);
 	public static final Registry<String> DECORATED_POT_PATTERNS = registerSimple(Registries.DECORATED_POT_PATTERNS, DecoratedPotPatterns::bootstrap);
 	public static final Registry<CreativeModeTab> CREATIVE_MODE_TAB = registerSimple(Registries.CREATIVE_MODE_TAB, CreativeModeTabs::bootstrap);
@@ -253,6 +255,7 @@ public class BuiltInRegistries {
 	public static final Registry<ItemSubPredicate.Type<?>> ITEM_SUB_PREDICATE_TYPE = registerSimple(
 		Registries.ITEM_SUB_PREDICATE_TYPE, ItemSubPredicates::bootstrap
 	);
+	public static final Registry<MapDecorationType> MAP_DECORATION_TYPE = registerSimple(Registries.MAP_DECORATION_TYPE, MapDecorationTypes::bootstrap);
 	public static final Registry<? extends Registry<?>> REGISTRY = WRITABLE_REGISTRY;
 
 	private static <T> Registry<T> registerSimple(ResourceKey<? extends Registry<T>> resourceKey, BuiltInRegistries.RegistryBootstrap<T> registryBootstrap) {

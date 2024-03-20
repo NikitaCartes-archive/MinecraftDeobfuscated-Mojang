@@ -265,7 +265,7 @@ public class Sniffer extends Animal {
 	private void dropSeed() {
 		if (!this.level().isClientSide() && this.entityData.get(DATA_DROP_SEED_AT_TICK) == this.tickCount) {
 			ServerLevel serverLevel = (ServerLevel)this.level();
-			LootTable lootTable = serverLevel.getServer().getLootData().getLootTable(BuiltInLootTables.SNIFFER_DIGGING);
+			LootTable lootTable = serverLevel.getServer().reloadableRegistries().getLootTable(BuiltInLootTables.SNIFFER_DIGGING);
 			LootParams lootParams = new LootParams.Builder(serverLevel)
 				.withParameter(LootContextParams.ORIGIN, this.getHeadPosition())
 				.withParameter(LootContextParams.THIS_ENTITY, this)

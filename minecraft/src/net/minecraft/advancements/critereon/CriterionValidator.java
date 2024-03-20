@@ -2,19 +2,19 @@ package net.minecraft.advancements.critereon;
 
 import java.util.List;
 import java.util.Optional;
+import net.minecraft.core.HolderGetter;
 import net.minecraft.util.ProblemReporter;
-import net.minecraft.world.level.storage.loot.LootDataResolver;
 import net.minecraft.world.level.storage.loot.ValidationContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSet;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 
 public class CriterionValidator {
 	private final ProblemReporter reporter;
-	private final LootDataResolver lootData;
+	private final HolderGetter.Provider lootData;
 
-	public CriterionValidator(ProblemReporter problemReporter, LootDataResolver lootDataResolver) {
+	public CriterionValidator(ProblemReporter problemReporter, HolderGetter.Provider provider) {
 		this.reporter = problemReporter;
-		this.lootData = lootDataResolver;
+		this.lootData = provider;
 	}
 
 	public void validateEntity(Optional<ContextAwarePredicate> optional, String string) {

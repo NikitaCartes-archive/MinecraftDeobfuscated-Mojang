@@ -6,6 +6,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingRecipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.CrafterBlock;
 
@@ -121,7 +122,7 @@ public class CrafterMenu extends AbstractContainerMenu implements ContainerListe
 		if (level instanceof ServerPlayer serverPlayer) {
 			Level levelx = serverPlayer.level();
 			ItemStack itemStack = (ItemStack)CrafterBlock.getPotentialResults(levelx, this.container)
-				.map(craftingRecipe -> craftingRecipe.assemble(this.container, level.registryAccess()))
+				.map(recipeHolder -> ((CraftingRecipe)recipeHolder.value()).assemble(this.container, level.registryAccess()))
 				.orElse(ItemStack.EMPTY);
 			this.resultContainer.setItem(0, itemStack);
 		}

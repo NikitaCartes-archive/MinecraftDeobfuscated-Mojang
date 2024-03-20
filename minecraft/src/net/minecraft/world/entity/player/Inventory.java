@@ -54,8 +54,7 @@ public class Inventory implements Container, Nameable {
 		return !itemStack.isEmpty()
 			&& ItemStack.isSameItemSameComponents(itemStack, itemStack2)
 			&& itemStack.isStackable()
-			&& itemStack.getCount() < itemStack.getMaxStackSize()
-			&& itemStack.getCount() < this.getMaxStackSize();
+			&& itemStack.getCount() < this.getMaxStackSize(itemStack);
 	}
 
 	public int getFreeSlot() {
@@ -187,20 +186,13 @@ public class Inventory implements Container, Nameable {
 			this.setItem(i, itemStack2);
 		}
 
-		int k = j;
-		if (j > itemStack2.getMaxStackSize() - itemStack2.getCount()) {
-			k = itemStack2.getMaxStackSize() - itemStack2.getCount();
-		}
-
-		if (k > this.getMaxStackSize() - itemStack2.getCount()) {
-			k = this.getMaxStackSize() - itemStack2.getCount();
-		}
-
-		if (k == 0) {
+		int k = this.getMaxStackSize(itemStack2) - itemStack2.getCount();
+		int l = Math.min(j, k);
+		if (l == 0) {
 			return j;
 		} else {
-			j -= k;
-			itemStack2.grow(k);
+			j -= l;
+			itemStack2.grow(l);
 			itemStack2.setPopTime(5);
 			return j;
 		}

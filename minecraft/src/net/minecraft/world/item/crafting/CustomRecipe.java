@@ -1,6 +1,6 @@
 package net.minecraft.world.item.crafting;
 
-import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.world.item.ItemStack;
 
 public abstract class CustomRecipe implements CraftingRecipe {
@@ -16,7 +16,7 @@ public abstract class CustomRecipe implements CraftingRecipe {
 	}
 
 	@Override
-	public ItemStack getResultItem(RegistryAccess registryAccess) {
+	public ItemStack getResultItem(HolderLookup.Provider provider) {
 		return ItemStack.EMPTY;
 	}
 

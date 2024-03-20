@@ -15,6 +15,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
@@ -42,8 +43,6 @@ import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
@@ -52,7 +51,6 @@ import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 
 public class Camel extends AbstractHorse implements PlayerRideableJumping, Saddleable {
-	public static final Ingredient TEMPTATION_ITEM = Ingredient.of(Items.CACTUS);
 	public static final float BABY_SCALE = 0.45F;
 	public static final int DASH_COOLDOWN_TICKS = 55;
 	public static final int MAX_HEAD_Y_ROT = 30;
@@ -342,7 +340,7 @@ public class Camel extends AbstractHorse implements PlayerRideableJumping, Saddl
 
 	@Override
 	public boolean isFood(ItemStack itemStack) {
-		return TEMPTATION_ITEM.test(itemStack);
+		return itemStack.is(ItemTags.CAMEL_FOOD);
 	}
 
 	@Override

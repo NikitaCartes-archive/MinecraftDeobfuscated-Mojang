@@ -30,7 +30,7 @@ public class StackedContents {
 	}
 
 	public void accountStack(ItemStack itemStack) {
-		this.accountStack(itemStack, 64);
+		this.accountStack(itemStack, itemStack.getMaxStackSize());
 	}
 
 	public void accountStack(ItemStack itemStack, int i) {

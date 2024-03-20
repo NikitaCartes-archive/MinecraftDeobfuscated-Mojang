@@ -49,6 +49,7 @@ import net.minecraft.commands.arguments.ObjectiveArgument;
 import net.minecraft.commands.arguments.RangeArgument;
 import net.minecraft.commands.arguments.ResourceArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
+import net.minecraft.commands.arguments.ResourceOrIdArgument;
 import net.minecraft.commands.arguments.ResourceOrTagArgument;
 import net.minecraft.commands.arguments.ScoreHolderArgument;
 import net.minecraft.commands.arguments.SlotsArgument;
@@ -83,6 +84,7 @@ import net.minecraft.nbt.LongTag;
 import net.minecraft.nbt.ShortTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.ReloadableServerRegistries;
 import net.minecraft.server.bossevents.CustomBossEvent;
 import net.minecraft.server.commands.data.DataAccessor;
 import net.minecraft.server.commands.data.DataCommands;
@@ -108,8 +110,6 @@ import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.storage.loot.LootContext;
-import net.minecraft.world.level.storage.loot.LootDataManager;
-import net.minecraft.world.level.storage.loot.LootDataType;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
@@ -137,8 +137,8 @@ public class ExecuteCommand {
 		(object, object2) -> Component.translatableEscape("commands.execute.function.instantiationFailure", object, object2)
 	);
 	private static final SuggestionProvider<CommandSourceStack> SUGGEST_PREDICATE = (commandContext, suggestionsBuilder) -> {
-		LootDataManager lootDataManager = commandContext.getSource().getServer().getLootData();
-		return SharedSuggestionProvider.suggestResource(lootDataManager.getKeys(LootDataType.PREDICATE), suggestionsBuilder);
+		ReloadableServerRegistries.Holder holder = commandContext.getSource().getServer().reloadableRegistries();
+		return SharedSuggestionProvider.suggestResource(holder.getKeys(Registries.PREDICATE), suggestionsBuilder);
 	};
 
 	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher, CommandBuildContext commandBuildContext) {
@@ -662,9 +662,9 @@ public class ExecuteCommand {
 					.then(
 						addConditional(
 							commandNode,
-							Commands.argument("predicate", ResourceLocationArgument.id()).suggests(SUGGEST_PREDICATE),
+							Commands.argument("predicate", ResourceOrIdArgument.lootPredicate(commandBuildContext)).suggests(SUGGEST_PREDICATE),
 							bl,
-							commandContext -> checkCustomPredicate(commandContext.getSource(), ResourceLocationArgument.getPredicate(commandContext, "predicate"))
+							commandContext -> checkCustomPredicate(commandContext.getSource(), ResourceOrIdArgument.getLootPredicate(commandContext, "predicate"))
 						)
 					)
 			)
@@ -858,15 +858,15 @@ public class ExecuteCommand {
 		return readOnlyScoreInfo == null ? false : ints.matches(readOnlyScoreInfo.value());
 	}
 
-	private static boolean checkCustomPredicate(CommandSourceStack commandSourceStack, LootItemCondition lootItemCondition) {
+	private static boolean checkCustomPredicate(CommandSourceStack commandSourceStack, Holder<LootItemCondition> holder) {
 		ServerLevel serverLevel = commandSourceStack.getLevel();
 		LootParams lootParams = new LootParams.Builder(serverLevel)
 			.withParameter(LootContextParams.ORIGIN, commandSourceStack.getPosition())
 			.withOptionalParameter(LootContextParams.THIS_ENTITY, commandSourceStack.getEntity())
 			.create(LootContextParamSets.COMMAND);
 		LootContext lootContext = new LootContext.Builder(lootParams).create(Optional.empty());
-		lootContext.pushVisitedElement(LootContext.createVisitedEntry(lootItemCondition));
-		return lootItemCondition.test(lootContext);
+		lootContext.pushVisitedElement(LootContext.createVisitedEntry(holder.value()));
+		return holder.value().test(lootContext);
 	}
 
 	private static Collection<CommandSourceStack> expect(CommandContext<CommandSourceStack> commandContext, boolean bl, boolean bl2) {

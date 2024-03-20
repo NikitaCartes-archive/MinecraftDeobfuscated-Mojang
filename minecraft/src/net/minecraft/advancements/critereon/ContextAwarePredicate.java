@@ -10,7 +10,7 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.level.storage.loot.predicates.LootItemConditions;
 
 public class ContextAwarePredicate {
-	public static final Codec<ContextAwarePredicate> CODEC = LootItemConditions.CODEC
+	public static final Codec<ContextAwarePredicate> CODEC = LootItemConditions.DIRECT_CODEC
 		.listOf()
 		.xmap(ContextAwarePredicate::new, contextAwarePredicate -> contextAwarePredicate.conditions);
 	private final List<LootItemCondition> conditions;

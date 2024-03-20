@@ -56,6 +56,7 @@ import net.minecraft.data.tags.UpdateOneTwentyOneBlockTagsProvider;
 import net.minecraft.data.tags.UpdateOneTwentyOneDamageTypeTagsProvider;
 import net.minecraft.data.tags.UpdateOneTwentyOneEntityTypeTagsProvider;
 import net.minecraft.data.tags.UpdateOneTwentyOneItemTagsProvider;
+import net.minecraft.data.tags.UpdateOneTwentyOneStructureTagsProvider;
 import net.minecraft.data.tags.VanillaBlockTagsProvider;
 import net.minecraft.data.tags.VanillaItemTagsProvider;
 import net.minecraft.data.tags.WorldPresetTagsProvider;
@@ -67,6 +68,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BannerPattern;
+import net.minecraft.world.level.levelgen.structure.Structure;
 
 public class Main {
 	@DontObfuscate
@@ -134,6 +136,7 @@ public class Main {
 		);
 		TagsProvider<Biome> tagsProvider3 = packGenerator3.addProvider(bindRegistries(BiomeTagsProvider::new, completableFuture));
 		TagsProvider<BannerPattern> tagsProvider4 = packGenerator3.addProvider(bindRegistries(BannerPatternTagsProvider::new, completableFuture));
+		TagsProvider<Structure> tagsProvider5 = packGenerator3.addProvider(bindRegistries(StructureTagsProvider::new, completableFuture));
 		packGenerator3.addProvider(bindRegistries(CatVariantTagsProvider::new, completableFuture));
 		packGenerator3.addProvider(bindRegistries(DamageTypeTagsProvider::new, completableFuture));
 		packGenerator3.addProvider(bindRegistries(EntityTypeTagsProvider::new, completableFuture));
@@ -143,7 +146,6 @@ public class Main {
 		packGenerator3.addProvider(bindRegistries(InstrumentTagsProvider::new, completableFuture));
 		packGenerator3.addProvider(bindRegistries(PaintingVariantTagsProvider::new, completableFuture));
 		packGenerator3.addProvider(bindRegistries(PoiTypeTagsProvider::new, completableFuture));
-		packGenerator3.addProvider(bindRegistries(StructureTagsProvider::new, completableFuture));
 		packGenerator3.addProvider(bindRegistries(WorldPresetTagsProvider::new, completableFuture));
 		packGenerator3 = dataGenerator.getVanillaPack(bl3);
 		packGenerator3.addProvider(packOutput -> new NbtToSnbt(packOutput, collection));
@@ -171,11 +173,11 @@ public class Main {
 		DataGenerator.PackGenerator packGenerator4 = dataGenerator.getBuiltinDatapack(bl2, "update_1_21");
 		packGenerator4.addProvider(bindRegistries(RegistriesDatapackGenerator::new, completableFuture2.thenApply(RegistrySetBuilder.PatchedRegistries::patches)));
 		packGenerator4.addProvider(bindRegistries(UpdateOneTwentyOneRecipeProvider::new, completableFuture3));
-		TagsProvider<Block> tagsProvider5 = packGenerator4.addProvider(
+		TagsProvider<Block> tagsProvider6 = packGenerator4.addProvider(
 			packOutput -> new UpdateOneTwentyOneBlockTagsProvider(packOutput, completableFuture3, tagsProvider.contentsGetter())
 		);
 		packGenerator4.addProvider(
-			packOutput -> new UpdateOneTwentyOneItemTagsProvider(packOutput, completableFuture3, tagsProvider2.contentsGetter(), tagsProvider5.contentsGetter())
+			packOutput -> new UpdateOneTwentyOneItemTagsProvider(packOutput, completableFuture3, tagsProvider2.contentsGetter(), tagsProvider6.contentsGetter())
 		);
 		packGenerator4.addProvider(packOutput -> new UpdateOneTwentyOneBiomeTagsProvider(packOutput, completableFuture3, tagsProvider3.contentsGetter()));
 		packGenerator4.addProvider(bindRegistries(UpdateOneTwentyOneLootTableProvider::create, completableFuture3));
@@ -188,6 +190,7 @@ public class Main {
 		packGenerator4.addProvider(bindRegistries(UpdateOneTwentyOneDamageTypeTagsProvider::new, completableFuture3));
 		packGenerator4.addProvider(bindRegistries(UpdateOneTwentyOneAdvancementProvider::create, completableFuture3));
 		packGenerator4.addProvider(packOutput -> new UpdateOneTwentyOneBannerPatternTagsProvider(packOutput, completableFuture3, tagsProvider4.contentsGetter()));
+		packGenerator4.addProvider(packOutput -> new UpdateOneTwentyOneStructureTagsProvider(packOutput, completableFuture3, tagsProvider5.contentsGetter()));
 		return dataGenerator;
 	}
 }

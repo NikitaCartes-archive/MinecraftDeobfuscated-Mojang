@@ -5,28 +5,34 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
 import javax.annotation.Nullable;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.storage.loot.LootTable;
 import org.slf4j.Logger;
 
 public class AppendLoot implements RuleBlockEntityModifier {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	public static final Codec<AppendLoot> CODEC = RecordCodecBuilder.create(
-		instance -> instance.group(ResourceLocation.CODEC.fieldOf("loot_table").forGetter(appendLoot -> appendLoot.lootTable)).apply(instance, AppendLoot::new)
+		instance -> instance.group(ResourceKey.codec(Registries.LOOT_TABLE).fieldOf("loot_table").forGetter(appendLoot -> appendLoot.lootTable))
+				.apply(instance, AppendLoot::new)
 	);
-	private final ResourceLocation lootTable;
+	private final ResourceKey<LootTable> lootTable;
 
-	public AppendLoot(ResourceLocation resourceLocation) {
-		this.lootTable = resourceLocation;
+	public AppendLoot(ResourceKey<LootTable> resourceKey) {
+		this.lootTable = resourceKey;
 	}
 
 	@Override
 	public CompoundTag apply(RandomSource randomSource, @Nullable CompoundTag compoundTag) {
 		CompoundTag compoundTag2 = compoundTag == null ? new CompoundTag() : compoundTag.copy();
-		ResourceLocation.CODEC.encodeStart(NbtOps.INSTANCE, this.lootTable).resultOrPartial(LOGGER::error).ifPresent(tag -> compoundTag2.put("LootTable", tag));
+		ResourceKey.codec(Registries.LOOT_TABLE)
+			.encodeStart(NbtOps.INSTANCE, this.lootTable)
+			.resultOrPartial(LOGGER::error)
+			.ifPresent(tag -> compoundTag2.put("LootTable", tag));
 		compoundTag2.putLong("LootTableSeed", randomSource.nextLong());
 		return compoundTag2;
 	}

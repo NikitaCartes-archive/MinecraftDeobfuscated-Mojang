@@ -1,6 +1,6 @@
 package net.minecraft.world.item.crafting;
 
-import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -37,7 +37,7 @@ public class MapCloningRecipe extends CustomRecipe {
 		return !itemStack.isEmpty() && i > 0;
 	}
 
-	public ItemStack assemble(CraftingContainer craftingContainer, RegistryAccess registryAccess) {
+	public ItemStack assemble(CraftingContainer craftingContainer, HolderLookup.Provider provider) {
 		int i = 0;
 		ItemStack itemStack = ItemStack.EMPTY;
 

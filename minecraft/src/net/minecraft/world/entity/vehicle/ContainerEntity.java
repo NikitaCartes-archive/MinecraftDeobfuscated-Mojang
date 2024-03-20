@@ -4,7 +4,9 @@ import javax.annotation.Nullable;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -36,9 +38,9 @@ public interface ContainerEntity extends Container, MenuProvider {
 	AABB getBoundingBox();
 
 	@Nullable
-	ResourceLocation getLootTable();
+	ResourceKey<LootTable> getLootTable();
 
-	void setLootTable(@Nullable ResourceLocation resourceLocation);
+	void setLootTable(@Nullable ResourceKey<LootTable> resourceKey);
 
 	long getLootTableSeed();
 
@@ -59,7 +61,7 @@ public interface ContainerEntity extends Container, MenuProvider {
 
 	default void addChestVehicleSaveData(CompoundTag compoundTag, HolderLookup.Provider provider) {
 		if (this.getLootTable() != null) {
-			compoundTag.putString("LootTable", this.getLootTable().toString());
+			compoundTag.putString("LootTable", this.getLootTable().location().toString());
 			if (this.getLootTableSeed() != 0L) {
 				compoundTag.putLong("LootTableSeed", this.getLootTableSeed());
 			}
@@ -71,7 +73,7 @@ public interface ContainerEntity extends Container, MenuProvider {
 	default void readChestVehicleSaveData(CompoundTag compoundTag, HolderLookup.Provider provider) {
 		this.clearItemStacks();
 		if (compoundTag.contains("LootTable", 8)) {
-			this.setLootTable(new ResourceLocation(compoundTag.getString("LootTable")));
+			this.setLootTable(ResourceKey.create(Registries.LOOT_TABLE, new ResourceLocation(compoundTag.getString("LootTable"))));
 			this.setLootTableSeed(compoundTag.getLong("LootTableSeed"));
 		} else {
 			ContainerHelper.loadAllItems(compoundTag, this.getItemStacks(), provider);
@@ -98,7 +100,7 @@ public interface ContainerEntity extends Container, MenuProvider {
 	default void unpackChestVehicleLootTable(@Nullable Player player) {
 		MinecraftServer minecraftServer = this.level().getServer();
 		if (this.getLootTable() != null && minecraftServer != null) {
-			LootTable lootTable = minecraftServer.getLootData().getLootTable(this.getLootTable());
+			LootTable lootTable = minecraftServer.reloadableRegistries().getLootTable(this.getLootTable());
 			if (player != null) {
 				CriteriaTriggers.GENERATE_LOOT.trigger((ServerPlayer)player, this.getLootTable());
 			}
@@ -152,9 +154,7 @@ public interface ContainerEntity extends Container, MenuProvider {
 	default void setChestVehicleItem(int i, ItemStack itemStack) {
 		this.unpackChestVehicleLootTable(null);
 		this.getItemStacks().set(i, itemStack);
-		if (!itemStack.isEmpty() && itemStack.getCount() > this.getMaxStackSize()) {
-			itemStack.setCount(this.getMaxStackSize());
-		}
+		itemStack.limitSize(this.getMaxStackSize(itemStack));
 	}
 
 	default SlotAccess getChestVehicleSlot(int i) {

@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.UnaryOperator;
-import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
@@ -25,21 +24,21 @@ public class SetLoreFunction extends LootItemConditionalFunction {
 		instance -> commonFields(instance)
 				.and(
 					instance.group(
-						Codec.BOOL.fieldOf("replace").orElse(false).forGetter(setLoreFunction -> setLoreFunction.replace),
-						ComponentSerialization.CODEC.listOf().fieldOf("lore").forGetter(setLoreFunction -> setLoreFunction.lore),
+						ExtraCodecs.sizeLimitedList(ComponentSerialization.CODEC.listOf(), 256).fieldOf("lore").forGetter(setLoreFunction -> setLoreFunction.lore),
+						ListOperation.codec(256).forGetter(setLoreFunction -> setLoreFunction.mode),
 						ExtraCodecs.strictOptionalField(LootContext.EntityTarget.CODEC, "entity").forGetter(setLoreFunction -> setLoreFunction.resolutionContext)
 					)
 				)
 				.apply(instance, SetLoreFunction::new)
 	);
-	private final boolean replace;
 	private final List<Component> lore;
+	private final ListOperation mode;
 	private final Optional<LootContext.EntityTarget> resolutionContext;
 
-	public SetLoreFunction(List<LootItemCondition> list, boolean bl, List<Component> list2, Optional<LootContext.EntityTarget> optional) {
+	public SetLoreFunction(List<LootItemCondition> list, List<Component> list2, ListOperation listOperation, Optional<LootContext.EntityTarget> optional) {
 		super(list);
-		this.replace = bl;
 		this.lore = List.copyOf(list2);
+		this.mode = listOperation;
 		this.resolutionContext = optional;
 	}
 
@@ -64,8 +63,8 @@ public class SetLoreFunction extends LootItemConditionalFunction {
 			return List.of();
 		} else {
 			UnaryOperator<Component> unaryOperator = SetNameFunction.createResolver(lootContext, (LootContext.EntityTarget)this.resolutionContext.orElse(null));
-			Stream<Component> stream = this.lore.stream().map(unaryOperator);
-			return !this.replace && itemLore != null ? Stream.concat(itemLore.lines().stream(), stream).toList() : stream.toList();
+			List<Component> list = this.lore.stream().map(unaryOperator).toList();
+			return this.mode.apply(itemLore.lines(), list, 256);
 		}
 	}
 
@@ -74,12 +73,12 @@ public class SetLoreFunction extends LootItemConditionalFunction {
 	}
 
 	public static class Builder extends LootItemConditionalFunction.Builder<SetLoreFunction.Builder> {
-		private boolean replace;
 		private Optional<LootContext.EntityTarget> resolutionContext = Optional.empty();
 		private final ImmutableList.Builder<Component> lore = ImmutableList.builder();
+		private ListOperation mode = ListOperation.Append.INSTANCE;
 
-		public SetLoreFunction.Builder setReplace(boolean bl) {
-			this.replace = bl;
+		public SetLoreFunction.Builder setMode(ListOperation listOperation) {
+			this.mode = listOperation;
 			return this;
 		}
 
@@ -99,7 +98,7 @@ public class SetLoreFunction extends LootItemConditionalFunction {
 
 		@Override
 		public LootItemFunction build() {
-			return new SetLoreFunction(this.getConditions(), this.replace, this.lore.build(), this.resolutionContext);
+			return new SetLoreFunction(this.getConditions(), this.lore.build(), this.mode, this.resolutionContext);
 		}
 	}
 }

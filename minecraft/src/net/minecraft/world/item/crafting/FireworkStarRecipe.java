@@ -6,7 +6,7 @@ import it.unimi.dsi.fastutil.ints.IntList;
 import java.util.HashMap;
 import java.util.Map;
 import net.minecraft.Util;
-import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.DyeItem;
@@ -96,7 +96,7 @@ public class FireworkStarRecipe extends CustomRecipe {
 		return bl && bl2;
 	}
 
-	public ItemStack assemble(CraftingContainer craftingContainer, RegistryAccess registryAccess) {
+	public ItemStack assemble(CraftingContainer craftingContainer, HolderLookup.Provider provider) {
 		FireworkExplosion.Shape shape = FireworkExplosion.Shape.SMALL_BALL;
 		boolean bl = false;
 		boolean bl2 = false;
@@ -128,7 +128,7 @@ public class FireworkStarRecipe extends CustomRecipe {
 	}
 
 	@Override
-	public ItemStack getResultItem(RegistryAccess registryAccess) {
+	public ItemStack getResultItem(HolderLookup.Provider provider) {
 		return new ItemStack(Items.FIREWORK_STAR);
 	}
 

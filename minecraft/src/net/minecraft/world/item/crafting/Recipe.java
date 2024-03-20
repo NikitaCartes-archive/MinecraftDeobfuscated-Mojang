@@ -1,8 +1,8 @@
 package net.minecraft.world.item.crafting;
 
 import com.mojang.serialization.Codec;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -21,11 +21,11 @@ public interface Recipe<C extends Container> {
 
 	boolean matches(C container, Level level);
 
-	ItemStack assemble(C container, RegistryAccess registryAccess);
+	ItemStack assemble(C container, HolderLookup.Provider provider);
 
 	boolean canCraftInDimensions(int i, int j);
 
-	ItemStack getResultItem(RegistryAccess registryAccess);
+	ItemStack getResultItem(HolderLookup.Provider provider);
 
 	default NonNullList<ItemStack> getRemainingItems(C container) {
 		NonNullList<ItemStack> nonNullList = NonNullList.withSize(container.getContainerSize(), ItemStack.EMPTY);

@@ -3,42 +3,19 @@ package net.minecraft.world.item.enchantment;
 import java.util.Optional;
 import javax.annotation.Nullable;
 import net.minecraft.tags.EntityTypeTags;
-import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 
 public class DamageEnchantment extends Enchantment {
-	private final int minCost;
-	private final int levelCost;
-	private final int levelCostSpan;
 	private final Optional<TagKey<EntityType<?>>> targets;
 
-	public DamageEnchantment(Enchantment.Rarity rarity, int i, int j, int k, Optional<TagKey<EntityType<?>>> optional, EquipmentSlot... equipmentSlots) {
-		super(rarity, ItemTags.WEAPON_ENCHANTABLE, equipmentSlots);
-		this.minCost = i;
-		this.levelCost = j;
-		this.levelCostSpan = k;
+	public DamageEnchantment(Enchantment.EnchantmentDefinition enchantmentDefinition, Optional<TagKey<EntityType<?>>> optional) {
+		super(enchantmentDefinition);
 		this.targets = optional;
-	}
-
-	@Override
-	public int getMinCost(int i) {
-		return this.minCost + (i - 1) * this.levelCost;
-	}
-
-	@Override
-	public int getMaxCost(int i) {
-		return this.getMinCost(i) + this.levelCostSpan;
-	}
-
-	@Override
-	public int getMaxLevel() {
-		return 5;
 	}
 
 	@Override
@@ -59,7 +36,7 @@ public class DamageEnchantment extends Enchantment {
 	public void doPostAttack(LivingEntity livingEntity, Entity entity, int i) {
 		if (this.targets.isPresent()
 			&& entity instanceof LivingEntity livingEntity2
-			&& this.targets.get() == EntityTypeTags.ARTHROPOD
+			&& this.targets.get() == EntityTypeTags.SENSITIVE_TO_BANE_OF_ARTHROPODS
 			&& i > 0
 			&& livingEntity2.getType().is((TagKey<EntityType<?>>)this.targets.get())) {
 			int j = 20 + livingEntity.getRandom().nextInt(10 * i);

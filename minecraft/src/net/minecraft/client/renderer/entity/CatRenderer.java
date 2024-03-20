@@ -22,7 +22,7 @@ public class CatRenderer extends MobRenderer<Cat, CatModel<Cat>> {
 	}
 
 	public ResourceLocation getTextureLocation(Cat cat) {
-		return cat.getResourceLocation();
+		return cat.getTextureId();
 	}
 
 	protected void scale(Cat cat, PoseStack poseStack, float f) {

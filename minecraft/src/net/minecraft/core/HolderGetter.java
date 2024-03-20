@@ -23,5 +23,9 @@ public interface HolderGetter<T> {
 		default <T> HolderGetter<T> lookupOrThrow(ResourceKey<? extends Registry<? extends T>> resourceKey) {
 			return (HolderGetter<T>)this.lookup(resourceKey).orElseThrow(() -> new IllegalStateException("Registry " + resourceKey.location() + " not found"));
 		}
+
+		default <T> Optional<Holder.Reference<T>> get(ResourceKey<? extends Registry<? extends T>> resourceKey, ResourceKey<T> resourceKey2) {
+			return this.lookup(resourceKey).flatMap(holderGetter -> holderGetter.get(resourceKey2));
+		}
 	}
 }

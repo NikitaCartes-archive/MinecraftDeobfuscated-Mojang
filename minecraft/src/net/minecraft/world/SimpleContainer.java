@@ -128,10 +128,7 @@ public class SimpleContainer implements Container, StackedContentsCompatible {
 	@Override
 	public void setItem(int i, ItemStack itemStack) {
 		this.items.set(i, itemStack);
-		if (!itemStack.isEmpty() && itemStack.getCount() > this.getMaxStackSize()) {
-			itemStack.setCount(this.getMaxStackSize());
-		}
-
+		itemStack.limitSize(this.getMaxStackSize(itemStack));
 		this.setChanged();
 	}
 
@@ -205,7 +202,7 @@ public class SimpleContainer implements Container, StackedContentsCompatible {
 	}
 
 	private void moveItemsBetweenStacks(ItemStack itemStack, ItemStack itemStack2) {
-		int i = Math.min(this.getMaxStackSize(), itemStack2.getMaxStackSize());
+		int i = this.getMaxStackSize(itemStack2);
 		int j = Math.min(itemStack.getCount(), i - itemStack2.getCount());
 		if (j > 0) {
 			itemStack2.grow(j);
