@@ -10,10 +10,10 @@ import net.minecraft.world.level.storage.loot.ValidationContext;
 
 public class SequenceFunction implements LootItemFunction {
 	public static final Codec<SequenceFunction> CODEC = RecordCodecBuilder.create(
-		instance -> instance.group(LootItemFunctions.CODEC.listOf().fieldOf("functions").forGetter(sequenceFunction -> sequenceFunction.functions))
+		instance -> instance.group(LootItemFunctions.TYPED_CODEC.listOf().fieldOf("functions").forGetter(sequenceFunction -> sequenceFunction.functions))
 				.apply(instance, SequenceFunction::new)
 	);
-	public static final Codec<SequenceFunction> INLINE_CODEC = LootItemFunctions.CODEC
+	public static final Codec<SequenceFunction> INLINE_CODEC = LootItemFunctions.TYPED_CODEC
 		.listOf()
 		.xmap(SequenceFunction::new, sequenceFunction -> sequenceFunction.functions);
 	private final List<LootItemFunction> functions;

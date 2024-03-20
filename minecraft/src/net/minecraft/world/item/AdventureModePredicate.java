@@ -48,6 +48,12 @@ public class AdventureModePredicate {
 	private boolean lastResult;
 	private boolean checksBlockEntity;
 
+	private AdventureModePredicate(List<BlockPredicate> list, boolean bl, List<Component> list2) {
+		this.predicates = list;
+		this.showInTooltip = bl;
+		this.tooltip = list2;
+	}
+
 	public AdventureModePredicate(List<BlockPredicate> list, boolean bl) {
 		this.predicates = list;
 		this.showInTooltip = bl;
@@ -91,6 +97,10 @@ public class AdventureModePredicate {
 
 	public void addToTooltip(Consumer<Component> consumer) {
 		this.tooltip.forEach(consumer);
+	}
+
+	public AdventureModePredicate withTooltip(boolean bl) {
+		return new AdventureModePredicate(this.predicates, bl, this.tooltip);
 	}
 
 	private static List<Component> computeTooltip(List<BlockPredicate> list) {

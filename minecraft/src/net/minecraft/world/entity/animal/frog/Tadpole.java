@@ -11,6 +11,7 @@ import net.minecraft.network.protocol.game.DebugPackets;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
@@ -194,7 +195,7 @@ public class Tadpole extends AbstractFish {
 	}
 
 	private boolean isFood(ItemStack itemStack) {
-		return Frog.TEMPTATION_ITEM.test(itemStack);
+		return itemStack.is(ItemTags.FROG_FOOD);
 	}
 
 	private void feed(Player player, ItemStack itemStack) {

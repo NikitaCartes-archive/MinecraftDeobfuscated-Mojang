@@ -268,7 +268,7 @@ public class Axolotl extends Animal implements LerpingModel, VariantHolder<Axolo
 
 	@Override
 	public boolean isFood(ItemStack itemStack) {
-		return itemStack.is(ItemTags.AXOLOTL_TEMPT_ITEMS);
+		return itemStack.is(ItemTags.AXOLOTL_FOOD);
 	}
 
 	@Override

@@ -5,7 +5,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Optional;
 import java.util.stream.Stream;
 import net.minecraft.core.Holder;
-import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -37,11 +37,11 @@ public class SmithingTrimRecipe implements SmithingRecipe {
 	}
 
 	@Override
-	public ItemStack assemble(Container container, RegistryAccess registryAccess) {
+	public ItemStack assemble(Container container, HolderLookup.Provider provider) {
 		ItemStack itemStack = container.getItem(1);
 		if (this.base.test(itemStack)) {
-			Optional<Holder.Reference<TrimMaterial>> optional = TrimMaterials.getFromIngredient(registryAccess, container.getItem(2));
-			Optional<Holder.Reference<TrimPattern>> optional2 = TrimPatterns.getFromTemplate(registryAccess, container.getItem(0));
+			Optional<Holder.Reference<TrimMaterial>> optional = TrimMaterials.getFromIngredient(provider, container.getItem(2));
+			Optional<Holder.Reference<TrimPattern>> optional2 = TrimPatterns.getFromTemplate(provider, container.getItem(0));
 			if (optional.isPresent() && optional2.isPresent()) {
 				ArmorTrim armorTrim = itemStack.get(DataComponents.TRIM);
 				if (armorTrim != null && armorTrim.hasPatternAndMaterial((Holder<TrimPattern>)optional2.get(), (Holder<TrimMaterial>)optional.get())) {
@@ -58,10 +58,10 @@ public class SmithingTrimRecipe implements SmithingRecipe {
 	}
 
 	@Override
-	public ItemStack getResultItem(RegistryAccess registryAccess) {
+	public ItemStack getResultItem(HolderLookup.Provider provider) {
 		ItemStack itemStack = new ItemStack(Items.IRON_CHESTPLATE);
-		Optional<Holder.Reference<TrimPattern>> optional = registryAccess.registryOrThrow(Registries.TRIM_PATTERN).holders().findFirst();
-		Optional<Holder.Reference<TrimMaterial>> optional2 = registryAccess.registryOrThrow(Registries.TRIM_MATERIAL).getHolder(TrimMaterials.REDSTONE);
+		Optional<Holder.Reference<TrimPattern>> optional = provider.lookupOrThrow(Registries.TRIM_PATTERN).listElements().findFirst();
+		Optional<Holder.Reference<TrimMaterial>> optional2 = provider.lookupOrThrow(Registries.TRIM_MATERIAL).get(TrimMaterials.REDSTONE);
 		if (optional.isPresent() && optional2.isPresent()) {
 			itemStack.set(DataComponents.TRIM, new ArmorTrim((Holder<TrimMaterial>)optional2.get(), (Holder<TrimPattern>)optional.get()));
 		}

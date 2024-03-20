@@ -29,8 +29,8 @@ public record WrittenBookContent(Filterable<String> title, String author, int ge
 	public static final int TITLE_MAX_LENGTH = 32;
 	public static final int MAX_GENERATION = 3;
 	public static final int MAX_CRAFTABLE_GENERATION = 2;
-	private static final Codec<Filterable<Component>> PAGE_CODEC = Filterable.codec(ComponentSerialization.flatCodec(32767));
-	public static final Codec<List<Filterable<Component>>> PAGES_CODEC = ExtraCodecs.sizeLimitedList(PAGE_CODEC.listOf(), 100);
+	public static final Codec<Component> CONTENT_CODEC = ComponentSerialization.flatCodec(32767);
+	public static final Codec<List<Filterable<Component>>> PAGES_CODEC = pagesCodec(CONTENT_CODEC);
 	public static final Codec<WrittenBookContent> CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
 					Filterable.codec(ExtraCodecs.sizeLimitedString(0, 32)).fieldOf("title").forGetter(WrittenBookContent::title),
@@ -54,6 +54,14 @@ public record WrittenBookContent(Filterable<String> title, String author, int ge
 		WrittenBookContent::resolved,
 		WrittenBookContent::new
 	);
+
+	private static Codec<Filterable<Component>> pageCodec(Codec<Component> codec) {
+		return Filterable.codec(codec);
+	}
+
+	public static Codec<List<Filterable<Component>>> pagesCodec(Codec<Component> codec) {
+		return ExtraCodecs.sizeLimitedList(pageCodec(codec).listOf(), 100);
+	}
 
 	@Nullable
 	public WrittenBookContent tryCraftCopy() {

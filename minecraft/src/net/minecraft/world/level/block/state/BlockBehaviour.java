@@ -21,6 +21,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.protocol.game.DebugPackets;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -97,7 +98,7 @@ public abstract class BlockBehaviour implements FeatureElement {
 	protected final FeatureFlagSet requiredFeatures;
 	protected final BlockBehaviour.Properties properties;
 	@Nullable
-	protected ResourceLocation drops;
+	protected ResourceKey<LootTable> drops;
 
 	public BlockBehaviour(BlockBehaviour.Properties properties) {
 		this.hasCollision = properties.hasCollision;
@@ -254,13 +255,13 @@ public abstract class BlockBehaviour implements FeatureElement {
 	}
 
 	protected List<ItemStack> getDrops(BlockState blockState, LootParams.Builder builder) {
-		ResourceLocation resourceLocation = this.getLootTable();
-		if (resourceLocation == BuiltInLootTables.EMPTY) {
+		ResourceKey<LootTable> resourceKey = this.getLootTable();
+		if (resourceKey == BuiltInLootTables.EMPTY) {
 			return Collections.emptyList();
 		} else {
 			LootParams lootParams = builder.withParameter(LootContextParams.BLOCK_STATE, blockState).create(LootContextParamSets.BLOCK);
 			ServerLevel serverLevel = lootParams.getLevel();
-			LootTable lootTable = serverLevel.getServer().getLootData().getLootTable(resourceLocation);
+			LootTable lootTable = serverLevel.getServer().reloadableRegistries().getLootTable(resourceKey);
 			return lootTable.getRandomItems(lootParams);
 		}
 	}
@@ -359,10 +360,10 @@ public abstract class BlockBehaviour implements FeatureElement {
 		return 0;
 	}
 
-	public final ResourceLocation getLootTable() {
+	public final ResourceKey<LootTable> getLootTable() {
 		if (this.drops == null) {
 			ResourceLocation resourceLocation = BuiltInRegistries.BLOCK.getKey(this.asBlock());
-			this.drops = resourceLocation.withPrefix("blocks/");
+			this.drops = ResourceKey.create(Registries.LOOT_TABLE, resourceLocation.withPrefix("blocks/"));
 		}
 
 		return this.drops;
@@ -945,7 +946,7 @@ public abstract class BlockBehaviour implements FeatureElement {
 		float friction = 0.6F;
 		float speedFactor = 1.0F;
 		float jumpFactor = 1.0F;
-		ResourceLocation drops;
+		ResourceKey<LootTable> drops;
 		boolean canOcclude = true;
 		boolean isAir;
 		boolean ignitedByLava;

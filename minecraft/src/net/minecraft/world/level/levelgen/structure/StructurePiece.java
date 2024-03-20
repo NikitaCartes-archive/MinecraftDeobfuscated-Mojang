@@ -11,7 +11,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
@@ -34,6 +34,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceType;
 import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.storage.loot.LootTable;
 import org.slf4j.Logger;
 
 public abstract class StructurePiece {
@@ -404,9 +405,9 @@ public abstract class StructurePiece {
 	}
 
 	protected boolean createChest(
-		WorldGenLevel worldGenLevel, BoundingBox boundingBox, RandomSource randomSource, int i, int j, int k, ResourceLocation resourceLocation
+		WorldGenLevel worldGenLevel, BoundingBox boundingBox, RandomSource randomSource, int i, int j, int k, ResourceKey<LootTable> resourceKey
 	) {
-		return this.createChest(worldGenLevel, boundingBox, randomSource, this.getWorldPos(i, j, k), resourceLocation, null);
+		return this.createChest(worldGenLevel, boundingBox, randomSource, this.getWorldPos(i, j, k), resourceKey, null);
 	}
 
 	public static BlockState reorient(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState) {
@@ -458,7 +459,7 @@ public abstract class StructurePiece {
 		BoundingBox boundingBox,
 		RandomSource randomSource,
 		BlockPos blockPos,
-		ResourceLocation resourceLocation,
+		ResourceKey<LootTable> resourceKey,
 		@Nullable BlockState blockState
 	) {
 		if (boundingBox.isInside(blockPos) && !serverLevelAccessor.getBlockState(blockPos).is(Blocks.CHEST)) {
@@ -469,7 +470,7 @@ public abstract class StructurePiece {
 			serverLevelAccessor.setBlock(blockPos, blockState, 2);
 			BlockEntity blockEntity = serverLevelAccessor.getBlockEntity(blockPos);
 			if (blockEntity instanceof ChestBlockEntity) {
-				((ChestBlockEntity)blockEntity).setLootTable(resourceLocation, randomSource.nextLong());
+				((ChestBlockEntity)blockEntity).setLootTable(resourceKey, randomSource.nextLong());
 			}
 
 			return true;
@@ -479,14 +480,14 @@ public abstract class StructurePiece {
 	}
 
 	protected boolean createDispenser(
-		WorldGenLevel worldGenLevel, BoundingBox boundingBox, RandomSource randomSource, int i, int j, int k, Direction direction, ResourceLocation resourceLocation
+		WorldGenLevel worldGenLevel, BoundingBox boundingBox, RandomSource randomSource, int i, int j, int k, Direction direction, ResourceKey<LootTable> resourceKey
 	) {
 		BlockPos blockPos = this.getWorldPos(i, j, k);
 		if (boundingBox.isInside(blockPos) && !worldGenLevel.getBlockState(blockPos).is(Blocks.DISPENSER)) {
 			this.placeBlock(worldGenLevel, Blocks.DISPENSER.defaultBlockState().setValue(DispenserBlock.FACING, direction), i, j, k, boundingBox);
 			BlockEntity blockEntity = worldGenLevel.getBlockEntity(blockPos);
 			if (blockEntity instanceof DispenserBlockEntity) {
-				((DispenserBlockEntity)blockEntity).setLootTable(resourceLocation, randomSource.nextLong());
+				((DispenserBlockEntity)blockEntity).setLootTable(resourceKey, randomSource.nextLong());
 			}
 
 			return true;

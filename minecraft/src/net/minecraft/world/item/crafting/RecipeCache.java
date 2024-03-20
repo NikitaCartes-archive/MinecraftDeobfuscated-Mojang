@@ -18,7 +18,7 @@ public class RecipeCache {
 		this.entries = new RecipeCache.Entry[i];
 	}
 
-	public Optional<CraftingRecipe> get(Level level, CraftingContainer craftingContainer) {
+	public Optional<RecipeHolder<CraftingRecipe>> get(Level level, CraftingContainer craftingContainer) {
 		if (craftingContainer.isEmpty()) {
 			return Optional.empty();
 		} else {
@@ -44,10 +44,10 @@ public class RecipeCache {
 		}
 	}
 
-	private Optional<CraftingRecipe> compute(CraftingContainer craftingContainer, Level level) {
+	private Optional<RecipeHolder<CraftingRecipe>> compute(CraftingContainer craftingContainer, Level level) {
 		Optional<RecipeHolder<CraftingRecipe>> optional = level.getRecipeManager().getRecipeFor(RecipeType.CRAFTING, craftingContainer, level);
-		this.insert(craftingContainer.getItems(), (CraftingRecipe)optional.map(RecipeHolder::value).orElse(null));
-		return optional.map(RecipeHolder::value);
+		this.insert(craftingContainer.getItems(), (RecipeHolder<CraftingRecipe>)optional.orElse(null));
+		return optional;
 	}
 
 	private void moveEntryToFront(int i) {
@@ -58,7 +58,7 @@ public class RecipeCache {
 		}
 	}
 
-	private void insert(List<ItemStack> list, @Nullable CraftingRecipe craftingRecipe) {
+	private void insert(List<ItemStack> list, @Nullable RecipeHolder<CraftingRecipe> recipeHolder) {
 		NonNullList<ItemStack> nonNullList = NonNullList.withSize(list.size(), ItemStack.EMPTY);
 
 		for (int i = 0; i < list.size(); i++) {
@@ -66,10 +66,10 @@ public class RecipeCache {
 		}
 
 		System.arraycopy(this.entries, 0, this.entries, 1, this.entries.length - 1);
-		this.entries[0] = new RecipeCache.Entry(nonNullList, craftingRecipe);
+		this.entries[0] = new RecipeCache.Entry(nonNullList, recipeHolder);
 	}
 
-	static record Entry(NonNullList<ItemStack> key, @Nullable CraftingRecipe value) {
+	static record Entry(NonNullList<ItemStack> key, @Nullable RecipeHolder<CraftingRecipe> value) {
 		public boolean matches(List<ItemStack> list) {
 			if (this.key.size() != list.size()) {
 				return false;

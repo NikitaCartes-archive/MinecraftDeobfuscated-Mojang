@@ -4,7 +4,7 @@ import java.util.Map;
 import java.util.Optional;
 import net.minecraft.Util;
 import net.minecraft.core.Holder;
-import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.network.chat.Component;
@@ -42,9 +42,9 @@ public class TrimMaterials {
 		register(bootstrapContext, AMETHYST, Items.AMETHYST_SHARD, Style.EMPTY.withColor(10116294), 1.0F);
 	}
 
-	public static Optional<Holder.Reference<TrimMaterial>> getFromIngredient(RegistryAccess registryAccess, ItemStack itemStack) {
-		return registryAccess.registryOrThrow(Registries.TRIM_MATERIAL)
-			.holders()
+	public static Optional<Holder.Reference<TrimMaterial>> getFromIngredient(HolderLookup.Provider provider, ItemStack itemStack) {
+		return provider.lookupOrThrow(Registries.TRIM_MATERIAL)
+			.listElements()
 			.filter(reference -> itemStack.is(((TrimMaterial)reference.value()).ingredient()))
 			.findFirst();
 	}

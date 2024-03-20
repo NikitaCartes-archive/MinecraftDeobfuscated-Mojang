@@ -4,7 +4,7 @@ public class TieredItem extends Item {
 	private final Tier tier;
 
 	public TieredItem(Tier tier, Item.Properties properties) {
-		super(properties.defaultDurability(tier.getUses()));
+		super(properties.durability(tier.getUses()));
 		this.tier = tier;
 	}
 

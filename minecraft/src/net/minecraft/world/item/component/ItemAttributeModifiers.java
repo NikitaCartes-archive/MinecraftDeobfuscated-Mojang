@@ -44,6 +44,10 @@ public record ItemAttributeModifiers(List<ItemAttributeModifiers.Entry> modifier
 		new DecimalFormat("#.##"), decimalFormat -> decimalFormat.setDecimalFormatSymbols(DecimalFormatSymbols.getInstance(Locale.ROOT))
 	);
 
+	public ItemAttributeModifiers withTooltip(boolean bl) {
+		return new ItemAttributeModifiers(this.modifiers, bl);
+	}
+
 	public static ItemAttributeModifiers.Builder builder() {
 		return new ItemAttributeModifiers.Builder();
 	}

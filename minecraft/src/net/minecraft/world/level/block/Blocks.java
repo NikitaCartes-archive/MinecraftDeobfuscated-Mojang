@@ -7011,11 +7011,12 @@ public class Blocks {
 		"heavy_core",
 		new HeavyCoreBlock(
 			BlockBehaviour.Properties.of()
-				.mapColor(MapColor.COLOR_BLACK)
+				.mapColor(MapColor.METAL)
 				.instrument(NoteBlockInstrument.SNARE)
 				.sound(SoundType.HEAVY_CORE)
-				.strength(30.0F)
-				.pushReaction(PushReaction.DESTROY)
+				.strength(10.0F)
+				.pushReaction(PushReaction.NORMAL)
+				.explosionResistance(1200.0F)
 				.requiredFeatures(FeatureFlags.UPDATE_1_21)
 		)
 	);

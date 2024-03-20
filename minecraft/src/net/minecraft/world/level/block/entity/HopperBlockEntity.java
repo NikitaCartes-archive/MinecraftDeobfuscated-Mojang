@@ -78,9 +78,7 @@ public class HopperBlockEntity extends RandomizableContainerBlockEntity implemen
 	public void setItem(int i, ItemStack itemStack) {
 		this.unpackLootTable(null);
 		this.getItems().set(i, itemStack);
-		if (itemStack.getCount() > this.getMaxStackSize()) {
-			itemStack.setCount(this.getMaxStackSize());
-		}
+		itemStack.limitSize(this.getMaxStackSize(itemStack));
 	}
 
 	@Override

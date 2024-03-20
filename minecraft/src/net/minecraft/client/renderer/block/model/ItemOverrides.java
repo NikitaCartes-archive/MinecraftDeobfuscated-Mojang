@@ -17,7 +17,6 @@ import net.minecraft.client.resources.model.ModelBaker;
 import net.minecraft.client.resources.model.UnbakedModel;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 @Environment(EnvType.CLIENT)
@@ -68,13 +67,12 @@ public class ItemOverrides {
 	@Nullable
 	public BakedModel resolve(BakedModel bakedModel, ItemStack itemStack, @Nullable ClientLevel clientLevel, @Nullable LivingEntity livingEntity, int i) {
 		if (this.overrides.length != 0) {
-			Item item = itemStack.getItem();
 			int j = this.properties.length;
 			float[] fs = new float[j];
 
 			for (int k = 0; k < j; k++) {
 				ResourceLocation resourceLocation = this.properties[k];
-				ItemPropertyFunction itemPropertyFunction = ItemProperties.getProperty(item, resourceLocation);
+				ItemPropertyFunction itemPropertyFunction = ItemProperties.getProperty(itemStack, resourceLocation);
 				if (itemPropertyFunction != null) {
 					fs[k] = itemPropertyFunction.call(itemStack, clientLevel, livingEntity, i);
 				} else {

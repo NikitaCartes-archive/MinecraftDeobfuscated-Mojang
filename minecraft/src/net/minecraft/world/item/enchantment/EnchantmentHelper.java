@@ -72,6 +72,10 @@ public class EnchantmentHelper {
 			|| !itemStack.getOrDefault(DataComponents.STORED_ENCHANTMENTS, ItemEnchantments.EMPTY).isEmpty();
 	}
 
+	public static float getSweepingDamageRatio(int i) {
+		return 1.0F - 1.0F / (float)(i + 1);
+	}
+
 	private static void runIterationOnItem(EnchantmentHelper.EnchantmentVisitor enchantmentVisitor, ItemStack itemStack) {
 		ItemEnchantments itemEnchantments = itemStack.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY);
 
@@ -100,7 +104,7 @@ public class EnchantmentHelper {
 
 	public static float getSweepingDamageRatio(LivingEntity livingEntity) {
 		int i = getEnchantmentLevel(Enchantments.SWEEPING_EDGE, livingEntity);
-		return i > 0 ? SweepingEdgeEnchantment.getSweepingDamageRatio(i) : 0.0F;
+		return i > 0 ? getSweepingDamageRatio(i) : 0.0F;
 	}
 
 	public static void doPostHurtEffects(LivingEntity livingEntity, Entity entity) {
@@ -330,7 +334,9 @@ public class EnchantmentHelper {
 		boolean bl2 = itemStack.is(Items.BOOK);
 
 		for (Enchantment enchantment : BuiltInRegistries.ENCHANTMENT) {
-			if ((!enchantment.isTreasureOnly() || bl) && enchantment.isDiscoverable() && (enchantment.canEnchant(itemStack) || bl2)) {
+			if ((!enchantment.isTreasureOnly() || bl)
+				&& enchantment.isDiscoverable()
+				&& (bl2 || enchantment.canEnchant(itemStack) && enchantment.isPrimaryItem(itemStack))) {
 				for (int j = enchantment.getMaxLevel(); j > enchantment.getMinLevel() - 1; j--) {
 					if (i >= enchantment.getMinCost(j) && i <= enchantment.getMaxCost(j)) {
 						list.add(new EnchantmentInstance(enchantment, j));

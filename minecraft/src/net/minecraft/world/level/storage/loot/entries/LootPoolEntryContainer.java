@@ -25,7 +25,7 @@ public abstract class LootPoolEntryContainer implements ComposableEntryContainer
 
 	protected static <T extends LootPoolEntryContainer> P1<Mu<T>, List<LootItemCondition>> commonFields(Instance<T> instance) {
 		return instance.group(
-			ExtraCodecs.strictOptionalField(LootItemConditions.CODEC.listOf(), "conditions", List.of())
+			ExtraCodecs.strictOptionalField(LootItemConditions.DIRECT_CODEC.listOf(), "conditions", List.of())
 				.forGetter(lootPoolEntryContainer -> lootPoolEntryContainer.conditions)
 		);
 	}

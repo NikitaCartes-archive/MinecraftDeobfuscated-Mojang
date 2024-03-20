@@ -132,5 +132,6 @@ public class EntityTypeTagsProvider extends IntrinsicHolderTagsProvider<EntityTy
 			.add(EntityType.TADPOLE);
 		this.tag(EntityTypeTags.SENSITIVE_TO_IMPALING).addTag(EntityTypeTags.AQUATIC);
 		this.tag(EntityTypeTags.SENSITIVE_TO_BANE_OF_ARTHROPODS).addTag(EntityTypeTags.ARTHROPOD);
+		this.tag(EntityTypeTags.SENSITIVE_TO_SMITE).addTag(EntityTypeTags.UNDEAD);
 	}
 }

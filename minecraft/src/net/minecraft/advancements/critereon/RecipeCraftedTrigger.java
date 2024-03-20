@@ -43,6 +43,10 @@ public class RecipeCraftedTrigger extends SimpleCriterionTrigger<RecipeCraftedTr
 			return CriteriaTriggers.RECIPE_CRAFTED.createCriterion(new RecipeCraftedTrigger.TriggerInstance(Optional.empty(), resourceLocation, List.of()));
 		}
 
+		public static Criterion<RecipeCraftedTrigger.TriggerInstance> crafterCraftedItem(ResourceLocation resourceLocation) {
+			return CriteriaTriggers.CRAFTER_RECIPE_CRAFTED.createCriterion(new RecipeCraftedTrigger.TriggerInstance(Optional.empty(), resourceLocation, List.of()));
+		}
+
 		boolean matches(ResourceLocation resourceLocation, List<ItemStack> list) {
 			if (!resourceLocation.equals(this.recipeId)) {
 				return false;

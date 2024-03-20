@@ -19,7 +19,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -302,14 +302,14 @@ public class VaultBlockEntity extends BlockEntity {
 				vaultSharedData.setDisplayItem(ItemStack.EMPTY);
 			} else {
 				ItemStack itemStack = getRandomDisplayItemFromLootTable(
-					serverLevel, blockPos, (ResourceLocation)vaultConfig.overrideLootTableToDisplay().orElse(vaultConfig.lootTable())
+					serverLevel, blockPos, (ResourceKey<LootTable>)vaultConfig.overrideLootTableToDisplay().orElse(vaultConfig.lootTable())
 				);
 				vaultSharedData.setDisplayItem(itemStack);
 			}
 		}
 
-		private static ItemStack getRandomDisplayItemFromLootTable(ServerLevel serverLevel, BlockPos blockPos, ResourceLocation resourceLocation) {
-			LootTable lootTable = serverLevel.getServer().getLootData().getLootTable(resourceLocation);
+		private static ItemStack getRandomDisplayItemFromLootTable(ServerLevel serverLevel, BlockPos blockPos, ResourceKey<LootTable> resourceKey) {
+			LootTable lootTable = serverLevel.getServer().reloadableRegistries().getLootTable(resourceKey);
 			LootParams lootParams = new LootParams.Builder(serverLevel)
 				.withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(blockPos))
 				.create(LootContextParamSets.VAULT);
@@ -333,7 +333,7 @@ public class VaultBlockEntity extends BlockEntity {
 		}
 
 		private static List<ItemStack> resolveItemsToEject(ServerLevel serverLevel, VaultConfig vaultConfig, BlockPos blockPos, Player player) {
-			LootTable lootTable = serverLevel.getServer().getLootData().getLootTable(vaultConfig.lootTable());
+			LootTable lootTable = serverLevel.getServer().reloadableRegistries().getLootTable(vaultConfig.lootTable());
 			LootParams lootParams = new LootParams.Builder(serverLevel)
 				.withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(blockPos))
 				.withLuck(player.getLuck())
@@ -343,7 +343,7 @@ public class VaultBlockEntity extends BlockEntity {
 		}
 
 		private static boolean canEjectReward(VaultConfig vaultConfig, VaultState vaultState) {
-			return !vaultConfig.lootTable().equals(BuiltInLootTables.EMPTY) && !vaultConfig.keyItem().isEmpty() && vaultState != VaultState.INACTIVE;
+			return vaultConfig.lootTable() != BuiltInLootTables.EMPTY && !vaultConfig.keyItem().isEmpty() && vaultState != VaultState.INACTIVE;
 		}
 
 		private static boolean isValidToInsert(VaultConfig vaultConfig, ItemStack itemStack) {

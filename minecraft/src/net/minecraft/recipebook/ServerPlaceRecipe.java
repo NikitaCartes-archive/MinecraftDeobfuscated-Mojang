@@ -109,7 +109,7 @@ public class ServerPlaceRecipe<C extends Container> implements PlaceRecipe<Integ
 		if (bl) {
 			j = i;
 		} else if (bl2) {
-			j = 64;
+			j = Integer.MAX_VALUE;
 
 			for (int k = 0; k < this.menu.getGridWidth() * this.menu.getGridHeight() + 1; k++) {
 				if (k != this.menu.getResultSlotIndex()) {
@@ -120,7 +120,7 @@ public class ServerPlaceRecipe<C extends Container> implements PlaceRecipe<Integ
 				}
 			}
 
-			if (j < 64) {
+			if (j != Integer.MAX_VALUE) {
 				j++;
 			}
 		}

@@ -44,10 +44,9 @@ public class WorldLoader {
 				new WorldLoader.DataLoadContext(closeableResourceManager, worldDataConfiguration, frozen, frozen2)
 			);
 			LayeredRegistryAccess<RegistryLayer> layeredRegistryAccess3 = layeredRegistryAccess2.replaceFrom(RegistryLayer.DIMENSIONS, dataLoadOutput.finalDimensions);
-			RegistryAccess.Frozen frozen3 = layeredRegistryAccess3.getAccessForLoading(RegistryLayer.RELOADABLE);
 			return ReloadableServerResources.loadResources(
 					closeableResourceManager,
-					frozen3,
+					layeredRegistryAccess3,
 					worldDataConfiguration.enabledFeatures(),
 					initConfig.commandSelection(),
 					initConfig.functionCompilationLevel(),
@@ -60,11 +59,11 @@ public class WorldLoader {
 					}
 				})
 				.thenApplyAsync(reloadableServerResources -> {
-					reloadableServerResources.updateRegistryTags(frozen3);
+					reloadableServerResources.updateRegistryTags();
 					return resultFactory.create(closeableResourceManager, reloadableServerResources, layeredRegistryAccess3, dataLoadOutput.cookie);
 				}, executor2);
-		} catch (Exception var15) {
-			return CompletableFuture.failedFuture(var15);
+		} catch (Exception var14) {
+			return CompletableFuture.failedFuture(var14);
 		}
 	}
 

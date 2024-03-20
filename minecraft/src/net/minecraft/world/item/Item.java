@@ -22,12 +22,11 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
+import net.minecraft.util.Unit;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -45,6 +44,7 @@ import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
+import net.minecraft.world.item.component.Tool;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.ItemLike;
@@ -60,21 +60,15 @@ public class Item implements FeatureElement, ItemLike {
 	public static final Map<Block, Item> BY_BLOCK = Maps.<Block, Item>newHashMap();
 	public static final UUID BASE_ATTACK_DAMAGE_UUID = UUID.fromString("CB3F55D3-645C-4F38-A497-9C13A33DB5CF");
 	public static final UUID BASE_ATTACK_SPEED_UUID = UUID.fromString("FA233E1C-4180-4865-B01B-BCCE9785ACA3");
-	public static final int MAX_STACK_SIZE = 64;
-	public static final int EAT_DURATION = 32;
+	public static final int DEFAULT_MAX_STACK_SIZE = 64;
+	public static final int ABSOLUTE_MAX_STACK_SIZE = 99;
 	public static final int MAX_BAR_WIDTH = 13;
 	private final Holder.Reference<Item> builtInRegistryHolder = BuiltInRegistries.ITEM.createIntrusiveHolder(this);
 	private final DataComponentMap components;
-	private final Rarity rarity;
-	private final int maxStackSize;
-	private final int maxDamage;
-	private final boolean isFireResistant;
 	@Nullable
 	private final Item craftingRemainingItem;
 	@Nullable
 	private String descriptionId;
-	@Nullable
-	private final FoodProperties foodProperties;
 	private final FeatureFlagSet requiredFeatures;
 
 	public static int getId(Item item) {
@@ -91,13 +85,8 @@ public class Item implements FeatureElement, ItemLike {
 	}
 
 	public Item(Item.Properties properties) {
-		this.components = properties.buildComponents();
-		this.rarity = properties.rarity;
+		this.components = properties.buildAndValidateComponents();
 		this.craftingRemainingItem = properties.craftingRemainingItem;
-		this.maxDamage = properties.maxDamage;
-		this.maxStackSize = properties.maxStackSize;
-		this.foodProperties = properties.foodProperties;
-		this.isFireResistant = properties.isFireResistant;
 		this.requiredFeatures = properties.requiredFeatures;
 		if (SharedConstants.IS_RUNNING_IN_IDE) {
 			String string = this.getClass().getSimpleName();
@@ -114,6 +103,10 @@ public class Item implements FeatureElement, ItemLike {
 
 	public DataComponentMap components() {
 		return this.components;
+	}
+
+	public int getDefaultMaxStackSize() {
+		return this.components.getOrDefault(DataComponents.MAX_STACK_SIZE, 1);
 	}
 
 	public void onUseTick(Level level, LivingEntity livingEntity, ItemStack itemStack, int i) {
@@ -139,13 +132,15 @@ public class Item implements FeatureElement, ItemLike {
 	}
 
 	public float getDestroySpeed(ItemStack itemStack, BlockState blockState) {
-		return 1.0F;
+		Tool tool = itemStack.get(DataComponents.TOOL);
+		return tool != null ? tool.getMiningSpeed(blockState) : 1.0F;
 	}
 
 	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand) {
-		if (this.isEdible()) {
-			ItemStack itemStack = player.getItemInHand(interactionHand);
-			if (player.canEat(this.getFoodProperties().canAlwaysEat())) {
+		ItemStack itemStack = player.getItemInHand(interactionHand);
+		FoodProperties foodProperties = itemStack.get(DataComponents.FOOD);
+		if (foodProperties != null) {
+			if (player.canEat(foodProperties.canAlwaysEat())) {
 				player.startUsingItem(interactionHand);
 				return InteractionResultHolder.consume(itemStack);
 			} else {
@@ -157,19 +152,7 @@ public class Item implements FeatureElement, ItemLike {
 	}
 
 	public ItemStack finishUsingItem(ItemStack itemStack, Level level, LivingEntity livingEntity) {
-		return this.isEdible() ? livingEntity.eat(level, itemStack) : itemStack;
-	}
-
-	public final int getMaxStackSize() {
-		return this.maxStackSize;
-	}
-
-	public final int getMaxDamage() {
-		return this.maxDamage;
-	}
-
-	public boolean canBeDepleted() {
-		return this.maxDamage > 0;
+		return itemStack.has(DataComponents.FOOD) ? livingEntity.eat(level, itemStack) : itemStack;
 	}
 
 	public boolean isBarVisible(ItemStack itemStack) {
@@ -177,11 +160,12 @@ public class Item implements FeatureElement, ItemLike {
 	}
 
 	public int getBarWidth(ItemStack itemStack) {
-		return Mth.clamp(Math.round(13.0F - (float)itemStack.getDamageValue() * 13.0F / (float)this.maxDamage), 0, 13);
+		return Mth.clamp(Math.round(13.0F - (float)itemStack.getDamageValue() * 13.0F / (float)itemStack.getMaxDamage()), 0, 13);
 	}
 
 	public int getBarColor(ItemStack itemStack) {
-		float f = Math.max(0.0F, ((float)this.maxDamage - (float)itemStack.getDamageValue()) / (float)this.maxDamage);
+		int i = itemStack.getMaxDamage();
+		float f = Math.max(0.0F, ((float)i - (float)itemStack.getDamageValue()) / (float)i);
 		return Mth.hsvToRgb(f / 3.0F, 1.0F, 1.0F);
 	}
 
@@ -193,16 +177,30 @@ public class Item implements FeatureElement, ItemLike {
 		return false;
 	}
 
+	public float getAttackDamageBonus(Player player, float f) {
+		return 0.0F;
+	}
+
 	public boolean hurtEnemy(ItemStack itemStack, LivingEntity livingEntity, LivingEntity livingEntity2) {
 		return false;
 	}
 
 	public boolean mineBlock(ItemStack itemStack, Level level, BlockState blockState, BlockPos blockPos, LivingEntity livingEntity) {
-		return false;
+		Tool tool = itemStack.get(DataComponents.TOOL);
+		if (tool == null) {
+			return false;
+		} else {
+			if (!level.isClientSide && blockState.getDestroySpeed(level, blockPos) != 0.0F && tool.damagePerBlock() > 0) {
+				itemStack.hurtAndBreak(tool.damagePerBlock(), livingEntity, EquipmentSlot.MAINHAND);
+			}
+
+			return true;
+		}
 	}
 
-	public boolean isCorrectToolForDrops(BlockState blockState) {
-		return false;
+	public boolean isCorrectToolForDrops(ItemStack itemStack, BlockState blockState) {
+		Tool tool = itemStack.get(DataComponents.TOOL);
+		return tool != null && tool.isCorrectForDrops(blockState);
 	}
 
 	public InteractionResult interactLivingEntity(ItemStack itemStack, Player player, LivingEntity livingEntity, InteractionHand interactionHand) {
@@ -257,15 +255,12 @@ public class Item implements FeatureElement, ItemLike {
 	}
 
 	public UseAnim getUseAnimation(ItemStack itemStack) {
-		return itemStack.getItem().isEdible() ? UseAnim.EAT : UseAnim.NONE;
+		return itemStack.has(DataComponents.FOOD) ? UseAnim.EAT : UseAnim.NONE;
 	}
 
 	public int getUseDuration(ItemStack itemStack) {
-		if (itemStack.getItem().isEdible()) {
-			return this.getFoodProperties().isFastFood() ? 16 : 32;
-		} else {
-			return 0;
-		}
+		FoodProperties foodProperties = itemStack.get(DataComponents.FOOD);
+		return foodProperties != null ? foodProperties.eatDurationTicks() : 0;
 	}
 
 	public void releaseUsing(ItemStack itemStack, Level level, LivingEntity livingEntity, int i) {
@@ -286,25 +281,8 @@ public class Item implements FeatureElement, ItemLike {
 		return itemStack.isEnchanted();
 	}
 
-	public Rarity getRarity(ItemStack itemStack) {
-		if (!itemStack.isEnchanted()) {
-			return this.rarity;
-		} else {
-			switch (this.rarity) {
-				case COMMON:
-				case UNCOMMON:
-					return Rarity.RARE;
-				case RARE:
-					return Rarity.EPIC;
-				case EPIC:
-				default:
-					return this.rarity;
-			}
-		}
-	}
-
 	public boolean isEnchantable(ItemStack itemStack) {
-		return this.getMaxStackSize() == 1 && this.canBeDepleted();
+		return itemStack.getMaxStackSize() == 1 && itemStack.has(DataComponents.MAX_DAMAGE);
 	}
 
 	protected static BlockHitResult getPlayerPOVHitResult(Level level, Player player, ClipContext.Fluid fluid) {
@@ -334,15 +312,6 @@ public class Item implements FeatureElement, ItemLike {
 		return new ItemStack(this);
 	}
 
-	public boolean isEdible() {
-		return this.foodProperties != null;
-	}
-
-	@Nullable
-	public FoodProperties getFoodProperties() {
-		return this.foodProperties;
-	}
-
 	public SoundEvent getDrinkingSound() {
 		return SoundEvents.GENERIC_DRINK;
 	}
@@ -353,14 +322,6 @@ public class Item implements FeatureElement, ItemLike {
 
 	public SoundEvent getBreakingSound() {
 		return SoundEvents.ITEM_BREAK;
-	}
-
-	public boolean isFireResistant() {
-		return this.isFireResistant;
-	}
-
-	public boolean canBeHurtBy(DamageSource damageSource) {
-		return !this.isFireResistant || !damageSource.is(DamageTypeTags.IS_FIRE);
 	}
 
 	public boolean canFitInsideContainerItems() {
@@ -376,37 +337,21 @@ public class Item implements FeatureElement, ItemLike {
 		private static final Interner<DataComponentMap> COMPONENT_INTERNER = Interners.newStrongInterner();
 		@Nullable
 		private DataComponentMap.Builder components;
-		int maxStackSize = 64;
-		int maxDamage;
 		@Nullable
 		Item craftingRemainingItem;
-		Rarity rarity = Rarity.COMMON;
-		@Nullable
-		FoodProperties foodProperties;
-		boolean isFireResistant;
 		FeatureFlagSet requiredFeatures = FeatureFlags.VANILLA_SET;
 
 		public Item.Properties food(FoodProperties foodProperties) {
-			this.foodProperties = foodProperties;
-			return this;
+			return this.component(DataComponents.FOOD, foodProperties);
 		}
 
 		public Item.Properties stacksTo(int i) {
-			if (this.maxDamage > 0) {
-				throw new RuntimeException("Unable to have damage AND stack.");
-			} else {
-				this.maxStackSize = i;
-				return this;
-			}
-		}
-
-		public Item.Properties defaultDurability(int i) {
-			return this.maxDamage == 0 ? this.durability(i) : this;
+			return this.component(DataComponents.MAX_STACK_SIZE, i);
 		}
 
 		public Item.Properties durability(int i) {
-			this.maxDamage = i;
-			this.maxStackSize = 1;
+			this.component(DataComponents.MAX_DAMAGE, i);
+			this.component(DataComponents.MAX_STACK_SIZE, 1);
 			this.component(DataComponents.DAMAGE, 0);
 			return this;
 		}
@@ -417,13 +362,11 @@ public class Item implements FeatureElement, ItemLike {
 		}
 
 		public Item.Properties rarity(Rarity rarity) {
-			this.rarity = rarity;
-			return this;
+			return this.component(DataComponents.RARITY, rarity);
 		}
 
 		public Item.Properties fireResistant() {
-			this.isFireResistant = true;
-			return this;
+			return this.component(DataComponents.FIRE_RESISTANT, Unit.INSTANCE);
 		}
 
 		public Item.Properties requiredFeatures(FeatureFlag... featureFlags) {
@@ -444,7 +387,16 @@ public class Item implements FeatureElement, ItemLike {
 			return this.component(DataComponents.ATTRIBUTE_MODIFIERS, itemAttributeModifiers);
 		}
 
-		DataComponentMap buildComponents() {
+		DataComponentMap buildAndValidateComponents() {
+			DataComponentMap dataComponentMap = this.buildComponents();
+			if (dataComponentMap.has(DataComponents.DAMAGE) && dataComponentMap.getOrDefault(DataComponents.MAX_STACK_SIZE, 1) > 1) {
+				throw new IllegalStateException("Item cannot have both durability and be stackable");
+			} else {
+				return dataComponentMap;
+			}
+		}
+
+		private DataComponentMap buildComponents() {
 			return this.components == null ? DataComponents.COMMON_ITEM_COMPONENTS : COMPONENT_INTERNER.intern(this.components.build());
 		}
 	}

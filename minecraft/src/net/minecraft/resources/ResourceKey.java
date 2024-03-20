@@ -61,6 +61,10 @@ public class ResourceKey<T> {
 		return this.registryName;
 	}
 
+	public ResourceKey<Registry<T>> registryKey() {
+		return createRegistryKey(this.registryName);
+	}
+
 	static record InternKey(ResourceLocation registry, ResourceLocation location) {
 	}
 }

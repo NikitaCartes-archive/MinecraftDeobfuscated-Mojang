@@ -50,9 +50,9 @@ public class GiveCommand {
 	}
 
 	private static int giveItem(CommandSourceStack commandSourceStack, ItemInput itemInput, Collection<ServerPlayer> collection, int i) throws CommandSyntaxException {
-		int j = itemInput.getItem().getMaxStackSize();
-		int k = j * 100;
 		ItemStack itemStack = itemInput.createItemStack(1, false);
+		int j = itemStack.getMaxStackSize();
+		int k = j * 100;
 		if (i > k) {
 			commandSourceStack.sendFailure(Component.translatable("commands.give.failed.toomanyitems", k, itemStack.getDisplayName()));
 			return 0;

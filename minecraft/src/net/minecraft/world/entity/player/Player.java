@@ -18,7 +18,6 @@ import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.GlobalPos;
-import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -85,7 +84,6 @@ import net.minecraft.world.item.ElytraItem;
 import net.minecraft.world.item.ItemCooldowns;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.MaceItem;
 import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.item.crafting.RecipeHolder;
@@ -146,8 +144,6 @@ public abstract class Player extends LivingEntity {
 		)
 		.put(Pose.DYING, EntityDimensions.fixed(0.2F, 0.2F).withEyeHeight(1.62F))
 		.build();
-	private static final float SMASH_ATTACK_KNOCKBACK_RADIUS = 2.5F;
-	private static final float SMASH_ATTACK_KNOCKBACK_POWER = 0.6F;
 	private static final EntityDataAccessor<Float> DATA_PLAYER_ABSORPTION_ID = SynchedEntityData.defineId(Player.class, EntityDataSerializers.FLOAT);
 	private static final EntityDataAccessor<Integer> DATA_SCORE_ID = SynchedEntityData.defineId(Player.class, EntityDataSerializers.INT);
 	protected static final EntityDataAccessor<Byte> DATA_PLAYER_MODE_CUSTOMISATION = SynchedEntityData.defineId(Player.class, EntityDataSerializers.BYTE);
@@ -188,7 +184,10 @@ public abstract class Player extends LivingEntity {
 	public FishingHook fishing;
 	protected float hurtDir;
 	@Nullable
-	public Double ignoreFallDamageAboveY;
+	public Vec3 currentImpulseImpactPos;
+	@Nullable
+	public Entity currentExplosionCause;
+	public boolean ignoreFallDamageFromCurrentImpulse;
 
 	public Player(Level level, BlockPos blockPos, float f, GameProfile gameProfile) {
 		super(EntityType.PLAYER, level);
@@ -799,9 +798,14 @@ public abstract class Player extends LivingEntity {
 			this.setLastDeathLocation(GlobalPos.CODEC.parse(NbtOps.INSTANCE, compoundTag.get("LastDeathLocation")).resultOrPartial(LOGGER::error));
 		}
 
-		if (compoundTag.contains("ignore_fall_damage_above_y", 6)) {
-			this.ignoreFallDamageAboveY = compoundTag.getDouble("ignore_fall_damage_above_y");
+		if (compoundTag.contains("current_explosion_impact_pos", 9)) {
+			Vec3.CODEC
+				.parse(NbtOps.INSTANCE, compoundTag.get("current_explosion_impact_pos"))
+				.resultOrPartial(LOGGER::error)
+				.ifPresent(vec3 -> this.currentImpulseImpactPos = vec3);
 		}
+
+		this.ignoreFallDamageFromCurrentImpulse = compoundTag.getBoolean("ignore_fall_damage_from_current_explosion");
 	}
 
 	@Override
@@ -830,9 +834,13 @@ public abstract class Player extends LivingEntity {
 		this.getLastDeathLocation()
 			.flatMap(globalPos -> GlobalPos.CODEC.encodeStart(NbtOps.INSTANCE, globalPos).resultOrPartial(LOGGER::error))
 			.ifPresent(tag -> compoundTag.put("LastDeathLocation", tag));
-		if (this.ignoreFallDamageAboveY != null) {
-			compoundTag.putDouble("ignore_fall_damage_above_y", this.ignoreFallDamageAboveY);
+		if (this.currentImpulseImpactPos != null) {
+			compoundTag.put(
+				"current_explosion_impact_pos", Util.getOrThrow(Vec3.CODEC.encodeStart(NbtOps.INSTANCE, this.currentImpulseImpactPos), IllegalStateException::new)
+			);
 		}
+
+		compoundTag.putBoolean("ignore_fall_damage_from_current_explosion", this.ignoreFallDamageFromCurrentImpulse);
 	}
 
 	@Override
@@ -1140,41 +1148,8 @@ public abstract class Player extends LivingEntity {
 						bl2 = true;
 					}
 
-					boolean bl3 = this.getItemInHand(InteractionHand.MAIN_HAND).getItem() instanceof MaceItem && this.fallDistance > 1.5F;
-					if (bl3) {
-						f += f * 0.5F * this.fallDistance;
-						this.level()
-							.getEntitiesOfClass(
-								LivingEntity.class,
-								entity.getBoundingBox().inflate(2.5),
-								livingEntity -> livingEntity != this
-										&& livingEntity != entity
-										&& !this.isAlliedTo(livingEntity)
-										&& (!(livingEntity instanceof ArmorStand) || !((ArmorStand)livingEntity).isMarker())
-										&& entity.distanceToSqr(livingEntity) <= Math.pow(2.5, 2.0)
-							)
-							.forEach(
-								livingEntity -> {
-									Vec3 vec3x = livingEntity.position().subtract(entity.position());
-									double dx = (2.5 - vec3x.length()) * 0.6F * (1.0 - livingEntity.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE));
-									Vec3 vec32 = vec3x.normalize().scale(dx);
-									if (dx > 0.0) {
-										livingEntity.push(vec32.x, 0.6F, vec32.z);
-										if (!this.level().isClientSide()) {
-											BlockPos blockPos = livingEntity.getOnPos();
-											Vec3 vec33 = blockPos.getCenter().add(0.0, 0.5, 0.0);
-											int ix = (int)(100.0 * dx);
-											((ServerLevel)this.level())
-												.sendParticles(
-													new BlockParticleOption(ParticleTypes.BLOCK, this.level().getBlockState(blockPos)), vec33.x, vec33.y, vec33.z, ix, 0.3F, 0.3F, 0.3F, 0.15F
-												);
-										}
-									}
-								}
-							);
-					}
-
-					boolean bl4 = bl
+					f += this.getItemInHand(InteractionHand.MAIN_HAND).getItem().getAttackDamageBonus(this, f);
+					boolean bl3 = bl
 						&& this.fallDistance > 0.0F
 						&& !this.onGround()
 						&& !this.onClimbable()
@@ -1183,34 +1158,34 @@ public abstract class Player extends LivingEntity {
 						&& !this.isPassenger()
 						&& entity instanceof LivingEntity
 						&& !this.isSprinting();
-					if (bl4) {
+					if (bl3) {
 						f *= 1.5F;
 					}
 
 					f += g;
-					boolean bl5 = false;
+					boolean bl4 = false;
 					double d = (double)(this.walkDist - this.walkDistO);
-					if (bl && !bl4 && !bl2 && this.onGround() && d < (double)this.getSpeed()) {
+					if (bl && !bl3 && !bl2 && this.onGround() && d < (double)this.getSpeed()) {
 						ItemStack itemStack = this.getItemInHand(InteractionHand.MAIN_HAND);
 						if (itemStack.getItem() instanceof SwordItem) {
-							bl5 = true;
+							bl4 = true;
 						}
 					}
 
 					float j = 0.0F;
-					boolean bl6 = false;
+					boolean bl5 = false;
 					int k = EnchantmentHelper.getFireAspect(this);
 					if (entity instanceof LivingEntity) {
 						j = ((LivingEntity)entity).getHealth();
 						if (k > 0 && !entity.isOnFire()) {
-							bl6 = true;
+							bl5 = true;
 							entity.igniteForSeconds(1);
 						}
 					}
 
 					Vec3 vec3 = entity.getDeltaMovement();
-					boolean bl7 = entity.hurt(this.damageSources().playerAttack(this), f);
-					if (bl7) {
+					boolean bl6 = entity.hurt(this.damageSources().playerAttack(this), f);
+					if (bl6) {
 						if (i > 0) {
 							if (entity instanceof LivingEntity) {
 								((LivingEntity)entity)
@@ -1231,7 +1206,7 @@ public abstract class Player extends LivingEntity {
 							this.setSprinting(false);
 						}
 
-						if (bl5) {
+						if (bl4) {
 							float l = 1.0F + EnchantmentHelper.getSweepingDamageRatio(this) * f;
 
 							for (LivingEntity livingEntity : this.level().getEntitiesOfClass(LivingEntity.class, entity.getBoundingBox().inflate(1.0, 0.25, 1.0))) {
@@ -1257,12 +1232,12 @@ public abstract class Player extends LivingEntity {
 							entity.setDeltaMovement(vec3);
 						}
 
-						if (bl4) {
+						if (bl3) {
 							this.level().playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.PLAYER_ATTACK_CRIT, this.getSoundSource(), 1.0F, 1.0F);
 							this.crit(entity);
 						}
 
-						if (!bl4 && !bl5) {
+						if (!bl3 && !bl4) {
 							if (bl) {
 								this.level().playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.PLAYER_ATTACK_STRONG, this.getSoundSource(), 1.0F, 1.0F);
 							} else {
@@ -1309,7 +1284,7 @@ public abstract class Player extends LivingEntity {
 						this.causeFoodExhaustion(0.1F);
 					} else {
 						this.level().playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.PLAYER_ATTACK_NODAMAGE, this.getSoundSource(), 1.0F, 1.0F);
-						if (bl6) {
+						if (bl5) {
 							entity.clearFire();
 						}
 					}
@@ -1535,10 +1510,10 @@ public abstract class Player extends LivingEntity {
 				this.awardStat(Stats.FALL_ONE_CM, (int)Math.round((double)f * 100.0));
 			}
 
-			if (this.ignoreFallDamageAboveY != null) {
-				float h = this.ignoreFallDamageAboveY.floatValue();
-				this.ignoreFallDamageAboveY = null;
-				return (double)h < this.getY() ? false : super.causeFallDamage(h - (float)this.getY(), g, damageSource);
+			if (this.ignoreFallDamageFromCurrentImpulse && this.currentImpulseImpactPos != null) {
+				double d = this.currentImpulseImpactPos.y;
+				this.resetCurrentImpulseContext();
+				return d < this.getY() ? false : super.causeFallDamage((float)(d - this.getY()), g, damageSource);
 			} else {
 				return super.causeFallDamage(f, g, damageSource);
 			}
@@ -1610,7 +1585,7 @@ public abstract class Player extends LivingEntity {
 			super.makeStuckInBlock(blockState, vec3);
 		}
 
-		this.ignoreFallDamageAboveY = null;
+		this.resetCurrentImpulseContext();
 	}
 
 	public void giveExperiencePoints(int i) {
@@ -2041,7 +2016,7 @@ public abstract class Player extends LivingEntity {
 
 	@Override
 	public ItemStack eat(Level level, ItemStack itemStack) {
-		this.getFoodData().eat(itemStack.getItem(), itemStack);
+		this.getFoodData().eat(itemStack);
 		this.awardStat(Stats.ITEM_USED.get(itemStack.getItem()));
 		level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.PLAYER_BURP, SoundSource.PLAYERS, 0.5F, level.random.nextFloat() * 0.1F + 0.9F);
 		if (this instanceof ServerPlayer) {
@@ -2152,6 +2127,12 @@ public abstract class Player extends LivingEntity {
 	public boolean canInteractWithBlock(BlockPos blockPos, double d) {
 		double e = this.blockInteractionRange() + d;
 		return new AABB(blockPos).distanceToSqr(this.getEyePosition()) < e * e;
+	}
+
+	public void resetCurrentImpulseContext() {
+		this.currentExplosionCause = null;
+		this.currentImpulseImpactPos = null;
+		this.ignoreFallDamageFromCurrentImpulse = false;
 	}
 
 	public static enum BedSleepingProblem {

@@ -10,6 +10,7 @@ import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
 import net.minecraft.advancements.critereon.CriterionValidator;
+import net.minecraft.core.HolderGetter;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -23,7 +24,6 @@ import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
-import net.minecraft.world.level.storage.loot.LootDataResolver;
 
 public record Advancement(
 	Optional<ResourceLocation> parent,
@@ -106,9 +106,9 @@ public record Advancement(
 		return this.parent.isEmpty();
 	}
 
-	public void validate(ProblemReporter problemReporter, LootDataResolver lootDataResolver) {
+	public void validate(ProblemReporter problemReporter, HolderGetter.Provider provider) {
 		this.criteria.forEach((string, criterion) -> {
-			CriterionValidator criterionValidator = new CriterionValidator(problemReporter.forChild(string), lootDataResolver);
+			CriterionValidator criterionValidator = new CriterionValidator(problemReporter.forChild(string), provider);
 			criterion.triggerInstance().validate(criterionValidator);
 		});
 	}

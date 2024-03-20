@@ -5,6 +5,7 @@ import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.RandomizableContainer;
@@ -25,6 +26,7 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.BlockIgnorePr
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
+import net.minecraft.world.level.storage.loot.LootTable;
 
 public class ShipwreckPieces {
 	static final BlockPos PIVOT = new BlockPos(4, 0, 15);
@@ -63,7 +65,7 @@ public class ShipwreckPieces {
 		new ResourceLocation("shipwreck/rightsideup_fronthalf_degraded"),
 		new ResourceLocation("shipwreck/rightsideup_backhalf_degraded")
 	};
-	static final Map<String, ResourceLocation> MARKERS_TO_LOOT = Map.of(
+	static final Map<String, ResourceKey<LootTable>> MARKERS_TO_LOOT = Map.of(
 		"map_chest", BuiltInLootTables.SHIPWRECK_MAP, "treasure_chest", BuiltInLootTables.SHIPWRECK_TREASURE, "supply_chest", BuiltInLootTables.SHIPWRECK_SUPPLY
 	);
 
@@ -111,9 +113,9 @@ public class ShipwreckPieces {
 
 		@Override
 		protected void handleDataMarker(String string, BlockPos blockPos, ServerLevelAccessor serverLevelAccessor, RandomSource randomSource, BoundingBox boundingBox) {
-			ResourceLocation resourceLocation = (ResourceLocation)ShipwreckPieces.MARKERS_TO_LOOT.get(string);
-			if (resourceLocation != null) {
-				RandomizableContainer.setBlockEntityLootTable(serverLevelAccessor, randomSource, blockPos.below(), resourceLocation);
+			ResourceKey<LootTable> resourceKey = (ResourceKey<LootTable>)ShipwreckPieces.MARKERS_TO_LOOT.get(string);
+			if (resourceKey != null) {
+				RandomizableContainer.setBlockEntityLootTable(serverLevelAccessor, randomSource, blockPos.below(), resourceKey);
 			}
 		}
 

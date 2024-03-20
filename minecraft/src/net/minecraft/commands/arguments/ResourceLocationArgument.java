@@ -13,10 +13,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeManager;
-import net.minecraft.world.level.storage.loot.LootDataManager;
-import net.minecraft.world.level.storage.loot.LootDataType;
-import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
-import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
 public class ResourceLocationArgument implements ArgumentType<ResourceLocation> {
 	private static final Collection<String> EXAMPLES = Arrays.asList("foo", "foo:bar", "012");
@@ -25,12 +21,6 @@ public class ResourceLocationArgument implements ArgumentType<ResourceLocation> 
 	);
 	private static final DynamicCommandExceptionType ERROR_UNKNOWN_RECIPE = new DynamicCommandExceptionType(
 		object -> Component.translatableEscape("recipe.notFound", object)
-	);
-	private static final DynamicCommandExceptionType ERROR_UNKNOWN_PREDICATE = new DynamicCommandExceptionType(
-		object -> Component.translatableEscape("predicate.unknown", object)
-	);
-	private static final DynamicCommandExceptionType ERROR_UNKNOWN_ITEM_MODIFIER = new DynamicCommandExceptionType(
-		object -> Component.translatableEscape("item_modifier.unknown", object)
 	);
 
 	public static ResourceLocationArgument id() {
@@ -51,28 +41,6 @@ public class ResourceLocationArgument implements ArgumentType<ResourceLocation> 
 		RecipeManager recipeManager = commandContext.getSource().getServer().getRecipeManager();
 		ResourceLocation resourceLocation = getId(commandContext, string);
 		return (RecipeHolder<?>)recipeManager.byKey(resourceLocation).orElseThrow(() -> ERROR_UNKNOWN_RECIPE.create(resourceLocation));
-	}
-
-	public static LootItemCondition getPredicate(CommandContext<CommandSourceStack> commandContext, String string) throws CommandSyntaxException {
-		ResourceLocation resourceLocation = getId(commandContext, string);
-		LootDataManager lootDataManager = commandContext.getSource().getServer().getLootData();
-		LootItemCondition lootItemCondition = lootDataManager.getElement(LootDataType.PREDICATE, resourceLocation);
-		if (lootItemCondition == null) {
-			throw ERROR_UNKNOWN_PREDICATE.create(resourceLocation);
-		} else {
-			return lootItemCondition;
-		}
-	}
-
-	public static LootItemFunction getItemModifier(CommandContext<CommandSourceStack> commandContext, String string) throws CommandSyntaxException {
-		ResourceLocation resourceLocation = getId(commandContext, string);
-		LootDataManager lootDataManager = commandContext.getSource().getServer().getLootData();
-		LootItemFunction lootItemFunction = lootDataManager.getElement(LootDataType.MODIFIER, resourceLocation);
-		if (lootItemFunction == null) {
-			throw ERROR_UNKNOWN_ITEM_MODIFIER.create(resourceLocation);
-		} else {
-			return lootItemFunction;
-		}
 	}
 
 	public static ResourceLocation getId(CommandContext<CommandSourceStack> commandContext, String string) {

@@ -6,6 +6,9 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import java.util.Optional;
 import java.util.stream.Stream;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunctions;
@@ -13,27 +16,20 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.level.storage.loot.predicates.LootItemConditions;
 import org.slf4j.Logger;
 
-public class LootDataType<T> {
+public record LootDataType<T>(ResourceKey<Registry<T>> registryKey, Codec<T> codec, String directory, LootDataType.Validator<T> validator) {
 	private static final Logger LOGGER = LogUtils.getLogger();
-	public static final LootDataType<LootItemCondition> PREDICATE = new LootDataType<>(LootItemConditions.CODEC, "predicates", createSimpleValidator());
-	public static final LootDataType<LootItemFunction> MODIFIER = new LootDataType<>(LootItemFunctions.CODEC, "item_modifiers", createSimpleValidator());
-	public static final LootDataType<LootTable> TABLE = new LootDataType<>(LootTable.CODEC, "loot_tables", createLootTableValidator());
-	private final Codec<T> codec;
-	private final String directory;
-	private final LootDataType.Validator<T> validator;
+	public static final LootDataType<LootItemCondition> PREDICATE = new LootDataType<>(
+		Registries.PREDICATE, LootItemConditions.DIRECT_CODEC, "predicates", createSimpleValidator()
+	);
+	public static final LootDataType<LootItemFunction> MODIFIER = new LootDataType<>(
+		Registries.ITEM_MODIFIER, LootItemFunctions.ROOT_CODEC, "item_modifiers", createSimpleValidator()
+	);
+	public static final LootDataType<LootTable> TABLE = new LootDataType<>(
+		Registries.LOOT_TABLE, LootTable.DIRECT_CODEC, "loot_tables", createLootTableValidator()
+	);
 
-	private LootDataType(Codec<T> codec, String string, LootDataType.Validator<T> validator) {
-		this.codec = codec;
-		this.directory = string;
-		this.validator = validator;
-	}
-
-	public String directory() {
-		return this.directory;
-	}
-
-	public void runValidation(ValidationContext validationContext, LootDataId<T> lootDataId, T object) {
-		this.validator.run(validationContext, lootDataId, object);
+	public void runValidation(ValidationContext validationContext, ResourceKey<T> resourceKey, T object) {
+		this.validator.run(validationContext, resourceKey, object);
 	}
 
 	public <V> Optional<T> deserialize(ResourceLocation resourceLocation, DynamicOps<V> dynamicOps, V object) {
@@ -47,19 +43,19 @@ public class LootDataType<T> {
 	}
 
 	private static <T extends LootContextUser> LootDataType.Validator<T> createSimpleValidator() {
-		return (validationContext, lootDataId, lootContextUser) -> lootContextUser.validate(
-				validationContext.enterElement("{" + lootDataId.type().directory + ":" + lootDataId.location() + "}", lootDataId)
+		return (validationContext, resourceKey, lootContextUser) -> lootContextUser.validate(
+				validationContext.enterElement("{" + resourceKey.registry() + "/" + resourceKey.location() + "}", resourceKey)
 			);
 	}
 
 	private static LootDataType.Validator<LootTable> createLootTableValidator() {
-		return (validationContext, lootDataId, lootTable) -> lootTable.validate(
-				validationContext.setParams(lootTable.getParamSet()).enterElement("{" + lootDataId.type().directory + ":" + lootDataId.location() + "}", lootDataId)
+		return (validationContext, resourceKey, lootTable) -> lootTable.validate(
+				validationContext.setParams(lootTable.getParamSet()).enterElement("{" + resourceKey.registry() + "/" + resourceKey.location() + "}", resourceKey)
 			);
 	}
 
 	@FunctionalInterface
 	public interface Validator<T> {
-		void run(ValidationContext validationContext, LootDataId<T> lootDataId, T object);
+		void run(ValidationContext validationContext, ResourceKey<T> resourceKey, T object);
 	}
 }

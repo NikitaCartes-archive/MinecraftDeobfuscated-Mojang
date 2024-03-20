@@ -26,7 +26,6 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.ProblemReporter;
 import net.minecraft.util.profiling.ProfilerFiller;
-import net.minecraft.world.level.storage.loot.LootDataManager;
 import org.slf4j.Logger;
 
 public class ServerAdvancementManager extends SimpleJsonResourceReloadListener {
@@ -35,12 +34,10 @@ public class ServerAdvancementManager extends SimpleJsonResourceReloadListener {
 	private Map<ResourceLocation, AdvancementHolder> advancements = Map.of();
 	private AdvancementTree tree = new AdvancementTree();
 	private final HolderLookup.Provider registries;
-	private final LootDataManager lootData;
 
-	public ServerAdvancementManager(HolderLookup.Provider provider, LootDataManager lootDataManager) {
+	public ServerAdvancementManager(HolderLookup.Provider provider) {
 		super(GSON, "advancements");
 		this.registries = provider;
-		this.lootData = lootDataManager;
 	}
 
 	protected void apply(Map<ResourceLocation, JsonElement> map, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
@@ -70,7 +67,7 @@ public class ServerAdvancementManager extends SimpleJsonResourceReloadListener {
 
 	private void validate(ResourceLocation resourceLocation, Advancement advancement) {
 		ProblemReporter.Collector collector = new ProblemReporter.Collector();
-		advancement.validate(collector, this.lootData);
+		advancement.validate(collector, this.registries.asGetterLookup());
 		Multimap<String, String> multimap = collector.get();
 		if (!multimap.isEmpty()) {
 			String string = (String)multimap.asMap()

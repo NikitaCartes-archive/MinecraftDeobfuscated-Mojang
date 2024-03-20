@@ -20,13 +20,15 @@ public abstract class CompositeLootItemCondition implements LootItemCondition {
 
 	protected static <T extends CompositeLootItemCondition> Codec<T> createCodec(Function<List<LootItemCondition>, T> function) {
 		return RecordCodecBuilder.create(
-			instance -> instance.group(LootItemConditions.CODEC.listOf().fieldOf("terms").forGetter(compositeLootItemCondition -> compositeLootItemCondition.terms))
+			instance -> instance.group(
+						LootItemConditions.DIRECT_CODEC.listOf().fieldOf("terms").forGetter(compositeLootItemCondition -> compositeLootItemCondition.terms)
+					)
 					.apply(instance, function)
 		);
 	}
 
 	protected static <T extends CompositeLootItemCondition> Codec<T> createInlineCodec(Function<List<LootItemCondition>, T> function) {
-		return LootItemConditions.CODEC.listOf().xmap(function, compositeLootItemCondition -> compositeLootItemCondition.terms);
+		return LootItemConditions.DIRECT_CODEC.listOf().xmap(function, compositeLootItemCondition -> compositeLootItemCondition.terms);
 	}
 
 	public final boolean test(LootContext lootContext) {

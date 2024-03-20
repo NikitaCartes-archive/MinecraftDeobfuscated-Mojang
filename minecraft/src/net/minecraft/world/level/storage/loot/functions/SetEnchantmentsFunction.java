@@ -13,6 +13,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.util.ExtraCodecs;
+import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -61,7 +62,7 @@ public class SetEnchantmentsFunction extends LootItemConditionalFunction {
 	@Override
 	public ItemStack run(ItemStack itemStack, LootContext lootContext) {
 		Object2IntMap<Enchantment> object2IntMap = new Object2IntOpenHashMap<>();
-		this.enchantments.forEach((holder, numberProvider) -> object2IntMap.put((Enchantment)holder.value(), numberProvider.getInt(lootContext)));
+		this.enchantments.forEach((holder, numberProvider) -> object2IntMap.put((Enchantment)holder.value(), Mth.clamp(numberProvider.getInt(lootContext), 0, 255)));
 		if (itemStack.is(Items.BOOK)) {
 			itemStack = itemStack.transmuteCopy(Items.ENCHANTED_BOOK, itemStack.getCount());
 			itemStack.set(DataComponents.STORED_ENCHANTMENTS, itemStack.remove(DataComponents.ENCHANTMENTS));

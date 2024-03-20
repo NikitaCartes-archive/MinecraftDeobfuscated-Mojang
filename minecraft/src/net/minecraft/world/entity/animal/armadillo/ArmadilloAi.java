@@ -5,8 +5,10 @@ import com.google.common.collect.ImmutableMap;
 import com.mojang.datafixers.util.Pair;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.util.TimeUtil;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.entity.EntityType;
@@ -34,11 +36,9 @@ import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.schedule.Activity;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.ItemStack;
 
 public class ArmadilloAi {
-	public static final Ingredient TEMPTATION_ITEM = Ingredient.of(Items.SPIDER_EYE);
 	private static final float SPEED_MULTIPLIER_WHEN_PANICKING = 2.0F;
 	private static final float SPEED_MULTIPLIER_WHEN_IDLING = 1.0F;
 	private static final float SPEED_MULTIPLIER_WHEN_TEMPTED = 1.25F;
@@ -156,8 +156,8 @@ public class ArmadilloAi {
 		armadillo.getBrain().setActiveActivityToFirstValid(ImmutableList.of(Activity.PANIC, Activity.IDLE));
 	}
 
-	public static Ingredient getTemptations() {
-		return TEMPTATION_ITEM;
+	public static Predicate<ItemStack> getTemptations() {
+		return itemStack -> itemStack.is(ItemTags.ARMADILLO_FOOD);
 	}
 
 	public static class ArmadilloBallUp extends Behavior<Armadillo> {

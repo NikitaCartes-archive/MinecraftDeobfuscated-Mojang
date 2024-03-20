@@ -96,4 +96,8 @@ public record DyedItemColor(int rgb, boolean showInTooltip) implements TooltipPr
 			}
 		}
 	}
+
+	public DyedItemColor withTooltip(boolean bl) {
+		return new DyedItemColor(this.rgb, bl);
+	}
 }

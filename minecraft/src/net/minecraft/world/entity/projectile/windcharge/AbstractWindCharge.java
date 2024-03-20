@@ -12,7 +12,6 @@ import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
 import net.minecraft.world.entity.projectile.ItemSupplier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.ExplosionDamageCalculator;
 import net.minecraft.world.level.Level;
@@ -88,15 +87,6 @@ public abstract class AbstractWindCharge extends AbstractHurtingProjectile imple
 
 	@Override
 	protected void onHit(HitResult hitResult) {
-		Level level = this.level();
-		if (hitResult.getType() == HitResult.Type.BLOCK) {
-			BlockPos blockPos = ((BlockHitResult)hitResult).getBlockPos();
-			BlockState blockState = level.getBlockState(blockPos);
-			if (!blockState.isCollisionShapeFullBlock(level, blockPos)) {
-				return;
-			}
-		}
-
 		super.onHit(hitResult);
 		if (!this.level().isClientSide && !this.isDeflected) {
 			this.discard();
@@ -129,11 +119,6 @@ public abstract class AbstractWindCharge extends AbstractHurtingProjectile imple
 	@Override
 	protected ParticleOptions getTrailParticle() {
 		return null;
-	}
-
-	@Override
-	protected ClipContext.Block getClipType() {
-		return ClipContext.Block.OUTLINE;
 	}
 
 	@Override

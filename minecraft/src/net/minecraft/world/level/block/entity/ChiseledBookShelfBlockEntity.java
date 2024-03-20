@@ -118,8 +118,7 @@ public class ChiseledBookShelfBlockEntity extends BlockEntity implements Contain
 		return container.hasAnyMatching(
 			itemStack2 -> itemStack2.isEmpty()
 					? true
-					: ItemStack.isSameItemSameComponents(itemStack, itemStack2)
-						&& itemStack2.getCount() + itemStack.getCount() <= Math.min(itemStack2.getMaxStackSize(), container.getMaxStackSize())
+					: ItemStack.isSameItemSameComponents(itemStack, itemStack2) && itemStack2.getCount() + itemStack.getCount() <= container.getMaxStackSize(itemStack2)
 		);
 	}
 

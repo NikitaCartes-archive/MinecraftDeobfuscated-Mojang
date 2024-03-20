@@ -1,11 +1,12 @@
 package net.minecraft.world.item.crafting;
 
-import com.google.common.collect.Lists;
-import java.util.List;
-import net.minecraft.core.RegistryAccess;
+import com.mojang.datafixers.util.Pair;
+import javax.annotation.Nullable;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.inventory.CraftingContainer;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
@@ -17,71 +18,70 @@ public class RepairItemRecipe extends CustomRecipe {
 		super(craftingBookCategory);
 	}
 
-	public boolean matches(CraftingContainer craftingContainer, Level level) {
-		List<ItemStack> list = Lists.<ItemStack>newArrayList();
+	@Nullable
+	private Pair<ItemStack, ItemStack> getItemsToCombine(CraftingContainer craftingContainer) {
+		ItemStack itemStack = null;
+		ItemStack itemStack2 = null;
 
 		for (int i = 0; i < craftingContainer.getContainerSize(); i++) {
-			ItemStack itemStack = craftingContainer.getItem(i);
-			if (!itemStack.isEmpty()) {
-				list.add(itemStack);
-				if (list.size() > 1) {
-					ItemStack itemStack2 = (ItemStack)list.get(0);
-					if (!itemStack.is(itemStack2.getItem()) || itemStack2.getCount() != 1 || itemStack.getCount() != 1 || !itemStack2.getItem().canBeDepleted()) {
-						return false;
+			ItemStack itemStack3 = craftingContainer.getItem(i);
+			if (!itemStack3.isEmpty()) {
+				if (itemStack == null) {
+					itemStack = itemStack3;
+				} else {
+					if (itemStack2 != null) {
+						return null;
 					}
+
+					itemStack2 = itemStack3;
 				}
 			}
 		}
 
-		return list.size() == 2;
+		return itemStack != null && itemStack2 != null && canCombine(itemStack, itemStack2) ? Pair.of(itemStack, itemStack2) : null;
 	}
 
-	public ItemStack assemble(CraftingContainer craftingContainer, RegistryAccess registryAccess) {
-		List<ItemStack> list = Lists.<ItemStack>newArrayList();
+	private static boolean canCombine(ItemStack itemStack, ItemStack itemStack2) {
+		return itemStack2.is(itemStack.getItem())
+			&& itemStack.getCount() == 1
+			&& itemStack2.getCount() == 1
+			&& itemStack.has(DataComponents.MAX_DAMAGE)
+			&& itemStack2.has(DataComponents.MAX_DAMAGE)
+			&& itemStack.has(DataComponents.DAMAGE)
+			&& itemStack2.has(DataComponents.DAMAGE);
+	}
 
-		for (int i = 0; i < craftingContainer.getContainerSize(); i++) {
-			ItemStack itemStack = craftingContainer.getItem(i);
-			if (!itemStack.isEmpty()) {
-				list.add(itemStack);
-				if (list.size() > 1) {
-					ItemStack itemStack2 = (ItemStack)list.get(0);
-					if (!itemStack.is(itemStack2.getItem()) || itemStack2.getCount() != 1 || itemStack.getCount() != 1 || !itemStack2.getItem().canBeDepleted()) {
-						return ItemStack.EMPTY;
-					}
-				}
-			}
+	public boolean matches(CraftingContainer craftingContainer, Level level) {
+		return this.getItemsToCombine(craftingContainer) != null;
+	}
+
+	public ItemStack assemble(CraftingContainer craftingContainer, HolderLookup.Provider provider) {
+		Pair<ItemStack, ItemStack> pair = this.getItemsToCombine(craftingContainer);
+		if (pair == null) {
+			return ItemStack.EMPTY;
+		} else {
+			ItemStack itemStack = pair.getFirst();
+			ItemStack itemStack2 = pair.getSecond();
+			int i = Math.max(itemStack.getMaxDamage(), itemStack2.getMaxDamage());
+			int j = itemStack.getMaxDamage() - itemStack.getDamageValue();
+			int k = itemStack2.getMaxDamage() - itemStack2.getDamageValue();
+			int l = j + k + i * 5 / 100;
+			ItemStack itemStack3 = new ItemStack(itemStack.getItem());
+			itemStack3.set(DataComponents.MAX_DAMAGE, i);
+			itemStack3.setDamageValue(Math.max(i - l, 0));
+			ItemEnchantments itemEnchantments = EnchantmentHelper.getEnchantmentsForCrafting(itemStack);
+			ItemEnchantments itemEnchantments2 = EnchantmentHelper.getEnchantmentsForCrafting(itemStack2);
+			EnchantmentHelper.updateEnchantments(
+				itemStack3,
+				mutable -> provider.lookupOrThrow(Registries.ENCHANTMENT).listElements().map(Holder::value).filter(Enchantment::isCurse).forEach(enchantment -> {
+						int ix = Math.max(itemEnchantments.getLevel(enchantment), itemEnchantments2.getLevel(enchantment));
+						if (ix > 0) {
+							mutable.upgrade(enchantment, ix);
+						}
+					})
+			);
+			return itemStack3;
 		}
-
-		if (list.size() == 2) {
-			ItemStack itemStack3 = (ItemStack)list.get(0);
-			ItemStack itemStack = (ItemStack)list.get(1);
-			if (itemStack3.is(itemStack.getItem()) && itemStack3.getCount() == 1 && itemStack.getCount() == 1 && itemStack3.getItem().canBeDepleted()) {
-				Item item = itemStack3.getItem();
-				int j = item.getMaxDamage() - itemStack3.getDamageValue();
-				int k = item.getMaxDamage() - itemStack.getDamageValue();
-				int l = j + k + item.getMaxDamage() * 5 / 100;
-				int m = item.getMaxDamage() - l;
-				if (m < 0) {
-					m = 0;
-				}
-
-				ItemStack itemStack4 = new ItemStack(itemStack3.getItem());
-				itemStack4.setDamageValue(m);
-				ItemEnchantments itemEnchantments = EnchantmentHelper.getEnchantmentsForCrafting(itemStack3);
-				ItemEnchantments itemEnchantments2 = EnchantmentHelper.getEnchantmentsForCrafting(itemStack);
-				EnchantmentHelper.updateEnchantments(
-					itemStack4, mutable -> registryAccess.registryOrThrow(Registries.ENCHANTMENT).stream().filter(Enchantment::isCurse).forEach(enchantment -> {
-							int ix = Math.max(itemEnchantments.getLevel(enchantment), itemEnchantments2.getLevel(enchantment));
-							if (ix > 0) {
-								mutable.upgrade(enchantment, ix);
-							}
-						})
-				);
-				return itemStack4;
-			}
-		}
-
-		return ItemStack.EMPTY;
 	}
 
 	@Override

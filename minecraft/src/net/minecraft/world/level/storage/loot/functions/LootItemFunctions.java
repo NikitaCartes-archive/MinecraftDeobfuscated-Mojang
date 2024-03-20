@@ -3,8 +3,11 @@ package net.minecraft.world.level.storage.loot.functions;
 import com.mojang.serialization.Codec;
 import java.util.List;
 import java.util.function.BiFunction;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.RegistryFileCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.ItemStack;
@@ -12,12 +15,13 @@ import net.minecraft.world.level.storage.loot.LootContext;
 
 public class LootItemFunctions {
 	public static final BiFunction<ItemStack, LootContext, ItemStack> IDENTITY = (itemStack, lootContext) -> itemStack;
-	private static final Codec<LootItemFunction> TYPED_CODEC = BuiltInRegistries.LOOT_FUNCTION_TYPE
+	public static final Codec<LootItemFunction> TYPED_CODEC = BuiltInRegistries.LOOT_FUNCTION_TYPE
 		.byNameCodec()
 		.dispatch("function", LootItemFunction::getType, LootItemFunctionType::codec);
-	public static final Codec<LootItemFunction> CODEC = ExtraCodecs.lazyInitializedCodec(
+	public static final Codec<LootItemFunction> ROOT_CODEC = ExtraCodecs.lazyInitializedCodec(
 		() -> ExtraCodecs.withAlternative(TYPED_CODEC, SequenceFunction.INLINE_CODEC)
 	);
+	public static final Codec<Holder<LootItemFunction>> CODEC = RegistryFileCodec.create(Registries.ITEM_MODIFIER, ROOT_CODEC);
 	public static final LootItemFunctionType SET_COUNT = register("set_count", SetItemCountFunction.CODEC);
 	public static final LootItemFunctionType ENCHANT_WITH_LEVELS = register("enchant_with_levels", EnchantWithLevelsFunction.CODEC);
 	public static final LootItemFunctionType ENCHANT_RANDOMLY = register("enchant_randomly", EnchantRandomlyFunction.CODEC);
@@ -52,6 +56,7 @@ public class LootItemFunctions {
 	public static final LootItemFunctionType SET_BOOK_COVER = register("set_book_cover", SetBookCoverFunction.CODEC);
 	public static final LootItemFunctionType SET_WRITTEN_BOOK_PAGES = register("set_written_book_pages", SetWrittenBookPagesFunction.CODEC);
 	public static final LootItemFunctionType SET_WRITABLE_BOOK_PAGES = register("set_writable_book_pages", SetWritableBookPagesFunction.CODEC);
+	public static final LootItemFunctionType TOGGLE_TOOLTIPS = register("toggle_tooltips", ToggleTooltips.CODEC);
 
 	private static LootItemFunctionType register(String string, Codec<? extends LootItemFunction> codec) {
 		return Registry.register(BuiltInRegistries.LOOT_FUNCTION_TYPE, new ResourceLocation(string), new LootItemFunctionType(codec));

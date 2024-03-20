@@ -64,7 +64,6 @@ import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.entity.ai.village.poi.PoiRecord;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
@@ -161,7 +160,7 @@ public class Bee extends Animal implements NeutralMob, FlyingAnimal {
 		this.goalSelector.addGoal(0, new Bee.BeeAttackGoal(this, 1.4F, true));
 		this.goalSelector.addGoal(1, new Bee.BeeEnterHiveGoal());
 		this.goalSelector.addGoal(2, new BreedGoal(this, 1.0));
-		this.goalSelector.addGoal(3, new TemptGoal(this, 1.25, Ingredient.of(ItemTags.FLOWERS), false));
+		this.goalSelector.addGoal(3, new TemptGoal(this, 1.25, itemStack -> itemStack.is(ItemTags.BEE_FOOD), false));
 		this.beePollinateGoal = new Bee.BeePollinateGoal();
 		this.goalSelector.addGoal(4, this.beePollinateGoal);
 		this.goalSelector.addGoal(5, new FollowParentGoal(this, 1.25));
@@ -552,7 +551,7 @@ public class Bee extends Animal implements NeutralMob, FlyingAnimal {
 
 	@Override
 	public boolean isFood(ItemStack itemStack) {
-		return itemStack.is(ItemTags.FLOWERS);
+		return itemStack.is(ItemTags.BEE_FOOD);
 	}
 
 	boolean isFlowerValid(BlockPos blockPos) {

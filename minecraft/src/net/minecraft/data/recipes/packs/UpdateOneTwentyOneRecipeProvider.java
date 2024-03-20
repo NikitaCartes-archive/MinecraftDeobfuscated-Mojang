@@ -106,10 +106,10 @@ public class UpdateOneTwentyOneRecipeProvider extends RecipeProvider {
 			.unlockedBy("has_breeze_rod", has(Items.BREEZE_ROD))
 			.save(recipeOutput);
 		ShapedRecipeBuilder.shaped(RecipeCategory.COMBAT, Items.MACE, 1)
-			.define('A', Items.BREEZE_ROD)
-			.define('B', Blocks.HEAVY_CORE)
-			.pattern(" B ")
-			.pattern(" A ")
+			.define('I', Items.BREEZE_ROD)
+			.define('#', Blocks.HEAVY_CORE)
+			.pattern(" # ")
+			.pattern(" I ")
 			.unlockedBy("has_breeze_rod", has(Items.BREEZE_ROD))
 			.unlockedBy("has_heavy_core", has(Blocks.HEAVY_CORE))
 			.save(recipeOutput);

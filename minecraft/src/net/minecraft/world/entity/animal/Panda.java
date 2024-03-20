@@ -15,6 +15,7 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.util.ByIdMap;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
@@ -56,7 +57,6 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
@@ -269,7 +269,7 @@ public class Panda extends Animal {
 		this.goalSelector.addGoal(2, new Panda.PandaPanicGoal(this, 2.0));
 		this.goalSelector.addGoal(2, new Panda.PandaBreedGoal(this, 1.0));
 		this.goalSelector.addGoal(3, new Panda.PandaAttackGoal(this, 1.2F, true));
-		this.goalSelector.addGoal(4, new TemptGoal(this, 1.0, Ingredient.of(Blocks.BAMBOO.asItem()), false));
+		this.goalSelector.addGoal(4, new TemptGoal(this, 1.0, itemStack -> itemStack.is(ItemTags.PANDA_FOOD), false));
 		this.goalSelector.addGoal(6, new Panda.PandaAvoidGoal(this, Player.class, 8.0F, 2.0, 2.0));
 		this.goalSelector.addGoal(6, new Panda.PandaAvoidGoal(this, Monster.class, 4.0F, 2.0, 2.0));
 		this.goalSelector.addGoal(7, new Panda.PandaSitGoal());
@@ -521,7 +521,7 @@ public class Panda extends Animal {
 
 		if (!level.isClientSide() && level.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
 			ServerLevel serverLevel = (ServerLevel)level;
-			LootTable lootTable = serverLevel.getServer().getLootData().getLootTable(BuiltInLootTables.PANDA_SNEEZE);
+			LootTable lootTable = serverLevel.getServer().reloadableRegistries().getLootTable(BuiltInLootTables.PANDA_SNEEZE);
 			LootParams lootParams = new LootParams.Builder(serverLevel)
 				.withParameter(LootContextParams.ORIGIN, this.position())
 				.withParameter(LootContextParams.THIS_ENTITY, this)
@@ -676,7 +676,7 @@ public class Panda extends Animal {
 
 	@Override
 	public boolean isFood(ItemStack itemStack) {
-		return itemStack.is(Blocks.BAMBOO.asItem());
+		return itemStack.is(ItemTags.PANDA_FOOD);
 	}
 
 	private boolean isFoodOrCake(ItemStack itemStack) {

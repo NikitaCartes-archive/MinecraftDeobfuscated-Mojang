@@ -40,7 +40,7 @@ public class RealmsPlayerScreen extends RealmsScreen {
 	private final RealmsConfigureWorldScreen lastScreen;
 	final RealmsServer serverData;
 	@Nullable
-	RealmsPlayerScreen.InvitedObjectSelectionList invitedList;
+	private RealmsPlayerScreen.InvitedObjectSelectionList invitedList;
 	boolean stateChanged;
 
 	public RealmsPlayerScreen(RealmsConfigureWorldScreen realmsConfigureWorldScreen, RealmsServer realmsServer) {
@@ -53,11 +53,7 @@ public class RealmsPlayerScreen extends RealmsScreen {
 	public void init() {
 		this.layout.addTitleHeader(TITLE, this.font);
 		this.invitedList = this.layout.addToContents(new RealmsPlayerScreen.InvitedObjectSelectionList());
-
-		for (PlayerInfo playerInfo : this.serverData.players) {
-			this.invitedList.children().add(new RealmsPlayerScreen.Entry(playerInfo));
-		}
-
+		this.repopulateInvitedList();
 		LinearLayout linearLayout = this.layout.addToFooter(LinearLayout.horizontal().spacing(8));
 		linearLayout.addChild(
 			Button.builder(
@@ -78,6 +74,16 @@ public class RealmsPlayerScreen extends RealmsScreen {
 		this.layout.arrangeElements();
 		if (this.invitedList != null) {
 			this.invitedList.updateSize(this.width, this.layout);
+		}
+	}
+
+	void repopulateInvitedList() {
+		if (this.invitedList != null) {
+			this.invitedList.children().clear();
+
+			for (PlayerInfo playerInfo : this.serverData.players) {
+				this.invitedList.children().add(new RealmsPlayerScreen.Entry(playerInfo));
+			}
 		}
 	}
 
@@ -184,13 +190,11 @@ public class RealmsPlayerScreen extends RealmsScreen {
 						}
 
 						RealmsPlayerScreen.this.serverData.players.remove(i);
+						RealmsPlayerScreen.this.repopulateInvitedList();
 					}
 
 					RealmsPlayerScreen.this.stateChanged = true;
 					RealmsPlayerScreen.this.minecraft.setScreen(RealmsPlayerScreen.this);
-					if (RealmsPlayerScreen.this.invitedList != null) {
-						RealmsPlayerScreen.this.invitedList.children().remove(this);
-					}
 				}, RealmsPlayerScreen.QUESTION_TITLE, Component.translatable("mco.configure.world.uninvite.player", playerInfo.getName()));
 				RealmsPlayerScreen.this.minecraft.setScreen(realmsConfirmScreen);
 			}

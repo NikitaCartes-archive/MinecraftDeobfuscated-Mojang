@@ -3,7 +3,9 @@ package net.minecraft.world;
 import javax.annotation.Nullable;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -22,12 +24,12 @@ public interface RandomizableContainer extends Container {
 	String LOOT_TABLE_SEED_TAG = "LootTableSeed";
 
 	@Nullable
-	ResourceLocation getLootTable();
+	ResourceKey<LootTable> getLootTable();
 
-	void setLootTable(@Nullable ResourceLocation resourceLocation);
+	void setLootTable(@Nullable ResourceKey<LootTable> resourceKey);
 
-	default void setLootTable(ResourceLocation resourceLocation, long l) {
-		this.setLootTable(resourceLocation);
+	default void setLootTable(ResourceKey<LootTable> resourceKey, long l) {
+		this.setLootTable(resourceKey);
 		this.setLootTableSeed(l);
 	}
 
@@ -40,15 +42,15 @@ public interface RandomizableContainer extends Container {
 	@Nullable
 	Level getLevel();
 
-	static void setBlockEntityLootTable(BlockGetter blockGetter, RandomSource randomSource, BlockPos blockPos, ResourceLocation resourceLocation) {
+	static void setBlockEntityLootTable(BlockGetter blockGetter, RandomSource randomSource, BlockPos blockPos, ResourceKey<LootTable> resourceKey) {
 		if (blockGetter.getBlockEntity(blockPos) instanceof RandomizableContainer randomizableContainer) {
-			randomizableContainer.setLootTable(resourceLocation, randomSource.nextLong());
+			randomizableContainer.setLootTable(resourceKey, randomSource.nextLong());
 		}
 	}
 
 	default boolean tryLoadLootTable(CompoundTag compoundTag) {
 		if (compoundTag.contains("LootTable", 8)) {
-			this.setLootTable(new ResourceLocation(compoundTag.getString("LootTable")));
+			this.setLootTable(ResourceKey.create(Registries.LOOT_TABLE, new ResourceLocation(compoundTag.getString("LootTable"))));
 			if (compoundTag.contains("LootTableSeed", 4)) {
 				this.setLootTableSeed(compoundTag.getLong("LootTableSeed"));
 			} else {
@@ -62,11 +64,11 @@ public interface RandomizableContainer extends Container {
 	}
 
 	default boolean trySaveLootTable(CompoundTag compoundTag) {
-		ResourceLocation resourceLocation = this.getLootTable();
-		if (resourceLocation == null) {
+		ResourceKey<LootTable> resourceKey = this.getLootTable();
+		if (resourceKey == null) {
 			return false;
 		} else {
-			compoundTag.putString("LootTable", resourceLocation.toString());
+			compoundTag.putString("LootTable", resourceKey.location().toString());
 			long l = this.getLootTableSeed();
 			if (l != 0L) {
 				compoundTag.putLong("LootTableSeed", l);
@@ -79,11 +81,11 @@ public interface RandomizableContainer extends Container {
 	default void unpackLootTable(@Nullable Player player) {
 		Level level = this.getLevel();
 		BlockPos blockPos = this.getBlockPos();
-		ResourceLocation resourceLocation = this.getLootTable();
-		if (resourceLocation != null && level != null && level.getServer() != null) {
-			LootTable lootTable = level.getServer().getLootData().getLootTable(resourceLocation);
+		ResourceKey<LootTable> resourceKey = this.getLootTable();
+		if (resourceKey != null && level != null && level.getServer() != null) {
+			LootTable lootTable = level.getServer().reloadableRegistries().getLootTable(resourceKey);
 			if (player instanceof ServerPlayer) {
-				CriteriaTriggers.GENERATE_LOOT.trigger((ServerPlayer)player, resourceLocation);
+				CriteriaTriggers.GENERATE_LOOT.trigger((ServerPlayer)player, resourceKey);
 			}
 
 			this.setLootTable(null);

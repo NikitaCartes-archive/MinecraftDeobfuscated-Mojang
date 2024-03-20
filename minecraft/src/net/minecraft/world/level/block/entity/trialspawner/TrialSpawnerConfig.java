@@ -3,10 +3,12 @@ package net.minecraft.world.level.block.entity.trialspawner;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.random.SimpleWeightedRandomList;
 import net.minecraft.world.level.SpawnData;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
+import net.minecraft.world.level.storage.loot.LootTable;
 
 public record TrialSpawnerConfig(
 	int requiredPlayerRange,
@@ -18,9 +20,9 @@ public record TrialSpawnerConfig(
 	int ticksBetweenSpawn,
 	int targetCooldownLength,
 	SimpleWeightedRandomList<SpawnData> spawnPotentialsDefinition,
-	SimpleWeightedRandomList<ResourceLocation> lootTablesToEject
+	SimpleWeightedRandomList<ResourceKey<LootTable>> lootTablesToEject
 ) {
-	public static TrialSpawnerConfig DEFAULT = new TrialSpawnerConfig(
+	public static final TrialSpawnerConfig DEFAULT = new TrialSpawnerConfig(
 		14,
 		4,
 		6.0F,
@@ -30,12 +32,12 @@ public record TrialSpawnerConfig(
 		40,
 		36000,
 		SimpleWeightedRandomList.empty(),
-		SimpleWeightedRandomList.<ResourceLocation>builder()
+		SimpleWeightedRandomList.<ResourceKey<LootTable>>builder()
 			.add(BuiltInLootTables.SPAWNER_TRIAL_CHAMBER_CONSUMABLES)
 			.add(BuiltInLootTables.SPAWNER_TRIAL_CHAMBER_KEY)
 			.build()
 	);
-	public static MapCodec<TrialSpawnerConfig> MAP_CODEC = RecordCodecBuilder.mapCodec(
+	public static final MapCodec<TrialSpawnerConfig> MAP_CODEC = RecordCodecBuilder.mapCodec(
 		instance -> instance.group(
 					Codec.intRange(1, 128).optionalFieldOf("required_player_range", DEFAULT.requiredPlayerRange).forGetter(TrialSpawnerConfig::requiredPlayerRange),
 					Codec.intRange(1, 128).optionalFieldOf("spawn_range", DEFAULT.spawnRange).forGetter(TrialSpawnerConfig::spawnRange),
@@ -52,7 +54,7 @@ public record TrialSpawnerConfig(
 						.optionalFieldOf("target_cooldown_length", DEFAULT.targetCooldownLength)
 						.forGetter(TrialSpawnerConfig::targetCooldownLength),
 					SpawnData.LIST_CODEC.optionalFieldOf("spawn_potentials", SimpleWeightedRandomList.empty()).forGetter(TrialSpawnerConfig::spawnPotentialsDefinition),
-					SimpleWeightedRandomList.wrappedCodecAllowingEmpty(ResourceLocation.CODEC)
+					SimpleWeightedRandomList.wrappedCodecAllowingEmpty(ResourceKey.codec(Registries.LOOT_TABLE))
 						.optionalFieldOf("loot_tables_to_eject", DEFAULT.lootTablesToEject)
 						.forGetter(TrialSpawnerConfig::lootTablesToEject)
 				)

@@ -141,7 +141,8 @@ public class TransferableSelectionList extends ObjectSelectionList<TransferableS
 		public void render(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
 			PackCompatibility packCompatibility = this.pack.getCompatibility();
 			if (!packCompatibility.isCompatible()) {
-				guiGraphics.fill(k - 1, j - 1, k + l - 3, j + m + 1, -8978432);
+				int p = k + l - 3 - (this.parent.scrollbarVisible() ? 7 : 0);
+				guiGraphics.fill(k - 1, j - 1, p, j + m + 1, -8978432);
 			}
 
 			guiGraphics.blit(this.pack.getIconTexture(), k, j, 0.0F, 0.0F, 32, 32, 32, 32);
@@ -149,22 +150,22 @@ public class TransferableSelectionList extends ObjectSelectionList<TransferableS
 			MultiLineLabel multiLineLabel = this.descriptionDisplayCache;
 			if (this.showHoverOverlay() && (this.minecraft.options.touchscreen().get() || bl || this.parent.getSelected() == this && this.parent.isFocused())) {
 				guiGraphics.fill(k, j, k + 32, j + 32, -1601138544);
-				int p = n - k;
-				int q = o - j;
+				int q = n - k;
+				int r = o - j;
 				if (!this.pack.getCompatibility().isCompatible()) {
 					formattedCharSequence = this.incompatibleNameDisplayCache;
 					multiLineLabel = this.incompatibleDescriptionDisplayCache;
 				}
 
 				if (this.pack.canSelect()) {
-					if (p < 32) {
+					if (q < 32) {
 						guiGraphics.blitSprite(TransferableSelectionList.SELECT_HIGHLIGHTED_SPRITE, k, j, 32, 32);
 					} else {
 						guiGraphics.blitSprite(TransferableSelectionList.SELECT_SPRITE, k, j, 32, 32);
 					}
 				} else {
 					if (this.pack.canUnselect()) {
-						if (p < 16) {
+						if (q < 16) {
 							guiGraphics.blitSprite(TransferableSelectionList.UNSELECT_HIGHLIGHTED_SPRITE, k, j, 32, 32);
 						} else {
 							guiGraphics.blitSprite(TransferableSelectionList.UNSELECT_SPRITE, k, j, 32, 32);
@@ -172,7 +173,7 @@ public class TransferableSelectionList extends ObjectSelectionList<TransferableS
 					}
 
 					if (this.pack.canMoveUp()) {
-						if (p < 32 && p > 16 && q < 16) {
+						if (q < 32 && q > 16 && r < 16) {
 							guiGraphics.blitSprite(TransferableSelectionList.MOVE_UP_HIGHLIGHTED_SPRITE, k, j, 32, 32);
 						} else {
 							guiGraphics.blitSprite(TransferableSelectionList.MOVE_UP_SPRITE, k, j, 32, 32);
@@ -180,7 +181,7 @@ public class TransferableSelectionList extends ObjectSelectionList<TransferableS
 					}
 
 					if (this.pack.canMoveDown()) {
-						if (p < 32 && p > 16 && q > 16) {
+						if (q < 32 && q > 16 && r > 16) {
 							guiGraphics.blitSprite(TransferableSelectionList.MOVE_DOWN_HIGHLIGHTED_SPRITE, k, j, 32, 32);
 						} else {
 							guiGraphics.blitSprite(TransferableSelectionList.MOVE_DOWN_SPRITE, k, j, 32, 32);

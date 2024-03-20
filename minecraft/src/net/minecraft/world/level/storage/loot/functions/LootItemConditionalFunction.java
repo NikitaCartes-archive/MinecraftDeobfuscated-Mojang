@@ -27,7 +27,7 @@ public abstract class LootItemConditionalFunction implements LootItemFunction {
 
 	protected static <T extends LootItemConditionalFunction> P1<Mu<T>, List<LootItemCondition>> commonFields(Instance<T> instance) {
 		return instance.group(
-			ExtraCodecs.strictOptionalField(LootItemConditions.CODEC.listOf(), "conditions", List.of())
+			ExtraCodecs.strictOptionalField(LootItemConditions.DIRECT_CODEC.listOf(), "conditions", List.of())
 				.forGetter(lootItemConditionalFunction -> lootItemConditionalFunction.predicates)
 		);
 	}

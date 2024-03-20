@@ -7,6 +7,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.util.Mth;
 import net.minecraft.util.StringUtil;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -112,30 +113,31 @@ public class AnvilMenu extends ItemCombinerMenu {
 		ItemStack itemStack = this.inputSlots.getItem(0);
 		this.cost.set(1);
 		int i = 0;
+		long l = 0L;
 		int j = 0;
-		int k = 0;
 		if (!itemStack.isEmpty() && EnchantmentHelper.canStoreEnchantments(itemStack)) {
 			ItemStack itemStack2 = itemStack.copy();
 			ItemStack itemStack3 = this.inputSlots.getItem(1);
 			ItemEnchantments.Mutable mutable = new ItemEnchantments.Mutable(EnchantmentHelper.getEnchantmentsForCrafting(itemStack2));
-			j += itemStack.getOrDefault(DataComponents.REPAIR_COST, Integer.valueOf(0)) + itemStack3.getOrDefault(DataComponents.REPAIR_COST, Integer.valueOf(0));
+			l += (long)itemStack.getOrDefault(DataComponents.REPAIR_COST, Integer.valueOf(0)).intValue()
+				+ (long)itemStack3.getOrDefault(DataComponents.REPAIR_COST, Integer.valueOf(0)).intValue();
 			this.repairItemCountCost = 0;
 			if (!itemStack3.isEmpty()) {
 				boolean bl = itemStack3.has(DataComponents.STORED_ENCHANTMENTS);
 				if (itemStack2.isDamageableItem() && itemStack2.getItem().isValidRepairItem(itemStack, itemStack3)) {
-					int l = Math.min(itemStack2.getDamageValue(), itemStack2.getMaxDamage() / 4);
-					if (l <= 0) {
+					int k = Math.min(itemStack2.getDamageValue(), itemStack2.getMaxDamage() / 4);
+					if (k <= 0) {
 						this.resultSlots.setItem(0, ItemStack.EMPTY);
 						this.cost.set(0);
 						return;
 					}
 
 					int m;
-					for (m = 0; l > 0 && m < itemStack3.getCount(); m++) {
-						int n = itemStack2.getDamageValue() - l;
+					for (m = 0; k > 0 && m < itemStack3.getCount(); m++) {
+						int n = itemStack2.getDamageValue() - k;
 						itemStack2.setDamageValue(n);
 						i++;
-						l = Math.min(itemStack2.getDamageValue(), itemStack2.getMaxDamage() / 4);
+						k = Math.min(itemStack2.getDamageValue(), itemStack2.getMaxDamage() / 4);
 					}
 
 					this.repairItemCountCost = m;
@@ -147,10 +149,10 @@ public class AnvilMenu extends ItemCombinerMenu {
 					}
 
 					if (itemStack2.isDamageableItem() && !bl) {
-						int lx = itemStack.getMaxDamage() - itemStack.getDamageValue();
+						int kx = itemStack.getMaxDamage() - itemStack.getDamageValue();
 						int m = itemStack3.getMaxDamage() - itemStack3.getDamageValue();
 						int n = m + itemStack2.getMaxDamage() * 12 / 100;
-						int o = lx + n;
+						int o = kx + n;
 						int p = itemStack2.getMaxDamage() - o;
 						if (p < 0) {
 							p = 0;
@@ -193,13 +195,7 @@ public class AnvilMenu extends ItemCombinerMenu {
 							}
 
 							mutable.set(enchantment, r);
-
-							int s = switch (enchantment.getRarity()) {
-								case COMMON -> 1;
-								case UNCOMMON -> 2;
-								case RARE -> 4;
-								case VERY_RARE -> 8;
-							};
+							int s = enchantment.getAnvilCost();
 							if (bl) {
 								s = Math.max(1, s / 2);
 							}
@@ -221,22 +217,23 @@ public class AnvilMenu extends ItemCombinerMenu {
 
 			if (this.itemName != null && !StringUtil.isBlank(this.itemName)) {
 				if (!this.itemName.equals(itemStack.getHoverName().getString())) {
-					k = 1;
-					i += k;
+					j = 1;
+					i += j;
 					itemStack2.set(DataComponents.CUSTOM_NAME, Component.literal(this.itemName));
 				}
 			} else if (itemStack.has(DataComponents.CUSTOM_NAME)) {
-				k = 1;
-				i += k;
+				j = 1;
+				i += j;
 				itemStack2.remove(DataComponents.CUSTOM_NAME);
 			}
 
-			this.cost.set(j + i);
+			int t = (int)Mth.clamp(l + (long)i, 0L, 2147483647L);
+			this.cost.set(t);
 			if (i <= 0) {
 				itemStack2 = ItemStack.EMPTY;
 			}
 
-			if (k == i && k > 0 && this.cost.get() >= 40) {
+			if (j == i && j > 0 && this.cost.get() >= 40) {
 				this.cost.set(39);
 			}
 
@@ -245,16 +242,16 @@ public class AnvilMenu extends ItemCombinerMenu {
 			}
 
 			if (!itemStack2.isEmpty()) {
-				int t = itemStack2.getOrDefault(DataComponents.REPAIR_COST, Integer.valueOf(0));
-				if (t < itemStack3.getOrDefault(DataComponents.REPAIR_COST, Integer.valueOf(0))) {
-					t = itemStack3.getOrDefault(DataComponents.REPAIR_COST, Integer.valueOf(0));
+				int kxx = itemStack2.getOrDefault(DataComponents.REPAIR_COST, Integer.valueOf(0));
+				if (kxx < itemStack3.getOrDefault(DataComponents.REPAIR_COST, Integer.valueOf(0))) {
+					kxx = itemStack3.getOrDefault(DataComponents.REPAIR_COST, Integer.valueOf(0));
 				}
 
-				if (k != i || k == 0) {
-					t = calculateIncreasedRepairCost(t);
+				if (j != i || j == 0) {
+					kxx = calculateIncreasedRepairCost(kxx);
 				}
 
-				itemStack2.set(DataComponents.REPAIR_COST, t);
+				itemStack2.set(DataComponents.REPAIR_COST, kxx);
 				EnchantmentHelper.setEnchantments(itemStack2, mutable.toImmutable());
 			}
 
@@ -267,7 +264,7 @@ public class AnvilMenu extends ItemCombinerMenu {
 	}
 
 	public static int calculateIncreasedRepairCost(int i) {
-		return i * 2 + 1;
+		return (int)Math.min((long)i * 2L + 1L, 2147483647L);
 	}
 
 	public boolean setItemName(String string) {

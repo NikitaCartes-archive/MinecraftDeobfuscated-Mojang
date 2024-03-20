@@ -2,10 +2,8 @@ package net.minecraft.world.level.storage.loot.functions;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import java.util.Set;
@@ -99,7 +97,7 @@ public class CopyCustomDataFunction extends LootItemConditionalFunction {
 
 		public CopyCustomDataFunction.Builder copy(String string, String string2, CopyCustomDataFunction.MergeStrategy mergeStrategy) {
 			try {
-				this.ops.add(new CopyCustomDataFunction.CopyOperation(CopyCustomDataFunction.Path.of(string), CopyCustomDataFunction.Path.of(string2), mergeStrategy));
+				this.ops.add(new CopyCustomDataFunction.CopyOperation(NbtPathArgument.NbtPath.of(string), NbtPathArgument.NbtPath.of(string2), mergeStrategy));
 				return this;
 			} catch (CommandSyntaxException var5) {
 				throw new IllegalArgumentException(var5);
@@ -120,11 +118,11 @@ public class CopyCustomDataFunction extends LootItemConditionalFunction {
 		}
 	}
 
-	static record CopyOperation(CopyCustomDataFunction.Path sourcePath, CopyCustomDataFunction.Path targetPath, CopyCustomDataFunction.MergeStrategy op) {
+	static record CopyOperation(NbtPathArgument.NbtPath sourcePath, NbtPathArgument.NbtPath targetPath, CopyCustomDataFunction.MergeStrategy op) {
 		public static final Codec<CopyCustomDataFunction.CopyOperation> CODEC = RecordCodecBuilder.create(
 			instance -> instance.group(
-						CopyCustomDataFunction.Path.CODEC.fieldOf("source").forGetter(CopyCustomDataFunction.CopyOperation::sourcePath),
-						CopyCustomDataFunction.Path.CODEC.fieldOf("target").forGetter(CopyCustomDataFunction.CopyOperation::targetPath),
+						NbtPathArgument.NbtPath.CODEC.fieldOf("source").forGetter(CopyCustomDataFunction.CopyOperation::sourcePath),
+						NbtPathArgument.NbtPath.CODEC.fieldOf("target").forGetter(CopyCustomDataFunction.CopyOperation::targetPath),
 						CopyCustomDataFunction.MergeStrategy.CODEC.fieldOf("op").forGetter(CopyCustomDataFunction.CopyOperation::op)
 					)
 					.apply(instance, CopyCustomDataFunction.CopyOperation::new)
@@ -132,9 +130,9 @@ public class CopyCustomDataFunction extends LootItemConditionalFunction {
 
 		public void apply(Supplier<Tag> supplier, Tag tag) {
 			try {
-				List<Tag> list = this.sourcePath.path().get(tag);
+				List<Tag> list = this.sourcePath.get(tag);
 				if (!list.isEmpty()) {
-					this.op.merge((Tag)supplier.get(), this.targetPath.path(), list);
+					this.op.merge((Tag)supplier.get(), this.targetPath, list);
 				}
 			} catch (CommandSyntaxException var4) {
 			}
@@ -187,21 +185,6 @@ public class CopyCustomDataFunction extends LootItemConditionalFunction {
 		@Override
 		public String getSerializedName() {
 			return this.name;
-		}
-	}
-
-	static record Path(String string, NbtPathArgument.NbtPath path) {
-		public static final Codec<CopyCustomDataFunction.Path> CODEC = Codec.STRING.comapFlatMap(string -> {
-			try {
-				return DataResult.success(of(string));
-			} catch (CommandSyntaxException var2) {
-				return DataResult.error(() -> "Failed to parse path " + string + ": " + var2.getMessage());
-			}
-		}, CopyCustomDataFunction.Path::string);
-
-		public static CopyCustomDataFunction.Path of(String string) throws CommandSyntaxException {
-			NbtPathArgument.NbtPath nbtPath = new NbtPathArgument().parse(new StringReader(string));
-			return new CopyCustomDataFunction.Path(string, nbtPath);
 		}
 	}
 }

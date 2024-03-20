@@ -1,5 +1,7 @@
 package net.minecraft.core.particles;
 
+import com.mojang.brigadier.StringReader;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import io.netty.buffer.ByteBuf;
 import java.util.Locale;
@@ -9,11 +11,23 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
+import org.joml.Vector3f;
 
 public class ColorParticleOption implements ParticleOptions {
-	public static final ParticleOptions.Deserializer<ColorParticleOption> DESERIALIZER = (particleType, stringReader, provider) -> new ColorParticleOption(
-			particleType, stringReader.readInt()
-		);
+	public static final ParticleOptions.Deserializer<ColorParticleOption> DESERIALIZER = new ParticleOptions.Deserializer<ColorParticleOption>() {
+		public ColorParticleOption fromCommand(ParticleType<ColorParticleOption> particleType, StringReader stringReader, HolderLookup.Provider provider) throws CommandSyntaxException {
+			Vector3f vector3f = DustParticleOptionsBase.readVector3f(stringReader);
+			stringReader.expect(' ');
+			float f = stringReader.readFloat();
+			int i = FastColor.ARGB32.color(
+				ColorParticleOption.as32BitChannel(f),
+				ColorParticleOption.as32BitChannel(vector3f.x),
+				ColorParticleOption.as32BitChannel(vector3f.y),
+				ColorParticleOption.as32BitChannel(vector3f.z)
+			);
+			return new ColorParticleOption(particleType, i);
+		}
+	};
 	private final ParticleType<? extends ColorParticleOption> type;
 	private final int color;
 
@@ -25,7 +39,7 @@ public class ColorParticleOption implements ParticleOptions {
 		return ByteBufCodecs.INT.map(integer -> new ColorParticleOption(particleType, integer), colorParticleOption -> colorParticleOption.color);
 	}
 
-	private ColorParticleOption(ParticleType<? extends ColorParticleOption> particleType, int i) {
+	ColorParticleOption(ParticleType<? extends ColorParticleOption> particleType, int i) {
 		this.type = particleType;
 		this.color = i;
 	}
@@ -64,7 +78,7 @@ public class ColorParticleOption implements ParticleOptions {
 		return create(particleType, FastColor.ARGB32.color(as32BitChannel(f), as32BitChannel(g), as32BitChannel(h)));
 	}
 
-	private static int as32BitChannel(float f) {
+	static int as32BitChannel(float f) {
 		return Mth.floor(f * 255.0F);
 	}
 }

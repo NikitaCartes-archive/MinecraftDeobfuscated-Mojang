@@ -7,6 +7,8 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import java.util.ArrayList;
@@ -530,6 +532,18 @@ public class NbtPathArgument implements ArgumentType<NbtPathArgument.NbtPath> {
 		private final String original;
 		private final Object2IntMap<NbtPathArgument.Node> nodeToOriginalPosition;
 		private final NbtPathArgument.Node[] nodes;
+		public static final Codec<NbtPathArgument.NbtPath> CODEC = Codec.STRING.comapFlatMap(string -> {
+			try {
+				NbtPathArgument.NbtPath nbtPath = new NbtPathArgument().parse(new StringReader(string));
+				return DataResult.success(nbtPath);
+			} catch (CommandSyntaxException var2) {
+				return DataResult.error(() -> "Failed to parse path " + string + ": " + var2.getMessage());
+			}
+		}, NbtPathArgument.NbtPath::asString);
+
+		public static NbtPathArgument.NbtPath of(String string) throws CommandSyntaxException {
+			return new NbtPathArgument().parse(new StringReader(string));
+		}
 
 		public NbtPath(String string, NbtPathArgument.Node[] nodes, Object2IntMap<NbtPathArgument.Node> object2IntMap) {
 			this.original = string;

@@ -114,11 +114,15 @@ public class EntityDataSerializers {
 	};
 	public static final EntityDataSerializer<OptionalInt> OPTIONAL_UNSIGNED_INT = EntityDataSerializer.forValueType(OPTIONAL_UNSIGNED_INT_CODEC);
 	public static final EntityDataSerializer<Pose> POSE = EntityDataSerializer.forValueType(Pose.STREAM_CODEC);
-	public static final EntityDataSerializer<CatVariant> CAT_VARIANT = EntityDataSerializer.forValueType(ByteBufCodecs.registry(Registries.CAT_VARIANT));
+	public static final EntityDataSerializer<Holder<CatVariant>> CAT_VARIANT = EntityDataSerializer.forValueType(
+		ByteBufCodecs.holderRegistry(Registries.CAT_VARIANT)
+	);
 	public static final EntityDataSerializer<Holder<WolfVariant>> WOLF_VARIANT = EntityDataSerializer.forValueType(
 		ByteBufCodecs.holderRegistry(Registries.WOLF_VARIANT)
 	);
-	public static final EntityDataSerializer<FrogVariant> FROG_VARIANT = EntityDataSerializer.forValueType(ByteBufCodecs.registry(Registries.FROG_VARIANT));
+	public static final EntityDataSerializer<Holder<FrogVariant>> FROG_VARIANT = EntityDataSerializer.forValueType(
+		ByteBufCodecs.holderRegistry(Registries.FROG_VARIANT)
+	);
 	public static final EntityDataSerializer<Holder<PaintingVariant>> PAINTING_VARIANT = EntityDataSerializer.forValueType(
 		ByteBufCodecs.holderRegistry(Registries.PAINTING_VARIANT)
 	);

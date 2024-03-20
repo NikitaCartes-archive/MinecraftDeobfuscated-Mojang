@@ -6,14 +6,13 @@ import java.util.List;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.SeededContainerLoot;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.storage.loot.LootContext;
-import net.minecraft.world.level.storage.loot.LootDataId;
-import net.minecraft.world.level.storage.loot.LootDataType;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.ValidationContext;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
@@ -21,22 +20,22 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 public class SetContainerLootTable extends LootItemConditionalFunction {
 	public static final Codec<SetContainerLootTable> CODEC = RecordCodecBuilder.create(
 		instance -> commonFields(instance)
-				.<ResourceLocation, long, Holder<BlockEntityType<?>>>and(
+				.<ResourceKey<LootTable>, long, Holder<BlockEntityType<?>>>and(
 					instance.group(
-						ResourceLocation.CODEC.fieldOf("name").forGetter(setContainerLootTable -> setContainerLootTable.name),
+						ResourceKey.codec(Registries.LOOT_TABLE).fieldOf("name").forGetter(setContainerLootTable -> setContainerLootTable.name),
 						ExtraCodecs.strictOptionalField(Codec.LONG, "seed", 0L).forGetter(setContainerLootTable -> setContainerLootTable.seed),
 						BuiltInRegistries.BLOCK_ENTITY_TYPE.holderByNameCodec().fieldOf("type").forGetter(setContainerLootTable -> setContainerLootTable.type)
 					)
 				)
 				.apply(instance, SetContainerLootTable::new)
 	);
-	private final ResourceLocation name;
+	private final ResourceKey<LootTable> name;
 	private final long seed;
 	private final Holder<BlockEntityType<?>> type;
 
-	private SetContainerLootTable(List<LootItemCondition> list, ResourceLocation resourceLocation, long l, Holder<BlockEntityType<?>> holder) {
+	private SetContainerLootTable(List<LootItemCondition> list, ResourceKey<LootTable> resourceKey, long l, Holder<BlockEntityType<?>> holder) {
 		super(list);
-		this.name = resourceLocation;
+		this.name = resourceKey;
 		this.seed = l;
 		this.type = holder;
 	}
@@ -59,17 +58,16 @@ public class SetContainerLootTable extends LootItemConditionalFunction {
 	@Override
 	public void validate(ValidationContext validationContext) {
 		super.validate(validationContext);
-		LootDataId<LootTable> lootDataId = new LootDataId<>(LootDataType.TABLE, this.name);
-		if (validationContext.resolver().getElementOptional(lootDataId).isEmpty()) {
-			validationContext.reportProblem("Missing loot table used for container: " + this.name);
+		if (validationContext.resolver().get(Registries.LOOT_TABLE, this.name).isEmpty()) {
+			validationContext.reportProblem("Missing loot table used for container: " + this.name.location());
 		}
 	}
 
-	public static LootItemConditionalFunction.Builder<?> withLootTable(BlockEntityType<?> blockEntityType, ResourceLocation resourceLocation) {
-		return simpleBuilder(list -> new SetContainerLootTable(list, resourceLocation, 0L, blockEntityType.builtInRegistryHolder()));
+	public static LootItemConditionalFunction.Builder<?> withLootTable(BlockEntityType<?> blockEntityType, ResourceKey<LootTable> resourceKey) {
+		return simpleBuilder(list -> new SetContainerLootTable(list, resourceKey, 0L, blockEntityType.builtInRegistryHolder()));
 	}
 
-	public static LootItemConditionalFunction.Builder<?> withLootTable(BlockEntityType<?> blockEntityType, ResourceLocation resourceLocation, long l) {
-		return simpleBuilder(list -> new SetContainerLootTable(list, resourceLocation, l, blockEntityType.builtInRegistryHolder()));
+	public static LootItemConditionalFunction.Builder<?> withLootTable(BlockEntityType<?> blockEntityType, ResourceKey<LootTable> resourceKey, long l) {
+		return simpleBuilder(list -> new SetContainerLootTable(list, resourceKey, l, blockEntityType.builtInRegistryHolder()));
 	}
 }

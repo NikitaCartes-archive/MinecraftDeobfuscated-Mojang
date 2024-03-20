@@ -146,6 +146,7 @@ import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.resources.ClientPackSource;
 import net.minecraft.client.resources.FoliageColorReloadListener;
 import net.minecraft.client.resources.GrassColorReloadListener;
+import net.minecraft.client.resources.MapDecorationTextureManager;
 import net.minecraft.client.resources.MobEffectTextureManager;
 import net.minecraft.client.resources.PaintingTextureManager;
 import net.minecraft.client.resources.SkinManager;
@@ -326,6 +327,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	private final BlockRenderDispatcher blockRenderer;
 	private final PaintingTextureManager paintingTextures;
 	private final MobEffectTextureManager mobEffectTextures;
+	private final MapDecorationTextureManager mapDecorationTextures;
 	private final GuiSpriteManager guiSprites;
 	private final ToastComponent toast;
 	private final Tutorial tutorial;
@@ -551,20 +553,22 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			this, this.textureManager, this.itemRenderer, this.blockRenderer, this.font, this.options, this.entityModels
 		);
 		this.resourceManager.registerReloadListener(this.entityRenderDispatcher);
-		this.gameRenderer = new GameRenderer(this, this.entityRenderDispatcher.getItemInHandRenderer(), this.resourceManager, this.renderBuffers);
-		this.resourceManager.registerReloadListener(this.gameRenderer.createReloadListener());
-		this.levelRenderer = new LevelRenderer(this, this.entityRenderDispatcher, this.blockEntityRenderDispatcher, this.renderBuffers);
-		this.resourceManager.registerReloadListener(this.levelRenderer);
-		this.createSearchTrees();
-		this.resourceManager.registerReloadListener(this.searchRegistry);
 		this.particleEngine = new ParticleEngine(this.level, this.textureManager);
 		this.resourceManager.registerReloadListener(this.particleEngine);
 		this.paintingTextures = new PaintingTextureManager(this.textureManager);
 		this.resourceManager.registerReloadListener(this.paintingTextures);
 		this.mobEffectTextures = new MobEffectTextureManager(this.textureManager);
 		this.resourceManager.registerReloadListener(this.mobEffectTextures);
+		this.mapDecorationTextures = new MapDecorationTextureManager(this.textureManager);
+		this.resourceManager.registerReloadListener(this.mapDecorationTextures);
 		this.guiSprites = new GuiSpriteManager(this.textureManager);
 		this.resourceManager.registerReloadListener(this.guiSprites);
+		this.gameRenderer = new GameRenderer(this, this.entityRenderDispatcher.getItemInHandRenderer(), this.resourceManager, this.renderBuffers);
+		this.resourceManager.registerReloadListener(this.gameRenderer.createReloadListener());
+		this.levelRenderer = new LevelRenderer(this, this.entityRenderDispatcher, this.blockEntityRenderDispatcher, this.renderBuffers);
+		this.resourceManager.registerReloadListener(this.levelRenderer);
+		this.createSearchTrees();
+		this.resourceManager.registerReloadListener(this.searchRegistry);
 		this.gpuWarnlistManager = new GpuWarnlistManager();
 		this.resourceManager.registerReloadListener(this.gpuWarnlistManager);
 		this.resourceManager.registerReloadListener(this.regionalCompliancies);
@@ -1144,6 +1148,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			this.particleEngine.close();
 			this.mobEffectTextures.close();
 			this.paintingTextures.close();
+			this.mapDecorationTextures.close();
 			this.guiSprites.close();
 			this.textureManager.close();
 			this.resourceManager.close();
@@ -2723,6 +2728,10 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 
 	public MobEffectTextureManager getMobEffectTextures() {
 		return this.mobEffectTextures;
+	}
+
+	public MapDecorationTextureManager getMapDecorationTextures() {
+		return this.mapDecorationTextures;
 	}
 
 	public GuiSpriteManager getGuiSprites() {

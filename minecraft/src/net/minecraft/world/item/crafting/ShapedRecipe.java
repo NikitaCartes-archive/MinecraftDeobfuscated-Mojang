@@ -2,8 +2,8 @@ package net.minecraft.world.item.crafting;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.ExtraCodecs;
@@ -46,7 +46,7 @@ public class ShapedRecipe implements CraftingRecipe {
 	}
 
 	@Override
-	public ItemStack getResultItem(RegistryAccess registryAccess) {
+	public ItemStack getResultItem(HolderLookup.Provider provider) {
 		return this.result;
 	}
 
@@ -69,8 +69,8 @@ public class ShapedRecipe implements CraftingRecipe {
 		return this.pattern.matches(craftingContainer);
 	}
 
-	public ItemStack assemble(CraftingContainer craftingContainer, RegistryAccess registryAccess) {
-		return this.getResultItem(registryAccess).copy();
+	public ItemStack assemble(CraftingContainer craftingContainer, HolderLookup.Provider provider) {
+		return this.getResultItem(provider).copy();
 	}
 
 	public int getWidth() {

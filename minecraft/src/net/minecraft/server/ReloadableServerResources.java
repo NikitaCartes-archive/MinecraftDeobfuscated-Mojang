@@ -13,6 +13,7 @@ import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.LayeredRegistryAccess;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
@@ -27,28 +28,27 @@ import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
-import net.minecraft.world.level.storage.loot.LootDataManager;
 import org.slf4j.Logger;
 
 public class ReloadableServerResources {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final CompletableFuture<Unit> DATA_RELOAD_INITIAL_TASK = CompletableFuture.completedFuture(Unit.INSTANCE);
+	private final ReloadableServerRegistries.Holder fullRegistryHolder;
 	private final ReloadableServerResources.ConfigurableRegistryLookup registryLookup;
 	private final Commands commands;
 	private final RecipeManager recipes;
 	private final TagManager tagManager;
-	private final LootDataManager lootData;
 	private final ServerAdvancementManager advancements;
 	private final ServerFunctionLibrary functionLibrary;
 
-	public ReloadableServerResources(RegistryAccess.Frozen frozen, FeatureFlagSet featureFlagSet, Commands.CommandSelection commandSelection, int i) {
+	private ReloadableServerResources(RegistryAccess.Frozen frozen, FeatureFlagSet featureFlagSet, Commands.CommandSelection commandSelection, int i) {
+		this.fullRegistryHolder = new ReloadableServerRegistries.Holder(frozen);
 		this.registryLookup = new ReloadableServerResources.ConfigurableRegistryLookup(frozen);
 		this.registryLookup.missingTagAccessPolicy(ReloadableServerResources.MissingTagAccessPolicy.CREATE_NEW);
 		this.recipes = new RecipeManager(this.registryLookup);
 		this.tagManager = new TagManager(frozen);
 		this.commands = new Commands(commandSelection, CommandBuildContext.simple(this.registryLookup, featureFlagSet));
-		this.lootData = new LootDataManager(this.registryLookup);
-		this.advancements = new ServerAdvancementManager(this.registryLookup, this.lootData);
+		this.advancements = new ServerAdvancementManager(this.registryLookup);
 		this.functionLibrary = new ServerFunctionLibrary(i, this.commands.getDispatcher());
 	}
 
@@ -56,8 +56,8 @@ public class ReloadableServerResources {
 		return this.functionLibrary;
 	}
 
-	public LootDataManager getLootData() {
-		return this.lootData;
+	public ReloadableServerRegistries.Holder fullRegistries() {
+		return this.fullRegistryHolder;
 	}
 
 	public RecipeManager getRecipeManager() {
@@ -73,29 +73,38 @@ public class ReloadableServerResources {
 	}
 
 	public List<PreparableReloadListener> listeners() {
-		return List.of(this.tagManager, this.lootData, this.recipes, this.functionLibrary, this.advancements);
+		return List.of(this.tagManager, this.recipes, this.functionLibrary, this.advancements);
 	}
 
 	public static CompletableFuture<ReloadableServerResources> loadResources(
 		ResourceManager resourceManager,
-		RegistryAccess.Frozen frozen,
+		LayeredRegistryAccess<RegistryLayer> layeredRegistryAccess,
 		FeatureFlagSet featureFlagSet,
 		Commands.CommandSelection commandSelection,
 		int i,
 		Executor executor,
 		Executor executor2
 	) {
-		ReloadableServerResources reloadableServerResources = new ReloadableServerResources(frozen, featureFlagSet, commandSelection, i);
-		return SimpleReloadInstance.create(
-				resourceManager, reloadableServerResources.listeners(), executor, executor2, DATA_RELOAD_INITIAL_TASK, LOGGER.isDebugEnabled()
-			)
-			.done()
-			.whenComplete((object, throwable) -> reloadableServerResources.registryLookup.missingTagAccessPolicy(ReloadableServerResources.MissingTagAccessPolicy.FAIL))
-			.thenApply(object -> reloadableServerResources);
+		return ReloadableServerRegistries.reload(layeredRegistryAccess, resourceManager, executor)
+			.thenCompose(
+				layeredRegistryAccessx -> {
+					ReloadableServerResources reloadableServerResources = new ReloadableServerResources(
+						layeredRegistryAccessx.compositeAccess(), featureFlagSet, commandSelection, i
+					);
+					return SimpleReloadInstance.create(
+							resourceManager, reloadableServerResources.listeners(), executor, executor2, DATA_RELOAD_INITIAL_TASK, LOGGER.isDebugEnabled()
+						)
+						.done()
+						.whenComplete(
+							(object, throwable) -> reloadableServerResources.registryLookup.missingTagAccessPolicy(ReloadableServerResources.MissingTagAccessPolicy.FAIL)
+						)
+						.thenApply(object -> reloadableServerResources);
+				}
+			);
 	}
 
-	public void updateRegistryTags(RegistryAccess registryAccess) {
-		this.tagManager.getResult().forEach(loadResult -> updateRegistryTags(registryAccess, loadResult));
+	public void updateRegistryTags() {
+		this.tagManager.getResult().forEach(loadResult -> updateRegistryTags(this.fullRegistryHolder.get(), loadResult));
 		AbstractFurnaceBlockEntity.invalidateCache();
 		Blocks.rebuildCache();
 	}

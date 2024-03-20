@@ -21,12 +21,14 @@ import net.minecraft.advancements.critereon.WrappedMinMaxBounds;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.commands.arguments.selector.EntitySelectorParser;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.PlayerAdvancements;
 import net.minecraft.server.ServerAdvancementManager;
@@ -39,7 +41,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.storage.loot.LootContext;
-import net.minecraft.world.level.storage.loot.LootDataType;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
@@ -464,15 +465,19 @@ public class EntitySelectorOptions {
 				"predicate",
 				entitySelectorParser -> {
 					boolean bl = entitySelectorParser.shouldInvertValue();
-					ResourceLocation resourceLocation = ResourceLocation.read(entitySelectorParser.getReader());
+					ResourceKey<LootItemCondition> resourceKey = ResourceKey.create(Registries.PREDICATE, ResourceLocation.read(entitySelectorParser.getReader()));
 					entitySelectorParser.addPredicate(
 						entity -> {
 							if (!(entity.level() instanceof ServerLevel)) {
 								return false;
 							} else {
 								ServerLevel serverLevel = (ServerLevel)entity.level();
-								LootItemCondition lootItemCondition = serverLevel.getServer().getLootData().getElement(LootDataType.PREDICATE, resourceLocation);
-								if (lootItemCondition == null) {
+								Optional<LootItemCondition> optional = serverLevel.getServer()
+									.reloadableRegistries()
+									.lookup()
+									.get(Registries.PREDICATE, resourceKey)
+									.map(Holder::value);
+								if (optional.isEmpty()) {
 									return false;
 								} else {
 									LootParams lootParams = new LootParams.Builder(serverLevel)
@@ -480,8 +485,8 @@ public class EntitySelectorOptions {
 										.withParameter(LootContextParams.ORIGIN, entity.position())
 										.create(LootContextParamSets.SELECTOR);
 									LootContext lootContext = new LootContext.Builder(lootParams).create(Optional.empty());
-									lootContext.pushVisitedElement(LootContext.createVisitedEntry(lootItemCondition));
-									return bl ^ lootItemCondition.test(lootContext);
+									lootContext.pushVisitedElement(LootContext.createVisitedEntry((LootItemCondition)optional.get()));
+									return bl ^ ((LootItemCondition)optional.get()).test(lootContext);
 								}
 							}
 						}

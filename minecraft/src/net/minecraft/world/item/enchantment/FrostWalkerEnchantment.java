@@ -1,9 +1,7 @@
 package net.minecraft.world.item.enchantment;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -12,28 +10,13 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.CollisionContext;
 
 public class FrostWalkerEnchantment extends Enchantment {
-	public FrostWalkerEnchantment(Enchantment.Rarity rarity, EquipmentSlot... equipmentSlots) {
-		super(rarity, ItemTags.FOOT_ARMOR_ENCHANTABLE, equipmentSlots);
-	}
-
-	@Override
-	public int getMinCost(int i) {
-		return i * 10;
-	}
-
-	@Override
-	public int getMaxCost(int i) {
-		return this.getMinCost(i) + 15;
+	public FrostWalkerEnchantment(Enchantment.EnchantmentDefinition enchantmentDefinition) {
+		super(enchantmentDefinition);
 	}
 
 	@Override
 	public boolean isTreasureOnly() {
 		return true;
-	}
-
-	@Override
-	public int getMaxLevel() {
-		return 2;
 	}
 
 	public static void onEntityMoved(LivingEntity livingEntity, Level level, BlockPos blockPos, int i) {

@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Optional;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
@@ -30,21 +30,23 @@ public class GiveGiftToHero extends Behavior<Villager> {
 	private static final int MIN_TIME_BETWEEN_GIFTS = 600;
 	private static final int MAX_TIME_BETWEEN_GIFTS = 6600;
 	private static final int TIME_TO_DELAY_FOR_HEAD_TO_FINISH_TURNING = 20;
-	private static final Map<VillagerProfession, ResourceLocation> GIFTS = Util.make(Maps.<VillagerProfession, ResourceLocation>newHashMap(), hashMap -> {
-		hashMap.put(VillagerProfession.ARMORER, BuiltInLootTables.ARMORER_GIFT);
-		hashMap.put(VillagerProfession.BUTCHER, BuiltInLootTables.BUTCHER_GIFT);
-		hashMap.put(VillagerProfession.CARTOGRAPHER, BuiltInLootTables.CARTOGRAPHER_GIFT);
-		hashMap.put(VillagerProfession.CLERIC, BuiltInLootTables.CLERIC_GIFT);
-		hashMap.put(VillagerProfession.FARMER, BuiltInLootTables.FARMER_GIFT);
-		hashMap.put(VillagerProfession.FISHERMAN, BuiltInLootTables.FISHERMAN_GIFT);
-		hashMap.put(VillagerProfession.FLETCHER, BuiltInLootTables.FLETCHER_GIFT);
-		hashMap.put(VillagerProfession.LEATHERWORKER, BuiltInLootTables.LEATHERWORKER_GIFT);
-		hashMap.put(VillagerProfession.LIBRARIAN, BuiltInLootTables.LIBRARIAN_GIFT);
-		hashMap.put(VillagerProfession.MASON, BuiltInLootTables.MASON_GIFT);
-		hashMap.put(VillagerProfession.SHEPHERD, BuiltInLootTables.SHEPHERD_GIFT);
-		hashMap.put(VillagerProfession.TOOLSMITH, BuiltInLootTables.TOOLSMITH_GIFT);
-		hashMap.put(VillagerProfession.WEAPONSMITH, BuiltInLootTables.WEAPONSMITH_GIFT);
-	});
+	private static final Map<VillagerProfession, ResourceKey<LootTable>> GIFTS = Util.make(
+		Maps.<VillagerProfession, ResourceKey<LootTable>>newHashMap(), hashMap -> {
+			hashMap.put(VillagerProfession.ARMORER, BuiltInLootTables.ARMORER_GIFT);
+			hashMap.put(VillagerProfession.BUTCHER, BuiltInLootTables.BUTCHER_GIFT);
+			hashMap.put(VillagerProfession.CARTOGRAPHER, BuiltInLootTables.CARTOGRAPHER_GIFT);
+			hashMap.put(VillagerProfession.CLERIC, BuiltInLootTables.CLERIC_GIFT);
+			hashMap.put(VillagerProfession.FARMER, BuiltInLootTables.FARMER_GIFT);
+			hashMap.put(VillagerProfession.FISHERMAN, BuiltInLootTables.FISHERMAN_GIFT);
+			hashMap.put(VillagerProfession.FLETCHER, BuiltInLootTables.FLETCHER_GIFT);
+			hashMap.put(VillagerProfession.LEATHERWORKER, BuiltInLootTables.LEATHERWORKER_GIFT);
+			hashMap.put(VillagerProfession.LIBRARIAN, BuiltInLootTables.LIBRARIAN_GIFT);
+			hashMap.put(VillagerProfession.MASON, BuiltInLootTables.MASON_GIFT);
+			hashMap.put(VillagerProfession.SHEPHERD, BuiltInLootTables.SHEPHERD_GIFT);
+			hashMap.put(VillagerProfession.TOOLSMITH, BuiltInLootTables.TOOLSMITH_GIFT);
+			hashMap.put(VillagerProfession.WEAPONSMITH, BuiltInLootTables.WEAPONSMITH_GIFT);
+		}
+	);
 	private static final float SPEED_MODIFIER = 0.5F;
 	private int timeUntilNextGift = 600;
 	private boolean giftGivenDuringThisRun;
@@ -121,7 +123,7 @@ public class GiveGiftToHero extends Behavior<Villager> {
 		} else {
 			VillagerProfession villagerProfession = villager.getVillagerData().getProfession();
 			if (GIFTS.containsKey(villagerProfession)) {
-				LootTable lootTable = villager.level().getServer().getLootData().getLootTable((ResourceLocation)GIFTS.get(villagerProfession));
+				LootTable lootTable = villager.level().getServer().reloadableRegistries().getLootTable((ResourceKey<LootTable>)GIFTS.get(villagerProfession));
 				LootParams lootParams = new LootParams.Builder((ServerLevel)villager.level())
 					.withParameter(LootContextParams.ORIGIN, villager.position())
 					.withParameter(LootContextParams.THIS_ENTITY, villager)

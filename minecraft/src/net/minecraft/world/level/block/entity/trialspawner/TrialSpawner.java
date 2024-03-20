@@ -12,7 +12,7 @@ import net.minecraft.core.dispenser.DefaultDispenseItemBehavior;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -187,8 +187,8 @@ public final class TrialSpawner {
 		}
 	}
 
-	public void ejectReward(ServerLevel serverLevel, BlockPos blockPos, ResourceLocation resourceLocation) {
-		LootTable lootTable = serverLevel.getServer().getLootData().getLootTable(resourceLocation);
+	public void ejectReward(ServerLevel serverLevel, BlockPos blockPos, ResourceKey<LootTable> resourceKey) {
+		LootTable lootTable = serverLevel.getServer().reloadableRegistries().getLootTable(resourceKey);
 		LootParams lootParams = new LootParams.Builder(serverLevel).create(LootContextParamSets.EMPTY);
 		ObjectArrayList<ItemStack> objectArrayList = lootTable.getRandomItems(lootParams);
 		if (!objectArrayList.isEmpty()) {

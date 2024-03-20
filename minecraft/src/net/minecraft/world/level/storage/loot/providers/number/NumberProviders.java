@@ -26,6 +26,7 @@ public class NumberProviders {
 	public static final LootNumberProviderType UNIFORM = register("uniform", UniformGenerator.CODEC);
 	public static final LootNumberProviderType BINOMIAL = register("binomial", BinomialDistributionGenerator.CODEC);
 	public static final LootNumberProviderType SCORE = register("score", ScoreboardValue.CODEC);
+	public static final LootNumberProviderType STORAGE = register("storage", StorageValue.CODEC);
 
 	private static LootNumberProviderType register(String string, Codec<? extends NumberProvider> codec) {
 		return Registry.register(BuiltInRegistries.LOOT_NUMBER_PROVIDER_TYPE, new ResourceLocation(string), new LootNumberProviderType(codec));

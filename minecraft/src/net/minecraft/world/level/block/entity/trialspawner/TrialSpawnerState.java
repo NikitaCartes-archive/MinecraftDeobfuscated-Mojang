@@ -102,7 +102,7 @@ public enum TrialSpawnerState implements StringRepresentable {
 						trialSpawnerData.ejectingLootTable = trialSpawnerConfig.lootTablesToEject().getRandomValue(serverLevel.getRandom());
 					}
 
-					trialSpawnerData.ejectingLootTable.ifPresent(resourceLocation -> trialSpawner.ejectReward(serverLevel, blockPos, resourceLocation));
+					trialSpawnerData.ejectingLootTable.ifPresent(resourceKey -> trialSpawner.ejectReward(serverLevel, blockPos, resourceKey));
 					trialSpawnerData.detectedPlayers.remove(trialSpawnerData.detectedPlayers.iterator().next());
 					yield this;
 				}

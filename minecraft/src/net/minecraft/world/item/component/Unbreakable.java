@@ -25,4 +25,8 @@ public record Unbreakable(boolean showInTooltip) implements TooltipProvider {
 			consumer.accept(TOOLTIP);
 		}
 	}
+
+	public Unbreakable withTooltip(boolean bl) {
+		return new Unbreakable(bl);
+	}
 }

@@ -12,6 +12,9 @@ import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import net.minecraft.Util;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.RegistryFileCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.ExtraCodecs;
@@ -31,15 +34,16 @@ public class LootTable {
 	public static final LootTable EMPTY = new LootTable(LootContextParamSets.EMPTY, Optional.empty(), List.of(), List.of());
 	public static final LootContextParamSet DEFAULT_PARAM_SET = LootContextParamSets.ALL_PARAMS;
 	public static final long RANDOMIZE_SEED = 0L;
-	public static final Codec<LootTable> CODEC = RecordCodecBuilder.create(
+	public static final Codec<LootTable> DIRECT_CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
 					LootContextParamSets.CODEC.optionalFieldOf("type", DEFAULT_PARAM_SET).forGetter(lootTable -> lootTable.paramSet),
 					ExtraCodecs.strictOptionalField(ResourceLocation.CODEC, "random_sequence").forGetter(lootTable -> lootTable.randomSequence),
 					ExtraCodecs.strictOptionalField(LootPool.CODEC.listOf(), "pools", List.of()).forGetter(lootTable -> lootTable.pools),
-					ExtraCodecs.strictOptionalField(LootItemFunctions.CODEC.listOf(), "functions", List.of()).forGetter(lootTable -> lootTable.functions)
+					ExtraCodecs.strictOptionalField(LootItemFunctions.ROOT_CODEC.listOf(), "functions", List.of()).forGetter(lootTable -> lootTable.functions)
 				)
 				.apply(instance, LootTable::new)
 	);
+	public static final Codec<Holder<LootTable>> CODEC = RegistryFileCodec.create(Registries.LOOT_TABLE, DIRECT_CODEC);
 	private final LootContextParamSet paramSet;
 	private final Optional<ResourceLocation> randomSequence;
 	private final List<LootPool> pools;

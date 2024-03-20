@@ -17,6 +17,7 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.FloatTag;
 import net.minecraft.nbt.ListTag;
@@ -26,6 +27,7 @@ import net.minecraft.network.protocol.game.DebugPackets;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
@@ -77,6 +79,7 @@ import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.pathfinder.PathType;
+import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.phys.AABB;
 
 public abstract class Mob extends LivingEntity implements Targeting {
@@ -117,7 +120,7 @@ public abstract class Mob extends LivingEntity implements Targeting {
 	private boolean persistenceRequired;
 	private final Map<PathType, Float> pathfindingMalus = Maps.newEnumMap(PathType.class);
 	@Nullable
-	private ResourceLocation lootTable;
+	private ResourceKey<LootTable> lootTable;
 	private long lootTableSeed;
 	@Nullable
 	private Entity leashHolder;
@@ -422,7 +425,7 @@ public abstract class Mob extends LivingEntity implements Targeting {
 
 		compoundTag.putBoolean("LeftHanded", this.isLeftHanded());
 		if (this.lootTable != null) {
-			compoundTag.putString("DeathLootTable", this.lootTable.toString());
+			compoundTag.putString("DeathLootTable", this.lootTable.location().toString());
 			if (this.lootTableSeed != 0L) {
 				compoundTag.putLong("DeathLootTableSeed", this.lootTableSeed);
 			}
@@ -492,7 +495,7 @@ public abstract class Mob extends LivingEntity implements Targeting {
 
 		this.setLeftHanded(compoundTag.getBoolean("LeftHanded"));
 		if (compoundTag.contains("DeathLootTable", 8)) {
-			this.lootTable = new ResourceLocation(compoundTag.getString("DeathLootTable"));
+			this.lootTable = ResourceKey.create(Registries.LOOT_TABLE, new ResourceLocation(compoundTag.getString("DeathLootTable")));
 			this.lootTableSeed = compoundTag.getLong("DeathLootTableSeed");
 		}
 
@@ -506,11 +509,11 @@ public abstract class Mob extends LivingEntity implements Targeting {
 	}
 
 	@Override
-	public final ResourceLocation getLootTable() {
+	public final ResourceKey<LootTable> getLootTable() {
 		return this.lootTable == null ? this.getDefaultLootTable() : this.lootTable;
 	}
 
-	protected ResourceLocation getDefaultLootTable() {
+	protected ResourceKey<LootTable> getDefaultLootTable() {
 		return super.getLootTable();
 	}
 

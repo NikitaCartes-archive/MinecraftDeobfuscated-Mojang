@@ -1,33 +1,16 @@
 package net.minecraft.world.item.enchantment;
 
 import net.minecraft.tags.DamageTypeTags;
-import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 
 public class ProtectionEnchantment extends Enchantment {
 	public final ProtectionEnchantment.Type type;
 
-	public ProtectionEnchantment(Enchantment.Rarity rarity, ProtectionEnchantment.Type type, EquipmentSlot... equipmentSlots) {
-		super(rarity, type == ProtectionEnchantment.Type.FALL ? ItemTags.FOOT_ARMOR_ENCHANTABLE : ItemTags.ARMOR_ENCHANTABLE, equipmentSlots);
+	public ProtectionEnchantment(Enchantment.EnchantmentDefinition enchantmentDefinition, ProtectionEnchantment.Type type) {
+		super(enchantmentDefinition);
 		this.type = type;
-	}
-
-	@Override
-	public int getMinCost(int i) {
-		return this.type.getMinCost() + (i - 1) * this.type.getLevelCost();
-	}
-
-	@Override
-	public int getMaxCost(int i) {
-		return this.getMinCost(i) + this.type.getLevelCost();
-	}
-
-	@Override
-	public int getMaxLevel() {
-		return 4;
 	}
 
 	@Override
@@ -77,26 +60,10 @@ public class ProtectionEnchantment extends Enchantment {
 	}
 
 	public static enum Type {
-		ALL(1, 11),
-		FIRE(10, 8),
-		FALL(5, 6),
-		EXPLOSION(5, 8),
-		PROJECTILE(3, 6);
-
-		private final int minCost;
-		private final int levelCost;
-
-		private Type(int j, int k) {
-			this.minCost = j;
-			this.levelCost = k;
-		}
-
-		public int getMinCost() {
-			return this.minCost;
-		}
-
-		public int getLevelCost() {
-			return this.levelCost;
-		}
+		ALL,
+		FIRE,
+		FALL,
+		EXPLOSION,
+		PROJECTILE;
 	}
 }

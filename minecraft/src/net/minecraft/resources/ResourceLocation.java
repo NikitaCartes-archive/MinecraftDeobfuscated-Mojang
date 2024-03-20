@@ -26,7 +26,7 @@ import org.apache.commons.lang3.StringUtils;
 public class ResourceLocation implements Comparable<ResourceLocation> {
 	public static final Codec<ResourceLocation> CODEC = Codec.STRING.<ResourceLocation>comapFlatMap(ResourceLocation::read, ResourceLocation::toString).stable();
 	public static final StreamCodec<ByteBuf, ResourceLocation> STREAM_CODEC = ByteBufCodecs.STRING_UTF8.map(ResourceLocation::new, ResourceLocation::toString);
-	private static final SimpleCommandExceptionType ERROR_INVALID = new SimpleCommandExceptionType(Component.translatable("argument.id.invalid"));
+	public static final SimpleCommandExceptionType ERROR_INVALID = new SimpleCommandExceptionType(Component.translatable("argument.id.invalid"));
 	public static final char NAMESPACE_SEPARATOR = ':';
 	public static final String DEFAULT_NAMESPACE = "minecraft";
 	public static final String REALMS_NAMESPACE = "realms";
@@ -164,20 +164,40 @@ public class ResourceLocation implements Comparable<ResourceLocation> {
 		return string + "." + this.toLanguageKey() + "." + string2;
 	}
 
-	public static ResourceLocation read(StringReader stringReader) throws CommandSyntaxException {
+	private static String readGreedy(StringReader stringReader) {
 		int i = stringReader.getCursor();
 
 		while (stringReader.canRead() && isAllowedInResourceLocation(stringReader.peek())) {
 			stringReader.skip();
 		}
 
-		String string = stringReader.getString().substring(i, stringReader.getCursor());
+		return stringReader.getString().substring(i, stringReader.getCursor());
+	}
+
+	public static ResourceLocation read(StringReader stringReader) throws CommandSyntaxException {
+		int i = stringReader.getCursor();
+		String string = readGreedy(stringReader);
 
 		try {
 			return new ResourceLocation(string);
 		} catch (ResourceLocationException var4) {
 			stringReader.setCursor(i);
 			throw ERROR_INVALID.createWithContext(stringReader);
+		}
+	}
+
+	public static ResourceLocation readNonEmpty(StringReader stringReader) throws CommandSyntaxException {
+		int i = stringReader.getCursor();
+		String string = readGreedy(stringReader);
+		if (string.isEmpty()) {
+			throw ERROR_INVALID.createWithContext(stringReader);
+		} else {
+			try {
+				return new ResourceLocation(string);
+			} catch (ResourceLocationException var4) {
+				stringReader.setCursor(i);
+				throw ERROR_INVALID.createWithContext(stringReader);
+			}
 		}
 	}
 

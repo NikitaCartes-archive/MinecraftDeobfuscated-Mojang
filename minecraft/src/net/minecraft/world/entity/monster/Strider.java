@@ -16,6 +16,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.DifficultyInstance;
@@ -54,7 +55,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.DismountHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
@@ -78,8 +78,6 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
 	);
 	private static final float SUFFOCATE_STEERING_MODIFIER = 0.35F;
 	private static final float STEERING_MODIFIER = 0.55F;
-	private static final Ingredient FOOD_ITEMS = Ingredient.of(Items.WARPED_FUNGUS);
-	private static final Ingredient TEMPT_ITEMS = Ingredient.of(Items.WARPED_FUNGUS, Items.WARPED_FUNGUS_ON_A_STICK);
 	private static final EntityDataAccessor<Integer> DATA_BOOST_TIME = SynchedEntityData.defineId(Strider.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Boolean> DATA_SUFFOCATING = SynchedEntityData.defineId(Strider.class, EntityDataSerializers.BOOLEAN);
 	private static final EntityDataAccessor<Boolean> DATA_SADDLE_ID = SynchedEntityData.defineId(Strider.class, EntityDataSerializers.BOOLEAN);
@@ -159,7 +157,7 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
 	protected void registerGoals() {
 		this.goalSelector.addGoal(1, new PanicGoal(this, 1.65));
 		this.goalSelector.addGoal(2, new BreedGoal(this, 1.0));
-		this.temptGoal = new TemptGoal(this, 1.4, TEMPT_ITEMS, false);
+		this.temptGoal = new TemptGoal(this, 1.4, itemStack -> itemStack.is(ItemTags.STRIDER_TEMPT_ITEMS), false);
 		this.goalSelector.addGoal(3, this.temptGoal);
 		this.goalSelector.addGoal(4, new Strider.StriderGoToLavaGoal(this, 1.0));
 		this.goalSelector.addGoal(5, new FollowParentGoal(this, 1.0));
@@ -405,7 +403,7 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
 
 	@Override
 	public boolean isFood(ItemStack itemStack) {
-		return FOOD_ITEMS.test(itemStack);
+		return itemStack.is(ItemTags.STRIDER_FOOD);
 	}
 
 	@Override

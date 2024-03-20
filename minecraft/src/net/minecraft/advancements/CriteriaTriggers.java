@@ -16,6 +16,7 @@ import net.minecraft.advancements.critereon.EffectsChangedTrigger;
 import net.minecraft.advancements.critereon.EnchantedItemTrigger;
 import net.minecraft.advancements.critereon.EnterBlockTrigger;
 import net.minecraft.advancements.critereon.EntityHurtPlayerTrigger;
+import net.minecraft.advancements.critereon.FallAfterExplosionTrigger;
 import net.minecraft.advancements.critereon.FilledBucketTrigger;
 import net.minecraft.advancements.critereon.FishingRodHookedTrigger;
 import net.minecraft.advancements.critereon.ImpossibleTrigger;
@@ -102,6 +103,8 @@ public class CriteriaTriggers {
 	public static final ItemUsedOnLocationTrigger ALLAY_DROP_ITEM_ON_BLOCK = register("allay_drop_item_on_block", new ItemUsedOnLocationTrigger());
 	public static final PlayerTrigger AVOID_VIBRATION = register("avoid_vibration", new PlayerTrigger());
 	public static final RecipeCraftedTrigger RECIPE_CRAFTED = register("recipe_crafted", new RecipeCraftedTrigger());
+	public static final RecipeCraftedTrigger CRAFTER_RECIPE_CRAFTED = register("crafter_recipe_crafted", new RecipeCraftedTrigger());
+	public static final FallAfterExplosionTrigger FALL_AFTER_EXPLOSION = register("fall_after_explosion", new FallAfterExplosionTrigger());
 
 	private static <T extends CriterionTrigger<?>> T register(String string, T criterionTrigger) {
 		return Registry.register(BuiltInRegistries.TRIGGER_TYPES, string, criterionTrigger);

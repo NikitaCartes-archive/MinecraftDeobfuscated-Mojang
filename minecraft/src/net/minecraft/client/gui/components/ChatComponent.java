@@ -409,7 +409,7 @@ public class ChatComponent {
 	}
 
 	private int getMessageLineIndexAt(double d, double e) {
-		if (this.isChatFocused() && !this.minecraft.options.hideGui && !this.isChatHidden()) {
+		if (this.isChatFocused() && !this.isChatHidden()) {
 			if (!(d < -4.0) && !(d > (double)Mth.floor((double)this.getWidth() / this.getScale()))) {
 				int i = Math.min(this.getLinesPerPage(), this.trimmedMessages.size());
 				if (e >= 0.0 && e < (double)i) {

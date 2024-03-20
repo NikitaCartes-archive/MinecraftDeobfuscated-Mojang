@@ -136,7 +136,7 @@ public class Bogged extends AbstractSkeleton implements Shearable {
 
 	private void spawnShearedMushrooms() {
 		if (this.level() instanceof ServerLevel serverLevel && serverLevel.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
-			LootTable lootTable = serverLevel.getServer().getLootData().getLootTable(BuiltInLootTables.BOGGED_SHEAR);
+			LootTable lootTable = serverLevel.getServer().reloadableRegistries().getLootTable(BuiltInLootTables.BOGGED_SHEAR);
 			LootParams lootParams = new LootParams.Builder(serverLevel)
 				.withParameter(LootContextParams.ORIGIN, this.position())
 				.withParameter(LootContextParams.THIS_ENTITY, this)

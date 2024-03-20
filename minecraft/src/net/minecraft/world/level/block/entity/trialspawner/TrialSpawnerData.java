@@ -16,10 +16,11 @@ import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.random.SimpleWeightedRandomList;
@@ -28,6 +29,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.SpawnData;
+import net.minecraft.world.level.storage.loot.LootTable;
 
 public class TrialSpawnerData {
 	public static final String TAG_SPAWN_DATA = "spawn_data";
@@ -40,7 +42,7 @@ public class TrialSpawnerData {
 					Codec.LONG.optionalFieldOf("next_mob_spawns_at", Long.valueOf(0L)).forGetter(trialSpawnerData -> trialSpawnerData.nextMobSpawnsAt),
 					Codec.intRange(0, Integer.MAX_VALUE).optionalFieldOf("total_mobs_spawned", 0).forGetter(trialSpawnerData -> trialSpawnerData.totalMobsSpawned),
 					SpawnData.CODEC.optionalFieldOf("spawn_data").forGetter(trialSpawnerData -> trialSpawnerData.nextSpawnData),
-					ResourceLocation.CODEC.optionalFieldOf("ejecting_loot_table").forGetter(trialSpawnerData -> trialSpawnerData.ejectingLootTable)
+					ResourceKey.codec(Registries.LOOT_TABLE).optionalFieldOf("ejecting_loot_table").forGetter(trialSpawnerData -> trialSpawnerData.ejectingLootTable)
 				)
 				.apply(instance, TrialSpawnerData::new)
 	);
@@ -50,7 +52,7 @@ public class TrialSpawnerData {
 	protected long nextMobSpawnsAt;
 	protected int totalMobsSpawned;
 	protected Optional<SpawnData> nextSpawnData;
-	protected Optional<ResourceLocation> ejectingLootTable;
+	protected Optional<ResourceKey<LootTable>> ejectingLootTable;
 	protected SimpleWeightedRandomList<SpawnData> spawnPotentials;
 	@Nullable
 	protected Entity displayEntity;
@@ -61,7 +63,7 @@ public class TrialSpawnerData {
 		this(Collections.emptySet(), Collections.emptySet(), 0L, 0L, 0, Optional.empty(), Optional.empty());
 	}
 
-	public TrialSpawnerData(Set<UUID> set, Set<UUID> set2, long l, long m, int i, Optional<SpawnData> optional, Optional<ResourceLocation> optional2) {
+	public TrialSpawnerData(Set<UUID> set, Set<UUID> set2, long l, long m, int i, Optional<SpawnData> optional, Optional<ResourceKey<LootTable>> optional2) {
 		this.detectedPlayers.addAll(set);
 		this.currentMobs.addAll(set2);
 		this.cooldownEndsAt = l;

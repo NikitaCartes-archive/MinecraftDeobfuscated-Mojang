@@ -89,6 +89,7 @@ import net.minecraft.server.network.TextFilter;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackRepository;
+import net.minecraft.server.packs.repository.PackSource;
 import net.minecraft.server.packs.resources.CloseableResourceManager;
 import net.minecraft.server.packs.resources.MultiPackResourceManager;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -158,7 +159,6 @@ import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.PlayerDataStorage;
 import net.minecraft.world.level.storage.ServerLevelData;
 import net.minecraft.world.level.storage.WorldData;
-import net.minecraft.world.level.storage.loot.LootDataManager;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import org.slf4j.Logger;
@@ -1426,7 +1426,6 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 	}
 
 	public CompletableFuture<Void> reloadResources(Collection<String> collection) {
-		RegistryAccess.Frozen frozen = this.registries.getAccessForLoading(RegistryLayer.RELOADABLE);
 		CompletableFuture<Void> completableFuture = CompletableFuture.supplyAsync(
 				() -> (ImmutableList)collection.stream()
 						.map(this.packRepository::getPack)
@@ -1440,7 +1439,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 					CloseableResourceManager closeableResourceManager = new MultiPackResourceManager(PackType.SERVER_DATA, immutableList);
 					return ReloadableServerResources.loadResources(
 							closeableResourceManager,
-							frozen,
+							this.registries,
 							this.worldData.enabledFeatures(),
 							this.isDedicatedServer() ? Commands.CommandSelection.DEDICATED : Commands.CommandSelection.INTEGRATED,
 							this.getFunctionCompilationLevel(),
@@ -1461,7 +1460,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 				this.packRepository.setSelected(collection);
 				WorldDataConfiguration worldDataConfiguration = new WorldDataConfiguration(getSelectedPacks(this.packRepository), this.worldData.enabledFeatures());
 				this.worldData.setDataConfiguration(worldDataConfiguration);
-				this.resources.managers.updateRegistryTags(this.registryAccess());
+				this.resources.managers.updateRegistryTags();
 				this.getPlayerList().saveAll();
 				this.getPlayerList().reloadResources();
 				this.functionManager.replaceLibrary(this.resources.managers.getFunctionLibrary());
@@ -1494,28 +1493,34 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 
 			for (Pack pack : packRepository.getAvailablePacks()) {
 				String string2 = pack.getId();
-				if (!dataPackConfig.getDisabled().contains(string2)) {
-					FeatureFlagSet featureFlagSet2 = pack.getRequestedFeatures();
-					boolean bl2 = set.contains(string2);
-					if (!bl2 && pack.getPackSource().shouldAddAutomatically()) {
-						if (featureFlagSet2.isSubsetOf(featureFlagSet)) {
-							LOGGER.info("Found new data pack {}, loading it automatically", string2);
-							set.add(string2);
-						} else {
-							LOGGER.info(
-								"Found new data pack {}, but can't load it due to missing features {}", string2, FeatureFlags.printMissingFlags(featureFlagSet, featureFlagSet2)
-							);
-						}
-					}
+				FeatureFlagSet featureFlagSet2 = pack.getRequestedFeatures();
+				FeatureFlagSet featureFlagSet3 = packRepository.getRequestedFeatureFlags();
+				if (pack.getPackSource() == PackSource.FEATURE && !featureFlagSet2.isEmpty() && featureFlagSet2.isSubsetOf(featureFlagSet3) && !set.contains(string2)) {
+					LOGGER.info("Found feature pack for requested feature, forcing to enabled");
+					set.add(string2);
+				} else if (dataPackConfig.getDisabled().contains(string2)) {
+					continue;
+				}
 
-					if (bl2 && !featureFlagSet2.isSubsetOf(featureFlagSet)) {
-						LOGGER.warn(
-							"Pack {} requires features {} that are not enabled for this world, disabling pack.",
-							string2,
-							FeatureFlags.printMissingFlags(featureFlagSet, featureFlagSet2)
+				boolean bl2 = set.contains(string2);
+				if (!bl2 && pack.getPackSource().shouldAddAutomatically()) {
+					if (featureFlagSet2.isSubsetOf(featureFlagSet)) {
+						LOGGER.info("Found new data pack {}, loading it automatically", string2);
+						set.add(string2);
+					} else {
+						LOGGER.info(
+							"Found new data pack {}, but can't load it due to missing features {}", string2, FeatureFlags.printMissingFlags(featureFlagSet, featureFlagSet2)
 						);
-						set.remove(string2);
 					}
+				}
+
+				if (bl2 && !featureFlagSet2.isSubsetOf(featureFlagSet)) {
+					LOGGER.warn(
+						"Pack {} requires features {} that are not enabled for this world, disabling pack.",
+						string2,
+						FeatureFlags.printMissingFlags(featureFlagSet, featureFlagSet2)
+					);
+					set.remove(string2);
 				}
 			}
 
@@ -1526,8 +1531,8 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 
 			packRepository.setSelected(set);
 			DataPackConfig dataPackConfig2 = getSelectedPacks(packRepository);
-			FeatureFlagSet featureFlagSet3 = packRepository.getRequestedFeatureFlags();
-			return new WorldDataConfiguration(dataPackConfig2, featureFlagSet3);
+			FeatureFlagSet featureFlagSet4 = packRepository.getRequestedFeatureFlags();
+			return new WorldDataConfiguration(dataPackConfig2, featureFlagSet4);
 		}
 	}
 
@@ -1604,10 +1609,6 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		} else {
 			return this.commandStorage;
 		}
-	}
-
-	public LootDataManager getLootData() {
-		return this.resources.managers.getLootData();
 	}
 
 	public GameRules getGameRules() {
@@ -1929,6 +1930,10 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 
 	public LayeredRegistryAccess<RegistryLayer> registries() {
 		return this.registries;
+	}
+
+	public ReloadableServerRegistries.Holder reloadableRegistries() {
+		return this.resources.managers.fullRegistries();
 	}
 
 	public TextFilter createTextFilterForPlayer(ServerPlayer serverPlayer) {

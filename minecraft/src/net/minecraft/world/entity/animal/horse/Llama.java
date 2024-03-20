@@ -55,7 +55,6 @@ import net.minecraft.world.entity.projectile.LlamaSpit;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Block;
@@ -66,7 +65,6 @@ import net.minecraft.world.phys.Vec3;
 
 public class Llama extends AbstractChestedHorse implements VariantHolder<Llama.Variant>, RangedAttackMob {
 	private static final int MAX_STRENGTH = 5;
-	private static final Ingredient FOOD_ITEMS = Ingredient.of(Items.WHEAT, Blocks.HAY_BLOCK.asItem());
 	private static final EntityDataAccessor<Integer> DATA_STRENGTH_ID = SynchedEntityData.defineId(Llama.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Integer> DATA_VARIANT_ID = SynchedEntityData.defineId(Llama.class, EntityDataSerializers.INT);
 	private static final EntityDimensions BABY_DIMENSIONS = EntityType.LLAMA
@@ -122,7 +120,7 @@ public class Llama extends AbstractChestedHorse implements VariantHolder<Llama.V
 		this.goalSelector.addGoal(3, new RangedAttackGoal(this, 1.25, 40, 20.0F));
 		this.goalSelector.addGoal(3, new PanicGoal(this, 1.2));
 		this.goalSelector.addGoal(4, new BreedGoal(this, 1.0));
-		this.goalSelector.addGoal(5, new TemptGoal(this, 1.25, Ingredient.of(Items.HAY_BLOCK), false));
+		this.goalSelector.addGoal(5, new TemptGoal(this, 1.25, itemStack -> itemStack.is(ItemTags.LLAMA_TEMPT_ITEMS), false));
 		this.goalSelector.addGoal(6, new FollowParentGoal(this, 1.0));
 		this.goalSelector.addGoal(7, new WaterAvoidingRandomStrollGoal(this, 0.7));
 		this.goalSelector.addGoal(8, new LookAtPlayerGoal(this, Player.class, 6.0F));
@@ -157,7 +155,7 @@ public class Llama extends AbstractChestedHorse implements VariantHolder<Llama.V
 
 	@Override
 	public boolean isFood(ItemStack itemStack) {
-		return FOOD_ITEMS.test(itemStack);
+		return itemStack.is(ItemTags.LLAMA_FOOD);
 	}
 
 	@Override

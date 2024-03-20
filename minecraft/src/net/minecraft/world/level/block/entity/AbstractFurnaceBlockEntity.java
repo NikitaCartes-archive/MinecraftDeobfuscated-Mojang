@@ -414,10 +414,7 @@ public abstract class AbstractFurnaceBlockEntity extends BaseContainerBlockEntit
 		ItemStack itemStack2 = this.items.get(i);
 		boolean bl = !itemStack.isEmpty() && ItemStack.isSameItemSameComponents(itemStack2, itemStack);
 		this.items.set(i, itemStack);
-		if (itemStack.getCount() > this.getMaxStackSize()) {
-			itemStack.setCount(this.getMaxStackSize());
-		}
-
+		itemStack.limitSize(this.getMaxStackSize(itemStack));
 		if (i == 0 && !bl) {
 			this.cookingTotalTime = getTotalCookTime(this.level, this);
 			this.cookingProgress = 0;

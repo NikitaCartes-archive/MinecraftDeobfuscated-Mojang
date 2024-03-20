@@ -43,6 +43,10 @@ public interface HolderSet<T> extends Iterable<Holder<T>> {
 		};
 	}
 
+	static <T> HolderSet<T> empty() {
+		return (HolderSet<T>)HolderSet.Direct.EMPTY;
+	}
+
 	@SafeVarargs
 	static <T> HolderSet.Direct<T> direct(Holder<T>... holders) {
 		return new HolderSet.Direct<>(List.of(holders));
@@ -62,6 +66,7 @@ public interface HolderSet<T> extends Iterable<Holder<T>> {
 	}
 
 	public static final class Direct<T> extends HolderSet.ListBacked<T> {
+		static final HolderSet.Direct<?> EMPTY = new HolderSet.Direct(List.of());
 		private final List<Holder<T>> contents;
 		@Nullable
 		private Set<Holder<T>> contentsSet;

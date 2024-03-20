@@ -1,5 +1,6 @@
 package net.minecraft.world.entity.animal;
 
+import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
@@ -12,6 +13,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
@@ -39,8 +41,6 @@ import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
@@ -53,7 +53,6 @@ public class Ocelot extends Animal {
 	public static final double CROUCH_SPEED_MOD = 0.6;
 	public static final double WALK_SPEED_MOD = 0.8;
 	public static final double SPRINT_SPEED_MOD = 1.33;
-	private static final Ingredient TEMPT_INGREDIENT = Ingredient.of(Items.COD, Items.SALMON);
 	private static final EntityDataAccessor<Boolean> DATA_TRUSTING = SynchedEntityData.defineId(Ocelot.class, EntityDataSerializers.BOOLEAN);
 	@Nullable
 	private Ocelot.OcelotAvoidEntityGoal<Player> ocelotAvoidPlayersGoal;
@@ -94,7 +93,7 @@ public class Ocelot extends Animal {
 
 	@Override
 	protected void registerGoals() {
-		this.temptGoal = new Ocelot.OcelotTemptGoal(this, 0.6, TEMPT_INGREDIENT, true);
+		this.temptGoal = new Ocelot.OcelotTemptGoal(this, 0.6, itemStack -> itemStack.is(ItemTags.OCELOT_FOOD), true);
 		this.goalSelector.addGoal(1, new FloatGoal(this));
 		this.goalSelector.addGoal(3, this.temptGoal);
 		this.goalSelector.addGoal(7, new LeapAtTargetGoal(this, 0.3F));
@@ -230,7 +229,7 @@ public class Ocelot extends Animal {
 
 	@Override
 	public boolean isFood(ItemStack itemStack) {
-		return TEMPT_INGREDIENT.test(itemStack);
+		return itemStack.is(ItemTags.OCELOT_FOOD);
 	}
 
 	public static boolean checkOcelotSpawnRules(
@@ -300,8 +299,8 @@ public class Ocelot extends Animal {
 	static class OcelotTemptGoal extends TemptGoal {
 		private final Ocelot ocelot;
 
-		public OcelotTemptGoal(Ocelot ocelot, double d, Ingredient ingredient, boolean bl) {
-			super(ocelot, d, ingredient, bl);
+		public OcelotTemptGoal(Ocelot ocelot, double d, Predicate<ItemStack> predicate, boolean bl) {
+			super(ocelot, d, predicate, bl);
 			this.ocelot = ocelot;
 		}
 

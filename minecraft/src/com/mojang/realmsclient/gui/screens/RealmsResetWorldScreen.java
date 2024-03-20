@@ -17,6 +17,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
@@ -25,6 +26,7 @@ import net.minecraft.client.gui.layouts.GridLayout;
 import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
 import net.minecraft.client.gui.layouts.LayoutSettings;
 import net.minecraft.client.gui.layouts.LinearLayout;
+import net.minecraft.client.gui.layouts.SpacerElement;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -148,9 +150,10 @@ public class RealmsResetWorldScreen extends RealmsScreen {
 		}).start();
 		GridLayout gridLayout = this.layout.addToContents(new GridLayout());
 		GridLayout.RowHelper rowHelper = gridLayout.createRowHelper(3);
-		rowHelper.defaultCellSetting().padding(16);
+		rowHelper.defaultCellSetting().paddingHorizontal(16);
 		rowHelper.addChild(
 			new RealmsResetWorldScreen.FrameButton(
+				this.minecraft.font,
 				RealmsResetNormalWorldScreen.TITLE,
 				NEW_WORLD_LOCATION,
 				button -> this.minecraft.setScreen(new RealmsResetNormalWorldScreen(this::generationSelectionCallback, this.title))
@@ -158,6 +161,7 @@ public class RealmsResetWorldScreen extends RealmsScreen {
 		);
 		rowHelper.addChild(
 			new RealmsResetWorldScreen.FrameButton(
+				this.minecraft.font,
 				RealmsSelectFileToUploadScreen.TITLE,
 				UPLOAD_LOCATION,
 				button -> this.minecraft.setScreen(new RealmsSelectFileToUploadScreen(this.realmCreationTask, this.serverData.id, this.slot, this))
@@ -165,14 +169,17 @@ public class RealmsResetWorldScreen extends RealmsScreen {
 		);
 		rowHelper.addChild(
 			new RealmsResetWorldScreen.FrameButton(
+				this.minecraft.font,
 				WORLD_TEMPLATES_TITLE,
 				SURVIVAL_SPAWN_LOCATION,
 				button -> this.minecraft
 						.setScreen(new RealmsSelectWorldTemplateScreen(WORLD_TEMPLATES_TITLE, this::templateSelectionCallback, RealmsServer.WorldType.NORMAL, this.templates))
 			)
 		);
+		rowHelper.addChild(SpacerElement.height(16), 3);
 		rowHelper.addChild(
 			new RealmsResetWorldScreen.FrameButton(
+				this.minecraft.font,
 				ADVENTURES_TITLE,
 				ADVENTURE_MAP_LOCATION,
 				button -> this.minecraft
@@ -183,6 +190,7 @@ public class RealmsResetWorldScreen extends RealmsScreen {
 		);
 		rowHelper.addChild(
 			new RealmsResetWorldScreen.FrameButton(
+				this.minecraft.font,
 				EXPERIENCES_TITLE,
 				EXPERIENCE_LOCATION,
 				button -> this.minecraft
@@ -191,6 +199,7 @@ public class RealmsResetWorldScreen extends RealmsScreen {
 		);
 		rowHelper.addChild(
 			new RealmsResetWorldScreen.FrameButton(
+				this.minecraft.font,
 				INSPIRATION_TITLE,
 				INSPIRATION_LOCATION,
 				button -> this.minecraft
@@ -256,8 +265,8 @@ public class RealmsResetWorldScreen extends RealmsScreen {
 		private static final int IMAGE_SIZE = 56;
 		private final ResourceLocation image;
 
-		FrameButton(Component component, ResourceLocation resourceLocation, Button.OnPress onPress) {
-			super(0, 0, 60, 60, component, onPress, DEFAULT_NARRATION);
+		FrameButton(Font font, Component component, ResourceLocation resourceLocation, Button.OnPress onPress) {
+			super(0, 0, 60, 60 + 9, component, onPress, DEFAULT_NARRATION);
 			this.image = resourceLocation;
 		}
 

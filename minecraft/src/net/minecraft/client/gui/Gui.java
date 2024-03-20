@@ -580,6 +580,7 @@ public class Gui {
 		int j = 182;
 		int k = (int)(f * 183.0F);
 		int l = guiGraphics.guiHeight() - 32 + 3;
+		RenderSystem.enableBlend();
 		guiGraphics.blitSprite(JUMP_BAR_BACKGROUND_SPRITE, i, l, 182, 5);
 		if (playerRideableJumping.getJumpCooldown() > 0) {
 			guiGraphics.blitSprite(JUMP_BAR_COOLDOWN_SPRITE, i, l, 182, 5);
@@ -587,6 +588,7 @@ public class Gui {
 			guiGraphics.blitSprite(JUMP_BAR_PROGRESS_SPRITE, 182, 5, 0, 0, i, l, k, 5);
 		}
 
+		RenderSystem.disableBlend();
 		this.minecraft.getProfiler().pop();
 	}
 
@@ -597,10 +599,13 @@ public class Gui {
 			int k = 182;
 			int l = (int)(this.minecraft.player.experienceProgress * 183.0F);
 			int m = guiGraphics.guiHeight() - 32 + 3;
+			RenderSystem.enableBlend();
 			guiGraphics.blitSprite(EXPERIENCE_BAR_BACKGROUND_SPRITE, i, m, 182, 5);
 			if (l > 0) {
 				guiGraphics.blitSprite(EXPERIENCE_BAR_PROGRESS_SPRITE, 182, 5, 0, 0, i, m, l, 5);
 			}
+
+			RenderSystem.disableBlend();
 		}
 
 		this.minecraft.getProfiler().pop();
@@ -629,7 +634,7 @@ public class Gui {
 	private void renderSelectedItemName(GuiGraphics guiGraphics) {
 		this.minecraft.getProfiler().push("selectedItemName");
 		if (this.toolHighlightTimer > 0 && !this.lastToolHighlight.isEmpty()) {
-			MutableComponent mutableComponent = Component.empty().append(this.lastToolHighlight.getHoverName()).withStyle(this.lastToolHighlight.getRarity().color);
+			MutableComponent mutableComponent = Component.empty().append(this.lastToolHighlight.getHoverName()).withStyle(this.lastToolHighlight.getRarity().color());
 			if (this.lastToolHighlight.has(DataComponents.CUSTOM_NAME)) {
 				mutableComponent.withStyle(ChatFormatting.ITALIC);
 			}
@@ -792,101 +797,78 @@ public class Gui {
 			this.lastHealth = i;
 			int j = this.displayHealth;
 			this.random.setSeed((long)(this.tickCount * 312871));
-			FoodData foodData = player.getFoodData();
-			int k = foodData.getFoodLevel();
-			int m = guiGraphics.guiWidth() / 2 - 91;
-			int n = guiGraphics.guiWidth() / 2 + 91;
-			int o = guiGraphics.guiHeight() - 39;
+			int k = guiGraphics.guiWidth() / 2 - 91;
+			int m = guiGraphics.guiWidth() / 2 + 91;
+			int n = guiGraphics.guiHeight() - 39;
 			float f = Math.max((float)player.getAttributeValue(Attributes.MAX_HEALTH), (float)Math.max(j, i));
-			int p = Mth.ceil(player.getAbsorptionAmount());
-			int q = Mth.ceil((f + (float)p) / 2.0F / 10.0F);
-			int r = Math.max(10 - (q - 2), 3);
-			int s = o - (q - 1) * r - 10;
-			int t = o - 10;
-			int u = player.getArmorValue();
-			int v = -1;
+			int o = Mth.ceil(player.getAbsorptionAmount());
+			int p = Mth.ceil((f + (float)o) / 2.0F / 10.0F);
+			int q = Math.max(10 - (p - 2), 3);
+			int r = n - 10;
+			int s = -1;
 			if (player.hasEffect(MobEffects.REGENERATION)) {
-				v = this.tickCount % Mth.ceil(f + 5.0F);
+				s = this.tickCount % Mth.ceil(f + 5.0F);
 			}
 
 			this.minecraft.getProfiler().push("armor");
-
-			for (int w = 0; w < 10; w++) {
-				if (u > 0) {
-					int x = m + w * 8;
-					if (w * 2 + 1 < u) {
-						guiGraphics.blitSprite(ARMOR_FULL_SPRITE, x, s, 9, 9);
-					}
-
-					if (w * 2 + 1 == u) {
-						guiGraphics.blitSprite(ARMOR_HALF_SPRITE, x, s, 9, 9);
-					}
-
-					if (w * 2 + 1 > u) {
-						guiGraphics.blitSprite(ARMOR_EMPTY_SPRITE, x, s, 9, 9);
-					}
-				}
-			}
-
+			renderArmor(guiGraphics, player, n, p, q, k);
 			this.minecraft.getProfiler().popPush("health");
-			this.renderHearts(guiGraphics, player, m, o, r, v, f, i, j, p, bl);
+			this.renderHearts(guiGraphics, player, k, n, q, s, f, i, j, o, bl);
 			LivingEntity livingEntity = this.getPlayerVehicleWithHealth();
-			int xx = this.getVehicleMaxHearts(livingEntity);
-			if (xx == 0) {
+			int t = this.getVehicleMaxHearts(livingEntity);
+			if (t == 0) {
 				this.minecraft.getProfiler().popPush("food");
-
-				for (int y = 0; y < 10; y++) {
-					int z = o;
-					ResourceLocation resourceLocation;
-					ResourceLocation resourceLocation2;
-					ResourceLocation resourceLocation3;
-					if (player.hasEffect(MobEffects.HUNGER)) {
-						resourceLocation = FOOD_EMPTY_HUNGER_SPRITE;
-						resourceLocation2 = FOOD_HALF_HUNGER_SPRITE;
-						resourceLocation3 = FOOD_FULL_HUNGER_SPRITE;
-					} else {
-						resourceLocation = FOOD_EMPTY_SPRITE;
-						resourceLocation2 = FOOD_HALF_SPRITE;
-						resourceLocation3 = FOOD_FULL_SPRITE;
-					}
-
-					if (player.getFoodData().getSaturationLevel() <= 0.0F && this.tickCount % (k * 3 + 1) == 0) {
-						z = o + (this.random.nextInt(3) - 1);
-					}
-
-					int aa = n - y * 8 - 9;
-					guiGraphics.blitSprite(resourceLocation, aa, z, 9, 9);
-					if (y * 2 + 1 < k) {
-						guiGraphics.blitSprite(resourceLocation3, aa, z, 9, 9);
-					}
-
-					if (y * 2 + 1 == k) {
-						guiGraphics.blitSprite(resourceLocation2, aa, z, 9, 9);
-					}
-				}
-
-				t -= 10;
+				this.renderFood(guiGraphics, player, n, m);
+				r -= 10;
 			}
 
 			this.minecraft.getProfiler().popPush("air");
-			int y = player.getMaxAirSupply();
-			int zx = Math.min(player.getAirSupply(), y);
-			if (player.isEyeInFluid(FluidTags.WATER) || zx < y) {
-				int ab = this.getVisibleVehicleHeartRows(xx) - 1;
-				t -= ab * 10;
-				int ac = Mth.ceil((double)(zx - 2) * 10.0 / (double)y);
-				int ad = Mth.ceil((double)zx * 10.0 / (double)y) - ac;
+			int u = player.getMaxAirSupply();
+			int v = Math.min(player.getAirSupply(), u);
+			if (player.isEyeInFluid(FluidTags.WATER) || v < u) {
+				int w = this.getVisibleVehicleHeartRows(t) - 1;
+				r -= w * 10;
+				int x = Mth.ceil((double)(v - 2) * 10.0 / (double)u);
+				int y = Mth.ceil((double)v * 10.0 / (double)u) - x;
+				RenderSystem.enableBlend();
 
-				for (int aax = 0; aax < ac + ad; aax++) {
-					if (aax < ac) {
-						guiGraphics.blitSprite(AIR_SPRITE, n - aax * 8 - 9, t, 9, 9);
+				for (int z = 0; z < x + y; z++) {
+					if (z < x) {
+						guiGraphics.blitSprite(AIR_SPRITE, m - z * 8 - 9, r, 9, 9);
 					} else {
-						guiGraphics.blitSprite(AIR_BURSTING_SPRITE, n - aax * 8 - 9, t, 9, 9);
+						guiGraphics.blitSprite(AIR_BURSTING_SPRITE, m - z * 8 - 9, r, 9, 9);
 					}
 				}
+
+				RenderSystem.disableBlend();
 			}
 
 			this.minecraft.getProfiler().pop();
+		}
+	}
+
+	private static void renderArmor(GuiGraphics guiGraphics, Player player, int i, int j, int k, int l) {
+		int m = player.getArmorValue();
+		if (m > 0) {
+			RenderSystem.enableBlend();
+			int n = i - (j - 1) * k - 10;
+
+			for (int o = 0; o < 10; o++) {
+				int p = l + o * 8;
+				if (o * 2 + 1 < m) {
+					guiGraphics.blitSprite(ARMOR_FULL_SPRITE, p, n, 9, 9);
+				}
+
+				if (o * 2 + 1 == m) {
+					guiGraphics.blitSprite(ARMOR_HALF_SPRITE, p, n, 9, 9);
+				}
+
+				if (o * 2 + 1 > m) {
+					guiGraphics.blitSprite(ARMOR_EMPTY_SPRITE, p, n, 9, 9);
+				}
+			}
+
+			RenderSystem.disableBlend();
 		}
 	}
 
@@ -934,7 +916,47 @@ public class Gui {
 	}
 
 	private void renderHeart(GuiGraphics guiGraphics, Gui.HeartType heartType, int i, int j, boolean bl, boolean bl2, boolean bl3) {
+		RenderSystem.enableBlend();
 		guiGraphics.blitSprite(heartType.getSprite(bl, bl3, bl2), i, j, 9, 9);
+		RenderSystem.disableBlend();
+	}
+
+	private void renderFood(GuiGraphics guiGraphics, Player player, int i, int j) {
+		FoodData foodData = player.getFoodData();
+		int k = foodData.getFoodLevel();
+		RenderSystem.enableBlend();
+
+		for (int l = 0; l < 10; l++) {
+			int m = i;
+			ResourceLocation resourceLocation;
+			ResourceLocation resourceLocation2;
+			ResourceLocation resourceLocation3;
+			if (player.hasEffect(MobEffects.HUNGER)) {
+				resourceLocation = FOOD_EMPTY_HUNGER_SPRITE;
+				resourceLocation2 = FOOD_HALF_HUNGER_SPRITE;
+				resourceLocation3 = FOOD_FULL_HUNGER_SPRITE;
+			} else {
+				resourceLocation = FOOD_EMPTY_SPRITE;
+				resourceLocation2 = FOOD_HALF_SPRITE;
+				resourceLocation3 = FOOD_FULL_SPRITE;
+			}
+
+			if (player.getFoodData().getSaturationLevel() <= 0.0F && this.tickCount % (k * 3 + 1) == 0) {
+				m = i + (this.random.nextInt(3) - 1);
+			}
+
+			int n = j - l * 8 - 9;
+			guiGraphics.blitSprite(resourceLocation, n, m, 9, 9);
+			if (l * 2 + 1 < k) {
+				guiGraphics.blitSprite(resourceLocation3, n, m, 9, 9);
+			}
+
+			if (l * 2 + 1 == k) {
+				guiGraphics.blitSprite(resourceLocation2, n, m, 9, 9);
+			}
+		}
+
+		RenderSystem.disableBlend();
 	}
 
 	private void renderVehicleHealth(GuiGraphics guiGraphics) {
@@ -947,8 +969,10 @@ public class Gui {
 				int k = guiGraphics.guiHeight() - 39;
 				int l = guiGraphics.guiWidth() / 2 + 91;
 				int m = k;
+				int n = 0;
+				RenderSystem.enableBlend();
 
-				for (int n = 0; i > 0; n += 20) {
+				while (i > 0) {
 					int o = Math.min(i, 10);
 					i -= o;
 
@@ -965,7 +989,10 @@ public class Gui {
 					}
 
 					m -= 10;
+					n += 20;
 				}
+
+				RenderSystem.disableBlend();
 			}
 		}
 	}

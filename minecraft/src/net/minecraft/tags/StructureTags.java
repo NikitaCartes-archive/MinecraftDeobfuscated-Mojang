@@ -17,6 +17,7 @@ public interface StructureTags {
 	TagKey<Structure> ON_JUNGLE_EXPLORER_MAPS = create("on_jungle_explorer_maps");
 	TagKey<Structure> ON_SWAMP_EXPLORER_MAPS = create("on_swamp_explorer_maps");
 	TagKey<Structure> ON_TREASURE_MAPS = create("on_treasure_maps");
+	TagKey<Structure> ON_TRIAL_CHAMBERS_MAPS = create("on_trial_chambers_maps");
 	TagKey<Structure> CATS_SPAWN_IN = create("cats_spawn_in");
 	TagKey<Structure> CATS_SPAWN_AS_BLACK = create("cats_spawn_as_black");
 	TagKey<Structure> VILLAGE = create("village");

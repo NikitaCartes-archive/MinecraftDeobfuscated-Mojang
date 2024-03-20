@@ -27,6 +27,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleOptions;
@@ -45,7 +46,7 @@ import net.minecraft.network.protocol.game.ClientboundUpdateMobEffectPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -144,7 +145,6 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	public static final double MIN_MOVEMENT_DISTANCE = 0.003;
 	public static final double DEFAULT_BASE_GRAVITY = 0.08;
 	public static final int DEATH_DURATION = 20;
-	private static final int WAIT_TICKS_BEFORE_ITEM_USE_EFFECTS = 7;
 	private static final int TICKS_PER_ELYTRA_FREE_FALL_EVENT = 10;
 	private static final int FREE_FALL_EVENTS_PER_ELYTRA_BREAK = 2;
 	public static final int USE_ITEM_INTERVAL = 4;
@@ -168,6 +168,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	protected static final EntityDimensions SLEEPING_DIMENSIONS = EntityDimensions.fixed(0.2F, 0.2F).withEyeHeight(0.2F);
 	public static final float EXTRA_RENDER_CULLING_SIZE_WITH_BIG_HAT = 0.5F;
 	public static final float DEFAULT_BABY_SCALE = 0.5F;
+	private static final float ITEM_USE_EFFECT_START_FRACTION = 0.21875F;
 	private final AttributeMap attributes;
 	private final CombatTracker combatTracker = new CombatTracker(this);
 	private final Map<Holder<MobEffect>, MobEffectInstance> activeEffects = Maps.<Holder<MobEffect>, MobEffectInstance>newHashMap();
@@ -1413,7 +1414,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	protected void dropCustomDeathLoot(DamageSource damageSource, int i, boolean bl) {
 	}
 
-	public ResourceLocation getLootTable() {
+	public ResourceKey<LootTable> getLootTable() {
 		return this.getType().getDefaultLootTable();
 	}
 
@@ -1422,8 +1423,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	}
 
 	protected void dropFromLootTable(DamageSource damageSource, boolean bl) {
-		ResourceLocation resourceLocation = this.getLootTable();
-		LootTable lootTable = this.level().getServer().getLootData().getLootTable(resourceLocation);
+		ResourceKey<LootTable> resourceKey = this.getLootTable();
+		LootTable lootTable = this.level().getServer().reloadableRegistries().getLootTable(resourceKey);
 		LootParams.Builder builder = new LootParams.Builder((ServerLevel)this.level())
 			.withParameter(LootContextParams.THIS_ENTITY, this)
 			.withParameter(LootContextParams.ORIGIN, this.position())
@@ -1609,7 +1610,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 
 			for (EquipmentSlot equipmentSlot : equipmentSlots) {
 				ItemStack itemStack = this.getItemBySlot(equipmentSlot);
-				if ((!damageSource.is(DamageTypeTags.IS_FIRE) || !itemStack.getItem().isFireResistant()) && itemStack.getItem() instanceof ArmorItem) {
+				if (itemStack.getItem() instanceof ArmorItem && itemStack.canBeHurtBy(damageSource)) {
 					itemStack.hurtAndBreak(i, this, equipmentSlot);
 				}
 			}
@@ -2961,11 +2962,10 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	}
 
 	private boolean shouldTriggerItemUseEffects() {
-		int i = this.getUseItemRemainingTicks();
-		FoodProperties foodProperties = this.useItem.getItem().getFoodProperties();
-		boolean bl = foodProperties != null && foodProperties.isFastFood();
-		bl |= i <= this.useItem.getUseDuration() - 7;
-		return bl && i % 4 == 0;
+		int i = this.useItem.getUseDuration() - this.getUseItemRemainingTicks();
+		int j = (int)((float)this.useItem.getUseDuration() * 0.21875F);
+		boolean bl = i > j;
+		return bl && this.getUseItemRemainingTicks() % 4 == 0;
 	}
 
 	private void updateSwimAmount() {
@@ -3315,7 +3315,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	}
 
 	public ItemStack eat(Level level, ItemStack itemStack) {
-		if (itemStack.isEdible()) {
+		FoodProperties foodProperties = itemStack.get(DataComponents.FOOD);
+		if (foodProperties != null) {
 			level.playSound(
 				null,
 				this.getX(),
@@ -3326,7 +3327,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 				1.0F,
 				1.0F + (level.random.nextFloat() - level.random.nextFloat()) * 0.4F
 			);
-			this.addEatEffect(itemStack, level, this);
+			this.addEatEffect(foodProperties);
 			itemStack.consume(1, this);
 			this.gameEvent(GameEvent.EAT);
 		}
@@ -3334,12 +3335,11 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		return itemStack;
 	}
 
-	private void addEatEffect(ItemStack itemStack, Level level, LivingEntity livingEntity) {
-		Item item = itemStack.getItem();
-		if (item.isEdible()) {
-			for (Pair<MobEffectInstance, Float> pair : item.getFoodProperties().getEffects()) {
-				if (!level.isClientSide && pair.getFirst() != null && level.random.nextFloat() < pair.getSecond()) {
-					livingEntity.addEffect(new MobEffectInstance(pair.getFirst()));
+	private void addEatEffect(FoodProperties foodProperties) {
+		if (!this.level().isClientSide()) {
+			for (FoodProperties.PossibleEffect possibleEffect : foodProperties.effects()) {
+				if (this.random.nextFloat() < possibleEffect.probability()) {
+					this.addEffect(possibleEffect.effect());
 				}
 			}
 		}

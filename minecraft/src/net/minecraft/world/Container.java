@@ -10,7 +10,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
 public interface Container extends Clearable {
-	int LARGE_MAX_STACK_SIZE = 64;
 	float DEFAULT_DISTANCE_BUFFER = 4.0F;
 
 	int getContainerSize();
@@ -26,7 +25,11 @@ public interface Container extends Clearable {
 	void setItem(int i, ItemStack itemStack);
 
 	default int getMaxStackSize() {
-		return 64;
+		return 99;
+	}
+
+	default int getMaxStackSize(ItemStack itemStack) {
+		return Math.min(this.getMaxStackSize(), itemStack.getMaxStackSize());
 	}
 
 	void setChanged();

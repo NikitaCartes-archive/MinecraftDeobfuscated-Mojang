@@ -11,7 +11,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.DynamicTexture;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.client.resources.MapDecorationTextureManager;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -23,15 +25,15 @@ import org.joml.Matrix4f;
 
 @Environment(EnvType.CLIENT)
 public class MapRenderer implements AutoCloseable {
-	private static final ResourceLocation MAP_ICONS_LOCATION = new ResourceLocation("textures/map/map_icons.png");
-	static final RenderType MAP_ICONS = RenderType.text(MAP_ICONS_LOCATION);
 	private static final int WIDTH = 128;
 	private static final int HEIGHT = 128;
 	final TextureManager textureManager;
+	final MapDecorationTextureManager decorationTextures;
 	private final Int2ObjectMap<MapRenderer.MapInstance> maps = new Int2ObjectOpenHashMap<>();
 
-	public MapRenderer(TextureManager textureManager) {
+	public MapRenderer(TextureManager textureManager, MapDecorationTextureManager mapDecorationTextureManager) {
 		this.textureManager = textureManager;
+		this.decorationTextures = mapDecorationTextureManager;
 	}
 
 	public void update(MapId mapId, MapItemSavedData mapItemSavedData) {
@@ -124,18 +126,18 @@ public class MapRenderer implements AutoCloseable {
 					poseStack.mulPose(Axis.ZP.rotationDegrees((float)(mapDecoration.rot() * 360) / 16.0F));
 					poseStack.scale(4.0F, 4.0F, 3.0F);
 					poseStack.translate(-0.125F, 0.125F, 0.0F);
-					byte b = mapDecoration.getImage();
-					float g = (float)(b % 16 + 0) / 16.0F;
-					float h = (float)(b / 16 + 0) / 16.0F;
-					float m = (float)(b % 16 + 1) / 16.0F;
-					float n = (float)(b / 16 + 1) / 16.0F;
 					Matrix4f matrix4f2 = poseStack.last().pose();
-					float o = -0.001F;
-					VertexConsumer vertexConsumer2 = multiBufferSource.getBuffer(MapRenderer.MAP_ICONS);
-					vertexConsumer2.vertex(matrix4f2, -1.0F, 1.0F, (float)l * -0.001F).color(255, 255, 255, 255).uv(g, h).uv2(i).endVertex();
-					vertexConsumer2.vertex(matrix4f2, 1.0F, 1.0F, (float)l * -0.001F).color(255, 255, 255, 255).uv(m, h).uv2(i).endVertex();
-					vertexConsumer2.vertex(matrix4f2, 1.0F, -1.0F, (float)l * -0.001F).color(255, 255, 255, 255).uv(m, n).uv2(i).endVertex();
-					vertexConsumer2.vertex(matrix4f2, -1.0F, -1.0F, (float)l * -0.001F).color(255, 255, 255, 255).uv(g, n).uv2(i).endVertex();
+					float g = -0.001F;
+					TextureAtlasSprite textureAtlasSprite = MapRenderer.this.decorationTextures.get(mapDecoration);
+					float h = textureAtlasSprite.getU0();
+					float m = textureAtlasSprite.getV0();
+					float n = textureAtlasSprite.getU1();
+					float o = textureAtlasSprite.getV1();
+					VertexConsumer vertexConsumer2 = multiBufferSource.getBuffer(RenderType.text(textureAtlasSprite.atlasLocation()));
+					vertexConsumer2.vertex(matrix4f2, -1.0F, 1.0F, (float)l * -0.001F).color(255, 255, 255, 255).uv(h, m).uv2(i).endVertex();
+					vertexConsumer2.vertex(matrix4f2, 1.0F, 1.0F, (float)l * -0.001F).color(255, 255, 255, 255).uv(n, m).uv2(i).endVertex();
+					vertexConsumer2.vertex(matrix4f2, 1.0F, -1.0F, (float)l * -0.001F).color(255, 255, 255, 255).uv(n, o).uv2(i).endVertex();
+					vertexConsumer2.vertex(matrix4f2, -1.0F, -1.0F, (float)l * -0.001F).color(255, 255, 255, 255).uv(h, o).uv2(i).endVertex();
 					poseStack.popPose();
 					if (mapDecoration.name().isPresent()) {
 						Font font = Minecraft.getInstance().font;

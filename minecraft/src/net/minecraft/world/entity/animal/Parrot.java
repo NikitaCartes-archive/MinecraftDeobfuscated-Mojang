@@ -2,11 +2,9 @@ package net.minecraft.world.entity.animal;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.mojang.serialization.Codec;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.IntFunction;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
@@ -22,6 +20,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.util.ByIdMap;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
@@ -56,9 +55,7 @@ import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.ai.util.LandRandomPos;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.ServerLevelAccessor;
@@ -75,10 +72,6 @@ public class Parrot extends ShoulderRidingEntity implements VariantHolder<Parrot
 			return mob != null && Parrot.MOB_SOUND_MAP.containsKey(mob.getType());
 		}
 	};
-	private static final Item POISONOUS_FOOD = Items.COOKIE;
-	private static final Set<Item> TAME_FOOD = Sets.<Item>newHashSet(
-		Items.WHEAT_SEEDS, Items.MELON_SEEDS, Items.PUMPKIN_SEEDS, Items.BEETROOT_SEEDS, Items.TORCHFLOWER_SEEDS, Items.PITCHER_POD
-	);
 	static final Map<EntityType<?>, SoundEvent> MOB_SOUND_MAP = Util.make(Maps.<EntityType<?>, SoundEvent>newHashMap(), hashMap -> {
 		hashMap.put(EntityType.BLAZE, SoundEvents.PARROT_IMITATE_BLAZE);
 		hashMap.put(EntityType.BOGGED, SoundEvents.PARROT_IMITATE_BOGGED);
@@ -242,7 +235,7 @@ public class Parrot extends ShoulderRidingEntity implements VariantHolder<Parrot
 	@Override
 	public InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
-		if (!this.isTame() && TAME_FOOD.contains(itemStack.getItem())) {
+		if (!this.isTame() && itemStack.is(ItemTags.PARROT_FOOD)) {
 			itemStack.consume(1, player);
 			if (!this.isSilent()) {
 				this.level()
@@ -268,7 +261,7 @@ public class Parrot extends ShoulderRidingEntity implements VariantHolder<Parrot
 			}
 
 			return InteractionResult.sidedSuccess(this.level().isClientSide);
-		} else if (!itemStack.is(POISONOUS_FOOD)) {
+		} else if (!itemStack.is(ItemTags.PARROT_POISONOUS_FOOD)) {
 			if (!this.isFlying() && this.isTame() && this.isOwnedBy(player)) {
 				if (!this.level().isClientSide) {
 					this.setOrderedToSit(!this.isOrderedToSit());

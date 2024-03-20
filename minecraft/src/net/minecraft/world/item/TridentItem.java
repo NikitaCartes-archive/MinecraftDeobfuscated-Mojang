@@ -1,5 +1,6 @@
 package net.minecraft.world.item;
 
+import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -18,6 +19,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.ThrownTrident;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
+import net.minecraft.world.item.component.Tool;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -45,6 +47,10 @@ public class TridentItem extends Item {
 				EquipmentSlotGroup.MAINHAND
 			)
 			.build();
+	}
+
+	public static Tool createToolProperties() {
+		return new Tool(List.of(), 1.0F, 2);
 	}
 
 	@Override
@@ -137,15 +143,6 @@ public class TridentItem extends Item {
 	@Override
 	public boolean hurtEnemy(ItemStack itemStack, LivingEntity livingEntity, LivingEntity livingEntity2) {
 		itemStack.hurtAndBreak(1, livingEntity2, EquipmentSlot.MAINHAND);
-		return true;
-	}
-
-	@Override
-	public boolean mineBlock(ItemStack itemStack, Level level, BlockState blockState, BlockPos blockPos, LivingEntity livingEntity) {
-		if ((double)blockState.getDestroySpeed(level, blockPos) != 0.0) {
-			itemStack.hurtAndBreak(2, livingEntity, EquipmentSlot.MAINHAND);
-		}
-
 		return true;
 	}
 

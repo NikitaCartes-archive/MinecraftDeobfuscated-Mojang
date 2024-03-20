@@ -46,17 +46,31 @@ public class ArmorTrim implements TooltipProvider {
 	private final Function<Holder<ArmorMaterial>, ResourceLocation> innerTexture;
 	private final Function<Holder<ArmorMaterial>, ResourceLocation> outerTexture;
 
+	private ArmorTrim(
+		Holder<TrimMaterial> holder,
+		Holder<TrimPattern> holder2,
+		boolean bl,
+		Function<Holder<ArmorMaterial>, ResourceLocation> function,
+		Function<Holder<ArmorMaterial>, ResourceLocation> function2
+	) {
+		this.material = holder;
+		this.pattern = holder2;
+		this.showInTooltip = bl;
+		this.innerTexture = function;
+		this.outerTexture = function2;
+	}
+
 	public ArmorTrim(Holder<TrimMaterial> holder, Holder<TrimPattern> holder2, boolean bl) {
 		this.material = holder;
 		this.pattern = holder2;
-		this.innerTexture = Util.memoize((Function<Holder<ArmorMaterial>, ResourceLocation>)(holder2x -> {
+		this.innerTexture = Util.memoize((Function<Holder<ArmorMaterial>, ResourceLocation>)(holder3 -> {
 			ResourceLocation resourceLocation = holder2.value().assetId();
-			String string = this.getColorPaletteSuffix(holder2x);
+			String string = getColorPaletteSuffix(holder, holder3);
 			return resourceLocation.withPath((UnaryOperator<String>)(string2 -> "trims/models/armor/" + string2 + "_leggings_" + string));
 		}));
-		this.outerTexture = Util.memoize((Function<Holder<ArmorMaterial>, ResourceLocation>)(holder2x -> {
+		this.outerTexture = Util.memoize((Function<Holder<ArmorMaterial>, ResourceLocation>)(holder3 -> {
 			ResourceLocation resourceLocation = holder2.value().assetId();
-			String string = this.getColorPaletteSuffix(holder2x);
+			String string = getColorPaletteSuffix(holder, holder3);
 			return resourceLocation.withPath((UnaryOperator<String>)(string2 -> "trims/models/armor/" + string2 + "_" + string));
 		}));
 		this.showInTooltip = bl;
@@ -66,10 +80,10 @@ public class ArmorTrim implements TooltipProvider {
 		this(holder, holder2, true);
 	}
 
-	private String getColorPaletteSuffix(Holder<ArmorMaterial> holder) {
-		Map<Holder<ArmorMaterial>, String> map = this.material.value().overrideArmorMaterials();
-		String string = (String)map.get(holder);
-		return string != null ? string : this.material.value().assetName();
+	private static String getColorPaletteSuffix(Holder<TrimMaterial> holder, Holder<ArmorMaterial> holder2) {
+		Map<Holder<ArmorMaterial>, String> map = holder.value().overrideArmorMaterials();
+		String string = (String)map.get(holder2);
+		return string != null ? string : holder.value().assetName();
 	}
 
 	public boolean hasPatternAndMaterial(Holder<TrimPattern> holder, Holder<TrimMaterial> holder2) {
@@ -111,5 +125,9 @@ public class ArmorTrim implements TooltipProvider {
 			consumer.accept(CommonComponents.space().append(this.pattern.value().copyWithStyle(this.material)));
 			consumer.accept(CommonComponents.space().append(this.material.value().description()));
 		}
+	}
+
+	public ArmorTrim withTooltip(boolean bl) {
+		return new ArmorTrim(this.material, this.pattern, bl, this.innerTexture, this.outerTexture);
 	}
 }

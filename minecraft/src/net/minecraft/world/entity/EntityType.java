@@ -18,10 +18,12 @@ import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -161,6 +163,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.level.pathfinder.NodeEvaluator;
+import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -793,7 +796,7 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 	@Nullable
 	private Component description;
 	@Nullable
-	private ResourceLocation lootTable;
+	private ResourceKey<LootTable> lootTable;
 	private final EntityDimensions dimensions;
 	private final FeatureFlagSet requiredFeatures;
 
@@ -984,10 +987,10 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 		return i == -1 ? this.getDescriptionId() : this.getDescriptionId().substring(i + 1);
 	}
 
-	public ResourceLocation getDefaultLootTable() {
+	public ResourceKey<LootTable> getDefaultLootTable() {
 		if (this.lootTable == null) {
 			ResourceLocation resourceLocation = BuiltInRegistries.ENTITY_TYPE.getKey(this);
-			this.lootTable = resourceLocation.withPrefix("entities/");
+			this.lootTable = ResourceKey.create(Registries.LOOT_TABLE, resourceLocation.withPrefix("entities/"));
 		}
 
 		return this.lootTable;
