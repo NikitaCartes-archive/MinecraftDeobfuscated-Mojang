@@ -1,6 +1,7 @@
 package net.minecraft.world.level.levelgen.structure.pools.alias;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
 import java.util.List;
@@ -13,7 +14,7 @@ import net.minecraft.util.random.WeightedEntry;
 import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
 
 public record RandomGroup(SimpleWeightedRandomList<List<PoolAliasBinding>> groups) implements PoolAliasBinding {
-	static Codec<RandomGroup> CODEC = RecordCodecBuilder.create(
+	static MapCodec<RandomGroup> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> instance.group(SimpleWeightedRandomList.wrappedCodec(Codec.list(PoolAliasBinding.CODEC)).fieldOf("groups").forGetter(RandomGroup::groups))
 				.apply(instance, RandomGroup::new)
 	);
@@ -22,16 +23,16 @@ public record RandomGroup(SimpleWeightedRandomList<List<PoolAliasBinding>> group
 	public void forEachResolved(RandomSource randomSource, BiConsumer<ResourceKey<StructureTemplatePool>, ResourceKey<StructureTemplatePool>> biConsumer) {
 		this.groups
 			.getRandom(randomSource)
-			.ifPresent(wrapper -> ((List)wrapper.getData()).forEach(poolAliasBinding -> poolAliasBinding.forEachResolved(randomSource, biConsumer)));
+			.ifPresent(wrapper -> ((List)wrapper.data()).forEach(poolAliasBinding -> poolAliasBinding.forEachResolved(randomSource, biConsumer)));
 	}
 
 	@Override
 	public Stream<ResourceKey<StructureTemplatePool>> allTargets() {
-		return this.groups.unwrap().stream().flatMap(wrapper -> ((List)wrapper.getData()).stream()).flatMap(PoolAliasBinding::allTargets);
+		return this.groups.unwrap().stream().flatMap(wrapper -> ((List)wrapper.data()).stream()).flatMap(PoolAliasBinding::allTargets);
 	}
 
 	@Override
-	public Codec<RandomGroup> codec() {
+	public MapCodec<RandomGroup> codec() {
 		return CODEC;
 	}
 }

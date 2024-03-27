@@ -8,6 +8,7 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.ChatComponent;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.Connection;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -19,6 +20,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.network.protocol.configuration.ClientConfigurationPacketListener;
 import net.minecraft.network.protocol.configuration.ClientboundFinishConfigurationPacket;
 import net.minecraft.network.protocol.configuration.ClientboundRegistryDataPacket;
+import net.minecraft.network.protocol.configuration.ClientboundResetChatPacket;
 import net.minecraft.network.protocol.configuration.ClientboundSelectKnownPacks;
 import net.minecraft.network.protocol.configuration.ClientboundUpdateEnabledFeaturesPacket;
 import net.minecraft.network.protocol.configuration.ServerboundFinishConfigurationPacket;
@@ -40,12 +42,15 @@ public class ClientConfigurationPacketListenerImpl extends ClientCommonPacketLis
 	private final RegistryDataCollector registryDataCollector = new RegistryDataCollector();
 	@Nullable
 	private KnownPacksManager knownPacks;
+	@Nullable
+	protected ChatComponent.State chatState;
 
 	public ClientConfigurationPacketListenerImpl(Minecraft minecraft, Connection connection, CommonListenerCookie commonListenerCookie) {
 		super(minecraft, connection, commonListenerCookie);
 		this.localGameProfile = commonListenerCookie.localGameProfile();
 		this.receivedRegistries = commonListenerCookie.receivedRegistries();
 		this.enabledFeatures = commonListenerCookie.enabledFeatures();
+		this.chatState = commonListenerCookie.chatState();
 	}
 
 	@Override
@@ -90,6 +95,11 @@ public class ClientConfigurationPacketListenerImpl extends ClientCommonPacketLis
 		this.send(new ServerboundSelectKnownPacks(list));
 	}
 
+	@Override
+	public void handleResetChat(ClientboundResetChatPacket clientboundResetChatPacket) {
+		this.chatState = null;
+	}
+
 	private <T> T runWithResources(Function<ResourceProvider, T> function) {
 		if (this.knownPacks == null) {
 			return (T)function.apply(ResourceProvider.EMPTY);
@@ -123,7 +133,8 @@ public class ClientConfigurationPacketListenerImpl extends ClientCommonPacketLis
 						this.serverBrand,
 						this.serverData,
 						this.postDisconnectScreen,
-						this.serverCookies
+						this.serverCookies,
+						this.chatState
 					)
 				)
 			);

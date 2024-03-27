@@ -698,6 +698,9 @@ public class SoundType {
 	public static final SoundType HEAVY_CORE = new SoundType(
 		1.0F, 1.0F, SoundEvents.HEAVY_CORE_BREAK, SoundEvents.HEAVY_CORE_STEP, SoundEvents.HEAVY_CORE_PLACE, SoundEvents.HEAVY_CORE_HIT, SoundEvents.HEAVY_CORE_FALL
 	);
+	public static final SoundType COBWEB = new SoundType(
+		1.0F, 1.0F, SoundEvents.COBWEB_BREAK, SoundEvents.COBWEB_STEP, SoundEvents.COBWEB_PLACE, SoundEvents.COBWEB_HIT, SoundEvents.COBWEB_FALL
+	);
 	public final float volume;
 	public final float pitch;
 	private final SoundEvent breakSound;

@@ -1,7 +1,7 @@
 package net.minecraft.world.level.levelgen.feature.trunkplacers;
 
 import com.google.common.collect.Lists;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
 import java.util.List;
@@ -16,7 +16,7 @@ import net.minecraft.world.level.levelgen.feature.configurations.TreeConfigurati
 import net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer;
 
 public class DarkOakTrunkPlacer extends TrunkPlacer {
-	public static final Codec<DarkOakTrunkPlacer> CODEC = RecordCodecBuilder.create(
+	public static final MapCodec<DarkOakTrunkPlacer> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> trunkPlacerParts(instance).apply(instance, DarkOakTrunkPlacer::new)
 	);
 

@@ -2,6 +2,7 @@ package net.minecraft.world.level.storage.loot.functions;
 
 import com.google.common.collect.ImmutableSet;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
 import java.util.List;
@@ -16,7 +17,7 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
 public class CopyNameFunction extends LootItemConditionalFunction {
-	public static final Codec<CopyNameFunction> CODEC = RecordCodecBuilder.create(
+	public static final MapCodec<CopyNameFunction> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> commonFields(instance)
 				.and(CopyNameFunction.NameSource.CODEC.fieldOf("source").forGetter(copyNameFunction -> copyNameFunction.source))
 				.apply(instance, CopyNameFunction::new)

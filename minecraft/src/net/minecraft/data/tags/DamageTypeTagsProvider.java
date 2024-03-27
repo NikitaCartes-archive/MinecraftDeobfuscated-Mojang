@@ -87,5 +87,6 @@ public class DamageTypeTagsProvider extends TagsProvider<DamageType> {
 				DamageTypes.THORNS,
 				DamageTypes.WITHER
 			);
+		this.tag(DamageTypeTags.IS_PLAYER_ATTACK).add(DamageTypes.PLAYER_ATTACK);
 	}
 }

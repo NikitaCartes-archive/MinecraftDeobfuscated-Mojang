@@ -1,17 +1,16 @@
 package net.minecraft.world.level.levelgen.feature.stateproviders;
 
-import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.random.SimpleWeightedRandomList;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class WeightedStateProvider extends BlockStateProvider {
-	public static final Codec<WeightedStateProvider> CODEC = SimpleWeightedRandomList.wrappedCodec(BlockState.CODEC)
+	public static final MapCodec<WeightedStateProvider> CODEC = SimpleWeightedRandomList.wrappedCodec(BlockState.CODEC)
 		.<WeightedStateProvider>comapFlatMap(WeightedStateProvider::create, weightedStateProvider -> weightedStateProvider.weightedList)
-		.fieldOf("entries")
-		.codec();
+		.fieldOf("entries");
 	private final SimpleWeightedRandomList<BlockState> weightedList;
 
 	private static DataResult<WeightedStateProvider> create(SimpleWeightedRandomList<BlockState> simpleWeightedRandomList) {

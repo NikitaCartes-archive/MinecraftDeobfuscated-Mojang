@@ -1,6 +1,7 @@
 package net.minecraft.world.level.levelgen.structure.templatesystem;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
 import javax.annotation.Nullable;
@@ -10,7 +11,7 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.levelgen.Heightmap;
 
 public class GravityProcessor extends StructureProcessor {
-	public static final Codec<GravityProcessor> CODEC = RecordCodecBuilder.create(
+	public static final MapCodec<GravityProcessor> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> instance.group(
 					Heightmap.Types.CODEC.fieldOf("heightmap").orElse(Heightmap.Types.WORLD_SURFACE_WG).forGetter(gravityProcessor -> gravityProcessor.heightmap),
 					Codec.INT.fieldOf("offset").orElse(0).forGetter(gravityProcessor -> gravityProcessor.offset)

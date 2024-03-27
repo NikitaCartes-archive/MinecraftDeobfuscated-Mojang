@@ -1,6 +1,7 @@
 package net.minecraft.core.particles;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import java.util.function.Function;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -48,6 +49,7 @@ public class ParticleTypes {
 	public static final SimpleParticleType EXPLOSION_EMITTER = register("explosion_emitter", true);
 	public static final SimpleParticleType EXPLOSION = register("explosion", true);
 	public static final SimpleParticleType GUST = register("gust", true);
+	public static final SimpleParticleType SMALL_GUST = register("small_gust", false);
 	public static final SimpleParticleType GUST_EMITTER_LARGE = register("gust_emitter_large", true);
 	public static final SimpleParticleType GUST_EMITTER_SMALL = register("gust_emitter_small", true);
 	public static final SimpleParticleType SONIC_BOOM = register("sonic_boom", true);
@@ -57,6 +59,7 @@ public class ParticleTypes {
 	public static final SimpleParticleType FIREWORK = register("firework", false);
 	public static final SimpleParticleType FISHING = register("fishing", false);
 	public static final SimpleParticleType FLAME = register("flame", false);
+	public static final SimpleParticleType INFESTED = register("infested", false);
 	public static final SimpleParticleType CHERRY_LEAVES = register("cherry_leaves", false);
 	public static final SimpleParticleType SCULK_SOUL = register("sculk_soul", false);
 	public static final ParticleType<SculkChargeParticleOptions> SCULK_CHARGE = register(
@@ -81,6 +84,7 @@ public class ParticleTypes {
 		"vibration", true, VibrationParticleOption.DESERIALIZER, particleType -> VibrationParticleOption.CODEC, particleType -> VibrationParticleOption.STREAM_CODEC
 	);
 	public static final SimpleParticleType ITEM_SLIME = register("item_slime", false);
+	public static final SimpleParticleType ITEM_COBWEB = register("item_cobweb", false);
 	public static final SimpleParticleType ITEM_SNOWBALL = register("item_snowball", false);
 	public static final SimpleParticleType LARGE_SMOKE = register("large_smoke", false);
 	public static final SimpleParticleType LAVA = register("lava", false);
@@ -137,8 +141,15 @@ public class ParticleTypes {
 	);
 	public static final SimpleParticleType EGG_CRACK = register("egg_crack", false);
 	public static final SimpleParticleType DUST_PLUME = register("dust_plume", false);
-	public static final SimpleParticleType TRIAL_SPAWNER_DETECTION = register("trial_spawner_detection", true);
+	public static final SimpleParticleType TRIAL_SPAWNER_DETECTED_PLAYER = register("trial_spawner_detection", true);
+	public static final SimpleParticleType TRIAL_SPAWNER_DETECTED_PLAYER_OMINOUS = register("trial_spawner_detection_ominous", true);
 	public static final SimpleParticleType VAULT_CONNECTION = register("vault_connection", true);
+	public static final ParticleType<BlockParticleOption> DUST_PILLAR = register(
+		"dust_pillar", true, BlockParticleOption.DESERIALIZER, BlockParticleOption::codec, BlockParticleOption::streamCodec
+	);
+	public static final SimpleParticleType OMINOUS_SPAWNING = register("ominous_spawning", true);
+	public static final SimpleParticleType RAID_OMEN = register("raid_omen", false);
+	public static final SimpleParticleType TRIAL_OMEN = register("trial_omen", false);
 	public static final Codec<ParticleOptions> CODEC = BuiltInRegistries.PARTICLE_TYPE
 		.byNameCodec()
 		.dispatch("type", ParticleOptions::getType, ParticleType::codec);
@@ -153,13 +164,13 @@ public class ParticleTypes {
 		String string,
 		boolean bl,
 		ParticleOptions.Deserializer<T> deserializer,
-		Function<ParticleType<T>, Codec<T>> function,
+		Function<ParticleType<T>, MapCodec<T>> function,
 		Function<ParticleType<T>, StreamCodec<? super RegistryFriendlyByteBuf, T>> function2
 	) {
 		return Registry.register(BuiltInRegistries.PARTICLE_TYPE, string, new ParticleType<T>(bl, deserializer) {
 			@Override
-			public Codec<T> codec() {
-				return (Codec<T>)function.apply(this);
+			public MapCodec<T> codec() {
+				return (MapCodec<T>)function.apply(this);
 			}
 
 			@Override

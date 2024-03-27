@@ -81,8 +81,8 @@ public class StructureBlockEntity extends BlockEntity {
 	}
 
 	@Override
-	public void load(CompoundTag compoundTag, HolderLookup.Provider provider) {
-		super.load(compoundTag, provider);
+	protected void loadAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
+		super.loadAdditional(compoundTag, provider);
 		this.setStructureName(compoundTag.getString("name"));
 		this.author = compoundTag.getString("author");
 		this.metaData = compoundTag.getString("metadata");
@@ -143,7 +143,7 @@ public class StructureBlockEntity extends BlockEntity {
 
 	@Override
 	public CompoundTag getUpdateTag(HolderLookup.Provider provider) {
-		return this.saveWithoutMetadata(provider);
+		return this.saveCustomOnly(provider);
 	}
 
 	public boolean usedBy(Player player) {

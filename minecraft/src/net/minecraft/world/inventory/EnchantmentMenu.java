@@ -16,6 +16,7 @@ import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
@@ -114,7 +115,7 @@ public class EnchantmentMenu extends AbstractContainerMenu {
 
 					for(int j = 0; j < 3; ++j) {
 						if (this.costs[j] > 0) {
-							List<EnchantmentInstance> list = this.getEnchantmentList(itemStack, j, this.costs[j]);
+							List<EnchantmentInstance> list = this.getEnchantmentList(level.enabledFeatures(), itemStack, j, this.costs[j]);
 							if (list != null && !list.isEmpty()) {
 								EnchantmentInstance enchantmentInstance = (EnchantmentInstance)list.get(this.random.nextInt(list.size()));
 								this.enchantClue[j] = BuiltInRegistries.ENCHANTMENT.getId(enchantmentInstance.enchantment);
@@ -150,7 +151,7 @@ public class EnchantmentMenu extends AbstractContainerMenu {
 			} else {
 				this.access.execute((level, blockPos) -> {
 					ItemStack itemStack3 = itemStack;
-					List<EnchantmentInstance> list = this.getEnchantmentList(itemStack, i, this.costs[i]);
+					List<EnchantmentInstance> list = this.getEnchantmentList(level.enabledFeatures(), itemStack, i, this.costs[i]);
 					if (!list.isEmpty()) {
 						player.onEnchantmentPerformed(itemStack, j);
 						if (itemStack.is(Items.BOOK)) {
@@ -188,9 +189,9 @@ public class EnchantmentMenu extends AbstractContainerMenu {
 		}
 	}
 
-	private List<EnchantmentInstance> getEnchantmentList(ItemStack itemStack, int i, int j) {
+	private List<EnchantmentInstance> getEnchantmentList(FeatureFlagSet featureFlagSet, ItemStack itemStack, int i, int j) {
 		this.random.setSeed((long)(this.enchantmentSeed.get() + i));
-		List<EnchantmentInstance> list = EnchantmentHelper.selectEnchantment(this.random, itemStack, j, false);
+		List<EnchantmentInstance> list = EnchantmentHelper.selectEnchantment(featureFlagSet, this.random, itemStack, j, false);
 		if (itemStack.is(Items.BOOK) && list.size() > 1) {
 			list.remove(this.random.nextInt(list.size()));
 		}

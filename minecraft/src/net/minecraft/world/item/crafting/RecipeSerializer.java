@@ -1,6 +1,6 @@
 package net.minecraft.world.item.crafting;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -43,7 +43,7 @@ public interface RecipeSerializer<T extends Recipe<?>> {
 	RecipeSerializer<SmithingTrimRecipe> SMITHING_TRIM = register("smithing_trim", new SmithingTrimRecipe.Serializer());
 	RecipeSerializer<DecoratedPotRecipe> DECORATED_POT_RECIPE = register("crafting_decorated_pot", new SimpleCraftingRecipeSerializer<>(DecoratedPotRecipe::new));
 
-	Codec<T> codec();
+	MapCodec<T> codec();
 
 	StreamCodec<RegistryFriendlyByteBuf, T> streamCodec();
 

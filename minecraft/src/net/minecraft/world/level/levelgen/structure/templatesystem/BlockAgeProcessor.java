@@ -1,6 +1,7 @@
 package net.minecraft.world.level.levelgen.structure.templatesystem;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -15,10 +16,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Half;
 
 public class BlockAgeProcessor extends StructureProcessor {
-	public static final Codec<BlockAgeProcessor> CODEC = Codec.FLOAT
+	public static final MapCodec<BlockAgeProcessor> CODEC = Codec.FLOAT
 		.fieldOf("mossiness")
-		.<BlockAgeProcessor>xmap(BlockAgeProcessor::new, blockAgeProcessor -> blockAgeProcessor.mossiness)
-		.codec();
+		.xmap(BlockAgeProcessor::new, blockAgeProcessor -> blockAgeProcessor.mossiness);
 	private static final float PROBABILITY_OF_REPLACING_FULL_BLOCK = 0.5F;
 	private static final float PROBABILITY_OF_REPLACING_STAIRS = 0.5F;
 	private static final float PROBABILITY_OF_REPLACING_OBSIDIAN = 0.15F;

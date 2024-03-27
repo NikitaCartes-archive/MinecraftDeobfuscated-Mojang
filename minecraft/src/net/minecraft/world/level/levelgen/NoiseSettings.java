@@ -2,7 +2,7 @@ package net.minecraft.world.level.levelgen;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
-import com.mojang.serialization.DataResult.PartialResult;
+import com.mojang.serialization.DataResult.Error;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
 import java.util.function.Function;
@@ -39,8 +39,8 @@ public record NoiseSettings(int minY, int height, int noiseSizeHorizontal, int n
 
 	public static NoiseSettings create(int i, int j, int k, int l) {
 		NoiseSettings noiseSettings = new NoiseSettings(i, j, k, l);
-		guardY(noiseSettings).error().ifPresent(partialResult -> {
-			throw new IllegalStateException(partialResult.message());
+		guardY(noiseSettings).error().ifPresent(error -> {
+			throw new IllegalStateException(error.message());
 		});
 		return noiseSettings;
 	}

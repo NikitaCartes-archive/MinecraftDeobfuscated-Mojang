@@ -2496,8 +2496,8 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 				}
 				break;
 			case 1010:
-				Item var62 = Item.byId(j);
-				if (var62 instanceof RecordItem recordItem) {
+				Item var65 = Item.byId(j);
+				if (var65 instanceof RecordItem recordItem) {
 					this.playStreamingMusic(recordItem.getSound(), blockPos);
 				}
 				break;
@@ -2816,6 +2816,9 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 			case 2012:
 				ParticleUtils.spawnParticleInBlock(this.level, blockPos, j, ParticleTypes.HAPPY_VILLAGER);
 				break;
+			case 2013:
+				ParticleUtils.spawnSmashAttackParticles(this.level, blockPos, j);
+				break;
 			case 3000:
 				this.level
 					.addParticle(
@@ -2936,8 +2939,8 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 				break;
 			case 3008:
 				BlockState blockState2 = Block.stateById(j);
-				Block var33 = blockState2.getBlock();
-				if (var33 instanceof BrushableBlock brushableBlock) {
+				Block var35 = blockState2.getBlock();
+				if (var35 instanceof BrushableBlock brushableBlock) {
 					this.level.playLocalSound(blockPos, brushableBlock.getBrushCompletedSound(), SoundSource.PLAYERS, 1.0F, 1.0F, false);
 				}
 
@@ -2947,21 +2950,21 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 				ParticleUtils.spawnParticlesOnBlockFaces(this.level, blockPos, ParticleTypes.EGG_CRACK, UniformInt.of(3, 6));
 				break;
 			case 3011:
-				TrialSpawner.addSpawnParticles(this.level, blockPos, randomSource);
+				TrialSpawner.addSpawnParticles(this.level, blockPos, randomSource, TrialSpawner.FlameParticle.decode(j).particleType);
 				break;
 			case 3012:
 				this.level
 					.playLocalSound(
 						blockPos, SoundEvents.TRIAL_SPAWNER_SPAWN_MOB, SoundSource.BLOCKS, 1.0F, (randomSource.nextFloat() - randomSource.nextFloat()) * 0.2F + 1.0F, true
 					);
-				TrialSpawner.addSpawnParticles(this.level, blockPos, randomSource);
+				TrialSpawner.addSpawnParticles(this.level, blockPos, randomSource, TrialSpawner.FlameParticle.decode(j).particleType);
 				break;
 			case 3013:
 				this.level
 					.playLocalSound(
 						blockPos, SoundEvents.TRIAL_SPAWNER_DETECT_PLAYER, SoundSource.BLOCKS, 1.0F, (randomSource.nextFloat() - randomSource.nextFloat()) * 0.2F + 1.0F, true
 					);
-				TrialSpawner.addDetectPlayerParticles(this.level, blockPos, randomSource, j);
+				TrialSpawner.addDetectPlayerParticles(this.level, blockPos, randomSource, j, ParticleTypes.TRIAL_SPAWNER_DETECTED_PLAYER);
 				break;
 			case 3014:
 				this.level
@@ -2971,17 +2974,21 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 				TrialSpawner.addEjectItemParticles(this.level, blockPos, randomSource);
 				break;
 			case 3015:
-				BlockEntity blockState3 = this.level.getBlockEntity(blockPos);
-				if (blockState3 instanceof VaultBlockEntity vaultBlockEntity) {
+				BlockEntity var34 = this.level.getBlockEntity(blockPos);
+				if (var34 instanceof VaultBlockEntity vaultBlockEntity) {
 					VaultBlockEntity.Client.emitActivationParticles(
-						this.level, vaultBlockEntity.getBlockPos(), vaultBlockEntity.getBlockState(), vaultBlockEntity.getSharedData()
+						this.level,
+						vaultBlockEntity.getBlockPos(),
+						vaultBlockEntity.getBlockState(),
+						vaultBlockEntity.getSharedData(),
+						j == 0 ? ParticleTypes.SMALL_FLAME : ParticleTypes.SOUL_FIRE_FLAME
 					);
 					this.level
 						.playLocalSound(blockPos, SoundEvents.VAULT_ACTIVATE, SoundSource.BLOCKS, 1.0F, (randomSource.nextFloat() - randomSource.nextFloat()) * 0.2F + 1.0F, true);
 				}
 				break;
 			case 3016:
-				VaultBlockEntity.Client.emitDeactivationParticles(this.level, blockPos);
+				VaultBlockEntity.Client.emitDeactivationParticles(this.level, blockPos, j == 0 ? ParticleTypes.SMALL_FLAME : ParticleTypes.SOUL_FIRE_FLAME);
 				this.level
 					.playLocalSound(
 						blockPos, SoundEvents.VAULT_DEACTIVATE, SoundSource.BLOCKS, 1.0F, (randomSource.nextFloat() - randomSource.nextFloat()) * 0.2F + 1.0F, true
@@ -2989,6 +2996,53 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 				break;
 			case 3017:
 				TrialSpawner.addEjectItemParticles(this.level, blockPos, randomSource);
+				break;
+			case 3018:
+				for(int u = 0; u < 10; ++u) {
+					double v = randomSource.nextGaussian() * 0.02;
+					double w = randomSource.nextGaussian() * 0.02;
+					double x = randomSource.nextGaussian() * 0.02;
+					this.level
+						.addParticle(
+							ParticleTypes.POOF,
+							(double)blockPos.getX() + randomSource.nextDouble(),
+							(double)blockPos.getY() + randomSource.nextDouble(),
+							(double)blockPos.getZ() + randomSource.nextDouble(),
+							v,
+							w,
+							x
+						);
+				}
+
+				this.level
+					.playLocalSound(blockPos, SoundEvents.COBWEB_PLACE, SoundSource.BLOCKS, 1.0F, (randomSource.nextFloat() - randomSource.nextFloat()) * 0.2F + 1.0F, true);
+				break;
+			case 3019:
+				this.level
+					.playLocalSound(
+						blockPos, SoundEvents.TRIAL_SPAWNER_DETECT_PLAYER, SoundSource.BLOCKS, 1.0F, (randomSource.nextFloat() - randomSource.nextFloat()) * 0.2F + 1.0F, true
+					);
+				TrialSpawner.addDetectPlayerParticles(this.level, blockPos, randomSource, j, ParticleTypes.TRIAL_SPAWNER_DETECTED_PLAYER_OMINOUS);
+				break;
+			case 3020:
+				this.level
+					.playLocalSound(
+						blockPos,
+						SoundEvents.TRIAL_SPAWNER_OMINOUS_ACTIVATE,
+						SoundSource.BLOCKS,
+						j == 0 ? 0.3F : 1.0F,
+						(randomSource.nextFloat() - randomSource.nextFloat()) * 0.2F + 1.0F,
+						true
+					);
+				TrialSpawner.addDetectPlayerParticles(this.level, blockPos, randomSource, 0, ParticleTypes.TRIAL_SPAWNER_DETECTED_PLAYER_OMINOUS);
+				TrialSpawner.addBecomeOminousParticles(this.level, blockPos, randomSource);
+				break;
+			case 3021:
+				this.level
+					.playLocalSound(
+						blockPos, SoundEvents.TRIAL_SPAWNER_SPAWN_ITEM, SoundSource.BLOCKS, 1.0F, (randomSource.nextFloat() - randomSource.nextFloat()) * 0.2F + 1.0F, true
+					);
+				TrialSpawner.addSpawnParticles(this.level, blockPos, randomSource, TrialSpawner.FlameParticle.decode(j).particleType);
 		}
 	}
 

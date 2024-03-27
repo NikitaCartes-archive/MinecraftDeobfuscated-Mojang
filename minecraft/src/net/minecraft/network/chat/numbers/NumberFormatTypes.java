@@ -13,7 +13,7 @@ import net.minecraft.network.codec.StreamCodec;
 public class NumberFormatTypes {
 	public static final MapCodec<NumberFormat> MAP_CODEC = BuiltInRegistries.NUMBER_FORMAT_TYPE
 		.byNameCodec()
-		.dispatchMap(NumberFormat::type, numberFormatType -> numberFormatType.mapCodec().codec());
+		.dispatchMap(NumberFormat::type, NumberFormatType::mapCodec);
 	public static final Codec<NumberFormat> CODEC = MAP_CODEC.codec();
 	public static final StreamCodec<RegistryFriendlyByteBuf, NumberFormat> STREAM_CODEC = ByteBufCodecs.registry(Registries.NUMBER_FORMAT_TYPE)
 		.dispatch(NumberFormat::type, NumberFormatType::streamCodec);

@@ -1,6 +1,7 @@
 package net.minecraft.world.level.storage.loot.functions;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
 import java.util.List;
@@ -10,7 +11,7 @@ import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.ValidationContext;
 
 public class SequenceFunction implements LootItemFunction {
-	public static final Codec<SequenceFunction> CODEC = RecordCodecBuilder.create(
+	public static final MapCodec<SequenceFunction> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> instance.group(LootItemFunctions.TYPED_CODEC.listOf().fieldOf("functions").forGetter(sequenceFunction -> sequenceFunction.functions))
 				.apply(instance, SequenceFunction::new)
 	);

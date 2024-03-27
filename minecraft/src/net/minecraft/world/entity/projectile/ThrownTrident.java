@@ -39,6 +39,12 @@ public class ThrownTrident extends AbstractArrow {
 		this.entityData.set(ID_FOIL, itemStack.hasFoil());
 	}
 
+	public ThrownTrident(Level level, double d, double e, double f, ItemStack itemStack) {
+		super(EntityType.TRIDENT, d, e, f, level, itemStack);
+		this.entityData.set(ID_LOYALTY, (byte)EnchantmentHelper.getLoyalty(itemStack));
+		this.entityData.set(ID_FOIL, itemStack.hasFoil());
+	}
+
 	@Override
 	protected void defineSynchedData(SynchedEntityData.Builder builder) {
 		super.defineSynchedData(builder);

@@ -16,7 +16,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import net.minecraft.util.datafix.ExtraDataFixUtils;
 import net.minecraft.util.datafix.fixes.References;
 
 public class V704 extends Schema {
@@ -208,7 +207,7 @@ public class V704 extends Schema {
 						"id",
 						References.ITEM_NAME.in(schema),
 						"tag",
-						ExtraDataFixUtils.optionalFields(
+						DSL.optionalFields(
 							Pair.of("EntityTag", References.ENTITY_TREE.in(schema)),
 							Pair.of("BlockEntityTag", References.BLOCK_ENTITY.in(schema)),
 							Pair.of("CanDestroy", DSL.list(References.BLOCK_NAME.in(schema))),

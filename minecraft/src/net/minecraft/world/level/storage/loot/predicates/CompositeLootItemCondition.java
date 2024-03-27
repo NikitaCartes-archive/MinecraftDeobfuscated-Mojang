@@ -2,6 +2,7 @@ package net.minecraft.world.level.storage.loot.predicates;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
 import java.util.List;
@@ -19,8 +20,8 @@ public abstract class CompositeLootItemCondition implements LootItemCondition {
 		this.composedPredicate = predicate;
 	}
 
-	protected static <T extends CompositeLootItemCondition> Codec<T> createCodec(Function<List<LootItemCondition>, T> function) {
-		return RecordCodecBuilder.create(
+	protected static <T extends CompositeLootItemCondition> MapCodec<T> createCodec(Function<List<LootItemCondition>, T> function) {
+		return RecordCodecBuilder.mapCodec(
 			instance -> instance.group(
 						LootItemConditions.DIRECT_CODEC.listOf().fieldOf("terms").forGetter(compositeLootItemCondition -> compositeLootItemCondition.terms)
 					)

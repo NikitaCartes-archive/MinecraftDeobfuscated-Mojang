@@ -10,6 +10,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.LockIconButton;
 import net.minecraft.client.gui.components.StringWidget;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.layouts.EqualSpacingLayout;
 import net.minecraft.client.gui.layouts.GridLayout;
 import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
@@ -38,6 +39,7 @@ public class OptionsScreen extends Screen {
 	private static final Component RESOURCEPACK = Component.translatable("options.resourcepack");
 	private static final Component ACCESSIBILITY = Component.translatable("options.accessibility");
 	private static final Component TELEMETRY = Component.translatable("options.telemetry");
+	private static final Tooltip TELEMETRY_DISABLED_TOOLTIP = Tooltip.create(Component.translatable("options.telemetry.disabled"));
 	private static final Component CREDITS_AND_ATTRIBUTION = Component.translatable("options.credits_and_attribution");
 	private static final int COLUMNS = 2;
 	private final HeaderAndFooterLayout layout = new HeaderAndFooterLayout(this, 61, 33);
@@ -79,10 +81,15 @@ public class OptionsScreen extends Screen {
 			)
 		);
 		rowHelper.addChild(this.openScreenButton(ACCESSIBILITY, () -> new AccessibilityOptionsScreen(this, this.options)));
-		rowHelper.addChild(this.openScreenButton(TELEMETRY, () -> new TelemetryInfoScreen(this, this.options)));
+		Button button = rowHelper.addChild(this.openScreenButton(TELEMETRY, () -> new TelemetryInfoScreen(this, this.options)));
+		if (!this.minecraft.allowsTelemetry()) {
+			button.active = false;
+			button.setTooltip(TELEMETRY_DISABLED_TOOLTIP);
+		}
+
 		rowHelper.addChild(this.openScreenButton(CREDITS_AND_ATTRIBUTION, () -> new CreditsAndAttributionScreen(this)));
 		this.layout.addToContents(gridLayout);
-		this.layout.addToFooter(Button.builder(CommonComponents.GUI_DONE, button -> this.onClose()).width(200).build());
+		this.layout.addToFooter(Button.builder(CommonComponents.GUI_DONE, buttonx -> this.onClose()).width(200).build());
 		this.layout.visitWidgets(this::addRenderableWidget);
 		this.repositionElements();
 	}

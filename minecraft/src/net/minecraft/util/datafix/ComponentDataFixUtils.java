@@ -65,4 +65,20 @@ public class ComponentDataFixUtils {
 			}
 		}
 	}
+
+	public static Optional<String> extractTranslationString(String string) {
+		try {
+			JsonElement jsonElement = JsonParser.parseString(string);
+			if (jsonElement.isJsonObject()) {
+				JsonObject jsonObject = jsonElement.getAsJsonObject();
+				JsonElement jsonElement2 = jsonObject.get("translate");
+				if (jsonElement2 != null && jsonElement2.isJsonPrimitive()) {
+					return Optional.of(jsonElement2.getAsString());
+				}
+			}
+		} catch (JsonParseException var4) {
+		}
+
+		return Optional.empty();
+	}
 }

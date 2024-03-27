@@ -740,7 +740,9 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	}
 
 	private UserApiService createUserApiService(YggdrasilAuthenticationService yggdrasilAuthenticationService, GameConfig gameConfig) {
-		return yggdrasilAuthenticationService.createUserApiService(gameConfig.user.user.getAccessToken());
+		return gameConfig.user.user.getType() != User.Type.MSA
+			? UserApiService.OFFLINE
+			: yggdrasilAuthenticationService.createUserApiService(gameConfig.user.user.getAccessToken());
 	}
 
 	public static ModCheck checkModStatus() {
@@ -2395,7 +2397,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	}
 
 	private void addCustomNbtData(ItemStack itemStack, BlockEntity blockEntity, RegistryAccess registryAccess) {
-		CompoundTag compoundTag = blockEntity.saveWithFullMetadata(registryAccess);
+		CompoundTag compoundTag = blockEntity.saveCustomOnly(registryAccess);
 		blockEntity.removeComponentsFromTag(compoundTag);
 		BlockItem.setBlockEntityData(itemStack, blockEntity.getType(), compoundTag);
 		itemStack.applyComponents(blockEntity.collectComponents());

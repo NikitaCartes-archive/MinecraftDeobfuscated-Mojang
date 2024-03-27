@@ -1,7 +1,7 @@
 package net.minecraft.world.level.levelgen.structure.pools;
 
 import com.google.common.collect.Lists;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
 import java.util.List;
@@ -25,7 +25,7 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemp
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
 
 public class FeaturePoolElement extends StructurePoolElement {
-	public static final Codec<FeaturePoolElement> CODEC = RecordCodecBuilder.create(
+	public static final MapCodec<FeaturePoolElement> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> instance.group(PlacedFeature.CODEC.fieldOf("feature").forGetter(featurePoolElement -> featurePoolElement.feature), projectionCodec())
 				.apply(instance, FeaturePoolElement::new)
 	);

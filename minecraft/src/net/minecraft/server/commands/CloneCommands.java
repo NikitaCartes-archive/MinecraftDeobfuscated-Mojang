@@ -18,6 +18,7 @@ import net.minecraft.commands.arguments.DimensionArgument;
 import net.minecraft.commands.arguments.blocks.BlockPredicateArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -237,9 +238,9 @@ public class CloneCommands {
 			if (i > j) {
 				throw ERROR_AREA_TOO_LARGE.create(j, i);
 			} else if (serverLevel.hasChunksAt(blockPos, blockPos2) && serverLevel2.hasChunksAt(blockPos3, blockPos4)) {
-				List<CloneCommands.CloneBlockInfo> list = Lists.<CloneCommands.CloneBlockInfo>newArrayList();
-				List<CloneCommands.CloneBlockInfo> list2 = Lists.<CloneCommands.CloneBlockInfo>newArrayList();
-				List<CloneCommands.CloneBlockInfo> list3 = Lists.<CloneCommands.CloneBlockInfo>newArrayList();
+				List<CloneCommands.CloneBlockInfo> list = Lists.newArrayList();
+				List<CloneCommands.CloneBlockInfo> list2 = Lists.newArrayList();
+				List<CloneCommands.CloneBlockInfo> list3 = Lists.newArrayList();
 				Deque<BlockPos> deque = Lists.<BlockPos>newLinkedList();
 				BlockPos blockPos5 = new BlockPos(
 					boundingBox2.minX() - boundingBox.minX(), boundingBox2.minY() - boundingBox.minY(), boundingBox2.minZ() - boundingBox.minZ()
@@ -255,8 +256,10 @@ public class CloneCommands {
 							if (predicate.test(blockInWorld)) {
 								BlockEntity blockEntity = serverLevel.getBlockEntity(blockPos6);
 								if (blockEntity != null) {
-									CompoundTag compoundTag = blockEntity.saveWithoutMetadata(commandSourceStack.registryAccess());
-									list2.add(new CloneCommands.CloneBlockInfo(blockPos7, blockState, compoundTag));
+									CloneCommands.CloneBlockEntityInfo cloneBlockEntityInfo = new CloneCommands.CloneBlockEntityInfo(
+										blockEntity.saveCustomOnly(commandSourceStack.registryAccess()), blockEntity.components()
+									);
+									list2.add(new CloneCommands.CloneBlockInfo(blockPos7, blockState, cloneBlockEntityInfo));
 									deque.addLast(blockPos6);
 								} else if (!blockState.isSolidRender(serverLevel, blockPos6) && !blockState.isCollisionShapeFullBlock(serverLevel, blockPos6)) {
 									list3.add(new CloneCommands.CloneBlockInfo(blockPos7, blockState, null));
@@ -282,7 +285,7 @@ public class CloneCommands {
 					}
 				}
 
-				List<CloneCommands.CloneBlockInfo> list4 = Lists.<CloneCommands.CloneBlockInfo>newArrayList();
+				List<CloneCommands.CloneBlockInfo> list4 = Lists.newArrayList();
 				list4.addAll(list);
 				list4.addAll(list2);
 				list4.addAll(list3);
@@ -304,8 +307,9 @@ public class CloneCommands {
 
 				for(CloneCommands.CloneBlockInfo cloneBlockInfo2 : list2) {
 					BlockEntity blockEntity4 = serverLevel2.getBlockEntity(cloneBlockInfo2.pos);
-					if (cloneBlockInfo2.tag != null && blockEntity4 != null) {
-						blockEntity4.load(cloneBlockInfo2.tag, serverLevel2.registryAccess());
+					if (cloneBlockInfo2.blockEntityInfo != null && blockEntity4 != null) {
+						blockEntity4.loadCustomOnly(cloneBlockInfo2.blockEntityInfo.tag, serverLevel2.registryAccess());
+						blockEntity4.setComponents(cloneBlockInfo2.blockEntityInfo.components);
 						blockEntity4.setChanged();
 					}
 
@@ -330,17 +334,16 @@ public class CloneCommands {
 		}
 	}
 
-	static class CloneBlockInfo {
-		public final BlockPos pos;
-		public final BlockState state;
-		@Nullable
-		public final CompoundTag tag;
+	static record CloneBlockEntityInfo(CompoundTag tag, DataComponentMap components) {
+		final CompoundTag tag;
+		final DataComponentMap components;
+	}
 
-		public CloneBlockInfo(BlockPos blockPos, BlockState blockState, @Nullable CompoundTag compoundTag) {
-			this.pos = blockPos;
-			this.state = blockState;
-			this.tag = compoundTag;
-		}
+	static record CloneBlockInfo(BlockPos pos, BlockState state, @Nullable CloneCommands.CloneBlockEntityInfo blockEntityInfo) {
+		final BlockPos pos;
+		final BlockState state;
+		@Nullable
+		final CloneCommands.CloneBlockEntityInfo blockEntityInfo;
 	}
 
 	@FunctionalInterface

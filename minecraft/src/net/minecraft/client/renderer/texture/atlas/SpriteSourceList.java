@@ -78,7 +78,7 @@ public class SpriteSourceList {
 
 				try {
 					Dynamic<JsonElement> dynamic = new Dynamic<>(JsonOps.INSTANCE, JsonParser.parseReader(bufferedReader));
-					list.addAll((Collection)SpriteSources.FILE_CODEC.parse(dynamic).getOrThrow(false, LOGGER::error));
+					list.addAll((Collection)SpriteSources.FILE_CODEC.parse(dynamic).getOrThrow());
 				} catch (Throwable var10) {
 					if (bufferedReader != null) {
 						try {
@@ -95,7 +95,7 @@ public class SpriteSourceList {
 					bufferedReader.close();
 				}
 			} catch (Exception var11) {
-				LOGGER.warn("Failed to parse atlas definition {} in pack {}", resourceLocation2, resource.sourcePackId(), var11);
+				LOGGER.error("Failed to parse atlas definition {} in pack {}", resourceLocation2, resource.sourcePackId(), var11);
 			}
 		}
 

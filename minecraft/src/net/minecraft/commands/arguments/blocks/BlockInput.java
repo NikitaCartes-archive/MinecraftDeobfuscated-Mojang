@@ -69,7 +69,7 @@ public class BlockInput implements Predicate<BlockInWorld> {
 			if (this.tag != null) {
 				BlockEntity blockEntity = serverLevel.getBlockEntity(blockPos);
 				if (blockEntity != null) {
-					blockEntity.load(this.tag, serverLevel.registryAccess());
+					blockEntity.loadWithComponents(this.tag, serverLevel.registryAccess());
 				}
 			}
 

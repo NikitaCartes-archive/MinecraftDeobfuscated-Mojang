@@ -1,6 +1,6 @@
 package net.minecraft.world.level.levelgen.feature.trunkplacers;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 
@@ -16,17 +16,17 @@ public class TrunkPlacerType<P extends TrunkPlacer> {
 		"upwards_branching_trunk_placer", UpwardsBranchingTrunkPlacer.CODEC
 	);
 	public static final TrunkPlacerType<CherryTrunkPlacer> CHERRY_TRUNK_PLACER = register("cherry_trunk_placer", CherryTrunkPlacer.CODEC);
-	private final Codec<P> codec;
+	private final MapCodec<P> codec;
 
-	private static <P extends TrunkPlacer> TrunkPlacerType<P> register(String string, Codec<P> codec) {
-		return Registry.register(BuiltInRegistries.TRUNK_PLACER_TYPE, string, new TrunkPlacerType<>(codec));
+	private static <P extends TrunkPlacer> TrunkPlacerType<P> register(String string, MapCodec<P> mapCodec) {
+		return Registry.register(BuiltInRegistries.TRUNK_PLACER_TYPE, string, new TrunkPlacerType<>(mapCodec));
 	}
 
-	private TrunkPlacerType(Codec<P> codec) {
-		this.codec = codec;
+	private TrunkPlacerType(MapCodec<P> mapCodec) {
+		this.codec = mapCodec;
 	}
 
-	public Codec<P> codec() {
+	public MapCodec<P> codec() {
 		return this.codec;
 	}
 }

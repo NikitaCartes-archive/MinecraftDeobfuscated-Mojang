@@ -2,6 +2,7 @@ package net.minecraft.world.level.levelgen.feature.trunkplacers;
 
 import com.google.common.collect.Lists;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
 import java.util.List;
@@ -20,7 +21,7 @@ import net.minecraft.world.level.levelgen.feature.configurations.TreeConfigurati
 import net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer;
 
 public class UpwardsBranchingTrunkPlacer extends TrunkPlacer {
-	public static final Codec<UpwardsBranchingTrunkPlacer> CODEC = RecordCodecBuilder.create(
+	public static final MapCodec<UpwardsBranchingTrunkPlacer> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> trunkPlacerParts(instance)
 				.<IntProvider, float, IntProvider, HolderSet<Block>>and(
 					instance.group(

@@ -83,7 +83,7 @@ public class CriteriaTriggers {
 	public static final ShotCrossbowTrigger SHOT_CROSSBOW = register("shot_crossbow", new ShotCrossbowTrigger());
 	public static final KilledByCrossbowTrigger KILLED_BY_CROSSBOW = register("killed_by_crossbow", new KilledByCrossbowTrigger());
 	public static final PlayerTrigger RAID_WIN = register("hero_of_the_village", new PlayerTrigger());
-	public static final PlayerTrigger BAD_OMEN = register("voluntary_exile", new PlayerTrigger());
+	public static final PlayerTrigger RAID_OMEN = register("voluntary_exile", new PlayerTrigger());
 	public static final SlideDownBlockTrigger HONEY_BLOCK_SLIDE = register("slide_down_block", new SlideDownBlockTrigger());
 	public static final BeeNestDestroyedTrigger BEE_NEST_DESTROYED = register("bee_nest_destroyed", new BeeNestDestroyedTrigger());
 	public static final TargetBlockTrigger TARGET_BLOCK_HIT = register("target_hit", new TargetBlockTrigger());

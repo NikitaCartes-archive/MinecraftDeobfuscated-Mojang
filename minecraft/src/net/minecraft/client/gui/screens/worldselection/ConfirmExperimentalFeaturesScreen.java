@@ -2,6 +2,7 @@ package net.minecraft.client.gui.screens.worldselection;
 
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import java.util.Collection;
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -81,6 +82,8 @@ public class ConfirmExperimentalFeaturesScreen extends Screen {
 	class DetailsScreen extends Screen {
 		private static final Component TITLE = Component.translatable("selectWorld.experimental.details.title");
 		final HeaderAndFooterLayout layout = new HeaderAndFooterLayout(this);
+		@Nullable
+		private ConfirmExperimentalFeaturesScreen.DetailsScreen.PackList list;
 
 		DetailsScreen() {
 			super(TITLE);
@@ -89,7 +92,8 @@ public class ConfirmExperimentalFeaturesScreen extends Screen {
 		@Override
 		protected void init() {
 			this.layout.addTitleHeader(TITLE, this.font);
-			this.layout.addToContents(new ConfirmExperimentalFeaturesScreen.DetailsScreen.PackList(this.minecraft, ConfirmExperimentalFeaturesScreen.this.enabledPacks));
+			this.list = this.layout
+				.addToContents(new ConfirmExperimentalFeaturesScreen.DetailsScreen.PackList(this.minecraft, ConfirmExperimentalFeaturesScreen.this.enabledPacks));
 			this.layout.addToFooter(Button.builder(CommonComponents.GUI_BACK, button -> this.onClose()).build());
 			this.layout.visitWidgets(guiEventListener -> {
 			});
@@ -98,6 +102,10 @@ public class ConfirmExperimentalFeaturesScreen extends Screen {
 
 		@Override
 		protected void repositionElements() {
+			if (this.list != null) {
+				this.list.updateSize(this.width, this.layout);
+			}
+
 			this.layout.arrangeElements();
 		}
 

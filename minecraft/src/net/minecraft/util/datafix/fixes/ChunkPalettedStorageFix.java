@@ -720,7 +720,7 @@ public class ChunkPalettedStorageFix extends DataFix {
 			this.level = dynamic;
 			this.x = dynamic.get("xPos").asInt(0) << 4;
 			this.z = dynamic.get("zPos").asInt(0) << 4;
-			dynamic.get("TileEntities").asStreamOpt().result().ifPresent(stream -> stream.forEach(dynamicx -> {
+			dynamic.get("TileEntities").asStreamOpt().ifSuccess(stream -> stream.forEach(dynamicx -> {
 					int ixx = dynamicx.get("x").asInt(0) - this.x & 15;
 					int jxx = dynamicx.get("y").asInt(0);
 					int k = dynamicx.get("z").asInt(0) - this.z & 15;
@@ -730,7 +730,7 @@ public class ChunkPalettedStorageFix extends DataFix {
 					}
 				}));
 			boolean bl = dynamic.get("convertedFromAlphaFormat").asBoolean(false);
-			dynamic.get("Sections").asStreamOpt().result().ifPresent(stream -> stream.forEach(dynamicx -> {
+			dynamic.get("Sections").asStreamOpt().ifSuccess(stream -> stream.forEach(dynamicx -> {
 					ChunkPalettedStorageFix.Section sectionxx = new ChunkPalettedStorageFix.Section(dynamicx);
 					this.sides = sectionxx.upgrade(this.sides);
 					this.sections[sectionxx.y] = sectionxx;

@@ -3,6 +3,7 @@ package net.minecraft.world.level.chunk;
 import com.google.common.base.Suppliers;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import it.unimi.dsi.fastutil.ints.IntArraySet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
@@ -98,13 +99,13 @@ public abstract class ChunkGenerator {
 		);
 	}
 
-	protected abstract Codec<? extends ChunkGenerator> codec();
+	protected abstract MapCodec<? extends ChunkGenerator> codec();
 
 	public ChunkGeneratorStructureState createState(HolderLookup<StructureSet> holderLookup, RandomState randomState, long l) {
 		return ChunkGeneratorStructureState.createForNormal(randomState, l, this.biomeSource, holderLookup);
 	}
 
-	public Optional<ResourceKey<Codec<? extends ChunkGenerator>>> getTypeNameForDataFixer() {
+	public Optional<ResourceKey<MapCodec<? extends ChunkGenerator>>> getTypeNameForDataFixer() {
 		return BuiltInRegistries.CHUNK_GENERATOR.getResourceKey(this.codec());
 	}
 

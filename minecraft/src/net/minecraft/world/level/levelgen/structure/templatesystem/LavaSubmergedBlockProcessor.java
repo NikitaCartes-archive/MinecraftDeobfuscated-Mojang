@@ -1,6 +1,6 @@
 package net.minecraft.world.level.levelgen.structure.templatesystem;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
@@ -9,7 +9,9 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 
 public class LavaSubmergedBlockProcessor extends StructureProcessor {
-	public static final Codec<LavaSubmergedBlockProcessor> CODEC = Codec.unit((Supplier<LavaSubmergedBlockProcessor>)(() -> LavaSubmergedBlockProcessor.INSTANCE));
+	public static final MapCodec<LavaSubmergedBlockProcessor> CODEC = MapCodec.unit(
+		(Supplier<LavaSubmergedBlockProcessor>)(() -> LavaSubmergedBlockProcessor.INSTANCE)
+	);
 	public static final LavaSubmergedBlockProcessor INSTANCE = new LavaSubmergedBlockProcessor();
 
 	@Nullable

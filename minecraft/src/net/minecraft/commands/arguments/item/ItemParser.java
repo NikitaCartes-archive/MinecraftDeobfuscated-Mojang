@@ -16,7 +16,6 @@ import java.util.Set;
 import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
-import net.minecraft.Util;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
@@ -189,7 +188,7 @@ public class ItemParser {
 			int i = this.reader.getCursor();
 			Tag tag = new TagParser(this.reader).readValue();
 			DataResult<T> dataResult = dataComponentType.codecOrThrow().parse(ItemParser.this.registryOps, tag);
-			this.visitor.visitComponent(dataComponentType, Util.getOrThrow(dataResult, string -> {
+			this.visitor.visitComponent(dataComponentType, dataResult.getOrThrow(string -> {
 				this.reader.setCursor(i);
 				return ItemParser.ERROR_MALFORMED_COMPONENT.createWithContext(this.reader, dataComponentType.toString(), string);
 			}));

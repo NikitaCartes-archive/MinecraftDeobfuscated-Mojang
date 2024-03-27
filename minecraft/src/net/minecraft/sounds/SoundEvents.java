@@ -328,6 +328,11 @@ public class SoundEvents {
 	public static final SoundEvent CHORUS_FLOWER_DEATH = register("block.chorus_flower.death");
 	public static final SoundEvent CHORUS_FLOWER_GROW = register("block.chorus_flower.grow");
 	public static final SoundEvent CHORUS_FRUIT_TELEPORT = register("item.chorus_fruit.teleport");
+	public static final SoundEvent COBWEB_BREAK = register("block.cobweb.break");
+	public static final SoundEvent COBWEB_STEP = register("block.cobweb.step");
+	public static final SoundEvent COBWEB_PLACE = register("block.cobweb.place");
+	public static final SoundEvent COBWEB_HIT = register("block.cobweb.hit");
+	public static final SoundEvent COBWEB_FALL = register("block.cobweb.fall");
 	public static final SoundEvent COD_AMBIENT = register("entity.cod.ambient");
 	public static final SoundEvent COD_DEATH = register("entity.cod.death");
 	public static final SoundEvent COD_FLOP = register("entity.cod.flop");
@@ -682,8 +687,13 @@ public class SoundEvents {
 	public static final SoundEvent TRIAL_SPAWNER_HIT = register("block.trial_spawner.hit");
 	public static final SoundEvent TRIAL_SPAWNER_FALL = register("block.trial_spawner.fall");
 	public static final SoundEvent TRIAL_SPAWNER_SPAWN_MOB = register("block.trial_spawner.spawn_mob");
+	public static final SoundEvent TRIAL_SPAWNER_ABOUT_TO_SPAWN_ITEM = register("block.trial_spawner.about_to_spawn_item");
+	public static final SoundEvent TRIAL_SPAWNER_SPAWN_ITEM = register("block.trial_spawner.spawn_item");
+	public static final SoundEvent TRIAL_SPAWNER_SPAWN_ITEM_BEGIN = register("block.trial_spawner.spawn_item_begin");
 	public static final SoundEvent TRIAL_SPAWNER_DETECT_PLAYER = register("block.trial_spawner.detect_player");
+	public static final SoundEvent TRIAL_SPAWNER_OMINOUS_ACTIVATE = register("block.trial_spawner.charge_activate");
 	public static final SoundEvent TRIAL_SPAWNER_AMBIENT = register("block.trial_spawner.ambient");
+	public static final SoundEvent TRIAL_SPAWNER_AMBIENT_OMINOUS = register("block.trial_spawner.ambient_charged");
 	public static final SoundEvent TRIAL_SPAWNER_OPEN_SHUTTER = register("block.trial_spawner.open_shutter");
 	public static final SoundEvent TRIAL_SPAWNER_CLOSE_SHUTTER = register("block.trial_spawner.close_shutter");
 	public static final SoundEvent TRIAL_SPAWNER_EJECT_ITEM = register("block.trial_spawner.eject_item");
@@ -1000,6 +1010,7 @@ public class SoundEvents {
 	public static final SoundEvent OCELOT_HURT = register("entity.ocelot.hurt");
 	public static final SoundEvent OCELOT_AMBIENT = register("entity.ocelot.ambient");
 	public static final SoundEvent OCELOT_DEATH = register("entity.ocelot.death");
+	public static final SoundEvent OMINOUS_BOTTLE_DISPOSE = register("item.ominous_bottle.dispose");
 	public static final SoundEvent PAINTING_BREAK = register("entity.painting.break");
 	public static final SoundEvent PAINTING_PLACE = register("entity.painting.place");
 	public static final SoundEvent PANDA_PRE_SNEEZE = register("entity.panda.pre_sneeze");
@@ -1595,6 +1606,9 @@ public class SoundEvents {
 	public static final SoundEvent ZOMBIE_VILLAGER_DEATH = register("entity.zombie_villager.death");
 	public static final SoundEvent ZOMBIE_VILLAGER_HURT = register("entity.zombie_villager.hurt");
 	public static final SoundEvent ZOMBIE_VILLAGER_STEP = register("entity.zombie_villager.step");
+	public static final SoundEvent APPLY_EFFECT_BAD_OMEN = register("event.mob_effect.bad_omen");
+	public static final SoundEvent APPLY_EFFECT_TRIAL_OMEN = register("event.mob_effect.trial_omen");
+	public static final SoundEvent APPLY_EFFECT_RAID_OMEN = register("event.mob_effect.raid_omen");
 
 	private static Holder<SoundEvent> register(ResourceLocation resourceLocation, ResourceLocation resourceLocation2, float f) {
 		return Registry.registerForHolder(BuiltInRegistries.SOUND_EVENT, resourceLocation, SoundEvent.createFixedRangeEvent(resourceLocation2, f));

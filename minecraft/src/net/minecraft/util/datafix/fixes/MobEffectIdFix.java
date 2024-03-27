@@ -17,7 +17,6 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Stream;
 import net.minecraft.Util;
-import net.minecraft.util.datafix.ExtraDataFixUtils;
 import net.minecraft.util.datafix.schemas.NamespacedSchema;
 
 public class MobEffectIdFix extends DataFix {
@@ -70,7 +69,7 @@ public class MobEffectIdFix extends DataFix {
 
 	private static <T> Dynamic<T> updateMobEffectIdField(Dynamic<T> dynamic, String string, Dynamic<T> dynamic2, String string2) {
 		Optional<Dynamic<T>> optional = getAndConvertMobEffectId(dynamic, string);
-		return ExtraDataFixUtils.replaceField(dynamic2, string, string2, optional);
+		return dynamic2.replaceField(string, string2, optional);
 	}
 
 	private static <T> Dynamic<T> updateMobEffectIdField(Dynamic<T> dynamic, String string, String string2) {
@@ -79,13 +78,13 @@ public class MobEffectIdFix extends DataFix {
 
 	private static <T> Dynamic<T> updateMobEffectInstance(Dynamic<T> dynamic) {
 		dynamic = updateMobEffectIdField(dynamic, "Id", "id");
-		dynamic = ExtraDataFixUtils.renameField(dynamic, "Ambient", "ambient");
-		dynamic = ExtraDataFixUtils.renameField(dynamic, "Amplifier", "amplifier");
-		dynamic = ExtraDataFixUtils.renameField(dynamic, "Duration", "duration");
-		dynamic = ExtraDataFixUtils.renameField(dynamic, "ShowParticles", "show_particles");
-		dynamic = ExtraDataFixUtils.renameField(dynamic, "ShowIcon", "show_icon");
+		dynamic = dynamic.renameField("Ambient", "ambient");
+		dynamic = dynamic.renameField("Amplifier", "amplifier");
+		dynamic = dynamic.renameField("Duration", "duration");
+		dynamic = dynamic.renameField("ShowParticles", "show_particles");
+		dynamic = dynamic.renameField("ShowIcon", "show_icon");
 		Optional<Dynamic<T>> optional = dynamic.get("HiddenEffect").result().map(MobEffectIdFix::updateMobEffectInstance);
-		return ExtraDataFixUtils.replaceField(dynamic, "HiddenEffect", "hidden_effect", optional);
+		return dynamic.replaceField("HiddenEffect", "hidden_effect", optional);
 	}
 
 	private static <T> Dynamic<T> updateMobEffectInstanceList(Dynamic<T> dynamic, String string, String string2) {
@@ -93,13 +92,13 @@ public class MobEffectIdFix extends DataFix {
 			.asStreamOpt()
 			.result()
 			.map(stream -> dynamic.createList(stream.map(MobEffectIdFix::updateMobEffectInstance)));
-		return ExtraDataFixUtils.replaceField(dynamic, string, string2, optional);
+		return dynamic.replaceField(string, string2, optional);
 	}
 
 	private static <T> Dynamic<T> updateSuspiciousStewEntry(Dynamic<T> dynamic, Dynamic<T> dynamic2) {
 		dynamic2 = updateMobEffectIdField(dynamic, "EffectId", dynamic2, "id");
 		Optional<Dynamic<T>> optional = dynamic.get("EffectDuration").result();
-		return ExtraDataFixUtils.replaceField(dynamic2, "EffectDuration", "duration", optional);
+		return dynamic2.replaceField("EffectDuration", "duration", optional);
 	}
 
 	private static <T> Dynamic<T> updateSuspiciousStewEntry(Dynamic<T> dynamic) {
@@ -164,7 +163,7 @@ public class MobEffectIdFix extends DataFix {
 			.asStreamOpt()
 			.result()
 			.map(stream -> dynamic.createList(stream.map(MobEffectIdFix::updateSuspiciousStewEntry)));
-		return ExtraDataFixUtils.replaceField(dynamic, "Effects", "effects", optional);
+		return dynamic.replaceField("Effects", "effects", optional);
 	}
 
 	private TypeRewriteRule itemStackFixer() {

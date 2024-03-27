@@ -2,6 +2,7 @@ package net.minecraft.world.level.storage.loot.functions;
 
 import com.google.common.collect.ImmutableSet;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
 import java.util.List;
@@ -22,7 +23,7 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
 public class CopyBlockState extends LootItemConditionalFunction {
-	public static final Codec<CopyBlockState> CODEC = RecordCodecBuilder.create(
+	public static final MapCodec<CopyBlockState> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> commonFields(instance)
 				.and(
 					instance.group(

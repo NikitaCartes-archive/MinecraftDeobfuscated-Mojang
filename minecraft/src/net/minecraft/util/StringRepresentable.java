@@ -93,7 +93,7 @@ public interface StringRepresentable {
 
 		public StringRepresentableCodec(S[] stringRepresentables, Function<String, S> function, ToIntFunction<S> toIntFunction) {
 			this.codec = ExtraCodecs.orCompressed(
-				ExtraCodecs.stringResolverCodec(StringRepresentable::getSerializedName, function),
+				Codec.stringResolver(StringRepresentable::getSerializedName, function),
 				ExtraCodecs.idResolverCodec(toIntFunction, i -> i >= 0 && i < stringRepresentables.length ? stringRepresentables[i] : null, -1)
 			);
 		}

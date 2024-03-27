@@ -7,7 +7,6 @@ import com.mojang.datafixers.types.templates.Hook.HookFunction;
 import com.mojang.datafixers.util.Pair;
 import java.util.Map;
 import java.util.function.Supplier;
-import net.minecraft.util.datafix.ExtraDataFixUtils;
 import net.minecraft.util.datafix.fixes.References;
 
 public class V102 extends Schema {
@@ -26,7 +25,7 @@ public class V102 extends Schema {
 						"id",
 						References.ITEM_NAME.in(schema),
 						"tag",
-						ExtraDataFixUtils.optionalFields(
+						DSL.optionalFields(
 							Pair.of("EntityTag", References.ENTITY_TREE.in(schema)),
 							Pair.of("BlockEntityTag", References.BLOCK_ENTITY.in(schema)),
 							Pair.of("CanDestroy", DSL.list(References.BLOCK_NAME.in(schema))),

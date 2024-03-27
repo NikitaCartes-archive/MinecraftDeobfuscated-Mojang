@@ -8,7 +8,7 @@ import com.mojang.datafixers.Typed;
 import com.mojang.datafixers.schemas.Schema;
 import com.mojang.datafixers.types.Type;
 import com.mojang.serialization.Dynamic;
-import com.mojang.serialization.DataResult.PartialResult;
+import com.mojang.serialization.DataResult.Error;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -45,14 +45,12 @@ public class RenameEnchantmentsFix extends DataFix {
 										"id",
 										dynamic2 -> dynamic2.asString()
 												.map(stringx -> dynamicxx.createString((String)this.renames.getOrDefault(stringx, stringx)))
-												.get()
-												.map(Function.identity(), partialResult -> dynamic2)
+												.mapOrElse(Function.identity(), error -> dynamic2)
 									)
 							)
 					)
 					.map(dynamicx::createList)
-					.get()
-					.map(Function.identity(), partialResult -> dynamicx)
+					.mapOrElse(Function.identity(), error -> dynamicx)
 		);
 	}
 }

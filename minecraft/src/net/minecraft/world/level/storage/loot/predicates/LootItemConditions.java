@@ -1,21 +1,19 @@
 package net.minecraft.world.level.storage.loot.predicates;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.RegistryFileCodec;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.ExtraCodecs;
 
 public class LootItemConditions {
 	private static final Codec<LootItemCondition> TYPED_CODEC = BuiltInRegistries.LOOT_CONDITION_TYPE
 		.byNameCodec()
 		.dispatch("condition", LootItemCondition::getType, LootItemConditionType::codec);
-	public static final Codec<LootItemCondition> DIRECT_CODEC = ExtraCodecs.lazyInitializedCodec(
-		() -> ExtraCodecs.withAlternative(TYPED_CODEC, AllOfCondition.INLINE_CODEC)
-	);
+	public static final Codec<LootItemCondition> DIRECT_CODEC = Codec.lazyInitialized(() -> Codec.withAlternative(TYPED_CODEC, AllOfCondition.INLINE_CODEC));
 	public static final Codec<Holder<LootItemCondition>> CODEC = RegistryFileCodec.create(Registries.PREDICATE, DIRECT_CODEC);
 	public static final LootItemConditionType INVERTED = register("inverted", InvertedLootItemCondition.CODEC);
 	public static final LootItemConditionType ANY_OF = register("any_of", AnyOfCondition.CODEC);
@@ -36,7 +34,7 @@ public class LootItemConditions {
 	public static final LootItemConditionType TIME_CHECK = register("time_check", TimeCheck.CODEC);
 	public static final LootItemConditionType VALUE_CHECK = register("value_check", ValueCheckCondition.CODEC);
 
-	private static LootItemConditionType register(String string, Codec<? extends LootItemCondition> codec) {
-		return Registry.register(BuiltInRegistries.LOOT_CONDITION_TYPE, new ResourceLocation(string), new LootItemConditionType(codec));
+	private static LootItemConditionType register(String string, MapCodec<? extends LootItemCondition> mapCodec) {
+		return Registry.register(BuiltInRegistries.LOOT_CONDITION_TYPE, new ResourceLocation(string), new LootItemConditionType(mapCodec));
 	}
 }

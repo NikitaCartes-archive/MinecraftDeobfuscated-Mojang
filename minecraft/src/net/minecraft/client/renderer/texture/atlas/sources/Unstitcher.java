@@ -3,6 +3,7 @@ package net.minecraft.client.renderer.texture.atlas.sources;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
 import java.util.List;
@@ -27,7 +28,7 @@ import org.slf4j.Logger;
 @Environment(EnvType.CLIENT)
 public class Unstitcher implements SpriteSource {
 	static final Logger LOGGER = LogUtils.getLogger();
-	public static final Codec<Unstitcher> CODEC = RecordCodecBuilder.create(
+	public static final MapCodec<Unstitcher> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> instance.group(
 					ResourceLocation.CODEC.fieldOf("resource").forGetter(unstitcher -> unstitcher.resource),
 					ExtraCodecs.nonEmptyList(Unstitcher.Region.CODEC.listOf()).fieldOf("regions").forGetter(unstitcher -> unstitcher.regions),

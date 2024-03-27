@@ -1,7 +1,7 @@
 package net.minecraft.world.level.storage.loot.functions;
 
 import com.google.common.collect.ImmutableList;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
 import java.util.List;
@@ -12,7 +12,6 @@ import javax.annotation.Nullable;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ItemLore;
 import net.minecraft.world.level.storage.loot.LootContext;
@@ -20,13 +19,13 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
 public class SetLoreFunction extends LootItemConditionalFunction {
-	public static final Codec<SetLoreFunction> CODEC = RecordCodecBuilder.create(
+	public static final MapCodec<SetLoreFunction> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> commonFields(instance)
 				.and(
 					instance.group(
-						ExtraCodecs.sizeLimitedList(ComponentSerialization.CODEC.listOf(), 256).fieldOf("lore").forGetter(setLoreFunction -> setLoreFunction.lore),
+						ComponentSerialization.CODEC.sizeLimitedListOf(256).fieldOf("lore").forGetter(setLoreFunction -> setLoreFunction.lore),
 						ListOperation.codec(256).forGetter(setLoreFunction -> setLoreFunction.mode),
-						ExtraCodecs.strictOptionalField(LootContext.EntityTarget.CODEC, "entity").forGetter(setLoreFunction -> setLoreFunction.resolutionContext)
+						LootContext.EntityTarget.CODEC.optionalFieldOf("entity").forGetter(setLoreFunction -> setLoreFunction.resolutionContext)
 					)
 				)
 				.apply(instance, SetLoreFunction::new)

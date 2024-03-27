@@ -44,7 +44,7 @@ public class BlockItem extends Item {
 	public InteractionResult useOn(UseOnContext useOnContext) {
 		InteractionResult interactionResult = this.place(new BlockPlaceContext(useOnContext));
 		if (!interactionResult.consumesAction() && useOnContext.getItemInHand().has(DataComponents.FOOD)) {
-			InteractionResult interactionResult2 = this.use(useOnContext.getLevel(), useOnContext.getPlayer(), useOnContext.getHand()).getResult();
+			InteractionResult interactionResult2 = super.use(useOnContext.getLevel(), useOnContext.getPlayer(), useOnContext.getHand()).getResult();
 			return interactionResult2 == InteractionResult.CONSUME ? InteractionResult.CONSUME_PARTIAL : interactionResult2;
 		} else {
 			return interactionResult;
@@ -104,7 +104,8 @@ public class BlockItem extends Item {
 	private static void updateBlockEntityComponents(Level level, BlockPos blockPos, ItemStack itemStack) {
 		BlockEntity blockEntity = level.getBlockEntity(blockPos);
 		if (blockEntity != null) {
-			blockEntity.applyComponents(itemStack.getComponents());
+			blockEntity.applyComponentsFromItemStack(itemStack);
+			blockEntity.setChanged();
 		}
 	}
 

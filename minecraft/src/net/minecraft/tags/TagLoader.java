@@ -53,7 +53,7 @@ public class TagLoader<T> {
 					try {
 						JsonElement jsonElement = JsonParser.parseReader(reader);
 						List<TagLoader.EntryWithSource> list = (List)map.computeIfAbsent(resourceLocation2, resourceLocationx -> new ArrayList());
-						TagFile tagFile = (TagFile)TagFile.CODEC.parse(new Dynamic<>(JsonOps.INSTANCE, jsonElement)).getOrThrow(false, LOGGER::error);
+						TagFile tagFile = (TagFile)TagFile.CODEC.parse(new Dynamic<>(JsonOps.INSTANCE, jsonElement)).getOrThrow();
 						if (tagFile.replace()) {
 							list.clear();
 						}

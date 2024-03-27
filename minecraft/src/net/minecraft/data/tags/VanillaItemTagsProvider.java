@@ -331,7 +331,9 @@ public class VanillaItemTagsProvider extends ItemTagsProvider {
 			.addTag(ItemTags.CHEST_ARMOR_ENCHANTABLE)
 			.addTag(ItemTags.HEAD_ARMOR_ENCHANTABLE);
 		this.tag(ItemTags.SWORD_ENCHANTABLE).addTag(ItemTags.SWORDS);
-		this.tag(ItemTags.WEAPON_ENCHANTABLE).addTag(ItemTags.SWORDS).addTag(ItemTags.AXES);
+		this.tag(ItemTags.FIRE_ASPECT_ENCHANTABLE).addTag(ItemTags.SWORD_ENCHANTABLE);
+		this.tag(ItemTags.SHARP_WEAPON_ENCHANTABLE).addTag(ItemTags.SWORDS).addTag(ItemTags.AXES);
+		this.tag(ItemTags.WEAPON_ENCHANTABLE).addTag(ItemTags.SHARP_WEAPON_ENCHANTABLE);
 		this.tag(ItemTags.MINING_ENCHANTABLE).addTag(ItemTags.AXES).addTag(ItemTags.PICKAXES).addTag(ItemTags.SHOVELS).addTag(ItemTags.HOES).add(Items.SHEARS);
 		this.tag(ItemTags.MINING_LOOT_ENCHANTABLE).addTag(ItemTags.AXES).addTag(ItemTags.PICKAXES).addTag(ItemTags.SHOVELS).addTag(ItemTags.HOES);
 		this.tag(ItemTags.FISHING_ENCHANTABLE).add(Items.FISHING_ROD);
@@ -406,7 +408,7 @@ public class VanillaItemTagsProvider extends ItemTagsProvider {
 		this.tag(ItemTags.TURTLE_FOOD).add(Items.SEAGRASS);
 		this.tag(ItemTags.PARROT_FOOD)
 			.add(Items.WHEAT_SEEDS, Items.MELON_SEEDS, Items.PUMPKIN_SEEDS, Items.BEETROOT_SEEDS, Items.TORCHFLOWER_SEEDS, Items.PITCHER_POD);
-		this.tag(ItemTags.PARROT_POISONOUS_FOOD).add(Items.CARROT);
+		this.tag(ItemTags.PARROT_POISONOUS_FOOD).add(Items.COOKIE);
 		this.tag(ItemTags.COW_FOOD).add(Items.WHEAT);
 		this.tag(ItemTags.SHEEP_FOOD).add(Items.WHEAT);
 		this.tag(ItemTags.GOAT_FOOD).add(Items.WHEAT);

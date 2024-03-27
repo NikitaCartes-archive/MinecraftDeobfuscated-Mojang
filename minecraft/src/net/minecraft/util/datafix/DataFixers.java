@@ -28,6 +28,7 @@ import net.minecraft.util.datafix.fixes.AdvancementsFix;
 import net.minecraft.util.datafix.fixes.AdvancementsRenameFix;
 import net.minecraft.util.datafix.fixes.AreaEffectCloudPotionFix;
 import net.minecraft.util.datafix.fixes.AttributesRename;
+import net.minecraft.util.datafix.fixes.BannerEntityCustomNameToOverrideComponentFix;
 import net.minecraft.util.datafix.fixes.BannerPatternFormatFix;
 import net.minecraft.util.datafix.fixes.BedItemColorFix;
 import net.minecraft.util.datafix.fixes.BeehiveFieldRenameFix;
@@ -130,6 +131,7 @@ import net.minecraft.util.datafix.fixes.ItemRenameFix;
 import net.minecraft.util.datafix.fixes.ItemShulkerBoxColorFix;
 import net.minecraft.util.datafix.fixes.ItemSpawnEggFix;
 import net.minecraft.util.datafix.fixes.ItemStackComponentizationFix;
+import net.minecraft.util.datafix.fixes.ItemStackCustomNameToOverrideComponentFix;
 import net.minecraft.util.datafix.fixes.ItemStackEnchantmentNamesFix;
 import net.minecraft.util.datafix.fixes.ItemStackMapIdFix;
 import net.minecraft.util.datafix.fixes.ItemStackSpawnEggFix;
@@ -198,6 +200,7 @@ import net.minecraft.util.datafix.fixes.StructuresBecomeConfiguredFix;
 import net.minecraft.util.datafix.fixes.TeamDisplayNameFix;
 import net.minecraft.util.datafix.fixes.TippedArrowPotionToItemFix;
 import net.minecraft.util.datafix.fixes.TrappedChestBlockEntityFix;
+import net.minecraft.util.datafix.fixes.TrialSpawnerConfigFix;
 import net.minecraft.util.datafix.fixes.VariantRenameFix;
 import net.minecraft.util.datafix.fixes.VillagerDataFix;
 import net.minecraft.util.datafix.fixes.VillagerFollowRangeFix;
@@ -286,6 +289,7 @@ import net.minecraft.util.datafix.schemas.V3816;
 import net.minecraft.util.datafix.schemas.V3818;
 import net.minecraft.util.datafix.schemas.V3818_3;
 import net.minecraft.util.datafix.schemas.V3818_4;
+import net.minecraft.util.datafix.schemas.V3825;
 import net.minecraft.util.datafix.schemas.V501;
 import net.minecraft.util.datafix.schemas.V700;
 import net.minecraft.util.datafix.schemas.V701;
@@ -1280,6 +1284,11 @@ public class DataFixers {
 		Schema schema217 = dataFixerBuilder.addSchema(3820, SAME_NAMESPACED);
 		dataFixerBuilder.addFixer(new PlayerHeadBlockProfileFix(schema217));
 		dataFixerBuilder.addFixer(new LodestoneCompassComponentFix(schema217));
+		Schema schema218 = dataFixerBuilder.addSchema(3825, V3825::new);
+		dataFixerBuilder.addFixer(new ItemStackCustomNameToOverrideComponentFix(schema218));
+		dataFixerBuilder.addFixer(new BannerEntityCustomNameToOverrideComponentFix(schema218));
+		dataFixerBuilder.addFixer(new TrialSpawnerConfigFix(schema218));
+		dataFixerBuilder.addFixer(new AddNewChoices(schema218, "Added Ominous Item Spawner", References.ENTITY));
 	}
 
 	private static UnaryOperator<String> createRenamerNoNamespace(Map<String, String> map) {

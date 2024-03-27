@@ -2,7 +2,7 @@ package net.minecraft.world.entity.ai.behavior;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.PathfinderMob;
@@ -24,7 +24,7 @@ public class InsideBrownianWalk {
 									BlockPos blockPos = pathfinderMob.blockPosition();
 									List<BlockPos> list = (List)BlockPos.betweenClosedStream(blockPos.offset(-1, -1, -1), blockPos.offset(1, 1, 1))
 										.map(BlockPos::immutable)
-										.collect(Collectors.toList());
+										.collect(Util.toMutableList());
 									Collections.shuffle(list);
 									list.stream()
 										.filter(blockPosx -> !serverLevel.canSeeSky(blockPosx))

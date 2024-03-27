@@ -4,7 +4,7 @@ import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
-import com.mojang.serialization.DataResult.PartialResult;
+import com.mojang.serialization.DataResult.Error;
 import java.util.Optional;
 import java.util.stream.Stream;
 import net.minecraft.core.Registry;
@@ -35,7 +35,7 @@ public record LootDataType<T>(ResourceKey<Registry<T>> registryKey, Codec<T> cod
 
 	public <V> Optional<T> deserialize(ResourceLocation resourceLocation, DynamicOps<V> dynamicOps, V object) {
 		DataResult<T> dataResult = this.codec.parse(dynamicOps, object);
-		dataResult.error().ifPresent(partialResult -> LOGGER.error("Couldn't parse element {}:{} - {}", this.directory, resourceLocation, partialResult.message()));
+		dataResult.error().ifPresent(error -> LOGGER.error("Couldn't parse element {}:{} - {}", this.directory, resourceLocation, error.message()));
 		return dataResult.result();
 	}
 

@@ -1,6 +1,7 @@
 package net.minecraft.world.level.levelgen.placement;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
 import net.minecraft.core.BlockPos;
@@ -8,7 +9,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.levelgen.Heightmap;
 
 public class SurfaceWaterDepthFilter extends PlacementFilter {
-	public static final Codec<SurfaceWaterDepthFilter> CODEC = RecordCodecBuilder.create(
+	public static final MapCodec<SurfaceWaterDepthFilter> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> instance.group(Codec.INT.fieldOf("max_water_depth").forGetter(surfaceWaterDepthFilter -> surfaceWaterDepthFilter.maxWaterDepth))
 				.apply(instance, SurfaceWaterDepthFilter::new)
 	);

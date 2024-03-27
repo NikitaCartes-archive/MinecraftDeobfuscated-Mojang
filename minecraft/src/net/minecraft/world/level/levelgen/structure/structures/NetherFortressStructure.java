@@ -1,6 +1,6 @@
 package net.minecraft.world.level.levelgen.structure.structures;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import java.util.List;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
@@ -21,7 +21,7 @@ public class NetherFortressStructure extends Structure {
 		new MobSpawnSettings.SpawnerData(EntityType.SKELETON, 2, 5, 5),
 		new MobSpawnSettings.SpawnerData(EntityType.MAGMA_CUBE, 3, 4, 4)
 	);
-	public static final Codec<NetherFortressStructure> CODEC = simpleCodec(NetherFortressStructure::new);
+	public static final MapCodec<NetherFortressStructure> CODEC = simpleCodec(NetherFortressStructure::new);
 
 	public NetherFortressStructure(Structure.StructureSettings structureSettings) {
 		super(structureSettings);

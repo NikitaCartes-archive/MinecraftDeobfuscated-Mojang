@@ -1,6 +1,6 @@
 package net.minecraft.world.level.levelgen.structure.pools;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 
@@ -11,9 +11,9 @@ public interface StructurePoolElementType<P extends StructurePoolElement> {
 	StructurePoolElementType<EmptyPoolElement> EMPTY = register("empty_pool_element", EmptyPoolElement.CODEC);
 	StructurePoolElementType<LegacySinglePoolElement> LEGACY = register("legacy_single_pool_element", LegacySinglePoolElement.CODEC);
 
-	Codec<P> codec();
+	MapCodec<P> codec();
 
-	static <P extends StructurePoolElement> StructurePoolElementType<P> register(String string, Codec<P> codec) {
-		return Registry.register(BuiltInRegistries.STRUCTURE_POOL_ELEMENT, string, () -> codec);
+	static <P extends StructurePoolElement> StructurePoolElementType<P> register(String string, MapCodec<P> mapCodec) {
+		return Registry.register(BuiltInRegistries.STRUCTURE_POOL_ELEMENT, string, () -> mapCodec);
 	}
 }

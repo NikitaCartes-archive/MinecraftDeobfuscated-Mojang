@@ -238,7 +238,7 @@ public class GameRules {
 	}
 
 	private void loadFromTag(DynamicLike<?> dynamicLike) {
-		this.rules.forEach((key, value) -> dynamicLike.get(key.id).asString().result().ifPresent(value::deserialize));
+		this.rules.forEach((key, value) -> dynamicLike.get(key.id).asString().ifSuccess(value::deserialize));
 	}
 
 	public GameRules copy() {

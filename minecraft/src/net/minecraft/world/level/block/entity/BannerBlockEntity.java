@@ -2,7 +2,6 @@ package net.minecraft.world.level.block.entity;
 
 import com.mojang.logging.LogUtils;
 import javax.annotation.Nullable;
-import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponentMap;
@@ -40,7 +39,7 @@ public class BannerBlockEntity extends BlockEntity implements Nameable {
 
 	public void fromItem(ItemStack itemStack, DyeColor dyeColor) {
 		this.baseColor = dyeColor;
-		this.applyComponents(itemStack.getComponents());
+		this.applyComponentsFromItemStack(itemStack);
 	}
 
 	@Override
@@ -58,10 +57,7 @@ public class BannerBlockEntity extends BlockEntity implements Nameable {
 	protected void saveAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
 		super.saveAdditional(compoundTag, provider);
 		if (!this.patterns.equals(BannerPatternLayers.EMPTY)) {
-			compoundTag.put(
-				"patterns",
-				Util.getOrThrow(BannerPatternLayers.CODEC.encodeStart(provider.createSerializationContext(NbtOps.INSTANCE), this.patterns), IllegalStateException::new)
-			);
+			compoundTag.put("patterns", BannerPatternLayers.CODEC.encodeStart(provider.createSerializationContext(NbtOps.INSTANCE), this.patterns).getOrThrow());
 		}
 
 		if (this.name != null) {
@@ -70,8 +66,8 @@ public class BannerBlockEntity extends BlockEntity implements Nameable {
 	}
 
 	@Override
-	public void load(CompoundTag compoundTag, HolderLookup.Provider provider) {
-		super.load(compoundTag, provider);
+	protected void loadAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
+		super.loadAdditional(compoundTag, provider);
 		if (compoundTag.contains("CustomName", 8)) {
 			this.name = Component.Serializer.fromJson(compoundTag.getString("CustomName"), provider);
 		}
@@ -90,7 +86,7 @@ public class BannerBlockEntity extends BlockEntity implements Nameable {
 
 	@Override
 	public CompoundTag getUpdateTag(HolderLookup.Provider provider) {
-		return this.saveWithoutMetadata(provider);
+		return this.saveCustomOnly(provider);
 	}
 
 	public BannerPatternLayers getPatterns() {
@@ -108,13 +104,15 @@ public class BannerBlockEntity extends BlockEntity implements Nameable {
 	}
 
 	@Override
-	public void applyComponents(DataComponentMap dataComponentMap) {
-		this.patterns = dataComponentMap.getOrDefault(DataComponents.BANNER_PATTERNS, BannerPatternLayers.EMPTY);
-		this.name = dataComponentMap.get(DataComponents.CUSTOM_NAME);
+	protected void applyImplicitComponents(BlockEntity.DataComponentInput dataComponentInput) {
+		super.applyImplicitComponents(dataComponentInput);
+		this.patterns = dataComponentInput.getOrDefault(DataComponents.BANNER_PATTERNS, BannerPatternLayers.EMPTY);
+		this.name = dataComponentInput.get(DataComponents.CUSTOM_NAME);
 	}
 
 	@Override
-	public void collectComponents(DataComponentMap.Builder builder) {
+	protected void collectImplicitComponents(DataComponentMap.Builder builder) {
+		super.collectImplicitComponents(builder);
 		builder.set(DataComponents.BANNER_PATTERNS, this.patterns);
 		builder.set(DataComponents.CUSTOM_NAME, this.name);
 	}

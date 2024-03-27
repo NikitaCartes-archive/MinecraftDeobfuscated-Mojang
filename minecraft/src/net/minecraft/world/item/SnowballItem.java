@@ -1,15 +1,18 @@
 package net.minecraft.world.item;
 
+import net.minecraft.core.Direction;
+import net.minecraft.core.Position;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.Snowball;
 import net.minecraft.world.level.Level;
 
-public class SnowballItem extends Item {
+public class SnowballItem extends Item implements ProjectileItem {
 	public SnowballItem(Item.Properties properties) {
 		super(properties);
 	}
@@ -37,5 +40,12 @@ public class SnowballItem extends Item {
 		player.awardStat(Stats.ITEM_USED.get(this));
 		itemStack.consume(1, player);
 		return InteractionResultHolder.sidedSuccess(itemStack, level.isClientSide());
+	}
+
+	@Override
+	public Projectile asProjectile(Level level, Position position, ItemStack itemStack, Direction direction) {
+		Snowball snowball = new Snowball(level, position.x(), position.y(), position.z());
+		snowball.setItem(itemStack);
+		return snowball;
 	}
 }

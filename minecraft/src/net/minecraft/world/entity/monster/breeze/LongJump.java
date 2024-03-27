@@ -24,6 +24,7 @@ import net.minecraft.world.entity.ai.behavior.Swim;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
@@ -58,7 +59,7 @@ public class LongJump extends Behavior<Breeze> {
 		);
 	}
 
-	protected boolean checkExtraStartConditions(ServerLevel serverLevel, Breeze breeze) {
+	public static boolean canRun(ServerLevel serverLevel, Breeze breeze) {
 		if (!breeze.onGround() && !breeze.isInWater()) {
 			return false;
 		} else if (Swim.shouldSwim(breeze)) {
@@ -80,14 +81,23 @@ public class LongJump extends Behavior<Breeze> {
 				BlockPos blockPos = snapToSurface(breeze, BreezeUtil.randomPointBehindTarget(livingEntity, breeze.getRandom()));
 				if (blockPos == null) {
 					return false;
-				} else if (!BreezeUtil.hasLineOfSight(breeze, blockPos.getCenter()) && !BreezeUtil.hasLineOfSight(breeze, blockPos.above(4).getCenter())) {
-					return false;
 				} else {
-					breeze.getBrain().setMemory(MemoryModuleType.BREEZE_JUMP_TARGET, blockPos);
-					return true;
+					BlockState blockState = serverLevel.getBlockState(blockPos.below());
+					if (breeze.getType().isBlockDangerous(blockState)) {
+						return false;
+					} else if (!BreezeUtil.hasLineOfSight(breeze, blockPos.getCenter()) && !BreezeUtil.hasLineOfSight(breeze, blockPos.above(4).getCenter())) {
+						return false;
+					} else {
+						breeze.getBrain().setMemory(MemoryModuleType.BREEZE_JUMP_TARGET, blockPos);
+						return true;
+					}
 				}
 			}
 		}
+	}
+
+	protected boolean checkExtraStartConditions(ServerLevel serverLevel, Breeze breeze) {
+		return canRun(serverLevel, breeze);
 	}
 
 	protected boolean canStillUse(ServerLevel serverLevel, Breeze breeze, long l) {
@@ -169,7 +179,7 @@ public class LongJump extends Behavior<Breeze> {
 		} else {
 			ClipContext clipContext2 = new ClipContext(vec3, vec3.relative(Direction.UP, 10.0), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, livingEntity);
 			HitResult hitResult2 = livingEntity.level().clip(clipContext2);
-			return hitResult2.getType() == HitResult.Type.BLOCK ? BlockPos.containing(hitResult.getLocation()).above() : null;
+			return hitResult2.getType() == HitResult.Type.BLOCK ? BlockPos.containing(hitResult2.getLocation()).above() : null;
 		}
 	}
 

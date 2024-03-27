@@ -12,7 +12,6 @@ import com.mojang.serialization.DynamicOps;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import net.minecraft.util.datafix.ExtraDataFixUtils;
 import net.minecraft.util.datafix.fixes.References;
 
 public class V705 extends NamespacedSchema {
@@ -309,7 +308,7 @@ public class V705 extends NamespacedSchema {
 						"id",
 						References.ITEM_NAME.in(schema),
 						"tag",
-						ExtraDataFixUtils.optionalFields(
+						DSL.optionalFields(
 							Pair.of("EntityTag", References.ENTITY_TREE.in(schema)),
 							Pair.of("BlockEntityTag", References.BLOCK_ENTITY.in(schema)),
 							Pair.of("CanDestroy", DSL.list(References.BLOCK_NAME.in(schema))),

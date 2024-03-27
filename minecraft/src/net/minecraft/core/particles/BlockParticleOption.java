@@ -2,7 +2,7 @@ package net.minecraft.core.particles;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.commands.arguments.blocks.BlockStateParser;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -22,8 +22,10 @@ public class BlockParticleOption implements ParticleOptions {
 	private final ParticleType<BlockParticleOption> type;
 	private final BlockState state;
 
-	public static Codec<BlockParticleOption> codec(ParticleType<BlockParticleOption> particleType) {
-		return BlockState.CODEC.xmap(blockState -> new BlockParticleOption(particleType, blockState), blockParticleOption -> blockParticleOption.state);
+	public static MapCodec<BlockParticleOption> codec(ParticleType<BlockParticleOption> particleType) {
+		return BlockState.CODEC
+			.<BlockParticleOption>xmap(blockState -> new BlockParticleOption(particleType, blockState), blockParticleOption -> blockParticleOption.state)
+			.fieldOf("value");
 	}
 
 	public static StreamCodec<? super RegistryFriendlyByteBuf, BlockParticleOption> streamCodec(ParticleType<BlockParticleOption> particleType) {

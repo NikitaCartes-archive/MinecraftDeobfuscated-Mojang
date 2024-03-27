@@ -1,6 +1,7 @@
 package net.minecraft.world.level.levelgen.feature.treedecorators;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -9,10 +10,9 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CocoaBlock;
 
 public class CocoaDecorator extends TreeDecorator {
-	public static final Codec<CocoaDecorator> CODEC = Codec.floatRange(0.0F, 1.0F)
+	public static final MapCodec<CocoaDecorator> CODEC = Codec.floatRange(0.0F, 1.0F)
 		.fieldOf("probability")
-		.<CocoaDecorator>xmap(CocoaDecorator::new, cocoaDecorator -> cocoaDecorator.probability)
-		.codec();
+		.xmap(CocoaDecorator::new, cocoaDecorator -> cocoaDecorator.probability);
 	private final float probability;
 
 	public CocoaDecorator(float f) {

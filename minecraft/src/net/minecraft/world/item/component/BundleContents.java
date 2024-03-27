@@ -9,7 +9,6 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
@@ -19,8 +18,7 @@ import net.minecraft.world.level.block.entity.BeehiveBlockEntity;
 public final class BundleContents implements TooltipComponent {
 	public static final int MAX_WEIGHT = 64;
 	public static final BundleContents EMPTY = new BundleContents(List.of());
-	public static final Codec<BundleContents> CODEC = ExtraCodecs.sizeLimitedList(ItemStack.CODEC.listOf(), 64)
-		.xmap(BundleContents::new, bundleContents -> bundleContents.items);
+	public static final Codec<BundleContents> CODEC = ItemStack.CODEC.sizeLimitedListOf(64).xmap(BundleContents::new, bundleContents -> bundleContents.items);
 	public static final StreamCodec<RegistryFriendlyByteBuf, BundleContents> STREAM_CODEC = ItemStack.STREAM_CODEC
 		.apply(ByteBufCodecs.list(64))
 		.map(BundleContents::new, bundleContents -> bundleContents.items);

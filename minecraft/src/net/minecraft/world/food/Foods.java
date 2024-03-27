@@ -80,6 +80,7 @@ public class Foods {
 	public static final FoodProperties SWEET_BERRIES = new FoodProperties.Builder().nutrition(2).saturationModifier(0.1F).build();
 	public static final FoodProperties GLOW_BERRIES = new FoodProperties.Builder().nutrition(2).saturationModifier(0.1F).build();
 	public static final FoodProperties TROPICAL_FISH = new FoodProperties.Builder().nutrition(1).saturationModifier(0.1F).build();
+	public static final FoodProperties OMINOUS_BOTTLE = new FoodProperties.Builder().nutrition(1).saturationModifier(0.1F).build();
 
 	private static FoodProperties.Builder stew(int i) {
 		return new FoodProperties.Builder().nutrition(i).saturationModifier(0.6F);

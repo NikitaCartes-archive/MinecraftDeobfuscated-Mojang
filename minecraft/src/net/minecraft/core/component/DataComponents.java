@@ -67,6 +67,9 @@ public class DataComponents {
 	public static final DataComponentType<Component> CUSTOM_NAME = register(
 		"custom_name", builder -> builder.persistent(ComponentSerialization.FLAT_CODEC).networkSynchronized(ComponentSerialization.STREAM_CODEC)
 	);
+	public static final DataComponentType<Component> ITEM_NAME = register(
+		"item_name", builder -> builder.persistent(ComponentSerialization.FLAT_CODEC).networkSynchronized(ComponentSerialization.STREAM_CODEC)
+	);
 	public static final DataComponentType<ItemLore> LORE = register(
 		"lore", builder -> builder.persistent(ItemLore.CODEC).networkSynchronized(ItemLore.STREAM_CODEC)
 	);
@@ -156,6 +159,9 @@ public class DataComponents {
 	);
 	public static final DataComponentType<Holder<Instrument>> INSTRUMENT = register(
 		"instrument", builder -> builder.persistent(Instrument.CODEC).networkSynchronized(Instrument.STREAM_CODEC)
+	);
+	public static final DataComponentType<Integer> OMINOUS_BOTTLE_AMPLIFIER = register(
+		"ominous_bottle_amplifier", builder -> builder.persistent(ExtraCodecs.intRange(0, 4)).networkSynchronized(ByteBufCodecs.VAR_INT)
 	);
 	public static final DataComponentType<List<ResourceLocation>> RECIPES = register("recipes", builder -> builder.persistent(ResourceLocation.CODEC.listOf()));
 	public static final DataComponentType<LodestoneTracker> LODESTONE_TRACKER = register(

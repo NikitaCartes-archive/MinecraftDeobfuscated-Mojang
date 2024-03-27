@@ -42,6 +42,7 @@ public class EntitySubPredicates {
 	public static final MapCodec<FishingHookPredicate> FISHING_HOOK = register("fishing_hook", FishingHookPredicate.CODEC);
 	public static final MapCodec<PlayerPredicate> PLAYER = register("player", PlayerPredicate.CODEC);
 	public static final MapCodec<SlimePredicate> SLIME = register("slime", SlimePredicate.CODEC);
+	public static final MapCodec<RaiderPredicate> RAIDER = register("raider", RaiderPredicate.CODEC);
 	public static final EntitySubPredicates.EntityVariantPredicateType<Axolotl.Variant> AXOLOTL = register(
 		"axolotl",
 		EntitySubPredicates.EntityVariantPredicateType.create(

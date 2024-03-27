@@ -23,6 +23,8 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 
 public abstract class AbstractWindCharge extends AbstractHurtingProjectile implements ItemSupplier {
+	public static final AbstractWindCharge.WindChargeDamageCalculator EXPLOSION_DAMAGE_CALCULATOR = new AbstractWindCharge.WindChargeDamageCalculator();
+
 	public AbstractWindCharge(EntityType<? extends AbstractWindCharge> entityType, Level level) {
 		super(entityType, level);
 	}
@@ -58,16 +60,24 @@ public abstract class AbstractWindCharge extends AbstractHurtingProjectile imple
 
 	@Override
 	protected boolean canHitEntity(Entity entity) {
-		return entity instanceof AbstractWindCharge ? false : super.canHitEntity(entity);
+		if (entity instanceof AbstractWindCharge) {
+			return false;
+		} else {
+			return entity.getType() == EntityType.END_CRYSTAL ? false : super.canHitEntity(entity);
+		}
 	}
 
 	@Override
 	protected void onHitEntity(EntityHitResult entityHitResult) {
 		super.onHitEntity(entityHitResult);
 		if (!this.level().isClientSide) {
-			Entity var10000 = entityHitResult.getEntity();
-			Entity var3 = this.getOwner();
-			var10000.hurt(this.damageSources().windCharge(this, var3 instanceof LivingEntity livingEntity ? livingEntity : null), 1.0F);
+			Entity var4 = this.getOwner();
+			LivingEntity livingEntity2 = var4 instanceof LivingEntity livingEntity ? livingEntity : null;
+			if (livingEntity2 != null) {
+				livingEntity2.setLastHurtMob(entityHitResult.getEntity());
+			}
+
+			entityHitResult.getEntity().hurt(this.damageSources().windCharge(this, livingEntity2), 1.0F);
 			this.explode();
 		}
 	}

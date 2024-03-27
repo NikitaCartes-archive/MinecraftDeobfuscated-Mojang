@@ -38,6 +38,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.AbstractIllager;
 import net.minecraft.world.entity.monster.PatrollingMonster;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
@@ -130,7 +131,10 @@ public abstract class Raider extends PatrollingMonster {
 				raid.removeFromRaid(this, false);
 			}
 
-			if (this.isPatrolLeader() && raid == null && ((ServerLevel)this.level()).getRaidAt(this.blockPosition()) == null) {
+			if (!this.level().enabledFeatures().contains(FeatureFlags.UPDATE_1_21)
+				&& this.isPatrolLeader()
+				&& raid == null
+				&& ((ServerLevel)this.level()).getRaidAt(this.blockPosition()) == null) {
 				ItemStack itemStack = this.getItemBySlot(EquipmentSlot.HEAD);
 				Player player = null;
 				if (entity instanceof Player) {
@@ -178,6 +182,24 @@ public abstract class Raider extends PatrollingMonster {
 	@Nullable
 	public Raid getCurrentRaid() {
 		return this.raid;
+	}
+
+	public boolean isCaptain() {
+		ItemStack itemStack = this.getItemBySlot(EquipmentSlot.HEAD);
+		boolean bl = !itemStack.isEmpty()
+			&& ItemStack.matches(itemStack, Raid.getLeaderBannerInstance(this.registryAccess().lookupOrThrow(Registries.BANNER_PATTERN)));
+		boolean bl2 = this.isPatrolLeader();
+		return bl && bl2;
+	}
+
+	public boolean hasRaid() {
+		Level var2 = this.level();
+		if (!(var2 instanceof ServerLevel)) {
+			return false;
+		} else {
+			ServerLevel serverLevel = (ServerLevel)var2;
+			return this.getCurrentRaid() != null || serverLevel.getRaidAt(this.blockPosition()) != null;
+		}
 	}
 
 	public boolean hasActiveRaid() {

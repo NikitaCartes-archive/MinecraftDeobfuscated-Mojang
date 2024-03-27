@@ -1,6 +1,6 @@
 package net.minecraft.world.level.levelgen.structure.structures;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import java.util.Objects;
 import java.util.Optional;
 import net.minecraft.core.Direction;
@@ -20,7 +20,7 @@ import net.minecraft.world.level.levelgen.structure.pieces.PiecesContainer;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePiecesBuilder;
 
 public class OceanMonumentStructure extends Structure {
-	public static final Codec<OceanMonumentStructure> CODEC = simpleCodec(OceanMonumentStructure::new);
+	public static final MapCodec<OceanMonumentStructure> CODEC = simpleCodec(OceanMonumentStructure::new);
 
 	public OceanMonumentStructure(Structure.StructureSettings structureSettings) {
 		super(structureSettings);

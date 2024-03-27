@@ -1,5 +1,6 @@
 package net.minecraft.client.particle;
 
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -71,13 +72,35 @@ public class TerrainParticle extends TextureSheetParticle {
 		return i == 0 && this.level.hasChunkAt(this.pos) ? LevelRenderer.getLightColor(this.level, this.pos) : i;
 	}
 
+	@Nullable
+	static TerrainParticle createTerrainParticle(
+		BlockParticleOption blockParticleOption, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i
+	) {
+		BlockState blockState = blockParticleOption.getState();
+		return !blockState.isAir() && !blockState.is(Blocks.MOVING_PISTON) && blockState.shouldSpawnTerrainParticles()
+			? new TerrainParticle(clientLevel, d, e, f, g, h, i, blockState)
+			: null;
+	}
+
+	@Environment(EnvType.CLIENT)
+	public static class DustPillarProvider implements ParticleProvider<BlockParticleOption> {
+		@Nullable
+		public Particle createParticle(BlockParticleOption blockParticleOption, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+			Particle particle = TerrainParticle.createTerrainParticle(blockParticleOption, clientLevel, d, e, f, g, h, i);
+			if (particle != null) {
+				particle.setParticleSpeed(clientLevel.random.nextGaussian() / 30.0, h + clientLevel.random.nextGaussian() / 2.0, clientLevel.random.nextGaussian() / 30.0);
+				particle.setLifetime(clientLevel.random.nextInt(20) + 20);
+			}
+
+			return particle;
+		}
+	}
+
 	@Environment(EnvType.CLIENT)
 	public static class Provider implements ParticleProvider<BlockParticleOption> {
+		@Nullable
 		public Particle createParticle(BlockParticleOption blockParticleOption, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
-			BlockState blockState = blockParticleOption.getState();
-			return !blockState.isAir() && !blockState.is(Blocks.MOVING_PISTON) && blockState.shouldSpawnTerrainParticles()
-				? new TerrainParticle(clientLevel, d, e, f, g, h, i, blockState)
-				: null;
+			return TerrainParticle.createTerrainParticle(blockParticleOption, clientLevel, d, e, f, g, h, i);
 		}
 	}
 }

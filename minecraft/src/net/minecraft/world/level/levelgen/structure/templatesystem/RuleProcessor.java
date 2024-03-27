@@ -1,7 +1,7 @@
 package net.minecraft.world.level.levelgen.structure.templatesystem;
 
 import com.google.common.collect.ImmutableList;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
@@ -11,11 +11,10 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class RuleProcessor extends StructureProcessor {
-	public static final Codec<RuleProcessor> CODEC = ProcessorRule.CODEC
+	public static final MapCodec<RuleProcessor> CODEC = ProcessorRule.CODEC
 		.listOf()
 		.fieldOf("rules")
-		.<RuleProcessor>xmap(RuleProcessor::new, ruleProcessor -> ruleProcessor.rules)
-		.codec();
+		.xmap(RuleProcessor::new, ruleProcessor -> ruleProcessor.rules);
 	private final ImmutableList<ProcessorRule> rules;
 
 	public RuleProcessor(List<? extends ProcessorRule> list) {

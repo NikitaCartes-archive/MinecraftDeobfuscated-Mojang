@@ -2,7 +2,7 @@ package net.minecraft.world.level.biome;
 
 import com.google.common.collect.Sets;
 import com.mojang.datafixers.util.Pair;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -13,11 +13,10 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.LevelReader;
 
 public class FixedBiomeSource extends BiomeSource implements BiomeManager.NoiseBiomeSource {
-	public static final Codec<FixedBiomeSource> CODEC = Biome.CODEC
+	public static final MapCodec<FixedBiomeSource> CODEC = Biome.CODEC
 		.fieldOf("biome")
 		.<FixedBiomeSource>xmap(FixedBiomeSource::new, fixedBiomeSource -> fixedBiomeSource.biome)
-		.stable()
-		.codec();
+		.stable();
 	private final Holder<Biome> biome;
 
 	public FixedBiomeSource(Holder<Biome> holder) {
@@ -30,7 +29,7 @@ public class FixedBiomeSource extends BiomeSource implements BiomeManager.NoiseB
 	}
 
 	@Override
-	protected Codec<? extends BiomeSource> codec() {
+	protected MapCodec<? extends BiomeSource> codec() {
 		return CODEC;
 	}
 

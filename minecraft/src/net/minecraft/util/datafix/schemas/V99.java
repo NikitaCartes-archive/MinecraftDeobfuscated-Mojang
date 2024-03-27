@@ -14,7 +14,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import net.minecraft.util.datafix.ExtraDataFixUtils;
 import net.minecraft.util.datafix.fixes.References;
 import org.slf4j.Logger;
 
@@ -275,7 +274,9 @@ public class V99 extends Schema {
 					)
 				)
 		);
-		schema.registerType(true, References.BLOCK_ENTITY, () -> DSL.taggedChoiceLazy("id", DSL.string(), map2));
+		schema.registerType(
+			true, References.BLOCK_ENTITY, () -> DSL.optionalFields("components", References.DATA_COMPONENTS.in(schema), DSL.taggedChoiceLazy("id", DSL.string(), map2))
+		);
 		schema.registerType(true, References.ENTITY_TREE, () -> DSL.optionalFields("Riding", References.ENTITY_TREE.in(schema), References.ENTITY.in(schema)));
 		schema.registerType(false, References.ENTITY_NAME, () -> DSL.constType(NamespacedSchema.namespacedString()));
 		schema.registerType(true, References.ENTITY, () -> DSL.taggedChoiceLazy("id", DSL.string(), map));
@@ -287,7 +288,7 @@ public class V99 extends Schema {
 						"id",
 						DSL.or(DSL.constType(DSL.intType()), References.ITEM_NAME.in(schema)),
 						"tag",
-						ExtraDataFixUtils.optionalFields(
+						DSL.optionalFields(
 							Pair.of("EntityTag", References.ENTITY_TREE.in(schema)),
 							Pair.of("BlockEntityTag", References.BLOCK_ENTITY.in(schema)),
 							Pair.of("CanDestroy", DSL.list(References.BLOCK_NAME.in(schema))),

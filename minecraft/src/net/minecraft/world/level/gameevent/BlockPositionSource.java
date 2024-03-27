@@ -1,6 +1,6 @@
 package net.minecraft.world.level.gameevent;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
 import java.util.Optional;
@@ -11,7 +11,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
 public class BlockPositionSource implements PositionSource {
-	public static final Codec<BlockPositionSource> CODEC = RecordCodecBuilder.create(
+	public static final MapCodec<BlockPositionSource> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> instance.group(BlockPos.CODEC.fieldOf("pos").forGetter(blockPositionSource -> blockPositionSource.pos)).apply(instance, BlockPositionSource::new)
 	);
 	public static final StreamCodec<RegistryFriendlyByteBuf, BlockPositionSource> STREAM_CODEC = StreamCodec.composite(
@@ -35,7 +35,7 @@ public class BlockPositionSource implements PositionSource {
 
 	public static class Type implements PositionSourceType<BlockPositionSource> {
 		@Override
-		public Codec<BlockPositionSource> codec() {
+		public MapCodec<BlockPositionSource> codec() {
 			return BlockPositionSource.CODEC;
 		}
 

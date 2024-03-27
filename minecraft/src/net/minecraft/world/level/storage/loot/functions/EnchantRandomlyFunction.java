@@ -2,6 +2,7 @@ package net.minecraft.world.level.storage.loot.functions;
 
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
 import java.util.ArrayList;
@@ -11,7 +12,6 @@ import net.minecraft.Util;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
@@ -27,9 +27,9 @@ public class EnchantRandomlyFunction extends LootItemConditionalFunction {
 		.holderByNameCodec()
 		.listOf()
 		.xmap(HolderSet::direct, holderSet -> holderSet.stream().toList());
-	public static final Codec<EnchantRandomlyFunction> CODEC = RecordCodecBuilder.create(
+	public static final MapCodec<EnchantRandomlyFunction> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> commonFields(instance)
-				.and(ExtraCodecs.strictOptionalField(ENCHANTMENT_SET_CODEC, "enchantments").forGetter(enchantRandomlyFunction -> enchantRandomlyFunction.enchantments))
+				.and(ENCHANTMENT_SET_CODEC.optionalFieldOf("enchantments").forGetter(enchantRandomlyFunction -> enchantRandomlyFunction.enchantments))
 				.apply(instance, EnchantRandomlyFunction::new)
 	);
 	private final Optional<HolderSet<Enchantment>> enchantments;
@@ -54,6 +54,7 @@ public class EnchantRandomlyFunction extends LootItemConditionalFunction {
 					boolean bl = itemStack.is(Items.BOOK);
 					List<Holder.Reference<Enchantment>> list = BuiltInRegistries.ENCHANTMENT
 						.holders()
+						.filter(reference -> ((Enchantment)reference.value()).isEnabled(lootContext.getLevel().enabledFeatures()))
 						.filter(reference -> ((Enchantment)reference.value()).isDiscoverable())
 						.filter(reference -> bl || ((Enchantment)reference.value()).canEnchant(itemStack))
 						.toList();

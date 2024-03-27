@@ -141,6 +141,8 @@ public final class ItemTags {
 	public static final TagKey<Item> HEAD_ARMOR_ENCHANTABLE = bind("enchantable/head_armor");
 	public static final TagKey<Item> ARMOR_ENCHANTABLE = bind("enchantable/armor");
 	public static final TagKey<Item> SWORD_ENCHANTABLE = bind("enchantable/sword");
+	public static final TagKey<Item> FIRE_ASPECT_ENCHANTABLE = bind("enchantable/fire_aspect");
+	public static final TagKey<Item> SHARP_WEAPON_ENCHANTABLE = bind("enchantable/sharp_weapon");
 	public static final TagKey<Item> WEAPON_ENCHANTABLE = bind("enchantable/weapon");
 	public static final TagKey<Item> MINING_ENCHANTABLE = bind("enchantable/mining");
 	public static final TagKey<Item> MINING_LOOT_ENCHANTABLE = bind("enchantable/mining_loot");
@@ -151,6 +153,7 @@ public final class ItemTags {
 	public static final TagKey<Item> EQUIPPABLE_ENCHANTABLE = bind("enchantable/equippable");
 	public static final TagKey<Item> CROSSBOW_ENCHANTABLE = bind("enchantable/crossbow");
 	public static final TagKey<Item> VANISHING_ENCHANTABLE = bind("enchantable/vanishing");
+	public static final TagKey<Item> MACE_ENCHANTABLE = bind("enchantable/mace");
 
 	private ItemTags() {
 	}

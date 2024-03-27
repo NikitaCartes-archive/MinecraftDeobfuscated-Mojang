@@ -146,12 +146,7 @@ public class VideoSettingsScreen extends OptionsSubScreen {
 
 	@Override
 	public boolean mouseClicked(double d, double e, int i) {
-		int j = this.options.guiScale().get();
 		if (super.mouseClicked(d, e, i)) {
-			if (this.options.guiScale().get() != j) {
-				this.minecraft.resizeDisplay();
-			}
-
 			if (this.gpuWarnlistManager.isShowingWarning()) {
 				List<Component> list = Lists.<Component>newArrayList(WARNING_MESSAGE, CommonComponents.NEW_LINE);
 				String string = this.gpuWarnlistManager.getRendererWarnings();
@@ -198,16 +193,14 @@ public class VideoSettingsScreen extends OptionsSubScreen {
 			OptionInstance<Integer> optionInstance = this.options.guiScale();
 			OptionInstance.ValueSet i = optionInstance.values();
 			if (i instanceof OptionInstance.ClampingLazyMaxIntRange clampingLazyMaxIntRange) {
-				int ix = optionInstance.get() + (int)Math.signum(g);
-				if (ix != 0 && ix <= clampingLazyMaxIntRange.maxInclusive()) {
+				int ix = optionInstance.get();
+				int j = ix == 0 ? clampingLazyMaxIntRange.maxInclusive() + 1 : ix;
+				int k = j + (int)Math.signum(g);
+				if (k != 0 && k <= clampingLazyMaxIntRange.maxInclusive() && k >= clampingLazyMaxIntRange.minInclusive()) {
 					CycleButton<Integer> cycleButton = (CycleButton)this.list.findOption(optionInstance);
 					if (cycleButton != null) {
-						optionInstance.set(ix);
-						cycleButton.setValue(ix);
-					}
-
-					if (optionInstance.get() == ix) {
-						this.minecraft.resizeDisplay();
+						optionInstance.set(k);
+						cycleButton.setValue(k);
 						this.list.setScrollAmount(0.0);
 						return true;
 					}

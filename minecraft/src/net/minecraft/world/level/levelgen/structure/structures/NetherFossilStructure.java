@@ -1,6 +1,6 @@
 package net.minecraft.world.level.levelgen.structure.structures;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
 import java.util.Optional;
@@ -18,7 +18,7 @@ import net.minecraft.world.level.levelgen.structure.StructureType;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePiecesBuilder;
 
 public class NetherFossilStructure extends Structure {
-	public static final Codec<NetherFossilStructure> CODEC = RecordCodecBuilder.create(
+	public static final MapCodec<NetherFossilStructure> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> instance.group(settingsCodec(instance), HeightProvider.CODEC.fieldOf("height").forGetter(netherFossilStructure -> netherFossilStructure.height))
 				.apply(instance, NetherFossilStructure::new)
 	);

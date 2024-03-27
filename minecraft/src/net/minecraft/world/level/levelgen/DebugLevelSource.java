@@ -1,6 +1,6 @@
 package net.minecraft.world.level.levelgen;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
 import java.util.List;
@@ -32,7 +32,7 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.blending.Blender;
 
 public class DebugLevelSource extends ChunkGenerator {
-	public static final Codec<DebugLevelSource> CODEC = RecordCodecBuilder.create(
+	public static final MapCodec<DebugLevelSource> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> instance.group(RegistryOps.retrieveElement(Biomes.PLAINS)).apply(instance, instance.stable(DebugLevelSource::new))
 	);
 	private static final int BLOCK_MARGIN = 2;
@@ -51,7 +51,7 @@ public class DebugLevelSource extends ChunkGenerator {
 	}
 
 	@Override
-	protected Codec<? extends ChunkGenerator> codec() {
+	protected MapCodec<? extends ChunkGenerator> codec() {
 		return CODEC;
 	}
 

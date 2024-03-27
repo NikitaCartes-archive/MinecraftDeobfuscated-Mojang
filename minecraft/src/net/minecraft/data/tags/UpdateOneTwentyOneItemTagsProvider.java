@@ -45,8 +45,13 @@ public class UpdateOneTwentyOneItemTagsProvider extends ItemTagsProvider {
 				Items.WAXED_WEATHERED_COPPER_TRAPDOOR,
 				Items.WAXED_OXIDIZED_COPPER_TRAPDOOR
 			);
+		this.tag(ItemTags.MACE_ENCHANTABLE).add(Items.MACE);
 		this.tag(ItemTags.DECORATED_POT_SHERDS).add(Items.FLOW_POTTERY_SHERD, Items.GUSTER_POTTERY_SHERD, Items.SCRAPE_POTTERY_SHERD);
 		this.tag(ItemTags.DECORATED_POT_INGREDIENTS).add(Items.FLOW_POTTERY_SHERD).add(Items.GUSTER_POTTERY_SHERD).add(Items.SCRAPE_POTTERY_SHERD);
 		this.tag(ItemTags.TRIM_TEMPLATES).add(Items.FLOW_ARMOR_TRIM_SMITHING_TEMPLATE).add(Items.BOLT_ARMOR_TRIM_SMITHING_TEMPLATE);
+		this.tag(ItemTags.DURABILITY_ENCHANTABLE).add(Items.MACE);
+		this.tag(ItemTags.WEAPON_ENCHANTABLE).add(Items.MACE);
+		this.tag(ItemTags.FIRE_ASPECT_ENCHANTABLE).add(Items.MACE);
+		this.tag(ItemTags.VANISHING_ENCHANTABLE).add(Items.MACE);
 	}
 }

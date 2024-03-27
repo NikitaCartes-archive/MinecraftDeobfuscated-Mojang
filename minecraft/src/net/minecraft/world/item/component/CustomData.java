@@ -9,7 +9,6 @@ import io.netty.buffer.ByteBuf;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import net.minecraft.Util;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.nbt.CompoundTag;
@@ -18,7 +17,6 @@ import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -26,8 +24,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 public final class CustomData {
 	public static final CustomData EMPTY = new CustomData(new CompoundTag());
 	public static final Codec<CustomData> CODEC = CompoundTag.CODEC.xmap(CustomData::new, customData -> customData.tag);
-	public static final Codec<CustomData> CODEC_WITH_ID = ExtraCodecs.validate(
-		CODEC,
+	public static final Codec<CustomData> CODEC_WITH_ID = CODEC.validate(
 		customData -> customData.getUnsafe().contains("id", 8) ? DataResult.success(customData) : DataResult.error(() -> "Missing id for entity in: " + customData)
 	);
 	@Deprecated
@@ -85,11 +82,11 @@ public final class CustomData {
 	}
 
 	public boolean loadInto(BlockEntity blockEntity, HolderLookup.Provider provider) {
-		CompoundTag compoundTag = blockEntity.saveWithoutMetadata(provider);
+		CompoundTag compoundTag = blockEntity.saveCustomOnly(provider);
 		CompoundTag compoundTag2 = compoundTag.copy();
 		compoundTag.merge(this.tag);
 		if (!compoundTag.equals(compoundTag2)) {
-			blockEntity.load(compoundTag, provider);
+			blockEntity.loadCustomOnly(compoundTag, provider);
 			blockEntity.setChanged();
 			return true;
 		} else {
@@ -102,7 +99,7 @@ public final class CustomData {
 	}
 
 	public <T> DataResult<T> read(MapDecoder<T> mapDecoder) {
-		MapLike<Tag> mapLike = Util.getOrThrow(NbtOps.INSTANCE.getMap((Tag)this.tag), IllegalStateException::new);
+		MapLike<Tag> mapLike = NbtOps.INSTANCE.getMap((Tag)this.tag).getOrThrow();
 		return mapDecoder.decode(NbtOps.INSTANCE, mapLike);
 	}
 
