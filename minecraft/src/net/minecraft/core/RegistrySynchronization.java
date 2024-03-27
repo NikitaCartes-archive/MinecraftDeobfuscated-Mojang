@@ -9,7 +9,6 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import net.minecraft.Util;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -53,10 +52,9 @@ public class RegistrySynchronization {
 								if (bl) {
 									optional = Optional.empty();
 								} else {
-									Tag tag = Util.getOrThrow(
-										registryData.elementCodec().encodeStart(dynamicOps, (T)reference.value()),
-										string -> new IllegalArgumentException("Failed to serialize " + reference.key() + ": " + string)
-									);
+									Tag tag = registryData.elementCodec()
+										.encodeStart(dynamicOps, (T)reference.value())
+										.getOrThrow(string -> new IllegalArgumentException("Failed to serialize " + reference.key() + ": " + string));
 									optional = Optional.of(tag);
 								}
 

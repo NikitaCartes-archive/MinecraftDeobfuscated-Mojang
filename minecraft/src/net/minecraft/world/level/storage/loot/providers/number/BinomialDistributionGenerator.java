@@ -1,7 +1,7 @@
 package net.minecraft.world.level.storage.loot.providers.number;
 
 import com.google.common.collect.Sets;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Set;
 import net.minecraft.util.RandomSource;
@@ -9,7 +9,7 @@ import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 
 public record BinomialDistributionGenerator(NumberProvider n, NumberProvider p) implements NumberProvider {
-	public static final Codec<BinomialDistributionGenerator> CODEC = RecordCodecBuilder.create(
+	public static final MapCodec<BinomialDistributionGenerator> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> instance.group(
 					NumberProviders.CODEC.fieldOf("n").forGetter(BinomialDistributionGenerator::n),
 					NumberProviders.CODEC.fieldOf("p").forGetter(BinomialDistributionGenerator::p)

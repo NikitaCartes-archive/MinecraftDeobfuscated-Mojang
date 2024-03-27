@@ -1,6 +1,7 @@
 package net.minecraft.world.level.storage.loot.entries;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -18,7 +19,7 @@ public class LootPoolEntries {
 	public static final LootPoolEntryType SEQUENCE = register("sequence", SequentialEntry.CODEC);
 	public static final LootPoolEntryType GROUP = register("group", EntryGroup.CODEC);
 
-	private static LootPoolEntryType register(String string, Codec<? extends LootPoolEntryContainer> codec) {
-		return Registry.register(BuiltInRegistries.LOOT_POOL_ENTRY_TYPE, new ResourceLocation(string), new LootPoolEntryType(codec));
+	private static LootPoolEntryType register(String string, MapCodec<? extends LootPoolEntryContainer> mapCodec) {
+		return Registry.register(BuiltInRegistries.LOOT_POOL_ENTRY_TYPE, new ResourceLocation(string), new LootPoolEntryType(mapCodec));
 	}
 }

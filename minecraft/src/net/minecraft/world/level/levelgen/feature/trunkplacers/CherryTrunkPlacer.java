@@ -2,6 +2,7 @@ package net.minecraft.world.level.levelgen.feature.trunkplacers;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,7 +10,6 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.IntProvider;
 import net.minecraft.util.valueproviders.UniformInt;
@@ -20,19 +20,20 @@ import net.minecraft.world.level.levelgen.feature.configurations.TreeConfigurati
 import net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer;
 
 public class CherryTrunkPlacer extends TrunkPlacer {
-	private static final Codec<UniformInt> BRANCH_START_CODEC = ExtraCodecs.validate(
-		UniformInt.CODEC,
-		uniformInt -> uniformInt.getMaxValue() - uniformInt.getMinValue() < 1
-				? DataResult.error(() -> "Need at least 2 blocks variation for the branch starts to fit both branches")
-				: DataResult.success(uniformInt)
-	);
-	public static final Codec<CherryTrunkPlacer> CODEC = RecordCodecBuilder.create(
+	private static final Codec<UniformInt> BRANCH_START_CODEC = UniformInt.CODEC
+		.codec()
+		.validate(
+			uniformInt -> uniformInt.getMaxValue() - uniformInt.getMinValue() < 1
+					? DataResult.error(() -> "Need at least 2 blocks variation for the branch starts to fit both branches")
+					: DataResult.success(uniformInt)
+		);
+	public static final MapCodec<CherryTrunkPlacer> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> trunkPlacerParts(instance)
 				.<IntProvider, IntProvider, UniformInt, IntProvider>and(
 					instance.group(
 						IntProvider.codec(1, 3).fieldOf("branch_count").forGetter(cherryTrunkPlacer -> cherryTrunkPlacer.branchCount),
 						IntProvider.codec(2, 16).fieldOf("branch_horizontal_length").forGetter(cherryTrunkPlacer -> cherryTrunkPlacer.branchHorizontalLength),
-						IntProvider.codec(-16, 0, BRANCH_START_CODEC)
+						IntProvider.validateCodec(-16, 0, BRANCH_START_CODEC)
 							.fieldOf("branch_start_offset_from_top")
 							.forGetter(cherryTrunkPlacer -> cherryTrunkPlacer.branchStartOffsetFromTop),
 						IntProvider.codec(-16, 16).fieldOf("branch_end_offset_from_top").forGetter(cherryTrunkPlacer -> cherryTrunkPlacer.branchEndOffsetFromTop)

@@ -146,4 +146,5 @@ public class BlockStateProperties {
 	public static final BooleanProperty CRAFTING = BooleanProperty.create("crafting");
 	public static final EnumProperty<TrialSpawnerState> TRIAL_SPAWNER_STATE = EnumProperty.create("trial_spawner_state", TrialSpawnerState.class);
 	public static final EnumProperty<VaultState> VAULT_STATE = EnumProperty.create("vault_state", VaultState.class);
+	public static final BooleanProperty OMINOUS = BooleanProperty.create("ominous");
 }

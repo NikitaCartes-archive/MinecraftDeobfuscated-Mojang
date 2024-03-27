@@ -12,7 +12,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.ItemTags;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -33,7 +32,7 @@ import net.minecraft.world.level.gameevent.GameEvent;
 
 public interface CauldronInteraction {
 	Map<String, CauldronInteraction.InteractionMap> INTERACTIONS = new Object2ObjectArrayMap<>();
-	Codec<CauldronInteraction.InteractionMap> CODEC = ExtraCodecs.stringResolverCodec(CauldronInteraction.InteractionMap::name, INTERACTIONS::get);
+	Codec<CauldronInteraction.InteractionMap> CODEC = Codec.stringResolver(CauldronInteraction.InteractionMap::name, INTERACTIONS::get);
 	CauldronInteraction.InteractionMap EMPTY = newInteractionMap("empty");
 	CauldronInteraction.InteractionMap WATER = newInteractionMap("water");
 	CauldronInteraction.InteractionMap LAVA = newInteractionMap("lava");

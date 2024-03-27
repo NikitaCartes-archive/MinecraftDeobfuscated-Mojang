@@ -18,7 +18,8 @@ public enum EquipmentSlotGroup implements StringRepresentable {
 	LEGS(5, "legs", EquipmentSlot.LEGS),
 	CHEST(6, "chest", EquipmentSlot.CHEST),
 	HEAD(7, "head", EquipmentSlot.HEAD),
-	ARMOR(8, "armor", EquipmentSlot::isArmor);
+	ARMOR(8, "armor", EquipmentSlot::isArmor),
+	BODY(9, "body", EquipmentSlot.BODY);
 
 	public static final IntFunction<EquipmentSlotGroup> BY_ID = ByIdMap.continuous(
 		equipmentSlotGroup -> equipmentSlotGroup.id, values(), ByIdMap.OutOfBoundsStrategy.ZERO

@@ -1,12 +1,12 @@
 package net.minecraft.world.level.storage.loot.entries;
 
 import com.google.common.collect.ImmutableList;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import java.util.List;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
 public class SequentialEntry extends CompositeEntryBase {
-	public static final Codec<SequentialEntry> CODEC = createCodec(SequentialEntry::new);
+	public static final MapCodec<SequentialEntry> CODEC = createCodec(SequentialEntry::new);
 
 	SequentialEntry(List<LootPoolEntryContainer> list, List<LootItemCondition> list2) {
 		super(list, list2);

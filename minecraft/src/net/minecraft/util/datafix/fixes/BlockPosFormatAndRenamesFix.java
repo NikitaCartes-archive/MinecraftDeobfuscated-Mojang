@@ -27,7 +27,7 @@ public class BlockPosFormatAndRenamesFix extends DataFix {
 	private Typed<?> fixFields(Typed<?> typed, Map<String, String> map) {
 		return typed.update(DSL.remainderFinder(), dynamic -> {
 			for (Entry<String, String> entry : map.entrySet()) {
-				dynamic = ExtraDataFixUtils.renameAndFixField(dynamic, (String)entry.getKey(), (String)entry.getValue(), ExtraDataFixUtils::fixBlockPos);
+				dynamic = dynamic.renameAndFixField((String)entry.getKey(), (String)entry.getValue(), ExtraDataFixUtils::fixBlockPos);
 			}
 
 			return dynamic;
@@ -36,13 +36,13 @@ public class BlockPosFormatAndRenamesFix extends DataFix {
 
 	private <T> Dynamic<T> fixMapSavedData(Dynamic<T> dynamic) {
 		return dynamic.update("frames", dynamicx -> dynamicx.createList(dynamicx.asStream().map(dynamicxx -> {
-				dynamicxx = ExtraDataFixUtils.renameAndFixField(dynamicxx, "Pos", "pos", ExtraDataFixUtils::fixBlockPos);
-				dynamicxx = ExtraDataFixUtils.renameField(dynamicxx, "Rotation", "rotation");
-				return ExtraDataFixUtils.renameField(dynamicxx, "EntityId", "entity_id");
+				dynamicxx = dynamicxx.renameAndFixField("Pos", "pos", ExtraDataFixUtils::fixBlockPos);
+				dynamicxx = dynamicxx.renameField("Rotation", "rotation");
+				return dynamicxx.renameField("EntityId", "entity_id");
 			}))).update("banners", dynamicx -> dynamicx.createList(dynamicx.asStream().map(dynamicxx -> {
-				dynamicxx = ExtraDataFixUtils.renameField(dynamicxx, "Pos", "pos");
-				dynamicxx = ExtraDataFixUtils.renameField(dynamicxx, "Color", "color");
-				return ExtraDataFixUtils.renameField(dynamicxx, "Name", "name");
+				dynamicxx = dynamicxx.renameField("Pos", "pos");
+				dynamicxx = dynamicxx.renameField("Color", "color");
+				return dynamicxx.renameField("Name", "name");
 			})));
 	}
 
@@ -82,7 +82,7 @@ public class BlockPosFormatAndRenamesFix extends DataFix {
 			this.fixTypeEverywhereTyped(
 				"BlockPos format in Leash for mobs",
 				this.getInputSchema().getType(References.ENTITY),
-				typed -> typed.update(DSL.remainderFinder(), dynamic -> ExtraDataFixUtils.renameAndFixField(dynamic, "Leash", "leash", ExtraDataFixUtils::fixBlockPos))
+				typed -> typed.update(DSL.remainderFinder(), dynamic -> dynamic.renameAndFixField("Leash", "leash", ExtraDataFixUtils::fixBlockPos))
 			)
 		);
 	}

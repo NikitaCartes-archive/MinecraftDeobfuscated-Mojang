@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
-import net.minecraft.Util;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
@@ -13,14 +12,12 @@ import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 
 public record PotDecorations(Optional<Item> back, Optional<Item> left, Optional<Item> right, Optional<Item> front) {
 	public static final PotDecorations EMPTY = new PotDecorations(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty());
-	public static final Codec<PotDecorations> CODEC = ExtraCodecs.sizeLimitedList(BuiltInRegistries.ITEM.byNameCodec().listOf(), 4)
-		.xmap(PotDecorations::new, PotDecorations::ordered);
+	public static final Codec<PotDecorations> CODEC = BuiltInRegistries.ITEM.byNameCodec().sizeLimitedListOf(4).xmap(PotDecorations::new, PotDecorations::ordered);
 	public static final StreamCodec<RegistryFriendlyByteBuf, PotDecorations> STREAM_CODEC = ByteBufCodecs.registry(Registries.ITEM)
 		.apply(ByteBufCodecs.list(4))
 		.map(PotDecorations::new, PotDecorations::ordered);
@@ -46,7 +43,7 @@ public record PotDecorations(Optional<Item> back, Optional<Item> left, Optional<
 		if (this.equals(EMPTY)) {
 			return compoundTag;
 		} else {
-			compoundTag.put("sherds", Util.getOrThrow(CODEC.encodeStart(NbtOps.INSTANCE, this), IllegalStateException::new));
+			compoundTag.put("sherds", CODEC.encodeStart(NbtOps.INSTANCE, this).getOrThrow());
 			return compoundTag;
 		}
 	}

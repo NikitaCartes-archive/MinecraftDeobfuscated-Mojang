@@ -6,7 +6,6 @@ import java.util.Optional;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.advancements.Criterion;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.storage.loot.LootContext;
 
@@ -25,8 +24,8 @@ public class SummonedEntityTrigger extends SimpleCriterionTrigger<SummonedEntity
 		implements SimpleCriterionTrigger.SimpleInstance {
 		public static final Codec<SummonedEntityTrigger.TriggerInstance> CODEC = RecordCodecBuilder.create(
 			instance -> instance.group(
-						ExtraCodecs.strictOptionalField(EntityPredicate.ADVANCEMENT_CODEC, "player").forGetter(SummonedEntityTrigger.TriggerInstance::player),
-						ExtraCodecs.strictOptionalField(EntityPredicate.ADVANCEMENT_CODEC, "entity").forGetter(SummonedEntityTrigger.TriggerInstance::entity)
+						EntityPredicate.ADVANCEMENT_CODEC.optionalFieldOf("player").forGetter(SummonedEntityTrigger.TriggerInstance::player),
+						EntityPredicate.ADVANCEMENT_CODEC.optionalFieldOf("entity").forGetter(SummonedEntityTrigger.TriggerInstance::entity)
 					)
 					.apply(instance, SummonedEntityTrigger.TriggerInstance::new)
 		);

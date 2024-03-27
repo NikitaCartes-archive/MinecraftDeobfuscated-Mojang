@@ -1,6 +1,6 @@
 package net.minecraft.world.level.gameevent;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -10,7 +10,7 @@ public interface PositionSourceType<T extends PositionSource> {
 	PositionSourceType<BlockPositionSource> BLOCK = register("block", new BlockPositionSource.Type());
 	PositionSourceType<EntityPositionSource> ENTITY = register("entity", new EntityPositionSource.Type());
 
-	Codec<T> codec();
+	MapCodec<T> codec();
 
 	StreamCodec<RegistryFriendlyByteBuf, T> streamCodec();
 

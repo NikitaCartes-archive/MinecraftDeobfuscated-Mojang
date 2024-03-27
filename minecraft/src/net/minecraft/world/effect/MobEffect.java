@@ -2,6 +2,7 @@ package net.minecraft.world.effect;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.Map.Entry;
 import java.util.function.BiConsumer;
@@ -14,16 +15,22 @@ import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeMap;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.flag.FeatureElement;
+import net.minecraft.world.flag.FeatureFlag;
+import net.minecraft.world.flag.FeatureFlagSet;
+import net.minecraft.world.flag.FeatureFlags;
 
-public class MobEffect {
+public class MobEffect implements FeatureElement {
 	private static final int AMBIENT_ALPHA = Mth.floor(38.25F);
 	private final Map<Holder<Attribute>, MobEffect.AttributeTemplate> attributeModifiers = new Object2ObjectOpenHashMap<>();
 	private final MobEffectCategory category;
@@ -32,6 +39,8 @@ public class MobEffect {
 	@Nullable
 	private String descriptionId;
 	private int blendDurationTicks;
+	private Optional<SoundEvent> soundOnAdded = Optional.empty();
+	private FeatureFlagSet requiredFeatures = FeatureFlags.VANILLA_SET;
 
 	protected MobEffect(MobEffectCategory mobEffectCategory, int i) {
 		this.category = mobEffectCategory;
@@ -65,6 +74,20 @@ public class MobEffect {
 	}
 
 	public void onEffectStarted(LivingEntity livingEntity, int i) {
+	}
+
+	public void onEffectAdded(LivingEntity livingEntity, int i) {
+		this.soundOnAdded
+			.ifPresent(
+				soundEvent -> livingEntity.level()
+						.playSound(null, livingEntity.getX(), livingEntity.getY(), livingEntity.getZ(), soundEvent, livingEntity.getSoundSource(), 1.0F, 1.0F)
+			);
+	}
+
+	public void onMobRemoved(LivingEntity livingEntity, int i, Entity.RemovalReason removalReason) {
+	}
+
+	public void onMobHurt(LivingEntity livingEntity, int i, DamageSource damageSource, float f) {
 	}
 
 	public boolean isInstantenous() {
@@ -134,6 +157,21 @@ public class MobEffect {
 
 	public ParticleOptions createParticleOptions(MobEffectInstance mobEffectInstance) {
 		return (ParticleOptions)this.particleFactory.apply(mobEffectInstance);
+	}
+
+	public MobEffect withSoundOnAdded(SoundEvent soundEvent) {
+		this.soundOnAdded = Optional.of(soundEvent);
+		return this;
+	}
+
+	public MobEffect requiredFeatures(FeatureFlag... featureFlags) {
+		this.requiredFeatures = FeatureFlags.REGISTRY.subset(featureFlags);
+		return this;
+	}
+
+	@Override
+	public FeatureFlagSet requiredFeatures() {
+		return this.requiredFeatures;
 	}
 
 	static record AttributeTemplate(UUID id, double amount, AttributeModifier.Operation operation) {

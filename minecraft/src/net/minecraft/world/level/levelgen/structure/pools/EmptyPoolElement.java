@@ -1,6 +1,6 @@
 package net.minecraft.world.level.levelgen.structure.pools;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
@@ -16,7 +16,7 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemp
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
 
 public class EmptyPoolElement extends StructurePoolElement {
-	public static final Codec<EmptyPoolElement> CODEC = Codec.unit((Supplier<EmptyPoolElement>)(() -> EmptyPoolElement.INSTANCE));
+	public static final MapCodec<EmptyPoolElement> CODEC = MapCodec.unit((Supplier<EmptyPoolElement>)(() -> EmptyPoolElement.INSTANCE));
 	public static final EmptyPoolElement INSTANCE = new EmptyPoolElement();
 
 	private EmptyPoolElement() {

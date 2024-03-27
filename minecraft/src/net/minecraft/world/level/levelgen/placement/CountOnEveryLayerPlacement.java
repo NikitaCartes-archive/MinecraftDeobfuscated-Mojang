@@ -1,6 +1,6 @@
 package net.minecraft.world.level.levelgen.placement;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import java.util.stream.Stream;
 import java.util.stream.Stream.Builder;
 import net.minecraft.core.BlockPos;
@@ -13,10 +13,9 @@ import net.minecraft.world.level.levelgen.Heightmap;
 
 @Deprecated
 public class CountOnEveryLayerPlacement extends PlacementModifier {
-	public static final Codec<CountOnEveryLayerPlacement> CODEC = IntProvider.codec(0, 256)
+	public static final MapCodec<CountOnEveryLayerPlacement> CODEC = IntProvider.codec(0, 256)
 		.fieldOf("count")
-		.<CountOnEveryLayerPlacement>xmap(CountOnEveryLayerPlacement::new, countOnEveryLayerPlacement -> countOnEveryLayerPlacement.count)
-		.codec();
+		.xmap(CountOnEveryLayerPlacement::new, countOnEveryLayerPlacement -> countOnEveryLayerPlacement.count);
 	private final IntProvider count;
 
 	private CountOnEveryLayerPlacement(IntProvider intProvider) {

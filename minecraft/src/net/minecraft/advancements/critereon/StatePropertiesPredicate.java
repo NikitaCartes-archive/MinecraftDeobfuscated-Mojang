@@ -11,7 +11,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
@@ -133,8 +132,8 @@ public record StatePropertiesPredicate(List<StatePropertiesPredicate.PropertyMat
 	static record RangedMatcher(Optional<String> minValue, Optional<String> maxValue) implements StatePropertiesPredicate.ValueMatcher {
 		public static final Codec<StatePropertiesPredicate.RangedMatcher> CODEC = RecordCodecBuilder.create(
 			instance -> instance.group(
-						ExtraCodecs.strictOptionalField(Codec.STRING, "min").forGetter(StatePropertiesPredicate.RangedMatcher::minValue),
-						ExtraCodecs.strictOptionalField(Codec.STRING, "max").forGetter(StatePropertiesPredicate.RangedMatcher::maxValue)
+						Codec.STRING.optionalFieldOf("min").forGetter(StatePropertiesPredicate.RangedMatcher::minValue),
+						Codec.STRING.optionalFieldOf("max").forGetter(StatePropertiesPredicate.RangedMatcher::maxValue)
 					)
 					.apply(instance, StatePropertiesPredicate.RangedMatcher::new)
 		);
@@ -169,7 +168,7 @@ public record StatePropertiesPredicate(List<StatePropertiesPredicate.PropertyMat
 
 	interface ValueMatcher {
 		Codec<StatePropertiesPredicate.ValueMatcher> CODEC = Codec.either(StatePropertiesPredicate.ExactMatcher.CODEC, StatePropertiesPredicate.RangedMatcher.CODEC)
-			.xmap(either -> either.map(exactMatcher -> exactMatcher, rangedMatcher -> rangedMatcher), valueMatcher -> {
+			.xmap(Either::unwrap, valueMatcher -> {
 				if (valueMatcher instanceof StatePropertiesPredicate.ExactMatcher exactMatcher) {
 					return Either.left(exactMatcher);
 				} else if (valueMatcher instanceof StatePropertiesPredicate.RangedMatcher rangedMatcher) {
@@ -181,7 +180,7 @@ public record StatePropertiesPredicate(List<StatePropertiesPredicate.PropertyMat
 		StreamCodec<ByteBuf, StatePropertiesPredicate.ValueMatcher> STREAM_CODEC = ByteBufCodecs.either(
 				StatePropertiesPredicate.ExactMatcher.STREAM_CODEC, StatePropertiesPredicate.RangedMatcher.STREAM_CODEC
 			)
-			.map(either -> either.map(exactMatcher -> exactMatcher, rangedMatcher -> rangedMatcher), valueMatcher -> {
+			.map(Either::unwrap, valueMatcher -> {
 				if (valueMatcher instanceof StatePropertiesPredicate.ExactMatcher exactMatcher) {
 					return Either.left(exactMatcher);
 				} else if (valueMatcher instanceof StatePropertiesPredicate.RangedMatcher rangedMatcher) {

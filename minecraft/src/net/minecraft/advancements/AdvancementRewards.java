@@ -13,7 +13,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootParams;
@@ -24,10 +23,10 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 public record AdvancementRewards(int experience, List<ResourceKey<LootTable>> loot, List<ResourceLocation> recipes, Optional<CacheableFunction> function) {
 	public static final Codec<AdvancementRewards> CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
-					ExtraCodecs.strictOptionalField(Codec.INT, "experience", 0).forGetter(AdvancementRewards::experience),
-					ExtraCodecs.strictOptionalField(ResourceKey.codec(Registries.LOOT_TABLE).listOf(), "loot", List.of()).forGetter(AdvancementRewards::loot),
-					ExtraCodecs.strictOptionalField(ResourceLocation.CODEC.listOf(), "recipes", List.of()).forGetter(AdvancementRewards::recipes),
-					ExtraCodecs.strictOptionalField(CacheableFunction.CODEC, "function").forGetter(AdvancementRewards::function)
+					Codec.INT.optionalFieldOf("experience", Integer.valueOf(0)).forGetter(AdvancementRewards::experience),
+					ResourceKey.codec(Registries.LOOT_TABLE).listOf().optionalFieldOf("loot", List.of()).forGetter(AdvancementRewards::loot),
+					ResourceLocation.CODEC.listOf().optionalFieldOf("recipes", List.of()).forGetter(AdvancementRewards::recipes),
+					CacheableFunction.CODEC.optionalFieldOf("function").forGetter(AdvancementRewards::function)
 				)
 				.apply(instance, AdvancementRewards::new)
 	);

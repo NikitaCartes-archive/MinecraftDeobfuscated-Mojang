@@ -15,7 +15,8 @@ import net.minecraft.resources.ResourceLocation;
 public class SoundEvent {
 	public static final Codec<SoundEvent> DIRECT_CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
-					ResourceLocation.CODEC.fieldOf("sound_id").forGetter(SoundEvent::getLocation), Codec.FLOAT.optionalFieldOf("range").forGetter(SoundEvent::fixedRange)
+					ResourceLocation.CODEC.fieldOf("sound_id").forGetter(SoundEvent::getLocation),
+					Codec.FLOAT.lenientOptionalFieldOf("range").forGetter(SoundEvent::fixedRange)
 				)
 				.apply(instance, SoundEvent::create)
 	);

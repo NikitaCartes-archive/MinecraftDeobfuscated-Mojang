@@ -25,7 +25,6 @@ import java.util.Map.Entry;
 import java.util.function.BiConsumer;
 import javax.annotation.Nullable;
 import net.minecraft.FileUtil;
-import net.minecraft.Util;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.advancements.AdvancementNode;
@@ -118,7 +117,7 @@ public class PlayerAdvancements {
 				try {
 					jsonReader.setLenient(false);
 					JsonElement jsonElement = Streams.parse(jsonReader);
-					PlayerAdvancements.Data data = Util.getOrThrow(this.codec.parse(JsonOps.INSTANCE, jsonElement), JsonParseException::new);
+					PlayerAdvancements.Data data = this.codec.parse(JsonOps.INSTANCE, jsonElement).getOrThrow(JsonParseException::new);
 					this.applyFrom(serverAdvancementManager, data);
 				} catch (Throwable var6) {
 					try {
@@ -143,7 +142,7 @@ public class PlayerAdvancements {
 	}
 
 	public void save() {
-		JsonElement jsonElement = Util.getOrThrow(this.codec.encodeStart(JsonOps.INSTANCE, this.asData()), IllegalStateException::new);
+		JsonElement jsonElement = this.codec.encodeStart(JsonOps.INSTANCE, this.asData()).getOrThrow();
 
 		try {
 			FileUtil.createDirectoriesSafe(this.playerSavePath.getParent());

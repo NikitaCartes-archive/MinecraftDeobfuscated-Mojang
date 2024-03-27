@@ -24,6 +24,7 @@ import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.CrashReportDetail;
 import net.minecraft.ReportedException;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.screens.Screen;
@@ -628,8 +629,8 @@ public class GuiGraphics {
 		List<ClientTooltipComponent> list2 = (List<ClientTooltipComponent>)list.stream()
 			.map(Component::getVisualOrderText)
 			.map(ClientTooltipComponent::create)
-			.collect(Collectors.toList());
-		optional.ifPresent(tooltipComponent -> list2.add(1, ClientTooltipComponent.create(tooltipComponent)));
+			.collect(Util.toMutableList());
+		optional.ifPresent(tooltipComponent -> list2.add(list2.isEmpty() ? 0 : 1, ClientTooltipComponent.create(tooltipComponent)));
 		this.renderTooltipInternal(font, list2, i, j, DefaultTooltipPositioner.INSTANCE);
 	}
 

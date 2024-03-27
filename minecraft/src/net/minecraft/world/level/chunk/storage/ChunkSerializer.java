@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Map.Entry;
 import javax.annotation.Nullable;
-import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
@@ -106,20 +105,18 @@ public class ChunkSerializer {
 			if (l >= 0 && l < levelChunkSections.length) {
 				PalettedContainer<BlockState> palettedContainer;
 				if (compoundTag2.contains("block_states", 10)) {
-					palettedContainer = Util.getOrThrow(
-						BLOCK_STATE_CODEC.parse(NbtOps.INSTANCE, compoundTag2.getCompound("block_states")).promotePartial(string -> logErrors(chunkPos, k, string)),
-						ChunkSerializer.ChunkReadException::new
-					);
+					palettedContainer = BLOCK_STATE_CODEC.parse(NbtOps.INSTANCE, compoundTag2.getCompound("block_states"))
+						.promotePartial(string -> logErrors(chunkPos, k, string))
+						.getOrThrow(ChunkSerializer.ChunkReadException::new);
 				} else {
 					palettedContainer = new PalettedContainer<>(Block.BLOCK_STATE_REGISTRY, Blocks.AIR.defaultBlockState(), PalettedContainer.Strategy.SECTION_STATES);
 				}
 
 				PalettedContainerRO<Holder<Biome>> palettedContainerRO;
 				if (compoundTag2.contains("biomes", 10)) {
-					palettedContainerRO = Util.getOrThrow(
-						codec.parse(NbtOps.INSTANCE, compoundTag2.getCompound("biomes")).promotePartial(string -> logErrors(chunkPos, k, string)),
-						ChunkSerializer.ChunkReadException::new
-					);
+					palettedContainerRO = codec.parse(NbtOps.INSTANCE, compoundTag2.getCompound("biomes"))
+						.promotePartial(string -> logErrors(chunkPos, k, string))
+						.getOrThrow(ChunkSerializer.ChunkReadException::new);
 				} else {
 					palettedContainerRO = new PalettedContainer<>(
 						registry.asHolderIdMap(), registry.getHolderOrThrow(Biomes.PLAINS), PalettedContainer.Strategy.SECTION_BIOMES
@@ -317,8 +314,8 @@ public class ChunkSerializer {
 				CompoundTag compoundTag2 = new CompoundTag();
 				if (bl2) {
 					LevelChunkSection levelChunkSection = levelChunkSections[j];
-					compoundTag2.put("block_states", BLOCK_STATE_CODEC.encodeStart(NbtOps.INSTANCE, levelChunkSection.getStates()).getOrThrow(false, LOGGER::error));
-					compoundTag2.put("biomes", codec.encodeStart(NbtOps.INSTANCE, levelChunkSection.getBiomes()).getOrThrow(false, LOGGER::error));
+					compoundTag2.put("block_states", BLOCK_STATE_CODEC.encodeStart(NbtOps.INSTANCE, levelChunkSection.getStates()).getOrThrow());
+					compoundTag2.put("biomes", codec.encodeStart(NbtOps.INSTANCE, levelChunkSection.getBiomes()).getOrThrow());
 				}
 
 				if (dataLayer != null && !dataLayer.isEmpty()) {

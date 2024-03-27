@@ -12,20 +12,17 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.RegistryFileCodec;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.levelgen.WorldDimensions;
 
 public class WorldPreset {
-	public static final Codec<WorldPreset> DIRECT_CODEC = ExtraCodecs.validate(
-		RecordCodecBuilder.create(
+	public static final Codec<WorldPreset> DIRECT_CODEC = RecordCodecBuilder.<WorldPreset>create(
 			instance -> instance.group(
 						Codec.unboundedMap(ResourceKey.codec(Registries.LEVEL_STEM), LevelStem.CODEC).fieldOf("dimensions").forGetter(worldPreset -> worldPreset.dimensions)
 					)
 					.apply(instance, WorldPreset::new)
-		),
-		WorldPreset::requireOverworld
-	);
+		)
+		.validate(WorldPreset::requireOverworld);
 	public static final Codec<Holder<WorldPreset>> CODEC = RegistryFileCodec.create(Registries.WORLD_PRESET, DIRECT_CODEC);
 	private final Map<ResourceKey<LevelStem>, LevelStem> dimensions;
 

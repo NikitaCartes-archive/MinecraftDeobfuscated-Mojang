@@ -11,7 +11,6 @@ import com.mojang.serialization.Codec;
 import java.util.Collection;
 import java.util.List;
 import javax.annotation.Nullable;
-import net.minecraft.Util;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.Holder;
@@ -83,7 +82,7 @@ public class ResourceOrIdArgument<T> implements ArgumentType<Holder<T>> {
 			return null;
 		} else {
 			RegistryOps<Tag> registryOps = this.registryLookup.createSerializationContext(NbtOps.INSTANCE);
-			return Util.getOrThrow(this.codec.parse(registryOps, tag), string -> ERROR_FAILED_TO_PARSE.createWithContext(stringReader, string));
+			return this.codec.parse(registryOps, tag).getOrThrow(string -> ERROR_FAILED_TO_PARSE.createWithContext(stringReader, string));
 		}
 	}
 

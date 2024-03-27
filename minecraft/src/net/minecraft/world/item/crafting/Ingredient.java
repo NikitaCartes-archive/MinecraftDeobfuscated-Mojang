@@ -21,7 +21,6 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.tags.TagKey;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.entity.player.StackedContents;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -127,7 +126,7 @@ public final class Ingredient implements Predicate<ItemStack> {
 						: DataResult.success((Ingredient.Value[])list.toArray(new Ingredient.Value[0])),
 				List::of
 			);
-		return ExtraCodecs.either(codec, Ingredient.Value.CODEC)
+		return Codec.either(codec, Ingredient.Value.CODEC)
 			.flatComapMap(
 				either -> either.map(Ingredient::new, value -> new Ingredient(new Ingredient.Value[]{value})),
 				ingredient -> {
@@ -181,7 +180,7 @@ public final class Ingredient implements Predicate<ItemStack> {
 	}
 
 	interface Value {
-		Codec<Ingredient.Value> CODEC = ExtraCodecs.xor(Ingredient.ItemValue.CODEC, Ingredient.TagValue.CODEC)
+		Codec<Ingredient.Value> CODEC = Codec.xor(Ingredient.ItemValue.CODEC, Ingredient.TagValue.CODEC)
 			.xmap(either -> either.map(itemValue -> itemValue, tagValue -> tagValue), value -> {
 				if (value instanceof Ingredient.TagValue tagValue) {
 					return Either.right(tagValue);

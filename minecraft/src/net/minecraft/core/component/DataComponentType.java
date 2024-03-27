@@ -1,6 +1,8 @@
 package net.minecraft.core.component;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import java.util.Map;
 import java.util.Objects;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
@@ -10,13 +12,18 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.util.ExtraCodecs;
 
 public interface DataComponentType<T> {
-	Codec<DataComponentType<?>> CODEC = ExtraCodecs.lazyInitializedCodec(() -> BuiltInRegistries.DATA_COMPONENT_TYPE.byNameCodec());
+	Codec<DataComponentType<?>> CODEC = Codec.lazyInitialized(() -> BuiltInRegistries.DATA_COMPONENT_TYPE.byNameCodec());
 	StreamCodec<RegistryFriendlyByteBuf, DataComponentType<?>> STREAM_CODEC = StreamCodec.recursive(
 		streamCodec -> ByteBufCodecs.registry(Registries.DATA_COMPONENT_TYPE)
 	);
+	Codec<DataComponentType<?>> PERSISTENT_CODEC = CODEC.validate(
+		dataComponentType -> dataComponentType.isTransient()
+				? DataResult.error(() -> "Encountered transient component " + BuiltInRegistries.DATA_COMPONENT_TYPE.getKey(dataComponentType))
+				: DataResult.success(dataComponentType)
+	);
+	Codec<Map<DataComponentType<?>, Object>> VALUE_MAP_CODEC = Codec.dispatchedMap(PERSISTENT_CODEC, DataComponentType::codecOrThrow);
 
 	static <T> DataComponentType.Builder<T> builder() {
 		return new DataComponentType.Builder<>();

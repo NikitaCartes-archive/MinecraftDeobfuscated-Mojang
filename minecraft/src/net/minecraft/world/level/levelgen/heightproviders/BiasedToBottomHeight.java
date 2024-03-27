@@ -2,6 +2,7 @@ package net.minecraft.world.level.levelgen.heightproviders;
 
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.levelgen.VerticalAnchor;
@@ -9,7 +10,7 @@ import net.minecraft.world.level.levelgen.WorldGenerationContext;
 import org.slf4j.Logger;
 
 public class BiasedToBottomHeight extends HeightProvider {
-	public static final Codec<BiasedToBottomHeight> CODEC = RecordCodecBuilder.create(
+	public static final MapCodec<BiasedToBottomHeight> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> instance.group(
 					VerticalAnchor.CODEC.fieldOf("min_inclusive").forGetter(biasedToBottomHeight -> biasedToBottomHeight.minInclusive),
 					VerticalAnchor.CODEC.fieldOf("max_inclusive").forGetter(biasedToBottomHeight -> biasedToBottomHeight.maxInclusive),

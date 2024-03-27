@@ -59,6 +59,13 @@ public class BreakingItemParticle extends TextureSheetParticle {
 	}
 
 	@Environment(EnvType.CLIENT)
+	public static class CobwebProvider implements ParticleProvider<SimpleParticleType> {
+		public Particle createParticle(SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+			return new BreakingItemParticle(clientLevel, d, e, f, new ItemStack(Items.COBWEB));
+		}
+	}
+
+	@Environment(EnvType.CLIENT)
 	public static class Provider implements ParticleProvider<ItemParticleOption> {
 		public Particle createParticle(ItemParticleOption itemParticleOption, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
 			return new BreakingItemParticle(clientLevel, d, e, f, g, h, i, itemParticleOption.getItem());

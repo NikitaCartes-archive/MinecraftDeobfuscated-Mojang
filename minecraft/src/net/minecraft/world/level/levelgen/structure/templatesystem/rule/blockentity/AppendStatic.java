@@ -1,13 +1,13 @@
 package net.minecraft.world.level.levelgen.structure.templatesystem.rule.blockentity;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import javax.annotation.Nullable;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.RandomSource;
 
 public class AppendStatic implements RuleBlockEntityModifier {
-	public static final Codec<AppendStatic> CODEC = RecordCodecBuilder.create(
+	public static final MapCodec<AppendStatic> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> instance.group(CompoundTag.CODEC.fieldOf("data").forGetter(appendStatic -> appendStatic.tag)).apply(instance, AppendStatic::new)
 	);
 	private final CompoundTag tag;

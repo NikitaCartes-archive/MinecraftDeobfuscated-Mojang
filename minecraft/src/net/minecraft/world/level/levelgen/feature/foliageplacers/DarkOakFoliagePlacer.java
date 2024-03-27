@@ -1,6 +1,6 @@
 package net.minecraft.world.level.levelgen.feature.foliageplacers;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
@@ -9,7 +9,7 @@ import net.minecraft.world.level.LevelSimulatedReader;
 import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
 
 public class DarkOakFoliagePlacer extends FoliagePlacer {
-	public static final Codec<DarkOakFoliagePlacer> CODEC = RecordCodecBuilder.create(
+	public static final MapCodec<DarkOakFoliagePlacer> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> foliagePlacerParts(instance).apply(instance, DarkOakFoliagePlacer::new)
 	);
 

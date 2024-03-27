@@ -1,6 +1,6 @@
 package net.minecraft.world.level.levelgen.blockpredicates;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 
@@ -18,9 +18,9 @@ public interface BlockPredicateType<P extends BlockPredicate> {
 	BlockPredicateType<NotPredicate> NOT = register("not", NotPredicate.CODEC);
 	BlockPredicateType<TrueBlockPredicate> TRUE = register("true", TrueBlockPredicate.CODEC);
 
-	Codec<P> codec();
+	MapCodec<P> codec();
 
-	private static <P extends BlockPredicate> BlockPredicateType<P> register(String string, Codec<P> codec) {
-		return Registry.register(BuiltInRegistries.BLOCK_PREDICATE_TYPE, string, () -> codec);
+	private static <P extends BlockPredicate> BlockPredicateType<P> register(String string, MapCodec<P> mapCodec) {
+		return Registry.register(BuiltInRegistries.BLOCK_PREDICATE_TYPE, string, () -> mapCodec);
 	}
 }

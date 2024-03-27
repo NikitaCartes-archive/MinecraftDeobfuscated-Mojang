@@ -12,15 +12,15 @@ public class MerchantOffer {
 	public static final Codec<MerchantOffer> CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
 					ItemCost.CODEC.fieldOf("buy").forGetter(merchantOffer -> merchantOffer.baseCostA),
-					ItemCost.CODEC.optionalFieldOf("buyB").forGetter(merchantOffer -> merchantOffer.costB),
+					ItemCost.CODEC.lenientOptionalFieldOf("buyB").forGetter(merchantOffer -> merchantOffer.costB),
 					ItemStack.CODEC.fieldOf("sell").forGetter(merchantOffer -> merchantOffer.result),
-					Codec.INT.optionalFieldOf("uses", Integer.valueOf(0)).forGetter(merchantOffer -> merchantOffer.uses),
-					Codec.INT.optionalFieldOf("maxUses", Integer.valueOf(4)).forGetter(merchantOffer -> merchantOffer.maxUses),
-					Codec.BOOL.optionalFieldOf("rewardExp", Boolean.valueOf(true)).forGetter(merchantOffer -> merchantOffer.rewardExp),
-					Codec.INT.optionalFieldOf("specialPrice", Integer.valueOf(0)).forGetter(merchantOffer -> merchantOffer.specialPriceDiff),
-					Codec.INT.optionalFieldOf("demand", Integer.valueOf(0)).forGetter(merchantOffer -> merchantOffer.demand),
-					Codec.FLOAT.optionalFieldOf("priceMultiplier", Float.valueOf(0.0F)).forGetter(merchantOffer -> merchantOffer.priceMultiplier),
-					Codec.INT.optionalFieldOf("xp", Integer.valueOf(1)).forGetter(merchantOffer -> merchantOffer.xp)
+					Codec.INT.lenientOptionalFieldOf("uses", Integer.valueOf(0)).forGetter(merchantOffer -> merchantOffer.uses),
+					Codec.INT.lenientOptionalFieldOf("maxUses", Integer.valueOf(4)).forGetter(merchantOffer -> merchantOffer.maxUses),
+					Codec.BOOL.lenientOptionalFieldOf("rewardExp", Boolean.valueOf(true)).forGetter(merchantOffer -> merchantOffer.rewardExp),
+					Codec.INT.lenientOptionalFieldOf("specialPrice", Integer.valueOf(0)).forGetter(merchantOffer -> merchantOffer.specialPriceDiff),
+					Codec.INT.lenientOptionalFieldOf("demand", Integer.valueOf(0)).forGetter(merchantOffer -> merchantOffer.demand),
+					Codec.FLOAT.lenientOptionalFieldOf("priceMultiplier", Float.valueOf(0.0F)).forGetter(merchantOffer -> merchantOffer.priceMultiplier),
+					Codec.INT.lenientOptionalFieldOf("xp", Integer.valueOf(1)).forGetter(merchantOffer -> merchantOffer.xp)
 				)
 				.apply(instance, MerchantOffer::new)
 	);

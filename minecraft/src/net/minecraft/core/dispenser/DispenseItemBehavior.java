@@ -4,10 +4,8 @@ import com.mojang.logging.LogUtils;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
-import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Position;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
@@ -15,7 +13,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -26,17 +23,6 @@ import net.minecraft.world.entity.animal.horse.AbstractChestedHorse;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.item.PrimedTnt;
-import net.minecraft.world.entity.projectile.AbstractArrow;
-import net.minecraft.world.entity.projectile.Arrow;
-import net.minecraft.world.entity.projectile.FireworkRocketEntity;
-import net.minecraft.world.entity.projectile.Projectile;
-import net.minecraft.world.entity.projectile.SmallFireball;
-import net.minecraft.world.entity.projectile.Snowball;
-import net.minecraft.world.entity.projectile.SpectralArrow;
-import net.minecraft.world.entity.projectile.ThrownEgg;
-import net.minecraft.world.entity.projectile.ThrownExperienceBottle;
-import net.minecraft.world.entity.projectile.ThrownPotion;
-import net.minecraft.world.entity.projectile.windcharge.WindCharge;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.BoneMealItem;
@@ -73,7 +59,6 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.RotationSegment;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.Vec3;
 import org.slf4j.Logger;
 
 public interface DispenseItemBehavior {
@@ -83,105 +68,17 @@ public interface DispenseItemBehavior {
 	ItemStack dispense(BlockSource blockSource, ItemStack itemStack);
 
 	static void bootStrap() {
-		DispenserBlock.registerBehavior(Items.ARROW, new AbstractProjectileDispenseBehavior() {
-			@Override
-			protected Projectile getProjectile(Level level, Position position, ItemStack itemStack) {
-				Arrow arrow = new Arrow(level, position.x(), position.y(), position.z(), itemStack.copyWithCount(1));
-				arrow.pickup = AbstractArrow.Pickup.ALLOWED;
-				return arrow;
-			}
-		});
-		DispenserBlock.registerBehavior(Items.TIPPED_ARROW, new AbstractProjectileDispenseBehavior() {
-			@Override
-			protected Projectile getProjectile(Level level, Position position, ItemStack itemStack) {
-				Arrow arrow = new Arrow(level, position.x(), position.y(), position.z(), itemStack.copyWithCount(1));
-				arrow.pickup = AbstractArrow.Pickup.ALLOWED;
-				return arrow;
-			}
-		});
-		DispenserBlock.registerBehavior(Items.SPECTRAL_ARROW, new AbstractProjectileDispenseBehavior() {
-			@Override
-			protected Projectile getProjectile(Level level, Position position, ItemStack itemStack) {
-				AbstractArrow abstractArrow = new SpectralArrow(level, position.x(), position.y(), position.z(), itemStack.copyWithCount(1));
-				abstractArrow.pickup = AbstractArrow.Pickup.ALLOWED;
-				return abstractArrow;
-			}
-		});
-		DispenserBlock.registerBehavior(Items.EGG, new AbstractProjectileDispenseBehavior() {
-			@Override
-			protected Projectile getProjectile(Level level, Position position, ItemStack itemStack) {
-				return Util.make(new ThrownEgg(level, position.x(), position.y(), position.z()), thrownEgg -> thrownEgg.setItem(itemStack));
-			}
-		});
-		DispenserBlock.registerBehavior(Items.SNOWBALL, new AbstractProjectileDispenseBehavior() {
-			@Override
-			protected Projectile getProjectile(Level level, Position position, ItemStack itemStack) {
-				return Util.make(new Snowball(level, position.x(), position.y(), position.z()), snowball -> snowball.setItem(itemStack));
-			}
-		});
-		DispenserBlock.registerBehavior(
-			Items.EXPERIENCE_BOTTLE,
-			new AbstractProjectileDispenseBehavior() {
-				@Override
-				protected Projectile getProjectile(Level level, Position position, ItemStack itemStack) {
-					return Util.make(
-						new ThrownExperienceBottle(level, position.x(), position.y(), position.z()), thrownExperienceBottle -> thrownExperienceBottle.setItem(itemStack)
-					);
-				}
-
-				@Override
-				protected float getUncertainty() {
-					return super.getUncertainty() * 0.5F;
-				}
-
-				@Override
-				protected float getPower() {
-					return super.getPower() * 1.25F;
-				}
-			}
-		);
-		DispenserBlock.registerBehavior(Items.SPLASH_POTION, new DispenseItemBehavior() {
-			@Override
-			public ItemStack dispense(BlockSource blockSource, ItemStack itemStack) {
-				return (new AbstractProjectileDispenseBehavior() {
-					@Override
-					protected Projectile getProjectile(Level level, Position position, ItemStack itemStack) {
-						return Util.make(new ThrownPotion(level, position.x(), position.y(), position.z()), thrownPotion -> thrownPotion.setItem(itemStack));
-					}
-
-					@Override
-					protected float getUncertainty() {
-						return super.getUncertainty() * 0.5F;
-					}
-
-					@Override
-					protected float getPower() {
-						return super.getPower() * 1.25F;
-					}
-				}).dispense(blockSource, itemStack);
-			}
-		});
-		DispenserBlock.registerBehavior(Items.LINGERING_POTION, new DispenseItemBehavior() {
-			@Override
-			public ItemStack dispense(BlockSource blockSource, ItemStack itemStack) {
-				return (new AbstractProjectileDispenseBehavior() {
-					@Override
-					protected Projectile getProjectile(Level level, Position position, ItemStack itemStack) {
-						return Util.make(new ThrownPotion(level, position.x(), position.y(), position.z()), thrownPotion -> thrownPotion.setItem(itemStack));
-					}
-
-					@Override
-					protected float getUncertainty() {
-						return super.getUncertainty() * 0.5F;
-					}
-
-					@Override
-					protected float getPower() {
-						return super.getPower() * 1.25F;
-					}
-				}).dispense(blockSource, itemStack);
-			}
-		});
+		DispenserBlock.registerProjectileBehavior(Items.ARROW);
+		DispenserBlock.registerProjectileBehavior(Items.TIPPED_ARROW);
+		DispenserBlock.registerProjectileBehavior(Items.SPECTRAL_ARROW);
+		DispenserBlock.registerProjectileBehavior(Items.EGG);
+		DispenserBlock.registerProjectileBehavior(Items.SNOWBALL);
+		DispenserBlock.registerProjectileBehavior(Items.EXPERIENCE_BOTTLE);
+		DispenserBlock.registerProjectileBehavior(Items.SPLASH_POTION);
+		DispenserBlock.registerProjectileBehavior(Items.LINGERING_POTION);
+		DispenserBlock.registerProjectileBehavior(Items.FIREWORK_ROCKET);
+		DispenserBlock.registerProjectileBehavior(Items.FIRE_CHARGE);
+		DispenserBlock.registerProjectileBehavior(Items.WIND_CHARGE);
 		DefaultDispenseItemBehavior defaultDispenseItemBehavior = new DefaultDispenseItemBehavior() {
 			@Override
 			public ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
@@ -299,74 +196,6 @@ public interface DispenseItemBehavior {
 					}
 
 					return super.execute(blockSource, itemStack);
-				}
-			}
-		);
-		DispenserBlock.registerBehavior(Items.FIREWORK_ROCKET, new DefaultDispenseItemBehavior() {
-			@Override
-			public ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
-				Direction direction = blockSource.state().getValue(DispenserBlock.FACING);
-				Vec3 vec3 = DispenseItemBehavior.getEntityPokingOutOfBlockPos(blockSource, EntityType.FIREWORK_ROCKET, direction);
-				FireworkRocketEntity fireworkRocketEntity = new FireworkRocketEntity(blockSource.level(), itemStack, vec3.x(), vec3.y(), vec3.z(), true);
-				fireworkRocketEntity.shoot((double)direction.getStepX(), (double)direction.getStepY(), (double)direction.getStepZ(), 0.5F, 1.0F);
-				blockSource.level().addFreshEntity(fireworkRocketEntity);
-				itemStack.shrink(1);
-				return itemStack;
-			}
-
-			@Override
-			protected void playSound(BlockSource blockSource) {
-				blockSource.level().levelEvent(1004, blockSource.pos(), 0);
-			}
-		});
-		DispenserBlock.registerBehavior(Items.FIRE_CHARGE, new DefaultDispenseItemBehavior() {
-			@Override
-			public ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
-				Direction direction = blockSource.state().getValue(DispenserBlock.FACING);
-				Position position = DispenserBlock.getDispensePosition(blockSource);
-				double d = position.x() + (double)((float)direction.getStepX() * 0.3F);
-				double e = position.y() + (double)((float)direction.getStepY() * 0.3F);
-				double f = position.z() + (double)((float)direction.getStepZ() * 0.3F);
-				Level level = blockSource.level();
-				RandomSource randomSource = level.random;
-				double g = randomSource.triangle((double)direction.getStepX(), 0.11485000000000001);
-				double h = randomSource.triangle((double)direction.getStepY(), 0.11485000000000001);
-				double i = randomSource.triangle((double)direction.getStepZ(), 0.11485000000000001);
-				SmallFireball smallFireball = new SmallFireball(level, d, e, f, g, h, i);
-				level.addFreshEntity(Util.make(smallFireball, smallFireballx -> smallFireballx.setItem(itemStack)));
-				itemStack.shrink(1);
-				return itemStack;
-			}
-
-			@Override
-			protected void playSound(BlockSource blockSource) {
-				blockSource.level().levelEvent(1018, blockSource.pos(), 0);
-			}
-		});
-		DispenserBlock.registerBehavior(
-			Items.WIND_CHARGE,
-			new DefaultDispenseItemBehavior() {
-				@Override
-				public ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
-					Direction direction = blockSource.state().getValue(DispenserBlock.FACING);
-					Position position = DispenserBlock.getDispensePosition(blockSource);
-					Level level = blockSource.level();
-					RandomSource randomSource = level.random;
-					double d = randomSource.triangle((double)direction.getStepX(), 0.11485000000000001);
-					double e = randomSource.triangle((double)direction.getStepY(), 0.11485000000000001);
-					double f = randomSource.triangle((double)direction.getStepZ(), 0.11485000000000001);
-					WindCharge windCharge = new WindCharge(
-						level,
-						position.x() + (double)((float)direction.getStepX() * 0.3F),
-						position.y() + (double)((float)direction.getStepY() * 0.3F),
-						position.z() + (double)((float)direction.getStepZ() * 0.3F),
-						d,
-						e,
-						f
-					);
-					level.addFreshEntity(windCharge);
-					itemStack.shrink(1);
-					return itemStack;
 				}
 			}
 		);
@@ -720,14 +549,5 @@ public interface DispenseItemBehavior {
 				}
 			}
 		);
-	}
-
-	static Vec3 getEntityPokingOutOfBlockPos(BlockSource blockSource, EntityType<?> entityType, Direction direction) {
-		return blockSource.center()
-			.add(
-				(double)direction.getStepX() * (0.5000099999997474 - (double)entityType.getWidth() / 2.0),
-				(double)direction.getStepY() * (0.5000099999997474 - (double)entityType.getHeight() / 2.0) - (double)entityType.getHeight() / 2.0,
-				(double)direction.getStepZ() * (0.5000099999997474 - (double)entityType.getWidth() / 2.0)
-			);
 	}
 }

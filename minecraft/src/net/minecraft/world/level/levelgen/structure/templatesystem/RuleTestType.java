@@ -1,6 +1,6 @@
 package net.minecraft.world.level.levelgen.structure.templatesystem;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 
@@ -12,9 +12,9 @@ public interface RuleTestType<P extends RuleTest> {
 	RuleTestType<RandomBlockMatchTest> RANDOM_BLOCK_TEST = register("random_block_match", RandomBlockMatchTest.CODEC);
 	RuleTestType<RandomBlockStateMatchTest> RANDOM_BLOCKSTATE_TEST = register("random_blockstate_match", RandomBlockStateMatchTest.CODEC);
 
-	Codec<P> codec();
+	MapCodec<P> codec();
 
-	static <P extends RuleTest> RuleTestType<P> register(String string, Codec<P> codec) {
-		return Registry.register(BuiltInRegistries.RULE_TEST, string, () -> codec);
+	static <P extends RuleTest> RuleTestType<P> register(String string, MapCodec<P> mapCodec) {
+		return Registry.register(BuiltInRegistries.RULE_TEST, string, () -> mapCodec);
 	}
 }

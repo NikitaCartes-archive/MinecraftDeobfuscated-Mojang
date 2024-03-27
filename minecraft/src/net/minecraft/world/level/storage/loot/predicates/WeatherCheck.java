@@ -1,17 +1,16 @@
 package net.minecraft.world.level.storage.loot.predicates;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Optional;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.level.storage.loot.LootContext;
 
 public record WeatherCheck(Optional<Boolean> isRaining, Optional<Boolean> isThundering) implements LootItemCondition {
-	public static final Codec<WeatherCheck> CODEC = RecordCodecBuilder.create(
+	public static final MapCodec<WeatherCheck> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> instance.group(
-					ExtraCodecs.strictOptionalField(Codec.BOOL, "raining").forGetter(WeatherCheck::isRaining),
-					ExtraCodecs.strictOptionalField(Codec.BOOL, "thundering").forGetter(WeatherCheck::isThundering)
+					Codec.BOOL.optionalFieldOf("raining").forGetter(WeatherCheck::isRaining), Codec.BOOL.optionalFieldOf("thundering").forGetter(WeatherCheck::isThundering)
 				)
 				.apply(instance, WeatherCheck::new)
 	);

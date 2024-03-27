@@ -39,7 +39,6 @@ public class EntityEvent {
 	public static final byte TRUSTING_FAILED = 40;
 	public static final byte TRUSTING_SUCCEEDED = 41;
 	public static final byte VILLAGER_SWEAT = 42;
-	public static final byte BAD_OMEN_TRIGGERED = 43;
 	public static final byte FOX_EAT = 45;
 	public static final byte TELEPORT = 46;
 	public static final byte MAINHAND_BREAK = 47;

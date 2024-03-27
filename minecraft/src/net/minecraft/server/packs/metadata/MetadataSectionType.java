@@ -4,7 +4,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
-import net.minecraft.Util;
 
 public interface MetadataSectionType<T> extends MetadataSectionSerializer<T> {
 	JsonObject toJson(T object);
@@ -18,12 +17,12 @@ public interface MetadataSectionType<T> extends MetadataSectionSerializer<T> {
 
 			@Override
 			public T fromJson(JsonObject jsonObject) {
-				return Util.getOrThrow(codec.parse(JsonOps.INSTANCE, jsonObject), JsonParseException::new);
+				return codec.parse(JsonOps.INSTANCE, jsonObject).getOrThrow(JsonParseException::new);
 			}
 
 			@Override
 			public JsonObject toJson(T object) {
-				return Util.getOrThrow(codec.encodeStart(JsonOps.INSTANCE, object), IllegalArgumentException::new).getAsJsonObject();
+				return codec.encodeStart(JsonOps.INSTANCE, object).getOrThrow(IllegalArgumentException::new).getAsJsonObject();
 			}
 		};
 	}

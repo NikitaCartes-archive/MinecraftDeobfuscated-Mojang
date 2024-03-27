@@ -13,30 +13,30 @@ import net.minecraft.world.phys.Vec3;
 public enum VaultState implements StringRepresentable {
 	INACTIVE("inactive", VaultState.LightLevel.HALF_LIT) {
 		@Override
-		protected void onEnter(ServerLevel serverLevel, BlockPos blockPos, VaultConfig vaultConfig, VaultSharedData vaultSharedData) {
+		protected void onEnter(ServerLevel serverLevel, BlockPos blockPos, VaultConfig vaultConfig, VaultSharedData vaultSharedData, boolean bl) {
 			vaultSharedData.setDisplayItem(ItemStack.EMPTY);
-			serverLevel.levelEvent(3016, blockPos, 0);
+			serverLevel.levelEvent(3016, blockPos, bl ? 1 : 0);
 		}
 	},
 	ACTIVE("active", VaultState.LightLevel.LIT) {
 		@Override
-		protected void onEnter(ServerLevel serverLevel, BlockPos blockPos, VaultConfig vaultConfig, VaultSharedData vaultSharedData) {
+		protected void onEnter(ServerLevel serverLevel, BlockPos blockPos, VaultConfig vaultConfig, VaultSharedData vaultSharedData, boolean bl) {
 			if (!vaultSharedData.hasDisplayItem()) {
 				VaultBlockEntity.Server.cycleDisplayItemFromLootTable(serverLevel, this, vaultConfig, vaultSharedData, blockPos);
 			}
 
-			serverLevel.levelEvent(3015, blockPos, 0);
+			serverLevel.levelEvent(3015, blockPos, bl ? 1 : 0);
 		}
 	},
 	UNLOCKING("unlocking", VaultState.LightLevel.LIT) {
 		@Override
-		protected void onEnter(ServerLevel serverLevel, BlockPos blockPos, VaultConfig vaultConfig, VaultSharedData vaultSharedData) {
+		protected void onEnter(ServerLevel serverLevel, BlockPos blockPos, VaultConfig vaultConfig, VaultSharedData vaultSharedData, boolean bl) {
 			serverLevel.playSound(null, blockPos, SoundEvents.VAULT_INSERT_ITEM, SoundSource.BLOCKS);
 		}
 	},
 	EJECTING("ejecting", VaultState.LightLevel.LIT) {
 		@Override
-		protected void onEnter(ServerLevel serverLevel, BlockPos blockPos, VaultConfig vaultConfig, VaultSharedData vaultSharedData) {
+		protected void onEnter(ServerLevel serverLevel, BlockPos blockPos, VaultConfig vaultConfig, VaultSharedData vaultSharedData, boolean bl) {
 			serverLevel.playSound(null, blockPos, SoundEvents.VAULT_OPEN_SHUTTER, SoundSource.BLOCKS);
 		}
 
@@ -102,12 +102,14 @@ public enum VaultState implements StringRepresentable {
 		return vaultSharedData.hasConnectedPlayers() ? ACTIVE : INACTIVE;
 	}
 
-	public void onTransition(ServerLevel serverLevel, BlockPos blockPos, VaultState vaultState, VaultConfig vaultConfig, VaultSharedData vaultSharedData) {
+	public void onTransition(
+		ServerLevel serverLevel, BlockPos blockPos, VaultState vaultState, VaultConfig vaultConfig, VaultSharedData vaultSharedData, boolean bl
+	) {
 		this.onExit(serverLevel, blockPos, vaultConfig, vaultSharedData);
-		vaultState.onEnter(serverLevel, blockPos, vaultConfig, vaultSharedData);
+		vaultState.onEnter(serverLevel, blockPos, vaultConfig, vaultSharedData, bl);
 	}
 
-	protected void onEnter(ServerLevel serverLevel, BlockPos blockPos, VaultConfig vaultConfig, VaultSharedData vaultSharedData) {
+	protected void onEnter(ServerLevel serverLevel, BlockPos blockPos, VaultConfig vaultConfig, VaultSharedData vaultSharedData, boolean bl) {
 	}
 
 	protected void onExit(ServerLevel serverLevel, BlockPos blockPos, VaultConfig vaultConfig, VaultSharedData vaultSharedData) {

@@ -1,7 +1,7 @@
 package net.minecraft.world.level.storage.loot.functions;
 
 import com.mojang.logging.LogUtils;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import java.util.Optional;
@@ -16,7 +16,7 @@ import org.slf4j.Logger;
 
 public class SmeltItemFunction extends LootItemConditionalFunction {
 	private static final Logger LOGGER = LogUtils.getLogger();
-	public static final Codec<SmeltItemFunction> CODEC = RecordCodecBuilder.create(instance -> commonFields(instance).apply(instance, SmeltItemFunction::new));
+	public static final MapCodec<SmeltItemFunction> CODEC = RecordCodecBuilder.mapCodec(instance -> commonFields(instance).apply(instance, SmeltItemFunction::new));
 
 	private SmeltItemFunction(List<LootItemCondition> list) {
 		super(list);

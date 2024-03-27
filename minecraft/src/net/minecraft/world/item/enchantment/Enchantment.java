@@ -17,10 +17,13 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.flag.FeatureElement;
+import net.minecraft.world.flag.FeatureFlagSet;
+import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
-public class Enchantment {
+public class Enchantment implements FeatureElement {
 	private final Enchantment.EnchantmentDefinition definition;
 	@Nullable
 	protected String descriptionId;
@@ -37,13 +40,19 @@ public class Enchantment {
 	public static Enchantment.EnchantmentDefinition definition(
 		TagKey<Item> tagKey, TagKey<Item> tagKey2, int i, int j, Enchantment.Cost cost, Enchantment.Cost cost2, int k, EquipmentSlot... equipmentSlots
 	) {
-		return new Enchantment.EnchantmentDefinition(tagKey, Optional.of(tagKey2), i, j, cost, cost2, k, equipmentSlots);
+		return new Enchantment.EnchantmentDefinition(tagKey, Optional.of(tagKey2), i, j, cost, cost2, k, FeatureFlags.DEFAULT_FLAGS, equipmentSlots);
 	}
 
 	public static Enchantment.EnchantmentDefinition definition(
 		TagKey<Item> tagKey, int i, int j, Enchantment.Cost cost, Enchantment.Cost cost2, int k, EquipmentSlot... equipmentSlots
 	) {
-		return new Enchantment.EnchantmentDefinition(tagKey, Optional.empty(), i, j, cost, cost2, k, equipmentSlots);
+		return new Enchantment.EnchantmentDefinition(tagKey, Optional.empty(), i, j, cost, cost2, k, FeatureFlags.DEFAULT_FLAGS, equipmentSlots);
+	}
+
+	public static Enchantment.EnchantmentDefinition definition(
+		TagKey<Item> tagKey, int i, int j, Enchantment.Cost cost, Enchantment.Cost cost2, int k, FeatureFlagSet featureFlagSet, EquipmentSlot... equipmentSlots
+	) {
+		return new Enchantment.EnchantmentDefinition(tagKey, Optional.empty(), i, j, cost, cost2, k, featureFlagSet, equipmentSlots);
 	}
 
 	@Nullable
@@ -153,6 +162,9 @@ public class Enchantment {
 	public void doPostHurt(LivingEntity livingEntity, Entity entity, int i) {
 	}
 
+	public void doPostItemStackHurt(LivingEntity livingEntity, Entity entity, int i) {
+	}
+
 	public boolean isTreasureOnly() {
 		return false;
 	}
@@ -174,6 +186,11 @@ public class Enchantment {
 		return this.builtInRegistryHolder;
 	}
 
+	@Override
+	public FeatureFlagSet requiredFeatures() {
+		return this.definition.requiredFeatures();
+	}
+
 	public static record Cost(int base, int perLevel) {
 		public int calculate(int i) {
 			return this.base + this.perLevel * (i - 1);
@@ -188,6 +205,7 @@ public class Enchantment {
 		Enchantment.Cost minCost,
 		Enchantment.Cost maxCost,
 		int anvilCost,
+		FeatureFlagSet requiredFeatures,
 		EquipmentSlot[] slots
 	) {
 	}

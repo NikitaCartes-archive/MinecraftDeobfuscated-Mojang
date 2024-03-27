@@ -12,7 +12,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.tags.ItemTags;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.FastColor;
 import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.ItemStack;
@@ -22,11 +21,11 @@ public record DyedItemColor(int rgb, boolean showInTooltip) implements TooltipPr
 	private static final Codec<DyedItemColor> FULL_CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
 					Codec.INT.fieldOf("rgb").forGetter(DyedItemColor::rgb),
-					ExtraCodecs.strictOptionalField(Codec.BOOL, "show_in_tooltip", true).forGetter(DyedItemColor::showInTooltip)
+					Codec.BOOL.optionalFieldOf("show_in_tooltip", Boolean.valueOf(true)).forGetter(DyedItemColor::showInTooltip)
 				)
 				.apply(instance, DyedItemColor::new)
 	);
-	public static final Codec<DyedItemColor> CODEC = ExtraCodecs.withAlternative(FULL_CODEC, Codec.INT, integer -> new DyedItemColor(integer, true));
+	public static final Codec<DyedItemColor> CODEC = Codec.withAlternative(FULL_CODEC, Codec.INT, integer -> new DyedItemColor(integer, true));
 	public static final StreamCodec<ByteBuf, DyedItemColor> STREAM_CODEC = StreamCodec.composite(
 		ByteBufCodecs.INT, DyedItemColor::rgb, ByteBufCodecs.BOOL, DyedItemColor::showInTooltip, DyedItemColor::new
 	);

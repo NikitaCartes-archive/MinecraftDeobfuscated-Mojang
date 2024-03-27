@@ -30,7 +30,7 @@ public record SuspiciousStewEffects(List<SuspiciousStewEffects.Entry> effects) {
 		public static final Codec<SuspiciousStewEffects.Entry> CODEC = RecordCodecBuilder.create(
 			instance -> instance.group(
 						BuiltInRegistries.MOB_EFFECT.holderByNameCodec().fieldOf("id").forGetter(SuspiciousStewEffects.Entry::effect),
-						Codec.INT.optionalFieldOf("duration", Integer.valueOf(160)).forGetter(SuspiciousStewEffects.Entry::duration)
+						Codec.INT.lenientOptionalFieldOf("duration", Integer.valueOf(160)).forGetter(SuspiciousStewEffects.Entry::duration)
 					)
 					.apply(instance, SuspiciousStewEffects.Entry::new)
 		);

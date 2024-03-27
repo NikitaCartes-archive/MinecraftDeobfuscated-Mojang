@@ -85,12 +85,7 @@ public class ZombieVillager extends Zombie implements VillagerDataHolder {
 		super.addAdditionalSaveData(compoundTag);
 		VillagerData.CODEC.encodeStart(NbtOps.INSTANCE, this.getVillagerData()).resultOrPartial(LOGGER::error).ifPresent(tag -> compoundTag.put("VillagerData", tag));
 		if (this.tradeOffers != null) {
-			compoundTag.put(
-				"Offers",
-				Util.getOrThrow(
-					MerchantOffers.CODEC.encodeStart(this.registryAccess().createSerializationContext(NbtOps.INSTANCE), this.tradeOffers), IllegalStateException::new
-				)
-			);
+			compoundTag.put("Offers", MerchantOffers.CODEC.encodeStart(this.registryAccess().createSerializationContext(NbtOps.INSTANCE), this.tradeOffers).getOrThrow());
 		}
 
 		if (this.gossips != null) {

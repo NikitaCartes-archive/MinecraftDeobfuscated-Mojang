@@ -3,7 +3,9 @@ package net.minecraft.util;
 import java.util.function.Supplier;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.util.valueproviders.IntProvider;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.level.Level;
@@ -94,6 +96,31 @@ public class ParticleUtils {
 			if (bl || !levelAccessor.getBlockState(BlockPos.containing(l, m, n).below()).isAir()) {
 				levelAccessor.addParticle(particleOptions, l, m, n, f, g, h);
 			}
+		}
+	}
+
+	public static void spawnSmashAttackParticles(LevelAccessor levelAccessor, BlockPos blockPos, int i) {
+		Vec3 vec3 = blockPos.getCenter().add(0.0, 0.5, 0.0);
+		BlockParticleOption blockParticleOption = new BlockParticleOption(ParticleTypes.DUST_PILLAR, levelAccessor.getBlockState(blockPos));
+
+		for (int j = 0; (float)j < (float)i / 3.0F; j++) {
+			double d = vec3.x + levelAccessor.getRandom().nextGaussian() / 2.0;
+			double e = vec3.y;
+			double f = vec3.z + levelAccessor.getRandom().nextGaussian() / 2.0;
+			double g = levelAccessor.getRandom().nextGaussian() * 0.2F;
+			double h = levelAccessor.getRandom().nextGaussian() * 0.2F;
+			double k = levelAccessor.getRandom().nextGaussian() * 0.2F;
+			levelAccessor.addParticle(blockParticleOption, d, e, f, g, h, k);
+		}
+
+		for (int j = 0; (float)j < (float)i / 1.5F; j++) {
+			double d = vec3.x + 3.5 * Math.cos((double)j) + levelAccessor.getRandom().nextGaussian() / 2.0;
+			double e = vec3.y;
+			double f = vec3.z + 3.5 * Math.sin((double)j) + levelAccessor.getRandom().nextGaussian() / 2.0;
+			double g = levelAccessor.getRandom().nextGaussian() * 0.05F;
+			double h = levelAccessor.getRandom().nextGaussian() * 0.05F;
+			double k = levelAccessor.getRandom().nextGaussian() * 0.05F;
+			levelAccessor.addParticle(blockParticleOption, d, e, f, g, h, k);
 		}
 	}
 }

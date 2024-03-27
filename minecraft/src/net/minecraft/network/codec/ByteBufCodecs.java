@@ -18,7 +18,6 @@ import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.function.Supplier;
 import java.util.function.ToIntFunction;
-import net.minecraft.Util;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.IdMap;
@@ -273,8 +272,8 @@ public interface ByteBufCodecs {
 	static <T> StreamCodec<ByteBuf, T> fromCodec(Codec<T> codec, Supplier<NbtAccounter> supplier) {
 		return tagCodec(supplier)
 			.map(
-				tag -> Util.getOrThrow(codec.parse(NbtOps.INSTANCE, tag), string -> new DecoderException("Failed to decode: " + string + " " + tag)),
-				object -> Util.getOrThrow(codec.encodeStart(NbtOps.INSTANCE, (T)object), string -> new EncoderException("Failed to encode: " + string + " " + object))
+				tag -> codec.parse(NbtOps.INSTANCE, tag).getOrThrow(string -> new DecoderException("Failed to decode: " + string + " " + tag)),
+				object -> codec.encodeStart(NbtOps.INSTANCE, (T)object).getOrThrow(string -> new EncoderException("Failed to encode: " + string + " " + object))
 			);
 	}
 
@@ -292,12 +291,12 @@ public interface ByteBufCodecs {
 			public T decode(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
 				Tag tag = streamCodec.decode(registryFriendlyByteBuf);
 				RegistryOps<Tag> registryOps = registryFriendlyByteBuf.registryAccess().createSerializationContext(NbtOps.INSTANCE);
-				return Util.getOrThrow(codec.parse(registryOps, tag), string -> new DecoderException("Failed to decode: " + string + " " + tag));
+				return codec.parse(registryOps, tag).getOrThrow(string -> new DecoderException("Failed to decode: " + string + " " + tag));
 			}
 
 			public void encode(RegistryFriendlyByteBuf registryFriendlyByteBuf, T object) {
 				RegistryOps<Tag> registryOps = registryFriendlyByteBuf.registryAccess().createSerializationContext(NbtOps.INSTANCE);
-				Tag tag = Util.getOrThrow(codec.encodeStart(registryOps, object), string -> new EncoderException("Failed to encode: " + string + " " + object));
+				Tag tag = codec.encodeStart(registryOps, object).getOrThrow(string -> new EncoderException("Failed to encode: " + string + " " + object));
 				streamCodec.encode(registryFriendlyByteBuf, tag);
 			}
 		};

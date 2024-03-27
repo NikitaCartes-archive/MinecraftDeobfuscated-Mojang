@@ -22,8 +22,8 @@ public record VibrationInfo(
 					BuiltInRegistries.GAME_EVENT.holderByNameCodec().fieldOf("game_event").forGetter(VibrationInfo::gameEvent),
 					Codec.floatRange(0.0F, Float.MAX_VALUE).fieldOf("distance").forGetter(VibrationInfo::distance),
 					Vec3.CODEC.fieldOf("pos").forGetter(VibrationInfo::pos),
-					UUIDUtil.CODEC.optionalFieldOf("source").forGetter(vibrationInfo -> Optional.ofNullable(vibrationInfo.uuid())),
-					UUIDUtil.CODEC.optionalFieldOf("projectile_owner").forGetter(vibrationInfo -> Optional.ofNullable(vibrationInfo.projectileOwnerUuid()))
+					UUIDUtil.CODEC.lenientOptionalFieldOf("source").forGetter(vibrationInfo -> Optional.ofNullable(vibrationInfo.uuid())),
+					UUIDUtil.CODEC.lenientOptionalFieldOf("projectile_owner").forGetter(vibrationInfo -> Optional.ofNullable(vibrationInfo.projectileOwnerUuid()))
 				)
 				.apply(
 					instance,

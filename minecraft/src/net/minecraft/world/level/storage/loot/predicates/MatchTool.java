@@ -1,20 +1,19 @@
 package net.minecraft.world.level.storage.loot.predicates;
 
 import com.google.common.collect.ImmutableSet;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Optional;
 import java.util.Set;
 import net.minecraft.advancements.critereon.ItemPredicate;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 
 public record MatchTool(Optional<ItemPredicate> predicate) implements LootItemCondition {
-	public static final Codec<MatchTool> CODEC = RecordCodecBuilder.create(
-		instance -> instance.group(ExtraCodecs.strictOptionalField(ItemPredicate.CODEC, "predicate").forGetter(MatchTool::predicate)).apply(instance, MatchTool::new)
+	public static final MapCodec<MatchTool> CODEC = RecordCodecBuilder.mapCodec(
+		instance -> instance.group(ItemPredicate.CODEC.optionalFieldOf("predicate").forGetter(MatchTool::predicate)).apply(instance, MatchTool::new)
 	);
 
 	@Override

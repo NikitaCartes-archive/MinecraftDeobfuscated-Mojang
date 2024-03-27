@@ -67,7 +67,6 @@ import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.Mth;
 import net.minecraft.util.datafix.DataFixTypes;
@@ -141,7 +140,7 @@ public class Options {
 		OptionInstance.noTooltip(),
 		OptionInstance.forOptionEnum(),
 		new OptionInstance.Enum<>(
-			Arrays.asList(CloudStatus.values()), ExtraCodecs.withAlternative(CloudStatus.CODEC, Codec.BOOL, boolean_ -> boolean_ ? CloudStatus.FANCY : CloudStatus.OFF)
+			Arrays.asList(CloudStatus.values()), Codec.withAlternative(CloudStatus.CODEC, Codec.BOOL, boolean_ -> boolean_ ? CloudStatus.FANCY : CloudStatus.OFF)
 		),
 		CloudStatus.FANCY,
 		cloudStatus -> {
@@ -681,8 +680,7 @@ public class Options {
 			return !minecraftx.isRunning() ? 2147483646 : minecraftx.getWindow().calculateScale(0, minecraftx.isEnforceUnicode());
 		}, 2147483646),
 		0,
-		integer -> {
-		}
+		integer -> this.minecraft.resizeDisplay()
 	);
 	private final OptionInstance<ParticleStatus> particles = new OptionInstance<>(
 		"options.particles",
@@ -1296,10 +1294,8 @@ public class Options {
 							JsonElement jsonElement = JsonParser.parseReader(jsonReader);
 							DataResult<T> dataResult = optionInstance.codec().parse(JsonOps.INSTANCE, jsonElement);
 							dataResult.error()
-								.ifPresent(
-									partialResult -> Options.LOGGER.error("Error parsing option value " + string2 + " for option " + optionInstance + ": " + partialResult.message())
-								);
-							dataResult.result().ifPresent(optionInstance::set);
+								.ifPresent(error -> Options.LOGGER.error("Error parsing option value " + string2 + " for option " + optionInstance + ": " + error.message()));
+							dataResult.ifSuccess(optionInstance::set);
 						}
 					}
 
@@ -1393,57 +1389,60 @@ public class Options {
 
 			try {
 				printWriter.println("version:" + SharedConstants.getCurrentVersion().getDataVersion().getVersion());
-				this.processOptions(new Options.FieldAccess() {
-					public void writePrefix(String string) {
-						printWriter.print(string);
-						printWriter.print(':');
-					}
+				this.processOptions(
+					new Options.FieldAccess() {
+						public void writePrefix(String string) {
+							printWriter.print(string);
+							printWriter.print(':');
+						}
 
-					@Override
-					public <T> void process(String string, OptionInstance<T> optionInstance) {
-						DataResult<JsonElement> dataResult = optionInstance.codec().encodeStart(JsonOps.INSTANCE, optionInstance.get());
-						dataResult.error().ifPresent(partialResult -> Options.LOGGER.error("Error saving option " + optionInstance + ": " + partialResult));
-						dataResult.result().ifPresent(jsonElement -> {
+						@Override
+						public <T> void process(String string, OptionInstance<T> optionInstance) {
+							optionInstance.codec()
+								.encodeStart(JsonOps.INSTANCE, optionInstance.get())
+								.ifError(error -> Options.LOGGER.error("Error saving option " + optionInstance + ": " + error))
+								.ifSuccess(jsonElement -> {
+									this.writePrefix(string);
+									printWriter.println(Options.GSON.toJson(jsonElement));
+								});
+						}
+
+						@Override
+						public int process(String string, int i) {
 							this.writePrefix(string);
-							printWriter.println(Options.GSON.toJson(jsonElement));
-						});
-					}
+							printWriter.println(i);
+							return i;
+						}
 
-					@Override
-					public int process(String string, int i) {
-						this.writePrefix(string);
-						printWriter.println(i);
-						return i;
-					}
+						@Override
+						public boolean process(String string, boolean bl) {
+							this.writePrefix(string);
+							printWriter.println(bl);
+							return bl;
+						}
 
-					@Override
-					public boolean process(String string, boolean bl) {
-						this.writePrefix(string);
-						printWriter.println(bl);
-						return bl;
-					}
+						@Override
+						public String process(String string, String string2) {
+							this.writePrefix(string);
+							printWriter.println(string2);
+							return string2;
+						}
 
-					@Override
-					public String process(String string, String string2) {
-						this.writePrefix(string);
-						printWriter.println(string2);
-						return string2;
-					}
+						@Override
+						public float process(String string, float f) {
+							this.writePrefix(string);
+							printWriter.println(f);
+							return f;
+						}
 
-					@Override
-					public float process(String string, float f) {
-						this.writePrefix(string);
-						printWriter.println(f);
-						return f;
+						@Override
+						public <T> T process(String string, T object, Function<String, T> function, Function<T, String> function2) {
+							this.writePrefix(string);
+							printWriter.println((String)function2.apply(object));
+							return object;
+						}
 					}
-
-					@Override
-					public <T> T process(String string, T object, Function<String, T> function, Function<T, String> function2) {
-						this.writePrefix(string);
-						printWriter.println((String)function2.apply(object));
-						return object;
-					}
-				});
+				);
 				if (this.minecraft.getWindow().getPreferredFullscreenVideoMode().isPresent()) {
 					printWriter.println("fullscreenResolution:" + ((VideoMode)this.minecraft.getWindow().getPreferredFullscreenVideoMode().get()).write());
 				}

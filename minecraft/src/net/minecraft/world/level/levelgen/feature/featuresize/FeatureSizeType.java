@@ -1,23 +1,23 @@
 package net.minecraft.world.level.levelgen.feature.featuresize;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 
 public class FeatureSizeType<P extends FeatureSize> {
 	public static final FeatureSizeType<TwoLayersFeatureSize> TWO_LAYERS_FEATURE_SIZE = register("two_layers_feature_size", TwoLayersFeatureSize.CODEC);
 	public static final FeatureSizeType<ThreeLayersFeatureSize> THREE_LAYERS_FEATURE_SIZE = register("three_layers_feature_size", ThreeLayersFeatureSize.CODEC);
-	private final Codec<P> codec;
+	private final MapCodec<P> codec;
 
-	private static <P extends FeatureSize> FeatureSizeType<P> register(String string, Codec<P> codec) {
-		return Registry.register(BuiltInRegistries.FEATURE_SIZE_TYPE, string, new FeatureSizeType<>(codec));
+	private static <P extends FeatureSize> FeatureSizeType<P> register(String string, MapCodec<P> mapCodec) {
+		return Registry.register(BuiltInRegistries.FEATURE_SIZE_TYPE, string, new FeatureSizeType<>(mapCodec));
 	}
 
-	private FeatureSizeType(Codec<P> codec) {
-		this.codec = codec;
+	private FeatureSizeType(MapCodec<P> mapCodec) {
+		this.codec = mapCodec;
 	}
 
-	public Codec<P> codec() {
+	public MapCodec<P> codec() {
 		return this.codec;
 	}
 }

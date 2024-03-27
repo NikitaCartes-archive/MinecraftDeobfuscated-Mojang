@@ -3,6 +3,7 @@ package net.minecraft.core.particles;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Locale;
 import net.minecraft.core.HolderLookup;
@@ -12,7 +13,7 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 
 public class ShriekParticleOption implements ParticleOptions {
-	public static final Codec<ShriekParticleOption> CODEC = RecordCodecBuilder.create(
+	public static final MapCodec<ShriekParticleOption> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> instance.group(Codec.INT.fieldOf("delay").forGetter(shriekParticleOption -> shriekParticleOption.delay))
 				.apply(instance, ShriekParticleOption::new)
 	);

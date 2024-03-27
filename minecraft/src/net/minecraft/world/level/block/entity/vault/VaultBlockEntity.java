@@ -12,6 +12,7 @@ import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
@@ -72,12 +73,12 @@ public class VaultBlockEntity extends BlockEntity {
 	}
 
 	private static <T> Tag encode(Codec<T> codec, T object, HolderLookup.Provider provider) {
-		return Util.getOrThrow(codec.encodeStart(provider.createSerializationContext(NbtOps.INSTANCE), object), IllegalStateException::new);
+		return codec.encodeStart(provider.createSerializationContext(NbtOps.INSTANCE), object).getOrThrow();
 	}
 
 	@Override
-	public void load(CompoundTag compoundTag, HolderLookup.Provider provider) {
-		super.load(compoundTag, provider);
+	protected void loadAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
+		super.loadAdditional(compoundTag, provider);
 		DynamicOps<Tag> dynamicOps = provider.createSerializationContext(NbtOps.INSTANCE);
 		if (compoundTag.contains("server_data")) {
 			VaultServerData.CODEC.parse(dynamicOps, compoundTag.get("server_data")).resultOrPartial(LOGGER::error).ifPresent(this.serverData::set);
@@ -127,38 +128,40 @@ public class VaultBlockEntity extends BlockEntity {
 				emitConnectionParticlesForNearbyPlayers(level, blockPos, blockState, vaultSharedData);
 			}
 
-			emitIdleParticles(level, blockPos, vaultSharedData);
+			emitIdleParticles(level, blockPos, vaultSharedData, blockState.getValue(VaultBlock.OMINOUS) ? ParticleTypes.SOUL_FIRE_FLAME : ParticleTypes.SMALL_FLAME);
 			playIdleSounds(level, blockPos, vaultSharedData);
 		}
 
-		public static void emitActivationParticles(Level level, BlockPos blockPos, BlockState blockState, VaultSharedData vaultSharedData) {
+		public static void emitActivationParticles(
+			Level level, BlockPos blockPos, BlockState blockState, VaultSharedData vaultSharedData, ParticleOptions particleOptions
+		) {
 			emitConnectionParticlesForNearbyPlayers(level, blockPos, blockState, vaultSharedData);
 			RandomSource randomSource = level.random;
 
 			for (int i = 0; i < 20; i++) {
 				Vec3 vec3 = randomPosInsideCage(blockPos, randomSource);
 				level.addParticle(ParticleTypes.SMOKE, vec3.x(), vec3.y(), vec3.z(), 0.0, 0.0, 0.0);
-				level.addParticle(ParticleTypes.SMALL_FLAME, vec3.x(), vec3.y(), vec3.z(), 0.0, 0.0, 0.0);
+				level.addParticle(particleOptions, vec3.x(), vec3.y(), vec3.z(), 0.0, 0.0, 0.0);
 			}
 		}
 
-		public static void emitDeactivationParticles(Level level, BlockPos blockPos) {
+		public static void emitDeactivationParticles(Level level, BlockPos blockPos, ParticleOptions particleOptions) {
 			RandomSource randomSource = level.random;
 
 			for (int i = 0; i < 20; i++) {
 				Vec3 vec3 = randomPosCenterOfCage(blockPos, randomSource);
 				Vec3 vec32 = new Vec3(randomSource.nextGaussian() * 0.02, randomSource.nextGaussian() * 0.02, randomSource.nextGaussian() * 0.02);
-				level.addParticle(ParticleTypes.SMALL_FLAME, vec3.x(), vec3.y(), vec3.z(), vec32.x(), vec32.y(), vec32.z());
+				level.addParticle(particleOptions, vec3.x(), vec3.y(), vec3.z(), vec32.x(), vec32.y(), vec32.z());
 			}
 		}
 
-		private static void emitIdleParticles(Level level, BlockPos blockPos, VaultSharedData vaultSharedData) {
+		private static void emitIdleParticles(Level level, BlockPos blockPos, VaultSharedData vaultSharedData, ParticleOptions particleOptions) {
 			RandomSource randomSource = level.getRandom();
 			if (randomSource.nextFloat() <= 0.5F) {
 				Vec3 vec3 = randomPosInsideCage(blockPos, randomSource);
 				level.addParticle(ParticleTypes.SMOKE, vec3.x(), vec3.y(), vec3.z(), 0.0, 0.0, 0.0);
 				if (shouldDisplayActiveEffects(vaultSharedData)) {
-					level.addParticle(ParticleTypes.SMALL_FLAME, vec3.x(), vec3.y(), vec3.z(), 0.0, 0.0, 0.0);
+					level.addParticle(particleOptions, vec3.x(), vec3.y(), vec3.z(), 0.0, 0.0, 0.0);
 				}
 			}
 		}
@@ -292,7 +295,7 @@ public class VaultBlockEntity extends BlockEntity {
 			VaultState vaultState = blockState.getValue(VaultBlock.STATE);
 			VaultState vaultState2 = blockState2.getValue(VaultBlock.STATE);
 			serverLevel.setBlock(blockPos, blockState2, 3);
-			vaultState.onTransition(serverLevel, blockPos, vaultState2, vaultConfig, vaultSharedData);
+			vaultState.onTransition(serverLevel, blockPos, vaultState2, vaultConfig, vaultSharedData, (Boolean)blockState2.getValue(VaultBlock.OMINOUS));
 		}
 
 		static void cycleDisplayItemFromLootTable(

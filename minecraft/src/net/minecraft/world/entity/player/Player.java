@@ -18,7 +18,6 @@ import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.GlobalPos;
-import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -88,6 +87,7 @@ import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.item.trading.MerchantOffers;
 import net.minecraft.world.level.BaseCommandBlock;
 import net.minecraft.world.level.GameRules;
@@ -474,19 +474,8 @@ public abstract class Player extends LivingEntity {
 			this.reducedDebugInfo = false;
 		} else if (b == 22) {
 			this.reducedDebugInfo = true;
-		} else if (b == 43) {
-			this.addParticlesAroundSelf(ParticleTypes.CLOUD);
 		} else {
 			super.handleEntityEvent(b);
-		}
-	}
-
-	private void addParticlesAroundSelf(ParticleOptions particleOptions) {
-		for (int i = 0; i < 5; i++) {
-			double d = this.random.nextGaussian() * 0.02;
-			double e = this.random.nextGaussian() * 0.02;
-			double f = this.random.nextGaussian() * 0.02;
-			this.level().addParticle(particleOptions, this.getRandomX(1.0), this.getRandomY() + 1.0, this.getRandomZ(1.0), d, e, f);
 		}
 	}
 
@@ -835,9 +824,7 @@ public abstract class Player extends LivingEntity {
 			.flatMap(globalPos -> GlobalPos.CODEC.encodeStart(NbtOps.INSTANCE, globalPos).resultOrPartial(LOGGER::error))
 			.ifPresent(tag -> compoundTag.put("LastDeathLocation", tag));
 		if (this.currentImpulseImpactPos != null) {
-			compoundTag.put(
-				"current_explosion_impact_pos", Util.getOrThrow(Vec3.CODEC.encodeStart(NbtOps.INSTANCE, this.currentImpulseImpactPos), IllegalStateException::new)
-			);
+			compoundTag.put("current_explosion_impact_pos", Vec3.CODEC.encodeStart(NbtOps.INSTANCE, this.currentImpulseImpactPos).getOrThrow());
 		}
 
 		compoundTag.putBoolean("ignore_fall_damage_from_current_explosion", this.ignoreFallDamageFromCurrentImpulse);
@@ -1256,6 +1243,7 @@ public abstract class Player extends LivingEntity {
 
 						EnchantmentHelper.doPostDamageEffects(this, entity);
 						ItemStack itemStack2 = this.getMainHandItem();
+						ItemEnchantments itemEnchantments = itemStack2.getEnchantments();
 						Entity entity2 = entity;
 						if (entity instanceof EnderDragonPart) {
 							entity2 = ((EnderDragonPart)entity).parentMob;
@@ -1268,6 +1256,7 @@ public abstract class Player extends LivingEntity {
 							}
 						}
 
+						EnchantmentHelper.doPostItemStackHurtEffects(this, entity, itemEnchantments);
 						if (entity instanceof LivingEntity) {
 							float m = j - ((LivingEntity)entity).getHealth();
 							this.awardStat(Stats.DAMAGE_DEALT, Math.round(m * 10.0F));

@@ -1,7 +1,7 @@
 package net.minecraft.world.level.chunk.storage;
 
 import com.mojang.datafixers.DataFixer;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Optional;
@@ -39,7 +39,7 @@ public class ChunkStorage implements AutoCloseable {
 		ResourceKey<Level> resourceKey,
 		Supplier<DimensionDataStorage> supplier,
 		CompoundTag compoundTag,
-		Optional<ResourceKey<Codec<? extends ChunkGenerator>>> optional
+		Optional<ResourceKey<MapCodec<? extends ChunkGenerator>>> optional
 	) {
 		int i = getVersion(compoundTag);
 		if (i < 1493) {
@@ -77,7 +77,7 @@ public class ChunkStorage implements AutoCloseable {
 	}
 
 	public static void injectDatafixingContext(
-		CompoundTag compoundTag, ResourceKey<Level> resourceKey, Optional<ResourceKey<Codec<? extends ChunkGenerator>>> optional
+		CompoundTag compoundTag, ResourceKey<Level> resourceKey, Optional<ResourceKey<MapCodec<? extends ChunkGenerator>>> optional
 	) {
 		CompoundTag compoundTag2 = new CompoundTag();
 		compoundTag2.putString("dimension", resourceKey.location().toString());

@@ -1,14 +1,13 @@
 package net.minecraft.world.level.storage.loot.predicates;
 
-import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Optional;
 import java.util.Set;
 import net.minecraft.advancements.critereon.StatePropertiesPredicate;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.loot.LootContext;
@@ -16,16 +15,14 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 
 public record LootItemBlockStatePropertyCondition(Holder<Block> block, Optional<StatePropertiesPredicate> properties) implements LootItemCondition {
-	public static final Codec<LootItemBlockStatePropertyCondition> CODEC = ExtraCodecs.validate(
-		RecordCodecBuilder.create(
+	public static final MapCodec<LootItemBlockStatePropertyCondition> CODEC = RecordCodecBuilder.<LootItemBlockStatePropertyCondition>mapCodec(
 			instance -> instance.group(
 						BuiltInRegistries.BLOCK.holderByNameCodec().fieldOf("block").forGetter(LootItemBlockStatePropertyCondition::block),
-						ExtraCodecs.strictOptionalField(StatePropertiesPredicate.CODEC, "properties").forGetter(LootItemBlockStatePropertyCondition::properties)
+						StatePropertiesPredicate.CODEC.optionalFieldOf("properties").forGetter(LootItemBlockStatePropertyCondition::properties)
 					)
 					.apply(instance, LootItemBlockStatePropertyCondition::new)
-		),
-		LootItemBlockStatePropertyCondition::validate
-	);
+		)
+		.validate(LootItemBlockStatePropertyCondition::validate);
 
 	private static DataResult<LootItemBlockStatePropertyCondition> validate(LootItemBlockStatePropertyCondition lootItemBlockStatePropertyCondition) {
 		return (DataResult<LootItemBlockStatePropertyCondition>)lootItemBlockStatePropertyCondition.properties()

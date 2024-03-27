@@ -1,6 +1,6 @@
 package net.minecraft.client.renderer.texture.atlas.sources;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -12,7 +12,7 @@ import net.minecraft.util.ResourceLocationPattern;
 
 @Environment(EnvType.CLIENT)
 public class SourceFilter implements SpriteSource {
-	public static final Codec<SourceFilter> CODEC = RecordCodecBuilder.create(
+	public static final MapCodec<SourceFilter> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> instance.group(ResourceLocationPattern.CODEC.fieldOf("pattern").forGetter(sourceFilter -> sourceFilter.filter))
 				.apply(instance, SourceFilter::new)
 	);

@@ -13,7 +13,6 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
-import net.minecraft.Util;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.advancements.AdvancementNode;
@@ -45,7 +44,7 @@ public class ServerAdvancementManager extends SimpleJsonResourceReloadListener {
 		Builder<ResourceLocation, AdvancementHolder> builder = ImmutableMap.builder();
 		map.forEach((resourceLocation, jsonElement) -> {
 			try {
-				Advancement advancement = Util.getOrThrow(Advancement.CODEC.parse(registryOps, jsonElement), JsonParseException::new);
+				Advancement advancement = Advancement.CODEC.parse(registryOps, jsonElement).getOrThrow(JsonParseException::new);
 				this.validate(resourceLocation, advancement);
 				builder.put(resourceLocation, new AdvancementHolder(resourceLocation, advancement));
 			} catch (Exception var6x) {

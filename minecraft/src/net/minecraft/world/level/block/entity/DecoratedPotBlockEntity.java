@@ -47,8 +47,8 @@ public class DecoratedPotBlockEntity extends BlockEntity implements Randomizable
 	}
 
 	@Override
-	public void load(CompoundTag compoundTag, HolderLookup.Provider provider) {
-		super.load(compoundTag, provider);
+	protected void loadAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
+		super.loadAdditional(compoundTag, provider);
 		this.decorations = PotDecorations.load(compoundTag);
 		if (!this.tryLoadLootTable(compoundTag)) {
 			if (compoundTag.contains("item", 10)) {
@@ -65,7 +65,7 @@ public class DecoratedPotBlockEntity extends BlockEntity implements Randomizable
 
 	@Override
 	public CompoundTag getUpdateTag(HolderLookup.Provider provider) {
-		return this.saveWithoutMetadata(provider);
+		return this.saveCustomOnly(provider);
 	}
 
 	public Direction getDirection() {
@@ -77,7 +77,7 @@ public class DecoratedPotBlockEntity extends BlockEntity implements Randomizable
 	}
 
 	public void setFromItem(ItemStack itemStack) {
-		this.applyComponents(itemStack.getComponents());
+		this.applyComponentsFromItemStack(itemStack);
 	}
 
 	public ItemStack getPotAsItem() {
@@ -114,15 +114,17 @@ public class DecoratedPotBlockEntity extends BlockEntity implements Randomizable
 	}
 
 	@Override
-	public void collectComponents(DataComponentMap.Builder builder) {
+	protected void collectImplicitComponents(DataComponentMap.Builder builder) {
+		super.collectImplicitComponents(builder);
 		builder.set(DataComponents.POT_DECORATIONS, this.decorations);
 		builder.set(DataComponents.CONTAINER, ItemContainerContents.copyOf(List.of(this.item)));
 	}
 
 	@Override
-	public void applyComponents(DataComponentMap dataComponentMap) {
-		this.decorations = dataComponentMap.getOrDefault(DataComponents.POT_DECORATIONS, PotDecorations.EMPTY);
-		this.item = dataComponentMap.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY).copyOne();
+	protected void applyImplicitComponents(BlockEntity.DataComponentInput dataComponentInput) {
+		super.applyImplicitComponents(dataComponentInput);
+		this.decorations = dataComponentInput.getOrDefault(DataComponents.POT_DECORATIONS, PotDecorations.EMPTY);
+		this.item = dataComponentInput.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY).copyOne();
 	}
 
 	@Override

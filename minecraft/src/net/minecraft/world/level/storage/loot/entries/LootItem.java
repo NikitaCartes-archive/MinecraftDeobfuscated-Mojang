@@ -1,6 +1,6 @@
 package net.minecraft.world.level.storage.loot.entries;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import java.util.function.Consumer;
@@ -14,7 +14,7 @@ import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
 public class LootItem extends LootPoolSingletonContainer {
-	public static final Codec<LootItem> CODEC = RecordCodecBuilder.create(
+	public static final MapCodec<LootItem> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> instance.group(BuiltInRegistries.ITEM.holderByNameCodec().fieldOf("name").forGetter(lootItem -> lootItem.item))
 				.<int, int, List<LootItemCondition>, List<LootItemFunction>>and(singletonFields(instance))
 				.apply(instance, LootItem::new)

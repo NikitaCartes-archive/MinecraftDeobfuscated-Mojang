@@ -4,6 +4,7 @@ import com.mojang.datafixers.Products.P4;
 import com.mojang.datafixers.Products.P5;
 import com.mojang.datafixers.Products.P9;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
 import com.mojang.serialization.codecs.RecordCodecBuilder.Mu;
@@ -18,7 +19,7 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.chunk.ChunkGeneratorStructureState;
 
 public class ConcentricRingsStructurePlacement extends StructurePlacement {
-	public static final Codec<ConcentricRingsStructurePlacement> CODEC = RecordCodecBuilder.create(
+	public static final MapCodec<ConcentricRingsStructurePlacement> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> codec(instance).apply(instance, ConcentricRingsStructurePlacement::new)
 	);
 	private final int distance;

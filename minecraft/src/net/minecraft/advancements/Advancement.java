@@ -20,7 +20,6 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
@@ -34,27 +33,23 @@ public record Advancement(
 	boolean sendsTelemetryEvent,
 	Optional<Component> name
 ) {
-	private static final Codec<Map<String, Criterion<?>>> CRITERIA_CODEC = ExtraCodecs.validate(
-		Codec.unboundedMap(Codec.STRING, Criterion.CODEC),
-		map -> map.isEmpty() ? DataResult.error(() -> "Advancement criteria cannot be empty") : DataResult.success(map)
-	);
-	public static final Codec<Advancement> CODEC = ExtraCodecs.validate(
-		RecordCodecBuilder.create(
+	private static final Codec<Map<String, Criterion<?>>> CRITERIA_CODEC = Codec.unboundedMap(Codec.STRING, Criterion.CODEC)
+		.validate(map -> map.isEmpty() ? DataResult.error(() -> "Advancement criteria cannot be empty") : DataResult.success(map));
+	public static final Codec<Advancement> CODEC = RecordCodecBuilder.<Advancement>create(
 			instance -> instance.group(
-						ExtraCodecs.strictOptionalField(ResourceLocation.CODEC, "parent").forGetter(Advancement::parent),
-						ExtraCodecs.strictOptionalField(DisplayInfo.CODEC, "display").forGetter(Advancement::display),
-						ExtraCodecs.strictOptionalField(AdvancementRewards.CODEC, "rewards", AdvancementRewards.EMPTY).forGetter(Advancement::rewards),
+						ResourceLocation.CODEC.optionalFieldOf("parent").forGetter(Advancement::parent),
+						DisplayInfo.CODEC.optionalFieldOf("display").forGetter(Advancement::display),
+						AdvancementRewards.CODEC.optionalFieldOf("rewards", AdvancementRewards.EMPTY).forGetter(Advancement::rewards),
 						CRITERIA_CODEC.fieldOf("criteria").forGetter(Advancement::criteria),
-						ExtraCodecs.strictOptionalField(AdvancementRequirements.CODEC, "requirements").forGetter(advancement -> Optional.of(advancement.requirements())),
-						ExtraCodecs.strictOptionalField(Codec.BOOL, "sends_telemetry_event", false).forGetter(Advancement::sendsTelemetryEvent)
+						AdvancementRequirements.CODEC.optionalFieldOf("requirements").forGetter(advancement -> Optional.of(advancement.requirements())),
+						Codec.BOOL.optionalFieldOf("sends_telemetry_event", Boolean.valueOf(false)).forGetter(Advancement::sendsTelemetryEvent)
 					)
 					.apply(instance, (optional, optional2, advancementRewards, map, optional3, boolean_) -> {
 						AdvancementRequirements advancementRequirements = (AdvancementRequirements)optional3.orElseGet(() -> AdvancementRequirements.allOf(map.keySet()));
 						return new Advancement(optional, optional2, advancementRewards, map, advancementRequirements, boolean_);
 					})
-		),
-		Advancement::validate
-	);
+		)
+		.validate(Advancement::validate);
 	public static final StreamCodec<RegistryFriendlyByteBuf, Advancement> STREAM_CODEC = StreamCodec.ofMember(Advancement::write, Advancement::read);
 
 	public Advancement(

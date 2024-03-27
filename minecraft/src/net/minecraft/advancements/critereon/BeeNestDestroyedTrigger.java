@@ -8,7 +8,6 @@ import net.minecraft.advancements.Criterion;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -28,11 +27,10 @@ public class BeeNestDestroyedTrigger extends SimpleCriterionTrigger<BeeNestDestr
 	) implements SimpleCriterionTrigger.SimpleInstance {
 		public static final Codec<BeeNestDestroyedTrigger.TriggerInstance> CODEC = RecordCodecBuilder.create(
 			instance -> instance.group(
-						ExtraCodecs.strictOptionalField(EntityPredicate.ADVANCEMENT_CODEC, "player").forGetter(BeeNestDestroyedTrigger.TriggerInstance::player),
-						ExtraCodecs.strictOptionalField(BuiltInRegistries.BLOCK.holderByNameCodec(), "block").forGetter(BeeNestDestroyedTrigger.TriggerInstance::block),
-						ExtraCodecs.strictOptionalField(ItemPredicate.CODEC, "item").forGetter(BeeNestDestroyedTrigger.TriggerInstance::item),
-						ExtraCodecs.strictOptionalField(MinMaxBounds.Ints.CODEC, "num_bees_inside", MinMaxBounds.Ints.ANY)
-							.forGetter(BeeNestDestroyedTrigger.TriggerInstance::beesInside)
+						EntityPredicate.ADVANCEMENT_CODEC.optionalFieldOf("player").forGetter(BeeNestDestroyedTrigger.TriggerInstance::player),
+						BuiltInRegistries.BLOCK.holderByNameCodec().optionalFieldOf("block").forGetter(BeeNestDestroyedTrigger.TriggerInstance::block),
+						ItemPredicate.CODEC.optionalFieldOf("item").forGetter(BeeNestDestroyedTrigger.TriggerInstance::item),
+						MinMaxBounds.Ints.CODEC.optionalFieldOf("num_bees_inside", MinMaxBounds.Ints.ANY).forGetter(BeeNestDestroyedTrigger.TriggerInstance::beesInside)
 					)
 					.apply(instance, BeeNestDestroyedTrigger.TriggerInstance::new)
 		);

@@ -19,10 +19,10 @@ public class VaultServerData {
 	static final String TAG_NAME = "server_data";
 	static Codec<VaultServerData> CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
-					UUIDUtil.CODEC_LINKED_SET.optionalFieldOf("rewarded_players", Set.of()).forGetter(vaultServerData -> vaultServerData.rewardedPlayers),
-					Codec.LONG.optionalFieldOf("state_updating_resumes_at", Long.valueOf(0L)).forGetter(vaultServerData -> vaultServerData.stateUpdatingResumesAt),
-					ItemStack.CODEC.listOf().optionalFieldOf("items_to_eject", List.of()).forGetter(vaultServerData -> vaultServerData.itemsToEject),
-					Codec.INT.optionalFieldOf("total_ejections_needed", Integer.valueOf(0)).forGetter(vaultServerData -> vaultServerData.totalEjectionsNeeded)
+					UUIDUtil.CODEC_LINKED_SET.lenientOptionalFieldOf("rewarded_players", Set.of()).forGetter(vaultServerData -> vaultServerData.rewardedPlayers),
+					Codec.LONG.lenientOptionalFieldOf("state_updating_resumes_at", Long.valueOf(0L)).forGetter(vaultServerData -> vaultServerData.stateUpdatingResumesAt),
+					ItemStack.CODEC.listOf().lenientOptionalFieldOf("items_to_eject", List.of()).forGetter(vaultServerData -> vaultServerData.itemsToEject),
+					Codec.INT.lenientOptionalFieldOf("total_ejections_needed", Integer.valueOf(0)).forGetter(vaultServerData -> vaultServerData.totalEjectionsNeeded)
 				)
 				.apply(instance, VaultServerData::new)
 	);

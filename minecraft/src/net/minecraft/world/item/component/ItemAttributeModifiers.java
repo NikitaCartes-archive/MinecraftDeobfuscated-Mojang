@@ -15,7 +15,6 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.ai.attributes.Attribute;
@@ -26,11 +25,11 @@ public record ItemAttributeModifiers(List<ItemAttributeModifiers.Entry> modifier
 	private static final Codec<ItemAttributeModifiers> FULL_CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
 					ItemAttributeModifiers.Entry.CODEC.listOf().fieldOf("modifiers").forGetter(ItemAttributeModifiers::modifiers),
-					ExtraCodecs.strictOptionalField(Codec.BOOL, "show_in_tooltip", true).forGetter(ItemAttributeModifiers::showInTooltip)
+					Codec.BOOL.optionalFieldOf("show_in_tooltip", Boolean.valueOf(true)).forGetter(ItemAttributeModifiers::showInTooltip)
 				)
 				.apply(instance, ItemAttributeModifiers::new)
 	);
-	public static final Codec<ItemAttributeModifiers> CODEC = ExtraCodecs.withAlternative(
+	public static final Codec<ItemAttributeModifiers> CODEC = Codec.withAlternative(
 		FULL_CODEC, ItemAttributeModifiers.Entry.CODEC.listOf(), list -> new ItemAttributeModifiers(list, true)
 	);
 	public static final StreamCodec<RegistryFriendlyByteBuf, ItemAttributeModifiers> STREAM_CODEC = StreamCodec.composite(
@@ -105,7 +104,7 @@ public record ItemAttributeModifiers(List<ItemAttributeModifiers.Entry> modifier
 			instance -> instance.group(
 						BuiltInRegistries.ATTRIBUTE.holderByNameCodec().fieldOf("type").forGetter(ItemAttributeModifiers.Entry::attribute),
 						AttributeModifier.MAP_CODEC.forGetter(ItemAttributeModifiers.Entry::modifier),
-						ExtraCodecs.strictOptionalField(EquipmentSlotGroup.CODEC, "slot", EquipmentSlotGroup.ANY).forGetter(ItemAttributeModifiers.Entry::slot)
+						EquipmentSlotGroup.CODEC.optionalFieldOf("slot", EquipmentSlotGroup.ANY).forGetter(ItemAttributeModifiers.Entry::slot)
 					)
 					.apply(instance, ItemAttributeModifiers.Entry::new)
 		);

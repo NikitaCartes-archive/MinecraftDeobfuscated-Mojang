@@ -2,31 +2,28 @@ package net.minecraft.world.level.levelgen.structure.placement;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Optional;
 import net.minecraft.core.Vec3i;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.ChunkGeneratorStructureState;
 import net.minecraft.world.level.levelgen.LegacyRandomSource;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 
 public class RandomSpreadStructurePlacement extends StructurePlacement {
-	public static final Codec<RandomSpreadStructurePlacement> CODEC = ExtraCodecs.validate(
-			RecordCodecBuilder.mapCodec(
-				instance -> placementCodec(instance)
-						.<int, int, RandomSpreadType>and(
-							instance.group(
-								Codec.intRange(0, 4096).fieldOf("spacing").forGetter(RandomSpreadStructurePlacement::spacing),
-								Codec.intRange(0, 4096).fieldOf("separation").forGetter(RandomSpreadStructurePlacement::separation),
-								RandomSpreadType.CODEC.optionalFieldOf("spread_type", RandomSpreadType.LINEAR).forGetter(RandomSpreadStructurePlacement::spreadType)
-							)
+	public static final MapCodec<RandomSpreadStructurePlacement> CODEC = RecordCodecBuilder.<RandomSpreadStructurePlacement>mapCodec(
+			instance -> placementCodec(instance)
+					.<int, int, RandomSpreadType>and(
+						instance.group(
+							Codec.intRange(0, 4096).fieldOf("spacing").forGetter(RandomSpreadStructurePlacement::spacing),
+							Codec.intRange(0, 4096).fieldOf("separation").forGetter(RandomSpreadStructurePlacement::separation),
+							RandomSpreadType.CODEC.optionalFieldOf("spread_type", RandomSpreadType.LINEAR).forGetter(RandomSpreadStructurePlacement::spreadType)
 						)
-						.apply(instance, RandomSpreadStructurePlacement::new)
-			),
-			RandomSpreadStructurePlacement::validate
+					)
+					.apply(instance, RandomSpreadStructurePlacement::new)
 		)
-		.codec();
+		.validate(RandomSpreadStructurePlacement::validate);
 	private final int spacing;
 	private final int separation;
 	private final RandomSpreadType spreadType;

@@ -11,28 +11,45 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.CollisionContext;
 
 public interface PlayerDetector {
-	PlayerDetector NO_CREATIVE_PLAYERS = (serverLevel, entitySelector, blockPos, d) -> entitySelector.getPlayers(
+	PlayerDetector NO_CREATIVE_PLAYERS = (serverLevel, entitySelector, blockPos, d, bl) -> entitySelector.getPlayers(
 				serverLevel, player -> player.blockPosition().closerThan(blockPos, d) && !player.isCreative() && !player.isSpectator()
 			)
 			.stream()
+			.filter(player -> !bl || inLineOfSight(serverLevel, blockPos.getCenter(), player.getEyePosition()))
 			.map(Entity::getUUID)
 			.toList();
-	PlayerDetector INCLUDING_CREATIVE_PLAYERS = (serverLevel, entitySelector, blockPos, d) -> entitySelector.getPlayers(
+	PlayerDetector INCLUDING_CREATIVE_PLAYERS = (serverLevel, entitySelector, blockPos, d, bl) -> entitySelector.getPlayers(
 				serverLevel, player -> player.blockPosition().closerThan(blockPos, d) && !player.isSpectator()
 			)
 			.stream()
+			.filter(player -> !bl || inLineOfSight(serverLevel, blockPos.getCenter(), player.getEyePosition()))
 			.map(Entity::getUUID)
 			.toList();
-	PlayerDetector SHEEP = (serverLevel, entitySelector, blockPos, d) -> {
+	PlayerDetector SHEEP = (serverLevel, entitySelector, blockPos, d, bl) -> {
 		AABB aABB = new AABB(blockPos).inflate(d);
-		return entitySelector.getEntities(serverLevel, EntityType.SHEEP, aABB, LivingEntity::isAlive).stream().map(Entity::getUUID).toList();
+		return entitySelector.getEntities(serverLevel, EntityType.SHEEP, aABB, LivingEntity::isAlive)
+			.stream()
+			.filter(sheep -> !bl || inLineOfSight(serverLevel, blockPos.getCenter(), sheep.getEyePosition()))
+			.map(Entity::getUUID)
+			.toList();
 	};
 
-	List<UUID> detect(ServerLevel serverLevel, PlayerDetector.EntitySelector entitySelector, BlockPos blockPos, double d);
+	List<UUID> detect(ServerLevel serverLevel, PlayerDetector.EntitySelector entitySelector, BlockPos blockPos, double d, boolean bl);
+
+	private static boolean inLineOfSight(Level level, Vec3 vec3, Vec3 vec32) {
+		BlockHitResult blockHitResult = level.clip(new ClipContext(vec32, vec3, ClipContext.Block.VISUAL, ClipContext.Fluid.NONE, CollisionContext.empty()));
+		return blockHitResult.getBlockPos().equals(BlockPos.containing(vec3)) || blockHitResult.getType() == HitResult.Type.MISS;
+	}
 
 	public interface EntitySelector {
 		PlayerDetector.EntitySelector SELECT_FROM_LEVEL = new PlayerDetector.EntitySelector() {

@@ -2,12 +2,12 @@ package net.minecraft.world.item.crafting;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.entity.player.StackedContents;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
@@ -76,9 +76,9 @@ public class ShapelessRecipe implements CraftingRecipe {
 	}
 
 	public static class Serializer implements RecipeSerializer<ShapelessRecipe> {
-		private static final Codec<ShapelessRecipe> CODEC = RecordCodecBuilder.create(
+		private static final MapCodec<ShapelessRecipe> CODEC = RecordCodecBuilder.mapCodec(
 			instance -> instance.group(
-						ExtraCodecs.strictOptionalField(Codec.STRING, "group", "").forGetter(shapelessRecipe -> shapelessRecipe.group),
+						Codec.STRING.optionalFieldOf("group", "").forGetter(shapelessRecipe -> shapelessRecipe.group),
 						CraftingBookCategory.CODEC.fieldOf("category").orElse(CraftingBookCategory.MISC).forGetter(shapelessRecipe -> shapelessRecipe.category),
 						ItemStack.CODEC.fieldOf("result").forGetter(shapelessRecipe -> shapelessRecipe.result),
 						Ingredient.CODEC_NONEMPTY
@@ -106,7 +106,7 @@ public class ShapelessRecipe implements CraftingRecipe {
 		);
 
 		@Override
-		public Codec<ShapelessRecipe> codec() {
+		public MapCodec<ShapelessRecipe> codec() {
 			return CODEC;
 		}
 

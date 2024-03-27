@@ -36,7 +36,7 @@ public class ApplyBonusCount extends LootItemConditionalFunction {
 	private static final MapCodec<ApplyBonusCount.Formula> FORMULA_CODEC = ExtraCodecs.dispatchOptionalValue(
 		"formula", "parameters", FORMULA_TYPE_CODEC, ApplyBonusCount.Formula::getType, ApplyBonusCount.FormulaType::codec
 	);
-	public static final Codec<ApplyBonusCount> CODEC = RecordCodecBuilder.create(
+	public static final MapCodec<ApplyBonusCount> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> commonFields(instance)
 				.<Holder<Enchantment>, ApplyBonusCount.Formula>and(
 					instance.group(

@@ -64,8 +64,8 @@ public class TheEndGatewayBlockEntity extends TheEndPortalBlockEntity {
 	}
 
 	@Override
-	public void load(CompoundTag compoundTag, HolderLookup.Provider provider) {
-		super.load(compoundTag, provider);
+	protected void loadAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
+		super.loadAdditional(compoundTag, provider);
 		this.age = compoundTag.getLong("Age");
 		NbtUtils.readBlockPos(compoundTag, "exit_portal").filter(Level::isInSpawnableBounds).ifPresent(blockPos -> this.exitPortal = blockPos);
 		this.exactTeleport = compoundTag.getBoolean("ExactTeleport");
@@ -126,7 +126,7 @@ public class TheEndGatewayBlockEntity extends TheEndPortalBlockEntity {
 
 	@Override
 	public CompoundTag getUpdateTag(HolderLookup.Provider provider) {
-		return this.saveWithoutMetadata(provider);
+		return this.saveCustomOnly(provider);
 	}
 
 	private static void triggerCooldown(Level level, BlockPos blockPos, BlockState blockState, TheEndGatewayBlockEntity theEndGatewayBlockEntity) {

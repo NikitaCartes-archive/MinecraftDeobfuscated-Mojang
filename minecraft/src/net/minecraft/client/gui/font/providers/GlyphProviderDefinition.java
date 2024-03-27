@@ -11,12 +11,10 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.font.FontOption;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.util.ExtraCodecs;
 
 @Environment(EnvType.CLIENT)
 public interface GlyphProviderDefinition {
-	MapCodec<GlyphProviderDefinition> MAP_CODEC = GlyphProviderType.CODEC
-		.dispatchMap(GlyphProviderDefinition::type, glyphProviderType -> glyphProviderType.mapCodec().codec());
+	MapCodec<GlyphProviderDefinition> MAP_CODEC = GlyphProviderType.CODEC.dispatchMap(GlyphProviderDefinition::type, GlyphProviderType::mapCodec);
 
 	GlyphProviderType type();
 
@@ -27,7 +25,7 @@ public interface GlyphProviderDefinition {
 		public static final Codec<GlyphProviderDefinition.Conditional> CODEC = RecordCodecBuilder.create(
 			instance -> instance.group(
 						GlyphProviderDefinition.MAP_CODEC.forGetter(GlyphProviderDefinition.Conditional::definition),
-						ExtraCodecs.strictOptionalField(FontOption.Filter.CODEC, "filter", FontOption.Filter.ALWAYS_PASS).forGetter(GlyphProviderDefinition.Conditional::filter)
+						FontOption.Filter.CODEC.optionalFieldOf("filter", FontOption.Filter.ALWAYS_PASS).forGetter(GlyphProviderDefinition.Conditional::filter)
 					)
 					.apply(instance, GlyphProviderDefinition.Conditional::new)
 		);

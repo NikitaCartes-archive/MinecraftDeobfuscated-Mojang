@@ -9,7 +9,6 @@ import com.mojang.datafixers.util.Pair;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import net.minecraft.util.datafix.ExtraDataFixUtils;
 import net.minecraft.util.datafix.fixes.References;
 
 public class V1460 extends NamespacedSchema {
@@ -238,7 +237,7 @@ public class V1460 extends NamespacedSchema {
 		schema.registerType(
 			false,
 			References.PLAYER,
-			() -> ExtraDataFixUtils.optionalFields(
+			() -> DSL.optionalFields(
 					Pair.of("RootVehicle", DSL.optionalFields("Entity", References.ENTITY_TREE.in(schema))),
 					Pair.of("Inventory", DSL.list(References.ITEM_STACK.in(schema))),
 					Pair.of("EnderItems", DSL.list(References.ITEM_STACK.in(schema))),
@@ -264,7 +263,11 @@ public class V1460 extends NamespacedSchema {
 					)
 				)
 		);
-		schema.registerType(true, References.BLOCK_ENTITY, () -> DSL.taggedChoiceLazy("id", namespacedString(), map2));
+		schema.registerType(
+			true,
+			References.BLOCK_ENTITY,
+			() -> DSL.optionalFields("components", References.DATA_COMPONENTS.in(schema), DSL.taggedChoiceLazy("id", namespacedString(), map2))
+		);
 		schema.registerType(
 			true, References.ENTITY_TREE, () -> DSL.optionalFields("Passengers", DSL.list(References.ENTITY_TREE.in(schema)), References.ENTITY.in(schema))
 		);
@@ -277,7 +280,7 @@ public class V1460 extends NamespacedSchema {
 						"id",
 						References.ITEM_NAME.in(schema),
 						"tag",
-						ExtraDataFixUtils.optionalFields(
+						DSL.optionalFields(
 							Pair.of("EntityTag", References.ENTITY_TREE.in(schema)),
 							Pair.of("BlockEntityTag", References.BLOCK_ENTITY.in(schema)),
 							Pair.of("CanDestroy", DSL.list(References.BLOCK_NAME.in(schema))),
@@ -314,7 +317,7 @@ public class V1460 extends NamespacedSchema {
 			References.STATS,
 			() -> DSL.optionalFields(
 					"stats",
-					ExtraDataFixUtils.optionalFields(
+					DSL.optionalFields(
 						Pair.of("minecraft:mined", DSL.compoundList(References.BLOCK_NAME.in(schema), DSL.constType(DSL.intType()))),
 						Pair.of("minecraft:crafted", (TypeTemplate)supplier.get()),
 						Pair.of("minecraft:used", (TypeTemplate)supplier.get()),

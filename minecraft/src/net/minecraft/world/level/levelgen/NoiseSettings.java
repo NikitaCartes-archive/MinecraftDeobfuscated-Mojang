@@ -37,8 +37,8 @@ public record NoiseSettings(int minY, int height, int noiseSizeHorizontal, int n
 
 	public static NoiseSettings create(int i, int j, int k, int l) {
 		NoiseSettings noiseSettings = new NoiseSettings(i, j, k, l);
-		guardY(noiseSettings).error().ifPresent(partialResult -> {
-			throw new IllegalStateException(partialResult.message());
+		guardY(noiseSettings).error().ifPresent(error -> {
+			throw new IllegalStateException(error.message());
 		});
 		return noiseSettings;
 	}

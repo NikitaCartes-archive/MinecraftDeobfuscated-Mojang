@@ -1,6 +1,7 @@
 package net.minecraft.world.level.levelgen.structure.pools.alias;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
@@ -29,7 +30,7 @@ public interface PoolAliasBinding {
 
 	static Random random(String string, SimpleWeightedRandomList<String> simpleWeightedRandomList) {
 		SimpleWeightedRandomList.Builder<ResourceKey<StructureTemplatePool>> builder = SimpleWeightedRandomList.builder();
-		simpleWeightedRandomList.unwrap().forEach(wrapper -> builder.add(Pools.createKey((String)wrapper.getData()), wrapper.getWeight().asInt()));
+		simpleWeightedRandomList.unwrap().forEach(wrapper -> builder.add(Pools.createKey((String)wrapper.data()), wrapper.getWeight().asInt()));
 		return random(Pools.createKey(string), builder.build());
 	}
 
@@ -41,5 +42,5 @@ public interface PoolAliasBinding {
 		return new RandomGroup(simpleWeightedRandomList);
 	}
 
-	Codec<? extends PoolAliasBinding> codec();
+	MapCodec<? extends PoolAliasBinding> codec();
 }

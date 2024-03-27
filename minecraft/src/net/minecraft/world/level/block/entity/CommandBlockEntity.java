@@ -79,8 +79,8 @@ public class CommandBlockEntity extends BlockEntity {
 	}
 
 	@Override
-	public void load(CompoundTag compoundTag, HolderLookup.Provider provider) {
-		super.load(compoundTag, provider);
+	protected void loadAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
+		super.loadAdditional(compoundTag, provider);
 		this.commandBlock.load(compoundTag, provider);
 		this.powered = compoundTag.getBoolean("powered");
 		this.conditionMet = compoundTag.getBoolean("conditionMet");
@@ -167,13 +167,14 @@ public class CommandBlockEntity extends BlockEntity {
 	}
 
 	@Override
-	public void applyComponents(DataComponentMap dataComponentMap) {
-		this.commandBlock.setCustomName(dataComponentMap.get(DataComponents.CUSTOM_NAME));
+	protected void applyImplicitComponents(BlockEntity.DataComponentInput dataComponentInput) {
+		super.applyImplicitComponents(dataComponentInput);
+		this.commandBlock.setCustomName(dataComponentInput.get(DataComponents.CUSTOM_NAME));
 	}
 
 	@Override
-	public void collectComponents(DataComponentMap.Builder builder) {
-		super.collectComponents(builder);
+	protected void collectImplicitComponents(DataComponentMap.Builder builder) {
+		super.collectImplicitComponents(builder);
 		builder.set(DataComponents.CUSTOM_NAME, this.commandBlock.getCustomName());
 	}
 

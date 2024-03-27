@@ -1,6 +1,6 @@
 package net.minecraft.world.level.storage.loot.functions;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import net.minecraft.core.component.DataComponentPatch;
@@ -10,7 +10,7 @@ import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
 public class SetComponentsFunction extends LootItemConditionalFunction {
-	public static final Codec<SetComponentsFunction> CODEC = RecordCodecBuilder.create(
+	public static final MapCodec<SetComponentsFunction> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> commonFields(instance)
 				.and(DataComponentPatch.CODEC.fieldOf("components").forGetter(setComponentsFunction -> setComponentsFunction.components))
 				.apply(instance, SetComponentsFunction::new)

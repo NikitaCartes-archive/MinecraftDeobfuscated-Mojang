@@ -36,6 +36,8 @@ public interface EntityTypeTags {
 	TagKey<EntityType<?>> SENSITIVE_TO_BANE_OF_ARTHROPODS = create("sensitive_to_bane_of_arthropods");
 	TagKey<EntityType<?>> SENSITIVE_TO_SMITE = create("sensitive_to_smite");
 	TagKey<EntityType<?>> NO_ANGER_FROM_WIND_CHARGE = create("no_anger_from_wind_charge");
+	TagKey<EntityType<?>> IMMUNE_TO_OOZING = create("immune_to_oozing");
+	TagKey<EntityType<?>> IMMUNE_TO_INFESTED = create("immune_to_infested");
 
 	private static TagKey<EntityType<?>> create(String string) {
 		return TagKey.create(Registries.ENTITY_TYPE, new ResourceLocation(string));

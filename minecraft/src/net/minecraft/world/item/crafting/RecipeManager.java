@@ -22,7 +22,6 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
-import net.minecraft.Util;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.resources.RegistryOps;
@@ -60,7 +59,7 @@ public class RecipeManager extends SimpleJsonResourceReloadListener {
 
 			try {
 				JsonObject jsonObject = GsonHelper.convertToJsonObject((JsonElement)entry.getValue(), "top element");
-				Recipe<?> recipe = Util.getOrThrow(Recipe.CODEC.parse(registryOps, jsonObject), JsonParseException::new);
+				Recipe<?> recipe = Recipe.CODEC.parse(registryOps, jsonObject).getOrThrow(JsonParseException::new);
 				RecipeHolder<?> recipeHolder = new RecipeHolder<>(resourceLocation, recipe);
 				((Builder)map2.computeIfAbsent(recipe.getType(), recipeType -> ImmutableMap.builder())).put(resourceLocation, recipeHolder);
 				builder.put(resourceLocation, recipeHolder);
@@ -148,7 +147,7 @@ public class RecipeManager extends SimpleJsonResourceReloadListener {
 
 	@VisibleForTesting
 	protected static RecipeHolder<?> fromJson(ResourceLocation resourceLocation, JsonObject jsonObject, HolderLookup.Provider provider) {
-		Recipe<?> recipe = Util.getOrThrow(Recipe.CODEC.parse(provider.createSerializationContext(JsonOps.INSTANCE), jsonObject), JsonParseException::new);
+		Recipe<?> recipe = Recipe.CODEC.parse(provider.createSerializationContext(JsonOps.INSTANCE), jsonObject).getOrThrow(JsonParseException::new);
 		return new RecipeHolder<>(resourceLocation, recipe);
 	}
 

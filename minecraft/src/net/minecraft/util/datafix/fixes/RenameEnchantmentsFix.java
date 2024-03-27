@@ -42,14 +42,12 @@ public class RenameEnchantmentsFix extends DataFix {
 										"id",
 										dynamic2 -> dynamic2.asString()
 												.map(stringx -> dynamicxx.createString((String)this.renames.getOrDefault(stringx, stringx)))
-												.get()
-												.map(Function.identity(), partialResult -> dynamic2)
+												.mapOrElse(Function.identity(), error -> dynamic2)
 									)
 							)
 					)
 					.map(dynamicx::createList)
-					.get()
-					.map(Function.identity(), partialResult -> dynamicx)
+					.mapOrElse(Function.identity(), error -> dynamicx)
 		);
 	}
 }

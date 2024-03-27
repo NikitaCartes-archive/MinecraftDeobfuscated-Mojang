@@ -15,10 +15,10 @@ public class VaultSharedData {
 	static final String TAG_NAME = "shared_data";
 	static Codec<VaultSharedData> CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
-					ItemStack.optionalFieldOf("display_item").forGetter(vaultSharedData -> vaultSharedData.displayItem),
-					UUIDUtil.CODEC_LINKED_SET.optionalFieldOf("connected_players", Set.of()).forGetter(vaultSharedData -> vaultSharedData.connectedPlayers),
+					ItemStack.lenientOptionalFieldOf("display_item").forGetter(vaultSharedData -> vaultSharedData.displayItem),
+					UUIDUtil.CODEC_LINKED_SET.lenientOptionalFieldOf("connected_players", Set.of()).forGetter(vaultSharedData -> vaultSharedData.connectedPlayers),
 					Codec.DOUBLE
-						.optionalFieldOf("connected_particles_range", Double.valueOf(VaultConfig.DEFAULT.deactivationRange()))
+						.lenientOptionalFieldOf("connected_particles_range", Double.valueOf(VaultConfig.DEFAULT.deactivationRange()))
 						.forGetter(vaultSharedData -> vaultSharedData.connectedParticlesRange)
 				)
 				.apply(instance, VaultSharedData::new)
@@ -66,7 +66,7 @@ public class VaultSharedData {
 
 	void updateConnectedPlayersWithinRange(ServerLevel serverLevel, BlockPos blockPos, VaultServerData vaultServerData, VaultConfig vaultConfig, double d) {
 		Set<UUID> set = (Set<UUID>)vaultConfig.playerDetector()
-			.detect(serverLevel, vaultConfig.entitySelector(), blockPos, d)
+			.detect(serverLevel, vaultConfig.entitySelector(), blockPos, d, false)
 			.stream()
 			.filter(uUID -> !vaultServerData.getRewardedPlayers().contains(uUID))
 			.collect(Collectors.toSet());

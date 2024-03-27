@@ -27,8 +27,8 @@ public class NbtContents implements ComponentContents {
 	public static final MapCodec<NbtContents> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> instance.group(
 					Codec.STRING.fieldOf("nbt").forGetter(NbtContents::getNbtPath),
-					Codec.BOOL.optionalFieldOf("interpret", Boolean.valueOf(false)).forGetter(NbtContents::isInterpreting),
-					ComponentSerialization.CODEC.optionalFieldOf("separator").forGetter(NbtContents::getSeparator),
+					Codec.BOOL.lenientOptionalFieldOf("interpret", Boolean.valueOf(false)).forGetter(NbtContents::isInterpreting),
+					ComponentSerialization.CODEC.lenientOptionalFieldOf("separator").forGetter(NbtContents::getSeparator),
 					DataSource.CODEC.forGetter(NbtContents::getDataSource)
 				)
 				.apply(instance, NbtContents::new)

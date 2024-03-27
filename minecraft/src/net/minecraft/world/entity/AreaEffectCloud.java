@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import javax.annotation.Nullable;
-import net.minecraft.Util;
 import net.minecraft.commands.arguments.ParticleArgument;
 import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ColorParticleOption;
@@ -34,7 +33,6 @@ public class AreaEffectCloud extends Entity implements TraceableEntity {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final int TIME_BETWEEN_APPLICATIONS = 5;
 	private static final EntityDataAccessor<Float> DATA_RADIUS = SynchedEntityData.defineId(AreaEffectCloud.class, EntityDataSerializers.FLOAT);
-	private static final EntityDataAccessor<Integer> DATA_COLOR = SynchedEntityData.defineId(AreaEffectCloud.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Boolean> DATA_WAITING = SynchedEntityData.defineId(AreaEffectCloud.class, EntityDataSerializers.BOOLEAN);
 	private static final EntityDataAccessor<ParticleOptions> DATA_PARTICLE = SynchedEntityData.defineId(AreaEffectCloud.class, EntityDataSerializers.PARTICLE);
 	private static final float MAX_RADIUS = 32.0F;
@@ -67,10 +65,9 @@ public class AreaEffectCloud extends Entity implements TraceableEntity {
 
 	@Override
 	protected void defineSynchedData(SynchedEntityData.Builder builder) {
-		builder.define(DATA_COLOR, 0);
 		builder.define(DATA_RADIUS, 3.0F);
 		builder.define(DATA_WAITING, false);
-		builder.define(DATA_PARTICLE, ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, 0.0F, 0.0F, 0.0F));
+		builder.define(DATA_PARTICLE, ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, -1));
 	}
 
 	public void setRadius(float f) {
@@ -98,15 +95,12 @@ public class AreaEffectCloud extends Entity implements TraceableEntity {
 	}
 
 	private void updateColor() {
-		this.entityData.set(DATA_COLOR, this.potionContents.equals(PotionContents.EMPTY) ? 0 : this.potionContents.getColor());
+		int i = this.potionContents.equals(PotionContents.EMPTY) ? 0 : this.potionContents.getColor();
+		this.entityData.set(DATA_PARTICLE, ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, i));
 	}
 
 	public void addEffect(MobEffectInstance mobEffectInstance) {
 		this.setPotionContents(this.potionContents.withEffectAdded(mobEffectInstance));
-	}
-
-	public int getColor() {
-		return this.getEntityData().get(DATA_COLOR);
 	}
 
 	public ParticleOptions getParticle() {
@@ -160,25 +154,11 @@ public class AreaEffectCloud extends Entity implements TraceableEntity {
 				double d = this.getX() + (double)(Mth.cos(h) * k);
 				double e = this.getY();
 				double l = this.getZ() + (double)(Mth.sin(h) * k);
-				double n;
-				double o;
-				double p;
-				if (particleOptions.getType() == ParticleTypes.ENTITY_EFFECT) {
-					int m = bl && this.random.nextBoolean() ? 16777215 : this.getColor();
-					n = (double)((float)(m >> 16 & 0xFF) / 255.0F);
-					o = (double)((float)(m >> 8 & 0xFF) / 255.0F);
-					p = (double)((float)(m & 0xFF) / 255.0F);
-				} else if (bl) {
-					n = 0.0;
-					o = 0.0;
-					p = 0.0;
+				if (bl && this.random.nextBoolean()) {
+					this.level().addAlwaysVisibleParticle(ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, -1), d, e, l, 0.0, 0.0, 0.0);
 				} else {
-					n = (0.5 - this.random.nextDouble()) * 0.15;
-					o = 0.01F;
-					p = (0.5 - this.random.nextDouble()) * 0.15;
+					this.level().addAlwaysVisibleParticle(particleOptions, d, e, l, 0.0, 0.0, 0.0);
 				}
-
-				this.level().addAlwaysVisibleParticle(particleOptions, d, e, l, n, o, p);
 			}
 		} else {
 			if (this.tickCount >= this.waitTime + this.duration) {
@@ -230,10 +210,10 @@ public class AreaEffectCloud extends Entity implements TraceableEntity {
 					if (!list2.isEmpty()) {
 						for (LivingEntity livingEntity : list2) {
 							if (!this.victims.containsKey(livingEntity) && livingEntity.isAffectedByPotions()) {
-								double q = livingEntity.getX() - this.getX();
-								double r = livingEntity.getZ() - this.getZ();
-								double s = q * q + r * r;
-								if (s <= (double)(f * f)) {
+								double m = livingEntity.getX() - this.getX();
+								double n = livingEntity.getZ() - this.getZ();
+								double o = m * m + n * n;
+								if (o <= (double)(f * f)) {
 									this.victims.put(livingEntity, this.tickCount + this.reapplicationDelay);
 
 									for (MobEffectInstance mobEffectInstance2 : list) {
@@ -365,7 +345,7 @@ public class AreaEffectCloud extends Entity implements TraceableEntity {
 		}
 
 		if (!this.potionContents.equals(PotionContents.EMPTY)) {
-			Tag tag = Util.getOrThrow(PotionContents.CODEC.encodeStart(NbtOps.INSTANCE, this.potionContents), IllegalStateException::new);
+			Tag tag = PotionContents.CODEC.encodeStart(NbtOps.INSTANCE, this.potionContents).getOrThrow();
 			compoundTag.put("potion_contents", tag);
 		}
 	}

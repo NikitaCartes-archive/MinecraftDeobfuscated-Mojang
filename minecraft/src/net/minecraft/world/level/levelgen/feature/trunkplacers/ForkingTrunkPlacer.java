@@ -1,7 +1,7 @@
 package net.minecraft.world.level.levelgen.feature.trunkplacers;
 
 import com.google.common.collect.Lists;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import java.util.OptionalInt;
@@ -15,7 +15,7 @@ import net.minecraft.world.level.levelgen.feature.configurations.TreeConfigurati
 import net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer;
 
 public class ForkingTrunkPlacer extends TrunkPlacer {
-	public static final Codec<ForkingTrunkPlacer> CODEC = RecordCodecBuilder.create(
+	public static final MapCodec<ForkingTrunkPlacer> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> trunkPlacerParts(instance).apply(instance, ForkingTrunkPlacer::new)
 	);
 

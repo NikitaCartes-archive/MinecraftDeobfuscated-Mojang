@@ -24,11 +24,11 @@ public record ServerStatus(
 ) {
 	public static final Codec<ServerStatus> CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
-					ComponentSerialization.CODEC.optionalFieldOf("description", CommonComponents.EMPTY).forGetter(ServerStatus::description),
-					ServerStatus.Players.CODEC.optionalFieldOf("players").forGetter(ServerStatus::players),
-					ServerStatus.Version.CODEC.optionalFieldOf("version").forGetter(ServerStatus::version),
-					ServerStatus.Favicon.CODEC.optionalFieldOf("favicon").forGetter(ServerStatus::favicon),
-					Codec.BOOL.optionalFieldOf("enforcesSecureChat", Boolean.valueOf(false)).forGetter(ServerStatus::enforcesSecureChat)
+					ComponentSerialization.CODEC.lenientOptionalFieldOf("description", CommonComponents.EMPTY).forGetter(ServerStatus::description),
+					ServerStatus.Players.CODEC.lenientOptionalFieldOf("players").forGetter(ServerStatus::players),
+					ServerStatus.Version.CODEC.lenientOptionalFieldOf("version").forGetter(ServerStatus::version),
+					ServerStatus.Favicon.CODEC.lenientOptionalFieldOf("favicon").forGetter(ServerStatus::favicon),
+					Codec.BOOL.lenientOptionalFieldOf("enforcesSecureChat", Boolean.valueOf(false)).forGetter(ServerStatus::enforcesSecureChat)
 				)
 				.apply(instance, ServerStatus::new)
 	);
@@ -59,7 +59,7 @@ public record ServerStatus(
 			instance -> instance.group(
 						Codec.INT.fieldOf("max").forGetter(ServerStatus.Players::max),
 						Codec.INT.fieldOf("online").forGetter(ServerStatus.Players::online),
-						PROFILE_CODEC.listOf().optionalFieldOf("sample", List.of()).forGetter(ServerStatus.Players::sample)
+						PROFILE_CODEC.listOf().lenientOptionalFieldOf("sample", List.of()).forGetter(ServerStatus.Players::sample)
 					)
 					.apply(instance, ServerStatus.Players::new)
 		);

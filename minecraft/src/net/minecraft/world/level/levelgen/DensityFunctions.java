@@ -39,7 +39,7 @@ public final class DensityFunctions {
 			densityFunction -> densityFunction instanceof DensityFunctions.Constant constant ? Either.left(constant.value()) : Either.right(densityFunction)
 		);
 
-	public static Codec<? extends DensityFunction> bootstrap(Registry<Codec<? extends DensityFunction>> registry) {
+	public static MapCodec<? extends DensityFunction> bootstrap(Registry<MapCodec<? extends DensityFunction>> registry) {
 		register(registry, "blend_alpha", DensityFunctions.BlendAlpha.CODEC);
 		register(registry, "blend_offset", DensityFunctions.BlendOffset.CODEC);
 		register(registry, "beardifier", DensityFunctions.BeardifierMarker.CODEC);
@@ -73,8 +73,8 @@ public final class DensityFunctions {
 		return register(registry, "y_clamped_gradient", DensityFunctions.YClampedGradient.CODEC);
 	}
 
-	private static Codec<? extends DensityFunction> register(
-		Registry<Codec<? extends DensityFunction>> registry, String string, KeyDispatchDataCodec<? extends DensityFunction> keyDispatchDataCodec
+	private static MapCodec<? extends DensityFunction> register(
+		Registry<MapCodec<? extends DensityFunction>> registry, String string, KeyDispatchDataCodec<? extends DensityFunction> keyDispatchDataCodec
 	) {
 		return Registry.register(registry, string, keyDispatchDataCodec.codec());
 	}

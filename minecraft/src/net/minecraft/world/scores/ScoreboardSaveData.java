@@ -202,10 +202,7 @@ public class ScoreboardSaveData extends SavedData {
 			compoundTag.putBoolean("display_auto_update", objective.displayAutoUpdate());
 			NumberFormat numberFormat = objective.numberFormat();
 			if (numberFormat != null) {
-				NumberFormatTypes.CODEC
-					.encodeStart(provider.createSerializationContext(NbtOps.INSTANCE), numberFormat)
-					.result()
-					.ifPresent(tag -> compoundTag.put("format", tag));
+				NumberFormatTypes.CODEC.encodeStart(provider.createSerializationContext(NbtOps.INSTANCE), numberFormat).ifSuccess(tag -> compoundTag.put("format", tag));
 			}
 
 			listTag.add(compoundTag);

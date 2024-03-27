@@ -14,7 +14,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.datafix.ExtraDataFixUtils;
 import net.minecraft.util.datafix.fixes.References;
 
 public class V1451_6 extends NamespacedSchema {
@@ -26,8 +25,7 @@ public class V1451_6 extends NamespacedSchema {
 			return DataFixUtils.orElse(
 					dynamic.get("CriteriaName")
 						.asString()
-						.get()
-						.left()
+						.result()
 						.map(string -> {
 							int i = string.indexOf(58);
 							if (i < 0) {
@@ -66,12 +64,11 @@ public class V1451_6 extends NamespacedSchema {
 			Dynamic<T> dynamic = new Dynamic<>(dynamicOps, object);
 			Optional<Dynamic<T>> optional = dynamic.get("CriteriaType")
 				.get()
-				.get()
-				.left()
+				.result()
 				.flatMap(
 					dynamic2 -> {
-						Optional<String> optionalx = dynamic2.get("type").asString().get().left();
-						Optional<String> optional2 = dynamic2.get("id").asString().get().left();
+						Optional<String> optionalx = dynamic2.get("type").asString().result();
+						Optional<String> optional2 = dynamic2.get("id").asString().result();
 						if (optionalx.isPresent() && optional2.isPresent()) {
 							String string = (String)optionalx.get();
 							return string.equals("_special")
@@ -99,7 +96,7 @@ public class V1451_6 extends NamespacedSchema {
 			References.STATS,
 			() -> DSL.optionalFields(
 					"stats",
-					ExtraDataFixUtils.optionalFields(
+					DSL.optionalFields(
 						Pair.of("minecraft:mined", DSL.compoundList(References.BLOCK_NAME.in(schema), DSL.constType(DSL.intType()))),
 						Pair.of("minecraft:crafted", (TypeTemplate)supplier.get()),
 						Pair.of("minecraft:used", (TypeTemplate)supplier.get()),

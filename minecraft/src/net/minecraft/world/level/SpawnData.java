@@ -9,26 +9,26 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.InclusiveRange;
 import net.minecraft.util.random.SimpleWeightedRandomList;
 
-public record SpawnData(CompoundTag entityToSpawn, Optional<SpawnData.CustomSpawnRules> customSpawnRules) {
+public record SpawnData(CompoundTag entityToSpawn, Optional<SpawnData.CustomSpawnRules> customSpawnRules, Optional<ResourceLocation> equipmentLootTable) {
 	public static final String ENTITY_TAG = "entity";
 	public static final Codec<SpawnData> CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
 					CompoundTag.CODEC.fieldOf("entity").forGetter(spawnData -> spawnData.entityToSpawn),
-					SpawnData.CustomSpawnRules.CODEC.optionalFieldOf("custom_spawn_rules").forGetter(spawnData -> spawnData.customSpawnRules)
+					SpawnData.CustomSpawnRules.CODEC.optionalFieldOf("custom_spawn_rules").forGetter(spawnData -> spawnData.customSpawnRules),
+					ResourceLocation.CODEC.optionalFieldOf("equipment_loot_table").forGetter(spawnData -> spawnData.equipmentLootTable)
 				)
 				.apply(instance, SpawnData::new)
 	);
 	public static final Codec<SimpleWeightedRandomList<SpawnData>> LIST_CODEC = SimpleWeightedRandomList.wrappedCodecAllowingEmpty(CODEC);
 
 	public SpawnData() {
-		this(new CompoundTag(), Optional.empty());
+		this(new CompoundTag(), Optional.empty(), Optional.empty());
 	}
 
-	public SpawnData(CompoundTag entityToSpawn, Optional<SpawnData.CustomSpawnRules> customSpawnRules) {
+	public SpawnData(CompoundTag entityToSpawn, Optional<SpawnData.CustomSpawnRules> customSpawnRules, Optional<ResourceLocation> equipmentLootTable) {
 		if (entityToSpawn.contains("id")) {
 			ResourceLocation resourceLocation = ResourceLocation.tryParse(entityToSpawn.getString("id"));
 			if (resourceLocation != null) {
@@ -40,6 +40,7 @@ public record SpawnData(CompoundTag entityToSpawn, Optional<SpawnData.CustomSpaw
 
 		this.entityToSpawn = entityToSpawn;
 		this.customSpawnRules = customSpawnRules;
+		this.equipmentLootTable = equipmentLootTable;
 	}
 
 	public CompoundTag getEntityToSpawn() {
@@ -48,6 +49,10 @@ public record SpawnData(CompoundTag entityToSpawn, Optional<SpawnData.CustomSpaw
 
 	public Optional<SpawnData.CustomSpawnRules> getCustomSpawnRules() {
 		return this.customSpawnRules;
+	}
+
+	public Optional<ResourceLocation> getEquipmentLootTable() {
+		return this.equipmentLootTable;
 	}
 
 	public static record CustomSpawnRules(InclusiveRange<Integer> blockLightLimit, InclusiveRange<Integer> skyLightLimit) {
@@ -67,7 +72,7 @@ public record SpawnData(CompoundTag entityToSpawn, Optional<SpawnData.CustomSpaw
 		}
 
 		private static MapCodec<InclusiveRange<Integer>> lightLimit(String string) {
-			return ExtraCodecs.validate(InclusiveRange.INT.optionalFieldOf(string, LIGHT_RANGE), SpawnData.CustomSpawnRules::checkLightBoundaries);
+			return InclusiveRange.INT.lenientOptionalFieldOf(string, LIGHT_RANGE).validate(SpawnData.CustomSpawnRules::checkLightBoundaries);
 		}
 
 		public boolean isValidPosition(BlockPos blockPos, ServerLevel serverLevel) {

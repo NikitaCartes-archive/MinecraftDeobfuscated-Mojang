@@ -9,11 +9,14 @@ import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.dispenser.DefaultDispenseItemBehavior;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
@@ -29,6 +32,7 @@ import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.SpawnData;
+import net.minecraft.world.level.block.TrialSpawnerBlock;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.LootTable;
@@ -39,54 +43,111 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 
 public final class TrialSpawner {
+	public static final String NORMAL_CONFIG_TAG_NAME = "normal_config";
+	public static final String OMINOUS_CONFIG_TAG_NAME = "ominous_config";
 	public static final int DETECT_PLAYER_SPAWN_BUFFER = 40;
+	private static final int DEFAULT_TARGET_COOLDOWN_LENGTH = 36000;
+	private static final int DEFAULT_PLAYER_SCAN_RANGE = 14;
 	private static final int MAX_MOB_TRACKING_DISTANCE = 47;
 	private static final int MAX_MOB_TRACKING_DISTANCE_SQR = Mth.square(47);
 	private static final float SPAWNING_AMBIENT_SOUND_CHANCE = 0.02F;
-	private final TrialSpawnerConfig config;
+	private final TrialSpawnerConfig normalConfig;
+	private final TrialSpawnerConfig ominousConfig;
 	private final TrialSpawnerData data;
+	private final int requiredPlayerRange;
+	private final int targetCooldownLength;
 	private final TrialSpawner.StateAccessor stateAccessor;
 	private PlayerDetector playerDetector;
 	private final PlayerDetector.EntitySelector entitySelector;
 	private boolean overridePeacefulAndMobSpawnRule;
+	private boolean isOminous;
 
 	public Codec<TrialSpawner> codec() {
 		return RecordCodecBuilder.create(
-			instance -> instance.group(TrialSpawnerConfig.MAP_CODEC.forGetter(TrialSpawner::getConfig), TrialSpawnerData.MAP_CODEC.forGetter(TrialSpawner::getData))
+			instance -> instance.group(
+						TrialSpawnerConfig.CODEC.optionalFieldOf("normal_config", TrialSpawnerConfig.DEFAULT).forGetter(TrialSpawner::getNormalConfig),
+						TrialSpawnerConfig.CODEC.optionalFieldOf("ominous_config", TrialSpawnerConfig.DEFAULT).forGetter(TrialSpawner::getOminousConfigForSerialization),
+						TrialSpawnerData.MAP_CODEC.forGetter(TrialSpawner::getData),
+						Codec.intRange(0, Integer.MAX_VALUE).optionalFieldOf("target_cooldown_length", 36000).forGetter(TrialSpawner::getTargetCooldownLength),
+						Codec.intRange(1, 128).optionalFieldOf("required_player_range", 14).forGetter(TrialSpawner::getRequiredPlayerRange)
+					)
 					.apply(
 						instance,
-						(trialSpawnerConfig, trialSpawnerData) -> new TrialSpawner(
-								trialSpawnerConfig, trialSpawnerData, this.stateAccessor, this.playerDetector, this.entitySelector
+						(trialSpawnerConfig, trialSpawnerConfig2, trialSpawnerData, integer, integer2) -> new TrialSpawner(
+								trialSpawnerConfig, trialSpawnerConfig2, trialSpawnerData, integer, integer2, this.stateAccessor, this.playerDetector, this.entitySelector
 							)
 					)
 		);
 	}
 
 	public TrialSpawner(TrialSpawner.StateAccessor stateAccessor, PlayerDetector playerDetector, PlayerDetector.EntitySelector entitySelector) {
-		this(TrialSpawnerConfig.DEFAULT, new TrialSpawnerData(), stateAccessor, playerDetector, entitySelector);
+		this(TrialSpawnerConfig.DEFAULT, TrialSpawnerConfig.DEFAULT, new TrialSpawnerData(), 36000, 14, stateAccessor, playerDetector, entitySelector);
 	}
 
 	public TrialSpawner(
 		TrialSpawnerConfig trialSpawnerConfig,
+		TrialSpawnerConfig trialSpawnerConfig2,
 		TrialSpawnerData trialSpawnerData,
+		int i,
+		int j,
 		TrialSpawner.StateAccessor stateAccessor,
 		PlayerDetector playerDetector,
 		PlayerDetector.EntitySelector entitySelector
 	) {
-		this.config = trialSpawnerConfig;
+		this.normalConfig = trialSpawnerConfig;
+		this.ominousConfig = trialSpawnerConfig2;
 		this.data = trialSpawnerData;
-		this.data.setSpawnPotentialsFromConfig(trialSpawnerConfig);
+		this.targetCooldownLength = i;
+		this.requiredPlayerRange = j;
 		this.stateAccessor = stateAccessor;
 		this.playerDetector = playerDetector;
 		this.entitySelector = entitySelector;
 	}
 
 	public TrialSpawnerConfig getConfig() {
-		return this.config;
+		return this.isOminous ? this.ominousConfig : this.normalConfig;
+	}
+
+	@VisibleForTesting
+	public TrialSpawnerConfig getNormalConfig() {
+		return this.normalConfig;
+	}
+
+	@VisibleForTesting
+	public TrialSpawnerConfig getOminousConfig() {
+		return this.ominousConfig;
+	}
+
+	private TrialSpawnerConfig getOminousConfigForSerialization() {
+		return !this.ominousConfig.equals(this.normalConfig) ? this.ominousConfig : TrialSpawnerConfig.DEFAULT;
+	}
+
+	public void applyOminous(ServerLevel serverLevel, BlockPos blockPos) {
+		serverLevel.setBlock(blockPos, serverLevel.getBlockState(blockPos).setValue(TrialSpawnerBlock.OMINOUS, Boolean.valueOf(true)), 3);
+		serverLevel.levelEvent(3020, blockPos, 1);
+		this.isOminous = true;
+		this.data.resetAfterBecomingOminous(this, serverLevel);
+	}
+
+	public void removeOminous(ServerLevel serverLevel, BlockPos blockPos) {
+		serverLevel.setBlock(blockPos, serverLevel.getBlockState(blockPos).setValue(TrialSpawnerBlock.OMINOUS, Boolean.valueOf(false)), 3);
+		this.isOminous = false;
+	}
+
+	public boolean isOminous() {
+		return this.isOminous;
 	}
 
 	public TrialSpawnerData getData() {
 		return this.data;
+	}
+
+	public int getTargetCooldownLength() {
+		return this.targetCooldownLength;
+	}
+
+	public int getRequiredPlayerRange() {
+		return this.requiredPlayerRange;
 	}
 
 	public TrialSpawnerState getState() {
@@ -129,12 +190,12 @@ public final class TrialSpawner {
 			int i = listTag.size();
 			double d = i >= 1
 				? listTag.getDouble(0)
-				: (double)blockPos.getX() + (randomSource.nextDouble() - randomSource.nextDouble()) * (double)this.config.spawnRange() + 0.5;
+				: (double)blockPos.getX() + (randomSource.nextDouble() - randomSource.nextDouble()) * (double)this.getConfig().spawnRange() + 0.5;
 			double e = i >= 2 ? listTag.getDouble(1) : (double)(blockPos.getY() + randomSource.nextInt(3) - 1);
 			double f = i >= 3
 				? listTag.getDouble(2)
-				: (double)blockPos.getZ() + (randomSource.nextDouble() - randomSource.nextDouble()) * (double)this.config.spawnRange() + 0.5;
-			if (!serverLevel.noCollision(((EntityType)optional.get()).getAABB(d, e, f))) {
+				: (double)blockPos.getZ() + (randomSource.nextDouble() - randomSource.nextDouble()) * (double)this.getConfig().spawnRange() + 0.5;
+			if (!serverLevel.noCollision(((EntityType)optional.get()).getSpawnAABB(d, e, f))) {
 				return Optional.empty();
 			} else {
 				Vec3 vec3 = new Vec3(d, e, f);
@@ -170,13 +231,15 @@ public final class TrialSpawner {
 								}
 
 								mob.setPersistenceRequired();
+								spawnData.getEquipmentLootTable().ifPresent(mob::equip);
 							}
 
 							if (!serverLevel.tryAddFreshEntityWithPassengers(entity)) {
 								return Optional.empty();
 							} else {
-								serverLevel.levelEvent(3011, blockPos, 0);
-								serverLevel.levelEvent(3012, blockPos2, 0);
+								TrialSpawner.FlameParticle flameParticle = this.isOminous ? TrialSpawner.FlameParticle.OMINOUS : TrialSpawner.FlameParticle.NORMAL;
+								serverLevel.levelEvent(3011, blockPos, flameParticle.encode());
+								serverLevel.levelEvent(3012, blockPos2, flameParticle.encode());
 								serverLevel.gameEvent(entity, GameEvent.ENTITY_PLACE, blockPos2);
 								return Optional.of(entity.getUUID());
 							}
@@ -200,12 +263,12 @@ public final class TrialSpawner {
 		}
 	}
 
-	public void tickClient(Level level, BlockPos blockPos) {
+	public void tickClient(Level level, BlockPos blockPos, boolean bl) {
 		if (!this.canSpawnInLevel(level)) {
 			this.data.oSpin = this.data.spin;
 		} else {
 			TrialSpawnerState trialSpawnerState = this.getState();
-			trialSpawnerState.emitParticles(level, blockPos);
+			trialSpawnerState.emitParticles(level, blockPos, bl);
 			if (trialSpawnerState.hasSpinningMob()) {
 				double d = (double)Math.max(0L, this.data.nextMobSpawnsAt - level.getGameTime());
 				this.data.oSpin = this.data.spin;
@@ -215,15 +278,15 @@ public final class TrialSpawner {
 			if (trialSpawnerState.isCapableOfSpawning()) {
 				RandomSource randomSource = level.getRandom();
 				if (randomSource.nextFloat() <= 0.02F) {
-					level.playLocalSound(
-						blockPos, SoundEvents.TRIAL_SPAWNER_AMBIENT, SoundSource.BLOCKS, randomSource.nextFloat() * 0.25F + 0.75F, randomSource.nextFloat() + 0.5F, false
-					);
+					SoundEvent soundEvent = bl ? SoundEvents.TRIAL_SPAWNER_AMBIENT_OMINOUS : SoundEvents.TRIAL_SPAWNER_AMBIENT;
+					level.playLocalSound(blockPos, soundEvent, SoundSource.BLOCKS, randomSource.nextFloat() * 0.25F + 0.75F, randomSource.nextFloat() + 0.5F, false);
 				}
 			}
 		}
 	}
 
-	public void tickServer(ServerLevel serverLevel, BlockPos blockPos) {
+	public void tickServer(ServerLevel serverLevel, BlockPos blockPos, boolean bl) {
+		this.isOminous = bl;
 		TrialSpawnerState trialSpawnerState = this.getState();
 		if (!this.canSpawnInLevel(serverLevel)) {
 			if (trialSpawnerState.isCapableOfSpawning()) {
@@ -232,7 +295,7 @@ public final class TrialSpawner {
 			}
 		} else {
 			if (this.data.currentMobs.removeIf(uUID -> shouldMobBeUntracked(serverLevel, blockPos, uUID))) {
-				this.data.nextMobSpawnsAt = serverLevel.getGameTime() + (long)this.config.ticksBetweenSpawn();
+				this.data.nextMobSpawnsAt = serverLevel.getGameTime() + (long)this.getConfig().ticksBetweenSpawn();
 			}
 
 			TrialSpawnerState trialSpawnerState2 = trialSpawnerState.tickAndGetNext(blockPos, this, serverLevel);
@@ -255,24 +318,37 @@ public final class TrialSpawner {
 		return blockHitResult.getBlockPos().equals(BlockPos.containing(vec3)) || blockHitResult.getType() == HitResult.Type.MISS;
 	}
 
-	public static void addSpawnParticles(Level level, BlockPos blockPos, RandomSource randomSource) {
+	public static void addSpawnParticles(Level level, BlockPos blockPos, RandomSource randomSource, SimpleParticleType simpleParticleType) {
 		for (int i = 0; i < 20; i++) {
 			double d = (double)blockPos.getX() + 0.5 + (randomSource.nextDouble() - 0.5) * 2.0;
 			double e = (double)blockPos.getY() + 0.5 + (randomSource.nextDouble() - 0.5) * 2.0;
 			double f = (double)blockPos.getZ() + 0.5 + (randomSource.nextDouble() - 0.5) * 2.0;
 			level.addParticle(ParticleTypes.SMOKE, d, e, f, 0.0, 0.0, 0.0);
-			level.addParticle(ParticleTypes.FLAME, d, e, f, 0.0, 0.0, 0.0);
+			level.addParticle(simpleParticleType, d, e, f, 0.0, 0.0, 0.0);
 		}
 	}
 
-	public static void addDetectPlayerParticles(Level level, BlockPos blockPos, RandomSource randomSource, int i) {
+	public static void addBecomeOminousParticles(Level level, BlockPos blockPos, RandomSource randomSource) {
+		for (int i = 0; i < 20; i++) {
+			double d = (double)blockPos.getX() + 0.5 + (randomSource.nextDouble() - 0.5) * 2.0;
+			double e = (double)blockPos.getY() + 0.5 + (randomSource.nextDouble() - 0.5) * 2.0;
+			double f = (double)blockPos.getZ() + 0.5 + (randomSource.nextDouble() - 0.5) * 2.0;
+			double g = randomSource.nextGaussian() * 0.02;
+			double h = randomSource.nextGaussian() * 0.02;
+			double j = randomSource.nextGaussian() * 0.02;
+			level.addParticle(ParticleTypes.TRIAL_OMEN, d, e, f, g, h, j);
+			level.addParticle(ParticleTypes.SOUL_FIRE_FLAME, d, e, f, g, h, j);
+		}
+	}
+
+	public static void addDetectPlayerParticles(Level level, BlockPos blockPos, RandomSource randomSource, int i, ParticleOptions particleOptions) {
 		for (int j = 0; j < 30 + Math.min(i, 10) * 5; j++) {
 			double d = (double)(2.0F * randomSource.nextFloat() - 1.0F) * 0.65;
 			double e = (double)(2.0F * randomSource.nextFloat() - 1.0F) * 0.65;
 			double f = (double)blockPos.getX() + 0.5 + d;
 			double g = (double)blockPos.getY() + 0.1 + (double)randomSource.nextFloat() * 0.8;
 			double h = (double)blockPos.getZ() + 0.5 + e;
-			level.addParticle(ParticleTypes.TRIAL_SPAWNER_DETECTION, f, g, h, 0.0, 0.0, 0.0);
+			level.addParticle(particleOptions, f, g, h, 0.0, 0.0, 0.0);
 		}
 	}
 
@@ -303,6 +379,26 @@ public final class TrialSpawner {
 	@VisibleForTesting
 	public void overridePeacefulAndMobSpawnRule() {
 		this.overridePeacefulAndMobSpawnRule = true;
+	}
+
+	public static enum FlameParticle {
+		NORMAL(ParticleTypes.FLAME),
+		OMINOUS(ParticleTypes.SOUL_FIRE_FLAME);
+
+		public final SimpleParticleType particleType;
+
+		private FlameParticle(SimpleParticleType simpleParticleType) {
+			this.particleType = simpleParticleType;
+		}
+
+		public static TrialSpawner.FlameParticle decode(int i) {
+			TrialSpawner.FlameParticle[] flameParticles = values();
+			return i <= flameParticles.length && i >= 0 ? flameParticles[i] : NORMAL;
+		}
+
+		public int encode() {
+			return this.ordinal();
+		}
 	}
 
 	public interface StateAccessor {

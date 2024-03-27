@@ -7,6 +7,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.function.Consumer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
@@ -20,7 +21,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.FastColor;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -34,18 +34,17 @@ import net.minecraft.world.item.component.ItemAttributeModifiers;
 public record PotionContents(Optional<Holder<Potion>> potion, Optional<Integer> customColor, List<MobEffectInstance> customEffects) {
 	public static final PotionContents EMPTY = new PotionContents(Optional.empty(), Optional.empty(), List.of());
 	private static final Component NO_EFFECT = Component.translatable("effect.none").withStyle(ChatFormatting.GRAY);
-	private static final int EMPTY_COLOR = 16253176;
-	private static final int BASE_POTION_COLOR = 3694022;
-	public static final int NO_POTION_COLOR = -1;
+	private static final int EMPTY_COLOR = -524040;
+	private static final int BASE_POTION_COLOR = -13083194;
 	private static final Codec<PotionContents> FULL_CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
-					ExtraCodecs.strictOptionalField(BuiltInRegistries.POTION.holderByNameCodec(), "potion").forGetter(PotionContents::potion),
-					ExtraCodecs.strictOptionalField(Codec.INT, "custom_color").forGetter(PotionContents::customColor),
-					ExtraCodecs.strictOptionalField(MobEffectInstance.CODEC.listOf(), "custom_effects", List.of()).forGetter(PotionContents::customEffects)
+					BuiltInRegistries.POTION.holderByNameCodec().optionalFieldOf("potion").forGetter(PotionContents::potion),
+					Codec.INT.optionalFieldOf("custom_color").forGetter(PotionContents::customColor),
+					MobEffectInstance.CODEC.listOf().optionalFieldOf("custom_effects", List.of()).forGetter(PotionContents::customEffects)
 				)
 				.apply(instance, PotionContents::new)
 	);
-	public static final Codec<PotionContents> CODEC = ExtraCodecs.withAlternative(FULL_CODEC, BuiltInRegistries.POTION.holderByNameCodec(), PotionContents::new);
+	public static final Codec<PotionContents> CODEC = Codec.withAlternative(FULL_CODEC, BuiltInRegistries.POTION.holderByNameCodec(), PotionContents::new);
 	public static final StreamCodec<RegistryFriendlyByteBuf, PotionContents> STREAM_CODEC = StreamCodec.composite(
 		ByteBufCodecs.holderRegistry(Registries.POTION).apply(ByteBufCodecs::optional),
 		PotionContents::potion,
@@ -104,7 +103,7 @@ public record PotionContents(Optional<Holder<Potion>> potion, Optional<Integer> 
 		if (this.customColor.isPresent()) {
 			return (Integer)this.customColor.get();
 		} else {
-			return this.potion.isEmpty() ? 16253176 : getColor(this.getAllEffects());
+			return this.potion.isEmpty() ? -524040 : getColor(this.getAllEffects());
 		}
 	}
 
@@ -117,11 +116,10 @@ public record PotionContents(Optional<Holder<Potion>> potion, Optional<Integer> 
 	}
 
 	public static int getColor(Iterable<MobEffectInstance> iterable) {
-		int i = getColorOptional(iterable);
-		return i == -1 ? 3694022 : i;
+		return getColorOptional(iterable).orElse(-13083194);
 	}
 
-	public static int getColorOptional(Iterable<MobEffectInstance> iterable) {
+	public static OptionalInt getColorOptional(Iterable<MobEffectInstance> iterable) {
 		int i = 0;
 		int j = 0;
 		int k = 0;
@@ -138,7 +136,7 @@ public record PotionContents(Optional<Holder<Potion>> potion, Optional<Integer> 
 			}
 		}
 
-		return l == 0 ? -1 : FastColor.ARGB32.color(0, i / l, j / l, k / l);
+		return l == 0 ? OptionalInt.empty() : OptionalInt.of(FastColor.ARGB32.color(i / l, j / l, k / l));
 	}
 
 	public boolean hasEffects() {

@@ -18,6 +18,7 @@ import net.minecraft.commands.arguments.DimensionArgument;
 import net.minecraft.commands.arguments.blocks.BlockPredicateArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -255,8 +256,10 @@ public class CloneCommands {
 							if (predicate.test(blockInWorld)) {
 								BlockEntity blockEntity = serverLevel.getBlockEntity(blockPos6);
 								if (blockEntity != null) {
-									CompoundTag compoundTag = blockEntity.saveWithoutMetadata(commandSourceStack.registryAccess());
-									list2.add(new CloneCommands.CloneBlockInfo(blockPos7, blockState, compoundTag));
+									CloneCommands.CloneBlockEntityInfo cloneBlockEntityInfo = new CloneCommands.CloneBlockEntityInfo(
+										blockEntity.saveCustomOnly(commandSourceStack.registryAccess()), blockEntity.components()
+									);
+									list2.add(new CloneCommands.CloneBlockInfo(blockPos7, blockState, cloneBlockEntityInfo));
 									deque.addLast(blockPos6);
 								} else if (!blockState.isSolidRender(serverLevel, blockPos6) && !blockState.isCollisionShapeFullBlock(serverLevel, blockPos6)) {
 									list3.add(new CloneCommands.CloneBlockInfo(blockPos7, blockState, null));
@@ -304,8 +307,9 @@ public class CloneCommands {
 
 				for (CloneCommands.CloneBlockInfo cloneBlockInfo2x : list2) {
 					BlockEntity blockEntity4 = serverLevel2.getBlockEntity(cloneBlockInfo2x.pos);
-					if (cloneBlockInfo2x.tag != null && blockEntity4 != null) {
-						blockEntity4.load(cloneBlockInfo2x.tag, serverLevel2.registryAccess());
+					if (cloneBlockInfo2x.blockEntityInfo != null && blockEntity4 != null) {
+						blockEntity4.loadCustomOnly(cloneBlockInfo2x.blockEntityInfo.tag, serverLevel2.registryAccess());
+						blockEntity4.setComponents(cloneBlockInfo2x.blockEntityInfo.components);
 						blockEntity4.setChanged();
 					}
 
@@ -330,17 +334,10 @@ public class CloneCommands {
 		}
 	}
 
-	static class CloneBlockInfo {
-		public final BlockPos pos;
-		public final BlockState state;
-		@Nullable
-		public final CompoundTag tag;
+	static record CloneBlockEntityInfo(CompoundTag tag, DataComponentMap components) {
+	}
 
-		public CloneBlockInfo(BlockPos blockPos, BlockState blockState, @Nullable CompoundTag compoundTag) {
-			this.pos = blockPos;
-			this.state = blockState;
-			this.tag = compoundTag;
-		}
+	static record CloneBlockInfo(BlockPos pos, BlockState state, @Nullable CloneCommands.CloneBlockEntityInfo blockEntityInfo) {
 	}
 
 	@FunctionalInterface

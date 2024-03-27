@@ -1,13 +1,13 @@
 package net.minecraft.world.level.levelgen.placement;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate;
 
 public class BlockPredicateFilter extends PlacementFilter {
-	public static final Codec<BlockPredicateFilter> CODEC = RecordCodecBuilder.create(
+	public static final MapCodec<BlockPredicateFilter> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> instance.group(BlockPredicate.CODEC.fieldOf("predicate").forGetter(blockPredicateFilter -> blockPredicateFilter.predicate))
 				.apply(instance, BlockPredicateFilter::new)
 	);

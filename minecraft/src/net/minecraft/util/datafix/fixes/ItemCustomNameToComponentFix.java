@@ -22,12 +22,6 @@ public class ItemCustomNameToComponentFix extends DataFix {
 			Optional<String> optional2 = dynamic2.get("Name").asString().result();
 			if (optional2.isPresent()) {
 				dynamic2 = dynamic2.set("Name", ComponentDataFixUtils.createPlainTextComponent(dynamic2.getOps(), (String)optional2.get()));
-			} else {
-				Optional<String> optional3 = dynamic2.get("LocName").asString().result();
-				if (optional3.isPresent()) {
-					dynamic2 = dynamic2.set("Name", ComponentDataFixUtils.createTranslatableComponent(dynamic2.getOps(), (String)optional3.get()));
-					dynamic2 = dynamic2.remove("LocName");
-				}
 			}
 
 			return dynamic.set("display", dynamic2);

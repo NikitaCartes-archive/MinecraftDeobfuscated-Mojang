@@ -3,7 +3,6 @@ package net.minecraft.network.chat;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
@@ -27,17 +26,14 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 public class HoverEvent {
-	public static final Codec<HoverEvent> CODEC = Codec.either(HoverEvent.TypedHoverEvent.CODEC.codec(), HoverEvent.TypedHoverEvent.LEGACY_CODEC.codec())
-		.xmap(
-			either -> new HoverEvent(either.map(typedHoverEvent -> typedHoverEvent, typedHoverEvent -> typedHoverEvent)), hoverEvent -> Either.left(hoverEvent.event)
-		);
+	public static final Codec<HoverEvent> CODEC = Codec.withAlternative(HoverEvent.TypedHoverEvent.CODEC.codec(), HoverEvent.TypedHoverEvent.LEGACY_CODEC.codec())
+		.xmap(HoverEvent::new, hoverEvent -> hoverEvent.event);
 	private final HoverEvent.TypedHoverEvent<?> event;
 
 	public <T> HoverEvent(HoverEvent.Action<T> action, T object) {
@@ -86,19 +82,18 @@ public class HoverEvent {
 		public static final Codec<HoverEvent.Action<?>> UNSAFE_CODEC = StringRepresentable.fromValues(
 			() -> new HoverEvent.Action[]{SHOW_TEXT, SHOW_ITEM, SHOW_ENTITY}
 		);
-		public static final Codec<HoverEvent.Action<?>> CODEC = ExtraCodecs.validate(UNSAFE_CODEC, HoverEvent.Action::filterForSerialization);
+		public static final Codec<HoverEvent.Action<?>> CODEC = UNSAFE_CODEC.validate(HoverEvent.Action::filterForSerialization);
 		private final String name;
 		private final boolean allowFromServer;
-		final Codec<HoverEvent.TypedHoverEvent<T>> codec;
-		final Codec<HoverEvent.TypedHoverEvent<T>> legacyCodec;
+		final MapCodec<HoverEvent.TypedHoverEvent<T>> codec;
+		final MapCodec<HoverEvent.TypedHoverEvent<T>> legacyCodec;
 
 		public Action(String string, boolean bl, Codec<T> codec, HoverEvent.LegacyConverter<T> legacyConverter) {
 			this.name = string;
 			this.allowFromServer = bl;
 			this.codec = codec.<HoverEvent.TypedHoverEvent<T>>xmap(object -> new HoverEvent.TypedHoverEvent<>(this, (T)object), typedHoverEvent -> typedHoverEvent.value)
-				.fieldOf("contents")
-				.codec();
-			this.legacyCodec = new Codec<HoverEvent.TypedHoverEvent<T>>() {
+				.fieldOf("contents");
+			this.legacyCodec = (new Codec<HoverEvent.TypedHoverEvent<T>>() {
 				@Override
 				public <D> DataResult<Pair<HoverEvent.TypedHoverEvent<T>, D>> decode(DynamicOps<D> dynamicOps, D object) {
 					return ComponentSerialization.CODEC.decode(dynamicOps, object).flatMap(pair -> {
@@ -116,7 +111,7 @@ public class HoverEvent {
 				public <D> DataResult<D> encode(HoverEvent.TypedHoverEvent<T> typedHoverEvent, DynamicOps<D> dynamicOps, D object) {
 					return DataResult.error(() -> "Can't encode in legacy format");
 				}
-			};
+			}).fieldOf("value");
 		}
 
 		public boolean isAllowedFromServer() {
@@ -150,7 +145,7 @@ public class HoverEvent {
 			instance -> instance.group(
 						BuiltInRegistries.ENTITY_TYPE.byNameCodec().fieldOf("type").forGetter(entityTooltipInfo -> entityTooltipInfo.type),
 						UUIDUtil.LENIENT_CODEC.fieldOf("id").forGetter(entityTooltipInfo -> entityTooltipInfo.id),
-						ExtraCodecs.strictOptionalField(ComponentSerialization.CODEC, "name").forGetter(entityTooltipInfo -> entityTooltipInfo.name)
+						ComponentSerialization.CODEC.lenientOptionalFieldOf("name").forGetter(entityTooltipInfo -> entityTooltipInfo.name)
 					)
 					.apply(instance, HoverEvent.EntityTooltipInfo::new)
 		);
@@ -216,7 +211,7 @@ public class HoverEvent {
 		public static final Codec<HoverEvent.ItemStackInfo> FULL_CODEC = ItemStack.CODEC.xmap(HoverEvent.ItemStackInfo::new, HoverEvent.ItemStackInfo::getItemStack);
 		private static final Codec<HoverEvent.ItemStackInfo> SIMPLE_CODEC = ItemStack.SIMPLE_ITEM_CODEC
 			.xmap(HoverEvent.ItemStackInfo::new, HoverEvent.ItemStackInfo::getItemStack);
-		public static final Codec<HoverEvent.ItemStackInfo> CODEC = ExtraCodecs.withAlternative(FULL_CODEC, SIMPLE_CODEC);
+		public static final Codec<HoverEvent.ItemStackInfo> CODEC = Codec.withAlternative(FULL_CODEC, SIMPLE_CODEC);
 		private final Holder<Item> item;
 		private final int count;
 		private final DataComponentPatch components;

@@ -2,6 +2,7 @@ package net.minecraft.world.level.storage.loot.providers.nbt;
 
 import com.google.common.collect.ImmutableSet;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Set;
 import javax.annotation.Nullable;
@@ -41,7 +42,7 @@ public class ContextNbtProvider implements NbtProvider {
 			return forEntity(entityTarget);
 		}
 	}, ContextNbtProvider.Getter::getId);
-	public static final Codec<ContextNbtProvider> CODEC = RecordCodecBuilder.create(
+	public static final MapCodec<ContextNbtProvider> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> instance.group(GETTER_CODEC.fieldOf("target").forGetter(contextNbtProvider -> contextNbtProvider.getter))
 				.apply(instance, ContextNbtProvider::new)
 	);

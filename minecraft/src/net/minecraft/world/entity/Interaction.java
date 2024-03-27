@@ -86,11 +86,11 @@ public class Interaction extends Entity implements Attackable, Targeting {
 		compoundTag.putFloat("width", this.getWidth());
 		compoundTag.putFloat("height", this.getHeight());
 		if (this.attack != null) {
-			Interaction.PlayerAction.CODEC.encodeStart(NbtOps.INSTANCE, this.attack).result().ifPresent(tag -> compoundTag.put("attack", tag));
+			Interaction.PlayerAction.CODEC.encodeStart(NbtOps.INSTANCE, this.attack).ifSuccess(tag -> compoundTag.put("attack", tag));
 		}
 
 		if (this.interaction != null) {
-			Interaction.PlayerAction.CODEC.encodeStart(NbtOps.INSTANCE, this.interaction).result().ifPresent(tag -> compoundTag.put("interaction", tag));
+			Interaction.PlayerAction.CODEC.encodeStart(NbtOps.INSTANCE, this.interaction).ifSuccess(tag -> compoundTag.put("interaction", tag));
 		}
 
 		compoundTag.putBoolean("response", this.getResponse());

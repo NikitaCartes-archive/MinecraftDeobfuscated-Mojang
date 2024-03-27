@@ -8,7 +8,7 @@ import org.apache.commons.lang3.tuple.Pair;
 public class VibrationSelector {
 	public static final Codec<VibrationSelector> CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
-					VibrationInfo.CODEC.optionalFieldOf("event").forGetter(vibrationSelector -> vibrationSelector.currentVibrationData.map(Pair::getLeft)),
+					VibrationInfo.CODEC.lenientOptionalFieldOf("event").forGetter(vibrationSelector -> vibrationSelector.currentVibrationData.map(Pair::getLeft)),
 					Codec.LONG.fieldOf("tick").forGetter(vibrationSelector -> (Long)vibrationSelector.currentVibrationData.map(Pair::getRight).orElse(-1L))
 				)
 				.apply(instance, VibrationSelector::new)

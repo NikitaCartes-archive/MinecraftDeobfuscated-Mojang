@@ -1,6 +1,6 @@
 package net.minecraft.util.valueproviders;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 
@@ -12,9 +12,9 @@ public interface IntProviderType<P extends IntProvider> {
 	IntProviderType<WeightedListInt> WEIGHTED_LIST = register("weighted_list", WeightedListInt.CODEC);
 	IntProviderType<ClampedNormalInt> CLAMPED_NORMAL = register("clamped_normal", ClampedNormalInt.CODEC);
 
-	Codec<P> codec();
+	MapCodec<P> codec();
 
-	static <P extends IntProvider> IntProviderType<P> register(String string, Codec<P> codec) {
-		return Registry.register(BuiltInRegistries.INT_PROVIDER_TYPE, string, () -> codec);
+	static <P extends IntProvider> IntProviderType<P> register(String string, MapCodec<P> mapCodec) {
+		return Registry.register(BuiltInRegistries.INT_PROVIDER_TYPE, string, () -> mapCodec);
 	}
 }

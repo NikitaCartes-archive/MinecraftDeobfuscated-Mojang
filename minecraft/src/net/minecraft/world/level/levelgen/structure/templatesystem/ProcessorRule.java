@@ -16,10 +16,10 @@ public class ProcessorRule {
 		instance -> instance.group(
 					RuleTest.CODEC.fieldOf("input_predicate").forGetter(processorRule -> processorRule.inputPredicate),
 					RuleTest.CODEC.fieldOf("location_predicate").forGetter(processorRule -> processorRule.locPredicate),
-					PosRuleTest.CODEC.optionalFieldOf("position_predicate", PosAlwaysTrueTest.INSTANCE).forGetter(processorRule -> processorRule.posPredicate),
+					PosRuleTest.CODEC.lenientOptionalFieldOf("position_predicate", PosAlwaysTrueTest.INSTANCE).forGetter(processorRule -> processorRule.posPredicate),
 					BlockState.CODEC.fieldOf("output_state").forGetter(processorRule -> processorRule.outputState),
 					RuleBlockEntityModifier.CODEC
-						.optionalFieldOf("block_entity_modifier", DEFAULT_BLOCK_ENTITY_MODIFIER)
+						.lenientOptionalFieldOf("block_entity_modifier", DEFAULT_BLOCK_ENTITY_MODIFIER)
 						.forGetter(processorRule -> processorRule.blockEntityModifier)
 				)
 				.apply(instance, ProcessorRule::new)

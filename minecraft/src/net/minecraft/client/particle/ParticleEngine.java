@@ -130,11 +130,13 @@ public class ParticleEngine implements PreparableReloadListener {
 		this.register(ParticleTypes.SONIC_BOOM, SonicBoomParticle.Provider::new);
 		this.register(ParticleTypes.FALLING_DUST, FallingDustParticle.Provider::new);
 		this.register(ParticleTypes.GUST, GustParticle.Provider::new);
+		this.register(ParticleTypes.SMALL_GUST, GustParticle.SmallProvider::new);
 		this.register(ParticleTypes.GUST_EMITTER_LARGE, new GustSeedParticle.Provider(3.0, 7, 0));
 		this.register(ParticleTypes.GUST_EMITTER_SMALL, new GustSeedParticle.Provider(1.0, 3, 2));
 		this.register(ParticleTypes.FIREWORK, FireworkParticles.SparkProvider::new);
 		this.register(ParticleTypes.FISHING, WakeParticle.Provider::new);
 		this.register(ParticleTypes.FLAME, FlameParticle.Provider::new);
+		this.register(ParticleTypes.INFESTED, SpellParticle.Provider::new);
 		this.register(ParticleTypes.SCULK_SOUL, SoulParticle.EmissiveProvider::new);
 		this.register(ParticleTypes.SCULK_CHARGE, SculkChargeParticle.Provider::new);
 		this.register(ParticleTypes.SCULK_CHARGE_POP, SculkChargePopParticle.Provider::new);
@@ -146,6 +148,7 @@ public class ParticleEngine implements PreparableReloadListener {
 		this.register(ParticleTypes.INSTANT_EFFECT, SpellParticle.InstantProvider::new);
 		this.register(ParticleTypes.ITEM, new BreakingItemParticle.Provider());
 		this.register(ParticleTypes.ITEM_SLIME, new BreakingItemParticle.SlimeProvider());
+		this.register(ParticleTypes.ITEM_COBWEB, new BreakingItemParticle.CobwebProvider());
 		this.register(ParticleTypes.ITEM_SNOWBALL, new BreakingItemParticle.SnowballProvider());
 		this.register(ParticleTypes.LARGE_SMOKE, LargeSmokeParticle.Provider::new);
 		this.register(ParticleTypes.LAVA, LavaParticle.Provider::new);
@@ -198,8 +201,13 @@ public class ParticleEngine implements PreparableReloadListener {
 		this.register(ParticleTypes.SHRIEK, ShriekParticle.Provider::new);
 		this.register(ParticleTypes.EGG_CRACK, SuspendedTownParticle.EggCrackProvider::new);
 		this.register(ParticleTypes.DUST_PLUME, DustPlumeParticle.Provider::new);
-		this.register(ParticleTypes.TRIAL_SPAWNER_DETECTION, TrialSpawnerDetectionParticle.Provider::new);
+		this.register(ParticleTypes.TRIAL_SPAWNER_DETECTED_PLAYER, TrialSpawnerDetectionParticle.Provider::new);
+		this.register(ParticleTypes.TRIAL_SPAWNER_DETECTED_PLAYER_OMINOUS, TrialSpawnerDetectionParticle.Provider::new);
 		this.register(ParticleTypes.VAULT_CONNECTION, FlyTowardsPositionParticle.VaultConnectionProvider::new);
+		this.register(ParticleTypes.DUST_PILLAR, new TerrainParticle.DustPillarProvider());
+		this.register(ParticleTypes.RAID_OMEN, SpellParticle.Provider::new);
+		this.register(ParticleTypes.TRIAL_OMEN, SpellParticle.Provider::new);
+		this.register(ParticleTypes.OMINOUS_SPAWNING, FlyStraightTowardsParticle.OminousSpawnProvider::new);
 	}
 
 	private <T extends ParticleOptions> void register(ParticleType<T> particleType, ParticleProvider<T> particleProvider) {

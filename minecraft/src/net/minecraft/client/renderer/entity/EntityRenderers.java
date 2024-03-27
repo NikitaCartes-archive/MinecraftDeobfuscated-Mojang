@@ -134,6 +134,7 @@ public class EntityRenderers {
 		register(EntityType.ITEM, ItemEntityRenderer::new);
 		register(EntityType.ITEM_DISPLAY, DisplayRenderer.ItemDisplayRenderer::new);
 		register(EntityType.ITEM_FRAME, ItemFrameRenderer::new);
+		register(EntityType.OMINOUS_ITEM_SPAWNER, OminousItemSpawnerRenderer::new);
 		register(EntityType.LEASH_KNOT, LeashKnotRenderer::new);
 		register(EntityType.LIGHTNING_BOLT, LightningBoltRenderer::new);
 		register(EntityType.LLAMA, context -> new LlamaRenderer(context, ModelLayers.LLAMA));

@@ -6,7 +6,6 @@ import com.mojang.datafixers.types.templates.TypeTemplate;
 import com.mojang.datafixers.util.Pair;
 import java.util.Map;
 import java.util.function.Supplier;
-import net.minecraft.util.datafix.ExtraDataFixUtils;
 import net.minecraft.util.datafix.fixes.References;
 
 public class V3818_3 extends NamespacedSchema {
@@ -20,7 +19,7 @@ public class V3818_3 extends NamespacedSchema {
 		schema.registerType(
 			true,
 			References.DATA_COMPONENTS,
-			() -> ExtraDataFixUtils.optionalFields(
+			() -> DSL.optionalFields(
 					Pair.of("minecraft:bees", DSL.list(DSL.optionalFields("entity_data", References.ENTITY_TREE.in(schema)))),
 					Pair.of("minecraft:block_entity_data", References.BLOCK_ENTITY.in(schema)),
 					Pair.of("minecraft:bundle_contents", DSL.list(References.ITEM_STACK.in(schema))),

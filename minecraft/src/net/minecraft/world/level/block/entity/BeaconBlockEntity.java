@@ -274,7 +274,7 @@ public class BeaconBlockEntity extends BlockEntity implements MenuProvider, Name
 
 	@Override
 	public CompoundTag getUpdateTag(HolderLookup.Provider provider) {
-		return this.saveWithoutMetadata(provider);
+		return this.saveCustomOnly(provider);
 	}
 
 	private static void storeEffect(CompoundTag compoundTag, String string, @Nullable Holder<MobEffect> holder) {
@@ -294,8 +294,8 @@ public class BeaconBlockEntity extends BlockEntity implements MenuProvider, Name
 	}
 
 	@Override
-	public void load(CompoundTag compoundTag, HolderLookup.Provider provider) {
-		super.load(compoundTag, provider);
+	protected void loadAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
+		super.loadAdditional(compoundTag, provider);
 		this.primaryPower = loadEffect(compoundTag, "primary_effect");
 		this.secondaryPower = loadEffect(compoundTag, "secondary_effect");
 		if (compoundTag.contains("CustomName", 8)) {
@@ -347,13 +347,15 @@ public class BeaconBlockEntity extends BlockEntity implements MenuProvider, Name
 	}
 
 	@Override
-	public void applyComponents(DataComponentMap dataComponentMap) {
-		this.name = dataComponentMap.get(DataComponents.CUSTOM_NAME);
-		this.lockKey = dataComponentMap.getOrDefault(DataComponents.LOCK, LockCode.NO_LOCK);
+	protected void applyImplicitComponents(BlockEntity.DataComponentInput dataComponentInput) {
+		super.applyImplicitComponents(dataComponentInput);
+		this.name = dataComponentInput.get(DataComponents.CUSTOM_NAME);
+		this.lockKey = dataComponentInput.getOrDefault(DataComponents.LOCK, LockCode.NO_LOCK);
 	}
 
 	@Override
-	public void collectComponents(DataComponentMap.Builder builder) {
+	protected void collectImplicitComponents(DataComponentMap.Builder builder) {
+		super.collectImplicitComponents(builder);
 		builder.set(DataComponents.CUSTOM_NAME, this.name);
 		if (!this.lockKey.equals(LockCode.NO_LOCK)) {
 			builder.set(DataComponents.LOCK, this.lockKey);

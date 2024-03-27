@@ -1,15 +1,18 @@
 package net.minecraft.world.item;
 
+import net.minecraft.core.Direction;
+import net.minecraft.core.Position;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.ThrownExperienceBottle;
 import net.minecraft.world.level.Level;
 
-public class ExperienceBottleItem extends Item {
+public class ExperienceBottleItem extends Item implements ProjectileItem {
 	public ExperienceBottleItem(Item.Properties properties) {
 		super(properties);
 	}
@@ -37,5 +40,20 @@ public class ExperienceBottleItem extends Item {
 		player.awardStat(Stats.ITEM_USED.get(this));
 		itemStack.consume(1, player);
 		return InteractionResultHolder.sidedSuccess(itemStack, level.isClientSide());
+	}
+
+	@Override
+	public Projectile asProjectile(Level level, Position position, ItemStack itemStack, Direction direction) {
+		ThrownExperienceBottle thrownExperienceBottle = new ThrownExperienceBottle(level, position.x(), position.y(), position.z());
+		thrownExperienceBottle.setItem(itemStack);
+		return thrownExperienceBottle;
+	}
+
+	@Override
+	public ProjectileItem.DispenseConfig createDispenseConfig() {
+		return ProjectileItem.DispenseConfig.builder()
+			.uncertainty(ProjectileItem.DispenseConfig.DEFAULT.uncertainty() * 0.5F)
+			.power(ProjectileItem.DispenseConfig.DEFAULT.power() * 1.25F)
+			.build();
 	}
 }

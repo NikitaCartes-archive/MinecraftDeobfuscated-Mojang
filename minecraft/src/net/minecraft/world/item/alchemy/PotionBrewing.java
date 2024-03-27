@@ -129,9 +129,17 @@ public class PotionBrewing {
 		addMix(Potions.WATER, Items.SPIDER_EYE, Potions.MUNDANE);
 		addMix(Potions.WATER, Items.SUGAR, Potions.MUNDANE);
 		addMix(Potions.WATER, Items.MAGMA_CREAM, Potions.MUNDANE);
+		addMix(Potions.WATER, Items.BREEZE_ROD, Potions.MUNDANE);
+		addMix(Potions.WATER, Items.SLIME_BLOCK, Potions.MUNDANE);
+		addMix(Potions.WATER, Items.STONE, Potions.MUNDANE);
+		addMix(Potions.WATER, Items.COBWEB, Potions.MUNDANE);
 		addMix(Potions.WATER, Items.GLOWSTONE_DUST, Potions.THICK);
 		addMix(Potions.WATER, Items.REDSTONE, Potions.MUNDANE);
 		addMix(Potions.WATER, Items.NETHER_WART, Potions.AWKWARD);
+		addMix(Potions.AWKWARD, Items.BREEZE_ROD, Potions.WIND_CHARGED);
+		addMix(Potions.AWKWARD, Items.SLIME_BLOCK, Potions.OOZING);
+		addMix(Potions.AWKWARD, Items.STONE, Potions.INFESTED);
+		addMix(Potions.AWKWARD, Items.COBWEB, Potions.WEAVING);
 		addMix(Potions.AWKWARD, Items.GOLDEN_CARROT, Potions.NIGHT_VISION);
 		addMix(Potions.NIGHT_VISION, Items.REDSTONE, Potions.LONG_NIGHT_VISION);
 		addMix(Potions.NIGHT_VISION, Items.FERMENTED_SPIDER_EYE, Potions.INVISIBILITY);

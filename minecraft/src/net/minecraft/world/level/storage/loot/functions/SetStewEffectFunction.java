@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import java.util.List;
@@ -12,7 +13,6 @@ import net.minecraft.Util;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -24,22 +24,20 @@ import net.minecraft.world.level.storage.loot.providers.number.NumberProvider;
 import net.minecraft.world.level.storage.loot.providers.number.NumberProviders;
 
 public class SetStewEffectFunction extends LootItemConditionalFunction {
-	private static final Codec<List<SetStewEffectFunction.EffectEntry>> EFFECTS_LIST = ExtraCodecs.validate(
-		SetStewEffectFunction.EffectEntry.CODEC.listOf(), list -> {
-			Set<Holder<MobEffect>> set = new ObjectOpenHashSet<>();
+	private static final Codec<List<SetStewEffectFunction.EffectEntry>> EFFECTS_LIST = SetStewEffectFunction.EffectEntry.CODEC.listOf().validate(list -> {
+		Set<Holder<MobEffect>> set = new ObjectOpenHashSet<>();
 
-			for (SetStewEffectFunction.EffectEntry effectEntry : list) {
-				if (!set.add(effectEntry.effect())) {
-					return DataResult.error(() -> "Encountered duplicate mob effect: '" + effectEntry.effect() + "'");
-				}
+		for (SetStewEffectFunction.EffectEntry effectEntry : list) {
+			if (!set.add(effectEntry.effect())) {
+				return DataResult.error(() -> "Encountered duplicate mob effect: '" + effectEntry.effect() + "'");
 			}
-
-			return DataResult.success(list);
 		}
-	);
-	public static final Codec<SetStewEffectFunction> CODEC = RecordCodecBuilder.create(
+
+		return DataResult.success(list);
+	});
+	public static final MapCodec<SetStewEffectFunction> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> commonFields(instance)
-				.and(ExtraCodecs.strictOptionalField(EFFECTS_LIST, "effects", List.of()).forGetter(setStewEffectFunction -> setStewEffectFunction.effects))
+				.and(EFFECTS_LIST.optionalFieldOf("effects", List.of()).forGetter(setStewEffectFunction -> setStewEffectFunction.effects))
 				.apply(instance, SetStewEffectFunction::new)
 	);
 	private final List<SetStewEffectFunction.EffectEntry> effects;

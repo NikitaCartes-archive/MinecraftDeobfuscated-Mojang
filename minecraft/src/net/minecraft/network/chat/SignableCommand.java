@@ -8,9 +8,14 @@ import com.mojang.brigadier.tree.ArgumentCommandNode;
 import com.mojang.brigadier.tree.CommandNode;
 import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.Nullable;
 import net.minecraft.commands.arguments.SignedArgument;
 
 public record SignableCommand<S>(List<SignableCommand.Argument<S>> arguments) {
+	public static <S> boolean hasSignableArguments(ParseResults<S> parseResults) {
+		return !of(parseResults).arguments().isEmpty();
+	}
+
 	public static <S> SignableCommand<S> of(ParseResults<S> parseResults) {
 		String string = parseResults.getReader().getString();
 		CommandContextBuilder<S> commandContextBuilder = parseResults.getContext();
@@ -18,12 +23,7 @@ public record SignableCommand<S>(List<SignableCommand.Argument<S>> arguments) {
 		List<SignableCommand.Argument<S>> list = collectArguments(string, commandContextBuilder);
 
 		CommandContextBuilder<S> commandContextBuilder3;
-		while ((commandContextBuilder3 = commandContextBuilder2.getChild()) != null) {
-			boolean bl = commandContextBuilder3.getRootNode() != commandContextBuilder.getRootNode();
-			if (!bl) {
-				break;
-			}
-
+		while ((commandContextBuilder3 = commandContextBuilder2.getChild()) != null && commandContextBuilder3.getRootNode() != commandContextBuilder.getRootNode()) {
 			list.addAll(collectArguments(string, commandContextBuilder3));
 			commandContextBuilder2 = commandContextBuilder3;
 		}
@@ -49,6 +49,17 @@ public record SignableCommand<S>(List<SignableCommand.Argument<S>> arguments) {
 		}
 
 		return list;
+	}
+
+	@Nullable
+	public SignableCommand.Argument<S> getArgument(String string) {
+		for (SignableCommand.Argument<S> argument : this.arguments) {
+			if (string.equals(argument.name())) {
+				return argument;
+			}
+		}
+
+		return null;
 	}
 
 	public static record Argument<S>(ArgumentCommandNode<S, ?> node, String value) {

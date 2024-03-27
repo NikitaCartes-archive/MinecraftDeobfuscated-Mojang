@@ -273,11 +273,8 @@ public abstract class Display extends Entity {
 
 	@Override
 	protected void addAdditionalSaveData(CompoundTag compoundTag) {
-		Transformation.EXTENDED_CODEC
-			.encodeStart(NbtOps.INSTANCE, createTransformation(this.entityData))
-			.result()
-			.ifPresent(tag -> compoundTag.put("transformation", tag));
-		Display.BillboardConstraints.CODEC.encodeStart(NbtOps.INSTANCE, this.getBillboardConstraints()).result().ifPresent(tag -> compoundTag.put("billboard", tag));
+		Transformation.EXTENDED_CODEC.encodeStart(NbtOps.INSTANCE, createTransformation(this.entityData)).ifSuccess(tag -> compoundTag.put("transformation", tag));
+		Display.BillboardConstraints.CODEC.encodeStart(NbtOps.INSTANCE, this.getBillboardConstraints()).ifSuccess(tag -> compoundTag.put("billboard", tag));
 		compoundTag.putInt("interpolation_duration", this.getTransformationInterpolationDuration());
 		compoundTag.putInt("teleport_duration", this.getPosRotInterpolationDuration());
 		compoundTag.putFloat("view_range", this.getViewRange());
@@ -288,7 +285,7 @@ public abstract class Display extends Entity {
 		compoundTag.putInt("glow_color_override", this.getGlowColorOverride());
 		Brightness brightness = this.getBrightnessOverride();
 		if (brightness != null) {
-			Brightness.CODEC.encodeStart(NbtOps.INSTANCE, brightness).result().ifPresent(tag -> compoundTag.put("brightness", tag));
+			Brightness.CODEC.encodeStart(NbtOps.INSTANCE, brightness).ifSuccess(tag -> compoundTag.put("brightness", tag));
 		}
 	}
 
@@ -710,7 +707,7 @@ public abstract class Display extends Entity {
 				compoundTag.put("item", this.getItemStack().save(this.registryAccess()));
 			}
 
-			ItemDisplayContext.CODEC.encodeStart(NbtOps.INSTANCE, this.getItemTransform()).result().ifPresent(tag -> compoundTag.put("item_display", tag));
+			ItemDisplayContext.CODEC.encodeStart(NbtOps.INSTANCE, this.getItemTransform()).ifSuccess(tag -> compoundTag.put("item_display", tag));
 		}
 
 		@Override
@@ -944,7 +941,7 @@ public abstract class Display extends Entity {
 			storeFlag(b, compoundTag, "shadow", (byte)1);
 			storeFlag(b, compoundTag, "see_through", (byte)2);
 			storeFlag(b, compoundTag, "default_background", (byte)4);
-			Display.TextDisplay.Align.CODEC.encodeStart(NbtOps.INSTANCE, getAlign(b)).result().ifPresent(tag -> compoundTag.put("alignment", tag));
+			Display.TextDisplay.Align.CODEC.encodeStart(NbtOps.INSTANCE, getAlign(b)).ifSuccess(tag -> compoundTag.put("alignment", tag));
 		}
 
 		@Override

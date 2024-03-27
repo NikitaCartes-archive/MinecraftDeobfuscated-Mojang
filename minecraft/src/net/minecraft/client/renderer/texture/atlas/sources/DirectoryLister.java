@@ -1,6 +1,7 @@
 package net.minecraft.client.renderer.texture.atlas.sources;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -13,7 +14,7 @@ import net.minecraft.server.packs.resources.ResourceManager;
 
 @Environment(EnvType.CLIENT)
 public class DirectoryLister implements SpriteSource {
-	public static final Codec<DirectoryLister> CODEC = RecordCodecBuilder.create(
+	public static final MapCodec<DirectoryLister> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> instance.group(
 					Codec.STRING.fieldOf("source").forGetter(directoryLister -> directoryLister.sourcePath),
 					Codec.STRING.fieldOf("prefix").forGetter(directoryLister -> directoryLister.idPrefix)

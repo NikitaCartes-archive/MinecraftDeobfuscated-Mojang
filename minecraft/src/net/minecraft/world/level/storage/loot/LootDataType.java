@@ -34,7 +34,7 @@ public record LootDataType<T>(ResourceKey<Registry<T>> registryKey, Codec<T> cod
 
 	public <V> Optional<T> deserialize(ResourceLocation resourceLocation, DynamicOps<V> dynamicOps, V object) {
 		DataResult<T> dataResult = this.codec.parse(dynamicOps, object);
-		dataResult.error().ifPresent(partialResult -> LOGGER.error("Couldn't parse element {}:{} - {}", this.directory, resourceLocation, partialResult.message()));
+		dataResult.error().ifPresent(error -> LOGGER.error("Couldn't parse element {}:{} - {}", this.directory, resourceLocation, error.message()));
 		return dataResult.result();
 	}
 

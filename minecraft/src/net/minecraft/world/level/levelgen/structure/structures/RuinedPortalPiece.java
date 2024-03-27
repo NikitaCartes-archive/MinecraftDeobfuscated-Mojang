@@ -88,7 +88,7 @@ public class RuinedPortalPiece extends TemplateStructurePiece {
 			resourceLocation -> makeSettings(structureTemplateManager, compoundTag, resourceLocation)
 		);
 		this.verticalPlacement = RuinedPortalPiece.VerticalPlacement.byName(compoundTag.getString("VerticalPlacement"));
-		this.properties = RuinedPortalPiece.Properties.CODEC.parse(new Dynamic<>(NbtOps.INSTANCE, compoundTag.get("Properties"))).getOrThrow(true, LOGGER::error);
+		this.properties = RuinedPortalPiece.Properties.CODEC.parse(new Dynamic<>(NbtOps.INSTANCE, compoundTag.get("Properties"))).getPartialOrThrow();
 	}
 
 	@Override
@@ -113,7 +113,7 @@ public class RuinedPortalPiece extends TemplateStructurePiece {
 			Rotation.valueOf(compoundTag.getString("Rotation")),
 			RuinedPortalPiece.VerticalPlacement.byName(compoundTag.getString("VerticalPlacement")),
 			blockPos,
-			RuinedPortalPiece.Properties.CODEC.parse(new Dynamic<>(NbtOps.INSTANCE, compoundTag.get("Properties"))).getOrThrow(true, LOGGER::error)
+			RuinedPortalPiece.Properties.CODEC.parse(new Dynamic<>(NbtOps.INSTANCE, compoundTag.get("Properties"))).getPartialOrThrow()
 		);
 	}
 

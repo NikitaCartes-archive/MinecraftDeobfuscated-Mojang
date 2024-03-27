@@ -20,7 +20,6 @@ import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -89,36 +88,29 @@ import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.slf4j.Logger;
 
 public final class ItemStack implements DataComponentHolder {
-	private static final Codec<Holder<Item>> ITEM_NON_AIR_CODEC = ExtraCodecs.validate(
-		BuiltInRegistries.ITEM.holderByNameCodec(),
-		holder -> holder.is(Items.AIR.builtInRegistryHolder()) ? DataResult.error(() -> "Item must not be minecraft:air") : DataResult.success(holder)
-	);
-	public static final Codec<ItemStack> CODEC = ExtraCodecs.lazyInitializedCodec(
-		() -> ExtraCodecs.validate(
-				RecordCodecBuilder.create(
+	private static final Codec<Holder<Item>> ITEM_NON_AIR_CODEC = BuiltInRegistries.ITEM
+		.holderByNameCodec()
+		.validate(holder -> holder.is(Items.AIR.builtInRegistryHolder()) ? DataResult.error(() -> "Item must not be minecraft:air") : DataResult.success(holder));
+	public static final Codec<ItemStack> CODEC = Codec.lazyInitialized(
+		() -> RecordCodecBuilder.create(
 					instance -> instance.group(
 								ITEM_NON_AIR_CODEC.fieldOf("id").forGetter(ItemStack::getItemHolder),
 								ExtraCodecs.POSITIVE_INT.fieldOf("count").orElse(1).forGetter(ItemStack::getCount),
-								ExtraCodecs.strictOptionalField(DataComponentPatch.CODEC, "components", DataComponentPatch.EMPTY)
-									.forGetter(itemStack -> itemStack.components.asPatch())
+								DataComponentPatch.CODEC.optionalFieldOf("components", DataComponentPatch.EMPTY).forGetter(itemStack -> itemStack.components.asPatch())
 							)
 							.apply(instance, ItemStack::new)
-				),
-				ItemStack::validate
-			)
+				)
+				.validate(ItemStack::validate)
 	);
-	public static final Codec<ItemStack> SINGLE_ITEM_CODEC = ExtraCodecs.lazyInitializedCodec(
-		() -> ExtraCodecs.validate(
-				RecordCodecBuilder.create(
+	public static final Codec<ItemStack> SINGLE_ITEM_CODEC = Codec.lazyInitialized(
+		() -> RecordCodecBuilder.create(
 					instance -> instance.group(
 								ITEM_NON_AIR_CODEC.fieldOf("id").forGetter(ItemStack::getItemHolder),
-								ExtraCodecs.strictOptionalField(DataComponentPatch.CODEC, "components", DataComponentPatch.EMPTY)
-									.forGetter(itemStack -> itemStack.components.asPatch())
+								DataComponentPatch.CODEC.optionalFieldOf("components", DataComponentPatch.EMPTY).forGetter(itemStack -> itemStack.components.asPatch())
 							)
 							.apply(instance, (holder, dataComponentPatch) -> new ItemStack(holder, 1, dataComponentPatch))
-				),
-				ItemStack::validate
-			)
+				)
+				.validate(ItemStack::validate)
 	);
 	public static final Codec<ItemStack> OPTIONAL_CODEC = ExtraCodecs.optionalEmptyMap(CODEC)
 		.xmap(optional -> (ItemStack)optional.orElse(ItemStack.EMPTY), itemStack -> itemStack.isEmpty() ? Optional.empty() : Optional.of(itemStack));
@@ -197,6 +189,10 @@ public final class ItemStack implements DataComponentHolder {
 	@Override
 	public DataComponentMap getComponents() {
 		return (DataComponentMap)(!this.isEmpty() ? this.components : DataComponentMap.EMPTY);
+	}
+
+	public DataComponentMap getPrototype() {
+		return !this.isEmpty() ? this.getItem().components() : DataComponentMap.EMPTY;
 	}
 
 	public DataComponentPatch getComponentsPatch() {
@@ -333,7 +329,7 @@ public final class ItemStack implements DataComponentHolder {
 		if (this.isEmpty()) {
 			throw new IllegalStateException("Cannot encode empty ItemStack");
 		} else {
-			return Util.getOrThrow(CODEC.encode(this, provider.createSerializationContext(NbtOps.INSTANCE), tag), IllegalStateException::new);
+			return CODEC.encode(this, provider.createSerializationContext(NbtOps.INSTANCE), tag).getOrThrow();
 		}
 	}
 
@@ -341,7 +337,7 @@ public final class ItemStack implements DataComponentHolder {
 		if (this.isEmpty()) {
 			throw new IllegalStateException("Cannot encode empty ItemStack");
 		} else {
-			return Util.getOrThrow(CODEC.encodeStart(provider.createSerializationContext(NbtOps.INSTANCE), this), IllegalStateException::new);
+			return CODEC.encodeStart(provider.createSerializationContext(NbtOps.INSTANCE), this).getOrThrow();
 		}
 	}
 
@@ -531,8 +527,8 @@ public final class ItemStack implements DataComponentHolder {
 		}
 	}
 
-	public static MapCodec<ItemStack> optionalFieldOf(String string) {
-		return CODEC.optionalFieldOf(string)
+	public static MapCodec<ItemStack> lenientOptionalFieldOf(String string) {
+		return CODEC.lenientOptionalFieldOf(string)
 			.xmap(optional -> (ItemStack)optional.orElse(EMPTY), itemStack -> itemStack.isEmpty() ? Optional.empty() : Optional.of(itemStack));
 	}
 
@@ -632,7 +628,12 @@ public final class ItemStack implements DataComponentHolder {
 
 	public Component getHoverName() {
 		Component component = this.get(DataComponents.CUSTOM_NAME);
-		return component != null ? component : this.getItem().getName(this);
+		if (component != null) {
+			return component;
+		} else {
+			Component component2 = this.get(DataComponents.ITEM_NAME);
+			return component2 != null ? component2 : this.getItem().getName(this);
+		}
 	}
 
 	private <T extends TooltipProvider> void addToTooltip(DataComponentType<T> dataComponentType, Consumer<Component> consumer, TooltipFlag tooltipFlag) {
@@ -814,6 +815,10 @@ public final class ItemStack implements DataComponentHolder {
 
 	public boolean isEnchanted() {
 		return !this.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY).isEmpty();
+	}
+
+	public ItemEnchantments getEnchantments() {
+		return this.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY);
 	}
 
 	public boolean isFramed() {

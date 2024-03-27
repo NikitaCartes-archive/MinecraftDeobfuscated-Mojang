@@ -6,7 +6,6 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Optional;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.entity.trialspawner.PlayerDetector;
@@ -24,19 +23,17 @@ public record VaultConfig(
 ) {
 	static final String TAG_NAME = "config";
 	static VaultConfig DEFAULT = new VaultConfig();
-	static Codec<VaultConfig> CODEC = ExtraCodecs.validate(
-		RecordCodecBuilder.create(
+	static Codec<VaultConfig> CODEC = RecordCodecBuilder.<VaultConfig>create(
 			instance -> instance.group(
-						ResourceKey.codec(Registries.LOOT_TABLE).optionalFieldOf("loot_table", DEFAULT.lootTable()).forGetter(VaultConfig::lootTable),
-						Codec.DOUBLE.optionalFieldOf("activation_range", Double.valueOf(DEFAULT.activationRange())).forGetter(VaultConfig::activationRange),
-						Codec.DOUBLE.optionalFieldOf("deactivation_range", Double.valueOf(DEFAULT.deactivationRange())).forGetter(VaultConfig::deactivationRange),
-						ItemStack.optionalFieldOf("key_item").forGetter(VaultConfig::keyItem),
-						ResourceKey.codec(Registries.LOOT_TABLE).optionalFieldOf("override_loot_table_to_display").forGetter(VaultConfig::overrideLootTableToDisplay)
+						ResourceKey.codec(Registries.LOOT_TABLE).lenientOptionalFieldOf("loot_table", DEFAULT.lootTable()).forGetter(VaultConfig::lootTable),
+						Codec.DOUBLE.lenientOptionalFieldOf("activation_range", Double.valueOf(DEFAULT.activationRange())).forGetter(VaultConfig::activationRange),
+						Codec.DOUBLE.lenientOptionalFieldOf("deactivation_range", Double.valueOf(DEFAULT.deactivationRange())).forGetter(VaultConfig::deactivationRange),
+						ItemStack.lenientOptionalFieldOf("key_item").forGetter(VaultConfig::keyItem),
+						ResourceKey.codec(Registries.LOOT_TABLE).lenientOptionalFieldOf("override_loot_table_to_display").forGetter(VaultConfig::overrideLootTableToDisplay)
 					)
 					.apply(instance, VaultConfig::new)
-		),
-		VaultConfig::validate
-	);
+		)
+		.validate(VaultConfig::validate);
 
 	private VaultConfig() {
 		this(

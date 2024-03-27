@@ -116,8 +116,8 @@ public class CampfireBlockEntity extends BlockEntity implements Clearable {
 	}
 
 	@Override
-	public void load(CompoundTag compoundTag, HolderLookup.Provider provider) {
-		super.load(compoundTag, provider);
+	protected void loadAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
+		super.loadAdditional(compoundTag, provider);
 		this.items.clear();
 		ContainerHelper.loadAllItems(compoundTag, this.items, provider);
 		if (compoundTag.contains("CookingTimes", 11)) {
@@ -187,12 +187,14 @@ public class CampfireBlockEntity extends BlockEntity implements Clearable {
 	}
 
 	@Override
-	public void applyComponents(DataComponentMap dataComponentMap) {
-		dataComponentMap.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY).copyInto(this.getItems());
+	protected void applyImplicitComponents(BlockEntity.DataComponentInput dataComponentInput) {
+		super.applyImplicitComponents(dataComponentInput);
+		dataComponentInput.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY).copyInto(this.getItems());
 	}
 
 	@Override
-	public void collectComponents(DataComponentMap.Builder builder) {
+	protected void collectImplicitComponents(DataComponentMap.Builder builder) {
+		super.collectImplicitComponents(builder);
 		builder.set(DataComponents.CONTAINER, ItemContainerContents.copyOf(this.getItems()));
 	}
 

@@ -35,8 +35,8 @@ public class JukeboxBlockEntity extends BlockEntity implements Clearable, Contai
 	}
 
 	@Override
-	public void load(CompoundTag compoundTag, HolderLookup.Provider provider) {
-		super.load(compoundTag, provider);
+	protected void loadAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
+		super.loadAdditional(compoundTag, provider);
 		if (compoundTag.contains("RecordItem", 10)) {
 			this.item = (ItemStack)ItemStack.parse(provider, compoundTag.getCompound("RecordItem")).orElse(ItemStack.EMPTY);
 		} else {

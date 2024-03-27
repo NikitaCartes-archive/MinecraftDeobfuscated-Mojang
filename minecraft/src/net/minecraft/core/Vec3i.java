@@ -6,7 +6,6 @@ import com.mojang.serialization.DataResult;
 import java.util.stream.IntStream;
 import javax.annotation.concurrent.Immutable;
 import net.minecraft.Util;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.Mth;
 
 @Immutable
@@ -22,8 +21,7 @@ public class Vec3i implements Comparable<Vec3i> {
 	private int z;
 
 	public static Codec<Vec3i> offsetCodec(int i) {
-		return ExtraCodecs.validate(
-			CODEC,
+		return CODEC.validate(
 			vec3i -> Math.abs(vec3i.getX()) < i && Math.abs(vec3i.getY()) < i && Math.abs(vec3i.getZ()) < i
 					? DataResult.success(vec3i)
 					: DataResult.error(() -> "Position out of range, expected at most " + i + ": " + vec3i)

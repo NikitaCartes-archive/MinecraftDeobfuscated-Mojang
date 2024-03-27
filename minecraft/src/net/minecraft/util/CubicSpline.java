@@ -29,7 +29,7 @@ public interface CubicSpline<C, I extends ToFloatFunction<C>> extends ToFloatFun
 		Codec<Point<C, I>> codec2 = RecordCodecBuilder.create(
 			instance -> instance.group(
 						Codec.FLOAT.fieldOf("location").forGetter(Point::location),
-						ExtraCodecs.lazyInitializedCodec(mutableObject::getValue).fieldOf("value").forGetter(Point::value),
+						Codec.lazyInitialized(mutableObject::getValue).fieldOf("value").forGetter(Point::value),
 						Codec.FLOAT.fieldOf("derivative").forGetter(Point::derivative)
 					)
 					.apply(instance, (f, cubicSpline, g) -> new Point(f, cubicSpline, g))

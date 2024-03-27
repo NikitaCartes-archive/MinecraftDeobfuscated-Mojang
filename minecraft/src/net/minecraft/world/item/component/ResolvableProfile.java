@@ -18,13 +18,13 @@ import net.minecraft.world.level.block.entity.SkullBlockEntity;
 public record ResolvableProfile(Optional<String> name, Optional<UUID> id, PropertyMap properties, GameProfile gameProfile) {
 	private static final Codec<ResolvableProfile> FULL_CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
-					ExtraCodecs.strictOptionalField(ExtraCodecs.PLAYER_NAME, "name").forGetter(ResolvableProfile::name),
-					ExtraCodecs.strictOptionalField(UUIDUtil.CODEC, "id").forGetter(ResolvableProfile::id),
-					ExtraCodecs.strictOptionalField(ExtraCodecs.PROPERTY_MAP, "properties", new PropertyMap()).forGetter(ResolvableProfile::properties)
+					ExtraCodecs.PLAYER_NAME.optionalFieldOf("name").forGetter(ResolvableProfile::name),
+					UUIDUtil.CODEC.optionalFieldOf("id").forGetter(ResolvableProfile::id),
+					ExtraCodecs.PROPERTY_MAP.optionalFieldOf("properties", new PropertyMap()).forGetter(ResolvableProfile::properties)
 				)
 				.apply(instance, ResolvableProfile::new)
 	);
-	public static final Codec<ResolvableProfile> CODEC = ExtraCodecs.withAlternative(
+	public static final Codec<ResolvableProfile> CODEC = Codec.withAlternative(
 		FULL_CODEC, ExtraCodecs.PLAYER_NAME, string -> new ResolvableProfile(Optional.of(string), Optional.empty(), new PropertyMap())
 	);
 	public static final StreamCodec<ByteBuf, ResolvableProfile> STREAM_CODEC = StreamCodec.composite(

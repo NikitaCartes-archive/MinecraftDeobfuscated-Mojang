@@ -79,10 +79,13 @@ import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.pathfinder.PathType;
+import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.LootTable;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.AABB;
 
-public abstract class Mob extends LivingEntity implements Targeting {
+public abstract class Mob extends LivingEntity implements EquipmentUser, Targeting {
 	private static final EntityDataAccessor<Byte> DATA_MOB_FLAGS_ID = SynchedEntityData.defineId(Mob.class, EntityDataSerializers.BYTE);
 	private static final int MOB_FLAG_NO_AI = 1;
 	private static final int MOB_FLAG_LEFTHANDED = 2;
@@ -976,6 +979,19 @@ public abstract class Mob extends LivingEntity implements Targeting {
 		};
 	}
 
+	private LootParams createEquipmentParams(ServerLevel serverLevel) {
+		return new LootParams.Builder(serverLevel)
+			.withParameter(LootContextParams.ORIGIN, this.position())
+			.withParameter(LootContextParams.THIS_ENTITY, this)
+			.create(LootContextParamSets.EQUIPMENT);
+	}
+
+	public void equip(ResourceLocation resourceLocation) {
+		if (this.level() instanceof ServerLevel serverLevel) {
+			this.equip(resourceLocation, this.createEquipmentParams(serverLevel));
+		}
+	}
+
 	protected void populateDefaultEquipmentSlots(RandomSource randomSource, DifficultyInstance difficultyInstance) {
 		if (randomSource.nextFloat() < 0.15F * difficultyInstance.getSpecialMultiplier()) {
 			int i = randomSource.nextInt(2);
@@ -1083,7 +1099,10 @@ public abstract class Mob extends LivingEntity implements Targeting {
 	protected void enchantSpawnedWeapon(RandomSource randomSource, float f) {
 		if (!this.getMainHandItem().isEmpty() && randomSource.nextFloat() < 0.25F * f) {
 			this.setItemSlot(
-				EquipmentSlot.MAINHAND, EnchantmentHelper.enchantItem(randomSource, this.getMainHandItem(), (int)(5.0F + f * (float)randomSource.nextInt(18)), false)
+				EquipmentSlot.MAINHAND,
+				EnchantmentHelper.enchantItem(
+					this.level().enabledFeatures(), randomSource, this.getMainHandItem(), (int)(5.0F + f * (float)randomSource.nextInt(18)), false
+				)
 			);
 		}
 	}
@@ -1091,7 +1110,10 @@ public abstract class Mob extends LivingEntity implements Targeting {
 	protected void enchantSpawnedArmor(RandomSource randomSource, float f, EquipmentSlot equipmentSlot) {
 		ItemStack itemStack = this.getItemBySlot(equipmentSlot);
 		if (!itemStack.isEmpty() && randomSource.nextFloat() < 0.5F * f) {
-			this.setItemSlot(equipmentSlot, EnchantmentHelper.enchantItem(randomSource, itemStack, (int)(5.0F + f * (float)randomSource.nextInt(18)), false));
+			this.setItemSlot(
+				equipmentSlot,
+				EnchantmentHelper.enchantItem(this.level().enabledFeatures(), randomSource, itemStack, (int)(5.0F + f * (float)randomSource.nextInt(18)), false)
+			);
 		}
 	}
 
@@ -1112,6 +1134,7 @@ public abstract class Mob extends LivingEntity implements Targeting {
 		this.persistenceRequired = true;
 	}
 
+	@Override
 	public void setDropChance(EquipmentSlot equipmentSlot, float f) {
 		switch (equipmentSlot.getType()) {
 			case HAND:

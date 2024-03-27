@@ -1,6 +1,7 @@
 package net.minecraft.world.level.storage.loot.functions;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import java.util.Set;
@@ -13,7 +14,7 @@ import net.minecraft.world.level.storage.loot.providers.number.NumberProvider;
 import net.minecraft.world.level.storage.loot.providers.number.NumberProviders;
 
 public class SetItemCountFunction extends LootItemConditionalFunction {
-	public static final Codec<SetItemCountFunction> CODEC = RecordCodecBuilder.create(
+	public static final MapCodec<SetItemCountFunction> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> commonFields(instance)
 				.<NumberProvider, boolean>and(
 					instance.group(

@@ -8,12 +8,11 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.TooltipFlag;
 
 public record Unbreakable(boolean showInTooltip) implements TooltipProvider {
 	public static final Codec<Unbreakable> CODEC = RecordCodecBuilder.create(
-		instance -> instance.group(ExtraCodecs.strictOptionalField(Codec.BOOL, "show_in_tooltip", true).forGetter(Unbreakable::showInTooltip))
+		instance -> instance.group(Codec.BOOL.optionalFieldOf("show_in_tooltip", Boolean.valueOf(true)).forGetter(Unbreakable::showInTooltip))
 				.apply(instance, Unbreakable::new)
 	);
 	public static final StreamCodec<ByteBuf, Unbreakable> STREAM_CODEC = ByteBufCodecs.BOOL.map(Unbreakable::new, Unbreakable::showInTooltip);

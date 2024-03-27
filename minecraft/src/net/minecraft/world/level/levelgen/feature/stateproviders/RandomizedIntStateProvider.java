@@ -1,6 +1,7 @@
 package net.minecraft.world.level.levelgen.feature.stateproviders;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Collection;
 import java.util.Optional;
@@ -13,7 +14,7 @@ import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.block.state.properties.Property;
 
 public class RandomizedIntStateProvider extends BlockStateProvider {
-	public static final Codec<RandomizedIntStateProvider> CODEC = RecordCodecBuilder.create(
+	public static final MapCodec<RandomizedIntStateProvider> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> instance.group(
 					BlockStateProvider.CODEC.fieldOf("source").forGetter(randomizedIntStateProvider -> randomizedIntStateProvider.source),
 					Codec.STRING.fieldOf("property").forGetter(randomizedIntStateProvider -> randomizedIntStateProvider.propertyName),

@@ -8,7 +8,6 @@ import com.mojang.serialization.codecs.RecordCodecBuilder.Mu;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;
@@ -46,13 +45,12 @@ public abstract class LootPoolSingletonContainer extends LootPoolEntryContainer 
 		Instance<T> instance
 	) {
 		return instance.group(
-				ExtraCodecs.strictOptionalField(Codec.INT, "weight", 1).forGetter(lootPoolSingletonContainer -> lootPoolSingletonContainer.weight),
-				ExtraCodecs.strictOptionalField(Codec.INT, "quality", 0).forGetter(lootPoolSingletonContainer -> lootPoolSingletonContainer.quality)
+				Codec.INT.optionalFieldOf("weight", Integer.valueOf(1)).forGetter(lootPoolSingletonContainer -> lootPoolSingletonContainer.weight),
+				Codec.INT.optionalFieldOf("quality", Integer.valueOf(0)).forGetter(lootPoolSingletonContainer -> lootPoolSingletonContainer.quality)
 			)
 			.and(commonFields(instance).t1())
 			.and(
-				ExtraCodecs.strictOptionalField(LootItemFunctions.ROOT_CODEC.listOf(), "functions", List.of())
-					.forGetter(lootPoolSingletonContainer -> lootPoolSingletonContainer.functions)
+				LootItemFunctions.ROOT_CODEC.listOf().optionalFieldOf("functions", List.of()).forGetter(lootPoolSingletonContainer -> lootPoolSingletonContainer.functions)
 			);
 	}
 

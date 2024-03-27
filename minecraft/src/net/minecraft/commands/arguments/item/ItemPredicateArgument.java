@@ -118,8 +118,7 @@ public class ItemPredicateArgument implements ArgumentType<ItemPredicateArgument
 
 		public Predicate<ItemStack> decode(ImmutableStringReader immutableStringReader, RegistryOps<Tag> registryOps, Tag tag) throws CommandSyntaxException {
 			DataResult<? extends Predicate<ItemStack>> dataResult = this.valueChecker.parse(registryOps, tag);
-			return Util.getOrThrow(
-				(DataResult<Predicate<ItemStack>>)dataResult,
+			return (Predicate<ItemStack>)dataResult.getOrThrow(
 				string -> ItemPredicateArgument.ERROR_MALFORMED_COMPONENT.createWithContext(immutableStringReader, this.id.toString(), string)
 			);
 		}
@@ -229,8 +228,7 @@ public class ItemPredicateArgument implements ArgumentType<ItemPredicateArgument
 
 		public Predicate<ItemStack> decode(ImmutableStringReader immutableStringReader, RegistryOps<Tag> registryOps, Tag tag) throws CommandSyntaxException {
 			DataResult<? extends Predicate<ItemStack>> dataResult = this.type.parse(registryOps, tag);
-			return Util.getOrThrow(
-				(DataResult<Predicate<ItemStack>>)dataResult,
+			return (Predicate<ItemStack>)dataResult.getOrThrow(
 				string -> ItemPredicateArgument.ERROR_MALFORMED_PREDICATE.createWithContext(immutableStringReader, this.id.toString(), string)
 			);
 		}

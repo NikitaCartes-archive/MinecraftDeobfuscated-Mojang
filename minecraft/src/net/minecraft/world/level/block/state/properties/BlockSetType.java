@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.stream.Stream;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.level.block.SoundType;
 
 public record BlockSetType(
@@ -26,7 +25,7 @@ public record BlockSetType(
 	SoundEvent buttonClickOn
 ) {
 	private static final Map<String, BlockSetType> TYPES = new Object2ObjectArrayMap<>();
-	public static final Codec<BlockSetType> CODEC = ExtraCodecs.stringResolverCodec(BlockSetType::name, TYPES::get);
+	public static final Codec<BlockSetType> CODEC = Codec.stringResolver(BlockSetType::name, TYPES::get);
 	public static final BlockSetType IRON = register(
 		new BlockSetType(
 			"iron",

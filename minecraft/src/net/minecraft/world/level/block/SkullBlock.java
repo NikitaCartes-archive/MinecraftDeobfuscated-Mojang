@@ -6,7 +6,6 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import java.util.Map;
 import net.minecraft.core.BlockPos;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
@@ -73,7 +72,7 @@ public class SkullBlock extends AbstractSkullBlock {
 
 	public interface Type extends StringRepresentable {
 		Map<String, SkullBlock.Type> TYPES = new Object2ObjectArrayMap<>();
-		Codec<SkullBlock.Type> CODEC = ExtraCodecs.stringResolverCodec(StringRepresentable::getSerializedName, TYPES::get);
+		Codec<SkullBlock.Type> CODEC = Codec.stringResolver(StringRepresentable::getSerializedName, TYPES::get);
 	}
 
 	public static enum Types implements SkullBlock.Type {

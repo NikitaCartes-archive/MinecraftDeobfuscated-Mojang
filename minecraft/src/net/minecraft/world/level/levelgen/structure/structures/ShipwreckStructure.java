@@ -1,6 +1,7 @@
 package net.minecraft.world.level.levelgen.structure.structures;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
@@ -11,7 +12,7 @@ import net.minecraft.world.level.levelgen.structure.StructureType;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePiecesBuilder;
 
 public class ShipwreckStructure extends Structure {
-	public static final Codec<ShipwreckStructure> CODEC = RecordCodecBuilder.create(
+	public static final MapCodec<ShipwreckStructure> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> instance.group(settingsCodec(instance), Codec.BOOL.fieldOf("is_beached").forGetter(shipwreckStructure -> shipwreckStructure.isBeached))
 				.apply(instance, ShipwreckStructure::new)
 	);

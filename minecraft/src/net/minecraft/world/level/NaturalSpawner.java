@@ -243,7 +243,9 @@ public final class NaturalSpawner {
 		} else {
 			return !SpawnPlacements.checkSpawnRules(entityType, serverLevel, MobSpawnType.NATURAL, mutableBlockPos, serverLevel.random)
 				? false
-				: serverLevel.noCollision(entityType.getAABB((double)mutableBlockPos.getX() + 0.5, (double)mutableBlockPos.getY(), (double)mutableBlockPos.getZ() + 0.5));
+				: serverLevel.noCollision(
+					entityType.getSpawnAABB((double)mutableBlockPos.getX() + 0.5, (double)mutableBlockPos.getY(), (double)mutableBlockPos.getZ() + 0.5)
+				);
 		}
 	}
 
@@ -366,7 +368,7 @@ public final class NaturalSpawner {
 								float f = spawnerData.type.getWidth();
 								double d = Mth.clamp((double)l, (double)i + (double)f, (double)i + 16.0 - (double)f);
 								double e = Mth.clamp((double)m, (double)j + (double)f, (double)j + 16.0 - (double)f);
-								if (!serverLevelAccessor.noCollision(spawnerData.type.getAABB(d, (double)blockPos.getY(), e))
+								if (!serverLevelAccessor.noCollision(spawnerData.type.getSpawnAABB(d, (double)blockPos.getY(), e))
 									|| !SpawnPlacements.checkSpawnRules(
 										spawnerData.type,
 										serverLevelAccessor,

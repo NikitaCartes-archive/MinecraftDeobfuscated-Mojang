@@ -1,17 +1,22 @@
 package net.minecraft.world.item;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Position;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.windcharge.WindCharge;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.phys.Vec3;
 
-public class WindChargeItem extends Item {
+public class WindChargeItem extends Item implements ProjectileItem {
 	private static final int COOLDOWN = 10;
 
 	public WindChargeItem(Item.Properties properties) {
@@ -46,5 +51,27 @@ public class WindChargeItem extends Item {
 		player.awardStat(Stats.ITEM_USED.get(this));
 		itemStack.consume(1, player);
 		return InteractionResultHolder.sidedSuccess(itemStack, level.isClientSide());
+	}
+
+	@Override
+	public Projectile asProjectile(Level level, Position position, ItemStack itemStack, Direction direction) {
+		RandomSource randomSource = level.getRandom();
+		double d = randomSource.triangle((double)direction.getStepX(), 0.11485000000000001);
+		double e = randomSource.triangle((double)direction.getStepY(), 0.11485000000000001);
+		double f = randomSource.triangle((double)direction.getStepZ(), 0.11485000000000001);
+		return new WindCharge(level, position.x(), position.y(), position.z(), d, e, f);
+	}
+
+	@Override
+	public void shoot(Projectile projectile, double d, double e, double f, float g, float h) {
+	}
+
+	@Override
+	public ProjectileItem.DispenseConfig createDispenseConfig() {
+		return ProjectileItem.DispenseConfig.builder()
+			.positionFunction((blockSource, direction) -> DispenserBlock.getDispensePosition(blockSource, 1.0, Vec3.ZERO))
+			.uncertainty(6.6666665F)
+			.power(1.0F)
+			.build();
 	}
 }

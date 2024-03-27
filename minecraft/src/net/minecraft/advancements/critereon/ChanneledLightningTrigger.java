@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.advancements.Criterion;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.storage.loot.LootContext;
 
@@ -30,9 +29,8 @@ public class ChanneledLightningTrigger extends SimpleCriterionTrigger<ChanneledL
 		implements SimpleCriterionTrigger.SimpleInstance {
 		public static final Codec<ChanneledLightningTrigger.TriggerInstance> CODEC = RecordCodecBuilder.create(
 			instance -> instance.group(
-						ExtraCodecs.strictOptionalField(EntityPredicate.ADVANCEMENT_CODEC, "player").forGetter(ChanneledLightningTrigger.TriggerInstance::player),
-						ExtraCodecs.strictOptionalField(EntityPredicate.ADVANCEMENT_CODEC.listOf(), "victims", List.of())
-							.forGetter(ChanneledLightningTrigger.TriggerInstance::victims)
+						EntityPredicate.ADVANCEMENT_CODEC.optionalFieldOf("player").forGetter(ChanneledLightningTrigger.TriggerInstance::player),
+						EntityPredicate.ADVANCEMENT_CODEC.listOf().optionalFieldOf("victims", List.of()).forGetter(ChanneledLightningTrigger.TriggerInstance::victims)
 					)
 					.apply(instance, ChanneledLightningTrigger.TriggerInstance::new)
 		);

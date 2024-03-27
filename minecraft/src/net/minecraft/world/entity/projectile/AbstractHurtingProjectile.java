@@ -113,12 +113,6 @@ public abstract class AbstractHurtingProjectile extends Projectile {
 	}
 
 	@Override
-	public void lerpMotion(double d, double e, double f) {
-		super.lerpMotion(d, e, f);
-		this.assignPower(d, e, f);
-	}
-
-	@Override
 	protected boolean canHitEntity(Entity entity) {
 		return super.canHitEntity(entity) && !entity.noPhysics;
 	}

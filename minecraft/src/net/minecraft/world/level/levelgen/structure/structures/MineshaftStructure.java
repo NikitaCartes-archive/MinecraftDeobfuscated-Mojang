@@ -2,6 +2,7 @@ package net.minecraft.world.level.levelgen.structure.structures;
 
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Optional;
 import java.util.function.IntFunction;
@@ -21,7 +22,7 @@ import net.minecraft.world.level.levelgen.structure.StructureType;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePiecesBuilder;
 
 public class MineshaftStructure extends Structure {
-	public static final Codec<MineshaftStructure> CODEC = RecordCodecBuilder.create(
+	public static final MapCodec<MineshaftStructure> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> instance.group(
 					settingsCodec(instance), MineshaftStructure.Type.CODEC.fieldOf("mineshaft_type").forGetter(mineshaftStructure -> mineshaftStructure.type)
 				)

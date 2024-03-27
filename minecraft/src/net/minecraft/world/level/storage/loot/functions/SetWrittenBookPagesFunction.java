@@ -2,24 +2,23 @@ package net.minecraft.world.level.storage.loot.functions;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.JavaOps;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.server.network.Filterable;
-import net.minecraft.util.ExtraCodecs;
-import net.minecraft.util.JavaOps;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.WrittenBookContent;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
 public class SetWrittenBookPagesFunction extends LootItemConditionalFunction {
-	public static final Codec<Component> PAGE_CODEC = ExtraCodecs.validate(
-		ComponentSerialization.CODEC, component -> WrittenBookContent.CONTENT_CODEC.encodeStart(JavaOps.INSTANCE, component).map(object -> component)
-	);
-	public static final Codec<SetWrittenBookPagesFunction> CODEC = RecordCodecBuilder.create(
+	public static final Codec<Component> PAGE_CODEC = ComponentSerialization.CODEC
+		.validate(component -> WrittenBookContent.CONTENT_CODEC.encodeStart(JavaOps.INSTANCE, component).map(object -> component));
+	public static final MapCodec<SetWrittenBookPagesFunction> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> commonFields(instance)
 				.<List<Filterable<Component>>, ListOperation>and(
 					instance.group(

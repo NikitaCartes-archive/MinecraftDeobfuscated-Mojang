@@ -36,12 +36,15 @@ public class FlatLevelGeneratorSettings {
 	public static final Codec<FlatLevelGeneratorSettings> CODEC = RecordCodecBuilder.create(
 			instance -> instance.group(
 						RegistryCodecs.homogeneousList(Registries.STRUCTURE_SET)
-							.optionalFieldOf("structure_overrides")
+							.lenientOptionalFieldOf("structure_overrides")
 							.forGetter(flatLevelGeneratorSettings -> flatLevelGeneratorSettings.structureOverrides),
 						FlatLayerInfo.CODEC.listOf().fieldOf("layers").forGetter(FlatLevelGeneratorSettings::getLayersInfo),
 						Codec.BOOL.fieldOf("lakes").orElse(false).forGetter(flatLevelGeneratorSettings -> flatLevelGeneratorSettings.addLakes),
 						Codec.BOOL.fieldOf("features").orElse(false).forGetter(flatLevelGeneratorSettings -> flatLevelGeneratorSettings.decoration),
-						Biome.CODEC.optionalFieldOf("biome").orElseGet(Optional::empty).forGetter(flatLevelGeneratorSettings -> Optional.of(flatLevelGeneratorSettings.biome)),
+						Biome.CODEC
+							.lenientOptionalFieldOf("biome")
+							.orElseGet(Optional::empty)
+							.forGetter(flatLevelGeneratorSettings -> Optional.of(flatLevelGeneratorSettings.biome)),
 						RegistryOps.retrieveElement(Biomes.PLAINS),
 						RegistryOps.retrieveElement(MiscOverworldPlacements.LAKE_LAVA_UNDERGROUND),
 						RegistryOps.retrieveElement(MiscOverworldPlacements.LAKE_LAVA_SURFACE)

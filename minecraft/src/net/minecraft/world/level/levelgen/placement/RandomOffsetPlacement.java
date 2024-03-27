@@ -1,6 +1,6 @@
 package net.minecraft.world.level.levelgen.placement;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
@@ -9,7 +9,7 @@ import net.minecraft.util.valueproviders.ConstantInt;
 import net.minecraft.util.valueproviders.IntProvider;
 
 public class RandomOffsetPlacement extends PlacementModifier {
-	public static final Codec<RandomOffsetPlacement> CODEC = RecordCodecBuilder.create(
+	public static final MapCodec<RandomOffsetPlacement> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> instance.group(
 					IntProvider.codec(-16, 16).fieldOf("xz_spread").forGetter(randomOffsetPlacement -> randomOffsetPlacement.xzSpread),
 					IntProvider.codec(-16, 16).fieldOf("y_spread").forGetter(randomOffsetPlacement -> randomOffsetPlacement.ySpread)

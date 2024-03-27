@@ -6,7 +6,6 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Optional;
 import javax.annotation.Nullable;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.FishingHook;
 import net.minecraft.world.phys.Vec3;
@@ -14,7 +13,7 @@ import net.minecraft.world.phys.Vec3;
 public record FishingHookPredicate(Optional<Boolean> inOpenWater) implements EntitySubPredicate {
 	public static final FishingHookPredicate ANY = new FishingHookPredicate(Optional.empty());
 	public static final MapCodec<FishingHookPredicate> CODEC = RecordCodecBuilder.mapCodec(
-		instance -> instance.group(ExtraCodecs.strictOptionalField(Codec.BOOL, "in_open_water").forGetter(FishingHookPredicate::inOpenWater))
+		instance -> instance.group(Codec.BOOL.optionalFieldOf("in_open_water").forGetter(FishingHookPredicate::inOpenWater))
 				.apply(instance, FishingHookPredicate::new)
 	);
 

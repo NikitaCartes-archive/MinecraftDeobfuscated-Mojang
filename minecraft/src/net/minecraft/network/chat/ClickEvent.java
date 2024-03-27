@@ -5,7 +5,6 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Lifecycle;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.StringRepresentable;
 
 public class ClickEvent {
@@ -60,7 +59,7 @@ public class ClickEvent {
 		COPY_TO_CLIPBOARD("copy_to_clipboard", true);
 
 		public static final MapCodec<ClickEvent.Action> UNSAFE_CODEC = StringRepresentable.fromEnum(ClickEvent.Action::values).fieldOf("action");
-		public static final MapCodec<ClickEvent.Action> CODEC = ExtraCodecs.validate(UNSAFE_CODEC, ClickEvent.Action::filterForSerialization);
+		public static final MapCodec<ClickEvent.Action> CODEC = UNSAFE_CODEC.validate(ClickEvent.Action::filterForSerialization);
 		private final boolean allowFromServer;
 		private final String name;
 

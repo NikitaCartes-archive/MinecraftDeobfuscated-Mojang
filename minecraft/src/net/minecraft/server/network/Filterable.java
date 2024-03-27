@@ -7,18 +7,15 @@ import java.util.Optional;
 import java.util.function.Function;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.util.ExtraCodecs;
 
 public record Filterable<T>(T raw, Optional<T> filtered) {
 	public static <T> Codec<Filterable<T>> codec(Codec<T> codec) {
 		Codec<Filterable<T>> codec2 = RecordCodecBuilder.create(
-			instance -> instance.group(
-						codec.fieldOf("text").forGetter(Filterable::raw), ExtraCodecs.strictOptionalField(codec, "filtered").forGetter(Filterable::filtered)
-					)
+			instance -> instance.group(codec.fieldOf("text").forGetter(Filterable::raw), codec.optionalFieldOf("filtered").forGetter(Filterable::filtered))
 					.apply(instance, Filterable::new)
 		);
 		Codec<Filterable<T>> codec3 = codec.xmap(Filterable::passThrough, Filterable::raw);
-		return ExtraCodecs.withAlternative(codec2, codec3);
+		return Codec.withAlternative(codec2, codec3);
 	}
 
 	public static <B extends ByteBuf, T> StreamCodec<B, Filterable<T>> streamCodec(StreamCodec<B, T> streamCodec) {

@@ -27,19 +27,7 @@ public interface WeightedEntry {
 		}
 	}
 
-	public static class Wrapper<T> implements WeightedEntry {
-		private final T data;
-		private final Weight weight;
-
-		Wrapper(T object, Weight weight) {
-			this.data = object;
-			this.weight = weight;
-		}
-
-		public T getData() {
-			return this.data;
-		}
-
+	public static record Wrapper<T>(T data, Weight weight) implements WeightedEntry {
 		@Override
 		public Weight getWeight() {
 			return this.weight;
@@ -48,7 +36,7 @@ public interface WeightedEntry {
 		public static <E> Codec<WeightedEntry.Wrapper<E>> codec(Codec<E> codec) {
 			return RecordCodecBuilder.create(
 				instance -> instance.group(
-							codec.fieldOf("data").forGetter(WeightedEntry.Wrapper::getData), Weight.CODEC.fieldOf("weight").forGetter(WeightedEntry.Wrapper::getWeight)
+							codec.fieldOf("data").forGetter(WeightedEntry.Wrapper::data), Weight.CODEC.fieldOf("weight").forGetter(WeightedEntry.Wrapper::weight)
 						)
 						.apply(instance, WeightedEntry.Wrapper::new)
 			);

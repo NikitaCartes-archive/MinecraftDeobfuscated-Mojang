@@ -1,12 +1,12 @@
 package net.minecraft.world.level.storage.loot.entries;
 
 import com.google.common.collect.ImmutableList;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import java.util.List;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
 public class EntryGroup extends CompositeEntryBase {
-	public static final Codec<EntryGroup> CODEC = createCodec(EntryGroup::new);
+	public static final MapCodec<EntryGroup> CODEC = createCodec(EntryGroup::new);
 
 	EntryGroup(List<LootPoolEntryContainer> list, List<LootItemCondition> list2) {
 		super(list, list2);

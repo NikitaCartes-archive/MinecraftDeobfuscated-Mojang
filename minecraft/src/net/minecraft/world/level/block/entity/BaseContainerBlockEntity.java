@@ -32,8 +32,8 @@ public abstract class BaseContainerBlockEntity extends BlockEntity implements Co
 	}
 
 	@Override
-	public void load(CompoundTag compoundTag, HolderLookup.Provider provider) {
-		super.load(compoundTag, provider);
+	protected void loadAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
+		super.loadAdditional(compoundTag, provider);
 		this.lockKey = LockCode.fromTag(compoundTag);
 		if (compoundTag.contains("CustomName", 8)) {
 			this.name = Component.Serializer.fromJson(compoundTag.getString("CustomName"), provider);
@@ -142,14 +142,16 @@ public abstract class BaseContainerBlockEntity extends BlockEntity implements Co
 	protected abstract AbstractContainerMenu createMenu(int i, Inventory inventory);
 
 	@Override
-	public void applyComponents(DataComponentMap dataComponentMap) {
-		this.name = dataComponentMap.get(DataComponents.CUSTOM_NAME);
-		this.lockKey = dataComponentMap.getOrDefault(DataComponents.LOCK, LockCode.NO_LOCK);
-		dataComponentMap.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY).copyInto(this.getItems());
+	protected void applyImplicitComponents(BlockEntity.DataComponentInput dataComponentInput) {
+		super.applyImplicitComponents(dataComponentInput);
+		this.name = dataComponentInput.get(DataComponents.CUSTOM_NAME);
+		this.lockKey = dataComponentInput.getOrDefault(DataComponents.LOCK, LockCode.NO_LOCK);
+		dataComponentInput.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY).copyInto(this.getItems());
 	}
 
 	@Override
-	public void collectComponents(DataComponentMap.Builder builder) {
+	protected void collectImplicitComponents(DataComponentMap.Builder builder) {
+		super.collectImplicitComponents(builder);
 		builder.set(DataComponents.CUSTOM_NAME, this.name);
 		if (!this.lockKey.equals(LockCode.NO_LOCK)) {
 			builder.set(DataComponents.LOCK, this.lockKey);

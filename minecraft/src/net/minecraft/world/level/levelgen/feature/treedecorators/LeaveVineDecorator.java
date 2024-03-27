@@ -1,16 +1,16 @@
 package net.minecraft.world.level.levelgen.feature.treedecorators;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.VineBlock;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 
 public class LeaveVineDecorator extends TreeDecorator {
-	public static final Codec<LeaveVineDecorator> CODEC = Codec.floatRange(0.0F, 1.0F)
+	public static final MapCodec<LeaveVineDecorator> CODEC = Codec.floatRange(0.0F, 1.0F)
 		.fieldOf("probability")
-		.<LeaveVineDecorator>xmap(LeaveVineDecorator::new, leaveVineDecorator -> leaveVineDecorator.probability)
-		.codec();
+		.xmap(LeaveVineDecorator::new, leaveVineDecorator -> leaveVineDecorator.probability);
 	private final float probability;
 
 	@Override

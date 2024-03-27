@@ -1378,7 +1378,7 @@ public class VillagerTrades {
 		@Override
 		public MerchantOffer getOffer(Entity entity, RandomSource randomSource) {
 			int i = 5 + randomSource.nextInt(15);
-			ItemStack itemStack = EnchantmentHelper.enchantItem(randomSource, new ItemStack(this.itemStack.getItem()), i, false);
+			ItemStack itemStack = EnchantmentHelper.enchantItem(entity.level().enabledFeatures(), randomSource, new ItemStack(this.itemStack.getItem()), i, false);
 			int j = Math.min(this.baseEmeraldCost + i, 64);
 			ItemCost itemCost = new ItemCost(Items.EMERALD, j);
 			return new MerchantOffer(itemCost, itemStack, this.maxUses, this.villagerXp, this.priceMultiplier);
@@ -1561,7 +1561,7 @@ public class VillagerTrades {
 					ItemStack itemStack = MapItem.create(serverLevel, blockPos.getX(), blockPos.getZ(), (byte)2, true, true);
 					MapItem.renderBiomePreviewMap(serverLevel, itemStack);
 					MapItemSavedData.addTargetDecoration(itemStack, blockPos, "+", this.destinationType);
-					itemStack.set(DataComponents.CUSTOM_NAME, Component.translatable(this.displayName));
+					itemStack.set(DataComponents.ITEM_NAME, Component.translatable(this.displayName));
 					return new MerchantOffer(
 						new ItemCost(Items.EMERALD, this.emeraldCost), Optional.of(new ItemCost(Items.COMPASS)), itemStack, this.maxUses, this.villagerXp, 0.2F
 					);

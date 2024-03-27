@@ -14,7 +14,7 @@ public class WorldOptions {
 					Codec.LONG.fieldOf("seed").stable().forGetter(WorldOptions::seed),
 					Codec.BOOL.fieldOf("generate_features").orElse(true).stable().forGetter(WorldOptions::generateStructures),
 					Codec.BOOL.fieldOf("bonus_chest").orElse(false).stable().forGetter(WorldOptions::generateBonusChest),
-					Codec.STRING.optionalFieldOf("legacy_custom_options").stable().forGetter(worldOptions -> worldOptions.legacyCustomOptions)
+					Codec.STRING.lenientOptionalFieldOf("legacy_custom_options").stable().forGetter(worldOptions -> worldOptions.legacyCustomOptions)
 				)
 				.apply(instance, instance.stable(WorldOptions::new))
 	);

@@ -1,7 +1,7 @@
 package net.minecraft.world.level.storage.loot.functions;
 
 import com.google.common.collect.ImmutableSet;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import java.util.Set;
@@ -15,7 +15,7 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
 public class FillPlayerHead extends LootItemConditionalFunction {
-	public static final Codec<FillPlayerHead> CODEC = RecordCodecBuilder.create(
+	public static final MapCodec<FillPlayerHead> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> commonFields(instance)
 				.and(LootContext.EntityTarget.CODEC.fieldOf("entity").forGetter(fillPlayerHead -> fillPlayerHead.entityTarget))
 				.apply(instance, FillPlayerHead::new)

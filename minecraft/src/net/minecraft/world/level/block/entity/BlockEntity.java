@@ -1,14 +1,21 @@
 package net.minecraft.world.level.block.entity;
 
 import com.mojang.logging.LogUtils;
+import com.mojang.serialization.Codec;
+import java.util.HashSet;
+import java.util.Set;
 import javax.annotation.Nullable;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.CrashReportDetail;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponentMap;
+import net.minecraft.core.component.DataComponentPatch;
+import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.component.PatchedDataComponentMap;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.resources.ResourceLocation;
@@ -26,6 +33,7 @@ public abstract class BlockEntity {
 	protected final BlockPos worldPosition;
 	protected boolean remove;
 	private BlockState blockState;
+	private DataComponentMap components = DataComponentMap.EMPTY;
 
 	public BlockEntity(BlockEntityType<?> blockEntityType, BlockPos blockPos, BlockState blockState) {
 		this.type = blockEntityType;
@@ -50,7 +58,19 @@ public abstract class BlockEntity {
 		return this.level != null;
 	}
 
-	public void load(CompoundTag compoundTag, HolderLookup.Provider provider) {
+	protected void loadAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
+	}
+
+	public final void loadWithComponents(CompoundTag compoundTag, HolderLookup.Provider provider) {
+		this.loadAdditional(compoundTag, provider);
+		BlockEntity.ComponentHelper.COMPONENTS_CODEC
+			.parse(provider.createSerializationContext(NbtOps.INSTANCE), compoundTag)
+			.resultOrPartial(string -> LOGGER.warn("Failed to load components: {}", string))
+			.ifPresent(dataComponentMap -> this.components = dataComponentMap);
+	}
+
+	public final void loadCustomOnly(CompoundTag compoundTag, HolderLookup.Provider provider) {
+		this.loadAdditional(compoundTag, provider);
 	}
 
 	protected void saveAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
@@ -71,6 +91,16 @@ public abstract class BlockEntity {
 	public final CompoundTag saveWithoutMetadata(HolderLookup.Provider provider) {
 		CompoundTag compoundTag = new CompoundTag();
 		this.saveAdditional(compoundTag, provider);
+		BlockEntity.ComponentHelper.COMPONENTS_CODEC
+			.encodeStart(provider.createSerializationContext(NbtOps.INSTANCE), this.components)
+			.resultOrPartial(string -> LOGGER.warn("Failed to save components: {}", string))
+			.ifPresent(tag -> compoundTag.merge((CompoundTag)tag));
+		return compoundTag;
+	}
+
+	public final CompoundTag saveCustomOnly(HolderLookup.Provider provider) {
+		CompoundTag compoundTag = new CompoundTag();
+		this.saveAdditional(compoundTag, provider);
 		return compoundTag;
 	}
 
@@ -88,7 +118,7 @@ public abstract class BlockEntity {
 	}
 
 	public void saveToItem(ItemStack itemStack, HolderLookup.Provider provider) {
-		CompoundTag compoundTag = this.saveWithoutMetadata(provider);
+		CompoundTag compoundTag = this.saveCustomOnly(provider);
 		this.removeComponentsFromTag(compoundTag);
 		BlockItem.setBlockEntityData(itemStack, this.getType(), compoundTag);
 		itemStack.applyComponents(this.collectComponents());
@@ -118,7 +148,7 @@ public abstract class BlockEntity {
 				}
 			}).map(blockEntity -> {
 				try {
-					blockEntity.load(compoundTag, provider);
+					blockEntity.loadWithComponents(compoundTag, provider);
 					return blockEntity;
 				} catch (Throwable var5x) {
 					LOGGER.error("Failed to load data for block entity {}", string, var5x);
@@ -200,10 +230,35 @@ public abstract class BlockEntity {
 		this.blockState = blockState;
 	}
 
-	public void applyComponents(DataComponentMap dataComponentMap) {
+	protected void applyImplicitComponents(BlockEntity.DataComponentInput dataComponentInput) {
 	}
 
-	public void collectComponents(DataComponentMap.Builder builder) {
+	public final void applyComponentsFromItemStack(ItemStack itemStack) {
+		this.applyComponents(itemStack.getPrototype(), itemStack.getComponentsPatch());
+	}
+
+	public final void applyComponents(DataComponentMap dataComponentMap, DataComponentPatch dataComponentPatch) {
+		final Set<DataComponentType<?>> set = new HashSet();
+		final DataComponentMap dataComponentMap2 = PatchedDataComponentMap.fromPatch(dataComponentMap, dataComponentPatch);
+		this.applyImplicitComponents(new BlockEntity.DataComponentInput() {
+			@Nullable
+			@Override
+			public <T> T get(DataComponentType<T> dataComponentType) {
+				set.add(dataComponentType);
+				return dataComponentMap2.get(dataComponentType);
+			}
+
+			@Override
+			public <T> T getOrDefault(DataComponentType<? extends T> dataComponentType, T object) {
+				set.add(dataComponentType);
+				return dataComponentMap2.getOrDefault(dataComponentType, object);
+			}
+		});
+		DataComponentPatch dataComponentPatch2 = dataComponentPatch.forget(set::contains);
+		this.components = dataComponentPatch2.split().added();
+	}
+
+	protected void collectImplicitComponents(DataComponentMap.Builder builder) {
 	}
 
 	@Deprecated
@@ -212,7 +267,30 @@ public abstract class BlockEntity {
 
 	public final DataComponentMap collectComponents() {
 		DataComponentMap.Builder builder = DataComponentMap.builder();
-		this.collectComponents(builder);
+		builder.addAll(this.components);
+		this.collectImplicitComponents(builder);
 		return builder.build();
+	}
+
+	public DataComponentMap components() {
+		return this.components;
+	}
+
+	public void setComponents(DataComponentMap dataComponentMap) {
+		this.components = dataComponentMap;
+	}
+
+	static class ComponentHelper {
+		public static final Codec<DataComponentMap> COMPONENTS_CODEC = DataComponentMap.CODEC.optionalFieldOf("components", DataComponentMap.EMPTY).codec();
+
+		private ComponentHelper() {
+		}
+	}
+
+	protected interface DataComponentInput {
+		@Nullable
+		<T> T get(DataComponentType<T> dataComponentType);
+
+		<T> T getOrDefault(DataComponentType<? extends T> dataComponentType, T object);
 	}
 }

@@ -68,8 +68,7 @@ public class Score implements ReadOnlyScoreInfo {
 		if (this.numberFormat != null) {
 			NumberFormatTypes.CODEC
 				.encodeStart(provider.createSerializationContext(NbtOps.INSTANCE), this.numberFormat)
-				.result()
-				.ifPresent(tag -> compoundTag.put("format", tag));
+				.ifSuccess(tag -> compoundTag.put("format", tag));
 		}
 
 		return compoundTag;
@@ -86,8 +85,7 @@ public class Score implements ReadOnlyScoreInfo {
 		if (compoundTag.contains("format", 10)) {
 			NumberFormatTypes.CODEC
 				.parse(provider.createSerializationContext(NbtOps.INSTANCE), compoundTag.get("format"))
-				.result()
-				.ifPresent(numberFormat -> score.numberFormat = numberFormat);
+				.ifSuccess(numberFormat -> score.numberFormat = numberFormat);
 		}
 
 		return score;

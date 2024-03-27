@@ -54,12 +54,13 @@ public class PathPackResources extends AbstractPackResources {
 		return getResource(resourceLocation, path);
 	}
 
+	@Nullable
 	public static IoSupplier<InputStream> getResource(ResourceLocation resourceLocation, Path path) {
-		return FileUtil.decomposePath(resourceLocation.getPath()).get().map(list -> {
+		return FileUtil.decomposePath(resourceLocation.getPath()).mapOrElse(list -> {
 			Path path2 = FileUtil.resolvePath(path, list);
 			return returnFileIfExists(path2);
-		}, partialResult -> {
-			LOGGER.error("Invalid path {}: {}", resourceLocation, partialResult.message());
+		}, error -> {
+			LOGGER.error("Invalid path {}: {}", resourceLocation, error.message());
 			return null;
 		});
 	}
@@ -71,10 +72,10 @@ public class PathPackResources extends AbstractPackResources {
 
 	@Override
 	public void listResources(PackType packType, String string, String string2, PackResources.ResourceOutput resourceOutput) {
-		FileUtil.decomposePath(string2).get().ifLeft(list -> {
+		FileUtil.decomposePath(string2).ifSuccess(list -> {
 			Path path = this.root.resolve(packType.getDirectory()).resolve(string);
 			listPath(string, path, list, resourceOutput);
-		}).ifRight(partialResult -> LOGGER.error("Invalid path {}: {}", string2, partialResult.message()));
+		}).ifError(error -> LOGGER.error("Invalid path {}: {}", string2, error.message()));
 	}
 
 	public static void listPath(String string, Path path, List<String> list, PackResources.ResourceOutput resourceOutput) {

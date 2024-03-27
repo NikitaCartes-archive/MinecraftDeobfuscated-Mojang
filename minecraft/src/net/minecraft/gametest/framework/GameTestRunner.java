@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
+import net.minecraft.Util;
 import net.minecraft.network.protocol.game.DebugPackets;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
@@ -45,7 +46,7 @@ public class GameTestRunner {
 		this.existingStructureSpawner = structureSpawner;
 		this.newStructureSpawner = structureSpawner2;
 		this.batches = ImmutableList.copyOf(collection);
-		this.allTestInfos = (List<GameTestInfo>)this.batches.stream().flatMap(gameTestBatch -> gameTestBatch.gameTestInfos().stream()).collect(Collectors.toList());
+		this.allTestInfos = (List<GameTestInfo>)this.batches.stream().flatMap(gameTestBatch -> gameTestBatch.gameTestInfos().stream()).collect(Util.toMutableList());
 		gameTestTicker.setRunner(this);
 		this.allTestInfos.forEach(gameTestInfo -> gameTestInfo.addListener(new ReportGameListener()));
 	}

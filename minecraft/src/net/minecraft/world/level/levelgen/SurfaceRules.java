@@ -123,7 +123,7 @@ public class SurfaceRules {
 		return SurfaceRules.Bandlands.INSTANCE;
 	}
 
-	static <A> Codec<? extends A> register(Registry<Codec<? extends A>> registry, String string, KeyDispatchDataCodec<? extends A> keyDispatchDataCodec) {
+	static <A> MapCodec<? extends A> register(Registry<MapCodec<? extends A>> registry, String string, KeyDispatchDataCodec<? extends A> keyDispatchDataCodec) {
 		return Registry.register(registry, string, keyDispatchDataCodec.codec());
 	}
 
@@ -234,7 +234,7 @@ public class SurfaceRules {
 			.byNameCodec()
 			.dispatch(conditionSource -> conditionSource.codec().codec(), Function.identity());
 
-		static Codec<? extends SurfaceRules.ConditionSource> bootstrap(Registry<Codec<? extends SurfaceRules.ConditionSource>> registry) {
+		static MapCodec<? extends SurfaceRules.ConditionSource> bootstrap(Registry<MapCodec<? extends SurfaceRules.ConditionSource>> registry) {
 			SurfaceRules.register(registry, "biome", SurfaceRules.BiomeConditionSource.CODEC);
 			SurfaceRules.register(registry, "noise_threshold", SurfaceRules.NoiseThresholdConditionSource.CODEC);
 			SurfaceRules.register(registry, "vertical_gradient", SurfaceRules.VerticalGradientConditionSource.CODEC);
@@ -555,7 +555,7 @@ public class SurfaceRules {
 	public interface RuleSource extends Function<SurfaceRules.Context, SurfaceRules.SurfaceRule> {
 		Codec<SurfaceRules.RuleSource> CODEC = BuiltInRegistries.MATERIAL_RULE.byNameCodec().dispatch(ruleSource -> ruleSource.codec().codec(), Function.identity());
 
-		static Codec<? extends SurfaceRules.RuleSource> bootstrap(Registry<Codec<? extends SurfaceRules.RuleSource>> registry) {
+		static MapCodec<? extends SurfaceRules.RuleSource> bootstrap(Registry<MapCodec<? extends SurfaceRules.RuleSource>> registry) {
 			SurfaceRules.register(registry, "bandlands", SurfaceRules.Bandlands.CODEC);
 			SurfaceRules.register(registry, "block", SurfaceRules.BlockRuleSource.CODEC);
 			SurfaceRules.register(registry, "sequence", SurfaceRules.SequenceRuleSource.CODEC);

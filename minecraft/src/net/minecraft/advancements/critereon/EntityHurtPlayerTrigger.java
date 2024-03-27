@@ -6,7 +6,6 @@ import java.util.Optional;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.advancements.Criterion;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.damagesource.DamageSource;
 
 public class EntityHurtPlayerTrigger extends SimpleCriterionTrigger<EntityHurtPlayerTrigger.TriggerInstance> {
@@ -23,8 +22,8 @@ public class EntityHurtPlayerTrigger extends SimpleCriterionTrigger<EntityHurtPl
 		implements SimpleCriterionTrigger.SimpleInstance {
 		public static final Codec<EntityHurtPlayerTrigger.TriggerInstance> CODEC = RecordCodecBuilder.create(
 			instance -> instance.group(
-						ExtraCodecs.strictOptionalField(EntityPredicate.ADVANCEMENT_CODEC, "player").forGetter(EntityHurtPlayerTrigger.TriggerInstance::player),
-						ExtraCodecs.strictOptionalField(DamagePredicate.CODEC, "damage").forGetter(EntityHurtPlayerTrigger.TriggerInstance::damage)
+						EntityPredicate.ADVANCEMENT_CODEC.optionalFieldOf("player").forGetter(EntityHurtPlayerTrigger.TriggerInstance::player),
+						DamagePredicate.CODEC.optionalFieldOf("damage").forGetter(EntityHurtPlayerTrigger.TriggerInstance::damage)
 					)
 					.apply(instance, EntityHurtPlayerTrigger.TriggerInstance::new)
 		);

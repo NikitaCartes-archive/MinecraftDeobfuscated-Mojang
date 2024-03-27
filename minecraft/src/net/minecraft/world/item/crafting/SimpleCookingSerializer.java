@@ -1,22 +1,22 @@
 package net.minecraft.world.item.crafting;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.ItemStack;
 
 public class SimpleCookingSerializer<T extends AbstractCookingRecipe> implements RecipeSerializer<T> {
 	private final AbstractCookingRecipe.Factory<T> factory;
-	private final Codec<T> codec;
+	private final MapCodec<T> codec;
 	private final StreamCodec<RegistryFriendlyByteBuf, T> streamCodec;
 
 	public SimpleCookingSerializer(AbstractCookingRecipe.Factory<T> factory, int i) {
 		this.factory = factory;
-		this.codec = RecordCodecBuilder.create(
+		this.codec = RecordCodecBuilder.mapCodec(
 			instance -> instance.group(
-						ExtraCodecs.strictOptionalField(Codec.STRING, "group", "").forGetter(abstractCookingRecipe -> abstractCookingRecipe.group),
+						Codec.STRING.optionalFieldOf("group", "").forGetter(abstractCookingRecipe -> abstractCookingRecipe.group),
 						CookingBookCategory.CODEC.fieldOf("category").orElse(CookingBookCategory.MISC).forGetter(abstractCookingRecipe -> abstractCookingRecipe.category),
 						Ingredient.CODEC_NONEMPTY.fieldOf("ingredient").forGetter(abstractCookingRecipe -> abstractCookingRecipe.ingredient),
 						ItemStack.SINGLE_ITEM_CODEC.fieldOf("result").forGetter(abstractCookingRecipe -> abstractCookingRecipe.result),
@@ -29,7 +29,7 @@ public class SimpleCookingSerializer<T extends AbstractCookingRecipe> implements
 	}
 
 	@Override
-	public Codec<T> codec() {
+	public MapCodec<T> codec() {
 		return this.codec;
 	}
 

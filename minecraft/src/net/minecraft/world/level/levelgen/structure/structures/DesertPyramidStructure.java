@@ -1,6 +1,6 @@
 package net.minecraft.world.level.levelgen.structure.structures;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.util.Set;
 import net.minecraft.Util;
@@ -23,7 +23,7 @@ import net.minecraft.world.level.levelgen.structure.pieces.PiecesContainer;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 
 public class DesertPyramidStructure extends SinglePieceStructure {
-	public static final Codec<DesertPyramidStructure> CODEC = simpleCodec(DesertPyramidStructure::new);
+	public static final MapCodec<DesertPyramidStructure> CODEC = simpleCodec(DesertPyramidStructure::new);
 
 	public DesertPyramidStructure(Structure.StructureSettings structureSettings) {
 		super(DesertPyramidPiece::new, 21, 21, structureSettings);

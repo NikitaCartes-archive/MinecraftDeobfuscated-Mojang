@@ -71,7 +71,7 @@ public class BlendingData {
 			instance -> instance.group(
 						Codec.INT.fieldOf("min_section").forGetter(blendingData -> blendingData.areaWithOldGeneration.getMinSection()),
 						Codec.INT.fieldOf("max_section").forGetter(blendingData -> blendingData.areaWithOldGeneration.getMaxSection()),
-						DOUBLE_ARRAY_CODEC.optionalFieldOf("heights")
+						DOUBLE_ARRAY_CODEC.lenientOptionalFieldOf("heights")
 							.forGetter(
 								blendingData -> DoubleStream.of(blendingData.heights).anyMatch(d -> d != Double.MAX_VALUE) ? Optional.of(blendingData.heights) : Optional.empty()
 							)

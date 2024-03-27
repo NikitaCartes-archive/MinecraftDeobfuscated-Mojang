@@ -202,8 +202,7 @@ public class RegistryDataLoader {
 		try {
 			JsonElement jsonElement = JsonParser.parseReader(reader);
 			DataResult<E> dataResult = decoder.parse(registryOps, jsonElement);
-			E object = dataResult.getOrThrow(false, string -> {
-			});
+			E object = dataResult.getOrThrow();
 			writableRegistry.register(resourceKey, object, registrationInfo);
 		} catch (Throwable var11) {
 			if (reader != null) {
@@ -270,8 +269,7 @@ public class RegistryDataLoader {
 				if (optional.isPresent()) {
 					try {
 						DataResult<E> dataResult = decoder.parse(registryOps, (Tag)optional.get());
-						E object = dataResult.getOrThrow(false, stringx -> {
-						});
+						E object = dataResult.getOrThrow();
 						writableRegistry.register(resourceKey, object, NETWORK_REGISTRATION_INFO);
 					} catch (Exception var17) {
 						map2.put(resourceKey, new IllegalStateException(String.format(Locale.ROOT, "Failed to parse value %s from server", optional.get()), var17));

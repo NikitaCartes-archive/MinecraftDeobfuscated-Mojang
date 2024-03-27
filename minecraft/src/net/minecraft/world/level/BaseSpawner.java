@@ -10,7 +10,6 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.random.SimpleWeightedRandomList;
@@ -105,7 +104,7 @@ public abstract class BaseSpawner {
 					double f = j >= 3
 						? listTag.getDouble(2)
 						: (double)blockPos.getZ() + (randomSource.nextDouble() - randomSource.nextDouble()) * (double)this.spawnRange + 0.5;
-					if (serverLevel.noCollision(((EntityType)optional.get()).getAABB(d, e, f))) {
+					if (serverLevel.noCollision(((EntityType)optional.get()).getSpawnAABB(d, e, f))) {
 						BlockPos blockPos2 = BlockPos.containing(d, e, f);
 						if (spawnData.getCustomSpawnRules().isPresent()) {
 							if (!((EntityType)optional.get()).getCategory().isFriendly() && serverLevel.getDifficulty() == Difficulty.PEACEFUL) {
@@ -158,6 +157,8 @@ public abstract class BaseSpawner {
 							if (bl2) {
 								((Mob)entity).finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(entity.blockPosition()), MobSpawnType.SPAWNER, null);
 							}
+
+							spawnData.getEquipmentLootTable().ifPresent(mob::equip);
 						}
 
 						if (!serverLevel.tryAddFreshEntityWithPassengers(entity)) {
@@ -190,7 +191,7 @@ public abstract class BaseSpawner {
 			this.spawnDelay = this.minSpawnDelay + randomSource.nextInt(this.maxSpawnDelay - this.minSpawnDelay);
 		}
 
-		this.spawnPotentials.getRandom(randomSource).ifPresent(wrapper -> this.setNextSpawnData(level, blockPos, (SpawnData)wrapper.getData()));
+		this.spawnPotentials.getRandom(randomSource).ifPresent(wrapper -> this.setNextSpawnData(level, blockPos, (SpawnData)wrapper.data()));
 		this.broadcastEvent(level, blockPos, 1);
 	}
 
@@ -245,11 +246,11 @@ public abstract class BaseSpawner {
 		if (this.nextSpawnData != null) {
 			compoundTag.put(
 				"SpawnData",
-				(Tag)SpawnData.CODEC.encodeStart(NbtOps.INSTANCE, this.nextSpawnData).result().orElseThrow(() -> new IllegalStateException("Invalid SpawnData"))
+				SpawnData.CODEC.encodeStart(NbtOps.INSTANCE, this.nextSpawnData).getOrThrow(string -> new IllegalStateException("Invalid SpawnData: " + string))
 			);
 		}
 
-		compoundTag.put("SpawnPotentials", (Tag)SpawnData.LIST_CODEC.encodeStart(NbtOps.INSTANCE, this.spawnPotentials).result().orElseThrow());
+		compoundTag.put("SpawnPotentials", SpawnData.LIST_CODEC.encodeStart(NbtOps.INSTANCE, this.spawnPotentials).getOrThrow());
 		return compoundTag;
 	}
 
@@ -289,7 +290,7 @@ public abstract class BaseSpawner {
 		if (this.nextSpawnData != null) {
 			return this.nextSpawnData;
 		} else {
-			this.setNextSpawnData(level, blockPos, (SpawnData)this.spawnPotentials.getRandom(randomSource).map(WeightedEntry.Wrapper::getData).orElseGet(SpawnData::new));
+			this.setNextSpawnData(level, blockPos, (SpawnData)this.spawnPotentials.getRandom(randomSource).map(WeightedEntry.Wrapper::data).orElseGet(SpawnData::new));
 			return this.nextSpawnData;
 		}
 	}

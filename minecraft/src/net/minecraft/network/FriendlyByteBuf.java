@@ -41,7 +41,6 @@ import java.util.function.Consumer;
 import java.util.function.IntFunction;
 import java.util.function.ToIntFunction;
 import javax.annotation.Nullable;
-import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.GlobalPos;
@@ -90,12 +89,12 @@ public class FriendlyByteBuf extends ByteBuf {
 	@Deprecated
 	public <T> T readWithCodec(DynamicOps<Tag> dynamicOps, Codec<T> codec, NbtAccounter nbtAccounter) {
 		Tag tag = this.readNbt(nbtAccounter);
-		return Util.getOrThrow(codec.parse(dynamicOps, tag), string -> new DecoderException("Failed to decode: " + string + " " + tag));
+		return codec.parse(dynamicOps, tag).getOrThrow(string -> new DecoderException("Failed to decode: " + string + " " + tag));
 	}
 
 	@Deprecated
 	public <T> FriendlyByteBuf writeWithCodec(DynamicOps<Tag> dynamicOps, Codec<T> codec, T object) {
-		Tag tag = Util.getOrThrow(codec.encodeStart(dynamicOps, object), string -> new EncoderException("Failed to encode: " + string + " " + object));
+		Tag tag = codec.encodeStart(dynamicOps, object).getOrThrow(string -> new EncoderException("Failed to encode: " + string + " " + object));
 		this.writeNbt(tag);
 		return this;
 	}
@@ -103,12 +102,12 @@ public class FriendlyByteBuf extends ByteBuf {
 	public <T> T readJsonWithCodec(Codec<T> codec) {
 		JsonElement jsonElement = GsonHelper.fromJson(GSON, this.readUtf(), JsonElement.class);
 		DataResult<T> dataResult = codec.parse(JsonOps.INSTANCE, jsonElement);
-		return Util.getOrThrow(dataResult, string -> new DecoderException("Failed to decode json: " + string));
+		return dataResult.getOrThrow(string -> new DecoderException("Failed to decode json: " + string));
 	}
 
 	public <T> void writeJsonWithCodec(Codec<T> codec, T object) {
 		DataResult<JsonElement> dataResult = codec.encodeStart(JsonOps.INSTANCE, object);
-		this.writeUtf(GSON.toJson(Util.getOrThrow(dataResult, string -> new EncoderException("Failed to encode: " + string + " " + object))));
+		this.writeUtf(GSON.toJson(dataResult.getOrThrow(string -> new EncoderException("Failed to encode: " + string + " " + object))));
 	}
 
 	public static <T> IntFunction<T> limitValue(IntFunction<T> intFunction, int i) {

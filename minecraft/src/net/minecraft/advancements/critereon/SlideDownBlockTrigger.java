@@ -9,7 +9,6 @@ import net.minecraft.advancements.Criterion;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -25,17 +24,15 @@ public class SlideDownBlockTrigger extends SimpleCriterionTrigger<SlideDownBlock
 
 	public static record TriggerInstance(Optional<ContextAwarePredicate> player, Optional<Holder<Block>> block, Optional<StatePropertiesPredicate> state)
 		implements SimpleCriterionTrigger.SimpleInstance {
-		public static final Codec<SlideDownBlockTrigger.TriggerInstance> CODEC = ExtraCodecs.validate(
-			RecordCodecBuilder.create(
+		public static final Codec<SlideDownBlockTrigger.TriggerInstance> CODEC = RecordCodecBuilder.<SlideDownBlockTrigger.TriggerInstance>create(
 				instance -> instance.group(
-							ExtraCodecs.strictOptionalField(EntityPredicate.ADVANCEMENT_CODEC, "player").forGetter(SlideDownBlockTrigger.TriggerInstance::player),
-							ExtraCodecs.strictOptionalField(BuiltInRegistries.BLOCK.holderByNameCodec(), "block").forGetter(SlideDownBlockTrigger.TriggerInstance::block),
-							ExtraCodecs.strictOptionalField(StatePropertiesPredicate.CODEC, "state").forGetter(SlideDownBlockTrigger.TriggerInstance::state)
+							EntityPredicate.ADVANCEMENT_CODEC.optionalFieldOf("player").forGetter(SlideDownBlockTrigger.TriggerInstance::player),
+							BuiltInRegistries.BLOCK.holderByNameCodec().optionalFieldOf("block").forGetter(SlideDownBlockTrigger.TriggerInstance::block),
+							StatePropertiesPredicate.CODEC.optionalFieldOf("state").forGetter(SlideDownBlockTrigger.TriggerInstance::state)
 						)
 						.apply(instance, SlideDownBlockTrigger.TriggerInstance::new)
-			),
-			SlideDownBlockTrigger.TriggerInstance::validate
-		);
+			)
+			.validate(SlideDownBlockTrigger.TriggerInstance::validate);
 
 		private static DataResult<SlideDownBlockTrigger.TriggerInstance> validate(SlideDownBlockTrigger.TriggerInstance triggerInstance) {
 			return (DataResult<SlideDownBlockTrigger.TriggerInstance>)triggerInstance.block

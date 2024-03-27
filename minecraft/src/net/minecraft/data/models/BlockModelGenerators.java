@@ -3386,19 +3386,36 @@ public class BlockModelGenerators {
 		TextureMapping textureMapping = TextureMapping.trialSpawner(block, "_side_inactive", "_top_inactive");
 		TextureMapping textureMapping2 = TextureMapping.trialSpawner(block, "_side_active", "_top_active");
 		TextureMapping textureMapping3 = TextureMapping.trialSpawner(block, "_side_active", "_top_ejecting_reward");
+		TextureMapping textureMapping4 = TextureMapping.trialSpawner(block, "_side_inactive_ominous", "_top_inactive_ominous");
+		TextureMapping textureMapping5 = TextureMapping.trialSpawner(block, "_side_active_ominous", "_top_active_ominous");
+		TextureMapping textureMapping6 = TextureMapping.trialSpawner(block, "_side_active_ominous", "_top_ejecting_reward_ominous");
 		ResourceLocation resourceLocation = ModelTemplates.CUBE_BOTTOM_TOP_INNER_FACES.create(block, textureMapping, this.modelOutput);
 		ResourceLocation resourceLocation2 = ModelTemplates.CUBE_BOTTOM_TOP_INNER_FACES.createWithSuffix(block, "_active", textureMapping2, this.modelOutput);
 		ResourceLocation resourceLocation3 = ModelTemplates.CUBE_BOTTOM_TOP_INNER_FACES
 			.createWithSuffix(block, "_ejecting_reward", textureMapping3, this.modelOutput);
+		ResourceLocation resourceLocation4 = ModelTemplates.CUBE_BOTTOM_TOP_INNER_FACES
+			.createWithSuffix(block, "_inactive_ominous", textureMapping4, this.modelOutput);
+		ResourceLocation resourceLocation5 = ModelTemplates.CUBE_BOTTOM_TOP_INNER_FACES.createWithSuffix(block, "_active_ominous", textureMapping5, this.modelOutput);
+		ResourceLocation resourceLocation6 = ModelTemplates.CUBE_BOTTOM_TOP_INNER_FACES
+			.createWithSuffix(block, "_ejecting_reward_ominous", textureMapping6, this.modelOutput);
 		this.delegateItemModel(block, resourceLocation);
 		this.blockStateOutput
-			.accept(MultiVariantGenerator.multiVariant(block).with(PropertyDispatch.property(BlockStateProperties.TRIAL_SPAWNER_STATE).generate(trialSpawnerState -> {
-				return switch (trialSpawnerState) {
-					case INACTIVE, COOLDOWN -> Variant.variant().with(VariantProperties.MODEL, resourceLocation);
-					case WAITING_FOR_PLAYERS, ACTIVE, WAITING_FOR_REWARD_EJECTION -> Variant.variant().with(VariantProperties.MODEL, resourceLocation2);
-					case EJECTING_REWARD -> Variant.variant().with(VariantProperties.MODEL, resourceLocation3);
-				};
-			})));
+			.accept(
+				MultiVariantGenerator.multiVariant(block)
+					.with(
+						PropertyDispatch.properties(BlockStateProperties.TRIAL_SPAWNER_STATE, BlockStateProperties.OMINOUS)
+							.generate(
+								(trialSpawnerState, boolean_) -> {
+									return switch (trialSpawnerState) {
+										case INACTIVE, COOLDOWN -> Variant.variant().with(VariantProperties.MODEL, boolean_ ? resourceLocation4 : resourceLocation);
+										case WAITING_FOR_PLAYERS, ACTIVE, WAITING_FOR_REWARD_EJECTION -> Variant.variant()
+										.with(VariantProperties.MODEL, boolean_ ? resourceLocation5 : resourceLocation2);
+										case EJECTING_REWARD -> Variant.variant().with(VariantProperties.MODEL, boolean_ ? resourceLocation6 : resourceLocation3);
+									};
+								}
+							)
+					)
+			);
 	}
 
 	private void createVault() {
@@ -3411,17 +3428,27 @@ public class BlockModelGenerators {
 		ResourceLocation resourceLocation2 = ModelTemplates.VAULT.createWithSuffix(block, "_active", textureMapping2, this.modelOutput);
 		ResourceLocation resourceLocation3 = ModelTemplates.VAULT.createWithSuffix(block, "_unlocking", textureMapping3, this.modelOutput);
 		ResourceLocation resourceLocation4 = ModelTemplates.VAULT.createWithSuffix(block, "_ejecting_reward", textureMapping4, this.modelOutput);
+		TextureMapping textureMapping5 = TextureMapping.vault(block, "_front_off_ominous", "_side_off_ominous", "_top_ominous", "_bottom_ominous");
+		TextureMapping textureMapping6 = TextureMapping.vault(block, "_front_on_ominous", "_side_on_ominous", "_top_ominous", "_bottom_ominous");
+		TextureMapping textureMapping7 = TextureMapping.vault(block, "_front_ejecting_ominous", "_side_on_ominous", "_top_ominous", "_bottom_ominous");
+		TextureMapping textureMapping8 = TextureMapping.vault(block, "_front_ejecting_ominous", "_side_on_ominous", "_top_ejecting_ominous", "_bottom_ominous");
+		ResourceLocation resourceLocation5 = ModelTemplates.VAULT.createWithSuffix(block, "_ominous", textureMapping5, this.modelOutput);
+		ResourceLocation resourceLocation6 = ModelTemplates.VAULT.createWithSuffix(block, "_active_ominous", textureMapping6, this.modelOutput);
+		ResourceLocation resourceLocation7 = ModelTemplates.VAULT.createWithSuffix(block, "_unlocking_ominous", textureMapping7, this.modelOutput);
+		ResourceLocation resourceLocation8 = ModelTemplates.VAULT.createWithSuffix(block, "_ejecting_reward_ominous", textureMapping8, this.modelOutput);
 		this.delegateItemModel(block, resourceLocation);
 		this.blockStateOutput
 			.accept(
-				MultiVariantGenerator.multiVariant(block).with(createHorizontalFacingDispatch()).with(PropertyDispatch.property(VaultBlock.STATE).generate(vaultState -> {
-					return switch (vaultState) {
-						case INACTIVE -> Variant.variant().with(VariantProperties.MODEL, resourceLocation);
-						case ACTIVE -> Variant.variant().with(VariantProperties.MODEL, resourceLocation2);
-						case UNLOCKING -> Variant.variant().with(VariantProperties.MODEL, resourceLocation3);
-						case EJECTING -> Variant.variant().with(VariantProperties.MODEL, resourceLocation4);
-					};
-				}))
+				MultiVariantGenerator.multiVariant(block)
+					.with(createHorizontalFacingDispatch())
+					.with(PropertyDispatch.properties(VaultBlock.STATE, VaultBlock.OMINOUS).generate((vaultState, boolean_) -> {
+						return switch (vaultState) {
+							case INACTIVE -> Variant.variant().with(VariantProperties.MODEL, boolean_ ? resourceLocation5 : resourceLocation);
+							case ACTIVE -> Variant.variant().with(VariantProperties.MODEL, boolean_ ? resourceLocation6 : resourceLocation2);
+							case UNLOCKING -> Variant.variant().with(VariantProperties.MODEL, boolean_ ? resourceLocation7 : resourceLocation3);
+							case EJECTING -> Variant.variant().with(VariantProperties.MODEL, boolean_ ? resourceLocation8 : resourceLocation4);
+						};
+					}))
 			);
 	}
 

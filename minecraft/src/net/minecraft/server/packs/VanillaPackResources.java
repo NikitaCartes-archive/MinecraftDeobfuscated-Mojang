@@ -54,19 +54,19 @@ public class VanillaPackResources implements PackResources {
 	}
 
 	public void listRawPaths(PackType packType, ResourceLocation resourceLocation, Consumer<Path> consumer) {
-		FileUtil.decomposePath(resourceLocation.getPath()).get().ifLeft(list -> {
+		FileUtil.decomposePath(resourceLocation.getPath()).ifSuccess(list -> {
 			String string = resourceLocation.getNamespace();
 
 			for (Path path : (List)this.pathsForType.get(packType)) {
 				Path path2 = path.resolve(string);
 				consumer.accept(FileUtil.resolvePath(path2, list));
 			}
-		}).ifRight(partialResult -> LOGGER.error("Invalid path {}: {}", resourceLocation, partialResult.message()));
+		}).ifError(error -> LOGGER.error("Invalid path {}: {}", resourceLocation, error.message()));
 	}
 
 	@Override
 	public void listResources(PackType packType, String string, String string2, PackResources.ResourceOutput resourceOutput) {
-		FileUtil.decomposePath(string2).get().ifLeft(list -> {
+		FileUtil.decomposePath(string2).ifSuccess(list -> {
 			List<Path> list2 = (List<Path>)this.pathsForType.get(packType);
 			int i = list2.size();
 			if (i == 1) {
@@ -86,7 +86,7 @@ public class VanillaPackResources implements PackResources {
 					map.forEach(resourceOutput);
 				}
 			}
-		}).ifRight(partialResult -> LOGGER.error("Invalid path {}: {}", string2, partialResult.message()));
+		}).ifError(error -> LOGGER.error("Invalid path {}: {}", string2, error.message()));
 	}
 
 	private static void getResources(PackResources.ResourceOutput resourceOutput, String string, Path path, List<String> list) {
@@ -97,7 +97,7 @@ public class VanillaPackResources implements PackResources {
 	@Nullable
 	@Override
 	public IoSupplier<InputStream> getResource(PackType packType, ResourceLocation resourceLocation) {
-		return FileUtil.decomposePath(resourceLocation.getPath()).get().map(list -> {
+		return FileUtil.decomposePath(resourceLocation.getPath()).mapOrElse(list -> {
 			String string = resourceLocation.getNamespace();
 
 			for (Path path : (List)this.pathsForType.get(packType)) {
@@ -108,8 +108,8 @@ public class VanillaPackResources implements PackResources {
 			}
 
 			return null;
-		}, partialResult -> {
-			LOGGER.error("Invalid path {}: {}", resourceLocation, partialResult.message());
+		}, error -> {
+			LOGGER.error("Invalid path {}: {}", resourceLocation, error.message());
 			return null;
 		});
 	}

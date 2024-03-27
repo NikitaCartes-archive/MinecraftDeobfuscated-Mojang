@@ -3,10 +3,10 @@ package net.minecraft.world.level.storage.loot.functions;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import java.util.Set;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
@@ -20,12 +20,12 @@ import net.minecraft.world.level.storage.loot.providers.number.NumberProviders;
 
 public class LootingEnchantFunction extends LootItemConditionalFunction {
 	public static final int NO_LIMIT = 0;
-	public static final Codec<LootingEnchantFunction> CODEC = RecordCodecBuilder.create(
+	public static final MapCodec<LootingEnchantFunction> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> commonFields(instance)
 				.<NumberProvider, int>and(
 					instance.group(
 						NumberProviders.CODEC.fieldOf("count").forGetter(lootingEnchantFunction -> lootingEnchantFunction.value),
-						ExtraCodecs.strictOptionalField(Codec.INT, "limit", 0).forGetter(lootingEnchantFunction -> lootingEnchantFunction.limit)
+						Codec.INT.optionalFieldOf("limit", Integer.valueOf(0)).forGetter(lootingEnchantFunction -> lootingEnchantFunction.limit)
 					)
 				)
 				.apply(instance, LootingEnchantFunction::new)

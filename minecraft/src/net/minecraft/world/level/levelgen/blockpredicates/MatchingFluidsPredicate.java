@@ -1,6 +1,6 @@
 package net.minecraft.world.level.levelgen.blockpredicates;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.RegistryCodecs;
@@ -11,7 +11,7 @@ import net.minecraft.world.level.material.Fluid;
 
 class MatchingFluidsPredicate extends StateTestingPredicate {
 	private final HolderSet<Fluid> fluids;
-	public static final Codec<MatchingFluidsPredicate> CODEC = RecordCodecBuilder.create(
+	public static final MapCodec<MatchingFluidsPredicate> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> stateTestingCodec(instance)
 				.and(RegistryCodecs.homogeneousList(Registries.FLUID).fieldOf("fluids").forGetter(matchingFluidsPredicate -> matchingFluidsPredicate.fluids))
 				.apply(instance, MatchingFluidsPredicate::new)

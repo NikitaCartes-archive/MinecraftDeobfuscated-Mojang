@@ -17,17 +17,6 @@ public record ArgumentSignatures(List<ArgumentSignatures.Entry> entries) {
 		this(friendlyByteBuf.readCollection(FriendlyByteBuf.limitValue(ArrayList::new, 8), ArgumentSignatures.Entry::new));
 	}
 
-	@Nullable
-	public MessageSignature get(String string) {
-		for (ArgumentSignatures.Entry entry : this.entries) {
-			if (entry.name.equals(string)) {
-				return entry.signature;
-			}
-		}
-
-		return null;
-	}
-
 	public void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeCollection(this.entries, (friendlyByteBufx, entry) -> entry.write(friendlyByteBufx));
 	}
@@ -41,7 +30,6 @@ public record ArgumentSignatures(List<ArgumentSignatures.Entry> entries) {
 	}
 
 	public static record Entry(String name, MessageSignature signature) {
-
 		public Entry(FriendlyByteBuf friendlyByteBuf) {
 			this(friendlyByteBuf.readUtf(16), MessageSignature.read(friendlyByteBuf));
 		}

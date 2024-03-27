@@ -1,5 +1,6 @@
 package net.minecraft.core.component;
 
+import com.google.common.collect.Sets;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectArrayMap;
@@ -8,19 +9,17 @@ import it.unimi.dsi.fastutil.objects.Reference2ObjectMaps;
 import java.util.Optional;
 import java.util.Set;
 import java.util.Map.Entry;
+import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.Unit;
 
 public final class DataComponentPatch {
 	public static final DataComponentPatch EMPTY = new DataComponentPatch(Reference2ObjectMaps.emptyMap());
-	public static final Codec<DataComponentPatch> CODEC = ExtraCodecs.unboundedDispatchMap(
-			DataComponentPatch.PatchKey.CODEC, DataComponentPatch.PatchKey::valueCodec
-		)
+	public static final Codec<DataComponentPatch> CODEC = Codec.dispatchedMap(DataComponentPatch.PatchKey.CODEC, DataComponentPatch.PatchKey::valueCodec)
 		.xmap(map -> {
 			if (map.isEmpty()) {
 				return EMPTY;
@@ -150,8 +149,35 @@ public final class DataComponentPatch {
 		return this.map.size();
 	}
 
+	public DataComponentPatch forget(Predicate<DataComponentType<?>> predicate) {
+		if (this.isEmpty()) {
+			return EMPTY;
+		} else {
+			Reference2ObjectMap<DataComponentType<?>, Optional<?>> reference2ObjectMap = new Reference2ObjectArrayMap<>(this.map);
+			reference2ObjectMap.keySet().removeIf(predicate);
+			return reference2ObjectMap.isEmpty() ? EMPTY : new DataComponentPatch(reference2ObjectMap);
+		}
+	}
+
 	public boolean isEmpty() {
 		return this.map.isEmpty();
+	}
+
+	public DataComponentPatch.SplitResult split() {
+		if (this.isEmpty()) {
+			return DataComponentPatch.SplitResult.EMPTY;
+		} else {
+			DataComponentMap.Builder builder = DataComponentMap.builder();
+			Set<DataComponentType<?>> set = Sets.newIdentityHashSet();
+			this.map.forEach((dataComponentType, optional) -> {
+				if (optional.isPresent()) {
+					builder.setUnchecked(dataComponentType, optional.get());
+				} else {
+					set.add(dataComponentType);
+				}
+			});
+			return new DataComponentPatch.SplitResult(builder.build(), set);
+		}
 	}
 
 	public boolean equals(Object object) {
@@ -222,7 +248,7 @@ public final class DataComponentPatch {
 		}
 
 		public DataComponentPatch build() {
-			return new DataComponentPatch(this.map);
+			return this.map.isEmpty() ? DataComponentPatch.EMPTY : new DataComponentPatch(this.map);
 		}
 	}
 
@@ -257,5 +283,9 @@ public final class DataComponentPatch {
 		public Codec<?> valueCodec() {
 			return this.removed ? Codec.unit(Unit.INSTANCE) : this.type.codecOrThrow();
 		}
+	}
+
+	public static record SplitResult(DataComponentMap added, Set<DataComponentType<?>> removed) {
+		public static final DataComponentPatch.SplitResult EMPTY = new DataComponentPatch.SplitResult(DataComponentMap.EMPTY, Set.of());
 	}
 }

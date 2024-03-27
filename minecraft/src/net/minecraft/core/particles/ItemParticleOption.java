@@ -2,7 +2,7 @@ package net.minecraft.core.particles;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.commands.arguments.item.ItemInput;
 import net.minecraft.commands.arguments.item.ItemParser;
 import net.minecraft.core.HolderLookup;
@@ -23,8 +23,10 @@ public class ItemParticleOption implements ParticleOptions {
 	private final ParticleType<ItemParticleOption> type;
 	private final ItemStack itemStack;
 
-	public static Codec<ItemParticleOption> codec(ParticleType<ItemParticleOption> particleType) {
-		return ItemStack.CODEC.xmap(itemStack -> new ItemParticleOption(particleType, itemStack), itemParticleOption -> itemParticleOption.itemStack);
+	public static MapCodec<ItemParticleOption> codec(ParticleType<ItemParticleOption> particleType) {
+		return ItemStack.CODEC
+			.<ItemParticleOption>xmap(itemStack -> new ItemParticleOption(particleType, itemStack), itemParticleOption -> itemParticleOption.itemStack)
+			.fieldOf("value");
 	}
 
 	public static StreamCodec<? super RegistryFriendlyByteBuf, ItemParticleOption> streamCodec(ParticleType<ItemParticleOption> particleType) {

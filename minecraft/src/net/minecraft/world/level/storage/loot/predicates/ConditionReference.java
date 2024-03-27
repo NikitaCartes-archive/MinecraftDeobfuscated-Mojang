@@ -1,7 +1,7 @@
 package net.minecraft.world.level.storage.loot.predicates;
 
 import com.mojang.logging.LogUtils;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
@@ -12,7 +12,7 @@ import org.slf4j.Logger;
 
 public record ConditionReference(ResourceKey<LootItemCondition> name) implements LootItemCondition {
 	private static final Logger LOGGER = LogUtils.getLogger();
-	public static final Codec<ConditionReference> CODEC = RecordCodecBuilder.create(
+	public static final MapCodec<ConditionReference> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> instance.group(ResourceKey.codec(Registries.PREDICATE).fieldOf("name").forGetter(ConditionReference::name))
 				.apply(instance, ConditionReference::new)
 	);

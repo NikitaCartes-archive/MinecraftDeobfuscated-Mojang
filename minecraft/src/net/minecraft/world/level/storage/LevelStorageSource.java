@@ -154,7 +154,7 @@ public class LevelStorageSource {
 	) {
 		Dynamic<?> dynamic2 = RegistryOps.injectRegistryContext(dynamic, frozen);
 		Dynamic<?> dynamic3 = dynamic2.get("WorldGenSettings").orElseEmptyMap();
-		WorldGenSettings worldGenSettings = WorldGenSettings.CODEC.parse(dynamic3).getOrThrow(false, Util.prefix("WorldGenSettings: ", LOGGER::error));
+		WorldGenSettings worldGenSettings = WorldGenSettings.CODEC.parse(dynamic3).getOrThrow();
 		LevelSettings levelSettings = LevelSettings.parse(dynamic2, worldDataConfiguration);
 		WorldDimensions.Complete complete = worldGenSettings.dimensions().bake(registry);
 		Lifecycle lifecycle = complete.lifecycle().add(frozen.allRegistriesLifecycle());

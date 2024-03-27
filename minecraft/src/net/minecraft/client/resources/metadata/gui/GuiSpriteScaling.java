@@ -3,9 +3,9 @@ package net.minecraft.client.resources.metadata.gui;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.OptionalInt;
-import java.util.function.Function;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.util.ExtraCodecs;
@@ -20,17 +20,15 @@ public interface GuiSpriteScaling {
 
 	@Environment(EnvType.CLIENT)
 	public static record NineSlice(int width, int height, GuiSpriteScaling.NineSlice.Border border) implements GuiSpriteScaling {
-		public static final Codec<GuiSpriteScaling.NineSlice> CODEC = ExtraCodecs.validate(
-			RecordCodecBuilder.create(
+		public static final MapCodec<GuiSpriteScaling.NineSlice> CODEC = RecordCodecBuilder.<GuiSpriteScaling.NineSlice>mapCodec(
 				instance -> instance.group(
 							ExtraCodecs.POSITIVE_INT.fieldOf("width").forGetter(GuiSpriteScaling.NineSlice::width),
 							ExtraCodecs.POSITIVE_INT.fieldOf("height").forGetter(GuiSpriteScaling.NineSlice::height),
 							GuiSpriteScaling.NineSlice.Border.CODEC.fieldOf("border").forGetter(GuiSpriteScaling.NineSlice::border)
 						)
 						.apply(instance, GuiSpriteScaling.NineSlice::new)
-			),
-			GuiSpriteScaling.NineSlice::validate
-		);
+			)
+			.validate(GuiSpriteScaling.NineSlice::validate);
 
 		private static DataResult<GuiSpriteScaling.NineSlice> validate(GuiSpriteScaling.NineSlice nineSlice) {
 			GuiSpriteScaling.NineSlice.Border border = nineSlice.border();
@@ -65,9 +63,7 @@ public interface GuiSpriteScaling {
 						.apply(instance, GuiSpriteScaling.NineSlice.Border::new)
 			);
 			static final Codec<GuiSpriteScaling.NineSlice.Border> CODEC = Codec.either(VALUE_CODEC, RECORD_CODEC)
-				.xmap(
-					either -> either.map(Function.identity(), Function.identity()), border -> border.unpackValue().isPresent() ? Either.left(border) : Either.right(border)
-				);
+				.xmap(Either::unwrap, border -> border.unpackValue().isPresent() ? Either.left(border) : Either.right(border));
 
 			private OptionalInt unpackValue() {
 				return this.left() == this.top() && this.top() == this.right() && this.right() == this.bottom() ? OptionalInt.of(this.left()) : OptionalInt.empty();
@@ -77,7 +73,7 @@ public interface GuiSpriteScaling {
 
 	@Environment(EnvType.CLIENT)
 	public static record Stretch() implements GuiSpriteScaling {
-		public static final Codec<GuiSpriteScaling.Stretch> CODEC = Codec.unit(GuiSpriteScaling.Stretch::new);
+		public static final MapCodec<GuiSpriteScaling.Stretch> CODEC = MapCodec.unit(GuiSpriteScaling.Stretch::new);
 
 		@Override
 		public GuiSpriteScaling.Type type() {
@@ -87,7 +83,7 @@ public interface GuiSpriteScaling {
 
 	@Environment(EnvType.CLIENT)
 	public static record Tile(int width, int height) implements GuiSpriteScaling {
-		public static final Codec<GuiSpriteScaling.Tile> CODEC = RecordCodecBuilder.create(
+		public static final MapCodec<GuiSpriteScaling.Tile> CODEC = RecordCodecBuilder.mapCodec(
 			instance -> instance.group(
 						ExtraCodecs.POSITIVE_INT.fieldOf("width").forGetter(GuiSpriteScaling.Tile::width),
 						ExtraCodecs.POSITIVE_INT.fieldOf("height").forGetter(GuiSpriteScaling.Tile::height)
@@ -109,11 +105,11 @@ public interface GuiSpriteScaling {
 
 		public static final Codec<GuiSpriteScaling.Type> CODEC = StringRepresentable.fromEnum(GuiSpriteScaling.Type::values);
 		private final String key;
-		private final Codec<? extends GuiSpriteScaling> codec;
+		private final MapCodec<? extends GuiSpriteScaling> codec;
 
-		private Type(String string2, Codec<? extends GuiSpriteScaling> codec) {
+		private Type(String string2, MapCodec<? extends GuiSpriteScaling> mapCodec) {
 			this.key = string2;
-			this.codec = codec;
+			this.codec = mapCodec;
 		}
 
 		@Override
@@ -121,7 +117,7 @@ public interface GuiSpriteScaling {
 			return this.key;
 		}
 
-		public Codec<? extends GuiSpriteScaling> codec() {
+		public MapCodec<? extends GuiSpriteScaling> codec() {
 			return this.codec;
 		}
 	}

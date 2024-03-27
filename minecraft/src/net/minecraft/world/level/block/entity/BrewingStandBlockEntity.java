@@ -185,8 +185,8 @@ public class BrewingStandBlockEntity extends BaseContainerBlockEntity implements
 	}
 
 	@Override
-	public void load(CompoundTag compoundTag, HolderLookup.Provider provider) {
-		super.load(compoundTag, provider);
+	protected void loadAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
+		super.loadAdditional(compoundTag, provider);
 		this.items = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
 		ContainerHelper.loadAllItems(compoundTag, this.items, provider);
 		this.brewTime = compoundTag.getShort("BrewTime");

@@ -3,7 +3,6 @@ package net.minecraft.world.level.storage;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.mojang.logging.LogUtils;
-import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.Lifecycle;
@@ -256,15 +255,15 @@ public class PrimaryLevelData implements ServerLevelData, WorldData {
 		compoundTag.putByte("Difficulty", (byte)this.settings.difficulty().getId());
 		compoundTag.putBoolean("DifficultyLocked", this.difficultyLocked);
 		compoundTag.put("GameRules", this.settings.gameRules().createTag());
-		compoundTag.put("DragonFight", Util.getOrThrow(EndDragonFight.Data.CODEC.encodeStart(NbtOps.INSTANCE, this.endDragonFightData), IllegalStateException::new));
+		compoundTag.put("DragonFight", EndDragonFight.Data.CODEC.encodeStart(NbtOps.INSTANCE, this.endDragonFightData).getOrThrow());
 		if (compoundTag2 != null) {
 			compoundTag.put("Player", compoundTag2);
 		}
 
-		DataResult<Tag> dataResult = WorldDataConfiguration.CODEC.encodeStart(NbtOps.INSTANCE, this.settings.getDataConfiguration());
-		dataResult.get()
-			.ifLeft(tag -> compoundTag.merge((CompoundTag)tag))
-			.ifRight(partialResult -> LOGGER.warn("Failed to encode configuration {}", partialResult.message()));
+		WorldDataConfiguration.CODEC
+			.encodeStart(NbtOps.INSTANCE, this.settings.getDataConfiguration())
+			.ifSuccess(tag -> compoundTag.merge((CompoundTag)tag))
+			.ifError(error -> LOGGER.warn("Failed to encode configuration {}", error.message()));
 		if (this.customBossEvents != null) {
 			compoundTag.put("CustomBossEvents", this.customBossEvents);
 		}

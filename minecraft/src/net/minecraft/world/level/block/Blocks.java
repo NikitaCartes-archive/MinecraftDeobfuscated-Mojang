@@ -657,6 +657,7 @@ public class Blocks {
 		new WebBlock(
 			BlockBehaviour.Properties.of()
 				.mapColor(MapColor.WOOL)
+				.sound(SoundType.COBWEB)
 				.forceSolidOn()
 				.noCollission()
 				.requiresCorrectToolForDrops()

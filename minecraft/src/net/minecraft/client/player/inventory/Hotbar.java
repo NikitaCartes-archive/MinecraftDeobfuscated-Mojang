@@ -17,7 +17,6 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.RegistryOps;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import org.slf4j.Logger;
@@ -26,12 +25,9 @@ import org.slf4j.Logger;
 public class Hotbar {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final int SIZE = Inventory.getSelectionSize();
-	public static final Codec<Hotbar> CODEC = ExtraCodecs.<List<Dynamic<?>>>validate(Codec.PASSTHROUGH.listOf(), list -> Util.fixedSize(list, SIZE))
-		.xmap(Hotbar::new, hotbar -> hotbar.items);
+	public static final Codec<Hotbar> CODEC = Codec.PASSTHROUGH.listOf().validate(list -> Util.fixedSize(list, SIZE)).xmap(Hotbar::new, hotbar -> hotbar.items);
 	private static final DynamicOps<Tag> DEFAULT_OPS = NbtOps.INSTANCE;
-	private static final Dynamic<?> EMPTY_STACK = new Dynamic<>(
-		DEFAULT_OPS, Util.getOrThrow(ItemStack.OPTIONAL_CODEC.encodeStart(DEFAULT_OPS, ItemStack.EMPTY), IllegalStateException::new)
-	);
+	private static final Dynamic<?> EMPTY_STACK = new Dynamic<>(DEFAULT_OPS, ItemStack.OPTIONAL_CODEC.encodeStart(DEFAULT_OPS, ItemStack.EMPTY).getOrThrow());
 	private List<Dynamic<?>> items;
 
 	private Hotbar(List<Dynamic<?>> list) {

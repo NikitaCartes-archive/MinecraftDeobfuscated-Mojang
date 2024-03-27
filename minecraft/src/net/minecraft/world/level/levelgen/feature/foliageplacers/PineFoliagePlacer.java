@@ -1,6 +1,6 @@
 package net.minecraft.world.level.levelgen.feature.foliageplacers;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.IntProvider;
@@ -8,7 +8,7 @@ import net.minecraft.world.level.LevelSimulatedReader;
 import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
 
 public class PineFoliagePlacer extends FoliagePlacer {
-	public static final Codec<PineFoliagePlacer> CODEC = RecordCodecBuilder.create(
+	public static final MapCodec<PineFoliagePlacer> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> foliagePlacerParts(instance)
 				.and(IntProvider.codec(0, 24).fieldOf("height").forGetter(pineFoliagePlacer -> pineFoliagePlacer.height))
 				.apply(instance, PineFoliagePlacer::new)

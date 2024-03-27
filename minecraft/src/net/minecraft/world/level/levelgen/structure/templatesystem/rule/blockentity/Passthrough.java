@@ -1,13 +1,13 @@
 package net.minecraft.world.level.levelgen.structure.templatesystem.rule.blockentity;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import javax.annotation.Nullable;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.RandomSource;
 
 public class Passthrough implements RuleBlockEntityModifier {
 	public static final Passthrough INSTANCE = new Passthrough();
-	public static final Codec<Passthrough> CODEC = Codec.unit(INSTANCE);
+	public static final MapCodec<Passthrough> CODEC = MapCodec.unit(INSTANCE);
 
 	@Nullable
 	@Override

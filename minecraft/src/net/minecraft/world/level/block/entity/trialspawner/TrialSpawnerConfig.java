@@ -1,7 +1,6 @@
 package net.minecraft.world.level.block.entity.trialspawner;
 
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
@@ -11,52 +10,53 @@ import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.level.storage.loot.LootTable;
 
 public record TrialSpawnerConfig(
-	int requiredPlayerRange,
 	int spawnRange,
 	float totalMobs,
 	float simultaneousMobs,
 	float totalMobsAddedPerPlayer,
 	float simultaneousMobsAddedPerPlayer,
 	int ticksBetweenSpawn,
-	int targetCooldownLength,
 	SimpleWeightedRandomList<SpawnData> spawnPotentialsDefinition,
-	SimpleWeightedRandomList<ResourceKey<LootTable>> lootTablesToEject
+	SimpleWeightedRandomList<ResourceKey<LootTable>> lootTablesToEject,
+	ResourceKey<LootTable> itemsToDropWhenOminous
 ) {
 	public static final TrialSpawnerConfig DEFAULT = new TrialSpawnerConfig(
-		14,
 		4,
 		6.0F,
 		2.0F,
 		2.0F,
 		1.0F,
 		40,
-		36000,
 		SimpleWeightedRandomList.empty(),
 		SimpleWeightedRandomList.<ResourceKey<LootTable>>builder()
 			.add(BuiltInLootTables.SPAWNER_TRIAL_CHAMBER_CONSUMABLES)
 			.add(BuiltInLootTables.SPAWNER_TRIAL_CHAMBER_KEY)
-			.build()
+			.build(),
+		BuiltInLootTables.SPAWNER_TRIAL_ITEMS_TO_DROP_WHEN_OMINOUS
 	);
-	public static final MapCodec<TrialSpawnerConfig> MAP_CODEC = RecordCodecBuilder.mapCodec(
+	public static final Codec<TrialSpawnerConfig> CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
-					Codec.intRange(1, 128).optionalFieldOf("required_player_range", DEFAULT.requiredPlayerRange).forGetter(TrialSpawnerConfig::requiredPlayerRange),
-					Codec.intRange(1, 128).optionalFieldOf("spawn_range", DEFAULT.spawnRange).forGetter(TrialSpawnerConfig::spawnRange),
-					Codec.floatRange(0.0F, Float.MAX_VALUE).optionalFieldOf("total_mobs", DEFAULT.totalMobs).forGetter(TrialSpawnerConfig::totalMobs),
-					Codec.floatRange(0.0F, Float.MAX_VALUE).optionalFieldOf("simultaneous_mobs", DEFAULT.simultaneousMobs).forGetter(TrialSpawnerConfig::simultaneousMobs),
+					Codec.intRange(1, 128).lenientOptionalFieldOf("spawn_range", DEFAULT.spawnRange).forGetter(TrialSpawnerConfig::spawnRange),
+					Codec.floatRange(0.0F, Float.MAX_VALUE).lenientOptionalFieldOf("total_mobs", DEFAULT.totalMobs).forGetter(TrialSpawnerConfig::totalMobs),
 					Codec.floatRange(0.0F, Float.MAX_VALUE)
-						.optionalFieldOf("total_mobs_added_per_player", DEFAULT.totalMobsAddedPerPlayer)
+						.lenientOptionalFieldOf("simultaneous_mobs", DEFAULT.simultaneousMobs)
+						.forGetter(TrialSpawnerConfig::simultaneousMobs),
+					Codec.floatRange(0.0F, Float.MAX_VALUE)
+						.lenientOptionalFieldOf("total_mobs_added_per_player", DEFAULT.totalMobsAddedPerPlayer)
 						.forGetter(TrialSpawnerConfig::totalMobsAddedPerPlayer),
 					Codec.floatRange(0.0F, Float.MAX_VALUE)
-						.optionalFieldOf("simultaneous_mobs_added_per_player", DEFAULT.simultaneousMobsAddedPerPlayer)
+						.lenientOptionalFieldOf("simultaneous_mobs_added_per_player", DEFAULT.simultaneousMobsAddedPerPlayer)
 						.forGetter(TrialSpawnerConfig::simultaneousMobsAddedPerPlayer),
-					Codec.intRange(0, Integer.MAX_VALUE).optionalFieldOf("ticks_between_spawn", DEFAULT.ticksBetweenSpawn).forGetter(TrialSpawnerConfig::ticksBetweenSpawn),
 					Codec.intRange(0, Integer.MAX_VALUE)
-						.optionalFieldOf("target_cooldown_length", DEFAULT.targetCooldownLength)
-						.forGetter(TrialSpawnerConfig::targetCooldownLength),
-					SpawnData.LIST_CODEC.optionalFieldOf("spawn_potentials", SimpleWeightedRandomList.empty()).forGetter(TrialSpawnerConfig::spawnPotentialsDefinition),
+						.lenientOptionalFieldOf("ticks_between_spawn", DEFAULT.ticksBetweenSpawn)
+						.forGetter(TrialSpawnerConfig::ticksBetweenSpawn),
+					SpawnData.LIST_CODEC.lenientOptionalFieldOf("spawn_potentials", SimpleWeightedRandomList.empty()).forGetter(TrialSpawnerConfig::spawnPotentialsDefinition),
 					SimpleWeightedRandomList.wrappedCodecAllowingEmpty(ResourceKey.codec(Registries.LOOT_TABLE))
-						.optionalFieldOf("loot_tables_to_eject", DEFAULT.lootTablesToEject)
-						.forGetter(TrialSpawnerConfig::lootTablesToEject)
+						.lenientOptionalFieldOf("loot_tables_to_eject", DEFAULT.lootTablesToEject)
+						.forGetter(TrialSpawnerConfig::lootTablesToEject),
+					ResourceKey.codec(Registries.LOOT_TABLE)
+						.lenientOptionalFieldOf("items_to_drop_when_ominous", DEFAULT.itemsToDropWhenOminous)
+						.forGetter(TrialSpawnerConfig::itemsToDropWhenOminous)
 				)
 				.apply(instance, TrialSpawnerConfig::new)
 	);
@@ -67,5 +67,9 @@ public record TrialSpawnerConfig(
 
 	public int calculateTargetSimultaneousMobs(int i) {
 		return (int)Math.floor((double)(this.simultaneousMobs + this.simultaneousMobsAddedPerPlayer * (float)i));
+	}
+
+	public long ticksBetweenItemSpawners() {
+		return 160L;
 	}
 }

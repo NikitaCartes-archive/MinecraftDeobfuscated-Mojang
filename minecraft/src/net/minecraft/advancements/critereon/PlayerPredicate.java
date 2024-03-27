@@ -51,14 +51,14 @@ public record PlayerPredicate(
 	public static final int LOOKING_AT_RANGE = 100;
 	public static final MapCodec<PlayerPredicate> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> instance.group(
-					ExtraCodecs.strictOptionalField(MinMaxBounds.Ints.CODEC, "level", MinMaxBounds.Ints.ANY).forGetter(PlayerPredicate::level),
+					MinMaxBounds.Ints.CODEC.optionalFieldOf("level", MinMaxBounds.Ints.ANY).forGetter(PlayerPredicate::level),
 					GameType.CODEC.optionalFieldOf("gamemode").forGetter(PlayerPredicate::gameType),
-					ExtraCodecs.strictOptionalField(PlayerPredicate.StatMatcher.CODEC.listOf(), "stats", List.of()).forGetter(PlayerPredicate::stats),
-					ExtraCodecs.strictOptionalField(ExtraCodecs.object2BooleanMap(ResourceLocation.CODEC), "recipes", Object2BooleanMaps.emptyMap())
-						.forGetter(PlayerPredicate::recipes),
-					ExtraCodecs.strictOptionalField(Codec.unboundedMap(ResourceLocation.CODEC, PlayerPredicate.AdvancementPredicate.CODEC), "advancements", Map.of())
+					PlayerPredicate.StatMatcher.CODEC.listOf().optionalFieldOf("stats", List.of()).forGetter(PlayerPredicate::stats),
+					ExtraCodecs.object2BooleanMap(ResourceLocation.CODEC).optionalFieldOf("recipes", Object2BooleanMaps.emptyMap()).forGetter(PlayerPredicate::recipes),
+					Codec.unboundedMap(ResourceLocation.CODEC, PlayerPredicate.AdvancementPredicate.CODEC)
+						.optionalFieldOf("advancements", Map.of())
 						.forGetter(PlayerPredicate::advancements),
-					ExtraCodecs.strictOptionalField(EntityPredicate.CODEC, "looking_at").forGetter(PlayerPredicate::lookingAt)
+					EntityPredicate.CODEC.optionalFieldOf("looking_at").forGetter(PlayerPredicate::lookingAt)
 				)
 				.apply(instance, PlayerPredicate::new)
 	);
@@ -157,18 +157,15 @@ public record PlayerPredicate(
 		Codec<PlayerPredicate.AdvancementPredicate> CODEC = Codec.either(
 				PlayerPredicate.AdvancementDonePredicate.CODEC, PlayerPredicate.AdvancementCriterionsPredicate.CODEC
 			)
-			.xmap(
-				either -> either.map(advancementDonePredicate -> advancementDonePredicate, advancementCriterionsPredicate -> advancementCriterionsPredicate),
-				advancementPredicate -> {
-					if (advancementPredicate instanceof PlayerPredicate.AdvancementDonePredicate advancementDonePredicate) {
-						return Either.left(advancementDonePredicate);
-					} else if (advancementPredicate instanceof PlayerPredicate.AdvancementCriterionsPredicate advancementCriterionsPredicate) {
-						return Either.right(advancementCriterionsPredicate);
-					} else {
-						throw new UnsupportedOperationException();
-					}
+			.xmap(Either::unwrap, advancementPredicate -> {
+				if (advancementPredicate instanceof PlayerPredicate.AdvancementDonePredicate advancementDonePredicate) {
+					return Either.left(advancementDonePredicate);
+				} else if (advancementPredicate instanceof PlayerPredicate.AdvancementCriterionsPredicate advancementCriterionsPredicate) {
+					return Either.right(advancementCriterionsPredicate);
+				} else {
+					throw new UnsupportedOperationException();
 				}
-			);
+			});
 	}
 
 	public static class Builder {
@@ -232,11 +229,11 @@ public record PlayerPredicate(
 			this(statType, holder, ints, Suppliers.memoize(() -> statType.get(holder.value())));
 		}
 
-		private static <T> Codec<PlayerPredicate.StatMatcher<T>> createTypedCodec(StatType<T> statType) {
-			return RecordCodecBuilder.create(
+		private static <T> MapCodec<PlayerPredicate.StatMatcher<T>> createTypedCodec(StatType<T> statType) {
+			return RecordCodecBuilder.mapCodec(
 				instance -> instance.group(
 							statType.getRegistry().holderByNameCodec().fieldOf("stat").forGetter(PlayerPredicate.StatMatcher::value),
-							ExtraCodecs.strictOptionalField(MinMaxBounds.Ints.CODEC, "value", MinMaxBounds.Ints.ANY).forGetter(PlayerPredicate.StatMatcher::range)
+							MinMaxBounds.Ints.CODEC.optionalFieldOf("value", MinMaxBounds.Ints.ANY).forGetter(PlayerPredicate.StatMatcher::range)
 						)
 						.apply(instance, (holder, ints) -> new PlayerPredicate.StatMatcher<>(statType, holder, ints))
 			);

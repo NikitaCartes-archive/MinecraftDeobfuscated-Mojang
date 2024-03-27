@@ -6,7 +6,6 @@ import com.mojang.datafixers.types.templates.TypeTemplate;
 import com.mojang.datafixers.util.Pair;
 import java.util.Map;
 import java.util.function.Supplier;
-import net.minecraft.util.datafix.ExtraDataFixUtils;
 import net.minecraft.util.datafix.fixes.References;
 
 public class V1022 extends Schema {
@@ -21,7 +20,7 @@ public class V1022 extends Schema {
 		schema.registerType(
 			false,
 			References.PLAYER,
-			() -> ExtraDataFixUtils.optionalFields(
+			() -> DSL.optionalFields(
 					Pair.of("RootVehicle", DSL.optionalFields("Entity", References.ENTITY_TREE.in(schema))),
 					Pair.of("Inventory", DSL.list(References.ITEM_STACK.in(schema))),
 					Pair.of("EnderItems", DSL.list(References.ITEM_STACK.in(schema))),

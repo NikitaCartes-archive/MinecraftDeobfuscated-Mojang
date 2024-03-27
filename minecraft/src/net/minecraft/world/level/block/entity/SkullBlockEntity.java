@@ -97,7 +97,7 @@ public class SkullBlockEntity extends BlockEntity {
 	protected void saveAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
 		super.saveAdditional(compoundTag, provider);
 		if (this.owner != null) {
-			compoundTag.put("profile", Util.getOrThrow(ResolvableProfile.CODEC.encodeStart(NbtOps.INSTANCE, this.owner), IllegalStateException::new));
+			compoundTag.put("profile", ResolvableProfile.CODEC.encodeStart(NbtOps.INSTANCE, this.owner).getOrThrow());
 		}
 
 		if (this.noteBlockSound != null) {
@@ -110,8 +110,8 @@ public class SkullBlockEntity extends BlockEntity {
 	}
 
 	@Override
-	public void load(CompoundTag compoundTag, HolderLookup.Provider provider) {
-		super.load(compoundTag, provider);
+	protected void loadAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
+		super.loadAdditional(compoundTag, provider);
 		if (compoundTag.contains("profile")) {
 			ResolvableProfile.CODEC
 				.parse(NbtOps.INSTANCE, compoundTag.get("profile"))
@@ -159,7 +159,7 @@ public class SkullBlockEntity extends BlockEntity {
 
 	@Override
 	public CompoundTag getUpdateTag(HolderLookup.Provider provider) {
-		return this.saveWithoutMetadata(provider);
+		return this.saveCustomOnly(provider);
 	}
 
 	public void setOwner(@Nullable ResolvableProfile resolvableProfile) {
@@ -187,14 +187,16 @@ public class SkullBlockEntity extends BlockEntity {
 	}
 
 	@Override
-	public void applyComponents(DataComponentMap dataComponentMap) {
-		this.setOwner(dataComponentMap.get(DataComponents.PROFILE));
-		this.noteBlockSound = dataComponentMap.get(DataComponents.NOTE_BLOCK_SOUND);
-		this.customName = dataComponentMap.get(DataComponents.CUSTOM_NAME);
+	protected void applyImplicitComponents(BlockEntity.DataComponentInput dataComponentInput) {
+		super.applyImplicitComponents(dataComponentInput);
+		this.setOwner(dataComponentInput.get(DataComponents.PROFILE));
+		this.noteBlockSound = dataComponentInput.get(DataComponents.NOTE_BLOCK_SOUND);
+		this.customName = dataComponentInput.get(DataComponents.CUSTOM_NAME);
 	}
 
 	@Override
-	public void collectComponents(DataComponentMap.Builder builder) {
+	protected void collectImplicitComponents(DataComponentMap.Builder builder) {
+		super.collectImplicitComponents(builder);
 		builder.set(DataComponents.PROFILE, this.owner);
 		builder.set(DataComponents.NOTE_BLOCK_SOUND, this.noteBlockSound);
 		builder.set(DataComponents.CUSTOM_NAME, this.customName);

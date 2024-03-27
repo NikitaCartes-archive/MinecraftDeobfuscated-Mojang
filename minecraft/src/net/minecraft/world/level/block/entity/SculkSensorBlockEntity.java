@@ -41,8 +41,8 @@ public class SculkSensorBlockEntity extends BlockEntity implements GameEventList
 	}
 
 	@Override
-	public void load(CompoundTag compoundTag, HolderLookup.Provider provider) {
-		super.load(compoundTag, provider);
+	protected void loadAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
+		super.loadAdditional(compoundTag, provider);
 		this.lastVibrationFrequency = compoundTag.getInt("last_vibration_frequency");
 		if (compoundTag.contains("listener", 10)) {
 			VibrationSystem.Data.CODEC

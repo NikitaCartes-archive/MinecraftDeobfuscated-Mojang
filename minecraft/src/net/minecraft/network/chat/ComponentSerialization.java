@@ -35,7 +35,7 @@ import net.minecraft.util.GsonHelper;
 import net.minecraft.util.StringRepresentable;
 
 public class ComponentSerialization {
-	public static final Codec<Component> CODEC = ExtraCodecs.recursive("Component", ComponentSerialization::createCodec);
+	public static final Codec<Component> CODEC = Codec.recursive("Component", ComponentSerialization::createCodec);
 	public static final StreamCodec<RegistryFriendlyByteBuf, Component> STREAM_CODEC = ByteBufCodecs.fromCodecWithRegistries(CODEC);
 	public static final StreamCodec<RegistryFriendlyByteBuf, Optional<Component>> OPTIONAL_STREAM_CODEC = STREAM_CODEC.apply(ByteBufCodecs::optional);
 	public static final StreamCodec<RegistryFriendlyByteBuf, Component> TRUSTED_STREAM_CODEC = ByteBufCodecs.fromCodecWithRegistriesTrusted(CODEC);
@@ -46,7 +46,7 @@ public class ComponentSerialization {
 	public static final Codec<Component> FLAT_CODEC = flatCodec(Integer.MAX_VALUE);
 
 	public static Codec<Component> flatCodec(int i) {
-		final Codec<String> codec = ExtraCodecs.sizeLimitedString(0, i);
+		final Codec<String> codec = Codec.string(0, i);
 		return new Codec<Component>() {
 			@Override
 			public <T> DataResult<Pair<Component, T>> decode(DynamicOps<T> dynamicOps, T object) {
@@ -95,7 +95,7 @@ public class ComponentSerialization {
 			Stream.of(stringRepresentables).map(function).toList(), object -> (MapEncoder)function.apply((StringRepresentable)function2.apply(object))
 		);
 		Codec<T> codec = StringRepresentable.fromValues(() -> stringRepresentables);
-		MapCodec<E> mapCodec2 = codec.dispatchMap(string, function2, stringRepresentable -> ((MapCodec)function.apply(stringRepresentable)).codec());
+		MapCodec<E> mapCodec2 = codec.dispatchMap(string, function2, function);
 		MapCodec<E> mapCodec3 = new ComponentSerialization.StrictEither<>(string, mapCodec2, mapCodec);
 		return ExtraCodecs.orCompressed(mapCodec3, mapCodec2);
 	}
@@ -108,7 +108,7 @@ public class ComponentSerialization {
 		Codec<Component> codec2 = RecordCodecBuilder.create(
 			instance -> instance.group(
 						mapCodec.forGetter(Component::getContents),
-						ExtraCodecs.strictOptionalField(ExtraCodecs.nonEmptyList(codec.listOf()), "extra", List.of()).forGetter(Component::getSiblings),
+						ExtraCodecs.nonEmptyList(codec.listOf()).optionalFieldOf("extra", List.of()).forGetter(Component::getSiblings),
 						Style.Serializer.MAP_CODEC.forGetter(Component::getStyle)
 					)
 					.apply(instance, MutableComponent::new)

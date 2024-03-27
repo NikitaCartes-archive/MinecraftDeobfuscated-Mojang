@@ -7,7 +7,6 @@ import com.mojang.serialization.codecs.RecordCodecBuilder.Mu;
 import java.util.List;
 import java.util.function.Predicate;
 import net.minecraft.Util;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.ValidationContext;
 import net.minecraft.world.level.storage.loot.predicates.ConditionUserBuilder;
@@ -25,8 +24,7 @@ public abstract class LootPoolEntryContainer implements ComposableEntryContainer
 
 	protected static <T extends LootPoolEntryContainer> P1<Mu<T>, List<LootItemCondition>> commonFields(Instance<T> instance) {
 		return instance.group(
-			ExtraCodecs.strictOptionalField(LootItemConditions.DIRECT_CODEC.listOf(), "conditions", List.of())
-				.forGetter(lootPoolEntryContainer -> lootPoolEntryContainer.conditions)
+			LootItemConditions.DIRECT_CODEC.listOf().optionalFieldOf("conditions", List.of()).forGetter(lootPoolEntryContainer -> lootPoolEntryContainer.conditions)
 		);
 	}
 

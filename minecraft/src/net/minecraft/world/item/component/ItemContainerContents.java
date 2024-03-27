@@ -12,13 +12,13 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.ItemStack;
 
 public final class ItemContainerContents implements Iterable<ItemStack> {
 	private static final int MAX_SIZE = 256;
 	public static final ItemContainerContents EMPTY = new ItemContainerContents(NonNullList.create());
-	public static final Codec<ItemContainerContents> CODEC = ExtraCodecs.sizeLimitedList(ItemContainerContents.Slot.CODEC.listOf(), 256)
+	public static final Codec<ItemContainerContents> CODEC = ItemContainerContents.Slot.CODEC
+		.sizeLimitedListOf(256)
 		.xmap(ItemContainerContents::fromSlots, ItemContainerContents::asSlots);
 	public static final StreamCodec<RegistryFriendlyByteBuf, ItemContainerContents> STREAM_CODEC = ItemStack.OPTIONAL_STREAM_CODEC
 		.apply(ByteBufCodecs.list(256))

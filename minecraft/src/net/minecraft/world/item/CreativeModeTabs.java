@@ -10,7 +10,6 @@ import java.util.function.Predicate;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
-import net.minecraft.Util;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
@@ -1414,7 +1413,11 @@ public class CreativeModeTabs {
 						output.accept(Items.SPECTRAL_ARROW);
 						itemDisplayParameters.holders()
 							.lookup(Registries.POTION)
-							.ifPresent(registryLookup -> generatePotionEffectTypes(output, registryLookup, Items.TIPPED_ARROW, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS));
+							.ifPresent(
+								registryLookup -> generatePotionEffectTypes(
+										output, registryLookup, Items.TIPPED_ARROW, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS, itemDisplayParameters.enabledFeatures()
+									)
+							);
 					}
 				)
 				.build()
@@ -1425,55 +1428,68 @@ public class CreativeModeTabs {
 			CreativeModeTab.builder(CreativeModeTab.Row.BOTTOM, 2)
 				.title(Component.translatable("itemGroup.foodAndDrink"))
 				.icon(() -> new ItemStack(Items.GOLDEN_APPLE))
-				.displayItems((itemDisplayParameters, output) -> {
-					output.accept(Items.APPLE);
-					output.accept(Items.GOLDEN_APPLE);
-					output.accept(Items.ENCHANTED_GOLDEN_APPLE);
-					output.accept(Items.MELON_SLICE);
-					output.accept(Items.SWEET_BERRIES);
-					output.accept(Items.GLOW_BERRIES);
-					output.accept(Items.CHORUS_FRUIT);
-					output.accept(Items.CARROT);
-					output.accept(Items.GOLDEN_CARROT);
-					output.accept(Items.POTATO);
-					output.accept(Items.BAKED_POTATO);
-					output.accept(Items.POISONOUS_POTATO);
-					output.accept(Items.BEETROOT);
-					output.accept(Items.DRIED_KELP);
-					output.accept(Items.BEEF);
-					output.accept(Items.COOKED_BEEF);
-					output.accept(Items.PORKCHOP);
-					output.accept(Items.COOKED_PORKCHOP);
-					output.accept(Items.MUTTON);
-					output.accept(Items.COOKED_MUTTON);
-					output.accept(Items.CHICKEN);
-					output.accept(Items.COOKED_CHICKEN);
-					output.accept(Items.RABBIT);
-					output.accept(Items.COOKED_RABBIT);
-					output.accept(Items.COD);
-					output.accept(Items.COOKED_COD);
-					output.accept(Items.SALMON);
-					output.accept(Items.COOKED_SALMON);
-					output.accept(Items.TROPICAL_FISH);
-					output.accept(Items.PUFFERFISH);
-					output.accept(Items.BREAD);
-					output.accept(Items.COOKIE);
-					output.accept(Items.CAKE);
-					output.accept(Items.PUMPKIN_PIE);
-					output.accept(Items.ROTTEN_FLESH);
-					output.accept(Items.SPIDER_EYE);
-					output.accept(Items.MUSHROOM_STEW);
-					output.accept(Items.BEETROOT_SOUP);
-					output.accept(Items.RABBIT_STEW);
-					generateSuspiciousStews(output, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
-					output.accept(Items.MILK_BUCKET);
-					output.accept(Items.HONEY_BOTTLE);
-					itemDisplayParameters.holders().lookup(Registries.POTION).ifPresent(registryLookup -> {
-						generatePotionEffectTypes(output, registryLookup, Items.POTION, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
-						generatePotionEffectTypes(output, registryLookup, Items.SPLASH_POTION, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
-						generatePotionEffectTypes(output, registryLookup, Items.LINGERING_POTION, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
-					});
-				})
+				.displayItems(
+					(itemDisplayParameters, output) -> {
+						output.accept(Items.APPLE);
+						output.accept(Items.GOLDEN_APPLE);
+						output.accept(Items.ENCHANTED_GOLDEN_APPLE);
+						output.accept(Items.MELON_SLICE);
+						output.accept(Items.SWEET_BERRIES);
+						output.accept(Items.GLOW_BERRIES);
+						output.accept(Items.CHORUS_FRUIT);
+						output.accept(Items.CARROT);
+						output.accept(Items.GOLDEN_CARROT);
+						output.accept(Items.POTATO);
+						output.accept(Items.BAKED_POTATO);
+						output.accept(Items.POISONOUS_POTATO);
+						output.accept(Items.BEETROOT);
+						output.accept(Items.DRIED_KELP);
+						output.accept(Items.BEEF);
+						output.accept(Items.COOKED_BEEF);
+						output.accept(Items.PORKCHOP);
+						output.accept(Items.COOKED_PORKCHOP);
+						output.accept(Items.MUTTON);
+						output.accept(Items.COOKED_MUTTON);
+						output.accept(Items.CHICKEN);
+						output.accept(Items.COOKED_CHICKEN);
+						output.accept(Items.RABBIT);
+						output.accept(Items.COOKED_RABBIT);
+						output.accept(Items.COD);
+						output.accept(Items.COOKED_COD);
+						output.accept(Items.SALMON);
+						output.accept(Items.COOKED_SALMON);
+						output.accept(Items.TROPICAL_FISH);
+						output.accept(Items.PUFFERFISH);
+						output.accept(Items.BREAD);
+						output.accept(Items.COOKIE);
+						output.accept(Items.CAKE);
+						output.accept(Items.PUMPKIN_PIE);
+						output.accept(Items.ROTTEN_FLESH);
+						output.accept(Items.SPIDER_EYE);
+						output.accept(Items.MUSHROOM_STEW);
+						output.accept(Items.BEETROOT_SOUP);
+						output.accept(Items.RABBIT_STEW);
+						generateSuspiciousStews(output, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
+						output.accept(Items.MILK_BUCKET);
+						output.accept(Items.HONEY_BOTTLE);
+						generateOminousVials(output, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
+						itemDisplayParameters.holders()
+							.lookup(Registries.POTION)
+							.ifPresent(
+								registryLookup -> {
+									generatePotionEffectTypes(
+										output, registryLookup, Items.POTION, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS, itemDisplayParameters.enabledFeatures()
+									);
+									generatePotionEffectTypes(
+										output, registryLookup, Items.SPLASH_POTION, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS, itemDisplayParameters.enabledFeatures()
+									);
+									generatePotionEffectTypes(
+										output, registryLookup, Items.LINGERING_POTION, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS, itemDisplayParameters.enabledFeatures()
+									);
+								}
+							);
+					}
+				)
 				.build()
 		);
 		Registry.register(
@@ -1627,6 +1643,7 @@ public class CreativeModeTabs {
 						output.accept(Items.BOLT_ARMOR_TRIM_SMITHING_TEMPLATE);
 						output.accept(Items.EXPERIENCE_BOTTLE);
 						output.accept(Items.TRIAL_KEY);
+						output.accept(Items.OMINOUS_TRIAL_KEY);
 						Set<TagKey<Item>> set = Set.of(
 							ItemTags.FOOT_ARMOR_ENCHANTABLE,
 							ItemTags.LEG_ARMOR_ENCHANTABLE,
@@ -1634,6 +1651,9 @@ public class CreativeModeTabs {
 							ItemTags.HEAD_ARMOR_ENCHANTABLE,
 							ItemTags.ARMOR_ENCHANTABLE,
 							ItemTags.SWORD_ENCHANTABLE,
+							ItemTags.SHARP_WEAPON_ENCHANTABLE,
+							ItemTags.MACE_ENCHANTABLE,
+							ItemTags.FIRE_ASPECT_ENCHANTABLE,
 							ItemTags.WEAPON_ENCHANTABLE,
 							ItemTags.MINING_ENCHANTABLE,
 							ItemTags.MINING_LOOT_ENCHANTABLE,
@@ -1645,10 +1665,18 @@ public class CreativeModeTabs {
 							ItemTags.CROSSBOW_ENCHANTABLE,
 							ItemTags.VANISHING_ENCHANTABLE
 						);
-						itemDisplayParameters.holders().lookup(Registries.ENCHANTMENT).ifPresent(registryLookup -> {
-							generateEnchantmentBookTypesOnlyMaxLevel(output, registryLookup, set, CreativeModeTab.TabVisibility.PARENT_TAB_ONLY);
-							generateEnchantmentBookTypesAllLevels(output, registryLookup, set, CreativeModeTab.TabVisibility.SEARCH_TAB_ONLY);
-						});
+						itemDisplayParameters.holders()
+							.lookup(Registries.ENCHANTMENT)
+							.ifPresent(
+								registryLookup -> {
+									generateEnchantmentBookTypesOnlyMaxLevel(
+										output, registryLookup, set, CreativeModeTab.TabVisibility.PARENT_TAB_ONLY, itemDisplayParameters.enabledFeatures()
+									);
+									generateEnchantmentBookTypesAllLevels(
+										output, registryLookup, set, CreativeModeTab.TabVisibility.SEARCH_TAB_ONLY, itemDisplayParameters.enabledFeatures()
+									);
+								}
+							);
 					}
 				)
 				.build()
@@ -1812,26 +1840,39 @@ public class CreativeModeTabs {
 	}
 
 	private static void generatePotionEffectTypes(
-		CreativeModeTab.Output output, HolderLookup<Potion> holderLookup, Item item, CreativeModeTab.TabVisibility tabVisibility
+		CreativeModeTab.Output output, HolderLookup<Potion> holderLookup, Item item, CreativeModeTab.TabVisibility tabVisibility, FeatureFlagSet featureFlagSet
 	) {
-		holderLookup.listElements().map(reference -> PotionContents.createItemStack(item, reference)).forEach(itemStack -> output.accept(itemStack, tabVisibility));
+		holderLookup.listElements()
+			.filter(reference -> ((Potion)reference.value()).isEnabled(featureFlagSet))
+			.map(reference -> PotionContents.createItemStack(item, reference))
+			.forEach(itemStack -> output.accept(itemStack, tabVisibility));
 	}
 
 	private static void generateEnchantmentBookTypesOnlyMaxLevel(
-		CreativeModeTab.Output output, HolderLookup<Enchantment> holderLookup, Set<TagKey<Item>> set, CreativeModeTab.TabVisibility tabVisibility
+		CreativeModeTab.Output output,
+		HolderLookup<Enchantment> holderLookup,
+		Set<TagKey<Item>> set,
+		CreativeModeTab.TabVisibility tabVisibility,
+		FeatureFlagSet featureFlagSet
 	) {
 		holderLookup.listElements()
 			.map(Holder::value)
+			.filter(enchantment -> enchantment.isEnabled(featureFlagSet))
 			.filter(enchantment -> set.contains(enchantment.getSupportedItems()))
 			.map(enchantment -> EnchantedBookItem.createForEnchantment(new EnchantmentInstance(enchantment, enchantment.getMaxLevel())))
 			.forEach(itemStack -> output.accept(itemStack, tabVisibility));
 	}
 
 	private static void generateEnchantmentBookTypesAllLevels(
-		CreativeModeTab.Output output, HolderLookup<Enchantment> holderLookup, Set<TagKey<Item>> set, CreativeModeTab.TabVisibility tabVisibility
+		CreativeModeTab.Output output,
+		HolderLookup<Enchantment> holderLookup,
+		Set<TagKey<Item>> set,
+		CreativeModeTab.TabVisibility tabVisibility,
+		FeatureFlagSet featureFlagSet
 	) {
 		holderLookup.listElements()
 			.map(Holder::value)
+			.filter(enchantment -> enchantment.isEnabled(featureFlagSet))
 			.filter(enchantment -> set.contains(enchantment.getSupportedItems()))
 			.flatMap(
 				enchantment -> IntStream.rangeClosed(enchantment.getMinLevel(), enchantment.getMaxLevel())
@@ -1860,6 +1901,14 @@ public class CreativeModeTabs {
 		output.acceptAll(set, tabVisibility);
 	}
 
+	private static void generateOminousVials(CreativeModeTab.Output output, CreativeModeTab.TabVisibility tabVisibility) {
+		for (int i = 0; i <= 4; i++) {
+			ItemStack itemStack = new ItemStack(Items.OMINOUS_BOTTLE);
+			itemStack.set(DataComponents.OMINOUS_BOTTLE_AMPLIFIER, i);
+			output.accept(itemStack, tabVisibility);
+		}
+	}
+
 	private static void generateFireworksAllDurations(CreativeModeTab.Output output, CreativeModeTab.TabVisibility tabVisibility) {
 		for (byte b : FireworkRocketItem.CRAFTABLE_DURATIONS) {
 			ItemStack itemStack = new ItemStack(Items.FIREWORK_ROCKET);
@@ -1879,7 +1928,9 @@ public class CreativeModeTabs {
 			.sorted(PAINTING_COMPARATOR)
 			.forEach(
 				reference -> {
-					CustomData customData = Util.getOrThrow(CustomData.EMPTY.update(Painting.VARIANT_MAP_CODEC, reference), IllegalStateException::new)
+					CustomData customData = CustomData.EMPTY
+						.update(Painting.VARIANT_MAP_CODEC, reference)
+						.getOrThrow()
 						.update(compoundTag -> compoundTag.putString("id", "minecraft:painting"));
 					ItemStack itemStack = new ItemStack(Items.PAINTING);
 					itemStack.set(DataComponents.ENTITY_DATA, customData);

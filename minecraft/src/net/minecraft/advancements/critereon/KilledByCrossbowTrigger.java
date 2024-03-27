@@ -12,7 +12,6 @@ import java.util.Set;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.advancements.Criterion;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.storage.loot.LootContext;
@@ -39,10 +38,10 @@ public class KilledByCrossbowTrigger extends SimpleCriterionTrigger<KilledByCros
 		implements SimpleCriterionTrigger.SimpleInstance {
 		public static final Codec<KilledByCrossbowTrigger.TriggerInstance> CODEC = RecordCodecBuilder.create(
 			instance -> instance.group(
-						ExtraCodecs.strictOptionalField(EntityPredicate.ADVANCEMENT_CODEC, "player").forGetter(KilledByCrossbowTrigger.TriggerInstance::player),
-						ExtraCodecs.strictOptionalField(EntityPredicate.ADVANCEMENT_CODEC.listOf(), "victims", List.of())
-							.forGetter(KilledByCrossbowTrigger.TriggerInstance::victims),
-						ExtraCodecs.strictOptionalField(MinMaxBounds.Ints.CODEC, "unique_entity_types", MinMaxBounds.Ints.ANY)
+						EntityPredicate.ADVANCEMENT_CODEC.optionalFieldOf("player").forGetter(KilledByCrossbowTrigger.TriggerInstance::player),
+						EntityPredicate.ADVANCEMENT_CODEC.listOf().optionalFieldOf("victims", List.of()).forGetter(KilledByCrossbowTrigger.TriggerInstance::victims),
+						MinMaxBounds.Ints.CODEC
+							.optionalFieldOf("unique_entity_types", MinMaxBounds.Ints.ANY)
 							.forGetter(KilledByCrossbowTrigger.TriggerInstance::uniqueEntityTypes)
 					)
 					.apply(instance, KilledByCrossbowTrigger.TriggerInstance::new)

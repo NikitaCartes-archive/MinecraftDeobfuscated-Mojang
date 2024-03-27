@@ -1,6 +1,7 @@
 package net.minecraft.world.level.levelgen.feature;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -150,19 +151,17 @@ public abstract class Feature<FC extends FeatureConfiguration> {
 		"pointed_dripstone", new PointedDripstoneFeature(PointedDripstoneConfiguration.CODEC)
 	);
 	public static final Feature<SculkPatchConfiguration> SCULK_PATCH = register("sculk_patch", new SculkPatchFeature(SculkPatchConfiguration.CODEC));
-	private final Codec<ConfiguredFeature<FC, Feature<FC>>> configuredCodec;
+	private final MapCodec<ConfiguredFeature<FC, Feature<FC>>> configuredCodec;
 
 	private static <C extends FeatureConfiguration, F extends Feature<C>> F register(String string, F feature) {
 		return Registry.register(BuiltInRegistries.FEATURE, string, feature);
 	}
 
 	public Feature(Codec<FC> codec) {
-		this.configuredCodec = codec.fieldOf("config")
-			.<ConfiguredFeature<FC, Feature<FC>>>xmap(featureConfiguration -> new ConfiguredFeature<>(this, featureConfiguration), ConfiguredFeature::config)
-			.codec();
+		this.configuredCodec = codec.fieldOf("config").xmap(featureConfiguration -> new ConfiguredFeature<>(this, featureConfiguration), ConfiguredFeature::config);
 	}
 
-	public Codec<ConfiguredFeature<FC, Feature<FC>>> configuredCodec() {
+	public MapCodec<ConfiguredFeature<FC, Feature<FC>>> configuredCodec() {
 		return this.configuredCodec;
 	}
 

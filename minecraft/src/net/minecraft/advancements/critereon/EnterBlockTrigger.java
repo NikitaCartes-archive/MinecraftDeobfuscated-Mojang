@@ -9,7 +9,6 @@ import net.minecraft.advancements.Criterion;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -25,17 +24,15 @@ public class EnterBlockTrigger extends SimpleCriterionTrigger<EnterBlockTrigger.
 
 	public static record TriggerInstance(Optional<ContextAwarePredicate> player, Optional<Holder<Block>> block, Optional<StatePropertiesPredicate> state)
 		implements SimpleCriterionTrigger.SimpleInstance {
-		public static final Codec<EnterBlockTrigger.TriggerInstance> CODEC = ExtraCodecs.validate(
-			RecordCodecBuilder.create(
+		public static final Codec<EnterBlockTrigger.TriggerInstance> CODEC = RecordCodecBuilder.<EnterBlockTrigger.TriggerInstance>create(
 				instance -> instance.group(
-							ExtraCodecs.strictOptionalField(EntityPredicate.ADVANCEMENT_CODEC, "player").forGetter(EnterBlockTrigger.TriggerInstance::player),
-							ExtraCodecs.strictOptionalField(BuiltInRegistries.BLOCK.holderByNameCodec(), "block").forGetter(EnterBlockTrigger.TriggerInstance::block),
-							ExtraCodecs.strictOptionalField(StatePropertiesPredicate.CODEC, "state").forGetter(EnterBlockTrigger.TriggerInstance::state)
+							EntityPredicate.ADVANCEMENT_CODEC.optionalFieldOf("player").forGetter(EnterBlockTrigger.TriggerInstance::player),
+							BuiltInRegistries.BLOCK.holderByNameCodec().optionalFieldOf("block").forGetter(EnterBlockTrigger.TriggerInstance::block),
+							StatePropertiesPredicate.CODEC.optionalFieldOf("state").forGetter(EnterBlockTrigger.TriggerInstance::state)
 						)
 						.apply(instance, EnterBlockTrigger.TriggerInstance::new)
-			),
-			EnterBlockTrigger.TriggerInstance::validate
-		);
+			)
+			.validate(EnterBlockTrigger.TriggerInstance::validate);
 
 		private static DataResult<EnterBlockTrigger.TriggerInstance> validate(EnterBlockTrigger.TriggerInstance triggerInstance) {
 			return (DataResult<EnterBlockTrigger.TriggerInstance>)triggerInstance.block

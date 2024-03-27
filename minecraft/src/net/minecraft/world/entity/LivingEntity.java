@@ -709,6 +709,12 @@ public abstract class LivingEntity extends Entity implements Attackable {
 
 	@Override
 	public void remove(Entity.RemovalReason removalReason) {
+		if (removalReason == Entity.RemovalReason.KILLED || removalReason == Entity.RemovalReason.DISCARDED) {
+			for (MobEffectInstance mobEffectInstance : this.getActiveEffects()) {
+				mobEffectInstance.onMobRemoved(this, removalReason);
+			}
+		}
+
 		super.remove(removalReason);
 		this.brain.clearMemories();
 	}
@@ -964,6 +970,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 				this.activeEffects.put(mobEffectInstance.getEffect(), mobEffectInstance);
 				this.onEffectAdded(mobEffectInstance, entity);
 				bl = true;
+				mobEffectInstance.onEffectAdded(this);
 			} else if (mobEffectInstance2.update(mobEffectInstance)) {
 				this.onEffectUpdated(mobEffectInstance2, true, entity);
 				bl = true;
@@ -975,9 +982,15 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	}
 
 	public boolean canBeAffected(MobEffectInstance mobEffectInstance) {
-		return !this.getType().is(EntityTypeTags.IGNORES_POISON_AND_REGEN)
-			? true
-			: !mobEffectInstance.is(MobEffects.REGENERATION) && !mobEffectInstance.is(MobEffects.POISON);
+		if (this.getType().is(EntityTypeTags.IMMUNE_TO_INFESTED)) {
+			return !mobEffectInstance.is(MobEffects.INFESTED);
+		} else if (this.getType().is(EntityTypeTags.IMMUNE_TO_OOZING)) {
+			return !mobEffectInstance.is(MobEffects.OOZING);
+		} else {
+			return !this.getType().is(EntityTypeTags.IGNORES_POISON_AND_REGEN)
+				? true
+				: !mobEffectInstance.is(MobEffects.REGENERATION) && !mobEffectInstance.is(MobEffects.POISON);
+		}
 	}
 
 	public void forceAddEffect(MobEffectInstance mobEffectInstance, @Nullable Entity entity) {
@@ -1225,6 +1238,10 @@ public abstract class LivingEntity extends Entity implements Attackable {
 
 			if (entity2 instanceof ServerPlayer) {
 				CriteriaTriggers.PLAYER_HURT_ENTITY.trigger((ServerPlayer)entity2, this, damageSource, g, f, bl);
+			}
+
+			for (MobEffectInstance mobEffectInstance : this.getActiveEffects()) {
+				mobEffectInstance.onMobHurt(this, damageSource, f);
 			}
 
 			return bl3;
@@ -1620,7 +1637,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	protected float getDamageAfterArmorAbsorb(DamageSource damageSource, float f) {
 		if (!damageSource.is(DamageTypeTags.BYPASSES_ARMOR)) {
 			this.hurtArmor(damageSource, f);
-			f = CombatRules.getDamageAfterAbsorb(f, (float)this.getArmorValue(), (float)this.getAttributeValue(Attributes.ARMOR_TOUGHNESS));
+			f = CombatRules.getDamageAfterAbsorb(f, damageSource, (float)this.getArmorValue(), (float)this.getAttributeValue(Attributes.ARMOR_TOUGHNESS));
 		}
 
 		return f;

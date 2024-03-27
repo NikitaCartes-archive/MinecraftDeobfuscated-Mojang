@@ -37,7 +37,7 @@ public interface DataProvider {
 
 	static <T> CompletableFuture<?> saveStable(CachedOutput cachedOutput, HolderLookup.Provider provider, Codec<T> codec, T object, Path path) {
 		RegistryOps<JsonElement> registryOps = provider.createSerializationContext(JsonOps.INSTANCE);
-		JsonElement jsonElement = Util.getOrThrow(codec.encodeStart(registryOps, object), IllegalStateException::new);
+		JsonElement jsonElement = codec.encodeStart(registryOps, object).getOrThrow();
 		return saveStable(cachedOutput, jsonElement, path);
 	}
 

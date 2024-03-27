@@ -52,7 +52,7 @@ public class BlockDataAccessor implements DataAccessor {
 	@Override
 	public void setData(CompoundTag compoundTag) {
 		BlockState blockState = this.entity.getLevel().getBlockState(this.pos);
-		this.entity.load(compoundTag, this.entity.getLevel().registryAccess());
+		this.entity.loadWithComponents(compoundTag, this.entity.getLevel().registryAccess());
 		this.entity.setChanged();
 		this.entity.getLevel().sendBlockUpdated(this.pos, blockState, blockState, 3);
 	}

@@ -1,6 +1,6 @@
 package net.minecraft.world.level.storage.loot.functions;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import net.minecraft.core.component.DataComponents;
@@ -12,7 +12,7 @@ import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
 public class SetCustomDataFunction extends LootItemConditionalFunction {
-	public static final Codec<SetCustomDataFunction> CODEC = RecordCodecBuilder.create(
+	public static final MapCodec<SetCustomDataFunction> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> commonFields(instance)
 				.and(TagParser.AS_CODEC.fieldOf("tag").forGetter(setCustomDataFunction -> setCustomDataFunction.tag))
 				.apply(instance, SetCustomDataFunction::new)

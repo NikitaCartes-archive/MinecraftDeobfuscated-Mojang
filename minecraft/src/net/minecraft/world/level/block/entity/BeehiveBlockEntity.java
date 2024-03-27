@@ -9,7 +9,6 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import javax.annotation.Nullable;
-import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -26,7 +25,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.EntityTypeTags;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.VisibleForDebug;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -286,8 +284,8 @@ public class BeehiveBlockEntity extends BlockEntity {
 	}
 
 	@Override
-	public void load(CompoundTag compoundTag, HolderLookup.Provider provider) {
-		super.load(compoundTag, provider);
+	protected void loadAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
+		super.loadAdditional(compoundTag, provider);
 		this.stored.clear();
 		if (compoundTag.contains("bees")) {
 			BeehiveBlockEntity.Occupant.LIST_CODEC
@@ -302,23 +300,23 @@ public class BeehiveBlockEntity extends BlockEntity {
 	@Override
 	protected void saveAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
 		super.saveAdditional(compoundTag, provider);
-		compoundTag.put("bees", Util.getOrThrow(BeehiveBlockEntity.Occupant.LIST_CODEC.encodeStart(NbtOps.INSTANCE, this.getBees()), IllegalStateException::new));
+		compoundTag.put("bees", BeehiveBlockEntity.Occupant.LIST_CODEC.encodeStart(NbtOps.INSTANCE, this.getBees()).getOrThrow());
 		if (this.hasSavedFlowerPos()) {
 			compoundTag.put("flower_pos", NbtUtils.writeBlockPos(this.savedFlowerPos));
 		}
 	}
 
 	@Override
-	public void applyComponents(DataComponentMap dataComponentMap) {
-		super.applyComponents(dataComponentMap);
+	protected void applyImplicitComponents(BlockEntity.DataComponentInput dataComponentInput) {
+		super.applyImplicitComponents(dataComponentInput);
 		this.stored.clear();
-		List<BeehiveBlockEntity.Occupant> list = dataComponentMap.getOrDefault(DataComponents.BEES, List.of());
+		List<BeehiveBlockEntity.Occupant> list = dataComponentInput.getOrDefault(DataComponents.BEES, List.of());
 		list.forEach(this::storeBee);
 	}
 
 	@Override
-	public void collectComponents(DataComponentMap.Builder builder) {
-		super.collectComponents(builder);
+	protected void collectImplicitComponents(DataComponentMap.Builder builder) {
+		super.collectImplicitComponents(builder);
 		builder.set(DataComponents.BEES, this.getBees());
 	}
 
@@ -363,7 +361,7 @@ public class BeehiveBlockEntity extends BlockEntity {
 	public static record Occupant(CustomData entityData, int ticksInHive, int minTicksInHive) {
 		public static final Codec<BeehiveBlockEntity.Occupant> CODEC = RecordCodecBuilder.create(
 			instance -> instance.group(
-						ExtraCodecs.strictOptionalField(CustomData.CODEC, "entity_data", CustomData.EMPTY).forGetter(BeehiveBlockEntity.Occupant::entityData),
+						CustomData.CODEC.optionalFieldOf("entity_data", CustomData.EMPTY).forGetter(BeehiveBlockEntity.Occupant::entityData),
 						Codec.INT.fieldOf("ticks_in_hive").forGetter(BeehiveBlockEntity.Occupant::ticksInHive),
 						Codec.INT.fieldOf("min_ticks_in_hive").forGetter(BeehiveBlockEntity.Occupant::minTicksInHive)
 					)

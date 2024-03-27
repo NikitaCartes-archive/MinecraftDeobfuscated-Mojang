@@ -953,8 +953,12 @@ public class ExecuteCommand {
 									return OptionalInt.empty();
 								}
 
-								CompoundTag compoundTag = blockEntity.saveWithoutMetadata(registryAccess);
-								CompoundTag compoundTag2 = blockEntity2.saveWithoutMetadata(registryAccess);
+								if (!blockEntity.components().equals(blockEntity2.components())) {
+									return OptionalInt.empty();
+								}
+
+								CompoundTag compoundTag = blockEntity.saveCustomOnly(registryAccess);
+								CompoundTag compoundTag2 = blockEntity2.saveCustomOnly(registryAccess);
 								if (!compoundTag.equals(compoundTag2)) {
 									return OptionalInt.empty();
 								}

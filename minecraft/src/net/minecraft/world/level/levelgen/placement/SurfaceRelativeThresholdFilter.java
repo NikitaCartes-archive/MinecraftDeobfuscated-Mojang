@@ -1,13 +1,14 @@
 package net.minecraft.world.level.levelgen.placement;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.levelgen.Heightmap;
 
 public class SurfaceRelativeThresholdFilter extends PlacementFilter {
-	public static final Codec<SurfaceRelativeThresholdFilter> CODEC = RecordCodecBuilder.create(
+	public static final MapCodec<SurfaceRelativeThresholdFilter> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> instance.group(
 					Heightmap.Types.CODEC.fieldOf("heightmap").forGetter(surfaceRelativeThresholdFilter -> surfaceRelativeThresholdFilter.heightmap),
 					Codec.INT

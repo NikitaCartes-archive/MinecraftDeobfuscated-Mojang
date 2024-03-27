@@ -2,6 +2,7 @@ package net.minecraft.world.level.levelgen.carver;
 
 import com.google.common.collect.ImmutableSet;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import java.util.Set;
 import java.util.function.Function;
 import javax.annotation.Nullable;
@@ -35,21 +36,21 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
 	protected static final FluidState WATER = Fluids.WATER.defaultFluidState();
 	protected static final FluidState LAVA = Fluids.LAVA.defaultFluidState();
 	protected Set<Fluid> liquids = ImmutableSet.of(Fluids.WATER);
-	private final Codec<ConfiguredWorldCarver<C>> configuredCodec;
+	private final MapCodec<ConfiguredWorldCarver<C>> configuredCodec;
 
 	private static <C extends CarverConfiguration, F extends WorldCarver<C>> F register(String string, F worldCarver) {
 		return Registry.register(BuiltInRegistries.CARVER, string, worldCarver);
 	}
 
 	public WorldCarver(Codec<C> codec) {
-		this.configuredCodec = codec.fieldOf("config").<ConfiguredWorldCarver<C>>xmap(this::configured, ConfiguredWorldCarver::config).codec();
+		this.configuredCodec = codec.fieldOf("config").xmap(this::configured, ConfiguredWorldCarver::config);
 	}
 
 	public ConfiguredWorldCarver<C> configured(C carverConfiguration) {
 		return new ConfiguredWorldCarver<>(this, carverConfiguration);
 	}
 
-	public Codec<ConfiguredWorldCarver<C>> configuredCodec() {
+	public MapCodec<ConfiguredWorldCarver<C>> configuredCodec() {
 		return this.configuredCodec;
 	}
 

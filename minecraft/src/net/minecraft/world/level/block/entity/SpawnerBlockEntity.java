@@ -37,8 +37,8 @@ public class SpawnerBlockEntity extends BlockEntity implements Spawner {
 	}
 
 	@Override
-	public void load(CompoundTag compoundTag, HolderLookup.Provider provider) {
-		super.load(compoundTag, provider);
+	protected void loadAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
+		super.loadAdditional(compoundTag, provider);
 		this.spawner.load(this.level, this.worldPosition, compoundTag);
 	}
 
@@ -62,7 +62,7 @@ public class SpawnerBlockEntity extends BlockEntity implements Spawner {
 
 	@Override
 	public CompoundTag getUpdateTag(HolderLookup.Provider provider) {
-		CompoundTag compoundTag = this.saveWithoutMetadata(provider);
+		CompoundTag compoundTag = this.saveCustomOnly(provider);
 		compoundTag.remove("SpawnPotentials");
 		return compoundTag;
 	}

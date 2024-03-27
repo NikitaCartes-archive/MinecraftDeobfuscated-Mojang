@@ -16,7 +16,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.util.ExtraCodecs;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
@@ -26,7 +25,7 @@ import org.lwjgl.util.freetype.FreeType;
 @Environment(EnvType.CLIENT)
 public record TrueTypeGlyphProviderDefinition(ResourceLocation location, float size, float oversample, TrueTypeGlyphProviderDefinition.Shift shift, String skip)
 	implements GlyphProviderDefinition {
-	private static final Codec<String> SKIP_LIST_CODEC = ExtraCodecs.withAlternative(Codec.STRING, Codec.STRING.listOf(), list -> String.join("", list));
+	private static final Codec<String> SKIP_LIST_CODEC = Codec.withAlternative(Codec.STRING, Codec.STRING.listOf(), list -> String.join("", list));
 	public static final MapCodec<TrueTypeGlyphProviderDefinition> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> instance.group(
 					ResourceLocation.CODEC.fieldOf("file").forGetter(TrueTypeGlyphProviderDefinition::location),

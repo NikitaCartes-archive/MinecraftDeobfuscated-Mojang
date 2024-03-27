@@ -2,6 +2,7 @@ package net.minecraft.world.level.storage.loot.predicates;
 
 import com.google.common.collect.ImmutableSet;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +17,7 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 
 public record BonusLevelTableCondition(Holder<Enchantment> enchantment, List<Float> values) implements LootItemCondition {
-	public static final Codec<BonusLevelTableCondition> CODEC = RecordCodecBuilder.create(
+	public static final MapCodec<BonusLevelTableCondition> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> instance.group(
 					BuiltInRegistries.ENCHANTMENT.holderByNameCodec().fieldOf("enchantment").forGetter(BonusLevelTableCondition::enchantment),
 					Codec.FLOAT.listOf().fieldOf("chances").forGetter(BonusLevelTableCondition::values)

@@ -160,12 +160,7 @@ public abstract class AbstractVillager extends AgeableMob implements InventoryCa
 		super.addAdditionalSaveData(compoundTag);
 		MerchantOffers merchantOffers = this.getOffers();
 		if (!merchantOffers.isEmpty()) {
-			compoundTag.put(
-				"Offers",
-				Util.getOrThrow(
-					MerchantOffers.CODEC.encodeStart(this.registryAccess().createSerializationContext(NbtOps.INSTANCE), merchantOffers), IllegalStateException::new
-				)
-			);
+			compoundTag.put("Offers", MerchantOffers.CODEC.encodeStart(this.registryAccess().createSerializationContext(NbtOps.INSTANCE), merchantOffers).getOrThrow());
 		}
 
 		this.writeInventoryToTag(compoundTag, this.registryAccess());

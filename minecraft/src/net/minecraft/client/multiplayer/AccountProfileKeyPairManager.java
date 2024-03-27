@@ -40,16 +40,12 @@ public class AccountProfileKeyPairManager implements ProfileKeyPairManager {
 	private static final Path PROFILE_KEY_PAIR_DIR = Path.of("profilekeys");
 	private final UserApiService userApiService;
 	private final Path profileKeyPairPath;
-	private CompletableFuture<Optional<ProfileKeyPair>> keyPair;
+	private CompletableFuture<Optional<ProfileKeyPair>> keyPair = CompletableFuture.completedFuture(Optional.empty());
 	private Instant nextProfileKeyRefreshTime = Instant.EPOCH;
 
 	public AccountProfileKeyPairManager(UserApiService userApiService, UUID uUID, Path path) {
 		this.userApiService = userApiService;
 		this.profileKeyPairPath = path.resolve(PROFILE_KEY_PAIR_DIR).resolve(uUID + ".json");
-		this.keyPair = CompletableFuture.supplyAsync(
-				() -> this.readProfileKeyPair().filter(profileKeyPair -> !profileKeyPair.publicKey().data().hasExpired()), Util.backgroundExecutor()
-			)
-			.thenCompose(this::readOrFetchProfileKeyPair);
 	}
 
 	@Override
@@ -78,14 +74,14 @@ public class AccountProfileKeyPairManager implements ProfileKeyPairManager {
 				try {
 					ProfileKeyPair profileKeyPair = this.fetchProfileKeyPair(this.userApiService);
 					this.writeProfileKeyPair(profileKeyPair);
-					return Optional.of(profileKeyPair);
+					return Optional.ofNullable(profileKeyPair);
 				} catch (CryptException | MinecraftClientException | IOException var3) {
 					LOGGER.error("Failed to retrieve profile key pair", (Throwable)var3);
 					this.writeProfileKeyPair(null);
 					return optional;
 				}
 			}
-		}, Util.backgroundExecutor());
+		}, Util.nonCriticalIoPool());
 	}
 
 	private Optional<ProfileKeyPair> readProfileKeyPair() {
@@ -131,7 +127,7 @@ public class AccountProfileKeyPairManager implements ProfileKeyPairManager {
 
 		if (profileKeyPair != null) {
 			if (SharedConstants.IS_RUNNING_IN_IDE) {
-				ProfileKeyPair.CODEC.encodeStart(JsonOps.INSTANCE, profileKeyPair).result().ifPresent(jsonElement -> {
+				ProfileKeyPair.CODEC.encodeStart(JsonOps.INSTANCE, profileKeyPair).ifSuccess(jsonElement -> {
 					try {
 						Files.createDirectories(this.profileKeyPairPath.getParent());
 						Files.writeString(this.profileKeyPairPath, jsonElement.toString());
@@ -143,6 +139,7 @@ public class AccountProfileKeyPairManager implements ProfileKeyPairManager {
 		}
 	}
 
+	@Nullable
 	private ProfileKeyPair fetchProfileKeyPair(UserApiService userApiService) throws CryptException, IOException {
 		KeyPairResponse keyPairResponse = userApiService.getKeyPair();
 		if (keyPairResponse != null) {
@@ -151,7 +148,7 @@ public class AccountProfileKeyPairManager implements ProfileKeyPairManager {
 				Crypt.stringToPemRsaPrivateKey(keyPairResponse.keyPair().privateKey()), new ProfilePublicKey(data), Instant.parse(keyPairResponse.refreshedAfter())
 			);
 		} else {
-			throw new IOException("Could not retrieve profile key pair");
+			return null;
 		}
 	}
 

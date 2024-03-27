@@ -1,7 +1,14 @@
 package net.minecraft.world.level.block.entity.trialspawner;
 
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Stream;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.server.level.ServerLevel;
@@ -10,9 +17,16 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.OminousItemSpawner;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.SpawnData;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.CollisionContext;
 
 public enum TrialSpawnerState implements StringRepresentable {
 	INACTIVE("inactive", 0, TrialSpawnerState.ParticleEmission.NONE, -1.0, false),
@@ -41,8 +55,6 @@ public enum TrialSpawnerState implements StringRepresentable {
 	TrialSpawnerState tickAndGetNext(BlockPos blockPos, TrialSpawner trialSpawner, ServerLevel serverLevel) {
 		TrialSpawnerData trialSpawnerData = trialSpawner.getData();
 		TrialSpawnerConfig trialSpawnerConfig = trialSpawner.getConfig();
-		PlayerDetector playerDetector = trialSpawner.getPlayerDetector();
-		PlayerDetector.EntitySelector entitySelector = trialSpawner.getEntitySelector();
 
 		return switch (this) {
 			case INACTIVE -> trialSpawnerData.getOrCreateDisplayEntity(trialSpawner, serverLevel, WAITING_FOR_PLAYERS) == null ? this : WAITING_FOR_PLAYERS;
@@ -50,7 +62,7 @@ public enum TrialSpawnerState implements StringRepresentable {
 				if (!trialSpawnerData.hasMobToSpawn(trialSpawner, serverLevel.random)) {
 					yield INACTIVE;
 				} else {
-					trialSpawnerData.tryDetectPlayers(serverLevel, blockPos, playerDetector, entitySelector, trialSpawnerConfig.requiredPlayerRange());
+					trialSpawnerData.tryDetectPlayers(serverLevel, blockPos, trialSpawner);
 					yield trialSpawnerData.detectedPlayers.isEmpty() ? this : ACTIVE;
 				}
 			}
@@ -59,10 +71,14 @@ public enum TrialSpawnerState implements StringRepresentable {
 					yield INACTIVE;
 				} else {
 					int i = trialSpawnerData.countAdditionalPlayers(blockPos);
-					trialSpawnerData.tryDetectPlayers(serverLevel, blockPos, playerDetector, entitySelector, trialSpawnerConfig.requiredPlayerRange());
+					trialSpawnerData.tryDetectPlayers(serverLevel, blockPos, trialSpawner);
+					if (trialSpawner.isOminous()) {
+						this.spawnOminousOminousItemSpawner(serverLevel, blockPos, trialSpawner);
+					}
+
 					if (trialSpawnerData.hasFinishedSpawningAllMobs(trialSpawnerConfig, i)) {
 						if (trialSpawnerData.haveAllCurrentMobsDied()) {
-							trialSpawnerData.cooldownEndsAt = serverLevel.getGameTime() + (long)trialSpawnerConfig.targetCooldownLength();
+							trialSpawnerData.cooldownEndsAt = serverLevel.getGameTime() + (long)trialSpawner.getTargetCooldownLength();
 							trialSpawnerData.totalMobsSpawned = 0;
 							trialSpawnerData.nextMobSpawnsAt = 0L;
 							yield WAITING_FOR_REWARD_EJECTION;
@@ -72,8 +88,8 @@ public enum TrialSpawnerState implements StringRepresentable {
 							trialSpawnerData.currentMobs.add(uUID);
 							trialSpawnerData.totalMobsSpawned++;
 							trialSpawnerData.nextMobSpawnsAt = serverLevel.getGameTime() + (long)trialSpawnerConfig.ticksBetweenSpawn();
-							trialSpawnerData.spawnPotentials.getRandom(serverLevel.getRandom()).ifPresent(wrapper -> {
-								trialSpawnerData.nextSpawnData = Optional.of((SpawnData)wrapper.getData());
+							trialSpawnerConfig.spawnPotentialsDefinition().getRandom(serverLevel.getRandom()).ifPresent(wrapper -> {
+								trialSpawnerData.nextSpawnData = Optional.of((SpawnData)wrapper.data());
 								trialSpawner.markUpdated();
 							});
 						});
@@ -83,7 +99,7 @@ public enum TrialSpawnerState implements StringRepresentable {
 				}
 			}
 			case WAITING_FOR_REWARD_EJECTION -> {
-				if (trialSpawnerData.isReadyToOpenShutter(serverLevel, trialSpawnerConfig, 40.0F)) {
+				if (trialSpawnerData.isReadyToOpenShutter(serverLevel, 40.0F, trialSpawner.getTargetCooldownLength())) {
 					serverLevel.playSound(null, blockPos, SoundEvents.TRIAL_SPAWNER_OPEN_SHUTTER, SoundSource.BLOCKS);
 					yield EJECTING_REWARD;
 				} else {
@@ -91,7 +107,7 @@ public enum TrialSpawnerState implements StringRepresentable {
 				}
 			}
 			case EJECTING_REWARD -> {
-				if (!trialSpawnerData.isReadyToEjectItems(serverLevel, trialSpawnerConfig, (float)TIME_BETWEEN_EACH_EJECTION)) {
+				if (!trialSpawnerData.isReadyToEjectItems(serverLevel, (float)TIME_BETWEEN_EACH_EJECTION, trialSpawner.getTargetCooldownLength())) {
 					yield this;
 				} else if (trialSpawnerData.detectedPlayers.isEmpty()) {
 					serverLevel.playSound(null, blockPos, SoundEvents.TRIAL_SPAWNER_CLOSE_SHUTTER, SoundSource.BLOCKS);
@@ -108,14 +124,85 @@ public enum TrialSpawnerState implements StringRepresentable {
 				}
 			}
 			case COOLDOWN -> {
-				if (trialSpawnerData.isCooldownFinished(serverLevel)) {
+				trialSpawnerData.tryDetectPlayers(serverLevel, blockPos, trialSpawner);
+				if (!trialSpawnerData.detectedPlayers.isEmpty()) {
+					trialSpawnerData.totalMobsSpawned = 0;
+					trialSpawnerData.nextMobSpawnsAt = 0L;
+					yield ACTIVE;
+				} else if (trialSpawnerData.isCooldownFinished(serverLevel)) {
 					trialSpawnerData.cooldownEndsAt = 0L;
+					trialSpawner.removeOminous(serverLevel, blockPos);
 					yield WAITING_FOR_PLAYERS;
 				} else {
 					yield this;
 				}
 			}
 		};
+	}
+
+	private void spawnOminousOminousItemSpawner(ServerLevel serverLevel, BlockPos blockPos, TrialSpawner trialSpawner) {
+		TrialSpawnerData trialSpawnerData = trialSpawner.getData();
+		TrialSpawnerConfig trialSpawnerConfig = trialSpawner.getConfig();
+		ItemStack itemStack = (ItemStack)trialSpawnerData.getDispensingItems(serverLevel, trialSpawnerConfig, blockPos)
+			.getRandomValue(serverLevel.random)
+			.orElse(ItemStack.EMPTY);
+		if (!itemStack.isEmpty()) {
+			if (this.timeToSpawnItemSpawner(serverLevel, trialSpawnerData)) {
+				calculatePositionToSpawnSpawner(serverLevel, blockPos, trialSpawner, trialSpawnerData).ifPresent(vec3 -> {
+					OminousItemSpawner ominousItemSpawner = OminousItemSpawner.create(serverLevel, itemStack);
+					ominousItemSpawner.moveTo(vec3);
+					serverLevel.addFreshEntity(ominousItemSpawner);
+					float f = (serverLevel.getRandom().nextFloat() - serverLevel.getRandom().nextFloat()) * 0.2F + 1.0F;
+					serverLevel.playSound(null, BlockPos.containing(vec3), SoundEvents.TRIAL_SPAWNER_SPAWN_ITEM_BEGIN, SoundSource.BLOCKS, 1.0F, f);
+					trialSpawnerData.cooldownEndsAt = serverLevel.getGameTime() + trialSpawner.getOminousConfig().ticksBetweenItemSpawners();
+				});
+			}
+		}
+	}
+
+	private static Optional<Vec3> calculatePositionToSpawnSpawner(
+		ServerLevel serverLevel, BlockPos blockPos, TrialSpawner trialSpawner, TrialSpawnerData trialSpawnerData
+	) {
+		List<Player> list = trialSpawnerData.detectedPlayers
+			.stream()
+			.map(serverLevel::getPlayerByUUID)
+			.filter(Objects::nonNull)
+			.filter(
+				player -> !player.isCreative()
+						&& !player.isSpectator()
+						&& player.isAlive()
+						&& player.distanceToSqr(blockPos.getCenter()) <= (double)Mth.square(trialSpawner.getRequiredPlayerRange())
+			)
+			.toList();
+		if (list.isEmpty()) {
+			return Optional.empty();
+		} else {
+			Entity entity = selectEntityToSpawnItemAbove(list, trialSpawnerData.currentMobs, trialSpawner, blockPos, serverLevel);
+			return calculatePositionAbove(entity, serverLevel);
+		}
+	}
+
+	private static Optional<Vec3> calculatePositionAbove(Entity entity, ServerLevel serverLevel) {
+		Vec3 vec3 = entity.position();
+		Vec3 vec32 = vec3.relative(Direction.UP, (double)(entity.getBbHeight() + 2.0F + (float)serverLevel.random.nextInt(4)))
+			.relative(Direction.Plane.HORIZONTAL.getRandomDirection(serverLevel.random), (double)serverLevel.random.nextInt(5));
+		BlockHitResult blockHitResult = serverLevel.clip(new ClipContext(vec3, vec32, ClipContext.Block.VISUAL, ClipContext.Fluid.NONE, CollisionContext.empty()));
+		Vec3 vec33 = blockHitResult.getBlockPos().getCenter().relative(Direction.DOWN, 1.0);
+		BlockPos blockPos = BlockPos.containing(vec33);
+		return !serverLevel.getBlockState(blockPos).getCollisionShape(serverLevel, blockPos).isEmpty() ? Optional.empty() : Optional.of(vec33);
+	}
+
+	private static Entity selectEntityToSpawnItemAbove(List<Player> list, Set<UUID> set, TrialSpawner trialSpawner, BlockPos blockPos, ServerLevel serverLevel) {
+		Stream<Entity> stream = set.stream()
+			.map(serverLevel::getEntity)
+			.filter(Objects::nonNull)
+			.filter(entity -> entity.isAlive() && entity.distanceToSqr(blockPos.getCenter()) <= (double)Mth.square(trialSpawner.getRequiredPlayerRange()));
+		List<Entity> list2 = Stream.concat(list.stream(), stream).toList();
+		return Util.getRandom(list2, serverLevel.random);
+	}
+
+	private boolean timeToSpawnItemSpawner(ServerLevel serverLevel, TrialSpawnerData trialSpawnerData) {
+		return serverLevel.getGameTime() >= trialSpawnerData.cooldownEndsAt;
 	}
 
 	public int lightLevel() {
@@ -134,8 +221,8 @@ public enum TrialSpawnerState implements StringRepresentable {
 		return this.isCapableOfSpawning;
 	}
 
-	public void emitParticles(Level level, BlockPos blockPos) {
-		this.particleEmission.emit(level, level.getRandom(), blockPos);
+	public void emitParticles(Level level, BlockPos blockPos, boolean bl) {
+		this.particleEmission.emit(level, level.getRandom(), blockPos, bl);
 	}
 
 	@Override
@@ -153,20 +240,20 @@ public enum TrialSpawnerState implements StringRepresentable {
 	}
 
 	interface ParticleEmission {
-		TrialSpawnerState.ParticleEmission NONE = (level, randomSource, blockPos) -> {
+		TrialSpawnerState.ParticleEmission NONE = (level, randomSource, blockPos, bl) -> {
 		};
-		TrialSpawnerState.ParticleEmission SMALL_FLAMES = (level, randomSource, blockPos) -> {
+		TrialSpawnerState.ParticleEmission SMALL_FLAMES = (level, randomSource, blockPos, bl) -> {
 			if (randomSource.nextInt(2) == 0) {
 				Vec3 vec3 = blockPos.getCenter().offsetRandom(randomSource, 0.9F);
-				addParticle(ParticleTypes.SMALL_FLAME, vec3, level);
+				addParticle(bl ? ParticleTypes.SOUL_FIRE_FLAME : ParticleTypes.SMALL_FLAME, vec3, level);
 			}
 		};
-		TrialSpawnerState.ParticleEmission FLAMES_AND_SMOKE = (level, randomSource, blockPos) -> {
+		TrialSpawnerState.ParticleEmission FLAMES_AND_SMOKE = (level, randomSource, blockPos, bl) -> {
 			Vec3 vec3 = blockPos.getCenter().offsetRandom(randomSource, 1.0F);
 			addParticle(ParticleTypes.SMOKE, vec3, level);
-			addParticle(ParticleTypes.FLAME, vec3, level);
+			addParticle(bl ? ParticleTypes.SOUL_FIRE_FLAME : ParticleTypes.FLAME, vec3, level);
 		};
-		TrialSpawnerState.ParticleEmission SMOKE_INSIDE_AND_TOP_FACE = (level, randomSource, blockPos) -> {
+		TrialSpawnerState.ParticleEmission SMOKE_INSIDE_AND_TOP_FACE = (level, randomSource, blockPos, bl) -> {
 			Vec3 vec3 = blockPos.getCenter().offsetRandom(randomSource, 0.9F);
 			if (randomSource.nextInt(3) == 0) {
 				addParticle(ParticleTypes.SMOKE, vec3, level);
@@ -186,7 +273,7 @@ public enum TrialSpawnerState implements StringRepresentable {
 			level.addParticle(simpleParticleType, vec3.x(), vec3.y(), vec3.z(), 0.0, 0.0, 0.0);
 		}
 
-		void emit(Level level, RandomSource randomSource, BlockPos blockPos);
+		void emit(Level level, RandomSource randomSource, BlockPos blockPos, boolean bl);
 	}
 
 	static class SpinningMob {

@@ -5,6 +5,7 @@ import java.util.Map;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.components.ChatComponent;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.telemetry.WorldSessionTelemetryManager;
 import net.minecraft.core.RegistryAccess;
@@ -20,6 +21,7 @@ public record CommonListenerCookie(
 	@Nullable String serverBrand,
 	@Nullable ServerData serverData,
 	@Nullable Screen postDisconnectScreen,
-	Map<ResourceLocation, byte[]> serverCookies
+	Map<ResourceLocation, byte[]> serverCookies,
+	@Nullable ChatComponent.State chatState
 ) {
 }

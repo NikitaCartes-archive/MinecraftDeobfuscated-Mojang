@@ -166,8 +166,8 @@ public abstract class StateHolder<O, S> {
 			object -> {
 				S stateHolder = (S)function.apply(object);
 				return stateHolder.getValues().isEmpty()
-					? Codec.unit(stateHolder)
-					: stateHolder.propertiesCodec.codec().optionalFieldOf("Properties").xmap(optional -> (StateHolder)optional.orElse(stateHolder), Optional::of).codec();
+					? MapCodec.unit(stateHolder)
+					: stateHolder.propertiesCodec.codec().lenientOptionalFieldOf("Properties").xmap(optional -> (StateHolder)optional.orElse(stateHolder), Optional::of);
 			}
 		);
 	}

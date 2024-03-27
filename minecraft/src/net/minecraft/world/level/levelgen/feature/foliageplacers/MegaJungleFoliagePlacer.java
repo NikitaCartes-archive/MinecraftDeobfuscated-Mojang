@@ -1,6 +1,7 @@
 package net.minecraft.world.level.levelgen.feature.foliageplacers;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.IntProvider;
@@ -8,7 +9,7 @@ import net.minecraft.world.level.LevelSimulatedReader;
 import net.minecraft.world.level.levelgen.feature.configurations.TreeConfiguration;
 
 public class MegaJungleFoliagePlacer extends FoliagePlacer {
-	public static final Codec<MegaJungleFoliagePlacer> CODEC = RecordCodecBuilder.create(
+	public static final MapCodec<MegaJungleFoliagePlacer> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> foliagePlacerParts(instance)
 				.and(Codec.intRange(0, 16).fieldOf("height").forGetter(megaJungleFoliagePlacer -> megaJungleFoliagePlacer.height))
 				.apply(instance, MegaJungleFoliagePlacer::new)

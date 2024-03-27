@@ -1,7 +1,7 @@
 package net.minecraft.world.level.levelgen.heightproviders;
 
 import com.mojang.logging.LogUtils;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
@@ -12,7 +12,7 @@ import net.minecraft.world.level.levelgen.WorldGenerationContext;
 import org.slf4j.Logger;
 
 public class UniformHeight extends HeightProvider {
-	public static final Codec<UniformHeight> CODEC = RecordCodecBuilder.create(
+	public static final MapCodec<UniformHeight> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> instance.group(
 					VerticalAnchor.CODEC.fieldOf("min_inclusive").forGetter(uniformHeight -> uniformHeight.minInclusive),
 					VerticalAnchor.CODEC.fieldOf("max_inclusive").forGetter(uniformHeight -> uniformHeight.maxInclusive)

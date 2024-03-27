@@ -482,7 +482,7 @@ public class LevelChunk extends ChunkAccess {
 		consumer.accept((ClientboundLevelChunkPacketData.BlockEntityTagOutput)(blockPos, blockEntityType, compoundTagx) -> {
 			BlockEntity blockEntity = this.getBlockEntity(blockPos, LevelChunk.EntityCreationType.IMMEDIATE);
 			if (blockEntity != null && compoundTagx != null && blockEntity.getType() == blockEntityType) {
-				blockEntity.load(compoundTagx, this.level.registryAccess());
+				blockEntity.loadWithComponents(compoundTagx, this.level.registryAccess());
 			}
 		});
 	}

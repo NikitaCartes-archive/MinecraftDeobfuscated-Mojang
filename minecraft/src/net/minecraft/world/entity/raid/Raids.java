@@ -5,20 +5,16 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Nullable;
-import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.network.protocol.game.ClientboundEntityEventPacket;
 import net.minecraft.network.protocol.game.DebugPackets;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.stats.Stats;
 import net.minecraft.tags.PoiTypeTags;
 import net.minecraft.util.datafix.DataFixTypes;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.entity.ai.village.poi.PoiRecord;
 import net.minecraft.world.level.GameRules;
@@ -80,7 +76,7 @@ public class Raids extends SavedData {
 	}
 
 	@Nullable
-	public Raid createOrExtendRaid(ServerPlayer serverPlayer) {
+	public Raid createOrExtendRaid(ServerPlayer serverPlayer, BlockPos blockPos) {
 		if (serverPlayer.isSpectator()) {
 			return null;
 		} else if (this.level.getGameRules().getBoolean(GameRules.RULE_DISABLE_RAIDS)) {
@@ -90,7 +86,6 @@ public class Raids extends SavedData {
 			if (!dimensionType.hasRaids()) {
 				return null;
 			} else {
-				BlockPos blockPos = serverPlayer.blockPosition();
 				List<PoiRecord> list = this.level
 					.getPoiManager()
 					.getInRange(holder -> holder.is(PoiTypeTags.VILLAGE), blockPos, 64, PoiManager.Occupancy.IS_OCCUPIED)
@@ -113,27 +108,12 @@ public class Raids extends SavedData {
 				}
 
 				Raid raid = this.getOrCreateRaid(serverPlayer.serverLevel(), blockPos3);
-				boolean bl = false;
-				if (!raid.isStarted()) {
-					if (!this.raidMap.containsKey(raid.getId())) {
-						this.raidMap.put(raid.getId(), raid);
-					}
-
-					bl = true;
-				} else if (raid.getBadOmenLevel() < raid.getMaxBadOmenLevel()) {
-					bl = true;
-				} else {
-					serverPlayer.removeEffect(MobEffects.BAD_OMEN);
-					serverPlayer.connection.send(new ClientboundEntityEventPacket(serverPlayer, (byte)43));
+				if (!raid.isStarted() && !this.raidMap.containsKey(raid.getId())) {
+					this.raidMap.put(raid.getId(), raid);
 				}
 
-				if (bl) {
-					raid.absorbBadOmen(serverPlayer);
-					serverPlayer.connection.send(new ClientboundEntityEventPacket(serverPlayer, (byte)43));
-					if (!raid.hasFirstWaveSpawned()) {
-						serverPlayer.awardStat(Stats.RAID_TRIGGER);
-						CriteriaTriggers.BAD_OMEN.trigger(serverPlayer);
-					}
+				if (!raid.isStarted() || raid.getRaidOmenLevel() < raid.getMaxRaidOmenLevel()) {
+					raid.absorbRaidOmen(serverPlayer);
 				}
 
 				this.setDirty();

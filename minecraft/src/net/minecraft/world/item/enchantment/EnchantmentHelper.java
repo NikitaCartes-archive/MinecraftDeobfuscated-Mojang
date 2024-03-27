@@ -23,6 +23,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -107,6 +108,17 @@ public class EnchantmentHelper {
 		return i > 0 ? getSweepingDamageRatio(i) : 0.0F;
 	}
 
+	public static float calculateArmorBreach(@Nullable Entity entity, float f) {
+		if (entity instanceof LivingEntity livingEntity) {
+			int i = getEnchantmentLevel(Enchantments.BREACH, livingEntity);
+			if (i > 0) {
+				return BreachEnchantment.calculateArmorBreach((float)i, f);
+			}
+		}
+
+		return f;
+	}
+
 	public static void doPostHurtEffects(LivingEntity livingEntity, Entity entity) {
 		EnchantmentHelper.EnchantmentVisitor enchantmentVisitor = (enchantment, i) -> enchantment.doPostHurt(livingEntity, entity, i);
 		if (livingEntity != null) {
@@ -126,6 +138,12 @@ public class EnchantmentHelper {
 
 		if (livingEntity instanceof Player) {
 			runIterationOnItem(enchantmentVisitor, livingEntity.getMainHandItem());
+		}
+	}
+
+	public static void doPostItemStackHurtEffects(LivingEntity livingEntity, Entity entity, ItemEnchantments itemEnchantments) {
+		for (Entry<Holder<Enchantment>> entry : itemEnchantments.entrySet()) {
+			((Enchantment)((Holder)entry.getKey()).value()).doPostItemStackHurt(livingEntity, entity, entry.getIntValue());
 		}
 	}
 
@@ -264,8 +282,8 @@ public class EnchantmentHelper {
 		}
 	}
 
-	public static ItemStack enchantItem(RandomSource randomSource, ItemStack itemStack, int i, boolean bl) {
-		List<EnchantmentInstance> list = selectEnchantment(randomSource, itemStack, i, bl);
+	public static ItemStack enchantItem(FeatureFlagSet featureFlagSet, RandomSource randomSource, ItemStack itemStack, int i, boolean bl) {
+		List<EnchantmentInstance> list = selectEnchantment(featureFlagSet, randomSource, itemStack, i, bl);
 		if (itemStack.is(Items.BOOK)) {
 			itemStack = new ItemStack(Items.ENCHANTED_BOOK);
 		}
@@ -277,7 +295,7 @@ public class EnchantmentHelper {
 		return itemStack;
 	}
 
-	public static List<EnchantmentInstance> selectEnchantment(RandomSource randomSource, ItemStack itemStack, int i, boolean bl) {
+	public static List<EnchantmentInstance> selectEnchantment(FeatureFlagSet featureFlagSet, RandomSource randomSource, ItemStack itemStack, int i, boolean bl) {
 		List<EnchantmentInstance> list = Lists.<EnchantmentInstance>newArrayList();
 		Item item = itemStack.getItem();
 		int j = item.getEnchantmentValue();
@@ -287,7 +305,7 @@ public class EnchantmentHelper {
 			i += 1 + randomSource.nextInt(j / 4 + 1) + randomSource.nextInt(j / 4 + 1);
 			float f = (randomSource.nextFloat() + randomSource.nextFloat() - 1.0F) * 0.15F;
 			i = Mth.clamp(Math.round((float)i + (float)i * f), 1, Integer.MAX_VALUE);
-			List<EnchantmentInstance> list2 = getAvailableEnchantmentResults(i, itemStack, bl);
+			List<EnchantmentInstance> list2 = getAvailableEnchantmentResults(featureFlagSet, i, itemStack, bl);
 			if (!list2.isEmpty()) {
 				WeightedRandom.getRandomItem(randomSource, list2).ifPresent(list::add);
 
@@ -329,12 +347,13 @@ public class EnchantmentHelper {
 		return true;
 	}
 
-	public static List<EnchantmentInstance> getAvailableEnchantmentResults(int i, ItemStack itemStack, boolean bl) {
+	public static List<EnchantmentInstance> getAvailableEnchantmentResults(FeatureFlagSet featureFlagSet, int i, ItemStack itemStack, boolean bl) {
 		List<EnchantmentInstance> list = Lists.<EnchantmentInstance>newArrayList();
 		boolean bl2 = itemStack.is(Items.BOOK);
 
 		for (Enchantment enchantment : BuiltInRegistries.ENCHANTMENT) {
-			if ((!enchantment.isTreasureOnly() || bl)
+			if (enchantment.isEnabled(featureFlagSet)
+				&& (!enchantment.isTreasureOnly() || bl)
 				&& enchantment.isDiscoverable()
 				&& (bl2 || enchantment.canEnchant(itemStack) && enchantment.isPrimaryItem(itemStack))) {
 				for (int j = enchantment.getMaxLevel(); j > enchantment.getMinLevel() - 1; j--) {

@@ -2,7 +2,6 @@ package net.minecraft.core.registries;
 
 import com.google.common.collect.Maps;
 import com.mojang.logging.LogUtils;
-import com.mojang.serialization.Codec;
 import com.mojang.serialization.Lifecycle;
 import com.mojang.serialization.MapCodec;
 import java.util.Map;
@@ -219,15 +218,15 @@ public class BuiltInRegistries {
 	public static final Registry<FeatureSizeType<?>> FEATURE_SIZE_TYPE = registerSimple(
 		Registries.FEATURE_SIZE_TYPE, registry -> FeatureSizeType.TWO_LAYERS_FEATURE_SIZE
 	);
-	public static final Registry<Codec<? extends BiomeSource>> BIOME_SOURCE = registerSimple(Registries.BIOME_SOURCE, BiomeSources::bootstrap);
-	public static final Registry<Codec<? extends ChunkGenerator>> CHUNK_GENERATOR = registerSimple(Registries.CHUNK_GENERATOR, ChunkGenerators::bootstrap);
-	public static final Registry<Codec<? extends SurfaceRules.ConditionSource>> MATERIAL_CONDITION = registerSimple(
+	public static final Registry<MapCodec<? extends BiomeSource>> BIOME_SOURCE = registerSimple(Registries.BIOME_SOURCE, BiomeSources::bootstrap);
+	public static final Registry<MapCodec<? extends ChunkGenerator>> CHUNK_GENERATOR = registerSimple(Registries.CHUNK_GENERATOR, ChunkGenerators::bootstrap);
+	public static final Registry<MapCodec<? extends SurfaceRules.ConditionSource>> MATERIAL_CONDITION = registerSimple(
 		Registries.MATERIAL_CONDITION, SurfaceRules.ConditionSource::bootstrap
 	);
-	public static final Registry<Codec<? extends SurfaceRules.RuleSource>> MATERIAL_RULE = registerSimple(
+	public static final Registry<MapCodec<? extends SurfaceRules.RuleSource>> MATERIAL_RULE = registerSimple(
 		Registries.MATERIAL_RULE, SurfaceRules.RuleSource::bootstrap
 	);
-	public static final Registry<Codec<? extends DensityFunction>> DENSITY_FUNCTION_TYPE = registerSimple(
+	public static final Registry<MapCodec<? extends DensityFunction>> DENSITY_FUNCTION_TYPE = registerSimple(
 		Registries.DENSITY_FUNCTION_TYPE, DensityFunctions::bootstrap
 	);
 	public static final Registry<MapCodec<? extends Block>> BLOCK_TYPE = registerSimple(Registries.BLOCK_TYPE, BlockTypes::bootstrap);
@@ -237,7 +236,7 @@ public class BuiltInRegistries {
 	public static final Registry<StructurePoolElementType<?>> STRUCTURE_POOL_ELEMENT = registerSimple(
 		Registries.STRUCTURE_POOL_ELEMENT, registry -> StructurePoolElementType.EMPTY
 	);
-	public static final Registry<Codec<? extends PoolAliasBinding>> POOL_ALIAS_BINDING_TYPE = registerSimple(
+	public static final Registry<MapCodec<? extends PoolAliasBinding>> POOL_ALIAS_BINDING_TYPE = registerSimple(
 		Registries.POOL_ALIAS_BINDING, PoolAliasBindings::bootstrap
 	);
 	public static final Registry<CatVariant> CAT_VARIANT = registerSimple(Registries.CAT_VARIANT, CatVariant::bootstrap);

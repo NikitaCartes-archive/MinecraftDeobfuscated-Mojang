@@ -1,6 +1,7 @@
 package net.minecraft.client.multiplayer.chat;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import java.util.function.Supplier;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -18,15 +19,15 @@ public interface LoggedChatEvent {
 		SYSTEM("system", () -> LoggedChatMessage.System.CODEC);
 
 		private final String serializedName;
-		private final Supplier<Codec<? extends LoggedChatEvent>> codec;
+		private final Supplier<MapCodec<? extends LoggedChatEvent>> codec;
 
-		private Type(String string2, Supplier<Codec<? extends LoggedChatEvent>> supplier) {
+		private Type(String string2, Supplier<MapCodec<? extends LoggedChatEvent>> supplier) {
 			this.serializedName = string2;
 			this.codec = supplier;
 		}
 
-		private Codec<? extends LoggedChatEvent> codec() {
-			return (Codec<? extends LoggedChatEvent>)this.codec.get();
+		private MapCodec<? extends LoggedChatEvent> codec() {
+			return (MapCodec<? extends LoggedChatEvent>)this.codec.get();
 		}
 
 		@Override

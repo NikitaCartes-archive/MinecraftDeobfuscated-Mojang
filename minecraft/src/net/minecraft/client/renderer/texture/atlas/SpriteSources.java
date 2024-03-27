@@ -4,6 +4,7 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
+import com.mojang.serialization.MapCodec;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -32,8 +33,8 @@ public class SpriteSources {
 	public static Codec<SpriteSource> CODEC = TYPE_CODEC.dispatch(SpriteSource::type, SpriteSourceType::codec);
 	public static Codec<List<SpriteSource>> FILE_CODEC = CODEC.listOf().fieldOf("sources").codec();
 
-	private static SpriteSourceType register(String string, Codec<? extends SpriteSource> codec) {
-		SpriteSourceType spriteSourceType = new SpriteSourceType(codec);
+	private static SpriteSourceType register(String string, MapCodec<? extends SpriteSource> mapCodec) {
+		SpriteSourceType spriteSourceType = new SpriteSourceType(mapCodec);
 		ResourceLocation resourceLocation = new ResourceLocation(string);
 		SpriteSourceType spriteSourceType2 = (SpriteSourceType)TYPES.putIfAbsent(resourceLocation, spriteSourceType);
 		if (spriteSourceType2 != null) {

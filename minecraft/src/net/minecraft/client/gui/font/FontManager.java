@@ -231,9 +231,9 @@ public class FontManager implements PreparableReloadListener, AutoCloseable {
 
 				try {
 					JsonElement jsonElement = GSON.fromJson(reader, JsonElement.class);
-					FontManager.FontDefinitionFile fontDefinitionFile = Util.getOrThrow(
-						FontManager.FontDefinitionFile.CODEC.parse(JsonOps.INSTANCE, jsonElement), JsonParseException::new
-					);
+					FontManager.FontDefinitionFile fontDefinitionFile = FontManager.FontDefinitionFile.CODEC
+						.parse(JsonOps.INSTANCE, jsonElement)
+						.getOrThrow(JsonParseException::new);
 					List<GlyphProviderDefinition.Conditional> list3 = fontDefinitionFile.providers;
 
 					for (int i = list3.size() - 1; i >= 0; i--) {

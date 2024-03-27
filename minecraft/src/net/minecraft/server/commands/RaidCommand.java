@@ -51,7 +51,7 @@ public class RaidCommand {
 					Commands.literal("setomen")
 						.then(
 							Commands.argument("level", IntegerArgumentType.integer(0))
-								.executes(commandContext -> setBadOmenLevel(commandContext.getSource(), IntegerArgumentType.getInteger(commandContext, "level")))
+								.executes(commandContext -> setRaidOmenLevel(commandContext.getSource(), IntegerArgumentType.getInteger(commandContext, "level")))
 						)
 				)
 				.then(Commands.literal("glow").executes(commandContext -> glow(commandContext.getSource())))
@@ -69,16 +69,16 @@ public class RaidCommand {
 		return 1;
 	}
 
-	private static int setBadOmenLevel(CommandSourceStack commandSourceStack, int i) throws CommandSyntaxException {
+	private static int setRaidOmenLevel(CommandSourceStack commandSourceStack, int i) throws CommandSyntaxException {
 		Raid raid = getRaid(commandSourceStack.getPlayerOrException());
 		if (raid != null) {
-			int j = raid.getMaxBadOmenLevel();
+			int j = raid.getMaxRaidOmenLevel();
 			if (i > j) {
-				commandSourceStack.sendFailure(Component.literal("Sorry, the max bad omen level you can set is " + j));
+				commandSourceStack.sendFailure(Component.literal("Sorry, the max raid omen level you can set is " + j));
 			} else {
-				int k = raid.getBadOmenLevel();
-				raid.setBadOmenLevel(i);
-				commandSourceStack.sendSuccess(() -> Component.literal("Changed village's bad omen level from " + k + " to " + i), false);
+				int k = raid.getRaidOmenLevel();
+				raid.setRaidOmenLevel(i);
+				commandSourceStack.sendSuccess(() -> Component.literal("Changed village's raid omen level from " + k + " to " + i), false);
 			}
 		} else {
 			commandSourceStack.sendFailure(Component.literal("No raid found here"));
@@ -126,9 +126,9 @@ public class RaidCommand {
 			return -1;
 		} else {
 			Raids raids = serverPlayer.serverLevel().getRaids();
-			Raid raid = raids.createOrExtendRaid(serverPlayer);
+			Raid raid = raids.createOrExtendRaid(serverPlayer, serverPlayer.blockPosition());
 			if (raid != null) {
-				raid.setBadOmenLevel(i);
+				raid.setRaidOmenLevel(i);
 				raids.setDirty();
 				commandSourceStack.sendSuccess(() -> Component.literal("Created a raid in your local village"), false);
 			} else {
@@ -162,8 +162,8 @@ public class RaidCommand {
 			StringBuilder stringBuilder2 = new StringBuilder();
 			stringBuilder2.append("Num groups spawned: ");
 			stringBuilder2.append(raid.getGroupsSpawned());
-			stringBuilder2.append(" Bad omen level: ");
-			stringBuilder2.append(raid.getBadOmenLevel());
+			stringBuilder2.append(" Raid omen level: ");
+			stringBuilder2.append(raid.getRaidOmenLevel());
 			stringBuilder2.append(" Num mobs: ");
 			stringBuilder2.append(raid.getTotalRaidersAlive());
 			stringBuilder2.append(" Raid health: ");

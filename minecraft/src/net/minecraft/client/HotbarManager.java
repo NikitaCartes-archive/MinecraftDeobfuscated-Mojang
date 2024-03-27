@@ -6,7 +6,6 @@ import com.mojang.serialization.DataResult;
 import java.nio.file.Path;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.Util;
 import net.minecraft.client.player.inventory.Hotbar;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
@@ -62,7 +61,7 @@ public class HotbarManager {
 			for (int i = 0; i < 9; i++) {
 				Hotbar hotbar = this.get(i);
 				DataResult<Tag> dataResult = Hotbar.CODEC.encodeStart(NbtOps.INSTANCE, hotbar);
-				compoundTag.put(String.valueOf(i), Util.getOrThrow(dataResult, IllegalStateException::new));
+				compoundTag.put(String.valueOf(i), dataResult.getOrThrow());
 			}
 
 			NbtIo.write(compoundTag, this.optionsFile);

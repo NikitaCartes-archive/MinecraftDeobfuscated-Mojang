@@ -1,7 +1,7 @@
 package net.minecraft.world.level.storage.loot.functions;
 
 import com.google.common.collect.ImmutableList;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import net.minecraft.core.Holder;
@@ -19,7 +19,7 @@ import net.minecraft.world.level.storage.loot.entries.LootPoolEntryContainer;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
 public class SetContainerContents extends LootItemConditionalFunction {
-	public static final Codec<SetContainerContents> CODEC = RecordCodecBuilder.create(
+	public static final MapCodec<SetContainerContents> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> commonFields(instance)
 				.<Holder<BlockEntityType<?>>, List<LootPoolEntryContainer>>and(
 					instance.group(

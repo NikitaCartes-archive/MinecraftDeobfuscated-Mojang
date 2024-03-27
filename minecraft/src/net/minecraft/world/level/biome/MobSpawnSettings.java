@@ -116,8 +116,7 @@ public class MobSpawnSettings {
 	}
 
 	public static class SpawnerData extends WeightedEntry.IntrusiveBase {
-		public static final Codec<MobSpawnSettings.SpawnerData> CODEC = ExtraCodecs.validate(
-			RecordCodecBuilder.create(
+		public static final Codec<MobSpawnSettings.SpawnerData> CODEC = RecordCodecBuilder.<MobSpawnSettings.SpawnerData>create(
 				instance -> instance.group(
 							BuiltInRegistries.ENTITY_TYPE.byNameCodec().fieldOf("type").forGetter(spawnerData -> spawnerData.type),
 							Weight.CODEC.fieldOf("weight").forGetter(WeightedEntry.IntrusiveBase::getWeight),
@@ -125,11 +124,12 @@ public class MobSpawnSettings {
 							ExtraCodecs.POSITIVE_INT.fieldOf("maxCount").forGetter(spawnerData -> spawnerData.maxCount)
 						)
 						.apply(instance, MobSpawnSettings.SpawnerData::new)
-			),
-			spawnerData -> spawnerData.minCount > spawnerData.maxCount
-					? DataResult.error(() -> "minCount needs to be smaller or equal to maxCount")
-					: DataResult.success(spawnerData)
-		);
+			)
+			.validate(
+				spawnerData -> spawnerData.minCount > spawnerData.maxCount
+						? DataResult.error(() -> "minCount needs to be smaller or equal to maxCount")
+						: DataResult.success(spawnerData)
+			);
 		public final EntityType<?> type;
 		public final int minCount;
 		public final int maxCount;

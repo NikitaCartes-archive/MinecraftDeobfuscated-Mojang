@@ -1,6 +1,6 @@
 package net.minecraft.world.level.levelgen.placement;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import java.util.function.Supplier;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -9,7 +9,7 @@ import net.minecraft.world.level.biome.Biome;
 
 public class BiomeFilter extends PlacementFilter {
 	private static final BiomeFilter INSTANCE = new BiomeFilter();
-	public static Codec<BiomeFilter> CODEC = Codec.unit((Supplier<BiomeFilter>)(() -> INSTANCE));
+	public static MapCodec<BiomeFilter> CODEC = MapCodec.unit((Supplier<BiomeFilter>)(() -> INSTANCE));
 
 	private BiomeFilter() {
 	}

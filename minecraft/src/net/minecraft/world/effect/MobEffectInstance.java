@@ -9,7 +9,6 @@ import io.netty.buffer.ByteBuf;
 import it.unimi.dsi.fastutil.ints.Int2IntFunction;
 import java.util.Optional;
 import javax.annotation.Nullable;
-import net.minecraft.Util;
 import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -22,6 +21,8 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.Mth;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import org.slf4j.Logger;
 
@@ -248,6 +249,14 @@ public class MobEffectInstance implements Comparable<MobEffectInstance> {
 		this.effect.value().onEffectStarted(livingEntity, this.amplifier);
 	}
 
+	public void onMobRemoved(LivingEntity livingEntity, Entity.RemovalReason removalReason) {
+		this.effect.value().onMobRemoved(livingEntity, this.amplifier, removalReason);
+	}
+
+	public void onMobHurt(LivingEntity livingEntity, DamageSource damageSource, float f) {
+		this.effect.value().onMobHurt(livingEntity, this.amplifier, damageSource, f);
+	}
+
 	public String getDescriptionId() {
 		return this.effect.value().getDescriptionId();
 	}
@@ -296,7 +305,7 @@ public class MobEffectInstance implements Comparable<MobEffectInstance> {
 	}
 
 	public Tag save() {
-		return Util.getOrThrow(CODEC.encodeStart(NbtOps.INSTANCE, this), IllegalStateException::new);
+		return CODEC.encodeStart(NbtOps.INSTANCE, this).getOrThrow();
 	}
 
 	@Nullable
@@ -317,6 +326,10 @@ public class MobEffectInstance implements Comparable<MobEffectInstance> {
 				.compare(this.isAmbient(), mobEffectInstance.isAmbient())
 				.compare(this.getEffect().value().getColor(), mobEffectInstance.getEffect().value().getColor())
 				.result();
+	}
+
+	public void onEffectAdded(LivingEntity livingEntity) {
+		this.effect.value().onEffectAdded(livingEntity, this.amplifier);
 	}
 
 	public boolean is(Holder<MobEffect> holder) {
@@ -378,16 +391,16 @@ public class MobEffectInstance implements Comparable<MobEffectInstance> {
 	}
 
 	static record Details(int amplifier, int duration, boolean ambient, boolean showParticles, boolean showIcon, Optional<MobEffectInstance.Details> hiddenEffect) {
-		public static final MapCodec<MobEffectInstance.Details> MAP_CODEC = ExtraCodecs.recursiveMap(
+		public static final MapCodec<MobEffectInstance.Details> MAP_CODEC = MapCodec.recursive(
 			"MobEffectInstance.Details",
 			codec -> RecordCodecBuilder.mapCodec(
 					instance -> instance.group(
-								ExtraCodecs.strictOptionalField(ExtraCodecs.UNSIGNED_BYTE, "amplifier", 0).forGetter(MobEffectInstance.Details::amplifier),
-								ExtraCodecs.strictOptionalField(Codec.INT, "duration", 0).forGetter(MobEffectInstance.Details::duration),
-								ExtraCodecs.strictOptionalField(Codec.BOOL, "ambient", false).forGetter(MobEffectInstance.Details::ambient),
-								ExtraCodecs.strictOptionalField(Codec.BOOL, "show_particles", true).forGetter(MobEffectInstance.Details::showParticles),
-								ExtraCodecs.strictOptionalField(Codec.BOOL, "show_icon").forGetter(details -> Optional.of(details.showIcon())),
-								ExtraCodecs.strictOptionalField(codec, "hidden_effect").forGetter(MobEffectInstance.Details::hiddenEffect)
+								ExtraCodecs.UNSIGNED_BYTE.optionalFieldOf("amplifier", 0).forGetter(MobEffectInstance.Details::amplifier),
+								Codec.INT.optionalFieldOf("duration", Integer.valueOf(0)).forGetter(MobEffectInstance.Details::duration),
+								Codec.BOOL.optionalFieldOf("ambient", Boolean.valueOf(false)).forGetter(MobEffectInstance.Details::ambient),
+								Codec.BOOL.optionalFieldOf("show_particles", Boolean.valueOf(true)).forGetter(MobEffectInstance.Details::showParticles),
+								Codec.BOOL.optionalFieldOf("show_icon").forGetter(details -> Optional.of(details.showIcon())),
+								codec.optionalFieldOf("hidden_effect").forGetter(MobEffectInstance.Details::hiddenEffect)
 							)
 							.apply(instance, MobEffectInstance.Details::create)
 				)

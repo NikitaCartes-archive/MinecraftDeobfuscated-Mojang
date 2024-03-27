@@ -177,7 +177,7 @@ public class FallingBlockEntity extends Entity {
 											}
 
 											try {
-												blockEntity.load(compoundTag, this.level().registryAccess());
+												blockEntity.loadWithComponents(compoundTag, this.level().registryAccess());
 											} catch (Exception var15) {
 												LOGGER.error("Failed to load block entity from falling block", (Throwable)var15);
 											}

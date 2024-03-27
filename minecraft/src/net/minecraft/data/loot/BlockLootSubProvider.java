@@ -214,7 +214,8 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
 					LootPool.lootPool()
 						.setRolls(ConstantValue.exactly(1.0F))
 						.add(
-							LootItem.lootTableItem(block).apply(CopyComponentsFunction.copyComponents(CopyComponentsFunction.Source.BLOCK_ENTITY).copy(DataComponents.CUSTOM_NAME))
+							LootItem.lootTableItem(block)
+								.apply(CopyComponentsFunction.copyComponents(CopyComponentsFunction.Source.BLOCK_ENTITY).include(DataComponents.CUSTOM_NAME))
 						)
 				)
 			);
@@ -231,10 +232,10 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
 							LootItem.lootTableItem(block)
 								.apply(
 									CopyComponentsFunction.copyComponents(CopyComponentsFunction.Source.BLOCK_ENTITY)
-										.copy(DataComponents.CUSTOM_NAME)
-										.copy(DataComponents.CONTAINER)
-										.copy(DataComponents.LOCK)
-										.copy(DataComponents.CONTAINER_LOOT)
+										.include(DataComponents.CUSTOM_NAME)
+										.include(DataComponents.CONTAINER)
+										.include(DataComponents.LOCK)
+										.include(DataComponents.CONTAINER_LOOT)
 								)
 						)
 				)
@@ -288,8 +289,10 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
 							LootItem.lootTableItem(block)
 								.apply(
 									CopyComponentsFunction.copyComponents(CopyComponentsFunction.Source.BLOCK_ENTITY)
-										.copy(DataComponents.CUSTOM_NAME)
-										.copy(DataComponents.BANNER_PATTERNS)
+										.include(DataComponents.CUSTOM_NAME)
+										.include(DataComponents.ITEM_NAME)
+										.include(DataComponents.HIDE_ADDITIONAL_TOOLTIP)
+										.include(DataComponents.BANNER_PATTERNS)
 								)
 						)
 				)
@@ -304,7 +307,7 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
 					.setRolls(ConstantValue.exactly(1.0F))
 					.add(
 						LootItem.lootTableItem(block)
-							.apply(CopyComponentsFunction.copyComponents(CopyComponentsFunction.Source.BLOCK_ENTITY).copy(DataComponents.BEES))
+							.apply(CopyComponentsFunction.copyComponents(CopyComponentsFunction.Source.BLOCK_ENTITY).include(DataComponents.BEES))
 							.apply(CopyBlockState.copyState(block).copy(BeehiveBlock.HONEY_LEVEL))
 					)
 			);
@@ -318,7 +321,7 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
 					.add(
 						LootItem.lootTableItem(block)
 							.when(HAS_SILK_TOUCH)
-							.apply(CopyComponentsFunction.copyComponents(CopyComponentsFunction.Source.BLOCK_ENTITY).copy(DataComponents.BEES))
+							.apply(CopyComponentsFunction.copyComponents(CopyComponentsFunction.Source.BLOCK_ENTITY).include(DataComponents.BEES))
 							.apply(CopyBlockState.copyState(block).copy(BeehiveBlock.HONEY_LEVEL))
 							.otherwise(LootItem.lootTableItem(block))
 					)

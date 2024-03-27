@@ -1988,7 +1988,14 @@ public class Items {
 	public static final Item WAXED_OXIDIZED_COPPER_BULB = registerBlock(Blocks.WAXED_OXIDIZED_COPPER_BULB);
 	public static final Item TRIAL_SPAWNER = registerBlock(Blocks.TRIAL_SPAWNER);
 	public static final Item TRIAL_KEY = registerItem("trial_key", new Item(new Item.Properties().requiredFeatures(FeatureFlags.UPDATE_1_21)));
+	public static final Item OMINOUS_TRIAL_KEY = registerItem("ominous_trial_key", new Item(new Item.Properties().requiredFeatures(FeatureFlags.UPDATE_1_21)));
 	public static final Item VAULT = registerBlock(Blocks.VAULT);
+	public static final Item OMINOUS_BOTTLE = registerItem(
+		"ominous_bottle",
+		new OminousBottleItem(
+			new Item.Properties().food(Foods.OMINOUS_BOTTLE).component(DataComponents.OMINOUS_BOTTLE_AMPLIFIER, 0).requiredFeatures(FeatureFlags.UPDATE_1_21)
+		)
+	);
 	public static final Item BREEZE_ROD = registerItem("breeze_rod", new Item(new Item.Properties().requiredFeatures(FeatureFlags.UPDATE_1_21)));
 
 	public static Item registerBlock(Block block) {

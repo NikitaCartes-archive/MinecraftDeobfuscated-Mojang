@@ -51,7 +51,8 @@ public class ChiseledBookShelfBlockEntity extends BlockEntity implements Contain
 	}
 
 	@Override
-	public void load(CompoundTag compoundTag, HolderLookup.Provider provider) {
+	protected void loadAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
+		super.loadAdditional(compoundTag, provider);
 		this.items.clear();
 		ContainerHelper.loadAllItems(compoundTag, this.items, provider);
 		this.lastInteractedSlot = compoundTag.getInt("last_interacted_slot");
@@ -59,6 +60,7 @@ public class ChiseledBookShelfBlockEntity extends BlockEntity implements Contain
 
 	@Override
 	protected void saveAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
+		super.saveAdditional(compoundTag, provider);
 		ContainerHelper.saveAllItems(compoundTag, this.items, true, provider);
 		compoundTag.putInt("last_interacted_slot", this.lastInteractedSlot);
 	}
@@ -142,12 +144,14 @@ public class ChiseledBookShelfBlockEntity extends BlockEntity implements Contain
 	}
 
 	@Override
-	public void applyComponents(DataComponentMap dataComponentMap) {
-		dataComponentMap.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY).copyInto(this.items);
+	protected void applyImplicitComponents(BlockEntity.DataComponentInput dataComponentInput) {
+		super.applyImplicitComponents(dataComponentInput);
+		dataComponentInput.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY).copyInto(this.items);
 	}
 
 	@Override
-	public void collectComponents(DataComponentMap.Builder builder) {
+	protected void collectImplicitComponents(DataComponentMap.Builder builder) {
+		super.collectImplicitComponents(builder);
 		builder.set(DataComponents.CONTAINER, ItemContainerContents.copyOf(this.items));
 	}
 

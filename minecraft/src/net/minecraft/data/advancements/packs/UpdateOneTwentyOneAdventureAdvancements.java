@@ -193,6 +193,7 @@ public class UpdateOneTwentyOneAdventureAdvancements implements AdvancementSubPr
 						.dealtDamage(MinMaxBounds.Doubles.atLeast(100.0))
 						.type(
 							DamageSourcePredicate.Builder.damageType()
+								.tag(TagPredicate.is(DamageTypeTags.IS_PLAYER_ATTACK))
 								.direct(
 									EntityPredicate.Builder.entity()
 										.of(EntityType.PLAYER)

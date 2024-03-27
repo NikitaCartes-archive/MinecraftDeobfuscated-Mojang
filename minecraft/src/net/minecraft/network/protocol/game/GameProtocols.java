@@ -34,6 +34,7 @@ public class GameProtocols {
 				.addPacket(GamePacketTypes.SERVERBOUND_CHANGE_DIFFICULTY, ServerboundChangeDifficultyPacket.STREAM_CODEC)
 				.addPacket(GamePacketTypes.SERVERBOUND_CHAT_ACK, ServerboundChatAckPacket.STREAM_CODEC)
 				.addPacket(GamePacketTypes.SERVERBOUND_CHAT_COMMAND, ServerboundChatCommandPacket.STREAM_CODEC)
+				.addPacket(GamePacketTypes.SERVERBOUND_CHAT_COMMAND_SIGNED, ServerboundChatCommandSignedPacket.STREAM_CODEC)
 				.addPacket(GamePacketTypes.SERVERBOUND_CHAT, ServerboundChatPacket.STREAM_CODEC)
 				.addPacket(GamePacketTypes.SERVERBOUND_CHAT_SESSION_UPDATE, ServerboundChatSessionUpdatePacket.STREAM_CODEC)
 				.addPacket(GamePacketTypes.SERVERBOUND_CHUNK_BATCH_RECEIVED, ServerboundChunkBatchReceivedPacket.STREAM_CODEC)

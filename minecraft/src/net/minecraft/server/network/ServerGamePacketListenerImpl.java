@@ -14,6 +14,7 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import java.net.SocketAddress;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -33,6 +34,7 @@ import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.commands.CommandSigningContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.ArgumentSignatures;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
@@ -75,6 +77,7 @@ import net.minecraft.network.protocol.game.ServerboundBlockEntityTagQueryPacket;
 import net.minecraft.network.protocol.game.ServerboundChangeDifficultyPacket;
 import net.minecraft.network.protocol.game.ServerboundChatAckPacket;
 import net.minecraft.network.protocol.game.ServerboundChatCommandPacket;
+import net.minecraft.network.protocol.game.ServerboundChatCommandSignedPacket;
 import net.minecraft.network.protocol.game.ServerboundChatPacket;
 import net.minecraft.network.protocol.game.ServerboundChatSessionUpdatePacket;
 import net.minecraft.network.protocol.game.ServerboundChunkBatchReceivedPacket;
@@ -191,6 +194,7 @@ public class ServerGamePacketListenerImpl
 	private static final int TRACKED_MESSAGE_DISCONNECT_THRESHOLD = 4096;
 	private static final int MAXIMUM_FLYING_TICKS = 80;
 	private static final Component CHAT_VALIDATION_FAILED = Component.translatable("multiplayer.disconnect.chat_validation_failed");
+	private static final Component INVALID_COMMAND_SIGNATURE = Component.translatable("chat.disabled.invalid_command_signature").withStyle(ChatFormatting.RED);
 	private static final int MAX_COMMAND_SUGGESTIONS = 1000;
 	public ServerPlayer player;
 	public final PlayerChunkSender chunkSender;
@@ -1190,52 +1194,62 @@ public class ServerGamePacketListenerImpl
 
 	@Override
 	public void handleChat(ServerboundChatPacket serverboundChatPacket) {
-		if (isChatMessageIllegal(serverboundChatPacket.message())) {
-			this.disconnect(Component.translatable("multiplayer.disconnect.illegal_characters"));
-		} else {
-			Optional<LastSeenMessages> optional = this.tryHandleChat(serverboundChatPacket.lastSeenMessages());
-			if (optional.isPresent()) {
-				this.server.execute(() -> {
-					PlayerChatMessage playerChatMessage;
-					try {
-						playerChatMessage = this.getSignedMessage(serverboundChatPacket, (LastSeenMessages)optional.get());
-					} catch (SignedMessageChain.DecodeException var6) {
-						this.handleMessageDecodeFailure(var6);
-						return;
-					}
+		Optional<LastSeenMessages> optional = this.unpackAndApplyLastSeen(serverboundChatPacket.lastSeenMessages());
+		if (!optional.isEmpty()) {
+			this.tryHandleChat(serverboundChatPacket.message(), () -> {
+				PlayerChatMessage playerChatMessage;
+				try {
+					playerChatMessage = this.getSignedMessage(serverboundChatPacket, (LastSeenMessages)optional.get());
+				} catch (SignedMessageChain.DecodeException var6) {
+					this.handleMessageDecodeFailure(var6);
+					return;
+				}
 
-					CompletableFuture<FilteredText> completableFuture = this.filterTextPacket(playerChatMessage.signedContent());
-					Component component = this.server.getChatDecorator().decorate(this.player, playerChatMessage.decoratedContent());
-					this.chatMessageChain.append(completableFuture, filteredText -> {
-						PlayerChatMessage playerChatMessage2 = playerChatMessage.withUnsignedContent(component).filter(filteredText.mask());
-						this.broadcastChatMessage(playerChatMessage2);
-					});
+				CompletableFuture<FilteredText> completableFuture = this.filterTextPacket(playerChatMessage.signedContent());
+				Component component = this.server.getChatDecorator().decorate(this.player, playerChatMessage.decoratedContent());
+				this.chatMessageChain.append(completableFuture, filteredText -> {
+					PlayerChatMessage playerChatMessage2 = playerChatMessage.withUnsignedContent(component).filter(filteredText.mask());
+					this.broadcastChatMessage(playerChatMessage2);
 				});
-			}
+			});
 		}
 	}
 
 	@Override
 	public void handleChatCommand(ServerboundChatCommandPacket serverboundChatCommandPacket) {
-		if (isChatMessageIllegal(serverboundChatCommandPacket.command())) {
-			this.disconnect(Component.translatable("multiplayer.disconnect.illegal_characters"));
+		this.tryHandleChat(serverboundChatCommandPacket.command(), () -> {
+			this.performUnsignedChatCommand(serverboundChatCommandPacket.command());
+			this.detectRateSpam();
+		});
+	}
+
+	private void performUnsignedChatCommand(String string) {
+		ParseResults<CommandSourceStack> parseResults = this.parseCommand(string);
+		if (this.server.enforceSecureProfile() && SignableCommand.hasSignableArguments(parseResults)) {
+			LOGGER.error("Received unsigned command packet from {}, but the command requires signable arguments: {}", this.player.getGameProfile().getName(), string);
+			this.player.sendSystemMessage(INVALID_COMMAND_SIGNATURE);
 		} else {
-			Optional<LastSeenMessages> optional = this.tryHandleChat(serverboundChatCommandPacket.lastSeenMessages());
-			if (optional.isPresent()) {
-				this.server.execute(() -> {
-					this.performChatCommand(serverboundChatCommandPacket, (LastSeenMessages)optional.get());
-					this.detectRateSpam();
-				});
-			}
+			this.server.getCommands().performCommand(parseResults, string);
 		}
 	}
 
-	private void performChatCommand(ServerboundChatCommandPacket serverboundChatCommandPacket, LastSeenMessages lastSeenMessages) {
-		ParseResults<CommandSourceStack> parseResults = this.parseCommand(serverboundChatCommandPacket.command());
+	@Override
+	public void handleSignedChatCommand(ServerboundChatCommandSignedPacket serverboundChatCommandSignedPacket) {
+		Optional<LastSeenMessages> optional = this.unpackAndApplyLastSeen(serverboundChatCommandSignedPacket.lastSeenMessages());
+		if (!optional.isEmpty()) {
+			this.tryHandleChat(serverboundChatCommandSignedPacket.command(), () -> {
+				this.performSignedChatCommand(serverboundChatCommandSignedPacket, (LastSeenMessages)optional.get());
+				this.detectRateSpam();
+			});
+		}
+	}
+
+	private void performSignedChatCommand(ServerboundChatCommandSignedPacket serverboundChatCommandSignedPacket, LastSeenMessages lastSeenMessages) {
+		ParseResults<CommandSourceStack> parseResults = this.parseCommand(serverboundChatCommandSignedPacket.command());
 
 		Map<String, PlayerChatMessage> map;
 		try {
-			map = this.collectSignedArguments(serverboundChatCommandPacket, SignableCommand.of(parseResults), lastSeenMessages);
+			map = this.collectSignedArguments(serverboundChatCommandSignedPacket, SignableCommand.of(parseResults), lastSeenMessages);
 		} catch (SignedMessageChain.DecodeException var6) {
 			this.handleMessageDecodeFailure(var6);
 			return;
@@ -1243,32 +1257,65 @@ public class ServerGamePacketListenerImpl
 
 		CommandSigningContext commandSigningContext = new CommandSigningContext.SignedArguments(map);
 		parseResults = Commands.mapSource(parseResults, commandSourceStack -> commandSourceStack.withSigningContext(commandSigningContext, this.chatMessageChain));
-		this.server.getCommands().performCommand(parseResults, serverboundChatCommandPacket.command());
+		this.server.getCommands().performCommand(parseResults, serverboundChatCommandSignedPacket.command());
 	}
 
 	private void handleMessageDecodeFailure(SignedMessageChain.DecodeException decodeException) {
 		LOGGER.warn("Failed to update secure chat state for {}: '{}'", this.player.getGameProfile().getName(), decodeException.getComponent().getString());
-		if (decodeException.shouldDisconnect()) {
-			this.disconnect(decodeException.getComponent());
+		this.player.sendSystemMessage(decodeException.getComponent().copy().withStyle(ChatFormatting.RED));
+	}
+
+	private <S> Map<String, PlayerChatMessage> collectSignedArguments(
+		ServerboundChatCommandSignedPacket serverboundChatCommandSignedPacket, SignableCommand<S> signableCommand, LastSeenMessages lastSeenMessages
+	) throws SignedMessageChain.DecodeException {
+		List<ArgumentSignatures.Entry> list = serverboundChatCommandSignedPacket.argumentSignatures().entries();
+		List<SignableCommand.Argument<S>> list2 = signableCommand.arguments();
+		if (list.isEmpty()) {
+			return this.collectUnsignedArguments(list2);
 		} else {
-			this.player.sendSystemMessage(decodeException.getComponent().copy().withStyle(ChatFormatting.RED));
+			Map<String, PlayerChatMessage> map = new Object2ObjectOpenHashMap<>();
+
+			for (ArgumentSignatures.Entry entry : list) {
+				SignableCommand.Argument<S> argument = signableCommand.getArgument(entry.name());
+				if (argument == null) {
+					this.signedMessageDecoder.setChainBroken();
+					throw createSignedArgumentMismatchException(serverboundChatCommandSignedPacket.command(), list, list2);
+				}
+
+				SignedMessageBody signedMessageBody = new SignedMessageBody(
+					argument.value(), serverboundChatCommandSignedPacket.timeStamp(), serverboundChatCommandSignedPacket.salt(), lastSeenMessages
+				);
+				map.put(argument.name(), this.signedMessageDecoder.unpack(entry.signature(), signedMessageBody));
+			}
+
+			for (SignableCommand.Argument<S> argument2 : list2) {
+				if (!map.containsKey(argument2.name())) {
+					throw createSignedArgumentMismatchException(serverboundChatCommandSignedPacket.command(), list, list2);
+				}
+			}
+
+			return map;
 		}
 	}
 
-	private Map<String, PlayerChatMessage> collectSignedArguments(
-		ServerboundChatCommandPacket serverboundChatCommandPacket, SignableCommand<?> signableCommand, LastSeenMessages lastSeenMessages
-	) throws SignedMessageChain.DecodeException {
-		Map<String, PlayerChatMessage> map = new Object2ObjectOpenHashMap<>();
+	private <S> Map<String, PlayerChatMessage> collectUnsignedArguments(List<SignableCommand.Argument<S>> list) throws SignedMessageChain.DecodeException {
+		Map<String, PlayerChatMessage> map = new HashMap();
 
-		for (SignableCommand.Argument<?> argument : signableCommand.arguments()) {
-			MessageSignature messageSignature = serverboundChatCommandPacket.argumentSignatures().get(argument.name());
-			SignedMessageBody signedMessageBody = new SignedMessageBody(
-				argument.value(), serverboundChatCommandPacket.timeStamp(), serverboundChatCommandPacket.salt(), lastSeenMessages
-			);
-			map.put(argument.name(), this.signedMessageDecoder.unpack(messageSignature, signedMessageBody));
+		for (SignableCommand.Argument<S> argument : list) {
+			SignedMessageBody signedMessageBody = SignedMessageBody.unsigned(argument.value());
+			map.put(argument.name(), this.signedMessageDecoder.unpack(null, signedMessageBody));
 		}
 
 		return map;
+	}
+
+	private static <S> SignedMessageChain.DecodeException createSignedArgumentMismatchException(
+		String string, List<ArgumentSignatures.Entry> list, List<SignableCommand.Argument<S>> list2
+	) {
+		String string2 = (String)list.stream().map(ArgumentSignatures.Entry::name).collect(Collectors.joining(", "));
+		String string3 = (String)list2.stream().map(SignableCommand.Argument::name).collect(Collectors.joining(", "));
+		LOGGER.error("Signed command mismatch between server and client ('{}'): got [{}] from client, but expected [{}]", string, string2, string3);
+		return new SignedMessageChain.DecodeException(INVALID_COMMAND_SIGNATURE);
 	}
 
 	private ParseResults<CommandSourceStack> parseCommand(String string) {
@@ -1276,14 +1323,14 @@ public class ServerGamePacketListenerImpl
 		return commandDispatcher.parse(string, this.player.createCommandSourceStack());
 	}
 
-	private Optional<LastSeenMessages> tryHandleChat(LastSeenMessages.Update update) {
-		Optional<LastSeenMessages> optional = this.unpackAndApplyLastSeen(update);
-		if (this.player.getChatVisibility() == ChatVisiblity.HIDDEN) {
+	private void tryHandleChat(String string, Runnable runnable) {
+		if (isChatMessageIllegal(string)) {
+			this.disconnect(Component.translatable("multiplayer.disconnect.illegal_characters"));
+		} else if (this.player.getChatVisibility() == ChatVisiblity.HIDDEN) {
 			this.send(new ClientboundSystemChatPacket(Component.translatable("chat.disabled.options").withStyle(ChatFormatting.RED), false));
-			return Optional.empty();
 		} else {
 			this.player.resetLastActionTime();
-			return optional;
+			this.server.execute(runnable);
 		}
 	}
 

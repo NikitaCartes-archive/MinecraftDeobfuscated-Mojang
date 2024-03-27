@@ -22,7 +22,7 @@ public record ItemCost(Holder<Item> item, int count, DataComponentPredicate comp
 		instance -> instance.group(
 					BuiltInRegistries.ITEM.holderByNameCodec().fieldOf("id").forGetter(ItemCost::item),
 					ExtraCodecs.POSITIVE_INT.fieldOf("count").orElse(1).forGetter(ItemCost::count),
-					ExtraCodecs.strictOptionalField(DataComponentPredicate.CODEC, "components", DataComponentPredicate.EMPTY).forGetter(ItemCost::components)
+					DataComponentPredicate.CODEC.optionalFieldOf("components", DataComponentPredicate.EMPTY).forGetter(ItemCost::components)
 				)
 				.apply(instance, ItemCost::new)
 	);

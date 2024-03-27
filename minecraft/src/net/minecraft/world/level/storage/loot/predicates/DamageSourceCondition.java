@@ -1,12 +1,11 @@
 package net.minecraft.world.level.storage.loot.predicates;
 
 import com.google.common.collect.ImmutableSet;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Optional;
 import java.util.Set;
 import net.minecraft.advancements.critereon.DamageSourcePredicate;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
@@ -14,8 +13,8 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.Vec3;
 
 public record DamageSourceCondition(Optional<DamageSourcePredicate> predicate) implements LootItemCondition {
-	public static final Codec<DamageSourceCondition> CODEC = RecordCodecBuilder.create(
-		instance -> instance.group(ExtraCodecs.strictOptionalField(DamageSourcePredicate.CODEC, "predicate").forGetter(DamageSourceCondition::predicate))
+	public static final MapCodec<DamageSourceCondition> CODEC = RecordCodecBuilder.mapCodec(
+		instance -> instance.group(DamageSourcePredicate.CODEC.optionalFieldOf("predicate").forGetter(DamageSourceCondition::predicate))
 				.apply(instance, DamageSourceCondition::new)
 	);
 

@@ -1,12 +1,12 @@
 package net.minecraft.world.item.crafting;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -88,13 +88,13 @@ public class ShapedRecipe implements CraftingRecipe {
 	}
 
 	public static class Serializer implements RecipeSerializer<ShapedRecipe> {
-		public static final Codec<ShapedRecipe> CODEC = RecordCodecBuilder.create(
+		public static final MapCodec<ShapedRecipe> CODEC = RecordCodecBuilder.mapCodec(
 			instance -> instance.group(
-						ExtraCodecs.strictOptionalField(Codec.STRING, "group", "").forGetter(shapedRecipe -> shapedRecipe.group),
+						Codec.STRING.optionalFieldOf("group", "").forGetter(shapedRecipe -> shapedRecipe.group),
 						CraftingBookCategory.CODEC.fieldOf("category").orElse(CraftingBookCategory.MISC).forGetter(shapedRecipe -> shapedRecipe.category),
 						ShapedRecipePattern.MAP_CODEC.forGetter(shapedRecipe -> shapedRecipe.pattern),
 						ItemStack.CODEC.fieldOf("result").forGetter(shapedRecipe -> shapedRecipe.result),
-						ExtraCodecs.strictOptionalField(Codec.BOOL, "show_notification", true).forGetter(shapedRecipe -> shapedRecipe.showNotification)
+						Codec.BOOL.optionalFieldOf("show_notification", Boolean.valueOf(true)).forGetter(shapedRecipe -> shapedRecipe.showNotification)
 					)
 					.apply(instance, ShapedRecipe::new)
 		);
@@ -103,7 +103,7 @@ public class ShapedRecipe implements CraftingRecipe {
 		);
 
 		@Override
-		public Codec<ShapedRecipe> codec() {
+		public MapCodec<ShapedRecipe> codec() {
 			return CODEC;
 		}
 
