@@ -12,8 +12,7 @@ import net.minecraft.util.StringRepresentable;
 @Environment(EnvType.CLIENT)
 public enum FontOption implements StringRepresentable {
 	UNIFORM("uniform"),
-	JAPANESE_VARIANTS("jp"),
-	POTATIS("potato");
+	JAPANESE_VARIANTS("jp");
 
 	public static final Codec<FontOption> CODEC = StringRepresentable.fromEnum(FontOption::values);
 	private final String name;

@@ -9,7 +9,7 @@ import net.minecraft.network.chat.Component;
 @Environment(EnvType.CLIENT)
 public class FontOptionsScreen extends SimpleOptionsSubScreen {
 	private static OptionInstance<?>[] options(Options options) {
-		return new OptionInstance[]{options.forceUnicodeFont(), options.japaneseGlyphVariants(), options.potatoFont()};
+		return new OptionInstance[]{options.forceUnicodeFont(), options.japaneseGlyphVariants()};
 	}
 
 	public FontOptionsScreen(Screen screen, Options options) {

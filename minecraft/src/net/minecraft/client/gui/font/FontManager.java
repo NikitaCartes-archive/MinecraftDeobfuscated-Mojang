@@ -188,10 +188,6 @@ public class FontManager implements PreparableReloadListener, AutoCloseable {
 			set.add(FontOption.JAPANESE_VARIANTS);
 		}
 
-		if (options.potatoFont().get()) {
-			set.add(FontOption.POTATIS);
-		}
-
 		return set;
 	}
 

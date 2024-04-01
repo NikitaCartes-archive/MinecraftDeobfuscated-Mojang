@@ -95,10 +95,6 @@ public class Options {
 	private final OptionInstance<Boolean> darkMojangStudiosBackground = OptionInstance.createBoolean(
 		"options.darkMojangStudiosBackgroundColor", OptionInstance.cachedConstantTooltip(ACCESSIBILITY_TOOLTIP_DARK_MOJANG_BACKGROUND), false
 	);
-	private static final Component POTATO_FONT_TOOLTIP = Component.translatable("options.potatoFont.tooltip");
-	private final OptionInstance<Boolean> potatoFont = OptionInstance.createBoolean(
-		"options.potatoFont", OptionInstance.cachedConstantTooltip(POTATO_FONT_TOOLTIP), false, boolean_ -> updateFontOptions()
-	);
 	private static final Component ACCESSIBILITY_TOOLTIP_HIDE_LIGHTNING_FLASHES = Component.translatable("options.hideLightningFlashes.tooltip");
 	private final OptionInstance<Boolean> hideLightningFlash = OptionInstance.createBoolean(
 		"options.hideLightningFlashes", OptionInstance.cachedConstantTooltip(ACCESSIBILITY_TOOLTIP_HIDE_LIGHTNING_FLASHES), false
@@ -741,10 +737,6 @@ public class Options {
 		return this.darkMojangStudiosBackground;
 	}
 
-	public OptionInstance<Boolean> potatoFont() {
-		return this.potatoFont;
-	}
-
 	public OptionInstance<Boolean> hideLightningFlash() {
 		return this.hideLightningFlash;
 	}
@@ -1180,7 +1172,6 @@ public class Options {
 		fieldAccess.process("toggleCrouch", this.toggleCrouch);
 		fieldAccess.process("toggleSprint", this.toggleSprint);
 		fieldAccess.process("darkMojangStudiosBackground", this.darkMojangStudiosBackground);
-		fieldAccess.process("potatoFont", this.potatoFont);
 		fieldAccess.process("hideLightningFlashes", this.hideLightningFlash);
 		fieldAccess.process("hideSplashTexts", this.hideSplashTexts);
 		fieldAccess.process("mouseSensitivity", this.sensitivity);
