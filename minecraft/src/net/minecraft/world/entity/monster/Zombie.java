@@ -71,6 +71,7 @@ public class Zombie extends Monster {
 	private static final EntityDataAccessor<Boolean> DATA_BABY_ID = SynchedEntityData.defineId(Zombie.class, EntityDataSerializers.BOOLEAN);
 	private static final EntityDataAccessor<Integer> DATA_SPECIAL_TYPE_ID = SynchedEntityData.defineId(Zombie.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Boolean> DATA_DROWNED_CONVERSION_ID = SynchedEntityData.defineId(Zombie.class, EntityDataSerializers.BOOLEAN);
+	private static final EntityDataAccessor<Boolean> DATA_POTATO_CONVERTING_ID = SynchedEntityData.defineId(Zombie.class, EntityDataSerializers.BOOLEAN);
 	public static final float ZOMBIE_LEADER_CHANCE = 0.05F;
 	public static final int REINFORCEMENT_ATTEMPTS = 50;
 	public static final int REINFORCEMENT_RANGE_MAX = 40;
@@ -100,7 +101,7 @@ public class Zombie extends Monster {
 	}
 
 	protected void addBehaviourGoals() {
-		this.goalSelector.addGoal(2, new ZombieAttackGoal(this, 1.0, false));
+		this.goalSelector.addGoal(2, new ZombieAttackGoal<>(this, 1.0, false));
 		this.goalSelector.addGoal(6, new MoveThroughVillageGoal(this, 1.0, true, 4, this::canBreakDoors));
 		this.goalSelector.addGoal(7, new WaterAvoidingRandomStrollGoal(this, 1.0));
 		this.targetSelector.addGoal(1, new HurtByTargetGoal(this).setAlertOthers(ZombifiedPiglin.class));
@@ -125,10 +126,15 @@ public class Zombie extends Monster {
 		builder.define(DATA_BABY_ID, false);
 		builder.define(DATA_SPECIAL_TYPE_ID, 0);
 		builder.define(DATA_DROWNED_CONVERSION_ID, false);
+		builder.define(DATA_POTATO_CONVERTING_ID, false);
 	}
 
 	public boolean isUnderWaterConverting() {
 		return this.getEntityData().get(DATA_DROWNED_CONVERSION_ID);
+	}
+
+	public boolean isPotatoConverting() {
+		return this.getEntityData().get(DATA_POTATO_CONVERTING_ID);
 	}
 
 	public boolean canBreakDoors() {
@@ -198,7 +204,9 @@ public class Zombie extends Monster {
 	@Override
 	public void tick() {
 		if (!this.level().isClientSide && this.isAlive() && !this.isNoAi()) {
-			if (this.isUnderWaterConverting()) {
+			if (this.isPotatoConverting()) {
+				this.doPotatoConversion();
+			} else if (this.isUnderWaterConverting()) {
 				this.conversionTime--;
 				if (this.conversionTime < 0) {
 					this.doUnderWaterConversion();
@@ -252,6 +260,17 @@ public class Zombie extends Monster {
 
 	protected void doUnderWaterConversion() {
 		this.convertToZombieType(EntityType.DROWNED);
+		if (!this.isSilent()) {
+			this.level().levelEvent(null, 1040, this.blockPosition(), 0);
+		}
+	}
+
+	private void startPotatoConversion() {
+		this.getEntityData().set(DATA_POTATO_CONVERTING_ID, true);
+	}
+
+	protected void doPotatoConversion() {
+		this.convertToZombieType(EntityType.POISONOUS_POTATO_ZOMBIE);
 		if (!this.isSilent()) {
 			this.level().levelEvent(null, 1040, this.blockPosition(), 0);
 		}

@@ -91,8 +91,7 @@ public class TitleScreen extends Screen {
 
 	public static CompletableFuture<Void> preloadResources(TextureManager textureManager, Executor executor) {
 		return CompletableFuture.allOf(
-			textureManager.preload(LogoRenderer.MINECRAFT_LOGO, executor),
-			textureManager.preload(LogoRenderer.MINECRAFT_EDITION, executor),
+			textureManager.preload(LogoRenderer.POISONOUS_POTATO_LOGO, executor),
 			textureManager.preload(PanoramaRenderer.PANORAMA_OVERLAY, executor),
 			CUBE_MAP.preload(textureManager, executor)
 		);

@@ -5,10 +5,12 @@ import it.unimi.dsi.fastutil.objects.Object2FloatMap;
 import it.unimi.dsi.fastutil.objects.Object2FloatOpenHashMap;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
+import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
@@ -76,6 +78,12 @@ public class ComposterBlock extends Block implements WorldlyContainerHolder {
 		add(0.3F, Items.SPRUCE_LEAVES);
 		add(0.3F, Items.DARK_OAK_LEAVES);
 		add(0.3F, Items.ACACIA_LEAVES);
+		add(0.3F, Items.POTATO_LEAVES);
+		add(0.3F, Items.POTATO_STEM);
+		add(0.3F, Items.POTATO_BUD);
+		add(0.3F, Items.POTATO_SPROUTS);
+		add(0.3F, Items.POTATO_FRUIT);
+		add(0.3F, Items.POTATO_PEDICULE);
 		add(0.3F, Items.CHERRY_LEAVES);
 		add(0.3F, Items.BIRCH_LEAVES);
 		add(0.3F, Items.AZALEA_LEAVES);
@@ -167,11 +175,14 @@ public class ComposterBlock extends Block implements WorldlyContainerHolder {
 		add(0.85F, Items.FLOWERING_AZALEA);
 		add(0.85F, Items.BREAD);
 		add(0.85F, Items.BAKED_POTATO);
+		add(0.85F, Items.HOT_POTATO);
+		add(0.85F, Items.POTATO_FLOWER);
 		add(0.85F, Items.COOKIE);
 		add(0.85F, Items.TORCHFLOWER);
 		add(0.85F, Items.PITCHER_PLANT);
 		add(1.0F, Items.CAKE);
 		add(1.0F, Items.PUMPKIN_PIE);
+		add(1.0F, Items.POTATO_STAFF);
 	}
 
 	private static void add(float f, ItemLike itemLike) {
@@ -291,6 +302,13 @@ public class ComposterBlock extends Block implements WorldlyContainerHolder {
 	}
 
 	static BlockState addItem(@Nullable Entity entity, BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos, ItemStack itemStack) {
+		if (itemStack.is(Items.POTATO_STAFF) && entity instanceof ServerPlayer serverPlayer) {
+			CriteriaTriggers.COMPOST_STAFF.trigger(serverPlayer);
+			if (!serverPlayer.chapterIsPast("composted_staff")) {
+				serverPlayer.setPotatoQuestChapter("composted_staff");
+			}
+		}
+
 		int i = (Integer)blockState.getValue(LEVEL);
 		float f = COMPOSTABLES.getFloat(itemStack.getItem());
 		if ((i != 0 || !(f > 0.0F)) && !(levelAccessor.getRandom().nextDouble() < (double)f)) {

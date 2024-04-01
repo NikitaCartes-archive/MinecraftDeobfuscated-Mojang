@@ -29,24 +29,27 @@ public class CocoaDecorator extends TreeDecorator {
 		RandomSource randomSource = context.random();
 		if (!(randomSource.nextFloat() >= this.probability)) {
 			List<BlockPos> list = context.logs();
-			int i = ((BlockPos)list.get(0)).getY();
-			list.stream()
-				.filter(blockPos -> blockPos.getY() - i <= 2)
-				.forEach(
-					blockPos -> {
-						for (Direction direction : Direction.Plane.HORIZONTAL) {
-							if (randomSource.nextFloat() <= 0.25F) {
-								Direction direction2 = direction.getOpposite();
-								BlockPos blockPos2 = blockPos.offset(direction2.getStepX(), 0, direction2.getStepZ());
-								if (context.isAir(blockPos2)) {
-									context.setBlock(
-										blockPos2, Blocks.COCOA.defaultBlockState().setValue(CocoaBlock.AGE, Integer.valueOf(randomSource.nextInt(3))).setValue(CocoaBlock.FACING, direction)
-									);
+			if (!list.isEmpty()) {
+				int i = ((BlockPos)list.get(0)).getY();
+				list.stream()
+					.filter(blockPos -> blockPos.getY() - i <= 2)
+					.forEach(
+						blockPos -> {
+							for (Direction direction : Direction.Plane.HORIZONTAL) {
+								if (randomSource.nextFloat() <= 0.25F) {
+									Direction direction2 = direction.getOpposite();
+									BlockPos blockPos2 = blockPos.offset(direction2.getStepX(), 0, direction2.getStepZ());
+									if (context.isAir(blockPos2)) {
+										context.setBlock(
+											blockPos2,
+											Blocks.COCOA.defaultBlockState().setValue(CocoaBlock.AGE, Integer.valueOf(randomSource.nextInt(3))).setValue(CocoaBlock.FACING, direction)
+										);
+									}
 								}
 							}
 						}
-					}
-				);
+					);
+			}
 		}
 	}
 }

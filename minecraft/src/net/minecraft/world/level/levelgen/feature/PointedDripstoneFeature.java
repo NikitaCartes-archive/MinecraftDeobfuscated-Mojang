@@ -6,6 +6,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.PointedDripstoneBlock;
 import net.minecraft.world.level.levelgen.feature.configurations.PointedDripstoneConfiguration;
 
 public class PointedDripstoneFeature extends Feature<PointedDripstoneConfiguration> {
@@ -35,6 +38,7 @@ public class PointedDripstoneFeature extends Feature<PointedDripstoneConfigurati
 	}
 
 	private static Optional<Direction> getTipDirection(LevelAccessor levelAccessor, BlockPos blockPos, RandomSource randomSource) {
+		PointedDripstoneBlock pointedDripstoneBlock = (PointedDripstoneBlock)Blocks.POINTED_DRIPSTONE;
 		boolean bl = DripstoneUtils.isDripstoneBase(levelAccessor.getBlockState(blockPos.above()));
 		boolean bl2 = DripstoneUtils.isDripstoneBase(levelAccessor.getBlockState(blockPos.below()));
 		if (bl && bl2) {
@@ -49,6 +53,7 @@ public class PointedDripstoneFeature extends Feature<PointedDripstoneConfigurati
 	private static void createPatchOfDripstoneBlocks(
 		LevelAccessor levelAccessor, RandomSource randomSource, BlockPos blockPos, PointedDripstoneConfiguration pointedDripstoneConfiguration
 	) {
+		Block block = Blocks.POINTED_DRIPSTONE;
 		DripstoneUtils.placeDripstoneBlockIfPossible(levelAccessor, blockPos);
 
 		for (Direction direction : Direction.Plane.HORIZONTAL) {

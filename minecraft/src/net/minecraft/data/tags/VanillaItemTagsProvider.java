@@ -94,6 +94,7 @@ public class VanillaItemTagsProvider extends ItemTagsProvider {
 				Items.RED_BANNER,
 				Items.BLACK_BANNER
 			);
+		this.tag(ItemTags.HEATABLE_POTATOS).add(Items.POTATO, Items.BAKED_POTATO, Items.POISONOUS_POTATO);
 		this.tag(ItemTags.BOATS)
 			.add(
 				Items.OAK_BOAT,
@@ -146,7 +147,7 @@ public class VanillaItemTagsProvider extends ItemTagsProvider {
 		this.tag(ItemTags.COALS).add(Items.COAL, Items.CHARCOAL);
 		this.tag(ItemTags.ARROWS).add(Items.ARROW, Items.TIPPED_ARROW, Items.SPECTRAL_ARROW);
 		this.tag(ItemTags.LECTERN_BOOKS).add(Items.WRITTEN_BOOK, Items.WRITABLE_BOOK);
-		this.tag(ItemTags.BEACON_PAYMENT_ITEMS).add(Items.NETHERITE_INGOT, Items.EMERALD, Items.DIAMOND, Items.GOLD_INGOT, Items.IRON_INGOT);
+		this.tag(ItemTags.BEACON_PAYMENT_ITEMS).add(Items.NETHERITE_INGOT, Items.EMERALD, Items.AMBER_GEM, Items.DIAMOND, Items.GOLD_INGOT, Items.IRON_INGOT);
 		this.tag(ItemTags.PIGLIN_REPELLENTS).add(Items.SOUL_TORCH).add(Items.SOUL_LANTERN).add(Items.SOUL_CAMPFIRE);
 		this.tag(ItemTags.PIGLIN_LOVED)
 			.addTag(ItemTags.GOLD_ORES)
@@ -157,6 +158,8 @@ public class VanillaItemTagsProvider extends ItemTagsProvider {
 				Items.GOLD_INGOT,
 				Items.BELL,
 				Items.CLOCK,
+				Items.GOLDEN_POISONOUS_POTATO,
+				Items.ENCHANTED_GOLDEN_POISONOUS_POTATO,
 				Items.GOLDEN_CARROT,
 				Items.GLISTERING_MELON_SLICE,
 				Items.GOLDEN_APPLE,
@@ -179,6 +182,7 @@ public class VanillaItemTagsProvider extends ItemTagsProvider {
 		this.tag(ItemTags.FOX_FOOD).add(Items.SWEET_BERRIES, Items.GLOW_BERRIES);
 		this.tag(ItemTags.NON_FLAMMABLE_WOOD)
 			.add(
+				Items.POTATO_STEM,
 				Items.WARPED_STEM,
 				Items.STRIPPED_WARPED_STEM,
 				Items.WARPED_HYPHAE,
@@ -189,6 +193,16 @@ public class VanillaItemTagsProvider extends ItemTagsProvider {
 				Items.STRIPPED_CRIMSON_HYPHAE,
 				Items.CRIMSON_PLANKS,
 				Items.WARPED_PLANKS,
+				Items.POTATO_PLANKS,
+				Items.POTATO_SLAB,
+				Items.POTATO_PRESSURE_PLATE,
+				Items.POTATO_FENCE,
+				Items.POTATO_FENCE_GATE,
+				Items.POTATO_BUTTON,
+				Items.POTATO_DOOR,
+				Items.POTATO_TRAPDOOR,
+				Items.POTATO_SIGN,
+				Items.POTATO_HANGING_SIGN,
 				Items.CRIMSON_SLAB,
 				Items.WARPED_SLAB,
 				Items.CRIMSON_PRESSURE_PLATE,
@@ -210,8 +224,8 @@ public class VanillaItemTagsProvider extends ItemTagsProvider {
 				Items.WARPED_HANGING_SIGN,
 				Items.CRIMSON_HANGING_SIGN
 			);
-		this.tag(ItemTags.STONE_TOOL_MATERIALS).add(Items.COBBLESTONE, Items.BLACKSTONE, Items.COBBLED_DEEPSLATE);
-		this.tag(ItemTags.STONE_CRAFTING_MATERIALS).add(Items.COBBLESTONE, Items.BLACKSTONE, Items.COBBLED_DEEPSLATE);
+		this.tag(ItemTags.STONE_TOOL_MATERIALS).add(Items.COBBLESTONE, Items.BLACKSTONE, Items.COBBLED_DEEPSLATE, Items.TATERSTONE);
+		this.tag(ItemTags.STONE_CRAFTING_MATERIALS).add(Items.COBBLESTONE, Items.BLACKSTONE, Items.COBBLED_DEEPSLATE, Items.TATERSTONE);
 		this.tag(ItemTags.FREEZE_IMMUNE_WEARABLES)
 			.add(Items.LEATHER_BOOTS, Items.LEATHER_LEGGINGS, Items.LEATHER_CHESTPLATE, Items.LEATHER_HELMET, Items.LEATHER_HORSE_ARMOR);
 		this.tag(ItemTags.AXOLOTL_FOOD).add(Items.TROPICAL_FISH_BUCKET);
@@ -275,12 +289,18 @@ public class VanillaItemTagsProvider extends ItemTagsProvider {
 			);
 		this.tag(ItemTags.DECORATED_POT_INGREDIENTS).add(Items.BRICK).addTag(ItemTags.DECORATED_POT_SHERDS);
 		this.tag(ItemTags.FOOT_ARMOR)
-			.add(Items.LEATHER_BOOTS, Items.CHAINMAIL_BOOTS, Items.GOLDEN_BOOTS, Items.IRON_BOOTS, Items.DIAMOND_BOOTS, Items.NETHERITE_BOOTS);
+			.add(Items.LEATHER_BOOTS, Items.CHAINMAIL_BOOTS, Items.GOLDEN_BOOTS, Items.IRON_BOOTS, Items.DIAMOND_BOOTS, Items.NETHERITE_BOOTS, Items.POISONOUS_POTA_TOES);
 		this.tag(ItemTags.LEG_ARMOR)
 			.add(Items.LEATHER_LEGGINGS, Items.CHAINMAIL_LEGGINGS, Items.GOLDEN_LEGGINGS, Items.IRON_LEGGINGS, Items.DIAMOND_LEGGINGS, Items.NETHERITE_LEGGINGS);
 		this.tag(ItemTags.CHEST_ARMOR)
 			.add(
-				Items.LEATHER_CHESTPLATE, Items.CHAINMAIL_CHESTPLATE, Items.GOLDEN_CHESTPLATE, Items.IRON_CHESTPLATE, Items.DIAMOND_CHESTPLATE, Items.NETHERITE_CHESTPLATE
+				Items.LEATHER_CHESTPLATE,
+				Items.CHAINMAIL_CHESTPLATE,
+				Items.GOLDEN_CHESTPLATE,
+				Items.IRON_CHESTPLATE,
+				Items.DIAMOND_CHESTPLATE,
+				Items.NETHERITE_CHESTPLATE,
+				Items.POISONOUS_POTATO_CHESTPLATE
 			);
 		this.tag(ItemTags.HEAD_ARMOR)
 			.add(Items.LEATHER_HELMET, Items.CHAINMAIL_HELMET, Items.GOLDEN_HELMET, Items.IRON_HELMET, Items.DIAMOND_HELMET, Items.NETHERITE_HELMET, Items.TURTLE_HELMET);
@@ -288,7 +308,7 @@ public class VanillaItemTagsProvider extends ItemTagsProvider {
 			.add(Items.PLAYER_HEAD, Items.CREEPER_HEAD, Items.ZOMBIE_HEAD, Items.SKELETON_SKULL, Items.WITHER_SKELETON_SKULL, Items.DRAGON_HEAD, Items.PIGLIN_HEAD);
 		this.tag(ItemTags.TRIMMABLE_ARMOR).addTag(ItemTags.FOOT_ARMOR).addTag(ItemTags.LEG_ARMOR).addTag(ItemTags.CHEST_ARMOR).addTag(ItemTags.HEAD_ARMOR);
 		this.tag(ItemTags.TRIM_MATERIALS)
-			.add(Items.IRON_INGOT)
+			.add(Items.IRON_INGOT, Items.AMBER_GEM)
 			.add(Items.COPPER_INGOT)
 			.add(Items.GOLD_INGOT)
 			.add(Items.LAPIS_LAZULI)
@@ -342,6 +362,7 @@ public class VanillaItemTagsProvider extends ItemTagsProvider {
 			.addTag(ItemTags.CHEST_ARMOR)
 			.addTag(ItemTags.HEAD_ARMOR)
 			.add(Items.ELYTRA)
+			.add(Items.POISONOUS_POLYTRA)
 			.add(Items.SHIELD)
 			.addTag(ItemTags.SWORDS)
 			.addTag(ItemTags.AXES)
@@ -363,6 +384,7 @@ public class VanillaItemTagsProvider extends ItemTagsProvider {
 			.addTag(ItemTags.CHEST_ARMOR)
 			.addTag(ItemTags.HEAD_ARMOR)
 			.add(Items.ELYTRA)
+			.add(Items.POISONOUS_POLYTRA)
 			.addTag(ItemTags.SKULLS)
 			.add(Items.CARVED_PUMPKIN);
 		this.tag(ItemTags.CROSSBOW_ENCHANTABLE).add(Items.CROSSBOW);

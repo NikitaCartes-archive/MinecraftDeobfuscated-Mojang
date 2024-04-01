@@ -36,7 +36,12 @@ public class DirtPathBlock extends Block {
 	@Override
 	public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
 		return !this.defaultBlockState().canSurvive(blockPlaceContext.getLevel(), blockPlaceContext.getClickedPos())
-			? Block.pushEntitiesUp(this.defaultBlockState(), Blocks.DIRT.defaultBlockState(), blockPlaceContext.getLevel(), blockPlaceContext.getClickedPos())
+			? Block.pushEntitiesUp(
+				this.defaultBlockState(),
+				(blockPlaceContext.getLevel().isPotato() ? Blocks.TERREDEPOMME : Blocks.DIRT).defaultBlockState(),
+				blockPlaceContext.getLevel(),
+				blockPlaceContext.getClickedPos()
+			)
 			: super.getStateForPlacement(blockPlaceContext);
 	}
 

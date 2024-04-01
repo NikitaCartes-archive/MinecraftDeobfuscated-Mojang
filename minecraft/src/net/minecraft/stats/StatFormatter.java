@@ -5,6 +5,7 @@ import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.util.Locale;
 import net.minecraft.Util;
+import org.apache.commons.lang3.time.DurationFormatUtils;
 
 public interface StatFormatter {
 	DecimalFormat DECIMAL_FORMAT = Util.make(
@@ -37,6 +38,7 @@ public interface StatFormatter {
 			return e > 0.5 ? DECIMAL_FORMAT.format(e) + " m" : d + " s";
 		}
 	};
+	StatFormatter HUMAN_TIME = i -> DurationFormatUtils.formatDurationHMS(Math.round((double)i * 50.0));
 
 	String format(int i);
 }

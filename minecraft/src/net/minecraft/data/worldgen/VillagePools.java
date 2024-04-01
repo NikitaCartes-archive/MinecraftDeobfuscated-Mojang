@@ -5,6 +5,7 @@ import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
 public class VillagePools {
 	public static void bootstrap(BootstrapContext<StructureTemplatePool> bootstrapContext) {
 		PlainVillagePools.bootstrap(bootstrapContext);
+		PotatoVillagePools.bootstrap(bootstrapContext);
 		SnowyVillagePools.bootstrap(bootstrapContext);
 		SavannaVillagePools.bootstrap(bootstrapContext);
 		DesertVillagePools.bootstrap(bootstrapContext);

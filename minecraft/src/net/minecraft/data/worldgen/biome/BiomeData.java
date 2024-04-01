@@ -15,6 +15,11 @@ public abstract class BiomeData {
 		bootstrapContext.register(Biomes.THE_VOID, OverworldBiomes.theVoid(holderGetter, holderGetter2));
 		bootstrapContext.register(Biomes.PLAINS, OverworldBiomes.plains(holderGetter, holderGetter2, false, false, false));
 		bootstrapContext.register(Biomes.SUNFLOWER_PLAINS, OverworldBiomes.plains(holderGetter, holderGetter2, true, false, false));
+		bootstrapContext.register(Biomes.FIELDS, PotatoBiomes.fields(holderGetter, holderGetter2));
+		bootstrapContext.register(Biomes.ARBORETUM, PotatoBiomes.arboretum(holderGetter, holderGetter2));
+		bootstrapContext.register(Biomes.HASH, PotatoBiomes.hash(holderGetter, holderGetter2));
+		bootstrapContext.register(Biomes.WASTELAND, PotatoBiomes.wasteland(holderGetter, holderGetter2));
+		bootstrapContext.register(Biomes.CORRUPTION, PotatoBiomes.corruption(holderGetter, holderGetter2));
 		bootstrapContext.register(Biomes.SNOWY_PLAINS, OverworldBiomes.plains(holderGetter, holderGetter2, false, true, false));
 		bootstrapContext.register(Biomes.ICE_SPIKES, OverworldBiomes.plains(holderGetter, holderGetter2, false, true, true));
 		bootstrapContext.register(Biomes.DESERT, OverworldBiomes.desert(holderGetter, holderGetter2));

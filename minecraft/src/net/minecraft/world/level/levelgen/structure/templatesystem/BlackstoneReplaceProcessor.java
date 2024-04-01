@@ -23,6 +23,7 @@ public class BlackstoneReplaceProcessor extends StructureProcessor {
 		hashMap.put(Blocks.COBBLESTONE, Blocks.BLACKSTONE);
 		hashMap.put(Blocks.MOSSY_COBBLESTONE, Blocks.BLACKSTONE);
 		hashMap.put(Blocks.STONE, Blocks.POLISHED_BLACKSTONE);
+		hashMap.put(Blocks.POTONE, Blocks.POLISHED_BLACKSTONE);
 		hashMap.put(Blocks.STONE_BRICKS, Blocks.POLISHED_BLACKSTONE_BRICKS);
 		hashMap.put(Blocks.MOSSY_STONE_BRICKS, Blocks.POLISHED_BLACKSTONE_BRICKS);
 		hashMap.put(Blocks.COBBLESTONE_STAIRS, Blocks.BLACKSTONE_STAIRS);

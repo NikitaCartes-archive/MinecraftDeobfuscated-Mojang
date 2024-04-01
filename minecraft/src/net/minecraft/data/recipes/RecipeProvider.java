@@ -20,7 +20,9 @@ import net.minecraft.advancements.critereon.EnterBlockTrigger;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
 import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.advancements.critereon.MinMaxBounds;
+import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.BlockFamilies;
 import net.minecraft.data.BlockFamily;
@@ -35,9 +37,11 @@ import net.minecraft.world.item.HoneycombItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.crafting.AbstractCookingRecipe;
 import net.minecraft.world.item.crafting.BlastingRecipe;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.PotatoRefinementRecipe;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.SmeltingRecipe;
@@ -210,6 +214,14 @@ public abstract class RecipeProvider implements DataProvider {
 			.requires(tagKey)
 			.group("planks")
 			.unlockedBy("has_logs", has(tagKey))
+			.save(recipeOutput);
+	}
+
+	protected static void planksFromLogs(RecipeOutput recipeOutput, ItemLike itemLike, ItemLike itemLike2, int i) {
+		ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, itemLike, i)
+			.requires(itemLike2)
+			.group("planks")
+			.unlockedBy("has_logs", has(itemLike2))
 			.save(recipeOutput);
 	}
 
@@ -469,6 +481,30 @@ public abstract class RecipeProvider implements DataProvider {
 			.save(recipeOutput, getConversionRecipeName(itemLike, itemLike2) + "_stonecutting");
 	}
 
+	protected static void poisonousPotatoCutterResultFromBase(
+		RecipeOutput recipeOutput, RecipeCategory recipeCategory, ItemLike itemLike, ItemLike itemLike2, int i
+	) {
+		SingleItemRecipeBuilder.poisonous_potato_cutting(Ingredient.of(itemLike2), recipeCategory, itemLike, i)
+			.unlockedBy(getHasName(itemLike2), has(itemLike2))
+			.save(recipeOutput, getConversionRecipeName(itemLike, itemLike2) + "_poisonous_potato_cutting");
+	}
+
+	protected static void potatoRefinement(RecipeOutput recipeOutput, ItemStack itemStack, ItemLike itemLike, ItemStack itemStack2, float f) {
+		potatoRefinement(recipeOutput, itemStack, itemLike, Ingredient.of(itemStack2), f);
+	}
+
+	protected static void potatoRefinement(RecipeOutput recipeOutput, ItemStack itemStack, ItemLike itemLike, ItemLike itemLike2, float f) {
+		potatoRefinement(recipeOutput, itemStack, itemLike, Ingredient.of(itemLike2), f);
+	}
+
+	protected static void potatoRefinement(RecipeOutput recipeOutput, ItemStack itemStack, ItemLike itemLike, Ingredient ingredient, float f) {
+		recipeOutput.accept(
+			new ResourceLocation(getPotatoRefinementRecipeName(itemStack)),
+			new PotatoRefinementRecipe(Ingredient.of(itemLike), ingredient, itemStack, 0.1F, (int)(f * 100.0F)),
+			null
+		);
+	}
+
 	private static void smeltingResultFromBase(RecipeOutput recipeOutput, ItemLike itemLike, ItemLike itemLike2) {
 		SimpleCookingRecipeBuilder.smelting(Ingredient.of(itemLike2), RecipeCategory.BUILDING_BLOCKS, itemLike, 0.1F, 200)
 			.unlockedBy(getHasName(itemLike2), has(itemLike2))
@@ -568,6 +604,8 @@ public abstract class RecipeProvider implements DataProvider {
 		simpleCookingRecipe(recipeOutput, string, recipeSerializer, factory, i, Items.MUTTON, Items.COOKED_MUTTON, 0.35F);
 		simpleCookingRecipe(recipeOutput, string, recipeSerializer, factory, i, Items.PORKCHOP, Items.COOKED_PORKCHOP, 0.35F);
 		simpleCookingRecipe(recipeOutput, string, recipeSerializer, factory, i, Items.POTATO, Items.BAKED_POTATO, 0.35F);
+		simpleCookingRecipe(recipeOutput, string, recipeSerializer, factory, i, Items.POISONOUS_POTATO_STICKS, Items.POISONOUS_POTATO_FRIES, 0.35F);
+		simpleCookingRecipe(recipeOutput, string, recipeSerializer, factory, i, Items.POISONOUS_POTATO_SLICES, Items.POISONOUS_POTATO_CHIPS, 0.35F);
 		simpleCookingRecipe(recipeOutput, string, recipeSerializer, factory, i, Items.RABBIT, Items.COOKED_RABBIT, 0.35F);
 	}
 
@@ -707,6 +745,19 @@ public abstract class RecipeProvider implements DataProvider {
 
 	protected static String getBlastingRecipeName(ItemLike itemLike) {
 		return getItemName(itemLike) + "_from_blasting";
+	}
+
+	protected static String getPotatoRefinementRecipeName(ItemStack itemStack) {
+		Item item = itemStack.getItem();
+		PotionContents potionContents = itemStack.get(DataComponents.POTION_CONTENTS);
+		String string = "_from_potato_refinement";
+		return potionContents != null
+			? getItemName(item) + "_with_" + getPotionName(potionContents) + "_from_potato_refinement"
+			: getItemName(item) + "_from_potato_refinement";
+	}
+
+	private static String getPotionName(PotionContents potionContents) {
+		return new ResourceLocation(((Holder)potionContents.potion().get()).getRegisteredName()).getPath();
 	}
 
 	@Override

@@ -12,6 +12,10 @@ public class Potions {
 	public static final Holder<Potion> MUNDANE = register("mundane", new Potion());
 	public static final Holder<Potion> THICK = register("thick", new Potion());
 	public static final Holder<Potion> AWKWARD = register("awkward", new Potion());
+	public static final Holder<Potion> POTATO_OIL = register("potato_oil", new Potion(new MobEffectInstance(MobEffects.POTATO_OIL, 1)));
+	public static final Holder<Potion> POISONOUS_POTATO_OIL = register(
+		"poisonous_potato_oil", new Potion(new MobEffectInstance(MobEffects.POTATO_OIL, 1), new MobEffectInstance(MobEffects.POISON, 200))
+	);
 	public static final Holder<Potion> NIGHT_VISION = register("night_vision", new Potion(new MobEffectInstance(MobEffects.NIGHT_VISION, 3600)));
 	public static final Holder<Potion> LONG_NIGHT_VISION = register(
 		"long_night_vision", new Potion("night_vision", new MobEffectInstance(MobEffects.NIGHT_VISION, 9600))
@@ -79,6 +83,7 @@ public class Potions {
 	public static final Holder<Potion> LONG_SLOW_FALLING = register(
 		"long_slow_falling", new Potion("slow_falling", new MobEffectInstance(MobEffects.SLOW_FALLING, 4800))
 	);
+	public static final Holder<Potion> STICKY = register("sticky", new Potion("sticky", new MobEffectInstance(MobEffects.STICKY, 1800)));
 
 	private static Holder<Potion> register(String string, Potion potion) {
 		return Registry.registerForHolder(BuiltInRegistries.POTION, new ResourceLocation(string), potion);

@@ -36,6 +36,7 @@ import net.minecraft.world.entity.animal.Cat;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
 
@@ -140,7 +141,7 @@ public class Phantom extends FlyingMob implements Enemy {
 
 	@Override
 	public void aiStep() {
-		if (this.isAlive() && this.isSunBurnTick()) {
+		if (this.isAlive() && this.isSunBurnTick() && (!this.level().getBiome(this.blockPosition()).is(Biomes.CORRUPTION) || this.getTarget() instanceof Player)) {
 			this.igniteForSeconds(8);
 		}
 

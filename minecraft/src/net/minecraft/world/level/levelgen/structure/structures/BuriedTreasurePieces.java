@@ -51,8 +51,12 @@ public class BuriedTreasurePieces {
 					|| blockState2 == Blocks.STONE.defaultBlockState()
 					|| blockState2 == Blocks.ANDESITE.defaultBlockState()
 					|| blockState2 == Blocks.GRANITE.defaultBlockState()
-					|| blockState2 == Blocks.DIORITE.defaultBlockState()) {
-					BlockState blockState3 = !blockState.isAir() && !this.isLiquid(blockState) ? blockState : Blocks.SAND.defaultBlockState();
+					|| blockState2 == Blocks.DIORITE.defaultBlockState()
+					|| blockState2 == Blocks.TATERSTONE.defaultBlockState()
+					|| blockState2 == Blocks.POTONE.defaultBlockState()) {
+					BlockState blockState3 = !blockState.isAir() && !this.isLiquid(blockState)
+						? blockState
+						: (worldGenLevel.isPotato() ? Blocks.SAND.defaultBlockState() : Blocks.GRAVTATER.defaultBlockState());
 
 					for (Direction direction : Direction.values()) {
 						BlockPos blockPos2 = mutableBlockPos.relative(direction);

@@ -546,7 +546,7 @@ public abstract class ChunkGenerator {
 		HolderSet<Biome> holderSet = structure.biomes();
 		Predicate<Holder<Biome>> predicate = holderSet::contains;
 		StructureStart structureStart = structure.generate(
-			registryAccess, this, this.biomeSource, randomState, structureTemplateManager, l, chunkPos, i, chunkAccess, predicate
+			registryAccess, this, this.biomeSource, randomState, structureTemplateManager, l, chunkPos, i, chunkAccess, predicate, structure.densityChecks()
 		);
 		if (structureStart.isValid()) {
 			structureManager.setStartForStructure(sectionPos, structure, structureStart, chunkAccess);

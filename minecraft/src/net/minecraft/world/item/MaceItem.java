@@ -57,7 +57,7 @@ public class MaceItem extends Item {
 	@Override
 	public boolean hurtEnemy(ItemStack itemStack, LivingEntity livingEntity, LivingEntity livingEntity2) {
 		itemStack.hurtAndBreak(1, livingEntity2, EquipmentSlot.MAINHAND);
-		if (livingEntity2 instanceof ServerPlayer serverPlayer && serverPlayer.fallDistance > 1.5F) {
+		if (livingEntity2 instanceof ServerPlayer serverPlayer && canSmashAttack(serverPlayer)) {
 			ServerLevel serverLevel = (ServerLevel)livingEntity2.level();
 			if (!serverPlayer.ignoreFallDamageFromCurrentImpulse
 				|| serverPlayer.currentImpulseImpactPos == null
@@ -94,7 +94,7 @@ public class MaceItem extends Item {
 
 	@Override
 	public float getAttackDamageBonus(Player player, float f) {
-		return player.fallDistance > 1.5F ? f * 0.5F * player.fallDistance : 0.0F;
+		return canSmashAttack(player) ? f * 0.5F * player.fallDistance : 0.0F;
 	}
 
 	private void knockback(Level level, Player player, Entity entity) {
@@ -125,5 +125,9 @@ public class MaceItem extends Item {
 					}
 				}
 			);
+	}
+
+	public static boolean canSmashAttack(Player player) {
+		return player.fallDistance > 1.5F && !player.isFallFlying();
 	}
 }

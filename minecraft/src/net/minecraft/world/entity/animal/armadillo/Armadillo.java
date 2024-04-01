@@ -67,6 +67,11 @@ public class Armadillo extends Animal {
 		this.scuteTime = this.pickNextScuteDropTime();
 	}
 
+	@Override
+	public boolean hasPotatoVariant() {
+		return true;
+	}
+
 	@Nullable
 	@Override
 	public AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {

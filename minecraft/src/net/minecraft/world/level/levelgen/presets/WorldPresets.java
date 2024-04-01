@@ -75,6 +75,7 @@ public class WorldPresets {
 		private final Holder<DimensionType> overworldDimensionType;
 		private final LevelStem netherStem;
 		private final LevelStem endStem;
+		private final LevelStem potatoStem;
 
 		Bootstrap(BootstrapContext<WorldPreset> bootstrapContext) {
 			this.context = bootstrapContext;
@@ -93,6 +94,11 @@ public class WorldPresets {
 			Holder<DimensionType> holder3 = holderGetter.getOrThrow(BuiltinDimensionTypes.END);
 			Holder<NoiseGeneratorSettings> holder4 = this.noiseSettings.getOrThrow(NoiseGeneratorSettings.END);
 			this.endStem = new LevelStem(holder3, new NoiseBasedChunkGenerator(TheEndBiomeSource.create(this.biomes), holder4));
+			Holder<DimensionType> holder5 = holderGetter.getOrThrow(BuiltinDimensionTypes.POTATO);
+			Holder<NoiseGeneratorSettings> holder6 = this.noiseSettings.getOrThrow(NoiseGeneratorSettings.POTATO);
+			Holder.Reference<MultiNoiseBiomeSourceParameterList> reference2 = this.multiNoiseBiomeSourceParameterLists
+				.getOrThrow(MultiNoiseBiomeSourceParameterLists.POTATO);
+			this.potatoStem = new LevelStem(holder5, new NoiseBasedChunkGenerator(MultiNoiseBiomeSource.createFromPreset(reference2), holder6));
 		}
 
 		private LevelStem makeOverworld(ChunkGenerator chunkGenerator) {
@@ -104,7 +110,9 @@ public class WorldPresets {
 		}
 
 		private WorldPreset createPresetWithCustomOverworld(LevelStem levelStem) {
-			return new WorldPreset(Map.of(LevelStem.OVERWORLD, levelStem, LevelStem.NETHER, this.netherStem, LevelStem.END, this.endStem));
+			return new WorldPreset(
+				Map.of(LevelStem.OVERWORLD, levelStem, LevelStem.NETHER, this.netherStem, LevelStem.END, this.endStem, LevelStem.POTATO, this.potatoStem)
+			);
 		}
 
 		private void registerCustomOverworldPreset(ResourceKey<WorldPreset> resourceKey, LevelStem levelStem) {

@@ -31,6 +31,7 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.util.datafix.fixes.References;
 import net.minecraft.world.entity.ambient.Bat;
+import net.minecraft.world.entity.ambient.Batato;
 import net.minecraft.world.entity.animal.Bee;
 import net.minecraft.world.entity.animal.Cat;
 import net.minecraft.world.entity.animal.Chicken;
@@ -95,8 +96,10 @@ import net.minecraft.world.entity.monster.Guardian;
 import net.minecraft.world.entity.monster.Husk;
 import net.minecraft.world.entity.monster.Illusioner;
 import net.minecraft.world.entity.monster.MagmaCube;
+import net.minecraft.world.entity.monster.MegaSpud;
 import net.minecraft.world.entity.monster.Phantom;
 import net.minecraft.world.entity.monster.Pillager;
+import net.minecraft.world.entity.monster.PoisonousPotatoZombie;
 import net.minecraft.world.entity.monster.Ravager;
 import net.minecraft.world.entity.monster.Shulker;
 import net.minecraft.world.entity.monster.Silverfish;
@@ -125,9 +128,11 @@ import net.minecraft.world.entity.projectile.Arrow;
 import net.minecraft.world.entity.projectile.DragonFireball;
 import net.minecraft.world.entity.projectile.EvokerFangs;
 import net.minecraft.world.entity.projectile.EyeOfEnder;
+import net.minecraft.world.entity.projectile.EyeOfPotato;
 import net.minecraft.world.entity.projectile.FireworkRocketEntity;
 import net.minecraft.world.entity.projectile.FishingHook;
 import net.minecraft.world.entity.projectile.LargeFireball;
+import net.minecraft.world.entity.projectile.LashingPotatoHook;
 import net.minecraft.world.entity.projectile.LlamaSpit;
 import net.minecraft.world.entity.projectile.ShulkerBullet;
 import net.minecraft.world.entity.projectile.SmallFireball;
@@ -138,6 +143,7 @@ import net.minecraft.world.entity.projectile.ThrownEnderpearl;
 import net.minecraft.world.entity.projectile.ThrownExperienceBottle;
 import net.minecraft.world.entity.projectile.ThrownPotion;
 import net.minecraft.world.entity.projectile.ThrownTrident;
+import net.minecraft.world.entity.projectile.VineProjectile;
 import net.minecraft.world.entity.projectile.WitherSkull;
 import net.minecraft.world.entity.projectile.windcharge.BreezeWindCharge;
 import net.minecraft.world.entity.projectile.windcharge.WindCharge;
@@ -154,6 +160,7 @@ import net.minecraft.world.flag.FeatureElement;
 import net.minecraft.world.flag.FeatureFlag;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.flag.FeatureFlags;
+import net.minecraft.world.grid.GridCarrier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
@@ -196,11 +203,17 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 	public static final EntityType<Arrow> ARROW = register(
 		"arrow", EntityType.Builder.<Arrow>of(Arrow::new, MobCategory.MISC).sized(0.5F, 0.5F).eyeHeight(0.13F).clientTrackingRange(4).updateInterval(20)
 	);
+	public static final EntityType<VineProjectile> VINE_PROJECTILE = register(
+		"vine_projectile", EntityType.Builder.of(VineProjectile::new, MobCategory.MISC).sized(0.1F, 0.1F).eyeHeight(0.13F).clientTrackingRange(4).updateInterval(20)
+	);
 	public static final EntityType<Axolotl> AXOLOTL = register(
 		"axolotl", EntityType.Builder.of(Axolotl::new, MobCategory.AXOLOTLS).sized(0.75F, 0.42F).eyeHeight(0.2751F).clientTrackingRange(10)
 	);
 	public static final EntityType<Bat> BAT = register(
 		"bat", EntityType.Builder.of(Bat::new, MobCategory.AMBIENT).sized(0.5F, 0.9F).eyeHeight(0.45F).clientTrackingRange(5)
+	);
+	public static final EntityType<Batato> BATATO = register(
+		"batato", EntityType.Builder.of(Batato::new, MobCategory.AMBIENT).sized(0.5F, 0.9F).eyeHeight(0.45F).clientTrackingRange(5)
 	);
 	public static final EntityType<Bee> BEE = register(
 		"bee", EntityType.Builder.of(Bee::new, MobCategory.CREATURE).sized(0.7F, 0.6F).eyeHeight(0.3F).clientTrackingRange(8)
@@ -216,7 +229,12 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 	);
 	public static final EntityType<Bogged> BOGGED = register(
 		"bogged",
-		EntityType.Builder.of(Bogged::new, MobCategory.MONSTER).sized(0.6F, 1.99F).eyeHeight(1.74F).clientTrackingRange(8).requiredFeatures(FeatureFlags.UPDATE_1_21)
+		EntityType.Builder.of(Bogged::new, MobCategory.MONSTER)
+			.sized(0.6F, 1.99F)
+			.eyeHeight(1.74F)
+			.ridingOffset(-0.7F)
+			.clientTrackingRange(8)
+			.requiredFeatures(FeatureFlags.UPDATE_1_21)
 	);
 	public static final EntityType<Breeze> BREEZE = register(
 		"breeze",
@@ -299,7 +317,7 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 	);
 	public static final EntityType<ElderGuardian> ELDER_GUARDIAN = register(
 		"elder_guardian",
-		EntityType.Builder.of(ElderGuardian::new, MobCategory.MONSTER)
+		EntityType.Builder.of(ElderGuardian::createNormalElder, MobCategory.MONSTER)
 			.sized(1.9975F, 1.9975F)
 			.eyeHeight(0.99875F)
 			.passengerAttachments(2.350625F)
@@ -393,7 +411,7 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 	);
 	public static final EntityType<Guardian> GUARDIAN = register(
 		"guardian",
-		EntityType.Builder.of(Guardian::new, MobCategory.MONSTER).sized(0.85F, 0.85F).eyeHeight(0.425F).passengerAttachments(0.975F).clientTrackingRange(8)
+		EntityType.Builder.of(Guardian::createNormal, MobCategory.MONSTER).sized(0.85F, 0.85F).eyeHeight(0.425F).passengerAttachments(0.975F).clientTrackingRange(8)
 	);
 	public static final EntityType<Hoglin> HOGLIN = register(
 		"hoglin", EntityType.Builder.of(Hoglin::new, MobCategory.MONSTER).sized(1.3964844F, 1.4F).passengerAttachments(1.49375F).clientTrackingRange(8)
@@ -533,6 +551,14 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 			.ridingOffset(-0.6F)
 			.clientTrackingRange(8)
 	);
+	public static final EntityType<ElderGuardian> PLAGUEWHALE = register(
+		"plaguewhale",
+		EntityType.Builder.of(ElderGuardian::createToxicElder, MobCategory.MONSTER)
+			.sized(1.9975F, 0.99875F)
+			.eyeHeight(0.499375F)
+			.passengerAttachments(1.1753125F)
+			.clientTrackingRange(10)
+	);
 	public static final EntityType<PolarBear> POLAR_BEAR = register(
 		"polar_bear", EntityType.Builder.of(PolarBear::new, MobCategory.CREATURE).immuneTo(Blocks.POWDER_SNOW).sized(1.4F, 1.4F).clientTrackingRange(10)
 	);
@@ -579,6 +605,9 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 	);
 	public static final EntityType<Slime> SLIME = register(
 		"slime", EntityType.Builder.of(Slime::new, MobCategory.MONSTER).sized(0.52F, 0.52F).eyeHeight(0.325F).clientTrackingRange(10)
+	);
+	public static final EntityType<MegaSpud> MEGA_SPUD = register(
+		"mega_spud", EntityType.Builder.of(MegaSpud::new, MobCategory.MONSTER).sized(0.52F, 0.52F).eyeHeight(0.325F).clientTrackingRange(10)
 	);
 	public static final EntityType<SmallFireball> SMALL_FIREBALL = register(
 		"small_fireball",
@@ -647,6 +676,14 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 	public static final EntityType<MinecartTNT> TNT_MINECART = register(
 		"tnt_minecart",
 		EntityType.Builder.<MinecartTNT>of(MinecartTNT::new, MobCategory.MISC).sized(0.98F, 0.7F).passengerAttachments(0.1875F).clientTrackingRange(8)
+	);
+	public static final EntityType<Guardian> TOXIFIN = register(
+		"toxifin",
+		EntityType.Builder.of(Guardian::createToxic, MobCategory.MONSTER)
+			.sized(0.85F, 0.425F)
+			.eyeHeight(0.2125F)
+			.passengerAttachments(0.4875F)
+			.clientTrackingRange(8)
 	);
 	public static final EntityType<TraderLlama> TRADER_LLAMA = register(
 		"trader_llama",
@@ -744,6 +781,15 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 			.ridingOffset(-0.7F)
 			.clientTrackingRange(8)
 	);
+	public static final EntityType<PoisonousPotatoZombie> POISONOUS_POTATO_ZOMBIE = register(
+		"poisonous_potato_zombie",
+		EntityType.Builder.of(PoisonousPotatoZombie::new, MobCategory.MONSTER)
+			.sized(0.6F, 1.95F)
+			.eyeHeight(1.74F)
+			.passengerAttachments(2.0125F)
+			.ridingOffset(-0.7F)
+			.clientTrackingRange(8)
+	);
 	public static final EntityType<ZombieHorse> ZOMBIE_HORSE = register(
 		"zombie_horse",
 		EntityType.Builder.of(ZombieHorse::new, MobCategory.CREATURE).sized(1.3964844F, 1.6F).eyeHeight(1.52F).passengerAttachments(1.31875F).clientTrackingRange(10)
@@ -767,6 +813,9 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 			.ridingOffset(-0.7F)
 			.clientTrackingRange(8)
 	);
+	public static final EntityType<EyeOfPotato> EYE_OF_POTATO = register(
+		"eye_of_potato", EntityType.Builder.<EyeOfPotato>of(EyeOfPotato::new, MobCategory.MISC).sized(0.25F, 0.25F).clientTrackingRange(4).updateInterval(4)
+	);
 	public static final EntityType<Player> PLAYER = register(
 		"player",
 		EntityType.Builder.<Player>createNothing(MobCategory.MISC)
@@ -781,6 +830,18 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 	public static final EntityType<FishingHook> FISHING_BOBBER = register(
 		"fishing_bobber",
 		EntityType.Builder.<FishingHook>of(FishingHook::new, MobCategory.MISC).noSave().noSummon().sized(0.25F, 0.25F).clientTrackingRange(4).updateInterval(5)
+	);
+	public static final EntityType<LashingPotatoHook> LASHING_POTATO_HOOK = register(
+		"lashing_potato_hook",
+		EntityType.Builder.<LashingPotatoHook>of(LashingPotatoHook::new, MobCategory.MISC)
+			.noSave()
+			.noSummon()
+			.sized(0.25F, 0.25F)
+			.clientTrackingRange(4)
+			.updateInterval(5)
+	);
+	public static final EntityType<GridCarrier> GRID_CARRIER = register(
+		"grid_carrier", EntityType.Builder.of(GridCarrier::new, MobCategory.MISC).noSummon().sized(0.0F, 0.0F).clientTrackingRange(10).updateInterval(2)
 	);
 	private final EntityType.EntityFactory<T> factory;
 	private final MobCategory category;

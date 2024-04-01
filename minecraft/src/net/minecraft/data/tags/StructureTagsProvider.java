@@ -17,6 +17,7 @@ public class StructureTagsProvider extends TagsProvider<Structure> {
 	protected void addTags(HolderLookup.Provider provider) {
 		this.tag(StructureTags.VILLAGE)
 			.add(BuiltinStructures.VILLAGE_PLAINS)
+			.add(BuiltinStructures.VILLAGE_POTATO)
 			.add(BuiltinStructures.VILLAGE_DESERT)
 			.add(BuiltinStructures.VILLAGE_SAVANNA)
 			.add(BuiltinStructures.VILLAGE_SNOWY)
@@ -32,6 +33,8 @@ public class StructureTagsProvider extends TagsProvider<Structure> {
 			.add(BuiltinStructures.RUINED_PORTAL_OCEAN)
 			.add(BuiltinStructures.RUINED_PORTAL_STANDARD)
 			.add(BuiltinStructures.RUINED_PORTAL_SWAMP);
+		this.tag(StructureTags.RUINED_PORTATOL).add(BuiltinStructures.RUINED_PORTATOL);
+		this.tag(StructureTags.COLOSSEUM).add(BuiltinStructures.COLOSSEUM);
 		this.tag(StructureTags.CATS_SPAWN_IN).add(BuiltinStructures.SWAMP_HUT);
 		this.tag(StructureTags.CATS_SPAWN_AS_BLACK).add(BuiltinStructures.SWAMP_HUT);
 		this.tag(StructureTags.EYE_OF_ENDER_LOCATED).add(BuiltinStructures.STRONGHOLD);

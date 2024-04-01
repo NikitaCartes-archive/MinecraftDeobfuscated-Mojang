@@ -23,6 +23,7 @@ public record NoiseGeneratorSettings(
 	SurfaceRules.RuleSource surfaceRule,
 	List<Climate.ParameterPoint> spawnTarget,
 	int seaLevel,
+	int bottomGenerationPadding,
 	@Deprecated boolean disableMobGeneration,
 	boolean aquifersEnabled,
 	boolean oreVeinsEnabled,
@@ -37,6 +38,7 @@ public record NoiseGeneratorSettings(
 					SurfaceRules.RuleSource.CODEC.fieldOf("surface_rule").forGetter(NoiseGeneratorSettings::surfaceRule),
 					Climate.ParameterPoint.CODEC.listOf().fieldOf("spawn_target").forGetter(NoiseGeneratorSettings::spawnTarget),
 					Codec.INT.fieldOf("sea_level").forGetter(NoiseGeneratorSettings::seaLevel),
+					Codec.INT.fieldOf("bottom_generation_padding").forGetter(NoiseGeneratorSettings::bottomGenerationPadding),
 					Codec.BOOL.fieldOf("disable_mob_generation").forGetter(NoiseGeneratorSettings::disableMobGeneration),
 					Codec.BOOL.fieldOf("aquifers_enabled").forGetter(NoiseGeneratorSettings::isAquifersEnabled),
 					Codec.BOOL.fieldOf("ore_veins_enabled").forGetter(NoiseGeneratorSettings::oreVeinsEnabled),
@@ -54,6 +56,7 @@ public record NoiseGeneratorSettings(
 	public static final ResourceKey<NoiseGeneratorSettings> FLOATING_ISLANDS = ResourceKey.create(
 		Registries.NOISE_SETTINGS, new ResourceLocation("floating_islands")
 	);
+	public static final ResourceKey<NoiseGeneratorSettings> POTATO = ResourceKey.create(Registries.NOISE_SETTINGS, new ResourceLocation("potato"));
 
 	public boolean isAquifersEnabled() {
 		return this.aquifersEnabled;
@@ -71,6 +74,7 @@ public record NoiseGeneratorSettings(
 		bootstrapContext.register(END, end(bootstrapContext));
 		bootstrapContext.register(CAVES, caves(bootstrapContext));
 		bootstrapContext.register(FLOATING_ISLANDS, floatingIslands(bootstrapContext));
+		bootstrapContext.register(POTATO, potato(bootstrapContext));
 	}
 
 	private static NoiseGeneratorSettings end(BootstrapContext<?> bootstrapContext) {
@@ -81,6 +85,7 @@ public record NoiseGeneratorSettings(
 			NoiseRouterData.end(bootstrapContext.lookup(Registries.DENSITY_FUNCTION)),
 			SurfaceRuleData.end(),
 			List.of(),
+			0,
 			0,
 			true,
 			false,
@@ -98,6 +103,7 @@ public record NoiseGeneratorSettings(
 			SurfaceRuleData.nether(),
 			List.of(),
 			32,
+			0,
 			false,
 			false,
 			false,
@@ -114,6 +120,7 @@ public record NoiseGeneratorSettings(
 			SurfaceRuleData.overworld(),
 			new OverworldBiomeBuilder().spawnTarget(),
 			63,
+			0,
 			false,
 			true,
 			true,
@@ -130,6 +137,7 @@ public record NoiseGeneratorSettings(
 			SurfaceRuleData.overworldLike(false, true, true),
 			List.of(),
 			32,
+			0,
 			false,
 			false,
 			false,
@@ -146,6 +154,24 @@ public record NoiseGeneratorSettings(
 			SurfaceRuleData.overworldLike(false, false, false),
 			List.of(),
 			-64,
+			8,
+			false,
+			false,
+			false,
+			true
+		);
+	}
+
+	private static NoiseGeneratorSettings potato(BootstrapContext<?> bootstrapContext) {
+		return new NoiseGeneratorSettings(
+			NoiseSettings.POTATO_NOISE_SETTINGS,
+			Blocks.POTONE.defaultBlockState(),
+			Blocks.WATER.defaultBlockState(),
+			NoiseRouterData.potato(bootstrapContext.lookup(Registries.DENSITY_FUNCTION), bootstrapContext.lookup(Registries.NOISE)),
+			SurfaceRuleData.potato(),
+			List.of(),
+			0,
+			8,
 			false,
 			false,
 			false,
@@ -162,6 +188,7 @@ public record NoiseGeneratorSettings(
 			SurfaceRuleData.air(),
 			List.of(),
 			63,
+			0,
 			true,
 			false,
 			false,

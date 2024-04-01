@@ -48,6 +48,7 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.TagKey;
@@ -69,6 +70,7 @@ import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.flag.FeatureFlagSet;
+import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
@@ -333,7 +335,7 @@ public final class ItemStack implements DataComponentHolder {
 		if (this.isEmpty()) {
 			throw new IllegalStateException("Cannot encode empty ItemStack");
 		} else {
-			return Util.getOrThrow(CODEC.encode(this, provider.createSerializationContext(NbtOps.INSTANCE), tag), IllegalStateException::new);
+			return Util.getOrThrow(CODEC.encode(this, provider.createSerializationContext(NbtOps.INSTANCE), tag), string -> new IllegalStateException(string));
 		}
 	}
 
@@ -665,13 +667,19 @@ public final class ItemStack implements DataComponentHolder {
 				this.getItem().appendHoverText(this, player == null ? null : player.level(), list, tooltipFlag);
 			}
 
+			this.addToTooltip(DataComponents.POTATO_BANE, consumer, tooltipFlag);
 			this.addToTooltip(DataComponents.TRIM, consumer, tooltipFlag);
+			this.addToTooltip(DataComponents.RESIN, consumer, tooltipFlag);
+			this.addToTooltip(DataComponents.FLETCHING, consumer, tooltipFlag);
 			this.addToTooltip(DataComponents.STORED_ENCHANTMENTS, consumer, tooltipFlag);
 			this.addToTooltip(DataComponents.ENCHANTMENTS, consumer, tooltipFlag);
 			this.addToTooltip(DataComponents.DYED_COLOR, consumer, tooltipFlag);
 			this.addToTooltip(DataComponents.LORE, consumer, tooltipFlag);
+			this.addToTooltip(DataComponents.XP, consumer, tooltipFlag);
 			this.addAttributeTooltips(consumer, player);
 			this.addToTooltip(DataComponents.UNBREAKABLE, consumer, tooltipFlag);
+			this.addToTooltip(DataComponents.LUBRICATION, consumer, tooltipFlag);
+			this.addToTooltip(DataComponents.BASE_COLOR, consumer, tooltipFlag);
 			AdventureModePredicate adventureModePredicate = this.get(DataComponents.CAN_BREAK);
 			if (adventureModePredicate != null && adventureModePredicate.showInTooltip()) {
 				consumer.accept(CommonComponents.EMPTY);
@@ -712,13 +720,15 @@ public final class ItemStack implements DataComponentHolder {
 			for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
 				MutableBoolean mutableBoolean = new MutableBoolean(true);
 				this.forEachModifier(equipmentSlot, (holder, attributeModifier) -> {
-					if (mutableBoolean.isTrue()) {
-						consumer.accept(CommonComponents.EMPTY);
-						consumer.accept(Component.translatable("item.modifiers." + equipmentSlot.getName()).withStyle(ChatFormatting.GRAY));
-						mutableBoolean.setFalse();
-					}
+					if (attributeModifier.amount() != 0.0) {
+						if (mutableBoolean.isTrue()) {
+							consumer.accept(CommonComponents.EMPTY);
+							consumer.accept(Component.translatable("item.modifiers." + equipmentSlot.getName()).withStyle(ChatFormatting.GRAY));
+							mutableBoolean.setFalse();
+						}
 
-					this.addModifierTooltip(consumer, player, holder, attributeModifier);
+						this.addModifierTooltip(consumer, player, holder, attributeModifier);
+					}
 				});
 			}
 		}
@@ -919,7 +929,8 @@ public final class ItemStack implements DataComponentHolder {
 	}
 
 	public SoundEvent getEatingSound() {
-		return this.getItem().getEatingSound();
+		FoodProperties foodProperties = this.get(DataComponents.FOOD);
+		return foodProperties == null ? SoundEvents.GENERIC_EAT.value() : foodProperties.eatSound().value();
 	}
 
 	public SoundEvent getBreakingSound() {
@@ -928,5 +939,10 @@ public final class ItemStack implements DataComponentHolder {
 
 	public boolean canBeHurtBy(DamageSource damageSource) {
 		return !this.has(DataComponents.FIRE_RESISTANT) || !damageSource.is(DamageTypeTags.IS_FIRE);
+	}
+
+	public ItemStack makeFoil() {
+		this.set(DataComponents.EXPLICIT_FOIL, true);
+		return this;
 	}
 }

@@ -19,6 +19,7 @@ public interface PlacementModifierType<P extends PlacementModifier> {
 	PlacementModifierType<EnvironmentScanPlacement> ENVIRONMENT_SCAN = register("environment_scan", EnvironmentScanPlacement.CODEC);
 	PlacementModifierType<HeightmapPlacement> HEIGHTMAP = register("heightmap", HeightmapPlacement.CODEC);
 	PlacementModifierType<HeightRangePlacement> HEIGHT_RANGE = register("height_range", HeightRangePlacement.CODEC);
+	PlacementModifierType<CloudPlacement> CLOUD = register("cloud", CloudPlacement.CODEC);
 	PlacementModifierType<InSquarePlacement> IN_SQUARE = register("in_square", InSquarePlacement.CODEC);
 	PlacementModifierType<RandomOffsetPlacement> RANDOM_OFFSET = register("random_offset", RandomOffsetPlacement.CODEC);
 	PlacementModifierType<CarvingMaskPlacement> CARVING_MASK_PLACEMENT = register("carving_mask", CarvingMaskPlacement.CODEC);

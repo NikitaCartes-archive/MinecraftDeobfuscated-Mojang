@@ -82,6 +82,7 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
 	protected static final LootItemCondition.Builder HAS_NO_SILK_TOUCH = HAS_SILK_TOUCH.invert();
 	protected static final LootItemCondition.Builder HAS_SHEARS = MatchTool.toolMatches(ItemPredicate.Builder.item().of(Items.SHEARS));
 	private static final LootItemCondition.Builder HAS_SHEARS_OR_SILK_TOUCH = HAS_SHEARS.or(HAS_SILK_TOUCH);
+	protected static final LootItemCondition.Builder HAS_POTATO_PEELER = MatchTool.toolMatches(ItemPredicate.Builder.item().of(Items.POTATO_PEELER));
 	private static final LootItemCondition.Builder HAS_NO_SHEARS_OR_SILK_TOUCH = HAS_SHEARS_OR_SILK_TOUCH.invert();
 	protected final Set<Item> explosionResistant;
 	protected final FeatureFlagSet enabledFeatures;
@@ -215,6 +216,20 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
 						.setRolls(ConstantValue.exactly(1.0F))
 						.add(
 							LootItem.lootTableItem(block).apply(CopyComponentsFunction.copyComponents(CopyComponentsFunction.Source.BLOCK_ENTITY).copy(DataComponents.CUSTOM_NAME))
+						)
+				)
+			);
+	}
+
+	protected LootTable.Builder createFletchingTableTableTable(Block block) {
+		return LootTable.lootTable()
+			.withPool(
+				this.applyExplosionCondition(
+					block,
+					LootPool.lootPool()
+						.setRolls(ConstantValue.exactly(1.0F))
+						.add(
+							LootItem.lootTableItem(block).apply(CopyComponentsFunction.copyComponents(CopyComponentsFunction.Source.BLOCK_ENTITY).copy(DataComponents.FLETCHING))
 						)
 				)
 			);

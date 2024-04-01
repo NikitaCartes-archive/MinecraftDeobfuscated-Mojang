@@ -26,6 +26,7 @@ public interface StructureSets {
 			new StructureSet(
 				List.of(
 					StructureSet.entry(holderGetter.getOrThrow(BuiltinStructures.VILLAGE_PLAINS)),
+					StructureSet.entry(holderGetter.getOrThrow(BuiltinStructures.VILLAGE_POTATO)),
 					StructureSet.entry(holderGetter.getOrThrow(BuiltinStructures.VILLAGE_DESERT)),
 					StructureSet.entry(holderGetter.getOrThrow(BuiltinStructures.VILLAGE_SAVANNA)),
 					StructureSet.entry(holderGetter.getOrThrow(BuiltinStructures.VILLAGE_SNOWY)),
@@ -93,7 +94,9 @@ public interface StructureSets {
 			BuiltinStructureSets.MINESHAFTS,
 			new StructureSet(
 				List.of(
-					StructureSet.entry(holderGetter.getOrThrow(BuiltinStructures.MINESHAFT)), StructureSet.entry(holderGetter.getOrThrow(BuiltinStructures.MINESHAFT_MESA))
+					StructureSet.entry(holderGetter.getOrThrow(BuiltinStructures.MINESHAFT)),
+					StructureSet.entry(holderGetter.getOrThrow(BuiltinStructures.MINESHAFT_MESA)),
+					StructureSet.entry(holderGetter.getOrThrow(BuiltinStructures.MINESHAFT_POTATO))
 				),
 				new RandomSpreadStructurePlacement(
 					Vec3i.ZERO, StructurePlacement.FrequencyReductionMethod.LEGACY_TYPE_3, 0.004F, 0, Optional.empty(), 1, 0, RandomSpreadType.LINEAR
@@ -113,6 +116,13 @@ public interface StructureSets {
 					StructureSet.entry(holderGetter.getOrThrow(BuiltinStructures.RUINED_PORTAL_NETHER))
 				),
 				new RandomSpreadStructurePlacement(40, 15, RandomSpreadType.LINEAR, 34222645)
+			)
+		);
+		bootstrapContext.register(
+			BuiltinStructureSets.RUINED_PORTATOLS,
+			new StructureSet(
+				List.of(StructureSet.entry(holderGetter.getOrThrow(BuiltinStructures.RUINED_PORTATOL))),
+				new RandomSpreadStructurePlacement(28, 8, RandomSpreadType.LINEAR, 31415926)
 			)
 		);
 		bootstrapContext.register(
@@ -143,6 +153,10 @@ public interface StructureSets {
 				),
 				new RandomSpreadStructurePlacement(27, 4, RandomSpreadType.LINEAR, 30084232)
 			)
+		);
+		bootstrapContext.register(
+			BuiltinStructureSets.COLOSSEA,
+			new StructureSet(holderGetter.getOrThrow(BuiltinStructures.COLOSSEUM), new RandomSpreadStructurePlacement(24, 5, RandomSpreadType.LINEAR, 123456789))
 		);
 		bootstrapContext.register(
 			BuiltinStructureSets.NETHER_FOSSILS,

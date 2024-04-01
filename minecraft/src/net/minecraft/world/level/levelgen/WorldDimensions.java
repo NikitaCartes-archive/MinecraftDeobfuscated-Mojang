@@ -39,7 +39,7 @@ public record WorldDimensions(Map<ResourceKey<LevelStem>, LevelStem> dimensions)
 				)
 				.apply(instance, instance.stable(WorldDimensions::new))
 	);
-	private static final Set<ResourceKey<LevelStem>> BUILTIN_ORDER = ImmutableSet.of(LevelStem.OVERWORLD, LevelStem.NETHER, LevelStem.END);
+	private static final Set<ResourceKey<LevelStem>> BUILTIN_ORDER = ImmutableSet.of(LevelStem.OVERWORLD, LevelStem.NETHER, LevelStem.END, LevelStem.POTATO);
 	private static final int VANILLA_DIMENSION_COUNT = BUILTIN_ORDER.size();
 
 	public WorldDimensions(Map<ResourceKey<LevelStem>, LevelStem> dimensions) {
@@ -123,8 +123,10 @@ public record WorldDimensions(Map<ResourceKey<LevelStem>, LevelStem> dimensions)
 			return isStableOverworld(levelStem);
 		} else if (resourceKey == LevelStem.NETHER) {
 			return isStableNether(levelStem);
+		} else if (resourceKey == LevelStem.END) {
+			return isStableEnd(levelStem);
 		} else {
-			return resourceKey == LevelStem.END ? isStableEnd(levelStem) : false;
+			return resourceKey == LevelStem.POTATO ? isStablePotato(levelStem) : false;
 		}
 	}
 
@@ -155,6 +157,14 @@ public record WorldDimensions(Map<ResourceKey<LevelStem>, LevelStem> dimensions)
 			&& levelStem.generator() instanceof NoiseBasedChunkGenerator noiseBasedChunkGenerator
 			&& noiseBasedChunkGenerator.stable(NoiseGeneratorSettings.END)
 			&& noiseBasedChunkGenerator.getBiomeSource() instanceof TheEndBiomeSource;
+	}
+
+	private static boolean isStablePotato(LevelStem levelStem) {
+		return levelStem.type().is(BuiltinDimensionTypes.POTATO)
+			&& levelStem.generator() instanceof NoiseBasedChunkGenerator noiseBasedChunkGenerator
+			&& noiseBasedChunkGenerator.stable(NoiseGeneratorSettings.POTATO)
+			&& noiseBasedChunkGenerator.getBiomeSource() instanceof MultiNoiseBiomeSource multiNoiseBiomeSource
+			&& multiNoiseBiomeSource.stable(MultiNoiseBiomeSourceParameterLists.POTATO);
 	}
 
 	public WorldDimensions.Complete bake(Registry<LevelStem> registry) {

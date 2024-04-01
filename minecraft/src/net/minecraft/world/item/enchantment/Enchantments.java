@@ -167,6 +167,12 @@ public class Enchantments {
 			Enchantment.definition(ItemTags.MINING_LOOT_ENCHANTABLE, 2, 3, Enchantment.dynamicCost(15, 9), Enchantment.dynamicCost(65, 9), 4, EquipmentSlot.MAINHAND)
 		)
 	);
+	public static final Enchantment POTATOFICATION = register(
+		"potatofication",
+		new Enchantment(
+			Enchantment.definition(ItemTags.MINING_ENCHANTABLE, 10, 5, Enchantment.dynamicCost(1, 10), Enchantment.dynamicCost(16, 10), 1, EquipmentSlot.MAINHAND)
+		)
+	);
 	public static final Enchantment POWER = register(
 		"power",
 		new Enchantment(

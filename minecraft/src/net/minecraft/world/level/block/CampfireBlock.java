@@ -59,6 +59,7 @@ public class CampfireBlock extends BaseEntityBlock implements SimpleWaterloggedB
 				.apply(instance, CampfireBlock::new)
 	);
 	protected static final VoxelShape SHAPE = Block.box(0.0, 0.0, 0.0, 16.0, 7.0, 16.0);
+	protected static final VoxelShape SHAPE_FRYING = Block.box(0.0, 0.0, 0.0, 16.0, 12.0, 16.0);
 	public static final BooleanProperty LIT = BlockStateProperties.LIT;
 	public static final BooleanProperty SIGNAL_FIRE = BlockStateProperties.SIGNAL_FIRE;
 	public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
@@ -163,7 +164,7 @@ public class CampfireBlock extends BaseEntityBlock implements SimpleWaterloggedB
 
 	@Override
 	protected VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
-		return SHAPE;
+		return blockState.is(Blocks.FRYING_TABLE) ? SHAPE_FRYING : SHAPE;
 	}
 
 	@Override

@@ -115,6 +115,9 @@ public class GameRules {
 	public static final GameRules.Key<GameRules.IntegerValue> RULE_COMMAND_MODIFICATION_BLOCK_LIMIT = register(
 		"commandModificationBlockLimit", GameRules.Category.MISC, GameRules.IntegerValue.create(32768)
 	);
+	public static final GameRules.Key<GameRules.IntegerValue> RULE_FLOATATER_SIZE_LIMIT = register(
+		"floataterSizeLimit", GameRules.Category.MISC, GameRules.IntegerValue.create(32)
+	);
 	public static final GameRules.Key<GameRules.BooleanValue> RULE_ANNOUNCE_ADVANCEMENTS = register(
 		"announceAdvancements", GameRules.Category.CHAT, GameRules.BooleanValue.create(true)
 	);
@@ -199,6 +202,9 @@ public class GameRules {
 			ServerLevel serverLevel = minecraftServer.overworld();
 			serverLevel.setDefaultSpawnPos(serverLevel.getSharedSpawnPos(), serverLevel.getSharedSpawnAngle());
 		})
+	);
+	public static final GameRules.Key<GameRules.BooleanValue> RULE_NEVER_EAT_ARMOR = register(
+		"neverEatArmor", GameRules.Category.PLAYER, GameRules.BooleanValue.create(false)
 	);
 	private final Map<GameRules.Key<?>, GameRules.Value<?>> rules;
 

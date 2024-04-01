@@ -44,6 +44,7 @@ public class ItemStackSpawnEggFix extends DataFix {
 		hashMap.put("minecraft:parrot", "minecraft:parrot_spawn_egg");
 		hashMap.put("minecraft:pig", "minecraft:pig_spawn_egg");
 		hashMap.put("minecraft:polar_bear", "minecraft:polar_bear_spawn_egg");
+		hashMap.put("minecraft:poisonous_potato_zombie", "minecraft:poisonous_potato_zombie_spawn_egg");
 		hashMap.put("minecraft:rabbit", "minecraft:rabbit_spawn_egg");
 		hashMap.put("minecraft:sheep", "minecraft:sheep_spawn_egg");
 		hashMap.put("minecraft:shulker", "minecraft:shulker_spawn_egg");

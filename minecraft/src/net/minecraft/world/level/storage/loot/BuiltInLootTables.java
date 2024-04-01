@@ -14,6 +14,7 @@ public class BuiltInLootTables {
 	public static final ResourceKey<LootTable> SPAWN_BONUS_CHEST = register("chests/spawn_bonus_chest");
 	public static final ResourceKey<LootTable> END_CITY_TREASURE = register("chests/end_city_treasure");
 	public static final ResourceKey<LootTable> SIMPLE_DUNGEON = register("chests/simple_dungeon");
+	public static final ResourceKey<LootTable> SIMPLE_DUNGEON_POTATO = register("chests/simple_dungeon_potato");
 	public static final ResourceKey<LootTable> VILLAGE_WEAPONSMITH = register("chests/village/village_weaponsmith");
 	public static final ResourceKey<LootTable> VILLAGE_TOOLSMITH = register("chests/village/village_toolsmith");
 	public static final ResourceKey<LootTable> VILLAGE_ARMORER = register("chests/village/village_armorer");
@@ -27,6 +28,7 @@ public class BuiltInLootTables {
 	public static final ResourceKey<LootTable> VILLAGE_TEMPLE = register("chests/village/village_temple");
 	public static final ResourceKey<LootTable> VILLAGE_DESERT_HOUSE = register("chests/village/village_desert_house");
 	public static final ResourceKey<LootTable> VILLAGE_PLAINS_HOUSE = register("chests/village/village_plains_house");
+	public static final ResourceKey<LootTable> VILLAGE_POTATO_HOUSE = register("chests/village/village_potato_house");
 	public static final ResourceKey<LootTable> VILLAGE_TAIGA_HOUSE = register("chests/village/village_taiga_house");
 	public static final ResourceKey<LootTable> VILLAGE_SNOWY_HOUSE = register("chests/village/village_snowy_house");
 	public static final ResourceKey<LootTable> VILLAGE_SAVANNA_HOUSE = register("chests/village/village_savanna_house");
@@ -54,6 +56,7 @@ public class BuiltInLootTables {
 	public static final ResourceKey<LootTable> ANCIENT_CITY = register("chests/ancient_city");
 	public static final ResourceKey<LootTable> ANCIENT_CITY_ICE_BOX = register("chests/ancient_city_ice_box");
 	public static final ResourceKey<LootTable> RUINED_PORTAL = register("chests/ruined_portal");
+	public static final ResourceKey<LootTable> RUINED_PORTATOL = register("chests/ruined_portatol");
 	public static final ResourceKey<LootTable> TRIAL_CHAMBERS_REWARD = register("chests/trial_chambers/reward");
 	public static final ResourceKey<LootTable> TRIAL_CHAMBERS_REWARD_COMMON = register("chests/trial_chambers/reward_common");
 	public static final ResourceKey<LootTable> TRIAL_CHAMBERS_REWARD_RARE = register("chests/trial_chambers/reward_rare");
@@ -83,6 +86,22 @@ public class BuiltInLootTables {
 	public static final ResourceKey<LootTable> SHEEP_GREEN = register("entities/sheep/green");
 	public static final ResourceKey<LootTable> SHEEP_RED = register("entities/sheep/red");
 	public static final ResourceKey<LootTable> SHEEP_BLACK = register("entities/sheep/black");
+	public static final ResourceKey<LootTable> SHEEP_WHITE_POTATO = register("entities/sheep/potato/white");
+	public static final ResourceKey<LootTable> SHEEP_ORANGE_POTATO = register("entities/sheep/potato/orange");
+	public static final ResourceKey<LootTable> SHEEP_MAGENTA_POTATO = register("entities/sheep/potato/magenta");
+	public static final ResourceKey<LootTable> SHEEP_LIGHT_BLUE_POTATO = register("entities/sheep/potato/light_blue");
+	public static final ResourceKey<LootTable> SHEEP_YELLOW_POTATO = register("entities/sheep/potato/yellow");
+	public static final ResourceKey<LootTable> SHEEP_LIME_POTATO = register("entities/sheep/potato/lime");
+	public static final ResourceKey<LootTable> SHEEP_PINK_POTATO = register("entities/sheep/potato/pink");
+	public static final ResourceKey<LootTable> SHEEP_GRAY_POTATO = register("entities/sheep/potato/gray");
+	public static final ResourceKey<LootTable> SHEEP_LIGHT_GRAY_POTATO = register("entities/sheep/potato/light_gray");
+	public static final ResourceKey<LootTable> SHEEP_CYAN_POTATO = register("entities/sheep/potato/cyan");
+	public static final ResourceKey<LootTable> SHEEP_PURPLE_POTATO = register("entities/sheep/potato/purple");
+	public static final ResourceKey<LootTable> SHEEP_BLUE_POTATO = register("entities/sheep/potato/blue");
+	public static final ResourceKey<LootTable> SHEEP_BROWN_POTATO = register("entities/sheep/potato/brown");
+	public static final ResourceKey<LootTable> SHEEP_GREEN_POTATO = register("entities/sheep/potato/green");
+	public static final ResourceKey<LootTable> SHEEP_RED_POTATO = register("entities/sheep/potato/red");
+	public static final ResourceKey<LootTable> SHEEP_BLACK_POTATO = register("entities/sheep/potato/black");
 	public static final ResourceKey<LootTable> FISHING = register("gameplay/fishing");
 	public static final ResourceKey<LootTable> FISHING_JUNK = register("gameplay/fishing/junk");
 	public static final ResourceKey<LootTable> FISHING_TREASURE = register("gameplay/fishing/treasure");

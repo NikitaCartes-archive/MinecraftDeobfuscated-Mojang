@@ -17,6 +17,7 @@ import net.minecraft.client.gui.screens.inventory.CrafterScreen;
 import net.minecraft.client.gui.screens.inventory.CraftingScreen;
 import net.minecraft.client.gui.screens.inventory.DispenserScreen;
 import net.minecraft.client.gui.screens.inventory.EnchantmentScreen;
+import net.minecraft.client.gui.screens.inventory.FletchingScreen;
 import net.minecraft.client.gui.screens.inventory.FurnaceScreen;
 import net.minecraft.client.gui.screens.inventory.GrindstoneScreen;
 import net.minecraft.client.gui.screens.inventory.HopperScreen;
@@ -24,6 +25,8 @@ import net.minecraft.client.gui.screens.inventory.LecternScreen;
 import net.minecraft.client.gui.screens.inventory.LoomScreen;
 import net.minecraft.client.gui.screens.inventory.MenuAccess;
 import net.minecraft.client.gui.screens.inventory.MerchantScreen;
+import net.minecraft.client.gui.screens.inventory.PoisonousPotatoCutterScreen;
+import net.minecraft.client.gui.screens.inventory.PotatoRefineryScreen;
 import net.minecraft.client.gui.screens.inventory.ShulkerBoxScreen;
 import net.minecraft.client.gui.screens.inventory.SmithingScreen;
 import net.minecraft.client.gui.screens.inventory.SmokerScreen;
@@ -89,6 +92,7 @@ public class MenuScreens {
 		register(MenuType.BEACON, BeaconScreen::new);
 		register(MenuType.BLAST_FURNACE, BlastFurnaceScreen::new);
 		register(MenuType.BREWING_STAND, BrewingStandScreen::new);
+		register(MenuType.FLETCHING, FletchingScreen::new);
 		register(MenuType.CRAFTING, CraftingScreen::new);
 		register(MenuType.ENCHANTMENT, EnchantmentScreen::new);
 		register(MenuType.FURNACE, FurnaceScreen::new);
@@ -102,6 +106,8 @@ public class MenuScreens {
 		register(MenuType.SMOKER, SmokerScreen::new);
 		register(MenuType.CARTOGRAPHY_TABLE, CartographyTableScreen::new);
 		register(MenuType.STONECUTTER, StonecutterScreen::new);
+		register(MenuType.POISONOUS_POTATO_CUTTER, PoisonousPotatoCutterScreen::new);
+		register(MenuType.POTATO_REFINERY, PotatoRefineryScreen::new);
 	}
 
 	@Environment(EnvType.CLIENT)

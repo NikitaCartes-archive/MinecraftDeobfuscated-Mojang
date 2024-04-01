@@ -236,13 +236,13 @@ public class PoiManager extends SectionStorage<PoiSection> {
 			);
 	}
 
-	public void ensureLoadedAndValid(LevelReader levelReader, BlockPos blockPos, int i) {
+	public void ensureLoadedAndValid(LevelReader levelReader, BlockPos blockPos, int i, ChunkStatus chunkStatus) {
 		SectionPos.aroundChunk(new ChunkPos(blockPos), Math.floorDiv(i, 16), this.levelHeightAccessor.getMinSection(), this.levelHeightAccessor.getMaxSection())
 			.map(sectionPos -> Pair.of(sectionPos, this.getOrLoad(sectionPos.asLong())))
 			.filter(pair -> !(Boolean)((Optional)pair.getSecond()).map(PoiSection::isValid).orElse(false))
 			.map(pair -> ((SectionPos)pair.getFirst()).chunk())
 			.filter(chunkPos -> this.loadedChunks.add(chunkPos.toLong()))
-			.forEach(chunkPos -> levelReader.getChunk(chunkPos.x, chunkPos.z, ChunkStatus.EMPTY));
+			.forEach(chunkPos -> levelReader.getChunk(chunkPos.x, chunkPos.z, chunkStatus));
 	}
 
 	final class DistanceTracker extends SectionTracker {

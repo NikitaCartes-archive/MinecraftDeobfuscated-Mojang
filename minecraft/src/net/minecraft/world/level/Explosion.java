@@ -44,18 +44,18 @@ public class Explosion {
 	private final boolean fire;
 	private final Explosion.BlockInteraction blockInteraction;
 	private final RandomSource random = RandomSource.create();
-	private final Level level;
-	private final double x;
-	private final double y;
-	private final double z;
+	final Level level;
+	final double x;
+	final double y;
+	final double z;
 	@Nullable
 	private final Entity source;
-	private final float radius;
+	final float radius;
 	private final DamageSource damageSource;
 	private final ExplosionDamageCalculator damageCalculator;
-	private final ParticleOptions smallExplosionParticles;
-	private final ParticleOptions largeExplosionParticles;
-	private final Holder<SoundEvent> explosionSound;
+	final ParticleOptions smallExplosionParticles;
+	final ParticleOptions largeExplosionParticles;
+	final Holder<SoundEvent> explosionSound;
 	private final ObjectArrayList<BlockPos> toBlow = new ObjectArrayList<>();
 	private final Map<Player, Vec3> hitPlayers = Maps.<Player, Vec3>newHashMap();
 

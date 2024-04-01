@@ -172,4 +172,6 @@ public interface BlockGetter extends LevelHeightAccessor {
 			}
 		}
 	}
+
+	boolean isPotato();
 }

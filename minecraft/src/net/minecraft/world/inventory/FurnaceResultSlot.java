@@ -41,7 +41,6 @@ public class FurnaceResultSlot extends Slot {
 		this.checkTakeAchievements(itemStack);
 	}
 
-	@Override
 	protected void checkTakeAchievements(ItemStack itemStack) {
 		itemStack.onCraftedBy(this.player.level(), this.player, this.removeCount);
 		if (this.player instanceof ServerPlayer serverPlayer && this.container instanceof AbstractFurnaceBlockEntity abstractFurnaceBlockEntity) {

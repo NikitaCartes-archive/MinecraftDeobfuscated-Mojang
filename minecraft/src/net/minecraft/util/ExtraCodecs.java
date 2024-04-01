@@ -24,9 +24,16 @@ import com.mojang.serialization.Codec.ResultFunction;
 import com.mojang.serialization.DataResult.PartialResult;
 import com.mojang.serialization.MapCodec.MapCodecCodec;
 import com.mojang.serialization.codecs.BaseMapCodec;
+import com.mojang.serialization.codecs.PrimitiveCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.floats.FloatArrayList;
 import it.unimi.dsi.fastutil.floats.FloatList;
+import it.unimi.dsi.fastutil.ints.Int2IntMap;
+import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
+import it.unimi.dsi.fastutil.ints.IntIntImmutablePair;
+import it.unimi.dsi.fastutil.ints.IntIntPair;
+import it.unimi.dsi.fastutil.longs.LongArrayList;
+import it.unimi.dsi.fastutil.longs.LongList;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
@@ -52,6 +59,7 @@ import java.util.function.Supplier;
 import java.util.function.ToIntFunction;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+import java.util.stream.LongStream;
 import java.util.stream.Stream;
 import java.util.stream.Stream.Builder;
 import net.minecraft.Util;
@@ -144,6 +152,20 @@ public class ExtraCodecs {
 			: Optional.empty();
 	public static final Codec<BitSet> BIT_SET = Codec.LONG_STREAM
 		.xmap(longStream -> BitSet.valueOf(longStream.toArray()), bitSet -> Arrays.stream(bitSet.toLongArray()));
+	public static final PrimitiveCodec<Character> CHAR = new PrimitiveCodec<Character>() {
+		@Override
+		public <T> DataResult<Character> read(DynamicOps<T> dynamicOps, T object) {
+			return dynamicOps.getStringValue(object).map(string -> string.charAt(0));
+		}
+
+		public <T> T write(DynamicOps<T> dynamicOps, Character character) {
+			return dynamicOps.createString(String.valueOf(character));
+		}
+
+		public String toString() {
+			return "Short";
+		}
+	};
 	private static final Codec<Property> PROPERTY = RecordCodecBuilder.create(
 		instance -> instance.group(
 					Codec.STRING.fieldOf("name").forGetter(Property::name),
@@ -518,6 +540,23 @@ public class ExtraCodecs {
 
 	public static <T> Codec<Object2BooleanMap<T>> object2BooleanMap(Codec<T> codec) {
 		return Codec.unboundedMap(codec, Codec.BOOL).xmap(Object2BooleanOpenHashMap::new, Object2ObjectOpenHashMap::new);
+	}
+
+	public static Codec<Int2IntMap> int2IntMap() {
+		return Codec.LONG_STREAM.xmap(longStream -> {
+			Int2IntMap int2IntMap = new Int2IntOpenHashMap();
+			longStream.forEach(l -> int2IntMap.put((int)l, (int)(l >> 32)));
+			return int2IntMap;
+		}, int2IntMap -> {
+			LongList longList = new LongArrayList();
+			int2IntMap.forEach((integer, integer2) -> longList.add((long)integer.intValue() | integer2.longValue() << 32));
+			return LongStream.of(longList.toArray(new long[0]));
+		});
+	}
+
+	public static Codec<IntIntPair> intIntPair() {
+		return Codec.LONG
+			.xmap(long_ -> new IntIntImmutablePair(long_.intValue(), (int)(long_ >> 32)), intIntPair -> (long)intIntPair.firstInt() | (long)intIntPair.secondInt() << 32);
 	}
 
 	@Deprecated

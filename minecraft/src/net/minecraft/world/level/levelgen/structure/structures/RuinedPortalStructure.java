@@ -11,6 +11,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.QuartPos;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.BiomeTags;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
@@ -44,6 +45,21 @@ public class RuinedPortalStructure extends Structure {
 	};
 	private static final String[] STRUCTURE_LOCATION_GIANT_PORTALS = new String[]{
 		"ruined_portal/giant_portal_1", "ruined_portal/giant_portal_2", "ruined_portal/giant_portal_3"
+	};
+	private static final String[] STRUCTURE_LOCATION_PORTATOLS = new String[]{
+		"ruined_portatol/portal_1",
+		"ruined_portatol/portal_2",
+		"ruined_portatol/portal_3",
+		"ruined_portatol/portal_4",
+		"ruined_portatol/portal_5",
+		"ruined_portatol/portal_6",
+		"ruined_portatol/portal_7",
+		"ruined_portatol/portal_8",
+		"ruined_portatol/portal_9",
+		"ruined_portatol/portal_10"
+	};
+	private static final String[] STRUCTURE_LOCATION_GIANT_PORTATOLS = new String[]{
+		"ruined_portatol/giant_portal_1", "ruined_portatol/giant_portal_2", "ruined_portatol/giant_portal_3"
 	};
 	private static final float PROBABILITY_OF_GIANT_PORTAL = 0.05F;
 	private static final int MIN_Y_INDEX = 15;
@@ -99,11 +115,14 @@ public class RuinedPortalStructure extends Structure {
 			properties.overgrown = setup4.overgrown();
 			properties.vines = setup4.vines();
 			properties.replaceWithBlackstone = setup4.replaceWithBlackstone();
+			properties.potato = setup4.potato;
+			String[] strings = setup4.potato ? STRUCTURE_LOCATION_GIANT_PORTATOLS : STRUCTURE_LOCATION_GIANT_PORTALS;
+			String[] strings2 = setup4.potato ? STRUCTURE_LOCATION_PORTATOLS : STRUCTURE_LOCATION_PORTALS;
 			ResourceLocation resourceLocation;
 			if (worldgenRandom.nextFloat() < 0.05F) {
-				resourceLocation = new ResourceLocation(STRUCTURE_LOCATION_GIANT_PORTALS[worldgenRandom.nextInt(STRUCTURE_LOCATION_GIANT_PORTALS.length)]);
+				resourceLocation = new ResourceLocation(strings[worldgenRandom.nextInt(strings.length)]);
 			} else {
-				resourceLocation = new ResourceLocation(STRUCTURE_LOCATION_PORTALS[worldgenRandom.nextInt(STRUCTURE_LOCATION_PORTALS.length)]);
+				resourceLocation = new ResourceLocation(strings2[worldgenRandom.nextInt(strings2.length)]);
 			}
 
 			StructureTemplate structureTemplate = generationContext.structureTemplateManager().getOrCreate(resourceLocation);
@@ -121,7 +140,19 @@ public class RuinedPortalStructure extends Structure {
 				)
 				- 1;
 			int j = findSuitableY(
-				worldgenRandom, chunkGenerator, setup4.placement(), properties.airPocket, i, boundingBox.getYSpan(), boundingBox, levelHeightAccessor, randomState
+				worldgenRandom,
+				chunkGenerator,
+				setup4.placement(),
+				properties.airPocket,
+				i,
+				boundingBox.getYSpan(),
+				boundingBox,
+				levelHeightAccessor,
+				randomState,
+				generationContext.chunkGenerator()
+					.getBiomeSource()
+					.getNoiseBiome(QuartPos.fromBlock(blockPos2.getX()), QuartPos.fromBlock(blockPos2.getY()), QuartPos.fromBlock(blockPos2.getZ()), randomState.sampler())
+					.is(BiomeTags.IS_POTATO)
 			);
 			BlockPos blockPos4 = new BlockPos(blockPos2.getX(), j, blockPos2.getZ());
 			return Optional.of(
@@ -177,9 +208,14 @@ public class RuinedPortalStructure extends Structure {
 		int j,
 		BoundingBox boundingBox,
 		LevelHeightAccessor levelHeightAccessor,
-		RandomState randomState
+		RandomState randomState,
+		boolean bl2
 	) {
-		int k = levelHeightAccessor.getMinBuildHeight() + 15;
+		int k = levelHeightAccessor.getMinBuildHeight() + (bl2 ? 40 : 15);
+		if (bl2 && i < k) {
+			i = k;
+		}
+
 		int l;
 		if (verticalPlacement == RuinedPortalPiece.VerticalPlacement.IN_NETHER) {
 			if (bl) {
@@ -248,7 +284,8 @@ public class RuinedPortalStructure extends Structure {
 		boolean vines,
 		boolean canBeCold,
 		boolean replaceWithBlackstone,
-		float weight
+		float weight,
+		boolean potato
 	) {
 		public static final Codec<RuinedPortalStructure.Setup> CODEC = RecordCodecBuilder.create(
 			instance -> instance.group(
@@ -259,7 +296,8 @@ public class RuinedPortalStructure extends Structure {
 						Codec.BOOL.fieldOf("vines").forGetter(RuinedPortalStructure.Setup::vines),
 						Codec.BOOL.fieldOf("can_be_cold").forGetter(RuinedPortalStructure.Setup::canBeCold),
 						Codec.BOOL.fieldOf("replace_with_blackstone").forGetter(RuinedPortalStructure.Setup::replaceWithBlackstone),
-						ExtraCodecs.POSITIVE_FLOAT.fieldOf("weight").forGetter(RuinedPortalStructure.Setup::weight)
+						ExtraCodecs.POSITIVE_FLOAT.fieldOf("weight").forGetter(RuinedPortalStructure.Setup::weight),
+						Codec.BOOL.fieldOf("potaot").forGetter(RuinedPortalStructure.Setup::potato)
 					)
 					.apply(instance, RuinedPortalStructure.Setup::new)
 		);

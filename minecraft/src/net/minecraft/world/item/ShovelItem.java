@@ -24,10 +24,13 @@ public class ShovelItem extends DiggerItem {
 		new Builder()
 			.put(Blocks.GRASS_BLOCK, Blocks.DIRT_PATH.defaultBlockState())
 			.put(Blocks.DIRT, Blocks.DIRT_PATH.defaultBlockState())
+			.put(Blocks.TERREDEPOMME, Blocks.POISON_PATH.defaultBlockState())
 			.put(Blocks.PODZOL, Blocks.DIRT_PATH.defaultBlockState())
 			.put(Blocks.COARSE_DIRT, Blocks.DIRT_PATH.defaultBlockState())
 			.put(Blocks.MYCELIUM, Blocks.DIRT_PATH.defaultBlockState())
 			.put(Blocks.ROOTED_DIRT, Blocks.DIRT_PATH.defaultBlockState())
+			.put(Blocks.PEELGRASS_BLOCK, Blocks.POISON_PATH.defaultBlockState())
+			.put(Blocks.CORRUPTED_PEELGRASS_BLOCK, Blocks.POISON_PATH.defaultBlockState())
 			.build()
 	);
 

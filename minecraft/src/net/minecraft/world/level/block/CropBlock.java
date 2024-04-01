@@ -54,7 +54,7 @@ public class CropBlock extends BushBlock implements BonemealableBlock {
 
 	@Override
 	protected boolean mayPlaceOn(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
-		return blockState.is(Blocks.FARMLAND);
+		return blockState.is(Blocks.FARMLAND) || blockState.is(Blocks.POISON_FARMLAND);
 	}
 
 	protected IntegerProperty getAgeProperty() {
@@ -69,7 +69,7 @@ public class CropBlock extends BushBlock implements BonemealableBlock {
 		return (Integer)blockState.getValue(this.getAgeProperty());
 	}
 
-	public BlockState getStateForAge(int i) {
+	public BlockState getStateForAge(int i, BlockState blockState) {
 		return this.defaultBlockState().setValue(this.getAgeProperty(), Integer.valueOf(i));
 	}
 
@@ -88,8 +88,12 @@ public class CropBlock extends BushBlock implements BonemealableBlock {
 			int i = this.getAge(blockState);
 			if (i < this.getMaxAge()) {
 				float f = getGrowthSpeed(this, serverLevel, blockPos);
-				if (randomSource.nextInt((int)(25.0F / f) + 1) == 0) {
-					serverLevel.setBlock(blockPos, this.getStateForAge(i + 1), 2);
+				if (blockState.is(Blocks.POTATOES)) {
+					if (randomSource.nextInt((int)(6.25F / f) + 1) == 0) {
+						serverLevel.setBlock(blockPos, this.getStateForAge(i + 1, blockState), 2);
+					}
+				} else if (randomSource.nextInt((int)(25.0F / f) + 1) == 0) {
+					serverLevel.setBlock(blockPos, this.getStateForAge(i + 1, blockState), 2);
 				}
 			}
 		}
@@ -102,7 +106,7 @@ public class CropBlock extends BushBlock implements BonemealableBlock {
 			i = j;
 		}
 
-		level.setBlock(blockPos, this.getStateForAge(i), 2);
+		level.setBlock(blockPos, this.getStateForAge(i, blockState), 2);
 	}
 
 	protected int getBonemealAgeIncrease(Level level) {
@@ -116,10 +120,15 @@ public class CropBlock extends BushBlock implements BonemealableBlock {
 		for (int i = -1; i <= 1; i++) {
 			for (int j = -1; j <= 1; j++) {
 				float g = 0.0F;
-				BlockState blockState = blockGetter.getBlockState(blockPos2.offset(i, 0, j));
-				if (blockState.is(Blocks.FARMLAND)) {
+				BlockPos blockPos3 = blockPos2.offset(i, 0, j);
+				BlockState blockState = blockGetter.getBlockState(blockPos3);
+				if (block instanceof BushBlock bushBlock && bushBlock.mayPlaceOn(blockState, blockGetter, blockPos3)) {
 					g = 1.0F;
-					if ((Integer)blockState.getValue(FarmBlock.MOISTURE) > 0) {
+					if ((blockState.is(Blocks.FARMLAND) || blockState.is(Blocks.POISON_FARMLAND)) && (Integer)blockState.getValue(FarmBlock.MOISTURE) > 0) {
+						g = 3.0F;
+					}
+
+					if (blockState.is(Blocks.CORRUPTED_PEELGRASS_BLOCK)) {
 						g = 3.0F;
 					}
 				}
@@ -132,19 +141,19 @@ public class CropBlock extends BushBlock implements BonemealableBlock {
 			}
 		}
 
-		BlockPos blockPos3 = blockPos.north();
-		BlockPos blockPos4 = blockPos.south();
-		BlockPos blockPos5 = blockPos.west();
-		BlockPos blockPos6 = blockPos.east();
-		boolean bl = blockGetter.getBlockState(blockPos5).is(block) || blockGetter.getBlockState(blockPos6).is(block);
-		boolean bl2 = blockGetter.getBlockState(blockPos3).is(block) || blockGetter.getBlockState(blockPos4).is(block);
+		BlockPos blockPos4 = blockPos.north();
+		BlockPos blockPos5 = blockPos.south();
+		BlockPos blockPos6 = blockPos.west();
+		BlockPos blockPos3x = blockPos.east();
+		boolean bl = blockGetter.getBlockState(blockPos6).is(block) || blockGetter.getBlockState(blockPos3x).is(block);
+		boolean bl2 = blockGetter.getBlockState(blockPos4).is(block) || blockGetter.getBlockState(blockPos5).is(block);
 		if (bl && bl2) {
 			f /= 2.0F;
 		} else {
-			boolean bl3 = blockGetter.getBlockState(blockPos5.north()).is(block)
-				|| blockGetter.getBlockState(blockPos6.north()).is(block)
-				|| blockGetter.getBlockState(blockPos6.south()).is(block)
-				|| blockGetter.getBlockState(blockPos5.south()).is(block);
+			boolean bl3 = blockGetter.getBlockState(blockPos6.north()).is(block)
+				|| blockGetter.getBlockState(blockPos3x.north()).is(block)
+				|| blockGetter.getBlockState(blockPos3x.south()).is(block)
+				|| blockGetter.getBlockState(blockPos6.south()).is(block);
 			if (bl3) {
 				f /= 2.0F;
 			}

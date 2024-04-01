@@ -65,7 +65,7 @@ public class InventoryMenu extends RecipeBookMenu<CraftingContainer> {
 
 				@Override
 				public int getMaxStackSize() {
-					return 1;
+					return equipmentSlot == EquipmentSlot.FEET ? 64 : 1;
 				}
 
 				@Override

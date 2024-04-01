@@ -1,6 +1,7 @@
 package net.minecraft.network.chat;
 
 import com.google.common.collect.Lists;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.UnaryOperator;
@@ -51,8 +52,24 @@ public class MutableComponent implements Component {
 		return this.append(Component.literal(string));
 	}
 
-	public MutableComponent append(Component component) {
-		this.siblings.add(component);
+	public MutableComponent append(Component... components) {
+		this.siblings.addAll(Arrays.asList(components));
+		return this;
+	}
+
+	public MutableComponent append(Object... objects) {
+		for (Object object : objects) {
+			if (object instanceof Component component) {
+				this.append(component);
+			} else {
+				if (!(object instanceof String string)) {
+					throw new IllegalArgumentException("Don't know how to turn " + object + " into a Component");
+				}
+
+				this.append(Component.literal(string));
+			}
+		}
+
 		return this;
 	}
 

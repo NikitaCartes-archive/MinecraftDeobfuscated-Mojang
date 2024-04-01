@@ -47,6 +47,7 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -64,6 +65,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.CombatRules;
 import net.minecraft.world.damagesource.CombatTracker;
 import net.minecraft.world.damagesource.DamageSource;
@@ -95,6 +97,8 @@ import net.minecraft.world.item.Equipable;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.PotatoArmorItem;
+import net.minecraft.world.item.PotatoPeelerItem;
 import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
@@ -103,13 +107,16 @@ import net.minecraft.world.item.enchantment.ProtectionEnchantment;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.HoneyBlock;
 import net.minecraft.world.level.block.LadderBlock;
+import net.minecraft.world.level.block.MashedPotatoBlock;
 import net.minecraft.world.level.block.PowderSnowBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.TrapDoorBlock;
+import net.minecraft.world.level.block.entity.LubricationComponent;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.level.gameevent.GameEvent;
@@ -161,6 +168,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	private static final EntityDataAccessor<Boolean> DATA_EFFECT_AMBIENCE_ID = SynchedEntityData.defineId(LivingEntity.class, EntityDataSerializers.BOOLEAN);
 	private static final EntityDataAccessor<Integer> DATA_ARROW_COUNT_ID = SynchedEntityData.defineId(LivingEntity.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Integer> DATA_STINGER_COUNT_ID = SynchedEntityData.defineId(LivingEntity.class, EntityDataSerializers.INT);
+	private static final EntityDataAccessor<Integer> DATA_POTATO_COUNT_ID = SynchedEntityData.defineId(LivingEntity.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Optional<BlockPos>> SLEEPING_POS_ID = SynchedEntityData.defineId(
 		LivingEntity.class, EntityDataSerializers.OPTIONAL_BLOCK_POS
 	);
@@ -181,6 +189,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	public int swingTime;
 	public int removeArrowTime;
 	public int removeStingerTime;
+	public int removePotatoTime;
 	public int hurtTime;
 	public int hurtDuration;
 	public int deathTime;
@@ -285,6 +294,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		builder.define(DATA_EFFECT_AMBIENCE_ID, false);
 		builder.define(DATA_ARROW_COUNT_ID, 0);
 		builder.define(DATA_STINGER_COUNT_ID, 0);
+		builder.define(DATA_POTATO_COUNT_ID, 0);
 		builder.define(DATA_HEALTH_ID, 1.0F);
 		builder.define(SLEEPING_POS_ID, Optional.empty());
 	}
@@ -311,33 +321,106 @@ public abstract class LivingEntity extends Entity implements Attackable {
 			this.updateInWaterStateAndDoWaterCurrentPushing();
 		}
 
+		float f = (float)this.getAttributeValue(Attributes.SAFE_FALL_DISTANCE);
 		if (!this.level().isClientSide && bl && this.fallDistance > 0.0F) {
 			this.removeSoulSpeed();
 			this.tryAddSoulSpeed();
-			double e = this.getAttributeValue(Attributes.SAFE_FALL_DISTANCE);
-			if ((double)this.fallDistance > e && !blockState.isAir()) {
-				double f = this.getX();
+			if (this.fallDistance > f && !blockState.isAir()) {
+				double e = this.getX();
 				double g = this.getY();
 				double h = this.getZ();
 				BlockPos blockPos2 = this.blockPosition();
 				if (blockPos.getX() != blockPos2.getX() || blockPos.getZ() != blockPos2.getZ()) {
-					double i = f - (double)blockPos.getX() - 0.5;
+					double i = e - (double)blockPos.getX() - 0.5;
 					double j = h - (double)blockPos.getZ() - 0.5;
 					double k = Math.max(Math.abs(i), Math.abs(j));
-					f = (double)blockPos.getX() + 0.5 + i / k * 0.5;
+					e = (double)blockPos.getX() + 0.5 + i / k * 0.5;
 					h = (double)blockPos.getZ() + 0.5 + j / k * 0.5;
 				}
 
-				float l = (float)Mth.ceil((double)this.fallDistance - e);
+				float l = (float)Mth.ceil(this.fallDistance - f);
 				double m = Math.min((double)(0.2F + l / 15.0F), 2.5);
 				int n = (int)(150.0 * m);
-				((ServerLevel)this.level()).sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, blockState), f, g, h, n, 0.0, 0.0, 0.0, 0.15F);
+				((ServerLevel)this.level()).sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, blockState), e, g, h, n, 0.0, 0.0, 0.0, 0.15F);
 			}
+		}
+
+		ItemStack itemStack = this.getItemBySlot(EquipmentSlot.FEET);
+		if (bl && this.fallDistance > f && itemStack.is(Items.POISONOUS_POTA_TOES)) {
+			this.onFallWithPotatoBoots(itemStack, this.fallDistance - f);
+			this.fallDistance = 0.0F;
 		}
 
 		super.checkFallDamage(d, bl, blockState, blockPos);
 		if (bl) {
 			this.lastClimbablePos = Optional.empty();
+		}
+	}
+
+	private void onFallWithPotatoBoots(ItemStack itemStack, float f) {
+		float g = Mth.clamp(Mth.inverseLerp(f, 0.0F, 50.0F), 0.0F, 1.0F);
+		Level level = this.level();
+		if (!level.isClientSide()) {
+			if (!this.hasInfiniteMaterials()) {
+				this.broadcastBreakEvent(EquipmentSlot.FEET);
+				itemStack.shrink(1);
+			}
+
+			if (this instanceof Player player) {
+				player.awardStat(Stats.ITEM_BROKEN.get(itemStack.getItem()));
+			}
+
+			BlockPos blockPos = this.blockPosition();
+			this.placeMashedPotato(level, blockPos, 1);
+			int i = (int)Mth.lerp(g, 1.0F, 5.0F);
+			int j = (int)Mth.lerp(g, 1.0F, 80.0F);
+
+			for (int k = 0; k < j; k++) {
+				this.placeMashedPotato(
+					level, blockPos.offset(this.random.nextInt(i * 2 + 1) - i, this.random.nextInt(2) - this.random.nextInt(2), this.random.nextInt(i * 2 + 1) - i), 1
+				);
+			}
+
+			((ServerLevel)this.level())
+				.sendParticles(
+					new BlockParticleOption(ParticleTypes.BLOCK, Blocks.POISONOUS_MASHED_POTATO.defaultBlockState()),
+					this.getX(),
+					this.getY(),
+					this.getZ(),
+					200,
+					1.0,
+					0.0,
+					1.0,
+					0.3F
+				);
+		}
+
+		this.playSound(SoundEvents.SLIME_SQUISH, 1.0F, 1.0F);
+		this.playSound(SoundEvents.SLIME_BLOCK_FALL, 1.0F, 1.0F);
+		this.screenShakeIntensity = Mth.lerp(g, 0.05F, 0.8F);
+	}
+
+	private void placeMashedPotato(Level level, BlockPos blockPos, int i) {
+		if (this instanceof Player player && !level.mayInteract(player, blockPos)) {
+			return;
+		}
+
+		BlockState blockState = level.getBlockState(blockPos);
+		if (blockState.canBeReplaced()) {
+			if (blockState.is(Blocks.POISONOUS_MASHED_POTATO)) {
+				i += blockState.getValue(MashedPotatoBlock.LAYERS);
+			}
+
+			if (i <= 8) {
+				BlockState blockState2 = Blocks.POISONOUS_MASHED_POTATO.defaultBlockState().setValue(MashedPotatoBlock.LAYERS, Integer.valueOf(i));
+				if (blockState2.canSurvive(level, blockPos)) {
+					if (!blockState.is(Blocks.POISONOUS_MASHED_POTATO)) {
+						level.destroyBlock(blockPos, true, this);
+					}
+
+					level.setBlockAndUpdate(blockPos, blockState2);
+				}
+			}
 		}
 	}
 
@@ -452,6 +535,13 @@ public abstract class LivingEntity extends Entity implements Attackable {
 			}
 		}
 
+		if (this.level().isPotato()
+			&& this.isInWaterOrRain()
+			&& this.level().getBiome(this.blockPosition()).is(Biomes.WASTELAND)
+			&& this.getEffect(MobEffects.POISON) == null) {
+			this.applyPoisonFromWaterContact();
+		}
+
 		this.tickEffects();
 		this.animStepO = this.animStep;
 		this.yBodyRotO = this.yBodyRot;
@@ -459,6 +549,10 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		this.yRotO = this.getYRot();
 		this.xRotO = this.getXRot();
 		this.level().getProfiler().pop();
+	}
+
+	protected void applyPoisonFromWaterContact() {
+		this.addEffect(new MobEffectInstance(MobEffects.POISON, 40));
 	}
 
 	public boolean canSpawnSoulSpeedParticle() {
@@ -695,6 +789,13 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		if (!bl && !ItemStack.isSameItemSameComponents(itemStack, itemStack2) && !this.firstTick) {
 			Equipable equipable = Equipable.get(itemStack2);
 			if (!this.level().isClientSide() && !this.isSpectator()) {
+				if (itemStack2.is(Items.POISONOUS_POTATO_PLANT) && !itemStack2.getItem().equals(itemStack.getItem()) && this instanceof ServerPlayer serverPlayer) {
+					Pair<String, Integer> pair = serverPlayer.getPotatoQuestChapterAndProgress();
+					if (pair.getFirst().equals("intro") && pair.getSecond() == 0) {
+						serverPlayer.resetStat(Stats.CUSTOM.get(Stats.POTATO_QUEST_TIME));
+					}
+				}
+
 				if (!this.isSilent() && equipable != null && equipable.getEquipmentSlot() == equipmentSlot) {
 					this.level()
 						.playSeededSound(null, this.getX(), this.getY(), this.getZ(), equipable.getEquipSound(), this.getSoundSource(), 1.0F, 1.0F, this.random.nextLong());
@@ -1394,18 +1495,20 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		}
 
 		this.dropEquipment();
-		this.dropExperience();
+		this.dropExperience(damageSource);
 	}
 
 	protected void dropEquipment() {
 	}
 
-	protected void dropExperience() {
+	protected void dropExperience(DamageSource damageSource) {
 		if (this.level() instanceof ServerLevel
 			&& !this.wasExperienceConsumed()
 			&& (
 				this.isAlwaysExperienceDropper()
-					|| this.lastHurtByPlayerTime > 0 && this.shouldDropExperience() && this.level().getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)
+					|| (this.lastHurtByPlayerTime > 0 || damageSource.is(DamageTypes.POTATO_MAGIC))
+						&& this.shouldDropExperience()
+						&& this.level().getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)
 			)) {
 			ExperienceOrb.award((ServerLevel)this.level(), this.position(), this.getExperienceReward());
 		}
@@ -1489,6 +1592,41 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		}
 	}
 
+	public boolean tryEatArmor() {
+		if (this.level().getGameRules().getBoolean(GameRules.RULE_NEVER_EAT_ARMOR)) {
+			return false;
+		} else {
+			ItemStack itemStack = this.getItemBySlot(EquipmentSlot.CHEST);
+			if (itemStack.is(Items.POISONOUS_POTATO_CHESTPLATE)) {
+				itemStack.hurtAndBreak(40, this, EquipmentSlot.CHEST);
+				this.level()
+					.playSoundSequence(
+						this.getX(),
+						this.getY(),
+						this.getZ(),
+						soundSequenceBuilder -> {
+							for (int i = 0; i < 3; i++) {
+								soundSequenceBuilder.waitThenPlay(
+									i == 0 ? 0 : 4,
+									this.getEatingSound(itemStack),
+									this.getSoundSource(),
+									0.5F + 0.5F * (float)this.random.nextInt(2),
+									(this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F
+								);
+							}
+						}
+					);
+				if (this instanceof ServerPlayer serverPlayer) {
+					CriteriaTriggers.EAT_ARMOR.trigger(serverPlayer);
+				}
+
+				return true;
+			} else {
+				return false;
+			}
+		}
+	}
+
 	public LivingEntity.Fallsounds getFallSounds() {
 		return new LivingEntity.Fallsounds(SoundEvents.GENERIC_SMALL_FALL, SoundEvents.GENERIC_BIG_FALL);
 	}
@@ -1514,11 +1652,24 @@ public abstract class LivingEntity extends Entity implements Attackable {
 			if (blockState.is(BlockTags.CLIMBABLE)) {
 				this.lastClimbablePos = Optional.of(blockPos);
 				return true;
-			} else if (blockState.getBlock() instanceof TrapDoorBlock && this.trapdoorUsableAsLadder(blockPos, blockState)) {
-				this.lastClimbablePos = Optional.of(blockPos);
-				return true;
 			} else {
-				return false;
+				if (this.hasEffect(MobEffects.STICKY)) {
+					for (Direction direction : Direction.Plane.HORIZONTAL) {
+						BlockPos blockPos2 = blockPos.relative(direction);
+						BlockState blockState2 = this.level().getBlockState(blockPos2);
+						if (!blockState2.getCollisionShape(this.level(), blockPos2).isEmpty()) {
+							this.lastClimbablePos = Optional.of(blockPos);
+							return true;
+						}
+					}
+				}
+
+				if (blockState.getBlock() instanceof TrapDoorBlock && this.trapdoorUsableAsLadder(blockPos, blockState)) {
+					this.lastClimbablePos = Optional.of(blockPos);
+					return true;
+				} else {
+					return false;
+				}
 			}
 		}
 	}
@@ -1714,8 +1865,16 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		return this.entityData.get(DATA_STINGER_COUNT_ID);
 	}
 
+	public final int getPotatoCount() {
+		return this.entityData.get(DATA_POTATO_COUNT_ID);
+	}
+
 	public final void setStingerCount(int i) {
 		this.entityData.set(DATA_STINGER_COUNT_ID, i);
+	}
+
+	public final void setPotatoCount(int i) {
+		this.entityData.set(DATA_POTATO_COUNT_ID, i);
 	}
 
 	private int getCurrentSwingDuration() {
@@ -1849,7 +2008,17 @@ public abstract class LivingEntity extends Entity implements Attackable {
 
 	@Override
 	protected void onBelowWorld() {
-		this.hurt(this.damageSources().fellOutOfWorld(), 4.0F);
+		if (this.level().isPotato() && !this.isRemoved()) {
+			MinecraftServer minecraftServer = this.getServer();
+			if (minecraftServer != null) {
+				ServerLevel serverLevel = minecraftServer.getLevel(Level.OVERWORLD);
+				if (serverLevel != null && this instanceof ServerPlayer serverPlayer) {
+					serverPlayer.removeAndSendPoem();
+				}
+			}
+		} else {
+			this.hurt(this.damageSources().fellOutOfWorld(), 4.0F);
+		}
 	}
 
 	protected void updateSwingTime() {
@@ -2166,9 +2335,16 @@ public abstract class LivingEntity extends Entity implements Attackable {
 				}
 			} else {
 				BlockPos blockPos = this.getBlockPosBelowThatAffectsMyMovement();
-				float p = this.level().getBlockState(blockPos).getBlock().getFriction();
-				float fxx = this.onGround() ? p * 0.91F : 0.91F;
-				Vec3 vec37 = this.handleRelativeFrictionAndCalculateMovement(vec3, p);
+				float fxx = this.level().getBlockState(blockPos).getBlock().getFriction();
+				if (this.onGround()) {
+					LubricationComponent lubricationComponent = this.getItemBySlot(EquipmentSlot.FEET).get(DataComponents.LUBRICATION);
+					if (lubricationComponent != null) {
+						fxx = lubricationComponent.applyToFriction(fxx);
+					}
+				}
+
+				float fxxx = this.onGround() ? fxx * 0.91F : 0.91F;
+				Vec3 vec37 = this.handleRelativeFrictionAndCalculateMovement(vec3, fxx);
 				double q = vec37.y;
 				if (this.hasEffect(MobEffects.LEVITATION)) {
 					q += (0.05 * (double)(this.getEffect(MobEffects.LEVITATION).getAmplifier() + 1) - vec37.y) * 0.2;
@@ -2180,15 +2356,19 @@ public abstract class LivingEntity extends Entity implements Attackable {
 					q = 0.0;
 				}
 
-				if (this.shouldDiscardFriction()) {
-					this.setDeltaMovement(vec37.x, q, vec37.z);
-				} else {
-					this.setDeltaMovement(vec37.x * (double)fxx, this instanceof FlyingAnimal ? q * (double)fxx : q * 0.98F, vec37.z * (double)fxx);
-				}
+				this.applyFriction(vec37, q, fxxx);
 			}
 		}
 
 		this.calculateEntityAnimation(this instanceof FlyingAnimal);
+	}
+
+	protected void applyFriction(Vec3 vec3, double d, float f) {
+		if (this.shouldDiscardFriction()) {
+			this.setDeltaMovement(vec3.x, d, vec3.z);
+		} else {
+			this.setDeltaMovement(vec3.x * (double)f, this instanceof FlyingAnimal ? d * (double)f : d * 0.98F, vec3.z * (double)f);
+		}
 	}
 
 	private void travelRidden(Player player, Vec3 vec3) {
@@ -2321,6 +2501,18 @@ public abstract class LivingEntity extends Entity implements Attackable {
 				}
 			}
 
+			int k = this.getPotatoCount();
+			if (k > 0) {
+				if (this.removePotatoTime <= 0) {
+					this.removePotatoTime = 20 * (30 - k);
+				}
+
+				this.removePotatoTime--;
+				if (this.removePotatoTime <= 0) {
+					this.setPotatoCount(k - 1);
+				}
+			}
+
 			this.detectEquipmentUpdates();
 			if (this.tickCount % 20 == 0) {
 				this.getCombatTracker().recheckStatus();
@@ -2341,16 +2533,16 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		float g = this.yBodyRot;
 		float h = 0.0F;
 		this.oRun = this.run;
-		float k = 0.0F;
+		float l = 0.0F;
 		if (f > 0.0025000002F) {
-			k = 1.0F;
+			l = 1.0F;
 			h = (float)Math.sqrt((double)f) * 3.0F;
-			float l = (float)Mth.atan2(e, d) * (180.0F / (float)Math.PI) - 90.0F;
-			float m = Mth.abs(Mth.wrapDegrees(this.getYRot()) - l);
-			if (95.0F < m && m < 265.0F) {
-				g = l - 180.0F;
+			float m = (float)Mth.atan2(e, d) * (180.0F / (float)Math.PI) - 90.0F;
+			float n = Mth.abs(Mth.wrapDegrees(this.getYRot()) - m);
+			if (95.0F < n && n < 265.0F) {
+				g = m - 180.0F;
 			} else {
-				g = l;
+				g = m;
 			}
 		}
 
@@ -2359,10 +2551,10 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		}
 
 		if (!this.onGround()) {
-			k = 0.0F;
+			l = 0.0F;
 		}
 
-		this.run = this.run + (k - this.run) * 0.3F;
+		this.run = this.run + (l - this.run) * 0.3F;
 		this.level().getProfiler().push("headTurn");
 		h = this.tickHeadTurn(g, h);
 		this.level().getProfiler().pop();
@@ -2413,9 +2605,9 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		}
 
 		this.refreshDirtyAttributes();
-		float l = this.getScale();
-		if (l != this.appliedScale) {
-			this.appliedScale = l;
+		float m = this.getScale();
+		if (m != this.appliedScale) {
+			this.appliedScale = m;
 			this.refreshDimensions();
 		}
 	}
@@ -2684,7 +2876,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		boolean bl = this.getSharedFlag(7);
 		if (bl && !this.onGround() && !this.isPassenger() && !this.hasEffect(MobEffects.LEVITATION)) {
 			ItemStack itemStack = this.getItemBySlot(EquipmentSlot.CHEST);
-			if (itemStack.is(Items.ELYTRA) && ElytraItem.isFlyEnabled(itemStack)) {
+			if ((itemStack.is(Items.ELYTRA) || itemStack.is(Items.POISONOUS_POLYTRA)) && ElytraItem.isFlyEnabled(itemStack)) {
 				bl = true;
 				int i = this.fallFlyTicks + 1;
 				if (!this.level().isClientSide && i % 10 == 0) {
@@ -3478,6 +3670,95 @@ public abstract class LivingEntity extends Entity implements Attackable {
 
 	public boolean hasInfiniteMaterials() {
 		return false;
+	}
+
+	@Nullable
+	public ItemEntity drop(ItemStack itemStack, boolean bl) {
+		return this.drop(itemStack, false, bl);
+	}
+
+	@Nullable
+	public ItemEntity drop(ItemStack itemStack, boolean bl, boolean bl2) {
+		if (itemStack.isEmpty()) {
+			return null;
+		} else {
+			if (this.level().isClientSide) {
+				this.swing(InteractionHand.MAIN_HAND);
+			}
+
+			double d = this.getEyeY() - 0.3F;
+			ItemEntity itemEntity = new ItemEntity(this.level(), this.getX(), d, this.getZ(), itemStack);
+			itemEntity.setPickUpDelay(40);
+			if (bl2) {
+				itemEntity.setThrower(this);
+			}
+
+			if (bl) {
+				float f = this.random.nextFloat() * 0.5F;
+				float g = this.random.nextFloat() * (float) (Math.PI * 2);
+				itemEntity.setDeltaMovement((double)(-Mth.sin(g) * f), 0.2F, (double)(Mth.cos(g) * f));
+			} else {
+				float f = 0.3F;
+				float g = Mth.sin(this.getXRot() * (float) (Math.PI / 180.0));
+				float h = Mth.cos(this.getXRot() * (float) (Math.PI / 180.0));
+				float i = Mth.sin(this.getYRot() * (float) (Math.PI / 180.0));
+				float j = Mth.cos(this.getYRot() * (float) (Math.PI / 180.0));
+				float k = this.random.nextFloat() * (float) (Math.PI * 2);
+				float l = 0.02F * this.random.nextFloat();
+				itemEntity.setDeltaMovement(
+					(double)(-i * h * 0.3F) + Math.cos((double)k) * (double)l,
+					(double)(-g * 0.3F + 0.1F + (this.random.nextFloat() - this.random.nextFloat()) * 0.1F),
+					(double)(j * h * 0.3F) + Math.sin((double)k) * (double)l
+				);
+			}
+
+			if (!(this instanceof Player) && !this.level().isClientSide) {
+				this.level().addFreshEntity(itemEntity);
+			}
+
+			return itemEntity;
+		}
+	}
+
+	@Override
+	public InteractionResult interact(Player player, InteractionHand interactionHand) {
+		if (player.getItemInHand(interactionHand).is(Items.POTATO_PEELER)) {
+			ItemStack itemStack = this.getItemBySlot(EquipmentSlot.CHEST);
+			if (itemStack.is(Items.POISONOUS_POTATO_CHESTPLATE)) {
+				PotatoPeelerItem.playPeelSound(player.level(), this);
+				if (this.level().isClientSide) {
+					return InteractionResult.CONSUME;
+				}
+
+				if (this instanceof Player player2) {
+					player2.awardStat(Stats.GET_PEELED);
+					if (player2 instanceof ServerPlayer serverPlayer) {
+						CriteriaTriggers.GET_PEELED.trigger(serverPlayer);
+					}
+				}
+
+				if (player instanceof ServerPlayer serverPlayer2) {
+					CriteriaTriggers.PEEL_POTATO_ARMOR.trigger(serverPlayer2);
+				}
+
+				itemStack.hurtAndBreak(itemStack.getMaxDamage(), this, EquipmentSlot.CHEST);
+				Item item = PotatoArmorItem.getPeelItem(itemStack);
+
+				for (int i = 0; i < 8; i++) {
+					this.drop(new ItemStack(item, 1), true, false);
+				}
+
+				this.gameEvent(GameEvent.ENTITY_INTERACT, player);
+				return InteractionResult.SUCCESS;
+			}
+		}
+
+		return super.interact(player, interactionHand);
+	}
+
+	@Override
+	public boolean canSpawnFootprintParticle() {
+		return this.hasEffect(MobEffects.STICKY) && !this.isInWater() && !this.isSpectator() && !this.isInLava() && this.isAlive();
 	}
 
 	public static record Fallsounds(SoundEvent small, SoundEvent big) {

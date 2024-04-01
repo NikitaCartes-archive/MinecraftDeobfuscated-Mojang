@@ -19,6 +19,6 @@ public class BoggedRenderer extends SkeletonRenderer<Bogged> {
 	}
 
 	public ResourceLocation getTextureLocation(Bogged bogged) {
-		return BOGGED_SKELETON_LOCATION;
+		return bogged.isPotato() ? SkeletonRenderer.SKELETON_LOCATION : BOGGED_SKELETON_LOCATION;
 	}
 }

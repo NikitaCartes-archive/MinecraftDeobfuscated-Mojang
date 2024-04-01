@@ -42,14 +42,22 @@ public abstract class SpreadingSnowyDirtBlock extends SnowyDirtBlock {
 	@Override
 	protected void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
 		if (!canBeGrass(blockState, serverLevel, blockPos)) {
-			serverLevel.setBlockAndUpdate(blockPos, Blocks.DIRT.defaultBlockState());
+			serverLevel.setBlockAndUpdate(blockPos, (serverLevel.isPotato() ? Blocks.TERREDEPOMME : Blocks.DIRT).defaultBlockState());
 		} else {
 			if (serverLevel.getMaxLocalRawBrightness(blockPos.above()) >= 9) {
 				BlockState blockState2 = this.defaultBlockState();
 
 				for (int i = 0; i < 4; i++) {
 					BlockPos blockPos2 = blockPos.offset(randomSource.nextInt(3) - 1, randomSource.nextInt(5) - 3, randomSource.nextInt(3) - 1);
-					if (serverLevel.getBlockState(blockPos2).is(Blocks.DIRT) && canPropagate(blockState2, serverLevel, blockPos2)) {
+					BlockState blockState3 = serverLevel.getBlockState(blockPos2);
+					if (blockState2.is(Blocks.CORRUPTED_PEELGRASS_BLOCK)
+						&& randomSource.nextInt(20) == 0
+						&& blockState3.is(Blocks.PEELGRASS_BLOCK)
+						&& canPropagate(blockState2, serverLevel, blockPos2)) {
+						serverLevel.setBlockAndUpdate(blockPos2, blockState2);
+					}
+
+					if ((blockState3.is(Blocks.DIRT) || blockState3.is(Blocks.TERREDEPOMME)) && canPropagate(blockState2, serverLevel, blockPos2)) {
 						serverLevel.setBlockAndUpdate(blockPos2, blockState2.setValue(SNOWY, Boolean.valueOf(serverLevel.getBlockState(blockPos2.above()).is(Blocks.SNOW))));
 					}
 				}

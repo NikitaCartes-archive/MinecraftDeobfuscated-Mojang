@@ -80,6 +80,7 @@ public class ParticleTypes {
 	public static final ParticleType<VibrationParticleOption> VIBRATION = register(
 		"vibration", true, VibrationParticleOption.DESERIALIZER, particleType -> VibrationParticleOption.CODEC, particleType -> VibrationParticleOption.STREAM_CODEC
 	);
+	public static final SimpleParticleType FOOTSTEP = register("footstep", true);
 	public static final SimpleParticleType ITEM_SLIME = register("item_slime", false);
 	public static final SimpleParticleType ITEM_SNOWBALL = register("item_snowball", false);
 	public static final SimpleParticleType LARGE_SMOKE = register("large_smoke", false);
@@ -110,6 +111,7 @@ public class ParticleTypes {
 	public static final SimpleParticleType FALLING_HONEY = register("falling_honey", false);
 	public static final SimpleParticleType LANDING_HONEY = register("landing_honey", false);
 	public static final SimpleParticleType FALLING_NECTAR = register("falling_nectar", false);
+	public static final SimpleParticleType FALLING_POISON = register("falling_poison", false);
 	public static final SimpleParticleType FALLING_SPORE_BLOSSOM = register("falling_spore_blossom", false);
 	public static final SimpleParticleType ASH = register("ash", false);
 	public static final SimpleParticleType CRIMSON_SPORE = register("crimson_spore", false);
@@ -119,6 +121,8 @@ public class ParticleTypes {
 	public static final SimpleParticleType FALLING_OBSIDIAN_TEAR = register("falling_obsidian_tear", false);
 	public static final SimpleParticleType LANDING_OBSIDIAN_TEAR = register("landing_obsidian_tear", false);
 	public static final SimpleParticleType REVERSE_PORTAL = register("reverse_portal", false);
+	public static final SimpleParticleType POTATO_LIGHTNING = register("lightning", false);
+	public static final SimpleParticleType REVERSE_POTATO_LIGHTNING = register("reverse_lightning", false);
 	public static final SimpleParticleType WHITE_ASH = register("white_ash", false);
 	public static final SimpleParticleType SMALL_FLAME = register("small_flame", false);
 	public static final SimpleParticleType SNOWFLAKE = register("snowflake", false);

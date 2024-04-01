@@ -48,7 +48,7 @@ import org.slf4j.Logger;
 
 public class FallingBlockEntity extends Entity {
 	private static final Logger LOGGER = LogUtils.getLogger();
-	private BlockState blockState = Blocks.SAND.defaultBlockState();
+	private BlockState blockState = Blocks.GRAVTATER.defaultBlockState();
 	public int time;
 	public boolean dropItem = true;
 	private boolean cancelDrop;
@@ -289,7 +289,7 @@ public class FallingBlockEntity extends Entity {
 
 		this.cancelDrop = compoundTag.getBoolean("CancelDrop");
 		if (this.blockState.isAir()) {
-			this.blockState = Blocks.SAND.defaultBlockState();
+			this.blockState = Blocks.GRAVTATER.defaultBlockState();
 		}
 	}
 

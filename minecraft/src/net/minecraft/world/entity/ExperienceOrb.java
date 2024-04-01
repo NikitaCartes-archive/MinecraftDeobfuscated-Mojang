@@ -2,6 +2,7 @@ package net.minecraft.world.entity;
 
 import java.util.List;
 import java.util.Map.Entry;
+import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
@@ -31,7 +32,8 @@ public class ExperienceOrb extends Entity {
 	private int health = 5;
 	private int value;
 	private int count = 1;
-	private Player followingPlayer;
+	@Nullable
+	private ExperienceOrb.Target followingTarget;
 
 	public ExperienceOrb(Level level, double d, double e, double f, int i) {
 		this(EntityType.EXPERIENCE_ORB, level);
@@ -85,20 +87,16 @@ public class ExperienceOrb extends Entity {
 			this.scanForEntities();
 		}
 
-		if (this.followingPlayer != null && (this.followingPlayer.isSpectator() || this.followingPlayer.isDeadOrDying())) {
-			this.followingPlayer = null;
-		}
-
-		if (this.followingPlayer != null) {
-			Vec3 vec3 = new Vec3(
-				this.followingPlayer.getX() - this.getX(),
-				this.followingPlayer.getY() + (double)this.followingPlayer.getEyeHeight() / 2.0 - this.getY(),
-				this.followingPlayer.getZ() - this.getZ()
-			);
-			double d = vec3.lengthSqr();
-			if (d < 64.0) {
-				double e = 1.0 - Math.sqrt(d) / 8.0;
-				this.setDeltaMovement(this.getDeltaMovement().add(vec3.normalize().scale(e * e * 0.1)));
+		if (this.followingTarget != null) {
+			if (this.followingTarget.valid()) {
+				Vec3 vec3 = this.followingTarget.target().subtract(this.getX(), this.getY(), this.getZ());
+				double d = vec3.lengthSqr();
+				if (d < 64.0) {
+					double e = 1.0 - Math.sqrt(d) / 8.0;
+					this.setDeltaMovement(this.getDeltaMovement().add(vec3.normalize().scale(e * e * 0.1)));
+				}
+			} else {
+				this.followingTarget = null;
 			}
 		}
 
@@ -125,8 +123,11 @@ public class ExperienceOrb extends Entity {
 	}
 
 	private void scanForEntities() {
-		if (this.followingPlayer == null || this.followingPlayer.distanceToSqr(this) > 64.0) {
-			this.followingPlayer = this.level().getNearestPlayer(this, 8.0);
+		if (this.followingTarget == null || this.followingTarget.target().distanceToSqr(this.getX(), this.getY(), this.getZ()) > 64.0) {
+			Player player = this.level().getNearestPlayer(this, 8.0);
+			if (player != null) {
+				this.followingTarget = new ExperienceOrb.PlayerTarget(player);
+			}
 		}
 
 		if (this.level() instanceof ServerLevel) {
@@ -261,6 +262,10 @@ public class ExperienceOrb extends Entity {
 		return this.value;
 	}
 
+	public int getTotalValue() {
+		return this.value * this.count;
+	}
+
 	public int getIcon() {
 		if (this.value >= 2477) {
 			return 10;
@@ -319,8 +324,57 @@ public class ExperienceOrb extends Entity {
 		return new ClientboundAddExperienceOrbPacket(this);
 	}
 
+	public void targetBlock(BlockPos blockPos) {
+		ExperienceOrb.BlockTarget blockTarget = new ExperienceOrb.BlockTarget(blockPos);
+		if (this.followingTarget == null || this.followingTarget.target().distanceTo(this.position()) > blockTarget.target().distanceTo(this.position())) {
+			this.followingTarget = blockTarget;
+		}
+	}
+
 	@Override
 	public SoundSource getSoundSource() {
 		return SoundSource.AMBIENT;
+	}
+
+	static class BlockTarget implements ExperienceOrb.Target {
+		private final BlockPos pos;
+
+		BlockTarget(BlockPos blockPos) {
+			this.pos = blockPos;
+		}
+
+		@Override
+		public Vec3 target() {
+			return Vec3.atCenterOf(this.pos);
+		}
+
+		@Override
+		public boolean valid() {
+			return true;
+		}
+	}
+
+	static class PlayerTarget implements ExperienceOrb.Target {
+		private final Player player;
+
+		PlayerTarget(Player player) {
+			this.player = player;
+		}
+
+		@Override
+		public Vec3 target() {
+			return new Vec3(this.player.getX(), this.player.getY() + (double)this.player.getEyeHeight() / 2.0, this.player.getZ());
+		}
+
+		@Override
+		public boolean valid() {
+			return !this.player.isSpectator() && !this.player.isDeadOrDying();
+		}
+	}
+
+	interface Target {
+		Vec3 target();
+
+		boolean valid();
 	}
 }

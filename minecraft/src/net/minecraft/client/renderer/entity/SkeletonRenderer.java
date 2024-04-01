@@ -11,7 +11,7 @@ import net.minecraft.world.entity.monster.AbstractSkeleton;
 
 @Environment(EnvType.CLIENT)
 public class SkeletonRenderer<T extends AbstractSkeleton> extends HumanoidMobRenderer<T, SkeletonModel<T>> {
-	private static final ResourceLocation SKELETON_LOCATION = new ResourceLocation("textures/entity/skeleton/skeleton.png");
+	public static final ResourceLocation SKELETON_LOCATION = new ResourceLocation("textures/entity/skeleton/skeleton.png");
 
 	public SkeletonRenderer(EntityRendererProvider.Context context) {
 		this(context, ModelLayers.SKELETON, ModelLayers.SKELETON_INNER_ARMOR, ModelLayers.SKELETON_OUTER_ARMOR);

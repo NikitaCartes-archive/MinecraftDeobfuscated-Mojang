@@ -181,6 +181,16 @@ public class DripParticle extends TextureSheetParticle {
 		return dripParticle;
 	}
 
+	public static TextureSheetParticle createPoisonFallParticle(
+		SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i
+	) {
+		DripParticle dripParticle = new DripParticle.FallingParticle(clientLevel, d, e, f, Fluids.EMPTY);
+		dripParticle.lifetime = (int)(16.0 / (Math.random() * 0.8 + 0.2));
+		dripParticle.gravity = 0.007F;
+		dripParticle.setColor(0.69F, 0.78F, 0.22F);
+		return dripParticle;
+	}
+
 	public static TextureSheetParticle createSporeBlossomFallParticle(
 		SimpleParticleType simpleParticleType, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i
 	) {

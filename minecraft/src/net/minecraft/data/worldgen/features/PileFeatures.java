@@ -14,6 +14,7 @@ import net.minecraft.world.level.levelgen.feature.stateproviders.WeightedStatePr
 
 public class PileFeatures {
 	public static final ResourceKey<ConfiguredFeature<?, ?>> PILE_HAY = FeatureUtils.createKey("pile_hay");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> PILE_POTATO_FRUIT = FeatureUtils.createKey("pile_potato_fruit");
 	public static final ResourceKey<ConfiguredFeature<?, ?>> PILE_MELON = FeatureUtils.createKey("pile_melon");
 	public static final ResourceKey<ConfiguredFeature<?, ?>> PILE_SNOW = FeatureUtils.createKey("pile_snow");
 	public static final ResourceKey<ConfiguredFeature<?, ?>> PILE_ICE = FeatureUtils.createKey("pile_ice");
@@ -21,6 +22,7 @@ public class PileFeatures {
 
 	public static void bootstrap(BootstrapContext<ConfiguredFeature<?, ?>> bootstrapContext) {
 		FeatureUtils.register(bootstrapContext, PILE_HAY, Feature.BLOCK_PILE, new BlockPileConfiguration(new RotatedBlockProvider(Blocks.HAY_BLOCK)));
+		FeatureUtils.register(bootstrapContext, PILE_POTATO_FRUIT, Feature.BLOCK_PILE, new BlockPileConfiguration(BlockStateProvider.simple(Blocks.POTATO_FRUIT)));
 		FeatureUtils.register(bootstrapContext, PILE_MELON, Feature.BLOCK_PILE, new BlockPileConfiguration(BlockStateProvider.simple(Blocks.MELON)));
 		FeatureUtils.register(bootstrapContext, PILE_SNOW, Feature.BLOCK_PILE, new BlockPileConfiguration(BlockStateProvider.simple(Blocks.SNOW)));
 		FeatureUtils.register(

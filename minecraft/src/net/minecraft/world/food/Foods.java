@@ -1,11 +1,33 @@
 package net.minecraft.world.food;
 
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 
 public class Foods {
 	public static final FoodProperties APPLE = new FoodProperties.Builder().nutrition(4).saturationModifier(0.3F).build();
 	public static final FoodProperties BAKED_POTATO = new FoodProperties.Builder().nutrition(5).saturationModifier(0.6F).build();
+	public static final FoodProperties HOT_POTATO = new FoodProperties.Builder().nutrition(5).saturationModifier(0.6F).alwaysEdible().build();
+	public static final FoodProperties POISONOUS_POTATO_STICKS = new FoodProperties.Builder()
+		.nutrition(1)
+		.saturationModifier(0.6F)
+		.eatSound(SoundEvents.ENTITY_POTATO_CHIPS)
+		.build();
+	public static final FoodProperties POISONOUS_POTATO_SLICES = new FoodProperties.Builder()
+		.nutrition(1)
+		.saturationModifier(0.6F)
+		.eatSound(SoundEvents.ENTITY_POTATO_CHIPS)
+		.build();
+	public static final FoodProperties POISONOUS_POTATO_FRIES = new FoodProperties.Builder()
+		.nutrition(10)
+		.saturationModifier(0.6F)
+		.eatSound(SoundEvents.ENTITY_POTATO_CHIPS)
+		.build();
+	public static final FoodProperties POISONOUS_POTATO_CHIPS = new FoodProperties.Builder()
+		.nutrition(8)
+		.saturationModifier(0.6F)
+		.eatSound(SoundEvents.ENTITY_POTATO_CHIPS)
+		.build();
 	public static final FoodProperties BEEF = new FoodProperties.Builder().nutrition(3).saturationModifier(0.3F).build();
 	public static final FoodProperties BEETROOT = new FoodProperties.Builder().nutrition(1).saturationModifier(0.6F).build();
 	public static final FoodProperties BEETROOT_SOUP = stew(6).build();
@@ -43,8 +65,24 @@ public class Foods {
 		.effect(new MobEffectInstance(MobEffects.ABSORPTION, 2400, 0), 1.0F)
 		.alwaysEdible()
 		.build();
+	public static final FoodProperties GOLDEN_POISONOUS_POTATO = new FoodProperties.Builder()
+		.nutrition(2)
+		.saturationModifier(1.2F)
+		.effect(new MobEffectInstance(MobEffects.POISON, 100, 1), 1.0F)
+		.effect(new MobEffectInstance(MobEffects.ABSORPTION, 2400, 0), 1.0F)
+		.alwaysEdible()
+		.build();
+	public static final FoodProperties ENCHANTED_GOLDEN_POISONOUS_POTATO = new FoodProperties.Builder()
+		.nutrition(2)
+		.saturationModifier(1.2F)
+		.effect(new MobEffectInstance(MobEffects.POISON, 400, 7), 1.0F)
+		.effect(new MobEffectInstance(MobEffects.LUCK, 6000, 4), 1.0F)
+		.effect(new MobEffectInstance(MobEffects.UNLUCK, 6000, 4), 1.0F)
+		.effect(new MobEffectInstance(MobEffects.ABSORPTION, 2400, 3), 1.0F)
+		.alwaysEdible()
+		.build();
 	public static final FoodProperties GOLDEN_CARROT = new FoodProperties.Builder().nutrition(6).saturationModifier(1.2F).build();
-	public static final FoodProperties HONEY_BOTTLE = new FoodProperties.Builder().nutrition(6).saturationModifier(0.1F).build();
+	public static final FoodProperties HONEY_BOTTLE = new FoodProperties.Builder().nutrition(6).saturationModifier(0.1F).eatSound(SoundEvents.HONEY_DRINK).build();
 	public static final FoodProperties MELON_SLICE = new FoodProperties.Builder().nutrition(2).saturationModifier(0.3F).build();
 	public static final FoodProperties MUSHROOM_STEW = stew(6).build();
 	public static final FoodProperties MUTTON = new FoodProperties.Builder().nutrition(2).saturationModifier(0.3F).build();
@@ -52,6 +90,11 @@ public class Foods {
 		.nutrition(2)
 		.saturationModifier(0.3F)
 		.effect(new MobEffectInstance(MobEffects.POISON, 100, 0), 0.6F)
+		.build();
+	public static final FoodProperties POTATO_FRUIT = new FoodProperties.Builder()
+		.nutrition(6)
+		.saturationModifier(1.2F)
+		.effect(new MobEffectInstance(MobEffects.POISON, 40, 0), 1.0F)
 		.build();
 	public static final FoodProperties PORKCHOP = new FoodProperties.Builder().nutrition(3).saturationModifier(0.3F).build();
 	public static final FoodProperties POTATO = new FoodProperties.Builder().nutrition(1).saturationModifier(0.3F).build();
@@ -80,6 +123,7 @@ public class Foods {
 	public static final FoodProperties SWEET_BERRIES = new FoodProperties.Builder().nutrition(2).saturationModifier(0.1F).build();
 	public static final FoodProperties GLOW_BERRIES = new FoodProperties.Builder().nutrition(2).saturationModifier(0.1F).build();
 	public static final FoodProperties TROPICAL_FISH = new FoodProperties.Builder().nutrition(1).saturationModifier(0.1F).build();
+	public static final FoodProperties HASH_BROWNS = new FoodProperties.Builder().nutrition(2).saturationModifier(0.6F).build();
 
 	private static FoodProperties.Builder stew(int i) {
 		return new FoodProperties.Builder().nutrition(i).saturationModifier(0.6F);

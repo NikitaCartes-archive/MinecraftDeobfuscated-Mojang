@@ -10,15 +10,22 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 
 public class LargeFireball extends Fireball {
+	private final boolean fire;
 	private int explosionPower = 1;
 
 	public LargeFireball(EntityType<? extends LargeFireball> entityType, Level level) {
 		super(entityType, level);
+		this.fire = true;
 	}
 
 	public LargeFireball(Level level, LivingEntity livingEntity, double d, double e, double f, int i) {
+		this(level, livingEntity, d, e, f, i, true);
+	}
+
+	public LargeFireball(Level level, LivingEntity livingEntity, double d, double e, double f, int i, boolean bl) {
 		super(EntityType.FIREBALL, livingEntity, d, e, f, level);
 		this.explosionPower = i;
+		this.fire = bl;
 	}
 
 	@Override
@@ -26,7 +33,7 @@ public class LargeFireball extends Fireball {
 		super.onHit(hitResult);
 		if (!this.level().isClientSide) {
 			boolean bl = this.level().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING);
-			this.level().explode(this, this.getX(), this.getY(), this.getZ(), (float)this.explosionPower, bl, Level.ExplosionInteraction.MOB);
+			this.level().explode(this, this.getX(), this.getY(), this.getZ(), (float)this.explosionPower, this.fire && bl, Level.ExplosionInteraction.MOB);
 			this.discard();
 		}
 	}

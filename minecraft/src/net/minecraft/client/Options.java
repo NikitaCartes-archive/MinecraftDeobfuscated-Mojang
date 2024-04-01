@@ -95,6 +95,10 @@ public class Options {
 	private final OptionInstance<Boolean> darkMojangStudiosBackground = OptionInstance.createBoolean(
 		"options.darkMojangStudiosBackgroundColor", OptionInstance.cachedConstantTooltip(ACCESSIBILITY_TOOLTIP_DARK_MOJANG_BACKGROUND), false
 	);
+	private static final Component POTATO_FONT_TOOLTIP = Component.translatable("options.potatoFont.tooltip");
+	private final OptionInstance<Boolean> potatoFont = OptionInstance.createBoolean(
+		"options.potatoFont", OptionInstance.cachedConstantTooltip(POTATO_FONT_TOOLTIP), false, boolean_ -> updateFontOptions()
+	);
 	private static final Component ACCESSIBILITY_TOOLTIP_HIDE_LIGHTNING_FLASHES = Component.translatable("options.hideLightningFlashes.tooltip");
 	private final OptionInstance<Boolean> hideLightningFlash = OptionInstance.createBoolean(
 		"options.hideLightningFlashes", OptionInstance.cachedConstantTooltip(ACCESSIBILITY_TOOLTIP_HIDE_LIGHTNING_FLASHES), false
@@ -509,6 +513,7 @@ public class Options {
 	public final KeyMapping keyPlayerList = new KeyMapping("key.playerlist", 258, "key.categories.multiplayer");
 	public final KeyMapping keyCommand = new KeyMapping("key.command", 47, "key.categories.multiplayer");
 	public final KeyMapping keySocialInteractions = new KeyMapping("key.socialInteractions", 80, "key.categories.multiplayer");
+	public final KeyMapping keyPotato = new KeyMapping("key.potato", 39, "key.categories.multiplayer");
 	public final KeyMapping keyScreenshot = new KeyMapping("key.screenshot", 291, "key.categories.misc");
 	public final KeyMapping keyTogglePerspective = new KeyMapping("key.togglePerspective", 294, "key.categories.misc");
 	public final KeyMapping keySmoothCamera = new KeyMapping("key.smoothCamera", InputConstants.UNKNOWN.getValue(), "key.categories.misc");
@@ -546,6 +551,7 @@ public class Options {
 			this.keyPickItem,
 			this.keyCommand,
 			this.keySocialInteractions,
+			this.keyPotato,
 			this.keyScreenshot,
 			this.keyTogglePerspective,
 			this.keySmoothCamera,
@@ -733,6 +739,10 @@ public class Options {
 
 	public OptionInstance<Boolean> darkMojangStudiosBackground() {
 		return this.darkMojangStudiosBackground;
+	}
+
+	public OptionInstance<Boolean> potatoFont() {
+		return this.potatoFont;
 	}
 
 	public OptionInstance<Boolean> hideLightningFlash() {
@@ -1170,6 +1180,7 @@ public class Options {
 		fieldAccess.process("toggleCrouch", this.toggleCrouch);
 		fieldAccess.process("toggleSprint", this.toggleSprint);
 		fieldAccess.process("darkMojangStudiosBackground", this.darkMojangStudiosBackground);
+		fieldAccess.process("potatoFont", this.potatoFont);
 		fieldAccess.process("hideLightningFlashes", this.hideLightningFlash);
 		fieldAccess.process("hideSplashTexts", this.hideSplashTexts);
 		fieldAccess.process("mouseSensitivity", this.sensitivity);

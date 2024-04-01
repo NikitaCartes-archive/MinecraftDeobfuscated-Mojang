@@ -24,6 +24,7 @@ public class Pools {
 		Holder<StructureTemplatePool> holder = holderGetter.getOrThrow(EMPTY);
 		bootstrapContext.register(EMPTY, new StructureTemplatePool(holder, ImmutableList.of(), StructureTemplatePool.Projection.RIGID));
 		BastionPieces.bootstrap(bootstrapContext);
+		ColosseumPieces.bootstrap(bootstrapContext);
 		PillagerOutpostPools.bootstrap(bootstrapContext);
 		VillagePools.bootstrap(bootstrapContext);
 		AncientCityStructurePieces.bootstrap(bootstrapContext);

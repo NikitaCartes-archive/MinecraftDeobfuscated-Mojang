@@ -33,6 +33,7 @@ import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.component.Fireworks;
+import net.minecraft.world.item.component.XpComponent;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentInstance;
 import net.minecraft.world.level.block.Blocks;
@@ -53,6 +54,7 @@ public class CreativeModeTabs {
 	private static final ResourceKey<CreativeModeTab> INGREDIENTS = createKey("ingredients");
 	private static final ResourceKey<CreativeModeTab> SPAWN_EGGS = createKey("spawn_eggs");
 	private static final ResourceKey<CreativeModeTab> OP_BLOCKS = createKey("op_blocks");
+	private static final ResourceKey<CreativeModeTab> POTATOES = createKey("potatoes");
 	private static final ResourceKey<CreativeModeTab> INVENTORY = createKey("inventory");
 	private static final Comparator<Holder<PaintingVariant>> PAINTING_COMPARATOR = Comparator.comparing(
 		Holder::value, Comparator.comparingInt(paintingVariant -> paintingVariant.getHeight() * paintingVariant.getWidth()).thenComparing(PaintingVariant::getWidth)
@@ -753,6 +755,8 @@ public class CreativeModeTabs {
 					output.accept(Items.DEEPSLATE_LAPIS_ORE);
 					output.accept(Items.DIAMOND_ORE);
 					output.accept(Items.DEEPSLATE_DIAMOND_ORE);
+					output.accept(Items.POISONOUS_POTATO_ORE);
+					output.accept(Items.DEEPSLATE_POISONOUS_POTATO_ORE);
 					output.accept(Items.NETHER_GOLD_ORE);
 					output.accept(Items.NETHER_QUARTZ_ORE);
 					output.accept(Items.ANCIENT_DEBRIS);
@@ -823,6 +827,7 @@ public class CreativeModeTabs {
 					output.accept(Items.OXEYE_DAISY);
 					output.accept(Items.CORNFLOWER);
 					output.accept(Items.LILY_OF_THE_VALLEY);
+					output.accept(Items.POTATO_FLOWER);
 					output.accept(Items.TORCHFLOWER);
 					output.accept(Items.WITHER_ROSE);
 					output.accept(Items.PINK_PETALS);
@@ -1227,6 +1232,144 @@ public class CreativeModeTabs {
 		);
 		Registry.register(
 			registry,
+			POTATOES,
+			CreativeModeTab.builder(CreativeModeTab.Row.TOP, 7)
+				.title(Component.translatable("itemGroup.potatoes"))
+				.icon(() -> new ItemStack(Items.POISONOUS_POTATO))
+				.displayItems(
+					(itemDisplayParameters, output) -> {
+						output.accept(Items.POISONOUS_POTATO);
+						output.accept(Items.POISONOUS_POTATO_PLANT);
+						output.accept(Items.POISONOUS_POTATO_FRIES);
+						output.accept(Items.POISONOUS_POTATO_SLICES);
+						output.accept(Items.POISONOUS_POTATO_STICKS);
+						output.accept(Items.POISONOUS_POTATO_CHIPS);
+						output.accept(Items.HASH_BROWNS);
+						output.accept(Items.PEDESTAL);
+						output.accept(Items.POTATO_PORTAL);
+						output.accept(Items.POTATO_EYE);
+						output.accept(Items.POTATO_STAFF);
+						output.accept(Items.BIG_BRAIN);
+						output.accept(createXpItem(Items.POTATO_OF_KNOWLEDGE, 10));
+						output.accept(createXpItem(Items.POTATO_OF_KNOWLEDGE, 50));
+						output.accept(createXpItem(Items.POTATO_OF_KNOWLEDGE, 100));
+						output.accept(Items.VENOMOUS_POTATO);
+						output.accept(Items.HOT_POTATO);
+						output.accept(Items.GOLDEN_POISONOUS_POTATO);
+						output.accept(Items.ENCHANTED_GOLDEN_POISONOUS_POTATO);
+						output.accept(Items.POTATO_HAMMER);
+						output.accept(Items.POISONOUS_POTA_TOES);
+						output.accept(Items.POISONOUS_POTATO_CHESTPLATE);
+						output.accept(Items.POISONOUS_POLYTRA);
+						output.accept(Items.POTATO_BATTERY);
+						output.accept(Items.POISONOUS_POTATO_CUTTER);
+						output.accept(Items.FRYING_TABLE);
+						output.accept(Items.POTATO_REFINERY);
+						output.accept(Items.POTATO_OIL);
+						output.accept(Items.POISONOUS_POTATO_OIL);
+						output.accept(Items.TOXIC_BEAM);
+						output.accept(Items.LASHING_POTATO);
+						output.accept(Items.POTATO_PEELER);
+						output.accept(Items.DENT);
+						output.accept(Items.FLOATATO);
+						output.accept(Items.FLOATATER);
+						output.accept(Items.POWERFUL_POTATO);
+						output.accept(Items.STRONG_ROOTS);
+						output.accept(Items.WEAK_ROOTS);
+						output.accept(Items.TOXIC_RESIN);
+						output.accept(Items.AMBER_GEM);
+						output.accept(Items.AMBER_BLOCK);
+						output.accept(Items.POTATO_FLOWER);
+						output.accept(Items.POTATO_BUD);
+						output.accept(Items.POTATO_STEM);
+						output.accept(Items.POTATO_PLANKS);
+						output.accept(Items.POTATO_SLAB);
+						output.accept(Items.POTATO_STAIRS);
+						output.accept(Items.POTATO_FENCE);
+						output.accept(Items.POTATO_FENCE_GATE);
+						output.accept(Items.POTATO_DOOR);
+						output.accept(Items.POTATO_TRAPDOOR);
+						output.accept(Items.POTATO_BUTTON);
+						output.accept(Items.POTATO_PRESSURE_PLATE);
+						output.accept(Items.POTATO_SIGN);
+						output.accept(Items.POTATO_HANGING_SIGN);
+						output.accept(Items.POTATO_LEAVES);
+						output.accept(Items.POTATO_FRUIT);
+						output.accept(Items.POTATO_PEDICULE);
+						output.accept(Items.POTATO_SPROUTS);
+						output.accept(Items.TERREDEPOMME);
+						output.accept(Items.PEELGRASS_BLOCK);
+						output.accept(Items.CORRUPTED_PEELGRASS_BLOCK);
+						output.accept(Items.POISON_FARMLAND);
+						output.accept(Items.POISON_PATH);
+						output.accept(Items.GRAVTATER);
+						output.accept(Items.VICIOUS_POTATO);
+						output.accept(Items.POISONOUS_POTATO_ORE);
+						output.accept(Items.DEEPSLATE_POISONOUS_POTATO_ORE);
+						output.accept(Items.RESIN_ORE);
+						output.accept(Items.POTONE_COPPER_ORE);
+						output.accept(Items.POTONE_IRON_ORE);
+						output.accept(Items.POTONE_GOLD_ORE);
+						output.accept(Items.POTONE_REDSTONE_ORE);
+						output.accept(Items.POTONE_LAPIS_ORE);
+						output.accept(Items.POTONE_DIAMOND_ORE);
+						output.accept(Items.POTONE);
+						output.accept(Items.POTONE_SLAB);
+						output.accept(Items.POTONE_STAIRS);
+						output.accept(Items.POTONE_WALL);
+						output.accept(Items.TATERSTONE);
+						output.accept(Items.TATERSTONE_SLAB);
+						output.accept(Items.TATERSTONE_STAIRS);
+						output.accept(Items.TATERSTONE_WALL);
+						output.accept(Items.BAKED_POTATO_BRICKS);
+						output.accept(Items.BAKED_POTATO_BRICK_SLAB);
+						output.accept(Items.BAKED_POTATO_BRICK_STAIRS);
+						output.accept(Items.BAKED_POTATO_BRICK_WALL);
+						output.accept(Items.EXPIRED_BAKED_POTATO_BRICKS);
+						output.accept(Items.EXPIRED_BAKED_POTATO_BRICK_SLAB);
+						output.accept(Items.EXPIRED_BAKED_POTATO_BRICK_STAIRS);
+						output.accept(Items.EXPIRED_BAKED_POTATO_BRICK_WALL);
+						output.accept(Items.CHARRED_BAKED_POTATO_BRICKS);
+						output.accept(Items.CHARRED_BAKED_POTATO_BRICK_SLAB);
+						output.accept(Items.CHARRED_BAKED_POTATO_BRICK_STAIRS);
+						output.accept(Items.CHARRED_BAKED_POTATO_BRICK_WALL);
+						output.accept(Items.POISONOUS_MASHED_POTATO);
+						output.accept(Items.POISONOUS_POTATO_BLOCK);
+						output.accept(Items.COMPRESSED_POISONOUS_POTATO_BLOCK);
+						output.accept(Items.DOUBLE_COMPRESSED_POISONOUS_POTATO_BLOCK);
+						output.accept(Items.TRIPLE_COMPRESSED_POISONOUS_POTATO_BLOCK);
+						output.accept(Items.QUADRUPLE_COMPRESSED_POISONOUS_POTATO_BLOCK);
+						output.accept(Items.POTATO_ZOMBIE_HEAD_HAT);
+						output.accept(Items.POTATO_ZOMBIE_HEAD_BLOCK);
+						output.accept(Items.BATATO_SPAWN_EGG);
+						output.accept(Items.POISONOUS_POTATO_ZOMBIE_SPAWN_EGG);
+						output.accept(Items.TOXIFIN_SPAWN_EGG);
+						output.accept(Items.PLAGUEWHALE_SPAWN_EGG);
+						output.accept(Items.MEGA_SPUD_SPAWN_EGG);
+						output.accept(Items.CORRUPTED_POTATO_PEELS);
+
+						for (Item item : Items.POTATO_PEELS_MAP.values()) {
+							output.accept(item);
+						}
+
+						for (Item item : Items.POTATO_PEELS_BLOCK_MAP.values()) {
+							output.accept(item);
+						}
+
+						output.accept(Blocks.CORRUPTED_POTATO_PEELS_BLOCK);
+						itemDisplayParameters.holders()
+							.lookup(Registries.PAINTING_VARIANT)
+							.ifPresent(
+								registryLookup -> generatePresetPaintings(
+										output, registryLookup, holder -> holder.is(PaintingVariantTags.POTATO), CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS
+									)
+							);
+					}
+				)
+				.build()
+		);
+		Registry.register(
+			registry,
 			TOOLS_AND_UTILITIES,
 			CreativeModeTab.builder(CreativeModeTab.Row.BOTTOM, 0)
 				.title(Component.translatable("itemGroup.tools"))
@@ -1290,6 +1433,7 @@ public class CreativeModeTabs {
 						output.accept(Items.ENDER_PEARL);
 						output.accept(Items.ENDER_EYE);
 						output.accept(Items.ELYTRA);
+						output.accept(Items.POISONOUS_POLYTRA);
 						generateFireworksAllDurations(output, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
 						output.accept(Items.SADDLE);
 						output.accept(Items.CARROT_ON_A_STICK);
@@ -1429,6 +1573,8 @@ public class CreativeModeTabs {
 					output.accept(Items.APPLE);
 					output.accept(Items.GOLDEN_APPLE);
 					output.accept(Items.ENCHANTED_GOLDEN_APPLE);
+					output.accept(Items.GOLDEN_POISONOUS_POTATO);
+					output.accept(Items.ENCHANTED_GOLDEN_POISONOUS_POTATO);
 					output.accept(Items.MELON_SLICE);
 					output.accept(Items.SWEET_BERRIES);
 					output.accept(Items.GLOW_BERRIES);
@@ -1437,7 +1583,12 @@ public class CreativeModeTabs {
 					output.accept(Items.GOLDEN_CARROT);
 					output.accept(Items.POTATO);
 					output.accept(Items.BAKED_POTATO);
+					output.accept(Items.HOT_POTATO);
 					output.accept(Items.POISONOUS_POTATO);
+					output.accept(Items.POISONOUS_POTATO_STICKS);
+					output.accept(Items.POISONOUS_POTATO_SLICES);
+					output.accept(Items.POISONOUS_POTATO_FRIES);
+					output.accept(Items.POISONOUS_POTATO_CHIPS);
 					output.accept(Items.BEETROOT);
 					output.accept(Items.DRIED_KELP);
 					output.accept(Items.BEEF);
@@ -1706,7 +1857,9 @@ public class CreativeModeTabs {
 					output.accept(Items.PIGLIN_SPAWN_EGG);
 					output.accept(Items.PIGLIN_BRUTE_SPAWN_EGG);
 					output.accept(Items.PILLAGER_SPAWN_EGG);
+					output.accept(Items.PLAGUEWHALE_SPAWN_EGG);
 					output.accept(Items.POLAR_BEAR_SPAWN_EGG);
+					output.accept(Items.POISONOUS_POTATO_ZOMBIE_SPAWN_EGG);
 					output.accept(Items.PUFFERFISH_SPAWN_EGG);
 					output.accept(Items.RABBIT_SPAWN_EGG);
 					output.accept(Items.RAVAGER_SPAWN_EGG);
@@ -1724,6 +1877,7 @@ public class CreativeModeTabs {
 					output.accept(Items.STRAY_SPAWN_EGG);
 					output.accept(Items.STRIDER_SPAWN_EGG);
 					output.accept(Items.TADPOLE_SPAWN_EGG);
+					output.accept(Items.TOXIFIN_SPAWN_EGG);
 					output.accept(Items.TRADER_LLAMA_SPAWN_EGG);
 					output.accept(Items.TROPICAL_FISH_SPAWN_EGG);
 					output.accept(Items.TURTLE_SPAWN_EGG);
@@ -1792,6 +1946,12 @@ public class CreativeModeTabs {
 				.noScrollBar()
 				.build()
 		);
+	}
+
+	private static ItemStack createXpItem(Item item, int i) {
+		ItemStack itemStack = new ItemStack(item);
+		itemStack.set(DataComponents.XP, new XpComponent(i));
+		return itemStack;
 	}
 
 	public static void validate() {

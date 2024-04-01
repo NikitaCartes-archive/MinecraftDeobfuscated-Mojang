@@ -119,7 +119,11 @@ public class MapItem extends ComplexItem {
 											int w = levelChunk.getHeight(Heightmap.Types.WORLD_SURFACE, mutableBlockPos.getX(), mutableBlockPos.getZ()) + 1;
 											BlockState blockState;
 											if (w <= level.getMinBuildHeight() + 1) {
-												blockState = Blocks.BEDROCK.defaultBlockState();
+												if (level.isPotato()) {
+													blockState = Blocks.WARPED_WART_BLOCK.defaultBlockState();
+												} else {
+													blockState = Blocks.BEDROCK.defaultBlockState();
+												}
 											} else {
 												do {
 													mutableBlockPos.setY(--w);

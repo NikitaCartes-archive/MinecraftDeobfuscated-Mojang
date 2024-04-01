@@ -134,10 +134,11 @@ public class BeaconScreen extends AbstractContainerScreen<BeaconMenu> {
 		guiGraphics.pose().pushPose();
 		guiGraphics.pose().translate(0.0F, 0.0F, 100.0F);
 		guiGraphics.renderItem(new ItemStack(Items.NETHERITE_INGOT), k + 20, l + 109);
-		guiGraphics.renderItem(new ItemStack(Items.EMERALD), k + 41, l + 109);
-		guiGraphics.renderItem(new ItemStack(Items.DIAMOND), k + 41 + 22, l + 109);
-		guiGraphics.renderItem(new ItemStack(Items.GOLD_INGOT), k + 42 + 44, l + 109);
-		guiGraphics.renderItem(new ItemStack(Items.IRON_INGOT), k + 42 + 66, l + 109);
+		guiGraphics.renderItem(new ItemStack(Items.AMBER_GEM), k + 41, l + 109);
+		guiGraphics.renderItem(new ItemStack(Items.DIAMOND), k + 41 + 18, l + 109);
+		guiGraphics.renderItem(new ItemStack(Items.EMERALD), k + 41 + 37, l + 109);
+		guiGraphics.renderItem(new ItemStack(Items.GOLD_INGOT), k + 42 + 55, l + 109);
+		guiGraphics.renderItem(new ItemStack(Items.IRON_INGOT), k + 42 + 74, l + 109);
 		guiGraphics.pose().popPose();
 	}
 

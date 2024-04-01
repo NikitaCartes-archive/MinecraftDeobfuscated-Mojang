@@ -65,10 +65,10 @@ public class Frustum {
 	}
 
 	public boolean isVisible(AABB aABB) {
-		return this.cubeInFrustum(aABB.minX, aABB.minY, aABB.minZ, aABB.maxX, aABB.maxY, aABB.maxZ);
+		return this.isVisible(aABB.minX, aABB.minY, aABB.minZ, aABB.maxX, aABB.maxY, aABB.maxZ);
 	}
 
-	private boolean cubeInFrustum(double d, double e, double f, double g, double h, double i) {
+	public boolean isVisible(double d, double e, double f, double g, double h, double i) {
 		float j = (float)(d - this.camX);
 		float k = (float)(e - this.camY);
 		float l = (float)(f - this.camZ);

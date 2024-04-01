@@ -38,7 +38,10 @@ public class FoodData {
 			if (this.saturationLevel > 0.0F) {
 				this.saturationLevel = Math.max(this.saturationLevel - 1.0F, 0.0F);
 			} else if (difficulty != Difficulty.PEACEFUL) {
-				this.foodLevel = Math.max(this.foodLevel - 1, 0);
+				boolean bl = player.tryEatArmor();
+				if (!bl) {
+					this.foodLevel = Math.max(this.foodLevel - 1, 0);
+				}
 			}
 		}
 

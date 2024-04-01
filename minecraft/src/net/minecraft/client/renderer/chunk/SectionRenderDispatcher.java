@@ -589,7 +589,9 @@ public class SectionRenderDispatcher {
 								RenderSection.this.beginLayer(bufferBuilder);
 							}
 
-							blockRenderDispatcher.renderLiquid(blockPos3, renderChunkRegion, bufferBuilder, blockState, fluidState);
+							blockRenderDispatcher.renderLiquid(
+								blockPos3, renderChunkRegion, bufferBuilder, blockState, fluidState, blockPos3.getX() & 15, blockPos3.getY() & 15, blockPos3.getZ() & 15
+							);
 						}
 
 						if (blockState.getRenderShape() != RenderShape.INVISIBLE) {

@@ -20,6 +20,7 @@ public class ModelLayers {
 	public static final ModelLayerLocation ARMOR_STAND_OUTER_ARMOR = registerOuterArmor("armor_stand");
 	public static final ModelLayerLocation AXOLOTL = register("axolotl");
 	public static final ModelLayerLocation BANNER = register("banner");
+	public static final ModelLayerLocation BATATO = register("batato");
 	public static final ModelLayerLocation BAT = register("bat");
 	public static final ModelLayerLocation BED_FOOT = register("bed_foot");
 	public static final ModelLayerLocation BED_HEAD = register("bed_head");
@@ -61,7 +62,9 @@ public class ModelLayers {
 	public static final ModelLayerLocation DROWNED_OUTER_ARMOR = registerOuterArmor("drowned");
 	public static final ModelLayerLocation DROWNED_OUTER_LAYER = register("drowned", "outer");
 	public static final ModelLayerLocation ELDER_GUARDIAN = register("elder_guardian");
+	public static final ModelLayerLocation ELDER_GUARDIAN_SLAB = register("elder_guardian_slab");
 	public static final ModelLayerLocation ELYTRA = register("elytra");
+	public static final ModelLayerLocation POISONOUS_POLYTRA = register("poisonous_polytra");
 	public static final ModelLayerLocation ENDERMAN = register("enderman");
 	public static final ModelLayerLocation ENDERMITE = register("endermite");
 	public static final ModelLayerLocation ENDER_DRAGON = register("ender_dragon");
@@ -78,6 +81,7 @@ public class ModelLayers {
 	public static final ModelLayerLocation GLOW_SQUID = register("glow_squid");
 	public static final ModelLayerLocation GOAT = register("goat");
 	public static final ModelLayerLocation GUARDIAN = register("guardian");
+	public static final ModelLayerLocation GUARDIAN_SLAB = register("guardian_slab");
 	public static final ModelLayerLocation HOGLIN = register("hoglin");
 	public static final ModelLayerLocation HOPPER_MINECART = register("hopper_minecart");
 	public static final ModelLayerLocation HORSE = register("horse");
@@ -137,6 +141,8 @@ public class ModelLayers {
 	public static final ModelLayerLocation SKELETON_SKULL = register("skeleton_skull");
 	public static final ModelLayerLocation SLIME = register("slime");
 	public static final ModelLayerLocation SLIME_OUTER = register("slime", "outer");
+	public static final ModelLayerLocation MEGA_SPUD = register("mega_spud");
+	public static final ModelLayerLocation MEGA_SPUD_OUTER = register("mega_spud", "outer");
 	public static final ModelLayerLocation SNIFFER = register("sniffer");
 	public static final ModelLayerLocation SNOW_GOLEM = register("snow_golem");
 	public static final ModelLayerLocation SPAWNER_MINECART = register("spawner_minecart");

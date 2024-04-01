@@ -88,6 +88,7 @@ public class Beardifier implements DensityFunctions.BeardifierOrMarker {
 			int q = switch (rigid.terrainAdjustment()) {
 				case NONE -> 0;
 				case BURY, BEARD_THIN -> p;
+				case BURY_PROPER -> Math.max(0, Math.max(boundingBox.minY() - j, j - boundingBox.maxY()));
 				case BEARD_BOX -> Math.max(0, Math.max(o - j, j - boundingBox.maxY()));
 			};
 
@@ -95,6 +96,7 @@ public class Beardifier implements DensityFunctions.BeardifierOrMarker {
 				case NONE -> 0.0;
 				case BURY -> getBuryContribution(m, q, n);
 				case BEARD_THIN, BEARD_BOX -> getBeardContribution(m, q, n, p) * 0.8;
+				case BURY_PROPER -> getBuryXContribution(m, q, n);
 			};
 		}
 
@@ -124,6 +126,11 @@ public class Beardifier implements DensityFunctions.BeardifierOrMarker {
 
 	private static double getBuryContribution(int i, int j, int k) {
 		double d = Mth.length((double)i, (double)j / 2.0, (double)k);
+		return Mth.clampedMap(d, 0.0, 6.0, 1.0, 0.0);
+	}
+
+	private static double getBuryXContribution(int i, int j, int k) {
+		double d = Mth.length((double)i, (double)j, (double)k);
 		return Mth.clampedMap(d, 0.0, 6.0, 1.0, 0.0);
 	}
 

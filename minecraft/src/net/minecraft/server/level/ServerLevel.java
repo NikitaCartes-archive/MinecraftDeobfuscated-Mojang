@@ -10,6 +10,8 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import it.unimi.dsi.fastutil.longs.LongSets;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
@@ -28,6 +30,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -60,6 +63,7 @@ import net.minecraft.network.protocol.game.ClientboundLevelParticlesPacket;
 import net.minecraft.network.protocol.game.ClientboundSetDefaultSpawnPositionPacket;
 import net.minecraft.network.protocol.game.ClientboundSoundEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
+import net.minecraft.network.protocol.game.ClientboundSoundSequencePacket;
 import net.minecraft.network.protocol.game.DebugPackets;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -68,6 +72,7 @@ import net.minecraft.server.ServerScoreboard;
 import net.minecraft.server.level.progress.ChunkProgressListener;
 import net.minecraft.server.players.SleepStatus;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundSequenceBuilder;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.AbortableIterationConsumer;
@@ -106,6 +111,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.raid.Raid;
 import net.minecraft.world.entity.raid.Raids;
 import net.minecraft.world.flag.FeatureFlagSet;
+import net.minecraft.world.grid.GridCarrier;
+import net.minecraft.world.grid.SubGrid;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.BlockEventData;
 import net.minecraft.world.level.ChunkPos;
@@ -204,6 +211,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 	private final StructureCheck structureCheck;
 	private final boolean tickTime;
 	private final RandomSequences randomSequences;
+	final Object2ObjectMap<UUID, SubGrid> grids = new Object2ObjectOpenHashMap<>();
 
 	public ServerLevel(
 		MinecraftServer minecraftServer,
@@ -339,12 +347,12 @@ public class ServerLevel extends Level implements WorldGenLevel {
 		if (this.sleepStatus.areEnoughSleeping(i) && this.sleepStatus.areEnoughDeepSleeping(i, this.players)) {
 			if (this.getGameRules().getBoolean(GameRules.RULE_DAYLIGHT)) {
 				long l = this.levelData.getDayTime() + 24000L;
-				this.setDayTime(l - l % 24000L);
+				this.getServer().overworld().setDayTime(l - l % 24000L);
 			}
 
 			this.wakeUpAllPlayers();
 			if (this.getGameRules().getBoolean(GameRules.RULE_WEATHER_CYCLE) && this.isRaining()) {
-				this.resetWeatherCycle();
+				this.getServer().overworld().resetWeatherCycle();
 			}
 		}
 
@@ -390,31 +398,11 @@ public class ServerLevel extends Level implements WorldGenLevel {
 				profilerFiller.pop();
 			}
 
-			this.entityTickList.forEach(entity -> {
-				if (!entity.isRemoved()) {
-					if (this.shouldDiscardEntity(entity)) {
-						entity.discard();
-					} else if (!tickRateManager.isEntityFrozen(entity)) {
-						profilerFiller.push("checkDespawn");
-						entity.checkDespawn();
-						profilerFiller.pop();
-						if (this.chunkSource.chunkMap.getDistanceManager().inEntityTickingRange(entity.chunkPosition().toLong())) {
-							Entity entity2 = entity.getVehicle();
-							if (entity2 != null) {
-								if (!entity2.isRemoved() && entity2.hasPassenger(entity)) {
-									return;
-								}
+			for (SubGrid subGrid : List.copyOf(this.grids.values())) {
+				this.tickEntity(subGrid.carrier(), tickRateManager, profilerFiller);
+			}
 
-								entity.stopRiding();
-							}
-
-							profilerFiller.push("tick");
-							this.guardEntityTick(this::tickNonPassenger, entity);
-							profilerFiller.pop();
-						}
-					}
-				}
-			});
+			this.entityTickList.forEach(entity -> this.tickEntity(entity, tickRateManager, profilerFiller));
 			profilerFiller.pop();
 			this.tickBlockEntities();
 		}
@@ -422,6 +410,32 @@ public class ServerLevel extends Level implements WorldGenLevel {
 		profilerFiller.push("entityManagement");
 		this.entityManager.tick();
 		profilerFiller.pop();
+	}
+
+	private void tickEntity(Entity entity, TickRateManager tickRateManager, ProfilerFiller profilerFiller) {
+		if (!entity.isRemoved()) {
+			if (this.shouldDiscardEntity(entity)) {
+				entity.discard();
+			} else if (!tickRateManager.isEntityFrozen(entity)) {
+				profilerFiller.push("checkDespawn");
+				entity.checkDespawn();
+				profilerFiller.pop();
+				if (this.chunkSource.chunkMap.getDistanceManager().inEntityTickingRange(entity.chunkPosition().toLong())) {
+					Entity entity2 = entity.getVehicle();
+					if (entity2 != null) {
+						if (!entity2.isRemoved() && entity2.hasPassenger(entity)) {
+							return;
+						}
+
+						entity.stopRiding();
+					}
+
+					profilerFiller.push("tick");
+					this.guardEntityTick(this::tickNonPassenger, entity);
+					profilerFiller.pop();
+				}
+			}
+		}
 	}
 
 	@Override
@@ -969,6 +983,33 @@ public class ServerLevel extends Level implements WorldGenLevel {
 				this.dimension(),
 				new ClientboundSoundEntityPacket(holder, soundSource, entity, f, g, l)
 			);
+	}
+
+	@Override
+	public void playDelayedSound(int i, double d, double e, double f, SoundEvent soundEvent, SoundSource soundSource, float g, float h) {
+		this.playSoundSequence(d, e, f, soundSequenceBuilder -> soundSequenceBuilder.waitThenPlay(i, soundEvent, soundSource, g, h));
+	}
+
+	@Override
+	public void playSoundSequence(double d, double e, double f, Consumer<SoundSequenceBuilder> consumer) {
+		class Builder implements SoundSequenceBuilder {
+			private int delay = 0;
+			final List<ClientboundSoundSequencePacket.DelayedSound> delayedSounds = new ArrayList();
+			float range = 0.0F;
+
+			@Override
+			public void waitThenPlay(int i, SoundEvent soundEvent, SoundSource soundSource, float f, float g) {
+				this.delay += i;
+				long l = 0L;
+				this.delayedSounds
+					.add(new ClientboundSoundSequencePacket.DelayedSound(this.delay, new ClientboundSoundPacket(Holder.direct(soundEvent), soundSource, d, e, f, f, g, 0L)));
+				this.range = Math.max(this.range, soundEvent.getRange(f));
+			}
+		}
+
+		Builder lv = new Builder();
+		consumer.accept(lv);
+		this.server.getPlayerList().broadcast(null, d, e, f, (double)lv.range, this.dimension(), new ClientboundSoundSequencePacket(lv.delayedSounds));
 	}
 
 	@Override
@@ -1670,6 +1711,17 @@ public class ServerLevel extends Level implements WorldGenLevel {
 		return this.entityManager.getEntityGetter();
 	}
 
+	@Override
+	public Iterable<? extends SubGrid> getGrids() {
+		return this.grids.values();
+	}
+
+	@Nullable
+	@Override
+	public SubGrid getGrid(UUID uUID) {
+		return this.grids.get(uUID);
+	}
+
 	public void addLegacyChunkEntities(Stream<Entity> stream) {
 		this.entityManager.addLegacyChunkEntities(stream);
 	}
@@ -1750,7 +1802,9 @@ public class ServerLevel extends Level implements WorldGenLevel {
 		}
 
 		public void onTickingStart(Entity entity) {
-			ServerLevel.this.entityTickList.add(entity);
+			if (!(entity instanceof GridCarrier)) {
+				ServerLevel.this.entityTickList.add(entity);
+			}
 		}
 
 		public void onTickingEnd(Entity entity) {
@@ -1781,6 +1835,10 @@ public class ServerLevel extends Level implements WorldGenLevel {
 				}
 			}
 
+			if (entity instanceof GridCarrier gridCarrier) {
+				ServerLevel.this.grids.put(gridCarrier.getUUID(), gridCarrier.grid());
+			}
+
 			entity.updateDynamicGameEventListener(DynamicGameEventListener::add);
 		}
 
@@ -1806,6 +1864,10 @@ public class ServerLevel extends Level implements WorldGenLevel {
 				for (EnderDragonPart enderDragonPart : enderDragon.getSubEntities()) {
 					ServerLevel.this.dragonParts.remove(enderDragonPart.getId());
 				}
+			}
+
+			if (entity instanceof GridCarrier gridCarrier) {
+				ServerLevel.this.grids.remove(gridCarrier.getUUID(), gridCarrier.grid());
 			}
 
 			entity.updateDynamicGameEventListener(DynamicGameEventListener::remove);

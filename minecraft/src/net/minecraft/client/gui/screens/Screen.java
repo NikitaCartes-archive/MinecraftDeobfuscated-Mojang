@@ -62,7 +62,7 @@ public abstract class Screen extends AbstractContainerEventHandler implements Re
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final Set<String> ALLOWED_PROTOCOLS = Sets.<String>newHashSet("http", "https");
 	private static final Component USAGE_NARRATION = Component.translatable("narrator.screen.usage");
-	protected static final CubeMap CUBE_MAP = new CubeMap(new ResourceLocation("textures/gui/title/background/panorama"));
+	protected static final CubeMap CUBE_MAP = new CubeMap(new ResourceLocation("nothingtoseeheremovealong", "textures/gui/title/background/panorama"));
 	protected static final PanoramaRenderer PANORAMA = new PanoramaRenderer(CUBE_MAP);
 	public static final ResourceLocation MENU_BACKGROUND = new ResourceLocation("textures/gui/menu_background.png");
 	public static final ResourceLocation HEADER_SEPARATOR = new ResourceLocation("textures/gui/header_separator.png");

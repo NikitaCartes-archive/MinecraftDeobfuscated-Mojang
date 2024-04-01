@@ -127,6 +127,7 @@ public class FlatLevelGeneratorPresets {
 					BuiltinStructureSets.MINESHAFTS,
 					BuiltinStructureSets.PILLAGER_OUTPOSTS,
 					BuiltinStructureSets.RUINED_PORTALS,
+					BuiltinStructureSets.RUINED_PORTATOLS,
 					BuiltinStructureSets.STRONGHOLDS
 				),
 				true,

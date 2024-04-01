@@ -115,7 +115,8 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 
 	@Override
 	public int getBaseHeight(int i, int j, Heightmap.Types types, LevelHeightAccessor levelHeightAccessor, RandomState randomState) {
-		return this.iterateNoiseColumn(levelHeightAccessor, randomState, i, j, null, types.isOpaque()).orElse(levelHeightAccessor.getMinBuildHeight());
+		return this.iterateNoiseColumn(levelHeightAccessor, randomState, i, j, null, types.isOpaque())
+			.orElse(levelHeightAccessor.getMinBuildHeight() + this.settings.value().bottomGenerationPadding());
 	}
 
 	@Override

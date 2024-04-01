@@ -6,6 +6,7 @@ import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.renderer.entity.layers.CustomHeadLayer;
 import net.minecraft.client.renderer.entity.layers.ElytraLayer;
 import net.minecraft.client.renderer.entity.layers.ItemInHandLayer;
+import net.minecraft.client.renderer.entity.layers.PoisonousPolytraLayer;
 import net.minecraft.world.entity.Mob;
 
 @Environment(EnvType.CLIENT)
@@ -18,6 +19,7 @@ public abstract class HumanoidMobRenderer<T extends Mob, M extends HumanoidModel
 		super(context, humanoidModel, f);
 		this.addLayer(new CustomHeadLayer<>(this, context.getModelSet(), g, h, i, context.getItemInHandRenderer()));
 		this.addLayer(new ElytraLayer<>(this, context.getModelSet()));
+		this.addLayer(new PoisonousPolytraLayer<>(this, context.getModelSet()));
 		this.addLayer(new ItemInHandLayer<>(this, context.getItemInHandRenderer()));
 	}
 }

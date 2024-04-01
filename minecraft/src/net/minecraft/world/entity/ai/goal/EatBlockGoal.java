@@ -3,6 +3,9 @@ package net.minecraft.world.entity.ai.goal;
 import java.util.EnumSet;
 import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
@@ -30,7 +33,7 @@ public class EatBlockGoal extends Goal {
 			return false;
 		} else {
 			BlockPos blockPos = this.mob.blockPosition();
-			return IS_TALL_GRASS.test(this.level.getBlockState(blockPos)) ? true : this.level.getBlockState(blockPos.below()).is(Blocks.GRASS_BLOCK);
+			return IS_TALL_GRASS.test(this.level.getBlockState(blockPos)) ? true : this.level.getBlockState(blockPos.below()).is(BlockTags.ANIMALS_SPAWNABLE_ON);
 		}
 	}
 
@@ -68,10 +71,15 @@ public class EatBlockGoal extends Goal {
 				this.mob.ate();
 			} else {
 				BlockPos blockPos2 = blockPos.below();
-				if (this.level.getBlockState(blockPos2).is(Blocks.GRASS_BLOCK)) {
+				BlockState blockState = this.level.getBlockState(blockPos2);
+				if (blockState.is(BlockTags.ANIMALS_SPAWNABLE_ON)) {
 					if (this.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
-						this.level.levelEvent(2001, blockPos2, Block.getId(Blocks.GRASS_BLOCK.defaultBlockState()));
-						this.level.setBlock(blockPos2, Blocks.DIRT.defaultBlockState(), 2);
+						this.level.levelEvent(2001, blockPos2, Block.getId(blockState));
+						this.level.setBlock(blockPos2, (this.level.isPotato() ? Blocks.TERREDEPOMME : Blocks.DIRT).defaultBlockState(), 2);
+					}
+
+					if (blockState.is(Blocks.CORRUPTED_PEELGRASS_BLOCK)) {
+						this.mob.addEffect(new MobEffectInstance(MobEffects.POISON, 20));
 					}
 
 					this.mob.ate();

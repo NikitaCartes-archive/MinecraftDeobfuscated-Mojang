@@ -9,6 +9,7 @@ import net.minecraft.network.codec.StreamDecoder;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketType;
 import net.minecraft.world.BossEvent;
+import net.minecraft.world.phys.Vec3;
 
 public class ClientboundBossEventPacket implements Packet<ClientGamePacketListener> {
 	public static final StreamCodec<RegistryFriendlyByteBuf, ClientboundBossEventPacket> STREAM_CODEC = Packet.codec(
@@ -60,6 +61,12 @@ public class ClientboundBossEventPacket implements Packet<ClientGamePacketListen
 
 	public static ClientboundBossEventPacket createUpdateNamePacket(BossEvent bossEvent) {
 		return new ClientboundBossEventPacket(bossEvent.getId(), new ClientboundBossEventPacket.UpdateNameOperation(bossEvent.getName()));
+	}
+
+	public static ClientboundBossEventPacket createUpdatePositionPacket(BossEvent bossEvent) {
+		return new ClientboundBossEventPacket(
+			bossEvent.getId(), new ClientboundBossEventPacket.UpdateCenterAndRadiusOperation(bossEvent.getCenter(), bossEvent.getRadius())
+		);
 	}
 
 	public static ClientboundBossEventPacket createUpdateStylePacket(BossEvent bossEvent) {
@@ -117,6 +124,8 @@ public class ClientboundBossEventPacket implements Packet<ClientGamePacketListen
 		private final boolean darkenScreen;
 		private final boolean playMusic;
 		private final boolean createWorldFog;
+		private final Vec3 center;
+		private final int radius;
 
 		AddOperation(BossEvent bossEvent) {
 			this.name = bossEvent.getName();
@@ -126,6 +135,8 @@ public class ClientboundBossEventPacket implements Packet<ClientGamePacketListen
 			this.darkenScreen = bossEvent.shouldDarkenScreen();
 			this.playMusic = bossEvent.shouldPlayBossMusic();
 			this.createWorldFog = bossEvent.shouldCreateWorldFog();
+			this.center = bossEvent.getCenter();
+			this.radius = bossEvent.getRadius();
 		}
 
 		private AddOperation(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
@@ -137,6 +148,8 @@ public class ClientboundBossEventPacket implements Packet<ClientGamePacketListen
 			this.darkenScreen = (i & 1) > 0;
 			this.playMusic = (i & 2) > 0;
 			this.createWorldFog = (i & 4) > 0;
+			this.center = registryFriendlyByteBuf.readVec3();
+			this.radius = registryFriendlyByteBuf.readVarInt();
 		}
 
 		@Override
@@ -146,7 +159,7 @@ public class ClientboundBossEventPacket implements Packet<ClientGamePacketListen
 
 		@Override
 		public void dispatch(UUID uUID, ClientboundBossEventPacket.Handler handler) {
-			handler.add(uUID, this.name, this.progress, this.color, this.overlay, this.darkenScreen, this.playMusic, this.createWorldFog);
+			handler.add(uUID, this.name, this.progress, this.color, this.overlay, this.darkenScreen, this.playMusic, this.createWorldFog, this.center, this.radius);
 		}
 
 		@Override
@@ -156,12 +169,23 @@ public class ClientboundBossEventPacket implements Packet<ClientGamePacketListen
 			registryFriendlyByteBuf.writeEnum(this.color);
 			registryFriendlyByteBuf.writeEnum(this.overlay);
 			registryFriendlyByteBuf.writeByte(ClientboundBossEventPacket.encodeProperties(this.darkenScreen, this.playMusic, this.createWorldFog));
+			registryFriendlyByteBuf.writeVec3(this.center);
+			registryFriendlyByteBuf.writeVarInt(this.radius);
 		}
 	}
 
 	public interface Handler {
 		default void add(
-			UUID uUID, Component component, float f, BossEvent.BossBarColor bossBarColor, BossEvent.BossBarOverlay bossBarOverlay, boolean bl, boolean bl2, boolean bl3
+			UUID uUID,
+			Component component,
+			float f,
+			BossEvent.BossBarColor bossBarColor,
+			BossEvent.BossBarOverlay bossBarOverlay,
+			boolean bl,
+			boolean bl2,
+			boolean bl3,
+			Vec3 vec3,
+			int i
 		) {
 		}
 
@@ -172,6 +196,9 @@ public class ClientboundBossEventPacket implements Packet<ClientGamePacketListen
 		}
 
 		default void updateName(UUID uUID, Component component) {
+		}
+
+		default void updateLocation(UUID uUID, Vec3 vec3, int i) {
 		}
 
 		default void updateStyle(UUID uUID, BossEvent.BossBarColor bossBarColor, BossEvent.BossBarOverlay bossBarOverlay) {
@@ -195,12 +222,35 @@ public class ClientboundBossEventPacket implements Packet<ClientGamePacketListen
 		UPDATE_PROGRESS(ClientboundBossEventPacket.UpdateProgressOperation::new),
 		UPDATE_NAME(ClientboundBossEventPacket.UpdateNameOperation::new),
 		UPDATE_STYLE(ClientboundBossEventPacket.UpdateStyleOperation::new),
-		UPDATE_PROPERTIES(ClientboundBossEventPacket.UpdatePropertiesOperation::new);
+		UPDATE_PROPERTIES(ClientboundBossEventPacket.UpdatePropertiesOperation::new),
+		UPDATE_CENTER_AND_RADIUS(ClientboundBossEventPacket.UpdateCenterAndRadiusOperation::new);
 
 		final StreamDecoder<RegistryFriendlyByteBuf, ClientboundBossEventPacket.Operation> reader;
 
 		private OperationType(StreamDecoder<RegistryFriendlyByteBuf, ClientboundBossEventPacket.Operation> streamDecoder) {
 			this.reader = streamDecoder;
+		}
+	}
+
+	static record UpdateCenterAndRadiusOperation(Vec3 position, int radius) implements ClientboundBossEventPacket.Operation {
+		private UpdateCenterAndRadiusOperation(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
+			this(registryFriendlyByteBuf.readVec3(), registryFriendlyByteBuf.readVarInt());
+		}
+
+		@Override
+		public ClientboundBossEventPacket.OperationType getType() {
+			return ClientboundBossEventPacket.OperationType.UPDATE_CENTER_AND_RADIUS;
+		}
+
+		@Override
+		public void dispatch(UUID uUID, ClientboundBossEventPacket.Handler handler) {
+			handler.updateLocation(uUID, this.position, this.radius);
+		}
+
+		@Override
+		public void write(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
+			registryFriendlyByteBuf.writeVec3(this.position);
+			registryFriendlyByteBuf.writeVarInt(this.radius);
 		}
 	}
 

@@ -186,7 +186,7 @@ public abstract class Particle {
 			double h = e;
 			double i = f;
 			if (this.hasPhysics && (d != 0.0 || e != 0.0 || f != 0.0) && d * d + e * e + f * f < MAXIMUM_COLLISION_VELOCITY_SQUARED) {
-				Vec3 vec3 = Entity.collideBoundingBox(null, new Vec3(d, e, f), this.getBoundingBox(), this.level, List.of());
+				Vec3 vec3 = Entity.collideBoundingBox(null, new Vec3(d, e, f), this.getBoundingBox(), this.level, List.of()).movement();
 				d = vec3.x;
 				e = vec3.y;
 				f = vec3.z;

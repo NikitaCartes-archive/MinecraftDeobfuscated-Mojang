@@ -21,6 +21,11 @@ public class CaveSpider extends Spider {
 		super(entityType, level);
 	}
 
+	@Override
+	public boolean hasPotatoVariant() {
+		return false;
+	}
+
 	public static AttributeSupplier.Builder createCaveSpider() {
 		return Spider.createAttributes().add(Attributes.MAX_HEALTH, 12.0);
 	}
@@ -28,22 +33,25 @@ public class CaveSpider extends Spider {
 	@Override
 	public boolean doHurtTarget(Entity entity) {
 		if (super.doHurtTarget(entity)) {
-			if (entity instanceof LivingEntity) {
-				int i = 0;
-				if (this.level().getDifficulty() == Difficulty.NORMAL) {
-					i = 7;
-				} else if (this.level().getDifficulty() == Difficulty.HARD) {
-					i = 15;
-				}
-
-				if (i > 0) {
-					((LivingEntity)entity).addEffect(new MobEffectInstance(MobEffects.POISON, i * 20, 0), this);
-				}
-			}
-
+			poisonMethodThatSpidersUse(entity, this);
 			return true;
 		} else {
 			return false;
+		}
+	}
+
+	public static void poisonMethodThatSpidersUse(Entity entity, @Nullable Entity entity2) {
+		if (entity instanceof LivingEntity livingEntity) {
+			int i = 0;
+			if (entity.level().getDifficulty() == Difficulty.NORMAL) {
+				i = 7;
+			} else if (entity.level().getDifficulty() == Difficulty.HARD) {
+				i = 15;
+			}
+
+			if (i > 0) {
+				livingEntity.addEffect(new MobEffectInstance(MobEffects.POISON, i * 20, 0), entity2);
+			}
 		}
 	}
 

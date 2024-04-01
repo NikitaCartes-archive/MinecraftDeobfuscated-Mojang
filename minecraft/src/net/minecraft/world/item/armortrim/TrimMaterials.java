@@ -28,18 +28,20 @@ public class TrimMaterials {
 	public static final ResourceKey<TrimMaterial> DIAMOND = registryKey("diamond");
 	public static final ResourceKey<TrimMaterial> LAPIS = registryKey("lapis");
 	public static final ResourceKey<TrimMaterial> AMETHYST = registryKey("amethyst");
+	public static final ResourceKey<TrimMaterial> AMBER = registryKey("amber");
 
 	public static void bootstrap(BootstrapContext<TrimMaterial> bootstrapContext) {
-		register(bootstrapContext, QUARTZ, Items.QUARTZ, Style.EMPTY.withColor(14931140), 0.1F);
-		register(bootstrapContext, IRON, Items.IRON_INGOT, Style.EMPTY.withColor(15527148), 0.2F, Map.of(ArmorMaterials.IRON, "iron_darker"));
-		register(bootstrapContext, NETHERITE, Items.NETHERITE_INGOT, Style.EMPTY.withColor(6445145), 0.3F, Map.of(ArmorMaterials.NETHERITE, "netherite_darker"));
-		register(bootstrapContext, REDSTONE, Items.REDSTONE, Style.EMPTY.withColor(9901575), 0.4F);
-		register(bootstrapContext, COPPER, Items.COPPER_INGOT, Style.EMPTY.withColor(11823181), 0.5F);
-		register(bootstrapContext, GOLD, Items.GOLD_INGOT, Style.EMPTY.withColor(14594349), 0.6F, Map.of(ArmorMaterials.GOLD, "gold_darker"));
-		register(bootstrapContext, EMERALD, Items.EMERALD, Style.EMPTY.withColor(1155126), 0.7F);
-		register(bootstrapContext, DIAMOND, Items.DIAMOND, Style.EMPTY.withColor(7269586), 0.8F, Map.of(ArmorMaterials.DIAMOND, "diamond_darker"));
-		register(bootstrapContext, LAPIS, Items.LAPIS_LAZULI, Style.EMPTY.withColor(4288151), 0.9F);
-		register(bootstrapContext, AMETHYST, Items.AMETHYST_SHARD, Style.EMPTY.withColor(10116294), 1.0F);
+		register(bootstrapContext, QUARTZ, Items.QUARTZ, Style.EMPTY.withColor(14931140), 0.01F);
+		register(bootstrapContext, IRON, Items.IRON_INGOT, Style.EMPTY.withColor(15527148), 0.02F, Map.of(ArmorMaterials.IRON, "iron_darker"));
+		register(bootstrapContext, NETHERITE, Items.NETHERITE_INGOT, Style.EMPTY.withColor(6445145), 0.03F, Map.of(ArmorMaterials.NETHERITE, "netherite_darker"));
+		register(bootstrapContext, REDSTONE, Items.REDSTONE, Style.EMPTY.withColor(9901575), 0.04F);
+		register(bootstrapContext, COPPER, Items.COPPER_INGOT, Style.EMPTY.withColor(11823181), 0.05F);
+		register(bootstrapContext, GOLD, Items.GOLD_INGOT, Style.EMPTY.withColor(14594349), 0.06F, Map.of(ArmorMaterials.GOLD, "gold_darker"));
+		register(bootstrapContext, EMERALD, Items.EMERALD, Style.EMPTY.withColor(1155126), 0.07F);
+		register(bootstrapContext, DIAMOND, Items.DIAMOND, Style.EMPTY.withColor(7269586), 0.08F, Map.of(ArmorMaterials.DIAMOND, "diamond_darker"));
+		register(bootstrapContext, LAPIS, Items.LAPIS_LAZULI, Style.EMPTY.withColor(4288151), 0.09F);
+		register(bootstrapContext, AMETHYST, Items.AMETHYST_SHARD, Style.EMPTY.withColor(10116294), 0.1F);
+		register(bootstrapContext, AMBER, Items.AMBER_GEM, Style.EMPTY.withColor(15042820), 1.0F);
 	}
 
 	public static Optional<Holder.Reference<TrimMaterial>> getFromIngredient(HolderLookup.Provider provider, ItemStack itemStack) {

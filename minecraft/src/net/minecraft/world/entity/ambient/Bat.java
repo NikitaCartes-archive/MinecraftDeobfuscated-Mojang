@@ -217,7 +217,7 @@ public class Bat extends AmbientCreature {
 	}
 
 	public static boolean checkBatSpawnRules(
-		EntityType<Bat> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, RandomSource randomSource
+		EntityType<? extends Bat> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, RandomSource randomSource
 	) {
 		if (blockPos.getY() >= levelAccessor.getSeaLevel()) {
 			return false;

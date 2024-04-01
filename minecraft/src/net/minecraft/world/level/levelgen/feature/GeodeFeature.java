@@ -143,24 +143,25 @@ public class GeodeFeature extends Feature<GeodeConfiguration> {
 		}
 
 		List<BlockState> list4 = geodeBlockSettings.innerPlacements;
+		if (!list4.isEmpty()) {
+			for (BlockPos blockPos2 : list3) {
+				BlockState blockState = Util.getRandom(list4, randomSource);
 
-		for (BlockPos blockPos2 : list3) {
-			BlockState blockState = Util.getRandom(list4, randomSource);
+				for (Direction direction2 : DIRECTIONS) {
+					if (blockState.hasProperty(BlockStateProperties.FACING)) {
+						blockState = blockState.setValue(BlockStateProperties.FACING, direction2);
+					}
 
-			for (Direction direction2 : DIRECTIONS) {
-				if (blockState.hasProperty(BlockStateProperties.FACING)) {
-					blockState = blockState.setValue(BlockStateProperties.FACING, direction2);
-				}
+					BlockPos blockPos6 = blockPos2.relative(direction2);
+					BlockState blockState2 = worldGenLevel.getBlockState(blockPos6);
+					if (blockState.hasProperty(BlockStateProperties.WATERLOGGED)) {
+						blockState = blockState.setValue(BlockStateProperties.WATERLOGGED, Boolean.valueOf(blockState2.getFluidState().isSource()));
+					}
 
-				BlockPos blockPos6 = blockPos2.relative(direction2);
-				BlockState blockState2 = worldGenLevel.getBlockState(blockPos6);
-				if (blockState.hasProperty(BlockStateProperties.WATERLOGGED)) {
-					blockState = blockState.setValue(BlockStateProperties.WATERLOGGED, Boolean.valueOf(blockState2.getFluidState().isSource()));
-				}
-
-				if (BuddingAmethystBlock.canClusterGrowAtState(blockState2)) {
-					this.safeSetBlock(worldGenLevel, blockPos6, blockState, predicate);
-					break;
+					if (BuddingAmethystBlock.canClusterGrowAtState(blockState2)) {
+						this.safeSetBlock(worldGenLevel, blockPos6, blockState, predicate);
+						break;
+					}
 				}
 			}
 		}

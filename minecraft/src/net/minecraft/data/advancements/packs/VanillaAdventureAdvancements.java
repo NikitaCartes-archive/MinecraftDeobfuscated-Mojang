@@ -102,6 +102,7 @@ public class VanillaAdventureAdvancements implements AdvancementSubProvider {
 		EntityType.PIGLIN,
 		EntityType.PIGLIN_BRUTE,
 		EntityType.PILLAGER,
+		EntityType.PLAGUEWHALE,
 		EntityType.RAVAGER,
 		EntityType.SHULKER,
 		EntityType.SILVERFISH,
@@ -109,6 +110,7 @@ public class VanillaAdventureAdvancements implements AdvancementSubProvider {
 		EntityType.SLIME,
 		EntityType.SPIDER,
 		EntityType.STRAY,
+		EntityType.TOXIFIN,
 		EntityType.VEX,
 		EntityType.VINDICATOR,
 		EntityType.WITCH,
@@ -117,7 +119,8 @@ public class VanillaAdventureAdvancements implements AdvancementSubProvider {
 		EntityType.ZOGLIN,
 		EntityType.ZOMBIE_VILLAGER,
 		EntityType.ZOMBIE,
-		EntityType.ZOMBIFIED_PIGLIN
+		EntityType.ZOMBIFIED_PIGLIN,
+		EntityType.POISONOUS_POTATO_ZOMBIE
 	);
 
 	private static Criterion<LightningStrikeTrigger.TriggerInstance> fireCountAndBystander(MinMaxBounds.Ints ints, Optional<EntityPredicate> optional) {
@@ -812,7 +815,7 @@ public class VanillaAdventureAdvancements implements AdvancementSubProvider {
 		return builder;
 	}
 
-	protected static Advancement.Builder addBiomes(Advancement.Builder builder, HolderLookup.Provider provider, List<ResourceKey<Biome>> list) {
+	protected static <T extends Advancement.Builder> T addBiomes(T builder, HolderLookup.Provider provider, List<ResourceKey<Biome>> list) {
 		HolderGetter<Biome> holderGetter = provider.lookupOrThrow(Registries.BIOME);
 
 		for (ResourceKey<Biome> resourceKey : list) {

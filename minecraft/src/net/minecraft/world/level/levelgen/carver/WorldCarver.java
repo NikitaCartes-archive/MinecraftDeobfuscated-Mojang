@@ -10,6 +10,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
@@ -131,14 +132,16 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
 		MutableBoolean mutableBoolean
 	) {
 		BlockState blockState = chunkAccess.getBlockState(mutableBlockPos);
-		if (blockState.is(Blocks.GRASS_BLOCK) || blockState.is(Blocks.MYCELIUM)) {
+		if (blockState.is(BlockTags.ANIMALS_SPAWNABLE_ON) || blockState.is(Blocks.MYCELIUM)) {
 			mutableBoolean.setTrue();
 		}
 
 		if (!this.canReplaceBlock(carverConfiguration, blockState) && !isDebugEnabled(carverConfiguration)) {
 			return false;
 		} else {
-			BlockState blockState2 = this.getCarveState(carvingContext, carverConfiguration, mutableBlockPos, aquifer);
+			BlockState blockState2 = chunkAccess.isPotato()
+				? Blocks.CAVE_AIR.defaultBlockState()
+				: this.getCarveState(carvingContext, carverConfiguration, mutableBlockPos, aquifer);
 			if (blockState2 == null) {
 				return false;
 			} else {
@@ -149,7 +152,8 @@ public abstract class WorldCarver<C extends CarverConfiguration> {
 
 				if (mutableBoolean.isTrue()) {
 					mutableBlockPos2.setWithOffset(mutableBlockPos, Direction.DOWN);
-					if (chunkAccess.getBlockState(mutableBlockPos2).is(Blocks.DIRT)) {
+					BlockState blockState3 = chunkAccess.getBlockState(mutableBlockPos2);
+					if (blockState3.is(Blocks.DIRT) || blockState3.is(Blocks.TERREDEPOMME)) {
 						carvingContext.topMaterial(function, chunkAccess, mutableBlockPos2, !blockState2.getFluidState().isEmpty()).ifPresent(blockStatex -> {
 							chunkAccess.setBlockState(mutableBlockPos2, blockStatex, false);
 							if (!blockStatex.getFluidState().isEmpty()) {

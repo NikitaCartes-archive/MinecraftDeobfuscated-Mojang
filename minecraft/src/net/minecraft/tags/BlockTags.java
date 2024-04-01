@@ -55,6 +55,7 @@ public final class BlockTags {
 	public static final TagKey<Block> PIGLIN_REPELLENTS = create("piglin_repellents");
 	public static final TagKey<Block> GOLD_ORES = create("gold_ores");
 	public static final TagKey<Block> IRON_ORES = create("iron_ores");
+	public static final TagKey<Block> POISONOUS_POTATO_ORES = create("poisonous_potato_ores");
 	public static final TagKey<Block> DIAMOND_ORES = create("diamond_ores");
 	public static final TagKey<Block> REDSTONE_ORES = create("redstone_ores");
 	public static final TagKey<Block> LAPIS_ORES = create("lapis_ores");
@@ -91,6 +92,7 @@ public final class BlockTags {
 	public static final TagKey<Block> WITHER_SUMMON_BASE_BLOCKS = create("wither_summon_base_blocks");
 	public static final TagKey<Block> BEEHIVES = create("beehives");
 	public static final TagKey<Block> CROPS = create("crops");
+	public static final TagKey<Block> GROWS_POTATOES = create("grows_potatoes");
 	public static final TagKey<Block> BEE_GROWABLES = create("bee_growables");
 	public static final TagKey<Block> PORTALS = create("portals");
 	public static final TagKey<Block> FIRE = create("fire");
@@ -138,6 +140,7 @@ public final class BlockTags {
 	public static final TagKey<Block> MINEABLE_WITH_AXE = create("mineable/axe");
 	public static final TagKey<Block> MINEABLE_WITH_HOE = create("mineable/hoe");
 	public static final TagKey<Block> MINEABLE_WITH_PICKAXE = create("mineable/pickaxe");
+	public static final TagKey<Block> POTONE_MINEABLE = create("mineable/potone");
 	public static final TagKey<Block> MINEABLE_WITH_SHOVEL = create("mineable/shovel");
 	public static final TagKey<Block> SWORD_EFFICIENT = create("sword_efficient");
 	public static final TagKey<Block> NEEDS_DIAMOND_TOOL = create("needs_diamond_tool");
@@ -187,6 +190,7 @@ public final class BlockTags {
 	public static final TagKey<Block> MAINTAINS_FARMLAND = create("maintains_farmland");
 	public static final TagKey<Block> BLOCKS_WIND_CHARGE_EXPLOSIONS = create("blocks_wind_charge_explosions");
 	public static final TagKey<Block> DOES_NOT_BLOCK_HOPPERS = create("does_not_block_hoppers");
+	public static final TagKey<Block> POTATOSTONE_BASE = create("potatostone_base");
 
 	private BlockTags() {
 	}

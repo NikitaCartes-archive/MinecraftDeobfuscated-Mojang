@@ -56,6 +56,11 @@ public class Creeper extends Monster implements PowerableMob {
 	}
 
 	@Override
+	public boolean hasPotatoVariant() {
+		return true;
+	}
+
+	@Override
 	protected void registerGoals() {
 		this.goalSelector.addGoal(1, new FloatGoal(this));
 		this.goalSelector.addGoal(2, new SwellGoal(this));

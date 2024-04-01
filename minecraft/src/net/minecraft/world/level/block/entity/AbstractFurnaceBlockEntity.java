@@ -15,6 +15,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
@@ -289,7 +290,7 @@ public abstract class AbstractFurnaceBlockEntity extends BaseContainerBlockEntit
 				if (abstractFurnaceBlockEntity.cookingProgress == abstractFurnaceBlockEntity.cookingTotalTime) {
 					abstractFurnaceBlockEntity.cookingProgress = 0;
 					abstractFurnaceBlockEntity.cookingTotalTime = getTotalCookTime(level, abstractFurnaceBlockEntity);
-					if (burn(level.registryAccess(), recipeHolder, abstractFurnaceBlockEntity.items, i)) {
+					if (burn(level, recipeHolder, abstractFurnaceBlockEntity.items, i)) {
 						abstractFurnaceBlockEntity.setRecipeUsed(recipeHolder);
 					}
 
@@ -322,6 +323,8 @@ public abstract class AbstractFurnaceBlockEntity extends BaseContainerBlockEntit
 				ItemStack itemStack2 = nonNullList.get(2);
 				if (itemStack2.isEmpty()) {
 					return true;
+				} else if (itemStack2.is(Items.TOXIC_RESIN)) {
+					return false;
 				} else if (!ItemStack.isSameItemSameComponents(itemStack2, itemStack)) {
 					return false;
 				} else {
@@ -333,10 +336,15 @@ public abstract class AbstractFurnaceBlockEntity extends BaseContainerBlockEntit
 		}
 	}
 
-	private static boolean burn(RegistryAccess registryAccess, @Nullable RecipeHolder<?> recipeHolder, NonNullList<ItemStack> nonNullList, int i) {
+	private static boolean burn(Level level, @Nullable RecipeHolder<?> recipeHolder, NonNullList<ItemStack> nonNullList, int i) {
+		RegistryAccess registryAccess = level.registryAccess();
 		if (recipeHolder != null && canBurn(registryAccess, recipeHolder, nonNullList, i)) {
 			ItemStack itemStack = nonNullList.get(0);
 			ItemStack itemStack2 = recipeHolder.value().getResultItem(registryAccess);
+			if (itemStack2.is(Items.TOXIC_RESIN)) {
+				itemStack2.set(DataComponents.RESIN, new FletchingBlockEntity.Resin('a', FletchingBlockEntity.Resin.getRandomImpurities(level.getRandom())));
+			}
+
 			ItemStack itemStack3 = nonNullList.get(2);
 			if (itemStack3.isEmpty()) {
 				nonNullList.set(2, itemStack2.copy());

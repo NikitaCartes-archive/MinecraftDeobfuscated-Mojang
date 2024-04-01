@@ -76,8 +76,10 @@ public class EntityRenderers {
 		register(EntityType.ARMADILLO, ArmadilloRenderer::new);
 		register(EntityType.ARMOR_STAND, ArmorStandRenderer::new);
 		register(EntityType.ARROW, TippableArrowRenderer::new);
+		register(EntityType.VINE_PROJECTILE, NoopRenderer::new);
 		register(EntityType.AXOLOTL, AxolotlRenderer::new);
 		register(EntityType.BAT, BatRenderer::new);
+		register(EntityType.BATATO, BatatoRenderer::new);
 		register(EntityType.BEE, BeeRenderer::new);
 		register(EntityType.BLAZE, BlazeRenderer::new);
 		register(EntityType.BLOCK_DISPLAY, DisplayRenderer.BlockDisplayRenderer::new);
@@ -100,7 +102,7 @@ public class EntityRenderers {
 		register(EntityType.DRAGON_FIREBALL, DragonFireballRenderer::new);
 		register(EntityType.DROWNED, DrownedRenderer::new);
 		register(EntityType.EGG, ThrownItemRenderer::new);
-		register(EntityType.ELDER_GUARDIAN, ElderGuardianRenderer::new);
+		register(EntityType.ELDER_GUARDIAN, context -> new ElderGuardianRenderer(context, ModelLayers.ELDER_GUARDIAN));
 		register(EntityType.ENDERMAN, EndermanRenderer::new);
 		register(EntityType.ENDERMITE, EndermiteRenderer::new);
 		register(EntityType.ENDER_DRAGON, EnderDragonRenderer::new);
@@ -115,6 +117,7 @@ public class EntityRenderers {
 		register(EntityType.FIREBALL, context -> new ThrownItemRenderer<>(context, 3.0F, true));
 		register(EntityType.FIREWORK_ROCKET, FireworkEntityRenderer::new);
 		register(EntityType.FISHING_BOBBER, FishingHookRenderer::new);
+		register(EntityType.LASHING_POTATO_HOOK, LashingPotatoHookRenderer::new);
 		register(EntityType.FOX, FoxRenderer::new);
 		register(EntityType.FROG, FrogRenderer::new);
 		register(EntityType.FURNACE_MINECART, context -> new MinecartRenderer<>(context, ModelLayers.FURNACE_MINECART));
@@ -123,7 +126,7 @@ public class EntityRenderers {
 		register(EntityType.GLOW_ITEM_FRAME, ItemFrameRenderer::new);
 		register(EntityType.GLOW_SQUID, context -> new GlowSquidRenderer(context, new SquidModel<>(context.bakeLayer(ModelLayers.GLOW_SQUID))));
 		register(EntityType.GOAT, GoatRenderer::new);
-		register(EntityType.GUARDIAN, GuardianRenderer::new);
+		register(EntityType.GUARDIAN, context -> new GuardianRenderer(context, ModelLayers.GUARDIAN));
 		register(EntityType.HOGLIN, HoglinRenderer::new);
 		register(EntityType.HOPPER_MINECART, context -> new MinecartRenderer<>(context, ModelLayers.HOPPER_MINECART));
 		register(EntityType.HORSE, HorseRenderer::new);
@@ -155,6 +158,7 @@ public class EntityRenderers {
 			context -> new PiglinRenderer(context, ModelLayers.PIGLIN_BRUTE, ModelLayers.PIGLIN_BRUTE_INNER_ARMOR, ModelLayers.PIGLIN_BRUTE_OUTER_ARMOR, false)
 		);
 		register(EntityType.PILLAGER, PillagerRenderer::new);
+		register(EntityType.PLAGUEWHALE, context -> new ElderGuardianRenderer(context, ModelLayers.ELDER_GUARDIAN_SLAB));
 		register(EntityType.POLAR_BEAR, PolarBearRenderer::new);
 		register(EntityType.POTION, ThrownItemRenderer::new);
 		register(EntityType.PUFFERFISH, PufferfishRenderer::new);
@@ -168,6 +172,7 @@ public class EntityRenderers {
 		register(EntityType.SKELETON, SkeletonRenderer::new);
 		register(EntityType.SKELETON_HORSE, context -> new UndeadHorseRenderer(context, ModelLayers.SKELETON_HORSE));
 		register(EntityType.SLIME, SlimeRenderer::new);
+		register(EntityType.MEGA_SPUD, MegaSpudRenderer::new);
 		register(EntityType.SMALL_FIREBALL, context -> new ThrownItemRenderer<>(context, 0.75F, true));
 		register(EntityType.SNIFFER, SnifferRenderer::new);
 		register(EntityType.SNOWBALL, ThrownItemRenderer::new);
@@ -182,6 +187,7 @@ public class EntityRenderers {
 		register(EntityType.TEXT_DISPLAY, DisplayRenderer.TextDisplayRenderer::new);
 		register(EntityType.TNT, TntRenderer::new);
 		register(EntityType.TNT_MINECART, TntMinecartRenderer::new);
+		register(EntityType.TOXIFIN, context -> new GuardianRenderer(context, ModelLayers.GUARDIAN_SLAB));
 		register(EntityType.TRADER_LLAMA, context -> new LlamaRenderer(context, ModelLayers.TRADER_LLAMA));
 		register(EntityType.TRIDENT, ThrownTridentRenderer::new);
 		register(EntityType.TROPICAL_FISH, TropicalFishRenderer::new);
@@ -199,6 +205,7 @@ public class EntityRenderers {
 		register(EntityType.WOLF, WolfRenderer::new);
 		register(EntityType.ZOGLIN, ZoglinRenderer::new);
 		register(EntityType.ZOMBIE, ZombieRenderer::new);
+		register(EntityType.POISONOUS_POTATO_ZOMBIE, PoisonousPotatoZombieRenderer::new);
 		register(EntityType.ZOMBIE_HORSE, context -> new UndeadHorseRenderer(context, ModelLayers.ZOMBIE_HORSE));
 		register(EntityType.ZOMBIE_VILLAGER, ZombieVillagerRenderer::new);
 		register(
@@ -207,5 +214,7 @@ public class EntityRenderers {
 					context, ModelLayers.ZOMBIFIED_PIGLIN, ModelLayers.ZOMBIFIED_PIGLIN_INNER_ARMOR, ModelLayers.ZOMBIFIED_PIGLIN_OUTER_ARMOR, true
 				)
 		);
+		register(EntityType.GRID_CARRIER, GridCarrierEntityRenderer::new);
+		register(EntityType.EYE_OF_POTATO, context -> new ThrownItemRenderer<>(context, 1.0F, true));
 	}
 }

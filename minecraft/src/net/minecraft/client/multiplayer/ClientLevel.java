@@ -1,16 +1,21 @@
 package net.minecraft.client.multiplayer;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Queues;
 import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
@@ -22,6 +27,7 @@ import net.minecraft.ReportedException;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.block.BlockTintCache;
+import net.minecraft.client.grid.ClientSubGrid;
 import net.minecraft.client.multiplayer.prediction.BlockStatePredictionHandler;
 import net.minecraft.client.particle.FireworkParticles;
 import net.minecraft.client.player.AbstractClientPlayer;
@@ -43,6 +49,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundSequenceBuilder;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.CubicSampler;
@@ -54,6 +61,8 @@ import net.minecraft.world.TickRateManager;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.flag.FeatureFlagSet;
+import net.minecraft.world.grid.GridCarrier;
+import net.minecraft.world.grid.SubGrid;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -78,6 +87,9 @@ import net.minecraft.world.level.entity.LevelCallback;
 import net.minecraft.world.level.entity.LevelEntityGetter;
 import net.minecraft.world.level.entity.TransientEntitySectionManager;
 import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.levelgen.LegacyRandomSource;
+import net.minecraft.world.level.levelgen.WorldgenRandom;
+import net.minecraft.world.level.levelgen.synth.PerlinSimplexNoise;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.saveddata.maps.MapId;
@@ -98,6 +110,7 @@ public class ClientLevel extends Level {
 	private static final int LIGHT_UPDATE_QUEUE_SIZE_THRESHOLD = 1000;
 	final EntityTickList tickingEntities = new EntityTickList();
 	private final TransientEntitySectionManager<Entity> entityStorage = new TransientEntitySectionManager<>(Entity.class, new ClientLevel.EntityCallbacks());
+	final Object2ObjectMap<UUID, ClientSubGrid> grids = new Object2ObjectOpenHashMap<>();
 	private final ClientPacketListener connection;
 	private final LevelRenderer levelRenderer;
 	private final ClientLevel.ClientLevelData clientLevelData;
@@ -106,7 +119,6 @@ public class ClientLevel extends Level {
 	private final Minecraft minecraft = Minecraft.getInstance();
 	final List<AbstractClientPlayer> players = Lists.<AbstractClientPlayer>newArrayList();
 	private final Map<MapId, MapItemSavedData> mapData = Maps.<MapId, MapItemSavedData>newHashMap();
-	private static final long CLOUD_COLOR = 16777215L;
 	private int skyFlashTime;
 	private final Object2ObjectArrayMap<ColorResolver, BlockTintCache> tintCaches = Util.make(
 		new Object2ObjectArrayMap<>(3),
@@ -127,6 +139,9 @@ public class ClientLevel extends Level {
 	private int serverSimulationDistance;
 	private final BlockStatePredictionHandler blockStatePredictionHandler = new BlockStatePredictionHandler();
 	private static final Set<Item> MARKER_PARTICLE_ITEMS = Set.of(Items.BARRIER, Items.LIGHT);
+	private static final int NOISE_SIZE = 512;
+	private static final float[][] noisedColorFromTexture1 = new float[512][512];
+	private static final float[][] noisedColorFromTexture2 = new float[512][512];
 
 	public void handleBlockChangedAck(int i) {
 		this.blockStatePredictionHandler.endPredictionsUpTo(i, this);
@@ -263,13 +278,20 @@ public class ClientLevel extends Level {
 	public void tickEntities() {
 		ProfilerFiller profilerFiller = this.getProfiler();
 		profilerFiller.push("entities");
-		this.tickingEntities.forEach(entity -> {
-			if (!entity.isRemoved() && !entity.isPassenger() && !this.tickRateManager.isEntityFrozen(entity)) {
-				this.guardEntityTick(this::tickNonPassenger, entity);
-			}
-		});
+
+		for (ClientSubGrid clientSubGrid : List.copyOf(this.grids.values())) {
+			this.tickEntity(clientSubGrid.carrier());
+		}
+
+		this.tickingEntities.forEach(this::tickEntity);
 		profilerFiller.pop();
 		this.tickBlockEntities();
+	}
+
+	private void tickEntity(Entity entity) {
+		if (!entity.isRemoved() && !entity.isPassenger() && !this.tickRateManager.isEntityFrozen(entity)) {
+			this.guardEntityTick(this::tickNonPassenger, entity);
+		}
 	}
 
 	@Override
@@ -518,6 +540,17 @@ public class ClientLevel extends Level {
 	}
 
 	@Override
+	public void playDelayedSound(int i, double d, double e, double f, SoundEvent soundEvent, SoundSource soundSource, float g, float h) {
+		SimpleSoundInstance simpleSoundInstance = new SimpleSoundInstance(soundEvent, soundSource, g, h, RandomSource.create(0L), d, e, f);
+		this.minecraft.getSoundManager().playDelayed(simpleSoundInstance, i);
+	}
+
+	@Override
+	public void playSoundSequence(double d, double e, double f, Consumer<SoundSequenceBuilder> consumer) {
+		consumer.accept((SoundSequenceBuilder)(i, soundEvent, soundSource, g, h) -> this.playDelayedSound(i, d, e, f, soundEvent, soundSource, g, h));
+	}
+
+	@Override
 	public void createFireworks(double d, double e, double f, double g, double h, double i, List<FireworkExplosion> list) {
 		if (list.isEmpty()) {
 			for (int j = 0; j < this.random.nextInt(3) + 2; j++) {
@@ -670,7 +703,7 @@ public class ClientLevel extends Level {
 		float i = (float)vec33.x * h;
 		float j = (float)vec33.y * h;
 		float k = (float)vec33.z * h;
-		float l = this.getRainLevel(f);
+		float l = this.getRainLevel(f, vec3.y());
 		if (l > 0.0F) {
 			float m = (i * 0.3F + j * 0.59F + k * 0.11F) * 0.6F;
 			float n = 1.0F - l * 0.75F;
@@ -679,7 +712,7 @@ public class ClientLevel extends Level {
 			k = k * n + m * (1.0F - n);
 		}
 
-		float m = this.getThunderLevel(f);
+		float m = this.getThunderLevel(f, vec3.y());
 		if (m > 0.0F) {
 			float n = (i * 0.3F + j * 0.59F + k * 0.11F) * 0.2F;
 			float o = 1.0F - m * 0.75F;
@@ -708,31 +741,32 @@ public class ClientLevel extends Level {
 		float g = this.getTimeOfDay(f);
 		float h = Mth.cos(g * (float) (Math.PI * 2)) * 2.0F + 0.5F;
 		h = Mth.clamp(h, 0.0F, 1.0F);
-		float i = 1.0F;
-		float j = 1.0F;
-		float k = 1.0F;
-		float l = this.getRainLevel(f);
-		if (l > 0.0F) {
-			float m = (i * 0.3F + j * 0.59F + k * 0.11F) * 0.6F;
-			float n = 1.0F - l * 0.95F;
-			i = i * n + m * (1.0F - n);
-			j = j * n + m * (1.0F - n);
-			k = k * n + m * (1.0F - n);
-		}
-
-		i *= h * 0.9F + 0.1F;
-		j *= h * 0.9F + 0.1F;
-		k *= h * 0.85F + 0.15F;
-		float m = this.getThunderLevel(f);
+		int i = this.effects().getCloudColor();
+		float j = (float)(i >> 16 & 0xFF) / 255.0F;
+		float k = (float)(i >> 8 & 0xFF) / 255.0F;
+		float l = (float)(i & 0xFF) / 255.0F;
+		float m = this.getRainLevel(f);
 		if (m > 0.0F) {
-			float n = (i * 0.3F + j * 0.59F + k * 0.11F) * 0.2F;
+			float n = (j * 0.3F + k * 0.59F + l * 0.11F) * 0.6F;
 			float o = 1.0F - m * 0.95F;
-			i = i * o + n * (1.0F - o);
 			j = j * o + n * (1.0F - o);
 			k = k * o + n * (1.0F - o);
+			l = l * o + n * (1.0F - o);
 		}
 
-		return new Vec3((double)i, (double)j, (double)k);
+		j *= h * 0.9F + 0.1F;
+		k *= h * 0.9F + 0.1F;
+		l *= h * 0.85F + 0.15F;
+		float n = this.getThunderLevel(f);
+		if (n > 0.0F) {
+			float o = (j * 0.3F + k * 0.59F + l * 0.11F) * 0.2F;
+			float p = 1.0F - n * 0.95F;
+			j = j * p + o * (1.0F - p);
+			k = k * p + o * (1.0F - p);
+			l = l * p + o * (1.0F - p);
+		}
+
+		return new Vec3((double)j, (double)k, (double)l);
 	}
 
 	public float getStarBrightness(float f) {
@@ -782,8 +816,16 @@ public class ClientLevel extends Level {
 
 	public int calculateBlockTint(BlockPos blockPos, ColorResolver colorResolver) {
 		int i = Minecraft.getInstance().options.biomeBlendRadius().get();
+		boolean bl = this.getBiome(blockPos).is(Biomes.ARBORETUM) && colorResolver == BiomeColors.FOLIAGE_COLOR_RESOLVER;
 		if (i == 0) {
-			return colorResolver.getColor(this.getBiome(blockPos).value(), (double)blockPos.getX(), (double)blockPos.getZ());
+			return bl
+				? this.getBiome(blockPos)
+					.value()
+					.getNoisedColorFromTexture(
+						noisedColorFromTexture1[Math.floorMod(blockPos.getX(), 512)][Math.floorMod(blockPos.getZ(), 512)],
+						noisedColorFromTexture2[Math.floorMod(blockPos.getX(), 512)][Math.floorMod(blockPos.getZ(), 512)]
+					)
+				: colorResolver.getColor(this.getBiome(blockPos).value(), (double)blockPos.getX(), (double)blockPos.getZ());
 		} else {
 			int j = (i * 2 + 1) * (i * 2 + 1);
 			int k = 0;
@@ -794,7 +836,18 @@ public class ClientLevel extends Level {
 
 			while (cursor3D.advance()) {
 				mutableBlockPos.set(cursor3D.nextX(), cursor3D.nextY(), cursor3D.nextZ());
-				int n = colorResolver.getColor(this.getBiome(mutableBlockPos).value(), (double)mutableBlockPos.getX(), (double)mutableBlockPos.getZ());
+				int n;
+				if (bl) {
+					n = this.getBiome(mutableBlockPos)
+						.value()
+						.getNoisedColorFromTexture(
+							noisedColorFromTexture1[Math.floorMod(mutableBlockPos.getX(), 512)][Math.floorMod(mutableBlockPos.getZ(), 512)],
+							noisedColorFromTexture2[Math.floorMod(mutableBlockPos.getX(), 512)][Math.floorMod(mutableBlockPos.getZ(), 512)]
+						);
+				} else {
+					n = colorResolver.getColor(this.getBiome(mutableBlockPos).value(), (double)mutableBlockPos.getX(), (double)mutableBlockPos.getZ());
+				}
+
 				k += (n & 0xFF0000) >> 16;
 				l += (n & 0xFF00) >> 8;
 				m += n & 0xFF;
@@ -834,6 +887,22 @@ public class ClientLevel extends Level {
 	}
 
 	@Override
+	public Iterable<ClientSubGrid> getGrids() {
+		return this.grids.values();
+	}
+
+	@Nullable
+	@Override
+	public SubGrid getGrid(UUID uUID) {
+		return this.grids.get(uUID);
+	}
+
+	@Override
+	public SubGrid createSubGrid(GridCarrier gridCarrier) {
+		return new ClientSubGrid(this, gridCarrier);
+	}
+
+	@Override
 	public String gatherChunkSourceStats() {
 		return "Chunks[C] W: " + this.chunkSource.gatherStats() + " E: " + this.entityStorage.gatherStats();
 	}
@@ -854,6 +923,18 @@ public class ClientLevel extends Level {
 	@Override
 	public FeatureFlagSet enabledFeatures() {
 		return this.connection.enabledFeatures();
+	}
+
+	static {
+		PerlinSimplexNoise perlinSimplexNoise = new PerlinSimplexNoise(new WorldgenRandom(new LegacyRandomSource(-559038242L)), ImmutableList.of(-2, -1, 0));
+		PerlinSimplexNoise perlinSimplexNoise2 = new PerlinSimplexNoise(new WorldgenRandom(new LegacyRandomSource(-17973521L)), ImmutableList.of(-2, -1, 0));
+
+		for (int i = 0; i < 512; i++) {
+			for (int j = 0; j < 512; j++) {
+				noisedColorFromTexture1[i][j] = 2.0F * (float)perlinSimplexNoise.getValue((double)((float)i / 8.0F), (double)((float)j / 8.0F), false);
+				noisedColorFromTexture2[i][j] = 2.0F * (float)perlinSimplexNoise2.getValue((double)((float)i / 8.0F), (double)((float)j / 8.0F), false);
+			}
+		}
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -976,7 +1057,9 @@ public class ClientLevel extends Level {
 		}
 
 		public void onTickingStart(Entity entity) {
-			ClientLevel.this.tickingEntities.add(entity);
+			if (!(entity instanceof GridCarrier)) {
+				ClientLevel.this.tickingEntities.add(entity);
+			}
 		}
 
 		public void onTickingEnd(Entity entity) {
@@ -987,11 +1070,19 @@ public class ClientLevel extends Level {
 			if (entity instanceof AbstractClientPlayer) {
 				ClientLevel.this.players.add((AbstractClientPlayer)entity);
 			}
+
+			if (entity instanceof GridCarrier gridCarrier && gridCarrier.grid() instanceof ClientSubGrid clientSubGrid) {
+				ClientLevel.this.grids.put(gridCarrier.getUUID(), clientSubGrid);
+			}
 		}
 
 		public void onTrackingEnd(Entity entity) {
 			entity.unRide();
 			ClientLevel.this.players.remove(entity);
+			if (entity instanceof GridCarrier gridCarrier && gridCarrier.grid() instanceof ClientSubGrid clientSubGrid) {
+				clientSubGrid.close();
+				ClientLevel.this.grids.remove(clientSubGrid.id(), clientSubGrid);
+			}
 		}
 
 		public void onSectionChange(Entity entity) {

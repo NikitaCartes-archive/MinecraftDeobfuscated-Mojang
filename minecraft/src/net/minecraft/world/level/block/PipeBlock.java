@@ -1,10 +1,7 @@
 package net.minecraft.world.level.block;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 import com.mojang.serialization.MapCodec;
 import java.util.Map;
-import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.BlockGetter;
@@ -25,14 +22,9 @@ public abstract class PipeBlock extends Block {
 	public static final BooleanProperty WEST = BlockStateProperties.WEST;
 	public static final BooleanProperty UP = BlockStateProperties.UP;
 	public static final BooleanProperty DOWN = BlockStateProperties.DOWN;
-	public static final Map<Direction, BooleanProperty> PROPERTY_BY_DIRECTION = ImmutableMap.copyOf(Util.make(Maps.newEnumMap(Direction.class), enumMap -> {
-		enumMap.put(Direction.NORTH, NORTH);
-		enumMap.put(Direction.EAST, EAST);
-		enumMap.put(Direction.SOUTH, SOUTH);
-		enumMap.put(Direction.WEST, WEST);
-		enumMap.put(Direction.UP, UP);
-		enumMap.put(Direction.DOWN, DOWN);
-	}));
+	public static final Map<Direction, BooleanProperty> PROPERTY_BY_DIRECTION = Map.of(
+		Direction.NORTH, NORTH, Direction.EAST, EAST, Direction.SOUTH, SOUTH, Direction.WEST, WEST, Direction.UP, UP, Direction.DOWN, DOWN
+	);
 	protected final VoxelShape[] shapeByIndex;
 
 	protected PipeBlock(float f, BlockBehaviour.Properties properties) {

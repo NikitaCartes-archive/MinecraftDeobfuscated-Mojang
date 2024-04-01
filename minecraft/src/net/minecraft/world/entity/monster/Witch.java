@@ -1,6 +1,7 @@
 package net.minecraft.world.entity.monster;
 
 import java.util.UUID;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
@@ -11,11 +12,14 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -37,6 +41,8 @@ import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.Vec3;
 
@@ -242,6 +248,18 @@ public class Witch extends Raider implements RangedAttackMob {
 
 			this.level().addFreshEntity(thrownPotion);
 		}
+	}
+
+	public static boolean checkWitchSpawnRules(
+		EntityType<Witch> entityType, ServerLevelAccessor serverLevelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, RandomSource randomSource
+	) {
+		return serverLevelAccessor.getDifficulty() != Difficulty.PEACEFUL
+			&& (
+				MobSpawnType.ignoresLightRequirements(mobSpawnType)
+					|| isDarkEnoughToSpawn(serverLevelAccessor, blockPos, randomSource)
+					|| serverLevelAccessor.getBiome(blockPos).is(Biomes.CORRUPTION)
+			)
+			&& checkMobSpawnRules(entityType, serverLevelAccessor, mobSpawnType, blockPos, randomSource);
 	}
 
 	@Override

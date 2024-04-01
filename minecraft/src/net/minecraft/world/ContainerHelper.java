@@ -1,5 +1,8 @@
 package net.minecraft.world;
 
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntList;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
 import net.minecraft.core.HolderLookup;
@@ -10,6 +13,26 @@ import net.minecraft.world.item.ItemStack;
 
 public class ContainerHelper {
 	public static final String TAG_ITEMS = "Items";
+
+	public static int tryAddItem(Container container, ItemStack itemStack) {
+		IntList intList = new IntArrayList();
+
+		for (int i = 0; i < container.getContainerSize(); i++) {
+			ItemStack itemStack2 = container.getItem(i);
+			if (itemStack2.isEmpty()) {
+				intList.add(i);
+			}
+		}
+
+		if (intList.isEmpty()) {
+			return -1;
+		} else {
+			Collections.shuffle(intList);
+			int ix = intList.getInt(0);
+			container.setItem(ix, itemStack);
+			return ix;
+		}
+	}
 
 	public static ItemStack removeItem(List<ItemStack> list, int i, int j) {
 		return i >= 0 && i < list.size() && !((ItemStack)list.get(i)).isEmpty() && j > 0 ? ((ItemStack)list.get(i)).split(j) : ItemStack.EMPTY;

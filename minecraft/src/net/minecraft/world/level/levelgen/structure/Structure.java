@@ -5,6 +5,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.mojang.serialization.codecs.RecordCodecBuilder.Instance;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -16,6 +17,7 @@ import net.minecraft.core.HolderSet;
 import net.minecraft.core.QuartPos;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.RegistryCodecs;
+import net.minecraft.core.Vec3i;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.RegistryFileCodec;
@@ -30,6 +32,7 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.levelgen.DensityFunction;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.LegacyRandomSource;
@@ -60,6 +63,10 @@ public abstract class Structure {
 		return this.settings.biomes;
 	}
 
+	public List<Structure.DensityCheck> densityChecks() {
+		return this.settings.densityChecks;
+	}
+
 	public Map<MobCategory, StructureSpawnOverride> spawnOverrides() {
 		return this.settings.spawnOverrides;
 	}
@@ -86,10 +93,11 @@ public abstract class Structure {
 		ChunkPos chunkPos,
 		int i,
 		LevelHeightAccessor levelHeightAccessor,
-		Predicate<Holder<Biome>> predicate
+		Predicate<Holder<Biome>> predicate,
+		List<Structure.DensityCheck> list
 	) {
 		Structure.GenerationContext generationContext = new Structure.GenerationContext(
-			registryAccess, chunkGenerator, biomeSource, randomState, structureTemplateManager, l, chunkPos, levelHeightAccessor, predicate
+			registryAccess, chunkGenerator, biomeSource, randomState, structureTemplateManager, l, chunkPos, levelHeightAccessor, predicate, list
 		);
 		Optional<Structure.GenerationStub> optional = this.findValidGenerationPoint(generationContext);
 		if (optional.isPresent()) {
@@ -123,6 +131,24 @@ public abstract class Structure {
 						QuartPos.fromBlock(blockPos.getX()), QuartPos.fromBlock(blockPos.getY()), QuartPos.fromBlock(blockPos.getZ()), generationContext.randomState.sampler()
 					)
 			);
+	}
+
+	private static boolean passesDensityTest(Structure.GenerationStub generationStub, Structure.GenerationContext generationContext) {
+		BlockPos blockPos = generationStub.position();
+
+		for (Structure.DensityCheck densityCheck : generationContext.densityChecks()) {
+			Vec3i vec3i = densityCheck.offset();
+			BlockPos blockPos2 = blockPos.offset(vec3i.getX(), vec3i.getY(), vec3i.getZ());
+			double d = generationContext.randomState
+				.router()
+				.finalDensity()
+				.compute(new DensityFunction.SinglePointContext(blockPos2.getX(), blockPos2.getY(), blockPos2.getZ()));
+			if (densityCheck.dense() != d > 0.0) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	public void afterPlace(
@@ -182,10 +208,24 @@ public abstract class Structure {
 	protected abstract Optional<Structure.GenerationStub> findGenerationPoint(Structure.GenerationContext generationContext);
 
 	public Optional<Structure.GenerationStub> findValidGenerationPoint(Structure.GenerationContext generationContext) {
-		return this.findGenerationPoint(generationContext).filter(generationStub -> isValidBiome(generationStub, generationContext));
+		return this.findGenerationPoint(generationContext)
+			.filter(generationStub -> isValidBiome(generationStub, generationContext) && passesDensityTest(generationStub, generationContext));
 	}
 
 	public abstract StructureType<?> type();
+
+	public static record DensityCheck(Vec3i offset, boolean dense) {
+		public static final Codec<Structure.DensityCheck> CODEC = RecordCodecBuilder.create(
+			instance -> instance.group(
+						Vec3i.CODEC.fieldOf("offset").forGetter(Structure.DensityCheck::offset), Codec.BOOL.fieldOf("dense").forGetter(Structure.DensityCheck::dense)
+					)
+					.apply(instance, Structure.DensityCheck::new)
+		);
+
+		public static Structure.DensityCheck of(int i, int j, int k, boolean bl) {
+			return new Structure.DensityCheck(new Vec3i(i, j, k), bl);
+		}
+	}
 
 	public static record GenerationContext(
 		RegistryAccess registryAccess,
@@ -197,7 +237,8 @@ public abstract class Structure {
 		long seed,
 		ChunkPos chunkPos,
 		LevelHeightAccessor heightAccessor,
-		Predicate<Holder<Biome>> validBiome
+		Predicate<Holder<Biome>> validBiome,
+		List<Structure.DensityCheck> densityChecks
 	) {
 
 		public GenerationContext(
@@ -209,10 +250,21 @@ public abstract class Structure {
 			long l,
 			ChunkPos chunkPos,
 			LevelHeightAccessor levelHeightAccessor,
-			Predicate<Holder<Biome>> predicate
+			Predicate<Holder<Biome>> predicate,
+			List<Structure.DensityCheck> list
 		) {
 			this(
-				registryAccess, chunkGenerator, biomeSource, randomState, structureTemplateManager, makeRandom(l, chunkPos), l, chunkPos, levelHeightAccessor, predicate
+				registryAccess,
+				chunkGenerator,
+				biomeSource,
+				randomState,
+				structureTemplateManager,
+				makeRandom(l, chunkPos),
+				l,
+				chunkPos,
+				levelHeightAccessor,
+				predicate,
+				list
 			);
 		}
 
@@ -238,11 +290,16 @@ public abstract class Structure {
 	}
 
 	public static record StructureSettings(
-		HolderSet<Biome> biomes, Map<MobCategory, StructureSpawnOverride> spawnOverrides, GenerationStep.Decoration step, TerrainAdjustment terrainAdaptation
+		HolderSet<Biome> biomes,
+		List<Structure.DensityCheck> densityChecks,
+		Map<MobCategory, StructureSpawnOverride> spawnOverrides,
+		GenerationStep.Decoration step,
+		TerrainAdjustment terrainAdaptation
 	) {
 		public static final MapCodec<Structure.StructureSettings> CODEC = RecordCodecBuilder.mapCodec(
 			instance -> instance.group(
 						RegistryCodecs.homogeneousList(Registries.BIOME).fieldOf("biomes").forGetter(Structure.StructureSettings::biomes),
+						Codec.list(Structure.DensityCheck.CODEC).fieldOf("density_checks").forGetter(Structure.StructureSettings::densityChecks),
 						Codec.simpleMap(MobCategory.CODEC, StructureSpawnOverride.CODEC, StringRepresentable.keys(MobCategory.values()))
 							.fieldOf("spawn_overrides")
 							.forGetter(Structure.StructureSettings::spawnOverrides),

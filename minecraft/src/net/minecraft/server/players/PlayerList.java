@@ -24,7 +24,10 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.FileUtil;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.LayeredRegistryAccess;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.Connection;
@@ -38,6 +41,7 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.common.ClientboundUpdateTagsPacket;
 import net.minecraft.network.protocol.game.ClientboundChangeDifficultyPacket;
 import net.minecraft.network.protocol.game.ClientboundEntityEventPacket;
+import net.minecraft.network.protocol.game.ClientboundExplodePacket;
 import net.minecraft.network.protocol.game.ClientboundGameEventPacket;
 import net.minecraft.network.protocol.game.ClientboundInitializeBorderPacket;
 import net.minecraft.network.protocol.game.ClientboundLoginPacket;
@@ -72,6 +76,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.CommonListenerCookie;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.ServerStatsCounter;
@@ -79,10 +84,15 @@ import net.minecraft.stats.Stats;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagNetworkSerialization;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -432,6 +442,44 @@ public abstract class PlayerList {
 		}
 
 		return !set.isEmpty();
+	}
+
+	public ServerPlayer sproutRespawn(ServerPlayer serverPlayer) {
+		ServerPlayer serverPlayer2 = this.respawn(serverPlayer, true);
+		RandomSource randomSource = RandomSource.create();
+		double d = randomSource.nextGaussian() * 0.3;
+		double e = randomSource.nextGaussian() * 0.3;
+		double f = serverPlayer2.position().x();
+		double g = serverPlayer2.position().y() + 1.0;
+		double h = serverPlayer2.position().z();
+		SimpleParticleType simpleParticleType = ParticleTypes.SMOKE;
+		SimpleParticleType simpleParticleType2 = ParticleTypes.REVERSE_POTATO_LIGHTNING;
+		Holder<SoundEvent> holder = SoundEvents.EMPTY_HOLDER;
+		ItemStack itemStack = serverPlayer2.getInventory().armor.get(EquipmentSlot.FEET.getIndex());
+		if (itemStack != ItemStack.EMPTY) {
+			serverPlayer2.spawnAtLocation(itemStack, 2.0F);
+		}
+
+		serverPlayer2.setItemSlot(EquipmentSlot.FEET, Items.POISONOUS_POTA_TOES.getDefaultInstance());
+		Explosion explosion = serverPlayer2.level()
+			.explode(null, null, null, f, g, h, 2.0F, false, Level.ExplosionInteraction.NONE, false, simpleParticleType, simpleParticleType2, holder);
+		serverPlayer2.connection
+			.send(
+				new ClientboundExplodePacket(
+					serverPlayer2.position().x,
+					serverPlayer2.position().y,
+					serverPlayer2.position().z,
+					5.0F,
+					explosion.getToBlow(),
+					new Vec3(d, 5.0, e),
+					Explosion.BlockInteraction.KEEP,
+					simpleParticleType,
+					simpleParticleType2,
+					holder
+				)
+			);
+		serverPlayer2.level().playSound(null, serverPlayer2.blockPosition(), SoundEvents.PLAYER_SPROUT_RESPAWN_2, SoundSource.PLAYERS);
+		return serverPlayer2;
 	}
 
 	public ServerPlayer respawn(ServerPlayer serverPlayer, boolean bl) {

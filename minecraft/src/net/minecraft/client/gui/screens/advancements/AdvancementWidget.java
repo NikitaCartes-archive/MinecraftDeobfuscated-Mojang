@@ -12,6 +12,7 @@ import net.minecraft.advancements.DisplayInfo;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.StringSplitter;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
@@ -20,6 +21,7 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
+import net.minecraft.world.item.Items;
 
 @Environment(EnvType.CLIENT)
 public class AdvancementWidget {
@@ -245,7 +247,14 @@ public class AdvancementWidget {
 			}
 		}
 
+		if (this.display.getIcon().is(Items.POISONOUS_POTATO_PLANT)) {
+			this.display.getIcon().set(DataComponents.HOVERED, true);
+		}
+
 		guiGraphics.renderFakeItem(this.display.getIcon(), i + this.x + 8, j + this.y + 5);
+		if (this.display.getIcon().is(Items.POISONOUS_POTATO_PLANT)) {
+			this.display.getIcon().set(DataComponents.HOVERED, false);
+		}
 	}
 
 	public boolean isMouseOver(int i, int j, int k, int l) {

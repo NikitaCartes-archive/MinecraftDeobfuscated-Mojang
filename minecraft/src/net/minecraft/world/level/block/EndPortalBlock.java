@@ -59,7 +59,7 @@ public class EndPortalBlock extends BaseEntityBlock {
 				return;
 			}
 
-			entity.changeDimension(serverLevel);
+			entity.changeDimension(serverLevel, false);
 		}
 	}
 

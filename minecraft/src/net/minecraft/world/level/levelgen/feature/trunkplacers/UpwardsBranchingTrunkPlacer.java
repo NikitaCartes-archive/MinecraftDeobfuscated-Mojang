@@ -21,7 +21,7 @@ import net.minecraft.world.level.levelgen.feature.foliageplacers.FoliagePlacer;
 public class UpwardsBranchingTrunkPlacer extends TrunkPlacer {
 	public static final Codec<UpwardsBranchingTrunkPlacer> CODEC = RecordCodecBuilder.create(
 		instance -> trunkPlacerParts(instance)
-				.<IntProvider, float, IntProvider, HolderSet<Block>>and(
+				.<IntProvider, float, IntProvider, HolderSet<Block>, boolean>and(
 					instance.group(
 						IntProvider.POSITIVE_CODEC.fieldOf("extra_branch_steps").forGetter(upwardsBranchingTrunkPlacer -> upwardsBranchingTrunkPlacer.extraBranchSteps),
 						Codec.floatRange(0.0F, 1.0F)
@@ -30,7 +30,8 @@ public class UpwardsBranchingTrunkPlacer extends TrunkPlacer {
 						IntProvider.NON_NEGATIVE_CODEC.fieldOf("extra_branch_length").forGetter(upwardsBranchingTrunkPlacer -> upwardsBranchingTrunkPlacer.extraBranchLength),
 						RegistryCodecs.homogeneousList(Registries.BLOCK)
 							.fieldOf("can_grow_through")
-							.forGetter(upwardsBranchingTrunkPlacer -> upwardsBranchingTrunkPlacer.canGrowThrough)
+							.forGetter(upwardsBranchingTrunkPlacer -> upwardsBranchingTrunkPlacer.canGrowThrough),
+						Codec.BOOL.fieldOf("megabush").forGetter(upwardsBranchingTrunkPlacer -> upwardsBranchingTrunkPlacer.megabush)
 					)
 				)
 				.apply(instance, UpwardsBranchingTrunkPlacer::new)
@@ -39,13 +40,15 @@ public class UpwardsBranchingTrunkPlacer extends TrunkPlacer {
 	private final float placeBranchPerLogProbability;
 	private final IntProvider extraBranchLength;
 	private final HolderSet<Block> canGrowThrough;
+	private final boolean megabush;
 
-	public UpwardsBranchingTrunkPlacer(int i, int j, int k, IntProvider intProvider, float f, IntProvider intProvider2, HolderSet<Block> holderSet) {
+	public UpwardsBranchingTrunkPlacer(int i, int j, int k, IntProvider intProvider, float f, IntProvider intProvider2, HolderSet<Block> holderSet, boolean bl) {
 		super(i, j, k);
 		this.extraBranchSteps = intProvider;
 		this.placeBranchPerLogProbability = f;
 		this.extraBranchLength = intProvider2;
 		this.canGrowThrough = holderSet;
+		this.megabush = bl;
 	}
 
 	@Override
@@ -113,7 +116,9 @@ public class UpwardsBranchingTrunkPlacer extends TrunkPlacer {
 					m = q + 1;
 				}
 
-				list.add(new FoliagePlacer.FoliageAttachment(mutableBlockPos.immutable(), 0, false));
+				if (this.megabush) {
+					list.add(new FoliagePlacer.FoliageAttachment(mutableBlockPos.immutable(), 0, false));
+				}
 			}
 
 			p++;
@@ -123,7 +128,9 @@ public class UpwardsBranchingTrunkPlacer extends TrunkPlacer {
 		if (m - j > 1) {
 			BlockPos blockPos = new BlockPos(n, m, o);
 			list.add(new FoliagePlacer.FoliageAttachment(blockPos, 0, false));
-			list.add(new FoliagePlacer.FoliageAttachment(blockPos.below(2), 0, false));
+			if (this.megabush) {
+				list.add(new FoliagePlacer.FoliageAttachment(blockPos.below(2), 0, false));
+			}
 		}
 	}
 

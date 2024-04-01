@@ -8,6 +8,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.preprocessor.GlslPreprocessor;
 import com.mojang.blaze3d.shaders.AbstractUniform;
 import com.mojang.blaze3d.shaders.BlendMode;
@@ -38,6 +39,7 @@ import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceProvider;
 import net.minecraft.util.GsonHelper;
 import org.apache.commons.io.IOUtils;
+import org.joml.Matrix4f;
 import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
@@ -528,5 +530,62 @@ public class ShaderInstance implements Shader, AutoCloseable {
 	@Override
 	public int getId() {
 		return this.programId;
+	}
+
+	public void setDefaultUniforms(VertexFormat.Mode mode, Matrix4f matrix4f, Matrix4f matrix4f2, Window window) {
+		for (int i = 0; i < 12; i++) {
+			int j = RenderSystem.getShaderTexture(i);
+			this.setSampler("Sampler" + i, j);
+		}
+
+		if (this.MODEL_VIEW_MATRIX != null) {
+			this.MODEL_VIEW_MATRIX.set(matrix4f);
+		}
+
+		if (this.PROJECTION_MATRIX != null) {
+			this.PROJECTION_MATRIX.set(matrix4f2);
+		}
+
+		if (this.COLOR_MODULATOR != null) {
+			this.COLOR_MODULATOR.set(RenderSystem.getShaderColor());
+		}
+
+		if (this.GLINT_ALPHA != null) {
+			this.GLINT_ALPHA.set(RenderSystem.getShaderGlintAlpha());
+		}
+
+		if (this.FOG_START != null) {
+			this.FOG_START.set(RenderSystem.getShaderFogStart());
+		}
+
+		if (this.FOG_END != null) {
+			this.FOG_END.set(RenderSystem.getShaderFogEnd());
+		}
+
+		if (this.FOG_COLOR != null) {
+			this.FOG_COLOR.set(RenderSystem.getShaderFogColor());
+		}
+
+		if (this.FOG_SHAPE != null) {
+			this.FOG_SHAPE.set(RenderSystem.getShaderFogShape().getIndex());
+		}
+
+		if (this.TEXTURE_MATRIX != null) {
+			this.TEXTURE_MATRIX.set(RenderSystem.getTextureMatrix());
+		}
+
+		if (this.GAME_TIME != null) {
+			this.GAME_TIME.set(RenderSystem.getShaderGameTime());
+		}
+
+		if (this.SCREEN_SIZE != null) {
+			this.SCREEN_SIZE.set((float)window.getWidth(), (float)window.getHeight());
+		}
+
+		if (this.LINE_WIDTH != null && (mode == VertexFormat.Mode.LINES || mode == VertexFormat.Mode.LINE_STRIP)) {
+			this.LINE_WIDTH.set(RenderSystem.getShaderLineWidth());
+		}
+
+		RenderSystem.setupShaderLights(this);
 	}
 }

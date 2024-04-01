@@ -4,6 +4,7 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.RecipeType;
 
 public class ResultSlot extends Slot {
@@ -42,7 +43,6 @@ public class ResultSlot extends Slot {
 		this.removeCount += i;
 	}
 
-	@Override
 	protected void checkTakeAchievements(ItemStack itemStack) {
 		if (this.removeCount > 0) {
 			itemStack.onCraftedBy(this.player.level(), this.player, this.removeCount);
@@ -58,6 +58,10 @@ public class ResultSlot extends Slot {
 	@Override
 	public void onTake(Player player, ItemStack itemStack) {
 		this.checkTakeAchievements(itemStack);
+		if (player.isChapterAndProgressPast("wrote_thoughts", 19) && itemStack.is(Items.POTATO_EYE)) {
+			player.setPotatoQuestChapter("crafted_eyes");
+		}
+
 		NonNullList<ItemStack> nonNullList = player.level().getRecipeManager().getRemainingItemsFor(RecipeType.CRAFTING, this.craftSlots, player.level());
 
 		for (int i = 0; i < nonNullList.size(); i++) {

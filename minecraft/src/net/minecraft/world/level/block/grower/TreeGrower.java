@@ -55,6 +55,16 @@ public final class TreeGrower {
 		Optional.empty(),
 		Optional.empty()
 	);
+	public static final TreeGrower POTATO = new TreeGrower(
+		"potato",
+		0.05F,
+		Optional.of(TreeFeatures.MOTHER_POTATO_TREE),
+		Optional.empty(),
+		Optional.of(TreeFeatures.POTATO_TREE),
+		Optional.of(TreeFeatures.POTATO_TREE_TALL),
+		Optional.empty(),
+		Optional.empty()
+	);
 	public static final TreeGrower AZALEA = new TreeGrower("azalea", Optional.empty(), Optional.of(TreeFeatures.AZALEA_TREE), Optional.empty());
 	public static final TreeGrower BIRCH = new TreeGrower("birch", Optional.empty(), Optional.of(TreeFeatures.BIRCH), Optional.of(TreeFeatures.BIRCH_BEES_005));
 	public static final TreeGrower JUNGLE = new TreeGrower(

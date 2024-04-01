@@ -19,6 +19,8 @@ import net.minecraft.world.level.levelgen.heightproviders.UniformHeight;
 import net.minecraft.world.level.levelgen.heightproviders.VeryBiasedToBottomHeight;
 import net.minecraft.world.level.levelgen.placement.BiomeFilter;
 import net.minecraft.world.level.levelgen.placement.BlockPredicateFilter;
+import net.minecraft.world.level.levelgen.placement.CloudPlacement;
+import net.minecraft.world.level.levelgen.placement.CountOnEveryLayerPlacement;
 import net.minecraft.world.level.levelgen.placement.CountPlacement;
 import net.minecraft.world.level.levelgen.placement.EnvironmentScanPlacement;
 import net.minecraft.world.level.levelgen.placement.HeightRangePlacement;
@@ -36,6 +38,7 @@ public class MiscOverworldPlacements {
 	public static final ResourceKey<PlacedFeature> ICEBERG_PACKED = PlacementUtils.createKey("iceberg_packed");
 	public static final ResourceKey<PlacedFeature> ICEBERG_BLUE = PlacementUtils.createKey("iceberg_blue");
 	public static final ResourceKey<PlacedFeature> BLUE_ICE = PlacementUtils.createKey("blue_ice");
+	public static final ResourceKey<PlacedFeature> POTATO_CLOUD = PlacementUtils.createKey("potato_cloud");
 	public static final ResourceKey<PlacedFeature> LAKE_LAVA_UNDERGROUND = PlacementUtils.createKey("lake_lava_underground");
 	public static final ResourceKey<PlacedFeature> LAKE_LAVA_SURFACE = PlacementUtils.createKey("lake_lava_surface");
 	public static final ResourceKey<PlacedFeature> DISK_CLAY = PlacementUtils.createKey("disk_clay");
@@ -45,6 +48,7 @@ public class MiscOverworldPlacements {
 	public static final ResourceKey<PlacedFeature> FREEZE_TOP_LAYER = PlacementUtils.createKey("freeze_top_layer");
 	public static final ResourceKey<PlacedFeature> VOID_START_PLATFORM = PlacementUtils.createKey("void_start_platform");
 	public static final ResourceKey<PlacedFeature> DESERT_WELL = PlacementUtils.createKey("desert_well");
+	public static final ResourceKey<PlacedFeature> HASH_WELL = PlacementUtils.createKey("hash_well");
 	public static final ResourceKey<PlacedFeature> SPRING_LAVA = PlacementUtils.createKey("spring_lava");
 	public static final ResourceKey<PlacedFeature> SPRING_LAVA_FROZEN = PlacementUtils.createKey("spring_lava_frozen");
 	public static final ResourceKey<PlacedFeature> SPRING_WATER = PlacementUtils.createKey("spring_water");
@@ -65,9 +69,11 @@ public class MiscOverworldPlacements {
 		Holder<ConfiguredFeature<?, ?>> holder12 = holderGetter.getOrThrow(MiscOverworldFeatures.FREEZE_TOP_LAYER);
 		Holder<ConfiguredFeature<?, ?>> holder13 = holderGetter.getOrThrow(MiscOverworldFeatures.VOID_START_PLATFORM);
 		Holder<ConfiguredFeature<?, ?>> holder14 = holderGetter.getOrThrow(MiscOverworldFeatures.DESERT_WELL);
-		Holder<ConfiguredFeature<?, ?>> holder15 = holderGetter.getOrThrow(MiscOverworldFeatures.SPRING_LAVA_OVERWORLD);
-		Holder<ConfiguredFeature<?, ?>> holder16 = holderGetter.getOrThrow(MiscOverworldFeatures.SPRING_LAVA_FROZEN);
-		Holder<ConfiguredFeature<?, ?>> holder17 = holderGetter.getOrThrow(MiscOverworldFeatures.SPRING_WATER);
+		Holder<ConfiguredFeature<?, ?>> holder15 = holderGetter.getOrThrow(MiscOverworldFeatures.HASH_WELL);
+		Holder<ConfiguredFeature<?, ?>> holder16 = holderGetter.getOrThrow(MiscOverworldFeatures.SPRING_LAVA_OVERWORLD);
+		Holder<ConfiguredFeature<?, ?>> holder17 = holderGetter.getOrThrow(MiscOverworldFeatures.SPRING_LAVA_FROZEN);
+		Holder<ConfiguredFeature<?, ?>> holder18 = holderGetter.getOrThrow(MiscOverworldFeatures.SPRING_WATER);
+		Holder<ConfiguredFeature<?, ?>> holder19 = holderGetter.getOrThrow(MiscOverworldFeatures.POTATO_CLOUD);
 		PlacementUtils.register(bootstrapContext, ICE_SPIKE, holder, CountPlacement.of(3), InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP, BiomeFilter.biome());
 		PlacementUtils.register(
 			bootstrapContext,
@@ -93,6 +99,9 @@ public class MiscOverworldPlacements {
 			InSquarePlacement.spread(),
 			HeightRangePlacement.uniform(VerticalAnchor.absolute(30), VerticalAnchor.absolute(61)),
 			BiomeFilter.biome()
+		);
+		PlacementUtils.register(
+			bootstrapContext, POTATO_CLOUD, holder19, RarityFilter.onAverageOnceEvery(10), InSquarePlacement.spread(), new CloudPlacement(), BiomeFilter.biome()
 		);
 		PlacementUtils.register(
 			bootstrapContext,
@@ -160,18 +169,10 @@ public class MiscOverworldPlacements {
 		PlacementUtils.register(
 			bootstrapContext, DESERT_WELL, holder14, RarityFilter.onAverageOnceEvery(1000), InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP, BiomeFilter.biome()
 		);
+		PlacementUtils.register(bootstrapContext, HASH_WELL, holder15, CountOnEveryLayerPlacement.of(1, 2), RarityFilter.onAverageOnceEvery(100), BiomeFilter.biome());
 		PlacementUtils.register(
 			bootstrapContext,
 			SPRING_LAVA,
-			holder15,
-			CountPlacement.of(20),
-			InSquarePlacement.spread(),
-			HeightRangePlacement.of(VeryBiasedToBottomHeight.of(VerticalAnchor.bottom(), VerticalAnchor.belowTop(8), 8)),
-			BiomeFilter.biome()
-		);
-		PlacementUtils.register(
-			bootstrapContext,
-			SPRING_LAVA_FROZEN,
 			holder16,
 			CountPlacement.of(20),
 			InSquarePlacement.spread(),
@@ -180,8 +181,17 @@ public class MiscOverworldPlacements {
 		);
 		PlacementUtils.register(
 			bootstrapContext,
-			SPRING_WATER,
+			SPRING_LAVA_FROZEN,
 			holder17,
+			CountPlacement.of(20),
+			InSquarePlacement.spread(),
+			HeightRangePlacement.of(VeryBiasedToBottomHeight.of(VerticalAnchor.bottom(), VerticalAnchor.belowTop(8), 8)),
+			BiomeFilter.biome()
+		);
+		PlacementUtils.register(
+			bootstrapContext,
+			SPRING_WATER,
+			holder18,
 			CountPlacement.of(25),
 			InSquarePlacement.spread(),
 			HeightRangePlacement.uniform(VerticalAnchor.bottom(), VerticalAnchor.absolute(192)),

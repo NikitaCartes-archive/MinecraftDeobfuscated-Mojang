@@ -86,6 +86,8 @@ public class MobEffects {
 	public static final Holder<MobEffect> BAD_OMEN = register("bad_omen", new BadOmenMobEffect(MobEffectCategory.NEUTRAL, 745784));
 	public static final Holder<MobEffect> HERO_OF_THE_VILLAGE = register("hero_of_the_village", new MobEffect(MobEffectCategory.BENEFICIAL, 4521796));
 	public static final Holder<MobEffect> DARKNESS = register("darkness", new MobEffect(MobEffectCategory.HARMFUL, 2696993).setBlendDuration(22));
+	public static final Holder<MobEffect> POTATO_OIL = register("potato_oil", new MobEffect(MobEffectCategory.BENEFICIAL, 14014113));
+	public static final Holder<MobEffect> STICKY = register("sticky", new MobEffect(MobEffectCategory.BENEFICIAL, 13023361));
 
 	private static Holder<MobEffect> register(String string, MobEffect mobEffect) {
 		return Registry.registerForHolder(BuiltInRegistries.MOB_EFFECT, new ResourceLocation(string), mobEffect);

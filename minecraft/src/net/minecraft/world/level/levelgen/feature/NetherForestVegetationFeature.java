@@ -35,7 +35,7 @@ public class NetherForestVegetationFeature extends Feature<NetherForestVegetatio
 					);
 					BlockState blockState2 = netherForestVegetationConfig.stateProvider.getState(randomSource, blockPos2);
 					if (worldGenLevel.isEmptyBlock(blockPos2) && blockPos2.getY() > worldGenLevel.getMinBuildHeight() && blockState2.canSurvive(worldGenLevel, blockPos2)) {
-						worldGenLevel.setBlock(blockPos2, blockState2, 2);
+						SimpleBlockFeature.place(blockState2, worldGenLevel, blockPos2);
 						j++;
 					}
 				}

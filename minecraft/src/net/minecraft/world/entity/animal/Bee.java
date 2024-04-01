@@ -144,6 +144,11 @@ public class Bee extends Animal implements NeutralMob, FlyingAnimal {
 	}
 
 	@Override
+	public boolean hasPotatoVariant() {
+		return true;
+	}
+
+	@Override
 	protected void defineSynchedData(SynchedEntityData.Builder builder) {
 		super.defineSynchedData(builder);
 		builder.define(DATA_FLAGS_ID, (byte)0);
@@ -241,9 +246,15 @@ public class Bee extends Animal implements NeutralMob, FlyingAnimal {
 		super.tick();
 		if (this.hasNectar() && this.getCropsGrownSincePollination() < 10 && this.random.nextFloat() < 0.05F) {
 			for (int i = 0; i < this.random.nextInt(2) + 1; i++) {
-				this.spawnFluidParticle(
-					this.level(), this.getX() - 0.3F, this.getX() + 0.3F, this.getZ() - 0.3F, this.getZ() + 0.3F, this.getY(0.5), ParticleTypes.FALLING_NECTAR
-				);
+				if (this.isPotato()) {
+					this.spawnFluidParticle(
+						this.level(), this.getX() - 0.3F, this.getX() + 0.3F, this.getZ() - 0.3F, this.getZ() + 0.3F, this.getY(0.5), ParticleTypes.FALLING_POISON
+					);
+				} else {
+					this.spawnFluidParticle(
+						this.level(), this.getX() - 0.3F, this.getX() + 0.3F, this.getZ() - 0.3F, this.getZ() + 0.3F, this.getY(0.5), ParticleTypes.FALLING_NECTAR
+					);
+				}
 			}
 		}
 
@@ -931,7 +942,7 @@ public class Bee extends Animal implements NeutralMob, FlyingAnimal {
 						if (block instanceof CropBlock) {
 							CropBlock cropBlock = (CropBlock)block;
 							if (!cropBlock.isMaxAge(blockState)) {
-								blockState2 = cropBlock.getStateForAge(cropBlock.getAge(blockState) + 1);
+								blockState2 = cropBlock.getStateForAge(cropBlock.getAge(blockState) + 1, blockState);
 							}
 						} else if (block instanceof StemBlock) {
 							int j = (Integer)blockState.getValue(StemBlock.AGE);

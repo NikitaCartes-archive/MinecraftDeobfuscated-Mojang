@@ -23,20 +23,23 @@ public class CampfireRenderer implements BlockEntityRenderer<CampfireBlockEntity
 	}
 
 	public void render(CampfireBlockEntity campfireBlockEntity, float f, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {
+		boolean bl = campfireBlockEntity.isFryingTable;
 		Direction direction = campfireBlockEntity.getBlockState().getValue(CampfireBlock.FACING);
 		NonNullList<ItemStack> nonNullList = campfireBlockEntity.getItems();
 		int k = (int)campfireBlockEntity.getBlockPos().asLong();
+		float g = bl ? -2.5F : -5.0F;
+		float h = bl ? 11.0F : 7.0F;
 
 		for (int l = 0; l < nonNullList.size(); l++) {
 			ItemStack itemStack = nonNullList.get(l);
 			if (itemStack != ItemStack.EMPTY) {
 				poseStack.pushPose();
-				poseStack.translate(0.5F, 0.44921875F, 0.5F);
+				poseStack.translate(0.5F, (h + 0.1875F) / 16.0F, 0.5F);
 				Direction direction2 = Direction.from2DDataValue((l + direction.get2DDataValue()) % 4);
-				float g = -direction2.toYRot();
-				poseStack.mulPose(Axis.YP.rotationDegrees(g));
+				float m = -direction2.toYRot();
+				poseStack.mulPose(Axis.YP.rotationDegrees(m));
 				poseStack.mulPose(Axis.XP.rotationDegrees(90.0F));
-				poseStack.translate(-0.3125F, -0.3125F, 0.0F);
+				poseStack.translate(g / 16.0F, g / 16.0F, 0.0F);
 				poseStack.scale(0.375F, 0.375F, 0.375F);
 				this.itemRenderer.renderStatic(itemStack, ItemDisplayContext.FIXED, i, j, poseStack, multiBufferSource, campfireBlockEntity.getLevel(), k + l);
 				poseStack.popPose();

@@ -330,6 +330,10 @@ public class TextureMapping {
 		return new TextureMapping().put(TextureSlot.LIT_LOG, getBlockTexture(block, "_log_lit")).put(TextureSlot.FIRE, getBlockTexture(block, "_fire"));
 	}
 
+	public static TextureMapping fryingTable(Block block) {
+		return new TextureMapping().put(TextureSlot.FRYING_TABLE, getBlockTexture(block));
+	}
+
 	public static TextureMapping candleCake(Block block, boolean bl) {
 		return new TextureMapping()
 			.put(TextureSlot.PARTICLE, getBlockTexture(Blocks.CAKE, "_side"))

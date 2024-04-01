@@ -34,7 +34,9 @@ import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.screens.DeathScreen;
 import net.minecraft.client.gui.screens.DemoIntroScreen;
 import net.minecraft.client.gui.screens.MenuScreens;
+import net.minecraft.client.gui.screens.PotatoPoemScreen;
 import net.minecraft.client.gui.screens.ReceivingLevelScreen;
+import net.minecraft.client.gui.screens.SproutRespawnScreen;
 import net.minecraft.client.gui.screens.WinScreen;
 import net.minecraft.client.gui.screens.achievement.StatsScreen;
 import net.minecraft.client.gui.screens.inventory.BookViewScreen;
@@ -108,6 +110,7 @@ import net.minecraft.network.protocol.configuration.ConfigurationProtocols;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundAddExperienceOrbPacket;
+import net.minecraft.network.protocol.game.ClientboundAddSubGridPacket;
 import net.minecraft.network.protocol.game.ClientboundAnimatePacket;
 import net.minecraft.network.protocol.game.ClientboundAwardStatsPacket;
 import net.minecraft.network.protocol.game.ClientboundBlockChangedAckPacket;
@@ -203,6 +206,7 @@ import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket;
 import net.minecraft.network.protocol.game.ClientboundSetTitlesAnimationPacket;
 import net.minecraft.network.protocol.game.ClientboundSoundEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
+import net.minecraft.network.protocol.game.ClientboundSoundSequencePacket;
 import net.minecraft.network.protocol.game.ClientboundStartConfigurationPacket;
 import net.minecraft.network.protocol.game.ClientboundStopSoundPacket;
 import net.minecraft.network.protocol.game.ClientboundSystemChatPacket;
@@ -268,6 +272,7 @@ import net.minecraft.world.entity.player.ProfilePublicKey;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.flag.FeatureFlagSet;
+import net.minecraft.world.grid.GridCarrier;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.HorseInventoryMenu;
 import net.minecraft.world.inventory.InventoryMenu;
@@ -425,6 +430,11 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 		this.minecraft.player.setPortalCooldown(commonPlayerSpawnInfo.portalCooldown());
 		this.minecraft.gameMode.setLocalMode(commonPlayerSpawnInfo.gameType(), commonPlayerSpawnInfo.previousGameType());
 		this.minecraft.options.setServerRenderDistance(clientboundLoginPacket.chunkRadius());
+		if (commonPlayerSpawnInfo.waitForGrid() != null) {
+			this.minecraft.player.reloadAttachedGrid = commonPlayerSpawnInfo.waitForGrid();
+			this.minecraft.player.reloadAttachedGridTimeout = 60;
+		}
+
 		this.chatSession = null;
 		this.lastSeenMessages = new LastSeenMessagesTracker(20);
 		this.messageSignatureCache = MessageSignatureCache.createDefault();
@@ -501,6 +511,22 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 		entity.setXRot(0.0F);
 		entity.setId(clientboundAddExperienceOrbPacket.getId());
 		this.level.addEntity(entity);
+	}
+
+	@Override
+	public void handleAddSubGrid(ClientboundAddSubGridPacket clientboundAddSubGridPacket) {
+		PacketUtils.ensureRunningOnSameThread(clientboundAddSubGridPacket, this, this.minecraft);
+		GridCarrier gridCarrier = new GridCarrier(EntityType.GRID_CARRIER, this.level);
+		double d = clientboundAddSubGridPacket.x();
+		double e = clientboundAddSubGridPacket.y();
+		double f = clientboundAddSubGridPacket.z();
+		gridCarrier.syncPacketPositionCodec(d, e, f);
+		gridCarrier.moveTo(d, e, f);
+		gridCarrier.setId(clientboundAddSubGridPacket.id());
+		gridCarrier.setUUID(clientboundAddSubGridPacket.uuid());
+		gridCarrier.grid().setBlocks(clientboundAddSubGridPacket.blocks());
+		gridCarrier.grid().setBiome(clientboundAddSubGridPacket.biome());
+		this.level.addEntity(gridCarrier);
 	}
 
 	@Override
@@ -1160,6 +1186,10 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 		}
 
 		this.minecraft.gameMode.setLocalMode(commonPlayerSpawnInfo.gameType(), commonPlayerSpawnInfo.previousGameType());
+		if (commonPlayerSpawnInfo.waitForGrid() != null) {
+			localPlayer2.reloadAttachedGrid = commonPlayerSpawnInfo.waitForGrid();
+			localPlayer2.reloadAttachedGridTimeout = 60;
+		}
 	}
 
 	@Override
@@ -1402,8 +1432,12 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 			this.minecraft.player.setShowDeathScreen(f == 0.0F);
 		} else if (type == ClientboundGameEventPacket.LIMITED_CRAFTING) {
 			this.minecraft.player.setDoLimitedCrafting(f == 1.0F);
-		} else if (type == ClientboundGameEventPacket.LEVEL_CHUNKS_LOAD_START && this.levelLoadStatusManager != null) {
-			this.levelLoadStatusManager.loadingPacketsReceived();
+		} else if (type == ClientboundGameEventPacket.LEVEL_CHUNKS_LOAD_START) {
+			if (this.levelLoadStatusManager != null) {
+				this.levelLoadStatusManager.loadingPacketsReceived();
+			}
+		} else if (type == ClientboundGameEventPacket.POTATO_POEM) {
+			this.minecraft.setScreen(new PotatoPoemScreen(() -> this.minecraft.setScreen(new SproutRespawnScreen())));
 		}
 	}
 
@@ -1857,6 +1891,27 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 				clientboundSoundPacket.getPitch(),
 				clientboundSoundPacket.getSeed()
 			);
+	}
+
+	@Override
+	public void handleSoundSequenceEvent(ClientboundSoundSequencePacket clientboundSoundSequencePacket) {
+		PacketUtils.ensureRunningOnSameThread(clientboundSoundSequencePacket, this, this.minecraft);
+
+		for (ClientboundSoundSequencePacket.DelayedSound delayedSound : clientboundSoundSequencePacket.getSounds()) {
+			ClientboundSoundPacket clientboundSoundPacket = delayedSound.packet();
+			this.minecraft
+				.level
+				.playDelayedSound(
+					delayedSound.ticks(),
+					clientboundSoundPacket.getX(),
+					clientboundSoundPacket.getY(),
+					clientboundSoundPacket.getZ(),
+					clientboundSoundPacket.getSound().value(),
+					clientboundSoundPacket.getSource(),
+					clientboundSoundPacket.getVolume(),
+					clientboundSoundPacket.getPitch()
+				);
+		}
 	}
 
 	@Override

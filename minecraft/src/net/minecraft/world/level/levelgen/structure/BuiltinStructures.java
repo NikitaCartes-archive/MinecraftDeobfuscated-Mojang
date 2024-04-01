@@ -8,6 +8,7 @@ public interface BuiltinStructures {
 	ResourceKey<Structure> PILLAGER_OUTPOST = createKey("pillager_outpost");
 	ResourceKey<Structure> MINESHAFT = createKey("mineshaft");
 	ResourceKey<Structure> MINESHAFT_MESA = createKey("mineshaft_mesa");
+	ResourceKey<Structure> MINESHAFT_POTATO = createKey("mineshaft_potato");
 	ResourceKey<Structure> WOODLAND_MANSION = createKey("mansion");
 	ResourceKey<Structure> JUNGLE_TEMPLE = createKey("jungle_pyramid");
 	ResourceKey<Structure> DESERT_PYRAMID = createKey("desert_pyramid");
@@ -24,7 +25,9 @@ public interface BuiltinStructures {
 	ResourceKey<Structure> END_CITY = createKey("end_city");
 	ResourceKey<Structure> BURIED_TREASURE = createKey("buried_treasure");
 	ResourceKey<Structure> BASTION_REMNANT = createKey("bastion_remnant");
+	ResourceKey<Structure> COLOSSEUM = createKey("colosseum");
 	ResourceKey<Structure> VILLAGE_PLAINS = createKey("village_plains");
+	ResourceKey<Structure> VILLAGE_POTATO = createKey("village_potato");
 	ResourceKey<Structure> VILLAGE_DESERT = createKey("village_desert");
 	ResourceKey<Structure> VILLAGE_SAVANNA = createKey("village_savanna");
 	ResourceKey<Structure> VILLAGE_SNOWY = createKey("village_snowy");
@@ -36,6 +39,7 @@ public interface BuiltinStructures {
 	ResourceKey<Structure> RUINED_PORTAL_MOUNTAIN = createKey("ruined_portal_mountain");
 	ResourceKey<Structure> RUINED_PORTAL_OCEAN = createKey("ruined_portal_ocean");
 	ResourceKey<Structure> RUINED_PORTAL_NETHER = createKey("ruined_portal_nether");
+	ResourceKey<Structure> RUINED_PORTATOL = createKey("ruined_portatol");
 	ResourceKey<Structure> ANCIENT_CITY = createKey("ancient_city");
 	ResourceKey<Structure> TRAIL_RUINS = createKey("trail_ruins");
 	ResourceKey<Structure> TRIAL_CHAMBERS = createKey("trial_chambers");

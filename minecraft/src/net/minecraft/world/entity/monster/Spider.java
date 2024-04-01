@@ -51,6 +51,11 @@ public class Spider extends Monster {
 	}
 
 	@Override
+	public boolean hasPotatoVariant() {
+		return true;
+	}
+
+	@Override
 	protected void registerGoals() {
 		this.goalSelector.addGoal(1, new FloatGoal(this));
 		this.goalSelector.addGoal(2, new AvoidEntityGoal(this, Armadillo.class, 6.0F, 1.0, 1.2, livingEntity -> !((Armadillo)livingEntity).isScared()));

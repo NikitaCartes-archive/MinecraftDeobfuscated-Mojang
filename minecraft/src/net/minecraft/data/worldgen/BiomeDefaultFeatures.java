@@ -50,17 +50,23 @@ public class BiomeDefaultFeatures {
 	}
 
 	public static void addDefaultOres(BiomeGenerationSettings.Builder builder) {
-		addDefaultOres(builder, false);
+		addDefaultOres(builder, false, false);
 	}
 
-	public static void addDefaultOres(BiomeGenerationSettings.Builder builder, boolean bl) {
+	public static void addDefaultOres(BiomeGenerationSettings.Builder builder, boolean bl, boolean bl2) {
 		builder.addFeature(GenerationStep.Decoration.UNDERGROUND_ORES, OrePlacements.ORE_COAL_UPPER);
 		builder.addFeature(GenerationStep.Decoration.UNDERGROUND_ORES, OrePlacements.ORE_COAL_LOWER);
 		builder.addFeature(GenerationStep.Decoration.UNDERGROUND_ORES, OrePlacements.ORE_IRON_UPPER);
 		builder.addFeature(GenerationStep.Decoration.UNDERGROUND_ORES, OrePlacements.ORE_IRON_MIDDLE);
 		builder.addFeature(GenerationStep.Decoration.UNDERGROUND_ORES, OrePlacements.ORE_IRON_SMALL);
-		builder.addFeature(GenerationStep.Decoration.UNDERGROUND_ORES, OrePlacements.ORE_GOLD);
-		builder.addFeature(GenerationStep.Decoration.UNDERGROUND_ORES, OrePlacements.ORE_GOLD_LOWER);
+		builder.addFeature(GenerationStep.Decoration.UNDERGROUND_ORES, OrePlacements.ORE_POISONOUS_POTATO);
+		if (bl2) {
+			builder.addFeature(GenerationStep.Decoration.UNDERGROUND_ORES, OrePlacements.ORE_GOLD_ABOVE_ZERO);
+		} else {
+			builder.addFeature(GenerationStep.Decoration.UNDERGROUND_ORES, OrePlacements.ORE_GOLD);
+			builder.addFeature(GenerationStep.Decoration.UNDERGROUND_ORES, OrePlacements.ORE_GOLD_LOWER);
+		}
+
 		builder.addFeature(GenerationStep.Decoration.UNDERGROUND_ORES, OrePlacements.ORE_REDSTONE);
 		builder.addFeature(GenerationStep.Decoration.UNDERGROUND_ORES, OrePlacements.ORE_REDSTONE_LOWER);
 		builder.addFeature(GenerationStep.Decoration.UNDERGROUND_ORES, OrePlacements.ORE_DIAMOND);
@@ -69,7 +75,12 @@ public class BiomeDefaultFeatures {
 		builder.addFeature(GenerationStep.Decoration.UNDERGROUND_ORES, OrePlacements.ORE_DIAMOND_BURIED);
 		builder.addFeature(GenerationStep.Decoration.UNDERGROUND_ORES, OrePlacements.ORE_LAPIS);
 		builder.addFeature(GenerationStep.Decoration.UNDERGROUND_ORES, OrePlacements.ORE_LAPIS_BURIED);
-		builder.addFeature(GenerationStep.Decoration.UNDERGROUND_ORES, bl ? OrePlacements.ORE_COPPER_LARGE : OrePlacements.ORE_COPPER);
+		if (bl2) {
+			builder.addFeature(GenerationStep.Decoration.UNDERGROUND_ORES, OrePlacements.ORE_COPPER_SMALL);
+		} else {
+			builder.addFeature(GenerationStep.Decoration.UNDERGROUND_ORES, bl ? OrePlacements.ORE_COPPER_LARGE : OrePlacements.ORE_COPPER);
+		}
+
 		builder.addFeature(GenerationStep.Decoration.UNDERGROUND_ORES, CavePlacements.UNDERWATER_MAGMA);
 	}
 
@@ -395,6 +406,7 @@ public class BiomeDefaultFeatures {
 
 	public static void addDefaultCrystalFormations(BiomeGenerationSettings.Builder builder) {
 		builder.addFeature(GenerationStep.Decoration.LOCAL_MODIFICATIONS, CavePlacements.AMETHYST_GEODE);
+		builder.addFeature(GenerationStep.Decoration.LOCAL_MODIFICATIONS, CavePlacements.POTATO_GEODE);
 	}
 
 	public static void farmAnimals(MobSpawnSettings.Builder builder) {
@@ -406,6 +418,7 @@ public class BiomeDefaultFeatures {
 
 	public static void caveSpawns(MobSpawnSettings.Builder builder) {
 		builder.addSpawn(MobCategory.AMBIENT, new MobSpawnSettings.SpawnerData(EntityType.BAT, 10, 8, 8));
+		builder.addSpawn(MobCategory.AMBIENT, new MobSpawnSettings.SpawnerData(EntityType.BATATO, 13, 8, 16));
 		builder.addSpawn(MobCategory.UNDERGROUND_WATER_CREATURE, new MobSpawnSettings.SpawnerData(EntityType.GLOW_SQUID, 10, 4, 6));
 	}
 
@@ -461,6 +474,7 @@ public class BiomeDefaultFeatures {
 	public static void monsters(MobSpawnSettings.Builder builder, int i, int j, int k, boolean bl) {
 		builder.addSpawn(MobCategory.MONSTER, new MobSpawnSettings.SpawnerData(EntityType.SPIDER, 100, 4, 4));
 		builder.addSpawn(MobCategory.MONSTER, new MobSpawnSettings.SpawnerData(bl ? EntityType.DROWNED : EntityType.ZOMBIE, i, 4, 4));
+		builder.addSpawn(MobCategory.MONSTER, new MobSpawnSettings.SpawnerData(EntityType.POISONOUS_POTATO_ZOMBIE, 25, 1, 4));
 		builder.addSpawn(MobCategory.MONSTER, new MobSpawnSettings.SpawnerData(EntityType.ZOMBIE_VILLAGER, j, 1, 1));
 		builder.addSpawn(MobCategory.MONSTER, new MobSpawnSettings.SpawnerData(EntityType.SKELETON, k, 4, 4));
 		builder.addSpawn(MobCategory.MONSTER, new MobSpawnSettings.SpawnerData(EntityType.CREEPER, 100, 4, 4));

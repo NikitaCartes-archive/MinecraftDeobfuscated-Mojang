@@ -60,6 +60,7 @@ import net.minecraft.world.level.block.CandleBlock;
 import net.minecraft.world.level.block.CandleCakeBlock;
 import net.minecraft.world.level.block.CarvedPumpkinBlock;
 import net.minecraft.world.level.block.DispenserBlock;
+import net.minecraft.world.level.block.PotatoZombieHeadBlock;
 import net.minecraft.world.level.block.RespawnAnchorBlock;
 import net.minecraft.world.level.block.ShulkerBoxBlock;
 import net.minecraft.world.level.block.SkullBlock;
@@ -561,6 +562,16 @@ public interface DispenseItemBehavior {
 					this.setSuccess(ArmorItem.dispenseArmor(blockSource, itemStack));
 				}
 
+				return itemStack;
+			}
+		});
+		DispenserBlock.registerBehavior(Blocks.POTATO_ZOMBIE_HEAD_HAT, new OptionalDispenseItemBehavior() {
+			@Override
+			protected ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
+				Level level = blockSource.level();
+				BlockPos blockPos = blockSource.pos().relative(blockSource.state().getValue(DispenserBlock.FACING));
+				PotatoZombieHeadBlock potatoZombieHeadBlock = (PotatoZombieHeadBlock)Blocks.POTATO_ZOMBIE_HEAD_HAT;
+				this.setSuccess(ArmorItem.dispenseArmor(blockSource, itemStack));
 				return itemStack;
 			}
 		});

@@ -35,7 +35,8 @@ public class DamageTypeTagsProvider extends TagsProvider<DamageType> {
 				DamageTypes.FELL_OUT_OF_WORLD,
 				DamageTypes.GENERIC_KILL,
 				DamageTypes.SONIC_BOOM,
-				DamageTypes.OUTSIDE_BORDER
+				DamageTypes.OUTSIDE_BORDER,
+				DamageTypes.POTATO_MAGIC
 			);
 		this.tag(DamageTypeTags.BYPASSES_SHIELD).addTag(DamageTypeTags.BYPASSES_ARMOR).add(DamageTypes.FALLING_ANVIL, DamageTypes.FALLING_STALACTITE);
 		this.tag(DamageTypeTags.BYPASSES_INVULNERABILITY).add(DamageTypes.FELL_OUT_OF_WORLD, DamageTypes.GENERIC_KILL);
@@ -52,7 +53,8 @@ public class DamageTypeTagsProvider extends TagsProvider<DamageType> {
 				DamageTypes.UNATTRIBUTED_FIREBALL,
 				DamageTypes.FIREBALL,
 				DamageTypes.WITHER_SKULL,
-				DamageTypes.THROWN
+				DamageTypes.THROWN,
+				DamageTypes.POTATO_MAGIC
 			);
 		this.tag(DamageTypeTags.WITCH_RESISTANT_TO).add(DamageTypes.MAGIC, DamageTypes.INDIRECT_MAGIC, DamageTypes.SONIC_BOOM, DamageTypes.THORNS);
 		this.tag(DamageTypeTags.IS_EXPLOSION).add(DamageTypes.FIREWORKS, DamageTypes.EXPLOSION, DamageTypes.PLAYER_EXPLOSION, DamageTypes.BAD_RESPAWN_POINT);

@@ -45,17 +45,27 @@ import net.minecraft.world.level.levelgen.structure.structures.WoodlandMansionSt
 
 public class Structures {
 	public static Structure.StructureSettings structure(
-		HolderSet<Biome> holderSet, Map<MobCategory, StructureSpawnOverride> map, GenerationStep.Decoration decoration, TerrainAdjustment terrainAdjustment
+		HolderSet<Biome> holderSet,
+		List<Structure.DensityCheck> list,
+		Map<MobCategory, StructureSpawnOverride> map,
+		GenerationStep.Decoration decoration,
+		TerrainAdjustment terrainAdjustment
 	) {
-		return new Structure.StructureSettings(holderSet, map, decoration, terrainAdjustment);
+		return new Structure.StructureSettings(holderSet, list, map, decoration, terrainAdjustment);
 	}
 
 	private static Structure.StructureSettings structure(HolderSet<Biome> holderSet, GenerationStep.Decoration decoration, TerrainAdjustment terrainAdjustment) {
-		return structure(holderSet, Map.of(), decoration, terrainAdjustment);
+		return structure(holderSet, List.of(), Map.of(), decoration, terrainAdjustment);
+	}
+
+	private static Structure.StructureSettings structure(
+		HolderSet<Biome> holderSet, Map<MobCategory, StructureSpawnOverride> map, GenerationStep.Decoration decoration, TerrainAdjustment terrainAdjustment
+	) {
+		return structure(holderSet, List.of(), map, decoration, terrainAdjustment);
 	}
 
 	private static Structure.StructureSettings structure(HolderSet<Biome> holderSet, TerrainAdjustment terrainAdjustment) {
-		return structure(holderSet, Map.of(), GenerationStep.Decoration.SURFACE_STRUCTURES, terrainAdjustment);
+		return structure(holderSet, List.of(), Map.of(), GenerationStep.Decoration.SURFACE_STRUCTURES, terrainAdjustment);
 	}
 
 	public static void bootstrap(BootstrapContext<Structure> bootstrapContext) {
@@ -94,6 +104,13 @@ public class Structures {
 			new MineshaftStructure(
 				structure(holderGetter.getOrThrow(BiomeTags.HAS_MINESHAFT_MESA), GenerationStep.Decoration.UNDERGROUND_STRUCTURES, TerrainAdjustment.NONE),
 				MineshaftStructure.Type.MESA
+			)
+		);
+		bootstrapContext.register(
+			BuiltinStructures.MINESHAFT_POTATO,
+			new MineshaftStructure(
+				structure(holderGetter.getOrThrow(BiomeTags.IS_POTATO), GenerationStep.Decoration.UNDERGROUND_STRUCTURES, TerrainAdjustment.NONE),
+				MineshaftStructure.Type.POTATO
 			)
 		);
 		bootstrapContext.register(
@@ -202,11 +219,59 @@ public class Structures {
 			)
 		);
 		bootstrapContext.register(
+			BuiltinStructures.COLOSSEUM,
+			new JigsawStructure(
+				structure(
+					holderGetter.getOrThrow(BiomeTags.HAS_COLOSSEA),
+					List.of(
+						Structure.DensityCheck.of(0, 0, 0, true),
+						Structure.DensityCheck.of(-18, 46, -18, true),
+						Structure.DensityCheck.of(-18, 46, 18, true),
+						Structure.DensityCheck.of(18, 46, -18, true),
+						Structure.DensityCheck.of(18, 46, 18, true)
+					),
+					Map.of(
+						MobCategory.MONSTER,
+						new StructureSpawnOverride(
+							StructureSpawnOverride.BoundingBoxType.STRUCTURE,
+							WeightedRandomList.create(
+								new MobSpawnSettings.SpawnerData(EntityType.TOXIFIN, 1, 2, 4),
+								new MobSpawnSettings.SpawnerData(EntityType.SPIDER, 1, 1, 1),
+								new MobSpawnSettings.SpawnerData(EntityType.SKELETON, 1, 1, 1),
+								new MobSpawnSettings.SpawnerData(EntityType.SLIME, 1, 1, 1)
+							)
+						),
+						MobCategory.UNDERGROUND_WATER_CREATURE,
+						new StructureSpawnOverride(StructureSpawnOverride.BoundingBoxType.STRUCTURE, MobSpawnSettings.EMPTY_MOB_LIST),
+						MobCategory.AXOLOTLS,
+						new StructureSpawnOverride(StructureSpawnOverride.BoundingBoxType.STRUCTURE, MobSpawnSettings.EMPTY_MOB_LIST)
+					),
+					GenerationStep.Decoration.UNDERGROUND_STRUCTURES,
+					TerrainAdjustment.NONE
+				),
+				holderGetter2.getOrThrow(ColosseumPieces.START),
+				6,
+				ConstantHeight.of(VerticalAnchor.absolute(33)),
+				false
+			)
+		);
+		bootstrapContext.register(
 			BuiltinStructures.VILLAGE_PLAINS,
 			new JigsawStructure(
 				structure(holderGetter.getOrThrow(BiomeTags.HAS_VILLAGE_PLAINS), TerrainAdjustment.BEARD_THIN),
 				holderGetter2.getOrThrow(PlainVillagePools.START),
 				6,
+				ConstantHeight.of(VerticalAnchor.absolute(0)),
+				true,
+				Heightmap.Types.WORLD_SURFACE_WG
+			)
+		);
+		bootstrapContext.register(
+			BuiltinStructures.VILLAGE_POTATO,
+			new JigsawStructure(
+				structure(holderGetter.getOrThrow(BiomeTags.HAS_VILLAGE_POTATO), TerrainAdjustment.BEARD_THIN),
+				holderGetter2.getOrThrow(PotatoVillagePools.START),
+				8,
 				ConstantHeight.of(VerticalAnchor.absolute(0)),
 				true,
 				Heightmap.Types.WORLD_SURFACE_WG
@@ -261,8 +326,8 @@ public class Structures {
 			new RuinedPortalStructure(
 				structure(holderGetter.getOrThrow(BiomeTags.HAS_RUINED_PORTAL_STANDARD), TerrainAdjustment.NONE),
 				List.of(
-					new RuinedPortalStructure.Setup(RuinedPortalPiece.VerticalPlacement.UNDERGROUND, 1.0F, 0.2F, false, false, true, false, 0.5F),
-					new RuinedPortalStructure.Setup(RuinedPortalPiece.VerticalPlacement.ON_LAND_SURFACE, 0.5F, 0.2F, false, false, true, false, 0.5F)
+					new RuinedPortalStructure.Setup(RuinedPortalPiece.VerticalPlacement.UNDERGROUND, 1.0F, 0.2F, false, false, true, false, 0.5F, false),
+					new RuinedPortalStructure.Setup(RuinedPortalPiece.VerticalPlacement.ON_LAND_SURFACE, 0.5F, 0.2F, false, false, true, false, 0.5F, false)
 				)
 			)
 		);
@@ -270,21 +335,21 @@ public class Structures {
 			BuiltinStructures.RUINED_PORTAL_DESERT,
 			new RuinedPortalStructure(
 				structure(holderGetter.getOrThrow(BiomeTags.HAS_RUINED_PORTAL_DESERT), TerrainAdjustment.NONE),
-				new RuinedPortalStructure.Setup(RuinedPortalPiece.VerticalPlacement.PARTLY_BURIED, 0.0F, 0.0F, false, false, false, false, 1.0F)
+				new RuinedPortalStructure.Setup(RuinedPortalPiece.VerticalPlacement.PARTLY_BURIED, 0.0F, 0.0F, false, false, false, false, 1.0F, false)
 			)
 		);
 		bootstrapContext.register(
 			BuiltinStructures.RUINED_PORTAL_JUNGLE,
 			new RuinedPortalStructure(
 				structure(holderGetter.getOrThrow(BiomeTags.HAS_RUINED_PORTAL_JUNGLE), TerrainAdjustment.NONE),
-				new RuinedPortalStructure.Setup(RuinedPortalPiece.VerticalPlacement.ON_LAND_SURFACE, 0.5F, 0.8F, true, true, false, false, 1.0F)
+				new RuinedPortalStructure.Setup(RuinedPortalPiece.VerticalPlacement.ON_LAND_SURFACE, 0.5F, 0.8F, true, true, false, false, 1.0F, false)
 			)
 		);
 		bootstrapContext.register(
 			BuiltinStructures.RUINED_PORTAL_SWAMP,
 			new RuinedPortalStructure(
 				structure(holderGetter.getOrThrow(BiomeTags.HAS_RUINED_PORTAL_SWAMP), TerrainAdjustment.NONE),
-				new RuinedPortalStructure.Setup(RuinedPortalPiece.VerticalPlacement.ON_OCEAN_FLOOR, 0.0F, 0.5F, false, true, false, false, 1.0F)
+				new RuinedPortalStructure.Setup(RuinedPortalPiece.VerticalPlacement.ON_OCEAN_FLOOR, 0.0F, 0.5F, false, true, false, false, 1.0F, false)
 			)
 		);
 		bootstrapContext.register(
@@ -292,8 +357,8 @@ public class Structures {
 			new RuinedPortalStructure(
 				structure(holderGetter.getOrThrow(BiomeTags.HAS_RUINED_PORTAL_MOUNTAIN), TerrainAdjustment.NONE),
 				List.of(
-					new RuinedPortalStructure.Setup(RuinedPortalPiece.VerticalPlacement.IN_MOUNTAIN, 1.0F, 0.2F, false, false, true, false, 0.5F),
-					new RuinedPortalStructure.Setup(RuinedPortalPiece.VerticalPlacement.ON_LAND_SURFACE, 0.5F, 0.2F, false, false, true, false, 0.5F)
+					new RuinedPortalStructure.Setup(RuinedPortalPiece.VerticalPlacement.IN_MOUNTAIN, 1.0F, 0.2F, false, false, true, false, 0.5F, false),
+					new RuinedPortalStructure.Setup(RuinedPortalPiece.VerticalPlacement.ON_LAND_SURFACE, 0.5F, 0.2F, false, false, true, false, 0.5F, false)
 				)
 			)
 		);
@@ -301,14 +366,27 @@ public class Structures {
 			BuiltinStructures.RUINED_PORTAL_OCEAN,
 			new RuinedPortalStructure(
 				structure(holderGetter.getOrThrow(BiomeTags.HAS_RUINED_PORTAL_OCEAN), TerrainAdjustment.NONE),
-				new RuinedPortalStructure.Setup(RuinedPortalPiece.VerticalPlacement.ON_OCEAN_FLOOR, 0.0F, 0.8F, false, false, true, false, 1.0F)
+				new RuinedPortalStructure.Setup(RuinedPortalPiece.VerticalPlacement.ON_OCEAN_FLOOR, 0.0F, 0.8F, false, false, true, false, 1.0F, false)
 			)
 		);
 		bootstrapContext.register(
 			BuiltinStructures.RUINED_PORTAL_NETHER,
 			new RuinedPortalStructure(
 				structure(holderGetter.getOrThrow(BiomeTags.HAS_RUINED_PORTAL_NETHER), TerrainAdjustment.NONE),
-				new RuinedPortalStructure.Setup(RuinedPortalPiece.VerticalPlacement.IN_NETHER, 0.5F, 0.0F, false, false, false, true, 1.0F)
+				new RuinedPortalStructure.Setup(RuinedPortalPiece.VerticalPlacement.IN_NETHER, 0.5F, 0.0F, false, false, false, true, 1.0F, false)
+			)
+		);
+		bootstrapContext.register(
+			BuiltinStructures.RUINED_PORTATOL,
+			new RuinedPortalStructure(
+				structure(holderGetter.getOrThrow(BiomeTags.HAS_RUINED_PORTATOLS), TerrainAdjustment.NONE),
+				List.of(
+					new RuinedPortalStructure.Setup(RuinedPortalPiece.VerticalPlacement.UNDERGROUND, 1.0F, 0.4F, false, false, true, false, 0.1F, true),
+					new RuinedPortalStructure.Setup(RuinedPortalPiece.VerticalPlacement.ON_LAND_SURFACE, 0.5F, 0.1F, false, false, true, false, 0.3F, true),
+					new RuinedPortalStructure.Setup(RuinedPortalPiece.VerticalPlacement.PARTLY_BURIED, 0.0F, 0.2F, false, false, true, false, 0.1F, true),
+					new RuinedPortalStructure.Setup(RuinedPortalPiece.VerticalPlacement.ON_OCEAN_FLOOR, 0.0F, 0.8F, false, true, false, false, 0.1F, true),
+					new RuinedPortalStructure.Setup(RuinedPortalPiece.VerticalPlacement.IN_MOUNTAIN, 1.0F, 0.2F, false, false, true, false, 0.2F, true)
+				)
 			)
 		);
 		bootstrapContext.register(

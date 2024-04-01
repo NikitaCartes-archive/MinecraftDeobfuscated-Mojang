@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
+import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -13,6 +14,7 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -50,6 +52,7 @@ import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.PotatoPeelerItem;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.ItemLike;
@@ -85,6 +88,9 @@ public class Sheep extends Animal implements Shearable {
 	private static final Map<DyeColor, float[]> COLORARRAY_BY_COLOR = Maps.newEnumMap(
 		(Map)Arrays.stream(DyeColor.values()).collect(Collectors.toMap(dyeColor -> dyeColor, Sheep::createSheepColor))
 	);
+	private static final Map<DyeColor, float[]> COLORARRAY_BY_POTATO = Maps.newEnumMap(
+		(Map)Arrays.stream(DyeColor.values()).collect(Collectors.toMap(dyeColor -> dyeColor, Sheep::createSheepColorPotato))
+	);
 	private int eatAnimationTick;
 	private EatBlockGoal eatBlockGoal;
 
@@ -98,12 +104,21 @@ public class Sheep extends Animal implements Shearable {
 		}
 	}
 
-	public static float[] getColorArray(DyeColor dyeColor) {
-		return (float[])COLORARRAY_BY_COLOR.get(dyeColor);
+	private static float[] createSheepColorPotato(DyeColor dyeColor) {
+		return dyeColor == DyeColor.WHITE ? new float[]{1.0F, 1.0F, 1.0F} : dyeColor.getTextureDiffuseColors();
+	}
+
+	public float[] getColorArray(DyeColor dyeColor) {
+		return this.isPotato() ? (float[])COLORARRAY_BY_POTATO.get(dyeColor) : (float[])COLORARRAY_BY_COLOR.get(dyeColor);
 	}
 
 	public Sheep(EntityType<? extends Sheep> entityType, Level level) {
 		super(entityType, level);
+	}
+
+	@Override
+	public boolean hasPotatoVariant() {
+		return true;
 	}
 
 	@Override
@@ -154,6 +169,25 @@ public class Sheep extends Animal implements Shearable {
 	public ResourceKey<LootTable> getDefaultLootTable() {
 		if (this.isSheared()) {
 			return this.getType().getDefaultLootTable();
+		} else if (this.isPotato()) {
+			return switch (this.getColor()) {
+				case WHITE -> BuiltInLootTables.SHEEP_WHITE_POTATO;
+				case ORANGE -> BuiltInLootTables.SHEEP_ORANGE_POTATO;
+				case MAGENTA -> BuiltInLootTables.SHEEP_MAGENTA_POTATO;
+				case LIGHT_BLUE -> BuiltInLootTables.SHEEP_LIGHT_BLUE_POTATO;
+				case YELLOW -> BuiltInLootTables.SHEEP_YELLOW_POTATO;
+				case LIME -> BuiltInLootTables.SHEEP_LIME_POTATO;
+				case PINK -> BuiltInLootTables.SHEEP_PINK_POTATO;
+				case GRAY -> BuiltInLootTables.SHEEP_GRAY_POTATO;
+				case LIGHT_GRAY -> BuiltInLootTables.SHEEP_LIGHT_GRAY_POTATO;
+				case CYAN -> BuiltInLootTables.SHEEP_CYAN_POTATO;
+				case PURPLE -> BuiltInLootTables.SHEEP_PURPLE_POTATO;
+				case BLUE -> BuiltInLootTables.SHEEP_BLUE_POTATO;
+				case BROWN -> BuiltInLootTables.SHEEP_BROWN_POTATO;
+				case GREEN -> BuiltInLootTables.SHEEP_GREEN_POTATO;
+				case RED -> BuiltInLootTables.SHEEP_RED_POTATO;
+				case BLACK -> BuiltInLootTables.SHEEP_BLACK_POTATO;
+			};
 		} else {
 			return switch (this.getColor()) {
 				case WHITE -> BuiltInLootTables.SHEEP_WHITE;
@@ -207,10 +241,14 @@ public class Sheep extends Animal implements Shearable {
 	@Override
 	public InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
-		if (itemStack.is(Items.SHEARS)) {
+		if (this.isCorrectShears(itemStack)) {
 			if (!this.level().isClientSide && this.readyForShearing()) {
 				this.shear(SoundSource.PLAYERS);
 				this.gameEvent(GameEvent.SHEAR, player);
+				if (this.isPotato() && player instanceof ServerPlayer serverPlayer) {
+					CriteriaTriggers.PEEL_POTATO_SHEEP.trigger(serverPlayer);
+				}
+
 				itemStack.hurtAndBreak(1, player, getSlotForHand(interactionHand));
 				return InteractionResult.SUCCESS;
 			} else {
@@ -221,14 +259,23 @@ public class Sheep extends Animal implements Shearable {
 		}
 	}
 
+	private boolean isCorrectShears(ItemStack itemStack) {
+		return this.isPotato() ? itemStack.is(Items.POTATO_PEELER) : itemStack.is(Items.SHEARS);
+	}
+
 	@Override
 	public void shear(SoundSource soundSource) {
-		this.level().playSound(null, this, SoundEvents.SHEEP_SHEAR, soundSource, 1.0F, 1.0F);
+		if (this.isPotato()) {
+			PotatoPeelerItem.playPeelSound(this.level(), this, soundSource);
+		} else {
+			this.level().playSound(null, this, SoundEvents.SHEEP_SHEAR, soundSource, 1.0F, 1.0F);
+		}
+
 		this.setSheared(true);
 		int i = 1 + this.random.nextInt(3);
 
 		for (int j = 0; j < i; j++) {
-			ItemEntity itemEntity = this.spawnAtLocation((ItemLike)ITEM_BY_DYE.get(this.getColor()), 1);
+			ItemEntity itemEntity = this.spawnAtLocation(this.getShearDrop(), 1);
 			if (itemEntity != null) {
 				itemEntity.setDeltaMovement(
 					itemEntity.getDeltaMovement()
@@ -240,6 +287,10 @@ public class Sheep extends Animal implements Shearable {
 				);
 			}
 		}
+	}
+
+	private ItemLike getShearDrop() {
+		return this.isPotato() ? Items.POTATO_PEELS_MAP.get(this.getColor()) : (ItemLike)ITEM_BY_DYE.get(this.getColor());
 	}
 
 	@Override

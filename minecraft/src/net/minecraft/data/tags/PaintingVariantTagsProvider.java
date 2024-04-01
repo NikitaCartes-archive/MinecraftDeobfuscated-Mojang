@@ -15,6 +15,16 @@ public class PaintingVariantTagsProvider extends TagsProvider<PaintingVariant> {
 
 	@Override
 	protected void addTags(HolderLookup.Provider provider) {
+		this.tag(PaintingVariantTags.POTATO)
+			.add(
+				PaintingVariants.POISONOUS_POTATO,
+				PaintingVariants.MR_POTATO,
+				PaintingVariants.BURNING_POTATO,
+				PaintingVariants.UBIQUITATO,
+				PaintingVariants.ABSTRACTATO,
+				PaintingVariants.CECI,
+				PaintingVariants.POTATOE
+			);
 		this.tag(PaintingVariantTags.PLACEABLE)
 			.add(
 				PaintingVariants.KEBAB,
@@ -43,6 +53,7 @@ public class PaintingVariantTagsProvider extends TagsProvider<PaintingVariant> {
 				PaintingVariants.BURNING_SKULL,
 				PaintingVariants.SKELETON,
 				PaintingVariants.DONKEY_KONG
-			);
+			)
+			.addTag(PaintingVariantTags.POTATO);
 	}
 }

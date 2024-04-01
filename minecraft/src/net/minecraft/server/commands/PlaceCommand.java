@@ -7,6 +7,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
+import java.util.List;
 import java.util.Optional;
 import net.minecraft.ResourceLocationException;
 import net.minecraft.commands.CommandSourceStack;
@@ -273,7 +274,8 @@ public class PlaceCommand {
 			new ChunkPos(blockPos),
 			0,
 			serverLevel,
-			holder -> true
+			holder -> true,
+			List.of()
 		);
 		if (!structureStart.isValid()) {
 			throw ERROR_STRUCTURE_FAILED.create();

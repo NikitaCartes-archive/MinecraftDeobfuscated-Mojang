@@ -57,12 +57,7 @@ public class HoneyBottleItem extends Item {
 
 	@Override
 	public SoundEvent getDrinkingSound() {
-		return SoundEvents.HONEY_DRINK;
-	}
-
-	@Override
-	public SoundEvent getEatingSound() {
-		return SoundEvents.HONEY_DRINK;
+		return SoundEvents.HONEY_DRINK.value();
 	}
 
 	@Override

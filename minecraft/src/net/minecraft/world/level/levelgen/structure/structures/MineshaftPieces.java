@@ -497,7 +497,13 @@ public class MineshaftPieces {
 						boolean bl3 = this.isReplaceableByStructures(blockState2);
 						if (!bl3 && this.canHangChainBelow(worldGenLevel, mutableBlockPos, blockState2)) {
 							worldGenLevel.setBlock(mutableBlockPos.setY(l + 1), this.type.getFenceState(), 2);
-							fillColumnBetween(worldGenLevel, Blocks.CHAIN.defaultBlockState(), mutableBlockPos, l + 2, l + m);
+							fillColumnBetween(
+								worldGenLevel,
+								blockState.is(Blocks.POTATO_STEM) ? Blocks.POTATO_PEDICULE.defaultBlockState() : Blocks.CHAIN.defaultBlockState(),
+								mutableBlockPos,
+								l + 2,
+								l + m
+							);
 							return;
 						}
 
@@ -955,7 +961,8 @@ public class MineshaftPieces {
 			return !blockState.is(this.type.getPlanksState().getBlock())
 				&& !blockState.is(this.type.getWoodState().getBlock())
 				&& !blockState.is(this.type.getFenceState().getBlock())
-				&& !blockState.is(Blocks.CHAIN);
+				&& !blockState.is(Blocks.CHAIN)
+				&& !blockState.is(Blocks.POTATO_PEDICULE);
 		}
 
 		@Override

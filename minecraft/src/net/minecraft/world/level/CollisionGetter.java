@@ -44,6 +44,10 @@ public interface CollisionGetter extends BlockGetter {
 	}
 
 	default boolean noCollision(@Nullable Entity entity, AABB aABB) {
+		return this.noCollision(entity, aABB, false);
+	}
+
+	default boolean noCollision(@Nullable Entity entity, AABB aABB, boolean bl) {
 		for (VoxelShape voxelShape : this.getBlockCollisions(entity, aABB)) {
 			if (!voxelShape.isEmpty()) {
 				return false;

@@ -122,21 +122,29 @@ public class RuinedPortalPiece extends TemplateStructurePiece {
 	) {
 		BlockIgnoreProcessor blockIgnoreProcessor = properties.airPocket ? BlockIgnoreProcessor.STRUCTURE_BLOCK : BlockIgnoreProcessor.STRUCTURE_AND_AIR;
 		List<ProcessorRule> list = Lists.<ProcessorRule>newArrayList();
-		list.add(getBlockReplaceRule(Blocks.GOLD_BLOCK, 0.3F, Blocks.AIR));
-		list.add(getLavaProcessorRule(verticalPlacement, properties));
-		if (!properties.cold) {
-			list.add(getBlockReplaceRule(Blocks.NETHERRACK, 0.07F, Blocks.MAGMA_BLOCK));
+		if (!properties.potato) {
+			list.add(getBlockReplaceRule(Blocks.GOLD_BLOCK, 0.3F, Blocks.AIR));
+			list.add(getLavaProcessorRule(verticalPlacement, properties));
+			if (!properties.cold) {
+				list.add(getBlockReplaceRule(Blocks.NETHERRACK, 0.07F, Blocks.MAGMA_BLOCK));
+			}
 		}
 
 		StructurePlaceSettings structurePlaceSettings = new StructurePlaceSettings()
 			.setRotation(rotation)
 			.setMirror(mirror)
 			.setRotationPivot(blockPos)
-			.addProcessor(blockIgnoreProcessor)
-			.addProcessor(new RuleProcessor(list))
-			.addProcessor(new BlockAgeProcessor(properties.mossiness))
-			.addProcessor(new ProtectedBlockProcessor(BlockTags.FEATURES_CANNOT_REPLACE))
-			.addProcessor(new LavaSubmergedBlockProcessor());
+			.addProcessor(blockIgnoreProcessor);
+		if (!list.isEmpty()) {
+			structurePlaceSettings.addProcessor(new RuleProcessor(list));
+		}
+
+		structurePlaceSettings.addProcessor(new BlockAgeProcessor(properties.mossiness, properties.potato));
+		structurePlaceSettings.addProcessor(new ProtectedBlockProcessor(BlockTags.FEATURES_CANNOT_REPLACE));
+		if (properties.potato) {
+			structurePlaceSettings.addProcessor(new LavaSubmergedBlockProcessor());
+		}
+
 		if (properties.replaceWithBlackstone) {
 			structurePlaceSettings.addProcessor(BlackstoneReplaceProcessor.INSTANCE);
 		}
@@ -202,7 +210,10 @@ public class RuinedPortalPiece extends TemplateStructurePiece {
 	}
 
 	private void maybeAddLeavesAbove(RandomSource randomSource, LevelAccessor levelAccessor, BlockPos blockPos) {
-		if (randomSource.nextFloat() < 0.5F && levelAccessor.getBlockState(blockPos).is(Blocks.NETHERRACK) && levelAccessor.getBlockState(blockPos.above()).isAir()) {
+		BlockState blockState = levelAccessor.getBlockState(blockPos);
+		if (randomSource.nextFloat() < 0.5F
+			&& (blockState.is(Blocks.NETHERRACK) || blockState.is(Blocks.TERREDEPOMME))
+			&& levelAccessor.getBlockState(blockPos.above()).isAir()) {
 			levelAccessor.setBlock(blockPos.above(), Blocks.JUNGLE_LEAVES.defaultBlockState().setValue(LeavesBlock.PERSISTENT, Boolean.valueOf(true)), 3);
 		}
 	}
@@ -211,7 +222,8 @@ public class RuinedPortalPiece extends TemplateStructurePiece {
 		for (int i = this.boundingBox.minX() + 1; i < this.boundingBox.maxX(); i++) {
 			for (int j = this.boundingBox.minZ() + 1; j < this.boundingBox.maxZ(); j++) {
 				BlockPos blockPos = new BlockPos(i, this.boundingBox.minY(), j);
-				if (levelAccessor.getBlockState(blockPos).is(Blocks.NETHERRACK)) {
+				BlockState blockState = levelAccessor.getBlockState(blockPos);
+				if (blockState.is(Blocks.NETHERRACK) || blockState.is(Blocks.TERREDEPOMME)) {
 					this.addNetherrackDripColumn(randomSource, levelAccessor, blockPos.below());
 				}
 			}
@@ -276,10 +288,14 @@ public class RuinedPortalPiece extends TemplateStructurePiece {
 	}
 
 	private void placeNetherrackOrMagma(RandomSource randomSource, LevelAccessor levelAccessor, BlockPos blockPos) {
-		if (!this.properties.cold && randomSource.nextFloat() < 0.07F) {
-			levelAccessor.setBlock(blockPos, Blocks.MAGMA_BLOCK.defaultBlockState(), 3);
+		if (this.properties.potato) {
+			levelAccessor.setBlock(blockPos, Blocks.TERREDEPOMME.defaultBlockState(), 3);
 		} else {
-			levelAccessor.setBlock(blockPos, Blocks.NETHERRACK.defaultBlockState(), 3);
+			if (!this.properties.cold && randomSource.nextFloat() < 0.07F) {
+				levelAccessor.setBlock(blockPos, Blocks.MAGMA_BLOCK.defaultBlockState(), 3);
+			} else {
+				levelAccessor.setBlock(blockPos, Blocks.NETHERRACK.defaultBlockState(), 3);
+			}
 		}
 	}
 
@@ -307,7 +323,8 @@ public class RuinedPortalPiece extends TemplateStructurePiece {
 						Codec.BOOL.fieldOf("air_pocket").forGetter(properties -> properties.airPocket),
 						Codec.BOOL.fieldOf("overgrown").forGetter(properties -> properties.overgrown),
 						Codec.BOOL.fieldOf("vines").forGetter(properties -> properties.vines),
-						Codec.BOOL.fieldOf("replace_with_blackstone").forGetter(properties -> properties.replaceWithBlackstone)
+						Codec.BOOL.fieldOf("replace_with_blackstone").forGetter(properties -> properties.replaceWithBlackstone),
+						Codec.BOOL.optionalFieldOf("potato", Boolean.valueOf(false)).forGetter(properties -> properties.potato)
 					)
 					.apply(instance, RuinedPortalPiece.Properties::new)
 		);
@@ -317,17 +334,19 @@ public class RuinedPortalPiece extends TemplateStructurePiece {
 		public boolean overgrown;
 		public boolean vines;
 		public boolean replaceWithBlackstone;
+		public boolean potato;
 
 		public Properties() {
 		}
 
-		public Properties(boolean bl, float f, boolean bl2, boolean bl3, boolean bl4, boolean bl5) {
+		public Properties(boolean bl, float f, boolean bl2, boolean bl3, boolean bl4, boolean bl5, boolean bl6) {
 			this.cold = bl;
 			this.mossiness = f;
 			this.airPocket = bl2;
 			this.overgrown = bl3;
 			this.vines = bl4;
 			this.replaceWithBlackstone = bl5;
+			this.potato = bl6;
 		}
 	}
 

@@ -286,6 +286,7 @@ import net.minecraft.util.datafix.schemas.V3816;
 import net.minecraft.util.datafix.schemas.V3818;
 import net.minecraft.util.datafix.schemas.V3818_3;
 import net.minecraft.util.datafix.schemas.V3818_4;
+import net.minecraft.util.datafix.schemas.V3819;
 import net.minecraft.util.datafix.schemas.V501;
 import net.minecraft.util.datafix.schemas.V700;
 import net.minecraft.util.datafix.schemas.V701;
@@ -1277,9 +1278,12 @@ public class DataFixers {
 		dataFixerBuilder.addFixer(new ItemStackComponentizationFix(schema215));
 		Schema schema216 = dataFixerBuilder.addSchema(3818, 5, SAME_NAMESPACED);
 		dataFixerBuilder.addFixer(new AreaEffectCloudPotionFix(schema216));
-		Schema schema217 = dataFixerBuilder.addSchema(3820, SAME_NAMESPACED);
-		dataFixerBuilder.addFixer(new PlayerHeadBlockProfileFix(schema217));
-		dataFixerBuilder.addFixer(new LodestoneCompassComponentFix(schema217));
+		Schema schema217 = dataFixerBuilder.addSchema(3819, V3819::new);
+		dataFixerBuilder.addFixer(new AddNewChoices(schema217, "Added April Fools Block Entity", References.BLOCK_ENTITY));
+		dataFixerBuilder.addFixer(new AddNewChoices(schema217, "Added April Fools Entity", References.ENTITY));
+		Schema schema218 = dataFixerBuilder.addSchema(3820, SAME_NAMESPACED);
+		dataFixerBuilder.addFixer(new PlayerHeadBlockProfileFix(schema218));
+		dataFixerBuilder.addFixer(new LodestoneCompassComponentFix(schema218));
 	}
 
 	private static UnaryOperator<String> createRenamerNoNamespace(Map<String, String> map) {

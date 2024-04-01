@@ -236,6 +236,10 @@ public class PlayerAdvancements {
 		return bl;
 	}
 
+	public AdvancementTree getTree() {
+		return this.tree;
+	}
+
 	private void markForVisibilityUpdate(AdvancementHolder advancementHolder) {
 		AdvancementNode advancementNode = this.tree.get(advancementHolder);
 		if (advancementNode != null) {

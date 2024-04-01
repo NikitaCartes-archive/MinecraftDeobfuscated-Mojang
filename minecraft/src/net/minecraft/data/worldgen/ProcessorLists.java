@@ -34,6 +34,7 @@ import net.minecraft.world.level.storage.loot.LootTable;
 public class ProcessorLists {
 	private static final ResourceKey<StructureProcessorList> EMPTY = createKey("empty");
 	public static final ResourceKey<StructureProcessorList> ZOMBIE_PLAINS = createKey("zombie_plains");
+	public static final ResourceKey<StructureProcessorList> ZOMBIE_POTATO = createKey("zombie_potato");
 	public static final ResourceKey<StructureProcessorList> ZOMBIE_SAVANNA = createKey("zombie_savanna");
 	public static final ResourceKey<StructureProcessorList> ZOMBIE_SNOWY = createKey("zombie_snowy");
 	public static final ResourceKey<StructureProcessorList> ZOMBIE_TAIGA = createKey("zombie_taiga");
@@ -42,9 +43,14 @@ public class ProcessorLists {
 	public static final ResourceKey<StructureProcessorList> MOSSIFY_20_PERCENT = createKey("mossify_20_percent");
 	public static final ResourceKey<StructureProcessorList> MOSSIFY_70_PERCENT = createKey("mossify_70_percent");
 	public static final ResourceKey<StructureProcessorList> STREET_PLAINS = createKey("street_plains");
+	public static final ResourceKey<StructureProcessorList> SPOIL_10_PERCENT = createKey("spoil_10_percent");
+	public static final ResourceKey<StructureProcessorList> SPOIL_20_PERCENT = createKey("spoil_20_percent");
+	public static final ResourceKey<StructureProcessorList> SPOIL_70_PERCENT = createKey("spoil_70_percent");
+	public static final ResourceKey<StructureProcessorList> STREET_POTATO = createKey("street_potato");
 	public static final ResourceKey<StructureProcessorList> STREET_SAVANNA = createKey("street_savanna");
 	public static final ResourceKey<StructureProcessorList> STREET_SNOWY_OR_TAIGA = createKey("street_snowy_or_taiga");
 	public static final ResourceKey<StructureProcessorList> FARM_PLAINS = createKey("farm_plains");
+	public static final ResourceKey<StructureProcessorList> FARM_POTATO = createKey("farm_potato");
 	public static final ResourceKey<StructureProcessorList> FARM_SAVANNA = createKey("farm_savanna");
 	public static final ResourceKey<StructureProcessorList> FARM_SNOWY = createKey("farm_snowy");
 	public static final ResourceKey<StructureProcessorList> FARM_TAIGA = createKey("farm_taiga");
@@ -64,6 +70,7 @@ public class ProcessorLists {
 	public static final ResourceKey<StructureProcessorList> HIGH_RAMPART = createKey("high_rampart");
 	public static final ResourceKey<StructureProcessorList> FOSSIL_ROT = createKey("fossil_rot");
 	public static final ResourceKey<StructureProcessorList> FOSSIL_COAL = createKey("fossil_coal");
+	public static final ResourceKey<StructureProcessorList> COLOSSEUM_VEINS = createKey("colosseum_veins");
 	public static final ResourceKey<StructureProcessorList> FOSSIL_DIAMONDS = createKey("fossil_diamonds");
 	public static final ResourceKey<StructureProcessorList> ANCIENT_CITY_START_DEGRADATION = createKey("ancient_city_start_degradation");
 	public static final ResourceKey<StructureProcessorList> ANCIENT_CITY_GENERIC_DEGRADATION = createKey("ancient_city_generic_degradation");
@@ -107,6 +114,51 @@ public class ProcessorLists {
 						new ProcessorRule(new RandomBlockMatchTest(Blocks.OAK_LOG, 0.05F), AlwaysTrueTest.INSTANCE, Blocks.COBWEB.defaultBlockState()),
 						new ProcessorRule(new RandomBlockMatchTest(Blocks.OAK_PLANKS, 0.1F), AlwaysTrueTest.INSTANCE, Blocks.COBWEB.defaultBlockState()),
 						new ProcessorRule(new RandomBlockMatchTest(Blocks.OAK_STAIRS, 0.1F), AlwaysTrueTest.INSTANCE, Blocks.COBWEB.defaultBlockState()),
+						new ProcessorRule(new RandomBlockMatchTest(Blocks.STRIPPED_OAK_LOG, 0.02F), AlwaysTrueTest.INSTANCE, Blocks.COBWEB.defaultBlockState()),
+						new ProcessorRule(new RandomBlockMatchTest(Blocks.GLASS_PANE, 0.5F), AlwaysTrueTest.INSTANCE, Blocks.COBWEB.defaultBlockState()),
+						new ProcessorRule(
+							new BlockStateMatchTest(
+								Blocks.GLASS_PANE.defaultBlockState().setValue(IronBarsBlock.NORTH, Boolean.valueOf(true)).setValue(IronBarsBlock.SOUTH, Boolean.valueOf(true))
+							),
+							AlwaysTrueTest.INSTANCE,
+							Blocks.BROWN_STAINED_GLASS_PANE
+								.defaultBlockState()
+								.setValue(IronBarsBlock.NORTH, Boolean.valueOf(true))
+								.setValue(IronBarsBlock.SOUTH, Boolean.valueOf(true))
+						),
+						new ProcessorRule(
+							new BlockStateMatchTest(
+								Blocks.GLASS_PANE.defaultBlockState().setValue(IronBarsBlock.EAST, Boolean.valueOf(true)).setValue(IronBarsBlock.WEST, Boolean.valueOf(true))
+							),
+							AlwaysTrueTest.INSTANCE,
+							Blocks.BROWN_STAINED_GLASS_PANE
+								.defaultBlockState()
+								.setValue(IronBarsBlock.EAST, Boolean.valueOf(true))
+								.setValue(IronBarsBlock.WEST, Boolean.valueOf(true))
+						),
+						new ProcessorRule(new RandomBlockMatchTest(Blocks.WHEAT, 0.3F), AlwaysTrueTest.INSTANCE, Blocks.CARROTS.defaultBlockState()),
+						new ProcessorRule(new RandomBlockMatchTest(Blocks.WHEAT, 0.2F), AlwaysTrueTest.INSTANCE, Blocks.POTATOES.defaultBlockState()),
+						new ProcessorRule(new RandomBlockMatchTest(Blocks.WHEAT, 0.1F), AlwaysTrueTest.INSTANCE, Blocks.BEETROOTS.defaultBlockState())
+					)
+				)
+			)
+		);
+		register(
+			bootstrapContext,
+			ZOMBIE_POTATO,
+			ImmutableList.of(
+				new RuleProcessor(
+					ImmutableList.of(
+						new ProcessorRule(new RandomBlockMatchTest(Blocks.TATERSTONE, 0.8F), AlwaysTrueTest.INSTANCE, Blocks.EXPIRED_BAKED_POTATO_BRICKS.defaultBlockState()),
+						new ProcessorRule(new TagMatchTest(BlockTags.DOORS), AlwaysTrueTest.INSTANCE, Blocks.AIR.defaultBlockState()),
+						new ProcessorRule(new BlockMatchTest(Blocks.TORCH), AlwaysTrueTest.INSTANCE, Blocks.AIR.defaultBlockState()),
+						new ProcessorRule(new BlockMatchTest(Blocks.WALL_TORCH), AlwaysTrueTest.INSTANCE, Blocks.AIR.defaultBlockState()),
+						new ProcessorRule(new RandomBlockMatchTest(Blocks.TATERSTONE, 0.07F), AlwaysTrueTest.INSTANCE, Blocks.COBWEB.defaultBlockState()),
+						new ProcessorRule(new RandomBlockMatchTest(Blocks.EXPIRED_BAKED_POTATO_BRICKS, 0.07F), AlwaysTrueTest.INSTANCE, Blocks.COBWEB.defaultBlockState()),
+						new ProcessorRule(new RandomBlockMatchTest(Blocks.WHITE_TERRACOTTA, 0.07F), AlwaysTrueTest.INSTANCE, Blocks.COBWEB.defaultBlockState()),
+						new ProcessorRule(new RandomBlockMatchTest(Blocks.POTATO_STEM, 0.05F), AlwaysTrueTest.INSTANCE, Blocks.COBWEB.defaultBlockState()),
+						new ProcessorRule(new RandomBlockMatchTest(Blocks.POTATO_PLANKS, 0.1F), AlwaysTrueTest.INSTANCE, Blocks.COBWEB.defaultBlockState()),
+						new ProcessorRule(new RandomBlockMatchTest(Blocks.POTATO_STAIRS, 0.1F), AlwaysTrueTest.INSTANCE, Blocks.COBWEB.defaultBlockState()),
 						new ProcessorRule(new RandomBlockMatchTest(Blocks.STRIPPED_OAK_LOG, 0.02F), AlwaysTrueTest.INSTANCE, Blocks.COBWEB.defaultBlockState()),
 						new ProcessorRule(new RandomBlockMatchTest(Blocks.GLASS_PANE, 0.5F), AlwaysTrueTest.INSTANCE, Blocks.COBWEB.defaultBlockState()),
 						new ProcessorRule(
@@ -323,7 +375,58 @@ public class ProcessorLists {
 						new ProcessorRule(new BlockMatchTest(Blocks.DIRT_PATH), new BlockMatchTest(Blocks.WATER), Blocks.OAK_PLANKS.defaultBlockState()),
 						new ProcessorRule(new RandomBlockMatchTest(Blocks.DIRT_PATH, 0.1F), AlwaysTrueTest.INSTANCE, Blocks.GRASS_BLOCK.defaultBlockState()),
 						new ProcessorRule(new BlockMatchTest(Blocks.GRASS_BLOCK), new BlockMatchTest(Blocks.WATER), Blocks.WATER.defaultBlockState()),
-						new ProcessorRule(new BlockMatchTest(Blocks.DIRT), new BlockMatchTest(Blocks.WATER), Blocks.WATER.defaultBlockState())
+						new ProcessorRule(new BlockMatchTest(Blocks.DIRT), new BlockMatchTest(Blocks.WATER), Blocks.WATER.defaultBlockState()),
+						new ProcessorRule(new BlockMatchTest(Blocks.PEELGRASS_BLOCK), new BlockMatchTest(Blocks.WATER), Blocks.WATER.defaultBlockState()),
+						new ProcessorRule(new BlockMatchTest(Blocks.CORRUPTED_PEELGRASS_BLOCK), new BlockMatchTest(Blocks.WATER), Blocks.WATER.defaultBlockState()),
+						new ProcessorRule(new BlockMatchTest(Blocks.TERREDEPOMME), new BlockMatchTest(Blocks.WATER), Blocks.WATER.defaultBlockState())
+					)
+				)
+			)
+		);
+		register(
+			bootstrapContext,
+			SPOIL_10_PERCENT,
+			ImmutableList.of(
+				new RuleProcessor(
+					ImmutableList.of(
+						new ProcessorRule(new RandomBlockMatchTest(Blocks.TATERSTONE, 0.1F), AlwaysTrueTest.INSTANCE, Blocks.EXPIRED_BAKED_POTATO_BRICKS.defaultBlockState())
+					)
+				)
+			)
+		);
+		register(
+			bootstrapContext,
+			SPOIL_20_PERCENT,
+			ImmutableList.of(
+				new RuleProcessor(
+					ImmutableList.of(
+						new ProcessorRule(new RandomBlockMatchTest(Blocks.TATERSTONE, 0.2F), AlwaysTrueTest.INSTANCE, Blocks.EXPIRED_BAKED_POTATO_BRICKS.defaultBlockState())
+					)
+				)
+			)
+		);
+		register(
+			bootstrapContext,
+			SPOIL_70_PERCENT,
+			ImmutableList.of(
+				new RuleProcessor(
+					ImmutableList.of(
+						new ProcessorRule(new RandomBlockMatchTest(Blocks.TATERSTONE, 0.7F), AlwaysTrueTest.INSTANCE, Blocks.EXPIRED_BAKED_POTATO_BRICKS.defaultBlockState())
+					)
+				)
+			)
+		);
+		register(
+			bootstrapContext,
+			STREET_POTATO,
+			ImmutableList.of(
+				new RuleProcessor(
+					ImmutableList.of(
+						new ProcessorRule(new BlockMatchTest(Blocks.POISON_PATH), new BlockMatchTest(Blocks.WATER), Blocks.POTATO_PLANKS.defaultBlockState()),
+						new ProcessorRule(new RandomBlockMatchTest(Blocks.POISON_PATH, 0.1F), AlwaysTrueTest.INSTANCE, Blocks.PEELGRASS_BLOCK.defaultBlockState()),
+						new ProcessorRule(new BlockMatchTest(Blocks.PEELGRASS_BLOCK), new BlockMatchTest(Blocks.WATER), Blocks.WATER.defaultBlockState()),
+						new ProcessorRule(new BlockMatchTest(Blocks.TERREDEPOMME), new BlockMatchTest(Blocks.WATER), Blocks.WATER.defaultBlockState()),
+						new ProcessorRule(new BlockMatchTest(Blocks.CORRUPTED_PEELGRASS_BLOCK), new BlockMatchTest(Blocks.WATER), Blocks.WATER.defaultBlockState())
 					)
 				)
 			)
@@ -337,7 +440,10 @@ public class ProcessorLists {
 						new ProcessorRule(new BlockMatchTest(Blocks.DIRT_PATH), new BlockMatchTest(Blocks.WATER), Blocks.ACACIA_PLANKS.defaultBlockState()),
 						new ProcessorRule(new RandomBlockMatchTest(Blocks.DIRT_PATH, 0.2F), AlwaysTrueTest.INSTANCE, Blocks.GRASS_BLOCK.defaultBlockState()),
 						new ProcessorRule(new BlockMatchTest(Blocks.GRASS_BLOCK), new BlockMatchTest(Blocks.WATER), Blocks.WATER.defaultBlockState()),
-						new ProcessorRule(new BlockMatchTest(Blocks.DIRT), new BlockMatchTest(Blocks.WATER), Blocks.WATER.defaultBlockState())
+						new ProcessorRule(new BlockMatchTest(Blocks.DIRT), new BlockMatchTest(Blocks.WATER), Blocks.WATER.defaultBlockState()),
+						new ProcessorRule(new BlockMatchTest(Blocks.PEELGRASS_BLOCK), new BlockMatchTest(Blocks.WATER), Blocks.WATER.defaultBlockState()),
+						new ProcessorRule(new BlockMatchTest(Blocks.CORRUPTED_PEELGRASS_BLOCK), new BlockMatchTest(Blocks.WATER), Blocks.WATER.defaultBlockState()),
+						new ProcessorRule(new BlockMatchTest(Blocks.TERREDEPOMME), new BlockMatchTest(Blocks.WATER), Blocks.WATER.defaultBlockState())
 					)
 				)
 			)
@@ -352,7 +458,10 @@ public class ProcessorLists {
 						new ProcessorRule(new BlockMatchTest(Blocks.DIRT_PATH), new BlockMatchTest(Blocks.ICE), Blocks.SPRUCE_PLANKS.defaultBlockState()),
 						new ProcessorRule(new RandomBlockMatchTest(Blocks.DIRT_PATH, 0.2F), AlwaysTrueTest.INSTANCE, Blocks.GRASS_BLOCK.defaultBlockState()),
 						new ProcessorRule(new BlockMatchTest(Blocks.GRASS_BLOCK), new BlockMatchTest(Blocks.WATER), Blocks.WATER.defaultBlockState()),
-						new ProcessorRule(new BlockMatchTest(Blocks.DIRT), new BlockMatchTest(Blocks.WATER), Blocks.WATER.defaultBlockState())
+						new ProcessorRule(new BlockMatchTest(Blocks.DIRT), new BlockMatchTest(Blocks.WATER), Blocks.WATER.defaultBlockState()),
+						new ProcessorRule(new BlockMatchTest(Blocks.PEELGRASS_BLOCK), new BlockMatchTest(Blocks.WATER), Blocks.WATER.defaultBlockState()),
+						new ProcessorRule(new BlockMatchTest(Blocks.CORRUPTED_PEELGRASS_BLOCK), new BlockMatchTest(Blocks.WATER), Blocks.WATER.defaultBlockState()),
+						new ProcessorRule(new BlockMatchTest(Blocks.TERREDEPOMME), new BlockMatchTest(Blocks.WATER), Blocks.WATER.defaultBlockState())
 					)
 				)
 			)
@@ -365,6 +474,19 @@ public class ProcessorLists {
 					ImmutableList.of(
 						new ProcessorRule(new RandomBlockMatchTest(Blocks.WHEAT, 0.3F), AlwaysTrueTest.INSTANCE, Blocks.CARROTS.defaultBlockState()),
 						new ProcessorRule(new RandomBlockMatchTest(Blocks.WHEAT, 0.2F), AlwaysTrueTest.INSTANCE, Blocks.POTATOES.defaultBlockState()),
+						new ProcessorRule(new RandomBlockMatchTest(Blocks.WHEAT, 0.1F), AlwaysTrueTest.INSTANCE, Blocks.BEETROOTS.defaultBlockState())
+					)
+				)
+			)
+		);
+		register(
+			bootstrapContext,
+			FARM_POTATO,
+			ImmutableList.of(
+				new RuleProcessor(
+					ImmutableList.of(
+						new ProcessorRule(new RandomBlockMatchTest(Blocks.WHEAT, 0.3F), AlwaysTrueTest.INSTANCE, Blocks.CARROTS.defaultBlockState()),
+						new ProcessorRule(new RandomBlockMatchTest(Blocks.WHEAT, 0.8F), AlwaysTrueTest.INSTANCE, Blocks.POTATOES.defaultBlockState()),
 						new ProcessorRule(new RandomBlockMatchTest(Blocks.WHEAT, 0.1F), AlwaysTrueTest.INSTANCE, Blocks.BEETROOTS.defaultBlockState())
 					)
 				)
@@ -642,6 +764,20 @@ public class ProcessorLists {
 		);
 		register(bootstrapContext, FOSSIL_ROT, ImmutableList.of(new BlockRotProcessor(0.9F), new ProtectedBlockProcessor(BlockTags.FEATURES_CANNOT_REPLACE)));
 		register(bootstrapContext, FOSSIL_COAL, ImmutableList.of(new BlockRotProcessor(0.1F), new ProtectedBlockProcessor(BlockTags.FEATURES_CANNOT_REPLACE)));
+		register(
+			bootstrapContext,
+			COLOSSEUM_VEINS,
+			ImmutableList.of(
+				new RuleProcessor(
+					ImmutableList.of(
+						new ProcessorRule(
+							new RandomBlockMatchTest(Blocks.BAKED_POTATO_BRICKS, 0.2F), AlwaysTrueTest.INSTANCE, Blocks.EXPIRED_BAKED_POTATO_BRICKS.defaultBlockState()
+						),
+						new ProcessorRule(new RandomBlockMatchTest(Blocks.BAKED_POTATO_BRICKS, 1.0E-4F), AlwaysTrueTest.INSTANCE, Blocks.AIR.defaultBlockState())
+					)
+				)
+			)
+		);
 		register(
 			bootstrapContext,
 			FOSSIL_DIAMONDS,

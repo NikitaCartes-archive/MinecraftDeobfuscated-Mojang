@@ -4,13 +4,18 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
+import net.minecraft.core.Holder;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.effect.MobEffectInstance;
 
-public record FoodProperties(int nutrition, float saturationModifier, boolean canAlwaysEat, float eatSeconds, List<FoodProperties.PossibleEffect> effects) {
+public record FoodProperties(
+	int nutrition, float saturationModifier, boolean canAlwaysEat, float eatSeconds, Holder<SoundEvent> eatSound, List<FoodProperties.PossibleEffect> effects
+) {
 	private static final float DEFAULT_EAT_SECONDS = 1.6F;
 	public static final Codec<FoodProperties> DIRECT_CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
@@ -18,6 +23,7 @@ public record FoodProperties(int nutrition, float saturationModifier, boolean ca
 					Codec.FLOAT.fieldOf("saturation_modifier").forGetter(FoodProperties::saturationModifier),
 					ExtraCodecs.strictOptionalField(Codec.BOOL, "can_always_eat", false).forGetter(FoodProperties::canAlwaysEat),
 					ExtraCodecs.strictOptionalField(ExtraCodecs.POSITIVE_FLOAT, "eat_seconds", 1.6F).forGetter(FoodProperties::eatSeconds),
+					SoundEvent.CODEC.fieldOf("eat_sound").forGetter(FoodProperties::eatSound),
 					ExtraCodecs.strictOptionalField(FoodProperties.PossibleEffect.CODEC.listOf(), "effects", List.of()).forGetter(FoodProperties::effects)
 				)
 				.apply(instance, FoodProperties::new)
@@ -31,6 +37,8 @@ public record FoodProperties(int nutrition, float saturationModifier, boolean ca
 		FoodProperties::canAlwaysEat,
 		ByteBufCodecs.FLOAT,
 		FoodProperties::eatSeconds,
+		SoundEvent.STREAM_CODEC,
+		FoodProperties::eatSound,
 		FoodProperties.PossibleEffect.STREAM_CODEC.apply(ByteBufCodecs.list()),
 		FoodProperties::effects,
 		FoodProperties::new
@@ -45,6 +53,7 @@ public record FoodProperties(int nutrition, float saturationModifier, boolean ca
 		private float saturationModifier;
 		private boolean canAlwaysEat;
 		private float eatSeconds = 1.6F;
+		private Holder<SoundEvent> eatSound = SoundEvents.GENERIC_EAT;
 		private final ImmutableList.Builder<FoodProperties.PossibleEffect> effects = ImmutableList.builder();
 
 		public FoodProperties.Builder nutrition(int i) {
@@ -72,8 +81,13 @@ public record FoodProperties(int nutrition, float saturationModifier, boolean ca
 			return this;
 		}
 
+		public FoodProperties.Builder eatSound(Holder<SoundEvent> holder) {
+			this.eatSound = holder;
+			return this;
+		}
+
 		public FoodProperties build() {
-			return new FoodProperties(this.nutrition, this.saturationModifier, this.canAlwaysEat, this.eatSeconds, this.effects.build());
+			return new FoodProperties(this.nutrition, this.saturationModifier, this.canAlwaysEat, this.eatSeconds, this.eatSound, this.effects.build());
 		}
 	}
 

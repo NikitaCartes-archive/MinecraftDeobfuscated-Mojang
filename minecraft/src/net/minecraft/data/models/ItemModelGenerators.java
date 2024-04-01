@@ -25,16 +25,17 @@ import net.minecraft.world.item.Items;
 public class ItemModelGenerators {
 	public static final ResourceLocation TRIM_TYPE_PREDICATE_ID = new ResourceLocation("trim_type");
 	private static final List<ItemModelGenerators.TrimModelData> GENERATED_TRIM_MODELS = List.of(
-		new ItemModelGenerators.TrimModelData("quartz", 0.1F, Map.of()),
-		new ItemModelGenerators.TrimModelData("iron", 0.2F, Map.of(ArmorMaterials.IRON, "iron_darker")),
-		new ItemModelGenerators.TrimModelData("netherite", 0.3F, Map.of(ArmorMaterials.NETHERITE, "netherite_darker")),
-		new ItemModelGenerators.TrimModelData("redstone", 0.4F, Map.of()),
-		new ItemModelGenerators.TrimModelData("copper", 0.5F, Map.of()),
-		new ItemModelGenerators.TrimModelData("gold", 0.6F, Map.of(ArmorMaterials.GOLD, "gold_darker")),
-		new ItemModelGenerators.TrimModelData("emerald", 0.7F, Map.of()),
-		new ItemModelGenerators.TrimModelData("diamond", 0.8F, Map.of(ArmorMaterials.DIAMOND, "diamond_darker")),
-		new ItemModelGenerators.TrimModelData("lapis", 0.9F, Map.of()),
-		new ItemModelGenerators.TrimModelData("amethyst", 1.0F, Map.of())
+		new ItemModelGenerators.TrimModelData("quartz", 0.01F, Map.of()),
+		new ItemModelGenerators.TrimModelData("iron", 0.02F, Map.of(ArmorMaterials.IRON, "iron_darker")),
+		new ItemModelGenerators.TrimModelData("netherite", 0.03F, Map.of(ArmorMaterials.NETHERITE, "netherite_darker")),
+		new ItemModelGenerators.TrimModelData("redstone", 0.04F, Map.of()),
+		new ItemModelGenerators.TrimModelData("copper", 0.05F, Map.of()),
+		new ItemModelGenerators.TrimModelData("gold", 0.06F, Map.of(ArmorMaterials.GOLD, "gold_darker")),
+		new ItemModelGenerators.TrimModelData("emerald", 0.07F, Map.of()),
+		new ItemModelGenerators.TrimModelData("diamond", 0.08F, Map.of(ArmorMaterials.DIAMOND, "diamond_darker")),
+		new ItemModelGenerators.TrimModelData("lapis", 0.09F, Map.of()),
+		new ItemModelGenerators.TrimModelData("amethyst", 0.1F, Map.of()),
+		new ItemModelGenerators.TrimModelData("amber", 1.0F, Map.of())
 	);
 	private final BiConsumer<ResourceLocation, Supplier<JsonElement>> output;
 
@@ -151,6 +152,7 @@ public class ItemModelGenerators {
 		this.generateFlatItem(Items.ARMOR_STAND, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.ARROW, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.BAKED_POTATO, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.HOT_POTATO, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.BAMBOO, ModelTemplates.FLAT_HANDHELD_ITEM);
 		this.generateFlatItem(Items.BEEF, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.BEETROOT, ModelTemplates.FLAT_ITEM);
@@ -176,12 +178,15 @@ public class ItemModelGenerators {
 		this.generateFlatItem(Items.CHICKEN, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.CHORUS_FRUIT, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.CLAY_BALL, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.POTATO_BUD, ModelTemplates.FLAT_ITEM);
 		this.generateClockItem(Items.CLOCK);
 		this.generateFlatItem(Items.COAL, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.COD_BUCKET, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.COMMAND_BLOCK_MINECART, ModelTemplates.FLAT_ITEM);
 		this.generateCompassItem(Items.COMPASS);
 		this.generateCompassItem(Items.RECOVERY_COMPASS);
+		this.generateFlatItem(Items.LASHING_POTATO, "_extended", ModelTemplates.FLAT_HANDHELD_ITEM);
+		this.generateFlatItem(Items.TOXIC_BEAM, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.COOKED_BEEF, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.COOKED_CHICKEN, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.COOKED_COD, ModelTemplates.FLAT_ITEM);
@@ -230,6 +235,7 @@ public class ItemModelGenerators {
 		this.generateFlatItem(Items.GLOW_ITEM_FRAME, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.RAW_GOLD, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.GOLDEN_APPLE, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.GOLDEN_POISONOUS_POTATO, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.GOLDEN_AXE, ModelTemplates.FLAT_HANDHELD_ITEM);
 		this.generateFlatItem(Items.GOLDEN_CARROT, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.GOLDEN_HOE, ModelTemplates.FLAT_HANDHELD_ITEM);
@@ -262,6 +268,9 @@ public class ItemModelGenerators {
 		this.generateFlatItem(Items.JUNGLE_CHEST_BOAT, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.KNOWLEDGE_BOOK, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.LAPIS_LAZULI, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.AMBER_GEM, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.DENT, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.TOXIC_RESIN, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.LAVA_BUCKET, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.LEATHER, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.LEATHER_HORSE_ARMOR, ModelTemplates.FLAT_ITEM);
@@ -399,10 +408,14 @@ public class ItemModelGenerators {
 		this.generateFlatItem(Items.BOLT_ARMOR_TRIM_SMITHING_TEMPLATE, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.DEBUG_STICK, Items.STICK, ModelTemplates.FLAT_HANDHELD_ITEM);
 		this.generateFlatItem(Items.ENCHANTED_GOLDEN_APPLE, Items.GOLDEN_APPLE, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.ENCHANTED_GOLDEN_POISONOUS_POTATO, Items.GOLDEN_POISONOUS_POTATO, ModelTemplates.FLAT_ITEM);
 
 		for (Item item : BuiltInRegistries.ITEM) {
-			if (item instanceof ArmorItem armorItem) {
-				this.generateArmorTrims(armorItem);
+			if (item instanceof ArmorItem) {
+				ArmorItem armorItem = (ArmorItem)item;
+				if (item != Items.POISONOUS_POTATO_PLANT) {
+					this.generateArmorTrims(armorItem);
+				}
 			}
 		}
 
@@ -430,6 +443,22 @@ public class ItemModelGenerators {
 		this.generateFlatItem(Items.SKULL_POTTERY_SHERD, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.SNORT_POTTERY_SHERD, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.TRIAL_KEY, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.POTATO_OF_KNOWLEDGE, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.POTATO_STAFF, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.POISONOUS_POTATO_STICKS, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.POISONOUS_POTATO_SLICES, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.POISONOUS_POTATO_FRIES, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.POISONOUS_POTATO_CHIPS, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.POTATO_HAMMER, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.POTATO_PEELER, ModelTemplates.FLAT_HANDHELD_ITEM);
+
+		for (Item itemx : Items.POTATO_PEELS_MAP.values()) {
+			this.generateFlatItem(itemx, ModelTemplates.FLAT_ITEM);
+		}
+
+		this.generateFlatItem(Items.CORRUPTED_POTATO_PEELS, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.HASH_BROWNS, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.POTATO_EYE, ModelTemplates.FLAT_ITEM);
 	}
 
 	static record TrimModelData(String name, float itemModelIndex, Map<Holder<ArmorMaterial>, String> overrideArmorMaterials) {

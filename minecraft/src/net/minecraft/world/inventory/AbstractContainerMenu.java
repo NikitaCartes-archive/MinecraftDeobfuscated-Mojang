@@ -19,6 +19,7 @@ import net.minecraft.CrashReportCategory;
 import net.minecraft.CrashReportDetail;
 import net.minecraft.ReportedException;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
@@ -402,6 +403,10 @@ public abstract class AbstractContainerMenu {
 
 				Slot slot = this.slots.get(i);
 				ItemStack itemStack = slot.getItem();
+				if (itemStack.has(DataComponents.CLICKS)) {
+					itemStack.set(DataComponents.CLICKS, itemStack.getOrDefault(DataComponents.CLICKS, Integer.valueOf(0)) + 1);
+				}
+
 				ItemStack itemStack4 = this.getCarried();
 				player.updateTutorialInventoryAction(itemStack4, slot.getItem(), clickAction);
 				if (!this.tryItemClickBehaviourOverride(player, clickAction, slot, itemStack, itemStack4)) {
@@ -440,38 +445,38 @@ public abstract class AbstractContainerMenu {
 			}
 		} else if (clickType == ClickType.SWAP && (j >= 0 && j < 9 || j == 40)) {
 			ItemStack itemStack5 = inventory.getItem(j);
-			Slot slot = this.slots.get(i);
-			ItemStack itemStack = slot.getItem();
-			if (!itemStack5.isEmpty() || !itemStack.isEmpty()) {
+			Slot slotx = this.slots.get(i);
+			ItemStack itemStackx = slotx.getItem();
+			if (!itemStack5.isEmpty() || !itemStackx.isEmpty()) {
 				if (itemStack5.isEmpty()) {
-					if (slot.mayPickup(player)) {
-						inventory.setItem(j, itemStack);
-						slot.onSwapCraft(itemStack.getCount());
-						slot.setByPlayer(ItemStack.EMPTY);
-						slot.onTake(player, itemStack);
+					if (slotx.mayPickup(player)) {
+						inventory.setItem(j, itemStackx);
+						slotx.onSwapCraft(itemStackx.getCount());
+						slotx.setByPlayer(ItemStack.EMPTY);
+						slotx.onTake(player, itemStackx);
 					}
-				} else if (itemStack.isEmpty()) {
-					if (slot.mayPlace(itemStack5)) {
-						int r = slot.getMaxStackSize(itemStack5);
+				} else if (itemStackx.isEmpty()) {
+					if (slotx.mayPlace(itemStack5)) {
+						int r = slotx.getMaxStackSize(itemStack5);
 						if (itemStack5.getCount() > r) {
-							slot.setByPlayer(itemStack5.split(r));
+							slotx.setByPlayer(itemStack5.split(r));
 						} else {
 							inventory.setItem(j, ItemStack.EMPTY);
-							slot.setByPlayer(itemStack5);
+							slotx.setByPlayer(itemStack5);
 						}
 					}
-				} else if (slot.mayPickup(player) && slot.mayPlace(itemStack5)) {
-					int r = slot.getMaxStackSize(itemStack5);
+				} else if (slotx.mayPickup(player) && slotx.mayPlace(itemStack5)) {
+					int r = slotx.getMaxStackSize(itemStack5);
 					if (itemStack5.getCount() > r) {
-						slot.setByPlayer(itemStack5.split(r));
-						slot.onTake(player, itemStack);
-						if (!inventory.add(itemStack)) {
-							player.drop(itemStack, true);
+						slotx.setByPlayer(itemStack5.split(r));
+						slotx.onTake(player, itemStackx);
+						if (!inventory.add(itemStackx)) {
+							player.drop(itemStackx, true);
 						}
 					} else {
-						inventory.setItem(j, itemStack);
-						slot.setByPlayer(itemStack5);
-						slot.onTake(player, itemStack);
+						inventory.setItem(j, itemStackx);
+						slotx.setByPlayer(itemStack5);
+						slotx.onTake(player, itemStackx);
 					}
 				}
 			}
@@ -484,8 +489,8 @@ public abstract class AbstractContainerMenu {
 		} else if (clickType == ClickType.THROW && this.getCarried().isEmpty() && i >= 0) {
 			Slot slot3 = this.slots.get(i);
 			int l = j == 0 ? 1 : slot3.getItem().getCount();
-			ItemStack itemStack = slot3.safeTake(l, Integer.MAX_VALUE, player);
-			player.drop(itemStack, true);
+			ItemStack itemStackx = slot3.safeTake(l, Integer.MAX_VALUE, player);
+			player.drop(itemStackx, true);
 		} else if (clickType == ClickType.PICKUP_ALL && i >= 0) {
 			Slot slot3 = this.slots.get(i);
 			ItemStack itemStack2 = this.getCarried();
@@ -602,12 +607,13 @@ public abstract class AbstractContainerMenu {
 				ItemStack itemStack2 = slot.getItem();
 				if (!itemStack2.isEmpty() && ItemStack.isSameItemSameComponents(itemStack, itemStack2)) {
 					int l = itemStack2.getCount() + itemStack.getCount();
-					if (l <= itemStack.getMaxStackSize()) {
+					int m = slot.getMaxStackSize(itemStack);
+					if (l <= m) {
 						itemStack.setCount(0);
 						itemStack2.setCount(l);
 						slot.setChanged();
 						bl2 = true;
-					} else if (itemStack2.getCount() < itemStack.getMaxStackSize()) {
+					} else if (itemStack2.getCount() < m) {
 						itemStack.shrink(itemStack.getMaxStackSize() - itemStack2.getCount());
 						itemStack2.setCount(itemStack.getMaxStackSize());
 						slot.setChanged();

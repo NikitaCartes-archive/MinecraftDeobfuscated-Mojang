@@ -14,7 +14,7 @@ public class SplashRenderer {
 	public static final SplashRenderer NEW_YEAR = new SplashRenderer("Happy new year!");
 	public static final SplashRenderer HALLOWEEN = new SplashRenderer("OOoooOOOoooo! Spooky!");
 	private static final int WIDTH_OFFSET = 123;
-	private static final int HEIGH_OFFSET = 69;
+	private static final int HEIGH_OFFSET = 89;
 	private final String splash;
 
 	public SplashRenderer(String string) {
@@ -23,7 +23,7 @@ public class SplashRenderer {
 
 	public void render(GuiGraphics guiGraphics, int i, Font font, int j) {
 		guiGraphics.pose().pushPose();
-		guiGraphics.pose().translate((float)i / 2.0F + 123.0F, 69.0F, 0.0F);
+		guiGraphics.pose().translate((float)i / 2.0F + 123.0F, 89.0F, 0.0F);
 		guiGraphics.pose().mulPose(Axis.ZP.rotationDegrees(-20.0F));
 		float f = 1.8F - Mth.abs(Mth.sin((float)(Util.getMillis() % 1000L) / 1000.0F * (float) (Math.PI * 2)) * 0.1F);
 		f = f * 100.0F / (float)(font.width(this.splash) + 32);

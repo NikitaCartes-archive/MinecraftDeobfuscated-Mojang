@@ -210,39 +210,62 @@ public class VanillaChestLoot implements LootTableSubProvider {
 				)
 		);
 		biConsumer.accept(
-			BuiltInLootTables.SPAWN_BONUS_CHEST,
+			BuiltInLootTables.SIMPLE_DUNGEON_POTATO,
 			LootTable.lootTable()
 				.withPool(
 					LootPool.lootPool()
-						.setRolls(ConstantValue.exactly(1.0F))
-						.add(LootItem.lootTableItem(Items.STONE_AXE))
-						.add(LootItem.lootTableItem(Items.WOODEN_AXE).setWeight(3))
+						.setRolls(UniformGenerator.between(1.0F, 3.0F))
+						.add(LootItem.lootTableItem(Items.SADDLE).setWeight(20))
+						.add(LootItem.lootTableItem(Items.GOLDEN_APPLE).setWeight(15))
+						.add(LootItem.lootTableItem(Items.ENCHANTED_GOLDEN_APPLE).setWeight(2))
+						.add(LootItem.lootTableItem(Items.MUSIC_DISC_OTHERSIDE).setWeight(2))
+						.add(LootItem.lootTableItem(Items.MUSIC_DISC_13).setWeight(15))
+						.add(LootItem.lootTableItem(Items.MUSIC_DISC_CAT).setWeight(15))
+						.add(LootItem.lootTableItem(Items.NAME_TAG).setWeight(20))
+						.add(LootItem.lootTableItem(Items.GOLDEN_HORSE_ARMOR).setWeight(10))
+						.add(LootItem.lootTableItem(Items.IRON_HORSE_ARMOR).setWeight(15))
+						.add(LootItem.lootTableItem(Items.DIAMOND_HORSE_ARMOR).setWeight(5))
+						.add(LootItem.lootTableItem(Items.BOOK).setWeight(10).apply(EnchantRandomlyFunction.randomApplicableEnchantment()))
 				)
 				.withPool(
 					LootPool.lootPool()
-						.setRolls(ConstantValue.exactly(1.0F))
-						.add(LootItem.lootTableItem(Items.STONE_PICKAXE))
-						.add(LootItem.lootTableItem(Items.WOODEN_PICKAXE).setWeight(3))
+						.setRolls(UniformGenerator.between(1.0F, 4.0F))
+						.add(LootItem.lootTableItem(Items.IRON_INGOT).setWeight(10).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 4.0F))))
+						.add(LootItem.lootTableItem(Items.GOLD_INGOT).setWeight(5).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 4.0F))))
+						.add(LootItem.lootTableItem(Items.POTATO_FRUIT).setWeight(20))
+						.add(LootItem.lootTableItem(Items.BAKED_POTATO).setWeight(20).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 4.0F))))
+						.add(LootItem.lootTableItem(Items.BUCKET).setWeight(10))
+						.add(LootItem.lootTableItem(Items.POISONOUS_POTATO_OIL).setWeight(15).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 4.0F))))
+						.add(LootItem.lootTableItem(Items.COAL).setWeight(15).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 4.0F))))
+						.add(LootItem.lootTableItem(Items.POTATO).setWeight(10).apply(SetItemCountFunction.setCount(UniformGenerator.between(2.0F, 4.0F))))
+						.add(LootItem.lootTableItem(Items.POISONOUS_POTATO).setWeight(10).apply(SetItemCountFunction.setCount(UniformGenerator.between(2.0F, 4.0F))))
+						.add(LootItem.lootTableItem(Items.POTATO_OIL).setWeight(10).apply(SetItemCountFunction.setCount(UniformGenerator.between(2.0F, 4.0F))))
 				)
 				.withPool(
 					LootPool.lootPool()
 						.setRolls(ConstantValue.exactly(3.0F))
-						.add(LootItem.lootTableItem(Items.APPLE).setWeight(5).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 2.0F))))
-						.add(LootItem.lootTableItem(Items.BREAD).setWeight(3).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 2.0F))))
-						.add(LootItem.lootTableItem(Items.SALMON).setWeight(3).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 2.0F))))
+						.add(LootItem.lootTableItem(Items.BONE).setWeight(10).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 8.0F))))
+						.add(LootItem.lootTableItem(Items.BONE_MEAL).setWeight(10).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 8.0F))))
+						.add(LootItem.lootTableItem(Items.ROTTEN_FLESH).setWeight(10).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 8.0F))))
+						.add(LootItem.lootTableItem(Items.STRING).setWeight(10).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 8.0F))))
+				)
+		);
+		biConsumer.accept(
+			BuiltInLootTables.SPAWN_BONUS_CHEST,
+			LootTable.lootTable()
+				.withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F)).add(LootItem.lootTableItem(Items.POISONOUS_POTATO_PLANT)))
+				.withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F)).add(LootItem.lootTableItem(Items.IRON_HOE)))
+				.withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F)).add(LootItem.lootTableItem(Items.WATER_BUCKET)))
+				.withPool(
+					LootPool.lootPool()
+						.setRolls(ConstantValue.exactly(4.0F))
+						.add(LootItem.lootTableItem(Items.POTATO).setWeight(9).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 8.0F))))
+						.add(LootItem.lootTableItem(Items.POISONOUS_POTATO).setWeight(6).apply(SetItemCountFunction.setCount(UniformGenerator.between(0.0F, 4.0F))))
 				)
 				.withPool(
 					LootPool.lootPool()
 						.setRolls(ConstantValue.exactly(4.0F))
-						.add(LootItem.lootTableItem(Items.STICK).setWeight(10).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 12.0F))))
-						.add(LootItem.lootTableItem(Blocks.OAK_PLANKS).setWeight(10).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 12.0F))))
-						.add(LootItem.lootTableItem(Blocks.OAK_LOG).setWeight(3).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 3.0F))))
-						.add(LootItem.lootTableItem(Blocks.SPRUCE_LOG).setWeight(3).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 3.0F))))
-						.add(LootItem.lootTableItem(Blocks.BIRCH_LOG).setWeight(3).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 3.0F))))
-						.add(LootItem.lootTableItem(Blocks.JUNGLE_LOG).setWeight(3).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 3.0F))))
-						.add(LootItem.lootTableItem(Blocks.ACACIA_LOG).setWeight(3).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 3.0F))))
-						.add(LootItem.lootTableItem(Blocks.DARK_OAK_LOG).setWeight(3).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 3.0F))))
-						.add(LootItem.lootTableItem(Blocks.MANGROVE_LOG).setWeight(3).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 3.0F))))
+						.add(LootItem.lootTableItem(Items.BONE_MEAL).apply(SetItemCountFunction.setCount(UniformGenerator.between(0.0F, 8.0F))))
 				)
 		);
 		biConsumer.accept(BuiltInLootTables.STRONGHOLD_CORRIDOR, strongholdCorridorLootTable());
@@ -518,6 +541,24 @@ public class VanillaChestLoot implements LootTableSubProvider {
 				)
 		);
 		biConsumer.accept(
+			BuiltInLootTables.VILLAGE_POTATO_HOUSE,
+			LootTable.lootTable()
+				.withPool(
+					LootPool.lootPool()
+						.setRolls(UniformGenerator.between(3.0F, 8.0F))
+						.add(LootItem.lootTableItem(Items.POTATO_OIL).setWeight(1).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 3.0F))))
+						.add(LootItem.lootTableItem(Items.POTATO_FLOWER).setWeight(2))
+						.add(LootItem.lootTableItem(Items.POISONOUS_POTATO_OIL).setWeight(1))
+						.add(LootItem.lootTableItem(Items.POTATO).setWeight(10).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 7.0F))))
+						.add(LootItem.lootTableItem(Items.BREAD).setWeight(10).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 4.0F))))
+						.add(LootItem.lootTableItem(Items.POTATO_FRUIT).setWeight(10).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 5.0F))))
+						.add(LootItem.lootTableItem(Items.BOOK).setWeight(1))
+						.add(LootItem.lootTableItem(Items.FEATHER).setWeight(1))
+						.add(LootItem.lootTableItem(Items.POISONOUS_POTATO).setWeight(2).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 4.0F))))
+						.add(LootItem.lootTableItem(Blocks.POTATO_SPROUTS).setWeight(5).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 2.0F))))
+				)
+		);
+		biConsumer.accept(
 			BuiltInLootTables.VILLAGE_TAIGA_HOUSE,
 			LootTable.lootTable()
 				.withPool(
@@ -623,6 +664,48 @@ public class VanillaChestLoot implements LootTableSubProvider {
 						.add(LootItem.lootTableItem(Items.GOLD_BLOCK).setWeight(1).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 2.0F))))
 				)
 		);
+		biConsumer.accept(
+			BuiltInLootTables.RUINED_PORTATOL,
+			LootTable.lootTable()
+				.withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F)).add(LootItem.lootTableItem(Items.IRON_HOE)))
+				.withPool(
+					LootPool.lootPool()
+						.setRolls(ConstantValue.exactly(4.0F))
+						.add(LootItem.lootTableItem(Items.POTATO).setWeight(9).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 8.0F))))
+						.add(LootItem.lootTableItem(Items.POISONOUS_POTATO).setWeight(6).apply(SetItemCountFunction.setCount(UniformGenerator.between(0.0F, 4.0F))))
+				)
+				.withPool(
+					LootPool.lootPool()
+						.setRolls(ConstantValue.exactly(4.0F))
+						.add(LootItem.lootTableItem(Items.BONE_MEAL).apply(SetItemCountFunction.setCount(UniformGenerator.between(0.0F, 8.0F))))
+				)
+				.withPool(
+					LootPool.lootPool()
+						.setRolls(UniformGenerator.between(4.0F, 8.0F))
+						.add(LootItem.lootTableItem(Items.OBSIDIAN).setWeight(40).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 2.0F))))
+						.add(LootItem.lootTableItem(Items.FLINT).setWeight(40).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 4.0F))))
+						.add(LootItem.lootTableItem(Items.IRON_NUGGET).setWeight(40).apply(SetItemCountFunction.setCount(UniformGenerator.between(9.0F, 18.0F))))
+						.add(LootItem.lootTableItem(Items.FLINT_AND_STEEL).setWeight(40))
+						.add(LootItem.lootTableItem(Items.FIRE_CHARGE).setWeight(40))
+						.add(LootItem.lootTableItem(Items.GOLD_NUGGET).setWeight(15).apply(SetItemCountFunction.setCount(UniformGenerator.between(4.0F, 24.0F))))
+						.add(LootItem.lootTableItem(Items.GOLDEN_SWORD).setWeight(15).apply(EnchantRandomlyFunction.randomApplicableEnchantment()))
+						.add(LootItem.lootTableItem(Items.GOLDEN_AXE).setWeight(15).apply(EnchantRandomlyFunction.randomApplicableEnchantment()))
+						.add(LootItem.lootTableItem(Items.GOLDEN_HOE).setWeight(15).apply(EnchantRandomlyFunction.randomApplicableEnchantment()))
+						.add(LootItem.lootTableItem(Items.POISONOUS_POTA_TOES).setWeight(15))
+						.add(LootItem.lootTableItem(Items.POISONOUS_POTATO_CHESTPLATE).setWeight(15))
+						.add(LootItem.lootTableItem(Items.GOLDEN_HELMET).setWeight(15).apply(EnchantRandomlyFunction.randomApplicableEnchantment()))
+						.add(LootItem.lootTableItem(Items.GOLDEN_LEGGINGS).setWeight(15).apply(EnchantRandomlyFunction.randomApplicableEnchantment()))
+						.add(LootItem.lootTableItem(Items.GLISTERING_MELON_SLICE).setWeight(5).apply(SetItemCountFunction.setCount(UniformGenerator.between(4.0F, 12.0F))))
+						.add(LootItem.lootTableItem(Items.GOLDEN_HORSE_ARMOR).setWeight(5))
+						.add(LootItem.lootTableItem(Items.POTATO_PRESSURE_PLATE).setWeight(5))
+						.add(LootItem.lootTableItem(Items.POTATO_FRUIT).setWeight(5).apply(SetItemCountFunction.setCount(UniformGenerator.between(4.0F, 12.0F))))
+						.add(LootItem.lootTableItem(Items.CLOCK).setWeight(5))
+						.add(LootItem.lootTableItem(Items.POTATO_OIL).setWeight(5).apply(SetItemCountFunction.setCount(UniformGenerator.between(2.0F, 8.0F))))
+						.add(LootItem.lootTableItem(Items.BELL).setWeight(1))
+						.add(LootItem.lootTableItem(Items.ENCHANTED_GOLDEN_APPLE).setWeight(1))
+						.add(LootItem.lootTableItem(Items.GOLD_BLOCK).setWeight(1).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 2.0F))))
+				)
+		);
 		biConsumer.accept(BuiltInLootTables.TRIAL_CHAMBERS_REWARD, LootTable.lootTable());
 		biConsumer.accept(BuiltInLootTables.TRIAL_CHAMBERS_REWARD_COMMON, LootTable.lootTable());
 		biConsumer.accept(BuiltInLootTables.TRIAL_CHAMBERS_REWARD_RARE, LootTable.lootTable());
@@ -653,6 +736,7 @@ public class VanillaChestLoot implements LootTableSubProvider {
 					.add(LootItem.lootTableItem(Items.POTATO).setWeight(7).apply(SetItemCountFunction.setCount(UniformGenerator.between(2.0F, 6.0F))))
 					.add(LootItem.lootTableItem(Items.MOSS_BLOCK).setWeight(7).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 4.0F))))
 					.add(LootItem.lootTableItem(Items.POISONOUS_POTATO).setWeight(7).apply(SetItemCountFunction.setCount(UniformGenerator.between(2.0F, 6.0F))))
+					.add(LootItem.lootTableItem(Items.POISONOUS_POTATO_PLANT).setWeight(3).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 2.0F))))
 					.add(LootItem.lootTableItem(Items.CARROT).setWeight(7).apply(SetItemCountFunction.setCount(UniformGenerator.between(4.0F, 8.0F))))
 					.add(LootItem.lootTableItem(Items.WHEAT).setWeight(7).apply(SetItemCountFunction.setCount(UniformGenerator.between(8.0F, 21.0F))))
 					.add(

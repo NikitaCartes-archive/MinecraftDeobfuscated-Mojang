@@ -21,6 +21,11 @@ public class Stray extends AbstractSkeleton {
 		super(entityType, level);
 	}
 
+	@Override
+	public boolean hasPotatoVariant() {
+		return true;
+	}
+
 	public static boolean checkStraySpawnRules(
 		EntityType<Stray> entityType, ServerLevelAccessor serverLevelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, RandomSource randomSource
 	) {

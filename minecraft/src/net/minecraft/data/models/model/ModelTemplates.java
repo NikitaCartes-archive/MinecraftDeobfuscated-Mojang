@@ -130,6 +130,10 @@ public class ModelTemplates {
 	public static final ModelTemplate FIRE_UP = create("template_fire_up", TextureSlot.FIRE);
 	public static final ModelTemplate FIRE_UP_ALT = create("template_fire_up_alt", TextureSlot.FIRE);
 	public static final ModelTemplate CAMPFIRE = create("template_campfire", TextureSlot.FIRE, TextureSlot.LIT_LOG);
+	public static final ModelTemplate FRYING_TABLE = create("frying_table", TextureSlot.FRYING_TABLE);
+	public static final ModelTemplate ROOTS = create("template_roots", TextureSlot.TEXTURE);
+	public static final ModelTemplate ROOTS_NOSIDE = create("template_roots_noside", "_noside", TextureSlot.TEXTURE);
+	public static final ModelTemplate ROOTS_SIDE = create("template_roots_side", "_side", TextureSlot.TEXTURE);
 	public static final ModelTemplate LANTERN = create("template_lantern", TextureSlot.LANTERN);
 	public static final ModelTemplate HANGING_LANTERN = create("template_hanging_lantern", "_hanging", TextureSlot.LANTERN);
 	public static final ModelTemplate TORCH = create("template_torch", TextureSlot.TORCH);
@@ -179,6 +183,15 @@ public class ModelTemplates {
 		"template_sculk_shrieker", TextureSlot.BOTTOM, TextureSlot.SIDE, TextureSlot.TOP, TextureSlot.PARTICLE, TextureSlot.INNER_TOP
 	);
 	public static final ModelTemplate VAULT = create("template_vault", TextureSlot.TOP, TextureSlot.BOTTOM, TextureSlot.SIDE, TextureSlot.FRONT);
+	public static final ModelTemplate[] LAYERED_BY_LEVEL = new ModelTemplate[]{
+		create("template_layered_height2", TextureSlot.TEXTURE),
+		create("template_layered_height4", TextureSlot.TEXTURE),
+		create("template_layered_height6", TextureSlot.TEXTURE),
+		create("template_layered_height8", TextureSlot.TEXTURE),
+		create("template_layered_height10", TextureSlot.TEXTURE),
+		create("template_layered_height12", TextureSlot.TEXTURE),
+		create("template_layered_height14", TextureSlot.TEXTURE)
+	};
 	public static final ModelTemplate FLAT_HANDHELD_MACE_ITEM = createItem("handheld_mace", TextureSlot.LAYER0);
 
 	private static ModelTemplate create(TextureSlot... textureSlots) {

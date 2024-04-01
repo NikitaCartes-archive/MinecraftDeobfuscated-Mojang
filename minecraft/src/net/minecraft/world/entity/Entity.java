@@ -1,12 +1,15 @@
 package net.minecraft.world.entity;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.collect.ImmutableList.Builder;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.objects.Object2DoubleArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -33,10 +36,12 @@ import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.DoubleTag;
 import net.minecraft.nbt.FloatTag;
@@ -74,11 +79,14 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.Nameable;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageSources;
+import net.minecraft.world.entity.ai.village.poi.PoiManager;
+import net.minecraft.world.entity.ai.village.poi.PoiTypes;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.ProjectileDeflection;
 import net.minecraft.world.entity.vehicle.Boat;
+import net.minecraft.world.grid.SubGrid;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
@@ -100,12 +108,19 @@ import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.border.WorldBorder;
+import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.entity.EntityAccess;
 import net.minecraft.world.level.entity.EntityInLevelCallback;
 import net.minecraft.world.level.gameevent.DynamicGameEventListener;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.structure.BuiltinStructures;
+import net.minecraft.world.level.levelgen.structure.Structure;
+import net.minecraft.world.level.levelgen.structure.StructurePiece;
+import net.minecraft.world.level.levelgen.structure.StructureStart;
+import net.minecraft.world.level.levelgen.structure.structures.StrongholdPieces;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.PushReaction;
@@ -147,6 +162,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 	public static final String UUID_TAG = "UUID";
 	private static double viewScale = 1.0;
 	private final EntityType<?> type;
+	public boolean ignoreGridCollision;
 	private int id = ENTITY_COUNTER.incrementAndGet();
 	public boolean blocksBuilding;
 	private ImmutableList<Entity> passengers = ImmutableList.of();
@@ -187,6 +203,9 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 	public double yOld;
 	public double zOld;
 	public boolean noPhysics;
+	protected float screenShakeIntensity;
+	public Vec3 screenShakeOffset = Vec3.ZERO;
+	public Vec3 lastScreenShakeOffset = Vec3.ZERO;
 	protected final RandomSource random = RandomSource.create();
 	public int tickCount;
 	private int remainingFireTicks = -this.getFireImmuneTicks();
@@ -241,6 +260,18 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 	private boolean hasVisualFire;
 	@Nullable
 	private BlockState inBlockState = null;
+	private static final int ATTACHED_GRID_TIMEOUT = 30;
+	@Nullable
+	protected SubGrid attachedGrid;
+	protected int attachedGridTimeout;
+	@Nullable
+	public UUID reloadAttachedGrid;
+	public int reloadAttachedGridTimeout;
+	private static final List<Pair<ResourceKey<Structure>, ResourceKey<Structure>>> STRUCTURE_LINKS = List.of(
+		Pair.of(BuiltinStructures.VILLAGE_PLAINS, BuiltinStructures.VILLAGE_POTATO),
+		Pair.of(BuiltinStructures.STRONGHOLD, BuiltinStructures.COLOSSEUM),
+		Pair.of(BuiltinStructures.RUINED_PORTATOL, BuiltinStructures.RUINED_PORTATOL)
+	);
 
 	public Entity(EntityType<?> entityType, Level level) {
 		this.type = entityType;
@@ -416,6 +447,25 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 	}
 
 	public void baseTick() {
+		if (this.attachedGridTimeout > 0) {
+			if (--this.attachedGridTimeout == 0) {
+				this.attachedGrid = null;
+			} else if (this.attachedGrid != null && this.attachedGrid.carrier().isRemoved()) {
+				this.attachedGrid = null;
+			}
+		}
+
+		if (this.reloadAttachedGrid != null && this.reloadAttachedGridTimeout > 0) {
+			SubGrid subGrid = this.level().getGrid(this.reloadAttachedGrid);
+			if (subGrid != null) {
+				this.attachedGrid = subGrid;
+				this.reloadAttachedGrid = null;
+				this.reloadAttachedGridTimeout = 0;
+			} else if (--this.reloadAttachedGridTimeout == 0 || this.attachedGrid != null) {
+				this.reloadAttachedGrid = null;
+			}
+		}
+
 		this.level().getProfiler().push("entityBaseTick");
 		this.inBlockState = null;
 		if (this.isPassenger() && this.getVehicle().isRemoved()) {
@@ -429,6 +479,18 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 		this.walkDistO = this.walkDist;
 		this.xRotO = this.getXRot();
 		this.yRotO = this.getYRot();
+		this.screenShakeIntensity *= 0.7F;
+		this.lastScreenShakeOffset = this.screenShakeOffset;
+		if (this.screenShakeIntensity > 0.0F) {
+			this.screenShakeOffset = new Vec3(
+				(this.random.nextDouble() - this.random.nextDouble()) * (double)this.screenShakeIntensity,
+				(this.random.nextDouble() - this.random.nextDouble()) * (double)this.screenShakeIntensity,
+				(this.random.nextDouble() - this.random.nextDouble()) * (double)this.screenShakeIntensity
+			);
+		} else {
+			this.screenShakeOffset = Vec3.ZERO;
+		}
+
 		this.handleNetherPortal();
 		if (this.canSpawnSprintParticle()) {
 			this.spawnSprintParticle();
@@ -594,7 +656,15 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 		return this.onGround;
 	}
 
+	protected boolean shouldMoveWithSubGrid() {
+		return true;
+	}
+
 	public void move(MoverType moverType, Vec3 vec3) {
+		if (this.attachedGrid != null && this.shouldMoveWithSubGrid()) {
+			vec3 = vec3.add(this.attachedGrid.getLastMovement());
+		}
+
 		if (this.noPhysics) {
 			this.setPos(this.getX() + vec3.x, this.getY() + vec3.y, this.getZ() + vec3.z);
 		} else {
@@ -614,47 +684,55 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 			}
 
 			vec3 = this.maybeBackOffFromEdge(vec3, moverType);
-			Vec3 vec32 = this.collide(vec3);
-			double d = vec32.lengthSqr();
+			Entity.CollideResult collideResult = this.collide(vec3);
+			if (collideResult.subGrid != null) {
+				this.attachedGrid = collideResult.subGrid;
+				this.attachedGridTimeout = 30;
+			}
+
+			Vec3 vec32 = this.attachedGrid != null ? this.attachedGrid.getLastMovement() : Vec3.ZERO;
+			Vec3 vec33 = collideResult.movement;
+			Vec3 vec34 = vec33.subtract(vec32);
+			double d = vec33.lengthSqr();
 			if (d > 1.0E-7) {
 				if (this.fallDistance != 0.0F && d >= 1.0) {
 					BlockHitResult blockHitResult = this.level()
-						.clip(new ClipContext(this.position(), this.position().add(vec32), ClipContext.Block.FALLDAMAGE_RESETTING, ClipContext.Fluid.WATER, this));
+						.clip(new ClipContext(this.position(), this.position().add(vec33), ClipContext.Block.FALLDAMAGE_RESETTING, ClipContext.Fluid.WATER, this));
 					if (blockHitResult.getType() != HitResult.Type.MISS) {
 						this.resetFallDistance();
 					}
 				}
 
-				this.setPos(this.getX() + vec32.x, this.getY() + vec32.y, this.getZ() + vec32.z);
+				this.setPos(this.getX() + vec33.x, this.getY() + vec33.y, this.getZ() + vec33.z);
 			}
 
 			this.level().getProfiler().pop();
 			this.level().getProfiler().push("rest");
-			boolean bl = !Mth.equal(vec3.x, vec32.x);
-			boolean bl2 = !Mth.equal(vec3.z, vec32.z);
+			boolean bl = !Mth.equal(vec3.x, vec33.x);
+			boolean bl2 = !Mth.equal(vec3.z, vec33.z);
 			this.horizontalCollision = bl || bl2;
-			this.verticalCollision = vec3.y != vec32.y;
-			this.verticalCollisionBelow = this.verticalCollision && vec3.y < 0.0;
+			this.verticalCollision = vec3.y != vec33.y;
+			this.verticalCollisionBelow = this.verticalCollision && vec3.y < vec32.y;
 			if (this.horizontalCollision) {
-				this.minorHorizontalCollision = this.isHorizontalCollisionMinor(vec32);
+				this.minorHorizontalCollision = this.isHorizontalCollisionMinor(vec33);
 			} else {
 				this.minorHorizontalCollision = false;
 			}
 
-			this.setOnGroundWithKnownMovement(this.verticalCollisionBelow, vec32);
+			this.setOnGroundWithKnownMovement(this.verticalCollisionBelow, vec33);
 			BlockPos blockPos = this.getOnPosLegacy();
-			BlockState blockState = this.level().getBlockState(blockPos);
-			this.checkFallDamage(vec32.y, this.onGround(), blockState, blockPos);
+			BlockState blockState = this.getEffectState();
+			this.checkFallDamage(vec33.y, this.onGround(), blockState, blockPos);
 			if (this.isRemoved()) {
 				this.level().getProfiler().pop();
 			} else {
 				if (this.horizontalCollision) {
-					Vec3 vec33 = this.getDeltaMovement();
-					this.setDeltaMovement(bl ? 0.0 : vec33.x, vec33.y, bl2 ? 0.0 : vec33.z);
+					Vec3 vec35 = this.getDeltaMovement();
+					this.setDeltaMovement(bl ? 0.0 : vec35.x, vec35.y, bl2 ? 0.0 : vec35.z);
 				}
 
 				Block block = blockState.getBlock();
-				if (vec3.y != vec32.y) {
+				if (vec3.y != vec33.y) {
 					block.updateEntityAfterFallOn(this.level(), this);
 				}
 
@@ -664,10 +742,10 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 
 				Entity.MovementEmission movementEmission = this.getMovementEmission();
 				if (movementEmission.emitsAnything() && !this.isPassenger()) {
-					double e = vec32.x;
-					double f = vec32.y;
-					double g = vec32.z;
-					this.flyDist = this.flyDist + (float)(vec32.length() * 0.6);
+					double e = vec34.x;
+					double f = vec34.y;
+					double g = vec34.z;
+					this.flyDist = this.flyDist + (float)(vec34.length() * 0.6);
 					BlockPos blockPos2 = this.getOnPos();
 					BlockState blockState2 = this.level().getBlockState(blockPos2);
 					boolean bl3 = this.isStateClimbable(blockState2);
@@ -675,9 +753,9 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 						f = 0.0;
 					}
 
-					this.walkDist = this.walkDist + (float)vec32.horizontalDistance() * 0.6F;
+					this.walkDist = this.walkDist + (float)vec34.horizontalDistance() * 0.6F;
 					this.moveDist = this.moveDist + (float)Math.sqrt(e * e + f * f + g * g) * 0.6F;
-					if (this.moveDist > this.nextStep && !blockState2.isAir()) {
+					if (this.moveDist > this.nextStep && (!blockState2.isAir() || this.attachedGrid != null)) {
 						boolean bl4 = blockPos2.equals(blockPos);
 						boolean bl5 = this.vibrationAndSoundEffectsFromBlock(blockPos, blockState, movementEmission.emitsSounds(), bl4, vec3);
 						if (!bl4) {
@@ -686,6 +764,9 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 
 						if (bl5) {
 							this.nextStep = this.nextStep();
+							if (this.canSpawnFootprintParticle()) {
+								this.spawnFootprintParticle();
+							}
 						} else if (this.isInWater()) {
 							this.nextStep = this.nextStep();
 							if (movementEmission.emitsSounds()) {
@@ -723,6 +804,14 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 				this.level().getProfiler().pop();
 			}
 		}
+	}
+
+	public boolean canSpawnFootprintParticle() {
+		return false;
+	}
+
+	protected void spawnFootprintParticle() {
+		this.level.addParticle(ParticleTypes.FOOTSTEP, this.getX(), this.getY() + 0.001, this.getZ(), (double)this.yRot, 0.0, 0.0);
 	}
 
 	private boolean isStateClimbable(BlockState blockState) {
@@ -871,33 +960,81 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 		return d;
 	}
 
-	private Vec3 collide(Vec3 vec3) {
+	public boolean isAttachedToGrid() {
+		return this.attachedGrid != null;
+	}
+
+	private Entity.CollideResult collide(Vec3 vec3) {
 		AABB aABB = this.getBoundingBox();
 		List<VoxelShape> list = this.level().getEntityCollisions(this, aABB.expandTowards(vec3));
-		Vec3 vec32 = vec3.lengthSqr() == 0.0 ? vec3 : collideBoundingBox(this, vec3, aABB, this.level(), list);
-		boolean bl = vec3.x != vec32.x;
-		boolean bl2 = vec3.y != vec32.y;
-		boolean bl3 = vec3.z != vec32.z;
+		Entity.CollideResult collideResult = collideBoundingBox(this, vec3, aABB, this.level(), list);
+		boolean bl = vec3.x != collideResult.movement.x;
+		boolean bl2 = vec3.y != collideResult.movement.y;
+		boolean bl3 = vec3.z != collideResult.movement.z;
 		boolean bl4 = this.onGround() || bl2 && vec3.y < 0.0;
 		if (this.maxUpStep() > 0.0F && bl4 && (bl || bl3)) {
-			Vec3 vec33 = collideBoundingBox(this, new Vec3(vec3.x, (double)this.maxUpStep(), vec3.z), aABB, this.level(), list);
-			Vec3 vec34 = collideBoundingBox(this, new Vec3(0.0, (double)this.maxUpStep(), 0.0), aABB.expandTowards(vec3.x, 0.0, vec3.z), this.level(), list);
+			Vec3 vec32 = collideResult.gridMovement();
+			Vec3 vec33 = collideBoundingBox(this, new Vec3(vec3.x, vec32.y + (double)this.maxUpStep(), vec3.z), aABB, this.level(), list).movementRelativeTo(vec32);
+			Vec3 vec34 = collideBoundingBox(this, vec32.add(0.0, (double)this.maxUpStep(), 0.0), aABB.expandTowards(vec3.x, 0.0, vec3.z), this.level(), list)
+				.movementRelativeTo(vec32);
 			if (vec34.y < (double)this.maxUpStep()) {
-				Vec3 vec35 = collideBoundingBox(this, new Vec3(vec3.x, 0.0, vec3.z), aABB.move(vec34), this.level(), list).add(vec34);
+				Vec3 vec35 = collideBoundingBox(this, new Vec3(vec3.x, 0.0, vec3.z), aABB.move(vec34), this.level(), list).add(vec34).movementRelativeTo(vec32);
 				if (vec35.horizontalDistanceSqr() > vec33.horizontalDistanceSqr()) {
 					vec33 = vec35;
 				}
 			}
 
-			if (vec33.horizontalDistanceSqr() > vec32.horizontalDistanceSqr()) {
-				return vec33.add(collideBoundingBox(this, new Vec3(0.0, -vec33.y + vec3.y, 0.0), aABB.move(vec33), this.level(), list));
+			if (vec33.horizontalDistanceSqr() > collideResult.movementRelativeTo(vec32).horizontalDistanceSqr()) {
+				Vec3 vec35 = collideBoundingBox(this, vec32.add(0.0, -vec33.y + vec3.y, 0.0), aABB.move(vec33), this.level(), list).movementRelativeTo(vec32);
+				return new Entity.CollideResult(vec35.add(vec33).add(vec32), collideResult.subGrid);
 			}
 		}
 
-		return vec32;
+		return collideResult;
 	}
 
-	public static Vec3 collideBoundingBox(@Nullable Entity entity, Vec3 vec3, AABB aABB, Level level, List<VoxelShape> list) {
+	public static Entity.CollideResult collideBoundingBox(@Nullable Entity entity, Vec3 vec3, AABB aABB, Level level, List<VoxelShape> list) {
+		if (vec3.lengthSqr() > 0.0) {
+			vec3 = collideBoundingBoxWithWorld(entity, vec3, aABB, level, list);
+		}
+
+		return collideBoundingBoxWithSubGrids(entity, new Entity.CollideResult(vec3, null), aABB, level);
+	}
+
+	private static Entity.CollideResult collideBoundingBoxWithSubGrids(@Nullable Entity entity, Entity.CollideResult collideResult, AABB aABB, Level level) {
+		if (entity != null && entity.ignoreGridCollision) {
+			return collideResult;
+		} else {
+			List<VoxelShape> list = new ArrayList();
+
+			for (SubGrid subGrid : level.getGrids()) {
+				collideResult = collideWithSubGrid(entity, collideResult, aABB, subGrid, list);
+				list.clear();
+			}
+
+			return collideResult;
+		}
+	}
+
+	private static Entity.CollideResult collideWithSubGrid(
+		@Nullable Entity entity, Entity.CollideResult collideResult, AABB aABB, SubGrid subGrid, List<VoxelShape> list
+	) {
+		Vec3 vec3 = subGrid.getLastMovement();
+		AABB aABB2 = subGrid.getKnownBoundingBox();
+		Vec3 vec32 = collideResult.movement.subtract(vec3);
+		AABB aABB3 = aABB.expandTowards(vec32);
+		if (!aABB2.intersects(aABB3)) {
+			return collideResult;
+		} else {
+			AABB aABB4 = aABB.move(-aABB2.minX, -aABB2.minY, -aABB2.minZ);
+			AABB aABB5 = aABB3.move(-aABB2.minX, -aABB2.minY, -aABB2.minZ);
+			Iterables.addAll(list, subGrid.getBlockCollisions(entity, aABB5));
+			Vec3 vec33 = collideWithShapes(vec32, aABB4, list);
+			return vec33.equals(vec32) ? collideResult : new Entity.CollideResult(vec33.add(vec3), subGrid);
+		}
+	}
+
+	private static Vec3 collideBoundingBoxWithWorld(@Nullable Entity entity, Vec3 vec3, AABB aABB, Level level, List<VoxelShape> list) {
 		Builder<VoxelShape> builder = ImmutableList.builderWithExpectedSize(list.size() + 1);
 		if (!list.isEmpty()) {
 			builder.addAll(list);
@@ -1103,7 +1240,11 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 	}
 
 	public final double getGravity() {
-		return this.isNoGravity() ? 0.0 : this.getDefaultGravity();
+		if (this.reloadAttachedGrid != null) {
+			return 0.0;
+		} else {
+			return this.isNoGravity() ? 0.0 : this.getDefaultGravity();
+		}
 	}
 
 	protected void applyGravity() {
@@ -1273,7 +1414,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 
 	@Deprecated
 	protected BlockState getBlockStateOnLegacy() {
-		return this.level().getBlockState(this.getOnPosLegacy());
+		return this.getEffectState();
 	}
 
 	public BlockState getBlockStateOn() {
@@ -1284,9 +1425,19 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 		return this.isSprinting() && !this.isInWater() && !this.isSpectator() && !this.isCrouching() && !this.isInLava() && this.isAlive();
 	}
 
+	protected BlockState getEffectState() {
+		if (this.attachedGrid != null) {
+			Vec3 vec3 = this.position.subtract(this.attachedGrid.carrier().position());
+			BlockPos blockPos = BlockPos.containing(vec3.add(0.0, -0.2F, 0.0));
+			return this.attachedGrid.getBlockState(blockPos);
+		} else {
+			return this.level().getBlockState(this.getOnPosLegacy());
+		}
+	}
+
 	protected void spawnSprintParticle() {
 		BlockPos blockPos = this.getOnPosLegacy();
-		BlockState blockState = this.level().getBlockState(blockPos);
+		BlockState blockState = this.getEffectState();
 		if (blockState.getRenderShape() != RenderShape.INVISIBLE) {
 			Vec3 vec3 = this.getDeltaMovement();
 			BlockPos blockPos2 = this.blockPosition();
@@ -1641,6 +1792,10 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 			}
 
 			this.addAdditionalSaveData(compoundTag);
+			if (this.attachedGrid != null) {
+				compoundTag.putUUID("attached_to_grid", this.attachedGrid.id());
+			}
+
 			if (this.isVehicle()) {
 				ListTag listTag = new ListTag();
 
@@ -1697,6 +1852,11 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 			if (compoundTag.hasUUID("UUID")) {
 				this.uuid = compoundTag.getUUID("UUID");
 				this.stringUUID = this.uuid.toString();
+			}
+
+			if (compoundTag.hasUUID("attached_to_grid")) {
+				this.reloadAttachedGrid = compoundTag.getUUID("attached_to_grid");
+				this.reloadAttachedGridTimeout = 40;
 			}
 
 			if (!Double.isFinite(this.getX()) || !Double.isFinite(this.getY()) || !Double.isFinite(this.getZ())) {
@@ -2059,18 +2219,26 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 	}
 
 	protected void handleNetherPortal() {
-		if (this.level() instanceof ServerLevel) {
-			int i = this.getPortalWaitTime();
-			ServerLevel serverLevel = (ServerLevel)this.level();
+		if (this.level() instanceof ServerLevel serverLevel) {
+			int var11 = this.getPortalWaitTime();
 			if (this.isInsidePortal) {
 				MinecraftServer minecraftServer = serverLevel.getServer();
-				ResourceKey<Level> resourceKey = this.level().dimension() == Level.NETHER ? Level.OVERWORLD : Level.NETHER;
+				BlockState blockState = serverLevel.getBlockState(this.portalEntrancePos);
+				boolean bl = blockState.is(Blocks.POTATO_PORTAL);
+				boolean bl2 = this.level.getBlockState(this.portalEntrancePos.below()).is(Blocks.PEDESTAL);
+				ResourceKey<Level> resourceKey = bl
+					? (this.level().isPotato() ? Level.OVERWORLD : Level.POTATO)
+					: (this.level().dimension() == Level.NETHER ? Level.OVERWORLD : Level.NETHER);
 				ServerLevel serverLevel2 = minecraftServer.getLevel(resourceKey);
-				if (serverLevel2 != null && minecraftServer.isNetherEnabled() && !this.isPassenger() && this.portalTime++ >= i) {
+				if (serverLevel2 != null && (minecraftServer.isNetherEnabled() || bl) && !this.isPassenger() && this.portalTime++ >= var11) {
 					this.level().getProfiler().push("portal");
-					this.portalTime = i;
+					this.portalTime = var11;
 					this.setPortalCooldown();
-					this.changeDimension(serverLevel2);
+					this.changeDimension(serverLevel2, bl2);
+					if (this instanceof ServerPlayer serverPlayer && bl && this.level().isPotato() && !serverPlayer.chapterIsPast("dimension")) {
+						serverPlayer.setPotatoQuestChapter("dimension");
+					}
+
 					this.level().getProfiler().pop();
 				}
 
@@ -2461,12 +2629,12 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 	}
 
 	@Nullable
-	public Entity changeDimension(ServerLevel serverLevel) {
+	public Entity changeDimension(ServerLevel serverLevel, boolean bl) {
 		if (this.level() instanceof ServerLevel && !this.isRemoved()) {
 			this.level().getProfiler().push("changeDimension");
 			this.unRide();
 			this.level().getProfiler().push("reposition");
-			PortalInfo portalInfo = this.findDimensionEntryPoint(serverLevel);
+			PortalInfo portalInfo = this.findDimensionEntryPoint(serverLevel, bl);
 			if (portalInfo == null) {
 				return null;
 			} else {
@@ -2499,53 +2667,175 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 	}
 
 	@Nullable
-	protected PortalInfo findDimensionEntryPoint(ServerLevel serverLevel) {
-		boolean bl = this.level().dimension() == Level.END && serverLevel.dimension() == Level.OVERWORLD;
-		boolean bl2 = serverLevel.dimension() == Level.END;
-		if (!bl && !bl2) {
-			boolean bl3 = serverLevel.dimension() == Level.NETHER;
-			if (this.level().dimension() != Level.NETHER && !bl3) {
-				return null;
-			} else {
-				WorldBorder worldBorder = serverLevel.getWorldBorder();
-				double d = DimensionType.getTeleportationScale(this.level().dimensionType(), serverLevel.dimensionType());
-				BlockPos blockPos2 = worldBorder.clampToBounds(this.getX() * d, this.getY(), this.getZ() * d);
-				return (PortalInfo)this.getExitPortal(serverLevel, blockPos2, bl3, worldBorder)
-					.map(
-						foundRectangle -> {
-							BlockState blockState = this.level().getBlockState(this.portalEntrancePos);
-							Direction.Axis axis;
-							Vec3 vec3;
-							if (blockState.hasProperty(BlockStateProperties.HORIZONTAL_AXIS)) {
-								axis = blockState.getValue(BlockStateProperties.HORIZONTAL_AXIS);
-								BlockUtil.FoundRectangle foundRectangle2 = BlockUtil.getLargestRectangleAround(
-									this.portalEntrancePos, axis, 21, Direction.Axis.Y, 21, blockPos -> this.level().getBlockState(blockPos) == blockState
-								);
-								vec3 = this.getRelativePortalPosition(axis, foundRectangle2);
-							} else {
-								axis = Direction.Axis.X;
-								vec3 = new Vec3(0.5, 0.0, 0.0);
-							}
-
-							return PortalShape.createPortalInfo(serverLevel, foundRectangle, axis, vec3, this, this.getDeltaMovement(), this.getYRot(), this.getXRot());
-						}
-					)
-					.orElse(null);
-			}
-		} else {
-			BlockPos blockPos = bl2 ? ServerLevel.END_SPAWN_POINT : serverLevel.getSharedSpawnPos();
-			serverLevel.getChunkSource().addRegionTicket(TicketType.PORTAL, new ChunkPos(blockPos), 3, blockPos);
-			int i;
-			if (bl2) {
-				i = blockPos.getY();
-			} else {
-				i = serverLevel.getChunkAt(blockPos).getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, blockPos.getX(), blockPos.getZ()) + 1;
-			}
-
-			return new PortalInfo(
-				new Vec3((double)blockPos.getX() + 0.5, (double)i, (double)blockPos.getZ() + 0.5), this.getDeltaMovement(), this.getYRot(), this.getXRot()
+	protected PortalInfo findDimensionEntryPoint(ServerLevel serverLevel, boolean bl) {
+		boolean bl2 = serverLevel.isPotato() || this.level().isPotato();
+		ServerLevel serverLevel2 = (ServerLevel)this.level();
+		if (bl2) {
+			WorldBorder worldBorder = serverLevel.getWorldBorder();
+			double d = DimensionType.getTeleportationScale(this.level().dimensionType(), serverLevel.dimensionType());
+			BlockPos blockPos = worldBorder.clampToBounds(
+				(double)this.portalEntrancePos.getX() * d,
+				(double)Mth.clamp(this.portalEntrancePos.getY(), serverLevel.getMinBuildHeight() + 1, serverLevel.getMaxBuildHeight() - 1),
+				(double)this.portalEntrancePos.getZ() * d
 			);
+			PortalInfo portalInfo = null;
+			if (bl) {
+				portalInfo = this.getPortalInfoInPotatoWithStructureLink(serverLevel, serverLevel2, blockPos);
+			}
+
+			if (portalInfo == null) {
+				portalInfo = this.getPortalInfoInPotatoWithRegularPortal(serverLevel, blockPos);
+			}
+
+			serverLevel2.getChunkSource().addRegionTicket(TicketType.PORTAL, new ChunkPos(this.portalEntrancePos), 3, this.portalEntrancePos);
+			BlockPos blockPos2 = BlockPos.containing(portalInfo.pos);
+			serverLevel.getChunkSource().addRegionTicket(TicketType.PORTAL, new ChunkPos(blockPos2), 3, blockPos2);
+			return portalInfo;
+		} else {
+			boolean bl3 = this.level().dimension() == Level.END && serverLevel.dimension() == Level.OVERWORLD;
+			boolean bl4 = serverLevel.dimension() == Level.END;
+			if (!bl3 && !bl4) {
+				boolean bl5 = serverLevel.dimension() == Level.NETHER;
+				if (this.level().dimension() != Level.NETHER && !bl5) {
+					return null;
+				} else {
+					WorldBorder worldBorder2 = serverLevel.getWorldBorder();
+					double e = DimensionType.getTeleportationScale(this.level().dimensionType(), serverLevel.dimensionType());
+					BlockPos blockPos4 = worldBorder2.clampToBounds(this.getX() * e, this.getY(), this.getZ() * e);
+					return (PortalInfo)this.getExitPortal(serverLevel, blockPos4, bl5, worldBorder2)
+						.map(
+							foundRectangle -> {
+								BlockState blockState = this.level().getBlockState(this.portalEntrancePos);
+								Direction.Axis axis;
+								Vec3 vec3;
+								if (blockState.hasProperty(BlockStateProperties.HORIZONTAL_AXIS)) {
+									axis = blockState.getValue(BlockStateProperties.HORIZONTAL_AXIS);
+									BlockUtil.FoundRectangle foundRectangle2 = BlockUtil.getLargestRectangleAround(
+										this.portalEntrancePos, axis, 21, Direction.Axis.Y, 21, blockPosx -> this.level().getBlockState(blockPosx) == blockState
+									);
+									vec3 = this.getRelativePortalPosition(axis, foundRectangle2);
+								} else {
+									axis = Direction.Axis.X;
+									vec3 = new Vec3(0.5, 0.0, 0.0);
+								}
+
+								return PortalShape.createPortalInfo(serverLevel, foundRectangle, axis, vec3, this, this.getDeltaMovement(), this.getYRot(), this.getXRot());
+							}
+						)
+						.orElse(null);
+				}
+			} else {
+				BlockPos blockPos3 = bl4 ? ServerLevel.END_SPAWN_POINT : serverLevel.getSharedSpawnPos();
+				serverLevel.getChunkSource().addRegionTicket(TicketType.PORTAL, new ChunkPos(blockPos3), 3, blockPos3);
+				int i;
+				if (bl4) {
+					i = blockPos3.getY();
+				} else {
+					i = serverLevel.getChunkAt(blockPos3).getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, blockPos3.getX(), blockPos3.getZ()) + 1;
+				}
+
+				return new PortalInfo(
+					new Vec3((double)blockPos3.getX() + 0.5, (double)i, (double)blockPos3.getZ() + 0.5), this.getDeltaMovement(), this.getYRot(), this.getXRot()
+				);
+			}
 		}
+	}
+
+	private PortalInfo getPortalInfoInPotatoWithRegularPortal(ServerLevel serverLevel, BlockPos blockPos) {
+		Vec3 vec3 = this.position.subtract(Vec3.atLowerCornerOf(this.portalEntrancePos));
+		PoiManager poiManager = serverLevel.getPoiManager();
+		poiManager.ensureLoadedAndValid(serverLevel, blockPos, 64, ChunkStatus.EMPTY);
+		BlockPos blockPos2 = (BlockPos)poiManager.findClosest(holder -> holder.is(PoiTypes.POTATO_PORTAL), blockPos, 64, PoiManager.Occupancy.ANY)
+			.or(() -> getClosestLandingPointBruteForce(serverLevel, blockPos))
+			.orElseGet(() -> setupSafeLandingPosition(serverLevel, blockPos));
+		if (!serverLevel.getBlockState(blockPos2).is(Blocks.POTATO_PORTAL) && serverLevel.isEmptyBlock(blockPos2)) {
+			serverLevel.setBlock(blockPos2, Blocks.POTATO_PORTAL.defaultBlockState(), 3);
+		}
+
+		return new PortalInfo(Vec3.atLowerCornerOf(blockPos2).add(vec3), this.getDeltaMovement(), this.getYRot(), this.getXRot());
+	}
+
+	private static Optional<BlockPos> getClosestLandingPointBruteForce(ServerLevel serverLevel, BlockPos blockPos) {
+		return BlockPos.findClosestMatch(
+			blockPos,
+			32,
+			32,
+			blockPosx -> isValidLandingBlock(serverLevel, blockPosx.below()) && serverLevel.isEmptyBlock(blockPosx) && serverLevel.isEmptyBlock(blockPosx.above())
+		);
+	}
+
+	private static boolean isValidLandingBlock(ServerLevel serverLevel, BlockPos blockPos) {
+		BlockState blockState = serverLevel.getBlockState(blockPos);
+		return !blockState.is(Blocks.FLOATATO) && blockState.isFaceSturdy(serverLevel, blockPos, Direction.UP);
+	}
+
+	private static Optional<BlockPos> getClosestPedestalBruteForce(ServerLevel serverLevel, BlockPos blockPos) {
+		return BlockPos.findClosestMatch(
+			blockPos,
+			32,
+			32,
+			blockPosx -> serverLevel.getBlockState(blockPosx.below()).is(Blocks.PEDESTAL)
+					&& (serverLevel.isEmptyBlock(blockPosx) || serverLevel.getBlockState(blockPosx).canBeReplaced())
+		);
+	}
+
+	private static BlockPos setupSafeLandingPosition(ServerLevel serverLevel, BlockPos blockPos) {
+		if (!serverLevel.getBlockState(blockPos.below()).isFaceSturdy(serverLevel, blockPos, Direction.UP)) {
+			serverLevel.setBlock(blockPos.below(), serverLevel.isPotato() ? Blocks.PEELGRASS_BLOCK.defaultBlockState() : Blocks.GRASS_BLOCK.defaultBlockState(), 3);
+		}
+
+		serverLevel.setBlock(blockPos, Blocks.CAVE_AIR.defaultBlockState(), 3);
+		serverLevel.setBlock(blockPos.above(), Blocks.CAVE_AIR.defaultBlockState(), 3);
+		return blockPos;
+	}
+
+	@Nullable
+	private PortalInfo getPortalInfoInPotatoWithStructureLink(ServerLevel serverLevel, ServerLevel serverLevel2, BlockPos blockPos) {
+		Vec3 vec3 = this.position.subtract(Vec3.atLowerCornerOf(this.portalEntrancePos));
+
+		for (Pair<ResourceKey<Structure>, ResourceKey<Structure>> pair : STRUCTURE_LINKS) {
+			ResourceKey<Structure> resourceKey = serverLevel2.isPotato() ? pair.getSecond() : pair.getFirst();
+			if (serverLevel2.structureManager().getStructureWithPieceAt(this.portalEntrancePos, holder -> holder.is(resourceKey)).isValid()) {
+				ResourceKey<Structure> resourceKey2 = serverLevel2.isPotato() ? pair.getFirst() : pair.getSecond();
+				HolderSet<Structure> holderSet = HolderSet.direct((Holder)this.registryAccess().registryOrThrow(Registries.STRUCTURE).getHolder(resourceKey2).orElseThrow());
+				Pair<BlockPos, Holder<Structure>> pair2 = serverLevel.getChunkSource().getGenerator().findNearestMapStructure(serverLevel, holderSet, blockPos, 128, false);
+				if (pair2 != null) {
+					ChunkPos chunkPos = new ChunkPos(pair2.getFirst());
+					ChunkAccess chunkAccess = serverLevel.getChunk(chunkPos.x, chunkPos.z, ChunkStatus.FEATURES);
+					StructureStart structureStart = serverLevel.structureManager()
+						.getStartForStructure(SectionPos.bottomOf(chunkAccess), pair2.getSecond().value(), chunkAccess);
+					if (structureStart != null && structureStart.isValid() && !structureStart.getPieces().isEmpty()) {
+						StructurePiece structurePiece = resourceKey2 == BuiltinStructures.STRONGHOLD
+							? (StructurePiece)structureStart.getPieces()
+								.stream()
+								.filter(structurePiecex -> structurePiecex instanceof StrongholdPieces.PortalRoom)
+								.findFirst()
+								.orElse((StructurePiece)structureStart.getPieces().get(0))
+							: (StructurePiece)structureStart.getPieces().get(0);
+						BlockPos blockPos2 = structurePiece.getBoundingBox().getCenter();
+						PoiManager poiManager = serverLevel.getPoiManager();
+						poiManager.ensureLoadedAndValid(serverLevel, blockPos2, 64, ChunkStatus.FULL);
+						System.out.println("Counts on the other side: " + poiManager.getInSquare(holder -> true, blockPos2, 64, PoiManager.Occupancy.ANY).count());
+						BlockPos blockPos3 = (BlockPos)poiManager.findClosest(holder -> holder.is(PoiTypes.POTATO_PORTAL), blockPos2.below(16), 64, PoiManager.Occupancy.ANY)
+							.or(() -> poiManager.findClosest(holder -> holder.is(PoiTypes.PEDESTAL), blockPosxx -> {
+									BlockPos blockPos2x = blockPosxx.above();
+									BlockState blockState = serverLevel.getBlockState(blockPos2x);
+									return blockState.getCollisionShape(serverLevel, blockPos2x).isEmpty() || blockState.canBeReplaced();
+								}, blockPos2.below(16), 64, PoiManager.Occupancy.ANY).map(BlockPos::above))
+							.or(() -> getClosestPedestalBruteForce(serverLevel, blockPos2.below(8)))
+							.or(() -> getClosestLandingPointBruteForce(serverLevel, blockPos2.below(8)))
+							.orElseGet(() -> setupSafeLandingPosition(serverLevel, blockPos2));
+						if (serverLevel.getBlockState(blockPos3.below()).is(Blocks.PEDESTAL) && !serverLevel.getBlockState(blockPos3).is(Blocks.POTATO_PORTAL)) {
+							serverLevel.setBlock(blockPos3, Blocks.POTATO_PORTAL.defaultBlockState(), 3);
+						}
+
+						return new PortalInfo(Vec3.atLowerCornerOf(blockPos3).add(vec3), this.getDeltaMovement(), this.getYRot(), this.getXRot());
+					}
+				}
+			}
+		}
+
+		return null;
 	}
 
 	protected Vec3 getRelativePortalPosition(Direction.Axis axis, BlockUtil.FoundRectangle foundRectangle) {
@@ -3396,6 +3686,14 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 		return this.level;
 	}
 
+	public boolean isPotato() {
+		return this.hasPotatoVariant() && this.level.isPotato();
+	}
+
+	public boolean hasPotatoVariant() {
+		return false;
+	}
+
 	protected void setLevel(Level level) {
 		this.level = level;
 	}
@@ -3408,7 +3706,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 		return this.level().registryAccess();
 	}
 
-	protected void lerpPositionAndRotationStep(int i, double d, double e, double f, double g, double h) {
+	public void lerpPositionAndRotationStep(int i, double d, double e, double f, double g, double h) {
 		double j = 1.0 / (double)i;
 		double k = Mth.lerp(j, this.getX(), d);
 		double l = Mth.lerp(j, this.getY(), e);
@@ -3417,6 +3715,21 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 		float o = (float)Mth.lerp(j, (double)this.getXRot(), h);
 		this.setPos(k, l, m);
 		this.setRot(n, o);
+	}
+
+	public static record CollideResult(Vec3 movement, @Nullable SubGrid subGrid) {
+
+		public Entity.CollideResult add(Vec3 vec3) {
+			return new Entity.CollideResult(this.movement.add(vec3), this.subGrid);
+		}
+
+		public Vec3 gridMovement() {
+			return this.subGrid != null ? this.subGrid.getLastMovement() : Vec3.ZERO;
+		}
+
+		public Vec3 movementRelativeTo(Vec3 vec3) {
+			return this.movement.subtract(vec3);
+		}
 	}
 
 	@FunctionalInterface

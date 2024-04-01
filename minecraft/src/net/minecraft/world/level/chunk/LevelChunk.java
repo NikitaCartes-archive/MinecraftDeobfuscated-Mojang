@@ -648,6 +648,11 @@ public class LevelChunk extends ChunkAccess {
 		return new LevelChunk.BoundTickingBlockEntity<>(blockEntity, blockEntityTicker);
 	}
 
+	@Override
+	public boolean isPotato() {
+		return this.level.isPotato();
+	}
+
 	class BoundTickingBlockEntity<T extends BlockEntity> implements TickingBlockEntity {
 		private final T blockEntity;
 		private final BlockEntityTicker<T> ticker;

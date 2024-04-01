@@ -21,6 +21,7 @@ import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.placement.BiomeFilter;
 import net.minecraft.world.level.levelgen.placement.BlockPredicateFilter;
+import net.minecraft.world.level.levelgen.placement.CountOnEveryLayerPlacement;
 import net.minecraft.world.level.levelgen.placement.CountPlacement;
 import net.minecraft.world.level.levelgen.placement.HeightRangePlacement;
 import net.minecraft.world.level.levelgen.placement.InSquarePlacement;
@@ -37,6 +38,11 @@ public class VegetationPlacements {
 	public static final ResourceKey<PlacedFeature> VINES = PlacementUtils.createKey("vines");
 	public static final ResourceKey<PlacedFeature> PATCH_SUNFLOWER = PlacementUtils.createKey("patch_sunflower");
 	public static final ResourceKey<PlacedFeature> PATCH_PUMPKIN = PlacementUtils.createKey("patch_pumpkin");
+	public static final ResourceKey<PlacedFeature> PATCH_POTATO = PlacementUtils.createKey("patch_potato");
+	public static final ResourceKey<PlacedFeature> PATCH_POTATO_SPARSE = PlacementUtils.createKey("patch_potato_sparse");
+	public static final ResourceKey<PlacedFeature> POTATO_FIELD = PlacementUtils.createKey("potato_field");
+	public static final ResourceKey<PlacedFeature> PARK_LANE = PlacementUtils.createKey("park_lane");
+	public static final ResourceKey<PlacedFeature> PARK_LANE_SURFACE = PlacementUtils.createKey("park_lane_surface");
 	public static final ResourceKey<PlacedFeature> PATCH_GRASS_PLAIN = PlacementUtils.createKey("patch_grass_plain");
 	public static final ResourceKey<PlacedFeature> PATCH_GRASS_FOREST = PlacementUtils.createKey("patch_grass_forest");
 	public static final ResourceKey<PlacedFeature> PATCH_GRASS_BADLANDS = PlacementUtils.createKey("patch_grass_badlands");
@@ -47,6 +53,7 @@ public class VegetationPlacements {
 	public static final ResourceKey<PlacedFeature> PATCH_GRASS_JUNGLE = PlacementUtils.createKey("patch_grass_jungle");
 	public static final ResourceKey<PlacedFeature> GRASS_BONEMEAL = PlacementUtils.createKey("grass_bonemeal");
 	public static final ResourceKey<PlacedFeature> PATCH_DEAD_BUSH_2 = PlacementUtils.createKey("patch_dead_bush_2");
+	public static final ResourceKey<PlacedFeature> PATCH_DEAD_BUSH_2_ALL_LEVELS = PlacementUtils.createKey("patch_dead_bush_2_all_levels");
 	public static final ResourceKey<PlacedFeature> PATCH_DEAD_BUSH = PlacementUtils.createKey("patch_dead_bush");
 	public static final ResourceKey<PlacedFeature> PATCH_DEAD_BUSH_BADLANDS = PlacementUtils.createKey("patch_dead_bush_badlands");
 	public static final ResourceKey<PlacedFeature> PATCH_MELON = PlacementUtils.createKey("patch_melon");
@@ -58,6 +65,8 @@ public class VegetationPlacements {
 	public static final ResourceKey<PlacedFeature> PATCH_TALL_GRASS = PlacementUtils.createKey("patch_tall_grass");
 	public static final ResourceKey<PlacedFeature> PATCH_LARGE_FERN = PlacementUtils.createKey("patch_large_fern");
 	public static final ResourceKey<PlacedFeature> PATCH_CACTUS_DESERT = PlacementUtils.createKey("patch_cactus_desert");
+	public static final ResourceKey<PlacedFeature> LEAF_PILE_HASH = PlacementUtils.createKey("leaf_pile_hash");
+	public static final ResourceKey<PlacedFeature> VENOMOUS_COLUMN_HASH = PlacementUtils.createKey("venomous_column_hash");
 	public static final ResourceKey<PlacedFeature> PATCH_CACTUS_DECORATED = PlacementUtils.createKey("patch_cactus_decorated");
 	public static final ResourceKey<PlacedFeature> PATCH_SUGAR_CANE_SWAMP = PlacementUtils.createKey("patch_sugar_cane_swamp");
 	public static final ResourceKey<PlacedFeature> PATCH_SUGAR_CANE_DESERT = PlacementUtils.createKey("patch_sugar_cane_desert");
@@ -82,6 +91,7 @@ public class VegetationPlacements {
 	public static final ResourceKey<PlacedFeature> FLOWER_CHERRY = PlacementUtils.createKey("flower_cherry");
 	public static final ResourceKey<PlacedFeature> TREES_PLAINS = PlacementUtils.createKey("trees_plains");
 	public static final ResourceKey<PlacedFeature> DARK_FOREST_VEGETATION = PlacementUtils.createKey("dark_forest_vegetation");
+	public static final ResourceKey<PlacedFeature> ARBORETUM_TREES = PlacementUtils.createKey("arboretum_trees");
 	public static final ResourceKey<PlacedFeature> FLOWER_FOREST_FLOWERS = PlacementUtils.createKey("flower_forest_flowers");
 	public static final ResourceKey<PlacedFeature> FOREST_FLOWERS = PlacementUtils.createKey("forest_flowers");
 	public static final ResourceKey<PlacedFeature> TREES_FLOWER_FOREST = PlacementUtils.createKey("trees_flower_forest");
@@ -155,50 +165,57 @@ public class VegetationPlacements {
 		Holder<ConfiguredFeature<?, ?>> holder3 = holderGetter.getOrThrow(VegetationFeatures.VINES);
 		Holder<ConfiguredFeature<?, ?>> holder4 = holderGetter.getOrThrow(VegetationFeatures.PATCH_SUNFLOWER);
 		Holder<ConfiguredFeature<?, ?>> holder5 = holderGetter.getOrThrow(VegetationFeatures.PATCH_PUMPKIN);
-		Holder<ConfiguredFeature<?, ?>> holder6 = holderGetter.getOrThrow(VegetationFeatures.PATCH_GRASS);
-		Holder<ConfiguredFeature<?, ?>> holder7 = holderGetter.getOrThrow(VegetationFeatures.PATCH_TAIGA_GRASS);
-		Holder<ConfiguredFeature<?, ?>> holder8 = holderGetter.getOrThrow(VegetationFeatures.PATCH_GRASS_JUNGLE);
-		Holder<ConfiguredFeature<?, ?>> holder9 = holderGetter.getOrThrow(VegetationFeatures.SINGLE_PIECE_OF_GRASS);
-		Holder<ConfiguredFeature<?, ?>> holder10 = holderGetter.getOrThrow(VegetationFeatures.PATCH_DEAD_BUSH);
-		Holder<ConfiguredFeature<?, ?>> holder11 = holderGetter.getOrThrow(VegetationFeatures.PATCH_MELON);
-		Holder<ConfiguredFeature<?, ?>> holder12 = holderGetter.getOrThrow(VegetationFeatures.PATCH_BERRY_BUSH);
-		Holder<ConfiguredFeature<?, ?>> holder13 = holderGetter.getOrThrow(VegetationFeatures.PATCH_WATERLILY);
-		Holder<ConfiguredFeature<?, ?>> holder14 = holderGetter.getOrThrow(VegetationFeatures.PATCH_TALL_GRASS);
-		Holder<ConfiguredFeature<?, ?>> holder15 = holderGetter.getOrThrow(VegetationFeatures.PATCH_LARGE_FERN);
-		Holder<ConfiguredFeature<?, ?>> holder16 = holderGetter.getOrThrow(VegetationFeatures.PATCH_CACTUS);
-		Holder<ConfiguredFeature<?, ?>> holder17 = holderGetter.getOrThrow(VegetationFeatures.PATCH_SUGAR_CANE);
-		Holder<ConfiguredFeature<?, ?>> holder18 = holderGetter.getOrThrow(VegetationFeatures.PATCH_BROWN_MUSHROOM);
-		Holder<ConfiguredFeature<?, ?>> holder19 = holderGetter.getOrThrow(VegetationFeatures.PATCH_RED_MUSHROOM);
-		Holder<ConfiguredFeature<?, ?>> holder20 = holderGetter.getOrThrow(VegetationFeatures.FLOWER_DEFAULT);
-		Holder<ConfiguredFeature<?, ?>> holder21 = holderGetter.getOrThrow(VegetationFeatures.FLOWER_FLOWER_FOREST);
-		Holder<ConfiguredFeature<?, ?>> holder22 = holderGetter.getOrThrow(VegetationFeatures.FLOWER_SWAMP);
-		Holder<ConfiguredFeature<?, ?>> holder23 = holderGetter.getOrThrow(VegetationFeatures.FLOWER_PLAIN);
-		Holder<ConfiguredFeature<?, ?>> holder24 = holderGetter.getOrThrow(VegetationFeatures.FLOWER_MEADOW);
-		Holder<ConfiguredFeature<?, ?>> holder25 = holderGetter.getOrThrow(VegetationFeatures.FLOWER_CHERRY);
-		Holder<ConfiguredFeature<?, ?>> holder26 = holderGetter.getOrThrow(VegetationFeatures.TREES_PLAINS);
-		Holder<ConfiguredFeature<?, ?>> holder27 = holderGetter.getOrThrow(VegetationFeatures.DARK_FOREST_VEGETATION);
-		Holder<ConfiguredFeature<?, ?>> holder28 = holderGetter.getOrThrow(VegetationFeatures.FOREST_FLOWERS);
-		Holder<ConfiguredFeature<?, ?>> holder29 = holderGetter.getOrThrow(VegetationFeatures.TREES_FLOWER_FOREST);
-		Holder<ConfiguredFeature<?, ?>> holder30 = holderGetter.getOrThrow(VegetationFeatures.MEADOW_TREES);
-		Holder<ConfiguredFeature<?, ?>> holder31 = holderGetter.getOrThrow(VegetationFeatures.TREES_TAIGA);
-		Holder<ConfiguredFeature<?, ?>> holder32 = holderGetter.getOrThrow(VegetationFeatures.TREES_GROVE);
-		Holder<ConfiguredFeature<?, ?>> holder33 = holderGetter.getOrThrow(TreeFeatures.OAK);
-		Holder<ConfiguredFeature<?, ?>> holder34 = holderGetter.getOrThrow(TreeFeatures.SPRUCE);
-		Holder<ConfiguredFeature<?, ?>> holder35 = holderGetter.getOrThrow(TreeFeatures.CHERRY_BEES_005);
-		Holder<ConfiguredFeature<?, ?>> holder36 = holderGetter.getOrThrow(TreeFeatures.SWAMP_OAK);
-		Holder<ConfiguredFeature<?, ?>> holder37 = holderGetter.getOrThrow(VegetationFeatures.TREES_SAVANNA);
-		Holder<ConfiguredFeature<?, ?>> holder38 = holderGetter.getOrThrow(VegetationFeatures.BIRCH_TALL);
-		Holder<ConfiguredFeature<?, ?>> holder39 = holderGetter.getOrThrow(TreeFeatures.BIRCH_BEES_0002);
-		Holder<ConfiguredFeature<?, ?>> holder40 = holderGetter.getOrThrow(VegetationFeatures.TREES_WINDSWEPT_HILLS);
-		Holder<ConfiguredFeature<?, ?>> holder41 = holderGetter.getOrThrow(VegetationFeatures.TREES_WATER);
-		Holder<ConfiguredFeature<?, ?>> holder42 = holderGetter.getOrThrow(VegetationFeatures.TREES_BIRCH_AND_OAK);
-		Holder<ConfiguredFeature<?, ?>> holder43 = holderGetter.getOrThrow(VegetationFeatures.TREES_SPARSE_JUNGLE);
-		Holder<ConfiguredFeature<?, ?>> holder44 = holderGetter.getOrThrow(VegetationFeatures.TREES_OLD_GROWTH_SPRUCE_TAIGA);
-		Holder<ConfiguredFeature<?, ?>> holder45 = holderGetter.getOrThrow(VegetationFeatures.TREES_OLD_GROWTH_PINE_TAIGA);
-		Holder<ConfiguredFeature<?, ?>> holder46 = holderGetter.getOrThrow(VegetationFeatures.TREES_JUNGLE);
-		Holder<ConfiguredFeature<?, ?>> holder47 = holderGetter.getOrThrow(VegetationFeatures.BAMBOO_VEGETATION);
-		Holder<ConfiguredFeature<?, ?>> holder48 = holderGetter.getOrThrow(VegetationFeatures.MUSHROOM_ISLAND_VEGETATION);
-		Holder<ConfiguredFeature<?, ?>> holder49 = holderGetter.getOrThrow(VegetationFeatures.MANGROVE_VEGETATION);
+		Holder<ConfiguredFeature<?, ?>> holder6 = holderGetter.getOrThrow(VegetationFeatures.PATCH_POTATO);
+		Holder<ConfiguredFeature<?, ?>> holder7 = holderGetter.getOrThrow(VegetationFeatures.POTATO_FIELD);
+		Holder<ConfiguredFeature<?, ?>> holder8 = holderGetter.getOrThrow(VegetationFeatures.PARK_LANE);
+		Holder<ConfiguredFeature<?, ?>> holder9 = holderGetter.getOrThrow(VegetationFeatures.PARK_LANE_SURFACE);
+		Holder<ConfiguredFeature<?, ?>> holder10 = holderGetter.getOrThrow(VegetationFeatures.PATCH_GRASS);
+		Holder<ConfiguredFeature<?, ?>> holder11 = holderGetter.getOrThrow(VegetationFeatures.PATCH_TAIGA_GRASS);
+		Holder<ConfiguredFeature<?, ?>> holder12 = holderGetter.getOrThrow(VegetationFeatures.PATCH_GRASS_JUNGLE);
+		Holder<ConfiguredFeature<?, ?>> holder13 = holderGetter.getOrThrow(VegetationFeatures.SINGLE_PIECE_OF_GRASS);
+		Holder<ConfiguredFeature<?, ?>> holder14 = holderGetter.getOrThrow(VegetationFeatures.PATCH_DEAD_BUSH);
+		Holder<ConfiguredFeature<?, ?>> holder15 = holderGetter.getOrThrow(VegetationFeatures.PATCH_MELON);
+		Holder<ConfiguredFeature<?, ?>> holder16 = holderGetter.getOrThrow(VegetationFeatures.PATCH_BERRY_BUSH);
+		Holder<ConfiguredFeature<?, ?>> holder17 = holderGetter.getOrThrow(VegetationFeatures.PATCH_WATERLILY);
+		Holder<ConfiguredFeature<?, ?>> holder18 = holderGetter.getOrThrow(VegetationFeatures.PATCH_TALL_GRASS);
+		Holder<ConfiguredFeature<?, ?>> holder19 = holderGetter.getOrThrow(VegetationFeatures.PATCH_LARGE_FERN);
+		Holder<ConfiguredFeature<?, ?>> holder20 = holderGetter.getOrThrow(VegetationFeatures.PATCH_CACTUS);
+		Holder<ConfiguredFeature<?, ?>> holder21 = holderGetter.getOrThrow(VegetationFeatures.LEAF_PILE);
+		Holder<ConfiguredFeature<?, ?>> holder22 = holderGetter.getOrThrow(VegetationFeatures.VENOMOUS_COLUMN);
+		Holder<ConfiguredFeature<?, ?>> holder23 = holderGetter.getOrThrow(VegetationFeatures.PATCH_SUGAR_CANE);
+		Holder<ConfiguredFeature<?, ?>> holder24 = holderGetter.getOrThrow(VegetationFeatures.PATCH_BROWN_MUSHROOM);
+		Holder<ConfiguredFeature<?, ?>> holder25 = holderGetter.getOrThrow(VegetationFeatures.PATCH_RED_MUSHROOM);
+		Holder<ConfiguredFeature<?, ?>> holder26 = holderGetter.getOrThrow(VegetationFeatures.FLOWER_DEFAULT);
+		Holder<ConfiguredFeature<?, ?>> holder27 = holderGetter.getOrThrow(VegetationFeatures.FLOWER_FLOWER_FOREST);
+		Holder<ConfiguredFeature<?, ?>> holder28 = holderGetter.getOrThrow(VegetationFeatures.FLOWER_SWAMP);
+		Holder<ConfiguredFeature<?, ?>> holder29 = holderGetter.getOrThrow(VegetationFeatures.FLOWER_PLAIN);
+		Holder<ConfiguredFeature<?, ?>> holder30 = holderGetter.getOrThrow(VegetationFeatures.FLOWER_MEADOW);
+		Holder<ConfiguredFeature<?, ?>> holder31 = holderGetter.getOrThrow(VegetationFeatures.FLOWER_CHERRY);
+		Holder<ConfiguredFeature<?, ?>> holder32 = holderGetter.getOrThrow(VegetationFeatures.TREES_PLAINS);
+		Holder<ConfiguredFeature<?, ?>> holder33 = holderGetter.getOrThrow(VegetationFeatures.DARK_FOREST_VEGETATION);
+		Holder<ConfiguredFeature<?, ?>> holder34 = holderGetter.getOrThrow(VegetationFeatures.ARBORETUM_TREES);
+		Holder<ConfiguredFeature<?, ?>> holder35 = holderGetter.getOrThrow(VegetationFeatures.FOREST_FLOWERS);
+		Holder<ConfiguredFeature<?, ?>> holder36 = holderGetter.getOrThrow(VegetationFeatures.TREES_FLOWER_FOREST);
+		Holder<ConfiguredFeature<?, ?>> holder37 = holderGetter.getOrThrow(VegetationFeatures.MEADOW_TREES);
+		Holder<ConfiguredFeature<?, ?>> holder38 = holderGetter.getOrThrow(VegetationFeatures.TREES_TAIGA);
+		Holder<ConfiguredFeature<?, ?>> holder39 = holderGetter.getOrThrow(VegetationFeatures.TREES_GROVE);
+		Holder<ConfiguredFeature<?, ?>> holder40 = holderGetter.getOrThrow(TreeFeatures.OAK);
+		Holder<ConfiguredFeature<?, ?>> holder41 = holderGetter.getOrThrow(TreeFeatures.SPRUCE);
+		Holder<ConfiguredFeature<?, ?>> holder42 = holderGetter.getOrThrow(TreeFeatures.CHERRY_BEES_005);
+		Holder<ConfiguredFeature<?, ?>> holder43 = holderGetter.getOrThrow(TreeFeatures.SWAMP_OAK);
+		Holder<ConfiguredFeature<?, ?>> holder44 = holderGetter.getOrThrow(VegetationFeatures.TREES_SAVANNA);
+		Holder<ConfiguredFeature<?, ?>> holder45 = holderGetter.getOrThrow(VegetationFeatures.BIRCH_TALL);
+		Holder<ConfiguredFeature<?, ?>> holder46 = holderGetter.getOrThrow(TreeFeatures.BIRCH_BEES_0002);
+		Holder<ConfiguredFeature<?, ?>> holder47 = holderGetter.getOrThrow(VegetationFeatures.TREES_WINDSWEPT_HILLS);
+		Holder<ConfiguredFeature<?, ?>> holder48 = holderGetter.getOrThrow(VegetationFeatures.TREES_WATER);
+		Holder<ConfiguredFeature<?, ?>> holder49 = holderGetter.getOrThrow(VegetationFeatures.TREES_BIRCH_AND_OAK);
+		Holder<ConfiguredFeature<?, ?>> holder50 = holderGetter.getOrThrow(VegetationFeatures.TREES_SPARSE_JUNGLE);
+		Holder<ConfiguredFeature<?, ?>> holder51 = holderGetter.getOrThrow(VegetationFeatures.TREES_OLD_GROWTH_SPRUCE_TAIGA);
+		Holder<ConfiguredFeature<?, ?>> holder52 = holderGetter.getOrThrow(VegetationFeatures.TREES_OLD_GROWTH_PINE_TAIGA);
+		Holder<ConfiguredFeature<?, ?>> holder53 = holderGetter.getOrThrow(VegetationFeatures.TREES_JUNGLE);
+		Holder<ConfiguredFeature<?, ?>> holder54 = holderGetter.getOrThrow(VegetationFeatures.BAMBOO_VEGETATION);
+		Holder<ConfiguredFeature<?, ?>> holder55 = holderGetter.getOrThrow(VegetationFeatures.MUSHROOM_ISLAND_VEGETATION);
+		Holder<ConfiguredFeature<?, ?>> holder56 = holderGetter.getOrThrow(VegetationFeatures.MANGROVE_VEGETATION);
 		PlacementUtils.register(
 			bootstrapContext, BAMBOO_LIGHT, holder, RarityFilter.onAverageOnceEvery(4), InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP, BiomeFilter.biome()
 		);
@@ -226,37 +243,45 @@ public class VegetationPlacements {
 		PlacementUtils.register(
 			bootstrapContext, PATCH_PUMPKIN, holder5, RarityFilter.onAverageOnceEvery(300), InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP, BiomeFilter.biome()
 		);
+		PlacementUtils.register(bootstrapContext, PATCH_POTATO, holder6, CountOnEveryLayerPlacement.of(1, 2), BiomeFilter.biome());
+		PlacementUtils.register(
+			bootstrapContext, PATCH_POTATO_SPARSE, holder6, RarityFilter.onAverageOnceEvery(4), CountOnEveryLayerPlacement.of(1, 2), BiomeFilter.biome()
+		);
+		PlacementUtils.register(bootstrapContext, POTATO_FIELD, holder7, CountOnEveryLayerPlacement.of(8, 2), BiomeFilter.biome());
+		PlacementUtils.register(bootstrapContext, PARK_LANE, holder8, CountOnEveryLayerPlacement.of(2, 2), BiomeFilter.biome());
+		PlacementUtils.register(bootstrapContext, PARK_LANE_SURFACE, holder9, BiomeFilter.biome());
 		PlacementUtils.register(
 			bootstrapContext,
 			PATCH_GRASS_PLAIN,
-			holder6,
+			holder10,
 			NoiseThresholdCountPlacement.of(-0.8, 5, 10),
 			InSquarePlacement.spread(),
 			PlacementUtils.HEIGHTMAP_WORLD_SURFACE,
 			BiomeFilter.biome()
 		);
-		PlacementUtils.register(bootstrapContext, PATCH_GRASS_FOREST, holder6, worldSurfaceSquaredWithCount(2));
+		PlacementUtils.register(bootstrapContext, PATCH_GRASS_FOREST, holder10, worldSurfaceSquaredWithCount(2));
 		PlacementUtils.register(
-			bootstrapContext, PATCH_GRASS_BADLANDS, holder6, InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP_WORLD_SURFACE, BiomeFilter.biome()
+			bootstrapContext, PATCH_GRASS_BADLANDS, holder10, InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP_WORLD_SURFACE, BiomeFilter.biome()
 		);
-		PlacementUtils.register(bootstrapContext, PATCH_GRASS_SAVANNA, holder6, worldSurfaceSquaredWithCount(20));
-		PlacementUtils.register(bootstrapContext, PATCH_GRASS_NORMAL, holder6, worldSurfaceSquaredWithCount(5));
+		PlacementUtils.register(bootstrapContext, PATCH_GRASS_SAVANNA, holder10, worldSurfaceSquaredWithCount(20));
+		PlacementUtils.register(bootstrapContext, PATCH_GRASS_NORMAL, holder10, worldSurfaceSquaredWithCount(5));
 		PlacementUtils.register(
-			bootstrapContext, PATCH_GRASS_TAIGA_2, holder7, InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP_WORLD_SURFACE, BiomeFilter.biome()
+			bootstrapContext, PATCH_GRASS_TAIGA_2, holder11, InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP_WORLD_SURFACE, BiomeFilter.biome()
 		);
-		PlacementUtils.register(bootstrapContext, PATCH_GRASS_TAIGA, holder7, worldSurfaceSquaredWithCount(7));
-		PlacementUtils.register(bootstrapContext, PATCH_GRASS_JUNGLE, holder8, worldSurfaceSquaredWithCount(25));
-		PlacementUtils.register(bootstrapContext, GRASS_BONEMEAL, holder9, PlacementUtils.isEmpty());
-		PlacementUtils.register(bootstrapContext, PATCH_DEAD_BUSH_2, holder10, worldSurfaceSquaredWithCount(2));
-		PlacementUtils.register(bootstrapContext, PATCH_DEAD_BUSH, holder10, InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP_WORLD_SURFACE, BiomeFilter.biome());
-		PlacementUtils.register(bootstrapContext, PATCH_DEAD_BUSH_BADLANDS, holder10, worldSurfaceSquaredWithCount(20));
+		PlacementUtils.register(bootstrapContext, PATCH_GRASS_TAIGA, holder11, worldSurfaceSquaredWithCount(7));
+		PlacementUtils.register(bootstrapContext, PATCH_GRASS_JUNGLE, holder12, worldSurfaceSquaredWithCount(25));
+		PlacementUtils.register(bootstrapContext, GRASS_BONEMEAL, holder13, PlacementUtils.isEmpty());
+		PlacementUtils.register(bootstrapContext, PATCH_DEAD_BUSH_2, holder14, worldSurfaceSquaredWithCount(2));
+		PlacementUtils.register(bootstrapContext, PATCH_DEAD_BUSH_2_ALL_LEVELS, holder14, CountOnEveryLayerPlacement.of(2, 2), BiomeFilter.biome());
+		PlacementUtils.register(bootstrapContext, PATCH_DEAD_BUSH, holder14, InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP_WORLD_SURFACE, BiomeFilter.biome());
+		PlacementUtils.register(bootstrapContext, PATCH_DEAD_BUSH_BADLANDS, holder14, worldSurfaceSquaredWithCount(20));
 		PlacementUtils.register(
-			bootstrapContext, PATCH_MELON, holder11, RarityFilter.onAverageOnceEvery(6), InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP, BiomeFilter.biome()
+			bootstrapContext, PATCH_MELON, holder15, RarityFilter.onAverageOnceEvery(6), InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP, BiomeFilter.biome()
 		);
 		PlacementUtils.register(
 			bootstrapContext,
 			PATCH_MELON_SPARSE,
-			holder11,
+			holder15,
 			RarityFilter.onAverageOnceEvery(64),
 			InSquarePlacement.spread(),
 			PlacementUtils.HEIGHTMAP,
@@ -265,7 +290,7 @@ public class VegetationPlacements {
 		PlacementUtils.register(
 			bootstrapContext,
 			PATCH_BERRY_COMMON,
-			holder12,
+			holder16,
 			RarityFilter.onAverageOnceEvery(32),
 			InSquarePlacement.spread(),
 			PlacementUtils.HEIGHTMAP_WORLD_SURFACE,
@@ -274,17 +299,17 @@ public class VegetationPlacements {
 		PlacementUtils.register(
 			bootstrapContext,
 			PATCH_BERRY_RARE,
-			holder12,
+			holder16,
 			RarityFilter.onAverageOnceEvery(384),
 			InSquarePlacement.spread(),
 			PlacementUtils.HEIGHTMAP_WORLD_SURFACE,
 			BiomeFilter.biome()
 		);
-		PlacementUtils.register(bootstrapContext, PATCH_WATERLILY, holder13, worldSurfaceSquaredWithCount(4));
+		PlacementUtils.register(bootstrapContext, PATCH_WATERLILY, holder17, worldSurfaceSquaredWithCount(4));
 		PlacementUtils.register(
 			bootstrapContext,
 			PATCH_TALL_GRASS_2,
-			holder14,
+			holder18,
 			NoiseThresholdCountPlacement.of(-0.8, 0, 7),
 			RarityFilter.onAverageOnceEvery(32),
 			InSquarePlacement.spread(),
@@ -292,24 +317,30 @@ public class VegetationPlacements {
 			BiomeFilter.biome()
 		);
 		PlacementUtils.register(
-			bootstrapContext, PATCH_TALL_GRASS, holder14, RarityFilter.onAverageOnceEvery(5), InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP, BiomeFilter.biome()
+			bootstrapContext, PATCH_TALL_GRASS, holder18, RarityFilter.onAverageOnceEvery(5), InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP, BiomeFilter.biome()
 		);
 		PlacementUtils.register(
-			bootstrapContext, PATCH_LARGE_FERN, holder15, RarityFilter.onAverageOnceEvery(5), InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP, BiomeFilter.biome()
+			bootstrapContext, PATCH_LARGE_FERN, holder19, RarityFilter.onAverageOnceEvery(5), InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP, BiomeFilter.biome()
 		);
 		PlacementUtils.register(
 			bootstrapContext,
 			PATCH_CACTUS_DESERT,
-			holder16,
+			holder20,
 			RarityFilter.onAverageOnceEvery(6),
 			InSquarePlacement.spread(),
 			PlacementUtils.HEIGHTMAP,
 			BiomeFilter.biome()
 		);
 		PlacementUtils.register(
+			bootstrapContext, LEAF_PILE_HASH, holder21, CountOnEveryLayerPlacement.of(1, 2), RarityFilter.onAverageOnceEvery(4), BiomeFilter.biome()
+		);
+		PlacementUtils.register(
+			bootstrapContext, VENOMOUS_COLUMN_HASH, holder22, CountOnEveryLayerPlacement.of(1, 2), RarityFilter.onAverageOnceEvery(16), BiomeFilter.biome()
+		);
+		PlacementUtils.register(
 			bootstrapContext,
 			PATCH_CACTUS_DECORATED,
-			holder16,
+			holder20,
 			RarityFilter.onAverageOnceEvery(13),
 			InSquarePlacement.spread(),
 			PlacementUtils.HEIGHTMAP,
@@ -318,29 +349,29 @@ public class VegetationPlacements {
 		PlacementUtils.register(
 			bootstrapContext,
 			PATCH_SUGAR_CANE_SWAMP,
-			holder17,
+			holder23,
 			RarityFilter.onAverageOnceEvery(3),
 			InSquarePlacement.spread(),
 			PlacementUtils.HEIGHTMAP,
 			BiomeFilter.biome()
 		);
-		PlacementUtils.register(bootstrapContext, PATCH_SUGAR_CANE_DESERT, holder17, InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP, BiomeFilter.biome());
+		PlacementUtils.register(bootstrapContext, PATCH_SUGAR_CANE_DESERT, holder23, InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP, BiomeFilter.biome());
 		PlacementUtils.register(
 			bootstrapContext,
 			PATCH_SUGAR_CANE_BADLANDS,
-			holder17,
+			holder23,
 			RarityFilter.onAverageOnceEvery(5),
 			InSquarePlacement.spread(),
 			PlacementUtils.HEIGHTMAP,
 			BiomeFilter.biome()
 		);
 		PlacementUtils.register(
-			bootstrapContext, PATCH_SUGAR_CANE, holder17, RarityFilter.onAverageOnceEvery(6), InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP, BiomeFilter.biome()
+			bootstrapContext, PATCH_SUGAR_CANE, holder23, RarityFilter.onAverageOnceEvery(6), InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP, BiomeFilter.biome()
 		);
 		PlacementUtils.register(
 			bootstrapContext,
 			BROWN_MUSHROOM_NETHER,
-			holder18,
+			holder24,
 			RarityFilter.onAverageOnceEvery(2),
 			InSquarePlacement.spread(),
 			PlacementUtils.FULL_RANGE,
@@ -349,30 +380,30 @@ public class VegetationPlacements {
 		PlacementUtils.register(
 			bootstrapContext,
 			RED_MUSHROOM_NETHER,
-			holder19,
+			holder25,
 			RarityFilter.onAverageOnceEvery(2),
 			InSquarePlacement.spread(),
 			PlacementUtils.FULL_RANGE,
 			BiomeFilter.biome()
 		);
-		PlacementUtils.register(bootstrapContext, BROWN_MUSHROOM_NORMAL, holder18, getMushroomPlacement(256, null));
-		PlacementUtils.register(bootstrapContext, RED_MUSHROOM_NORMAL, holder19, getMushroomPlacement(512, null));
-		PlacementUtils.register(bootstrapContext, BROWN_MUSHROOM_TAIGA, holder18, getMushroomPlacement(4, null));
-		PlacementUtils.register(bootstrapContext, RED_MUSHROOM_TAIGA, holder19, getMushroomPlacement(256, null));
-		PlacementUtils.register(bootstrapContext, BROWN_MUSHROOM_OLD_GROWTH, holder18, getMushroomPlacement(4, CountPlacement.of(3)));
-		PlacementUtils.register(bootstrapContext, RED_MUSHROOM_OLD_GROWTH, holder19, getMushroomPlacement(171, null));
-		PlacementUtils.register(bootstrapContext, BROWN_MUSHROOM_SWAMP, holder18, getMushroomPlacement(0, CountPlacement.of(2)));
-		PlacementUtils.register(bootstrapContext, RED_MUSHROOM_SWAMP, holder19, getMushroomPlacement(64, null));
+		PlacementUtils.register(bootstrapContext, BROWN_MUSHROOM_NORMAL, holder24, getMushroomPlacement(256, null));
+		PlacementUtils.register(bootstrapContext, RED_MUSHROOM_NORMAL, holder25, getMushroomPlacement(512, null));
+		PlacementUtils.register(bootstrapContext, BROWN_MUSHROOM_TAIGA, holder24, getMushroomPlacement(4, null));
+		PlacementUtils.register(bootstrapContext, RED_MUSHROOM_TAIGA, holder25, getMushroomPlacement(256, null));
+		PlacementUtils.register(bootstrapContext, BROWN_MUSHROOM_OLD_GROWTH, holder24, getMushroomPlacement(4, CountPlacement.of(3)));
+		PlacementUtils.register(bootstrapContext, RED_MUSHROOM_OLD_GROWTH, holder25, getMushroomPlacement(171, null));
+		PlacementUtils.register(bootstrapContext, BROWN_MUSHROOM_SWAMP, holder24, getMushroomPlacement(0, CountPlacement.of(2)));
+		PlacementUtils.register(bootstrapContext, RED_MUSHROOM_SWAMP, holder25, getMushroomPlacement(64, null));
 		PlacementUtils.register(
-			bootstrapContext, FLOWER_WARM, holder20, RarityFilter.onAverageOnceEvery(16), InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP, BiomeFilter.biome()
+			bootstrapContext, FLOWER_WARM, holder26, RarityFilter.onAverageOnceEvery(16), InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP, BiomeFilter.biome()
 		);
 		PlacementUtils.register(
-			bootstrapContext, FLOWER_DEFAULT, holder20, RarityFilter.onAverageOnceEvery(32), InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP, BiomeFilter.biome()
+			bootstrapContext, FLOWER_DEFAULT, holder26, RarityFilter.onAverageOnceEvery(32), InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP, BiomeFilter.biome()
 		);
 		PlacementUtils.register(
 			bootstrapContext,
 			FLOWER_FLOWER_FOREST,
-			holder21,
+			holder27,
 			CountPlacement.of(3),
 			RarityFilter.onAverageOnceEvery(2),
 			InSquarePlacement.spread(),
@@ -380,12 +411,12 @@ public class VegetationPlacements {
 			BiomeFilter.biome()
 		);
 		PlacementUtils.register(
-			bootstrapContext, FLOWER_SWAMP, holder22, RarityFilter.onAverageOnceEvery(32), InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP, BiomeFilter.biome()
+			bootstrapContext, FLOWER_SWAMP, holder28, RarityFilter.onAverageOnceEvery(32), InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP, BiomeFilter.biome()
 		);
 		PlacementUtils.register(
 			bootstrapContext,
 			FLOWER_PLAINS,
-			holder23,
+			holder29,
 			NoiseThresholdCountPlacement.of(-0.8, 15, 4),
 			RarityFilter.onAverageOnceEvery(32),
 			InSquarePlacement.spread(),
@@ -395,18 +426,18 @@ public class VegetationPlacements {
 		PlacementUtils.register(
 			bootstrapContext,
 			FLOWER_CHERRY,
-			holder25,
+			holder31,
 			NoiseThresholdCountPlacement.of(-0.8, 5, 10),
 			InSquarePlacement.spread(),
 			PlacementUtils.HEIGHTMAP,
 			BiomeFilter.biome()
 		);
-		PlacementUtils.register(bootstrapContext, FLOWER_MEADOW, holder24, InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP, BiomeFilter.biome());
+		PlacementUtils.register(bootstrapContext, FLOWER_MEADOW, holder30, InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP, BiomeFilter.biome());
 		PlacementModifier placementModifier = SurfaceWaterDepthFilter.forMaxDepth(0);
 		PlacementUtils.register(
 			bootstrapContext,
 			TREES_PLAINS,
-			holder26,
+			holder32,
 			PlacementUtils.countExtra(0, 0.05F, 1),
 			InSquarePlacement.spread(),
 			placementModifier,
@@ -417,17 +448,18 @@ public class VegetationPlacements {
 		PlacementUtils.register(
 			bootstrapContext,
 			DARK_FOREST_VEGETATION,
-			holder27,
+			holder33,
 			CountPlacement.of(16),
 			InSquarePlacement.spread(),
 			placementModifier,
 			PlacementUtils.HEIGHTMAP_OCEAN_FLOOR,
 			BiomeFilter.biome()
 		);
+		PlacementUtils.register(bootstrapContext, ARBORETUM_TREES, holder34, CountOnEveryLayerPlacement.of(12, 2), placementModifier, BiomeFilter.biome());
 		PlacementUtils.register(
 			bootstrapContext,
 			FLOWER_FOREST_FLOWERS,
-			holder28,
+			holder35,
 			RarityFilter.onAverageOnceEvery(7),
 			InSquarePlacement.spread(),
 			PlacementUtils.HEIGHTMAP,
@@ -437,24 +469,24 @@ public class VegetationPlacements {
 		PlacementUtils.register(
 			bootstrapContext,
 			FOREST_FLOWERS,
-			holder28,
+			holder35,
 			RarityFilter.onAverageOnceEvery(7),
 			InSquarePlacement.spread(),
 			PlacementUtils.HEIGHTMAP,
 			CountPlacement.of(ClampedInt.of(UniformInt.of(-3, 1), 0, 1)),
 			BiomeFilter.biome()
 		);
-		PlacementUtils.register(bootstrapContext, TREES_FLOWER_FOREST, holder29, treePlacement(PlacementUtils.countExtra(6, 0.1F, 1)));
-		PlacementUtils.register(bootstrapContext, TREES_MEADOW, holder30, treePlacement(RarityFilter.onAverageOnceEvery(100)));
-		PlacementUtils.register(bootstrapContext, TREES_CHERRY, holder35, treePlacement(PlacementUtils.countExtra(10, 0.1F, 1), Blocks.CHERRY_SAPLING));
-		PlacementUtils.register(bootstrapContext, TREES_TAIGA, holder31, treePlacement(PlacementUtils.countExtra(10, 0.1F, 1)));
-		PlacementUtils.register(bootstrapContext, TREES_GROVE, holder32, treePlacement(PlacementUtils.countExtra(10, 0.1F, 1)));
-		PlacementUtils.register(bootstrapContext, TREES_BADLANDS, holder33, treePlacement(PlacementUtils.countExtra(5, 0.1F, 1), Blocks.OAK_SAPLING));
-		PlacementUtils.register(bootstrapContext, TREES_SNOWY, holder34, treePlacement(PlacementUtils.countExtra(0, 0.1F, 1), Blocks.SPRUCE_SAPLING));
+		PlacementUtils.register(bootstrapContext, TREES_FLOWER_FOREST, holder36, treePlacement(PlacementUtils.countExtra(6, 0.1F, 1)));
+		PlacementUtils.register(bootstrapContext, TREES_MEADOW, holder37, treePlacement(RarityFilter.onAverageOnceEvery(100)));
+		PlacementUtils.register(bootstrapContext, TREES_CHERRY, holder42, treePlacement(PlacementUtils.countExtra(10, 0.1F, 1), Blocks.CHERRY_SAPLING));
+		PlacementUtils.register(bootstrapContext, TREES_TAIGA, holder38, treePlacement(PlacementUtils.countExtra(10, 0.1F, 1)));
+		PlacementUtils.register(bootstrapContext, TREES_GROVE, holder39, treePlacement(PlacementUtils.countExtra(10, 0.1F, 1)));
+		PlacementUtils.register(bootstrapContext, TREES_BADLANDS, holder40, treePlacement(PlacementUtils.countExtra(5, 0.1F, 1), Blocks.OAK_SAPLING));
+		PlacementUtils.register(bootstrapContext, TREES_SNOWY, holder41, treePlacement(PlacementUtils.countExtra(0, 0.1F, 1), Blocks.SPRUCE_SAPLING));
 		PlacementUtils.register(
 			bootstrapContext,
 			TREES_SWAMP,
-			holder36,
+			holder43,
 			PlacementUtils.countExtra(2, 0.1F, 1),
 			InSquarePlacement.spread(),
 			SurfaceWaterDepthFilter.forMaxDepth(2),
@@ -462,24 +494,24 @@ public class VegetationPlacements {
 			BiomeFilter.biome(),
 			BlockPredicateFilter.forPredicate(BlockPredicate.wouldSurvive(Blocks.OAK_SAPLING.defaultBlockState(), BlockPos.ZERO))
 		);
-		PlacementUtils.register(bootstrapContext, TREES_WINDSWEPT_SAVANNA, holder37, treePlacement(PlacementUtils.countExtra(2, 0.1F, 1)));
-		PlacementUtils.register(bootstrapContext, TREES_SAVANNA, holder37, treePlacement(PlacementUtils.countExtra(1, 0.1F, 1)));
-		PlacementUtils.register(bootstrapContext, BIRCH_TALL, holder38, treePlacement(PlacementUtils.countExtra(10, 0.1F, 1)));
-		PlacementUtils.register(bootstrapContext, TREES_BIRCH, holder39, treePlacement(PlacementUtils.countExtra(10, 0.1F, 1), Blocks.BIRCH_SAPLING));
-		PlacementUtils.register(bootstrapContext, TREES_WINDSWEPT_FOREST, holder40, treePlacement(PlacementUtils.countExtra(3, 0.1F, 1)));
-		PlacementUtils.register(bootstrapContext, TREES_WINDSWEPT_HILLS, holder40, treePlacement(PlacementUtils.countExtra(0, 0.1F, 1)));
-		PlacementUtils.register(bootstrapContext, TREES_WATER, holder41, treePlacement(PlacementUtils.countExtra(0, 0.1F, 1)));
-		PlacementUtils.register(bootstrapContext, TREES_BIRCH_AND_OAK, holder42, treePlacement(PlacementUtils.countExtra(10, 0.1F, 1)));
-		PlacementUtils.register(bootstrapContext, TREES_SPARSE_JUNGLE, holder43, treePlacement(PlacementUtils.countExtra(2, 0.1F, 1)));
-		PlacementUtils.register(bootstrapContext, TREES_OLD_GROWTH_SPRUCE_TAIGA, holder44, treePlacement(PlacementUtils.countExtra(10, 0.1F, 1)));
-		PlacementUtils.register(bootstrapContext, TREES_OLD_GROWTH_PINE_TAIGA, holder45, treePlacement(PlacementUtils.countExtra(10, 0.1F, 1)));
-		PlacementUtils.register(bootstrapContext, TREES_JUNGLE, holder46, treePlacement(PlacementUtils.countExtra(50, 0.1F, 1)));
-		PlacementUtils.register(bootstrapContext, BAMBOO_VEGETATION, holder47, treePlacement(PlacementUtils.countExtra(30, 0.1F, 1)));
-		PlacementUtils.register(bootstrapContext, MUSHROOM_ISLAND_VEGETATION, holder48, InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP, BiomeFilter.biome());
+		PlacementUtils.register(bootstrapContext, TREES_WINDSWEPT_SAVANNA, holder44, treePlacement(PlacementUtils.countExtra(2, 0.1F, 1)));
+		PlacementUtils.register(bootstrapContext, TREES_SAVANNA, holder44, treePlacement(PlacementUtils.countExtra(1, 0.1F, 1)));
+		PlacementUtils.register(bootstrapContext, BIRCH_TALL, holder45, treePlacement(PlacementUtils.countExtra(10, 0.1F, 1)));
+		PlacementUtils.register(bootstrapContext, TREES_BIRCH, holder46, treePlacement(PlacementUtils.countExtra(10, 0.1F, 1), Blocks.BIRCH_SAPLING));
+		PlacementUtils.register(bootstrapContext, TREES_WINDSWEPT_FOREST, holder47, treePlacement(PlacementUtils.countExtra(3, 0.1F, 1)));
+		PlacementUtils.register(bootstrapContext, TREES_WINDSWEPT_HILLS, holder47, treePlacement(PlacementUtils.countExtra(0, 0.1F, 1)));
+		PlacementUtils.register(bootstrapContext, TREES_WATER, holder48, treePlacement(PlacementUtils.countExtra(0, 0.1F, 1)));
+		PlacementUtils.register(bootstrapContext, TREES_BIRCH_AND_OAK, holder49, treePlacement(PlacementUtils.countExtra(10, 0.1F, 1)));
+		PlacementUtils.register(bootstrapContext, TREES_SPARSE_JUNGLE, holder50, treePlacement(PlacementUtils.countExtra(2, 0.1F, 1)));
+		PlacementUtils.register(bootstrapContext, TREES_OLD_GROWTH_SPRUCE_TAIGA, holder51, treePlacement(PlacementUtils.countExtra(10, 0.1F, 1)));
+		PlacementUtils.register(bootstrapContext, TREES_OLD_GROWTH_PINE_TAIGA, holder52, treePlacement(PlacementUtils.countExtra(10, 0.1F, 1)));
+		PlacementUtils.register(bootstrapContext, TREES_JUNGLE, holder53, treePlacement(PlacementUtils.countExtra(50, 0.1F, 1)));
+		PlacementUtils.register(bootstrapContext, BAMBOO_VEGETATION, holder54, treePlacement(PlacementUtils.countExtra(30, 0.1F, 1)));
+		PlacementUtils.register(bootstrapContext, MUSHROOM_ISLAND_VEGETATION, holder55, InSquarePlacement.spread(), PlacementUtils.HEIGHTMAP, BiomeFilter.biome());
 		PlacementUtils.register(
 			bootstrapContext,
 			TREES_MANGROVE,
-			holder49,
+			holder56,
 			CountPlacement.of(25),
 			InSquarePlacement.spread(),
 			SurfaceWaterDepthFilter.forMaxDepth(5),

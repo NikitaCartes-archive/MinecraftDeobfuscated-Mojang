@@ -9,11 +9,13 @@ import net.minecraft.resources.ResourceLocation;
 public class MultiNoiseBiomeSourceParameterLists {
 	public static final ResourceKey<MultiNoiseBiomeSourceParameterList> NETHER = register("nether");
 	public static final ResourceKey<MultiNoiseBiomeSourceParameterList> OVERWORLD = register("overworld");
+	public static final ResourceKey<MultiNoiseBiomeSourceParameterList> POTATO = register("potato");
 
 	public static void bootstrap(BootstrapContext<MultiNoiseBiomeSourceParameterList> bootstrapContext) {
 		HolderGetter<Biome> holderGetter = bootstrapContext.lookup(Registries.BIOME);
 		bootstrapContext.register(NETHER, new MultiNoiseBiomeSourceParameterList(MultiNoiseBiomeSourceParameterList.Preset.NETHER, holderGetter));
 		bootstrapContext.register(OVERWORLD, new MultiNoiseBiomeSourceParameterList(MultiNoiseBiomeSourceParameterList.Preset.OVERWORLD, holderGetter));
+		bootstrapContext.register(POTATO, new MultiNoiseBiomeSourceParameterList(MultiNoiseBiomeSourceParameterList.Preset.POTATO, holderGetter));
 	}
 
 	private static ResourceKey<MultiNoiseBiomeSourceParameterList> register(String string) {

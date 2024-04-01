@@ -225,6 +225,12 @@ public final class Biome {
 		return FoliageColor.get(d, e);
 	}
 
+	public int getNoisedColorFromTexture(float f, float g) {
+		double d = (double)Mth.clamp(this.climateSettings.temperature + f, 0.0F, 1.0F);
+		double e = (double)Mth.clamp(this.climateSettings.downfall + g, 0.0F, 1.0F);
+		return FoliageColor.get(d, e);
+	}
+
 	public float getBaseTemperature() {
 		return this.climateSettings.temperature;
 	}

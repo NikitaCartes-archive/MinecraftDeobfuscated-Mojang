@@ -24,6 +24,7 @@ public class MenuType<T extends AbstractContainerMenu> implements FeatureElement
 	public static final MenuType<CraftingMenu> CRAFTING = register("crafting", CraftingMenu::new);
 	public static final MenuType<EnchantmentMenu> ENCHANTMENT = register("enchantment", EnchantmentMenu::new);
 	public static final MenuType<FurnaceMenu> FURNACE = register("furnace", FurnaceMenu::new);
+	public static final MenuType<FletchingMenu> FLETCHING = register("fletching", FletchingMenu::new);
 	public static final MenuType<GrindstoneMenu> GRINDSTONE = register("grindstone", GrindstoneMenu::new);
 	public static final MenuType<HopperMenu> HOPPER = register("hopper", HopperMenu::new);
 	public static final MenuType<LecternMenu> LECTERN = register("lectern", (i, inventory) -> new LecternMenu(i));
@@ -34,6 +35,8 @@ public class MenuType<T extends AbstractContainerMenu> implements FeatureElement
 	public static final MenuType<SmokerMenu> SMOKER = register("smoker", SmokerMenu::new);
 	public static final MenuType<CartographyTableMenu> CARTOGRAPHY_TABLE = register("cartography_table", CartographyTableMenu::new);
 	public static final MenuType<StonecutterMenu> STONECUTTER = register("stonecutter", StonecutterMenu::new);
+	public static final MenuType<PoisonousPotatoCutterMenu> POISONOUS_POTATO_CUTTER = register("poisonous_potato_cutter", PoisonousPotatoCutterMenu::new);
+	public static final MenuType<PotatoRefineryMenu> POTATO_REFINERY = register("potato_refinery", PotatoRefineryMenu::new);
 	private final FeatureFlagSet requiredFeatures;
 	private final MenuType.MenuSupplier<T> constructor;
 

@@ -33,6 +33,7 @@ public final class TextureSlot {
 	public static final TextureSlot DIRT = create("dirt");
 	public static final TextureSlot FIRE = create("fire");
 	public static final TextureSlot LANTERN = create("lantern");
+	public static final TextureSlot FRYING_TABLE = create("frying_table");
 	public static final TextureSlot PLATFORM = create("platform");
 	public static final TextureSlot UNSTICKY = create("unsticky");
 	public static final TextureSlot TORCH = create("torch");

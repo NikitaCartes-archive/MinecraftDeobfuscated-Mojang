@@ -407,6 +407,7 @@ public abstract class FlowingFluid extends Fluid {
 					&& !blockState.is(Blocks.END_PORTAL)
 					&& !blockState.is(Blocks.END_GATEWAY)
 					&& !blockState.is(Blocks.STRUCTURE_VOID)
+					&& !blockState.is(Blocks.POTATO_PORTAL)
 				? !blockState.blocksMotion()
 				: false;
 		}

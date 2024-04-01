@@ -40,7 +40,7 @@ public class CapeLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<Abs
 			PlayerSkin playerSkin = abstractClientPlayer.getSkin();
 			if (playerSkin.capeTexture() != null) {
 				ItemStack itemStack = abstractClientPlayer.getItemBySlot(EquipmentSlot.CHEST);
-				if (!itemStack.is(Items.ELYTRA)) {
+				if (!itemStack.is(Items.ELYTRA) && !itemStack.is(Items.POISONOUS_POLYTRA)) {
 					poseStack.pushPose();
 					poseStack.translate(0.0F, 0.0F, 0.125F);
 					double d = Mth.lerp((double)h, abstractClientPlayer.xCloakO, abstractClientPlayer.xCloak)

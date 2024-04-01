@@ -1,6 +1,8 @@
 package net.minecraft.core.component;
 
 import com.mojang.serialization.Codec;
+import it.unimi.dsi.fastutil.ints.Int2IntMap;
+import it.unimi.dsi.fastutil.ints.IntIntPair;
 import java.util.List;
 import java.util.function.UnaryOperator;
 import net.minecraft.core.Holder;
@@ -39,15 +41,21 @@ import net.minecraft.world.item.component.MapItemColor;
 import net.minecraft.world.item.component.MapPostProcessing;
 import net.minecraft.world.item.component.ResolvableProfile;
 import net.minecraft.world.item.component.SeededContainerLoot;
+import net.minecraft.world.item.component.SnekComponent;
 import net.minecraft.world.item.component.SuspiciousStewEffects;
 import net.minecraft.world.item.component.Tool;
 import net.minecraft.world.item.component.Unbreakable;
 import net.minecraft.world.item.component.WritableBookContent;
 import net.minecraft.world.item.component.WrittenBookContent;
+import net.minecraft.world.item.component.XpComponent;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.level.block.entity.BannerPatternLayers;
 import net.minecraft.world.level.block.entity.BeehiveBlockEntity;
+import net.minecraft.world.level.block.entity.FletchingBlockEntity;
+import net.minecraft.world.level.block.entity.InventoryHeatComponent;
+import net.minecraft.world.level.block.entity.LubricationComponent;
 import net.minecraft.world.level.block.entity.PotDecorations;
+import net.minecraft.world.level.block.entity.PotatoBaneComponent;
 import net.minecraft.world.level.saveddata.maps.MapId;
 
 public class DataComponents {
@@ -148,6 +156,12 @@ public class DataComponents {
 	public static final DataComponentType<CustomData> ENTITY_DATA = register(
 		"entity_data", builder -> builder.persistent(CustomData.CODEC_WITH_ID).networkSynchronized(CustomData.STREAM_CODEC)
 	);
+	public static final DataComponentType<FletchingBlockEntity.Fletching> FLETCHING = register(
+		"fletching", builder -> builder.persistent(FletchingBlockEntity.Fletching.CODEC).networkSynchronized(FletchingBlockEntity.Fletching.STREAM_CODEC)
+	);
+	public static final DataComponentType<FletchingBlockEntity.Resin> RESIN = register(
+		"resin", builder -> builder.persistent(FletchingBlockEntity.Resin.CODEC).networkSynchronized(FletchingBlockEntity.Resin.STREAM_CODEC)
+	);
 	public static final DataComponentType<CustomData> BUCKET_ENTITY_DATA = register(
 		"bucket_entity_data", builder -> builder.persistent(CustomData.CODEC).networkSynchronized(CustomData.STREAM_CODEC)
 	);
@@ -196,6 +210,36 @@ public class DataComponents {
 	public static final DataComponentType<LockCode> LOCK = register("lock", builder -> builder.persistent(LockCode.CODEC));
 	public static final DataComponentType<SeededContainerLoot> CONTAINER_LOOT = register(
 		"container_loot", builder -> builder.persistent(SeededContainerLoot.CODEC)
+	);
+	public static final DataComponentType<XpComponent> XP = register(
+		"xp", builder -> builder.persistent(XpComponent.CODEC).networkSynchronized(XpComponent.STREAM_CODEC)
+	);
+	public static final DataComponentType<SnekComponent> SNEK = register(
+		"snek", builder -> builder.persistent(SnekComponent.CODEC).networkSynchronized(SnekComponent.STREAM_CODEC)
+	);
+	public static final DataComponentType<Boolean> HOVERED = register("hovered", builder -> builder.persistent(Codec.BOOL).networkSynchronized(ByteBufCodecs.BOOL));
+	public static final DataComponentType<Integer> CLICKS = register("clicks", builder -> builder.persistent(Codec.INT).networkSynchronized(ByteBufCodecs.INT));
+	public static final DataComponentType<Integer> VIEWS = register("views", builder -> builder.persistent(Codec.INT).networkSynchronized(ByteBufCodecs.INT));
+	public static final DataComponentType<Integer> UNDERCOVER_ID = register(
+		"undercover_id", builder -> builder.persistent(Codec.INT).networkSynchronized(ByteBufCodecs.INT)
+	);
+	public static final DataComponentType<Int2IntMap> CONTACTS_MESSAGES = register(
+		"contacts_messages", builder -> builder.persistent(ExtraCodecs.int2IntMap()).networkSynchronized(ByteBufCodecs.fromCodec(ExtraCodecs.int2IntMap()))
+	);
+	public static final DataComponentType<IntIntPair> SECRET_MESSAGE = register(
+		"secret_message", builder -> builder.persistent(ExtraCodecs.intIntPair()).networkSynchronized(ByteBufCodecs.fromCodec(ExtraCodecs.intIntPair()))
+	);
+	public static final DataComponentType<LubricationComponent> LUBRICATION = register(
+		"lubrication", builder -> builder.persistent(LubricationComponent.CODEC).networkSynchronized(LubricationComponent.STREAM_CODEC)
+	);
+	public static final DataComponentType<Boolean> EXPLICIT_FOIL = register(
+		"explicit_foil", builder -> builder.persistent(Codec.BOOL).networkSynchronized(ByteBufCodecs.BOOL)
+	);
+	public static final DataComponentType<InventoryHeatComponent> INVENTORY_HEAT = register(
+		"heat", builder -> builder.persistent(InventoryHeatComponent.CODEC).networkSynchronized(InventoryHeatComponent.STREAM_CODEC)
+	);
+	public static final DataComponentType<PotatoBaneComponent> POTATO_BANE = register(
+		"potato_bane", builder -> builder.persistent(PotatoBaneComponent.CODEC).networkSynchronized(PotatoBaneComponent.STREAM_CODEC)
 	);
 	public static final DataComponentMap COMMON_ITEM_COMPONENTS = DataComponentMap.builder()
 		.set(MAX_STACK_SIZE, 64)

@@ -23,6 +23,11 @@ public class Skeleton extends AbstractSkeleton {
 	}
 
 	@Override
+	public boolean hasPotatoVariant() {
+		return true;
+	}
+
+	@Override
 	protected void defineSynchedData(SynchedEntityData.Builder builder) {
 		super.defineSynchedData(builder);
 		builder.define(DATA_STRAY_CONVERSION_ID, false);

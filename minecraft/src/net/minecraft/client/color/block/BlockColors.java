@@ -64,6 +64,7 @@ public class BlockColors {
 			(blockState, blockAndTintGetter, blockPos, i) -> blockAndTintGetter != null && blockPos != null
 					? BiomeColors.getAverageFoliageColor(blockAndTintGetter, blockPos)
 					: FoliageColor.getDefaultColor(),
+			Blocks.POTATO_LEAVES,
 			Blocks.OAK_LEAVES,
 			Blocks.JUNGLE_LEAVES,
 			Blocks.ACACIA_LEAVES,

@@ -35,6 +35,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeGenerationSettings;
@@ -83,6 +84,7 @@ public abstract class ChunkAccess implements BlockGetter, BiomeManager.NoiseBiom
 	protected final Map<BlockPos, BlockEntity> blockEntities = new Object2ObjectOpenHashMap<>();
 	protected final LevelHeightAccessor levelHeightAccessor;
 	protected final LevelChunkSection[] sections;
+	private final boolean certainPotato;
 
 	public ChunkAccess(
 		ChunkPos chunkPos,
@@ -96,6 +98,12 @@ public abstract class ChunkAccess implements BlockGetter, BiomeManager.NoiseBiom
 		this.chunkPos = chunkPos;
 		this.upgradeData = upgradeData;
 		this.levelHeightAccessor = levelHeightAccessor;
+		if (levelHeightAccessor instanceof Level level) {
+			this.certainPotato = level.isPotato();
+		} else {
+			this.certainPotato = false;
+		}
+
 		this.sections = new LevelChunkSection[levelHeightAccessor.getSectionsCount()];
 		this.inhabitedTime = l;
 		this.postProcessing = new ShortList[levelHeightAccessor.getSectionsCount()];
@@ -110,6 +118,11 @@ public abstract class ChunkAccess implements BlockGetter, BiomeManager.NoiseBiom
 		}
 
 		replaceMissingSections(registry, this.sections);
+	}
+
+	@Override
+	public boolean isPotato() {
+		return this.certainPotato;
 	}
 
 	private static void replaceMissingSections(Registry<Biome> registry, LevelChunkSection[] levelChunkSections) {

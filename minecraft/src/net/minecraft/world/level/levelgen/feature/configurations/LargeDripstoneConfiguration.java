@@ -2,8 +2,10 @@ package net.minecraft.world.level.levelgen.feature.configurations;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.util.valueproviders.FloatProvider;
 import net.minecraft.util.valueproviders.IntProvider;
+import net.minecraft.world.level.block.PointedDripstoneBlock;
 
 public class LargeDripstoneConfiguration implements FeatureConfiguration {
 	public static final Codec<LargeDripstoneConfiguration> CODEC = RecordCodecBuilder.create(
@@ -21,7 +23,12 @@ public class LargeDripstoneConfiguration implements FeatureConfiguration {
 					FloatProvider.codec(0.1F, 10.0F).fieldOf("stalagmite_bluntness").forGetter(largeDripstoneConfiguration -> largeDripstoneConfiguration.stalagmiteBluntness),
 					FloatProvider.codec(0.0F, 2.0F).fieldOf("wind_speed").forGetter(largeDripstoneConfiguration -> largeDripstoneConfiguration.windSpeed),
 					Codec.intRange(0, 100).fieldOf("min_radius_for_wind").forGetter(largeDripstoneConfiguration -> largeDripstoneConfiguration.minRadiusForWind),
-					Codec.floatRange(0.0F, 5.0F).fieldOf("min_bluntness_for_wind").forGetter(largeDripstoneConfiguration -> largeDripstoneConfiguration.minBluntnessForWind)
+					Codec.floatRange(0.0F, 5.0F).fieldOf("min_bluntness_for_wind").forGetter(largeDripstoneConfiguration -> largeDripstoneConfiguration.minBluntnessForWind),
+					BuiltInRegistries.BLOCK
+						.byNameCodec()
+						.xmap(block -> (PointedDripstoneBlock)block, pointedDripstoneBlock -> pointedDripstoneBlock)
+						.fieldOf("block")
+						.forGetter(largeDripstoneConfiguration -> largeDripstoneConfiguration.block)
 				)
 				.apply(instance, LargeDripstoneConfiguration::new)
 	);
@@ -34,6 +41,7 @@ public class LargeDripstoneConfiguration implements FeatureConfiguration {
 	public final FloatProvider windSpeed;
 	public final int minRadiusForWind;
 	public final float minBluntnessForWind;
+	public final PointedDripstoneBlock block;
 
 	public LargeDripstoneConfiguration(
 		int i,
@@ -44,7 +52,8 @@ public class LargeDripstoneConfiguration implements FeatureConfiguration {
 		FloatProvider floatProvider3,
 		FloatProvider floatProvider4,
 		int j,
-		float g
+		float g,
+		PointedDripstoneBlock pointedDripstoneBlock
 	) {
 		this.floorToCeilingSearchRange = i;
 		this.columnRadius = intProvider;
@@ -55,5 +64,6 @@ public class LargeDripstoneConfiguration implements FeatureConfiguration {
 		this.windSpeed = floatProvider4;
 		this.minRadiusForWind = j;
 		this.minBluntnessForWind = g;
+		this.block = pointedDripstoneBlock;
 	}
 }

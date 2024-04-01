@@ -91,7 +91,7 @@ public class PitcherCropBlock extends DoublePlantBlock implements BonemealableBl
 
 	@Override
 	protected boolean mayPlaceOn(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
-		return blockState.is(Blocks.FARMLAND);
+		return blockState.is(Blocks.FARMLAND) || blockState.is(Blocks.POISON_FARMLAND);
 	}
 
 	@Override

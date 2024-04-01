@@ -37,6 +37,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
@@ -296,7 +297,32 @@ public class Block extends BlockBehaviour implements ItemLike {
 	) {
 		if (level instanceof ServerLevel) {
 			getDrops(blockState, (ServerLevel)level, blockPos, blockEntity, entity, itemStack).forEach(itemStackx -> popResource(level, blockPos, itemStackx));
+			int i = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.POTATOFICATION, itemStack);
+			if (i > 0) {
+				int j = level.random.nextInt(i + 1);
+				int k = i - j;
+				popPotatoes(j, level, blockPos, Items.POISONOUS_POTATO);
+				popPotatoes(k, level, blockPos, Items.POTATO);
+				if (level.random.nextFloat() <= 0.05F) {
+					popPotatoes(1, level, blockPos, Items.POISONOUS_POTATO_PLANT);
+				}
+			}
+
 			blockState.spawnAfterBreak((ServerLevel)level, blockPos, itemStack, true);
+		}
+	}
+
+	public static void popPotatoes(int i, Level level, BlockPos blockPos, Item item) {
+		for (int j = 0; j < Mth.square(i); j++) {
+			ItemStack itemStack = new ItemStack(item);
+			double d = (double)EntityType.ITEM.getHeight() / 2.0;
+			double e = (double)blockPos.getX() + 0.5 + Mth.nextDouble(level.random, -0.25, 0.25);
+			double f = (double)blockPos.getY() + 0.5 + Mth.nextDouble(level.random, -0.25, 0.25) - d;
+			double g = (double)blockPos.getZ() + 0.5 + Mth.nextDouble(level.random, -0.25, 0.25);
+			double h = Mth.nextDouble(level.random, -0.25, 0.25);
+			double k = Mth.nextDouble(level.random, 0.0, 0.25);
+			double l = Mth.nextDouble(level.random, -0.25, 0.25);
+			popResource(level, () -> new ItemEntity(level, e, f, g, itemStack, h, k, l), itemStack);
 		}
 	}
 

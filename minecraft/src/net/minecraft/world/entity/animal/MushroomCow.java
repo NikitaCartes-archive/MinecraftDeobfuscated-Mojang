@@ -55,6 +55,11 @@ public class MushroomCow extends Cow implements Shearable, VariantHolder<Mushroo
 	}
 
 	@Override
+	public boolean hasPotatoVariant() {
+		return false;
+	}
+
+	@Override
 	public float getWalkTargetValue(BlockPos blockPos, LevelReader levelReader) {
 		return levelReader.getBlockState(blockPos.below()).is(Blocks.MYCELIUM) ? 10.0F : levelReader.getPathfindingCostFromLightLevels(blockPos);
 	}

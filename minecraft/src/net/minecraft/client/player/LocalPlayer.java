@@ -750,7 +750,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 
 		if (this.input.jumping && !bl8 && !bl && !this.getAbilities().flying && !this.isPassenger() && !this.onClimbable()) {
 			ItemStack itemStack = this.getItemBySlot(EquipmentSlot.CHEST);
-			if (itemStack.is(Items.ELYTRA) && ElytraItem.isFlyEnabled(itemStack) && this.tryToStartFallFlying()) {
+			if ((itemStack.is(Items.ELYTRA) || itemStack.is(Items.POISONOUS_POLYTRA)) && ElytraItem.isFlyEnabled(itemStack) && this.tryToStartFallFlying()) {
 				this.connection.send(new ServerboundPlayerCommandPacket(this, ServerboundPlayerCommandPacket.Action.START_FALL_FLYING));
 			}
 		}
@@ -1112,5 +1112,9 @@ public class LocalPlayer extends AbstractClientPlayer {
 	@Override
 	public float getVisualRotationYInDegrees() {
 		return this.getYRot();
+	}
+
+	public String getQuestKey() {
+		return this.entityData.get(DATA_POTATO_QUEST);
 	}
 }

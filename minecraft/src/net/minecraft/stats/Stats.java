@@ -62,6 +62,7 @@ public class Stats {
 	public static final ResourceLocation CLEAN_BANNER = makeCustomStat("clean_banner", StatFormatter.DEFAULT);
 	public static final ResourceLocation CLEAN_SHULKER_BOX = makeCustomStat("clean_shulker_box", StatFormatter.DEFAULT);
 	public static final ResourceLocation INTERACT_WITH_BREWINGSTAND = makeCustomStat("interact_with_brewingstand", StatFormatter.DEFAULT);
+	public static final ResourceLocation INTERACT_WITH_FLETCHING = makeCustomStat("interact_with_fletching", StatFormatter.DEFAULT);
 	public static final ResourceLocation INTERACT_WITH_BEACON = makeCustomStat("interact_with_beacon", StatFormatter.DEFAULT);
 	public static final ResourceLocation INSPECT_DROPPER = makeCustomStat("inspect_dropper", StatFormatter.DEFAULT);
 	public static final ResourceLocation INSPECT_HOPPER = makeCustomStat("inspect_hopper", StatFormatter.DEFAULT);
@@ -93,6 +94,9 @@ public class Stats {
 	public static final ResourceLocation INTERACT_WITH_GRINDSTONE = makeCustomStat("interact_with_grindstone", StatFormatter.DEFAULT);
 	public static final ResourceLocation TARGET_HIT = makeCustomStat("target_hit", StatFormatter.DEFAULT);
 	public static final ResourceLocation INTERACT_WITH_SMITHING_TABLE = makeCustomStat("interact_with_smithing_table", StatFormatter.DEFAULT);
+	public static final ResourceLocation SAID_POTATO = makeCustomStat("said_potato", StatFormatter.DEFAULT);
+	public static final ResourceLocation GET_PEELED = makeCustomStat("get_peeled", StatFormatter.DEFAULT);
+	public static final ResourceLocation POTATO_QUEST_TIME = makeCustomStat("potato_quest_time", StatFormatter.HUMAN_TIME);
 
 	private static ResourceLocation makeCustomStat(String string, StatFormatter statFormatter) {
 		ResourceLocation resourceLocation = new ResourceLocation(string);

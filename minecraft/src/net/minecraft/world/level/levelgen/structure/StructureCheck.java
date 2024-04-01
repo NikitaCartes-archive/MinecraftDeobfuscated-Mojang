@@ -105,7 +105,8 @@ public class StructureCheck {
 					this.seed,
 					chunkPos,
 					this.heightAccessor,
-					structure.biomes()::contains
+					structure.biomes()::contains,
+					structure.densityChecks()
 				)
 			)
 			.isPresent();

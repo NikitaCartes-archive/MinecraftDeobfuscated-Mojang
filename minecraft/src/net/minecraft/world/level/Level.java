@@ -5,6 +5,7 @@ import com.mojang.serialization.Codec;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -29,6 +30,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.FullChunkStatus;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSequenceBuilder;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.AbortableIterationConsumer;
 import net.minecraft.util.Mth;
@@ -42,6 +44,8 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.boss.EnderDragonPart;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.grid.GridCarrier;
+import net.minecraft.world.grid.SubGrid;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.FireworkExplosion;
 import net.minecraft.world.item.crafting.RecipeManager;
@@ -80,6 +84,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 	public static final ResourceKey<Level> OVERWORLD = ResourceKey.create(Registries.DIMENSION, new ResourceLocation("overworld"));
 	public static final ResourceKey<Level> NETHER = ResourceKey.create(Registries.DIMENSION, new ResourceLocation("the_nether"));
 	public static final ResourceKey<Level> END = ResourceKey.create(Registries.DIMENSION, new ResourceLocation("the_end"));
+	public static final ResourceKey<Level> POTATO = ResourceKey.create(Registries.DIMENSION, new ResourceLocation("potato"));
 	public static final int MAX_LEVEL_SIZE = 30000000;
 	public static final int LONG_PARTICLE_CLIP_RANGE = 512;
 	public static final int SHORT_PARTICLE_CLIP_RANGE = 32;
@@ -113,6 +118,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 	private final RegistryAccess registryAccess;
 	private final DamageSources damageSources;
 	private long subTickCount;
+	private final boolean isPotato;
 
 	protected Level(
 		WritableLevelData writableLevelData,
@@ -153,6 +159,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 		this.neighborUpdater = new CollectingNeighborUpdater(this, i);
 		this.registryAccess = registryAccess;
 		this.damageSources = new DamageSources(registryAccess);
+		this.isPotato = resourceKey == POTATO;
 	}
 
 	@Override
@@ -475,6 +482,22 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 	public boolean shouldTickBlocksAt(BlockPos blockPos) {
 		return this.shouldTickBlocksAt(ChunkPos.asLong(blockPos));
 	}
+
+	@Override
+	public boolean isPotato() {
+		return this.isPotato;
+	}
+
+	public abstract void playDelayedSound(int i, double d, double e, double f, SoundEvent soundEvent, SoundSource soundSource, float g, float h);
+
+	public abstract void playSoundSequence(double d, double e, double f, Consumer<SoundSequenceBuilder> consumer);
+
+	public SubGrid createSubGrid(GridCarrier gridCarrier) {
+		return new SubGrid(this, gridCarrier);
+	}
+
+	@Nullable
+	public abstract SubGrid getGrid(UUID uUID);
 
 	public Explosion explode(@Nullable Entity entity, double d, double e, double f, float g, Level.ExplosionInteraction explosionInteraction) {
 		return this.explode(
@@ -825,6 +848,18 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 		this.thunderLevel = g;
 	}
 
+	public float getRainLevel(float f, double d) {
+		return this.adjustPreciptiationToClouds(this.getRainLevel(f), d);
+	}
+
+	public float getThunderLevel(float f, double d) {
+		return this.adjustPreciptiationToClouds(this.getThunderLevel(f), d);
+	}
+
+	private float adjustPreciptiationToClouds(float f, double d) {
+		return f > 0.0F && this.isPotato() && d > 112.0 ? Math.max(0.0F, f - ((float)d - 112.0F) * 0.1F) : f;
+	}
+
 	public float getRainLevel(float f) {
 		return Mth.lerp(f, this.oRainLevel, this.rainLevel);
 	}
@@ -849,6 +884,8 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 		} else if (!this.canSeeSky(blockPos)) {
 			return false;
 		} else if (this.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, blockPos).getY() > blockPos.getY()) {
+			return false;
+		} else if (this.isPotato && blockPos.getY() > 112) {
 			return false;
 		} else {
 			Biome biome = this.getBiome(blockPos).value();
@@ -994,6 +1031,8 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 
 	protected abstract LevelEntityGetter<Entity> getEntities();
 
+	public abstract Iterable<? extends SubGrid> getGrids();
+
 	@Override
 	public long nextSubTickCount() {
 		return this.subTickCount++;
@@ -1006,6 +1045,24 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 
 	public DamageSources damageSources() {
 		return this.damageSources;
+	}
+
+	@Override
+	public boolean noCollision(@Nullable Entity entity, AABB aABB, boolean bl) {
+		if (!LevelAccessor.super.noCollision(entity, aABB, bl)) {
+			return false;
+		} else {
+			if (!bl) {
+				for (SubGrid subGrid : this.getGrids()) {
+					AABB aABB2 = subGrid.getNextBoundingBox();
+					if (!subGrid.noCollision(entity, aABB.move(-aABB2.minX, -aABB2.minY, -aABB2.minZ))) {
+						return false;
+					}
+				}
+			}
+
+			return true;
+		}
 	}
 
 	public static enum ExplosionInteraction {

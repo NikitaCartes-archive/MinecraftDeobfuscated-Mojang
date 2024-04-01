@@ -52,6 +52,10 @@ public class DoorBlock extends Block {
 	protected static final VoxelShape EAST_AABB = Block.box(0.0, 0.0, 0.0, 3.0, 16.0, 16.0);
 	private final BlockSetType type;
 
+	public static boolean shouldTrigger(Level level, BlockPos blockPos) {
+		return level.hasNeighborSignal(blockPos) || level.hasNeighborSignal(blockPos.above());
+	}
+
 	@Override
 	public MapCodec<? extends DoorBlock> codec() {
 		return CODEC;
@@ -141,7 +145,7 @@ public class DoorBlock extends Block {
 		BlockPos blockPos = blockPlaceContext.getClickedPos();
 		Level level = blockPlaceContext.getLevel();
 		if (blockPos.getY() < level.getMaxBuildHeight() - 1 && level.getBlockState(blockPos.above()).canBeReplaced(blockPlaceContext)) {
-			boolean bl = level.hasNeighborSignal(blockPos) || level.hasNeighborSignal(blockPos.above());
+			boolean bl = shouldTrigger(level, blockPos);
 			return this.defaultBlockState()
 				.setValue(FACING, blockPlaceContext.getHorizontalDirection())
 				.setValue(HINGE, this.getHinge(blockPlaceContext))

@@ -1,6 +1,9 @@
 package net.minecraft.world;
 
+import com.google.common.collect.Lists;
+import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
@@ -65,6 +68,25 @@ public interface Container extends Clearable {
 
 	default boolean hasAnyOf(Set<Item> set) {
 		return this.hasAnyMatching(itemStack -> !itemStack.isEmpty() && set.contains(itemStack.getItem()));
+	}
+
+	default List<ItemStack> getMatching(Predicate<ItemStack> predicate) {
+		List<ItemStack> list = Lists.<ItemStack>newArrayList();
+		this.forEach(itemStack -> {
+			if (predicate.test(itemStack)) {
+				list.add(itemStack);
+			}
+		});
+		return list;
+	}
+
+	default void forEach(Consumer<ItemStack> consumer) {
+		for (int i = 0; i < this.getContainerSize(); i++) {
+			ItemStack itemStack = this.getItem(i);
+			if (!itemStack.isEmpty()) {
+				consumer.accept(itemStack);
+			}
+		}
 	}
 
 	default boolean hasAnyMatching(Predicate<ItemStack> predicate) {

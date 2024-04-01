@@ -23,11 +23,14 @@ import net.minecraft.world.item.FishingRodItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.LashingPotatoItem;
+import net.minecraft.world.item.PoisonousPolytraItem;
 import net.minecraft.world.item.armortrim.ArmorTrim;
 import net.minecraft.world.item.component.BlockItemStateProperties;
 import net.minecraft.world.item.component.ChargedProjectiles;
 import net.minecraft.world.item.component.CustomModelData;
 import net.minecraft.world.item.component.LodestoneTracker;
+import net.minecraft.world.item.component.SnekComponent;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.LightBlock;
 
@@ -199,6 +202,11 @@ public class ItemProperties {
 			return chargedProjectiles != null && chargedProjectiles.contains(Items.FIREWORK_ROCKET) ? 1.0F : 0.0F;
 		});
 		register(Items.ELYTRA, new ResourceLocation("broken"), (itemStack, clientLevel, livingEntity, i) -> ElytraItem.isFlyEnabled(itemStack) ? 0.0F : 1.0F);
+		register(
+			Items.POISONOUS_POLYTRA,
+			new ResourceLocation("broken"),
+			(itemStack, clientLevel, livingEntity, i) -> PoisonousPolytraItem.isFlyEnabled(itemStack) ? 0.0F : 1.0F
+		);
 		register(Items.FISHING_ROD, new ResourceLocation("cast"), (itemStack, clientLevel, livingEntity, i) -> {
 			if (livingEntity == null) {
 				return 0.0F;
@@ -210,6 +218,19 @@ public class ItemProperties {
 				}
 
 				return (bl || bl2) && livingEntity instanceof Player && ((Player)livingEntity).fishing != null ? 1.0F : 0.0F;
+			}
+		});
+		register(Items.LASHING_POTATO, new ResourceLocation("lashing_potato_extended"), (itemStack, clientLevel, livingEntity, i) -> {
+			if (livingEntity == null) {
+				return 0.0F;
+			} else {
+				boolean bl = livingEntity.getMainHandItem() == itemStack;
+				boolean bl2 = livingEntity.getOffhandItem() == itemStack;
+				if (livingEntity.getMainHandItem().getItem() instanceof LashingPotatoItem) {
+					bl2 = false;
+				}
+
+				return (bl || bl2) && livingEntity instanceof Player && ((Player)livingEntity).grappling != null ? 1.0F : 0.0F;
 			}
 		});
 		register(
@@ -231,6 +252,15 @@ public class ItemProperties {
 			Items.GOAT_HORN,
 			new ResourceLocation("tooting"),
 			(itemStack, clientLevel, livingEntity, i) -> livingEntity != null && livingEntity.isUsingItem() && livingEntity.getUseItem() == itemStack ? 1.0F : 0.0F
+		);
+		register(
+			Items.VENOMOUS_POTATO,
+			new ResourceLocation("hidden"),
+			(itemStack, clientLevel, livingEntity, i) -> itemStack.getOrDefault(DataComponents.SNEK, SnekComponent.HIDDEN_SNEK).revealed() ? 0.0F : 1.0F
+		);
+		registerGeneric(
+			new ResourceLocation("hovered"),
+			(itemStack, clientLevel, livingEntity, i) -> itemStack.getOrDefault(DataComponents.HOVERED, Boolean.valueOf(false)) ? 1.0F : 0.0F
 		);
 	}
 }

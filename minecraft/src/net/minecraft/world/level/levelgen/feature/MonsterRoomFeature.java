@@ -76,9 +76,9 @@ public class MonsterRoomFeature extends Feature<NoneFeatureConfiguration> {
 								worldGenLevel.setBlock(blockPos2x, AIR, 2);
 							} else if (blockState.isSolid() && !blockState.is(Blocks.CHEST)) {
 								if (t == -1 && randomSource.nextInt(4) != 0) {
-									this.safeSetBlock(worldGenLevel, blockPos2x, Blocks.MOSSY_COBBLESTONE.defaultBlockState(), predicate);
+									this.safeSetBlock(worldGenLevel, blockPos2x, (worldGenLevel.isPotato() ? Blocks.GRAVTATER : Blocks.MOSSY_COBBLESTONE).defaultBlockState(), predicate);
 								} else {
-									this.safeSetBlock(worldGenLevel, blockPos2x, Blocks.COBBLESTONE.defaultBlockState(), predicate);
+									this.safeSetBlock(worldGenLevel, blockPos2x, (worldGenLevel.isPotato() ? Blocks.TATERSTONE : Blocks.COBBLESTONE).defaultBlockState(), predicate);
 								}
 							}
 						} else if (!blockState.is(Blocks.CHEST) && !blockState.is(Blocks.SPAWNER)) {
@@ -105,7 +105,9 @@ public class MonsterRoomFeature extends Feature<NoneFeatureConfiguration> {
 
 						if (x == 1) {
 							this.safeSetBlock(worldGenLevel, blockPos3, StructurePiece.reorient(worldGenLevel, blockPos3, Blocks.CHEST.defaultBlockState()), predicate);
-							RandomizableContainer.setBlockEntityLootTable(worldGenLevel, randomSource, blockPos3, BuiltInLootTables.SIMPLE_DUNGEON);
+							RandomizableContainer.setBlockEntityLootTable(
+								worldGenLevel, randomSource, blockPos3, worldGenLevel.isPotato() ? BuiltInLootTables.SIMPLE_DUNGEON_POTATO : BuiltInLootTables.SIMPLE_DUNGEON
+							);
 							break;
 						}
 					}

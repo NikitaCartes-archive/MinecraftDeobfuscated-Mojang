@@ -124,13 +124,13 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.stats.Stats;
 import net.minecraft.util.FutureChain;
 import net.minecraft.util.Mth;
 import net.minecraft.util.SignatureValidator;
 import net.minecraft.util.StringUtil;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.HasCustomInventoryScreen;
@@ -179,6 +179,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 public class ServerGamePacketListenerImpl
@@ -415,7 +416,7 @@ public class ServerGamePacketListenerImpl
 				double n = i - this.vehicleFirstGoodZ;
 				double o = entity.getDeltaMovement().lengthSqr();
 				double p = l * l + m * m + n * n;
-				if (p - o > 100.0 && !this.isSingleplayerOwner()) {
+				if (p - o > 100.0 && !this.isSingleplayerOwner() && !entity.isAttachedToGrid()) {
 					LOGGER.warn("{} (vehicle of {}) moved too quickly! {},{},{}", entity.getName().getString(), this.player.getName().getString(), l, m, n);
 					this.send(new ClientboundMoveVehiclePacket(entity));
 					return;
@@ -430,7 +431,13 @@ public class ServerGamePacketListenerImpl
 					livingEntity.resetFallDistance();
 				}
 
-				entity.move(MoverType.PLAYER, new Vec3(l, m, n));
+				try {
+					entity.ignoreGridCollision = true;
+					entity.move(MoverType.PLAYER, new Vec3(l, m, n));
+				} finally {
+					entity.ignoreGridCollision = false;
+				}
+
 				l = g - entity.getX();
 				m = h - entity.getY();
 				if (m > -0.5 || m < 0.5) {
@@ -455,7 +462,7 @@ public class ServerGamePacketListenerImpl
 
 				this.player.serverLevel().getChunkSource().move(this.player);
 				this.player.checkMovementStatistics(this.player.getX() - d, this.player.getY() - e, this.player.getZ() - f);
-				this.clientVehicleIsFloating = m >= -0.03125 && !bl2 && !this.server.isFlightAllowed() && !entity.isNoGravity() && this.noBlocksAround(entity);
+				this.clientVehicleIsFloating = awesomeAntiCheatIsFlying();
 				this.vehicleLastGoodX = entity.getX();
 				this.vehicleLastGoodY = entity.getY();
 				this.vehicleLastGoodZ = entity.getZ();
@@ -891,7 +898,10 @@ public class ServerGamePacketListenerImpl
 									q = 1;
 								}
 
-								if (!this.player.isChangingDimension() && (!this.player.level().getGameRules().getBoolean(GameRules.RULE_DISABLE_ELYTRA_MOVEMENT_CHECK) || !bl)) {
+								if (!this.player.isChangingDimension()
+									&& !this.player.isAttachedToGrid()
+									&& this.player.grappling == null
+									&& (!this.player.level().getGameRules().getBoolean(GameRules.RULE_DISABLE_ELYTRA_MOVEMENT_CHECK) || !bl)) {
 									float r = bl ? 300.0F : 100.0F;
 									if (p - o > (double)(r * (float)q) && !this.isSingleplayerOwner()) {
 										LOGGER.warn("{} moved too quickly! {},{},{}", this.player.getName().getString(), l, m, n);
@@ -911,7 +921,14 @@ public class ServerGamePacketListenerImpl
 							}
 
 							boolean bl3 = this.player.verticalCollisionBelow;
-							this.player.move(MoverType.PLAYER, new Vec3(l, m, n));
+
+							try {
+								this.player.ignoreGridCollision = true;
+								this.player.move(MoverType.PLAYER, new Vec3(l, m, n));
+							} finally {
+								this.player.ignoreGridCollision = false;
+							}
+
 							l = d - this.player.getX();
 							m = e - this.player.getY();
 							if (m > -0.5 || m < 0.5) {
@@ -935,15 +952,7 @@ public class ServerGamePacketListenerImpl
 								|| (!bl4 || !serverLevel.noCollision(this.player, aABB)) && !this.isPlayerCollidingWithAnythingNew(serverLevel, aABB, d, e, f)) {
 								this.player.absMoveTo(d, e, f, g, h);
 								boolean bl5 = this.player.isAutoSpinAttack();
-								this.clientIsFloating = m >= -0.03125
-									&& !bl3
-									&& this.player.gameMode.getGameModeForPlayer() != GameType.SPECTATOR
-									&& !this.server.isFlightAllowed()
-									&& !this.player.getAbilities().mayfly
-									&& !this.player.hasEffect(MobEffects.LEVITATION)
-									&& !bl
-									&& !bl5
-									&& this.noBlocksAround(this.player);
+								this.clientIsFloating = awesomeAntiCheatIsFlying();
 								this.player.serverLevel().getChunkSource().move(this.player);
 								this.player.doCheckFallDamage(this.player.getX() - i, this.player.getY() - j, this.player.getZ() - k, serverboundMovePlayerPacket.isOnGround());
 								this.player
@@ -971,6 +980,10 @@ public class ServerGamePacketListenerImpl
 				}
 			}
 		}
+	}
+
+	private static boolean awesomeAntiCheatIsFlying() {
+		return false;
 	}
 
 	private boolean isPlayerCollidingWithAnythingNew(LevelReader levelReader, AABB aABB, double d, double e, double f) {
@@ -1196,11 +1209,17 @@ public class ServerGamePacketListenerImpl
 			Optional<LastSeenMessages> optional = this.tryHandleChat(serverboundChatPacket.lastSeenMessages());
 			if (optional.isPresent()) {
 				this.server.execute(() -> {
+					int i = StringUtils.countMatches(serverboundChatPacket.message(), "potato");
+					if (i > 0) {
+						this.player.awardStat(Stats.SAID_POTATO, i);
+						CriteriaTriggers.SAID_POTATO.trigger(this.player);
+					}
+
 					PlayerChatMessage playerChatMessage;
 					try {
 						playerChatMessage = this.getSignedMessage(serverboundChatPacket, (LastSeenMessages)optional.get());
-					} catch (SignedMessageChain.DecodeException var6) {
-						this.handleMessageDecodeFailure(var6);
+					} catch (SignedMessageChain.DecodeException var7) {
+						this.handleMessageDecodeFailure(var7);
 						return;
 					}
 
@@ -1530,6 +1549,10 @@ public class ServerGamePacketListenerImpl
 						this.player.level().getGameRules().getRule(GameRules.RULE_SPECTATORSGENERATECHUNKS).set(false, this.server);
 					}
 				}
+				break;
+			case SPROUT_RESPAWN:
+				this.player = this.server.getPlayerList().sproutRespawn(this.player);
+				CriteriaTriggers.CHANGED_DIMENSION.trigger(this.player, Level.POTATO, Level.OVERWORLD);
 				break;
 			case REQUEST_STATS:
 				this.player.getStats().sendStats(this.player);

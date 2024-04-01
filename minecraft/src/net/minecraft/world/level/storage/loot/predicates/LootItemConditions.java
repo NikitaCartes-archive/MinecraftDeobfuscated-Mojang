@@ -35,6 +35,7 @@ public class LootItemConditions {
 	public static final LootItemConditionType REFERENCE = register("reference", ConditionReference.CODEC);
 	public static final LootItemConditionType TIME_CHECK = register("time_check", TimeCheck.CODEC);
 	public static final LootItemConditionType VALUE_CHECK = register("value_check", ValueCheckCondition.CODEC);
+	public static final LootItemConditionType KILLER_MAIN_HAND_TOOL = register("killer_main_hand_tool", LootItemKillerMainHandToolCondition.CODEC);
 
 	private static LootItemConditionType register(String string, Codec<? extends LootItemCondition> codec) {
 		return Registry.register(BuiltInRegistries.LOOT_CONDITION_TYPE, new ResourceLocation(string), new LootItemConditionType(codec));

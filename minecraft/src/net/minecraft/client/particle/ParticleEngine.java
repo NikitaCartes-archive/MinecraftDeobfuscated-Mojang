@@ -153,7 +153,7 @@ public class ParticleEngine implements PreparableReloadListener {
 		this.register(ParticleTypes.NAUTILUS, FlyTowardsPositionParticle.NautilusProvider::new);
 		this.register(ParticleTypes.NOTE, NoteParticle.Provider::new);
 		this.register(ParticleTypes.POOF, ExplodeParticle.Provider::new);
-		this.register(ParticleTypes.PORTAL, PortalParticle.Provider::new);
+		this.register(ParticleTypes.PORTAL, spriteSet -> new PortalParticle.Provider(spriteSet, 0.9F, 0.3F, 1.0F));
 		this.register(ParticleTypes.RAIN, WaterDropParticle.Provider::new);
 		this.register(ParticleTypes.SMOKE, SmokeParticle.Provider::new);
 		this.register(ParticleTypes.WHITE_SMOKE, WhiteSmokeParticle.Provider::new);
@@ -170,6 +170,7 @@ public class ParticleEngine implements PreparableReloadListener {
 		this.register(ParticleTypes.FALLING_HONEY, DripParticle::createHoneyFallParticle);
 		this.register(ParticleTypes.LANDING_HONEY, DripParticle::createHoneyLandParticle);
 		this.register(ParticleTypes.FALLING_NECTAR, DripParticle::createNectarFallParticle);
+		this.register(ParticleTypes.FALLING_POISON, DripParticle::createPoisonFallParticle);
 		this.register(ParticleTypes.FALLING_SPORE_BLOSSOM, DripParticle::createSporeBlossomFallParticle);
 		this.register(ParticleTypes.SPORE_BLOSSOM_AIR, SuspendedParticle.SporeBlossomAirProvider::new);
 		this.register(ParticleTypes.ASH, AshParticle.Provider::new);
@@ -178,7 +179,9 @@ public class ParticleEngine implements PreparableReloadListener {
 		this.register(ParticleTypes.DRIPPING_OBSIDIAN_TEAR, DripParticle::createObsidianTearHangParticle);
 		this.register(ParticleTypes.FALLING_OBSIDIAN_TEAR, DripParticle::createObsidianTearFallParticle);
 		this.register(ParticleTypes.LANDING_OBSIDIAN_TEAR, DripParticle::createObsidianTearLandParticle);
-		this.register(ParticleTypes.REVERSE_PORTAL, ReversePortalParticle.ReversePortalProvider::new);
+		this.register(ParticleTypes.REVERSE_PORTAL, spriteSet -> new ReversePortalParticle.ReversePortalProvider(spriteSet, 0.9F, 0.3F, 1.0F));
+		this.register(ParticleTypes.REVERSE_POTATO_LIGHTNING, spriteSet -> new ReversePortalParticle.ReversePortalProvider(spriteSet, 0.6F, 1.0F, 0.2F));
+		this.register(ParticleTypes.POTATO_LIGHTNING, spriteSet -> new PortalParticle.Provider(spriteSet, 0.6F, 1.0F, 0.2F));
 		this.register(ParticleTypes.WHITE_ASH, WhiteAshParticle.Provider::new);
 		this.register(ParticleTypes.SMALL_FLAME, FlameParticle.SmallFlameProvider::new);
 		this.register(ParticleTypes.DRIPPING_DRIPSTONE_WATER, DripParticle::createDripstoneWaterHangParticle);
@@ -196,6 +199,7 @@ public class ParticleEngine implements PreparableReloadListener {
 		this.register(ParticleTypes.ELECTRIC_SPARK, GlowParticle.ElectricSparkProvider::new);
 		this.register(ParticleTypes.SCRAPE, GlowParticle.ScrapeProvider::new);
 		this.register(ParticleTypes.SHRIEK, ShriekParticle.Provider::new);
+		this.register(ParticleTypes.FOOTSTEP, FootprintParticle.Provider::new);
 		this.register(ParticleTypes.EGG_CRACK, SuspendedTownParticle.EggCrackProvider::new);
 		this.register(ParticleTypes.DUST_PLUME, DustPlumeParticle.Provider::new);
 		this.register(ParticleTypes.TRIAL_SPAWNER_DETECTION, TrialSpawnerDetectionParticle.Provider::new);

@@ -11,6 +11,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.math.Axis;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.List;
@@ -260,6 +261,20 @@ public class GuiGraphics {
 		vertexConsumer.vertex(matrix4f, (float)k, (float)l, (float)m).endVertex();
 		vertexConsumer.vertex(matrix4f, (float)k, (float)j, (float)m).endVertex();
 		this.flushIfUnmanaged();
+	}
+
+	public GuiGraphics.DrawString beginString(double d, double e, Font font, String string, int i, int j) {
+		List<FormattedText> list = font.getSplitter().splitLines(string, j, Style.EMPTY);
+		String string2 = (String)list.stream().map(FormattedText::getString).collect(Collectors.joining("\n"));
+		return new GuiGraphics.DrawString(d, e, string2, (stringx, jx, k) -> {
+			String[] strings = stringx.split("\\r?\\n");
+			int l = k;
+
+			for (String string2x : strings) {
+				this.drawString(font, string2x, jx, l, i);
+				l += 9 + 4;
+			}
+		});
 	}
 
 	public void drawCenteredString(Font font, String string, int i, int j, int k) {
@@ -586,6 +601,41 @@ public class GuiGraphics {
 		}
 	}
 
+	public void renderItem(@Nullable LivingEntity livingEntity, @Nullable Level level, ItemStack itemStack, float f, float g, float h, int i, int j) {
+		if (!itemStack.isEmpty()) {
+			BakedModel bakedModel = this.minecraft.getItemRenderer().getModel(itemStack, level, livingEntity, i);
+			this.pose.pushPose();
+			this.pose.translate(f + 8.0F, g + 8.0F, (float)(150 + (bakedModel.isGui3d() ? j : 0)));
+			this.pose.rotateAround(Axis.XP.rotation(h), 0.0F, 0.0F, 0.0F);
+			this.pose.rotateAround(Axis.YP.rotation(2.0F * h), 0.0F, 0.0F, 0.0F);
+
+			try {
+				this.pose.scale(16.0F, -16.0F, 16.0F);
+				boolean bl = !bakedModel.usesBlockLight();
+				if (bl) {
+					Lighting.setupForFlatItems();
+				}
+
+				this.minecraft
+					.getItemRenderer()
+					.render(itemStack, ItemDisplayContext.GUI, false, this.pose, this.bufferSource(), 15728880, OverlayTexture.NO_OVERLAY, bakedModel);
+				this.flush();
+				if (bl) {
+					Lighting.setupFor3DItems();
+				}
+			} catch (Throwable var13) {
+				CrashReport crashReport = CrashReport.forThrowable(var13, "Rendering item");
+				CrashReportCategory crashReportCategory = crashReport.addCategory("Item being rendered");
+				crashReportCategory.setDetail("Item Type", (CrashReportDetail<String>)(() -> String.valueOf(itemStack.getItem())));
+				crashReportCategory.setDetail("Item Components", (CrashReportDetail<String>)(() -> String.valueOf(itemStack.getComponents())));
+				crashReportCategory.setDetail("Item Foil", (CrashReportDetail<String>)(() -> String.valueOf(itemStack.hasFoil())));
+				throw new ReportedException(crashReport);
+			}
+
+			this.pose.popPose();
+		}
+	}
+
 	public void renderItemDecorations(Font font, ItemStack itemStack, int i, int j) {
 		this.renderItemDecorations(font, itemStack, i, j, null);
 	}
@@ -715,6 +765,55 @@ public class GuiGraphics {
 					}
 				}
 			}
+		}
+	}
+
+	@Environment(EnvType.CLIENT)
+	public static class DrawString {
+		private final double charsPerTick;
+		private final String targetString;
+		private final GuiGraphics.DrawString.DrawFunction drawFunction;
+		private double lastTick;
+		private String subString = "";
+
+		DrawString(double d, double e, String string, GuiGraphics.DrawString.DrawFunction drawFunction) {
+			this.lastTick = d;
+			this.charsPerTick = e;
+			this.targetString = string;
+			this.drawFunction = drawFunction;
+		}
+
+		public boolean draw(double d, int i, int j) {
+			if (this.targetString.equals(this.subString)) {
+				this.drawFunction.apply(this.targetString, i, j);
+				return false;
+			} else {
+				int k = Mth.floor((d - this.lastTick) * this.charsPerTick);
+				if (k == 0) {
+					this.drawFunction.apply(this.subString, i, j);
+					return false;
+				} else {
+					int l = Math.min(this.subString.length() + k, this.targetString.length());
+
+					while (l < this.targetString.length() && Character.isWhitespace(this.targetString.charAt(l - 1))) {
+						l++;
+					}
+
+					this.subString = this.targetString.substring(0, l);
+					this.drawFunction.apply(this.subString, i, j);
+					this.lastTick = d;
+					return true;
+				}
+			}
+		}
+
+		public double getLastTick() {
+			return this.lastTick;
+		}
+
+		@Environment(EnvType.CLIENT)
+		public interface DrawFunction {
+			void apply(String string, int i, int j);
 		}
 	}
 

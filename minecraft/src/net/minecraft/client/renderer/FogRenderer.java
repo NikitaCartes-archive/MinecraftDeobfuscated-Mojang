@@ -121,7 +121,7 @@ public class FogRenderer {
 			fogRed = fogRed + (v - fogRed) * u;
 			fogGreen = fogGreen + (w - fogGreen) * u;
 			fogBlue = fogBlue + (x - fogBlue) * u;
-			float hx = clientLevel.getRainLevel(f);
+			float hx = clientLevel.getRainLevel(f, camera.getPosition().y);
 			if (hx > 0.0F) {
 				float r = 1.0F - hx * 0.5F;
 				float sx = 1.0F - hx * 0.4F;
@@ -130,7 +130,7 @@ public class FogRenderer {
 				fogBlue *= sx;
 			}
 
-			float r = clientLevel.getThunderLevel(f);
+			float r = clientLevel.getThunderLevel(f, camera.getPosition().y);
 			if (r > 0.0F) {
 				float sx = 1.0F - r * 0.5F;
 				fogRed *= sx;

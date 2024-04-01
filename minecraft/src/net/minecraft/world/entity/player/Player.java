@@ -5,7 +5,10 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.mojang.authlib.GameProfile;
 import com.mojang.datafixers.util.Either;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
+import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +23,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.locale.Language;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
@@ -72,9 +76,9 @@ import net.minecraft.world.entity.animal.Parrot;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.boss.EnderDragonPart;
 import net.minecraft.world.entity.decoration.ArmorStand;
-import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.warden.WardenSpawnTracker;
 import net.minecraft.world.entity.projectile.FishingHook;
+import net.minecraft.world.entity.projectile.LashingPotatoHook;
 import net.minecraft.world.food.FoodData;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ClickAction;
@@ -98,6 +102,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.RespawnAnchorBlock;
 import net.minecraft.world.level.block.entity.CommandBlockEntity;
 import net.minecraft.world.level.block.entity.JigsawBlockEntity;
+import net.minecraft.world.level.block.entity.PotatoBaneComponent;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.entity.StructureBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -126,6 +131,7 @@ public abstract class Player extends LivingEntity {
 	public static final float SWIMMING_BB_WIDTH = 0.6F;
 	public static final float SWIMMING_BB_HEIGHT = 0.6F;
 	public static final float DEFAULT_EYE_HEIGHT = 1.62F;
+	private static final String POTATO_QUEST_START_KEY = "potato.quest.intro.jump.0";
 	public static final Vec3 DEFAULT_VEHICLE_ATTACHMENT = new Vec3(0.0, 0.6, 0.0);
 	public static final EntityDimensions STANDING_DIMENSIONS = EntityDimensions.scalable(0.6F, 1.8F)
 		.withEyeHeight(1.62F)
@@ -151,6 +157,14 @@ public abstract class Player extends LivingEntity {
 	protected static final EntityDataAccessor<CompoundTag> DATA_SHOULDER_LEFT = SynchedEntityData.defineId(Player.class, EntityDataSerializers.COMPOUND_TAG);
 	protected static final EntityDataAccessor<CompoundTag> DATA_SHOULDER_RIGHT = SynchedEntityData.defineId(Player.class, EntityDataSerializers.COMPOUND_TAG);
 	private long timeEntitySatOnShoulder;
+	protected static final EntityDataAccessor<String> DATA_POTATO_QUEST = SynchedEntityData.defineId(Player.class, EntityDataSerializers.STRING);
+	protected static final EntityDataAccessor<Optional<BlockPos>> DATA_FOUND_POTATO_PORTAL = SynchedEntityData.defineId(
+		Player.class, EntityDataSerializers.OPTIONAL_BLOCK_POS
+	);
+	protected static final EntityDataAccessor<Optional<BlockPos>> DATA_FOUND_COLOSSEUM = SynchedEntityData.defineId(
+		Player.class, EntityDataSerializers.OPTIONAL_BLOCK_POS
+	);
+	public static final EntityDataAccessor<Boolean> DATA_POTATO_QUEST_COMPLETED = SynchedEntityData.defineId(Player.class, EntityDataSerializers.BOOLEAN);
 	final Inventory inventory = new Inventory(this);
 	protected PlayerEnderChestContainer enderChestInventory = new PlayerEnderChestContainer();
 	public final InventoryMenu inventoryMenu;
@@ -160,6 +174,7 @@ public abstract class Player extends LivingEntity {
 	public float oBob;
 	public float bob;
 	public int takeXpDelay;
+	public int potatoQuestDelay;
 	public double xCloakO;
 	public double yCloakO;
 	public double zCloakO;
@@ -182,12 +197,41 @@ public abstract class Player extends LivingEntity {
 	private Optional<GlobalPos> lastDeathLocation = Optional.empty();
 	@Nullable
 	public FishingHook fishing;
+	@Nullable
+	public LashingPotatoHook grappling;
 	protected float hurtDir;
 	@Nullable
 	public Vec3 currentImpulseImpactPos;
 	@Nullable
 	public Entity currentExplosionCause;
 	public boolean ignoreFallDamageFromCurrentImpulse;
+	private static final Object2IntMap<String> CHAPTER_ID = Util.make(() -> {
+		Object2IntMap<String> object2IntMap = new Object2IntArrayMap<>();
+		object2IntMap.defaultReturnValue(Integer.MAX_VALUE);
+		object2IntMap.put("intro", 0);
+		object2IntMap.put("leaving_village", 1);
+		object2IntMap.put("in_village", 2);
+		object2IntMap.put("took_bed", 3);
+		object2IntMap.put("slept_in_bed", 3);
+		object2IntMap.put("meta_one", 4);
+		object2IntMap.put("got_paper", 5);
+		object2IntMap.put("anvil_dropped", 6);
+		object2IntMap.put("wrote_thoughts", 7);
+		object2IntMap.put("crafted_eyes", 8);
+		object2IntMap.put("thrown_eye", 9);
+		object2IntMap.put("got_book", 10);
+		object2IntMap.put("found_portal", 11);
+		object2IntMap.put("portal_opened", 12);
+		object2IntMap.put("dimension", 13);
+		object2IntMap.put("potato_village", 14);
+		object2IntMap.put("thrown_eye_part_two", 15);
+		object2IntMap.put("found_colosseum", 16);
+		object2IntMap.put("inside_colosseum", 17);
+		object2IntMap.put("got_sword", 18);
+		object2IntMap.put("got_staff", 21);
+		object2IntMap.put("composted_staff", 22);
+		return object2IntMap;
+	});
 
 	public Player(Level level, BlockPos blockPos, float f, GameProfile gameProfile) {
 		super(EntityType.PLAYER, level);
@@ -232,6 +276,10 @@ public abstract class Player extends LivingEntity {
 		builder.define(DATA_PLAYER_MAIN_HAND, (byte)DEFAULT_MAIN_HAND.getId());
 		builder.define(DATA_SHOULDER_LEFT, new CompoundTag());
 		builder.define(DATA_SHOULDER_RIGHT, new CompoundTag());
+		builder.define(DATA_POTATO_QUEST, "potato.quest.intro.jump.0");
+		builder.define(DATA_FOUND_POTATO_PORTAL, Optional.empty());
+		builder.define(DATA_FOUND_COLOSSEUM, Optional.empty());
+		builder.define(DATA_POTATO_QUEST_COMPLETED, false);
 	}
 
 	@Override
@@ -243,6 +291,10 @@ public abstract class Player extends LivingEntity {
 
 		if (this.takeXpDelay > 0) {
 			this.takeXpDelay--;
+		}
+
+		if (this.potatoQuestDelay > 0) {
+			this.potatoQuestDelay--;
 		}
 
 		if (this.isSleeping()) {
@@ -306,6 +358,28 @@ public abstract class Player extends LivingEntity {
 		this.turtleHelmetTick();
 		this.cooldowns.tick();
 		this.updatePlayerPose();
+	}
+
+	public boolean isChapterAndProgressAt(String string, int i) {
+		if (this.isPotatoPlant()) {
+			Pair<String, Integer> pair = this.getPotatoQuestChapterAndProgress();
+			if (string.equals(pair.getFirst()) && pair.getSecond() == i) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	public boolean isChapterAndProgressPast(String string, int i) {
+		if (this.isPotatoPlant()) {
+			Pair<String, Integer> pair = this.getPotatoQuestChapterAndProgress();
+			if (string.equals(pair.getFirst()) && pair.getSecond() >= i) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	@Override
@@ -415,7 +489,7 @@ public abstract class Player extends LivingEntity {
 	}
 
 	protected boolean canPlayerFitWithinBlocksAndEntitiesWhen(Pose pose) {
-		return this.level().noCollision(this, this.getDimensions(pose).makeBoundingBox(this.position()).deflate(1.0E-7));
+		return this.level().noCollision(this, this.getDimensions(pose).makeBoundingBox(this.position()).deflate(1.0E-7), true);
 	}
 
 	@Override
@@ -573,6 +647,30 @@ public abstract class Player extends LivingEntity {
 		if (!this.level().isClientSide && (this.fallDistance > 0.5F || this.isInWater()) || this.abilities.flying || this.isSleeping() || this.isInPowderSnow) {
 			this.removeEntitiesOnShoulder();
 		}
+
+		if (this.grappling != null && this.grappling.inBlock()) {
+			this.resetFallDistance();
+			if (this.isControlledByLocalInstance()) {
+				Vec3 vec3 = this.grappling.position().subtract(this.getEyePosition());
+				float g = this.grappling.length();
+				double d = vec3.length();
+				if (d > (double)g) {
+					double e = d / (double)g * 0.1;
+					this.addDeltaMovement(vec3.scale(1.0 / d).multiply(e, e * 1.1, e));
+				}
+			}
+		}
+	}
+
+	@Override
+	protected void applyFriction(Vec3 vec3, double d, float f) {
+		if (this.grappling != null && this.grappling.inBlock() && !this.onGround()) {
+			float g = 0.99F;
+			float h = 0.995F;
+			this.setDeltaMovement(vec3.x * 0.99F, d * 0.995F, vec3.z * 0.99F);
+		} else {
+			super.applyFriction(vec3, d, f);
+		}
 	}
 
 	private void playShoulderEntityAmbientSound(@Nullable CompoundTag compoundTag) {
@@ -679,50 +777,6 @@ public abstract class Player extends LivingEntity {
 		return SoundEvents.PLAYER_DEATH;
 	}
 
-	@Nullable
-	public ItemEntity drop(ItemStack itemStack, boolean bl) {
-		return this.drop(itemStack, false, bl);
-	}
-
-	@Nullable
-	public ItemEntity drop(ItemStack itemStack, boolean bl, boolean bl2) {
-		if (itemStack.isEmpty()) {
-			return null;
-		} else {
-			if (this.level().isClientSide) {
-				this.swing(InteractionHand.MAIN_HAND);
-			}
-
-			double d = this.getEyeY() - 0.3F;
-			ItemEntity itemEntity = new ItemEntity(this.level(), this.getX(), d, this.getZ(), itemStack);
-			itemEntity.setPickUpDelay(40);
-			if (bl2) {
-				itemEntity.setThrower(this);
-			}
-
-			if (bl) {
-				float f = this.random.nextFloat() * 0.5F;
-				float g = this.random.nextFloat() * (float) (Math.PI * 2);
-				itemEntity.setDeltaMovement((double)(-Mth.sin(g) * f), 0.2F, (double)(Mth.cos(g) * f));
-			} else {
-				float f = 0.3F;
-				float g = Mth.sin(this.getXRot() * (float) (Math.PI / 180.0));
-				float h = Mth.cos(this.getXRot() * (float) (Math.PI / 180.0));
-				float i = Mth.sin(this.getYRot() * (float) (Math.PI / 180.0));
-				float j = Mth.cos(this.getYRot() * (float) (Math.PI / 180.0));
-				float k = this.random.nextFloat() * (float) (Math.PI * 2);
-				float l = 0.02F * this.random.nextFloat();
-				itemEntity.setDeltaMovement(
-					(double)(-i * h * 0.3F) + Math.cos((double)k) * (double)l,
-					(double)(-g * 0.3F + 0.1F + (this.random.nextFloat() - this.random.nextFloat()) * 0.1F),
-					(double)(j * h * 0.3F) + Math.sin((double)k) * (double)l
-				);
-			}
-
-			return itemEntity;
-		}
-	}
-
 	public float getDestroySpeed(BlockState blockState) {
 		float f = this.inventory.getDestroySpeed(blockState);
 		if (f > 1.0F) {
@@ -806,6 +860,9 @@ public abstract class Player extends LivingEntity {
 		}
 
 		this.ignoreFallDamageFromCurrentImpulse = compoundTag.getBoolean("ignore_fall_damage_from_current_explosion");
+		if (compoundTag.contains("PotatoQuest")) {
+			this.entityData.set(DATA_POTATO_QUEST, compoundTag.getString("PotatoQuest"));
+		}
 	}
 
 	@Override
@@ -841,6 +898,7 @@ public abstract class Player extends LivingEntity {
 		}
 
 		compoundTag.putBoolean("ignore_fall_damage_from_current_explosion", this.ignoreFallDamageFromCurrentImpulse);
+		compoundTag.putString("PotatoQuest", this.entityData.get(DATA_POTATO_QUEST));
 	}
 
 	@Override
@@ -1068,6 +1126,11 @@ public abstract class Player extends LivingEntity {
 	}
 
 	@Override
+	protected boolean shouldMoveWithSubGrid() {
+		return !this.abilities.flying;
+	}
+
+	@Override
 	protected Vec3 maybeBackOffFromEdge(Vec3 vec3, MoverType moverType) {
 		if (!this.abilities.flying
 			&& vec3.y <= 0.0
@@ -1132,6 +1195,7 @@ public abstract class Player extends LivingEntity {
 		if (entity.isAttackable()) {
 			if (!entity.skipAttackInteraction(this)) {
 				float f = (float)this.getAttributeValue(Attributes.ATTACK_DAMAGE);
+				f += this.getPotatoDamageBoost(this.getMainHandItem(), entity);
 				float g = EnchantmentHelper.getDamageBonus(this.getMainHandItem(), entity.getType());
 				float h = this.getAttackStrengthScale(0.5F);
 				f *= 0.2F + h * h * 0.8F;
@@ -1291,6 +1355,10 @@ public abstract class Player extends LivingEntity {
 				}
 			}
 		}
+	}
+
+	private float getPotatoDamageBoost(ItemStack itemStack, Entity entity) {
+		return PotatoBaneComponent.getPotatoDamageBoost(itemStack, entity);
 	}
 
 	@Override
@@ -1456,6 +1524,75 @@ public abstract class Player extends LivingEntity {
 		} else {
 			this.causeFoodExhaustion(0.05F);
 		}
+
+		if (this.potatoQuestDelay == 0 && this.isPotatoPlant()) {
+			this.potatoQuestDelay = 40;
+			String string = this.entityData.get(DATA_POTATO_QUEST);
+			if (string.contains(".jump.")) {
+				int i = string.length();
+
+				while (i > 0 && Character.isDigit(string.charAt(i - 1))) {
+					i--;
+				}
+
+				int j = Integer.parseInt(string.substring(i)) + 1;
+				String string2 = string.substring(0, i);
+				if (Language.getInstance().has(string2 + j)) {
+					this.entityData.set(DATA_POTATO_QUEST, string2 + j);
+				}
+			}
+		}
+	}
+
+	public boolean isPotatoPlant() {
+		return this.getInventory().getArmor(3).is(Items.POISONOUS_POTATO_PLANT);
+	}
+
+	public void setPotatoQuestChapter(String string) {
+		this.setPotatoQuestChapterAndProgress(string, 0);
+	}
+
+	public void setPotatoQuestChapterAndProgress(String string, int i) {
+		String string2 = "potato.quest." + string + "." + i;
+		if (Language.getInstance().has(string2)) {
+			this.entityData.set(DATA_POTATO_QUEST, string2);
+		} else {
+			this.entityData.set(DATA_POTATO_QUEST, "potato.quest." + string + ".jump." + i);
+		}
+	}
+
+	public boolean chapterIsPast(String string) {
+		if (!this.isPotatoPlant()) {
+			return false;
+		} else {
+			Pair<String, Integer> pair = this.getPotatoQuestChapterAndProgress();
+			int i = CHAPTER_ID.getInt(pair.getFirst());
+			return i > CHAPTER_ID.getInt(string);
+		}
+	}
+
+	public Pair<String, Integer> getPotatoQuestChapterAndProgress() {
+		String string = this.entityData.get(DATA_POTATO_QUEST);
+		int i = string.length();
+
+		while (i > 0 && Character.isDigit(string.charAt(i - 1))) {
+			i--;
+		}
+
+		int j = Integer.parseInt(string.substring(i));
+		String string2 = string.substring(0, i).substring("potato.quest.".length());
+		int k = string2.indexOf(".jump.");
+		if (k >= 0) {
+			return Pair.of(string2.substring(0, k), j);
+		} else {
+			int l = string2.length();
+
+			while (l > 0 && string2.charAt(l - 1) == '.') {
+				l--;
+			}
+
+			return Pair.of(string2.substring(0, l), j);
+		}
 	}
 
 	@Override
@@ -1523,7 +1660,7 @@ public abstract class Player extends LivingEntity {
 	public boolean tryToStartFallFlying() {
 		if (!this.onGround() && !this.isFallFlying() && !this.isInWater() && !this.hasEffect(MobEffects.LEVITATION)) {
 			ItemStack itemStack = this.getItemBySlot(EquipmentSlot.CHEST);
-			if (itemStack.is(Items.ELYTRA) && ElytraItem.isFlyEnabled(itemStack)) {
+			if ((itemStack.is(Items.ELYTRA) || itemStack.is(Items.POISONOUS_POLYTRA)) && ElytraItem.isFlyEnabled(itemStack)) {
 				this.startFallFlying();
 				return true;
 			}

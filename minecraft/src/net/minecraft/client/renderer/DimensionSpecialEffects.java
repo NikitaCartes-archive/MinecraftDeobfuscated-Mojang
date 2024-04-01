@@ -20,8 +20,9 @@ public abstract class DimensionSpecialEffects {
 		object2ObjectArrayMap.put(BuiltinDimensionTypes.OVERWORLD_EFFECTS, overworldEffects);
 		object2ObjectArrayMap.put(BuiltinDimensionTypes.NETHER_EFFECTS, new DimensionSpecialEffects.NetherEffects());
 		object2ObjectArrayMap.put(BuiltinDimensionTypes.END_EFFECTS, new DimensionSpecialEffects.EndEffects());
+		object2ObjectArrayMap.put(BuiltinDimensionTypes.POTATO_EFFECTS, new DimensionSpecialEffects.PotatoEffects());
 	});
-	private final float[] sunriseCol = new float[4];
+	protected final float[] sunriseCol = new float[4];
 	private final float cloudLevel;
 	private final boolean hasGround;
 	private final DimensionSpecialEffects.SkyType skyType;
@@ -73,6 +74,10 @@ public abstract class DimensionSpecialEffects {
 
 	public DimensionSpecialEffects.SkyType skyType() {
 		return this.skyType;
+	}
+
+	public int getCloudColor() {
+		return 16777215;
 	}
 
 	public boolean forceBrightLightmap() {
@@ -139,6 +144,48 @@ public abstract class DimensionSpecialEffects {
 		@Override
 		public boolean isFoggyAt(int i, int j) {
 			return false;
+		}
+	}
+
+	@Environment(EnvType.CLIENT)
+	public static class PotatoEffects extends DimensionSpecialEffects {
+		public PotatoEffects() {
+			super(112.0F, false, DimensionSpecialEffects.SkyType.NORMAL, false, false);
+		}
+
+		@Override
+		public Vec3 getBrightnessDependentFogColor(Vec3 vec3, float f) {
+			return vec3.multiply((double)(f * 0.94F + 0.06F), (double)(f * 0.94F + 0.06F), (double)(f * 0.91F + 0.09F));
+		}
+
+		@Override
+		public boolean isFoggyAt(int i, int j) {
+			return false;
+		}
+
+		@Override
+		public int getCloudColor() {
+			return 14548906;
+		}
+
+		@Nullable
+		@Override
+		public float[] getSunriseColor(float f, float g) {
+			float h = 0.4F;
+			float i = Mth.cos(f * (float) (Math.PI * 2)) - 0.0F;
+			float j = -0.0F;
+			if (i >= -0.4F && i <= 0.4F) {
+				float k = (i - -0.0F) / 0.4F * 0.5F + 0.5F;
+				float l = 1.0F - (1.0F - Mth.sin(k * (float) Math.PI)) * 0.99F;
+				l *= l;
+				this.sunriseCol[0] = k * k * 0.3F + 0.35F;
+				this.sunriseCol[1] = k * 0.7F + 0.2F;
+				this.sunriseCol[2] = k * k * 0.0F + 0.2F;
+				this.sunriseCol[3] = l;
+				return this.sunriseCol;
+			} else {
+				return null;
+			}
 		}
 	}
 

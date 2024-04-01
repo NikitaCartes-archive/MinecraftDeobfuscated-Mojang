@@ -16,8 +16,10 @@ import net.minecraft.world.level.levelgen.feature.configurations.ColumnFeatureCo
 public class BasaltColumnsFeature extends Feature<ColumnFeatureConfiguration> {
 	private static final ImmutableList<Block> CANNOT_PLACE_ON = ImmutableList.of(
 		Blocks.LAVA,
+		Blocks.WATER,
 		Blocks.BEDROCK,
 		Blocks.MAGMA_BLOCK,
+		Blocks.SLIME_BLOCK,
 		Blocks.SOUL_SAND,
 		Blocks.NETHER_BRICKS,
 		Blocks.NETHER_BRICK_FENCE,
@@ -56,7 +58,7 @@ public class BasaltColumnsFeature extends Feature<ColumnFeatureConfiguration> {
 			)) {
 				int m = j - blockPos2.distManhattan(blockPos);
 				if (m >= 0) {
-					bl2 |= this.placeColumn(worldGenLevel, i, blockPos2, m, columnFeatureConfiguration.reach().sample(randomSource));
+					bl2 |= this.placeColumn(worldGenLevel, i, blockPos2, m, columnFeatureConfiguration.reach().sample(randomSource), columnFeatureConfiguration.state());
 				}
 			}
 
@@ -64,7 +66,7 @@ public class BasaltColumnsFeature extends Feature<ColumnFeatureConfiguration> {
 		}
 	}
 
-	private boolean placeColumn(LevelAccessor levelAccessor, int i, BlockPos blockPos, int j, int k) {
+	private boolean placeColumn(LevelAccessor levelAccessor, int i, BlockPos blockPos, int j, int k, BlockState blockState) {
 		boolean bl = false;
 
 		for (BlockPos blockPos2 : BlockPos.betweenClosed(
@@ -79,11 +81,11 @@ public class BasaltColumnsFeature extends Feature<ColumnFeatureConfiguration> {
 
 				for (BlockPos.MutableBlockPos mutableBlockPos = blockPos3.mutable(); m >= 0; m--) {
 					if (isAirOrLavaOcean(levelAccessor, i, mutableBlockPos)) {
-						this.setBlock(levelAccessor, mutableBlockPos, Blocks.BASALT.defaultBlockState());
+						this.setBlock(levelAccessor, mutableBlockPos, blockState);
 						mutableBlockPos.move(Direction.UP);
 						bl = true;
 					} else {
-						if (!levelAccessor.getBlockState(mutableBlockPos).is(Blocks.BASALT)) {
+						if (!levelAccessor.getBlockState(mutableBlockPos).is(Blocks.BASALT) && !levelAccessor.getBlockState(mutableBlockPos).is(Blocks.ANCIENT_DEBRIS)) {
 							break;
 						}
 

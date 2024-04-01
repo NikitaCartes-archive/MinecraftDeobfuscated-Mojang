@@ -5,6 +5,8 @@ import com.google.common.collect.Ordering;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
@@ -28,6 +30,7 @@ import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.MobEffectTextureManager;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
@@ -35,8 +38,11 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.numbers.NumberFormat;
 import net.minecraft.network.chat.numbers.StyledFormat;
+import net.minecraft.network.protocol.game.ServerboundClientCommandPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.stats.Stats;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
@@ -54,8 +60,10 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodData;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.phys.BlockHitResult;
@@ -152,6 +160,9 @@ public class Gui {
 	private float lastAutosaveIndicatorValue;
 	private final LayeredDraw layers = new LayeredDraw();
 	private float scopeScale;
+	@Nullable
+	private GuiGraphics.DrawString dialogue = null;
+	private String questKey = "";
 
 	public Gui(Minecraft minecraft) {
 		this.minecraft = minecraft;
@@ -164,6 +175,7 @@ public class Gui {
 		this.resetTitleTimes();
 		LayeredDraw layeredDraw = new LayeredDraw()
 			.add(this::renderCameraOverlays)
+			.add(this::renderMissionDialogue)
 			.add(this::renderCrosshair)
 			.add(this::renderHotbarAndDecorations)
 			.add(this::renderExperienceLevel)
@@ -267,6 +279,64 @@ public class Gui {
 			}
 
 			this.minecraft.getProfiler().pop();
+		}
+	}
+
+	private void renderMissionDialogue(GuiGraphics guiGraphics, float f) {
+		ItemStack itemStack = this.minecraft.player.getInventory().getArmor(3);
+		if (!itemStack.is(Items.POISONOUS_POTATO_PLANT)) {
+			this.dialogue = null;
+		} else {
+			float g = (float)this.getGuiTicks() + f;
+			PoseStack poseStack = guiGraphics.pose();
+			Font font = this.getFont();
+			ItemStack itemStack2 = new ItemStack(Items.POISONOUS_POTATO_PLANT);
+			itemStack2.set(DataComponents.HOVERED, true);
+			if (this.dialogue == null || !this.questKey.equals(this.minecraft.player.getQuestKey())) {
+				this.questKey = this.minecraft.player.getQuestKey();
+				Component component = Component.translatable(
+					this.questKey,
+					this.minecraft.player.getDisplayName(),
+					this.minecraft.options.keyJump.getTranslatedKeyMessage(),
+					this.minecraft.options.keyUse.getTranslatedKeyMessage()
+				);
+				this.dialogue = guiGraphics.beginString((double)g, 2.0, font, component.getString(), 16777215, guiGraphics.guiWidth() - 72);
+			}
+
+			if (this.minecraft.player.getEntityData().get(Player.DATA_POTATO_QUEST_COMPLETED)) {
+				this.minecraft.getConnection().send(new ServerboundClientCommandPacket(ServerboundClientCommandPacket.Action.REQUEST_STATS));
+				String string = Stats.CUSTOM.get(Stats.POTATO_QUEST_TIME).format(this.minecraft.player.getStats().getValue(Stats.CUSTOM.get(Stats.POTATO_QUEST_TIME)));
+				RenderSystem.disableDepthTest();
+				RenderSystem.depthMask(false);
+				poseStack.pushPose();
+				guiGraphics.drawCenteredString(font, Component.translatable("stat.minecraft.potato_quest_time_format", string), guiGraphics.guiWidth() / 2, 48, 16777215);
+				poseStack.popPose();
+				RenderSystem.enableDepthTest();
+				RenderSystem.depthMask(true);
+			}
+
+			if (!((double)g - this.dialogue.getLastTick() > 200.0)) {
+				RenderSystem.disableDepthTest();
+				RenderSystem.depthMask(false);
+				guiGraphics.fill(0, 0, guiGraphics.guiWidth(), 32, 0, 1073741824);
+				guiGraphics.fillGradient(0, 32, guiGraphics.guiWidth(), 64, 1073741824, 0);
+				poseStack.pushPose();
+				poseStack.translate(-4.0F, -12.0F, 0.0F);
+				poseStack.scale(4.0F, 4.0F, 1.0F);
+				poseStack.rotateAround(Axis.ZP.rotationDegrees(Mth.sin(((float)this.tickCount + f) / 5.0F) * 20.0F), 8.0F, 8.0F, 0.0F);
+				guiGraphics.renderItem(itemStack2, 0, 0);
+				poseStack.popPose();
+				poseStack.pushPose();
+				if (this.dialogue.draw((double)g, 72, 16)) {
+					this.minecraft
+						.getSoundManager()
+						.play(SimpleSoundInstance.forUI(SoundEvents.NOTE_BLOCK_FLUTE, Mth.randomBetween(this.minecraft.player.getRandom(), 1.25F, 1.75F)));
+				}
+
+				poseStack.popPose();
+				RenderSystem.enableDepthTest();
+				RenderSystem.depthMask(true);
+			}
 		}
 	}
 
@@ -542,6 +612,11 @@ public class Gui {
 			for (int m = 0; m < 9; m++) {
 				int n = i - 90 + m * 20 + 2;
 				int o = guiGraphics.guiHeight() - 16 - 3;
+				ItemStack itemStack2 = player.getInventory().items.get(m);
+				if (itemStack2.has(DataComponents.HOVERED)) {
+					itemStack2.set(DataComponents.HOVERED, player.getInventory().selected == m);
+				}
+
 				this.renderSlot(guiGraphics, n, o, f, player, player.getInventory().items.get(m), l++);
 			}
 
@@ -1082,7 +1157,12 @@ public class Gui {
 		RenderSystem.depthMask(false);
 		RenderSystem.enableBlend();
 		guiGraphics.setColor(1.0F, 1.0F, 1.0F, f);
-		TextureAtlasSprite textureAtlasSprite = this.minecraft.getBlockRenderer().getBlockModelShaper().getParticleIcon(Blocks.NETHER_PORTAL.defaultBlockState());
+		Block block = Blocks.NETHER_PORTAL;
+		if (this.minecraft.level.isPotato() || this.minecraft.player.level().getBlockState(this.minecraft.player.blockPosition()).is(Blocks.POTATO_PORTAL)) {
+			block = Blocks.POTATO_PORTAL;
+		}
+
+		TextureAtlasSprite textureAtlasSprite = this.minecraft.getBlockRenderer().getBlockModelShaper().getParticleIcon(block.defaultBlockState());
 		guiGraphics.blit(0, 0, -90, guiGraphics.guiWidth(), guiGraphics.guiHeight(), textureAtlasSprite);
 		RenderSystem.disableBlend();
 		RenderSystem.depthMask(true);

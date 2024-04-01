@@ -11,14 +11,20 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundBossEventPacket;
 import net.minecraft.util.Mth;
 import net.minecraft.world.BossEvent;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.phys.Vec3;
 
 public class ServerBossEvent extends BossEvent {
 	private final Set<ServerPlayer> players = Sets.<ServerPlayer>newHashSet();
 	private final Set<ServerPlayer> unmodifiablePlayers = Collections.unmodifiableSet(this.players);
 	private boolean visible = true;
 
+	public ServerBossEvent(Entity entity, BossEvent.BossBarColor bossBarColor, BossEvent.BossBarOverlay bossBarOverlay) {
+		super(entity.getUUID(), entity.getDisplayName(), bossBarColor, bossBarOverlay, entity.position(), -1);
+	}
+
 	public ServerBossEvent(Component component, BossEvent.BossBarColor bossBarColor, BossEvent.BossBarOverlay bossBarOverlay) {
-		super(Mth.createInsecureUUID(), component, bossBarColor, bossBarOverlay);
+		super(Mth.createInsecureUUID(), component, bossBarColor, bossBarOverlay, Vec3.ZERO, 0);
 	}
 
 	@Override
@@ -73,6 +79,14 @@ public class ServerBossEvent extends BossEvent {
 		}
 
 		return this;
+	}
+
+	@Override
+	public void setLocation(Vec3 vec3, int i) {
+		if (vec3.distanceToSqr(this.center) > 1.0 || i != this.radius) {
+			super.setLocation(vec3, i);
+			this.broadcast(ClientboundBossEventPacket::createUpdatePositionPacket);
+		}
 	}
 
 	@Override

@@ -186,9 +186,9 @@ public abstract class AbstractVillager extends AgeableMob implements InventoryCa
 
 	@Nullable
 	@Override
-	public Entity changeDimension(ServerLevel serverLevel) {
+	public Entity changeDimension(ServerLevel serverLevel, boolean bl) {
 		this.stopTrading();
-		return super.changeDimension(serverLevel);
+		return super.changeDimension(serverLevel, bl);
 	}
 
 	protected void stopTrading() {

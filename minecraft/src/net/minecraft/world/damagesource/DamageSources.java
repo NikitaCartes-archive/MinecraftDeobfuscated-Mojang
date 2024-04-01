@@ -21,6 +21,7 @@ public class DamageSources {
 	private final DamageSource lightningBolt;
 	private final DamageSource onFire;
 	private final DamageSource lava;
+	private final DamageSource potatoHeat;
 	private final DamageSource hotFloor;
 	private final DamageSource inWall;
 	private final DamageSource cramming;
@@ -40,6 +41,7 @@ public class DamageSources {
 	private final DamageSource stalagmite;
 	private final DamageSource outsideBorder;
 	private final DamageSource genericKill;
+	private final DamageSource potatoMagic;
 
 	public DamageSources(RegistryAccess registryAccess) {
 		this.damageTypes = registryAccess.registryOrThrow(Registries.DAMAGE_TYPE);
@@ -47,6 +49,7 @@ public class DamageSources {
 		this.lightningBolt = this.source(DamageTypes.LIGHTNING_BOLT);
 		this.onFire = this.source(DamageTypes.ON_FIRE);
 		this.lava = this.source(DamageTypes.LAVA);
+		this.potatoHeat = this.source(DamageTypes.POTATO_HEAT);
 		this.hotFloor = this.source(DamageTypes.HOT_FLOOR);
 		this.inWall = this.source(DamageTypes.IN_WALL);
 		this.cramming = this.source(DamageTypes.CRAMMING);
@@ -66,6 +69,7 @@ public class DamageSources {
 		this.stalagmite = this.source(DamageTypes.STALAGMITE);
 		this.outsideBorder = this.source(DamageTypes.OUTSIDE_BORDER);
 		this.genericKill = this.source(DamageTypes.GENERIC_KILL);
+		this.potatoMagic = this.source(DamageTypes.POTATO_MAGIC);
 	}
 
 	private DamageSource source(ResourceKey<DamageType> resourceKey) {
@@ -94,6 +98,10 @@ public class DamageSources {
 
 	public DamageSource lava() {
 		return this.lava;
+	}
+
+	public DamageSource potatoHeat() {
+		return this.potatoHeat;
 	}
 
 	public DamageSource hotFloor() {
@@ -138,6 +146,10 @@ public class DamageSources {
 
 	public DamageSource magic() {
 		return this.magic;
+	}
+
+	public DamageSource potatoMagic() {
+		return this.potatoMagic;
 	}
 
 	public DamageSource wither() {

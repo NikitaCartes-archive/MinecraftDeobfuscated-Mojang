@@ -9,6 +9,7 @@ import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -242,6 +243,16 @@ public class ChestBlock extends AbstractChestBlock<ChestBlockEntity> implements 
 				player.openMenu(menuProvider);
 				player.awardStat(this.getOpenChestStat());
 				PiglinAi.angerNearbyPiglins(player, true);
+			}
+
+			Container container = getContainer(this, blockState, level, blockPos, false);
+			if (container != null) {
+				container.forEach(itemStack -> {
+					if (itemStack.has(DataComponents.VIEWS)) {
+						itemStack.set(DataComponents.VIEWS, itemStack.getOrDefault(DataComponents.VIEWS, Integer.valueOf(0)) + 1);
+						itemStack.getItem().onViewedInContainer(itemStack, level, blockPos, container);
+					}
+				});
 			}
 
 			return InteractionResult.CONSUME;

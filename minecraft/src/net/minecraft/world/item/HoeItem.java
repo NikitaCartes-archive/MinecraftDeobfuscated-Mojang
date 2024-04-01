@@ -25,6 +25,14 @@ import net.minecraft.world.level.gameevent.GameEvent;
 public class HoeItem extends DiggerItem {
 	protected static final Map<Block, Pair<Predicate<UseOnContext>, Consumer<UseOnContext>>> TILLABLES = Maps.<Block, Pair<Predicate<UseOnContext>, Consumer<UseOnContext>>>newHashMap(
 		ImmutableMap.of(
+			Blocks.CORRUPTED_PEELGRASS_BLOCK,
+			Pair.of(HoeItem::onlyIfAirAbove, changeIntoState(Blocks.POISON_FARMLAND.defaultBlockState())),
+			Blocks.PEELGRASS_BLOCK,
+			Pair.of(HoeItem::onlyIfAirAbove, changeIntoState(Blocks.POISON_FARMLAND.defaultBlockState())),
+			Blocks.TERREDEPOMME,
+			Pair.of(HoeItem::onlyIfAirAbove, changeIntoState(Blocks.POISON_FARMLAND.defaultBlockState())),
+			Blocks.POISON_PATH,
+			Pair.of(HoeItem::onlyIfAirAbove, changeIntoState(Blocks.POISON_FARMLAND.defaultBlockState())),
 			Blocks.GRASS_BLOCK,
 			Pair.of(HoeItem::onlyIfAirAbove, changeIntoState(Blocks.FARMLAND.defaultBlockState())),
 			Blocks.DIRT_PATH,

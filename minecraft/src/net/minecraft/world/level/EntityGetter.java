@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.LivingEntity;
@@ -14,6 +15,7 @@ import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -101,6 +103,12 @@ public interface EntityGetter {
 	default Player getNearestPlayer(double d, double e, double f, double g, boolean bl) {
 		Predicate<Entity> predicate = bl ? EntitySelector.NO_CREATIVE_OR_SPECTATOR : EntitySelector.NO_SPECTATORS;
 		return this.getNearestPlayer(d, e, f, g, predicate);
+	}
+
+	@Nullable
+	default Player getNearestPlayer(BlockPos blockPos, double d, boolean bl) {
+		Vec3 vec3 = blockPos.getCenter();
+		return this.getNearestPlayer(vec3.x(), vec3.y(), vec3.z(), d, bl);
 	}
 
 	default boolean hasNearbyAlivePlayer(double d, double e, double f, double g) {

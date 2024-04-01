@@ -60,7 +60,8 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 		new ResourceLocation("container/creative_inventory/tab_top_unselected_4"),
 		new ResourceLocation("container/creative_inventory/tab_top_unselected_5"),
 		new ResourceLocation("container/creative_inventory/tab_top_unselected_6"),
-		new ResourceLocation("container/creative_inventory/tab_top_unselected_7")
+		new ResourceLocation("container/creative_inventory/tab_top_unselected_7"),
+		new ResourceLocation("container/creative_inventory/tab_top_unselected_8")
 	};
 	private static final ResourceLocation[] SELECTED_TOP_TABS = new ResourceLocation[]{
 		new ResourceLocation("container/creative_inventory/tab_top_selected_1"),
@@ -69,7 +70,8 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 		new ResourceLocation("container/creative_inventory/tab_top_selected_4"),
 		new ResourceLocation("container/creative_inventory/tab_top_selected_5"),
 		new ResourceLocation("container/creative_inventory/tab_top_selected_6"),
-		new ResourceLocation("container/creative_inventory/tab_top_selected_7")
+		new ResourceLocation("container/creative_inventory/tab_top_selected_7"),
+		new ResourceLocation("container/creative_inventory/tab_top_selected_8")
 	};
 	private static final ResourceLocation[] UNSELECTED_BOTTOM_TABS = new ResourceLocation[]{
 		new ResourceLocation("container/creative_inventory/tab_bottom_unselected_1"),

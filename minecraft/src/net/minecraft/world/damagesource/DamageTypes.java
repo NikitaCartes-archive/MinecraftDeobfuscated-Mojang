@@ -10,6 +10,7 @@ public interface DamageTypes {
 	ResourceKey<DamageType> LIGHTNING_BOLT = ResourceKey.create(Registries.DAMAGE_TYPE, new ResourceLocation("lightning_bolt"));
 	ResourceKey<DamageType> ON_FIRE = ResourceKey.create(Registries.DAMAGE_TYPE, new ResourceLocation("on_fire"));
 	ResourceKey<DamageType> LAVA = ResourceKey.create(Registries.DAMAGE_TYPE, new ResourceLocation("lava"));
+	ResourceKey<DamageType> POTATO_HEAT = ResourceKey.create(Registries.DAMAGE_TYPE, new ResourceLocation("potato_heat"));
 	ResourceKey<DamageType> HOT_FLOOR = ResourceKey.create(Registries.DAMAGE_TYPE, new ResourceLocation("hot_floor"));
 	ResourceKey<DamageType> IN_WALL = ResourceKey.create(Registries.DAMAGE_TYPE, new ResourceLocation("in_wall"));
 	ResourceKey<DamageType> CRAMMING = ResourceKey.create(Registries.DAMAGE_TYPE, new ResourceLocation("cramming"));
@@ -52,12 +53,14 @@ public interface DamageTypes {
 	ResourceKey<DamageType> BAD_RESPAWN_POINT = ResourceKey.create(Registries.DAMAGE_TYPE, new ResourceLocation("bad_respawn_point"));
 	ResourceKey<DamageType> OUTSIDE_BORDER = ResourceKey.create(Registries.DAMAGE_TYPE, new ResourceLocation("outside_border"));
 	ResourceKey<DamageType> GENERIC_KILL = ResourceKey.create(Registries.DAMAGE_TYPE, new ResourceLocation("generic_kill"));
+	ResourceKey<DamageType> POTATO_MAGIC = ResourceKey.create(Registries.DAMAGE_TYPE, new ResourceLocation("potato_magic"));
 
 	static void bootstrap(BootstrapContext<DamageType> bootstrapContext) {
 		bootstrapContext.register(IN_FIRE, new DamageType("inFire", 0.1F, DamageEffects.BURNING));
 		bootstrapContext.register(LIGHTNING_BOLT, new DamageType("lightningBolt", 0.1F));
 		bootstrapContext.register(ON_FIRE, new DamageType("onFire", 0.0F, DamageEffects.BURNING));
 		bootstrapContext.register(LAVA, new DamageType("lava", 0.1F, DamageEffects.BURNING));
+		bootstrapContext.register(POTATO_HEAT, new DamageType("potato_heat", 0.1F, DamageEffects.BURNING));
 		bootstrapContext.register(HOT_FLOOR, new DamageType("hotFloor", 0.1F, DamageEffects.BURNING));
 		bootstrapContext.register(IN_WALL, new DamageType("inWall", 0.0F));
 		bootstrapContext.register(CRAMMING, new DamageType("cramming", 0.0F));
@@ -103,5 +106,6 @@ public interface DamageTypes {
 		);
 		bootstrapContext.register(OUTSIDE_BORDER, new DamageType("outsideBorder", 0.0F));
 		bootstrapContext.register(GENERIC_KILL, new DamageType("genericKill", 0.0F));
+		bootstrapContext.register(POTATO_MAGIC, new DamageType("potato_magic", DamageScaling.ALWAYS, 0.2F));
 	}
 }

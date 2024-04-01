@@ -70,6 +70,23 @@ public class MultiNoiseBiomeSourceParameterList {
 				}
 			}
 		);
+		public static final MultiNoiseBiomeSourceParameterList.Preset POTATO = new MultiNoiseBiomeSourceParameterList.Preset(
+			new ResourceLocation("potato"),
+			new MultiNoiseBiomeSourceParameterList.Preset.SourceProvider() {
+				@Override
+				public <T> Climate.ParameterList<T> apply(Function<ResourceKey<Biome>, T> function) {
+					return new Climate.ParameterList<>(
+						List.of(
+							Pair.of(Climate.parameters(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F), function.apply(Biomes.FIELDS)),
+							Pair.of(Climate.parameters(0.0F, -0.5F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F), function.apply(Biomes.ARBORETUM)),
+							Pair.of(Climate.parameters(0.4F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F), function.apply(Biomes.HASH)),
+							Pair.of(Climate.parameters(0.0F, 0.5F, 0.0F, 0.0F, 0.0F, 0.0F, 0.375F), function.apply(Biomes.WASTELAND)),
+							Pair.of(Climate.parameters(-0.5F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.175F), function.apply(Biomes.CORRUPTION))
+						)
+					);
+				}
+			}
+		);
 		public static final MultiNoiseBiomeSourceParameterList.Preset OVERWORLD = new MultiNoiseBiomeSourceParameterList.Preset(
 			new ResourceLocation("overworld"), new MultiNoiseBiomeSourceParameterList.Preset.SourceProvider() {
 				@Override
@@ -79,7 +96,7 @@ public class MultiNoiseBiomeSourceParameterList {
 			}
 		);
 		static final Map<ResourceLocation, MultiNoiseBiomeSourceParameterList.Preset> BY_NAME = (Map<ResourceLocation, MultiNoiseBiomeSourceParameterList.Preset>)Stream.of(
-				NETHER, OVERWORLD
+				NETHER, OVERWORLD, POTATO
 			)
 			.collect(Collectors.toMap(MultiNoiseBiomeSourceParameterList.Preset::id, preset -> preset));
 		public static final Codec<MultiNoiseBiomeSourceParameterList.Preset> CODEC = ResourceLocation.CODEC

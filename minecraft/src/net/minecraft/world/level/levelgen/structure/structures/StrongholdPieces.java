@@ -876,6 +876,7 @@ public class StrongholdPieces {
 			this.placeBlock(worldGenLevel, blockState7.setValue(EndPortalFrameBlock.HAS_EYE, Boolean.valueOf(bls[9])), 7, 3, 9, boundingBox);
 			this.placeBlock(worldGenLevel, blockState7.setValue(EndPortalFrameBlock.HAS_EYE, Boolean.valueOf(bls[10])), 7, 3, 10, boundingBox);
 			this.placeBlock(worldGenLevel, blockState7.setValue(EndPortalFrameBlock.HAS_EYE, Boolean.valueOf(bls[11])), 7, 3, 11, boundingBox);
+			this.placeBlock(worldGenLevel, Blocks.PEDESTAL.defaultBlockState(), 5, 2, 10, boundingBox);
 			if (bl) {
 				BlockState blockState8 = Blocks.END_PORTAL.defaultBlockState();
 				this.placeBlock(worldGenLevel, blockState8, 4, 3, 9, boundingBox);

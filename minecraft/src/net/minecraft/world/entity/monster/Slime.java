@@ -4,6 +4,7 @@ import com.google.common.annotations.VisibleForTesting;
 import java.util.EnumSet;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -40,6 +41,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.WorldGenLevel;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.phys.Vec3;
 
@@ -288,7 +291,12 @@ public class Slime extends Mob implements Enemy {
 					return checkMobSpawnRules(entityType, levelAccessor, mobSpawnType, blockPos, randomSource);
 				}
 
-				if (levelAccessor.getBiome(blockPos).is(BiomeTags.ALLOWS_SURFACE_SLIME_SPAWNS)
+				Holder<Biome> holder = levelAccessor.getBiome(blockPos);
+				if (holder.is(Biomes.WASTELAND)) {
+					return checkMobSpawnRules(entityType, levelAccessor, mobSpawnType, blockPos, randomSource);
+				}
+
+				if (holder.is(BiomeTags.ALLOWS_SURFACE_SLIME_SPAWNS)
 					&& blockPos.getY() > 50
 					&& blockPos.getY() < 70
 					&& randomSource.nextFloat() < 0.5F

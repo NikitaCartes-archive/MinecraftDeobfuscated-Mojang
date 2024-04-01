@@ -24,6 +24,7 @@ public record NoiseSettings(int minY, int height, int noiseSizeHorizontal, int n
 	protected static final NoiseSettings END_NOISE_SETTINGS = create(0, 128, 2, 1);
 	protected static final NoiseSettings CAVES_NOISE_SETTINGS = create(-64, 192, 1, 2);
 	protected static final NoiseSettings FLOATING_ISLANDS_NOISE_SETTINGS = create(0, 256, 2, 1);
+	protected static final NoiseSettings POTATO_NOISE_SETTINGS = create(0, 256, 4, 1);
 
 	private static DataResult<NoiseSettings> guardY(NoiseSettings noiseSettings) {
 		if (noiseSettings.minY() + noiseSettings.height() > DimensionType.MAX_Y + 1) {

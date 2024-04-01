@@ -36,6 +36,13 @@ public class PaintingVariants {
 	public static final ResourceKey<PaintingVariant> WIND = create("wind");
 	public static final ResourceKey<PaintingVariant> WATER = create("water");
 	public static final ResourceKey<PaintingVariant> FIRE = create("fire");
+	public static final ResourceKey<PaintingVariant> POISONOUS_POTATO = create("poisonous_potato");
+	public static final ResourceKey<PaintingVariant> MR_POTATO = create("mr_potato");
+	public static final ResourceKey<PaintingVariant> ABSTRACTATO = create("abstractato");
+	public static final ResourceKey<PaintingVariant> BURNING_POTATO = create("burning_potato");
+	public static final ResourceKey<PaintingVariant> UBIQUITATO = create("ubiquitato");
+	public static final ResourceKey<PaintingVariant> CECI = create("ceci");
+	public static final ResourceKey<PaintingVariant> POTATOE = create("potatoe");
 
 	public static PaintingVariant bootstrap(Registry<PaintingVariant> registry) {
 		Registry.register(registry, KEBAB, new PaintingVariant(16, 16));
@@ -67,6 +74,13 @@ public class PaintingVariants {
 		Registry.register(registry, WIND, new PaintingVariant(32, 32));
 		Registry.register(registry, WATER, new PaintingVariant(32, 32));
 		Registry.register(registry, FIRE, new PaintingVariant(32, 32));
+		Registry.register(registry, POISONOUS_POTATO, new PaintingVariant(128, 128));
+		Registry.register(registry, MR_POTATO, new PaintingVariant(32, 48));
+		Registry.register(registry, ABSTRACTATO, new PaintingVariant(32, 32));
+		Registry.register(registry, BURNING_POTATO, new PaintingVariant(64, 64));
+		Registry.register(registry, UBIQUITATO, new PaintingVariant(48, 48));
+		Registry.register(registry, CECI, new PaintingVariant(128, 64));
+		Registry.register(registry, POTATOE, new PaintingVariant(64, 32));
 		return Registry.register(registry, DONKEY_KONG, new PaintingVariant(64, 48));
 	}
 

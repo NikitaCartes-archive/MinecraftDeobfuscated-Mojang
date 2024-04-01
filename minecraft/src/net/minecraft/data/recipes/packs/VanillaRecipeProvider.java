@@ -3,6 +3,7 @@ package net.minecraft.data.recipes.packs;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 import net.minecraft.advancements.Advancement;
@@ -27,6 +28,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.flag.FeatureFlags;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.ArmorDyeRecipe;
@@ -91,6 +94,7 @@ public class VanillaRecipeProvider extends RecipeProvider {
 		planksFromLogs(recipeOutput, Blocks.OAK_PLANKS, ItemTags.OAK_LOGS, 4);
 		planksFromLogs(recipeOutput, Blocks.SPRUCE_PLANKS, ItemTags.SPRUCE_LOGS, 4);
 		planksFromLogs(recipeOutput, Blocks.WARPED_PLANKS, ItemTags.WARPED_STEMS, 4);
+		planksFromLogs(recipeOutput, Blocks.POTATO_PLANKS, Items.POTATO_STEM, 4);
 		planksFromLogs(recipeOutput, Blocks.MANGROVE_PLANKS, ItemTags.MANGROVE_LOGS, 4);
 		woodFromLogs(recipeOutput, Blocks.ACACIA_WOOD, Blocks.ACACIA_LOG);
 		woodFromLogs(recipeOutput, Blocks.BIRCH_WOOD, Blocks.BIRCH_LOG);
@@ -345,6 +349,11 @@ public class VanillaRecipeProvider extends RecipeProvider {
 		candle(recipeOutput, Blocks.RED_CANDLE, Items.RED_DYE);
 		candle(recipeOutput, Blocks.WHITE_CANDLE, Items.WHITE_DYE);
 		candle(recipeOutput, Blocks.YELLOW_CANDLE, Items.YELLOW_DYE);
+		ShapelessRecipeBuilder.shapeless(RecipeCategory.TOOLS, Items.LASHING_POTATO, 1)
+			.requires(Items.POISONOUS_POTATO_BLOCK)
+			.requires(Items.TOXIC_BEAM)
+			.unlockedBy("has_toxic_beam", has(Items.TOXIC_BEAM))
+			.save(recipeOutput);
 		ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, Blocks.PACKED_MUD, 1)
 			.requires(Blocks.MUD)
 			.requires(Items.WHEAT)
@@ -747,6 +756,21 @@ public class VanillaRecipeProvider extends RecipeProvider {
 			.pattern("X X")
 			.unlockedBy("has_diamond", has(Items.DIAMOND))
 			.save(recipeOutput);
+		ShapedRecipeBuilder.shaped(RecipeCategory.COMBAT, Items.POISONOUS_POTA_TOES)
+			.define('X', Items.POISONOUS_POTATO)
+			.define('P', Items.POTATO_PEELS_INGREDIENT)
+			.pattern("P P")
+			.pattern("X X")
+			.unlockedBy("has_poisonous_potato", has(Items.POISONOUS_POTATO))
+			.save(recipeOutput);
+		ShapedRecipeBuilder.shaped(RecipeCategory.COMBAT, Items.POISONOUS_POTATO_CHESTPLATE)
+			.define('X', Items.POISONOUS_POTATO)
+			.define('P', Items.POTATO_PEELS_INGREDIENT)
+			.pattern("X X")
+			.pattern("PPP")
+			.pattern("PPP")
+			.unlockedBy("has_poisonous_potato", has(Items.POISONOUS_POTATO))
+			.save(recipeOutput);
 		ShapedRecipeBuilder.shaped(RecipeCategory.COMBAT, Items.DIAMOND_CHESTPLATE)
 			.define('X', Items.DIAMOND)
 			.pattern("X X")
@@ -825,6 +849,7 @@ public class VanillaRecipeProvider extends RecipeProvider {
 			.unlockedBy("has_redstone", has(Items.REDSTONE))
 			.save(recipeOutput);
 		nineBlockStorageRecipes(recipeOutput, RecipeCategory.MISC, Items.EMERALD, RecipeCategory.BUILDING_BLOCKS, Items.EMERALD_BLOCK);
+		nineBlockStorageRecipes(recipeOutput, RecipeCategory.MISC, Items.AMBER_GEM, RecipeCategory.BUILDING_BLOCKS, Items.AMBER_BLOCK);
 		ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, Blocks.ENCHANTING_TABLE)
 			.define('B', Items.BOOK)
 			.define('#', Blocks.OBSIDIAN)
@@ -913,6 +938,13 @@ public class VanillaRecipeProvider extends RecipeProvider {
 			.pattern("###")
 			.unlockedBy("has_cobblestone", has(ItemTags.STONE_CRAFTING_MATERIALS))
 			.save(recipeOutput);
+		ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, Blocks.POTATO_REFINERY, 1)
+			.define('#', Items.BAKED_POTATO_BRICKS)
+			.pattern("###")
+			.pattern("# #")
+			.pattern("###")
+			.unlockedBy("has_baked_potato_bricks", has(Items.BAKED_POTATO_BRICKS))
+			.save(recipeOutput);
 		ShapelessRecipeBuilder.shapeless(RecipeCategory.TRANSPORTATION, Items.FURNACE_MINECART)
 			.requires(Blocks.FURNACE)
 			.requires(Items.MINECART)
@@ -944,6 +976,22 @@ public class VanillaRecipeProvider extends RecipeProvider {
 			.pattern("#X#")
 			.pattern("###")
 			.unlockedBy("has_gold_ingot", has(Items.GOLD_INGOT))
+			.save(recipeOutput);
+		ShapedRecipeBuilder.shaped(RecipeCategory.FOOD, Items.GOLDEN_POISONOUS_POTATO)
+			.define('#', Items.GOLD_INGOT)
+			.define('X', Items.POISONOUS_POTATO)
+			.pattern("###")
+			.pattern("#X#")
+			.pattern("###")
+			.unlockedBy("has_gold_ingot", has(Items.GOLD_INGOT))
+			.save(recipeOutput);
+		ShapedRecipeBuilder.shaped(RecipeCategory.FOOD, Items.ENCHANTED_GOLDEN_POISONOUS_POTATO)
+			.define('#', Items.GOLD_BLOCK)
+			.define('X', Items.POISONOUS_POTATO)
+			.pattern("###")
+			.pattern("#X#")
+			.pattern("###")
+			.unlockedBy("has_gold_block", has(Items.GOLD_BLOCK))
 			.save(recipeOutput);
 		ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, Items.GOLDEN_AXE)
 			.define('#', Items.STICK)
@@ -1046,6 +1094,11 @@ public class VanillaRecipeProvider extends RecipeProvider {
 			.unlockedBy("has_black_dye", has(Items.BLACK_DYE))
 			.save(recipeOutput);
 		threeByThreePacker(recipeOutput, RecipeCategory.BUILDING_BLOCKS, Blocks.HAY_BLOCK, Items.WHEAT);
+		potatoPacker(recipeOutput, Items.POISONOUS_POTATO, Blocks.POISONOUS_POTATO_BLOCK);
+		potatoPacker(recipeOutput, Blocks.POISONOUS_POTATO_BLOCK, Blocks.COMPRESSED_POISONOUS_POTATO_BLOCK);
+		potatoPacker(recipeOutput, Blocks.COMPRESSED_POISONOUS_POTATO_BLOCK, Blocks.DOUBLE_COMPRESSED_POISONOUS_POTATO_BLOCK);
+		potatoPacker(recipeOutput, Blocks.DOUBLE_COMPRESSED_POISONOUS_POTATO_BLOCK, Blocks.TRIPLE_COMPRESSED_POISONOUS_POTATO_BLOCK);
+		potatoPacker(recipeOutput, Blocks.TRIPLE_COMPRESSED_POISONOUS_POTATO_BLOCK, Blocks.QUADRUPLE_COMPRESSED_POISONOUS_POTATO_BLOCK);
 		pressurePlate(recipeOutput, Blocks.HEAVY_WEIGHTED_PRESSURE_PLATE, Items.IRON_INGOT);
 		ShapelessRecipeBuilder.shapeless(RecipeCategory.FOOD, Items.HONEY_BOTTLE, 4)
 			.requires(Items.HONEY_BLOCK)
@@ -1658,6 +1711,22 @@ public class VanillaRecipeProvider extends RecipeProvider {
 			.group("sticks")
 			.unlockedBy("has_bamboo", has(Blocks.BAMBOO))
 			.save(recipeOutput, "stick_from_bamboo_item");
+		ShapedRecipeBuilder.shaped(RecipeCategory.COMBAT, Items.VICIOUS_POTATO, 1)
+			.define('P', Items.GRAVTATER)
+			.define('S', Items.WITHER_SKELETON_SKULL)
+			.pattern("PPP")
+			.pattern("PSP")
+			.pattern("PPP")
+			.unlockedBy("has_skull", has(Blocks.WITHER_SKELETON_SKULL))
+			.save(recipeOutput);
+		ShapedRecipeBuilder.shaped(RecipeCategory.COMBAT, Items.BIG_BRAIN, 1)
+			.define('P', Items.POISONOUS_POTATO)
+			.define('S', Items.ZOMBIE_HEAD)
+			.pattern("PPP")
+			.pattern("PSP")
+			.pattern("PPP")
+			.unlockedBy("has_skull", has(Blocks.WITHER_SKELETON_SKULL))
+			.save(recipeOutput);
 		ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, Blocks.STICKY_PISTON)
 			.define('P', Blocks.PISTON)
 			.define('S', Items.SLIME_BALL)
@@ -1671,6 +1740,19 @@ public class VanillaRecipeProvider extends RecipeProvider {
 			.pattern("##")
 			.unlockedBy("has_stone", has(Blocks.STONE))
 			.save(recipeOutput);
+		ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, Items.BAKED_POTATO_BRICKS, 4)
+			.define('#', Items.BAKED_POTATO)
+			.pattern("##")
+			.pattern("##")
+			.unlockedBy("has_baked_potato", has(Items.BAKED_POTATO))
+			.save(recipeOutput);
+		ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, Items.EXPIRED_BAKED_POTATO_BRICKS, 4)
+			.define('#', Items.BAKED_POTATO)
+			.define('X', Items.POISONOUS_POTATO)
+			.pattern("#X")
+			.pattern("X#")
+			.unlockedBy("has_poisonous_potato", has(Items.POISONOUS_POTATO))
+			.save(recipeOutput);
 		ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, Items.STONE_AXE)
 			.define('#', Items.STICK)
 			.define('X', ItemTags.STONE_TOOL_MATERIALS)
@@ -1678,6 +1760,10 @@ public class VanillaRecipeProvider extends RecipeProvider {
 			.pattern("X#")
 			.pattern(" #")
 			.unlockedBy("has_cobblestone", has(ItemTags.STONE_TOOL_MATERIALS))
+			.save(recipeOutput);
+		ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, Items.POTATO_EYE, 2)
+			.requires(Items.POISONOUS_POTATO)
+			.unlockedBy("has_poisonous_potato", has(Items.POISONOUS_POTATO))
 			.save(recipeOutput);
 		slabBuilder(RecipeCategory.BUILDING_BLOCKS, Blocks.STONE_BRICK_SLAB, Ingredient.of(Blocks.STONE_BRICKS))
 			.unlockedBy("has_stone_bricks", has(ItemTags.STONE_BRICKS))
@@ -1738,7 +1824,7 @@ public class VanillaRecipeProvider extends RecipeProvider {
 			.unlockedBy("has_hay_block", has(Blocks.HAY_BLOCK))
 			.save(recipeOutput);
 		ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, Blocks.TNT)
-			.define('#', Ingredient.of(Blocks.SAND, Blocks.RED_SAND))
+			.define('#', Ingredient.of(Blocks.SAND, Blocks.RED_SAND, Blocks.GRAVTATER))
 			.define('X', Items.GUNPOWDER)
 			.pattern("X#X")
 			.pattern("#X#")
@@ -1820,6 +1906,14 @@ public class VanillaRecipeProvider extends RecipeProvider {
 			.unlockedBy("has_bone_meal", has(Items.BONE_MEAL))
 			.save(recipeOutput);
 		oneToOneConversionRecipe(recipeOutput, Items.WHITE_DYE, Blocks.LILY_OF_THE_VALLEY, "white_dye");
+		ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, Items.TRIDENT)
+			.define('^', Items.DENT)
+			.define('/', Items.STICK)
+			.pattern(" ^^")
+			.pattern(" /^")
+			.pattern("/  ")
+			.unlockedBy("has_dent", has(Items.DENT))
+			.save(recipeOutput);
 		ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, Items.WOODEN_AXE)
 			.define('#', Items.STICK)
 			.define('X', ItemTags.PLANKS)
@@ -1965,6 +2059,13 @@ public class VanillaRecipeProvider extends RecipeProvider {
 			.pattern("###")
 			.unlockedBy("has_stone", has(Blocks.STONE))
 			.save(recipeOutput);
+		ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, Blocks.POISONOUS_POTATO_CUTTER)
+			.define('I', Items.POISONOUS_POTATO)
+			.define('#', Blocks.POTONE)
+			.pattern(" I ")
+			.pattern("###")
+			.unlockedBy("has_potone", has(Blocks.POTONE))
+			.save(recipeOutput);
 		ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, Blocks.LODESTONE)
 			.define('S', Items.CHISELED_STONE_BRICKS)
 			.define('#', Items.NETHERITE_INGOT)
@@ -2022,6 +2123,16 @@ public class VanillaRecipeProvider extends RecipeProvider {
 			.pattern("SSS")
 			.unlockedBy("has_echo_shard", has(Items.ECHO_SHARD))
 			.save(recipeOutput);
+		ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, Items.FRYING_TABLE)
+			.define('S', Items.STICK)
+			.define('I', Items.IRON_INGOT)
+			.define('P', Items.POTATO_PLANKS)
+			.define('g', Items.GOLD_NUGGET)
+			.pattern("  S")
+			.pattern("IIg")
+			.pattern("PP ")
+			.unlockedBy("has_potato_planks", has(Items.POTATO_PLANKS))
+			.save(recipeOutput);
 		ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, Items.CALIBRATED_SCULK_SENSOR)
 			.define('#', Items.AMETHYST_SHARD)
 			.define('X', Items.SCULK_SENSOR)
@@ -2046,11 +2157,28 @@ public class VanillaRecipeProvider extends RecipeProvider {
 		SimpleCookingRecipeBuilder.smelting(Ingredient.of(Items.POTATO), RecipeCategory.FOOD, Items.BAKED_POTATO, 0.35F, 200)
 			.unlockedBy("has_potato", has(Items.POTATO))
 			.save(recipeOutput);
+		SimpleCookingRecipeBuilder.smelting(Ingredient.of(Items.TERREDEPOMME), RecipeCategory.FOOD, Items.BAKED_POTATO_BRICKS, 0.35F, 200)
+			.unlockedBy("has_terredepomme", has(Items.TERREDEPOMME))
+			.save(recipeOutput, "baked_potato_bricks_from_terredepomme");
+		SimpleCookingRecipeBuilder.smelting(Ingredient.of(Items.POISONOUS_POTATO_STICKS), RecipeCategory.FOOD, Items.POISONOUS_POTATO_FRIES, 0.35F, 200)
+			.unlockedBy("has_poisonous_potato", has(Items.POISONOUS_POTATO_STICKS))
+			.save(recipeOutput);
+		SimpleCookingRecipeBuilder.smelting(Ingredient.of(Items.POISONOUS_POTATO_SLICES), RecipeCategory.FOOD, Items.POISONOUS_POTATO_CHIPS, 0.35F, 200)
+			.unlockedBy("has_poisonous_potato", has(Items.POISONOUS_POTATO_SLICES))
+			.save(recipeOutput);
 		SimpleCookingRecipeBuilder.smelting(Ingredient.of(Items.CLAY_BALL), RecipeCategory.MISC, Items.BRICK, 0.3F, 200)
 			.unlockedBy("has_clay_ball", has(Items.CLAY_BALL))
 			.save(recipeOutput);
 		SimpleCookingRecipeBuilder.smelting(Ingredient.of(ItemTags.LOGS_THAT_BURN), RecipeCategory.MISC, Items.CHARCOAL, 0.15F, 200)
 			.unlockedBy("has_log", has(ItemTags.LOGS_THAT_BURN))
+			.save(recipeOutput);
+		SimpleCookingRecipeBuilder.smelting(Ingredient.of(Items.CHARRED_BAKED_POTATO_BRICKS), RecipeCategory.MISC, Items.CHARCOAL, 0.15F, 200)
+			.unlockedBy("has_charred", has(Items.CHARRED_BAKED_POTATO_BRICKS))
+			.save(recipeOutput, "overcooked_potatoes");
+		SimpleCookingRecipeBuilder.smelting(
+				Ingredient.of(Blocks.BAKED_POTATO_BRICKS, Blocks.EXPIRED_BAKED_POTATO_BRICKS), RecipeCategory.BUILDING_BLOCKS, Items.CHARRED_BAKED_POTATO_BRICKS, 0.01F, 20
+			)
+			.unlockedBy("has_baked_potato_bricks", has(Blocks.BAKED_POTATO_BRICKS))
 			.save(recipeOutput);
 		SimpleCookingRecipeBuilder.smelting(Ingredient.of(Items.CHORUS_FRUIT), RecipeCategory.MISC, Items.POPPED_CHORUS_FRUIT, 0.1F, 200)
 			.unlockedBy("has_chorus_fruit", has(Items.CHORUS_FRUIT))
@@ -2179,6 +2307,9 @@ public class VanillaRecipeProvider extends RecipeProvider {
 			.save(recipeOutput);
 		SimpleCookingRecipeBuilder.smelting(Ingredient.of(Blocks.COBBLESTONE), RecipeCategory.BUILDING_BLOCKS, Blocks.STONE.asItem(), 0.1F, 200)
 			.unlockedBy("has_cobblestone", has(Blocks.COBBLESTONE))
+			.save(recipeOutput);
+		SimpleCookingRecipeBuilder.smelting(Ingredient.of(Blocks.TATERSTONE), RecipeCategory.BUILDING_BLOCKS, Blocks.POTONE.asItem(), 0.1F, 200)
+			.unlockedBy("has_taterstone", has(Blocks.TATERSTONE))
 			.save(recipeOutput);
 		SimpleCookingRecipeBuilder.smelting(Ingredient.of(Blocks.STONE), RecipeCategory.BUILDING_BLOCKS, Blocks.SMOOTH_STONE.asItem(), 0.1F, 200)
 			.unlockedBy("has_stone", has(Blocks.STONE))
@@ -2340,6 +2471,11 @@ public class VanillaRecipeProvider extends RecipeProvider {
 			.save(recipeOutput, getBlastingRecipeName(Items.NETHERITE_SCRAP));
 		cookRecipes(recipeOutput, "smoking", RecipeSerializer.SMOKING_RECIPE, SmokingRecipe::new, 100);
 		cookRecipes(recipeOutput, "campfire_cooking", RecipeSerializer.CAMPFIRE_COOKING_RECIPE, CampfireCookingRecipe::new, 600);
+		SimpleCookingRecipeBuilder.generic(
+				Items.POTATO_PEELS_INGREDIENT, RecipeCategory.FOOD, Items.HASH_BROWNS, 0.1F, 600, RecipeSerializer.CAMPFIRE_COOKING_RECIPE, CampfireCookingRecipe::new
+			)
+			.unlockedBy(getHasName(Items.POTATO_PEELS_MAP.get(DyeColor.WHITE)), has(Items.POTATO_PEELS_MAP.get(DyeColor.WHITE)))
+			.save(recipeOutput, getItemName(Items.HASH_BROWNS) + "_from_campfire_cooking");
 		stonecutterResultFromBase(recipeOutput, RecipeCategory.BUILDING_BLOCKS, Blocks.STONE_SLAB, Blocks.STONE, 2);
 		stonecutterResultFromBase(recipeOutput, RecipeCategory.BUILDING_BLOCKS, Blocks.STONE_STAIRS, Blocks.STONE);
 		stonecutterResultFromBase(recipeOutput, RecipeCategory.BUILDING_BLOCKS, Blocks.STONE_BRICKS, Blocks.STONE);
@@ -2397,6 +2533,21 @@ public class VanillaRecipeProvider extends RecipeProvider {
 		stonecutterResultFromBase(recipeOutput, RecipeCategory.BUILDING_BLOCKS, Blocks.PURPUR_SLAB, Blocks.PURPUR_BLOCK, 2);
 		stonecutterResultFromBase(recipeOutput, RecipeCategory.BUILDING_BLOCKS, Blocks.PURPUR_STAIRS, Blocks.PURPUR_BLOCK);
 		stonecutterResultFromBase(recipeOutput, RecipeCategory.BUILDING_BLOCKS, Blocks.PURPUR_PILLAR, Blocks.PURPUR_BLOCK);
+		stonecutterResultFromBase(recipeOutput, RecipeCategory.BUILDING_BLOCKS, Blocks.POTONE_SLAB, Blocks.POTONE, 2);
+		stonecutterResultFromBase(recipeOutput, RecipeCategory.BUILDING_BLOCKS, Blocks.POTONE_STAIRS, Blocks.POTONE);
+		stonecutterResultFromBase(recipeOutput, RecipeCategory.BUILDING_BLOCKS, Blocks.POTONE_WALL, Blocks.POTONE);
+		stonecutterResultFromBase(recipeOutput, RecipeCategory.BUILDING_BLOCKS, Blocks.BAKED_POTATO_BRICK_SLAB, Blocks.BAKED_POTATO_BRICKS, 2);
+		stonecutterResultFromBase(recipeOutput, RecipeCategory.BUILDING_BLOCKS, Blocks.BAKED_POTATO_BRICK_STAIRS, Blocks.BAKED_POTATO_BRICKS);
+		stonecutterResultFromBase(recipeOutput, RecipeCategory.BUILDING_BLOCKS, Blocks.BAKED_POTATO_BRICK_WALL, Blocks.BAKED_POTATO_BRICKS);
+		stonecutterResultFromBase(recipeOutput, RecipeCategory.BUILDING_BLOCKS, Blocks.EXPIRED_BAKED_POTATO_BRICK_SLAB, Blocks.EXPIRED_BAKED_POTATO_BRICKS, 2);
+		stonecutterResultFromBase(recipeOutput, RecipeCategory.BUILDING_BLOCKS, Blocks.EXPIRED_BAKED_POTATO_BRICK_STAIRS, Blocks.EXPIRED_BAKED_POTATO_BRICKS);
+		stonecutterResultFromBase(recipeOutput, RecipeCategory.BUILDING_BLOCKS, Blocks.EXPIRED_BAKED_POTATO_BRICK_WALL, Blocks.EXPIRED_BAKED_POTATO_BRICKS);
+		stonecutterResultFromBase(recipeOutput, RecipeCategory.BUILDING_BLOCKS, Blocks.CHARRED_BAKED_POTATO_BRICK_SLAB, Blocks.CHARRED_BAKED_POTATO_BRICKS, 2);
+		stonecutterResultFromBase(recipeOutput, RecipeCategory.BUILDING_BLOCKS, Blocks.CHARRED_BAKED_POTATO_BRICK_STAIRS, Blocks.CHARRED_BAKED_POTATO_BRICKS);
+		stonecutterResultFromBase(recipeOutput, RecipeCategory.BUILDING_BLOCKS, Blocks.CHARRED_BAKED_POTATO_BRICK_WALL, Blocks.CHARRED_BAKED_POTATO_BRICKS);
+		stonecutterResultFromBase(recipeOutput, RecipeCategory.BUILDING_BLOCKS, Blocks.TATERSTONE_SLAB, Blocks.TATERSTONE, 2);
+		stonecutterResultFromBase(recipeOutput, RecipeCategory.BUILDING_BLOCKS, Blocks.TATERSTONE_STAIRS, Blocks.TATERSTONE);
+		stonecutterResultFromBase(recipeOutput, RecipeCategory.BUILDING_BLOCKS, Blocks.TATERSTONE_WALL, Blocks.TATERSTONE);
 		stonecutterResultFromBase(recipeOutput, RecipeCategory.BUILDING_BLOCKS, Blocks.PRISMARINE_SLAB, Blocks.PRISMARINE, 2);
 		stonecutterResultFromBase(recipeOutput, RecipeCategory.BUILDING_BLOCKS, Blocks.PRISMARINE_STAIRS, Blocks.PRISMARINE);
 		stonecutterResultFromBase(recipeOutput, RecipeCategory.DECORATIONS, Blocks.PRISMARINE_WALL, Blocks.PRISMARINE);
@@ -2565,6 +2716,23 @@ public class VanillaRecipeProvider extends RecipeProvider {
 		stonecutterResultFromBase(recipeOutput, RecipeCategory.BUILDING_BLOCKS, Blocks.DEEPSLATE_TILE_SLAB, Blocks.DEEPSLATE_TILES, 2);
 		stonecutterResultFromBase(recipeOutput, RecipeCategory.BUILDING_BLOCKS, Blocks.DEEPSLATE_TILE_STAIRS, Blocks.DEEPSLATE_TILES);
 		stonecutterResultFromBase(recipeOutput, RecipeCategory.DECORATIONS, Blocks.DEEPSLATE_TILE_WALL, Blocks.DEEPSLATE_TILES);
+		poisonousPotatoCutterResultFromBase(recipeOutput, RecipeCategory.FOOD, Items.POISONOUS_POTATO_SLICES, Items.POISONOUS_POTATO, 1);
+		poisonousPotatoCutterResultFromBase(recipeOutput, RecipeCategory.FOOD, Items.POISONOUS_POTATO_STICKS, Items.POISONOUS_POTATO, 1);
+		potatoRefinement(recipeOutput, Items.POTATO_OIL.getDefaultInstance(), Items.POTATO, Items.GLASS_BOTTLE, 1.0F);
+		potatoRefinement(recipeOutput, Items.POISONOUS_POTATO_OIL.getDefaultInstance(), Items.POISONOUS_POTATO, Items.GLASS_BOTTLE, 1.25F);
+		SimpleCookingRecipeBuilder.smelting(Ingredient.of(Items.POISONOUS_POTATO_OIL), RecipeCategory.MISC, Items.TOXIC_RESIN, 0.1F, 300)
+			.unlockedBy("has_potato_oil", has(Items.POISONOUS_POTATO_OIL))
+			.save(recipeOutput);
+
+		for (Entry<DyeColor, Item> entry : Items.POTATO_PEELS_MAP.entrySet()) {
+			ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, (ItemLike)entry.getValue())
+				.requires(Items.POTATO_PEELS_INGREDIENT)
+				.requires(DyeItem.byColor((DyeColor)entry.getKey()))
+				.unlockedBy("has_potato_peels", has(Items.POTATO_PEELS_MAP.get(DyeColor.WHITE)))
+				.save(recipeOutput);
+		}
+
+		nineBlockStorageRecipes(recipeOutput, RecipeCategory.MISC, Items.CORRUPTED_POTATO_PEELS, RecipeCategory.TOOLS, Items.CORRUPTED_POTATO_PEELS_BLOCK);
 		smithingTrims().forEach(trimTemplate -> trimSmithing(recipeOutput, trimTemplate.template(), trimTemplate.id()));
 		netheriteSmithing(recipeOutput, Items.DIAMOND_CHESTPLATE, RecipeCategory.COMBAT, Items.NETHERITE_CHESTPLATE);
 		netheriteSmithing(recipeOutput, Items.DIAMOND_LEGGINGS, RecipeCategory.COMBAT, Items.NETHERITE_LEGGINGS);
@@ -2608,6 +2776,7 @@ public class VanillaRecipeProvider extends RecipeProvider {
 		hangingSign(recipeOutput, Items.BAMBOO_HANGING_SIGN, Items.STRIPPED_BAMBOO_BLOCK);
 		hangingSign(recipeOutput, Items.CRIMSON_HANGING_SIGN, Blocks.STRIPPED_CRIMSON_STEM);
 		hangingSign(recipeOutput, Items.WARPED_HANGING_SIGN, Blocks.STRIPPED_WARPED_STEM);
+		hangingSign(recipeOutput, Items.POTATO_HANGING_SIGN, Blocks.POTATO_STEM);
 		ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, Blocks.CHISELED_BOOKSHELF)
 			.define('#', ItemTags.PLANKS)
 			.define('X', ItemTags.WOODEN_SLABS)
@@ -2615,6 +2784,28 @@ public class VanillaRecipeProvider extends RecipeProvider {
 			.pattern("XXX")
 			.pattern("###")
 			.unlockedBy("has_book", has(Items.BOOK))
+			.save(recipeOutput);
+		ShapelessRecipeBuilder.shapeless(RecipeCategory.FOOD, Items.HOT_POTATO)
+			.requires(ItemTags.HEATABLE_POTATOS)
+			.requires(Items.LAVA_BUCKET)
+			.unlockedBy("has_potato", has(ItemTags.HEATABLE_POTATOS))
+			.save(recipeOutput);
+		ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, Blocks.FLOATATER)
+			.define('#', Blocks.FLOATATO)
+			.define('T', Items.POISONOUS_POTATO)
+			.define('X', Items.HOT_POTATO)
+			.pattern("TTT")
+			.pattern("#X#")
+			.pattern("###")
+			.unlockedBy("has_floatato", has(Blocks.FLOATATO))
+			.save(recipeOutput);
+		ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, Blocks.FLOATATO, 8)
+			.define('#', Items.POISONOUS_POTATO)
+			.define('X', Items.GHAST_TEAR)
+			.pattern("###")
+			.pattern("#X#")
+			.pattern("###")
+			.unlockedBy("has_ghast_tear", has(Items.GHAST_TEAR))
 			.save(recipeOutput);
 		oneToOneConversionRecipe(recipeOutput, Items.ORANGE_DYE, Blocks.TORCHFLOWER, "orange_dye");
 		oneToOneConversionRecipe(recipeOutput, Items.CYAN_DYE, Blocks.PITCHER_PLANT, "cyan_dye", 2);
@@ -2640,7 +2831,58 @@ public class VanillaRecipeProvider extends RecipeProvider {
 			.pattern(" # ")
 			.unlockedBy("has_brick", has(ItemTags.DECORATED_POT_INGREDIENTS))
 			.save(recipeOutput, "decorated_pot_simple");
+		ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, Items.POTATO_BATTERY, 1)
+			.define('P', Items.POISONOUS_POTATO)
+			.define('R', Items.REDSTONE)
+			.define('I', Items.IRON_INGOT)
+			.define('C', Items.COPPER_INGOT)
+			.pattern("I C")
+			.pattern("PRP")
+			.pattern("PPP")
+			.unlockedBy("has_poisonous_potato", has(Items.POISONOUS_POTATO))
+			.save(recipeOutput);
+		ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, Items.POTATO_PEELER)
+			.define('X', Items.SHEARS)
+			.define('S', Items.STICK)
+			.pattern(" X")
+			.pattern("S ")
+			.unlockedBy("has_shears", has(Items.SHEARS))
+			.save(recipeOutput);
+		ShapedRecipeBuilder.shaped(RecipeCategory.MISC, Items.POTATO_HAMMER)
+			.define('P', Items.POISONOUS_POTATO)
+			.define('R', Items.BLAZE_ROD)
+			.pattern("P")
+			.pattern("R")
+			.unlockedBy("has_poisonous_potato", has(Items.POISONOUS_POTATO))
+			.save(recipeOutput);
+		ShapedRecipeBuilder.shaped(RecipeCategory.MISC, Items.POISONOUS_POLYTRA)
+			.define('P', Items.POISONOUS_POTATO)
+			.define('#', Items.PHANTOM_MEMBRANE)
+			.pattern("#P#")
+			.pattern("# #")
+			.unlockedBy("has_poisonous_potato", has(Items.POISONOUS_POTATO))
+			.save(recipeOutput);
+
+		for (Entry<DyeColor, Item> entry : Items.POTATO_PEELS_MAP.entrySet()) {
+			ItemLike itemLike = (ItemLike)Items.POTATO_PEELS_BLOCK_MAP.get(entry.getKey());
+			ShapedRecipeBuilder.shaped(RecipeCategory.MISC, itemLike)
+				.define('P', (ItemLike)entry.getValue())
+				.pattern("PPP")
+				.pattern("PPP")
+				.pattern("PPP")
+				.unlockedBy("has_" + ((DyeColor)entry.getKey()).getName() + "_potato_peels", has((ItemLike)entry.getValue()))
+				.save(recipeOutput);
+		}
+
 		SpecialRecipeBuilder.special(DecoratedPotRecipe::new).save(recipeOutput, "decorated_pot");
+	}
+
+	private static void potatoPacker(RecipeOutput recipeOutput, ItemLike itemLike, ItemLike itemLike2) {
+		threeByThreePacker(recipeOutput, RecipeCategory.BUILDING_BLOCKS, itemLike2, itemLike);
+		ShapelessRecipeBuilder.shapeless(RecipeCategory.FOOD, itemLike, 9)
+			.requires(itemLike2)
+			.unlockedBy("has_compressed_block", has(itemLike2))
+			.save(recipeOutput, getConversionRecipeName(itemLike, itemLike2) + "_unpacking");
 	}
 
 	public static Stream<VanillaRecipeProvider.TrimTemplate> smithingTrims() {

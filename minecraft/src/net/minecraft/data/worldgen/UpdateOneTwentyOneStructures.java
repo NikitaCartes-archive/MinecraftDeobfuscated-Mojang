@@ -1,6 +1,7 @@
 package net.minecraft.data.worldgen;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -29,6 +30,7 @@ public class UpdateOneTwentyOneStructures {
 			new JigsawStructure(
 				Structures.structure(
 					holderGetter.getOrThrow(BiomeTags.HAS_TRIAL_CHAMBERS),
+					List.of(),
 					(Map<MobCategory, StructureSpawnOverride>)Arrays.stream(MobCategory.values())
 						.collect(
 							Collectors.toMap(

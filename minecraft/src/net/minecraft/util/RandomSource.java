@@ -69,4 +69,8 @@ public interface RandomSource {
 			return i + this.nextInt(j - i);
 		}
 	}
+
+	default float nextFloat(float f, float g) {
+		return f + this.nextFloat() * (g - f);
+	}
 }

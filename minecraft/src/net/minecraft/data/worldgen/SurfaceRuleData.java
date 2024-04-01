@@ -2,6 +2,7 @@ package net.minecraft.data.worldgen;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -20,13 +21,21 @@ public class SurfaceRuleData {
 	private static final SurfaceRules.RuleSource STONE = makeStateRule(Blocks.STONE);
 	private static final SurfaceRules.RuleSource DEEPSLATE = makeStateRule(Blocks.DEEPSLATE);
 	private static final SurfaceRules.RuleSource DIRT = makeStateRule(Blocks.DIRT);
+	private static final SurfaceRules.RuleSource TERREDEPOMME = makeStateRule(Blocks.TERREDEPOMME);
 	private static final SurfaceRules.RuleSource PODZOL = makeStateRule(Blocks.PODZOL);
 	private static final SurfaceRules.RuleSource COARSE_DIRT = makeStateRule(Blocks.COARSE_DIRT);
 	private static final SurfaceRules.RuleSource MYCELIUM = makeStateRule(Blocks.MYCELIUM);
 	private static final SurfaceRules.RuleSource GRASS_BLOCK = makeStateRule(Blocks.GRASS_BLOCK);
+	private static final SurfaceRules.RuleSource PEELGRASS_BLOCK = makeStateRule(Blocks.PEELGRASS_BLOCK);
+	private static final SurfaceRules.RuleSource CORRUPTED_PEELGRASS_BLOCK = makeStateRule(Blocks.CORRUPTED_PEELGRASS_BLOCK);
+	private static final SurfaceRules.RuleSource GREEN_PEELS = makeStateRule((Block)Blocks.POTATO_PEELS_BLOCK_MAP.get(DyeColor.GREEN));
+	private static final SurfaceRules.RuleSource GRAY_PEELS = makeStateRule((Block)Blocks.POTATO_PEELS_BLOCK_MAP.get(DyeColor.GRAY));
+	private static final SurfaceRules.RuleSource LIGH_GRAY_PEELS = makeStateRule((Block)Blocks.POTATO_PEELS_BLOCK_MAP.get(DyeColor.LIGHT_GRAY));
+	private static final SurfaceRules.RuleSource PEELS = makeStateRule((Block)Blocks.POTATO_PEELS_BLOCK_MAP.get(DyeColor.WHITE));
 	private static final SurfaceRules.RuleSource CALCITE = makeStateRule(Blocks.CALCITE);
 	private static final SurfaceRules.RuleSource GRAVEL = makeStateRule(Blocks.GRAVEL);
 	private static final SurfaceRules.RuleSource SAND = makeStateRule(Blocks.SAND);
+	private static final SurfaceRules.RuleSource GRAVTATER = makeStateRule(Blocks.GRAVTATER);
 	private static final SurfaceRules.RuleSource SANDSTONE = makeStateRule(Blocks.SANDSTONE);
 	private static final SurfaceRules.RuleSource PACKED_ICE = makeStateRule(Blocks.PACKED_ICE);
 	private static final SurfaceRules.RuleSource SNOW_BLOCK = makeStateRule(Blocks.SNOW_BLOCK);
@@ -274,6 +283,35 @@ public class SurfaceRuleData {
 		SurfaceRules.RuleSource ruleSource10 = SurfaceRules.ifTrue(SurfaceRules.abovePreliminarySurface(), ruleSource9);
 		builder.add(bl ? ruleSource10 : ruleSource9);
 		builder.add(SurfaceRules.ifTrue(SurfaceRules.verticalGradient("deepslate", VerticalAnchor.absolute(0), VerticalAnchor.absolute(8)), DEEPSLATE));
+		return SurfaceRules.sequence((SurfaceRules.RuleSource[])builder.build().toArray(SurfaceRules.RuleSource[]::new));
+	}
+
+	public static SurfaceRules.RuleSource potato() {
+		SurfaceRules.RuleSource ruleSource = SurfaceRules.sequence(
+			SurfaceRules.ifTrue(SurfaceRules.isBiome(Biomes.HASH), SurfaceRules.sequence(SurfaceRules.ifTrue(SurfaceRules.ON_CEILING, TERREDEPOMME), GRAVTATER))
+		);
+		SurfaceRules.RuleSource ruleSource2 = SurfaceRules.sequence(
+			SurfaceRules.ifTrue(
+				SurfaceRules.ON_FLOOR,
+				SurfaceRules.sequence(
+					ruleSource,
+					SurfaceRules.ifTrue(
+						SurfaceRules.isBiome(Biomes.WASTELAND),
+						SurfaceRules.sequence(
+							SurfaceRules.ifTrue(surfaceNoiseAbove(2.0), CORRUPTED_PEELGRASS_BLOCK),
+							SurfaceRules.ifTrue(surfaceNoiseAbove(1.0), GREEN_PEELS),
+							SurfaceRules.ifTrue(surfaceNoiseAbove(0.0), GRAY_PEELS),
+							SurfaceRules.ifTrue(surfaceNoiseAbove(-1.0), LIGH_GRAY_PEELS)
+						)
+					),
+					SurfaceRules.ifTrue(SurfaceRules.isBiome(Biomes.CORRUPTION), CORRUPTED_PEELGRASS_BLOCK),
+					PEELGRASS_BLOCK
+				)
+			),
+			SurfaceRules.ifTrue(SurfaceRules.UNDER_FLOOR, SurfaceRules.sequence(ruleSource, TERREDEPOMME))
+		);
+		Builder<SurfaceRules.RuleSource> builder = ImmutableList.builder();
+		builder.add(ruleSource2);
 		return SurfaceRules.sequence((SurfaceRules.RuleSource[])builder.build().toArray(SurfaceRules.RuleSource[]::new));
 	}
 

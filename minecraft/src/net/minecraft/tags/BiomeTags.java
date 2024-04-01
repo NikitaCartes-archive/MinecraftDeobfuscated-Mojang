@@ -18,6 +18,7 @@ public class BiomeTags {
 	public static final TagKey<Biome> IS_SAVANNA = create("is_savanna");
 	public static final TagKey<Biome> IS_OVERWORLD = create("is_overworld");
 	public static final TagKey<Biome> IS_NETHER = create("is_nether");
+	public static final TagKey<Biome> IS_POTATO = create("is_potato");
 	public static final TagKey<Biome> IS_END = create("is_end");
 	public static final TagKey<Biome> STRONGHOLD_BIASED_TO = create("stronghold_biased_to");
 	public static final TagKey<Biome> HAS_BURIED_TREASURE = create("has_structure/buried_treasure");
@@ -31,6 +32,7 @@ public class BiomeTags {
 	public static final TagKey<Biome> HAS_OCEAN_RUIN_WARM = create("has_structure/ocean_ruin_warm");
 	public static final TagKey<Biome> HAS_PILLAGER_OUTPOST = create("has_structure/pillager_outpost");
 	public static final TagKey<Biome> HAS_RUINED_PORTAL_DESERT = create("has_structure/ruined_portal_desert");
+	public static final TagKey<Biome> HAS_RUINED_PORTATOLS = create("has_structure/ruined_portatols");
 	public static final TagKey<Biome> HAS_RUINED_PORTAL_JUNGLE = create("has_structure/ruined_portal_jungle");
 	public static final TagKey<Biome> HAS_RUINED_PORTAL_OCEAN = create("has_structure/ruined_portal_ocean");
 	public static final TagKey<Biome> HAS_RUINED_PORTAL_SWAMP = create("has_structure/ruined_portal_swamp");
@@ -43,6 +45,7 @@ public class BiomeTags {
 	public static final TagKey<Biome> HAS_SWAMP_HUT = create("has_structure/swamp_hut");
 	public static final TagKey<Biome> HAS_VILLAGE_DESERT = create("has_structure/village_desert");
 	public static final TagKey<Biome> HAS_VILLAGE_PLAINS = create("has_structure/village_plains");
+	public static final TagKey<Biome> HAS_VILLAGE_POTATO = create("has_structure/village_potato");
 	public static final TagKey<Biome> HAS_VILLAGE_SAVANNA = create("has_structure/village_savanna");
 	public static final TagKey<Biome> HAS_VILLAGE_SNOWY = create("has_structure/village_snowy");
 	public static final TagKey<Biome> HAS_VILLAGE_TAIGA = create("has_structure/village_taiga");
@@ -51,6 +54,7 @@ public class BiomeTags {
 	public static final TagKey<Biome> HAS_NETHER_FORTRESS = create("has_structure/nether_fortress");
 	public static final TagKey<Biome> HAS_NETHER_FOSSIL = create("has_structure/nether_fossil");
 	public static final TagKey<Biome> HAS_BASTION_REMNANT = create("has_structure/bastion_remnant");
+	public static final TagKey<Biome> HAS_COLOSSEA = create("has_structure/colosseum");
 	public static final TagKey<Biome> HAS_ANCIENT_CITY = create("has_structure/ancient_city");
 	public static final TagKey<Biome> HAS_RUINED_PORTAL_NETHER = create("has_structure/ruined_portal_nether");
 	public static final TagKey<Biome> HAS_END_CITY = create("has_structure/end_city");

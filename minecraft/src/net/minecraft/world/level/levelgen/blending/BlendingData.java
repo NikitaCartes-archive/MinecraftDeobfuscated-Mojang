@@ -52,14 +52,19 @@ public class BlendingData {
 		Blocks.PODZOL,
 		Blocks.GRAVEL,
 		Blocks.GRASS_BLOCK,
+		Blocks.PEELGRASS_BLOCK,
+		Blocks.CORRUPTED_PEELGRASS_BLOCK,
 		Blocks.STONE,
+		Blocks.POTONE,
 		Blocks.COARSE_DIRT,
 		Blocks.SAND,
+		Blocks.GRAVTATER,
 		Blocks.RED_SAND,
 		Blocks.MYCELIUM,
 		Blocks.SNOW_BLOCK,
 		Blocks.TERRACOTTA,
-		Blocks.DIRT
+		Blocks.DIRT,
+		Blocks.TERREDEPOMME
 	);
 	protected static final double NO_VALUE = Double.MAX_VALUE;
 	private boolean hasCalculatedData;

@@ -282,6 +282,7 @@ public class UpgradeData {
 			Blocks.DRAGON_EGG,
 			Blocks.GRAVEL,
 			Blocks.SAND,
+			Blocks.GRAVTATER,
 			Blocks.RED_SAND,
 			Blocks.OAK_SIGN,
 			Blocks.SPRUCE_SIGN,
@@ -353,7 +354,15 @@ public class UpgradeData {
 			}
 		},
 		LEAVES(
-			true, Blocks.ACACIA_LEAVES, Blocks.CHERRY_LEAVES, Blocks.BIRCH_LEAVES, Blocks.DARK_OAK_LEAVES, Blocks.JUNGLE_LEAVES, Blocks.OAK_LEAVES, Blocks.SPRUCE_LEAVES
+			true,
+			Blocks.POTATO_LEAVES,
+			Blocks.ACACIA_LEAVES,
+			Blocks.CHERRY_LEAVES,
+			Blocks.BIRCH_LEAVES,
+			Blocks.DARK_OAK_LEAVES,
+			Blocks.JUNGLE_LEAVES,
+			Blocks.OAK_LEAVES,
+			Blocks.SPRUCE_LEAVES
 		) {
 			private final ThreadLocal<List<ObjectSet<BlockPos>>> queue = ThreadLocal.withInitial(() -> Lists.newArrayListWithCapacity(7));
 

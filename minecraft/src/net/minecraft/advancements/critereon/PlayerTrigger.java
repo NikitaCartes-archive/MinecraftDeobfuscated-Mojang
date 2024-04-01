@@ -5,7 +5,11 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Optional;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.advancements.Criterion;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.stats.Stats;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
@@ -43,6 +47,14 @@ public class PlayerTrigger extends SimpleCriterionTrigger<PlayerTrigger.TriggerI
 			return CriteriaTriggers.SLEPT_IN_BED.createCriterion(new PlayerTrigger.TriggerInstance(Optional.empty()));
 		}
 
+		public static Criterion<PlayerTrigger.TriggerInstance> getPeeled() {
+			return CriteriaTriggers.GET_PEELED.createCriterion(new PlayerTrigger.TriggerInstance(Optional.empty()));
+		}
+
+		public static Criterion<PlayerTrigger.TriggerInstance> eatArmor() {
+			return CriteriaTriggers.EAT_ARMOR.createCriterion(new PlayerTrigger.TriggerInstance(Optional.empty()));
+		}
+
 		public static Criterion<PlayerTrigger.TriggerInstance> raidWon() {
 			return CriteriaTriggers.RAID_WIN.createCriterion(new PlayerTrigger.TriggerInstance(Optional.empty()));
 		}
@@ -53,6 +65,27 @@ public class PlayerTrigger extends SimpleCriterionTrigger<PlayerTrigger.TriggerI
 
 		public static Criterion<PlayerTrigger.TriggerInstance> tick() {
 			return CriteriaTriggers.TICK.createCriterion(new PlayerTrigger.TriggerInstance(Optional.empty()));
+		}
+
+		public static Criterion<PlayerTrigger.TriggerInstance> rumbleThePlant() {
+			return CriteriaTriggers.RUMBLE_PLANT.createCriterion(new PlayerTrigger.TriggerInstance(Optional.empty()));
+		}
+
+		public static Criterion<PlayerTrigger.TriggerInstance> compostedStaff() {
+			return CriteriaTriggers.COMPOST_STAFF.createCriterion(new PlayerTrigger.TriggerInstance(Optional.empty()));
+		}
+
+		public static Criterion<PlayerTrigger.TriggerInstance> saidPotato(int i) {
+			PlayerPredicate.Builder builder = new PlayerPredicate.Builder()
+				.addStat(
+					Stats.CUSTOM, (Holder.Reference<ResourceLocation>)BuiltInRegistries.CUSTOM_STAT.getHolder(Stats.SAID_POTATO).orElseThrow(), MinMaxBounds.Ints.atLeast(99)
+				);
+			ContextAwarePredicate contextAwarePredicate = EntityPredicate.wrap(EntityPredicate.Builder.entity().subPredicate(builder.build()));
+			return CriteriaTriggers.SAID_POTATO.createCriterion(new PlayerTrigger.TriggerInstance(Optional.of(contextAwarePredicate)));
+		}
+
+		public static Criterion<PlayerTrigger.TriggerInstance> bringHomeCorruption() {
+			return CriteriaTriggers.BRING_HOME_CORRUPTION.createCriterion(new PlayerTrigger.TriggerInstance(Optional.empty()));
 		}
 
 		public static Criterion<PlayerTrigger.TriggerInstance> walkOnBlockWithEquipment(Block block, Item item) {

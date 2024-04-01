@@ -11,6 +11,7 @@ import java.util.function.Function;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Util;
 import net.minecraft.client.StringSplitter;
 import net.minecraft.client.gui.font.FontSet;
 import net.minecraft.client.gui.font.glyphs.BakedGlyph;
@@ -350,24 +351,31 @@ public class Font {
 				l = this.b;
 			}
 
-			if (!(bakedGlyph instanceof EmptyGlyph)) {
-				float m = bl ? glyphInfo.getBoldOffset() : 0.0F;
-				float n = this.dropShadow ? glyphInfo.getShadowOffset() : 0.0F;
-				VertexConsumer vertexConsumer = this.bufferSource.getBuffer(bakedGlyph.renderType(this.mode));
-				Font.this.renderChar(bakedGlyph, bl, style.isItalic(), m, this.x + n, this.y + n, this.pose, vertexConsumer, g, h, l, f, this.packedLightCoords);
+			float m;
+			if (j == 129364) {
+				m = 1.5F * Mth.sin(this.x + (float)Util.getNanos() / 1.0E8F);
+			} else {
+				m = 0.0F;
 			}
 
-			float m = glyphInfo.getAdvance(bl);
-			float n = this.dropShadow ? 1.0F : 0.0F;
+			if (!(bakedGlyph instanceof EmptyGlyph)) {
+				float n = bl ? glyphInfo.getBoldOffset() : 0.0F;
+				float o = this.dropShadow ? glyphInfo.getShadowOffset() : 0.0F;
+				VertexConsumer vertexConsumer = this.bufferSource.getBuffer(bakedGlyph.renderType(this.mode));
+				Font.this.renderChar(bakedGlyph, bl, style.isItalic(), n, this.x + o, this.y + o + m, this.pose, vertexConsumer, g, h, l, f, this.packedLightCoords);
+			}
+
+			float n = glyphInfo.getAdvance(bl);
+			float o = this.dropShadow ? 1.0F : 0.0F;
 			if (style.isStrikethrough()) {
-				this.addEffect(new BakedGlyph.Effect(this.x + n - 1.0F, this.y + n + 4.5F, this.x + n + m, this.y + n + 4.5F - 1.0F, 0.01F, g, h, l, f));
+				this.addEffect(new BakedGlyph.Effect(this.x + o - 1.0F, this.y + o + 4.5F, this.x + o + n, this.y + o + 4.5F - 1.0F, 0.01F, g, h, l, f));
 			}
 
 			if (style.isUnderlined()) {
-				this.addEffect(new BakedGlyph.Effect(this.x + n - 1.0F, this.y + n + 9.0F, this.x + n + m, this.y + n + 9.0F - 1.0F, 0.01F, g, h, l, f));
+				this.addEffect(new BakedGlyph.Effect(this.x + o - 1.0F, this.y + o + 9.0F, this.x + o + n, this.y + o + 9.0F - 1.0F, 0.01F, g, h, l, f));
 			}
 
-			this.x += m;
+			this.x += n;
 			return true;
 		}
 

@@ -23,6 +23,7 @@ import net.minecraft.client.renderer.entity.layers.ElytraLayer;
 import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
 import net.minecraft.client.renderer.entity.layers.ParrotOnShoulderLayer;
 import net.minecraft.client.renderer.entity.layers.PlayerItemInHandLayer;
+import net.minecraft.client.renderer.entity.layers.PoisonousPolytraLayer;
 import net.minecraft.client.renderer.entity.layers.SpinAttackEffectLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.network.chat.CommonComponents;
@@ -61,6 +62,7 @@ public class PlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer, P
 		this.addLayer(new CapeLayer(this));
 		this.addLayer(new CustomHeadLayer<>(this, context.getModelSet(), context.getItemInHandRenderer()));
 		this.addLayer(new ElytraLayer<>(this, context.getModelSet()));
+		this.addLayer(new PoisonousPolytraLayer<>(this, context.getModelSet()));
 		this.addLayer(new ParrotOnShoulderLayer<>(this, context.getModelSet()));
 		this.addLayer(new SpinAttackEffectLayer<>(this, context.getModelSet()));
 		this.addLayer(new BeeStingerLayer<>(this));

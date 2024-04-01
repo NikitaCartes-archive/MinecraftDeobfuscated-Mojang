@@ -7,6 +7,7 @@ import net.minecraft.Util;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.BossEvent;
+import net.minecraft.world.phys.Vec3;
 
 @Environment(EnvType.CLIENT)
 public class LerpingBossEvent extends BossEvent {
@@ -15,9 +16,18 @@ public class LerpingBossEvent extends BossEvent {
 	protected long setTime;
 
 	public LerpingBossEvent(
-		UUID uUID, Component component, float f, BossEvent.BossBarColor bossBarColor, BossEvent.BossBarOverlay bossBarOverlay, boolean bl, boolean bl2, boolean bl3
+		UUID uUID,
+		Component component,
+		float f,
+		BossEvent.BossBarColor bossBarColor,
+		BossEvent.BossBarOverlay bossBarOverlay,
+		boolean bl,
+		boolean bl2,
+		boolean bl3,
+		Vec3 vec3,
+		int i
 	) {
-		super(uUID, component, bossBarColor, bossBarOverlay);
+		super(uUID, component, bossBarColor, bossBarOverlay, vec3, i);
 		this.targetPercent = f;
 		this.progress = f;
 		this.setTime = Util.getMillis();
@@ -38,5 +48,9 @@ public class LerpingBossEvent extends BossEvent {
 		long l = Util.getMillis() - this.setTime;
 		float f = Mth.clamp((float)l / 100.0F, 0.0F, 1.0F);
 		return Mth.lerp(f, this.progress, this.targetPercent);
+	}
+
+	public boolean isActiveFor(Vec3 vec3) {
+		return this.radius > 0 ? this.center.distanceToSqr(vec3) < (double)(this.radius * this.radius) : this.radius >= 0;
 	}
 }

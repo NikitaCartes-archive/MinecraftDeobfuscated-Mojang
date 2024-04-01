@@ -70,6 +70,15 @@ public interface ByteBufCodecs {
 			byteBuf.writeShort(short_);
 		}
 	};
+	StreamCodec<ByteBuf, Character> CHAR = new StreamCodec<ByteBuf, Character>() {
+		public Character decode(ByteBuf byteBuf) {
+			return byteBuf.readChar();
+		}
+
+		public void encode(ByteBuf byteBuf, Character character) {
+			byteBuf.writeChar(character);
+		}
+	};
 	StreamCodec<ByteBuf, Integer> INT = new StreamCodec<ByteBuf, Integer>() {
 		public Integer decode(ByteBuf byteBuf) {
 			return byteBuf.readInt();

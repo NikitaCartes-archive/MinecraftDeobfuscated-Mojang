@@ -19,6 +19,7 @@ import net.minecraft.world.level.Level;
 public abstract class ProjectileWeaponItem extends Item {
 	public static final Predicate<ItemStack> ARROW_ONLY = itemStack -> itemStack.is(ItemTags.ARROWS);
 	public static final Predicate<ItemStack> ARROW_OR_FIREWORK = ARROW_ONLY.or(itemStack -> itemStack.is(Items.FIREWORK_ROCKET));
+	public static final Predicate<ItemStack> POISONOUS_POTATO = itemStack -> itemStack.is(Items.POISONOUS_POTATO);
 
 	public ProjectileWeaponItem(Item.Properties properties) {
 		super(properties);

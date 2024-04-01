@@ -10,6 +10,7 @@ public class GamePacketTypes {
 	public static final PacketType<ClientboundBundleDelimiterPacket> CLIENTBOUND_BUNDLE_DELIMITER = createClientbound("bundle_delimiter");
 	public static final PacketType<ClientboundAddEntityPacket> CLIENTBOUND_ADD_ENTITY = createClientbound("add_entity");
 	public static final PacketType<ClientboundAddExperienceOrbPacket> CLIENTBOUND_ADD_EXPERIENCE_ORB = createClientbound("add_experience_orb");
+	public static final PacketType<ClientboundAddSubGridPacket> CLIENTBOUND_ADD_SUB_GRID = createClientbound("add_sub_grid");
 	public static final PacketType<ClientboundAnimatePacket> CLIENTBOUND_ANIMATE = createClientbound("animate");
 	public static final PacketType<ClientboundAwardStatsPacket> CLIENTBOUND_AWARD_STATS = createClientbound("award_stats");
 	public static final PacketType<ClientboundBlockChangedAckPacket> CLIENTBOUND_BLOCK_CHANGED_ACK = createClientbound("block_changed_ack");
@@ -107,6 +108,7 @@ public class GamePacketTypes {
 	public static final PacketType<ClientboundSetTitlesAnimationPacket> CLIENTBOUND_SET_TITLES_ANIMATION = createClientbound("set_titles_animation");
 	public static final PacketType<ClientboundSoundEntityPacket> CLIENTBOUND_SOUND_ENTITY = createClientbound("sound_entity");
 	public static final PacketType<ClientboundSoundPacket> CLIENTBOUND_SOUND = createClientbound("sound");
+	public static final PacketType<ClientboundSoundSequencePacket> CLIENTBOUND_SOUND_SEQUENCE = createClientbound("sound_sequence");
 	public static final PacketType<ClientboundStartConfigurationPacket> CLIENTBOUND_START_CONFIGURATION = createClientbound("start_configuration");
 	public static final PacketType<ClientboundStopSoundPacket> CLIENTBOUND_STOP_SOUND = createClientbound("stop_sound");
 	public static final PacketType<ClientboundSystemChatPacket> CLIENTBOUND_SYSTEM_CHAT = createClientbound("system_chat");

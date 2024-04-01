@@ -65,6 +65,7 @@ public abstract class Feature<FC extends FeatureConfiguration> {
 	public static final Feature<BlockPileConfiguration> BLOCK_PILE = register("block_pile", new BlockPileFeature(BlockPileConfiguration.CODEC));
 	public static final Feature<SpringConfiguration> SPRING = register("spring_feature", new SpringFeature(SpringConfiguration.CODEC));
 	public static final Feature<NoneFeatureConfiguration> CHORUS_PLANT = register("chorus_plant", new ChorusPlantFeature(NoneFeatureConfiguration.CODEC));
+	public static final Feature<NoneFeatureConfiguration> TWISTED_POTATO = register("twisted_potato", new TwistedPotatoFeature(NoneFeatureConfiguration.CODEC));
 	public static final Feature<ReplaceBlockConfiguration> REPLACE_SINGLE_BLOCK = register(
 		"replace_single_block", new ReplaceBlockFeature(ReplaceBlockConfiguration.CODEC)
 	);
@@ -72,6 +73,7 @@ public abstract class Feature<FC extends FeatureConfiguration> {
 		"void_start_platform", new VoidStartPlatformFeature(NoneFeatureConfiguration.CODEC)
 	);
 	public static final Feature<NoneFeatureConfiguration> DESERT_WELL = register("desert_well", new DesertWellFeature(NoneFeatureConfiguration.CODEC));
+	public static final Feature<NoneFeatureConfiguration> HASH_WELL = register("hash_well", new HashWellFeature(NoneFeatureConfiguration.CODEC));
 	public static final Feature<FossilFeatureConfiguration> FOSSIL = register("fossil", new FossilFeature(FossilFeatureConfiguration.CODEC));
 	public static final Feature<HugeMushroomFeatureConfiguration> HUGE_RED_MUSHROOM = register(
 		"huge_red_mushroom", new HugeRedMushroomFeature(HugeMushroomFeatureConfiguration.CODEC)
@@ -101,6 +103,7 @@ public abstract class Feature<FC extends FeatureConfiguration> {
 	public static final Feature<NoneFeatureConfiguration> BLUE_ICE = register("blue_ice", new BlueIceFeature(NoneFeatureConfiguration.CODEC));
 	public static final Feature<BlockStateConfiguration> ICEBERG = register("iceberg", new IcebergFeature(BlockStateConfiguration.CODEC));
 	public static final Feature<BlockStateConfiguration> FOREST_ROCK = register("forest_rock", new BlockBlobFeature(BlockStateConfiguration.CODEC));
+	public static final Feature<BlockStateConfiguration> CLOUD = register("cloud", new CloudFeature(BlockStateConfiguration.CODEC));
 	public static final Feature<DiskConfiguration> DISK = register("disk", new DiskFeature(DiskConfiguration.CODEC));
 	public static final Feature<LakeFeature.Configuration> LAKE = register("lake", new LakeFeature(LakeFeature.Configuration.CODEC));
 	public static final Feature<OreConfiguration> ORE = register("ore", new OreFeature(OreConfiguration.CODEC));
@@ -121,6 +124,12 @@ public abstract class Feature<FC extends FeatureConfiguration> {
 	);
 	public static final Feature<NoneFeatureConfiguration> WEEPING_VINES = register("weeping_vines", new WeepingVinesFeature(NoneFeatureConfiguration.CODEC));
 	public static final Feature<TwistingVinesConfig> TWISTING_VINES = register("twisting_vines", new TwistingVinesFeature(TwistingVinesConfig.CODEC));
+	public static final Feature<TwistingVinesConfig> POTATO_BUDS = register("potato_buds", new PotatoBudsFeature(TwistingVinesConfig.CODEC));
+	public static final Feature<NoneFeatureConfiguration> POTATO_FIELD = register("potato_field", new PotatoFieldFeature(NoneFeatureConfiguration.CODEC));
+	public static final Feature<NoneFeatureConfiguration> PARK_LANE = register("park_lane", new ParkLaneFeature(NoneFeatureConfiguration.CODEC));
+	public static final Feature<NoneFeatureConfiguration> PARK_LANE_SURFACE = register(
+		"park_lane_surface", new ParkLaneSurfaceFeature(NoneFeatureConfiguration.CODEC)
+	);
 	public static final Feature<ColumnFeatureConfiguration> BASALT_COLUMNS = register("basalt_columns", new BasaltColumnsFeature(ColumnFeatureConfiguration.CODEC));
 	public static final Feature<DeltaFeatureConfiguration> DELTA_FEATURE = register("delta_feature", new DeltaFeature(DeltaFeatureConfiguration.CODEC));
 	public static final Feature<ReplaceSphereConfiguration> REPLACE_BLOBS = register(

@@ -16,6 +16,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -99,6 +100,11 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 
 		for (int m = 0; m < this.menu.slots.size(); m++) {
 			Slot slot = this.menu.slots.get(m);
+			ItemStack itemStack = slot.getItem();
+			if (itemStack.has(DataComponents.HOVERED)) {
+				itemStack.set(DataComponents.HOVERED, this.isHovering(slot, (double)i, (double)j) && slot.isHighlightable());
+			}
+
 			if (slot.isActive()) {
 				this.renderSlot(guiGraphics, slot);
 			}
@@ -107,28 +113,28 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 				this.hoveredSlot = slot;
 				int n = slot.x;
 				int o = slot.y;
-				if (this.hoveredSlot.isHighlightable()) {
+				if (this.hoveredSlot.isHighlightable() && !itemStack.has(DataComponents.HOVERED)) {
 					renderSlotHighlight(guiGraphics, n, o, 0);
 				}
 			}
 		}
 
 		this.renderLabels(guiGraphics, i, j);
-		ItemStack itemStack = this.draggingItem.isEmpty() ? this.menu.getCarried() : this.draggingItem;
-		if (!itemStack.isEmpty()) {
+		ItemStack itemStack2 = this.draggingItem.isEmpty() ? this.menu.getCarried() : this.draggingItem;
+		if (!itemStack2.isEmpty()) {
 			int p = 8;
-			int n = this.draggingItem.isEmpty() ? 8 : 16;
+			int q = this.draggingItem.isEmpty() ? 8 : 16;
 			String string = null;
 			if (!this.draggingItem.isEmpty() && this.isSplittingStack) {
-				itemStack = itemStack.copyWithCount(Mth.ceil((float)itemStack.getCount() / 2.0F));
+				itemStack2 = itemStack2.copyWithCount(Mth.ceil((float)itemStack2.getCount() / 2.0F));
 			} else if (this.isQuickCrafting && this.quickCraftSlots.size() > 1) {
-				itemStack = itemStack.copyWithCount(this.quickCraftingRemainder);
-				if (itemStack.isEmpty()) {
+				itemStack2 = itemStack2.copyWithCount(this.quickCraftingRemainder);
+				if (itemStack2.isEmpty()) {
 					string = ChatFormatting.YELLOW + "0";
 				}
 			}
 
-			this.renderFloatingItem(guiGraphics, itemStack, i - k - 8, j - l - n, string);
+			this.renderFloatingItem(guiGraphics, itemStack2, i - k - 8, j - l - q, string);
 		}
 
 		if (!this.snapbackItem.isEmpty()) {
@@ -138,11 +144,11 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 				this.snapbackItem = ItemStack.EMPTY;
 			}
 
-			int n = this.snapbackEnd.x - this.snapbackStartX;
-			int o = this.snapbackEnd.y - this.snapbackStartY;
-			int q = this.snapbackStartX + (int)((float)n * g);
-			int r = this.snapbackStartY + (int)((float)o * g);
-			this.renderFloatingItem(guiGraphics, this.snapbackItem, q, r, null);
+			int q = this.snapbackEnd.x - this.snapbackStartX;
+			int n = this.snapbackEnd.y - this.snapbackStartY;
+			int o = this.snapbackStartX + (int)((float)q * g);
+			int r = this.snapbackStartY + (int)((float)n * g);
+			this.renderFloatingItem(guiGraphics, this.snapbackItem, o, r, null);
 		}
 
 		guiGraphics.pose().popPose();
@@ -170,7 +176,7 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 		return getTooltipFromItem(this.minecraft, itemStack);
 	}
 
-	private void renderFloatingItem(GuiGraphics guiGraphics, ItemStack itemStack, int i, int j, String string) {
+	protected void renderFloatingItem(GuiGraphics guiGraphics, ItemStack itemStack, int i, int j, @Nullable String string) {
 		guiGraphics.pose().pushPose();
 		guiGraphics.pose().translate(0.0F, 0.0F, 232.0F);
 		guiGraphics.renderItem(itemStack, i, j);
@@ -178,8 +184,15 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 		guiGraphics.pose().popPose();
 	}
 
+	protected void renderFloatingItem(GuiGraphics guiGraphics, ItemStack itemStack, float f, float g, float h) {
+		guiGraphics.pose().pushPose();
+		guiGraphics.pose().translate(0.0F, 0.0F, 232.0F);
+		guiGraphics.renderItem(null, null, itemStack, f, g, h, 0, 0);
+		guiGraphics.pose().popPose();
+	}
+
 	protected void renderLabels(GuiGraphics guiGraphics, int i, int j) {
-		guiGraphics.drawString(this.font, this.title, this.titleLabelX, this.titleLabelY, 4210752, false);
+		guiGraphics.drawString(this.font, this.getTitle(), this.titleLabelX, this.titleLabelY, 4210752, false);
 		guiGraphics.drawString(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, 4210752, false);
 	}
 

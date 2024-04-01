@@ -206,7 +206,8 @@ public class JigsawPlacement {
 			serverLevel.getSeed(),
 			new ChunkPos(blockPos),
 			serverLevel,
-			holderx -> true
+			holderx -> true,
+			List.of()
 		);
 		Optional<Structure.GenerationStub> optional = addPieces(
 			generationContext, holder, Optional.of(resourceLocation), i, blockPos, false, Optional.empty(), 128, PoolAliasLookup.EMPTY

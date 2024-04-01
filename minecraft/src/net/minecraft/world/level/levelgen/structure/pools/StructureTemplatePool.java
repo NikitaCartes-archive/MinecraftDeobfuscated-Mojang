@@ -22,6 +22,7 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.GravityProces
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessor;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
 import org.apache.commons.lang3.mutable.MutableObject;
+import org.apache.commons.lang3.tuple.Triple;
 
 public class StructureTemplatePool {
 	private static final int SIZE_UNSET = Integer.MIN_VALUE;
@@ -73,6 +74,25 @@ public class StructureTemplatePool {
 			this.rawTemplates.add(Pair.of(structurePoolElement, pair.getSecond()));
 
 			for (int i = 0; i < pair.getSecond(); i++) {
+				this.templates.add(structurePoolElement);
+			}
+		}
+
+		this.fallback = holder;
+	}
+
+	public StructureTemplatePool(
+		List<Triple<Function<StructureTemplatePool.Projection, ? extends StructurePoolElement>, Integer, StructureTemplatePool.Projection>> list,
+		Holder<StructureTemplatePool> holder
+	) {
+		this.rawTemplates = Lists.<Pair<StructurePoolElement, Integer>>newArrayList();
+		this.templates = new ObjectArrayList<>();
+
+		for (Triple<Function<StructureTemplatePool.Projection, ? extends StructurePoolElement>, Integer, StructureTemplatePool.Projection> triple : list) {
+			StructurePoolElement structurePoolElement = (StructurePoolElement)triple.getLeft().apply(triple.getRight());
+			this.rawTemplates.add(Pair.of(structurePoolElement, triple.getMiddle()));
+
+			for (int i = 0; i < triple.getMiddle(); i++) {
 				this.templates.add(structurePoolElement);
 			}
 		}

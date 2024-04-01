@@ -35,6 +35,7 @@ public class OptimizeWorldScreen extends Screen {
 		reference2IntOpenHashMap.put(Level.OVERWORLD, -13408734);
 		reference2IntOpenHashMap.put(Level.NETHER, -10075085);
 		reference2IntOpenHashMap.put(Level.END, -8943531);
+		reference2IntOpenHashMap.put(Level.POTATO, -559038737);
 		reference2IntOpenHashMap.defaultReturnValue(-2236963);
 	});
 	private final BooleanConsumer callback;

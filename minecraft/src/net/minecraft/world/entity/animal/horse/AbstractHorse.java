@@ -21,6 +21,7 @@ import net.minecraft.server.players.OldUsersConverter;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
@@ -580,7 +581,7 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 				if (!this.isEating()
 					&& !this.isVehicle()
 					&& this.random.nextInt(300) == 0
-					&& this.level().getBlockState(this.blockPosition().below()).is(Blocks.GRASS_BLOCK)) {
+					&& this.level().getBlockState(this.blockPosition().below()).is(BlockTags.ANIMALS_SPAWNABLE_ON)) {
 					this.setEating(true);
 				}
 

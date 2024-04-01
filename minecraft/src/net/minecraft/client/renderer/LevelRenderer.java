@@ -52,6 +52,7 @@ import net.minecraft.client.GraphicsStatus;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.ParticleStatus;
 import net.minecraft.client.PrioritizeChunkUpdates;
+import net.minecraft.client.grid.ClientSubGrid;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.player.LocalPlayer;
@@ -121,6 +122,7 @@ import net.minecraft.world.level.block.entity.vault.VaultBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.border.WorldBorder;
+import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.material.FluidState;
@@ -150,10 +152,12 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 	private static final int TRANSPARENT_SORT_COUNT = 15;
 	private static final ResourceLocation MOON_LOCATION = new ResourceLocation("textures/environment/moon_phases.png");
 	private static final ResourceLocation SUN_LOCATION = new ResourceLocation("textures/environment/sun.png");
+	private static final ResourceLocation POTATO_SUN_LOCATION = new ResourceLocation("textures/environment/poisonus_sun.png");
 	protected static final ResourceLocation CLOUDS_LOCATION = new ResourceLocation("textures/environment/clouds.png");
 	private static final ResourceLocation END_SKY_LOCATION = new ResourceLocation("textures/environment/end_sky.png");
 	private static final ResourceLocation FORCEFIELD_LOCATION = new ResourceLocation("textures/misc/forcefield.png");
 	private static final ResourceLocation RAIN_LOCATION = new ResourceLocation("textures/environment/rain.png");
+	private static final ResourceLocation RAIN_LOCATION_POTATO = new ResourceLocation("textures/environment/rain_potato.png");
 	private static final ResourceLocation SNOW_LOCATION = new ResourceLocation("textures/environment/snow.png");
 	public static final Direction[] DIRECTIONS = Direction.values();
 	private final Minecraft minecraft;
@@ -257,6 +261,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 		if (!(h <= 0.0F)) {
 			lightTexture.turnOnLightLayer();
 			Level level = this.minecraft.level;
+			boolean bl = level.isPotato();
 			int i = Mth.floor(d);
 			int j = Mth.floor(e);
 			int k = Mth.floor(g);
@@ -295,9 +300,20 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 							v = t;
 						}
 
-						int w = t;
+						if (bl) {
+							int w = 112;
+							if (u > 112) {
+								u = 112;
+							}
+
+							if (v > 112) {
+								v = 112;
+							}
+						}
+
+						int wx = t;
 						if (t < j) {
-							w = j;
+							wx = j;
 						}
 
 						if (u != v) {
@@ -311,7 +327,12 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 									}
 
 									m = 0;
-									RenderSystem.setShaderTexture(0, RAIN_LOCATION);
+									if (bl) {
+										RenderSystem.setShaderTexture(0, RAIN_LOCATION_POTATO);
+									} else {
+										RenderSystem.setShaderTexture(0, RAIN_LOCATION);
+									}
+
 									bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.PARTICLE);
 								}
 
@@ -324,26 +345,40 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 								double ad = (double)o + 0.5 - g;
 								float ae = (float)Math.sqrt(ac * ac + ad * ad) / (float)l;
 								float af = ((1.0F - ae * ae) * 0.5F + 0.5F) * h;
-								mutableBlockPos.set(p, w, o);
+								mutableBlockPos.set(p, wx, o);
 								int ag = getLightColor(level, mutableBlockPos);
+								float ai;
+								float aj;
+								float ak;
+								if (bl) {
+									int ah = BiomeColors.getAverageWaterColor(level, mutableBlockPos);
+									ai = (float)FastColor.ARGB32.red(ah) / 255.0F;
+									aj = (float)FastColor.ARGB32.green(ah) / 255.0F;
+									ak = (float)FastColor.ARGB32.blue(ah) / 255.0F;
+								} else {
+									ai = 1.0F;
+									aj = 1.0F;
+									ak = 1.0F;
+								}
+
 								bufferBuilder.vertex((double)p - d - r + 0.5, (double)v - e, (double)o - g - s + 0.5)
 									.uv(0.0F, (float)u * 0.25F + ab)
-									.color(1.0F, 1.0F, 1.0F, af)
+									.color(ai, aj, ak, af)
 									.uv2(ag)
 									.endVertex();
 								bufferBuilder.vertex((double)p - d + r + 0.5, (double)v - e, (double)o - g + s + 0.5)
 									.uv(1.0F, (float)u * 0.25F + ab)
-									.color(1.0F, 1.0F, 1.0F, af)
+									.color(ai, aj, ak, af)
 									.uv2(ag)
 									.endVertex();
 								bufferBuilder.vertex((double)p - d + r + 0.5, (double)u - e, (double)o - g + s + 0.5)
 									.uv(1.0F, (float)v * 0.25F + ab)
-									.color(1.0F, 1.0F, 1.0F, af)
+									.color(ai, aj, ak, af)
 									.uv2(ag)
 									.endVertex();
 								bufferBuilder.vertex((double)p - d - r + 0.5, (double)u - e, (double)o - g - s + 0.5)
 									.uv(0.0F, (float)v * 0.25F + ab)
-									.color(1.0F, 1.0F, 1.0F, af)
+									.color(ai, aj, ak, af)
 									.uv2(ag)
 									.endVertex();
 							} else if (precipitation == Biome.Precipitation.SNOW) {
@@ -357,38 +392,38 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 									bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.PARTICLE);
 								}
 
-								float ah = -((float)(this.ticks & 511) + f) / 512.0F;
-								float ai = (float)(randomSource.nextDouble() + (double)n * 0.01 * (double)((float)randomSource.nextGaussian()));
+								float al = -((float)(this.ticks & 511) + f) / 512.0F;
+								float am = (float)(randomSource.nextDouble() + (double)n * 0.01 * (double)((float)randomSource.nextGaussian()));
 								float z = (float)(randomSource.nextDouble() + (double)(n * (float)randomSource.nextGaussian()) * 0.001);
-								double aj = (double)p + 0.5 - d;
+								double an = (double)p + 0.5 - d;
 								double ac = (double)o + 0.5 - g;
-								float ak = (float)Math.sqrt(aj * aj + ac * ac) / (float)l;
-								float al = ((1.0F - ak * ak) * 0.3F + 0.5F) * h;
-								mutableBlockPos.set(p, w, o);
-								int am = getLightColor(level, mutableBlockPos);
-								int an = am >> 16 & 65535;
-								int ag = am & 65535;
-								int ao = (an * 3 + 240) / 4;
-								int ap = (ag * 3 + 240) / 4;
+								float ao = (float)Math.sqrt(an * an + ac * ac) / (float)l;
+								float ap = ((1.0F - ao * ao) * 0.3F + 0.5F) * h;
+								mutableBlockPos.set(p, wx, o);
+								int aq = getLightColor(level, mutableBlockPos);
+								int ar = aq >> 16 & 65535;
+								int ag = aq & 65535;
+								int as = (ar * 3 + 240) / 4;
+								int at = (ag * 3 + 240) / 4;
 								bufferBuilder.vertex((double)p - d - r + 0.5, (double)v - e, (double)o - g - s + 0.5)
-									.uv(0.0F + ai, (float)u * 0.25F + ah + z)
-									.color(1.0F, 1.0F, 1.0F, al)
-									.uv2(ap, ao)
+									.uv(0.0F + am, (float)u * 0.25F + al + z)
+									.color(1.0F, 1.0F, 1.0F, ap)
+									.uv2(at, as)
 									.endVertex();
 								bufferBuilder.vertex((double)p - d + r + 0.5, (double)v - e, (double)o - g + s + 0.5)
-									.uv(1.0F + ai, (float)u * 0.25F + ah + z)
-									.color(1.0F, 1.0F, 1.0F, al)
-									.uv2(ap, ao)
+									.uv(1.0F + am, (float)u * 0.25F + al + z)
+									.color(1.0F, 1.0F, 1.0F, ap)
+									.uv2(at, as)
 									.endVertex();
 								bufferBuilder.vertex((double)p - d + r + 0.5, (double)u - e, (double)o - g + s + 0.5)
-									.uv(1.0F + ai, (float)v * 0.25F + ah + z)
-									.color(1.0F, 1.0F, 1.0F, al)
-									.uv2(ap, ao)
+									.uv(1.0F + am, (float)v * 0.25F + al + z)
+									.color(1.0F, 1.0F, 1.0F, ap)
+									.uv2(at, as)
 									.endVertex();
 								bufferBuilder.vertex((double)p - d - r + 0.5, (double)u - e, (double)o - g - s + 0.5)
-									.uv(0.0F + ai, (float)v * 0.25F + ah + z)
-									.color(1.0F, 1.0F, 1.0F, al)
-									.uv2(ap, ao)
+									.uv(0.0F + am, (float)v * 0.25F + al + z)
+									.color(1.0F, 1.0F, 1.0F, ap)
+									.uv2(at, as)
 									.endVertex();
 							}
 						}
@@ -964,6 +999,8 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 		this.renderSectionLayer(RenderType.solid(), d, e, h, matrix4f, matrix4f2);
 		this.renderSectionLayer(RenderType.cutoutMipped(), d, e, h, matrix4f, matrix4f2);
 		this.renderSectionLayer(RenderType.cutout(), d, e, h, matrix4f, matrix4f2);
+		profilerFiller.popPush("grids");
+		this.drawGrids(matrix4f, matrix4f2, g, d, e, h, frustum, false);
 		if (this.level.effects().constantAmbientLight()) {
 			Lighting.setupNetherLevel();
 		} else {
@@ -1148,6 +1185,8 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 			this.renderSectionLayer(RenderType.translucent(), d, e, h, matrix4f, matrix4f2);
 			profilerFiller.popPush("string");
 			this.renderSectionLayer(RenderType.tripwire(), d, e, h, matrix4f, matrix4f2);
+			profilerFiller.popPush("grids_transluicent");
+			this.drawGrids(matrix4f, matrix4f2, g, d, e, h, frustum, true);
 			this.particlesTarget.clear(Minecraft.ON_OSX);
 			this.particlesTarget.copyDepthFrom(this.minecraft.getMainRenderTarget());
 			RenderStateShard.PARTICLES_TARGET.setupRenderState();
@@ -1165,6 +1204,8 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 			bufferSource.endBatch();
 			profilerFiller.popPush("string");
 			this.renderSectionLayer(RenderType.tripwire(), d, e, h, matrix4f, matrix4f2);
+			profilerFiller.popPush("grids_transluicent");
+			this.drawGrids(matrix4f, matrix4f2, g, d, e, h, frustum, true);
 			profilerFiller.popPush("particles");
 			this.minecraft.particleEngine.render(lightTexture, camera, g);
 		}
@@ -1201,6 +1242,12 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 		RenderSystem.depthMask(true);
 		RenderSystem.disableBlend();
 		FogRenderer.setupNoFog();
+	}
+
+	private void drawGrids(Matrix4f matrix4f, Matrix4f matrix4f2, float f, double d, double e, double g, Frustum frustum, boolean bl) {
+		for (ClientSubGrid clientSubGrid : this.level.getGrids()) {
+			clientSubGrid.getRenderer().draw(f, d, e, g, frustum, matrix4f, matrix4f2, bl);
+		}
 	}
 
 	private void checkPoseStack(PoseStack poseStack) {
@@ -1253,53 +1300,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 		boolean bl2 = renderType != RenderType.translucent();
 		ObjectListIterator<SectionRenderDispatcher.RenderSection> objectListIterator = this.visibleSections.listIterator(bl2 ? 0 : this.visibleSections.size());
 		ShaderInstance shaderInstance = RenderSystem.getShader();
-
-		for (int n = 0; n < 12; n++) {
-			int o = RenderSystem.getShaderTexture(n);
-			shaderInstance.setSampler("Sampler" + n, o);
-		}
-
-		if (shaderInstance.MODEL_VIEW_MATRIX != null) {
-			shaderInstance.MODEL_VIEW_MATRIX.set(matrix4f);
-		}
-
-		if (shaderInstance.PROJECTION_MATRIX != null) {
-			shaderInstance.PROJECTION_MATRIX.set(matrix4f2);
-		}
-
-		if (shaderInstance.COLOR_MODULATOR != null) {
-			shaderInstance.COLOR_MODULATOR.set(RenderSystem.getShaderColor());
-		}
-
-		if (shaderInstance.GLINT_ALPHA != null) {
-			shaderInstance.GLINT_ALPHA.set(RenderSystem.getShaderGlintAlpha());
-		}
-
-		if (shaderInstance.FOG_START != null) {
-			shaderInstance.FOG_START.set(RenderSystem.getShaderFogStart());
-		}
-
-		if (shaderInstance.FOG_END != null) {
-			shaderInstance.FOG_END.set(RenderSystem.getShaderFogEnd());
-		}
-
-		if (shaderInstance.FOG_COLOR != null) {
-			shaderInstance.FOG_COLOR.set(RenderSystem.getShaderFogColor());
-		}
-
-		if (shaderInstance.FOG_SHAPE != null) {
-			shaderInstance.FOG_SHAPE.set(RenderSystem.getShaderFogShape().getIndex());
-		}
-
-		if (shaderInstance.TEXTURE_MATRIX != null) {
-			shaderInstance.TEXTURE_MATRIX.set(RenderSystem.getTextureMatrix());
-		}
-
-		if (shaderInstance.GAME_TIME != null) {
-			shaderInstance.GAME_TIME.set(RenderSystem.getShaderGameTime());
-		}
-
-		RenderSystem.setupShaderLights(shaderInstance);
+		shaderInstance.setDefaultUniforms(VertexFormat.Mode.QUADS, matrix4f, matrix4f2, this.minecraft.getWindow());
 		shaderInstance.apply();
 		Uniform uniform = shaderInstance.CHUNK_OFFSET;
 
@@ -1624,14 +1625,19 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 						GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO
 					);
 					poseStack.pushPose();
-					float j = 1.0F - this.level.getRainLevel(f);
+					float j = 1.0F - this.level.getRainLevel(f, camera.getPosition().y());
 					RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, j);
 					poseStack.mulPose(Axis.YP.rotationDegrees(-90.0F));
 					poseStack.mulPose(Axis.XP.rotationDegrees(this.level.getTimeOfDay(f) * 360.0F));
 					Matrix4f matrix4f4 = poseStack.last().pose();
 					float l = 30.0F;
 					RenderSystem.setShader(GameRenderer::getPositionTexShader);
-					RenderSystem.setShaderTexture(0, SUN_LOCATION);
+					if (this.level.dimensionTypeRegistration().is(BuiltinDimensionTypes.POTATO)) {
+						RenderSystem.setShaderTexture(0, POTATO_SUN_LOCATION);
+					} else {
+						RenderSystem.setShaderTexture(0, SUN_LOCATION);
+					}
+
 					bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
 					bufferBuilder.vertex(matrix4f4, -l, 100.0F, -l).uv(0.0F, 0.0F).endVertex();
 					bufferBuilder.vertex(matrix4f4, l, 100.0F, -l).uv(1.0F, 0.0F).endVertex();
@@ -2568,7 +2574,11 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 				this.level.playLocalSound(blockPos, SoundEvents.ANVIL_LAND, SoundSource.BLOCKS, 0.3F, this.level.random.nextFloat() * 0.1F + 0.9F, false);
 				break;
 			case 1032:
-				this.minecraft.getSoundManager().play(SimpleSoundInstance.forLocalAmbience(SoundEvents.PORTAL_TRAVEL, randomSource.nextFloat() * 0.4F + 0.8F, 0.25F));
+				this.minecraft
+					.getSoundManager()
+					.play(
+						SimpleSoundInstance.forLocalAmbience(j > 0 ? SoundEvents.PLAGUEWHALE_AMBIENT : SoundEvents.PORTAL_TRAVEL, randomSource.nextFloat() * 0.4F + 0.8F, 0.25F)
+					);
 				break;
 			case 1033:
 				this.level.playLocalSound(blockPos, SoundEvents.CHORUS_FLOWER_GROW, SoundSource.BLOCKS, 1.0F, 1.0F, false);
@@ -2630,6 +2640,23 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 			case 1050:
 				this.level.playLocalSound(blockPos, SoundEvents.CRAFTER_FAIL, SoundSource.BLOCKS, 1.0F, 1.0F, false);
 				break;
+			case 1051:
+				this.level
+					.playLocalSound(
+						blockPos, SoundEvents.POTATO_ZOMBIE_INFECT, SoundSource.HOSTILE, 2.0F, (randomSource.nextFloat() - randomSource.nextFloat()) * 0.2F + 1.0F, false
+					);
+				break;
+			case 1052:
+				this.level
+					.playLocalSound(
+						blockPos,
+						SoundEvents.POTATO_ZOMBIE_ATTACK_IRON_DOOR,
+						SoundSource.HOSTILE,
+						2.0F,
+						(randomSource.nextFloat() - randomSource.nextFloat()) * 0.2F + 1.0F,
+						false
+					);
+				break;
 			case 1500:
 				ComposterBlock.handleFill(this.level, blockPos, j > 0);
 				break;
@@ -2639,7 +2666,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 						blockPos, SoundEvents.LAVA_EXTINGUISH, SoundSource.BLOCKS, 0.5F, 2.6F + (randomSource.nextFloat() - randomSource.nextFloat()) * 0.8F, false
 					);
 
-				for (int ox = 0; ox < 8; ox++) {
+				for (int abx = 0; abx < 8; abx++) {
 					this.level
 						.addParticle(
 							ParticleTypes.LARGE_SMOKE,
@@ -2658,21 +2685,21 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 						blockPos, SoundEvents.REDSTONE_TORCH_BURNOUT, SoundSource.BLOCKS, 0.5F, 2.6F + (randomSource.nextFloat() - randomSource.nextFloat()) * 0.8F, false
 					);
 
-				for (int ox = 0; ox < 5; ox++) {
+				for (int abx = 0; abx < 5; abx++) {
 					double g = (double)blockPos.getX() + randomSource.nextDouble() * 0.6 + 0.2;
-					double p = (double)blockPos.getY() + randomSource.nextDouble() * 0.6 + 0.2;
-					double q = (double)blockPos.getZ() + randomSource.nextDouble() * 0.6 + 0.2;
-					this.level.addParticle(ParticleTypes.SMOKE, g, p, q, 0.0, 0.0, 0.0);
+					double ac = (double)blockPos.getY() + randomSource.nextDouble() * 0.6 + 0.2;
+					double u = (double)blockPos.getZ() + randomSource.nextDouble() * 0.6 + 0.2;
+					this.level.addParticle(ParticleTypes.SMOKE, g, ac, u, 0.0, 0.0, 0.0);
 				}
 				break;
 			case 1503:
 				this.level.playLocalSound(blockPos, SoundEvents.END_PORTAL_FRAME_FILL, SoundSource.BLOCKS, 1.0F, 1.0F, false);
 
-				for (int ox = 0; ox < 16; ox++) {
+				for (int abx = 0; abx < 16; abx++) {
 					double g = (double)blockPos.getX() + (5.0 + randomSource.nextDouble() * 6.0) / 16.0;
-					double p = (double)blockPos.getY() + 0.8125;
-					double q = (double)blockPos.getZ() + (5.0 + randomSource.nextDouble() * 6.0) / 16.0;
-					this.level.addParticle(ParticleTypes.SMOKE, g, p, q, 0.0, 0.0, 0.0);
+					double ac = (double)blockPos.getY() + 0.8125;
+					double u = (double)blockPos.getZ() + (5.0 + randomSource.nextDouble() * 6.0) / 16.0;
+					this.level.addParticle(ParticleTypes.SMOKE, g, ac, u, 0.0, 0.0, 0.0);
 				}
 				break;
 			case 1504:
@@ -2697,42 +2724,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 				break;
 			case 2002:
 			case 2007:
-				Vec3 vec3 = Vec3.atBottomCenterOf(blockPos);
-
-				for (int l = 0; l < 8; l++) {
-					this.addParticle(
-						new ItemParticleOption(ParticleTypes.ITEM, new ItemStack(Items.SPLASH_POTION)),
-						vec3.x,
-						vec3.y,
-						vec3.z,
-						randomSource.nextGaussian() * 0.15,
-						randomSource.nextDouble() * 0.2,
-						randomSource.nextGaussian() * 0.15
-					);
-				}
-
-				float h = (float)(j >> 16 & 0xFF) / 255.0F;
-				float m = (float)(j >> 8 & 0xFF) / 255.0F;
-				float n = (float)(j >> 0 & 0xFF) / 255.0F;
-				ParticleOptions particleOptions = i == 2007 ? ParticleTypes.INSTANT_EFFECT : ParticleTypes.EFFECT;
-
-				for (int ox = 0; ox < 100; ox++) {
-					double g = randomSource.nextDouble() * 4.0;
-					double p = randomSource.nextDouble() * Math.PI * 2.0;
-					double q = Math.cos(p) * g;
-					double r = 0.01 + randomSource.nextDouble() * 0.5;
-					double s = Math.sin(p) * g;
-					Particle particle = this.addParticleInternal(
-						particleOptions, particleOptions.getType().getOverrideLimiter(), vec3.x + q * 0.1, vec3.y + 0.3, vec3.z + s * 0.1, q, r, s
-					);
-					if (particle != null) {
-						float t = 0.75F + randomSource.nextFloat() * 0.25F;
-						particle.setColor(h * t, m * t, n * t);
-						particle.setPower((float)g);
-					}
-				}
-
-				this.level.playLocalSound(blockPos, SoundEvents.SPLASH_POTION_BREAK, SoundSource.NEUTRAL, 1.0F, randomSource.nextFloat() * 0.1F + 0.9F, false);
+				this.potionEvent(i, blockPos, j, randomSource);
 				break;
 			case 2003:
 				double d = (double)blockPos.getX() + 0.5;
@@ -2757,26 +2749,26 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 				}
 				break;
 			case 2004:
-				for (int ux = 0; ux < 20; ux++) {
-					double v = (double)blockPos.getX() + 0.5 + (randomSource.nextDouble() - 0.5) * 2.0;
-					double w = (double)blockPos.getY() + 0.5 + (randomSource.nextDouble() - 0.5) * 2.0;
-					double x = (double)blockPos.getZ() + 0.5 + (randomSource.nextDouble() - 0.5) * 2.0;
-					this.level.addParticle(ParticleTypes.SMOKE, v, w, x, 0.0, 0.0, 0.0);
-					this.level.addParticle(ParticleTypes.FLAME, v, w, x, 0.0, 0.0, 0.0);
+				for (int lx = 0; lx < 20; lx++) {
+					double h = (double)blockPos.getX() + 0.5 + (randomSource.nextDouble() - 0.5) * 2.0;
+					double m = (double)blockPos.getY() + 0.5 + (randomSource.nextDouble() - 0.5) * 2.0;
+					double n = (double)blockPos.getZ() + 0.5 + (randomSource.nextDouble() - 0.5) * 2.0;
+					this.level.addParticle(ParticleTypes.SMOKE, h, m, n, 0.0, 0.0, 0.0);
+					this.level.addParticle(ParticleTypes.FLAME, h, m, n, 0.0, 0.0, 0.0);
 				}
 				break;
 			case 2006:
-				for (int o = 0; o < 200; o++) {
-					float ad = randomSource.nextFloat() * 4.0F;
-					float ai = randomSource.nextFloat() * (float) (Math.PI * 2);
-					double p = (double)(Mth.cos(ai) * ad);
-					double q = 0.01 + randomSource.nextDouble() * 0.5;
-					double r = (double)(Mth.sin(ai) * ad);
-					Particle particle2 = this.addParticleInternal(
-						ParticleTypes.DRAGON_BREATH, false, (double)blockPos.getX() + p * 0.1, (double)blockPos.getY() + 0.3, (double)blockPos.getZ() + r * 0.1, p, q, r
+				for (int ab = 0; ab < 200; ab++) {
+					float w = randomSource.nextFloat() * 4.0F;
+					float ad = randomSource.nextFloat() * (float) (Math.PI * 2);
+					double ac = (double)(Mth.cos(ad) * w);
+					double u = 0.01 + randomSource.nextDouble() * 0.5;
+					double s = (double)(Mth.sin(ad) * w);
+					Particle particle = this.addParticleInternal(
+						ParticleTypes.DRAGON_BREATH, false, (double)blockPos.getX() + ac * 0.1, (double)blockPos.getY() + 0.3, (double)blockPos.getZ() + s * 0.1, ac, u, s
 					);
-					if (particle2 != null) {
-						particle2.setPower(ad);
+					if (particle != null) {
+						particle.setPower(w);
 					}
 				}
 
@@ -2788,7 +2780,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 				this.level.addParticle(ParticleTypes.EXPLOSION, (double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5, 0.0, 0.0, 0.0);
 				break;
 			case 2009:
-				for (int ox = 0; ox < 8; ox++) {
+				for (int abx = 0; abx < 8; abx++) {
 					this.level
 						.addParticle(
 							ParticleTypes.CLOUD,
@@ -2846,62 +2838,62 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 				ParticleUtils.spawnParticlesOnBlockFaces(this.level, blockPos, ParticleTypes.SCRAPE, UniformInt.of(3, 5));
 				break;
 			case 3006:
-				int u = j >> 6;
-				if (u > 0) {
-					if (randomSource.nextFloat() < 0.3F + (float)u * 0.1F) {
-						float n = 0.15F + 0.02F * (float)u * (float)u * randomSource.nextFloat();
-						float y = 0.4F + 0.3F * (float)u * randomSource.nextFloat();
-						this.level.playLocalSound(blockPos, SoundEvents.SCULK_BLOCK_CHARGE, SoundSource.BLOCKS, n, y, false);
+				int l = j >> 6;
+				if (l > 0) {
+					if (randomSource.nextFloat() < 0.3F + (float)l * 0.1F) {
+						float o = 0.15F + 0.02F * (float)l * (float)l * randomSource.nextFloat();
+						float p = 0.4F + 0.3F * (float)l * randomSource.nextFloat();
+						this.level.playLocalSound(blockPos, SoundEvents.SCULK_BLOCK_CHARGE, SoundSource.BLOCKS, o, p, false);
 					}
 
 					byte b = (byte)(j & 63);
-					IntProvider intProvider = UniformInt.of(0, u);
-					float z = 0.005F;
+					IntProvider intProvider = UniformInt.of(0, l);
+					float q = 0.005F;
 					Supplier<Vec3> supplier = () -> new Vec3(
 							Mth.nextDouble(randomSource, -0.005F, 0.005F), Mth.nextDouble(randomSource, -0.005F, 0.005F), Mth.nextDouble(randomSource, -0.005F, 0.005F)
 						);
 					if (b == 0) {
 						for (Direction direction : Direction.values()) {
-							float aa = direction == Direction.DOWN ? (float) Math.PI : 0.0F;
-							double r = direction.getAxis() == Direction.Axis.Y ? 0.65 : 0.57;
-							ParticleUtils.spawnParticlesOnBlockFace(this.level, blockPos, new SculkChargeParticleOptions(aa), intProvider, direction, supplier, r);
+							float r = direction == Direction.DOWN ? (float) Math.PI : 0.0F;
+							double s = direction.getAxis() == Direction.Axis.Y ? 0.65 : 0.57;
+							ParticleUtils.spawnParticlesOnBlockFace(this.level, blockPos, new SculkChargeParticleOptions(r), intProvider, direction, supplier, s);
 						}
 					} else {
 						for (Direction direction2 : MultifaceBlock.unpack(b)) {
-							float ab = direction2 == Direction.UP ? (float) Math.PI : 0.0F;
-							double q = 0.35;
-							ParticleUtils.spawnParticlesOnBlockFace(this.level, blockPos, new SculkChargeParticleOptions(ab), intProvider, direction2, supplier, 0.35);
+							float t = direction2 == Direction.UP ? (float) Math.PI : 0.0F;
+							double u = 0.35;
+							ParticleUtils.spawnParticlesOnBlockFace(this.level, blockPos, new SculkChargeParticleOptions(t), intProvider, direction2, supplier, 0.35);
 						}
 					}
 				} else {
 					this.level.playLocalSound(blockPos, SoundEvents.SCULK_BLOCK_CHARGE, SoundSource.BLOCKS, 1.0F, 1.0F, false);
 					boolean bl = this.level.getBlockState(blockPos).isCollisionShapeFullBlock(this.level, blockPos);
-					int ac = bl ? 40 : 20;
-					float z = bl ? 0.45F : 0.25F;
-					float ad = 0.07F;
+					int v = bl ? 40 : 20;
+					float q = bl ? 0.45F : 0.25F;
+					float w = 0.07F;
 
-					for (int ae = 0; ae < ac; ae++) {
-						float af = 2.0F * randomSource.nextFloat() - 1.0F;
-						float ab = 2.0F * randomSource.nextFloat() - 1.0F;
-						float ag = 2.0F * randomSource.nextFloat() - 1.0F;
+					for (int x = 0; x < v; x++) {
+						float y = 2.0F * randomSource.nextFloat() - 1.0F;
+						float t = 2.0F * randomSource.nextFloat() - 1.0F;
+						float z = 2.0F * randomSource.nextFloat() - 1.0F;
 						this.level
 							.addParticle(
 								ParticleTypes.SCULK_CHARGE_POP,
-								(double)blockPos.getX() + 0.5 + (double)(af * z),
-								(double)blockPos.getY() + 0.5 + (double)(ab * z),
-								(double)blockPos.getZ() + 0.5 + (double)(ag * z),
-								(double)(af * 0.07F),
-								(double)(ab * 0.07F),
-								(double)(ag * 0.07F)
+								(double)blockPos.getX() + 0.5 + (double)(y * q),
+								(double)blockPos.getY() + 0.5 + (double)(t * q),
+								(double)blockPos.getZ() + 0.5 + (double)(z * q),
+								(double)(y * 0.07F),
+								(double)(t * 0.07F),
+								(double)(z * 0.07F)
 							);
 					}
 				}
 				break;
 			case 3007:
-				for (int ah = 0; ah < 10; ah++) {
+				for (int aa = 0; aa < 10; aa++) {
 					this.level
 						.addParticle(
-							new ShriekParticleOption(ah * 5),
+							new ShriekParticleOption(aa * 5),
 							false,
 							(double)blockPos.getX() + 0.5,
 							(double)blockPos.getY() + SculkShriekerBlock.TOP_Y,
@@ -2982,6 +2974,45 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 			case 3017:
 				TrialSpawner.addEjectItemParticles(this.level, blockPos, randomSource);
 		}
+	}
+
+	private void potionEvent(int i, BlockPos blockPos, int j, RandomSource randomSource) {
+		Vec3 vec3 = Vec3.atBottomCenterOf(blockPos);
+
+		for (int k = 0; k < 8; k++) {
+			this.addParticle(
+				new ItemParticleOption(ParticleTypes.ITEM, new ItemStack(Items.SPLASH_POTION)),
+				vec3.x,
+				vec3.y,
+				vec3.z,
+				randomSource.nextGaussian() * 0.15,
+				randomSource.nextDouble() * 0.2,
+				randomSource.nextGaussian() * 0.15
+			);
+		}
+
+		float f = (float)(j >> 16 & 0xFF) / 255.0F;
+		float g = (float)(j >> 8 & 0xFF) / 255.0F;
+		float h = (float)(j >> 0 & 0xFF) / 255.0F;
+		ParticleOptions particleOptions = i == 2007 ? ParticleTypes.INSTANT_EFFECT : ParticleTypes.EFFECT;
+
+		for (int l = 0; l < 100; l++) {
+			double d = randomSource.nextDouble() * 4.0;
+			double e = randomSource.nextDouble() * Math.PI * 2.0;
+			double m = Math.cos(e) * d;
+			double n = 0.01 + randomSource.nextDouble() * 0.5;
+			double o = Math.sin(e) * d;
+			Particle particle = this.addParticleInternal(
+				particleOptions, particleOptions.getType().getOverrideLimiter(), vec3.x + m * 0.1, vec3.y + 0.3, vec3.z + o * 0.1, m, n, o
+			);
+			if (particle != null) {
+				float p = 0.75F + randomSource.nextFloat() * 0.25F;
+				particle.setColor(f * p, g * p, h * p);
+				particle.setPower((float)d);
+			}
+		}
+
+		this.level.playLocalSound(blockPos, SoundEvents.SPLASH_POTION_BREAK, SoundSource.NEUTRAL, 1.0F, randomSource.nextFloat() * 0.1F + 0.9F, false);
 	}
 
 	public void destroyBlockProgress(int i, BlockPos blockPos, int j) {

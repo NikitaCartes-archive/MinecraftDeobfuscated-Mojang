@@ -43,6 +43,8 @@ public class LevelEvent {
 	public static final int SOUND_SKELETON_TO_STRAY = 1048;
 	public static final int SOUND_CRAFTER_CRAFT = 1049;
 	public static final int SOUND_CRAFTER_FAIL = 1050;
+	public static final int SOUND_POTATO_ZOMBIE_INFECTED = 1051;
+	public static final int SOUND_POTATO_ZOMBIE_IRON_DOOR = 1052;
 	public static final int COMPOSTER_FILL = 1500;
 	public static final int LAVA_FIZZ = 1501;
 	public static final int REDSTONE_TORCH_BURNOUT = 1502;

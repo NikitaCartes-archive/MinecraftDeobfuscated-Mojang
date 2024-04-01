@@ -1,6 +1,7 @@
 package net.minecraft.world.level.levelgen.placement;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.stream.Stream;
 import java.util.stream.Stream.Builder;
 import net.minecraft.core.BlockPos;
@@ -13,22 +14,31 @@ import net.minecraft.world.level.levelgen.Heightmap;
 
 @Deprecated
 public class CountOnEveryLayerPlacement extends PlacementModifier {
-	public static final Codec<CountOnEveryLayerPlacement> CODEC = IntProvider.codec(0, 256)
-		.fieldOf("count")
-		.<CountOnEveryLayerPlacement>xmap(CountOnEveryLayerPlacement::new, countOnEveryLayerPlacement -> countOnEveryLayerPlacement.count)
-		.codec();
+	public static final Codec<CountOnEveryLayerPlacement> CODEC = RecordCodecBuilder.create(
+		instance -> instance.group(
+					IntProvider.codec(0, 256).fieldOf("count").forGetter(countOnEveryLayerPlacement -> countOnEveryLayerPlacement.count),
+					Codec.INT.fieldOf("start_offset").forGetter(countOnEveryLayerPlacement -> countOnEveryLayerPlacement.start_offset)
+				)
+				.apply(instance, CountOnEveryLayerPlacement::new)
+	);
 	private final IntProvider count;
+	private final int start_offset;
 
-	private CountOnEveryLayerPlacement(IntProvider intProvider) {
+	private CountOnEveryLayerPlacement(IntProvider intProvider, int i) {
+		this.start_offset = i;
 		this.count = intProvider;
 	}
 
 	public static CountOnEveryLayerPlacement of(IntProvider intProvider) {
-		return new CountOnEveryLayerPlacement(intProvider);
+		return new CountOnEveryLayerPlacement(intProvider, 0);
 	}
 
 	public static CountOnEveryLayerPlacement of(int i) {
 		return of(ConstantInt.of(i));
+	}
+
+	public static CountOnEveryLayerPlacement of(int i, int j) {
+		return new CountOnEveryLayerPlacement(ConstantInt.of(i), j);
 	}
 
 	@Override
@@ -43,7 +53,7 @@ public class CountOnEveryLayerPlacement extends PlacementModifier {
 			for (int j = 0; j < this.count.sample(randomSource); j++) {
 				int k = randomSource.nextInt(16) + blockPos.getX();
 				int l = randomSource.nextInt(16) + blockPos.getZ();
-				int m = placementContext.getHeight(Heightmap.Types.MOTION_BLOCKING, k, l);
+				int m = placementContext.getHeight(Heightmap.Types.MOTION_BLOCKING, k, l) + this.start_offset;
 				int n = findOnGroundYPosition(placementContext, k, m, l, i);
 				if (n != Integer.MAX_VALUE) {
 					builder.add(new BlockPos(k, n, l));

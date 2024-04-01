@@ -13,7 +13,8 @@ public enum Rarity implements StringRepresentable {
 	COMMON(0, "common", ChatFormatting.WHITE),
 	UNCOMMON(1, "uncommon", ChatFormatting.YELLOW),
 	RARE(2, "rare", ChatFormatting.AQUA),
-	EPIC(3, "epic", ChatFormatting.LIGHT_PURPLE);
+	EPIC(3, "epic", ChatFormatting.LIGHT_PURPLE),
+	POTATO(4, "potato", ChatFormatting.GREEN);
 
 	public static final Codec<Rarity> CODEC = StringRepresentable.fromValues(Rarity::values);
 	public static final IntFunction<Rarity> BY_ID = ByIdMap.continuous(rarity -> rarity.id, values(), ByIdMap.OutOfBoundsStrategy.ZERO);

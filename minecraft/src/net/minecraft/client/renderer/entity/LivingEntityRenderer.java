@@ -6,6 +6,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.logging.LogUtils;
 import com.mojang.math.Axis;
 import java.util.List;
+import java.util.function.UnaryOperator;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -136,9 +137,17 @@ public abstract class LivingEntityRenderer<T extends LivingEntity, M extends Ent
 		super.render(livingEntity, f, g, poseStack, multiBufferSource, i);
 	}
 
+	public static ResourceLocation potatoify(ResourceLocation resourceLocation) {
+		return resourceLocation.withPath((UnaryOperator<String>)(string -> string.replaceFirst(".png$", "_potato.png")));
+	}
+
 	@Nullable
 	protected RenderType getRenderType(T livingEntity, boolean bl, boolean bl2, boolean bl3) {
 		ResourceLocation resourceLocation = this.getTextureLocation(livingEntity);
+		if (livingEntity.hasPotatoVariant() && livingEntity.isPotato()) {
+			resourceLocation = potatoify(resourceLocation);
+		}
+
 		if (bl2) {
 			return RenderType.itemEntityTranslucentCull(resourceLocation);
 		} else if (bl) {

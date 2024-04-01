@@ -90,6 +90,11 @@ public class EnderMan extends Monster implements NeutralMob {
 	}
 
 	@Override
+	public boolean hasPotatoVariant() {
+		return true;
+	}
+
+	@Override
 	protected void registerGoals() {
 		this.goalSelector.addGoal(0, new FloatGoal(this));
 		this.goalSelector.addGoal(1, new EnderMan.EndermanFreezeWhenLookedAt(this));

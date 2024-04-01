@@ -13,6 +13,7 @@ import net.minecraft.network.protocol.game.ClientboundBossEventPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.BossEvent;
+import net.minecraft.world.phys.Vec3;
 
 @Environment(EnvType.CLIENT)
 public class BossHealthOverlay {
@@ -62,16 +63,18 @@ public class BossHealthOverlay {
 			int j = 12;
 
 			for (LerpingBossEvent lerpingBossEvent : this.events.values()) {
-				int k = i / 2 - 91;
-				this.drawBar(guiGraphics, k, j, lerpingBossEvent);
-				Component component = lerpingBossEvent.getName();
-				int m = this.minecraft.font.width(component);
-				int n = i / 2 - m / 2;
-				int o = j - 9;
-				guiGraphics.drawString(this.minecraft.font, component, n, o, 16777215);
-				j += 10 + 9;
-				if (j >= guiGraphics.guiHeight() / 3) {
-					break;
+				if (lerpingBossEvent.isActiveFor(this.minecraft.cameraEntity.position())) {
+					int k = i / 2 - 91;
+					this.drawBar(guiGraphics, k, j, lerpingBossEvent);
+					Component component = lerpingBossEvent.getName();
+					int m = this.minecraft.font.width(component);
+					int n = i / 2 - m / 2;
+					int o = j - 9;
+					guiGraphics.drawString(this.minecraft.font, component, n, o, 16777215);
+					j += 10 + 9;
+					if (j >= guiGraphics.guiHeight() / 3) {
+						break;
+					}
 				}
 			}
 
@@ -111,9 +114,11 @@ public class BossHealthOverlay {
 					BossEvent.BossBarOverlay bossBarOverlay,
 					boolean bl,
 					boolean bl2,
-					boolean bl3
+					boolean bl3,
+					Vec3 vec3,
+					int i
 				) {
-					BossHealthOverlay.this.events.put(uUID, new LerpingBossEvent(uUID, component, f, bossBarColor, bossBarOverlay, bl, bl2, bl3));
+					BossHealthOverlay.this.events.put(uUID, new LerpingBossEvent(uUID, component, f, bossBarColor, bossBarOverlay, bl, bl2, bl3, vec3, i));
 				}
 
 				@Override
@@ -129,6 +134,12 @@ public class BossHealthOverlay {
 				@Override
 				public void updateName(UUID uUID, Component component) {
 					((LerpingBossEvent)BossHealthOverlay.this.events.get(uUID)).setName(component);
+				}
+
+				@Override
+				public void updateLocation(UUID uUID, Vec3 vec3, int i) {
+					LerpingBossEvent lerpingBossEvent = (LerpingBossEvent)BossHealthOverlay.this.events.get(uUID);
+					lerpingBossEvent.setLocation(vec3, i);
 				}
 
 				@Override

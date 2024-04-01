@@ -6,6 +6,7 @@ import net.minecraft.util.StringRepresentable;
 public enum TerrainAdjustment implements StringRepresentable {
 	NONE("none"),
 	BURY("bury"),
+	BURY_PROPER("bury_proper"),
 	BEARD_THIN("beard_thin"),
 	BEARD_BOX("beard_box");
 

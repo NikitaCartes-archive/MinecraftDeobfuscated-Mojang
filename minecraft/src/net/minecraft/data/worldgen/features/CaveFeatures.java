@@ -24,6 +24,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CaveVines;
 import net.minecraft.world.level.block.CaveVinesBlock;
 import net.minecraft.world.level.block.MultifaceBlock;
+import net.minecraft.world.level.block.PointedDripstoneBlock;
 import net.minecraft.world.level.block.SmallDripleafBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -62,6 +63,7 @@ public class CaveFeatures {
 	public static final ResourceKey<ConfiguredFeature<?, ?>> FOSSIL_DIAMONDS = FeatureUtils.createKey("fossil_diamonds");
 	public static final ResourceKey<ConfiguredFeature<?, ?>> DRIPSTONE_CLUSTER = FeatureUtils.createKey("dripstone_cluster");
 	public static final ResourceKey<ConfiguredFeature<?, ?>> LARGE_DRIPSTONE = FeatureUtils.createKey("large_dripstone");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> LARGE_POTATOSTONE = FeatureUtils.createKey("large_potatostone");
 	public static final ResourceKey<ConfiguredFeature<?, ?>> POINTED_DRIPSTONE = FeatureUtils.createKey("pointed_dripstone");
 	public static final ResourceKey<ConfiguredFeature<?, ?>> UNDERWATER_MAGMA = FeatureUtils.createKey("underwater_magma");
 	public static final ResourceKey<ConfiguredFeature<?, ?>> GLOW_LICHEN = FeatureUtils.createKey("glow_lichen");
@@ -71,6 +73,8 @@ public class CaveFeatures {
 	public static final ResourceKey<ConfiguredFeature<?, ?>> MOSS_VEGETATION = FeatureUtils.createKey("moss_vegetation");
 	public static final ResourceKey<ConfiguredFeature<?, ?>> MOSS_PATCH = FeatureUtils.createKey("moss_patch");
 	public static final ResourceKey<ConfiguredFeature<?, ?>> MOSS_PATCH_BONEMEAL = FeatureUtils.createKey("moss_patch_bonemeal");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> POTATO_LEAF = FeatureUtils.createKey("potato_leaf");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> TWISTED_POTATO = FeatureUtils.createKey("twisted_potato");
 	public static final ResourceKey<ConfiguredFeature<?, ?>> DRIPLEAF = FeatureUtils.createKey("dripleaf");
 	public static final ResourceKey<ConfiguredFeature<?, ?>> CLAY_WITH_DRIPLEAVES = FeatureUtils.createKey("clay_with_dripleaves");
 	public static final ResourceKey<ConfiguredFeature<?, ?>> CLAY_POOL_WITH_DRIPLEAVES = FeatureUtils.createKey("clay_pool_with_dripleaves");
@@ -78,6 +82,7 @@ public class CaveFeatures {
 	public static final ResourceKey<ConfiguredFeature<?, ?>> MOSS_PATCH_CEILING = FeatureUtils.createKey("moss_patch_ceiling");
 	public static final ResourceKey<ConfiguredFeature<?, ?>> SPORE_BLOSSOM = FeatureUtils.createKey("spore_blossom");
 	public static final ResourceKey<ConfiguredFeature<?, ?>> AMETHYST_GEODE = FeatureUtils.createKey("amethyst_geode");
+	public static final ResourceKey<ConfiguredFeature<?, ?>> POTATO_GEODE = FeatureUtils.createKey("potato_geode");
 	public static final ResourceKey<ConfiguredFeature<?, ?>> SCULK_PATCH_DEEP_DARK = FeatureUtils.createKey("sculk_patch_deep_dark");
 	public static final ResourceKey<ConfiguredFeature<?, ?>> SCULK_PATCH_ANCIENT_CITY = FeatureUtils.createKey("sculk_patch_ancient_city");
 	public static final ResourceKey<ConfiguredFeature<?, ?>> SCULK_VEIN = FeatureUtils.createKey("sculk_vein");
@@ -182,7 +187,25 @@ public class CaveFeatures {
 				UniformFloat.of(0.4F, 1.0F),
 				UniformFloat.of(0.0F, 0.3F),
 				4,
-				0.6F
+				0.6F,
+				(PointedDripstoneBlock)Blocks.POINTED_DRIPSTONE
+			)
+		);
+		FeatureUtils.register(
+			bootstrapContext,
+			LARGE_POTATOSTONE,
+			Feature.LARGE_DRIPSTONE,
+			new LargeDripstoneConfiguration(
+				50,
+				UniformInt.of(6, 12),
+				UniformFloat.of(0.4F, 2.0F),
+				1.0F,
+				UniformFloat.of(0.3F, 0.9F),
+				UniformFloat.of(0.6F, 0.8F),
+				UniformFloat.of(0.2F, 0.3F),
+				4,
+				0.6F,
+				(PointedDripstoneBlock)Blocks.POTATO_BUD
 			)
 		);
 		FeatureUtils.register(
@@ -222,6 +245,7 @@ public class CaveFeatures {
 				HolderSet.direct(
 					Block::builtInRegistryHolder,
 					Blocks.STONE,
+					Blocks.POTONE,
 					Blocks.ANDESITE,
 					Blocks.DIORITE,
 					Blocks.GRANITE,
@@ -460,6 +484,35 @@ public class CaveFeatures {
 				1
 			)
 		);
+		FeatureUtils.register(
+			bootstrapContext,
+			POTATO_GEODE,
+			Feature.GEODE,
+			new GeodeConfiguration(
+				new GeodeBlockSettings(
+					BlockStateProvider.simple(Blocks.AIR),
+					BlockStateProvider.simple(Blocks.TERREDEPOMME),
+					BlockStateProvider.simple(Blocks.POISONOUS_POTATO_BLOCK),
+					BlockStateProvider.simple(Blocks.GRANITE),
+					BlockStateProvider.simple(Blocks.COBBLESTONE),
+					List.of(),
+					BlockTags.FEATURES_CANNOT_REPLACE,
+					BlockTags.GEODE_INVALID_BLOCKS
+				),
+				new GeodeLayerSettings(1.7, 2.2, 3.2, 4.2),
+				new GeodeCrackSettings(0.95, 2.0, 2),
+				0.35,
+				0.083,
+				true,
+				UniformInt.of(4, 6),
+				UniformInt.of(3, 4),
+				UniformInt.of(1, 2),
+				-16,
+				16,
+				0.05,
+				1
+			)
+		);
 		FeatureUtils.register(bootstrapContext, SCULK_PATCH_DEEP_DARK, Feature.SCULK_PATCH, new SculkPatchConfiguration(10, 32, 64, 0, 1, ConstantInt.of(0), 0.5F));
 		FeatureUtils.register(
 			bootstrapContext, SCULK_PATCH_ANCIENT_CITY, Feature.SCULK_PATCH, new SculkPatchConfiguration(10, 32, 64, 0, 1, UniformInt.of(1, 3), 0.5F)
@@ -479,6 +532,7 @@ public class CaveFeatures {
 				HolderSet.direct(
 					Block::builtInRegistryHolder,
 					Blocks.STONE,
+					Blocks.POTONE,
 					Blocks.ANDESITE,
 					Blocks.DIORITE,
 					Blocks.GRANITE,
@@ -489,5 +543,7 @@ public class CaveFeatures {
 				)
 			)
 		);
+		FeatureUtils.register(bootstrapContext, POTATO_LEAF, Feature.SIMPLE_BLOCK, new SimpleBlockConfiguration(BlockStateProvider.simple(Blocks.POTATO_LEAVES)));
+		FeatureUtils.register(bootstrapContext, TWISTED_POTATO, Feature.TWISTED_POTATO);
 	}
 }

@@ -208,6 +208,7 @@ import net.minecraft.util.FileZipper;
 import net.minecraft.util.MemoryReserve;
 import net.minecraft.util.ModCheck;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.SignatureValidator;
 import net.minecraft.util.TimeUtil;
 import net.minecraft.util.Unit;
@@ -349,6 +350,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	@Nullable
 	private Connection pendingConnection;
 	private boolean isLocalServer;
+	private final RandomSource randomSource = RandomSource.create();
 	@Nullable
 	public Entity cameraEntity;
 	@Nullable
@@ -2012,6 +2014,13 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 
 		if (this.screen == null && this.overlay == null && this.options.keyCommand.consumeClick()) {
 			this.openChatScreen("/");
+		}
+
+		while (this.options.keyPotato.consumeClick()) {
+			Minecraft.ChatStatus chatStatus = this.getChatStatus();
+			if (chatStatus.isChatAllowed(this.isLocalServer())) {
+				this.player.connection.sendChat("\ud83e\udd54".repeat(this.randomSource.nextIntBetweenInclusive(1, 6)));
+			}
 		}
 
 		boolean bl3 = false;

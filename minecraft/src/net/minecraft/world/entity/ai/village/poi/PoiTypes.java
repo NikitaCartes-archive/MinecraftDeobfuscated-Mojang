@@ -3,6 +3,7 @@ package net.minecraft.world.entity.ai.village.poi;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
+import java.util.Arrays;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
@@ -40,6 +41,8 @@ public class PoiTypes {
 	public static final ResourceKey<PoiType> NETHER_PORTAL = createKey("nether_portal");
 	public static final ResourceKey<PoiType> LODESTONE = createKey("lodestone");
 	public static final ResourceKey<PoiType> LIGHTNING_ROD = createKey("lightning_rod");
+	public static final ResourceKey<PoiType> POTATO_PORTAL = createKey("potato_portal");
+	public static final ResourceKey<PoiType> PEDESTAL = createKey("pedestal");
 	private static final Set<BlockState> BEDS = (Set<BlockState>)ImmutableList.of(
 			Blocks.RED_BED,
 			Blocks.BLACK_BED,
@@ -70,8 +73,10 @@ public class PoiTypes {
 		.collect(ImmutableSet.toImmutableSet());
 	private static final Map<BlockState, Holder<PoiType>> TYPE_BY_STATE = Maps.<BlockState, Holder<PoiType>>newHashMap();
 
-	private static Set<BlockState> getBlockStates(Block block) {
-		return ImmutableSet.copyOf(block.getStateDefinition().getPossibleStates());
+	private static Set<BlockState> getBlockStates(Block... blocks) {
+		return (Set<BlockState>)(blocks.length == 1
+			? ImmutableSet.copyOf(blocks[0].getStateDefinition().getPossibleStates())
+			: (Set)Arrays.stream(blocks).flatMap(block -> block.getStateDefinition().getPossibleStates().stream()).collect(ImmutableSet.toImmutableSet()));
 	}
 
 	private static ResourceKey<PoiType> createKey(String string) {
@@ -121,7 +126,9 @@ public class PoiTypes {
 		register(registry, BEEHIVE, getBlockStates(Blocks.BEEHIVE), 0, 1);
 		register(registry, BEE_NEST, getBlockStates(Blocks.BEE_NEST), 0, 1);
 		register(registry, NETHER_PORTAL, getBlockStates(Blocks.NETHER_PORTAL), 0, 1);
+		register(registry, POTATO_PORTAL, getBlockStates(Blocks.POTATO_PORTAL), 0, 1);
 		register(registry, LODESTONE, getBlockStates(Blocks.LODESTONE), 0, 1);
+		register(registry, PEDESTAL, getBlockStates(Blocks.PEDESTAL), 0, 1);
 		return register(registry, LIGHTNING_ROD, getBlockStates(Blocks.LIGHTNING_ROD), 0, 1);
 	}
 }

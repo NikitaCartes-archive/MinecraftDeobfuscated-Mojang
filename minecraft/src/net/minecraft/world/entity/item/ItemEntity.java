@@ -18,6 +18,7 @@ import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MoverType;
@@ -28,6 +29,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.LubricationComponent;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.Vec3;
 
@@ -151,6 +153,10 @@ public class ItemEntity extends Entity implements TraceableEntity {
 				float f = 0.98F;
 				if (this.onGround()) {
 					f = this.level().getBlockState(this.getBlockPosBelowThatAffectsMyMovement()).getBlock().getFriction() * 0.98F;
+					LubricationComponent lubricationComponent = this.getItem().get(DataComponents.LUBRICATION);
+					if (lubricationComponent != null) {
+						f = lubricationComponent.applyToFriction(f);
+					}
 				}
 
 				this.setDeltaMovement(this.getDeltaMovement().multiply((double)f, 0.98, (double)f));
@@ -199,6 +205,13 @@ public class ItemEntity extends Entity implements TraceableEntity {
 	private void setUnderLavaMovement() {
 		Vec3 vec3 = this.getDeltaMovement();
 		this.setDeltaMovement(vec3.x * 0.95F, vec3.y + (double)(vec3.y < 0.06F ? 5.0E-4F : 0.0F), vec3.z * 0.95F);
+		if (this.getItem().is(Items.HOT_POTATO)) {
+			this.setDeltaMovement(
+				vec3.x + ((double)this.random.nextFloat() - 0.5) * 0.21,
+				vec3.y + (double)this.random.nextFloat() * 0.1337,
+				vec3.z + ((double)this.random.nextFloat() - 0.5) * 0.21
+			);
+		}
 	}
 
 	private void mergeWithNeighbours() {
@@ -266,22 +279,35 @@ public class ItemEntity extends Entity implements TraceableEntity {
 	public boolean hurt(DamageSource damageSource, float f) {
 		if (this.isInvulnerableTo(damageSource)) {
 			return false;
-		} else if (!this.getItem().isEmpty() && this.getItem().is(Items.NETHER_STAR) && damageSource.is(DamageTypeTags.IS_EXPLOSION)) {
-			return false;
-		} else if (!this.getItem().canBeHurtBy(damageSource)) {
-			return false;
-		} else if (this.level().isClientSide) {
-			return true;
 		} else {
-			this.markHurt();
-			this.health = (int)((float)this.health - f);
-			this.gameEvent(GameEvent.ENTITY_DAMAGE, damageSource.getEntity());
-			if (this.health <= 0) {
-				this.getItem().onDestroyed(this);
-				this.discard();
-			}
+			ItemStack itemStack = this.getItem();
+			if (!itemStack.isEmpty() && itemStack.is(Items.NETHER_STAR) && damageSource.is(DamageTypeTags.IS_EXPLOSION)) {
+				return false;
+			} else if (!itemStack.canBeHurtBy(damageSource)) {
+				return false;
+			} else if (this.level().isClientSide) {
+				return true;
+			} else if (itemStack.is(ItemTags.HEATABLE_POTATOS) && damageSource.is(DamageTypes.LAVA)) {
+				this.setItem(itemStack.transmuteCopy(Items.HOT_POTATO, 1));
 
-			return true;
+				for (int i = 0; i < itemStack.getCount() - 1; i++) {
+					ItemEntity itemEntity = new ItemEntity(this);
+					itemEntity.getItem().setCount(1);
+					this.level().addFreshEntity(itemEntity);
+				}
+
+				return true;
+			} else {
+				this.markHurt();
+				this.health = (int)((float)this.health - f);
+				this.gameEvent(GameEvent.ENTITY_DAMAGE, damageSource.getEntity());
+				if (this.health <= 0) {
+					itemStack.onDestroyed(this);
+					this.discard();
+				}
+
+				return true;
+			}
 		}
 	}
 
@@ -364,8 +390,8 @@ public class ItemEntity extends Entity implements TraceableEntity {
 
 	@Nullable
 	@Override
-	public Entity changeDimension(ServerLevel serverLevel) {
-		Entity entity = super.changeDimension(serverLevel);
+	public Entity changeDimension(ServerLevel serverLevel, boolean bl) {
+		Entity entity = super.changeDimension(serverLevel, bl);
 		if (!this.level().isClientSide && entity instanceof ItemEntity) {
 			((ItemEntity)entity).mergeWithNeighbours();
 		}
