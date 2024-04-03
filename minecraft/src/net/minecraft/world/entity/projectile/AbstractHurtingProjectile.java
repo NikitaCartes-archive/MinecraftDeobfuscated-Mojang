@@ -19,6 +19,7 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 public abstract class AbstractHurtingProjectile extends Projectile {
+	public static final double DEFLECTION_SCALE = 0.05;
 	public double xPower;
 	public double yPower;
 	public double zPower;
@@ -79,7 +80,7 @@ public abstract class AbstractHurtingProjectile extends Projectile {
 
 			HitResult hitResult = ProjectileUtil.getHitResultOnMoveVector(this, this::canHitEntity, this.getClipType());
 			if (hitResult.getType() != HitResult.Type.MISS) {
-				this.onHit(hitResult);
+				this.hitOrDeflect(hitResult);
 			}
 
 			this.checkInsideBlocks();
@@ -227,5 +228,12 @@ public abstract class AbstractHurtingProjectile extends Projectile {
 			this.yPower = e / g * 0.1;
 			this.zPower = f / g * 0.1;
 		}
+	}
+
+	@Override
+	public void onDeflection() {
+		this.xPower = this.getDeltaMovement().x * 0.05;
+		this.yPower = this.getDeltaMovement().y * 0.05;
+		this.zPower = this.getDeltaMovement().z * 0.05;
 	}
 }

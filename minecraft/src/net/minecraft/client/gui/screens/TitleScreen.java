@@ -85,8 +85,6 @@ public class TitleScreen extends Screen {
 		if (this.realmsNotificationsEnabled()) {
 			this.realmsNotificationsScreen.tick();
 		}
-
-		this.minecraft.getRealms32BitWarningStatus().showRealms32BitWarningIfNeeded(this);
 	}
 
 	public static CompletableFuture<Void> preloadResources(TextureManager textureManager, Executor executor) {
@@ -151,12 +149,6 @@ public class TitleScreen extends Screen {
 
 		if (this.realmsNotificationsEnabled()) {
 			this.realmsNotificationsScreen.init(this.minecraft, this.width, this.height);
-		}
-
-		if (!this.minecraft.is64Bit()) {
-			this.warningLabel = new TitleScreen.WarningLabel(
-				this.font, MultiLineLabel.create(this.font, Component.translatable("title.32bit.deprecation"), 350, 2), this.width / 2, l - 24
-			);
 		}
 	}
 

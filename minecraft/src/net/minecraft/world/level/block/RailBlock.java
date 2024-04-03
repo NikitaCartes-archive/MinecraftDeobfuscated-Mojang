@@ -65,7 +65,7 @@ public class RailBlock extends BaseRailBlock {
 					case NORTH_EAST:
 						yield RailShape.SOUTH_WEST;
 					default:
-						throw new IncompatibleClassChangeError();
+						throw new MatchException(null, null);
 				}
 			}
 			case COUNTERCLOCKWISE_90 -> {
@@ -91,7 +91,7 @@ public class RailBlock extends BaseRailBlock {
 					case NORTH_EAST:
 						yield RailShape.NORTH_WEST;
 					default:
-						throw new IncompatibleClassChangeError();
+						throw new MatchException(null, null);
 				}
 			}
 			case CLOCKWISE_90 -> {
@@ -117,7 +117,7 @@ public class RailBlock extends BaseRailBlock {
 					case NORTH_EAST:
 						yield RailShape.SOUTH_EAST;
 					default:
-						throw new IncompatibleClassChangeError();
+						throw new MatchException(null, null);
 				}
 			}
 			default -> railShape;

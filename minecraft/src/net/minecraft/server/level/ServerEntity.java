@@ -16,6 +16,7 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBundlePacket;
 import net.minecraft.network.protocol.game.ClientboundMoveEntityPacket;
+import net.minecraft.network.protocol.game.ClientboundProjectilePowerPacket;
 import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
 import net.minecraft.network.protocol.game.ClientboundRotateHeadPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
@@ -35,6 +36,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.MapItem;
 import net.minecraft.world.level.saveddata.maps.MapId;
@@ -202,6 +204,14 @@ public class ServerEntity {
 		this.tickCount++;
 		if (this.entity.hurtMarked) {
 			this.broadcastAndSend(new ClientboundSetEntityMotionPacket(this.entity));
+			if (this.entity instanceof AbstractHurtingProjectile abstractHurtingProjectile) {
+				this.broadcastAndSend(
+					new ClientboundProjectilePowerPacket(
+						abstractHurtingProjectile.getId(), abstractHurtingProjectile.xPower, abstractHurtingProjectile.yPower, abstractHurtingProjectile.zPower
+					)
+				);
+			}
+
 			this.entity.hurtMarked = false;
 		}
 	}

@@ -277,10 +277,7 @@ public class Squid extends WaterAnimal {
 	}
 
 	class SquidRandomMovementGoal extends Goal {
-		private final Squid squid;
-
 		public SquidRandomMovementGoal(Squid squid2) {
-			this.squid = squid2;
 		}
 
 		@Override
@@ -290,15 +287,15 @@ public class Squid extends WaterAnimal {
 
 		@Override
 		public void tick() {
-			int i = this.squid.getNoActionTime();
+			int i = Squid.this.getNoActionTime();
 			if (i > 100) {
-				this.squid.setMovementVector(0.0F, 0.0F, 0.0F);
-			} else if (this.squid.getRandom().nextInt(reducedTickDelay(50)) == 0 || !this.squid.wasTouchingWater || !this.squid.hasMovementVector()) {
-				float f = this.squid.getRandom().nextFloat() * (float) (Math.PI * 2);
+				Squid.this.setMovementVector(0.0F, 0.0F, 0.0F);
+			} else if (Squid.this.getRandom().nextInt(reducedTickDelay(50)) == 0 || !Squid.this.wasTouchingWater || !Squid.this.hasMovementVector()) {
+				float f = Squid.this.getRandom().nextFloat() * (float) (Math.PI * 2);
 				float g = Mth.cos(f) * 0.2F;
-				float h = -0.1F + this.squid.getRandom().nextFloat() * 0.2F;
+				float h = -0.1F + Squid.this.getRandom().nextFloat() * 0.2F;
 				float j = Mth.sin(f) * 0.2F;
-				this.squid.setMovementVector(g, h, j);
+				Squid.this.setMovementVector(g, h, j);
 			}
 		}
 	}

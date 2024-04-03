@@ -1,9 +1,6 @@
 package net.minecraft.world.item;
 
 import com.google.common.base.Suppliers;
-import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.ImmutableMultimap.Builder;
 import com.mojang.serialization.Codec;
 import java.util.EnumMap;
 import java.util.List;
@@ -21,12 +18,13 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.DispenserBlock;
@@ -48,7 +46,7 @@ public class ArmorItem extends Item implements Equipable {
 	};
 	protected final ArmorItem.Type type;
 	protected final Holder<ArmorMaterial> material;
-	private final Supplier<Multimap<Holder<Attribute>, AttributeModifier>> defaultModifiers;
+	private final Supplier<ItemAttributeModifiers> defaultModifiers;
 
 	public static boolean dispenseArmor(BlockSource blockSource, ItemStack itemStack) {
 		BlockPos blockPos = blockSource.pos().relative(blockSource.state().getValue(DispenserBlock.FACING));
@@ -75,20 +73,29 @@ public class ArmorItem extends Item implements Equipable {
 		this.material = holder;
 		this.type = type;
 		DispenserBlock.registerBehavior(this, DISPENSE_ITEM_BEHAVIOR);
-		this.defaultModifiers = Suppliers.memoize(() -> {
-			int i = holder.value().getDefense(type);
-			float f = holder.value().toughness();
-			Builder<Holder<Attribute>, AttributeModifier> builder = ImmutableMultimap.builder();
-			UUID uUID = (UUID)ARMOR_MODIFIER_UUID_PER_TYPE.get(type);
-			builder.put(Attributes.ARMOR, new AttributeModifier(uUID, "Armor modifier", (double)i, AttributeModifier.Operation.ADD_VALUE));
-			builder.put(Attributes.ARMOR_TOUGHNESS, new AttributeModifier(uUID, "Armor toughness", (double)f, AttributeModifier.Operation.ADD_VALUE));
-			float g = holder.value().knockbackResistance();
-			if (g > 0.0F) {
-				builder.put(Attributes.KNOCKBACK_RESISTANCE, new AttributeModifier(uUID, "Armor knockback resistance", (double)g, AttributeModifier.Operation.ADD_VALUE));
-			}
+		this.defaultModifiers = Suppliers.memoize(
+			() -> {
+				int i = holder.value().getDefense(type);
+				float f = holder.value().toughness();
+				ItemAttributeModifiers.Builder builder = ItemAttributeModifiers.builder();
+				EquipmentSlotGroup equipmentSlotGroup = EquipmentSlotGroup.bySlot(type.getSlot());
+				UUID uUID = (UUID)ARMOR_MODIFIER_UUID_PER_TYPE.get(type);
+				builder.add(Attributes.ARMOR, new AttributeModifier(uUID, "Armor modifier", (double)i, AttributeModifier.Operation.ADD_VALUE), equipmentSlotGroup);
+				builder.add(
+					Attributes.ARMOR_TOUGHNESS, new AttributeModifier(uUID, "Armor toughness", (double)f, AttributeModifier.Operation.ADD_VALUE), equipmentSlotGroup
+				);
+				float g = holder.value().knockbackResistance();
+				if (g > 0.0F) {
+					builder.add(
+						Attributes.KNOCKBACK_RESISTANCE,
+						new AttributeModifier(uUID, "Armor knockback resistance", (double)g, AttributeModifier.Operation.ADD_VALUE),
+						equipmentSlotGroup
+					);
+				}
 
-			return builder.build();
-		});
+				return builder.build();
+			}
+		);
 	}
 
 	public ArmorItem.Type getType() {
@@ -115,8 +122,8 @@ public class ArmorItem extends Item implements Equipable {
 	}
 
 	@Override
-	public Multimap<Holder<Attribute>, AttributeModifier> getDefaultAttributeModifiers(EquipmentSlot equipmentSlot) {
-		return equipmentSlot == this.type.getSlot() ? (Multimap)this.defaultModifiers.get() : super.getDefaultAttributeModifiers(equipmentSlot);
+	public ItemAttributeModifiers getDefaultAttributeModifiers() {
+		return (ItemAttributeModifiers)this.defaultModifiers.get();
 	}
 
 	public int getDefense() {

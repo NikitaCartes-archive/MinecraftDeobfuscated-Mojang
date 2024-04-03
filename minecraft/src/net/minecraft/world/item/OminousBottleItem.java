@@ -1,7 +1,6 @@
 package net.minecraft.world.item;
 
 import java.util.List;
-import javax.annotation.Nullable;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
@@ -61,10 +60,10 @@ public class OminousBottleItem extends Item {
 	}
 
 	@Override
-	public void appendHoverText(ItemStack itemStack, @Nullable Level level, List<Component> list, TooltipFlag tooltipFlag) {
-		super.appendHoverText(itemStack, level, list, tooltipFlag);
+	public void appendHoverText(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Component> list, TooltipFlag tooltipFlag) {
+		super.appendHoverText(itemStack, tooltipContext, list, tooltipFlag);
 		Integer integer = itemStack.getOrDefault(DataComponents.OMINOUS_BOTTLE_AMPLIFIER, Integer.valueOf(0));
 		List<MobEffectInstance> list2 = List.of(new MobEffectInstance(MobEffects.BAD_OMEN, 120000, integer, false, false, true));
-		PotionContents.addPotionTooltip(list2, list::add, 1.0F, level == null ? 20.0F : level.tickRateManager().tickrate());
+		PotionContents.addPotionTooltip(list2, list::add, 1.0F, tooltipContext.tickRate());
 	}
 }

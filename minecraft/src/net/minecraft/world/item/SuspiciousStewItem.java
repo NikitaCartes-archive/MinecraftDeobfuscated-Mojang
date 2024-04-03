@@ -2,7 +2,6 @@ package net.minecraft.world.item;
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.Nullable;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -19,8 +18,8 @@ public class SuspiciousStewItem extends Item {
 	}
 
 	@Override
-	public void appendHoverText(ItemStack itemStack, @Nullable Level level, List<Component> list, TooltipFlag tooltipFlag) {
-		super.appendHoverText(itemStack, level, list, tooltipFlag);
+	public void appendHoverText(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Component> list, TooltipFlag tooltipFlag) {
+		super.appendHoverText(itemStack, tooltipContext, list, tooltipFlag);
 		if (tooltipFlag.isCreative()) {
 			List<MobEffectInstance> list2 = new ArrayList();
 			SuspiciousStewEffects suspiciousStewEffects = itemStack.getOrDefault(DataComponents.SUSPICIOUS_STEW_EFFECTS, SuspiciousStewEffects.EMPTY);
@@ -29,7 +28,7 @@ public class SuspiciousStewItem extends Item {
 				list2.add(entry.createEffectInstance());
 			}
 
-			PotionContents.addPotionTooltip(list2, list::add, 1.0F, level == null ? 20.0F : level.tickRateManager().tickrate());
+			PotionContents.addPotionTooltip(list2, list::add, 1.0F, tooltipContext.tickRate());
 		}
 	}
 

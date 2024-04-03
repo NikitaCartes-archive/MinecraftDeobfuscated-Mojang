@@ -46,6 +46,55 @@ public class ItemStackComponentizationFix extends DataFix {
 	private static final List<String> BUCKETED_MOB_TAGS = List.of(
 		"NoAI", "Silent", "NoGravity", "Glowing", "Invulnerable", "Health", "Age", "Variant", "HuntingCooldown", "BucketVariantTag"
 	);
+	private static final Set<String> BOOLEAN_BLOCK_STATE_PROPERTIES = Set.of(
+		"attached",
+		"bottom",
+		"conditional",
+		"disarmed",
+		"drag",
+		"enabled",
+		"extended",
+		"eye",
+		"falling",
+		"hanging",
+		"has_bottle_0",
+		"has_bottle_1",
+		"has_bottle_2",
+		"has_record",
+		"has_book",
+		"inverted",
+		"in_wall",
+		"lit",
+		"locked",
+		"occupied",
+		"open",
+		"persistent",
+		"powered",
+		"short",
+		"signal_fire",
+		"snowy",
+		"triggered",
+		"unstable",
+		"waterlogged",
+		"berries",
+		"bloom",
+		"shrieking",
+		"can_summon",
+		"up",
+		"down",
+		"north",
+		"east",
+		"south",
+		"west",
+		"slot_0_occupied",
+		"slot_1_occupied",
+		"slot_2_occupied",
+		"slot_3_occupied",
+		"slot_4_occupied",
+		"slot_5_occupied",
+		"cracked",
+		"crafting"
+	);
 	private static final Splitter PROPERTY_SPLITTER = Splitter.on(',');
 
 	public ItemStackComponentizationFix(Schema schema) {
@@ -167,15 +216,19 @@ public class ItemStackComponentizationFix extends DataFix {
 	}
 
 	private static Dynamic<?> fixBlockStateTag(Dynamic<?> dynamic) {
-		return dynamic.createMap(dynamic.asMap(dynamicx -> dynamicx, dynamicx -> {
-			Optional<Boolean> optional = dynamicx.asBoolean().result();
-			if (optional.isPresent()) {
-				return dynamicx.createString(String.valueOf(optional.get()));
-			} else {
-				Optional<Number> optional2 = dynamicx.asNumber().result();
-				return optional2.isPresent() ? dynamicx.createString(((Number)optional2.get()).toString()) : dynamicx;
-			}
-		}));
+		return DataFixUtils.orElse(dynamic.asMapOpt().result().map(stream -> (Map)stream.collect(Collectors.toMap(Pair::getFirst, pair -> {
+				String string = ((Dynamic)pair.getFirst()).asString("");
+				Dynamic<?> dynamicx = (Dynamic<?>)pair.getSecond();
+				if (BOOLEAN_BLOCK_STATE_PROPERTIES.contains(string)) {
+					Optional<Boolean> optional = dynamicx.asBoolean().result();
+					if (optional.isPresent()) {
+						return dynamicx.createString(String.valueOf(optional.get()));
+					}
+				}
+
+				Optional<Number> optional = dynamicx.asNumber().result();
+				return optional.isPresent() ? dynamicx.createString(((Number)optional.get()).toString()) : dynamicx;
+			}))).map(dynamic::createMap), dynamic);
 	}
 
 	private static Dynamic<?> fixDisplay(ItemStackComponentizationFix.ItemStackData itemStackData, Dynamic<?> dynamic, int i) {
@@ -262,13 +315,13 @@ public class ItemStackComponentizationFix extends DataFix {
 	}
 
 	private static void fixEnchantments(ItemStackComponentizationFix.ItemStackData itemStackData, Dynamic<?> dynamic, String string, String string2, boolean bl) {
-		List<? extends Dynamic<?>> list = itemStackData.removeTag(string).asList(Function.identity());
-		List<Pair<String, Integer>> list2 = list.stream().flatMap(dynamicx -> parseEnchantment(dynamicx).stream()).toList();
-		if (!list2.isEmpty() || bl) {
+		OptionalDynamic<?> optionalDynamic = itemStackData.removeTag(string);
+		List<Pair<String, Integer>> list = optionalDynamic.asList(Function.identity()).stream().flatMap(dynamicx -> parseEnchantment(dynamicx).stream()).toList();
+		if (!list.isEmpty() || bl) {
 			Dynamic<?> dynamic2 = dynamic.emptyMap();
 			Dynamic<?> dynamic3 = dynamic.emptyMap();
 
-			for (Pair<String, Integer> pair : list2) {
+			for (Pair<String, Integer> pair : list) {
 				dynamic3 = dynamic3.set(pair.getFirst(), dynamic.createInt(pair.getSecond()));
 			}
 
@@ -280,7 +333,7 @@ public class ItemStackComponentizationFix extends DataFix {
 			itemStackData.setComponent(string2, dynamic2);
 		}
 
-		if (!list.isEmpty() && list2.isEmpty()) {
+		if (optionalDynamic.result().isPresent() && list.isEmpty()) {
 			itemStackData.setComponent("minecraft:enchantment_glint_override", dynamic.createBoolean(true));
 		}
 	}
@@ -495,7 +548,7 @@ public class ItemStackComponentizationFix extends DataFix {
 	}
 
 	private static Dynamic<?> createFilteredText(Dynamic<?> dynamic, String string, Optional<String> optional) {
-		Dynamic<?> dynamic2 = dynamic.emptyMap().set("text", dynamic.createString(string));
+		Dynamic<?> dynamic2 = dynamic.emptyMap().set("raw", dynamic.createString(string));
 		if (optional.isPresent()) {
 			dynamic2 = dynamic2.set("filtered", dynamic.createString((String)optional.get()));
 		}

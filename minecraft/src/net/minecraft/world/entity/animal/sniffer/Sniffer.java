@@ -156,20 +156,22 @@ public class Sniffer extends Animal {
 			Sniffer.State state = this.getState();
 			this.resetAnimations();
 			switch (state) {
+				case FEELING_HAPPY:
+					this.feelingHappyAnimationState.startIfStopped(this.tickCount);
+					break;
 				case SCENTING:
 					this.scentingAnimationState.startIfStopped(this.tickCount);
 					break;
 				case SNIFFING:
 					this.sniffingAnimationState.startIfStopped(this.tickCount);
+				case SEARCHING:
+				default:
 					break;
 				case DIGGING:
 					this.diggingAnimationState.startIfStopped(this.tickCount);
 					break;
 				case RISING:
 					this.risingAnimationState.startIfStopped(this.tickCount);
-					break;
-				case FEELING_HAPPY:
-					this.feelingHappyAnimationState.startIfStopped(this.tickCount);
 			}
 
 			this.refreshDimensions();
@@ -188,6 +190,13 @@ public class Sniffer extends Animal {
 
 	public Sniffer transitionTo(Sniffer.State state) {
 		switch (state) {
+			case IDLING:
+				this.setState(Sniffer.State.IDLING);
+				break;
+			case FEELING_HAPPY:
+				this.playSound(SoundEvents.SNIFFER_HAPPY, 1.0F, 1.0F);
+				this.setState(Sniffer.State.FEELING_HAPPY);
+				break;
 			case SCENTING:
 				this.setState(Sniffer.State.SCENTING).onScentingStart();
 				break;
@@ -195,22 +204,15 @@ public class Sniffer extends Animal {
 				this.playSound(SoundEvents.SNIFFER_SNIFFING, 1.0F, 1.0F);
 				this.setState(Sniffer.State.SNIFFING);
 				break;
+			case SEARCHING:
+				this.setState(Sniffer.State.SEARCHING);
+				break;
 			case DIGGING:
 				this.setState(Sniffer.State.DIGGING).onDiggingStart();
 				break;
 			case RISING:
 				this.playSound(SoundEvents.SNIFFER_DIGGING_STOP, 1.0F, 1.0F);
 				this.setState(Sniffer.State.RISING);
-				break;
-			case FEELING_HAPPY:
-				this.playSound(SoundEvents.SNIFFER_HAPPY, 1.0F, 1.0F);
-				this.setState(Sniffer.State.FEELING_HAPPY);
-				break;
-			case IDLING:
-				this.setState(Sniffer.State.IDLING);
-				break;
-			case SEARCHING:
-				this.setState(Sniffer.State.SEARCHING);
 		}
 
 		return this;
@@ -349,11 +351,11 @@ public class Sniffer extends Animal {
 	@Override
 	public void tick() {
 		switch (this.getState()) {
-			case DIGGING:
-				this.emitDiggingParticles(this.diggingAnimationState).dropSeed();
-				break;
 			case SEARCHING:
 				this.playSearchingSound();
+				break;
+			case DIGGING:
+				this.emitDiggingParticles(this.diggingAnimationState).dropSeed();
 		}
 
 		super.tick();

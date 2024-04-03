@@ -1186,6 +1186,16 @@ public abstract class BlockBehaviour implements FeatureElement {
 
 		public BlockBehaviour.Properties offsetType(BlockBehaviour.OffsetType offsetType) {
 			switch (offsetType) {
+				case XZ:
+					this.offsetFunction = Optional.of((BlockBehaviour.OffsetFunction)(blockState, blockGetter, blockPos) -> {
+						Block block = blockState.getBlock();
+						long l = Mth.getSeed(blockPos.getX(), 0, blockPos.getZ());
+						float f = block.getMaxHorizontalOffset();
+						double d = Mth.clamp(((double)((float)(l & 15L) / 15.0F) - 0.5) * 0.5, (double)(-f), (double)f);
+						double e = Mth.clamp(((double)((float)(l >> 8 & 15L) / 15.0F) - 0.5) * 0.5, (double)(-f), (double)f);
+						return new Vec3(d, 0.0, e);
+					});
+					break;
 				case XYZ:
 					this.offsetFunction = Optional.of((BlockBehaviour.OffsetFunction)(blockState, blockGetter, blockPos) -> {
 						Block block = blockState.getBlock();
@@ -1195,16 +1205,6 @@ public abstract class BlockBehaviour implements FeatureElement {
 						double e = Mth.clamp(((double)((float)(l & 15L) / 15.0F) - 0.5) * 0.5, (double)(-f), (double)f);
 						double g = Mth.clamp(((double)((float)(l >> 8 & 15L) / 15.0F) - 0.5) * 0.5, (double)(-f), (double)f);
 						return new Vec3(e, d, g);
-					});
-					break;
-				case XZ:
-					this.offsetFunction = Optional.of((BlockBehaviour.OffsetFunction)(blockState, blockGetter, blockPos) -> {
-						Block block = blockState.getBlock();
-						long l = Mth.getSeed(blockPos.getX(), 0, blockPos.getZ());
-						float f = block.getMaxHorizontalOffset();
-						double d = Mth.clamp(((double)((float)(l & 15L) / 15.0F) - 0.5) * 0.5, (double)(-f), (double)f);
-						double e = Mth.clamp(((double)((float)(l >> 8 & 15L) / 15.0F) - 0.5) * 0.5, (double)(-f), (double)f);
-						return new Vec3(d, 0.0, e);
 					});
 					break;
 				default:

@@ -185,7 +185,9 @@ public class Breeze extends Monster {
 
 	@Override
 	public ProjectileDeflection deflection(Projectile projectile) {
-		return projectile.getType() == EntityType.BREEZE_WIND_CHARGE ? ProjectileDeflection.NONE : PROJECTILE_DEFLECTION;
+		return projectile.getType() != EntityType.BREEZE_WIND_CHARGE && projectile.getType() != EntityType.WIND_CHARGE
+			? PROJECTILE_DEFLECTION
+			: ProjectileDeflection.NONE;
 	}
 
 	@Override

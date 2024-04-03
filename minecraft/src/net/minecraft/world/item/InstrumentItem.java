@@ -3,7 +3,6 @@ package net.minecraft.world.item;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
-import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.core.Holder;
@@ -32,8 +31,8 @@ public class InstrumentItem extends Item {
 	}
 
 	@Override
-	public void appendHoverText(ItemStack itemStack, @Nullable Level level, List<Component> list, TooltipFlag tooltipFlag) {
-		super.appendHoverText(itemStack, level, list, tooltipFlag);
+	public void appendHoverText(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Component> list, TooltipFlag tooltipFlag) {
+		super.appendHoverText(itemStack, tooltipContext, list, tooltipFlag);
 		Optional<ResourceKey<Instrument>> optional = this.getInstrument(itemStack).flatMap(Holder::unwrapKey);
 		if (optional.isPresent()) {
 			MutableComponent mutableComponent = Component.translatable(Util.makeDescriptionId("instrument", ((ResourceKey)optional.get()).location()));
@@ -55,9 +54,9 @@ public class InstrumentItem extends Item {
 	@Override
 	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
-		Holder<Instrument> holder = itemStack.get(DataComponents.INSTRUMENT);
-		if (holder != null) {
-			Instrument instrument = holder.value();
+		Optional<? extends Holder<Instrument>> optional = this.getInstrument(itemStack);
+		if (optional.isPresent()) {
+			Instrument instrument = (Instrument)((Holder)optional.get()).value();
 			player.startUsingItem(interactionHand);
 			play(level, player, instrument);
 			player.getCooldowns().addCooldown(this, instrument.useDuration());

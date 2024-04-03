@@ -387,7 +387,7 @@ public class KeyboardHandler {
 			if (k != 0) {
 				boolean bl2 = screen == null || !(screen.getFocused() instanceof EditBox) || !((EditBox)screen.getFocused()).canConsumeInput();
 				if (bl2) {
-					if (Screen.hasControlDown() && i == 66 && this.minecraft.getNarrator().isActive()) {
+					if (Screen.hasControlDown() && i == 66 && this.minecraft.getNarrator().isActive() && this.minecraft.options.narratorHotkey().get()) {
 						boolean bl3 = this.minecraft.options.narrator().get() == NarratorStatus.OFF;
 						this.minecraft.options.narrator().set(NarratorStatus.byId(this.minecraft.options.narrator().get().getId() + 1));
 						this.minecraft.options.save();
@@ -422,17 +422,17 @@ public class KeyboardHandler {
 			InputConstants.Key key;
 			boolean bl3x;
 			boolean var10000;
-			label185: {
+			label187: {
 				key = InputConstants.getKey(i, j);
 				bl3x = this.minecraft.screen == null;
-				label145:
+				label147:
 				if (!bl3x) {
 					if (this.minecraft.screen instanceof PauseScreen pauseScreen && !pauseScreen.showsPauseMenu()) {
-						break label145;
+						break label147;
 					}
 
 					var10000 = false;
-					break label185;
+					break label187;
 				}
 
 				var10000 = true;

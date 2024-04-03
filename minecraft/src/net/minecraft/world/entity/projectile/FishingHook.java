@@ -250,7 +250,7 @@ public class FishingHook extends Projectile {
 
 	private void checkCollision() {
 		HitResult hitResult = ProjectileUtil.getHitResultOnMoveVector(this, this::canHitEntity);
-		this.onHit(hitResult);
+		this.hitOrDeflect(hitResult);
 	}
 
 	@Override
@@ -384,8 +384,6 @@ public class FishingHook extends Projectile {
 		for (int i = -1; i <= 2; i++) {
 			FishingHook.OpenWaterType openWaterType2 = this.getOpenWaterTypeForArea(blockPos.offset(-2, i, -2), blockPos.offset(2, i, 2));
 			switch (openWaterType2) {
-				case INVALID:
-					return false;
 				case ABOVE_WATER:
 					if (openWaterType == FishingHook.OpenWaterType.INVALID) {
 						return false;
@@ -395,6 +393,9 @@ public class FishingHook extends Projectile {
 					if (openWaterType == FishingHook.OpenWaterType.ABOVE_WATER) {
 						return false;
 					}
+					break;
+				case INVALID:
+					return false;
 			}
 
 			openWaterType = openWaterType2;

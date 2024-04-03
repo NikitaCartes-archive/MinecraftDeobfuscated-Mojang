@@ -103,6 +103,23 @@ public class ParrotModel extends HierarchicalModel<Parrot> {
 		this.rightWing.x = -1.5F;
 		this.leftWing.x = 1.5F;
 		switch (state) {
+			case STANDING:
+				this.leftLeg.xRot = this.leftLeg.xRot + Mth.cos(f * 0.6662F) * 1.4F * g;
+				this.rightLeg.xRot = this.rightLeg.xRot + Mth.cos(f * 0.6662F + (float) Math.PI) * 1.4F * g;
+			case FLYING:
+			case ON_SHOULDER:
+			default:
+				float n = h * 0.3F;
+				this.head.y = 15.69F + n;
+				this.tail.xRot = 1.015F + Mth.cos(f * 0.6662F) * 0.3F * g;
+				this.tail.y = 21.07F + n;
+				this.body.y = 16.5F + n;
+				this.leftWing.zRot = -0.0873F - h;
+				this.leftWing.y = 16.94F + n;
+				this.rightWing.zRot = 0.0873F + h;
+				this.rightWing.y = 16.94F + n;
+				this.leftLeg.y = 22.0F + n;
+				this.rightLeg.y = 22.0F + n;
 			case SITTING:
 				break;
 			case PARTY:
@@ -123,24 +140,6 @@ public class ParrotModel extends HierarchicalModel<Parrot> {
 				this.rightWing.y = 16.94F + m;
 				this.tail.x = l;
 				this.tail.y = 21.07F + m;
-				break;
-			case STANDING:
-				this.leftLeg.xRot = this.leftLeg.xRot + Mth.cos(f * 0.6662F) * 1.4F * g;
-				this.rightLeg.xRot = this.rightLeg.xRot + Mth.cos(f * 0.6662F + (float) Math.PI) * 1.4F * g;
-			case FLYING:
-			case ON_SHOULDER:
-			default:
-				float n = h * 0.3F;
-				this.head.y = 15.69F + n;
-				this.tail.xRot = 1.015F + Mth.cos(f * 0.6662F) * 0.3F * g;
-				this.tail.y = 21.07F + n;
-				this.body.y = 16.5F + n;
-				this.leftWing.zRot = -0.0873F - h;
-				this.leftWing.y = 16.94F + n;
-				this.rightWing.zRot = 0.0873F + h;
-				this.rightWing.y = 16.94F + n;
-				this.leftLeg.y = 22.0F + n;
-				this.rightLeg.y = 22.0F + n;
 		}
 	}
 
@@ -158,6 +157,13 @@ public class ParrotModel extends HierarchicalModel<Parrot> {
 		this.leftLeg.zRot = 0.0F;
 		this.rightLeg.zRot = 0.0F;
 		switch (state) {
+			case FLYING:
+				this.leftLeg.xRot += (float) (Math.PI * 2.0 / 9.0);
+				this.rightLeg.xRot += (float) (Math.PI * 2.0 / 9.0);
+			case STANDING:
+			case ON_SHOULDER:
+			default:
+				break;
 			case SITTING:
 				float f = 1.9F;
 				this.head.y = 17.59F;
@@ -176,13 +182,6 @@ public class ParrotModel extends HierarchicalModel<Parrot> {
 			case PARTY:
 				this.leftLeg.zRot = (float) (-Math.PI / 9);
 				this.rightLeg.zRot = (float) (Math.PI / 9);
-			case STANDING:
-			case ON_SHOULDER:
-			default:
-				break;
-			case FLYING:
-				this.leftLeg.xRot += (float) (Math.PI * 2.0 / 9.0);
-				this.rightLeg.xRot += (float) (Math.PI * 2.0 / 9.0);
 		}
 	}
 

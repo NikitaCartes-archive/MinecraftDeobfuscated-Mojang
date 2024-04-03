@@ -90,7 +90,7 @@ public class ItemCommands {
 																		)
 																)
 																.then(
-																	Commands.argument("count", IntegerArgumentType.integer(1, 64))
+																	Commands.argument("count", IntegerArgumentType.integer(1, 99))
 																		.executes(
 																			commandContext -> setBlockItem(
 																					commandContext.getSource(),
@@ -191,7 +191,7 @@ public class ItemCommands {
 																		)
 																)
 																.then(
-																	Commands.argument("count", IntegerArgumentType.integer(1, 64))
+																	Commands.argument("count", IntegerArgumentType.integer(1, 99))
 																		.executes(
 																			commandContext -> setEntityItem(
 																					commandContext.getSource(),

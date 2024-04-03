@@ -213,5 +213,6 @@ public class GameProtocols {
 				.addPacket(GamePacketTypes.CLIENTBOUND_UPDATE_MOB_EFFECT, ClientboundUpdateMobEffectPacket.STREAM_CODEC)
 				.addPacket(GamePacketTypes.CLIENTBOUND_UPDATE_RECIPES, ClientboundUpdateRecipesPacket.STREAM_CODEC)
 				.addPacket(CommonPacketTypes.CLIENTBOUND_UPDATE_TAGS, ClientboundUpdateTagsPacket.STREAM_CODEC)
+				.addPacket(GamePacketTypes.CLIENTBOUND_PROJECTILE_POWER, ClientboundProjectilePowerPacket.STREAM_CODEC)
 	);
 }

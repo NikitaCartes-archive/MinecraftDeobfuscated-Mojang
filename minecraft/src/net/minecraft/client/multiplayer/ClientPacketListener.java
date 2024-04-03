@@ -166,6 +166,7 @@ import net.minecraft.network.protocol.game.ClientboundPlayerInfoRemovePacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerLookAtPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
+import net.minecraft.network.protocol.game.ClientboundProjectilePowerPacket;
 import net.minecraft.network.protocol.game.ClientboundRecipePacket;
 import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
 import net.minecraft.network.protocol.game.ClientboundRemoveMobEffectPacket;
@@ -267,6 +268,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.ProfileKeyPair;
 import net.minecraft.world.entity.player.ProfilePublicKey;
+import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.flag.FeatureFlagSet;
@@ -2291,6 +2293,16 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 
 		for (Packet<? super ClientGamePacketListener> packet : clientboundBundlePacket.subPackets()) {
 			packet.handle(this);
+		}
+	}
+
+	@Override
+	public void handleProjectilePowerPacket(ClientboundProjectilePowerPacket clientboundProjectilePowerPacket) {
+		PacketUtils.ensureRunningOnSameThread(clientboundProjectilePowerPacket, this, this.minecraft);
+		if (this.level.getEntity(clientboundProjectilePowerPacket.getId()) instanceof AbstractHurtingProjectile abstractHurtingProjectile) {
+			abstractHurtingProjectile.xPower = clientboundProjectilePowerPacket.getXPower();
+			abstractHurtingProjectile.yPower = clientboundProjectilePowerPacket.getYPower();
+			abstractHurtingProjectile.zPower = clientboundProjectilePowerPacket.getZPower();
 		}
 	}
 

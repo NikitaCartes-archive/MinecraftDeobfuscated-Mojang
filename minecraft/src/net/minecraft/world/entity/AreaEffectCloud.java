@@ -95,8 +95,11 @@ public class AreaEffectCloud extends Entity implements TraceableEntity {
 	}
 
 	private void updateColor() {
-		int i = this.potionContents.equals(PotionContents.EMPTY) ? 0 : this.potionContents.getColor();
-		this.entityData.set(DATA_PARTICLE, ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, i));
+		ParticleOptions particleOptions = this.entityData.get(DATA_PARTICLE);
+		if (particleOptions instanceof ColorParticleOption colorParticleOption) {
+			int i = this.potionContents.equals(PotionContents.EMPTY) ? 0 : this.potionContents.getColor();
+			this.entityData.set(DATA_PARTICLE, ColorParticleOption.create(colorParticleOption.getType(), i));
+		}
 	}
 
 	public void addEffect(MobEffectInstance mobEffectInstance) {
@@ -154,10 +157,16 @@ public class AreaEffectCloud extends Entity implements TraceableEntity {
 				double d = this.getX() + (double)(Mth.cos(h) * k);
 				double e = this.getY();
 				double l = this.getZ() + (double)(Mth.sin(h) * k);
-				if (bl && this.random.nextBoolean()) {
-					this.level().addAlwaysVisibleParticle(ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, -1), d, e, l, 0.0, 0.0, 0.0);
-				} else {
+				if (particleOptions.getType() == ParticleTypes.ENTITY_EFFECT) {
+					if (bl && this.random.nextBoolean()) {
+						this.level().addAlwaysVisibleParticle(ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, -1), d, e, l, 0.0, 0.0, 0.0);
+					} else {
+						this.level().addAlwaysVisibleParticle(particleOptions, d, e, l, 0.0, 0.0, 0.0);
+					}
+				} else if (bl) {
 					this.level().addAlwaysVisibleParticle(particleOptions, d, e, l, 0.0, 0.0, 0.0);
+				} else {
+					this.level().addAlwaysVisibleParticle(particleOptions, d, e, l, (0.5 - this.random.nextDouble()) * 0.15, 0.01F, (0.5 - this.random.nextDouble()) * 0.15);
 				}
 			}
 		} else {

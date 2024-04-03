@@ -51,6 +51,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.Music;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.StringUtil;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import org.slf4j.Logger;
@@ -241,7 +242,11 @@ public abstract class Screen extends AbstractContainerEventHandler implements Re
 	}
 
 	public static List<Component> getTooltipFromItem(Minecraft minecraft, ItemStack itemStack) {
-		return itemStack.getTooltipLines(minecraft.player, minecraft.options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL);
+		return itemStack.getTooltipLines(
+			Item.TooltipContext.of(minecraft.level),
+			minecraft.player,
+			minecraft.options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL
+		);
 	}
 
 	protected void insertText(String string, boolean bl) {

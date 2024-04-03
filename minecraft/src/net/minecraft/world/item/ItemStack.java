@@ -643,7 +643,7 @@ public final class ItemStack implements DataComponentHolder {
 		}
 	}
 
-	public List<Component> getTooltipLines(@Nullable Player player, TooltipFlag tooltipFlag) {
+	public List<Component> getTooltipLines(Item.TooltipContext tooltipContext, @Nullable Player player, TooltipFlag tooltipFlag) {
 		if (!tooltipFlag.isCreative() && this.has(DataComponents.HIDE_TOOLTIP)) {
 			return List.of();
 		} else {
@@ -663,7 +663,7 @@ public final class ItemStack implements DataComponentHolder {
 
 			Consumer<Component> consumer = list::add;
 			if (!this.has(DataComponents.HIDE_ADDITIONAL_TOOLTIP)) {
-				this.getItem().appendHoverText(this, player == null ? null : player.level(), list, tooltipFlag);
+				this.getItem().appendHoverText(this, tooltipContext, list, tooltipFlag);
 			}
 
 			this.addToTooltip(DataComponents.TRIM, consumer, tooltipFlag);
@@ -846,7 +846,7 @@ public final class ItemStack implements DataComponentHolder {
 		if (!itemAttributeModifiers.modifiers().isEmpty()) {
 			itemAttributeModifiers.forEach(equipmentSlot, biConsumer);
 		} else {
-			this.getItem().getDefaultAttributeModifiers(equipmentSlot).forEach(biConsumer);
+			this.getItem().getDefaultAttributeModifiers().forEach(equipmentSlot, biConsumer);
 		}
 	}
 

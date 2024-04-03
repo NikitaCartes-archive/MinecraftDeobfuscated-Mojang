@@ -471,7 +471,7 @@ public class SectionRenderDispatcher {
 			protected final AtomicBoolean isCancelled = new AtomicBoolean(false);
 			protected final boolean isHighPriority;
 
-			public CompileTask(double d, boolean bl) {
+			public CompileTask(SectionRenderDispatcher.RenderSection renderSection, double d, boolean bl) {
 				this.distAtCreation = d;
 				this.isHighPriority = bl;
 			}
@@ -493,7 +493,7 @@ public class SectionRenderDispatcher {
 			protected RenderChunkRegion region;
 
 			public RebuildTask(double d, @Nullable RenderChunkRegion renderChunkRegion, boolean bl) {
-				super(d, bl);
+				super(RenderSection.this, d, bl);
 				this.region = renderChunkRegion;
 			}
 
@@ -662,7 +662,7 @@ public class SectionRenderDispatcher {
 			private final SectionRenderDispatcher.CompiledSection compiledSection;
 
 			public ResortTransparencyTask(double d, SectionRenderDispatcher.CompiledSection compiledSection) {
-				super(d, true);
+				super(RenderSection.this, d, true);
 				this.compiledSection = compiledSection;
 			}
 

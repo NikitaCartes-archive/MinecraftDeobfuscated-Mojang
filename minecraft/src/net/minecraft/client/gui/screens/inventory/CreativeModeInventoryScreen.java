@@ -658,7 +658,7 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 		boolean bl3 = selectedTab.getType() == CreativeModeTab.Type.SEARCH;
 		TooltipFlag.Default default_ = this.minecraft.options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL;
 		TooltipFlag tooltipFlag = bl ? default_.asCreative() : default_;
-		List<Component> list = itemStack.getTooltipLines(this.minecraft.player, tooltipFlag);
+		List<Component> list = itemStack.getTooltipLines(Item.TooltipContext.of(this.minecraft.level), this.minecraft.player, tooltipFlag);
 		if (bl2 && bl) {
 			return list;
 		} else {

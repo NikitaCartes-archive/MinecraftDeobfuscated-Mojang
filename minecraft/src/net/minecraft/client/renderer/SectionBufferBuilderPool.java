@@ -13,7 +13,6 @@ import org.slf4j.Logger;
 @Environment(EnvType.CLIENT)
 public class SectionBufferBuilderPool {
 	private static final Logger LOGGER = LogUtils.getLogger();
-	public static final int MAX_BUILDERS_32_BIT = 4;
 	private final Queue<SectionBufferBuilderPack> freeBuffers;
 	private volatile int freeBufferCount;
 

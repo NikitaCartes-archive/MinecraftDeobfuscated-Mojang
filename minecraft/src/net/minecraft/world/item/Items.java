@@ -1500,7 +1500,13 @@ public class Items {
 	);
 	public static final Item MACE = registerItem(
 		"mace",
-		new MaceItem(new Item.Properties().durability(250).component(DataComponents.TOOL, MaceItem.createToolProperties()).requiredFeatures(FeatureFlags.UPDATE_1_21))
+		new MaceItem(
+			new Item.Properties()
+				.durability(250)
+				.component(DataComponents.TOOL, MaceItem.createToolProperties())
+				.attributes(MaceItem.createAttributes())
+				.requiredFeatures(FeatureFlags.UPDATE_1_21)
+		)
 	);
 	public static final Item ITEM_FRAME = registerItem("item_frame", new ItemFrameItem(EntityType.ITEM_FRAME, new Item.Properties()));
 	public static final Item GLOW_ITEM_FRAME = registerItem("glow_item_frame", new ItemFrameItem(EntityType.GLOW_ITEM_FRAME, new Item.Properties()));

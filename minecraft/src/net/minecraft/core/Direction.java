@@ -140,8 +140,8 @@ public enum Direction implements StringRepresentable {
 	public static Direction getFacingAxis(Entity entity, Direction.Axis axis) {
 		return switch (axis) {
 			case X -> EAST.isFacingAngle(entity.getViewYRot(1.0F)) ? EAST : WEST;
-			case Z -> SOUTH.isFacingAngle(entity.getViewYRot(1.0F)) ? SOUTH : NORTH;
 			case Y -> entity.getViewXRot(1.0F) < 0.0F ? UP : DOWN;
+			case Z -> SOUTH.isFacingAngle(entity.getViewYRot(1.0F)) ? SOUTH : NORTH;
 		};
 	}
 
@@ -152,16 +152,16 @@ public enum Direction implements StringRepresentable {
 	public Direction getClockWise(Direction.Axis axis) {
 		return switch (axis) {
 			case X -> this != WEST && this != EAST ? this.getClockWiseX() : this;
-			case Z -> this != NORTH && this != SOUTH ? this.getClockWiseZ() : this;
 			case Y -> this != UP && this != DOWN ? this.getClockWise() : this;
+			case Z -> this != NORTH && this != SOUTH ? this.getClockWiseZ() : this;
 		};
 	}
 
 	public Direction getCounterClockWise(Direction.Axis axis) {
 		return switch (axis) {
 			case X -> this != WEST && this != EAST ? this.getCounterClockWiseX() : this;
-			case Z -> this != NORTH && this != SOUTH ? this.getCounterClockWiseZ() : this;
 			case Y -> this != UP && this != DOWN ? this.getCounterClockWise() : this;
+			case Z -> this != NORTH && this != SOUTH ? this.getCounterClockWiseZ() : this;
 		};
 	}
 
@@ -298,8 +298,8 @@ public enum Direction implements StringRepresentable {
 	public static Direction fromAxisAndDirection(Direction.Axis axis, Direction.AxisDirection axisDirection) {
 		return switch (axis) {
 			case X -> axisDirection == Direction.AxisDirection.POSITIVE ? EAST : WEST;
-			case Z -> axisDirection == Direction.AxisDirection.POSITIVE ? SOUTH : NORTH;
 			case Y -> axisDirection == Direction.AxisDirection.POSITIVE ? UP : DOWN;
+			case Z -> axisDirection == Direction.AxisDirection.POSITIVE ? SOUTH : NORTH;
 		};
 	}
 

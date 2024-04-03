@@ -980,26 +980,23 @@ public class Fox extends Animal implements VariantHolder<Fox.Type> {
 	}
 
 	class FoxFollowParentGoal extends FollowParentGoal {
-		private final Fox fox;
-
 		public FoxFollowParentGoal(Fox fox2, double d) {
 			super(fox2, d);
-			this.fox = fox2;
 		}
 
 		@Override
 		public boolean canUse() {
-			return !this.fox.isDefending() && super.canUse();
+			return !Fox.this.isDefending() && super.canUse();
 		}
 
 		@Override
 		public boolean canContinueToUse() {
-			return !this.fox.isDefending() && super.canContinueToUse();
+			return !Fox.this.isDefending() && super.canContinueToUse();
 		}
 
 		@Override
 		public void start() {
-			this.fox.clearStates();
+			Fox.this.clearStates();
 			super.start();
 		}
 	}

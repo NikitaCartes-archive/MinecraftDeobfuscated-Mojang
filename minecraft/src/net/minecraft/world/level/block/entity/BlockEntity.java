@@ -104,6 +104,12 @@ public abstract class BlockEntity {
 		return compoundTag;
 	}
 
+	public final CompoundTag saveCustomAndMetadata(HolderLookup.Provider provider) {
+		CompoundTag compoundTag = this.saveCustomOnly(provider);
+		this.saveMetadata(compoundTag);
+		return compoundTag;
+	}
+
 	private void saveId(CompoundTag compoundTag) {
 		ResourceLocation resourceLocation = BlockEntityType.getKey(this.getType());
 		if (resourceLocation == null) {

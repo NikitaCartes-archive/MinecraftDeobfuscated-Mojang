@@ -712,15 +712,8 @@ public class Raid {
 		boolean bl3 = difficulty == Difficulty.NORMAL;
 		int j;
 		switch (raiderType) {
-			case WITCH:
-				if (bl2 || i <= 2 || i == 4) {
-					return 0;
-				}
-
-				j = 1;
-				break;
-			case PILLAGER:
 			case VINDICATOR:
+			case PILLAGER:
 				if (bl2) {
 					j = randomSource.nextInt(2);
 				} else if (bl3) {
@@ -729,11 +722,18 @@ public class Raid {
 					j = 2;
 				}
 				break;
-			case RAVAGER:
-				j = !bl2 && bl ? 1 : 0;
-				break;
+			case EVOKER:
 			default:
 				return 0;
+			case WITCH:
+				if (bl2 || i <= 2 || i == 4) {
+					return 0;
+				}
+
+				j = 1;
+				break;
+			case RAVAGER:
+				j = !bl2 && bl ? 1 : 0;
 		}
 
 		return j > 0 ? randomSource.nextInt(j + 1) : 0;

@@ -37,10 +37,10 @@ public class ItemInput {
 
 	public ItemStack createItemStack(int i, boolean bl) throws CommandSyntaxException {
 		ItemStack itemStack = new ItemStack(this.item, i);
+		itemStack.applyComponents(this.components);
 		if (bl && i > itemStack.getMaxStackSize()) {
 			throw ERROR_STACK_TOO_BIG.create(this.getItemName(), itemStack.getMaxStackSize());
 		} else {
-			itemStack.applyComponents(this.components);
 			return itemStack;
 		}
 	}

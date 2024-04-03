@@ -65,7 +65,7 @@ public class RecordItem extends Item {
 	}
 
 	@Override
-	public void appendHoverText(ItemStack itemStack, @Nullable Level level, List<Component> list, TooltipFlag tooltipFlag) {
+	public void appendHoverText(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Component> list, TooltipFlag tooltipFlag) {
 		list.add(this.getDisplayName().withStyle(ChatFormatting.GRAY));
 	}
 

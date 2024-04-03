@@ -99,11 +99,9 @@ public abstract class AbstractWindCharge extends AbstractHurtingProjectile imple
 	@Override
 	protected void onHit(HitResult hitResult) {
 		super.onHit(hitResult);
-		if (!this.level().isClientSide && !this.isDeflected) {
+		if (!this.level().isClientSide) {
 			this.discard();
 		}
-
-		this.isDeflected = false;
 	}
 
 	@Override

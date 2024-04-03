@@ -8,6 +8,9 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
+import net.minecraft.CrashReport;
+import net.minecraft.CrashReportCategory;
+import net.minecraft.ReportedException;
 import net.minecraft.SharedConstants;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
@@ -42,22 +45,30 @@ public class ChunkStorage implements AutoCloseable {
 		Optional<ResourceKey<MapCodec<? extends ChunkGenerator>>> optional
 	) {
 		int i = getVersion(compoundTag);
-		if (i < 1493) {
-			compoundTag = DataFixTypes.CHUNK.update(this.fixerUpper, compoundTag, i, 1493);
-			if (compoundTag.getCompound("Level").getBoolean("hasLegacyStructureData")) {
-				LegacyStructureDataHandler legacyStructureDataHandler = this.getLegacyStructureHandler(resourceKey, supplier);
-				compoundTag = legacyStructureDataHandler.updateFromLegacy(compoundTag);
+
+		try {
+			if (i < 1493) {
+				compoundTag = DataFixTypes.CHUNK.update(this.fixerUpper, compoundTag, i, 1493);
+				if (compoundTag.getCompound("Level").getBoolean("hasLegacyStructureData")) {
+					LegacyStructureDataHandler legacyStructureDataHandler = this.getLegacyStructureHandler(resourceKey, supplier);
+					compoundTag = legacyStructureDataHandler.updateFromLegacy(compoundTag);
+				}
 			}
-		}
 
-		injectDatafixingContext(compoundTag, resourceKey, optional);
-		compoundTag = DataFixTypes.CHUNK.updateToCurrentVersion(this.fixerUpper, compoundTag, Math.max(1493, i));
-		if (i < SharedConstants.getCurrentVersion().getDataVersion().getVersion()) {
-			NbtUtils.addCurrentDataVersion(compoundTag);
-		}
+			injectDatafixingContext(compoundTag, resourceKey, optional);
+			compoundTag = DataFixTypes.CHUNK.updateToCurrentVersion(this.fixerUpper, compoundTag, Math.max(1493, i));
+			if (i < SharedConstants.getCurrentVersion().getDataVersion().getVersion()) {
+				NbtUtils.addCurrentDataVersion(compoundTag);
+			}
 
-		compoundTag.remove("__context");
-		return compoundTag;
+			compoundTag.remove("__context");
+			return compoundTag;
+		} catch (Exception var9) {
+			CrashReport crashReport = CrashReport.forThrowable(var9, "Updated chunk");
+			CrashReportCategory crashReportCategory = crashReport.addCategory("Updated chunk details");
+			crashReportCategory.setDetail("Data version", i);
+			throw new ReportedException(crashReport);
+		}
 	}
 
 	private LegacyStructureDataHandler getLegacyStructureHandler(ResourceKey<Level> resourceKey, Supplier<DimensionDataStorage> supplier) {

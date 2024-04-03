@@ -198,7 +198,11 @@ public class V704 extends Schema {
 	@Override
 	public void registerTypes(Schema schema, Map<String, Supplier<TypeTemplate>> map, Map<String, Supplier<TypeTemplate>> map2) {
 		super.registerTypes(schema, map, map2);
-		schema.registerType(false, References.BLOCK_ENTITY, () -> DSL.taggedChoiceLazy("id", NamespacedSchema.namespacedString(), map2));
+		schema.registerType(
+			true,
+			References.BLOCK_ENTITY,
+			() -> DSL.optionalFields("components", References.DATA_COMPONENTS.in(schema), DSL.taggedChoiceLazy("id", NamespacedSchema.namespacedString(), map2))
+		);
 		schema.registerType(
 			true,
 			References.ITEM_STACK,

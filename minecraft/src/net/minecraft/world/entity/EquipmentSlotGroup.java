@@ -40,6 +40,18 @@ public enum EquipmentSlotGroup implements StringRepresentable {
 		this(j, string2, equipmentSlot2 -> equipmentSlot2 == equipmentSlot);
 	}
 
+	public static EquipmentSlotGroup bySlot(EquipmentSlot equipmentSlot) {
+		return switch (equipmentSlot) {
+			case MAINHAND -> MAINHAND;
+			case OFFHAND -> OFFHAND;
+			case FEET -> FEET;
+			case LEGS -> LEGS;
+			case CHEST -> CHEST;
+			case HEAD -> HEAD;
+			case BODY -> BODY;
+		};
+	}
+
 	@Override
 	public String getSerializedName() {
 		return this.key;

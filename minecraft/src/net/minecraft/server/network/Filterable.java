@@ -11,7 +11,7 @@ import net.minecraft.network.codec.StreamCodec;
 public record Filterable<T>(T raw, Optional<T> filtered) {
 	public static <T> Codec<Filterable<T>> codec(Codec<T> codec) {
 		Codec<Filterable<T>> codec2 = RecordCodecBuilder.create(
-			instance -> instance.group(codec.fieldOf("text").forGetter(Filterable::raw), codec.optionalFieldOf("filtered").forGetter(Filterable::filtered))
+			instance -> instance.group(codec.fieldOf("raw").forGetter(Filterable::raw), codec.optionalFieldOf("filtered").forGetter(Filterable::filtered))
 					.apply(instance, Filterable::new)
 		);
 		Codec<Filterable<T>> codec3 = codec.xmap(Filterable::passThrough, Filterable::raw);

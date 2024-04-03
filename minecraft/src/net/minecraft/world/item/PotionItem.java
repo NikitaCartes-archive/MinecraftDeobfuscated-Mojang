@@ -1,7 +1,6 @@
 package net.minecraft.world.item;
 
 import java.util.List;
-import javax.annotation.Nullable;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -139,10 +138,10 @@ public class PotionItem extends Item {
 	}
 
 	@Override
-	public void appendHoverText(ItemStack itemStack, @Nullable Level level, List<Component> list, TooltipFlag tooltipFlag) {
+	public void appendHoverText(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Component> list, TooltipFlag tooltipFlag) {
 		PotionContents potionContents = itemStack.get(DataComponents.POTION_CONTENTS);
 		if (potionContents != null) {
-			potionContents.addPotionTooltip(list::add, 1.0F, level == null ? 20.0F : level.tickRateManager().tickrate());
+			potionContents.addPotionTooltip(list::add, 1.0F, tooltipContext.tickRate());
 		}
 	}
 }

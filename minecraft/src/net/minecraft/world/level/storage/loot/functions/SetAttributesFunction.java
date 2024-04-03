@@ -33,18 +33,23 @@ import net.minecraft.world.level.storage.loot.providers.number.NumberProviders;
 public class SetAttributesFunction extends LootItemConditionalFunction {
 	public static final MapCodec<SetAttributesFunction> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> commonFields(instance)
-				.and(
-					ExtraCodecs.nonEmptyList(SetAttributesFunction.Modifier.CODEC.listOf())
-						.fieldOf("modifiers")
-						.forGetter(setAttributesFunction -> setAttributesFunction.modifiers)
+				.<List<SetAttributesFunction.Modifier>, boolean>and(
+					instance.group(
+						ExtraCodecs.nonEmptyList(SetAttributesFunction.Modifier.CODEC.listOf())
+							.fieldOf("modifiers")
+							.forGetter(setAttributesFunction -> setAttributesFunction.modifiers),
+						Codec.BOOL.optionalFieldOf("replace", Boolean.valueOf(true)).forGetter(setAttributesFunction -> setAttributesFunction.replace)
+					)
 				)
 				.apply(instance, SetAttributesFunction::new)
 	);
 	private final List<SetAttributesFunction.Modifier> modifiers;
+	private final boolean replace;
 
-	SetAttributesFunction(List<LootItemCondition> list, List<SetAttributesFunction.Modifier> list2) {
+	SetAttributesFunction(List<LootItemCondition> list, List<SetAttributesFunction.Modifier> list2, boolean bl) {
 		super(list);
 		this.modifiers = List.copyOf(list2);
+		this.replace = bl;
 	}
 
 	@Override
@@ -62,24 +67,33 @@ public class SetAttributesFunction extends LootItemConditionalFunction {
 
 	@Override
 	public ItemStack run(ItemStack itemStack, LootContext lootContext) {
-		itemStack.update(
-			DataComponents.ATTRIBUTE_MODIFIERS,
-			ItemAttributeModifiers.EMPTY,
-			itemAttributeModifiers -> {
-				RandomSource randomSource = lootContext.getRandom();
+		if (this.replace) {
+			itemStack.set(DataComponents.ATTRIBUTE_MODIFIERS, this.updateModifiers(lootContext, ItemAttributeModifiers.EMPTY));
+		} else {
+			itemStack.update(
+				DataComponents.ATTRIBUTE_MODIFIERS,
+				ItemAttributeModifiers.EMPTY,
+				itemAttributeModifiers -> itemAttributeModifiers.modifiers().isEmpty()
+						? this.updateModifiers(lootContext, itemStack.getItem().getDefaultAttributeModifiers())
+						: this.updateModifiers(lootContext, itemAttributeModifiers)
+			);
+		}
 
-				for (SetAttributesFunction.Modifier modifier : this.modifiers) {
-					UUID uUID = (UUID)modifier.id.orElseGet(UUID::randomUUID);
-					EquipmentSlotGroup equipmentSlotGroup = Util.getRandom(modifier.slots, randomSource);
-					itemAttributeModifiers = itemAttributeModifiers.withModifierAdded(
-						modifier.attribute, new AttributeModifier(uUID, modifier.name, (double)modifier.amount.getFloat(lootContext), modifier.operation), equipmentSlotGroup
-					);
-				}
-
-				return itemAttributeModifiers;
-			}
-		);
 		return itemStack;
+	}
+
+	private ItemAttributeModifiers updateModifiers(LootContext lootContext, ItemAttributeModifiers itemAttributeModifiers) {
+		RandomSource randomSource = lootContext.getRandom();
+
+		for (SetAttributesFunction.Modifier modifier : this.modifiers) {
+			UUID uUID = (UUID)modifier.id.orElseGet(UUID::randomUUID);
+			EquipmentSlotGroup equipmentSlotGroup = Util.getRandom(modifier.slots, randomSource);
+			itemAttributeModifiers = itemAttributeModifiers.withModifierAdded(
+				modifier.attribute, new AttributeModifier(uUID, modifier.name, (double)modifier.amount.getFloat(lootContext), modifier.operation), equipmentSlotGroup
+			);
+		}
+
+		return itemAttributeModifiers;
 	}
 
 	public static SetAttributesFunction.ModifierBuilder modifier(
@@ -93,7 +107,16 @@ public class SetAttributesFunction extends LootItemConditionalFunction {
 	}
 
 	public static class Builder extends LootItemConditionalFunction.Builder<SetAttributesFunction.Builder> {
+		private final boolean replace;
 		private final List<SetAttributesFunction.Modifier> modifiers = Lists.<SetAttributesFunction.Modifier>newArrayList();
+
+		public Builder(boolean bl) {
+			this.replace = bl;
+		}
+
+		public Builder() {
+			this(false);
+		}
 
 		protected SetAttributesFunction.Builder getThis() {
 			return this;
@@ -106,7 +129,7 @@ public class SetAttributesFunction extends LootItemConditionalFunction {
 
 		@Override
 		public LootItemFunction build() {
-			return new SetAttributesFunction(this.getConditions(), this.modifiers);
+			return new SetAttributesFunction(this.getConditions(), this.modifiers, this.replace);
 		}
 	}
 
@@ -115,7 +138,7 @@ public class SetAttributesFunction extends LootItemConditionalFunction {
 	) {
 		private static final Codec<List<EquipmentSlotGroup>> SLOTS_CODEC = ExtraCodecs.nonEmptyList(
 			Codec.either(EquipmentSlotGroup.CODEC, EquipmentSlotGroup.CODEC.listOf())
-				.xmap(either -> either.map(List::of, Function.identity()), list -> list.size() == 1 ? Either.left((EquipmentSlotGroup)list.get(0)) : Either.right(list))
+				.xmap(either -> either.map(List::of, Function.identity()), list -> list.size() == 1 ? Either.left((EquipmentSlotGroup)list.getFirst()) : Either.right(list))
 		);
 		public static final Codec<SetAttributesFunction.Modifier> CODEC = RecordCodecBuilder.create(
 			instance -> instance.group(

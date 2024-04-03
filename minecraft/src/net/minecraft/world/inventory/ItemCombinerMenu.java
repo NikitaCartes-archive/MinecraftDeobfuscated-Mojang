@@ -118,12 +118,7 @@ public abstract class ItemCombinerMenu extends AbstractContainerMenu {
 	@Override
 	public boolean stillValid(Player player) {
 		return this.access
-			.evaluate(
-				(level, blockPos) -> !this.isValidBlock(level.getBlockState(blockPos))
-						? false
-						: player.distanceToSqr((double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5) <= 64.0,
-				true
-			);
+			.evaluate((level, blockPos) -> !this.isValidBlock(level.getBlockState(blockPos)) ? false : player.canInteractWithBlock(blockPos, 4.0), true);
 	}
 
 	@Override

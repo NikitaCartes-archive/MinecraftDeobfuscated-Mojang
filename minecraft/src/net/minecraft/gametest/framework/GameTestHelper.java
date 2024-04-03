@@ -377,7 +377,7 @@ public class GameTestHelper {
 	public <T extends Comparable<T>> void assertBlockProperty(BlockPos blockPos, Property<T> property, T comparable) {
 		BlockState blockState = this.getBlockState(blockPos);
 		boolean bl = blockState.hasProperty(property);
-		if (!bl || !blockState.getValue(property).equals(comparable)) {
+		if (!bl || !blockState.<T>getValue(property).equals(comparable)) {
 			String string = bl ? "was " + blockState.getValue(property) : "property " + property.getName() + " is missing";
 			String string2 = String.format(Locale.ROOT, "Expected property %s to be %s, %s", property.getName(), comparable, string);
 			throw new GameTestAssertPosException(string2, this.absolutePos(blockPos), blockPos, this.testInfo.getTick());

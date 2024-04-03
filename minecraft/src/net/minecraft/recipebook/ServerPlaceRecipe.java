@@ -80,9 +80,12 @@ public class ServerPlaceRecipe<C extends Container> implements PlaceRecipe<Integ
 			int k = jx;
 
 			for (int l : intList) {
-				int m = StackedContents.fromStackingIndex(l).getMaxStackSize();
-				if (m < k) {
-					k = m;
+				ItemStack itemStack2 = StackedContents.fromStackingIndex(l);
+				if (!itemStack2.isEmpty()) {
+					int m = itemStack2.getMaxStackSize();
+					if (m < k) {
+						k = m;
+					}
 				}
 			}
 

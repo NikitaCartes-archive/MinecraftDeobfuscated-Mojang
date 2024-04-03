@@ -1,7 +1,6 @@
 package net.minecraft.world.item;
 
 import java.util.List;
-import javax.annotation.Nullable;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Position;
 import net.minecraft.core.component.DataComponents;
@@ -68,7 +67,7 @@ public class FireworkRocketItem extends Item implements ProjectileItem {
 	}
 
 	@Override
-	public void appendHoverText(ItemStack itemStack, @Nullable Level level, List<Component> list, TooltipFlag tooltipFlag) {
+	public void appendHoverText(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Component> list, TooltipFlag tooltipFlag) {
 		Fireworks fireworks = itemStack.get(DataComponents.FIREWORKS);
 		if (fireworks != null) {
 			fireworks.addToTooltip(list::add, tooltipFlag);

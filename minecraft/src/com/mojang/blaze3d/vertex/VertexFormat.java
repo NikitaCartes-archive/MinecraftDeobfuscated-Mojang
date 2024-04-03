@@ -157,8 +157,8 @@ public class VertexFormat {
 
 		public int indexCount(int i) {
 			return switch (this) {
-				case LINE_STRIP, DEBUG_LINES, DEBUG_LINE_STRIP, TRIANGLES, TRIANGLE_STRIP, TRIANGLE_FAN -> i;
 				case LINES, QUADS -> i / 4 * 6;
+				case LINE_STRIP, DEBUG_LINES, DEBUG_LINE_STRIP, TRIANGLES, TRIANGLE_STRIP, TRIANGLE_FAN -> i;
 				default -> 0;
 			};
 		}

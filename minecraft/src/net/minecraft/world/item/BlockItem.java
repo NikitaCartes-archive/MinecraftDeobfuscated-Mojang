@@ -175,9 +175,9 @@ public class BlockItem extends Item {
 	}
 
 	@Override
-	public void appendHoverText(ItemStack itemStack, @Nullable Level level, List<Component> list, TooltipFlag tooltipFlag) {
-		super.appendHoverText(itemStack, level, list, tooltipFlag);
-		this.getBlock().appendHoverText(itemStack, level, list, tooltipFlag, level != null ? level.registryAccess() : null);
+	public void appendHoverText(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Component> list, TooltipFlag tooltipFlag) {
+		super.appendHoverText(itemStack, tooltipContext, list, tooltipFlag);
+		this.getBlock().appendHoverText(itemStack, tooltipContext, list, tooltipFlag);
 	}
 
 	public Block getBlock() {

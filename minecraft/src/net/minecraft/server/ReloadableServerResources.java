@@ -149,8 +149,8 @@ public class ReloadableServerResources {
 				@Override
 				public HolderLookup.RegistryLookup<T> parent() {
 					return switch (ConfigurableRegistryLookup.this.missingTagAccessPolicy) {
-						case FAIL -> registryLookup;
 						case CREATE_NEW -> registryLookup2;
+						case FAIL -> registryLookup;
 					};
 				}
 			};

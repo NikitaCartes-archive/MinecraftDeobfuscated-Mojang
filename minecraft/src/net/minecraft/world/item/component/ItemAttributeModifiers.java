@@ -52,9 +52,16 @@ public record ItemAttributeModifiers(List<ItemAttributeModifiers.Entry> modifier
 	}
 
 	public ItemAttributeModifiers withModifierAdded(Holder<Attribute> holder, AttributeModifier attributeModifier, EquipmentSlotGroup equipmentSlotGroup) {
-		return new ItemAttributeModifiers(
-			Util.copyAndAdd(this.modifiers, new ItemAttributeModifiers.Entry(holder, attributeModifier, equipmentSlotGroup)), this.showInTooltip
-		);
+		ImmutableList.Builder<ItemAttributeModifiers.Entry> builder = ImmutableList.builderWithExpectedSize(this.modifiers.size() + 1);
+
+		for (ItemAttributeModifiers.Entry entry : this.modifiers) {
+			if (!entry.modifier.id().equals(attributeModifier.id())) {
+				builder.add(entry);
+			}
+		}
+
+		builder.add(new ItemAttributeModifiers.Entry(holder, attributeModifier, equipmentSlotGroup));
+		return new ItemAttributeModifiers(builder.build(), this.showInTooltip);
 	}
 
 	public void forEach(EquipmentSlot equipmentSlot, BiConsumer<Holder<Attribute>, AttributeModifier> biConsumer) {

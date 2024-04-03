@@ -14,45 +14,45 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BeehiveBlockEntity;
+import org.apache.commons.lang3.math.Fraction;
 
 public final class BundleContents implements TooltipComponent {
-	public static final int MAX_WEIGHT = 64;
 	public static final BundleContents EMPTY = new BundleContents(List.of());
-	public static final Codec<BundleContents> CODEC = ItemStack.CODEC.sizeLimitedListOf(64).xmap(BundleContents::new, bundleContents -> bundleContents.items);
+	public static final Codec<BundleContents> CODEC = ItemStack.CODEC.listOf().xmap(BundleContents::new, bundleContents -> bundleContents.items);
 	public static final StreamCodec<RegistryFriendlyByteBuf, BundleContents> STREAM_CODEC = ItemStack.STREAM_CODEC
-		.apply(ByteBufCodecs.list(64))
+		.apply(ByteBufCodecs.list())
 		.map(BundleContents::new, bundleContents -> bundleContents.items);
-	private static final int BUNDLE_IN_BUNDLE_WEIGHT = 4;
+	private static final Fraction BUNDLE_IN_BUNDLE_WEIGHT = Fraction.getFraction(1, 16);
 	private static final int NO_STACK_INDEX = -1;
 	final List<ItemStack> items;
-	final int weight;
+	final Fraction weight;
 
-	BundleContents(List<ItemStack> list, int i) {
+	BundleContents(List<ItemStack> list, Fraction fraction) {
 		this.items = list;
-		this.weight = i;
+		this.weight = fraction;
 	}
 
 	public BundleContents(List<ItemStack> list) {
 		this(list, computeContentWeight(list));
 	}
 
-	private static int computeContentWeight(List<ItemStack> list) {
-		int i = 0;
+	private static Fraction computeContentWeight(List<ItemStack> list) {
+		Fraction fraction = Fraction.ZERO;
 
 		for (ItemStack itemStack : list) {
-			i += getWeight(itemStack) * itemStack.getCount();
+			fraction = fraction.add(getWeight(itemStack).multiplyBy(Fraction.getFraction(itemStack.getCount(), 1)));
 		}
 
-		return i;
+		return fraction;
 	}
 
-	static int getWeight(ItemStack itemStack) {
+	static Fraction getWeight(ItemStack itemStack) {
 		BundleContents bundleContents = itemStack.get(DataComponents.BUNDLE_CONTENTS);
 		if (bundleContents != null) {
-			return 4 + bundleContents.weight();
+			return BUNDLE_IN_BUNDLE_WEIGHT.add(bundleContents.weight());
 		} else {
 			List<BeehiveBlockEntity.Occupant> list = itemStack.getOrDefault(DataComponents.BEES, List.of());
-			return !list.isEmpty() ? 64 : 64 / itemStack.getMaxStackSize();
+			return !list.isEmpty() ? Fraction.ONE : Fraction.getFraction(1, itemStack.getMaxStackSize());
 		}
 	}
 
@@ -68,7 +68,7 @@ public final class BundleContents implements TooltipComponent {
 		return this.items.size();
 	}
 
-	public int weight() {
+	public Fraction weight() {
 		return this.weight;
 	}
 
@@ -82,7 +82,7 @@ public final class BundleContents implements TooltipComponent {
 		} else {
 			return !(object instanceof BundleContents bundleContents)
 				? false
-				: this.weight == bundleContents.weight && ItemStack.listMatches(this.items, bundleContents.items);
+				: this.weight.equals(bundleContents.weight) && ItemStack.listMatches(this.items, bundleContents.items);
 		}
 	}
 
@@ -96,7 +96,7 @@ public final class BundleContents implements TooltipComponent {
 
 	public static class Mutable {
 		private final List<ItemStack> items;
-		private int weight;
+		private Fraction weight;
 
 		public Mutable(BundleContents bundleContents) {
 			this.items = new ArrayList(bundleContents.items);
@@ -118,7 +118,8 @@ public final class BundleContents implements TooltipComponent {
 		}
 
 		private int getMaxAmountToAdd(ItemStack itemStack) {
-			return Math.max(64 - this.weight, 0) / BundleContents.getWeight(itemStack);
+			Fraction fraction = Fraction.ONE.subtract(this.weight);
+			return Math.max(fraction.divideBy(BundleContents.getWeight(itemStack)).intValue(), 0);
 		}
 
 		public int tryInsert(ItemStack itemStack) {
@@ -127,7 +128,7 @@ public final class BundleContents implements TooltipComponent {
 				if (i == 0) {
 					return 0;
 				} else {
-					this.weight = this.weight + BundleContents.getWeight(itemStack) * i;
+					this.weight = this.weight.add(BundleContents.getWeight(itemStack).multiplyBy(Fraction.getFraction(i, 1)));
 					int j = this.findStackIndex(itemStack);
 					if (j != -1) {
 						ItemStack itemStack2 = (ItemStack)this.items.remove(j);
@@ -157,12 +158,12 @@ public final class BundleContents implements TooltipComponent {
 				return null;
 			} else {
 				ItemStack itemStack = ((ItemStack)this.items.remove(0)).copy();
-				this.weight = this.weight - BundleContents.getWeight(itemStack) * itemStack.getCount();
+				this.weight = this.weight.subtract(BundleContents.getWeight(itemStack).multiplyBy(Fraction.getFraction(itemStack.getCount(), 1)));
 				return itemStack;
 			}
 		}
 
-		public int weight() {
+		public Fraction weight() {
 			return this.weight;
 		}
 

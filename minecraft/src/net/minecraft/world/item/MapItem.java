@@ -325,9 +325,9 @@ public class MapItem extends ComplexItem {
 	}
 
 	@Override
-	public void appendHoverText(ItemStack itemStack, @Nullable Level level, List<Component> list, TooltipFlag tooltipFlag) {
+	public void appendHoverText(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Component> list, TooltipFlag tooltipFlag) {
 		MapId mapId = itemStack.get(DataComponents.MAP_ID);
-		MapItemSavedData mapItemSavedData = level == null ? null : getSavedData(mapId, level);
+		MapItemSavedData mapItemSavedData = mapId != null ? tooltipContext.mapData(mapId) : null;
 		MapPostProcessing mapPostProcessing = itemStack.get(DataComponents.MAP_POST_PROCESSING);
 		if (mapItemSavedData != null && (mapItemSavedData.locked || mapPostProcessing == MapPostProcessing.LOCK)) {
 			list.add(Component.translatable("filled_map.locked", mapId.id()).withStyle(ChatFormatting.GRAY));

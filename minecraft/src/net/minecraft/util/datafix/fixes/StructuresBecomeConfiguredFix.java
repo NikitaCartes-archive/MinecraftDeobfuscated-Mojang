@@ -1,24 +1,29 @@
 package net.minecraft.util.datafix.fixes;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import com.google.common.collect.ImmutableMap.Builder;
 import com.mojang.datafixers.DataFix;
 import com.mojang.datafixers.TypeRewriteRule;
 import com.mojang.datafixers.schemas.Schema;
 import com.mojang.datafixers.types.Type;
-import com.mojang.datafixers.util.Pair;
+import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Dynamic;
 import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
-import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Map.Entry;
 import java.util.function.Function;
+import java.util.stream.LongStream;
+import javax.annotation.Nullable;
+import org.slf4j.Logger;
 
 public class StructuresBecomeConfiguredFix extends DataFix {
+	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final Map<String, StructuresBecomeConfiguredFix.Conversion> CONVERSION_MAP = ImmutableMap.<String, StructuresBecomeConfiguredFix.Conversion>builder()
 		.put(
 			"mineshaft",
@@ -131,56 +136,52 @@ public class StructuresBecomeConfiguredFix extends DataFix {
 	}
 
 	private Dynamic<?> updateStarts(Dynamic<?> dynamic, Dynamic<?> dynamic2) {
-		Map<? extends Dynamic<?>, ? extends Dynamic<?>> map = (Map<? extends Dynamic<?>, ? extends Dynamic<?>>)dynamic.getMapValues().result().get();
-		List<Dynamic<?>> list = new ArrayList();
-		map.forEach((dynamicx, dynamic2x) -> {
-			if (dynamic2x.get("id").asString("INVALID").equals("INVALID")) {
-				list.add(dynamicx);
+		Map<? extends Dynamic<?>, ? extends Dynamic<?>> map = (Map<? extends Dynamic<?>, ? extends Dynamic<?>>)dynamic.getMapValues().result().orElse(Map.of());
+		HashMap<Dynamic<?>, Dynamic<?>> hashMap = Maps.newHashMap();
+		map.forEach((dynamic2x, dynamic3) -> {
+			if (!dynamic3.get("id").asString("INVALID").equals("INVALID")) {
+				Dynamic<?> dynamic4 = this.findUpdatedStructureType(dynamic2x, dynamic2);
+				if (dynamic4 == null) {
+					LOGGER.warn("Encountered unknown structure in datafixer: " + dynamic2x.asString("<missing key>"));
+				} else {
+					hashMap.computeIfAbsent(dynamic4, dynamic3x -> dynamic3.set("id", dynamic4));
+				}
 			}
 		});
-
-		for (Dynamic<?> dynamic3 : list) {
-			dynamic = dynamic.remove(dynamic3.asString(""));
-		}
-
-		return dynamic.updateMapValues(pair -> this.updateStart(pair, dynamic2));
-	}
-
-	private Pair<Dynamic<?>, Dynamic<?>> updateStart(Pair<Dynamic<?>, Dynamic<?>> pair, Dynamic<?> dynamic) {
-		Dynamic<?> dynamic2 = this.findUpdatedStructureType(pair, dynamic);
-		return new Pair<>(dynamic2, pair.getSecond().set("id", dynamic2));
+		return dynamic2.createMap(hashMap);
 	}
 
 	private Dynamic<?> updateReferences(Dynamic<?> dynamic, Dynamic<?> dynamic2) {
-		Map<? extends Dynamic<?>, ? extends Dynamic<?>> map = (Map<? extends Dynamic<?>, ? extends Dynamic<?>>)dynamic.getMapValues().result().get();
-		List<Dynamic<?>> list = new ArrayList();
-		map.forEach((dynamicx, dynamic2x) -> {
-			if (dynamic2x.asLongStream().count() == 0L) {
-				list.add(dynamicx);
+		Map<? extends Dynamic<?>, ? extends Dynamic<?>> map = (Map<? extends Dynamic<?>, ? extends Dynamic<?>>)dynamic.getMapValues().result().orElse(Map.of());
+		HashMap<Dynamic<?>, Dynamic<?>> hashMap = Maps.newHashMap();
+		map.forEach(
+			(dynamic2x, dynamic3) -> {
+				if (dynamic3.asLongStream().count() != 0L) {
+					Dynamic<?> dynamic4 = this.findUpdatedStructureType(dynamic2x, dynamic2);
+					if (dynamic4 == null) {
+						LOGGER.warn("Encountered unknown structure in datafixer: " + dynamic2x.asString("<missing key>"));
+					} else {
+						hashMap.compute(
+							dynamic4,
+							(dynamic2xx, dynamic3x) -> dynamic3x == null ? dynamic3 : dynamic3.createLongList(LongStream.concat(dynamic3x.asLongStream(), dynamic3.asLongStream()))
+						);
+					}
+				}
 			}
-		});
-
-		for (Dynamic<?> dynamic3 : list) {
-			dynamic = dynamic.remove(dynamic3.asString(""));
-		}
-
-		return dynamic.updateMapValues(pair -> this.updateReference(pair, dynamic2));
+		);
+		return dynamic2.createMap(hashMap);
 	}
 
-	private Pair<Dynamic<?>, Dynamic<?>> updateReference(Pair<Dynamic<?>, Dynamic<?>> pair, Dynamic<?> dynamic) {
-		return pair.mapFirst(dynamic2 -> this.findUpdatedStructureType(pair, dynamic));
-	}
-
-	private Dynamic<?> findUpdatedStructureType(Pair<Dynamic<?>, Dynamic<?>> pair, Dynamic<?> dynamic) {
-		String string = pair.getFirst().asString("UNKNOWN").toLowerCase(Locale.ROOT);
+	@Nullable
+	private Dynamic<?> findUpdatedStructureType(Dynamic<?> dynamic, Dynamic<?> dynamic2) {
+		String string = dynamic.asString("UNKNOWN").toLowerCase(Locale.ROOT);
 		StructuresBecomeConfiguredFix.Conversion conversion = (StructuresBecomeConfiguredFix.Conversion)CONVERSION_MAP.get(string);
 		if (conversion == null) {
-			throw new IllegalStateException("Found unknown structure: " + string);
+			return null;
 		} else {
-			Dynamic<?> dynamic2 = pair.getSecond();
 			String string2 = conversion.fallback;
 			if (!conversion.biomeMapping().isEmpty()) {
-				Optional<String> optional = this.guessConfiguration(dynamic, conversion);
+				Optional<String> optional = this.guessConfiguration(dynamic2, conversion);
 				if (optional.isPresent()) {
 					string2 = (String)optional.get();
 				}

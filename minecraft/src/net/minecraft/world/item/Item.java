@@ -1,10 +1,8 @@
 package net.minecraft.world.item;
 
-import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Interner;
 import com.google.common.collect.Interners;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
 import com.mojang.logging.LogUtils;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +13,7 @@ import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
@@ -31,8 +30,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.SlotAccess;
-import net.minecraft.world.entity.ai.attributes.Attribute;
-import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.flag.FeatureElement;
@@ -51,6 +48,8 @@ import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.saveddata.maps.MapId;
+import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import org.slf4j.Logger;
@@ -266,7 +265,7 @@ public class Item implements FeatureElement, ItemLike {
 	public void releaseUsing(ItemStack itemStack, Level level, LivingEntity livingEntity, int i) {
 	}
 
-	public void appendHoverText(ItemStack itemStack, @Nullable Level level, List<Component> list, TooltipFlag tooltipFlag) {
+	public void appendHoverText(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Component> list, TooltipFlag tooltipFlag) {
 	}
 
 	public Optional<TooltipComponent> getTooltipImage(ItemStack itemStack) {
@@ -300,8 +299,8 @@ public class Item implements FeatureElement, ItemLike {
 	}
 
 	@Deprecated
-	public Multimap<Holder<Attribute>, AttributeModifier> getDefaultAttributeModifiers(EquipmentSlot equipmentSlot) {
-		return ImmutableMultimap.of();
+	public ItemAttributeModifiers getDefaultAttributeModifiers() {
+		return ItemAttributeModifiers.EMPTY;
 	}
 
 	public boolean useOnRelease(ItemStack itemStack) {
@@ -398,6 +397,74 @@ public class Item implements FeatureElement, ItemLike {
 
 		private DataComponentMap buildComponents() {
 			return this.components == null ? DataComponents.COMMON_ITEM_COMPONENTS : COMPONENT_INTERNER.intern(this.components.build());
+		}
+	}
+
+	public interface TooltipContext {
+		Item.TooltipContext EMPTY = new Item.TooltipContext() {
+			@Nullable
+			@Override
+			public HolderLookup.Provider registries() {
+				return null;
+			}
+
+			@Override
+			public float tickRate() {
+				return 20.0F;
+			}
+
+			@Nullable
+			@Override
+			public MapItemSavedData mapData(MapId mapId) {
+				return null;
+			}
+		};
+
+		@Nullable
+		HolderLookup.Provider registries();
+
+		float tickRate();
+
+		@Nullable
+		MapItemSavedData mapData(MapId mapId);
+
+		static Item.TooltipContext of(@Nullable Level level) {
+			return level == null ? EMPTY : new Item.TooltipContext() {
+				@Override
+				public HolderLookup.Provider registries() {
+					return level.registryAccess();
+				}
+
+				@Override
+				public float tickRate() {
+					return level.tickRateManager().tickrate();
+				}
+
+				@Override
+				public MapItemSavedData mapData(MapId mapId) {
+					return level.getMapData(mapId);
+				}
+			};
+		}
+
+		static Item.TooltipContext of(HolderLookup.Provider provider) {
+			return new Item.TooltipContext() {
+				@Override
+				public HolderLookup.Provider registries() {
+					return provider;
+				}
+
+				@Override
+				public float tickRate() {
+					return 20.0F;
+				}
+
+				@Nullable
+				@Override
+				public MapItemSavedData mapData(MapId mapId) {
+					return null;
+				}
+			};
 		}
 	}
 }

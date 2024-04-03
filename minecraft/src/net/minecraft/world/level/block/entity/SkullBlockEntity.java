@@ -39,7 +39,9 @@ public class SkullBlockEntity extends BlockEntity {
 	@Nullable
 	private static Executor mainThreadExecutor;
 	@Nullable
-	private static LoadingCache<String, CompletableFuture<Optional<GameProfile>>> profileCache;
+	private static LoadingCache<String, CompletableFuture<Optional<GameProfile>>> profileCacheByName;
+	@Nullable
+	private static LoadingCache<UUID, CompletableFuture<Optional<GameProfile>>> profileCacheById;
 	public static final Executor CHECKED_MAIN_THREAD_EXECUTOR = runnable -> {
 		Executor executor = mainThreadExecutor;
 		if (executor != null) {
@@ -61,36 +63,53 @@ public class SkullBlockEntity extends BlockEntity {
 
 	public static void setup(Services services, Executor executor) {
 		mainThreadExecutor = executor;
-		final BooleanSupplier booleanSupplier = () -> profileCache == null;
-		profileCache = CacheBuilder.newBuilder()
+		final BooleanSupplier booleanSupplier = () -> profileCacheById == null;
+		profileCacheByName = CacheBuilder.newBuilder()
 			.expireAfterAccess(Duration.ofMinutes(10L))
 			.maximumSize(256L)
-			.build(
-				new CacheLoader<String, CompletableFuture<Optional<GameProfile>>>() {
-					public CompletableFuture<Optional<GameProfile>> load(String string) {
-						return booleanSupplier.getAsBoolean()
-							? CompletableFuture.completedFuture(Optional.empty())
-							: SkullBlockEntity.loadProfile(string, services, booleanSupplier);
-					}
+			.build(new CacheLoader<String, CompletableFuture<Optional<GameProfile>>>() {
+				public CompletableFuture<Optional<GameProfile>> load(String string) {
+					return SkullBlockEntity.fetchProfileByName(string, services);
+				}
+			});
+		profileCacheById = CacheBuilder.newBuilder()
+			.expireAfterAccess(Duration.ofMinutes(10L))
+			.maximumSize(256L)
+			.build(new CacheLoader<UUID, CompletableFuture<Optional<GameProfile>>>() {
+				public CompletableFuture<Optional<GameProfile>> load(UUID uUID) {
+					return SkullBlockEntity.fetchProfileById(uUID, services, booleanSupplier);
+				}
+			});
+	}
+
+	static CompletableFuture<Optional<GameProfile>> fetchProfileByName(String string, Services services) {
+		return services.profileCache()
+			.getAsync(string)
+			.thenCompose(
+				optional -> {
+					LoadingCache<UUID, CompletableFuture<Optional<GameProfile>>> loadingCache = profileCacheById;
+					return loadingCache != null && !optional.isEmpty()
+						? loadingCache.getUnchecked(((GameProfile)optional.get()).getId()).thenApply(optional2 -> optional2.or(() -> optional))
+						: CompletableFuture.completedFuture(Optional.empty());
 				}
 			);
 	}
 
-	public static void clear() {
-		mainThreadExecutor = null;
-		profileCache = null;
-	}
-
-	static CompletableFuture<Optional<GameProfile>> loadProfile(String string, Services services, BooleanSupplier booleanSupplier) {
-		return services.profileCache().getAsync(string).thenApplyAsync(optional -> {
-			if (optional.isPresent() && !booleanSupplier.getAsBoolean()) {
-				UUID uUID = ((GameProfile)optional.get()).getId();
-				ProfileResult profileResult = services.sessionService().fetchProfile(uUID, true);
-				return profileResult != null ? Optional.ofNullable(profileResult.profile()) : optional;
-			} else {
+	static CompletableFuture<Optional<GameProfile>> fetchProfileById(UUID uUID, Services services, BooleanSupplier booleanSupplier) {
+		return CompletableFuture.supplyAsync(() -> {
+			if (booleanSupplier.getAsBoolean()) {
 				return Optional.empty();
+			} else {
+				ProfileResult profileResult = services.sessionService().fetchProfile(uUID, true);
+				return Optional.ofNullable(profileResult).map(ProfileResult::profile);
 			}
 		}, Util.backgroundExecutor());
+	}
+
+	public static void clear() {
+		mainThreadExecutor = null;
+		profileCacheByName = null;
+		profileCacheById = null;
 	}
 
 	@Override
@@ -182,8 +201,13 @@ public class SkullBlockEntity extends BlockEntity {
 	}
 
 	public static CompletableFuture<Optional<GameProfile>> fetchGameProfile(String string) {
-		LoadingCache<String, CompletableFuture<Optional<GameProfile>>> loadingCache = profileCache;
+		LoadingCache<String, CompletableFuture<Optional<GameProfile>>> loadingCache = profileCacheByName;
 		return loadingCache != null && StringUtil.isValidPlayerName(string) ? loadingCache.getUnchecked(string) : CompletableFuture.completedFuture(Optional.empty());
+	}
+
+	public static CompletableFuture<Optional<GameProfile>> fetchGameProfile(UUID uUID) {
+		LoadingCache<UUID, CompletableFuture<Optional<GameProfile>>> loadingCache = profileCacheById;
+		return loadingCache != null ? loadingCache.getUnchecked(uUID) : CompletableFuture.completedFuture(Optional.empty());
 	}
 
 	@Override

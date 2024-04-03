@@ -8,6 +8,7 @@ import net.minecraft.Util;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import org.apache.commons.lang3.math.Fraction;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
@@ -655,6 +656,10 @@ public class Mth {
 	public static Quaternionf rotationAroundAxis(Vector3f vector3f, Quaternionf quaternionf, Quaternionf quaternionf2) {
 		float f = vector3f.dot(quaternionf.x, quaternionf.y, quaternionf.z);
 		return quaternionf2.set(vector3f.x * f, vector3f.y * f, vector3f.z * f, quaternionf.w).normalize();
+	}
+
+	public static int mulAndTruncate(Fraction fraction, int i) {
+		return fraction.getNumerator() * i / fraction.getDenominator();
 	}
 
 	static {

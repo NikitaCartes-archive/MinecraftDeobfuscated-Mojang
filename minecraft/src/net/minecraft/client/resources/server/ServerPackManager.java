@@ -290,15 +290,15 @@ public class ServerPackManager {
 
 						for (ServerPackManager.ServerPackData serverPackData : ServerPackManager.this.packs) {
 							switch (serverPackData.activationStatus) {
-								case ACTIVE:
-									list.add(serverPackData);
+								case INACTIVE:
+									serverPackData.setRemovalReasonIfNotSet(ServerPackManager.RemovalReason.DISCARDED);
 									break;
 								case PENDING:
 									serverPackData.activationStatus = ServerPackManager.ActivationStatus.INACTIVE;
 									serverPackData.setRemovalReasonIfNotSet(ServerPackManager.RemovalReason.ACTIVATION_FAILED);
 									break;
-								case INACTIVE:
-									serverPackData.setRemovalReasonIfNotSet(ServerPackManager.RemovalReason.DISCARDED);
+								case ACTIVE:
+									list.add(serverPackData);
 							}
 						}
 

@@ -83,6 +83,9 @@ public class ShulkerBoxBlockEntity extends RandomizableContainerBlockEntity impl
 
 				this.moveCollidedEntities(level, blockPos, blockState);
 				break;
+			case OPENED:
+				this.progress = 1.0F;
+				break;
 			case CLOSING:
 				this.progress -= 0.1F;
 				if (this.progressOld == 1.0F) {
@@ -94,9 +97,6 @@ public class ShulkerBoxBlockEntity extends RandomizableContainerBlockEntity impl
 					this.progress = 0.0F;
 					doNeighborUpdates(level, blockPos, blockState);
 				}
-				break;
-			case OPENED:
-				this.progress = 1.0F;
 		}
 	}
 

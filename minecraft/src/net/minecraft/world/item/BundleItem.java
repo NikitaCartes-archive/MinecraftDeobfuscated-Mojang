@@ -21,9 +21,11 @@ import net.minecraft.world.inventory.tooltip.BundleTooltip;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.component.BundleContents;
 import net.minecraft.world.level.Level;
+import org.apache.commons.lang3.math.Fraction;
 
 public class BundleItem extends Item {
 	private static final int BAR_COLOR = Mth.color(0.4F, 0.4F, 1.0F);
+	private static final int TOOLTIP_MAX_WEIGHT = 64;
 
 	public BundleItem(Item.Properties properties) {
 		super(properties);
@@ -31,7 +33,7 @@ public class BundleItem extends Item {
 
 	public static float getFullnessDisplay(ItemStack itemStack) {
 		BundleContents bundleContents = itemStack.getOrDefault(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY);
-		return (float)bundleContents.weight() / 64.0F;
+		return bundleContents.weight().floatValue();
 	}
 
 	@Override
@@ -109,13 +111,13 @@ public class BundleItem extends Item {
 	@Override
 	public boolean isBarVisible(ItemStack itemStack) {
 		BundleContents bundleContents = itemStack.getOrDefault(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY);
-		return bundleContents.weight() > 0;
+		return bundleContents.weight().compareTo(Fraction.ZERO) > 0;
 	}
 
 	@Override
 	public int getBarWidth(ItemStack itemStack) {
 		BundleContents bundleContents = itemStack.getOrDefault(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY);
-		return Math.min(1 + 12 * bundleContents.weight() / 64, 13);
+		return Math.min(1 + Mth.mulAndTruncate(bundleContents.weight(), 12), 13);
 	}
 
 	@Override
@@ -145,10 +147,11 @@ public class BundleItem extends Item {
 	}
 
 	@Override
-	public void appendHoverText(ItemStack itemStack, Level level, List<Component> list, TooltipFlag tooltipFlag) {
+	public void appendHoverText(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Component> list, TooltipFlag tooltipFlag) {
 		BundleContents bundleContents = itemStack.get(DataComponents.BUNDLE_CONTENTS);
 		if (bundleContents != null) {
-			list.add(Component.translatable("item.minecraft.bundle.fullness", bundleContents.weight(), 64).withStyle(ChatFormatting.GRAY));
+			int i = Mth.mulAndTruncate(bundleContents.weight(), 64);
+			list.add(Component.translatable("item.minecraft.bundle.fullness", i, 64).withStyle(ChatFormatting.GRAY));
 		}
 	}
 

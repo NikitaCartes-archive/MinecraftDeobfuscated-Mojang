@@ -176,11 +176,6 @@ public class Armadillo extends Animal {
 				this.rollUpAnimationState.stop();
 				this.peekAnimationState.stop();
 				break;
-			case UNROLLING:
-				this.rollOutAnimationState.startIfStopped(this.tickCount);
-				this.rollUpAnimationState.stop();
-				this.peekAnimationState.stop();
-				break;
 			case ROLLING:
 				this.rollOutAnimationState.stop();
 				this.rollUpAnimationState.startIfStopped(this.tickCount);
@@ -200,6 +195,11 @@ public class Armadillo extends Animal {
 				} else {
 					this.peekAnimationState.startIfStopped(this.tickCount);
 				}
+				break;
+			case UNROLLING:
+				this.rollOutAnimationState.startIfStopped(this.tickCount);
+				this.rollUpAnimationState.stop();
+				this.peekAnimationState.stop();
 		}
 	}
 

@@ -26,10 +26,10 @@ public enum Mirror implements StringRepresentable {
 		int k = j / 2;
 		int l = i > k ? i - j : i;
 		switch (this) {
-			case FRONT_BACK:
-				return (j - l) % j;
 			case LEFT_RIGHT:
 				return (k - l + j) % j;
+			case FRONT_BACK:
+				return (j - l) % j;
 			default:
 				return i;
 		}

@@ -300,7 +300,6 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	private final String versionType;
 	private final Proxy proxy;
 	private final LevelStorageSource levelSource;
-	private final boolean is64bit;
 	private final boolean demo;
 	private final boolean allowsMultiplayer;
 	private final boolean allowsChat;
@@ -396,7 +395,6 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	private double gpuUtilization;
 	@Nullable
 	private TimerQuery.FrameProfile currentFrameProfile;
-	private final Realms32BitWarningStatus realms32BitWarningStatus;
 	private final GameNarrator narrator;
 	private final ChatListener chatListener;
 	private ReportingContext reportingContext;
@@ -444,7 +442,6 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		this.demo = gameConfig.game.demo;
 		this.allowsMultiplayer = !gameConfig.game.disableMultiplayer;
 		this.allowsChat = !gameConfig.game.disableChat;
-		this.is64bit = checkIs64Bit();
 		this.singleplayerServer = null;
 		KeybindResolver.setKeyResolver(KeyMapping::createNameSupplier);
 		this.fixerUpper = DataFixers.getDataFixer();
@@ -532,9 +529,8 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 
 		try {
 			int i = Runtime.getRuntime().availableProcessors();
-			int j = this.is64Bit() ? i : Math.min(i, 4);
 			Tesselator.init();
-			this.renderBuffers = new RenderBuffers(j);
+			this.renderBuffers = new RenderBuffers(i);
 		} catch (OutOfMemoryError var12) {
 			TinyFileDialogs.tinyfd_messageBox(
 				"Minecraft",
@@ -603,7 +599,6 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		this.gameRenderer.preloadUiShader(this.vanillaPackResources.asProvider());
 		this.telemetryManager = new ClientTelemetryManager(this, this.userApiService, this.user);
 		this.profileKeyPairManager = ProfileKeyPairManager.create(this.userApiService, this.user, path);
-		this.realms32BitWarningStatus = new Realms32BitWarningStatus(this);
 		this.narrator = new GameNarrator(this);
 		this.narrator.checkStatus(this.options.narrator().get() != NarratorStatus.OFF);
 		this.chatListener = new ChatListener(this);
@@ -832,7 +827,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			.register(
 				SearchRegistry.CREATIVE_NAMES,
 				list -> new FullTextSearchTree(
-						itemStack -> itemStack.getTooltipLines(null, TooltipFlag.Default.NORMAL.asCreative())
+						itemStack -> itemStack.getTooltipLines(Item.TooltipContext.EMPTY, null, TooltipFlag.Default.NORMAL.asCreative())
 								.stream()
 								.map(component -> ChatFormatting.stripFormatting(component.getString()).trim())
 								.filter(string -> !string.isEmpty()),
@@ -845,13 +840,19 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			.register(
 				SearchRegistry.RECIPE_COLLECTIONS,
 				list -> new FullTextSearchTree(
-						recipeCollection -> recipeCollection.getRecipes()
+						recipeCollection -> {
+							Item.TooltipContext tooltipContext = Item.TooltipContext.of(recipeCollection.registryAccess());
+							return recipeCollection.getRecipes()
 								.stream()
 								.flatMap(
-									recipeHolder -> recipeHolder.value().getResultItem(recipeCollection.registryAccess()).getTooltipLines(null, TooltipFlag.Default.NORMAL).stream()
+									recipeHolder -> recipeHolder.value()
+											.getResultItem(recipeCollection.registryAccess())
+											.getTooltipLines(tooltipContext, null, TooltipFlag.Default.NORMAL)
+											.stream()
 								)
 								.map(component -> ChatFormatting.stripFormatting(component.getString()).trim())
-								.filter(string -> !string.isEmpty()),
+								.filter(string -> !string.isEmpty());
+						},
 						recipeCollection -> recipeCollection.getRecipes()
 								.stream()
 								.map(recipeHolder -> BuiltInRegistries.ITEM.getKey(recipeHolder.value().getResultItem(recipeCollection.registryAccess()).getItem())),
@@ -867,19 +868,6 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	private void onFullscreenError(int i, long l) {
 		this.options.enableVsync().set(false);
 		this.options.save();
-	}
-
-	private static boolean checkIs64Bit() {
-		String[] strings = new String[]{"sun.arch.data.model", "com.ibm.vm.bitmode", "os.arch"};
-
-		for (String string : strings) {
-			String string2 = System.getProperty(string);
-			if (string2 != null && string2.contains("64")) {
-				return true;
-			}
-		}
-
-		return false;
 	}
 
 	public RenderTarget getMainRenderTarget() {
@@ -2392,7 +2380,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	}
 
 	private void addCustomNbtData(ItemStack itemStack, BlockEntity blockEntity, RegistryAccess registryAccess) {
-		CompoundTag compoundTag = blockEntity.saveCustomOnly(registryAccess);
+		CompoundTag compoundTag = blockEntity.saveCustomAndMetadata(registryAccess);
 		blockEntity.removeComponentsFromTag(compoundTag);
 		BlockItem.setBlockEntityData(itemStack, blockEntity.getType(), compoundTag);
 		itemStack.applyComponents(blockEntity.collectComponents());
@@ -2582,10 +2570,6 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 
 	public Function<ResourceLocation, TextureAtlasSprite> getTextureAtlas(ResourceLocation resourceLocation) {
 		return this.modelManager.getAtlas(resourceLocation)::getSprite;
-	}
-
-	public boolean is64Bit() {
-		return this.is64bit;
 	}
 
 	public boolean isPaused() {
@@ -2919,10 +2903,6 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	public void prepareForMultiplayer() {
 		this.playerSocialManager.startOnlineMode();
 		this.getProfileKeyPairManager().prepareKeyPair();
-	}
-
-	public Realms32BitWarningStatus getRealms32BitWarningStatus() {
-		return this.realms32BitWarningStatus;
 	}
 
 	@Nullable

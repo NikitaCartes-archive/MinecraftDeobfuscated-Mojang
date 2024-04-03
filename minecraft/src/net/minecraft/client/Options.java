@@ -481,7 +481,6 @@ public class Options {
 		}
 	);
 	public boolean skipMultiplayerWarning;
-	public boolean skipRealms32bitWarning;
 	private static final Component CHAT_TOOLTIP_HIDE_MATCHED_NAMES = Component.translatable("options.hideMatchedNames.tooltip");
 	private final OptionInstance<Boolean> hideMatchedNames = OptionInstance.createBoolean(
 		"options.hideMatchedNames", OptionInstance.cachedConstantTooltip(CHAT_TOOLTIP_HIDE_MATCHED_NAMES), true
@@ -1080,22 +1079,21 @@ public class Options {
 	public Options(Minecraft minecraft, File file) {
 		this.minecraft = minecraft;
 		this.optionsFile = new File(file, "options.txt");
-		boolean bl = minecraft.is64Bit();
-		boolean bl2 = bl && Runtime.getRuntime().maxMemory() >= 1000000000L;
+		boolean bl = Runtime.getRuntime().maxMemory() >= 1000000000L;
 		this.renderDistance = new OptionInstance<>(
 			"options.renderDistance",
 			OptionInstance.noTooltip(),
 			(component, integer) -> genericValueLabel(component, Component.translatable("options.chunks", integer)),
-			new OptionInstance.IntRange(2, bl2 ? 32 : 16),
-			bl ? 12 : 8,
+			new OptionInstance.IntRange(2, bl ? 32 : 16),
+			12,
 			integer -> Minecraft.getInstance().levelRenderer.needsUpdate()
 		);
 		this.simulationDistance = new OptionInstance<>(
 			"options.simulationDistance",
 			OptionInstance.noTooltip(),
 			(component, integer) -> genericValueLabel(component, Component.translatable("options.chunks", integer)),
-			new OptionInstance.IntRange(5, bl2 ? 32 : 16),
-			bl ? 12 : 8,
+			new OptionInstance.IntRange(5, bl ? 32 : 16),
+			12,
 			integer -> {
 			}
 		);
@@ -1202,7 +1200,6 @@ public class Options {
 		fieldAccess.process("rawMouseInput", this.rawMouseInput);
 		this.glDebugVerbosity = fieldAccess.process("glDebugVerbosity", this.glDebugVerbosity);
 		this.skipMultiplayerWarning = fieldAccess.process("skipMultiplayerWarning", this.skipMultiplayerWarning);
-		this.skipRealms32bitWarning = fieldAccess.process("skipRealms32bitWarning", this.skipRealms32bitWarning);
 		fieldAccess.process("hideMatchedNames", this.hideMatchedNames);
 		this.joinedFirstServer = fieldAccess.process("joinedFirstServer", this.joinedFirstServer);
 		this.hideBundleTutorial = fieldAccess.process("hideBundleTutorial", this.hideBundleTutorial);

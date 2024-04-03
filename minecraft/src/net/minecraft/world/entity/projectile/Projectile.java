@@ -31,7 +31,6 @@ public abstract class Projectile extends Entity implements TraceableEntity {
 	private Entity cachedOwner;
 	private boolean leftOwner;
 	private boolean hasBeenShot;
-	protected boolean isDeflected;
 
 	Projectile(EntityType<? extends Projectile> entityType, Level level) {
 		super(entityType, level);
@@ -151,19 +150,25 @@ public abstract class Projectile extends Entity implements TraceableEntity {
 		this.setDeltaMovement(this.getDeltaMovement().add(vec3.x, entity.onGround() ? 0.0 : vec3.y, vec3.z));
 	}
 
+	protected ProjectileDeflection hitOrDeflect(HitResult hitResult) {
+		if (hitResult.getType() == HitResult.Type.ENTITY) {
+			EntityHitResult entityHitResult = (EntityHitResult)hitResult;
+			ProjectileDeflection projectileDeflection = entityHitResult.getEntity().deflection(this);
+			if (projectileDeflection != ProjectileDeflection.NONE) {
+				projectileDeflection.deflect(this, entityHitResult.getEntity(), this.random);
+				this.markHurt();
+				return projectileDeflection;
+			}
+		}
+
+		this.onHit(hitResult);
+		return ProjectileDeflection.NONE;
+	}
+
 	protected void onHit(HitResult hitResult) {
 		HitResult.Type type = hitResult.getType();
 		if (type == HitResult.Type.ENTITY) {
 			EntityHitResult entityHitResult = (EntityHitResult)hitResult;
-			if (!this.isDeflected) {
-				ProjectileDeflection projectileDeflection = entityHitResult.getEntity().deflection(this);
-				if (projectileDeflection != ProjectileDeflection.NONE) {
-					projectileDeflection.deflect(this, entityHitResult.getEntity(), this.random);
-					this.isDeflected = true;
-					return;
-				}
-			}
-
 			this.onHitEntity(entityHitResult);
 			this.level().gameEvent(GameEvent.PROJECTILE_LAND, hitResult.getLocation(), GameEvent.Context.of(this, null));
 		} else if (type == HitResult.Type.BLOCK) {
@@ -246,5 +251,8 @@ public abstract class Projectile extends Entity implements TraceableEntity {
 
 	public boolean mayBreak(Level level) {
 		return this.getType().is(EntityTypeTags.IMPACT_PROJECTILES) && level.getGameRules().getBoolean(GameRules.RULE_PROJECTILESCANBREAKBLOCKS);
+	}
+
+	public void onDeflection() {
 	}
 }

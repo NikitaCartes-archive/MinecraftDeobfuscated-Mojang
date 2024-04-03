@@ -249,14 +249,14 @@ public class CrossbowItem extends ProjectileWeaponItem {
 	}
 
 	@Override
-	public void appendHoverText(ItemStack itemStack, @Nullable Level level, List<Component> list, TooltipFlag tooltipFlag) {
+	public void appendHoverText(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Component> list, TooltipFlag tooltipFlag) {
 		ChargedProjectiles chargedProjectiles = itemStack.get(DataComponents.CHARGED_PROJECTILES);
 		if (chargedProjectiles != null && !chargedProjectiles.isEmpty()) {
 			ItemStack itemStack2 = (ItemStack)chargedProjectiles.getItems().get(0);
 			list.add(Component.translatable("item.minecraft.crossbow.projectile").append(CommonComponents.SPACE).append(itemStack2.getDisplayName()));
 			if (tooltipFlag.isAdvanced() && itemStack2.is(Items.FIREWORK_ROCKET)) {
 				List<Component> list2 = Lists.<Component>newArrayList();
-				Items.FIREWORK_ROCKET.appendHoverText(itemStack2, level, list2, tooltipFlag);
+				Items.FIREWORK_ROCKET.appendHoverText(itemStack2, tooltipContext, list2, tooltipFlag);
 				if (!list2.isEmpty()) {
 					for (int i = 0; i < list2.size(); i++) {
 						list2.set(i, Component.literal("  ").append((Component)list2.get(i)).withStyle(ChatFormatting.GRAY));

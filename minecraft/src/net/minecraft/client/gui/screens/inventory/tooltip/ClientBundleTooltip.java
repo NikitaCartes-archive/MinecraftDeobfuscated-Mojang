@@ -8,6 +8,7 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.BundleContents;
+import org.apache.commons.lang3.math.Fraction;
 
 @Environment(EnvType.CLIENT)
 public class ClientBundleTooltip implements ClientTooltipComponent {
@@ -45,7 +46,7 @@ public class ClientBundleTooltip implements ClientTooltipComponent {
 		int k = this.gridSizeX();
 		int l = this.gridSizeY();
 		guiGraphics.blitSprite(BACKGROUND_SPRITE, i, j, this.backgroundWidth(), this.backgroundHeight());
-		boolean bl = this.contents.weight() >= 64;
+		boolean bl = this.contents.weight().compareTo(Fraction.ONE) >= 0;
 		int m = 0;
 
 		for (int n = 0; n < l; n++) {

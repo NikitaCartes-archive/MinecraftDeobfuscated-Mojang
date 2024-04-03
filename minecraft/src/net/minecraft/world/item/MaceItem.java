@@ -1,12 +1,9 @@
 package net.minecraft.world.item;
 
-import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.Multimap;
 import java.util.List;
 import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Holder;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -14,12 +11,13 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.item.component.Tool;
 import net.minecraft.world.item.enchantment.DensityEnchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
@@ -36,13 +34,24 @@ public class MaceItem extends Item {
 	public static final float SMASH_ATTACK_KNOCKBACK_RADIUS = 3.5F;
 	private static final float SMASH_ATTACK_KNOCKBACK_POWER = 0.7F;
 	private static final float SMASH_ATTACK_FALL_DISTANCE_MULTIPLIER = 3.0F;
-	private static final ImmutableMultimap<Holder<Attribute>, AttributeModifier> ATTRIBUTES = ImmutableMultimap.<Holder<Attribute>, AttributeModifier>builder()
-		.put(Attributes.ATTACK_DAMAGE, new AttributeModifier(BASE_ATTACK_DAMAGE_UUID, "Weapon modifier", 6.0, AttributeModifier.Operation.ADD_VALUE))
-		.put(Attributes.ATTACK_SPEED, new AttributeModifier(BASE_ATTACK_SPEED_UUID, "Weapon modifier", -2.4F, AttributeModifier.Operation.ADD_VALUE))
-		.build();
 
 	public MaceItem(Item.Properties properties) {
 		super(properties);
+	}
+
+	public static ItemAttributeModifiers createAttributes() {
+		return ItemAttributeModifiers.builder()
+			.add(
+				Attributes.ATTACK_DAMAGE,
+				new AttributeModifier(BASE_ATTACK_DAMAGE_UUID, "Weapon modifier", 6.0, AttributeModifier.Operation.ADD_VALUE),
+				EquipmentSlotGroup.MAINHAND
+			)
+			.add(
+				Attributes.ATTACK_SPEED,
+				new AttributeModifier(BASE_ATTACK_SPEED_UUID, "Weapon modifier", -2.4F, AttributeModifier.Operation.ADD_VALUE),
+				EquipmentSlotGroup.MAINHAND
+			)
+			.build();
 	}
 
 	public static Tool createToolProperties() {
@@ -87,13 +96,6 @@ public class MaceItem extends Item {
 		}
 
 		return true;
-	}
-
-	@Override
-	public Multimap<Holder<Attribute>, AttributeModifier> getDefaultAttributeModifiers(EquipmentSlot equipmentSlot) {
-		return (Multimap<Holder<Attribute>, AttributeModifier>)(equipmentSlot == EquipmentSlot.MAINHAND
-			? ATTRIBUTES
-			: super.getDefaultAttributeModifiers(equipmentSlot));
 	}
 
 	@Override

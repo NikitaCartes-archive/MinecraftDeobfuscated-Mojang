@@ -119,7 +119,11 @@ public class DeathScreen extends Screen {
 
 	@Override
 	public void renderBackground(GuiGraphics guiGraphics, int i, int j, float f) {
-		guiGraphics.fillGradient(0, 0, this.width, this.height, 1615855616, -1602211792);
+		renderDeathBackground(guiGraphics, this.width, this.height);
+	}
+
+	static void renderDeathBackground(GuiGraphics guiGraphics, int i, int j) {
+		guiGraphics.fillGradient(0, 0, i, j, 1615855616, -1602211792);
 	}
 
 	@Nullable
@@ -171,6 +175,11 @@ public class DeathScreen extends Screen {
 	public static class TitleConfirmScreen extends ConfirmScreen {
 		public TitleConfirmScreen(BooleanConsumer booleanConsumer, Component component, Component component2, Component component3, Component component4) {
 			super(booleanConsumer, component, component2, component3, component4);
+		}
+
+		@Override
+		public void renderBackground(GuiGraphics guiGraphics, int i, int j, float f) {
+			DeathScreen.renderDeathBackground(guiGraphics, this.width, this.height);
 		}
 	}
 }

@@ -72,7 +72,8 @@ public class UpdateOneTwentyOneBlockTagsProvider extends IntrinsicHolderTagsProv
 				Blocks.WAXED_COPPER_TRAPDOOR,
 				Blocks.WAXED_EXPOSED_COPPER_TRAPDOOR,
 				Blocks.WAXED_WEATHERED_COPPER_TRAPDOOR,
-				Blocks.WAXED_OXIDIZED_COPPER_TRAPDOOR
+				Blocks.WAXED_OXIDIZED_COPPER_TRAPDOOR,
+				Blocks.HEAVY_CORE
 			);
 		this.tag(BlockTags.STAIRS).add(Blocks.TUFF_STAIRS, Blocks.POLISHED_TUFF_STAIRS, Blocks.TUFF_BRICK_STAIRS);
 		this.tag(BlockTags.SLABS).add(Blocks.TUFF_SLAB, Blocks.POLISHED_TUFF_SLAB, Blocks.TUFF_BRICK_SLAB);

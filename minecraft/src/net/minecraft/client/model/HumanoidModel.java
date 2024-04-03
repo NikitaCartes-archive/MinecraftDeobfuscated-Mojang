@@ -262,16 +262,12 @@ public class HumanoidModel<T extends LivingEntity> extends AgeableListModel<T> i
 			case EMPTY:
 				this.rightArm.yRot = 0.0F;
 				break;
-			case BLOCK:
-				this.poseBlockingArm(this.rightArm, true);
-				break;
 			case ITEM:
 				this.rightArm.xRot = this.rightArm.xRot * 0.5F - (float) (Math.PI / 10);
 				this.rightArm.yRot = 0.0F;
 				break;
-			case THROW_SPEAR:
-				this.rightArm.xRot = this.rightArm.xRot * 0.5F - (float) Math.PI;
-				this.rightArm.yRot = 0.0F;
+			case BLOCK:
+				this.poseBlockingArm(this.rightArm, true);
 				break;
 			case BOW_AND_ARROW:
 				this.rightArm.yRot = -0.1F + this.head.yRot;
@@ -279,15 +275,15 @@ public class HumanoidModel<T extends LivingEntity> extends AgeableListModel<T> i
 				this.rightArm.xRot = (float) (-Math.PI / 2) + this.head.xRot;
 				this.leftArm.xRot = (float) (-Math.PI / 2) + this.head.xRot;
 				break;
+			case THROW_SPEAR:
+				this.rightArm.xRot = this.rightArm.xRot * 0.5F - (float) Math.PI;
+				this.rightArm.yRot = 0.0F;
+				break;
 			case CROSSBOW_CHARGE:
 				AnimationUtils.animateCrossbowCharge(this.rightArm, this.leftArm, livingEntity, true);
 				break;
 			case CROSSBOW_HOLD:
 				AnimationUtils.animateCrossbowHold(this.rightArm, this.leftArm, this.head, true);
-				break;
-			case BRUSH:
-				this.rightArm.xRot = this.rightArm.xRot * 0.5F - (float) (Math.PI / 5);
-				this.rightArm.yRot = 0.0F;
 				break;
 			case SPYGLASS:
 				this.rightArm.xRot = Mth.clamp(this.head.xRot - 1.9198622F - (livingEntity.isCrouching() ? (float) (Math.PI / 12) : 0.0F), -2.4F, 3.3F);
@@ -296,6 +292,10 @@ public class HumanoidModel<T extends LivingEntity> extends AgeableListModel<T> i
 			case TOOT_HORN:
 				this.rightArm.xRot = Mth.clamp(this.head.xRot, -1.2F, 1.2F) - 1.4835298F;
 				this.rightArm.yRot = this.head.yRot - (float) (Math.PI / 6);
+				break;
+			case BRUSH:
+				this.rightArm.xRot = this.rightArm.xRot * 0.5F - (float) (Math.PI / 5);
+				this.rightArm.yRot = 0.0F;
 		}
 	}
 
@@ -304,16 +304,12 @@ public class HumanoidModel<T extends LivingEntity> extends AgeableListModel<T> i
 			case EMPTY:
 				this.leftArm.yRot = 0.0F;
 				break;
-			case BLOCK:
-				this.poseBlockingArm(this.leftArm, false);
-				break;
 			case ITEM:
 				this.leftArm.xRot = this.leftArm.xRot * 0.5F - (float) (Math.PI / 10);
 				this.leftArm.yRot = 0.0F;
 				break;
-			case THROW_SPEAR:
-				this.leftArm.xRot = this.leftArm.xRot * 0.5F - (float) Math.PI;
-				this.leftArm.yRot = 0.0F;
+			case BLOCK:
+				this.poseBlockingArm(this.leftArm, false);
 				break;
 			case BOW_AND_ARROW:
 				this.rightArm.yRot = -0.1F + this.head.yRot - 0.4F;
@@ -321,15 +317,15 @@ public class HumanoidModel<T extends LivingEntity> extends AgeableListModel<T> i
 				this.rightArm.xRot = (float) (-Math.PI / 2) + this.head.xRot;
 				this.leftArm.xRot = (float) (-Math.PI / 2) + this.head.xRot;
 				break;
+			case THROW_SPEAR:
+				this.leftArm.xRot = this.leftArm.xRot * 0.5F - (float) Math.PI;
+				this.leftArm.yRot = 0.0F;
+				break;
 			case CROSSBOW_CHARGE:
 				AnimationUtils.animateCrossbowCharge(this.rightArm, this.leftArm, livingEntity, false);
 				break;
 			case CROSSBOW_HOLD:
 				AnimationUtils.animateCrossbowHold(this.rightArm, this.leftArm, this.head, false);
-				break;
-			case BRUSH:
-				this.leftArm.xRot = this.leftArm.xRot * 0.5F - (float) (Math.PI / 5);
-				this.leftArm.yRot = 0.0F;
 				break;
 			case SPYGLASS:
 				this.leftArm.xRot = Mth.clamp(this.head.xRot - 1.9198622F - (livingEntity.isCrouching() ? (float) (Math.PI / 12) : 0.0F), -2.4F, 3.3F);
@@ -338,6 +334,10 @@ public class HumanoidModel<T extends LivingEntity> extends AgeableListModel<T> i
 			case TOOT_HORN:
 				this.leftArm.xRot = Mth.clamp(this.head.xRot, -1.2F, 1.2F) - 1.4835298F;
 				this.leftArm.yRot = this.head.yRot + (float) (Math.PI / 6);
+				break;
+			case BRUSH:
+				this.leftArm.xRot = this.leftArm.xRot * 0.5F - (float) (Math.PI / 5);
+				this.leftArm.yRot = 0.0F;
 		}
 	}
 

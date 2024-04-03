@@ -1,19 +1,17 @@
 package net.minecraft.util;
 
 import com.google.common.annotations.VisibleForTesting;
-import java.io.Serializable;
 import java.util.AbstractList;
-import java.util.Deque;
 import java.util.Iterator;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
-import java.util.RandomAccess;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 import javax.annotation.Nullable;
 
-public class ArrayListDeque<T> extends AbstractList<T> implements Serializable, Cloneable, Deque<T>, RandomAccess {
+public class ArrayListDeque<T> extends AbstractList<T> implements ListAndDeque<T> {
 	private static final int MIN_GROWTH = 1;
 	private Object[] contents;
 	private int head;
@@ -166,10 +164,12 @@ public class ArrayListDeque<T> extends AbstractList<T> implements Serializable, 
 		}
 	}
 
+	@Override
 	public void addFirst(T object) {
 		this.add(0, object);
 	}
 
+	@Override
 	public void addLast(T object) {
 		this.add(this.size, object);
 	}
@@ -184,6 +184,7 @@ public class ArrayListDeque<T> extends AbstractList<T> implements Serializable, 
 		return true;
 	}
 
+	@Override
 	public T removeFirst() {
 		if (this.size == 0) {
 			throw new NoSuchElementException();
@@ -192,12 +193,18 @@ public class ArrayListDeque<T> extends AbstractList<T> implements Serializable, 
 		}
 	}
 
+	@Override
 	public T removeLast() {
 		if (this.size == 0) {
 			throw new NoSuchElementException();
 		} else {
 			return this.remove(this.size - 1);
 		}
+	}
+
+	@Override
+	public ListAndDeque<T> reversed() {
+		return new ArrayListDeque.ReversedView(this);
 	}
 
 	@Nullable
@@ -210,6 +217,7 @@ public class ArrayListDeque<T> extends AbstractList<T> implements Serializable, 
 		return this.size == 0 ? null : this.removeLast();
 	}
 
+	@Override
 	public T getFirst() {
 		if (this.size == 0) {
 			throw new NoSuchElementException();
@@ -218,6 +226,7 @@ public class ArrayListDeque<T> extends AbstractList<T> implements Serializable, 
 		}
 	}
 
+	@Override
 	public T getLast() {
 		if (this.size == 0) {
 			throw new NoSuchElementException();
@@ -260,36 +269,6 @@ public class ArrayListDeque<T> extends AbstractList<T> implements Serializable, 
 		return false;
 	}
 
-	public boolean offer(T object) {
-		return this.offerLast(object);
-	}
-
-	public T remove() {
-		return this.removeFirst();
-	}
-
-	@Nullable
-	public T poll() {
-		return this.pollFirst();
-	}
-
-	public T element() {
-		return this.getFirst();
-	}
-
-	@Nullable
-	public T peek() {
-		return this.peekFirst();
-	}
-
-	public void push(T object) {
-		this.addFirst(object);
-	}
-
-	public T pop() {
-		return this.removeFirst();
-	}
-
 	public Iterator<T> descendingIterator() {
 		return new ArrayListDeque.DescendingIterator();
 	}
@@ -310,6 +289,137 @@ public class ArrayListDeque<T> extends AbstractList<T> implements Serializable, 
 
 		public void remove() {
 			ArrayListDeque.this.remove(this.index + 1);
+		}
+	}
+
+	class ReversedView extends AbstractList<T> implements ListAndDeque<T> {
+		private final ArrayListDeque<T> source;
+
+		public ReversedView(ArrayListDeque<T> arrayListDeque2) {
+			this.source = arrayListDeque2;
+		}
+
+		@Override
+		public ListAndDeque<T> reversed() {
+			return this.source;
+		}
+
+		@Override
+		public T getFirst() {
+			return this.source.getLast();
+		}
+
+		@Override
+		public T getLast() {
+			return this.source.getFirst();
+		}
+
+		@Override
+		public void addFirst(T object) {
+			this.source.addLast(object);
+		}
+
+		@Override
+		public void addLast(T object) {
+			this.source.addFirst(object);
+		}
+
+		public boolean offerFirst(T object) {
+			return this.source.offerLast(object);
+		}
+
+		public boolean offerLast(T object) {
+			return this.source.offerFirst(object);
+		}
+
+		public T pollFirst() {
+			return this.source.pollLast();
+		}
+
+		public T pollLast() {
+			return this.source.pollFirst();
+		}
+
+		public T peekFirst() {
+			return this.source.peekLast();
+		}
+
+		public T peekLast() {
+			return this.source.peekFirst();
+		}
+
+		@Override
+		public T removeFirst() {
+			return this.source.removeLast();
+		}
+
+		@Override
+		public T removeLast() {
+			return this.source.removeFirst();
+		}
+
+		public boolean removeFirstOccurrence(Object object) {
+			return this.source.removeLastOccurrence(object);
+		}
+
+		public boolean removeLastOccurrence(Object object) {
+			return this.source.removeFirstOccurrence(object);
+		}
+
+		public Iterator<T> descendingIterator() {
+			return this.source.iterator();
+		}
+
+		public int size() {
+			return this.source.size();
+		}
+
+		public boolean isEmpty() {
+			return this.source.isEmpty();
+		}
+
+		public boolean contains(Object object) {
+			return this.source.contains(object);
+		}
+
+		public T get(int i) {
+			return this.source.get(this.reverseIndex(i));
+		}
+
+		public T set(int i, T object) {
+			return this.source.set(this.reverseIndex(i), object);
+		}
+
+		public void add(int i, T object) {
+			this.source.add(this.reverseIndex(i) + 1, object);
+		}
+
+		public T remove(int i) {
+			return this.source.remove(this.reverseIndex(i));
+		}
+
+		public int indexOf(Object object) {
+			return this.reverseIndex(this.source.lastIndexOf(object));
+		}
+
+		public int lastIndexOf(Object object) {
+			return this.reverseIndex(this.source.indexOf(object));
+		}
+
+		public List<T> subList(int i, int j) {
+			return this.source.subList(this.reverseIndex(j) + 1, this.reverseIndex(i) + 1).reversed();
+		}
+
+		public Iterator<T> iterator() {
+			return this.source.descendingIterator();
+		}
+
+		public void clear() {
+			this.source.clear();
+		}
+
+		private int reverseIndex(int i) {
+			return i == -1 ? -1 : this.source.size() - 1 - i;
 		}
 	}
 }

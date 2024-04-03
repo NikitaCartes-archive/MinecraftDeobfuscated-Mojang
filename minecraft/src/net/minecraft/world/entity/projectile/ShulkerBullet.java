@@ -221,7 +221,7 @@ public class ShulkerBullet extends Projectile {
 
 			HitResult hitResult = ProjectileUtil.getHitResultOnMoveVector(this, this::canHitEntity);
 			if (hitResult.getType() != HitResult.Type.MISS) {
-				this.onHit(hitResult);
+				this.hitOrDeflect(hitResult);
 			}
 		}
 

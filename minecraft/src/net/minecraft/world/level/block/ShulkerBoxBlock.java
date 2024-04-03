@@ -11,7 +11,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -185,10 +184,8 @@ public class ShulkerBoxBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	public void appendHoverText(
-		ItemStack itemStack, @Nullable BlockGetter blockGetter, List<Component> list, TooltipFlag tooltipFlag, @Nullable RegistryAccess registryAccess
-	) {
-		super.appendHoverText(itemStack, blockGetter, list, tooltipFlag, registryAccess);
+	public void appendHoverText(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Component> list, TooltipFlag tooltipFlag) {
+		super.appendHoverText(itemStack, tooltipContext, list, tooltipFlag);
 		if (itemStack.has(DataComponents.CONTAINER_LOOT)) {
 			list.add(UNKNOWN_CONTENTS);
 		}

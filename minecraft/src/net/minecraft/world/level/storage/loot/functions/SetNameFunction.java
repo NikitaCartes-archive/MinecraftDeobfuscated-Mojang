@@ -116,8 +116,8 @@ public class SetNameFunction extends LootItemConditionalFunction {
 
 		public DataComponentType<Component> component() {
 			return switch (this) {
-				case ITEM_NAME -> DataComponents.ITEM_NAME;
 				case CUSTOM_NAME -> DataComponents.CUSTOM_NAME;
+				case ITEM_NAME -> DataComponents.ITEM_NAME;
 			};
 		}
 	}

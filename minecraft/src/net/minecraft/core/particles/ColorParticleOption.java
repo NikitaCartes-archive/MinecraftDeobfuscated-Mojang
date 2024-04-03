@@ -48,7 +48,7 @@ public class ColorParticleOption implements ParticleOptions {
 	}
 
 	@Override
-	public ParticleType<?> getType() {
+	public ParticleType<? extends ColorParticleOption> getType() {
 		return this.type;
 	}
 
