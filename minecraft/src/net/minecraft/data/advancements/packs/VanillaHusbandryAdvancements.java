@@ -17,6 +17,7 @@ import net.minecraft.advancements.critereon.BredAnimalsTrigger;
 import net.minecraft.advancements.critereon.ConsumeItemTrigger;
 import net.minecraft.advancements.critereon.EffectsChangedTrigger;
 import net.minecraft.advancements.critereon.EnchantmentPredicate;
+import net.minecraft.advancements.critereon.EntityEquipmentPredicate;
 import net.minecraft.advancements.critereon.EntityFlagsPredicate;
 import net.minecraft.advancements.critereon.EntityPredicate;
 import net.minecraft.advancements.critereon.EntitySubPredicates;
@@ -33,14 +34,21 @@ import net.minecraft.advancements.critereon.PickedUpItemTrigger;
 import net.minecraft.advancements.critereon.PlayerInteractTrigger;
 import net.minecraft.advancements.critereon.StartRidingTrigger;
 import net.minecraft.advancements.critereon.TameAnimalTrigger;
+import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.component.DataComponentPredicate;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.advancements.AdvancementSubProvider;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.animal.WolfVariant;
 import net.minecraft.world.item.HoneycombItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
@@ -290,6 +298,20 @@ public class VanillaHusbandryAdvancements implements AdvancementSubProvider {
 			)
 			.rewards(AdvancementRewards.Builder.experience(50))
 			.save(consumer, "husbandry/complete_catalogue");
+		addTamedWolfVariants(Advancement.Builder.advancement(), provider)
+			.parent(advancementHolder4)
+			.display(
+				Items.BONE,
+				Component.translatable("advancements.husbandry.whole_pack.title"),
+				Component.translatable("advancements.husbandry.whole_pack.description"),
+				null,
+				AdvancementType.CHALLENGE,
+				true,
+				true,
+				false
+			)
+			.rewards(AdvancementRewards.Builder.experience(50))
+			.save(consumer, "husbandry/whole_pack");
 		AdvancementHolder advancementHolder8 = Advancement.Builder.advancement()
 			.parent(advancementHolder)
 			.addCriterion(
@@ -546,6 +568,54 @@ public class VanillaHusbandryAdvancements implements AdvancementSubProvider {
 			.addCriterion("torchflower", ItemUsedOnLocationTrigger.TriggerInstance.placedBlock(Blocks.TORCHFLOWER_CROP))
 			.addCriterion("pitcher_pod", ItemUsedOnLocationTrigger.TriggerInstance.placedBlock(Blocks.PITCHER_CROP))
 			.save(consumer, "husbandry/plant_any_sniffer_seed");
+		Advancement.Builder.advancement()
+			.parent(advancementHolder4)
+			.display(
+				Items.SHEARS,
+				Component.translatable("advancements.husbandry.remove_wolf_armor.title"),
+				Component.translatable("advancements.husbandry.remove_wolf_armor.description"),
+				null,
+				AdvancementType.TASK,
+				true,
+				true,
+				false
+			)
+			.addCriterion(
+				"remove_wolf_armor",
+				PlayerInteractTrigger.TriggerInstance.itemUsedOnEntity(
+					ItemPredicate.Builder.item().of(Items.SHEARS), Optional.of(EntityPredicate.wrap(EntityPredicate.Builder.entity().of(EntityType.WOLF)))
+				)
+			)
+			.save(consumer, "husbandry/remove_wolf_armor");
+		Advancement.Builder.advancement()
+			.parent(advancementHolder4)
+			.display(
+				Items.WOLF_ARMOR,
+				Component.translatable("advancements.husbandry.repair_wolf_armor.title"),
+				Component.translatable("advancements.husbandry.repair_wolf_armor.description"),
+				null,
+				AdvancementType.TASK,
+				true,
+				true,
+				false
+			)
+			.addCriterion(
+				"repair_wolf_armor",
+				PlayerInteractTrigger.TriggerInstance.itemUsedOnEntity(
+					ItemPredicate.Builder.item().of(Items.ARMADILLO_SCUTE),
+					Optional.of(
+						EntityPredicate.wrap(
+							EntityPredicate.Builder.entity()
+								.of(EntityType.WOLF)
+								.equipment(
+									EntityEquipmentPredicate.Builder.equipment()
+										.body(ItemPredicate.Builder.item().of(Items.WOLF_ARMOR).hasComponents(DataComponentPredicate.builder().expect(DataComponents.DAMAGE, 0).build()))
+								)
+						)
+					)
+				)
+			)
+			.save(consumer, "husbandry/repair_wolf_armor");
 	}
 
 	public static AdvancementHolder createBreedAllAnimalsAdvancement(
@@ -637,6 +707,22 @@ public class VanillaHusbandryAdvancements implements AdvancementSubProvider {
 						reference.key().location().toString(),
 						TameAnimalTrigger.TriggerInstance.tamedAnimal(EntityPredicate.Builder.entity().subPredicate(EntitySubPredicates.catVariant(reference)))
 					)
+			);
+		return builder;
+	}
+
+	private static Advancement.Builder addTamedWolfVariants(Advancement.Builder builder, HolderLookup.Provider provider) {
+		HolderLookup.RegistryLookup<WolfVariant> registryLookup = provider.lookupOrThrow(Registries.WOLF_VARIANT);
+		registryLookup.listElementIds()
+			.sorted(Comparator.comparing(ResourceKey::location))
+			.forEach(
+				resourceKey -> {
+					Holder<WolfVariant> holder = registryLookup.getOrThrow(resourceKey);
+					builder.addCriterion(
+						resourceKey.location().toString(),
+						TameAnimalTrigger.TriggerInstance.tamedAnimal(EntityPredicate.Builder.entity().subPredicate(EntitySubPredicates.wolfVariant(HolderSet.direct(holder))))
+					);
+				}
 			);
 		return builder;
 	}

@@ -117,7 +117,7 @@ public class DecoratedPotBlockEntity extends BlockEntity implements Randomizable
 	protected void collectImplicitComponents(DataComponentMap.Builder builder) {
 		super.collectImplicitComponents(builder);
 		builder.set(DataComponents.POT_DECORATIONS, this.decorations);
-		builder.set(DataComponents.CONTAINER, ItemContainerContents.copyOf(List.of(this.item)));
+		builder.set(DataComponents.CONTAINER, ItemContainerContents.fromItems(List.of(this.item)));
 	}
 
 	@Override
@@ -185,7 +185,7 @@ public class DecoratedPotBlockEntity extends BlockEntity implements Randomizable
 
 		public final int duration;
 
-		private WobbleStyle(int j) {
+		private WobbleStyle(final int j) {
 			this.duration = j;
 		}
 	}

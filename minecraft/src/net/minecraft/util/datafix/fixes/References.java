@@ -26,6 +26,8 @@ public class References {
 	public static final TypeReference BLOCK_STATE = reference("block_state");
 	public static final TypeReference FLAT_BLOCK_STATE = reference("flat_block_state");
 	public static final TypeReference DATA_COMPONENTS = reference("data_components");
+	public static final TypeReference VILLAGER_TRADE = reference("villager_trade");
+	public static final TypeReference PARTICLE = reference("particle");
 	public static final TypeReference ENTITY_NAME = reference("entity_name");
 	public static final TypeReference ENTITY_TREE = reference("entity_tree");
 	public static final TypeReference ENTITY = reference("entity");

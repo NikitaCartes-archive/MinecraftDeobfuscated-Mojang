@@ -483,7 +483,7 @@ public class Sniffer extends Animal {
 		public static final StreamCodec<ByteBuf, Sniffer.State> STREAM_CODEC = ByteBufCodecs.idMapper(BY_ID, Sniffer.State::id);
 		private final int id;
 
-		private State(int j) {
+		private State(final int j) {
 			this.id = j;
 		}
 

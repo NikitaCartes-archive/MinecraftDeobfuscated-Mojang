@@ -4,13 +4,10 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
-import net.minecraft.core.Holder;
-import net.minecraft.core.NonNullList;
-import net.minecraft.core.component.DataComponents;
-import net.minecraft.core.registries.BuiltInRegistries;
+import java.util.stream.Stream;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.component.ItemContainerContents;
-import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.storage.loot.ContainerComponentManipulator;
+import net.minecraft.world.level.storage.loot.ContainerComponentManipulators;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.ValidationContext;
@@ -21,25 +18,25 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 public class SetContainerContents extends LootItemConditionalFunction {
 	public static final MapCodec<SetContainerContents> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> commonFields(instance)
-				.<Holder<BlockEntityType<?>>, List<LootPoolEntryContainer>>and(
+				.<ContainerComponentManipulator<?>, List<LootPoolEntryContainer>>and(
 					instance.group(
-						BuiltInRegistries.BLOCK_ENTITY_TYPE.holderByNameCodec().fieldOf("type").forGetter(setContainerContents -> setContainerContents.type),
+						ContainerComponentManipulators.CODEC.fieldOf("component").forGetter(setContainerContents -> setContainerContents.component),
 						LootPoolEntries.CODEC.listOf().fieldOf("entries").forGetter(setContainerContents -> setContainerContents.entries)
 					)
 				)
 				.apply(instance, SetContainerContents::new)
 	);
-	private final Holder<BlockEntityType<?>> type;
+	private final ContainerComponentManipulator<?> component;
 	private final List<LootPoolEntryContainer> entries;
 
-	SetContainerContents(List<LootItemCondition> list, Holder<BlockEntityType<?>> holder, List<LootPoolEntryContainer> list2) {
+	SetContainerContents(List<LootItemCondition> list, ContainerComponentManipulator<?> containerComponentManipulator, List<LootPoolEntryContainer> list2) {
 		super(list);
-		this.type = holder;
+		this.component = containerComponentManipulator;
 		this.entries = List.copyOf(list2);
 	}
 
 	@Override
-	public LootItemFunctionType getType() {
+	public LootItemFunctionType<SetContainerContents> getType() {
 		return LootItemFunctions.SET_CONTENTS;
 	}
 
@@ -48,14 +45,14 @@ public class SetContainerContents extends LootItemConditionalFunction {
 		if (itemStack.isEmpty()) {
 			return itemStack;
 		} else {
-			NonNullList<ItemStack> nonNullList = NonNullList.create();
+			java.util.stream.Stream.Builder<ItemStack> builder = Stream.builder();
 			this.entries
 				.forEach(
 					lootPoolEntryContainer -> lootPoolEntryContainer.expand(
-							lootContext, lootPoolEntry -> lootPoolEntry.createItemStack(LootTable.createStackSplitter(lootContext.getLevel(), nonNullList::add), lootContext)
+							lootContext, lootPoolEntry -> lootPoolEntry.createItemStack(LootTable.createStackSplitter(lootContext.getLevel(), builder::add), lootContext)
 						)
 				);
-			itemStack.set(DataComponents.CONTAINER, ItemContainerContents.copyOf(nonNullList));
+			this.component.setContents(itemStack, builder.build());
 			return itemStack;
 		}
 	}
@@ -69,16 +66,16 @@ public class SetContainerContents extends LootItemConditionalFunction {
 		}
 	}
 
-	public static SetContainerContents.Builder setContents(BlockEntityType<?> blockEntityType) {
-		return new SetContainerContents.Builder(blockEntityType);
+	public static SetContainerContents.Builder setContents(ContainerComponentManipulator<?> containerComponentManipulator) {
+		return new SetContainerContents.Builder(containerComponentManipulator);
 	}
 
 	public static class Builder extends LootItemConditionalFunction.Builder<SetContainerContents.Builder> {
 		private final ImmutableList.Builder<LootPoolEntryContainer> entries = ImmutableList.builder();
-		private final BlockEntityType<?> type;
+		private final ContainerComponentManipulator<?> component;
 
-		public Builder(BlockEntityType<?> blockEntityType) {
-			this.type = blockEntityType;
+		public Builder(ContainerComponentManipulator<?> containerComponentManipulator) {
+			this.component = containerComponentManipulator;
 		}
 
 		protected SetContainerContents.Builder getThis() {
@@ -92,7 +89,7 @@ public class SetContainerContents extends LootItemConditionalFunction {
 
 		@Override
 		public LootItemFunction build() {
-			return new SetContainerContents(this.getConditions(), this.type.builtInRegistryHolder(), this.entries.build());
+			return new SetContainerContents(this.getConditions(), this.component, this.entries.build());
 		}
 	}
 }

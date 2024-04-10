@@ -114,7 +114,7 @@ public class QuickPlayLog {
 		static final Codec<QuickPlayLog.Type> CODEC = StringRepresentable.fromEnum(QuickPlayLog.Type::values);
 		private final String name;
 
-		private Type(String string2) {
+		private Type(final String string2) {
 			this.name = string2;
 		}
 

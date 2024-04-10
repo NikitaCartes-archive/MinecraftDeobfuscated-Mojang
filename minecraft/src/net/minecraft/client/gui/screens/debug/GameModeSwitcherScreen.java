@@ -157,7 +157,7 @@ public class GameModeSwitcherScreen extends Screen {
 		final String command;
 		final ItemStack renderStack;
 
-		private GameModeIcon(Component component, String string2, ItemStack itemStack) {
+		private GameModeIcon(final Component component, final String string2, final ItemStack itemStack) {
 			this.name = component;
 			this.command = string2;
 			this.renderStack = itemStack;
@@ -199,7 +199,7 @@ public class GameModeSwitcherScreen extends Screen {
 		final GameModeSwitcherScreen.GameModeIcon icon;
 		private boolean isSelected;
 
-		public GameModeSlot(GameModeSwitcherScreen.GameModeIcon gameModeIcon, int i, int j) {
+		public GameModeSlot(final GameModeSwitcherScreen.GameModeIcon gameModeIcon, final int i, final int j) {
 			super(i, j, 26, 26, gameModeIcon.getName());
 			this.icon = gameModeIcon;
 		}

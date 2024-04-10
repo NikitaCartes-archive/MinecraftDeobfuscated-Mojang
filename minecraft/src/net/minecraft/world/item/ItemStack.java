@@ -5,6 +5,7 @@ import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.DataResult.Error;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.netty.handler.codec.DecoderException;
 import io.netty.handler.codec.EncoderException;
@@ -15,7 +16,6 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
@@ -45,6 +45,7 @@ import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.stats.Stats;
@@ -52,7 +53,9 @@ import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.Mth;
+import net.minecraft.util.NullOps;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.Unit;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
@@ -88,30 +91,30 @@ import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.slf4j.Logger;
 
 public final class ItemStack implements DataComponentHolder {
-	private static final Codec<Holder<Item>> ITEM_NON_AIR_CODEC = BuiltInRegistries.ITEM
+	public static final Codec<Holder<Item>> ITEM_NON_AIR_CODEC = BuiltInRegistries.ITEM
 		.holderByNameCodec()
 		.validate(holder -> holder.is(Items.AIR.builtInRegistryHolder()) ? DataResult.error(() -> "Item must not be minecraft:air") : DataResult.success(holder));
 	public static final Codec<ItemStack> CODEC = Codec.lazyInitialized(
 		() -> RecordCodecBuilder.create(
-					instance -> instance.group(
-								ITEM_NON_AIR_CODEC.fieldOf("id").forGetter(ItemStack::getItemHolder),
-								ExtraCodecs.POSITIVE_INT.fieldOf("count").orElse(1).forGetter(ItemStack::getCount),
-								DataComponentPatch.CODEC.optionalFieldOf("components", DataComponentPatch.EMPTY).forGetter(itemStack -> itemStack.components.asPatch())
-							)
-							.apply(instance, ItemStack::new)
-				)
-				.validate(ItemStack::validate)
+				instance -> instance.group(
+							ITEM_NON_AIR_CODEC.fieldOf("id").forGetter(ItemStack::getItemHolder),
+							ExtraCodecs.POSITIVE_INT.fieldOf("count").orElse(1).forGetter(ItemStack::getCount),
+							DataComponentPatch.CODEC.optionalFieldOf("components", DataComponentPatch.EMPTY).forGetter(itemStack -> itemStack.components.asPatch())
+						)
+						.apply(instance, ItemStack::new)
+			)
 	);
 	public static final Codec<ItemStack> SINGLE_ITEM_CODEC = Codec.lazyInitialized(
 		() -> RecordCodecBuilder.create(
-					instance -> instance.group(
-								ITEM_NON_AIR_CODEC.fieldOf("id").forGetter(ItemStack::getItemHolder),
-								DataComponentPatch.CODEC.optionalFieldOf("components", DataComponentPatch.EMPTY).forGetter(itemStack -> itemStack.components.asPatch())
-							)
-							.apply(instance, (holder, dataComponentPatch) -> new ItemStack(holder, 1, dataComponentPatch))
-				)
-				.validate(ItemStack::validate)
+				instance -> instance.group(
+							ITEM_NON_AIR_CODEC.fieldOf("id").forGetter(ItemStack::getItemHolder),
+							DataComponentPatch.CODEC.optionalFieldOf("components", DataComponentPatch.EMPTY).forGetter(itemStack -> itemStack.components.asPatch())
+						)
+						.apply(instance, (holder, dataComponentPatch) -> new ItemStack(holder, 1, dataComponentPatch))
+			)
 	);
+	public static final Codec<ItemStack> STRICT_CODEC = CODEC.validate(ItemStack::validateStrict);
+	public static final Codec<ItemStack> STRICT_SINGLE_ITEM_CODEC = SINGLE_ITEM_CODEC.validate(ItemStack::validateStrict);
 	public static final Codec<ItemStack> OPTIONAL_CODEC = ExtraCodecs.optionalEmptyMap(CODEC)
 		.xmap(optional -> (ItemStack)optional.orElse(ItemStack.EMPTY), itemStack -> itemStack.isEmpty() ? Optional.empty() : Optional.of(itemStack));
 	public static final Codec<ItemStack> SIMPLE_ITEM_CODEC = ITEM_NON_AIR_CODEC.xmap(ItemStack::new, ItemStack::getItemHolder);
@@ -175,11 +178,33 @@ public final class ItemStack implements DataComponentHolder {
 	@Nullable
 	private Entity entityRepresentation;
 
-	private static DataResult<ItemStack> validate(ItemStack itemStack) {
-		return itemStack.getCount() > itemStack.getMaxStackSize()
-			? DataResult.<ItemStack>error(() -> "Item stack with stack size of " + itemStack.getCount() + " was larger than maximum: " + itemStack.getMaxStackSize())
-				.setPartial((Supplier<ItemStack>)(() -> itemStack.copyWithCount(itemStack.getMaxStackSize())))
-			: DataResult.success(itemStack);
+	private static DataResult<ItemStack> validateStrict(ItemStack itemStack) {
+		DataResult<Unit> dataResult = validateComponents(itemStack.getComponents());
+		if (dataResult.isError()) {
+			return dataResult.map(unit -> itemStack);
+		} else {
+			return itemStack.getCount() > itemStack.getMaxStackSize()
+				? DataResult.error(() -> "Item stack with stack size of " + itemStack.getCount() + " was larger than maximum: " + itemStack.getMaxStackSize())
+				: DataResult.success(itemStack);
+		}
+	}
+
+	public static StreamCodec<RegistryFriendlyByteBuf, ItemStack> validatedStreamCodec(StreamCodec<RegistryFriendlyByteBuf, ItemStack> streamCodec) {
+		return new StreamCodec<RegistryFriendlyByteBuf, ItemStack>() {
+			public ItemStack decode(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
+				ItemStack itemStack = streamCodec.decode(registryFriendlyByteBuf);
+				if (!itemStack.isEmpty()) {
+					RegistryOps<Unit> registryOps = registryFriendlyByteBuf.registryAccess().createSerializationContext(NullOps.INSTANCE);
+					ItemStack.CODEC.encodeStart(registryOps, itemStack).getOrThrow(DecoderException::new);
+				}
+
+				return itemStack;
+			}
+
+			public void encode(RegistryFriendlyByteBuf registryFriendlyByteBuf, ItemStack itemStack) {
+				streamCodec.encode(registryFriendlyByteBuf, itemStack);
+			}
+		};
 	}
 
 	public Optional<TooltipComponent> getTooltipImage() {
@@ -229,6 +254,12 @@ public final class ItemStack implements DataComponentHolder {
 	private ItemStack(@Nullable Void void_) {
 		this.item = null;
 		this.components = new PatchedDataComponentMap(DataComponentMap.EMPTY);
+	}
+
+	public static DataResult<Unit> validateComponents(DataComponentMap dataComponentMap) {
+		return dataComponentMap.has(DataComponents.MAX_DAMAGE) && dataComponentMap.getOrDefault(DataComponents.MAX_STACK_SIZE, 1) > 1
+			? DataResult.error(() -> "Item cannot be both damageable and stackable")
+			: DataResult.success(Unit.INSTANCE);
 	}
 
 	public static Optional<ItemStack> parse(HolderLookup.Provider provider, Tag tag) {
@@ -305,7 +336,7 @@ public final class ItemStack implements DataComponentHolder {
 		} else {
 			Item item = this.getItem();
 			InteractionResult interactionResult = item.useOn(useOnContext);
-			if (player != null && interactionResult.shouldAwardStats()) {
+			if (player != null && interactionResult.indicateItemUse()) {
 				player.awardStat(Stats.ITEM_USED.get(item));
 			}
 
@@ -444,8 +475,10 @@ public final class ItemStack implements DataComponentHolder {
 
 	public void hurtEnemy(LivingEntity livingEntity, Player player) {
 		Item item = this.getItem();
+		ItemEnchantments itemEnchantments = this.getEnchantments();
 		if (item.hurtEnemy(this, livingEntity, player)) {
 			player.awardStat(Stats.ITEM_USED.get(item));
+			EnchantmentHelper.doPostItemStackHurtEffects(player, livingEntity, itemEnchantments);
 		}
 	}
 
@@ -616,6 +649,18 @@ public final class ItemStack implements DataComponentHolder {
 		return this.components.remove(dataComponentType);
 	}
 
+	public void applyComponentsAndValidate(DataComponentPatch dataComponentPatch) {
+		DataComponentPatch dataComponentPatch2 = this.components.asPatch();
+		this.components.applyPatch(dataComponentPatch);
+		Optional<Error<ItemStack>> optional = validateStrict(this).error();
+		if (optional.isPresent()) {
+			LOGGER.error("Failed to apply component patch '{}' to item: '{}'", dataComponentPatch, ((Error)optional.get()).message());
+			this.components.restorePatch(dataComponentPatch2);
+		} else {
+			this.getItem().verifyComponentsAfterLoad(this);
+		}
+	}
+
 	public void applyComponents(DataComponentPatch dataComponentPatch) {
 		this.components.applyPatch(dataComponentPatch);
 		this.getItem().verifyComponentsAfterLoad(this);
@@ -636,10 +681,12 @@ public final class ItemStack implements DataComponentHolder {
 		}
 	}
 
-	private <T extends TooltipProvider> void addToTooltip(DataComponentType<T> dataComponentType, Consumer<Component> consumer, TooltipFlag tooltipFlag) {
+	private <T extends TooltipProvider> void addToTooltip(
+		DataComponentType<T> dataComponentType, Item.TooltipContext tooltipContext, Consumer<Component> consumer, TooltipFlag tooltipFlag
+	) {
 		T tooltipProvider = (T)this.get(dataComponentType);
 		if (tooltipProvider != null) {
-			tooltipProvider.addToTooltip(consumer, tooltipFlag);
+			tooltipProvider.addToTooltip(tooltipContext, consumer, tooltipFlag);
 		}
 	}
 
@@ -666,13 +713,13 @@ public final class ItemStack implements DataComponentHolder {
 				this.getItem().appendHoverText(this, tooltipContext, list, tooltipFlag);
 			}
 
-			this.addToTooltip(DataComponents.TRIM, consumer, tooltipFlag);
-			this.addToTooltip(DataComponents.STORED_ENCHANTMENTS, consumer, tooltipFlag);
-			this.addToTooltip(DataComponents.ENCHANTMENTS, consumer, tooltipFlag);
-			this.addToTooltip(DataComponents.DYED_COLOR, consumer, tooltipFlag);
-			this.addToTooltip(DataComponents.LORE, consumer, tooltipFlag);
+			this.addToTooltip(DataComponents.TRIM, tooltipContext, consumer, tooltipFlag);
+			this.addToTooltip(DataComponents.STORED_ENCHANTMENTS, tooltipContext, consumer, tooltipFlag);
+			this.addToTooltip(DataComponents.ENCHANTMENTS, tooltipContext, consumer, tooltipFlag);
+			this.addToTooltip(DataComponents.DYED_COLOR, tooltipContext, consumer, tooltipFlag);
+			this.addToTooltip(DataComponents.LORE, tooltipContext, consumer, tooltipFlag);
 			this.addAttributeTooltips(consumer, player);
-			this.addToTooltip(DataComponents.UNBREAKABLE, consumer, tooltipFlag);
+			this.addToTooltip(DataComponents.UNBREAKABLE, tooltipContext, consumer, tooltipFlag);
 			AdventureModePredicate adventureModePredicate = this.get(DataComponents.CAN_BREAK);
 			if (adventureModePredicate != null && adventureModePredicate.showInTooltip()) {
 				consumer.accept(CommonComponents.EMPTY);

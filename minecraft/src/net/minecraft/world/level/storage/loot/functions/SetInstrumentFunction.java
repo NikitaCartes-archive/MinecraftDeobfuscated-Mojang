@@ -25,7 +25,7 @@ public class SetInstrumentFunction extends LootItemConditionalFunction {
 	}
 
 	@Override
-	public LootItemFunctionType getType() {
+	public LootItemFunctionType<SetInstrumentFunction> getType() {
 		return LootItemFunctions.SET_INSTRUMENT;
 	}
 

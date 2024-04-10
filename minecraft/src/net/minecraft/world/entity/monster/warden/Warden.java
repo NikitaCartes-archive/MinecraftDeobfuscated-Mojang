@@ -459,7 +459,7 @@ public class Warden extends Monster implements VibrationSystem {
 	public void increaseAngerAt(@Nullable Entity entity, int i, boolean bl) {
 		if (!this.isNoAi() && this.canTargetEntity(entity)) {
 			WardenAi.setDigCooldown(this);
-			boolean bl2 = !(this.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).orElse(null) instanceof Player);
+			boolean bl2 = !(this.getTarget() instanceof Player);
 			int j = this.angerManagement.increaseAnger(entity, i);
 			if (entity instanceof Player && bl2 && AngerLevel.byAnger(j).isAngry()) {
 				this.getBrain().eraseMemory(MemoryModuleType.ATTACK_TARGET);
@@ -478,7 +478,7 @@ public class Warden extends Monster implements VibrationSystem {
 	@Nullable
 	@Override
 	public LivingEntity getTarget() {
-		return (LivingEntity)this.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).orElse(null);
+		return this.getTargetFromBrain();
 	}
 
 	@Override

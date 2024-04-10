@@ -57,7 +57,7 @@ public class RecipeCraftedTrigger extends SimpleCriterionTrigger<RecipeCraftedTr
 					Iterator<ItemStack> iterator = list2.iterator();
 
 					while (iterator.hasNext()) {
-						if (itemPredicate.matches((ItemStack)iterator.next())) {
+						if (itemPredicate.test((ItemStack)iterator.next())) {
 							iterator.remove();
 							bl = true;
 							break;

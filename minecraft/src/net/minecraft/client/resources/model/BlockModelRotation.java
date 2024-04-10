@@ -40,7 +40,7 @@ public enum BlockModelRotation implements ModelState {
 		return i * 360 + j;
 	}
 
-	private BlockModelRotation(int j, int k) {
+	private BlockModelRotation(final int j, final int k) {
 		this.index = getIndex(j, k);
 		Quaternionf quaternionf = new Quaternionf().rotateYXZ((float)(-k) * (float) (Math.PI / 180.0), (float)(-j) * (float) (Math.PI / 180.0), 0.0F);
 		OctahedralGroup octahedralGroup = OctahedralGroup.IDENTITY;

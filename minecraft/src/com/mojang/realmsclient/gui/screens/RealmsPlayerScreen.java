@@ -115,7 +115,7 @@ public class RealmsPlayerScreen extends RealmsScreen {
 		private final Button makeOpButton;
 		private final Button removeOpButton;
 
-		public Entry(PlayerInfo playerInfo) {
+		public Entry(final PlayerInfo playerInfo) {
 			this.playerInfo = playerInfo;
 			int i = RealmsPlayerScreen.this.serverData.players.indexOf(this.playerInfo);
 			this.makeOpButton = SpriteIconButton.builder(NORMAL_USER_TEXT, button -> this.op(i), false)

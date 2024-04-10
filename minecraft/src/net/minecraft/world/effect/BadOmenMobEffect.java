@@ -41,10 +41,8 @@ class BadOmenMobEffect extends MobEffect {
 
 	private boolean legacyApplyEffectTick(ServerPlayer serverPlayer, ServerLevel serverLevel) {
 		BlockPos blockPos = serverPlayer.blockPosition();
-		if (serverLevel.getDifficulty() != Difficulty.PEACEFUL && serverLevel.isVillage(blockPos)) {
-			serverLevel.getRaids().createOrExtendRaid(serverPlayer, blockPos);
-		}
-
-		return true;
+		return serverLevel.getDifficulty() != Difficulty.PEACEFUL && serverLevel.isVillage(blockPos)
+			? serverLevel.getRaids().createOrExtendRaid(serverPlayer, blockPos) == null
+			: true;
 	}
 }

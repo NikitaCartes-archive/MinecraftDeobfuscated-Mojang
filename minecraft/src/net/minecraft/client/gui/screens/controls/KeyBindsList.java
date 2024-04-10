@@ -73,7 +73,7 @@ public class KeyBindsList extends ContainerObjectSelectionList<KeyBindsList.Entr
 		final Component name;
 		private final int width;
 
-		public CategoryEntry(Component component) {
+		public CategoryEntry(final Component component) {
 			this.name = component;
 			this.width = KeyBindsList.this.minecraft.font.width(this.name);
 		}
@@ -129,7 +129,7 @@ public class KeyBindsList extends ContainerObjectSelectionList<KeyBindsList.Entr
 		private final Button resetButton;
 		private boolean hasCollision = false;
 
-		KeyEntry(KeyMapping keyMapping, Component component) {
+		KeyEntry(final KeyMapping keyMapping, final Component component) {
 			this.key = keyMapping;
 			this.name = component;
 			this.changeButton = Button.builder(component, button -> {

@@ -25,6 +25,7 @@ import net.minecraft.FileUtil;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.structures.NbtToSnbt;
@@ -32,6 +33,7 @@ import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.protocol.game.DebugPackets;
@@ -47,6 +49,7 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.phys.BlockHitResult;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.mutable.MutableBoolean;
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.slf4j.Logger;
 
 public class TestCommand {
@@ -162,6 +165,18 @@ public class TestCommand {
 				.then(runWithRetryOptions(Commands.literal("runclosest"), testFinder::nearest))
 				.then(runWithRetryOptions(Commands.literal("runthat"), testFinder::lookedAt))
 				.then(runWithRetryOptionsAndBuildInfo(Commands.literal("runfailed").then(argumentBuilder), testFinder::failedTests))
+				.then(
+					Commands.literal("locate")
+						.then(
+							Commands.argument("testName", TestFunctionArgument.testFunctionArgument())
+								.executes(
+									commandContext -> testFinder.locateByName(
+												commandContext, "minecraft:" + TestFunctionArgument.getTestFunction(commandContext, "testName").structureName()
+											)
+											.locate()
+								)
+						)
+				)
 				.then(Commands.literal("resetclosest").executes(commandContext -> testFinder.nearest(commandContext).reset()))
 				.then(Commands.literal("resetthese").executes(commandContext -> testFinder.allNearby(commandContext).reset()))
 				.then(Commands.literal("resetthat").executes(commandContext -> testFinder.lookedAt(commandContext).reset()))
@@ -547,6 +562,47 @@ public class TestCommand {
 
 		public int run() {
 			return this.run(RetryOptions.noRetries());
+		}
+
+		public int locate() {
+			TestCommand.say(this.finder.source(), "Started locating test structures, this might take a while..");
+			MutableInt mutableInt = new MutableInt(0);
+			BlockPos blockPos = BlockPos.containing(this.finder.source().getPosition());
+			this.finder
+				.findStructureBlockPos()
+				.forEach(
+					blockPos2 -> {
+						StructureBlockEntity structureBlockEntity = (StructureBlockEntity)this.finder.source().getLevel().getBlockEntity(blockPos2);
+						if (structureBlockEntity != null) {
+							Direction direction = structureBlockEntity.getRotation().rotate(Direction.NORTH);
+							BlockPos blockPos3 = structureBlockEntity.getBlockPos().relative(direction, 2);
+							int ix = (int)direction.getOpposite().toYRot();
+							String string = String.format("/tp @s %d %d %d %d 0", blockPos3.getX(), blockPos3.getY(), blockPos3.getZ(), ix);
+							int j = blockPos.getX() - blockPos2.getX();
+							int k = blockPos.getZ() - blockPos2.getZ();
+							int l = Mth.floor(Mth.sqrt((float)(j * j + k * k)));
+							Component component = ComponentUtils.wrapInSquareBrackets(
+									Component.translatable("chat.coordinates", blockPos2.getX(), blockPos2.getY(), blockPos2.getZ())
+								)
+								.withStyle(
+									style -> style.withColor(ChatFormatting.GREEN)
+											.withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, string))
+											.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("chat.coordinates.tooltip")))
+								);
+							Component component2 = Component.literal("Found structure at: ").append(component).append(" (distance: " + l + ")");
+							this.finder.source().sendSuccess(() -> component2, false);
+							mutableInt.increment();
+						}
+					}
+				);
+			int i = mutableInt.intValue();
+			if (i == 0) {
+				TestCommand.say(this.finder.source().getLevel(), "No such test structure found", ChatFormatting.RED);
+				return 0;
+			} else {
+				TestCommand.say(this.finder.source().getLevel(), "Finished locating, found " + i + " structure(s)", ChatFormatting.GREEN);
+				return 1;
+			}
 		}
 	}
 

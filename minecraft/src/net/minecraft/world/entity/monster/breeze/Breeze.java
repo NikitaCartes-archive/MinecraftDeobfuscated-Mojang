@@ -2,6 +2,7 @@ package net.minecraft.world.entity.monster.breeze;
 
 import com.mojang.serialization.Dynamic;
 import java.util.Optional;
+import javax.annotation.Nullable;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.protocol.game.DebugPackets;
@@ -281,5 +282,11 @@ public class Breeze extends Monster {
 	@Override
 	protected Entity.MovementEmission getMovementEmission() {
 		return Entity.MovementEmission.EVENTS;
+	}
+
+	@Nullable
+	@Override
+	public LivingEntity getTarget() {
+		return this.getTargetFromBrain();
 	}
 }

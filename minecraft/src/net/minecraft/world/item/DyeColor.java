@@ -45,7 +45,7 @@ public enum DyeColor implements StringRepresentable {
 	private final int fireworkColor;
 	private final int textColor;
 
-	private DyeColor(int j, String string2, int k, MapColor mapColor, int l, int m) {
+	private DyeColor(final int j, final String string2, final int k, final MapColor mapColor, final int l, final int m) {
 		this.id = j;
 		this.name = string2;
 		this.mapColor = mapColor;

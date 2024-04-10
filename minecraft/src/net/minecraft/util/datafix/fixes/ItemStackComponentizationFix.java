@@ -381,7 +381,7 @@ public class ItemStackComponentizationFix extends DataFix {
 		}
 
 		if (j != -1) {
-			k = Math.min(i, j);
+			k = Math.min(k, j);
 		}
 
 		String string2 = string.substring(0, k);

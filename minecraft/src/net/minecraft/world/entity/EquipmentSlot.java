@@ -17,7 +17,7 @@ public enum EquipmentSlot implements StringRepresentable {
 	private final int filterFlag;
 	private final String name;
 
-	private EquipmentSlot(EquipmentSlot.Type type, int j, int k, String string2) {
+	private EquipmentSlot(final EquipmentSlot.Type type, final int j, final int k, final String string2) {
 		this.type = type;
 		this.index = j;
 		this.filterFlag = k;

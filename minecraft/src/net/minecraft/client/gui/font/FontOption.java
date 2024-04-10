@@ -17,7 +17,7 @@ public enum FontOption implements StringRepresentable {
 	public static final Codec<FontOption> CODEC = StringRepresentable.fromEnum(FontOption::values);
 	private final String name;
 
-	private FontOption(String string2) {
+	private FontOption(final String string2) {
 		this.name = string2;
 	}
 

@@ -16,6 +16,8 @@ import net.minecraft.util.StringRepresentable;
 import org.slf4j.Logger;
 
 public interface ListOperation {
+	MapCodec<ListOperation> UNLIMITED_CODEC = codec(Integer.MAX_VALUE);
+
 	static MapCodec<ListOperation> codec(int i) {
 		return ListOperation.Type.CODEC.<ListOperation>dispatchMap("mode", ListOperation::mode, type -> type.mapCodec).validate(listOperation -> {
 			if (listOperation instanceof ListOperation.ReplaceSection replaceSection && replaceSection.size().isPresent()) {
@@ -30,6 +32,10 @@ public interface ListOperation {
 	}
 
 	ListOperation.Type mode();
+
+	default <T> List<T> apply(List<T> list, List<T> list2) {
+		return this.apply(list, list2, Integer.MAX_VALUE);
+	}
 
 	<T> List<T> apply(List<T> list, List<T> list2, int i);
 
@@ -161,7 +167,7 @@ public interface ListOperation {
 		private final String id;
 		final MapCodec<? extends ListOperation> mapCodec;
 
-		private Type(String string2, MapCodec<? extends ListOperation> mapCodec) {
+		private Type(final String string2, final MapCodec<? extends ListOperation> mapCodec) {
 			this.id = string2;
 			this.mapCodec = mapCodec;
 		}

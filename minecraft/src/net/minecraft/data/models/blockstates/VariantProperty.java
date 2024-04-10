@@ -24,7 +24,7 @@ public class VariantProperty<T> {
 	public class Value {
 		private final T value;
 
-		public Value(T object) {
+		public Value(final T object) {
 			this.value = object;
 		}
 

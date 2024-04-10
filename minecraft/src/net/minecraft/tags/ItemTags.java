@@ -131,7 +131,6 @@ public final class ItemTags {
 	public static final TagKey<Item> HOES = bind("hoes");
 	public static final TagKey<Item> PICKAXES = bind("pickaxes");
 	public static final TagKey<Item> SHOVELS = bind("shovels");
-	public static final TagKey<Item> TOOLS = bind("tools");
 	public static final TagKey<Item> BREAKS_DECORATED_POTS = bind("breaks_decorated_pots");
 	public static final TagKey<Item> VILLAGER_PLANTABLE_SEEDS = bind("villager_plantable_seeds");
 	public static final TagKey<Item> DYEABLE = bind("dyeable");

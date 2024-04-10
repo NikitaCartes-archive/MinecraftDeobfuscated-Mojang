@@ -106,6 +106,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.raid.Raid;
 import net.minecraft.world.entity.raid.Raids;
 import net.minecraft.world.flag.FeatureFlagSet;
+import net.minecraft.world.item.alchemy.PotionBrewing;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.BlockEventData;
 import net.minecraft.world.level.ChunkPos;
@@ -1724,6 +1725,11 @@ public class ServerLevel extends Level implements WorldGenLevel {
 	@Override
 	public FeatureFlagSet enabledFeatures() {
 		return this.server.getWorldData().enabledFeatures();
+	}
+
+	@Override
+	public PotionBrewing potionBrewing() {
+		return this.server.potionBrewing();
 	}
 
 	public RandomSource getRandomSequence(ResourceLocation resourceLocation) {

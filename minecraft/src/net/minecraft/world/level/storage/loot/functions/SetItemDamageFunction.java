@@ -37,7 +37,7 @@ public class SetItemDamageFunction extends LootItemConditionalFunction {
 	}
 
 	@Override
-	public LootItemFunctionType getType() {
+	public LootItemFunctionType<SetItemDamageFunction> getType() {
 		return LootItemFunctions.SET_DAMAGE;
 	}
 

@@ -313,7 +313,16 @@ public class Font {
 			this.effects.add(effect);
 		}
 
-		public StringRenderOutput(MultiBufferSource multiBufferSource, float f, float g, int i, boolean bl, Matrix4f matrix4f, Font.DisplayMode displayMode, int j) {
+		public StringRenderOutput(
+			final MultiBufferSource multiBufferSource,
+			final float f,
+			final float g,
+			final int i,
+			final boolean bl,
+			final Matrix4f matrix4f,
+			final Font.DisplayMode displayMode,
+			final int j
+		) {
 			this.bufferSource = multiBufferSource;
 			this.x = f;
 			this.y = g;

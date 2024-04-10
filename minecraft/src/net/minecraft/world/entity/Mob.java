@@ -49,6 +49,7 @@ import net.minecraft.world.entity.ai.control.LookControl;
 import net.minecraft.world.entity.ai.control.MoveControl;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.GoalSelector;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.ai.sensing.Sensing;
@@ -230,6 +231,11 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Targeti
 	@Override
 	public LivingEntity getTarget() {
 		return this.target;
+	}
+
+	@Nullable
+	protected final LivingEntity getTargetFromBrain() {
+		return (LivingEntity)this.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).orElse(null);
 	}
 
 	public void setTarget(@Nullable LivingEntity livingEntity) {
@@ -986,9 +992,13 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Targeti
 			.create(LootContextParamSets.EQUIPMENT);
 	}
 
-	public void equip(ResourceLocation resourceLocation) {
+	public void equip(EquipmentTable equipmentTable) {
+		this.equip(equipmentTable.lootTable(), equipmentTable.slotDropChances());
+	}
+
+	public void equip(ResourceKey<LootTable> resourceKey, Map<EquipmentSlot, Float> map) {
 		if (this.level() instanceof ServerLevel serverLevel) {
-			this.equip(resourceLocation, this.createEquipmentParams(serverLevel));
+			this.equip(resourceKey, this.createEquipmentParams(serverLevel), map);
 		}
 	}
 

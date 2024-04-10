@@ -2519,7 +2519,7 @@ public class Blocks {
 	);
 	public static final Block ENCHANTING_TABLE = register(
 		"enchanting_table",
-		new EnchantmentTableBlock(
+		new EnchantingTableBlock(
 			BlockBehaviour.Properties.of()
 				.mapColor(MapColor.COLOR_RED)
 				.instrument(NoteBlockInstrument.BASEDRUM)

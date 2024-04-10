@@ -9,7 +9,7 @@ public enum RedstoneSide implements StringRepresentable {
 
 	private final String name;
 
-	private RedstoneSide(String string2) {
+	private RedstoneSide(final String string2) {
 		this.name = string2;
 	}
 

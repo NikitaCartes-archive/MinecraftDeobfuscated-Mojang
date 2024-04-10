@@ -48,7 +48,7 @@ public class SetStewEffectFunction extends LootItemConditionalFunction {
 	}
 
 	@Override
-	public LootItemFunctionType getType() {
+	public LootItemFunctionType<SetStewEffectFunction> getType() {
 		return LootItemFunctions.SET_STEW_EFFECT;
 	}
 

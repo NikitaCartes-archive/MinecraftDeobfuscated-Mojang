@@ -100,8 +100,8 @@ public class BlockEntityType<T extends BlockEntity> {
 	public static final BlockEntityType<BrewingStandBlockEntity> BREWING_STAND = register(
 		"brewing_stand", BlockEntityType.Builder.of(BrewingStandBlockEntity::new, Blocks.BREWING_STAND)
 	);
-	public static final BlockEntityType<EnchantmentTableBlockEntity> ENCHANTING_TABLE = register(
-		"enchanting_table", BlockEntityType.Builder.of(EnchantmentTableBlockEntity::new, Blocks.ENCHANTING_TABLE)
+	public static final BlockEntityType<EnchantingTableBlockEntity> ENCHANTING_TABLE = register(
+		"enchanting_table", BlockEntityType.Builder.of(EnchantingTableBlockEntity::new, Blocks.ENCHANTING_TABLE)
 	);
 	public static final BlockEntityType<TheEndPortalBlockEntity> END_PORTAL = register(
 		"end_portal", BlockEntityType.Builder.of(TheEndPortalBlockEntity::new, Blocks.END_PORTAL)

@@ -61,7 +61,7 @@ public record ChatTypeDecoration(String translationKey, List<ChatTypeDecoration.
 		private final String name;
 		private final ChatTypeDecoration.Parameter.Selector selector;
 
-		private Parameter(String string2, ChatTypeDecoration.Parameter.Selector selector) {
+		private Parameter(final String string2, final ChatTypeDecoration.Parameter.Selector selector) {
 			this.name = string2;
 			this.selector = selector;
 		}

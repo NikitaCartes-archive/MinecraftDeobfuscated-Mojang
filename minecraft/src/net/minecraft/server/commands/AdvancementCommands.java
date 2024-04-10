@@ -421,7 +421,7 @@ public class AdvancementCommands {
 
 		private final String key;
 
-		Action(String string2) {
+		Action(final String string2) {
 			this.key = "commands.advancement." + string2;
 		}
 
@@ -456,7 +456,7 @@ public class AdvancementCommands {
 		final boolean parents;
 		final boolean children;
 
-		private Mode(boolean bl, boolean bl2) {
+		private Mode(final boolean bl, final boolean bl2) {
 			this.parents = bl;
 			this.children = bl2;
 		}

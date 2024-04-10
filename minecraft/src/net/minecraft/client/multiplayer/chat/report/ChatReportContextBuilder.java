@@ -75,7 +75,7 @@ public class ChatReportContextBuilder {
 		private boolean collectingChain = true;
 		private int count;
 
-		Collector(PlayerChatMessage playerChatMessage) {
+		Collector(final PlayerChatMessage playerChatMessage) {
 			this.lastSeenSignatures = new ObjectOpenHashSet<>(playerChatMessage.signedBody().lastSeen().entries());
 			this.lastChainMessage = playerChatMessage;
 		}

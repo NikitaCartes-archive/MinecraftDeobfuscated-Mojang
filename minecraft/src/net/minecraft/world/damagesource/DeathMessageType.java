@@ -11,7 +11,7 @@ public enum DeathMessageType implements StringRepresentable {
 	public static final Codec<DeathMessageType> CODEC = StringRepresentable.fromEnum(DeathMessageType::values);
 	private final String id;
 
-	private DeathMessageType(String string2) {
+	private DeathMessageType(final String string2) {
 		this.id = string2;
 	}
 

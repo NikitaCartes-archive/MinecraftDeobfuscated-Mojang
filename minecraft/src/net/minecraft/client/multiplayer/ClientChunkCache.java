@@ -182,7 +182,7 @@ public class ClientChunkCache extends ChunkSource {
 		volatile int viewCenterZ;
 		int chunkCount;
 
-		Storage(int i) {
+		Storage(final int i) {
 			this.chunkRadius = i;
 			this.viewRange = i * 2 + 1;
 			this.chunks = new AtomicReferenceArray(this.viewRange * this.viewRange);

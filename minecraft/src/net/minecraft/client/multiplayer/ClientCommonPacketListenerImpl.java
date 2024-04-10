@@ -167,23 +167,27 @@ public abstract class ClientCommonPacketListenerImpl implements ClientCommonPack
 
 	@Override
 	public void handleTransfer(ClientboundTransferPacket clientboundTransferPacket) {
-		PacketUtils.ensureRunningOnSameThread(clientboundTransferPacket, this, this.minecraft);
 		if (this.serverData == null) {
 			throw new IllegalStateException("Cannot transfer to server from singleplayer");
 		} else {
 			this.keepResourcePacks = true;
 			this.connection.disconnect(Component.translatable("disconnect.transfer"));
-			this.connection.setReadOnly();
-			this.connection.handleDisconnection();
-			ServerAddress serverAddress = new ServerAddress(clientboundTransferPacket.host(), clientboundTransferPacket.port());
-			ConnectScreen.startConnecting(
-				(Screen)Objects.requireNonNullElseGet(this.postDisconnectScreen, TitleScreen::new),
-				this.minecraft,
-				serverAddress,
-				this.serverData,
-				false,
-				new TransferState(this.serverCookies)
-			);
+			this.minecraft
+				.executeIfPossible(
+					() -> {
+						this.connection.setReadOnly();
+						this.connection.handleDisconnection();
+						ServerAddress serverAddress = new ServerAddress(clientboundTransferPacket.host(), clientboundTransferPacket.port());
+						ConnectScreen.startConnecting(
+							(Screen)Objects.requireNonNullElseGet(this.postDisconnectScreen, TitleScreen::new),
+							this.minecraft,
+							serverAddress,
+							this.serverData,
+							false,
+							new TransferState(this.serverCookies)
+						);
+					}
+				);
 		}
 	}
 
@@ -263,11 +267,11 @@ public abstract class ClientCommonPacketListenerImpl implements ClientCommonPack
 		private final Screen parentScreen;
 
 		PackConfirmScreen(
-			Minecraft minecraft,
-			@Nullable Screen screen,
-			List<ClientCommonPacketListenerImpl.PackConfirmScreen.PendingRequest> list,
-			boolean bl,
-			@Nullable Component component
+			final Minecraft minecraft,
+			@Nullable final Screen screen,
+			final List<ClientCommonPacketListenerImpl.PackConfirmScreen.PendingRequest> list,
+			final boolean bl,
+			@Nullable final Component component
 		) {
 			super(
 				bl2 -> {

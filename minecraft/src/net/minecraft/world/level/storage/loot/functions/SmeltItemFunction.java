@@ -23,7 +23,7 @@ public class SmeltItemFunction extends LootItemConditionalFunction {
 	}
 
 	@Override
-	public LootItemFunctionType getType() {
+	public LootItemFunctionType<SmeltItemFunction> getType() {
 		return LootItemFunctions.FURNACE_SMELT;
 	}
 

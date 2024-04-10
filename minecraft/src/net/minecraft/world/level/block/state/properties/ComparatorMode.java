@@ -8,7 +8,7 @@ public enum ComparatorMode implements StringRepresentable {
 
 	private final String name;
 
-	private ComparatorMode(String string2) {
+	private ComparatorMode(final String string2) {
 		this.name = string2;
 	}
 

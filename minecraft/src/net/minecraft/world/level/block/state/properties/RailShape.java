@@ -16,7 +16,7 @@ public enum RailShape implements StringRepresentable {
 
 	private final String name;
 
-	private RailShape(String string2) {
+	private RailShape(final String string2) {
 		this.name = string2;
 	}
 

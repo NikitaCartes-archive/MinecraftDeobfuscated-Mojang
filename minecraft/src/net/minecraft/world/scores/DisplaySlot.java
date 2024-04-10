@@ -32,7 +32,7 @@ public enum DisplaySlot implements StringRepresentable {
 	private final int id;
 	private final String name;
 
-	private DisplaySlot(int j, String string2) {
+	private DisplaySlot(final int j, final String string2) {
 		this.id = j;
 		this.name = string2;
 	}

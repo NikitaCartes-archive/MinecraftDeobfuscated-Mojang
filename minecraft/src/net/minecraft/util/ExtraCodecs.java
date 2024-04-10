@@ -60,6 +60,7 @@ import org.joml.AxisAngle4f;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
+import org.joml.Vector4f;
 
 public class ExtraCodecs {
 	public static final Codec<JsonElement> JSON = converter(JsonOps.INSTANCE);
@@ -69,6 +70,12 @@ public class ExtraCodecs {
 		.comapFlatMap(
 			list -> Util.fixedSize(list, 3).map(listx -> new Vector3f((Float)listx.get(0), (Float)listx.get(1), (Float)listx.get(2))),
 			vector3f -> List.of(vector3f.x(), vector3f.y(), vector3f.z())
+		);
+	public static final Codec<Vector4f> VECTOR4F = Codec.FLOAT
+		.listOf()
+		.comapFlatMap(
+			list -> Util.fixedSize(list, 4).map(listx -> new Vector4f((Float)listx.get(0), (Float)listx.get(1), (Float)listx.get(2), (Float)listx.get(3))),
+			vector4f -> List.of(vector4f.x(), vector4f.y(), vector4f.z(), vector4f.w())
 		);
 	public static final Codec<Quaternionf> QUATERNIONF_COMPONENTS = Codec.FLOAT
 		.listOf()
@@ -101,6 +108,9 @@ public class ExtraCodecs {
 
 		return floatList;
 	});
+	public static final Codec<Integer> ARGB_COLOR_CODEC = Codec.withAlternative(
+		Codec.INT, VECTOR4F, vector4f -> FastColor.ARGB32.colorFromFloat(vector4f.w(), vector4f.x(), vector4f.y(), vector4f.z())
+	);
 	public static final Codec<Integer> UNSIGNED_BYTE = Codec.BYTE
 		.flatComapMap(
 			UnsignedBytes::toInt,

@@ -93,11 +93,6 @@ public class WitherSkull extends AbstractHurtingProjectile {
 	}
 
 	@Override
-	public boolean isPickable() {
-		return false;
-	}
-
-	@Override
 	public boolean hurt(DamageSource damageSource, float f) {
 		return false;
 	}

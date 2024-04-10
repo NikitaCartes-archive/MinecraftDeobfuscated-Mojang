@@ -13,7 +13,7 @@ public enum RecipeCategory {
 
 	private final String recipeFolderName;
 
-	private RecipeCategory(String string2) {
+	private RecipeCategory(final String string2) {
 		this.recipeFolderName = string2;
 	}
 

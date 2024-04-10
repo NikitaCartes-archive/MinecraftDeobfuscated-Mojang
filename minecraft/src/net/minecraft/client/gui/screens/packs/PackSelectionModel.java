@@ -113,7 +113,7 @@ public class PackSelectionModel {
 	abstract class EntryBase implements PackSelectionModel.Entry {
 		private final Pack pack;
 
-		public EntryBase(Pack pack) {
+		public EntryBase(final Pack pack) {
 			this.pack = pack;
 		}
 
@@ -211,7 +211,7 @@ public class PackSelectionModel {
 
 	@Environment(EnvType.CLIENT)
 	class SelectedPackEntry extends PackSelectionModel.EntryBase {
-		public SelectedPackEntry(Pack pack) {
+		public SelectedPackEntry(final Pack pack) {
 			super(pack);
 		}
 
@@ -242,7 +242,7 @@ public class PackSelectionModel {
 
 	@Environment(EnvType.CLIENT)
 	class UnselectedPackEntry extends PackSelectionModel.EntryBase {
-		public UnselectedPackEntry(Pack pack) {
+		public UnselectedPackEntry(final Pack pack) {
 			super(pack);
 		}
 

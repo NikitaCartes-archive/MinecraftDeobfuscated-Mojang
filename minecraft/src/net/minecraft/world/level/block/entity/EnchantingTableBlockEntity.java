@@ -14,7 +14,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 
-public class EnchantmentTableBlockEntity extends BlockEntity implements Nameable {
+public class EnchantingTableBlockEntity extends BlockEntity implements Nameable {
 	public int time;
 	public float flip;
 	public float oFlip;
@@ -29,7 +29,7 @@ public class EnchantmentTableBlockEntity extends BlockEntity implements Nameable
 	@Nullable
 	private Component name;
 
-	public EnchantmentTableBlockEntity(BlockPos blockPos, BlockState blockState) {
+	public EnchantingTableBlockEntity(BlockPos blockPos, BlockState blockState) {
 		super(BlockEntityType.ENCHANTING_TABLE, blockPos, blockState);
 	}
 
@@ -49,44 +49,44 @@ public class EnchantmentTableBlockEntity extends BlockEntity implements Nameable
 		}
 	}
 
-	public static void bookAnimationTick(Level level, BlockPos blockPos, BlockState blockState, EnchantmentTableBlockEntity enchantmentTableBlockEntity) {
-		enchantmentTableBlockEntity.oOpen = enchantmentTableBlockEntity.open;
-		enchantmentTableBlockEntity.oRot = enchantmentTableBlockEntity.rot;
+	public static void bookAnimationTick(Level level, BlockPos blockPos, BlockState blockState, EnchantingTableBlockEntity enchantingTableBlockEntity) {
+		enchantingTableBlockEntity.oOpen = enchantingTableBlockEntity.open;
+		enchantingTableBlockEntity.oRot = enchantingTableBlockEntity.rot;
 		Player player = level.getNearestPlayer((double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5, 3.0, false);
 		if (player != null) {
 			double d = player.getX() - ((double)blockPos.getX() + 0.5);
 			double e = player.getZ() - ((double)blockPos.getZ() + 0.5);
-			enchantmentTableBlockEntity.tRot = (float)Mth.atan2(e, d);
-			enchantmentTableBlockEntity.open += 0.1F;
-			if (enchantmentTableBlockEntity.open < 0.5F || RANDOM.nextInt(40) == 0) {
-				float f = enchantmentTableBlockEntity.flipT;
+			enchantingTableBlockEntity.tRot = (float)Mth.atan2(e, d);
+			enchantingTableBlockEntity.open += 0.1F;
+			if (enchantingTableBlockEntity.open < 0.5F || RANDOM.nextInt(40) == 0) {
+				float f = enchantingTableBlockEntity.flipT;
 
 				do {
-					enchantmentTableBlockEntity.flipT = enchantmentTableBlockEntity.flipT + (float)(RANDOM.nextInt(4) - RANDOM.nextInt(4));
-				} while (f == enchantmentTableBlockEntity.flipT);
+					enchantingTableBlockEntity.flipT = enchantingTableBlockEntity.flipT + (float)(RANDOM.nextInt(4) - RANDOM.nextInt(4));
+				} while (f == enchantingTableBlockEntity.flipT);
 			}
 		} else {
-			enchantmentTableBlockEntity.tRot += 0.02F;
-			enchantmentTableBlockEntity.open -= 0.1F;
+			enchantingTableBlockEntity.tRot += 0.02F;
+			enchantingTableBlockEntity.open -= 0.1F;
 		}
 
-		while (enchantmentTableBlockEntity.rot >= (float) Math.PI) {
-			enchantmentTableBlockEntity.rot -= (float) (Math.PI * 2);
+		while (enchantingTableBlockEntity.rot >= (float) Math.PI) {
+			enchantingTableBlockEntity.rot -= (float) (Math.PI * 2);
 		}
 
-		while (enchantmentTableBlockEntity.rot < (float) -Math.PI) {
-			enchantmentTableBlockEntity.rot += (float) (Math.PI * 2);
+		while (enchantingTableBlockEntity.rot < (float) -Math.PI) {
+			enchantingTableBlockEntity.rot += (float) (Math.PI * 2);
 		}
 
-		while (enchantmentTableBlockEntity.tRot >= (float) Math.PI) {
-			enchantmentTableBlockEntity.tRot -= (float) (Math.PI * 2);
+		while (enchantingTableBlockEntity.tRot >= (float) Math.PI) {
+			enchantingTableBlockEntity.tRot -= (float) (Math.PI * 2);
 		}
 
-		while (enchantmentTableBlockEntity.tRot < (float) -Math.PI) {
-			enchantmentTableBlockEntity.tRot += (float) (Math.PI * 2);
+		while (enchantingTableBlockEntity.tRot < (float) -Math.PI) {
+			enchantingTableBlockEntity.tRot += (float) (Math.PI * 2);
 		}
 
-		float g = enchantmentTableBlockEntity.tRot - enchantmentTableBlockEntity.rot;
+		float g = enchantingTableBlockEntity.tRot - enchantingTableBlockEntity.rot;
 
 		while (g >= (float) Math.PI) {
 			g -= (float) (Math.PI * 2);
@@ -96,15 +96,15 @@ public class EnchantmentTableBlockEntity extends BlockEntity implements Nameable
 			g += (float) (Math.PI * 2);
 		}
 
-		enchantmentTableBlockEntity.rot += g * 0.4F;
-		enchantmentTableBlockEntity.open = Mth.clamp(enchantmentTableBlockEntity.open, 0.0F, 1.0F);
-		enchantmentTableBlockEntity.time++;
-		enchantmentTableBlockEntity.oFlip = enchantmentTableBlockEntity.flip;
-		float h = (enchantmentTableBlockEntity.flipT - enchantmentTableBlockEntity.flip) * 0.4F;
+		enchantingTableBlockEntity.rot += g * 0.4F;
+		enchantingTableBlockEntity.open = Mth.clamp(enchantingTableBlockEntity.open, 0.0F, 1.0F);
+		enchantingTableBlockEntity.time++;
+		enchantingTableBlockEntity.oFlip = enchantingTableBlockEntity.flip;
+		float h = (enchantingTableBlockEntity.flipT - enchantingTableBlockEntity.flip) * 0.4F;
 		float i = 0.2F;
 		h = Mth.clamp(h, -0.2F, 0.2F);
-		enchantmentTableBlockEntity.flipA = enchantmentTableBlockEntity.flipA + (h - enchantmentTableBlockEntity.flipA) * 0.9F;
-		enchantmentTableBlockEntity.flip = enchantmentTableBlockEntity.flip + enchantmentTableBlockEntity.flipA;
+		enchantingTableBlockEntity.flipA = enchantingTableBlockEntity.flipA + (h - enchantingTableBlockEntity.flipA) * 0.9F;
+		enchantingTableBlockEntity.flip = enchantingTableBlockEntity.flip + enchantingTableBlockEntity.flipA;
 	}
 
 	@Override

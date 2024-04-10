@@ -146,7 +146,9 @@ public class V705 extends NamespacedSchema {
 	@Override
 	public Map<String, Supplier<TypeTemplate>> registerEntities(Schema schema) {
 		Map<String, Supplier<TypeTemplate>> map = Maps.<String, Supplier<TypeTemplate>>newHashMap();
-		schema.registerSimple(map, "minecraft:area_effect_cloud");
+		schema.register(
+			map, "minecraft:area_effect_cloud", (Function<String, TypeTemplate>)(string -> DSL.optionalFields("Particle", References.PARTICLE.in(schema)))
+		);
 		registerMob(schema, map, "minecraft:armor_stand");
 		schema.register(map, "minecraft:arrow", (Function<String, TypeTemplate>)(string -> DSL.optionalFields("inTile", References.BLOCK_NAME.in(schema))));
 		registerMob(schema, map, "minecraft:bat");
@@ -276,10 +278,7 @@ public class V705 extends NamespacedSchema {
 					"Inventory",
 					DSL.list(References.ITEM_STACK.in(schema)),
 					"Offers",
-					DSL.optionalFields(
-						"Recipes",
-						DSL.list(DSL.optionalFields("buy", References.ITEM_STACK.in(schema), "buyB", References.ITEM_STACK.in(schema), "sell", References.ITEM_STACK.in(schema)))
-					),
+					DSL.optionalFields("Recipes", DSL.list(References.VILLAGER_TRADE.in(schema))),
 					V100.equipment(schema)
 				))
 		);
@@ -298,7 +297,13 @@ public class V705 extends NamespacedSchema {
 			(Function<String, TypeTemplate>)(string -> DSL.optionalFields("SaddleItem", References.ITEM_STACK.in(schema), V100.equipment(schema)))
 		);
 		registerMob(schema, map, "minecraft:zombie_pigman");
-		registerMob(schema, map, "minecraft:zombie_villager");
+		schema.register(
+			map,
+			"minecraft:zombie_villager",
+			(Function<String, TypeTemplate>)(string -> DSL.optionalFields(
+					"Offers", DSL.optionalFields("Recipes", DSL.list(References.VILLAGER_TRADE.in(schema))), V100.equipment(schema)
+				))
+		);
 		schema.registerSimple(map, "minecraft:evocation_fangs");
 		registerMob(schema, map, "minecraft:evocation_illager");
 		schema.registerSimple(map, "minecraft:illusion_illager");

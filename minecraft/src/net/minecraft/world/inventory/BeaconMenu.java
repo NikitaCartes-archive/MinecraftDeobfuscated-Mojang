@@ -167,7 +167,7 @@ public class BeaconMenu extends AbstractContainerMenu {
 	}
 
 	class PaymentSlot extends Slot {
-		public PaymentSlot(Container container, int i, int j, int k) {
+		public PaymentSlot(final Container container, final int i, final int j, final int k) {
 			super(container, i, j, k);
 		}
 

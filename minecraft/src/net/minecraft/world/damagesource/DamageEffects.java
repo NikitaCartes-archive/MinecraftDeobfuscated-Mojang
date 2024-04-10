@@ -17,7 +17,7 @@ public enum DamageEffects implements StringRepresentable {
 	private final String id;
 	private final SoundEvent sound;
 
-	private DamageEffects(String string2, SoundEvent soundEvent) {
+	private DamageEffects(final String string2, final SoundEvent soundEvent) {
 		this.id = string2;
 		this.sound = soundEvent;
 	}

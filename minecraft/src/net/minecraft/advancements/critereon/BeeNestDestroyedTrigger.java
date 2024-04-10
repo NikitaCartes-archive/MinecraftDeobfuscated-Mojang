@@ -46,7 +46,7 @@ public class BeeNestDestroyedTrigger extends SimpleCriterionTrigger<BeeNestDestr
 			if (this.block.isPresent() && !blockState.is((Holder<Block>)this.block.get())) {
 				return false;
 			} else {
-				return this.item.isPresent() && !((ItemPredicate)this.item.get()).matches(itemStack) ? false : this.beesInside.matches(i);
+				return this.item.isPresent() && !((ItemPredicate)this.item.get()).test(itemStack) ? false : this.beesInside.matches(i);
 			}
 		}
 	}

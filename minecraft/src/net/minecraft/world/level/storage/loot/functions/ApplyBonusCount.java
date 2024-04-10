@@ -56,7 +56,7 @@ public class ApplyBonusCount extends LootItemConditionalFunction {
 	}
 
 	@Override
-	public LootItemFunctionType getType() {
+	public LootItemFunctionType<ApplyBonusCount> getType() {
 		return LootItemFunctions.APPLY_BONUS;
 	}
 

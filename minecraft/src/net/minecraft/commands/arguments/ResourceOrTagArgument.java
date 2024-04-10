@@ -120,7 +120,7 @@ public class ResourceOrTagArgument<T> implements ArgumentType<ResourceOrTagArgum
 		public final class Template implements ArgumentTypeInfo.Template<ResourceOrTagArgument<T>> {
 			final ResourceKey<? extends Registry<T>> registryKey;
 
-			Template(ResourceKey<? extends Registry<T>> resourceKey) {
+			Template(final ResourceKey<? extends Registry<T>> resourceKey) {
 				this.registryKey = resourceKey;
 			}
 

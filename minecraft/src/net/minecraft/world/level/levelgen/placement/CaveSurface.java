@@ -13,7 +13,7 @@ public enum CaveSurface implements StringRepresentable {
 	private final int y;
 	private final String id;
 
-	private CaveSurface(Direction direction, int j, String string2) {
+	private CaveSurface(final Direction direction, final int j, final String string2) {
 		this.direction = direction;
 		this.y = j;
 		this.id = string2;

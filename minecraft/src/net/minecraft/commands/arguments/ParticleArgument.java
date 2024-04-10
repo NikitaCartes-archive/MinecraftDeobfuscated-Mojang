@@ -18,14 +18,20 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.TagParser;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 
 public class ParticleArgument implements ArgumentType<ParticleOptions> {
-	private static final Collection<String> EXAMPLES = Arrays.asList("foo", "foo:bar", "particle with options");
+	private static final Collection<String> EXAMPLES = Arrays.asList("foo", "foo:bar", "particle{foo:bar}");
 	public static final DynamicCommandExceptionType ERROR_UNKNOWN_PARTICLE = new DynamicCommandExceptionType(
 		object -> Component.translatableEscape("particle.notFound", object)
+	);
+	public static final DynamicCommandExceptionType ERROR_INVALID_OPTIONS = new DynamicCommandExceptionType(
+		object -> Component.translatableEscape("particle.invalidOptions", object)
 	);
 	private final HolderLookup.Provider registries;
 
@@ -64,7 +70,14 @@ public class ParticleArgument implements ArgumentType<ParticleOptions> {
 	}
 
 	private static <T extends ParticleOptions> T readParticle(StringReader stringReader, ParticleType<T> particleType, HolderLookup.Provider provider) throws CommandSyntaxException {
-		return particleType.getDeserializer().fromCommand(particleType, stringReader, provider);
+		CompoundTag compoundTag;
+		if (stringReader.canRead() && stringReader.peek() == '{') {
+			compoundTag = new TagParser(stringReader).readStruct();
+		} else {
+			compoundTag = new CompoundTag();
+		}
+
+		return particleType.codec().codec().parse(provider.createSerializationContext(NbtOps.INSTANCE), compoundTag).getOrThrow(ERROR_INVALID_OPTIONS::create);
 	}
 
 	@Override

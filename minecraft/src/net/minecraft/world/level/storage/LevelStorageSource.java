@@ -448,7 +448,7 @@ public class LevelStorageSource {
 		private final String levelId;
 		private final Map<LevelResource, Path> resources = Maps.<LevelResource, Path>newHashMap();
 
-		LevelStorageAccess(String string, Path path) throws IOException {
+		LevelStorageAccess(final String string, final Path path) throws IOException {
 			this.levelId = string;
 			this.levelDirectory = new LevelStorageSource.LevelDirectory(path);
 			this.lock = DirectoryLock.create(path);

@@ -8,6 +8,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.TooltipFlag;
 
 public record Unbreakable(boolean showInTooltip) implements TooltipProvider {
@@ -19,7 +20,7 @@ public record Unbreakable(boolean showInTooltip) implements TooltipProvider {
 	private static final Component TOOLTIP = Component.translatable("item.unbreakable").withStyle(ChatFormatting.BLUE);
 
 	@Override
-	public void addToTooltip(Consumer<Component> consumer, TooltipFlag tooltipFlag) {
+	public void addToTooltip(Item.TooltipContext tooltipContext, Consumer<Component> consumer, TooltipFlag tooltipFlag) {
 		if (this.showInTooltip) {
 			consumer.accept(TOOLTIP);
 		}

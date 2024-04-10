@@ -8,6 +8,7 @@ import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.objects.Object2DoubleArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -2891,6 +2892,10 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 		return this.passengers;
 	}
 
+	public Optional<Entity> getPassengerClosestTo(Vec3 vec3) {
+		return this.getPassengers().stream().filter(entity -> entity != this).min(Comparator.comparingDouble(entity -> vec3.distanceToSqr(entity.position())));
+	}
+
 	@Nullable
 	public Entity getFirstPassenger() {
 		return this.passengers.isEmpty() ? null : (Entity)this.passengers.get(0);
@@ -3433,7 +3438,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 		final boolean sounds;
 		final boolean events;
 
-		private MovementEmission(boolean bl, boolean bl2) {
+		private MovementEmission(final boolean bl, final boolean bl2) {
 			this.sounds = bl;
 			this.events = bl2;
 		}
@@ -3461,7 +3466,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 		private final boolean destroy;
 		private final boolean save;
 
-		private RemovalReason(boolean bl, boolean bl2) {
+		private RemovalReason(final boolean bl, final boolean bl2) {
 			this.destroy = bl;
 			this.save = bl2;
 		}

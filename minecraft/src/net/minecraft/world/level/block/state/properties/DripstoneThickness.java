@@ -11,7 +11,7 @@ public enum DripstoneThickness implements StringRepresentable {
 
 	private final String name;
 
-	private DripstoneThickness(String string2) {
+	private DripstoneThickness(final String string2) {
 		this.name = string2;
 	}
 

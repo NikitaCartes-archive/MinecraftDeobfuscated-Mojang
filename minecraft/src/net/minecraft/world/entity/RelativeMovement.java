@@ -14,7 +14,7 @@ public enum RelativeMovement {
 	public static final Set<RelativeMovement> ROTATION = Set.of(X_ROT, Y_ROT);
 	private final int bit;
 
-	private RelativeMovement(int j) {
+	private RelativeMovement(final int j) {
 		this.bit = j;
 	}
 

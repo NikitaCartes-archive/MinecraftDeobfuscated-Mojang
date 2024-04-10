@@ -96,13 +96,13 @@ public class InventoryChangeTrigger extends SimpleCriterionTrigger<InventoryChan
 
 					ItemStack itemStack2 = inventory.getItem(m);
 					if (!itemStack2.isEmpty()) {
-						list.removeIf(itemPredicate -> itemPredicate.matches(itemStack2));
+						list.removeIf(itemPredicate -> itemPredicate.test(itemStack2));
 					}
 				}
 
 				return list.isEmpty();
 			} else {
-				return !itemStack.isEmpty() && ((ItemPredicate)this.items.get(0)).matches(itemStack);
+				return !itemStack.isEmpty() && ((ItemPredicate)this.items.get(0)).test(itemStack);
 			}
 		}
 

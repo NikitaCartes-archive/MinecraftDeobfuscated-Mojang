@@ -237,7 +237,7 @@ public abstract class Settings<T extends Settings<T>> {
 		private final V value;
 		private final Function<V, String> serializer;
 
-		MutableValue(String string, V object, Function<V, String> function) {
+		MutableValue(final String string, final V object, final Function<V, String> function) {
 			this.key = string;
 			this.value = object;
 			this.serializer = function;

@@ -33,7 +33,7 @@ public class UsingItemTrigger extends SimpleCriterionTrigger<UsingItemTrigger.Tr
 		}
 
 		public boolean matches(ItemStack itemStack) {
-			return !this.item.isPresent() || ((ItemPredicate)this.item.get()).matches(itemStack);
+			return !this.item.isPresent() || ((ItemPredicate)this.item.get()).test(itemStack);
 		}
 	}
 }

@@ -14,6 +14,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.FastColor;
 import net.minecraft.world.item.DyeItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 
@@ -86,7 +87,7 @@ public record DyedItemColor(int rgb, boolean showInTooltip) implements TooltipPr
 	}
 
 	@Override
-	public void addToTooltip(Consumer<Component> consumer, TooltipFlag tooltipFlag) {
+	public void addToTooltip(Item.TooltipContext tooltipContext, Consumer<Component> consumer, TooltipFlag tooltipFlag) {
 		if (this.showInTooltip) {
 			if (tooltipFlag.isAdvanced()) {
 				consumer.accept(Component.translatable("item.color", String.format(Locale.ROOT, "#%06X", this.rgb)).withStyle(ChatFormatting.GRAY));

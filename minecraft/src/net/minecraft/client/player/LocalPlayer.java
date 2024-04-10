@@ -65,6 +65,7 @@ import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.PlayerRideableJumping;
 import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.player.Abilities;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.inventory.ClickAction;
@@ -669,7 +670,8 @@ public class LocalPlayer extends AbstractClientPlayer {
 		boolean bl = this.input.jumping;
 		boolean bl2 = this.input.shiftKeyDown;
 		boolean bl3 = this.hasEnoughImpulseToStartSprinting();
-		this.crouching = !this.getAbilities().flying
+		Abilities abilities = this.getAbilities();
+		this.crouching = !abilities.flying
 			&& !this.isSwimming()
 			&& !this.isPassenger()
 			&& this.canPlayerFitWithinBlocksAndEntitiesWhen(Pose.CROUCHING)
@@ -729,10 +731,10 @@ public class LocalPlayer extends AbstractClientPlayer {
 		}
 
 		boolean bl8 = false;
-		if (this.getAbilities().mayfly) {
+		if (abilities.mayfly) {
 			if (this.minecraft.gameMode.isAlwaysFlying()) {
-				if (!this.getAbilities().flying) {
-					this.getAbilities().flying = true;
+				if (!abilities.flying) {
+					abilities.flying = true;
 					bl8 = true;
 					this.onUpdateAbilities();
 				}
@@ -740,7 +742,11 @@ public class LocalPlayer extends AbstractClientPlayer {
 				if (this.jumpTriggerTime == 0) {
 					this.jumpTriggerTime = 7;
 				} else if (!this.isSwimming()) {
-					this.getAbilities().flying = !this.getAbilities().flying;
+					abilities.flying = !abilities.flying;
+					if (abilities.flying && this.onGround()) {
+						this.jumpFromGround();
+					}
+
 					bl8 = true;
 					this.onUpdateAbilities();
 					this.jumpTriggerTime = 0;
@@ -748,7 +754,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 			}
 		}
 
-		if (this.input.jumping && !bl8 && !bl && !this.getAbilities().flying && !this.isPassenger() && !this.onClimbable()) {
+		if (this.input.jumping && !bl8 && !bl && !abilities.flying && !this.isPassenger() && !this.onClimbable()) {
 			ItemStack itemStack = this.getItemBySlot(EquipmentSlot.CHEST);
 			if (itemStack.is(Items.ELYTRA) && ElytraItem.isFlyEnabled(itemStack) && this.tryToStartFallFlying()) {
 				this.connection.send(new ServerboundPlayerCommandPacket(this, ServerboundPlayerCommandPacket.Action.START_FALL_FLYING));
@@ -768,7 +774,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 			this.waterVisionTime = Mth.clamp(this.waterVisionTime - 10, 0, 600);
 		}
 
-		if (this.getAbilities().flying && this.isControlledCamera()) {
+		if (abilities.flying && this.isControlledCamera()) {
 			int i = 0;
 			if (this.input.shiftKeyDown) {
 				i--;
@@ -779,7 +785,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 			}
 
 			if (i != 0) {
-				this.setDeltaMovement(this.getDeltaMovement().add(0.0, (double)((float)i * this.getAbilities().getFlyingSpeed() * 3.0F), 0.0));
+				this.setDeltaMovement(this.getDeltaMovement().add(0.0, (double)((float)i * abilities.getFlyingSpeed() * 3.0F), 0.0));
 			}
 		}
 
@@ -812,8 +818,8 @@ public class LocalPlayer extends AbstractClientPlayer {
 		}
 
 		super.aiStep();
-		if (this.onGround() && this.getAbilities().flying && !this.minecraft.gameMode.isAlwaysFlying()) {
-			this.getAbilities().flying = false;
+		if (this.onGround() && abilities.flying && !this.minecraft.gameMode.isAlwaysFlying()) {
+			abilities.flying = false;
 			this.onUpdateAbilities();
 		}
 	}

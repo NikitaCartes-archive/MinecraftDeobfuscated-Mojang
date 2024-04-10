@@ -455,17 +455,6 @@ public class ItemEntity extends Entity implements TraceableEntity {
 
 	@Override
 	public SlotAccess getSlot(int i) {
-		return i == 0 ? new SlotAccess() {
-			@Override
-			public ItemStack get() {
-				return ItemEntity.this.getItem();
-			}
-
-			@Override
-			public boolean set(ItemStack itemStack) {
-				ItemEntity.this.setItem(itemStack);
-				return true;
-			}
-		} : super.getSlot(i);
+		return i == 0 ? SlotAccess.of(this::getItem, this::setItem) : super.getSlot(i);
 	}
 }

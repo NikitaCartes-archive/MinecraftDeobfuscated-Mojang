@@ -69,7 +69,7 @@ public class EntityAnchorArgument implements ArgumentType<EntityAnchorArgument.A
 		private final String name;
 		private final BiFunction<Vec3, Entity, Vec3> transform;
 
-		private Anchor(String string2, BiFunction<Vec3, Entity, Vec3> biFunction) {
+		private Anchor(final String string2, final BiFunction<Vec3, Entity, Vec3> biFunction) {
 			this.name = string2;
 			this.transform = biFunction;
 		}

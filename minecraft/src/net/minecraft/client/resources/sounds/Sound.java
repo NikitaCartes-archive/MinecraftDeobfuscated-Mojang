@@ -92,7 +92,7 @@ public class Sound implements Weighted<Sound> {
 
 		private final String name;
 
-		private Type(String string2) {
+		private Type(final String string2) {
 			this.name = string2;
 		}
 

@@ -10,6 +10,7 @@ import net.minecraft.core.dispenser.DispenseItemBehavior;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.DispenserBlockEntity;
@@ -34,7 +35,7 @@ public class DropperBlock extends DispenserBlock {
 	}
 
 	@Override
-	protected DispenseItemBehavior getDispenseMethod(ItemStack itemStack) {
+	protected DispenseItemBehavior getDispenseMethod(Level level, ItemStack itemStack) {
 		return DISPENSE_BEHAVIOUR;
 	}
 

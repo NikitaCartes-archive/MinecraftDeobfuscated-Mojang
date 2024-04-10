@@ -22,7 +22,7 @@ public class LimitCount extends LootItemConditionalFunction {
 	}
 
 	@Override
-	public LootItemFunctionType getType() {
+	public LootItemFunctionType<LimitCount> getType() {
 		return LootItemFunctions.LIMIT_COUNT;
 	}
 

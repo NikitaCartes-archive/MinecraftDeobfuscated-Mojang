@@ -14,6 +14,7 @@ import net.minecraft.util.RandomSource;
 public class SpellParticle extends TextureSheetParticle {
 	private static final RandomSource RANDOM = RandomSource.create();
 	private final SpriteSet sprites;
+	private float originalAlpha;
 
 	SpellParticle(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i, SpriteSet spriteSet) {
 		super(clientLevel, d, e, f, 0.5 - RANDOM.nextDouble(), h, 0.5 - RANDOM.nextDouble());
@@ -46,10 +47,16 @@ public class SpellParticle extends TextureSheetParticle {
 		super.tick();
 		this.setSpriteFromAge(this.sprites);
 		if (this.isCloseToScopingPlayer()) {
-			this.setAlpha(0.0F);
+			this.alpha = 0.0F;
 		} else {
-			this.setAlpha(Mth.lerp(0.05F, this.alpha, 1.0F));
+			this.alpha = Mth.lerp(0.05F, this.alpha, this.originalAlpha);
 		}
+	}
+
+	@Override
+	protected void setAlpha(float f) {
+		super.setAlpha(f);
+		this.originalAlpha = f;
 	}
 
 	private boolean isCloseToScopingPlayer() {

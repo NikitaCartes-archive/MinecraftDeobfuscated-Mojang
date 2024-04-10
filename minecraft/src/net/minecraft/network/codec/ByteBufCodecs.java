@@ -69,6 +69,15 @@ public interface ByteBufCodecs {
 			byteBuf.writeShort(short_);
 		}
 	};
+	StreamCodec<ByteBuf, Integer> UNSIGNED_SHORT = new StreamCodec<ByteBuf, Integer>() {
+		public Integer decode(ByteBuf byteBuf) {
+			return byteBuf.readUnsignedShort();
+		}
+
+		public void encode(ByteBuf byteBuf, Integer integer) {
+			byteBuf.writeShort(integer);
+		}
+	};
 	StreamCodec<ByteBuf, Integer> INT = new StreamCodec<ByteBuf, Integer>() {
 		public Integer decode(ByteBuf byteBuf) {
 			return byteBuf.readInt();

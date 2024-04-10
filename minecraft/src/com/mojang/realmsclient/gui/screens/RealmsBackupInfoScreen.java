@@ -81,7 +81,7 @@ public class RealmsBackupInfoScreen extends RealmsScreen {
 
 	@Environment(EnvType.CLIENT)
 	class BackupInfoList extends ObjectSelectionList<RealmsBackupInfoScreen.BackupInfoListEntry> {
-		public BackupInfoList(Minecraft minecraft) {
+		public BackupInfoList(final Minecraft minecraft) {
 			super(
 				minecraft,
 				RealmsBackupInfoScreen.this.width,
@@ -113,7 +113,7 @@ public class RealmsBackupInfoScreen extends RealmsScreen {
 		private final String key;
 		private final String value;
 
-		public BackupInfoListEntry(String string, String string2) {
+		public BackupInfoListEntry(final String string, final String string2) {
 			this.key = string;
 			this.value = string2;
 		}

@@ -72,6 +72,8 @@ public class BuiltInLootTables {
 	public static final ResourceKey<LootTable> TRIAL_CHAMBERS_WATER_DISPENSER = register("dispensers/trial_chambers/water");
 	public static final ResourceKey<LootTable> TRIAL_CHAMBERS_CORRIDOR_POT = register("pots/trial_chambers/corridor");
 	public static final ResourceKey<LootTable> EQUIPMENT_TRIAL_CHAMBER = register("equipment/trial_chamber");
+	public static final ResourceKey<LootTable> EQUIPMENT_TRIAL_CHAMBER_RANGED = register("equipment/trial_chamber_ranged");
+	public static final ResourceKey<LootTable> EQUIPMENT_TRIAL_CHAMBER_MELEE = register("equipment/trial_chamber_melee");
 	public static final ResourceKey<LootTable> SHEEP_WHITE = register("entities/sheep/white");
 	public static final ResourceKey<LootTable> SHEEP_ORANGE = register("entities/sheep/orange");
 	public static final ResourceKey<LootTable> SHEEP_MAGENTA = register("entities/sheep/magenta");

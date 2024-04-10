@@ -153,7 +153,7 @@ public class StatsScreen extends Screen {
 
 	@Environment(EnvType.CLIENT)
 	class GeneralStatisticsList extends ObjectSelectionList<StatsScreen.GeneralStatisticsList.Entry> {
-		public GeneralStatisticsList(Minecraft minecraft) {
+		public GeneralStatisticsList(final Minecraft minecraft) {
 			super(minecraft, StatsScreen.this.width, StatsScreen.this.height - 33 - 58, 33, 14);
 			ObjectArrayList<Stat<ResourceLocation>> objectArrayList = new ObjectArrayList<>(Stats.CUSTOM.iterator());
 			objectArrayList.sort(Comparator.comparing(statx -> I18n.get(StatsScreen.getTranslationKey(statx))));
@@ -173,7 +173,7 @@ public class StatsScreen extends Screen {
 			private final Stat<ResourceLocation> stat;
 			private final Component statDisplay;
 
-			Entry(Stat<ResourceLocation> stat) {
+			Entry(final Stat<ResourceLocation> stat) {
 				this.stat = stat;
 				this.statDisplay = Component.translatable(StatsScreen.getTranslationKey(stat));
 			}
@@ -222,7 +222,7 @@ public class StatsScreen extends Screen {
 		protected int headerPressed = -1;
 		protected int sortOrder;
 
-		public ItemStatisticsList(Minecraft minecraft) {
+		public ItemStatisticsList(final Minecraft minecraft) {
 			super(minecraft, StatsScreen.this.width, StatsScreen.this.height - 33 - 58, 33, 22);
 			this.blockColumns = Lists.<StatType<Block>>newArrayList();
 			this.blockColumns.add(Stats.BLOCK_MINED);
@@ -381,7 +381,7 @@ public class StatsScreen extends Screen {
 		class ItemRow extends ObjectSelectionList.Entry<StatsScreen.ItemStatisticsList.ItemRow> {
 			private final Item item;
 
-			ItemRow(Item item) {
+			ItemRow(final Item item) {
 				this.item = item;
 			}
 
@@ -457,7 +457,7 @@ public class StatsScreen extends Screen {
 
 	@Environment(EnvType.CLIENT)
 	class MobsStatisticsList extends ObjectSelectionList<StatsScreen.MobsStatisticsList.MobRow> {
-		public MobsStatisticsList(Minecraft minecraft) {
+		public MobsStatisticsList(final Minecraft minecraft) {
 			super(minecraft, StatsScreen.this.width, StatsScreen.this.height - 33 - 58, 33, 9 * 4);
 
 			for (EntityType<?> entityType : BuiltInRegistries.ENTITY_TYPE) {
@@ -482,7 +482,7 @@ public class StatsScreen extends Screen {
 			private final boolean hasKills;
 			private final boolean wasKilledBy;
 
-			public MobRow(EntityType<?> entityType) {
+			public MobRow(final EntityType<?> entityType) {
 				this.mobName = entityType.getDescription();
 				int i = StatsScreen.this.stats.getValue(Stats.ENTITY_KILLED.get(entityType));
 				if (i == 0) {

@@ -36,7 +36,7 @@ public class UpdateOneTwentyOneStructures {
 							)
 						),
 					GenerationStep.Decoration.UNDERGROUND_STRUCTURES,
-					TerrainAdjustment.BURY
+					TerrainAdjustment.ENCAPSULATE
 				),
 				holderGetter2.getOrThrow(TrialChambersStructurePools.START),
 				Optional.empty(),

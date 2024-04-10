@@ -75,7 +75,7 @@ enum AdvancementTabType {
 	private final int height;
 	private final int max;
 
-	private AdvancementTabType(AdvancementTabType.Sprites sprites, AdvancementTabType.Sprites sprites2, int j, int k, int l) {
+	private AdvancementTabType(final AdvancementTabType.Sprites sprites, final AdvancementTabType.Sprites sprites2, final int j, final int k, final int l) {
 		this.selectedSprites = sprites;
 		this.unselectedSprites = sprites2;
 		this.width = j;

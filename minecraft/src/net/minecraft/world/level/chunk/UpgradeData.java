@@ -427,11 +427,11 @@ public class UpgradeData {
 
 		public static final Direction[] DIRECTIONS = Direction.values();
 
-		BlockFixers(Block... blocks) {
+		BlockFixers(final Block... blocks) {
 			this(false, blocks);
 		}
 
-		BlockFixers(boolean bl, Block... blocks) {
+		BlockFixers(final boolean bl, final Block... blocks) {
 			for (Block block : blocks) {
 				UpgradeData.MAP.put(block, this);
 			}

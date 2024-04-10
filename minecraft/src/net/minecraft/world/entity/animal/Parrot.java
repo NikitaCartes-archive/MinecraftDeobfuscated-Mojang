@@ -492,7 +492,7 @@ public class Parrot extends ShoulderRidingEntity implements VariantHolder<Parrot
 		final int id;
 		private final String name;
 
-		private Variant(int j, String string2) {
+		private Variant(final int j, final String string2) {
 			this.id = j;
 			this.name = string2;
 		}

@@ -241,7 +241,7 @@ public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList
 		@Nullable
 		private Component statusIconTooltip;
 
-		protected OnlineServerEntry(JoinMultiplayerScreen joinMultiplayerScreen, ServerData serverData) {
+		protected OnlineServerEntry(final JoinMultiplayerScreen joinMultiplayerScreen, final ServerData serverData) {
 			this.screen = joinMultiplayerScreen;
 			this.serverData = serverData;
 			this.minecraft = Minecraft.getInstance();

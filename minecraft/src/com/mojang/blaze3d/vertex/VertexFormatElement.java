@@ -102,7 +102,7 @@ public class VertexFormatElement {
 		private final String name;
 		private final int glType;
 
-		private Type(int j, String string2, int k) {
+		private Type(final int j, final String string2, final int k) {
 			this.size = j;
 			this.name = string2;
 			this.glType = k;
@@ -155,7 +155,7 @@ public class VertexFormatElement {
 		private final VertexFormatElement.Usage.SetupState setupState;
 		private final VertexFormatElement.Usage.ClearState clearState;
 
-		private Usage(String string2, VertexFormatElement.Usage.SetupState setupState, VertexFormatElement.Usage.ClearState clearState) {
+		private Usage(final String string2, final VertexFormatElement.Usage.SetupState setupState, final VertexFormatElement.Usage.ClearState clearState) {
 			this.name = string2;
 			this.setupState = setupState;
 			this.clearState = clearState;

@@ -46,7 +46,7 @@ public class IntegerArgumentInfo implements ArgumentTypeInfo<IntegerArgumentType
 		final int min;
 		final int max;
 
-		Template(int i, int j) {
+		Template(final int i, final int j) {
 			this.min = i;
 			this.max = j;
 		}

@@ -292,7 +292,7 @@ public class SectionRenderDispatcher {
 		});
 		private boolean playerChanged;
 
-		public RenderSection(int i, int j, int k, int l) {
+		public RenderSection(final int i, final int j, final int k, final int l) {
 			this.index = i;
 			this.setOrigin(j, k, l);
 		}
@@ -471,7 +471,7 @@ public class SectionRenderDispatcher {
 			protected final AtomicBoolean isCancelled = new AtomicBoolean(false);
 			protected final boolean isHighPriority;
 
-			public CompileTask(SectionRenderDispatcher.RenderSection renderSection, double d, boolean bl) {
+			public CompileTask(final double d, final boolean bl) {
 				this.distAtCreation = d;
 				this.isHighPriority = bl;
 			}
@@ -492,8 +492,8 @@ public class SectionRenderDispatcher {
 			@Nullable
 			protected RenderChunkRegion region;
 
-			public RebuildTask(double d, @Nullable RenderChunkRegion renderChunkRegion, boolean bl) {
-				super(RenderSection.this, d, bl);
+			public RebuildTask(final double d, @Nullable final RenderChunkRegion renderChunkRegion, final boolean bl) {
+				super(d, bl);
 				this.region = renderChunkRegion;
 			}
 
@@ -661,8 +661,8 @@ public class SectionRenderDispatcher {
 		class ResortTransparencyTask extends SectionRenderDispatcher.RenderSection.CompileTask {
 			private final SectionRenderDispatcher.CompiledSection compiledSection;
 
-			public ResortTransparencyTask(double d, SectionRenderDispatcher.CompiledSection compiledSection) {
-				super(RenderSection.this, d, true);
+			public ResortTransparencyTask(final double d, final SectionRenderDispatcher.CompiledSection compiledSection) {
+				super(d, true);
 				this.compiledSection = compiledSection;
 			}
 

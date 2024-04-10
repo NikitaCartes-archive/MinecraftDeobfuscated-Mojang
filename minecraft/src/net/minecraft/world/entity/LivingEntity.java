@@ -1227,6 +1227,10 @@ public abstract class LivingEntity extends Entity implements Attackable {
 			if (bl3) {
 				this.lastDamageSource = damageSource;
 				this.lastDamageStamp = this.level().getGameTime();
+
+				for (MobEffectInstance mobEffectInstance : this.getActiveEffects()) {
+					mobEffectInstance.onMobHurt(this, damageSource, f);
+				}
 			}
 
 			if (this instanceof ServerPlayer) {
@@ -1238,10 +1242,6 @@ public abstract class LivingEntity extends Entity implements Attackable {
 
 			if (entity2 instanceof ServerPlayer) {
 				CriteriaTriggers.PLAYER_HURT_ENTITY.trigger((ServerPlayer)entity2, this, damageSource, g, f, bl);
-			}
-
-			for (MobEffectInstance mobEffectInstance : this.getActiveEffects()) {
-				mobEffectInstance.onMobHurt(this, damageSource, f);
 			}
 
 			return bl3;
@@ -2046,14 +2046,17 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	}
 
 	protected void jumpFromGround() {
-		Vec3 vec3 = this.getDeltaMovement();
-		this.setDeltaMovement(vec3.x, (double)this.getJumpPower(), vec3.z);
-		if (this.isSprinting()) {
-			float f = this.getYRot() * (float) (Math.PI / 180.0);
-			this.setDeltaMovement(this.getDeltaMovement().add((double)(-Mth.sin(f) * 0.2F), 0.0, (double)(Mth.cos(f) * 0.2F)));
-		}
+		float f = this.getJumpPower();
+		if (!(f <= 1.0E-5F)) {
+			Vec3 vec3 = this.getDeltaMovement();
+			this.setDeltaMovement(vec3.x, (double)f, vec3.z);
+			if (this.isSprinting()) {
+				float g = this.getYRot() * (float) (Math.PI / 180.0);
+				this.addDeltaMovement(new Vec3((double)(-Mth.sin(g)) * 0.2, 0.0, (double)Mth.cos(g) * 0.2));
+			}
 
-		this.hasImpulse = true;
+			this.hasImpulse = true;
+		}
 	}
 
 	protected void goDownInWater() {

@@ -68,7 +68,7 @@ public class User {
 			.collect(Collectors.toMap(type -> type.name, Function.identity()));
 		private final String name;
 
-		private Type(String string2) {
+		private Type(final String string2) {
 			this.name = string2;
 		}
 

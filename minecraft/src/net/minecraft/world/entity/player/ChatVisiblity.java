@@ -13,7 +13,7 @@ public enum ChatVisiblity implements OptionEnum {
 	private final int id;
 	private final String key;
 
-	private ChatVisiblity(int j, String string2) {
+	private ChatVisiblity(final int j, final String string2) {
 		this.id = j;
 		this.key = string2;
 	}

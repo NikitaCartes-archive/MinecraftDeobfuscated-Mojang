@@ -493,6 +493,12 @@ public class Axolotl extends Animal implements LerpingModel, VariantHolder<Axolo
 		return !this.fromBucket() && !this.hasCustomName();
 	}
 
+	@Nullable
+	@Override
+	public LivingEntity getTarget() {
+		return this.getTargetFromBrain();
+	}
+
 	public static boolean checkAxolotlSpawnRules(
 		EntityType<? extends LivingEntity> entityType,
 		ServerLevelAccessor serverLevelAccessor,
@@ -517,7 +523,7 @@ public class Axolotl extends Animal implements LerpingModel, VariantHolder<Axolo
 	}
 
 	class AxolotlLookControl extends SmoothSwimmingLookControl {
-		public AxolotlLookControl(Axolotl axolotl2, int i) {
+		public AxolotlLookControl(final Axolotl axolotl2, final int i) {
 			super(axolotl2, i);
 		}
 
@@ -558,7 +564,7 @@ public class Axolotl extends Animal implements LerpingModel, VariantHolder<Axolo
 		private final String name;
 		private final boolean common;
 
-		private Variant(int j, String string2, boolean bl) {
+		private Variant(final int j, final String string2, final boolean bl) {
 			this.id = j;
 			this.name = string2;
 			this.common = bl;

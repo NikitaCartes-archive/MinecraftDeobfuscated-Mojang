@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableSet;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Dynamic;
 import java.util.Optional;
+import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.DebugPackets;
@@ -300,6 +301,12 @@ public class Zoglin extends Monster implements Enemy, HoglinBase {
 
 	protected void playAngrySound() {
 		this.makeSound(SoundEvents.ZOGLIN_ANGRY);
+	}
+
+	@Nullable
+	@Override
+	public LivingEntity getTarget() {
+		return this.getTargetFromBrain();
 	}
 
 	@Override

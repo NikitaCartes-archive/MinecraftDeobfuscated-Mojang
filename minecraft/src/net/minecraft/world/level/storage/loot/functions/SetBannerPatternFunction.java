@@ -50,7 +50,7 @@ public class SetBannerPatternFunction extends LootItemConditionalFunction {
 	}
 
 	@Override
-	public LootItemFunctionType getType() {
+	public LootItemFunctionType<SetBannerPatternFunction> getType() {
 		return LootItemFunctions.SET_BANNER_PATTERN;
 	}
 

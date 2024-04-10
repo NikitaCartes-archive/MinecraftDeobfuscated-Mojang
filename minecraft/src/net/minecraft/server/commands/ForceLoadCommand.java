@@ -165,10 +165,11 @@ public class ForceLoadCommand {
 				}
 
 				ChunkPos chunkPos2 = chunkPos;
-				if (r == 0) {
+				int tx = r;
+				if (tx == 0) {
 					throw (bl ? ERROR_ALL_ADDED : ERROR_NONE_REMOVED).create();
 				} else {
-					if (r == 1) {
+					if (tx == 1) {
 						commandSourceStack.sendSuccess(
 							() -> Component.translatable(
 									"commands.forceload." + (bl ? "added" : "removed") + ".single", Component.translationArg(chunkPos2), Component.translationArg(resourceKey.location())
@@ -181,7 +182,7 @@ public class ForceLoadCommand {
 						commandSourceStack.sendSuccess(
 							() -> Component.translatable(
 									"commands.forceload." + (bl ? "added" : "removed") + ".multiple",
-									Component.translationArg(chunkPos2),
+									t,
 									Component.translationArg(resourceKey.location()),
 									Component.translationArg(chunkPos3),
 									Component.translationArg(chunkPos4)
@@ -190,7 +191,7 @@ public class ForceLoadCommand {
 						);
 					}
 
-					return r;
+					return tx;
 				}
 			}
 		} else {

@@ -505,7 +505,7 @@ public class NoiseChunk implements DensityFunction.ContextProvider, DensityFunct
 		final DensityFunction noiseFiller;
 		final double[] values;
 
-		CacheAllInCell(DensityFunction densityFunction) {
+		CacheAllInCell(final DensityFunction densityFunction) {
 			this.noiseFiller = densityFunction;
 			this.values = new double[NoiseChunk.this.cellWidth * NoiseChunk.this.cellWidth * NoiseChunk.this.cellHeight];
 			NoiseChunk.this.cellCaches.add(this);
@@ -551,7 +551,7 @@ public class NoiseChunk implements DensityFunction.ContextProvider, DensityFunct
 		@Nullable
 		private double[] lastArray;
 
-		CacheOnce(DensityFunction densityFunction) {
+		CacheOnce(final DensityFunction densityFunction) {
 			this.function = densityFunction;
 		}
 
@@ -602,7 +602,7 @@ public class NoiseChunk implements DensityFunction.ContextProvider, DensityFunct
 		private final DensityFunction noiseFiller;
 		final double[][] values;
 
-		FlatCache(DensityFunction densityFunction, boolean bl) {
+		FlatCache(final DensityFunction densityFunction, final boolean bl) {
 			this.noiseFiller = densityFunction;
 			this.values = new double[NoiseChunk.this.noiseSizeXZ + 1][NoiseChunk.this.noiseSizeXZ + 1];
 			if (bl) {
@@ -679,7 +679,7 @@ public class NoiseChunk implements DensityFunction.ContextProvider, DensityFunct
 		private double valueZ1;
 		private double value;
 
-		NoiseInterpolator(DensityFunction densityFunction) {
+		NoiseInterpolator(final DensityFunction densityFunction) {
 			this.noiseFiller = densityFunction;
 			this.slice0 = this.allocateSlice(NoiseChunk.this.cellCountY, NoiseChunk.this.cellCountXZ);
 			this.slice1 = this.allocateSlice(NoiseChunk.this.cellCountY, NoiseChunk.this.cellCountXZ);

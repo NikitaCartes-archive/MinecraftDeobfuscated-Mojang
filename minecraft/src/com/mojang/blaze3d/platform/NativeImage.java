@@ -689,7 +689,21 @@ public final class NativeImage implements AutoCloseable {
 		private final int alphaOffset;
 		private final boolean supportedByStb;
 
-		private Format(int j, int k, boolean bl, boolean bl2, boolean bl3, boolean bl4, boolean bl5, int l, int m, int n, int o, int p, boolean bl6) {
+		private Format(
+			final int j,
+			final int k,
+			final boolean bl,
+			final boolean bl2,
+			final boolean bl3,
+			final boolean bl4,
+			final boolean bl5,
+			final int l,
+			final int m,
+			final int n,
+			final int o,
+			final int p,
+			final boolean bl6
+		) {
 			this.components = j;
 			this.glFormat = k;
 			this.hasRed = bl;
@@ -823,7 +837,7 @@ public final class NativeImage implements AutoCloseable {
 
 		private final int glFormat;
 
-		private InternalGlFormat(int j) {
+		private InternalGlFormat(final int j) {
 			this.glFormat = j;
 		}
 

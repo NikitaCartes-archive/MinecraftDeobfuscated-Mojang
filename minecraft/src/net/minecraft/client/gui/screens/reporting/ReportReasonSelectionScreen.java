@@ -129,7 +129,7 @@ public class ReportReasonSelectionScreen extends Screen {
 
 	@Environment(EnvType.CLIENT)
 	public class ReasonSelectionList extends ObjectSelectionList<ReportReasonSelectionScreen.ReasonSelectionList.Entry> {
-		public ReasonSelectionList(Minecraft minecraft) {
+		public ReasonSelectionList(final Minecraft minecraft) {
 			super(
 				minecraft,
 				ReportReasonSelectionScreen.this.width,
@@ -166,7 +166,7 @@ public class ReportReasonSelectionScreen extends Screen {
 		public class Entry extends ObjectSelectionList.Entry<ReportReasonSelectionScreen.ReasonSelectionList.Entry> {
 			final ReportReason reason;
 
-			public Entry(ReportReason reportReason) {
+			public Entry(final ReportReason reportReason) {
 				this.reason = reportReason;
 			}
 

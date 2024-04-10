@@ -197,7 +197,7 @@ public class BlockItem extends Item {
 	public void onDestroyed(ItemEntity itemEntity) {
 		ItemContainerContents itemContainerContents = itemEntity.getItem().set(DataComponents.CONTAINER, ItemContainerContents.EMPTY);
 		if (itemContainerContents != null) {
-			ItemUtils.onContainerDestroyed(itemEntity, itemContainerContents.stream());
+			ItemUtils.onContainerDestroyed(itemEntity, itemContainerContents.nonEmptyItemsCopy());
 		}
 	}
 

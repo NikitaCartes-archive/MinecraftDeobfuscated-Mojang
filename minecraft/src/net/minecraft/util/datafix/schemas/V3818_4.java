@@ -16,7 +16,7 @@ public class V3818_4 extends NamespacedSchema {
 	public void registerTypes(Schema schema, Map<String, Supplier<TypeTemplate>> map, Map<String, Supplier<TypeTemplate>> map2) {
 		super.registerTypes(schema, map, map2);
 		schema.registerType(
-			true, References.ITEM_STACK, () -> DSL.optionalFields("id", References.ITEM_NAME.in(schema), "components", References.DATA_COMPONENTS.in(schema))
+			true, References.PARTICLE, () -> DSL.optionalFields("item", References.ITEM_STACK.in(schema), "block_state", References.BLOCK_STATE.in(schema))
 		);
 	}
 }

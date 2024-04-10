@@ -44,7 +44,7 @@ public class PlayerInteractTrigger extends SimpleCriterionTrigger<PlayerInteract
 		}
 
 		public boolean matches(ItemStack itemStack, LootContext lootContext) {
-			return this.item.isPresent() && !((ItemPredicate)this.item.get()).matches(itemStack)
+			return this.item.isPresent() && !((ItemPredicate)this.item.get()).test(itemStack)
 				? false
 				: this.entity.isEmpty() || ((ContextAwarePredicate)this.entity.get()).matches(lootContext);
 		}

@@ -396,7 +396,7 @@ public class CommandSuggestions {
 		boolean tabCycles;
 		private int lastNarratedEntry;
 
-		SuggestionsList(int i, int j, int k, List<Suggestion> list, boolean bl) {
+		SuggestionsList(final int i, final int j, final int k, final List<Suggestion> list, final boolean bl) {
 			int l = i - (CommandSuggestions.this.input.isBordered() ? 0 : 1);
 			int m = CommandSuggestions.this.anchorToBottom
 				? j - 3 - Math.min(list.size(), CommandSuggestions.this.suggestionLineLimit) * 12

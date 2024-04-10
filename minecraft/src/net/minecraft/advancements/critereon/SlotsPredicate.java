@@ -26,7 +26,7 @@ public record SlotsPredicate(Map<SlotRange, ItemPredicate> slots) {
 		for (int i = 0; i < intList.size(); i++) {
 			int j = intList.getInt(i);
 			SlotAccess slotAccess = entity.getSlot(j);
-			if (itemPredicate.matches(slotAccess.get())) {
+			if (itemPredicate.test(slotAccess.get())) {
 				return true;
 			}
 		}

@@ -237,7 +237,7 @@ public class BiomeSpecialEffects {
 
 		public abstract int modifyColor(double d, double e, int i);
 
-		GrassColorModifier(String string2) {
+		GrassColorModifier(final String string2) {
 			this.name = string2;
 		}
 

@@ -35,7 +35,7 @@ public class EnchantWithLevelsFunction extends LootItemConditionalFunction {
 	}
 
 	@Override
-	public LootItemFunctionType getType() {
+	public LootItemFunctionType<EnchantWithLevelsFunction> getType() {
 		return LootItemFunctions.ENCHANT_WITH_LEVELS;
 	}
 

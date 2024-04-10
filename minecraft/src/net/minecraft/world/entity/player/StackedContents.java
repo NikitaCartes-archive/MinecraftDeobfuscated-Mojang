@@ -96,7 +96,7 @@ public class StackedContents {
 		private final BitSet data;
 		private final IntList path = new IntArrayList();
 
-		public RecipePicker(Recipe<?> recipe) {
+		public RecipePicker(final Recipe<?> recipe) {
 			this.recipe = recipe;
 			this.ingredients.addAll(recipe.getIngredients());
 			this.ingredients.removeIf(Ingredient::isEmpty);

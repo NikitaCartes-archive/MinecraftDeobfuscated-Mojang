@@ -442,7 +442,7 @@ public class RealmsClient {
 		public final String baseUrl;
 		public final String protocol;
 
-		private Environment(String string2, String string3) {
+		private Environment(final String string2, final String string3) {
 			this.baseUrl = string2;
 			this.protocol = string3;
 		}

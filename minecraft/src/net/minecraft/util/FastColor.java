@@ -1,6 +1,10 @@
 package net.minecraft.util;
 
 public class FastColor {
+	public static int as8BitChannel(float f) {
+		return Mth.floor(f * 255.0F);
+	}
+
 	public static class ABGR32 {
 		public static int alpha(int i) {
 			return i >>> 24;
@@ -78,6 +82,10 @@ public class FastColor {
 
 		public static int color(int i, int j) {
 			return i << 24 | j & 16777215;
+		}
+
+		public static int colorFromFloat(float f, float g, float h, float i) {
+			return color(FastColor.as8BitChannel(f), FastColor.as8BitChannel(g), FastColor.as8BitChannel(h), FastColor.as8BitChannel(i));
 		}
 	}
 }

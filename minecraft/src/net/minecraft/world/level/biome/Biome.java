@@ -364,7 +364,7 @@ public final class Biome {
 		public static final Codec<Biome.Precipitation> CODEC = StringRepresentable.fromEnum(Biome.Precipitation::values);
 		private final String name;
 
-		private Precipitation(String string2) {
+		private Precipitation(final String string2) {
 			this.name = string2;
 		}
 
@@ -403,7 +403,7 @@ public final class Biome {
 
 		public abstract float modifyTemperature(BlockPos blockPos, float f);
 
-		TemperatureModifier(String string2) {
+		TemperatureModifier(final String string2) {
 			this.name = string2;
 		}
 

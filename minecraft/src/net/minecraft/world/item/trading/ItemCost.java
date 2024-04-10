@@ -7,7 +7,6 @@ import java.util.function.UnaryOperator;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponentHolder;
 import net.minecraft.core.component.DataComponentPredicate;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -20,7 +19,7 @@ import net.minecraft.world.level.ItemLike;
 public record ItemCost(Holder<Item> item, int count, DataComponentPredicate components, ItemStack itemStack) {
 	public static final Codec<ItemCost> CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
-					BuiltInRegistries.ITEM.holderByNameCodec().fieldOf("id").forGetter(ItemCost::item),
+					ItemStack.ITEM_NON_AIR_CODEC.fieldOf("id").forGetter(ItemCost::item),
 					ExtraCodecs.POSITIVE_INT.fieldOf("count").orElse(1).forGetter(ItemCost::count),
 					DataComponentPredicate.CODEC.optionalFieldOf("components", DataComponentPredicate.EMPTY).forGetter(ItemCost::components)
 				)

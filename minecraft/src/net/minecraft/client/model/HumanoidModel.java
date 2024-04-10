@@ -450,7 +450,7 @@ public class HumanoidModel<T extends LivingEntity> extends AgeableListModel<T> i
 
 		private final boolean twoHanded;
 
-		private ArmPose(boolean bl) {
+		private ArmPose(final boolean bl) {
 			this.twoHanded = bl;
 		}
 

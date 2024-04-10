@@ -18,15 +18,19 @@ public class FoodData {
 		this.saturationLevel = 5.0F;
 	}
 
-	public void eat(int i, float f) {
+	private void add(int i, float f) {
 		this.foodLevel = Math.min(i + this.foodLevel, 20);
-		this.saturationLevel = Math.min(this.saturationLevel + (float)i * f * 2.0F, (float)this.foodLevel);
+		this.saturationLevel = Math.min(f + this.saturationLevel, (float)this.foodLevel);
+	}
+
+	public void eat(int i, float f) {
+		this.add(i, FoodConstants.saturationByModifier(i, f));
 	}
 
 	public void eat(ItemStack itemStack) {
 		FoodProperties foodProperties = itemStack.get(DataComponents.FOOD);
 		if (foodProperties != null) {
-			this.eat(foodProperties.nutrition(), foodProperties.saturationModifier());
+			this.add(foodProperties.nutrition(), foodProperties.saturation());
 		}
 	}
 

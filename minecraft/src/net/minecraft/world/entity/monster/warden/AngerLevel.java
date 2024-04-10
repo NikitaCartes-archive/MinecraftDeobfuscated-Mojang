@@ -17,7 +17,7 @@ public enum AngerLevel {
 	private final SoundEvent ambientSound;
 	private final SoundEvent listeningSound;
 
-	private AngerLevel(int j, SoundEvent soundEvent, SoundEvent soundEvent2) {
+	private AngerLevel(final int j, final SoundEvent soundEvent, final SoundEvent soundEvent2) {
 		this.minimumAnger = j;
 		this.ambientSound = soundEvent;
 		this.listeningSound = soundEvent2;

@@ -5003,7 +5003,7 @@ public class BlockModelGenerators {
 	class BlockEntityModelGenerator {
 		private final ResourceLocation baseModel;
 
-		public BlockEntityModelGenerator(ResourceLocation resourceLocation, Block block) {
+		public BlockEntityModelGenerator(final ResourceLocation resourceLocation, final Block block) {
 			this.baseModel = ModelTemplates.PARTICLE_ONLY.create(resourceLocation, TextureMapping.particle(block), BlockModelGenerators.this.modelOutput);
 		}
 
@@ -5041,7 +5041,7 @@ public class BlockModelGenerators {
 		private ResourceLocation fullBlock;
 		private final Set<Block> skipGeneratingModelsFor = new HashSet();
 
-		public BlockFamilyProvider(TextureMapping textureMapping) {
+		public BlockFamilyProvider(final TextureMapping textureMapping) {
 			this.mapping = textureMapping;
 		}
 
@@ -5242,7 +5242,7 @@ public class BlockModelGenerators {
 	class WoodProvider {
 		private final TextureMapping logMapping;
 
-		public WoodProvider(TextureMapping textureMapping) {
+		public WoodProvider(final TextureMapping textureMapping) {
 			this.logMapping = textureMapping;
 		}
 

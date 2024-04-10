@@ -54,10 +54,12 @@ import net.minecraft.data.tags.UpdateOneTwentyOneBannerPatternTagsProvider;
 import net.minecraft.data.tags.UpdateOneTwentyOneBiomeTagsProvider;
 import net.minecraft.data.tags.UpdateOneTwentyOneBlockTagsProvider;
 import net.minecraft.data.tags.UpdateOneTwentyOneDamageTypeTagsProvider;
+import net.minecraft.data.tags.UpdateOneTwentyOneEnchantmentTagsProvider;
 import net.minecraft.data.tags.UpdateOneTwentyOneEntityTypeTagsProvider;
 import net.minecraft.data.tags.UpdateOneTwentyOneItemTagsProvider;
 import net.minecraft.data.tags.UpdateOneTwentyOneStructureTagsProvider;
 import net.minecraft.data.tags.VanillaBlockTagsProvider;
+import net.minecraft.data.tags.VanillaEnchantmentTagsProvider;
 import net.minecraft.data.tags.VanillaItemTagsProvider;
 import net.minecraft.data.tags.WorldPresetTagsProvider;
 import net.minecraft.network.chat.Component;
@@ -147,6 +149,7 @@ public class Main {
 		packGenerator3.addProvider(bindRegistries(PaintingVariantTagsProvider::new, completableFuture));
 		packGenerator3.addProvider(bindRegistries(PoiTypeTagsProvider::new, completableFuture));
 		packGenerator3.addProvider(bindRegistries(WorldPresetTagsProvider::new, completableFuture));
+		packGenerator3.addProvider(bindRegistries(VanillaEnchantmentTagsProvider::new, completableFuture));
 		packGenerator3 = dataGenerator.getVanillaPack(bl3);
 		packGenerator3.addProvider(packOutput -> new NbtToSnbt(packOutput, collection));
 		packGenerator3 = dataGenerator.getVanillaPack(bl4);
@@ -191,6 +194,7 @@ public class Main {
 		packGenerator4.addProvider(bindRegistries(UpdateOneTwentyOneAdvancementProvider::create, completableFuture3));
 		packGenerator4.addProvider(packOutput -> new UpdateOneTwentyOneBannerPatternTagsProvider(packOutput, completableFuture3, tagsProvider4.contentsGetter()));
 		packGenerator4.addProvider(packOutput -> new UpdateOneTwentyOneStructureTagsProvider(packOutput, completableFuture3, tagsProvider5.contentsGetter()));
+		packGenerator4.addProvider(bindRegistries(UpdateOneTwentyOneEnchantmentTagsProvider::new, completableFuture3));
 		return dataGenerator;
 	}
 }

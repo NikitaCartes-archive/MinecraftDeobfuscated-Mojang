@@ -46,7 +46,7 @@ public class CopyCustomDataFunction extends LootItemConditionalFunction {
 	}
 
 	@Override
-	public LootItemFunctionType getType() {
+	public LootItemFunctionType<CopyCustomDataFunction> getType() {
 		return LootItemFunctions.COPY_CUSTOM_DATA;
 	}
 
@@ -179,7 +179,7 @@ public class CopyCustomDataFunction extends LootItemConditionalFunction {
 
 		public abstract void merge(Tag tag, NbtPathArgument.NbtPath nbtPath, List<Tag> list) throws CommandSyntaxException;
 
-		MergeStrategy(String string2) {
+		MergeStrategy(final String string2) {
 			this.name = string2;
 		}
 

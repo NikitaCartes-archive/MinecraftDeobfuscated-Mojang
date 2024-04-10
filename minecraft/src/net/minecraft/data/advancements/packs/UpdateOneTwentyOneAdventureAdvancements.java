@@ -35,6 +35,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CopperBulbBlock;
+import net.minecraft.world.level.block.VaultBlock;
 import net.minecraft.world.level.levelgen.structure.BuiltinStructures;
 
 public class UpdateOneTwentyOneAdventureAdvancements implements AdvancementSubProvider {
@@ -98,7 +99,7 @@ public class UpdateOneTwentyOneAdventureAdvancements implements AdvancementSubPr
 				)
 			)
 			.save(consumer, "adventure/lighten_up");
-		Advancement.Builder.advancement()
+		AdvancementHolder advancementHolder3 = Advancement.Builder.advancement()
 			.parent(advancementHolder2)
 			.display(
 				Items.TRIAL_KEY,
@@ -117,6 +118,29 @@ public class UpdateOneTwentyOneAdventureAdvancements implements AdvancementSubPr
 				)
 			)
 			.save(consumer, "adventure/under_lock_and_key");
+		Advancement.Builder.advancement()
+			.parent(advancementHolder3)
+			.display(
+				Items.OMINOUS_TRIAL_KEY,
+				Component.translatable("advancements.adventure.revaulting.title"),
+				Component.translatable("advancements.adventure.revaulting.description"),
+				null,
+				AdvancementType.GOAL,
+				true,
+				true,
+				false
+			)
+			.addCriterion(
+				"revaulting",
+				ItemUsedOnLocationTrigger.TriggerInstance.itemUsedOnBlock(
+					LocationPredicate.Builder.location()
+						.setBlock(
+							BlockPredicate.Builder.block().of(Blocks.VAULT).setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(VaultBlock.OMINOUS, true))
+						),
+					ItemPredicate.Builder.item().of(Items.OMINOUS_TRIAL_KEY)
+				)
+			)
+			.save(consumer, "adventure/revaulting");
 		Advancement.Builder.advancement()
 			.parent(advancementHolder2)
 			.display(

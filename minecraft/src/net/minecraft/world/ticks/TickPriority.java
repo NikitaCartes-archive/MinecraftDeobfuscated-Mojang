@@ -11,7 +11,7 @@ public enum TickPriority {
 
 	private final int value;
 
-	private TickPriority(int j) {
+	private TickPriority(final int j) {
 		this.value = j;
 	}
 

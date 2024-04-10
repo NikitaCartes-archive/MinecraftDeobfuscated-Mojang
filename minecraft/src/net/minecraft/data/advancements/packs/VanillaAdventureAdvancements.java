@@ -31,6 +31,7 @@ import net.minecraft.advancements.critereon.LocationPredicate;
 import net.minecraft.advancements.critereon.LootTableTrigger;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.advancements.critereon.PlayerHurtEntityTrigger;
+import net.minecraft.advancements.critereon.PlayerInteractTrigger;
 import net.minecraft.advancements.critereon.PlayerPredicate;
 import net.minecraft.advancements.critereon.PlayerTrigger;
 import net.minecraft.advancements.critereon.RecipeCraftedTrigger;
@@ -676,6 +677,25 @@ public class VanillaAdventureAdvancements implements AdvancementSubProvider {
 			.addCriterion("chiseled_bookshelf", placedBlockReadByComparator(Blocks.CHISELED_BOOKSHELF))
 			.addCriterion("comparator", placedComparatorReadingBlock(Blocks.CHISELED_BOOKSHELF))
 			.save(consumer, "adventure/read_power_of_chiseled_bookshelf");
+		Advancement.Builder.advancement()
+			.parent(advancementHolder)
+			.display(
+				Items.ARMADILLO_SCUTE,
+				Component.translatable("advancements.adventure.brush_armadillo.title"),
+				Component.translatable("advancements.adventure.brush_armadillo.description"),
+				null,
+				AdvancementType.TASK,
+				true,
+				true,
+				false
+			)
+			.addCriterion(
+				"brush_armadillo",
+				PlayerInteractTrigger.TriggerInstance.itemUsedOnEntity(
+					ItemPredicate.Builder.item().of(Items.BRUSH), Optional.of(EntityPredicate.wrap(EntityPredicate.Builder.entity().of(EntityType.ARMADILLO)))
+				)
+			)
+			.save(consumer, "adventure/brush_armadillo");
 	}
 
 	public static AdvancementHolder createMonsterHunterAdvancement(

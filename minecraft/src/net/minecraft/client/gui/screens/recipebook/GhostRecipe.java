@@ -78,7 +78,7 @@ public class GhostRecipe {
 		private final int x;
 		private final int y;
 
-		public GhostIngredient(Ingredient ingredient, int i, int j) {
+		public GhostIngredient(final Ingredient ingredient, final int i, final int j) {
 			this.ingredient = ingredient;
 			this.x = i;
 			this.y = j;

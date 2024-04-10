@@ -3,9 +3,9 @@
 		"name": "Java 21"
 	},
 	{
-		"sha1sum": "65085e2eb921c4a3ebdde3d248637f1776e6d80d",
-		"name": "authlib-6.0.52.jar",
-		"url": "https://libraries.minecraft.net/com/mojang/authlib/6.0.52/authlib-6.0.52.jar"
+		"sha1sum": "de8bc95660e1b2fe8793fd427a7a10dcec5b3ea7",
+		"name": "authlib-6.0.54.jar",
+		"url": "https://libraries.minecraft.net/com/mojang/authlib/6.0.54/authlib-6.0.54.jar"
 	},
 	{
 		"sha1sum": "5c685c5ffa94c4cd39496c7184c1d122e515ecef",
@@ -43,9 +43,9 @@
 		"url": "https://libraries.minecraft.net/commons-logging/commons-logging/1.2/commons-logging-1.2.jar"
 	},
 	{
-		"sha1sum": "706ad1b52a6a988ad4bd98823fb5e854ac352cdb",
-		"name": "datafixerupper-7.0.13.jar",
-		"url": "https://libraries.minecraft.net/com/mojang/datafixerupper/7.0.13/datafixerupper-7.0.13.jar"
+		"sha1sum": "db3485dc1e6b712bd81170d5ce6dca2fb2f8bd86",
+		"name": "datafixerupper-7.0.14.jar",
+		"url": "https://libraries.minecraft.net/com/mojang/datafixerupper/7.0.14/datafixerupper-7.0.14.jar"
 	},
 	{
 		"sha1sum": "1dcf1de382a0bf95a3d8b0849546c88bac1292c9",
@@ -106,6 +106,11 @@
 		"sha1sum": "4fdac2fbe92dfad86aa6e9301736f6b4342a3f5c",
 		"name": "jopt-simple-5.0.4.jar",
 		"url": "https://libraries.minecraft.net/net/sf/jopt-simple/jopt-simple/5.0.4/jopt-simple-5.0.4.jar"
+	},
+	{
+		"sha1sum": "8872d22b293e8f5d7d56ff92be966e6dc28ebdc6",
+		"name": "jorbis-0.0.17.jar",
+		"url": "https://libraries.minecraft.net/org/jcraft/jorbis/0.0.17/jorbis-0.0.17.jar"
 	},
 	{
 		"sha1sum": "bea6fede6328fabafd7e68363161a7ea6605abd1",

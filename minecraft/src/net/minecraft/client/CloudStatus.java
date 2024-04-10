@@ -17,7 +17,7 @@ public enum CloudStatus implements OptionEnum, StringRepresentable {
 	private final String legacyName;
 	private final String key;
 
-	private CloudStatus(int j, String string2, String string3) {
+	private CloudStatus(final int j, final String string2, final String string3) {
 		this.id = j;
 		this.legacyName = string2;
 		this.key = string3;

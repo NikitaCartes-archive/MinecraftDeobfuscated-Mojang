@@ -154,7 +154,7 @@ public class HashCache {
 		private final AtomicInteger writes = new AtomicInteger();
 		private volatile boolean closed;
 
-		CacheUpdater(String string, String string2, HashCache.ProviderCache providerCache) {
+		CacheUpdater(final String string, final String string2, final HashCache.ProviderCache providerCache) {
 			this.provider = string;
 			this.oldCache = providerCache;
 			this.newCache = new HashCache.ProviderCacheBuilder(string2);

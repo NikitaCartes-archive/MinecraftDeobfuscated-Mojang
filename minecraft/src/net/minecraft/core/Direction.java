@@ -55,7 +55,9 @@ public enum Direction implements StringRepresentable {
 		.sorted(Comparator.comparingInt(direction -> direction.data2d))
 		.toArray(Direction[]::new);
 
-	private Direction(int j, int k, int l, String string2, Direction.AxisDirection axisDirection, Direction.Axis axis, Vec3i vec3i) {
+	private Direction(
+		final int j, final int k, final int l, final String string2, final Direction.AxisDirection axisDirection, final Direction.Axis axis, final Vec3i vec3i
+	) {
 		this.data3d = j;
 		this.data2d = l;
 		this.oppositeIndex = k;
@@ -407,7 +409,7 @@ public enum Direction implements StringRepresentable {
 		public static final StringRepresentable.EnumCodec<Direction.Axis> CODEC = StringRepresentable.fromEnum(Direction.Axis::values);
 		private final String name;
 
-		Axis(String string2) {
+		Axis(final String string2) {
 			this.name = string2;
 		}
 
@@ -464,7 +466,7 @@ public enum Direction implements StringRepresentable {
 		private final int step;
 		private final String name;
 
-		private AxisDirection(int j, String string2) {
+		private AxisDirection(final int j, final String string2) {
 			this.step = j;
 			this.name = string2;
 		}
@@ -493,7 +495,7 @@ public enum Direction implements StringRepresentable {
 		private final Direction[] faces;
 		private final Direction.Axis[] axis;
 
-		private Plane(Direction[] directions, Direction.Axis[] axiss) {
+		private Plane(final Direction[] directions, final Direction.Axis[] axiss) {
 			this.faces = directions;
 			this.axis = axiss;
 		}

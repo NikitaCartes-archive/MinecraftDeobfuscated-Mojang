@@ -53,5 +53,6 @@ public class UpdateOneTwentyOneItemTagsProvider extends ItemTagsProvider {
 		this.tag(ItemTags.WEAPON_ENCHANTABLE).add(Items.MACE);
 		this.tag(ItemTags.FIRE_ASPECT_ENCHANTABLE).add(Items.MACE);
 		this.tag(ItemTags.VANISHING_ENCHANTABLE).add(Items.MACE);
+		this.tag(ItemTags.BREAKS_DECORATED_POTS).add(Items.MACE);
 	}
 }

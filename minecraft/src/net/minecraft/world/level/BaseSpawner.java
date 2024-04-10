@@ -158,7 +158,7 @@ public abstract class BaseSpawner {
 								((Mob)entity).finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(entity.blockPosition()), MobSpawnType.SPAWNER, null);
 							}
 
-							spawnData.getEquipmentLootTable().ifPresent(mob::equip);
+							spawnData.getEquipment().ifPresent(mob::equip);
 						}
 
 						if (!serverLevel.tryAddFreshEntityWithPassengers(entity)) {

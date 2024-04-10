@@ -22,7 +22,7 @@ public class CalibratedSculkSensorBlockEntity extends SculkSensorBlockEntity {
 	}
 
 	protected class VibrationUser extends SculkSensorBlockEntity.VibrationUser {
-		public VibrationUser(BlockPos blockPos) {
+		public VibrationUser(final BlockPos blockPos) {
 			super(blockPos);
 		}
 

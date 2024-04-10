@@ -279,7 +279,7 @@ public class WorldCreationUiState {
 		public final Component displayName;
 		private final Component info;
 
-		private SelectedGameMode(String string2, GameType gameType) {
+		private SelectedGameMode(final String string2, final GameType gameType) {
 			this.gameType = gameType;
 			this.displayName = Component.translatable("selectWorld.gameMode." + string2);
 			this.info = Component.translatable("selectWorld.gameMode." + string2 + ".info");

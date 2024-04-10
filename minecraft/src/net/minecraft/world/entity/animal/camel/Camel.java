@@ -615,7 +615,7 @@ public class Camel extends AbstractHorse implements PlayerRideableJumping, Saddl
 	}
 
 	class CamelBodyRotationControl extends BodyRotationControl {
-		public CamelBodyRotationControl(Camel camel2) {
+		public CamelBodyRotationControl(final Camel camel2) {
 			super(camel2);
 		}
 

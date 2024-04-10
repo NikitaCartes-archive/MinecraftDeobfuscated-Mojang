@@ -277,7 +277,7 @@ public class Squid extends WaterAnimal {
 	}
 
 	class SquidRandomMovementGoal extends Goal {
-		public SquidRandomMovementGoal(Squid squid2) {
+		public SquidRandomMovementGoal(final Squid squid2) {
 		}
 
 		@Override

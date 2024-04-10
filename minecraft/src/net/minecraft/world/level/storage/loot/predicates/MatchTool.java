@@ -28,7 +28,7 @@ public record MatchTool(Optional<ItemPredicate> predicate) implements LootItemCo
 
 	public boolean test(LootContext lootContext) {
 		ItemStack itemStack = lootContext.getParamOrNull(LootContextParams.TOOL);
-		return itemStack != null && (this.predicate.isEmpty() || ((ItemPredicate)this.predicate.get()).matches(itemStack));
+		return itemStack != null && (this.predicate.isEmpty() || ((ItemPredicate)this.predicate.get()).test(itemStack));
 	}
 
 	public static LootItemCondition.Builder toolMatches(ItemPredicate.Builder builder) {

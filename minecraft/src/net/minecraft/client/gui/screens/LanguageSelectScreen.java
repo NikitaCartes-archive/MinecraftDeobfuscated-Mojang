@@ -67,7 +67,7 @@ public class LanguageSelectScreen extends OptionsSubScreen {
 
 	@Environment(EnvType.CLIENT)
 	class LanguageSelectionList extends ObjectSelectionList<LanguageSelectScreen.LanguageSelectionList.Entry> {
-		public LanguageSelectionList(Minecraft minecraft) {
+		public LanguageSelectionList(final Minecraft minecraft) {
 			super(minecraft, LanguageSelectScreen.this.width, LanguageSelectScreen.this.height - 33 - 53, 33, 18);
 			String string = LanguageSelectScreen.this.languageManager.getSelected();
 			LanguageSelectScreen.this.languageManager.getLanguages().forEach((string2, languageInfo) -> {
@@ -93,7 +93,7 @@ public class LanguageSelectScreen extends OptionsSubScreen {
 			private final Component language;
 			private long lastClickTime;
 
-			public Entry(String string, LanguageInfo languageInfo) {
+			public Entry(final String string, final LanguageInfo languageInfo) {
 				this.code = string;
 				this.language = languageInfo.toComponent();
 			}

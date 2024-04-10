@@ -18,6 +18,7 @@ public record EntityEquipmentPredicate(
 	Optional<ItemPredicate> chest,
 	Optional<ItemPredicate> legs,
 	Optional<ItemPredicate> feet,
+	Optional<ItemPredicate> body,
 	Optional<ItemPredicate> mainhand,
 	Optional<ItemPredicate> offhand
 ) {
@@ -27,6 +28,7 @@ public record EntityEquipmentPredicate(
 					ItemPredicate.CODEC.optionalFieldOf("chest").forGetter(EntityEquipmentPredicate::chest),
 					ItemPredicate.CODEC.optionalFieldOf("legs").forGetter(EntityEquipmentPredicate::legs),
 					ItemPredicate.CODEC.optionalFieldOf("feet").forGetter(EntityEquipmentPredicate::feet),
+					ItemPredicate.CODEC.optionalFieldOf("body").forGetter(EntityEquipmentPredicate::body),
 					ItemPredicate.CODEC.optionalFieldOf("mainhand").forGetter(EntityEquipmentPredicate::mainhand),
 					ItemPredicate.CODEC.optionalFieldOf("offhand").forGetter(EntityEquipmentPredicate::offhand)
 				)
@@ -43,18 +45,20 @@ public record EntityEquipmentPredicate(
 
 	public boolean matches(@Nullable Entity entity) {
 		if (entity instanceof LivingEntity livingEntity) {
-			if (this.head.isPresent() && !((ItemPredicate)this.head.get()).matches(livingEntity.getItemBySlot(EquipmentSlot.HEAD))) {
+			if (this.head.isPresent() && !((ItemPredicate)this.head.get()).test(livingEntity.getItemBySlot(EquipmentSlot.HEAD))) {
 				return false;
-			} else if (this.chest.isPresent() && !((ItemPredicate)this.chest.get()).matches(livingEntity.getItemBySlot(EquipmentSlot.CHEST))) {
+			} else if (this.chest.isPresent() && !((ItemPredicate)this.chest.get()).test(livingEntity.getItemBySlot(EquipmentSlot.CHEST))) {
 				return false;
-			} else if (this.legs.isPresent() && !((ItemPredicate)this.legs.get()).matches(livingEntity.getItemBySlot(EquipmentSlot.LEGS))) {
+			} else if (this.legs.isPresent() && !((ItemPredicate)this.legs.get()).test(livingEntity.getItemBySlot(EquipmentSlot.LEGS))) {
 				return false;
-			} else if (this.feet.isPresent() && !((ItemPredicate)this.feet.get()).matches(livingEntity.getItemBySlot(EquipmentSlot.FEET))) {
+			} else if (this.feet.isPresent() && !((ItemPredicate)this.feet.get()).test(livingEntity.getItemBySlot(EquipmentSlot.FEET))) {
+				return false;
+			} else if (this.body.isPresent() && !((ItemPredicate)this.body.get()).test(livingEntity.getItemBySlot(EquipmentSlot.BODY))) {
 				return false;
 			} else {
-				return this.mainhand.isPresent() && !((ItemPredicate)this.mainhand.get()).matches(livingEntity.getItemBySlot(EquipmentSlot.MAINHAND))
+				return this.mainhand.isPresent() && !((ItemPredicate)this.mainhand.get()).test(livingEntity.getItemBySlot(EquipmentSlot.MAINHAND))
 					? false
-					: !this.offhand.isPresent() || ((ItemPredicate)this.offhand.get()).matches(livingEntity.getItemBySlot(EquipmentSlot.OFFHAND));
+					: !this.offhand.isPresent() || ((ItemPredicate)this.offhand.get()).test(livingEntity.getItemBySlot(EquipmentSlot.OFFHAND));
 			}
 		} else {
 			return false;
@@ -66,6 +70,7 @@ public record EntityEquipmentPredicate(
 		private Optional<ItemPredicate> chest = Optional.empty();
 		private Optional<ItemPredicate> legs = Optional.empty();
 		private Optional<ItemPredicate> feet = Optional.empty();
+		private Optional<ItemPredicate> body = Optional.empty();
 		private Optional<ItemPredicate> mainhand = Optional.empty();
 		private Optional<ItemPredicate> offhand = Optional.empty();
 
@@ -93,6 +98,11 @@ public record EntityEquipmentPredicate(
 			return this;
 		}
 
+		public EntityEquipmentPredicate.Builder body(ItemPredicate.Builder builder) {
+			this.body = Optional.of(builder.build());
+			return this;
+		}
+
 		public EntityEquipmentPredicate.Builder mainhand(ItemPredicate.Builder builder) {
 			this.mainhand = Optional.of(builder.build());
 			return this;
@@ -104,7 +114,7 @@ public record EntityEquipmentPredicate(
 		}
 
 		public EntityEquipmentPredicate build() {
-			return new EntityEquipmentPredicate(this.head, this.chest, this.legs, this.feet, this.mainhand, this.offhand);
+			return new EntityEquipmentPredicate(this.head, this.chest, this.legs, this.feet, this.body, this.mainhand, this.offhand);
 		}
 	}
 }

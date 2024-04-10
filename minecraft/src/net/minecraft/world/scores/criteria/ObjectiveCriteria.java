@@ -127,7 +127,7 @@ public class ObjectiveCriteria {
 		private final String id;
 		public static final StringRepresentable.EnumCodec<ObjectiveCriteria.RenderType> CODEC = StringRepresentable.fromEnum(ObjectiveCriteria.RenderType::values);
 
-		private RenderType(String string2) {
+		private RenderType(final String string2) {
 			this.id = string2;
 		}
 

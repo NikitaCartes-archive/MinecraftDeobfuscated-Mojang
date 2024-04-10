@@ -177,7 +177,7 @@ public class OverlayRecipeComponent implements Renderable, GuiEventListener {
 		private final boolean isCraftable;
 		protected final List<OverlayRecipeComponent.OverlayRecipeButton.Pos> ingredientPos = Lists.<OverlayRecipeComponent.OverlayRecipeButton.Pos>newArrayList();
 
-		public OverlayRecipeButton(int i, int j, RecipeHolder<?> recipeHolder, boolean bl) {
+		public OverlayRecipeButton(final int i, final int j, final RecipeHolder<?> recipeHolder, final boolean bl) {
 			super(i, j, 200, 20, CommonComponents.EMPTY);
 			this.width = 24;
 			this.height = 24;
@@ -199,7 +199,7 @@ public class OverlayRecipeComponent implements Renderable, GuiEventListener {
 		public void addItemToSlot(Iterator<Ingredient> iterator, int i, int j, int k, int l) {
 			ItemStack[] itemStacks = ((Ingredient)iterator.next()).getItems();
 			if (itemStacks.length != 0) {
-				this.ingredientPos.add(new OverlayRecipeComponent.OverlayRecipeButton.Pos(this, 3 + l * 7, 3 + k * 7, itemStacks));
+				this.ingredientPos.add(new OverlayRecipeComponent.OverlayRecipeButton.Pos(3 + l * 7, 3 + k * 7, itemStacks));
 			}
 		}
 
@@ -247,7 +247,7 @@ public class OverlayRecipeComponent implements Renderable, GuiEventListener {
 			public final int x;
 			public final int y;
 
-			public Pos(OverlayRecipeComponent.OverlayRecipeButton overlayRecipeButton, int i, int j, ItemStack[] itemStacks) {
+			public Pos(final int i, final int j, final ItemStack[] itemStacks) {
 				this.x = i;
 				this.y = j;
 				this.ingredients = itemStacks;
@@ -257,7 +257,7 @@ public class OverlayRecipeComponent implements Renderable, GuiEventListener {
 
 	@Environment(EnvType.CLIENT)
 	class OverlaySmeltingRecipeButton extends OverlayRecipeComponent.OverlayRecipeButton {
-		public OverlaySmeltingRecipeButton(int i, int j, RecipeHolder<?> recipeHolder, boolean bl) {
+		public OverlaySmeltingRecipeButton(final int i, final int j, final RecipeHolder<?> recipeHolder, final boolean bl) {
 			super(i, j, recipeHolder, bl);
 		}
 
@@ -265,7 +265,7 @@ public class OverlayRecipeComponent implements Renderable, GuiEventListener {
 		protected void calculateIngredientsPositions(RecipeHolder<?> recipeHolder) {
 			Ingredient ingredient = recipeHolder.value().getIngredients().get(0);
 			ItemStack[] itemStacks = ingredient.getItems();
-			this.ingredientPos.add(new OverlayRecipeComponent.OverlayRecipeButton.Pos(this, 10, 10, itemStacks));
+			this.ingredientPos.add(new OverlayRecipeComponent.OverlayRecipeButton.Pos(10, 10, itemStacks));
 		}
 	}
 }

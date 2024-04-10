@@ -21,6 +21,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Unit;
 import net.minecraft.world.damagesource.DamageSource;
@@ -28,6 +29,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MoverType;
+import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -495,7 +497,7 @@ public abstract class AbstractArrow extends Projectile {
 		if (compoundTag.contains("item", 10)) {
 			this.setPickupItemStack((ItemStack)ItemStack.parse(this.registryAccess(), compoundTag.getCompound("item")).orElse(this.getDefaultPickupItem()));
 		} else {
-			this.setPickupItemStack(this.pickupItemStack);
+			this.setPickupItemStack(this.getDefaultPickupItem());
 		}
 	}
 
@@ -558,7 +560,7 @@ public abstract class AbstractArrow extends Projectile {
 
 	@Override
 	public boolean isAttackable() {
-		return false;
+		return this.getType().is(EntityTypeTags.PUNCHABLE_PROJECTILES);
 	}
 
 	public void setCritArrow(boolean bl) {
@@ -579,7 +581,11 @@ public abstract class AbstractArrow extends Projectile {
 	}
 
 	protected void setPickupItemStack(ItemStack itemStack) {
-		this.pickupItemStack = itemStack;
+		if (!itemStack.isEmpty()) {
+			this.pickupItemStack = itemStack;
+		} else {
+			this.pickupItemStack = this.getDefaultPickupItem();
+		}
 	}
 
 	public boolean isCritArrow() {
@@ -628,6 +634,16 @@ public abstract class AbstractArrow extends Projectile {
 
 	public void setShotFromCrossbow(boolean bl) {
 		this.setFlag(4, bl);
+	}
+
+	@Override
+	public boolean isPickable() {
+		return super.isPickable() && !this.inGround;
+	}
+
+	@Override
+	public SlotAccess getSlot(int i) {
+		return i == 0 ? SlotAccess.of(this::getPickupItemStackOrigin, this::setPickupItemStack) : super.getSlot(i);
 	}
 
 	public static enum Pickup {

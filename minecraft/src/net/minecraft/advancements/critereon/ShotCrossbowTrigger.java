@@ -38,7 +38,7 @@ public class ShotCrossbowTrigger extends SimpleCriterionTrigger<ShotCrossbowTrig
 		}
 
 		public boolean matches(ItemStack itemStack) {
-			return this.item.isEmpty() || ((ItemPredicate)this.item.get()).matches(itemStack);
+			return this.item.isEmpty() || ((ItemPredicate)this.item.get()).test(itemStack);
 		}
 	}
 }

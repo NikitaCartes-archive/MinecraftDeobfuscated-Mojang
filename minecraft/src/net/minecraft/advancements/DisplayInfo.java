@@ -13,7 +13,7 @@ import net.minecraft.world.item.ItemStack;
 public class DisplayInfo {
 	public static final Codec<DisplayInfo> CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
-					ItemStack.CODEC.fieldOf("icon").forGetter(DisplayInfo::getIcon),
+					ItemStack.STRICT_CODEC.fieldOf("icon").forGetter(DisplayInfo::getIcon),
 					ComponentSerialization.CODEC.fieldOf("title").forGetter(DisplayInfo::getTitle),
 					ComponentSerialization.CODEC.fieldOf("description").forGetter(DisplayInfo::getDescription),
 					ResourceLocation.CODEC.optionalFieldOf("background").forGetter(DisplayInfo::getBackground),

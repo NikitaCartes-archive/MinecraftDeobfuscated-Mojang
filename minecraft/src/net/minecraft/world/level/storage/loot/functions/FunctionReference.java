@@ -28,7 +28,7 @@ public class FunctionReference extends LootItemConditionalFunction {
 	}
 
 	@Override
-	public LootItemFunctionType getType() {
+	public LootItemFunctionType<FunctionReference> getType() {
 		return LootItemFunctions.REFERENCE;
 	}
 

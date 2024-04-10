@@ -332,7 +332,7 @@ public class InputConstants {
 			type.map.put(i, key);
 		}
 
-		private Type(String string2, BiFunction<Integer, String, Component> biFunction) {
+		private Type(final String string2, final BiFunction<Integer, String, Component> biFunction) {
 			this.defaultPrefix = string2;
 			this.displayTextSupplier = biFunction;
 		}

@@ -41,7 +41,7 @@ public class SetContainerLootTable extends LootItemConditionalFunction {
 	}
 
 	@Override
-	public LootItemFunctionType getType() {
+	public LootItemFunctionType<SetContainerLootTable> getType() {
 		return LootItemFunctions.SET_LOOT_TABLE;
 	}
 

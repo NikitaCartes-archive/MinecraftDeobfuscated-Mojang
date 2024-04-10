@@ -386,7 +386,7 @@ public abstract class DistanceManager {
 		protected final Long2ByteMap chunks = new Long2ByteOpenHashMap();
 		protected final int maxDistance;
 
-		protected FixedPlayerDistanceChunkTracker(int i) {
+		protected FixedPlayerDistanceChunkTracker(final int i) {
 			super(i + 2, 16, 256);
 			this.maxDistance = i;
 			this.chunks.defaultReturnValue((byte)(i + 2));
@@ -458,7 +458,7 @@ public abstract class DistanceManager {
 		private final Long2IntMap queueLevels = Long2IntMaps.synchronize(new Long2IntOpenHashMap());
 		private final LongSet toUpdate = new LongOpenHashSet();
 
-		protected PlayerTicketTracker(int i) {
+		protected PlayerTicketTracker(final int i) {
 			super(i);
 			this.viewDistance = 0;
 			this.queueLevels.defaultReturnValue(i + 2);

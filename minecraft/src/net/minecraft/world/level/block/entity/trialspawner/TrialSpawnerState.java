@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
+import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -44,7 +45,7 @@ public enum TrialSpawnerState implements StringRepresentable {
 	private final TrialSpawnerState.ParticleEmission particleEmission;
 	private final boolean isCapableOfSpawning;
 
-	private TrialSpawnerState(String string2, int j, TrialSpawnerState.ParticleEmission particleEmission, double d, boolean bl) {
+	private TrialSpawnerState(final String string2, final int j, final TrialSpawnerState.ParticleEmission particleEmission, final double d, final boolean bl) {
 		this.name = string2;
 		this.lightLevel = j;
 		this.particleEmission = particleEmission;
@@ -178,27 +179,31 @@ public enum TrialSpawnerState implements StringRepresentable {
 			return Optional.empty();
 		} else {
 			Entity entity = selectEntityToSpawnItemAbove(list, trialSpawnerData.currentMobs, trialSpawner, blockPos, serverLevel);
-			return calculatePositionAbove(entity, serverLevel);
+			return entity == null ? Optional.empty() : calculatePositionAbove(entity, serverLevel);
 		}
 	}
 
 	private static Optional<Vec3> calculatePositionAbove(Entity entity, ServerLevel serverLevel) {
 		Vec3 vec3 = entity.position();
-		Vec3 vec32 = vec3.relative(Direction.UP, (double)(entity.getBbHeight() + 2.0F + (float)serverLevel.random.nextInt(4)))
-			.relative(Direction.Plane.HORIZONTAL.getRandomDirection(serverLevel.random), (double)serverLevel.random.nextInt(5));
+		Vec3 vec32 = vec3.relative(Direction.UP, (double)(entity.getBbHeight() + 2.0F + (float)serverLevel.random.nextInt(4)));
 		BlockHitResult blockHitResult = serverLevel.clip(new ClipContext(vec3, vec32, ClipContext.Block.VISUAL, ClipContext.Fluid.NONE, CollisionContext.empty()));
 		Vec3 vec33 = blockHitResult.getBlockPos().getCenter().relative(Direction.DOWN, 1.0);
 		BlockPos blockPos = BlockPos.containing(vec33);
 		return !serverLevel.getBlockState(blockPos).getCollisionShape(serverLevel, blockPos).isEmpty() ? Optional.empty() : Optional.of(vec33);
 	}
 
+	@Nullable
 	private static Entity selectEntityToSpawnItemAbove(List<Player> list, Set<UUID> set, TrialSpawner trialSpawner, BlockPos blockPos, ServerLevel serverLevel) {
 		Stream<Entity> stream = set.stream()
 			.map(serverLevel::getEntity)
 			.filter(Objects::nonNull)
 			.filter(entity -> entity.isAlive() && entity.distanceToSqr(blockPos.getCenter()) <= (double)Mth.square(trialSpawner.getRequiredPlayerRange()));
-		List<Entity> list2 = Stream.concat(list.stream(), stream).toList();
-		return Util.getRandom(list2, serverLevel.random);
+		List<? extends Entity> list2 = serverLevel.random.nextBoolean() ? stream.toList() : list;
+		if (list2.isEmpty()) {
+			return null;
+		} else {
+			return list2.size() == 1 ? (Entity)list2.getFirst() : Util.getRandom(list2, serverLevel.random);
+		}
 	}
 
 	private boolean timeToSpawnItemSpawner(ServerLevel serverLevel, TrialSpawnerData trialSpawnerData) {

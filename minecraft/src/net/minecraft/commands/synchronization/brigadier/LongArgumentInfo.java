@@ -46,7 +46,7 @@ public class LongArgumentInfo implements ArgumentTypeInfo<LongArgumentType, Long
 		final long min;
 		final long max;
 
-		Template(long l, long m) {
+		Template(final long l, final long m) {
 			this.min = l;
 			this.max = m;
 		}

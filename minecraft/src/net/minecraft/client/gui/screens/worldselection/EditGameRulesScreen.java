@@ -100,7 +100,7 @@ public class EditGameRulesScreen extends Screen {
 	public class BooleanRuleEntry extends EditGameRulesScreen.GameRuleEntry {
 		private final CycleButton<Boolean> checkbox;
 
-		public BooleanRuleEntry(Component component, List<FormattedCharSequence> list, String string, GameRules.BooleanValue booleanValue) {
+		public BooleanRuleEntry(final Component component, final List<FormattedCharSequence> list, final String string, final GameRules.BooleanValue booleanValue) {
 			super(list, component);
 			this.checkbox = CycleButton.onOffBuilder(booleanValue.get())
 				.displayOnlyValue()
@@ -122,7 +122,7 @@ public class EditGameRulesScreen extends Screen {
 	public class CategoryRuleEntry extends EditGameRulesScreen.RuleEntry {
 		final Component label;
 
-		public CategoryRuleEntry(Component component) {
+		public CategoryRuleEntry(final Component component) {
 			super(null);
 			this.label = component;
 		}
@@ -164,7 +164,7 @@ public class EditGameRulesScreen extends Screen {
 		private final List<FormattedCharSequence> label;
 		protected final List<AbstractWidget> children = Lists.<AbstractWidget>newArrayList();
 
-		public GameRuleEntry(@Nullable List<FormattedCharSequence> list, Component component) {
+		public GameRuleEntry(@Nullable final List<FormattedCharSequence> list, final Component component) {
 			super(list);
 			this.label = EditGameRulesScreen.this.minecraft.font.split(component, 175);
 		}
@@ -193,7 +193,7 @@ public class EditGameRulesScreen extends Screen {
 	public class IntegerRuleEntry extends EditGameRulesScreen.GameRuleEntry {
 		private final EditBox input;
 
-		public IntegerRuleEntry(Component component, List<FormattedCharSequence> list, String string, GameRules.IntegerValue integerValue) {
+		public IntegerRuleEntry(final Component component, final List<FormattedCharSequence> list, final String string, final GameRules.IntegerValue integerValue) {
 			super(list, component);
 			this.input = new EditBox(EditGameRulesScreen.this.minecraft.font, 10, 5, 44, 20, component.copy().append("\n").append(string).append("\n"));
 			this.input.setValue(Integer.toString(integerValue.get()));
@@ -232,7 +232,7 @@ public class EditGameRulesScreen extends Screen {
 	public class RuleList extends ContainerObjectSelectionList<EditGameRulesScreen.RuleEntry> {
 		private static final int ITEM_HEIGHT = 24;
 
-		public RuleList(GameRules gameRules) {
+		public RuleList(final GameRules gameRules) {
 			super(
 				Minecraft.getInstance(),
 				EditGameRulesScreen.this.width,

@@ -721,7 +721,7 @@ public class Fox extends Animal implements VariantHolder<Fox.Type> {
 		private LivingEntity trustedLastHurt;
 		private int timestamp;
 
-		public DefendTrustedTargetGoal(Class<LivingEntity> class_, boolean bl, boolean bl2, @Nullable Predicate<LivingEntity> predicate) {
+		public DefendTrustedTargetGoal(final Class<LivingEntity> class_, final boolean bl, final boolean bl2, @Nullable final Predicate<LivingEntity> predicate) {
 			super(Fox.this, class_, 10, bl, bl2, predicate);
 		}
 
@@ -826,7 +826,7 @@ public class Fox extends Animal implements VariantHolder<Fox.Type> {
 	}
 
 	class FoxBreedGoal extends BreedGoal {
-		public FoxBreedGoal(double d) {
+		public FoxBreedGoal(final double d) {
 			super(Fox.this, d);
 		}
 
@@ -880,7 +880,7 @@ public class Fox extends Animal implements VariantHolder<Fox.Type> {
 		private static final int WAIT_TICKS = 40;
 		protected int ticksWaited;
 
-		public FoxEatBerriesGoal(double d, int i, int j) {
+		public FoxEatBerriesGoal(final double d, final int i, final int j) {
 			super(Fox.this, d, i, j);
 		}
 
@@ -980,7 +980,7 @@ public class Fox extends Animal implements VariantHolder<Fox.Type> {
 	}
 
 	class FoxFollowParentGoal extends FollowParentGoal {
-		public FoxFollowParentGoal(Fox fox2, double d) {
+		public FoxFollowParentGoal(final Fox fox2, final double d) {
 			super(fox2, d);
 		}
 
@@ -1011,7 +1011,7 @@ public class Fox extends Animal implements VariantHolder<Fox.Type> {
 	}
 
 	class FoxLookAtPlayerGoal extends LookAtPlayerGoal {
-		public FoxLookAtPlayerGoal(Mob mob, Class<? extends LivingEntity> class_, float f) {
+		public FoxLookAtPlayerGoal(final Mob mob, final Class<? extends LivingEntity> class_, final float f) {
 			super(mob, class_, f);
 		}
 
@@ -1045,7 +1045,7 @@ public class Fox extends Animal implements VariantHolder<Fox.Type> {
 	}
 
 	class FoxMeleeAttackGoal extends MeleeAttackGoal {
-		public FoxMeleeAttackGoal(double d, boolean bl) {
+		public FoxMeleeAttackGoal(final double d, final boolean bl) {
 			super(Fox.this, d, bl);
 		}
 
@@ -1084,7 +1084,7 @@ public class Fox extends Animal implements VariantHolder<Fox.Type> {
 	}
 
 	class FoxPanicGoal extends PanicGoal {
-		public FoxPanicGoal(double d) {
+		public FoxPanicGoal(final double d) {
 			super(Fox.this, d);
 		}
 
@@ -1231,7 +1231,7 @@ public class Fox extends Animal implements VariantHolder<Fox.Type> {
 	}
 
 	class FoxStrollThroughVillageGoal extends StrollThroughVillageGoal {
-		public FoxStrollThroughVillageGoal(int i, int j) {
+		public FoxStrollThroughVillageGoal(final int i, final int j) {
 			super(Fox.this, j);
 		}
 
@@ -1319,7 +1319,7 @@ public class Fox extends Animal implements VariantHolder<Fox.Type> {
 	class SeekShelterGoal extends FleeSunGoal {
 		private int interval = reducedTickDelay(100);
 
-		public SeekShelterGoal(double d) {
+		public SeekShelterGoal(final double d) {
 			super(Fox.this, d);
 		}
 
@@ -1459,7 +1459,7 @@ public class Fox extends Animal implements VariantHolder<Fox.Type> {
 		private final int id;
 		private final String name;
 
-		private Type(int j, String string2) {
+		private Type(final int j, final String string2) {
 			this.id = j;
 			this.name = string2;
 		}

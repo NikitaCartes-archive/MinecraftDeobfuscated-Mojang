@@ -101,9 +101,11 @@ public class SpectatorGui implements SpectatorMenuListener {
 			SpectatorMenuItem spectatorMenuItem = this.menu.getSelectedItem();
 			Component component = spectatorMenuItem == SpectatorMenu.EMPTY_SLOT ? this.menu.getSelectedCategory().getPrompt() : spectatorMenuItem.getName();
 			if (component != null) {
-				int j = (guiGraphics.guiWidth() - this.minecraft.font.width(component)) / 2;
-				int k = guiGraphics.guiHeight() - 35;
-				guiGraphics.drawString(this.minecraft.font, component, j, k, 16777215 + (i << 24));
+				int j = this.minecraft.font.width(component);
+				int k = (guiGraphics.guiWidth() - j) / 2;
+				int l = guiGraphics.guiHeight() - 35;
+				guiGraphics.fill(k - 2, l - 2, k + j + 2, l + 9 + 2, this.minecraft.options.getBackgroundColor(0));
+				guiGraphics.drawString(this.minecraft.font, component, k, l, 16777215 + (i << 24));
 			}
 		}
 	}

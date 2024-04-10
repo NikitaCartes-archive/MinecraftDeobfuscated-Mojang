@@ -48,7 +48,7 @@ public abstract class Team {
 			return (Team.CollisionRule)BY_NAME.get(string);
 		}
 
-		private CollisionRule(String string2, int j) {
+		private CollisionRule(final String string2, final int j) {
 			this.name = string2;
 			this.id = j;
 		}
@@ -78,7 +78,7 @@ public abstract class Team {
 			return (Team.Visibility)BY_NAME.get(string);
 		}
 
-		private Visibility(String string2, int j) {
+		private Visibility(final String string2, final int j) {
 			this.name = string2;
 			this.id = j;
 		}

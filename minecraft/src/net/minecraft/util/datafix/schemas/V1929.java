@@ -23,10 +23,7 @@ public class V1929 extends NamespacedSchema {
 					"Inventory",
 					DSL.list(References.ITEM_STACK.in(schema)),
 					"Offers",
-					DSL.optionalFields(
-						"Recipes",
-						DSL.list(DSL.optionalFields("buy", References.ITEM_STACK.in(schema), "buyB", References.ITEM_STACK.in(schema), "sell", References.ITEM_STACK.in(schema)))
-					),
+					DSL.optionalFields("Recipes", DSL.list(References.VILLAGER_TRADE.in(schema))),
 					V100.equipment(schema)
 				))
 		);

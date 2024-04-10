@@ -58,6 +58,7 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.alchemy.PotionBrewing;
 import net.minecraft.world.item.component.FireworkExplosion;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.ChunkPos;
@@ -854,6 +855,11 @@ public class ClientLevel extends Level {
 	@Override
 	public FeatureFlagSet enabledFeatures() {
 		return this.connection.enabledFeatures();
+	}
+
+	@Override
+	public PotionBrewing potionBrewing() {
+		return this.connection.potionBrewing();
 	}
 
 	@Environment(EnvType.CLIENT)

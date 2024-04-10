@@ -374,7 +374,7 @@ public class TextFilterClient implements AutoCloseable {
 		private final GameProfile profile;
 		private final Executor streamExecutor;
 
-		PlayerContext(GameProfile gameProfile) {
+		PlayerContext(final GameProfile gameProfile) {
 			this.profile = gameProfile;
 			ProcessorMailbox<Runnable> processorMailbox = ProcessorMailbox.create(TextFilterClient.this.workerPool, "chat stream for " + gameProfile.getName());
 			this.streamExecutor = processorMailbox::tell;

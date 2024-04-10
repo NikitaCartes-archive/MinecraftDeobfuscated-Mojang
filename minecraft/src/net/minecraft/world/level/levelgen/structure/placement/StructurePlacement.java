@@ -159,7 +159,7 @@ public abstract class StructurePlacement {
 		private final String name;
 		private final StructurePlacement.FrequencyReducer reducer;
 
-		private FrequencyReductionMethod(String string2, StructurePlacement.FrequencyReducer frequencyReducer) {
+		private FrequencyReductionMethod(final String string2, final StructurePlacement.FrequencyReducer frequencyReducer) {
 			this.name = string2;
 			this.reducer = frequencyReducer;
 		}

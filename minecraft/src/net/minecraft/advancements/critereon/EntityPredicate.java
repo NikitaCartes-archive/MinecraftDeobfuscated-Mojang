@@ -131,9 +131,9 @@ public record EntityPredicate(
 						}
 					}
 
-					return this.nbt.isPresent() && !((NbtPredicate)this.nbt.get()).matches(entity)
+					return this.slots.isPresent() && !((SlotsPredicate)this.slots.get()).matches(entity)
 						? false
-						: !this.slots.isPresent() || ((SlotsPredicate)this.slots.get()).matches(entity);
+						: !this.nbt.isPresent() || ((NbtPredicate)this.nbt.get()).matches(entity);
 				}
 			}
 		}

@@ -231,7 +231,7 @@ public final class TrialSpawner {
 								}
 
 								mob.setPersistenceRequired();
-								spawnData.getEquipmentLootTable().ifPresent(mob::equip);
+								spawnData.getEquipment().ifPresent(mob::equip);
 							}
 
 							if (!serverLevel.tryAddFreshEntityWithPassengers(entity)) {
@@ -387,7 +387,7 @@ public final class TrialSpawner {
 
 		public final SimpleParticleType particleType;
 
-		private FlameParticle(SimpleParticleType simpleParticleType) {
+		private FlameParticle(final SimpleParticleType simpleParticleType) {
 			this.particleType = simpleParticleType;
 		}
 

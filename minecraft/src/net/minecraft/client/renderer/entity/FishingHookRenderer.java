@@ -43,57 +43,46 @@ public class FishingHookRenderer extends EntityRenderer<FishingHook> {
 			vertex(vertexConsumer, pose, i, 1.0F, 1, 1, 0);
 			vertex(vertexConsumer, pose, i, 0.0F, 1, 0, 0);
 			poseStack.popPose();
-			int j = player.getMainArm() == HumanoidArm.RIGHT ? 1 : -1;
-			ItemStack itemStack = player.getMainHandItem();
-			if (!itemStack.is(Items.FISHING_ROD)) {
-				j = -j;
-			}
-
 			float h = player.getAttackAnim(g);
-			float k = Mth.sin(Mth.sqrt(h) * (float) Math.PI);
-			float l = Mth.lerp(g, player.yBodyRotO, player.yBodyRot) * (float) (Math.PI / 180.0);
-			double d = (double)Mth.sin(l);
-			double e = (double)Mth.cos(l);
-			double m = (double)j * 0.35;
-			double n = 0.8;
-			double o;
-			double p;
-			double q;
-			float r;
-			if ((this.entityRenderDispatcher.options == null || this.entityRenderDispatcher.options.getCameraType().isFirstPerson())
-				&& player == Minecraft.getInstance().player) {
-				double s = 960.0 / (double)this.entityRenderDispatcher.options.fov().get().intValue();
-				Vec3 vec3 = this.entityRenderDispatcher.camera.getNearPlane().getPointOnPlane((float)j * 0.525F, -0.1F);
-				vec3 = vec3.scale(s);
-				vec3 = vec3.yRot(k * 0.5F);
-				vec3 = vec3.xRot(-k * 0.7F);
-				o = Mth.lerp((double)g, player.xo, player.getX()) + vec3.x;
-				p = Mth.lerp((double)g, player.yo, player.getY()) + vec3.y;
-				q = Mth.lerp((double)g, player.zo, player.getZ()) + vec3.z;
-				r = player.getEyeHeight();
-			} else {
-				o = Mth.lerp((double)g, player.xo, player.getX()) - e * m - d * 0.8;
-				p = player.yo + (double)player.getEyeHeight() + (player.getY() - player.yo) * (double)g - 0.45;
-				q = Mth.lerp((double)g, player.zo, player.getZ()) - d * m + e * 0.8;
-				r = player.isCrouching() ? -0.1875F : 0.0F;
-			}
-
-			double s = Mth.lerp((double)g, fishingHook.xo, fishingHook.getX());
-			double t = Mth.lerp((double)g, fishingHook.yo, fishingHook.getY()) + 0.25;
-			double u = Mth.lerp((double)g, fishingHook.zo, fishingHook.getZ());
-			float v = (float)(o - s);
-			float w = (float)(p - t) + r;
-			float x = (float)(q - u);
+			float j = Mth.sin(Mth.sqrt(h) * (float) Math.PI);
+			Vec3 vec3 = this.getPlayerHandPos(player, j, g);
+			Vec3 vec32 = fishingHook.getPosition(g).add(0.0, 0.25, 0.0);
+			float k = (float)(vec3.x - vec32.x);
+			float l = (float)(vec3.y - vec32.y);
+			float m = (float)(vec3.z - vec32.z);
 			VertexConsumer vertexConsumer2 = multiBufferSource.getBuffer(RenderType.lineStrip());
 			PoseStack.Pose pose2 = poseStack.last();
-			int y = 16;
+			int n = 16;
 
-			for (int z = 0; z <= 16; z++) {
-				stringVertex(v, w, x, vertexConsumer2, pose2, fraction(z, 16), fraction(z + 1, 16));
+			for (int o = 0; o <= 16; o++) {
+				stringVertex(k, l, m, vertexConsumer2, pose2, fraction(o, 16), fraction(o + 1, 16));
 			}
 
 			poseStack.popPose();
 			super.render(fishingHook, f, g, poseStack, multiBufferSource, i);
+		}
+	}
+
+	private Vec3 getPlayerHandPos(Player player, float f, float g) {
+		int i = player.getMainArm() == HumanoidArm.RIGHT ? 1 : -1;
+		ItemStack itemStack = player.getMainHandItem();
+		if (!itemStack.is(Items.FISHING_ROD)) {
+			i = -i;
+		}
+
+		if (this.entityRenderDispatcher.options.getCameraType().isFirstPerson() && player == Minecraft.getInstance().player) {
+			double n = 960.0 / (double)this.entityRenderDispatcher.options.fov().get().intValue();
+			Vec3 vec3 = this.entityRenderDispatcher.camera.getNearPlane().getPointOnPlane((float)i * 0.525F, -0.1F).scale(n).yRot(f * 0.5F).xRot(-f * 0.7F);
+			return player.getEyePosition(g).add(vec3);
+		} else {
+			float h = Mth.lerp(g, player.yBodyRotO, player.yBodyRot) * (float) (Math.PI / 180.0);
+			double d = (double)Mth.sin(h);
+			double e = (double)Mth.cos(h);
+			float j = player.getScale();
+			double k = (double)i * 0.35 * (double)j;
+			double l = 0.8 * (double)j;
+			float m = player.isCrouching() ? -0.1875F : 0.0F;
+			return player.getEyePosition(g).add(-e * k - d * l, (double)m - 0.45 * (double)j, -d * k + e * l);
 		}
 	}
 

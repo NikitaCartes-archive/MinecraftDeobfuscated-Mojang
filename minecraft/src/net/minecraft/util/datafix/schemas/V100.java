@@ -84,15 +84,12 @@ public class V100 extends Schema {
 					"Inventory",
 					DSL.list(References.ITEM_STACK.in(schema)),
 					"Offers",
-					DSL.optionalFields(
-						"Recipes",
-						DSL.list(DSL.optionalFields("buy", References.ITEM_STACK.in(schema), "buyB", References.ITEM_STACK.in(schema), "sell", References.ITEM_STACK.in(schema)))
-					),
+					DSL.optionalFields("Recipes", DSL.list(References.VILLAGER_TRADE.in(schema))),
 					equipment(schema)
 				))
 		);
 		registerMob(schema, map, "Shulker");
-		schema.registerSimple(map, "AreaEffectCloud");
+		schema.register(map, "AreaEffectCloud", (Function<String, TypeTemplate>)(string -> DSL.optionalFields("Particle", References.PARTICLE.in(schema))));
 		schema.registerSimple(map, "ShulkerBullet");
 		return map;
 	}

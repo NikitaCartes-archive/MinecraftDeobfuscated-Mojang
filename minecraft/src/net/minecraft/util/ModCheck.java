@@ -35,7 +35,7 @@ public record ModCheck(ModCheck.Confidence confidence, String description) {
 		final String description;
 		final boolean shouldReportAsModified;
 
-		private Confidence(String string2, boolean bl) {
+		private Confidence(final String string2, final boolean bl) {
 			this.description = string2;
 			this.shouldReportAsModified = bl;
 		}

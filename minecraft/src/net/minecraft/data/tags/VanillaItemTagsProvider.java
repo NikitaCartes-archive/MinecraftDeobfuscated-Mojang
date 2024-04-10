@@ -242,14 +242,13 @@ public class VanillaItemTagsProvider extends ItemTagsProvider {
 			.add(Items.WOODEN_SHOVEL)
 			.add(Items.IRON_SHOVEL);
 		this.tag(ItemTags.HOES).add(Items.DIAMOND_HOE).add(Items.STONE_HOE).add(Items.GOLDEN_HOE).add(Items.NETHERITE_HOE).add(Items.WOODEN_HOE).add(Items.IRON_HOE);
-		this.tag(ItemTags.TOOLS)
+		this.tag(ItemTags.BREAKS_DECORATED_POTS)
 			.addTag(ItemTags.SWORDS)
 			.addTag(ItemTags.AXES)
 			.addTag(ItemTags.PICKAXES)
 			.addTag(ItemTags.SHOVELS)
 			.addTag(ItemTags.HOES)
 			.add(Items.TRIDENT);
-		this.tag(ItemTags.BREAKS_DECORATED_POTS).addTag(ItemTags.TOOLS);
 		this.tag(ItemTags.DECORATED_POT_SHERDS)
 			.add(
 				Items.ANGLER_POTTERY_SHERD,

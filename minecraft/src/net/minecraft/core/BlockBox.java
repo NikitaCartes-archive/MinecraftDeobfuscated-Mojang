@@ -18,7 +18,7 @@ public record BlockBox(BlockPos min, BlockPos max) implements Iterable<BlockPos>
 		}
 	};
 
-	public BlockBox(BlockPos min, BlockPos max) {
+	public BlockBox(final BlockPos min, final BlockPos max) {
 		this.min = BlockPos.min(min, max);
 		this.max = BlockPos.max(min, max);
 	}

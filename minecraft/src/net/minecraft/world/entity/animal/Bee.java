@@ -654,7 +654,7 @@ public class Bee extends Animal implements NeutralMob, FlyingAnimal {
 	}
 
 	class BeeAttackGoal extends MeleeAttackGoal {
-		BeeAttackGoal(PathfinderMob pathfinderMob, double d, boolean bl) {
+		BeeAttackGoal(final PathfinderMob pathfinderMob, final double d, final boolean bl) {
 			super(pathfinderMob, d, bl);
 		}
 
@@ -959,7 +959,7 @@ public class Bee extends Animal implements NeutralMob, FlyingAnimal {
 	}
 
 	class BeeHurtByOtherGoal extends HurtByTargetGoal {
-		BeeHurtByOtherGoal(Bee bee2) {
+		BeeHurtByOtherGoal(final Bee bee2) {
 			super(bee2);
 		}
 
@@ -1016,7 +1016,7 @@ public class Bee extends Animal implements NeutralMob, FlyingAnimal {
 	}
 
 	class BeeLookControl extends LookControl {
-		BeeLookControl(Mob mob) {
+		BeeLookControl(final Mob mob) {
 			super(mob);
 		}
 

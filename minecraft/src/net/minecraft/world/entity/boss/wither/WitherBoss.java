@@ -49,6 +49,7 @@ import net.minecraft.world.entity.monster.RangedAttackMob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.WitherSkull;
+import net.minecraft.world.entity.projectile.windcharge.WindCharge;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
@@ -450,7 +451,7 @@ public class WitherBoss extends Monster implements PowerableMob, RangedAttackMob
 		} else {
 			if (this.isPowered()) {
 				Entity entity = damageSource.getDirectEntity();
-				if (entity instanceof AbstractArrow) {
+				if (entity instanceof AbstractArrow || entity instanceof WindCharge) {
 					return false;
 				}
 			}

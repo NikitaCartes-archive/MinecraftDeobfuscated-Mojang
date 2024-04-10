@@ -410,7 +410,7 @@ public class BufferBuilder extends DefaultedVertexConsumer implements BufferVert
 		private final BufferBuilder.DrawState drawState;
 		private boolean released;
 
-		RenderedBuffer(int i, BufferBuilder.DrawState drawState) {
+		RenderedBuffer(final int i, final BufferBuilder.DrawState drawState) {
 			this.pointer = i;
 			this.drawState = drawState;
 		}

@@ -13,7 +13,7 @@ public enum MetricCategory {
 
 	private final String description;
 
-	private MetricCategory(String string2) {
+	private MetricCategory(final String string2) {
 		this.description = string2;
 	}
 

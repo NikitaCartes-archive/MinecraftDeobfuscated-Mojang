@@ -55,7 +55,7 @@ public class AnimalArmorItem extends ArmorItem {
 		final Function<ResourceLocation, ResourceLocation> textureLocator;
 		final SoundEvent breakingSound;
 
-		private BodyType(Function<ResourceLocation, ResourceLocation> function, SoundEvent soundEvent) {
+		private BodyType(final Function<ResourceLocation, ResourceLocation> function, final SoundEvent soundEvent) {
 			this.textureLocator = function;
 			this.breakingSound = soundEvent;
 		}

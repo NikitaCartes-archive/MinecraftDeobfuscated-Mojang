@@ -26,7 +26,10 @@ public enum AdvancementWidgetType {
 	private final ResourceLocation goalFrameSprite;
 
 	private AdvancementWidgetType(
-		ResourceLocation resourceLocation, ResourceLocation resourceLocation2, ResourceLocation resourceLocation3, ResourceLocation resourceLocation4
+		final ResourceLocation resourceLocation,
+		final ResourceLocation resourceLocation2,
+		final ResourceLocation resourceLocation3,
+		final ResourceLocation resourceLocation4
 	) {
 		this.boxSprite = resourceLocation;
 		this.taskFrameSprite = resourceLocation2;

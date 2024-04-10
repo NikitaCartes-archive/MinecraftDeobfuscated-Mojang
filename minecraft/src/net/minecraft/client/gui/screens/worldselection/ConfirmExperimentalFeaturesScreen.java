@@ -94,7 +94,7 @@ public class ConfirmExperimentalFeaturesScreen extends Screen {
 		protected void init() {
 			this.layout.addTitleHeader(TITLE, this.font);
 			this.list = this.layout
-				.addToContents(new ConfirmExperimentalFeaturesScreen.DetailsScreen.PackList(this, this.minecraft, ConfirmExperimentalFeaturesScreen.this.enabledPacks));
+				.addToContents(new ConfirmExperimentalFeaturesScreen.DetailsScreen.PackList(this.minecraft, ConfirmExperimentalFeaturesScreen.this.enabledPacks));
 			this.layout.addToFooter(Button.builder(CommonComponents.GUI_BACK, button -> this.onClose()).build());
 			this.layout.visitWidgets(guiEventListener -> {
 				AbstractWidget var10000 = this.addRenderableWidget(guiEventListener);
@@ -118,15 +118,15 @@ public class ConfirmExperimentalFeaturesScreen extends Screen {
 
 		@Environment(EnvType.CLIENT)
 		class PackList extends ObjectSelectionList<ConfirmExperimentalFeaturesScreen.DetailsScreen.PackListEntry> {
-			public PackList(Minecraft detailsScreen, Collection<Pack> minecraft, Collection collection) {
-				super(minecraft, detailsScreen.width, detailsScreen.layout.getContentHeight(), detailsScreen.layout.getHeaderHeight(), (9 + 2) * 3);
+			public PackList(final Minecraft minecraft, final Collection<Pack> collection) {
+				super(minecraft, DetailsScreen.this.width, DetailsScreen.this.layout.getContentHeight(), DetailsScreen.this.layout.getHeaderHeight(), (9 + 2) * 3);
 
 				for (Pack pack : collection) {
 					String string = FeatureFlags.printMissingFlags(FeatureFlags.VANILLA_SET, pack.getRequestedFeatures());
 					if (!string.isEmpty()) {
 						Component component = ComponentUtils.mergeStyles(pack.getTitle().copy(), Style.EMPTY.withBold(true));
 						Component component2 = Component.translatable("selectWorld.experimental.details.entry", string);
-						this.addEntry(detailsScreen.new PackListEntry(component, component2, MultiLineLabel.create(detailsScreen.font, component2, this.getRowWidth())));
+						this.addEntry(DetailsScreen.this.new PackListEntry(component, component2, MultiLineLabel.create(DetailsScreen.this.font, component2, this.getRowWidth())));
 					}
 				}
 			}
@@ -143,7 +143,7 @@ public class ConfirmExperimentalFeaturesScreen extends Screen {
 			private final Component message;
 			private final MultiLineLabel splitMessage;
 
-			PackListEntry(Component component, Component component2, MultiLineLabel multiLineLabel) {
+			PackListEntry(final Component component, final Component component2, final MultiLineLabel multiLineLabel) {
 				this.packId = component;
 				this.message = component2;
 				this.splitMessage = multiLineLabel;

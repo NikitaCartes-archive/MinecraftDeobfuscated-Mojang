@@ -859,7 +859,7 @@ public class Boat extends VehicleEntity implements VariantHolder<Boat.Type> {
 		public static final StringRepresentable.EnumCodec<Boat.Type> CODEC = StringRepresentable.fromEnum(Boat.Type::values);
 		private static final IntFunction<Boat.Type> BY_ID = ByIdMap.continuous(Enum::ordinal, values(), ByIdMap.OutOfBoundsStrategy.ZERO);
 
-		private Type(Block block, String string2) {
+		private Type(final Block block, final String string2) {
 			this.name = string2;
 			this.planks = block;
 		}

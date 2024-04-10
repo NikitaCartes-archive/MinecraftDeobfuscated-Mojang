@@ -47,7 +47,7 @@ public class PackOutput {
 
 		final String directory;
 
-		private Target(String string2) {
+		private Target(final String string2) {
 			this.directory = string2;
 		}
 	}

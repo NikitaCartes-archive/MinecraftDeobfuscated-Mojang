@@ -85,7 +85,7 @@ public class TransientEntitySectionManager<T extends EntityAccess> {
 		private long currentSectionKey;
 		private EntitySection<T> currentSection;
 
-		Callback(T entityAccess, long l, EntitySection<T> entitySection) {
+		Callback(final T entityAccess, final long l, final EntitySection<T> entitySection) {
 			this.entity = entityAccess;
 			this.currentSectionKey = l;
 			this.currentSection = entitySection;

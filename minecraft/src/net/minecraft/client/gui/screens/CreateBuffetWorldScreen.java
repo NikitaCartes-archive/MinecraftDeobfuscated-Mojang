@@ -108,7 +108,7 @@ public class CreateBuffetWorldScreen extends Screen {
 			final Holder.Reference<Biome> biome;
 			final Component name;
 
-			public Entry(Holder.Reference<Biome> reference) {
+			public Entry(final Holder.Reference<Biome> reference) {
 				this.biome = reference;
 				ResourceLocation resourceLocation = reference.key().location();
 				String string = resourceLocation.toLanguageKey("biome");

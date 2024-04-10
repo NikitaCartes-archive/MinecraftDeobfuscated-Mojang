@@ -22,7 +22,6 @@ import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.DefaultAttributes;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.alchemy.PotionBrewing;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.block.Block;
@@ -48,7 +47,6 @@ public class Bootstrap {
 				if (EntityType.getKey(EntityType.PLAYER) == null) {
 					throw new IllegalStateException("Failed loading EntityTypes");
 				} else {
-					PotionBrewing.bootStrap();
 					EntitySelectorOptions.bootStrap();
 					DispenseItemBehavior.bootStrap();
 					CauldronInteraction.bootStrap();

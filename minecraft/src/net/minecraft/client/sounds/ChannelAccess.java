@@ -74,7 +74,7 @@ public class ChannelAccess {
 			return this.stopped;
 		}
 
-		public ChannelHandle(Channel channel) {
+		public ChannelHandle(final Channel channel) {
 			this.channel = channel;
 		}
 

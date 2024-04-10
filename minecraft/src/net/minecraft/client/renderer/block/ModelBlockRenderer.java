@@ -631,13 +631,13 @@ public class ModelBlockRenderer {
 		});
 
 		private AdjacencyInfo(
-			Direction[] directions,
-			float f,
-			boolean bl,
-			ModelBlockRenderer.SizeInfo[] sizeInfos,
-			ModelBlockRenderer.SizeInfo[] sizeInfos2,
-			ModelBlockRenderer.SizeInfo[] sizeInfos3,
-			ModelBlockRenderer.SizeInfo[] sizeInfos4
+			final Direction[] directions,
+			final float f,
+			final boolean bl,
+			final ModelBlockRenderer.SizeInfo[] sizeInfos,
+			final ModelBlockRenderer.SizeInfo[] sizeInfos2,
+			final ModelBlockRenderer.SizeInfo[] sizeInfos3,
+			final ModelBlockRenderer.SizeInfo[] sizeInfos4
 		) {
 			this.corners = directions;
 			this.doNonCubicWeight = bl;
@@ -850,7 +850,7 @@ public class ModelBlockRenderer {
 			ambientVertexRemaps[Direction.EAST.get3DDataValue()] = EAST;
 		});
 
-		private AmbientVertexRemap(int j, int k, int l, int m) {
+		private AmbientVertexRemap(final int j, final int k, final int l, final int m) {
 			this.vert0 = j;
 			this.vert1 = k;
 			this.vert2 = l;
@@ -957,7 +957,7 @@ public class ModelBlockRenderer {
 
 		final int shape;
 
-		private SizeInfo(Direction direction, boolean bl) {
+		private SizeInfo(final Direction direction, final boolean bl) {
 			this.shape = direction.get3DDataValue() + (bl ? ModelBlockRenderer.DIRECTIONS.length : 0);
 		}
 	}

@@ -26,7 +26,7 @@ public class SetPotionFunction extends LootItemConditionalFunction {
 	}
 
 	@Override
-	public LootItemFunctionType getType() {
+	public LootItemFunctionType<SetPotionFunction> getType() {
 		return LootItemFunctions.SET_POTION;
 	}
 

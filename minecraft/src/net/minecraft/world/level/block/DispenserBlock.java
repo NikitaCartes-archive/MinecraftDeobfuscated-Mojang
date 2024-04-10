@@ -44,8 +44,9 @@ public class DispenserBlock extends BaseEntityBlock {
 	public static final MapCodec<DispenserBlock> CODEC = simpleCodec(DispenserBlock::new);
 	public static final DirectionProperty FACING = DirectionalBlock.FACING;
 	public static final BooleanProperty TRIGGERED = BlockStateProperties.TRIGGERED;
+	private static final DefaultDispenseItemBehavior DEFAULT_BEHAVIOR = new DefaultDispenseItemBehavior();
 	public static final Map<Item, DispenseItemBehavior> DISPENSER_REGISTRY = Util.make(
-		new Object2ObjectOpenHashMap<>(), object2ObjectOpenHashMap -> object2ObjectOpenHashMap.defaultReturnValue(new DefaultDispenseItemBehavior())
+		new Object2ObjectOpenHashMap<>(), object2ObjectOpenHashMap -> object2ObjectOpenHashMap.defaultReturnValue(DEFAULT_BEHAVIOR)
 	);
 	private static final int TRIGGER_DURATION = 4;
 
@@ -98,7 +99,7 @@ public class DispenserBlock extends BaseEntityBlock {
 				serverLevel.gameEvent(GameEvent.BLOCK_ACTIVATE, blockPos, GameEvent.Context.of(dispenserBlockEntity.getBlockState()));
 			} else {
 				ItemStack itemStack = dispenserBlockEntity.getItem(i);
-				DispenseItemBehavior dispenseItemBehavior = this.getDispenseMethod(itemStack);
+				DispenseItemBehavior dispenseItemBehavior = this.getDispenseMethod(serverLevel, itemStack);
 				if (dispenseItemBehavior != DispenseItemBehavior.NOOP) {
 					dispenserBlockEntity.setItem(i, dispenseItemBehavior.dispense(blockSource, itemStack));
 				}
@@ -106,8 +107,10 @@ public class DispenserBlock extends BaseEntityBlock {
 		}
 	}
 
-	protected DispenseItemBehavior getDispenseMethod(ItemStack itemStack) {
-		return (DispenseItemBehavior)DISPENSER_REGISTRY.get(itemStack.getItem());
+	protected DispenseItemBehavior getDispenseMethod(Level level, ItemStack itemStack) {
+		return (DispenseItemBehavior)(!itemStack.isItemEnabled(level.enabledFeatures())
+			? DEFAULT_BEHAVIOR
+			: (DispenseItemBehavior)DISPENSER_REGISTRY.get(itemStack.getItem()));
 	}
 
 	@Override

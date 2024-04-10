@@ -74,7 +74,7 @@ public class RealmsLongConfirmationScreen extends RealmsScreen {
 		public final int colorCode;
 		public final Component text;
 
-		private Type(Component component, int j) {
+		private Type(final Component component, final int j) {
 			this.text = component;
 			this.colorCode = j;
 		}

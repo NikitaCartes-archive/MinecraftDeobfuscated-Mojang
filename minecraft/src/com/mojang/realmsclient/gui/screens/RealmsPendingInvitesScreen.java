@@ -148,7 +148,7 @@ public class RealmsPendingInvitesScreen extends RealmsScreen {
 		final PendingInvite pendingInvite;
 		private final List<RowButton> rowButtons;
 
-		Entry(PendingInvite pendingInvite) {
+		Entry(final PendingInvite pendingInvite) {
 			this.pendingInvite = pendingInvite;
 			this.rowButtons = Arrays.asList(new RealmsPendingInvitesScreen.Entry.AcceptRowButton(), new RealmsPendingInvitesScreen.Entry.RejectRowButton());
 		}

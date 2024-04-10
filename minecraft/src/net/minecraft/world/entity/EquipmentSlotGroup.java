@@ -30,13 +30,13 @@ public enum EquipmentSlotGroup implements StringRepresentable {
 	private final String key;
 	private final Predicate<EquipmentSlot> predicate;
 
-	private EquipmentSlotGroup(int j, String string2, Predicate<EquipmentSlot> predicate) {
+	private EquipmentSlotGroup(final int j, final String string2, final Predicate<EquipmentSlot> predicate) {
 		this.id = j;
 		this.key = string2;
 		this.predicate = predicate;
 	}
 
-	private EquipmentSlotGroup(int j, String string2, EquipmentSlot equipmentSlot) {
+	private EquipmentSlotGroup(final int j, final String string2, final EquipmentSlot equipmentSlot) {
 		this(j, string2, equipmentSlot2 -> equipmentSlot2 == equipmentSlot);
 	}
 

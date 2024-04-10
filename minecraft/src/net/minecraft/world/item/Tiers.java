@@ -23,7 +23,7 @@ public enum Tiers implements Tier {
 	private final int enchantmentValue;
 	private final Supplier<Ingredient> repairIngredient;
 
-	private Tiers(TagKey<Block> tagKey, int j, float f, float g, int k, Supplier<Ingredient> supplier) {
+	private Tiers(final TagKey<Block> tagKey, final int j, final float f, final float g, final int k, final Supplier<Ingredient> supplier) {
 		this.incorrectBlocksForDrops = tagKey;
 		this.uses = j;
 		this.speed = f;

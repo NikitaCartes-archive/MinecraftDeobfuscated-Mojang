@@ -486,7 +486,7 @@ public class MapItemSavedData extends SavedData {
 		private int tick;
 		public int step;
 
-		HoldingPlayer(Player player) {
+		HoldingPlayer(final Player player) {
 			this.player = player;
 		}
 

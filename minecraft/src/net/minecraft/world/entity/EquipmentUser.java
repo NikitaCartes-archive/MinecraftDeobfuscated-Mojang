@@ -2,10 +2,9 @@ package net.minecraft.world.entity;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import javax.annotation.Nullable;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Equipable;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
@@ -19,12 +18,15 @@ public interface EquipmentUser {
 
 	void setDropChance(EquipmentSlot equipmentSlot, float f);
 
-	default void equip(ResourceLocation resourceLocation, LootParams lootParams) {
-		this.equip(resourceLocation, lootParams, 0L);
+	default void equip(EquipmentTable equipmentTable, LootParams lootParams) {
+		this.equip(equipmentTable.lootTable(), lootParams, equipmentTable.slotDropChances());
 	}
 
-	default void equip(ResourceLocation resourceLocation, LootParams lootParams, long l) {
-		ResourceKey<LootTable> resourceKey = ResourceKey.create(Registries.LOOT_TABLE, resourceLocation);
+	default void equip(ResourceKey<LootTable> resourceKey, LootParams lootParams, Map<EquipmentSlot, Float> map) {
+		this.equip(resourceKey, lootParams, 0L, map);
+	}
+
+	default void equip(ResourceKey<LootTable> resourceKey, LootParams lootParams, long l, Map<EquipmentSlot, Float> map) {
 		if (!resourceKey.equals(BuiltInLootTables.EMPTY)) {
 			LootTable lootTable = lootParams.getLevel().getServer().reloadableRegistries().getLootTable(resourceKey);
 			if (lootTable != LootTable.EMPTY) {
@@ -36,7 +38,11 @@ public interface EquipmentUser {
 					if (equipmentSlot != null) {
 						ItemStack itemStack2 = equipmentSlot.isArmor() ? itemStack.copyWithCount(1) : itemStack;
 						this.setItemSlot(equipmentSlot, itemStack2);
-						this.setDropChance(equipmentSlot, 0.085F);
+						Float float_ = (Float)map.get(equipmentSlot);
+						if (float_ != null) {
+							this.setDropChance(equipmentSlot, float_);
+						}
+
 						list2.add(equipmentSlot);
 					}
 				}
@@ -46,16 +52,20 @@ public interface EquipmentUser {
 
 	@Nullable
 	default EquipmentSlot resolveSlot(ItemStack itemStack, List<EquipmentSlot> list) {
-		Equipable equipable = Equipable.get(itemStack);
-		if (equipable != null) {
-			EquipmentSlot equipmentSlot = equipable.getEquipmentSlot();
-			if (!list.contains(equipmentSlot)) {
-				return equipmentSlot;
+		if (itemStack.isEmpty()) {
+			return null;
+		} else {
+			Equipable equipable = Equipable.get(itemStack);
+			if (equipable != null) {
+				EquipmentSlot equipmentSlot = equipable.getEquipmentSlot();
+				if (!list.contains(equipmentSlot)) {
+					return equipmentSlot;
+				}
+			} else if (!list.contains(EquipmentSlot.MAINHAND)) {
+				return EquipmentSlot.MAINHAND;
 			}
-		} else if (!list.contains(EquipmentSlot.MAINHAND)) {
-			return EquipmentSlot.MAINHAND;
-		}
 
-		return null;
+			return null;
+		}
 	}
 }

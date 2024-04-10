@@ -19,14 +19,11 @@ public class V3083 extends NamespacedSchema {
 			map,
 			"minecraft:allay",
 			(Supplier<TypeTemplate>)(() -> DSL.optionalFields(
-					"ArmorItems",
-					DSL.list(References.ITEM_STACK.in(schema)),
-					"HandItems",
-					DSL.list(References.ITEM_STACK.in(schema)),
 					"Inventory",
 					DSL.list(References.ITEM_STACK.in(schema)),
 					"listener",
-					DSL.optionalFields("event", DSL.optionalFields("game_event", References.GAME_EVENT_NAME.in(schema)))
+					DSL.optionalFields("event", DSL.optionalFields("game_event", References.GAME_EVENT_NAME.in(schema))),
+					V100.equipment(schema)
 				))
 		);
 		return map;

@@ -155,7 +155,7 @@ public class ServerData {
 
 		private final Component name;
 
-		private ServerPackStatus(String string2) {
+		private ServerPackStatus(final String string2) {
 			this.name = Component.translatable("addServer.resourcePack." + string2);
 		}
 

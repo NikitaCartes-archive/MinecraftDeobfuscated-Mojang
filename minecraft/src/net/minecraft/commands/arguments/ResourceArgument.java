@@ -136,7 +136,7 @@ public class ResourceArgument<T> implements ArgumentType<Holder.Reference<T>> {
 		public final class Template implements ArgumentTypeInfo.Template<ResourceArgument<T>> {
 			final ResourceKey<? extends Registry<T>> registryKey;
 
-			Template(ResourceKey<? extends Registry<T>> resourceKey) {
+			Template(final ResourceKey<? extends Registry<T>> resourceKey) {
 				this.registryKey = resourceKey;
 			}
 

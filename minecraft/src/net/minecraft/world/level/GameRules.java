@@ -349,7 +349,7 @@ public class GameRules {
 
 		private final String descriptionId;
 
-		private Category(String string2) {
+		private Category(final String string2) {
 			this.descriptionId = string2;
 		}
 

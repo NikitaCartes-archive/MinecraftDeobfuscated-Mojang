@@ -317,7 +317,7 @@ public abstract class LayerLightSectionStorage<M extends DataLayerStorageMap<M>>
 
 		private final String display;
 
-		private SectionType(String string2) {
+		private SectionType(final String string2) {
 			this.display = string2;
 		}
 

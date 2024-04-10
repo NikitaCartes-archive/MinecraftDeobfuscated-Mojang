@@ -44,7 +44,7 @@ public class TradeTrigger extends SimpleCriterionTrigger<TradeTrigger.TriggerIns
 		public boolean matches(LootContext lootContext, ItemStack itemStack) {
 			return this.villager.isPresent() && !((ContextAwarePredicate)this.villager.get()).matches(lootContext)
 				? false
-				: !this.item.isPresent() || ((ItemPredicate)this.item.get()).matches(itemStack);
+				: !this.item.isPresent() || ((ItemPredicate)this.item.get()).test(itemStack);
 		}
 
 		@Override

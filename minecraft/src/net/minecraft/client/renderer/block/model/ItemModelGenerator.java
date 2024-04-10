@@ -243,7 +243,7 @@ public class ItemModelGenerator {
 		private final int xOffset;
 		private final int yOffset;
 
-		private SpanFacing(Direction direction, int j, int k) {
+		private SpanFacing(final Direction direction, final int j, final int k) {
 			this.direction = direction;
 			this.xOffset = j;
 			this.yOffset = k;

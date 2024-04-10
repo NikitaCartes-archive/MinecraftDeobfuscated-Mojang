@@ -28,7 +28,9 @@ import net.minecraft.nbt.TagParser;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Unit;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import org.apache.commons.lang3.mutable.MutableObject;
 
 public class ItemParser {
@@ -44,6 +46,9 @@ public class ItemParser {
 	static final SimpleCommandExceptionType ERROR_EXPECTED_COMPONENT = new SimpleCommandExceptionType(Component.translatable("arguments.item.component.expected"));
 	static final DynamicCommandExceptionType ERROR_REPEATED_COMPONENT = new DynamicCommandExceptionType(
 		object -> Component.translatableEscape("arguments.item.component.repeated", object)
+	);
+	private static final DynamicCommandExceptionType ERROR_MALFORMED_ITEM = new DynamicCommandExceptionType(
+		object -> Component.translatableEscape("arguments.item.malformed", object)
 	);
 	public static final char SYNTAX_START_COMPONENTS = '[';
 	public static final char SYNTAX_END_COMPONENTS = ']';
@@ -72,7 +77,16 @@ public class ItemParser {
 				builder.set(dataComponentType, object);
 			}
 		});
-		return new ItemParser.ItemResult((Holder<Item>)Objects.requireNonNull(mutableObject.getValue(), "Parser gave no item"), builder.build());
+		Holder<Item> holder = (Holder<Item>)Objects.requireNonNull(mutableObject.getValue(), "Parser gave no item");
+		DataComponentMap dataComponentMap = builder.build();
+		validateComponents(stringReader, holder, dataComponentMap);
+		return new ItemParser.ItemResult(holder, dataComponentMap);
+	}
+
+	private static void validateComponents(StringReader stringReader, Holder<Item> holder, DataComponentMap dataComponentMap) throws CommandSyntaxException {
+		DataComponentMap dataComponentMap2 = DataComponentMap.composite(holder.value().components(), dataComponentMap);
+		DataResult<Unit> dataResult = ItemStack.validateComponents(dataComponentMap2);
+		dataResult.getOrThrow(string -> ERROR_MALFORMED_ITEM.createWithContext(stringReader, string));
 	}
 
 	public void parse(StringReader stringReader, ItemParser.Visitor visitor) throws CommandSyntaxException {
@@ -107,7 +121,7 @@ public class ItemParser {
 		private final StringReader reader;
 		private final ItemParser.Visitor visitor;
 
-		State(StringReader stringReader, ItemParser.Visitor visitor) {
+		State(final StringReader stringReader, final ItemParser.Visitor visitor) {
 			this.reader = stringReader;
 			this.visitor = visitor;
 		}

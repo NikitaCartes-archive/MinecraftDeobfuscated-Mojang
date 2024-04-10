@@ -46,7 +46,7 @@ public class FishingRodHookedTrigger extends SimpleCriterionTrigger<FishingRodHo
 		}
 
 		public boolean matches(ItemStack itemStack, LootContext lootContext, Collection<ItemStack> collection) {
-			if (this.rod.isPresent() && !((ItemPredicate)this.rod.get()).matches(itemStack)) {
+			if (this.rod.isPresent() && !((ItemPredicate)this.rod.get()).test(itemStack)) {
 				return false;
 			} else if (this.entity.isPresent() && !((ContextAwarePredicate)this.entity.get()).matches(lootContext)) {
 				return false;
@@ -54,12 +54,12 @@ public class FishingRodHookedTrigger extends SimpleCriterionTrigger<FishingRodHo
 				if (this.item.isPresent()) {
 					boolean bl = false;
 					Entity entity = lootContext.getParamOrNull(LootContextParams.THIS_ENTITY);
-					if (entity instanceof ItemEntity itemEntity && ((ItemPredicate)this.item.get()).matches(itemEntity.getItem())) {
+					if (entity instanceof ItemEntity itemEntity && ((ItemPredicate)this.item.get()).test(itemEntity.getItem())) {
 						bl = true;
 					}
 
 					for (ItemStack itemStack2 : collection) {
-						if (((ItemPredicate)this.item.get()).matches(itemStack2)) {
+						if (((ItemPredicate)this.item.get()).test(itemStack2)) {
 							bl = true;
 							break;
 						}

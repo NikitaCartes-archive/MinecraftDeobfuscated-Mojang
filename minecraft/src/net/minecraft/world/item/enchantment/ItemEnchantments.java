@@ -2,31 +2,40 @@ package net.minecraft.world.item.enchantment;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import it.unimi.dsi.fastutil.objects.Object2IntLinkedOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap.Entry;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import javax.annotation.Nullable;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.tags.EnchantmentTags;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.TooltipProvider;
 
 public class ItemEnchantments implements TooltipProvider {
-	public static final ItemEnchantments EMPTY = new ItemEnchantments(new Object2IntLinkedOpenHashMap<>(), true);
+	public static final ItemEnchantments EMPTY = new ItemEnchantments(new Object2IntOpenHashMap<>(), true);
 	public static final int MAX_LEVEL = 255;
 	private static final Codec<Integer> LEVEL_CODEC = Codec.intRange(0, 255);
-	private static final Codec<Object2IntLinkedOpenHashMap<Holder<Enchantment>>> LEVELS_CODEC = Codec.unboundedMap(
+	private static final Codec<Object2IntOpenHashMap<Holder<Enchantment>>> LEVELS_CODEC = Codec.unboundedMap(
 			BuiltInRegistries.ENCHANTMENT.holderByNameCodec(), LEVEL_CODEC
 		)
-		.xmap(Object2IntLinkedOpenHashMap::new, Function.identity());
+		.xmap(Object2IntOpenHashMap::new, Function.identity());
 	private static final Codec<ItemEnchantments> FULL_CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
 					LEVELS_CODEC.fieldOf("levels").forGetter(itemEnchantments -> itemEnchantments.enchantments),
@@ -35,20 +44,20 @@ public class ItemEnchantments implements TooltipProvider {
 				.apply(instance, ItemEnchantments::new)
 	);
 	public static final Codec<ItemEnchantments> CODEC = Codec.withAlternative(
-		FULL_CODEC, LEVELS_CODEC, object2IntLinkedOpenHashMap -> new ItemEnchantments(object2IntLinkedOpenHashMap, true)
+		FULL_CODEC, LEVELS_CODEC, object2IntOpenHashMap -> new ItemEnchantments(object2IntOpenHashMap, true)
 	);
 	public static final StreamCodec<RegistryFriendlyByteBuf, ItemEnchantments> STREAM_CODEC = StreamCodec.composite(
-		ByteBufCodecs.map(Object2IntLinkedOpenHashMap::new, ByteBufCodecs.holderRegistry(Registries.ENCHANTMENT), ByteBufCodecs.VAR_INT),
+		ByteBufCodecs.map(Object2IntOpenHashMap::new, ByteBufCodecs.holderRegistry(Registries.ENCHANTMENT), ByteBufCodecs.VAR_INT),
 		itemEnchantments -> itemEnchantments.enchantments,
 		ByteBufCodecs.BOOL,
 		itemEnchantments -> itemEnchantments.showInTooltip,
 		ItemEnchantments::new
 	);
-	final Object2IntLinkedOpenHashMap<Holder<Enchantment>> enchantments;
+	final Object2IntOpenHashMap<Holder<Enchantment>> enchantments;
 	final boolean showInTooltip;
 
-	ItemEnchantments(Object2IntLinkedOpenHashMap<Holder<Enchantment>> object2IntLinkedOpenHashMap, boolean bl) {
-		this.enchantments = object2IntLinkedOpenHashMap;
+	ItemEnchantments(Object2IntOpenHashMap<Holder<Enchantment>> object2IntOpenHashMap, boolean bl) {
+		this.enchantments = object2IntOpenHashMap;
 		this.showInTooltip = bl;
 	}
 
@@ -57,12 +66,36 @@ public class ItemEnchantments implements TooltipProvider {
 	}
 
 	@Override
-	public void addToTooltip(Consumer<Component> consumer, TooltipFlag tooltipFlag) {
+	public void addToTooltip(Item.TooltipContext tooltipContext, Consumer<Component> consumer, TooltipFlag tooltipFlag) {
 		if (this.showInTooltip) {
+			HolderLookup.Provider provider = tooltipContext.registries();
+			HolderSet<Enchantment> holderSet = getTagOrEmpty(provider, Registries.ENCHANTMENT, EnchantmentTags.TOOLTIP_ORDER);
+
+			for (Holder<Enchantment> holder : holderSet) {
+				int i = this.enchantments.getInt(holder);
+				if (i > 0) {
+					consumer.accept(holder.value().getFullname(i));
+				}
+			}
+
 			for (Entry<Holder<Enchantment>> entry : this.enchantments.object2IntEntrySet()) {
-				consumer.accept(((Enchantment)((Holder)entry.getKey()).value()).getFullname(entry.getIntValue()));
+				Holder<Enchantment> holder2 = (Holder<Enchantment>)entry.getKey();
+				if (!holderSet.contains(holder2)) {
+					consumer.accept(holder2.value().getFullname(entry.getIntValue()));
+				}
 			}
 		}
+	}
+
+	private static <T> HolderSet<T> getTagOrEmpty(@Nullable HolderLookup.Provider provider, ResourceKey<Registry<T>> resourceKey, TagKey<T> tagKey) {
+		if (provider != null) {
+			Optional<HolderSet.Named<T>> optional = provider.lookupOrThrow(resourceKey).get(tagKey);
+			if (optional.isPresent()) {
+				return (HolderSet<T>)optional.get();
+			}
+		}
+
+		return HolderSet.direct();
 	}
 
 	public ItemEnchantments withTooltip(boolean bl) {
@@ -105,7 +138,7 @@ public class ItemEnchantments implements TooltipProvider {
 	}
 
 	public static class Mutable {
-		private final Object2IntLinkedOpenHashMap<Holder<Enchantment>> enchantments = new Object2IntLinkedOpenHashMap<>();
+		private final Object2IntOpenHashMap<Holder<Enchantment>> enchantments = new Object2IntOpenHashMap<>();
 		private final boolean showInTooltip;
 
 		public Mutable(ItemEnchantments itemEnchantments) {

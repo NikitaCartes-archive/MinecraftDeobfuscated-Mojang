@@ -187,7 +187,7 @@ public class ScoreHolderArgument implements ArgumentType<ScoreHolderArgument.Res
 		public final class Template implements ArgumentTypeInfo.Template<ScoreHolderArgument> {
 			final boolean multiple;
 
-			Template(boolean bl) {
+			Template(final boolean bl) {
 				this.multiple = bl;
 			}
 

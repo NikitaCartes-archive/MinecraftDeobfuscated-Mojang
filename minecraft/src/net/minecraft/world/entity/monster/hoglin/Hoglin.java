@@ -376,4 +376,10 @@ public class Hoglin extends Animal implements Enemy, HoglinBase {
 		super.sendDebugPackets();
 		DebugPackets.sendEntityBrain(this);
 	}
+
+	@Nullable
+	@Override
+	public LivingEntity getTarget() {
+		return this.getTargetFromBrain();
+	}
 }

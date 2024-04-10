@@ -83,7 +83,7 @@ public class Program {
 		private final int glType;
 		private final Map<String, Program> programs = Maps.<String, Program>newHashMap();
 
-		private Type(String string2, String string3, int j) {
+		private Type(final String string2, final String string3, final int j) {
 			this.name = string2;
 			this.extension = string3;
 			this.glType = j;

@@ -53,15 +53,15 @@ public enum ChatFormatting implements StringRepresentable {
 		return string.toLowerCase(Locale.ROOT).replaceAll("[^a-z]", "");
 	}
 
-	private ChatFormatting(String string2, char c, int j, @Nullable Integer integer) {
+	private ChatFormatting(final String string2, final char c, final int j, @Nullable final Integer integer) {
 		this(string2, c, false, j, integer);
 	}
 
-	private ChatFormatting(String string2, char c, boolean bl) {
+	private ChatFormatting(final String string2, final char c, final boolean bl) {
 		this(string2, c, bl, -1, null);
 	}
 
-	private ChatFormatting(String string2, char c, boolean bl, int j, @Nullable Integer integer) {
+	private ChatFormatting(final String string2, final char c, final boolean bl, final int j, @Nullable final Integer integer) {
 		this.name = string2;
 		this.code = c;
 		this.isFormat = bl;

@@ -83,7 +83,7 @@ public class ResourceLoadStateTracker {
 
 		final String name;
 
-		private ReloadReason(String string2) {
+		private ReloadReason(final String string2) {
 			this.name = string2;
 		}
 	}

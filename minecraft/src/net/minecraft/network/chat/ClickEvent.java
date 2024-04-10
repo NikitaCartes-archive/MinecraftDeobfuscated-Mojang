@@ -63,7 +63,7 @@ public class ClickEvent {
 		private final boolean allowFromServer;
 		private final String name;
 
-		private Action(String string2, boolean bl) {
+		private Action(final String string2, final boolean bl) {
 			this.name = string2;
 			this.allowFromServer = bl;
 		}

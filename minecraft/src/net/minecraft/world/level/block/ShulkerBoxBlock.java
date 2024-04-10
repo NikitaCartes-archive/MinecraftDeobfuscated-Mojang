@@ -193,7 +193,7 @@ public class ShulkerBoxBlock extends BaseEntityBlock {
 		int i = 0;
 		int j = 0;
 
-		for (ItemStack itemStack2 : itemStack.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY)) {
+		for (ItemStack itemStack2 : itemStack.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY).nonEmptyItems()) {
 			j++;
 			if (i <= 4) {
 				i++;

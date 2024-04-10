@@ -30,7 +30,7 @@ public class VillagerMetaDataSection {
 			.collect(Collectors.toMap(VillagerMetaDataSection.Hat::getName, hat -> hat));
 		private final String name;
 
-		private Hat(String string2) {
+		private Hat(final String string2) {
 			this.name = string2;
 		}
 

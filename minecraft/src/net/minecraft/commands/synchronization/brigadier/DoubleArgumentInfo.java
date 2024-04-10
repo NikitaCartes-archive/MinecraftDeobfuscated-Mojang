@@ -46,7 +46,7 @@ public class DoubleArgumentInfo implements ArgumentTypeInfo<DoubleArgumentType, 
 		final double min;
 		final double max;
 
-		Template(double d, double e) {
+		Template(final double d, final double e) {
 			this.min = d;
 			this.max = e;
 		}

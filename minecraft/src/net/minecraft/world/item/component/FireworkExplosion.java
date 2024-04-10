@@ -17,6 +17,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.ByIdMap;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.TooltipFlag;
 
 public record FireworkExplosion(FireworkExplosion.Shape shape, IntList colors, IntList fadeColors, boolean hasTrail, boolean hasTwinkle)
@@ -52,7 +53,7 @@ public record FireworkExplosion(FireworkExplosion.Shape shape, IntList colors, I
 	private static final Component CUSTOM_COLOR_NAME = Component.translatable("item.minecraft.firework_star.custom_color");
 
 	@Override
-	public void addToTooltip(Consumer<Component> consumer, TooltipFlag tooltipFlag) {
+	public void addToTooltip(Item.TooltipContext tooltipContext, Consumer<Component> consumer, TooltipFlag tooltipFlag) {
 		this.addShapeNameTooltip(consumer);
 		this.addAdditionalTooltip(consumer);
 	}
@@ -117,7 +118,7 @@ public record FireworkExplosion(FireworkExplosion.Shape shape, IntList colors, I
 		private final int id;
 		private final String name;
 
-		private Shape(int j, String string2) {
+		private Shape(final int j, final String string2) {
 			this.id = j;
 			this.name = string2;
 		}

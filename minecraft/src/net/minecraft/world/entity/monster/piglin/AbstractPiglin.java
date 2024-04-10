@@ -11,7 +11,6 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.util.GoalUtils;
 import net.minecraft.world.entity.monster.Monster;
@@ -109,7 +108,7 @@ public abstract class AbstractPiglin extends Monster {
 	@Nullable
 	@Override
 	public LivingEntity getTarget() {
-		return (LivingEntity)this.brain.getMemory(MemoryModuleType.ATTACK_TARGET).orElse(null);
+		return this.getTargetFromBrain();
 	}
 
 	protected boolean isHoldingMeleeWeapon() {

@@ -117,7 +117,7 @@ public class ChatSelectionScreen extends Screen {
 		@Nullable
 		private ChatSelectionScreen.ChatSelectionList.Heading previousHeading;
 
-		public ChatSelectionList(Minecraft minecraft, int i) {
+		public ChatSelectionList(final Minecraft minecraft, final int i) {
 			super(minecraft, ChatSelectionScreen.this.width, ChatSelectionScreen.this.height - i - 80, 40, 16);
 		}
 
@@ -157,9 +157,9 @@ public class ChatSelectionScreen extends Screen {
 
 		@Override
 		public void acceptDivider(Component component) {
-			this.addEntryToTop(new ChatSelectionScreen.ChatSelectionList.PaddingEntry(this));
+			this.addEntryToTop(new ChatSelectionScreen.ChatSelectionList.PaddingEntry());
 			this.addEntryToTop(new ChatSelectionScreen.ChatSelectionList.DividerEntry(component));
-			this.addEntryToTop(new ChatSelectionScreen.ChatSelectionList.PaddingEntry(this));
+			this.addEntryToTop(new ChatSelectionScreen.ChatSelectionList.PaddingEntry());
 			this.previousHeading = null;
 		}
 
@@ -223,8 +223,7 @@ public class ChatSelectionScreen extends Screen {
 			private static final int COLOR = -6250336;
 			private final Component text;
 
-			public DividerEntry(Component component) {
-				super(ChatSelectionList.this);
+			public DividerEntry(final Component component) {
 				this.text = component;
 			}
 
@@ -246,9 +245,6 @@ public class ChatSelectionScreen extends Screen {
 
 		@Environment(EnvType.CLIENT)
 		public abstract class Entry extends ObjectSelectionList.Entry<ChatSelectionScreen.ChatSelectionList.Entry> {
-			public Entry(ChatSelectionScreen.ChatSelectionList chatSelectionList) {
-			}
-
 			@Override
 			public Component getNarration() {
 				return CommonComponents.EMPTY;
@@ -292,8 +288,9 @@ public class ChatSelectionScreen extends Screen {
 			private final boolean canReport;
 			private final boolean playerMessage;
 
-			public MessageEntry(int i, Component component, Component component2, @Nullable GuiMessageTag guiMessageTag, boolean bl, boolean bl2) {
-				super(ChatSelectionList.this);
+			public MessageEntry(
+				final int i, final Component component, final Component component2, @Nullable final GuiMessageTag guiMessageTag, final boolean bl, final boolean bl2
+			) {
 				this.chatId = i;
 				this.tagIcon = Optionull.map(guiMessageTag, GuiMessageTag::icon);
 				this.tagHoverText = guiMessageTag != null && guiMessageTag.text() != null
@@ -407,8 +404,7 @@ public class ChatSelectionScreen extends Screen {
 			private final Supplier<PlayerSkin> skin;
 			private final boolean canReport;
 
-			public MessageHeadingEntry(GameProfile gameProfile, Component component, boolean bl) {
-				super(ChatSelectionList.this);
+			public MessageHeadingEntry(final GameProfile gameProfile, final Component component, final boolean bl) {
 				this.heading = component;
 				this.canReport = bl;
 				this.skin = ChatSelectionList.this.minecraft.getSkinManager().lookupInsecure(gameProfile);
@@ -426,10 +422,6 @@ public class ChatSelectionScreen extends Screen {
 
 		@Environment(EnvType.CLIENT)
 		public class PaddingEntry extends ChatSelectionScreen.ChatSelectionList.Entry {
-			public PaddingEntry(ChatSelectionScreen.ChatSelectionList chatSelectionList) {
-				super(chatSelectionList);
-			}
-
 			@Override
 			public void render(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
 			}

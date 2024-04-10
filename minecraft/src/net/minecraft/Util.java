@@ -917,7 +917,7 @@ public class Util {
 
 		private final String telemetryName;
 
-		OS(String string2) {
+		OS(final String string2) {
 			this.telemetryName = string2;
 		}
 

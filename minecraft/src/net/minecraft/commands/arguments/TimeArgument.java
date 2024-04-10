@@ -103,7 +103,7 @@ public class TimeArgument implements ArgumentType<Integer> {
 		public final class Template implements ArgumentTypeInfo.Template<TimeArgument> {
 			final int min;
 
-			Template(int i) {
+			Template(final int i) {
 				this.min = i;
 			}
 

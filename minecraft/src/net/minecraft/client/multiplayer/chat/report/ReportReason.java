@@ -22,7 +22,7 @@ public enum ReportReason {
 	private final Component title;
 	private final Component description;
 
-	private ReportReason(String string2) {
+	private ReportReason(final String string2) {
 		this.backendName = string2.toUpperCase(Locale.ROOT);
 		String string3 = "gui.abuseReport.reason." + string2;
 		this.title = Component.translatable(string3);

@@ -97,7 +97,7 @@ public abstract class BossEvent {
 		private final String name;
 		private final ChatFormatting formatting;
 
-		private BossBarColor(String string2, ChatFormatting chatFormatting) {
+		private BossBarColor(final String string2, final ChatFormatting chatFormatting) {
 			this.name = string2;
 			this.formatting = chatFormatting;
 		}
@@ -130,7 +130,7 @@ public abstract class BossEvent {
 
 		private final String name;
 
-		private BossBarOverlay(String string2) {
+		private BossBarOverlay(final String string2) {
 			this.name = string2;
 		}
 

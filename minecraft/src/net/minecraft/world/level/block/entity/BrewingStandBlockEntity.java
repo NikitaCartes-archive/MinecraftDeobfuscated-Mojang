@@ -97,7 +97,7 @@ public class BrewingStandBlockEntity extends BaseContainerBlockEntity implements
 			setChanged(level, blockPos, blockState);
 		}
 
-		boolean bl = isBrewable(brewingStandBlockEntity.items);
+		boolean bl = isBrewable(level.potionBrewing(), brewingStandBlockEntity.items);
 		boolean bl2 = brewingStandBlockEntity.brewTime > 0;
 		ItemStack itemStack2 = brewingStandBlockEntity.items.get(3);
 		if (bl2) {
@@ -145,16 +145,16 @@ public class BrewingStandBlockEntity extends BaseContainerBlockEntity implements
 		return bls;
 	}
 
-	private static boolean isBrewable(NonNullList<ItemStack> nonNullList) {
+	private static boolean isBrewable(PotionBrewing potionBrewing, NonNullList<ItemStack> nonNullList) {
 		ItemStack itemStack = nonNullList.get(3);
 		if (itemStack.isEmpty()) {
 			return false;
-		} else if (!PotionBrewing.isIngredient(itemStack)) {
+		} else if (!potionBrewing.isIngredient(itemStack)) {
 			return false;
 		} else {
 			for (int i = 0; i < 3; i++) {
 				ItemStack itemStack2 = nonNullList.get(i);
-				if (!itemStack2.isEmpty() && PotionBrewing.hasMix(itemStack2, itemStack)) {
+				if (!itemStack2.isEmpty() && potionBrewing.hasMix(itemStack2, itemStack)) {
 					return true;
 				}
 			}
@@ -165,9 +165,10 @@ public class BrewingStandBlockEntity extends BaseContainerBlockEntity implements
 
 	private static void doBrew(Level level, BlockPos blockPos, NonNullList<ItemStack> nonNullList) {
 		ItemStack itemStack = nonNullList.get(3);
+		PotionBrewing potionBrewing = level.potionBrewing();
 
 		for (int i = 0; i < 3; i++) {
-			nonNullList.set(i, PotionBrewing.mix(itemStack, nonNullList.get(i)));
+			nonNullList.set(i, potionBrewing.mix(itemStack, nonNullList.get(i)));
 		}
 
 		itemStack.shrink(1);
@@ -204,7 +205,8 @@ public class BrewingStandBlockEntity extends BaseContainerBlockEntity implements
 	@Override
 	public boolean canPlaceItem(int i, ItemStack itemStack) {
 		if (i == 3) {
-			return PotionBrewing.isIngredient(itemStack);
+			PotionBrewing potionBrewing = this.level != null ? this.level.potionBrewing() : PotionBrewing.EMPTY;
+			return potionBrewing.isIngredient(itemStack);
 		} else {
 			return i == 4
 				? itemStack.is(Items.BLAZE_POWDER)

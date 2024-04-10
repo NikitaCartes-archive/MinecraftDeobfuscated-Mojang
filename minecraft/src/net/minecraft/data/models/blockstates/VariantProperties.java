@@ -20,7 +20,7 @@ public class VariantProperties {
 
 		final int value;
 
-		private Rotation(int j) {
+		private Rotation(final int j) {
 			this.value = j;
 		}
 	}

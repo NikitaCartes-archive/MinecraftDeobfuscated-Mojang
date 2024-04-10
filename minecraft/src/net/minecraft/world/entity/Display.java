@@ -517,7 +517,7 @@ public abstract class Display extends Entity {
 		private final byte id;
 		private final String name;
 
-		private BillboardConstraints(byte b, String string2) {
+		private BillboardConstraints(final byte b, final String string2) {
 			this.name = string2;
 			this.id = b;
 		}
@@ -633,18 +633,7 @@ public abstract class Display extends Entity {
 			Display.ItemDisplay.class, EntityDataSerializers.ITEM_STACK
 		);
 		private static final EntityDataAccessor<Byte> DATA_ITEM_DISPLAY_ID = SynchedEntityData.defineId(Display.ItemDisplay.class, EntityDataSerializers.BYTE);
-		private final SlotAccess slot = new SlotAccess() {
-			@Override
-			public ItemStack get() {
-				return ItemDisplay.this.getItemStack();
-			}
-
-			@Override
-			public boolean set(ItemStack itemStack) {
-				ItemDisplay.this.setItemStack(itemStack);
-				return true;
-			}
-		};
+		private final SlotAccess slot = SlotAccess.of(this::getItemStack, this::setItemStack);
 		@Nullable
 		private Display.ItemDisplay.ItemRenderState itemRenderState;
 
@@ -667,11 +656,11 @@ public abstract class Display extends Entity {
 			}
 		}
 
-		ItemStack getItemStack() {
+		private ItemStack getItemStack() {
 			return this.entityData.get(DATA_ITEM_STACK_ID);
 		}
 
-		void setItemStack(ItemStack itemStack) {
+		private void setItemStack(ItemStack itemStack) {
 			this.entityData.set(DATA_ITEM_STACK_ID, itemStack);
 		}
 
@@ -1010,7 +999,7 @@ public abstract class Display extends Entity {
 			public static final Codec<Display.TextDisplay.Align> CODEC = StringRepresentable.fromEnum(Display.TextDisplay.Align::values);
 			private final String name;
 
-			private Align(String string2) {
+			private Align(final String string2) {
 				this.name = string2;
 			}
 

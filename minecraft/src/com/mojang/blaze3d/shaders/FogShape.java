@@ -10,7 +10,7 @@ public enum FogShape {
 
 	private final int index;
 
-	private FogShape(int j) {
+	private FogShape(final int j) {
 		this.index = j;
 	}
 

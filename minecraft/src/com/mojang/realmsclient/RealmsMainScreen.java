@@ -721,7 +721,7 @@ public class RealmsMainScreen extends RealmsScreen {
 		private final WidgetTooltipHolder tooltip = new WidgetTooltipHolder();
 		private final RealmsServer parent;
 
-		public AvailableSnapshotEntry(RealmsServer realmsServer) {
+		public AvailableSnapshotEntry(final RealmsServer realmsServer) {
 			this.parent = realmsServer;
 			this.tooltip.set(Tooltip.create(Component.translatable("mco.snapshot.tooltip")));
 		}
@@ -778,7 +778,7 @@ public class RealmsMainScreen extends RealmsScreen {
 	class ButtonEntry extends RealmsMainScreen.Entry {
 		private final Button button;
 
-		public ButtonEntry(Button button) {
+		public ButtonEntry(final Button button) {
 			this.button = button;
 		}
 
@@ -986,7 +986,7 @@ public class RealmsMainScreen extends RealmsScreen {
 		private final FrameLayout textFrame;
 		private int lastEntryWidth = -1;
 
-		public NotificationMessageEntry(Component component, int i, RealmsNotification realmsNotification) {
+		public NotificationMessageEntry(final Component component, final int i, final RealmsNotification realmsNotification) {
 			this.text = component;
 			this.frameItemHeight = i;
 			this.gridLayout = new GridLayout();
@@ -1069,7 +1069,7 @@ public class RealmsMainScreen extends RealmsScreen {
 		private final RealmsServer server;
 		private final WidgetTooltipHolder tooltip = new WidgetTooltipHolder();
 
-		public ParentEntry(RealmsServer realmsServer) {
+		public ParentEntry(final RealmsServer realmsServer) {
 			this.server = realmsServer;
 			if (!realmsServer.expired) {
 				this.tooltip.set(Tooltip.create(Component.translatable("mco.snapshot.parent.tooltip")));
@@ -1138,7 +1138,7 @@ public class RealmsMainScreen extends RealmsScreen {
 		private final RealmsServer serverData;
 		private final WidgetTooltipHolder tooltip = new WidgetTooltipHolder();
 
-		public ServerEntry(RealmsServer realmsServer) {
+		public ServerEntry(final RealmsServer realmsServer) {
 			this.serverData = realmsServer;
 			boolean bl = RealmsMainScreen.this.isSelfOwnedServer(realmsServer);
 			if (RealmsMainScreen.isSnapshot() && bl && realmsServer.isSnapshotRealm()) {

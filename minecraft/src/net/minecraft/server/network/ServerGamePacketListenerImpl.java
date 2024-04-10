@@ -127,6 +127,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.util.FutureChain;
 import net.minecraft.util.Mth;
 import net.minecraft.util.SignatureValidator;
@@ -1516,7 +1517,8 @@ public class ServerGamePacketListenerImpl
 								ItemStack itemStack2 = itemStack.copy();
 								InteractionResult interactionResult = entityInteraction.run(ServerGamePacketListenerImpl.this.player, entity, interactionHand);
 								if (interactionResult.consumesAction()) {
-									CriteriaTriggers.PLAYER_INTERACTED_WITH_ENTITY.trigger(ServerGamePacketListenerImpl.this.player, itemStack2, entity);
+									CriteriaTriggers.PLAYER_INTERACTED_WITH_ENTITY
+										.trigger(ServerGamePacketListenerImpl.this.player, interactionResult.indicateItemUse() ? itemStack2 : ItemStack.EMPTY, entity);
 									if (interactionResult.shouldSwing()) {
 										ServerGamePacketListenerImpl.this.player.swing(interactionHand, true);
 									}
@@ -1538,8 +1540,8 @@ public class ServerGamePacketListenerImpl
 						public void onAttack() {
 							if (!(entity instanceof ItemEntity)
 								&& !(entity instanceof ExperienceOrb)
-								&& !(entity instanceof AbstractArrow)
-								&& entity != ServerGamePacketListenerImpl.this.player) {
+								&& entity != ServerGamePacketListenerImpl.this.player
+								&& (!(entity instanceof AbstractArrow) || entity.getType().is(EntityTypeTags.PUNCHABLE_PROJECTILES))) {
 								ItemStack itemStack = ServerGamePacketListenerImpl.this.player.getItemInHand(InteractionHand.MAIN_HAND);
 								if (itemStack.isItemEnabled(serverLevel.enabledFeatures())) {
 									ServerGamePacketListenerImpl.this.player.attack(entity);
@@ -1663,8 +1665,8 @@ public class ServerGamePacketListenerImpl
 	public void handleSetCreativeModeSlot(ServerboundSetCreativeModeSlotPacket serverboundSetCreativeModeSlotPacket) {
 		PacketUtils.ensureRunningOnSameThread(serverboundSetCreativeModeSlotPacket, this, this.player.serverLevel());
 		if (this.player.gameMode.isCreative()) {
-			boolean bl = serverboundSetCreativeModeSlotPacket.getSlotNum() < 0;
-			ItemStack itemStack = serverboundSetCreativeModeSlotPacket.getItem();
+			boolean bl = serverboundSetCreativeModeSlotPacket.slotNum() < 0;
+			ItemStack itemStack = serverboundSetCreativeModeSlotPacket.itemStack();
 			if (!itemStack.isItemEnabled(this.player.level().enabledFeatures())) {
 				return;
 			}
@@ -1680,10 +1682,10 @@ public class ServerGamePacketListenerImpl
 				}
 			}
 
-			boolean bl2 = serverboundSetCreativeModeSlotPacket.getSlotNum() >= 1 && serverboundSetCreativeModeSlotPacket.getSlotNum() <= 45;
-			boolean bl3 = itemStack.isEmpty() || itemStack.getDamageValue() >= 0 && itemStack.getCount() <= itemStack.getMaxStackSize() && !itemStack.isEmpty();
+			boolean bl2 = serverboundSetCreativeModeSlotPacket.slotNum() >= 1 && serverboundSetCreativeModeSlotPacket.slotNum() <= 45;
+			boolean bl3 = itemStack.isEmpty() || itemStack.getCount() <= itemStack.getMaxStackSize();
 			if (bl2 && bl3) {
-				this.player.inventoryMenu.getSlot(serverboundSetCreativeModeSlotPacket.getSlotNum()).setByPlayer(itemStack);
+				this.player.inventoryMenu.getSlot(serverboundSetCreativeModeSlotPacket.slotNum()).setByPlayer(itemStack);
 				this.player.inventoryMenu.broadcastChanges();
 			} else if (bl && bl3 && this.dropSpamTickCount < 200) {
 				this.dropSpamTickCount += 20;

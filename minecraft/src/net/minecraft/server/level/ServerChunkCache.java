@@ -529,7 +529,7 @@ public class ServerChunkCache extends ChunkSource {
 	}
 
 	final class MainThreadExecutor extends BlockableEventLoop<Runnable> {
-		MainThreadExecutor(Level level) {
+		MainThreadExecutor(final Level level) {
 			super("Chunk source main thread executor for " + level.dimension().location());
 		}
 

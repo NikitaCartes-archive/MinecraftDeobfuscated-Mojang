@@ -276,7 +276,7 @@ public class WorldBorder {
 		private final long lerpBegin;
 		private final double lerpDuration;
 
-		MovingBorderExtent(double d, double e, long l) {
+		MovingBorderExtent(final double d, final double e, final long l) {
 			this.from = d;
 			this.to = e;
 			this.lerpDuration = (double)l;
@@ -465,7 +465,7 @@ public class WorldBorder {
 		private double maxZ;
 		private VoxelShape shape;
 
-		public StaticBorderExtent(double d) {
+		public StaticBorderExtent(final double d) {
 			this.size = d;
 			this.updateBox();
 		}

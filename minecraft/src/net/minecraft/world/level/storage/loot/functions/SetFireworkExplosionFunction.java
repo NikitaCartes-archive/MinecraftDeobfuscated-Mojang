@@ -66,7 +66,7 @@ public class SetFireworkExplosionFunction extends LootItemConditionalFunction {
 	}
 
 	@Override
-	public LootItemFunctionType getType() {
+	public LootItemFunctionType<SetFireworkExplosionFunction> getType() {
 		return LootItemFunctions.SET_FIREWORK_EXPLOSION;
 	}
 }

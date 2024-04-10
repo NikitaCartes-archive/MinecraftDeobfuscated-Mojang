@@ -14,7 +14,7 @@ public enum SoundSource {
 
 	private final String name;
 
-	private SoundSource(String string2) {
+	private SoundSource(final String string2) {
 		this.name = string2;
 	}
 

@@ -135,7 +135,7 @@ public class Registries {
 	public static final ResourceKey<Registry<IntProviderType<?>>> INT_PROVIDER_TYPE = createRegistryKey("int_provider_type");
 	public static final ResourceKey<Registry<Item>> ITEM = createRegistryKey("item");
 	public static final ResourceKey<Registry<LootItemConditionType>> LOOT_CONDITION_TYPE = createRegistryKey("loot_condition_type");
-	public static final ResourceKey<Registry<LootItemFunctionType>> LOOT_FUNCTION_TYPE = createRegistryKey("loot_function_type");
+	public static final ResourceKey<Registry<LootItemFunctionType<?>>> LOOT_FUNCTION_TYPE = createRegistryKey("loot_function_type");
 	public static final ResourceKey<Registry<LootNbtProviderType>> LOOT_NBT_PROVIDER_TYPE = createRegistryKey("loot_nbt_provider_type");
 	public static final ResourceKey<Registry<LootNumberProviderType>> LOOT_NUMBER_PROVIDER_TYPE = createRegistryKey("loot_number_provider_type");
 	public static final ResourceKey<Registry<LootPoolEntryType>> LOOT_POOL_ENTRY_TYPE = createRegistryKey("loot_pool_entry_type");

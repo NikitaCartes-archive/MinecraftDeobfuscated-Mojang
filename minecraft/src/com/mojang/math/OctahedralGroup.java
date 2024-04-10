@@ -105,7 +105,7 @@ public enum OctahedralGroup implements StringRepresentable {
 		)
 		.toArray(OctahedralGroup[]::new);
 
-	private OctahedralGroup(String string2, SymmetricGroup3 symmetricGroup3, boolean bl, boolean bl2, boolean bl3) {
+	private OctahedralGroup(final String string2, final SymmetricGroup3 symmetricGroup3, final boolean bl, final boolean bl2, final boolean bl3) {
 		this.name = string2;
 		this.invertX = bl;
 		this.invertY = bl2;

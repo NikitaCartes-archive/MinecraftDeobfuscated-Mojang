@@ -42,7 +42,7 @@ public class SetWritableBookPagesFunction extends LootItemConditionalFunction {
 	}
 
 	@Override
-	public LootItemFunctionType getType() {
+	public LootItemFunctionType<SetWritableBookPagesFunction> getType() {
 		return LootItemFunctions.SET_WRITABLE_BOOK_PAGES;
 	}
 }

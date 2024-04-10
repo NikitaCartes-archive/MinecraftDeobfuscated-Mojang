@@ -26,7 +26,7 @@ public record PiecesContainer(List<StructurePiece> pieces) {
 		.put(new ResourceLocation("runtime"), JIGSAW_RENAME)
 		.build();
 
-	public PiecesContainer(List<StructurePiece> pieces) {
+	public PiecesContainer(final List<StructurePiece> pieces) {
 		this.pieces = List.copyOf(pieces);
 	}
 

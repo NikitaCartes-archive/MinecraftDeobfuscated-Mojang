@@ -50,7 +50,7 @@ public enum RecipeBookCategories {
 	);
 	private final List<ItemStack> itemIcons;
 
-	private RecipeBookCategories(ItemStack... itemStacks) {
+	private RecipeBookCategories(final ItemStack... itemStacks) {
 		this.itemIcons = ImmutableList.copyOf(itemStacks);
 	}
 

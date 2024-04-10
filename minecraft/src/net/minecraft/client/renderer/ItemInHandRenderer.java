@@ -597,7 +597,7 @@ public class ItemInHandRenderer {
 		final boolean renderMainHand;
 		final boolean renderOffHand;
 
-		private HandRenderSelection(boolean bl, boolean bl2) {
+		private HandRenderSelection(final boolean bl, final boolean bl2) {
 			this.renderMainHand = bl;
 			this.renderOffHand = bl2;
 		}

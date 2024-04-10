@@ -744,7 +744,7 @@ public class SurfaceRules {
 			final PositionalRandomFactory positionalRandomFactory = context.randomState.getOrCreateRandomFactory(this.randomName());
 
 			class VerticalGradientCondition extends SurfaceRules.LazyYCondition {
-				VerticalGradientCondition(SurfaceRules.VerticalGradientConditionSource verticalGradientConditionSource) {
+				VerticalGradientCondition() {
 					super(context);
 				}
 
@@ -763,7 +763,7 @@ public class SurfaceRules {
 				}
 			}
 
-			return new VerticalGradientCondition(this);
+			return new VerticalGradientCondition();
 		}
 	}
 

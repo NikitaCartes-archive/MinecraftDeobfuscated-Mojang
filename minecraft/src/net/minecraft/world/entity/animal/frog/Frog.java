@@ -351,6 +351,12 @@ public class Frog extends Animal implements VariantHolder<Holder<FrogVariant>> {
 		return new Frog.FrogPathNavigation(this, level);
 	}
 
+	@Nullable
+	@Override
+	public LivingEntity getTarget() {
+		return this.getTargetFromBrain();
+	}
+
 	@Override
 	public boolean isFood(ItemStack itemStack) {
 		return itemStack.is(ItemTags.FROG_FOOD);
@@ -363,7 +369,7 @@ public class Frog extends Animal implements VariantHolder<Holder<FrogVariant>> {
 	}
 
 	class FrogLookControl extends LookControl {
-		FrogLookControl(Mob mob) {
+		FrogLookControl(final Mob mob) {
 			super(mob);
 		}
 

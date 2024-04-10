@@ -189,7 +189,7 @@ public class BlockFamily {
 
 		private final String recipeGroup;
 
-		private Variant(String string2) {
+		private Variant(final String string2) {
 			this.recipeGroup = string2;
 		}
 

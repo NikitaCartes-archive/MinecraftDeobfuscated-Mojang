@@ -402,7 +402,7 @@ public class BlockModel implements UnbakedModel {
 
 		private final String name;
 
-		private GuiLight(String string2) {
+		private GuiLight(final String string2) {
 			this.name = string2;
 		}
 

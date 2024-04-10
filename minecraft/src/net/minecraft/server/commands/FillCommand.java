@@ -203,7 +203,7 @@ public class FillCommand {
 
 		public final SetBlockCommand.Filter filter;
 
-		private Mode(SetBlockCommand.Filter filter) {
+		private Mode(final SetBlockCommand.Filter filter) {
 			this.filter = filter;
 		}
 	}

@@ -46,7 +46,7 @@ public class FloatArgumentInfo implements ArgumentTypeInfo<FloatArgumentType, Fl
 		final float min;
 		final float max;
 
-		Template(float f, float g) {
+		Template(final float f, final float g) {
 			this.min = f;
 			this.max = g;
 		}

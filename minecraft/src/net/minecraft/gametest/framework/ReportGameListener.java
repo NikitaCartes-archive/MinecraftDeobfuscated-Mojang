@@ -132,7 +132,7 @@ class ReportGameListener implements GameTestListener {
 	protected static void spawnBeacon(GameTestInfo gameTestInfo, Block block) {
 		ServerLevel serverLevel = gameTestInfo.getLevel();
 		BlockPos blockPos = gameTestInfo.getStructureBlockPos();
-		BlockPos blockPos2 = new BlockPos(-1, -1, -1);
+		BlockPos blockPos2 = new BlockPos(-1, -2, -1);
 		BlockPos blockPos3 = StructureTemplate.transform(blockPos.offset(blockPos2), Mirror.NONE, gameTestInfo.getRotation(), blockPos);
 		serverLevel.setBlockAndUpdate(blockPos3, Blocks.BEACON.defaultBlockState().rotate(gameTestInfo.getRotation()));
 		BlockPos blockPos4 = blockPos3.offset(0, 1, 0);
@@ -149,7 +149,7 @@ class ReportGameListener implements GameTestListener {
 	private static void spawnLectern(GameTestInfo gameTestInfo, String string) {
 		ServerLevel serverLevel = gameTestInfo.getLevel();
 		BlockPos blockPos = gameTestInfo.getStructureBlockPos();
-		BlockPos blockPos2 = new BlockPos(-1, 1, -1);
+		BlockPos blockPos2 = new BlockPos(-1, 0, -1);
 		BlockPos blockPos3 = StructureTemplate.transform(blockPos.offset(blockPos2), Mirror.NONE, gameTestInfo.getRotation(), blockPos);
 		serverLevel.setBlockAndUpdate(blockPos3, Blocks.LECTERN.defaultBlockState().rotate(gameTestInfo.getRotation()));
 		BlockState blockState = serverLevel.getBlockState(blockPos3);

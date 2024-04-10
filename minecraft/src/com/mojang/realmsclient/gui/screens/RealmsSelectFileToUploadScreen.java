@@ -130,7 +130,7 @@ public class RealmsSelectFileToUploadScreen extends RealmsScreen {
 		private final Component id;
 		private final Component info;
 
-		public Entry(LevelSummary levelSummary) {
+		public Entry(final LevelSummary levelSummary) {
 			this.levelSummary = levelSummary;
 			this.name = levelSummary.getLevelName();
 			this.id = Component.translatable("mco.upload.entry.id", levelSummary.getLevelId(), RealmsSelectFileToUploadScreen.formatLastPlayed(levelSummary));

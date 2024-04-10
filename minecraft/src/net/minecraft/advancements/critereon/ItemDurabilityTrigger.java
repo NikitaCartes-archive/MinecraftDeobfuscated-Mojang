@@ -42,7 +42,7 @@ public class ItemDurabilityTrigger extends SimpleCriterionTrigger<ItemDurability
 		}
 
 		public boolean matches(ItemStack itemStack, int i) {
-			if (this.item.isPresent() && !((ItemPredicate)this.item.get()).matches(itemStack)) {
+			if (this.item.isPresent() && !((ItemPredicate)this.item.get()).test(itemStack)) {
 				return false;
 			} else {
 				return !this.durability.matches(itemStack.getMaxDamage() - i) ? false : this.delta.matches(itemStack.getDamageValue() - i);

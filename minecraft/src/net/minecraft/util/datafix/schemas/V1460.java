@@ -27,7 +27,9 @@ public class V1460 extends NamespacedSchema {
 	@Override
 	public Map<String, Supplier<TypeTemplate>> registerEntities(Schema schema) {
 		Map<String, Supplier<TypeTemplate>> map = Maps.<String, Supplier<TypeTemplate>>newHashMap();
-		schema.registerSimple(map, "minecraft:area_effect_cloud");
+		schema.register(
+			map, "minecraft:area_effect_cloud", (Function<String, TypeTemplate>)(string -> DSL.optionalFields("Particle", References.PARTICLE.in(schema)))
+		);
 		registerMob(schema, map, "minecraft:armor_stand");
 		schema.register(map, "minecraft:arrow", (Function<String, TypeTemplate>)(string -> DSL.optionalFields("inBlockState", References.BLOCK_STATE.in(schema))));
 		registerMob(schema, map, "minecraft:bat");
@@ -173,10 +175,7 @@ public class V1460 extends NamespacedSchema {
 					"Inventory",
 					DSL.list(References.ITEM_STACK.in(schema)),
 					"Offers",
-					DSL.optionalFields(
-						"Recipes",
-						DSL.list(DSL.optionalFields("buy", References.ITEM_STACK.in(schema), "buyB", References.ITEM_STACK.in(schema), "sell", References.ITEM_STACK.in(schema)))
-					),
+					DSL.optionalFields("Recipes", DSL.list(References.VILLAGER_TRADE.in(schema))),
 					V100.equipment(schema)
 				))
 		);
@@ -196,7 +195,13 @@ public class V1460 extends NamespacedSchema {
 			(Function<String, TypeTemplate>)(string -> DSL.optionalFields("SaddleItem", References.ITEM_STACK.in(schema), V100.equipment(schema)))
 		);
 		registerMob(schema, map, "minecraft:zombie_pigman");
-		registerMob(schema, map, "minecraft:zombie_villager");
+		schema.register(
+			map,
+			"minecraft:zombie_villager",
+			(Function<String, TypeTemplate>)(string -> DSL.optionalFields(
+					"Offers", DSL.optionalFields("Recipes", DSL.list(References.VILLAGER_TRADE.in(schema))), V100.equipment(schema)
+				))
+		);
 		return map;
 	}
 
@@ -383,5 +388,11 @@ public class V1460 extends NamespacedSchema {
 		schema.registerType(false, References.WORLD_GEN_SETTINGS, DSL::remainder);
 		schema.registerType(false, References.ENTITY_CHUNK, () -> DSL.optionalFields("Entities", DSL.list(References.ENTITY_TREE.in(schema))));
 		schema.registerType(true, References.DATA_COMPONENTS, DSL::remainder);
+		schema.registerType(
+			true,
+			References.VILLAGER_TRADE,
+			() -> DSL.optionalFields("buy", References.ITEM_STACK.in(schema), "buyB", References.ITEM_STACK.in(schema), "sell", References.ITEM_STACK.in(schema))
+		);
+		schema.registerType(true, References.PARTICLE, () -> DSL.constType(DSL.string()));
 	}
 }

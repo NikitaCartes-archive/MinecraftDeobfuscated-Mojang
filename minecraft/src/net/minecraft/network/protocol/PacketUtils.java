@@ -2,6 +2,8 @@ package net.minecraft.network.protocol;
 
 import com.mojang.logging.LogUtils;
 import net.minecraft.CrashReport;
+import net.minecraft.CrashReportCategory;
+import net.minecraft.CrashReportDetail;
 import net.minecraft.ReportedException;
 import net.minecraft.network.PacketListener;
 import net.minecraft.server.RunningOnDifferentThreadException;
@@ -27,12 +29,12 @@ public class PacketUtils {
 							if (var6 instanceof ReportedException reportedException && reportedException.getCause() instanceof OutOfMemoryError
 								|| packetListener.shouldPropagateHandlingExceptions()) {
 								if (var6 instanceof ReportedException reportedException2) {
-									packetListener.fillCrashReport(reportedException2.getReport());
+									fillCrashReport(reportedException2.getReport(), packetListener, packet);
 									throw var6;
 								}
 
 								CrashReport crashReport = CrashReport.forThrowable(var6, "Main thread packet handler");
-								packetListener.fillCrashReport(crashReport);
+								fillCrashReport(crashReport, packetListener, packet);
 								throw new ReportedException(crashReport);
 							}
 
@@ -45,5 +47,13 @@ public class PacketUtils {
 			);
 			throw RunningOnDifferentThreadException.RUNNING_ON_DIFFERENT_THREAD;
 		}
+	}
+
+	private static <T extends PacketListener> void fillCrashReport(CrashReport crashReport, T packetListener, Packet<T> packet) {
+		CrashReportCategory crashReportCategory = crashReport.addCategory("Incoming Packet");
+		crashReportCategory.setDetail("Type", (CrashReportDetail<String>)(() -> packet.type().toString()));
+		crashReportCategory.setDetail("Is Terminal", (CrashReportDetail<String>)(() -> Boolean.toString(packet.isTerminal())));
+		crashReportCategory.setDetail("Is Skippable", (CrashReportDetail<String>)(() -> Boolean.toString(packet.isSkippable())));
+		packetListener.fillCrashReport(crashReport);
 	}
 }

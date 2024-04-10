@@ -23,13 +23,13 @@ public class SetComponentsFunction extends LootItemConditionalFunction {
 	}
 
 	@Override
-	public LootItemFunctionType getType() {
+	public LootItemFunctionType<SetComponentsFunction> getType() {
 		return LootItemFunctions.SET_COMPONENTS;
 	}
 
 	@Override
 	public ItemStack run(ItemStack itemStack, LootContext lootContext) {
-		itemStack.applyComponents(this.components);
+		itemStack.applyComponentsAndValidate(this.components);
 		return itemStack;
 	}
 

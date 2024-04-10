@@ -1,11 +1,8 @@
 package net.minecraft.core.particles;
 
-import com.mojang.brigadier.StringReader;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -30,14 +27,6 @@ public class DustParticleOptions extends DustParticleOptionsBase {
 		dustParticleOptions -> dustParticleOptions.scale,
 		DustParticleOptions::new
 	);
-	public static final ParticleOptions.Deserializer<DustParticleOptions> DESERIALIZER = new ParticleOptions.Deserializer<DustParticleOptions>() {
-		public DustParticleOptions fromCommand(ParticleType<DustParticleOptions> particleType, StringReader stringReader, HolderLookup.Provider provider) throws CommandSyntaxException {
-			Vector3f vector3f = DustParticleOptionsBase.readVector3f(stringReader);
-			stringReader.expect(' ');
-			float f = stringReader.readFloat();
-			return new DustParticleOptions(vector3f, f);
-		}
-	};
 
 	public DustParticleOptions(Vector3f vector3f, float f) {
 		super(vector3f, f);

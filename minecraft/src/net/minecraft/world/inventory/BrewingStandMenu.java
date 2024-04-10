@@ -40,10 +40,11 @@ public class BrewingStandMenu extends AbstractContainerMenu {
 		checkContainerDataCount(containerData, 2);
 		this.brewingStand = container;
 		this.brewingStandData = containerData;
+		PotionBrewing potionBrewing = inventory.player.level().potionBrewing();
 		this.addSlot(new BrewingStandMenu.PotionSlot(container, 0, 56, 51));
 		this.addSlot(new BrewingStandMenu.PotionSlot(container, 1, 79, 58));
 		this.addSlot(new BrewingStandMenu.PotionSlot(container, 2, 102, 51));
-		this.ingredientSlot = this.addSlot(new BrewingStandMenu.IngredientsSlot(container, 3, 79, 17));
+		this.ingredientSlot = this.addSlot(new BrewingStandMenu.IngredientsSlot(potionBrewing, container, 3, 79, 17));
 		this.addSlot(new BrewingStandMenu.FuelSlot(container, 4, 17, 17));
 		this.addDataSlots(containerData);
 
@@ -79,7 +80,7 @@ public class BrewingStandMenu extends AbstractContainerMenu {
 					if (!this.moveItemStackTo(itemStack2, 3, 4, false)) {
 						return ItemStack.EMPTY;
 					}
-				} else if (BrewingStandMenu.PotionSlot.mayPlaceItem(itemStack) && itemStack.getCount() == 1) {
+				} else if (BrewingStandMenu.PotionSlot.mayPlaceItem(itemStack)) {
 					if (!this.moveItemStackTo(itemStack2, 0, 3, false)) {
 						return ItemStack.EMPTY;
 					}
@@ -139,26 +140,19 @@ public class BrewingStandMenu extends AbstractContainerMenu {
 		public static boolean mayPlaceItem(ItemStack itemStack) {
 			return itemStack.is(Items.BLAZE_POWDER);
 		}
-
-		@Override
-		public int getMaxStackSize() {
-			return 64;
-		}
 	}
 
 	static class IngredientsSlot extends Slot {
-		public IngredientsSlot(Container container, int i, int j, int k) {
+		private final PotionBrewing potionBrewing;
+
+		public IngredientsSlot(PotionBrewing potionBrewing, Container container, int i, int j, int k) {
 			super(container, i, j, k);
+			this.potionBrewing = potionBrewing;
 		}
 
 		@Override
 		public boolean mayPlace(ItemStack itemStack) {
-			return PotionBrewing.isIngredient(itemStack);
-		}
-
-		@Override
-		public int getMaxStackSize() {
-			return 64;
+			return this.potionBrewing.isIngredient(itemStack);
 		}
 	}
 

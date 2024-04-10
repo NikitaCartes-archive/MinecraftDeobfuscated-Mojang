@@ -23,7 +23,7 @@ public class SetWrittenBookPagesFunction extends LootItemConditionalFunction {
 				.<List<Filterable<Component>>, ListOperation>and(
 					instance.group(
 						WrittenBookContent.pagesCodec(PAGE_CODEC).fieldOf("pages").forGetter(setWrittenBookPagesFunction -> setWrittenBookPagesFunction.pages),
-						ListOperation.codec(100).forGetter(setWrittenBookPagesFunction -> setWrittenBookPagesFunction.pageOperation)
+						ListOperation.UNLIMITED_CODEC.forGetter(setWrittenBookPagesFunction -> setWrittenBookPagesFunction.pageOperation)
 					)
 				)
 				.apply(instance, SetWrittenBookPagesFunction::new)
@@ -45,12 +45,12 @@ public class SetWrittenBookPagesFunction extends LootItemConditionalFunction {
 
 	@VisibleForTesting
 	public WrittenBookContent apply(WrittenBookContent writtenBookContent) {
-		List<Filterable<Component>> list = this.pageOperation.apply(writtenBookContent.pages(), this.pages, 100);
+		List<Filterable<Component>> list = this.pageOperation.apply(writtenBookContent.pages(), this.pages);
 		return writtenBookContent.withReplacedPages(list);
 	}
 
 	@Override
-	public LootItemFunctionType getType() {
+	public LootItemFunctionType<SetWrittenBookPagesFunction> getType() {
 		return LootItemFunctions.SET_WRITTEN_BOOK_PAGES;
 	}
 }

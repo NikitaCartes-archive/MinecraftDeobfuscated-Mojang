@@ -72,11 +72,12 @@ public abstract class AbstractWindCharge extends AbstractHurtingProjectile imple
 		super.onHitEntity(entityHitResult);
 		if (!this.level().isClientSide) {
 			LivingEntity livingEntity2 = this.getOwner() instanceof LivingEntity livingEntity ? livingEntity : null;
+			Entity entity = (Entity)entityHitResult.getEntity().getPassengerClosestTo(entityHitResult.getLocation()).orElse(entityHitResult.getEntity());
 			if (livingEntity2 != null) {
-				livingEntity2.setLastHurtMob(entityHitResult.getEntity());
+				livingEntity2.setLastHurtMob(entity);
 			}
 
-			entityHitResult.getEntity().hurt(this.damageSources().windCharge(this, livingEntity2), 1.0F);
+			entity.hurt(this.damageSources().windCharge(this, livingEntity2), 1.0F);
 			this.explode();
 		}
 	}

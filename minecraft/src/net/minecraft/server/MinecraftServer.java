@@ -129,6 +129,7 @@ import net.minecraft.world.entity.npc.WanderingTraderSpawner;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.flag.FeatureFlags;
+import net.minecraft.world.item.alchemy.PotionBrewing;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.CustomSpawner;
@@ -254,6 +255,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 	private final StructureTemplateManager structureTemplateManager;
 	private final ServerTickRateManager tickRateManager;
 	protected final WorldData worldData;
+	private final PotionBrewing potionBrewing;
 	private volatile boolean isSaving;
 
 	public static <S extends MinecraftServer> S spin(Function<Thread, S> function) {
@@ -309,6 +311,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 			this.structureTemplateManager = new StructureTemplateManager(worldStem.resourceManager(), levelStorageAccess, dataFixer, holderGetter);
 			this.serverThread = thread;
 			this.executor = Util.backgroundExecutor();
+			this.potionBrewing = PotionBrewing.bootstrap(this.worldData.enabledFeatures());
 		}
 	}
 
@@ -2007,6 +2010,10 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 	}
 
 	public void reportChunkSaveFailure(ChunkPos chunkPos) {
+	}
+
+	public PotionBrewing potionBrewing() {
+		return this.potionBrewing;
 	}
 
 	static record ReloadableResources(CloseableResourceManager resourceManager, ReloadableServerResources managers) implements AutoCloseable {

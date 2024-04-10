@@ -20,7 +20,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraft.world.level.block.entity.EnchantmentTableBlockEntity;
+import net.minecraft.world.level.block.entity.EnchantingTableBlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.PathComputationType;
@@ -28,8 +28,8 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-public class EnchantmentTableBlock extends BaseEntityBlock {
-	public static final MapCodec<EnchantmentTableBlock> CODEC = simpleCodec(EnchantmentTableBlock::new);
+public class EnchantingTableBlock extends BaseEntityBlock {
+	public static final MapCodec<EnchantingTableBlock> CODEC = simpleCodec(EnchantingTableBlock::new);
 	protected static final VoxelShape SHAPE = Block.box(0.0, 0.0, 0.0, 16.0, 12.0, 16.0);
 	public static final List<BlockPos> BOOKSHELF_OFFSETS = BlockPos.betweenClosedStream(-2, 0, -2, 2, 1, 2)
 		.filter(blockPos -> Math.abs(blockPos.getX()) == 2 || Math.abs(blockPos.getZ()) == 2)
@@ -37,11 +37,11 @@ public class EnchantmentTableBlock extends BaseEntityBlock {
 		.toList();
 
 	@Override
-	public MapCodec<EnchantmentTableBlock> codec() {
+	public MapCodec<EnchantingTableBlock> codec() {
 		return CODEC;
 	}
 
-	protected EnchantmentTableBlock(BlockBehaviour.Properties properties) {
+	protected EnchantingTableBlock(BlockBehaviour.Properties properties) {
 		super(properties);
 	}
 
@@ -86,13 +86,13 @@ public class EnchantmentTableBlock extends BaseEntityBlock {
 
 	@Override
 	public BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
-		return new EnchantmentTableBlockEntity(blockPos, blockState);
+		return new EnchantingTableBlockEntity(blockPos, blockState);
 	}
 
 	@Nullable
 	@Override
 	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState blockState, BlockEntityType<T> blockEntityType) {
-		return level.isClientSide ? createTickerHelper(blockEntityType, BlockEntityType.ENCHANTING_TABLE, EnchantmentTableBlockEntity::bookAnimationTick) : null;
+		return level.isClientSide ? createTickerHelper(blockEntityType, BlockEntityType.ENCHANTING_TABLE, EnchantingTableBlockEntity::bookAnimationTick) : null;
 	}
 
 	@Override
@@ -109,7 +109,7 @@ public class EnchantmentTableBlock extends BaseEntityBlock {
 	@Override
 	protected MenuProvider getMenuProvider(BlockState blockState, Level level, BlockPos blockPos) {
 		BlockEntity blockEntity = level.getBlockEntity(blockPos);
-		if (blockEntity instanceof EnchantmentTableBlockEntity) {
+		if (blockEntity instanceof EnchantingTableBlockEntity) {
 			Component component = ((Nameable)blockEntity).getDisplayName();
 			return new SimpleMenuProvider((i, inventory, player) -> new EnchantmentMenu(i, inventory, ContainerLevelAccess.create(level, blockPos)), component);
 		} else {

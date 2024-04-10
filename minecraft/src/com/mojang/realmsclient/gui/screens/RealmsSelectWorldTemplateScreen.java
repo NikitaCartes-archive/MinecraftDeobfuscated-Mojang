@@ -73,10 +73,10 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
 		this.callback = consumer;
 		this.worldType = worldType;
 		if (worldTemplatePaginatedList == null) {
-			this.worldTemplateList = new RealmsSelectWorldTemplateScreen.WorldTemplateList();
+			this.worldTemplateList = new RealmsSelectWorldTemplateScreen.WorldTemplateList(this);
 			this.fetchTemplatesAsync(new WorldTemplatePaginatedList(10));
 		} else {
-			this.worldTemplateList = new RealmsSelectWorldTemplateScreen.WorldTemplateList(Lists.<WorldTemplate>newArrayList(worldTemplatePaginatedList.templates));
+			this.worldTemplateList = new RealmsSelectWorldTemplateScreen.WorldTemplateList(this, Lists.newArrayList(worldTemplatePaginatedList.templates));
 			this.fetchTemplatesAsync(worldTemplatePaginatedList);
 		}
 	}
@@ -88,7 +88,7 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
 	@Override
 	public void init() {
 		this.layout.addTitleHeader(this.title, this.font);
-		this.worldTemplateList = this.layout.addToContents(new RealmsSelectWorldTemplateScreen.WorldTemplateList(this.worldTemplateList.getTemplates()));
+		this.worldTemplateList = this.layout.addToContents(new RealmsSelectWorldTemplateScreen.WorldTemplateList(this, this.worldTemplateList.getTemplates()));
 		LinearLayout linearLayout = this.layout.addToFooter(LinearLayout.horizontal().spacing(10));
 		linearLayout.defaultCellSetting().alignHorizontallyCenter();
 		this.trailerButton = linearLayout.addChild(Button.builder(TRAILER_BUTTON_NAME, button -> this.onTrailer()).width(100).build());
@@ -259,7 +259,7 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
 		@Nullable
 		private ImageButton trailerButton;
 
-		public Entry(WorldTemplate worldTemplate) {
+		public Entry(final WorldTemplate worldTemplate) {
 			this.template = worldTemplate;
 			if (!worldTemplate.link.isBlank()) {
 				this.websiteButton = new ImageButton(
@@ -336,28 +336,29 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
 
 	@Environment(EnvType.CLIENT)
 	class WorldTemplateList extends RealmsObjectSelectionList<RealmsSelectWorldTemplateScreen.Entry> {
-		public WorldTemplateList() {
-			this(Collections.emptyList());
+		public WorldTemplateList(final RealmsSelectWorldTemplateScreen realmsSelectWorldTemplateScreen) {
+			this(realmsSelectWorldTemplateScreen, Collections.emptyList());
 		}
 
-		public WorldTemplateList(Iterable<WorldTemplate> iterable) {
+		public WorldTemplateList(final Iterable<WorldTemplate> realmsSelectWorldTemplateScreen, final Iterable iterable) {
 			super(
-				RealmsSelectWorldTemplateScreen.this.width,
-				RealmsSelectWorldTemplateScreen.this.height - 33 - RealmsSelectWorldTemplateScreen.this.getHeaderHeight(),
-				RealmsSelectWorldTemplateScreen.this.getHeaderHeight(),
+				realmsSelectWorldTemplateScreen.width,
+				realmsSelectWorldTemplateScreen.height - 33 - realmsSelectWorldTemplateScreen.getHeaderHeight(),
+				realmsSelectWorldTemplateScreen.getHeaderHeight(),
 				46
 			);
+			this.this$0 = realmsSelectWorldTemplateScreen;
 			iterable.forEach(this::addEntry);
 		}
 
 		public void addEntry(WorldTemplate worldTemplate) {
-			this.addEntry(RealmsSelectWorldTemplateScreen.this.new Entry(worldTemplate));
+			this.addEntry(this.this$0.new Entry(worldTemplate));
 		}
 
 		@Override
 		public boolean mouseClicked(double d, double e, int i) {
-			if (RealmsSelectWorldTemplateScreen.this.currentLink != null) {
-				ConfirmLinkScreen.confirmLinkNow(RealmsSelectWorldTemplateScreen.this, RealmsSelectWorldTemplateScreen.this.currentLink);
+			if (this.this$0.currentLink != null) {
+				ConfirmLinkScreen.confirmLinkNow(this.this$0, this.this$0.currentLink);
 				return true;
 			} else {
 				return super.mouseClicked(d, e, i);
@@ -366,8 +367,8 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
 
 		public void setSelected(@Nullable RealmsSelectWorldTemplateScreen.Entry entry) {
 			super.setSelected(entry);
-			RealmsSelectWorldTemplateScreen.this.selectedTemplate = entry == null ? null : entry.template;
-			RealmsSelectWorldTemplateScreen.this.updateButtonStates();
+			this.this$0.selectedTemplate = entry == null ? null : entry.template;
+			this.this$0.updateButtonStates();
 		}
 
 		@Override

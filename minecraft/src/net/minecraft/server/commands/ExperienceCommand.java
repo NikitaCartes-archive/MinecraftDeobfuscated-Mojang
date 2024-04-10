@@ -194,7 +194,10 @@ public class ExperienceCommand {
 		final ToIntFunction<ServerPlayer> query;
 
 		private Type(
-			String string2, BiConsumer<ServerPlayer, Integer> biConsumer, BiPredicate<ServerPlayer, Integer> biPredicate, ToIntFunction<ServerPlayer> toIntFunction
+			final String string2,
+			final BiConsumer<ServerPlayer, Integer> biConsumer,
+			final BiPredicate<ServerPlayer, Integer> biPredicate,
+			final ToIntFunction<ServerPlayer> toIntFunction
 		) {
 			this.add = biConsumer;
 			this.name = string2;

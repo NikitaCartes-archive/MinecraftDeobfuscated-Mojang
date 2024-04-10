@@ -11,6 +11,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.ExtraCodecs;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.TooltipFlag;
 
 public record Fireworks(int flightDuration, List<FireworkExplosion> explosions) implements TooltipProvider {
@@ -26,8 +27,17 @@ public record Fireworks(int flightDuration, List<FireworkExplosion> explosions) 
 		ByteBufCodecs.VAR_INT, Fireworks::flightDuration, FireworkExplosion.STREAM_CODEC.apply(ByteBufCodecs.list(256)), Fireworks::explosions, Fireworks::new
 	);
 
+	public Fireworks(int flightDuration, List<FireworkExplosion> explosions) {
+		if (explosions.size() > 256) {
+			throw new IllegalArgumentException("Got " + explosions.size() + " explosions, but maximum is 256");
+		} else {
+			this.flightDuration = flightDuration;
+			this.explosions = explosions;
+		}
+	}
+
 	@Override
-	public void addToTooltip(Consumer<Component> consumer, TooltipFlag tooltipFlag) {
+	public void addToTooltip(Item.TooltipContext tooltipContext, Consumer<Component> consumer, TooltipFlag tooltipFlag) {
 		if (this.flightDuration > 0) {
 			consumer.accept(
 				Component.translatable("item.minecraft.firework_rocket.flight")

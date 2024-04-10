@@ -38,7 +38,7 @@ public class UsedTotemTrigger extends SimpleCriterionTrigger<UsedTotemTrigger.Tr
 		}
 
 		public boolean matches(ItemStack itemStack) {
-			return this.item.isEmpty() || ((ItemPredicate)this.item.get()).matches(itemStack);
+			return this.item.isEmpty() || ((ItemPredicate)this.item.get()).test(itemStack);
 		}
 	}
 }

@@ -295,7 +295,7 @@ public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.E
 		private Path iconFile;
 		private long lastClickTime;
 
-		public WorldListEntry(WorldSelectionList worldSelectionList2, LevelSummary levelSummary) {
+		public WorldListEntry(final WorldSelectionList worldSelectionList2, final LevelSummary levelSummary) {
 			this.minecraft = worldSelectionList2.minecraft;
 			this.screen = worldSelectionList2.getScreen();
 			this.summary = levelSummary;

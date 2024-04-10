@@ -395,9 +395,6 @@ public class Style {
 		class Collector {
 			private boolean isNotFirst;
 
-			Collector(Style style) {
-			}
-
 			private void prependSeparator() {
 				if (this.isNotFirst) {
 					stringBuilder.append(',');
@@ -427,7 +424,7 @@ public class Style {
 			}
 		}
 
-		Collector lv = new Collector(this);
+		Collector lv = new Collector();
 		lv.addValueString("color", this.color);
 		lv.addFlagString("bold", this.bold);
 		lv.addFlagString("italic", this.italic);

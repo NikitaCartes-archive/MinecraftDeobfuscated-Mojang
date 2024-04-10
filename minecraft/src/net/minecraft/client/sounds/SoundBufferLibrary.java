@@ -1,7 +1,6 @@
 package net.minecraft.client.sounds;
 
 import com.google.common.collect.Maps;
-import com.mojang.blaze3d.audio.OggAudioStream;
 import com.mojang.blaze3d.audio.SoundBuffer;
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,14 +32,14 @@ public class SoundBufferLibrary {
 
 					SoundBuffer var5;
 					try {
-						OggAudioStream oggAudioStream = new OggAudioStream(inputStream);
+						FiniteAudioStream finiteAudioStream = new JOrbisAudioStream(inputStream);
 
 						try {
-							ByteBuffer byteBuffer = oggAudioStream.readAll();
-							var5 = new SoundBuffer(byteBuffer, oggAudioStream.getFormat());
+							ByteBuffer byteBuffer = finiteAudioStream.readAll();
+							var5 = new SoundBuffer(byteBuffer, finiteAudioStream.getFormat());
 						} catch (Throwable var8) {
 							try {
-								oggAudioStream.close();
+								finiteAudioStream.close();
 							} catch (Throwable var7) {
 								var8.addSuppressed(var7);
 							}
@@ -48,7 +47,7 @@ public class SoundBufferLibrary {
 							throw var8;
 						}
 
-						oggAudioStream.close();
+						finiteAudioStream.close();
 					} catch (Throwable var9) {
 						if (inputStream != null) {
 							try {
@@ -69,18 +68,18 @@ public class SoundBufferLibrary {
 				} catch (IOException var10) {
 					throw new CompletionException(var10);
 				}
-			}, Util.backgroundExecutor()));
+			}, Util.nonCriticalIoPool()));
 	}
 
 	public CompletableFuture<AudioStream> getStream(ResourceLocation resourceLocation, boolean bl) {
 		return CompletableFuture.supplyAsync(() -> {
 			try {
 				InputStream inputStream = this.resourceManager.open(resourceLocation);
-				return (AudioStream)(bl ? new LoopingAudioStream(OggAudioStream::new, inputStream) : new OggAudioStream(inputStream));
+				return (AudioStream)(bl ? new LoopingAudioStream(JOrbisAudioStream::new, inputStream) : new JOrbisAudioStream(inputStream));
 			} catch (IOException var4) {
 				throw new CompletionException(var4);
 			}
-		}, Util.backgroundExecutor());
+		}, Util.nonCriticalIoPool());
 	}
 
 	public void clear() {

@@ -52,7 +52,7 @@ public class DataFetcher {
 		private final Consumer<T> output;
 		private long lastCheckTime = -1L;
 
-		SubscribedTask(DataFetcher.Task<T> task, Consumer<T> consumer) {
+		SubscribedTask(final DataFetcher.Task<T> task, final Consumer<T> consumer) {
 			this.task = task;
 			this.output = consumer;
 		}
@@ -129,7 +129,7 @@ public class DataFetcher {
 		DataFetcher.SuccessfulComputationResult<T> lastResult;
 		private long nextUpdate = -1L;
 
-		Task(String string, Callable<T> callable, long l, RepeatedDelayStrategy repeatedDelayStrategy) {
+		Task(final String string, final Callable<T> callable, final long l, final RepeatedDelayStrategy repeatedDelayStrategy) {
 			this.id = string;
 			this.updater = callable;
 			this.period = l;

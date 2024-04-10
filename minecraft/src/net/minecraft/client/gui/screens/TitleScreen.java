@@ -272,13 +272,9 @@ public class TitleScreen extends Screen {
 				h = Mth.clamp(h, 0.0F, 1.0F);
 				g = Mth.clampedMap(h, 0.5F, 1.0F, 0.0F, 1.0F);
 				this.panoramaFade = Mth.clampedMap(h, 0.0F, 0.5F, 0.0F, 1.0F);
-
-				for (GuiEventListener guiEventListener : this.children()) {
-					if (guiEventListener instanceof AbstractWidget abstractWidget) {
-						abstractWidget.setAlpha(g);
-					}
-				}
 			}
+
+			this.fadeWidgets(g);
 		}
 
 		this.renderPanorama(guiGraphics, f);
@@ -309,6 +305,14 @@ public class TitleScreen extends Screen {
 			if (this.realmsNotificationsEnabled() && g >= 1.0F) {
 				RenderSystem.enableDepthTest();
 				this.realmsNotificationsScreen.render(guiGraphics, i, j, f);
+			}
+		}
+	}
+
+	private void fadeWidgets(float f) {
+		for (GuiEventListener guiEventListener : this.children()) {
+			if (guiEventListener instanceof AbstractWidget abstractWidget) {
+				abstractWidget.setAlpha(f);
 			}
 		}
 	}
