@@ -239,7 +239,7 @@ public class Options {
 	private final OptionInstance<Double> menuBackgroundBlurriness = new OptionInstance<>(
 		"options.accessibility.menu_background_blurriness",
 		OptionInstance.cachedConstantTooltip(MENU_BACKGROUND_BLURRINESS_TOOLTIP),
-		Options::percentValueLabel,
+		Options::percentValueOrOffLabel,
 		OptionInstance.UnitDouble.INSTANCE,
 		0.5,
 		double_ -> {
@@ -601,7 +601,7 @@ public class Options {
 	private final OptionInstance<Double> screenEffectScale = new OptionInstance<>(
 		"options.screenEffectScale",
 		OptionInstance.cachedConstantTooltip(ACCESSIBILITY_TOOLTIP_SCREEN_EFFECT),
-		(component, double_) -> double_ == 0.0 ? genericValueLabel(component, CommonComponents.OPTION_OFF) : percentValueLabel(component, double_),
+		Options::percentValueOrOffLabel,
 		OptionInstance.UnitDouble.INSTANCE,
 		1.0,
 		double_ -> {
@@ -611,7 +611,7 @@ public class Options {
 	private final OptionInstance<Double> fovEffectScale = new OptionInstance<>(
 		"options.fovEffectScale",
 		OptionInstance.cachedConstantTooltip(ACCESSIBILITY_TOOLTIP_FOV_EFFECT),
-		(component, double_) -> double_ == 0.0 ? genericValueLabel(component, CommonComponents.OPTION_OFF) : percentValueLabel(component, double_),
+		Options::percentValueOrOffLabel,
 		OptionInstance.UnitDouble.INSTANCE.xmap(Mth::square, Math::sqrt),
 		Codec.doubleRange(0.0, 1.0),
 		1.0,
@@ -622,7 +622,7 @@ public class Options {
 	private final OptionInstance<Double> darknessEffectScale = new OptionInstance<>(
 		"options.darknessEffectScale",
 		OptionInstance.cachedConstantTooltip(ACCESSIBILITY_TOOLTIP_DARKNESS_EFFECT),
-		(component, double_) -> double_ == 0.0 ? genericValueLabel(component, CommonComponents.OPTION_OFF) : percentValueLabel(component, double_),
+		Options::percentValueOrOffLabel,
 		OptionInstance.UnitDouble.INSTANCE.xmap(Mth::square, Math::sqrt),
 		1.0,
 		double_ -> {
@@ -632,7 +632,7 @@ public class Options {
 	private final OptionInstance<Double> glintSpeed = new OptionInstance<>(
 		"options.glintSpeed",
 		OptionInstance.cachedConstantTooltip(ACCESSIBILITY_TOOLTIP_GLINT_SPEED),
-		(component, double_) -> double_ == 0.0 ? genericValueLabel(component, CommonComponents.OPTION_OFF) : percentValueLabel(component, double_),
+		Options::percentValueOrOffLabel,
 		OptionInstance.UnitDouble.INSTANCE,
 		0.5,
 		double_ -> {
@@ -642,7 +642,7 @@ public class Options {
 	private final OptionInstance<Double> glintStrength = new OptionInstance<>(
 		"options.glintStrength",
 		OptionInstance.cachedConstantTooltip(ACCESSIBILITY_TOOLTIP_GLINT_STRENGTH),
-		(component, double_) -> double_ == 0.0 ? genericValueLabel(component, CommonComponents.OPTION_OFF) : percentValueLabel(component, double_),
+		Options::percentValueOrOffLabel,
 		OptionInstance.UnitDouble.INSTANCE,
 		0.75,
 		RenderSystem::setShaderGlintAlpha
@@ -651,7 +651,7 @@ public class Options {
 	private final OptionInstance<Double> damageTiltStrength = new OptionInstance<>(
 		"options.damageTiltStrength",
 		OptionInstance.cachedConstantTooltip(ACCESSIBILITY_TOOLTIP_DAMAGE_TILT_STRENGTH),
-		(component, double_) -> double_ == 0.0 ? genericValueLabel(component, CommonComponents.OPTION_OFF) : percentValueLabel(component, double_),
+		Options::percentValueOrOffLabel,
 		OptionInstance.UnitDouble.INSTANCE,
 		1.0,
 		double_ -> {
@@ -973,7 +973,7 @@ public class Options {
 		return new OptionInstance<>(
 			string,
 			OptionInstance.noTooltip(),
-			(component, double_) -> double_ == 0.0 ? genericValueLabel(component, CommonComponents.OPTION_OFF) : percentValueLabel(component, double_),
+			Options::percentValueOrOffLabel,
 			OptionInstance.UnitDouble.INSTANCE,
 			1.0,
 			double_ -> Minecraft.getInstance().getSoundManager().updateSourceVolume(soundSource, double_.floatValue())
@@ -1595,6 +1595,10 @@ public class Options {
 
 	public static Component genericValueLabel(Component component, Component component2) {
 		return Component.translatable("options.generic_value", component, component2);
+	}
+
+	private static Component percentValueOrOffLabel(Component component, double d) {
+		return d == 0.0 ? genericValueLabel(component, CommonComponents.OPTION_OFF) : percentValueLabel(component, d);
 	}
 
 	public static Component genericValueLabel(Component component, int i) {

@@ -236,7 +236,7 @@ public class PresetFlatWorldScreen extends Screen {
 		guiGraphics.pose().translate(0.0F, 0.0F, 400.0F);
 		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 8, 16777215);
 		guiGraphics.drawString(this.font, this.shareText, 51, 30, 10526880);
-		guiGraphics.drawString(this.font, this.listText, 51, 70, 10526880);
+		guiGraphics.drawString(this.font, this.listText, 51, 68, 10526880);
 		guiGraphics.pose().popPose();
 		this.export.render(guiGraphics, i, j, f);
 	}

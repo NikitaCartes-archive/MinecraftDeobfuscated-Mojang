@@ -15,28 +15,24 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 public class SetFireworksFunction extends LootItemConditionalFunction {
 	public static final MapCodec<SetFireworksFunction> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> commonFields(instance)
-				.<List<FireworkExplosion>, ListOperation, Optional<Integer>>and(
+				.<Optional<ListOperation.StandAlone<FireworkExplosion>>, Optional<Integer>>and(
 					instance.group(
-						FireworkExplosion.CODEC
-							.sizeLimitedListOf(256)
-							.optionalFieldOf("explosions", List.of())
+						ListOperation.StandAlone.codec(FireworkExplosion.CODEC, 256)
+							.optionalFieldOf("explosions")
 							.forGetter(setFireworksFunction -> setFireworksFunction.explosions),
-						ListOperation.codec(256).forGetter(setFireworksFunction -> setFireworksFunction.explosionsOperation),
 						ExtraCodecs.UNSIGNED_BYTE.optionalFieldOf("flight_duration").forGetter(setFireworksFunction -> setFireworksFunction.flightDuration)
 					)
 				)
 				.apply(instance, SetFireworksFunction::new)
 	);
 	public static final Fireworks DEFAULT_VALUE = new Fireworks(0, List.of());
-	private final List<FireworkExplosion> explosions;
-	private final ListOperation explosionsOperation;
+	private final Optional<ListOperation.StandAlone<FireworkExplosion>> explosions;
 	private final Optional<Integer> flightDuration;
 
-	protected SetFireworksFunction(List<LootItemCondition> list, List<FireworkExplosion> list2, ListOperation listOperation, Optional<Integer> optional) {
+	protected SetFireworksFunction(List<LootItemCondition> list, Optional<ListOperation.StandAlone<FireworkExplosion>> optional, Optional<Integer> optional2) {
 		super(list);
-		this.explosions = list2;
-		this.explosionsOperation = listOperation;
-		this.flightDuration = optional;
+		this.explosions = optional;
+		this.flightDuration = optional2;
 	}
 
 	@Override
@@ -46,8 +42,10 @@ public class SetFireworksFunction extends LootItemConditionalFunction {
 	}
 
 	private Fireworks apply(Fireworks fireworks) {
-		List<FireworkExplosion> list = this.explosionsOperation.apply(fireworks.explosions(), this.explosions, 256);
-		return new Fireworks((Integer)this.flightDuration.orElseGet(fireworks::flightDuration), list);
+		return new Fireworks(
+			(Integer)this.flightDuration.orElseGet(fireworks::flightDuration),
+			(List<FireworkExplosion>)this.explosions.map(standAlone -> standAlone.apply(fireworks.explosions())).orElse(fireworks.explosions())
+		);
 	}
 
 	@Override

@@ -573,11 +573,13 @@ public class ServerGamePacketListenerImpl
 				BlockState blockState = this.player.level().getBlockState(blockPos);
 				Direction direction = blockState.getValue(CommandBlock.FACING);
 
-				BlockState blockState3 = (switch (serverboundSetCommandBlockPacket.getMode()) {
+				BlockState blockState2 = switch (serverboundSetCommandBlockPacket.getMode()) {
 					case SEQUENCE -> Blocks.CHAIN_COMMAND_BLOCK.defaultBlockState();
 					case AUTO -> Blocks.REPEATING_COMMAND_BLOCK.defaultBlockState();
 					default -> Blocks.COMMAND_BLOCK.defaultBlockState();
-				}).setValue(CommandBlock.FACING, direction).setValue(CommandBlock.CONDITIONAL, Boolean.valueOf(serverboundSetCommandBlockPacket.isConditional()));
+				};
+				BlockState blockState3 = blockState2.setValue(CommandBlock.FACING, direction)
+					.setValue(CommandBlock.CONDITIONAL, Boolean.valueOf(serverboundSetCommandBlockPacket.isConditional()));
 				if (blockState3 != blockState) {
 					this.player.level().setBlock(blockPos, blockState3, 2);
 					blockEntity.setBlockState(blockState3);
@@ -1649,11 +1651,11 @@ public class ServerGamePacketListenerImpl
 	public void handleContainerButtonClick(ServerboundContainerButtonClickPacket serverboundContainerButtonClickPacket) {
 		PacketUtils.ensureRunningOnSameThread(serverboundContainerButtonClickPacket, this, this.player.serverLevel());
 		this.player.resetLastActionTime();
-		if (this.player.containerMenu.containerId == serverboundContainerButtonClickPacket.getContainerId() && !this.player.isSpectator()) {
+		if (this.player.containerMenu.containerId == serverboundContainerButtonClickPacket.containerId() && !this.player.isSpectator()) {
 			if (!this.player.containerMenu.stillValid(this.player)) {
 				LOGGER.debug("Player {} interacted with invalid menu {}", this.player, this.player.containerMenu);
 			} else {
-				boolean bl = this.player.containerMenu.clickMenuButton(this.player, serverboundContainerButtonClickPacket.getButtonId());
+				boolean bl = this.player.containerMenu.clickMenuButton(this.player, serverboundContainerButtonClickPacket.buttonId());
 				if (bl) {
 					this.player.containerMenu.broadcastChanges();
 				}

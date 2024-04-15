@@ -14,7 +14,7 @@ public class Varint21LengthFieldPrepender extends MessageToByteEncoder<ByteBuf> 
 		int i = byteBuf.readableBytes();
 		int j = VarInt.getByteSize(i);
 		if (j > 3) {
-			throw new EncoderException("unable to fit " + i + " into 3");
+			throw new EncoderException("Packet too large: size " + i + " is over 8");
 		} else {
 			byteBuf2.ensureWritable(j + i);
 			VarInt.write(byteBuf2, i);

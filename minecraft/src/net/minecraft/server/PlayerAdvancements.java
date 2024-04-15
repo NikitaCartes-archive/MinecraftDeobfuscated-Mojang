@@ -3,6 +3,7 @@ package net.minecraft.server;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonIOException;
 import com.google.gson.JsonParseException;
 import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonReader;
@@ -130,10 +131,10 @@ public class PlayerAdvancements {
 				}
 
 				jsonReader.close();
-			} catch (JsonParseException var7) {
-				LOGGER.error("Couldn't parse player advancements in {}", this.playerSavePath, var7);
-			} catch (IOException var8) {
-				LOGGER.error("Couldn't access player advancements in {}", this.playerSavePath, var8);
+			} catch (JsonIOException | IOException var7) {
+				LOGGER.error("Couldn't access player advancements in {}", this.playerSavePath, var7);
+			} catch (JsonParseException var8) {
+				LOGGER.error("Couldn't parse player advancements in {}", this.playerSavePath, var8);
 			}
 		}
 
@@ -149,7 +150,7 @@ public class PlayerAdvancements {
 			Writer writer = Files.newBufferedWriter(this.playerSavePath, StandardCharsets.UTF_8);
 
 			try {
-				GSON.toJson(jsonElement, writer);
+				GSON.toJson(jsonElement, GSON.newJsonWriter(writer));
 			} catch (Throwable var6) {
 				if (writer != null) {
 					try {

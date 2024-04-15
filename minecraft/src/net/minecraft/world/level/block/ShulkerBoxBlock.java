@@ -222,6 +222,11 @@ public class ShulkerBoxBlock extends BaseEntityBlock {
 	}
 
 	@Override
+	protected boolean propagatesSkylightDown(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
+		return false;
+	}
+
+	@Override
 	protected boolean hasAnalogOutputSignal(BlockState blockState) {
 		return true;
 	}

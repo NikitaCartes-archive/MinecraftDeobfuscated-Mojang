@@ -17,7 +17,7 @@ public record ServerboundChatCommandSignedPacket(
 
 	private ServerboundChatCommandSignedPacket(FriendlyByteBuf friendlyByteBuf) {
 		this(
-			friendlyByteBuf.readUtf(256),
+			friendlyByteBuf.readUtf(),
 			friendlyByteBuf.readInstant(),
 			friendlyByteBuf.readLong(),
 			new ArgumentSignatures(friendlyByteBuf),
@@ -26,7 +26,7 @@ public record ServerboundChatCommandSignedPacket(
 	}
 
 	private void write(FriendlyByteBuf friendlyByteBuf) {
-		friendlyByteBuf.writeUtf(this.command, 256);
+		friendlyByteBuf.writeUtf(this.command);
 		friendlyByteBuf.writeInstant(this.timeStamp);
 		friendlyByteBuf.writeLong(this.salt);
 		this.argumentSignatures.write(friendlyByteBuf);

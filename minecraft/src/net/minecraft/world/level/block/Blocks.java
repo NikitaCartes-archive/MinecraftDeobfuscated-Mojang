@@ -1,5 +1,6 @@
 package net.minecraft.world.level.block;
 
+import java.util.function.Function;
 import java.util.function.ToIntFunction;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
@@ -3178,6 +3179,7 @@ public class Blocks {
 		new BarrierBlock(
 			BlockBehaviour.Properties.of()
 				.strength(-1.0F, 3600000.8F)
+				.mapColor(waterloggedMapColor(MapColor.NONE))
 				.noLootTable()
 				.noOcclusion()
 				.isValidSpawn(Blocks::never)
@@ -3187,7 +3189,15 @@ public class Blocks {
 	);
 	public static final Block LIGHT = register(
 		"light",
-		new LightBlock(BlockBehaviour.Properties.of().replaceable().strength(-1.0F, 3600000.8F).noLootTable().noOcclusion().lightLevel(LightBlock.LIGHT_EMISSION))
+		new LightBlock(
+			BlockBehaviour.Properties.of()
+				.replaceable()
+				.strength(-1.0F, 3600000.8F)
+				.mapColor(waterloggedMapColor(MapColor.NONE))
+				.noLootTable()
+				.noOcclusion()
+				.lightLevel(LightBlock.LIGHT_EMISSION)
+		)
 	);
 	public static final Block IRON_TRAPDOOR = register(
 		"iron_trapdoor",
@@ -7024,6 +7034,10 @@ public class Blocks {
 
 	private static ToIntFunction<BlockState> litBlockEmission(int i) {
 		return blockState -> blockState.getValue(BlockStateProperties.LIT) ? i : 0;
+	}
+
+	private static Function<BlockState, MapColor> waterloggedMapColor(MapColor mapColor) {
+		return blockState -> blockState.getValue(BlockStateProperties.WATERLOGGED) ? MapColor.WATER : mapColor;
 	}
 
 	private static Boolean never(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, EntityType<?> entityType) {

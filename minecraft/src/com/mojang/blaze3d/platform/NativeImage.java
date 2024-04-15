@@ -471,11 +471,12 @@ public final class NativeImage implements AutoCloseable {
 		this.writeToFile(file.toPath());
 	}
 
-	public void copyFromFont(FT_Face fT_Face, int i) {
+	public boolean copyFromFont(FT_Face fT_Face, int i) {
 		if (this.format.components() != 1) {
 			throw new IllegalArgumentException("Can only write fonts into 1-component images.");
+		} else if (FreeTypeUtil.checkError(FreeType.FT_Load_Glyph(fT_Face, i, 4), "Loading glyph")) {
+			return false;
 		} else {
-			FreeTypeUtil.checkError(FreeType.FT_Load_Glyph(fT_Face, i, 4), "Loading glyph");
 			FT_GlyphSlot fT_GlyphSlot = (FT_GlyphSlot)Objects.requireNonNull(fT_Face.glyph(), "Glyph not initialized");
 			FT_Bitmap fT_Bitmap = fT_GlyphSlot.bitmap();
 			if (fT_Bitmap.pixel_mode() != 2) {
@@ -484,6 +485,7 @@ public final class NativeImage implements AutoCloseable {
 				int j = fT_Bitmap.width() * fT_Bitmap.rows();
 				ByteBuffer byteBuffer = (ByteBuffer)Objects.requireNonNull(fT_Bitmap.buffer(j), "Glyph has no bitmap");
 				MemoryUtil.memCopy(MemoryUtil.memAddress(byteBuffer), this.pixels, (long)j);
+				return true;
 			} else {
 				throw new IllegalArgumentException(
 					String.format(

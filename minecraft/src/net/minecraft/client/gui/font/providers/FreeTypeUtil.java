@@ -1,31 +1,46 @@
 package net.minecraft.client.gui.font.providers;
 
+import com.mojang.logging.LogUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.util.freetype.FT_Vector;
 import org.lwjgl.util.freetype.FreeType;
+import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class FreeTypeUtil {
+	private static final Logger LOGGER = LogUtils.getLogger();
+	public static final Object LIBRARY_LOCK = new Object();
 	private static long library = 0L;
 
 	public static long getLibrary() {
-		if (library == 0L) {
-			try (MemoryStack memoryStack = MemoryStack.stackPush()) {
-				PointerBuffer pointerBuffer = memoryStack.mallocPointer(1);
-				checkError(FreeType.FT_Init_FreeType(pointerBuffer), "Initializing FreeType library");
-				library = pointerBuffer.get();
+		synchronized (LIBRARY_LOCK) {
+			if (library == 0L) {
+				try (MemoryStack memoryStack = MemoryStack.stackPush()) {
+					PointerBuffer pointerBuffer = memoryStack.mallocPointer(1);
+					assertError(FreeType.FT_Init_FreeType(pointerBuffer), "Initializing FreeType library");
+					library = pointerBuffer.get();
+				}
 			}
-		}
 
-		return library;
+			return library;
+		}
 	}
 
-	public static void checkError(int i, String string) {
+	public static void assertError(int i, String string) {
 		if (i != 0) {
 			throw new IllegalStateException("FreeType error: " + describeError(i) + " (" + string + ")");
+		}
+	}
+
+	public static boolean checkError(int i, String string) {
+		if (i != 0) {
+			LOGGER.error("FreeType error: {} ({})", describeError(i), string);
+			return true;
+		} else {
+			return false;
 		}
 	}
 
@@ -45,9 +60,11 @@ public class FreeTypeUtil {
 	}
 
 	public static void destroy() {
-		if (library != 0L) {
-			FreeType.FT_Done_Library(library);
-			library = 0L;
+		synchronized (LIBRARY_LOCK) {
+			if (library != 0L) {
+				FreeType.FT_Done_Library(library);
+				library = 0L;
+			}
 		}
 	}
 }

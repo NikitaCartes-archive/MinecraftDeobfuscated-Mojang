@@ -323,7 +323,7 @@ public class Wolf extends TamableAnimal implements NeutralMob, VariantHolder<Hol
 	}
 
 	public float getWetShade(float f) {
-		return Math.min(0.5F + Mth.lerp(f, this.shakeAnimO, this.shakeAnim) / 2.0F * 0.5F, 1.0F);
+		return Math.min(0.75F + Mth.lerp(f, this.shakeAnimO, this.shakeAnim) / 2.0F * 0.25F, 1.0F);
 	}
 
 	public float getBodyRollAngle(float f, float g) {
@@ -444,7 +444,10 @@ public class Wolf extends TamableAnimal implements NeutralMob, VariantHolder<Hol
 						this.setBodyArmorItem(itemStack.copyWithCount(1));
 						itemStack.consume(1, player);
 						return InteractionResult.SUCCESS;
-					} else if (itemStack.is(Items.SHEARS) && this.isOwnedBy(player) && this.hasArmor() && !EnchantmentHelper.hasBindingCurse(this.getBodyArmorItem())) {
+					} else if (itemStack.is(Items.SHEARS)
+						&& this.isOwnedBy(player)
+						&& this.hasArmor()
+						&& (!EnchantmentHelper.hasBindingCurse(this.getBodyArmorItem()) || player.isCreative())) {
 						itemStack.hurtAndBreak(1, player, getSlotForHand(interactionHand));
 						this.playSound(SoundEvents.ARMOR_UNEQUIP_WOLF);
 						ItemStack itemStack2 = this.getBodyArmorItem();

@@ -2,6 +2,7 @@ package net.minecraft.client.gui.screens.inventory;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.Lighting;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import java.util.List;
@@ -99,20 +100,25 @@ public class EnchantmentScreen extends AbstractContainerScreen<EnchantmentMenu> 
 			int p = o + 20;
 			int q = this.menu.costs[n];
 			if (q == 0) {
+				RenderSystem.enableBlend();
 				guiGraphics.blitSprite(ENCHANTMENT_SLOT_DISABLED_SPRITE, o, l + 14 + 19 * n, 108, 19);
+				RenderSystem.disableBlend();
 			} else {
 				String string = q + "";
 				int r = 86 - this.font.width(string);
 				FormattedText formattedText = EnchantmentNames.getInstance().getRandomName(this.font, r);
 				int s = 6839882;
 				if ((m < n + 1 || this.minecraft.player.experienceLevel < q) && !this.minecraft.player.getAbilities().instabuild) {
+					RenderSystem.enableBlend();
 					guiGraphics.blitSprite(ENCHANTMENT_SLOT_DISABLED_SPRITE, o, l + 14 + 19 * n, 108, 19);
 					guiGraphics.blitSprite(DISABLED_LEVEL_SPRITES[n], o + 1, l + 15 + 19 * n, 16, 16);
+					RenderSystem.disableBlend();
 					guiGraphics.drawWordWrap(this.font, formattedText, p, l + 16 + 19 * n, r, (s & 16711422) >> 1);
 					s = 4226832;
 				} else {
 					int t = i - (k + 60);
 					int u = j - (l + 14 + 19 * n);
+					RenderSystem.enableBlend();
 					if (t >= 0 && u >= 0 && t < 108 && u < 19) {
 						guiGraphics.blitSprite(ENCHANTMENT_SLOT_HIGHLIGHTED_SPRITE, o, l + 14 + 19 * n, 108, 19);
 						s = 16777088;
@@ -121,6 +127,7 @@ public class EnchantmentScreen extends AbstractContainerScreen<EnchantmentMenu> 
 					}
 
 					guiGraphics.blitSprite(ENABLED_LEVEL_SPRITES[n], o + 1, l + 15 + 19 * n, 16, 16);
+					RenderSystem.disableBlend();
 					guiGraphics.drawWordWrap(this.font, formattedText, p, l + 16 + 19 * n, r, s);
 					s = 8453920;
 				}

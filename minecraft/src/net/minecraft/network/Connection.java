@@ -11,8 +11,10 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandler;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
+import io.netty.channel.ChannelOutboundHandler;
 import io.netty.channel.ChannelOutboundHandlerAdapter;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.ChannelPromise;
@@ -32,6 +34,7 @@ import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.TimeoutException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.nio.channels.ClosedChannelException;
 import java.util.Objects;
 import java.util.Queue;
 import java.util.concurrent.RejectedExecutionException;
@@ -195,6 +198,18 @@ public class Connection extends SimpleChannelInboundHandler<Packet<?>> {
 		}
 	}
 
+	private static void syncAfterConfigurationChange(ChannelFuture channelFuture) {
+		try {
+			channelFuture.syncUninterruptibly();
+		} catch (Exception var2) {
+			if (var2 instanceof ClosedChannelException) {
+				LOGGER.info("Connection closed during protocol change");
+			} else {
+				throw var2;
+			}
+		}
+	}
+
 	public <T extends PacketListener> void setupInboundProtocol(ProtocolInfo<T> protocolInfo, T packetListener) {
 		this.validateListener(protocolInfo, packetListener);
 		if (protocolInfo.flow() != this.getReceiving()) {
@@ -211,7 +226,7 @@ public class Connection extends SimpleChannelInboundHandler<Packet<?>> {
 				);
 			}
 
-			this.channel.writeAndFlush(inboundConfigurationTask).syncUninterruptibly();
+			syncAfterConfigurationChange(this.channel.writeAndFlush(inboundConfigurationTask));
 		}
 	}
 
@@ -229,7 +244,7 @@ public class Connection extends SimpleChannelInboundHandler<Packet<?>> {
 			}
 
 			boolean bl = protocolInfo.id() == ConnectionProtocol.LOGIN;
-			this.channel.writeAndFlush(outboundConfigurationTask.andThen(channelHandlerContext -> this.sendLoginDisconnect = bl)).syncUninterruptibly();
+			syncAfterConfigurationChange(this.channel.writeAndFlush(outboundConfigurationTask.andThen(channelHandlerContext -> this.sendLoginDisconnect = bl)));
 		}
 	}
 
@@ -449,7 +464,7 @@ public class Connection extends SimpleChannelInboundHandler<Packet<?>> {
 				}
 
 				ChannelPipeline channelPipeline = channel.pipeline().addLast("timeout", new ReadTimeoutHandler(30));
-				Connection.configureSerialization(channelPipeline, PacketFlow.CLIENTBOUND, connection.bandwidthDebugMonitor);
+				Connection.configureSerialization(channelPipeline, PacketFlow.CLIENTBOUND, false, connection.bandwidthDebugMonitor);
 				connection.configurePacketHandler(channelPipeline);
 			}
 		}).channel(class_).connect(inetSocketAddress.getAddress(), inetSocketAddress.getPort());
@@ -472,19 +487,33 @@ public class Connection extends SimpleChannelInboundHandler<Packet<?>> {
 		}).addLast("packet_handler", this);
 	}
 
-	public static void configureSerialization(ChannelPipeline channelPipeline, PacketFlow packetFlow, @Nullable BandwidthDebugMonitor bandwidthDebugMonitor) {
+	public static void configureSerialization(
+		ChannelPipeline channelPipeline, PacketFlow packetFlow, boolean bl, @Nullable BandwidthDebugMonitor bandwidthDebugMonitor
+	) {
 		PacketFlow packetFlow2 = packetFlow.getOpposite();
-		boolean bl = packetFlow == PacketFlow.SERVERBOUND;
-		boolean bl2 = packetFlow2 == PacketFlow.SERVERBOUND;
-		channelPipeline.addLast("splitter", new Varint21FrameDecoder(bandwidthDebugMonitor))
+		boolean bl2 = packetFlow == PacketFlow.SERVERBOUND;
+		boolean bl3 = packetFlow2 == PacketFlow.SERVERBOUND;
+		channelPipeline.addLast("splitter", createFrameDecoder(bandwidthDebugMonitor, bl))
 			.addLast(new FlowControlHandler())
-			.addLast(inboundHandlerName(bl), (ChannelHandler)(bl ? new PacketDecoder<>(INITIAL_PROTOCOL) : new UnconfiguredPipelineHandler.Inbound()))
-			.addLast("prepender", new Varint21LengthFieldPrepender())
-			.addLast(outboundHandlerName(bl2), (ChannelHandler)(bl2 ? new PacketEncoder<>(INITIAL_PROTOCOL) : new UnconfiguredPipelineHandler.Outbound()));
+			.addLast(inboundHandlerName(bl2), (ChannelHandler)(bl2 ? new PacketDecoder<>(INITIAL_PROTOCOL) : new UnconfiguredPipelineHandler.Inbound()))
+			.addLast("prepender", createFrameEncoder(bl))
+			.addLast(outboundHandlerName(bl3), (ChannelHandler)(bl3 ? new PacketEncoder<>(INITIAL_PROTOCOL) : new UnconfiguredPipelineHandler.Outbound()));
+	}
+
+	private static ChannelOutboundHandler createFrameEncoder(boolean bl) {
+		return (ChannelOutboundHandler)(bl ? new NoOpFrameEncoder() : new Varint21LengthFieldPrepender());
+	}
+
+	private static ChannelInboundHandler createFrameDecoder(@Nullable BandwidthDebugMonitor bandwidthDebugMonitor, boolean bl) {
+		if (!bl) {
+			return new Varint21FrameDecoder(bandwidthDebugMonitor);
+		} else {
+			return (ChannelInboundHandler)(bandwidthDebugMonitor != null ? new MonitorFrameDecoder(bandwidthDebugMonitor) : new NoOpFrameDecoder());
+		}
 	}
 
 	public static void configureInMemoryPipeline(ChannelPipeline channelPipeline, PacketFlow packetFlow) {
-		configureSerialization(channelPipeline, packetFlow, null);
+		configureSerialization(channelPipeline, packetFlow, true, null);
 	}
 
 	public static Connection connectToLocalServer(SocketAddress socketAddress) {

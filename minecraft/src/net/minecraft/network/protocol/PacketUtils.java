@@ -20,32 +20,33 @@ public class PacketUtils {
 
 	public static <T extends PacketListener> void ensureRunningOnSameThread(Packet<T> packet, T packetListener, BlockableEventLoop<?> blockableEventLoop) throws RunningOnDifferentThreadException {
 		if (!blockableEventLoop.isSameThread()) {
-			blockableEventLoop.executeIfPossible(
-				() -> {
-					if (packetListener.shouldHandleMessage(packet)) {
-						try {
-							packet.handle(packetListener);
-						} catch (Exception var6) {
-							if (var6 instanceof ReportedException reportedException && reportedException.getCause() instanceof OutOfMemoryError
-								|| packetListener.shouldPropagateHandlingExceptions()) {
-								if (var6 instanceof ReportedException reportedException2) {
-									fillCrashReport(reportedException2.getReport(), packetListener, packet);
-									throw var6;
-								}
-
-								CrashReport crashReport = CrashReport.forThrowable(var6, "Main thread packet handler");
-								fillCrashReport(crashReport, packetListener, packet);
-								throw new ReportedException(crashReport);
-							}
-
-							LOGGER.error("Failed to handle packet {}, suppressing error", packet, var6);
+			blockableEventLoop.executeIfPossible(() -> {
+				if (packetListener.shouldHandleMessage(packet)) {
+					try {
+						packet.handle(packetListener);
+					} catch (Exception var4) {
+						if (var4 instanceof ReportedException reportedException && reportedException.getCause() instanceof OutOfMemoryError) {
+							throw makeReportedException(var4, packet, packetListener);
 						}
-					} else {
-						LOGGER.debug("Ignoring packet due to disconnection: {}", packet);
+
+						packetListener.onPacketError(packet, var4);
 					}
+				} else {
+					LOGGER.debug("Ignoring packet due to disconnection: {}", packet);
 				}
-			);
+			});
 			throw RunningOnDifferentThreadException.RUNNING_ON_DIFFERENT_THREAD;
+		}
+	}
+
+	public static <T extends PacketListener> ReportedException makeReportedException(Exception exception, Packet<T> packet, T packetListener) {
+		if (exception instanceof ReportedException reportedException) {
+			fillCrashReport(reportedException.getReport(), packetListener, packet);
+			return reportedException;
+		} else {
+			CrashReport crashReport = CrashReport.forThrowable(exception, "Main thread packet handler");
+			fillCrashReport(crashReport, packetListener, packet);
+			return new ReportedException(crashReport);
 		}
 	}
 

@@ -13,6 +13,7 @@ import com.mojang.datafixers.DataFixer;
 import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.longs.LongIterator;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.ObjectArraySet;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -1108,14 +1109,8 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 			);
 		}
 
-		systemReport.setDetail(
-			"Data Packs",
-			(Supplier<String>)(() -> (String)this.packRepository
-					.getSelectedPacks()
-					.stream()
-					.map(pack -> pack.getId() + (pack.getCompatibility().isCompatible() ? "" : " (incompatible)"))
-					.collect(Collectors.joining(", ")))
-		);
+		systemReport.setDetail("Active Data Packs", (Supplier<String>)(() -> PackRepository.displayPackList(this.packRepository.getSelectedPacks())));
+		systemReport.setDetail("Available Data Packs", (Supplier<String>)(() -> PackRepository.displayPackList(this.packRepository.getAvailablePacks())));
 		systemReport.setDetail(
 			"Enabled Feature Flags",
 			(Supplier<String>)(() -> (String)FeatureFlags.REGISTRY
@@ -1461,7 +1456,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 				this.resources.close();
 				this.resources = reloadableResources;
 				this.packRepository.setSelected(collection);
-				WorldDataConfiguration worldDataConfiguration = new WorldDataConfiguration(getSelectedPacks(this.packRepository), this.worldData.enabledFeatures());
+				WorldDataConfiguration worldDataConfiguration = new WorldDataConfiguration(getSelectedPacks(this.packRepository, true), this.worldData.enabledFeatures());
 				this.worldData.setDataConfiguration(worldDataConfiguration);
 				this.resources.managers.updateRegistryTags();
 				this.getPlayerList().saveAll();
@@ -1477,12 +1472,14 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 	}
 
 	public static WorldDataConfiguration configurePackRepository(
-		PackRepository packRepository, DataPackConfig dataPackConfig, boolean bl, FeatureFlagSet featureFlagSet
+		PackRepository packRepository, WorldDataConfiguration worldDataConfiguration, boolean bl, boolean bl2
 	) {
+		DataPackConfig dataPackConfig = worldDataConfiguration.dataPacks();
+		FeatureFlagSet featureFlagSet = bl ? FeatureFlagSet.of() : worldDataConfiguration.enabledFeatures();
+		FeatureFlagSet featureFlagSet2 = bl ? FeatureFlags.REGISTRY.allFlags() : worldDataConfiguration.enabledFeatures();
 		packRepository.reload();
-		if (bl) {
-			packRepository.setSelected(Collections.singleton("vanilla"));
-			return WorldDataConfiguration.DEFAULT;
+		if (bl2) {
+			return configureRepositoryWithSelection(packRepository, List.of("vanilla"), featureFlagSet, false);
 		} else {
 			Set<String> set = Sets.<String>newLinkedHashSet();
 
@@ -1496,34 +1493,28 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 
 			for (Pack pack : packRepository.getAvailablePacks()) {
 				String string2 = pack.getId();
-				FeatureFlagSet featureFlagSet2 = pack.getRequestedFeatures();
-				FeatureFlagSet featureFlagSet3 = packRepository.getRequestedFeatureFlags();
-				if (pack.getPackSource() == PackSource.FEATURE && !featureFlagSet2.isEmpty() && featureFlagSet2.isSubsetOf(featureFlagSet3) && !set.contains(string2)) {
-					LOGGER.info("Found feature pack for requested feature, forcing to enabled");
-					set.add(string2);
-				} else if (dataPackConfig.getDisabled().contains(string2)) {
-					continue;
-				}
-
-				boolean bl2 = set.contains(string2);
-				if (!bl2 && pack.getPackSource().shouldAddAutomatically()) {
-					if (featureFlagSet2.isSubsetOf(featureFlagSet)) {
-						LOGGER.info("Found new data pack {}, loading it automatically", string2);
-						set.add(string2);
-					} else {
-						LOGGER.info(
-							"Found new data pack {}, but can't load it due to missing features {}", string2, FeatureFlags.printMissingFlags(featureFlagSet, featureFlagSet2)
-						);
+				if (!dataPackConfig.getDisabled().contains(string2)) {
+					FeatureFlagSet featureFlagSet3 = pack.getRequestedFeatures();
+					boolean bl3 = set.contains(string2);
+					if (!bl3 && pack.getPackSource().shouldAddAutomatically()) {
+						if (featureFlagSet3.isSubsetOf(featureFlagSet2)) {
+							LOGGER.info("Found new data pack {}, loading it automatically", string2);
+							set.add(string2);
+						} else {
+							LOGGER.info(
+								"Found new data pack {}, but can't load it due to missing features {}", string2, FeatureFlags.printMissingFlags(featureFlagSet2, featureFlagSet3)
+							);
+						}
 					}
-				}
 
-				if (bl2 && !featureFlagSet2.isSubsetOf(featureFlagSet)) {
-					LOGGER.warn(
-						"Pack {} requires features {} that are not enabled for this world, disabling pack.",
-						string2,
-						FeatureFlags.printMissingFlags(featureFlagSet, featureFlagSet2)
-					);
-					set.remove(string2);
+					if (bl3 && !featureFlagSet3.isSubsetOf(featureFlagSet2)) {
+						LOGGER.warn(
+							"Pack {} requires features {} that are not enabled for this world, disabling pack.",
+							string2,
+							FeatureFlags.printMissingFlags(featureFlagSet2, featureFlagSet3)
+						);
+						set.remove(string2);
+					}
 				}
 			}
 
@@ -1532,20 +1523,53 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 				set.add("vanilla");
 			}
 
-			packRepository.setSelected(set);
-			DataPackConfig dataPackConfig2 = getSelectedPacks(packRepository);
-			FeatureFlagSet featureFlagSet4 = packRepository.getRequestedFeatureFlags();
-			return new WorldDataConfiguration(dataPackConfig2, featureFlagSet4);
+			return configureRepositoryWithSelection(packRepository, set, featureFlagSet, true);
 		}
 	}
 
-	private static DataPackConfig getSelectedPacks(PackRepository packRepository) {
+	private static WorldDataConfiguration configureRepositoryWithSelection(
+		PackRepository packRepository, Collection<String> collection, FeatureFlagSet featureFlagSet, boolean bl
+	) {
+		packRepository.setSelected(collection);
+		enableForcedFeaturePacks(packRepository, featureFlagSet);
+		DataPackConfig dataPackConfig = getSelectedPacks(packRepository, bl);
+		FeatureFlagSet featureFlagSet2 = packRepository.getRequestedFeatureFlags().join(featureFlagSet);
+		return new WorldDataConfiguration(dataPackConfig, featureFlagSet2);
+	}
+
+	private static void enableForcedFeaturePacks(PackRepository packRepository, FeatureFlagSet featureFlagSet) {
+		FeatureFlagSet featureFlagSet2 = packRepository.getRequestedFeatureFlags();
+		FeatureFlagSet featureFlagSet3 = featureFlagSet.subtract(featureFlagSet2);
+		if (!featureFlagSet3.isEmpty()) {
+			Set<String> set = new ObjectArraySet<>(packRepository.getSelectedIds());
+
+			for (Pack pack : packRepository.getAvailablePacks()) {
+				if (featureFlagSet3.isEmpty()) {
+					break;
+				}
+
+				if (pack.getPackSource() == PackSource.FEATURE) {
+					String string = pack.getId();
+					FeatureFlagSet featureFlagSet4 = pack.getRequestedFeatures();
+					if (!featureFlagSet4.isEmpty() && featureFlagSet4.intersects(featureFlagSet3) && featureFlagSet4.isSubsetOf(featureFlagSet)) {
+						if (!set.add(string)) {
+							throw new IllegalStateException("Tried to force '" + string + "', but it was already enabled");
+						}
+
+						LOGGER.info("Found feature pack ('{}') for requested feature, forcing to enabled", string);
+						featureFlagSet3 = featureFlagSet3.subtract(featureFlagSet4);
+					}
+				}
+			}
+
+			packRepository.setSelected(set);
+		}
+	}
+
+	private static DataPackConfig getSelectedPacks(PackRepository packRepository, boolean bl) {
 		Collection<String> collection = packRepository.getSelectedIds();
 		List<String> list = ImmutableList.copyOf(collection);
-		List<String> list2 = (List<String>)packRepository.getAvailableIds()
-			.stream()
-			.filter(string -> !collection.contains(string))
-			.collect(ImmutableList.toImmutableList());
+		List<String> list2 = bl ? packRepository.getAvailableIds().stream().filter(string -> !collection.contains(string)).toList() : List.of();
 		return new DataPackConfig(list, list2);
 	}
 

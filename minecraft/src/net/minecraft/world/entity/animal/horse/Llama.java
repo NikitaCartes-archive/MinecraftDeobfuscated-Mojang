@@ -17,7 +17,6 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.util.ByIdMap;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringRepresentable;
-import net.minecraft.world.Container;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgeableMob;
@@ -302,16 +301,6 @@ public class Llama extends AbstractChestedHorse implements VariantHolder<Llama.V
 	@Override
 	public boolean isSaddleable() {
 		return false;
-	}
-
-	@Override
-	public void containerChanged(Container container) {
-		DyeColor dyeColor = this.getSwag();
-		super.containerChanged(container);
-		DyeColor dyeColor2 = this.getSwag();
-		if (this.tickCount > 20 && dyeColor2 != null && dyeColor2 != dyeColor) {
-			this.playSound(SoundEvents.LLAMA_SWAG, 0.5F, 1.0F);
-		}
 	}
 
 	@Nullable

@@ -378,7 +378,7 @@ public class DataFixers {
 		Schema schema20 = dataFixerBuilder.addSchema(701, V701::new);
 		dataFixerBuilder.addFixer(new EntitySkeletonSplitFix(schema20, true));
 		Schema schema21 = dataFixerBuilder.addSchema(702, V702::new);
-		dataFixerBuilder.addFixer(new EntityZombieSplitFix(schema21, true));
+		dataFixerBuilder.addFixer(new EntityZombieSplitFix(schema21));
 		Schema schema22 = dataFixerBuilder.addSchema(703, V703::new);
 		dataFixerBuilder.addFixer(new EntityHorseSplitFix(schema22, true));
 		Schema schema23 = dataFixerBuilder.addSchema(704, V704::new);

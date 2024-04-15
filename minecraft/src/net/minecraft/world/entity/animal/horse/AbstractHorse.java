@@ -313,11 +313,6 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 		}
 	}
 
-	@Override
-	protected int calculateFallDamage(float f, float g) {
-		return Mth.ceil((f * 0.5F - 3.0F) * g);
-	}
-
 	protected int getInventorySize() {
 		return 1;
 	}
@@ -421,7 +416,9 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 			.add(Attributes.JUMP_STRENGTH, 0.7)
 			.add(Attributes.MAX_HEALTH, 53.0)
 			.add(Attributes.MOVEMENT_SPEED, 0.225F)
-			.add(Attributes.STEP_HEIGHT, 1.0);
+			.add(Attributes.STEP_HEIGHT, 1.0)
+			.add(Attributes.SAFE_FALL_DISTANCE, 6.0)
+			.add(Attributes.FALL_DAMAGE_MULTIPLIER, 0.5);
 	}
 
 	@Override

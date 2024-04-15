@@ -260,12 +260,8 @@ public class LevelStorageSource {
 		CompoundTag compoundTag2 = compoundTag.getCompound("Data");
 		int i = NbtUtils.getDataVersion(compoundTag2, -1);
 		Dynamic<?> dynamic = DataFixTypes.LEVEL.updateToCurrentVersion(dataFixer, new Dynamic<>(NbtOps.INSTANCE, compoundTag2), i);
-		Dynamic<?> dynamic2 = dynamic.get("Player").orElseEmptyMap();
-		Dynamic<?> dynamic3 = DataFixTypes.PLAYER.updateToCurrentVersion(dataFixer, dynamic2, i);
-		dynamic = dynamic.set("Player", dynamic3);
-		Dynamic<?> dynamic4 = dynamic.get("WorldGenSettings").orElseEmptyMap();
-		Dynamic<?> dynamic5 = DataFixTypes.WORLD_GEN_SETTINGS.updateToCurrentVersion(dataFixer, dynamic4, i);
-		return dynamic.set("WorldGenSettings", dynamic5);
+		dynamic = dynamic.update("Player", dynamicx -> DataFixTypes.PLAYER.updateToCurrentVersion(dataFixer, dynamicx, i));
+		return dynamic.update("WorldGenSettings", dynamicx -> DataFixTypes.WORLD_GEN_SETTINGS.updateToCurrentVersion(dataFixer, dynamicx, i));
 	}
 
 	private LevelSummary readLevelSummary(LevelStorageSource.LevelDirectory levelDirectory, boolean bl) {

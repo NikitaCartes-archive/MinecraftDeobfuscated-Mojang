@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
@@ -23,6 +24,12 @@ public class PackRepository {
 
 	public PackRepository(RepositorySource... repositorySources) {
 		this.sources = ImmutableSet.copyOf(repositorySources);
+	}
+
+	public static String displayPackList(Collection<Pack> collection) {
+		return (String)collection.stream()
+			.map(pack -> pack.getId() + (pack.getCompatibility().isCompatible() ? "" : " (incompatible)"))
+			.collect(Collectors.joining(", "));
 	}
 
 	public void reload() {

@@ -4,7 +4,7 @@ import net.minecraft.network.ConnectionProtocol;
 import net.minecraft.network.protocol.common.ClientCommonPacketListener;
 import net.minecraft.network.protocol.ping.ClientPongPacketListener;
 
-public interface ClientGamePacketListener extends ClientPongPacketListener, ClientCommonPacketListener {
+public interface ClientGamePacketListener extends ClientCommonPacketListener, ClientPongPacketListener {
 	@Override
 	default ConnectionProtocol protocol() {
 		return ConnectionProtocol.PLAY;

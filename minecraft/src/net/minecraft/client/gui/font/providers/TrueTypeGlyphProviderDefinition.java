@@ -56,55 +56,58 @@ public record TrueTypeGlyphProviderDefinition(ResourceLocation location, float s
 		try {
 			InputStream inputStream = resourceManager.open(this.location.withPrefix("font/"));
 
-			TrueTypeGlyphProvider var14;
+			TrueTypeGlyphProvider var20;
 			try {
 				byteBuffer = TextureUtil.readResource(inputStream);
 				byteBuffer.flip();
+				synchronized (FreeTypeUtil.LIBRARY_LOCK) {
+					try (MemoryStack memoryStack = MemoryStack.stackPush()) {
+						PointerBuffer pointerBuffer = memoryStack.mallocPointer(1);
+						FreeTypeUtil.assertError(FreeType.FT_New_Memory_Face(FreeTypeUtil.getLibrary(), byteBuffer, 0L, pointerBuffer), "Initializing font face");
+						fT_Face = FT_Face.create(pointerBuffer.get());
+					}
 
-				try (MemoryStack memoryStack = MemoryStack.stackPush()) {
-					PointerBuffer pointerBuffer = memoryStack.mallocPointer(1);
-					FreeTypeUtil.checkError(FreeType.FT_New_Memory_Face(FreeTypeUtil.getLibrary(), byteBuffer, 0L, pointerBuffer), "Initializing font face");
-					fT_Face = FT_Face.create(pointerBuffer.get());
+					String string = FreeType.FT_Get_Font_Format(fT_Face);
+					if (!"TrueType".equals(string)) {
+						throw new IOException("Font is not in TTF format, was " + string);
+					}
+
+					FreeTypeUtil.assertError(FreeType.FT_Select_Charmap(fT_Face, FreeType.FT_ENCODING_UNICODE), "Find unicode charmap");
+					var20 = new TrueTypeGlyphProvider(byteBuffer, fT_Face, this.size, this.oversample, this.shift.x, this.shift.y, this.skip);
 				}
-
-				String string = FreeType.FT_Get_Font_Format(fT_Face);
-				if (!"TrueType".equals(string)) {
-					throw new IOException("Font is not in TTF format, was " + string);
-				}
-
-				FreeTypeUtil.checkError(FreeType.FT_Select_Charmap(fT_Face, FreeType.FT_ENCODING_UNICODE), "Find unicode charmap");
-				var14 = new TrueTypeGlyphProvider(byteBuffer, fT_Face, this.size, this.oversample, this.shift.x, this.shift.y, this.skip);
-			} catch (Throwable var11) {
+			} catch (Throwable var16) {
 				if (inputStream != null) {
 					try {
 						inputStream.close();
-					} catch (Throwable var8) {
-						var11.addSuppressed(var8);
+					} catch (Throwable var11) {
+						var16.addSuppressed(var11);
 					}
 				}
 
-				throw var11;
+				throw var16;
 			}
 
 			if (inputStream != null) {
 				inputStream.close();
 			}
 
-			return var14;
-		} catch (Exception var12) {
-			if (fT_Face != null) {
-				FreeType.FT_Done_Face(fT_Face);
+			return var20;
+		} catch (Exception var17) {
+			synchronized (FreeTypeUtil.LIBRARY_LOCK) {
+				if (fT_Face != null) {
+					FreeType.FT_Done_Face(fT_Face);
+				}
 			}
 
 			MemoryUtil.memFree(byteBuffer);
-			throw var12;
+			throw var17;
 		}
 	}
 
 	@Environment(EnvType.CLIENT)
 	public static record Shift(float x, float y) {
 		public static final TrueTypeGlyphProviderDefinition.Shift NONE = new TrueTypeGlyphProviderDefinition.Shift(0.0F, 0.0F);
-		public static final Codec<TrueTypeGlyphProviderDefinition.Shift> CODEC = Codec.FLOAT
+		public static final Codec<TrueTypeGlyphProviderDefinition.Shift> CODEC = Codec.floatRange(-100.0F, 100.0F)
 			.listOf()
 			.comapFlatMap(
 				list -> Util.fixedSize(list, 2).map(listx -> new TrueTypeGlyphProviderDefinition.Shift((Float)listx.get(0), (Float)listx.get(1))),

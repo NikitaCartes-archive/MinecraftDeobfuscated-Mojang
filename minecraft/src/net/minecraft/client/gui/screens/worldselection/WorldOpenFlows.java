@@ -333,8 +333,12 @@ public class WorldOpenFlows {
 		WorldStem worldStem;
 		try {
 			worldStem = this.loadWorldStem(dynamic, bl, packRepository);
-		} catch (Exception var8) {
-			LOGGER.warn("Failed to load level data or datapacks, can't proceed with server load", (Throwable)var8);
+
+			for (LevelStem levelStem : worldStem.registries().compositeAccess().registryOrThrow(Registries.LEVEL_STEM)) {
+				levelStem.generator().validate();
+			}
+		} catch (Exception var9) {
+			LOGGER.warn("Failed to load level data or datapacks, can't proceed with server load", (Throwable)var9);
 			if (!bl) {
 				this.minecraft.setScreen(new DatapackLoadFailureScreen(() -> {
 					levelStorageAccess.safeClose();

@@ -19,26 +19,22 @@ public class PacketEncoder<T extends PacketListener> extends MessageToByteEncode
 
 	protected void encode(ChannelHandlerContext channelHandlerContext, Packet<T> packet, ByteBuf byteBuf) throws Exception {
 		PacketType<? extends Packet<? super T>> packetType = packet.type();
-		if (LOGGER.isDebugEnabled()) {
-			LOGGER.debug(Connection.PACKET_SENT_MARKER, "OUT: [{}:{}] {}", this.protocolInfo.id().id(), packetType, packet.getClass().getName());
-		}
 
 		try {
-			int i = byteBuf.writerIndex();
 			this.protocolInfo.codec().encode(byteBuf, packet);
-			int j = byteBuf.writerIndex() - i;
-			if (j > 8388608) {
-				throw new IllegalArgumentException("Packet too big (is " + j + ", should be less than 8388608): " + packet);
+			int i = byteBuf.readableBytes();
+			if (LOGGER.isDebugEnabled()) {
+				LOGGER.debug(Connection.PACKET_SENT_MARKER, "OUT: [{}:{}] {} -> {} bytes", this.protocolInfo.id().id(), packetType, packet.getClass().getName(), i);
 			}
 
-			JvmProfiler.INSTANCE.onPacketSent(this.protocolInfo.id(), packetType, channelHandlerContext.channel().remoteAddress(), j);
-		} catch (Throwable var10) {
-			LOGGER.error("Error sending packet {}", packetType, var10);
+			JvmProfiler.INSTANCE.onPacketSent(this.protocolInfo.id(), packetType, channelHandlerContext.channel().remoteAddress(), i);
+		} catch (Throwable var9) {
+			LOGGER.error("Error sending packet {}", packetType, var9);
 			if (packet.isSkippable()) {
-				throw new SkipPacketException(var10);
+				throw new SkipPacketException(var9);
 			}
 
-			throw var10;
+			throw var9;
 		} finally {
 			ProtocolSwapHandler.handleOutboundTerminalPacket(channelHandlerContext, packet);
 		}

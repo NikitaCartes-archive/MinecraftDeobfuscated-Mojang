@@ -199,7 +199,7 @@ public abstract class PlayerList {
 		serverGamePacketListenerImpl.send(new ClientboundChangeDifficultyPacket(levelData.getDifficulty(), levelData.isDifficultyLocked()));
 		serverGamePacketListenerImpl.send(new ClientboundPlayerAbilitiesPacket(serverPlayer.getAbilities()));
 		serverGamePacketListenerImpl.send(new ClientboundSetCarriedItemPacket(serverPlayer.getInventory().selected));
-		serverGamePacketListenerImpl.send(new ClientboundUpdateRecipesPacket(this.server.getRecipeManager().getRecipes()));
+		serverGamePacketListenerImpl.send(new ClientboundUpdateRecipesPacket(this.server.getRecipeManager().getOrderedRecipes()));
 		this.sendPlayerPermissionLevel(serverPlayer);
 		serverPlayer.getStats().markAllDirty();
 		serverPlayer.getRecipeBook().sendInitialRecipeBook(serverPlayer);
@@ -883,7 +883,7 @@ public abstract class PlayerList {
 		}
 
 		this.broadcastAll(new ClientboundUpdateTagsPacket(TagNetworkSerialization.serializeTagsToNetwork(this.registries)));
-		ClientboundUpdateRecipesPacket clientboundUpdateRecipesPacket = new ClientboundUpdateRecipesPacket(this.server.getRecipeManager().getRecipes());
+		ClientboundUpdateRecipesPacket clientboundUpdateRecipesPacket = new ClientboundUpdateRecipesPacket(this.server.getRecipeManager().getOrderedRecipes());
 
 		for (ServerPlayer serverPlayer : this.players) {
 			serverPlayer.connection.send(clientboundUpdateRecipesPacket);

@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 public class TextComponentTagVisitor implements TagVisitor {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final int INLINE_LIST_THRESHOLD = 8;
+	private static final int MAX_DEPTH = 64;
 	private static final ByteCollection INLINE_ELEMENT_TYPES = new ByteOpenHashSet(Arrays.asList((byte)1, (byte)2, (byte)3, (byte)4, (byte)5, (byte)6));
 	private static final ChatFormatting SYNTAX_HIGHLIGHTING_KEY = ChatFormatting.AQUA;
 	private static final ChatFormatting SYNTAX_HIGHLIGHTING_STRING = ChatFormatting.GREEN;
@@ -35,13 +36,20 @@ public class TextComponentTagVisitor implements TagVisitor {
 	private static final String STRUCT_OPEN = "{";
 	private static final String STRUCT_CLOSE = "}";
 	private static final String NEWLINE = "\n";
+	private static final Component TOO_DEEP = Component.literal("<...>").withStyle(ChatFormatting.GRAY);
 	private final String indentation;
+	private final int indentDepth;
 	private final int depth;
 	private Component result = CommonComponents.EMPTY;
 
-	public TextComponentTagVisitor(String string, int i) {
+	public TextComponentTagVisitor(String string) {
+		this(string, 0, 0);
+	}
+
+	private TextComponentTagVisitor(String string, int i, int j) {
 		this.indentation = string;
-		this.depth = i;
+		this.indentDepth = i;
+		this.depth = j;
 	}
 
 	public Component visit(Tag tag) {
@@ -149,6 +157,8 @@ public class TextComponentTagVisitor implements TagVisitor {
 	public void visitList(ListTag listTag) {
 		if (listTag.isEmpty()) {
 			this.result = Component.literal("[]");
+		} else if (this.depth >= 64) {
+			this.result = Component.literal("[").append(TOO_DEEP).append("]");
 		} else if (INLINE_ELEMENT_TYPES.contains(listTag.getElementType()) && listTag.size() <= 8) {
 			String string = ELEMENT_SEPARATOR + " ";
 			MutableComponent mutableComponent = Component.literal("[");
@@ -158,7 +168,7 @@ public class TextComponentTagVisitor implements TagVisitor {
 					mutableComponent.append(string);
 				}
 
-				mutableComponent.append(new TextComponentTagVisitor(this.indentation, this.depth).visit(listTag.get(i)));
+				mutableComponent.append(this.buildSubTag(listTag.get(i), false));
 			}
 
 			mutableComponent.append("]");
@@ -169,10 +179,12 @@ public class TextComponentTagVisitor implements TagVisitor {
 				mutableComponent2.append("\n");
 			}
 
-			for (int j = 0; j < listTag.size(); j++) {
-				MutableComponent mutableComponent3 = Component.literal(Strings.repeat(this.indentation, this.depth + 1));
-				mutableComponent3.append(new TextComponentTagVisitor(this.indentation, this.depth + 1).visit(listTag.get(j)));
-				if (j != listTag.size() - 1) {
+			String string2 = Strings.repeat(this.indentation, this.indentDepth + 1);
+
+			for (int i = 0; i < listTag.size(); i++) {
+				MutableComponent mutableComponent3 = Component.literal(string2);
+				mutableComponent3.append(this.buildSubTag(listTag.get(i), true));
+				if (i != listTag.size() - 1) {
 					mutableComponent3.append(ELEMENT_SEPARATOR).append(this.indentation.isEmpty() ? " " : "\n");
 				}
 
@@ -180,7 +192,7 @@ public class TextComponentTagVisitor implements TagVisitor {
 			}
 
 			if (!this.indentation.isEmpty()) {
-				mutableComponent2.append("\n").append(Strings.repeat(this.indentation, this.depth));
+				mutableComponent2.append("\n").append(Strings.repeat(this.indentation, this.indentDepth));
 			}
 
 			mutableComponent2.append("]");
@@ -192,6 +204,8 @@ public class TextComponentTagVisitor implements TagVisitor {
 	public void visitCompound(CompoundTag compoundTag) {
 		if (compoundTag.isEmpty()) {
 			this.result = Component.literal("{}");
+		} else if (this.depth >= 64) {
+			this.result = Component.literal("{").append(TOO_DEEP).append("}");
 		} else {
 			MutableComponent mutableComponent = Component.literal("{");
 			Collection<String> collection = compoundTag.getAllKeys();
@@ -205,15 +219,16 @@ public class TextComponentTagVisitor implements TagVisitor {
 				mutableComponent.append("\n");
 			}
 
+			String string = Strings.repeat(this.indentation, this.indentDepth + 1);
 			Iterator<String> iterator = collection.iterator();
 
 			while (iterator.hasNext()) {
-				String string = (String)iterator.next();
-				MutableComponent mutableComponent2 = Component.literal(Strings.repeat(this.indentation, this.depth + 1))
-					.append(handleEscapePretty(string))
+				String string2 = (String)iterator.next();
+				MutableComponent mutableComponent2 = Component.literal(string)
+					.append(handleEscapePretty(string2))
 					.append(NAME_VALUE_SEPARATOR)
 					.append(" ")
-					.append(new TextComponentTagVisitor(this.indentation, this.depth + 1).visit(compoundTag.get(string)));
+					.append(this.buildSubTag(compoundTag.get(string2), true));
 				if (iterator.hasNext()) {
 					mutableComponent2.append(ELEMENT_SEPARATOR).append(this.indentation.isEmpty() ? " " : "\n");
 				}
@@ -222,12 +237,16 @@ public class TextComponentTagVisitor implements TagVisitor {
 			}
 
 			if (!this.indentation.isEmpty()) {
-				mutableComponent.append("\n").append(Strings.repeat(this.indentation, this.depth));
+				mutableComponent.append("\n").append(Strings.repeat(this.indentation, this.indentDepth));
 			}
 
 			mutableComponent.append("}");
 			this.result = mutableComponent;
 		}
+	}
+
+	private Component buildSubTag(Tag tag, boolean bl) {
+		return new TextComponentTagVisitor(this.indentation, bl ? this.indentDepth + 1 : this.indentDepth, this.depth + 1).visit(tag);
 	}
 
 	protected static Component handleEscapePretty(String string) {

@@ -251,6 +251,8 @@ public class PlaceCommand {
 		CommandSourceStack commandSourceStack, Holder<StructureTemplatePool> holder, ResourceLocation resourceLocation, int i, BlockPos blockPos
 	) throws CommandSyntaxException {
 		ServerLevel serverLevel = commandSourceStack.getLevel();
+		ChunkPos chunkPos = new ChunkPos(blockPos);
+		checkLoaded(serverLevel, chunkPos, chunkPos);
 		if (!JigsawPlacement.generateJigsaw(serverLevel, holder, resourceLocation, i, blockPos, false)) {
 			throw ERROR_JIGSAW_FAILED.create();
 		} else {

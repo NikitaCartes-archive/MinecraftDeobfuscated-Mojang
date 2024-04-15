@@ -91,7 +91,7 @@ public class ServerConnectionListener {
 						channelPipeline.addLast("legacy_query", new LegacyQueryHandler(ServerConnectionListener.this.getServer()));
 					}
 
-					Connection.configureSerialization(channelPipeline, PacketFlow.SERVERBOUND, null);
+					Connection.configureSerialization(channelPipeline, PacketFlow.SERVERBOUND, false, null);
 					int i = ServerConnectionListener.this.server.getRateLimitPacketsPerSecond();
 					Connection connection = (Connection)(i > 0 ? new RateKickingConnection(i) : new Connection(PacketFlow.SERVERBOUND));
 					ServerConnectionListener.this.connections.add(connection);

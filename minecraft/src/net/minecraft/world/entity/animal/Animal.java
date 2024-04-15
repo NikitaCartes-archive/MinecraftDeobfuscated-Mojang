@@ -69,13 +69,9 @@ public abstract class Animal extends AgeableMob {
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float f) {
-		if (this.isInvulnerableTo(damageSource)) {
-			return false;
-		} else {
-			this.inLove = 0;
-			return super.hurt(damageSource, f);
-		}
+	protected void actuallyHurt(DamageSource damageSource, float f) {
+		this.resetLove();
+		super.actuallyHurt(damageSource, f);
 	}
 
 	@Override

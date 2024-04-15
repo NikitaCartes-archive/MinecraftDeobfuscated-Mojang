@@ -57,7 +57,7 @@ public class TrueTypeGlyphProvider implements GlyphProvider {
 			if (j == 0) {
 				return null;
 			} else {
-				FreeTypeUtil.checkError(FreeType.FT_Load_Glyph(fT_Face, j, 4194312), "Loading glyph");
+				FreeTypeUtil.assertError(FreeType.FT_Load_Glyph(fT_Face, j, 4194312), "Loading glyph");
 				FT_GlyphSlot fT_GlyphSlot = (FT_GlyphSlot)Objects.requireNonNull(fT_Face.glyph(), "Glyph not initialized");
 				float f = FreeTypeUtil.x(fT_GlyphSlot.advance());
 				FT_Bitmap fT_Bitmap = fT_GlyphSlot.bitmap();
@@ -81,7 +81,10 @@ public class TrueTypeGlyphProvider implements GlyphProvider {
 	@Override
 	public void close() {
 		if (this.face != null) {
-			FreeTypeUtil.checkError(FreeType.FT_Done_Face(this.face), "Deleting face");
+			synchronized (FreeTypeUtil.LIBRARY_LOCK) {
+				FreeTypeUtil.checkError(FreeType.FT_Done_Face(this.face), "Deleting face");
+			}
+
 			this.face = null;
 		}
 
@@ -161,8 +164,11 @@ public class TrueTypeGlyphProvider implements GlyphProvider {
 				public void upload(int i, int j) {
 					FT_Face fT_Face = TrueTypeGlyphProvider.this.validateFontOpen();
 					NativeImage nativeImage = new NativeImage(NativeImage.Format.LUMINANCE, Glyph.this.width, Glyph.this.height, false);
-					nativeImage.copyFromFont(fT_Face, Glyph.this.index);
-					nativeImage.upload(0, i, j, 0, 0, Glyph.this.width, Glyph.this.height, false, true);
+					if (nativeImage.copyFromFont(fT_Face, Glyph.this.index)) {
+						nativeImage.upload(0, i, j, 0, 0, Glyph.this.width, Glyph.this.height, false, true);
+					} else {
+						nativeImage.close();
+					}
 				}
 
 				@Override

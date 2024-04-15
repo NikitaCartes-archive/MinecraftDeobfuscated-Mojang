@@ -886,4 +886,9 @@ public class EnderDragon extends Mob implements Enemy {
 	public boolean canAttack(LivingEntity livingEntity) {
 		return livingEntity.canBeSeenAsEnemy();
 	}
+
+	@Override
+	protected float sanitizeScale(float f) {
+		return 1.0F;
+	}
 }

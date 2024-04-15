@@ -210,15 +210,15 @@ public class MerchantMenu extends AbstractContainerMenu {
 			ItemStack itemStack = this.slots.get(j).getItem();
 			if (!itemStack.isEmpty() && itemCost.test(itemStack)) {
 				ItemStack itemStack2 = this.tradeContainer.getItem(i);
-				int k = itemStack2.isEmpty() ? 0 : itemStack2.getCount();
-				int l = Math.min(itemCost.itemStack().getMaxStackSize() - k, itemStack.getCount());
-				ItemStack itemStack3 = itemStack.copy();
-				int m = k + l;
-				itemStack.shrink(l);
-				itemStack3.setCount(m);
-				this.tradeContainer.setItem(i, itemStack3);
-				if (m >= itemCost.itemStack().getMaxStackSize()) {
-					break;
+				if (itemStack2.isEmpty() || ItemStack.isSameItemSameComponents(itemStack, itemStack2)) {
+					int k = itemStack.getMaxStackSize();
+					int l = Math.min(k - itemStack2.getCount(), itemStack.getCount());
+					ItemStack itemStack3 = itemStack.copyWithCount(itemStack2.getCount() + l);
+					itemStack.shrink(l);
+					this.tradeContainer.setItem(i, itemStack3);
+					if (itemStack3.getCount() >= k) {
+						break;
+					}
 				}
 			}
 		}

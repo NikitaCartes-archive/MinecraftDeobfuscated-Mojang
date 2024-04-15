@@ -23,6 +23,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.LongArrayTag;
+import net.minecraft.nbt.NbtException;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.ShortTag;
@@ -521,7 +522,7 @@ public class ChunkSerializer {
 		return listTag;
 	}
 
-	public static class ChunkReadException extends RuntimeException {
+	public static class ChunkReadException extends NbtException {
 		public ChunkReadException(String string) {
 			super(string);
 		}

@@ -12,6 +12,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.component.PatchedDataComponentMap;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
@@ -245,6 +246,7 @@ public abstract class BlockEntity {
 
 	public final void applyComponents(DataComponentMap dataComponentMap, DataComponentPatch dataComponentPatch) {
 		final Set<DataComponentType<?>> set = new HashSet();
+		set.add(DataComponents.BLOCK_ENTITY_DATA);
 		final DataComponentMap dataComponentMap2 = PatchedDataComponentMap.fromPatch(dataComponentMap, dataComponentPatch);
 		this.applyImplicitComponents(new BlockEntity.DataComponentInput() {
 			@Nullable

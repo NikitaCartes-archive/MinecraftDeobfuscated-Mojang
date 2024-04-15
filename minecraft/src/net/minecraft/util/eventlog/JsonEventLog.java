@@ -2,7 +2,6 @@ package net.minecraft.util.eventlog;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonIOException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import java.io.Closeable;
@@ -32,11 +31,11 @@ public class JsonEventLog<T> implements Closeable {
 		return new JsonEventLog<>(codec, fileChannel);
 	}
 
-	public void write(T object) throws IOException, JsonIOException {
+	public void write(T object) throws IOException {
 		JsonElement jsonElement = this.codec.encodeStart(JsonOps.INSTANCE, object).getOrThrow(IOException::new);
 		this.channel.position(this.channel.size());
 		Writer writer = Channels.newWriter(this.channel, StandardCharsets.UTF_8);
-		GSON.toJson(jsonElement, writer);
+		GSON.toJson(jsonElement, GSON.newJsonWriter(writer));
 		writer.write(10);
 		writer.flush();
 	}

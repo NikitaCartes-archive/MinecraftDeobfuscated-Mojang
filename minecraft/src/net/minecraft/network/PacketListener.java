@@ -3,9 +3,11 @@ package net.minecraft.network;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.CrashReportDetail;
+import net.minecraft.ReportedException;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketFlow;
+import net.minecraft.network.protocol.PacketUtils;
 
 public interface PacketListener {
 	PacketFlow flow();
@@ -14,14 +16,14 @@ public interface PacketListener {
 
 	void onDisconnect(Component component);
 
+	default void onPacketError(Packet packet, Exception exception) throws ReportedException {
+		throw PacketUtils.makeReportedException(exception, packet, this);
+	}
+
 	boolean isAcceptingMessages();
 
 	default boolean shouldHandleMessage(Packet<?> packet) {
 		return this.isAcceptingMessages();
-	}
-
-	default boolean shouldPropagateHandlingExceptions() {
-		return true;
 	}
 
 	default void fillCrashReport(CrashReport crashReport) {

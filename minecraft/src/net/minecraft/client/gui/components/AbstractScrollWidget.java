@@ -1,5 +1,6 @@
 package net.minecraft.client.gui.components;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiGraphics;
@@ -157,7 +158,9 @@ public abstract class AbstractScrollWidget extends AbstractWidget implements Ren
 		int i = this.getScrollBarHeight();
 		int j = this.getX() + this.width;
 		int k = Math.max(this.getY(), (int)this.scrollAmount * (this.height - i) / this.getMaxScrollAmount() + this.getY());
+		RenderSystem.enableBlend();
 		guiGraphics.blitSprite(SCROLLER_SPRITE, j, k, 8, i);
+		RenderSystem.disableBlend();
 	}
 
 	protected boolean withinContentAreaTopBottom(int i, int j) {

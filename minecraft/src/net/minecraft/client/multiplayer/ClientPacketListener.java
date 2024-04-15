@@ -412,7 +412,7 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 			bl,
 			commonPlayerSpawnInfo.seed()
 		);
-		this.minecraft.setLevel(this.level);
+		this.minecraft.setLevel(this.level, ReceivingLevelScreen.Reason.OTHER);
 		if (this.minecraft.player == null) {
 			this.minecraft.player = this.minecraft.gameMode.createPlayer(this.level, new StatsCounter(), new ClientRecipeBook());
 			this.minecraft.player.setYRot(-180.0F);
@@ -428,7 +428,7 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 		this.minecraft.player.input = new KeyboardInput(this.minecraft.options);
 		this.minecraft.gameMode.adjustPlayer(this.minecraft.player);
 		this.minecraft.cameraEntity = this.minecraft.player;
-		this.startWaitingForNewLevel(this.minecraft.player, this.level);
+		this.startWaitingForNewLevel(this.minecraft.player, this.level, ReceivingLevelScreen.Reason.OTHER);
 		this.minecraft.player.setReducedDebugInfo(clientboundLoginPacket.reducedDebugInfo());
 		this.minecraft.player.setShowDeathScreen(clientboundLoginPacket.showDeathScreen());
 		this.minecraft.player.setDoLimitedCrafting(clientboundLoginPacket.doLimitedCrafting());
@@ -1104,11 +1104,14 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 		ResourceKey<Level> resourceKey = commonPlayerSpawnInfo.dimension();
 		Holder<DimensionType> holder = commonPlayerSpawnInfo.dimensionType();
 		LocalPlayer localPlayer = this.minecraft.player;
-		if (resourceKey != localPlayer.level().dimension()) {
+		ResourceKey<Level> resourceKey2 = localPlayer.level().dimension();
+		boolean bl = resourceKey != resourceKey2;
+		ReceivingLevelScreen.Reason reason = this.determineLevelLoadingReason(localPlayer.isDeadOrDying(), resourceKey, resourceKey2);
+		if (bl) {
 			Map<MapId, MapItemSavedData> map = this.level.getAllMapData();
-			boolean bl = commonPlayerSpawnInfo.isDebug();
-			boolean bl2 = commonPlayerSpawnInfo.isFlat();
-			ClientLevel.ClientLevelData clientLevelData = new ClientLevel.ClientLevelData(this.levelData.getDifficulty(), this.levelData.isHardcore(), bl2);
+			boolean bl2 = commonPlayerSpawnInfo.isDebug();
+			boolean bl3 = commonPlayerSpawnInfo.isFlat();
+			ClientLevel.ClientLevelData clientLevelData = new ClientLevel.ClientLevelData(this.levelData.getDifficulty(), this.levelData.isHardcore(), bl3);
 			this.levelData = clientLevelData;
 			this.level = new ClientLevel(
 				this,
@@ -1119,11 +1122,11 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 				this.serverSimulationDistance,
 				this.minecraft::getProfiler,
 				this.minecraft.levelRenderer,
-				bl,
+				bl2,
 				commonPlayerSpawnInfo.seed()
 			);
 			this.level.addMapData(map);
-			this.minecraft.setLevel(this.level);
+			this.minecraft.setLevel(this.level, reason);
 		}
 
 		this.minecraft.cameraEntity = null;
@@ -1140,10 +1143,10 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 			localPlayer2 = this.minecraft.gameMode.createPlayer(this.level, localPlayer.getStats(), localPlayer.getRecipeBook());
 		}
 
-		this.startWaitingForNewLevel(localPlayer2, this.level);
+		this.startWaitingForNewLevel(localPlayer2, this.level, reason);
 		localPlayer2.setId(localPlayer.getId());
 		this.minecraft.player = localPlayer2;
-		if (resourceKey != localPlayer.level().dimension()) {
+		if (bl) {
 			this.minecraft.getMusicManager().stopPlaying();
 		}
 
@@ -1175,6 +1178,19 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 		}
 
 		this.minecraft.gameMode.setLocalMode(commonPlayerSpawnInfo.gameType(), commonPlayerSpawnInfo.previousGameType());
+	}
+
+	private ReceivingLevelScreen.Reason determineLevelLoadingReason(boolean bl, ResourceKey<Level> resourceKey, ResourceKey<Level> resourceKey2) {
+		ReceivingLevelScreen.Reason reason = ReceivingLevelScreen.Reason.OTHER;
+		if (!bl) {
+			if (resourceKey == Level.NETHER || resourceKey2 == Level.NETHER) {
+				reason = ReceivingLevelScreen.Reason.NETHER_PORTAL;
+			} else if (resourceKey == Level.END || resourceKey2 == Level.END) {
+				reason = ReceivingLevelScreen.Reason.END_PORTAL;
+			}
+		}
+
+		return reason;
 	}
 
 	@Override
@@ -1369,7 +1385,7 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 		} else if (type == ClientboundGameEventPacket.WIN_GAME) {
 			if (i == 0) {
 				this.minecraft.player.connection.send(new ServerboundClientCommandPacket(ServerboundClientCommandPacket.Action.PERFORM_RESPAWN));
-				this.minecraft.setScreen(new ReceivingLevelScreen(() -> false));
+				this.minecraft.setScreen(new ReceivingLevelScreen(() -> false, ReceivingLevelScreen.Reason.END_PORTAL));
 			} else if (i == 1) {
 				this.minecraft.setScreen(new WinScreen(true, () -> {
 					this.minecraft.player.connection.send(new ServerboundClientCommandPacket(ServerboundClientCommandPacket.Action.PERFORM_RESPAWN));
@@ -1422,9 +1438,9 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 		}
 	}
 
-	private void startWaitingForNewLevel(LocalPlayer localPlayer, ClientLevel clientLevel) {
+	private void startWaitingForNewLevel(LocalPlayer localPlayer, ClientLevel clientLevel, ReceivingLevelScreen.Reason reason) {
 		this.levelLoadStatusManager = new LevelLoadStatusManager(localPlayer, clientLevel, this.minecraft.levelRenderer);
-		this.minecraft.setScreen(new ReceivingLevelScreen(this.levelLoadStatusManager::levelReady));
+		this.minecraft.setScreen(new ReceivingLevelScreen(this.levelLoadStatusManager::levelReady, reason));
 	}
 
 	@Override
@@ -1495,7 +1511,7 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 		PacketUtils.ensureRunningOnSameThread(clientboundUpdateRecipesPacket, this, this.minecraft);
 		this.recipeManager.replaceRecipes(clientboundUpdateRecipesPacket.getRecipes());
 		ClientRecipeBook clientRecipeBook = this.minecraft.player.getRecipeBook();
-		clientRecipeBook.setupCollections(this.recipeManager.getRecipes(), this.minecraft.level.registryAccess());
+		clientRecipeBook.setupCollections(this.recipeManager.getOrderedRecipes(), this.minecraft.level.registryAccess());
 		this.minecraft.populateSearchTree(SearchRegistry.RECIPE_COLLECTIONS, clientRecipeBook.getCollections());
 	}
 

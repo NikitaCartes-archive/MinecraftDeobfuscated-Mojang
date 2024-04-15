@@ -101,6 +101,7 @@ import net.minecraft.client.gui.screens.OutOfMemoryScreen;
 import net.minecraft.client.gui.screens.Overlay;
 import net.minecraft.client.gui.screens.PauseScreen;
 import net.minecraft.client.gui.screens.ProgressScreen;
+import net.minecraft.client.gui.screens.ReceivingLevelScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.gui.screens.advancements.AdvancementsScreen;
@@ -171,7 +172,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
@@ -236,7 +236,6 @@ import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.item.component.ItemLore;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
@@ -266,7 +265,6 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	public static final ResourceLocation ALT_FONT = new ResourceLocation("alt");
 	private static final ResourceLocation REGIONAL_COMPLIANCIES = new ResourceLocation("regional_compliancies.json");
 	private static final CompletableFuture<Unit> RESOURCE_RELOAD_INITIAL_TASK = CompletableFuture.completedFuture(Unit.INSTANCE);
-	private static final Component NBT_TOOLTIP = Component.literal("(+NBT)");
 	private static final Component SOCIAL_INTERACTIONS_NOT_AVAILABLE = Component.translatable("multiplayer.socialInteractions.not_available");
 	public static final String UPDATE_DRIVERS_ADVICE = "Please make sure you have up-to-date drivers (see aka.ms/mcdriver for instructions).";
 	private final long canary = Double.doubleToLongBits(Math.PI);
@@ -2112,10 +2110,8 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		this.pendingConnection = connection;
 	}
 
-	public void setLevel(ClientLevel clientLevel) {
-		ProgressScreen progressScreen = new ProgressScreen(true);
-		progressScreen.progressStartNoAbort(Component.translatable("connect.joining"));
-		this.updateScreenAndTick(progressScreen);
+	public void setLevel(ClientLevel clientLevel, ReceivingLevelScreen.Reason reason) {
+		this.updateScreenAndTick(new ReceivingLevelScreen(() -> false, reason));
 		this.level = clientLevel;
 		this.updateLevelInEngines(clientLevel);
 		if (!this.isLocalServer) {
@@ -2384,7 +2380,6 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		blockEntity.removeComponentsFromTag(compoundTag);
 		BlockItem.setBlockEntityData(itemStack, blockEntity.getType(), compoundTag);
 		itemStack.applyComponents(blockEntity.collectComponents());
-		itemStack.update(DataComponents.LORE, ItemLore.EMPTY, NBT_TOOLTIP, ItemLore::withLineAdded);
 	}
 
 	public CrashReport fillReport(CrashReport crashReport) {
@@ -2459,22 +2454,10 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 
 			systemReport.setDetail("Graphics mode", options.graphicsMode().get().toString());
 			systemReport.setDetail("Render Distance", options.getEffectiveRenderDistance() + "/" + options.renderDistance().get() + " chunks");
-			systemReport.setDetail("Resource Packs", (Supplier<String>)(() -> {
-				StringBuilder stringBuilder = new StringBuilder();
+		}
 
-				for (String stringx : options.resourcePacks) {
-					if (stringBuilder.length() > 0) {
-						stringBuilder.append(", ");
-					}
-
-					stringBuilder.append(stringx);
-					if (options.incompatibleResourcePacks.contains(stringx)) {
-						stringBuilder.append(" (incompatible)");
-					}
-				}
-
-				return stringBuilder.toString();
-			}));
+		if (minecraft != null) {
+			systemReport.setDetail("Resource Packs", (Supplier<String>)(() -> PackRepository.displayPackList(minecraft.getResourcePackRepository().getSelectedPacks())));
 		}
 
 		if (languageManager != null) {

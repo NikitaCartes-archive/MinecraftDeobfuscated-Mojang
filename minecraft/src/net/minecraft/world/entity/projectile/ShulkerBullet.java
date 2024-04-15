@@ -51,11 +51,8 @@ public class ShulkerBullet extends Projectile {
 	public ShulkerBullet(Level level, LivingEntity livingEntity, Entity entity, Direction.Axis axis) {
 		this(EntityType.SHULKER_BULLET, level);
 		this.setOwner(livingEntity);
-		BlockPos blockPos = livingEntity.blockPosition();
-		double d = (double)blockPos.getX() + 0.5;
-		double e = (double)blockPos.getY() + 0.5;
-		double f = (double)blockPos.getZ() + 0.5;
-		this.moveTo(d, e, f, this.getYRot(), this.getXRot());
+		Vec3 vec3 = livingEntity.getBoundingBox().getCenter();
+		this.moveTo(vec3.x, vec3.y, vec3.z, this.getYRot(), this.getXRot());
 		this.finalTarget = entity;
 		this.currentMoveDirection = Direction.UP;
 		this.selectNextMoveDirection(axis);

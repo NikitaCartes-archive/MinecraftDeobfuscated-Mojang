@@ -11,11 +11,11 @@ public record ServerboundChatCommandPacket(String command) implements Packet<Ser
 	);
 
 	private ServerboundChatCommandPacket(FriendlyByteBuf friendlyByteBuf) {
-		this(friendlyByteBuf.readUtf(256));
+		this(friendlyByteBuf.readUtf());
 	}
 
 	private void write(FriendlyByteBuf friendlyByteBuf) {
-		friendlyByteBuf.writeUtf(this.command, 256);
+		friendlyByteBuf.writeUtf(this.command);
 	}
 
 	@Override

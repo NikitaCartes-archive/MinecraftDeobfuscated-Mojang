@@ -56,6 +56,7 @@ import net.minecraft.core.SectionPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtException;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundChunksBiomesPacket;
 import net.minecraft.network.protocol.game.ClientboundSetChunkCacheCenterPacket;
@@ -610,7 +611,7 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 		Throwable throwable2 = throwable instanceof CompletionException completionException ? completionException.getCause() : throwable;
 		Throwable throwable3 = throwable2 instanceof ReportedException reportedException ? reportedException.getCause() : throwable2;
 		boolean bl = throwable3 instanceof Error;
-		boolean bl2 = throwable3 instanceof IOException || throwable3 instanceof ChunkSerializer.ChunkReadException;
+		boolean bl2 = throwable3 instanceof IOException || throwable3 instanceof NbtException;
 		if (!bl && bl2) {
 			LOGGER.error("Couldn't load chunk {}", chunkPos, throwable3);
 			this.level.getServer().reportChunkLoadFailure(chunkPos);

@@ -11,6 +11,10 @@ public class DustParticle extends DustParticleBase<DustParticleOptions> {
 		ClientLevel clientLevel, double d, double e, double f, double g, double h, double i, DustParticleOptions dustParticleOptions, SpriteSet spriteSet
 	) {
 		super(clientLevel, d, e, f, g, h, i, dustParticleOptions, spriteSet);
+		float j = this.random.nextFloat() * 0.4F + 0.6F;
+		this.rCol = this.randomizeColor(dustParticleOptions.getColor().x(), j);
+		this.gCol = this.randomizeColor(dustParticleOptions.getColor().y(), j);
+		this.bCol = this.randomizeColor(dustParticleOptions.getColor().z(), j);
 	}
 
 	@Environment(EnvType.CLIENT)

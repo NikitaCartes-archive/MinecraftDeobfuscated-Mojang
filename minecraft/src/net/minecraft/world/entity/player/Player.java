@@ -1057,63 +1057,61 @@ public abstract class Player extends LivingEntity {
 
 	@Override
 	protected Vec3 maybeBackOffFromEdge(Vec3 vec3, MoverType moverType) {
+		float f = this.maxUpStep();
 		if (!this.abilities.flying
-			&& vec3.y <= 0.0
+			&& !(vec3.y > 0.0)
 			&& (moverType == MoverType.SELF || moverType == MoverType.PLAYER)
 			&& this.isStayingOnGroundSurface()
-			&& this.isAboveGround()) {
+			&& this.isAboveGround(f)) {
 			double d = vec3.x;
 			double e = vec3.z;
-			double f = 0.05;
+			double g = 0.05;
+			double h = Math.signum(d) * 0.05;
 
-			while (d != 0.0 && this.level().noCollision(this, this.getBoundingBox().move(d, (double)(-this.maxUpStep()), 0.0))) {
-				if (d < 0.05 && d >= -0.05) {
+			double i;
+			for (i = Math.signum(e) * 0.05; d != 0.0 && this.canFallAtLeast(d, 0.0, f); d -= h) {
+				if (Math.abs(d) <= 0.05) {
 					d = 0.0;
-				} else if (d > 0.0) {
-					d -= 0.05;
-				} else {
-					d += 0.05;
+					break;
 				}
 			}
 
-			while (e != 0.0 && this.level().noCollision(this, this.getBoundingBox().move(0.0, (double)(-this.maxUpStep()), e))) {
-				if (e < 0.05 && e >= -0.05) {
+			while (e != 0.0 && this.canFallAtLeast(0.0, e, f)) {
+				if (Math.abs(e) <= 0.05) {
 					e = 0.0;
-				} else if (e > 0.0) {
-					e -= 0.05;
-				} else {
-					e += 0.05;
+					break;
 				}
+
+				e -= i;
 			}
 
-			while (d != 0.0 && e != 0.0 && this.level().noCollision(this, this.getBoundingBox().move(d, (double)(-this.maxUpStep()), e))) {
-				if (d < 0.05 && d >= -0.05) {
+			while (d != 0.0 && e != 0.0 && this.canFallAtLeast(d, e, f)) {
+				if (Math.abs(d) <= 0.05) {
 					d = 0.0;
-				} else if (d > 0.0) {
-					d -= 0.05;
 				} else {
-					d += 0.05;
+					d -= h;
 				}
 
-				if (e < 0.05 && e >= -0.05) {
+				if (Math.abs(e) <= 0.05) {
 					e = 0.0;
-				} else if (e > 0.0) {
-					e -= 0.05;
 				} else {
-					e += 0.05;
+					e -= i;
 				}
 			}
 
-			vec3 = new Vec3(d, vec3.y, e);
+			return new Vec3(d, vec3.y, e);
+		} else {
+			return vec3;
 		}
-
-		return vec3;
 	}
 
-	private boolean isAboveGround() {
-		return this.onGround()
-			|| this.fallDistance < this.maxUpStep()
-				&& !this.level().noCollision(this, this.getBoundingBox().move(0.0, (double)(this.fallDistance - this.maxUpStep()), 0.0));
+	private boolean isAboveGround(float f) {
+		return this.onGround() || this.fallDistance < f && !this.canFallAtLeast(0.0, 0.0, f - this.fallDistance);
+	}
+
+	private boolean canFallAtLeast(double d, double e, float f) {
+		AABB aABB = this.getBoundingBox();
+		return this.level().noCollision(this, new AABB(aABB.minX + d, aABB.minY - (double)f - 1.0E-5F, aABB.minZ + e, aABB.maxX + d, aABB.minY, aABB.maxZ + e));
 	}
 
 	public void attack(Entity entity) {

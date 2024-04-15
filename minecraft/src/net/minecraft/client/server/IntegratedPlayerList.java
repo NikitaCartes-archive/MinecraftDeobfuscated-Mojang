@@ -2,6 +2,7 @@ package net.minecraft.client.server;
 
 import com.mojang.authlib.GameProfile;
 import java.net.SocketAddress;
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.LayeredRegistryAccess;
@@ -14,6 +15,7 @@ import net.minecraft.world.level.storage.PlayerDataStorage;
 
 @Environment(EnvType.CLIENT)
 public class IntegratedPlayerList extends PlayerList {
+	@Nullable
 	private CompoundTag playerData;
 
 	public IntegratedPlayerList(IntegratedServer integratedServer, LayeredRegistryAccess<RegistryLayer> layeredRegistryAccess, PlayerDataStorage playerDataStorage) {
@@ -41,6 +43,7 @@ public class IntegratedPlayerList extends PlayerList {
 		return (IntegratedServer)super.getServer();
 	}
 
+	@Nullable
 	@Override
 	public CompoundTag getSingleplayerData() {
 		return this.playerData;

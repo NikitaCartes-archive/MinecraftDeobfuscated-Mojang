@@ -5,6 +5,9 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.collect.ImmutableList.Builder;
 import com.mojang.logging.LogUtils;
+import it.unimi.dsi.fastutil.floats.FloatArraySet;
+import it.unimi.dsi.fastutil.floats.FloatArrays;
+import it.unimi.dsi.fastutil.floats.FloatSet;
 import it.unimi.dsi.fastutil.objects.Object2DoubleArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
 import java.util.Arrays;
@@ -879,39 +882,64 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 		boolean bl = vec3.x != vec32.x;
 		boolean bl2 = vec3.y != vec32.y;
 		boolean bl3 = vec3.z != vec32.z;
-		boolean bl4 = this.onGround() || bl2 && vec3.y < 0.0;
-		if (this.maxUpStep() > 0.0F && bl4 && (bl || bl3)) {
-			Vec3 vec33 = collideBoundingBox(this, new Vec3(vec3.x, (double)this.maxUpStep(), vec3.z), aABB, this.level(), list);
-			Vec3 vec34 = collideBoundingBox(this, new Vec3(0.0, (double)this.maxUpStep(), 0.0), aABB.expandTowards(vec3.x, 0.0, vec3.z), this.level(), list);
-			if (vec34.y < (double)this.maxUpStep()) {
-				Vec3 vec35 = collideBoundingBox(this, new Vec3(vec3.x, 0.0, vec3.z), aABB.move(vec34), this.level(), list).add(vec34);
-				if (vec35.horizontalDistanceSqr() > vec33.horizontalDistanceSqr()) {
-					vec33 = vec35;
-				}
-			}
+		boolean bl4 = bl2 && vec3.y < 0.0;
+		if (this.maxUpStep() > 0.0F && (bl4 || this.onGround()) && (bl || bl3)) {
+			AABB aABB2 = bl4 ? aABB.move(0.0, vec32.y, 0.0) : aABB;
+			AABB aABB3 = aABB2.expandTowards(vec3.x, (double)this.maxUpStep(), vec3.z);
+			List<VoxelShape> list2 = collectColliders(this, this.level, list, aABB3);
+			float[] fs = collectCandidateStepUpHeights(aABB2, list2, this.maxUpStep());
 
-			if (vec33.horizontalDistanceSqr() > vec32.horizontalDistanceSqr()) {
-				return vec33.add(collideBoundingBox(this, new Vec3(0.0, -vec33.y + vec3.y, 0.0), aABB.move(vec33), this.level(), list));
+			for (float f : fs) {
+				Vec3 vec33 = collideWithShapes(new Vec3(vec3.x, (double)f, vec3.z), aABB2, list2);
+				if (vec33.horizontalDistanceSqr() > vec32.horizontalDistanceSqr()) {
+					return vec33;
+				}
 			}
 		}
 
 		return vec32;
 	}
 
+	private static float[] collectCandidateStepUpHeights(AABB aABB, List<VoxelShape> list, float f) {
+		FloatSet floatSet = new FloatArraySet(4);
+
+		for (VoxelShape voxelShape : list) {
+			for (double d : voxelShape.getCoords(Direction.Axis.Y)) {
+				float g = (float)(d - aABB.minY);
+				if (!(g < 1.0E-5F)) {
+					if (g > f) {
+						break;
+					}
+
+					floatSet.add(g);
+				}
+			}
+		}
+
+		float[] fs = floatSet.toFloatArray();
+		FloatArrays.unstableSort(fs);
+		return fs;
+	}
+
 	public static Vec3 collideBoundingBox(@Nullable Entity entity, Vec3 vec3, AABB aABB, Level level, List<VoxelShape> list) {
+		List<VoxelShape> list2 = collectColliders(entity, level, list, aABB.expandTowards(vec3));
+		return collideWithShapes(vec3, aABB, list2);
+	}
+
+	private static List<VoxelShape> collectColliders(@Nullable Entity entity, Level level, List<VoxelShape> list, AABB aABB) {
 		Builder<VoxelShape> builder = ImmutableList.builderWithExpectedSize(list.size() + 1);
 		if (!list.isEmpty()) {
 			builder.addAll(list);
 		}
 
 		WorldBorder worldBorder = level.getWorldBorder();
-		boolean bl = entity != null && worldBorder.isInsideCloseToBorder(entity, aABB.expandTowards(vec3));
+		boolean bl = entity != null && worldBorder.isInsideCloseToBorder(entity, aABB);
 		if (bl) {
 			builder.add(worldBorder.getCollisionShape());
 		}
 
-		builder.addAll(level.getBlockCollisions(entity, aABB.expandTowards(vec3)));
-		return collideWithShapes(vec3, aABB, builder.build());
+		builder.addAll(level.getBlockCollisions(entity, aABB));
+		return builder.build();
 	}
 
 	private static Vec3 collideWithShapes(Vec3 vec3, AABB aABB, List<VoxelShape> list) {

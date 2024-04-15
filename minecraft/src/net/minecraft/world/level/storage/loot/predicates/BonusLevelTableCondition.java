@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Set;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
@@ -20,7 +21,7 @@ public record BonusLevelTableCondition(Holder<Enchantment> enchantment, List<Flo
 	public static final MapCodec<BonusLevelTableCondition> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> instance.group(
 					BuiltInRegistries.ENCHANTMENT.holderByNameCodec().fieldOf("enchantment").forGetter(BonusLevelTableCondition::enchantment),
-					Codec.FLOAT.listOf().fieldOf("chances").forGetter(BonusLevelTableCondition::values)
+					ExtraCodecs.nonEmptyList(Codec.FLOAT.listOf()).fieldOf("chances").forGetter(BonusLevelTableCondition::values)
 				)
 				.apply(instance, BonusLevelTableCondition::new)
 	);

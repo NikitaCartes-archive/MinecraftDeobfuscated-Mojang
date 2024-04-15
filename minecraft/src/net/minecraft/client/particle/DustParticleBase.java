@@ -3,14 +3,16 @@ package net.minecraft.client.particle;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.core.particles.DustParticleOptionsBase;
+import net.minecraft.core.particles.ScalableParticleOptionsBase;
 import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
-public class DustParticleBase<T extends DustParticleOptionsBase> extends TextureSheetParticle {
+public class DustParticleBase<T extends ScalableParticleOptionsBase> extends TextureSheetParticle {
 	private final SpriteSet sprites;
 
-	protected DustParticleBase(ClientLevel clientLevel, double d, double e, double f, double g, double h, double i, T dustParticleOptionsBase, SpriteSet spriteSet) {
+	protected DustParticleBase(
+		ClientLevel clientLevel, double d, double e, double f, double g, double h, double i, T scalableParticleOptionsBase, SpriteSet spriteSet
+	) {
 		super(clientLevel, d, e, f, g, h, i);
 		this.friction = 0.96F;
 		this.speedUpWhenYMotionIsBlocked = true;
@@ -18,13 +20,9 @@ public class DustParticleBase<T extends DustParticleOptionsBase> extends Texture
 		this.xd *= 0.1F;
 		this.yd *= 0.1F;
 		this.zd *= 0.1F;
-		float j = this.random.nextFloat() * 0.4F + 0.6F;
-		this.rCol = this.randomizeColor(dustParticleOptionsBase.getColor().x(), j);
-		this.gCol = this.randomizeColor(dustParticleOptionsBase.getColor().y(), j);
-		this.bCol = this.randomizeColor(dustParticleOptionsBase.getColor().z(), j);
-		this.quadSize = this.quadSize * 0.75F * dustParticleOptionsBase.getScale();
-		int k = (int)(8.0 / (this.random.nextDouble() * 0.8 + 0.2));
-		this.lifetime = (int)Math.max((float)k * dustParticleOptionsBase.getScale(), 1.0F);
+		this.quadSize = this.quadSize * 0.75F * scalableParticleOptionsBase.getScale();
+		int j = (int)(8.0 / (this.random.nextDouble() * 0.8 + 0.2));
+		this.lifetime = (int)Math.max((float)j * scalableParticleOptionsBase.getScale(), 1.0F);
 		this.setSpriteFromAge(spriteSet);
 	}
 

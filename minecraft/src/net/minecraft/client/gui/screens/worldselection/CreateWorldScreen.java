@@ -70,6 +70,7 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.WorldDataConfiguration;
+import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.levelgen.WorldDimensions;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.levelgen.WorldOptions;
@@ -419,8 +420,15 @@ public class CreateWorldScreen extends Screen {
 				Util.backgroundExecutor(),
 				this.minecraft
 			)
+			.thenApplyAsync(worldCreationContext -> {
+				for (LevelStem levelStem : worldCreationContext.datapackDimensions()) {
+					levelStem.generator().validate();
+				}
+
+				return worldCreationContext;
+			})
 			.thenAcceptAsync(this.uiState::setSettings, this.minecraft)
-			.handle(
+			.handleAsync(
 				(void_, throwable) -> {
 					if (throwable != null) {
 						LOGGER.warn("Failed to validate datapack", throwable);
@@ -445,7 +453,8 @@ public class CreateWorldScreen extends Screen {
 					}
 
 					return null;
-				}
+				},
+				this.minecraft
 			);
 	}
 

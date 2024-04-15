@@ -422,7 +422,7 @@ public final class NbtUtils {
 	}
 
 	public static Component toPrettyComponent(Tag tag) {
-		return new TextComponentTagVisitor("", 0).visit(tag);
+		return new TextComponentTagVisitor("").visit(tag);
 	}
 
 	public static String structureToSnbt(CompoundTag compoundTag) {

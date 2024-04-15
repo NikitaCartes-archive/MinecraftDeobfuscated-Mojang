@@ -41,14 +41,15 @@ public class WolfArmorLayer extends RenderLayer<Wolf, WolfModel<Wolf>> {
 	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, Wolf wolf, float f, float g, float h, float j, float k, float l) {
 		if (wolf.hasArmor()) {
 			ItemStack itemStack = wolf.getBodyArmorItem();
-			if (itemStack.getItem() instanceof AnimalArmorItem animalArmorItem) {
+			if (itemStack.getItem() instanceof AnimalArmorItem animalArmorItem && animalArmorItem.getBodyType() == AnimalArmorItem.BodyType.CANINE) {
 				this.getParentModel().copyPropertiesTo(this.model);
 				this.model.prepareMobModel(wolf, f, g, h);
 				this.model.setupAnim(wolf, f, g, j, k, l);
-				VertexConsumer var14 = multiBufferSource.getBuffer(RenderType.entityCutoutNoCull(animalArmorItem.getTexture()));
-				this.model.renderToBuffer(poseStack, var14, i, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
+				VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entityCutoutNoCull(animalArmorItem.getTexture()));
+				this.model.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
 				this.maybeRenderColoredLayer(poseStack, multiBufferSource, i, itemStack, animalArmorItem);
 				this.maybeRenderCracks(poseStack, multiBufferSource, i, itemStack);
+				return;
 			}
 		}
 	}

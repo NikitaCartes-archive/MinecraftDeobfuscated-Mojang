@@ -42,7 +42,7 @@ public class PacketDecoder<T extends PacketListener> extends ByteToMessageDecode
 			} else {
 				list.add(packet);
 				if (LOGGER.isDebugEnabled()) {
-					LOGGER.debug(Connection.PACKET_RECEIVED_MARKER, " IN: [{}:{}] {}", this.protocolInfo.id().id(), packetType, packet.getClass().getName());
+					LOGGER.debug(Connection.PACKET_RECEIVED_MARKER, " IN: [{}:{}] {} -> {} bytes", this.protocolInfo.id().id(), packetType, packet.getClass().getName(), i);
 				}
 
 				ProtocolSwapHandler.handleInboundTerminalPacket(channelHandlerContext, packet);
