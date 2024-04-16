@@ -376,7 +376,7 @@ public class Options {
 		"options.biomeBlendRadius", OptionInstance.noTooltip(), (component, integer) -> {
 			int i = integer * 2 + 1;
 			return genericValueLabel(component, Component.translatable("options.biomeBlendRadius." + i));
-		}, new OptionInstance.IntRange(0, 7), 2, integer -> Minecraft.getInstance().levelRenderer.allChanged()
+		}, new OptionInstance.IntRange(0, 7, false), 2, integer -> Minecraft.getInstance().levelRenderer.allChanged()
 	);
 	private final OptionInstance<Double> mouseWheelSensitivity = new OptionInstance<>(
 		"options.mouseWheelSensitivity",
@@ -1084,7 +1084,7 @@ public class Options {
 			"options.renderDistance",
 			OptionInstance.noTooltip(),
 			(component, integer) -> genericValueLabel(component, Component.translatable("options.chunks", integer)),
-			new OptionInstance.IntRange(2, bl ? 32 : 16),
+			new OptionInstance.IntRange(2, bl ? 32 : 16, false),
 			12,
 			integer -> Minecraft.getInstance().levelRenderer.needsUpdate()
 		);
@@ -1092,7 +1092,7 @@ public class Options {
 			"options.simulationDistance",
 			OptionInstance.noTooltip(),
 			(component, integer) -> genericValueLabel(component, Component.translatable("options.chunks", integer)),
-			new OptionInstance.IntRange(5, bl ? 32 : 16),
+			new OptionInstance.IntRange(5, bl ? 32 : 16, false),
 			12,
 			integer -> {
 			}

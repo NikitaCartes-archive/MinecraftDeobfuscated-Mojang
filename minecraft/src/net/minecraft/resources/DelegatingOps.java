@@ -10,6 +10,7 @@ import com.mojang.serialization.ListBuilder.Builder;
 import com.mojang.serialization.RecordBuilder.MapBuilder;
 import java.nio.ByteBuffer;
 import java.util.List;
+import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.IntStream;
@@ -26,6 +27,16 @@ public abstract class DelegatingOps<T> implements DynamicOps<T> {
 	@Override
 	public T empty() {
 		return this.delegate.empty();
+	}
+
+	@Override
+	public T emptyMap() {
+		return this.delegate.emptyMap();
+	}
+
+	@Override
+	public T emptyList() {
+		return this.delegate.emptyList();
 	}
 
 	@Override
@@ -114,6 +125,16 @@ public abstract class DelegatingOps<T> implements DynamicOps<T> {
 	}
 
 	@Override
+	public DataResult<T> mergeToMap(T object, Map<T, T> map) {
+		return this.delegate.mergeToMap(object, map);
+	}
+
+	@Override
+	public DataResult<T> mergeToPrimitive(T object, T object2) {
+		return this.delegate.mergeToPrimitive(object, object2);
+	}
+
+	@Override
 	public DataResult<Stream<Pair<T, T>>> getMapValues(T object) {
 		return this.delegate.getMapValues(object);
 	}
@@ -121,6 +142,11 @@ public abstract class DelegatingOps<T> implements DynamicOps<T> {
 	@Override
 	public DataResult<Consumer<BiConsumer<T, T>>> getMapEntries(T object) {
 		return this.delegate.getMapEntries(object);
+	}
+
+	@Override
+	public T createMap(Map<T, T> map) {
+		return this.delegate.createMap(map);
 	}
 
 	@Override

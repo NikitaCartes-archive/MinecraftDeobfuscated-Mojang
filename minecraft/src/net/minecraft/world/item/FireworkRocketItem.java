@@ -83,8 +83,8 @@ public class FireworkRocketItem extends Item implements ProjectileItem {
 	public ProjectileItem.DispenseConfig createDispenseConfig() {
 		return ProjectileItem.DispenseConfig.builder()
 			.positionFunction(FireworkRocketItem::getEntityPokingOutOfBlockPos)
-			.uncertainty(0.5F)
-			.power(1.0F)
+			.uncertainty(1.0F)
+			.power(0.5F)
 			.overrideDispenseEvent(1004)
 			.build();
 	}

@@ -9,6 +9,7 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -18,7 +19,8 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 public abstract class AbstractHurtingProjectile extends Projectile {
-	public static final double DEFLECTION_SCALE = 0.05;
+	public static final double ATTACK_DEFLECTION_SCALE = 0.1;
+	public static final double BOUNCE_DEFLECTION_SCALE = 0.05;
 	public double xPower;
 	public double yPower;
 	public double zPower;
@@ -79,7 +81,7 @@ public abstract class AbstractHurtingProjectile extends Projectile {
 
 			HitResult hitResult = ProjectileUtil.getHitResultOnMoveVector(this, this::canHitEntity, this.getClipType());
 			if (hitResult.getType() != HitResult.Type.MISS) {
-				this.hitOrDeflect(hitResult);
+				this.hitTargetOrDeflectSelf(hitResult);
 			}
 
 			this.checkInsideBlocks();
@@ -110,6 +112,11 @@ public abstract class AbstractHurtingProjectile extends Projectile {
 		} else {
 			this.discard();
 		}
+	}
+
+	@Override
+	public boolean hurt(DamageSource damageSource, float f) {
+		return !this.isInvulnerableTo(damageSource);
 	}
 
 	@Override
@@ -151,15 +158,6 @@ public abstract class AbstractHurtingProjectile extends Projectile {
 				this.zPower = listTag.getDouble(2);
 			}
 		}
-	}
-
-	@Override
-	protected void onPunch(Entity entity) {
-		Vec3 vec3 = entity.getLookAngle();
-		this.setDeltaMovement(vec3);
-		this.xPower = vec3.x * 0.1;
-		this.yPower = vec3.y * 0.1;
-		this.zPower = vec3.z * 0.1;
 	}
 
 	@Override
@@ -205,9 +203,17 @@ public abstract class AbstractHurtingProjectile extends Projectile {
 	}
 
 	@Override
-	public void onDeflection() {
-		this.xPower = this.getDeltaMovement().x * 0.05;
-		this.yPower = this.getDeltaMovement().y * 0.05;
-		this.zPower = this.getDeltaMovement().z * 0.05;
+	protected void onDeflection(@Nullable Entity entity, boolean bl) {
+		super.onDeflection(entity, bl);
+		if (bl) {
+			this.setDeltaMovement(this.getDeltaMovement().normalize());
+			this.xPower = this.getDeltaMovement().x * 0.1;
+			this.yPower = this.getDeltaMovement().y * 0.1;
+			this.zPower = this.getDeltaMovement().z * 0.1;
+		} else {
+			this.xPower = this.getDeltaMovement().x * 0.05;
+			this.yPower = this.getDeltaMovement().y * 0.05;
+			this.zPower = this.getDeltaMovement().z * 0.05;
+		}
 	}
 }

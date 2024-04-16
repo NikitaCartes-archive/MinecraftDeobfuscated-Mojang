@@ -29,6 +29,7 @@ import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.level.storage.loot.LootTable;
 
 public class ShipwreckPieces {
+	private static final int NUMBER_OF_BLOCKS_ALLOWED_IN_WORLD_GEN_REGION = 32;
 	static final BlockPos PIVOT = new BlockPos(4, 0, 15);
 	private static final ResourceLocation[] STRUCTURE_LOCATION_BEACHED = new ResourceLocation[]{
 		new ResourceLocation("shipwreck/with_mast"),
@@ -69,7 +70,7 @@ public class ShipwreckPieces {
 		"map_chest", BuiltInLootTables.SHIPWRECK_MAP, "treasure_chest", BuiltInLootTables.SHIPWRECK_TREASURE, "supply_chest", BuiltInLootTables.SHIPWRECK_SUPPLY
 	);
 
-	public static void addPieces(
+	public static ShipwreckPieces.ShipwreckPiece addRandomPiece(
 		StructureTemplateManager structureTemplateManager,
 		BlockPos blockPos,
 		Rotation rotation,
@@ -78,7 +79,9 @@ public class ShipwreckPieces {
 		boolean bl
 	) {
 		ResourceLocation resourceLocation = Util.getRandom(bl ? STRUCTURE_LOCATION_BEACHED : STRUCTURE_LOCATION_OCEAN, randomSource);
-		structurePieceAccessor.addPiece(new ShipwreckPieces.ShipwreckPiece(structureTemplateManager, resourceLocation, blockPos, rotation, bl));
+		ShipwreckPieces.ShipwreckPiece shipwreckPiece = new ShipwreckPieces.ShipwreckPiece(structureTemplateManager, resourceLocation, blockPos, rotation, bl);
+		structurePieceAccessor.addPiece(shipwreckPiece);
+		return shipwreckPiece;
 	}
 
 	public static class ShipwreckPiece extends TemplateStructurePiece {
@@ -129,28 +132,44 @@ public class ShipwreckPieces {
 			ChunkPos chunkPos,
 			BlockPos blockPos
 		) {
-			int i = worldGenLevel.getMaxBuildHeight();
-			int j = 0;
-			Vec3i vec3i = this.template.getSize();
-			Heightmap.Types types = this.isBeached ? Heightmap.Types.WORLD_SURFACE_WG : Heightmap.Types.OCEAN_FLOOR_WG;
-			int k = vec3i.getX() * vec3i.getZ();
-			if (k == 0) {
-				j = worldGenLevel.getHeight(types, this.templatePosition.getX(), this.templatePosition.getZ());
+			if (this.isTooBigToFitInWorldGenRegion()) {
+				super.postProcess(worldGenLevel, structureManager, chunkGenerator, randomSource, boundingBox, chunkPos, blockPos);
 			} else {
-				BlockPos blockPos2 = this.templatePosition.offset(vec3i.getX() - 1, 0, vec3i.getZ() - 1);
+				int i = worldGenLevel.getMaxBuildHeight();
+				int j = 0;
+				Vec3i vec3i = this.template.getSize();
+				Heightmap.Types types = this.isBeached ? Heightmap.Types.WORLD_SURFACE_WG : Heightmap.Types.OCEAN_FLOOR_WG;
+				int k = vec3i.getX() * vec3i.getZ();
+				if (k == 0) {
+					j = worldGenLevel.getHeight(types, this.templatePosition.getX(), this.templatePosition.getZ());
+				} else {
+					BlockPos blockPos2 = this.templatePosition.offset(vec3i.getX() - 1, 0, vec3i.getZ() - 1);
 
-				for (BlockPos blockPos3 : BlockPos.betweenClosed(this.templatePosition, blockPos2)) {
-					int l = worldGenLevel.getHeight(types, blockPos3.getX(), blockPos3.getZ());
-					j += l;
-					i = Math.min(i, l);
+					for (BlockPos blockPos3 : BlockPos.betweenClosed(this.templatePosition, blockPos2)) {
+						int l = worldGenLevel.getHeight(types, blockPos3.getX(), blockPos3.getZ());
+						j += l;
+						i = Math.min(i, l);
+					}
+
+					j /= k;
 				}
 
-				j /= k;
+				this.adjustPositionHeight(this.isBeached ? this.calculateBeachedPosition(i, randomSource) : j);
+				super.postProcess(worldGenLevel, structureManager, chunkGenerator, randomSource, boundingBox, chunkPos, blockPos);
 			}
+		}
 
-			int m = this.isBeached ? i - vec3i.getY() / 2 - randomSource.nextInt(3) : j;
-			this.templatePosition = new BlockPos(this.templatePosition.getX(), m, this.templatePosition.getZ());
-			super.postProcess(worldGenLevel, structureManager, chunkGenerator, randomSource, boundingBox, chunkPos, blockPos);
+		public boolean isTooBigToFitInWorldGenRegion() {
+			Vec3i vec3i = this.template.getSize();
+			return vec3i.getX() > 32 || vec3i.getY() > 32;
+		}
+
+		public int calculateBeachedPosition(int i, RandomSource randomSource) {
+			return i - this.template.getSize().getY() / 2 - randomSource.nextInt(3);
+		}
+
+		public void adjustPositionHeight(int i) {
+			this.templatePosition = new BlockPos(this.templatePosition.getX(), i, this.templatePosition.getZ());
 		}
 	}
 }

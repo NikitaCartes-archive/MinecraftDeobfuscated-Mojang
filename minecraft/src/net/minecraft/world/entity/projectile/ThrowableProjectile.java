@@ -61,7 +61,7 @@ public abstract class ThrowableProjectile extends Projectile {
 		}
 
 		if (hitResult.getType() != HitResult.Type.MISS && !bl) {
-			this.hitOrDeflect(hitResult);
+			this.hitTargetOrDeflectSelf(hitResult);
 		}
 
 		this.checkInsideBlocks();

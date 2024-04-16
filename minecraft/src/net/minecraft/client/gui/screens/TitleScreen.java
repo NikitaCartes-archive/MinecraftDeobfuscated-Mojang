@@ -323,7 +323,7 @@ public class TitleScreen extends Screen {
 
 	@Override
 	protected void renderPanorama(GuiGraphics guiGraphics, float f) {
-		PANORAMA.render(guiGraphics, this.width, this.height, this.panoramaFade, f);
+		PANORAMA.render(guiGraphics, this.width, this.height, this.panoramaFade, this.advancePanoramaTime());
 	}
 
 	@Override

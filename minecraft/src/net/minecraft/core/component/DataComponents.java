@@ -11,6 +11,7 @@ import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.EncoderCache;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.Unit;
 import net.minecraft.world.LockCode;
@@ -51,6 +52,7 @@ import net.minecraft.world.level.block.entity.PotDecorations;
 import net.minecraft.world.level.saveddata.maps.MapId;
 
 public class DataComponents {
+	static final EncoderCache ENCODER_CACHE = new EncoderCache(512);
 	public static final DataComponentType<CustomData> CUSTOM_DATA = register("custom_data", builder -> builder.persistent(CustomData.CODEC));
 	public static final DataComponentType<Integer> MAX_STACK_SIZE = register(
 		"max_stack_size", builder -> builder.persistent(ExtraCodecs.intRange(1, 99)).networkSynchronized(ByteBufCodecs.VAR_INT)
@@ -65,26 +67,26 @@ public class DataComponents {
 		"unbreakable", builder -> builder.persistent(Unbreakable.CODEC).networkSynchronized(Unbreakable.STREAM_CODEC)
 	);
 	public static final DataComponentType<Component> CUSTOM_NAME = register(
-		"custom_name", builder -> builder.persistent(ComponentSerialization.FLAT_CODEC).networkSynchronized(ComponentSerialization.STREAM_CODEC)
+		"custom_name", builder -> builder.persistent(ComponentSerialization.FLAT_CODEC).networkSynchronized(ComponentSerialization.STREAM_CODEC).cacheEncoding()
 	);
 	public static final DataComponentType<Component> ITEM_NAME = register(
-		"item_name", builder -> builder.persistent(ComponentSerialization.FLAT_CODEC).networkSynchronized(ComponentSerialization.STREAM_CODEC)
+		"item_name", builder -> builder.persistent(ComponentSerialization.FLAT_CODEC).networkSynchronized(ComponentSerialization.STREAM_CODEC).cacheEncoding()
 	);
 	public static final DataComponentType<ItemLore> LORE = register(
-		"lore", builder -> builder.persistent(ItemLore.CODEC).networkSynchronized(ItemLore.STREAM_CODEC)
+		"lore", builder -> builder.persistent(ItemLore.CODEC).networkSynchronized(ItemLore.STREAM_CODEC).cacheEncoding()
 	);
 	public static final DataComponentType<Rarity> RARITY = register("rarity", builder -> builder.persistent(Rarity.CODEC).networkSynchronized(Rarity.STREAM_CODEC));
 	public static final DataComponentType<ItemEnchantments> ENCHANTMENTS = register(
-		"enchantments", builder -> builder.persistent(ItemEnchantments.CODEC).networkSynchronized(ItemEnchantments.STREAM_CODEC)
+		"enchantments", builder -> builder.persistent(ItemEnchantments.CODEC).networkSynchronized(ItemEnchantments.STREAM_CODEC).cacheEncoding()
 	);
 	public static final DataComponentType<AdventureModePredicate> CAN_PLACE_ON = register(
-		"can_place_on", builder -> builder.persistent(AdventureModePredicate.CODEC).networkSynchronized(AdventureModePredicate.STREAM_CODEC)
+		"can_place_on", builder -> builder.persistent(AdventureModePredicate.CODEC).networkSynchronized(AdventureModePredicate.STREAM_CODEC).cacheEncoding()
 	);
 	public static final DataComponentType<AdventureModePredicate> CAN_BREAK = register(
-		"can_break", builder -> builder.persistent(AdventureModePredicate.CODEC).networkSynchronized(AdventureModePredicate.STREAM_CODEC)
+		"can_break", builder -> builder.persistent(AdventureModePredicate.CODEC).networkSynchronized(AdventureModePredicate.STREAM_CODEC).cacheEncoding()
 	);
 	public static final DataComponentType<ItemAttributeModifiers> ATTRIBUTE_MODIFIERS = register(
-		"attribute_modifiers", builder -> builder.persistent(ItemAttributeModifiers.CODEC).networkSynchronized(ItemAttributeModifiers.STREAM_CODEC)
+		"attribute_modifiers", builder -> builder.persistent(ItemAttributeModifiers.CODEC).networkSynchronized(ItemAttributeModifiers.STREAM_CODEC).cacheEncoding()
 	);
 	public static final DataComponentType<CustomModelData> CUSTOM_MODEL_DATA = register(
 		"custom_model_data", builder -> builder.persistent(CustomModelData.CODEC).networkSynchronized(CustomModelData.STREAM_CODEC)
@@ -106,14 +108,16 @@ public class DataComponents {
 	);
 	public static final DataComponentType<Unit> INTANGIBLE_PROJECTILE = register("intangible_projectile", builder -> builder.persistent(Codec.unit(Unit.INSTANCE)));
 	public static final DataComponentType<FoodProperties> FOOD = register(
-		"food", builder -> builder.persistent(FoodProperties.DIRECT_CODEC).networkSynchronized(FoodProperties.DIRECT_STREAM_CODEC)
+		"food", builder -> builder.persistent(FoodProperties.DIRECT_CODEC).networkSynchronized(FoodProperties.DIRECT_STREAM_CODEC).cacheEncoding()
 	);
 	public static final DataComponentType<Unit> FIRE_RESISTANT = register(
 		"fire_resistant", builder -> builder.persistent(Codec.unit(Unit.INSTANCE)).networkSynchronized(StreamCodec.unit(Unit.INSTANCE))
 	);
-	public static final DataComponentType<Tool> TOOL = register("tool", builder -> builder.persistent(Tool.CODEC).networkSynchronized(Tool.STREAM_CODEC));
+	public static final DataComponentType<Tool> TOOL = register(
+		"tool", builder -> builder.persistent(Tool.CODEC).networkSynchronized(Tool.STREAM_CODEC).cacheEncoding()
+	);
 	public static final DataComponentType<ItemEnchantments> STORED_ENCHANTMENTS = register(
-		"stored_enchantments", builder -> builder.persistent(ItemEnchantments.CODEC).networkSynchronized(ItemEnchantments.STREAM_CODEC)
+		"stored_enchantments", builder -> builder.persistent(ItemEnchantments.CODEC).networkSynchronized(ItemEnchantments.STREAM_CODEC).cacheEncoding()
 	);
 	public static final DataComponentType<DyedItemColor> DYED_COLOR = register(
 		"dyed_color", builder -> builder.persistent(DyedItemColor.CODEC).networkSynchronized(DyedItemColor.STREAM_CODEC)
@@ -122,32 +126,36 @@ public class DataComponents {
 		"map_color", builder -> builder.persistent(MapItemColor.CODEC).networkSynchronized(MapItemColor.STREAM_CODEC)
 	);
 	public static final DataComponentType<MapId> MAP_ID = register("map_id", builder -> builder.persistent(MapId.CODEC).networkSynchronized(MapId.STREAM_CODEC));
-	public static final DataComponentType<MapDecorations> MAP_DECORATIONS = register("map_decorations", builder -> builder.persistent(MapDecorations.CODEC));
+	public static final DataComponentType<MapDecorations> MAP_DECORATIONS = register(
+		"map_decorations", builder -> builder.persistent(MapDecorations.CODEC).cacheEncoding()
+	);
 	public static final DataComponentType<MapPostProcessing> MAP_POST_PROCESSING = register(
 		"map_post_processing", builder -> builder.networkSynchronized(MapPostProcessing.STREAM_CODEC)
 	);
 	public static final DataComponentType<ChargedProjectiles> CHARGED_PROJECTILES = register(
-		"charged_projectiles", builder -> builder.persistent(ChargedProjectiles.CODEC).networkSynchronized(ChargedProjectiles.STREAM_CODEC)
+		"charged_projectiles", builder -> builder.persistent(ChargedProjectiles.CODEC).networkSynchronized(ChargedProjectiles.STREAM_CODEC).cacheEncoding()
 	);
 	public static final DataComponentType<BundleContents> BUNDLE_CONTENTS = register(
-		"bundle_contents", builder -> builder.persistent(BundleContents.CODEC).networkSynchronized(BundleContents.STREAM_CODEC)
+		"bundle_contents", builder -> builder.persistent(BundleContents.CODEC).networkSynchronized(BundleContents.STREAM_CODEC).cacheEncoding()
 	);
 	public static final DataComponentType<PotionContents> POTION_CONTENTS = register(
-		"potion_contents", builder -> builder.persistent(PotionContents.CODEC).networkSynchronized(PotionContents.STREAM_CODEC)
+		"potion_contents", builder -> builder.persistent(PotionContents.CODEC).networkSynchronized(PotionContents.STREAM_CODEC).cacheEncoding()
 	);
 	public static final DataComponentType<SuspiciousStewEffects> SUSPICIOUS_STEW_EFFECTS = register(
-		"suspicious_stew_effects", builder -> builder.persistent(SuspiciousStewEffects.CODEC).networkSynchronized(SuspiciousStewEffects.STREAM_CODEC)
+		"suspicious_stew_effects", builder -> builder.persistent(SuspiciousStewEffects.CODEC).networkSynchronized(SuspiciousStewEffects.STREAM_CODEC).cacheEncoding()
 	);
 	public static final DataComponentType<WritableBookContent> WRITABLE_BOOK_CONTENT = register(
-		"writable_book_content", builder -> builder.persistent(WritableBookContent.CODEC).networkSynchronized(WritableBookContent.STREAM_CODEC)
+		"writable_book_content", builder -> builder.persistent(WritableBookContent.CODEC).networkSynchronized(WritableBookContent.STREAM_CODEC).cacheEncoding()
 	);
 	public static final DataComponentType<WrittenBookContent> WRITTEN_BOOK_CONTENT = register(
-		"written_book_content", builder -> builder.persistent(WrittenBookContent.CODEC).networkSynchronized(WrittenBookContent.STREAM_CODEC)
+		"written_book_content", builder -> builder.persistent(WrittenBookContent.CODEC).networkSynchronized(WrittenBookContent.STREAM_CODEC).cacheEncoding()
 	);
 	public static final DataComponentType<ArmorTrim> TRIM = register(
-		"trim", builder -> builder.persistent(ArmorTrim.CODEC).networkSynchronized(ArmorTrim.STREAM_CODEC)
+		"trim", builder -> builder.persistent(ArmorTrim.CODEC).networkSynchronized(ArmorTrim.STREAM_CODEC).cacheEncoding()
 	);
-	public static final DataComponentType<DebugStickState> DEBUG_STICK_STATE = register("debug_stick_state", builder -> builder.persistent(DebugStickState.CODEC));
+	public static final DataComponentType<DebugStickState> DEBUG_STICK_STATE = register(
+		"debug_stick_state", builder -> builder.persistent(DebugStickState.CODEC).cacheEncoding()
+	);
 	public static final DataComponentType<CustomData> ENTITY_DATA = register(
 		"entity_data", builder -> builder.persistent(CustomData.CODEC_WITH_ID).networkSynchronized(CustomData.STREAM_CODEC)
 	);
@@ -158,46 +166,49 @@ public class DataComponents {
 		"block_entity_data", builder -> builder.persistent(CustomData.CODEC_WITH_ID).networkSynchronized(CustomData.STREAM_CODEC)
 	);
 	public static final DataComponentType<Holder<Instrument>> INSTRUMENT = register(
-		"instrument", builder -> builder.persistent(Instrument.CODEC).networkSynchronized(Instrument.STREAM_CODEC)
+		"instrument", builder -> builder.persistent(Instrument.CODEC).networkSynchronized(Instrument.STREAM_CODEC).cacheEncoding()
 	);
 	public static final DataComponentType<Integer> OMINOUS_BOTTLE_AMPLIFIER = register(
 		"ominous_bottle_amplifier", builder -> builder.persistent(ExtraCodecs.intRange(0, 4)).networkSynchronized(ByteBufCodecs.VAR_INT)
 	);
-	public static final DataComponentType<List<ResourceLocation>> RECIPES = register("recipes", builder -> builder.persistent(ResourceLocation.CODEC.listOf()));
+	public static final DataComponentType<List<ResourceLocation>> RECIPES = register(
+		"recipes", builder -> builder.persistent(ResourceLocation.CODEC.listOf()).cacheEncoding()
+	);
 	public static final DataComponentType<LodestoneTracker> LODESTONE_TRACKER = register(
-		"lodestone_tracker", builder -> builder.persistent(LodestoneTracker.CODEC).networkSynchronized(LodestoneTracker.STREAM_CODEC)
+		"lodestone_tracker", builder -> builder.persistent(LodestoneTracker.CODEC).networkSynchronized(LodestoneTracker.STREAM_CODEC).cacheEncoding()
 	);
 	public static final DataComponentType<FireworkExplosion> FIREWORK_EXPLOSION = register(
-		"firework_explosion", builder -> builder.persistent(FireworkExplosion.CODEC).networkSynchronized(FireworkExplosion.STREAM_CODEC)
+		"firework_explosion", builder -> builder.persistent(FireworkExplosion.CODEC).networkSynchronized(FireworkExplosion.STREAM_CODEC).cacheEncoding()
 	);
 	public static final DataComponentType<Fireworks> FIREWORKS = register(
-		"fireworks", builder -> builder.persistent(Fireworks.CODEC).networkSynchronized(Fireworks.STREAM_CODEC)
+		"fireworks", builder -> builder.persistent(Fireworks.CODEC).networkSynchronized(Fireworks.STREAM_CODEC).cacheEncoding()
 	);
 	public static final DataComponentType<ResolvableProfile> PROFILE = register(
-		"profile", builder -> builder.persistent(ResolvableProfile.CODEC).networkSynchronized(ResolvableProfile.STREAM_CODEC)
+		"profile", builder -> builder.persistent(ResolvableProfile.CODEC).networkSynchronized(ResolvableProfile.STREAM_CODEC).cacheEncoding()
 	);
 	public static final DataComponentType<ResourceLocation> NOTE_BLOCK_SOUND = register(
 		"note_block_sound", builder -> builder.persistent(ResourceLocation.CODEC).networkSynchronized(ResourceLocation.STREAM_CODEC)
 	);
 	public static final DataComponentType<BannerPatternLayers> BANNER_PATTERNS = register(
-		"banner_patterns", builder -> builder.persistent(BannerPatternLayers.CODEC).networkSynchronized(BannerPatternLayers.STREAM_CODEC)
+		"banner_patterns", builder -> builder.persistent(BannerPatternLayers.CODEC).networkSynchronized(BannerPatternLayers.STREAM_CODEC).cacheEncoding()
 	);
 	public static final DataComponentType<DyeColor> BASE_COLOR = register(
 		"base_color", builder -> builder.persistent(DyeColor.CODEC).networkSynchronized(DyeColor.STREAM_CODEC)
 	);
 	public static final DataComponentType<PotDecorations> POT_DECORATIONS = register(
-		"pot_decorations", builder -> builder.persistent(PotDecorations.CODEC).networkSynchronized(PotDecorations.STREAM_CODEC)
+		"pot_decorations", builder -> builder.persistent(PotDecorations.CODEC).networkSynchronized(PotDecorations.STREAM_CODEC).cacheEncoding()
 	);
 	public static final DataComponentType<ItemContainerContents> CONTAINER = register(
-		"container", builder -> builder.persistent(ItemContainerContents.CODEC).networkSynchronized(ItemContainerContents.STREAM_CODEC)
+		"container", builder -> builder.persistent(ItemContainerContents.CODEC).networkSynchronized(ItemContainerContents.STREAM_CODEC).cacheEncoding()
 	);
 	public static final DataComponentType<BlockItemStateProperties> BLOCK_STATE = register(
-		"block_state", builder -> builder.persistent(BlockItemStateProperties.CODEC).networkSynchronized(BlockItemStateProperties.STREAM_CODEC)
+		"block_state", builder -> builder.persistent(BlockItemStateProperties.CODEC).networkSynchronized(BlockItemStateProperties.STREAM_CODEC).cacheEncoding()
 	);
 	public static final DataComponentType<List<BeehiveBlockEntity.Occupant>> BEES = register(
 		"bees",
 		builder -> builder.persistent(BeehiveBlockEntity.Occupant.LIST_CODEC)
 				.networkSynchronized(BeehiveBlockEntity.Occupant.STREAM_CODEC.apply(ByteBufCodecs.list()))
+				.cacheEncoding()
 	);
 	public static final DataComponentType<LockCode> LOCK = register("lock", builder -> builder.persistent(LockCode.CODEC));
 	public static final DataComponentType<SeededContainerLoot> CONTAINER_LOOT = register(

@@ -78,6 +78,7 @@ public abstract class Screen extends AbstractContainerEventHandler implements Re
 	public int width;
 	public int height;
 	private final List<Renderable> renderables = Lists.<Renderable>newArrayList();
+	private long lastPanoramaRenderTime = Util.getMillis();
 	protected Font font;
 	@Nullable
 	private URI clickedLink;
@@ -369,8 +370,16 @@ public abstract class Screen extends AbstractContainerEventHandler implements Re
 		this.minecraft.getMainRenderTarget().bindWrite(false);
 	}
 
+	protected float advancePanoramaTime() {
+		long l = Util.getMillis();
+		long m = 50L;
+		float f = (float)(l - this.lastPanoramaRenderTime) / 50.0F;
+		this.lastPanoramaRenderTime = l;
+		return f > 7.0F ? 0.5F : f;
+	}
+
 	protected void renderPanorama(GuiGraphics guiGraphics, float f) {
-		PANORAMA.render(guiGraphics, this.width, this.height, 1.0F, f);
+		PANORAMA.render(guiGraphics, this.width, this.height, 1.0F, this.advancePanoramaTime());
 	}
 
 	protected void renderMenuBackground(GuiGraphics guiGraphics) {

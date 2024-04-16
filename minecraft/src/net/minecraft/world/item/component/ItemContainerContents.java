@@ -24,12 +24,14 @@ public final class ItemContainerContents {
 		.apply(ByteBufCodecs.list(256))
 		.map(ItemContainerContents::new, itemContainerContents -> itemContainerContents.items);
 	private final NonNullList<ItemStack> items;
+	private final int hashCode;
 
 	private ItemContainerContents(NonNullList<ItemStack> nonNullList) {
 		if (nonNullList.size() > 256) {
 			throw new IllegalArgumentException("Got " + nonNullList.size() + " items, but maximum is 256");
 		} else {
 			this.items = nonNullList;
+			this.hashCode = ItemStack.hashStackList(nonNullList);
 		}
 	}
 
@@ -138,7 +140,7 @@ public final class ItemContainerContents {
 	}
 
 	public int hashCode() {
-		return ItemStack.hashStackList(this.items);
+		return this.hashCode;
 	}
 
 	static record Slot(int index, ItemStack item) {

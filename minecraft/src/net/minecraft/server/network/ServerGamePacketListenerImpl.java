@@ -127,7 +127,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.util.FutureChain;
 import net.minecraft.util.Mth;
 import net.minecraft.util.SignatureValidator;
@@ -1540,18 +1539,23 @@ public class ServerGamePacketListenerImpl
 
 						@Override
 						public void onAttack() {
-							if (!(entity instanceof ItemEntity)
-								&& !(entity instanceof ExperienceOrb)
-								&& entity != ServerGamePacketListenerImpl.this.player
-								&& (!(entity instanceof AbstractArrow) || entity.getType().is(EntityTypeTags.PUNCHABLE_PROJECTILES))) {
-								ItemStack itemStack = ServerGamePacketListenerImpl.this.player.getItemInHand(InteractionHand.MAIN_HAND);
-								if (itemStack.isItemEnabled(serverLevel.enabledFeatures())) {
-									ServerGamePacketListenerImpl.this.player.attack(entity);
+							label23:
+							if (!(entity instanceof ItemEntity) && !(entity instanceof ExperienceOrb) && entity != ServerGamePacketListenerImpl.this.player) {
+								if (entity instanceof AbstractArrow abstractArrow && !abstractArrow.isAttackable()) {
+									break label23;
 								}
-							} else {
-								ServerGamePacketListenerImpl.this.disconnect(Component.translatable("multiplayer.disconnect.invalid_entity_attacked"));
-								ServerGamePacketListenerImpl.LOGGER.warn("Player {} tried to attack an invalid entity", ServerGamePacketListenerImpl.this.player.getName().getString());
+
+								ItemStack itemStack = ServerGamePacketListenerImpl.this.player.getItemInHand(InteractionHand.MAIN_HAND);
+								if (!itemStack.isItemEnabled(serverLevel.enabledFeatures())) {
+									return;
+								}
+
+								ServerGamePacketListenerImpl.this.player.attack(entity);
+								return;
 							}
+
+							ServerGamePacketListenerImpl.this.disconnect(Component.translatable("multiplayer.disconnect.invalid_entity_attacked"));
+							ServerGamePacketListenerImpl.LOGGER.warn("Player {} tried to attack an invalid entity", ServerGamePacketListenerImpl.this.player.getName().getString());
 						}
 					}
 				);

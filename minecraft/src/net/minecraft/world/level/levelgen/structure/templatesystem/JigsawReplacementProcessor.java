@@ -46,7 +46,8 @@ public class JigsawReplacementProcessor extends StructureProcessor {
 					BlockStateParser.BlockResult blockResult = BlockStateParser.parseForBlock(levelReader.holderLookup(Registries.BLOCK), string, true);
 					blockState2 = blockResult.blockState();
 				} catch (CommandSyntaxException var11) {
-					throw new RuntimeException(var11);
+					LOGGER.error("Failed to parse jigsaw replacement state '{}' at {}: {}", string, blockPos, var11.getMessage());
+					return null;
 				}
 
 				return blockState2.is(Blocks.STRUCTURE_VOID) ? null : new StructureTemplate.StructureBlockInfo(structureBlockInfo2.pos(), blockState2, null);

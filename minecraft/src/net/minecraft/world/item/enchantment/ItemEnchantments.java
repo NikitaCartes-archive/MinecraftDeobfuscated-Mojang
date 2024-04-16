@@ -59,6 +59,13 @@ public class ItemEnchantments implements TooltipProvider {
 	ItemEnchantments(Object2IntOpenHashMap<Holder<Enchantment>> object2IntOpenHashMap, boolean bl) {
 		this.enchantments = object2IntOpenHashMap;
 		this.showInTooltip = bl;
+
+		for (Entry<Holder<Enchantment>> entry : object2IntOpenHashMap.object2IntEntrySet()) {
+			int i = entry.getIntValue();
+			if (i < 0 || i > 255) {
+				throw new IllegalArgumentException("Enchantment " + entry.getKey() + " has invalid level " + i);
+			}
+		}
 	}
 
 	public int getLevel(Enchantment enchantment) {
@@ -150,13 +157,13 @@ public class ItemEnchantments implements TooltipProvider {
 			if (i <= 0) {
 				this.enchantments.removeInt(enchantment.builtInRegistryHolder());
 			} else {
-				this.enchantments.put(enchantment.builtInRegistryHolder(), i);
+				this.enchantments.put(enchantment.builtInRegistryHolder(), Math.min(i, 255));
 			}
 		}
 
 		public void upgrade(Enchantment enchantment, int i) {
 			if (i > 0) {
-				this.enchantments.merge(enchantment.builtInRegistryHolder(), i, Integer::max);
+				this.enchantments.merge(enchantment.builtInRegistryHolder(), Math.min(i, 255), Integer::max);
 			}
 		}
 

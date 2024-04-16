@@ -250,7 +250,7 @@ public class FishingHook extends Projectile {
 
 	private void checkCollision() {
 		HitResult hitResult = ProjectileUtil.getHitResultOnMoveVector(this, this::canHitEntity);
-		this.hitOrDeflect(hitResult);
+		this.hitTargetOrDeflectSelf(hitResult);
 	}
 
 	@Override

@@ -11,7 +11,6 @@ import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.util.Mth;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.TraceableEntity;
@@ -151,13 +150,12 @@ public abstract class Projectile extends Entity implements TraceableEntity {
 		this.setDeltaMovement(this.getDeltaMovement().add(vec3.x, entity.onGround() ? 0.0 : vec3.y, vec3.z));
 	}
 
-	protected ProjectileDeflection hitOrDeflect(HitResult hitResult) {
+	protected ProjectileDeflection hitTargetOrDeflectSelf(HitResult hitResult) {
 		if (hitResult.getType() == HitResult.Type.ENTITY) {
 			EntityHitResult entityHitResult = (EntityHitResult)hitResult;
 			ProjectileDeflection projectileDeflection = entityHitResult.getEntity().deflection(this);
 			if (projectileDeflection != ProjectileDeflection.NONE) {
-				projectileDeflection.deflect(this, entityHitResult.getEntity(), this.random);
-				this.markHurt();
+				this.deflect(projectileDeflection, entityHitResult.getEntity(), this.getOwner(), false);
 				return projectileDeflection;
 			}
 		}
@@ -166,10 +164,26 @@ public abstract class Projectile extends Entity implements TraceableEntity {
 		return ProjectileDeflection.NONE;
 	}
 
+	public void deflect(ProjectileDeflection projectileDeflection, @Nullable Entity entity, @Nullable Entity entity2, boolean bl) {
+		if (!this.level().isClientSide) {
+			projectileDeflection.deflect(this, entity, this.random);
+			this.setOwner(entity2);
+			this.onDeflection(entity, bl);
+		}
+	}
+
+	protected void onDeflection(@Nullable Entity entity, boolean bl) {
+	}
+
 	protected void onHit(HitResult hitResult) {
 		HitResult.Type type = hitResult.getType();
 		if (type == HitResult.Type.ENTITY) {
 			EntityHitResult entityHitResult = (EntityHitResult)hitResult;
+			Entity entity = entityHitResult.getEntity();
+			if (entity.getType().is(EntityTypeTags.REDIRECTABLE_PROJECTILE) && entity instanceof Projectile projectile) {
+				projectile.deflect(ProjectileDeflection.AIM_DEFLECT, this.getOwner(), this.getOwner(), true);
+			}
+
 			this.onHitEntity(entityHitResult);
 			this.level().gameEvent(GameEvent.PROJECTILE_LAND, hitResult.getLocation(), GameEvent.Context.of(this, null));
 		} else if (type == HitResult.Type.BLOCK) {
@@ -254,40 +268,13 @@ public abstract class Projectile extends Entity implements TraceableEntity {
 		return this.getType().is(EntityTypeTags.IMPACT_PROJECTILES) && level.getGameRules().getBoolean(GameRules.RULE_PROJECTILESCANBREAKBLOCKS);
 	}
 
-	public void onDeflection() {
-	}
-
-	protected void onPunch(Entity entity) {
-		Vec3 vec3 = entity.getLookAngle();
-		this.setDeltaMovement(vec3.scale(this.getDeltaMovement().length()));
-	}
-
 	@Override
 	public boolean isPickable() {
-		return this.getType().is(EntityTypeTags.PUNCHABLE_PROJECTILES);
+		return this.getType().is(EntityTypeTags.REDIRECTABLE_PROJECTILE);
 	}
 
 	@Override
 	public float getPickRadius() {
 		return this.isPickable() ? 1.0F : 0.0F;
-	}
-
-	public boolean punch(DamageSource damageSource) {
-		if (this.isInvulnerableTo(damageSource)) {
-			return false;
-		} else {
-			this.markHurt();
-			Entity entity = damageSource.getEntity();
-			if (entity != null) {
-				if (!this.level().isClientSide) {
-					this.onPunch(entity);
-					this.setOwner(entity);
-				}
-
-				return true;
-			} else {
-				return false;
-			}
-		}
 	}
 }

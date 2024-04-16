@@ -281,7 +281,7 @@ public final class DataComponentPatch {
 			);
 
 		public Codec<?> valueCodec() {
-			return this.removed ? Codec.unit(Unit.INSTANCE) : this.type.codecOrThrow();
+			return this.removed ? Codec.EMPTY.codec() : this.type.codecOrThrow();
 		}
 	}
 

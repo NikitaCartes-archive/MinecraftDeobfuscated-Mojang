@@ -21,6 +21,8 @@ import java.util.stream.IntStream;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Util;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractOptionSliderButton;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.CycleButton;
@@ -263,7 +265,11 @@ public final class OptionInstance<T> {
 	}
 
 	@Environment(EnvType.CLIENT)
-	public static record IntRange(int minInclusive, int maxInclusive) implements OptionInstance.IntRangeBase {
+	public static record IntRange(int minInclusive, int maxInclusive, boolean applyValueImmediately) implements OptionInstance.IntRangeBase {
+		public IntRange(int i, int j) {
+			this(i, j, true);
+		}
+
 		public Optional<Integer> validateValue(Integer integer) {
 			return integer.compareTo(this.minInclusive()) >= 0 && integer.compareTo(this.maxInclusive()) <= 0 ? Optional.of(integer) : Optional.empty();
 		}
@@ -328,11 +334,14 @@ public final class OptionInstance<T> {
 	}
 
 	@Environment(EnvType.CLIENT)
-	static final class OptionInstanceSliderButton<N> extends AbstractOptionSliderButton {
+	public static final class OptionInstanceSliderButton<N> extends AbstractOptionSliderButton {
 		private final OptionInstance<N> instance;
 		private final OptionInstance.SliderableValueSet<N> values;
 		private final OptionInstance.TooltipSupplier<N> tooltipSupplier;
 		private final Consumer<N> onValueChanged;
+		@Nullable
+		private Long delayedApplyAt;
+		private final boolean applyValueImmediately;
 
 		OptionInstanceSliderButton(
 			Options options,
@@ -343,27 +352,49 @@ public final class OptionInstance<T> {
 			OptionInstance<N> optionInstance,
 			OptionInstance.SliderableValueSet<N> sliderableValueSet,
 			OptionInstance.TooltipSupplier<N> tooltipSupplier,
-			Consumer<N> consumer
+			Consumer<N> consumer,
+			boolean bl
 		) {
 			super(options, i, j, k, l, sliderableValueSet.toSliderValue(optionInstance.get()));
 			this.instance = optionInstance;
 			this.values = sliderableValueSet;
 			this.tooltipSupplier = tooltipSupplier;
 			this.onValueChanged = consumer;
+			this.applyValueImmediately = bl;
 			this.updateMessage();
 		}
 
 		@Override
 		protected void updateMessage() {
-			this.setMessage((Component)this.instance.toString.apply(this.instance.get()));
+			this.setMessage((Component)this.instance.toString.apply(this.values.fromSliderValue(this.value)));
 			this.setTooltip(this.tooltipSupplier.apply(this.values.fromSliderValue(this.value)));
 		}
 
 		@Override
 		protected void applyValue() {
-			this.instance.set(this.values.fromSliderValue(this.value));
-			this.options.save();
-			this.onValueChanged.accept(this.instance.get());
+			if (this.applyValueImmediately) {
+				this.applyUnsavedValue();
+			} else {
+				this.delayedApplyAt = Util.getMillis() + 600L;
+			}
+		}
+
+		public void applyUnsavedValue() {
+			N object = this.values.fromSliderValue(this.value);
+			if (!Objects.equals(object, this.instance.get())) {
+				this.instance.set(object);
+				this.options.save();
+				this.onValueChanged.accept(this.instance.get());
+			}
+		}
+
+		@Override
+		public void renderWidget(GuiGraphics guiGraphics, int i, int j, float f) {
+			super.renderWidget(guiGraphics, i, j, f);
+			if (this.delayedApplyAt != null && Util.getMillis() >= this.delayedApplyAt) {
+				this.delayedApplyAt = null;
+				this.applyUnsavedValue();
+			}
 		}
 	}
 
@@ -387,11 +418,17 @@ public final class OptionInstance<T> {
 
 		T fromSliderValue(double d);
 
+		default boolean applyValueImmediately() {
+			return true;
+		}
+
 		@Override
 		default Function<OptionInstance<T>, AbstractWidget> createButton(
 			OptionInstance.TooltipSupplier<T> tooltipSupplier, Options options, int i, int j, int k, Consumer<T> consumer
 		) {
-			return optionInstance -> new OptionInstance.OptionInstanceSliderButton<>(options, i, j, k, 20, optionInstance, this, tooltipSupplier, consumer);
+			return optionInstance -> new OptionInstance.OptionInstanceSliderButton<>(
+					options, i, j, k, 20, optionInstance, this, tooltipSupplier, consumer, this.applyValueImmediately()
+				);
 		}
 	}
 

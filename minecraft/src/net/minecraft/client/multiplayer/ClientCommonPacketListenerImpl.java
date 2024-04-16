@@ -70,7 +70,7 @@ public abstract class ClientCommonPacketListenerImpl implements ClientCommonPack
 	protected final WorldSessionTelemetryManager telemetryManager;
 	@Nullable
 	protected final Screen postDisconnectScreen;
-	protected boolean keepResourcePacks;
+	protected boolean isTransferring;
 	private final List<ClientCommonPacketListenerImpl.DeferredPacket> deferredPackets = new ArrayList();
 	protected final Map<ResourceLocation, byte[]> serverCookies;
 
@@ -89,6 +89,13 @@ public abstract class ClientCommonPacketListenerImpl implements ClientCommonPack
 		LOGGER.error("Failed to handle packet {}, disconnecting", packet, exception);
 		ClientCommonPacketListener.super.onPacketError(packet, exception);
 		this.connection.disconnect(Component.translatable("disconnect.packetError"));
+	}
+
+	@Override
+	public boolean shouldHandleMessage(Packet<?> packet) {
+		return ClientCommonPacketListener.super.shouldHandleMessage(packet)
+			? true
+			: this.isTransferring && (packet instanceof ClientboundStoreCookiePacket || packet instanceof ClientboundTransferPacket);
 	}
 
 	@Override
@@ -174,27 +181,23 @@ public abstract class ClientCommonPacketListenerImpl implements ClientCommonPack
 
 	@Override
 	public void handleTransfer(ClientboundTransferPacket clientboundTransferPacket) {
+		this.isTransferring = true;
+		PacketUtils.ensureRunningOnSameThread(clientboundTransferPacket, this, this.minecraft);
 		if (this.serverData == null) {
 			throw new IllegalStateException("Cannot transfer to server from singleplayer");
 		} else {
-			this.keepResourcePacks = true;
 			this.connection.disconnect(Component.translatable("disconnect.transfer"));
-			this.minecraft
-				.executeIfPossible(
-					() -> {
-						this.connection.setReadOnly();
-						this.connection.handleDisconnection();
-						ServerAddress serverAddress = new ServerAddress(clientboundTransferPacket.host(), clientboundTransferPacket.port());
-						ConnectScreen.startConnecting(
-							(Screen)Objects.requireNonNullElseGet(this.postDisconnectScreen, TitleScreen::new),
-							this.minecraft,
-							serverAddress,
-							this.serverData,
-							false,
-							new TransferState(this.serverCookies)
-						);
-					}
-				);
+			this.connection.setReadOnly();
+			this.connection.handleDisconnection();
+			ServerAddress serverAddress = new ServerAddress(clientboundTransferPacket.host(), clientboundTransferPacket.port());
+			ConnectScreen.startConnecting(
+				(Screen)Objects.requireNonNullElseGet(this.postDisconnectScreen, TitleScreen::new),
+				this.minecraft,
+				serverAddress,
+				this.serverData,
+				false,
+				new TransferState(this.serverCookies)
+			);
 		}
 	}
 
@@ -224,7 +227,7 @@ public abstract class ClientCommonPacketListenerImpl implements ClientCommonPack
 	@Override
 	public void onDisconnect(Component component) {
 		this.telemetryManager.onDisconnect();
-		this.minecraft.disconnect(this.createDisconnectScreen(component), this.keepResourcePacks);
+		this.minecraft.disconnect(this.createDisconnectScreen(component), this.isTransferring);
 		LOGGER.warn("Client disconnected with reason: {}", component.getString());
 	}
 

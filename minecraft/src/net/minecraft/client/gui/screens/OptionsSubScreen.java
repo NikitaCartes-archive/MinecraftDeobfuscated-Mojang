@@ -4,6 +4,8 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Options;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.OptionsList;
+import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -48,6 +50,12 @@ public class OptionsSubScreen extends Screen {
 
 	@Override
 	public void onClose() {
+		for (GuiEventListener guiEventListener : this.children()) {
+			if (guiEventListener instanceof OptionsList optionsList) {
+				optionsList.applyUnsavedChanges();
+			}
+		}
+
 		this.minecraft.setScreen(this.lastScreen);
 	}
 }

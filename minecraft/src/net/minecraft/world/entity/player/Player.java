@@ -76,6 +76,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.warden.WardenSpawnTracker;
 import net.minecraft.world.entity.projectile.FishingHook;
 import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.entity.projectile.ProjectileDeflection;
 import net.minecraft.world.food.FoodData;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ClickAction;
@@ -1123,8 +1124,8 @@ public abstract class Player extends LivingEntity {
 				f *= 0.2F + h * h * 0.8F;
 				g *= h;
 				this.resetAttackStrengthTicker();
-				if (entity.getType().is(EntityTypeTags.PUNCHABLE_PROJECTILES) && entity instanceof Projectile projectile) {
-					projectile.punch(this.damageSources().playerAttack(this));
+				if (entity.getType().is(EntityTypeTags.REDIRECTABLE_PROJECTILE) && entity instanceof Projectile projectile) {
+					projectile.deflect(ProjectileDeflection.AIM_DEFLECT, this, this, true);
 				} else {
 					if (f > 0.0F || g > 0.0F) {
 						boolean bl = h > 0.9F;

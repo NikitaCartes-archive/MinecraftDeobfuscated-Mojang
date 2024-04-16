@@ -7,6 +7,7 @@ import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureType;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePiecesBuilder;
@@ -32,9 +33,21 @@ public class ShipwreckStructure extends Structure {
 	private void generatePieces(StructurePiecesBuilder structurePiecesBuilder, Structure.GenerationContext generationContext) {
 		Rotation rotation = Rotation.getRandom(generationContext.random());
 		BlockPos blockPos = new BlockPos(generationContext.chunkPos().getMinBlockX(), 90, generationContext.chunkPos().getMinBlockZ());
-		ShipwreckPieces.addPieces(
+		ShipwreckPieces.ShipwreckPiece shipwreckPiece = ShipwreckPieces.addRandomPiece(
 			generationContext.structureTemplateManager(), blockPos, rotation, structurePiecesBuilder, generationContext.random(), this.isBeached
 		);
+		if (shipwreckPiece.isTooBigToFitInWorldGenRegion()) {
+			BoundingBox boundingBox = shipwreckPiece.getBoundingBox();
+			int j;
+			if (this.isBeached) {
+				int i = Structure.getLowestY(generationContext, boundingBox.minX(), boundingBox.getXSpan(), boundingBox.minZ(), boundingBox.getZSpan());
+				j = shipwreckPiece.calculateBeachedPosition(i, generationContext.random());
+			} else {
+				j = Structure.getMeanFirstOccupiedHeight(generationContext, boundingBox.minX(), boundingBox.getXSpan(), boundingBox.minZ(), boundingBox.getZSpan());
+			}
+
+			shipwreckPiece.adjustPositionHeight(j);
+		}
 	}
 
 	@Override
