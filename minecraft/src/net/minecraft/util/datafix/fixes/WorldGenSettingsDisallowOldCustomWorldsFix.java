@@ -5,6 +5,7 @@ import com.mojang.datafixers.OpticFinder;
 import com.mojang.datafixers.TypeRewriteRule;
 import com.mojang.datafixers.schemas.Schema;
 import com.mojang.datafixers.types.Type;
+import net.minecraft.nbt.NbtFormatException;
 
 public class WorldGenSettingsDisallowOldCustomWorldsFix extends DataFix {
 	public WorldGenSettingsDisallowOldCustomWorldsFix(Schema schema) {
@@ -20,7 +21,7 @@ public class WorldGenSettingsDisallowOldCustomWorldsFix extends DataFix {
 					typedx.write().map(dynamic -> dynamic.getMapValues().map(map -> {
 							map.forEach((dynamicx, dynamic2) -> {
 								if (dynamic2.get("type").asString().result().isEmpty()) {
-									throw new IllegalStateException("Unable load old custom worlds.");
+									throw new NbtFormatException("Unable load old custom worlds.");
 								}
 							});
 							return map;

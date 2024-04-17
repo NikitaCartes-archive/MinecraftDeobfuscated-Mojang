@@ -107,7 +107,7 @@ public record TrueTypeGlyphProviderDefinition(ResourceLocation location, float s
 	@Environment(EnvType.CLIENT)
 	public static record Shift(float x, float y) {
 		public static final TrueTypeGlyphProviderDefinition.Shift NONE = new TrueTypeGlyphProviderDefinition.Shift(0.0F, 0.0F);
-		public static final Codec<TrueTypeGlyphProviderDefinition.Shift> CODEC = Codec.floatRange(-100.0F, 100.0F)
+		public static final Codec<TrueTypeGlyphProviderDefinition.Shift> CODEC = Codec.floatRange(-512.0F, 512.0F)
 			.listOf()
 			.comapFlatMap(
 				list -> Util.fixedSize(list, 2).map(listx -> new TrueTypeGlyphProviderDefinition.Shift((Float)listx.get(0), (Float)listx.get(1))),

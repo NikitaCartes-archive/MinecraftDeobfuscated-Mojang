@@ -206,7 +206,6 @@ public abstract class AbstractHurtingProjectile extends Projectile {
 	protected void onDeflection(@Nullable Entity entity, boolean bl) {
 		super.onDeflection(entity, bl);
 		if (bl) {
-			this.setDeltaMovement(this.getDeltaMovement().normalize());
 			this.xPower = this.getDeltaMovement().x * 0.1;
 			this.yPower = this.getDeltaMovement().y * 0.1;
 			this.zPower = this.getDeltaMovement().z * 0.1;
