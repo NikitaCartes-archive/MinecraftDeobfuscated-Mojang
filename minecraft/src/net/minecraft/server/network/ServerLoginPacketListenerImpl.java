@@ -159,7 +159,7 @@ public class ServerLoginPacketListenerImpl implements ServerLoginPacketListener,
 
 	private void finishLoginAndWaitForClient(GameProfile gameProfile) {
 		this.state = ServerLoginPacketListenerImpl.State.PROTOCOL_SWITCHING;
-		this.connection.send(new ClientboundGameProfilePacket(gameProfile));
+		this.connection.send(new ClientboundGameProfilePacket(gameProfile, true));
 	}
 
 	@Override

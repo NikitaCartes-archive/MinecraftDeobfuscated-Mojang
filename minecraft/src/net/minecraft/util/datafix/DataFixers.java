@@ -184,6 +184,7 @@ import net.minecraft.util.datafix.fixes.RecipesRenameningFix;
 import net.minecraft.util.datafix.fixes.RedstoneWireConnectionsFix;
 import net.minecraft.util.datafix.fixes.References;
 import net.minecraft.util.datafix.fixes.RemapChunkStatusFix;
+import net.minecraft.util.datafix.fixes.RemoveEmptyItemInBrushableBlockFix;
 import net.minecraft.util.datafix.fixes.RemoveGolemGossipFix;
 import net.minecraft.util.datafix.fixes.RenameEnchantmentsFix;
 import net.minecraft.util.datafix.fixes.RenamedCoralFansFix;
@@ -1256,9 +1257,9 @@ public class DataFixers {
 		Schema schema203 = dataFixerBuilder.addSchema(3807, 1, SAME_NAMESPACED);
 		dataFixerBuilder.addFixer(new MapBannerBlockPosFormatFix(schema203));
 		Schema schema204 = dataFixerBuilder.addSchema(3808, V3808::new);
-		dataFixerBuilder.addFixer(new HorseBodyArmorItemFix(schema204, "minecraft:horse", "ArmorItem"));
+		dataFixerBuilder.addFixer(new HorseBodyArmorItemFix(schema204, "minecraft:horse", "ArmorItem", true));
 		Schema schema205 = dataFixerBuilder.addSchema(3808, 1, V3808_1::new);
-		dataFixerBuilder.addFixer(new HorseBodyArmorItemFix(schema205, "minecraft:llama", "DecorItem"));
+		dataFixerBuilder.addFixer(new HorseBodyArmorItemFix(schema205, "minecraft:llama", "DecorItem", false));
 		Schema schema206 = dataFixerBuilder.addSchema(3809, SAME_NAMESPACED);
 		dataFixerBuilder.addFixer(new ChestedHorsesInventoryZeroIndexingFix(schema206));
 		Schema schema207 = dataFixerBuilder.addSchema(3812, SAME_NAMESPACED);
@@ -1296,6 +1297,8 @@ public class DataFixers {
 		dataFixerBuilder.addFixer(new AddNewChoices(schema219, "Added Ominous Item Spawner", References.ENTITY));
 		Schema schema220 = dataFixerBuilder.addSchema(3828, SAME_NAMESPACED);
 		dataFixerBuilder.addFixer(new EmptyItemInVillagerTradeFix(schema220));
+		Schema schema221 = dataFixerBuilder.addSchema(3833, SAME_NAMESPACED);
+		dataFixerBuilder.addFixer(new RemoveEmptyItemInBrushableBlockFix(schema221));
 	}
 
 	private static UnaryOperator<String> createRenamerNoNamespace(Map<String, String> map) {

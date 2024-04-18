@@ -190,7 +190,8 @@ public class ClientHandshakePacketListenerImpl implements ClientLoginPacketListe
 						this.serverData,
 						this.parent,
 						this.cookies,
-						null
+						null,
+						clientboundGameProfilePacket.strictErrorHandling()
 					)
 				)
 			);
