@@ -303,7 +303,7 @@ public class WinScreen extends Screen {
 
 	@Override
 	public boolean isPauseScreen() {
-		return false;
+		return !this.poem;
 	}
 
 	@Override

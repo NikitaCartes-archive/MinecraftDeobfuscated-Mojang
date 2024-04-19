@@ -27,6 +27,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.EnchantedBookItem;
@@ -1335,9 +1336,14 @@ public class VillagerTrades {
 			this.tradeableEnchantments = Arrays.asList(enchantments);
 		}
 
+		private Enchantment getEnchantment(RandomSource randomSource, FeatureFlagSet featureFlagSet) {
+			List<Enchantment> list = this.tradeableEnchantments.stream().filter(enchantment -> enchantment.isEnabled(featureFlagSet)).toList();
+			return (Enchantment)list.get(randomSource.nextInt(list.size()));
+		}
+
 		@Override
 		public MerchantOffer getOffer(Entity entity, RandomSource randomSource) {
-			Enchantment enchantment = (Enchantment)this.tradeableEnchantments.get(randomSource.nextInt(this.tradeableEnchantments.size()));
+			Enchantment enchantment = this.getEnchantment(randomSource, entity.level().enabledFeatures());
 			int i = Math.max(enchantment.getMinLevel(), this.minLevel);
 			int j = Math.min(enchantment.getMaxLevel(), this.maxLevel);
 			int k = Mth.nextInt(randomSource, i, j);

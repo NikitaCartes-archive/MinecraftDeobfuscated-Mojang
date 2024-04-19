@@ -7,6 +7,7 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
+import net.minecraft.nbt.Tag;
 
 public class EncoderCache {
 	final LoadingCache<EncoderCache.Key<?, ?>, DataResult<?>> cache;
@@ -28,7 +29,9 @@ public class EncoderCache {
 
 			@Override
 			public <T> DataResult<T> encode(A object, DynamicOps<T> dynamicOps, T object2) {
-				return (DataResult<T>)EncoderCache.this.cache.getUnchecked(new EncoderCache.Key<>(codec, object, dynamicOps));
+				return EncoderCache.this.cache
+					.getUnchecked(new EncoderCache.Key<>(codec, object, dynamicOps))
+					.map(objectx -> objectx instanceof Tag tag ? tag.copy() : objectx);
 			}
 		};
 	}
