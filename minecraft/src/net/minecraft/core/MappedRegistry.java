@@ -78,6 +78,7 @@ public class MappedRegistry<T> implements WritableRegistry<T> {
 			return MappedRegistry.this.getTags().map(Pair::getSecond);
 		}
 	};
+	private final Object tagAdditionLock = new Object();
 
 	public MappedRegistry(ResourceKey<? extends Registry<T>> resourceKey, Lifecycle lifecycle) {
 		this(resourceKey, lifecycle, false);
@@ -269,14 +270,22 @@ public class MappedRegistry<T> implements WritableRegistry<T> {
 	@Override
 	public HolderSet.Named<T> getOrCreateTag(TagKey<T> tagKey) {
 		HolderSet.Named<T> named = (HolderSet.Named<T>)this.tags.get(tagKey);
-		if (named == null) {
-			named = this.createTag(tagKey);
-			Map<TagKey<T>, HolderSet.Named<T>> map = new IdentityHashMap(this.tags);
-			map.put(tagKey, named);
-			this.tags = map;
+		if (named != null) {
+			return named;
+		} else {
+			synchronized (this.tagAdditionLock) {
+				named = (HolderSet.Named<T>)this.tags.get(tagKey);
+				if (named != null) {
+					return named;
+				} else {
+					named = this.createTag(tagKey);
+					Map<TagKey<T>, HolderSet.Named<T>> map = new IdentityHashMap(this.tags);
+					map.put(tagKey, named);
+					this.tags = map;
+					return named;
+				}
+			}
 		}
-
-		return named;
 	}
 
 	private HolderSet.Named<T> createTag(TagKey<T> tagKey) {
@@ -380,10 +389,12 @@ public class MappedRegistry<T> implements WritableRegistry<T> {
 			);
 		}
 
-		Map<TagKey<T>, HolderSet.Named<T>> map3 = new IdentityHashMap(this.tags);
-		map.forEach((tagKey, list) -> ((HolderSet.Named)map3.computeIfAbsent(tagKey, this::createTag)).bind(list));
-		map2.forEach(Holder.Reference::bindTags);
-		this.tags = map3;
+		synchronized (this.tagAdditionLock) {
+			Map<TagKey<T>, HolderSet.Named<T>> map3 = new IdentityHashMap(this.tags);
+			map.forEach((tagKey, list) -> ((HolderSet.Named)map3.computeIfAbsent(tagKey, this::createTag)).bind(list));
+			map2.forEach(Holder.Reference::bindTags);
+			this.tags = map3;
+		}
 	}
 
 	@Override

@@ -5,9 +5,9 @@ import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.Lifecycle;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.HolderLookup;
@@ -90,7 +90,7 @@ public class RegistryOps<T> extends DelegatingOps<T> {
 
 	static final class HolderLookupAdapter implements RegistryOps.RegistryInfoLookup {
 		private final HolderLookup.Provider lookupProvider;
-		private final Map<ResourceKey<? extends Registry<?>>, Optional<? extends RegistryOps.RegistryInfo<?>>> lookups = new HashMap();
+		private final Map<ResourceKey<? extends Registry<?>>, Optional<? extends RegistryOps.RegistryInfo<?>>> lookups = new ConcurrentHashMap();
 
 		public HolderLookupAdapter(HolderLookup.Provider provider) {
 			this.lookupProvider = provider;
