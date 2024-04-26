@@ -24,6 +24,7 @@ public class ChestedHorsesInventoryZeroIndexingFix extends DataFix {
 		Type<?> type = this.getInputSchema().getType(References.ENTITY);
 		return TypeRewriteRule.seq(
 			this.horseLikeInventoryIndexingFixer(opticFinder, type, "minecraft:llama"),
+			this.horseLikeInventoryIndexingFixer(opticFinder, type, "minecraft:trader_llama"),
 			this.horseLikeInventoryIndexingFixer(opticFinder, type, "minecraft:mule"),
 			this.horseLikeInventoryIndexingFixer(opticFinder, type, "minecraft:donkey")
 		);

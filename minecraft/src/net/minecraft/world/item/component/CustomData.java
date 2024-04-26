@@ -1,5 +1,6 @@
 package net.minecraft.world.item.component;
 
+import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapDecoder;
@@ -20,8 +21,10 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import org.slf4j.Logger;
 
 public final class CustomData {
+	private static final Logger LOGGER = LogUtils.getLogger();
 	public static final CustomData EMPTY = new CustomData(new CompoundTag());
 	public static final Codec<CustomData> CODEC = CompoundTag.CODEC.xmap(CustomData::new, customData -> customData.tag);
 	public static final Codec<CustomData> CODEC_WITH_ID = CODEC.validate(
@@ -86,9 +89,21 @@ public final class CustomData {
 		CompoundTag compoundTag2 = compoundTag.copy();
 		compoundTag.merge(this.tag);
 		if (!compoundTag.equals(compoundTag2)) {
-			blockEntity.loadCustomOnly(compoundTag, provider);
-			blockEntity.setChanged();
-			return true;
+			try {
+				blockEntity.loadCustomOnly(compoundTag, provider);
+				blockEntity.setChanged();
+				return true;
+			} catch (Exception var8) {
+				LOGGER.warn("Failed to apply custom data to block entity at {}", blockEntity.getBlockPos(), var8);
+
+				try {
+					blockEntity.loadCustomOnly(compoundTag2, provider);
+				} catch (Exception var7) {
+					LOGGER.warn("Failed to rollback block entity at {} after failure", blockEntity.getBlockPos(), var7);
+				}
+
+				return false;
+			}
 		} else {
 			return false;
 		}

@@ -69,7 +69,7 @@ public class BannerBlockEntity extends BlockEntity implements Nameable {
 	protected void loadAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
 		super.loadAdditional(compoundTag, provider);
 		if (compoundTag.contains("CustomName", 8)) {
-			this.name = Component.Serializer.fromJson(compoundTag.getString("CustomName"), provider);
+			this.name = parseCustomNameSafe(compoundTag.getString("CustomName"), provider);
 		}
 
 		if (compoundTag.contains("patterns")) {
