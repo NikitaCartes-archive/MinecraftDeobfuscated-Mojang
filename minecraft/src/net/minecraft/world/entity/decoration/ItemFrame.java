@@ -1,6 +1,5 @@
 package net.minecraft.world.entity.decoration;
 
-import com.mojang.logging.LogUtils;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -38,13 +37,14 @@ import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.Validate;
-import org.slf4j.Logger;
 
 public class ItemFrame extends HangingEntity {
-	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final EntityDataAccessor<ItemStack> DATA_ITEM = SynchedEntityData.defineId(ItemFrame.class, EntityDataSerializers.ITEM_STACK);
 	private static final EntityDataAccessor<Integer> DATA_ROTATION = SynchedEntityData.defineId(ItemFrame.class, EntityDataSerializers.INT);
 	public static final int NUM_ROTATIONS = 8;
+	private static final float DEPTH = 0.0625F;
+	private static final float WIDTH = 0.75F;
+	private static final float HEIGHT = 0.75F;
 	private float dropChance = 1.0F;
 	private boolean fixed;
 
@@ -85,33 +85,14 @@ public class ItemFrame extends HangingEntity {
 	}
 
 	@Override
-	protected void recalculateBoundingBox() {
-		if (this.direction != null) {
-			double d = 0.46875;
-			double e = (double)this.pos.getX() + 0.5 - (double)this.direction.getStepX() * 0.46875;
-			double f = (double)this.pos.getY() + 0.5 - (double)this.direction.getStepY() * 0.46875;
-			double g = (double)this.pos.getZ() + 0.5 - (double)this.direction.getStepZ() * 0.46875;
-			this.setPosRaw(e, f, g);
-			double h = (double)this.getWidth();
-			double i = (double)this.getHeight();
-			double j = (double)this.getWidth();
-			Direction.Axis axis = this.direction.getAxis();
-			switch (axis) {
-				case X:
-					h = 1.0;
-					break;
-				case Y:
-					i = 1.0;
-					break;
-				case Z:
-					j = 1.0;
-			}
-
-			h /= 32.0;
-			i /= 32.0;
-			j /= 32.0;
-			this.setBoundingBox(new AABB(e - h, f - i, g - j, e + h, f + i, g + j));
-		}
+	protected AABB calculateBoundingBox(BlockPos blockPos, Direction direction) {
+		float f = 0.46875F;
+		Vec3 vec3 = Vec3.atCenterOf(blockPos).relative(direction, -0.46875);
+		Direction.Axis axis = direction.getAxis();
+		double d = axis == Direction.Axis.X ? 0.0625 : 0.75;
+		double e = axis == Direction.Axis.Y ? 0.0625 : 0.75;
+		double g = axis == Direction.Axis.Z ? 0.0625 : 0.75;
+		return AABB.ofSize(vec3, d, e, g);
 	}
 
 	@Override
@@ -169,16 +150,6 @@ public class ItemFrame extends HangingEntity {
 
 	public SoundEvent getRemoveItemSound() {
 		return SoundEvents.ITEM_FRAME_REMOVE_ITEM;
-	}
-
-	@Override
-	public int getWidth() {
-		return 12;
-	}
-
-	@Override
-	public int getHeight() {
-		return 12;
 	}
 
 	@Override

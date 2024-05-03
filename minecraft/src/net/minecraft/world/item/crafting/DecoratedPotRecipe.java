@@ -2,7 +2,6 @@ package net.minecraft.world.item.crafting;
 
 import net.minecraft.core.HolderLookup;
 import net.minecraft.tags.ItemTags;
-import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
@@ -14,12 +13,12 @@ public class DecoratedPotRecipe extends CustomRecipe {
 		super(craftingBookCategory);
 	}
 
-	public boolean matches(CraftingContainer craftingContainer, Level level) {
-		if (!this.canCraftInDimensions(craftingContainer.getWidth(), craftingContainer.getHeight())) {
+	public boolean matches(CraftingInput craftingInput, Level level) {
+		if (!this.canCraftInDimensions(craftingInput.width(), craftingInput.height())) {
 			return false;
 		} else {
-			for (int i = 0; i < craftingContainer.getContainerSize(); i++) {
-				ItemStack itemStack = craftingContainer.getItem(i);
+			for (int i = 0; i < craftingInput.size(); i++) {
+				ItemStack itemStack = craftingInput.getItem(i);
 				switch (i) {
 					case 1:
 					case 3:
@@ -43,12 +42,9 @@ public class DecoratedPotRecipe extends CustomRecipe {
 		}
 	}
 
-	public ItemStack assemble(CraftingContainer craftingContainer, HolderLookup.Provider provider) {
+	public ItemStack assemble(CraftingInput craftingInput, HolderLookup.Provider provider) {
 		PotDecorations potDecorations = new PotDecorations(
-			craftingContainer.getItem(1).getItem(),
-			craftingContainer.getItem(3).getItem(),
-			craftingContainer.getItem(5).getItem(),
-			craftingContainer.getItem(7).getItem()
+			craftingInput.getItem(1).getItem(), craftingInput.getItem(3).getItem(), craftingInput.getItem(5).getItem(), craftingInput.getItem(7).getItem()
 		);
 		return DecoratedPotBlockEntity.createDecoratedPotItem(potDecorations);
 	}

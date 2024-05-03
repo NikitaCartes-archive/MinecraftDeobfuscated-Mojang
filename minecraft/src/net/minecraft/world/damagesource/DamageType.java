@@ -2,6 +2,9 @@ package net.minecraft.world.damagesource;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.RegistryFixedCodec;
 
 public record DamageType(String msgId, DamageScaling scaling, float exhaustion, DamageEffects effects, DeathMessageType deathMessageType) {
 	public static final Codec<DamageType> DIRECT_CODEC = RecordCodecBuilder.create(
@@ -14,6 +17,7 @@ public record DamageType(String msgId, DamageScaling scaling, float exhaustion, 
 				)
 				.apply(instance, DamageType::new)
 	);
+	public static final Codec<Holder<DamageType>> CODEC = RegistryFixedCodec.create(Registries.DAMAGE_TYPE);
 
 	public DamageType(String string, DamageScaling damageScaling, float f) {
 		this(string, damageScaling, f, DamageEffects.HURT, DeathMessageType.DEFAULT);

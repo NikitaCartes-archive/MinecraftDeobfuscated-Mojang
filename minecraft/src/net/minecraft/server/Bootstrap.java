@@ -22,7 +22,6 @@ import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.DefaultAttributes;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.ComposterBlock;
@@ -87,7 +86,6 @@ public class Bootstrap {
 		checkTranslations(BuiltInRegistries.ENTITY_TYPE, EntityType::getDescriptionId, set);
 		checkTranslations(BuiltInRegistries.MOB_EFFECT, MobEffect::getDescriptionId, set);
 		checkTranslations(BuiltInRegistries.ITEM, Item::getDescriptionId, set);
-		checkTranslations(BuiltInRegistries.ENCHANTMENT, Enchantment::getDescriptionId, set);
 		checkTranslations(BuiltInRegistries.BLOCK, Block::getDescriptionId, set);
 		checkTranslations(BuiltInRegistries.CUSTOM_STAT, resourceLocation -> "stat." + resourceLocation.toString().replace(':', '.'), set);
 		checkGameruleTranslations(set);

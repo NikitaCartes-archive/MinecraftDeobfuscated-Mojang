@@ -120,9 +120,9 @@ public class LootContext {
 
 	public static enum EntityTarget implements StringRepresentable {
 		THIS("this", LootContextParams.THIS_ENTITY),
-		KILLER("killer", LootContextParams.KILLER_ENTITY),
-		DIRECT_KILLER("direct_killer", LootContextParams.DIRECT_KILLER_ENTITY),
-		KILLER_PLAYER("killer_player", LootContextParams.LAST_DAMAGE_PLAYER);
+		ATTACKER("attacker", LootContextParams.ATTACKING_ENTITY),
+		DIRECT_ATTACKER("direct_attacker", LootContextParams.DIRECT_ATTACKING_ENTITY),
+		ATTACKING_PLAYER("attacking_player", LootContextParams.LAST_DAMAGE_PLAYER);
 
 		public static final StringRepresentable.EnumCodec<LootContext.EntityTarget> CODEC = StringRepresentable.fromEnum(LootContext.EntityTarget::values);
 		private final String name;

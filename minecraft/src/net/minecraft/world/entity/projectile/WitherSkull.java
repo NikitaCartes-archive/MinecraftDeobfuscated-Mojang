@@ -5,6 +5,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -13,6 +14,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
@@ -52,23 +54,24 @@ public class WitherSkull extends AbstractHurtingProjectile {
 	@Override
 	protected void onHitEntity(EntityHitResult entityHitResult) {
 		super.onHitEntity(entityHitResult);
-		if (!this.level().isClientSide) {
-			Entity entity = entityHitResult.getEntity();
+		if (this.level() instanceof ServerLevel serverLevel) {
+			Entity var8 = entityHitResult.getEntity();
 			boolean bl;
 			if (this.getOwner() instanceof LivingEntity livingEntity) {
-				bl = entity.hurt(this.damageSources().witherSkull(this, livingEntity), 8.0F);
+				DamageSource damageSource = this.damageSources().witherSkull(this, livingEntity);
+				bl = var8.hurt(damageSource, 8.0F);
 				if (bl) {
-					if (entity.isAlive()) {
-						this.doEnchantDamageEffects(livingEntity, entity);
+					if (var8.isAlive()) {
+						EnchantmentHelper.doPostAttackEffects(serverLevel, var8, damageSource);
 					} else {
 						livingEntity.heal(5.0F);
 					}
 				}
 			} else {
-				bl = entity.hurt(this.damageSources().magic(), 5.0F);
+				bl = var8.hurt(this.damageSources().magic(), 5.0F);
 			}
 
-			if (bl && entity instanceof LivingEntity livingEntityx) {
+			if (bl && var8 instanceof LivingEntity livingEntityx) {
 				int i = 0;
 				if (this.level().getDifficulty() == Difficulty.NORMAL) {
 					i = 10;

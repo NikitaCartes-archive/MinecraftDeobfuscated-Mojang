@@ -28,7 +28,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
-import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import org.slf4j.Logger;
@@ -74,48 +73,54 @@ public class RecipeManager extends SimpleJsonResourceReloadListener {
 		return this.hasErrors;
 	}
 
-	public <C extends Container, T extends Recipe<C>> Optional<RecipeHolder<T>> getRecipeFor(RecipeType<T> recipeType, C container, Level level) {
-		return this.byType(recipeType).stream().filter(recipeHolder -> recipeHolder.value().matches(container, level)).findFirst();
+	public <I extends RecipeInput, T extends Recipe<I>> Optional<RecipeHolder<T>> getRecipeFor(RecipeType<T> recipeType, I recipeInput, Level level) {
+		return this.getRecipeFor(recipeType, recipeInput, level, (RecipeHolder<T>)null);
 	}
 
-	public <C extends Container, T extends Recipe<C>> Optional<RecipeHolder<T>> getRecipeFor(
-		RecipeType<T> recipeType, C container, Level level, @Nullable ResourceLocation resourceLocation
+	public <I extends RecipeInput, T extends Recipe<I>> Optional<RecipeHolder<T>> getRecipeFor(
+		RecipeType<T> recipeType, I recipeInput, Level level, @Nullable ResourceLocation resourceLocation
 	) {
-		if (resourceLocation != null) {
-			RecipeHolder<T> recipeHolder = this.byKeyTyped(recipeType, resourceLocation);
-			if (recipeHolder != null && recipeHolder.value().matches(container, level)) {
-				return Optional.of(recipeHolder);
-			}
-		}
-
-		return this.byType(recipeType).stream().filter(recipeHolderx -> recipeHolderx.value().matches(container, level)).findFirst();
+		RecipeHolder<T> recipeHolder = resourceLocation != null ? this.byKeyTyped(recipeType, resourceLocation) : null;
+		return this.getRecipeFor(recipeType, recipeInput, level, recipeHolder);
 	}
 
-	public <C extends Container, T extends Recipe<C>> List<RecipeHolder<T>> getAllRecipesFor(RecipeType<T> recipeType) {
+	public <I extends RecipeInput, T extends Recipe<I>> Optional<RecipeHolder<T>> getRecipeFor(
+		RecipeType<T> recipeType, I recipeInput, Level level, @Nullable RecipeHolder<T> recipeHolder
+	) {
+		if (recipeInput.isEmpty()) {
+			return Optional.empty();
+		} else {
+			return recipeHolder != null && recipeHolder.value().matches(recipeInput, level)
+				? Optional.of(recipeHolder)
+				: this.byType(recipeType).stream().filter(recipeHolderx -> recipeHolderx.value().matches(recipeInput, level)).findFirst();
+		}
+	}
+
+	public <I extends RecipeInput, T extends Recipe<I>> List<RecipeHolder<T>> getAllRecipesFor(RecipeType<T> recipeType) {
 		return List.copyOf(this.byType(recipeType));
 	}
 
-	public <C extends Container, T extends Recipe<C>> List<RecipeHolder<T>> getRecipesFor(RecipeType<T> recipeType, C container, Level level) {
+	public <I extends RecipeInput, T extends Recipe<I>> List<RecipeHolder<T>> getRecipesFor(RecipeType<T> recipeType, I recipeInput, Level level) {
 		return (List<RecipeHolder<T>>)this.byType(recipeType)
 			.stream()
-			.filter(recipeHolder -> recipeHolder.value().matches(container, level))
+			.filter(recipeHolder -> recipeHolder.value().matches(recipeInput, level))
 			.sorted(Comparator.comparing(recipeHolder -> recipeHolder.value().getResultItem(level.registryAccess()).getDescriptionId()))
 			.collect(Collectors.toList());
 	}
 
-	private <C extends Container, T extends Recipe<C>> Collection<RecipeHolder<T>> byType(RecipeType<T> recipeType) {
+	private <I extends RecipeInput, T extends Recipe<I>> Collection<RecipeHolder<T>> byType(RecipeType<T> recipeType) {
 		return (Collection<RecipeHolder<T>>)this.byType.get(recipeType);
 	}
 
-	public <C extends Container, T extends Recipe<C>> NonNullList<ItemStack> getRemainingItemsFor(RecipeType<T> recipeType, C container, Level level) {
-		Optional<RecipeHolder<T>> optional = this.getRecipeFor(recipeType, container, level);
+	public <I extends RecipeInput, T extends Recipe<I>> NonNullList<ItemStack> getRemainingItemsFor(RecipeType<T> recipeType, I recipeInput, Level level) {
+		Optional<RecipeHolder<T>> optional = this.getRecipeFor(recipeType, recipeInput, level);
 		if (optional.isPresent()) {
-			return ((RecipeHolder)optional.get()).value().getRemainingItems(container);
+			return ((RecipeHolder)optional.get()).value().getRemainingItems(recipeInput);
 		} else {
-			NonNullList<ItemStack> nonNullList = NonNullList.withSize(container.getContainerSize(), ItemStack.EMPTY);
+			NonNullList<ItemStack> nonNullList = NonNullList.withSize(recipeInput.size(), ItemStack.EMPTY);
 
 			for (int i = 0; i < nonNullList.size(); i++) {
-				nonNullList.set(i, container.getItem(i));
+				nonNullList.set(i, recipeInput.getItem(i));
 			}
 
 			return nonNullList;
@@ -165,15 +170,15 @@ public class RecipeManager extends SimpleJsonResourceReloadListener {
 		this.byName = builder2.build();
 	}
 
-	public static <C extends Container, T extends Recipe<C>> RecipeManager.CachedCheck<C, T> createCheck(RecipeType<T> recipeType) {
-		return new RecipeManager.CachedCheck<C, T>() {
+	public static <I extends RecipeInput, T extends Recipe<I>> RecipeManager.CachedCheck<I, T> createCheck(RecipeType<T> recipeType) {
+		return new RecipeManager.CachedCheck<I, T>() {
 			@Nullable
 			private ResourceLocation lastRecipe;
 
 			@Override
-			public Optional<RecipeHolder<T>> getRecipeFor(C container, Level level) {
+			public Optional<RecipeHolder<T>> getRecipeFor(I recipeInput, Level level) {
 				RecipeManager recipeManager = level.getRecipeManager();
-				Optional<RecipeHolder<T>> optional = recipeManager.getRecipeFor(recipeType, container, level, this.lastRecipe);
+				Optional<RecipeHolder<T>> optional = recipeManager.getRecipeFor(recipeType, recipeInput, level, this.lastRecipe);
 				if (optional.isPresent()) {
 					RecipeHolder<T> recipeHolder = (RecipeHolder<T>)optional.get();
 					this.lastRecipe = recipeHolder.id();
@@ -185,7 +190,7 @@ public class RecipeManager extends SimpleJsonResourceReloadListener {
 		};
 	}
 
-	public interface CachedCheck<C extends Container, T extends Recipe<C>> {
-		Optional<RecipeHolder<T>> getRecipeFor(C container, Level level);
+	public interface CachedCheck<I extends RecipeInput, T extends Recipe<I>> {
+		Optional<RecipeHolder<T>> getRecipeFor(I recipeInput, Level level);
 	}
 }

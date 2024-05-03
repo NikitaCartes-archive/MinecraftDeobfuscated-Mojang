@@ -162,12 +162,12 @@ public class Zombie extends Monster {
 	}
 
 	@Override
-	public int getExperienceReward() {
+	protected int getBaseExperienceReward() {
 		if (this.isBaby()) {
 			this.xpReward = (int)((double)this.xpReward * 2.5);
 		}
 
-		return super.getExperienceReward();
+		return super.getBaseExperienceReward();
 	}
 
 	@Override
@@ -237,7 +237,7 @@ public class Zombie extends Monster {
 				}
 
 				if (bl) {
-					this.igniteForSeconds(8);
+					this.igniteForSeconds(8.0F);
 				}
 			}
 		}
@@ -327,7 +327,7 @@ public class Zombie extends Monster {
 		if (bl) {
 			float f = this.level().getCurrentDifficultyAt(this.blockPosition()).getEffectiveDifficulty();
 			if (this.getMainHandItem().isEmpty() && this.isOnFire() && this.random.nextFloat() < f * 0.3F) {
-				entity.igniteForSeconds(2 * (int)f);
+				entity.igniteForSeconds((float)(2 * (int)f));
 			}
 		}
 
@@ -520,8 +520,8 @@ public class Zombie extends Monster {
 	}
 
 	@Override
-	protected void dropCustomDeathLoot(DamageSource damageSource, int i, boolean bl) {
-		super.dropCustomDeathLoot(damageSource, i, bl);
+	protected void dropCustomDeathLoot(DamageSource damageSource, boolean bl) {
+		super.dropCustomDeathLoot(damageSource, bl);
 		if (damageSource.getEntity() instanceof Creeper creeper && creeper.canDropMobsSkull()) {
 			ItemStack itemStack = this.getSkull();
 			if (!itemStack.isEmpty()) {

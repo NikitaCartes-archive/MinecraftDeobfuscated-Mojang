@@ -16,7 +16,10 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.InstrumentTags;
@@ -54,7 +57,7 @@ public class CreativeModeTabs {
 	private static final ResourceKey<CreativeModeTab> OP_BLOCKS = createKey("op_blocks");
 	private static final ResourceKey<CreativeModeTab> INVENTORY = createKey("inventory");
 	private static final Comparator<Holder<PaintingVariant>> PAINTING_COMPARATOR = Comparator.comparing(
-		Holder::value, Comparator.comparingInt(paintingVariant -> paintingVariant.getHeight() * paintingVariant.getWidth()).thenComparing(PaintingVariant::getWidth)
+		Holder::value, Comparator.comparingInt(PaintingVariant::area).thenComparing(PaintingVariant::width)
 	);
 	@Nullable
 	private static CreativeModeTab.ItemDisplayParameters CACHED_PARAMETERS;
@@ -996,7 +999,11 @@ public class CreativeModeTabs {
 							.lookup(Registries.PAINTING_VARIANT)
 							.ifPresent(
 								registryLookup -> generatePresetPaintings(
-										output, registryLookup, holder -> holder.is(PaintingVariantTags.PLACEABLE), CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS
+										output,
+										itemDisplayParameters.holders(),
+										registryLookup,
+										holder -> holder.is(PaintingVariantTags.PLACEABLE),
+										CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS
 									)
 							);
 						output.accept(Items.BOOKSHELF);
@@ -1342,7 +1349,10 @@ public class CreativeModeTabs {
 						output.accept(Items.MUSIC_DISC_STRAD);
 						output.accept(Items.MUSIC_DISC_WARD);
 						output.accept(Items.MUSIC_DISC_11);
+						output.accept(Items.MUSIC_DISC_CREATOR_MUSIC_BOX);
 						output.accept(Items.MUSIC_DISC_WAIT);
+						output.accept(Items.MUSIC_DISC_CREATOR);
+						output.accept(Items.MUSIC_DISC_PRECIPICE);
 						output.accept(Items.MUSIC_DISC_OTHERSIDE);
 						output.accept(Items.MUSIC_DISC_RELIC);
 						output.accept(Items.MUSIC_DISC_5);
@@ -1669,18 +1679,10 @@ public class CreativeModeTabs {
 							ItemTags.CROSSBOW_ENCHANTABLE,
 							ItemTags.VANISHING_ENCHANTABLE
 						);
-						itemDisplayParameters.holders()
-							.lookup(Registries.ENCHANTMENT)
-							.ifPresent(
-								registryLookup -> {
-									generateEnchantmentBookTypesOnlyMaxLevel(
-										output, registryLookup, set, CreativeModeTab.TabVisibility.PARENT_TAB_ONLY, itemDisplayParameters.enabledFeatures()
-									);
-									generateEnchantmentBookTypesAllLevels(
-										output, registryLookup, set, CreativeModeTab.TabVisibility.SEARCH_TAB_ONLY, itemDisplayParameters.enabledFeatures()
-									);
-								}
-							);
+						itemDisplayParameters.holders().lookup(Registries.ENCHANTMENT).ifPresent(registryLookup -> {
+							generateEnchantmentBookTypesOnlyMaxLevel(output, registryLookup, set, CreativeModeTab.TabVisibility.PARENT_TAB_ONLY);
+							generateEnchantmentBookTypesAllLevels(output, registryLookup, set, CreativeModeTab.TabVisibility.SEARCH_TAB_ONLY);
+						});
 					}
 				)
 				.build()
@@ -1803,7 +1805,11 @@ public class CreativeModeTabs {
 								.lookup(Registries.PAINTING_VARIANT)
 								.ifPresent(
 									registryLookup -> generatePresetPaintings(
-											output, registryLookup, holder -> !holder.is(PaintingVariantTags.PLACEABLE), CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS
+											output,
+											itemDisplayParameters.holders(),
+											registryLookup,
+											holder -> !holder.is(PaintingVariantTags.PLACEABLE),
+											CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS
 										)
 								);
 						}
@@ -1853,34 +1859,22 @@ public class CreativeModeTabs {
 	}
 
 	private static void generateEnchantmentBookTypesOnlyMaxLevel(
-		CreativeModeTab.Output output,
-		HolderLookup<Enchantment> holderLookup,
-		Set<TagKey<Item>> set,
-		CreativeModeTab.TabVisibility tabVisibility,
-		FeatureFlagSet featureFlagSet
+		CreativeModeTab.Output output, HolderLookup<Enchantment> holderLookup, Set<TagKey<Item>> set, CreativeModeTab.TabVisibility tabVisibility
 	) {
 		holderLookup.listElements()
-			.map(Holder::value)
-			.filter(enchantment -> enchantment.isEnabled(featureFlagSet))
-			.filter(enchantment -> set.contains(enchantment.getSupportedItems()))
-			.map(enchantment -> EnchantedBookItem.createForEnchantment(new EnchantmentInstance(enchantment, enchantment.getMaxLevel())))
+			.filter(reference -> ((Enchantment)reference.value()).getSupportedItems().unwrapKey().filter(set::contains).isPresent())
+			.map(reference -> EnchantedBookItem.createForEnchantment(new EnchantmentInstance(reference, ((Enchantment)reference.value()).getMaxLevel())))
 			.forEach(itemStack -> output.accept(itemStack, tabVisibility));
 	}
 
 	private static void generateEnchantmentBookTypesAllLevels(
-		CreativeModeTab.Output output,
-		HolderLookup<Enchantment> holderLookup,
-		Set<TagKey<Item>> set,
-		CreativeModeTab.TabVisibility tabVisibility,
-		FeatureFlagSet featureFlagSet
+		CreativeModeTab.Output output, HolderLookup<Enchantment> holderLookup, Set<TagKey<Item>> set, CreativeModeTab.TabVisibility tabVisibility
 	) {
 		holderLookup.listElements()
-			.map(Holder::value)
-			.filter(enchantment -> enchantment.isEnabled(featureFlagSet))
-			.filter(enchantment -> set.contains(enchantment.getSupportedItems()))
+			.filter(reference -> ((Enchantment)reference.value()).getSupportedItems().unwrapKey().filter(set::contains).isPresent())
 			.flatMap(
-				enchantment -> IntStream.rangeClosed(enchantment.getMinLevel(), enchantment.getMaxLevel())
-						.mapToObj(i -> EnchantedBookItem.createForEnchantment(new EnchantmentInstance(enchantment, i)))
+				reference -> IntStream.rangeClosed(((Enchantment)reference.value()).getMinLevel(), ((Enchantment)reference.value()).getMaxLevel())
+						.mapToObj(i -> EnchantedBookItem.createForEnchantment(new EnchantmentInstance(reference, i)))
 			)
 			.forEach(itemStack -> output.accept(itemStack, tabVisibility));
 	}
@@ -1923,17 +1917,19 @@ public class CreativeModeTabs {
 
 	private static void generatePresetPaintings(
 		CreativeModeTab.Output output,
+		HolderLookup.Provider provider,
 		HolderLookup.RegistryLookup<PaintingVariant> registryLookup,
 		Predicate<Holder<PaintingVariant>> predicate,
 		CreativeModeTab.TabVisibility tabVisibility
 	) {
+		RegistryOps<Tag> registryOps = provider.createSerializationContext(NbtOps.INSTANCE);
 		registryLookup.listElements()
 			.filter(predicate)
 			.sorted(PAINTING_COMPARATOR)
 			.forEach(
 				reference -> {
 					CustomData customData = CustomData.EMPTY
-						.update(Painting.VARIANT_MAP_CODEC, reference)
+						.update(registryOps, Painting.VARIANT_MAP_CODEC, reference)
 						.getOrThrow()
 						.update(compoundTag -> compoundTag.putString("id", "minecraft:painting"));
 					ItemStack itemStack = new ItemStack(Items.PAINTING);

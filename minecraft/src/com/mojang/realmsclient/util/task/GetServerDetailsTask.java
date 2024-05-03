@@ -8,11 +8,10 @@ import com.mojang.realmsclient.exception.RealmsServiceException;
 import com.mojang.realmsclient.exception.RetryCallException;
 import com.mojang.realmsclient.gui.screens.RealmsBrokenWorldScreen;
 import com.mojang.realmsclient.gui.screens.RealmsGenericErrorScreen;
-import com.mojang.realmsclient.gui.screens.RealmsLongConfirmationScreen;
 import com.mojang.realmsclient.gui.screens.RealmsLongRunningMcoTaskScreen;
 import com.mojang.realmsclient.gui.screens.RealmsLongRunningMcoTickTaskScreen;
+import com.mojang.realmsclient.gui.screens.RealmsPopups;
 import com.mojang.realmsclient.gui.screens.RealmsTermsScreen;
-import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
@@ -23,6 +22,7 @@ import java.util.function.Function;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.PopupScreen;
 import net.minecraft.client.gui.screens.GenericMessageScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.server.DownloadedPackSource;
@@ -58,7 +58,7 @@ public class GetServerDetailsTask extends LongRunningTask {
 					boolean bl = Minecraft.getInstance().isLocalPlayer(this.server.ownerUUID);
 					setScreen(
 						(Screen)(bl
-							? new RealmsBrokenWorldScreen(this.lastScreen, this.server.id, this.server.worldType == RealmsServer.WorldType.MINIGAME)
+							? new RealmsBrokenWorldScreen(this.lastScreen, this.server.id, this.server.isMinigameActive())
 							: new RealmsGenericErrorScreen(
 								Component.translatable("mco.brokenworld.nonowner.title"), Component.translatable("mco.brokenworld.nonowner.error"), this.lastScreen
 							))
@@ -118,13 +118,12 @@ public class GetServerDetailsTask extends LongRunningTask {
 		return new RealmsLongRunningMcoTickTaskScreen(this.lastScreen, new ConnectTask(this.lastScreen, this.server, realmsServerAddress));
 	}
 
-	private RealmsLongConfirmationScreen resourcePackDownloadConfirmationScreen(
-		RealmsServerAddress realmsServerAddress, UUID uUID, Function<RealmsServerAddress, Screen> function
-	) {
-		BooleanConsumer booleanConsumer = bl -> {
-			if (!bl) {
-				setScreen(this.lastScreen);
-			} else {
+	private PopupScreen resourcePackDownloadConfirmationScreen(RealmsServerAddress realmsServerAddress, UUID uUID, Function<RealmsServerAddress, Screen> function) {
+		Component component = Component.translatable("mco.configure.world.resourcepack.question");
+		return RealmsPopups.infoPopupScreen(
+			this.lastScreen,
+			component,
+			popupScreen -> {
 				setScreen(new GenericMessageScreen(APPLYING_PACK_TEXT));
 				this.scheduleResourcePackDownload(realmsServerAddress, uUID)
 					.thenRun(() -> setScreen((Screen)function.apply(realmsServerAddress)))
@@ -135,13 +134,6 @@ public class GetServerDetailsTask extends LongRunningTask {
 						return null;
 					});
 			}
-		};
-		return new RealmsLongConfirmationScreen(
-			booleanConsumer,
-			RealmsLongConfirmationScreen.Type.INFO,
-			Component.translatable("mco.configure.world.resourcepack.question.line1"),
-			Component.translatable("mco.configure.world.resourcepack.question.line2"),
-			true
 		);
 	}
 

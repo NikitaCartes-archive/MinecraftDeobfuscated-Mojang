@@ -2477,9 +2477,6 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 			case 1002:
 				this.level.playLocalSound(blockPos, SoundEvents.DISPENSER_LAUNCH, SoundSource.BLOCKS, 1.0F, 1.2F, false);
 				break;
-			case 1003:
-				this.level.playLocalSound(blockPos, SoundEvents.ENDER_EYE_LAUNCH, SoundSource.NEUTRAL, 1.0F, 1.2F, false);
-				break;
 			case 1004:
 				this.level.playLocalSound(blockPos, SoundEvents.FIREWORK_ROCKET_SHOOT, SoundSource.NEUTRAL, 1.0F, 1.2F, false);
 				break;
@@ -2635,6 +2632,12 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 				break;
 			case 1050:
 				this.level.playLocalSound(blockPos, SoundEvents.CRAFTER_FAIL, SoundSource.BLOCKS, 1.0F, 1.0F, false);
+				break;
+			case 1051:
+				this.level
+					.playLocalSound(blockPos, SoundEvents.WIND_CHARGE_THROW, SoundSource.BLOCKS, 0.5F, 0.4F / (this.level.getRandom().nextFloat() * 0.4F + 0.8F), false);
+			case 2010:
+				this.shootParticles(j, blockPos, randomSource, ParticleTypes.WHITE_SMOKE);
 				break;
 			case 1500:
 				ComposterBlock.handleFill(this.level, blockPos, j > 0);
@@ -2806,9 +2809,6 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 							0.0
 						);
 				}
-				break;
-			case 2010:
-				this.shootParticles(j, blockPos, randomSource, ParticleTypes.WHITE_SMOKE);
 				break;
 			case 2011:
 				ParticleUtils.spawnParticleInBlock(this.level, blockPos, j, ParticleTypes.HAPPY_VILLAGER);

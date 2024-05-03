@@ -1,7 +1,6 @@
 package net.minecraft.world.item.crafting;
 
 import net.minecraft.core.HolderLookup;
-import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
@@ -11,12 +10,12 @@ public class MapCloningRecipe extends CustomRecipe {
 		super(craftingBookCategory);
 	}
 
-	public boolean matches(CraftingContainer craftingContainer, Level level) {
+	public boolean matches(CraftingInput craftingInput, Level level) {
 		int i = 0;
 		ItemStack itemStack = ItemStack.EMPTY;
 
-		for (int j = 0; j < craftingContainer.getContainerSize(); j++) {
-			ItemStack itemStack2 = craftingContainer.getItem(j);
+		for (int j = 0; j < craftingInput.size(); j++) {
+			ItemStack itemStack2 = craftingInput.getItem(j);
 			if (!itemStack2.isEmpty()) {
 				if (itemStack2.is(Items.FILLED_MAP)) {
 					if (!itemStack.isEmpty()) {
@@ -37,12 +36,12 @@ public class MapCloningRecipe extends CustomRecipe {
 		return !itemStack.isEmpty() && i > 0;
 	}
 
-	public ItemStack assemble(CraftingContainer craftingContainer, HolderLookup.Provider provider) {
+	public ItemStack assemble(CraftingInput craftingInput, HolderLookup.Provider provider) {
 		int i = 0;
 		ItemStack itemStack = ItemStack.EMPTY;
 
-		for (int j = 0; j < craftingContainer.getContainerSize(); j++) {
-			ItemStack itemStack2 = craftingContainer.getItem(j);
+		for (int j = 0; j < craftingInput.size(); j++) {
+			ItemStack itemStack2 = craftingInput.getItem(j);
 			if (!itemStack2.isEmpty()) {
 				if (itemStack2.is(Items.FILLED_MAP)) {
 					if (!itemStack.isEmpty()) {

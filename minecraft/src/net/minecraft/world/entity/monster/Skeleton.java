@@ -117,8 +117,8 @@ public class Skeleton extends AbstractSkeleton {
 	}
 
 	@Override
-	protected void dropCustomDeathLoot(DamageSource damageSource, int i, boolean bl) {
-		super.dropCustomDeathLoot(damageSource, i, bl);
+	protected void dropCustomDeathLoot(DamageSource damageSource, boolean bl) {
+		super.dropCustomDeathLoot(damageSource, bl);
 		if (damageSource.getEntity() instanceof Creeper creeper && creeper.canDropMobsSkull()) {
 			creeper.increaseDroppedSkulls();
 			this.spawnAtLocation(Items.SKELETON_SKULL);

@@ -6,6 +6,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import java.util.List;
+import java.util.Optional;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
@@ -13,6 +14,8 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.model.BookModel;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
@@ -170,38 +173,44 @@ public class EnchantmentScreen extends AbstractContainerScreen<EnchantmentMenu> 
 
 		for (int l = 0; l < 3; l++) {
 			int m = this.menu.costs[l];
-			Enchantment enchantment = Enchantment.byId(this.menu.enchantClue[l]);
-			int n = this.menu.levelClue[l];
-			int o = l + 1;
-			if (this.isHovering(60, 14 + 19 * l, 108, 17, (double)i, (double)j) && m > 0 && n >= 0 && enchantment != null) {
-				List<Component> list = Lists.<Component>newArrayList();
-				list.add(Component.translatable("container.enchant.clue", enchantment.getFullname(n)).withStyle(ChatFormatting.WHITE));
-				if (!bl) {
-					list.add(CommonComponents.EMPTY);
-					if (this.minecraft.player.experienceLevel < m) {
-						list.add(Component.translatable("container.enchant.level.requirement", this.menu.costs[l]).withStyle(ChatFormatting.RED));
-					} else {
-						MutableComponent mutableComponent;
-						if (o == 1) {
-							mutableComponent = Component.translatable("container.enchant.lapis.one");
+			Optional<Holder.Reference<Enchantment>> optional = this.minecraft
+				.level
+				.registryAccess()
+				.registryOrThrow(Registries.ENCHANTMENT)
+				.getHolder(this.menu.enchantClue[l]);
+			if (!optional.isEmpty()) {
+				int n = this.menu.levelClue[l];
+				int o = l + 1;
+				if (this.isHovering(60, 14 + 19 * l, 108, 17, (double)i, (double)j) && m > 0 && n >= 0 && optional != null) {
+					List<Component> list = Lists.<Component>newArrayList();
+					list.add(Component.translatable("container.enchant.clue", Enchantment.getFullname((Holder<Enchantment>)optional.get(), n)).withStyle(ChatFormatting.WHITE));
+					if (!bl) {
+						list.add(CommonComponents.EMPTY);
+						if (this.minecraft.player.experienceLevel < m) {
+							list.add(Component.translatable("container.enchant.level.requirement", this.menu.costs[l]).withStyle(ChatFormatting.RED));
 						} else {
-							mutableComponent = Component.translatable("container.enchant.lapis.many", o);
-						}
+							MutableComponent mutableComponent;
+							if (o == 1) {
+								mutableComponent = Component.translatable("container.enchant.lapis.one");
+							} else {
+								mutableComponent = Component.translatable("container.enchant.lapis.many", o);
+							}
 
-						list.add(mutableComponent.withStyle(k >= o ? ChatFormatting.GRAY : ChatFormatting.RED));
-						MutableComponent mutableComponent2;
-						if (o == 1) {
-							mutableComponent2 = Component.translatable("container.enchant.level.one");
-						} else {
-							mutableComponent2 = Component.translatable("container.enchant.level.many", o);
-						}
+							list.add(mutableComponent.withStyle(k >= o ? ChatFormatting.GRAY : ChatFormatting.RED));
+							MutableComponent mutableComponent2;
+							if (o == 1) {
+								mutableComponent2 = Component.translatable("container.enchant.level.one");
+							} else {
+								mutableComponent2 = Component.translatable("container.enchant.level.many", o);
+							}
 
-						list.add(mutableComponent2.withStyle(ChatFormatting.GRAY));
+							list.add(mutableComponent2.withStyle(ChatFormatting.GRAY));
+						}
 					}
-				}
 
-				guiGraphics.renderComponentTooltip(this.font, list, i, j);
-				break;
+					guiGraphics.renderComponentTooltip(this.font, list, i, j);
+					break;
+				}
 			}
 		}
 	}

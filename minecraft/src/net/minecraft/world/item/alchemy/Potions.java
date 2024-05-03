@@ -6,7 +6,6 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.flag.FeatureFlags;
 
 public class Potions {
 	public static final Holder<Potion> WATER = register("water", new Potion());
@@ -80,18 +79,10 @@ public class Potions {
 	public static final Holder<Potion> LONG_SLOW_FALLING = register(
 		"long_slow_falling", new Potion("slow_falling", new MobEffectInstance(MobEffects.SLOW_FALLING, 4800))
 	);
-	public static final Holder<Potion> WIND_CHARGED = register(
-		"wind_charged", new Potion("wind_charged", new MobEffectInstance(MobEffects.WIND_CHARGED, 3600)).requiredFeatures(FeatureFlags.UPDATE_1_21)
-	);
-	public static final Holder<Potion> WEAVING = register(
-		"weaving", new Potion("weaving", new MobEffectInstance(MobEffects.WEAVING, 3600)).requiredFeatures(FeatureFlags.UPDATE_1_21)
-	);
-	public static final Holder<Potion> OOZING = register(
-		"oozing", new Potion("oozing", new MobEffectInstance(MobEffects.OOZING, 3600)).requiredFeatures(FeatureFlags.UPDATE_1_21)
-	);
-	public static final Holder<Potion> INFESTED = register(
-		"infested", new Potion("infested", new MobEffectInstance(MobEffects.INFESTED, 3600)).requiredFeatures(FeatureFlags.UPDATE_1_21)
-	);
+	public static final Holder<Potion> WIND_CHARGED = register("wind_charged", new Potion("wind_charged", new MobEffectInstance(MobEffects.WIND_CHARGED, 3600)));
+	public static final Holder<Potion> WEAVING = register("weaving", new Potion("weaving", new MobEffectInstance(MobEffects.WEAVING, 3600)));
+	public static final Holder<Potion> OOZING = register("oozing", new Potion("oozing", new MobEffectInstance(MobEffects.OOZING, 3600)));
+	public static final Holder<Potion> INFESTED = register("infested", new Potion("infested", new MobEffectInstance(MobEffects.INFESTED, 3600)));
 
 	private static Holder<Potion> register(String string, Potion potion) {
 		return Registry.registerForHolder(BuiltInRegistries.POTION, new ResourceLocation(string), potion);

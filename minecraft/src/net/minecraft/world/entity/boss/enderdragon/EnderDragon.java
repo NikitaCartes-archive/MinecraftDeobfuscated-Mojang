@@ -36,6 +36,7 @@ import net.minecraft.world.entity.boss.enderdragon.phases.EnderDragonPhase;
 import net.minecraft.world.entity.boss.enderdragon.phases.EnderDragonPhaseManager;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -292,15 +293,17 @@ public class EnderDragon extends Mob implements Enemy {
 				this.tickPart(this.body, (double)(w * 0.5F), 0.0, (double)(-x * 0.5F));
 				this.tickPart(this.wing1, (double)(x * 4.5F), 2.0, (double)(w * 4.5F));
 				this.tickPart(this.wing2, (double)(x * -4.5F), 2.0, (double)(w * -4.5F));
-				if (!this.level().isClientSide && this.hurtTime == 0) {
+				if (this.level() instanceof ServerLevel serverLevel2 && this.hurtTime == 0) {
 					this.knockBack(
-						this.level().getEntities(this, this.wing1.getBoundingBox().inflate(4.0, 2.0, 4.0).move(0.0, -2.0, 0.0), EntitySelector.NO_CREATIVE_OR_SPECTATOR)
+						serverLevel2,
+						serverLevel2.getEntities(this, this.wing1.getBoundingBox().inflate(4.0, 2.0, 4.0).move(0.0, -2.0, 0.0), EntitySelector.NO_CREATIVE_OR_SPECTATOR)
 					);
 					this.knockBack(
-						this.level().getEntities(this, this.wing2.getBoundingBox().inflate(4.0, 2.0, 4.0).move(0.0, -2.0, 0.0), EntitySelector.NO_CREATIVE_OR_SPECTATOR)
+						serverLevel2,
+						serverLevel2.getEntities(this, this.wing2.getBoundingBox().inflate(4.0, 2.0, 4.0).move(0.0, -2.0, 0.0), EntitySelector.NO_CREATIVE_OR_SPECTATOR)
 					);
-					this.hurt(this.level().getEntities(this, this.head.getBoundingBox().inflate(1.0), EntitySelector.NO_CREATIVE_OR_SPECTATOR));
-					this.hurt(this.level().getEntities(this, this.neck.getBoundingBox().inflate(1.0), EntitySelector.NO_CREATIVE_OR_SPECTATOR));
+					this.hurt(serverLevel2.getEntities(this, this.head.getBoundingBox().inflate(1.0), EntitySelector.NO_CREATIVE_OR_SPECTATOR));
+					this.hurt(serverLevel2.getEntities(this, this.neck.getBoundingBox().inflate(1.0), EntitySelector.NO_CREATIVE_OR_SPECTATOR));
 				}
 
 				float y = Mth.sin(this.getYRot() * (float) (Math.PI / 180.0) - this.yRotA * 0.01F);
@@ -392,19 +395,21 @@ public class EnderDragon extends Mob implements Enemy {
 		}
 	}
 
-	private void knockBack(List<Entity> list) {
+	private void knockBack(ServerLevel serverLevel, List<Entity> list) {
 		double d = (this.body.getBoundingBox().minX + this.body.getBoundingBox().maxX) / 2.0;
 		double e = (this.body.getBoundingBox().minZ + this.body.getBoundingBox().maxZ) / 2.0;
 
 		for (Entity entity : list) {
 			if (entity instanceof LivingEntity) {
+				LivingEntity livingEntity = (LivingEntity)entity;
 				double f = entity.getX() - d;
 				double g = entity.getZ() - e;
 				double h = Math.max(f * f + g * g, 0.1);
 				entity.push(f / h * 4.0, 0.2F, g / h * 4.0);
-				if (!this.phaseManager.getCurrentPhase().isSitting() && ((LivingEntity)entity).getLastHurtByMobTimestamp() < entity.tickCount - 2) {
-					entity.hurt(this.damageSources().mobAttack(this), 5.0F);
-					this.doEnchantDamageEffects(this, entity);
+				if (!this.phaseManager.getCurrentPhase().isSitting() && livingEntity.getLastHurtByMobTimestamp() < entity.tickCount - 2) {
+					DamageSource damageSource = this.damageSources().mobAttack(this);
+					entity.hurt(damageSource, 5.0F);
+					EnchantmentHelper.doPostAttackEffects(serverLevel, entity, damageSource);
 				}
 			}
 		}
@@ -413,8 +418,11 @@ public class EnderDragon extends Mob implements Enemy {
 	private void hurt(List<Entity> list) {
 		for (Entity entity : list) {
 			if (entity instanceof LivingEntity) {
-				entity.hurt(this.damageSources().mobAttack(this), 10.0F);
-				this.doEnchantDamageEffects(this, entity);
+				DamageSource damageSource = this.damageSources().mobAttack(this);
+				entity.hurt(damageSource, 10.0F);
+				if (this.level() instanceof ServerLevel serverLevel) {
+					EnchantmentHelper.doPostAttackEffects(serverLevel, entity, damageSource);
+				}
 			}
 		}
 	}

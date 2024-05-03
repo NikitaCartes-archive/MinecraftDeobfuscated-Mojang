@@ -1,6 +1,7 @@
 package net.minecraft.world.level.block.entity;
 
 import com.google.common.annotations.VisibleForTesting;
+import net.minecraft.Optionull;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -84,7 +85,8 @@ public class SculkCatalystBlockEntity extends BlockEntity implements GameEventLi
 		public boolean handleGameEvent(ServerLevel serverLevel, Holder<GameEvent> holder, GameEvent.Context context, Vec3 vec3) {
 			if (holder.is(GameEvent.ENTITY_DIE) && context.sourceEntity() instanceof LivingEntity livingEntity) {
 				if (!livingEntity.wasExperienceConsumed()) {
-					int i = livingEntity.getExperienceReward();
+					DamageSource damageSource = livingEntity.getLastDamageSource();
+					int i = livingEntity.getExperienceReward(serverLevel, Optionull.map(damageSource, DamageSource::getEntity));
 					if (livingEntity.shouldDropExperience() && i > 0) {
 						this.sculkSpreader.addCursors(BlockPos.containing(vec3.relative(Direction.UP, 0.5)), i);
 						this.tryAwardItSpreadsAdvancement(serverLevel, livingEntity);

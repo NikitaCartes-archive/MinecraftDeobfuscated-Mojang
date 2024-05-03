@@ -151,7 +151,7 @@ public class RealmsWorldSlotButton extends Button {
 		public State(RealmsServer realmsServer, int i) {
 			this.minigame = i == 4;
 			if (this.minigame) {
-				this.isCurrentlyActiveSlot = realmsServer.worldType == RealmsServer.WorldType.MINIGAME;
+				this.isCurrentlyActiveSlot = realmsServer.isMinigameActive();
 				this.slotName = RealmsWorldSlotButton.MINIGAME.getString();
 				this.imageId = (long)realmsServer.minigameId;
 				this.image = realmsServer.minigameImage;
@@ -160,7 +160,7 @@ public class RealmsWorldSlotButton extends Button {
 				this.compatibility = RealmsServer.Compatibility.UNVERIFIABLE;
 			} else {
 				RealmsWorldOptions realmsWorldOptions = (RealmsWorldOptions)realmsServer.slots.get(i);
-				this.isCurrentlyActiveSlot = realmsServer.activeSlot == i && realmsServer.worldType != RealmsServer.WorldType.MINIGAME;
+				this.isCurrentlyActiveSlot = realmsServer.activeSlot == i && !realmsServer.isMinigameActive();
 				this.slotName = realmsWorldOptions.getSlotName(i);
 				this.imageId = realmsWorldOptions.templateId;
 				this.image = realmsWorldOptions.templateImage;

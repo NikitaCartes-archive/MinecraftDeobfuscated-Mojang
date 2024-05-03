@@ -25,7 +25,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.item.crafting.CampfireCookingRecipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -112,8 +111,8 @@ public class CampfireBlock extends BaseEntityBlock implements SimpleWaterloggedB
 
 	@Override
 	protected void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
-		if ((Boolean)blockState.getValue(LIT) && entity instanceof LivingEntity && !EnchantmentHelper.hasFrostWalker((LivingEntity)entity)) {
-			entity.hurt(level.damageSources().inFire(), (float)this.fireDamage);
+		if ((Boolean)blockState.getValue(LIT) && entity instanceof LivingEntity) {
+			entity.hurt(level.damageSources().campfire(), (float)this.fireDamage);
 		}
 
 		super.entityInside(blockState, level, blockPos, entity);

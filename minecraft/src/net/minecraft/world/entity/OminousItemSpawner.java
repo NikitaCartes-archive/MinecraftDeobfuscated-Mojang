@@ -73,6 +73,7 @@ public class OminousItemSpawner extends Entity {
 			if (itemStack.getItem() instanceof ProjectileItem projectileItem) {
 				Direction direction = Direction.DOWN;
 				Projectile projectile = projectileItem.asProjectile(level, this.position(), itemStack, direction);
+				projectile.setOwner(this);
 				ProjectileItem.DispenseConfig dispenseConfig = projectileItem.createDispenseConfig();
 				projectileItem.shoot(
 					projectile, (double)direction.getStepX(), (double)direction.getStepY(), (double)direction.getStepZ(), dispenseConfig.power(), dispenseConfig.uncertainty()

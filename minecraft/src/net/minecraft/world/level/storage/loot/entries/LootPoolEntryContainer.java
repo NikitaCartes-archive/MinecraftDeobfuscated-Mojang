@@ -11,7 +11,6 @@ import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.ValidationContext;
 import net.minecraft.world.level.storage.loot.predicates.ConditionUserBuilder;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
-import net.minecraft.world.level.storage.loot.predicates.LootItemConditions;
 
 public abstract class LootPoolEntryContainer implements ComposableEntryContainer {
 	protected final List<LootItemCondition> conditions;
@@ -24,7 +23,7 @@ public abstract class LootPoolEntryContainer implements ComposableEntryContainer
 
 	protected static <T extends LootPoolEntryContainer> P1<Mu<T>, List<LootItemCondition>> commonFields(Instance<T> instance) {
 		return instance.group(
-			LootItemConditions.DIRECT_CODEC.listOf().optionalFieldOf("conditions", List.of()).forGetter(lootPoolEntryContainer -> lootPoolEntryContainer.conditions)
+			LootItemCondition.DIRECT_CODEC.listOf().optionalFieldOf("conditions", List.of()).forGetter(lootPoolEntryContainer -> lootPoolEntryContainer.conditions)
 		);
 	}
 

@@ -39,5 +39,6 @@ public class StructureTagsProvider extends TagsProvider<Structure> {
 		this.tag(StructureTags.ON_WOODLAND_EXPLORER_MAPS).add(BuiltinStructures.WOODLAND_MANSION);
 		this.tag(StructureTags.ON_OCEAN_EXPLORER_MAPS).add(BuiltinStructures.OCEAN_MONUMENT);
 		this.tag(StructureTags.ON_TREASURE_MAPS).add(BuiltinStructures.BURIED_TREASURE);
+		this.tag(StructureTags.ON_TRIAL_CHAMBERS_MAPS).add(BuiltinStructures.TRIAL_CHAMBERS);
 	}
 }

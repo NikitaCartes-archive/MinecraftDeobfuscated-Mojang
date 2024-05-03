@@ -15,10 +15,15 @@ import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.EnchantmentTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.StructureTags;
 import net.minecraft.tags.TagKey;
@@ -27,7 +32,6 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.EnchantedBookItem;
@@ -43,7 +47,8 @@ import net.minecraft.world.item.component.SuspiciousStewEffects;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.EnchantmentInstance;
-import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.item.enchantment.providers.EnchantmentProvider;
+import net.minecraft.world.item.enchantment.providers.TradeRebalanceEnchantmentProviders;
 import net.minecraft.world.item.trading.ItemCost;
 import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.level.ItemLike;
@@ -299,7 +304,7 @@ public class VillagerTrades {
 							1,
 							new VillagerTrades.ItemListing[]{
 								new VillagerTrades.EmeraldForItems(Items.PAPER, 24, 16, 2),
-								new VillagerTrades.EnchantBookForEmeralds(1),
+								new VillagerTrades.EnchantBookForEmeralds(1, EnchantmentTags.TRADEABLE),
 								new VillagerTrades.ItemsForEmeralds(Blocks.BOOKSHELF, 9, 1, 12, 1)
 							}
 						)
@@ -307,7 +312,7 @@ public class VillagerTrades {
 							2,
 							new VillagerTrades.ItemListing[]{
 								new VillagerTrades.EmeraldForItems(Items.BOOK, 4, 12, 10),
-								new VillagerTrades.EnchantBookForEmeralds(5),
+								new VillagerTrades.EnchantBookForEmeralds(5, EnchantmentTags.TRADEABLE),
 								new VillagerTrades.ItemsForEmeralds(Items.LANTERN, 1, 1, 5)
 							}
 						)
@@ -315,7 +320,7 @@ public class VillagerTrades {
 							3,
 							new VillagerTrades.ItemListing[]{
 								new VillagerTrades.EmeraldForItems(Items.INK_SAC, 5, 12, 20),
-								new VillagerTrades.EnchantBookForEmeralds(10),
+								new VillagerTrades.EnchantBookForEmeralds(10, EnchantmentTags.TRADEABLE),
 								new VillagerTrades.ItemsForEmeralds(Items.GLASS, 1, 4, 10)
 							}
 						)
@@ -323,7 +328,7 @@ public class VillagerTrades {
 							4,
 							new VillagerTrades.ItemListing[]{
 								new VillagerTrades.EmeraldForItems(Items.WRITABLE_BOOK, 2, 12, 30),
-								new VillagerTrades.EnchantBookForEmeralds(15),
+								new VillagerTrades.EnchantBookForEmeralds(15, EnchantmentTags.TRADEABLE),
 								new VillagerTrades.ItemsForEmeralds(Items.CLOCK, 5, 1, 15),
 								new VillagerTrades.ItemsForEmeralds(Items.COMPASS, 4, 1, 15)
 							}
@@ -834,70 +839,96 @@ public class VillagerTrades {
 					4,
 					new VillagerTrades.ItemListing[]{
 						VillagerTrades.TypeSpecificTrade.oneTradeInBiomes(
-							new VillagerTrades.ItemsForEmeralds(enchant(Items.IRON_BOOTS, Enchantments.THORNS, 1), 8, 1, 3, 15, 0.05F), VillagerType.DESERT
+							new VillagerTrades.ItemsForEmeralds(Items.IRON_BOOTS, 8, 1, 3, 15, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_DESERT_ARMORER_BOOTS_4),
+							VillagerType.DESERT
 						),
 						VillagerTrades.TypeSpecificTrade.oneTradeInBiomes(
-							new VillagerTrades.ItemsForEmeralds(enchant(Items.IRON_HELMET, Enchantments.THORNS, 1), 9, 1, 3, 15, 0.05F), VillagerType.DESERT
+							new VillagerTrades.ItemsForEmeralds(Items.IRON_HELMET, 9, 1, 3, 15, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_DESERT_ARMORER_HELMET_4),
+							VillagerType.DESERT
 						),
 						VillagerTrades.TypeSpecificTrade.oneTradeInBiomes(
-							new VillagerTrades.ItemsForEmeralds(enchant(Items.IRON_LEGGINGS, Enchantments.THORNS, 1), 11, 1, 3, 15, 0.05F), VillagerType.DESERT
+							new VillagerTrades.ItemsForEmeralds(Items.IRON_LEGGINGS, 11, 1, 3, 15, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_DESERT_ARMORER_LEGGINGS_4),
+							VillagerType.DESERT
 						),
 						VillagerTrades.TypeSpecificTrade.oneTradeInBiomes(
-							new VillagerTrades.ItemsForEmeralds(enchant(Items.IRON_CHESTPLATE, Enchantments.THORNS, 1), 13, 1, 3, 15, 0.05F), VillagerType.DESERT
+							new VillagerTrades.ItemsForEmeralds(Items.IRON_CHESTPLATE, 13, 1, 3, 15, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_DESERT_ARMORER_CHESTPLATE_4),
+							VillagerType.DESERT
 						),
 						VillagerTrades.TypeSpecificTrade.oneTradeInBiomes(
-							new VillagerTrades.ItemsForEmeralds(enchant(Items.IRON_BOOTS, Enchantments.PROTECTION, 1), 8, 1, 3, 15, 0.05F), VillagerType.PLAINS
+							new VillagerTrades.ItemsForEmeralds(Items.IRON_BOOTS, 8, 1, 3, 15, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_PLAINS_ARMORER_BOOTS_4),
+							VillagerType.PLAINS
 						),
 						VillagerTrades.TypeSpecificTrade.oneTradeInBiomes(
-							new VillagerTrades.ItemsForEmeralds(enchant(Items.IRON_HELMET, Enchantments.PROTECTION, 1), 9, 1, 3, 15, 0.05F), VillagerType.PLAINS
+							new VillagerTrades.ItemsForEmeralds(Items.IRON_HELMET, 9, 1, 3, 15, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_PLAINS_ARMORER_HELMET_4),
+							VillagerType.PLAINS
 						),
 						VillagerTrades.TypeSpecificTrade.oneTradeInBiomes(
-							new VillagerTrades.ItemsForEmeralds(enchant(Items.IRON_LEGGINGS, Enchantments.PROTECTION, 1), 11, 1, 3, 15, 0.05F), VillagerType.PLAINS
+							new VillagerTrades.ItemsForEmeralds(Items.IRON_LEGGINGS, 11, 1, 3, 15, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_PLAINS_ARMORER_LEGGINGS_4),
+							VillagerType.PLAINS
 						),
 						VillagerTrades.TypeSpecificTrade.oneTradeInBiomes(
-							new VillagerTrades.ItemsForEmeralds(enchant(Items.IRON_CHESTPLATE, Enchantments.PROTECTION, 1), 13, 1, 3, 15, 0.05F), VillagerType.PLAINS
+							new VillagerTrades.ItemsForEmeralds(Items.IRON_CHESTPLATE, 13, 1, 3, 15, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_PLAINS_ARMORER_CHESTPLATE_4),
+							VillagerType.PLAINS
 						),
 						VillagerTrades.TypeSpecificTrade.oneTradeInBiomes(
-							new VillagerTrades.ItemsForEmeralds(enchant(Items.IRON_BOOTS, Enchantments.BINDING_CURSE, 1), 2, 1, 3, 15, 0.05F), VillagerType.SAVANNA
+							new VillagerTrades.ItemsForEmeralds(Items.IRON_BOOTS, 2, 1, 3, 15, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_SAVANNA_ARMORER_BOOTS_4),
+							VillagerType.SAVANNA
 						),
 						VillagerTrades.TypeSpecificTrade.oneTradeInBiomes(
-							new VillagerTrades.ItemsForEmeralds(enchant(Items.IRON_HELMET, Enchantments.BINDING_CURSE, 1), 3, 1, 3, 15, 0.05F), VillagerType.SAVANNA
+							new VillagerTrades.ItemsForEmeralds(Items.IRON_HELMET, 3, 1, 3, 15, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_SAVANNA_ARMORER_HELMET_4),
+							VillagerType.SAVANNA
 						),
 						VillagerTrades.TypeSpecificTrade.oneTradeInBiomes(
-							new VillagerTrades.ItemsForEmeralds(enchant(Items.IRON_LEGGINGS, Enchantments.BINDING_CURSE, 1), 5, 1, 3, 15, 0.05F), VillagerType.SAVANNA
+							new VillagerTrades.ItemsForEmeralds(Items.IRON_LEGGINGS, 5, 1, 3, 15, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_SAVANNA_ARMORER_LEGGINGS_4),
+							VillagerType.SAVANNA
 						),
 						VillagerTrades.TypeSpecificTrade.oneTradeInBiomes(
-							new VillagerTrades.ItemsForEmeralds(enchant(Items.IRON_CHESTPLATE, Enchantments.BINDING_CURSE, 1), 7, 1, 3, 15, 0.05F), VillagerType.SAVANNA
+							new VillagerTrades.ItemsForEmeralds(Items.IRON_CHESTPLATE, 7, 1, 3, 15, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_SAVANNA_ARMORER_CHESTPLATE_4),
+							VillagerType.SAVANNA
 						),
 						VillagerTrades.TypeSpecificTrade.oneTradeInBiomes(
-							new VillagerTrades.ItemsForEmeralds(enchant(Items.IRON_BOOTS, Enchantments.FROST_WALKER, 1), 8, 1, 3, 15, 0.05F), VillagerType.SNOW
+							new VillagerTrades.ItemsForEmeralds(Items.IRON_BOOTS, 8, 1, 3, 15, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_SNOW_ARMORER_BOOTS_4),
+							VillagerType.SNOW
 						),
 						VillagerTrades.TypeSpecificTrade.oneTradeInBiomes(
-							new VillagerTrades.ItemsForEmeralds(enchant(Items.IRON_HELMET, Enchantments.AQUA_AFFINITY, 1), 9, 1, 3, 15, 0.05F), VillagerType.SNOW
+							new VillagerTrades.ItemsForEmeralds(Items.IRON_HELMET, 9, 1, 3, 15, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_SNOW_ARMORER_HELMET_4),
+							VillagerType.SNOW
 						),
 						VillagerTrades.TypeSpecificTrade.oneTradeInBiomes(
-							new VillagerTrades.ItemsForEmeralds(enchant(Items.CHAINMAIL_BOOTS, Enchantments.UNBREAKING, 1), 8, 1, 3, 15, 0.05F), VillagerType.JUNGLE
+							new VillagerTrades.ItemsForEmeralds(Items.CHAINMAIL_BOOTS, 8, 1, 3, 15, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_JUNGLE_ARMORER_BOOTS_4),
+							VillagerType.JUNGLE
 						),
 						VillagerTrades.TypeSpecificTrade.oneTradeInBiomes(
-							new VillagerTrades.ItemsForEmeralds(enchant(Items.CHAINMAIL_HELMET, Enchantments.UNBREAKING, 1), 9, 1, 3, 15, 0.05F), VillagerType.JUNGLE
+							new VillagerTrades.ItemsForEmeralds(Items.CHAINMAIL_HELMET, 9, 1, 3, 15, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_JUNGLE_ARMORER_HELMET_4),
+							VillagerType.JUNGLE
 						),
 						VillagerTrades.TypeSpecificTrade.oneTradeInBiomes(
-							new VillagerTrades.ItemsForEmeralds(enchant(Items.CHAINMAIL_LEGGINGS, Enchantments.UNBREAKING, 1), 11, 1, 3, 15, 0.05F), VillagerType.JUNGLE
+							new VillagerTrades.ItemsForEmeralds(Items.CHAINMAIL_LEGGINGS, 11, 1, 3, 15, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_JUNGLE_ARMORER_LEGGINGS_4),
+							VillagerType.JUNGLE
 						),
 						VillagerTrades.TypeSpecificTrade.oneTradeInBiomes(
-							new VillagerTrades.ItemsForEmeralds(enchant(Items.CHAINMAIL_CHESTPLATE, Enchantments.UNBREAKING, 1), 13, 1, 3, 15, 0.05F), VillagerType.JUNGLE
+							new VillagerTrades.ItemsForEmeralds(
+								Items.CHAINMAIL_CHESTPLATE, 13, 1, 3, 15, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_JUNGLE_ARMORER_CHESTPLATE_4
+							),
+							VillagerType.JUNGLE
 						),
 						VillagerTrades.TypeSpecificTrade.oneTradeInBiomes(
-							new VillagerTrades.ItemsForEmeralds(enchant(Items.CHAINMAIL_BOOTS, Enchantments.MENDING, 1), 8, 1, 3, 15, 0.05F), VillagerType.SWAMP
+							new VillagerTrades.ItemsForEmeralds(Items.CHAINMAIL_BOOTS, 8, 1, 3, 15, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_SWAMP_ARMORER_BOOTS_4),
+							VillagerType.SWAMP
 						),
 						VillagerTrades.TypeSpecificTrade.oneTradeInBiomes(
-							new VillagerTrades.ItemsForEmeralds(enchant(Items.CHAINMAIL_HELMET, Enchantments.MENDING, 1), 9, 1, 3, 15, 0.05F), VillagerType.SWAMP
+							new VillagerTrades.ItemsForEmeralds(Items.CHAINMAIL_HELMET, 9, 1, 3, 15, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_SWAMP_ARMORER_HELMET_4),
+							VillagerType.SWAMP
 						),
 						VillagerTrades.TypeSpecificTrade.oneTradeInBiomes(
-							new VillagerTrades.ItemsForEmeralds(enchant(Items.CHAINMAIL_LEGGINGS, Enchantments.MENDING, 1), 11, 1, 3, 15, 0.05F), VillagerType.SWAMP
+							new VillagerTrades.ItemsForEmeralds(Items.CHAINMAIL_LEGGINGS, 11, 1, 3, 15, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_SWAMP_ARMORER_LEGGINGS_4),
+							VillagerType.SWAMP
 						),
 						VillagerTrades.TypeSpecificTrade.oneTradeInBiomes(
-							new VillagerTrades.ItemsForEmeralds(enchant(Items.CHAINMAIL_CHESTPLATE, Enchantments.MENDING, 1), 13, 1, 3, 15, 0.05F), VillagerType.SWAMP
+							new VillagerTrades.ItemsForEmeralds(
+								Items.CHAINMAIL_CHESTPLATE, 13, 1, 3, 15, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_SWAMP_ARMORER_CHESTPLATE_4
+							),
+							VillagerType.SWAMP
 						),
 						VillagerTrades.TypeSpecificTrade.oneTradeInBiomes(
 							new VillagerTrades.ItemsAndEmeraldsToItems(Items.DIAMOND_BOOTS, 1, 4, Items.DIAMOND_LEGGINGS, 1, 3, 15, 0.05F), VillagerType.TAIGA
@@ -917,55 +948,79 @@ public class VillagerTrades {
 					5,
 					new VillagerTrades.ItemListing[]{
 						VillagerTrades.TypeSpecificTrade.oneTradeInBiomes(
-							new VillagerTrades.ItemsAndEmeraldsToItems(Items.DIAMOND, 4, 16, enchant(Items.DIAMOND_CHESTPLATE, Enchantments.THORNS, 1), 1, 3, 30, 0.05F),
+							new VillagerTrades.ItemsAndEmeraldsToItems(
+								Items.DIAMOND, 4, 16, Items.DIAMOND_CHESTPLATE, 1, 3, 30, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_DESERT_ARMORER_CHESTPLATE_5
+							),
 							VillagerType.DESERT
 						),
 						VillagerTrades.TypeSpecificTrade.oneTradeInBiomes(
-							new VillagerTrades.ItemsAndEmeraldsToItems(Items.DIAMOND, 3, 16, enchant(Items.DIAMOND_LEGGINGS, Enchantments.THORNS, 1), 1, 3, 30, 0.05F),
+							new VillagerTrades.ItemsAndEmeraldsToItems(
+								Items.DIAMOND, 3, 16, Items.DIAMOND_LEGGINGS, 1, 3, 30, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_DESERT_ARMORER_LEGGINGS_5
+							),
 							VillagerType.DESERT
 						),
 						VillagerTrades.TypeSpecificTrade.oneTradeInBiomes(
-							new VillagerTrades.ItemsAndEmeraldsToItems(Items.DIAMOND, 3, 16, enchant(Items.DIAMOND_LEGGINGS, Enchantments.PROTECTION, 1), 1, 3, 30, 0.05F),
+							new VillagerTrades.ItemsAndEmeraldsToItems(
+								Items.DIAMOND, 3, 16, Items.DIAMOND_LEGGINGS, 1, 3, 30, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_PLAINS_ARMORER_LEGGINGS_5
+							),
 							VillagerType.PLAINS
 						),
 						VillagerTrades.TypeSpecificTrade.oneTradeInBiomes(
-							new VillagerTrades.ItemsAndEmeraldsToItems(Items.DIAMOND, 2, 12, enchant(Items.DIAMOND_BOOTS, Enchantments.PROTECTION, 1), 1, 3, 30, 0.05F),
+							new VillagerTrades.ItemsAndEmeraldsToItems(
+								Items.DIAMOND, 2, 12, Items.DIAMOND_BOOTS, 1, 3, 30, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_PLAINS_ARMORER_BOOTS_5
+							),
 							VillagerType.PLAINS
 						),
 						VillagerTrades.TypeSpecificTrade.oneTradeInBiomes(
-							new VillagerTrades.ItemsAndEmeraldsToItems(Items.DIAMOND, 2, 6, enchant(Items.DIAMOND_HELMET, Enchantments.BINDING_CURSE, 1), 1, 3, 30, 0.05F),
+							new VillagerTrades.ItemsAndEmeraldsToItems(
+								Items.DIAMOND, 2, 6, Items.DIAMOND_HELMET, 1, 3, 30, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_SAVANNA_ARMORER_HELMET_5
+							),
 							VillagerType.SAVANNA
 						),
 						VillagerTrades.TypeSpecificTrade.oneTradeInBiomes(
-							new VillagerTrades.ItemsAndEmeraldsToItems(Items.DIAMOND, 3, 8, enchant(Items.DIAMOND_CHESTPLATE, Enchantments.BINDING_CURSE, 1), 1, 3, 30, 0.05F),
+							new VillagerTrades.ItemsAndEmeraldsToItems(
+								Items.DIAMOND, 3, 8, Items.DIAMOND_CHESTPLATE, 1, 3, 30, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_SAVANNA_ARMORER_CHESTPLATE_5
+							),
 							VillagerType.SAVANNA
 						),
 						VillagerTrades.TypeSpecificTrade.oneTradeInBiomes(
-							new VillagerTrades.ItemsAndEmeraldsToItems(Items.DIAMOND, 2, 12, enchant(Items.DIAMOND_BOOTS, Enchantments.FROST_WALKER, 1), 1, 3, 30, 0.05F),
+							new VillagerTrades.ItemsAndEmeraldsToItems(
+								Items.DIAMOND, 2, 12, Items.DIAMOND_BOOTS, 1, 3, 30, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_SNOW_ARMORER_BOOTS_5
+							),
 							VillagerType.SNOW
 						),
 						VillagerTrades.TypeSpecificTrade.oneTradeInBiomes(
-							new VillagerTrades.ItemsAndEmeraldsToItems(Items.DIAMOND, 3, 12, enchant(Items.DIAMOND_HELMET, Enchantments.AQUA_AFFINITY, 1), 1, 3, 30, 0.05F),
+							new VillagerTrades.ItemsAndEmeraldsToItems(
+								Items.DIAMOND, 3, 12, Items.DIAMOND_HELMET, 1, 3, 30, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_SNOW_ARMORER_HELMET_5
+							),
 							VillagerType.SNOW
 						),
 						VillagerTrades.TypeSpecificTrade.oneTradeInBiomes(
-							new VillagerTrades.ItemsForEmeralds(enchant(Items.CHAINMAIL_HELMET, Enchantments.PROJECTILE_PROTECTION, 1), 9, 1, 3, 30, 0.05F), VillagerType.JUNGLE
+							new VillagerTrades.ItemsForEmeralds(Items.CHAINMAIL_HELMET, 9, 1, 3, 30, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_JUNGLE_ARMORER_HELMET_5),
+							VillagerType.JUNGLE
 						),
 						VillagerTrades.TypeSpecificTrade.oneTradeInBiomes(
-							new VillagerTrades.ItemsForEmeralds(enchant(Items.CHAINMAIL_BOOTS, Enchantments.FEATHER_FALLING, 1), 8, 1, 3, 30, 0.05F), VillagerType.JUNGLE
+							new VillagerTrades.ItemsForEmeralds(Items.CHAINMAIL_BOOTS, 8, 1, 3, 30, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_JUNGLE_ARMORER_BOOTS_5),
+							VillagerType.JUNGLE
 						),
 						VillagerTrades.TypeSpecificTrade.oneTradeInBiomes(
-							new VillagerTrades.ItemsForEmeralds(enchant(Items.CHAINMAIL_HELMET, Enchantments.RESPIRATION, 1), 9, 1, 3, 30, 0.05F), VillagerType.SWAMP
+							new VillagerTrades.ItemsForEmeralds(Items.CHAINMAIL_HELMET, 9, 1, 3, 30, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_SWAMP_ARMORER_HELMET_5),
+							VillagerType.SWAMP
 						),
 						VillagerTrades.TypeSpecificTrade.oneTradeInBiomes(
-							new VillagerTrades.ItemsForEmeralds(enchant(Items.CHAINMAIL_BOOTS, Enchantments.DEPTH_STRIDER, 1), 8, 1, 3, 30, 0.05F), VillagerType.SWAMP
+							new VillagerTrades.ItemsForEmeralds(Items.CHAINMAIL_BOOTS, 8, 1, 3, 30, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_SWAMP_ARMORER_BOOTS_5),
+							VillagerType.SWAMP
 						),
 						VillagerTrades.TypeSpecificTrade.oneTradeInBiomes(
-							new VillagerTrades.ItemsAndEmeraldsToItems(Items.DIAMOND, 4, 18, enchant(Items.DIAMOND_CHESTPLATE, Enchantments.BLAST_PROTECTION, 1), 1, 3, 30, 0.05F),
+							new VillagerTrades.ItemsAndEmeraldsToItems(
+								Items.DIAMOND, 4, 18, Items.DIAMOND_CHESTPLATE, 1, 3, 30, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_TAIGA_ARMORER_CHESTPLATE_5
+							),
 							VillagerType.TAIGA
 						),
 						VillagerTrades.TypeSpecificTrade.oneTradeInBiomes(
-							new VillagerTrades.ItemsAndEmeraldsToItems(Items.DIAMOND, 3, 18, enchant(Items.DIAMOND_LEGGINGS, Enchantments.BLAST_PROTECTION, 1), 1, 3, 30, 0.05F),
+							new VillagerTrades.ItemsAndEmeraldsToItems(
+								Items.DIAMOND, 3, 18, Items.DIAMOND_LEGGINGS, 1, 3, 30, 0.05F, TradeRebalanceEnchantmentProviders.TRADES_TAIGA_ARMORER_LEGGINGS_5
+							),
 							VillagerType.TAIGA
 						),
 						VillagerTrades.TypeSpecificTrade.oneTradeInBiomes(new VillagerTrades.EmeraldForItems(Items.DIAMOND_BLOCK, 1, 12, 30, 42), VillagerType.TAIGA),
@@ -1170,15 +1225,13 @@ public class VillagerTrades {
 	private static VillagerTrades.ItemListing commonBooks(int i) {
 		return new VillagerTrades.TypeSpecificTrade(
 			ImmutableMap.<VillagerType, VillagerTrades.ItemListing>builder()
-				.put(VillagerType.DESERT, new VillagerTrades.EnchantBookForEmeralds(i, Enchantments.FIRE_PROTECTION, Enchantments.THORNS, Enchantments.INFINITY))
-				.put(
-					VillagerType.JUNGLE, new VillagerTrades.EnchantBookForEmeralds(i, Enchantments.FEATHER_FALLING, Enchantments.PROJECTILE_PROTECTION, Enchantments.POWER)
-				)
-				.put(VillagerType.PLAINS, new VillagerTrades.EnchantBookForEmeralds(i, Enchantments.PUNCH, Enchantments.SMITE, Enchantments.BANE_OF_ARTHROPODS))
-				.put(VillagerType.SAVANNA, new VillagerTrades.EnchantBookForEmeralds(i, Enchantments.KNOCKBACK, Enchantments.BINDING_CURSE, Enchantments.SWEEPING_EDGE))
-				.put(VillagerType.SNOW, new VillagerTrades.EnchantBookForEmeralds(i, Enchantments.AQUA_AFFINITY, Enchantments.LOOTING, Enchantments.FROST_WALKER))
-				.put(VillagerType.SWAMP, new VillagerTrades.EnchantBookForEmeralds(i, Enchantments.DEPTH_STRIDER, Enchantments.RESPIRATION, Enchantments.VANISHING_CURSE))
-				.put(VillagerType.TAIGA, new VillagerTrades.EnchantBookForEmeralds(i, Enchantments.BLAST_PROTECTION, Enchantments.FIRE_ASPECT, Enchantments.FLAME))
+				.put(VillagerType.DESERT, new VillagerTrades.EnchantBookForEmeralds(i, EnchantmentTags.TRADES_DESERT_COMMON))
+				.put(VillagerType.JUNGLE, new VillagerTrades.EnchantBookForEmeralds(i, EnchantmentTags.TRADES_JUNGLE_COMMON))
+				.put(VillagerType.PLAINS, new VillagerTrades.EnchantBookForEmeralds(i, EnchantmentTags.TRADES_PLAINS_COMMON))
+				.put(VillagerType.SAVANNA, new VillagerTrades.EnchantBookForEmeralds(i, EnchantmentTags.TRADES_SAVANNA_COMMON))
+				.put(VillagerType.SNOW, new VillagerTrades.EnchantBookForEmeralds(i, EnchantmentTags.TRADES_SNOW_COMMON))
+				.put(VillagerType.SWAMP, new VillagerTrades.EnchantBookForEmeralds(i, EnchantmentTags.TRADES_SWAMP_COMMON))
+				.put(VillagerType.TAIGA, new VillagerTrades.EnchantBookForEmeralds(i, EnchantmentTags.TRADES_TAIGA_COMMON))
 				.build()
 		);
 	}
@@ -1186,13 +1239,13 @@ public class VillagerTrades {
 	private static VillagerTrades.ItemListing specialBooks() {
 		return new VillagerTrades.TypeSpecificTrade(
 			ImmutableMap.<VillagerType, VillagerTrades.ItemListing>builder()
-				.put(VillagerType.DESERT, new VillagerTrades.EnchantBookForEmeralds(30, 3, 3, Enchantments.EFFICIENCY))
-				.put(VillagerType.JUNGLE, new VillagerTrades.EnchantBookForEmeralds(30, 2, 2, Enchantments.UNBREAKING))
-				.put(VillagerType.PLAINS, new VillagerTrades.EnchantBookForEmeralds(30, 3, 3, Enchantments.PROTECTION))
-				.put(VillagerType.SAVANNA, new VillagerTrades.EnchantBookForEmeralds(30, 3, 3, Enchantments.SHARPNESS))
-				.put(VillagerType.SNOW, new VillagerTrades.EnchantBookForEmeralds(30, Enchantments.SILK_TOUCH))
-				.put(VillagerType.SWAMP, new VillagerTrades.EnchantBookForEmeralds(30, Enchantments.MENDING))
-				.put(VillagerType.TAIGA, new VillagerTrades.EnchantBookForEmeralds(30, 2, 2, Enchantments.FORTUNE))
+				.put(VillagerType.DESERT, new VillagerTrades.EnchantBookForEmeralds(30, 3, 3, EnchantmentTags.TRADES_DESERT_SPECIAL))
+				.put(VillagerType.JUNGLE, new VillagerTrades.EnchantBookForEmeralds(30, 2, 2, EnchantmentTags.TRADES_JUNGLE_SPECIAL))
+				.put(VillagerType.PLAINS, new VillagerTrades.EnchantBookForEmeralds(30, 3, 3, EnchantmentTags.TRADES_PLAINS_SPECIAL))
+				.put(VillagerType.SAVANNA, new VillagerTrades.EnchantBookForEmeralds(30, 3, 3, EnchantmentTags.TRADES_SAVANNA_SPECIAL))
+				.put(VillagerType.SNOW, new VillagerTrades.EnchantBookForEmeralds(30, EnchantmentTags.TRADES_SNOW_SPECIAL))
+				.put(VillagerType.SWAMP, new VillagerTrades.EnchantBookForEmeralds(30, EnchantmentTags.TRADES_SWAMP_SPECIAL))
+				.put(VillagerType.TAIGA, new VillagerTrades.EnchantBookForEmeralds(30, 2, 2, EnchantmentTags.TRADES_TAIGA_SPECIAL))
 				.build()
 		);
 	}
@@ -1207,12 +1260,6 @@ public class VillagerTrades {
 
 	private static ItemStack potion(Holder<Potion> holder) {
 		return PotionContents.createItemStack(Items.POTION, holder);
-	}
-
-	private static ItemStack enchant(Item item, Enchantment enchantment, int i) {
-		ItemStack itemStack = new ItemStack(item);
-		itemStack.enchant(enchantment, i);
-		return itemStack;
 	}
 
 	static class DyedArmorForEmeralds implements VillagerTrades.ItemListing {
@@ -1317,44 +1364,47 @@ public class VillagerTrades {
 
 	static class EnchantBookForEmeralds implements VillagerTrades.ItemListing {
 		private final int villagerXp;
-		private final List<Enchantment> tradeableEnchantments;
+		private final TagKey<Enchantment> tradeableEnchantments;
 		private final int minLevel;
 		private final int maxLevel;
 
-		public EnchantBookForEmeralds(int i) {
-			this(i, (Enchantment[])BuiltInRegistries.ENCHANTMENT.stream().filter(Enchantment::isTradeable).toArray(Enchantment[]::new));
+		public EnchantBookForEmeralds(int i, TagKey<Enchantment> tagKey) {
+			this(i, 0, Integer.MAX_VALUE, tagKey);
 		}
 
-		public EnchantBookForEmeralds(int i, Enchantment... enchantments) {
-			this(i, 0, Integer.MAX_VALUE, enchantments);
-		}
-
-		public EnchantBookForEmeralds(int i, int j, int k, Enchantment... enchantments) {
+		public EnchantBookForEmeralds(int i, int j, int k, TagKey<Enchantment> tagKey) {
 			this.minLevel = j;
 			this.maxLevel = k;
 			this.villagerXp = i;
-			this.tradeableEnchantments = Arrays.asList(enchantments);
-		}
-
-		private Enchantment getEnchantment(RandomSource randomSource, FeatureFlagSet featureFlagSet) {
-			List<Enchantment> list = this.tradeableEnchantments.stream().filter(enchantment -> enchantment.isEnabled(featureFlagSet)).toList();
-			return (Enchantment)list.get(randomSource.nextInt(list.size()));
+			this.tradeableEnchantments = tagKey;
 		}
 
 		@Override
 		public MerchantOffer getOffer(Entity entity, RandomSource randomSource) {
-			Enchantment enchantment = this.getEnchantment(randomSource, entity.level().enabledFeatures());
-			int i = Math.max(enchantment.getMinLevel(), this.minLevel);
-			int j = Math.min(enchantment.getMaxLevel(), this.maxLevel);
-			int k = Mth.nextInt(randomSource, i, j);
-			ItemStack itemStack = EnchantedBookItem.createForEnchantment(new EnchantmentInstance(enchantment, k));
-			int l = 2 + randomSource.nextInt(5 + k * 10) + 3 * k;
-			if (enchantment.isTreasureOnly()) {
-				l *= 2;
-			}
+			Optional<Holder<Enchantment>> optional = entity.level()
+				.registryAccess()
+				.registryOrThrow(Registries.ENCHANTMENT)
+				.getRandomElementOf(this.tradeableEnchantments, randomSource);
+			int l;
+			ItemStack itemStack;
+			if (!optional.isEmpty()) {
+				Holder<Enchantment> holder = (Holder<Enchantment>)optional.get();
+				Enchantment enchantment = holder.value();
+				int i = Math.max(enchantment.getMinLevel(), this.minLevel);
+				int j = Math.min(enchantment.getMaxLevel(), this.maxLevel);
+				int k = Mth.nextInt(randomSource, i, j);
+				itemStack = EnchantedBookItem.createForEnchantment(new EnchantmentInstance(holder, k));
+				l = 2 + randomSource.nextInt(5 + k * 10) + 3 * k;
+				if (holder.is(EnchantmentTags.DOUBLE_TRADE_PRICE)) {
+					l *= 2;
+				}
 
-			if (l > 64) {
-				l = 64;
+				if (l > 64) {
+					l = 64;
+				}
+			} else {
+				l = 1;
+				itemStack = new ItemStack(Items.BOOK);
 			}
 
 			return new MerchantOffer(new ItemCost(Items.EMERALD, l), Optional.of(new ItemCost(Items.BOOK)), itemStack, 12, this.villagerXp, 0.2F);
@@ -1383,7 +1433,9 @@ public class VillagerTrades {
 		@Override
 		public MerchantOffer getOffer(Entity entity, RandomSource randomSource) {
 			int i = 5 + randomSource.nextInt(15);
-			ItemStack itemStack = EnchantmentHelper.enchantItem(entity.level().enabledFeatures(), randomSource, new ItemStack(this.itemStack.getItem()), i, false);
+			RegistryAccess registryAccess = entity.level().registryAccess();
+			Optional<HolderSet.Named<Enchantment>> optional = registryAccess.registryOrThrow(Registries.ENCHANTMENT).getTag(EnchantmentTags.ON_TRADED_EQUIPMENT);
+			ItemStack itemStack = EnchantmentHelper.enchantItem(randomSource, new ItemStack(this.itemStack.getItem()), i, registryAccess, optional);
 			int j = Math.min(this.baseEmeraldCost + i, 64);
 			ItemCost itemCost = new ItemCost(Items.EMERALD, j);
 			return new MerchantOffer(itemCost, itemStack, this.maxUses, this.villagerXp, this.priceMultiplier);
@@ -1409,29 +1461,38 @@ public class VillagerTrades {
 		private final int maxUses;
 		private final int villagerXp;
 		private final float priceMultiplier;
+		private final Optional<ResourceKey<EnchantmentProvider>> enchantmentProvider;
 
 		public ItemsAndEmeraldsToItems(ItemLike itemLike, int i, int j, Item item, int k, int l, int m, float f) {
 			this(itemLike, i, j, new ItemStack(item), k, l, m, f);
 		}
 
-		ItemsAndEmeraldsToItems(ItemLike itemLike, int i, int j, ItemStack itemStack, int k, int l, int m, float f) {
-			this(new ItemCost(itemLike, i), j, itemStack.copyWithCount(k), l, m, f);
+		private ItemsAndEmeraldsToItems(ItemLike itemLike, int i, int j, ItemStack itemStack, int k, int l, int m, float f) {
+			this(new ItemCost(itemLike, i), j, itemStack.copyWithCount(k), l, m, f, Optional.empty());
 		}
 
-		public ItemsAndEmeraldsToItems(ItemCost itemCost, int i, ItemStack itemStack, int j, int k, float f) {
+		ItemsAndEmeraldsToItems(ItemLike itemLike, int i, int j, ItemLike itemLike2, int k, int l, int m, float f, ResourceKey<EnchantmentProvider> resourceKey) {
+			this(new ItemCost(itemLike, i), j, new ItemStack(itemLike2, k), l, m, f, Optional.of(resourceKey));
+		}
+
+		public ItemsAndEmeraldsToItems(ItemCost itemCost, int i, ItemStack itemStack, int j, int k, float f, Optional<ResourceKey<EnchantmentProvider>> optional) {
 			this.fromItem = itemCost;
 			this.emeraldCost = i;
 			this.toItem = itemStack;
 			this.maxUses = j;
 			this.villagerXp = k;
 			this.priceMultiplier = f;
+			this.enchantmentProvider = optional;
 		}
 
 		@Nullable
 		@Override
 		public MerchantOffer getOffer(Entity entity, RandomSource randomSource) {
+			ItemStack itemStack = this.toItem.copy();
+			this.enchantmentProvider
+				.ifPresent(resourceKey -> EnchantmentHelper.enchantItemFromProvider(itemStack, resourceKey, entity.level(), entity.blockPosition(), randomSource));
 			return new MerchantOffer(
-				new ItemCost(Items.EMERALD, this.emeraldCost), Optional.of(this.fromItem), this.toItem.copy(), 0, this.maxUses, this.villagerXp, this.priceMultiplier, 0
+				new ItemCost(Items.EMERALD, this.emeraldCost), Optional.of(this.fromItem), itemStack, 0, this.maxUses, this.villagerXp, this.priceMultiplier
 			);
 		}
 	}
@@ -1442,6 +1503,7 @@ public class VillagerTrades {
 		private final int maxUses;
 		private final int villagerXp;
 		private final float priceMultiplier;
+		private final Optional<ResourceKey<EnchantmentProvider>> enchantmentProvider;
 
 		public ItemsForEmeralds(Block block, int i, int j, int k, int l) {
 			this(new ItemStack(block), i, j, k, l);
@@ -1463,18 +1525,30 @@ public class VillagerTrades {
 			this(new ItemStack(item), i, j, k, l, f);
 		}
 
+		public ItemsForEmeralds(Item item, int i, int j, int k, int l, float f, ResourceKey<EnchantmentProvider> resourceKey) {
+			this(new ItemStack(item), i, j, k, l, f, Optional.of(resourceKey));
+		}
+
 		public ItemsForEmeralds(ItemStack itemStack, int i, int j, int k, int l, float f) {
+			this(itemStack, i, j, k, l, f, Optional.empty());
+		}
+
+		public ItemsForEmeralds(ItemStack itemStack, int i, int j, int k, int l, float f, Optional<ResourceKey<EnchantmentProvider>> optional) {
 			this.itemStack = itemStack;
 			this.emeraldCost = i;
 			this.itemStack.setCount(j);
 			this.maxUses = k;
 			this.villagerXp = l;
 			this.priceMultiplier = f;
+			this.enchantmentProvider = optional;
 		}
 
 		@Override
 		public MerchantOffer getOffer(Entity entity, RandomSource randomSource) {
-			return new MerchantOffer(new ItemCost(Items.EMERALD, this.emeraldCost), this.itemStack.copy(), this.maxUses, this.villagerXp, this.priceMultiplier);
+			ItemStack itemStack = this.itemStack.copy();
+			this.enchantmentProvider
+				.ifPresent(resourceKey -> EnchantmentHelper.enchantItemFromProvider(itemStack, resourceKey, entity.level(), entity.blockPosition(), randomSource));
+			return new MerchantOffer(new ItemCost(Items.EMERALD, this.emeraldCost), itemStack, this.maxUses, this.villagerXp, this.priceMultiplier);
 		}
 	}
 

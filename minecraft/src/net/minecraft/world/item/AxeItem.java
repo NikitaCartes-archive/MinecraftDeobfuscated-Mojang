@@ -12,6 +12,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -58,23 +59,32 @@ public class AxeItem extends DiggerItem {
 		Level level = useOnContext.getLevel();
 		BlockPos blockPos = useOnContext.getClickedPos();
 		Player player = useOnContext.getPlayer();
-		Optional<BlockState> optional = this.evaluateNewBlockState(level, blockPos, player, level.getBlockState(blockPos));
-		if (optional.isEmpty()) {
+		if (playerHasShieldUseIntent(useOnContext)) {
 			return InteractionResult.PASS;
 		} else {
-			ItemStack itemStack = useOnContext.getItemInHand();
-			if (player instanceof ServerPlayer) {
-				CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger((ServerPlayer)player, blockPos, itemStack);
-			}
+			Optional<BlockState> optional = this.evaluateNewBlockState(level, blockPos, player, level.getBlockState(blockPos));
+			if (optional.isEmpty()) {
+				return InteractionResult.PASS;
+			} else {
+				ItemStack itemStack = useOnContext.getItemInHand();
+				if (player instanceof ServerPlayer) {
+					CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger((ServerPlayer)player, blockPos, itemStack);
+				}
 
-			level.setBlock(blockPos, (BlockState)optional.get(), 11);
-			level.gameEvent(GameEvent.BLOCK_CHANGE, blockPos, GameEvent.Context.of(player, (BlockState)optional.get()));
-			if (player != null) {
-				itemStack.hurtAndBreak(1, player, LivingEntity.getSlotForHand(useOnContext.getHand()));
-			}
+				level.setBlock(blockPos, (BlockState)optional.get(), 11);
+				level.gameEvent(GameEvent.BLOCK_CHANGE, blockPos, GameEvent.Context.of(player, (BlockState)optional.get()));
+				if (player != null) {
+					itemStack.hurtAndBreak(1, player, LivingEntity.getSlotForHand(useOnContext.getHand()));
+				}
 
-			return InteractionResult.sidedSuccess(level.isClientSide);
+				return InteractionResult.sidedSuccess(level.isClientSide);
+			}
 		}
+	}
+
+	private static boolean playerHasShieldUseIntent(UseOnContext useOnContext) {
+		Player player = useOnContext.getPlayer();
+		return useOnContext.getHand().equals(InteractionHand.MAIN_HAND) && player.getOffhandItem().is(Items.SHIELD) && !player.isSecondaryUseActive();
 	}
 
 	private Optional<BlockState> evaluateNewBlockState(Level level, BlockPos blockPos, @Nullable Player player, BlockState blockState) {

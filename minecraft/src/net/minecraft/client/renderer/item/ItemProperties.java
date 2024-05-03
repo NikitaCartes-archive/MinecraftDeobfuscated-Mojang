@@ -99,7 +99,7 @@ public class ItemProperties {
 			if (livingEntity == null) {
 				return 0.0F;
 			} else {
-				return livingEntity.getUseItem() != itemStack ? 0.0F : (float)(itemStack.getUseDuration() - livingEntity.getUseItemRemainingTicks()) / 20.0F;
+				return livingEntity.getUseItem() != itemStack ? 0.0F : (float)(itemStack.getUseDuration(livingEntity) - livingEntity.getUseItemRemainingTicks()) / 20.0F;
 			}
 		});
 		register(
@@ -179,7 +179,8 @@ public class ItemProperties {
 				} else {
 					return CrossbowItem.isCharged(itemStack)
 						? 0.0F
-						: (float)(itemStack.getUseDuration() - livingEntity.getUseItemRemainingTicks()) / (float)CrossbowItem.getChargeDuration(itemStack);
+						: (float)(itemStack.getUseDuration(livingEntity) - livingEntity.getUseItemRemainingTicks())
+							/ (float)CrossbowItem.getChargeDuration(itemStack, livingEntity);
 				}
 			}
 		);

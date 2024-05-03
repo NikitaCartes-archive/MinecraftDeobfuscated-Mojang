@@ -8,11 +8,11 @@ import java.util.function.Supplier;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.EnchantmentTags;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.monster.Silverfish;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
-import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
@@ -59,7 +59,7 @@ public class InfestedBlock extends Block {
 	@Override
 	protected void spawnAfterBreak(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, ItemStack itemStack, boolean bl) {
 		super.spawnAfterBreak(blockState, serverLevel, blockPos, itemStack, bl);
-		if (serverLevel.getGameRules().getBoolean(GameRules.RULE_DOBLOCKDROPS) && EnchantmentHelper.getItemEnchantmentLevel(Enchantments.SILK_TOUCH, itemStack) == 0) {
+		if (serverLevel.getGameRules().getBoolean(GameRules.RULE_DOBLOCKDROPS) && !EnchantmentHelper.hasTag(itemStack, EnchantmentTags.PREVENTS_INFESTED_SPAWNS)) {
 			this.spawnInfestation(serverLevel, blockPos);
 		}
 	}

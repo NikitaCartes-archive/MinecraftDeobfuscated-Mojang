@@ -14,8 +14,8 @@ import net.minecraft.client.Options;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
-import net.minecraft.client.gui.screens.OptionsSubScreen;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.options.OptionsSubScreen;
 
 @Environment(EnvType.CLIENT)
 public class OptionsList extends ContainerObjectSelectionList<OptionsList.Entry> {
@@ -23,7 +23,7 @@ public class OptionsList extends ContainerObjectSelectionList<OptionsList.Entry>
 	private static final int DEFAULT_ITEM_HEIGHT = 25;
 	private final OptionsSubScreen screen;
 
-	public OptionsList(Minecraft minecraft, int i, int j, OptionsSubScreen optionsSubScreen) {
+	public OptionsList(Minecraft minecraft, int i, OptionsSubScreen optionsSubScreen) {
 		super(minecraft, i, optionsSubScreen.layout.getContentHeight(), optionsSubScreen.layout.getHeaderHeight(), 25);
 		this.centerListVertically = false;
 		this.screen = optionsSubScreen;

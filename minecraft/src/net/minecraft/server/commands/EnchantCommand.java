@@ -78,8 +78,8 @@ public class EnchantCommand {
 					ItemStack itemStack = livingEntity.getMainHandItem();
 					if (!itemStack.isEmpty()) {
 						if (enchantment.canEnchant(itemStack)
-							&& EnchantmentHelper.isEnchantmentCompatible(EnchantmentHelper.getEnchantmentsForCrafting(itemStack).keySet(), enchantment)) {
-							itemStack.enchant(enchantment, i);
+							&& EnchantmentHelper.isEnchantmentCompatible(EnchantmentHelper.getEnchantmentsForCrafting(itemStack).keySet(), holder)) {
+							itemStack.enchant(holder, i);
 							j++;
 						} else if (collection.size() == 1) {
 							throw ERROR_INCOMPATIBLE.create(itemStack.getItem().getName(itemStack).getString());
@@ -97,11 +97,15 @@ public class EnchantCommand {
 			} else {
 				if (collection.size() == 1) {
 					commandSourceStack.sendSuccess(
-						() -> Component.translatable("commands.enchant.success.single", enchantment.getFullname(i), ((Entity)collection.iterator().next()).getDisplayName()),
+						() -> Component.translatable(
+								"commands.enchant.success.single", Enchantment.getFullname(holder, i), ((Entity)collection.iterator().next()).getDisplayName()
+							),
 						true
 					);
 				} else {
-					commandSourceStack.sendSuccess(() -> Component.translatable("commands.enchant.success.multiple", enchantment.getFullname(i), collection.size()), true);
+					commandSourceStack.sendSuccess(
+						() -> Component.translatable("commands.enchant.success.multiple", Enchantment.getFullname(holder, i), collection.size()), true
+					);
 				}
 
 				return j;

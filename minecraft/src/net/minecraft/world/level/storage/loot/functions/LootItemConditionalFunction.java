@@ -13,7 +13,6 @@ import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.ValidationContext;
 import net.minecraft.world.level.storage.loot.predicates.ConditionUserBuilder;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
-import net.minecraft.world.level.storage.loot.predicates.LootItemConditions;
 
 public abstract class LootItemConditionalFunction implements LootItemFunction {
 	protected final List<LootItemCondition> predicates;
@@ -29,7 +28,7 @@ public abstract class LootItemConditionalFunction implements LootItemFunction {
 
 	protected static <T extends LootItemConditionalFunction> P1<Mu<T>, List<LootItemCondition>> commonFields(Instance<T> instance) {
 		return instance.group(
-			LootItemConditions.DIRECT_CODEC
+			LootItemCondition.DIRECT_CODEC
 				.listOf()
 				.optionalFieldOf("conditions", List.of())
 				.forGetter(lootItemConditionalFunction -> lootItemConditionalFunction.predicates)

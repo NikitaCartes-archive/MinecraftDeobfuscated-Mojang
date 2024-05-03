@@ -1,5 +1,6 @@
 package net.minecraft.world.entity.projectile;
 
+import it.unimi.dsi.fastutil.doubles.DoubleDoubleImmutablePair;
 import java.util.List;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
@@ -8,6 +9,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.AreaEffectCloud;
@@ -186,5 +188,12 @@ public class ThrownPotion extends ThrowableItemProjectile implements ItemSupplie
 			CampfireBlock.dowse(this.getOwner(), this.level(), blockPos, blockState);
 			this.level().setBlockAndUpdate(blockPos, blockState.setValue(CampfireBlock.LIT, Boolean.valueOf(false)));
 		}
+	}
+
+	@Override
+	public DoubleDoubleImmutablePair calculateHorizontalHurtKnockbackDirection(LivingEntity livingEntity, DamageSource damageSource) {
+		double d = livingEntity.position().x - this.position().x;
+		double e = livingEntity.position().z - this.position().z;
+		return DoubleDoubleImmutablePair.of(d, e);
 	}
 }

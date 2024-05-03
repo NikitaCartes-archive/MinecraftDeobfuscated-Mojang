@@ -112,26 +112,26 @@ public class ButtonBlock extends FaceAttachedHorizontalDirectionalBlock {
 		if ((Boolean)blockState.getValue(POWERED)) {
 			return InteractionResult.CONSUME;
 		} else {
-			this.press(blockState, level, blockPos);
-			this.playSound(player, level, blockPos, true);
-			level.gameEvent(player, GameEvent.BLOCK_ACTIVATE, blockPos);
+			this.press(blockState, level, blockPos, player);
 			return InteractionResult.sidedSuccess(level.isClientSide);
 		}
 	}
 
 	@Override
 	protected void onExplosionHit(BlockState blockState, Level level, BlockPos blockPos, Explosion explosion, BiConsumer<ItemStack, BlockPos> biConsumer) {
-		if (explosion.getBlockInteraction() == Explosion.BlockInteraction.TRIGGER_BLOCK && !level.isClientSide() && !(Boolean)blockState.getValue(POWERED)) {
-			this.press(blockState, level, blockPos);
+		if (explosion.canTriggerBlocks() && !(Boolean)blockState.getValue(POWERED)) {
+			this.press(blockState, level, blockPos, null);
 		}
 
 		super.onExplosionHit(blockState, level, blockPos, explosion, biConsumer);
 	}
 
-	public void press(BlockState blockState, Level level, BlockPos blockPos) {
+	public void press(BlockState blockState, Level level, BlockPos blockPos, @Nullable Player player) {
 		level.setBlock(blockPos, blockState.setValue(POWERED, Boolean.valueOf(true)), 3);
 		this.updateNeighbours(blockState, level, blockPos);
 		level.scheduleTick(blockPos, this, this.ticksToStayPressed);
+		this.playSound(player, level, blockPos, false);
+		level.gameEvent(player, GameEvent.BLOCK_ACTIVATE, blockPos);
 	}
 
 	protected void playSound(@Nullable Player player, LevelAccessor levelAccessor, BlockPos blockPos, boolean bl) {

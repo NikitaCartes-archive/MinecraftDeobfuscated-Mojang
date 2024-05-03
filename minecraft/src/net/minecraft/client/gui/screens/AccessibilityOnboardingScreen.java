@@ -10,10 +10,13 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CommonButtons;
+import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.FocusableTextWidget;
 import net.minecraft.client.gui.components.LogoRenderer;
 import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
 import net.minecraft.client.gui.layouts.LinearLayout;
+import net.minecraft.client.gui.screens.options.AccessibilityOptionsScreen;
+import net.minecraft.client.gui.screens.options.LanguageSelectScreen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 
@@ -32,7 +35,7 @@ public class AccessibilityOnboardingScreen extends Screen {
 	@Nullable
 	private FocusableTextWidget textWidget;
 	@Nullable
-	private AbstractWidget narrationButton;
+	private AbstractWidget narratorButton;
 	private final HeaderAndFooterLayout layout = new HeaderAndFooterLayout(this, this.initTitleYPos(), 33);
 
 	public AccessibilityOnboardingScreen(Options options, Runnable runnable) {
@@ -48,9 +51,9 @@ public class AccessibilityOnboardingScreen extends Screen {
 		LinearLayout linearLayout = this.layout.addToContents(LinearLayout.vertical());
 		linearLayout.defaultCellSetting().alignHorizontallyCenter().padding(4);
 		this.textWidget = linearLayout.addChild(new FocusableTextWidget(this.width, this.title, this.font), layoutSettings -> layoutSettings.padding(8));
-		this.narrationButton = this.options.narrator().createButton(this.options);
-		this.narrationButton.active = this.narratorAvailable;
-		linearLayout.addChild(this.narrationButton);
+		this.narratorButton = this.options.narrator().createButton(this.options);
+		this.narratorButton.active = this.narratorAvailable;
+		linearLayout.addChild(this.narratorButton);
 		linearLayout.addChild(CommonButtons.accessibility(150, button -> this.closeAndSetScreen(new AccessibilityOptionsScreen(this, this.minecraft.options)), false));
 		linearLayout.addChild(
 			CommonButtons.language(
@@ -73,8 +76,8 @@ public class AccessibilityOnboardingScreen extends Screen {
 
 	@Override
 	protected void setInitialFocus() {
-		if (this.narratorAvailable && this.narrationButton != null) {
-			this.setInitialFocus(this.narrationButton);
+		if (this.narratorAvailable && this.narratorButton != null) {
+			this.setInitialFocus(this.narratorButton);
 		} else {
 			super.setInitialFocus();
 		}
@@ -120,6 +123,12 @@ public class AccessibilityOnboardingScreen extends Screen {
 				Narrator.getNarrator().say(ONBOARDING_NARRATOR_MESSAGE.getString(), true);
 				this.hasNarrated = true;
 			}
+		}
+	}
+
+	public void updateNarratorButton() {
+		if (this.narratorButton instanceof CycleButton) {
+			((CycleButton)this.narratorButton).setValue(this.options.narrator().get());
 		}
 	}
 }

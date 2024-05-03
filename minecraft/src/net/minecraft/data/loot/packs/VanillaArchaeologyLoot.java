@@ -14,9 +14,9 @@ import net.minecraft.world.level.storage.loot.functions.SetStewEffectFunction;
 import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
 
-public class VanillaArchaeologyLoot implements LootTableSubProvider {
+public record VanillaArchaeologyLoot(HolderLookup.Provider registries) implements LootTableSubProvider {
 	@Override
-	public void generate(HolderLookup.Provider provider, BiConsumer<ResourceKey<LootTable>, LootTable.Builder> biConsumer) {
+	public void generate(BiConsumer<ResourceKey<LootTable>, LootTable.Builder> biConsumer) {
 		biConsumer.accept(
 			BuiltInLootTables.DESERT_WELL_ARCHAEOLOGY,
 			LootTable.lootTable()

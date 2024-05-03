@@ -63,20 +63,25 @@ public class RealmsSubscriptionInfoScreen extends RealmsScreen {
 				.build()
 		);
 		if (this.serverData.expired) {
-			this.addRenderableWidget(Button.builder(Component.translatable("mco.configure.world.delete.button"), button -> {
-				Component component = Component.translatable("mco.configure.world.delete.question.line1");
-				Component component2 = Component.translatable("mco.configure.world.delete.question.line2");
-				this.minecraft.setScreen(new RealmsLongConfirmationScreen(this::deleteRealm, RealmsLongConfirmationScreen.Type.WARNING, component, component2, true));
-			}).bounds(this.width / 2 - 100, row(10), 200, 20).build());
+			this.addRenderableWidget(
+				Button.builder(
+						Component.translatable("mco.configure.world.delete.button"),
+						button -> this.minecraft
+								.setScreen(
+									RealmsPopups.warningPopupScreen(this, Component.translatable("mco.configure.world.delete.question.line1"), popupScreen -> this.deleteRealm())
+								)
+					)
+					.bounds(this.width / 2 - 100, row(10), 200, 20)
+					.build()
+			);
 		} else if (RealmsMainScreen.isSnapshot() && this.serverData.parentWorldName != null) {
 			this.addRenderableWidget(
 				new FittingMultiLineTextWidget(
-						this.width / 2 - 100, row(8), 200, 46, Component.translatable("mco.snapshot.subscription.info", this.serverData.parentWorldName), this.font
-					)
-					.setColor(-6250336)
+					this.width / 2 - 100, row(8), 200, 46, Component.translatable("mco.snapshot.subscription.info", this.serverData.parentWorldName), this.font
+				)
 			);
 		} else {
-			this.addRenderableWidget(new FittingMultiLineTextWidget(this.width / 2 - 100, row(8), 200, 46, RECURRING_INFO, this.font).setColor(-6250336));
+			this.addRenderableWidget(new FittingMultiLineTextWidget(this.width / 2 - 100, row(8), 200, 46, RECURRING_INFO, this.font));
 		}
 
 		this.addRenderableWidget(Button.builder(CommonComponents.GUI_BACK, button -> this.onClose()).bounds(this.width / 2 - 100, row(12), 200, 20).build());
@@ -87,24 +92,21 @@ public class RealmsSubscriptionInfoScreen extends RealmsScreen {
 		return CommonComponents.joinLines(SUBSCRIPTION_TITLE, SUBSCRIPTION_START_LABEL, this.startDate, TIME_LEFT_LABEL, this.daysLeft);
 	}
 
-	private void deleteRealm(boolean bl) {
-		if (bl) {
-			(new Thread("Realms-delete-realm") {
-					public void run() {
-						try {
-							RealmsClient realmsClient = RealmsClient.create();
-							realmsClient.deleteRealm(RealmsSubscriptionInfoScreen.this.serverData.id);
-						} catch (RealmsServiceException var2) {
-							RealmsSubscriptionInfoScreen.LOGGER.error("Couldn't delete world", (Throwable)var2);
-						}
-
-						RealmsSubscriptionInfoScreen.this.minecraft
-							.execute(() -> RealmsSubscriptionInfoScreen.this.minecraft.setScreen(RealmsSubscriptionInfoScreen.this.mainScreen));
+	private void deleteRealm() {
+		(new Thread("Realms-delete-realm") {
+				public void run() {
+					try {
+						RealmsClient realmsClient = RealmsClient.create();
+						realmsClient.deleteRealm(RealmsSubscriptionInfoScreen.this.serverData.id);
+					} catch (RealmsServiceException var2) {
+						RealmsSubscriptionInfoScreen.LOGGER.error("Couldn't delete world", (Throwable)var2);
 					}
-				})
-				.start();
-		}
 
+					RealmsSubscriptionInfoScreen.this.minecraft
+						.execute(() -> RealmsSubscriptionInfoScreen.this.minecraft.setScreen(RealmsSubscriptionInfoScreen.this.mainScreen));
+				}
+			})
+			.start();
 		this.minecraft.setScreen(this);
 	}
 

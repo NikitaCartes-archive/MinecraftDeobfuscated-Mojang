@@ -74,7 +74,7 @@ public class RealmsBrokenWorldScreen extends RealmsScreen {
 	private void addButtons() {
 		for (Entry<Integer, RealmsWorldOptions> entry : this.serverData.slots.entrySet()) {
 			int i = (Integer)entry.getKey();
-			boolean bl = i != this.serverData.activeSlot || this.serverData.worldType == RealmsServer.WorldType.MINIGAME;
+			boolean bl = i != this.serverData.activeSlot || this.serverData.isMinigameActive();
 			Button button;
 			if (bl) {
 				button = Button.builder(
@@ -86,17 +86,15 @@ public class RealmsBrokenWorldScreen extends RealmsScreen {
 					.build();
 				button.active = !((RealmsWorldOptions)this.serverData.slots.get(i)).empty;
 			} else {
-				button = Button.builder(Component.translatable("mco.brokenworld.download"), buttonx -> {
-					Component component = Component.translatable("mco.configure.world.restore.download.question.line1");
-					Component component2 = Component.translatable("mco.configure.world.restore.download.question.line2");
-					this.minecraft.setScreen(new RealmsLongConfirmationScreen(blx -> {
-						if (blx) {
-							this.downloadWorld(i);
-						} else {
-							this.minecraft.setScreen(this);
-						}
-					}, RealmsLongConfirmationScreen.Type.INFO, component, component2, true));
-				}).bounds(this.getFramePositionX(i), row(8), 80, 20).build();
+				button = Button.builder(
+						Component.translatable("mco.brokenworld.download"),
+						buttonx -> this.minecraft
+								.setScreen(
+									RealmsPopups.infoPopupScreen(this, Component.translatable("mco.configure.world.restore.download.question.line1"), popupScreen -> this.downloadWorld(i))
+								)
+					)
+					.bounds(this.getFramePositionX(i), row(8), 80, 20)
+					.build();
 			}
 
 			if (this.slotsThatHasBeenDownloaded.contains(i)) {
@@ -225,7 +223,7 @@ public class RealmsBrokenWorldScreen extends RealmsScreen {
 	}
 
 	private boolean isMinigame() {
-		return this.serverData != null && this.serverData.worldType == RealmsServer.WorldType.MINIGAME;
+		return this.serverData != null && this.serverData.isMinigameActive();
 	}
 
 	private void drawSlotFrame(

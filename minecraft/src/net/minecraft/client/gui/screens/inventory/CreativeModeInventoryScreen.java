@@ -19,9 +19,10 @@ import net.minecraft.client.HotbarManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.client.multiplayer.SessionSearchTrees;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.player.inventory.Hotbar;
-import net.minecraft.client.searchtree.SearchRegistry;
 import net.minecraft.client.searchtree.SearchTree;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
@@ -113,13 +114,13 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 	private final Set<TagKey<Item>> visibleTags = new HashSet();
 	private final boolean displayOperatorCreativeTab;
 
-	public CreativeModeInventoryScreen(Player player, FeatureFlagSet featureFlagSet, boolean bl) {
-		super(new CreativeModeInventoryScreen.ItemPickerMenu(player), player.getInventory(), CommonComponents.EMPTY);
-		player.containerMenu = this.menu;
+	public CreativeModeInventoryScreen(LocalPlayer localPlayer, FeatureFlagSet featureFlagSet, boolean bl) {
+		super(new CreativeModeInventoryScreen.ItemPickerMenu(localPlayer), localPlayer.getInventory(), CommonComponents.EMPTY);
+		localPlayer.containerMenu = this.menu;
 		this.imageHeight = 136;
 		this.imageWidth = 195;
 		this.displayOperatorCreativeTab = bl;
-		CreativeModeTabs.tryRebuildTabContents(featureFlagSet, this.hasPermissions(player), player.level().registryAccess());
+		this.tryRebuildTabContents(localPlayer.connection.searchTrees(), featureFlagSet, this.hasPermissions(localPlayer), localPlayer.level().registryAccess());
 	}
 
 	private boolean hasPermissions(Player player) {
@@ -127,7 +128,8 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 	}
 
 	private void tryRefreshInvalidatedTabs(FeatureFlagSet featureFlagSet, boolean bl, HolderLookup.Provider provider) {
-		if (CreativeModeTabs.tryRebuildTabContents(featureFlagSet, bl, provider)) {
+		ClientPacketListener clientPacketListener = this.minecraft.getConnection();
+		if (this.tryRebuildTabContents(clientPacketListener != null ? clientPacketListener.searchTrees() : null, featureFlagSet, bl, provider)) {
 			for (CreativeModeTab creativeModeTab : CreativeModeTabs.allTabs()) {
 				Collection<ItemStack> collection = creativeModeTab.getDisplayItems();
 				if (creativeModeTab == selectedTab) {
@@ -138,6 +140,22 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 					}
 				}
 			}
+		}
+	}
+
+	private boolean tryRebuildTabContents(
+		@Nullable SessionSearchTrees sessionSearchTrees, FeatureFlagSet featureFlagSet, boolean bl, HolderLookup.Provider provider
+	) {
+		if (!CreativeModeTabs.tryRebuildTabContents(featureFlagSet, bl, provider)) {
+			return false;
+		} else {
+			if (sessionSearchTrees != null) {
+				List<ItemStack> list = List.copyOf(CreativeModeTabs.searchTab().getDisplayItems());
+				sessionSearchTrees.updateCreativeTooltips(provider, list);
+				sessionSearchTrees.updateCreativeTags(list);
+			}
+
+			return true;
 		}
 	}
 
@@ -411,16 +429,20 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 		if (string.isEmpty()) {
 			this.menu.items.addAll(selectedTab.getDisplayItems());
 		} else {
-			SearchTree<ItemStack> searchTree;
-			if (string.startsWith("#")) {
-				string = string.substring(1);
-				searchTree = this.minecraft.getSearchTree(SearchRegistry.CREATIVE_TAGS);
-				this.updateVisibleTags(string);
-			} else {
-				searchTree = this.minecraft.getSearchTree(SearchRegistry.CREATIVE_NAMES);
-			}
+			ClientPacketListener clientPacketListener = this.minecraft.getConnection();
+			if (clientPacketListener != null) {
+				SessionSearchTrees sessionSearchTrees = clientPacketListener.searchTrees();
+				SearchTree<ItemStack> searchTree;
+				if (string.startsWith("#")) {
+					string = string.substring(1);
+					searchTree = sessionSearchTrees.creativeTagSearch();
+					this.updateVisibleTags(string);
+				} else {
+					searchTree = sessionSearchTrees.creativeNameSearch();
+				}
 
-			this.menu.items.addAll(searchTree.search(string.toLowerCase(Locale.ROOT)));
+				this.menu.items.addAll(searchTree.search(string.toLowerCase(Locale.ROOT)));
+			}
 		}
 
 		this.scrollOffs = 0.0F;

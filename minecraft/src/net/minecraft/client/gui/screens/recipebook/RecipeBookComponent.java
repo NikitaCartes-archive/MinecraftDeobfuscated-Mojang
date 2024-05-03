@@ -3,7 +3,6 @@ package net.minecraft.client.gui.screens.recipebook;
 import com.google.common.collect.Lists;
 import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import javax.annotation.Nullable;
@@ -23,9 +22,9 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.resources.language.LanguageInfo;
 import net.minecraft.client.resources.language.LanguageManager;
-import net.minecraft.client.searchtree.SearchRegistry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ServerboundRecipeBookChangeSettingsPacket;
 import net.minecraft.recipebook.PlaceRecipe;
@@ -66,7 +65,7 @@ public class RecipeBookComponent implements PlaceRecipe<Ingredient>, Renderable,
 	@Nullable
 	private RecipeBookTabButton selectedTab;
 	protected StateSwitchingButton filterButton;
-	protected RecipeBookMenu<?> menu;
+	protected RecipeBookMenu<?, ?> menu;
 	protected Minecraft minecraft;
 	@Nullable
 	private EditBox searchBox;
@@ -79,7 +78,7 @@ public class RecipeBookComponent implements PlaceRecipe<Ingredient>, Renderable,
 	private boolean visible;
 	private boolean widthTooNarrow;
 
-	public void init(int i, int j, Minecraft minecraft, boolean bl, RecipeBookMenu<?> recipeBookMenu) {
+	public void init(int i, int j, Minecraft minecraft, boolean bl, RecipeBookMenu<?, ?> recipeBookMenu) {
 		this.minecraft = minecraft;
 		this.width = i;
 		this.height = j;
@@ -198,10 +197,11 @@ public class RecipeBookComponent implements PlaceRecipe<Ingredient>, Renderable,
 		list2.removeIf(recipeCollection -> !recipeCollection.hasFitting());
 		String string = this.searchBox.getValue();
 		if (!string.isEmpty()) {
-			ObjectSet<RecipeCollection> objectSet = new ObjectLinkedOpenHashSet<>(
-				this.minecraft.getSearchTree(SearchRegistry.RECIPE_COLLECTIONS).search(string.toLowerCase(Locale.ROOT))
-			);
-			list2.removeIf(recipeCollection -> !objectSet.contains(recipeCollection));
+			ClientPacketListener clientPacketListener = this.minecraft.getConnection();
+			if (clientPacketListener != null) {
+				ObjectSet<RecipeCollection> objectSet = new ObjectLinkedOpenHashSet<>(clientPacketListener.searchTrees().recipes().search(string.toLowerCase(Locale.ROOT)));
+				list2.removeIf(recipeCollection -> !objectSet.contains(recipeCollection));
+			}
 		}
 
 		if (this.book.isFiltering(this.menu)) {
@@ -483,9 +483,7 @@ public class RecipeBookComponent implements PlaceRecipe<Ingredient>, Renderable,
 		);
 	}
 
-	@Override
-	public void addItemToSlot(Iterator<Ingredient> iterator, int i, int j, int k, int l) {
-		Ingredient ingredient = (Ingredient)iterator.next();
+	public void addItemToSlot(Ingredient ingredient, int i, int j, int k, int l) {
 		if (!ingredient.isEmpty()) {
 			Slot slot = this.menu.slots.get(i);
 			this.ghostRecipe.addIngredient(ingredient, slot.x, slot.y);

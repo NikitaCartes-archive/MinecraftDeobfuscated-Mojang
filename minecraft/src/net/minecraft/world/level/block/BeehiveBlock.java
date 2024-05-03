@@ -14,6 +14,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.EnchantmentTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
@@ -34,7 +35,6 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.BlockItemStateProperties;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
-import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -86,7 +86,7 @@ public class BeehiveBlock extends BaseEntityBlock {
 	public void playerDestroy(Level level, Player player, BlockPos blockPos, BlockState blockState, @Nullable BlockEntity blockEntity, ItemStack itemStack) {
 		super.playerDestroy(level, player, blockPos, blockState, blockEntity, itemStack);
 		if (!level.isClientSide && blockEntity instanceof BeehiveBlockEntity beehiveBlockEntity) {
-			if (EnchantmentHelper.getItemEnchantmentLevel(Enchantments.SILK_TOUCH, itemStack) == 0) {
+			if (!EnchantmentHelper.hasTag(itemStack, EnchantmentTags.PREVENTS_BEE_SPAWNS_WHEN_MINING)) {
 				beehiveBlockEntity.emptyAllLivingFromHive(player, blockState, BeehiveBlockEntity.BeeReleaseStatus.EMERGENCY);
 				level.updateNeighbourForOutputSignal(blockPos, this);
 				this.angerNearbyBees(level, blockPos);

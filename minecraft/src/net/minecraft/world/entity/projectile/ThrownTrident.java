@@ -1,7 +1,6 @@
 package net.minecraft.world.entity.projectile;
 
 import javax.annotation.Nullable;
-import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -10,16 +9,17 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
 
@@ -34,14 +34,14 @@ public class ThrownTrident extends AbstractArrow {
 	}
 
 	public ThrownTrident(Level level, LivingEntity livingEntity, ItemStack itemStack) {
-		super(EntityType.TRIDENT, livingEntity, level, itemStack);
-		this.entityData.set(ID_LOYALTY, (byte)EnchantmentHelper.getLoyalty(itemStack));
+		super(EntityType.TRIDENT, livingEntity, level, itemStack, null);
+		this.entityData.set(ID_LOYALTY, this.getLoyaltyFromItem(itemStack));
 		this.entityData.set(ID_FOIL, itemStack.hasFoil());
 	}
 
 	public ThrownTrident(Level level, double d, double e, double f, ItemStack itemStack) {
-		super(EntityType.TRIDENT, d, e, f, level, itemStack);
-		this.entityData.set(ID_LOYALTY, (byte)EnchantmentHelper.getLoyalty(itemStack));
+		super(EntityType.TRIDENT, d, e, f, level, itemStack, itemStack);
+		this.entityData.set(ID_LOYALTY, this.getLoyaltyFromItem(itemStack));
 		this.entityData.set(ID_FOIL, itemStack.hasFoil());
 	}
 
@@ -107,50 +107,42 @@ public class ThrownTrident extends AbstractArrow {
 	protected void onHitEntity(EntityHitResult entityHitResult) {
 		Entity entity = entityHitResult.getEntity();
 		float f = 8.0F;
-		if (entity instanceof LivingEntity livingEntity) {
-			f += EnchantmentHelper.getDamageBonus(this.getPickupItemStackOrigin(), livingEntity.getType());
-		}
-
 		Entity entity2 = this.getOwner();
 		DamageSource damageSource = this.damageSources().trident(this, (Entity)(entity2 == null ? this : entity2));
+		if (this.level() instanceof ServerLevel serverLevel) {
+			f = EnchantmentHelper.modifyDamage(serverLevel, this.getPickupItemStackOrigin(), entity, damageSource, f);
+		}
+
 		this.dealtDamage = true;
-		SoundEvent soundEvent = SoundEvents.TRIDENT_HIT;
 		if (entity.hurt(damageSource, f)) {
 			if (entity.getType() == EntityType.ENDERMAN) {
 				return;
 			}
 
-			if (entity instanceof LivingEntity livingEntity2) {
-				if (entity2 instanceof LivingEntity) {
-					EnchantmentHelper.doPostHurtEffects(livingEntity2, entity2);
-					EnchantmentHelper.doPostDamageEffects((LivingEntity)entity2, livingEntity2);
-				}
+			if (this.level() instanceof ServerLevel serverLevel) {
+				EnchantmentHelper.doPostAttackEffects(serverLevel, entity, damageSource);
+			}
 
-				this.doPostHurtEffects(livingEntity2);
+			if (entity instanceof LivingEntity livingEntity) {
+				this.doKnockback(livingEntity, damageSource);
+				this.doPostHurtEffects(livingEntity);
 			}
 		}
 
 		this.setDeltaMovement(this.getDeltaMovement().multiply(-0.01, -0.1, -0.01));
-		float g = 1.0F;
-		if (this.level() instanceof ServerLevel && this.level().isThundering() && this.isChanneling()) {
-			BlockPos blockPos = entity.blockPosition();
-			if (this.level().canSeeSky(blockPos)) {
-				LightningBolt lightningBolt = EntityType.LIGHTNING_BOLT.create(this.level());
-				if (lightningBolt != null) {
-					lightningBolt.moveTo(Vec3.atBottomCenterOf(blockPos));
-					lightningBolt.setCause(entity2 instanceof ServerPlayer ? (ServerPlayer)entity2 : null);
-					this.level().addFreshEntity(lightningBolt);
-					soundEvent = SoundEvents.TRIDENT_THUNDER;
-					g = 5.0F;
-				}
-			}
-		}
-
-		this.playSound(soundEvent, g, 1.0F);
+		this.playSound(SoundEvents.TRIDENT_HIT, 1.0F, 1.0F);
 	}
 
-	public boolean isChanneling() {
-		return EnchantmentHelper.hasChanneling(this.getPickupItemStackOrigin());
+	@Override
+	protected void hitBlockEnchantmentEffects(ServerLevel serverLevel, BlockHitResult blockHitResult, ItemStack itemStack) {
+		EnchantmentHelper.onHitBlock(
+			serverLevel, itemStack, this.getOwner() instanceof LivingEntity livingEntity ? livingEntity : null, this, null, blockHitResult.getLocation(), this::kill
+		);
+	}
+
+	@Override
+	protected ItemStack getWeaponItem() {
+		return this.getPickupItemStackOrigin();
 	}
 
 	@Override
@@ -179,13 +171,19 @@ public class ThrownTrident extends AbstractArrow {
 	public void readAdditionalSaveData(CompoundTag compoundTag) {
 		super.readAdditionalSaveData(compoundTag);
 		this.dealtDamage = compoundTag.getBoolean("DealtDamage");
-		this.entityData.set(ID_LOYALTY, (byte)EnchantmentHelper.getLoyalty(this.getPickupItemStackOrigin()));
+		this.entityData.set(ID_LOYALTY, this.getLoyaltyFromItem(this.getPickupItemStackOrigin()));
 	}
 
 	@Override
 	public void addAdditionalSaveData(CompoundTag compoundTag) {
 		super.addAdditionalSaveData(compoundTag);
 		compoundTag.putBoolean("DealtDamage", this.dealtDamage);
+	}
+
+	private byte getLoyaltyFromItem(ItemStack itemStack) {
+		return this.level() instanceof ServerLevel serverLevel
+			? (byte)Mth.clamp(EnchantmentHelper.getTridentReturnToOwnerAcceleration(serverLevel, itemStack, this), 0, 127)
+			: 0;
 	}
 
 	@Override

@@ -2,13 +2,11 @@ package net.minecraft.world.item.crafting;
 
 import com.mojang.datafixers.util.Pair;
 import javax.annotation.Nullable;
-import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.tags.EnchantmentTags;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.level.Level;
@@ -19,12 +17,12 @@ public class RepairItemRecipe extends CustomRecipe {
 	}
 
 	@Nullable
-	private Pair<ItemStack, ItemStack> getItemsToCombine(CraftingContainer craftingContainer) {
+	private Pair<ItemStack, ItemStack> getItemsToCombine(CraftingInput craftingInput) {
 		ItemStack itemStack = null;
 		ItemStack itemStack2 = null;
 
-		for (int i = 0; i < craftingContainer.getContainerSize(); i++) {
-			ItemStack itemStack3 = craftingContainer.getItem(i);
+		for (int i = 0; i < craftingInput.size(); i++) {
+			ItemStack itemStack3 = craftingInput.getItem(i);
 			if (!itemStack3.isEmpty()) {
 				if (itemStack == null) {
 					itemStack = itemStack3;
@@ -51,12 +49,12 @@ public class RepairItemRecipe extends CustomRecipe {
 			&& itemStack2.has(DataComponents.DAMAGE);
 	}
 
-	public boolean matches(CraftingContainer craftingContainer, Level level) {
-		return this.getItemsToCombine(craftingContainer) != null;
+	public boolean matches(CraftingInput craftingInput, Level level) {
+		return this.getItemsToCombine(craftingInput) != null;
 	}
 
-	public ItemStack assemble(CraftingContainer craftingContainer, HolderLookup.Provider provider) {
-		Pair<ItemStack, ItemStack> pair = this.getItemsToCombine(craftingContainer);
+	public ItemStack assemble(CraftingInput craftingInput, HolderLookup.Provider provider) {
+		Pair<ItemStack, ItemStack> pair = this.getItemsToCombine(craftingInput);
 		if (pair == null) {
 			return ItemStack.EMPTY;
 		} else {
@@ -73,10 +71,10 @@ public class RepairItemRecipe extends CustomRecipe {
 			ItemEnchantments itemEnchantments2 = EnchantmentHelper.getEnchantmentsForCrafting(itemStack2);
 			EnchantmentHelper.updateEnchantments(
 				itemStack3,
-				mutable -> provider.lookupOrThrow(Registries.ENCHANTMENT).listElements().map(Holder::value).filter(Enchantment::isCurse).forEach(enchantment -> {
-						int ix = Math.max(itemEnchantments.getLevel(enchantment), itemEnchantments2.getLevel(enchantment));
+				mutable -> provider.lookupOrThrow(Registries.ENCHANTMENT).listElements().filter(reference -> reference.is(EnchantmentTags.CURSE)).forEach(reference -> {
+						int ix = Math.max(itemEnchantments.getLevel(reference), itemEnchantments2.getLevel(reference));
 						if (ix > 0) {
-							mutable.upgrade(enchantment, ix);
+							mutable.upgrade(reference, ix);
 						}
 					})
 			);

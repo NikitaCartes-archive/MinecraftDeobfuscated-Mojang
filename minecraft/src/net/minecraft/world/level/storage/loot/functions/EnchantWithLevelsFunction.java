@@ -1,12 +1,19 @@
 package net.minecraft.world.level.storage.loot.functions;
 
-import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.RegistryCodecs;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.tags.EnchantmentTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
@@ -17,21 +24,23 @@ import net.minecraft.world.level.storage.loot.providers.number.NumberProviders;
 public class EnchantWithLevelsFunction extends LootItemConditionalFunction {
 	public static final MapCodec<EnchantWithLevelsFunction> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> commonFields(instance)
-				.<NumberProvider, boolean>and(
+				.<NumberProvider, Optional<HolderSet<Enchantment>>>and(
 					instance.group(
 						NumberProviders.CODEC.fieldOf("levels").forGetter(enchantWithLevelsFunction -> enchantWithLevelsFunction.levels),
-						Codec.BOOL.fieldOf("treasure").orElse(false).forGetter(enchantWithLevelsFunction -> enchantWithLevelsFunction.treasure)
+						RegistryCodecs.homogeneousList(Registries.ENCHANTMENT)
+							.optionalFieldOf("options")
+							.forGetter(enchantWithLevelsFunction -> enchantWithLevelsFunction.options)
 					)
 				)
 				.apply(instance, EnchantWithLevelsFunction::new)
 	);
 	private final NumberProvider levels;
-	private final boolean treasure;
+	private final Optional<HolderSet<Enchantment>> options;
 
-	EnchantWithLevelsFunction(List<LootItemCondition> list, NumberProvider numberProvider, boolean bl) {
+	EnchantWithLevelsFunction(List<LootItemCondition> list, NumberProvider numberProvider, Optional<HolderSet<Enchantment>> optional) {
 		super(list);
 		this.levels = numberProvider;
-		this.treasure = bl;
+		this.options = optional;
 	}
 
 	@Override
@@ -47,16 +56,18 @@ public class EnchantWithLevelsFunction extends LootItemConditionalFunction {
 	@Override
 	public ItemStack run(ItemStack itemStack, LootContext lootContext) {
 		RandomSource randomSource = lootContext.getRandom();
-		return EnchantmentHelper.enchantItem(lootContext.getLevel().enabledFeatures(), randomSource, itemStack, this.levels.getInt(lootContext), this.treasure);
+		RegistryAccess registryAccess = lootContext.getLevel().registryAccess();
+		return EnchantmentHelper.enchantItem(randomSource, itemStack, this.levels.getInt(lootContext), registryAccess, this.options);
 	}
 
-	public static EnchantWithLevelsFunction.Builder enchantWithLevels(NumberProvider numberProvider) {
-		return new EnchantWithLevelsFunction.Builder(numberProvider);
+	public static EnchantWithLevelsFunction.Builder enchantWithLevels(HolderLookup.Provider provider, NumberProvider numberProvider) {
+		return new EnchantWithLevelsFunction.Builder(numberProvider)
+			.fromOptions(provider.lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(EnchantmentTags.ON_RANDOM_LOOT));
 	}
 
 	public static class Builder extends LootItemConditionalFunction.Builder<EnchantWithLevelsFunction.Builder> {
 		private final NumberProvider levels;
-		private boolean treasure;
+		private Optional<HolderSet<Enchantment>> options = Optional.empty();
 
 		public Builder(NumberProvider numberProvider) {
 			this.levels = numberProvider;
@@ -66,14 +77,14 @@ public class EnchantWithLevelsFunction extends LootItemConditionalFunction {
 			return this;
 		}
 
-		public EnchantWithLevelsFunction.Builder allowTreasure() {
-			this.treasure = true;
+		public EnchantWithLevelsFunction.Builder fromOptions(HolderSet<Enchantment> holderSet) {
+			this.options = Optional.of(holderSet);
 			return this;
 		}
 
 		@Override
 		public LootItemFunction build() {
-			return new EnchantWithLevelsFunction(this.getConditions(), this.levels, this.treasure);
+			return new EnchantWithLevelsFunction(this.getConditions(), this.levels, this.options);
 		}
 	}
 }

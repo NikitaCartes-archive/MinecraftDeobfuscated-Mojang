@@ -12,6 +12,7 @@ import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 import java.util.function.ToDoubleFunction;
 import java.util.stream.IntStream;
+import net.minecraft.SystemReport;
 import net.minecraft.util.profiling.ProfileCollector;
 import net.minecraft.util.profiling.metrics.MetricCategory;
 import net.minecraft.util.profiling.metrics.MetricSampler;
@@ -47,7 +48,7 @@ public class ServerMetricsSamplersProvider implements MetricsSamplerProvider {
 
 		builder.add(
 			MetricSampler.create(
-				"heap MiB", MetricCategory.JVM, () -> (double)((float)(Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1048576.0F)
+				"heap MiB", MetricCategory.JVM, () -> (double)SystemReport.sizeInMiB(Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())
 			)
 		);
 		builder.addAll(MetricsRegistry.INSTANCE.getRegisteredSamplers());

@@ -1,7 +1,7 @@
 package net.minecraft.world.entity;
 
 import java.util.List;
-import java.util.Map.Entry;
+import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
@@ -9,13 +9,15 @@ import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundAddExperienceOrbPacket;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.EnchantedItemInUse;
+import net.minecraft.world.item.enchantment.EnchantmentEffectComponents;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
-import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.phys.AABB;
@@ -219,11 +221,11 @@ public class ExperienceOrb extends Entity {
 
 	@Override
 	public void playerTouch(Player player) {
-		if (!this.level().isClientSide) {
+		if (player instanceof ServerPlayer serverPlayer) {
 			if (player.takeXpDelay == 0) {
 				player.takeXpDelay = 2;
 				player.take(this, 1);
-				int i = this.repairPlayerItems(player, this.value);
+				int i = this.repairPlayerItems(serverPlayer, this.value);
 				if (i > 0) {
 					player.giveExperiencePoints(i);
 				}
@@ -236,25 +238,24 @@ public class ExperienceOrb extends Entity {
 		}
 	}
 
-	private int repairPlayerItems(Player player, int i) {
-		Entry<EquipmentSlot, ItemStack> entry = EnchantmentHelper.getRandomItemWith(Enchantments.MENDING, player, ItemStack::isDamaged);
-		if (entry != null) {
-			ItemStack itemStack = (ItemStack)entry.getValue();
-			int j = Math.min(this.xpToDurability(i), itemStack.getDamageValue());
-			itemStack.setDamageValue(itemStack.getDamageValue() - j);
-			int k = i - this.durabilityToXp(j);
-			return k > 0 ? this.repairPlayerItems(player, k) : 0;
+	private int repairPlayerItems(ServerPlayer serverPlayer, int i) {
+		Optional<EnchantedItemInUse> optional = EnchantmentHelper.getRandomItemWith(EnchantmentEffectComponents.REPAIR_WITH_XP, serverPlayer, ItemStack::isDamaged);
+		if (optional.isPresent()) {
+			ItemStack itemStack = ((EnchantedItemInUse)optional.get()).itemStack();
+			int j = EnchantmentHelper.modifyDurabilityToRepairFromXp(serverPlayer.serverLevel(), itemStack, i);
+			int k = Math.min(j, itemStack.getDamageValue());
+			itemStack.setDamageValue(itemStack.getDamageValue() - k);
+			if (k > 0) {
+				int l = i - k * i / j;
+				if (l > 0) {
+					return this.repairPlayerItems(serverPlayer, l);
+				}
+			}
+
+			return 0;
 		} else {
 			return i;
 		}
-	}
-
-	private int durabilityToXp(int i) {
-		return i / 2;
-	}
-
-	private int xpToDurability(int i) {
-		return i * 2;
 	}
 
 	public int getValue() {

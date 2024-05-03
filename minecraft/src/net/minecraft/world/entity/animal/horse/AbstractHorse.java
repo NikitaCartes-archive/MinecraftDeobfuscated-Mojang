@@ -65,6 +65,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.DismountHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.EnchantmentEffectComponents;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
@@ -554,7 +555,7 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 		if (this.inventory != null) {
 			for (int i = 0; i < this.inventory.getContainerSize(); i++) {
 				ItemStack itemStack = this.inventory.getItem(i);
-				if (!itemStack.isEmpty() && !EnchantmentHelper.hasVanishingCurse(itemStack)) {
+				if (!itemStack.isEmpty() && !EnchantmentHelper.has(itemStack, EnchantmentEffectComponents.PREVENT_EQUIPMENT_DROP)) {
 					this.spawnAtLocation(itemStack);
 				}
 			}

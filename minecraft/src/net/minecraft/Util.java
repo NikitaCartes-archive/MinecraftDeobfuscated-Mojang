@@ -349,6 +349,27 @@ public class Util {
 		};
 	}
 
+	public static <T> boolean isSymmetrical(int i, int j, List<T> list) {
+		if (i == 1) {
+			return true;
+		} else {
+			int k = i / 2;
+
+			for (int l = 0; l < j; l++) {
+				for (int m = 0; m < k; m++) {
+					int n = i - 1 - m;
+					T object = (T)list.get(m + l * i);
+					T object2 = (T)list.get(n + l * i);
+					if (!object.equals(object2)) {
+						return false;
+					}
+				}
+			}
+
+			return true;
+		}
+	}
+
 	public static Util.OS getPlatform() {
 		String string = System.getProperty("os.name").toLowerCase(Locale.ROOT);
 		if (string.contains("win")) {

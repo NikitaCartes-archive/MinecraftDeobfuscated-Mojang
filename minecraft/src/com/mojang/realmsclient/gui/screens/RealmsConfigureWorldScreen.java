@@ -20,7 +20,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.realms.RealmsScreen;
@@ -285,9 +284,9 @@ public class RealmsConfigureWorldScreen extends RealmsScreen {
 
 	private void joinRealm(RealmsServer realmsServer) {
 		if (this.serverData.state == RealmsServer.State.OPEN) {
-			RealmsMainScreen.play(realmsServer, new RealmsConfigureWorldScreen(this.lastScreen, this.serverId));
+			RealmsMainScreen.play(realmsServer, this);
 		} else {
-			this.openTheWorld(true, new RealmsConfigureWorldScreen(this.lastScreen, this.serverId));
+			this.openTheWorld(true);
 		}
 	}
 
@@ -300,53 +299,37 @@ public class RealmsConfigureWorldScreen extends RealmsScreen {
 	}
 
 	private void switchToFullSlot(int i, RealmsServer realmsServer) {
-		Component component = Component.translatable("mco.configure.world.slot.switch.question.line1");
-		Component component2 = Component.translatable("mco.configure.world.slot.switch.question.line2");
 		this.minecraft
 			.setScreen(
-				new RealmsLongConfirmationScreen(
-					bl -> {
-						if (bl) {
-							this.stateChanged();
-							this.minecraft
-								.setScreen(
-									new RealmsLongRunningMcoTaskScreen(
-										this.lastScreen, new SwitchSlotTask(realmsServer.id, i, () -> this.minecraft.execute(() -> this.minecraft.setScreen(this.getNewScreen())))
-									)
-								);
-						} else {
-							this.minecraft.setScreen(this);
-						}
-					},
-					RealmsLongConfirmationScreen.Type.INFO,
-					component,
-					component2,
-					true
+				RealmsPopups.infoPopupScreen(
+					this,
+					Component.translatable("mco.configure.world.slot.switch.question.line1"),
+					popupScreen -> {
+						this.stateChanged();
+						this.minecraft
+							.setScreen(
+								new RealmsLongRunningMcoTaskScreen(
+									this.lastScreen, new SwitchSlotTask(realmsServer.id, i, () -> this.minecraft.execute(() -> this.minecraft.setScreen(this.getNewScreen())))
+								)
+							);
+					}
 				)
 			);
 	}
 
 	private void switchToEmptySlot(int i, RealmsServer realmsServer) {
-		Component component = Component.translatable("mco.configure.world.slot.switch.question.line1");
-		Component component2 = Component.translatable("mco.configure.world.slot.switch.question.line2");
 		this.minecraft
 			.setScreen(
-				new RealmsLongConfirmationScreen(
-					bl -> {
-						if (bl) {
-							this.stateChanged();
-							RealmsResetWorldScreen realmsResetWorldScreen = RealmsResetWorldScreen.forEmptySlot(
-								this, i, realmsServer, () -> this.minecraft.execute(() -> this.minecraft.setScreen(this.getNewScreen()))
-							);
-							this.minecraft.setScreen(realmsResetWorldScreen);
-						} else {
-							this.minecraft.setScreen(this);
-						}
-					},
-					RealmsLongConfirmationScreen.Type.INFO,
-					component,
-					component2,
-					true
+				RealmsPopups.infoPopupScreen(
+					this,
+					Component.translatable("mco.configure.world.slot.switch.question.line1"),
+					popupScreen -> {
+						this.stateChanged();
+						RealmsResetWorldScreen realmsResetWorldScreen = RealmsResetWorldScreen.forEmptySlot(
+							this, i, realmsServer, () -> this.minecraft.execute(() -> this.minecraft.setScreen(this.getNewScreen()))
+						);
+						this.minecraft.setScreen(realmsResetWorldScreen);
+					}
 				)
 			);
 	}
@@ -389,7 +372,7 @@ public class RealmsConfigureWorldScreen extends RealmsScreen {
 	}
 
 	private boolean isMinigame() {
-		return this.serverData != null && this.serverData.worldType == RealmsServer.WorldType.MINIGAME;
+		return this.serverData != null && this.serverData.isMinigameActive();
 	}
 
 	private void hideRegularButtons() {
@@ -446,12 +429,17 @@ public class RealmsConfigureWorldScreen extends RealmsScreen {
 		this.minecraft.setScreen(this);
 	}
 
-	public void openTheWorld(boolean bl, Screen screen) {
-		this.minecraft.setScreen(new RealmsLongRunningMcoTaskScreen(screen, new OpenServerTask(this.serverData, this, bl, this.minecraft)));
+	public void openTheWorld(boolean bl) {
+		RealmsConfigureWorldScreen realmsConfigureWorldScreen = this.getNewScreen();
+		this.minecraft
+			.setScreen(
+				new RealmsLongRunningMcoTaskScreen(realmsConfigureWorldScreen, new OpenServerTask(this.serverData, realmsConfigureWorldScreen, bl, this.minecraft))
+			);
 	}
 
-	public void closeTheWorld(Screen screen) {
-		this.minecraft.setScreen(new RealmsLongRunningMcoTaskScreen(screen, new CloseServerTask(this.serverData, this)));
+	public void closeTheWorld() {
+		RealmsConfigureWorldScreen realmsConfigureWorldScreen = this.getNewScreen();
+		this.minecraft.setScreen(new RealmsLongRunningMcoTaskScreen(realmsConfigureWorldScreen, new CloseServerTask(this.serverData, realmsConfigureWorldScreen)));
 	}
 
 	public void stateChanged() {

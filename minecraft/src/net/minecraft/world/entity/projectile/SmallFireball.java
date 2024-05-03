@@ -1,11 +1,13 @@
 package net.minecraft.world.entity.projectile;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseFireBlock;
@@ -29,15 +31,16 @@ public class SmallFireball extends Fireball {
 	@Override
 	protected void onHitEntity(EntityHitResult entityHitResult) {
 		super.onHitEntity(entityHitResult);
-		if (!this.level().isClientSide) {
-			Entity entity = entityHitResult.getEntity();
+		if (this.level() instanceof ServerLevel serverLevel) {
+			Entity var7 = entityHitResult.getEntity();
 			Entity entity2 = this.getOwner();
-			int i = entity.getRemainingFireTicks();
-			entity.igniteForSeconds(5);
-			if (!entity.hurt(this.damageSources().fireball(this, entity2), 5.0F)) {
-				entity.setRemainingFireTicks(i);
-			} else if (entity2 instanceof LivingEntity) {
-				this.doEnchantDamageEffects((LivingEntity)entity2, entity);
+			int i = var7.getRemainingFireTicks();
+			var7.igniteForSeconds(5.0F);
+			DamageSource damageSource = this.damageSources().fireball(this, entity2);
+			if (!var7.hurt(damageSource, 5.0F)) {
+				var7.setRemainingFireTicks(i);
+			} else {
+				EnchantmentHelper.doPostAttackEffects(serverLevel, var7, damageSource);
 			}
 		}
 	}

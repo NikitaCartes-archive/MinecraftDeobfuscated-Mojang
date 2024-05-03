@@ -3,7 +3,6 @@ package net.minecraft.world.item.crafting;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.BannerItem;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
@@ -16,13 +15,13 @@ public class BannerDuplicateRecipe extends CustomRecipe {
 		super(craftingBookCategory);
 	}
 
-	public boolean matches(CraftingContainer craftingContainer, Level level) {
+	public boolean matches(CraftingInput craftingInput, Level level) {
 		DyeColor dyeColor = null;
 		ItemStack itemStack = null;
 		ItemStack itemStack2 = null;
 
-		for (int i = 0; i < craftingContainer.getContainerSize(); i++) {
-			ItemStack itemStack3 = craftingContainer.getItem(i);
+		for (int i = 0; i < craftingInput.size(); i++) {
+			ItemStack itemStack3 = craftingInput.getItem(i);
 			if (!itemStack3.isEmpty()) {
 				Item item = itemStack3.getItem();
 				if (!(item instanceof BannerItem)) {
@@ -60,9 +59,9 @@ public class BannerDuplicateRecipe extends CustomRecipe {
 		return itemStack != null && itemStack2 != null;
 	}
 
-	public ItemStack assemble(CraftingContainer craftingContainer, HolderLookup.Provider provider) {
-		for (int i = 0; i < craftingContainer.getContainerSize(); i++) {
-			ItemStack itemStack = craftingContainer.getItem(i);
+	public ItemStack assemble(CraftingInput craftingInput, HolderLookup.Provider provider) {
+		for (int i = 0; i < craftingInput.size(); i++) {
+			ItemStack itemStack = craftingInput.getItem(i);
 			if (!itemStack.isEmpty()) {
 				int j = itemStack.getOrDefault(DataComponents.BANNER_PATTERNS, BannerPatternLayers.EMPTY).layers().size();
 				if (j > 0 && j <= 6) {
@@ -74,11 +73,11 @@ public class BannerDuplicateRecipe extends CustomRecipe {
 		return ItemStack.EMPTY;
 	}
 
-	public NonNullList<ItemStack> getRemainingItems(CraftingContainer craftingContainer) {
-		NonNullList<ItemStack> nonNullList = NonNullList.withSize(craftingContainer.getContainerSize(), ItemStack.EMPTY);
+	public NonNullList<ItemStack> getRemainingItems(CraftingInput craftingInput) {
+		NonNullList<ItemStack> nonNullList = NonNullList.withSize(craftingInput.size(), ItemStack.EMPTY);
 
 		for (int i = 0; i < nonNullList.size(); i++) {
-			ItemStack itemStack = craftingContainer.getItem(i);
+			ItemStack itemStack = craftingInput.getItem(i);
 			if (!itemStack.isEmpty()) {
 				if (itemStack.getItem().hasCraftingRemainingItem()) {
 					nonNullList.set(i, new ItemStack(itemStack.getItem().getCraftingRemainingItem()));

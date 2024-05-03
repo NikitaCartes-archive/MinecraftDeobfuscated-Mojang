@@ -23,6 +23,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.BlockHitResult;
@@ -279,9 +280,13 @@ public class ShulkerBullet extends Projectile {
 		Entity entity = entityHitResult.getEntity();
 		Entity entity2 = this.getOwner();
 		LivingEntity livingEntity = entity2 instanceof LivingEntity ? (LivingEntity)entity2 : null;
-		boolean bl = entity.hurt(this.damageSources().mobProjectile(this, livingEntity), 4.0F);
+		DamageSource damageSource = this.damageSources().mobProjectile(this, livingEntity);
+		boolean bl = entity.hurt(damageSource, 4.0F);
 		if (bl) {
-			this.doEnchantDamageEffects(livingEntity, entity);
+			if (this.level() instanceof ServerLevel serverLevel) {
+				EnchantmentHelper.doPostAttackEffects(serverLevel, entity, damageSource);
+			}
+
 			if (entity instanceof LivingEntity livingEntity2) {
 				livingEntity2.addEffect(new MobEffectInstance(MobEffects.LEVITATION, 200), MoreObjects.firstNonNull(entity2, this));
 			}

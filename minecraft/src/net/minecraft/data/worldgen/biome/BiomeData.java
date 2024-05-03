@@ -18,10 +18,8 @@ public abstract class BiomeData {
 		bootstrapContext.register(Biomes.SNOWY_PLAINS, OverworldBiomes.plains(holderGetter, holderGetter2, false, true, false));
 		bootstrapContext.register(Biomes.ICE_SPIKES, OverworldBiomes.plains(holderGetter, holderGetter2, false, true, true));
 		bootstrapContext.register(Biomes.DESERT, OverworldBiomes.desert(holderGetter, holderGetter2));
-		bootstrapContext.register(Biomes.SWAMP, OverworldBiomes.swamp(holderGetter, holderGetter2, builder -> {
-		}));
-		bootstrapContext.register(Biomes.MANGROVE_SWAMP, OverworldBiomes.mangroveSwamp(holderGetter, holderGetter2, builder -> {
-		}));
+		bootstrapContext.register(Biomes.SWAMP, OverworldBiomes.swamp(holderGetter, holderGetter2));
+		bootstrapContext.register(Biomes.MANGROVE_SWAMP, OverworldBiomes.mangroveSwamp(holderGetter, holderGetter2));
 		bootstrapContext.register(Biomes.FOREST, OverworldBiomes.forest(holderGetter, holderGetter2, false, false, false));
 		bootstrapContext.register(Biomes.FLOWER_FOREST, OverworldBiomes.forest(holderGetter, holderGetter2, false, false, true));
 		bootstrapContext.register(Biomes.BIRCH_FOREST, OverworldBiomes.forest(holderGetter, holderGetter2, true, false, false));

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.FireworkExplosion;
@@ -20,12 +19,12 @@ public class FireworkRocketRecipe extends CustomRecipe {
 		super(craftingBookCategory);
 	}
 
-	public boolean matches(CraftingContainer craftingContainer, Level level) {
+	public boolean matches(CraftingInput craftingInput, Level level) {
 		boolean bl = false;
 		int i = 0;
 
-		for (int j = 0; j < craftingContainer.getContainerSize(); j++) {
-			ItemStack itemStack = craftingContainer.getItem(j);
+		for (int j = 0; j < craftingInput.size(); j++) {
+			ItemStack itemStack = craftingInput.getItem(j);
 			if (!itemStack.isEmpty()) {
 				if (PAPER_INGREDIENT.test(itemStack)) {
 					if (bl) {
@@ -46,12 +45,12 @@ public class FireworkRocketRecipe extends CustomRecipe {
 		return bl && i >= 1;
 	}
 
-	public ItemStack assemble(CraftingContainer craftingContainer, HolderLookup.Provider provider) {
+	public ItemStack assemble(CraftingInput craftingInput, HolderLookup.Provider provider) {
 		List<FireworkExplosion> list = new ArrayList();
 		int i = 0;
 
-		for (int j = 0; j < craftingContainer.getContainerSize(); j++) {
-			ItemStack itemStack = craftingContainer.getItem(j);
+		for (int j = 0; j < craftingInput.size(); j++) {
+			ItemStack itemStack = craftingInput.getItem(j);
 			if (!itemStack.isEmpty()) {
 				if (GUNPOWDER_INGREDIENT.test(itemStack)) {
 					i++;

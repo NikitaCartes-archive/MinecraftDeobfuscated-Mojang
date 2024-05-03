@@ -92,7 +92,7 @@ public class DataComponents {
 		"custom_model_data", builder -> builder.persistent(CustomModelData.CODEC).networkSynchronized(CustomModelData.STREAM_CODEC)
 	);
 	public static final DataComponentType<Unit> HIDE_ADDITIONAL_TOOLTIP = register(
-		"hide_additional_tooltip", builder -> builder.persistent(Codec.unit(Unit.INSTANCE)).networkSynchronized(StreamCodec.unit(Unit.INSTANCE))
+		"hide_additional_tooltip", builder -> builder.persistent(Unit.CODEC).networkSynchronized(StreamCodec.unit(Unit.INSTANCE))
 	);
 	public static final DataComponentType<Unit> HIDE_TOOLTIP = register(
 		"hide_tooltip", builder -> builder.persistent(Codec.unit(Unit.INSTANCE)).networkSynchronized(StreamCodec.unit(Unit.INSTANCE))
@@ -106,12 +106,12 @@ public class DataComponents {
 	public static final DataComponentType<Boolean> ENCHANTMENT_GLINT_OVERRIDE = register(
 		"enchantment_glint_override", builder -> builder.persistent(Codec.BOOL).networkSynchronized(ByteBufCodecs.BOOL)
 	);
-	public static final DataComponentType<Unit> INTANGIBLE_PROJECTILE = register("intangible_projectile", builder -> builder.persistent(Codec.unit(Unit.INSTANCE)));
+	public static final DataComponentType<Unit> INTANGIBLE_PROJECTILE = register("intangible_projectile", builder -> builder.persistent(Unit.CODEC));
 	public static final DataComponentType<FoodProperties> FOOD = register(
 		"food", builder -> builder.persistent(FoodProperties.DIRECT_CODEC).networkSynchronized(FoodProperties.DIRECT_STREAM_CODEC).cacheEncoding()
 	);
 	public static final DataComponentType<Unit> FIRE_RESISTANT = register(
-		"fire_resistant", builder -> builder.persistent(Codec.unit(Unit.INSTANCE)).networkSynchronized(StreamCodec.unit(Unit.INSTANCE))
+		"fire_resistant", builder -> builder.persistent(Unit.CODEC).networkSynchronized(StreamCodec.unit(Unit.INSTANCE))
 	);
 	public static final DataComponentType<Tool> TOOL = register(
 		"tool", builder -> builder.persistent(Tool.CODEC).networkSynchronized(Tool.STREAM_CODEC).cacheEncoding()

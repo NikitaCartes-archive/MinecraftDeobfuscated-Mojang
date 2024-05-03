@@ -8,10 +8,9 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 
-public abstract class SingleItemRecipe implements Recipe<Container> {
+public abstract class SingleItemRecipe implements Recipe<SingleRecipeInput> {
 	protected final Ingredient ingredient;
 	protected final ItemStack result;
 	private final RecipeType<?> type;
@@ -58,8 +57,7 @@ public abstract class SingleItemRecipe implements Recipe<Container> {
 		return true;
 	}
 
-	@Override
-	public ItemStack assemble(Container container, HolderLookup.Provider provider) {
+	public ItemStack assemble(SingleRecipeInput singleRecipeInput, HolderLookup.Provider provider) {
 		return this.result.copy();
 	}
 

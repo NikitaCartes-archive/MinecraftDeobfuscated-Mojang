@@ -8,9 +8,11 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.StructureTags;
+import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.EyeOfEnder;
 import net.minecraft.world.item.context.UseOnContext;
@@ -64,7 +66,7 @@ public class EnderEyeItem extends Item {
 	}
 
 	@Override
-	public int getUseDuration(ItemStack itemStack) {
+	public int getUseDuration(ItemStack itemStack, LivingEntity livingEntity) {
 		return 0;
 	}
 
@@ -84,21 +86,12 @@ public class EnderEyeItem extends Item {
 					eyeOfEnder.signalTo(blockPos);
 					level.gameEvent(GameEvent.PROJECTILE_SHOOT, eyeOfEnder.position(), GameEvent.Context.of(player));
 					level.addFreshEntity(eyeOfEnder);
-					if (player instanceof ServerPlayer) {
-						CriteriaTriggers.USED_ENDER_EYE.trigger((ServerPlayer)player, blockPos);
+					if (player instanceof ServerPlayer serverPlayer) {
+						CriteriaTriggers.USED_ENDER_EYE.trigger(serverPlayer, blockPos);
 					}
 
-					level.playSound(
-						null,
-						player.getX(),
-						player.getY(),
-						player.getZ(),
-						SoundEvents.ENDER_EYE_LAUNCH,
-						SoundSource.NEUTRAL,
-						0.5F,
-						0.4F / (level.getRandom().nextFloat() * 0.4F + 0.8F)
-					);
-					level.levelEvent(null, 1003, player.blockPosition(), 0);
+					float f = Mth.lerp(level.random.nextFloat(), 0.33F, 0.5F);
+					level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENDER_EYE_LAUNCH, SoundSource.NEUTRAL, 1.0F, f);
 					itemStack.consume(1, player);
 					player.awardStat(Stats.ITEM_USED.get(this));
 					player.swing(interactionHand, true);

@@ -9,31 +9,30 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.item.component.Tool;
-import net.minecraft.world.item.enchantment.DensityEnchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
-import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 public class MaceItem extends Item {
-	private static final int DEFAULT_ATTACK_DAMAGE = 6;
-	private static final float DEFAULT_ATTACK_SPEED = -2.4F;
-	private static final float SMASH_ATTACK_FALL_THRESHOLD = 1.5F;
+	private static final int DEFAULT_ATTACK_DAMAGE = 5;
+	private static final float DEFAULT_ATTACK_SPEED = -3.5F;
+	public static final float SMASH_ATTACK_FALL_THRESHOLD = 1.5F;
 	private static final float SMASH_ATTACK_HEAVY_THRESHOLD = 5.0F;
 	public static final float SMASH_ATTACK_KNOCKBACK_RADIUS = 3.5F;
 	private static final float SMASH_ATTACK_KNOCKBACK_POWER = 0.7F;
-	private static final float SMASH_ATTACK_FALL_DISTANCE_MULTIPLIER = 3.0F;
 
 	public MaceItem(Item.Properties properties) {
 		super(properties);
@@ -43,12 +42,12 @@ public class MaceItem extends Item {
 		return ItemAttributeModifiers.builder()
 			.add(
 				Attributes.ATTACK_DAMAGE,
-				new AttributeModifier(BASE_ATTACK_DAMAGE_UUID, "Weapon modifier", 6.0, AttributeModifier.Operation.ADD_VALUE),
+				new AttributeModifier(BASE_ATTACK_DAMAGE_UUID, "Weapon modifier", 5.0, AttributeModifier.Operation.ADD_VALUE),
 				EquipmentSlotGroup.MAINHAND
 			)
 			.add(
 				Attributes.ATTACK_SPEED,
-				new AttributeModifier(BASE_ATTACK_SPEED_UUID, "Weapon modifier", -2.4F, AttributeModifier.Operation.ADD_VALUE),
+				new AttributeModifier(BASE_ATTACK_SPEED_UUID, "Weapon modifier", -3.5, AttributeModifier.Operation.ADD_VALUE),
 				EquipmentSlotGroup.MAINHAND
 			)
 			.build();
@@ -70,7 +69,6 @@ public class MaceItem extends Item {
 
 	@Override
 	public boolean hurtEnemy(ItemStack itemStack, LivingEntity livingEntity, LivingEntity livingEntity2) {
-		itemStack.hurtAndBreak(1, livingEntity2, EquipmentSlot.MAINHAND);
 		if (livingEntity2 instanceof ServerPlayer serverPlayer && canSmashAttack(serverPlayer)) {
 			ServerLevel serverLevel = (ServerLevel)livingEntity2.level();
 			serverPlayer.currentImpulseImpactPos = serverPlayer.position();
@@ -95,15 +93,40 @@ public class MaceItem extends Item {
 	}
 
 	@Override
+	public void postHurtEnemy(ItemStack itemStack, LivingEntity livingEntity, LivingEntity livingEntity2) {
+		itemStack.hurtAndBreak(1, livingEntity2, EquipmentSlot.MAINHAND);
+	}
+
+	@Override
 	public boolean isValidRepairItem(ItemStack itemStack, ItemStack itemStack2) {
 		return itemStack2.is(Items.BREEZE_ROD);
 	}
 
 	@Override
-	public float getAttackDamageBonus(Player player, float f) {
-		int i = EnchantmentHelper.getEnchantmentLevel(Enchantments.DENSITY, player);
-		float g = DensityEnchantment.calculateDamageAddition(i, player.fallDistance);
-		return canSmashAttack(player) ? 3.0F * player.fallDistance + g : 0.0F;
+	public float getAttackDamageBonus(Entity entity, float f, DamageSource damageSource) {
+		if (damageSource.getDirectEntity() instanceof LivingEntity livingEntity) {
+			if (!canSmashAttack(livingEntity)) {
+				return 0.0F;
+			} else {
+				float g = 3.0F;
+				float h = 8.0F;
+				float i = livingEntity.fallDistance;
+				float j;
+				if (i <= 3.0F) {
+					j = 4.0F * i;
+				} else if (i <= 8.0F) {
+					j = 12.0F + 2.0F * (i - 3.0F);
+				} else {
+					j = 22.0F + i - 8.0F;
+				}
+
+				return livingEntity.level() instanceof ServerLevel serverLevel
+					? j + EnchantmentHelper.modifyFallBasedDamage(serverLevel, livingEntity.getMainHandItem(), entity, damageSource, 0.0F) * i
+					: j;
+			}
+		} else {
+			return 0.0F;
+		}
 	}
 
 	private static void knockback(Level level, Player player, Entity entity) {
@@ -124,21 +147,32 @@ public class MaceItem extends Item {
 			boolean bl2;
 			boolean bl3;
 			boolean var10000;
-			label44: {
+			label62: {
 				bl = !livingEntity.isSpectator();
 				bl2 = livingEntity != player && livingEntity != entity;
 				bl3 = !player.isAlliedTo(livingEntity);
+				if (livingEntity instanceof TamableAnimal tamableAnimal && tamableAnimal.isTame() && player.getUUID().equals(tamableAnimal.getOwnerUUID())) {
+					var10000 = true;
+					break label62;
+				}
+
+				var10000 = false;
+			}
+
+			boolean bl4;
+			label55: {
+				bl4 = !var10000;
 				if (livingEntity instanceof ArmorStand armorStand && armorStand.isMarker()) {
 					var10000 = false;
-					break label44;
+					break label55;
 				}
 
 				var10000 = true;
 			}
 
-			boolean bl4 = var10000;
-			boolean bl5 = entity.distanceToSqr(livingEntity) <= Math.pow(3.5, 2.0);
-			return bl && bl2 && bl3 && bl4 && bl5;
+			boolean bl5 = var10000;
+			boolean bl6 = entity.distanceToSqr(livingEntity) <= Math.pow(3.5, 2.0);
+			return bl && bl2 && bl3 && bl4 && bl5 && bl6;
 		};
 	}
 
@@ -146,7 +180,7 @@ public class MaceItem extends Item {
 		return (3.5 - vec3.length()) * 0.7F * (double)(player.fallDistance > 5.0F ? 2 : 1) * (1.0 - livingEntity.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE));
 	}
 
-	public static boolean canSmashAttack(Player player) {
-		return player.fallDistance > 1.5F && !player.isFallFlying();
+	public static boolean canSmashAttack(LivingEntity livingEntity) {
+		return livingEntity.fallDistance > 1.5F && !livingEntity.isFallFlying();
 	}
 }

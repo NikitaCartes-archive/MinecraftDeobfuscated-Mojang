@@ -16,9 +16,9 @@ import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeCache;
 import net.minecraft.world.item.crafting.RecipeHolder;
@@ -156,12 +156,13 @@ public class CrafterBlock extends BaseEntityBlock {
 
 	protected void dispenseFrom(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos) {
 		if (serverLevel.getBlockEntity(blockPos) instanceof CrafterBlockEntity crafterBlockEntity) {
-			Optional<RecipeHolder<CraftingRecipe>> optional = getPotentialResults(serverLevel, crafterBlockEntity);
+			CraftingInput var11 = crafterBlockEntity.asCraftInput();
+			Optional<RecipeHolder<CraftingRecipe>> optional = getPotentialResults(serverLevel, var11);
 			if (optional.isEmpty()) {
 				serverLevel.levelEvent(1050, blockPos, 0);
 			} else {
 				RecipeHolder<CraftingRecipe> recipeHolder = (RecipeHolder<CraftingRecipe>)optional.get();
-				ItemStack itemStack = recipeHolder.value().assemble(crafterBlockEntity, serverLevel.registryAccess());
+				ItemStack itemStack = recipeHolder.value().assemble(var11, serverLevel.registryAccess());
 				if (itemStack.isEmpty()) {
 					serverLevel.levelEvent(1050, blockPos, 0);
 				} else {
@@ -170,7 +171,7 @@ public class CrafterBlock extends BaseEntityBlock {
 					itemStack.onCraftedBySystem(serverLevel);
 					this.dispenseItem(serverLevel, blockPos, crafterBlockEntity, itemStack, blockState, recipeHolder);
 
-					for (ItemStack itemStack2 : recipeHolder.value().getRemainingItems(crafterBlockEntity)) {
+					for (ItemStack itemStack2 : recipeHolder.value().getRemainingItems(var11)) {
 						if (!itemStack2.isEmpty()) {
 							this.dispenseItem(serverLevel, blockPos, crafterBlockEntity, itemStack2, blockState, recipeHolder);
 						}
@@ -187,8 +188,8 @@ public class CrafterBlock extends BaseEntityBlock {
 		}
 	}
 
-	public static Optional<RecipeHolder<CraftingRecipe>> getPotentialResults(Level level, CraftingContainer craftingContainer) {
-		return RECIPE_CACHE.get(level, craftingContainer);
+	public static Optional<RecipeHolder<CraftingRecipe>> getPotentialResults(Level level, CraftingInput craftingInput) {
+		return RECIPE_CACHE.get(level, craftingInput);
 	}
 
 	private void dispenseItem(

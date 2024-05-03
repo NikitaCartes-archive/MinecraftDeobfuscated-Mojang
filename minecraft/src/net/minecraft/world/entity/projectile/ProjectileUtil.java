@@ -151,10 +151,10 @@ public final class ProjectileUtil {
 		return livingEntity.getMainHandItem().is(item) ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND;
 	}
 
-	public static AbstractArrow getMobArrow(LivingEntity livingEntity, ItemStack itemStack, float f) {
+	public static AbstractArrow getMobArrow(LivingEntity livingEntity, ItemStack itemStack, float f, @Nullable ItemStack itemStack2) {
 		ArrowItem arrowItem = (ArrowItem)(itemStack.getItem() instanceof ArrowItem ? itemStack.getItem() : Items.ARROW);
-		AbstractArrow abstractArrow = arrowItem.createArrow(livingEntity.level(), itemStack, livingEntity);
-		abstractArrow.setEnchantmentEffectsFromEntity(livingEntity, f);
+		AbstractArrow abstractArrow = arrowItem.createArrow(livingEntity.level(), itemStack, livingEntity, itemStack2);
+		abstractArrow.setBaseDamageFromMob(f);
 		return abstractArrow;
 	}
 }

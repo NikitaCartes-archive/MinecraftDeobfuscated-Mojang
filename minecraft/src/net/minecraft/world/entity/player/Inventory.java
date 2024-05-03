@@ -112,9 +112,9 @@ public class Inventory implements Container, Nameable {
 	public int findSlotMatchingUnusedItem(ItemStack itemStack) {
 		for (int i = 0; i < this.items.size(); i++) {
 			ItemStack itemStack2 = this.items.get(i);
-			if (!this.items.get(i).isEmpty()
-				&& ItemStack.isSameItemSameComponents(itemStack, this.items.get(i))
-				&& !this.items.get(i).isDamaged()
+			if (!itemStack2.isEmpty()
+				&& ItemStack.isSameItemSameComponents(itemStack, itemStack2)
+				&& !itemStack2.isDamaged()
 				&& !itemStack2.isEnchanted()
 				&& !itemStack2.has(DataComponents.CUSTOM_NAME)) {
 				return i;

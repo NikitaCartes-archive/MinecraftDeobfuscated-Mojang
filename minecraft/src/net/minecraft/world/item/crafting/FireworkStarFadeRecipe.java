@@ -4,7 +4,6 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -19,12 +18,12 @@ public class FireworkStarFadeRecipe extends CustomRecipe {
 		super(craftingBookCategory);
 	}
 
-	public boolean matches(CraftingContainer craftingContainer, Level level) {
+	public boolean matches(CraftingInput craftingInput, Level level) {
 		boolean bl = false;
 		boolean bl2 = false;
 
-		for (int i = 0; i < craftingContainer.getContainerSize(); i++) {
-			ItemStack itemStack = craftingContainer.getItem(i);
+		for (int i = 0; i < craftingInput.size(); i++) {
+			ItemStack itemStack = craftingInput.getItem(i);
 			if (!itemStack.isEmpty()) {
 				if (itemStack.getItem() instanceof DyeItem) {
 					bl = true;
@@ -45,12 +44,12 @@ public class FireworkStarFadeRecipe extends CustomRecipe {
 		return bl2 && bl;
 	}
 
-	public ItemStack assemble(CraftingContainer craftingContainer, HolderLookup.Provider provider) {
+	public ItemStack assemble(CraftingInput craftingInput, HolderLookup.Provider provider) {
 		IntList intList = new IntArrayList();
 		ItemStack itemStack = null;
 
-		for (int i = 0; i < craftingContainer.getContainerSize(); i++) {
-			ItemStack itemStack2 = craftingContainer.getItem(i);
+		for (int i = 0; i < craftingInput.size(); i++) {
+			ItemStack itemStack2 = craftingInput.getItem(i);
 			Item item = itemStack2.getItem();
 			if (item instanceof DyeItem) {
 				intList.add(((DyeItem)item).getDyeColor().getFireworkColor());

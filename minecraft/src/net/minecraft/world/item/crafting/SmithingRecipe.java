@@ -1,10 +1,9 @@
 package net.minecraft.world.item.crafting;
 
-import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 
-public interface SmithingRecipe extends Recipe<Container> {
+public interface SmithingRecipe extends Recipe<SmithingRecipeInput> {
 	@Override
 	default RecipeType<?> getType() {
 		return RecipeType.SMITHING;

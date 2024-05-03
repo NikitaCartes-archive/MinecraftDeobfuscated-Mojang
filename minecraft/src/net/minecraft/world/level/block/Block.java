@@ -39,7 +39,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
-import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.GameRules;
@@ -490,11 +489,9 @@ public class Block extends BlockBehaviour implements ItemLike {
 	}
 
 	protected void tryDropExperience(ServerLevel serverLevel, BlockPos blockPos, ItemStack itemStack, IntProvider intProvider) {
-		if (EnchantmentHelper.getItemEnchantmentLevel(Enchantments.SILK_TOUCH, itemStack) == 0) {
-			int i = intProvider.sample(serverLevel.random);
-			if (i > 0) {
-				this.popExperience(serverLevel, blockPos, i);
-			}
+		int i = EnchantmentHelper.processBlockExperience(serverLevel, itemStack, intProvider.sample(serverLevel.getRandom()));
+		if (i > 0) {
+			this.popExperience(serverLevel, blockPos, i);
 		}
 	}
 

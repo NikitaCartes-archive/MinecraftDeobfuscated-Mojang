@@ -11,6 +11,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -35,6 +36,7 @@ import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -242,11 +244,14 @@ public class Slime extends Mob implements Enemy {
 	protected void dealDamage(LivingEntity livingEntity) {
 		if (this.isAlive()) {
 			int i = this.getSize();
-			if (this.distanceToSqr(livingEntity) < 0.6 * (double)i * 0.6 * (double)i
-				&& this.hasLineOfSight(livingEntity)
-				&& livingEntity.hurt(this.damageSources().mobAttack(this), this.getAttackDamage())) {
-				this.playSound(SoundEvents.SLIME_ATTACK, 1.0F, (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
-				this.doEnchantDamageEffects(this, livingEntity);
+			if (this.distanceToSqr(livingEntity) < 0.6 * (double)i * 0.6 * (double)i && this.hasLineOfSight(livingEntity)) {
+				DamageSource damageSource = this.damageSources().mobAttack(this);
+				if (livingEntity.hurt(damageSource, this.getAttackDamage())) {
+					this.playSound(SoundEvents.SLIME_ATTACK, 1.0F, (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
+					if (this.level() instanceof ServerLevel serverLevel) {
+						EnchantmentHelper.doPostAttackEffects(serverLevel, livingEntity, damageSource);
+					}
+				}
 			}
 		}
 	}

@@ -4,6 +4,7 @@ import it.unimi.dsi.fastutil.objects.Object2IntMap.Entry;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.EnchantmentTags;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.ExperienceOrb;
@@ -92,10 +93,10 @@ public class GrindstoneMenu extends AbstractContainerMenu {
 				ItemEnchantments itemEnchantments = EnchantmentHelper.getEnchantmentsForCrafting(itemStack);
 
 				for (Entry<Holder<Enchantment>> entry : itemEnchantments.entrySet()) {
-					Enchantment enchantment = (Enchantment)((Holder)entry.getKey()).value();
+					Holder<Enchantment> holder = (Holder<Enchantment>)entry.getKey();
 					int j = entry.getIntValue();
-					if (!enchantment.isCurse()) {
-						i += enchantment.getMinCost(j);
+					if (!holder.is(EnchantmentTags.CURSE)) {
+						i += holder.value().getMinCost(j);
 					}
 				}
 
@@ -177,18 +178,16 @@ public class GrindstoneMenu extends AbstractContainerMenu {
 			ItemEnchantments itemEnchantments = EnchantmentHelper.getEnchantmentsForCrafting(itemStack2);
 
 			for (Entry<Holder<Enchantment>> entry : itemEnchantments.entrySet()) {
-				Enchantment enchantment = (Enchantment)((Holder)entry.getKey()).value();
-				if (!enchantment.isCurse() || mutable.getLevel(enchantment) == 0) {
-					mutable.upgrade(enchantment, entry.getIntValue());
+				Holder<Enchantment> holder = (Holder<Enchantment>)entry.getKey();
+				if (!holder.is(EnchantmentTags.CURSE) || mutable.getLevel(holder) == 0) {
+					mutable.upgrade(holder, entry.getIntValue());
 				}
 			}
 		});
 	}
 
 	private ItemStack removeNonCursesFrom(ItemStack itemStack) {
-		ItemEnchantments itemEnchantments = EnchantmentHelper.updateEnchantments(
-			itemStack, mutable -> mutable.removeIf(holder -> !((Enchantment)holder.value()).isCurse())
-		);
+		ItemEnchantments itemEnchantments = EnchantmentHelper.updateEnchantments(itemStack, mutable -> mutable.removeIf(holder -> !holder.is(EnchantmentTags.CURSE)));
 		if (itemStack.is(Items.ENCHANTED_BOOK) && itemEnchantments.isEmpty()) {
 			itemStack = itemStack.transmuteCopy(Items.BOOK, itemStack.getCount());
 		}

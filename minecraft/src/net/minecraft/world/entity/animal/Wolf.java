@@ -6,6 +6,8 @@ import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
@@ -32,7 +34,6 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.Crackiness;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -77,6 +78,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.enchantment.EnchantmentEffectComponents;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -164,7 +166,9 @@ public class Wolf extends TamableAnimal implements NeutralMob, VariantHolder<Hol
 	@Override
 	protected void defineSynchedData(SynchedEntityData.Builder builder) {
 		super.defineSynchedData(builder);
-		builder.define(DATA_VARIANT_ID, this.registryAccess().registryOrThrow(Registries.WOLF_VARIANT).getHolderOrThrow(WolfVariants.PALE));
+		RegistryAccess registryAccess = this.registryAccess();
+		Registry<WolfVariant> registry = registryAccess.registryOrThrow(Registries.WOLF_VARIANT);
+		builder.define(DATA_VARIANT_ID, (Holder<WolfVariant>)registry.getHolder(WolfVariants.DEFAULT).or(registry::getAny).orElseThrow());
 		builder.define(DATA_INTERESTED_ID, false);
 		builder.define(DATA_COLLAR_COLOR, DyeColor.RED.getId());
 		builder.define(DATA_REMAINING_ANGER_TIME, 0);
@@ -179,7 +183,7 @@ public class Wolf extends TamableAnimal implements NeutralMob, VariantHolder<Hol
 	public void addAdditionalSaveData(CompoundTag compoundTag) {
 		super.addAdditionalSaveData(compoundTag);
 		compoundTag.putByte("CollarColor", (byte)this.getCollarColor().getId());
-		compoundTag.putString("variant", ((ResourceKey)this.getVariant().unwrapKey().orElse(WolfVariants.PALE)).location().toString());
+		this.getVariant().unwrapKey().ifPresent(resourceKey -> compoundTag.putString("variant", resourceKey.location().toString()));
 		this.addPersistentAngerSaveData(compoundTag);
 	}
 
@@ -392,16 +396,6 @@ public class Wolf extends TamableAnimal implements NeutralMob, VariantHolder<Hol
 	}
 
 	@Override
-	public boolean doHurtTarget(Entity entity) {
-		boolean bl = entity.hurt(this.damageSources().mobAttack(this), (float)((int)this.getAttributeValue(Attributes.ATTACK_DAMAGE)));
-		if (bl) {
-			this.doEnchantDamageEffects(this, entity);
-		}
-
-		return bl;
-	}
-
-	@Override
 	protected void applyTamingSideEffects() {
 		if (this.isTame()) {
 			this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(40.0);
@@ -447,7 +441,7 @@ public class Wolf extends TamableAnimal implements NeutralMob, VariantHolder<Hol
 					} else if (itemStack.is(Items.SHEARS)
 						&& this.isOwnedBy(player)
 						&& this.hasArmor()
-						&& (!EnchantmentHelper.hasBindingCurse(this.getBodyArmorItem()) || player.isCreative())) {
+						&& (!EnchantmentHelper.has(this.getBodyArmorItem(), EnchantmentEffectComponents.PREVENT_ARMOR_CHANGE) || player.isCreative())) {
 						itemStack.hurtAndBreak(1, player, getSlotForHand(interactionHand));
 						this.playSound(SoundEvents.ARMOR_UNEQUIP_WOLF);
 						ItemStack itemStack2 = this.getBodyArmorItem();

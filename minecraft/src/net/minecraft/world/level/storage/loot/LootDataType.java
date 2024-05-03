@@ -13,13 +13,12 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunctions;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
-import net.minecraft.world.level.storage.loot.predicates.LootItemConditions;
 import org.slf4j.Logger;
 
 public record LootDataType<T>(ResourceKey<Registry<T>> registryKey, Codec<T> codec, String directory, LootDataType.Validator<T> validator) {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	public static final LootDataType<LootItemCondition> PREDICATE = new LootDataType<>(
-		Registries.PREDICATE, LootItemConditions.DIRECT_CODEC, "predicates", createSimpleValidator()
+		Registries.PREDICATE, LootItemCondition.DIRECT_CODEC, "predicates", createSimpleValidator()
 	);
 	public static final LootDataType<LootItemFunction> MODIFIER = new LootDataType<>(
 		Registries.ITEM_MODIFIER, LootItemFunctions.ROOT_CODEC, "item_modifiers", createSimpleValidator()

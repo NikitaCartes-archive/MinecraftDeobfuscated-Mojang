@@ -14,7 +14,6 @@ import net.minecraft.tags.InstrumentTags;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.entity.vehicle.Boat;
-import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.food.Foods;
 import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.armortrim.TrimPatterns;
@@ -1491,7 +1490,7 @@ public class Items {
 		"experience_bottle", new ExperienceBottleItem(new Item.Properties().rarity(Rarity.UNCOMMON).component(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true))
 	);
 	public static final Item FIRE_CHARGE = registerItem("fire_charge", new FireChargeItem(new Item.Properties()));
-	public static final Item WIND_CHARGE = registerItem("wind_charge", new WindChargeItem(new Item.Properties().requiredFeatures(FeatureFlags.UPDATE_1_21)));
+	public static final Item WIND_CHARGE = registerItem("wind_charge", new WindChargeItem(new Item.Properties()));
 	public static final Item WRITABLE_BOOK = registerItem(
 		"writable_book", new WritableBookItem(new Item.Properties().stacksTo(1).component(DataComponents.WRITABLE_BOOK_CONTENT, WritableBookContent.EMPTY))
 	);
@@ -1500,13 +1499,7 @@ public class Items {
 	);
 	public static final Item MACE = registerItem(
 		"mace",
-		new MaceItem(
-			new Item.Properties()
-				.durability(250)
-				.component(DataComponents.TOOL, MaceItem.createToolProperties())
-				.attributes(MaceItem.createAttributes())
-				.requiredFeatures(FeatureFlags.UPDATE_1_21)
-		)
+		new MaceItem(new Item.Properties().durability(500).component(DataComponents.TOOL, MaceItem.createToolProperties()).attributes(MaceItem.createAttributes()))
 	);
 	public static final Item ITEM_FRAME = registerItem("item_frame", new ItemFrameItem(EntityType.ITEM_FRAME, new Item.Properties()));
 	public static final Item GLOW_ITEM_FRAME = registerItem("glow_item_frame", new ItemFrameItem(EntityType.GLOW_ITEM_FRAME, new Item.Properties()));
@@ -1736,6 +1729,12 @@ public class Items {
 	public static final Item MUSIC_DISC_CHIRP = registerItem(
 		"music_disc_chirp", new RecordItem(4, SoundEvents.MUSIC_DISC_CHIRP, new Item.Properties().stacksTo(1).rarity(Rarity.RARE), 185)
 	);
+	public static final Item MUSIC_DISC_CREATOR = registerItem(
+		"music_disc_creator", new RecordItem(12, SoundEvents.MUSIC_DISC_CREATOR, new Item.Properties().stacksTo(1).rarity(Rarity.RARE), 176)
+	);
+	public static final Item MUSIC_DISC_CREATOR_MUSIC_BOX = registerItem(
+		"music_disc_creator_music_box", new RecordItem(11, SoundEvents.MUSIC_DISC_CREATOR_MUSIC_BOX, new Item.Properties().stacksTo(1).rarity(Rarity.RARE), 73)
+	);
 	public static final Item MUSIC_DISC_FAR = registerItem(
 		"music_disc_far", new RecordItem(5, SoundEvents.MUSIC_DISC_FAR, new Item.Properties().stacksTo(1).rarity(Rarity.RARE), 174)
 	);
@@ -1771,6 +1770,9 @@ public class Items {
 	);
 	public static final Item MUSIC_DISC_PIGSTEP = registerItem(
 		"music_disc_pigstep", new RecordItem(13, SoundEvents.MUSIC_DISC_PIGSTEP, new Item.Properties().stacksTo(1).rarity(Rarity.RARE), 149)
+	);
+	public static final Item MUSIC_DISC_PRECIPICE = registerItem(
+		"music_disc_precipice", new RecordItem(13, SoundEvents.MUSIC_DISC_PRECIPICE, new Item.Properties().stacksTo(1).rarity(Rarity.RARE), 299)
 	);
 	public static final Item DISC_FRAGMENT_5 = registerItem("disc_fragment_5", new DiscFragmentItem(new Item.Properties()));
 	public static final Item TRIDENT = registerItem(
@@ -1811,12 +1813,10 @@ public class Items {
 		"piglin_banner_pattern", new BannerPatternItem(BannerPatternTags.PATTERN_ITEM_PIGLIN, new Item.Properties().stacksTo(1))
 	);
 	public static final Item FLOW_BANNER_PATTERN = registerItem(
-		"flow_banner_pattern",
-		new BannerPatternItem(BannerPatternTags.PATTERN_ITEM_FLOW, new Item.Properties().stacksTo(1).requiredFeatures(FeatureFlags.UPDATE_1_21))
+		"flow_banner_pattern", new BannerPatternItem(BannerPatternTags.PATTERN_ITEM_FLOW, new Item.Properties().stacksTo(1))
 	);
 	public static final Item GUSTER_BANNER_PATTERN = registerItem(
-		"guster_banner_pattern",
-		new BannerPatternItem(BannerPatternTags.PATTERN_ITEM_GUSTER, new Item.Properties().stacksTo(1).requiredFeatures(FeatureFlags.UPDATE_1_21))
+		"guster_banner_pattern", new BannerPatternItem(BannerPatternTags.PATTERN_ITEM_GUSTER, new Item.Properties().stacksTo(1))
 	);
 	public static final Item GOAT_HORN = registerItem("goat_horn", new InstrumentItem(new Item.Properties().stacksTo(1), InstrumentTags.GOAT_HORNS));
 	public static final Item COMPOSTER = registerBlock(Blocks.COMPOSTER);
@@ -1944,10 +1944,10 @@ public class Items {
 		"host_armor_trim_smithing_template", SmithingTemplateItem.createArmorTrimTemplate(TrimPatterns.HOST)
 	);
 	public static final Item FLOW_ARMOR_TRIM_SMITHING_TEMPLATE = registerItem(
-		"flow_armor_trim_smithing_template", SmithingTemplateItem.createArmorTrimTemplate(TrimPatterns.FLOW, FeatureFlags.UPDATE_1_21)
+		"flow_armor_trim_smithing_template", SmithingTemplateItem.createArmorTrimTemplate(TrimPatterns.FLOW)
 	);
 	public static final Item BOLT_ARMOR_TRIM_SMITHING_TEMPLATE = registerItem(
-		"bolt_armor_trim_smithing_template", SmithingTemplateItem.createArmorTrimTemplate(TrimPatterns.BOLT, FeatureFlags.UPDATE_1_21)
+		"bolt_armor_trim_smithing_template", SmithingTemplateItem.createArmorTrimTemplate(TrimPatterns.BOLT)
 	);
 	public static final Item ANGLER_POTTERY_SHERD = registerItem("angler_pottery_sherd", new Item(new Item.Properties()));
 	public static final Item ARCHER_POTTERY_SHERD = registerItem("archer_pottery_sherd", new Item(new Item.Properties()));
@@ -1957,11 +1957,9 @@ public class Items {
 	public static final Item BURN_POTTERY_SHERD = registerItem("burn_pottery_sherd", new Item(new Item.Properties()));
 	public static final Item DANGER_POTTERY_SHERD = registerItem("danger_pottery_sherd", new Item(new Item.Properties()));
 	public static final Item EXPLORER_POTTERY_SHERD = registerItem("explorer_pottery_sherd", new Item(new Item.Properties()));
-	public static final Item FLOW_POTTERY_SHERD = registerItem("flow_pottery_sherd", new Item(new Item.Properties().requiredFeatures(FeatureFlags.UPDATE_1_21)));
+	public static final Item FLOW_POTTERY_SHERD = registerItem("flow_pottery_sherd", new Item(new Item.Properties()));
 	public static final Item FRIEND_POTTERY_SHERD = registerItem("friend_pottery_sherd", new Item(new Item.Properties()));
-	public static final Item GUSTER_POTTERY_SHERD = registerItem(
-		"guster_pottery_sherd", new Item(new Item.Properties().requiredFeatures(FeatureFlags.UPDATE_1_21))
-	);
+	public static final Item GUSTER_POTTERY_SHERD = registerItem("guster_pottery_sherd", new Item(new Item.Properties()));
 	public static final Item HEART_POTTERY_SHERD = registerItem("heart_pottery_sherd", new Item(new Item.Properties()));
 	public static final Item HEARTBREAK_POTTERY_SHERD = registerItem("heartbreak_pottery_sherd", new Item(new Item.Properties()));
 	public static final Item HOWL_POTTERY_SHERD = registerItem("howl_pottery_sherd", new Item(new Item.Properties()));
@@ -1969,9 +1967,7 @@ public class Items {
 	public static final Item MOURNER_POTTERY_SHERD = registerItem("mourner_pottery_sherd", new Item(new Item.Properties()));
 	public static final Item PLENTY_POTTERY_SHERD = registerItem("plenty_pottery_sherd", new Item(new Item.Properties()));
 	public static final Item PRIZE_POTTERY_SHERD = registerItem("prize_pottery_sherd", new Item(new Item.Properties()));
-	public static final Item SCRAPE_POTTERY_SHERD = registerItem(
-		"scrape_pottery_sherd", new Item(new Item.Properties().requiredFeatures(FeatureFlags.UPDATE_1_21))
-	);
+	public static final Item SCRAPE_POTTERY_SHERD = registerItem("scrape_pottery_sherd", new Item(new Item.Properties()));
 	public static final Item SHEAF_POTTERY_SHERD = registerItem("sheaf_pottery_sherd", new Item(new Item.Properties()));
 	public static final Item SHELTER_POTTERY_SHERD = registerItem("shelter_pottery_sherd", new Item(new Item.Properties()));
 	public static final Item SKULL_POTTERY_SHERD = registerItem("skull_pottery_sherd", new Item(new Item.Properties()));
@@ -1993,16 +1989,13 @@ public class Items {
 	public static final Item WAXED_WEATHERED_COPPER_BULB = registerBlock(Blocks.WAXED_WEATHERED_COPPER_BULB);
 	public static final Item WAXED_OXIDIZED_COPPER_BULB = registerBlock(Blocks.WAXED_OXIDIZED_COPPER_BULB);
 	public static final Item TRIAL_SPAWNER = registerBlock(Blocks.TRIAL_SPAWNER);
-	public static final Item TRIAL_KEY = registerItem("trial_key", new Item(new Item.Properties().requiredFeatures(FeatureFlags.UPDATE_1_21)));
-	public static final Item OMINOUS_TRIAL_KEY = registerItem("ominous_trial_key", new Item(new Item.Properties().requiredFeatures(FeatureFlags.UPDATE_1_21)));
+	public static final Item TRIAL_KEY = registerItem("trial_key", new Item(new Item.Properties()));
+	public static final Item OMINOUS_TRIAL_KEY = registerItem("ominous_trial_key", new Item(new Item.Properties()));
 	public static final Item VAULT = registerBlock(Blocks.VAULT);
 	public static final Item OMINOUS_BOTTLE = registerItem(
-		"ominous_bottle",
-		new OminousBottleItem(
-			new Item.Properties().food(Foods.OMINOUS_BOTTLE).component(DataComponents.OMINOUS_BOTTLE_AMPLIFIER, 0).requiredFeatures(FeatureFlags.UPDATE_1_21)
-		)
+		"ominous_bottle", new OminousBottleItem(new Item.Properties().food(Foods.OMINOUS_BOTTLE).component(DataComponents.OMINOUS_BOTTLE_AMPLIFIER, 0))
 	);
-	public static final Item BREEZE_ROD = registerItem("breeze_rod", new Item(new Item.Properties().requiredFeatures(FeatureFlags.UPDATE_1_21)));
+	public static final Item BREEZE_ROD = registerItem("breeze_rod", new Item(new Item.Properties()));
 
 	public static Item registerBlock(Block block) {
 		return registerBlock(new BlockItem(block, new Item.Properties()));

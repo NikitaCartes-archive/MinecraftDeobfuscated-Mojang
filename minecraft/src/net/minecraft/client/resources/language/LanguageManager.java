@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
@@ -26,9 +27,11 @@ public class LanguageManager implements ResourceManagerReloadListener {
 	private static final LanguageInfo DEFAULT_LANGUAGE = new LanguageInfo("US", "English", false);
 	private Map<String, LanguageInfo> languages = ImmutableMap.of("en_us", DEFAULT_LANGUAGE);
 	private String currentCode;
+	private final Consumer<ClientLanguage> reloadCallback;
 
-	public LanguageManager(String string) {
+	public LanguageManager(String string, Consumer<ClientLanguage> consumer) {
 		this.currentCode = string;
+		this.reloadCallback = consumer;
 	}
 
 	private static Map<String, LanguageInfo> extractLanguages(Stream<PackResources> stream) {
@@ -63,6 +66,7 @@ public class LanguageManager implements ResourceManagerReloadListener {
 		ClientLanguage clientLanguage = ClientLanguage.loadFrom(resourceManager, list, bl);
 		I18n.setLanguage(clientLanguage);
 		Language.inject(clientLanguage);
+		this.reloadCallback.accept(clientLanguage);
 	}
 
 	public void setSelected(String string) {

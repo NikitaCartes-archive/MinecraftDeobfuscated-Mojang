@@ -3,7 +3,6 @@ package net.minecraft.client.gui.screens.recipebook;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
@@ -57,7 +56,7 @@ public class OverlayRecipeComponent implements Renderable, GuiEventListener {
 			this.isFurnaceMenu = true;
 		}
 
-		boolean bl = minecraft.player.getRecipeBook().isFiltering((RecipeBookMenu<?>)minecraft.player.containerMenu);
+		boolean bl = minecraft.player.getRecipeBook().isFiltering((RecipeBookMenu<?, ?>)minecraft.player.containerMenu);
 		List<RecipeHolder<?>> list = recipeCollection.getDisplayRecipes(true);
 		List<RecipeHolder<?>> list2 = bl ? Collections.emptyList() : recipeCollection.getDisplayRecipes(false);
 		int m = list.size();
@@ -195,11 +194,10 @@ public class OverlayRecipeComponent implements Renderable, GuiEventListener {
 			this.defaultButtonNarrationText(narrationElementOutput);
 		}
 
-		@Override
-		public void addItemToSlot(Iterator<Ingredient> iterator, int i, int j, int k, int l) {
-			ItemStack[] itemStacks = ((Ingredient)iterator.next()).getItems();
+		public void addItemToSlot(Ingredient ingredient, int i, int j, int k, int l) {
+			ItemStack[] itemStacks = ingredient.getItems();
 			if (itemStacks.length != 0) {
-				this.ingredientPos.add(new OverlayRecipeComponent.OverlayRecipeButton.Pos(3 + l * 7, 3 + k * 7, itemStacks));
+				this.ingredientPos.add(new OverlayRecipeComponent.OverlayRecipeButton.Pos(3 + k * 7, 3 + l * 7, itemStacks));
 			}
 		}
 

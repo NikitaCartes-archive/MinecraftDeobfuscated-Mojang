@@ -276,26 +276,26 @@ public interface DispenseItemBehavior {
 		DispenserBlock.registerBehavior(Items.FLINT_AND_STEEL, new OptionalDispenseItemBehavior() {
 			@Override
 			protected ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
-				Level level = blockSource.level();
+				ServerLevel serverLevel = blockSource.level();
 				this.setSuccess(true);
 				Direction direction = blockSource.state().getValue(DispenserBlock.FACING);
 				BlockPos blockPos = blockSource.pos().relative(direction);
-				BlockState blockState = level.getBlockState(blockPos);
-				if (BaseFireBlock.canBePlacedAt(level, blockPos, direction)) {
-					level.setBlockAndUpdate(blockPos, BaseFireBlock.getState(level, blockPos));
-					level.gameEvent(null, GameEvent.BLOCK_PLACE, blockPos);
+				BlockState blockState = serverLevel.getBlockState(blockPos);
+				if (BaseFireBlock.canBePlacedAt(serverLevel, blockPos, direction)) {
+					serverLevel.setBlockAndUpdate(blockPos, BaseFireBlock.getState(serverLevel, blockPos));
+					serverLevel.gameEvent(null, GameEvent.BLOCK_PLACE, blockPos);
 				} else if (CampfireBlock.canLight(blockState) || CandleBlock.canLight(blockState) || CandleCakeBlock.canLight(blockState)) {
-					level.setBlockAndUpdate(blockPos, blockState.setValue(BlockStateProperties.LIT, Boolean.valueOf(true)));
-					level.gameEvent(null, GameEvent.BLOCK_CHANGE, blockPos);
+					serverLevel.setBlockAndUpdate(blockPos, blockState.setValue(BlockStateProperties.LIT, Boolean.valueOf(true)));
+					serverLevel.gameEvent(null, GameEvent.BLOCK_CHANGE, blockPos);
 				} else if (blockState.getBlock() instanceof TntBlock) {
-					TntBlock.explode(level, blockPos);
-					level.removeBlock(blockPos, false);
+					TntBlock.explode(serverLevel, blockPos);
+					serverLevel.removeBlock(blockPos, false);
 				} else {
 					this.setSuccess(false);
 				}
 
 				if (this.isSuccess()) {
-					itemStack.hurtAndBreak(1, level.getRandom(), null, () -> itemStack.setCount(0));
+					itemStack.hurtAndBreak(1, serverLevel, null, () -> itemStack.setCount(0));
 				}
 
 				return itemStack;
@@ -476,7 +476,7 @@ public interface DispenseItemBehavior {
 				} else {
 					for (Armadillo armadillo : list) {
 						if (armadillo.brushOffScute()) {
-							itemStack.hurtAndBreak(16, serverLevel.getRandom(), null, () -> {
+							itemStack.hurtAndBreak(16, serverLevel, null, () -> {
 								itemStack.shrink(1);
 								itemStack.setDamageValue(0);
 							});

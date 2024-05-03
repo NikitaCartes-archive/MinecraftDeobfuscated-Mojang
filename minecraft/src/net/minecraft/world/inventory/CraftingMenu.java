@@ -1,6 +1,7 @@
 package net.minecraft.world.inventory;
 
 import java.util.Optional;
+import javax.annotation.Nullable;
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
@@ -8,14 +9,14 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.StackedContents;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.CraftingRecipe;
-import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 
-public class CraftingMenu extends RecipeBookMenu<CraftingContainer> {
+public class CraftingMenu extends RecipeBookMenu<CraftingInput, CraftingRecipe> {
 	public static final int RESULT_SLOT = 0;
 	private static final int CRAFT_SLOT_START = 1;
 	private static final int CRAFT_SLOT_END = 10;
@@ -27,6 +28,7 @@ public class CraftingMenu extends RecipeBookMenu<CraftingContainer> {
 	private final ResultContainer resultSlots = new ResultContainer();
 	private final ContainerLevelAccess access;
 	private final Player player;
+	private boolean placingRecipe;
 
 	public CraftingMenu(int i, Inventory inventory) {
 		this(i, inventory, ContainerLevelAccess.NULL);
@@ -56,17 +58,23 @@ public class CraftingMenu extends RecipeBookMenu<CraftingContainer> {
 	}
 
 	protected static void slotChangedCraftingGrid(
-		AbstractContainerMenu abstractContainerMenu, Level level, Player player, CraftingContainer craftingContainer, ResultContainer resultContainer
+		AbstractContainerMenu abstractContainerMenu,
+		Level level,
+		Player player,
+		CraftingContainer craftingContainer,
+		ResultContainer resultContainer,
+		@Nullable RecipeHolder<CraftingRecipe> recipeHolder
 	) {
 		if (!level.isClientSide) {
+			CraftingInput craftingInput = craftingContainer.asCraftInput();
 			ServerPlayer serverPlayer = (ServerPlayer)player;
 			ItemStack itemStack = ItemStack.EMPTY;
-			Optional<RecipeHolder<CraftingRecipe>> optional = level.getServer().getRecipeManager().getRecipeFor(RecipeType.CRAFTING, craftingContainer, level);
+			Optional<RecipeHolder<CraftingRecipe>> optional = level.getServer().getRecipeManager().getRecipeFor(RecipeType.CRAFTING, craftingInput, level, recipeHolder);
 			if (optional.isPresent()) {
-				RecipeHolder<CraftingRecipe> recipeHolder = (RecipeHolder<CraftingRecipe>)optional.get();
-				CraftingRecipe craftingRecipe = recipeHolder.value();
-				if (resultContainer.setRecipeUsed(level, serverPlayer, recipeHolder)) {
-					ItemStack itemStack2 = craftingRecipe.assemble(craftingContainer, level.registryAccess());
+				RecipeHolder<CraftingRecipe> recipeHolder2 = (RecipeHolder<CraftingRecipe>)optional.get();
+				CraftingRecipe craftingRecipe = recipeHolder2.value();
+				if (resultContainer.setRecipeUsed(level, serverPlayer, recipeHolder2)) {
+					ItemStack itemStack2 = craftingRecipe.assemble(craftingInput, level.registryAccess());
 					if (itemStack2.isItemEnabled(level.enabledFeatures())) {
 						itemStack = itemStack2;
 					}
@@ -82,7 +90,20 @@ public class CraftingMenu extends RecipeBookMenu<CraftingContainer> {
 
 	@Override
 	public void slotsChanged(Container container) {
-		this.access.execute((level, blockPos) -> slotChangedCraftingGrid(this, level, this.player, this.craftSlots, this.resultSlots));
+		if (!this.placingRecipe) {
+			this.access.execute((level, blockPos) -> slotChangedCraftingGrid(this, level, this.player, this.craftSlots, this.resultSlots, null));
+		}
+	}
+
+	@Override
+	public void beginPlacingRecipe() {
+		this.placingRecipe = true;
+	}
+
+	@Override
+	public void finishPlacingRecipe(RecipeHolder<CraftingRecipe> recipeHolder) {
+		this.placingRecipe = false;
+		this.access.execute((level, blockPos) -> slotChangedCraftingGrid(this, level, this.player, this.craftSlots, this.resultSlots, recipeHolder));
 	}
 
 	@Override
@@ -97,8 +118,8 @@ public class CraftingMenu extends RecipeBookMenu<CraftingContainer> {
 	}
 
 	@Override
-	public boolean recipeMatches(RecipeHolder<? extends Recipe<CraftingContainer>> recipeHolder) {
-		return recipeHolder.value().matches(this.craftSlots, this.player.level());
+	public boolean recipeMatches(RecipeHolder<CraftingRecipe> recipeHolder) {
+		return recipeHolder.value().matches(this.craftSlots.asCraftInput(), this.player.level());
 	}
 
 	@Override

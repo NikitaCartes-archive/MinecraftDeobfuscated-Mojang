@@ -1,5 +1,6 @@
 package net.minecraft.world.entity.monster;
 
+import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -55,8 +56,8 @@ public class Stray extends AbstractSkeleton {
 	}
 
 	@Override
-	protected AbstractArrow getArrow(ItemStack itemStack, float f) {
-		AbstractArrow abstractArrow = super.getArrow(itemStack, f);
+	protected AbstractArrow getArrow(ItemStack itemStack, float f, @Nullable ItemStack itemStack2) {
+		AbstractArrow abstractArrow = super.getArrow(itemStack, f, itemStack2);
 		if (abstractArrow instanceof Arrow) {
 			((Arrow)abstractArrow).addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 600));
 		}

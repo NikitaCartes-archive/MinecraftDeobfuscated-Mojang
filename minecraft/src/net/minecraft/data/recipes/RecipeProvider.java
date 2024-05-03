@@ -280,7 +280,7 @@ public abstract class RecipeProvider implements DataProvider {
 		return ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, itemLike, 4).define('#', ingredient).pattern("#  ").pattern("## ").pattern("###");
 	}
 
-	private static RecipeBuilder trapdoorBuilder(ItemLike itemLike, Ingredient ingredient) {
+	protected static RecipeBuilder trapdoorBuilder(ItemLike itemLike, Ingredient ingredient) {
 		return ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, itemLike, 2).define('#', ingredient).pattern("###").pattern("###");
 	}
 

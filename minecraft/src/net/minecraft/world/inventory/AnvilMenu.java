@@ -170,17 +170,17 @@ public class AnvilMenu extends ItemCombinerMenu {
 
 					for (Entry<Holder<Enchantment>> entry : itemEnchantments.entrySet()) {
 						Holder<Enchantment> holder = (Holder<Enchantment>)entry.getKey();
-						Enchantment enchantment = holder.value();
-						int q = mutable.getLevel(enchantment);
+						int q = mutable.getLevel(holder);
 						int r = entry.getIntValue();
 						r = q == r ? r + 1 : Math.max(r, q);
+						Enchantment enchantment = holder.value();
 						boolean bl4 = enchantment.canEnchant(itemStack);
 						if (this.player.getAbilities().instabuild || itemStack.is(Items.ENCHANTED_BOOK)) {
 							bl4 = true;
 						}
 
 						for (Holder<Enchantment> holder2 : mutable.keySet()) {
-							if (!holder2.equals(holder) && !enchantment.isCompatibleWith(holder2.value())) {
+							if (!holder2.equals(holder) && !Enchantment.areCompatible(holder, holder2)) {
 								bl4 = false;
 								i++;
 							}
@@ -194,7 +194,7 @@ public class AnvilMenu extends ItemCombinerMenu {
 								r = enchantment.getMaxLevel();
 							}
 
-							mutable.set(enchantment, r);
+							mutable.set(holder, r);
 							int s = enchantment.getAnvilCost();
 							if (bl) {
 								s = Math.max(1, s / 2);

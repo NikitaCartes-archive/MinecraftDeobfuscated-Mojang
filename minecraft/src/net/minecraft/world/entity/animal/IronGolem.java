@@ -39,6 +39,7 @@ import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.NaturalSpawner;
@@ -188,12 +189,15 @@ public class IronGolem extends AbstractGolem implements NeutralMob {
 		this.level().broadcastEntityEvent(this, (byte)4);
 		float f = this.getAttackDamage();
 		float g = (int)f > 0 ? f / 2.0F + (float)this.random.nextInt((int)f) : f;
-		boolean bl = entity.hurt(this.damageSources().mobAttack(this), g);
+		DamageSource damageSource = this.damageSources().mobAttack(this);
+		boolean bl = entity.hurt(damageSource, g);
 		if (bl) {
 			double d = entity instanceof LivingEntity livingEntity ? livingEntity.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE) : 0.0;
 			double e = Math.max(0.0, 1.0 - d);
 			entity.setDeltaMovement(entity.getDeltaMovement().add(0.0, 0.4F * e, 0.0));
-			this.doEnchantDamageEffects(this, entity);
+			if (this.level() instanceof ServerLevel serverLevel) {
+				EnchantmentHelper.doPostAttackEffects(serverLevel, entity, damageSource);
+			}
 		}
 
 		this.playSound(SoundEvents.IRON_GOLEM_ATTACK, 1.0F, 1.0F);

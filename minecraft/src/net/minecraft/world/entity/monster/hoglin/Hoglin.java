@@ -253,7 +253,7 @@ public class Hoglin extends Animal implements Enemy, HoglinBase {
 	}
 
 	@Override
-	public int getExperienceReward() {
+	protected int getBaseExperienceReward() {
 		return this.xpReward;
 	}
 

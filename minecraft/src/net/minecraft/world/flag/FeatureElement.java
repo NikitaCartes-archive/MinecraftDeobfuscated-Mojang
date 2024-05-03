@@ -7,7 +7,7 @@ import net.minecraft.resources.ResourceKey;
 
 public interface FeatureElement {
 	Set<ResourceKey<? extends Registry<? extends FeatureElement>>> FILTERED_REGISTRIES = Set.of(
-		Registries.ITEM, Registries.BLOCK, Registries.ENTITY_TYPE, Registries.MENU, Registries.ENCHANTMENT, Registries.POTION, Registries.MOB_EFFECT
+		Registries.ITEM, Registries.BLOCK, Registries.ENTITY_TYPE, Registries.MENU, Registries.POTION, Registries.MOB_EFFECT
 	);
 
 	FeatureFlagSet requiredFeatures();

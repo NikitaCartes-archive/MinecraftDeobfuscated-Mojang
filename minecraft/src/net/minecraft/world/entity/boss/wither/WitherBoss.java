@@ -474,8 +474,8 @@ public class WitherBoss extends Monster implements PowerableMob, RangedAttackMob
 	}
 
 	@Override
-	protected void dropCustomDeathLoot(DamageSource damageSource, int i, boolean bl) {
-		super.dropCustomDeathLoot(damageSource, i, bl);
+	protected void dropCustomDeathLoot(DamageSource damageSource, boolean bl) {
+		super.dropCustomDeathLoot(damageSource, bl);
 		ItemEntity itemEntity = this.spawnAtLocation(Items.NETHER_STAR);
 		if (itemEntity != null) {
 			itemEntity.setExtendedLifetime();

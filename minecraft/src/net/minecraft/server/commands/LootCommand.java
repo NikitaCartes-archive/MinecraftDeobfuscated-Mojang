@@ -458,8 +458,8 @@ public class LootCommand {
 			}
 
 			builder.withParameter(LootContextParams.DAMAGE_SOURCE, entity.damageSources().magic());
-			builder.withOptionalParameter(LootContextParams.DIRECT_KILLER_ENTITY, entity2);
-			builder.withOptionalParameter(LootContextParams.KILLER_ENTITY, entity2);
+			builder.withOptionalParameter(LootContextParams.DIRECT_ATTACKING_ENTITY, entity2);
+			builder.withOptionalParameter(LootContextParams.ATTACKING_ENTITY, entity2);
 			builder.withParameter(LootContextParams.THIS_ENTITY, entity);
 			builder.withParameter(LootContextParams.ORIGIN, commandSourceStack.getPosition());
 			LootParams lootParams = builder.create(LootContextParamSets.ENTITY);

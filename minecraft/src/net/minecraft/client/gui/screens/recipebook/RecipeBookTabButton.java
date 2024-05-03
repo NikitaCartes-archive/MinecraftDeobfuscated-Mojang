@@ -34,7 +34,7 @@ public class RecipeBookTabButton extends StateSwitchingButton {
 		List<RecipeCollection> list = clientRecipeBook.getCollection(this.category);
 		if (minecraft.player.containerMenu instanceof RecipeBookMenu) {
 			for (RecipeCollection recipeCollection : list) {
-				for (RecipeHolder<?> recipeHolder : recipeCollection.getRecipes(clientRecipeBook.isFiltering((RecipeBookMenu<?>)minecraft.player.containerMenu))) {
+				for (RecipeHolder<?> recipeHolder : recipeCollection.getRecipes(clientRecipeBook.isFiltering((RecipeBookMenu<?, ?>)minecraft.player.containerMenu))) {
 					if (clientRecipeBook.willHighlight(recipeHolder)) {
 						this.animationTime = 15.0F;
 						return;

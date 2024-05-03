@@ -6,6 +6,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import org.joml.Vector3f;
 
 public class AABB {
 	private static final double EPSILON = 1.0E-7;
@@ -242,6 +243,10 @@ public class AABB {
 
 	public AABB move(Vec3 vec3) {
 		return this.move(vec3.x, vec3.y, vec3.z);
+	}
+
+	public AABB move(Vector3f vector3f) {
+		return this.move((double)vector3f.x, (double)vector3f.y, (double)vector3f.z);
 	}
 
 	public boolean intersects(AABB aABB) {

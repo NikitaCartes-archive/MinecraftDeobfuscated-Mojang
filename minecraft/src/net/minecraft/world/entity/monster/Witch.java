@@ -146,7 +146,7 @@ public class Witch extends Raider implements RangedAttackMob {
 
 				if (holder != null) {
 					this.setItemSlot(EquipmentSlot.MAINHAND, PotionContents.createItemStack(Items.POTION, holder));
-					this.usingTime = this.getMainHandItem().getUseDuration();
+					this.usingTime = this.getMainHandItem().getUseDuration(this);
 					this.setUsingItem(true);
 					if (!this.isSilent()) {
 						this.level()

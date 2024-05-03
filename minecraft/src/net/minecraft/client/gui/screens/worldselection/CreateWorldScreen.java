@@ -70,7 +70,6 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.WorldDataConfiguration;
-import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.levelgen.WorldDimensions;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.levelgen.WorldOptions;
@@ -421,10 +420,7 @@ public class CreateWorldScreen extends Screen {
 				this.minecraft
 			)
 			.thenApplyAsync(worldCreationContext -> {
-				for (LevelStem levelStem : worldCreationContext.datapackDimensions()) {
-					levelStem.generator().validate();
-				}
-
+				worldCreationContext.validate();
 				return worldCreationContext;
 			})
 			.thenAcceptAsync(this.uiState::setSettings, this.minecraft)

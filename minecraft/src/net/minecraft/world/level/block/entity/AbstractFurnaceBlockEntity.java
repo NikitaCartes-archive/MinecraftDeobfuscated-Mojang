@@ -23,7 +23,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
-import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.entity.ExperienceOrb;
@@ -39,6 +38,7 @@ import net.minecraft.world.item.crafting.AbstractCookingRecipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.crafting.SingleRecipeInput;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.AbstractFurnaceBlock;
@@ -107,7 +107,7 @@ public abstract class AbstractFurnaceBlockEntity extends BaseContainerBlockEntit
 		}
 	};
 	private final Object2IntOpenHashMap<ResourceLocation> recipesUsed = new Object2IntOpenHashMap<>();
-	private final RecipeManager.CachedCheck<Container, ? extends AbstractCookingRecipe> quickCheck;
+	private final RecipeManager.CachedCheck<SingleRecipeInput, ? extends AbstractCookingRecipe> quickCheck;
 
 	protected AbstractFurnaceBlockEntity(
 		BlockEntityType<?> blockEntityType, BlockPos blockPos, BlockState blockState, RecipeType<? extends AbstractCookingRecipe> recipeType
@@ -257,12 +257,13 @@ public abstract class AbstractFurnaceBlockEntity extends BaseContainerBlockEntit
 		}
 
 		ItemStack itemStack = abstractFurnaceBlockEntity.items.get(1);
-		boolean bl3 = !abstractFurnaceBlockEntity.items.get(0).isEmpty();
+		ItemStack itemStack2 = abstractFurnaceBlockEntity.items.get(0);
+		boolean bl3 = !itemStack2.isEmpty();
 		boolean bl4 = !itemStack.isEmpty();
 		if (abstractFurnaceBlockEntity.isLit() || bl4 && bl3) {
 			RecipeHolder<?> recipeHolder;
 			if (bl3) {
-				recipeHolder = (RecipeHolder<?>)abstractFurnaceBlockEntity.quickCheck.getRecipeFor(abstractFurnaceBlockEntity, level).orElse(null);
+				recipeHolder = (RecipeHolder<?>)abstractFurnaceBlockEntity.quickCheck.getRecipeFor(new SingleRecipeInput(itemStack2), level).orElse(null);
 			} else {
 				recipeHolder = null;
 			}
@@ -365,8 +366,9 @@ public abstract class AbstractFurnaceBlockEntity extends BaseContainerBlockEntit
 	}
 
 	private static int getTotalCookTime(Level level, AbstractFurnaceBlockEntity abstractFurnaceBlockEntity) {
+		SingleRecipeInput singleRecipeInput = new SingleRecipeInput(abstractFurnaceBlockEntity.getItem(0));
 		return (Integer)abstractFurnaceBlockEntity.quickCheck
-			.getRecipeFor(abstractFurnaceBlockEntity, level)
+			.getRecipeFor(singleRecipeInput, level)
 			.map(recipeHolder -> ((AbstractCookingRecipe)recipeHolder.value()).getCookingTime())
 			.orElse(200);
 	}

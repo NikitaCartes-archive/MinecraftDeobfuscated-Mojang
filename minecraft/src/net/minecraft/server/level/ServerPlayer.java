@@ -134,6 +134,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ServerItemCooldowns;
 import net.minecraft.world.item.WrittenBookItem;
 import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.trading.MerchantOffers;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.GameRules;
@@ -623,7 +624,7 @@ public class ServerPlayer extends Player {
 	public void trackStartFallingPosition() {
 		if (this.fallDistance > 0.0F && this.startingToFallPosition == null) {
 			this.startingToFallPosition = this.position();
-			if (this.currentImpulseImpactPos != null) {
+			if (this.currentImpulseImpactPos != null && this.currentImpulseImpactPos.y <= this.startingToFallPosition.y) {
 				CriteriaTriggers.FALL_AFTER_EXPLOSION.trigger(this, this.currentImpulseImpactPos, this.currentExplosionCause);
 			}
 		}
@@ -998,9 +999,9 @@ public class ServerPlayer extends Player {
 	}
 
 	@Override
-	protected void onChangedBlock(BlockPos blockPos) {
+	protected void onChangedBlock(ServerLevel serverLevel, BlockPos blockPos) {
 		if (!this.isSpectator()) {
-			super.onChangedBlock(blockPos);
+			super.onChangedBlock(serverLevel, blockPos);
 		}
 	}
 
@@ -1429,6 +1430,7 @@ public class ServerPlayer extends Player {
 	}
 
 	public boolean setGameMode(GameType gameType) {
+		boolean bl = this.isSpectator();
 		if (!this.gameMode.changeGameModeForPlayer(gameType)) {
 			return false;
 		} else {
@@ -1436,8 +1438,12 @@ public class ServerPlayer extends Player {
 			if (gameType == GameType.SPECTATOR) {
 				this.removeEntitiesOnShoulder();
 				this.stopRiding();
+				EnchantmentHelper.stopLocationBasedEffects(this);
 			} else {
 				this.setCamera(this);
+				if (bl) {
+					EnchantmentHelper.runLocationChangedEffects(this.serverLevel(), this);
+				}
 			}
 
 			this.onUpdateAbilities();
@@ -1882,5 +1888,16 @@ public class ServerPlayer extends Player {
 	@Nullable
 	public BlockPos getRaidOmenPosition() {
 		return this.raidOmenPosition;
+	}
+
+	@Override
+	public void setOnGroundWithKnownMovement(boolean bl, Vec3 vec3) {
+		super.setOnGroundWithKnownMovement(bl, vec3);
+		this.setDeltaMovement(vec3);
+	}
+
+	@Override
+	protected float getEnchantedDamage(Entity entity, float f, DamageSource damageSource) {
+		return EnchantmentHelper.modifyDamage(this.serverLevel(), this.getMainHandItem(), entity, damageSource, f);
 	}
 }

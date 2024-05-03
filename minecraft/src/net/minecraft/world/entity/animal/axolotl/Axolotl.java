@@ -304,14 +304,8 @@ public class Axolotl extends Animal implements LerpingModel, VariantHolder<Axolo
 	}
 
 	@Override
-	public boolean doHurtTarget(Entity entity) {
-		boolean bl = entity.hurt(this.damageSources().mobAttack(this), (float)((int)this.getAttributeValue(Attributes.ATTACK_DAMAGE)));
-		if (bl) {
-			this.doEnchantDamageEffects(this, entity);
-			this.playSound(SoundEvents.AXOLOTL_ATTACK, 1.0F, 1.0F);
-		}
-
-		return bl;
+	public void playAttackSound() {
+		this.playSound(SoundEvents.AXOLOTL_ATTACK, 1.0F, 1.0F);
 	}
 
 	@Override

@@ -19,7 +19,9 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponentMap;
+import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.component.PatchedDataComponentMap;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.NbtOps;
@@ -54,6 +56,7 @@ public class ItemParser {
 	public static final char SYNTAX_END_COMPONENTS = ']';
 	public static final char SYNTAX_COMPONENT_SEPARATOR = ',';
 	public static final char SYNTAX_COMPONENT_ASSIGNMENT = '=';
+	public static final char SYNTAX_REMOVED_COMPONENT = '!';
 	static final Function<SuggestionsBuilder, CompletableFuture<Suggestions>> SUGGEST_NOTHING = SuggestionsBuilder::buildFuture;
 	final HolderLookup.RegistryLookup<Item> items;
 	final DynamicOps<Tag> registryOps;
@@ -65,7 +68,7 @@ public class ItemParser {
 
 	public ItemParser.ItemResult parse(StringReader stringReader) throws CommandSyntaxException {
 		final MutableObject<Holder<Item>> mutableObject = new MutableObject<>();
-		final DataComponentMap.Builder builder = DataComponentMap.builder();
+		final DataComponentPatch.Builder builder = DataComponentPatch.builder();
 		this.parse(stringReader, new ItemParser.Visitor() {
 			@Override
 			public void visitItem(Holder<Item> holder) {
@@ -76,16 +79,21 @@ public class ItemParser {
 			public <T> void visitComponent(DataComponentType<T> dataComponentType, T object) {
 				builder.set(dataComponentType, object);
 			}
+
+			@Override
+			public <T> void visitRemovedComponent(DataComponentType<T> dataComponentType) {
+				builder.remove(dataComponentType);
+			}
 		});
 		Holder<Item> holder = (Holder<Item>)Objects.requireNonNull(mutableObject.getValue(), "Parser gave no item");
-		DataComponentMap dataComponentMap = builder.build();
-		validateComponents(stringReader, holder, dataComponentMap);
-		return new ItemParser.ItemResult(holder, dataComponentMap);
+		DataComponentPatch dataComponentPatch = builder.build();
+		validateComponents(stringReader, holder, dataComponentPatch);
+		return new ItemParser.ItemResult(holder, dataComponentPatch);
 	}
 
-	private static void validateComponents(StringReader stringReader, Holder<Item> holder, DataComponentMap dataComponentMap) throws CommandSyntaxException {
-		DataComponentMap dataComponentMap2 = DataComponentMap.composite(holder.value().components(), dataComponentMap);
-		DataResult<Unit> dataResult = ItemStack.validateComponents(dataComponentMap2);
+	private static void validateComponents(StringReader stringReader, Holder<Item> holder, DataComponentPatch dataComponentPatch) throws CommandSyntaxException {
+		DataComponentMap dataComponentMap = PatchedDataComponentMap.fromPatch(holder.value().components(), dataComponentPatch);
+		DataResult<Unit> dataResult = ItemStack.validateComponents(dataComponentMap);
 		dataResult.getOrThrow(string -> ERROR_MALFORMED_ITEM.createWithContext(stringReader, string));
 	}
 
@@ -114,7 +122,7 @@ public class ItemParser {
 		return suggestionsVisitor.resolveSuggestions(suggestionsBuilder, stringReader);
 	}
 
-	public static record ItemResult(Holder<Item> item, DataComponentMap components) {
+	public static record ItemResult(Holder<Item> item, DataComponentPatch components) {
 	}
 
 	class State {
@@ -147,23 +155,37 @@ public class ItemParser {
 
 		private void readComponents() throws CommandSyntaxException {
 			this.reader.expect('[');
-			this.visitor.visitSuggestions(this::suggestComponentAssignment);
+			this.visitor.visitSuggestions(this::suggestComponentAssignmentOrRemoval);
 			Set<DataComponentType<?>> set = new ReferenceArraySet<>();
 
 			while (this.reader.canRead() && this.reader.peek() != ']') {
 				this.reader.skipWhitespace();
-				DataComponentType<?> dataComponentType = readComponentType(this.reader);
-				if (!set.add(dataComponentType)) {
-					throw ItemParser.ERROR_REPEATED_COMPONENT.create(dataComponentType);
+				if (this.reader.canRead() && this.reader.peek() == '!') {
+					this.reader.skip();
+					this.visitor.visitSuggestions(this::suggestComponent);
+					DataComponentType<?> dataComponentType = readComponentType(this.reader);
+					if (!set.add(dataComponentType)) {
+						throw ItemParser.ERROR_REPEATED_COMPONENT.create(dataComponentType);
+					}
+
+					this.visitor.visitRemovedComponent(dataComponentType);
+					this.visitor.visitSuggestions(ItemParser.SUGGEST_NOTHING);
+					this.reader.skipWhitespace();
+				} else {
+					DataComponentType<?> dataComponentType = readComponentType(this.reader);
+					if (!set.add(dataComponentType)) {
+						throw ItemParser.ERROR_REPEATED_COMPONENT.create(dataComponentType);
+					}
+
+					this.visitor.visitSuggestions(this::suggestAssignment);
+					this.reader.skipWhitespace();
+					this.reader.expect('=');
+					this.visitor.visitSuggestions(ItemParser.SUGGEST_NOTHING);
+					this.reader.skipWhitespace();
+					this.readComponent(dataComponentType);
+					this.reader.skipWhitespace();
 				}
 
-				this.visitor.visitSuggestions(this::suggestAssignment);
-				this.reader.skipWhitespace();
-				this.reader.expect('=');
-				this.visitor.visitSuggestions(ItemParser.SUGGEST_NOTHING);
-				this.reader.skipWhitespace();
-				this.readComponent(dataComponentType);
-				this.reader.skipWhitespace();
 				this.visitor.visitSuggestions(this::suggestNextOrEndComponents);
 				if (!this.reader.canRead() || this.reader.peek() != ',') {
 					break;
@@ -171,7 +193,7 @@ public class ItemParser {
 
 				this.reader.skip();
 				this.reader.skipWhitespace();
-				this.visitor.visitSuggestions(this::suggestComponentAssignment);
+				this.visitor.visitSuggestions(this::suggestComponentAssignmentOrRemoval);
 				if (!this.reader.canRead()) {
 					throw ItemParser.ERROR_EXPECTED_COMPONENT.createWithContext(this.reader);
 				}
@@ -236,14 +258,23 @@ public class ItemParser {
 			return SharedSuggestionProvider.suggestResource(ItemParser.this.items.listElementIds().map(ResourceKey::location), suggestionsBuilder);
 		}
 
-		private CompletableFuture<Suggestions> suggestComponentAssignment(SuggestionsBuilder suggestionsBuilder) {
-			String string = suggestionsBuilder.getRemaining().toLowerCase(Locale.ROOT);
+		private CompletableFuture<Suggestions> suggestComponentAssignmentOrRemoval(SuggestionsBuilder suggestionsBuilder) {
+			suggestionsBuilder.suggest(String.valueOf('!'));
+			return this.suggestComponent(suggestionsBuilder, String.valueOf('='));
+		}
+
+		private CompletableFuture<Suggestions> suggestComponent(SuggestionsBuilder suggestionsBuilder) {
+			return this.suggestComponent(suggestionsBuilder, "");
+		}
+
+		private CompletableFuture<Suggestions> suggestComponent(SuggestionsBuilder suggestionsBuilder, String string) {
+			String string2 = suggestionsBuilder.getRemaining().toLowerCase(Locale.ROOT);
 			SharedSuggestionProvider.filterResources(
-				BuiltInRegistries.DATA_COMPONENT_TYPE.entrySet(), string, entry -> ((ResourceKey)entry.getKey()).location(), entry -> {
+				BuiltInRegistries.DATA_COMPONENT_TYPE.entrySet(), string2, entry -> ((ResourceKey)entry.getKey()).location(), entry -> {
 					DataComponentType<?> dataComponentType = (DataComponentType<?>)entry.getValue();
 					if (dataComponentType.codec() != null) {
 						ResourceLocation resourceLocation = ((ResourceKey)entry.getKey()).location();
-						suggestionsBuilder.suggest(resourceLocation.toString() + "=");
+						suggestionsBuilder.suggest(resourceLocation + string);
 					}
 				}
 			);
@@ -269,6 +300,9 @@ public class ItemParser {
 		}
 
 		default <T> void visitComponent(DataComponentType<T> dataComponentType, T object) {
+		}
+
+		default <T> void visitRemovedComponent(DataComponentType<T> dataComponentType) {
 		}
 
 		default void visitSuggestions(Function<SuggestionsBuilder, CompletableFuture<Suggestions>> function) {

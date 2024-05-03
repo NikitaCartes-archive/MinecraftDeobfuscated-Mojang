@@ -3,6 +3,7 @@ package net.minecraft.world.item;
 import java.util.List;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
@@ -26,12 +27,12 @@ public class BowItem extends ProjectileWeaponItem {
 		if (livingEntity instanceof Player player) {
 			ItemStack itemStack2 = player.getProjectile(itemStack);
 			if (!itemStack2.isEmpty()) {
-				int j = this.getUseDuration(itemStack) - i;
+				int j = this.getUseDuration(itemStack, livingEntity) - i;
 				float f = getPowerForTime(j);
 				if (!((double)f < 0.1)) {
 					List<ItemStack> list = draw(itemStack, itemStack2, player);
-					if (!level.isClientSide() && !list.isEmpty()) {
-						this.shoot(level, player, player.getUsedItemHand(), itemStack, list, f * 3.0F, 1.0F, f == 1.0F, null);
+					if (level instanceof ServerLevel serverLevel && !list.isEmpty()) {
+						this.shoot(serverLevel, player, player.getUsedItemHand(), itemStack, list, f * 3.0F, 1.0F, f == 1.0F, null);
 					}
 
 					level.playSound(
@@ -66,7 +67,7 @@ public class BowItem extends ProjectileWeaponItem {
 	}
 
 	@Override
-	public int getUseDuration(ItemStack itemStack) {
+	public int getUseDuration(ItemStack itemStack, LivingEntity livingEntity) {
 		return 72000;
 	}
 

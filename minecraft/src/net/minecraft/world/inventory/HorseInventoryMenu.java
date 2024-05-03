@@ -1,6 +1,7 @@
 package net.minecraft.world.inventory;
 
 import net.minecraft.world.Container;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.animal.horse.AbstractChestedHorse;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.player.Inventory;
@@ -34,7 +35,7 @@ public class HorseInventoryMenu extends AbstractContainerMenu {
 				return abstractHorse.isSaddleable();
 			}
 		});
-		this.addSlot(new Slot(this.armorContainer, 0, 8, 36) {
+		this.addSlot(new ArmorSlot(this.armorContainer, abstractHorse, EquipmentSlot.BODY, 0, 8, 36, null) {
 			@Override
 			public boolean mayPlace(ItemStack itemStack) {
 				return abstractHorse.isBodyArmorItem(itemStack);
@@ -43,11 +44,6 @@ public class HorseInventoryMenu extends AbstractContainerMenu {
 			@Override
 			public boolean isActive() {
 				return abstractHorse.canWearBodyArmor();
-			}
-
-			@Override
-			public int getMaxStackSize() {
-				return 1;
 			}
 		});
 		if (this.hasChest(abstractHorse)) {

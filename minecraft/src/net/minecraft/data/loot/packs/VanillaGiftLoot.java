@@ -16,9 +16,9 @@ import net.minecraft.world.level.storage.loot.functions.SetPotionFunction;
 import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
 
-public class VanillaGiftLoot implements LootTableSubProvider {
+public record VanillaGiftLoot(HolderLookup.Provider registries) implements LootTableSubProvider {
 	@Override
-	public void generate(HolderLookup.Provider provider, BiConsumer<ResourceKey<LootTable>, LootTable.Builder> biConsumer) {
+	public void generate(BiConsumer<ResourceKey<LootTable>, LootTable.Builder> biConsumer) {
 		biConsumer.accept(
 			BuiltInLootTables.CAT_MORNING_GIFT,
 			LootTable.lootTable()

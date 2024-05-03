@@ -4,7 +4,6 @@ public class LevelEvent {
 	public static final int SOUND_DISPENSER_DISPENSE = 1000;
 	public static final int SOUND_DISPENSER_FAIL = 1001;
 	public static final int SOUND_DISPENSER_PROJECTILE_LAUNCH = 1002;
-	public static final int SOUND_ENDER_EYE_LAUNCH = 1003;
 	public static final int SOUND_FIREWORK_SHOOT = 1004;
 	public static final int SOUND_EXTINGUISH_FIRE = 1009;
 	public static final int SOUND_PLAY_JUKEBOX_SONG = 1010;
@@ -43,6 +42,7 @@ public class LevelEvent {
 	public static final int SOUND_SKELETON_TO_STRAY = 1048;
 	public static final int SOUND_CRAFTER_CRAFT = 1049;
 	public static final int SOUND_CRAFTER_FAIL = 1050;
+	public static final int SOUND_WIND_CHARGE_SHOOT = 1051;
 	public static final int COMPOSTER_FILL = 1500;
 	public static final int LAVA_FIZZ = 1501;
 	public static final int REDSTONE_TORCH_BURNOUT = 1502;

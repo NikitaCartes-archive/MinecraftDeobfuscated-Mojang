@@ -64,6 +64,7 @@ import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.entity.ai.village.poi.PoiRecord;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
@@ -211,11 +212,15 @@ public class Bee extends Animal implements NeutralMob, FlyingAnimal {
 
 	@Override
 	public boolean doHurtTarget(Entity entity) {
-		boolean bl = entity.hurt(this.damageSources().sting(this), (float)((int)this.getAttributeValue(Attributes.ATTACK_DAMAGE)));
+		DamageSource damageSource = this.damageSources().sting(this);
+		boolean bl = entity.hurt(damageSource, (float)((int)this.getAttributeValue(Attributes.ATTACK_DAMAGE)));
 		if (bl) {
-			this.doEnchantDamageEffects(this, entity);
-			if (entity instanceof LivingEntity) {
-				((LivingEntity)entity).setStingerCount(((LivingEntity)entity).getStingerCount() + 1);
+			if (this.level() instanceof ServerLevel serverLevel) {
+				EnchantmentHelper.doPostAttackEffects(serverLevel, entity, damageSource);
+			}
+
+			if (entity instanceof LivingEntity livingEntity) {
+				livingEntity.setStingerCount(livingEntity.getStingerCount() + 1);
 				int i = 0;
 				if (this.level().getDifficulty() == Difficulty.NORMAL) {
 					i = 10;
@@ -224,7 +229,7 @@ public class Bee extends Animal implements NeutralMob, FlyingAnimal {
 				}
 
 				if (i > 0) {
-					((LivingEntity)entity).addEffect(new MobEffectInstance(MobEffects.POISON, i * 20, 0), this);
+					livingEntity.addEffect(new MobEffectInstance(MobEffects.POISON, i * 20, 0), this);
 				}
 			}
 

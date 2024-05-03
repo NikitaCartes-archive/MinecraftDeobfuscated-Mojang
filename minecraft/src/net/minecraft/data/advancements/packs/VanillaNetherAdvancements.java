@@ -288,6 +288,10 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 						.and(MobEffects.POISON)
 						.and(MobEffects.SLOW_FALLING)
 						.and(MobEffects.DAMAGE_RESISTANCE)
+						.and(MobEffects.OOZING)
+						.and(MobEffects.INFESTED)
+						.and(MobEffects.WIND_CHARGED)
+						.and(MobEffects.WEAVING)
 				)
 			)
 			.save(consumer, "nether/all_potions");
@@ -335,6 +339,12 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 						.and(MobEffects.BAD_OMEN)
 						.and(MobEffects.HERO_OF_THE_VILLAGE)
 						.and(MobEffects.DARKNESS)
+						.and(MobEffects.OOZING)
+						.and(MobEffects.INFESTED)
+						.and(MobEffects.WIND_CHARGED)
+						.and(MobEffects.WEAVING)
+						.and(MobEffects.TRIAL_OMEN)
+						.and(MobEffects.RAID_OMEN)
 				)
 			)
 			.save(consumer, "nether/all_effects");

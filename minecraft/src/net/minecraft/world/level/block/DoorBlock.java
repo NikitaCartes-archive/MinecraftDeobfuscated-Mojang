@@ -107,9 +107,8 @@ public class DoorBlock extends Block {
 
 	@Override
 	protected void onExplosionHit(BlockState blockState, Level level, BlockPos blockPos, Explosion explosion, BiConsumer<ItemStack, BlockPos> biConsumer) {
-		if (explosion.getBlockInteraction() == Explosion.BlockInteraction.TRIGGER_BLOCK
+		if (explosion.canTriggerBlocks()
 			&& blockState.getValue(HALF) == DoubleBlockHalf.LOWER
-			&& !level.isClientSide()
 			&& this.type.canOpenByWindCharge()
 			&& !(Boolean)blockState.getValue(POWERED)) {
 			this.setOpen(null, level, blockState, blockPos, !this.isOpen(blockState));

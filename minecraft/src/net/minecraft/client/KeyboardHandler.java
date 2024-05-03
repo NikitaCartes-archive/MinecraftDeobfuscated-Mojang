@@ -19,11 +19,12 @@ import net.minecraft.Util;
 import net.minecraft.client.gui.components.ChatComponent;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.screens.AccessibilityOnboardingScreen;
 import net.minecraft.client.gui.screens.PauseScreen;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.SimpleOptionsSubScreen;
-import net.minecraft.client.gui.screens.controls.KeyBindsScreen;
 import net.minecraft.client.gui.screens.debug.GameModeSwitcherScreen;
+import net.minecraft.client.gui.screens.options.ChatOptionsScreen;
+import net.minecraft.client.gui.screens.options.controls.KeyBindsScreen;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.commands.arguments.blocks.BlockStateParser;
@@ -391,8 +392,12 @@ public class KeyboardHandler {
 						boolean bl3 = this.minecraft.options.narrator().get() == NarratorStatus.OFF;
 						this.minecraft.options.narrator().set(NarratorStatus.byId(this.minecraft.options.narrator().get().getId() + 1));
 						this.minecraft.options.save();
-						if (screen instanceof SimpleOptionsSubScreen) {
-							((SimpleOptionsSubScreen)screen).updateNarratorButton();
+						if (screen instanceof AccessibilityOnboardingScreen accessibilityOnboardingScreen) {
+							accessibilityOnboardingScreen.updateNarratorButton();
+						}
+
+						if (screen instanceof ChatOptionsScreen chatOptionsScreen) {
+							chatOptionsScreen.updateNarratorButton();
 						}
 
 						if (bl3 && screen != null) {
@@ -422,17 +427,17 @@ public class KeyboardHandler {
 			InputConstants.Key key;
 			boolean bl3x;
 			boolean var10000;
-			label187: {
+			label191: {
 				key = InputConstants.getKey(i, j);
 				bl3x = this.minecraft.screen == null;
-				label147:
+				label151:
 				if (!bl3x) {
 					if (this.minecraft.screen instanceof PauseScreen pauseScreen && !pauseScreen.showsPauseMenu()) {
-						break label147;
+						break label151;
 					}
 
 					var10000 = false;
-					break label187;
+					break label191;
 				}
 
 				var10000 = true;

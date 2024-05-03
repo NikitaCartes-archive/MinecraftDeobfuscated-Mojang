@@ -23,6 +23,7 @@ public class WolfVariants {
 	public static final ResourceKey<WolfVariant> WOODS = createKey("woods");
 	public static final ResourceKey<WolfVariant> CHESTNUT = createKey("chestnut");
 	public static final ResourceKey<WolfVariant> STRIPED = createKey("striped");
+	public static final ResourceKey<WolfVariant> DEFAULT = PALE;
 
 	private static ResourceKey<WolfVariant> createKey(String string) {
 		return ResourceKey.create(Registries.WOLF_VARIANT, new ResourceLocation(string));
@@ -48,7 +49,9 @@ public class WolfVariants {
 		return (Holder<WolfVariant>)registry.holders()
 			.filter(reference -> ((WolfVariant)reference.value()).biomes().contains(holder))
 			.findFirst()
-			.orElse(registry.getHolderOrThrow(PALE));
+			.or(() -> registry.getHolder(DEFAULT))
+			.or(registry::getAny)
+			.orElseThrow();
 	}
 
 	public static void bootstrap(BootstrapContext<WolfVariant> bootstrapContext) {

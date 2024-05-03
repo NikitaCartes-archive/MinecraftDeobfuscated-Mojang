@@ -178,6 +178,7 @@ import net.minecraft.util.datafix.fixes.PlayerUUIDFix;
 import net.minecraft.util.datafix.fixes.PoiTypeRemoveFix;
 import net.minecraft.util.datafix.fixes.PoiTypeRenameFix;
 import net.minecraft.util.datafix.fixes.PrimedTntBlockStateFixer;
+import net.minecraft.util.datafix.fixes.ProjectileStoredWeaponFix;
 import net.minecraft.util.datafix.fixes.RandomSequenceSettingsFix;
 import net.minecraft.util.datafix.fixes.RecipesFix;
 import net.minecraft.util.datafix.fixes.RecipesRenameningFix;
@@ -295,6 +296,7 @@ import net.minecraft.util.datafix.schemas.V3818_3;
 import net.minecraft.util.datafix.schemas.V3818_4;
 import net.minecraft.util.datafix.schemas.V3818_5;
 import net.minecraft.util.datafix.schemas.V3825;
+import net.minecraft.util.datafix.schemas.V3938;
 import net.minecraft.util.datafix.schemas.V501;
 import net.minecraft.util.datafix.schemas.V700;
 import net.minecraft.util.datafix.schemas.V701;
@@ -1302,6 +1304,10 @@ public class DataFixers {
 		dataFixerBuilder.addFixer(new EmptyItemInVillagerTradeFix(schema221));
 		Schema schema222 = dataFixerBuilder.addSchema(3833, SAME_NAMESPACED);
 		dataFixerBuilder.addFixer(new RemoveEmptyItemInBrushableBlockFix(schema222));
+		Schema schema223 = dataFixerBuilder.addSchema(3938, V3938::new);
+		dataFixerBuilder.addFixer(new ProjectileStoredWeaponFix(schema223));
+		Schema schema224 = dataFixerBuilder.addSchema(3939, SAME_NAMESPACED);
+		dataFixerBuilder.addFixer(new FeatureFlagRemoveFix(schema224, "Remove 1.21 feature toggle", Set.of("minecraft:update_1_21")));
 	}
 
 	private static UnaryOperator<String> createRenamerNoNamespace(Map<String, String> map) {

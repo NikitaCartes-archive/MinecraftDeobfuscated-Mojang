@@ -20,7 +20,7 @@ public abstract class AbstractDragonSittingPhase extends AbstractDragonPhaseInst
 		if (!(damageSource.getDirectEntity() instanceof AbstractArrow) && !(damageSource.getDirectEntity() instanceof WindCharge)) {
 			return super.onHurt(damageSource, f);
 		} else {
-			damageSource.getDirectEntity().igniteForSeconds(1);
+			damageSource.getDirectEntity().igniteForSeconds(1.0F);
 			return 0.0F;
 		}
 	}

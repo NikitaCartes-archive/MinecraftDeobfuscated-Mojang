@@ -18,6 +18,7 @@ import net.minecraft.world.phys.Vec3;
 public class DamageSources {
 	private final Registry<DamageType> damageTypes;
 	private final DamageSource inFire;
+	private final DamageSource campfire;
 	private final DamageSource lightningBolt;
 	private final DamageSource onFire;
 	private final DamageSource lava;
@@ -44,6 +45,7 @@ public class DamageSources {
 	public DamageSources(RegistryAccess registryAccess) {
 		this.damageTypes = registryAccess.registryOrThrow(Registries.DAMAGE_TYPE);
 		this.inFire = this.source(DamageTypes.IN_FIRE);
+		this.campfire = this.source(DamageTypes.CAMPFIRE);
 		this.lightningBolt = this.source(DamageTypes.LIGHTNING_BOLT);
 		this.onFire = this.source(DamageTypes.ON_FIRE);
 		this.lava = this.source(DamageTypes.LAVA);
@@ -82,6 +84,10 @@ public class DamageSources {
 
 	public DamageSource inFire() {
 		return this.inFire;
+	}
+
+	public DamageSource campfire() {
+		return this.campfire;
 	}
 
 	public DamageSource lightningBolt() {

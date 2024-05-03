@@ -10,12 +10,16 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Dynamic;
+import it.unimi.dsi.fastutil.doubles.DoubleDoubleImmutablePair;
+import it.unimi.dsi.fastutil.objects.Reference2ObjectArrayMap;
+import it.unimi.dsi.fastutil.objects.Reference2ObjectMap;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
@@ -61,7 +65,6 @@ import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.CombatRules;
@@ -87,6 +90,7 @@ import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.AxeItem;
@@ -96,10 +100,9 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.UseAnim;
+import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
-import net.minecraft.world.item.enchantment.Enchantments;
-import net.minecraft.world.item.enchantment.FrostWalkerEnchantment;
-import net.minecraft.world.item.enchantment.ProtectionEnchantment;
+import net.minecraft.world.item.enchantment.effects.EnchantmentLocationBasedEffect;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
@@ -129,7 +132,6 @@ import org.slf4j.Logger;
 public abstract class LivingEntity extends Entity implements Attackable {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final String TAG_ACTIVE_EFFECTS = "active_effects";
-	private static final UUID SPEED_MODIFIER_SOUL_SPEED_UUID = UUID.fromString("87f46a96-686f-4796-b035-22e16ee9e038");
 	private static final UUID SPEED_MODIFIER_POWDER_SNOW_UUID = UUID.fromString("1eaf83ff-7207-4596-b37a-d7a07b3ec4ce");
 	private static final AttributeModifier SPEED_MODIFIER_SPRINTING = new AttributeModifier(
 		UUID.fromString("662A6B8D-DA3E-4C1C-8813-96EA6097278D"), "Sprinting speed boost", 0.3F, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL
@@ -223,6 +225,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	@Nullable
 	private LivingEntity lastHurtByMob;
 	private int lastHurtByMobTimestamp;
+	@Nullable
 	private LivingEntity lastHurtMob;
 	private int lastHurtMobTimestamp;
 	private float speed;
@@ -237,10 +240,14 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	private DamageSource lastDamageSource;
 	private long lastDamageStamp;
 	protected int autoSpinAttackTicks;
+	protected float autoSpinAttackDmg;
+	@Nullable
+	protected ItemStack autoSpinAttackItemStack;
 	private float swimAmount;
 	private float swimAmountO;
 	protected Brain<?> brain;
 	private boolean skipDropExperience;
+	private final Reference2ObjectMap<Enchantment, Set<EnchantmentLocationBasedEffect>> activeLocationDependentEnchantments = new Reference2ObjectArrayMap<>();
 	protected float appliedScale = 1.0F;
 
 	protected LivingEntity(EntityType<? extends LivingEntity> entityType, Level level) {
@@ -302,7 +309,13 @@ public abstract class LivingEntity extends Entity implements Attackable {
 			.add(Attributes.GRAVITY)
 			.add(Attributes.SAFE_FALL_DISTANCE)
 			.add(Attributes.FALL_DAMAGE_MULTIPLIER)
-			.add(Attributes.JUMP_STRENGTH);
+			.add(Attributes.JUMP_STRENGTH)
+			.add(Attributes.OXYGEN_BONUS)
+			.add(Attributes.BURNING_TIME)
+			.add(Attributes.EXPLOSION_KNOCKBACK_RESISTANCE)
+			.add(Attributes.WATER_MOVEMENT_EFFICIENCY)
+			.add(Attributes.MOVEMENT_EFFICIENCY)
+			.add(Attributes.ATTACK_KNOCKBACK);
 	}
 
 	@Override
@@ -311,9 +324,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
 			this.updateInWaterStateAndDoWaterCurrentPushing();
 		}
 
-		if (!this.level().isClientSide && bl && this.fallDistance > 0.0F) {
-			this.removeSoulSpeed();
-			this.tryAddSoulSpeed();
+		if (this.level() instanceof ServerLevel serverLevel && bl && this.fallDistance > 0.0F) {
+			this.onChangedBlock(serverLevel, blockPos);
 			double e = this.getAttributeValue(Attributes.SAFE_FALL_DISTANCE);
 			if ((double)this.fallDistance > e && !blockState.isAir()) {
 				double f = this.getX();
@@ -349,6 +361,10 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		return Mth.lerp(f, this.swimAmountO, this.swimAmount);
 	}
 
+	public boolean hasLandedInLiquid() {
+		return this.getDeltaMovement().y() < 1.0E-5F && this.isInLiquid();
+	}
+
 	@Override
 	public void baseTick() {
 		this.oAttackAnim = this.attackAnim;
@@ -356,8 +372,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
 			this.getSleepingPos().ifPresent(this::setPosToBed);
 		}
 
-		if (this.canSpawnSoulSpeedParticle()) {
-			this.spawnSoulSpeedParticle();
+		if (this.level() instanceof ServerLevel serverLevel) {
+			EnchantmentHelper.tickEffects(serverLevel, this);
 		}
 
 		super.baseTick();
@@ -409,11 +425,11 @@ public abstract class LivingEntity extends Entity implements Attackable {
 				this.setAirSupply(this.increaseAirSupply(this.getAirSupply()));
 			}
 
-			if (!this.level().isClientSide) {
+			if (this.level() instanceof ServerLevel serverLevel2) {
 				BlockPos blockPos = this.blockPosition();
 				if (!Objects.equal(this.lastPos, blockPos)) {
 					this.lastPos = blockPos;
-					this.onChangedBlock(blockPos);
+					this.onChangedBlock(serverLevel2, blockPos);
 				}
 			}
 		}
@@ -461,73 +477,9 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		this.level().getProfiler().pop();
 	}
 
-	public boolean canSpawnSoulSpeedParticle() {
-		return this.tickCount % 5 == 0
-			&& this.getDeltaMovement().x != 0.0
-			&& this.getDeltaMovement().z != 0.0
-			&& !this.isSpectator()
-			&& EnchantmentHelper.hasSoulSpeed(this)
-			&& this.onSoulSpeedBlock();
-	}
-
-	protected void spawnSoulSpeedParticle() {
-		Vec3 vec3 = this.getDeltaMovement();
-		this.level()
-			.addParticle(
-				ParticleTypes.SOUL,
-				this.getX() + (this.random.nextDouble() - 0.5) * (double)this.getBbWidth(),
-				this.getY() + 0.1,
-				this.getZ() + (this.random.nextDouble() - 0.5) * (double)this.getBbWidth(),
-				vec3.x * -0.2,
-				0.1,
-				vec3.z * -0.2
-			);
-		float f = this.random.nextFloat() * 0.4F + this.random.nextFloat() > 0.9F ? 0.6F : 0.0F;
-		this.playSound(SoundEvents.SOUL_ESCAPE, f, 0.6F + this.random.nextFloat() * 0.4F);
-	}
-
-	protected boolean onSoulSpeedBlock() {
-		return this.level().getBlockState(this.getBlockPosBelowThatAffectsMyMovement()).is(BlockTags.SOUL_SPEED_BLOCKS);
-	}
-
 	@Override
 	protected float getBlockSpeedFactor() {
-		return this.onSoulSpeedBlock() && EnchantmentHelper.getEnchantmentLevel(Enchantments.SOUL_SPEED, this) > 0 ? 1.0F : super.getBlockSpeedFactor();
-	}
-
-	protected boolean shouldRemoveSoulSpeed(BlockState blockState) {
-		return !blockState.isAir() || this.isFallFlying();
-	}
-
-	protected void removeSoulSpeed() {
-		AttributeInstance attributeInstance = this.getAttribute(Attributes.MOVEMENT_SPEED);
-		if (attributeInstance != null) {
-			if (attributeInstance.getModifier(SPEED_MODIFIER_SOUL_SPEED_UUID) != null) {
-				attributeInstance.removeModifier(SPEED_MODIFIER_SOUL_SPEED_UUID);
-			}
-		}
-	}
-
-	protected void tryAddSoulSpeed() {
-		if (!this.getBlockStateOnLegacy().isAir()) {
-			int i = EnchantmentHelper.getEnchantmentLevel(Enchantments.SOUL_SPEED, this);
-			if (i > 0 && this.onSoulSpeedBlock()) {
-				AttributeInstance attributeInstance = this.getAttribute(Attributes.MOVEMENT_SPEED);
-				if (attributeInstance == null) {
-					return;
-				}
-
-				attributeInstance.addTransientModifier(
-					new AttributeModifier(
-						SPEED_MODIFIER_SOUL_SPEED_UUID, "Soul speed boost", (double)(0.03F * (1.0F + (float)i * 0.35F)), AttributeModifier.Operation.ADD_VALUE
-					)
-				);
-				if (this.getRandom().nextFloat() < 0.04F) {
-					ItemStack itemStack = this.getItemBySlot(EquipmentSlot.FEET);
-					itemStack.hurtAndBreak(1, this, EquipmentSlot.FEET);
-				}
-			}
-		}
+		return Mth.lerp((float)this.getAttributeValue(Attributes.MOVEMENT_EFFICIENCY), super.getBlockSpeedFactor(), 1.0F);
 	}
 
 	protected void removeFrost() {
@@ -556,17 +508,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		}
 	}
 
-	protected void onChangedBlock(BlockPos blockPos) {
-		int i = EnchantmentHelper.getEnchantmentLevel(Enchantments.FROST_WALKER, this);
-		if (i > 0) {
-			FrostWalkerEnchantment.onEntityMoved(this, this.level(), blockPos, i);
-		}
-
-		if (this.shouldRemoveSoulSpeed(this.getBlockStateOnLegacy())) {
-			this.removeSoulSpeed();
-		}
-
-		this.tryAddSoulSpeed();
+	protected void onChangedBlock(ServerLevel serverLevel, BlockPos blockPos) {
+		EnchantmentHelper.runLocationChangedEffects(serverLevel, this);
 	}
 
 	public boolean isBaby() {
@@ -607,24 +550,31 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	}
 
 	protected int decreaseAirSupply(int i) {
-		int j = EnchantmentHelper.getRespiration(this);
-		return j > 0 && this.random.nextInt(j + 1) > 0 ? i : i - 1;
+		AttributeInstance attributeInstance = this.getAttribute(Attributes.OXYGEN_BONUS);
+		double d;
+		if (attributeInstance != null) {
+			d = attributeInstance.getValue();
+		} else {
+			d = 0.0;
+		}
+
+		return d > 0.0 && this.random.nextDouble() >= 1.0 / (d + 1.0) ? i : i - 1;
 	}
 
 	protected int increaseAirSupply(int i) {
 		return Math.min(i + 4, this.getMaxAirSupply());
 	}
 
-	public int getExperienceReward() {
+	public final int getExperienceReward(ServerLevel serverLevel, @Nullable Entity entity) {
+		return EnchantmentHelper.processMobExperience(serverLevel, entity, this, this.getBaseExperienceReward());
+	}
+
+	protected int getBaseExperienceReward() {
 		return 0;
 	}
 
 	protected boolean isAlwaysExperienceDropper() {
 		return false;
-	}
-
-	public RandomSource getRandom() {
-		return this.random;
 	}
 
 	@Nullable
@@ -1196,12 +1146,16 @@ public abstract class LivingEntity extends Entity implements Attackable {
 					this.markHurt();
 				}
 
-				if (entity2 != null && !damageSource.is(DamageTypeTags.NO_KNOCKBACK)) {
-					double d = entity2.getX() - this.getX();
-
-					double e;
-					for (e = entity2.getZ() - this.getZ(); d * d + e * e < 1.0E-4; e = (Math.random() - Math.random()) * 0.01) {
-						d = (Math.random() - Math.random()) * 0.01;
+				if (!damageSource.is(DamageTypeTags.NO_KNOCKBACK)) {
+					double d = 0.0;
+					double e = 0.0;
+					if (damageSource.getDirectEntity() instanceof Projectile projectile) {
+						DoubleDoubleImmutablePair doubleDoubleImmutablePair = projectile.calculateHorizontalHurtKnockbackDirection(this, damageSource);
+						d = -doubleDoubleImmutablePair.leftDouble();
+						e = -doubleDoubleImmutablePair.rightDouble();
+					} else if (entity2 != null) {
+						d = entity2.getX() - this.getX();
+						e = entity2.getZ() - this.getZ();
 					}
 
 					this.knockback(0.4F, d, e);
@@ -1396,39 +1350,31 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	}
 
 	protected void dropAllDeathLoot(DamageSource damageSource) {
-		Entity entity = damageSource.getEntity();
-		int i;
-		if (entity instanceof Player) {
-			i = EnchantmentHelper.getMobLooting((LivingEntity)entity);
-		} else {
-			i = 0;
-		}
-
 		boolean bl = this.lastHurtByPlayerTime > 0;
 		if (this.shouldDropLoot() && this.level().getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
 			this.dropFromLootTable(damageSource, bl);
-			this.dropCustomDeathLoot(damageSource, i, bl);
+			this.dropCustomDeathLoot(damageSource, bl);
 		}
 
 		this.dropEquipment();
-		this.dropExperience();
+		this.dropExperience(damageSource.getEntity());
 	}
 
 	protected void dropEquipment() {
 	}
 
-	protected void dropExperience() {
-		if (this.level() instanceof ServerLevel
+	protected void dropExperience(@Nullable Entity entity) {
+		if (this.level() instanceof ServerLevel serverLevel
 			&& !this.wasExperienceConsumed()
 			&& (
 				this.isAlwaysExperienceDropper()
 					|| this.lastHurtByPlayerTime > 0 && this.shouldDropExperience() && this.level().getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)
 			)) {
-			ExperienceOrb.award((ServerLevel)this.level(), this.position(), this.getExperienceReward());
+			ExperienceOrb.award(serverLevel, this.position(), this.getExperienceReward(serverLevel, entity));
 		}
 	}
 
-	protected void dropCustomDeathLoot(DamageSource damageSource, int i, boolean bl) {
+	protected void dropCustomDeathLoot(DamageSource damageSource, boolean bl) {
 	}
 
 	public ResourceKey<LootTable> getLootTable() {
@@ -1439,6 +1385,11 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		return 0L;
 	}
 
+	protected float getKnockback(Entity entity, DamageSource damageSource) {
+		float f = (float)this.getAttributeValue(Attributes.ATTACK_KNOCKBACK);
+		return this.level() instanceof ServerLevel serverLevel ? EnchantmentHelper.modifyKnockback(serverLevel, this.getMainHandItem(), entity, damageSource, f) : f;
+	}
+
 	protected void dropFromLootTable(DamageSource damageSource, boolean bl) {
 		ResourceKey<LootTable> resourceKey = this.getLootTable();
 		LootTable lootTable = this.level().getServer().reloadableRegistries().getLootTable(resourceKey);
@@ -1446,8 +1397,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
 			.withParameter(LootContextParams.THIS_ENTITY, this)
 			.withParameter(LootContextParams.ORIGIN, this.position())
 			.withParameter(LootContextParams.DAMAGE_SOURCE, damageSource)
-			.withOptionalParameter(LootContextParams.KILLER_ENTITY, damageSource.getEntity())
-			.withOptionalParameter(LootContextParams.DIRECT_KILLER_ENTITY, damageSource.getDirectEntity());
+			.withOptionalParameter(LootContextParams.ATTACKING_ENTITY, damageSource.getEntity())
+			.withOptionalParameter(LootContextParams.DIRECT_ATTACKING_ENTITY, damageSource.getDirectEntity());
 		if (bl && this.lastHurtByPlayer != null) {
 			builder = builder.withParameter(LootContextParams.LAST_DAMAGE_PLAYER, this.lastHurtByPlayer).withLuck(this.lastHurtByPlayer.getLuck());
 		}
@@ -1461,6 +1412,12 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		if (!(d <= 0.0)) {
 			this.hasImpulse = true;
 			Vec3 vec3 = this.getDeltaMovement();
+
+			while (e * e + f * f < 1.0E-5F) {
+				e = (Math.random() - Math.random()) * 0.01;
+				f = (Math.random() - Math.random()) * 0.01;
+			}
+
 			Vec3 vec32 = new Vec3(e, 0.0, f).normalize().scale(d);
 			this.setDeltaMovement(vec3.x / 2.0 - vec32.x, this.onGround() ? Math.min(0.4, vec3.y / 2.0 + d) : vec3.y, vec3.z / 2.0 - vec32.z);
 		}
@@ -1504,6 +1461,10 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		} else {
 			return aABB;
 		}
+	}
+
+	public Map<Enchantment, Set<EnchantmentLocationBasedEffect>> activeLocationDependentEnchantments() {
+		return this.activeLocationDependentEnchantments;
 	}
 
 	public LivingEntity.Fallsounds getFallSounds() {
@@ -1637,7 +1598,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	protected float getDamageAfterArmorAbsorb(DamageSource damageSource, float f) {
 		if (!damageSource.is(DamageTypeTags.BYPASSES_ARMOR)) {
 			this.hurtArmor(damageSource, f);
-			f = CombatRules.getDamageAfterAbsorb(f, damageSource, (float)this.getArmorValue(), (float)this.getAttributeValue(Attributes.ARMOR_TOUGHNESS));
+			f = CombatRules.getDamageAfterAbsorb(this, f, damageSource, (float)this.getArmorValue(), (float)this.getAttributeValue(Attributes.ARMOR_TOUGHNESS));
 		}
 
 		return f;
@@ -1668,9 +1629,15 @@ public abstract class LivingEntity extends Entity implements Attackable {
 			} else if (damageSource.is(DamageTypeTags.BYPASSES_ENCHANTMENTS)) {
 				return f;
 			} else {
-				int i = EnchantmentHelper.getDamageProtection(this.getArmorAndBodyArmorSlots(), damageSource);
-				if (i > 0) {
-					f = CombatRules.getDamageAfterMagicAbsorb(f, (float)i);
+				float l;
+				if (this.level() instanceof ServerLevel serverLevel) {
+					l = EnchantmentHelper.getDamageProtection(serverLevel, this, damageSource);
+				} else {
+					l = 0.0F;
+				}
+
+				if (l > 0.0F) {
+					f = CombatRules.getDamageAfterMagicAbsorb(f, l);
 				}
 
 				return f;
@@ -2093,18 +2060,14 @@ public abstract class LivingEntity extends Entity implements Attackable {
 				double e = this.getY();
 				float f = this.isSprinting() ? 0.9F : this.getWaterSlowDown();
 				float g = 0.02F;
-				float h = (float)EnchantmentHelper.getDepthStrider(this);
-				if (h > 3.0F) {
-					h = 3.0F;
-				}
-
+				float h = (float)this.getAttributeValue(Attributes.WATER_MOVEMENT_EFFICIENCY);
 				if (!this.onGround()) {
 					h *= 0.5F;
 				}
 
 				if (h > 0.0F) {
-					f += (0.54600006F - f) * h / 3.0F;
-					g += (this.getSpeed() - g) * h / 3.0F;
+					f += (0.54600006F - f) * h;
+					g += (this.getSpeed() - g) * h;
 				}
 
 				if (this.hasEffect(MobEffects.DOLPHINS_GRACE)) {
@@ -2474,6 +2437,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
 						if (attributeInstance != null) {
 							attributeInstance.removeModifier(attributeModifier);
 						}
+
+						EnchantmentHelper.stopLocationBasedEffects(itemStack, this, equipmentSlot);
 					});
 				}
 
@@ -2483,6 +2448,10 @@ public abstract class LivingEntity extends Entity implements Attackable {
 						if (attributeInstance != null) {
 							attributeInstance.removeModifier(attributeModifier.id());
 							attributeInstance.addTransientModifier(attributeModifier);
+						}
+
+						if (this.level() instanceof ServerLevel serverLevel) {
+							EnchantmentHelper.runLocationChangedEffects(serverLevel, itemStack2, this, equipmentSlot);
 						}
 					});
 				}
@@ -2776,6 +2745,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
 
 		if (!this.level().isClientSide && this.autoSpinAttackTicks <= 0) {
 			this.setLivingEntityFlag(4, false);
+			this.autoSpinAttackDmg = 0.0F;
+			this.autoSpinAttackItemStack = null;
 		}
 	}
 
@@ -2982,8 +2953,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	}
 
 	private boolean shouldTriggerItemUseEffects() {
-		int i = this.useItem.getUseDuration() - this.getUseItemRemainingTicks();
-		int j = (int)((float)this.useItem.getUseDuration() * 0.21875F);
+		int i = this.useItem.getUseDuration(this) - this.getUseItemRemainingTicks();
+		int j = (int)((float)this.useItem.getUseDuration(this) * 0.21875F);
 		boolean bl = i > j;
 		return bl && this.getUseItemRemainingTicks() % 4 == 0;
 	}
@@ -3012,7 +2983,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		ItemStack itemStack = this.getItemInHand(interactionHand);
 		if (!itemStack.isEmpty() && !this.isUsingItem()) {
 			this.useItem = itemStack;
-			this.useItemRemaining = itemStack.getUseDuration();
+			this.useItemRemaining = itemStack.getUseDuration(this);
 			if (!this.level().isClientSide) {
 				this.setLivingEntityFlag(1, true);
 				this.setLivingEntityFlag(2, interactionHand == InteractionHand.OFF_HAND);
@@ -3032,7 +3003,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 			if (this.isUsingItem() && this.useItem.isEmpty()) {
 				this.useItem = this.getItemInHand(this.getUsedItemHand());
 				if (!this.useItem.isEmpty()) {
-					this.useItemRemaining = this.useItem.getUseDuration();
+					this.useItemRemaining = this.useItem.getUseDuration(this);
 				}
 			} else if (!this.isUsingItem() && !this.useItem.isEmpty()) {
 				this.useItem = ItemStack.EMPTY;
@@ -3106,7 +3077,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	}
 
 	public int getTicksUsingItem() {
-		return this.isUsingItem() ? this.useItem.getUseDuration() - this.getUseItemRemainingTicks() : 0;
+		return this.isUsingItem() ? this.useItem.getUseDuration(this) - this.getUseItemRemainingTicks() : 0;
 	}
 
 	public void releaseUsingItem() {
@@ -3136,7 +3107,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	public boolean isBlocking() {
 		if (this.isUsingItem() && !this.useItem.isEmpty()) {
 			Item item = this.useItem.getItem();
-			return item.getUseAnimation(this.useItem) != UseAnim.BLOCK ? false : item.getUseDuration(this.useItem) - this.useItemRemaining >= 5;
+			return item.getUseAnimation(this.useItem) != UseAnim.BLOCK ? false : item.getUseDuration(this.useItem, this) - this.useItemRemaining >= 5;
 		} else {
 			return false;
 		}
@@ -3494,11 +3465,24 @@ public abstract class LivingEntity extends Entity implements Attackable {
 
 	@Override
 	public void igniteForTicks(int i) {
-		super.igniteForTicks(ProtectionEnchantment.getFireAfterDampener(this, i));
+		super.igniteForTicks(Mth.ceil((double)i * this.getAttributeValue(Attributes.BURNING_TIME)));
 	}
 
 	public boolean hasInfiniteMaterials() {
 		return false;
+	}
+
+	@Override
+	public boolean isInvulnerableTo(DamageSource damageSource) {
+		if (super.isInvulnerableTo(damageSource)) {
+			return true;
+		} else {
+			if (this.level() instanceof ServerLevel serverLevel && EnchantmentHelper.isImmuneToDamage(serverLevel, this, damageSource)) {
+				return true;
+			}
+
+			return false;
+		}
 	}
 
 	public static record Fallsounds(SoundEvent small, SoundEvent big) {

@@ -28,5 +28,6 @@ public class Pools {
 		VillagePools.bootstrap(bootstrapContext);
 		AncientCityStructurePieces.bootstrap(bootstrapContext);
 		TrailRuinsStructurePools.bootstrap(bootstrapContext);
+		TrialChambersStructurePools.bootstrap(bootstrapContext);
 	}
 }

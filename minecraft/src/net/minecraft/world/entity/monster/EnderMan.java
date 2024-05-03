@@ -50,7 +50,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.alchemy.Potions;
-import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.providers.VanillaEnchantmentProviders;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
@@ -331,12 +332,12 @@ public class EnderMan extends Monster implements NeutralMob {
 	}
 
 	@Override
-	protected void dropCustomDeathLoot(DamageSource damageSource, int i, boolean bl) {
-		super.dropCustomDeathLoot(damageSource, i, bl);
+	protected void dropCustomDeathLoot(DamageSource damageSource, boolean bl) {
+		super.dropCustomDeathLoot(damageSource, bl);
 		BlockState blockState = this.getCarriedBlock();
 		if (blockState != null) {
 			ItemStack itemStack = new ItemStack(Items.DIAMOND_AXE);
-			itemStack.enchant(Enchantments.SILK_TOUCH, 1);
+			EnchantmentHelper.enchantItemFromProvider(itemStack, VanillaEnchantmentProviders.ENDERMAN_LOOT_DROP, this.level(), this.blockPosition(), this.getRandom());
 			LootParams.Builder builder = new LootParams.Builder((ServerLevel)this.level())
 				.withParameter(LootContextParams.ORIGIN, this.position())
 				.withParameter(LootContextParams.TOOL, itemStack)

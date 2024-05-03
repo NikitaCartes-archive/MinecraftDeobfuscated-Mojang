@@ -141,7 +141,7 @@ public class Phantom extends FlyingMob implements Enemy {
 	@Override
 	public void aiStep() {
 		if (this.isAlive() && this.isSunBurnTick()) {
-			this.igniteForSeconds(8);
+			this.igniteForSeconds(8.0F);
 		}
 
 		super.aiStep();

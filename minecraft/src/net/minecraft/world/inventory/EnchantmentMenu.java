@@ -2,23 +2,29 @@ package net.minecraft.world.inventory;
 
 import com.mojang.datafixers.util.Pair;
 import java.util.List;
+import java.util.Optional;
 import net.minecraft.Util;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.IdMap;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
+import net.minecraft.tags.EnchantmentTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.EnchantmentInstance;
 import net.minecraft.world.level.block.Blocks;
@@ -93,6 +99,7 @@ public class EnchantmentMenu extends AbstractContainerMenu {
 			ItemStack itemStack = container.getItem(0);
 			if (!itemStack.isEmpty() && itemStack.isEnchantable()) {
 				this.access.execute((level, blockPos) -> {
+					IdMap<Holder<Enchantment>> idMap = level.registryAccess().registryOrThrow(Registries.ENCHANTMENT).asHolderIdMap();
 					int ix = 0;
 
 					for (BlockPos blockPos2 : EnchantingTableBlock.BOOKSHELF_OFFSETS) {
@@ -114,10 +121,10 @@ public class EnchantmentMenu extends AbstractContainerMenu {
 
 					for (int jx = 0; jx < 3; jx++) {
 						if (this.costs[jx] > 0) {
-							List<EnchantmentInstance> list = this.getEnchantmentList(level.enabledFeatures(), itemStack, jx, this.costs[jx]);
+							List<EnchantmentInstance> list = this.getEnchantmentList(level.registryAccess(), itemStack, jx, this.costs[jx]);
 							if (list != null && !list.isEmpty()) {
 								EnchantmentInstance enchantmentInstance = (EnchantmentInstance)list.get(this.random.nextInt(list.size()));
-								this.enchantClue[jx] = BuiltInRegistries.ENCHANTMENT.getId(enchantmentInstance.enchantment);
+								this.enchantClue[jx] = idMap.getId(enchantmentInstance.enchantment);
 								this.levelClue[jx] = enchantmentInstance.level;
 							}
 						}
@@ -150,7 +157,7 @@ public class EnchantmentMenu extends AbstractContainerMenu {
 			} else {
 				this.access.execute((level, blockPos) -> {
 					ItemStack itemStack3 = itemStack;
-					List<EnchantmentInstance> list = this.getEnchantmentList(level.enabledFeatures(), itemStack, i, this.costs[i]);
+					List<EnchantmentInstance> list = this.getEnchantmentList(level.registryAccess(), itemStack, i, this.costs[i]);
 					if (!list.isEmpty()) {
 						player.onEnchantmentPerformed(itemStack, j);
 						if (itemStack.is(Items.BOOK)) {
@@ -188,14 +195,19 @@ public class EnchantmentMenu extends AbstractContainerMenu {
 		}
 	}
 
-	private List<EnchantmentInstance> getEnchantmentList(FeatureFlagSet featureFlagSet, ItemStack itemStack, int i, int j) {
+	private List<EnchantmentInstance> getEnchantmentList(RegistryAccess registryAccess, ItemStack itemStack, int i, int j) {
 		this.random.setSeed((long)(this.enchantmentSeed.get() + i));
-		List<EnchantmentInstance> list = EnchantmentHelper.selectEnchantment(featureFlagSet, this.random, itemStack, j, false);
-		if (itemStack.is(Items.BOOK) && list.size() > 1) {
-			list.remove(this.random.nextInt(list.size()));
-		}
+		Optional<HolderSet.Named<Enchantment>> optional = registryAccess.registryOrThrow(Registries.ENCHANTMENT).getTag(EnchantmentTags.IN_ENCHANTING_TABLE);
+		if (optional.isEmpty()) {
+			return List.of();
+		} else {
+			List<EnchantmentInstance> list = EnchantmentHelper.selectEnchantment(this.random, itemStack, j, ((HolderSet.Named)optional.get()).stream());
+			if (itemStack.is(Items.BOOK) && list.size() > 1) {
+				list.remove(this.random.nextInt(list.size()));
+			}
 
-		return list;
+			return list;
+		}
 	}
 
 	public int getGoldCount() {

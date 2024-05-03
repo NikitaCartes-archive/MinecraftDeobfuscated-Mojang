@@ -61,7 +61,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -157,10 +156,6 @@ import net.minecraft.client.resources.language.LanguageManager;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelManager;
 import net.minecraft.client.resources.server.DownloadedPackSource;
-import net.minecraft.client.searchtree.FullTextSearchTree;
-import net.minecraft.client.searchtree.IdSearchTree;
-import net.minecraft.client.searchtree.SearchRegistry;
-import net.minecraft.client.searchtree.SearchTree;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.client.sounds.MusicManager;
 import net.minecraft.client.sounds.SoundManager;
@@ -203,7 +198,6 @@ import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.sounds.Music;
 import net.minecraft.sounds.Musics;
 import net.minecraft.tags.BiomeTags;
-import net.minecraft.tags.TagKey;
 import net.minecraft.util.FileZipper;
 import net.minecraft.util.MemoryReserve;
 import net.minecraft.util.ModCheck;
@@ -232,10 +226,8 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.ChatVisiblity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
@@ -280,7 +272,6 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	private final EntityRenderDispatcher entityRenderDispatcher;
 	private final ItemRenderer itemRenderer;
 	public final ParticleEngine particleEngine;
-	private final SearchRegistry searchRegistry = new SearchRegistry();
 	private final User user;
 	public final Font font;
 	public final Font fontFilterFishy;
@@ -488,7 +479,11 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		this.resourceManager = new ReloadableResourceManager(PackType.CLIENT_RESOURCES);
 		this.resourcePackRepository.reload();
 		this.options.loadSelectedResourcePacks(this.resourcePackRepository);
-		this.languageManager = new LanguageManager(this.options.languageCode);
+		this.languageManager = new LanguageManager(this.options.languageCode, clientLanguage -> {
+			if (this.player != null) {
+				this.player.connection.updateSearchTrees();
+			}
+		});
 		this.resourceManager.registerReloadListener(this.languageManager);
 		this.textureManager = new TextureManager(this.resourceManager);
 		this.resourceManager.registerReloadListener(this.textureManager);
@@ -561,8 +556,6 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		this.resourceManager.registerReloadListener(this.gameRenderer.createReloadListener());
 		this.levelRenderer = new LevelRenderer(this, this.entityRenderDispatcher, this.blockEntityRenderDispatcher, this.renderBuffers);
 		this.resourceManager.registerReloadListener(this.levelRenderer);
-		this.createSearchTrees();
-		this.resourceManager.registerReloadListener(this.searchRegistry);
 		this.gpuWarnlistManager = new GpuWarnlistManager();
 		this.resourceManager.registerReloadListener(this.gpuWarnlistManager);
 		this.resourceManager.registerReloadListener(this.regionalCompliancies);
@@ -818,49 +811,6 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 
 	void updateFontOptions() {
 		this.fontManager.updateOptions(this.options);
-	}
-
-	private void createSearchTrees() {
-		this.searchRegistry
-			.register(
-				SearchRegistry.CREATIVE_NAMES,
-				list -> new FullTextSearchTree(
-						itemStack -> itemStack.getTooltipLines(Item.TooltipContext.EMPTY, null, TooltipFlag.Default.NORMAL.asCreative())
-								.stream()
-								.map(component -> ChatFormatting.stripFormatting(component.getString()).trim())
-								.filter(string -> !string.isEmpty()),
-						itemStack -> Stream.of(BuiltInRegistries.ITEM.getKey(itemStack.getItem())),
-						list
-					)
-			);
-		this.searchRegistry.register(SearchRegistry.CREATIVE_TAGS, list -> new IdSearchTree(itemStack -> itemStack.getTags().map(TagKey::location), list));
-		this.searchRegistry
-			.register(
-				SearchRegistry.RECIPE_COLLECTIONS,
-				list -> new FullTextSearchTree(
-						recipeCollection -> {
-							Item.TooltipContext tooltipContext = Item.TooltipContext.of(recipeCollection.registryAccess());
-							return recipeCollection.getRecipes()
-								.stream()
-								.flatMap(
-									recipeHolder -> recipeHolder.value()
-											.getResultItem(recipeCollection.registryAccess())
-											.getTooltipLines(tooltipContext, null, TooltipFlag.Default.NORMAL)
-											.stream()
-								)
-								.map(component -> ChatFormatting.stripFormatting(component.getString()).trim())
-								.filter(string -> !string.isEmpty());
-						},
-						recipeCollection -> recipeCollection.getRecipes()
-								.stream()
-								.map(recipeHolder -> BuiltInRegistries.ITEM.getKey(recipeHolder.value().getResultItem(recipeCollection.registryAccess()).getItem())),
-						list
-					)
-			);
-		CreativeModeTabs.searchTab().setSearchTreeBuilder(list -> {
-			this.populateSearchTree(SearchRegistry.CREATIVE_NAMES, list);
-			this.populateSearchTree(SearchRegistry.CREATIVE_TAGS, list);
-		});
 	}
 
 	private void onFullscreenError(int i, long l) {
@@ -2641,14 +2591,6 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 
 	public ItemRenderer getItemRenderer() {
 		return this.itemRenderer;
-	}
-
-	public <T> SearchTree<T> getSearchTree(SearchRegistry.Key<T> key) {
-		return this.searchRegistry.getTree(key);
-	}
-
-	public <T> void populateSearchTree(SearchRegistry.Key<T> key, List<T> list) {
-		this.searchRegistry.populate(key, list);
 	}
 
 	public DataFixer getFixerUpper() {

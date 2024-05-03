@@ -32,7 +32,7 @@ public record TypedDataComponent<T>(DataComponentType<T> type, T value) {
 		return createUnchecked((DataComponentType<T>)entry.getKey(), entry.getValue());
 	}
 
-	static <T> TypedDataComponent<T> createUnchecked(DataComponentType<T> dataComponentType, Object object) {
+	public static <T> TypedDataComponent<T> createUnchecked(DataComponentType<T> dataComponentType, Object object) {
 		return new TypedDataComponent<>(dataComponentType, (T)object);
 	}
 

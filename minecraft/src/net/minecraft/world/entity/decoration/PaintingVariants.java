@@ -1,7 +1,7 @@
 package net.minecraft.world.entity.decoration;
 
-import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 
@@ -36,38 +36,82 @@ public class PaintingVariants {
 	public static final ResourceKey<PaintingVariant> WIND = create("wind");
 	public static final ResourceKey<PaintingVariant> WATER = create("water");
 	public static final ResourceKey<PaintingVariant> FIRE = create("fire");
+	public static final ResourceKey<PaintingVariant> BAROQUE = create("baroque");
+	public static final ResourceKey<PaintingVariant> HUMBLE = create("humble");
+	public static final ResourceKey<PaintingVariant> MEDITATIVE = create("meditative");
+	public static final ResourceKey<PaintingVariant> PRAIRIE_RIDE = create("prairie_ride");
+	public static final ResourceKey<PaintingVariant> UNPACKED = create("unpacked");
+	public static final ResourceKey<PaintingVariant> BACKYARD = create("backyard");
+	public static final ResourceKey<PaintingVariant> BOUQUET = create("bouquet");
+	public static final ResourceKey<PaintingVariant> CAVEBIRD = create("cavebird");
+	public static final ResourceKey<PaintingVariant> CHANGING = create("changing");
+	public static final ResourceKey<PaintingVariant> COTAN = create("cotan");
+	public static final ResourceKey<PaintingVariant> ENDBOSS = create("endboss");
+	public static final ResourceKey<PaintingVariant> FERN = create("fern");
+	public static final ResourceKey<PaintingVariant> FINDING = create("finding");
+	public static final ResourceKey<PaintingVariant> LOWMIST = create("lowmist");
+	public static final ResourceKey<PaintingVariant> ORB = create("orb");
+	public static final ResourceKey<PaintingVariant> OWLEMONS = create("owlemons");
+	public static final ResourceKey<PaintingVariant> PASSAGE = create("passage");
+	public static final ResourceKey<PaintingVariant> POND = create("pond");
+	public static final ResourceKey<PaintingVariant> SUNFLOWERS = create("sunflowers");
+	public static final ResourceKey<PaintingVariant> TIDES = create("tides");
 
-	public static PaintingVariant bootstrap(Registry<PaintingVariant> registry) {
-		Registry.register(registry, KEBAB, new PaintingVariant(16, 16));
-		Registry.register(registry, AZTEC, new PaintingVariant(16, 16));
-		Registry.register(registry, ALBAN, new PaintingVariant(16, 16));
-		Registry.register(registry, AZTEC2, new PaintingVariant(16, 16));
-		Registry.register(registry, BOMB, new PaintingVariant(16, 16));
-		Registry.register(registry, PLANT, new PaintingVariant(16, 16));
-		Registry.register(registry, WASTELAND, new PaintingVariant(16, 16));
-		Registry.register(registry, POOL, new PaintingVariant(32, 16));
-		Registry.register(registry, COURBET, new PaintingVariant(32, 16));
-		Registry.register(registry, SEA, new PaintingVariant(32, 16));
-		Registry.register(registry, SUNSET, new PaintingVariant(32, 16));
-		Registry.register(registry, CREEBET, new PaintingVariant(32, 16));
-		Registry.register(registry, WANDERER, new PaintingVariant(16, 32));
-		Registry.register(registry, GRAHAM, new PaintingVariant(16, 32));
-		Registry.register(registry, MATCH, new PaintingVariant(32, 32));
-		Registry.register(registry, BUST, new PaintingVariant(32, 32));
-		Registry.register(registry, STAGE, new PaintingVariant(32, 32));
-		Registry.register(registry, VOID, new PaintingVariant(32, 32));
-		Registry.register(registry, SKULL_AND_ROSES, new PaintingVariant(32, 32));
-		Registry.register(registry, WITHER, new PaintingVariant(32, 32));
-		Registry.register(registry, FIGHTERS, new PaintingVariant(64, 32));
-		Registry.register(registry, POINTER, new PaintingVariant(64, 64));
-		Registry.register(registry, PIGSCENE, new PaintingVariant(64, 64));
-		Registry.register(registry, BURNING_SKULL, new PaintingVariant(64, 64));
-		Registry.register(registry, SKELETON, new PaintingVariant(64, 48));
-		Registry.register(registry, EARTH, new PaintingVariant(32, 32));
-		Registry.register(registry, WIND, new PaintingVariant(32, 32));
-		Registry.register(registry, WATER, new PaintingVariant(32, 32));
-		Registry.register(registry, FIRE, new PaintingVariant(32, 32));
-		return Registry.register(registry, DONKEY_KONG, new PaintingVariant(64, 48));
+	public static void bootstrap(BootstrapContext<PaintingVariant> bootstrapContext) {
+		register(bootstrapContext, KEBAB, 1, 1);
+		register(bootstrapContext, AZTEC, 1, 1);
+		register(bootstrapContext, ALBAN, 1, 1);
+		register(bootstrapContext, AZTEC2, 1, 1);
+		register(bootstrapContext, BOMB, 1, 1);
+		register(bootstrapContext, PLANT, 1, 1);
+		register(bootstrapContext, WASTELAND, 1, 1);
+		register(bootstrapContext, POOL, 2, 1);
+		register(bootstrapContext, COURBET, 2, 1);
+		register(bootstrapContext, SEA, 2, 1);
+		register(bootstrapContext, SUNSET, 2, 1);
+		register(bootstrapContext, CREEBET, 2, 1);
+		register(bootstrapContext, WANDERER, 1, 2);
+		register(bootstrapContext, GRAHAM, 1, 2);
+		register(bootstrapContext, MATCH, 2, 2);
+		register(bootstrapContext, BUST, 2, 2);
+		register(bootstrapContext, STAGE, 2, 2);
+		register(bootstrapContext, VOID, 2, 2);
+		register(bootstrapContext, SKULL_AND_ROSES, 2, 2);
+		register(bootstrapContext, WITHER, 2, 2);
+		register(bootstrapContext, FIGHTERS, 4, 2);
+		register(bootstrapContext, POINTER, 4, 4);
+		register(bootstrapContext, PIGSCENE, 4, 4);
+		register(bootstrapContext, BURNING_SKULL, 4, 4);
+		register(bootstrapContext, SKELETON, 4, 3);
+		register(bootstrapContext, EARTH, 2, 2);
+		register(bootstrapContext, WIND, 2, 2);
+		register(bootstrapContext, WATER, 2, 2);
+		register(bootstrapContext, FIRE, 2, 2);
+		register(bootstrapContext, DONKEY_KONG, 4, 3);
+		register(bootstrapContext, BAROQUE, 2, 2);
+		register(bootstrapContext, HUMBLE, 2, 2);
+		register(bootstrapContext, MEDITATIVE, 1, 1);
+		register(bootstrapContext, PRAIRIE_RIDE, 1, 2);
+		register(bootstrapContext, UNPACKED, 4, 4);
+		register(bootstrapContext, BACKYARD, 3, 4);
+		register(bootstrapContext, BOUQUET, 3, 3);
+		register(bootstrapContext, CAVEBIRD, 3, 3);
+		register(bootstrapContext, CHANGING, 4, 2);
+		register(bootstrapContext, COTAN, 3, 3);
+		register(bootstrapContext, ENDBOSS, 3, 3);
+		register(bootstrapContext, FERN, 3, 3);
+		register(bootstrapContext, FINDING, 4, 2);
+		register(bootstrapContext, LOWMIST, 4, 2);
+		register(bootstrapContext, ORB, 4, 4);
+		register(bootstrapContext, OWLEMONS, 3, 3);
+		register(bootstrapContext, PASSAGE, 4, 2);
+		register(bootstrapContext, POND, 3, 4);
+		register(bootstrapContext, SUNFLOWERS, 3, 3);
+		register(bootstrapContext, TIDES, 3, 3);
+	}
+
+	private static void register(BootstrapContext<PaintingVariant> bootstrapContext, ResourceKey<PaintingVariant> resourceKey, int i, int j) {
+		bootstrapContext.register(resourceKey, new PaintingVariant(i, j, resourceKey.location()));
 	}
 
 	private static ResourceKey<PaintingVariant> create(String string) {

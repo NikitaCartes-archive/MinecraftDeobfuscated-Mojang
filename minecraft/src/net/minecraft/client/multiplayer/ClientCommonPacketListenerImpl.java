@@ -92,6 +92,7 @@ public abstract class ClientCommonPacketListenerImpl implements ClientCommonPack
 	@Override
 	public void onPacketError(Packet packet, Exception exception) {
 		LOGGER.error("Failed to handle packet {}", packet, exception);
+		ClientCommonPacketListener.super.onPacketError(packet, exception);
 		if (this.strictErrorHandling) {
 			this.connection.disconnect(Component.translatable("disconnect.packetError"));
 		}

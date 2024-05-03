@@ -33,7 +33,6 @@ public class OminousBottleItem extends Item {
 			serverPlayer.awardStat(Stats.ITEM_USED.get(this));
 		}
 
-		itemStack.consume(1, livingEntity);
 		if (!level.isClientSide) {
 			level.playSound(null, livingEntity.blockPosition(), SoundEvents.OMINOUS_BOTTLE_DISPOSE, livingEntity.getSoundSource(), 1.0F, 1.0F);
 			Integer integer = itemStack.getOrDefault(DataComponents.OMINOUS_BOTTLE_AMPLIFIER, Integer.valueOf(0));
@@ -41,11 +40,12 @@ public class OminousBottleItem extends Item {
 			livingEntity.addEffect(new MobEffectInstance(MobEffects.BAD_OMEN, 120000, integer, false, false, true));
 		}
 
+		itemStack.consume(1, livingEntity);
 		return itemStack;
 	}
 
 	@Override
-	public int getUseDuration(ItemStack itemStack) {
+	public int getUseDuration(ItemStack itemStack, LivingEntity livingEntity) {
 		return 32;
 	}
 

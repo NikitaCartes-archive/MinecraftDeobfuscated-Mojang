@@ -142,7 +142,10 @@ public class VanillaItemTagsProvider extends ItemTagsProvider {
 			.add(Items.MUSIC_DISC_PIGSTEP)
 			.add(Items.MUSIC_DISC_OTHERSIDE)
 			.add(Items.MUSIC_DISC_5)
-			.add(Items.MUSIC_DISC_RELIC);
+			.add(Items.MUSIC_DISC_RELIC)
+			.add(Items.MUSIC_DISC_CREATOR)
+			.add(Items.MUSIC_DISC_CREATOR_MUSIC_BOX)
+			.add(Items.MUSIC_DISC_PRECIPICE);
 		this.tag(ItemTags.COALS).add(Items.COAL, Items.CHARCOAL);
 		this.tag(ItemTags.ARROWS).add(Items.ARROW, Items.TIPPED_ARROW, Items.SPECTRAL_ARROW);
 		this.tag(ItemTags.LECTERN_BOOKS).add(Items.WRITTEN_BOOK, Items.WRITABLE_BOOK);
@@ -248,7 +251,8 @@ public class VanillaItemTagsProvider extends ItemTagsProvider {
 			.addTag(ItemTags.PICKAXES)
 			.addTag(ItemTags.SHOVELS)
 			.addTag(ItemTags.HOES)
-			.add(Items.TRIDENT);
+			.add(Items.TRIDENT)
+			.add(Items.MACE);
 		this.tag(ItemTags.DECORATED_POT_SHERDS)
 			.add(
 				Items.ANGLER_POTTERY_SHERD,
@@ -270,7 +274,10 @@ public class VanillaItemTagsProvider extends ItemTagsProvider {
 				Items.SHEAF_POTTERY_SHERD,
 				Items.SHELTER_POTTERY_SHERD,
 				Items.SKULL_POTTERY_SHERD,
-				Items.SNORT_POTTERY_SHERD
+				Items.SNORT_POTTERY_SHERD,
+				Items.FLOW_POTTERY_SHERD,
+				Items.GUSTER_POTTERY_SHERD,
+				Items.SCRAPE_POTTERY_SHERD
 			);
 		this.tag(ItemTags.DECORATED_POT_INGREDIENTS).add(Items.BRICK).addTag(ItemTags.DECORATED_POT_SHERDS);
 		this.tag(ItemTags.FOOT_ARMOR)
@@ -313,7 +320,9 @@ public class VanillaItemTagsProvider extends ItemTagsProvider {
 			.add(Items.SHAPER_ARMOR_TRIM_SMITHING_TEMPLATE)
 			.add(Items.SILENCE_ARMOR_TRIM_SMITHING_TEMPLATE)
 			.add(Items.RAISER_ARMOR_TRIM_SMITHING_TEMPLATE)
-			.add(Items.HOST_ARMOR_TRIM_SMITHING_TEMPLATE);
+			.add(Items.HOST_ARMOR_TRIM_SMITHING_TEMPLATE)
+			.add(Items.FLOW_ARMOR_TRIM_SMITHING_TEMPLATE)
+			.add(Items.BOLT_ARMOR_TRIM_SMITHING_TEMPLATE);
 		this.tag(ItemTags.BOOKSHELF_BOOKS).add(Items.BOOK, Items.WRITTEN_BOOK, Items.ENCHANTED_BOOK, Items.WRITABLE_BOOK, Items.KNOWLEDGE_BOOK);
 		this.tag(ItemTags.NOTE_BLOCK_TOP_INSTRUMENTS)
 			.add(Items.ZOMBIE_HEAD, Items.SKELETON_SKULL, Items.CREEPER_HEAD, Items.DRAGON_HEAD, Items.WITHER_SKELETON_SKULL, Items.PIGLIN_HEAD, Items.PLAYER_HEAD);
@@ -330,9 +339,10 @@ public class VanillaItemTagsProvider extends ItemTagsProvider {
 			.addTag(ItemTags.CHEST_ARMOR_ENCHANTABLE)
 			.addTag(ItemTags.HEAD_ARMOR_ENCHANTABLE);
 		this.tag(ItemTags.SWORD_ENCHANTABLE).addTag(ItemTags.SWORDS);
-		this.tag(ItemTags.FIRE_ASPECT_ENCHANTABLE).addTag(ItemTags.SWORD_ENCHANTABLE);
+		this.tag(ItemTags.FIRE_ASPECT_ENCHANTABLE).addTag(ItemTags.SWORD_ENCHANTABLE).add(Items.MACE);
 		this.tag(ItemTags.SHARP_WEAPON_ENCHANTABLE).addTag(ItemTags.SWORDS).addTag(ItemTags.AXES);
-		this.tag(ItemTags.WEAPON_ENCHANTABLE).addTag(ItemTags.SHARP_WEAPON_ENCHANTABLE);
+		this.tag(ItemTags.WEAPON_ENCHANTABLE).addTag(ItemTags.SHARP_WEAPON_ENCHANTABLE).add(Items.MACE);
+		this.tag(ItemTags.MACE_ENCHANTABLE).add(Items.MACE);
 		this.tag(ItemTags.MINING_ENCHANTABLE).addTag(ItemTags.AXES).addTag(ItemTags.PICKAXES).addTag(ItemTags.SHOVELS).addTag(ItemTags.HOES).add(Items.SHEARS);
 		this.tag(ItemTags.MINING_LOOT_ENCHANTABLE).addTag(ItemTags.AXES).addTag(ItemTags.PICKAXES).addTag(ItemTags.SHOVELS).addTag(ItemTags.HOES);
 		this.tag(ItemTags.FISHING_ENCHANTABLE).add(Items.FISHING_ROD);
@@ -356,7 +366,8 @@ public class VanillaItemTagsProvider extends ItemTagsProvider {
 			.add(Items.SHEARS)
 			.add(Items.BRUSH)
 			.add(Items.FISHING_ROD)
-			.add(Items.CARROT_ON_A_STICK, Items.WARPED_FUNGUS_ON_A_STICK);
+			.add(Items.CARROT_ON_A_STICK, Items.WARPED_FUNGUS_ON_A_STICK)
+			.add(Items.MACE);
 		this.tag(ItemTags.BOW_ENCHANTABLE).add(Items.BOW);
 		this.tag(ItemTags.EQUIPPABLE_ENCHANTABLE)
 			.addTag(ItemTags.FOOT_ARMOR)

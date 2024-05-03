@@ -33,6 +33,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.AbortableIterationConsumer;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.StringRepresentable;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.TickRateManager;
@@ -602,7 +603,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 			? this.getDestroyType(GameRules.RULE_MOB_EXPLOSION_DROP_DECAY)
 			: Explosion.BlockInteraction.KEEP;
 			case TNT -> this.getDestroyType(GameRules.RULE_TNT_EXPLOSION_DROP_DECAY);
-			case BLOW -> Explosion.BlockInteraction.TRIGGER_BLOCK;
+			case TRIGGER -> Explosion.BlockInteraction.TRIGGER_BLOCK;
 		};
 		Explosion explosion = new Explosion(
 			this, entity, damageSource, explosionDamageCalculator, d, e, f, g, bl, blockInteraction, particleOptions, particleOptions2, holder
@@ -1011,11 +1012,23 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 
 	public abstract PotionBrewing potionBrewing();
 
-	public static enum ExplosionInteraction {
-		NONE,
-		BLOCK,
-		MOB,
-		TNT,
-		BLOW;
+	public static enum ExplosionInteraction implements StringRepresentable {
+		NONE("none"),
+		BLOCK("block"),
+		MOB("mob"),
+		TNT("tnt"),
+		TRIGGER("trigger");
+
+		public static final Codec<Level.ExplosionInteraction> CODEC = StringRepresentable.fromEnum(Level.ExplosionInteraction::values);
+		private final String id;
+
+		private ExplosionInteraction(String string2) {
+			this.id = string2;
+		}
+
+		@Override
+		public String getSerializedName() {
+			return this.id;
+		}
 	}
 }

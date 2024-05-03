@@ -20,7 +20,6 @@ import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgeableMob;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -214,16 +213,6 @@ public class PolarBear extends Animal implements NeutralMob {
 		} else {
 			return super.getDefaultDimensions(pose);
 		}
-	}
-
-	@Override
-	public boolean doHurtTarget(Entity entity) {
-		boolean bl = entity.hurt(this.damageSources().mobAttack(this), (float)((int)this.getAttributeValue(Attributes.ATTACK_DAMAGE)));
-		if (bl) {
-			this.doEnchantDamageEffects(this, entity);
-		}
-
-		return bl;
 	}
 
 	public boolean isStanding() {

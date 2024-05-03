@@ -29,7 +29,7 @@ public class BreezeWindCharge extends AbstractWindCharge {
 				this.getZ(),
 				3.0F,
 				false,
-				Level.ExplosionInteraction.BLOW,
+				Level.ExplosionInteraction.TRIGGER,
 				ParticleTypes.GUST_EMITTER_SMALL,
 				ParticleTypes.GUST_EMITTER_LARGE,
 				SoundEvents.BREEZE_WIND_CHARGE_BURST

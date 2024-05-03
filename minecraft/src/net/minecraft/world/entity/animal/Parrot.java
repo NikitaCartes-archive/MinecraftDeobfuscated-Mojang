@@ -159,7 +159,11 @@ public class Parrot extends ShoulderRidingEntity implements VariantHolder<Parrot
 	}
 
 	public static AttributeSupplier.Builder createAttributes() {
-		return Mob.createMobAttributes().add(Attributes.MAX_HEALTH, 6.0).add(Attributes.FLYING_SPEED, 0.4F).add(Attributes.MOVEMENT_SPEED, 0.2F);
+		return Mob.createMobAttributes()
+			.add(Attributes.MAX_HEALTH, 6.0)
+			.add(Attributes.FLYING_SPEED, 0.4F)
+			.add(Attributes.MOVEMENT_SPEED, 0.2F)
+			.add(Attributes.ATTACK_DAMAGE, 3.0);
 	}
 
 	@Override
@@ -306,11 +310,6 @@ public class Parrot extends ShoulderRidingEntity implements VariantHolder<Parrot
 	@Override
 	public AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
 		return null;
-	}
-
-	@Override
-	public boolean doHurtTarget(Entity entity) {
-		return entity.hurt(this.damageSources().mobAttack(this), 3.0F);
 	}
 
 	@Nullable

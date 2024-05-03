@@ -9,6 +9,7 @@ import javax.annotation.Nullable;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.TagKey;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
@@ -24,6 +25,7 @@ import net.minecraft.world.scores.Team;
 public record EntityPredicate(
 	Optional<EntityTypePredicate> entityType,
 	Optional<DistancePredicate> distanceToPlayer,
+	Optional<MovementPredicate> movement,
 	Optional<LocationPredicate> location,
 	Optional<LocationPredicate> steppingOnLocation,
 	Optional<MobEffectsPredicate> effects,
@@ -31,6 +33,7 @@ public record EntityPredicate(
 	Optional<EntityFlagsPredicate> flags,
 	Optional<EntityEquipmentPredicate> equipment,
 	Optional<EntitySubPredicate> subPredicate,
+	Optional<Integer> periodicTick,
 	Optional<EntityPredicate> vehicle,
 	Optional<EntityPredicate> passenger,
 	Optional<EntityPredicate> targetedEntity,
@@ -43,6 +46,7 @@ public record EntityPredicate(
 				instance -> instance.group(
 							EntityTypePredicate.CODEC.optionalFieldOf("type").forGetter(EntityPredicate::entityType),
 							DistancePredicate.CODEC.optionalFieldOf("distance").forGetter(EntityPredicate::distanceToPlayer),
+							MovementPredicate.CODEC.optionalFieldOf("movement").forGetter(EntityPredicate::movement),
 							LocationPredicate.CODEC.optionalFieldOf("location").forGetter(EntityPredicate::location),
 							LocationPredicate.CODEC.optionalFieldOf("stepping_on").forGetter(EntityPredicate::steppingOnLocation),
 							MobEffectsPredicate.CODEC.optionalFieldOf("effects").forGetter(EntityPredicate::effects),
@@ -50,6 +54,7 @@ public record EntityPredicate(
 							EntityFlagsPredicate.CODEC.optionalFieldOf("flags").forGetter(EntityPredicate::flags),
 							EntityEquipmentPredicate.CODEC.optionalFieldOf("equipment").forGetter(EntityPredicate::equipment),
 							EntitySubPredicate.CODEC.optionalFieldOf("type_specific").forGetter(EntityPredicate::subPredicate),
+							ExtraCodecs.POSITIVE_INT.optionalFieldOf("periodic_tick").forGetter(EntityPredicate::periodicTick),
 							codec.optionalFieldOf("vehicle").forGetter(EntityPredicate::vehicle),
 							codec.optionalFieldOf("passenger").forGetter(EntityPredicate::passenger),
 							codec.optionalFieldOf("targeted_entity").forGetter(EntityPredicate::targetedEntity),
@@ -97,6 +102,14 @@ public record EntityPredicate(
 				return false;
 			}
 
+			if (this.movement.isPresent()) {
+				Vec3 vec32 = entity.getDeltaMovement();
+				Vec3 vec33 = vec32.scale(20.0);
+				if (!((MovementPredicate)this.movement.get()).matches(vec33.x, vec33.y, vec33.z, (double)entity.fallDistance)) {
+					return false;
+				}
+			}
+
 			if (this.location.isPresent() && !((LocationPredicate)this.location.get()).matches(serverLevel, entity.getX(), entity.getY(), entity.getZ())) {
 				return false;
 			} else {
@@ -122,6 +135,8 @@ public record EntityPredicate(
 					return false;
 				} else if (this.targetedEntity.isPresent()
 					&& !((EntityPredicate)this.targetedEntity.get()).matches(serverLevel, vec3, entity instanceof Mob ? ((Mob)entity).getTarget() : null)) {
+					return false;
+				} else if (this.periodicTick.isPresent() && entity.tickCount % (Integer)this.periodicTick.get() != 0) {
 					return false;
 				} else {
 					if (this.team.isPresent()) {
@@ -150,6 +165,8 @@ public record EntityPredicate(
 	public static class Builder {
 		private Optional<EntityTypePredicate> entityType = Optional.empty();
 		private Optional<DistancePredicate> distanceToPlayer = Optional.empty();
+		private Optional<DistancePredicate> fallDistance = Optional.empty();
+		private Optional<MovementPredicate> movement = Optional.empty();
 		private Optional<LocationPredicate> location = Optional.empty();
 		private Optional<LocationPredicate> steppingOnLocation = Optional.empty();
 		private Optional<MobEffectsPredicate> effects = Optional.empty();
@@ -157,6 +174,7 @@ public record EntityPredicate(
 		private Optional<EntityFlagsPredicate> flags = Optional.empty();
 		private Optional<EntityEquipmentPredicate> equipment = Optional.empty();
 		private Optional<EntitySubPredicate> subPredicate = Optional.empty();
+		private Optional<Integer> periodicTick = Optional.empty();
 		private Optional<EntityPredicate> vehicle = Optional.empty();
 		private Optional<EntityPredicate> passenger = Optional.empty();
 		private Optional<EntityPredicate> targetedEntity = Optional.empty();
@@ -184,6 +202,11 @@ public record EntityPredicate(
 
 		public EntityPredicate.Builder distance(DistancePredicate distancePredicate) {
 			this.distanceToPlayer = Optional.of(distancePredicate);
+			return this;
+		}
+
+		public EntityPredicate.Builder moving(MovementPredicate movementPredicate) {
+			this.movement = Optional.of(movementPredicate);
 			return this;
 		}
 
@@ -227,6 +250,11 @@ public record EntityPredicate(
 			return this;
 		}
 
+		public EntityPredicate.Builder periodicTick(int i) {
+			this.periodicTick = Optional.of(i);
+			return this;
+		}
+
 		public EntityPredicate.Builder vehicle(EntityPredicate.Builder builder) {
 			this.vehicle = Optional.of(builder.build());
 			return this;
@@ -256,6 +284,7 @@ public record EntityPredicate(
 			return new EntityPredicate(
 				this.entityType,
 				this.distanceToPlayer,
+				this.movement,
 				this.location,
 				this.steppingOnLocation,
 				this.effects,
@@ -263,6 +292,7 @@ public record EntityPredicate(
 				this.flags,
 				this.equipment,
 				this.subPredicate,
+				this.periodicTick,
 				this.vehicle,
 				this.passenger,
 				this.targetedEntity,

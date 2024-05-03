@@ -10,7 +10,6 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.armortrim.ArmorTrim;
@@ -31,17 +30,15 @@ public class SmithingTrimRecipe implements SmithingRecipe {
 		this.addition = ingredient3;
 	}
 
-	@Override
-	public boolean matches(Container container, Level level) {
-		return this.template.test(container.getItem(0)) && this.base.test(container.getItem(1)) && this.addition.test(container.getItem(2));
+	public boolean matches(SmithingRecipeInput smithingRecipeInput, Level level) {
+		return this.template.test(smithingRecipeInput.template()) && this.base.test(smithingRecipeInput.base()) && this.addition.test(smithingRecipeInput.addition());
 	}
 
-	@Override
-	public ItemStack assemble(Container container, HolderLookup.Provider provider) {
-		ItemStack itemStack = container.getItem(1);
+	public ItemStack assemble(SmithingRecipeInput smithingRecipeInput, HolderLookup.Provider provider) {
+		ItemStack itemStack = smithingRecipeInput.base();
 		if (this.base.test(itemStack)) {
-			Optional<Holder.Reference<TrimMaterial>> optional = TrimMaterials.getFromIngredient(provider, container.getItem(2));
-			Optional<Holder.Reference<TrimPattern>> optional2 = TrimPatterns.getFromTemplate(provider, container.getItem(0));
+			Optional<Holder.Reference<TrimMaterial>> optional = TrimMaterials.getFromIngredient(provider, smithingRecipeInput.addition());
+			Optional<Holder.Reference<TrimPattern>> optional2 = TrimPatterns.getFromTemplate(provider, smithingRecipeInput.template());
 			if (optional.isPresent() && optional2.isPresent()) {
 				ArmorTrim armorTrim = itemStack.get(DataComponents.TRIM);
 				if (armorTrim != null && armorTrim.hasPatternAndMaterial((Holder<TrimPattern>)optional2.get(), (Holder<TrimMaterial>)optional.get())) {

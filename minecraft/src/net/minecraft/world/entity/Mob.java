@@ -53,7 +53,6 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.ai.sensing.Sensing;
-import net.minecraft.world.entity.decoration.HangingEntity;
 import net.minecraft.world.entity.decoration.LeashFenceKnotEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Enemy;
@@ -71,7 +70,9 @@ import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
+import net.minecraft.world.item.enchantment.EnchantmentEffectComponents;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.providers.VanillaEnchantmentProviders;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -156,7 +157,7 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Targeti
 	}
 
 	public static AttributeSupplier.Builder createMobAttributes() {
-		return LivingEntity.createLivingAttributes().add(Attributes.FOLLOW_RANGE, 16.0).add(Attributes.ATTACK_KNOCKBACK);
+		return LivingEntity.createLivingAttributes().add(Attributes.FOLLOW_RANGE, 16.0);
 	}
 
 	protected PathNavigation createNavigation(Level level) {
@@ -292,7 +293,7 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Targeti
 	}
 
 	@Override
-	public int getExperienceReward() {
+	protected int getBaseExperienceReward() {
 		if (this.xpReward > 0) {
 			int i = this.xpReward;
 
@@ -420,8 +421,8 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Targeti
 		Either<UUID, BlockPos> either = this.delayedLeashInfo;
 		if (this.leashHolder instanceof LivingEntity) {
 			either = Either.left(this.leashHolder.getUUID());
-		} else if (this.leashHolder instanceof HangingEntity hangingEntity) {
-			either = Either.right(hangingEntity.getPos());
+		} else if (this.leashHolder instanceof LeashFenceKnotEntity leashFenceKnotEntity) {
+			either = Either.right(leashFenceKnotEntity.getPos());
 		}
 
 		if (either != null) {
@@ -655,7 +656,7 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Targeti
 		} else if (itemStack.getItem() instanceof CrossbowItem && itemStack2.getItem() instanceof CrossbowItem) {
 			return this.canReplaceEqualItem(itemStack, itemStack2);
 		} else if (itemStack.getItem() instanceof ArmorItem armorItem) {
-			if (EnchantmentHelper.hasBindingCurse(itemStack2)) {
+			if (EnchantmentHelper.has(itemStack2, EnchantmentEffectComponents.PREVENT_ARMOR_CHANGE)) {
 				return false;
 			} else if (!(itemStack2.getItem() instanceof ArmorItem)) {
 				return true;
@@ -957,22 +958,33 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Targeti
 	}
 
 	@Override
-	protected void dropCustomDeathLoot(DamageSource damageSource, int i, boolean bl) {
-		super.dropCustomDeathLoot(damageSource, i, bl);
+	protected void dropCustomDeathLoot(DamageSource damageSource, boolean bl) {
+		super.dropCustomDeathLoot(damageSource, bl);
 
 		for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
 			ItemStack itemStack = this.getItemBySlot(equipmentSlot);
 			float f = this.getEquipmentDropChance(equipmentSlot);
-			boolean bl2 = f > 1.0F;
-			if (!itemStack.isEmpty() && !EnchantmentHelper.hasVanishingCurse(itemStack) && (bl || bl2) && Math.max(this.random.nextFloat() - (float)i * 0.01F, 0.0F) < f
-				)
-			 {
-				if (!bl2 && itemStack.isDamageableItem()) {
-					itemStack.setDamageValue(itemStack.getMaxDamage() - this.random.nextInt(1 + this.random.nextInt(Math.max(itemStack.getMaxDamage() - 3, 1))));
+			if (f != 0.0F) {
+				boolean bl2 = f > 1.0F;
+				Entity var12 = damageSource.getEntity();
+				if (var12 instanceof LivingEntity) {
+					LivingEntity livingEntity = (LivingEntity)var12;
+					if (this.level() instanceof ServerLevel serverLevel) {
+						f = EnchantmentHelper.processEquipmentDropChance(serverLevel, livingEntity, damageSource, f);
+					}
 				}
 
-				this.spawnAtLocation(itemStack);
-				this.setItemSlot(equipmentSlot, ItemStack.EMPTY);
+				if (!itemStack.isEmpty()
+					&& !EnchantmentHelper.has(itemStack, EnchantmentEffectComponents.PREVENT_EQUIPMENT_DROP)
+					&& (bl || bl2)
+					&& this.random.nextFloat() < f) {
+					if (!bl2 && itemStack.isDamageableItem()) {
+						itemStack.setDamageValue(itemStack.getMaxDamage() - this.random.nextInt(1 + this.random.nextInt(Math.max(itemStack.getMaxDamage() - 3, 1))));
+					}
+
+					this.spawnAtLocation(itemStack);
+					this.setItemSlot(equipmentSlot, ItemStack.EMPTY);
+				}
 			}
 		}
 	}
@@ -1107,23 +1119,18 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Targeti
 	}
 
 	protected void enchantSpawnedWeapon(RandomSource randomSource, float f) {
-		if (!this.getMainHandItem().isEmpty() && randomSource.nextFloat() < 0.25F * f) {
-			this.setItemSlot(
-				EquipmentSlot.MAINHAND,
-				EnchantmentHelper.enchantItem(
-					this.level().enabledFeatures(), randomSource, this.getMainHandItem(), (int)(5.0F + f * (float)randomSource.nextInt(18)), false
-				)
-			);
-		}
+		this.enchantSpawnedEquipment(EquipmentSlot.MAINHAND, randomSource, 0.25F, f);
 	}
 
 	protected void enchantSpawnedArmor(RandomSource randomSource, float f, EquipmentSlot equipmentSlot) {
+		this.enchantSpawnedEquipment(equipmentSlot, randomSource, 0.5F, f);
+	}
+
+	private void enchantSpawnedEquipment(EquipmentSlot equipmentSlot, RandomSource randomSource, float f, float g) {
 		ItemStack itemStack = this.getItemBySlot(equipmentSlot);
-		if (!itemStack.isEmpty() && randomSource.nextFloat() < 0.5F * f) {
-			this.setItemSlot(
-				equipmentSlot,
-				EnchantmentHelper.enchantItem(this.level().enabledFeatures(), randomSource, itemStack, (int)(5.0F + f * (float)randomSource.nextInt(18)), false)
-			);
+		if (!itemStack.isEmpty() && randomSource.nextFloat() < f * g) {
+			EnchantmentHelper.enchantItemFromProvider(itemStack, VanillaEnchantmentProviders.MOB_SPAWN_EQUIPMENT, this.level(), this.blockPosition(), randomSource);
+			this.setItemSlot(equipmentSlot, itemStack);
 		}
 	}
 
@@ -1475,30 +1482,33 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Targeti
 	@Override
 	public boolean doHurtTarget(Entity entity) {
 		float f = (float)this.getAttributeValue(Attributes.ATTACK_DAMAGE);
-		float g = (float)this.getAttributeValue(Attributes.ATTACK_KNOCKBACK);
-		if (entity instanceof LivingEntity) {
-			f += EnchantmentHelper.getDamageBonus(this.getMainHandItem(), entity.getType());
-			g += (float)EnchantmentHelper.getKnockbackBonus(this);
+		DamageSource damageSource = this.damageSources().mobAttack(this);
+		if (this.level() instanceof ServerLevel serverLevel) {
+			f = EnchantmentHelper.modifyDamage(serverLevel, this.getMainHandItem(), entity, damageSource, f);
 		}
 
-		int i = EnchantmentHelper.getFireAspect(this);
-		if (i > 0) {
-			entity.igniteForSeconds(i * 4);
-		}
-
-		boolean bl = entity.hurt(this.damageSources().mobAttack(this), f);
+		boolean bl = entity.hurt(damageSource, f);
 		if (bl) {
-			if (g > 0.0F && entity instanceof LivingEntity) {
-				((LivingEntity)entity)
-					.knockback((double)(g * 0.5F), (double)Mth.sin(this.getYRot() * (float) (Math.PI / 180.0)), (double)(-Mth.cos(this.getYRot() * (float) (Math.PI / 180.0))));
+			float g = this.getKnockback(entity, damageSource);
+			if (g > 0.0F && entity instanceof LivingEntity livingEntity) {
+				livingEntity.knockback(
+					(double)(g * 0.5F), (double)Mth.sin(this.getYRot() * (float) (Math.PI / 180.0)), (double)(-Mth.cos(this.getYRot() * (float) (Math.PI / 180.0)))
+				);
 				this.setDeltaMovement(this.getDeltaMovement().multiply(0.6, 1.0, 0.6));
 			}
 
-			this.doEnchantDamageEffects(this, entity);
+			if (this.level() instanceof ServerLevel serverLevel2) {
+				EnchantmentHelper.doPostAttackEffects(serverLevel2, entity, damageSource);
+			}
+
 			this.setLastHurtMob(entity);
+			this.playAttackSound();
 		}
 
 		return bl;
+	}
+
+	protected void playAttackSound() {
 	}
 
 	protected boolean isSunBurnTick() {

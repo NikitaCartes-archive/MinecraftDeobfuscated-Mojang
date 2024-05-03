@@ -174,8 +174,9 @@ public class Illusioner extends SpellcasterIllager implements RangedAttackMob {
 
 	@Override
 	public void performRangedAttack(LivingEntity livingEntity, float f) {
-		ItemStack itemStack = this.getProjectile(this.getItemInHand(ProjectileUtil.getWeaponHoldingHand(this, Items.BOW)));
-		AbstractArrow abstractArrow = ProjectileUtil.getMobArrow(this, itemStack, f);
+		ItemStack itemStack = this.getItemInHand(ProjectileUtil.getWeaponHoldingHand(this, Items.BOW));
+		ItemStack itemStack2 = this.getProjectile(itemStack);
+		AbstractArrow abstractArrow = ProjectileUtil.getMobArrow(this, itemStack2, f, itemStack);
 		double d = livingEntity.getX() - this.getX();
 		double e = livingEntity.getY(0.3333333333333333) - abstractArrow.getY();
 		double g = livingEntity.getZ() - this.getZ();

@@ -8,6 +8,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.narration.NarrationSupplier;
+import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
 
@@ -17,6 +18,8 @@ public class Tooltip implements NarrationSupplier {
 	private final Component message;
 	@Nullable
 	private List<FormattedCharSequence> cachedTooltip;
+	@Nullable
+	private Language splitWithLanguage;
 	@Nullable
 	private final Component narration;
 
@@ -41,8 +44,10 @@ public class Tooltip implements NarrationSupplier {
 	}
 
 	public List<FormattedCharSequence> toCharSequence(Minecraft minecraft) {
-		if (this.cachedTooltip == null) {
+		Language language = Language.getInstance();
+		if (this.cachedTooltip == null || language != this.splitWithLanguage) {
 			this.cachedTooltip = splitTooltip(minecraft, this.message);
+			this.splitWithLanguage = language;
 		}
 
 		return this.cachedTooltip;

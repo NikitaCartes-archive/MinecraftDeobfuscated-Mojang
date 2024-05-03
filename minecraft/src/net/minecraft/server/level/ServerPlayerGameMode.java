@@ -14,8 +14,10 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -23,6 +25,7 @@ import net.minecraft.world.level.block.GameMasterBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 import org.slf4j.Logger;
 
 public class ServerPlayerGameMode {
@@ -157,6 +160,15 @@ public class ServerPlayerGameMode {
 				float f = 1.0F;
 				BlockState blockState = this.level.getBlockState(blockPos);
 				if (!blockState.isAir()) {
+					EnchantmentHelper.onHitBlock(
+						this.level,
+						this.player.getMainHandItem(),
+						this.player,
+						this.player,
+						EquipmentSlot.MAINHAND,
+						Vec3.atCenterOf(blockPos),
+						() -> this.player.broadcastBreakEvent(EquipmentSlot.MAINHAND)
+					);
 					blockState.attack(this.level, blockPos, this.player);
 					f = blockState.getDestroyProgress(this.player, this.player.level(), blockPos);
 				}
@@ -268,9 +280,9 @@ public class ServerPlayerGameMode {
 			int j = itemStack.getDamageValue();
 			InteractionResultHolder<ItemStack> interactionResultHolder = itemStack.use(level, serverPlayer, interactionHand);
 			ItemStack itemStack2 = interactionResultHolder.getObject();
-			if (itemStack2 == itemStack && itemStack2.getCount() == i && itemStack2.getUseDuration() <= 0 && itemStack2.getDamageValue() == j) {
+			if (itemStack2 == itemStack && itemStack2.getCount() == i && itemStack2.getUseDuration(serverPlayer) <= 0 && itemStack2.getDamageValue() == j) {
 				return interactionResultHolder.getResult();
-			} else if (interactionResultHolder.getResult() == InteractionResult.FAIL && itemStack2.getUseDuration() > 0 && !serverPlayer.isUsingItem()) {
+			} else if (interactionResultHolder.getResult() == InteractionResult.FAIL && itemStack2.getUseDuration(serverPlayer) > 0 && !serverPlayer.isUsingItem()) {
 				return interactionResultHolder.getResult();
 			} else {
 				if (itemStack != itemStack2) {

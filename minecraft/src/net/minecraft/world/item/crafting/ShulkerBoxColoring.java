@@ -1,7 +1,6 @@
 package net.minecraft.world.item.crafting;
 
 import net.minecraft.core.HolderLookup;
-import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -15,12 +14,12 @@ public class ShulkerBoxColoring extends CustomRecipe {
 		super(craftingBookCategory);
 	}
 
-	public boolean matches(CraftingContainer craftingContainer, Level level) {
+	public boolean matches(CraftingInput craftingInput, Level level) {
 		int i = 0;
 		int j = 0;
 
-		for (int k = 0; k < craftingContainer.getContainerSize(); k++) {
-			ItemStack itemStack = craftingContainer.getItem(k);
+		for (int k = 0; k < craftingInput.size(); k++) {
+			ItemStack itemStack = craftingInput.getItem(k);
 			if (!itemStack.isEmpty()) {
 				if (Block.byItem(itemStack.getItem()) instanceof ShulkerBoxBlock) {
 					i++;
@@ -41,12 +40,12 @@ public class ShulkerBoxColoring extends CustomRecipe {
 		return i == 1 && j == 1;
 	}
 
-	public ItemStack assemble(CraftingContainer craftingContainer, HolderLookup.Provider provider) {
+	public ItemStack assemble(CraftingInput craftingInput, HolderLookup.Provider provider) {
 		ItemStack itemStack = ItemStack.EMPTY;
 		DyeItem dyeItem = (DyeItem)Items.WHITE_DYE;
 
-		for (int i = 0; i < craftingContainer.getContainerSize(); i++) {
-			ItemStack itemStack2 = craftingContainer.getItem(i);
+		for (int i = 0; i < craftingInput.size(); i++) {
+			ItemStack itemStack2 = craftingInput.getItem(i);
 			if (!itemStack2.isEmpty()) {
 				Item item = itemStack2.getItem();
 				if (Block.byItem(item) instanceof ShulkerBoxBlock) {

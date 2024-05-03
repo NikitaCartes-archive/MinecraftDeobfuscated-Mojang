@@ -324,12 +324,16 @@ public class Panda extends Animal {
 
 	@Override
 	public boolean doHurtTarget(Entity entity) {
-		this.playSound(SoundEvents.PANDA_BITE, 1.0F, 1.0F);
 		if (!this.isAggressive()) {
 			this.didBite = true;
 		}
 
 		return super.doHurtTarget(entity);
+	}
+
+	@Override
+	public void playAttackSound() {
+		this.playSound(SoundEvents.PANDA_BITE, 1.0F, 1.0F);
 	}
 
 	@Override

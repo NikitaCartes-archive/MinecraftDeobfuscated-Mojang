@@ -3,7 +3,9 @@ package net.minecraft.world.item;
 import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Position;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -23,6 +25,7 @@ import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.ThrownTrident;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.item.component.Tool;
+import net.minecraft.world.item.enchantment.EnchantmentEffectComponents;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -67,28 +70,30 @@ public class TridentItem extends Item implements ProjectileItem {
 	}
 
 	@Override
-	public int getUseDuration(ItemStack itemStack) {
+	public int getUseDuration(ItemStack itemStack, LivingEntity livingEntity) {
 		return 72000;
 	}
 
 	@Override
 	public void releaseUsing(ItemStack itemStack, Level level, LivingEntity livingEntity, int i) {
 		if (livingEntity instanceof Player player) {
-			int j = this.getUseDuration(itemStack) - i;
+			int j = this.getUseDuration(itemStack, livingEntity) - i;
 			if (j >= 10) {
-				int k = EnchantmentHelper.getRiptide(itemStack);
-				if (k <= 0 || player.isInWaterOrRain()) {
+				float f = level instanceof ServerLevel serverLevel ? EnchantmentHelper.getTridentSpinAttackStrength(serverLevel, itemStack, player) : 0.0F;
+				if (!(f > 0.0F) || player.isInWaterOrRain()) {
+					Holder<SoundEvent> holder = (Holder<SoundEvent>)EnchantmentHelper.pickHighestLevel(itemStack, EnchantmentEffectComponents.TRIDENT_SOUND)
+						.orElse(SoundEvents.TRIDENT_THROW);
 					if (!level.isClientSide) {
 						itemStack.hurtAndBreak(1, player, LivingEntity.getSlotForHand(livingEntity.getUsedItemHand()));
-						if (k == 0) {
+						if (f == 0.0F) {
 							ThrownTrident thrownTrident = new ThrownTrident(level, player, itemStack);
-							thrownTrident.shootFromRotation(player, player.getXRot(), player.getYRot(), 0.0F, 2.5F + (float)k * 0.5F, 1.0F);
+							thrownTrident.shootFromRotation(player, player.getXRot(), player.getYRot(), 0.0F, 2.5F, 1.0F);
 							if (player.hasInfiniteMaterials()) {
 								thrownTrident.pickup = AbstractArrow.Pickup.CREATIVE_ONLY;
 							}
 
 							level.addFreshEntity(thrownTrident);
-							level.playSound(null, thrownTrident, SoundEvents.TRIDENT_THROW, SoundSource.PLAYERS, 1.0F, 1.0F);
+							level.playSound(null, thrownTrident, holder.value(), SoundSource.PLAYERS, 1.0F, 1.0F);
 							if (!player.hasInfiniteMaterials()) {
 								player.getInventory().removeItem(itemStack);
 							}
@@ -96,34 +101,24 @@ public class TridentItem extends Item implements ProjectileItem {
 					}
 
 					player.awardStat(Stats.ITEM_USED.get(this));
-					if (k > 0) {
-						float f = player.getYRot();
-						float g = player.getXRot();
-						float h = -Mth.sin(f * (float) (Math.PI / 180.0)) * Mth.cos(g * (float) (Math.PI / 180.0));
-						float l = -Mth.sin(g * (float) (Math.PI / 180.0));
-						float m = Mth.cos(f * (float) (Math.PI / 180.0)) * Mth.cos(g * (float) (Math.PI / 180.0));
-						float n = Mth.sqrt(h * h + l * l + m * m);
-						float o = 3.0F * ((1.0F + (float)k) / 4.0F);
-						h *= o / n;
-						l *= o / n;
-						m *= o / n;
-						player.push((double)h, (double)l, (double)m);
-						player.startAutoSpinAttack(20);
+					if (f > 0.0F) {
+						float g = player.getYRot();
+						float h = player.getXRot();
+						float k = -Mth.sin(g * (float) (Math.PI / 180.0)) * Mth.cos(h * (float) (Math.PI / 180.0));
+						float l = -Mth.sin(h * (float) (Math.PI / 180.0));
+						float m = Mth.cos(g * (float) (Math.PI / 180.0)) * Mth.cos(h * (float) (Math.PI / 180.0));
+						float n = Mth.sqrt(k * k + l * l + m * m);
+						k *= f / n;
+						l *= f / n;
+						m *= f / n;
+						player.push((double)k, (double)l, (double)m);
+						player.startAutoSpinAttack(20, 8.0F, itemStack);
 						if (player.onGround()) {
-							float p = 1.1999999F;
+							float o = 1.1999999F;
 							player.move(MoverType.SELF, new Vec3(0.0, 1.1999999F, 0.0));
 						}
 
-						SoundEvent soundEvent;
-						if (k >= 3) {
-							soundEvent = SoundEvents.TRIDENT_RIPTIDE_3;
-						} else if (k == 2) {
-							soundEvent = SoundEvents.TRIDENT_RIPTIDE_2;
-						} else {
-							soundEvent = SoundEvents.TRIDENT_RIPTIDE_1;
-						}
-
-						level.playSound(null, player, soundEvent, SoundSource.PLAYERS, 1.0F, 1.0F);
+						level.playSound(null, player, holder.value(), SoundSource.PLAYERS, 1.0F, 1.0F);
 					}
 				}
 			}
@@ -135,9 +130,13 @@ public class TridentItem extends Item implements ProjectileItem {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
 		if (itemStack.getDamageValue() >= itemStack.getMaxDamage() - 1) {
 			return InteractionResultHolder.fail(itemStack);
-		} else if (EnchantmentHelper.getRiptide(itemStack) > 0 && !player.isInWaterOrRain()) {
-			return InteractionResultHolder.fail(itemStack);
 		} else {
+			if (level instanceof ServerLevel serverLevel
+				&& EnchantmentHelper.getTridentSpinAttackStrength(serverLevel, itemStack, player) > 0.0F
+				&& !player.isInWaterOrRain()) {
+				return InteractionResultHolder.fail(itemStack);
+			}
+
 			player.startUsingItem(interactionHand);
 			return InteractionResultHolder.consume(itemStack);
 		}
@@ -145,8 +144,12 @@ public class TridentItem extends Item implements ProjectileItem {
 
 	@Override
 	public boolean hurtEnemy(ItemStack itemStack, LivingEntity livingEntity, LivingEntity livingEntity2) {
-		itemStack.hurtAndBreak(1, livingEntity2, EquipmentSlot.MAINHAND);
 		return true;
+	}
+
+	@Override
+	public void postHurtEnemy(ItemStack itemStack, LivingEntity livingEntity, LivingEntity livingEntity2) {
+		itemStack.hurtAndBreak(1, livingEntity2, EquipmentSlot.MAINHAND);
 	}
 
 	@Override

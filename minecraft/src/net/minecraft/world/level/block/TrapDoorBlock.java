@@ -113,10 +113,7 @@ public class TrapDoorBlock extends HorizontalDirectionalBlock implements SimpleW
 
 	@Override
 	protected void onExplosionHit(BlockState blockState, Level level, BlockPos blockPos, Explosion explosion, BiConsumer<ItemStack, BlockPos> biConsumer) {
-		if (explosion.getBlockInteraction() == Explosion.BlockInteraction.TRIGGER_BLOCK
-			&& !level.isClientSide()
-			&& this.type.canOpenByWindCharge()
-			&& !(Boolean)blockState.getValue(POWERED)) {
+		if (explosion.canTriggerBlocks() && this.type.canOpenByWindCharge() && !(Boolean)blockState.getValue(POWERED)) {
 			this.toggle(blockState, level, blockPos, null);
 		}
 

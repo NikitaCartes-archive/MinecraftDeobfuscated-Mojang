@@ -18,6 +18,7 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -29,12 +30,13 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MoverType;
+import net.minecraft.world.entity.OminousItemSpawner;
 import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
-import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -52,7 +54,6 @@ public abstract class AbstractArrow extends Projectile {
 	private static final EntityDataAccessor<Byte> PIERCE_LEVEL = SynchedEntityData.defineId(AbstractArrow.class, EntityDataSerializers.BYTE);
 	private static final int FLAG_CRIT = 1;
 	private static final int FLAG_NOPHYSICS = 2;
-	private static final int FLAG_CROSSBOW = 4;
 	@Nullable
 	private BlockState lastState;
 	protected boolean inGround;
@@ -61,19 +62,20 @@ public abstract class AbstractArrow extends Projectile {
 	public int shakeTime;
 	private int life;
 	private double baseDamage = 2.0;
-	private int knockback;
 	private SoundEvent soundEvent = this.getDefaultHitGroundSoundEvent();
 	@Nullable
 	private IntOpenHashSet piercingIgnoreEntityIds;
 	@Nullable
 	private List<Entity> piercedAndKilledEntities;
 	private ItemStack pickupItemStack = this.getDefaultPickupItem();
+	@Nullable
+	private ItemStack firedFromWeapon = null;
 
 	protected AbstractArrow(EntityType<? extends AbstractArrow> entityType, Level level) {
 		super(entityType, level);
 	}
 
-	protected AbstractArrow(EntityType<? extends AbstractArrow> entityType, Level level, ItemStack itemStack) {
+	protected AbstractArrow(EntityType<? extends AbstractArrow> entityType, Level level, ItemStack itemStack, @Nullable ItemStack itemStack2) {
 		this(entityType, level);
 		this.pickupItemStack = itemStack.copy();
 		this.setCustomName(itemStack.get(DataComponents.CUSTOM_NAME));
@@ -81,15 +83,29 @@ public abstract class AbstractArrow extends Projectile {
 		if (unit != null) {
 			this.pickup = AbstractArrow.Pickup.CREATIVE_ONLY;
 		}
+
+		if (itemStack2 != null && level instanceof ServerLevel serverLevel) {
+			this.firedFromWeapon = itemStack2.copy();
+			int i = EnchantmentHelper.getPiercingCount(serverLevel, itemStack2, this.pickupItemStack);
+			if (i > 0) {
+				this.setPierceLevel((byte)i);
+			}
+
+			EnchantmentHelper.onProjectileSpawned(serverLevel, itemStack2, this, () -> this.firedFromWeapon = null);
+		}
 	}
 
-	protected AbstractArrow(EntityType<? extends AbstractArrow> entityType, double d, double e, double f, Level level, ItemStack itemStack) {
-		this(entityType, level, itemStack);
+	protected AbstractArrow(
+		EntityType<? extends AbstractArrow> entityType, double d, double e, double f, Level level, ItemStack itemStack, @Nullable ItemStack itemStack2
+	) {
+		this(entityType, level, itemStack, itemStack2);
 		this.setPos(d, e, f);
 	}
 
-	protected AbstractArrow(EntityType<? extends AbstractArrow> entityType, LivingEntity livingEntity, Level level, ItemStack itemStack) {
-		this(entityType, livingEntity.getX(), livingEntity.getEyeY() - 0.1F, livingEntity.getZ(), level, itemStack);
+	protected AbstractArrow(
+		EntityType<? extends AbstractArrow> entityType, LivingEntity livingEntity, Level level, ItemStack itemStack, @Nullable ItemStack itemStack2
+	) {
+		this(entityType, livingEntity.getX(), livingEntity.getEyeY() - 0.1F, livingEntity.getZ(), level, itemStack, itemStack2);
 		this.setOwner(livingEntity);
 	}
 
@@ -310,7 +326,14 @@ public abstract class AbstractArrow extends Projectile {
 		super.onHitEntity(entityHitResult);
 		Entity entity = entityHitResult.getEntity();
 		float f = (float)this.getDeltaMovement().length();
-		int i = Mth.ceil(Mth.clamp((double)f * this.baseDamage, 0.0, 2.147483647E9));
+		double d = this.baseDamage;
+		Entity entity2 = this.getOwner();
+		DamageSource damageSource = this.damageSources().arrow(this, (Entity)(entity2 != null ? entity2 : this));
+		if (this.firedFromWeapon != null && this.level() instanceof ServerLevel serverLevel) {
+			d = (double)EnchantmentHelper.modifyDamage(serverLevel, this.firedFromWeapon, entity, damageSource, (float)d);
+		}
+
+		int i = Mth.ceil(Mth.clamp((double)f * d, 0.0, 2.147483647E9));
 		if (this.getPierceLevel() > 0) {
 			if (this.piercingIgnoreEntityIds == null) {
 				this.piercingIgnoreEntityIds = new IntOpenHashSet(5);
@@ -333,21 +356,14 @@ public abstract class AbstractArrow extends Projectile {
 			i = (int)Math.min(l + (long)i, 2147483647L);
 		}
 
-		Entity entity2 = this.getOwner();
-		DamageSource damageSource;
-		if (entity2 == null) {
-			damageSource = this.damageSources().arrow(this, this);
-		} else {
-			damageSource = this.damageSources().arrow(this, entity2);
-			if (entity2 instanceof LivingEntity) {
-				((LivingEntity)entity2).setLastHurtMob(entity);
-			}
+		if (entity2 instanceof LivingEntity livingEntity) {
+			livingEntity.setLastHurtMob(entity);
 		}
 
 		boolean bl = entity.getType() == EntityType.ENDERMAN;
 		int j = entity.getRemainingFireTicks();
 		if (this.isOnFire() && !bl) {
-			entity.igniteForSeconds(5);
+			entity.igniteForSeconds(5.0F);
 		}
 
 		if (entity.hurt(damageSource, (float)i)) {
@@ -355,31 +371,23 @@ public abstract class AbstractArrow extends Projectile {
 				return;
 			}
 
-			if (entity instanceof LivingEntity livingEntity) {
+			if (entity instanceof LivingEntity livingEntity2) {
 				if (!this.level().isClientSide && this.getPierceLevel() <= 0) {
-					livingEntity.setArrowCount(livingEntity.getArrowCount() + 1);
+					livingEntity2.setArrowCount(livingEntity2.getArrowCount() + 1);
 				}
 
-				if (this.knockback > 0) {
-					double d = Math.max(0.0, 1.0 - livingEntity.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE));
-					Vec3 vec3 = this.getDeltaMovement().multiply(1.0, 0.0, 1.0).normalize().scale((double)this.knockback * 0.6 * d);
-					if (vec3.lengthSqr() > 0.0) {
-						livingEntity.push(vec3.x, 0.1, vec3.z);
-					}
+				this.doKnockback(livingEntity2, damageSource);
+				if (this.level() instanceof ServerLevel serverLevel2) {
+					EnchantmentHelper.doPostAttackEffects(serverLevel2, livingEntity2, damageSource);
 				}
 
-				if (!this.level().isClientSide && entity2 instanceof LivingEntity) {
-					EnchantmentHelper.doPostHurtEffects(livingEntity, entity2);
-					EnchantmentHelper.doPostDamageEffects((LivingEntity)entity2, livingEntity);
-				}
-
-				this.doPostHurtEffects(livingEntity);
-				if (entity2 != null && livingEntity != entity2 && livingEntity instanceof Player && entity2 instanceof ServerPlayer && !this.isSilent()) {
+				this.doPostHurtEffects(livingEntity2);
+				if (livingEntity2 != entity2 && livingEntity2 instanceof Player && entity2 instanceof ServerPlayer && !this.isSilent()) {
 					((ServerPlayer)entity2).connection.send(new ClientboundGameEventPacket(ClientboundGameEventPacket.ARROW_HIT_PLAYER, 0.0F));
 				}
 
 				if (!entity.isAlive() && this.piercedAndKilledEntities != null) {
-					this.piercedAndKilledEntities.add(livingEntity);
+					this.piercedAndKilledEntities.add(livingEntity2);
 				}
 
 				if (!this.level().isClientSide && entity2 instanceof ServerPlayer serverPlayer) {
@@ -409,12 +417,32 @@ public abstract class AbstractArrow extends Projectile {
 		}
 	}
 
+	protected void doKnockback(LivingEntity livingEntity, DamageSource damageSource) {
+		double d = (double)(
+			this.firedFromWeapon != null && this.level() instanceof ServerLevel serverLevel
+				? EnchantmentHelper.modifyKnockback(serverLevel, this.firedFromWeapon, livingEntity, damageSource, 0.0F)
+				: 0.0F
+		);
+		if (d > 0.0) {
+			double e = Math.max(0.0, 1.0 - livingEntity.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE));
+			Vec3 vec3 = this.getDeltaMovement().multiply(1.0, 0.0, 1.0).normalize().scale(d * 0.6 * e);
+			if (vec3.lengthSqr() > 0.0) {
+				livingEntity.push(vec3.x, 0.1, vec3.z);
+			}
+		}
+	}
+
 	@Override
 	protected void onHitBlock(BlockHitResult blockHitResult) {
 		this.lastState = this.level().getBlockState(blockHitResult.getBlockPos());
 		super.onHitBlock(blockHitResult);
 		Vec3 vec3 = blockHitResult.getLocation().subtract(this.getX(), this.getY(), this.getZ());
 		this.setDeltaMovement(vec3);
+		ItemStack itemStack = this.getWeaponItem();
+		if (this.level() instanceof ServerLevel serverLevel && itemStack != null) {
+			this.hitBlockEnchantmentEffects(serverLevel, blockHitResult, itemStack);
+		}
+
 		Vec3 vec32 = vec3.normalize().scale(0.05F);
 		this.setPosRaw(this.getX() - vec32.x, this.getY() - vec32.y, this.getZ() - vec32.z);
 		this.playSound(this.getHitGroundSoundEvent(), 1.0F, 1.2F / (this.random.nextFloat() * 0.2F + 0.9F));
@@ -423,8 +451,20 @@ public abstract class AbstractArrow extends Projectile {
 		this.setCritArrow(false);
 		this.setPierceLevel((byte)0);
 		this.setSoundEvent(SoundEvents.ARROW_HIT);
-		this.setShotFromCrossbow(false);
+		this.firedFromWeapon = null;
 		this.resetPiercedEntities();
+	}
+
+	protected void hitBlockEnchantmentEffects(ServerLevel serverLevel, BlockHitResult blockHitResult, ItemStack itemStack) {
+		EnchantmentHelper.onHitBlock(
+			serverLevel, itemStack, this.getOwner() instanceof LivingEntity livingEntity ? livingEntity : null, this, null, blockHitResult.getLocation(), () -> {
+			}
+		);
+	}
+
+	@Nullable
+	protected ItemStack getWeaponItem() {
+		return this.firedFromWeapon;
 	}
 
 	protected SoundEvent getDefaultHitGroundSoundEvent() {
@@ -465,8 +505,10 @@ public abstract class AbstractArrow extends Projectile {
 		compoundTag.putBoolean("crit", this.isCritArrow());
 		compoundTag.putByte("PierceLevel", this.getPierceLevel());
 		compoundTag.putString("SoundEvent", BuiltInRegistries.SOUND_EVENT.getKey(this.soundEvent).toString());
-		compoundTag.putBoolean("ShotFromCrossbow", this.shotFromCrossbow());
 		compoundTag.put("item", this.pickupItemStack.save(this.registryAccess()));
+		if (this.firedFromWeapon != null) {
+			compoundTag.put("weapon", this.firedFromWeapon.save(this.registryAccess(), new CompoundTag()));
+		}
 	}
 
 	@Override
@@ -492,20 +534,28 @@ public abstract class AbstractArrow extends Projectile {
 				.orElse(this.getDefaultHitGroundSoundEvent());
 		}
 
-		this.setShotFromCrossbow(compoundTag.getBoolean("ShotFromCrossbow"));
 		if (compoundTag.contains("item", 10)) {
 			this.setPickupItemStack((ItemStack)ItemStack.parse(this.registryAccess(), compoundTag.getCompound("item")).orElse(this.getDefaultPickupItem()));
 		} else {
 			this.setPickupItemStack(this.getDefaultPickupItem());
+		}
+
+		if (compoundTag.contains("weapon", 10)) {
+			this.firedFromWeapon = (ItemStack)ItemStack.parse(this.registryAccess(), compoundTag.getCompound("weapon")).orElse(null);
+		} else {
+			this.firedFromWeapon = null;
 		}
 	}
 
 	@Override
 	public void setOwner(@Nullable Entity entity) {
 		super.setOwner(entity);
-		if (entity instanceof Player && this.pickup == AbstractArrow.Pickup.DISALLOWED) {
-			this.pickup = AbstractArrow.Pickup.ALLOWED;
-		}
+
+		this.pickup = switch (entity) {
+			case null, default -> this.pickup;
+			case Player player when this.pickup == AbstractArrow.Pickup.DISALLOWED -> AbstractArrow.Pickup.ALLOWED;
+			case OminousItemSpawner ominousItemSpawner -> AbstractArrow.Pickup.DISALLOWED;
+		};
 	}
 
 	@Override
@@ -549,14 +599,6 @@ public abstract class AbstractArrow extends Projectile {
 		return this.baseDamage;
 	}
 
-	public void setKnockback(int i) {
-		this.knockback = i;
-	}
-
-	public int getKnockback() {
-		return this.knockback;
-	}
-
 	@Override
 	public boolean isAttackable() {
 		return this.getType().is(EntityTypeTags.REDIRECTABLE_PROJECTILE);
@@ -566,7 +608,7 @@ public abstract class AbstractArrow extends Projectile {
 		this.setFlag(1, bl);
 	}
 
-	public void setPierceLevel(byte b) {
+	private void setPierceLevel(byte b) {
 		this.entityData.set(PIERCE_LEVEL, b);
 	}
 
@@ -593,29 +635,15 @@ public abstract class AbstractArrow extends Projectile {
 	}
 
 	public boolean shotFromCrossbow() {
-		byte b = this.entityData.get(ID_FLAGS);
-		return (b & 4) != 0;
+		return this.firedFromWeapon != null && this.firedFromWeapon.is(Items.CROSSBOW);
 	}
 
 	public byte getPierceLevel() {
 		return this.entityData.get(PIERCE_LEVEL);
 	}
 
-	public void setEnchantmentEffectsFromEntity(LivingEntity livingEntity, float f) {
-		int i = EnchantmentHelper.getEnchantmentLevel(Enchantments.POWER, livingEntity);
-		int j = EnchantmentHelper.getEnchantmentLevel(Enchantments.PUNCH, livingEntity);
+	public void setBaseDamageFromMob(float f) {
 		this.setBaseDamage((double)(f * 2.0F) + this.random.triangle((double)this.level().getDifficulty().getId() * 0.11, 0.57425));
-		if (i > 0) {
-			this.setBaseDamage(this.getBaseDamage() + (double)i * 0.5 + 0.5);
-		}
-
-		if (j > 0) {
-			this.setKnockback(j);
-		}
-
-		if (EnchantmentHelper.getEnchantmentLevel(Enchantments.FLAME, livingEntity) > 0) {
-			this.igniteForSeconds(100);
-		}
 	}
 
 	protected float getWaterInertia() {
@@ -629,10 +657,6 @@ public abstract class AbstractArrow extends Projectile {
 
 	public boolean isNoPhysics() {
 		return !this.level().isClientSide ? this.noPhysics : (this.entityData.get(ID_FLAGS) & 2) != 0;
-	}
-
-	public void setShotFromCrossbow(boolean bl) {
-		this.setFlag(4, bl);
 	}
 
 	@Override

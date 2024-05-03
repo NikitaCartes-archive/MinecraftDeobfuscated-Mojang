@@ -163,5 +163,9 @@ public interface StructureSets {
 			BuiltinStructureSets.TRAIL_RUINS,
 			new StructureSet(holderGetter.getOrThrow(BuiltinStructures.TRAIL_RUINS), new RandomSpreadStructurePlacement(34, 8, RandomSpreadType.LINEAR, 83469867))
 		);
+		bootstrapContext.register(
+			BuiltinStructureSets.TRIAL_CHAMBERS,
+			new StructureSet(holderGetter.getOrThrow(BuiltinStructures.TRIAL_CHAMBERS), new RandomSpreadStructurePlacement(34, 12, RandomSpreadType.LINEAR, 94251327))
+		);
 	}
 }

@@ -4,7 +4,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.logging.LogUtils;
-import com.mojang.realmsclient.gui.screens.RealmsPopupScreen;
+import com.mojang.realmsclient.gui.screens.AddRealmPopupScreen;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -182,7 +182,7 @@ public class TextureManager implements PreparableReloadListener, Tickable, AutoC
 		CompletableFuture<Void> completableFuture = new CompletableFuture();
 		TitleScreen.preloadResources(this, executor).thenCompose(preparationBarrier::wait).thenAcceptAsync(void_ -> {
 			MissingTextureAtlasSprite.getTexture();
-			RealmsPopupScreen.updateCarouselImages(this.resourceManager);
+			AddRealmPopupScreen.updateCarouselImages(this.resourceManager);
 			Iterator<Entry<ResourceLocation, AbstractTexture>> iterator = this.byPath.entrySet().iterator();
 
 			while (iterator.hasNext()) {

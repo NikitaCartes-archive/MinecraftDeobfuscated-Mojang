@@ -195,6 +195,11 @@ public class MappedRegistry<T> implements WritableRegistry<T> {
 	}
 
 	@Override
+	public Optional<Holder.Reference<T>> getAny() {
+		return this.byId.isEmpty() ? Optional.empty() : Optional.of((Holder.Reference)this.byId.getFirst());
+	}
+
+	@Override
 	public Holder<T> wrapAsHolder(T object) {
 		Holder.Reference<T> reference = (Holder.Reference<T>)this.byValue.get(object);
 		return (Holder<T>)(reference != null ? reference : Holder.direct(object));

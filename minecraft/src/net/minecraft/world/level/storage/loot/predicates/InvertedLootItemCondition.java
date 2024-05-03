@@ -9,7 +9,7 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 
 public record InvertedLootItemCondition(LootItemCondition term) implements LootItemCondition {
 	public static final MapCodec<InvertedLootItemCondition> CODEC = RecordCodecBuilder.mapCodec(
-		instance -> instance.group(LootItemConditions.DIRECT_CODEC.fieldOf("term").forGetter(InvertedLootItemCondition::term))
+		instance -> instance.group(LootItemCondition.DIRECT_CODEC.fieldOf("term").forGetter(InvertedLootItemCondition::term))
 				.apply(instance, InvertedLootItemCondition::new)
 	);
 

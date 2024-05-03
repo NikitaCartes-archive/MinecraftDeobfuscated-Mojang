@@ -55,6 +55,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.enchantment.EnchantmentEffectComponents;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
@@ -443,7 +444,7 @@ public class Allay extends PathfinderMob implements InventoryCarrier, VibrationS
 		super.dropEquipment();
 		this.inventory.removeAllItems().forEach(this::spawnAtLocation);
 		ItemStack itemStack = this.getItemBySlot(EquipmentSlot.MAINHAND);
-		if (!itemStack.isEmpty() && !EnchantmentHelper.hasVanishingCurse(itemStack)) {
+		if (!itemStack.isEmpty() && !EnchantmentHelper.has(itemStack, EnchantmentEffectComponents.PREVENT_EQUIPMENT_DROP)) {
 			this.spawnAtLocation(itemStack);
 			this.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
 		}

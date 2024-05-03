@@ -43,7 +43,15 @@ public class DamageTypeTagsProvider extends TagsProvider<DamageType> {
 		this.tag(DamageTypeTags.BYPASSES_RESISTANCE).add(DamageTypes.FELL_OUT_OF_WORLD, DamageTypes.GENERIC_KILL);
 		this.tag(DamageTypeTags.BYPASSES_ENCHANTMENTS).add(DamageTypes.SONIC_BOOM);
 		this.tag(DamageTypeTags.IS_FIRE)
-			.add(DamageTypes.IN_FIRE, DamageTypes.ON_FIRE, DamageTypes.LAVA, DamageTypes.HOT_FLOOR, DamageTypes.UNATTRIBUTED_FIREBALL, DamageTypes.FIREBALL);
+			.add(
+				DamageTypes.IN_FIRE,
+				DamageTypes.CAMPFIRE,
+				DamageTypes.ON_FIRE,
+				DamageTypes.LAVA,
+				DamageTypes.HOT_FLOOR,
+				DamageTypes.UNATTRIBUTED_FIREBALL,
+				DamageTypes.FIREBALL
+			);
 		this.tag(DamageTypeTags.IS_PROJECTILE)
 			.add(
 				DamageTypes.ARROW,
@@ -52,7 +60,8 @@ public class DamageTypeTagsProvider extends TagsProvider<DamageType> {
 				DamageTypes.UNATTRIBUTED_FIREBALL,
 				DamageTypes.FIREBALL,
 				DamageTypes.WITHER_SKULL,
-				DamageTypes.THROWN
+				DamageTypes.THROWN,
+				DamageTypes.WIND_CHARGE
 			);
 		this.tag(DamageTypeTags.WITCH_RESISTANT_TO).add(DamageTypes.MAGIC, DamageTypes.INDIRECT_MAGIC, DamageTypes.SONIC_BOOM, DamageTypes.THORNS);
 		this.tag(DamageTypeTags.IS_EXPLOSION).add(DamageTypes.FIREWORKS, DamageTypes.EXPLOSION, DamageTypes.PLAYER_EXPLOSION, DamageTypes.BAD_RESPAWN_POINT);
@@ -64,13 +73,42 @@ public class DamageTypeTagsProvider extends TagsProvider<DamageType> {
 		this.tag(DamageTypeTags.NO_IMPACT).add(DamageTypes.DROWN);
 		this.tag(DamageTypeTags.ALWAYS_MOST_SIGNIFICANT_FALL).add(DamageTypes.FELL_OUT_OF_WORLD);
 		this.tag(DamageTypeTags.WITHER_IMMUNE_TO).add(DamageTypes.DROWN);
-		this.tag(DamageTypeTags.IGNITES_ARMOR_STANDS).add(DamageTypes.IN_FIRE);
+		this.tag(DamageTypeTags.IGNITES_ARMOR_STANDS).add(DamageTypes.IN_FIRE, DamageTypes.CAMPFIRE);
 		this.tag(DamageTypeTags.BURNS_ARMOR_STANDS).add(DamageTypes.ON_FIRE);
 		this.tag(DamageTypeTags.AVOIDS_GUARDIAN_THORNS).add(DamageTypes.MAGIC, DamageTypes.THORNS).addTag(DamageTypeTags.IS_EXPLOSION);
 		this.tag(DamageTypeTags.ALWAYS_TRIGGERS_SILVERFISH).add(DamageTypes.MAGIC);
 		this.tag(DamageTypeTags.ALWAYS_HURTS_ENDER_DRAGONS).addTag(DamageTypeTags.IS_EXPLOSION);
-		this.tag(DamageTypeTags.NO_KNOCKBACK).add(DamageTypes.EXPLOSION, DamageTypes.PLAYER_EXPLOSION, DamageTypes.BAD_RESPAWN_POINT);
-		this.tag(DamageTypeTags.ALWAYS_KILLS_ARMOR_STANDS).add(DamageTypes.ARROW, DamageTypes.TRIDENT, DamageTypes.FIREBALL, DamageTypes.WITHER_SKULL);
+		this.tag(DamageTypeTags.NO_KNOCKBACK)
+			.add(
+				DamageTypes.EXPLOSION,
+				DamageTypes.PLAYER_EXPLOSION,
+				DamageTypes.BAD_RESPAWN_POINT,
+				DamageTypes.IN_FIRE,
+				DamageTypes.LIGHTNING_BOLT,
+				DamageTypes.ON_FIRE,
+				DamageTypes.LAVA,
+				DamageTypes.HOT_FLOOR,
+				DamageTypes.IN_WALL,
+				DamageTypes.CRAMMING,
+				DamageTypes.DROWN,
+				DamageTypes.STARVE,
+				DamageTypes.CACTUS,
+				DamageTypes.FALL,
+				DamageTypes.FLY_INTO_WALL,
+				DamageTypes.FELL_OUT_OF_WORLD,
+				DamageTypes.GENERIC,
+				DamageTypes.MAGIC,
+				DamageTypes.WITHER,
+				DamageTypes.DRAGON_BREATH,
+				DamageTypes.DRY_OUT,
+				DamageTypes.SWEET_BERRY_BUSH,
+				DamageTypes.FREEZE,
+				DamageTypes.STALAGMITE,
+				DamageTypes.OUTSIDE_BORDER,
+				DamageTypes.GENERIC_KILL
+			);
+		this.tag(DamageTypeTags.ALWAYS_KILLS_ARMOR_STANDS)
+			.add(DamageTypes.ARROW, DamageTypes.TRIDENT, DamageTypes.FIREBALL, DamageTypes.WITHER_SKULL, DamageTypes.WIND_CHARGE);
 		this.tag(DamageTypeTags.CAN_BREAK_ARMOR_STAND).add(DamageTypes.PLAYER_ATTACK, DamageTypes.PLAYER_EXPLOSION);
 		this.tag(DamageTypeTags.BYPASSES_WOLF_ARMOR)
 			.addTag(DamageTypeTags.BYPASSES_INVULNERABILITY)
@@ -88,5 +126,7 @@ public class DamageTypeTagsProvider extends TagsProvider<DamageType> {
 				DamageTypes.WITHER
 			);
 		this.tag(DamageTypeTags.IS_PLAYER_ATTACK).add(DamageTypes.PLAYER_ATTACK);
+		this.tag(DamageTypeTags.BURN_FROM_STEPPING).add(DamageTypes.CAMPFIRE, DamageTypes.HOT_FLOOR);
+		this.tag(DamageTypeTags.BREEZE_IMMUNE_TO).add(DamageTypes.ARROW, DamageTypes.TRIDENT);
 	}
 }

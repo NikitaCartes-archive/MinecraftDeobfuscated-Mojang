@@ -1,7 +1,11 @@
 package net.minecraft.world.entity.ai.attributes;
 
+import com.mojang.serialization.Codec;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
+
 public class Attribute {
-	public static final int MAX_NAME_LENGTH = 64;
+	public static final Codec<Holder<Attribute>> CODEC = BuiltInRegistries.ATTRIBUTE.holderByNameCodec();
 	private final double defaultValue;
 	private boolean syncable;
 	private final String descriptionId;

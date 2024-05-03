@@ -96,6 +96,8 @@ public class BannerPatterns {
 		register(bootstrapContext, FLOWER);
 		register(bootstrapContext, MOJANG);
 		register(bootstrapContext, PIGLIN);
+		register(bootstrapContext, FLOW);
+		register(bootstrapContext, GUSTER);
 	}
 
 	public static void register(BootstrapContext<BannerPattern> bootstrapContext, ResourceKey<BannerPattern> resourceKey) {

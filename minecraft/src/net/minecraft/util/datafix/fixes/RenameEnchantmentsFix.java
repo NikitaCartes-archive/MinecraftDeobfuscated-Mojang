@@ -9,6 +9,7 @@ import com.mojang.datafixers.types.Type;
 import com.mojang.serialization.Dynamic;
 import java.util.Map;
 import java.util.function.Function;
+import net.minecraft.util.datafix.schemas.NamespacedSchema;
 
 public class RenameEnchantmentsFix extends DataFix {
 	final String name;
@@ -41,7 +42,7 @@ public class RenameEnchantmentsFix extends DataFix {
 								dynamicxx -> dynamicxx.update(
 										"id",
 										dynamic2 -> dynamic2.asString()
-												.map(stringx -> dynamicxx.createString((String)this.renames.getOrDefault(stringx, stringx)))
+												.map(stringx -> dynamicxx.createString((String)this.renames.getOrDefault(NamespacedSchema.ensureNamespaced(stringx), stringx)))
 												.mapOrElse(Function.identity(), error -> dynamic2)
 									)
 							)

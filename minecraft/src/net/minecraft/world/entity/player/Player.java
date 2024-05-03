@@ -89,6 +89,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.enchantment.EnchantmentEffectComponents;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.trading.MerchantOffers;
 import net.minecraft.world.level.BaseCommandBlock;
@@ -222,7 +223,11 @@ public abstract class Player extends LivingEntity {
 			.add(Attributes.LUCK)
 			.add(Attributes.BLOCK_INTERACTION_RANGE, 4.5)
 			.add(Attributes.ENTITY_INTERACTION_RANGE, 3.0)
-			.add(Attributes.BLOCK_BREAK_SPEED);
+			.add(Attributes.BLOCK_BREAK_SPEED)
+			.add(Attributes.SUBMERGED_MINING_SPEED)
+			.add(Attributes.SNEAKING_SPEED)
+			.add(Attributes.MINING_EFFICIENCY)
+			.add(Attributes.SWEEPING_DAMAGE_RATIO);
 	}
 
 	@Override
@@ -608,12 +613,18 @@ public abstract class Player extends LivingEntity {
 		this.entityData.set(DATA_SCORE_ID, j + i);
 	}
 
-	public void startAutoSpinAttack(int i) {
+	public void startAutoSpinAttack(int i, float f, ItemStack itemStack) {
 		this.autoSpinAttackTicks = i;
+		this.autoSpinAttackDmg = f;
+		this.autoSpinAttackItemStack = itemStack;
 		if (!this.level().isClientSide) {
 			this.removeEntitiesOnShoulder();
 			this.setLivingEntityFlag(4, true);
 		}
+	}
+
+	private ItemStack getAttackingItemStack() {
+		return this.isAutoSpinAttack() && this.autoSpinAttackItemStack != null ? this.autoSpinAttackItemStack : this.getMainHandItem();
 	}
 
 	@Override
@@ -654,7 +665,7 @@ public abstract class Player extends LivingEntity {
 	protected void destroyVanishingCursedItems() {
 		for (int i = 0; i < this.inventory.getContainerSize(); i++) {
 			ItemStack itemStack = this.inventory.getItem(i);
-			if (!itemStack.isEmpty() && EnchantmentHelper.hasVanishingCurse(itemStack)) {
+			if (!itemStack.isEmpty() && EnchantmentHelper.has(itemStack, EnchantmentEffectComponents.PREVENT_EQUIPMENT_DROP)) {
 				this.inventory.removeItemNoUpdate(i);
 			}
 		}
@@ -717,11 +728,7 @@ public abstract class Player extends LivingEntity {
 	public float getDestroySpeed(BlockState blockState) {
 		float f = this.inventory.getDestroySpeed(blockState);
 		if (f > 1.0F) {
-			int i = EnchantmentHelper.getBlockEfficiency(this);
-			ItemStack itemStack = this.getMainHandItem();
-			if (i > 0 && !itemStack.isEmpty()) {
-				f += (float)(i * i + 1);
-			}
+			f += (float)this.getAttributeValue(Attributes.MINING_EFFICIENCY);
 		}
 
 		if (MobEffectUtil.hasDigSpeed(this)) {
@@ -738,8 +745,8 @@ public abstract class Player extends LivingEntity {
 		}
 
 		f *= (float)this.getAttributeValue(Attributes.BLOCK_BREAK_SPEED);
-		if (this.isEyeInFluid(FluidTags.WATER) && !EnchantmentHelper.hasAquaAffinity(this)) {
-			f /= 5.0F;
+		if (this.isEyeInFluid(FluidTags.WATER)) {
+			f *= (float)this.getAttribute(Attributes.SUBMERGED_MINING_SPEED).getValue();
 		}
 
 		if (!this.onGround()) {
@@ -964,11 +971,6 @@ public abstract class Player extends LivingEntity {
 		}
 	}
 
-	@Override
-	protected boolean onSoulSpeedBlock() {
-		return !this.abilities.flying && super.onSoulSpeedBlock();
-	}
-
 	public boolean isTextFilteringEnabled() {
 		return false;
 	}
@@ -1118,27 +1120,29 @@ public abstract class Player extends LivingEntity {
 	public void attack(Entity entity) {
 		if (entity.isAttackable()) {
 			if (!entity.skipAttackInteraction(this)) {
-				float f = (float)this.getAttributeValue(Attributes.ATTACK_DAMAGE);
-				float g = EnchantmentHelper.getDamageBonus(this.getMainHandItem(), entity.getType());
+				float f = this.isAutoSpinAttack() ? this.autoSpinAttackDmg : (float)this.getAttributeValue(Attributes.ATTACK_DAMAGE);
+				ItemStack itemStack = this.getAttackingItemStack();
+				DamageSource damageSource = this.damageSources().playerAttack(this);
+				float g = f - this.getEnchantedDamage(entity, f, damageSource);
 				float h = this.getAttackStrengthScale(0.5F);
 				f *= 0.2F + h * h * 0.8F;
 				g *= h;
 				this.resetAttackStrengthTicker();
 				if (entity.getType().is(EntityTypeTags.REDIRECTABLE_PROJECTILE) && entity instanceof Projectile projectile) {
 					projectile.deflect(ProjectileDeflection.AIM_DEFLECT, this, this, true);
+					this.level().playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.PLAYER_ATTACK_NODAMAGE, this.getSoundSource());
 				} else {
 					if (f > 0.0F || g > 0.0F) {
 						boolean bl = h > 0.9F;
-						boolean bl2 = false;
-						int i = 0;
-						i += EnchantmentHelper.getKnockbackBonus(this);
+						boolean bl2;
 						if (this.isSprinting() && bl) {
 							this.level().playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.PLAYER_ATTACK_KNOCKBACK, this.getSoundSource(), 1.0F, 1.0F);
-							i++;
 							bl2 = true;
+						} else {
+							bl2 = false;
 						}
 
-						f += this.getItemInHand(InteractionHand.MAIN_HAND).getItem().getAttackDamageBonus(this, f);
+						f += itemStack.getItem().getAttackDamageBonus(entity, f, damageSource);
 						boolean bl3 = bl
 							&& this.fallDistance > 0.0F
 							&& !this.onGround()
@@ -1152,43 +1156,35 @@ public abstract class Player extends LivingEntity {
 							f *= 1.5F;
 						}
 
-						f += g;
+						float j = f + g;
 						boolean bl4 = false;
 						double d = (double)(this.walkDist - this.walkDistO);
 						if (bl && !bl3 && !bl2 && this.onGround() && d < (double)this.getSpeed()) {
-							ItemStack itemStack = this.getItemInHand(InteractionHand.MAIN_HAND);
-							if (itemStack.getItem() instanceof SwordItem) {
+							ItemStack itemStack2 = this.getItemInHand(InteractionHand.MAIN_HAND);
+							if (itemStack2.getItem() instanceof SwordItem) {
 								bl4 = true;
 							}
 						}
 
-						float j = 0.0F;
-						boolean bl5 = false;
-						int k = EnchantmentHelper.getFireAspect(this);
-						if (entity instanceof LivingEntity) {
-							j = ((LivingEntity)entity).getHealth();
-							if (k > 0 && !entity.isOnFire()) {
-								bl5 = true;
-								entity.igniteForSeconds(1);
-							}
+						float k = 0.0F;
+						if (entity instanceof LivingEntity livingEntity) {
+							k = livingEntity.getHealth();
 						}
 
 						Vec3 vec3 = entity.getDeltaMovement();
-						boolean bl6 = entity.hurt(this.damageSources().playerAttack(this), f);
-						if (bl6) {
-							if (i > 0) {
-								if (entity instanceof LivingEntity) {
-									((LivingEntity)entity)
-										.knockback(
-											(double)((float)i * 0.5F),
-											(double)Mth.sin(this.getYRot() * (float) (Math.PI / 180.0)),
-											(double)(-Mth.cos(this.getYRot() * (float) (Math.PI / 180.0)))
-										);
+						boolean bl5 = entity.hurt(damageSource, j);
+						if (bl5) {
+							float l = this.getKnockback(entity, damageSource) + (bl2 ? 1.0F : 0.0F);
+							if (l > 0.0F) {
+								if (entity instanceof LivingEntity livingEntity2) {
+									livingEntity2.knockback(
+										(double)(l * 0.5F), (double)Mth.sin(this.getYRot() * (float) (Math.PI / 180.0)), (double)(-Mth.cos(this.getYRot() * (float) (Math.PI / 180.0)))
+									);
 								} else {
 									entity.push(
-										(double)(-Mth.sin(this.getYRot() * (float) (Math.PI / 180.0)) * (float)i * 0.5F),
+										(double)(-Mth.sin(this.getYRot() * (float) (Math.PI / 180.0)) * l * 0.5F),
 										0.1,
-										(double)(Mth.cos(this.getYRot() * (float) (Math.PI / 180.0)) * (float)i * 0.5F)
+										(double)(Mth.cos(this.getYRot() * (float) (Math.PI / 180.0)) * l * 0.5F)
 									);
 								}
 
@@ -1197,18 +1193,22 @@ public abstract class Player extends LivingEntity {
 							}
 
 							if (bl4) {
-								float l = 1.0F + EnchantmentHelper.getSweepingDamageRatio(this) * f;
+								float m = 1.0F + (float)this.getAttributeValue(Attributes.SWEEPING_DAMAGE_RATIO) * f;
 
-								for (LivingEntity livingEntity : this.level().getEntitiesOfClass(LivingEntity.class, entity.getBoundingBox().inflate(1.0, 0.25, 1.0))) {
-									if (livingEntity != this
-										&& livingEntity != entity
-										&& !this.isAlliedTo(livingEntity)
-										&& (!(livingEntity instanceof ArmorStand) || !((ArmorStand)livingEntity).isMarker())
-										&& this.distanceToSqr(livingEntity) < 9.0) {
-										livingEntity.knockback(
+								for (LivingEntity livingEntity3 : this.level().getEntitiesOfClass(LivingEntity.class, entity.getBoundingBox().inflate(1.0, 0.25, 1.0))) {
+									if (livingEntity3 != this
+										&& livingEntity3 != entity
+										&& !this.isAlliedTo(livingEntity3)
+										&& (!(livingEntity3 instanceof ArmorStand) || !((ArmorStand)livingEntity3).isMarker())
+										&& this.distanceToSqr(livingEntity3) < 9.0) {
+										float n = this.getEnchantedDamage(livingEntity3, m, damageSource) * h;
+										livingEntity3.knockback(
 											0.4F, (double)Mth.sin(this.getYRot() * (float) (Math.PI / 180.0)), (double)(-Mth.cos(this.getYRot() * (float) (Math.PI / 180.0)))
 										);
-										livingEntity.hurt(this.damageSources().playerAttack(this), l);
+										livingEntity3.hurt(damageSource, n);
+										if (this.level() instanceof ServerLevel serverLevel) {
+											EnchantmentHelper.doPostAttackEffects(serverLevel, livingEntity3, damageSource);
+										}
 									}
 								}
 
@@ -1240,48 +1240,55 @@ public abstract class Player extends LivingEntity {
 							}
 
 							this.setLastHurtMob(entity);
-							if (entity instanceof LivingEntity) {
-								EnchantmentHelper.doPostHurtEffects((LivingEntity)entity, this);
-							}
-
-							EnchantmentHelper.doPostDamageEffects(this, entity);
-							ItemStack itemStack2 = this.getMainHandItem();
 							Entity entity2 = entity;
 							if (entity instanceof EnderDragonPart) {
 								entity2 = ((EnderDragonPart)entity).parentMob;
 							}
 
-							if (!this.level().isClientSide && !itemStack2.isEmpty() && entity2 instanceof LivingEntity) {
-								itemStack2.hurtEnemy((LivingEntity)entity2, this);
-								if (itemStack2.isEmpty()) {
-									this.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+							boolean bl6 = false;
+							if (this.level() instanceof ServerLevel serverLevel2) {
+								if (entity2 instanceof LivingEntity livingEntity3x) {
+									bl6 = itemStack.hurtEnemy(livingEntity3x, this);
+								}
+
+								EnchantmentHelper.doPostAttackEffects(serverLevel2, entity, damageSource);
+							}
+
+							if (!this.level().isClientSide && !itemStack.isEmpty() && entity2 instanceof LivingEntity) {
+								if (bl6) {
+									itemStack.postHurtEnemy((LivingEntity)entity2, this);
+								}
+
+								if (itemStack.isEmpty()) {
+									if (itemStack == this.getMainHandItem()) {
+										this.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+									} else {
+										this.setItemInHand(InteractionHand.OFF_HAND, ItemStack.EMPTY);
+									}
 								}
 							}
 
 							if (entity instanceof LivingEntity) {
-								float m = j - ((LivingEntity)entity).getHealth();
-								this.awardStat(Stats.DAMAGE_DEALT, Math.round(m * 10.0F));
-								if (k > 0) {
-									entity.igniteForSeconds(k * 4);
-								}
-
-								if (this.level() instanceof ServerLevel && m > 2.0F) {
-									int n = (int)((double)m * 0.5);
-									((ServerLevel)this.level()).sendParticles(ParticleTypes.DAMAGE_INDICATOR, entity.getX(), entity.getY(0.5), entity.getZ(), n, 0.1, 0.0, 0.1, 0.2);
+								float o = k - ((LivingEntity)entity).getHealth();
+								this.awardStat(Stats.DAMAGE_DEALT, Math.round(o * 10.0F));
+								if (this.level() instanceof ServerLevel && o > 2.0F) {
+									int p = (int)((double)o * 0.5);
+									((ServerLevel)this.level()).sendParticles(ParticleTypes.DAMAGE_INDICATOR, entity.getX(), entity.getY(0.5), entity.getZ(), p, 0.1, 0.0, 0.1, 0.2);
 								}
 							}
 
 							this.causeFoodExhaustion(0.1F);
 						} else {
 							this.level().playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.PLAYER_ATTACK_NODAMAGE, this.getSoundSource(), 1.0F, 1.0F);
-							if (bl5) {
-								entity.clearFire();
-							}
 						}
 					}
 				}
 			}
 		}
+	}
+
+	protected float getEnchantedDamage(Entity entity, float f, DamageSource damageSource) {
+		return f;
 	}
 
 	@Override
@@ -1679,7 +1686,7 @@ public abstract class Player extends LivingEntity {
 	}
 
 	@Override
-	public int getExperienceReward() {
+	protected int getBaseExperienceReward() {
 		if (!this.level().getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY) && !this.isSpectator()) {
 			int i = this.experienceLevel * 7;
 			return i > 100 ? 100 : i;
@@ -2015,11 +2022,6 @@ public abstract class Player extends LivingEntity {
 		}
 
 		return super.eat(level, itemStack);
-	}
-
-	@Override
-	protected boolean shouldRemoveSoulSpeed(BlockState blockState) {
-		return this.abilities.flying || super.shouldRemoveSoulSpeed(blockState);
 	}
 
 	@Override

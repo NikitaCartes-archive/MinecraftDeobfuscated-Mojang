@@ -1,5 +1,6 @@
 package net.minecraft.world.item;
 
+import javax.annotation.Nullable;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Position;
 import net.minecraft.world.entity.LivingEntity;
@@ -14,13 +15,13 @@ public class SpectralArrowItem extends ArrowItem {
 	}
 
 	@Override
-	public AbstractArrow createArrow(Level level, ItemStack itemStack, LivingEntity livingEntity) {
-		return new SpectralArrow(level, livingEntity, itemStack.copyWithCount(1));
+	public AbstractArrow createArrow(Level level, ItemStack itemStack, LivingEntity livingEntity, @Nullable ItemStack itemStack2) {
+		return new SpectralArrow(level, livingEntity, itemStack.copyWithCount(1), itemStack2);
 	}
 
 	@Override
 	public Projectile asProjectile(Level level, Position position, ItemStack itemStack, Direction direction) {
-		SpectralArrow spectralArrow = new SpectralArrow(level, position.x(), position.y(), position.z(), itemStack.copyWithCount(1));
+		SpectralArrow spectralArrow = new SpectralArrow(level, position.x(), position.y(), position.z(), itemStack.copyWithCount(1), null);
 		spectralArrow.pickup = AbstractArrow.Pickup.ALLOWED;
 		return spectralArrow;
 	}

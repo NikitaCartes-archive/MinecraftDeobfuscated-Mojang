@@ -4,7 +4,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.decoration.PaintingVariant;
 
@@ -17,7 +16,7 @@ public class PaintingTextureManager extends TextureAtlasHolder {
 	}
 
 	public TextureAtlasSprite get(PaintingVariant paintingVariant) {
-		return this.getSprite(BuiltInRegistries.PAINTING_VARIANT.getKey(paintingVariant));
+		return this.getSprite(paintingVariant.assetId());
 	}
 
 	public TextureAtlasSprite getBackSprite() {

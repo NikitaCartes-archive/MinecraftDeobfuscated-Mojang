@@ -20,6 +20,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
@@ -262,9 +263,9 @@ public class ItemInHandRenderer {
 		}
 	}
 
-	private void applyEatTransform(PoseStack poseStack, float f, HumanoidArm humanoidArm, ItemStack itemStack) {
-		float g = (float)this.minecraft.player.getUseItemRemainingTicks() - f + 1.0F;
-		float h = g / (float)itemStack.getUseDuration();
+	private void applyEatTransform(PoseStack poseStack, float f, HumanoidArm humanoidArm, ItemStack itemStack, Player player) {
+		float g = (float)player.getUseItemRemainingTicks() - f + 1.0F;
+		float h = g / (float)itemStack.getUseDuration(player);
 		if (h < 0.8F) {
 			float i = Mth.abs(Mth.cos(g / 4.0F * (float) Math.PI) * 0.1F);
 			poseStack.translate(0.0F, i, 0.0F);
@@ -278,9 +279,9 @@ public class ItemInHandRenderer {
 		poseStack.mulPose(Axis.ZP.rotationDegrees((float)j * i * 30.0F));
 	}
 
-	private void applyBrushTransform(PoseStack poseStack, float f, HumanoidArm humanoidArm, ItemStack itemStack, float g) {
+	private void applyBrushTransform(PoseStack poseStack, float f, HumanoidArm humanoidArm, ItemStack itemStack, Player player, float g) {
 		this.applyItemArmTransform(poseStack, humanoidArm, g);
-		float h = (float)(this.minecraft.player.getUseItemRemainingTicks() % 10);
+		float h = (float)(player.getUseItemRemainingTicks() % 10);
 		float i = h - f + 1.0F;
 		float j = 1.0F - i / 10.0F;
 		float k = -90.0F;
@@ -412,8 +413,8 @@ public class ItemInHandRenderer {
 					poseStack.mulPose(Axis.XP.rotationDegrees(-11.935F));
 					poseStack.mulPose(Axis.YP.rotationDegrees((float)k * 65.3F));
 					poseStack.mulPose(Axis.ZP.rotationDegrees((float)k * -9.785F));
-					float l = (float)itemStack.getUseDuration() - ((float)this.minecraft.player.getUseItemRemainingTicks() - f + 1.0F);
-					float m = l / (float)CrossbowItem.getChargeDuration(itemStack);
+					float l = (float)itemStack.getUseDuration(abstractClientPlayer) - ((float)abstractClientPlayer.getUseItemRemainingTicks() - f + 1.0F);
+					float m = l / (float)CrossbowItem.getChargeDuration(itemStack, abstractClientPlayer);
 					if (m > 1.0F) {
 						m = 1.0F;
 					}
@@ -460,7 +461,7 @@ public class ItemInHandRenderer {
 							break;
 						case EAT:
 						case DRINK:
-							this.applyEatTransform(poseStack, f, humanoidArm, itemStack);
+							this.applyEatTransform(poseStack, f, humanoidArm, itemStack, abstractClientPlayer);
 							this.applyItemArmTransform(poseStack, humanoidArm, i);
 							break;
 						case BLOCK:
@@ -472,7 +473,7 @@ public class ItemInHandRenderer {
 							poseStack.mulPose(Axis.XP.rotationDegrees(-13.935F));
 							poseStack.mulPose(Axis.YP.rotationDegrees((float)q * 35.3F));
 							poseStack.mulPose(Axis.ZP.rotationDegrees((float)q * -9.785F));
-							float rx = (float)itemStack.getUseDuration() - ((float)this.minecraft.player.getUseItemRemainingTicks() - f + 1.0F);
+							float rx = (float)itemStack.getUseDuration(abstractClientPlayer) - ((float)abstractClientPlayer.getUseItemRemainingTicks() - f + 1.0F);
 							float lxx = rx / 20.0F;
 							lxx = (lxx * lxx + lxx * 2.0F) / 3.0F;
 							if (lxx > 1.0F) {
@@ -496,7 +497,7 @@ public class ItemInHandRenderer {
 							poseStack.mulPose(Axis.XP.rotationDegrees(-55.0F));
 							poseStack.mulPose(Axis.YP.rotationDegrees((float)q * 35.3F));
 							poseStack.mulPose(Axis.ZP.rotationDegrees((float)q * -9.785F));
-							float r = (float)itemStack.getUseDuration() - ((float)this.minecraft.player.getUseItemRemainingTicks() - f + 1.0F);
+							float r = (float)itemStack.getUseDuration(abstractClientPlayer) - ((float)abstractClientPlayer.getUseItemRemainingTicks() - f + 1.0F);
 							float lx = r / 10.0F;
 							if (lx > 1.0F) {
 								lx = 1.0F;
@@ -514,7 +515,7 @@ public class ItemInHandRenderer {
 							poseStack.mulPose(Axis.YN.rotationDegrees((float)q * 45.0F));
 							break;
 						case BRUSH:
-							this.applyBrushTransform(poseStack, f, humanoidArm, itemStack, i);
+							this.applyBrushTransform(poseStack, f, humanoidArm, itemStack, abstractClientPlayer, i);
 					}
 				} else if (abstractClientPlayer.isAutoSpinAttack()) {
 					this.applyItemArmTransform(poseStack, humanoidArm, i);

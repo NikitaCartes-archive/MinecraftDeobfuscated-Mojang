@@ -108,7 +108,7 @@ public abstract class AbstractSkeleton extends Monster implements RangedAttackMo
 			}
 
 			if (bl) {
-				this.igniteForSeconds(8);
+				this.igniteForSeconds(8.0F);
 			}
 		}
 
@@ -182,8 +182,9 @@ public abstract class AbstractSkeleton extends Monster implements RangedAttackMo
 
 	@Override
 	public void performRangedAttack(LivingEntity livingEntity, float f) {
-		ItemStack itemStack = this.getProjectile(this.getItemInHand(ProjectileUtil.getWeaponHoldingHand(this, Items.BOW)));
-		AbstractArrow abstractArrow = this.getArrow(itemStack, f);
+		ItemStack itemStack = this.getItemInHand(ProjectileUtil.getWeaponHoldingHand(this, Items.BOW));
+		ItemStack itemStack2 = this.getProjectile(itemStack);
+		AbstractArrow abstractArrow = this.getArrow(itemStack2, f, itemStack);
 		double d = livingEntity.getX() - this.getX();
 		double e = livingEntity.getY(0.3333333333333333) - abstractArrow.getY();
 		double g = livingEntity.getZ() - this.getZ();
@@ -193,8 +194,8 @@ public abstract class AbstractSkeleton extends Monster implements RangedAttackMo
 		this.level().addFreshEntity(abstractArrow);
 	}
 
-	protected AbstractArrow getArrow(ItemStack itemStack, float f) {
-		return ProjectileUtil.getMobArrow(this, itemStack, f);
+	protected AbstractArrow getArrow(ItemStack itemStack, float f, @Nullable ItemStack itemStack2) {
+		return ProjectileUtil.getMobArrow(this, itemStack, f, itemStack2);
 	}
 
 	@Override

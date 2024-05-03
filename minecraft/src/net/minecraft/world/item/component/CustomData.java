@@ -3,6 +3,7 @@ package net.minecraft.world.item.component;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
+import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.MapDecoder;
 import com.mojang.serialization.MapEncoder;
 import com.mojang.serialization.MapLike;
@@ -101,21 +102,23 @@ public final class CustomData {
 				} catch (Exception var7) {
 					LOGGER.warn("Failed to rollback block entity at {} after failure", blockEntity.getBlockPos(), var7);
 				}
-
-				return false;
 			}
-		} else {
-			return false;
 		}
+
+		return false;
 	}
 
-	public <T> DataResult<CustomData> update(MapEncoder<T> mapEncoder, T object) {
-		return mapEncoder.encode(object, NbtOps.INSTANCE, NbtOps.INSTANCE.mapBuilder()).build(this.tag).map(tag -> new CustomData((CompoundTag)tag));
+	public <T> DataResult<CustomData> update(DynamicOps<Tag> dynamicOps, MapEncoder<T> mapEncoder, T object) {
+		return mapEncoder.encode(object, dynamicOps, dynamicOps.mapBuilder()).build(this.tag).map(tag -> new CustomData((CompoundTag)tag));
 	}
 
 	public <T> DataResult<T> read(MapDecoder<T> mapDecoder) {
-		MapLike<Tag> mapLike = NbtOps.INSTANCE.getMap((Tag)this.tag).getOrThrow();
-		return mapDecoder.decode(NbtOps.INSTANCE, mapLike);
+		return this.read(NbtOps.INSTANCE, mapDecoder);
+	}
+
+	public <T> DataResult<T> read(DynamicOps<Tag> dynamicOps, MapDecoder<T> mapDecoder) {
+		MapLike<Tag> mapLike = dynamicOps.getMap(this.tag).getOrThrow();
+		return mapDecoder.decode(dynamicOps, mapLike);
 	}
 
 	public int size() {

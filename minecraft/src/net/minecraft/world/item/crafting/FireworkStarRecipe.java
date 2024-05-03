@@ -7,7 +7,6 @@ import java.util.Map;
 import net.minecraft.Util;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -48,15 +47,15 @@ public class FireworkStarRecipe extends CustomRecipe {
 		super(craftingBookCategory);
 	}
 
-	public boolean matches(CraftingContainer craftingContainer, Level level) {
+	public boolean matches(CraftingInput craftingInput, Level level) {
 		boolean bl = false;
 		boolean bl2 = false;
 		boolean bl3 = false;
 		boolean bl4 = false;
 		boolean bl5 = false;
 
-		for (int i = 0; i < craftingContainer.getContainerSize(); i++) {
-			ItemStack itemStack = craftingContainer.getItem(i);
+		for (int i = 0; i < craftingInput.size(); i++) {
+			ItemStack itemStack = craftingInput.getItem(i);
 			if (!itemStack.isEmpty()) {
 				if (SHAPE_INGREDIENT.test(itemStack)) {
 					if (bl3) {
@@ -95,14 +94,14 @@ public class FireworkStarRecipe extends CustomRecipe {
 		return bl && bl2;
 	}
 
-	public ItemStack assemble(CraftingContainer craftingContainer, HolderLookup.Provider provider) {
+	public ItemStack assemble(CraftingInput craftingInput, HolderLookup.Provider provider) {
 		FireworkExplosion.Shape shape = FireworkExplosion.Shape.SMALL_BALL;
 		boolean bl = false;
 		boolean bl2 = false;
 		IntList intList = new IntArrayList();
 
-		for (int i = 0; i < craftingContainer.getContainerSize(); i++) {
-			ItemStack itemStack = craftingContainer.getItem(i);
+		for (int i = 0; i < craftingInput.size(); i++) {
+			ItemStack itemStack = craftingInput.getItem(i);
 			if (!itemStack.isEmpty()) {
 				if (SHAPE_INGREDIENT.test(itemStack)) {
 					shape = (FireworkExplosion.Shape)SHAPE_BY_ITEM.get(itemStack.getItem());

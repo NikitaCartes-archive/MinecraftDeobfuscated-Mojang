@@ -51,6 +51,8 @@ public class TrimPatterns {
 		register(bootstrapContext, Items.SILENCE_ARMOR_TRIM_SMITHING_TEMPLATE, SILENCE);
 		register(bootstrapContext, Items.RAISER_ARMOR_TRIM_SMITHING_TEMPLATE, RAISER);
 		register(bootstrapContext, Items.HOST_ARMOR_TRIM_SMITHING_TEMPLATE, HOST);
+		register(bootstrapContext, Items.FLOW_ARMOR_TRIM_SMITHING_TEMPLATE, FLOW);
+		register(bootstrapContext, Items.BOLT_ARMOR_TRIM_SMITHING_TEMPLATE, BOLT);
 	}
 
 	public static Optional<Holder.Reference<TrimPattern>> getFromTemplate(HolderLookup.Provider provider, ItemStack itemStack) {

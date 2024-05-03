@@ -14,7 +14,7 @@ public class EntityTypeTagsProvider extends IntrinsicHolderTagsProvider<EntityTy
 
 	@Override
 	protected void addTags(HolderLookup.Provider provider) {
-		this.tag(EntityTypeTags.SKELETONS).add(EntityType.SKELETON, EntityType.STRAY, EntityType.WITHER_SKELETON, EntityType.SKELETON_HORSE);
+		this.tag(EntityTypeTags.SKELETONS).add(EntityType.SKELETON, EntityType.STRAY, EntityType.WITHER_SKELETON, EntityType.SKELETON_HORSE, EntityType.BOGGED);
 		this.tag(EntityTypeTags.ZOMBIES)
 			.add(
 				EntityType.ZOMBIE_HORSE, EntityType.ZOMBIE, EntityType.ZOMBIE_VILLAGER, EntityType.ZOMBIFIED_PIGLIN, EntityType.ZOGLIN, EntityType.DROWNED, EntityType.HUSK
@@ -34,7 +34,9 @@ public class EntityTypeTagsProvider extends IntrinsicHolderTagsProvider<EntityTy
 				EntityType.EGG,
 				EntityType.TRIDENT,
 				EntityType.DRAGON_FIREBALL,
-				EntityType.WITHER_SKULL
+				EntityType.WITHER_SKULL,
+				EntityType.WIND_CHARGE,
+				EntityType.BREEZE_WIND_CHARGE
 			);
 		this.tag(EntityTypeTags.POWDER_SNOW_WALKABLE_MOBS).add(EntityType.RABBIT, EntityType.ENDERMITE, EntityType.SILVERFISH, EntityType.FOX);
 		this.tag(EntityTypeTags.AXOLOTL_HUNT_TARGETS)
@@ -76,7 +78,8 @@ public class EntityTypeTagsProvider extends IntrinsicHolderTagsProvider<EntityTy
 				EntityType.MAGMA_CUBE,
 				EntityType.OCELOT,
 				EntityType.PARROT,
-				EntityType.WITHER
+				EntityType.WITHER,
+				EntityType.BREEZE
 			);
 		this.tag(EntityTypeTags.DISMOUNTS_UNDERWATER)
 			.add(
@@ -133,6 +136,22 @@ public class EntityTypeTagsProvider extends IntrinsicHolderTagsProvider<EntityTy
 		this.tag(EntityTypeTags.SENSITIVE_TO_IMPALING).addTag(EntityTypeTags.AQUATIC);
 		this.tag(EntityTypeTags.SENSITIVE_TO_BANE_OF_ARTHROPODS).addTag(EntityTypeTags.ARTHROPOD);
 		this.tag(EntityTypeTags.SENSITIVE_TO_SMITE).addTag(EntityTypeTags.UNDEAD);
-		this.tag(EntityTypeTags.REDIRECTABLE_PROJECTILE).add(EntityType.FIREBALL);
+		this.tag(EntityTypeTags.REDIRECTABLE_PROJECTILE).add(EntityType.FIREBALL, EntityType.WIND_CHARGE, EntityType.BREEZE_WIND_CHARGE);
+		this.tag(EntityTypeTags.DEFLECTS_PROJECTILES).add(EntityType.BREEZE);
+		this.tag(EntityTypeTags.CAN_TURN_IN_BOATS).add(EntityType.BREEZE);
+		this.tag(EntityTypeTags.NO_ANGER_FROM_WIND_CHARGE)
+			.add(
+				EntityType.BREEZE,
+				EntityType.SKELETON,
+				EntityType.BOGGED,
+				EntityType.STRAY,
+				EntityType.ZOMBIE,
+				EntityType.HUSK,
+				EntityType.SPIDER,
+				EntityType.CAVE_SPIDER,
+				EntityType.SLIME
+			);
+		this.tag(EntityTypeTags.IMMUNE_TO_INFESTED).add(EntityType.SILVERFISH);
+		this.tag(EntityTypeTags.IMMUNE_TO_OOZING).add(EntityType.SLIME);
 	}
 }

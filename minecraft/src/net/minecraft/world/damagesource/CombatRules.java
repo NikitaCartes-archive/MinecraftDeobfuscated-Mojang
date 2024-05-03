@@ -1,6 +1,8 @@
 package net.minecraft.world.damagesource;
 
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 
 public class CombatRules {
@@ -10,11 +12,20 @@ public class CombatRules {
 	public static final float MIN_ARMOR_RATIO = 0.2F;
 	private static final int NUM_ARMOR_ITEMS = 4;
 
-	public static float getDamageAfterAbsorb(float f, DamageSource damageSource, float g, float h) {
-		float i = 2.0F + h / 4.0F;
-		float j = Mth.clamp(g - f / i, g * 0.2F, 20.0F);
-		float k = j / 25.0F;
-		float l = EnchantmentHelper.calculateArmorBreach(damageSource.getEntity(), k);
+	public static float getDamageAfterAbsorb(LivingEntity livingEntity, float f, DamageSource damageSource, float g, float h) {
+		float l;
+		label12: {
+			float i = 2.0F + h / 4.0F;
+			float j = Mth.clamp(g - f / i, g * 0.2F, 20.0F);
+			float k = j / 25.0F;
+			if (damageSource.getDirectEntity() instanceof LivingEntity livingEntity2 && livingEntity2.level() instanceof ServerLevel serverLevel) {
+				l = Mth.clamp(EnchantmentHelper.modifyArmorEffectiveness(serverLevel, livingEntity2.getMainHandItem(), livingEntity, damageSource, k), 0.0F, 1.0F);
+				break label12;
+			}
+
+			l = k;
+		}
+
 		float m = 1.0F - l;
 		return f * m;
 	}

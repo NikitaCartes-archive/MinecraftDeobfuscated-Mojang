@@ -13,6 +13,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.valueproviders.UniformInt;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.Brain;
@@ -22,6 +23,7 @@ import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.animal.goat.Goat;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.phys.Vec3;
 
 public class RamTarget extends Behavior<Goat> {
@@ -74,7 +76,11 @@ public class RamTarget extends Behavior<Goat> {
 		Brain<?> brain = goat.getBrain();
 		if (!list.isEmpty()) {
 			LivingEntity livingEntity = (LivingEntity)list.get(0);
-			livingEntity.hurt(serverLevel.damageSources().noAggroMobAttack(goat), (float)goat.getAttributeValue(Attributes.ATTACK_DAMAGE));
+			DamageSource damageSource = serverLevel.damageSources().noAggroMobAttack(goat);
+			if (livingEntity.hurt(damageSource, (float)goat.getAttributeValue(Attributes.ATTACK_DAMAGE))) {
+				EnchantmentHelper.doPostAttackEffects(serverLevel, livingEntity, damageSource);
+			}
+
 			int i = goat.hasEffect(MobEffects.MOVEMENT_SPEED) ? goat.getEffect(MobEffects.MOVEMENT_SPEED).getAmplifier() + 1 : 0;
 			int j = goat.hasEffect(MobEffects.MOVEMENT_SLOWDOWN) ? goat.getEffect(MobEffects.MOVEMENT_SLOWDOWN).getAmplifier() + 1 : 0;
 			float f = 0.25F * (float)(i - j);

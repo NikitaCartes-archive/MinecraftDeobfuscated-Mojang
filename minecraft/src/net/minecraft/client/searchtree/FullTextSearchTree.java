@@ -11,20 +11,11 @@ import net.minecraft.resources.ResourceLocation;
 
 @Environment(EnvType.CLIENT)
 public class FullTextSearchTree<T> extends IdSearchTree<T> {
-	private final List<T> contents;
-	private final Function<T, Stream<String>> filler;
-	private PlainTextSearchTree<T> plainTextSearchTree = PlainTextSearchTree.empty();
+	private final SearchTree<T> plainTextSearchTree;
 
 	public FullTextSearchTree(Function<T, Stream<String>> function, Function<T, Stream<ResourceLocation>> function2, List<T> list) {
 		super(function2, list);
-		this.contents = list;
-		this.filler = function;
-	}
-
-	@Override
-	public void refresh() {
-		super.refresh();
-		this.plainTextSearchTree = PlainTextSearchTree.create(this.contents, this.filler);
+		this.plainTextSearchTree = SearchTree.plainText(list, function);
 	}
 
 	@Override

@@ -24,8 +24,11 @@ import net.minecraft.network.chat.ChatType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.animal.WolfVariants;
+import net.minecraft.world.entity.decoration.PaintingVariants;
 import net.minecraft.world.item.armortrim.TrimMaterials;
 import net.minecraft.world.item.armortrim.TrimPatterns;
+import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.item.enchantment.providers.VanillaEnchantmentProviders;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.MultiNoiseBiomeSourceParameterLists;
 import net.minecraft.world.level.block.entity.BannerPatterns;
@@ -57,8 +60,11 @@ public class VanillaRegistries {
 		.add(Registries.TRIM_PATTERN, TrimPatterns::bootstrap)
 		.add(Registries.TRIM_MATERIAL, TrimMaterials::bootstrap)
 		.add(Registries.WOLF_VARIANT, WolfVariants::bootstrap)
+		.add(Registries.PAINTING_VARIANT, PaintingVariants::bootstrap)
 		.add(Registries.DAMAGE_TYPE, DamageTypes::bootstrap)
-		.add(Registries.BANNER_PATTERN, BannerPatterns::bootstrap);
+		.add(Registries.BANNER_PATTERN, BannerPatterns::bootstrap)
+		.add(Registries.ENCHANTMENT, Enchantments::bootstrap)
+		.add(Registries.ENCHANTMENT_PROVIDER, VanillaEnchantmentProviders::bootstrap);
 
 	private static void validateThatAllBiomeFeaturesHaveBiomeFilter(HolderLookup.Provider provider) {
 		validateThatAllBiomeFeaturesHaveBiomeFilter(provider.lookupOrThrow(Registries.PLACED_FEATURE), provider.lookupOrThrow(Registries.BIOME));

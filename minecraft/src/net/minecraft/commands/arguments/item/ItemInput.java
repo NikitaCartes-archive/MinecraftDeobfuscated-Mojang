@@ -8,8 +8,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.component.DataComponentMap;
+import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.component.TypedDataComponent;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
@@ -24,11 +25,11 @@ public class ItemInput {
 		(object, object2) -> Component.translatableEscape("arguments.item.overstacked", object, object2)
 	);
 	private final Holder<Item> item;
-	private final DataComponentMap components;
+	private final DataComponentPatch components;
 
-	public ItemInput(Holder<Item> holder, DataComponentMap dataComponentMap) {
+	public ItemInput(Holder<Item> holder, DataComponentPatch dataComponentPatch) {
 		this.item = holder;
-		this.components = dataComponentMap;
+		this.components = dataComponentPatch;
 	}
 
 	public Item getItem() {
@@ -59,11 +60,20 @@ public class ItemInput {
 
 	private String serializeComponents(HolderLookup.Provider provider) {
 		DynamicOps<Tag> dynamicOps = provider.createSerializationContext(NbtOps.INSTANCE);
-		return (String)this.components.stream().flatMap(typedDataComponent -> {
-			DataComponentType<?> dataComponentType = typedDataComponent.type();
+		return (String)this.components.entrySet().stream().flatMap(entry -> {
+			DataComponentType<?> dataComponentType = (DataComponentType<?>)entry.getKey();
 			ResourceLocation resourceLocation = BuiltInRegistries.DATA_COMPONENT_TYPE.getKey(dataComponentType);
-			Optional<Tag> optional = typedDataComponent.encodeValue(dynamicOps).result();
-			return resourceLocation != null && !optional.isEmpty() ? Stream.of(resourceLocation.toString() + "=" + optional.get()) : Stream.empty();
+			if (resourceLocation == null) {
+				return Stream.empty();
+			} else {
+				Optional<?> optional = (Optional<?>)entry.getValue();
+				if (optional.isPresent()) {
+					TypedDataComponent<?> typedDataComponent = TypedDataComponent.createUnchecked(dataComponentType, optional.get());
+					return typedDataComponent.encodeValue(dynamicOps).result().stream().map(tag -> resourceLocation.toString() + "=" + tag);
+				} else {
+					return Stream.of("!" + resourceLocation.toString());
+				}
+			}
 		}).collect(Collectors.joining(String.valueOf(',')));
 	}
 

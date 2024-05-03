@@ -1,6 +1,5 @@
 package net.minecraft.data.worldgen.biome;
 
-import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.data.worldgen.BiomeDefaultFeatures;
@@ -580,15 +579,13 @@ public class OverworldBiomes {
 			.build();
 	}
 
-	public static Biome swamp(
-		HolderGetter<PlacedFeature> holderGetter, HolderGetter<ConfiguredWorldCarver<?>> holderGetter2, Consumer<MobSpawnSettings.Builder> consumer
-	) {
+	public static Biome swamp(HolderGetter<PlacedFeature> holderGetter, HolderGetter<ConfiguredWorldCarver<?>> holderGetter2) {
 		MobSpawnSettings.Builder builder = new MobSpawnSettings.Builder();
 		BiomeDefaultFeatures.farmAnimals(builder);
 		BiomeDefaultFeatures.commonSpawns(builder);
 		builder.addSpawn(MobCategory.MONSTER, new MobSpawnSettings.SpawnerData(EntityType.SLIME, 1, 1, 1));
+		builder.addSpawn(MobCategory.MONSTER, new MobSpawnSettings.SpawnerData(EntityType.BOGGED, 50, 4, 4));
 		builder.addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.FROG, 10, 2, 5));
-		consumer.accept(builder);
 		BiomeGenerationSettings.Builder builder2 = new BiomeGenerationSettings.Builder(holderGetter, holderGetter2);
 		BiomeDefaultFeatures.addFossilDecoration(builder2);
 		globalOverworldGeneration(builder2);
@@ -620,15 +617,13 @@ public class OverworldBiomes {
 			.build();
 	}
 
-	public static Biome mangroveSwamp(
-		HolderGetter<PlacedFeature> holderGetter, HolderGetter<ConfiguredWorldCarver<?>> holderGetter2, Consumer<MobSpawnSettings.Builder> consumer
-	) {
+	public static Biome mangroveSwamp(HolderGetter<PlacedFeature> holderGetter, HolderGetter<ConfiguredWorldCarver<?>> holderGetter2) {
 		MobSpawnSettings.Builder builder = new MobSpawnSettings.Builder();
 		BiomeDefaultFeatures.commonSpawns(builder);
 		builder.addSpawn(MobCategory.MONSTER, new MobSpawnSettings.SpawnerData(EntityType.SLIME, 1, 1, 1));
+		builder.addSpawn(MobCategory.MONSTER, new MobSpawnSettings.SpawnerData(EntityType.BOGGED, 50, 4, 4));
 		builder.addSpawn(MobCategory.CREATURE, new MobSpawnSettings.SpawnerData(EntityType.FROG, 10, 2, 5));
 		builder.addSpawn(MobCategory.WATER_AMBIENT, new MobSpawnSettings.SpawnerData(EntityType.TROPICAL_FISH, 25, 8, 8));
-		consumer.accept(builder);
 		BiomeGenerationSettings.Builder builder2 = new BiomeGenerationSettings.Builder(holderGetter, holderGetter2);
 		BiomeDefaultFeatures.addFossilDecoration(builder2);
 		globalOverworldGeneration(builder2);

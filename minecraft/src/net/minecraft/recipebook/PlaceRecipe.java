@@ -43,7 +43,7 @@ public interface PlaceRecipe<T> {
 				}
 
 				if (bl2) {
-					this.addItemToSlot(iterator, o, l, p, r);
+					this.addItemToSlot((T)iterator.next(), o, l, r, p);
 				} else if (s == r) {
 					o += i - r;
 					break;
@@ -54,5 +54,5 @@ public interface PlaceRecipe<T> {
 		}
 	}
 
-	void addItemToSlot(Iterator<T> iterator, int i, int j, int k, int l);
+	void addItemToSlot(T object, int i, int j, int k, int l);
 }

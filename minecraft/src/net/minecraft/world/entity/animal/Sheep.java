@@ -2,6 +2,7 @@ package net.minecraft.world.entity.animal;
 
 import com.google.common.collect.Maps;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
@@ -42,14 +43,11 @@ import net.minecraft.world.entity.ai.goal.TemptGoal;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.CraftingContainer;
-import net.minecraft.world.inventory.MenuType;
-import net.minecraft.world.inventory.TransientCraftingContainer;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.ItemLike;
@@ -349,11 +347,11 @@ public class Sheep extends Animal implements Shearable {
 	private DyeColor getOffspringColor(Animal animal, Animal animal2) {
 		DyeColor dyeColor = ((Sheep)animal).getColor();
 		DyeColor dyeColor2 = ((Sheep)animal2).getColor();
-		CraftingContainer craftingContainer = makeContainer(dyeColor, dyeColor2);
+		CraftingInput craftingInput = makeCraftInput(dyeColor, dyeColor2);
 		return (DyeColor)this.level()
 			.getRecipeManager()
-			.getRecipeFor(RecipeType.CRAFTING, craftingContainer, this.level())
-			.map(recipeHolder -> ((CraftingRecipe)recipeHolder.value()).assemble(craftingContainer, this.level().registryAccess()))
+			.getRecipeFor(RecipeType.CRAFTING, craftingInput, this.level())
+			.map(recipeHolder -> ((CraftingRecipe)recipeHolder.value()).assemble(craftingInput, this.level().registryAccess()))
 			.map(ItemStack::getItem)
 			.filter(DyeItem.class::isInstance)
 			.map(DyeItem.class::cast)
@@ -361,20 +359,7 @@ public class Sheep extends Animal implements Shearable {
 			.orElseGet(() -> this.level().random.nextBoolean() ? dyeColor : dyeColor2);
 	}
 
-	private static CraftingContainer makeContainer(DyeColor dyeColor, DyeColor dyeColor2) {
-		CraftingContainer craftingContainer = new TransientCraftingContainer(new AbstractContainerMenu(null, -1) {
-			@Override
-			public ItemStack quickMoveStack(Player player, int i) {
-				return ItemStack.EMPTY;
-			}
-
-			@Override
-			public boolean stillValid(Player player) {
-				return false;
-			}
-		}, 2, 1);
-		craftingContainer.setItem(0, new ItemStack(DyeItem.byColor(dyeColor)));
-		craftingContainer.setItem(1, new ItemStack(DyeItem.byColor(dyeColor2)));
-		return craftingContainer;
+	private static CraftingInput makeCraftInput(DyeColor dyeColor, DyeColor dyeColor2) {
+		return CraftingInput.of(2, 1, List.of(new ItemStack(DyeItem.byColor(dyeColor)), new ItemStack(DyeItem.byColor(dyeColor2))));
 	}
 }

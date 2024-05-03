@@ -5,17 +5,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.ParticleUtils;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.UniformInt;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LightningBolt;
-import net.minecraft.world.entity.projectile.Projectile;
-import net.minecraft.world.entity.projectile.ThrownTrident;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -28,8 +20,6 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.Vec3;
 
 public class LightningRodBlock extends RodBlock implements SimpleWaterloggedBlock {
 	public static final MapCodec<LightningRodBlock> CODEC = simpleCodec(LightningRodBlock::new);
@@ -128,24 +118,6 @@ public class LightningRodBlock extends RodBlock implements SimpleWaterloggedBloc
 		if (!blockState.is(blockState2.getBlock())) {
 			if ((Boolean)blockState.getValue(POWERED) && !level.getBlockTicks().hasScheduledTick(blockPos, this)) {
 				level.setBlock(blockPos, blockState.setValue(POWERED, Boolean.valueOf(false)), 18);
-			}
-		}
-	}
-
-	@Override
-	protected void onProjectileHit(Level level, BlockState blockState, BlockHitResult blockHitResult, Projectile projectile) {
-		if (level.isThundering() && projectile instanceof ThrownTrident && ((ThrownTrident)projectile).isChanneling()) {
-			BlockPos blockPos = blockHitResult.getBlockPos();
-			if (level.canSeeSky(blockPos)) {
-				LightningBolt lightningBolt = EntityType.LIGHTNING_BOLT.create(level);
-				if (lightningBolt != null) {
-					lightningBolt.moveTo(Vec3.atBottomCenterOf(blockPos.above()));
-					Entity entity = projectile.getOwner();
-					lightningBolt.setCause(entity instanceof ServerPlayer ? (ServerPlayer)entity : null);
-					level.addFreshEntity(lightningBolt);
-				}
-
-				level.playSound(null, blockPos, SoundEvents.TRIDENT_THUNDER, SoundSource.WEATHER, 5.0F, 1.0F);
 			}
 		}
 	}

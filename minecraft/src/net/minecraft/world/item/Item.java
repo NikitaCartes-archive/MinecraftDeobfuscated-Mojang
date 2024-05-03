@@ -26,6 +26,7 @@ import net.minecraft.util.Unit;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -176,12 +177,15 @@ public class Item implements FeatureElement, ItemLike {
 		return false;
 	}
 
-	public float getAttackDamageBonus(Player player, float f) {
+	public float getAttackDamageBonus(Entity entity, float f, DamageSource damageSource) {
 		return 0.0F;
 	}
 
 	public boolean hurtEnemy(ItemStack itemStack, LivingEntity livingEntity, LivingEntity livingEntity2) {
 		return false;
+	}
+
+	public void postHurtEnemy(ItemStack itemStack, LivingEntity livingEntity, LivingEntity livingEntity2) {
 	}
 
 	public boolean mineBlock(ItemStack itemStack, Level level, BlockState blockState, BlockPos blockPos, LivingEntity livingEntity) {
@@ -257,7 +261,7 @@ public class Item implements FeatureElement, ItemLike {
 		return itemStack.has(DataComponents.FOOD) ? UseAnim.EAT : UseAnim.NONE;
 	}
 
-	public int getUseDuration(ItemStack itemStack) {
+	public int getUseDuration(ItemStack itemStack, LivingEntity livingEntity) {
 		FoodProperties foodProperties = itemStack.get(DataComponents.FOOD);
 		return foodProperties != null ? foodProperties.eatDurationTicks() : 0;
 	}

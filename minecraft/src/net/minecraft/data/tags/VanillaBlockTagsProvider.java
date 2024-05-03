@@ -96,7 +96,15 @@ public class VanillaBlockTagsProvider extends IntrinsicHolderTagsProvider<Block>
 				Blocks.WARPED_DOOR,
 				Blocks.MANGROVE_DOOR,
 				Blocks.BAMBOO_DOOR,
-				Blocks.CHERRY_DOOR
+				Blocks.CHERRY_DOOR,
+				Blocks.COPPER_DOOR,
+				Blocks.EXPOSED_COPPER_DOOR,
+				Blocks.WEATHERED_COPPER_DOOR,
+				Blocks.OXIDIZED_COPPER_DOOR,
+				Blocks.WAXED_COPPER_DOOR,
+				Blocks.WAXED_EXPOSED_COPPER_DOOR,
+				Blocks.WAXED_WEATHERED_COPPER_DOOR,
+				Blocks.WAXED_OXIDIZED_COPPER_DOOR
 			);
 		this.tag(BlockTags.WOODEN_STAIRS)
 			.add(
@@ -140,7 +148,19 @@ public class VanillaBlockTagsProvider extends IntrinsicHolderTagsProvider<Block>
 				Blocks.BAMBOO_FENCE,
 				Blocks.CHERRY_FENCE
 			);
-		this.tag(BlockTags.DOORS).addTag(BlockTags.WOODEN_DOORS).add(Blocks.IRON_DOOR);
+		this.tag(BlockTags.DOORS)
+			.addTag(BlockTags.WOODEN_DOORS)
+			.add(
+				Blocks.IRON_DOOR,
+				Blocks.COPPER_DOOR,
+				Blocks.EXPOSED_COPPER_DOOR,
+				Blocks.WEATHERED_COPPER_DOOR,
+				Blocks.OXIDIZED_COPPER_DOOR,
+				Blocks.WAXED_COPPER_DOOR,
+				Blocks.WAXED_EXPOSED_COPPER_DOOR,
+				Blocks.WAXED_WEATHERED_COPPER_DOOR,
+				Blocks.WAXED_OXIDIZED_COPPER_DOOR
+			);
 		this.tag(BlockTags.SAPLINGS)
 			.add(
 				Blocks.OAK_SAPLING,
@@ -372,7 +392,10 @@ public class VanillaBlockTagsProvider extends IntrinsicHolderTagsProvider<Block>
 				Blocks.WAXED_EXPOSED_CUT_COPPER_STAIRS,
 				Blocks.WAXED_CUT_COPPER_STAIRS,
 				Blocks.WAXED_OXIDIZED_CUT_COPPER_STAIRS,
-				Blocks.MUD_BRICK_STAIRS
+				Blocks.MUD_BRICK_STAIRS,
+				Blocks.TUFF_STAIRS,
+				Blocks.POLISHED_TUFF_STAIRS,
+				Blocks.TUFF_BRICK_STAIRS
 			);
 		this.tag(BlockTags.SLABS)
 			.addTag(BlockTags.WOODEN_SLABS)
@@ -422,7 +445,10 @@ public class VanillaBlockTagsProvider extends IntrinsicHolderTagsProvider<Block>
 				Blocks.EXPOSED_CUT_COPPER_SLAB,
 				Blocks.CUT_COPPER_SLAB,
 				Blocks.WAXED_OXIDIZED_CUT_COPPER_SLAB,
-				Blocks.MUD_BRICK_SLAB
+				Blocks.MUD_BRICK_SLAB,
+				Blocks.TUFF_SLAB,
+				Blocks.POLISHED_TUFF_SLAB,
+				Blocks.TUFF_BRICK_SLAB
 			);
 		this.tag(BlockTags.WALLS)
 			.add(
@@ -447,7 +473,10 @@ public class VanillaBlockTagsProvider extends IntrinsicHolderTagsProvider<Block>
 				Blocks.POLISHED_DEEPSLATE_WALL,
 				Blocks.DEEPSLATE_TILE_WALL,
 				Blocks.DEEPSLATE_BRICK_WALL,
-				Blocks.MUD_BRICK_WALL
+				Blocks.MUD_BRICK_WALL,
+				Blocks.TUFF_WALL,
+				Blocks.POLISHED_TUFF_WALL,
+				Blocks.TUFF_BRICK_WALL
 			);
 		this.tag(BlockTags.CORAL_PLANTS).add(Blocks.TUBE_CORAL, Blocks.BRAIN_CORAL, Blocks.BUBBLE_CORAL, Blocks.FIRE_CORAL, Blocks.HORN_CORAL);
 		this.tag(BlockTags.CORALS)
@@ -510,7 +539,19 @@ public class VanillaBlockTagsProvider extends IntrinsicHolderTagsProvider<Block>
 				Blocks.BAMBOO_TRAPDOOR,
 				Blocks.CHERRY_TRAPDOOR
 			);
-		this.tag(BlockTags.TRAPDOORS).addTag(BlockTags.WOODEN_TRAPDOORS).add(Blocks.IRON_TRAPDOOR);
+		this.tag(BlockTags.TRAPDOORS)
+			.addTag(BlockTags.WOODEN_TRAPDOORS)
+			.add(
+				Blocks.IRON_TRAPDOOR,
+				Blocks.COPPER_TRAPDOOR,
+				Blocks.EXPOSED_COPPER_TRAPDOOR,
+				Blocks.WEATHERED_COPPER_TRAPDOOR,
+				Blocks.OXIDIZED_COPPER_TRAPDOOR,
+				Blocks.WAXED_COPPER_TRAPDOOR,
+				Blocks.WAXED_EXPOSED_COPPER_TRAPDOOR,
+				Blocks.WAXED_WEATHERED_COPPER_TRAPDOOR,
+				Blocks.WAXED_OXIDIZED_COPPER_TRAPDOOR
+			);
 		this.tag(BlockTags.UNDERWATER_BONEMEALS).add(Blocks.SEAGRASS).addTag(BlockTags.CORALS).addTag(BlockTags.WALL_CORALS);
 		this.tag(BlockTags.BAMBOO_PLANTABLE_ON)
 			.addTag(BlockTags.SAND)
@@ -1286,7 +1327,64 @@ public class VanillaBlockTagsProvider extends IntrinsicHolderTagsProvider<Block>
 			.add(Blocks.MUD_BRICKS)
 			.add(Blocks.MUD_BRICK_STAIRS)
 			.add(Blocks.MUD_BRICK_SLAB)
-			.add(Blocks.PACKED_MUD);
+			.add(Blocks.PACKED_MUD)
+			.add(
+				Blocks.CRAFTER,
+				Blocks.TUFF_SLAB,
+				Blocks.TUFF_STAIRS,
+				Blocks.TUFF_WALL,
+				Blocks.CHISELED_TUFF,
+				Blocks.POLISHED_TUFF,
+				Blocks.POLISHED_TUFF_SLAB,
+				Blocks.POLISHED_TUFF_STAIRS,
+				Blocks.POLISHED_TUFF_WALL,
+				Blocks.TUFF_BRICKS,
+				Blocks.TUFF_BRICK_SLAB,
+				Blocks.TUFF_BRICK_STAIRS,
+				Blocks.TUFF_BRICK_WALL,
+				Blocks.CHISELED_TUFF_BRICKS,
+				Blocks.CHISELED_COPPER,
+				Blocks.EXPOSED_CHISELED_COPPER,
+				Blocks.WEATHERED_CHISELED_COPPER,
+				Blocks.OXIDIZED_CHISELED_COPPER,
+				Blocks.WAXED_CHISELED_COPPER,
+				Blocks.WAXED_EXPOSED_CHISELED_COPPER,
+				Blocks.WAXED_WEATHERED_CHISELED_COPPER,
+				Blocks.WAXED_OXIDIZED_CHISELED_COPPER,
+				Blocks.COPPER_GRATE,
+				Blocks.EXPOSED_COPPER_GRATE,
+				Blocks.WEATHERED_COPPER_GRATE,
+				Blocks.OXIDIZED_COPPER_GRATE,
+				Blocks.WAXED_COPPER_GRATE,
+				Blocks.WAXED_EXPOSED_COPPER_GRATE,
+				Blocks.WAXED_WEATHERED_COPPER_GRATE,
+				Blocks.WAXED_OXIDIZED_COPPER_GRATE,
+				Blocks.COPPER_BULB,
+				Blocks.EXPOSED_COPPER_BULB,
+				Blocks.WEATHERED_COPPER_BULB,
+				Blocks.OXIDIZED_COPPER_BULB,
+				Blocks.WAXED_COPPER_BULB,
+				Blocks.WAXED_EXPOSED_COPPER_BULB,
+				Blocks.WAXED_WEATHERED_COPPER_BULB,
+				Blocks.WAXED_OXIDIZED_COPPER_BULB,
+				Blocks.COPPER_DOOR,
+				Blocks.EXPOSED_COPPER_DOOR,
+				Blocks.WEATHERED_COPPER_DOOR,
+				Blocks.OXIDIZED_COPPER_DOOR,
+				Blocks.WAXED_COPPER_DOOR,
+				Blocks.WAXED_EXPOSED_COPPER_DOOR,
+				Blocks.WAXED_WEATHERED_COPPER_DOOR,
+				Blocks.WAXED_OXIDIZED_COPPER_DOOR,
+				Blocks.COPPER_TRAPDOOR,
+				Blocks.EXPOSED_COPPER_TRAPDOOR,
+				Blocks.WEATHERED_COPPER_TRAPDOOR,
+				Blocks.OXIDIZED_COPPER_TRAPDOOR,
+				Blocks.WAXED_COPPER_TRAPDOOR,
+				Blocks.WAXED_EXPOSED_COPPER_TRAPDOOR,
+				Blocks.WAXED_WEATHERED_COPPER_TRAPDOOR,
+				Blocks.WAXED_OXIDIZED_COPPER_TRAPDOOR,
+				Blocks.HEAVY_CORE
+			);
 		this.tag(BlockTags.MINEABLE_WITH_SHOVEL)
 			.add(
 				Blocks.CLAY,
@@ -1427,7 +1525,40 @@ public class VanillaBlockTagsProvider extends IntrinsicHolderTagsProvider<Block>
 				Blocks.WAXED_OXIDIZED_CUT_COPPER_SLAB,
 				Blocks.WAXED_OXIDIZED_CUT_COPPER_STAIRS,
 				Blocks.WAXED_OXIDIZED_CUT_COPPER,
-				Blocks.LIGHTNING_ROD
+				Blocks.LIGHTNING_ROD,
+				Blocks.CRAFTER,
+				Blocks.CHISELED_COPPER,
+				Blocks.EXPOSED_CHISELED_COPPER,
+				Blocks.WEATHERED_CHISELED_COPPER,
+				Blocks.OXIDIZED_CHISELED_COPPER,
+				Blocks.WAXED_CHISELED_COPPER,
+				Blocks.WAXED_EXPOSED_CHISELED_COPPER,
+				Blocks.WAXED_WEATHERED_CHISELED_COPPER,
+				Blocks.WAXED_OXIDIZED_CHISELED_COPPER,
+				Blocks.COPPER_GRATE,
+				Blocks.EXPOSED_COPPER_GRATE,
+				Blocks.WEATHERED_COPPER_GRATE,
+				Blocks.OXIDIZED_COPPER_GRATE,
+				Blocks.WAXED_COPPER_GRATE,
+				Blocks.WAXED_EXPOSED_COPPER_GRATE,
+				Blocks.WAXED_WEATHERED_COPPER_GRATE,
+				Blocks.WAXED_OXIDIZED_COPPER_GRATE,
+				Blocks.COPPER_BULB,
+				Blocks.EXPOSED_COPPER_BULB,
+				Blocks.WEATHERED_COPPER_BULB,
+				Blocks.OXIDIZED_COPPER_BULB,
+				Blocks.WAXED_COPPER_BULB,
+				Blocks.WAXED_EXPOSED_COPPER_BULB,
+				Blocks.WAXED_WEATHERED_COPPER_BULB,
+				Blocks.WAXED_OXIDIZED_COPPER_BULB,
+				Blocks.COPPER_TRAPDOOR,
+				Blocks.EXPOSED_COPPER_TRAPDOOR,
+				Blocks.WEATHERED_COPPER_TRAPDOOR,
+				Blocks.OXIDIZED_COPPER_TRAPDOOR,
+				Blocks.WAXED_COPPER_TRAPDOOR,
+				Blocks.WAXED_EXPOSED_COPPER_TRAPDOOR,
+				Blocks.WAXED_WEATHERED_COPPER_TRAPDOOR,
+				Blocks.WAXED_OXIDIZED_COPPER_TRAPDOOR
 			);
 		this.tag(BlockTags.INCORRECT_FOR_NETHERITE_TOOL);
 		this.tag(BlockTags.INCORRECT_FOR_DIAMOND_TOOL);
@@ -1435,7 +1566,8 @@ public class VanillaBlockTagsProvider extends IntrinsicHolderTagsProvider<Block>
 		this.tag(BlockTags.INCORRECT_FOR_STONE_TOOL).addTag(BlockTags.NEEDS_DIAMOND_TOOL).addTag(BlockTags.NEEDS_IRON_TOOL);
 		this.tag(BlockTags.INCORRECT_FOR_GOLD_TOOL).addTag(BlockTags.NEEDS_DIAMOND_TOOL).addTag(BlockTags.NEEDS_IRON_TOOL).addTag(BlockTags.NEEDS_STONE_TOOL);
 		this.tag(BlockTags.INCORRECT_FOR_WOODEN_TOOL).addTag(BlockTags.NEEDS_DIAMOND_TOOL).addTag(BlockTags.NEEDS_IRON_TOOL).addTag(BlockTags.NEEDS_STONE_TOOL);
-		this.tag(BlockTags.FEATURES_CANNOT_REPLACE).add(Blocks.BEDROCK, Blocks.SPAWNER, Blocks.CHEST, Blocks.END_PORTAL_FRAME, Blocks.REINFORCED_DEEPSLATE);
+		this.tag(BlockTags.FEATURES_CANNOT_REPLACE)
+			.add(Blocks.BEDROCK, Blocks.SPAWNER, Blocks.CHEST, Blocks.END_PORTAL_FRAME, Blocks.REINFORCED_DEEPSLATE, Blocks.TRIAL_SPAWNER, Blocks.VAULT);
 		this.tag(BlockTags.LAVA_POOL_STONE_CANNOT_REPLACE).addTag(BlockTags.FEATURES_CANNOT_REPLACE).addTag(BlockTags.LEAVES).addTag(BlockTags.LOGS);
 		this.tag(BlockTags.GEODE_INVALID_BLOCKS).add(Blocks.BEDROCK, Blocks.WATER, Blocks.LAVA, Blocks.ICE, Blocks.PACKED_ICE, Blocks.BLUE_ICE);
 		this.tag(BlockTags.ANIMALS_SPAWNABLE_ON).add(Blocks.GRASS_BLOCK);
@@ -1613,5 +1745,6 @@ public class VanillaBlockTagsProvider extends IntrinsicHolderTagsProvider<Block>
 			);
 		this.tag(BlockTags.CAMEL_SAND_STEP_SOUND_BLOCKS).addTag(BlockTags.SAND).addTag(BlockTags.CONCRETE_POWDER);
 		this.tag(BlockTags.DOES_NOT_BLOCK_HOPPERS).addTag(BlockTags.BEEHIVES);
+		this.tag(BlockTags.BLOCKS_WIND_CHARGE_EXPLOSIONS).add(Blocks.BARRIER, Blocks.BEDROCK);
 	}
 }

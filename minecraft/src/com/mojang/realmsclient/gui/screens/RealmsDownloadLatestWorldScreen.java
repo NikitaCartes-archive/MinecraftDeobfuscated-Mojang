@@ -72,23 +72,21 @@ public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
 
 	@Override
 	public void init() {
-		this.cancelButton = this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, button -> {
-			this.cancelled = true;
-			this.backButtonClicked();
-		}).bounds((this.width - 200) / 2, this.height - 42, 200, 20).build());
+		this.cancelButton = this.addRenderableWidget(
+			Button.builder(CommonComponents.GUI_CANCEL, button -> this.onClose()).bounds((this.width - 200) / 2, this.height - 42, 200, 20).build()
+		);
 		this.checkDownloadSize();
 	}
 
 	private void checkDownloadSize() {
-		if (!this.finished) {
-			if (!this.checked && this.getContentLength(this.worldDownload.downloadLink) >= 5368709120L) {
-				Component component = Component.translatable("mco.download.confirmation.line1", Unit.humanReadable(5368709120L));
-				Component component2 = Component.translatable("mco.download.confirmation.line2");
-				this.minecraft.setScreen(new RealmsLongConfirmationScreen(bl -> {
-					this.checked = true;
+		if (!this.finished && !this.checked) {
+			this.checked = true;
+			if (this.getContentLength(this.worldDownload.downloadLink) >= 5368709120L) {
+				Component component = Component.translatable("mco.download.confirmation.oversized", Unit.humanReadable(5368709120L));
+				this.minecraft.setScreen(RealmsPopups.warningAcknowledgePopupScreen(this, component, popupScreen -> {
 					this.minecraft.setScreen(this);
 					this.downloadSave();
-				}, RealmsLongConfirmationScreen.Type.WARNING, component, component2, false));
+				}));
 			} else {
 				this.downloadSave();
 			}
@@ -127,17 +125,8 @@ public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
 	}
 
 	@Override
-	public boolean keyPressed(int i, int j, int k) {
-		if (i == 256) {
-			this.cancelled = true;
-			this.backButtonClicked();
-			return true;
-		} else {
-			return super.keyPressed(i, j, k);
-		}
-	}
-
-	private void backButtonClicked() {
+	public void onClose() {
+		this.cancelled = true;
 		if (this.finished && this.callback != null && this.errorMessage == null) {
 			this.callback.accept(true);
 		}
@@ -166,7 +155,7 @@ public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
 
 	private void drawDots(GuiGraphics guiGraphics) {
 		int i = this.font.width(this.status);
-		if (this.animTick % 10 == 0) {
+		if (this.animTick != 0 && this.animTick % 10 == 0) {
 			this.dotIndex++;
 		}
 

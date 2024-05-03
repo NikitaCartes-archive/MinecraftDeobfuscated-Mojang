@@ -420,7 +420,7 @@ public class Guardian extends Monster {
 						}
 
 						livingEntity.hurt(this.guardian.damageSources().indirectMagic(this.guardian, this.guardian), f);
-						livingEntity.hurt(this.guardian.damageSources().mobAttack(this.guardian), (float)this.guardian.getAttributeValue(Attributes.ATTACK_DAMAGE));
+						this.guardian.doHurtTarget(livingEntity);
 						this.guardian.setTarget(null);
 					}
 

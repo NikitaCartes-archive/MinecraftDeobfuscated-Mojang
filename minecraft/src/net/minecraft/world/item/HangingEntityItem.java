@@ -5,9 +5,10 @@ import java.util.Optional;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.decoration.GlowItemFrame;
@@ -86,27 +87,17 @@ public class HangingEntityItem extends Item {
 	@Override
 	public void appendHoverText(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Component> list, TooltipFlag tooltipFlag) {
 		super.appendHoverText(itemStack, tooltipContext, list, tooltipFlag);
-		if (this.type == EntityType.PAINTING) {
+		HolderLookup.Provider provider = tooltipContext.registries();
+		if (provider != null && this.type == EntityType.PAINTING) {
 			CustomData customData = itemStack.getOrDefault(DataComponents.ENTITY_DATA, CustomData.EMPTY);
 			if (!customData.isEmpty()) {
-				customData.read(Painting.VARIANT_MAP_CODEC)
-					.result()
-					.ifPresentOrElse(
-						holder -> {
-							holder.unwrapKey().ifPresent(resourceKey -> {
-								list.add(Component.translatable(resourceKey.location().toLanguageKey("painting", "title")).withStyle(ChatFormatting.YELLOW));
-								list.add(Component.translatable(resourceKey.location().toLanguageKey("painting", "author")).withStyle(ChatFormatting.GRAY));
-							});
-							list.add(
-								Component.translatable(
-									"painting.dimensions",
-									Mth.positiveCeilDiv(((PaintingVariant)holder.value()).getWidth(), 16),
-									Mth.positiveCeilDiv(((PaintingVariant)holder.value()).getHeight(), 16)
-								)
-							);
-						},
-						() -> list.add(TOOLTIP_RANDOM_VARIANT)
-					);
+				customData.read(provider.createSerializationContext(NbtOps.INSTANCE), Painting.VARIANT_MAP_CODEC).result().ifPresentOrElse(holder -> {
+					holder.unwrapKey().ifPresent(resourceKey -> {
+						list.add(Component.translatable(resourceKey.location().toLanguageKey("painting", "title")).withStyle(ChatFormatting.YELLOW));
+						list.add(Component.translatable(resourceKey.location().toLanguageKey("painting", "author")).withStyle(ChatFormatting.GRAY));
+					});
+					list.add(Component.translatable("painting.dimensions", ((PaintingVariant)holder.value()).width(), ((PaintingVariant)holder.value()).height()));
+				}, () -> list.add(TOOLTIP_RANDOM_VARIANT));
 			} else if (tooltipFlag.isCreative()) {
 				list.add(TOOLTIP_RANDOM_VARIANT);
 			}

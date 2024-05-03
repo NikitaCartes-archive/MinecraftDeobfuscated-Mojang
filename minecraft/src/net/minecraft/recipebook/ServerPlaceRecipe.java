@@ -1,15 +1,12 @@
 package net.minecraft.recipebook;
 
 import com.google.common.collect.Lists;
-import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
-import java.util.Iterator;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.network.protocol.game.ClientboundPlaceGhostRecipePacket;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.StackedContents;
 import net.minecraft.world.inventory.RecipeBookMenu;
@@ -17,26 +14,26 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
-import org.slf4j.Logger;
+import net.minecraft.world.item.crafting.RecipeInput;
 
-public class ServerPlaceRecipe<C extends Container> implements PlaceRecipe<Integer> {
-	private static final Logger LOGGER = LogUtils.getLogger();
+public class ServerPlaceRecipe<I extends RecipeInput, R extends Recipe<I>> implements PlaceRecipe<Integer> {
+	private static final int ITEM_NOT_FOUND = -1;
 	protected final StackedContents stackedContents = new StackedContents();
 	protected Inventory inventory;
-	protected RecipeBookMenu<C> menu;
+	protected RecipeBookMenu<I, R> menu;
 
-	public ServerPlaceRecipe(RecipeBookMenu<C> recipeBookMenu) {
+	public ServerPlaceRecipe(RecipeBookMenu<I, R> recipeBookMenu) {
 		this.menu = recipeBookMenu;
 	}
 
-	public void recipeClicked(ServerPlayer serverPlayer, @Nullable RecipeHolder<? extends Recipe<C>> recipeHolder, boolean bl) {
+	public void recipeClicked(ServerPlayer serverPlayer, @Nullable RecipeHolder<R> recipeHolder, boolean bl) {
 		if (recipeHolder != null && serverPlayer.getRecipeBook().contains(recipeHolder)) {
 			this.inventory = serverPlayer.getInventory();
 			if (this.testClearGrid() || serverPlayer.isCreative()) {
 				this.stackedContents.clear();
 				serverPlayer.getInventory().fillStackedContents(this.stackedContents);
 				this.menu.fillCraftSlotsStackedContents(this.stackedContents);
-				if (this.stackedContents.canCraft((Recipe<?>)recipeHolder.value(), null)) {
+				if (this.stackedContents.canCraft(recipeHolder.value(), null)) {
 					this.handleRecipeClicked(recipeHolder, bl);
 				} else {
 					this.clearGrid();
@@ -60,7 +57,7 @@ public class ServerPlaceRecipe<C extends Container> implements PlaceRecipe<Integ
 		this.menu.clearCraftingContent();
 	}
 
-	protected void handleRecipeClicked(RecipeHolder<? extends Recipe<C>> recipeHolder, boolean bl) {
+	protected void handleRecipeClicked(RecipeHolder<R> recipeHolder, boolean bl) {
 		boolean bl2 = this.menu.recipeMatches(recipeHolder);
 		int i = this.stackedContents.getBiggestCraftableStack(recipeHolder, null);
 		if (bl2) {
@@ -76,7 +73,7 @@ public class ServerPlaceRecipe<C extends Container> implements PlaceRecipe<Integ
 
 		int jx = this.getStackSize(bl, i, bl2);
 		IntList intList = new IntArrayList();
-		if (this.stackedContents.canCraft((Recipe<?>)recipeHolder.value(), intList, jx)) {
+		if (this.stackedContents.canCraft(recipeHolder.value(), intList, jx)) {
 			int k = jx;
 
 			for (int l : intList) {
@@ -89,20 +86,24 @@ public class ServerPlaceRecipe<C extends Container> implements PlaceRecipe<Integ
 				}
 			}
 
-			if (this.stackedContents.canCraft((Recipe<?>)recipeHolder.value(), intList, k)) {
+			if (this.stackedContents.canCraft(recipeHolder.value(), intList, k)) {
 				this.clearGrid();
 				this.placeRecipe(this.menu.getGridWidth(), this.menu.getGridHeight(), this.menu.getResultSlotIndex(), recipeHolder, intList.iterator(), k);
 			}
 		}
 	}
 
-	@Override
-	public void addItemToSlot(Iterator<Integer> iterator, int i, int j, int k, int l) {
+	public void addItemToSlot(Integer integer, int i, int j, int k, int l) {
 		Slot slot = this.menu.getSlot(i);
-		ItemStack itemStack = StackedContents.fromStackingIndex((Integer)iterator.next());
+		ItemStack itemStack = StackedContents.fromStackingIndex(integer);
 		if (!itemStack.isEmpty()) {
-			for (int m = 0; m < j; m++) {
-				this.moveItemToGrid(slot, itemStack);
+			int m = j;
+
+			while (m > 0) {
+				m = this.moveItemToGrid(slot, itemStack, m);
+				if (m == -1) {
+					return;
+				}
 			}
 		}
 	}
@@ -131,23 +132,28 @@ public class ServerPlaceRecipe<C extends Container> implements PlaceRecipe<Integ
 		return j;
 	}
 
-	protected void moveItemToGrid(Slot slot, ItemStack itemStack) {
-		int i = this.inventory.findSlotMatchingUnusedItem(itemStack);
-		if (i != -1) {
-			ItemStack itemStack2 = this.inventory.getItem(i);
-			if (!itemStack2.isEmpty()) {
-				if (itemStack2.getCount() > 1) {
-					this.inventory.removeItem(i, 1);
-				} else {
-					this.inventory.removeItemNoUpdate(i);
-				}
-
-				if (slot.getItem().isEmpty()) {
-					slot.set(itemStack2.copyWithCount(1));
-				} else {
-					slot.getItem().grow(1);
-				}
+	protected int moveItemToGrid(Slot slot, ItemStack itemStack, int i) {
+		int j = this.inventory.findSlotMatchingUnusedItem(itemStack);
+		if (j == -1) {
+			return -1;
+		} else {
+			ItemStack itemStack2 = this.inventory.getItem(j);
+			int k;
+			if (i < itemStack2.getCount()) {
+				this.inventory.removeItem(j, i);
+				k = i;
+			} else {
+				this.inventory.removeItemNoUpdate(j);
+				k = itemStack2.getCount();
 			}
+
+			if (slot.getItem().isEmpty()) {
+				slot.set(itemStack2.copyWithCount(k));
+			} else {
+				slot.getItem().grow(k);
+			}
+
+			return i - k;
 		}
 	}
 

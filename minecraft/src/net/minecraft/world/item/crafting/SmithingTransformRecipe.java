@@ -6,7 +6,6 @@ import java.util.stream.Stream;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
@@ -23,14 +22,12 @@ public class SmithingTransformRecipe implements SmithingRecipe {
 		this.result = itemStack;
 	}
 
-	@Override
-	public boolean matches(Container container, Level level) {
-		return this.template.test(container.getItem(0)) && this.base.test(container.getItem(1)) && this.addition.test(container.getItem(2));
+	public boolean matches(SmithingRecipeInput smithingRecipeInput, Level level) {
+		return this.template.test(smithingRecipeInput.template()) && this.base.test(smithingRecipeInput.base()) && this.addition.test(smithingRecipeInput.addition());
 	}
 
-	@Override
-	public ItemStack assemble(Container container, HolderLookup.Provider provider) {
-		ItemStack itemStack = container.getItem(1).transmuteCopy(this.result.getItem(), this.result.getCount());
+	public ItemStack assemble(SmithingRecipeInput smithingRecipeInput, HolderLookup.Provider provider) {
+		ItemStack itemStack = smithingRecipeInput.base().transmuteCopy(this.result.getItem(), this.result.getCount());
 		itemStack.applyComponents(this.result.getComponentsPatch());
 		return itemStack;
 	}

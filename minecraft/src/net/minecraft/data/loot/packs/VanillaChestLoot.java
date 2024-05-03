@@ -2,6 +2,8 @@ package net.minecraft.data.loot.packs;
 
 import java.util.function.BiConsumer;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.loot.LootTableSubProvider;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
@@ -10,6 +12,7 @@ import net.minecraft.tags.StructureTags;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.Potions;
+import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.saveddata.maps.MapDecorationTypes;
@@ -18,21 +21,26 @@ import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.entries.EmptyLootItem;
 import net.minecraft.world.level.storage.loot.entries.LootItem;
+import net.minecraft.world.level.storage.loot.entries.NestedLootTable;
 import net.minecraft.world.level.storage.loot.functions.EnchantRandomlyFunction;
 import net.minecraft.world.level.storage.loot.functions.EnchantWithLevelsFunction;
 import net.minecraft.world.level.storage.loot.functions.ExplorationMapFunction;
+import net.minecraft.world.level.storage.loot.functions.SetEnchantmentsFunction;
 import net.minecraft.world.level.storage.loot.functions.SetInstrumentFunction;
 import net.minecraft.world.level.storage.loot.functions.SetItemCountFunction;
 import net.minecraft.world.level.storage.loot.functions.SetItemDamageFunction;
 import net.minecraft.world.level.storage.loot.functions.SetNameFunction;
+import net.minecraft.world.level.storage.loot.functions.SetOminousBottleAmplifierFunction;
 import net.minecraft.world.level.storage.loot.functions.SetPotionFunction;
 import net.minecraft.world.level.storage.loot.functions.SetStewEffectFunction;
+import net.minecraft.world.level.storage.loot.predicates.LootItemRandomChanceCondition;
 import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
 
-public class VanillaChestLoot implements LootTableSubProvider {
+public record VanillaChestLoot(HolderLookup.Provider registries) implements LootTableSubProvider {
 	@Override
-	public void generate(HolderLookup.Provider provider, BiConsumer<ResourceKey<LootTable>, LootTable.Builder> biConsumer) {
+	public void generate(BiConsumer<ResourceKey<LootTable>, LootTable.Builder> biConsumer) {
+		HolderLookup.RegistryLookup<Enchantment> registryLookup = this.registries.lookupOrThrow(Registries.ENCHANTMENT);
 		biConsumer.accept(
 			BuiltInLootTables.ABANDONED_MINESHAFT,
 			LootTable.lootTable()
@@ -42,7 +50,7 @@ public class VanillaChestLoot implements LootTableSubProvider {
 						.add(LootItem.lootTableItem(Items.GOLDEN_APPLE).setWeight(20))
 						.add(LootItem.lootTableItem(Items.ENCHANTED_GOLDEN_APPLE))
 						.add(LootItem.lootTableItem(Items.NAME_TAG).setWeight(30))
-						.add(LootItem.lootTableItem(Items.BOOK).setWeight(10).apply(EnchantRandomlyFunction.randomApplicableEnchantment()))
+						.add(LootItem.lootTableItem(Items.BOOK).setWeight(10).apply(EnchantRandomlyFunction.randomApplicableEnchantment(this.registries)))
 						.add(LootItem.lootTableItem(Items.IRON_PICKAXE).setWeight(5))
 						.add(EmptyLootItem.emptyItem().setWeight(5))
 				)
@@ -71,10 +79,10 @@ public class VanillaChestLoot implements LootTableSubProvider {
 						.add(LootItem.lootTableItem(Blocks.TORCH).setWeight(15).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 16.0F))))
 				)
 		);
-		biConsumer.accept(BuiltInLootTables.BASTION_BRIDGE, bastionBridgeLootTable());
-		biConsumer.accept(BuiltInLootTables.BASTION_HOGLIN_STABLE, bastionHoglinStableLootTable());
-		biConsumer.accept(BuiltInLootTables.BASTION_OTHER, bastionOtherLootTable());
-		biConsumer.accept(BuiltInLootTables.BASTION_TREASURE, bastionTreasureLootTable());
+		biConsumer.accept(BuiltInLootTables.BASTION_BRIDGE, this.bastionBridgeLootTable());
+		biConsumer.accept(BuiltInLootTables.BASTION_HOGLIN_STABLE, this.bastionHoglinStableLootTable());
+		biConsumer.accept(BuiltInLootTables.BASTION_OTHER, this.bastionOtherLootTable());
+		biConsumer.accept(BuiltInLootTables.BASTION_TREASURE, this.bastionTreasureLootTable());
 		biConsumer.accept(
 			BuiltInLootTables.BURIED_TREASURE,
 			LootTable.lootTable()
@@ -112,7 +120,7 @@ public class VanillaChestLoot implements LootTableSubProvider {
 						.apply(SetPotionFunction.setPotion(Potions.WATER_BREATHING))
 				)
 		);
-		biConsumer.accept(BuiltInLootTables.ANCIENT_CITY, ancientCityLootTable());
+		biConsumer.accept(BuiltInLootTables.ANCIENT_CITY, this.ancientCityLootTable());
 		biConsumer.accept(
 			BuiltInLootTables.ANCIENT_CITY_ICE_BOX,
 			LootTable.lootTable()
@@ -135,8 +143,8 @@ public class VanillaChestLoot implements LootTableSubProvider {
 						.add(LootItem.lootTableItem(Items.SNOWBALL).setWeight(4).apply(SetItemCountFunction.setCount(UniformGenerator.between(2.0F, 6.0F))))
 				)
 		);
-		biConsumer.accept(BuiltInLootTables.DESERT_PYRAMID, desertPyramidLootTable());
-		biConsumer.accept(BuiltInLootTables.END_CITY_TREASURE, endCityTreasureLootTable());
+		biConsumer.accept(BuiltInLootTables.DESERT_PYRAMID, this.desertPyramidLootTable());
+		biConsumer.accept(BuiltInLootTables.END_CITY_TREASURE, this.endCityTreasureLootTable());
 		biConsumer.accept(
 			BuiltInLootTables.IGLOO_CHEST,
 			LootTable.lootTable()
@@ -153,7 +161,7 @@ public class VanillaChestLoot implements LootTableSubProvider {
 				)
 				.withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F)).add(LootItem.lootTableItem(Items.GOLDEN_APPLE)))
 		);
-		biConsumer.accept(BuiltInLootTables.JUNGLE_TEMPLE, jungleTempleLootTable());
+		biConsumer.accept(BuiltInLootTables.JUNGLE_TEMPLE, this.jungleTempleLootTable());
 		biConsumer.accept(
 			BuiltInLootTables.JUNGLE_TEMPLE_DISPENSER,
 			LootTable.lootTable()
@@ -163,11 +171,11 @@ public class VanillaChestLoot implements LootTableSubProvider {
 						.add(LootItem.lootTableItem(Items.ARROW).setWeight(30).apply(SetItemCountFunction.setCount(UniformGenerator.between(2.0F, 7.0F))))
 				)
 		);
-		biConsumer.accept(BuiltInLootTables.NETHER_BRIDGE, netherBridgeLootTable());
-		biConsumer.accept(BuiltInLootTables.PILLAGER_OUTPOST, pillagerOutpostLootTable());
-		biConsumer.accept(BuiltInLootTables.SHIPWRECK_MAP, shipwreckMapLootTable());
-		biConsumer.accept(BuiltInLootTables.SHIPWRECK_SUPPLY, shipwreckSupplyLootTable());
-		biConsumer.accept(BuiltInLootTables.SHIPWRECK_TREASURE, shipwreckTreasureLootTable());
+		biConsumer.accept(BuiltInLootTables.NETHER_BRIDGE, this.netherBridgeLootTable());
+		biConsumer.accept(BuiltInLootTables.PILLAGER_OUTPOST, this.pillagerOutpostLootTable());
+		biConsumer.accept(BuiltInLootTables.SHIPWRECK_MAP, this.shipwreckMapLootTable());
+		biConsumer.accept(BuiltInLootTables.SHIPWRECK_SUPPLY, this.shipwreckSupplyLootTable());
+		biConsumer.accept(BuiltInLootTables.SHIPWRECK_TREASURE, this.shipwreckTreasureLootTable());
 		biConsumer.accept(
 			BuiltInLootTables.SIMPLE_DUNGEON,
 			LootTable.lootTable()
@@ -184,7 +192,7 @@ public class VanillaChestLoot implements LootTableSubProvider {
 						.add(LootItem.lootTableItem(Items.GOLDEN_HORSE_ARMOR).setWeight(10))
 						.add(LootItem.lootTableItem(Items.IRON_HORSE_ARMOR).setWeight(15))
 						.add(LootItem.lootTableItem(Items.DIAMOND_HORSE_ARMOR).setWeight(5))
-						.add(LootItem.lootTableItem(Items.BOOK).setWeight(10).apply(EnchantRandomlyFunction.randomApplicableEnchantment()))
+						.add(LootItem.lootTableItem(Items.BOOK).setWeight(10).apply(EnchantRandomlyFunction.randomApplicableEnchantment(this.registries)))
 				)
 				.withPool(
 					LootPool.lootPool()
@@ -245,7 +253,7 @@ public class VanillaChestLoot implements LootTableSubProvider {
 						.add(LootItem.lootTableItem(Blocks.MANGROVE_LOG).setWeight(3).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 3.0F))))
 				)
 		);
-		biConsumer.accept(BuiltInLootTables.STRONGHOLD_CORRIDOR, strongholdCorridorLootTable());
+		biConsumer.accept(BuiltInLootTables.STRONGHOLD_CORRIDOR, this.strongholdCorridorLootTable());
 		biConsumer.accept(
 			BuiltInLootTables.STRONGHOLD_CROSSING,
 			LootTable.lootTable()
@@ -259,10 +267,10 @@ public class VanillaChestLoot implements LootTableSubProvider {
 						.add(LootItem.lootTableItem(Items.BREAD).setWeight(15).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 3.0F))))
 						.add(LootItem.lootTableItem(Items.APPLE).setWeight(15).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 3.0F))))
 						.add(LootItem.lootTableItem(Items.IRON_PICKAXE))
-						.add(LootItem.lootTableItem(Items.BOOK).apply(EnchantWithLevelsFunction.enchantWithLevels(ConstantValue.exactly(30.0F)).allowTreasure()))
+						.add(LootItem.lootTableItem(Items.BOOK).apply(EnchantWithLevelsFunction.enchantWithLevels(this.registries, ConstantValue.exactly(30.0F))))
 				)
 		);
-		biConsumer.accept(BuiltInLootTables.STRONGHOLD_LIBRARY, strongholdLibraryLootTable());
+		biConsumer.accept(BuiltInLootTables.STRONGHOLD_LIBRARY, this.strongholdLibraryLootTable());
 		biConsumer.accept(
 			BuiltInLootTables.UNDERWATER_RUIN_BIG,
 			LootTable.lootTable()
@@ -278,10 +286,10 @@ public class VanillaChestLoot implements LootTableSubProvider {
 					LootPool.lootPool()
 						.setRolls(ConstantValue.exactly(1.0F))
 						.add(LootItem.lootTableItem(Items.GOLDEN_APPLE))
-						.add(LootItem.lootTableItem(Items.BOOK).setWeight(5).apply(EnchantRandomlyFunction.randomApplicableEnchantment()))
+						.add(LootItem.lootTableItem(Items.BOOK).setWeight(5).apply(EnchantRandomlyFunction.randomApplicableEnchantment(this.registries)))
 						.add(LootItem.lootTableItem(Items.LEATHER_CHESTPLATE))
 						.add(LootItem.lootTableItem(Items.GOLDEN_HELMET))
-						.add(LootItem.lootTableItem(Items.FISHING_ROD).setWeight(5).apply(EnchantRandomlyFunction.randomApplicableEnchantment()))
+						.add(LootItem.lootTableItem(Items.FISHING_ROD).setWeight(5).apply(EnchantRandomlyFunction.randomApplicableEnchantment(this.registries)))
 						.add(
 							LootItem.lootTableItem(Items.MAP)
 								.setWeight(10)
@@ -313,7 +321,7 @@ public class VanillaChestLoot implements LootTableSubProvider {
 						.setRolls(ConstantValue.exactly(1.0F))
 						.add(LootItem.lootTableItem(Items.LEATHER_CHESTPLATE))
 						.add(LootItem.lootTableItem(Items.GOLDEN_HELMET))
-						.add(LootItem.lootTableItem(Items.FISHING_ROD).setWeight(5).apply(EnchantRandomlyFunction.randomApplicableEnchantment()))
+						.add(LootItem.lootTableItem(Items.FISHING_ROD).setWeight(5).apply(EnchantRandomlyFunction.randomApplicableEnchantment(this.registries)))
 						.add(
 							LootItem.lootTableItem(Items.MAP)
 								.setWeight(5)
@@ -589,7 +597,7 @@ public class VanillaChestLoot implements LootTableSubProvider {
 						.add(LootItem.lootTableItem(Items.EMERALD).setWeight(1).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 3.0F))))
 				)
 		);
-		biConsumer.accept(BuiltInLootTables.WOODLAND_MANSION, woodlandMansionLootTable());
+		biConsumer.accept(BuiltInLootTables.WOODLAND_MANSION, this.woodlandMansionLootTable());
 		biConsumer.accept(
 			BuiltInLootTables.RUINED_PORTAL,
 			LootTable.lootTable()
@@ -603,15 +611,15 @@ public class VanillaChestLoot implements LootTableSubProvider {
 						.add(LootItem.lootTableItem(Items.FIRE_CHARGE).setWeight(40))
 						.add(LootItem.lootTableItem(Items.GOLDEN_APPLE).setWeight(15))
 						.add(LootItem.lootTableItem(Items.GOLD_NUGGET).setWeight(15).apply(SetItemCountFunction.setCount(UniformGenerator.between(4.0F, 24.0F))))
-						.add(LootItem.lootTableItem(Items.GOLDEN_SWORD).setWeight(15).apply(EnchantRandomlyFunction.randomApplicableEnchantment()))
-						.add(LootItem.lootTableItem(Items.GOLDEN_AXE).setWeight(15).apply(EnchantRandomlyFunction.randomApplicableEnchantment()))
-						.add(LootItem.lootTableItem(Items.GOLDEN_HOE).setWeight(15).apply(EnchantRandomlyFunction.randomApplicableEnchantment()))
-						.add(LootItem.lootTableItem(Items.GOLDEN_SHOVEL).setWeight(15).apply(EnchantRandomlyFunction.randomApplicableEnchantment()))
-						.add(LootItem.lootTableItem(Items.GOLDEN_PICKAXE).setWeight(15).apply(EnchantRandomlyFunction.randomApplicableEnchantment()))
-						.add(LootItem.lootTableItem(Items.GOLDEN_BOOTS).setWeight(15).apply(EnchantRandomlyFunction.randomApplicableEnchantment()))
-						.add(LootItem.lootTableItem(Items.GOLDEN_CHESTPLATE).setWeight(15).apply(EnchantRandomlyFunction.randomApplicableEnchantment()))
-						.add(LootItem.lootTableItem(Items.GOLDEN_HELMET).setWeight(15).apply(EnchantRandomlyFunction.randomApplicableEnchantment()))
-						.add(LootItem.lootTableItem(Items.GOLDEN_LEGGINGS).setWeight(15).apply(EnchantRandomlyFunction.randomApplicableEnchantment()))
+						.add(LootItem.lootTableItem(Items.GOLDEN_SWORD).setWeight(15).apply(EnchantRandomlyFunction.randomApplicableEnchantment(this.registries)))
+						.add(LootItem.lootTableItem(Items.GOLDEN_AXE).setWeight(15).apply(EnchantRandomlyFunction.randomApplicableEnchantment(this.registries)))
+						.add(LootItem.lootTableItem(Items.GOLDEN_HOE).setWeight(15).apply(EnchantRandomlyFunction.randomApplicableEnchantment(this.registries)))
+						.add(LootItem.lootTableItem(Items.GOLDEN_SHOVEL).setWeight(15).apply(EnchantRandomlyFunction.randomApplicableEnchantment(this.registries)))
+						.add(LootItem.lootTableItem(Items.GOLDEN_PICKAXE).setWeight(15).apply(EnchantRandomlyFunction.randomApplicableEnchantment(this.registries)))
+						.add(LootItem.lootTableItem(Items.GOLDEN_BOOTS).setWeight(15).apply(EnchantRandomlyFunction.randomApplicableEnchantment(this.registries)))
+						.add(LootItem.lootTableItem(Items.GOLDEN_CHESTPLATE).setWeight(15).apply(EnchantRandomlyFunction.randomApplicableEnchantment(this.registries)))
+						.add(LootItem.lootTableItem(Items.GOLDEN_HELMET).setWeight(15).apply(EnchantRandomlyFunction.randomApplicableEnchantment(this.registries)))
+						.add(LootItem.lootTableItem(Items.GOLDEN_LEGGINGS).setWeight(15).apply(EnchantRandomlyFunction.randomApplicableEnchantment(this.registries)))
 						.add(LootItem.lootTableItem(Items.GLISTERING_MELON_SLICE).setWeight(5).apply(SetItemCountFunction.setCount(UniformGenerator.between(4.0F, 12.0F))))
 						.add(LootItem.lootTableItem(Items.GOLDEN_HORSE_ARMOR).setWeight(5))
 						.add(LootItem.lootTableItem(Items.LIGHT_WEIGHTED_PRESSURE_PLATE).setWeight(5))
@@ -623,35 +631,618 @@ public class VanillaChestLoot implements LootTableSubProvider {
 						.add(LootItem.lootTableItem(Items.GOLD_BLOCK).setWeight(1).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 2.0F))))
 				)
 		);
-		biConsumer.accept(BuiltInLootTables.TRIAL_CHAMBERS_REWARD, LootTable.lootTable());
-		biConsumer.accept(BuiltInLootTables.TRIAL_CHAMBERS_REWARD_COMMON, LootTable.lootTable());
-		biConsumer.accept(BuiltInLootTables.TRIAL_CHAMBERS_REWARD_RARE, LootTable.lootTable());
-		biConsumer.accept(BuiltInLootTables.TRIAL_CHAMBERS_REWARD_UNIQUE, LootTable.lootTable());
-		biConsumer.accept(BuiltInLootTables.TRIAL_CHAMBERS_REWARD_OMINOUS, LootTable.lootTable());
-		biConsumer.accept(BuiltInLootTables.TRIAL_CHAMBERS_REWARD_OMINOUS_COMMON, LootTable.lootTable());
-		biConsumer.accept(BuiltInLootTables.TRIAL_CHAMBERS_REWARD_OMINOUS_RARE, LootTable.lootTable());
-		biConsumer.accept(BuiltInLootTables.TRIAL_CHAMBERS_REWARD_OMINOUS_UNIQUE, LootTable.lootTable());
-		biConsumer.accept(BuiltInLootTables.TRIAL_CHAMBERS_SUPPLY, LootTable.lootTable());
-		biConsumer.accept(BuiltInLootTables.TRIAL_CHAMBERS_CORRIDOR, LootTable.lootTable());
-		biConsumer.accept(BuiltInLootTables.TRIAL_CHAMBERS_ENTRANCE, LootTable.lootTable());
-		biConsumer.accept(BuiltInLootTables.TRIAL_CHAMBERS_INTERSECTION, LootTable.lootTable());
-		biConsumer.accept(BuiltInLootTables.TRIAL_CHAMBERS_INTERSECTION_BARREL, LootTable.lootTable());
-		biConsumer.accept(BuiltInLootTables.TRIAL_CHAMBERS_CHAMBER_DISPENSER, LootTable.lootTable());
-		biConsumer.accept(BuiltInLootTables.TRIAL_CHAMBERS_CORRIDOR_DISPENSER, LootTable.lootTable());
-		biConsumer.accept(BuiltInLootTables.TRIAL_CHAMBERS_WATER_DISPENSER, LootTable.lootTable());
-		biConsumer.accept(BuiltInLootTables.TRIAL_CHAMBERS_CORRIDOR_POT, LootTable.lootTable());
-		spawnerLootTables(biConsumer);
+		biConsumer.accept(
+			BuiltInLootTables.TRIAL_CHAMBERS_CORRIDOR_DISPENSER,
+			LootTable.lootTable()
+				.withPool(
+					LootPool.lootPool()
+						.setRolls(ConstantValue.exactly(1.0F))
+						.add(LootItem.lootTableItem(Items.ARROW).apply(SetItemCountFunction.setCount(UniformGenerator.between(4.0F, 8.0F))))
+				)
+		);
+		biConsumer.accept(
+			BuiltInLootTables.TRIAL_CHAMBERS_WATER_DISPENSER,
+			LootTable.lootTable()
+				.withPool(
+					LootPool.lootPool()
+						.setRolls(ConstantValue.exactly(1.0F))
+						.add(LootItem.lootTableItem(Items.WATER_BUCKET).apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F))))
+				)
+		);
+		biConsumer.accept(
+			BuiltInLootTables.TRIAL_CHAMBERS_CHAMBER_DISPENSER,
+			LootTable.lootTable()
+				.withPool(
+					LootPool.lootPool()
+						.setRolls(ConstantValue.exactly(1.0F))
+						.add(LootItem.lootTableItem(Items.WATER_BUCKET).apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F))).setWeight(4))
+						.add(LootItem.lootTableItem(Items.ARROW).apply(SetItemCountFunction.setCount(UniformGenerator.between(4.0F, 8.0F))).setWeight(4))
+						.add(LootItem.lootTableItem(Items.SNOWBALL).apply(SetItemCountFunction.setCount(UniformGenerator.between(4.0F, 8.0F))).setWeight(6))
+						.add(LootItem.lootTableItem(Items.EGG).apply(SetItemCountFunction.setCount(UniformGenerator.between(4.0F, 8.0F))).setWeight(2))
+						.add(LootItem.lootTableItem(Items.FIRE_CHARGE).apply(SetItemCountFunction.setCount(UniformGenerator.between(4.0F, 8.0F))).setWeight(6))
+						.add(
+							LootItem.lootTableItem(Items.SPLASH_POTION)
+								.apply(SetPotionFunction.setPotion(Potions.SLOWNESS))
+								.apply(SetItemCountFunction.setCount(UniformGenerator.between(2.0F, 5.0F)))
+								.setWeight(1)
+						)
+						.add(
+							LootItem.lootTableItem(Items.SPLASH_POTION)
+								.apply(SetPotionFunction.setPotion(Potions.POISON))
+								.apply(SetItemCountFunction.setCount(UniformGenerator.between(2.0F, 5.0F)))
+								.setWeight(1)
+						)
+						.add(
+							LootItem.lootTableItem(Items.SPLASH_POTION)
+								.apply(SetPotionFunction.setPotion(Potions.WEAKNESS))
+								.apply(SetItemCountFunction.setCount(UniformGenerator.between(2.0F, 5.0F)))
+								.setWeight(1)
+						)
+						.add(
+							LootItem.lootTableItem(Items.LINGERING_POTION)
+								.apply(SetPotionFunction.setPotion(Potions.SLOWNESS))
+								.apply(SetItemCountFunction.setCount(UniformGenerator.between(2.0F, 5.0F)))
+								.setWeight(1)
+						)
+						.add(
+							LootItem.lootTableItem(Items.LINGERING_POTION)
+								.apply(SetPotionFunction.setPotion(Potions.POISON))
+								.apply(SetItemCountFunction.setCount(UniformGenerator.between(2.0F, 5.0F)))
+								.setWeight(1)
+						)
+						.add(
+							LootItem.lootTableItem(Items.LINGERING_POTION)
+								.apply(SetPotionFunction.setPotion(Potions.WEAKNESS))
+								.apply(SetItemCountFunction.setCount(UniformGenerator.between(2.0F, 5.0F)))
+								.setWeight(1)
+						)
+						.add(
+							LootItem.lootTableItem(Items.LINGERING_POTION)
+								.apply(SetPotionFunction.setPotion(Potions.HEALING))
+								.apply(SetItemCountFunction.setCount(UniformGenerator.between(2.0F, 5.0F)))
+								.setWeight(1)
+						)
+				)
+		);
+		biConsumer.accept(
+			BuiltInLootTables.TRIAL_CHAMBERS_CORRIDOR_POT,
+			LootTable.lootTable()
+				.withPool(
+					LootPool.lootPool()
+						.setRolls(ConstantValue.exactly(1.0F))
+						.add(LootItem.lootTableItem(Items.EMERALD).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 3.0F))).setWeight(125))
+						.add(LootItem.lootTableItem(Items.ARROW).apply(SetItemCountFunction.setCount(UniformGenerator.between(2.0F, 8.0F))).setWeight(100))
+						.add(LootItem.lootTableItem(Items.IRON_INGOT).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 2.0F))).setWeight(100))
+						.add(LootItem.lootTableItem(Items.TRIAL_KEY).apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F))).setWeight(10))
+						.add(LootItem.lootTableItem(Items.MUSIC_DISC_CREATOR_MUSIC_BOX).setWeight(5))
+						.add(LootItem.lootTableItem(Items.DIAMOND).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 2.0F))).setWeight(5))
+						.add(LootItem.lootTableItem(Items.EMERALD_BLOCK).apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F))).setWeight(5))
+						.add(LootItem.lootTableItem(Items.DIAMOND_BLOCK).apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F))).setWeight(1))
+				)
+		);
+		biConsumer.accept(
+			BuiltInLootTables.TRIAL_CHAMBERS_SUPPLY,
+			LootTable.lootTable()
+				.withPool(
+					LootPool.lootPool()
+						.setRolls(UniformGenerator.between(3.0F, 5.0F))
+						.add(LootItem.lootTableItem(Items.ARROW).apply(SetItemCountFunction.setCount(UniformGenerator.between(4.0F, 14.0F))).setWeight(2))
+						.add(
+							LootItem.lootTableItem(Items.TIPPED_ARROW)
+								.apply(SetItemCountFunction.setCount(UniformGenerator.between(4.0F, 8.0F)))
+								.apply(SetPotionFunction.setPotion(Potions.POISON))
+								.setWeight(1)
+						)
+						.add(
+							LootItem.lootTableItem(Items.TIPPED_ARROW)
+								.apply(SetItemCountFunction.setCount(UniformGenerator.between(4.0F, 8.0F)))
+								.apply(SetPotionFunction.setPotion(Potions.SLOWNESS))
+								.setWeight(1)
+						)
+						.add(LootItem.lootTableItem(Items.BAKED_POTATO).apply(SetItemCountFunction.setCount(UniformGenerator.between(2.0F, 4.0F))).setWeight(2))
+						.add(LootItem.lootTableItem(Items.GLOW_BERRIES).apply(SetItemCountFunction.setCount(UniformGenerator.between(2.0F, 10.0F))).setWeight(2))
+						.add(LootItem.lootTableItem(Items.ACACIA_PLANKS).apply(SetItemCountFunction.setCount(UniformGenerator.between(3.0F, 6.0F))).setWeight(1))
+						.add(LootItem.lootTableItem(Items.MOSS_BLOCK).apply(SetItemCountFunction.setCount(UniformGenerator.between(2.0F, 5.0F))).setWeight(1))
+						.add(LootItem.lootTableItem(Items.BONE_MEAL).apply(SetItemCountFunction.setCount(UniformGenerator.between(2.0F, 5.0F))).setWeight(1))
+						.add(LootItem.lootTableItem(Items.TUFF).apply(SetItemCountFunction.setCount(UniformGenerator.between(5.0F, 10.0F))).setWeight(1))
+						.add(LootItem.lootTableItem(Items.TORCH).apply(SetItemCountFunction.setCount(UniformGenerator.between(3.0F, 6.0F))).setWeight(1))
+						.add(
+							LootItem.lootTableItem(Items.POTION)
+								.apply(SetItemCountFunction.setCount(ConstantValue.exactly(2.0F)))
+								.apply(SetPotionFunction.setPotion(Potions.REGENERATION))
+						)
+						.add(
+							LootItem.lootTableItem(Items.POTION)
+								.apply(SetItemCountFunction.setCount(ConstantValue.exactly(2.0F)))
+								.apply(SetPotionFunction.setPotion(Potions.STRENGTH))
+						)
+						.add(
+							LootItem.lootTableItem(Items.STONE_PICKAXE)
+								.apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F)))
+								.apply(SetItemDamageFunction.setDamage(UniformGenerator.between(0.15F, 0.8F)))
+								.setWeight(2)
+						)
+						.add(LootItem.lootTableItem(Items.MILK_BUCKET).apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F))))
+				)
+		);
+		biConsumer.accept(
+			BuiltInLootTables.TRIAL_CHAMBERS_ENTRANCE,
+			LootTable.lootTable()
+				.withPool(
+					LootPool.lootPool()
+						.setRolls(UniformGenerator.between(2.0F, 3.0F))
+						.add(LootItem.lootTableItem(Items.TRIAL_KEY).apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F))).setWeight(1))
+						.add(LootItem.lootTableItem(Items.STICK).apply(SetItemCountFunction.setCount(UniformGenerator.between(2.0F, 5.0F))).setWeight(5))
+						.add(LootItem.lootTableItem(Items.WOODEN_AXE).apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F))).setWeight(10))
+						.add(LootItem.lootTableItem(Items.HONEYCOMB).apply(SetItemCountFunction.setCount(UniformGenerator.between(2.0F, 8.0F))).setWeight(10))
+						.add(LootItem.lootTableItem(Items.ARROW).apply(SetItemCountFunction.setCount(UniformGenerator.between(5.0F, 10.0F))).setWeight(10))
+				)
+		);
+		biConsumer.accept(
+			BuiltInLootTables.TRIAL_CHAMBERS_INTERSECTION,
+			LootTable.lootTable()
+				.withPool(
+					LootPool.lootPool()
+						.setRolls(UniformGenerator.between(1.0F, 3.0F))
+						.add(LootItem.lootTableItem(Items.DIAMOND_BLOCK).apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F))).setWeight(1))
+						.add(LootItem.lootTableItem(Items.EMERALD_BLOCK).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 3.0F))).setWeight(5))
+						.add(
+							LootItem.lootTableItem(Items.DIAMOND_AXE)
+								.apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F)))
+								.apply(SetItemDamageFunction.setDamage(UniformGenerator.between(0.1F, 0.5F)))
+								.setWeight(5)
+						)
+						.add(
+							LootItem.lootTableItem(Items.DIAMOND_PICKAXE)
+								.apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F)))
+								.apply(SetItemDamageFunction.setDamage(UniformGenerator.between(0.1F, 0.5F)))
+								.setWeight(5)
+						)
+						.add(LootItem.lootTableItem(Items.DIAMOND).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 2.0F))).setWeight(10))
+						.add(LootItem.lootTableItem(Items.CAKE).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 4.0F))).setWeight(20))
+						.add(LootItem.lootTableItem(Items.AMETHYST_SHARD).apply(SetItemCountFunction.setCount(UniformGenerator.between(8.0F, 20.0F))).setWeight(20))
+						.add(LootItem.lootTableItem(Items.IRON_BLOCK).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 2.0F))).setWeight(20))
+				)
+		);
+		biConsumer.accept(
+			BuiltInLootTables.TRIAL_CHAMBERS_INTERSECTION_BARREL,
+			LootTable.lootTable()
+				.withPool(
+					LootPool.lootPool()
+						.setRolls(UniformGenerator.between(1.0F, 3.0F))
+						.add(
+							LootItem.lootTableItem(Items.DIAMOND_AXE)
+								.apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F)))
+								.apply(SetItemDamageFunction.setDamage(UniformGenerator.between(0.4F, 0.9F)))
+								.apply(EnchantRandomlyFunction.randomApplicableEnchantment(this.registries))
+								.setWeight(1)
+						)
+						.add(
+							LootItem.lootTableItem(Items.DIAMOND_PICKAXE)
+								.apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F)))
+								.apply(SetItemDamageFunction.setDamage(UniformGenerator.between(0.15F, 0.8F)))
+								.setWeight(1)
+						)
+						.add(LootItem.lootTableItem(Items.DIAMOND).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 3.0F))).setWeight(1))
+						.add(
+							LootItem.lootTableItem(Items.COMPASS)
+								.apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F)))
+								.apply(SetItemDamageFunction.setDamage(UniformGenerator.between(0.15F, 0.8F)))
+								.setWeight(1)
+						)
+						.add(LootItem.lootTableItem(Items.BUCKET).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 2.0F))).setWeight(1))
+						.add(
+							LootItem.lootTableItem(Items.GOLDEN_AXE)
+								.apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F)))
+								.apply(SetItemDamageFunction.setDamage(UniformGenerator.between(0.15F, 0.8F)))
+								.setWeight(4)
+						)
+						.add(
+							LootItem.lootTableItem(Items.GOLDEN_PICKAXE)
+								.apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F)))
+								.apply(SetItemDamageFunction.setDamage(UniformGenerator.between(0.15F, 0.8F)))
+								.setWeight(4)
+						)
+						.add(LootItem.lootTableItem(Items.BAMBOO_PLANKS).apply(SetItemCountFunction.setCount(UniformGenerator.between(5.0F, 15.0F))).setWeight(10))
+						.add(LootItem.lootTableItem(Items.BAKED_POTATO).apply(SetItemCountFunction.setCount(UniformGenerator.between(6.0F, 10.0F))).setWeight(10))
+				)
+		);
+		biConsumer.accept(
+			BuiltInLootTables.TRIAL_CHAMBERS_CORRIDOR,
+			LootTable.lootTable()
+				.withPool(
+					LootPool.lootPool()
+						.setRolls(UniformGenerator.between(1.0F, 3.0F))
+						.add(
+							LootItem.lootTableItem(Items.IRON_AXE)
+								.apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F)))
+								.apply(SetItemDamageFunction.setDamage(UniformGenerator.between(0.4F, 0.9F)))
+								.apply(EnchantRandomlyFunction.randomApplicableEnchantment(this.registries))
+								.setWeight(1)
+						)
+						.add(LootItem.lootTableItem(Items.HONEYCOMB).apply(SetItemCountFunction.setCount(UniformGenerator.between(2.0F, 8.0F))).setWeight(1))
+						.add(
+							LootItem.lootTableItem(Items.STONE_AXE)
+								.apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F)))
+								.apply(SetItemDamageFunction.setDamage(UniformGenerator.between(0.15F, 0.8F)))
+								.setWeight(2)
+						)
+						.add(
+							LootItem.lootTableItem(Items.STONE_PICKAXE)
+								.apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F)))
+								.apply(SetItemDamageFunction.setDamage(UniformGenerator.between(0.15F, 0.8F)))
+								.setWeight(2)
+						)
+						.add(LootItem.lootTableItem(Items.ENDER_PEARL).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 2.0F))).setWeight(2))
+						.add(LootItem.lootTableItem(Items.BAMBOO_HANGING_SIGN).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 4.0F))).setWeight(2))
+						.add(LootItem.lootTableItem(Items.BAMBOO_PLANKS).apply(SetItemCountFunction.setCount(UniformGenerator.between(3.0F, 6.0F))).setWeight(2))
+						.add(LootItem.lootTableItem(Items.SCAFFOLDING).apply(SetItemCountFunction.setCount(UniformGenerator.between(2.0F, 10.0F))).setWeight(2))
+						.add(LootItem.lootTableItem(Items.TORCH).apply(SetItemCountFunction.setCount(UniformGenerator.between(3.0F, 6.0F))).setWeight(2))
+						.add(LootItem.lootTableItem(Items.TUFF).apply(SetItemCountFunction.setCount(UniformGenerator.between(8.0F, 20.0F))).setWeight(3))
+				)
+		);
+		biConsumer.accept(
+			BuiltInLootTables.TRIAL_CHAMBERS_REWARD_RARE,
+			LootTable.lootTable()
+				.withPool(
+					LootPool.lootPool()
+						.setRolls(ConstantValue.exactly(1.0F))
+						.add(LootItem.lootTableItem(Items.EMERALD).setWeight(3).apply(SetItemCountFunction.setCount(UniformGenerator.between(2.0F, 4.0F))))
+						.add(LootItem.lootTableItem(Items.SHIELD).setWeight(3).apply(SetItemDamageFunction.setDamage(UniformGenerator.between(0.5F, 1.0F))))
+						.add(
+							LootItem.lootTableItem(Items.BOW)
+								.setWeight(3)
+								.apply(EnchantWithLevelsFunction.enchantWithLevels(this.registries, UniformGenerator.between(5.0F, 15.0F)))
+						)
+						.add(
+							LootItem.lootTableItem(Items.CROSSBOW)
+								.setWeight(2)
+								.apply(EnchantWithLevelsFunction.enchantWithLevels(this.registries, UniformGenerator.between(5.0F, 20.0F)))
+						)
+						.add(
+							LootItem.lootTableItem(Items.IRON_AXE)
+								.setWeight(2)
+								.apply(EnchantWithLevelsFunction.enchantWithLevels(this.registries, UniformGenerator.between(0.0F, 10.0F)))
+						)
+						.add(
+							LootItem.lootTableItem(Items.IRON_CHESTPLATE)
+								.setWeight(2)
+								.apply(EnchantWithLevelsFunction.enchantWithLevels(this.registries, UniformGenerator.between(0.0F, 10.0F)))
+						)
+						.add(LootItem.lootTableItem(Items.GOLDEN_CARROT).setWeight(2).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 2.0F))))
+						.add(
+							LootItem.lootTableItem(Items.BOOK)
+								.setWeight(2)
+								.apply(
+									new EnchantRandomlyFunction.Builder()
+										.withOneOf(
+											HolderSet.direct(
+												registryLookup.getOrThrow(Enchantments.SHARPNESS),
+												registryLookup.getOrThrow(Enchantments.BANE_OF_ARTHROPODS),
+												registryLookup.getOrThrow(Enchantments.EFFICIENCY),
+												registryLookup.getOrThrow(Enchantments.FORTUNE),
+												registryLookup.getOrThrow(Enchantments.SILK_TOUCH),
+												registryLookup.getOrThrow(Enchantments.FEATHER_FALLING)
+											)
+										)
+								)
+						)
+						.add(
+							LootItem.lootTableItem(Items.BOOK)
+								.setWeight(2)
+								.apply(
+									new EnchantRandomlyFunction.Builder()
+										.withOneOf(
+											HolderSet.direct(
+												registryLookup.getOrThrow(Enchantments.RIPTIDE),
+												registryLookup.getOrThrow(Enchantments.LOYALTY),
+												registryLookup.getOrThrow(Enchantments.CHANNELING),
+												registryLookup.getOrThrow(Enchantments.IMPALING),
+												registryLookup.getOrThrow(Enchantments.MENDING)
+											)
+										)
+								)
+						)
+						.add(
+							LootItem.lootTableItem(Items.DIAMOND_CHESTPLATE)
+								.setWeight(1)
+								.apply(EnchantWithLevelsFunction.enchantWithLevels(this.registries, UniformGenerator.between(5.0F, 15.0F)))
+						)
+						.add(
+							LootItem.lootTableItem(Items.DIAMOND_AXE)
+								.setWeight(1)
+								.apply(EnchantWithLevelsFunction.enchantWithLevels(this.registries, UniformGenerator.between(5.0F, 15.0F)))
+						)
+				)
+		);
+		biConsumer.accept(
+			BuiltInLootTables.TRIAL_CHAMBERS_REWARD_COMMON,
+			LootTable.lootTable()
+				.withPool(
+					LootPool.lootPool()
+						.setRolls(ConstantValue.exactly(1.0F))
+						.add(LootItem.lootTableItem(Items.ARROW).setWeight(4).apply(SetItemCountFunction.setCount(UniformGenerator.between(2.0F, 8.0F))))
+						.add(
+							LootItem.lootTableItem(Items.TIPPED_ARROW)
+								.setWeight(4)
+								.apply(SetItemCountFunction.setCount(UniformGenerator.between(2.0F, 8.0F)))
+								.apply(SetPotionFunction.setPotion(Potions.POISON))
+						)
+						.add(LootItem.lootTableItem(Items.EMERALD).setWeight(4).apply(SetItemCountFunction.setCount(UniformGenerator.between(2.0F, 4.0F))))
+						.add(LootItem.lootTableItem(Items.WIND_CHARGE).setWeight(3).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 3.0F))))
+						.add(LootItem.lootTableItem(Items.IRON_INGOT).setWeight(3).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 4.0F))))
+						.add(LootItem.lootTableItem(Items.HONEY_BOTTLE).setWeight(3).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 2.0F))))
+						.add(
+							LootItem.lootTableItem(Items.OMINOUS_BOTTLE)
+								.setWeight(2)
+								.apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F)))
+								.apply(SetOminousBottleAmplifierFunction.setAmplifier(UniformGenerator.between(0.0F, 1.0F)))
+						)
+						.add(LootItem.lootTableItem(Items.WIND_CHARGE).setWeight(1).apply(SetItemCountFunction.setCount(UniformGenerator.between(4.0F, 12.0F))))
+						.add(LootItem.lootTableItem(Items.DIAMOND).setWeight(1).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 2.0F))))
+				)
+		);
+		biConsumer.accept(
+			BuiltInLootTables.TRIAL_CHAMBERS_REWARD_UNIQUE,
+			LootTable.lootTable()
+				.withPool(
+					LootPool.lootPool()
+						.setRolls(ConstantValue.exactly(1.0F))
+						.add(LootItem.lootTableItem(Items.GOLDEN_APPLE).setWeight(4))
+						.add(LootItem.lootTableItem(Items.BOLT_ARMOR_TRIM_SMITHING_TEMPLATE).setWeight(3))
+						.add(LootItem.lootTableItem(Items.GUSTER_BANNER_PATTERN).setWeight(2))
+						.add(LootItem.lootTableItem(Items.MUSIC_DISC_PRECIPICE).setWeight(2))
+						.add(LootItem.lootTableItem(Items.TRIDENT).setWeight(1))
+				)
+		);
+		biConsumer.accept(
+			BuiltInLootTables.TRIAL_CHAMBERS_REWARD,
+			LootTable.lootTable()
+				.withPool(
+					LootPool.lootPool()
+						.setRolls(ConstantValue.exactly(1.0F))
+						.add(NestedLootTable.lootTableReference(BuiltInLootTables.TRIAL_CHAMBERS_REWARD_RARE).setWeight(8))
+						.add(NestedLootTable.lootTableReference(BuiltInLootTables.TRIAL_CHAMBERS_REWARD_COMMON).setWeight(2))
+				)
+				.withPool(
+					LootPool.lootPool().setRolls(UniformGenerator.between(1.0F, 3.0F)).add(NestedLootTable.lootTableReference(BuiltInLootTables.TRIAL_CHAMBERS_REWARD_COMMON))
+				)
+				.withPool(
+					LootPool.lootPool()
+						.setRolls(ConstantValue.exactly(1.0F))
+						.when(LootItemRandomChanceCondition.randomChance(0.25F))
+						.add(NestedLootTable.lootTableReference(BuiltInLootTables.TRIAL_CHAMBERS_REWARD_UNIQUE))
+				)
+		);
+		biConsumer.accept(
+			BuiltInLootTables.TRIAL_CHAMBERS_REWARD_OMINOUS_RARE,
+			LootTable.lootTable()
+				.withPool(
+					LootPool.lootPool()
+						.setRolls(ConstantValue.exactly(1.0F))
+						.add(LootItem.lootTableItem(Items.EMERALD_BLOCK).setWeight(5))
+						.add(LootItem.lootTableItem(Items.IRON_BLOCK).setWeight(4))
+						.add(
+							LootItem.lootTableItem(Items.CROSSBOW)
+								.setWeight(4)
+								.apply(EnchantWithLevelsFunction.enchantWithLevels(this.registries, UniformGenerator.between(5.0F, 20.0F)))
+						)
+						.add(LootItem.lootTableItem(Items.GOLDEN_APPLE).setWeight(3))
+						.add(
+							LootItem.lootTableItem(Items.DIAMOND_AXE)
+								.setWeight(3)
+								.apply(EnchantWithLevelsFunction.enchantWithLevels(this.registries, UniformGenerator.between(10.0F, 20.0F)))
+						)
+						.add(
+							LootItem.lootTableItem(Items.DIAMOND_CHESTPLATE)
+								.setWeight(3)
+								.apply(EnchantWithLevelsFunction.enchantWithLevels(this.registries, UniformGenerator.between(10.0F, 20.0F)))
+						)
+						.add(
+							LootItem.lootTableItem(Items.BOOK)
+								.setWeight(2)
+								.apply(
+									new EnchantRandomlyFunction.Builder()
+										.withOneOf(
+											HolderSet.direct(
+												registryLookup.getOrThrow(Enchantments.KNOCKBACK),
+												registryLookup.getOrThrow(Enchantments.PUNCH),
+												registryLookup.getOrThrow(Enchantments.SMITE),
+												registryLookup.getOrThrow(Enchantments.LOOTING),
+												registryLookup.getOrThrow(Enchantments.MULTISHOT)
+											)
+										)
+								)
+						)
+						.add(
+							LootItem.lootTableItem(Items.BOOK)
+								.setWeight(2)
+								.apply(
+									new EnchantRandomlyFunction.Builder()
+										.withOneOf(HolderSet.direct(registryLookup.getOrThrow(Enchantments.BREACH), registryLookup.getOrThrow(Enchantments.DENSITY)))
+								)
+						)
+						.add(
+							LootItem.lootTableItem(Items.BOOK)
+								.setWeight(2)
+								.apply(new SetEnchantmentsFunction.Builder().withEnchantment(registryLookup.getOrThrow(Enchantments.WIND_BURST), ConstantValue.exactly(1.0F)))
+						)
+						.add(LootItem.lootTableItem(Items.DIAMOND_BLOCK).setWeight(1))
+				)
+		);
+		biConsumer.accept(
+			BuiltInLootTables.TRIAL_CHAMBERS_REWARD_OMINOUS_COMMON,
+			LootTable.lootTable()
+				.withPool(
+					LootPool.lootPool()
+						.setRolls(ConstantValue.exactly(1.0F))
+						.add(LootItem.lootTableItem(Items.EMERALD).setWeight(5).apply(SetItemCountFunction.setCount(UniformGenerator.between(4.0F, 10.0F))))
+						.add(LootItem.lootTableItem(Items.WIND_CHARGE).setWeight(4).apply(SetItemCountFunction.setCount(UniformGenerator.between(8.0F, 12.0F))))
+						.add(
+							LootItem.lootTableItem(Items.TIPPED_ARROW)
+								.setWeight(3)
+								.apply(SetItemCountFunction.setCount(UniformGenerator.between(4.0F, 12.0F)))
+								.apply(SetPotionFunction.setPotion(Potions.STRONG_SLOWNESS))
+						)
+						.add(LootItem.lootTableItem(Items.DIAMOND).setWeight(2).apply(SetItemCountFunction.setCount(UniformGenerator.between(2.0F, 3.0F))))
+						.add(
+							LootItem.lootTableItem(Items.OMINOUS_BOTTLE)
+								.setWeight(1)
+								.apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F)))
+								.apply(SetOminousBottleAmplifierFunction.setAmplifier(UniformGenerator.between(2.0F, 4.0F)))
+						)
+				)
+		);
+		biConsumer.accept(
+			BuiltInLootTables.TRIAL_CHAMBERS_REWARD_OMINOUS_UNIQUE,
+			LootTable.lootTable()
+				.withPool(
+					LootPool.lootPool()
+						.setRolls(ConstantValue.exactly(1.0F))
+						.add(LootItem.lootTableItem(Items.ENCHANTED_GOLDEN_APPLE).setWeight(3))
+						.add(LootItem.lootTableItem(Items.FLOW_ARMOR_TRIM_SMITHING_TEMPLATE).setWeight(3))
+						.add(LootItem.lootTableItem(Items.FLOW_BANNER_PATTERN).setWeight(2))
+						.add(LootItem.lootTableItem(Items.MUSIC_DISC_CREATOR).setWeight(1))
+						.add(LootItem.lootTableItem(Items.HEAVY_CORE).setWeight(1))
+				)
+		);
+		biConsumer.accept(
+			BuiltInLootTables.TRIAL_CHAMBERS_REWARD_OMINOUS,
+			LootTable.lootTable()
+				.withPool(
+					LootPool.lootPool()
+						.setRolls(ConstantValue.exactly(1.0F))
+						.add(NestedLootTable.lootTableReference(BuiltInLootTables.TRIAL_CHAMBERS_REWARD_OMINOUS_RARE).setWeight(8))
+						.add(NestedLootTable.lootTableReference(BuiltInLootTables.TRIAL_CHAMBERS_REWARD_OMINOUS_COMMON).setWeight(2))
+				)
+				.withPool(
+					LootPool.lootPool()
+						.setRolls(UniformGenerator.between(1.0F, 3.0F))
+						.add(NestedLootTable.lootTableReference(BuiltInLootTables.TRIAL_CHAMBERS_REWARD_OMINOUS_COMMON))
+				)
+				.withPool(
+					LootPool.lootPool()
+						.setRolls(ConstantValue.exactly(1.0F))
+						.when(LootItemRandomChanceCondition.randomChance(0.75F))
+						.add(NestedLootTable.lootTableReference(BuiltInLootTables.TRIAL_CHAMBERS_REWARD_OMINOUS_UNIQUE))
+				)
+		);
+		this.spawnerLootTables(biConsumer);
 	}
 
-	public static void spawnerLootTables(BiConsumer<ResourceKey<LootTable>, LootTable.Builder> biConsumer) {
-		biConsumer.accept(BuiltInLootTables.SPAWNER_TRIAL_CHAMBER_KEY, LootTable.lootTable());
-		biConsumer.accept(BuiltInLootTables.SPAWNER_TRIAL_CHAMBER_CONSUMABLES, LootTable.lootTable());
-		biConsumer.accept(BuiltInLootTables.SPAWNER_OMINOUS_TRIAL_CHAMBER_KEY, LootTable.lootTable());
-		biConsumer.accept(BuiltInLootTables.SPAWNER_OMINOUS_TRIAL_CHAMBER_CONSUMABLES, LootTable.lootTable());
-		biConsumer.accept(BuiltInLootTables.SPAWNER_TRIAL_ITEMS_TO_DROP_WHEN_OMINOUS, LootTable.lootTable());
+	public void spawnerLootTables(BiConsumer<ResourceKey<LootTable>, LootTable.Builder> biConsumer) {
+		HolderLookup.RegistryLookup<Enchantment> registryLookup = this.registries.lookupOrThrow(Registries.ENCHANTMENT);
+		biConsumer.accept(
+			BuiltInLootTables.SPAWNER_TRIAL_CHAMBER_KEY,
+			LootTable.lootTable().withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F)).add(LootItem.lootTableItem(Items.TRIAL_KEY)))
+		);
+		biConsumer.accept(
+			BuiltInLootTables.SPAWNER_TRIAL_CHAMBER_CONSUMABLES,
+			LootTable.lootTable()
+				.withPool(
+					LootPool.lootPool()
+						.setRolls(ConstantValue.exactly(1.0F))
+						.add(LootItem.lootTableItem(Items.COOKED_CHICKEN).setWeight(3).apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F))))
+						.add(LootItem.lootTableItem(Items.BREAD).setWeight(3).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 3.0F))))
+						.add(LootItem.lootTableItem(Items.BAKED_POTATO).setWeight(2).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 3.0F))))
+						.add(
+							LootItem.lootTableItem(Items.POTION)
+								.apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F)))
+								.apply(SetPotionFunction.setPotion(Potions.REGENERATION))
+						)
+						.add(
+							LootItem.lootTableItem(Items.POTION)
+								.apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F)))
+								.apply(SetPotionFunction.setPotion(Potions.SWIFTNESS))
+						)
+				)
+		);
+		biConsumer.accept(
+			BuiltInLootTables.SPAWNER_OMINOUS_TRIAL_CHAMBER_KEY,
+			LootTable.lootTable().withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F)).add(LootItem.lootTableItem(Items.OMINOUS_TRIAL_KEY)))
+		);
+		biConsumer.accept(
+			BuiltInLootTables.SPAWNER_OMINOUS_TRIAL_CHAMBER_CONSUMABLES,
+			LootTable.lootTable()
+				.withPool(
+					LootPool.lootPool()
+						.setRolls(ConstantValue.exactly(1.0F))
+						.add(LootItem.lootTableItem(Items.COOKED_BEEF).setWeight(3).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 2.0F))))
+						.add(LootItem.lootTableItem(Items.BAKED_POTATO).setWeight(3).apply(SetItemCountFunction.setCount(UniformGenerator.between(2.0F, 4.0F))))
+						.add(LootItem.lootTableItem(Items.GOLDEN_CARROT).setWeight(2).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 2.0F))))
+						.add(
+							LootItem.lootTableItem(Items.POTION)
+								.apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F)))
+								.apply(SetPotionFunction.setPotion(Potions.REGENERATION))
+						)
+						.add(
+							LootItem.lootTableItem(Items.POTION)
+								.apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F)))
+								.apply(SetPotionFunction.setPotion(Potions.STRENGTH))
+						)
+				)
+		);
+		biConsumer.accept(
+			BuiltInLootTables.SPAWNER_TRIAL_ITEMS_TO_DROP_WHEN_OMINOUS,
+			LootTable.lootTable()
+				.withPool(
+					LootPool.lootPool()
+						.setRolls(ConstantValue.exactly(1.0F))
+						.add(
+							LootItem.lootTableItem(Items.LINGERING_POTION)
+								.apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F)))
+								.apply(SetPotionFunction.setPotion(Potions.WIND_CHARGED))
+						)
+						.add(
+							LootItem.lootTableItem(Items.LINGERING_POTION)
+								.apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F)))
+								.apply(SetPotionFunction.setPotion(Potions.OOZING))
+						)
+						.add(
+							LootItem.lootTableItem(Items.LINGERING_POTION)
+								.apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F)))
+								.apply(SetPotionFunction.setPotion(Potions.WEAVING))
+						)
+						.add(
+							LootItem.lootTableItem(Items.LINGERING_POTION)
+								.apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F)))
+								.apply(SetPotionFunction.setPotion(Potions.INFESTED))
+						)
+						.add(
+							LootItem.lootTableItem(Items.LINGERING_POTION)
+								.apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F)))
+								.apply(SetPotionFunction.setPotion(Potions.STRENGTH))
+						)
+						.add(
+							LootItem.lootTableItem(Items.LINGERING_POTION)
+								.apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F)))
+								.apply(SetPotionFunction.setPotion(Potions.SWIFTNESS))
+						)
+						.add(
+							LootItem.lootTableItem(Items.LINGERING_POTION)
+								.apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F)))
+								.apply(SetPotionFunction.setPotion(Potions.SLOW_FALLING))
+						)
+				)
+				.withPool(
+					LootPool.lootPool()
+						.setRolls(ConstantValue.exactly(1.0F))
+						.add(LootItem.lootTableItem(Items.ARROW).apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F))))
+						.add(
+							LootItem.lootTableItem(Items.ARROW).apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F))).apply(SetPotionFunction.setPotion(Potions.POISON))
+						)
+						.add(
+							LootItem.lootTableItem(Items.ARROW)
+								.apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F)))
+								.apply(SetPotionFunction.setPotion(Potions.STRONG_SLOWNESS))
+						)
+						.add(LootItem.lootTableItem(Items.FIRE_CHARGE).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 3.0F))))
+						.add(LootItem.lootTableItem(Items.WIND_CHARGE).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 3.0F))))
+				)
+		);
 	}
 
-	public static LootTable.Builder shipwreckSupplyLootTable() {
+	public LootTable.Builder shipwreckSupplyLootTable() {
 		return LootTable.lootTable()
 			.withPool(
 				LootPool.lootPool()
@@ -681,10 +1272,10 @@ public class VanillaChestLoot implements LootTableSubProvider {
 					.add(LootItem.lootTableItem(Blocks.BAMBOO).setWeight(2).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 3.0F))))
 					.add(LootItem.lootTableItem(Items.GUNPOWDER).setWeight(3).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 5.0F))))
 					.add(LootItem.lootTableItem(Blocks.TNT).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 2.0F))))
-					.add(LootItem.lootTableItem(Items.LEATHER_HELMET).setWeight(3).apply(EnchantRandomlyFunction.randomApplicableEnchantment()))
-					.add(LootItem.lootTableItem(Items.LEATHER_CHESTPLATE).setWeight(3).apply(EnchantRandomlyFunction.randomApplicableEnchantment()))
-					.add(LootItem.lootTableItem(Items.LEATHER_LEGGINGS).setWeight(3).apply(EnchantRandomlyFunction.randomApplicableEnchantment()))
-					.add(LootItem.lootTableItem(Items.LEATHER_BOOTS).setWeight(3).apply(EnchantRandomlyFunction.randomApplicableEnchantment()))
+					.add(LootItem.lootTableItem(Items.LEATHER_HELMET).setWeight(3).apply(EnchantRandomlyFunction.randomApplicableEnchantment(this.registries)))
+					.add(LootItem.lootTableItem(Items.LEATHER_CHESTPLATE).setWeight(3).apply(EnchantRandomlyFunction.randomApplicableEnchantment(this.registries)))
+					.add(LootItem.lootTableItem(Items.LEATHER_LEGGINGS).setWeight(3).apply(EnchantRandomlyFunction.randomApplicableEnchantment(this.registries)))
+					.add(LootItem.lootTableItem(Items.LEATHER_BOOTS).setWeight(3).apply(EnchantRandomlyFunction.randomApplicableEnchantment(this.registries)))
 			)
 			.withPool(
 				LootPool.lootPool()
@@ -694,7 +1285,7 @@ public class VanillaChestLoot implements LootTableSubProvider {
 			);
 	}
 
-	public static LootTable.Builder shipwreckMapLootTable() {
+	public LootTable.Builder shipwreckMapLootTable() {
 		return LootTable.lootTable()
 			.withPool(
 				LootPool.lootPool()
@@ -729,7 +1320,7 @@ public class VanillaChestLoot implements LootTableSubProvider {
 			);
 	}
 
-	public static LootTable.Builder bastionHoglinStableLootTable() {
+	public LootTable.Builder bastionHoglinStableLootTable() {
 		return LootTable.lootTable()
 			.withPool(
 				LootPool.lootPool()
@@ -738,14 +1329,14 @@ public class VanillaChestLoot implements LootTableSubProvider {
 						LootItem.lootTableItem(Items.DIAMOND_SHOVEL)
 							.setWeight(15)
 							.apply(SetItemDamageFunction.setDamage(UniformGenerator.between(0.15F, 0.8F)))
-							.apply(EnchantRandomlyFunction.randomApplicableEnchantment())
+							.apply(EnchantRandomlyFunction.randomApplicableEnchantment(this.registries))
 					)
 					.add(
 						LootItem.lootTableItem(Items.DIAMOND_PICKAXE)
 							.setWeight(12)
 							.apply(SetItemDamageFunction.setDamage(UniformGenerator.between(0.15F, 0.95F)))
 							.apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F)))
-							.apply(EnchantRandomlyFunction.randomApplicableEnchantment())
+							.apply(EnchantRandomlyFunction.randomApplicableEnchantment(this.registries))
 					)
 					.add(LootItem.lootTableItem(Items.NETHERITE_SCRAP).setWeight(8).apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F))))
 					.add(LootItem.lootTableItem(Items.ANCIENT_DEBRIS).setWeight(12).apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F))))
@@ -761,7 +1352,7 @@ public class VanillaChestLoot implements LootTableSubProvider {
 					.add(
 						LootItem.lootTableItem(Items.GOLDEN_AXE)
 							.apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F)))
-							.apply(EnchantRandomlyFunction.randomApplicableEnchantment())
+							.apply(EnchantRandomlyFunction.randomApplicableEnchantment(this.registries))
 					)
 					.add(LootItem.lootTableItem(Blocks.CRYING_OBSIDIAN).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 5.0F))))
 					.add(LootItem.lootTableItem(Blocks.GLOWSTONE).apply(SetItemCountFunction.setCount(UniformGenerator.between(3.0F, 6.0F))))
@@ -791,7 +1382,7 @@ public class VanillaChestLoot implements LootTableSubProvider {
 			);
 	}
 
-	public static LootTable.Builder bastionBridgeLootTable() {
+	public LootTable.Builder bastionBridgeLootTable() {
 		return LootTable.lootTable()
 			.withPool(
 				LootPool.lootPool()
@@ -804,7 +1395,7 @@ public class VanillaChestLoot implements LootTableSubProvider {
 					.add(
 						LootItem.lootTableItem(Items.CROSSBOW)
 							.apply(SetItemDamageFunction.setDamage(UniformGenerator.between(0.1F, 0.5F)))
-							.apply(EnchantRandomlyFunction.randomApplicableEnchantment())
+							.apply(EnchantRandomlyFunction.randomApplicableEnchantment(this.registries))
 					)
 					.add(LootItem.lootTableItem(Items.SPECTRAL_ARROW).apply(SetItemCountFunction.setCount(UniformGenerator.between(10.0F, 28.0F))))
 					.add(LootItem.lootTableItem(Blocks.GILDED_BLACKSTONE).apply(SetItemCountFunction.setCount(UniformGenerator.between(8.0F, 12.0F))))
@@ -816,27 +1407,27 @@ public class VanillaChestLoot implements LootTableSubProvider {
 					.add(
 						LootItem.lootTableItem(Items.GOLDEN_CHESTPLATE)
 							.apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F)))
-							.apply(EnchantRandomlyFunction.randomApplicableEnchantment())
+							.apply(EnchantRandomlyFunction.randomApplicableEnchantment(this.registries))
 					)
 					.add(
 						LootItem.lootTableItem(Items.GOLDEN_HELMET)
 							.apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F)))
-							.apply(EnchantRandomlyFunction.randomApplicableEnchantment())
+							.apply(EnchantRandomlyFunction.randomApplicableEnchantment(this.registries))
 					)
 					.add(
 						LootItem.lootTableItem(Items.GOLDEN_LEGGINGS)
 							.apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F)))
-							.apply(EnchantRandomlyFunction.randomApplicableEnchantment())
+							.apply(EnchantRandomlyFunction.randomApplicableEnchantment(this.registries))
 					)
 					.add(
 						LootItem.lootTableItem(Items.GOLDEN_BOOTS)
 							.apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F)))
-							.apply(EnchantRandomlyFunction.randomApplicableEnchantment())
+							.apply(EnchantRandomlyFunction.randomApplicableEnchantment(this.registries))
 					)
 					.add(
 						LootItem.lootTableItem(Items.GOLDEN_AXE)
 							.apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F)))
-							.apply(EnchantRandomlyFunction.randomApplicableEnchantment())
+							.apply(EnchantRandomlyFunction.randomApplicableEnchantment(this.registries))
 					)
 			)
 			.withPool(
@@ -862,7 +1453,7 @@ public class VanillaChestLoot implements LootTableSubProvider {
 			);
 	}
 
-	public static LootTable.Builder endCityTreasureLootTable() {
+	public LootTable.Builder endCityTreasureLootTable() {
 		return LootTable.lootTable()
 			.withPool(
 				LootPool.lootPool()
@@ -879,72 +1470,72 @@ public class VanillaChestLoot implements LootTableSubProvider {
 					.add(
 						LootItem.lootTableItem(Items.DIAMOND_SWORD)
 							.setWeight(3)
-							.apply(EnchantWithLevelsFunction.enchantWithLevels(UniformGenerator.between(20.0F, 39.0F)).allowTreasure())
+							.apply(EnchantWithLevelsFunction.enchantWithLevels(this.registries, UniformGenerator.between(20.0F, 39.0F)))
 					)
 					.add(
 						LootItem.lootTableItem(Items.DIAMOND_BOOTS)
 							.setWeight(3)
-							.apply(EnchantWithLevelsFunction.enchantWithLevels(UniformGenerator.between(20.0F, 39.0F)).allowTreasure())
+							.apply(EnchantWithLevelsFunction.enchantWithLevels(this.registries, UniformGenerator.between(20.0F, 39.0F)))
 					)
 					.add(
 						LootItem.lootTableItem(Items.DIAMOND_CHESTPLATE)
 							.setWeight(3)
-							.apply(EnchantWithLevelsFunction.enchantWithLevels(UniformGenerator.between(20.0F, 39.0F)).allowTreasure())
+							.apply(EnchantWithLevelsFunction.enchantWithLevels(this.registries, UniformGenerator.between(20.0F, 39.0F)))
 					)
 					.add(
 						LootItem.lootTableItem(Items.DIAMOND_LEGGINGS)
 							.setWeight(3)
-							.apply(EnchantWithLevelsFunction.enchantWithLevels(UniformGenerator.between(20.0F, 39.0F)).allowTreasure())
+							.apply(EnchantWithLevelsFunction.enchantWithLevels(this.registries, UniformGenerator.between(20.0F, 39.0F)))
 					)
 					.add(
 						LootItem.lootTableItem(Items.DIAMOND_HELMET)
 							.setWeight(3)
-							.apply(EnchantWithLevelsFunction.enchantWithLevels(UniformGenerator.between(20.0F, 39.0F)).allowTreasure())
+							.apply(EnchantWithLevelsFunction.enchantWithLevels(this.registries, UniformGenerator.between(20.0F, 39.0F)))
 					)
 					.add(
 						LootItem.lootTableItem(Items.DIAMOND_PICKAXE)
 							.setWeight(3)
-							.apply(EnchantWithLevelsFunction.enchantWithLevels(UniformGenerator.between(20.0F, 39.0F)).allowTreasure())
+							.apply(EnchantWithLevelsFunction.enchantWithLevels(this.registries, UniformGenerator.between(20.0F, 39.0F)))
 					)
 					.add(
 						LootItem.lootTableItem(Items.DIAMOND_SHOVEL)
 							.setWeight(3)
-							.apply(EnchantWithLevelsFunction.enchantWithLevels(UniformGenerator.between(20.0F, 39.0F)).allowTreasure())
+							.apply(EnchantWithLevelsFunction.enchantWithLevels(this.registries, UniformGenerator.between(20.0F, 39.0F)))
 					)
 					.add(
 						LootItem.lootTableItem(Items.IRON_SWORD)
 							.setWeight(3)
-							.apply(EnchantWithLevelsFunction.enchantWithLevels(UniformGenerator.between(20.0F, 39.0F)).allowTreasure())
+							.apply(EnchantWithLevelsFunction.enchantWithLevels(this.registries, UniformGenerator.between(20.0F, 39.0F)))
 					)
 					.add(
 						LootItem.lootTableItem(Items.IRON_BOOTS)
 							.setWeight(3)
-							.apply(EnchantWithLevelsFunction.enchantWithLevels(UniformGenerator.between(20.0F, 39.0F)).allowTreasure())
+							.apply(EnchantWithLevelsFunction.enchantWithLevels(this.registries, UniformGenerator.between(20.0F, 39.0F)))
 					)
 					.add(
 						LootItem.lootTableItem(Items.IRON_CHESTPLATE)
 							.setWeight(3)
-							.apply(EnchantWithLevelsFunction.enchantWithLevels(UniformGenerator.between(20.0F, 39.0F)).allowTreasure())
+							.apply(EnchantWithLevelsFunction.enchantWithLevels(this.registries, UniformGenerator.between(20.0F, 39.0F)))
 					)
 					.add(
 						LootItem.lootTableItem(Items.IRON_LEGGINGS)
 							.setWeight(3)
-							.apply(EnchantWithLevelsFunction.enchantWithLevels(UniformGenerator.between(20.0F, 39.0F)).allowTreasure())
+							.apply(EnchantWithLevelsFunction.enchantWithLevels(this.registries, UniformGenerator.between(20.0F, 39.0F)))
 					)
 					.add(
 						LootItem.lootTableItem(Items.IRON_HELMET)
 							.setWeight(3)
-							.apply(EnchantWithLevelsFunction.enchantWithLevels(UniformGenerator.between(20.0F, 39.0F)).allowTreasure())
+							.apply(EnchantWithLevelsFunction.enchantWithLevels(this.registries, UniformGenerator.between(20.0F, 39.0F)))
 					)
 					.add(
 						LootItem.lootTableItem(Items.IRON_PICKAXE)
 							.setWeight(3)
-							.apply(EnchantWithLevelsFunction.enchantWithLevels(UniformGenerator.between(20.0F, 39.0F)).allowTreasure())
+							.apply(EnchantWithLevelsFunction.enchantWithLevels(this.registries, UniformGenerator.between(20.0F, 39.0F)))
 					)
 					.add(
 						LootItem.lootTableItem(Items.IRON_SHOVEL)
 							.setWeight(3)
-							.apply(EnchantWithLevelsFunction.enchantWithLevels(UniformGenerator.between(20.0F, 39.0F)).allowTreasure())
+							.apply(EnchantWithLevelsFunction.enchantWithLevels(this.registries, UniformGenerator.between(20.0F, 39.0F)))
 					)
 			)
 			.withPool(
@@ -955,7 +1546,7 @@ public class VanillaChestLoot implements LootTableSubProvider {
 			);
 	}
 
-	public static LootTable.Builder netherBridgeLootTable() {
+	public LootTable.Builder netherBridgeLootTable() {
 		return LootTable.lootTable()
 			.withPool(
 				LootPool.lootPool()
@@ -981,7 +1572,7 @@ public class VanillaChestLoot implements LootTableSubProvider {
 			);
 	}
 
-	public static LootTable.Builder bastionTreasureLootTable() {
+	public LootTable.Builder bastionTreasureLootTable() {
 		return LootTable.lootTable()
 			.withPool(
 				LootPool.lootPool()
@@ -994,31 +1585,31 @@ public class VanillaChestLoot implements LootTableSubProvider {
 						LootItem.lootTableItem(Items.DIAMOND_SWORD)
 							.setWeight(6)
 							.apply(SetItemDamageFunction.setDamage(UniformGenerator.between(0.8F, 1.0F)))
-							.apply(EnchantRandomlyFunction.randomApplicableEnchantment())
+							.apply(EnchantRandomlyFunction.randomApplicableEnchantment(this.registries))
 					)
 					.add(
 						LootItem.lootTableItem(Items.DIAMOND_CHESTPLATE)
 							.setWeight(6)
 							.apply(SetItemDamageFunction.setDamage(UniformGenerator.between(0.8F, 1.0F)))
-							.apply(EnchantRandomlyFunction.randomApplicableEnchantment())
+							.apply(EnchantRandomlyFunction.randomApplicableEnchantment(this.registries))
 					)
 					.add(
 						LootItem.lootTableItem(Items.DIAMOND_HELMET)
 							.setWeight(6)
 							.apply(SetItemDamageFunction.setDamage(UniformGenerator.between(0.8F, 1.0F)))
-							.apply(EnchantRandomlyFunction.randomApplicableEnchantment())
+							.apply(EnchantRandomlyFunction.randomApplicableEnchantment(this.registries))
 					)
 					.add(
 						LootItem.lootTableItem(Items.DIAMOND_LEGGINGS)
 							.setWeight(6)
 							.apply(SetItemDamageFunction.setDamage(UniformGenerator.between(0.8F, 1.0F)))
-							.apply(EnchantRandomlyFunction.randomApplicableEnchantment())
+							.apply(EnchantRandomlyFunction.randomApplicableEnchantment(this.registries))
 					)
 					.add(
 						LootItem.lootTableItem(Items.DIAMOND_BOOTS)
 							.setWeight(6)
 							.apply(SetItemDamageFunction.setDamage(UniformGenerator.between(0.8F, 1.0F)))
-							.apply(EnchantRandomlyFunction.randomApplicableEnchantment())
+							.apply(EnchantRandomlyFunction.randomApplicableEnchantment(this.registries))
 					)
 					.add(LootItem.lootTableItem(Items.DIAMOND_SWORD).setWeight(6))
 					.add(LootItem.lootTableItem(Items.DIAMOND_CHESTPLATE).setWeight(5))
@@ -1050,7 +1641,8 @@ public class VanillaChestLoot implements LootTableSubProvider {
 			.withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F)).add(LootItem.lootTableItem(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE).setWeight(1)));
 	}
 
-	public static LootTable.Builder bastionOtherLootTable() {
+	public LootTable.Builder bastionOtherLootTable() {
+		HolderLookup.RegistryLookup<Enchantment> registryLookup = this.registries.lookupOrThrow(Registries.ENCHANTMENT);
 		return LootTable.lootTable()
 			.withPool(
 				LootPool.lootPool()
@@ -1059,14 +1651,14 @@ public class VanillaChestLoot implements LootTableSubProvider {
 						LootItem.lootTableItem(Items.DIAMOND_PICKAXE)
 							.setWeight(6)
 							.apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F)))
-							.apply(EnchantRandomlyFunction.randomApplicableEnchantment())
+							.apply(EnchantRandomlyFunction.randomApplicableEnchantment(this.registries))
 					)
 					.add(LootItem.lootTableItem(Items.DIAMOND_SHOVEL).setWeight(6).apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F))))
 					.add(
 						LootItem.lootTableItem(Items.CROSSBOW)
 							.setWeight(6)
 							.apply(SetItemDamageFunction.setDamage(UniformGenerator.between(0.1F, 0.9F)))
-							.apply(EnchantRandomlyFunction.randomApplicableEnchantment())
+							.apply(EnchantRandomlyFunction.randomApplicableEnchantment(this.registries))
 					)
 					.add(LootItem.lootTableItem(Items.ANCIENT_DEBRIS).setWeight(12).apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F))))
 					.add(LootItem.lootTableItem(Items.NETHERITE_SCRAP).setWeight(4).apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F))))
@@ -1075,7 +1667,11 @@ public class VanillaChestLoot implements LootTableSubProvider {
 					.add(LootItem.lootTableItem(Items.MUSIC_DISC_PIGSTEP).setWeight(5).apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F))))
 					.add(LootItem.lootTableItem(Items.GOLDEN_CARROT).setWeight(12).apply(SetItemCountFunction.setCount(UniformGenerator.between(6.0F, 17.0F))))
 					.add(LootItem.lootTableItem(Items.GOLDEN_APPLE).setWeight(9).apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F))))
-					.add(LootItem.lootTableItem(Items.BOOK).setWeight(10).apply(new EnchantRandomlyFunction.Builder().withEnchantment(Enchantments.SOUL_SPEED)))
+					.add(
+						LootItem.lootTableItem(Items.BOOK)
+							.setWeight(10)
+							.apply(new EnchantRandomlyFunction.Builder().withEnchantment(registryLookup.getOrThrow(Enchantments.SOUL_SPEED)))
+					)
 			)
 			.withPool(
 				LootPool.lootPool()
@@ -1085,18 +1681,18 @@ public class VanillaChestLoot implements LootTableSubProvider {
 							.setWeight(2)
 							.apply(SetItemDamageFunction.setDamage(UniformGenerator.between(0.1F, 0.9F)))
 							.apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F)))
-							.apply(EnchantRandomlyFunction.randomApplicableEnchantment())
+							.apply(EnchantRandomlyFunction.randomApplicableEnchantment(this.registries))
 					)
 					.add(LootItem.lootTableItem(Blocks.IRON_BLOCK).setWeight(2).apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F))))
 					.add(
 						LootItem.lootTableItem(Items.GOLDEN_BOOTS)
 							.apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F)))
-							.apply(new EnchantRandomlyFunction.Builder().withEnchantment(Enchantments.SOUL_SPEED))
+							.apply(new EnchantRandomlyFunction.Builder().withEnchantment(registryLookup.getOrThrow(Enchantments.SOUL_SPEED)))
 					)
 					.add(
 						LootItem.lootTableItem(Items.GOLDEN_AXE)
 							.apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F)))
-							.apply(EnchantRandomlyFunction.randomApplicableEnchantment())
+							.apply(EnchantRandomlyFunction.randomApplicableEnchantment(this.registries))
 					)
 					.add(LootItem.lootTableItem(Blocks.GOLD_BLOCK).setWeight(2).apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F))))
 					.add(LootItem.lootTableItem(Items.CROSSBOW).apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F))))
@@ -1137,7 +1733,7 @@ public class VanillaChestLoot implements LootTableSubProvider {
 			);
 	}
 
-	public static LootTable.Builder woodlandMansionLootTable() {
+	public LootTable.Builder woodlandMansionLootTable() {
 		return LootTable.lootTable()
 			.withPool(
 				LootPool.lootPool()
@@ -1151,7 +1747,7 @@ public class VanillaChestLoot implements LootTableSubProvider {
 					.add(LootItem.lootTableItem(Items.CHAINMAIL_CHESTPLATE).setWeight(10))
 					.add(LootItem.lootTableItem(Items.DIAMOND_HOE).setWeight(15))
 					.add(LootItem.lootTableItem(Items.DIAMOND_CHESTPLATE).setWeight(5))
-					.add(LootItem.lootTableItem(Items.BOOK).setWeight(10).apply(EnchantRandomlyFunction.randomApplicableEnchantment()))
+					.add(LootItem.lootTableItem(Items.BOOK).setWeight(10).apply(EnchantRandomlyFunction.randomApplicableEnchantment(this.registries)))
 			)
 			.withPool(
 				LootPool.lootPool()
@@ -1183,7 +1779,7 @@ public class VanillaChestLoot implements LootTableSubProvider {
 			);
 	}
 
-	public static LootTable.Builder strongholdLibraryLootTable() {
+	public LootTable.Builder strongholdLibraryLootTable() {
 		return LootTable.lootTable()
 			.withPool(
 				LootPool.lootPool()
@@ -1192,12 +1788,12 @@ public class VanillaChestLoot implements LootTableSubProvider {
 					.add(LootItem.lootTableItem(Items.PAPER).setWeight(20).apply(SetItemCountFunction.setCount(UniformGenerator.between(2.0F, 7.0F))))
 					.add(LootItem.lootTableItem(Items.MAP))
 					.add(LootItem.lootTableItem(Items.COMPASS))
-					.add(LootItem.lootTableItem(Items.BOOK).setWeight(10).apply(EnchantWithLevelsFunction.enchantWithLevels(ConstantValue.exactly(30.0F)).allowTreasure()))
+					.add(LootItem.lootTableItem(Items.BOOK).setWeight(10).apply(EnchantWithLevelsFunction.enchantWithLevels(this.registries, ConstantValue.exactly(30.0F))))
 			)
 			.withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F)).add(LootItem.lootTableItem(Items.EYE_ARMOR_TRIM_SMITHING_TEMPLATE).setWeight(1)));
 	}
 
-	public static LootTable.Builder strongholdCorridorLootTable() {
+	public LootTable.Builder strongholdCorridorLootTable() {
 		return LootTable.lootTable()
 			.withPool(
 				LootPool.lootPool()
@@ -1221,7 +1817,7 @@ public class VanillaChestLoot implements LootTableSubProvider {
 					.add(LootItem.lootTableItem(Items.GOLDEN_HORSE_ARMOR))
 					.add(LootItem.lootTableItem(Items.DIAMOND_HORSE_ARMOR))
 					.add(LootItem.lootTableItem(Items.MUSIC_DISC_OTHERSIDE))
-					.add(LootItem.lootTableItem(Items.BOOK).apply(EnchantWithLevelsFunction.enchantWithLevels(ConstantValue.exactly(30.0F)).allowTreasure()))
+					.add(LootItem.lootTableItem(Items.BOOK).apply(EnchantWithLevelsFunction.enchantWithLevels(this.registries, ConstantValue.exactly(30.0F))))
 			)
 			.withPool(
 				LootPool.lootPool()
@@ -1231,7 +1827,8 @@ public class VanillaChestLoot implements LootTableSubProvider {
 			);
 	}
 
-	public static LootTable.Builder ancientCityLootTable() {
+	public LootTable.Builder ancientCityLootTable() {
+		HolderLookup.RegistryLookup<Enchantment> registryLookup = this.registries.lookupOrThrow(Registries.ENCHANTMENT);
 		return LootTable.lootTable()
 			.withPool(
 				LootPool.lootPool()
@@ -1246,7 +1843,7 @@ public class VanillaChestLoot implements LootTableSubProvider {
 							.setWeight(2)
 							.apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F)))
 							.apply(SetItemDamageFunction.setDamage(UniformGenerator.between(0.8F, 1.0F)))
-							.apply(EnchantWithLevelsFunction.enchantWithLevels(UniformGenerator.between(30.0F, 50.0F)).allowTreasure())
+							.apply(EnchantWithLevelsFunction.enchantWithLevels(this.registries, UniformGenerator.between(30.0F, 50.0F)))
 					)
 					.add(LootItem.lootTableItem(Items.LEAD).setWeight(2).apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F))))
 					.add(LootItem.lootTableItem(Items.DIAMOND_HORSE_ARMOR).setWeight(2).apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F))))
@@ -1256,9 +1853,13 @@ public class VanillaChestLoot implements LootTableSubProvider {
 					.add(
 						LootItem.lootTableItem(Items.DIAMOND_LEGGINGS)
 							.setWeight(2)
-							.apply(EnchantWithLevelsFunction.enchantWithLevels(UniformGenerator.between(30.0F, 50.0F)).allowTreasure())
+							.apply(EnchantWithLevelsFunction.enchantWithLevels(this.registries, UniformGenerator.between(30.0F, 50.0F)))
 					)
-					.add(LootItem.lootTableItem(Items.BOOK).setWeight(3).apply(new EnchantRandomlyFunction.Builder().withEnchantment(Enchantments.SWIFT_SNEAK)))
+					.add(
+						LootItem.lootTableItem(Items.BOOK)
+							.setWeight(3)
+							.apply(new EnchantRandomlyFunction.Builder().withEnchantment(registryLookup.getOrThrow(Enchantments.SWIFT_SNEAK)))
+					)
 					.add(LootItem.lootTableItem(Items.SCULK).setWeight(3).apply(SetItemCountFunction.setCount(UniformGenerator.between(4.0F, 10.0F))))
 					.add(LootItem.lootTableItem(Items.SCULK_SENSOR).setWeight(3).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 3.0F))))
 					.add(LootItem.lootTableItem(Items.CANDLE).setWeight(3).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 4.0F))))
@@ -1268,7 +1869,7 @@ public class VanillaChestLoot implements LootTableSubProvider {
 					.add(
 						LootItem.lootTableItem(Items.IRON_LEGGINGS)
 							.setWeight(3)
-							.apply(EnchantWithLevelsFunction.enchantWithLevels(UniformGenerator.between(20.0F, 39.0F)).allowTreasure())
+							.apply(EnchantWithLevelsFunction.enchantWithLevels(this.registries, UniformGenerator.between(20.0F, 39.0F)))
 					)
 					.add(LootItem.lootTableItem(Items.ECHO_SHARD).setWeight(4).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 3.0F))))
 					.add(LootItem.lootTableItem(Items.DISC_FRAGMENT_5).setWeight(4).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 3.0F))))
@@ -1278,7 +1879,7 @@ public class VanillaChestLoot implements LootTableSubProvider {
 							.apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 3.0F)))
 							.apply(SetPotionFunction.setPotion(Potions.STRONG_REGENERATION))
 					)
-					.add(LootItem.lootTableItem(Items.BOOK).setWeight(5).apply(EnchantRandomlyFunction.randomApplicableEnchantment()))
+					.add(LootItem.lootTableItem(Items.BOOK).setWeight(5).apply(EnchantRandomlyFunction.randomApplicableEnchantment(this.registries)))
 					.add(LootItem.lootTableItem(Items.BOOK).setWeight(5).apply(SetItemCountFunction.setCount(UniformGenerator.between(3.0F, 10.0F))))
 					.add(LootItem.lootTableItem(Items.BONE).setWeight(5).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 15.0F))))
 					.add(LootItem.lootTableItem(Items.SOUL_TORCH).setWeight(5).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 15.0F))))
@@ -1293,7 +1894,7 @@ public class VanillaChestLoot implements LootTableSubProvider {
 			);
 	}
 
-	public static LootTable.Builder jungleTempleLootTable() {
+	public LootTable.Builder jungleTempleLootTable() {
 		return LootTable.lootTable()
 			.withPool(
 				LootPool.lootPool()
@@ -1309,7 +1910,7 @@ public class VanillaChestLoot implements LootTableSubProvider {
 					.add(LootItem.lootTableItem(Items.IRON_HORSE_ARMOR))
 					.add(LootItem.lootTableItem(Items.GOLDEN_HORSE_ARMOR))
 					.add(LootItem.lootTableItem(Items.DIAMOND_HORSE_ARMOR))
-					.add(LootItem.lootTableItem(Items.BOOK).apply(EnchantWithLevelsFunction.enchantWithLevels(ConstantValue.exactly(30.0F)).allowTreasure()))
+					.add(LootItem.lootTableItem(Items.BOOK).apply(EnchantWithLevelsFunction.enchantWithLevels(this.registries, ConstantValue.exactly(30.0F))))
 			)
 			.withPool(
 				LootPool.lootPool()
@@ -1319,7 +1920,7 @@ public class VanillaChestLoot implements LootTableSubProvider {
 			);
 	}
 
-	public static LootTable.Builder shipwreckTreasureLootTable() {
+	public LootTable.Builder shipwreckTreasureLootTable() {
 		return LootTable.lootTable()
 			.withPool(
 				LootPool.lootPool()
@@ -1345,7 +1946,7 @@ public class VanillaChestLoot implements LootTableSubProvider {
 			);
 	}
 
-	public static LootTable.Builder pillagerOutpostLootTable() {
+	public LootTable.Builder pillagerOutpostLootTable() {
 		return LootTable.lootTable()
 			.withPool(LootPool.lootPool().setRolls(UniformGenerator.between(0.0F, 1.0F)).add(LootItem.lootTableItem(Items.CROSSBOW)))
 			.withPool(
@@ -1368,7 +1969,7 @@ public class VanillaChestLoot implements LootTableSubProvider {
 					.add(LootItem.lootTableItem(Items.ARROW).setWeight(4).apply(SetItemCountFunction.setCount(UniformGenerator.between(2.0F, 7.0F))))
 					.add(LootItem.lootTableItem(Items.TRIPWIRE_HOOK).setWeight(3).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 3.0F))))
 					.add(LootItem.lootTableItem(Items.IRON_INGOT).setWeight(3).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 3.0F))))
-					.add(LootItem.lootTableItem(Items.BOOK).setWeight(1).apply(EnchantRandomlyFunction.randomApplicableEnchantment()))
+					.add(LootItem.lootTableItem(Items.BOOK).setWeight(1).apply(EnchantRandomlyFunction.randomApplicableEnchantment(this.registries)))
 			)
 			.withPool(
 				LootPool.lootPool()
@@ -1384,7 +1985,7 @@ public class VanillaChestLoot implements LootTableSubProvider {
 			);
 	}
 
-	public static LootTable.Builder desertPyramidLootTable() {
+	public LootTable.Builder desertPyramidLootTable() {
 		return LootTable.lootTable()
 			.withPool(
 				LootPool.lootPool()
@@ -1400,7 +2001,7 @@ public class VanillaChestLoot implements LootTableSubProvider {
 					.add(LootItem.lootTableItem(Items.IRON_HORSE_ARMOR).setWeight(15))
 					.add(LootItem.lootTableItem(Items.GOLDEN_HORSE_ARMOR).setWeight(10))
 					.add(LootItem.lootTableItem(Items.DIAMOND_HORSE_ARMOR).setWeight(5))
-					.add(LootItem.lootTableItem(Items.BOOK).setWeight(20).apply(EnchantRandomlyFunction.randomApplicableEnchantment()))
+					.add(LootItem.lootTableItem(Items.BOOK).setWeight(20).apply(EnchantRandomlyFunction.randomApplicableEnchantment(this.registries)))
 					.add(LootItem.lootTableItem(Items.GOLDEN_APPLE).setWeight(20))
 					.add(LootItem.lootTableItem(Items.ENCHANTED_GOLDEN_APPLE).setWeight(2))
 					.add(EmptyLootItem.emptyItem().setWeight(15))

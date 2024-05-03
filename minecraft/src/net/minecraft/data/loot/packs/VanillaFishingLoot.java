@@ -29,10 +29,10 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemEntityPropertyC
 import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
 
-public class VanillaFishingLoot implements LootTableSubProvider {
+public record VanillaFishingLoot(HolderLookup.Provider registries) implements LootTableSubProvider {
 	@Override
-	public void generate(HolderLookup.Provider provider, BiConsumer<ResourceKey<LootTable>, LootTable.Builder> biConsumer) {
-		HolderLookup.RegistryLookup<Biome> registryLookup = provider.lookupOrThrow(Registries.BIOME);
+	public void generate(BiConsumer<ResourceKey<LootTable>, LootTable.Builder> biConsumer) {
+		HolderLookup.RegistryLookup<Biome> registryLookup = this.registries.lookupOrThrow(Registries.BIOME);
 		biConsumer.accept(
 			BuiltInLootTables.FISHING,
 			LootTable.lootTable()
@@ -97,14 +97,14 @@ public class VanillaFishingLoot implements LootTableSubProvider {
 						.add(
 							LootItem.lootTableItem(Items.BOW)
 								.apply(SetItemDamageFunction.setDamage(UniformGenerator.between(0.0F, 0.25F)))
-								.apply(EnchantWithLevelsFunction.enchantWithLevels(ConstantValue.exactly(30.0F)).allowTreasure())
+								.apply(EnchantWithLevelsFunction.enchantWithLevels(this.registries, ConstantValue.exactly(30.0F)))
 						)
 						.add(
 							LootItem.lootTableItem(Items.FISHING_ROD)
 								.apply(SetItemDamageFunction.setDamage(UniformGenerator.between(0.0F, 0.25F)))
-								.apply(EnchantWithLevelsFunction.enchantWithLevels(ConstantValue.exactly(30.0F)).allowTreasure())
+								.apply(EnchantWithLevelsFunction.enchantWithLevels(this.registries, ConstantValue.exactly(30.0F)))
 						)
-						.add(LootItem.lootTableItem(Items.BOOK).apply(EnchantWithLevelsFunction.enchantWithLevels(ConstantValue.exactly(30.0F)).allowTreasure()))
+						.add(LootItem.lootTableItem(Items.BOOK).apply(EnchantWithLevelsFunction.enchantWithLevels(this.registries, ConstantValue.exactly(30.0F))))
 						.add(LootItem.lootTableItem(Items.NAUTILUS_SHELL))
 				)
 		);

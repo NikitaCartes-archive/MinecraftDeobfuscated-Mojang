@@ -264,23 +264,19 @@ public final class TrialSpawner {
 	}
 
 	public void tickClient(Level level, BlockPos blockPos, boolean bl) {
-		if (!this.canSpawnInLevel(level)) {
+		TrialSpawnerState trialSpawnerState = this.getState();
+		trialSpawnerState.emitParticles(level, blockPos, bl);
+		if (trialSpawnerState.hasSpinningMob()) {
+			double d = (double)Math.max(0L, this.data.nextMobSpawnsAt - level.getGameTime());
 			this.data.oSpin = this.data.spin;
-		} else {
-			TrialSpawnerState trialSpawnerState = this.getState();
-			trialSpawnerState.emitParticles(level, blockPos, bl);
-			if (trialSpawnerState.hasSpinningMob()) {
-				double d = (double)Math.max(0L, this.data.nextMobSpawnsAt - level.getGameTime());
-				this.data.oSpin = this.data.spin;
-				this.data.spin = (this.data.spin + trialSpawnerState.spinningMobSpeed() / (d + 200.0)) % 360.0;
-			}
+			this.data.spin = (this.data.spin + trialSpawnerState.spinningMobSpeed() / (d + 200.0)) % 360.0;
+		}
 
-			if (trialSpawnerState.isCapableOfSpawning()) {
-				RandomSource randomSource = level.getRandom();
-				if (randomSource.nextFloat() <= 0.02F) {
-					SoundEvent soundEvent = bl ? SoundEvents.TRIAL_SPAWNER_AMBIENT_OMINOUS : SoundEvents.TRIAL_SPAWNER_AMBIENT;
-					level.playLocalSound(blockPos, soundEvent, SoundSource.BLOCKS, randomSource.nextFloat() * 0.25F + 0.75F, randomSource.nextFloat() + 0.5F, false);
-				}
+		if (trialSpawnerState.isCapableOfSpawning()) {
+			RandomSource randomSource = level.getRandom();
+			if (randomSource.nextFloat() <= 0.02F) {
+				SoundEvent soundEvent = bl ? SoundEvents.TRIAL_SPAWNER_AMBIENT_OMINOUS : SoundEvents.TRIAL_SPAWNER_AMBIENT;
+				level.playLocalSound(blockPos, soundEvent, SoundSource.BLOCKS, randomSource.nextFloat() * 0.25F + 0.75F, randomSource.nextFloat() + 0.5F, false);
 			}
 		}
 	}
@@ -288,20 +284,13 @@ public final class TrialSpawner {
 	public void tickServer(ServerLevel serverLevel, BlockPos blockPos, boolean bl) {
 		this.isOminous = bl;
 		TrialSpawnerState trialSpawnerState = this.getState();
-		if (!this.canSpawnInLevel(serverLevel)) {
-			if (trialSpawnerState.isCapableOfSpawning()) {
-				this.data.reset();
-				this.setState(serverLevel, TrialSpawnerState.INACTIVE);
-			}
-		} else {
-			if (this.data.currentMobs.removeIf(uUID -> shouldMobBeUntracked(serverLevel, blockPos, uUID))) {
-				this.data.nextMobSpawnsAt = serverLevel.getGameTime() + (long)this.getConfig().ticksBetweenSpawn();
-			}
+		if (this.data.currentMobs.removeIf(uUID -> shouldMobBeUntracked(serverLevel, blockPos, uUID))) {
+			this.data.nextMobSpawnsAt = serverLevel.getGameTime() + (long)this.getConfig().ticksBetweenSpawn();
+		}
 
-			TrialSpawnerState trialSpawnerState2 = trialSpawnerState.tickAndGetNext(blockPos, this, serverLevel);
-			if (trialSpawnerState2 != trialSpawnerState) {
-				this.setState(serverLevel, trialSpawnerState2);
-			}
+		TrialSpawnerState trialSpawnerState2 = trialSpawnerState.tickAndGetNext(blockPos, this, serverLevel);
+		if (trialSpawnerState2 != trialSpawnerState) {
+			this.setState(serverLevel, trialSpawnerState2);
 		}
 	}
 

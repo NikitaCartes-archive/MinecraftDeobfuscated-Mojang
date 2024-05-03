@@ -42,7 +42,27 @@ public class PaintingVariantTagsProvider extends TagsProvider<PaintingVariant> {
 				PaintingVariants.PIGSCENE,
 				PaintingVariants.BURNING_SKULL,
 				PaintingVariants.SKELETON,
-				PaintingVariants.DONKEY_KONG
+				PaintingVariants.DONKEY_KONG,
+				PaintingVariants.BAROQUE,
+				PaintingVariants.HUMBLE,
+				PaintingVariants.MEDITATIVE,
+				PaintingVariants.PRAIRIE_RIDE,
+				PaintingVariants.UNPACKED,
+				PaintingVariants.BACKYARD,
+				PaintingVariants.BOUQUET,
+				PaintingVariants.CAVEBIRD,
+				PaintingVariants.CHANGING,
+				PaintingVariants.COTAN,
+				PaintingVariants.ENDBOSS,
+				PaintingVariants.FERN,
+				PaintingVariants.FINDING,
+				PaintingVariants.LOWMIST,
+				PaintingVariants.ORB,
+				PaintingVariants.OWLEMONS,
+				PaintingVariants.PASSAGE,
+				PaintingVariants.POND,
+				PaintingVariants.SUNFLOWERS,
+				PaintingVariants.TIDES
 			);
 	}
 }

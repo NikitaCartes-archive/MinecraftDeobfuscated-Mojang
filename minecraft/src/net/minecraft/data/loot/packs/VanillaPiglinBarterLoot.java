@@ -2,10 +2,12 @@ package net.minecraft.data.loot.packs;
 
 import java.util.function.BiConsumer;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.loot.LootTableSubProvider;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.Potions;
+import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.level.storage.loot.LootPool;
@@ -17,17 +19,26 @@ import net.minecraft.world.level.storage.loot.functions.SetPotionFunction;
 import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
 
-public class VanillaPiglinBarterLoot implements LootTableSubProvider {
+public record VanillaPiglinBarterLoot(HolderLookup.Provider registries) implements LootTableSubProvider {
 	@Override
-	public void generate(HolderLookup.Provider provider, BiConsumer<ResourceKey<LootTable>, LootTable.Builder> biConsumer) {
+	public void generate(BiConsumer<ResourceKey<LootTable>, LootTable.Builder> biConsumer) {
+		HolderLookup.RegistryLookup<Enchantment> registryLookup = this.registries.lookupOrThrow(Registries.ENCHANTMENT);
 		biConsumer.accept(
 			BuiltInLootTables.PIGLIN_BARTERING,
 			LootTable.lootTable()
 				.withPool(
 					LootPool.lootPool()
 						.setRolls(ConstantValue.exactly(1.0F))
-						.add(LootItem.lootTableItem(Items.BOOK).setWeight(5).apply(new EnchantRandomlyFunction.Builder().withEnchantment(Enchantments.SOUL_SPEED)))
-						.add(LootItem.lootTableItem(Items.IRON_BOOTS).setWeight(8).apply(new EnchantRandomlyFunction.Builder().withEnchantment(Enchantments.SOUL_SPEED)))
+						.add(
+							LootItem.lootTableItem(Items.BOOK)
+								.setWeight(5)
+								.apply(new EnchantRandomlyFunction.Builder().withEnchantment(registryLookup.getOrThrow(Enchantments.SOUL_SPEED)))
+						)
+						.add(
+							LootItem.lootTableItem(Items.IRON_BOOTS)
+								.setWeight(8)
+								.apply(new EnchantRandomlyFunction.Builder().withEnchantment(registryLookup.getOrThrow(Enchantments.SOUL_SPEED)))
+						)
 						.add(LootItem.lootTableItem(Items.POTION).setWeight(8).apply(SetPotionFunction.setPotion(Potions.FIRE_RESISTANCE)))
 						.add(LootItem.lootTableItem(Items.SPLASH_POTION).setWeight(8).apply(SetPotionFunction.setPotion(Potions.FIRE_RESISTANCE)))
 						.add(LootItem.lootTableItem(Items.POTION).setWeight(10).apply(SetPotionFunction.setPotion(Potions.WATER)))

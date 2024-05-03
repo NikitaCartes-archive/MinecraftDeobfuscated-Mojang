@@ -8,13 +8,13 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.StackedContents;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.AbstractCookingRecipe;
-import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.crafting.SingleRecipeInput;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
 
-public abstract class AbstractFurnaceMenu extends RecipeBookMenu<Container> {
+public abstract class AbstractFurnaceMenu extends RecipeBookMenu<SingleRecipeInput, AbstractCookingRecipe> {
 	public static final int INGREDIENT_SLOT = 0;
 	public static final int FUEL_SLOT = 1;
 	public static final int RESULT_SLOT = 2;
@@ -84,8 +84,8 @@ public abstract class AbstractFurnaceMenu extends RecipeBookMenu<Container> {
 	}
 
 	@Override
-	public boolean recipeMatches(RecipeHolder<? extends Recipe<Container>> recipeHolder) {
-		return recipeHolder.value().matches(this.container, this.level);
+	public boolean recipeMatches(RecipeHolder<AbstractCookingRecipe> recipeHolder) {
+		return recipeHolder.value().matches(new SingleRecipeInput(this.container.getItem(0)), this.level);
 	}
 
 	@Override
@@ -163,7 +163,7 @@ public abstract class AbstractFurnaceMenu extends RecipeBookMenu<Container> {
 	}
 
 	protected boolean canSmelt(ItemStack itemStack) {
-		return this.level.getRecipeManager().getRecipeFor(this.recipeType, new SimpleContainer(itemStack), this.level).isPresent();
+		return this.level.getRecipeManager().getRecipeFor(this.recipeType, new SingleRecipeInput(itemStack), this.level).isPresent();
 	}
 
 	protected boolean isFuel(ItemStack itemStack) {

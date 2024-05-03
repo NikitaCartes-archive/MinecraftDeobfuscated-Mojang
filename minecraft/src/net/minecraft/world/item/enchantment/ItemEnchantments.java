@@ -15,7 +15,6 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -32,9 +31,7 @@ public class ItemEnchantments implements TooltipProvider {
 	public static final ItemEnchantments EMPTY = new ItemEnchantments(new Object2IntOpenHashMap<>(), true);
 	public static final int MAX_LEVEL = 255;
 	private static final Codec<Integer> LEVEL_CODEC = Codec.intRange(0, 255);
-	private static final Codec<Object2IntOpenHashMap<Holder<Enchantment>>> LEVELS_CODEC = Codec.unboundedMap(
-			BuiltInRegistries.ENCHANTMENT.holderByNameCodec(), LEVEL_CODEC
-		)
+	private static final Codec<Object2IntOpenHashMap<Holder<Enchantment>>> LEVELS_CODEC = Codec.unboundedMap(Enchantment.CODEC, LEVEL_CODEC)
 		.xmap(Object2IntOpenHashMap::new, Function.identity());
 	private static final Codec<ItemEnchantments> FULL_CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
@@ -68,8 +65,8 @@ public class ItemEnchantments implements TooltipProvider {
 		}
 	}
 
-	public int getLevel(Enchantment enchantment) {
-		return this.enchantments.getInt(enchantment.builtInRegistryHolder());
+	public int getLevel(Holder<Enchantment> holder) {
+		return this.enchantments.getInt(holder);
 	}
 
 	@Override
@@ -81,14 +78,14 @@ public class ItemEnchantments implements TooltipProvider {
 			for (Holder<Enchantment> holder : holderSet) {
 				int i = this.enchantments.getInt(holder);
 				if (i > 0) {
-					consumer.accept(holder.value().getFullname(i));
+					consumer.accept(Enchantment.getFullname(holder, i));
 				}
 			}
 
 			for (Entry<Holder<Enchantment>> entry : this.enchantments.object2IntEntrySet()) {
 				Holder<Enchantment> holder2 = (Holder<Enchantment>)entry.getKey();
 				if (!holderSet.contains(holder2)) {
-					consumer.accept(holder2.value().getFullname(entry.getIntValue()));
+					consumer.accept(Enchantment.getFullname((Holder<Enchantment>)entry.getKey(), entry.getIntValue()));
 				}
 			}
 		}
@@ -153,17 +150,17 @@ public class ItemEnchantments implements TooltipProvider {
 			this.showInTooltip = itemEnchantments.showInTooltip;
 		}
 
-		public void set(Enchantment enchantment, int i) {
+		public void set(Holder<Enchantment> holder, int i) {
 			if (i <= 0) {
-				this.enchantments.removeInt(enchantment.builtInRegistryHolder());
+				this.enchantments.removeInt(holder);
 			} else {
-				this.enchantments.put(enchantment.builtInRegistryHolder(), Math.min(i, 255));
+				this.enchantments.put(holder, Math.min(i, 255));
 			}
 		}
 
-		public void upgrade(Enchantment enchantment, int i) {
+		public void upgrade(Holder<Enchantment> holder, int i) {
 			if (i > 0) {
-				this.enchantments.merge(enchantment.builtInRegistryHolder(), Math.min(i, 255), Integer::max);
+				this.enchantments.merge(holder, Math.min(i, 255), Integer::max);
 			}
 		}
 
@@ -171,8 +168,8 @@ public class ItemEnchantments implements TooltipProvider {
 			this.enchantments.keySet().removeIf(predicate);
 		}
 
-		public int getLevel(Enchantment enchantment) {
-			return this.enchantments.getOrDefault(enchantment.builtInRegistryHolder(), 0);
+		public int getLevel(Holder<Enchantment> holder) {
+			return this.enchantments.getOrDefault(holder, 0);
 		}
 
 		public Set<Holder<Enchantment>> keySet() {

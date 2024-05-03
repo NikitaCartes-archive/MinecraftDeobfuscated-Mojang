@@ -29,16 +29,14 @@ public class PaintingRenderer extends EntityRenderer<Painting> {
 		poseStack.pushPose();
 		poseStack.mulPose(Axis.YP.rotationDegrees(180.0F - f));
 		PaintingVariant paintingVariant = painting.getVariant().value();
-		float h = 0.0625F;
-		poseStack.scale(0.0625F, 0.0625F, 0.0625F);
 		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entitySolid(this.getTextureLocation(painting)));
 		PaintingTextureManager paintingTextureManager = Minecraft.getInstance().getPaintingTextures();
 		this.renderPainting(
 			poseStack,
 			vertexConsumer,
 			painting,
-			paintingVariant.getWidth(),
-			paintingVariant.getHeight(),
+			paintingVariant.width(),
+			paintingVariant.height(),
 			paintingTextureManager.get(paintingVariant),
 			paintingTextureManager.getBackSprite()
 		);
@@ -62,7 +60,7 @@ public class PaintingRenderer extends EntityRenderer<Painting> {
 		PoseStack.Pose pose = poseStack.last();
 		float f = (float)(-i) / 2.0F;
 		float g = (float)(-j) / 2.0F;
-		float h = 0.5F;
+		float h = 0.03125F;
 		float k = textureAtlasSprite2.getU0();
 		float l = textureAtlasSprite2.getU1();
 		float m = textureAtlasSprite2.getV0();
@@ -75,66 +73,64 @@ public class PaintingRenderer extends EntityRenderer<Painting> {
 		float t = textureAtlasSprite2.getU(0.0625F);
 		float u = textureAtlasSprite2.getV0();
 		float v = textureAtlasSprite2.getV1();
-		int w = i / 16;
-		int x = j / 16;
-		double d = 1.0 / (double)w;
-		double e = 1.0 / (double)x;
+		double d = 1.0 / (double)i;
+		double e = 1.0 / (double)j;
 
-		for (int y = 0; y < w; y++) {
-			for (int z = 0; z < x; z++) {
-				float aa = f + (float)((y + 1) * 16);
-				float ab = f + (float)(y * 16);
-				float ac = g + (float)((z + 1) * 16);
-				float ad = g + (float)(z * 16);
-				int ae = painting.getBlockX();
-				int af = Mth.floor(painting.getY() + (double)((ac + ad) / 2.0F / 16.0F));
-				int ag = painting.getBlockZ();
+		for (int w = 0; w < i; w++) {
+			for (int x = 0; x < j; x++) {
+				float y = f + (float)(w + 1);
+				float z = f + (float)w;
+				float aa = g + (float)(x + 1);
+				float ab = g + (float)x;
+				int ac = painting.getBlockX();
+				int ad = Mth.floor(painting.getY() + (double)((aa + ab) / 2.0F));
+				int ae = painting.getBlockZ();
 				Direction direction = painting.getDirection();
 				if (direction == Direction.NORTH) {
-					ae = Mth.floor(painting.getX() + (double)((aa + ab) / 2.0F / 16.0F));
+					ac = Mth.floor(painting.getX() + (double)((y + z) / 2.0F));
 				}
 
 				if (direction == Direction.WEST) {
-					ag = Mth.floor(painting.getZ() - (double)((aa + ab) / 2.0F / 16.0F));
+					ae = Mth.floor(painting.getZ() - (double)((y + z) / 2.0F));
 				}
 
 				if (direction == Direction.SOUTH) {
-					ae = Mth.floor(painting.getX() - (double)((aa + ab) / 2.0F / 16.0F));
+					ac = Mth.floor(painting.getX() - (double)((y + z) / 2.0F));
 				}
 
 				if (direction == Direction.EAST) {
-					ag = Mth.floor(painting.getZ() + (double)((aa + ab) / 2.0F / 16.0F));
+					ae = Mth.floor(painting.getZ() + (double)((y + z) / 2.0F));
 				}
 
-				int ah = LevelRenderer.getLightColor(painting.level(), new BlockPos(ae, af, ag));
-				float ai = textureAtlasSprite.getU((float)(d * (double)(w - y)));
-				float aj = textureAtlasSprite.getU((float)(d * (double)(w - (y + 1))));
-				float ak = textureAtlasSprite.getV((float)(e * (double)(x - z)));
-				float al = textureAtlasSprite.getV((float)(e * (double)(x - (z + 1))));
-				this.vertex(pose, vertexConsumer, aa, ad, aj, ak, -0.5F, 0, 0, -1, ah);
-				this.vertex(pose, vertexConsumer, ab, ad, ai, ak, -0.5F, 0, 0, -1, ah);
-				this.vertex(pose, vertexConsumer, ab, ac, ai, al, -0.5F, 0, 0, -1, ah);
-				this.vertex(pose, vertexConsumer, aa, ac, aj, al, -0.5F, 0, 0, -1, ah);
-				this.vertex(pose, vertexConsumer, aa, ac, l, m, 0.5F, 0, 0, 1, ah);
-				this.vertex(pose, vertexConsumer, ab, ac, k, m, 0.5F, 0, 0, 1, ah);
-				this.vertex(pose, vertexConsumer, ab, ad, k, n, 0.5F, 0, 0, 1, ah);
-				this.vertex(pose, vertexConsumer, aa, ad, l, n, 0.5F, 0, 0, 1, ah);
-				this.vertex(pose, vertexConsumer, aa, ac, o, q, -0.5F, 0, 1, 0, ah);
-				this.vertex(pose, vertexConsumer, ab, ac, p, q, -0.5F, 0, 1, 0, ah);
-				this.vertex(pose, vertexConsumer, ab, ac, p, r, 0.5F, 0, 1, 0, ah);
-				this.vertex(pose, vertexConsumer, aa, ac, o, r, 0.5F, 0, 1, 0, ah);
-				this.vertex(pose, vertexConsumer, aa, ad, o, q, 0.5F, 0, -1, 0, ah);
-				this.vertex(pose, vertexConsumer, ab, ad, p, q, 0.5F, 0, -1, 0, ah);
-				this.vertex(pose, vertexConsumer, ab, ad, p, r, -0.5F, 0, -1, 0, ah);
-				this.vertex(pose, vertexConsumer, aa, ad, o, r, -0.5F, 0, -1, 0, ah);
-				this.vertex(pose, vertexConsumer, aa, ac, t, u, 0.5F, -1, 0, 0, ah);
-				this.vertex(pose, vertexConsumer, aa, ad, t, v, 0.5F, -1, 0, 0, ah);
-				this.vertex(pose, vertexConsumer, aa, ad, s, v, -0.5F, -1, 0, 0, ah);
-				this.vertex(pose, vertexConsumer, aa, ac, s, u, -0.5F, -1, 0, 0, ah);
-				this.vertex(pose, vertexConsumer, ab, ac, t, u, -0.5F, 1, 0, 0, ah);
-				this.vertex(pose, vertexConsumer, ab, ad, t, v, -0.5F, 1, 0, 0, ah);
-				this.vertex(pose, vertexConsumer, ab, ad, s, v, 0.5F, 1, 0, 0, ah);
-				this.vertex(pose, vertexConsumer, ab, ac, s, u, 0.5F, 1, 0, 0, ah);
+				int af = LevelRenderer.getLightColor(painting.level(), new BlockPos(ac, ad, ae));
+				float ag = textureAtlasSprite.getU((float)(d * (double)(i - w)));
+				float ah = textureAtlasSprite.getU((float)(d * (double)(i - (w + 1))));
+				float ai = textureAtlasSprite.getV((float)(e * (double)(j - x)));
+				float aj = textureAtlasSprite.getV((float)(e * (double)(j - (x + 1))));
+				this.vertex(pose, vertexConsumer, y, ab, ah, ai, -0.03125F, 0, 0, -1, af);
+				this.vertex(pose, vertexConsumer, z, ab, ag, ai, -0.03125F, 0, 0, -1, af);
+				this.vertex(pose, vertexConsumer, z, aa, ag, aj, -0.03125F, 0, 0, -1, af);
+				this.vertex(pose, vertexConsumer, y, aa, ah, aj, -0.03125F, 0, 0, -1, af);
+				this.vertex(pose, vertexConsumer, y, aa, l, m, 0.03125F, 0, 0, 1, af);
+				this.vertex(pose, vertexConsumer, z, aa, k, m, 0.03125F, 0, 0, 1, af);
+				this.vertex(pose, vertexConsumer, z, ab, k, n, 0.03125F, 0, 0, 1, af);
+				this.vertex(pose, vertexConsumer, y, ab, l, n, 0.03125F, 0, 0, 1, af);
+				this.vertex(pose, vertexConsumer, y, aa, o, q, -0.03125F, 0, 1, 0, af);
+				this.vertex(pose, vertexConsumer, z, aa, p, q, -0.03125F, 0, 1, 0, af);
+				this.vertex(pose, vertexConsumer, z, aa, p, r, 0.03125F, 0, 1, 0, af);
+				this.vertex(pose, vertexConsumer, y, aa, o, r, 0.03125F, 0, 1, 0, af);
+				this.vertex(pose, vertexConsumer, y, ab, o, q, 0.03125F, 0, -1, 0, af);
+				this.vertex(pose, vertexConsumer, z, ab, p, q, 0.03125F, 0, -1, 0, af);
+				this.vertex(pose, vertexConsumer, z, ab, p, r, -0.03125F, 0, -1, 0, af);
+				this.vertex(pose, vertexConsumer, y, ab, o, r, -0.03125F, 0, -1, 0, af);
+				this.vertex(pose, vertexConsumer, y, aa, t, u, 0.03125F, -1, 0, 0, af);
+				this.vertex(pose, vertexConsumer, y, ab, t, v, 0.03125F, -1, 0, 0, af);
+				this.vertex(pose, vertexConsumer, y, ab, s, v, -0.03125F, -1, 0, 0, af);
+				this.vertex(pose, vertexConsumer, y, aa, s, u, -0.03125F, -1, 0, 0, af);
+				this.vertex(pose, vertexConsumer, z, aa, t, u, -0.03125F, 1, 0, 0, af);
+				this.vertex(pose, vertexConsumer, z, ab, t, v, -0.03125F, 1, 0, 0, af);
+				this.vertex(pose, vertexConsumer, z, ab, s, v, 0.03125F, 1, 0, 0, af);
+				this.vertex(pose, vertexConsumer, z, aa, s, u, 0.03125F, 1, 0, 0, af);
 			}
 		}
 	}

@@ -5,34 +5,38 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.objects.Object2IntMap.Entry;
 import java.util.Optional;
 import net.minecraft.core.Holder;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.RegistryCodecs;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
 
-public record EnchantmentPredicate(Optional<Holder<Enchantment>> enchantment, MinMaxBounds.Ints level) {
+public record EnchantmentPredicate(Optional<HolderSet<Enchantment>> enchantments, MinMaxBounds.Ints level) {
 	public static final Codec<EnchantmentPredicate> CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
-					BuiltInRegistries.ENCHANTMENT.holderByNameCodec().optionalFieldOf("enchantment").forGetter(EnchantmentPredicate::enchantment),
+					RegistryCodecs.homogeneousList(Registries.ENCHANTMENT).optionalFieldOf("enchantments").forGetter(EnchantmentPredicate::enchantments),
 					MinMaxBounds.Ints.CODEC.optionalFieldOf("levels", MinMaxBounds.Ints.ANY).forGetter(EnchantmentPredicate::level)
 				)
 				.apply(instance, EnchantmentPredicate::new)
 	);
 
-	public EnchantmentPredicate(Enchantment enchantment, MinMaxBounds.Ints ints) {
-		this(Optional.of(enchantment.builtInRegistryHolder()), ints);
+	public EnchantmentPredicate(Holder<Enchantment> holder, MinMaxBounds.Ints ints) {
+		this(Optional.of(HolderSet.direct(holder)), ints);
+	}
+
+	public EnchantmentPredicate(HolderSet<Enchantment> holderSet, MinMaxBounds.Ints ints) {
+		this(Optional.of(holderSet), ints);
 	}
 
 	public boolean containedIn(ItemEnchantments itemEnchantments) {
-		if (this.enchantment.isPresent()) {
-			Enchantment enchantment = (Enchantment)((Holder)this.enchantment.get()).value();
-			int i = itemEnchantments.getLevel(enchantment);
-			if (i == 0) {
-				return false;
+		if (this.enchantments.isPresent()) {
+			for (Holder<Enchantment> holder : (HolderSet)this.enchantments.get()) {
+				if (this.matchesEnchantment(itemEnchantments, holder)) {
+					return true;
+				}
 			}
 
-			if (this.level != MinMaxBounds.Ints.ANY && !this.level.matches(i)) {
-				return false;
-			}
+			return false;
 		} else if (this.level != MinMaxBounds.Ints.ANY) {
 			for (Entry<Holder<Enchantment>> entry : itemEnchantments.entrySet()) {
 				if (this.level.matches(entry.getIntValue())) {
@@ -41,8 +45,17 @@ public record EnchantmentPredicate(Optional<Holder<Enchantment>> enchantment, Mi
 			}
 
 			return false;
+		} else {
+			return !itemEnchantments.isEmpty();
 		}
+	}
 
-		return true;
+	private boolean matchesEnchantment(ItemEnchantments itemEnchantments, Holder<Enchantment> holder) {
+		int i = itemEnchantments.getLevel(holder);
+		if (i == 0) {
+			return false;
+		} else {
+			return this.level == MinMaxBounds.Ints.ANY ? true : this.level.matches(i);
+		}
 	}
 }

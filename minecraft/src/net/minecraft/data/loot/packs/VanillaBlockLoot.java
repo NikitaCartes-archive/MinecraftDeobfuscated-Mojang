@@ -6,12 +6,15 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.advancements.critereon.StatePropertiesPredicate;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.loot.BlockLootSubProvider;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.BedBlock;
@@ -90,12 +93,13 @@ public class VanillaBlockLoot extends BlockLootSubProvider {
 		.map(ItemLike::asItem)
 		.collect(Collectors.toSet());
 
-	public VanillaBlockLoot() {
-		super(EXPLOSION_RESISTANT, FeatureFlags.REGISTRY.allFlags());
+	public VanillaBlockLoot(HolderLookup.Provider provider) {
+		super(EXPLOSION_RESISTANT, FeatureFlags.REGISTRY.allFlags(), provider);
 	}
 
 	@Override
 	protected void generate() {
+		HolderLookup.RegistryLookup<Enchantment> registryLookup = this.registries.lookupOrThrow(Registries.ENCHANTMENT);
 		this.dropSelf(Blocks.GRANITE);
 		this.dropSelf(Blocks.POLISHED_GRANITE);
 		this.dropSelf(Blocks.DIORITE);
@@ -283,14 +287,14 @@ public class VanillaBlockLoot extends BlockLootSubProvider {
 		this.dropSelf(Blocks.MANGROVE_TRAPDOOR);
 		this.dropSelf(Blocks.CHERRY_TRAPDOOR);
 		this.dropSelf(Blocks.BAMBOO_TRAPDOOR);
-		this.add(Blocks.COPPER_TRAPDOOR, noDrop());
-		this.add(Blocks.EXPOSED_COPPER_TRAPDOOR, noDrop());
-		this.add(Blocks.WEATHERED_COPPER_TRAPDOOR, noDrop());
-		this.add(Blocks.OXIDIZED_COPPER_TRAPDOOR, noDrop());
-		this.add(Blocks.WAXED_COPPER_TRAPDOOR, noDrop());
-		this.add(Blocks.WAXED_EXPOSED_COPPER_TRAPDOOR, noDrop());
-		this.add(Blocks.WAXED_WEATHERED_COPPER_TRAPDOOR, noDrop());
-		this.add(Blocks.WAXED_OXIDIZED_COPPER_TRAPDOOR, noDrop());
+		this.dropSelf(Blocks.COPPER_TRAPDOOR);
+		this.dropSelf(Blocks.EXPOSED_COPPER_TRAPDOOR);
+		this.dropSelf(Blocks.WEATHERED_COPPER_TRAPDOOR);
+		this.dropSelf(Blocks.OXIDIZED_COPPER_TRAPDOOR);
+		this.dropSelf(Blocks.WAXED_COPPER_TRAPDOOR);
+		this.dropSelf(Blocks.WAXED_EXPOSED_COPPER_TRAPDOOR);
+		this.dropSelf(Blocks.WAXED_WEATHERED_COPPER_TRAPDOOR);
+		this.dropSelf(Blocks.WAXED_OXIDIZED_COPPER_TRAPDOOR);
 		this.dropSelf(Blocks.STONE_BRICKS);
 		this.dropSelf(Blocks.MOSSY_STONE_BRICKS);
 		this.dropSelf(Blocks.CRACKED_STONE_BRICKS);
@@ -569,7 +573,7 @@ public class VanillaBlockLoot extends BlockLootSubProvider {
 		this.dropWhenSilkTouch(Blocks.CALIBRATED_SCULK_SENSOR);
 		this.dropWhenSilkTouch(Blocks.SCULK);
 		this.dropWhenSilkTouch(Blocks.SCULK_CATALYST);
-		this.add(Blocks.SCULK_VEIN, block -> this.createMultifaceBlockDrops(block, HAS_SILK_TOUCH));
+		this.add(Blocks.SCULK_VEIN, block -> this.createMultifaceBlockDrops(block, this.hasSilkTouch()));
 		this.dropWhenSilkTouch(Blocks.SCULK_SHRIEKER);
 		this.dropWhenSilkTouch(Blocks.CHISELED_BOOKSHELF);
 		this.dropSelf(Blocks.COPPER_BLOCK);
@@ -632,45 +636,45 @@ public class VanillaBlockLoot extends BlockLootSubProvider {
 		this.dropSelf(Blocks.MANGROVE_LOG);
 		this.dropSelf(Blocks.MUD);
 		this.dropSelf(Blocks.PACKED_MUD);
-		this.add(Blocks.CRAFTER, noDrop());
-		this.add(Blocks.CHISELED_TUFF, noDrop());
-		this.add(Blocks.TUFF_STAIRS, noDrop());
-		this.add(Blocks.TUFF_WALL, noDrop());
-		this.add(Blocks.POLISHED_TUFF, noDrop());
-		this.add(Blocks.POLISHED_TUFF_STAIRS, noDrop());
-		this.add(Blocks.POLISHED_TUFF_WALL, noDrop());
-		this.add(Blocks.TUFF_BRICKS, noDrop());
-		this.add(Blocks.TUFF_BRICK_STAIRS, noDrop());
-		this.add(Blocks.TUFF_BRICK_WALL, noDrop());
-		this.add(Blocks.CHISELED_TUFF_BRICKS, noDrop());
-		this.add(Blocks.TUFF_SLAB, noDrop());
-		this.add(Blocks.TUFF_BRICK_SLAB, noDrop());
-		this.add(Blocks.POLISHED_TUFF_SLAB, noDrop());
-		this.add(Blocks.CHISELED_COPPER, noDrop());
-		this.add(Blocks.EXPOSED_CHISELED_COPPER, noDrop());
-		this.add(Blocks.WEATHERED_CHISELED_COPPER, noDrop());
-		this.add(Blocks.OXIDIZED_CHISELED_COPPER, noDrop());
-		this.add(Blocks.WAXED_CHISELED_COPPER, noDrop());
-		this.add(Blocks.WAXED_EXPOSED_CHISELED_COPPER, noDrop());
-		this.add(Blocks.WAXED_WEATHERED_CHISELED_COPPER, noDrop());
-		this.add(Blocks.WAXED_OXIDIZED_CHISELED_COPPER, noDrop());
-		this.add(Blocks.COPPER_GRATE, noDrop());
-		this.add(Blocks.EXPOSED_COPPER_GRATE, noDrop());
-		this.add(Blocks.WEATHERED_COPPER_GRATE, noDrop());
-		this.add(Blocks.OXIDIZED_COPPER_GRATE, noDrop());
-		this.add(Blocks.WAXED_COPPER_GRATE, noDrop());
-		this.add(Blocks.WAXED_EXPOSED_COPPER_GRATE, noDrop());
-		this.add(Blocks.WAXED_WEATHERED_COPPER_GRATE, noDrop());
-		this.add(Blocks.WAXED_OXIDIZED_COPPER_GRATE, noDrop());
-		this.add(Blocks.COPPER_BULB, noDrop());
-		this.add(Blocks.EXPOSED_COPPER_BULB, noDrop());
-		this.add(Blocks.WEATHERED_COPPER_BULB, noDrop());
-		this.add(Blocks.OXIDIZED_COPPER_BULB, noDrop());
-		this.add(Blocks.WAXED_COPPER_BULB, noDrop());
-		this.add(Blocks.WAXED_EXPOSED_COPPER_BULB, noDrop());
-		this.add(Blocks.WAXED_WEATHERED_COPPER_BULB, noDrop());
-		this.add(Blocks.WAXED_OXIDIZED_COPPER_BULB, noDrop());
-		this.add(Blocks.HEAVY_CORE, noDrop());
+		this.dropSelf(Blocks.CRAFTER);
+		this.dropSelf(Blocks.CHISELED_TUFF);
+		this.dropSelf(Blocks.TUFF_STAIRS);
+		this.dropSelf(Blocks.TUFF_WALL);
+		this.dropSelf(Blocks.POLISHED_TUFF);
+		this.dropSelf(Blocks.POLISHED_TUFF_STAIRS);
+		this.dropSelf(Blocks.POLISHED_TUFF_WALL);
+		this.dropSelf(Blocks.TUFF_BRICKS);
+		this.dropSelf(Blocks.TUFF_BRICK_STAIRS);
+		this.dropSelf(Blocks.TUFF_BRICK_WALL);
+		this.dropSelf(Blocks.CHISELED_TUFF_BRICKS);
+		this.add(Blocks.TUFF_SLAB, block -> this.createSlabItemTable(block));
+		this.add(Blocks.TUFF_BRICK_SLAB, block -> this.createSlabItemTable(block));
+		this.add(Blocks.POLISHED_TUFF_SLAB, block -> this.createSlabItemTable(block));
+		this.dropSelf(Blocks.CHISELED_COPPER);
+		this.dropSelf(Blocks.EXPOSED_CHISELED_COPPER);
+		this.dropSelf(Blocks.WEATHERED_CHISELED_COPPER);
+		this.dropSelf(Blocks.OXIDIZED_CHISELED_COPPER);
+		this.dropSelf(Blocks.WAXED_CHISELED_COPPER);
+		this.dropSelf(Blocks.WAXED_EXPOSED_CHISELED_COPPER);
+		this.dropSelf(Blocks.WAXED_WEATHERED_CHISELED_COPPER);
+		this.dropSelf(Blocks.WAXED_OXIDIZED_CHISELED_COPPER);
+		this.dropSelf(Blocks.COPPER_GRATE);
+		this.dropSelf(Blocks.EXPOSED_COPPER_GRATE);
+		this.dropSelf(Blocks.WEATHERED_COPPER_GRATE);
+		this.dropSelf(Blocks.OXIDIZED_COPPER_GRATE);
+		this.dropSelf(Blocks.WAXED_COPPER_GRATE);
+		this.dropSelf(Blocks.WAXED_EXPOSED_COPPER_GRATE);
+		this.dropSelf(Blocks.WAXED_WEATHERED_COPPER_GRATE);
+		this.dropSelf(Blocks.WAXED_OXIDIZED_COPPER_GRATE);
+		this.dropSelf(Blocks.COPPER_BULB);
+		this.dropSelf(Blocks.EXPOSED_COPPER_BULB);
+		this.dropSelf(Blocks.WEATHERED_COPPER_BULB);
+		this.dropSelf(Blocks.OXIDIZED_COPPER_BULB);
+		this.dropSelf(Blocks.WAXED_COPPER_BULB);
+		this.dropSelf(Blocks.WAXED_EXPOSED_COPPER_BULB);
+		this.dropSelf(Blocks.WAXED_WEATHERED_COPPER_BULB);
+		this.dropSelf(Blocks.WAXED_OXIDIZED_COPPER_BULB);
+		this.dropSelf(Blocks.HEAVY_CORE);
 		this.dropOther(Blocks.FARMLAND, Blocks.DIRT);
 		this.dropOther(Blocks.TRIPWIRE, Items.STRING);
 		this.dropOther(Blocks.DIRT_PATH, Blocks.DIRT);
@@ -800,14 +804,14 @@ public class VanillaBlockLoot extends BlockLootSubProvider {
 		this.add(Blocks.WARPED_DOOR, block -> this.createDoorTable(block));
 		this.add(Blocks.CRIMSON_DOOR, block -> this.createDoorTable(block));
 		this.add(Blocks.IRON_DOOR, block -> this.createDoorTable(block));
-		this.add(Blocks.COPPER_DOOR, noDrop());
-		this.add(Blocks.EXPOSED_COPPER_DOOR, noDrop());
-		this.add(Blocks.WEATHERED_COPPER_DOOR, noDrop());
-		this.add(Blocks.OXIDIZED_COPPER_DOOR, noDrop());
-		this.add(Blocks.WAXED_COPPER_DOOR, noDrop());
-		this.add(Blocks.WAXED_EXPOSED_COPPER_DOOR, noDrop());
-		this.add(Blocks.WAXED_WEATHERED_COPPER_DOOR, noDrop());
-		this.add(Blocks.WAXED_OXIDIZED_COPPER_DOOR, noDrop());
+		this.add(Blocks.COPPER_DOOR, block -> this.createDoorTable(block));
+		this.add(Blocks.EXPOSED_COPPER_DOOR, block -> this.createDoorTable(block));
+		this.add(Blocks.WEATHERED_COPPER_DOOR, block -> this.createDoorTable(block));
+		this.add(Blocks.OXIDIZED_COPPER_DOOR, block -> this.createDoorTable(block));
+		this.add(Blocks.WAXED_COPPER_DOOR, block -> this.createDoorTable(block));
+		this.add(Blocks.WAXED_EXPOSED_COPPER_DOOR, block -> this.createDoorTable(block));
+		this.add(Blocks.WAXED_WEATHERED_COPPER_DOOR, block -> this.createDoorTable(block));
+		this.add(Blocks.WAXED_OXIDIZED_COPPER_DOOR, block -> this.createDoorTable(block));
 		this.add(Blocks.BLACK_BED, block -> this.createSinglePropConditionTable(block, BedBlock.PART, BedPart.HEAD));
 		this.add(Blocks.BLUE_BED, block -> this.createSinglePropConditionTable(block, BedBlock.PART, BedPart.HEAD));
 		this.add(Blocks.BROWN_BED, block -> this.createSinglePropConditionTable(block, BedBlock.PART, BedPart.HEAD));
@@ -902,8 +906,8 @@ public class VanillaBlockLoot extends BlockLootSubProvider {
 							)
 					)
 		);
-		this.add(Blocks.CAVE_VINES, block -> BlockLootSubProvider.createCaveVinesDrop(block));
-		this.add(Blocks.CAVE_VINES_PLANT, block -> BlockLootSubProvider.createCaveVinesDrop(block));
+		this.add(Blocks.CAVE_VINES, block -> this.createCaveVinesDrop(block));
+		this.add(Blocks.CAVE_VINES_PLANT, block -> this.createCaveVinesDrop(block));
 		this.add(Blocks.CANDLE, block -> this.createCandleDrops(block));
 		this.add(Blocks.WHITE_CANDLE, block -> this.createCandleDrops(block));
 		this.add(Blocks.ORANGE_CANDLE, block -> this.createCandleDrops(block));
@@ -995,8 +999,8 @@ public class VanillaBlockLoot extends BlockLootSubProvider {
 						)
 					)
 		);
-		this.add(Blocks.BEE_NEST, block -> createBeeNestDrop(block));
-		this.add(Blocks.BEEHIVE, block -> createBeeHiveDrop(block));
+		this.add(Blocks.BEE_NEST, block -> this.createBeeNestDrop(block));
+		this.add(Blocks.BEEHIVE, block -> this.createBeeHiveDrop(block));
 		this.add(Blocks.OAK_LEAVES, block -> this.createOakLeavesDrops(block, Blocks.OAK_SAPLING, NORMAL_LEAVES_SAPLING_CHANCES));
 		this.add(Blocks.SPRUCE_LEAVES, block -> this.createLeavesDrops(block, Blocks.SPRUCE_SAPLING, NORMAL_LEAVES_SAPLING_CHANCES));
 		this.add(Blocks.BIRCH_LEAVES, block -> this.createLeavesDrops(block, Blocks.BIRCH_SAPLING, NORMAL_LEAVES_SAPLING_CHANCES));
@@ -1055,7 +1059,10 @@ public class VanillaBlockLoot extends BlockLootSubProvider {
 					.withPool(
 						LootPool.lootPool()
 							.when(builder3)
-							.add(LootItem.lootTableItem(Items.CARROT).apply(ApplyBonusCount.addBonusBinomialDistributionCount(Enchantments.FORTUNE, 0.5714286F, 3)))
+							.add(
+								LootItem.lootTableItem(Items.CARROT)
+									.apply(ApplyBonusCount.addBonusBinomialDistributionCount(registryLookup.getOrThrow(Enchantments.FORTUNE), 0.5714286F, 3))
+							)
 					)
 			)
 		);
@@ -1070,7 +1077,10 @@ public class VanillaBlockLoot extends BlockLootSubProvider {
 					.withPool(
 						LootPool.lootPool()
 							.when(builder5)
-							.add(LootItem.lootTableItem(Items.POTATO).apply(ApplyBonusCount.addBonusBinomialDistributionCount(Enchantments.FORTUNE, 0.5714286F, 3)))
+							.add(
+								LootItem.lootTableItem(Items.POTATO)
+									.apply(ApplyBonusCount.addBonusBinomialDistributionCount(registryLookup.getOrThrow(Enchantments.FORTUNE), 0.5714286F, 3))
+							)
 					)
 					.withPool(LootPool.lootPool().when(builder5).add(LootItem.lootTableItem(Items.POISONOUS_POTATO).when(LootItemRandomChanceCondition.randomChance(0.02F))))
 			)
@@ -1088,7 +1098,7 @@ public class VanillaBlockLoot extends BlockLootSubProvider {
 								)
 								.add(LootItem.lootTableItem(Items.SWEET_BERRIES))
 								.apply(SetItemCountFunction.setCount(UniformGenerator.between(2.0F, 3.0F)))
-								.apply(ApplyBonusCount.addUniformBonusCount(Enchantments.FORTUNE))
+								.apply(ApplyBonusCount.addUniformBonusCount(registryLookup.getOrThrow(Enchantments.FORTUNE)))
 						)
 						.withPool(
 							LootPool.lootPool()
@@ -1098,7 +1108,7 @@ public class VanillaBlockLoot extends BlockLootSubProvider {
 								)
 								.add(LootItem.lootTableItem(Items.SWEET_BERRIES))
 								.apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 2.0F)))
-								.apply(ApplyBonusCount.addUniformBonusCount(Enchantments.FORTUNE))
+								.apply(ApplyBonusCount.addUniformBonusCount(registryLookup.getOrThrow(Enchantments.FORTUNE)))
 						)
 				)
 		);
@@ -1119,13 +1129,13 @@ public class VanillaBlockLoot extends BlockLootSubProvider {
 		this.add(Blocks.DEEPSLATE_GOLD_ORE, block -> this.createOreDrop(block, Items.RAW_GOLD));
 		this.add(
 			Blocks.NETHER_GOLD_ORE,
-			block -> createSilkTouchDispatchTable(
+			block -> this.createSilkTouchDispatchTable(
 					block,
 					(LootPoolEntryContainer.Builder<?>)this.applyExplosionDecay(
 						block,
 						LootItem.lootTableItem(Items.GOLD_NUGGET)
 							.apply(SetItemCountFunction.setCount(UniformGenerator.between(2.0F, 6.0F)))
-							.apply(ApplyBonusCount.addOreBonusCount(Enchantments.FORTUNE))
+							.apply(ApplyBonusCount.addOreBonusCount(registryLookup.getOrThrow(Enchantments.FORTUNE)))
 					)
 				)
 		);
@@ -1133,13 +1143,13 @@ public class VanillaBlockLoot extends BlockLootSubProvider {
 		this.add(Blocks.DEEPSLATE_LAPIS_ORE, block -> this.createLapisOreDrops(block));
 		this.add(
 			Blocks.COBWEB,
-			block -> createSilkTouchOrShearsDispatchTable(
+			block -> this.createSilkTouchOrShearsDispatchTable(
 					block, (LootPoolEntryContainer.Builder<?>)this.applyExplosionCondition(block, LootItem.lootTableItem(Items.STRING))
 				)
 		);
 		this.add(
 			Blocks.DEAD_BUSH,
-			block -> createShearsDispatchTable(
+			block -> this.createShearsDispatchTable(
 					block,
 					(LootPoolEntryContainer.Builder<?>)this.applyExplosionDecay(
 						block, LootItem.lootTableItem(Items.STICK).apply(SetItemCountFunction.setCount(UniformGenerator.between(0.0F, 2.0F)))
@@ -1153,7 +1163,7 @@ public class VanillaBlockLoot extends BlockLootSubProvider {
 		this.add(Blocks.HANGING_ROOTS, itemLike -> BlockLootSubProvider.createShearsOnlyDrop(itemLike));
 		this.add(Blocks.SMALL_DRIPLEAF, itemLike -> BlockLootSubProvider.createShearsOnlyDrop(itemLike));
 		this.add(Blocks.MANGROVE_LEAVES, block -> this.createMangroveLeavesDrops(block));
-		this.add(Blocks.TALL_SEAGRASS, createDoublePlantShearsDrop(Blocks.SEAGRASS));
+		this.add(Blocks.TALL_SEAGRASS, this.createDoublePlantShearsDrop(Blocks.SEAGRASS));
 		this.add(Blocks.LARGE_FERN, block -> this.createDoublePlantWithSeedDrops(block, Blocks.FERN));
 		this.add(Blocks.TALL_GRASS, block -> this.createDoublePlantWithSeedDrops(block, Blocks.SHORT_GRASS));
 		this.add(Blocks.MELON_STEM, block -> this.createStemDrops(block, Items.MELON_SEEDS));
@@ -1176,26 +1186,26 @@ public class VanillaBlockLoot extends BlockLootSubProvider {
 		this.add(Blocks.SHORT_GRASS, block -> this.createGrassDrops(block));
 		this.add(
 			Blocks.GLOWSTONE,
-			block -> createSilkTouchDispatchTable(
+			block -> this.createSilkTouchDispatchTable(
 					block,
 					(LootPoolEntryContainer.Builder<?>)this.applyExplosionDecay(
 						block,
 						LootItem.lootTableItem(Items.GLOWSTONE_DUST)
 							.apply(SetItemCountFunction.setCount(UniformGenerator.between(2.0F, 4.0F)))
-							.apply(ApplyBonusCount.addUniformBonusCount(Enchantments.FORTUNE))
+							.apply(ApplyBonusCount.addUniformBonusCount(registryLookup.getOrThrow(Enchantments.FORTUNE)))
 							.apply(LimitCount.limitCount(IntRange.range(1, 4)))
 					)
 				)
 		);
 		this.add(
 			Blocks.MELON,
-			block -> createSilkTouchDispatchTable(
+			block -> this.createSilkTouchDispatchTable(
 					block,
 					(LootPoolEntryContainer.Builder<?>)this.applyExplosionDecay(
 						block,
 						LootItem.lootTableItem(Items.MELON_SLICE)
 							.apply(SetItemCountFunction.setCount(UniformGenerator.between(3.0F, 7.0F)))
-							.apply(ApplyBonusCount.addUniformBonusCount(Enchantments.FORTUNE))
+							.apply(ApplyBonusCount.addUniformBonusCount(registryLookup.getOrThrow(Enchantments.FORTUNE)))
 							.apply(LimitCount.limitCount(IntRange.upperBound(9)))
 					)
 				)
@@ -1204,13 +1214,13 @@ public class VanillaBlockLoot extends BlockLootSubProvider {
 		this.add(Blocks.DEEPSLATE_REDSTONE_ORE, block -> this.createRedstoneOreDrops(block));
 		this.add(
 			Blocks.SEA_LANTERN,
-			block -> createSilkTouchDispatchTable(
+			block -> this.createSilkTouchDispatchTable(
 					block,
 					(LootPoolEntryContainer.Builder<?>)this.applyExplosionDecay(
 						block,
 						LootItem.lootTableItem(Items.PRISMARINE_CRYSTALS)
 							.apply(SetItemCountFunction.setCount(UniformGenerator.between(2.0F, 3.0F)))
-							.apply(ApplyBonusCount.addUniformBonusCount(Enchantments.FORTUNE))
+							.apply(ApplyBonusCount.addUniformBonusCount(registryLookup.getOrThrow(Enchantments.FORTUNE)))
 							.apply(LimitCount.limitCount(IntRange.range(1, 5)))
 					)
 				)
@@ -1233,7 +1243,7 @@ public class VanillaBlockLoot extends BlockLootSubProvider {
 												)
 										)
 										.apply(
-											ApplyBonusCount.addUniformBonusCount(Enchantments.FORTUNE)
+											ApplyBonusCount.addUniformBonusCount(registryLookup.getOrThrow(Enchantments.FORTUNE))
 												.when(
 													LootItemBlockStatePropertyCondition.hasBlockStateProperties(block)
 														.setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(NetherWartBlock.AGE, 3))
@@ -1260,7 +1270,7 @@ public class VanillaBlockLoot extends BlockLootSubProvider {
 													)
 													.apply(SetItemCountFunction.setCount(ConstantValue.exactly((float)integer.intValue())))
 										)
-										.when(HAS_NO_SILK_TOUCH),
+										.when(this.doesNotHaveSilkTouch()),
 									AlternativesEntry.alternatives(
 										SnowLayerBlock.LAYERS.getPossibleValues(),
 										integer -> integer == 8
@@ -1278,19 +1288,19 @@ public class VanillaBlockLoot extends BlockLootSubProvider {
 		);
 		this.add(
 			Blocks.GRAVEL,
-			block -> createSilkTouchDispatchTable(
+			block -> this.createSilkTouchDispatchTable(
 					block,
 					this.applyExplosionCondition(
 						block,
 						LootItem.lootTableItem(Items.FLINT)
-							.when(BonusLevelTableCondition.bonusLevelFlatChance(Enchantments.FORTUNE, 0.1F, 0.14285715F, 0.25F, 1.0F))
+							.when(BonusLevelTableCondition.bonusLevelFlatChance(registryLookup.getOrThrow(Enchantments.FORTUNE), 0.1F, 0.14285715F, 0.25F, 1.0F))
 							.otherwise(LootItem.lootTableItem(block))
 					)
 				)
 		);
 		this.add(
 			Blocks.CAMPFIRE,
-			block -> createSilkTouchDispatchTable(
+			block -> this.createSilkTouchDispatchTable(
 					block,
 					(LootPoolEntryContainer.Builder<?>)this.applyExplosionCondition(
 						block, LootItem.lootTableItem(Items.CHARCOAL).apply(SetItemCountFunction.setCount(ConstantValue.exactly(2.0F)))
@@ -1299,20 +1309,20 @@ public class VanillaBlockLoot extends BlockLootSubProvider {
 		);
 		this.add(
 			Blocks.GILDED_BLACKSTONE,
-			block -> createSilkTouchDispatchTable(
+			block -> this.createSilkTouchDispatchTable(
 					block,
 					this.applyExplosionCondition(
 						block,
 						LootItem.lootTableItem(Items.GOLD_NUGGET)
 							.apply(SetItemCountFunction.setCount(UniformGenerator.between(2.0F, 5.0F)))
-							.when(BonusLevelTableCondition.bonusLevelFlatChance(Enchantments.FORTUNE, 0.1F, 0.14285715F, 0.25F, 1.0F))
+							.when(BonusLevelTableCondition.bonusLevelFlatChance(registryLookup.getOrThrow(Enchantments.FORTUNE), 0.1F, 0.14285715F, 0.25F, 1.0F))
 							.otherwise(LootItem.lootTableItem(block))
 					)
 				)
 		);
 		this.add(
 			Blocks.SOUL_CAMPFIRE,
-			block -> createSilkTouchDispatchTable(
+			block -> this.createSilkTouchDispatchTable(
 					block,
 					(LootPoolEntryContainer.Builder<?>)this.applyExplosionCondition(
 						block, LootItem.lootTableItem(Items.SOUL_SOIL).apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F)))
@@ -1321,11 +1331,11 @@ public class VanillaBlockLoot extends BlockLootSubProvider {
 		);
 		this.add(
 			Blocks.AMETHYST_CLUSTER,
-			block -> createSilkTouchDispatchTable(
+			block -> this.createSilkTouchDispatchTable(
 					block,
 					LootItem.lootTableItem(Items.AMETHYST_SHARD)
 						.apply(SetItemCountFunction.setCount(ConstantValue.exactly(4.0F)))
-						.apply(ApplyBonusCount.addOreBonusCount(Enchantments.FORTUNE))
+						.apply(ApplyBonusCount.addOreBonusCount(registryLookup.getOrThrow(Enchantments.FORTUNE)))
 						.when(MatchTool.toolMatches(ItemPredicate.Builder.item().of(ItemTags.CLUSTER_MAX_HARVESTABLES)))
 						.otherwise(
 							(LootPoolEntryContainer.Builder<?>)this.applyExplosionDecay(

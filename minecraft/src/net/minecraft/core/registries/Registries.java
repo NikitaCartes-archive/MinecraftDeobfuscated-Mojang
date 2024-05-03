@@ -42,6 +42,11 @@ import net.minecraft.world.item.armortrim.TrimPattern;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.LevelBasedValue;
+import net.minecraft.world.item.enchantment.effects.EnchantmentEntityEffect;
+import net.minecraft.world.item.enchantment.effects.EnchantmentLocationBasedEffect;
+import net.minecraft.world.item.enchantment.effects.EnchantmentValueEffect;
+import net.minecraft.world.item.enchantment.providers.EnchantmentProvider;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
@@ -121,7 +126,19 @@ public class Registries {
 	public static final ResourceKey<Registry<ResourceLocation>> CUSTOM_STAT = createRegistryKey("custom_stat");
 	public static final ResourceKey<Registry<DamageType>> DAMAGE_TYPE = createRegistryKey("damage_type");
 	public static final ResourceKey<Registry<MapCodec<? extends DensityFunction>>> DENSITY_FUNCTION_TYPE = createRegistryKey("worldgen/density_function_type");
-	public static final ResourceKey<Registry<Enchantment>> ENCHANTMENT = createRegistryKey("enchantment");
+	public static final ResourceKey<Registry<MapCodec<? extends EnchantmentEntityEffect>>> ENCHANTMENT_ENTITY_EFFECT_TYPE = createRegistryKey(
+		"enchantment_entity_effect_type"
+	);
+	public static final ResourceKey<Registry<MapCodec<? extends LevelBasedValue>>> ENCHANTMENT_LEVEL_BASED_VALUE_TYPE = createRegistryKey(
+		"enchantment_level_based_value_type"
+	);
+	public static final ResourceKey<Registry<MapCodec<? extends EnchantmentLocationBasedEffect>>> ENCHANTMENT_LOCATION_BASED_EFFECT_TYPE = createRegistryKey(
+		"enchantment_location_based_effect_type"
+	);
+	public static final ResourceKey<Registry<MapCodec<? extends EnchantmentProvider>>> ENCHANTMENT_PROVIDER_TYPE = createRegistryKey("enchantment_provider_type");
+	public static final ResourceKey<Registry<MapCodec<? extends EnchantmentValueEffect>>> ENCHANTMENT_VALUE_EFFECT_TYPE = createRegistryKey(
+		"enchantment_value_effect_type"
+	);
 	public static final ResourceKey<Registry<EntityType<?>>> ENTITY_TYPE = createRegistryKey("entity_type");
 	public static final ResourceKey<Registry<Feature<?>>> FEATURE = createRegistryKey("worldgen/feature");
 	public static final ResourceKey<Registry<FeatureSizeType<?>>> FEATURE_SIZE_TYPE = createRegistryKey("worldgen/feature_size_type");
@@ -180,12 +197,15 @@ public class Registries {
 	public static final ResourceKey<Registry<MapCodec<? extends EntitySubPredicate>>> ENTITY_SUB_PREDICATE_TYPE = createRegistryKey("entity_sub_predicate_type");
 	public static final ResourceKey<Registry<ItemSubPredicate.Type<?>>> ITEM_SUB_PREDICATE_TYPE = createRegistryKey("item_sub_predicate_type");
 	public static final ResourceKey<Registry<MapDecorationType>> MAP_DECORATION_TYPE = createRegistryKey("map_decoration_type");
+	public static final ResourceKey<Registry<DataComponentType<?>>> ENCHANTMENT_EFFECT_COMPONENT_TYPE = createRegistryKey("enchantment_effect_component_type");
 	public static final ResourceKey<Registry<Biome>> BIOME = createRegistryKey("worldgen/biome");
 	public static final ResourceKey<Registry<ChatType>> CHAT_TYPE = createRegistryKey("chat_type");
 	public static final ResourceKey<Registry<ConfiguredWorldCarver<?>>> CONFIGURED_CARVER = createRegistryKey("worldgen/configured_carver");
 	public static final ResourceKey<Registry<ConfiguredFeature<?, ?>>> CONFIGURED_FEATURE = createRegistryKey("worldgen/configured_feature");
 	public static final ResourceKey<Registry<DensityFunction>> DENSITY_FUNCTION = createRegistryKey("worldgen/density_function");
 	public static final ResourceKey<Registry<DimensionType>> DIMENSION_TYPE = createRegistryKey("dimension_type");
+	public static final ResourceKey<Registry<Enchantment>> ENCHANTMENT = createRegistryKey("enchantment");
+	public static final ResourceKey<Registry<EnchantmentProvider>> ENCHANTMENT_PROVIDER = createRegistryKey("enchantment_provider");
 	public static final ResourceKey<Registry<FlatLevelGeneratorPreset>> FLAT_LEVEL_GENERATOR_PRESET = createRegistryKey("worldgen/flat_level_generator_preset");
 	public static final ResourceKey<Registry<NoiseGeneratorSettings>> NOISE_SETTINGS = createRegistryKey("worldgen/noise_settings");
 	public static final ResourceKey<Registry<NormalNoise.NoiseParameters>> NOISE = createRegistryKey("worldgen/noise");

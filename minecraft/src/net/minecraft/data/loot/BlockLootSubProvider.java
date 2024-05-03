@@ -22,11 +22,13 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.BeehiveBlock;
@@ -72,31 +74,48 @@ import net.minecraft.world.level.storage.loot.providers.number.NumberProvider;
 import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
 
 public abstract class BlockLootSubProvider implements LootTableSubProvider {
-	protected static final LootItemCondition.Builder HAS_SILK_TOUCH = MatchTool.toolMatches(
-		ItemPredicate.Builder.item()
-			.withSubPredicate(
-				ItemSubPredicates.ENCHANTMENTS,
-				ItemEnchantmentsPredicate.enchantments(List.of(new EnchantmentPredicate(Enchantments.SILK_TOUCH, MinMaxBounds.Ints.atLeast(1))))
-			)
-	);
-	protected static final LootItemCondition.Builder HAS_NO_SILK_TOUCH = HAS_SILK_TOUCH.invert();
 	protected static final LootItemCondition.Builder HAS_SHEARS = MatchTool.toolMatches(ItemPredicate.Builder.item().of(Items.SHEARS));
-	private static final LootItemCondition.Builder HAS_SHEARS_OR_SILK_TOUCH = HAS_SHEARS.or(HAS_SILK_TOUCH);
-	private static final LootItemCondition.Builder HAS_NO_SHEARS_OR_SILK_TOUCH = HAS_SHEARS_OR_SILK_TOUCH.invert();
+	protected final HolderLookup.Provider registries;
 	protected final Set<Item> explosionResistant;
 	protected final FeatureFlagSet enabledFeatures;
 	protected final Map<ResourceKey<LootTable>, LootTable.Builder> map;
 	protected static final float[] NORMAL_LEAVES_SAPLING_CHANCES = new float[]{0.05F, 0.0625F, 0.083333336F, 0.1F};
 	private static final float[] NORMAL_LEAVES_STICK_CHANCES = new float[]{0.02F, 0.022222223F, 0.025F, 0.033333335F, 0.1F};
 
-	protected BlockLootSubProvider(Set<Item> set, FeatureFlagSet featureFlagSet) {
-		this(set, featureFlagSet, new HashMap());
+	protected LootItemCondition.Builder hasSilkTouch() {
+		HolderLookup.RegistryLookup<Enchantment> registryLookup = this.registries.lookupOrThrow(Registries.ENCHANTMENT);
+		return MatchTool.toolMatches(
+			ItemPredicate.Builder.item()
+				.withSubPredicate(
+					ItemSubPredicates.ENCHANTMENTS,
+					ItemEnchantmentsPredicate.enchantments(List.of(new EnchantmentPredicate(registryLookup.getOrThrow(Enchantments.SILK_TOUCH), MinMaxBounds.Ints.atLeast(1))))
+				)
+		);
 	}
 
-	protected BlockLootSubProvider(Set<Item> set, FeatureFlagSet featureFlagSet, Map<ResourceKey<LootTable>, LootTable.Builder> map) {
+	protected LootItemCondition.Builder doesNotHaveSilkTouch() {
+		return this.hasSilkTouch().invert();
+	}
+
+	private LootItemCondition.Builder hasShearsOrSilkTouch() {
+		return HAS_SHEARS.or(this.hasSilkTouch());
+	}
+
+	private LootItemCondition.Builder doesNotHaveShearsOrSilkTouch() {
+		return this.hasShearsOrSilkTouch().invert();
+	}
+
+	protected BlockLootSubProvider(Set<Item> set, FeatureFlagSet featureFlagSet, HolderLookup.Provider provider) {
+		this(set, featureFlagSet, new HashMap(), provider);
+	}
+
+	protected BlockLootSubProvider(
+		Set<Item> set, FeatureFlagSet featureFlagSet, Map<ResourceKey<LootTable>, LootTable.Builder> map, HolderLookup.Provider provider
+	) {
 		this.explosionResistant = set;
 		this.enabledFeatures = featureFlagSet;
 		this.map = map;
+		this.registries = provider;
 	}
 
 	protected <T extends FunctionUserBuilder<T>> T applyExplosionDecay(ItemLike itemLike, FunctionUserBuilder<T> functionUserBuilder) {
@@ -119,20 +138,20 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
 			.withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F)).add(LootItem.lootTableItem(block).when(builder).otherwise(builder2)));
 	}
 
-	protected static LootTable.Builder createSilkTouchDispatchTable(Block block, LootPoolEntryContainer.Builder<?> builder) {
-		return createSelfDropDispatchTable(block, HAS_SILK_TOUCH, builder);
+	protected LootTable.Builder createSilkTouchDispatchTable(Block block, LootPoolEntryContainer.Builder<?> builder) {
+		return createSelfDropDispatchTable(block, this.hasSilkTouch(), builder);
 	}
 
-	protected static LootTable.Builder createShearsDispatchTable(Block block, LootPoolEntryContainer.Builder<?> builder) {
+	protected LootTable.Builder createShearsDispatchTable(Block block, LootPoolEntryContainer.Builder<?> builder) {
 		return createSelfDropDispatchTable(block, HAS_SHEARS, builder);
 	}
 
-	protected static LootTable.Builder createSilkTouchOrShearsDispatchTable(Block block, LootPoolEntryContainer.Builder<?> builder) {
-		return createSelfDropDispatchTable(block, HAS_SHEARS_OR_SILK_TOUCH, builder);
+	protected LootTable.Builder createSilkTouchOrShearsDispatchTable(Block block, LootPoolEntryContainer.Builder<?> builder) {
+		return createSelfDropDispatchTable(block, this.hasShearsOrSilkTouch(), builder);
 	}
 
 	protected LootTable.Builder createSingleItemTableWithSilkTouch(Block block, ItemLike itemLike) {
-		return createSilkTouchDispatchTable(block, (LootPoolEntryContainer.Builder<?>)this.applyExplosionCondition(block, LootItem.lootTableItem(itemLike)));
+		return this.createSilkTouchDispatchTable(block, (LootPoolEntryContainer.Builder<?>)this.applyExplosionCondition(block, LootItem.lootTableItem(itemLike)));
 	}
 
 	protected LootTable.Builder createSingleItemTable(ItemLike itemLike, NumberProvider numberProvider) {
@@ -149,14 +168,15 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
 	}
 
 	protected LootTable.Builder createSingleItemTableWithSilkTouch(Block block, ItemLike itemLike, NumberProvider numberProvider) {
-		return createSilkTouchDispatchTable(
+		return this.createSilkTouchDispatchTable(
 			block,
 			(LootPoolEntryContainer.Builder<?>)this.applyExplosionDecay(block, LootItem.lootTableItem(itemLike).apply(SetItemCountFunction.setCount(numberProvider)))
 		);
 	}
 
-	private static LootTable.Builder createSilkTouchOnlyTable(ItemLike itemLike) {
-		return LootTable.lootTable().withPool(LootPool.lootPool().when(HAS_SILK_TOUCH).setRolls(ConstantValue.exactly(1.0F)).add(LootItem.lootTableItem(itemLike)));
+	private LootTable.Builder createSilkTouchOnlyTable(ItemLike itemLike) {
+		return LootTable.lootTable()
+			.withPool(LootPool.lootPool().when(this.hasSilkTouch()).setRolls(ConstantValue.exactly(1.0F)).add(LootItem.lootTableItem(itemLike)));
 	}
 
 	private LootTable.Builder createPotFlowerItemTable(ItemLike itemLike) {
@@ -243,37 +263,40 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
 	}
 
 	protected LootTable.Builder createCopperOreDrops(Block block) {
-		return createSilkTouchDispatchTable(
+		HolderLookup.RegistryLookup<Enchantment> registryLookup = this.registries.lookupOrThrow(Registries.ENCHANTMENT);
+		return this.createSilkTouchDispatchTable(
 			block,
 			(LootPoolEntryContainer.Builder<?>)this.applyExplosionDecay(
 				block,
 				LootItem.lootTableItem(Items.RAW_COPPER)
 					.apply(SetItemCountFunction.setCount(UniformGenerator.between(2.0F, 5.0F)))
-					.apply(ApplyBonusCount.addOreBonusCount(Enchantments.FORTUNE))
+					.apply(ApplyBonusCount.addOreBonusCount(registryLookup.getOrThrow(Enchantments.FORTUNE)))
 			)
 		);
 	}
 
 	protected LootTable.Builder createLapisOreDrops(Block block) {
-		return createSilkTouchDispatchTable(
+		HolderLookup.RegistryLookup<Enchantment> registryLookup = this.registries.lookupOrThrow(Registries.ENCHANTMENT);
+		return this.createSilkTouchDispatchTable(
 			block,
 			(LootPoolEntryContainer.Builder<?>)this.applyExplosionDecay(
 				block,
 				LootItem.lootTableItem(Items.LAPIS_LAZULI)
 					.apply(SetItemCountFunction.setCount(UniformGenerator.between(4.0F, 9.0F)))
-					.apply(ApplyBonusCount.addOreBonusCount(Enchantments.FORTUNE))
+					.apply(ApplyBonusCount.addOreBonusCount(registryLookup.getOrThrow(Enchantments.FORTUNE)))
 			)
 		);
 	}
 
 	protected LootTable.Builder createRedstoneOreDrops(Block block) {
-		return createSilkTouchDispatchTable(
+		HolderLookup.RegistryLookup<Enchantment> registryLookup = this.registries.lookupOrThrow(Registries.ENCHANTMENT);
+		return this.createSilkTouchDispatchTable(
 			block,
 			(LootPoolEntryContainer.Builder<?>)this.applyExplosionDecay(
 				block,
 				LootItem.lootTableItem(Items.REDSTONE)
 					.apply(SetItemCountFunction.setCount(UniformGenerator.between(4.0F, 5.0F)))
-					.apply(ApplyBonusCount.addUniformBonusCount(Enchantments.FORTUNE))
+					.apply(ApplyBonusCount.addUniformBonusCount(registryLookup.getOrThrow(Enchantments.FORTUNE)))
 			)
 		);
 	}
@@ -299,11 +322,11 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
 			);
 	}
 
-	protected static LootTable.Builder createBeeNestDrop(Block block) {
+	protected LootTable.Builder createBeeNestDrop(Block block) {
 		return LootTable.lootTable()
 			.withPool(
 				LootPool.lootPool()
-					.when(HAS_SILK_TOUCH)
+					.when(this.hasSilkTouch())
 					.setRolls(ConstantValue.exactly(1.0F))
 					.add(
 						LootItem.lootTableItem(block)
@@ -313,14 +336,14 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
 			);
 	}
 
-	protected static LootTable.Builder createBeeHiveDrop(Block block) {
+	protected LootTable.Builder createBeeHiveDrop(Block block) {
 		return LootTable.lootTable()
 			.withPool(
 				LootPool.lootPool()
 					.setRolls(ConstantValue.exactly(1.0F))
 					.add(
 						LootItem.lootTableItem(block)
-							.when(HAS_SILK_TOUCH)
+							.when(this.hasSilkTouch())
 							.apply(CopyComponentsFunction.copyComponents(CopyComponentsFunction.Source.BLOCK_ENTITY).include(DataComponents.BEES))
 							.apply(CopyBlockState.copyState(block).copy(BeehiveBlock.HONEY_LEVEL))
 							.otherwise(LootItem.lootTableItem(block))
@@ -328,7 +351,7 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
 			);
 	}
 
-	protected static LootTable.Builder createCaveVinesDrop(Block block) {
+	protected LootTable.Builder createCaveVinesDrop(Block block) {
 		return LootTable.lootTable()
 			.withPool(
 				LootPool.lootPool()
@@ -341,16 +364,17 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
 	}
 
 	protected LootTable.Builder createOreDrop(Block block, Item item) {
-		return createSilkTouchDispatchTable(
+		HolderLookup.RegistryLookup<Enchantment> registryLookup = this.registries.lookupOrThrow(Registries.ENCHANTMENT);
+		return this.createSilkTouchDispatchTable(
 			block,
 			(LootPoolEntryContainer.Builder<?>)this.applyExplosionDecay(
-				block, LootItem.lootTableItem(item).apply(ApplyBonusCount.addOreBonusCount(Enchantments.FORTUNE))
+				block, LootItem.lootTableItem(item).apply(ApplyBonusCount.addOreBonusCount(registryLookup.getOrThrow(Enchantments.FORTUNE)))
 			)
 		);
 	}
 
 	protected LootTable.Builder createMushroomBlockDrop(Block block, ItemLike itemLike) {
-		return createSilkTouchDispatchTable(
+		return this.createSilkTouchDispatchTable(
 			block,
 			(LootPoolEntryContainer.Builder<?>)this.applyExplosionDecay(
 				block,
@@ -362,13 +386,14 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
 	}
 
 	protected LootTable.Builder createGrassDrops(Block block) {
-		return createShearsDispatchTable(
+		HolderLookup.RegistryLookup<Enchantment> registryLookup = this.registries.lookupOrThrow(Registries.ENCHANTMENT);
+		return this.createShearsDispatchTable(
 			block,
 			(LootPoolEntryContainer.Builder<?>)this.applyExplosionDecay(
 				block,
 				LootItem.lootTableItem(Items.WHEAT_SEEDS)
 					.when(LootItemRandomChanceCondition.randomChance(0.125F))
-					.apply(ApplyBonusCount.addUniformBonusCount(Enchantments.FORTUNE, 2))
+					.apply(ApplyBonusCount.addUniformBonusCount(registryLookup.getOrThrow(Enchantments.FORTUNE), 2))
 			)
 		);
 	}
@@ -435,48 +460,54 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
 	}
 
 	protected LootTable.Builder createLeavesDrops(Block block, Block block2, float... fs) {
-		return createSilkTouchOrShearsDispatchTable(
+		HolderLookup.RegistryLookup<Enchantment> registryLookup = this.registries.lookupOrThrow(Registries.ENCHANTMENT);
+		return this.createSilkTouchOrShearsDispatchTable(
 				block,
 				((LootPoolSingletonContainer.Builder)this.applyExplosionCondition(block, LootItem.lootTableItem(block2)))
-					.when(BonusLevelTableCondition.bonusLevelFlatChance(Enchantments.FORTUNE, fs))
+					.when(BonusLevelTableCondition.bonusLevelFlatChance(registryLookup.getOrThrow(Enchantments.FORTUNE), fs))
 			)
 			.withPool(
 				LootPool.lootPool()
 					.setRolls(ConstantValue.exactly(1.0F))
-					.when(HAS_NO_SHEARS_OR_SILK_TOUCH)
+					.when(this.doesNotHaveShearsOrSilkTouch())
 					.add(
 						((LootPoolSingletonContainer.Builder)this.applyExplosionDecay(
 								block, LootItem.lootTableItem(Items.STICK).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 2.0F)))
 							))
-							.when(BonusLevelTableCondition.bonusLevelFlatChance(Enchantments.FORTUNE, NORMAL_LEAVES_STICK_CHANCES))
+							.when(BonusLevelTableCondition.bonusLevelFlatChance(registryLookup.getOrThrow(Enchantments.FORTUNE), NORMAL_LEAVES_STICK_CHANCES))
 					)
 			);
 	}
 
 	protected LootTable.Builder createOakLeavesDrops(Block block, Block block2, float... fs) {
+		HolderLookup.RegistryLookup<Enchantment> registryLookup = this.registries.lookupOrThrow(Registries.ENCHANTMENT);
 		return this.createLeavesDrops(block, block2, fs)
 			.withPool(
 				LootPool.lootPool()
 					.setRolls(ConstantValue.exactly(1.0F))
-					.when(HAS_NO_SHEARS_OR_SILK_TOUCH)
+					.when(this.doesNotHaveShearsOrSilkTouch())
 					.add(
 						((LootPoolSingletonContainer.Builder)this.applyExplosionCondition(block, LootItem.lootTableItem(Items.APPLE)))
-							.when(BonusLevelTableCondition.bonusLevelFlatChance(Enchantments.FORTUNE, 0.005F, 0.0055555557F, 0.00625F, 0.008333334F, 0.025F))
+							.when(
+								BonusLevelTableCondition.bonusLevelFlatChance(registryLookup.getOrThrow(Enchantments.FORTUNE), 0.005F, 0.0055555557F, 0.00625F, 0.008333334F, 0.025F)
+							)
 					)
 			);
 	}
 
 	protected LootTable.Builder createMangroveLeavesDrops(Block block) {
-		return createSilkTouchOrShearsDispatchTable(
+		HolderLookup.RegistryLookup<Enchantment> registryLookup = this.registries.lookupOrThrow(Registries.ENCHANTMENT);
+		return this.createSilkTouchOrShearsDispatchTable(
 			block,
 			((LootPoolSingletonContainer.Builder)this.applyExplosionDecay(
 					Blocks.MANGROVE_LEAVES, LootItem.lootTableItem(Items.STICK).apply(SetItemCountFunction.setCount(UniformGenerator.between(1.0F, 2.0F)))
 				))
-				.when(BonusLevelTableCondition.bonusLevelFlatChance(Enchantments.FORTUNE, NORMAL_LEAVES_STICK_CHANCES))
+				.when(BonusLevelTableCondition.bonusLevelFlatChance(registryLookup.getOrThrow(Enchantments.FORTUNE), NORMAL_LEAVES_STICK_CHANCES))
 		);
 	}
 
 	protected LootTable.Builder createCropDrops(Block block, Item item, Item item2, LootItemCondition.Builder builder) {
+		HolderLookup.RegistryLookup<Enchantment> registryLookup = this.registries.lookupOrThrow(Registries.ENCHANTMENT);
 		return this.applyExplosionDecay(
 			block,
 			LootTable.lootTable()
@@ -484,12 +515,14 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
 				.withPool(
 					LootPool.lootPool()
 						.when(builder)
-						.add(LootItem.lootTableItem(item2).apply(ApplyBonusCount.addBonusBinomialDistributionCount(Enchantments.FORTUNE, 0.5714286F, 3)))
+						.add(
+							LootItem.lootTableItem(item2).apply(ApplyBonusCount.addBonusBinomialDistributionCount(registryLookup.getOrThrow(Enchantments.FORTUNE), 0.5714286F, 3))
+						)
 				)
 		);
 	}
 
-	protected static LootTable.Builder createDoublePlantShearsDrop(Block block) {
+	protected LootTable.Builder createDoublePlantShearsDrop(Block block) {
 		return LootTable.lootTable()
 			.withPool(LootPool.lootPool().when(HAS_SHEARS).add(LootItem.lootTableItem(block).apply(SetItemCountFunction.setCount(ConstantValue.exactly(2.0F)))));
 	}
@@ -598,7 +631,7 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
 	protected abstract void generate();
 
 	@Override
-	public void generate(HolderLookup.Provider provider, BiConsumer<ResourceKey<LootTable>, LootTable.Builder> biConsumer) {
+	public void generate(BiConsumer<ResourceKey<LootTable>, LootTable.Builder> biConsumer) {
 		this.generate();
 		Set<ResourceKey<LootTable>> set = new HashSet();
 
@@ -624,8 +657,11 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
 	}
 
 	protected void addNetherVinesDropTable(Block block, Block block2) {
-		LootTable.Builder builder = createSilkTouchOrShearsDispatchTable(
-			block, LootItem.lootTableItem(block).when(BonusLevelTableCondition.bonusLevelFlatChance(Enchantments.FORTUNE, 0.33F, 0.55F, 0.77F, 1.0F))
+		HolderLookup.RegistryLookup<Enchantment> registryLookup = this.registries.lookupOrThrow(Registries.ENCHANTMENT);
+		LootTable.Builder builder = this.createSilkTouchOrShearsDispatchTable(
+			block,
+			LootItem.lootTableItem(block)
+				.when(BonusLevelTableCondition.bonusLevelFlatChance(registryLookup.getOrThrow(Enchantments.FORTUNE), 0.33F, 0.55F, 0.77F, 1.0F))
 		);
 		this.add(block, builder);
 		this.add(block2, builder);
@@ -640,7 +676,7 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
 	}
 
 	protected void otherWhenSilkTouch(Block block, Block block2) {
-		this.add(block, createSilkTouchOnlyTable(block2));
+		this.add(block, this.createSilkTouchOnlyTable(block2));
 	}
 
 	protected void dropOther(Block block, ItemLike itemLike) {

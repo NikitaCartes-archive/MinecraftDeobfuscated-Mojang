@@ -9,8 +9,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.flag.FeatureFlag;
-import net.minecraft.world.flag.FeatureFlags;
 
 public class MobEffects {
 	private static final int DARKNESS_EFFECT_FACTOR_PADDING_DURATION_TICKS = 22;
@@ -94,32 +92,18 @@ public class MobEffects {
 	public static final Holder<MobEffect> HERO_OF_THE_VILLAGE = register("hero_of_the_village", new MobEffect(MobEffectCategory.BENEFICIAL, 4521796));
 	public static final Holder<MobEffect> DARKNESS = register("darkness", new MobEffect(MobEffectCategory.HARMFUL, 2696993).setBlendDuration(22));
 	public static final Holder<MobEffect> TRIAL_OMEN = register(
-		"trial_omen",
-		new MobEffect(MobEffectCategory.NEUTRAL, 1484454, ParticleTypes.TRIAL_OMEN)
-			.withSoundOnAdded(SoundEvents.APPLY_EFFECT_TRIAL_OMEN)
-			.requiredFeatures(FeatureFlags.UPDATE_1_21)
+		"trial_omen", new MobEffect(MobEffectCategory.NEUTRAL, 1484454, ParticleTypes.TRIAL_OMEN).withSoundOnAdded(SoundEvents.APPLY_EFFECT_TRIAL_OMEN)
 	);
 	public static final Holder<MobEffect> RAID_OMEN = register(
-		"raid_omen",
-		new RaidOmenMobEffect(MobEffectCategory.NEUTRAL, 14565464, ParticleTypes.RAID_OMEN)
-			.withSoundOnAdded(SoundEvents.APPLY_EFFECT_RAID_OMEN)
-			.requiredFeatures(FeatureFlags.UPDATE_1_21)
+		"raid_omen", new RaidOmenMobEffect(MobEffectCategory.NEUTRAL, 14565464, ParticleTypes.RAID_OMEN).withSoundOnAdded(SoundEvents.APPLY_EFFECT_RAID_OMEN)
 	);
-	public static final Holder<MobEffect> WIND_CHARGED = register(
-		"wind_charged", new WindChargedMobEffect(MobEffectCategory.HARMFUL, 12438015).requiredFeatures(new FeatureFlag[]{FeatureFlags.UPDATE_1_21})
-	);
+	public static final Holder<MobEffect> WIND_CHARGED = register("wind_charged", new WindChargedMobEffect(MobEffectCategory.HARMFUL, 12438015));
 	public static final Holder<MobEffect> WEAVING = register(
-		"weaving",
-		new WeavingMobEffect(MobEffectCategory.HARMFUL, 7891290, randomSource -> Mth.randomBetweenInclusive(randomSource, 2, 3))
-			.requiredFeatures(new FeatureFlag[]{FeatureFlags.UPDATE_1_21})
+		"weaving", new WeavingMobEffect(MobEffectCategory.HARMFUL, 7891290, randomSource -> Mth.randomBetweenInclusive(randomSource, 2, 3))
 	);
-	public static final Holder<MobEffect> OOZING = register(
-		"oozing", new OozingMobEffect(MobEffectCategory.HARMFUL, 10092451, randomSource -> 2).requiredFeatures(new FeatureFlag[]{FeatureFlags.UPDATE_1_21})
-	);
+	public static final Holder<MobEffect> OOZING = register("oozing", new OozingMobEffect(MobEffectCategory.HARMFUL, 10092451, randomSource -> 2));
 	public static final Holder<MobEffect> INFESTED = register(
-		"infested",
-		new InfestedMobEffect(MobEffectCategory.HARMFUL, 9214860, 0.1F, randomSource -> Mth.randomBetweenInclusive(randomSource, 1, 2))
-			.requiredFeatures(new FeatureFlag[]{FeatureFlags.UPDATE_1_21})
+		"infested", new InfestedMobEffect(MobEffectCategory.HARMFUL, 9214860, 0.1F, randomSource -> Mth.randomBetweenInclusive(randomSource, 1, 2))
 	);
 
 	private static Holder<MobEffect> register(String string, MobEffect mobEffect) {

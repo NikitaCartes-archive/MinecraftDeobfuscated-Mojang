@@ -219,7 +219,9 @@ public class TrialSpawnerData {
 
 	@Nullable
 	public Entity getOrCreateDisplayEntity(TrialSpawner trialSpawner, Level level, TrialSpawnerState trialSpawnerState) {
-		if (trialSpawner.canSpawnInLevel(level) && trialSpawnerState.hasSpinningMob()) {
+		if (!trialSpawnerState.hasSpinningMob()) {
+			return null;
+		} else {
 			if (this.displayEntity == null) {
 				CompoundTag compoundTag = this.getOrCreateNextSpawnData(trialSpawner, level.getRandom()).getEntityToSpawn();
 				if (compoundTag.contains("id", 8)) {
@@ -228,8 +230,6 @@ public class TrialSpawnerData {
 			}
 
 			return this.displayEntity;
-		} else {
-			return null;
 		}
 	}
 

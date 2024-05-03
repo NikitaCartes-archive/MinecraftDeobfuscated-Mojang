@@ -3,7 +3,6 @@ package net.minecraft.world.item.crafting;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.tags.ItemTags;
-import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
@@ -15,14 +14,14 @@ public class SuspiciousStewRecipe extends CustomRecipe {
 		super(craftingBookCategory);
 	}
 
-	public boolean matches(CraftingContainer craftingContainer, Level level) {
+	public boolean matches(CraftingInput craftingInput, Level level) {
 		boolean bl = false;
 		boolean bl2 = false;
 		boolean bl3 = false;
 		boolean bl4 = false;
 
-		for (int i = 0; i < craftingContainer.getContainerSize(); i++) {
-			ItemStack itemStack = craftingContainer.getItem(i);
+		for (int i = 0; i < craftingInput.size(); i++) {
+			ItemStack itemStack = craftingInput.getItem(i);
 			if (!itemStack.isEmpty()) {
 				if (itemStack.is(Blocks.BROWN_MUSHROOM.asItem()) && !bl3) {
 					bl3 = true;
@@ -43,11 +42,11 @@ public class SuspiciousStewRecipe extends CustomRecipe {
 		return bl && bl3 && bl2 && bl4;
 	}
 
-	public ItemStack assemble(CraftingContainer craftingContainer, HolderLookup.Provider provider) {
+	public ItemStack assemble(CraftingInput craftingInput, HolderLookup.Provider provider) {
 		ItemStack itemStack = new ItemStack(Items.SUSPICIOUS_STEW, 1);
 
-		for (int i = 0; i < craftingContainer.getContainerSize(); i++) {
-			ItemStack itemStack2 = craftingContainer.getItem(i);
+		for (int i = 0; i < craftingInput.size(); i++) {
+			ItemStack itemStack2 = craftingInput.getItem(i);
 			if (!itemStack2.isEmpty()) {
 				SuspiciousEffectHolder suspiciousEffectHolder = SuspiciousEffectHolder.tryGet(itemStack2.getItem());
 				if (suspiciousEffectHolder != null) {

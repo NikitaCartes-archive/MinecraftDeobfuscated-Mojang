@@ -31,21 +31,23 @@ public class RealmsSettingsScreen extends RealmsScreen {
 	public void init() {
 		int i = this.width / 2 - 106;
 		String string = this.serverData.state == RealmsServer.State.OPEN ? "mco.configure.world.buttons.close" : "mco.configure.world.buttons.open";
-		Button button = Button.builder(Component.translatable(string), buttonx -> {
-			if (this.serverData.state == RealmsServer.State.OPEN) {
-				Component component = Component.translatable("mco.configure.world.close.question.line1");
-				Component component2 = Component.translatable("mco.configure.world.close.question.line2");
-				this.minecraft.setScreen(new RealmsLongConfirmationScreen(bl -> {
-					if (bl) {
-						this.configureWorldScreen.closeTheWorld(this);
+		Button button = Button.builder(
+				Component.translatable(string),
+				buttonx -> {
+					if (this.serverData.state == RealmsServer.State.OPEN) {
+						this.minecraft
+							.setScreen(
+								RealmsPopups.infoPopupScreen(
+									this, Component.translatable("mco.configure.world.close.question.line1"), popupScreen -> this.configureWorldScreen.closeTheWorld()
+								)
+							);
 					} else {
-						this.minecraft.setScreen(this);
+						this.configureWorldScreen.openTheWorld(false);
 					}
-				}, RealmsLongConfirmationScreen.Type.INFO, component, component2, true));
-			} else {
-				this.configureWorldScreen.openTheWorld(false, this);
-			}
-		}).bounds(this.width / 2 - 53, row(0), 106, 20).build();
+				}
+			)
+			.bounds(this.width / 2 - 53, row(0), 106, 20)
+			.build();
 		this.addRenderableWidget(button);
 		this.nameEdit = new EditBox(this.minecraft.font, i, row(4), 212, 20, Component.translatable("mco.configure.world.name"));
 		this.nameEdit.setMaxLength(32);

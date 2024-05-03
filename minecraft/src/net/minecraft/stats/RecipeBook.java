@@ -72,7 +72,7 @@ public class RecipeBook {
 		this.bookSettings.setOpen(recipeBookType, bl);
 	}
 
-	public boolean isFiltering(RecipeBookMenu<?> recipeBookMenu) {
+	public boolean isFiltering(RecipeBookMenu<?, ?> recipeBookMenu) {
 		return this.isFiltering(recipeBookMenu.getRecipeBookType());
 	}
 

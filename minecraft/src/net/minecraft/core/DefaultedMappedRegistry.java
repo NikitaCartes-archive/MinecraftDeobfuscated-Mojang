@@ -52,6 +52,11 @@ public class DefaultedMappedRegistry<T> extends MappedRegistry<T> implements Def
 		return Optional.ofNullable(super.get(resourceLocation));
 	}
 
+	@Override
+	public Optional<Holder.Reference<T>> getAny() {
+		return Optional.ofNullable(this.defaultValue);
+	}
+
 	@Nonnull
 	@Override
 	public T byId(int i) {

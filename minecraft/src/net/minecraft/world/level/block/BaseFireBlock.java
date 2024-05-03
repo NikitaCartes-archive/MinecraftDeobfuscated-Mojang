@@ -130,7 +130,7 @@ public abstract class BaseFireBlock extends Block {
 		if (!entity.fireImmune()) {
 			entity.setRemainingFireTicks(entity.getRemainingFireTicks() + 1);
 			if (entity.getRemainingFireTicks() == 0) {
-				entity.igniteForSeconds(8);
+				entity.igniteForSeconds(8.0F);
 			}
 		}
 

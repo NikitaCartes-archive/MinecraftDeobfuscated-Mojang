@@ -2,6 +2,7 @@ package net.minecraft.world.level.block;
 
 import com.mojang.serialization.MapCodec;
 import java.util.function.BiConsumer;
+import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.DustParticleOptions;
@@ -98,28 +99,31 @@ public class LeverBlock extends FaceAttachedHorizontalDirectionalBlock {
 
 			return InteractionResult.SUCCESS;
 		} else {
-			BlockState blockState2 = this.pull(blockState, level, blockPos);
-			float f = blockState2.getValue(POWERED) ? 0.6F : 0.5F;
-			level.playSound(null, blockPos, SoundEvents.LEVER_CLICK, SoundSource.BLOCKS, 0.3F, f);
-			level.gameEvent(player, blockState2.getValue(POWERED) ? GameEvent.BLOCK_ACTIVATE : GameEvent.BLOCK_DEACTIVATE, blockPos);
+			this.pull(blockState, level, blockPos, null);
 			return InteractionResult.CONSUME;
 		}
 	}
 
 	@Override
 	protected void onExplosionHit(BlockState blockState, Level level, BlockPos blockPos, Explosion explosion, BiConsumer<ItemStack, BlockPos> biConsumer) {
-		if (explosion.getBlockInteraction() == Explosion.BlockInteraction.TRIGGER_BLOCK && !level.isClientSide()) {
-			this.pull(blockState, level, blockPos);
+		if (explosion.canTriggerBlocks()) {
+			this.pull(blockState, level, blockPos, null);
 		}
 
 		super.onExplosionHit(blockState, level, blockPos, explosion, biConsumer);
 	}
 
-	public BlockState pull(BlockState blockState, Level level, BlockPos blockPos) {
+	public void pull(BlockState blockState, Level level, BlockPos blockPos, @Nullable Player player) {
 		blockState = blockState.cycle(POWERED);
 		level.setBlock(blockPos, blockState, 3);
 		this.updateNeighbours(blockState, level, blockPos);
-		return blockState;
+		playSound(player, level, blockPos, blockState);
+		level.gameEvent(player, blockState.getValue(POWERED) ? GameEvent.BLOCK_ACTIVATE : GameEvent.BLOCK_DEACTIVATE, blockPos);
+	}
+
+	protected static void playSound(@Nullable Player player, LevelAccessor levelAccessor, BlockPos blockPos, BlockState blockState) {
+		float f = blockState.getValue(POWERED) ? 0.6F : 0.5F;
+		levelAccessor.playSound(player, blockPos, SoundEvents.LEVER_CLICK, SoundSource.BLOCKS, 0.3F, f);
 	}
 
 	private static void makeParticle(BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos, float f) {

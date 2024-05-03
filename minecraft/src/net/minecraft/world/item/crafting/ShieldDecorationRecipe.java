@@ -2,7 +2,6 @@ package net.minecraft.world.item.crafting;
 
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.BannerItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -14,12 +13,12 @@ public class ShieldDecorationRecipe extends CustomRecipe {
 		super(craftingBookCategory);
 	}
 
-	public boolean matches(CraftingContainer craftingContainer, Level level) {
+	public boolean matches(CraftingInput craftingInput, Level level) {
 		ItemStack itemStack = ItemStack.EMPTY;
 		ItemStack itemStack2 = ItemStack.EMPTY;
 
-		for (int i = 0; i < craftingContainer.getContainerSize(); i++) {
-			ItemStack itemStack3 = craftingContainer.getItem(i);
+		for (int i = 0; i < craftingInput.size(); i++) {
+			ItemStack itemStack3 = craftingInput.getItem(i);
 			if (!itemStack3.isEmpty()) {
 				if (itemStack3.getItem() instanceof BannerItem) {
 					if (!itemStack2.isEmpty()) {
@@ -49,12 +48,12 @@ public class ShieldDecorationRecipe extends CustomRecipe {
 		return !itemStack.isEmpty() && !itemStack2.isEmpty();
 	}
 
-	public ItemStack assemble(CraftingContainer craftingContainer, HolderLookup.Provider provider) {
+	public ItemStack assemble(CraftingInput craftingInput, HolderLookup.Provider provider) {
 		ItemStack itemStack = ItemStack.EMPTY;
 		ItemStack itemStack2 = ItemStack.EMPTY;
 
-		for (int i = 0; i < craftingContainer.getContainerSize(); i++) {
-			ItemStack itemStack3 = craftingContainer.getItem(i);
+		for (int i = 0; i < craftingInput.size(); i++) {
+			ItemStack itemStack3 = craftingInput.getItem(i);
 			if (!itemStack3.isEmpty()) {
 				if (itemStack3.getItem() instanceof BannerItem) {
 					itemStack = itemStack3;

@@ -52,6 +52,7 @@ import net.minecraft.world.entity.animal.WolfVariant;
 import net.minecraft.world.item.HoneycombItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.block.Blocks;
 
@@ -131,6 +132,7 @@ public class VanillaHusbandryAdvancements implements AdvancementSubProvider {
 
 	@Override
 	public void generate(HolderLookup.Provider provider, Consumer<AdvancementHolder> consumer) {
+		HolderLookup.RegistryLookup<Enchantment> registryLookup = provider.lookupOrThrow(Registries.ENCHANTMENT);
 		AdvancementHolder advancementHolder = Advancement.Builder.advancement()
 			.display(
 				Blocks.HAY_BLOCK,
@@ -425,7 +427,9 @@ public class VanillaHusbandryAdvancements implements AdvancementSubProvider {
 					ItemPredicate.Builder.item()
 						.withSubPredicate(
 							ItemSubPredicates.ENCHANTMENTS,
-							ItemEnchantmentsPredicate.enchantments(List.of(new EnchantmentPredicate(Enchantments.SILK_TOUCH, MinMaxBounds.Ints.atLeast(1))))
+							ItemEnchantmentsPredicate.enchantments(
+								List.of(new EnchantmentPredicate(registryLookup.getOrThrow(Enchantments.SILK_TOUCH), MinMaxBounds.Ints.atLeast(1)))
+							)
 						),
 					MinMaxBounds.Ints.exactly(3)
 				)

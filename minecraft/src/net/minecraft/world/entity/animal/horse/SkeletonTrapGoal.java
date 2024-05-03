@@ -10,11 +10,11 @@ import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.monster.Skeleton;
-import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
+import net.minecraft.world.item.enchantment.providers.VanillaEnchantmentProviders;
 
 public class SkeletonTrapGoal extends Goal {
 	private final SkeletonHorse horse;
@@ -87,34 +87,19 @@ public class SkeletonTrapGoal extends Goal {
 				skeleton.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.IRON_HELMET));
 			}
 
-			FeatureFlagSet featureFlagSet = abstractHorse.level().enabledFeatures();
-			skeleton.setItemSlot(
-				EquipmentSlot.MAINHAND,
-				EnchantmentHelper.enchantItem(
-					featureFlagSet,
-					skeleton.getRandom(),
-					this.disenchant(skeleton.getMainHandItem()),
-					(int)(5.0F + difficultyInstance.getSpecialMultiplier() * (float)skeleton.getRandom().nextInt(18)),
-					false
-				)
-			);
-			skeleton.setItemSlot(
-				EquipmentSlot.HEAD,
-				EnchantmentHelper.enchantItem(
-					featureFlagSet,
-					skeleton.getRandom(),
-					this.disenchant(skeleton.getItemBySlot(EquipmentSlot.HEAD)),
-					(int)(5.0F + difficultyInstance.getSpecialMultiplier() * (float)skeleton.getRandom().nextInt(18)),
-					false
-				)
-			);
+			this.enchant(skeleton, EquipmentSlot.MAINHAND);
+			this.enchant(skeleton, EquipmentSlot.HEAD);
 		}
 
 		return skeleton;
 	}
 
-	private ItemStack disenchant(ItemStack itemStack) {
+	private void enchant(Skeleton skeleton, EquipmentSlot equipmentSlot) {
+		ItemStack itemStack = skeleton.getItemBySlot(equipmentSlot);
 		itemStack.set(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY);
-		return itemStack;
+		EnchantmentHelper.enchantItemFromProvider(
+			itemStack, VanillaEnchantmentProviders.MOB_SPAWN_EQUIPMENT, skeleton.level(), skeleton.blockPosition(), skeleton.getRandom()
+		);
+		skeleton.setItemSlot(equipmentSlot, itemStack);
 	}
 }

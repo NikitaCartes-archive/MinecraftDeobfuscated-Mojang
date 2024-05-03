@@ -83,6 +83,8 @@ public interface Registry<T> extends Keyable, IdMap<T> {
 		return Optional.ofNullable(this.get(resourceKey));
 	}
 
+	Optional<Holder.Reference<T>> getAny();
+
 	default T getOrThrow(ResourceKey<T> resourceKey) {
 		T object = this.get(resourceKey);
 		if (object == null) {

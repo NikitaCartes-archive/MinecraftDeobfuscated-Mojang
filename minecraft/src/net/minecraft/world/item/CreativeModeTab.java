@@ -1,10 +1,7 @@
 package net.minecraft.world.item;
 
-import com.google.common.collect.Lists;
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import net.minecraft.core.HolderLookup;
@@ -27,8 +24,6 @@ public class CreativeModeTab {
 	private ItemStack iconItemStack;
 	private Collection<ItemStack> displayItems = ItemStackLinkedSet.createTypeAndComponentsSet();
 	private Set<ItemStack> displayItemsSearchTab = ItemStackLinkedSet.createTypeAndComponentsSet();
-	@Nullable
-	private Consumer<List<ItemStack>> searchTreeBuilder;
 	private final Supplier<ItemStack> iconGenerator;
 	private final CreativeModeTab.DisplayItemsGenerator displayItemsGenerator;
 
@@ -108,7 +103,6 @@ public class CreativeModeTab {
 		this.displayItemsGenerator.accept(itemDisplayParameters, itemDisplayBuilder);
 		this.displayItems = itemDisplayBuilder.tabContents;
 		this.displayItemsSearchTab = itemDisplayBuilder.searchTabContents;
-		this.rebuildSearchTree();
 	}
 
 	public Collection<ItemStack> getDisplayItems() {
@@ -121,16 +115,6 @@ public class CreativeModeTab {
 
 	public boolean contains(ItemStack itemStack) {
 		return this.displayItemsSearchTab.contains(itemStack);
-	}
-
-	public void setSearchTreeBuilder(Consumer<List<ItemStack>> consumer) {
-		this.searchTreeBuilder = consumer;
-	}
-
-	public void rebuildSearchTree() {
-		if (this.searchTreeBuilder != null) {
-			this.searchTreeBuilder.accept(Lists.newArrayList(this.displayItemsSearchTab));
-		}
 	}
 
 	public static class Builder {

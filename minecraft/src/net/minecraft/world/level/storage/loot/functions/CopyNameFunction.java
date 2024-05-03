@@ -53,8 +53,8 @@ public class CopyNameFunction extends LootItemConditionalFunction {
 
 	public static enum NameSource implements StringRepresentable {
 		THIS("this", LootContextParams.THIS_ENTITY),
-		KILLER("killer", LootContextParams.KILLER_ENTITY),
-		KILLER_PLAYER("killer_player", LootContextParams.LAST_DAMAGE_PLAYER),
+		ATTACKING_ENTITY("attacking_entity", LootContextParams.ATTACKING_ENTITY),
+		LAST_DAMAGE_PLAYER("last_damage_player", LootContextParams.LAST_DAMAGE_PLAYER),
 		BLOCK_ENTITY("block_entity", LootContextParams.BLOCK_ENTITY);
 
 		public static final Codec<CopyNameFunction.NameSource> CODEC = StringRepresentable.fromEnum(CopyNameFunction.NameSource::values);

@@ -3,7 +3,6 @@ package net.minecraft.world.item.crafting;
 import java.util.Map;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.MapItem;
@@ -22,11 +21,11 @@ public class MapExtendingRecipe extends ShapedRecipe {
 	}
 
 	@Override
-	public boolean matches(CraftingContainer craftingContainer, Level level) {
-		if (!super.matches(craftingContainer, level)) {
+	public boolean matches(CraftingInput craftingInput, Level level) {
+		if (!super.matches(craftingInput, level)) {
 			return false;
 		} else {
-			ItemStack itemStack = findFilledMap(craftingContainer);
+			ItemStack itemStack = findFilledMap(craftingInput);
 			if (itemStack.isEmpty()) {
 				return false;
 			} else {
@@ -41,15 +40,15 @@ public class MapExtendingRecipe extends ShapedRecipe {
 	}
 
 	@Override
-	public ItemStack assemble(CraftingContainer craftingContainer, HolderLookup.Provider provider) {
-		ItemStack itemStack = findFilledMap(craftingContainer).copyWithCount(1);
+	public ItemStack assemble(CraftingInput craftingInput, HolderLookup.Provider provider) {
+		ItemStack itemStack = findFilledMap(craftingInput).copyWithCount(1);
 		itemStack.set(DataComponents.MAP_POST_PROCESSING, MapPostProcessing.SCALE);
 		return itemStack;
 	}
 
-	private static ItemStack findFilledMap(CraftingContainer craftingContainer) {
-		for (int i = 0; i < craftingContainer.getContainerSize(); i++) {
-			ItemStack itemStack = craftingContainer.getItem(i);
+	private static ItemStack findFilledMap(CraftingInput craftingInput) {
+		for (int i = 0; i < craftingInput.size(); i++) {
+			ItemStack itemStack = craftingInput.getItem(i);
 			if (itemStack.is(Items.FILLED_MAP)) {
 				return itemStack;
 			}

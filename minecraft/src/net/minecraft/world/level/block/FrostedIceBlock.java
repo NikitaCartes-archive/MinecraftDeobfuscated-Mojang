@@ -34,8 +34,8 @@ public class FrostedIceBlock extends IceBlock {
 	}
 
 	@Override
-	protected void randomTick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
-		this.tick(blockState, serverLevel, blockPos, randomSource);
+	public void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
+		level.scheduleTick(blockPos, this, Mth.nextInt(level.getRandom(), 60, 120));
 	}
 
 	@Override

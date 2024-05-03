@@ -46,6 +46,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ProjectileWeaponItem;
+import net.minecraft.world.item.enchantment.EnchantmentEffectComponents;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
@@ -151,8 +152,8 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob, Invento
 	}
 
 	@Override
-	protected void dropCustomDeathLoot(DamageSource damageSource, int i, boolean bl) {
-		super.dropCustomDeathLoot(damageSource, i, bl);
+	protected void dropCustomDeathLoot(DamageSource damageSource, boolean bl) {
+		super.dropCustomDeathLoot(damageSource, bl);
 		if (damageSource.getEntity() instanceof Creeper creeper && creeper.canDropMobsSkull()) {
 			ItemStack itemStack = new ItemStack(Items.PIGLIN_HEAD);
 			creeper.increaseDroppedSkulls();
@@ -311,7 +312,7 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob, Invento
 	}
 
 	@Override
-	public int getExperienceReward() {
+	protected int getBaseExperienceReward() {
 		return this.xpReward;
 	}
 
@@ -413,7 +414,7 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob, Invento
 
 	@Override
 	protected boolean canReplaceCurrentItem(ItemStack itemStack, ItemStack itemStack2) {
-		if (EnchantmentHelper.hasBindingCurse(itemStack2)) {
+		if (EnchantmentHelper.has(itemStack2, EnchantmentEffectComponents.PREVENT_ARMOR_CHANGE)) {
 			return false;
 		} else {
 			boolean bl = PiglinAi.isLovedItem(itemStack) || itemStack.is(Items.CROSSBOW);

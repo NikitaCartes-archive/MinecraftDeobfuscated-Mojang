@@ -9,6 +9,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.crafting.SmithingRecipe;
+import net.minecraft.world.item.crafting.SmithingRecipeInput;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -55,7 +56,7 @@ public class SmithingMenu extends ItemCombinerMenu {
 
 	@Override
 	protected boolean mayPickup(Player player, boolean bl) {
-		return this.selectedRecipe != null && this.selectedRecipe.value().matches(this.inputSlots, this.level);
+		return this.selectedRecipe != null && this.selectedRecipe.value().matches(this.createRecipeInput(), this.level);
 	}
 
 	@Override
@@ -72,6 +73,10 @@ public class SmithingMenu extends ItemCombinerMenu {
 		return List.of(this.inputSlots.getItem(0), this.inputSlots.getItem(1), this.inputSlots.getItem(2));
 	}
 
+	private SmithingRecipeInput createRecipeInput() {
+		return new SmithingRecipeInput(this.inputSlots.getItem(0), this.inputSlots.getItem(1), this.inputSlots.getItem(2));
+	}
+
 	private void shrinkStackInSlot(int i) {
 		ItemStack itemStack = this.inputSlots.getItem(i);
 		if (!itemStack.isEmpty()) {
@@ -82,12 +87,13 @@ public class SmithingMenu extends ItemCombinerMenu {
 
 	@Override
 	public void createResult() {
-		List<RecipeHolder<SmithingRecipe>> list = this.level.getRecipeManager().getRecipesFor(RecipeType.SMITHING, this.inputSlots, this.level);
+		SmithingRecipeInput smithingRecipeInput = this.createRecipeInput();
+		List<RecipeHolder<SmithingRecipe>> list = this.level.getRecipeManager().getRecipesFor(RecipeType.SMITHING, smithingRecipeInput, this.level);
 		if (list.isEmpty()) {
 			this.resultSlots.setItem(0, ItemStack.EMPTY);
 		} else {
 			RecipeHolder<SmithingRecipe> recipeHolder = (RecipeHolder<SmithingRecipe>)list.get(0);
-			ItemStack itemStack = recipeHolder.value().assemble(this.inputSlots, this.level.registryAccess());
+			ItemStack itemStack = recipeHolder.value().assemble(smithingRecipeInput, this.level.registryAccess());
 			if (itemStack.isItemEnabled(this.level.enabledFeatures())) {
 				this.selectedRecipe = recipeHolder;
 				this.resultSlots.setRecipeUsed(recipeHolder);

@@ -17,7 +17,6 @@ import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.component.DataComponents;
@@ -40,7 +39,6 @@ import net.minecraft.util.Unit;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.DifficultyInstance;
-import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
@@ -50,7 +48,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.SpawnPlacementType;
 import net.minecraft.world.entity.SpawnPlacements;
-import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -228,11 +225,11 @@ public class Raid {
 	}
 
 	public boolean absorbRaidOmen(ServerPlayer serverPlayer) {
-		Holder<MobEffect> holder = this.level.enabledFeatures().contains(FeatureFlags.UPDATE_1_21) ? MobEffects.RAID_OMEN : MobEffects.BAD_OMEN;
-		if (!serverPlayer.hasEffect(holder)) {
+		MobEffectInstance mobEffectInstance = serverPlayer.getEffect(MobEffects.RAID_OMEN);
+		if (mobEffectInstance == null) {
 			return false;
 		} else {
-			this.raidOmenLevel = this.raidOmenLevel + serverPlayer.getEffect(holder).getAmplifier() + 1;
+			this.raidOmenLevel = this.raidOmenLevel + mobEffectInstance.getAmplifier() + 1;
 			this.raidOmenLevel = Mth.clamp(this.raidOmenLevel, 0, this.getMaxRaidOmenLevel());
 			if (!this.hasFirstWaveSpawned()) {
 				serverPlayer.awardStat(Stats.RAID_TRIGGER);
