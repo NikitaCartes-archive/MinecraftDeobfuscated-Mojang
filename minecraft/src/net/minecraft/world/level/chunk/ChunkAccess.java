@@ -271,14 +271,14 @@ public abstract class ChunkAccess implements BlockGetter, BiomeManager.NoiseBiom
 		return this.unsaved;
 	}
 
-	public abstract ChunkStatus getStatus();
+	public abstract ChunkStatus getPersistedStatus();
 
 	public ChunkStatus getHighestGeneratedStatus() {
-		ChunkStatus chunkStatus = this.getStatus();
+		ChunkStatus chunkStatus = this.getPersistedStatus();
 		BelowZeroRetrogen belowZeroRetrogen = this.getBelowZeroRetrogen();
 		if (belowZeroRetrogen != null) {
 			ChunkStatus chunkStatus2 = belowZeroRetrogen.targetStatus();
-			return chunkStatus2.isOrAfter(chunkStatus) ? chunkStatus2 : chunkStatus;
+			return ChunkStatus.max(chunkStatus2, chunkStatus);
 		} else {
 			return chunkStatus;
 		}

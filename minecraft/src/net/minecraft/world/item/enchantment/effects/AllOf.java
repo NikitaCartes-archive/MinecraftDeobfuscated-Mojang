@@ -8,7 +8,6 @@ import java.util.function.Function;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantedItemInUse;
 import net.minecraft.world.phys.Vec3;
 
@@ -74,9 +73,9 @@ public interface AllOf {
 		public static final MapCodec<AllOf.ValueEffects> CODEC = AllOf.codec(EnchantmentValueEffect.CODEC, AllOf.ValueEffects::new, AllOf.ValueEffects::effects);
 
 		@Override
-		public float process(ItemStack itemStack, int i, RandomSource randomSource, float f) {
+		public float process(int i, RandomSource randomSource, float f) {
 			for (EnchantmentValueEffect enchantmentValueEffect : this.effects) {
-				f = enchantmentValueEffect.process(itemStack, i, randomSource, f);
+				f = enchantmentValueEffect.process(i, randomSource, f);
 			}
 
 			return f;

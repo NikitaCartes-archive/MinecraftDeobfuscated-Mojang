@@ -13,6 +13,10 @@ public interface CraftingContainer extends Container, StackedContentsCompatible 
 	List<ItemStack> getItems();
 
 	default CraftingInput asCraftInput() {
-		return CraftingInput.of(this.getWidth(), this.getHeight(), this.getItems());
+		return this.asPositionedCraftInput().input();
+	}
+
+	default CraftingInput.Positioned asPositionedCraftInput() {
+		return CraftingInput.ofPositioned(this.getWidth(), this.getHeight(), this.getItems());
 	}
 }

@@ -22,6 +22,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 
 public class WitherSkull extends AbstractHurtingProjectile {
 	private static final EntityDataAccessor<Boolean> DATA_DANGEROUS = SynchedEntityData.defineId(WitherSkull.class, EntityDataSerializers.BOOLEAN);
@@ -30,8 +31,8 @@ public class WitherSkull extends AbstractHurtingProjectile {
 		super(entityType, level);
 	}
 
-	public WitherSkull(Level level, LivingEntity livingEntity, double d, double e, double f) {
-		super(EntityType.WITHER_SKULL, livingEntity, d, e, f, level);
+	public WitherSkull(Level level, LivingEntity livingEntity, Vec3 vec3) {
+		super(EntityType.WITHER_SKULL, livingEntity, vec3, level);
 	}
 
 	@Override

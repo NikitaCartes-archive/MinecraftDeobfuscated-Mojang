@@ -4,7 +4,6 @@ import javax.annotation.Nullable;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
@@ -19,11 +18,9 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 public abstract class AbstractHurtingProjectile extends Projectile {
-	public static final double ATTACK_DEFLECTION_SCALE = 0.1;
-	public static final double BOUNCE_DEFLECTION_SCALE = 0.05;
-	public double xPower;
-	public double yPower;
-	public double zPower;
+	public static final double INITAL_ACCELERATION_POWER = 0.1;
+	public static final double DEFLECTION_SCALE = 0.5;
+	public double accelerationPower = 0.1;
 
 	protected AbstractHurtingProjectile(EntityType<? extends AbstractHurtingProjectile> entityType, Level level) {
 		super(entityType, level);
@@ -34,19 +31,15 @@ public abstract class AbstractHurtingProjectile extends Projectile {
 		this.setPos(d, e, f);
 	}
 
-	public AbstractHurtingProjectile(
-		EntityType<? extends AbstractHurtingProjectile> entityType, double d, double e, double f, double g, double h, double i, Level level
-	) {
+	public AbstractHurtingProjectile(EntityType<? extends AbstractHurtingProjectile> entityType, double d, double e, double f, Vec3 vec3, Level level) {
 		this(entityType, level);
 		this.moveTo(d, e, f, this.getYRot(), this.getXRot());
 		this.reapplyPosition();
-		this.assignPower(g, h, i);
+		this.assignDirectionalMovement(vec3, this.accelerationPower);
 	}
 
-	public AbstractHurtingProjectile(
-		EntityType<? extends AbstractHurtingProjectile> entityType, LivingEntity livingEntity, double d, double e, double f, Level level
-	) {
-		this(entityType, livingEntity.getX(), livingEntity.getY(), livingEntity.getZ(), d, e, f, level);
+	public AbstractHurtingProjectile(EntityType<? extends AbstractHurtingProjectile> entityType, LivingEntity livingEntity, Vec3 vec3, Level level) {
+		this(entityType, livingEntity.getX(), livingEntity.getY(), livingEntity.getZ(), vec3, level);
 		this.setOwner(livingEntity);
 		this.setRot(livingEntity.getYRot(), livingEntity.getXRot());
 	}
@@ -102,7 +95,7 @@ public abstract class AbstractHurtingProjectile extends Projectile {
 				h = this.getInertia();
 			}
 
-			this.setDeltaMovement(vec3.add(this.xPower, this.yPower, this.zPower).scale((double)h));
+			this.setDeltaMovement(vec3.add(vec3.normalize().scale(this.accelerationPower)).scale((double)h));
 			ParticleOptions particleOptions = this.getTrailParticle();
 			if (particleOptions != null) {
 				this.level().addParticle(particleOptions, d, e + 0.5, f, 0.0, 0.0, 0.0);
@@ -144,19 +137,14 @@ public abstract class AbstractHurtingProjectile extends Projectile {
 	@Override
 	public void addAdditionalSaveData(CompoundTag compoundTag) {
 		super.addAdditionalSaveData(compoundTag);
-		compoundTag.put("power", this.newDoubleList(new double[]{this.xPower, this.yPower, this.zPower}));
+		compoundTag.putDouble("acceleration_power", this.accelerationPower);
 	}
 
 	@Override
 	public void readAdditionalSaveData(CompoundTag compoundTag) {
 		super.readAdditionalSaveData(compoundTag);
-		if (compoundTag.contains("power", 9)) {
-			ListTag listTag = compoundTag.getList("power", 6);
-			if (listTag.size() == 3) {
-				this.xPower = listTag.getDouble(0);
-				this.yPower = listTag.getDouble(1);
-				this.zPower = listTag.getDouble(2);
-			}
+		if (compoundTag.contains("acceleration_power", 6)) {
+			this.accelerationPower = compoundTag.getDouble("acceleration_power");
 		}
 	}
 
@@ -170,49 +158,29 @@ public abstract class AbstractHurtingProjectile extends Projectile {
 		Entity entity = this.getOwner();
 		int i = entity == null ? 0 : entity.getId();
 		return new ClientboundAddEntityPacket(
-			this.getId(),
-			this.getUUID(),
-			this.getX(),
-			this.getY(),
-			this.getZ(),
-			this.getXRot(),
-			this.getYRot(),
-			this.getType(),
-			i,
-			new Vec3(this.xPower, this.yPower, this.zPower),
-			0.0
+			this.getId(), this.getUUID(), this.getX(), this.getY(), this.getZ(), this.getXRot(), this.getYRot(), this.getType(), i, this.getDeltaMovement(), 0.0
 		);
 	}
 
 	@Override
 	public void recreateFromPacket(ClientboundAddEntityPacket clientboundAddEntityPacket) {
 		super.recreateFromPacket(clientboundAddEntityPacket);
-		double d = clientboundAddEntityPacket.getXa();
-		double e = clientboundAddEntityPacket.getYa();
-		double f = clientboundAddEntityPacket.getZa();
-		this.assignPower(d, e, f);
+		Vec3 vec3 = new Vec3(clientboundAddEntityPacket.getXa(), clientboundAddEntityPacket.getYa(), clientboundAddEntityPacket.getZa());
+		this.setDeltaMovement(vec3);
 	}
 
-	private void assignPower(double d, double e, double f) {
-		double g = Math.sqrt(d * d + e * e + f * f);
-		if (g != 0.0) {
-			this.xPower = d / g * 0.1;
-			this.yPower = e / g * 0.1;
-			this.zPower = f / g * 0.1;
-		}
+	private void assignDirectionalMovement(Vec3 vec3, double d) {
+		this.setDeltaMovement(vec3.normalize().scale(d));
+		this.hasImpulse = true;
 	}
 
 	@Override
 	protected void onDeflection(@Nullable Entity entity, boolean bl) {
 		super.onDeflection(entity, bl);
 		if (bl) {
-			this.xPower = this.getDeltaMovement().x * 0.1;
-			this.yPower = this.getDeltaMovement().y * 0.1;
-			this.zPower = this.getDeltaMovement().z * 0.1;
+			this.accelerationPower = 0.1;
 		} else {
-			this.xPower = this.getDeltaMovement().x * 0.05;
-			this.yPower = this.getDeltaMovement().y * 0.05;
-			this.zPower = this.getDeltaMovement().z * 0.05;
+			this.accelerationPower *= 0.5;
 		}
 	}
 }

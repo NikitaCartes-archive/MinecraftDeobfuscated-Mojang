@@ -105,11 +105,11 @@ public class BrewingStandBlockEntity extends BaseContainerBlockEntity implements
 			boolean bl3 = brewingStandBlockEntity.brewTime == 0;
 			if (bl3 && bl) {
 				doBrew(level, blockPos, brewingStandBlockEntity.items);
-				setChanged(level, blockPos, blockState);
 			} else if (!bl || !itemStack2.is(brewingStandBlockEntity.ingredient)) {
 				brewingStandBlockEntity.brewTime = 0;
-				setChanged(level, blockPos, blockState);
 			}
+
+			setChanged(level, blockPos, blockState);
 		} else if (bl && brewingStandBlockEntity.fuel > 0) {
 			brewingStandBlockEntity.fuel--;
 			brewingStandBlockEntity.brewTime = 400;
@@ -191,6 +191,10 @@ public class BrewingStandBlockEntity extends BaseContainerBlockEntity implements
 		this.items = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
 		ContainerHelper.loadAllItems(compoundTag, this.items, provider);
 		this.brewTime = compoundTag.getShort("BrewTime");
+		if (this.brewTime > 0) {
+			this.ingredient = this.items.get(3).getItem();
+		}
+
 		this.fuel = compoundTag.getByte("Fuel");
 	}
 

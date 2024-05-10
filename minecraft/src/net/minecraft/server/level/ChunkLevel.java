@@ -1,19 +1,40 @@
 package net.minecraft.server.level;
 
+import javax.annotation.Nullable;
+import net.minecraft.world.level.chunk.status.ChunkPyramid;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
+import net.minecraft.world.level.chunk.status.ChunkStep;
+import org.jetbrains.annotations.Contract;
 
 public class ChunkLevel {
 	private static final int FULL_CHUNK_LEVEL = 33;
 	private static final int BLOCK_TICKING_LEVEL = 32;
 	private static final int ENTITY_TICKING_LEVEL = 31;
-	public static final int MAX_LEVEL = 33 + ChunkStatus.maxDistance();
+	private static final ChunkStep FULL_CHUNK_STEP = ChunkPyramid.GENERATION_PYRAMID.getStepTo(ChunkStatus.FULL);
+	public static final int RADIUS_AROUND_FULL_CHUNK = FULL_CHUNK_STEP.accumulatedDependencies().getRadius();
+	public static final int MAX_LEVEL = 33 + RADIUS_AROUND_FULL_CHUNK;
 
+	@Nullable
 	public static ChunkStatus generationStatus(int i) {
-		return i < 33 ? ChunkStatus.FULL : ChunkStatus.getStatusAroundFullChunk(i - 33);
+		return getStatusAroundFullChunk(i - 33, null);
+	}
+
+	@Nullable
+	@Contract("_,!null->!null;_,_->_")
+	public static ChunkStatus getStatusAroundFullChunk(int i, @Nullable ChunkStatus chunkStatus) {
+		if (i > RADIUS_AROUND_FULL_CHUNK) {
+			return chunkStatus;
+		} else {
+			return i <= 0 ? ChunkStatus.FULL : FULL_CHUNK_STEP.accumulatedDependencies().get(i);
+		}
+	}
+
+	public static ChunkStatus getStatusAroundFullChunk(int i) {
+		return getStatusAroundFullChunk(i, ChunkStatus.EMPTY);
 	}
 
 	public static int byStatus(ChunkStatus chunkStatus) {
-		return 33 + ChunkStatus.getDistance(chunkStatus);
+		return 33 + FULL_CHUNK_STEP.getAccumulatedRadiusOf(chunkStatus);
 	}
 
 	public static FullChunkStatus fullStatus(int i) {

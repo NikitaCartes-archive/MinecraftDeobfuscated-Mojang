@@ -29,8 +29,8 @@ public class DamageSource {
 		return this.type().exhaustion();
 	}
 
-	public boolean isIndirect() {
-		return this.causingEntity != this.directEntity;
+	public boolean isDirect() {
+		return this.causingEntity == this.directEntity;
 	}
 
 	private DamageSource(Holder<DamageType> holder, @Nullable Entity entity, @Nullable Entity entity2, @Nullable Vec3 vec3) {

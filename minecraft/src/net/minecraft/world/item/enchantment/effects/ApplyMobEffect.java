@@ -39,7 +39,7 @@ public record ApplyMobEffect(
 			Optional<Holder<MobEffect>> optional = this.toApply.getRandomElement(randomSource);
 			if (optional.isPresent()) {
 				int j = Math.round(Mth.randomBetween(randomSource, this.minDuration.calculate(i), this.maxDuration.calculate(i)) * 20.0F);
-				int k = Math.min(0, Math.round(Mth.randomBetween(randomSource, this.minAmplifier.calculate(i), this.maxAmplifier.calculate(i))));
+				int k = Math.max(0, Math.round(Mth.randomBetween(randomSource, this.minAmplifier.calculate(i), this.maxAmplifier.calculate(i))));
 				livingEntity.addEffect(new MobEffectInstance((Holder<MobEffect>)optional.get(), j, k));
 			}
 		}

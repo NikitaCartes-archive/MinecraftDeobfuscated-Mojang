@@ -137,6 +137,9 @@ public class MaceItem extends Item {
 			Vec3 vec32 = vec3.normalize().scale(d);
 			if (d > 0.0) {
 				livingEntity.push(vec32.x, 0.7F, vec32.z);
+				if (livingEntity instanceof ServerPlayer serverPlayer) {
+					serverPlayer.connection.send(new ClientboundSetEntityMotionPacket(serverPlayer));
+				}
 			}
 		});
 	}

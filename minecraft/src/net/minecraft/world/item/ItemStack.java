@@ -75,6 +75,7 @@ import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
+import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.item.component.TooltipProvider;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -96,7 +97,7 @@ public final class ItemStack implements DataComponentHolder {
 		() -> RecordCodecBuilder.create(
 				instance -> instance.group(
 							ITEM_NON_AIR_CODEC.fieldOf("id").forGetter(ItemStack::getItemHolder),
-							ExtraCodecs.POSITIVE_INT.fieldOf("count").orElse(1).forGetter(ItemStack::getCount),
+							ExtraCodecs.intRange(1, 99).fieldOf("count").orElse(1).forGetter(ItemStack::getCount),
 							DataComponentPatch.CODEC.optionalFieldOf("components", DataComponentPatch.EMPTY).forGetter(itemStack -> itemStack.components.asPatch())
 						)
 						.apply(instance, ItemStack::new)
@@ -255,9 +256,21 @@ public final class ItemStack implements DataComponentHolder {
 	}
 
 	public static DataResult<Unit> validateComponents(DataComponentMap dataComponentMap) {
-		return dataComponentMap.has(DataComponents.MAX_DAMAGE) && dataComponentMap.getOrDefault(DataComponents.MAX_STACK_SIZE, 1) > 1
-			? DataResult.error(() -> "Item cannot be both damageable and stackable")
-			: DataResult.success(Unit.INSTANCE);
+		if (dataComponentMap.has(DataComponents.MAX_DAMAGE) && dataComponentMap.getOrDefault(DataComponents.MAX_STACK_SIZE, 1) > 1) {
+			return DataResult.error(() -> "Item cannot be both damageable and stackable");
+		} else {
+			ItemContainerContents itemContainerContents = dataComponentMap.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY);
+
+			for (ItemStack itemStack : itemContainerContents.nonEmptyItems()) {
+				int i = itemStack.getCount();
+				int j = itemStack.getMaxStackSize();
+				if (i > j) {
+					return DataResult.error(() -> "Item stack with count of " + i + " was larger than maximum: " + j);
+				}
+			}
+
+			return DataResult.success(Unit.INSTANCE);
+		}
 	}
 
 	public static Optional<ItemStack> parse(HolderLookup.Provider provider, Tag tag) {
@@ -511,6 +524,10 @@ public final class ItemStack implements DataComponentHolder {
 			itemStack.setCount(i);
 			return itemStack;
 		}
+	}
+
+	public ItemStack transmuteCopy(ItemLike itemLike) {
+		return this.transmuteCopy(itemLike, this.getCount());
 	}
 
 	public ItemStack transmuteCopy(ItemLike itemLike, int i) {
@@ -810,7 +827,7 @@ public final class ItemStack implements DataComponentHolder {
 						ItemAttributeModifiers.ATTRIBUTE_MODIFIER_FORMAT.format(e),
 						Component.translatable(holder.value().getDescriptionId())
 					)
-					.withStyle(ChatFormatting.BLUE)
+					.withStyle(holder.value().getStyle(true))
 			);
 		} else if (d < 0.0) {
 			consumer.accept(
@@ -819,7 +836,7 @@ public final class ItemStack implements DataComponentHolder {
 						ItemAttributeModifiers.ATTRIBUTE_MODIFIER_FORMAT.format(-e),
 						Component.translatable(holder.value().getDescriptionId())
 					)
-					.withStyle(ChatFormatting.RED)
+					.withStyle(holder.value().getStyle(false))
 			);
 		}
 	}
@@ -953,6 +970,12 @@ public final class ItemStack implements DataComponentHolder {
 		if (livingEntity == null || !livingEntity.hasInfiniteMaterials()) {
 			this.shrink(i);
 		}
+	}
+
+	public ItemStack consumeAndReturn(int i, @Nullable LivingEntity livingEntity) {
+		ItemStack itemStack = this.copyWithCount(i);
+		this.consume(i, livingEntity);
+		return itemStack;
 	}
 
 	public void onUseTick(Level level, LivingEntity livingEntity, int i) {

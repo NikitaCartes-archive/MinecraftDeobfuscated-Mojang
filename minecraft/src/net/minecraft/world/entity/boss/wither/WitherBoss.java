@@ -425,7 +425,8 @@ public class WitherBoss extends Monster implements PowerableMob, RangedAttackMob
 		double k = d - g;
 		double l = e - h;
 		double m = f - j;
-		WitherSkull witherSkull = new WitherSkull(this.level(), this, k, l, m);
+		Vec3 vec3 = new Vec3(k, l, m);
+		WitherSkull witherSkull = new WitherSkull(this.level(), this, vec3.normalize());
 		witherSkull.setOwner(this);
 		if (bl) {
 			witherSkull.setDangerous(true);

@@ -31,7 +31,9 @@ public record RunFunction(ResourceLocation function) implements EnchantmentEntit
 				.withPermission(2)
 				.withSuppressedOutput()
 				.withEntity(entity)
-				.withPosition(vec3);
+				.withLevel(serverLevel)
+				.withPosition(vec3)
+				.withRotation(entity.getRotationVector());
 			serverFunctionManager.execute((CommandFunction<CommandSourceStack>)optional.get(), commandSourceStack);
 		} else {
 			LOGGER.error("Enchantment run_function effect failed for non-existent function {}", this.function);

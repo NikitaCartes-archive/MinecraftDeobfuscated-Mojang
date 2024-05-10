@@ -55,7 +55,7 @@ public record SpawnParticlesEffect(
 	@Override
 	public void apply(ServerLevel serverLevel, int i, EnchantedItemInUse enchantedItemInUse, Entity entity, Vec3 vec3) {
 		RandomSource randomSource = entity.getRandom();
-		Vec3 vec32 = entity.getDeltaMovement();
+		Vec3 vec32 = entity.getKnownMovement();
 		float f = entity.getBbWidth();
 		float g = entity.getBbHeight();
 		serverLevel.sendParticles(

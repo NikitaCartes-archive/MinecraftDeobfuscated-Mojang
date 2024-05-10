@@ -38,7 +38,8 @@ public class V3818_3 extends NamespacedSchema {
 					Pair.of("minecraft:charged_projectiles", DSL.list(References.ITEM_STACK.in(schema))),
 					Pair.of("minecraft:container", DSL.list(DSL.optionalFields("item", References.ITEM_STACK.in(schema)))),
 					Pair.of("minecraft:entity_data", References.ENTITY_TREE.in(schema)),
-					Pair.of("minecraft:pot_decorations", DSL.list(References.ITEM_NAME.in(schema)))
+					Pair.of("minecraft:pot_decorations", DSL.list(References.ITEM_NAME.in(schema))),
+					Pair.of("minecraft:food", DSL.optionalFields("using_converts_to", References.ITEM_STACK.in(schema)))
 				)
 		);
 	}

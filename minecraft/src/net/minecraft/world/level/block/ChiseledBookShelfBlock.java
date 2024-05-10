@@ -154,11 +154,8 @@ public class ChiseledBookShelfBlock extends BaseEntityBlock {
 		if (!level.isClientSide) {
 			player.awardStat(Stats.ITEM_USED.get(itemStack.getItem()));
 			SoundEvent soundEvent = itemStack.is(Items.ENCHANTED_BOOK) ? SoundEvents.CHISELED_BOOKSHELF_INSERT_ENCHANTED : SoundEvents.CHISELED_BOOKSHELF_INSERT;
-			chiseledBookShelfBlockEntity.setItem(i, itemStack.split(1));
+			chiseledBookShelfBlockEntity.setItem(i, itemStack.consumeAndReturn(1, player));
 			level.playSound(null, blockPos, soundEvent, SoundSource.BLOCKS, 1.0F, 1.0F);
-			if (player.isCreative()) {
-				itemStack.grow(1);
-			}
 		}
 	}
 

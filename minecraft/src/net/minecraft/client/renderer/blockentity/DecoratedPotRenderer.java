@@ -4,9 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import java.util.EnumSet;
-import java.util.Objects;
 import java.util.Optional;
-import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelLayers;
@@ -24,7 +22,6 @@ import net.minecraft.client.resources.model.Material;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.entity.DecoratedPotBlockEntity;
 import net.minecraft.world.level.block.entity.DecoratedPotPatterns;
 import net.minecraft.world.level.block.entity.PotDecorations;
@@ -45,7 +42,6 @@ public class DecoratedPotRenderer implements BlockEntityRenderer<DecoratedPotBlo
 	private final ModelPart rightSide;
 	private final ModelPart top;
 	private final ModelPart bottom;
-	private final Material baseMaterial = (Material)Objects.requireNonNull(Sheets.getDecoratedPotMaterial(DecoratedPotPatterns.BASE));
 	private static final float WOBBLE_AMPLITUDE = 0.125F;
 
 	public DecoratedPotRenderer(BlockEntityRendererProvider.Context context) {
@@ -91,16 +87,15 @@ public class DecoratedPotRenderer implements BlockEntityRenderer<DecoratedPotBlo
 		return LayerDefinition.create(meshDefinition, 16, 16);
 	}
 
-	@Nullable
-	private static Material getMaterial(Optional<Item> optional) {
+	private static Material getSideMaterial(Optional<Item> optional) {
 		if (optional.isPresent()) {
-			Material material = Sheets.getDecoratedPotMaterial(DecoratedPotPatterns.getResourceKey((Item)optional.get()));
+			Material material = Sheets.getDecoratedPotMaterial(DecoratedPotPatterns.getPatternFromItem((Item)optional.get()));
 			if (material != null) {
 				return material;
 			}
 		}
 
-		return Sheets.getDecoratedPotMaterial(DecoratedPotPatterns.getResourceKey(Items.BRICK));
+		return Sheets.DECORATED_POT_SIDE;
 	}
 
 	public void render(DecoratedPotBlockEntity decoratedPotBlockEntity, float f, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j) {
@@ -128,25 +123,19 @@ public class DecoratedPotRenderer implements BlockEntityRenderer<DecoratedPotBlo
 			}
 		}
 
-		VertexConsumer vertexConsumer = this.baseMaterial.buffer(multiBufferSource, RenderType::entitySolid);
+		VertexConsumer vertexConsumer = Sheets.DECORATED_POT_BASE.buffer(multiBufferSource, RenderType::entitySolid);
 		this.neck.render(poseStack, vertexConsumer, i, j);
 		this.top.render(poseStack, vertexConsumer, i, j);
 		this.bottom.render(poseStack, vertexConsumer, i, j);
 		PotDecorations potDecorations = decoratedPotBlockEntity.getDecorations();
-		this.renderSide(this.frontSide, poseStack, multiBufferSource, i, j, getMaterial(potDecorations.front()));
-		this.renderSide(this.backSide, poseStack, multiBufferSource, i, j, getMaterial(potDecorations.back()));
-		this.renderSide(this.leftSide, poseStack, multiBufferSource, i, j, getMaterial(potDecorations.left()));
-		this.renderSide(this.rightSide, poseStack, multiBufferSource, i, j, getMaterial(potDecorations.right()));
+		this.renderSide(this.frontSide, poseStack, multiBufferSource, i, j, getSideMaterial(potDecorations.front()));
+		this.renderSide(this.backSide, poseStack, multiBufferSource, i, j, getSideMaterial(potDecorations.back()));
+		this.renderSide(this.leftSide, poseStack, multiBufferSource, i, j, getSideMaterial(potDecorations.left()));
+		this.renderSide(this.rightSide, poseStack, multiBufferSource, i, j, getSideMaterial(potDecorations.right()));
 		poseStack.popPose();
 	}
 
-	private void renderSide(ModelPart modelPart, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j, @Nullable Material material) {
-		if (material == null) {
-			material = getMaterial(Optional.empty());
-		}
-
-		if (material != null) {
-			modelPart.render(poseStack, material.buffer(multiBufferSource, RenderType::entitySolid), i, j);
-		}
+	private void renderSide(ModelPart modelPart, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j, Material material) {
+		modelPart.render(poseStack, material.buffer(multiBufferSource, RenderType::entitySolid), i, j);
 	}
 }

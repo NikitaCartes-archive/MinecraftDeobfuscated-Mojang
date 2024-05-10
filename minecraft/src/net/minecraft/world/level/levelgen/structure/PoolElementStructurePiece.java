@@ -55,10 +55,9 @@ public class PoolElementStructurePiece extends StructurePiece {
 		this.position = new BlockPos(compoundTag.getInt("PosX"), compoundTag.getInt("PosY"), compoundTag.getInt("PosZ"));
 		this.groundLevelDelta = compoundTag.getInt("ground_level_delta");
 		DynamicOps<Tag> dynamicOps = structurePieceSerializationContext.registryAccess().createSerializationContext(NbtOps.INSTANCE);
-		this.element = (StructurePoolElement)StructurePoolElement.CODEC
+		this.element = StructurePoolElement.CODEC
 			.parse(dynamicOps, compoundTag.getCompound("pool_element"))
-			.resultOrPartial(LOGGER::error)
-			.orElseThrow(() -> new IllegalStateException("Invalid pool element found"));
+			.getPartialOrThrow(string -> new IllegalStateException("Invalid pool element found: " + string));
 		this.rotation = Rotation.valueOf(compoundTag.getString("rotation"));
 		this.boundingBox = this.element.getBoundingBox(this.structureTemplateManager, this.position, this.rotation);
 		ListTag listTag = compoundTag.getList("junctions", 10);

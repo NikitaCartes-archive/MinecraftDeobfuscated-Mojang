@@ -1479,6 +1479,10 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 		}
 	}
 
+	public void push(Vec3 vec3) {
+		this.push(vec3.x, vec3.y, vec3.z);
+	}
+
 	public void push(double d, double e, double f) {
 		this.setDeltaMovement(this.getDeltaMovement().add(d, e, f));
 		this.hasImpulse = true;
@@ -2777,19 +2781,39 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 		this.eyeHeight = entityDimensions2.eyeHeight();
 		this.reapplyPosition();
 		boolean bl = (double)entityDimensions2.width() <= 4.0 && (double)entityDimensions2.height() <= 4.0;
-		if (!this.level().isClientSide
+		if (!this.level.isClientSide
 			&& !this.firstTick
 			&& !this.noPhysics
 			&& bl
 			&& (entityDimensions2.width() > entityDimensions.width() || entityDimensions2.height() > entityDimensions.height())
 			&& !(this instanceof Player)) {
-			Vec3 vec3 = this.position().add(0.0, (double)entityDimensions.height() / 2.0, 0.0);
-			double d = (double)Math.max(0.0F, entityDimensions2.width() - entityDimensions.width()) + 1.0E-6;
-			double e = (double)Math.max(0.0F, entityDimensions2.height() - entityDimensions.height()) + 1.0E-6;
-			VoxelShape voxelShape = Shapes.create(AABB.ofSize(vec3, d, e, d));
-			this.level()
-				.findFreePosition(this, voxelShape, vec3, (double)entityDimensions2.width(), (double)entityDimensions2.height(), (double)entityDimensions2.width())
-				.ifPresent(vec3x -> this.setPos(vec3x.add(0.0, (double)(-entityDimensions2.height()) / 2.0, 0.0)));
+			this.fudgePositionAfterSizeChange(entityDimensions);
+		}
+	}
+
+	public boolean fudgePositionAfterSizeChange(EntityDimensions entityDimensions) {
+		EntityDimensions entityDimensions2 = this.getDimensions(this.getPose());
+		Vec3 vec3 = this.position().add(0.0, (double)entityDimensions.height() / 2.0, 0.0);
+		double d = (double)Math.max(0.0F, entityDimensions2.width() - entityDimensions.width()) + 1.0E-6;
+		double e = (double)Math.max(0.0F, entityDimensions2.height() - entityDimensions.height()) + 1.0E-6;
+		VoxelShape voxelShape = Shapes.create(AABB.ofSize(vec3, d, e, d));
+		Optional<Vec3> optional = this.level
+			.findFreePosition(this, voxelShape, vec3, (double)entityDimensions2.width(), (double)entityDimensions2.height(), (double)entityDimensions2.width());
+		if (optional.isPresent()) {
+			this.setPos(((Vec3)optional.get()).add(0.0, (double)(-entityDimensions2.height()) / 2.0, 0.0));
+			return true;
+		} else {
+			if (entityDimensions2.width() > entityDimensions.width() && entityDimensions2.height() > entityDimensions.height()) {
+				VoxelShape voxelShape2 = Shapes.create(AABB.ofSize(vec3, d, 1.0E-6, d));
+				Optional<Vec3> optional2 = this.level
+					.findFreePosition(this, voxelShape2, vec3, (double)entityDimensions2.width(), (double)entityDimensions.height(), (double)entityDimensions2.width());
+				if (optional2.isPresent()) {
+					this.setPos(((Vec3)optional2.get()).add(0.0, (double)(-entityDimensions.height()) / 2.0 + 1.0E-6, 0.0));
+					return true;
+				}
+			}
+
+			return false;
 		}
 	}
 
@@ -3450,6 +3474,10 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 
 	public RandomSource getRandom() {
 		return this.random;
+	}
+
+	public Vec3 getKnownMovement() {
+		return this.getDeltaMovement();
 	}
 
 	@FunctionalInterface

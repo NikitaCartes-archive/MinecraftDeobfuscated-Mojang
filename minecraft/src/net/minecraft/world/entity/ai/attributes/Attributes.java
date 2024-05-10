@@ -26,7 +26,8 @@ public class Attributes {
 		"player.block_interaction_range", new RangedAttribute("attribute.name.player.block_interaction_range", 4.5, 0.0, 64.0).setSyncable(true)
 	);
 	public static final Holder<Attribute> BURNING_TIME = register(
-		"generic.burning_time", new RangedAttribute("attribute.name.generic.burning_time", 1.0, 0.0, 1024.0).setSyncable(true)
+		"generic.burning_time",
+		new RangedAttribute("attribute.name.generic.burning_time", 1.0, 0.0, 1024.0).setSyncable(true).setSentiment(Attribute.Sentiment.NEGATIVE)
 	);
 	public static final Holder<Attribute> EXPLOSION_KNOCKBACK_RESISTANCE = register(
 		"generic.explosion_knockback_resistance", new RangedAttribute("attribute.name.generic.explosion_knockback_resistance", 0.0, 0.0, 1.0).setSyncable(true)
@@ -35,7 +36,8 @@ public class Attributes {
 		"player.entity_interaction_range", new RangedAttribute("attribute.name.player.entity_interaction_range", 3.0, 0.0, 64.0).setSyncable(true)
 	);
 	public static final Holder<Attribute> FALL_DAMAGE_MULTIPLIER = register(
-		"generic.fall_damage_multiplier", new RangedAttribute("attribute.name.generic.fall_damage_multiplier", 1.0, 0.0, 100.0).setSyncable(true)
+		"generic.fall_damage_multiplier",
+		new RangedAttribute("attribute.name.generic.fall_damage_multiplier", 1.0, 0.0, 100.0).setSyncable(true).setSentiment(Attribute.Sentiment.NEGATIVE)
 	);
 	public static final Holder<Attribute> FLYING_SPEED = register(
 		"generic.flying_speed", new RangedAttribute("attribute.name.generic.flying_speed", 0.4, 0.0, 1024.0).setSyncable(true)
@@ -44,7 +46,7 @@ public class Attributes {
 		"generic.follow_range", new RangedAttribute("attribute.name.generic.follow_range", 32.0, 0.0, 2048.0)
 	);
 	public static final Holder<Attribute> GRAVITY = register(
-		"generic.gravity", new RangedAttribute("attribute.name.generic.gravity", 0.08, -1.0, 1.0).setSyncable(true)
+		"generic.gravity", new RangedAttribute("attribute.name.generic.gravity", 0.08, -1.0, 1.0).setSyncable(true).setSentiment(Attribute.Sentiment.NEUTRAL)
 	);
 	public static final Holder<Attribute> JUMP_STRENGTH = register(
 		"generic.jump_strength", new RangedAttribute("attribute.name.generic.jump_strength", 0.42F, 0.0, 32.0).setSyncable(true)
@@ -77,7 +79,7 @@ public class Attributes {
 		"generic.safe_fall_distance", new RangedAttribute("attribute.name.generic.safe_fall_distance", 3.0, -1024.0, 1024.0).setSyncable(true)
 	);
 	public static final Holder<Attribute> SCALE = register(
-		"generic.scale", new RangedAttribute("attribute.name.generic.scale", 1.0, 0.0625, 16.0).setSyncable(true)
+		"generic.scale", new RangedAttribute("attribute.name.generic.scale", 1.0, 0.0625, 16.0).setSyncable(true).setSentiment(Attribute.Sentiment.NEUTRAL)
 	);
 	public static final Holder<Attribute> SNEAKING_SPEED = register(
 		"player.sneaking_speed", new RangedAttribute("attribute.name.player.sneaking_speed", 0.3, 0.0, 1.0).setSyncable(true)

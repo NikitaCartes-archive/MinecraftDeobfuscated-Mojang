@@ -66,7 +66,8 @@ public class FireChargeItem extends Item implements ProjectileItem {
 		double d = randomSource.triangle((double)direction.getStepX(), 0.11485000000000001);
 		double e = randomSource.triangle((double)direction.getStepY(), 0.11485000000000001);
 		double f = randomSource.triangle((double)direction.getStepZ(), 0.11485000000000001);
-		SmallFireball smallFireball = new SmallFireball(level, position.x(), position.y(), position.z(), d, e, f);
+		Vec3 vec3 = new Vec3(d, e, f);
+		SmallFireball smallFireball = new SmallFireball(level, position.x(), position.y(), position.z(), vec3.normalize());
 		smallFireball.setItem(itemStack);
 		return smallFireball;
 	}

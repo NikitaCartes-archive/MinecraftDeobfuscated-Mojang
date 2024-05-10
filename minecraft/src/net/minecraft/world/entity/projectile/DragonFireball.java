@@ -13,6 +13,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 
 public class DragonFireball extends AbstractHurtingProjectile {
 	public static final float SPLASH_RANGE = 4.0F;
@@ -21,8 +22,8 @@ public class DragonFireball extends AbstractHurtingProjectile {
 		super(entityType, level);
 	}
 
-	public DragonFireball(Level level, LivingEntity livingEntity, double d, double e, double f) {
-		super(EntityType.DRAGON_FIREBALL, livingEntity, d, e, f, level);
+	public DragonFireball(Level level, LivingEntity livingEntity, Vec3 vec3) {
+		super(EntityType.DRAGON_FIREBALL, livingEntity, vec3, level);
 	}
 
 	@Override

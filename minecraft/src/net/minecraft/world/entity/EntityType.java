@@ -628,11 +628,7 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 		"strider", EntityType.Builder.of(Strider::new, MobCategory.CREATURE).fireImmune().sized(0.9F, 1.7F).clientTrackingRange(10)
 	);
 	public static final EntityType<Tadpole> TADPOLE = register(
-		"tadpole",
-		EntityType.Builder.of(Tadpole::new, MobCategory.CREATURE)
-			.sized(Tadpole.HITBOX_WIDTH, Tadpole.HITBOX_HEIGHT)
-			.eyeHeight(Tadpole.HITBOX_HEIGHT * 0.65F)
-			.clientTrackingRange(10)
+		"tadpole", EntityType.Builder.of(Tadpole::new, MobCategory.CREATURE).sized(0.4F, 0.3F).eyeHeight(0.19500001F).clientTrackingRange(10)
 	);
 	public static final EntityType<Display.TextDisplay> TEXT_DISPLAY = register(
 		"text_display", EntityType.Builder.of(Display.TextDisplay::new, MobCategory.MISC).sized(0.0F, 0.0F).clientTrackingRange(10).updateInterval(1)

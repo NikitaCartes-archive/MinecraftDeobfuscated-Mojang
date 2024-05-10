@@ -48,7 +48,7 @@ public class MutableComponent implements Component {
 	}
 
 	public MutableComponent append(String string) {
-		return this.append(Component.literal(string));
+		return string.isEmpty() ? this : this.append(Component.literal(string));
 	}
 
 	public MutableComponent append(Component component) {

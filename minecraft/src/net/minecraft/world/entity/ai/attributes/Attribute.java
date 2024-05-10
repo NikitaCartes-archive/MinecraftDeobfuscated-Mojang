@@ -1,6 +1,7 @@
 package net.minecraft.world.entity.ai.attributes;
 
 import com.mojang.serialization.Codec;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 
@@ -9,6 +10,7 @@ public class Attribute {
 	private final double defaultValue;
 	private boolean syncable;
 	private final String descriptionId;
+	private Attribute.Sentiment sentiment = Attribute.Sentiment.POSITIVE;
 
 	protected Attribute(String string, double d) {
 		this.defaultValue = d;
@@ -28,11 +30,34 @@ public class Attribute {
 		return this;
 	}
 
+	public Attribute setSentiment(Attribute.Sentiment sentiment) {
+		this.sentiment = sentiment;
+		return this;
+	}
+
 	public double sanitizeValue(double d) {
 		return d;
 	}
 
 	public String getDescriptionId() {
 		return this.descriptionId;
+	}
+
+	public ChatFormatting getStyle(boolean bl) {
+		return this.sentiment.getStyle(bl);
+	}
+
+	public static enum Sentiment {
+		POSITIVE,
+		NEUTRAL,
+		NEGATIVE;
+
+		public ChatFormatting getStyle(boolean bl) {
+			return switch (this) {
+				case POSITIVE -> bl ? ChatFormatting.BLUE : ChatFormatting.RED;
+				case NEUTRAL -> ChatFormatting.GRAY;
+				case NEGATIVE -> bl ? ChatFormatting.RED : ChatFormatting.BLUE;
+			};
+		}
 	}
 }

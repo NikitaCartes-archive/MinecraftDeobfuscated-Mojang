@@ -10,6 +10,7 @@ import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 
 public abstract class Fireball extends AbstractHurtingProjectile implements ItemSupplier {
 	private static final EntityDataAccessor<ItemStack> DATA_ITEM_STACK = SynchedEntityData.defineId(Fireball.class, EntityDataSerializers.ITEM_STACK);
@@ -18,12 +19,12 @@ public abstract class Fireball extends AbstractHurtingProjectile implements Item
 		super(entityType, level);
 	}
 
-	public Fireball(EntityType<? extends Fireball> entityType, double d, double e, double f, double g, double h, double i, Level level) {
-		super(entityType, d, e, f, g, h, i, level);
+	public Fireball(EntityType<? extends Fireball> entityType, double d, double e, double f, Vec3 vec3, Level level) {
+		super(entityType, d, e, f, vec3, level);
 	}
 
-	public Fireball(EntityType<? extends Fireball> entityType, LivingEntity livingEntity, double d, double e, double f, Level level) {
-		super(entityType, livingEntity, d, e, f, level);
+	public Fireball(EntityType<? extends Fireball> entityType, LivingEntity livingEntity, Vec3 vec3, Level level) {
+		super(entityType, livingEntity, vec3, level);
 	}
 
 	public void setItem(ItemStack itemStack) {

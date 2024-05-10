@@ -59,15 +59,15 @@ public class ClientboundSetEntityMotionPacket implements Packet<ClientGamePacket
 		return this.id;
 	}
 
-	public int getXa() {
-		return this.xa;
+	public double getXa() {
+		return (double)this.xa / 8000.0;
 	}
 
-	public int getYa() {
-		return this.ya;
+	public double getYa() {
+		return (double)this.ya / 8000.0;
 	}
 
-	public int getZa() {
-		return this.za;
+	public double getZa() {
+		return (double)this.za / 8000.0;
 	}
 }

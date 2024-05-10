@@ -227,7 +227,7 @@ public interface DispenseItemBehavior {
 				Level level = blockSource.level();
 				if (dispensibleContainerItem.emptyContents(null, level, blockPos, null)) {
 					dispensibleContainerItem.checkExtraContent(null, level, itemStack, blockPos);
-					return new ItemStack(Items.BUCKET);
+					return this.consumeWithRemainder(blockSource, itemStack, new ItemStack(Items.BUCKET));
 				} else {
 					return this.defaultDispenseItemBehavior.dispense(blockSource, itemStack);
 				}
@@ -243,8 +243,6 @@ public interface DispenseItemBehavior {
 		DispenserBlock.registerBehavior(Items.AXOLOTL_BUCKET, dispenseItemBehavior);
 		DispenserBlock.registerBehavior(Items.TADPOLE_BUCKET, dispenseItemBehavior);
 		DispenserBlock.registerBehavior(Items.BUCKET, new DefaultDispenseItemBehavior() {
-			private final DefaultDispenseItemBehavior defaultDispenseItemBehavior = new DefaultDispenseItemBehavior();
-
 			@Override
 			public ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
 				LevelAccessor levelAccessor = blockSource.level();
@@ -257,16 +255,7 @@ public interface DispenseItemBehavior {
 					} else {
 						levelAccessor.gameEvent(null, GameEvent.FLUID_PICKUP, blockPos);
 						Item item = itemStack2.getItem();
-						itemStack.shrink(1);
-						if (itemStack.isEmpty()) {
-							return new ItemStack(item);
-						} else {
-							if (blockSource.blockEntity().addItem(new ItemStack(item)) < 0) {
-								this.defaultDispenseItemBehavior.dispense(blockSource, new ItemStack(item));
-							}
-
-							return itemStack;
-						}
+						return this.consumeWithRemainder(blockSource, itemStack, new ItemStack(item));
 					}
 				} else {
 					return super.execute(blockSource, itemStack);
@@ -402,20 +391,9 @@ public interface DispenseItemBehavior {
 		DispenserBlock.registerBehavior(
 			Items.GLASS_BOTTLE.asItem(),
 			new OptionalDispenseItemBehavior() {
-				private final DefaultDispenseItemBehavior defaultDispenseItemBehavior = new DefaultDispenseItemBehavior();
-
 				private ItemStack takeLiquid(BlockSource blockSource, ItemStack itemStack, ItemStack itemStack2) {
-					itemStack.shrink(1);
-					if (itemStack.isEmpty()) {
-						blockSource.level().gameEvent(null, GameEvent.FLUID_PICKUP, blockSource.pos());
-						return itemStack2.copy();
-					} else {
-						if (blockSource.blockEntity().addItem(itemStack2.copy()) < 0) {
-							this.defaultDispenseItemBehavior.dispense(blockSource, itemStack2.copy());
-						}
-
-						return itemStack;
-					}
+					blockSource.level().gameEvent(null, GameEvent.FLUID_PICKUP, blockSource.pos());
+					return this.consumeWithRemainder(blockSource, itemStack, itemStack2);
 				}
 
 				@Override
@@ -543,7 +521,7 @@ public interface DispenseItemBehavior {
 							serverLevel.playSound(null, blockPos, SoundEvents.BOTTLE_EMPTY, SoundSource.BLOCKS, 1.0F, 1.0F);
 							serverLevel.gameEvent(null, GameEvent.FLUID_PLACE, blockPos);
 							serverLevel.setBlockAndUpdate(blockPos2, Blocks.MUD.defaultBlockState());
-							return new ItemStack(Items.GLASS_BOTTLE);
+							return this.consumeWithRemainder(blockSource, itemStack, new ItemStack(Items.GLASS_BOTTLE));
 						}
 					}
 				}

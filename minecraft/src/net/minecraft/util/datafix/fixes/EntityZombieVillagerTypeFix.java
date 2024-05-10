@@ -8,7 +8,6 @@ import net.minecraft.util.RandomSource;
 
 public class EntityZombieVillagerTypeFix extends NamedEntityFix {
 	private static final int PROFESSION_MAX = 6;
-	private static final RandomSource RANDOM = RandomSource.create();
 
 	public EntityZombieVillagerTypeFix(Schema schema, boolean bl) {
 		super(schema, bl, "EntityZombieVillagerTypeFix", References.ENTITY, "Zombie");
@@ -19,7 +18,7 @@ public class EntityZombieVillagerTypeFix extends NamedEntityFix {
 			if (dynamic.get("ZombieType").result().isEmpty()) {
 				int i = this.getVillagerProfession(dynamic.get("VillagerProfession").asInt(-1));
 				if (i == -1) {
-					i = this.getVillagerProfession(RANDOM.nextInt(6));
+					i = this.getVillagerProfession(RandomSource.create().nextInt(6));
 				}
 
 				dynamic = dynamic.set("ZombieType", dynamic.createInt(i));

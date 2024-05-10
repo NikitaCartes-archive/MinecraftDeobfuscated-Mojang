@@ -332,7 +332,8 @@ public class Structures {
 				false,
 				Optional.empty(),
 				116,
-				List.of()
+				List.of(),
+				0
 			)
 		);
 		bootstrapContext.register(
@@ -367,7 +368,8 @@ public class Structures {
 				false,
 				Optional.empty(),
 				116,
-				TrialChambersStructurePools.ALIAS_BINDINGS
+				TrialChambersStructurePools.ALIAS_BINDINGS,
+				10
 			)
 		);
 	}

@@ -73,7 +73,8 @@ public class BannerPatternFormatFix extends NamedEntityFix {
 					dynamicx.asString().map(string -> (String)PATTERN_ID_MAP.getOrDefault(string, string)).map(dynamicx::createString).result(), dynamicx
 				)
 		);
-		return dynamic.renameAndFixField("Color", "color", dynamicx -> dynamicx.createString(fixColor(dynamicx.asInt(0))));
+		dynamic = dynamic.set("color", dynamic.createString(fixColor(dynamic.get("Color").asInt(0))));
+		return dynamic.remove("Color");
 	}
 
 	public static String fixColor(int i) {

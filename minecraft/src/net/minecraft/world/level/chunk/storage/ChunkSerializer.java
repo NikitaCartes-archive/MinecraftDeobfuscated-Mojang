@@ -197,7 +197,7 @@ public class ChunkSerializer {
 			}
 
 			ChunkStatus chunkStatus = ChunkStatus.byName(compoundTag.getString("Status"));
-			protoChunk.setStatus(chunkStatus);
+			protoChunk.setPersistedStatus(chunkStatus);
 			if (chunkStatus.isOrAfter(ChunkStatus.INITIALIZE_LIGHT)) {
 				protoChunk.setLightEngine(levelLightEngine);
 			}
@@ -207,7 +207,7 @@ public class ChunkSerializer {
 		CompoundTag compoundTag3 = compoundTag.getCompound("Heightmaps");
 		EnumSet<Heightmap.Types> enumSet = EnumSet.noneOf(Heightmap.Types.class);
 
-		for (Heightmap.Types types : chunkAccess.getStatus().heightmapsAfter()) {
+		for (Heightmap.Types types : chunkAccess.getPersistedStatus().heightmapsAfter()) {
 			String string = types.getSerializationKey();
 			if (compoundTag3.contains(string, 12)) {
 				chunkAccess.setHeightmap(types, compoundTag3.getLongArray(string));
@@ -280,7 +280,7 @@ public class ChunkSerializer {
 		compoundTag.putInt("zPos", chunkPos.z);
 		compoundTag.putLong("LastUpdate", serverLevel.getGameTime());
 		compoundTag.putLong("InhabitedTime", chunkAccess.getInhabitedTime());
-		compoundTag.putString("Status", BuiltInRegistries.CHUNK_STATUS.getKey(chunkAccess.getStatus()).toString());
+		compoundTag.putString("Status", BuiltInRegistries.CHUNK_STATUS.getKey(chunkAccess.getPersistedStatus()).toString());
 		BlendingData blendingData = chunkAccess.getBlendingData();
 		if (blendingData != null) {
 			BlendingData.CODEC.encodeStart(NbtOps.INSTANCE, blendingData).resultOrPartial(LOGGER::error).ifPresent(tag -> compoundTag.put("blending_data", tag));
@@ -349,7 +349,7 @@ public class ChunkSerializer {
 		}
 
 		compoundTag.put("block_entities", listTag2);
-		if (chunkAccess.getStatus().getChunkType() == ChunkType.PROTOCHUNK) {
+		if (chunkAccess.getPersistedStatus().getChunkType() == ChunkType.PROTOCHUNK) {
 			ProtoChunk protoChunk = (ProtoChunk)chunkAccess;
 			ListTag listTag3 = new ListTag();
 			listTag3.addAll(protoChunk.getEntities());
@@ -371,7 +371,7 @@ public class ChunkSerializer {
 		CompoundTag compoundTag4 = new CompoundTag();
 
 		for (Entry<Heightmap.Types, Heightmap> entry : chunkAccess.getHeightmaps()) {
-			if (chunkAccess.getStatus().heightmapsAfter().contains(entry.getKey())) {
+			if (chunkAccess.getPersistedStatus().heightmapsAfter().contains(entry.getKey())) {
 				compoundTag4.put(((Heightmap.Types)entry.getKey()).getSerializationKey(), new LongArrayTag(((Heightmap)entry.getValue()).getRawData()));
 			}
 		}

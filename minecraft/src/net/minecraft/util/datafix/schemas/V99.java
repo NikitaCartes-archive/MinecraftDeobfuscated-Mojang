@@ -348,9 +348,13 @@ public class V99 extends Schema {
 
 				return dynamic2x;
 			}).update("EntityTag", dynamic2x -> {
-				String string = NamespacedSchema.ensureNamespaced(dynamic.get("id").asString(""));
-				String string2 = (String)map2.get(string);
-				return string2 != null ? dynamic2x.set("id", dynamic.createString(string2)) : dynamic2x;
+				if (dynamic2x.get("id").result().isPresent()) {
+					return dynamic2x;
+				} else {
+					String string = NamespacedSchema.ensureNamespaced(dynamic.get("id").asString(""));
+					String string2 = (String)map2.get(string);
+					return string2 != null ? dynamic2x.set("id", dynamic.createString(string2)) : dynamic2x;
+				}
 			})).getValue();
 	}
 }

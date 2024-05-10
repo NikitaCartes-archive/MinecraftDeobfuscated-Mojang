@@ -2,6 +2,7 @@ package net.minecraft.server.level.progress;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import javax.annotation.Nullable;
+import net.minecraft.server.level.ChunkLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
 
@@ -28,7 +29,7 @@ public class StoringChunkProgressListener implements ChunkProgressListener {
 	public static StoringChunkProgressListener create(int i) {
 		LoggerChunkProgressListener loggerChunkProgressListener = LoggerChunkProgressListener.create(i);
 		int j = ChunkProgressListener.calculateDiameter(i);
-		int k = i + ChunkStatus.maxDistance();
+		int k = i + ChunkLevel.RADIUS_AROUND_FULL_CHUNK;
 		int l = ChunkProgressListener.calculateDiameter(k);
 		return new StoringChunkProgressListener(loggerChunkProgressListener, j, k, l);
 	}

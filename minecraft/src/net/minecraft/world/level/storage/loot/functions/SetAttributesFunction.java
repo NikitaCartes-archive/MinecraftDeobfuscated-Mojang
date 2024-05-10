@@ -35,9 +35,7 @@ public class SetAttributesFunction extends LootItemConditionalFunction {
 		instance -> commonFields(instance)
 				.<List<SetAttributesFunction.Modifier>, boolean>and(
 					instance.group(
-						ExtraCodecs.nonEmptyList(SetAttributesFunction.Modifier.CODEC.listOf())
-							.fieldOf("modifiers")
-							.forGetter(setAttributesFunction -> setAttributesFunction.modifiers),
+						SetAttributesFunction.Modifier.CODEC.listOf().fieldOf("modifiers").forGetter(setAttributesFunction -> setAttributesFunction.modifiers),
 						Codec.BOOL.optionalFieldOf("replace", Boolean.valueOf(true)).forGetter(setAttributesFunction -> setAttributesFunction.replace)
 					)
 				)

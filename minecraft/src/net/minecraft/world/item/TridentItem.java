@@ -5,7 +5,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Position;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -79,7 +78,7 @@ public class TridentItem extends Item implements ProjectileItem {
 		if (livingEntity instanceof Player player) {
 			int j = this.getUseDuration(itemStack, livingEntity) - i;
 			if (j >= 10) {
-				float f = level instanceof ServerLevel serverLevel ? EnchantmentHelper.getTridentSpinAttackStrength(serverLevel, itemStack, player) : 0.0F;
+				float f = EnchantmentHelper.getTridentSpinAttackStrength(player);
 				if (!(f > 0.0F) || player.isInWaterOrRain()) {
 					Holder<SoundEvent> holder = (Holder<SoundEvent>)EnchantmentHelper.pickHighestLevel(itemStack, EnchantmentEffectComponents.TRIDENT_SOUND)
 						.orElse(SoundEvents.TRIDENT_THROW);
@@ -130,13 +129,9 @@ public class TridentItem extends Item implements ProjectileItem {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
 		if (itemStack.getDamageValue() >= itemStack.getMaxDamage() - 1) {
 			return InteractionResultHolder.fail(itemStack);
+		} else if (EnchantmentHelper.getTridentSpinAttackStrength(player) > 0.0F && !player.isInWaterOrRain()) {
+			return InteractionResultHolder.fail(itemStack);
 		} else {
-			if (level instanceof ServerLevel serverLevel
-				&& EnchantmentHelper.getTridentSpinAttackStrength(serverLevel, itemStack, player) > 0.0F
-				&& !player.isInWaterOrRain()) {
-				return InteractionResultHolder.fail(itemStack);
-			}
-
 			player.startUsingItem(interactionHand);
 			return InteractionResultHolder.consume(itemStack);
 		}

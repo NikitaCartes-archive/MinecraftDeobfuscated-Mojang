@@ -40,7 +40,6 @@ public class SuspiciousStewItem extends Item {
 			livingEntity.addEffect(entry.createEffectInstance());
 		}
 
-		super.finishUsingItem(itemStack, level, livingEntity);
-		return livingEntity.hasInfiniteMaterials() ? itemStack : new ItemStack(Items.BOWL);
+		return super.finishUsingItem(itemStack, level, livingEntity);
 	}
 }

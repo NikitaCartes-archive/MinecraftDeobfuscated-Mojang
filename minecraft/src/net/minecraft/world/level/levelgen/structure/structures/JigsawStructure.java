@@ -34,11 +34,13 @@ public final class JigsawStructure extends Structure {
 						Codec.BOOL.fieldOf("use_expansion_hack").forGetter(jigsawStructure -> jigsawStructure.useExpansionHack),
 						Heightmap.Types.CODEC.optionalFieldOf("project_start_to_heightmap").forGetter(jigsawStructure -> jigsawStructure.projectStartToHeightmap),
 						Codec.intRange(1, 128).fieldOf("max_distance_from_center").forGetter(jigsawStructure -> jigsawStructure.maxDistanceFromCenter),
-						Codec.list(PoolAliasBinding.CODEC).optionalFieldOf("pool_aliases", List.of()).forGetter(jigsawStructure -> jigsawStructure.poolAliases)
+						Codec.list(PoolAliasBinding.CODEC).optionalFieldOf("pool_aliases", List.of()).forGetter(jigsawStructure -> jigsawStructure.poolAliases),
+						Codec.intRange(0, Integer.MAX_VALUE).lenientOptionalFieldOf("dimension_padding", 0).forGetter(jigsawStructure -> jigsawStructure.dimensionPadding)
 					)
 					.apply(instance, JigsawStructure::new)
 		)
 		.validate(JigsawStructure::verifyRange);
+	public static final int DEFAULT_DIMENSION_PADDING = 0;
 	private final Holder<StructureTemplatePool> startPool;
 	private final Optional<ResourceLocation> startJigsawName;
 	private final int maxDepth;
@@ -47,6 +49,7 @@ public final class JigsawStructure extends Structure {
 	private final Optional<Heightmap.Types> projectStartToHeightmap;
 	private final int maxDistanceFromCenter;
 	private final List<PoolAliasBinding> poolAliases;
+	private final int dimensionPadding;
 
 	private static DataResult<JigsawStructure> verifyRange(JigsawStructure jigsawStructure) {
 		int i = switch (jigsawStructure.terrainAdaptation()) {
@@ -67,7 +70,8 @@ public final class JigsawStructure extends Structure {
 		boolean bl,
 		Optional<Heightmap.Types> optional2,
 		int j,
-		List<PoolAliasBinding> list
+		List<PoolAliasBinding> list,
+		int k
 	) {
 		super(structureSettings);
 		this.startPool = holder;
@@ -78,16 +82,17 @@ public final class JigsawStructure extends Structure {
 		this.projectStartToHeightmap = optional2;
 		this.maxDistanceFromCenter = j;
 		this.poolAliases = list;
+		this.dimensionPadding = k;
 	}
 
 	public JigsawStructure(
 		Structure.StructureSettings structureSettings, Holder<StructureTemplatePool> holder, int i, HeightProvider heightProvider, boolean bl, Heightmap.Types types
 	) {
-		this(structureSettings, holder, Optional.empty(), i, heightProvider, bl, Optional.of(types), 80, List.of());
+		this(structureSettings, holder, Optional.empty(), i, heightProvider, bl, Optional.of(types), 80, List.of(), 0);
 	}
 
 	public JigsawStructure(Structure.StructureSettings structureSettings, Holder<StructureTemplatePool> holder, int i, HeightProvider heightProvider, boolean bl) {
-		this(structureSettings, holder, Optional.empty(), i, heightProvider, bl, Optional.empty(), 80, List.of());
+		this(structureSettings, holder, Optional.empty(), i, heightProvider, bl, Optional.empty(), 80, List.of(), 0);
 	}
 
 	@Override
@@ -105,16 +110,13 @@ public final class JigsawStructure extends Structure {
 			this.useExpansionHack,
 			this.projectStartToHeightmap,
 			this.maxDistanceFromCenter,
-			PoolAliasLookup.create(this.poolAliases, blockPos, generationContext.seed())
+			PoolAliasLookup.create(this.poolAliases, blockPos, generationContext.seed()),
+			this.dimensionPadding
 		);
 	}
 
 	@Override
 	public StructureType<?> type() {
 		return StructureType.JIGSAW;
-	}
-
-	public List<PoolAliasBinding> getPoolAliases() {
-		return this.poolAliases;
 	}
 }

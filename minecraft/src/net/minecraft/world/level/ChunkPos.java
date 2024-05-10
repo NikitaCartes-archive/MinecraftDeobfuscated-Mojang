@@ -150,7 +150,11 @@ public class ChunkPos {
 	}
 
 	public int getChessboardDistance(ChunkPos chunkPos) {
-		return Math.max(Math.abs(this.x - chunkPos.x), Math.abs(this.z - chunkPos.z));
+		return this.getChessboardDistance(chunkPos.x, chunkPos.z);
+	}
+
+	public int getChessboardDistance(int i, int j) {
+		return Math.max(Math.abs(this.x - i), Math.abs(this.z - j));
 	}
 
 	public int distanceSquared(ChunkPos chunkPos) {

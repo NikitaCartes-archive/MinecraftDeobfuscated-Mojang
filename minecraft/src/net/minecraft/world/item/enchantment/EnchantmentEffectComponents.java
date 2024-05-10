@@ -78,9 +78,6 @@ public interface EnchantmentEffectComponents {
 	DataComponentType<List<ConditionalEffect<EnchantmentValueEffect>>> PROJECTILE_COUNT = register(
 		"projectile_count", builder -> builder.persistent(ConditionalEffect.codec(EnchantmentValueEffect.CODEC, LootContextParamSets.ENCHANTED_ENTITY).listOf())
 	);
-	DataComponentType<List<ConditionalEffect<EnchantmentValueEffect>>> CROSSBOW_CHARGE_TIME = register(
-		"crossbow_charge_time", builder -> builder.persistent(ConditionalEffect.codec(EnchantmentValueEffect.CODEC, LootContextParamSets.ENCHANTED_ITEM).listOf())
-	);
 	DataComponentType<List<ConditionalEffect<EnchantmentValueEffect>>> TRIDENT_RETURN_ACCELERATION = register(
 		"trident_return_acceleration",
 		builder -> builder.persistent(ConditionalEffect.codec(EnchantmentValueEffect.CODEC, LootContextParamSets.ENCHANTED_ENTITY).listOf())
@@ -98,19 +95,19 @@ public interface EnchantmentEffectComponents {
 	DataComponentType<List<ConditionalEffect<EnchantmentValueEffect>>> MOB_EXPERIENCE = register(
 		"mob_experience", builder -> builder.persistent(ConditionalEffect.codec(EnchantmentValueEffect.CODEC, LootContextParamSets.ENCHANTED_ENTITY).listOf())
 	);
-	DataComponentType<List<ConditionalEffect<EnchantmentValueEffect>>> TRIDENT_SPIN_ATTACK_STRENGTH = register(
-		"trident_spin_attack_strength",
-		builder -> builder.persistent(ConditionalEffect.codec(EnchantmentValueEffect.CODEC, LootContextParamSets.ENCHANTED_ENTITY).listOf())
-	);
 	DataComponentType<List<ConditionalEffect<EnchantmentValueEffect>>> REPAIR_WITH_XP = register(
 		"repair_with_xp", builder -> builder.persistent(ConditionalEffect.codec(EnchantmentValueEffect.CODEC, LootContextParamSets.ENCHANTED_ITEM).listOf())
 	);
+	DataComponentType<EnchantmentValueEffect> CROSSBOW_CHARGE_TIME = register("crossbow_charge_time", builder -> builder.persistent(EnchantmentValueEffect.CODEC));
 	DataComponentType<List<CrossbowItem.ChargingSounds>> CROSSBOW_CHARGING_SOUNDS = register(
 		"crossbow_charging_sounds", builder -> builder.persistent(CrossbowItem.ChargingSounds.CODEC.listOf())
 	);
 	DataComponentType<List<Holder<SoundEvent>>> TRIDENT_SOUND = register("trident_sound", builder -> builder.persistent(SoundEvent.CODEC.listOf()));
 	DataComponentType<Unit> PREVENT_EQUIPMENT_DROP = register("prevent_equipment_drop", builder -> builder.persistent(Unit.CODEC));
 	DataComponentType<Unit> PREVENT_ARMOR_CHANGE = register("prevent_armor_change", builder -> builder.persistent(Unit.CODEC));
+	DataComponentType<EnchantmentValueEffect> TRIDENT_SPIN_ATTACK_STRENGTH = register(
+		"trident_spin_attack_strength", builder -> builder.persistent(EnchantmentValueEffect.CODEC)
+	);
 
 	static DataComponentType<?> bootstrap(Registry<DataComponentType<?>> registry) {
 		return DAMAGE_PROTECTION;

@@ -8,6 +8,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.DispenserBlock;
 
 public class DefaultDispenseItemBehavior implements DispenseItemBehavior {
+	private static final int DEFAULT_ACCURACY = 6;
+
 	@Override
 	public final ItemStack dispense(BlockSource blockSource, ItemStack itemStack) {
 		ItemStack itemStack2 = this.execute(blockSource, itemStack);
@@ -45,10 +47,38 @@ public class DefaultDispenseItemBehavior implements DispenseItemBehavior {
 	}
 
 	protected void playSound(BlockSource blockSource) {
-		blockSource.level().levelEvent(1000, blockSource.pos(), 0);
+		playDefaultSound(blockSource);
 	}
 
 	protected void playAnimation(BlockSource blockSource, Direction direction) {
+		playDefaultAnimation(blockSource, direction);
+	}
+
+	private static void playDefaultSound(BlockSource blockSource) {
+		blockSource.level().levelEvent(1000, blockSource.pos(), 0);
+	}
+
+	private static void playDefaultAnimation(BlockSource blockSource, Direction direction) {
 		blockSource.level().levelEvent(2000, blockSource.pos(), direction.get3DDataValue());
+	}
+
+	protected ItemStack consumeWithRemainder(BlockSource blockSource, ItemStack itemStack, ItemStack itemStack2) {
+		itemStack.shrink(1);
+		if (itemStack.isEmpty()) {
+			return itemStack2;
+		} else {
+			this.addToInventoryOrDispense(blockSource, itemStack2);
+			return itemStack;
+		}
+	}
+
+	private void addToInventoryOrDispense(BlockSource blockSource, ItemStack itemStack) {
+		ItemStack itemStack2 = blockSource.blockEntity().insertItem(itemStack);
+		if (!itemStack2.isEmpty()) {
+			Direction direction = blockSource.state().getValue(DispenserBlock.FACING);
+			spawnItem(blockSource.level(), itemStack2, 6, direction, DispenserBlock.getDispensePosition(blockSource));
+			playDefaultSound(blockSource);
+			playDefaultAnimation(blockSource, direction);
+		}
 	}
 }

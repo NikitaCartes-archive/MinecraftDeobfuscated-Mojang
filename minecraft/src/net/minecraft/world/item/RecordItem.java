@@ -43,12 +43,12 @@ public class RecordItem extends Item {
 			ItemStack itemStack = useOnContext.getItemInHand();
 			if (!level.isClientSide) {
 				Player player = useOnContext.getPlayer();
+				ItemStack itemStack2 = itemStack.consumeAndReturn(1, player);
 				if (level.getBlockEntity(blockPos) instanceof JukeboxBlockEntity jukeboxBlockEntity) {
-					jukeboxBlockEntity.setTheItem(itemStack.copy());
+					jukeboxBlockEntity.setTheItem(itemStack2);
 					level.gameEvent(GameEvent.BLOCK_CHANGE, blockPos, GameEvent.Context.of(player, blockState));
 				}
 
-				itemStack.shrink(1);
 				if (player != null) {
 					player.awardStat(Stats.PLAY_RECORD);
 				}

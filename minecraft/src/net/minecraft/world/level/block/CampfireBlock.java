@@ -95,9 +95,7 @@ public class CampfireBlock extends BaseEntityBlock implements SimpleWaterloggedB
 			Optional<RecipeHolder<CampfireCookingRecipe>> optional = campfireBlockEntity.getCookableRecipe(itemStack2);
 			if (optional.isPresent()) {
 				if (!level.isClientSide
-					&& campfireBlockEntity.placeFood(
-						player, player.hasInfiniteMaterials() ? itemStack2.copy() : itemStack2, ((CampfireCookingRecipe)((RecipeHolder)optional.get()).value()).getCookingTime()
-					)) {
+					&& campfireBlockEntity.placeFood(player, itemStack2, ((CampfireCookingRecipe)((RecipeHolder)optional.get()).value()).getCookingTime())) {
 					player.awardStat(Stats.INTERACT_WITH_CAMPFIRE);
 					return ItemInteractionResult.SUCCESS;
 				}

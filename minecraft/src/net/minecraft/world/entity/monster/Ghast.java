@@ -272,11 +272,12 @@ public class Ghast extends FlyingMob implements Enemy {
 						double f = livingEntity.getX() - (this.ghast.getX() + vec3.x * 4.0);
 						double g = livingEntity.getY(0.5) - (0.5 + this.ghast.getY(0.5));
 						double h = livingEntity.getZ() - (this.ghast.getZ() + vec3.z * 4.0);
+						Vec3 vec32 = new Vec3(f, g, h);
 						if (!this.ghast.isSilent()) {
 							level.levelEvent(null, 1016, this.ghast.blockPosition(), 0);
 						}
 
-						LargeFireball largeFireball = new LargeFireball(level, this.ghast, f, g, h, this.ghast.getExplosionPower());
+						LargeFireball largeFireball = new LargeFireball(level, this.ghast, vec32.normalize(), this.ghast.getExplosionPower());
 						largeFireball.setPos(this.ghast.getX() + vec3.x * 4.0, this.ghast.getY(0.5) + 0.5, largeFireball.getZ() + vec3.z * 4.0);
 						level.addFreshEntity(largeFireball);
 						this.chargeTime = -40;

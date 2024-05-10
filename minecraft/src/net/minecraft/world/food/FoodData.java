@@ -1,10 +1,9 @@
 package net.minecraft.world.food;
 
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.util.Mth;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameRules;
 
 public class FoodData {
@@ -19,19 +18,16 @@ public class FoodData {
 	}
 
 	private void add(int i, float f) {
-		this.foodLevel = Math.min(i + this.foodLevel, 20);
-		this.saturationLevel = Math.min(f + this.saturationLevel, (float)this.foodLevel);
+		this.foodLevel = Mth.clamp(i + this.foodLevel, 0, 20);
+		this.saturationLevel = Mth.clamp(f + this.saturationLevel, 0.0F, (float)this.foodLevel);
 	}
 
 	public void eat(int i, float f) {
 		this.add(i, FoodConstants.saturationByModifier(i, f));
 	}
 
-	public void eat(ItemStack itemStack) {
-		FoodProperties foodProperties = itemStack.get(DataComponents.FOOD);
-		if (foodProperties != null) {
-			this.add(foodProperties.nutrition(), foodProperties.saturation());
-		}
+	public void eat(FoodProperties foodProperties) {
+		this.add(foodProperties.nutrition(), foodProperties.saturation());
 	}
 
 	public void tick(Player player) {

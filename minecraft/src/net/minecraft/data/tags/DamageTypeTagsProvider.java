@@ -105,7 +105,8 @@ public class DamageTypeTagsProvider extends TagsProvider<DamageType> {
 				DamageTypes.FREEZE,
 				DamageTypes.STALAGMITE,
 				DamageTypes.OUTSIDE_BORDER,
-				DamageTypes.GENERIC_KILL
+				DamageTypes.GENERIC_KILL,
+				DamageTypes.CAMPFIRE
 			);
 		this.tag(DamageTypeTags.ALWAYS_KILLS_ARMOR_STANDS)
 			.add(DamageTypes.ARROW, DamageTypes.TRIDENT, DamageTypes.FIREBALL, DamageTypes.WITHER_SKULL, DamageTypes.WIND_CHARGE);

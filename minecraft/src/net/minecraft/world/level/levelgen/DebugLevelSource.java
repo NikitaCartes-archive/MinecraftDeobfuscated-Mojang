@@ -4,7 +4,6 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import net.minecraft.core.BlockPos;
@@ -76,9 +75,7 @@ public class DebugLevelSource extends ChunkGenerator {
 	}
 
 	@Override
-	public CompletableFuture<ChunkAccess> fillFromNoise(
-		Executor executor, Blender blender, RandomState randomState, StructureManager structureManager, ChunkAccess chunkAccess
-	) {
+	public CompletableFuture<ChunkAccess> fillFromNoise(Blender blender, RandomState randomState, StructureManager structureManager, ChunkAccess chunkAccess) {
 		return CompletableFuture.completedFuture(chunkAccess);
 	}
 

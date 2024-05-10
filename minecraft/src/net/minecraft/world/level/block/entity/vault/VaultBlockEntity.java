@@ -277,10 +277,7 @@ public class VaultBlockEntity extends BlockEntity {
 					List<ItemStack> list = resolveItemsToEject(serverLevel, vaultConfig, blockPos, player);
 					if (!list.isEmpty()) {
 						player.awardStat(Stats.ITEM_USED.get(itemStack.getItem()));
-						if (!player.isCreative()) {
-							itemStack.shrink(vaultConfig.keyItem().getCount());
-						}
-
+						itemStack.consume(vaultConfig.keyItem().getCount(), player);
 						unlock(serverLevel, blockState, blockPos, vaultConfig, vaultServerData, vaultSharedData, list);
 						vaultServerData.addToRewardedPlayers(player);
 						vaultSharedData.updateConnectedPlayersWithinRange(serverLevel, blockPos, vaultServerData, vaultConfig, vaultConfig.deactivationRange());
@@ -316,7 +313,7 @@ public class VaultBlockEntity extends BlockEntity {
 			LootParams lootParams = new LootParams.Builder(serverLevel)
 				.withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(blockPos))
 				.create(LootContextParamSets.VAULT);
-			List<ItemStack> list = lootTable.getRandomItems(lootParams);
+			List<ItemStack> list = lootTable.getRandomItems(lootParams, serverLevel.getRandom());
 			return list.isEmpty() ? ItemStack.EMPTY : Util.getRandom(list, serverLevel.getRandom());
 		}
 

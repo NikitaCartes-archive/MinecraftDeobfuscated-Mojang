@@ -2,6 +2,7 @@ package net.minecraft.world.food;
 
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.item.Items;
 
 public class Foods {
 	public static final FoodProperties APPLE = new FoodProperties.Builder().nutrition(4).saturationModifier(0.3F).build();
@@ -83,6 +84,6 @@ public class Foods {
 	public static final FoodProperties OMINOUS_BOTTLE = new FoodProperties.Builder().nutrition(1).saturationModifier(0.1F).build();
 
 	private static FoodProperties.Builder stew(int i) {
-		return new FoodProperties.Builder().nutrition(i).saturationModifier(0.6F);
+		return new FoodProperties.Builder().nutrition(i).saturationModifier(0.6F).usingConvertsTo(Items.BOWL);
 	}
 }

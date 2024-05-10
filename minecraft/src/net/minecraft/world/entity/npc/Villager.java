@@ -319,24 +319,24 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 			this.setUnhappy();
 			return InteractionResult.sidedSuccess(this.level().isClientSide);
 		} else {
-			boolean bl = this.getOffers().isEmpty();
-			if (interactionHand == InteractionHand.MAIN_HAND) {
-				if (bl && !this.level().isClientSide) {
-					this.setUnhappy();
+			if (!this.level().isClientSide) {
+				boolean bl = this.getOffers().isEmpty();
+				if (interactionHand == InteractionHand.MAIN_HAND) {
+					if (bl) {
+						this.setUnhappy();
+					}
+
+					player.awardStat(Stats.TALKED_TO_VILLAGER);
 				}
 
-				player.awardStat(Stats.TALKED_TO_VILLAGER);
-			}
-
-			if (bl) {
-				return InteractionResult.sidedSuccess(this.level().isClientSide);
-			} else {
-				if (!this.level().isClientSide && !this.offers.isEmpty()) {
-					this.startTrading(player);
+				if (bl) {
+					return InteractionResult.CONSUME;
 				}
 
-				return InteractionResult.sidedSuccess(this.level().isClientSide);
+				this.startTrading(player);
 			}
+
+			return InteractionResult.sidedSuccess(this.level().isClientSide);
 		}
 	}
 

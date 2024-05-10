@@ -23,12 +23,16 @@ public class MilkBucketItem extends Item {
 			serverPlayer.awardStat(Stats.ITEM_USED.get(this));
 		}
 
-		itemStack.consume(1, livingEntity);
 		if (!level.isClientSide) {
 			livingEntity.removeAllEffects();
 		}
 
-		return itemStack.isEmpty() ? new ItemStack(Items.BUCKET) : itemStack;
+		if (livingEntity instanceof Player player) {
+			return ItemUtils.createFilledResult(itemStack, player, new ItemStack(Items.BUCKET), false);
+		} else {
+			itemStack.consume(1, livingEntity);
+			return itemStack;
+		}
 	}
 
 	@Override

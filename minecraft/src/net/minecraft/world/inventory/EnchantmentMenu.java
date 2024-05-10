@@ -161,7 +161,7 @@ public class EnchantmentMenu extends AbstractContainerMenu {
 					if (!list.isEmpty()) {
 						player.onEnchantmentPerformed(itemStack, j);
 						if (itemStack.is(Items.BOOK)) {
-							itemStack3 = itemStack.transmuteCopy(Items.ENCHANTED_BOOK, 1);
+							itemStack3 = itemStack.transmuteCopy(Items.ENCHANTED_BOOK);
 							this.enchantSlots.setItem(0, itemStack3);
 						}
 
@@ -169,11 +169,9 @@ public class EnchantmentMenu extends AbstractContainerMenu {
 							itemStack3.enchant(enchantmentInstance.enchantment, enchantmentInstance.level);
 						}
 
-						if (!player.hasInfiniteMaterials()) {
-							itemStack2.shrink(j);
-							if (itemStack2.isEmpty()) {
-								this.enchantSlots.setItem(1, ItemStack.EMPTY);
-							}
+						itemStack2.consume(j, player);
+						if (itemStack2.isEmpty()) {
+							this.enchantSlots.setItem(1, ItemStack.EMPTY);
 						}
 
 						player.awardStat(Stats.ENCHANT_ITEM);

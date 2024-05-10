@@ -94,9 +94,9 @@ public class ImposterProtoChunk extends ProtoChunk {
 	}
 
 	@Override
-	public void setStatus(ChunkStatus chunkStatus) {
+	public void setPersistedStatus(ChunkStatus chunkStatus) {
 		if (this.allowWrites) {
-			super.setStatus(chunkStatus);
+			super.setPersistedStatus(chunkStatus);
 		}
 	}
 
@@ -185,8 +185,8 @@ public class ImposterProtoChunk extends ProtoChunk {
 	}
 
 	@Override
-	public ChunkStatus getStatus() {
-		return this.wrapped.getStatus();
+	public ChunkStatus getPersistedStatus() {
+		return this.wrapped.getPersistedStatus();
 	}
 
 	@Override

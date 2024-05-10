@@ -31,6 +31,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.EnchantmentTags;
 import net.minecraft.util.ExtraCodecs;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.Unit;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
@@ -194,7 +195,7 @@ public record Enchantment(Component description, Enchantment.EnchantmentDefiniti
 
 		for (ConditionalEffect<EnchantmentValueEffect> conditionalEffect : this.getEffects(EnchantmentEffectComponents.DAMAGE_PROTECTION)) {
 			if (conditionalEffect.matches(lootContext)) {
-				mutableFloat.setValue(conditionalEffect.effect().process(itemStack, i, entity.getRandom(), mutableFloat.floatValue()));
+				mutableFloat.setValue(conditionalEffect.effect().process(i, entity.getRandom(), mutableFloat.floatValue()));
 			}
 		}
 	}
@@ -227,8 +228,8 @@ public record Enchantment(Component description, Enchantment.EnchantmentDefiniti
 		this.modifyEntityFilteredValue(EnchantmentEffectComponents.TRIDENT_RETURN_ACCELERATION, serverLevel, i, itemStack, entity, mutableFloat);
 	}
 
-	public void modifyTridentSpinAttackStrength(ServerLevel serverLevel, int i, ItemStack itemStack, Entity entity, MutableFloat mutableFloat) {
-		this.modifyEntityFilteredValue(EnchantmentEffectComponents.TRIDENT_SPIN_ATTACK_STRENGTH, serverLevel, i, itemStack, entity, mutableFloat);
+	public void modifyTridentSpinAttackStrength(RandomSource randomSource, int i, MutableFloat mutableFloat) {
+		this.modifyUnfilteredValue(EnchantmentEffectComponents.TRIDENT_SPIN_ATTACK_STRENGTH, randomSource, i, mutableFloat);
 	}
 
 	public void modifyFishingTimeReduction(ServerLevel serverLevel, int i, ItemStack itemStack, Entity entity, MutableFloat mutableFloat) {
@@ -293,8 +294,15 @@ public record Enchantment(Component description, Enchantment.EnchantmentDefiniti
 		this.modifyEntityFilteredValue(EnchantmentEffectComponents.PROJECTILE_SPREAD, serverLevel, i, itemStack, entity, mutableFloat);
 	}
 
-	public void modifyCrossbowChargeTime(ServerLevel serverLevel, int i, ItemStack itemStack, MutableFloat mutableFloat) {
-		this.modifyItemFilteredCount(EnchantmentEffectComponents.CROSSBOW_CHARGE_TIME, serverLevel, i, itemStack, mutableFloat);
+	public void modifyCrossbowChargeTime(RandomSource randomSource, int i, MutableFloat mutableFloat) {
+		this.modifyUnfilteredValue(EnchantmentEffectComponents.CROSSBOW_CHARGE_TIME, randomSource, i, mutableFloat);
+	}
+
+	public void modifyUnfilteredValue(DataComponentType<EnchantmentValueEffect> dataComponentType, RandomSource randomSource, int i, MutableFloat mutableFloat) {
+		EnchantmentValueEffect enchantmentValueEffect = this.effects.get(dataComponentType);
+		if (enchantmentValueEffect != null) {
+			mutableFloat.setValue(enchantmentValueEffect.process(i, randomSource, mutableFloat.floatValue()));
+		}
 	}
 
 	public void tick(ServerLevel serverLevel, int i, EnchantedItemInUse enchantedItemInUse, Entity entity) {
@@ -331,7 +339,7 @@ public record Enchantment(Component description, Enchantment.EnchantmentDefiniti
 		applyEffects(
 			this.getEffects(dataComponentType),
 			itemContext(serverLevel, i, itemStack),
-			enchantmentValueEffect -> mutableFloat.setValue(enchantmentValueEffect.process(itemStack, i, serverLevel.getRandom(), mutableFloat.getValue()))
+			enchantmentValueEffect -> mutableFloat.setValue(enchantmentValueEffect.process(i, serverLevel.getRandom(), mutableFloat.getValue()))
 		);
 	}
 
@@ -346,7 +354,7 @@ public record Enchantment(Component description, Enchantment.EnchantmentDefiniti
 		applyEffects(
 			this.getEffects(dataComponentType),
 			entityContext(serverLevel, i, entity, entity.position()),
-			enchantmentValueEffect -> mutableFloat.setValue(enchantmentValueEffect.process(itemStack, i, entity.getRandom(), mutableFloat.floatValue()))
+			enchantmentValueEffect -> mutableFloat.setValue(enchantmentValueEffect.process(i, entity.getRandom(), mutableFloat.floatValue()))
 		);
 	}
 
@@ -362,7 +370,7 @@ public record Enchantment(Component description, Enchantment.EnchantmentDefiniti
 		applyEffects(
 			this.getEffects(dataComponentType),
 			damageContext(serverLevel, i, entity, damageSource),
-			enchantmentValueEffect -> mutableFloat.setValue(enchantmentValueEffect.process(itemStack, i, entity.getRandom(), mutableFloat.floatValue()))
+			enchantmentValueEffect -> mutableFloat.setValue(enchantmentValueEffect.process(i, entity.getRandom(), mutableFloat.floatValue()))
 		);
 	}
 

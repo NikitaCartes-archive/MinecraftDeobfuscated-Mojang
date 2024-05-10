@@ -95,7 +95,6 @@ import net.minecraft.server.commands.RaidCommand;
 import net.minecraft.server.commands.RandomCommand;
 import net.minecraft.server.commands.RecipeCommand;
 import net.minecraft.server.commands.ReloadCommand;
-import net.minecraft.server.commands.ResetChunksCommand;
 import net.minecraft.server.commands.ReturnCommand;
 import net.minecraft.server.commands.RideCommand;
 import net.minecraft.server.commands.SaveAllCommand;
@@ -215,7 +214,6 @@ public class Commands {
 
 		if (SharedConstants.IS_RUNNING_IN_IDE) {
 			TestCommand.register(this.dispatcher);
-			ResetChunksCommand.register(this.dispatcher);
 			RaidCommand.register(this.dispatcher, commandBuildContext);
 			DebugPathCommand.register(this.dispatcher);
 			DebugMobSpawningCommand.register(this.dispatcher);

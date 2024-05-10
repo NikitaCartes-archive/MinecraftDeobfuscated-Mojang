@@ -78,7 +78,8 @@ public class BucketItem extends Item implements DispensibleContainerItem {
 					}
 
 					player.awardStat(Stats.ITEM_USED.get(this));
-					return InteractionResultHolder.sidedSuccess(getEmptySuccessItem(itemStack, player), level.isClientSide());
+					ItemStack itemStack2 = ItemUtils.createFilledResult(itemStack, player, getEmptySuccessItem(itemStack, player));
+					return InteractionResultHolder.sidedSuccess(itemStack2, level.isClientSide());
 				} else {
 					return InteractionResultHolder.fail(itemStack);
 				}

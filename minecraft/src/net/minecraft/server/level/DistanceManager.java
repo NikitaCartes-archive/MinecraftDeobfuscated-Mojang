@@ -114,6 +114,7 @@ public abstract class DistanceManager {
 		}
 
 		if (!this.chunksToUpdateFutures.isEmpty()) {
+			this.chunksToUpdateFutures.forEach(chunkHolderx -> chunkHolderx.updateHighestAllowedStatus(chunkMap));
 			this.chunksToUpdateFutures.forEach(chunkHolderx -> chunkHolderx.updateFutures(chunkMap, this.mainThreadExecutor));
 			this.chunksToUpdateFutures.clear();
 			return true;
@@ -305,7 +306,7 @@ public abstract class DistanceManager {
 	}
 
 	public void removeTicketsOnClosing() {
-		ImmutableSet<TicketType<?>> immutableSet = ImmutableSet.of(TicketType.UNKNOWN, TicketType.POST_TELEPORT, TicketType.LIGHT);
+		ImmutableSet<TicketType<?>> immutableSet = ImmutableSet.of(TicketType.UNKNOWN, TicketType.POST_TELEPORT);
 		ObjectIterator<Entry<SortedArraySet<Ticket<?>>>> objectIterator = this.tickets.long2ObjectEntrySet().fastIterator();
 
 		while (objectIterator.hasNext()) {

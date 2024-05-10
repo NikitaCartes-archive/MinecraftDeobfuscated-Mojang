@@ -4,6 +4,7 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.RecipeType;
 
 public class ResultSlot extends Slot {
@@ -58,26 +59,31 @@ public class ResultSlot extends Slot {
 	@Override
 	public void onTake(Player player, ItemStack itemStack) {
 		this.checkTakeAchievements(itemStack);
-		NonNullList<ItemStack> nonNullList = player.level()
-			.getRecipeManager()
-			.getRemainingItemsFor(RecipeType.CRAFTING, this.craftSlots.asCraftInput(), player.level());
+		CraftingInput.Positioned positioned = this.craftSlots.asPositionedCraftInput();
+		CraftingInput craftingInput = positioned.input();
+		int i = positioned.left();
+		int j = positioned.top();
+		NonNullList<ItemStack> nonNullList = player.level().getRecipeManager().getRemainingItemsFor(RecipeType.CRAFTING, craftingInput, player.level());
 
-		for (int i = 0; i < nonNullList.size(); i++) {
-			ItemStack itemStack2 = this.craftSlots.getItem(i);
-			ItemStack itemStack3 = nonNullList.get(i);
-			if (!itemStack2.isEmpty()) {
-				this.craftSlots.removeItem(i, 1);
-				itemStack2 = this.craftSlots.getItem(i);
-			}
+		for (int k = 0; k < craftingInput.height(); k++) {
+			for (int l = 0; l < craftingInput.width(); l++) {
+				int m = l + i + (k + j) * this.craftSlots.getWidth();
+				ItemStack itemStack2 = this.craftSlots.getItem(m);
+				ItemStack itemStack3 = nonNullList.get(l + k * craftingInput.width());
+				if (!itemStack2.isEmpty()) {
+					this.craftSlots.removeItem(m, 1);
+					itemStack2 = this.craftSlots.getItem(m);
+				}
 
-			if (!itemStack3.isEmpty()) {
-				if (itemStack2.isEmpty()) {
-					this.craftSlots.setItem(i, itemStack3);
-				} else if (ItemStack.isSameItemSameComponents(itemStack2, itemStack3)) {
-					itemStack3.grow(itemStack2.getCount());
-					this.craftSlots.setItem(i, itemStack3);
-				} else if (!this.player.getInventory().add(itemStack3)) {
-					this.player.drop(itemStack3, false);
+				if (!itemStack3.isEmpty()) {
+					if (itemStack2.isEmpty()) {
+						this.craftSlots.setItem(m, itemStack3);
+					} else if (ItemStack.isSameItemSameComponents(itemStack2, itemStack3)) {
+						itemStack3.grow(itemStack2.getCount());
+						this.craftSlots.setItem(m, itemStack3);
+					} else if (!this.player.getInventory().add(itemStack3)) {
+						this.player.drop(itemStack3, false);
+					}
 				}
 			}
 		}

@@ -1,36 +1,33 @@
 package net.minecraft;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.datafixers.DSL.TypeReference;
 import io.netty.util.ResourceLeakDetector;
 import io.netty.util.ResourceLeakDetector.Level;
 import java.time.Duration;
-import java.util.Set;
 import javax.annotation.Nullable;
 import net.minecraft.commands.BrigadierExceptions;
-import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.level.ChunkPos;
 
 public class SharedConstants {
 	@Deprecated
 	public static final boolean SNAPSHOT = true;
 	@Deprecated
-	public static final int WORLD_VERSION = 3940;
+	public static final int WORLD_VERSION = 3941;
 	@Deprecated
 	public static final String SERIES = "main";
 	@Deprecated
-	public static final String VERSION_STRING = "24w18a";
+	public static final String VERSION_STRING = "24w19a";
 	@Deprecated
 	public static final int RELEASE_NETWORK_PROTOCOL_VERSION = 767;
 	@Deprecated
-	public static final int SNAPSHOT_NETWORK_PROTOCOL_VERSION = 193;
+	public static final int SNAPSHOT_NETWORK_PROTOCOL_VERSION = 194;
 	public static final int SNBT_NAG_VERSION = 3937;
 	private static final int SNAPSHOT_PROTOCOL_BIT = 30;
 	public static final boolean CRASH_EAGERLY = true;
 	@Deprecated
 	public static final int RESOURCE_PACK_FORMAT = 33;
 	@Deprecated
-	public static final int DATA_PACK_FORMAT = 42;
+	public static final int DATA_PACK_FORMAT = 43;
 	@Deprecated
 	public static final int LANGUAGE_FORMAT = 1;
 	public static final int REPORT_FORMAT_VERSION = 1;
@@ -113,7 +110,6 @@ public class SharedConstants {
 	public static final boolean COMMAND_STACK_TRACES = false;
 	public static final boolean DEBUG_WORLD_RECREATE = false;
 	public static final boolean DEBUG_SHOW_SERVER_DEBUG_VALUES = false;
-	public static final boolean DEBUG_STORE_CHUNK_STACKTRACES = false;
 	public static final boolean DEBUG_FEATURE_COUNT = false;
 	public static final boolean DEBUG_RESOURCE_GENERATION_OVERRIDE = false;
 	public static final boolean DEBUG_FORCE_TELEMETRY = false;
@@ -124,7 +120,6 @@ public class SharedConstants {
 	public static final boolean USE_DEVONLY = false;
 	public static boolean CHECK_DATA_FIXER_SCHEMA = true;
 	public static boolean IS_RUNNING_IN_IDE;
-	public static Set<TypeReference> DATA_FIX_TYPES_TO_OPTIMIZE = Set.of();
 	public static final int WORLD_RESOLUTION = 16;
 	public static final int MAX_CHAT_LENGTH = 256;
 	public static final int MAX_USER_INPUT_COMMAND_LENGTH = 32500;
@@ -167,17 +162,13 @@ public class SharedConstants {
 	}
 
 	public static int getProtocolVersion() {
-		return 1073742017;
+		return 1073742018;
 	}
 
 	public static boolean debugVoidTerrain(ChunkPos chunkPos) {
 		int i = chunkPos.getMinBlockX();
 		int j = chunkPos.getMinBlockZ();
 		return !debugGenerateSquareTerrainWithoutNoise ? false : i > 8192 || i < 0 || j > 1024 || j < 0;
-	}
-
-	public static void enableDataFixerOptimizations() {
-		DATA_FIX_TYPES_TO_OPTIMIZE = DataFixTypes.TYPES_FOR_LEVEL_LIST;
 	}
 
 	static {

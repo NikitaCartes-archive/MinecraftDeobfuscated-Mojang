@@ -75,7 +75,9 @@ public abstract class AbstractArrow extends Projectile {
 		super(entityType, level);
 	}
 
-	protected AbstractArrow(EntityType<? extends AbstractArrow> entityType, Level level, ItemStack itemStack, @Nullable ItemStack itemStack2) {
+	protected AbstractArrow(
+		EntityType<? extends AbstractArrow> entityType, double d, double e, double f, Level level, ItemStack itemStack, @Nullable ItemStack itemStack2
+	) {
 		this(entityType, level);
 		this.pickupItemStack = itemStack.copy();
 		this.setCustomName(itemStack.get(DataComponents.CUSTOM_NAME));
@@ -84,6 +86,7 @@ public abstract class AbstractArrow extends Projectile {
 			this.pickup = AbstractArrow.Pickup.CREATIVE_ONLY;
 		}
 
+		this.setPos(d, e, f);
 		if (itemStack2 != null && level instanceof ServerLevel serverLevel) {
 			this.firedFromWeapon = itemStack2.copy();
 			int i = EnchantmentHelper.getPiercingCount(serverLevel, itemStack2, this.pickupItemStack);
@@ -93,13 +96,6 @@ public abstract class AbstractArrow extends Projectile {
 
 			EnchantmentHelper.onProjectileSpawned(serverLevel, itemStack2, this, () -> this.firedFromWeapon = null);
 		}
-	}
-
-	protected AbstractArrow(
-		EntityType<? extends AbstractArrow> entityType, double d, double e, double f, Level level, ItemStack itemStack, @Nullable ItemStack itemStack2
-	) {
-		this(entityType, level, itemStack, itemStack2);
-		this.setPos(d, e, f);
 	}
 
 	protected AbstractArrow(
@@ -451,7 +447,6 @@ public abstract class AbstractArrow extends Projectile {
 		this.setCritArrow(false);
 		this.setPierceLevel((byte)0);
 		this.setSoundEvent(SoundEvents.ARROW_HIT);
-		this.firedFromWeapon = null;
 		this.resetPiercedEntities();
 	}
 

@@ -8,6 +8,7 @@ import net.minecraft.advancements.critereon.DamageSourcePredicate;
 import net.minecraft.advancements.critereon.EntityFlagsPredicate;
 import net.minecraft.advancements.critereon.EntityPredicate;
 import net.minecraft.advancements.critereon.EntityTypePredicate;
+import net.minecraft.advancements.critereon.FluidPredicate;
 import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.advancements.critereon.LocationPredicate;
 import net.minecraft.advancements.critereon.MinMaxBounds;
@@ -62,6 +63,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CandleBlock;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate;
 import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvider;
 import net.minecraft.world.level.material.Fluids;
@@ -298,7 +301,7 @@ public class Enchantments {
 						Enchantment.dynamicCost(10, 20),
 						Enchantment.dynamicCost(60, 20),
 						8,
-						EquipmentSlotGroup.ARMOR
+						EquipmentSlotGroup.ANY
 					)
 				)
 				.withEffect(
@@ -370,10 +373,11 @@ public class Enchantments {
 						new Vec3i(0, -1, 0),
 						Optional.of(
 							BlockPredicate.allOf(
-								BlockPredicate.matchesBlocks(new Vec3i(0, 1, 0), Blocks.AIR), BlockPredicate.matchesFluids(Fluids.WATER), BlockPredicate.unobstructed()
+								BlockPredicate.matchesBlocks(new Vec3i(0, 1, 0), Blocks.AIR), BlockPredicate.matchesBlocks(Blocks.WATER), BlockPredicate.unobstructed()
 							)
 						),
-						BlockStateProvider.simple(Blocks.FROSTED_ICE)
+						BlockStateProvider.simple(Blocks.FROSTED_ICE),
+						Optional.of(GameEvent.BLOCK_PLACE)
 					),
 					LootItemEntityPropertyCondition.hasProperties(
 						LootContext.EntityTarget.THIS, EntityPredicate.Builder.entity().flags(EntityFlagsPredicate.Builder.flags().setOnGround(true))
@@ -611,8 +615,9 @@ public class Enchantments {
 						LevelBasedValue.constant(3.0F)
 					),
 					LootItemEntityPropertyCondition.hasProperties(
-						LootContext.EntityTarget.THIS, EntityPredicate.Builder.entity().entityType(EntityTypePredicate.of(EntityTypeTags.SENSITIVE_TO_BANE_OF_ARTHROPODS))
-					)
+							LootContext.EntityTarget.THIS, EntityPredicate.Builder.entity().entityType(EntityTypePredicate.of(EntityTypeTags.SENSITIVE_TO_BANE_OF_ARTHROPODS))
+						)
+						.and(DamageSourceCondition.hasDamageSource(DamageSourcePredicate.Builder.damageType().isDirect(true)))
 				)
 		);
 		register(
@@ -636,6 +641,7 @@ public class Enchantments {
 			FIRE_ASPECT,
 			Enchantment.enchantment(
 					Enchantment.definition(
+						holderGetter3.getOrThrow(ItemTags.FIRE_ASPECT_ENCHANTABLE),
 						holderGetter3.getOrThrow(ItemTags.SWORD_ENCHANTABLE),
 						2,
 						2,
@@ -645,16 +651,27 @@ public class Enchantments {
 						EquipmentSlotGroup.MAINHAND
 					)
 				)
-				.withEffect(EnchantmentEffectComponents.POST_ATTACK, EnchantmentTarget.ATTACKER, EnchantmentTarget.VICTIM, new Ignite(LevelBasedValue.perLevel(4.0F)))
+				.withEffect(
+					EnchantmentEffectComponents.POST_ATTACK,
+					EnchantmentTarget.ATTACKER,
+					EnchantmentTarget.VICTIM,
+					new Ignite(LevelBasedValue.perLevel(4.0F)),
+					DamageSourceCondition.hasDamageSource(DamageSourcePredicate.Builder.damageType().isDirect(true))
+				)
 				.withEffect(
 					EnchantmentEffectComponents.HIT_BLOCK,
-					AllOf.entityEffects(new SetBlockProperties(BlockItemStateProperties.EMPTY.with(CandleBlock.LIT, true)), new DamageItem(LevelBasedValue.constant(1.0F))),
+					AllOf.entityEffects(
+						new SetBlockProperties(BlockItemStateProperties.EMPTY.with(CandleBlock.LIT, true), Vec3i.ZERO, Optional.of(GameEvent.BLOCK_CHANGE)),
+						new DamageItem(LevelBasedValue.constant(1.0F))
+					),
 					LocationCheck.checkLocation(
 						LocationPredicate.Builder.location()
 							.setBlock(
 								net.minecraft.advancements.critereon.BlockPredicate.Builder.block()
-									.setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(CandleBlock.LIT, false))
+									.of(BlockTags.FIRE_ASPECT_LIGHTABLE)
+									.setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(BlockStateProperties.LIT, false))
 							)
+							.setFluid(FluidPredicate.Builder.fluid().of(Fluids.EMPTY))
 					)
 				)
 		);
@@ -748,13 +765,7 @@ public class Enchantments {
 			UNBREAKING,
 			Enchantment.enchantment(
 					Enchantment.definition(
-						holderGetter3.getOrThrow(ItemTags.DURABILITY_ENCHANTABLE),
-						5,
-						3,
-						Enchantment.dynamicCost(5, 8),
-						Enchantment.dynamicCost(55, 8),
-						2,
-						EquipmentSlotGroup.MAINHAND
+						holderGetter3.getOrThrow(ItemTags.DURABILITY_ENCHANTABLE), 5, 3, Enchantment.dynamicCost(5, 8), Enchantment.dynamicCost(55, 8), 2, EquipmentSlotGroup.ANY
 					)
 				)
 				.withEffect(
@@ -923,17 +934,11 @@ public class Enchantments {
 			RIPTIDE,
 			Enchantment.enchantment(
 					Enchantment.definition(
-						holderGetter3.getOrThrow(ItemTags.TRIDENT_ENCHANTABLE),
-						2,
-						3,
-						Enchantment.dynamicCost(17, 7),
-						Enchantment.constantCost(50),
-						4,
-						EquipmentSlotGroup.MAINHAND
+						holderGetter3.getOrThrow(ItemTags.TRIDENT_ENCHANTABLE), 2, 3, Enchantment.dynamicCost(17, 7), Enchantment.constantCost(50), 4, EquipmentSlotGroup.HAND
 					)
 				)
 				.exclusiveWith(holderGetter2.getOrThrow(EnchantmentTags.RIPTIDE_EXCLUSIVE))
-				.withEffect(EnchantmentEffectComponents.TRIDENT_SPIN_ATTACK_STRENGTH, new AddValue(LevelBasedValue.perLevel(1.5F, 0.75F)))
+				.withSpecialEffect(EnchantmentEffectComponents.TRIDENT_SPIN_ATTACK_STRENGTH, new AddValue(LevelBasedValue.perLevel(1.5F, 0.75F)))
 				.withSpecialEffect(
 					EnchantmentEffectComponents.TRIDENT_SOUND, List.of(SoundEvents.TRIDENT_RIPTIDE_1, SoundEvents.TRIDENT_RIPTIDE_2, SoundEvents.TRIDENT_RIPTIDE_3)
 				)
@@ -1009,7 +1014,7 @@ public class Enchantments {
 						EquipmentSlotGroup.MAINHAND
 					)
 				)
-				.withEffect(EnchantmentEffectComponents.CROSSBOW_CHARGE_TIME, new AddValue(LevelBasedValue.perLevel(-0.25F)))
+				.withSpecialEffect(EnchantmentEffectComponents.CROSSBOW_CHARGE_TIME, new AddValue(LevelBasedValue.perLevel(-0.25F)))
 				.withSpecialEffect(
 					EnchantmentEffectComponents.CROSSBOW_CHARGING_SOUNDS,
 					List.of(
@@ -1044,6 +1049,7 @@ public class Enchantments {
 						holderGetter3.getOrThrow(ItemTags.MACE_ENCHANTABLE), 5, 5, Enchantment.dynamicCost(5, 8), Enchantment.dynamicCost(25, 8), 2, EquipmentSlotGroup.MAINHAND
 					)
 				)
+				.exclusiveWith(holderGetter2.getOrThrow(EnchantmentTags.DAMAGE_EXCLUSIVE))
 				.withEffect(EnchantmentEffectComponents.SMASH_DAMAGE_PER_FALLEN_BLOCK, new AddValue(LevelBasedValue.perLevel(0.5F)))
 		);
 		register(
@@ -1054,6 +1060,7 @@ public class Enchantments {
 						holderGetter3.getOrThrow(ItemTags.MACE_ENCHANTABLE), 2, 4, Enchantment.dynamicCost(15, 9), Enchantment.dynamicCost(65, 9), 4, EquipmentSlotGroup.MAINHAND
 					)
 				)
+				.exclusiveWith(holderGetter2.getOrThrow(EnchantmentTags.DAMAGE_EXCLUSIVE))
 				.withEffect(EnchantmentEffectComponents.ARMOR_EFFECTIVENESS, new AddValue(LevelBasedValue.perLevel(-0.15F)))
 		);
 		register(

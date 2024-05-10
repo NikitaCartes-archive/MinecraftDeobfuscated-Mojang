@@ -102,12 +102,10 @@ public class TntBlock extends Block {
 			explode(level, blockPos, player);
 			level.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 11);
 			Item item = itemStack.getItem();
-			if (!player.isCreative()) {
-				if (itemStack.is(Items.FLINT_AND_STEEL)) {
-					itemStack.hurtAndBreak(1, player, LivingEntity.getSlotForHand(interactionHand));
-				} else {
-					itemStack.shrink(1);
-				}
+			if (itemStack.is(Items.FLINT_AND_STEEL)) {
+				itemStack.hurtAndBreak(1, player, LivingEntity.getSlotForHand(interactionHand));
+			} else {
+				itemStack.consume(1, player);
 			}
 
 			player.awardStat(Stats.ITEM_USED.get(item));

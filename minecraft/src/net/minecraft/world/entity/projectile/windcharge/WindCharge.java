@@ -11,6 +11,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ExplosionDamageCalculator;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.SimpleExplosionDamageCalculator;
+import net.minecraft.world.phys.Vec3;
 
 public class WindCharge extends AbstractWindCharge {
 	private static final ExplosionDamageCalculator EXPLOSION_DAMAGE_CALCULATOR = new SimpleExplosionDamageCalculator(
@@ -26,8 +27,8 @@ public class WindCharge extends AbstractWindCharge {
 		super(EntityType.WIND_CHARGE, level, player, d, e, f);
 	}
 
-	public WindCharge(Level level, double d, double e, double f, double g, double h, double i) {
-		super(EntityType.WIND_CHARGE, d, e, f, g, h, i, level);
+	public WindCharge(Level level, double d, double e, double f, Vec3 vec3) {
+		super(EntityType.WIND_CHARGE, d, e, f, vec3, level);
 	}
 
 	@Override

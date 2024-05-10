@@ -3,7 +3,6 @@ package net.minecraft.world.item.enchantment.effects;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.LevelBasedValue;
 
 public record RemoveBinomial(LevelBasedValue chance) implements EnchantmentValueEffect {
@@ -12,7 +11,7 @@ public record RemoveBinomial(LevelBasedValue chance) implements EnchantmentValue
 	);
 
 	@Override
-	public float process(ItemStack itemStack, int i, RandomSource randomSource, float f) {
+	public float process(int i, RandomSource randomSource, float f) {
 		float g = this.chance.calculate(i);
 		int j = 0;
 

@@ -154,7 +154,10 @@ public class AccountProfileKeyPairManager implements ProfileKeyPairManager {
 
 	private static ProfilePublicKey.Data parsePublicKey(KeyPairResponse keyPairResponse) throws CryptException {
 		KeyPair keyPair = keyPairResponse.keyPair();
-		if (!Strings.isNullOrEmpty(keyPair.publicKey()) && keyPairResponse.publicKeySignature() != null && keyPairResponse.publicKeySignature().array().length != 0) {
+		if (keyPair != null
+			&& !Strings.isNullOrEmpty(keyPair.publicKey())
+			&& keyPairResponse.publicKeySignature() != null
+			&& keyPairResponse.publicKeySignature().array().length != 0) {
 			try {
 				Instant instant = Instant.parse(keyPairResponse.expiresAt());
 				PublicKey publicKey = Crypt.stringToRsaPublicKey(keyPair.publicKey());

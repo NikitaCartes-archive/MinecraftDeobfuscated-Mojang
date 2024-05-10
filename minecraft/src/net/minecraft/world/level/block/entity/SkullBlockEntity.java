@@ -143,7 +143,7 @@ public class SkullBlockEntity extends BlockEntity {
 		}
 
 		if (compoundTag.contains("custom_name", 8)) {
-			this.customName = Component.Serializer.fromJson(compoundTag.getString("custom_name"), provider);
+			this.customName = parseCustomNameSafe(compoundTag.getString("custom_name"), provider);
 		} else {
 			this.customName = null;
 		}

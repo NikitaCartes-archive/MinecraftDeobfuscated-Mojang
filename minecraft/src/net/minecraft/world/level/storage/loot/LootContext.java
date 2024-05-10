@@ -104,6 +104,11 @@ public class LootContext {
 			return this;
 		}
 
+		public LootContext.Builder withOptionalRandomSource(RandomSource randomSource) {
+			this.random = randomSource;
+			return this;
+		}
+
 		public ServerLevel getLevel() {
 			return this.params.getLevel();
 		}

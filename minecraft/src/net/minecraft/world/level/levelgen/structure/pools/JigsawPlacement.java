@@ -55,7 +55,8 @@ public class JigsawPlacement {
 		boolean bl,
 		Optional<Heightmap.Types> optional2,
 		int j,
-		PoolAliasLookup poolAliasLookup
+		PoolAliasLookup poolAliasLookup,
+		int k
 	) {
 		RegistryAccess registryAccess = generationContext.registryAccess();
 		ChunkGenerator chunkGenerator = generationContext.chunkGenerator();
@@ -100,26 +101,33 @@ public class JigsawPlacement {
 				structurePoolElement.getBoundingBox(structureTemplateManager, blockPos3, rotation)
 			);
 			BoundingBox boundingBox = poolElementStructurePiece.getBoundingBox();
-			int k = (boundingBox.maxX() + boundingBox.minX()) / 2;
-			int l = (boundingBox.maxZ() + boundingBox.minZ()) / 2;
-			int m;
+			int l = (boundingBox.maxX() + boundingBox.minX()) / 2;
+			int m = (boundingBox.maxZ() + boundingBox.minZ()) / 2;
+			int n;
 			if (optional2.isPresent()) {
-				m = blockPos.getY() + chunkGenerator.getFirstFreeHeight(k, l, (Heightmap.Types)optional2.get(), levelHeightAccessor, generationContext.randomState());
+				n = blockPos.getY() + chunkGenerator.getFirstFreeHeight(l, m, (Heightmap.Types)optional2.get(), levelHeightAccessor, generationContext.randomState());
 			} else {
-				m = blockPos3.getY();
+				n = blockPos3.getY();
 			}
 
-			int n = boundingBox.minY() + poolElementStructurePiece.getGroundLevelDelta();
-			poolElementStructurePiece.move(0, m - n, 0);
-			int o = m + vec3i.getY();
+			int o = boundingBox.minY() + poolElementStructurePiece.getGroundLevelDelta();
+			poolElementStructurePiece.move(0, n - o, 0);
+			int p = n + vec3i.getY();
 			return Optional.of(
 				new Structure.GenerationStub(
-					new BlockPos(k, o, l),
+					new BlockPos(l, p, m),
 					structurePiecesBuilder -> {
 						List<PoolElementStructurePiece> list = Lists.<PoolElementStructurePiece>newArrayList();
 						list.add(poolElementStructurePiece);
 						if (i > 0) {
-							AABB aABB = new AABB((double)(k - j), (double)(o - j), (double)(l - j), (double)(k + j + 1), (double)(o + j + 1), (double)(l + j + 1));
+							AABB aABB = new AABB(
+								(double)(l - j),
+								(double)Math.max(p - j, levelHeightAccessor.getMinBuildHeight() + k),
+								(double)(m - j),
+								(double)(l + j + 1),
+								(double)Math.min(p + j + 1, levelHeightAccessor.getMaxBuildHeight() - k),
+								(double)(m + j + 1)
+							);
 							VoxelShape voxelShape = Shapes.join(Shapes.create(aABB), Shapes.create(AABB.of(boundingBox)), BooleanOp.ONLY_FIRST);
 							addPieces(
 								generationContext.randomState(),
@@ -209,7 +217,7 @@ public class JigsawPlacement {
 			holderx -> true
 		);
 		Optional<Structure.GenerationStub> optional = addPieces(
-			generationContext, holder, Optional.of(resourceLocation), i, blockPos, false, Optional.empty(), 128, PoolAliasLookup.EMPTY
+			generationContext, holder, Optional.of(resourceLocation), i, blockPos, false, Optional.empty(), 128, PoolAliasLookup.EMPTY, 0
 		);
 		if (optional.isPresent()) {
 			StructurePiecesBuilder structurePiecesBuilder = ((Structure.GenerationStub)optional.get()).getPiecesBuilder();

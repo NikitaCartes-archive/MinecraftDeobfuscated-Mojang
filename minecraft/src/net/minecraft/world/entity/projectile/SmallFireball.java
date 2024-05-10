@@ -14,18 +14,19 @@ import net.minecraft.world.level.block.BaseFireBlock;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 
 public class SmallFireball extends Fireball {
 	public SmallFireball(EntityType<? extends SmallFireball> entityType, Level level) {
 		super(entityType, level);
 	}
 
-	public SmallFireball(Level level, LivingEntity livingEntity, double d, double e, double f) {
-		super(EntityType.SMALL_FIREBALL, livingEntity, d, e, f, level);
+	public SmallFireball(Level level, LivingEntity livingEntity, Vec3 vec3) {
+		super(EntityType.SMALL_FIREBALL, livingEntity, vec3, level);
 	}
 
-	public SmallFireball(Level level, double d, double e, double f, double g, double h, double i) {
-		super(EntityType.SMALL_FIREBALL, d, e, f, g, h, i, level);
+	public SmallFireball(Level level, double d, double e, double f, Vec3 vec3) {
+		super(EntityType.SMALL_FIREBALL, d, e, f, vec3, level);
 	}
 
 	@Override

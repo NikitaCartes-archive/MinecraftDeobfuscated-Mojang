@@ -16,6 +16,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -158,10 +159,10 @@ public class LecternBlock extends BaseEntityBlock {
 		return new LecternBlockEntity(blockPos, blockState);
 	}
 
-	public static boolean tryPlaceBook(@Nullable Entity entity, Level level, BlockPos blockPos, BlockState blockState, ItemStack itemStack) {
+	public static boolean tryPlaceBook(@Nullable LivingEntity livingEntity, Level level, BlockPos blockPos, BlockState blockState, ItemStack itemStack) {
 		if (!(Boolean)blockState.getValue(HAS_BOOK)) {
 			if (!level.isClientSide) {
-				placeBook(entity, level, blockPos, blockState, itemStack);
+				placeBook(livingEntity, level, blockPos, blockState, itemStack);
 			}
 
 			return true;
@@ -170,10 +171,10 @@ public class LecternBlock extends BaseEntityBlock {
 		}
 	}
 
-	private static void placeBook(@Nullable Entity entity, Level level, BlockPos blockPos, BlockState blockState, ItemStack itemStack) {
+	private static void placeBook(@Nullable LivingEntity livingEntity, Level level, BlockPos blockPos, BlockState blockState, ItemStack itemStack) {
 		if (level.getBlockEntity(blockPos) instanceof LecternBlockEntity lecternBlockEntity) {
-			lecternBlockEntity.setBook(itemStack.split(1));
-			resetBookState(entity, level, blockPos, blockState, true);
+			lecternBlockEntity.setBook(itemStack.consumeAndReturn(1, livingEntity));
+			resetBookState(livingEntity, level, blockPos, blockState, true);
 			level.playSound(null, blockPos, SoundEvents.BOOK_PUT, SoundSource.BLOCKS, 1.0F, 1.0F);
 		}
 	}

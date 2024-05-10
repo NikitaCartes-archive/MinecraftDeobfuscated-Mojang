@@ -312,9 +312,7 @@ public class EnchantmentHelper {
 							if (targetedConditionalEffect.enchanted() == EnchantmentTarget.VICTIM
 								&& targetedConditionalEffect.affected() == EnchantmentTarget.VICTIM
 								&& targetedConditionalEffect.matches(lootContext)) {
-								mutableFloat.setValue(
-									((EnchantmentValueEffect)targetedConditionalEffect.effect()).process(enchantedItemInUse.itemStack(), i, randomSource, mutableFloat.floatValue())
-								);
+								mutableFloat.setValue(((EnchantmentValueEffect)targetedConditionalEffect.effect()).process(i, randomSource, mutableFloat.floatValue()));
 							}
 						}
 					);
@@ -332,9 +330,7 @@ public class EnchantmentHelper {
 								if (targetedConditionalEffect.enchanted() == EnchantmentTarget.ATTACKER
 									&& targetedConditionalEffect.affected() == EnchantmentTarget.VICTIM
 									&& targetedConditionalEffect.matches(lootContext)) {
-									mutableFloat.setValue(
-										((EnchantmentValueEffect)targetedConditionalEffect.effect()).process(enchantedItemInUse.itemStack(), i, randomSource, mutableFloat.floatValue())
-									);
+									mutableFloat.setValue(((EnchantmentValueEffect)targetedConditionalEffect.effect()).process(i, randomSource, mutableFloat.floatValue()));
 								}
 							}
 						);
@@ -371,16 +367,16 @@ public class EnchantmentHelper {
 		return Math.max(0, mutableFloat.intValue());
 	}
 
-	public static float modifyCrossbowChargingTime(ServerLevel serverLevel, ItemStack itemStack, Entity entity, float f) {
+	public static float modifyCrossbowChargingTime(LivingEntity livingEntity, float f) {
 		MutableFloat mutableFloat = new MutableFloat(f);
-		runIterationOnItem(itemStack, (holder, i) -> holder.value().modifyCrossbowChargeTime(serverLevel, i, itemStack, mutableFloat));
+		runIterationOnEquipment(livingEntity, (holder, i, enchantedItemInUse) -> holder.value().modifyCrossbowChargeTime(livingEntity.getRandom(), i, mutableFloat));
 		return Math.max(0.0F, mutableFloat.floatValue());
 	}
 
-	public static float getTridentSpinAttackStrength(ServerLevel serverLevel, ItemStack itemStack, LivingEntity livingEntity) {
+	public static float getTridentSpinAttackStrength(LivingEntity livingEntity) {
 		MutableFloat mutableFloat = new MutableFloat(0.0F);
 		runIterationOnEquipment(
-			livingEntity, (holder, i, enchantedItemInUse) -> holder.value().modifyTridentSpinAttackStrength(serverLevel, i, itemStack, livingEntity, mutableFloat)
+			livingEntity, (holder, i, enchantedItemInUse) -> holder.value().modifyTridentSpinAttackStrength(livingEntity.getRandom(), i, mutableFloat)
 		);
 		return mutableFloat.floatValue();
 	}

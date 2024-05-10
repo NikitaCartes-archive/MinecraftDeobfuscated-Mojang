@@ -101,12 +101,16 @@ public abstract class AbstractVillager extends AgeableMob implements InventoryCa
 
 	@Override
 	public MerchantOffers getOffers() {
-		if (this.offers == null) {
-			this.offers = new MerchantOffers();
-			this.updateTrades();
-		}
+		if (this.level().isClientSide) {
+			throw new IllegalStateException("Cannot load Villager offers on the client");
+		} else {
+			if (this.offers == null) {
+				this.offers = new MerchantOffers();
+				this.updateTrades();
+			}
 
-		return this.offers;
+			return this.offers;
+		}
 	}
 
 	@Override

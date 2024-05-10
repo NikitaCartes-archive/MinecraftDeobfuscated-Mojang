@@ -61,15 +61,16 @@ public final class DataComponentPatch {
 			if (i == 0 && j == 0) {
 				return DataComponentPatch.EMPTY;
 			} else {
-				Reference2ObjectMap<DataComponentType<?>, Optional<?>> reference2ObjectMap = new Reference2ObjectArrayMap<>(i + j);
+				int k = i + j;
+				Reference2ObjectMap<DataComponentType<?>, Optional<?>> reference2ObjectMap = new Reference2ObjectArrayMap<>(Math.min(k, 65536));
 
-				for (int k = 0; k < i; k++) {
+				for (int l = 0; l < i; l++) {
 					DataComponentType<?> dataComponentType = DataComponentType.STREAM_CODEC.decode(registryFriendlyByteBuf);
 					Object object = dataComponentType.streamCodec().decode(registryFriendlyByteBuf);
 					reference2ObjectMap.put(dataComponentType, Optional.of(object));
 				}
 
-				for (int k = 0; k < j; k++) {
+				for (int l = 0; l < j; l++) {
 					DataComponentType<?> dataComponentType = DataComponentType.STREAM_CODEC.decode(registryFriendlyByteBuf);
 					reference2ObjectMap.put(dataComponentType, Optional.empty());
 				}

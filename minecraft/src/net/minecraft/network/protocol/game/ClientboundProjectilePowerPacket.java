@@ -10,29 +10,21 @@ public class ClientboundProjectilePowerPacket implements Packet<ClientGamePacket
 		ClientboundProjectilePowerPacket::write, ClientboundProjectilePowerPacket::new
 	);
 	private final int id;
-	private final double xPower;
-	private final double yPower;
-	private final double zPower;
+	private final double accelerationPower;
 
-	public ClientboundProjectilePowerPacket(int i, double d, double e, double f) {
+	public ClientboundProjectilePowerPacket(int i, double d) {
 		this.id = i;
-		this.xPower = d;
-		this.yPower = e;
-		this.zPower = f;
+		this.accelerationPower = d;
 	}
 
 	private ClientboundProjectilePowerPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.id = friendlyByteBuf.readVarInt();
-		this.xPower = friendlyByteBuf.readDouble();
-		this.yPower = friendlyByteBuf.readDouble();
-		this.zPower = friendlyByteBuf.readDouble();
+		this.accelerationPower = friendlyByteBuf.readDouble();
 	}
 
 	private void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeVarInt(this.id);
-		friendlyByteBuf.writeDouble(this.xPower);
-		friendlyByteBuf.writeDouble(this.yPower);
-		friendlyByteBuf.writeDouble(this.zPower);
+		friendlyByteBuf.writeDouble(this.accelerationPower);
 	}
 
 	@Override
@@ -48,15 +40,7 @@ public class ClientboundProjectilePowerPacket implements Packet<ClientGamePacket
 		return this.id;
 	}
 
-	public double getXPower() {
-		return this.xPower;
-	}
-
-	public double getYPower() {
-		return this.yPower;
-	}
-
-	public double getZPower() {
-		return this.zPower;
+	public double getAccelerationPower() {
+		return this.accelerationPower;
 	}
 }

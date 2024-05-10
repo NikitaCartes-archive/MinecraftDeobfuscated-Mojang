@@ -293,6 +293,8 @@ public class MobEffectInstance implements Comparable<MobEffectInstance> {
 				: this.duration == mobEffectInstance.duration
 					&& this.amplifier == mobEffectInstance.amplifier
 					&& this.ambient == mobEffectInstance.ambient
+					&& this.visible == mobEffectInstance.visible
+					&& this.showIcon == mobEffectInstance.showIcon
 					&& this.effect.equals(mobEffectInstance.effect);
 		}
 	}
@@ -301,7 +303,9 @@ public class MobEffectInstance implements Comparable<MobEffectInstance> {
 		int i = this.effect.hashCode();
 		i = 31 * i + this.duration;
 		i = 31 * i + this.amplifier;
-		return 31 * i + (this.ambient ? 1 : 0);
+		i = 31 * i + (this.ambient ? 1 : 0);
+		i = 31 * i + (this.visible ? 1 : 0);
+		return 31 * i + (this.showIcon ? 1 : 0);
 	}
 
 	public Tag save() {

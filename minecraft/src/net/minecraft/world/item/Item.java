@@ -152,7 +152,8 @@ public class Item implements FeatureElement, ItemLike {
 	}
 
 	public ItemStack finishUsingItem(ItemStack itemStack, Level level, LivingEntity livingEntity) {
-		return itemStack.has(DataComponents.FOOD) ? livingEntity.eat(level, itemStack) : itemStack;
+		FoodProperties foodProperties = itemStack.get(DataComponents.FOOD);
+		return foodProperties != null ? livingEntity.eat(level, itemStack, foodProperties) : itemStack;
 	}
 
 	public boolean isBarVisible(ItemStack itemStack) {

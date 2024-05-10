@@ -17,6 +17,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.TagParser;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.entity.Entity;
@@ -27,7 +28,7 @@ import org.slf4j.Logger;
 public final class CustomData {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	public static final CustomData EMPTY = new CustomData(new CompoundTag());
-	public static final Codec<CustomData> CODEC = CompoundTag.CODEC.xmap(CustomData::new, customData -> customData.tag);
+	public static final Codec<CustomData> CODEC = Codec.withAlternative(CompoundTag.CODEC, TagParser.AS_CODEC).xmap(CustomData::new, customData -> customData.tag);
 	public static final Codec<CustomData> CODEC_WITH_ID = CODEC.validate(
 		customData -> customData.getUnsafe().contains("id", 8) ? DataResult.success(customData) : DataResult.error(() -> "Missing id for entity in: " + customData)
 	);

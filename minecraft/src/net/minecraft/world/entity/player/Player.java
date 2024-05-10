@@ -78,6 +78,7 @@ import net.minecraft.world.entity.projectile.FishingHook;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.ProjectileDeflection;
 import net.minecraft.world.food.FoodData;
+import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.inventory.InventoryMenu;
@@ -1123,7 +1124,7 @@ public abstract class Player extends LivingEntity {
 				float f = this.isAutoSpinAttack() ? this.autoSpinAttackDmg : (float)this.getAttributeValue(Attributes.ATTACK_DAMAGE);
 				ItemStack itemStack = this.getAttackingItemStack();
 				DamageSource damageSource = this.damageSources().playerAttack(this);
-				float g = f - this.getEnchantedDamage(entity, f, damageSource);
+				float g = this.getEnchantedDamage(entity, f, damageSource) - f;
 				float h = this.getAttackStrengthScale(0.5F);
 				f *= 0.2F + h * h * 0.8F;
 				g *= h;
@@ -2013,15 +2014,25 @@ public abstract class Player extends LivingEntity {
 	}
 
 	@Override
-	public ItemStack eat(Level level, ItemStack itemStack) {
-		this.getFoodData().eat(itemStack);
+	public ItemStack eat(Level level, ItemStack itemStack, FoodProperties foodProperties) {
+		this.getFoodData().eat(foodProperties);
 		this.awardStat(Stats.ITEM_USED.get(itemStack.getItem()));
 		level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.PLAYER_BURP, SoundSource.PLAYERS, 0.5F, level.random.nextFloat() * 0.1F + 0.9F);
 		if (this instanceof ServerPlayer) {
 			CriteriaTriggers.CONSUME_ITEM.trigger((ServerPlayer)this, itemStack);
 		}
 
-		return super.eat(level, itemStack);
+		ItemStack itemStack2 = super.eat(level, itemStack, foodProperties);
+		Optional<ItemStack> optional = foodProperties.usingConvertsTo();
+		if (optional.isPresent() && !this.hasInfiniteMaterials()) {
+			if (itemStack2.isEmpty()) {
+				return ((ItemStack)optional.get()).copy();
+			}
+
+			this.getInventory().add(((ItemStack)optional.get()).copy());
+		}
+
+		return itemStack2;
 	}
 
 	@Override

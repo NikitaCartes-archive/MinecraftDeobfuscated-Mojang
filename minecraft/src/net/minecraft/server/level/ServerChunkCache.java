@@ -17,6 +17,7 @@ import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.progress.ChunkProgressListener;
 import net.minecraft.util.VisibleForDebug;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -182,20 +183,15 @@ public class ServerChunkCache extends ChunkSource {
 			if (chunkHolder == null) {
 				return null;
 			} else {
-				ChunkResult<ChunkAccess> chunkResult = (ChunkResult<ChunkAccess>)chunkHolder.getFutureIfPresent(ChunkStatus.FULL).getNow(null);
-				if (chunkResult == null) {
-					return null;
-				} else {
-					ChunkAccess chunkAccess2 = chunkResult.orElse(null);
-					if (chunkAccess2 != null) {
-						this.storeInCache(l, chunkAccess2, ChunkStatus.FULL);
-						if (chunkAccess2 instanceof LevelChunk) {
-							return (LevelChunk)chunkAccess2;
-						}
+				ChunkAccess chunkAccess = chunkHolder.getChunkIfPresent(ChunkStatus.FULL);
+				if (chunkAccess != null) {
+					this.storeInCache(l, chunkAccess, ChunkStatus.FULL);
+					if (chunkAccess instanceof LevelChunk) {
+						return (LevelChunk)chunkAccess;
 					}
-
-					return null;
 				}
+
+				return null;
 			}
 		}
 	}
@@ -239,7 +235,7 @@ public class ServerChunkCache extends ChunkSource {
 			}
 		}
 
-		return this.chunkAbsent(chunkHolder, k) ? ChunkHolder.UNLOADED_CHUNK_FUTURE : chunkHolder.getOrScheduleFuture(chunkStatus, this.chunkMap);
+		return this.chunkAbsent(chunkHolder, k) ? GenerationChunkHolder.UNLOADED_CHUNK_FUTURE : chunkHolder.scheduleChunkGenerationTask(chunkStatus, this.chunkMap);
 	}
 
 	private boolean chunkAbsent(@Nullable ChunkHolder chunkHolder, int i) {
@@ -258,25 +254,7 @@ public class ServerChunkCache extends ChunkSource {
 	public LightChunk getChunkForLighting(int i, int j) {
 		long l = ChunkPos.asLong(i, j);
 		ChunkHolder chunkHolder = this.getVisibleChunkIfPresent(l);
-		if (chunkHolder == null) {
-			return null;
-		} else {
-			int k = CHUNK_STATUSES.size() - 1;
-
-			while (true) {
-				ChunkStatus chunkStatus = (ChunkStatus)CHUNK_STATUSES.get(k);
-				ChunkAccess chunkAccess = (ChunkAccess)((ChunkResult)chunkHolder.getFutureIfPresentUnchecked(chunkStatus).getNow(ChunkHolder.UNLOADED_CHUNK)).orElse(null);
-				if (chunkAccess != null) {
-					return chunkAccess;
-				}
-
-				if (chunkStatus == ChunkStatus.INITIALIZE_LIGHT.getParent()) {
-					return null;
-				}
-
-				k--;
-			}
-		}
+		return chunkHolder == null ? null : chunkHolder.getChunkIfPresentUnchecked(ChunkStatus.INITIALIZE_LIGHT);
 	}
 
 	public Level getLevel() {
@@ -290,6 +268,7 @@ public class ServerChunkCache extends ChunkSource {
 	boolean runDistanceManagerUpdates() {
 		boolean bl = this.distanceManager.runAllUpdates(this.chunkMap);
 		boolean bl2 = this.chunkMap.promoteChunkMap();
+		this.chunkMap.runGenerationTasks();
 		if (!bl && !bl2) {
 			return false;
 		} else {
@@ -531,6 +510,11 @@ public class ServerChunkCache extends ChunkSource {
 	final class MainThreadExecutor extends BlockableEventLoop<Runnable> {
 		MainThreadExecutor(final Level level) {
 			super("Chunk source main thread executor for " + level.dimension().location());
+		}
+
+		@Override
+		public void managedBlock(BooleanSupplier booleanSupplier) {
+			super.managedBlock(() -> MinecraftServer.throwIfFatalException() && booleanSupplier.getAsBoolean());
 		}
 
 		@Override

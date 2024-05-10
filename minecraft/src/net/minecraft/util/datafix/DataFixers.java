@@ -7,11 +7,13 @@ import com.mojang.datafixers.DataFixer;
 import com.mojang.datafixers.DataFixerBuilder;
 import com.mojang.datafixers.Typed;
 import com.mojang.datafixers.DSL.TypeReference;
+import com.mojang.datafixers.DataFixerBuilder.Result;
 import com.mojang.datafixers.schemas.Schema;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.function.BiFunction;
@@ -310,24 +312,28 @@ import net.minecraft.util.datafix.schemas.V99;
 public class DataFixers {
 	private static final BiFunction<Integer, Schema, Schema> SAME = Schema::new;
 	private static final BiFunction<Integer, Schema, Schema> SAME_NAMESPACED = NamespacedSchema::new;
-	private static final DataFixer dataFixer = createFixerUpper(SharedConstants.DATA_FIX_TYPES_TO_OPTIMIZE);
+	private static final Result DATA_FIXER = createFixerUpper();
 	public static final int BLENDING_VERSION = 3441;
 
 	private DataFixers() {
 	}
 
 	public static DataFixer getDataFixer() {
-		return dataFixer;
+		return DATA_FIXER.fixer();
 	}
 
-	private static synchronized DataFixer createFixerUpper(Set<TypeReference> set) {
+	private static Result createFixerUpper() {
 		DataFixerBuilder dataFixerBuilder = new DataFixerBuilder(SharedConstants.getCurrentVersion().getDataVersion().getVersion());
 		addFixers(dataFixerBuilder);
+		return dataFixerBuilder.build();
+	}
+
+	public static CompletableFuture<?> optimize(Set<TypeReference> set) {
 		if (set.isEmpty()) {
-			return dataFixerBuilder.buildUnoptimized();
+			return CompletableFuture.completedFuture(null);
 		} else {
 			Executor executor = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat("Datafixer Bootstrap").setDaemon(true).setPriority(1).build());
-			return dataFixerBuilder.buildOptimized(set, executor);
+			return DATA_FIXER.optimize(set, executor);
 		}
 	}
 

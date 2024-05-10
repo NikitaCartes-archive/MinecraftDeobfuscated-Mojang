@@ -520,11 +520,7 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 		PacketUtils.ensureRunningOnSameThread(clientboundSetEntityMotionPacket, this, this.minecraft);
 		Entity entity = this.level.getEntity(clientboundSetEntityMotionPacket.getId());
 		if (entity != null) {
-			entity.lerpMotion(
-				(double)clientboundSetEntityMotionPacket.getXa() / 8000.0,
-				(double)clientboundSetEntityMotionPacket.getYa() / 8000.0,
-				(double)clientboundSetEntityMotionPacket.getZa() / 8000.0
-			);
+			entity.lerpMotion(clientboundSetEntityMotionPacket.getXa(), clientboundSetEntityMotionPacket.getYa(), clientboundSetEntityMotionPacket.getZa());
 		}
 	}
 
@@ -2324,9 +2320,7 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 	public void handleProjectilePowerPacket(ClientboundProjectilePowerPacket clientboundProjectilePowerPacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundProjectilePowerPacket, this, this.minecraft);
 		if (this.level.getEntity(clientboundProjectilePowerPacket.getId()) instanceof AbstractHurtingProjectile abstractHurtingProjectile) {
-			abstractHurtingProjectile.xPower = clientboundProjectilePowerPacket.getXPower();
-			abstractHurtingProjectile.yPower = clientboundProjectilePowerPacket.getYPower();
-			abstractHurtingProjectile.zPower = clientboundProjectilePowerPacket.getZPower();
+			abstractHurtingProjectile.accelerationPower = clientboundProjectilePowerPacket.getAccelerationPower();
 		}
 	}
 

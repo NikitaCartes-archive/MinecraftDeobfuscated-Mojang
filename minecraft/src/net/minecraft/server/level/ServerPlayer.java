@@ -223,6 +223,7 @@ public class ServerPlayer extends Player {
 	private WardenSpawnTracker wardenSpawnTracker = new WardenSpawnTracker(0, 0, 0);
 	@Nullable
 	private BlockPos raidOmenPosition;
+	private Vec3 lastKnownClientMovement = Vec3.ZERO;
 	private final ContainerSynchronizer containerSynchronizer = new ContainerSynchronizer() {
 		@Override
 		public void sendInitialData(AbstractContainerMenu abstractContainerMenu, NonNullList<ItemStack> nonNullList, ItemStack itemStack, int[] is) {
@@ -1026,7 +1027,7 @@ public class ServerPlayer extends Player {
 		super.onExplosionHit(entity);
 		this.currentImpulseImpactPos = this.position();
 		this.currentExplosionCause = entity;
-		this.ignoreFallDamageFromCurrentImpulse = entity != null && entity.getType() == EntityType.WIND_CHARGE;
+		this.ignoreFallDamageFromCurrentImpulse = this.ignoreFallDamageFromCurrentImpulse || entity != null && entity.getType() == EntityType.WIND_CHARGE;
 	}
 
 	@Override
@@ -1893,7 +1894,12 @@ public class ServerPlayer extends Player {
 	@Override
 	public void setOnGroundWithKnownMovement(boolean bl, Vec3 vec3) {
 		super.setOnGroundWithKnownMovement(bl, vec3);
-		this.setDeltaMovement(vec3);
+		this.lastKnownClientMovement = vec3;
+	}
+
+	@Override
+	public Vec3 getKnownMovement() {
+		return this.lastKnownClientMovement;
 	}
 
 	@Override

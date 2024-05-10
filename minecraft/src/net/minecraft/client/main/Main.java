@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import javax.annotation.Nullable;
 import joptsimple.ArgumentAcceptingOptionSpec;
 import joptsimple.OptionParser;
@@ -43,22 +44,16 @@ import net.minecraft.obfuscate.DontObfuscate;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.NativeModuleLister;
+import net.minecraft.util.datafix.DataFixTypes;
+import net.minecraft.util.datafix.DataFixers;
 import net.minecraft.util.profiling.jfr.JvmProfiler;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class Main {
-	static final Logger LOGGER = LogUtils.getLogger();
-
 	@DontObfuscate
 	public static void main(String[] strings) {
-		Stopwatch stopwatch = Stopwatch.createStarted(Ticker.systemTicker());
-		Stopwatch stopwatch2 = Stopwatch.createStarted(Ticker.systemTicker());
-		GameLoadTimesEvent.INSTANCE.beginStep(TelemetryProperty.LOAD_TIME_TOTAL_TIME_MS, stopwatch);
-		GameLoadTimesEvent.INSTANCE.beginStep(TelemetryProperty.LOAD_TIME_PRE_WINDOW_MS, stopwatch2);
-		SharedConstants.tryDetectVersion();
-		SharedConstants.enableDataFixerOptimizations();
 		OptionParser optionParser = new OptionParser();
 		optionParser.allowsUnrecognizedOptions();
 		optionParser.accepts("demo");
@@ -78,7 +73,7 @@ public class Main {
 		OptionSpec<Integer> optionSpec10 = optionParser.accepts("proxyPort").withRequiredArg().defaultsTo("8080").ofType(Integer.class);
 		OptionSpec<String> optionSpec11 = optionParser.accepts("proxyUser").withRequiredArg();
 		OptionSpec<String> optionSpec12 = optionParser.accepts("proxyPass").withRequiredArg();
-		OptionSpec<String> optionSpec13 = optionParser.accepts("username").withRequiredArg().defaultsTo("Player" + Util.getMillis() % 1000L);
+		OptionSpec<String> optionSpec13 = optionParser.accepts("username").withRequiredArg().defaultsTo("Player" + System.currentTimeMillis() % 1000L);
 		OptionSpec<String> optionSpec14 = optionParser.accepts("uuid").withRequiredArg();
 		OptionSpec<String> optionSpec15 = optionParser.accepts("xuid").withOptionalArg().defaultsTo("");
 		OptionSpec<String> optionSpec16 = optionParser.accepts("clientId").withOptionalArg().defaultsTo("");
@@ -91,96 +86,109 @@ public class Main {
 		OptionSpec<String> optionSpec23 = optionParser.accepts("userProperties").withRequiredArg().defaultsTo("{}");
 		OptionSpec<String> optionSpec24 = optionParser.accepts("profileProperties").withRequiredArg().defaultsTo("{}");
 		OptionSpec<String> optionSpec25 = optionParser.accepts("assetIndex").withRequiredArg();
-		OptionSpec<String> optionSpec26 = optionParser.accepts("userType").withRequiredArg().defaultsTo(User.Type.LEGACY.getName());
+		OptionSpec<String> optionSpec26 = optionParser.accepts("userType").withRequiredArg().defaultsTo("legacy");
 		OptionSpec<String> optionSpec27 = optionParser.accepts("versionType").withRequiredArg().defaultsTo("release");
 		OptionSpec<String> optionSpec28 = optionParser.nonOptions();
 		OptionSet optionSet = optionParser.parse(strings);
-		List<String> list = optionSet.valuesOf(optionSpec28);
-		if (!list.isEmpty()) {
-			LOGGER.info("Completely ignored arguments: {}", list);
-		}
-
-		String string = parseArgument(optionSet, optionSpec9);
-		Proxy proxy = Proxy.NO_PROXY;
-		if (string != null) {
-			try {
-				proxy = new Proxy(Type.SOCKS, new InetSocketAddress(string, parseArgument(optionSet, optionSpec10)));
-			} catch (Exception var85) {
-			}
-		}
-
-		final String string2 = parseArgument(optionSet, optionSpec11);
-		final String string3 = parseArgument(optionSet, optionSpec12);
-		if (!proxy.equals(Proxy.NO_PROXY) && stringHasValue(string2) && stringHasValue(string3)) {
-			Authenticator.setDefault(new Authenticator() {
-				protected PasswordAuthentication getPasswordAuthentication() {
-					return new PasswordAuthentication(string2, string3.toCharArray());
-				}
-			});
-		}
-
-		int i = parseArgument(optionSet, optionSpec19);
-		int j = parseArgument(optionSet, optionSpec20);
-		OptionalInt optionalInt = ofNullable(parseArgument(optionSet, optionSpec21));
-		OptionalInt optionalInt2 = ofNullable(parseArgument(optionSet, optionSpec22));
-		boolean bl = optionSet.has("fullscreen");
-		boolean bl2 = optionSet.has("demo");
-		boolean bl3 = optionSet.has("disableMultiplayer");
-		boolean bl4 = optionSet.has("disableChat");
-		String string4 = parseArgument(optionSet, optionSpec18);
-		Gson gson = new GsonBuilder().registerTypeAdapter(PropertyMap.class, new Serializer()).create();
-		PropertyMap propertyMap = GsonHelper.fromJson(gson, parseArgument(optionSet, optionSpec23), PropertyMap.class);
-		PropertyMap propertyMap2 = GsonHelper.fromJson(gson, parseArgument(optionSet, optionSpec24), PropertyMap.class);
-		String string5 = parseArgument(optionSet, optionSpec27);
 		File file = parseArgument(optionSet, optionSpec6);
-		File file2 = optionSet.has(optionSpec7) ? parseArgument(optionSet, optionSpec7) : new File(file, "assets/");
-		File file3 = optionSet.has(optionSpec8) ? parseArgument(optionSet, optionSpec8) : new File(file, "resourcepacks/");
-		UUID uUID = optionSet.has(optionSpec14)
-			? UndashedUuid.fromStringLenient(optionSpec14.value(optionSet))
-			: UUIDUtil.createOfflinePlayerUUID(optionSpec13.value(optionSet));
-		String string6 = optionSet.has(optionSpec25) ? optionSpec25.value(optionSet) : null;
-		String string7 = optionSet.valueOf(optionSpec15);
-		String string8 = optionSet.valueOf(optionSpec16);
-		String string9 = parseArgument(optionSet, optionSpec2);
-		String string10 = unescapeJavaArgument(parseArgument(optionSet, optionSpec3));
-		String string11 = unescapeJavaArgument(parseArgument(optionSet, optionSpec4));
-		String string12 = unescapeJavaArgument(parseArgument(optionSet, optionSpec5));
-		if (optionSet.has(optionSpec)) {
-			JvmProfiler.INSTANCE.start(net.minecraft.util.profiling.jfr.Environment.CLIENT);
-		}
+		String string = parseArgument(optionSet, optionSpec18);
+		String string2 = "Pre-bootstrap";
 
-		CrashReport.preload();
-
+		Logger logger;
+		GameConfig gameConfig;
 		try {
+			if (optionSet.has(optionSpec)) {
+				JvmProfiler.INSTANCE.start(net.minecraft.util.profiling.jfr.Environment.CLIENT);
+			}
+
+			Stopwatch stopwatch = Stopwatch.createStarted(Ticker.systemTicker());
+			Stopwatch stopwatch2 = Stopwatch.createStarted(Ticker.systemTicker());
+			GameLoadTimesEvent.INSTANCE.beginStep(TelemetryProperty.LOAD_TIME_TOTAL_TIME_MS, stopwatch);
+			GameLoadTimesEvent.INSTANCE.beginStep(TelemetryProperty.LOAD_TIME_PRE_WINDOW_MS, stopwatch2);
+			SharedConstants.tryDetectVersion();
+			CompletableFuture<?> completableFuture = DataFixers.optimize(DataFixTypes.TYPES_FOR_LEVEL_LIST);
+			CrashReport.preload();
+			logger = LogUtils.getLogger();
+			string2 = "Bootstrap";
 			Bootstrap.bootStrap();
 			GameLoadTimesEvent.INSTANCE.setBootstrapTime(Bootstrap.bootstrapDuration.get());
 			Bootstrap.validate();
-		} catch (Throwable var84) {
-			CrashReport crashReport = CrashReport.forThrowable(var84, "Bootstrap");
+			string2 = "Argument parsing";
+			List<String> list = optionSet.valuesOf(optionSpec28);
+			if (!list.isEmpty()) {
+				logger.info("Completely ignored arguments: {}", list);
+			}
+
+			String string3 = optionSpec26.value(optionSet);
+			User.Type type = User.Type.byName(string3);
+			if (type == null) {
+				logger.warn("Unrecognized user type: {}", string3);
+			}
+
+			String string4 = parseArgument(optionSet, optionSpec9);
+			Proxy proxy = Proxy.NO_PROXY;
+			if (string4 != null) {
+				try {
+					proxy = new Proxy(Type.SOCKS, new InetSocketAddress(string4, parseArgument(optionSet, optionSpec10)));
+				} catch (Exception var80) {
+				}
+			}
+
+			final String string5 = parseArgument(optionSet, optionSpec11);
+			final String string6 = parseArgument(optionSet, optionSpec12);
+			if (!proxy.equals(Proxy.NO_PROXY) && stringHasValue(string5) && stringHasValue(string6)) {
+				Authenticator.setDefault(new Authenticator() {
+					protected PasswordAuthentication getPasswordAuthentication() {
+						return new PasswordAuthentication(string5, string6.toCharArray());
+					}
+				});
+			}
+
+			int i = parseArgument(optionSet, optionSpec19);
+			int j = parseArgument(optionSet, optionSpec20);
+			OptionalInt optionalInt = ofNullable(parseArgument(optionSet, optionSpec21));
+			OptionalInt optionalInt2 = ofNullable(parseArgument(optionSet, optionSpec22));
+			boolean bl = optionSet.has("fullscreen");
+			boolean bl2 = optionSet.has("demo");
+			boolean bl3 = optionSet.has("disableMultiplayer");
+			boolean bl4 = optionSet.has("disableChat");
+			Gson gson = new GsonBuilder().registerTypeAdapter(PropertyMap.class, new Serializer()).create();
+			PropertyMap propertyMap = GsonHelper.fromJson(gson, parseArgument(optionSet, optionSpec23), PropertyMap.class);
+			PropertyMap propertyMap2 = GsonHelper.fromJson(gson, parseArgument(optionSet, optionSpec24), PropertyMap.class);
+			String string7 = parseArgument(optionSet, optionSpec27);
+			File file2 = optionSet.has(optionSpec7) ? parseArgument(optionSet, optionSpec7) : new File(file, "assets/");
+			File file3 = optionSet.has(optionSpec8) ? parseArgument(optionSet, optionSpec8) : new File(file, "resourcepacks/");
+			UUID uUID = optionSet.has(optionSpec14)
+				? UndashedUuid.fromStringLenient(optionSpec14.value(optionSet))
+				: UUIDUtil.createOfflinePlayerUUID(optionSpec13.value(optionSet));
+			String string8 = optionSet.has(optionSpec25) ? optionSpec25.value(optionSet) : null;
+			String string9 = optionSet.valueOf(optionSpec15);
+			String string10 = optionSet.valueOf(optionSpec16);
+			String string11 = parseArgument(optionSet, optionSpec2);
+			String string12 = unescapeJavaArgument(parseArgument(optionSet, optionSpec3));
+			String string13 = unescapeJavaArgument(parseArgument(optionSet, optionSpec4));
+			String string14 = unescapeJavaArgument(parseArgument(optionSet, optionSpec5));
+			User user = new User(
+				optionSpec13.value(optionSet), uUID, optionSpec17.value(optionSet), emptyStringToEmptyOptional(string9), emptyStringToEmptyOptional(string10), type
+			);
+			gameConfig = new GameConfig(
+				new GameConfig.UserData(user, propertyMap, propertyMap2, proxy),
+				new DisplayData(i, j, optionalInt, optionalInt2, bl),
+				new GameConfig.FolderData(file, file3, file2, string8),
+				new GameConfig.GameData(bl2, string, string7, bl3, bl4),
+				new GameConfig.QuickPlayData(string11, string12, string13, string14)
+			);
+			Util.startTimerHackThread();
+			completableFuture.join();
+		} catch (Throwable var81) {
+			CrashReport crashReport = CrashReport.forThrowable(var81, string2);
 			CrashReportCategory crashReportCategory = crashReport.addCategory("Initialization");
 			NativeModuleLister.addCrashSection(crashReportCategory);
-			Minecraft.fillReport(null, null, string4, null, crashReport);
+			Minecraft.fillReport(null, null, string, null, crashReport);
 			Minecraft.crash(null, file, crashReport);
 			return;
 		}
 
-		String string13 = optionSpec26.value(optionSet);
-		User.Type type = User.Type.byName(string13);
-		if (type == null) {
-			LOGGER.warn("Unrecognized user type: {}", string13);
-		}
-
-		User user = new User(
-			optionSpec13.value(optionSet), uUID, optionSpec17.value(optionSet), emptyStringToEmptyOptional(string7), emptyStringToEmptyOptional(string8), type
-		);
-		GameConfig gameConfig = new GameConfig(
-			new GameConfig.UserData(user, propertyMap, propertyMap2, proxy),
-			new DisplayData(i, j, optionalInt, optionalInt2, bl),
-			new GameConfig.FolderData(file, file3, file2, string6),
-			new GameConfig.GameData(bl2, string4, string5, bl3, bl4),
-			new GameConfig.QuickPlayData(string9, string10, string11, string12)
-		);
-		Util.startTimerHackThread();
 		Thread thread = new Thread("Client Shutdown Thread") {
 			public void run() {
 				Minecraft minecraft = Minecraft.getInstance();
@@ -192,7 +200,7 @@ public class Main {
 				}
 			}
 		};
-		thread.setUncaughtExceptionHandler(new DefaultUncaughtExceptionHandler(LOGGER));
+		thread.setUncaughtExceptionHandler(new DefaultUncaughtExceptionHandler(logger));
 		Runtime.getRuntime().addShutdownHook(thread);
 		final Minecraft minecraft = null;
 
@@ -202,12 +210,12 @@ public class Main {
 			RenderSystem.beginInitialization();
 			minecraft = new Minecraft(gameConfig);
 			RenderSystem.finishInitialization();
-		} catch (SilentInitException var82) {
+		} catch (SilentInitException var78) {
 			Util.shutdownExecutors();
-			LOGGER.warn("Failed to create window: ", (Throwable)var82);
+			logger.warn("Failed to create window: ", (Throwable)var78);
 			return;
-		} catch (Throwable var83) {
-			CrashReport crashReport2 = CrashReport.forThrowable(var83, "Initializing game");
+		} catch (Throwable var79) {
+			CrashReport crashReport2 = CrashReport.forThrowable(var79, "Initializing game");
 			CrashReportCategory crashReportCategory2 = crashReport2.addCategory("Initialization");
 			NativeModuleLister.addCrashSection(crashReportCategory2);
 			Minecraft.fillReport(minecraft, null, gameConfig.game.launchVersion, null, crashReport2);
@@ -220,12 +228,8 @@ public class Main {
 		if (minecraft.renderOnThread()) {
 			thread2 = new Thread("Game thread") {
 				public void run() {
-					try {
-						RenderSystem.initGameThread(true);
-						minecraft.run();
-					} catch (Throwable var2) {
-						Main.LOGGER.error("Exception in client thread", var2);
-					}
+					RenderSystem.initGameThread(true);
+					minecraft.run();
 				}
 			};
 			thread2.start();
@@ -234,13 +238,8 @@ public class Main {
 			}
 		} else {
 			thread2 = null;
-
-			try {
-				RenderSystem.initGameThread(false);
-				minecraft2.run();
-			} catch (Throwable var81) {
-				LOGGER.error("Unhandled game exception", var81);
-			}
+			RenderSystem.initGameThread(false);
+			minecraft.run();
 		}
 
 		BufferUploader.reset();
@@ -250,8 +249,8 @@ public class Main {
 			if (thread2 != null) {
 				thread2.join();
 			}
-		} catch (InterruptedException var79) {
-			LOGGER.error("Exception during client thread shutdown", (Throwable)var79);
+		} catch (InterruptedException var76) {
+			logger.error("Exception during client thread shutdown", (Throwable)var76);
 		} finally {
 			minecraft2.destroy();
 		}

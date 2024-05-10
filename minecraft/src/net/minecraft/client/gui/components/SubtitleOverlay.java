@@ -3,8 +3,10 @@ package net.minecraft.client.gui.components;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.audio.ListenerTransform;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
@@ -61,7 +63,8 @@ public class SubtitleOverlay implements SoundEventListener {
 
 				while (iterator.hasNext()) {
 					SubtitleOverlay.Subtitle subtitle2 = (SubtitleOverlay.Subtitle)iterator.next();
-					if ((double)subtitle2.getTime() + 3000.0 * d <= (double)Util.getMillis()) {
+					subtitle2.purgeOldInstances(3000.0 * d);
+					if (!subtitle2.isStillActive()) {
 						iterator.remove();
 					} else {
 						j = Math.max(j, this.minecraft.font.width(subtitle2.getText()));
@@ -73,34 +76,37 @@ public class SubtitleOverlay implements SoundEventListener {
 				for (SubtitleOverlay.Subtitle subtitle2 : this.audibleSubtitles) {
 					int k = 255;
 					Component component = subtitle2.getText();
-					Vec3 vec34 = subtitle2.getLocation().subtract(vec3).normalize();
-					double e = vec33.dot(vec34);
-					double f = vec32.dot(vec34);
-					boolean bl = f > 0.5;
-					int l = j / 2;
-					int m = 9;
-					int n = m / 2;
-					float g = 1.0F;
-					int o = this.minecraft.font.width(component);
-					int p = Mth.floor(Mth.clampedLerp(255.0F, 75.0F, (float)(Util.getMillis() - subtitle2.getTime()) / (float)(3000.0 * d)));
-					int q = p << 16 | p << 8 | p;
-					guiGraphics.pose().pushPose();
-					guiGraphics.pose()
-						.translate((float)guiGraphics.guiWidth() - (float)l * 1.0F - 2.0F, (float)(guiGraphics.guiHeight() - 35) - (float)(i * (m + 1)) * 1.0F, 0.0F);
-					guiGraphics.pose().scale(1.0F, 1.0F, 1.0F);
-					guiGraphics.fill(-l - 1, -n - 1, l + 1, n + 1, this.minecraft.options.getBackgroundColor(0.8F));
-					int r = q + -16777216;
-					if (!bl) {
-						if (e > 0.0) {
-							guiGraphics.drawString(this.minecraft.font, ">", l - this.minecraft.font.width(">"), -n, r);
-						} else if (e < 0.0) {
-							guiGraphics.drawString(this.minecraft.font, "<", -l, -n, r);
+					SubtitleOverlay.SoundPlayedAt soundPlayedAt = subtitle2.getClosest(vec3);
+					if (soundPlayedAt != null) {
+						Vec3 vec34 = soundPlayedAt.location.subtract(vec3).normalize();
+						double e = vec33.dot(vec34);
+						double f = vec32.dot(vec34);
+						boolean bl = f > 0.5;
+						int l = j / 2;
+						int m = 9;
+						int n = m / 2;
+						float g = 1.0F;
+						int o = this.minecraft.font.width(component);
+						int p = Mth.floor(Mth.clampedLerp(255.0F, 75.0F, (float)(Util.getMillis() - soundPlayedAt.time) / (float)(3000.0 * d)));
+						int q = p << 16 | p << 8 | p;
+						guiGraphics.pose().pushPose();
+						guiGraphics.pose()
+							.translate((float)guiGraphics.guiWidth() - (float)l * 1.0F - 2.0F, (float)(guiGraphics.guiHeight() - 35) - (float)(i * (m + 1)) * 1.0F, 0.0F);
+						guiGraphics.pose().scale(1.0F, 1.0F, 1.0F);
+						guiGraphics.fill(-l - 1, -n - 1, l + 1, n + 1, this.minecraft.options.getBackgroundColor(0.8F));
+						int r = q + -16777216;
+						if (!bl) {
+							if (e > 0.0) {
+								guiGraphics.drawString(this.minecraft.font, ">", l - this.minecraft.font.width(">"), -n, r);
+							} else if (e < 0.0) {
+								guiGraphics.drawString(this.minecraft.font, "<", -l, -n, r);
+							}
 						}
-					}
 
-					guiGraphics.drawString(this.minecraft.font, component, -o / 2, -n, r);
-					guiGraphics.pose().popPose();
-					i++;
+						guiGraphics.drawString(this.minecraft.font, component, -o / 2, -n, r);
+						guiGraphics.pose().popPose();
+						i++;
+					}
 				}
 			}
 		}
@@ -124,38 +130,62 @@ public class SubtitleOverlay implements SoundEventListener {
 	}
 
 	@Environment(EnvType.CLIENT)
-	public static class Subtitle {
+	static record SoundPlayedAt(Vec3 location, long time) {
+	}
+
+	@Environment(EnvType.CLIENT)
+	static class Subtitle {
 		private final Component text;
 		private final float range;
-		private long time;
-		private Vec3 location;
+		private final List<SubtitleOverlay.SoundPlayedAt> playedAt = new ArrayList();
 
 		public Subtitle(Component component, float f, Vec3 vec3) {
 			this.text = component;
 			this.range = f;
-			this.location = vec3;
-			this.time = Util.getMillis();
+			this.playedAt.add(new SubtitleOverlay.SoundPlayedAt(vec3, Util.getMillis()));
 		}
 
 		public Component getText() {
 			return this.text;
 		}
 
-		public long getTime() {
-			return this.time;
-		}
-
-		public Vec3 getLocation() {
-			return this.location;
+		@Nullable
+		public SubtitleOverlay.SoundPlayedAt getClosest(Vec3 vec3) {
+			if (this.playedAt.isEmpty()) {
+				return null;
+			} else {
+				return this.playedAt.size() == 1
+					? (SubtitleOverlay.SoundPlayedAt)this.playedAt.getFirst()
+					: (SubtitleOverlay.SoundPlayedAt)this.playedAt
+						.stream()
+						.min(Comparator.comparingDouble(soundPlayedAt -> soundPlayedAt.location().distanceTo(vec3)))
+						.orElse(null);
+			}
 		}
 
 		public void refresh(Vec3 vec3) {
-			this.location = vec3;
-			this.time = Util.getMillis();
+			this.playedAt.removeIf(soundPlayedAt -> vec3.equals(soundPlayedAt.location()));
+			this.playedAt.add(new SubtitleOverlay.SoundPlayedAt(vec3, Util.getMillis()));
 		}
 
 		public boolean isAudibleFrom(Vec3 vec3) {
-			return Float.isInfinite(this.range) || vec3.closerThan(this.location, (double)this.range);
+			if (Float.isInfinite(this.range)) {
+				return true;
+			} else if (this.playedAt.isEmpty()) {
+				return false;
+			} else {
+				SubtitleOverlay.SoundPlayedAt soundPlayedAt = this.getClosest(vec3);
+				return soundPlayedAt == null ? false : vec3.closerThan(soundPlayedAt.location, (double)this.range);
+			}
+		}
+
+		public void purgeOldInstances(double d) {
+			long l = Util.getMillis();
+			this.playedAt.removeIf(soundPlayedAt -> (double)(l - soundPlayedAt.time()) > d);
+		}
+
+		public boolean isStillActive() {
+			return !this.playedAt.isEmpty();
 		}
 	}
 }

@@ -66,10 +66,7 @@ public class CakeBlock extends Block {
 	) {
 		Item item = itemStack.getItem();
 		if (itemStack.is(ItemTags.CANDLES) && (Integer)blockState.getValue(BITES) == 0 && Block.byItem(item) instanceof CandleBlock candleBlock) {
-			if (!player.isCreative()) {
-				itemStack.shrink(1);
-			}
-
+			itemStack.consume(1, player);
 			level.playSound(null, blockPos, SoundEvents.CAKE_ADD_CANDLE, SoundSource.BLOCKS, 1.0F, 1.0F);
 			level.setBlockAndUpdate(blockPos, CandleCakeBlock.byCandle(candleBlock));
 			level.gameEvent(player, GameEvent.BLOCK_CHANGE, blockPos);

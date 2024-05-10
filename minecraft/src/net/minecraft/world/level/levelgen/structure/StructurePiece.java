@@ -71,10 +71,7 @@ public abstract class StructurePiece {
 		this(
 			structurePieceType,
 			compoundTag.getInt("GD"),
-			(BoundingBox)BoundingBox.CODEC
-				.parse(NbtOps.INSTANCE, compoundTag.get("BB"))
-				.resultOrPartial(LOGGER::error)
-				.orElseThrow(() -> new IllegalArgumentException("Invalid boundingbox"))
+			BoundingBox.CODEC.parse(NbtOps.INSTANCE, compoundTag.get("BB")).getOrThrow(string -> new IllegalArgumentException("Invalid boundingbox: " + string))
 		);
 		int i = compoundTag.getInt("O");
 		this.setOrientation(i == -1 ? null : Direction.from2DDataValue(i));

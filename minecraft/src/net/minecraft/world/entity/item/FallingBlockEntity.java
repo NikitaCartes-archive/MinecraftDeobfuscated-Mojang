@@ -213,6 +213,7 @@ public class FallingBlockEntity extends Entity {
 			}
 
 			this.setDeltaMovement(this.getDeltaMovement().scale(0.98));
+			this.handleNetherPortal();
 		}
 	}
 

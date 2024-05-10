@@ -63,7 +63,7 @@ public class DropperBlock extends DispenserBlock {
 					if (container == null) {
 						itemStack2 = DISPENSE_BEHAVIOUR.dispense(blockSource, itemStack);
 					} else {
-						itemStack2 = HopperBlockEntity.addItem(dispenserBlockEntity, container, itemStack.copy().split(1), direction.getOpposite());
+						itemStack2 = HopperBlockEntity.addItem(dispenserBlockEntity, container, itemStack.copyWithCount(1), direction.getOpposite());
 						if (itemStack2.isEmpty()) {
 							itemStack2 = itemStack.copy();
 							itemStack2.shrink(1);

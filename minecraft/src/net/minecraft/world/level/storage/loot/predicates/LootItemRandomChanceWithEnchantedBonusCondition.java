@@ -50,6 +50,6 @@ public record LootItemRandomChanceWithEnchantedBonusCondition(LevelBasedValue ch
 
 	public static LootItemCondition.Builder randomChanceAndLootingBoost(HolderLookup.Provider provider, float f, float g) {
 		HolderLookup.RegistryLookup<Enchantment> registryLookup = provider.lookupOrThrow(Registries.ENCHANTMENT);
-		return () -> new LootItemRandomChanceWithEnchantedBonusCondition(new LevelBasedValue.Linear(f, g), registryLookup.getOrThrow(Enchantments.LOOTING));
+		return () -> new LootItemRandomChanceWithEnchantedBonusCondition(new LevelBasedValue.Linear(f + g, g), registryLookup.getOrThrow(Enchantments.LOOTING));
 	}
 }

@@ -44,15 +44,29 @@ public class DispenserBlockEntity extends RandomizableContainerBlockEntity {
 		return i;
 	}
 
-	public int addItem(ItemStack itemStack) {
-		for (int i = 0; i < this.items.size(); i++) {
-			if (this.items.get(i).isEmpty()) {
-				this.setItem(i, itemStack);
-				return i;
+	public ItemStack insertItem(ItemStack itemStack) {
+		int i = this.getMaxStackSize(itemStack);
+
+		for (int j = 0; j < this.items.size(); j++) {
+			ItemStack itemStack2 = this.items.get(j);
+			if (itemStack2.isEmpty() || ItemStack.isSameItemSameComponents(itemStack, itemStack2)) {
+				int k = Math.min(itemStack.getCount(), i - itemStack2.getCount());
+				if (k > 0) {
+					if (itemStack2.isEmpty()) {
+						this.setItem(j, itemStack.split(k));
+					} else {
+						itemStack.shrink(k);
+						itemStack2.grow(k);
+					}
+				}
+
+				if (itemStack.isEmpty()) {
+					break;
+				}
 			}
 		}
 
-		return -1;
+		return itemStack;
 	}
 
 	@Override

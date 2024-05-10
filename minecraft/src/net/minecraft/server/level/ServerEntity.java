@@ -171,7 +171,19 @@ public class ServerEntity {
 					double d = vec32.distanceToSqr(this.ap);
 					if (d > 1.0E-7 || d > 0.0 && vec32.lengthSqr() == 0.0) {
 						this.ap = vec32;
-						this.broadcast.accept(new ClientboundSetEntityMotionPacket(this.entity.getId(), this.ap));
+						if (this.entity instanceof AbstractHurtingProjectile abstractHurtingProjectile) {
+							this.broadcast
+								.accept(
+									new ClientboundBundlePacket(
+										List.of(
+											new ClientboundSetEntityMotionPacket(this.entity.getId(), this.ap),
+											new ClientboundProjectilePowerPacket(abstractHurtingProjectile.getId(), abstractHurtingProjectile.accelerationPower)
+										)
+									)
+								);
+						} else {
+							this.broadcast.accept(new ClientboundSetEntityMotionPacket(this.entity.getId(), this.ap));
+						}
 					}
 				}
 
@@ -203,16 +215,8 @@ public class ServerEntity {
 
 		this.tickCount++;
 		if (this.entity.hurtMarked) {
-			this.broadcastAndSend(new ClientboundSetEntityMotionPacket(this.entity));
-			if (this.entity instanceof AbstractHurtingProjectile abstractHurtingProjectile) {
-				this.broadcastAndSend(
-					new ClientboundProjectilePowerPacket(
-						abstractHurtingProjectile.getId(), abstractHurtingProjectile.xPower, abstractHurtingProjectile.yPower, abstractHurtingProjectile.zPower
-					)
-				);
-			}
-
 			this.entity.hurtMarked = false;
+			this.broadcastAndSend(new ClientboundSetEntityMotionPacket(this.entity));
 		}
 	}
 
@@ -298,7 +302,7 @@ public class ServerEntity {
 		}
 
 		if (this.entity instanceof LivingEntity) {
-			Set<AttributeInstance> set = ((LivingEntity)this.entity).getAttributes().getDirtyAttributes();
+			Set<AttributeInstance> set = ((LivingEntity)this.entity).getAttributes().getAttributesToSync();
 			if (!set.isEmpty()) {
 				this.broadcastAndSend(new ClientboundUpdateAttributesPacket(this.entity.getId(), set));
 			}

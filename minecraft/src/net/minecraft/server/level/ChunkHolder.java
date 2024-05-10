@@ -1,17 +1,13 @@
 package net.minecraft.server.level;
 
-import com.mojang.datafixers.util.Pair;
 import it.unimi.dsi.fastutil.shorts.ShortOpenHashSet;
 import it.unimi.dsi.fastutil.shorts.ShortSet;
-import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
-import java.util.concurrent.atomic.AtomicReferenceArray;
 import java.util.function.IntConsumer;
 import java.util.function.IntSupplier;
-import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -20,7 +16,6 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundLightUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundSectionBlocksUpdatePacket;
-import net.minecraft.util.DebugBuffer;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelHeightAccessor;
@@ -28,32 +23,21 @@ import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraft.world.level.chunk.ImposterProtoChunk;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
-import net.minecraft.world.level.chunk.ProtoChunk;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 
-public class ChunkHolder {
-	public static final ChunkResult<ChunkAccess> UNLOADED_CHUNK = ChunkResult.error("Unloaded chunk");
-	public static final CompletableFuture<ChunkResult<ChunkAccess>> UNLOADED_CHUNK_FUTURE = CompletableFuture.completedFuture(UNLOADED_CHUNK);
+public class ChunkHolder extends GenerationChunkHolder {
 	public static final ChunkResult<LevelChunk> UNLOADED_LEVEL_CHUNK = ChunkResult.error("Unloaded level chunk");
-	public static final ChunkResult<ChunkAccess> NOT_DONE_YET = ChunkResult.error("Not done yet");
 	private static final CompletableFuture<ChunkResult<LevelChunk>> UNLOADED_LEVEL_CHUNK_FUTURE = CompletableFuture.completedFuture(UNLOADED_LEVEL_CHUNK);
-	private static final List<ChunkStatus> CHUNK_STATUSES = ChunkStatus.getStatusList();
-	private final AtomicReferenceArray<CompletableFuture<ChunkResult<ChunkAccess>>> futures = new AtomicReferenceArray(CHUNK_STATUSES.size());
 	private final LevelHeightAccessor levelHeightAccessor;
 	private volatile CompletableFuture<ChunkResult<LevelChunk>> fullChunkFuture = UNLOADED_LEVEL_CHUNK_FUTURE;
 	private volatile CompletableFuture<ChunkResult<LevelChunk>> tickingChunkFuture = UNLOADED_LEVEL_CHUNK_FUTURE;
 	private volatile CompletableFuture<ChunkResult<LevelChunk>> entityTickingChunkFuture = UNLOADED_LEVEL_CHUNK_FUTURE;
-	private CompletableFuture<ChunkAccess> chunkToSave = CompletableFuture.completedFuture(null);
-	@Nullable
-	private final DebugBuffer<ChunkHolder.ChunkSaveDebug> chunkToSaveHistory = null;
 	private int oldTicketLevel;
 	private int ticketLevel;
 	private int queueLevel;
-	private final ChunkPos pos;
 	private boolean hasChangedSections;
 	private final ShortSet[] changedBlocksPerSection;
 	private final BitSet blockChangedLightSectionFilter = new BitSet();
@@ -62,8 +46,9 @@ public class ChunkHolder {
 	private final ChunkHolder.LevelChangeListener onLevelChange;
 	private final ChunkHolder.PlayerProvider playerProvider;
 	private boolean wasAccessibleSinceLastSave;
-	private CompletableFuture<Void> pendingFullStateConfirmation = CompletableFuture.completedFuture(null);
+	private CompletableFuture<?> pendingFullStateConfirmation = CompletableFuture.completedFuture(null);
 	private CompletableFuture<?> sendSync = CompletableFuture.completedFuture(null);
+	private CompletableFuture<?> saveSync = CompletableFuture.completedFuture(null);
 
 	public ChunkHolder(
 		ChunkPos chunkPos,
@@ -73,7 +58,7 @@ public class ChunkHolder {
 		ChunkHolder.LevelChangeListener levelChangeListener,
 		ChunkHolder.PlayerProvider playerProvider
 	) {
-		this.pos = chunkPos;
+		super(chunkPos);
 		this.levelHeightAccessor = levelHeightAccessor;
 		this.lightEngine = levelLightEngine;
 		this.onLevelChange = levelChangeListener;
@@ -83,15 +68,6 @@ public class ChunkHolder {
 		this.queueLevel = this.oldTicketLevel;
 		this.setTicketLevel(i);
 		this.changedBlocksPerSection = new ShortSet[levelHeightAccessor.getSectionsCount()];
-	}
-
-	public CompletableFuture<ChunkResult<ChunkAccess>> getFutureIfPresentUnchecked(ChunkStatus chunkStatus) {
-		CompletableFuture<ChunkResult<ChunkAccess>> completableFuture = (CompletableFuture<ChunkResult<ChunkAccess>>)this.futures.get(chunkStatus.getIndex());
-		return completableFuture == null ? UNLOADED_CHUNK_FUTURE : completableFuture;
-	}
-
-	public CompletableFuture<ChunkResult<ChunkAccess>> getFutureIfPresent(ChunkStatus chunkStatus) {
-		return ChunkLevel.generationStatus(this.ticketLevel).isOrAfter(chunkStatus) ? this.getFutureIfPresentUnchecked(chunkStatus) : UNLOADED_CHUNK_FUTURE;
 	}
 
 	public CompletableFuture<ChunkResult<LevelChunk>> getTickingChunkFuture() {
@@ -111,46 +87,37 @@ public class ChunkHolder {
 		return (LevelChunk)((ChunkResult)this.getTickingChunkFuture().getNow(UNLOADED_LEVEL_CHUNK)).orElse(null);
 	}
 
-	public CompletableFuture<?> getChunkSendSyncFuture() {
-		return this.sendSync;
-	}
-
 	@Nullable
 	public LevelChunk getChunkToSend() {
 		return !this.sendSync.isDone() ? null : this.getTickingChunk();
 	}
 
-	@Nullable
-	public ChunkStatus getLastAvailableStatus() {
-		for (int i = CHUNK_STATUSES.size() - 1; i >= 0; i--) {
-			ChunkStatus chunkStatus = (ChunkStatus)CHUNK_STATUSES.get(i);
-			CompletableFuture<ChunkResult<ChunkAccess>> completableFuture = this.getFutureIfPresentUnchecked(chunkStatus);
-			if (((ChunkResult)completableFuture.getNow(UNLOADED_CHUNK)).isSuccess()) {
-				return chunkStatus;
-			}
-		}
-
-		return null;
+	public CompletableFuture<?> getSendSyncFuture() {
+		return this.sendSync;
 	}
 
-	@Nullable
-	public ChunkAccess getLastAvailable() {
-		for (int i = CHUNK_STATUSES.size() - 1; i >= 0; i--) {
-			ChunkStatus chunkStatus = (ChunkStatus)CHUNK_STATUSES.get(i);
-			CompletableFuture<ChunkResult<ChunkAccess>> completableFuture = this.getFutureIfPresentUnchecked(chunkStatus);
-			if (!completableFuture.isCompletedExceptionally()) {
-				ChunkAccess chunkAccess = (ChunkAccess)((ChunkResult)completableFuture.getNow(UNLOADED_CHUNK)).orElse(null);
-				if (chunkAccess != null) {
-					return chunkAccess;
-				}
-			}
+	public void addSendDependency(CompletableFuture<?> completableFuture) {
+		if (this.sendSync.isDone()) {
+			this.sendSync = completableFuture;
+		} else {
+			this.sendSync = this.sendSync.thenCombine(completableFuture, (object, object2) -> null);
 		}
-
-		return null;
 	}
 
-	public CompletableFuture<ChunkAccess> getChunkToSave() {
-		return this.chunkToSave;
+	public CompletableFuture<?> getSaveSyncFuture() {
+		return this.saveSync;
+	}
+
+	public boolean isReadyForSaving() {
+		return this.getGenerationRefCount() == 0 && this.saveSync.isDone();
+	}
+
+	private void addSaveDependency(CompletableFuture<?> completableFuture) {
+		if (this.saveSync.isDone()) {
+			this.saveSync = completableFuture;
+		} else {
+			this.saveSync = this.saveSync.thenCombine(completableFuture, (object, object2) -> null);
+		}
 	}
 
 	public void blockChanged(BlockPos blockPos) {
@@ -167,7 +134,7 @@ public class ChunkHolder {
 	}
 
 	public void sectionLightChanged(LightLayer lightLayer, int i) {
-		ChunkAccess chunkAccess = (ChunkAccess)((ChunkResult)this.getFutureIfPresent(ChunkStatus.INITIALIZE_LIGHT).getNow(UNLOADED_CHUNK)).orElse(null);
+		ChunkAccess chunkAccess = this.getChunkIfPresent(ChunkStatus.INITIALIZE_LIGHT);
 		if (chunkAccess != null) {
 			chunkAccess.setUnsaved(true);
 			LevelChunk levelChunk = this.getTickingChunk();
@@ -254,67 +221,12 @@ public class ChunkHolder {
 		list.forEach(serverPlayer -> serverPlayer.connection.send(packet));
 	}
 
-	public CompletableFuture<ChunkResult<ChunkAccess>> getOrScheduleFuture(ChunkStatus chunkStatus, ChunkMap chunkMap) {
-		int i = chunkStatus.getIndex();
-		CompletableFuture<ChunkResult<ChunkAccess>> completableFuture = (CompletableFuture<ChunkResult<ChunkAccess>>)this.futures.get(i);
-		if (completableFuture != null) {
-			ChunkResult<ChunkAccess> chunkResult = (ChunkResult<ChunkAccess>)completableFuture.getNow(NOT_DONE_YET);
-			if (chunkResult == null) {
-				String string = "value in future for status: " + chunkStatus + " was incorrectly set to null at chunk: " + this.pos;
-				throw chunkMap.debugFuturesAndCreateReportedException(new IllegalStateException("null value previously set for chunk status"), string);
-			}
-
-			if (chunkResult == NOT_DONE_YET || chunkResult.isSuccess()) {
-				return completableFuture;
-			}
-		}
-
-		if (ChunkLevel.generationStatus(this.ticketLevel).isOrAfter(chunkStatus)) {
-			CompletableFuture<ChunkResult<ChunkAccess>> completableFuture2 = chunkMap.schedule(this, chunkStatus);
-			this.updateChunkToSave(completableFuture2, "schedule " + chunkStatus);
-			this.futures.set(i, completableFuture2);
-			return completableFuture2;
-		} else {
-			return completableFuture == null ? UNLOADED_CHUNK_FUTURE : completableFuture;
-		}
-	}
-
-	protected void addSaveDependency(String string, CompletableFuture<?> completableFuture) {
-		if (this.chunkToSaveHistory != null) {
-			this.chunkToSaveHistory.push(new ChunkHolder.ChunkSaveDebug(Thread.currentThread(), completableFuture, string));
-		}
-
-		this.chunkToSave = this.chunkToSave.thenCombine(completableFuture, (chunkAccess, object) -> chunkAccess);
-	}
-
-	private void updateChunkToSave(CompletableFuture<? extends ChunkResult<? extends ChunkAccess>> completableFuture, String string) {
-		if (this.chunkToSaveHistory != null) {
-			this.chunkToSaveHistory.push(new ChunkHolder.ChunkSaveDebug(Thread.currentThread(), completableFuture, string));
-		}
-
-		this.chunkToSave = this.chunkToSave.thenCombine(completableFuture, (chunkAccess, chunkResult) -> ChunkResult.orElse(chunkResult, chunkAccess));
-	}
-
-	public void addSendDependency(CompletableFuture<?> completableFuture) {
-		if (this.sendSync.isDone()) {
-			this.sendSync = completableFuture;
-		} else {
-			this.sendSync = this.sendSync.thenCombine(completableFuture, (object, object2) -> null);
-		}
-	}
-
-	public FullChunkStatus getFullStatus() {
-		return ChunkLevel.fullStatus(this.ticketLevel);
-	}
-
-	public ChunkPos getPos() {
-		return this.pos;
-	}
-
+	@Override
 	public int getTicketLevel() {
 		return this.ticketLevel;
 	}
 
+	@Override
 	public int getQueueLevel() {
 		return this.queueLevel;
 	}
@@ -343,63 +255,48 @@ public class ChunkHolder {
 	}
 
 	protected void updateFutures(ChunkMap chunkMap, Executor executor) {
-		ChunkStatus chunkStatus = ChunkLevel.generationStatus(this.oldTicketLevel);
-		ChunkStatus chunkStatus2 = ChunkLevel.generationStatus(this.ticketLevel);
-		boolean bl = ChunkLevel.isLoaded(this.oldTicketLevel);
-		boolean bl2 = ChunkLevel.isLoaded(this.ticketLevel);
 		FullChunkStatus fullChunkStatus = ChunkLevel.fullStatus(this.oldTicketLevel);
 		FullChunkStatus fullChunkStatus2 = ChunkLevel.fullStatus(this.ticketLevel);
-		if (bl) {
-			ChunkResult<ChunkAccess> chunkResult = ChunkResult.error((Supplier<String>)(() -> "Unloaded ticket level " + this.pos));
-
-			for (int i = bl2 ? chunkStatus2.getIndex() + 1 : 0; i <= chunkStatus.getIndex(); i++) {
-				CompletableFuture<ChunkResult<ChunkAccess>> completableFuture = (CompletableFuture<ChunkResult<ChunkAccess>>)this.futures.get(i);
-				if (completableFuture == null) {
-					this.futures.set(i, CompletableFuture.completedFuture(chunkResult));
-				}
-			}
-		}
-
-		boolean bl3 = fullChunkStatus.isOrAfter(FullChunkStatus.FULL);
-		boolean bl4 = fullChunkStatus2.isOrAfter(FullChunkStatus.FULL);
-		this.wasAccessibleSinceLastSave |= bl4;
-		if (!bl3 && bl4) {
+		boolean bl = fullChunkStatus.isOrAfter(FullChunkStatus.FULL);
+		boolean bl2 = fullChunkStatus2.isOrAfter(FullChunkStatus.FULL);
+		this.wasAccessibleSinceLastSave |= bl2;
+		if (!bl && bl2) {
 			this.fullChunkFuture = chunkMap.prepareAccessibleChunk(this);
 			this.scheduleFullChunkPromotion(chunkMap, this.fullChunkFuture, executor, FullChunkStatus.FULL);
-			this.updateChunkToSave(this.fullChunkFuture, "full");
+			this.addSaveDependency(this.fullChunkFuture);
 		}
 
-		if (bl3 && !bl4) {
+		if (bl && !bl2) {
 			this.fullChunkFuture.complete(UNLOADED_LEVEL_CHUNK);
 			this.fullChunkFuture = UNLOADED_LEVEL_CHUNK_FUTURE;
 		}
 
-		boolean bl5 = fullChunkStatus.isOrAfter(FullChunkStatus.BLOCK_TICKING);
-		boolean bl6 = fullChunkStatus2.isOrAfter(FullChunkStatus.BLOCK_TICKING);
-		if (!bl5 && bl6) {
+		boolean bl3 = fullChunkStatus.isOrAfter(FullChunkStatus.BLOCK_TICKING);
+		boolean bl4 = fullChunkStatus2.isOrAfter(FullChunkStatus.BLOCK_TICKING);
+		if (!bl3 && bl4) {
 			this.tickingChunkFuture = chunkMap.prepareTickingChunk(this);
 			this.scheduleFullChunkPromotion(chunkMap, this.tickingChunkFuture, executor, FullChunkStatus.BLOCK_TICKING);
-			this.updateChunkToSave(this.tickingChunkFuture, "ticking");
+			this.addSaveDependency(this.tickingChunkFuture);
 		}
 
-		if (bl5 && !bl6) {
+		if (bl3 && !bl4) {
 			this.tickingChunkFuture.complete(UNLOADED_LEVEL_CHUNK);
 			this.tickingChunkFuture = UNLOADED_LEVEL_CHUNK_FUTURE;
 		}
 
-		boolean bl7 = fullChunkStatus.isOrAfter(FullChunkStatus.ENTITY_TICKING);
-		boolean bl8 = fullChunkStatus2.isOrAfter(FullChunkStatus.ENTITY_TICKING);
-		if (!bl7 && bl8) {
+		boolean bl5 = fullChunkStatus.isOrAfter(FullChunkStatus.ENTITY_TICKING);
+		boolean bl6 = fullChunkStatus2.isOrAfter(FullChunkStatus.ENTITY_TICKING);
+		if (!bl5 && bl6) {
 			if (this.entityTickingChunkFuture != UNLOADED_LEVEL_CHUNK_FUTURE) {
 				throw (IllegalStateException)Util.pauseInIde(new IllegalStateException());
 			}
 
 			this.entityTickingChunkFuture = chunkMap.prepareEntityTickingChunk(this);
 			this.scheduleFullChunkPromotion(chunkMap, this.entityTickingChunkFuture, executor, FullChunkStatus.ENTITY_TICKING);
-			this.updateChunkToSave(this.entityTickingChunkFuture, "entity ticking");
+			this.addSaveDependency(this.entityTickingChunkFuture);
 		}
 
-		if (bl7 && !bl8) {
+		if (bl5 && !bl6) {
 			this.entityTickingChunkFuture.complete(UNLOADED_LEVEL_CHUNK);
 			this.entityTickingChunkFuture = UNLOADED_LEVEL_CHUNK_FUTURE;
 		}
@@ -418,33 +315,6 @@ public class ChunkHolder {
 
 	public void refreshAccessibility() {
 		this.wasAccessibleSinceLastSave = ChunkLevel.fullStatus(this.ticketLevel).isOrAfter(FullChunkStatus.FULL);
-	}
-
-	public void replaceProtoChunk(ImposterProtoChunk imposterProtoChunk) {
-		for (int i = 0; i < this.futures.length(); i++) {
-			CompletableFuture<ChunkResult<ChunkAccess>> completableFuture = (CompletableFuture<ChunkResult<ChunkAccess>>)this.futures.get(i);
-			if (completableFuture != null) {
-				ChunkAccess chunkAccess = (ChunkAccess)((ChunkResult)completableFuture.getNow(UNLOADED_CHUNK)).orElse(null);
-				if (chunkAccess instanceof ProtoChunk) {
-					this.futures.set(i, CompletableFuture.completedFuture(ChunkResult.of(imposterProtoChunk)));
-				}
-			}
-		}
-
-		this.updateChunkToSave(CompletableFuture.completedFuture(ChunkResult.of(imposterProtoChunk.getWrapped())), "replaceProto");
-	}
-
-	public List<Pair<ChunkStatus, CompletableFuture<ChunkResult<ChunkAccess>>>> getAllFutures() {
-		List<Pair<ChunkStatus, CompletableFuture<ChunkResult<ChunkAccess>>>> list = new ArrayList();
-
-		for (int i = 0; i < CHUNK_STATUSES.size(); i++) {
-			list.add(Pair.of((ChunkStatus)CHUNK_STATUSES.get(i), (CompletableFuture)this.futures.get(i)));
-		}
-
-		return list;
-	}
-
-	static record ChunkSaveDebug(Thread thread, CompletableFuture<?> future, String source) {
 	}
 
 	@FunctionalInterface
