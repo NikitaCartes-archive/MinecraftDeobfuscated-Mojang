@@ -369,8 +369,10 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 	}
 
 	private void resetSpecialPrices() {
-		for (MerchantOffer merchantOffer : this.getOffers()) {
-			merchantOffer.resetSpecialPriceDiff();
+		if (!this.level().isClientSide()) {
+			for (MerchantOffer merchantOffer : this.getOffers()) {
+				merchantOffer.resetSpecialPriceDiff();
+			}
 		}
 	}
 
