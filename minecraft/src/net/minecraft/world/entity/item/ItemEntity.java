@@ -187,7 +187,7 @@ public class ItemEntity extends Entity implements TraceableEntity {
 	}
 
 	@Override
-	protected BlockPos getBlockPosBelowThatAffectsMyMovement() {
+	public BlockPos getBlockPosBelowThatAffectsMyMovement() {
 		return this.getOnPos(0.999999F);
 	}
 
@@ -364,8 +364,8 @@ public class ItemEntity extends Entity implements TraceableEntity {
 
 	@Nullable
 	@Override
-	public Entity changeDimension(ServerLevel serverLevel) {
-		Entity entity = super.changeDimension(serverLevel);
+	public Entity changeDimension(Entity.DimensionTransitionSupplier dimensionTransitionSupplier) {
+		Entity entity = super.changeDimension(dimensionTransitionSupplier);
 		if (!this.level().isClientSide && entity instanceof ItemEntity) {
 			((ItemEntity)entity).mergeWithNeighbours();
 		}

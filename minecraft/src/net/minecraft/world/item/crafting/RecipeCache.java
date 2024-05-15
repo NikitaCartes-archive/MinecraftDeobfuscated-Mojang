@@ -2,7 +2,6 @@ package net.minecraft.world.item.crafting;
 
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 import javax.annotation.Nullable;
 import net.minecraft.core.NonNullList;
@@ -25,7 +24,7 @@ public class RecipeCache {
 
 			for (int i = 0; i < this.entries.length; i++) {
 				RecipeCache.Entry entry = this.entries[i];
-				if (entry != null && entry.matches(craftingInput.items())) {
+				if (entry != null && entry.matches(craftingInput)) {
 					this.moveEntryToFront(i);
 					return Optional.ofNullable(entry.value());
 				}
@@ -45,7 +44,7 @@ public class RecipeCache {
 
 	private Optional<RecipeHolder<CraftingRecipe>> compute(CraftingInput craftingInput, Level level) {
 		Optional<RecipeHolder<CraftingRecipe>> optional = level.getRecipeManager().getRecipeFor(RecipeType.CRAFTING, craftingInput, level);
-		this.insert(craftingInput.items(), (RecipeHolder<CraftingRecipe>)optional.orElse(null));
+		this.insert(craftingInput, (RecipeHolder<CraftingRecipe>)optional.orElse(null));
 		return optional;
 	}
 
@@ -57,29 +56,29 @@ public class RecipeCache {
 		}
 	}
 
-	private void insert(List<ItemStack> list, @Nullable RecipeHolder<CraftingRecipe> recipeHolder) {
-		NonNullList<ItemStack> nonNullList = NonNullList.withSize(list.size(), ItemStack.EMPTY);
+	private void insert(CraftingInput craftingInput, @Nullable RecipeHolder<CraftingRecipe> recipeHolder) {
+		NonNullList<ItemStack> nonNullList = NonNullList.withSize(craftingInput.size(), ItemStack.EMPTY);
 
-		for (int i = 0; i < list.size(); i++) {
-			nonNullList.set(i, ((ItemStack)list.get(i)).copyWithCount(1));
+		for (int i = 0; i < craftingInput.size(); i++) {
+			nonNullList.set(i, craftingInput.getItem(i).copyWithCount(1));
 		}
 
 		System.arraycopy(this.entries, 0, this.entries, 1, this.entries.length - 1);
-		this.entries[0] = new RecipeCache.Entry(nonNullList, recipeHolder);
+		this.entries[0] = new RecipeCache.Entry(nonNullList, craftingInput.width(), craftingInput.height(), recipeHolder);
 	}
 
-	static record Entry(NonNullList<ItemStack> key, @Nullable RecipeHolder<CraftingRecipe> value) {
-		public boolean matches(List<ItemStack> list) {
-			if (this.key.size() != list.size()) {
-				return false;
-			} else {
+	static record Entry(NonNullList<ItemStack> key, int width, int height, @Nullable RecipeHolder<CraftingRecipe> value) {
+		public boolean matches(CraftingInput craftingInput) {
+			if (this.width == craftingInput.width() && this.height == craftingInput.height()) {
 				for (int i = 0; i < this.key.size(); i++) {
-					if (!ItemStack.isSameItemSameComponents(this.key.get(i), (ItemStack)list.get(i))) {
+					if (!ItemStack.isSameItemSameComponents(this.key.get(i), craftingInput.getItem(i))) {
 						return false;
 					}
 				}
 
 				return true;
+			} else {
+				return false;
 			}
 		}
 	}

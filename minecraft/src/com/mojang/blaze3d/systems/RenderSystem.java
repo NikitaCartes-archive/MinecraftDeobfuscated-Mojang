@@ -19,7 +19,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
-import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
@@ -48,9 +47,6 @@ public class RenderSystem {
 	private static final ConcurrentLinkedQueue<RenderCall> recordingQueue = Queues.newConcurrentLinkedQueue();
 	private static final Tesselator RENDER_THREAD_TESSELATOR = new Tesselator(1536);
 	private static final int MINIMUM_ATLAS_TEXTURE_SIZE = 1024;
-	private static boolean isReplayingQueue;
-	@Nullable
-	private static Thread gameThread;
 	@Nullable
 	private static Thread renderThread;
 	private static int MAX_SUPPORTED_TEXTURE_SIZE = -1;
@@ -97,10 +93,10 @@ public class RenderSystem {
 	private static final AtomicBoolean pollingEvents = new AtomicBoolean(false);
 
 	public static void initRenderThread() {
-		if (renderThread == null && gameThread != Thread.currentThread()) {
-			renderThread = Thread.currentThread();
-		} else {
+		if (renderThread != null) {
 			throw new IllegalStateException("Could not initialize render thread");
+		} else {
+			renderThread = Thread.currentThread();
 		}
 	}
 
@@ -110,31 +106,6 @@ public class RenderSystem {
 
 	public static boolean isOnRenderThreadOrInit() {
 		return isInInit || isOnRenderThread();
-	}
-
-	public static void initGameThread(boolean bl) {
-		boolean bl2 = renderThread == Thread.currentThread();
-		if (gameThread == null && renderThread != null && bl2 != bl) {
-			gameThread = Thread.currentThread();
-		} else {
-			throw new IllegalStateException("Could not initialize tick thread");
-		}
-	}
-
-	public static boolean isOnGameThread() {
-		return true;
-	}
-
-	public static void assertInInitPhase() {
-		if (!isInInitPhase()) {
-			throw constructThreadException();
-		}
-	}
-
-	public static void assertOnGameThreadOrInit() {
-		if (!isInInit && !isOnGameThread()) {
-			throw constructThreadException();
-		}
 	}
 
 	public static void assertOnRenderThreadOrInit() {
@@ -149,18 +120,8 @@ public class RenderSystem {
 		}
 	}
 
-	public static void assertOnGameThread() {
-		if (!isOnGameThread()) {
-			throw constructThreadException();
-		}
-	}
-
 	private static IllegalStateException constructThreadException() {
 		return new IllegalStateException("Rendersystem called from wrong thread");
-	}
-
-	public static boolean isInInitPhase() {
-		return true;
 	}
 
 	public static void recordRenderCall(RenderCall renderCall) {
@@ -187,14 +148,10 @@ public class RenderSystem {
 	}
 
 	public static void replayQueue() {
-		isReplayingQueue = true;
-
 		while (!recordingQueue.isEmpty()) {
 			RenderCall renderCall = (RenderCall)recordingQueue.poll();
 			renderCall.execute();
 		}
-
-		isReplayingQueue = false;
 	}
 
 	public static void limitDisplayFPS(int i) {
@@ -214,18 +171,15 @@ public class RenderSystem {
 	}
 
 	public static void enableDepthTest() {
-		assertOnGameThreadOrInit();
 		GlStateManager._enableDepthTest();
 	}
 
 	public static void enableScissor(int i, int j, int k, int l) {
-		assertOnGameThreadOrInit();
 		GlStateManager._enableScissorTest();
 		GlStateManager._scissorBox(i, j, k, l);
 	}
 
 	public static void disableScissor() {
-		assertOnGameThreadOrInit();
 		GlStateManager._disableScissorTest();
 	}
 
@@ -334,7 +288,6 @@ public class RenderSystem {
 	}
 
 	public static void deleteTexture(int i) {
-		assertOnGameThreadOrInit();
 		GlStateManager._deleteTexture(i);
 	}
 
@@ -347,7 +300,6 @@ public class RenderSystem {
 	}
 
 	public static void viewport(int i, int j, int k, int l) {
-		assertOnGameThreadOrInit();
 		GlStateManager._viewport(i, j, k, l);
 	}
 
@@ -372,12 +324,10 @@ public class RenderSystem {
 	}
 
 	public static void clearDepth(double d) {
-		assertOnGameThreadOrInit();
 		GlStateManager._clearDepth(d);
 	}
 
 	public static void clearColor(float f, float g, float h, float i) {
-		assertOnGameThreadOrInit();
 		GlStateManager._clearColor(f, g, h, i);
 	}
 
@@ -387,16 +337,11 @@ public class RenderSystem {
 	}
 
 	public static void clear(int i, boolean bl) {
-		assertOnGameThreadOrInit();
 		GlStateManager._clear(i, bl);
 	}
 
 	public static void setShaderFogStart(float f) {
 		assertOnRenderThread();
-		_setShaderFogStart(f);
-	}
-
-	private static void _setShaderFogStart(float f) {
 		shaderFogStart = f;
 	}
 
@@ -411,10 +356,6 @@ public class RenderSystem {
 
 	public static void setShaderGlintAlpha(float f) {
 		assertOnRenderThread();
-		_setShaderGlintAlpha(f);
-	}
-
-	private static void _setShaderGlintAlpha(float f) {
 		shaderGlintAlpha = f;
 	}
 
@@ -425,10 +366,6 @@ public class RenderSystem {
 
 	public static void setShaderFogEnd(float f) {
 		assertOnRenderThread();
-		_setShaderFogEnd(f);
-	}
-
-	private static void _setShaderFogEnd(float f) {
 		shaderFogEnd = f;
 	}
 
@@ -439,18 +376,14 @@ public class RenderSystem {
 
 	public static void setShaderFogColor(float f, float g, float h, float i) {
 		assertOnRenderThread();
-		_setShaderFogColor(f, g, h, i);
-	}
-
-	public static void setShaderFogColor(float f, float g, float h) {
-		setShaderFogColor(f, g, h, 1.0F);
-	}
-
-	private static void _setShaderFogColor(float f, float g, float h, float i) {
 		shaderFogColor[0] = f;
 		shaderFogColor[1] = g;
 		shaderFogColor[2] = h;
 		shaderFogColor[3] = i;
+	}
+
+	public static void setShaderFogColor(float f, float g, float h) {
+		setShaderFogColor(f, g, h, 1.0F);
 	}
 
 	public static float[] getShaderFogColor() {
@@ -460,10 +393,6 @@ public class RenderSystem {
 
 	public static void setShaderFogShape(FogShape fogShape) {
 		assertOnRenderThread();
-		_setShaderFogShape(fogShape);
-	}
-
-	private static void _setShaderFogShape(FogShape fogShape) {
 		shaderFogShape = fogShape;
 	}
 
@@ -474,10 +403,6 @@ public class RenderSystem {
 
 	public static void setShaderLights(Vector3f vector3f, Vector3f vector3f2) {
 		assertOnRenderThread();
-		_setShaderLights(vector3f, vector3f2);
-	}
-
-	public static void _setShaderLights(Vector3f vector3f, Vector3f vector3f2) {
 		shaderLightDirections[0] = vector3f;
 		shaderLightDirections[1] = vector3f2;
 	}
@@ -532,7 +457,6 @@ public class RenderSystem {
 	}
 
 	public static void pixelStore(int i, int j) {
-		assertOnGameThreadOrInit();
 		GlStateManager._pixelStore(i, j);
 	}
 
@@ -547,7 +471,6 @@ public class RenderSystem {
 	}
 
 	public static String getBackendDescription() {
-		assertInInitPhase();
 		return String.format(Locale.ROOT, "LWJGL version %s", GLX._getLWJGLVersion());
 	}
 
@@ -556,18 +479,15 @@ public class RenderSystem {
 	}
 
 	public static TimeSource.NanoTimeSource initBackendSystem() {
-		assertInInitPhase();
 		return GLX._initGlfw()::getAsLong;
 	}
 
 	public static void initRenderer(int i, boolean bl) {
-		assertInInitPhase();
 		GLX._init(i, bl);
 		apiDescription = GLX.getOpenGLVersionString();
 	}
 
 	public static void setErrorCallback(GLFWErrorCallbackI gLFWErrorCallbackI) {
-		assertInInitPhase();
 		GLX._setGlfwErrorCallback(gLFWErrorCallbackI);
 	}
 
@@ -582,7 +502,6 @@ public class RenderSystem {
 	}
 
 	public static void setupDefaultState(int i, int j, int k, int l) {
-		assertInInitPhase();
 		GlStateManager._clearDepth(1.0);
 		GlStateManager._enableDepthTest();
 		GlStateManager._depthFunc(515);
@@ -614,12 +533,12 @@ public class RenderSystem {
 		return MAX_SUPPORTED_TEXTURE_SIZE;
 	}
 
-	public static void glBindBuffer(int i, IntSupplier intSupplier) {
-		GlStateManager._glBindBuffer(i, intSupplier.getAsInt());
+	public static void glBindBuffer(int i, int j) {
+		GlStateManager._glBindBuffer(i, j);
 	}
 
-	public static void glBindVertexArray(Supplier<Integer> supplier) {
-		GlStateManager._glBindVertexArray((Integer)supplier.get());
+	public static void glBindVertexArray(int i) {
+		GlStateManager._glBindVertexArray(i);
 	}
 
 	public static void glBufferData(int i, ByteBuffer byteBuffer, int j) {
@@ -697,10 +616,9 @@ public class RenderSystem {
 		GlStateManager._glUniformMatrix4(i, bl, floatBuffer);
 	}
 
-	public static void setupOverlayColor(IntSupplier intSupplier, int i) {
+	public static void setupOverlayColor(int i, int j) {
 		assertOnRenderThread();
-		int j = intSupplier.getAsInt();
-		setShaderTexture(1, j);
+		setShaderTexture(1, i);
 	}
 
 	public static void teardownOverlayColor() {

@@ -171,6 +171,7 @@ import net.minecraft.util.datafix.fixes.OptionsForceVBOFix;
 import net.minecraft.util.datafix.fixes.OptionsKeyLwjgl3Fix;
 import net.minecraft.util.datafix.fixes.OptionsKeyTranslationFix;
 import net.minecraft.util.datafix.fixes.OptionsLowerCaseLanguageFix;
+import net.minecraft.util.datafix.fixes.OptionsMenuBlurrinessFix;
 import net.minecraft.util.datafix.fixes.OptionsProgrammerArtFix;
 import net.minecraft.util.datafix.fixes.OptionsRenameFieldFix;
 import net.minecraft.util.datafix.fixes.OverreachingTickFix;
@@ -1314,6 +1315,8 @@ public class DataFixers {
 		dataFixerBuilder.addFixer(new ProjectileStoredWeaponFix(schema223));
 		Schema schema224 = dataFixerBuilder.addSchema(3939, SAME_NAMESPACED);
 		dataFixerBuilder.addFixer(new FeatureFlagRemoveFix(schema224, "Remove 1.21 feature toggle", Set.of("minecraft:update_1_21")));
+		Schema schema225 = dataFixerBuilder.addSchema(3943, SAME_NAMESPACED);
+		dataFixerBuilder.addFixer(new OptionsMenuBlurrinessFix(schema225));
 	}
 
 	private static UnaryOperator<String> createRenamerNoNamespace(Map<String, String> map) {

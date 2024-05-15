@@ -36,7 +36,7 @@ public interface EquipmentUser {
 				for (ItemStack itemStack : list) {
 					EquipmentSlot equipmentSlot = this.resolveSlot(itemStack, list2);
 					if (equipmentSlot != null) {
-						ItemStack itemStack2 = equipmentSlot.isArmor() ? itemStack.copyWithCount(1) : itemStack;
+						ItemStack itemStack2 = equipmentSlot.limit(itemStack);
 						this.setItemSlot(equipmentSlot, itemStack2);
 						Float float_ = (Float)map.get(equipmentSlot);
 						if (float_ != null) {

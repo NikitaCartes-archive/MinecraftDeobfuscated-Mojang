@@ -13,6 +13,7 @@ import net.minecraft.client.gui.spectator.SpectatorMenuListener;
 import net.minecraft.client.gui.spectator.categories.SpectatorPage;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
@@ -104,8 +105,7 @@ public class SpectatorGui implements SpectatorMenuListener {
 				int j = this.minecraft.font.width(component);
 				int k = (guiGraphics.guiWidth() - j) / 2;
 				int l = guiGraphics.guiHeight() - 35;
-				guiGraphics.fill(k - 2, l - 2, k + j + 2, l + 9 + 2, this.minecraft.options.getBackgroundColor(0));
-				guiGraphics.drawString(this.minecraft.font, component, k, l, 16777215 + (i << 24));
+				guiGraphics.drawStringWithBackdrop(this.minecraft.font, component, k, l, j, FastColor.ARGB32.color(i, -1));
 			}
 		}
 	}

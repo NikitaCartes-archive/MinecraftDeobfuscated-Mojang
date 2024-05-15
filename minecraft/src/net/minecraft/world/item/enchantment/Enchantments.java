@@ -398,7 +398,7 @@ public class Enchantments {
 			.periodicTick(5)
 			.flags(EntityFlagsPredicate.Builder.flags().setIsFlying(false).setOnGround(true))
 			.moving(MovementPredicate.horizontalSpeed(MinMaxBounds.Doubles.atLeast(1.0E-5F)))
-			.steppingOn(
+			.movementAffectedBy(
 				LocationPredicate.Builder.location().setBlock(net.minecraft.advancements.critereon.BlockPredicate.Builder.block().of(BlockTags.SOUL_SPEED_BLOCKS))
 			);
 		register(
@@ -438,7 +438,7 @@ public class Enchantments {
 									LootItemEntityPropertyCondition.hasProperties(
 										LootContext.EntityTarget.THIS,
 										EntityPredicate.Builder.entity()
-											.steppingOn(
+											.movementAffectedBy(
 												LocationPredicate.Builder.location().setBlock(net.minecraft.advancements.critereon.BlockPredicate.Builder.block().of(BlockTags.SOUL_SPEED_BLOCKS))
 											)
 									),
@@ -452,7 +452,7 @@ public class Enchantments {
 								LootItemEntityPropertyCondition.hasProperties(
 									LootContext.EntityTarget.THIS,
 									EntityPredicate.Builder.entity()
-										.steppingOn(
+										.movementAffectedBy(
 											LocationPredicate.Builder.location().setBlock(net.minecraft.advancements.critereon.BlockPredicate.Builder.block().of(BlockTags.SOUL_SPEED_BLOCKS))
 										)
 										.flags(EntityFlagsPredicate.Builder.flags().setIsFlying(false))
@@ -473,7 +473,7 @@ public class Enchantments {
 					LootItemEntityPropertyCondition.hasProperties(
 						LootContext.EntityTarget.THIS,
 						EntityPredicate.Builder.entity()
-							.steppingOn(
+							.movementAffectedBy(
 								LocationPredicate.Builder.location().setBlock(net.minecraft.advancements.critereon.BlockPredicate.Builder.block().of(BlockTags.SOUL_SPEED_BLOCKS))
 							)
 					)
@@ -487,7 +487,7 @@ public class Enchantments {
 							LootContext.EntityTarget.THIS,
 							EntityPredicate.Builder.entity()
 								.flags(EntityFlagsPredicate.Builder.flags().setOnGround(true))
-								.steppingOn(
+								.movementAffectedBy(
 									LocationPredicate.Builder.location().setBlock(net.minecraft.advancements.critereon.BlockPredicate.Builder.block().of(BlockTags.SOUL_SPEED_BLOCKS))
 								)
 						)

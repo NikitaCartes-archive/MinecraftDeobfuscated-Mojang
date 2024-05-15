@@ -24,6 +24,7 @@ import net.minecraft.world.level.levelgen.structure.BuiltinStructures;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureSpawnOverride;
 import net.minecraft.world.level.levelgen.structure.TerrainAdjustment;
+import net.minecraft.world.level.levelgen.structure.pools.DimensionPadding;
 import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
 import net.minecraft.world.level.levelgen.structure.structures.BuriedTreasureStructure;
 import net.minecraft.world.level.levelgen.structure.structures.DesertPyramidStructure;
@@ -333,7 +334,7 @@ public class Structures {
 				Optional.empty(),
 				116,
 				List.of(),
-				0
+				JigsawStructure.DEFAULT_DIMENSION_PADDING
 			)
 		);
 		bootstrapContext.register(
@@ -369,7 +370,7 @@ public class Structures {
 				Optional.empty(),
 				116,
 				TrialChambersStructurePools.ALIAS_BINDINGS,
-				10
+				new DimensionPadding(10)
 			)
 		);
 	}

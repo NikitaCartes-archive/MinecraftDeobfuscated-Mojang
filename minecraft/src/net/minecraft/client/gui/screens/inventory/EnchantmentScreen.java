@@ -165,7 +165,6 @@ public class EnchantmentScreen extends AbstractContainerScreen<EnchantmentMenu> 
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-		f = this.minecraft.getFrameTime();
 		super.render(guiGraphics, i, j, f);
 		this.renderTooltip(guiGraphics, i, j);
 		boolean bl = this.minecraft.player.getAbilities().instabuild;

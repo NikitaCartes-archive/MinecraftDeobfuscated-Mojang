@@ -10,8 +10,6 @@ import java.util.Locale;
 import java.util.function.BiConsumer;
 import net.minecraft.Util;
 import net.minecraft.core.Holder;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -64,6 +62,14 @@ public record ItemAttributeModifiers(List<ItemAttributeModifiers.Entry> modifier
 		return new ItemAttributeModifiers(builder.build(), this.showInTooltip);
 	}
 
+	public void forEach(EquipmentSlotGroup equipmentSlotGroup, BiConsumer<Holder<Attribute>, AttributeModifier> biConsumer) {
+		for (ItemAttributeModifiers.Entry entry : this.modifiers) {
+			if (entry.slot.equals(equipmentSlotGroup)) {
+				biConsumer.accept(entry.attribute, entry.modifier);
+			}
+		}
+	}
+
 	public void forEach(EquipmentSlot equipmentSlot, BiConsumer<Holder<Attribute>, AttributeModifier> biConsumer) {
 		for (ItemAttributeModifiers.Entry entry : this.modifiers) {
 			if (entry.slot.test(equipmentSlot)) {
@@ -109,14 +115,14 @@ public record ItemAttributeModifiers(List<ItemAttributeModifiers.Entry> modifier
 	public static record Entry(Holder<Attribute> attribute, AttributeModifier modifier, EquipmentSlotGroup slot) {
 		public static final Codec<ItemAttributeModifiers.Entry> CODEC = RecordCodecBuilder.create(
 			instance -> instance.group(
-						BuiltInRegistries.ATTRIBUTE.holderByNameCodec().fieldOf("type").forGetter(ItemAttributeModifiers.Entry::attribute),
+						Attribute.CODEC.fieldOf("type").forGetter(ItemAttributeModifiers.Entry::attribute),
 						AttributeModifier.MAP_CODEC.forGetter(ItemAttributeModifiers.Entry::modifier),
 						EquipmentSlotGroup.CODEC.optionalFieldOf("slot", EquipmentSlotGroup.ANY).forGetter(ItemAttributeModifiers.Entry::slot)
 					)
 					.apply(instance, ItemAttributeModifiers.Entry::new)
 		);
 		public static final StreamCodec<RegistryFriendlyByteBuf, ItemAttributeModifiers.Entry> STREAM_CODEC = StreamCodec.composite(
-			ByteBufCodecs.holderRegistry(Registries.ATTRIBUTE),
+			Attribute.STREAM_CODEC,
 			ItemAttributeModifiers.Entry::attribute,
 			AttributeModifier.STREAM_CODEC,
 			ItemAttributeModifiers.Entry::modifier,

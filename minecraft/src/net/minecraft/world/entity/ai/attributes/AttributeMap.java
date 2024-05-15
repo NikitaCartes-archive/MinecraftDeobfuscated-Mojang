@@ -100,11 +100,20 @@ public class AttributeMap {
 		});
 	}
 
-	public void assignValues(AttributeMap attributeMap) {
+	public void assignAllValues(AttributeMap attributeMap) {
 		attributeMap.attributes.values().forEach(attributeInstance -> {
 			AttributeInstance attributeInstance2 = this.getInstance(attributeInstance.getAttribute());
 			if (attributeInstance2 != null) {
 				attributeInstance2.replaceFrom(attributeInstance);
+			}
+		});
+	}
+
+	public void assignBaseValues(AttributeMap attributeMap) {
+		attributeMap.attributes.values().forEach(attributeInstance -> {
+			AttributeInstance attributeInstance2 = this.getInstance(attributeInstance.getAttribute());
+			if (attributeInstance2 != null) {
+				attributeInstance2.setBaseValue(attributeInstance.getBaseValue());
 			}
 		});
 	}

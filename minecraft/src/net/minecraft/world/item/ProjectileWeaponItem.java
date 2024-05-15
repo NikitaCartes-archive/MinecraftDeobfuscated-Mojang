@@ -101,7 +101,10 @@ public abstract class ProjectileWeaponItem extends Item {
 			ItemStack itemStack3 = itemStack2.copy();
 
 			for (int j = 0; j < i; j++) {
-				list.add(useAmmo(itemStack, j == 0 ? itemStack2 : itemStack3, livingEntity, j > 0));
+				ItemStack itemStack4 = useAmmo(itemStack, j == 0 ? itemStack2 : itemStack3, livingEntity, j > 0);
+				if (!itemStack4.isEmpty()) {
+					list.add(itemStack4);
+				}
 			}
 
 			return list;

@@ -17,7 +17,7 @@ public record DamageItem(LevelBasedValue amount) implements EnchantmentEntityEff
 	@Override
 	public void apply(ServerLevel serverLevel, int i, EnchantedItemInUse enchantedItemInUse, Entity entity, Vec3 vec3) {
 		ServerPlayer serverPlayer2 = enchantedItemInUse.owner() instanceof ServerPlayer serverPlayer ? serverPlayer : null;
-		enchantedItemInUse.itemStack().hurtAndBreak((int)this.amount.calculate(i), serverLevel, serverPlayer2, enchantedItemInUse::onBreak);
+		enchantedItemInUse.itemStack().hurtAndBreak((int)this.amount.calculate(i), serverLevel, serverPlayer2, enchantedItemInUse.onBreak());
 	}
 
 	@Override

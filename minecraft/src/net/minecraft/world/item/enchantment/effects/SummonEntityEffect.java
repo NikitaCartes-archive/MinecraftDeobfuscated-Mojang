@@ -36,7 +36,7 @@ public record SummonEntityEffect(HolderSet<EntityType<?>> entityTypes, boolean j
 			if (!optional.isEmpty()) {
 				Entity entity2 = ((EntityType)((Holder)optional.get()).value()).spawn(serverLevel, blockPos, MobSpawnType.TRIGGERED);
 				if (entity2 != null) {
-					if (entity2 instanceof LightningBolt lightningBolt && entity instanceof ServerPlayer serverPlayer) {
+					if (entity2 instanceof LightningBolt lightningBolt && enchantedItemInUse.owner() instanceof ServerPlayer serverPlayer) {
 						lightningBolt.setCause(serverPlayer);
 					}
 

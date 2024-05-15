@@ -5,6 +5,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
@@ -59,7 +60,12 @@ public class EndPortalBlock extends BaseEntityBlock {
 				return;
 			}
 
-			entity.changeDimension(serverLevel);
+			if (level.dimension() == Level.END && entity instanceof ServerPlayer serverPlayer && !serverPlayer.seenCredits) {
+				serverPlayer.showEndCredits();
+				return;
+			}
+
+			entity.changeDimension(() -> entity.findOrCreateDimensionEntryPoint(serverLevel));
 		}
 	}
 

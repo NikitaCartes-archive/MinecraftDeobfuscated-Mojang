@@ -76,12 +76,11 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.ServerStatsCounter;
 import net.minecraft.stats.Stats;
-import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagNetworkSerialization;
-import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
@@ -90,6 +89,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.border.BorderChangeListener;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.portal.DimensionTransition;
 import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.PlayerDataStorage;
@@ -150,7 +150,7 @@ public abstract class PlayerList {
 
 		Optional<CompoundTag> optional = this.load(serverPlayer);
 		ResourceKey<Level> resourceKey = (ResourceKey<Level>)optional.flatMap(
-				compoundTag -> DimensionType.parseLegacy(new Dynamic<>(NbtOps.INSTANCE, compoundTag.get("Dimension"))).resultOrPartial(LOGGER::error)
+				compoundTagx -> DimensionType.parseLegacy(new Dynamic<>(NbtOps.INSTANCE, compoundTagx.get("Dimension"))).resultOrPartial(LOGGER::error)
 			)
 			.orElse(Level.OVERWORLD);
 		ServerLevel serverLevel = this.server.getLevel(resourceKey);
@@ -226,11 +226,7 @@ public abstract class PlayerList {
 		this.sendLevelInfo(serverPlayer, serverLevel2);
 		serverLevel2.addNewPlayer(serverPlayer);
 		this.server.getCustomBossEvents().onPlayerConnect(serverPlayer);
-
-		for (MobEffectInstance mobEffectInstance : serverPlayer.getActiveEffects()) {
-			serverGamePacketListenerImpl.send(new ClientboundUpdateMobEffectPacket(serverPlayer.getId(), mobEffectInstance, false));
-		}
-
+		this.sendActivePlayerEffects(serverPlayer);
 		if (optional.isPresent() && ((CompoundTag)optional.get()).contains("RootVehicle", 10)) {
 			CompoundTag compoundTag = ((CompoundTag)optional.get()).getCompound("RootVehicle");
 			Entity entity = EntityType.loadEntityRecursive(
@@ -434,88 +430,78 @@ public abstract class PlayerList {
 		return !set.isEmpty();
 	}
 
-	public ServerPlayer respawn(ServerPlayer serverPlayer, boolean bl) {
+	public ServerPlayer respawn(ServerPlayer serverPlayer, boolean bl, Entity.RemovalReason removalReason) {
 		this.players.remove(serverPlayer);
-		serverPlayer.serverLevel().removePlayerImmediately(serverPlayer, Entity.RemovalReason.DISCARDED);
-		BlockPos blockPos = serverPlayer.getRespawnPosition();
-		float f = serverPlayer.getRespawnAngle();
-		boolean bl2 = serverPlayer.isRespawnForced();
-		ServerLevel serverLevel = this.server.getLevel(serverPlayer.getRespawnDimension());
-		Optional<Vec3> optional;
-		if (serverLevel != null && blockPos != null) {
-			optional = Player.findRespawnPositionAndUseSpawnBlock(serverLevel, blockPos, f, bl2, bl);
-		} else {
-			optional = Optional.empty();
-		}
-
-		ServerLevel serverLevel2 = serverLevel != null && optional.isPresent() ? serverLevel : this.server.overworld();
-		ServerPlayer serverPlayer2 = new ServerPlayer(this.server, serverLevel2, serverPlayer.getGameProfile(), serverPlayer.clientInformation());
+		serverPlayer.serverLevel().removePlayerImmediately(serverPlayer, removalReason);
+		DimensionTransition dimensionTransition = serverPlayer.findRespawnPositionAndUseSpawnBlock(bl);
+		ServerLevel serverLevel = dimensionTransition.newDimension();
+		ServerPlayer serverPlayer2 = new ServerPlayer(this.server, serverLevel, serverPlayer.getGameProfile(), serverPlayer.clientInformation());
 		serverPlayer2.connection = serverPlayer.connection;
 		serverPlayer2.restoreFrom(serverPlayer, bl);
 		serverPlayer2.setId(serverPlayer.getId());
 		serverPlayer2.setMainArm(serverPlayer.getMainArm());
+		if (!dimensionTransition.missingRespawnBlock()) {
+			serverPlayer2.copyRespawnPosition(serverPlayer);
+		}
 
 		for (String string : serverPlayer.getTags()) {
 			serverPlayer2.addTag(string);
 		}
 
-		boolean bl3 = false;
-		if (optional.isPresent()) {
-			BlockState blockState = serverLevel2.getBlockState(blockPos);
-			boolean bl4 = blockState.is(Blocks.RESPAWN_ANCHOR);
-			Vec3 vec3 = (Vec3)optional.get();
-			float g;
-			if (!blockState.is(BlockTags.BEDS) && !bl4) {
-				g = f;
-			} else {
-				Vec3 vec32 = Vec3.atBottomCenterOf(blockPos).subtract(vec3).normalize();
-				g = (float)Mth.wrapDegrees(Mth.atan2(vec32.z, vec32.x) * 180.0F / (float)Math.PI - 90.0);
-			}
-
-			serverPlayer2.moveTo(vec3.x, vec3.y, vec3.z, g, 0.0F);
-			serverPlayer2.setRespawnPosition(serverLevel2.dimension(), blockPos, f, bl2, false);
-			bl3 = !bl && bl4;
-		} else if (blockPos != null) {
+		Vec3 vec3 = dimensionTransition.pos();
+		serverPlayer2.moveTo(vec3.x, vec3.y, vec3.z, dimensionTransition.yRot(), dimensionTransition.xRot());
+		if (dimensionTransition.missingRespawnBlock()) {
 			serverPlayer2.connection.send(new ClientboundGameEventPacket(ClientboundGameEventPacket.NO_RESPAWN_BLOCK_AVAILABLE, 0.0F));
 		}
 
-		while (!serverLevel2.noCollision(serverPlayer2) && serverPlayer2.getY() < (double)serverLevel2.getMaxBuildHeight()) {
-			serverPlayer2.setPos(serverPlayer2.getX(), serverPlayer2.getY() + 1.0, serverPlayer2.getZ());
-		}
-
 		byte b = (byte)(bl ? 1 : 0);
-		ServerLevel serverLevel3 = serverPlayer2.serverLevel();
-		LevelData levelData = serverLevel3.getLevelData();
-		serverPlayer2.connection.send(new ClientboundRespawnPacket(serverPlayer2.createCommonSpawnInfo(serverLevel3), b));
+		ServerLevel serverLevel2 = serverPlayer2.serverLevel();
+		LevelData levelData = serverLevel2.getLevelData();
+		serverPlayer2.connection.send(new ClientboundRespawnPacket(serverPlayer2.createCommonSpawnInfo(serverLevel2), b));
 		serverPlayer2.connection.teleport(serverPlayer2.getX(), serverPlayer2.getY(), serverPlayer2.getZ(), serverPlayer2.getYRot(), serverPlayer2.getXRot());
-		serverPlayer2.connection.send(new ClientboundSetDefaultSpawnPositionPacket(serverLevel2.getSharedSpawnPos(), serverLevel2.getSharedSpawnAngle()));
+		serverPlayer2.connection.send(new ClientboundSetDefaultSpawnPositionPacket(serverLevel.getSharedSpawnPos(), serverLevel.getSharedSpawnAngle()));
 		serverPlayer2.connection.send(new ClientboundChangeDifficultyPacket(levelData.getDifficulty(), levelData.isDifficultyLocked()));
 		serverPlayer2.connection
 			.send(new ClientboundSetExperiencePacket(serverPlayer2.experienceProgress, serverPlayer2.totalExperience, serverPlayer2.experienceLevel));
-		this.sendLevelInfo(serverPlayer2, serverLevel2);
+		this.sendActivePlayerEffects(serverPlayer2);
+		this.sendLevelInfo(serverPlayer2, serverLevel);
 		this.sendPlayerPermissionLevel(serverPlayer2);
-		serverLevel2.addRespawnedPlayer(serverPlayer2);
+		serverLevel.addRespawnedPlayer(serverPlayer2);
 		this.players.add(serverPlayer2);
 		this.playersByUUID.put(serverPlayer2.getUUID(), serverPlayer2);
 		serverPlayer2.initInventoryMenu();
 		serverPlayer2.setHealth(serverPlayer2.getHealth());
-		if (bl3) {
-			serverPlayer2.connection
-				.send(
-					new ClientboundSoundPacket(
-						SoundEvents.RESPAWN_ANCHOR_DEPLETE,
-						SoundSource.BLOCKS,
-						(double)blockPos.getX(),
-						(double)blockPos.getY(),
-						(double)blockPos.getZ(),
-						1.0F,
-						1.0F,
-						serverLevel2.getRandom().nextLong()
-					)
-				);
+		if (!bl) {
+			BlockPos blockPos = BlockPos.containing(dimensionTransition.pos());
+			BlockState blockState = serverLevel.getBlockState(blockPos);
+			if (blockState.is(Blocks.RESPAWN_ANCHOR)) {
+				serverPlayer2.connection
+					.send(
+						new ClientboundSoundPacket(
+							SoundEvents.RESPAWN_ANCHOR_DEPLETE,
+							SoundSource.BLOCKS,
+							(double)blockPos.getX(),
+							(double)blockPos.getY(),
+							(double)blockPos.getZ(),
+							1.0F,
+							1.0F,
+							serverLevel.getRandom().nextLong()
+						)
+					);
+			}
 		}
 
 		return serverPlayer2;
+	}
+
+	public void sendActivePlayerEffects(ServerPlayer serverPlayer) {
+		this.sendActiveEffects(serverPlayer, serverPlayer.connection);
+	}
+
+	public void sendActiveEffects(LivingEntity livingEntity, ServerGamePacketListenerImpl serverGamePacketListenerImpl) {
+		for (MobEffectInstance mobEffectInstance : livingEntity.getActiveEffects()) {
+			serverGamePacketListenerImpl.send(new ClientboundUpdateMobEffectPacket(livingEntity.getId(), mobEffectInstance, false));
+		}
 	}
 
 	public void sendPlayerPermissionLevel(ServerPlayer serverPlayer) {

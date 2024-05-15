@@ -401,7 +401,6 @@ public class ShaderInstance implements Shader, AutoCloseable {
 	}
 
 	public AbstractUniform safeGetUniform(String string) {
-		RenderSystem.assertOnGameThread();
 		Uniform uniform = this.getUniform(string);
 		return (AbstractUniform)(uniform == null ? DUMMY_UNIFORM : uniform);
 	}

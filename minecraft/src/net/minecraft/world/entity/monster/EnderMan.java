@@ -332,12 +332,18 @@ public class EnderMan extends Monster implements NeutralMob {
 	}
 
 	@Override
-	protected void dropCustomDeathLoot(DamageSource damageSource, boolean bl) {
-		super.dropCustomDeathLoot(damageSource, bl);
+	protected void dropCustomDeathLoot(ServerLevel serverLevel, DamageSource damageSource, boolean bl) {
+		super.dropCustomDeathLoot(serverLevel, damageSource, bl);
 		BlockState blockState = this.getCarriedBlock();
 		if (blockState != null) {
 			ItemStack itemStack = new ItemStack(Items.DIAMOND_AXE);
-			EnchantmentHelper.enchantItemFromProvider(itemStack, VanillaEnchantmentProviders.ENDERMAN_LOOT_DROP, this.level(), this.blockPosition(), this.getRandom());
+			EnchantmentHelper.enchantItemFromProvider(
+				itemStack,
+				serverLevel.registryAccess(),
+				VanillaEnchantmentProviders.ENDERMAN_LOOT_DROP,
+				serverLevel.getCurrentDifficultyAt(this.blockPosition()),
+				this.getRandom()
+			);
 			LootParams.Builder builder = new LootParams.Builder((ServerLevel)this.level())
 				.withParameter(LootContextParams.ORIGIN, this.position())
 				.withParameter(LootContextParams.TOOL, itemStack)

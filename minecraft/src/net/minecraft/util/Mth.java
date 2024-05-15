@@ -420,50 +420,54 @@ public class Mth {
 	}
 
 	public static int hsvToRgb(float f, float g, float h) {
-		int i = (int)(f * 6.0F) % 6;
-		float j = f * 6.0F - (float)i;
-		float k = h * (1.0F - g);
-		float l = h * (1.0F - j * g);
-		float m = h * (1.0F - (1.0F - j) * g);
-		float n;
+		return hsvToArgb(f, g, h, 0);
+	}
+
+	public static int hsvToArgb(float f, float g, float h, int i) {
+		int j = (int)(f * 6.0F) % 6;
+		float k = f * 6.0F - (float)j;
+		float l = h * (1.0F - g);
+		float m = h * (1.0F - k * g);
+		float n = h * (1.0F - (1.0F - k) * g);
 		float o;
 		float p;
-		switch (i) {
+		float q;
+		switch (j) {
 			case 0:
-				n = h;
-				o = m;
-				p = k;
+				o = h;
+				p = n;
+				q = l;
 				break;
 			case 1:
-				n = l;
-				o = h;
-				p = k;
+				o = m;
+				p = h;
+				q = l;
 				break;
 			case 2:
-				n = k;
-				o = h;
-				p = m;
-				break;
-			case 3:
-				n = k;
 				o = l;
 				p = h;
+				q = n;
+				break;
+			case 3:
+				o = l;
+				p = m;
+				q = h;
 				break;
 			case 4:
-				n = m;
-				o = k;
-				p = h;
+				o = n;
+				p = l;
+				q = h;
 				break;
 			case 5:
-				n = h;
-				o = k;
+				o = h;
 				p = l;
+				q = m;
 				break;
 			default:
 				throw new RuntimeException("Something went wrong when converting from HSV to RGB. Input was " + f + ", " + g + ", " + h);
 		}
 
-		return FastColor.ARGB32.color(0, clamp((int)(n * 255.0F), 0, 255), clamp((int)(o * 255.0F), 0, 255), clamp((int)(p * 255.0F), 0, 255));
+		return FastColor.ARGB32.color(i, clamp((int)(o * 255.0F), 0, 255), clamp((int)(p * 255.0F), 0, 255), clamp((int)(q * 255.0F), 0, 255));
 	}
 
 	public static int murmurHash3Mixer(int i) {

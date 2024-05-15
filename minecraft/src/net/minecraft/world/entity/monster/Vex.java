@@ -213,7 +213,7 @@ public class Vex extends Monster implements TraceableEntity {
 	) {
 		RandomSource randomSource = serverLevelAccessor.getRandom();
 		this.populateDefaultEquipmentSlots(randomSource, difficultyInstance);
-		this.populateDefaultEquipmentEnchantments(randomSource, difficultyInstance);
+		this.populateDefaultEquipmentEnchantments(serverLevelAccessor, randomSource, difficultyInstance);
 		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData);
 	}
 

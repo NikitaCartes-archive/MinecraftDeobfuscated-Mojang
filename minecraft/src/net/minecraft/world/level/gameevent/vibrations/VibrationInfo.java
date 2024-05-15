@@ -7,7 +7,6 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 import net.minecraft.core.Holder;
 import net.minecraft.core.UUIDUtil;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.Projectile;
@@ -19,7 +18,7 @@ public record VibrationInfo(
 ) {
 	public static final Codec<VibrationInfo> CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
-					BuiltInRegistries.GAME_EVENT.holderByNameCodec().fieldOf("game_event").forGetter(VibrationInfo::gameEvent),
+					GameEvent.CODEC.fieldOf("game_event").forGetter(VibrationInfo::gameEvent),
 					Codec.floatRange(0.0F, Float.MAX_VALUE).fieldOf("distance").forGetter(VibrationInfo::distance),
 					Vec3.CODEC.fieldOf("pos").forGetter(VibrationInfo::pos),
 					UUIDUtil.CODEC.lenientOptionalFieldOf("source").forGetter(vibrationInfo -> Optional.ofNullable(vibrationInfo.uuid())),

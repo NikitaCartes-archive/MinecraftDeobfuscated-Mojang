@@ -11,8 +11,6 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleOptions;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
@@ -33,17 +31,12 @@ public class MobEffectInstance implements Comparable<MobEffectInstance> {
 	public static final int MAX_AMPLIFIER = 255;
 	public static final Codec<MobEffectInstance> CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
-					BuiltInRegistries.MOB_EFFECT.holderByNameCodec().fieldOf("id").forGetter(MobEffectInstance::getEffect),
-					MobEffectInstance.Details.MAP_CODEC.forGetter(MobEffectInstance::asDetails)
+					MobEffect.CODEC.fieldOf("id").forGetter(MobEffectInstance::getEffect), MobEffectInstance.Details.MAP_CODEC.forGetter(MobEffectInstance::asDetails)
 				)
 				.apply(instance, MobEffectInstance::new)
 	);
 	public static final StreamCodec<RegistryFriendlyByteBuf, MobEffectInstance> STREAM_CODEC = StreamCodec.composite(
-		ByteBufCodecs.holderRegistry(Registries.MOB_EFFECT),
-		MobEffectInstance::getEffect,
-		MobEffectInstance.Details.STREAM_CODEC,
-		MobEffectInstance::asDetails,
-		MobEffectInstance::new
+		MobEffect.STREAM_CODEC, MobEffectInstance::getEffect, MobEffectInstance.Details.STREAM_CODEC, MobEffectInstance::asDetails, MobEffectInstance::new
 	);
 	private final Holder<MobEffect> effect;
 	private int duration;

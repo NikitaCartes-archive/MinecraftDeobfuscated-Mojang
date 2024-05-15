@@ -57,7 +57,6 @@ public final class Window implements AutoCloseable {
 	private boolean vsync;
 
 	public Window(WindowEventHandler windowEventHandler, ScreenManager screenManager, DisplayData displayData, @Nullable String string, String string2) {
-		RenderSystem.assertInInitPhase();
 		this.screenManager = screenManager;
 		this.setBootErrorCallback();
 		this.setErrorSection("Pre startup");
@@ -116,8 +115,6 @@ public final class Window implements AutoCloseable {
 	}
 
 	public static void checkGlfwError(BiConsumer<Integer, String> biConsumer) {
-		RenderSystem.assertInInitPhase();
-
 		try (MemoryStack memoryStack = MemoryStack.stackPush()) {
 			PointerBuffer pointerBuffer = memoryStack.mallocPointer(1);
 			int i = GLFW.glfwGetError(pointerBuffer);
@@ -130,7 +127,6 @@ public final class Window implements AutoCloseable {
 	}
 
 	public void setIcon(PackResources packResources, IconSet iconSet) throws IOException {
-		RenderSystem.assertInInitPhase();
 		int i = GLFW.glfwGetPlatform();
 		switch (i) {
 			case 393217:
@@ -173,12 +169,10 @@ public final class Window implements AutoCloseable {
 	}
 
 	private void setBootErrorCallback() {
-		RenderSystem.assertInInitPhase();
 		GLFW.glfwSetErrorCallback(Window::bootCrash);
 	}
 
 	private static void bootCrash(int i, long l) {
-		RenderSystem.assertInInitPhase();
 		String string = "GLFW error " + i + ": " + MemoryUtil.memUTF8(l);
 		TinyFileDialogs.tinyfd_messageBox(
 			"Minecraft", string + ".\n\nPlease make sure you have up-to-date drivers (see aka.ms/mcdriver for instructions).", "ok", "error", false
@@ -235,7 +229,6 @@ public final class Window implements AutoCloseable {
 	}
 
 	private void refreshFramebufferSize() {
-		RenderSystem.assertInInitPhase();
 		int[] is = new int[1];
 		int[] js = new int[1];
 		GLFW.glfwGetFramebufferSize(this.window, is, js);
@@ -297,7 +290,6 @@ public final class Window implements AutoCloseable {
 	}
 
 	private void setMode() {
-		RenderSystem.assertInInitPhase();
 		boolean bl = GLFW.glfwGetWindowMonitor(this.window) != 0L;
 		if (this.fullscreen) {
 			Monitor monitor = this.screenManager.findBestMonitor(this);

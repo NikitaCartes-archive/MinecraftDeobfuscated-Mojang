@@ -96,7 +96,8 @@ public interface LevelBasedValue {
 
 		@Override
 		public float calculate(int i) {
-			return this.numerator.calculate(i) / this.denominator.calculate(i);
+			float f = this.denominator.calculate(i);
+			return f == 0.0F ? 0.0F : this.numerator.calculate(i) / f;
 		}
 
 		@Override

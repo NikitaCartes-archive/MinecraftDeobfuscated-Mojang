@@ -16,7 +16,6 @@ import net.minecraft.Util;
 import net.minecraft.core.Holder;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EquipmentSlotGroup;
@@ -141,7 +140,7 @@ public class SetAttributesFunction extends LootItemConditionalFunction {
 		public static final Codec<SetAttributesFunction.Modifier> CODEC = RecordCodecBuilder.create(
 			instance -> instance.group(
 						Codec.STRING.fieldOf("name").forGetter(SetAttributesFunction.Modifier::name),
-						BuiltInRegistries.ATTRIBUTE.holderByNameCodec().fieldOf("attribute").forGetter(SetAttributesFunction.Modifier::attribute),
+						Attribute.CODEC.fieldOf("attribute").forGetter(SetAttributesFunction.Modifier::attribute),
 						AttributeModifier.Operation.CODEC.fieldOf("operation").forGetter(SetAttributesFunction.Modifier::operation),
 						NumberProviders.CODEC.fieldOf("amount").forGetter(SetAttributesFunction.Modifier::amount),
 						SLOTS_CODEC.fieldOf("slot").forGetter(SetAttributesFunction.Modifier::slots),

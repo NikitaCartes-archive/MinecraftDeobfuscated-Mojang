@@ -14,6 +14,7 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerBossEvent;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -475,8 +476,8 @@ public class WitherBoss extends Monster implements PowerableMob, RangedAttackMob
 	}
 
 	@Override
-	protected void dropCustomDeathLoot(DamageSource damageSource, boolean bl) {
-		super.dropCustomDeathLoot(damageSource, bl);
+	protected void dropCustomDeathLoot(ServerLevel serverLevel, DamageSource damageSource, boolean bl) {
+		super.dropCustomDeathLoot(serverLevel, damageSource, bl);
 		ItemEntity itemEntity = this.spawnAtLocation(Items.NETHER_STAR);
 		if (itemEntity != null) {
 			itemEntity.setExtendedLifetime();

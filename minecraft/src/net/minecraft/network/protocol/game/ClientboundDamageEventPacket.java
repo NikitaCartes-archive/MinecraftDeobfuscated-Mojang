@@ -2,10 +2,8 @@ package net.minecraft.network.protocol.game;
 
 import java.util.Optional;
 import net.minecraft.core.Holder;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketType;
@@ -19,9 +17,6 @@ public record ClientboundDamageEventPacket(int entityId, Holder<DamageType> sour
 	implements Packet<ClientGamePacketListener> {
 	public static final StreamCodec<RegistryFriendlyByteBuf, ClientboundDamageEventPacket> STREAM_CODEC = Packet.codec(
 		ClientboundDamageEventPacket::write, ClientboundDamageEventPacket::new
-	);
-	private static final StreamCodec<RegistryFriendlyByteBuf, Holder<DamageType>> DAMAGE_TYPE_ID_STREAM_CODEC = ByteBufCodecs.holderRegistry(
-		Registries.DAMAGE_TYPE
 	);
 
 	public ClientboundDamageEventPacket(Entity entity, DamageSource damageSource) {
@@ -37,7 +32,7 @@ public record ClientboundDamageEventPacket(int entityId, Holder<DamageType> sour
 	private ClientboundDamageEventPacket(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
 		this(
 			registryFriendlyByteBuf.readVarInt(),
-			DAMAGE_TYPE_ID_STREAM_CODEC.decode(registryFriendlyByteBuf),
+			DamageType.STREAM_CODEC.decode(registryFriendlyByteBuf),
 			readOptionalEntityId(registryFriendlyByteBuf),
 			readOptionalEntityId(registryFriendlyByteBuf),
 			registryFriendlyByteBuf.readOptional(friendlyByteBuf -> new Vec3(friendlyByteBuf.readDouble(), friendlyByteBuf.readDouble(), friendlyByteBuf.readDouble()))
@@ -54,7 +49,7 @@ public record ClientboundDamageEventPacket(int entityId, Holder<DamageType> sour
 
 	private void write(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
 		registryFriendlyByteBuf.writeVarInt(this.entityId);
-		DAMAGE_TYPE_ID_STREAM_CODEC.encode(registryFriendlyByteBuf, this.sourceType);
+		DamageType.STREAM_CODEC.encode(registryFriendlyByteBuf, this.sourceType);
 		writeOptionalEntityId(registryFriendlyByteBuf, this.sourceCauseId);
 		writeOptionalEntityId(registryFriendlyByteBuf, this.sourceDirectId);
 		registryFriendlyByteBuf.writeOptional(this.sourcePosition, (friendlyByteBuf, vec3) -> {

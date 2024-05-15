@@ -7,7 +7,6 @@ import java.util.Collection;
 import java.util.List;
 import net.minecraft.core.Holder;
 import net.minecraft.core.UUIDUtil;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -75,7 +74,7 @@ public class ClientboundUpdateAttributesPacket implements Packet<ClientGamePacke
 			(uUID, double_, operation) -> new AttributeModifier(uUID, "Unknown synced attribute modifier", double_, operation)
 		);
 		public static final StreamCodec<RegistryFriendlyByteBuf, ClientboundUpdateAttributesPacket.AttributeSnapshot> STREAM_CODEC = StreamCodec.composite(
-			ByteBufCodecs.holderRegistry(Registries.ATTRIBUTE),
+			Attribute.STREAM_CODEC,
 			ClientboundUpdateAttributesPacket.AttributeSnapshot::attribute,
 			ByteBufCodecs.DOUBLE,
 			ClientboundUpdateAttributesPacket.AttributeSnapshot::base,

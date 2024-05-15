@@ -39,7 +39,7 @@ public class OverlayTexture implements AutoCloseable {
 	}
 
 	public void setupOverlayColor() {
-		RenderSystem.setupOverlayColor(this.texture::getId, 16);
+		RenderSystem.setupOverlayColor(this.texture.getId(), 16);
 	}
 
 	public static int u(float f) {

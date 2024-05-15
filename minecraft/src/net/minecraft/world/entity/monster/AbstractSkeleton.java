@@ -34,6 +34,7 @@ import net.minecraft.world.entity.animal.Wolf;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ProjectileWeaponItem;
@@ -97,9 +98,10 @@ public abstract class AbstractSkeleton extends Monster implements RangedAttackMo
 			ItemStack itemStack = this.getItemBySlot(EquipmentSlot.HEAD);
 			if (!itemStack.isEmpty()) {
 				if (itemStack.isDamageableItem()) {
+					Item item = itemStack.getItem();
 					itemStack.setDamageValue(itemStack.getDamageValue() + this.random.nextInt(2));
 					if (itemStack.getDamageValue() >= itemStack.getMaxDamage()) {
-						this.broadcastBreakEvent(EquipmentSlot.HEAD);
+						this.onEquippedItemBroken(item, EquipmentSlot.HEAD);
 						this.setItemSlot(EquipmentSlot.HEAD, ItemStack.EMPTY);
 					}
 				}
@@ -137,7 +139,7 @@ public abstract class AbstractSkeleton extends Monster implements RangedAttackMo
 		spawnGroupData = super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData);
 		RandomSource randomSource = serverLevelAccessor.getRandom();
 		this.populateDefaultEquipmentSlots(randomSource, difficultyInstance);
-		this.populateDefaultEquipmentEnchantments(randomSource, difficultyInstance);
+		this.populateDefaultEquipmentEnchantments(serverLevelAccessor, randomSource, difficultyInstance);
 		this.reassessWeaponGoal();
 		this.setCanPickUpLoot(randomSource.nextFloat() < 0.55F * difficultyInstance.getSpecialMultiplier());
 		if (this.getItemBySlot(EquipmentSlot.HEAD).isEmpty()) {

@@ -364,6 +364,11 @@ public class Wolf extends TamableAnimal implements NeutralMob, VariantHolder<Hol
 	}
 
 	@Override
+	public boolean canUseSlot(EquipmentSlot equipmentSlot) {
+		return true;
+	}
+
+	@Override
 	protected void actuallyHurt(DamageSource damageSource, float f) {
 		if (!this.canArmorAbsorb(damageSource)) {
 			super.actuallyHurt(damageSource, f);

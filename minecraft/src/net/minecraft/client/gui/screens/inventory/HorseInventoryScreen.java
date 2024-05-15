@@ -4,6 +4,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.animal.horse.AbstractChestedHorse;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.animal.horse.Llama;
@@ -39,7 +40,7 @@ public class HorseInventoryScreen extends AbstractContainerScreen<HorseInventory
 			guiGraphics.blitSprite(SADDLE_SLOT_SPRITE, k + 7, l + 35 - 18, 18, 18);
 		}
 
-		if (this.horse.canWearBodyArmor()) {
+		if (this.horse.canUseSlot(EquipmentSlot.BODY)) {
 			if (this.horse instanceof Llama) {
 				guiGraphics.blitSprite(LLAMA_ARMOR_SLOT_SPRITE, k + 7, l + 35, 18, 18);
 			} else {

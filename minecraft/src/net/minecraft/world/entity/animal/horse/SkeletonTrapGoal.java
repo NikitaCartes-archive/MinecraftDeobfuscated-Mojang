@@ -87,18 +87,18 @@ public class SkeletonTrapGoal extends Goal {
 				skeleton.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.IRON_HELMET));
 			}
 
-			this.enchant(skeleton, EquipmentSlot.MAINHAND);
-			this.enchant(skeleton, EquipmentSlot.HEAD);
+			this.enchant(skeleton, EquipmentSlot.MAINHAND, difficultyInstance);
+			this.enchant(skeleton, EquipmentSlot.HEAD, difficultyInstance);
 		}
 
 		return skeleton;
 	}
 
-	private void enchant(Skeleton skeleton, EquipmentSlot equipmentSlot) {
+	private void enchant(Skeleton skeleton, EquipmentSlot equipmentSlot, DifficultyInstance difficultyInstance) {
 		ItemStack itemStack = skeleton.getItemBySlot(equipmentSlot);
 		itemStack.set(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY);
 		EnchantmentHelper.enchantItemFromProvider(
-			itemStack, VanillaEnchantmentProviders.MOB_SPAWN_EQUIPMENT, skeleton.level(), skeleton.blockPosition(), skeleton.getRandom()
+			itemStack, skeleton.level().registryAccess(), VanillaEnchantmentProviders.MOB_SPAWN_EQUIPMENT, difficultyInstance, skeleton.getRandom()
 		);
 		skeleton.setItemSlot(equipmentSlot, itemStack);
 	}

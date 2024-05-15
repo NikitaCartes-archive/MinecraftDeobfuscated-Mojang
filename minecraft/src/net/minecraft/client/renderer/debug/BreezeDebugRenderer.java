@@ -43,7 +43,7 @@ public class BreezeDebugRenderer {
 					Optional<BreezeDebugPayload.BreezeInfo> optional = Optional.ofNullable((BreezeDebugPayload.BreezeInfo)this.perEntity.get(breeze.getId()));
 					optional.map(BreezeDebugPayload.BreezeInfo::attackTarget)
 						.map(integer -> localPlayer.level().getEntity(integer))
-						.map(entity -> entity.getPosition(this.minecraft.getFrameTime()))
+						.map(entity -> entity.getPosition(this.minecraft.getTimer().getGameTimeDeltaPartialTick(true)))
 						.ifPresent(vec3 -> {
 							drawLine(poseStack, multiBufferSource, d, e, f, breeze.position(), vec3, TARGET_LINE_COLOR);
 							Vec3 vec32 = vec3.add(0.0, 0.01F, 0.0);

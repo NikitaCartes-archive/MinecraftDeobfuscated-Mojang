@@ -7,6 +7,7 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.RandomSource;
@@ -146,7 +147,7 @@ public class Pillager extends AbstractIllager implements CrossbowAttackMob, Inve
 	) {
 		RandomSource randomSource = serverLevelAccessor.getRandom();
 		this.populateDefaultEquipmentSlots(randomSource, difficultyInstance);
-		this.populateDefaultEquipmentEnchantments(randomSource, difficultyInstance);
+		this.populateDefaultEquipmentEnchantments(serverLevelAccessor, randomSource, difficultyInstance);
 		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData);
 	}
 
@@ -156,12 +157,14 @@ public class Pillager extends AbstractIllager implements CrossbowAttackMob, Inve
 	}
 
 	@Override
-	protected void enchantSpawnedWeapon(RandomSource randomSource, float f) {
-		super.enchantSpawnedWeapon(randomSource, f);
+	protected void enchantSpawnedWeapon(ServerLevelAccessor serverLevelAccessor, RandomSource randomSource, DifficultyInstance difficultyInstance) {
+		super.enchantSpawnedWeapon(serverLevelAccessor, randomSource, difficultyInstance);
 		if (randomSource.nextInt(300) == 0) {
 			ItemStack itemStack = this.getMainHandItem();
 			if (itemStack.is(Items.CROSSBOW)) {
-				EnchantmentHelper.enchantItemFromProvider(itemStack, VanillaEnchantmentProviders.PILLAGER_SPAWN_CROSSBOW, this.level(), this.blockPosition(), randomSource);
+				EnchantmentHelper.enchantItemFromProvider(
+					itemStack, serverLevelAccessor.registryAccess(), VanillaEnchantmentProviders.PILLAGER_SPAWN_CROSSBOW, difficultyInstance, randomSource
+				);
 			}
 		}
 	}
@@ -218,7 +221,7 @@ public class Pillager extends AbstractIllager implements CrossbowAttackMob, Inve
 	}
 
 	@Override
-	public void applyRaidBuffs(int i, boolean bl) {
+	public void applyRaidBuffs(ServerLevel serverLevel, int i, boolean bl) {
 		Raid raid = this.getCurrentRaid();
 		boolean bl2 = this.random.nextFloat() <= raid.getEnchantOdds();
 		if (bl2) {
@@ -233,7 +236,9 @@ public class Pillager extends AbstractIllager implements CrossbowAttackMob, Inve
 			}
 
 			if (resourceKey != null) {
-				EnchantmentHelper.enchantItemFromProvider(itemStack, resourceKey, this.level(), this.blockPosition(), this.getRandom());
+				EnchantmentHelper.enchantItemFromProvider(
+					itemStack, serverLevel.registryAccess(), resourceKey, serverLevel.getCurrentDifficultyAt(this.blockPosition()), this.getRandom()
+				);
 				this.setItemSlot(EquipmentSlot.MAINHAND, itemStack);
 			}
 		}

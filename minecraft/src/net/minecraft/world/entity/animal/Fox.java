@@ -472,7 +472,7 @@ public class Fox extends Animal implements VariantHolder<Fox.Type> {
 
 	@Override
 	public boolean canTakeItem(ItemStack itemStack) {
-		EquipmentSlot equipmentSlot = Mob.getEquipmentSlotForItem(itemStack);
+		EquipmentSlot equipmentSlot = this.getEquipmentSlotForItem(itemStack);
 		return !this.getItemBySlot(equipmentSlot).isEmpty() ? false : equipmentSlot == EquipmentSlot.MAINHAND && super.canTakeItem(itemStack);
 	}
 
@@ -675,14 +675,14 @@ public class Fox extends Animal implements VariantHolder<Fox.Type> {
 	}
 
 	@Override
-	protected void dropAllDeathLoot(DamageSource damageSource) {
+	protected void dropAllDeathLoot(ServerLevel serverLevel, DamageSource damageSource) {
 		ItemStack itemStack = this.getItemBySlot(EquipmentSlot.MAINHAND);
 		if (!itemStack.isEmpty()) {
 			this.spawnAtLocation(itemStack);
 			this.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
 		}
 
-		super.dropAllDeathLoot(damageSource);
+		super.dropAllDeathLoot(serverLevel, damageSource);
 	}
 
 	public static boolean isPathClear(Fox fox, LivingEntity livingEntity) {

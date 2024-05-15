@@ -952,10 +952,9 @@ public class ServerGamePacketListenerImpl
 									&& this.noBlocksAround(this.player);
 								this.player.serverLevel().getChunkSource().move(this.player);
 								this.player.doCheckFallDamage(this.player.getX() - i, this.player.getY() - j, this.player.getZ() - k, serverboundMovePlayerPacket.isOnGround());
-								this.player
-									.setOnGroundWithKnownMovement(
-										serverboundMovePlayerPacket.isOnGround(), new Vec3(this.player.getX() - i, this.player.getY() - j, this.player.getZ() - k)
-									);
+								Vec3 vec3 = new Vec3(this.player.getX() - i, this.player.getY() - j, this.player.getZ() - k);
+								this.player.setOnGroundWithMovement(serverboundMovePlayerPacket.isOnGround(), vec3);
+								this.player.setKnownMovement(vec3);
 								if (bl2) {
 									this.player.resetFallDistance();
 								}
@@ -1124,6 +1123,12 @@ public class ServerGamePacketListenerImpl
 		ItemStack itemStack = this.player.getItemInHand(interactionHand);
 		this.player.resetLastActionTime();
 		if (!itemStack.isEmpty() && itemStack.isItemEnabled(serverLevel.enabledFeatures())) {
+			float f = Mth.wrapDegrees(serverboundUseItemPacket.getYRot());
+			float g = Mth.wrapDegrees(serverboundUseItemPacket.getXRot());
+			if (g != this.player.getXRot() || f != this.player.getYRot()) {
+				this.player.absRotateTo(f, g);
+			}
+
 			InteractionResult interactionResult = this.player.gameMode.useItem(this.player, serverLevel, itemStack, interactionHand);
 			if (interactionResult.shouldSwing()) {
 				this.player.swing(interactionHand, true);
@@ -1574,14 +1579,14 @@ public class ServerGamePacketListenerImpl
 			case PERFORM_RESPAWN:
 				if (this.player.wonGame) {
 					this.player.wonGame = false;
-					this.player = this.server.getPlayerList().respawn(this.player, true);
+					this.player = this.server.getPlayerList().respawn(this.player, true, Entity.RemovalReason.CHANGED_DIMENSION);
 					CriteriaTriggers.CHANGED_DIMENSION.trigger(this.player, Level.END, Level.OVERWORLD);
 				} else {
 					if (this.player.getHealth() > 0.0F) {
 						return;
 					}
 
-					this.player = this.server.getPlayerList().respawn(this.player, false);
+					this.player = this.server.getPlayerList().respawn(this.player, false, Entity.RemovalReason.KILLED);
 					if (this.server.isHardcore()) {
 						this.player.setGameMode(GameType.SPECTATOR);
 						this.player.level().getGameRules().getRule(GameRules.RULE_SPECTATORSGENERATECHUNKS).set(false, this.server);

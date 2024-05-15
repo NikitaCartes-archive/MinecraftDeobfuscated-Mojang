@@ -3,7 +3,6 @@ package com.mojang.blaze3d.platform;
 import com.google.common.collect.EvictingQueue;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.logging.LogUtils;
 import java.util.List;
 import java.util.Queue;
@@ -123,7 +122,6 @@ public class GlDebug {
 	}
 
 	public static void enableDebugCallback(int i, boolean bl) {
-		RenderSystem.assertInInitPhase();
 		if (i > 0) {
 			GLCapabilities gLCapabilities = GL.getCapabilities();
 			if (gLCapabilities.GL_KHR_debug) {

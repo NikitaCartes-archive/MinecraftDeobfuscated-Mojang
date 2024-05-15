@@ -25,7 +25,6 @@ import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
@@ -152,8 +151,8 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob, Invento
 	}
 
 	@Override
-	protected void dropCustomDeathLoot(DamageSource damageSource, boolean bl) {
-		super.dropCustomDeathLoot(damageSource, bl);
+	protected void dropCustomDeathLoot(ServerLevel serverLevel, DamageSource damageSource, boolean bl) {
+		super.dropCustomDeathLoot(serverLevel, damageSource, bl);
 		if (damageSource.getEntity() instanceof Creeper creeper && creeper.canDropMobsSkull()) {
 			ItemStack itemStack = new ItemStack(Items.PIGLIN_HEAD);
 			creeper.increaseDroppedSkulls();
@@ -213,7 +212,7 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob, Invento
 
 		PiglinAi.initMemories(this, serverLevelAccessor.getRandom());
 		this.populateDefaultEquipmentSlots(randomSource, difficultyInstance);
-		this.populateDefaultEquipmentEnchantments(randomSource, difficultyInstance);
+		this.populateDefaultEquipmentEnchantments(serverLevelAccessor, randomSource, difficultyInstance);
 		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData);
 	}
 
@@ -407,7 +406,7 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob, Invento
 	}
 
 	protected boolean canReplaceCurrentItem(ItemStack itemStack) {
-		EquipmentSlot equipmentSlot = Mob.getEquipmentSlotForItem(itemStack);
+		EquipmentSlot equipmentSlot = this.getEquipmentSlotForItem(itemStack);
 		ItemStack itemStack2 = this.getItemBySlot(equipmentSlot);
 		return this.canReplaceCurrentItem(itemStack, itemStack2);
 	}

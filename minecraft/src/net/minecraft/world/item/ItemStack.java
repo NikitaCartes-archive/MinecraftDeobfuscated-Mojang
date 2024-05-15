@@ -62,6 +62,7 @@ import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.ai.attributes.Attribute;
@@ -415,7 +416,7 @@ public final class ItemStack implements DataComponentHolder {
 		return this.getOrDefault(DataComponents.MAX_DAMAGE, Integer.valueOf(0));
 	}
 
-	public void hurtAndBreak(int i, ServerLevel serverLevel, @Nullable ServerPlayer serverPlayer, Runnable runnable) {
+	public void hurtAndBreak(int i, ServerLevel serverLevel, @Nullable ServerPlayer serverPlayer, Consumer<Item> consumer) {
 		if (this.isDamageableItem()) {
 			if (i > 0) {
 				i = EnchantmentHelper.processDurabilityChange(serverLevel, this, i);
@@ -431,30 +432,19 @@ public final class ItemStack implements DataComponentHolder {
 			int j = this.getDamageValue() + i;
 			this.setDamageValue(j);
 			if (j >= this.getMaxDamage()) {
-				runnable.run();
+				Item item = this.getItem();
+				this.shrink(1);
+				consumer.accept(item);
 			}
 		}
 	}
 
 	public void hurtAndBreak(int i, LivingEntity livingEntity, EquipmentSlot equipmentSlot) {
-		if (!(livingEntity.level() instanceof ServerLevel serverLevel)) {
-			return;
+		if (livingEntity.level() instanceof ServerLevel serverLevel && !livingEntity.hasInfiniteMaterials()) {
+			this.hurtAndBreak(
+				i, serverLevel, livingEntity instanceof ServerPlayer serverPlayer ? serverPlayer : null, item -> livingEntity.onEquippedItemBroken(item, equipmentSlot)
+			);
 		}
-
-		if (livingEntity instanceof Player player && player.hasInfiniteMaterials()) {
-			return;
-		}
-
-		this.hurtAndBreak(i, serverLevel, livingEntity instanceof ServerPlayer serverPlayer ? serverPlayer : null, () -> {
-			livingEntity.broadcastBreakEvent(equipmentSlot);
-			Item item = this.getItem();
-			this.shrink(1);
-			if (livingEntity instanceof Player) {
-				((Player)livingEntity).awardStat(Stats.ITEM_BROKEN.get(item));
-			}
-
-			this.setDamageValue(0);
-		});
 	}
 
 	public boolean isBarVisible() {
@@ -770,12 +760,12 @@ public final class ItemStack implements DataComponentHolder {
 	private void addAttributeTooltips(Consumer<Component> consumer, @Nullable Player player) {
 		ItemAttributeModifiers itemAttributeModifiers = this.getOrDefault(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY);
 		if (itemAttributeModifiers.showInTooltip()) {
-			for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
+			for (EquipmentSlotGroup equipmentSlotGroup : EquipmentSlotGroup.values()) {
 				MutableBoolean mutableBoolean = new MutableBoolean(true);
-				this.forEachModifier(equipmentSlot, (holder, attributeModifier) -> {
+				this.forEachModifier(equipmentSlotGroup, (holder, attributeModifier) -> {
 					if (mutableBoolean.isTrue()) {
 						consumer.accept(CommonComponents.EMPTY);
-						consumer.accept(Component.translatable("item.modifiers." + equipmentSlot.getName()).withStyle(ChatFormatting.GRAY));
+						consumer.accept(Component.translatable("item.modifiers." + equipmentSlotGroup.getSerializedName()).withStyle(ChatFormatting.GRAY));
 						mutableBoolean.setFalse();
 					}
 
@@ -898,6 +888,17 @@ public final class ItemStack implements DataComponentHolder {
 	@Nullable
 	public Entity getEntityRepresentation() {
 		return !this.isEmpty() ? this.entityRepresentation : null;
+	}
+
+	public void forEachModifier(EquipmentSlotGroup equipmentSlotGroup, BiConsumer<Holder<Attribute>, AttributeModifier> biConsumer) {
+		ItemAttributeModifiers itemAttributeModifiers = this.getOrDefault(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY);
+		if (!itemAttributeModifiers.modifiers().isEmpty()) {
+			itemAttributeModifiers.forEach(equipmentSlotGroup, biConsumer);
+		} else {
+			this.getItem().getDefaultAttributeModifiers().forEach(equipmentSlotGroup, biConsumer);
+		}
+
+		EnchantmentHelper.forEachModifier(this, equipmentSlotGroup, biConsumer);
 	}
 
 	public void forEachModifier(EquipmentSlot equipmentSlot, BiConsumer<Holder<Attribute>, AttributeModifier> biConsumer) {

@@ -6,6 +6,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ColorParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.EntityTypeTags;
@@ -298,7 +299,7 @@ public class Ravager extends Raider {
 	}
 
 	@Override
-	public void applyRaidBuffs(int i, boolean bl) {
+	public void applyRaidBuffs(ServerLevel serverLevel, int i, boolean bl) {
 	}
 
 	@Override

@@ -66,7 +66,6 @@ public class SocialInteractionsScreen extends Screen {
 	@Nullable
 	private Component serverLabel;
 	private int playerCount;
-	private boolean initialized;
 
 	public SocialInteractionsScreen() {
 		this(null);
@@ -98,12 +97,7 @@ public class SocialInteractionsScreen extends Screen {
 	@Override
 	protected void init() {
 		this.layout.addTitleHeader(TITLE, this.font);
-		if (this.initialized) {
-			this.socialInteractionsPlayerList.setRectangle(this.width, this.windowHeight(), 0, 88);
-		} else {
-			this.socialInteractionsPlayerList = new SocialInteractionsPlayerList(this, this.minecraft, this.width, this.windowHeight(), 88, 36);
-		}
-
+		this.socialInteractionsPlayerList = new SocialInteractionsPlayerList(this, this.minecraft, this.width, this.listEnd() - 88, 88, 36);
 		int i = this.socialInteractionsPlayerList.getRowWidth() / 3;
 		int j = this.socialInteractionsPlayerList.getRowLeft();
 		int k = this.socialInteractionsPlayerList.getRowRight();
@@ -136,7 +130,6 @@ public class SocialInteractionsScreen extends Screen {
 				.bounds(this.width / 2 - 100, 64 + this.windowHeight(), 200, 20)
 				.build()
 		);
-		this.initialized = true;
 		this.showPage(this.page);
 		this.layout.addToFooter(Button.builder(CommonComponents.GUI_DONE, button -> this.onClose()).width(200).build());
 		this.layout.visitWidgets(guiEventListener -> {
@@ -148,7 +141,7 @@ public class SocialInteractionsScreen extends Screen {
 	@Override
 	protected void repositionElements() {
 		this.layout.arrangeElements();
-		this.socialInteractionsPlayerList.updateSizeAndPosition(this.width, this.windowHeight(), 88);
+		this.socialInteractionsPlayerList.updateSizeAndPosition(this.width, this.listEnd() - 88, 88);
 		this.searchBox.setPosition(this.marginX() + 28, 74);
 		int i = this.socialInteractionsPlayerList.getRowLeft();
 		int j = this.socialInteractionsPlayerList.getRowRight();

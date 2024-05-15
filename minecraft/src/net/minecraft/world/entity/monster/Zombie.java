@@ -54,6 +54,7 @@ import net.minecraft.world.entity.animal.Turtle;
 import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameRules;
@@ -226,9 +227,10 @@ public class Zombie extends Monster {
 				ItemStack itemStack = this.getItemBySlot(EquipmentSlot.HEAD);
 				if (!itemStack.isEmpty()) {
 					if (itemStack.isDamageableItem()) {
+						Item item = itemStack.getItem();
 						itemStack.setDamageValue(itemStack.getDamageValue() + this.random.nextInt(2));
 						if (itemStack.getDamageValue() >= itemStack.getMaxDamage()) {
-							this.broadcastBreakEvent(EquipmentSlot.HEAD);
+							this.onEquippedItemBroken(item, EquipmentSlot.HEAD);
 							this.setItemSlot(EquipmentSlot.HEAD, ItemStack.EMPTY);
 						}
 					}
@@ -475,7 +477,7 @@ public class Zombie extends Monster {
 
 			this.setCanBreakDoors(this.supportsBreakDoorGoal() && randomSource.nextFloat() < f * 0.1F);
 			this.populateDefaultEquipmentSlots(randomSource, difficultyInstance);
-			this.populateDefaultEquipmentEnchantments(randomSource, difficultyInstance);
+			this.populateDefaultEquipmentEnchantments(serverLevelAccessor, randomSource, difficultyInstance);
 		}
 
 		if (this.getItemBySlot(EquipmentSlot.HEAD).isEmpty()) {
@@ -520,8 +522,8 @@ public class Zombie extends Monster {
 	}
 
 	@Override
-	protected void dropCustomDeathLoot(DamageSource damageSource, boolean bl) {
-		super.dropCustomDeathLoot(damageSource, bl);
+	protected void dropCustomDeathLoot(ServerLevel serverLevel, DamageSource damageSource, boolean bl) {
+		super.dropCustomDeathLoot(serverLevel, damageSource, bl);
 		if (damageSource.getEntity() instanceof Creeper creeper && creeper.canDropMobsSkull()) {
 			ItemStack itemStack = this.getSkull();
 			if (!itemStack.isEmpty()) {

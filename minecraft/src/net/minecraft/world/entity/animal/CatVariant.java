@@ -1,11 +1,16 @@
 package net.minecraft.world.entity.animal;
 
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 
 public record CatVariant(ResourceLocation texture) {
+	public static final StreamCodec<RegistryFriendlyByteBuf, Holder<CatVariant>> STREAM_CODEC = ByteBufCodecs.holderRegistry(Registries.CAT_VARIANT);
 	public static final ResourceKey<CatVariant> TABBY = createKey("tabby");
 	public static final ResourceKey<CatVariant> BLACK = createKey("black");
 	public static final ResourceKey<CatVariant> RED = createKey("red");

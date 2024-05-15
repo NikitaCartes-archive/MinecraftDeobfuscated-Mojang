@@ -8,6 +8,9 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.RegistryCodecs;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.RegistryFileCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.biome.Biome;
@@ -22,7 +25,19 @@ public final class WolfVariant {
 				)
 				.apply(instance, WolfVariant::new)
 	);
+	public static final StreamCodec<RegistryFriendlyByteBuf, WolfVariant> DIRECT_STREAM_CODEC = StreamCodec.composite(
+		ResourceLocation.STREAM_CODEC,
+		WolfVariant::wildTexture,
+		ResourceLocation.STREAM_CODEC,
+		WolfVariant::tameTexture,
+		ResourceLocation.STREAM_CODEC,
+		WolfVariant::angryTexture,
+		ByteBufCodecs.holderSet(Registries.BIOME),
+		WolfVariant::biomes,
+		WolfVariant::new
+	);
 	public static final Codec<Holder<WolfVariant>> CODEC = RegistryFileCodec.create(Registries.WOLF_VARIANT, DIRECT_CODEC);
+	public static final StreamCodec<RegistryFriendlyByteBuf, Holder<WolfVariant>> STREAM_CODEC = ByteBufCodecs.holder(Registries.WOLF_VARIANT, DIRECT_STREAM_CODEC);
 	private final ResourceLocation wildTexture;
 	private final ResourceLocation tameTexture;
 	private final ResourceLocation angryTexture;

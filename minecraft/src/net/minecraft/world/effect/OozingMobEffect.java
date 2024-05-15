@@ -25,8 +25,8 @@ class OozingMobEffect extends MobEffect {
 	}
 
 	@VisibleForTesting
-	protected static int numberOfSlimesToSpawn(int i, int j, int k) {
-		return Mth.clamp(0, i - j, k);
+	protected static int numberOfSlimesToSpawn(int i, OozingMobEffect.NearbySlimes nearbySlimes, int j) {
+		return i < 1 ? j : Mth.clamp(0, i - nearbySlimes.count(i), j);
 	}
 
 	@Override
@@ -35,9 +35,7 @@ class OozingMobEffect extends MobEffect {
 			int j = this.spawnedCount.applyAsInt(livingEntity.getRandom());
 			Level level = livingEntity.level();
 			int k = level.getGameRules().getInt(GameRules.RULE_MAX_ENTITY_CRAMMING);
-			List<Slime> list = new ArrayList();
-			level.getEntities(EntityType.SLIME, livingEntity.getBoundingBox().inflate(2.0), slime -> slime != livingEntity, list, k);
-			int l = numberOfSlimesToSpawn(k, list.size(), j);
+			int l = numberOfSlimesToSpawn(k, OozingMobEffect.NearbySlimes.closeTo(livingEntity), j);
 
 			for (int m = 0; m < l; m++) {
 				this.spawnSlimeOffspring(livingEntity.level(), livingEntity.getX(), livingEntity.getY() + 0.5, livingEntity.getZ());
@@ -51,6 +49,19 @@ class OozingMobEffect extends MobEffect {
 			slime.setSize(2, true);
 			slime.moveTo(d, e, f, level.getRandom().nextFloat() * 360.0F, 0.0F);
 			level.addFreshEntity(slime);
+		}
+	}
+
+	@FunctionalInterface
+	protected interface NearbySlimes {
+		int count(int i);
+
+		static OozingMobEffect.NearbySlimes closeTo(LivingEntity livingEntity) {
+			return i -> {
+				List<Slime> list = new ArrayList();
+				livingEntity.level().getEntities(EntityType.SLIME, livingEntity.getBoundingBox().inflate(2.0), slime -> slime != livingEntity, list, i);
+				return list.size();
+			};
 		}
 	}
 }

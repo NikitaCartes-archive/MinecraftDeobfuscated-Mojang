@@ -200,7 +200,7 @@ public class Dolphin extends WaterAnimal {
 
 	@Override
 	public boolean canTakeItem(ItemStack itemStack) {
-		EquipmentSlot equipmentSlot = Mob.getEquipmentSlotForItem(itemStack);
+		EquipmentSlot equipmentSlot = this.getEquipmentSlotForItem(itemStack);
 		return !this.getItemBySlot(equipmentSlot).isEmpty() ? false : equipmentSlot == EquipmentSlot.MAINHAND && super.canTakeItem(itemStack);
 	}
 

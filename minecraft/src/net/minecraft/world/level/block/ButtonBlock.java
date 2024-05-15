@@ -130,7 +130,7 @@ public class ButtonBlock extends FaceAttachedHorizontalDirectionalBlock {
 		level.setBlock(blockPos, blockState.setValue(POWERED, Boolean.valueOf(true)), 3);
 		this.updateNeighbours(blockState, level, blockPos);
 		level.scheduleTick(blockPos, this, this.ticksToStayPressed);
-		this.playSound(player, level, blockPos, false);
+		this.playSound(player, level, blockPos, true);
 		level.gameEvent(player, GameEvent.BLOCK_ACTIVATE, blockPos);
 	}
 

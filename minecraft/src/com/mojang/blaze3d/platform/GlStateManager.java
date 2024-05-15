@@ -502,7 +502,6 @@ public class GlStateManager {
 	}
 
 	public static int _getTexLevelParameter(int i, int j, int k) {
-		RenderSystem.assertInInitPhase();
 		return GL11.glGetTexLevelParameteri(i, j, k);
 	}
 

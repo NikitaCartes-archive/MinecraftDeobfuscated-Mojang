@@ -94,7 +94,7 @@ public abstract class AbstractArrow extends Projectile {
 				this.setPierceLevel((byte)i);
 			}
 
-			EnchantmentHelper.onProjectileSpawned(serverLevel, itemStack2, this, () -> this.firedFromWeapon = null);
+			EnchantmentHelper.onProjectileSpawned(serverLevel, itemStack2, this, item -> this.firedFromWeapon = null);
 		}
 	}
 
@@ -325,8 +325,8 @@ public abstract class AbstractArrow extends Projectile {
 		double d = this.baseDamage;
 		Entity entity2 = this.getOwner();
 		DamageSource damageSource = this.damageSources().arrow(this, (Entity)(entity2 != null ? entity2 : this));
-		if (this.firedFromWeapon != null && this.level() instanceof ServerLevel serverLevel) {
-			d = (double)EnchantmentHelper.modifyDamage(serverLevel, this.firedFromWeapon, entity, damageSource, (float)d);
+		if (this.getWeaponItem() != null && this.level() instanceof ServerLevel serverLevel) {
+			d = (double)EnchantmentHelper.modifyDamage(serverLevel, this.getWeaponItem(), entity, damageSource, (float)d);
 		}
 
 		int i = Mth.ceil(Mth.clamp((double)f * d, 0.0, 2.147483647E9));
@@ -374,7 +374,7 @@ public abstract class AbstractArrow extends Projectile {
 
 				this.doKnockback(livingEntity2, damageSource);
 				if (this.level() instanceof ServerLevel serverLevel2) {
-					EnchantmentHelper.doPostAttackEffects(serverLevel2, livingEntity2, damageSource);
+					EnchantmentHelper.doPostAttackEffectsWithItemSource(serverLevel2, livingEntity2, damageSource, this.getWeaponItem());
 				}
 
 				this.doPostHurtEffects(livingEntity2);
@@ -452,8 +452,13 @@ public abstract class AbstractArrow extends Projectile {
 
 	protected void hitBlockEnchantmentEffects(ServerLevel serverLevel, BlockHitResult blockHitResult, ItemStack itemStack) {
 		EnchantmentHelper.onHitBlock(
-			serverLevel, itemStack, this.getOwner() instanceof LivingEntity livingEntity ? livingEntity : null, this, null, blockHitResult.getLocation(), () -> {
-			}
+			serverLevel,
+			itemStack,
+			this.getOwner() instanceof LivingEntity livingEntity ? livingEntity : null,
+			this,
+			null,
+			blockHitResult.getLocation(),
+			item -> this.firedFromWeapon = null
 		);
 	}
 

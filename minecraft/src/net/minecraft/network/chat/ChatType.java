@@ -23,6 +23,10 @@ public record ChatType(ChatTypeDecoration chat, ChatTypeDecoration narration) {
 				)
 				.apply(instance, ChatType::new)
 	);
+	public static final StreamCodec<RegistryFriendlyByteBuf, ChatType> DIRECT_STREAM_CODEC = StreamCodec.composite(
+		ChatTypeDecoration.STREAM_CODEC, ChatType::chat, ChatTypeDecoration.STREAM_CODEC, ChatType::narration, ChatType::new
+	);
+	public static final StreamCodec<RegistryFriendlyByteBuf, Holder<ChatType>> STREAM_CODEC = ByteBufCodecs.holder(Registries.CHAT_TYPE, DIRECT_STREAM_CODEC);
 	public static final ChatTypeDecoration DEFAULT_CHAT_DECORATION = ChatTypeDecoration.withSender("chat.type.text");
 	public static final ResourceKey<ChatType> CHAT = create("chat");
 	public static final ResourceKey<ChatType> SAY_COMMAND = create("say_command");
@@ -73,7 +77,7 @@ public record ChatType(ChatTypeDecoration chat, ChatTypeDecoration narration) {
 
 	public static record Bound(Holder<ChatType> chatType, Component name, Optional<Component> targetName) {
 		public static final StreamCodec<RegistryFriendlyByteBuf, ChatType.Bound> STREAM_CODEC = StreamCodec.composite(
-			ByteBufCodecs.holderRegistry(Registries.CHAT_TYPE),
+			ChatType.STREAM_CODEC,
 			ChatType.Bound::chatType,
 			ComponentSerialization.TRUSTED_STREAM_CODEC,
 			ChatType.Bound::name,

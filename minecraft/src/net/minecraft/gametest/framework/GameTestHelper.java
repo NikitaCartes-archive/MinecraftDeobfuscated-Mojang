@@ -77,9 +77,13 @@ public class GameTestHelper {
 		return this.getLevel().getBlockState(this.absolutePos(blockPos));
 	}
 
-	@Nullable
-	public BlockEntity getBlockEntity(BlockPos blockPos) {
-		return this.getLevel().getBlockEntity(this.absolutePos(blockPos));
+	public <T extends BlockEntity> T getBlockEntity(BlockPos blockPos) {
+		BlockEntity blockEntity = this.getLevel().getBlockEntity(this.absolutePos(blockPos));
+		if (blockEntity == null) {
+			throw new GameTestAssertPosException("Missing block entity", this.absolutePos(blockPos), blockPos, this.testInfo.getTick());
+		} else {
+			return (T)blockEntity;
+		}
 	}
 
 	public void killAllEntities() {
@@ -398,6 +402,13 @@ public class GameTestHelper {
 	public void assertBlockState(BlockPos blockPos, Predicate<BlockState> predicate, Supplier<String> supplier) {
 		BlockState blockState = this.getBlockState(blockPos);
 		if (!predicate.test(blockState)) {
+			throw new GameTestAssertPosException((String)supplier.get(), this.absolutePos(blockPos), blockPos, this.testInfo.getTick());
+		}
+	}
+
+	public <T extends BlockEntity> void assertBlockEntityData(BlockPos blockPos, Predicate<T> predicate, Supplier<String> supplier) {
+		T blockEntity = this.getBlockEntity(blockPos);
+		if (!predicate.test(blockEntity)) {
 			throw new GameTestAssertPosException((String)supplier.get(), this.absolutePos(blockPos), blockPos, this.testInfo.getTick());
 		}
 	}

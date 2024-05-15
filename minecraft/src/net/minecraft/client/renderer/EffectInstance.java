@@ -278,7 +278,6 @@ public class EffectInstance implements Effect, AutoCloseable {
 	}
 
 	public void apply() {
-		RenderSystem.assertOnGameThread();
 		this.dirty = false;
 		lastAppliedEffect = this;
 		this.blend.apply();
@@ -317,7 +316,6 @@ public class EffectInstance implements Effect, AutoCloseable {
 	}
 
 	public AbstractUniform safeGetUniform(String string) {
-		RenderSystem.assertOnGameThread();
 		Uniform uniform = this.getUniform(string);
 		return (AbstractUniform)(uniform == null ? DUMMY_UNIFORM : uniform);
 	}

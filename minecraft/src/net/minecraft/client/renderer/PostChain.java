@@ -324,14 +324,7 @@ public class PostChain implements AutoCloseable {
 	}
 
 	public void process(float f) {
-		if (f < this.lastStamp) {
-			this.time = this.time + (1.0F - this.lastStamp);
-			this.time += f;
-		} else {
-			this.time = this.time + (f - this.lastStamp);
-		}
-
-		this.lastStamp = f;
+		this.time += f;
 
 		while (this.time > 20.0F) {
 			this.time -= 20.0F;

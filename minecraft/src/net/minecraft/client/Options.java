@@ -235,14 +235,14 @@ public class Options {
 		}
 	);
 	private static final Component MENU_BACKGROUND_BLURRINESS_TOOLTIP = Component.translatable("options.accessibility.menu_background_blurriness.tooltip");
-	private static final double BLURRINESS_DEFAULT_VALUE = 0.5;
-	private final OptionInstance<Double> menuBackgroundBlurriness = new OptionInstance<>(
+	private static final int BLURRINESS_DEFAULT_VALUE = 5;
+	private final OptionInstance<Integer> menuBackgroundBlurriness = new OptionInstance<>(
 		"options.accessibility.menu_background_blurriness",
 		OptionInstance.cachedConstantTooltip(MENU_BACKGROUND_BLURRINESS_TOOLTIP),
-		Options::percentValueOrOffLabel,
-		OptionInstance.UnitDouble.INSTANCE,
-		0.5,
-		double_ -> {
+		Options::genericValueOrOffLabel,
+		new OptionInstance.IntRange(0, 10),
+		5,
+		integer -> {
 		}
 	);
 	private final OptionInstance<Double> textBackgroundOpacity = new OptionInstance<>(
@@ -809,11 +809,11 @@ public class Options {
 		return this.chatLineSpacing;
 	}
 
-	public OptionInstance<Double> menuBackgroundBlurriness() {
+	public OptionInstance<Integer> menuBackgroundBlurriness() {
 		return this.menuBackgroundBlurriness;
 	}
 
-	public double getMenuBackgroundBlurriness() {
+	public int getMenuBackgroundBlurriness() {
 		return this.menuBackgroundBlurriness().get();
 	}
 
@@ -1280,7 +1280,7 @@ public class Options {
 				new Options.FieldAccess() {
 					@Nullable
 					private String getValueOrNull(String string) {
-						return compoundTag2.contains(string) ? compoundTag2.getString(string) : null;
+						return compoundTag2.contains(string) ? compoundTag2.get(string).getAsString() : null;
 					}
 
 					@Override
@@ -1597,12 +1597,16 @@ public class Options {
 		return Component.translatable("options.generic_value", component, component2);
 	}
 
-	private static Component percentValueOrOffLabel(Component component, double d) {
-		return d == 0.0 ? genericValueLabel(component, CommonComponents.OPTION_OFF) : percentValueLabel(component, d);
-	}
-
 	public static Component genericValueLabel(Component component, int i) {
 		return genericValueLabel(component, Component.literal(Integer.toString(i)));
+	}
+
+	public static Component genericValueOrOffLabel(Component component, int i) {
+		return i == 0 ? genericValueLabel(component, CommonComponents.OPTION_OFF) : genericValueLabel(component, i);
+	}
+
+	private static Component percentValueOrOffLabel(Component component, double d) {
+		return d == 0.0 ? genericValueLabel(component, CommonComponents.OPTION_OFF) : percentValueLabel(component, d);
 	}
 
 	@Environment(EnvType.CLIENT)

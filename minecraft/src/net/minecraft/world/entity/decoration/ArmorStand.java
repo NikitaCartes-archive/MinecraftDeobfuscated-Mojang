@@ -27,7 +27,6 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -145,7 +144,7 @@ public class ArmorStand extends LivingEntity {
 		switch (equipmentSlot.getType()) {
 			case HAND:
 				return this.handItems.get(equipmentSlot.getIndex());
-			case ARMOR:
+			case HUMANOID_ARMOR:
 				return this.armorItems.get(equipmentSlot.getIndex());
 			default:
 				return ItemStack.EMPTY;
@@ -164,14 +163,14 @@ public class ArmorStand extends LivingEntity {
 			case HAND:
 				this.onEquipItem(equipmentSlot, this.handItems.set(equipmentSlot.getIndex(), itemStack), itemStack);
 				break;
-			case ARMOR:
+			case HUMANOID_ARMOR:
 				this.onEquipItem(equipmentSlot, this.armorItems.set(equipmentSlot.getIndex(), itemStack), itemStack);
 		}
 	}
 
 	@Override
 	public boolean canTakeItem(ItemStack itemStack) {
-		EquipmentSlot equipmentSlot = Mob.getEquipmentSlotForItem(itemStack);
+		EquipmentSlot equipmentSlot = this.getEquipmentSlotForItem(itemStack);
 		return this.getItemBySlot(equipmentSlot).isEmpty() && !this.isDisabled(equipmentSlot);
 	}
 
@@ -308,7 +307,7 @@ public class ArmorStand extends LivingEntity {
 		} else if (player.level().isClientSide) {
 			return InteractionResult.CONSUME;
 		} else {
-			EquipmentSlot equipmentSlot = Mob.getEquipmentSlotForItem(itemStack);
+			EquipmentSlot equipmentSlot = this.getEquipmentSlotForItem(itemStack);
 			if (itemStack.isEmpty()) {
 				EquipmentSlot equipmentSlot2 = this.getClickedSlot(vec3);
 				EquipmentSlot equipmentSlot3 = this.isDisabled(equipmentSlot2) ? equipmentSlot : equipmentSlot2;
@@ -380,58 +379,62 @@ public class ArmorStand extends LivingEntity {
 
 	@Override
 	public boolean hurt(DamageSource damageSource, float f) {
-		if (this.level().isClientSide || this.isRemoved()) {
+		if (this.isRemoved()) {
 			return false;
-		} else if (damageSource.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
-			this.kill();
-			return false;
-		} else if (this.isInvulnerableTo(damageSource) || this.invisible || this.isMarker()) {
-			return false;
-		} else if (damageSource.is(DamageTypeTags.IS_EXPLOSION)) {
-			this.brokenByAnything(damageSource);
-			this.kill();
-			return false;
-		} else if (damageSource.is(DamageTypeTags.IGNITES_ARMOR_STANDS)) {
-			if (this.isOnFire()) {
-				this.causeDamage(damageSource, 0.15F);
-			} else {
-				this.igniteForSeconds(5.0F);
-			}
+		} else if (this.level() instanceof ServerLevel serverLevel) {
+			if (damageSource.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
+				this.kill();
+				return false;
+			} else if (this.isInvulnerableTo(damageSource) || this.invisible || this.isMarker()) {
+				return false;
+			} else if (damageSource.is(DamageTypeTags.IS_EXPLOSION)) {
+				this.brokenByAnything(serverLevel, damageSource);
+				this.kill();
+				return false;
+			} else if (damageSource.is(DamageTypeTags.IGNITES_ARMOR_STANDS)) {
+				if (this.isOnFire()) {
+					this.causeDamage(serverLevel, damageSource, 0.15F);
+				} else {
+					this.igniteForSeconds(5.0F);
+				}
 
-			return false;
-		} else if (damageSource.is(DamageTypeTags.BURNS_ARMOR_STANDS) && this.getHealth() > 0.5F) {
-			this.causeDamage(damageSource, 4.0F);
-			return false;
-		} else {
-			boolean bl = damageSource.is(DamageTypeTags.CAN_BREAK_ARMOR_STAND);
-			boolean bl2 = damageSource.is(DamageTypeTags.ALWAYS_KILLS_ARMOR_STANDS);
-			if (!bl && !bl2) {
+				return false;
+			} else if (damageSource.is(DamageTypeTags.BURNS_ARMOR_STANDS) && this.getHealth() > 0.5F) {
+				this.causeDamage(serverLevel, damageSource, 4.0F);
 				return false;
 			} else {
-				if (damageSource.getEntity() instanceof Player player && !player.getAbilities().mayBuild) {
+				boolean bl = damageSource.is(DamageTypeTags.CAN_BREAK_ARMOR_STAND);
+				boolean bl2 = damageSource.is(DamageTypeTags.ALWAYS_KILLS_ARMOR_STANDS);
+				if (!bl && !bl2) {
 					return false;
-				}
-
-				if (damageSource.isCreativePlayer()) {
-					this.playBrokenSound();
-					this.showBreakingParticles();
-					this.kill();
-					return true;
 				} else {
-					long l = this.level().getGameTime();
-					if (l - this.lastHit > 5L && !bl2) {
-						this.level().broadcastEntityEvent(this, (byte)32);
-						this.gameEvent(GameEvent.ENTITY_DAMAGE, damageSource.getEntity());
-						this.lastHit = l;
-					} else {
-						this.brokenByPlayer(damageSource);
-						this.showBreakingParticles();
-						this.kill();
+					if (damageSource.getEntity() instanceof Player player && !player.getAbilities().mayBuild) {
+						return false;
 					}
 
-					return true;
+					if (damageSource.isCreativePlayer()) {
+						this.playBrokenSound();
+						this.showBreakingParticles();
+						this.kill();
+						return true;
+					} else {
+						long l = serverLevel.getGameTime();
+						if (l - this.lastHit > 5L && !bl2) {
+							serverLevel.broadcastEntityEvent(this, (byte)32);
+							this.gameEvent(GameEvent.ENTITY_DAMAGE, damageSource.getEntity());
+							this.lastHit = l;
+						} else {
+							this.brokenByPlayer(serverLevel, damageSource);
+							this.showBreakingParticles();
+							this.kill();
+						}
+
+						return true;
+					}
 				}
 			}
+		} else {
+			return false;
 		}
 	}
 
@@ -475,11 +478,11 @@ public class ArmorStand extends LivingEntity {
 		}
 	}
 
-	private void causeDamage(DamageSource damageSource, float f) {
+	private void causeDamage(ServerLevel serverLevel, DamageSource damageSource, float f) {
 		float g = this.getHealth();
 		g -= f;
 		if (g <= 0.5F) {
-			this.brokenByAnything(damageSource);
+			this.brokenByAnything(serverLevel, damageSource);
 			this.kill();
 		} else {
 			this.setHealth(g);
@@ -487,16 +490,16 @@ public class ArmorStand extends LivingEntity {
 		}
 	}
 
-	private void brokenByPlayer(DamageSource damageSource) {
+	private void brokenByPlayer(ServerLevel serverLevel, DamageSource damageSource) {
 		ItemStack itemStack = new ItemStack(Items.ARMOR_STAND);
 		itemStack.set(DataComponents.CUSTOM_NAME, this.getCustomName());
 		Block.popResource(this.level(), this.blockPosition(), itemStack);
-		this.brokenByAnything(damageSource);
+		this.brokenByAnything(serverLevel, damageSource);
 	}
 
-	private void brokenByAnything(DamageSource damageSource) {
+	private void brokenByAnything(ServerLevel serverLevel, DamageSource damageSource) {
 		this.playBrokenSound();
-		this.dropAllDeathLoot(damageSource);
+		this.dropAllDeathLoot(serverLevel, damageSource);
 
 		for (int i = 0; i < this.handItems.size(); i++) {
 			ItemStack itemStack = this.handItems.get(i);

@@ -6,7 +6,6 @@ import java.util.Optional;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.advancements.Criterion;
 import net.minecraft.core.Holder;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.alchemy.Potion;
 
@@ -24,7 +23,7 @@ public class BrewedPotionTrigger extends SimpleCriterionTrigger<BrewedPotionTrig
 		public static final Codec<BrewedPotionTrigger.TriggerInstance> CODEC = RecordCodecBuilder.create(
 			instance -> instance.group(
 						EntityPredicate.ADVANCEMENT_CODEC.optionalFieldOf("player").forGetter(BrewedPotionTrigger.TriggerInstance::player),
-						BuiltInRegistries.POTION.holderByNameCodec().optionalFieldOf("potion").forGetter(BrewedPotionTrigger.TriggerInstance::potion)
+						Potion.CODEC.optionalFieldOf("potion").forGetter(BrewedPotionTrigger.TriggerInstance::potion)
 					)
 					.apply(instance, BrewedPotionTrigger.TriggerInstance::new)
 		);

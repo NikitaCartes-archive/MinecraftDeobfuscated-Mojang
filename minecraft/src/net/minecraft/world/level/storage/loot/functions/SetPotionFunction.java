@@ -5,7 +5,6 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.PotionContents;
@@ -15,7 +14,7 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 public class SetPotionFunction extends LootItemConditionalFunction {
 	public static final MapCodec<SetPotionFunction> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> commonFields(instance)
-				.and(BuiltInRegistries.POTION.holderByNameCodec().fieldOf("id").forGetter(setPotionFunction -> setPotionFunction.potion))
+				.and(Potion.CODEC.fieldOf("id").forGetter(setPotionFunction -> setPotionFunction.potion))
 				.apply(instance, SetPotionFunction::new)
 	);
 	private final Holder<Potion> potion;

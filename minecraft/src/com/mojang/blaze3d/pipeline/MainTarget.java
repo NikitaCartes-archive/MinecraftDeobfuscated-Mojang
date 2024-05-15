@@ -17,16 +17,10 @@ public class MainTarget extends RenderTarget {
 
 	public MainTarget(int i, int j) {
 		super(true);
-		RenderSystem.assertOnRenderThreadOrInit();
-		if (!RenderSystem.isOnRenderThread()) {
-			RenderSystem.recordRenderCall(() -> this.createFrameBuffer(i, j));
-		} else {
-			this.createFrameBuffer(i, j);
-		}
+		this.createFrameBuffer(i, j);
 	}
 
 	private void createFrameBuffer(int i, int j) {
-		RenderSystem.assertOnRenderThreadOrInit();
 		MainTarget.Dimension dimension = this.allocateAttachments(i, j);
 		this.frameBufferId = GlStateManager.glGenFramebuffers();
 		GlStateManager._glBindFramebuffer(36160, this.frameBufferId);

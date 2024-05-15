@@ -2,6 +2,7 @@ package net.minecraft.world.entity.monster;
 
 import javax.annotation.Nullable;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.Difficulty;
@@ -169,7 +170,7 @@ public class Illusioner extends SpellcasterIllager implements RangedAttackMob {
 	}
 
 	@Override
-	public void applyRaidBuffs(int i, boolean bl) {
+	public void applyRaidBuffs(ServerLevel serverLevel, int i, boolean bl) {
 	}
 
 	@Override

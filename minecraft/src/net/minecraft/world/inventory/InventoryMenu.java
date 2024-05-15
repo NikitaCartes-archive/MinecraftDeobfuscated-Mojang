@@ -5,7 +5,6 @@ import java.util.Map;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.StackedContents;
@@ -138,7 +137,7 @@ public class InventoryMenu extends RecipeBookMenu<CraftingInput, CraftingRecipe>
 		if (slot.hasItem()) {
 			ItemStack itemStack2 = slot.getItem();
 			itemStack = itemStack2.copy();
-			EquipmentSlot equipmentSlot = Mob.getEquipmentSlotForItem(itemStack);
+			EquipmentSlot equipmentSlot = player.getEquipmentSlotForItem(itemStack);
 			if (i == 0) {
 				if (!this.moveItemStackTo(itemStack2, 9, 45, true)) {
 					return ItemStack.EMPTY;
@@ -153,7 +152,7 @@ public class InventoryMenu extends RecipeBookMenu<CraftingInput, CraftingRecipe>
 				if (!this.moveItemStackTo(itemStack2, 9, 45, false)) {
 					return ItemStack.EMPTY;
 				}
-			} else if (equipmentSlot.getType() == EquipmentSlot.Type.ARMOR && !this.slots.get(8 - equipmentSlot.getIndex()).hasItem()) {
+			} else if (equipmentSlot.getType() == EquipmentSlot.Type.HUMANOID_ARMOR && !this.slots.get(8 - equipmentSlot.getIndex()).hasItem()) {
 				int j = 8 - equipmentSlot.getIndex();
 				if (!this.moveItemStackTo(itemStack2, j, j + 1, false)) {
 					return ItemStack.EMPTY;

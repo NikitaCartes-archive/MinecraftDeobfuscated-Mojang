@@ -86,10 +86,9 @@ public class MaceItem extends Item {
 			}
 
 			knockback(serverLevel, serverPlayer, livingEntity);
-			return true;
 		}
 
-		return false;
+		return true;
 	}
 
 	@Override

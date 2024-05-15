@@ -13,7 +13,6 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.RegistryAccess;
@@ -26,9 +25,11 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.random.WeightedRandom;
+import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -38,7 +39,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.effects.EnchantmentValueEffect;
 import net.minecraft.world.item.enchantment.providers.EnchantmentProvider;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.mutable.MutableBoolean;
@@ -195,6 +195,14 @@ public class EnchantmentHelper {
 	}
 
 	public static void doPostAttackEffects(ServerLevel serverLevel, Entity entity, DamageSource damageSource) {
+		if (damageSource.getEntity() instanceof LivingEntity livingEntity) {
+			doPostAttackEffectsWithItemSource(serverLevel, entity, damageSource, livingEntity.getMainHandItem());
+		} else {
+			doPostAttackEffectsWithItemSource(serverLevel, entity, damageSource, null);
+		}
+	}
+
+	public static void doPostAttackEffectsWithItemSource(ServerLevel serverLevel, Entity entity, DamageSource damageSource, @Nullable ItemStack itemStack) {
 		if (entity instanceof LivingEntity livingEntity) {
 			runIterationOnEquipment(
 				livingEntity,
@@ -202,9 +210,9 @@ public class EnchantmentHelper {
 			);
 		}
 
-		if (damageSource.getEntity() instanceof LivingEntity livingEntity) {
+		if (itemStack != null && damageSource.getEntity() instanceof LivingEntity livingEntity) {
 			runIterationOnItem(
-				livingEntity.getMainHandItem(),
+				itemStack,
 				EquipmentSlot.MAINHAND,
 				livingEntity,
 				(holder, i, enchantedItemInUse) -> holder.value().doPostAttack(serverLevel, i, enchantedItemInUse, EnchantmentTarget.ATTACKER, entity, damageSource)
@@ -273,9 +281,9 @@ public class EnchantmentHelper {
 		return Math.max(0, mutableFloat.intValue());
 	}
 
-	public static void onProjectileSpawned(ServerLevel serverLevel, ItemStack itemStack, AbstractArrow abstractArrow, Runnable runnable) {
+	public static void onProjectileSpawned(ServerLevel serverLevel, ItemStack itemStack, AbstractArrow abstractArrow, Consumer<Item> consumer) {
 		LivingEntity livingEntity2 = abstractArrow.getOwner() instanceof LivingEntity livingEntity ? livingEntity : null;
-		EnchantedItemInUse enchantedItemInUse = new EnchantedItemInUse(itemStack, null, livingEntity2, runnable);
+		EnchantedItemInUse enchantedItemInUse = new EnchantedItemInUse(itemStack, null, livingEntity2, consumer);
 		runIterationOnItem(itemStack, (holder, i) -> holder.value().onProjectileSpawned(serverLevel, i, enchantedItemInUse, abstractArrow));
 	}
 
@@ -286,9 +294,9 @@ public class EnchantmentHelper {
 		Entity entity,
 		@Nullable EquipmentSlot equipmentSlot,
 		Vec3 vec3,
-		Runnable runnable
+		Consumer<Item> consumer
 	) {
-		EnchantedItemInUse enchantedItemInUse = new EnchantedItemInUse(itemStack, equipmentSlot, livingEntity, runnable);
+		EnchantedItemInUse enchantedItemInUse = new EnchantedItemInUse(itemStack, equipmentSlot, livingEntity, consumer);
 		runIterationOnItem(itemStack, (holder, i) -> holder.value().onHitBlock(serverLevel, i, enchantedItemInUse, entity, vec3));
 	}
 
@@ -339,6 +347,14 @@ public class EnchantmentHelper {
 		}
 
 		return mutableFloat.floatValue();
+	}
+
+	public static void forEachModifier(ItemStack itemStack, EquipmentSlotGroup equipmentSlotGroup, BiConsumer<Holder<Attribute>, AttributeModifier> biConsumer) {
+		runIterationOnItem(itemStack, (holder, i) -> holder.value().getEffects(EnchantmentEffectComponents.ATTRIBUTES).forEach(enchantmentAttributeEffect -> {
+				if (((Enchantment)holder.value()).definition().slots().contains(equipmentSlotGroup)) {
+					biConsumer.accept(enchantmentAttributeEffect.attribute(), enchantmentAttributeEffect.getModifier(i));
+				}
+			}));
 	}
 
 	public static void forEachModifier(ItemStack itemStack, EquipmentSlot equipmentSlot, BiConsumer<Holder<Attribute>, AttributeModifier> biConsumer) {
@@ -556,11 +572,15 @@ public class EnchantmentHelper {
 	}
 
 	public static void enchantItemFromProvider(
-		ItemStack itemStack, ResourceKey<EnchantmentProvider> resourceKey, Level level, BlockPos blockPos, RandomSource randomSource
+		ItemStack itemStack,
+		RegistryAccess registryAccess,
+		ResourceKey<EnchantmentProvider> resourceKey,
+		DifficultyInstance difficultyInstance,
+		RandomSource randomSource
 	) {
-		EnchantmentProvider enchantmentProvider = level.registryAccess().registryOrThrow(Registries.ENCHANTMENT_PROVIDER).get(resourceKey);
+		EnchantmentProvider enchantmentProvider = registryAccess.registryOrThrow(Registries.ENCHANTMENT_PROVIDER).get(resourceKey);
 		if (enchantmentProvider != null) {
-			updateEnchantments(itemStack, mutable -> enchantmentProvider.enchant(itemStack, mutable, randomSource, level, blockPos));
+			updateEnchantments(itemStack, mutable -> enchantmentProvider.enchant(itemStack, mutable, randomSource, difficultyInstance));
 		}
 	}
 

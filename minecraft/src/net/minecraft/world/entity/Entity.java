@@ -112,7 +112,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.PushReaction;
-import net.minecraft.world.level.portal.PortalInfo;
+import net.minecraft.world.level.portal.DimensionTransition;
 import net.minecraft.world.level.portal.PortalShape;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
@@ -562,7 +562,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 		this.checkSupportingBlock(bl, null);
 	}
 
-	public void setOnGroundWithKnownMovement(boolean bl, Vec3 vec3) {
+	public void setOnGroundWithMovement(boolean bl, Vec3 vec3) {
 		this.onGround = bl;
 		this.checkSupportingBlock(bl, vec3);
 	}
@@ -644,7 +644,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 				this.minorHorizontalCollision = false;
 			}
 
-			this.setOnGroundWithKnownMovement(this.verticalCollisionBelow, vec32);
+			this.setOnGroundWithMovement(this.verticalCollisionBelow, vec32);
 			BlockPos blockPos = this.getOnPosLegacy();
 			BlockState blockState = this.level().getBlockState(blockPos);
 			this.checkFallDamage(vec32.y, this.onGround(), blockState, blockPos);
@@ -794,7 +794,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 		return this.getOnPos(0.2F);
 	}
 
-	protected BlockPos getBlockPosBelowThatAffectsMyMovement() {
+	public BlockPos getBlockPosBelowThatAffectsMyMovement() {
 		return this.getOnPos(0.500001F);
 	}
 
@@ -891,7 +891,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 
 			List<VoxelShape> list2 = collectColliders(this, this.level, list, aABB3);
 			float f = (float)vec32.y;
-			float[] fs = collectCandidateStepUpHeights(aABB2, list2, f, this.maxUpStep());
+			float[] fs = collectCandidateStepUpHeights(aABB2, list2, this.maxUpStep(), f);
 
 			for (float g : fs) {
 				Vec3 vec33 = collideWithShapes(new Vec3(vec3.x, (double)g, vec3.z), aABB2, list2);
@@ -910,8 +910,8 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 		for (VoxelShape voxelShape : list) {
 			for (double d : voxelShape.getCoords(Direction.Axis.Y)) {
 				float h = (float)(d - aABB.minY);
-				if (!(h <= f)) {
-					if (h > g) {
+				if (!(h < 0.0F) && !Mth.equal(h, g)) {
+					if (h > f) {
 						break;
 					}
 
@@ -1371,8 +1371,12 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 
 	public void absMoveTo(double d, double e, double f, float g, float h) {
 		this.absMoveTo(d, e, f);
-		this.setYRot(g % 360.0F);
-		this.setXRot(Mth.clamp(h, -90.0F, 90.0F) % 360.0F);
+		this.absRotateTo(g, h);
+	}
+
+	public void absRotateTo(float f, float g) {
+		this.setYRot(f % 360.0F);
+		this.setXRot(Mth.clamp(g, -90.0F, 90.0F) % 360.0F);
 		this.yRotO = this.getYRot();
 		this.xRotO = this.getXRot();
 	}
@@ -2107,7 +2111,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 					this.level().getProfiler().push("portal");
 					this.portalTime = i;
 					this.setPortalCooldown();
-					this.changeDimension(serverLevel2);
+					this.changeDimension(() -> this.findOrCreateDimensionEntryPoint(serverLevel2));
 					this.level().getProfiler().pop();
 				}
 
@@ -2498,21 +2502,22 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 	}
 
 	@Nullable
-	public Entity changeDimension(ServerLevel serverLevel) {
+	public Entity changeDimension(Entity.DimensionTransitionSupplier dimensionTransitionSupplier) {
 		if (this.level() instanceof ServerLevel && !this.isRemoved()) {
-			this.level().getProfiler().push("changeDimension");
-			this.unRide();
-			this.level().getProfiler().push("reposition");
-			PortalInfo portalInfo = this.findDimensionEntryPoint(serverLevel);
-			if (portalInfo == null) {
+			DimensionTransition dimensionTransition = dimensionTransitionSupplier.get();
+			if (dimensionTransition == null) {
 				return null;
 			} else {
+				ServerLevel serverLevel = dimensionTransition.newDimension();
+				this.level().getProfiler().push("changeDimension");
+				this.unRide();
+				this.level().getProfiler().push("reposition");
 				this.level().getProfiler().popPush("reloading");
 				Entity entity = this.getType().create(serverLevel);
 				if (entity != null) {
 					entity.restoreFrom(this);
-					entity.moveTo(portalInfo.pos.x, portalInfo.pos.y, portalInfo.pos.z, portalInfo.yRot, entity.getXRot());
-					entity.setDeltaMovement(portalInfo.speed);
+					entity.moveTo(dimensionTransition.pos().x, dimensionTransition.pos().y, dimensionTransition.pos().z, dimensionTransition.yRot(), entity.getXRot());
+					entity.setDeltaMovement(dimensionTransition.speed());
 					serverLevel.addDuringTeleport(entity);
 					if (serverLevel.dimension() == Level.END) {
 						ServerLevel.makeObsidianPlatform(serverLevel);
@@ -2536,7 +2541,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 	}
 
 	@Nullable
-	protected PortalInfo findDimensionEntryPoint(ServerLevel serverLevel) {
+	public DimensionTransition findOrCreateDimensionEntryPoint(ServerLevel serverLevel) {
 		boolean bl = this.level().dimension() == Level.END && serverLevel.dimension() == Level.OVERWORLD;
 		boolean bl2 = serverLevel.dimension() == Level.END;
 		if (!bl && !bl2) {
@@ -2547,7 +2552,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 				WorldBorder worldBorder = serverLevel.getWorldBorder();
 				double d = DimensionType.getTeleportationScale(this.level().dimensionType(), serverLevel.dimensionType());
 				BlockPos blockPos2 = worldBorder.clampToBounds(this.getX() * d, this.getY(), this.getZ() * d);
-				return (PortalInfo)this.getExitPortal(serverLevel, blockPos2, bl3, worldBorder)
+				return (DimensionTransition)this.getExitPortal(serverLevel, blockPos2, bl3, worldBorder)
 					.map(
 						foundRectangle -> {
 							BlockState blockState = this.level().getBlockState(this.portalEntrancePos);
@@ -2564,7 +2569,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 								vec3 = new Vec3(0.5, 0.0, 0.0);
 							}
 
-							return PortalShape.createPortalInfo(serverLevel, foundRectangle, axis, vec3, this, this.getDeltaMovement(), this.getYRot(), this.getXRot());
+							return PortalShape.createDimensionTransition(serverLevel, foundRectangle, axis, vec3, this, this.getDeltaMovement(), this.getYRot(), this.getXRot());
 						}
 					)
 					.orElse(null);
@@ -2579,8 +2584,8 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 				i = serverLevel.getChunkAt(blockPos).getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, blockPos.getX(), blockPos.getZ()) + 1;
 			}
 
-			return new PortalInfo(
-				new Vec3((double)blockPos.getX() + 0.5, (double)i, (double)blockPos.getZ() + 0.5), this.getDeltaMovement(), this.getYRot(), this.getXRot()
+			return new DimensionTransition(
+				serverLevel, new Vec3((double)blockPos.getX() + 0.5, (double)i, (double)blockPos.getZ() + 0.5), this.getDeltaMovement(), this.getYRot(), this.getXRot()
 			);
 		}
 	}
@@ -3478,6 +3483,12 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 
 	public Vec3 getKnownMovement() {
 		return this.getDeltaMovement();
+	}
+
+	@FunctionalInterface
+	public interface DimensionTransitionSupplier {
+		@Nullable
+		DimensionTransition get();
 	}
 
 	@FunctionalInterface

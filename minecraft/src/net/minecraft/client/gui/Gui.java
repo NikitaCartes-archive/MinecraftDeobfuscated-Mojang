@@ -15,6 +15,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.AttackIndicatorStatus;
 import net.minecraft.client.Camera;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
 import net.minecraft.client.gui.components.BossHealthOverlay;
@@ -110,7 +111,6 @@ public class Gui {
 		.thenComparing(PlayerScoreEntry::owner, String.CASE_INSENSITIVE_ORDER);
 	private static final Component DEMO_EXPIRED_TEXT = Component.translatable("demo.demoExpired");
 	private static final Component SAVING_TEXT = Component.translatable("menu.savingLevel");
-	private static final int COLOR_WHITE = 16777215;
 	private static final float MIN_CROSSHAIR_ATTACK_SPEED = 5.0F;
 	private static final int NUM_HEARTS_PER_ROW = 10;
 	private static final int LINE_HEIGHT = 10;
@@ -168,10 +168,10 @@ public class Gui {
 			.add(this::renderHotbarAndDecorations)
 			.add(this::renderExperienceLevel)
 			.add(this::renderEffects)
-			.add((guiGraphics, f) -> this.bossOverlay.render(guiGraphics));
+			.add((guiGraphics, deltaTracker) -> this.bossOverlay.render(guiGraphics));
 		LayeredDraw layeredDraw2 = new LayeredDraw()
 			.add(this::renderDemoOverlay)
-			.add((guiGraphics, f) -> {
+			.add((guiGraphics, deltaTracker) -> {
 				if (this.debugOverlay.showDebugScreen()) {
 					this.debugOverlay.render(guiGraphics);
 				}
@@ -181,7 +181,7 @@ public class Gui {
 			.add(this::renderTitle)
 			.add(this::renderChat)
 			.add(this::renderTabList)
-			.add((guiGraphics, f) -> this.subtitleOverlay.render(guiGraphics));
+			.add((guiGraphics, deltaTracker) -> this.subtitleOverlay.render(guiGraphics));
 		this.layers.add(layeredDraw, () -> !minecraft.options.hideGui).add(this::renderSleepOverlay).add(layeredDraw2, () -> !minecraft.options.hideGui);
 	}
 
@@ -191,19 +191,19 @@ public class Gui {
 		this.titleFadeOutTime = 20;
 	}
 
-	public void render(GuiGraphics guiGraphics, float f) {
+	public void render(GuiGraphics guiGraphics, DeltaTracker deltaTracker) {
 		RenderSystem.enableDepthTest();
-		this.layers.render(guiGraphics, f);
+		this.layers.render(guiGraphics, deltaTracker);
 		RenderSystem.disableDepthTest();
 	}
 
-	private void renderCameraOverlays(GuiGraphics guiGraphics, float f) {
+	private void renderCameraOverlays(GuiGraphics guiGraphics, DeltaTracker deltaTracker) {
 		if (Minecraft.useFancyGraphics()) {
 			this.renderVignette(guiGraphics, this.minecraft.getCameraEntity());
 		}
 
-		float g = this.minecraft.getDeltaFrameTime();
-		this.scopeScale = Mth.lerp(0.5F * g, this.scopeScale, 1.125F);
+		float f = deltaTracker.getGameTimeDeltaTicks();
+		this.scopeScale = Mth.lerp(0.5F * f, this.scopeScale, 1.125F);
 		if (this.minecraft.options.getCameraType().isFirstPerson()) {
 			if (this.minecraft.player.isScoping()) {
 				this.renderSpyglassOverlay(guiGraphics, this.scopeScale);
@@ -220,33 +220,35 @@ public class Gui {
 			this.renderTextureOverlay(guiGraphics, POWDER_SNOW_OUTLINE_LOCATION, this.minecraft.player.getPercentFrozen());
 		}
 
-		float h = Mth.lerp(f, this.minecraft.player.oSpinningEffectIntensity, this.minecraft.player.spinningEffectIntensity);
-		if (h > 0.0F && !this.minecraft.player.hasEffect(MobEffects.CONFUSION)) {
-			this.renderPortalOverlay(guiGraphics, h);
+		float g = Mth.lerp(
+			deltaTracker.getGameTimeDeltaPartialTick(false), this.minecraft.player.oSpinningEffectIntensity, this.minecraft.player.spinningEffectIntensity
+		);
+		if (g > 0.0F && !this.minecraft.player.hasEffect(MobEffects.CONFUSION)) {
+			this.renderPortalOverlay(guiGraphics, g);
 		}
 	}
 
-	private void renderSleepOverlay(GuiGraphics guiGraphics, float f) {
+	private void renderSleepOverlay(GuiGraphics guiGraphics, DeltaTracker deltaTracker) {
 		if (this.minecraft.player.getSleepTimer() > 0) {
 			this.minecraft.getProfiler().push("sleep");
-			float g = (float)this.minecraft.player.getSleepTimer();
-			float h = g / 100.0F;
-			if (h > 1.0F) {
-				h = 1.0F - (g - 100.0F) / 10.0F;
+			float f = (float)this.minecraft.player.getSleepTimer();
+			float g = f / 100.0F;
+			if (g > 1.0F) {
+				g = 1.0F - (f - 100.0F) / 10.0F;
 			}
 
-			int i = (int)(220.0F * h) << 24 | 1052704;
+			int i = (int)(220.0F * g) << 24 | 1052704;
 			guiGraphics.fill(RenderType.guiOverlay(), 0, 0, guiGraphics.guiWidth(), guiGraphics.guiHeight(), i);
 			this.minecraft.getProfiler().pop();
 		}
 	}
 
-	private void renderOverlayMessage(GuiGraphics guiGraphics, float f) {
+	private void renderOverlayMessage(GuiGraphics guiGraphics, DeltaTracker deltaTracker) {
 		Font font = this.getFont();
 		if (this.overlayMessageString != null && this.overlayMessageTime > 0) {
 			this.minecraft.getProfiler().push("overlayMessage");
-			float g = (float)this.overlayMessageTime - f;
-			int i = (int)(g * 255.0F / 20.0F);
+			float f = (float)this.overlayMessageTime - deltaTracker.getGameTimeDeltaPartialTick(false);
+			int i = (int)(f * 255.0F / 20.0F);
 			if (i > 255) {
 				i = 255;
 			}
@@ -254,15 +256,15 @@ public class Gui {
 			if (i > 8) {
 				guiGraphics.pose().pushPose();
 				guiGraphics.pose().translate((float)(guiGraphics.guiWidth() / 2), (float)(guiGraphics.guiHeight() - 68), 0.0F);
-				int j = 16777215;
+				int j;
 				if (this.animateOverlayMessageColor) {
-					j = Mth.hsvToRgb(g / 50.0F, 0.7F, 0.6F) & 16777215;
+					j = Mth.hsvToArgb(f / 50.0F, 0.7F, 0.6F, i);
+				} else {
+					j = FastColor.ARGB32.color(i, -1);
 				}
 
-				int k = i << 24 & 0xFF000000;
-				int l = font.width(this.overlayMessageString);
-				this.drawBackdrop(guiGraphics, font, -4, l, 16777215 | k);
-				guiGraphics.drawString(font, this.overlayMessageString, -l / 2, -4, j | k);
+				int k = font.width(this.overlayMessageString);
+				guiGraphics.drawStringWithBackdrop(font, this.overlayMessageString, -k / 2, -4, k, j);
 				guiGraphics.pose().popPose();
 			}
 
@@ -270,19 +272,19 @@ public class Gui {
 		}
 	}
 
-	private void renderTitle(GuiGraphics guiGraphics, float f) {
+	private void renderTitle(GuiGraphics guiGraphics, DeltaTracker deltaTracker) {
 		if (this.title != null && this.titleTime > 0) {
 			Font font = this.getFont();
 			this.minecraft.getProfiler().push("titleAndSubtitle");
-			float g = (float)this.titleTime - f;
+			float f = (float)this.titleTime - deltaTracker.getGameTimeDeltaPartialTick(false);
 			int i = 255;
 			if (this.titleTime > this.titleFadeOutTime + this.titleStayTime) {
-				float h = (float)(this.titleFadeInTime + this.titleStayTime + this.titleFadeOutTime) - g;
-				i = (int)(h * 255.0F / (float)this.titleFadeInTime);
+				float g = (float)(this.titleFadeInTime + this.titleStayTime + this.titleFadeOutTime) - f;
+				i = (int)(g * 255.0F / (float)this.titleFadeInTime);
 			}
 
 			if (this.titleTime <= this.titleFadeOutTime) {
-				i = (int)(g * 255.0F / (float)this.titleFadeOutTime);
+				i = (int)(f * 255.0F / (float)this.titleFadeOutTime);
 			}
 
 			i = Mth.clamp(i, 0, 255);
@@ -291,17 +293,15 @@ public class Gui {
 				guiGraphics.pose().translate((float)(guiGraphics.guiWidth() / 2), (float)(guiGraphics.guiHeight() / 2), 0.0F);
 				guiGraphics.pose().pushPose();
 				guiGraphics.pose().scale(4.0F, 4.0F, 4.0F);
-				int j = i << 24 & 0xFF000000;
-				int k = font.width(this.title);
-				this.drawBackdrop(guiGraphics, font, -10, k, 16777215 | j);
-				guiGraphics.drawString(font, this.title, -k / 2, -10, 16777215 | j);
+				int j = font.width(this.title);
+				int k = FastColor.ARGB32.color(i, -1);
+				guiGraphics.drawStringWithBackdrop(font, this.title, -j / 2, -10, j, k);
 				guiGraphics.pose().popPose();
 				if (this.subtitle != null) {
 					guiGraphics.pose().pushPose();
 					guiGraphics.pose().scale(2.0F, 2.0F, 2.0F);
 					int l = font.width(this.subtitle);
-					this.drawBackdrop(guiGraphics, font, 5, l, 16777215 | j);
-					guiGraphics.drawString(font, this.subtitle, -l / 2, 5, 16777215 | j);
+					guiGraphics.drawStringWithBackdrop(font, this.subtitle, -l / 2, 5, l, k);
 					guiGraphics.pose().popPose();
 				}
 
@@ -312,7 +312,7 @@ public class Gui {
 		}
 	}
 
-	private void renderChat(GuiGraphics guiGraphics, float f) {
+	private void renderChat(GuiGraphics guiGraphics, DeltaTracker deltaTracker) {
 		if (!this.chat.isChatFocused()) {
 			Window window = this.minecraft.getWindow();
 			int i = Mth.floor(this.minecraft.mouseHandler.xpos() * (double)window.getGuiScaledWidth() / (double)window.getScreenWidth());
@@ -321,7 +321,7 @@ public class Gui {
 		}
 	}
 
-	private void renderScoreboardSidebar(GuiGraphics guiGraphics, float f) {
+	private void renderScoreboardSidebar(GuiGraphics guiGraphics, DeltaTracker deltaTracker) {
 		Scoreboard scoreboard = this.minecraft.level.getScoreboard();
 		Objective objective = null;
 		PlayerTeam playerTeam = scoreboard.getPlayersTeam(this.minecraft.player.getScoreboardName());
@@ -338,7 +338,7 @@ public class Gui {
 		}
 	}
 
-	private void renderTabList(GuiGraphics guiGraphics, float f) {
+	private void renderTabList(GuiGraphics guiGraphics, DeltaTracker deltaTracker) {
 		Scoreboard scoreboard = this.minecraft.level.getScoreboard();
 		Objective objective = scoreboard.getDisplayObjective(DisplaySlot.LIST);
 		if (!this.minecraft.options.keyPlayerList.isDown()
@@ -350,15 +350,7 @@ public class Gui {
 		}
 	}
 
-	private void drawBackdrop(GuiGraphics guiGraphics, Font font, int i, int j, int k) {
-		int l = this.minecraft.options.getBackgroundColor(0.0F);
-		if (l != 0) {
-			int m = -j / 2;
-			guiGraphics.fill(m - 2, i - 2, m + j + 2, i + 9 + 2, FastColor.ARGB32.multiply(l, k));
-		}
-	}
-
-	private void renderCrosshair(GuiGraphics guiGraphics, float f) {
+	private void renderCrosshair(GuiGraphics guiGraphics, DeltaTracker deltaTracker) {
 		Options options = this.minecraft.options;
 		if (options.getCameraType().isFirstPerson()) {
 			if (this.minecraft.gameMode.getPlayerMode() != GameType.SPECTATOR || this.canRenderCrosshairForSpectator(this.minecraft.hitResult)) {
@@ -386,9 +378,9 @@ public class Gui {
 					int i = 15;
 					guiGraphics.blitSprite(CROSSHAIR_SPRITE, (guiGraphics.guiWidth() - 15) / 2, (guiGraphics.guiHeight() - 15) / 2, 15, 15);
 					if (this.minecraft.options.attackIndicator().get() == AttackIndicatorStatus.CROSSHAIR) {
-						float g = this.minecraft.player.getAttackStrengthScale(0.0F);
+						float f = this.minecraft.player.getAttackStrengthScale(0.0F);
 						boolean bl = false;
-						if (this.minecraft.crosshairPickEntity != null && this.minecraft.crosshairPickEntity instanceof LivingEntity && g >= 1.0F) {
+						if (this.minecraft.crosshairPickEntity != null && this.minecraft.crosshairPickEntity instanceof LivingEntity && f >= 1.0F) {
 							bl = this.minecraft.player.getCurrentItemAttackStrengthDelay() > 5.0F;
 							bl &= this.minecraft.crosshairPickEntity.isAlive();
 						}
@@ -397,8 +389,8 @@ public class Gui {
 						int k = guiGraphics.guiWidth() / 2 - 8;
 						if (bl) {
 							guiGraphics.blitSprite(CROSSHAIR_ATTACK_INDICATOR_FULL_SPRITE, k, j, 16, 16);
-						} else if (g < 1.0F) {
-							int l = (int)(g * 17.0F);
+						} else if (f < 1.0F) {
+							int l = (int)(f * 17.0F);
 							guiGraphics.blitSprite(CROSSHAIR_ATTACK_INDICATOR_BACKGROUND_SPRITE, k, j, 16, 4);
 							guiGraphics.blitSprite(CROSSHAIR_ATTACK_INDICATOR_PROGRESS_SPRITE, 16, 4, 0, 0, k, j, l, 4);
 						}
@@ -426,7 +418,7 @@ public class Gui {
 		}
 	}
 
-	private void renderEffects(GuiGraphics guiGraphics, float f) {
+	private void renderEffects(GuiGraphics guiGraphics, DeltaTracker deltaTracker) {
 		Collection<MobEffectInstance> collection = this.minecraft.player.getActiveEffects();
 		if (!collection.isEmpty()) {
 			if (this.minecraft.screen instanceof EffectRenderingInventoryScreen effectRenderingInventoryScreen && effectRenderingInventoryScreen.canSeeEffects()) {
@@ -457,7 +449,7 @@ public class Gui {
 						l += 26;
 					}
 
-					float g = 1.0F;
+					float f = 1.0F;
 					if (mobEffectInstance.isAmbient()) {
 						guiGraphics.blitSprite(EFFECT_BACKGROUND_AMBIENT_SPRITE, k, l, 24, 24);
 					} else {
@@ -465,7 +457,7 @@ public class Gui {
 						if (mobEffectInstance.endsWithin(200)) {
 							int m = mobEffectInstance.getDuration();
 							int n = 10 - m / 20;
-							g = Mth.clamp((float)m / 10.0F / 5.0F * 0.5F, 0.0F, 0.5F)
+							f = Mth.clamp((float)m / 10.0F / 5.0F * 0.5F, 0.0F, 0.5F)
 								+ Mth.cos((float)m * (float) Math.PI / 5.0F) * Mth.clamp((float)n / 10.0F * 0.25F, 0.0F, 0.25F);
 						}
 					}
@@ -473,9 +465,9 @@ public class Gui {
 					TextureAtlasSprite textureAtlasSprite = mobEffectTextureManager.get(holder);
 					int n = k;
 					int o = l;
-					float h = g;
+					float g = f;
 					list.add((Runnable)() -> {
-						guiGraphics.setColor(1.0F, 1.0F, 1.0F, h);
+						guiGraphics.setColor(1.0F, 1.0F, 1.0F, g);
 						guiGraphics.blit(n + 3, o + 3, 0, 18, 18, textureAtlasSprite);
 						guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
 					});
@@ -487,11 +479,11 @@ public class Gui {
 		}
 	}
 
-	private void renderHotbarAndDecorations(GuiGraphics guiGraphics, float f) {
+	private void renderHotbarAndDecorations(GuiGraphics guiGraphics, DeltaTracker deltaTracker) {
 		if (this.minecraft.gameMode.getPlayerMode() == GameType.SPECTATOR) {
 			this.spectatorGui.renderHotbar(guiGraphics);
 		} else {
-			this.renderItemHotbar(guiGraphics, f);
+			this.renderItemHotbar(guiGraphics, deltaTracker);
 		}
 
 		int i = guiGraphics.guiWidth() / 2 - 91;
@@ -514,7 +506,7 @@ public class Gui {
 		}
 	}
 
-	private void renderItemHotbar(GuiGraphics guiGraphics, float f) {
+	private void renderItemHotbar(GuiGraphics guiGraphics, DeltaTracker deltaTracker) {
 		Player player = this.getCameraPlayer();
 		if (player != null) {
 			ItemStack itemStack = player.getOffhandItem();
@@ -542,29 +534,29 @@ public class Gui {
 			for (int m = 0; m < 9; m++) {
 				int n = i - 90 + m * 20 + 2;
 				int o = guiGraphics.guiHeight() - 16 - 3;
-				this.renderSlot(guiGraphics, n, o, f, player, player.getInventory().items.get(m), l++);
+				this.renderSlot(guiGraphics, n, o, deltaTracker, player, player.getInventory().items.get(m), l++);
 			}
 
 			if (!itemStack.isEmpty()) {
 				int m = guiGraphics.guiHeight() - 16 - 3;
 				if (humanoidArm == HumanoidArm.LEFT) {
-					this.renderSlot(guiGraphics, i - 91 - 26, m, f, player, itemStack, l++);
+					this.renderSlot(guiGraphics, i - 91 - 26, m, deltaTracker, player, itemStack, l++);
 				} else {
-					this.renderSlot(guiGraphics, i + 91 + 10, m, f, player, itemStack, l++);
+					this.renderSlot(guiGraphics, i + 91 + 10, m, deltaTracker, player, itemStack, l++);
 				}
 			}
 
 			if (this.minecraft.options.attackIndicator().get() == AttackIndicatorStatus.HOTBAR) {
 				RenderSystem.enableBlend();
-				float g = this.minecraft.player.getAttackStrengthScale(0.0F);
-				if (g < 1.0F) {
+				float f = this.minecraft.player.getAttackStrengthScale(0.0F);
+				if (f < 1.0F) {
 					int n = guiGraphics.guiHeight() - 20;
 					int o = i + 91 + 6;
 					if (humanoidArm == HumanoidArm.RIGHT) {
 						o = i - 91 - 22;
 					}
 
-					int p = (int)(g * 19.0F);
+					int p = (int)(f * 19.0F);
 					guiGraphics.blitSprite(HOTBAR_ATTACK_INDICATOR_BACKGROUND_SPRITE, o, n, 18, 18);
 					guiGraphics.blitSprite(HOTBAR_ATTACK_INDICATOR_PROGRESS_SPRITE, 18, 18, 0, 18 - p, o, n + 18 - p, 18, p);
 				}
@@ -611,7 +603,7 @@ public class Gui {
 		this.minecraft.getProfiler().pop();
 	}
 
-	private void renderExperienceLevel(GuiGraphics guiGraphics, float f) {
+	private void renderExperienceLevel(GuiGraphics guiGraphics, DeltaTracker deltaTracker) {
 		int i = this.minecraft.player.experienceLevel;
 		if (this.isExperienceBarVisible() && i > 0) {
 			this.minecraft.getProfiler().push("expLevel");
@@ -652,15 +644,14 @@ public class Gui {
 			}
 
 			if (l > 0) {
-				guiGraphics.fill(j - 2, k - 2, j + i + 2, k + 9 + 2, this.minecraft.options.getBackgroundColor(0));
-				guiGraphics.drawString(this.getFont(), mutableComponent, j, k, 16777215 + (l << 24));
+				guiGraphics.drawStringWithBackdrop(this.getFont(), mutableComponent, j, k, i, FastColor.ARGB32.color(l, -1));
 			}
 		}
 
 		this.minecraft.getProfiler().pop();
 	}
 
-	private void renderDemoOverlay(GuiGraphics guiGraphics, float f) {
+	private void renderDemoOverlay(GuiGraphics guiGraphics, DeltaTracker deltaTracker) {
 		if (this.minecraft.isDemo()) {
 			this.minecraft.getProfiler().push("demo");
 			Component component;
@@ -674,7 +665,9 @@ public class Gui {
 			}
 
 			int i = this.getFont().width(component);
-			guiGraphics.drawString(this.getFont(), component, guiGraphics.guiWidth() - i - 10, 5, 16777215);
+			int j = guiGraphics.guiWidth() - i - 10;
+			int k = 5;
+			guiGraphics.drawStringWithBackdrop(this.getFont(), component, j, 5, i, -1);
 			this.minecraft.getProfiler().pop();
 		}
 	}
@@ -1090,19 +1083,19 @@ public class Gui {
 		guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
 	}
 
-	private void renderSlot(GuiGraphics guiGraphics, int i, int j, float f, Player player, ItemStack itemStack, int k) {
+	private void renderSlot(GuiGraphics guiGraphics, int i, int j, DeltaTracker deltaTracker, Player player, ItemStack itemStack, int k) {
 		if (!itemStack.isEmpty()) {
-			float g = (float)itemStack.getPopTime() - f;
-			if (g > 0.0F) {
-				float h = 1.0F + g / 5.0F;
+			float f = (float)itemStack.getPopTime() - deltaTracker.getGameTimeDeltaPartialTick(false);
+			if (f > 0.0F) {
+				float g = 1.0F + f / 5.0F;
 				guiGraphics.pose().pushPose();
 				guiGraphics.pose().translate((float)(i + 8), (float)(j + 12), 0.0F);
-				guiGraphics.pose().scale(1.0F / h, (h + 1.0F) / 2.0F, 1.0F);
+				guiGraphics.pose().scale(1.0F / g, (g + 1.0F) / 2.0F, 1.0F);
 				guiGraphics.pose().translate((float)(-(i + 8)), (float)(-(j + 12)), 0.0F);
 			}
 
 			guiGraphics.renderItem(player, itemStack, i, j, k);
-			if (g > 0.0F) {
+			if (f > 0.0F) {
 				guiGraphics.pose().popPose();
 			}
 
@@ -1255,14 +1248,18 @@ public class Gui {
 		this.debugOverlay.clearChunkCache();
 	}
 
-	public void renderSavingIndicator(GuiGraphics guiGraphics, float f) {
+	public void renderSavingIndicator(GuiGraphics guiGraphics, DeltaTracker deltaTracker) {
 		if (this.minecraft.options.showAutosaveIndicator().get() && (this.autosaveIndicatorValue > 0.0F || this.lastAutosaveIndicatorValue > 0.0F)) {
-			int i = Mth.floor(255.0F * Mth.clamp(Mth.lerp(this.minecraft.getFrameTime(), this.lastAutosaveIndicatorValue, this.autosaveIndicatorValue), 0.0F, 1.0F));
+			int i = Mth.floor(
+				255.0F * Mth.clamp(Mth.lerp(deltaTracker.getRealtimeDeltaTicks(), this.lastAutosaveIndicatorValue, this.autosaveIndicatorValue), 0.0F, 1.0F)
+			);
 			if (i > 8) {
 				Font font = this.getFont();
 				int j = font.width(SAVING_TEXT);
-				int k = 16777215 | i << 24 & 0xFF000000;
-				guiGraphics.drawString(font, SAVING_TEXT, guiGraphics.guiWidth() - j - 10, guiGraphics.guiHeight() - 15, k);
+				int k = FastColor.ARGB32.color(i, -1);
+				int l = guiGraphics.guiWidth() - j - 2;
+				int m = guiGraphics.guiHeight() - 35;
+				guiGraphics.drawStringWithBackdrop(font, SAVING_TEXT, l, m, j, k);
 			}
 		}
 	}

@@ -152,7 +152,7 @@ public abstract class Projectile extends Entity implements TraceableEntity {
 		float l = -Mth.sin((f + h) * (float) (Math.PI / 180.0));
 		float m = Mth.cos(g * (float) (Math.PI / 180.0)) * Mth.cos(f * (float) (Math.PI / 180.0));
 		this.shoot((double)k, (double)l, (double)m, i, j);
-		Vec3 vec3 = entity.getDeltaMovement();
+		Vec3 vec3 = entity.getKnownMovement();
 		this.setDeltaMovement(this.getDeltaMovement().add(vec3.x, entity.onGround() ? 0.0 : vec3.y, vec3.z));
 	}
 

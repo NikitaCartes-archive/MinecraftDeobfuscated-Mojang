@@ -354,7 +354,7 @@ public class Rabbit extends Animal implements VariantHolder<Rabbit.Variant> {
 			this.targetSelector.addGoal(2, new NearestAttackableTargetGoal(this, Player.class, true));
 			this.targetSelector.addGoal(2, new NearestAttackableTargetGoal(this, Wolf.class, true));
 			this.getAttribute(Attributes.ATTACK_DAMAGE)
-				.addPermanentModifier(new AttributeModifier(EVIL_ATTACK_POWER_MODIFIER, "Evil rabbit strength", 5.0, AttributeModifier.Operation.ADD_VALUE));
+				.addOrUpdateTransientModifier(new AttributeModifier(EVIL_ATTACK_POWER_MODIFIER, "Evil rabbit strength", 5.0, AttributeModifier.Operation.ADD_VALUE));
 			if (!this.hasCustomName()) {
 				this.setCustomName(Component.translatable(Util.makeDescriptionId("entity", KILLER_BUNNY)));
 			}

@@ -9,7 +9,7 @@ public record ClientboundRespawnPacket(CommonPlayerSpawnInfo commonPlayerSpawnIn
 	public static final StreamCodec<RegistryFriendlyByteBuf, ClientboundRespawnPacket> STREAM_CODEC = Packet.codec(
 		ClientboundRespawnPacket::write, ClientboundRespawnPacket::new
 	);
-	public static final byte KEEP_ATTRIBUTES = 1;
+	public static final byte KEEP_ATTRIBUTE_MODIFIERS = 1;
 	public static final byte KEEP_ENTITY_DATA = 2;
 	public static final byte KEEP_ALL_DATA = 3;
 

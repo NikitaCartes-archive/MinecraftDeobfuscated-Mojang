@@ -128,7 +128,7 @@ public class Vindicator extends AbstractIllager {
 		((GroundPathNavigation)this.getNavigation()).setCanOpenDoors(true);
 		RandomSource randomSource = serverLevelAccessor.getRandom();
 		this.populateDefaultEquipmentSlots(randomSource, difficultyInstance);
-		this.populateDefaultEquipmentEnchantments(randomSource, difficultyInstance);
+		this.populateDefaultEquipmentEnchantments(serverLevelAccessor, randomSource, difficultyInstance);
 		return spawnGroupData2;
 	}
 
@@ -163,7 +163,7 @@ public class Vindicator extends AbstractIllager {
 	}
 
 	@Override
-	public void applyRaidBuffs(int i, boolean bl) {
+	public void applyRaidBuffs(ServerLevel serverLevel, int i, boolean bl) {
 		ItemStack itemStack = new ItemStack(Items.IRON_AXE);
 		Raid raid = this.getCurrentRaid();
 		boolean bl2 = this.random.nextFloat() <= raid.getEnchantOdds();
@@ -171,7 +171,9 @@ public class Vindicator extends AbstractIllager {
 			ResourceKey<EnchantmentProvider> resourceKey = i > raid.getNumGroups(Difficulty.NORMAL)
 				? VanillaEnchantmentProviders.RAID_VINDICATOR_POST_WAVE_5
 				: VanillaEnchantmentProviders.RAID_VINDICATOR;
-			EnchantmentHelper.enchantItemFromProvider(itemStack, resourceKey, this.level(), this.blockPosition(), this.random);
+			EnchantmentHelper.enchantItemFromProvider(
+				itemStack, serverLevel.registryAccess(), resourceKey, serverLevel.getCurrentDifficultyAt(this.blockPosition()), this.random
+			);
 		}
 
 		this.setItemSlot(EquipmentSlot.MAINHAND, itemStack);

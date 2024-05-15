@@ -37,6 +37,7 @@ import net.minecraft.CrashReportDetail;
 import net.minecraft.ReportedException;
 import net.minecraft.Util;
 import net.minecraft.client.Camera;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Screenshot;
 import net.minecraft.client.gui.GuiGraphics;
@@ -87,7 +88,7 @@ import org.slf4j.Logger;
 public class GameRenderer implements AutoCloseable {
 	private static final ResourceLocation NAUSEA_LOCATION = new ResourceLocation("textures/misc/nausea.png");
 	private static final ResourceLocation BLUR_LOCATION = new ResourceLocation("shaders/post/blur.json");
-	private static final float MAX_BLUR_RADIUS = 10.0F;
+	public static final int MAX_BLUR_RADIUS = 10;
 	static final Logger LOGGER = LogUtils.getLogger();
 	private static final boolean DEPTH_BUFFER_DEBUG = false;
 	public static final float PROJECTION_Z_NEAR = 0.05F;
@@ -349,10 +350,9 @@ public class GameRenderer implements AutoCloseable {
 
 	public void processBlurEffect(float f) {
 		float g = (float)this.minecraft.options.getMenuBackgroundBlurriness();
-		float h = g * 10.0F;
-		if (this.blurEffect != null && h >= 1.0F) {
+		if (this.blurEffect != null && g >= 1.0F) {
 			RenderSystem.enableBlend();
-			this.blurEffect.setUniform("Radius", h);
+			this.blurEffect.setUniform("Radius", g);
 			this.blurEffect.process(f);
 			RenderSystem.disableBlend();
 		}
@@ -972,7 +972,7 @@ public class GameRenderer implements AutoCloseable {
 		this.zoomY = h;
 		this.setRenderBlockOutline(false);
 		this.setRenderHand(false);
-		this.renderLevel(1.0F, 0L);
+		this.renderLevel(DeltaTracker.ZERO);
 		this.zoom = 1.0F;
 	}
 
@@ -1044,7 +1044,7 @@ public class GameRenderer implements AutoCloseable {
 		return !mobEffectInstance.endsWithin(200) ? 1.0F : 0.7F + Mth.sin(((float)mobEffectInstance.getDuration() - f) * (float) Math.PI * 0.2F) * 0.3F;
 	}
 
-	public void render(float f, long l, boolean bl) {
+	public void render(DeltaTracker deltaTracker, boolean bl) {
 		if (!this.minecraft.isWindowActive()
 			&& this.minecraft.options.pauseOnLostFocus
 			&& (!this.minecraft.options.touchscreen().get() || !this.minecraft.mouseHandler.isRightPressed())) {
@@ -1056,7 +1056,6 @@ public class GameRenderer implements AutoCloseable {
 		}
 
 		if (!this.minecraft.noRender) {
-			float g = this.minecraft.level != null && this.minecraft.level.tickRateManager().runsNormally() ? f : 1.0F;
 			boolean bl2 = this.minecraft.isGameLoadFinished();
 			int i = (int)(
 				this.minecraft.mouseHandler.xpos() * (double)this.minecraft.getWindow().getGuiScaledWidth() / (double)this.minecraft.getWindow().getScreenWidth()
@@ -1067,14 +1066,14 @@ public class GameRenderer implements AutoCloseable {
 			RenderSystem.viewport(0, 0, this.minecraft.getWindow().getWidth(), this.minecraft.getWindow().getHeight());
 			if (bl2 && bl && this.minecraft.level != null) {
 				this.minecraft.getProfiler().push("level");
-				this.renderLevel(f, l);
+				this.renderLevel(deltaTracker);
 				this.tryTakeScreenshotIfNeeded();
 				this.minecraft.levelRenderer.doEntityOutline();
 				if (this.postEffect != null && this.effectActive) {
 					RenderSystem.disableBlend();
 					RenderSystem.disableDepthTest();
 					RenderSystem.resetTextureMatrix();
-					this.postEffect.process(g);
+					this.postEffect.process(deltaTracker.getGameTimeDeltaTicks());
 				}
 
 				this.minecraft.getMainRenderTarget().bindWrite(true);
@@ -1096,36 +1095,40 @@ public class GameRenderer implements AutoCloseable {
 			if (bl2 && bl && this.minecraft.level != null) {
 				this.minecraft.getProfiler().popPush("gui");
 				if (this.minecraft.player != null) {
-					float h = Mth.lerp(g, this.minecraft.player.oSpinningEffectIntensity, this.minecraft.player.spinningEffectIntensity);
-					float k = this.minecraft.options.screenEffectScale().get().floatValue();
-					if (h > 0.0F && this.minecraft.player.hasEffect(MobEffects.CONFUSION) && k < 1.0F) {
-						this.renderConfusionOverlay(guiGraphics, h * (1.0F - k));
+					float f = Mth.lerp(
+						deltaTracker.getGameTimeDeltaPartialTick(false), this.minecraft.player.oSpinningEffectIntensity, this.minecraft.player.spinningEffectIntensity
+					);
+					float g = this.minecraft.options.screenEffectScale().get().floatValue();
+					if (f > 0.0F && this.minecraft.player.hasEffect(MobEffects.CONFUSION) && g < 1.0F) {
+						this.renderConfusionOverlay(guiGraphics, f * (1.0F - g));
 					}
 				}
 
 				if (!this.minecraft.options.hideGui) {
-					this.renderItemActivationAnimation(this.minecraft.getWindow().getGuiScaledWidth(), this.minecraft.getWindow().getGuiScaledHeight(), g);
+					this.renderItemActivationAnimation(
+						this.minecraft.getWindow().getGuiScaledWidth(), this.minecraft.getWindow().getGuiScaledHeight(), deltaTracker.getGameTimeDeltaPartialTick(false)
+					);
 				}
 
-				this.minecraft.gui.render(guiGraphics, g);
+				this.minecraft.gui.render(guiGraphics, deltaTracker);
 				RenderSystem.clear(256, Minecraft.ON_OSX);
 				this.minecraft.getProfiler().pop();
 			}
 
 			if (this.minecraft.getOverlay() != null) {
 				try {
-					this.minecraft.getOverlay().render(guiGraphics, i, j, this.minecraft.getDeltaFrameTime());
-				} catch (Throwable var18) {
-					CrashReport crashReport = CrashReport.forThrowable(var18, "Rendering overlay");
+					this.minecraft.getOverlay().render(guiGraphics, i, j, deltaTracker.getRealtimeDeltaTicks());
+				} catch (Throwable var15) {
+					CrashReport crashReport = CrashReport.forThrowable(var15, "Rendering overlay");
 					CrashReportCategory crashReportCategory = crashReport.addCategory("Overlay render details");
 					crashReportCategory.setDetail("Overlay name", (CrashReportDetail<String>)(() -> this.minecraft.getOverlay().getClass().getCanonicalName()));
 					throw new ReportedException(crashReport);
 				}
 			} else if (bl2 && this.minecraft.screen != null) {
 				try {
-					this.minecraft.screen.renderWithTooltip(guiGraphics, i, j, this.minecraft.getDeltaFrameTime());
-				} catch (Throwable var17) {
-					CrashReport crashReport = CrashReport.forThrowable(var17, "Rendering screen");
+					this.minecraft.screen.renderWithTooltip(guiGraphics, i, j, deltaTracker.getRealtimeDeltaTicks());
+				} catch (Throwable var14) {
+					CrashReport crashReport = CrashReport.forThrowable(var14, "Rendering screen");
 					CrashReportCategory crashReportCategory = crashReport.addCategory("Screen render details");
 					crashReportCategory.setDetail("Screen name", (CrashReportDetail<String>)(() -> this.minecraft.screen.getClass().getCanonicalName()));
 					crashReportCategory.setDetail(
@@ -1153,8 +1156,8 @@ public class GameRenderer implements AutoCloseable {
 					if (this.minecraft.screen != null) {
 						this.minecraft.screen.handleDelayedNarration();
 					}
-				} catch (Throwable var16) {
-					CrashReport crashReport = CrashReport.forThrowable(var16, "Narrating screen");
+				} catch (Throwable var13) {
+					CrashReport crashReport = CrashReport.forThrowable(var13, "Narrating screen");
 					CrashReportCategory crashReportCategory = crashReport.addCategory("Screen details");
 					crashReportCategory.setDetail("Screen name", (CrashReportDetail<String>)(() -> this.minecraft.screen.getClass().getCanonicalName()));
 					throw new ReportedException(crashReport);
@@ -1162,7 +1165,7 @@ public class GameRenderer implements AutoCloseable {
 			}
 
 			if (bl2 && bl && this.minecraft.level != null) {
-				this.minecraft.gui.renderSavingIndicator(guiGraphics, g);
+				this.minecraft.gui.renderSavingIndicator(guiGraphics, deltaTracker);
 			}
 
 			if (bl2) {
@@ -1250,7 +1253,8 @@ public class GameRenderer implements AutoCloseable {
 		}
 	}
 
-	public void renderLevel(float f, long l) {
+	public void renderLevel(DeltaTracker deltaTracker) {
+		float f = deltaTracker.getGameTimeDeltaPartialTick(true);
 		this.lightTexture.updateLightTexture(f);
 		if (this.minecraft.getCameraEntity() == null) {
 			this.minecraft.setCameraEntity(this.minecraft.player);
@@ -1262,13 +1266,8 @@ public class GameRenderer implements AutoCloseable {
 		this.minecraft.getProfiler().popPush("camera");
 		Camera camera = this.mainCamera;
 		Entity entity = (Entity)(this.minecraft.getCameraEntity() == null ? this.minecraft.player : this.minecraft.getCameraEntity());
-		camera.setup(
-			this.minecraft.level,
-			entity,
-			!this.minecraft.options.getCameraType().isFirstPerson(),
-			this.minecraft.options.getCameraType().isMirrored(),
-			this.minecraft.level.tickRateManager().isEntityFrozen(entity) ? 1.0F : f
-		);
+		float g = this.minecraft.level.tickRateManager().isEntityFrozen(entity) ? 1.0F : f;
+		camera.setup(this.minecraft.level, entity, !this.minecraft.options.getCameraType().isFirstPerson(), this.minecraft.options.getCameraType().isMirrored(), g);
 		this.renderDistance = (float)(this.minecraft.options.getEffectiveRenderDistance() * 16);
 		double d = this.getFov(camera, f, true);
 		Matrix4f matrix4f = this.getProjectionMatrix(d);
@@ -1279,17 +1278,17 @@ public class GameRenderer implements AutoCloseable {
 		}
 
 		matrix4f.mul(poseStack.last().pose());
-		float g = this.minecraft.options.screenEffectScale().get().floatValue();
-		float h = Mth.lerp(f, this.minecraft.player.oSpinningEffectIntensity, this.minecraft.player.spinningEffectIntensity) * g * g;
-		if (h > 0.0F) {
-			int i = this.minecraft.player.hasEffect(MobEffects.CONFUSION) ? 7 : 20;
-			float j = 5.0F / (h * h + 5.0F) - h * 0.04F;
-			j *= j;
+		float h = this.minecraft.options.screenEffectScale().get().floatValue();
+		float i = Mth.lerp(f, this.minecraft.player.oSpinningEffectIntensity, this.minecraft.player.spinningEffectIntensity) * h * h;
+		if (i > 0.0F) {
+			int j = this.minecraft.player.hasEffect(MobEffects.CONFUSION) ? 7 : 20;
+			float k = 5.0F / (i * i + 5.0F) - i * 0.04F;
+			k *= k;
 			Vector3f vector3f = new Vector3f(0.0F, Mth.SQRT_OF_TWO / 2.0F, Mth.SQRT_OF_TWO / 2.0F);
-			float k = ((float)this.confusionAnimationTick + f) * (float)i * (float) (Math.PI / 180.0);
-			matrix4f.rotate(k, vector3f);
-			matrix4f.scale(1.0F / j, 1.0F, 1.0F);
-			matrix4f.rotate(-k, vector3f);
+			float l = ((float)this.confusionAnimationTick + f) * (float)j * (float) (Math.PI / 180.0);
+			matrix4f.rotate(l, vector3f);
+			matrix4f.scale(1.0F / k, 1.0F, 1.0F);
+			matrix4f.rotate(-l, vector3f);
 		}
 
 		this.resetProjectionMatrix(matrix4f);
@@ -1298,7 +1297,7 @@ public class GameRenderer implements AutoCloseable {
 		this.minecraft
 			.levelRenderer
 			.prepareCullFrustum(camera.getPosition(), matrix4f2, this.getProjectionMatrix(Math.max(d, (double)this.minecraft.options.fov().get().intValue())));
-		this.minecraft.levelRenderer.renderLevel(f, l, bl, camera, this, this.lightTexture, matrix4f2, matrix4f);
+		this.minecraft.levelRenderer.renderLevel(deltaTracker, bl, camera, this, this.lightTexture, matrix4f2, matrix4f);
 		this.minecraft.getProfiler().popPush("hand");
 		if (this.renderHand) {
 			RenderSystem.clear(256, Minecraft.ON_OSX);

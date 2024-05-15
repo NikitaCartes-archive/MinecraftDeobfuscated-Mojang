@@ -1,5 +1,6 @@
 package net.minecraft.world.entity.projectile;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -110,7 +111,7 @@ public class ThrownTrident extends AbstractArrow {
 		Entity entity2 = this.getOwner();
 		DamageSource damageSource = this.damageSources().trident(this, (Entity)(entity2 == null ? this : entity2));
 		if (this.level() instanceof ServerLevel serverLevel) {
-			f = EnchantmentHelper.modifyDamage(serverLevel, this.getPickupItemStackOrigin(), entity, damageSource, f);
+			f = EnchantmentHelper.modifyDamage(serverLevel, this.getWeaponItem(), entity, damageSource, f);
 		}
 
 		this.dealtDamage = true;
@@ -120,7 +121,7 @@ public class ThrownTrident extends AbstractArrow {
 			}
 
 			if (this.level() instanceof ServerLevel serverLevel) {
-				EnchantmentHelper.doPostAttackEffects(serverLevel, entity, damageSource);
+				EnchantmentHelper.doPostAttackEffectsWithItemSource(serverLevel, entity, damageSource, this.getWeaponItem());
 			}
 
 			if (entity instanceof LivingEntity livingEntity) {
@@ -136,10 +137,17 @@ public class ThrownTrident extends AbstractArrow {
 	@Override
 	protected void hitBlockEnchantmentEffects(ServerLevel serverLevel, BlockHitResult blockHitResult, ItemStack itemStack) {
 		EnchantmentHelper.onHitBlock(
-			serverLevel, itemStack, this.getOwner() instanceof LivingEntity livingEntity ? livingEntity : null, this, null, blockHitResult.getLocation(), this::kill
+			serverLevel,
+			itemStack,
+			this.getOwner() instanceof LivingEntity livingEntity ? livingEntity : null,
+			this,
+			null,
+			blockHitResult.getLocation(),
+			item -> this.kill()
 		);
 	}
 
+	@Nonnull
 	@Override
 	protected ItemStack getWeaponItem() {
 		return this.getPickupItemStackOrigin();

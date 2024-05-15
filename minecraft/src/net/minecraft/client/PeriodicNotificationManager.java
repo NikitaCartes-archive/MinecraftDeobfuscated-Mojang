@@ -12,6 +12,7 @@ import java.io.Reader;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
@@ -50,7 +51,7 @@ public class PeriodicNotificationManager
 	private final ResourceLocation notifications;
 	private final Object2BooleanFunction<String> selector;
 	@Nullable
-	private java.util.Timer timer;
+	private Timer timer;
 	@Nullable
 	private PeriodicNotificationManager.NotificationTask notificationTask;
 
@@ -105,7 +106,7 @@ public class PeriodicNotificationManager
 			long l = this.calculateInitialDelay(list);
 			long m = this.calculateOptimalPeriod(list, l);
 			if (this.timer == null) {
-				this.timer = new java.util.Timer();
+				this.timer = new Timer();
 			}
 
 			if (this.notificationTask == null) {

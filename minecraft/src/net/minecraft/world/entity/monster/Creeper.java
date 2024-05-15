@@ -172,8 +172,8 @@ public class Creeper extends Monster implements PowerableMob {
 	}
 
 	@Override
-	protected void dropCustomDeathLoot(DamageSource damageSource, boolean bl) {
-		super.dropCustomDeathLoot(damageSource, bl);
+	protected void dropCustomDeathLoot(ServerLevel serverLevel, DamageSource damageSource, boolean bl) {
+		super.dropCustomDeathLoot(serverLevel, damageSource, bl);
 		Entity entity = damageSource.getEntity();
 		if (entity != this && entity instanceof Creeper creeper && creeper.canDropMobsSkull()) {
 			creeper.increaseDroppedSkulls();

@@ -34,6 +34,7 @@ import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePiecesBuilder;
 import net.minecraft.world.level.levelgen.structure.pools.alias.PoolAliasLookup;
+import net.minecraft.world.level.levelgen.structure.structures.JigsawStructure;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
 import net.minecraft.world.phys.AABB;
@@ -56,7 +57,7 @@ public class JigsawPlacement {
 		Optional<Heightmap.Types> optional2,
 		int j,
 		PoolAliasLookup poolAliasLookup,
-		int k
+		DimensionPadding dimensionPadding
 	) {
 		RegistryAccess registryAccess = generationContext.registryAccess();
 		ChunkGenerator chunkGenerator = generationContext.chunkGenerator();
@@ -101,32 +102,32 @@ public class JigsawPlacement {
 				structurePoolElement.getBoundingBox(structureTemplateManager, blockPos3, rotation)
 			);
 			BoundingBox boundingBox = poolElementStructurePiece.getBoundingBox();
-			int l = (boundingBox.maxX() + boundingBox.minX()) / 2;
-			int m = (boundingBox.maxZ() + boundingBox.minZ()) / 2;
-			int n;
+			int k = (boundingBox.maxX() + boundingBox.minX()) / 2;
+			int l = (boundingBox.maxZ() + boundingBox.minZ()) / 2;
+			int m;
 			if (optional2.isPresent()) {
-				n = blockPos.getY() + chunkGenerator.getFirstFreeHeight(l, m, (Heightmap.Types)optional2.get(), levelHeightAccessor, generationContext.randomState());
+				m = blockPos.getY() + chunkGenerator.getFirstFreeHeight(k, l, (Heightmap.Types)optional2.get(), levelHeightAccessor, generationContext.randomState());
 			} else {
-				n = blockPos3.getY();
+				m = blockPos3.getY();
 			}
 
-			int o = boundingBox.minY() + poolElementStructurePiece.getGroundLevelDelta();
-			poolElementStructurePiece.move(0, n - o, 0);
-			int p = n + vec3i.getY();
+			int n = boundingBox.minY() + poolElementStructurePiece.getGroundLevelDelta();
+			poolElementStructurePiece.move(0, m - n, 0);
+			int o = m + vec3i.getY();
 			return Optional.of(
 				new Structure.GenerationStub(
-					new BlockPos(l, p, m),
+					new BlockPos(k, o, l),
 					structurePiecesBuilder -> {
 						List<PoolElementStructurePiece> list = Lists.<PoolElementStructurePiece>newArrayList();
 						list.add(poolElementStructurePiece);
 						if (i > 0) {
 							AABB aABB = new AABB(
+								(double)(k - j),
+								(double)Math.max(o - j, levelHeightAccessor.getMinBuildHeight() + dimensionPadding.bottom()),
 								(double)(l - j),
-								(double)Math.max(p - j, levelHeightAccessor.getMinBuildHeight() + k),
-								(double)(m - j),
-								(double)(l + j + 1),
-								(double)Math.min(p + j + 1, levelHeightAccessor.getMaxBuildHeight() - k),
-								(double)(m + j + 1)
+								(double)(k + j + 1),
+								(double)Math.min(o + j + 1, levelHeightAccessor.getMaxBuildHeight() - dimensionPadding.top()),
+								(double)(l + j + 1)
 							);
 							VoxelShape voxelShape = Shapes.join(Shapes.create(aABB), Shapes.create(AABB.of(boundingBox)), BooleanOp.ONLY_FIRST);
 							addPieces(
@@ -217,7 +218,16 @@ public class JigsawPlacement {
 			holderx -> true
 		);
 		Optional<Structure.GenerationStub> optional = addPieces(
-			generationContext, holder, Optional.of(resourceLocation), i, blockPos, false, Optional.empty(), 128, PoolAliasLookup.EMPTY, 0
+			generationContext,
+			holder,
+			Optional.of(resourceLocation),
+			i,
+			blockPos,
+			false,
+			Optional.empty(),
+			128,
+			PoolAliasLookup.EMPTY,
+			JigsawStructure.DEFAULT_DIMENSION_PADDING
 		);
 		if (optional.isPresent()) {
 			StructurePiecesBuilder structurePiecesBuilder = ((Structure.GenerationStub)optional.get()).getPiecesBuilder();

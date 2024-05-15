@@ -167,7 +167,7 @@ public class ServerPlayerGameMode {
 						this.player,
 						EquipmentSlot.MAINHAND,
 						Vec3.atCenterOf(blockPos),
-						() -> this.player.broadcastBreakEvent(EquipmentSlot.MAINHAND)
+						item -> this.player.onEquippedItemBroken(item, EquipmentSlot.MAINHAND)
 					);
 					blockState.attack(this.level, blockPos, this.player);
 					f = blockState.getDestroyProgress(this.player, this.player.level(), blockPos);

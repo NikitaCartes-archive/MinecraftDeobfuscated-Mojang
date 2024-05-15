@@ -317,6 +317,16 @@ public class GuiGraphics {
 		}
 	}
 
+	public int drawStringWithBackdrop(Font font, Component component, int i, int j, int k, int l) {
+		int m = this.minecraft.options.getBackgroundColor(0.0F);
+		if (m != 0) {
+			int n = 2;
+			this.fill(i - 2, j - 2, i + k + 2, j + 9 + 2, FastColor.ARGB32.multiply(m, l));
+		}
+
+		return this.drawString(font, component, i, j, l, true);
+	}
+
 	public void blit(int i, int j, int k, int l, int m, TextureAtlasSprite textureAtlasSprite) {
 		this.blitSprite(textureAtlasSprite, i, j, k, l, m);
 	}
@@ -610,7 +620,9 @@ public class GuiGraphics {
 			}
 
 			LocalPlayer localPlayer = this.minecraft.player;
-			float f = localPlayer == null ? 0.0F : localPlayer.getCooldowns().getCooldownPercent(itemStack.getItem(), this.minecraft.getFrameTime());
+			float f = localPlayer == null
+				? 0.0F
+				: localPlayer.getCooldowns().getCooldownPercent(itemStack.getItem(), this.minecraft.getTimer().getGameTimeDeltaPartialTick(true));
 			if (f > 0.0F) {
 				int m = j + Mth.floor(16.0F * (1.0F - f));
 				int n = m + Mth.ceil(16.0F * f);

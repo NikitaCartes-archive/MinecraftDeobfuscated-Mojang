@@ -52,6 +52,7 @@ import net.minecraft.world.item.enchantment.providers.TradeRebalanceEnchantmentP
 import net.minecraft.world.item.trading.ItemCost;
 import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.level.ItemLike;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.structure.Structure;
@@ -1489,8 +1490,13 @@ public class VillagerTrades {
 		@Override
 		public MerchantOffer getOffer(Entity entity, RandomSource randomSource) {
 			ItemStack itemStack = this.toItem.copy();
+			Level level = entity.level();
 			this.enchantmentProvider
-				.ifPresent(resourceKey -> EnchantmentHelper.enchantItemFromProvider(itemStack, resourceKey, entity.level(), entity.blockPosition(), randomSource));
+				.ifPresent(
+					resourceKey -> EnchantmentHelper.enchantItemFromProvider(
+							itemStack, level.registryAccess(), resourceKey, level.getCurrentDifficultyAt(entity.blockPosition()), randomSource
+						)
+				);
 			return new MerchantOffer(
 				new ItemCost(Items.EMERALD, this.emeraldCost), Optional.of(this.fromItem), itemStack, 0, this.maxUses, this.villagerXp, this.priceMultiplier
 			);
@@ -1546,8 +1552,13 @@ public class VillagerTrades {
 		@Override
 		public MerchantOffer getOffer(Entity entity, RandomSource randomSource) {
 			ItemStack itemStack = this.itemStack.copy();
+			Level level = entity.level();
 			this.enchantmentProvider
-				.ifPresent(resourceKey -> EnchantmentHelper.enchantItemFromProvider(itemStack, resourceKey, entity.level(), entity.blockPosition(), randomSource));
+				.ifPresent(
+					resourceKey -> EnchantmentHelper.enchantItemFromProvider(
+							itemStack, level.registryAccess(), resourceKey, level.getCurrentDifficultyAt(entity.blockPosition()), randomSource
+						)
+				);
 			return new MerchantOffer(new ItemCost(Items.EMERALD, this.emeraldCost), itemStack, this.maxUses, this.villagerXp, this.priceMultiplier);
 		}
 	}

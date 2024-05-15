@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.function.BooleanSupplier;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.DeltaTracker;
 
 @Environment(EnvType.CLIENT)
 public class LayeredDraw {
@@ -17,28 +18,28 @@ public class LayeredDraw {
 	}
 
 	public LayeredDraw add(LayeredDraw layeredDraw, BooleanSupplier booleanSupplier) {
-		return this.add((guiGraphics, f) -> {
+		return this.add((guiGraphics, deltaTracker) -> {
 			if (booleanSupplier.getAsBoolean()) {
-				layeredDraw.renderInner(guiGraphics, f);
+				layeredDraw.renderInner(guiGraphics, deltaTracker);
 			}
 		});
 	}
 
-	public void render(GuiGraphics guiGraphics, float f) {
+	public void render(GuiGraphics guiGraphics, DeltaTracker deltaTracker) {
 		guiGraphics.pose().pushPose();
-		this.renderInner(guiGraphics, f);
+		this.renderInner(guiGraphics, deltaTracker);
 		guiGraphics.pose().popPose();
 	}
 
-	private void renderInner(GuiGraphics guiGraphics, float f) {
+	private void renderInner(GuiGraphics guiGraphics, DeltaTracker deltaTracker) {
 		for (LayeredDraw.Layer layer : this.layers) {
-			layer.render(guiGraphics, f);
+			layer.render(guiGraphics, deltaTracker);
 			guiGraphics.pose().translate(0.0F, 0.0F, 200.0F);
 		}
 	}
 
 	@Environment(EnvType.CLIENT)
 	public interface Layer {
-		void render(GuiGraphics guiGraphics, float f);
+		void render(GuiGraphics guiGraphics, DeltaTracker deltaTracker);
 	}
 }

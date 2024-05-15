@@ -20,6 +20,7 @@ import net.minecraft.world.entity.EntityAttachment;
 import net.minecraft.world.entity.EntityAttachments;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
@@ -211,7 +212,7 @@ public class Horse extends AbstractHorse implements VariantHolder<Variant> {
 	}
 
 	@Override
-	public boolean canWearBodyArmor() {
+	public boolean canUseSlot(EquipmentSlot equipmentSlot) {
 		return true;
 	}
 
