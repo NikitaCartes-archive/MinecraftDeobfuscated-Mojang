@@ -64,7 +64,7 @@ public class AttributeModifierIdFix extends DataFix {
 		"Random spawn bonus",
 		"minecraft:random_spawn_bonus",
 		"Random zombie-spawn bonus",
-		"minecraft:random_spawn_bonus",
+		"minecraft:zombie_random_spawn_bonus",
 		"Leader zombie bonus",
 		"minecraft:leader_zombie_bonus",
 		"Zombie reinforcement callee charge",
