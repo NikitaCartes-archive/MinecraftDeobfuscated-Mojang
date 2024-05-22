@@ -64,12 +64,11 @@ public abstract class ArrowRenderer<T extends AbstractArrow> extends EntityRende
 	}
 
 	public void vertex(PoseStack.Pose pose, VertexConsumer vertexConsumer, int i, int j, int k, float f, float g, int l, int m, int n, int o) {
-		vertexConsumer.vertex(pose, (float)i, (float)j, (float)k)
-			.color(255, 255, 255, 255)
-			.uv(f, g)
-			.overlayCoords(OverlayTexture.NO_OVERLAY)
-			.uv2(o)
-			.normal(pose, (float)l, (float)n, (float)m)
-			.endVertex();
+		vertexConsumer.addVertex(pose, (float)i, (float)j, (float)k)
+			.setColor(-1)
+			.setUv(f, g)
+			.setOverlay(OverlayTexture.NO_OVERLAY)
+			.setLight(o)
+			.setNormal(pose, (float)l, (float)n, (float)m);
 	}
 }

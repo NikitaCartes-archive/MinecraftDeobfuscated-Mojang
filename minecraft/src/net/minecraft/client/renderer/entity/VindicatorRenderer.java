@@ -12,7 +12,7 @@ import net.minecraft.world.entity.monster.Vindicator;
 
 @Environment(EnvType.CLIENT)
 public class VindicatorRenderer extends IllagerRenderer<Vindicator> {
-	private static final ResourceLocation VINDICATOR = new ResourceLocation("textures/entity/illager/vindicator.png");
+	private static final ResourceLocation VINDICATOR = ResourceLocation.withDefaultNamespace("textures/entity/illager/vindicator.png");
 
 	public VindicatorRenderer(EntityRendererProvider.Context context) {
 		super(context, new IllagerModel<>(context.bakeLayer(ModelLayers.VINDICATOR)), 0.5F);

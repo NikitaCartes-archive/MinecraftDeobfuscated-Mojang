@@ -48,6 +48,7 @@ import net.minecraft.world.item.enchantment.effects.EnchantmentAttributeEffect;
 import net.minecraft.world.item.enchantment.effects.EnchantmentEntityEffect;
 import net.minecraft.world.item.enchantment.effects.EnchantmentLocationBasedEffect;
 import net.minecraft.world.item.enchantment.effects.EnchantmentValueEffect;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
@@ -326,10 +327,10 @@ public record Enchantment(Component description, Enchantment.EnchantmentDefiniti
 		);
 	}
 
-	public void onHitBlock(ServerLevel serverLevel, int i, EnchantedItemInUse enchantedItemInUse, Entity entity, Vec3 vec3) {
+	public void onHitBlock(ServerLevel serverLevel, int i, EnchantedItemInUse enchantedItemInUse, Entity entity, Vec3 vec3, BlockState blockState) {
 		applyEffects(
 			this.getEffects(EnchantmentEffectComponents.HIT_BLOCK),
-			entityContext(serverLevel, i, entity, vec3),
+			blockHitContext(serverLevel, i, entity, vec3, blockState),
 			enchantmentEntityEffect -> enchantmentEntityEffect.apply(serverLevel, i, enchantedItemInUse, entity, vec3)
 		);
 	}
@@ -415,6 +416,16 @@ public record Enchantment(Component description, Enchantment.EnchantmentDefiniti
 			.withParameter(LootContextParams.ENCHANTMENT_LEVEL, i)
 			.withParameter(LootContextParams.ORIGIN, vec3)
 			.create(LootContextParamSets.ENCHANTED_ENTITY);
+		return new LootContext.Builder(lootParams).create(Optional.empty());
+	}
+
+	private static LootContext blockHitContext(ServerLevel serverLevel, int i, Entity entity, Vec3 vec3, BlockState blockState) {
+		LootParams lootParams = new LootParams.Builder(serverLevel)
+			.withParameter(LootContextParams.THIS_ENTITY, entity)
+			.withParameter(LootContextParams.ENCHANTMENT_LEVEL, i)
+			.withParameter(LootContextParams.ORIGIN, vec3)
+			.withParameter(LootContextParams.BLOCK_STATE, blockState)
+			.create(LootContextParamSets.HIT_BLOCK);
 		return new LootContext.Builder(lootParams).create(Optional.empty());
 	}
 

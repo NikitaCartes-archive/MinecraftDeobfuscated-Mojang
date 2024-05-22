@@ -11,6 +11,6 @@ public class PaintingVariantTags {
 	}
 
 	private static TagKey<PaintingVariant> create(String string) {
-		return TagKey.create(Registries.PAINTING_VARIANT, new ResourceLocation(string));
+		return TagKey.create(Registries.PAINTING_VARIANT, ResourceLocation.withDefaultNamespace(string));
 	}
 }

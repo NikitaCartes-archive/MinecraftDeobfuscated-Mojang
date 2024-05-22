@@ -1,6 +1,7 @@
 package net.minecraft.network.protocol;
 
 import com.mojang.logging.LogUtils;
+import javax.annotation.Nullable;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.CrashReportDetail;
@@ -50,11 +51,14 @@ public class PacketUtils {
 		}
 	}
 
-	private static <T extends PacketListener> void fillCrashReport(CrashReport crashReport, T packetListener, Packet<T> packet) {
-		CrashReportCategory crashReportCategory = crashReport.addCategory("Incoming Packet");
-		crashReportCategory.setDetail("Type", (CrashReportDetail<String>)(() -> packet.type().toString()));
-		crashReportCategory.setDetail("Is Terminal", (CrashReportDetail<String>)(() -> Boolean.toString(packet.isTerminal())));
-		crashReportCategory.setDetail("Is Skippable", (CrashReportDetail<String>)(() -> Boolean.toString(packet.isSkippable())));
+	public static <T extends PacketListener> void fillCrashReport(CrashReport crashReport, T packetListener, @Nullable Packet<T> packet) {
+		if (packet != null) {
+			CrashReportCategory crashReportCategory = crashReport.addCategory("Incoming Packet");
+			crashReportCategory.setDetail("Type", (CrashReportDetail<String>)(() -> packet.type().toString()));
+			crashReportCategory.setDetail("Is Terminal", (CrashReportDetail<String>)(() -> Boolean.toString(packet.isTerminal())));
+			crashReportCategory.setDetail("Is Skippable", (CrashReportDetail<String>)(() -> Boolean.toString(packet.isSkippable())));
+		}
+
 		packetListener.fillCrashReport(crashReport);
 	}
 }

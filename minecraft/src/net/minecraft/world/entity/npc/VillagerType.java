@@ -61,7 +61,7 @@ public final class VillagerType {
 	}
 
 	private static VillagerType register(String string) {
-		return Registry.register(BuiltInRegistries.VILLAGER_TYPE, new ResourceLocation(string), new VillagerType(string));
+		return Registry.register(BuiltInRegistries.VILLAGER_TYPE, ResourceLocation.withDefaultNamespace(string), new VillagerType(string));
 	}
 
 	public static VillagerType byBiome(Holder<Biome> holder) {

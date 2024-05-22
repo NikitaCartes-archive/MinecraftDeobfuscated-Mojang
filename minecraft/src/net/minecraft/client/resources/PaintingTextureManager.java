@@ -9,10 +9,10 @@ import net.minecraft.world.entity.decoration.PaintingVariant;
 
 @Environment(EnvType.CLIENT)
 public class PaintingTextureManager extends TextureAtlasHolder {
-	private static final ResourceLocation BACK_SPRITE_LOCATION = new ResourceLocation("back");
+	private static final ResourceLocation BACK_SPRITE_LOCATION = ResourceLocation.withDefaultNamespace("back");
 
 	public PaintingTextureManager(TextureManager textureManager) {
-		super(textureManager, new ResourceLocation("textures/atlas/paintings.png"), new ResourceLocation("paintings"));
+		super(textureManager, ResourceLocation.withDefaultNamespace("textures/atlas/paintings.png"), ResourceLocation.withDefaultNamespace("paintings"));
 	}
 
 	public TextureAtlasSprite get(PaintingVariant paintingVariant) {

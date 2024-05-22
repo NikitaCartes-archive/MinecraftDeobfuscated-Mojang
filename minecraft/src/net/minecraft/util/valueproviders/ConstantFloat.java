@@ -33,7 +33,7 @@ public class ConstantFloat extends FloatProvider {
 
 	@Override
 	public float getMaxValue() {
-		return this.value + 1.0F;
+		return this.value;
 	}
 
 	@Override

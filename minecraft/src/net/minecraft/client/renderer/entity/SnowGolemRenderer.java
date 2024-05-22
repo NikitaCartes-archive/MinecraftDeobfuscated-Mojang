@@ -10,7 +10,7 @@ import net.minecraft.world.entity.animal.SnowGolem;
 
 @Environment(EnvType.CLIENT)
 public class SnowGolemRenderer extends MobRenderer<SnowGolem, SnowGolemModel<SnowGolem>> {
-	private static final ResourceLocation SNOW_GOLEM_LOCATION = new ResourceLocation("textures/entity/snow_golem.png");
+	private static final ResourceLocation SNOW_GOLEM_LOCATION = ResourceLocation.withDefaultNamespace("textures/entity/snow_golem.png");
 
 	public SnowGolemRenderer(EntityRendererProvider.Context context) {
 		super(context, new SnowGolemModel<>(context.bakeLayer(ModelLayers.SNOW_GOLEM)), 0.5F);

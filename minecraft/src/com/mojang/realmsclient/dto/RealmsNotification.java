@@ -118,7 +118,7 @@ public class RealmsNotification {
 		public static RealmsNotification.InfoPopup parse(RealmsNotification realmsNotification, JsonObject jsonObject) {
 			RealmsText realmsText = JsonUtils.getRequired("title", jsonObject, RealmsText::parse);
 			RealmsText realmsText2 = JsonUtils.getRequired("message", jsonObject, RealmsText::parse);
-			ResourceLocation resourceLocation = new ResourceLocation(JsonUtils.getRequiredString("image", jsonObject));
+			ResourceLocation resourceLocation = ResourceLocation.parse(JsonUtils.getRequiredString("image", jsonObject));
 			RealmsNotification.UrlButton urlButton = JsonUtils.getOptional("urlButton", jsonObject, RealmsNotification.UrlButton::parse);
 			return new RealmsNotification.InfoPopup(realmsNotification, realmsText, realmsText2, resourceLocation, urlButton);
 		}

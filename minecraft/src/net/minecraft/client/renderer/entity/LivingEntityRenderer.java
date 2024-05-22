@@ -123,7 +123,7 @@ public abstract class LivingEntityRenderer<T extends LivingEntity, M extends Ent
 		if (renderType != null) {
 			VertexConsumer vertexConsumer = multiBufferSource.getBuffer(renderType);
 			int q = getOverlayCoords(livingEntity, this.getWhiteOverlayProgress(livingEntity, g));
-			this.model.renderToBuffer(poseStack, vertexConsumer, i, q, 1.0F, 1.0F, 1.0F, bl2 ? 0.15F : 1.0F);
+			this.model.renderToBuffer(poseStack, vertexConsumer, i, q, bl2 ? 654311423 : -1);
 		}
 
 		if (!livingEntity.isSpectator()) {

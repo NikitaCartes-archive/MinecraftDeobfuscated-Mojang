@@ -75,7 +75,7 @@ public class ProcessorLists {
 	public static final ResourceKey<StructureProcessorList> TRIAL_CHAMBERS_COPPER_BULB_DEGRADATION = createKey("trial_chambers_copper_bulb_degradation");
 
 	private static ResourceKey<StructureProcessorList> createKey(String string) {
-		return ResourceKey.create(Registries.PROCESSOR_LIST, new ResourceLocation(string));
+		return ResourceKey.create(Registries.PROCESSOR_LIST, ResourceLocation.withDefaultNamespace(string));
 	}
 
 	private static void register(

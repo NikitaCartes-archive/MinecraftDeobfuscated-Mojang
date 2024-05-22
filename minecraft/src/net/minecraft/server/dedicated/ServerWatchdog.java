@@ -2,10 +2,10 @@ package net.minecraft.server.dedicated;
 
 import com.google.common.collect.Streams;
 import com.mojang.logging.LogUtils;
-import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
+import java.nio.file.Path;
 import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.CrashReportDetail;
+import net.minecraft.ReportType;
 import net.minecraft.Util;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.util.TimeUtil;
@@ -72,10 +73,10 @@ public class ServerWatchdog implements Runnable {
 							.map(serverLevel -> serverLevel.dimension() + ": " + serverLevel.getWatchdogStats())
 							.collect(Collectors.joining(",\n")))
 				);
-				Bootstrap.realStdoutPrintln("Crash report:\n" + crashReport.getFriendlyReport());
-				File file = new File(new File(this.server.getServerDirectory(), "crash-reports"), "crash-" + Util.getFilenameFormattedDateTime() + "-server.txt");
-				if (crashReport.saveToFile(file)) {
-					LOGGER.error("This crash report has been saved to: {}", file.getAbsolutePath());
+				Bootstrap.realStdoutPrintln("Crash report:\n" + crashReport.getFriendlyReport(ReportType.CRASH));
+				Path path = this.server.getServerDirectory().resolve("crash-reports").resolve("crash-" + Util.getFilenameFormattedDateTime() + "-server.txt");
+				if (crashReport.saveToFile(path, ReportType.CRASH)) {
+					LOGGER.error("This crash report has been saved to: {}", path.toAbsolutePath());
 				} else {
 					LOGGER.error("We were unable to save this crash report to disk.");
 				}

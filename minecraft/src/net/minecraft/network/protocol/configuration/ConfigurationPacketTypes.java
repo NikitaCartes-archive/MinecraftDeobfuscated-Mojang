@@ -15,10 +15,10 @@ public class ConfigurationPacketTypes {
 	public static final PacketType<ServerboundSelectKnownPacks> SERVERBOUND_SELECT_KNOWN_PACKS = createServerbound("select_known_packs");
 
 	private static <T extends Packet<ClientConfigurationPacketListener>> PacketType<T> createClientbound(String string) {
-		return new PacketType<>(PacketFlow.CLIENTBOUND, new ResourceLocation(string));
+		return new PacketType<>(PacketFlow.CLIENTBOUND, ResourceLocation.withDefaultNamespace(string));
 	}
 
 	private static <T extends Packet<ServerConfigurationPacketListener>> PacketType<T> createServerbound(String string) {
-		return new PacketType<>(PacketFlow.SERVERBOUND, new ResourceLocation(string));
+		return new PacketType<>(PacketFlow.SERVERBOUND, ResourceLocation.withDefaultNamespace(string));
 	}
 }

@@ -136,13 +136,15 @@ public class ThrownTrident extends AbstractArrow {
 
 	@Override
 	protected void hitBlockEnchantmentEffects(ServerLevel serverLevel, BlockHitResult blockHitResult, ItemStack itemStack) {
+		Vec3 vec3 = blockHitResult.getBlockPos().clampLocationWithin(blockHitResult.getLocation());
 		EnchantmentHelper.onHitBlock(
 			serverLevel,
 			itemStack,
 			this.getOwner() instanceof LivingEntity livingEntity ? livingEntity : null,
 			this,
 			null,
-			blockHitResult.getLocation(),
+			vec3,
+			serverLevel.getBlockState(blockHitResult.getBlockPos()),
 			item -> this.kill()
 		);
 	}

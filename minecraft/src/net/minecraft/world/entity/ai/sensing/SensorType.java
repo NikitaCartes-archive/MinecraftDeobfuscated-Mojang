@@ -60,6 +60,6 @@ public class SensorType<U extends Sensor<?>> {
 	}
 
 	private static <U extends Sensor<?>> SensorType<U> register(String string, Supplier<U> supplier) {
-		return Registry.register(BuiltInRegistries.SENSOR_TYPE, new ResourceLocation(string), new SensorType<>(supplier));
+		return Registry.register(BuiltInRegistries.SENSOR_TYPE, ResourceLocation.withDefaultNamespace(string), new SensorType<>(supplier));
 	}
 }

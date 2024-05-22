@@ -16,52 +16,37 @@ public class SpriteCoordinateExpander implements VertexConsumer {
 	}
 
 	@Override
-	public VertexConsumer vertex(double d, double e, double f) {
-		return this.delegate.vertex(d, e, f);
+	public VertexConsumer addVertex(float f, float g, float h) {
+		return this.delegate.addVertex(f, g, h);
 	}
 
 	@Override
-	public VertexConsumer color(int i, int j, int k, int l) {
-		return this.delegate.color(i, j, k, l);
+	public VertexConsumer setColor(int i, int j, int k, int l) {
+		return this.delegate.setColor(i, j, k, l);
 	}
 
 	@Override
-	public VertexConsumer uv(float f, float g) {
-		return this.delegate.uv(this.sprite.getU(f), this.sprite.getV(g));
+	public VertexConsumer setUv(float f, float g) {
+		return this.delegate.setUv(this.sprite.getU(f), this.sprite.getV(g));
 	}
 
 	@Override
-	public VertexConsumer overlayCoords(int i, int j) {
-		return this.delegate.overlayCoords(i, j);
+	public VertexConsumer setUv1(int i, int j) {
+		return this.delegate.setUv1(i, j);
 	}
 
 	@Override
-	public VertexConsumer uv2(int i, int j) {
-		return this.delegate.uv2(i, j);
+	public VertexConsumer setUv2(int i, int j) {
+		return this.delegate.setUv2(i, j);
 	}
 
 	@Override
-	public VertexConsumer normal(float f, float g, float h) {
-		return this.delegate.normal(f, g, h);
+	public VertexConsumer setNormal(float f, float g, float h) {
+		return this.delegate.setNormal(f, g, h);
 	}
 
 	@Override
-	public void endVertex() {
-		this.delegate.endVertex();
-	}
-
-	@Override
-	public void defaultColor(int i, int j, int k, int l) {
-		this.delegate.defaultColor(i, j, k, l);
-	}
-
-	@Override
-	public void unsetDefaultColor() {
-		this.delegate.unsetDefaultColor();
-	}
-
-	@Override
-	public void vertex(float f, float g, float h, float i, float j, float k, float l, float m, float n, int o, int p, float q, float r, float s) {
-		this.delegate.vertex(f, g, h, i, j, k, l, this.sprite.getU(m), this.sprite.getV(n), o, p, q, r, s);
+	public void addVertex(float f, float g, float h, int i, float j, float k, int l, int m, float n, float o, float p) {
+		this.delegate.addVertex(f, g, h, i, this.sprite.getU(j), this.sprite.getV(k), l, m, n, o, p);
 	}
 }

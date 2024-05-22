@@ -136,12 +136,11 @@ public class PaintingRenderer extends EntityRenderer<Painting> {
 	}
 
 	private void vertex(PoseStack.Pose pose, VertexConsumer vertexConsumer, float f, float g, float h, float i, float j, int k, int l, int m, int n) {
-		vertexConsumer.vertex(pose, f, g, j)
-			.color(255, 255, 255, 255)
-			.uv(h, i)
-			.overlayCoords(OverlayTexture.NO_OVERLAY)
-			.uv2(n)
-			.normal(pose, (float)k, (float)l, (float)m)
-			.endVertex();
+		vertexConsumer.addVertex(pose, f, g, j)
+			.setColor(-1)
+			.setUv(h, i)
+			.setOverlay(OverlayTexture.NO_OVERLAY)
+			.setLight(n)
+			.setNormal(pose, (float)k, (float)l, (float)m);
 	}
 }

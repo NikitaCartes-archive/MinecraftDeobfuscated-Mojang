@@ -233,7 +233,7 @@ public abstract class AbstractFurnaceBlockEntity extends BaseContainerBlockEntit
 		CompoundTag compoundTag2 = compoundTag.getCompound("RecipesUsed");
 
 		for (String string : compoundTag2.getAllKeys()) {
-			this.recipesUsed.put(new ResourceLocation(string), compoundTag2.getInt(string));
+			this.recipesUsed.put(ResourceLocation.parse(string), compoundTag2.getInt(string));
 		}
 	}
 

@@ -17,6 +17,6 @@ public class MultiNoiseBiomeSourceParameterLists {
 	}
 
 	private static ResourceKey<MultiNoiseBiomeSourceParameterList> register(String string) {
-		return ResourceKey.create(Registries.MULTI_NOISE_BIOME_SOURCE_PARAMETER_LIST, new ResourceLocation(string));
+		return ResourceKey.create(Registries.MULTI_NOISE_BIOME_SOURCE_PARAMETER_LIST, ResourceLocation.withDefaultNamespace(string));
 	}
 }

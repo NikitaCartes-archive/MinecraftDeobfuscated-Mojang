@@ -58,7 +58,7 @@ public class EffectInstance implements Effect, AutoCloseable {
 	private final EffectProgram fragmentProgram;
 
 	public EffectInstance(ResourceProvider resourceProvider, String string) throws IOException {
-		ResourceLocation resourceLocation = new ResourceLocation("shaders/program/" + string + ".json");
+		ResourceLocation resourceLocation = ResourceLocation.withDefaultNamespace("shaders/program/" + string + ".json");
 		this.name = string;
 		Resource resource = resourceProvider.getResourceOrThrow(resourceLocation);
 
@@ -168,7 +168,7 @@ public class EffectInstance implements Effect, AutoCloseable {
 		} else {
 			EffectProgram effectProgram;
 			if (program == null) {
-				ResourceLocation resourceLocation = new ResourceLocation("shaders/program/" + string + type.getExtension());
+				ResourceLocation resourceLocation = ResourceLocation.withDefaultNamespace("shaders/program/" + string + type.getExtension());
 				Resource resource = resourceProvider.getResourceOrThrow(resourceLocation);
 				InputStream inputStream = resource.open();
 

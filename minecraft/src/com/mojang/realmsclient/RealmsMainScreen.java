@@ -2,6 +2,7 @@ package com.mojang.realmsclient;
 
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.RateLimiter;
+import com.mojang.authlib.yggdrasil.ProfileResult;
 import com.mojang.logging.LogUtils;
 import com.mojang.math.Axis;
 import com.mojang.realmsclient.client.Ping;
@@ -9,6 +10,7 @@ import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.dto.PingResult;
 import com.mojang.realmsclient.dto.RealmsNotification;
 import com.mojang.realmsclient.dto.RealmsServer;
+import com.mojang.realmsclient.dto.RealmsServerPlayerLists;
 import com.mojang.realmsclient.dto.RegionPingResult;
 import com.mojang.realmsclient.exception.RealmsServiceException;
 import com.mojang.realmsclient.gui.RealmsDataFetcher;
@@ -28,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -50,6 +53,7 @@ import net.minecraft.client.gui.components.ImageWidget;
 import net.minecraft.client.gui.components.LoadingDotsWidget;
 import net.minecraft.client.gui.components.MultiLineTextWidget;
 import net.minecraft.client.gui.components.ObjectSelectionList;
+import net.minecraft.client.gui.components.PlayerFaceRenderer;
 import net.minecraft.client.gui.components.PopupScreen;
 import net.minecraft.client.gui.components.SpriteIconButton;
 import net.minecraft.client.gui.components.Tooltip;
@@ -65,8 +69,8 @@ import net.minecraft.client.gui.layouts.SpacerElement;
 import net.minecraft.client.gui.navigation.CommonInputs;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.screens.ConfirmLinkScreen;
-import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientActivePlayersTooltip;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -81,17 +85,17 @@ import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class RealmsMainScreen extends RealmsScreen {
-	static final ResourceLocation INFO_SPRITE = new ResourceLocation("icon/info");
-	static final ResourceLocation NEW_REALM_SPRITE = new ResourceLocation("icon/new_realm");
-	static final ResourceLocation EXPIRED_SPRITE = new ResourceLocation("realm_status/expired");
-	static final ResourceLocation EXPIRES_SOON_SPRITE = new ResourceLocation("realm_status/expires_soon");
-	static final ResourceLocation OPEN_SPRITE = new ResourceLocation("realm_status/open");
-	static final ResourceLocation CLOSED_SPRITE = new ResourceLocation("realm_status/closed");
-	private static final ResourceLocation INVITE_SPRITE = new ResourceLocation("icon/invite");
-	private static final ResourceLocation NEWS_SPRITE = new ResourceLocation("icon/news");
+	static final ResourceLocation INFO_SPRITE = ResourceLocation.withDefaultNamespace("icon/info");
+	static final ResourceLocation NEW_REALM_SPRITE = ResourceLocation.withDefaultNamespace("icon/new_realm");
+	static final ResourceLocation EXPIRED_SPRITE = ResourceLocation.withDefaultNamespace("realm_status/expired");
+	static final ResourceLocation EXPIRES_SOON_SPRITE = ResourceLocation.withDefaultNamespace("realm_status/expires_soon");
+	static final ResourceLocation OPEN_SPRITE = ResourceLocation.withDefaultNamespace("realm_status/open");
+	static final ResourceLocation CLOSED_SPRITE = ResourceLocation.withDefaultNamespace("realm_status/closed");
+	private static final ResourceLocation INVITE_SPRITE = ResourceLocation.withDefaultNamespace("icon/invite");
+	private static final ResourceLocation NEWS_SPRITE = ResourceLocation.withDefaultNamespace("icon/news");
 	static final Logger LOGGER = LogUtils.getLogger();
-	private static final ResourceLocation LOGO_LOCATION = new ResourceLocation("textures/gui/title/realms.png");
-	private static final ResourceLocation NO_REALMS_LOCATION = new ResourceLocation("textures/gui/realms/no_realms.png");
+	private static final ResourceLocation LOGO_LOCATION = ResourceLocation.withDefaultNamespace("textures/gui/title/realms.png");
+	private static final ResourceLocation NO_REALMS_LOCATION = ResourceLocation.withDefaultNamespace("textures/gui/realms/no_realms.png");
 	private static final Component TITLE = Component.translatable("menu.online");
 	private static final Component LOADING_TEXT = Component.translatable("mco.selectServer.loading");
 	static final Component SERVER_UNITIALIZED_TEXT = Component.translatable("mco.selectServer.uninitialized");
@@ -144,6 +148,7 @@ public class RealmsMainScreen extends RealmsScreen {
 	RealmsMainScreen.RealmSelectionList realmSelectionList;
 	private RealmsServerList serverList;
 	private List<RealmsServer> availableSnapshotServers = List.of();
+	RealmsServerPlayerLists onlinePlayersPerRealm = new RealmsServerPlayerLists();
 	private volatile boolean trialsAvailable;
 	@Nullable
 	private volatile String newsLink;
@@ -324,19 +329,19 @@ public class RealmsMainScreen extends RealmsScreen {
 
 	boolean shouldPlayButtonBeActive(RealmsServer realmsServer) {
 		boolean bl = !realmsServer.expired && realmsServer.state == RealmsServer.State.OPEN;
-		return bl && (realmsServer.isCompatible() || this.isSelfOwnedServer(realmsServer));
+		return bl && (realmsServer.isCompatible() || realmsServer.needsUpgrade() || isSelfOwnedServer(realmsServer));
 	}
 
 	private boolean shouldRenewButtonBeActive(RealmsServer realmsServer) {
-		return realmsServer.expired && this.isSelfOwnedServer(realmsServer);
+		return realmsServer.expired && isSelfOwnedServer(realmsServer);
 	}
 
 	private boolean shouldConfigureButtonBeActive(RealmsServer realmsServer) {
-		return this.isSelfOwnedServer(realmsServer) && realmsServer.state != RealmsServer.State.UNINITIALIZED;
+		return isSelfOwnedServer(realmsServer) && realmsServer.state != RealmsServer.State.UNINITIALIZED;
 	}
 
 	private boolean shouldLeaveButtonBeActive(RealmsServer realmsServer) {
-		return !this.isSelfOwnedServer(realmsServer);
+		return !isSelfOwnedServer(realmsServer);
 	}
 
 	@Override
@@ -407,6 +412,7 @@ public class RealmsMainScreen extends RealmsScreen {
 			}
 		});
 		subscription.subscribe(realmsDataFetcher.trialAvailabilityTask, boolean_ -> this.trialsAvailable = boolean_);
+		subscription.subscribe(realmsDataFetcher.onlinePlayersTask, realmsServerPlayerLists -> this.onlinePlayersPerRealm = realmsServerPlayerLists);
 		subscription.subscribe(realmsDataFetcher.newsTask, realmsNews -> {
 			realmsDataFetcher.newsManager.updateUnreadNews(realmsNews);
 			this.newsLink = realmsDataFetcher.newsManager.newsLink();
@@ -657,17 +663,7 @@ public class RealmsMainScreen extends RealmsScreen {
 					);
 					break;
 				case NEEDS_UPGRADE:
-					confirmToPlay(
-						realmsServer,
-						screen,
-						Component.translatable("mco.compatibility.upgrade.title").withColor(-171),
-						Component.translatable(
-							"mco.compatibility.upgrade.description",
-							Component.literal(realmsServer.activeVersion).withColor(-171),
-							Component.literal(SharedConstants.getCurrentVersion().getName()).withColor(-171)
-						),
-						Component.translatable("mco.compatibility.upgrade")
-					);
+					upgradeRealmAndPlay(realmsServer, screen);
 					break;
 				case INCOMPATIBLE:
 					Minecraft.getInstance()
@@ -697,17 +693,21 @@ public class RealmsMainScreen extends RealmsScreen {
 	}
 
 	private static void confirmToPlay(RealmsServer realmsServer, Screen screen, Component component, Component component2, Component component3) {
-		Minecraft.getInstance().setScreen(new ConfirmScreen(bl -> {
-			Screen screen2;
-			if (bl) {
-				screen2 = new RealmsLongRunningMcoTaskScreen(screen, new GetServerDetailsTask(screen, realmsServer));
-				refreshServerList();
-			} else {
-				screen2 = screen;
-			}
+		Minecraft.getInstance().setScreen(new PopupScreen.Builder(screen, component).setMessage(component2).addButton(component3, popupScreen -> {
+			Minecraft.getInstance().setScreen(new RealmsLongRunningMcoTaskScreen(screen, new GetServerDetailsTask(screen, realmsServer)));
+			refreshServerList();
+		}).addButton(CommonComponents.GUI_CANCEL, PopupScreen::onClose).build());
+	}
 
-			Minecraft.getInstance().setScreen(screen2);
-		}, component, component2, component3, CommonComponents.GUI_CANCEL));
+	private static void upgradeRealmAndPlay(RealmsServer realmsServer, Screen screen) {
+		Component component = Component.translatable("mco.compatibility.upgrade.title").withColor(-171);
+		Component component2 = Component.translatable("mco.compatibility.upgrade");
+		Component component3 = Component.literal(realmsServer.activeVersion).withColor(-171);
+		Component component4 = Component.literal(SharedConstants.getCurrentVersion().getName()).withColor(-171);
+		Component component5 = isSelfOwnedServer(realmsServer)
+			? Component.translatable("mco.compatibility.upgrade.description", component3, component4)
+			: Component.translatable("mco.compatibility.upgrade.friend.description", component3, component4);
+		confirmToPlay(realmsServer, screen, component, component5, component2);
 	}
 
 	public static Component getVersionComponent(String string, boolean bl) {
@@ -718,12 +718,12 @@ public class RealmsMainScreen extends RealmsScreen {
 		return (Component)(StringUtils.isBlank(string) ? CommonComponents.EMPTY : Component.translatable("mco.version", Component.literal(string).withColor(i)));
 	}
 
-	boolean isSelfOwnedServer(RealmsServer realmsServer) {
-		return this.minecraft.isLocalPlayer(realmsServer.ownerUUID);
+	static boolean isSelfOwnedServer(RealmsServer realmsServer) {
+		return Minecraft.getInstance().isLocalPlayer(realmsServer.ownerUUID);
 	}
 
 	private boolean isSelfOwnedNonExpiredServer(RealmsServer realmsServer) {
-		return this.isSelfOwnedServer(realmsServer) && !realmsServer.expired;
+		return isSelfOwnedServer(realmsServer) && !realmsServer.expired;
 	}
 
 	private void renderEnvironment(GuiGraphics guiGraphics, String string, int i) {
@@ -835,7 +835,7 @@ public class RealmsMainScreen extends RealmsScreen {
 	@Environment(EnvType.CLIENT)
 	static class CrossButton extends ImageButton {
 		private static final WidgetSprites SPRITES = new WidgetSprites(
-			new ResourceLocation("widget/cross_button"), new ResourceLocation("widget/cross_button_highlighted")
+			ResourceLocation.withDefaultNamespace("widget/cross_button"), ResourceLocation.withDefaultNamespace("widget/cross_button_highlighted")
 		);
 
 		protected CrossButton(Button.OnPress onPress, Component component) {
@@ -858,9 +858,10 @@ public class RealmsMainScreen extends RealmsScreen {
 
 	@Environment(EnvType.CLIENT)
 	abstract class Entry extends ObjectSelectionList.Entry<RealmsMainScreen.Entry> {
-		private static final int STATUS_LIGHT_WIDTH = 10;
+		protected static final int STATUS_LIGHT_WIDTH = 10;
 		private static final int STATUS_LIGHT_HEIGHT = 28;
-		private static final int PADDING = 7;
+		protected static final int PADDING_X = 7;
+		protected static final int PADDING_Y = 2;
 
 		protected void renderStatusLights(RealmsServer realmsServer, GuiGraphics guiGraphics, int i, int j, int k, int l) {
 			int m = i - 10 - 7;
@@ -869,7 +870,7 @@ public class RealmsMainScreen extends RealmsScreen {
 				this.drawRealmStatus(guiGraphics, m, n, k, l, RealmsMainScreen.EXPIRED_SPRITE, () -> RealmsMainScreen.SERVER_EXPIRED_TOOLTIP);
 			} else if (realmsServer.state == RealmsServer.State.CLOSED) {
 				this.drawRealmStatus(guiGraphics, m, n, k, l, RealmsMainScreen.CLOSED_SPRITE, () -> RealmsMainScreen.SERVER_CLOSED_TOOLTIP);
-			} else if (RealmsMainScreen.this.isSelfOwnedServer(realmsServer) && realmsServer.daysLeft < 7) {
+			} else if (RealmsMainScreen.isSelfOwnedServer(realmsServer) && realmsServer.daysLeft < 7) {
 				this.drawRealmStatus(
 					guiGraphics,
 					m,
@@ -903,7 +904,7 @@ public class RealmsMainScreen extends RealmsScreen {
 			int k = this.textX(j);
 			int l = this.firstLineY(i);
 			int m = this.thirdLineY(l);
-			if (!RealmsMainScreen.this.isSelfOwnedServer(realmsServer)) {
+			if (!RealmsMainScreen.isSelfOwnedServer(realmsServer)) {
 				guiGraphics.drawString(RealmsMainScreen.this.font, realmsServer.owner, k, this.thirdLineY(l), -8355712, false);
 			} else if (realmsServer.expired) {
 				Component component = realmsServer.expiredTrial ? RealmsMainScreen.TRIAL_EXPIRED_TEXT : RealmsMainScreen.SUBSCRIPTION_EXPIRED_TEXT;
@@ -911,7 +912,7 @@ public class RealmsMainScreen extends RealmsScreen {
 			}
 		}
 
-		protected void renderClampedName(GuiGraphics guiGraphics, String string, int i, int j, int k, int l) {
+		protected void renderClampedString(GuiGraphics guiGraphics, String string, int i, int j, int k, int l) {
 			int m = k - i;
 			if (RealmsMainScreen.this.font.width(string) > m) {
 				String string2 = RealmsMainScreen.this.font.plainSubstrByWidth(string, m - RealmsMainScreen.this.font.width("... "));
@@ -956,12 +957,12 @@ public class RealmsMainScreen extends RealmsScreen {
 	@Environment(EnvType.CLIENT)
 	static class NotificationButton extends SpriteIconButton.CenteredIcon {
 		private static final ResourceLocation[] NOTIFICATION_ICONS = new ResourceLocation[]{
-			new ResourceLocation("notification/1"),
-			new ResourceLocation("notification/2"),
-			new ResourceLocation("notification/3"),
-			new ResourceLocation("notification/4"),
-			new ResourceLocation("notification/5"),
-			new ResourceLocation("notification/more")
+			ResourceLocation.withDefaultNamespace("notification/1"),
+			ResourceLocation.withDefaultNamespace("notification/2"),
+			ResourceLocation.withDefaultNamespace("notification/3"),
+			ResourceLocation.withDefaultNamespace("notification/4"),
+			ResourceLocation.withDefaultNamespace("notification/5"),
+			ResourceLocation.withDefaultNamespace("notification/more")
 		};
 		private static final int UNKNOWN_COUNT = Integer.MAX_VALUE;
 		private static final int SIZE = 20;
@@ -1098,18 +1099,13 @@ public class RealmsMainScreen extends RealmsScreen {
 		}
 
 		@Override
-		public boolean mouseClicked(double d, double e, int i) {
-			return true;
-		}
-
-		@Override
 		public void render(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
 			int p = this.textX(k);
 			int q = this.firstLineY(j);
 			RealmsUtil.renderPlayerFace(guiGraphics, k, j, 32, this.server.ownerUUID);
 			Component component = RealmsMainScreen.getVersionComponent(this.server.activeVersion, -8355712);
 			int r = this.versionTextX(k, l, component);
-			this.renderClampedName(guiGraphics, this.server.getName(), p, q, r, -8355712);
+			this.renderClampedString(guiGraphics, this.server.getName(), p, q, r, -8355712);
 			if (component != CommonComponents.EMPTY) {
 				guiGraphics.drawString(RealmsMainScreen.this.font, component, r, q, -8355712, false);
 			}
@@ -1155,17 +1151,17 @@ public class RealmsMainScreen extends RealmsScreen {
 
 	@Environment(EnvType.CLIENT)
 	class ServerEntry extends RealmsMainScreen.Entry {
+		private static final Component ONLINE_PLAYERS_TOOLTIP_HEADER = Component.translatable("mco.onlinePlayers");
+		private static final int PLAYERS_ONLINE_SPRITE_SIZE = 9;
 		private static final int SKIN_HEAD_LARGE_WIDTH = 36;
 		private final RealmsServer serverData;
 		private final WidgetTooltipHolder tooltip = new WidgetTooltipHolder();
 
 		public ServerEntry(final RealmsServer realmsServer) {
 			this.serverData = realmsServer;
-			boolean bl = RealmsMainScreen.this.isSelfOwnedServer(realmsServer);
+			boolean bl = RealmsMainScreen.isSelfOwnedServer(realmsServer);
 			if (RealmsMainScreen.isSnapshot() && bl && realmsServer.isSnapshotRealm()) {
 				this.tooltip.set(Tooltip.create(Component.translatable("mco.snapshot.paired", realmsServer.parentWorldName)));
-			} else if (!bl && realmsServer.needsUpgrade()) {
-				this.tooltip.set(Tooltip.create(Component.translatable("mco.snapshot.friendsRealm.upgrade", realmsServer.owner)));
 			} else if (!bl && realmsServer.needsDowngrade()) {
 				this.tooltip.set(Tooltip.create(Component.translatable("mco.snapshot.friendsRealm.downgrade", realmsServer.activeVersion)));
 			}
@@ -1178,12 +1174,16 @@ public class RealmsMainScreen extends RealmsScreen {
 				int p = j + m / 2 - 9 / 2;
 				guiGraphics.drawString(RealmsMainScreen.this.font, RealmsMainScreen.SERVER_UNITIALIZED_TEXT, k + 40 - 2, p, 8388479);
 			} else {
+				this.renderStatusLights(this.serverData, guiGraphics, k + 36, j, n, o);
 				RealmsUtil.renderPlayerFace(guiGraphics, k, j, 32, this.serverData.ownerUUID);
 				this.renderFirstLine(guiGraphics, j, k, l);
 				this.renderSecondLine(guiGraphics, j, k);
 				this.renderThirdLine(guiGraphics, j, k, this.serverData);
+				boolean bl2 = this.renderOnlinePlayers(guiGraphics, j, k, l, m, n, o);
 				this.renderStatusLights(this.serverData, guiGraphics, k + l, j, n, o);
-				this.tooltip.refreshTooltipForNextRenderPass(bl, this.isFocused(), new ScreenRectangle(k, j, l, m));
+				if (!bl2) {
+					this.tooltip.refreshTooltipForNextRenderPass(bl, this.isFocused(), new ScreenRectangle(k, j, l, m));
+				}
 			}
 		}
 
@@ -1192,7 +1192,7 @@ public class RealmsMainScreen extends RealmsScreen {
 			int m = this.firstLineY(i);
 			Component component = RealmsMainScreen.getVersionComponent(this.serverData.activeVersion, this.serverData.isCompatible());
 			int n = this.versionTextX(j, k, component);
-			this.renderClampedName(guiGraphics, this.serverData.getName(), l, m, n, -1);
+			this.renderClampedString(guiGraphics, this.serverData.getName(), l, m, n, -1);
 			if (component != CommonComponents.EMPTY && !this.serverData.isMinigameActive()) {
 				guiGraphics.drawString(RealmsMainScreen.this.font, component, n, m, -8355712, false);
 			}
@@ -1209,6 +1209,29 @@ public class RealmsMainScreen extends RealmsScreen {
 			} else {
 				guiGraphics.drawString(RealmsMainScreen.this.font, this.serverData.getDescription(), k, this.secondLineY(l), -8355712, false);
 			}
+		}
+
+		private boolean renderOnlinePlayers(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n) {
+			List<ProfileResult> list = RealmsMainScreen.this.onlinePlayersPerRealm.getProfileResultsFor(this.serverData.id);
+			if (!list.isEmpty()) {
+				int o = j + k - 21;
+				int p = i + l - 9 - 2;
+				int q = o;
+
+				for (int r = 0; r < list.size(); r++) {
+					q -= 9 + (r == 0 ? 0 : 3);
+					PlayerFaceRenderer.draw(guiGraphics, Minecraft.getInstance().getSkinManager().getInsecureSkin(((ProfileResult)list.get(r)).profile()), q, p, 9);
+				}
+
+				if (m >= q && m <= o && n >= p && n <= p + 9) {
+					guiGraphics.renderTooltip(
+						RealmsMainScreen.this.font, List.of(ONLINE_PLAYERS_TOOLTIP_HEADER), Optional.of(new ClientActivePlayersTooltip.ActivePlayersTooltip(list)), m, n
+					);
+					return true;
+				}
+			}
+
+			return false;
 		}
 
 		private void playRealm() {

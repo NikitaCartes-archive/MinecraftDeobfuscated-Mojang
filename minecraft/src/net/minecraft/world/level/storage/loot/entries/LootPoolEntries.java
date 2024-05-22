@@ -20,6 +20,6 @@ public class LootPoolEntries {
 	public static final LootPoolEntryType GROUP = register("group", EntryGroup.CODEC);
 
 	private static LootPoolEntryType register(String string, MapCodec<? extends LootPoolEntryContainer> mapCodec) {
-		return Registry.register(BuiltInRegistries.LOOT_POOL_ENTRY_TYPE, new ResourceLocation(string), new LootPoolEntryType(mapCodec));
+		return Registry.register(BuiltInRegistries.LOOT_POOL_ENTRY_TYPE, ResourceLocation.withDefaultNamespace(string), new LootPoolEntryType(mapCodec));
 	}
 }

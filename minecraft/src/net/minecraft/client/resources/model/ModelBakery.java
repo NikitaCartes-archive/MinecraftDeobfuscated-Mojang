@@ -29,6 +29,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import javax.annotation.Nullable;
@@ -63,20 +64,20 @@ import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class ModelBakery {
-	public static final Material FIRE_0 = new Material(TextureAtlas.LOCATION_BLOCKS, new ResourceLocation("block/fire_0"));
-	public static final Material FIRE_1 = new Material(TextureAtlas.LOCATION_BLOCKS, new ResourceLocation("block/fire_1"));
-	public static final Material LAVA_FLOW = new Material(TextureAtlas.LOCATION_BLOCKS, new ResourceLocation("block/lava_flow"));
-	public static final Material WATER_FLOW = new Material(TextureAtlas.LOCATION_BLOCKS, new ResourceLocation("block/water_flow"));
-	public static final Material WATER_OVERLAY = new Material(TextureAtlas.LOCATION_BLOCKS, new ResourceLocation("block/water_overlay"));
-	public static final Material BANNER_BASE = new Material(Sheets.BANNER_SHEET, new ResourceLocation("entity/banner_base"));
-	public static final Material SHIELD_BASE = new Material(Sheets.SHIELD_SHEET, new ResourceLocation("entity/shield_base"));
-	public static final Material NO_PATTERN_SHIELD = new Material(Sheets.SHIELD_SHEET, new ResourceLocation("entity/shield_base_nopattern"));
+	public static final Material FIRE_0 = new Material(TextureAtlas.LOCATION_BLOCKS, ResourceLocation.withDefaultNamespace("block/fire_0"));
+	public static final Material FIRE_1 = new Material(TextureAtlas.LOCATION_BLOCKS, ResourceLocation.withDefaultNamespace("block/fire_1"));
+	public static final Material LAVA_FLOW = new Material(TextureAtlas.LOCATION_BLOCKS, ResourceLocation.withDefaultNamespace("block/lava_flow"));
+	public static final Material WATER_FLOW = new Material(TextureAtlas.LOCATION_BLOCKS, ResourceLocation.withDefaultNamespace("block/water_flow"));
+	public static final Material WATER_OVERLAY = new Material(TextureAtlas.LOCATION_BLOCKS, ResourceLocation.withDefaultNamespace("block/water_overlay"));
+	public static final Material BANNER_BASE = new Material(Sheets.BANNER_SHEET, ResourceLocation.withDefaultNamespace("entity/banner_base"));
+	public static final Material SHIELD_BASE = new Material(Sheets.SHIELD_SHEET, ResourceLocation.withDefaultNamespace("entity/shield_base"));
+	public static final Material NO_PATTERN_SHIELD = new Material(Sheets.SHIELD_SHEET, ResourceLocation.withDefaultNamespace("entity/shield_base_nopattern"));
 	public static final int DESTROY_STAGE_COUNT = 10;
 	public static final List<ResourceLocation> DESTROY_STAGES = (List<ResourceLocation>)IntStream.range(0, 10)
-		.mapToObj(i -> new ResourceLocation("block/destroy_stage_" + i))
+		.mapToObj(i -> ResourceLocation.withDefaultNamespace("block/destroy_stage_" + i))
 		.collect(Collectors.toList());
 	public static final List<ResourceLocation> BREAKING_LOCATIONS = (List<ResourceLocation>)DESTROY_STAGES.stream()
-		.map(resourceLocation -> new ResourceLocation("textures/" + resourceLocation.getPath() + ".png"))
+		.map(resourceLocation -> resourceLocation.withPath((UnaryOperator<String>)(string -> "textures/" + string + ".png")))
 		.collect(Collectors.toList());
 	public static final List<RenderType> DESTROY_TYPES = (List<RenderType>)BREAKING_LOCATIONS.stream().map(RenderType::crumbling).collect(Collectors.toList());
 	static final int SINGLETON_MODEL_GROUP = -1;
@@ -110,7 +111,10 @@ public class ModelBakery {
 		.create(Block::defaultBlockState, BlockState::new);
 	static final ItemModelGenerator ITEM_MODEL_GENERATOR = new ItemModelGenerator();
 	private static final Map<ResourceLocation, StateDefinition<Block, BlockState>> STATIC_DEFINITIONS = ImmutableMap.of(
-		new ResourceLocation("item_frame"), ITEM_FRAME_FAKE_DEFINITION, new ResourceLocation("glow_item_frame"), ITEM_FRAME_FAKE_DEFINITION
+		ResourceLocation.withDefaultNamespace("item_frame"),
+		ITEM_FRAME_FAKE_DEFINITION,
+		ResourceLocation.withDefaultNamespace("glow_item_frame"),
+		ITEM_FRAME_FAKE_DEFINITION
 	);
 	private final BlockColors blockColors;
 	private final Map<ResourceLocation, BlockModel> modelResources;
@@ -266,7 +270,7 @@ public class ModelBakery {
 				this.cacheAndQueueDependencies(modelResourceLocation, blockModel);
 				this.unbakedCache.put(resourceLocation2, blockModel);
 			} else {
-				ResourceLocation resourceLocation2 = new ResourceLocation(resourceLocation.getNamespace(), resourceLocation.getPath());
+				ResourceLocation resourceLocation2 = ResourceLocation.fromNamespaceAndPath(resourceLocation.getNamespace(), resourceLocation.getPath());
 				StateDefinition<Block, BlockState> stateDefinition = (StateDefinition<Block, BlockState>)Optional.ofNullable(
 						(StateDefinition)STATIC_DEFINITIONS.get(resourceLocation2)
 					)

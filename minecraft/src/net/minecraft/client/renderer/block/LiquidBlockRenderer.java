@@ -121,143 +121,143 @@ public class LiquidBlockRenderer {
 				r = this.calculateAverageHeight(blockAndTintGetter, fluid, n, t, v, blockPos.relative(Direction.SOUTH).relative(Direction.WEST));
 			}
 
-			double d = (double)(blockPos.getX() & 15);
-			double e = (double)(blockPos.getY() & 15);
-			double w = (double)(blockPos.getZ() & 15);
-			float x = 0.001F;
-			float y = bl3 ? 0.001F : 0.0F;
+			float s = (float)(blockPos.getX() & 15);
+			float t = (float)(blockPos.getY() & 15);
+			float u = (float)(blockPos.getZ() & 15);
+			float v = 0.001F;
+			float w = bl3 ? 0.001F : 0.0F;
 			if (bl2 && !isFaceOccludedByNeighbor(blockAndTintGetter, blockPos, Direction.UP, Math.min(Math.min(p, r), Math.min(q, o)), blockState3)) {
 				p -= 0.001F;
 				r -= 0.001F;
 				q -= 0.001F;
 				o -= 0.001F;
 				Vec3 vec3 = fluidState.getFlow(blockAndTintGetter, blockPos);
+				float x;
 				float z;
 				float ab;
 				float ad;
-				float af;
+				float y;
 				float aa;
 				float ac;
 				float ae;
-				float ag;
 				if (vec3.x == 0.0 && vec3.z == 0.0) {
 					TextureAtlasSprite textureAtlasSprite = textureAtlasSprites[0];
-					z = textureAtlasSprite.getU(0.0F);
-					aa = textureAtlasSprite.getV(0.0F);
-					ab = z;
-					ac = textureAtlasSprite.getV(1.0F);
-					ad = textureAtlasSprite.getU(1.0F);
-					ae = ac;
-					af = ad;
-					ag = aa;
+					x = textureAtlasSprite.getU(0.0F);
+					y = textureAtlasSprite.getV(0.0F);
+					z = x;
+					aa = textureAtlasSprite.getV(1.0F);
+					ab = textureAtlasSprite.getU(1.0F);
+					ac = aa;
+					ad = ab;
+					ae = y;
 				} else {
 					TextureAtlasSprite textureAtlasSprite = textureAtlasSprites[1];
-					float ah = (float)Mth.atan2(vec3.z, vec3.x) - (float) (Math.PI / 2);
-					float ai = Mth.sin(ah) * 0.25F;
-					float aj = Mth.cos(ah) * 0.25F;
-					float ak = 0.5F;
-					z = textureAtlasSprite.getU(0.5F + (-aj - ai));
-					aa = textureAtlasSprite.getV(0.5F + -aj + ai);
-					ab = textureAtlasSprite.getU(0.5F + -aj + ai);
-					ac = textureAtlasSprite.getV(0.5F + aj + ai);
-					ad = textureAtlasSprite.getU(0.5F + aj + ai);
-					ae = textureAtlasSprite.getV(0.5F + (aj - ai));
-					af = textureAtlasSprite.getU(0.5F + (aj - ai));
-					ag = textureAtlasSprite.getV(0.5F + (-aj - ai));
+					float af = (float)Mth.atan2(vec3.z, vec3.x) - (float) (Math.PI / 2);
+					float ag = Mth.sin(af) * 0.25F;
+					float ah = Mth.cos(af) * 0.25F;
+					float ai = 0.5F;
+					x = textureAtlasSprite.getU(0.5F + (-ah - ag));
+					y = textureAtlasSprite.getV(0.5F + -ah + ag);
+					z = textureAtlasSprite.getU(0.5F + -ah + ag);
+					aa = textureAtlasSprite.getV(0.5F + ah + ag);
+					ab = textureAtlasSprite.getU(0.5F + ah + ag);
+					ac = textureAtlasSprite.getV(0.5F + (ah - ag));
+					ad = textureAtlasSprite.getU(0.5F + (ah - ag));
+					ae = textureAtlasSprite.getV(0.5F + (-ah - ag));
 				}
 
-				float al = (z + ab + ad + af) / 4.0F;
-				float ah = (aa + ac + ae + ag) / 4.0F;
-				float ai = textureAtlasSprites[0].uvShrinkRatio();
-				z = Mth.lerp(ai, z, al);
-				ab = Mth.lerp(ai, ab, al);
-				ad = Mth.lerp(ai, ad, al);
-				af = Mth.lerp(ai, af, al);
-				aa = Mth.lerp(ai, aa, ah);
-				ac = Mth.lerp(ai, ac, ah);
-				ae = Mth.lerp(ai, ae, ah);
-				ag = Mth.lerp(ai, ag, ah);
-				int am = this.getLightColor(blockAndTintGetter, blockPos);
-				float ak = k * f;
-				float an = k * g;
-				float ao = k * h;
-				this.vertex(vertexConsumer, d + 0.0, e + (double)p, w + 0.0, ak, an, ao, z, aa, am);
-				this.vertex(vertexConsumer, d + 0.0, e + (double)r, w + 1.0, ak, an, ao, ab, ac, am);
-				this.vertex(vertexConsumer, d + 1.0, e + (double)q, w + 1.0, ak, an, ao, ad, ae, am);
-				this.vertex(vertexConsumer, d + 1.0, e + (double)o, w + 0.0, ak, an, ao, af, ag, am);
+				float aj = (x + z + ab + ad) / 4.0F;
+				float af = (y + aa + ac + ae) / 4.0F;
+				float ag = textureAtlasSprites[0].uvShrinkRatio();
+				x = Mth.lerp(ag, x, aj);
+				z = Mth.lerp(ag, z, aj);
+				ab = Mth.lerp(ag, ab, aj);
+				ad = Mth.lerp(ag, ad, aj);
+				y = Mth.lerp(ag, y, af);
+				aa = Mth.lerp(ag, aa, af);
+				ac = Mth.lerp(ag, ac, af);
+				ae = Mth.lerp(ag, ae, af);
+				int ak = this.getLightColor(blockAndTintGetter, blockPos);
+				float ai = k * f;
+				float al = k * g;
+				float am = k * h;
+				this.vertex(vertexConsumer, s + 0.0F, t + p, u + 0.0F, ai, al, am, x, y, ak);
+				this.vertex(vertexConsumer, s + 0.0F, t + r, u + 1.0F, ai, al, am, z, aa, ak);
+				this.vertex(vertexConsumer, s + 1.0F, t + q, u + 1.0F, ai, al, am, ab, ac, ak);
+				this.vertex(vertexConsumer, s + 1.0F, t + o, u + 0.0F, ai, al, am, ad, ae, ak);
 				if (fluidState.shouldRenderBackwardUpFace(blockAndTintGetter, blockPos.above())) {
-					this.vertex(vertexConsumer, d + 0.0, e + (double)p, w + 0.0, ak, an, ao, z, aa, am);
-					this.vertex(vertexConsumer, d + 1.0, e + (double)o, w + 0.0, ak, an, ao, af, ag, am);
-					this.vertex(vertexConsumer, d + 1.0, e + (double)q, w + 1.0, ak, an, ao, ad, ae, am);
-					this.vertex(vertexConsumer, d + 0.0, e + (double)r, w + 1.0, ak, an, ao, ab, ac, am);
+					this.vertex(vertexConsumer, s + 0.0F, t + p, u + 0.0F, ai, al, am, x, y, ak);
+					this.vertex(vertexConsumer, s + 1.0F, t + o, u + 0.0F, ai, al, am, ad, ae, ak);
+					this.vertex(vertexConsumer, s + 1.0F, t + q, u + 1.0F, ai, al, am, ab, ac, ak);
+					this.vertex(vertexConsumer, s + 0.0F, t + r, u + 1.0F, ai, al, am, z, aa, ak);
 				}
 			}
 
 			if (bl3) {
-				float zx = textureAtlasSprites[0].getU0();
-				float abx = textureAtlasSprites[0].getU1();
-				float adx = textureAtlasSprites[0].getV0();
-				float afx = textureAtlasSprites[0].getV1();
-				int ap = this.getLightColor(blockAndTintGetter, blockPos.below());
-				float acx = j * f;
-				float aex = j * g;
-				float agx = j * h;
-				this.vertex(vertexConsumer, d, e + (double)y, w + 1.0, acx, aex, agx, zx, afx, ap);
-				this.vertex(vertexConsumer, d, e + (double)y, w, acx, aex, agx, zx, adx, ap);
-				this.vertex(vertexConsumer, d + 1.0, e + (double)y, w, acx, aex, agx, abx, adx, ap);
-				this.vertex(vertexConsumer, d + 1.0, e + (double)y, w + 1.0, acx, aex, agx, abx, afx, ap);
+				float xx = textureAtlasSprites[0].getU0();
+				float zx = textureAtlasSprites[0].getU1();
+				float abx = textureAtlasSprites[0].getV0();
+				float adx = textureAtlasSprites[0].getV1();
+				int an = this.getLightColor(blockAndTintGetter, blockPos.below());
+				float aax = j * f;
+				float acx = j * g;
+				float aex = j * h;
+				this.vertex(vertexConsumer, s, t + w, u + 1.0F, aax, acx, aex, xx, adx, an);
+				this.vertex(vertexConsumer, s, t + w, u, aax, acx, aex, xx, abx, an);
+				this.vertex(vertexConsumer, s + 1.0F, t + w, u, aax, acx, aex, zx, abx, an);
+				this.vertex(vertexConsumer, s + 1.0F, t + w, u + 1.0F, aax, acx, aex, zx, adx, an);
 			}
 
-			int aq = this.getLightColor(blockAndTintGetter, blockPos);
+			int ao = this.getLightColor(blockAndTintGetter, blockPos);
 
 			for (Direction direction : Direction.Plane.HORIZONTAL) {
-				float afx;
+				float adx;
+				float yx;
 				float aax;
-				double ar;
-				double at;
-				double as;
-				double au;
+				float acx;
+				float aex;
+				float ap;
 				boolean bl8;
 				switch (direction) {
 					case NORTH:
-						afx = p;
-						aax = o;
-						ar = d;
-						as = d + 1.0;
-						at = w + 0.001F;
-						au = w + 0.001F;
+						adx = p;
+						yx = o;
+						aax = s;
+						aex = s + 1.0F;
+						acx = u + 0.001F;
+						ap = u + 0.001F;
 						bl8 = bl4;
 						break;
 					case SOUTH:
-						afx = q;
-						aax = r;
-						ar = d + 1.0;
-						as = d;
-						at = w + 1.0 - 0.001F;
-						au = w + 1.0 - 0.001F;
+						adx = q;
+						yx = r;
+						aax = s + 1.0F;
+						aex = s;
+						acx = u + 1.0F - 0.001F;
+						ap = u + 1.0F - 0.001F;
 						bl8 = bl5;
 						break;
 					case WEST:
-						afx = r;
-						aax = p;
-						ar = d + 0.001F;
-						as = d + 0.001F;
-						at = w + 1.0;
-						au = w;
+						adx = r;
+						yx = p;
+						aax = s + 0.001F;
+						aex = s + 0.001F;
+						acx = u + 1.0F;
+						ap = u;
 						bl8 = bl6;
 						break;
 					default:
-						afx = o;
-						aax = q;
-						ar = d + 1.0 - 0.001F;
-						as = d + 1.0 - 0.001F;
-						at = w;
-						au = w + 1.0;
+						adx = o;
+						yx = q;
+						aax = s + 1.0F - 0.001F;
+						aex = s + 1.0F - 0.001F;
+						acx = u;
+						ap = u + 1.0F;
 						bl8 = bl7;
 				}
 
 				if (bl8
-					&& !isFaceOccludedByNeighbor(blockAndTintGetter, blockPos, direction, Math.max(afx, aax), blockAndTintGetter.getBlockState(blockPos.relative(direction)))) {
+					&& !isFaceOccludedByNeighbor(blockAndTintGetter, blockPos, direction, Math.max(adx, yx), blockAndTintGetter.getBlockState(blockPos.relative(direction)))) {
 					BlockPos blockPos2 = blockPos.relative(direction);
 					TextureAtlasSprite textureAtlasSprite2 = textureAtlasSprites[1];
 					if (!bl) {
@@ -267,24 +267,24 @@ public class LiquidBlockRenderer {
 						}
 					}
 
-					float av = textureAtlasSprite2.getU(0.0F);
-					float aw = textureAtlasSprite2.getU(0.5F);
-					float ax = textureAtlasSprite2.getV((1.0F - afx) * 0.5F);
-					float ay = textureAtlasSprite2.getV((1.0F - aax) * 0.5F);
-					float az = textureAtlasSprite2.getV(0.5F);
-					float ba = direction.getAxis() == Direction.Axis.Z ? l : m;
-					float bb = k * ba * f;
-					float bc = k * ba * g;
-					float bd = k * ba * h;
-					this.vertex(vertexConsumer, ar, e + (double)afx, at, bb, bc, bd, av, ax, aq);
-					this.vertex(vertexConsumer, as, e + (double)aax, au, bb, bc, bd, aw, ay, aq);
-					this.vertex(vertexConsumer, as, e + (double)y, au, bb, bc, bd, aw, az, aq);
-					this.vertex(vertexConsumer, ar, e + (double)y, at, bb, bc, bd, av, az, aq);
+					float ah = textureAtlasSprite2.getU(0.0F);
+					float ai = textureAtlasSprite2.getU(0.5F);
+					float al = textureAtlasSprite2.getV((1.0F - adx) * 0.5F);
+					float am = textureAtlasSprite2.getV((1.0F - yx) * 0.5F);
+					float aq = textureAtlasSprite2.getV(0.5F);
+					float ar = direction.getAxis() == Direction.Axis.Z ? l : m;
+					float as = k * ar * f;
+					float at = k * ar * g;
+					float au = k * ar * h;
+					this.vertex(vertexConsumer, aax, t + adx, acx, as, at, au, ah, al, ao);
+					this.vertex(vertexConsumer, aex, t + yx, ap, as, at, au, ai, am, ao);
+					this.vertex(vertexConsumer, aex, t + w, ap, as, at, au, ai, aq, ao);
+					this.vertex(vertexConsumer, aax, t + w, acx, as, at, au, ah, aq, ao);
 					if (textureAtlasSprite2 != this.waterOverlay) {
-						this.vertex(vertexConsumer, ar, e + (double)y, at, bb, bc, bd, av, az, aq);
-						this.vertex(vertexConsumer, as, e + (double)y, au, bb, bc, bd, aw, az, aq);
-						this.vertex(vertexConsumer, as, e + (double)aax, au, bb, bc, bd, aw, ay, aq);
-						this.vertex(vertexConsumer, ar, e + (double)afx, at, bb, bc, bd, av, ax, aq);
+						this.vertex(vertexConsumer, aax, t + w, acx, as, at, au, ah, aq, ao);
+						this.vertex(vertexConsumer, aex, t + w, ap, as, at, au, ai, aq, ao);
+						this.vertex(vertexConsumer, aex, t + yx, ap, as, at, au, ai, am, ao);
+						this.vertex(vertexConsumer, aax, t + adx, acx, as, at, au, ah, al, ao);
 					}
 				}
 			}
@@ -336,8 +336,8 @@ public class LiquidBlockRenderer {
 		}
 	}
 
-	private void vertex(VertexConsumer vertexConsumer, double d, double e, double f, float g, float h, float i, float j, float k, int l) {
-		vertexConsumer.vertex(d, e, f).color(g, h, i, 1.0F).uv(j, k).uv2(l).normal(0.0F, 1.0F, 0.0F).endVertex();
+	private void vertex(VertexConsumer vertexConsumer, float f, float g, float h, float i, float j, float k, float l, float m, int n) {
+		vertexConsumer.addVertex(f, g, h).setColor(i, j, k, 1.0F).setUv(l, m).setLight(n).setNormal(0.0F, 1.0F, 0.0F);
 	}
 
 	private int getLightColor(BlockAndTintGetter blockAndTintGetter, BlockPos blockPos) {

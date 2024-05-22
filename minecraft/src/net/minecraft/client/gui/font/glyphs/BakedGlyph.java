@@ -39,17 +39,17 @@ public class BakedGlyph {
 		float p = g + this.down;
 		float q = bl ? 1.0F - 0.25F * this.up : 0.0F;
 		float r = bl ? 1.0F - 0.25F * this.down : 0.0F;
-		vertexConsumer.vertex(matrix4f, m + q, o, 0.0F).color(h, i, j, k).uv(this.u0, this.v0).uv2(l).endVertex();
-		vertexConsumer.vertex(matrix4f, m + r, p, 0.0F).color(h, i, j, k).uv(this.u0, this.v1).uv2(l).endVertex();
-		vertexConsumer.vertex(matrix4f, n + r, p, 0.0F).color(h, i, j, k).uv(this.u1, this.v1).uv2(l).endVertex();
-		vertexConsumer.vertex(matrix4f, n + q, o, 0.0F).color(h, i, j, k).uv(this.u1, this.v0).uv2(l).endVertex();
+		vertexConsumer.addVertex(matrix4f, m + q, o, 0.0F).setColor(h, i, j, k).setUv(this.u0, this.v0).setLight(l);
+		vertexConsumer.addVertex(matrix4f, m + r, p, 0.0F).setColor(h, i, j, k).setUv(this.u0, this.v1).setLight(l);
+		vertexConsumer.addVertex(matrix4f, n + r, p, 0.0F).setColor(h, i, j, k).setUv(this.u1, this.v1).setLight(l);
+		vertexConsumer.addVertex(matrix4f, n + q, o, 0.0F).setColor(h, i, j, k).setUv(this.u1, this.v0).setLight(l);
 	}
 
 	public void renderEffect(BakedGlyph.Effect effect, Matrix4f matrix4f, VertexConsumer vertexConsumer, int i) {
-		vertexConsumer.vertex(matrix4f, effect.x0, effect.y0, effect.depth).color(effect.r, effect.g, effect.b, effect.a).uv(this.u0, this.v0).uv2(i).endVertex();
-		vertexConsumer.vertex(matrix4f, effect.x1, effect.y0, effect.depth).color(effect.r, effect.g, effect.b, effect.a).uv(this.u0, this.v1).uv2(i).endVertex();
-		vertexConsumer.vertex(matrix4f, effect.x1, effect.y1, effect.depth).color(effect.r, effect.g, effect.b, effect.a).uv(this.u1, this.v1).uv2(i).endVertex();
-		vertexConsumer.vertex(matrix4f, effect.x0, effect.y1, effect.depth).color(effect.r, effect.g, effect.b, effect.a).uv(this.u1, this.v0).uv2(i).endVertex();
+		vertexConsumer.addVertex(matrix4f, effect.x0, effect.y0, effect.depth).setColor(effect.r, effect.g, effect.b, effect.a).setUv(this.u0, this.v0).setLight(i);
+		vertexConsumer.addVertex(matrix4f, effect.x1, effect.y0, effect.depth).setColor(effect.r, effect.g, effect.b, effect.a).setUv(this.u0, this.v1).setLight(i);
+		vertexConsumer.addVertex(matrix4f, effect.x1, effect.y1, effect.depth).setColor(effect.r, effect.g, effect.b, effect.a).setUv(this.u1, this.v1).setLight(i);
+		vertexConsumer.addVertex(matrix4f, effect.x0, effect.y1, effect.depth).setColor(effect.r, effect.g, effect.b, effect.a).setUv(this.u1, this.v0).setLight(i);
 	}
 
 	public RenderType renderType(Font.DisplayMode displayMode) {

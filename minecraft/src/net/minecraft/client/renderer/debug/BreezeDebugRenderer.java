@@ -66,8 +66,8 @@ public class BreezeDebugRenderer {
 
 	private static void drawLine(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f, Vec3 vec3, Vec3 vec32, int i) {
 		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.debugLineStrip(2.0));
-		vertexConsumer.vertex(poseStack.last(), (float)(vec3.x - d), (float)(vec3.y - e), (float)(vec3.z - f)).color(i).endVertex();
-		vertexConsumer.vertex(poseStack.last(), (float)(vec32.x - d), (float)(vec32.y - e), (float)(vec32.z - f)).color(i).endVertex();
+		vertexConsumer.addVertex(poseStack.last(), (float)(vec3.x - d), (float)(vec3.y - e), (float)(vec3.z - f)).setColor(i);
+		vertexConsumer.addVertex(poseStack.last(), (float)(vec32.x - d), (float)(vec32.y - e), (float)(vec32.z - f)).setColor(i);
 	}
 
 	private static void drawCircle(Matrix4f matrix4f, double d, double e, double f, VertexConsumer vertexConsumer, Vec3 vec3, float g, int i) {
@@ -81,7 +81,7 @@ public class BreezeDebugRenderer {
 	private static void drawCircleVertex(int i, Matrix4f matrix4f, double d, double e, double f, VertexConsumer vertexConsumer, Vec3 vec3, float g, int j) {
 		float h = (float)i * (float) (Math.PI / 10);
 		Vec3 vec32 = vec3.add((double)g * Math.cos((double)h), 0.0, (double)g * Math.sin((double)h));
-		vertexConsumer.vertex(matrix4f, (float)(vec32.x - d), (float)(vec32.y - e), (float)(vec32.z - f)).color(j).endVertex();
+		vertexConsumer.addVertex(matrix4f, (float)(vec32.x - d), (float)(vec32.y - e), (float)(vec32.z - f)).setColor(j);
 	}
 
 	public void clear() {

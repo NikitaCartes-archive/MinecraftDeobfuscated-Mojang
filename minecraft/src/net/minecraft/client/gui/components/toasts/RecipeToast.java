@@ -12,7 +12,7 @@ import net.minecraft.world.item.crafting.RecipeHolder;
 
 @Environment(EnvType.CLIENT)
 public class RecipeToast implements Toast {
-	private static final ResourceLocation BACKGROUND_SPRITE = new ResourceLocation("toast/recipe");
+	private static final ResourceLocation BACKGROUND_SPRITE = ResourceLocation.withDefaultNamespace("toast/recipe");
 	private static final long DISPLAY_TIME = 5000L;
 	private static final Component TITLE_TEXT = Component.translatable("recipe.toast.title");
 	private static final Component DESCRIPTION_TEXT = Component.translatable("recipe.toast.description");

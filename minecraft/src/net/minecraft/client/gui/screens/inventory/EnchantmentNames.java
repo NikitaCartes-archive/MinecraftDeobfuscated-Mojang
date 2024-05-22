@@ -12,7 +12,7 @@ import net.minecraft.util.RandomSource;
 
 @Environment(EnvType.CLIENT)
 public class EnchantmentNames {
-	private static final ResourceLocation ALT_FONT = new ResourceLocation("minecraft", "alt");
+	private static final ResourceLocation ALT_FONT = ResourceLocation.withDefaultNamespace("alt");
 	private static final Style ROOT_STYLE = Style.EMPTY.withFont(ALT_FONT);
 	private static final EnchantmentNames INSTANCE = new EnchantmentNames();
 	private final RandomSource random = RandomSource.create();

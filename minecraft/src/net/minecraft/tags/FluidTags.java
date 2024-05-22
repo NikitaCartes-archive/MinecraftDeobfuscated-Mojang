@@ -12,6 +12,6 @@ public final class FluidTags {
 	}
 
 	private static TagKey<Fluid> create(String string) {
-		return TagKey.create(Registries.FLUID, new ResourceLocation(string));
+		return TagKey.create(Registries.FLUID, ResourceLocation.withDefaultNamespace(string));
 	}
 }

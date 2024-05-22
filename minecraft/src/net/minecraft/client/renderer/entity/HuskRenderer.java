@@ -9,7 +9,7 @@ import net.minecraft.world.entity.monster.Zombie;
 
 @Environment(EnvType.CLIENT)
 public class HuskRenderer extends ZombieRenderer {
-	private static final ResourceLocation HUSK_LOCATION = new ResourceLocation("textures/entity/zombie/husk.png");
+	private static final ResourceLocation HUSK_LOCATION = ResourceLocation.withDefaultNamespace("textures/entity/zombie/husk.png");
 
 	public HuskRenderer(EntityRendererProvider.Context context) {
 		super(context, ModelLayers.HUSK, ModelLayers.HUSK_INNER_ARMOR, ModelLayers.HUSK_OUTER_ARMOR);

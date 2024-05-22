@@ -34,8 +34,8 @@ import net.minecraft.world.level.block.LightBlock;
 @Environment(EnvType.CLIENT)
 public class ItemProperties {
 	private static final Map<ResourceLocation, ItemPropertyFunction> GENERIC_PROPERTIES = Maps.<ResourceLocation, ItemPropertyFunction>newHashMap();
-	private static final ResourceLocation DAMAGED = new ResourceLocation("damaged");
-	private static final ResourceLocation DAMAGE = new ResourceLocation("damage");
+	private static final ResourceLocation DAMAGED = ResourceLocation.withDefaultNamespace("damaged");
+	private static final ResourceLocation DAMAGE = ResourceLocation.withDefaultNamespace("damage");
 	private static final ClampedItemPropertyFunction PROPERTY_DAMAGED = (itemStack, clientLevel, livingEntity, i) -> itemStack.isDamaged() ? 1.0F : 0.0F;
 	private static final ClampedItemPropertyFunction PROPERTY_DAMAGE = (itemStack, clientLevel, livingEntity, i) -> Mth.clamp(
 			(float)itemStack.getDamageValue() / (float)itemStack.getMaxDamage(), 0.0F, 1.0F
@@ -48,7 +48,7 @@ public class ItemProperties {
 	}
 
 	private static void registerCustomModelData(ItemPropertyFunction itemPropertyFunction) {
-		GENERIC_PROPERTIES.put(new ResourceLocation("custom_model_data"), itemPropertyFunction);
+		GENERIC_PROPERTIES.put(ResourceLocation.withDefaultNamespace("custom_model_data"), itemPropertyFunction);
 	}
 
 	private static void register(Item item, ResourceLocation resourceLocation, ClampedItemPropertyFunction clampedItemPropertyFunction) {
@@ -78,11 +78,11 @@ public class ItemProperties {
 
 	static {
 		registerGeneric(
-			new ResourceLocation("lefthanded"),
+			ResourceLocation.withDefaultNamespace("lefthanded"),
 			(itemStack, clientLevel, livingEntity, i) -> livingEntity != null && livingEntity.getMainArm() != HumanoidArm.RIGHT ? 1.0F : 0.0F
 		);
 		registerGeneric(
-			new ResourceLocation("cooldown"),
+			ResourceLocation.withDefaultNamespace("cooldown"),
 			(itemStack, clientLevel, livingEntity, i) -> livingEntity instanceof Player
 					? ((Player)livingEntity).getCooldowns().getCooldownPercent(itemStack.getItem(), 0.0F)
 					: 0.0F
@@ -95,7 +95,7 @@ public class ItemProperties {
 		registerCustomModelData(
 			(itemStack, clientLevel, livingEntity, i) -> (float)itemStack.getOrDefault(DataComponents.CUSTOM_MODEL_DATA, CustomModelData.DEFAULT).value()
 		);
-		register(Items.BOW, new ResourceLocation("pull"), (itemStack, clientLevel, livingEntity, i) -> {
+		register(Items.BOW, ResourceLocation.withDefaultNamespace("pull"), (itemStack, clientLevel, livingEntity, i) -> {
 			if (livingEntity == null) {
 				return 0.0F;
 			} else {
@@ -104,18 +104,18 @@ public class ItemProperties {
 		});
 		register(
 			Items.BRUSH,
-			new ResourceLocation("brushing"),
+			ResourceLocation.withDefaultNamespace("brushing"),
 			(itemStack, clientLevel, livingEntity, i) -> livingEntity != null && livingEntity.getUseItem() == itemStack
 					? (float)(livingEntity.getUseItemRemainingTicks() % 10) / 10.0F
 					: 0.0F
 		);
 		register(
 			Items.BOW,
-			new ResourceLocation("pulling"),
+			ResourceLocation.withDefaultNamespace("pulling"),
 			(itemStack, clientLevel, livingEntity, i) -> livingEntity != null && livingEntity.isUsingItem() && livingEntity.getUseItem() == itemStack ? 1.0F : 0.0F
 		);
-		register(Items.BUNDLE, new ResourceLocation("filled"), (itemStack, clientLevel, livingEntity, i) -> BundleItem.getFullnessDisplay(itemStack));
-		register(Items.CLOCK, new ResourceLocation("time"), new ClampedItemPropertyFunction() {
+		register(Items.BUNDLE, ResourceLocation.withDefaultNamespace("filled"), (itemStack, clientLevel, livingEntity, i) -> BundleItem.getFullnessDisplay(itemStack));
+		register(Items.CLOCK, ResourceLocation.withDefaultNamespace("time"), new ClampedItemPropertyFunction() {
 			private double rotation;
 			private double rota;
 			private long lastUpdateTick;
@@ -159,20 +159,20 @@ public class ItemProperties {
 				return this.rotation;
 			}
 		});
-		register(Items.COMPASS, new ResourceLocation("angle"), new CompassItemPropertyFunction((clientLevel, itemStack, entity) -> {
+		register(Items.COMPASS, ResourceLocation.withDefaultNamespace("angle"), new CompassItemPropertyFunction((clientLevel, itemStack, entity) -> {
 			LodestoneTracker lodestoneTracker = itemStack.get(DataComponents.LODESTONE_TRACKER);
 			return lodestoneTracker != null ? (GlobalPos)lodestoneTracker.target().orElse(null) : CompassItem.getSpawnPosition(clientLevel);
 		}));
 		register(
 			Items.RECOVERY_COMPASS,
-			new ResourceLocation("angle"),
+			ResourceLocation.withDefaultNamespace("angle"),
 			new CompassItemPropertyFunction(
 				(clientLevel, itemStack, entity) -> entity instanceof Player player ? (GlobalPos)player.getLastDeathLocation().orElse(null) : null
 			)
 		);
 		register(
 			Items.CROSSBOW,
-			new ResourceLocation("pull"),
+			ResourceLocation.withDefaultNamespace("pull"),
 			(itemStack, clientLevel, livingEntity, i) -> {
 				if (livingEntity == null) {
 					return 0.0F;
@@ -185,7 +185,7 @@ public class ItemProperties {
 		);
 		register(
 			Items.CROSSBOW,
-			new ResourceLocation("pulling"),
+			ResourceLocation.withDefaultNamespace("pulling"),
 			(itemStack, clientLevel, livingEntity, i) -> livingEntity != null
 						&& livingEntity.isUsingItem()
 						&& livingEntity.getUseItem() == itemStack
@@ -193,13 +193,19 @@ public class ItemProperties {
 					? 1.0F
 					: 0.0F
 		);
-		register(Items.CROSSBOW, new ResourceLocation("charged"), (itemStack, clientLevel, livingEntity, i) -> CrossbowItem.isCharged(itemStack) ? 1.0F : 0.0F);
-		register(Items.CROSSBOW, new ResourceLocation("firework"), (itemStack, clientLevel, livingEntity, i) -> {
+		register(
+			Items.CROSSBOW,
+			ResourceLocation.withDefaultNamespace("charged"),
+			(itemStack, clientLevel, livingEntity, i) -> CrossbowItem.isCharged(itemStack) ? 1.0F : 0.0F
+		);
+		register(Items.CROSSBOW, ResourceLocation.withDefaultNamespace("firework"), (itemStack, clientLevel, livingEntity, i) -> {
 			ChargedProjectiles chargedProjectiles = itemStack.get(DataComponents.CHARGED_PROJECTILES);
 			return chargedProjectiles != null && chargedProjectiles.contains(Items.FIREWORK_ROCKET) ? 1.0F : 0.0F;
 		});
-		register(Items.ELYTRA, new ResourceLocation("broken"), (itemStack, clientLevel, livingEntity, i) -> ElytraItem.isFlyEnabled(itemStack) ? 0.0F : 1.0F);
-		register(Items.FISHING_ROD, new ResourceLocation("cast"), (itemStack, clientLevel, livingEntity, i) -> {
+		register(
+			Items.ELYTRA, ResourceLocation.withDefaultNamespace("broken"), (itemStack, clientLevel, livingEntity, i) -> ElytraItem.isFlyEnabled(itemStack) ? 0.0F : 1.0F
+		);
+		register(Items.FISHING_ROD, ResourceLocation.withDefaultNamespace("cast"), (itemStack, clientLevel, livingEntity, i) -> {
 			if (livingEntity == null) {
 				return 0.0F;
 			} else {
@@ -214,22 +220,22 @@ public class ItemProperties {
 		});
 		register(
 			Items.SHIELD,
-			new ResourceLocation("blocking"),
+			ResourceLocation.withDefaultNamespace("blocking"),
 			(itemStack, clientLevel, livingEntity, i) -> livingEntity != null && livingEntity.isUsingItem() && livingEntity.getUseItem() == itemStack ? 1.0F : 0.0F
 		);
 		register(
 			Items.TRIDENT,
-			new ResourceLocation("throwing"),
+			ResourceLocation.withDefaultNamespace("throwing"),
 			(itemStack, clientLevel, livingEntity, i) -> livingEntity != null && livingEntity.isUsingItem() && livingEntity.getUseItem() == itemStack ? 1.0F : 0.0F
 		);
-		register(Items.LIGHT, new ResourceLocation("level"), (itemStack, clientLevel, livingEntity, i) -> {
+		register(Items.LIGHT, ResourceLocation.withDefaultNamespace("level"), (itemStack, clientLevel, livingEntity, i) -> {
 			BlockItemStateProperties blockItemStateProperties = itemStack.getOrDefault(DataComponents.BLOCK_STATE, BlockItemStateProperties.EMPTY);
 			Integer integer = blockItemStateProperties.get(LightBlock.LEVEL);
 			return integer != null ? (float)integer.intValue() / 16.0F : 1.0F;
 		});
 		register(
 			Items.GOAT_HORN,
-			new ResourceLocation("tooting"),
+			ResourceLocation.withDefaultNamespace("tooting"),
 			(itemStack, clientLevel, livingEntity, i) -> livingEntity != null && livingEntity.isUsingItem() && livingEntity.getUseItem() == itemStack ? 1.0F : 0.0F
 		);
 	}

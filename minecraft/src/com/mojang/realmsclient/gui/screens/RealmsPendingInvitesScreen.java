@@ -28,10 +28,10 @@ import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class RealmsPendingInvitesScreen extends RealmsScreen {
-	static final ResourceLocation ACCEPT_HIGHLIGHTED_SPRITE = new ResourceLocation("pending_invite/accept_highlighted");
-	static final ResourceLocation ACCEPT_SPRITE = new ResourceLocation("pending_invite/accept");
-	static final ResourceLocation REJECT_HIGHLIGHTED_SPRITE = new ResourceLocation("pending_invite/reject_highlighted");
-	static final ResourceLocation REJECT_SPRITE = new ResourceLocation("pending_invite/reject");
+	static final ResourceLocation ACCEPT_HIGHLIGHTED_SPRITE = ResourceLocation.withDefaultNamespace("pending_invite/accept_highlighted");
+	static final ResourceLocation ACCEPT_SPRITE = ResourceLocation.withDefaultNamespace("pending_invite/accept");
+	static final ResourceLocation REJECT_HIGHLIGHTED_SPRITE = ResourceLocation.withDefaultNamespace("pending_invite/reject_highlighted");
+	static final ResourceLocation REJECT_SPRITE = ResourceLocation.withDefaultNamespace("pending_invite/reject");
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final Component NO_PENDING_INVITES_TEXT = Component.translatable("mco.invites.nopending");
 	static final Component ACCEPT_INVITE = Component.translatable("mco.invites.button.accept");

@@ -25,15 +25,15 @@ public abstract class AgeableHierarchicalModel<E extends Entity> extends Hierarc
 	}
 
 	@Override
-	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h, float k) {
+	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, int k) {
 		if (this.young) {
 			poseStack.pushPose();
 			poseStack.scale(this.youngScaleFactor, this.youngScaleFactor, this.youngScaleFactor);
 			poseStack.translate(0.0F, this.bodyYOffset / 16.0F, 0.0F);
-			this.root().render(poseStack, vertexConsumer, i, j, f, g, h, k);
+			this.root().render(poseStack, vertexConsumer, i, j, k);
 			poseStack.popPose();
 		} else {
-			this.root().render(poseStack, vertexConsumer, i, j, f, g, h, k);
+			this.root().render(poseStack, vertexConsumer, i, j, k);
 		}
 	}
 }

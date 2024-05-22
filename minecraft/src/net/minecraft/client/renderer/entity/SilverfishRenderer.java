@@ -9,7 +9,7 @@ import net.minecraft.world.entity.monster.Silverfish;
 
 @Environment(EnvType.CLIENT)
 public class SilverfishRenderer extends MobRenderer<Silverfish, SilverfishModel<Silverfish>> {
-	private static final ResourceLocation SILVERFISH_LOCATION = new ResourceLocation("textures/entity/silverfish.png");
+	private static final ResourceLocation SILVERFISH_LOCATION = ResourceLocation.withDefaultNamespace("textures/entity/silverfish.png");
 
 	public SilverfishRenderer(EntityRendererProvider.Context context) {
 		super(context, new SilverfishModel<>(context.bakeLayer(ModelLayers.SILVERFISH)), 0.3F);

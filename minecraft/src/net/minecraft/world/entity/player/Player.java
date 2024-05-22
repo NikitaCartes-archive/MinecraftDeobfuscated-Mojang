@@ -423,16 +423,6 @@ public abstract class Player extends LivingEntity {
 	}
 
 	@Override
-	public int getPortalWaitTime() {
-		return Math.max(
-			1,
-			this.level()
-				.getGameRules()
-				.getInt(this.abilities.invulnerable ? GameRules.RULE_PLAYERS_NETHER_PORTAL_CREATIVE_DELAY : GameRules.RULE_PLAYERS_NETHER_PORTAL_DEFAULT_DELAY)
-		);
-	}
-
-	@Override
 	protected SoundEvent getSwimSound() {
 		return SoundEvents.PLAYER_SWIM;
 	}
@@ -518,6 +508,10 @@ public abstract class Player extends LivingEntity {
 		if (this.level().getDifficulty() == Difficulty.PEACEFUL && this.level().getGameRules().getBoolean(GameRules.RULE_NATURAL_REGENERATION)) {
 			if (this.getHealth() < this.getMaxHealth() && this.tickCount % 20 == 0) {
 				this.heal(1.0F);
+			}
+
+			if (this.foodData.getSaturationLevel() < 20.0F && this.tickCount % 20 == 0) {
+				this.foodData.setSaturation(this.foodData.getSaturationLevel() + 1.0F);
 			}
 
 			if (this.foodData.needsFood() && this.tickCount % 10 == 0) {
@@ -1125,159 +1119,161 @@ public abstract class Player extends LivingEntity {
 				f *= 0.2F + h * h * 0.8F;
 				g *= h;
 				this.resetAttackStrengthTicker();
-				if (entity.getType().is(EntityTypeTags.REDIRECTABLE_PROJECTILE) && entity instanceof Projectile projectile) {
-					projectile.deflect(ProjectileDeflection.AIM_DEFLECT, this, this, true);
+				if (entity.getType().is(EntityTypeTags.REDIRECTABLE_PROJECTILE)
+					&& entity instanceof Projectile projectile
+					&& projectile.deflect(ProjectileDeflection.AIM_DEFLECT, this, this, true)) {
 					this.level().playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.PLAYER_ATTACK_NODAMAGE, this.getSoundSource());
-				} else {
-					if (f > 0.0F || g > 0.0F) {
-						boolean bl = h > 0.9F;
-						boolean bl2;
-						if (this.isSprinting() && bl) {
-							this.level().playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.PLAYER_ATTACK_KNOCKBACK, this.getSoundSource(), 1.0F, 1.0F);
-							bl2 = true;
-						} else {
-							bl2 = false;
+					return;
+				}
+
+				if (f > 0.0F || g > 0.0F) {
+					boolean bl = h > 0.9F;
+					boolean bl2;
+					if (this.isSprinting() && bl) {
+						this.level().playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.PLAYER_ATTACK_KNOCKBACK, this.getSoundSource(), 1.0F, 1.0F);
+						bl2 = true;
+					} else {
+						bl2 = false;
+					}
+
+					f += itemStack.getItem().getAttackDamageBonus(entity, f, damageSource);
+					boolean bl3 = bl
+						&& this.fallDistance > 0.0F
+						&& !this.onGround()
+						&& !this.onClimbable()
+						&& !this.isInWater()
+						&& !this.hasEffect(MobEffects.BLINDNESS)
+						&& !this.isPassenger()
+						&& entity instanceof LivingEntity
+						&& !this.isSprinting();
+					if (bl3) {
+						f *= 1.5F;
+					}
+
+					float j = f + g;
+					boolean bl4 = false;
+					double d = (double)(this.walkDist - this.walkDistO);
+					if (bl && !bl3 && !bl2 && this.onGround() && d < (double)this.getSpeed()) {
+						ItemStack itemStack2 = this.getItemInHand(InteractionHand.MAIN_HAND);
+						if (itemStack2.getItem() instanceof SwordItem) {
+							bl4 = true;
+						}
+					}
+
+					float k = 0.0F;
+					if (entity instanceof LivingEntity livingEntity) {
+						k = livingEntity.getHealth();
+					}
+
+					Vec3 vec3 = entity.getDeltaMovement();
+					boolean bl5 = entity.hurt(damageSource, j);
+					if (bl5) {
+						float l = this.getKnockback(entity, damageSource) + (bl2 ? 1.0F : 0.0F);
+						if (l > 0.0F) {
+							if (entity instanceof LivingEntity livingEntity2) {
+								livingEntity2.knockback(
+									(double)(l * 0.5F), (double)Mth.sin(this.getYRot() * (float) (Math.PI / 180.0)), (double)(-Mth.cos(this.getYRot() * (float) (Math.PI / 180.0)))
+								);
+							} else {
+								entity.push(
+									(double)(-Mth.sin(this.getYRot() * (float) (Math.PI / 180.0)) * l * 0.5F),
+									0.1,
+									(double)(Mth.cos(this.getYRot() * (float) (Math.PI / 180.0)) * l * 0.5F)
+								);
+							}
+
+							this.setDeltaMovement(this.getDeltaMovement().multiply(0.6, 1.0, 0.6));
+							this.setSprinting(false);
 						}
 
-						f += itemStack.getItem().getAttackDamageBonus(entity, f, damageSource);
-						boolean bl3 = bl
-							&& this.fallDistance > 0.0F
-							&& !this.onGround()
-							&& !this.onClimbable()
-							&& !this.isInWater()
-							&& !this.hasEffect(MobEffects.BLINDNESS)
-							&& !this.isPassenger()
-							&& entity instanceof LivingEntity
-							&& !this.isSprinting();
+						if (bl4) {
+							float m = 1.0F + (float)this.getAttributeValue(Attributes.SWEEPING_DAMAGE_RATIO) * f;
+
+							for (LivingEntity livingEntity3 : this.level().getEntitiesOfClass(LivingEntity.class, entity.getBoundingBox().inflate(1.0, 0.25, 1.0))) {
+								if (livingEntity3 != this
+									&& livingEntity3 != entity
+									&& !this.isAlliedTo(livingEntity3)
+									&& (!(livingEntity3 instanceof ArmorStand) || !((ArmorStand)livingEntity3).isMarker())
+									&& this.distanceToSqr(livingEntity3) < 9.0) {
+									float n = this.getEnchantedDamage(livingEntity3, m, damageSource) * h;
+									livingEntity3.knockback(
+										0.4F, (double)Mth.sin(this.getYRot() * (float) (Math.PI / 180.0)), (double)(-Mth.cos(this.getYRot() * (float) (Math.PI / 180.0)))
+									);
+									livingEntity3.hurt(damageSource, n);
+									if (this.level() instanceof ServerLevel serverLevel) {
+										EnchantmentHelper.doPostAttackEffects(serverLevel, livingEntity3, damageSource);
+									}
+								}
+							}
+
+							this.level().playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, this.getSoundSource(), 1.0F, 1.0F);
+							this.sweepAttack();
+						}
+
+						if (entity instanceof ServerPlayer && entity.hurtMarked) {
+							((ServerPlayer)entity).connection.send(new ClientboundSetEntityMotionPacket(entity));
+							entity.hurtMarked = false;
+							entity.setDeltaMovement(vec3);
+						}
+
 						if (bl3) {
-							f *= 1.5F;
+							this.level().playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.PLAYER_ATTACK_CRIT, this.getSoundSource(), 1.0F, 1.0F);
+							this.crit(entity);
 						}
 
-						float j = f + g;
-						boolean bl4 = false;
-						double d = (double)(this.walkDist - this.walkDistO);
-						if (bl && !bl3 && !bl2 && this.onGround() && d < (double)this.getSpeed()) {
-							ItemStack itemStack2 = this.getItemInHand(InteractionHand.MAIN_HAND);
-							if (itemStack2.getItem() instanceof SwordItem) {
-								bl4 = true;
+						if (!bl3 && !bl4) {
+							if (bl) {
+								this.level().playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.PLAYER_ATTACK_STRONG, this.getSoundSource(), 1.0F, 1.0F);
+							} else {
+								this.level().playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.PLAYER_ATTACK_WEAK, this.getSoundSource(), 1.0F, 1.0F);
 							}
 						}
 
-						float k = 0.0F;
-						if (entity instanceof LivingEntity livingEntity) {
-							k = livingEntity.getHealth();
+						if (g > 0.0F) {
+							this.magicCrit(entity);
 						}
 
-						Vec3 vec3 = entity.getDeltaMovement();
-						boolean bl5 = entity.hurt(damageSource, j);
-						if (bl5) {
-							float l = this.getKnockback(entity, damageSource) + (bl2 ? 1.0F : 0.0F);
-							if (l > 0.0F) {
-								if (entity instanceof LivingEntity livingEntity2) {
-									livingEntity2.knockback(
-										(double)(l * 0.5F), (double)Mth.sin(this.getYRot() * (float) (Math.PI / 180.0)), (double)(-Mth.cos(this.getYRot() * (float) (Math.PI / 180.0)))
-									);
+						this.setLastHurtMob(entity);
+						Entity entity2 = entity;
+						if (entity instanceof EnderDragonPart) {
+							entity2 = ((EnderDragonPart)entity).parentMob;
+						}
+
+						boolean bl6 = false;
+						if (this.level() instanceof ServerLevel serverLevel2) {
+							if (entity2 instanceof LivingEntity livingEntity3x) {
+								bl6 = itemStack.hurtEnemy(livingEntity3x, this);
+							}
+
+							EnchantmentHelper.doPostAttackEffects(serverLevel2, entity, damageSource);
+						}
+
+						if (!this.level().isClientSide && !itemStack.isEmpty() && entity2 instanceof LivingEntity) {
+							if (bl6) {
+								itemStack.postHurtEnemy((LivingEntity)entity2, this);
+							}
+
+							if (itemStack.isEmpty()) {
+								if (itemStack == this.getMainHandItem()) {
+									this.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
 								} else {
-									entity.push(
-										(double)(-Mth.sin(this.getYRot() * (float) (Math.PI / 180.0)) * l * 0.5F),
-										0.1,
-										(double)(Mth.cos(this.getYRot() * (float) (Math.PI / 180.0)) * l * 0.5F)
-									);
-								}
-
-								this.setDeltaMovement(this.getDeltaMovement().multiply(0.6, 1.0, 0.6));
-								this.setSprinting(false);
-							}
-
-							if (bl4) {
-								float m = 1.0F + (float)this.getAttributeValue(Attributes.SWEEPING_DAMAGE_RATIO) * f;
-
-								for (LivingEntity livingEntity3 : this.level().getEntitiesOfClass(LivingEntity.class, entity.getBoundingBox().inflate(1.0, 0.25, 1.0))) {
-									if (livingEntity3 != this
-										&& livingEntity3 != entity
-										&& !this.isAlliedTo(livingEntity3)
-										&& (!(livingEntity3 instanceof ArmorStand) || !((ArmorStand)livingEntity3).isMarker())
-										&& this.distanceToSqr(livingEntity3) < 9.0) {
-										float n = this.getEnchantedDamage(livingEntity3, m, damageSource) * h;
-										livingEntity3.knockback(
-											0.4F, (double)Mth.sin(this.getYRot() * (float) (Math.PI / 180.0)), (double)(-Mth.cos(this.getYRot() * (float) (Math.PI / 180.0)))
-										);
-										livingEntity3.hurt(damageSource, n);
-										if (this.level() instanceof ServerLevel serverLevel) {
-											EnchantmentHelper.doPostAttackEffects(serverLevel, livingEntity3, damageSource);
-										}
-									}
-								}
-
-								this.level().playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, this.getSoundSource(), 1.0F, 1.0F);
-								this.sweepAttack();
-							}
-
-							if (entity instanceof ServerPlayer && entity.hurtMarked) {
-								((ServerPlayer)entity).connection.send(new ClientboundSetEntityMotionPacket(entity));
-								entity.hurtMarked = false;
-								entity.setDeltaMovement(vec3);
-							}
-
-							if (bl3) {
-								this.level().playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.PLAYER_ATTACK_CRIT, this.getSoundSource(), 1.0F, 1.0F);
-								this.crit(entity);
-							}
-
-							if (!bl3 && !bl4) {
-								if (bl) {
-									this.level().playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.PLAYER_ATTACK_STRONG, this.getSoundSource(), 1.0F, 1.0F);
-								} else {
-									this.level().playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.PLAYER_ATTACK_WEAK, this.getSoundSource(), 1.0F, 1.0F);
+									this.setItemInHand(InteractionHand.OFF_HAND, ItemStack.EMPTY);
 								}
 							}
-
-							if (g > 0.0F) {
-								this.magicCrit(entity);
-							}
-
-							this.setLastHurtMob(entity);
-							Entity entity2 = entity;
-							if (entity instanceof EnderDragonPart) {
-								entity2 = ((EnderDragonPart)entity).parentMob;
-							}
-
-							boolean bl6 = false;
-							if (this.level() instanceof ServerLevel serverLevel2) {
-								if (entity2 instanceof LivingEntity livingEntity3x) {
-									bl6 = itemStack.hurtEnemy(livingEntity3x, this);
-								}
-
-								EnchantmentHelper.doPostAttackEffects(serverLevel2, entity, damageSource);
-							}
-
-							if (!this.level().isClientSide && !itemStack.isEmpty() && entity2 instanceof LivingEntity) {
-								if (bl6) {
-									itemStack.postHurtEnemy((LivingEntity)entity2, this);
-								}
-
-								if (itemStack.isEmpty()) {
-									if (itemStack == this.getMainHandItem()) {
-										this.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
-									} else {
-										this.setItemInHand(InteractionHand.OFF_HAND, ItemStack.EMPTY);
-									}
-								}
-							}
-
-							if (entity instanceof LivingEntity) {
-								float o = k - ((LivingEntity)entity).getHealth();
-								this.awardStat(Stats.DAMAGE_DEALT, Math.round(o * 10.0F));
-								if (this.level() instanceof ServerLevel && o > 2.0F) {
-									int p = (int)((double)o * 0.5);
-									((ServerLevel)this.level()).sendParticles(ParticleTypes.DAMAGE_INDICATOR, entity.getX(), entity.getY(0.5), entity.getZ(), p, 0.1, 0.0, 0.1, 0.2);
-								}
-							}
-
-							this.causeFoodExhaustion(0.1F);
-						} else {
-							this.level().playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.PLAYER_ATTACK_NODAMAGE, this.getSoundSource(), 1.0F, 1.0F);
 						}
+
+						if (entity instanceof LivingEntity) {
+							float o = k - ((LivingEntity)entity).getHealth();
+							this.awardStat(Stats.DAMAGE_DEALT, Math.round(o * 10.0F));
+							if (this.level() instanceof ServerLevel && o > 2.0F) {
+								int p = (int)((double)o * 0.5);
+								((ServerLevel)this.level()).sendParticles(ParticleTypes.DAMAGE_INDICATOR, entity.getX(), entity.getY(0.5), entity.getZ(), p, 0.1, 0.0, 0.1, 0.2);
+							}
+						}
+
+						this.causeFoodExhaustion(0.1F);
+					} else {
+						this.level().playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.PLAYER_ATTACK_NODAMAGE, this.getSoundSource(), 1.0F, 1.0F);
 					}
 				}
 			}

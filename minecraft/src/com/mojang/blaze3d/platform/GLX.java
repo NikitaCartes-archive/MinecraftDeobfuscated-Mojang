@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.DontObfuscate;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
@@ -105,51 +106,52 @@ public class GLX {
 	}
 
 	public static void _renderCrosshair(int i, boolean bl, boolean bl2, boolean bl3) {
-		RenderSystem.assertOnRenderThread();
-		GlStateManager._depthMask(false);
-		GlStateManager._disableCull();
-		RenderSystem.setShader(GameRenderer::getRendertypeLinesShader);
-		Tesselator tesselator = RenderSystem.renderThreadTesselator();
-		BufferBuilder bufferBuilder = tesselator.getBuilder();
-		RenderSystem.lineWidth(4.0F);
-		bufferBuilder.begin(VertexFormat.Mode.LINES, DefaultVertexFormat.POSITION_COLOR_NORMAL);
-		if (bl) {
-			bufferBuilder.vertex(0.0, 0.0, 0.0).color(0, 0, 0, 255).normal(1.0F, 0.0F, 0.0F).endVertex();
-			bufferBuilder.vertex((double)i, 0.0, 0.0).color(0, 0, 0, 255).normal(1.0F, 0.0F, 0.0F).endVertex();
-		}
+		if (bl || bl2 || bl3) {
+			RenderSystem.assertOnRenderThread();
+			GlStateManager._depthMask(false);
+			GlStateManager._disableCull();
+			RenderSystem.setShader(GameRenderer::getRendertypeLinesShader);
+			Tesselator tesselator = RenderSystem.renderThreadTesselator();
+			BufferBuilder bufferBuilder = tesselator.begin(VertexFormat.Mode.LINES, DefaultVertexFormat.POSITION_COLOR_NORMAL);
+			RenderSystem.lineWidth(4.0F);
+			if (bl) {
+				bufferBuilder.addVertex(0.0F, 0.0F, 0.0F).setColor(-16777216).setNormal(1.0F, 0.0F, 0.0F);
+				bufferBuilder.addVertex((float)i, 0.0F, 0.0F).setColor(-16777216).setNormal(1.0F, 0.0F, 0.0F);
+			}
 
-		if (bl2) {
-			bufferBuilder.vertex(0.0, 0.0, 0.0).color(0, 0, 0, 255).normal(0.0F, 1.0F, 0.0F).endVertex();
-			bufferBuilder.vertex(0.0, (double)i, 0.0).color(0, 0, 0, 255).normal(0.0F, 1.0F, 0.0F).endVertex();
-		}
+			if (bl2) {
+				bufferBuilder.addVertex(0.0F, 0.0F, 0.0F).setColor(-16777216).setNormal(0.0F, 1.0F, 0.0F);
+				bufferBuilder.addVertex(0.0F, (float)i, 0.0F).setColor(-16777216).setNormal(0.0F, 1.0F, 0.0F);
+			}
 
-		if (bl3) {
-			bufferBuilder.vertex(0.0, 0.0, 0.0).color(0, 0, 0, 255).normal(0.0F, 0.0F, 1.0F).endVertex();
-			bufferBuilder.vertex(0.0, 0.0, (double)i).color(0, 0, 0, 255).normal(0.0F, 0.0F, 1.0F).endVertex();
-		}
+			if (bl3) {
+				bufferBuilder.addVertex(0.0F, 0.0F, 0.0F).setColor(-16777216).setNormal(0.0F, 0.0F, 1.0F);
+				bufferBuilder.addVertex(0.0F, 0.0F, (float)i).setColor(-16777216).setNormal(0.0F, 0.0F, 1.0F);
+			}
 
-		tesselator.end();
-		RenderSystem.lineWidth(2.0F);
-		bufferBuilder.begin(VertexFormat.Mode.LINES, DefaultVertexFormat.POSITION_COLOR_NORMAL);
-		if (bl) {
-			bufferBuilder.vertex(0.0, 0.0, 0.0).color(255, 0, 0, 255).normal(1.0F, 0.0F, 0.0F).endVertex();
-			bufferBuilder.vertex((double)i, 0.0, 0.0).color(255, 0, 0, 255).normal(1.0F, 0.0F, 0.0F).endVertex();
-		}
+			BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
+			RenderSystem.lineWidth(2.0F);
+			bufferBuilder = tesselator.begin(VertexFormat.Mode.LINES, DefaultVertexFormat.POSITION_COLOR_NORMAL);
+			if (bl) {
+				bufferBuilder.addVertex(0.0F, 0.0F, 0.0F).setColor(-65536).setNormal(1.0F, 0.0F, 0.0F);
+				bufferBuilder.addVertex((float)i, 0.0F, 0.0F).setColor(-65536).setNormal(1.0F, 0.0F, 0.0F);
+			}
 
-		if (bl2) {
-			bufferBuilder.vertex(0.0, 0.0, 0.0).color(0, 255, 0, 255).normal(0.0F, 1.0F, 0.0F).endVertex();
-			bufferBuilder.vertex(0.0, (double)i, 0.0).color(0, 255, 0, 255).normal(0.0F, 1.0F, 0.0F).endVertex();
-		}
+			if (bl2) {
+				bufferBuilder.addVertex(0.0F, 0.0F, 0.0F).setColor(-16711936).setNormal(0.0F, 1.0F, 0.0F);
+				bufferBuilder.addVertex(0.0F, (float)i, 0.0F).setColor(-16711936).setNormal(0.0F, 1.0F, 0.0F);
+			}
 
-		if (bl3) {
-			bufferBuilder.vertex(0.0, 0.0, 0.0).color(127, 127, 255, 255).normal(0.0F, 0.0F, 1.0F).endVertex();
-			bufferBuilder.vertex(0.0, 0.0, (double)i).color(127, 127, 255, 255).normal(0.0F, 0.0F, 1.0F).endVertex();
-		}
+			if (bl3) {
+				bufferBuilder.addVertex(0.0F, 0.0F, 0.0F).setColor(-8421377).setNormal(0.0F, 0.0F, 1.0F);
+				bufferBuilder.addVertex(0.0F, 0.0F, (float)i).setColor(-8421377).setNormal(0.0F, 0.0F, 1.0F);
+			}
 
-		tesselator.end();
-		RenderSystem.lineWidth(1.0F);
-		GlStateManager._enableCull();
-		GlStateManager._depthMask(true);
+			BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
+			RenderSystem.lineWidth(1.0F);
+			GlStateManager._enableCull();
+			GlStateManager._depthMask(true);
+		}
 	}
 
 	public static <T> T make(Supplier<T> supplier) {

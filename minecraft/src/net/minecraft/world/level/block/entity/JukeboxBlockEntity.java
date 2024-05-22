@@ -1,20 +1,18 @@
 package net.minecraft.world.level.block.entity;
 
 import com.google.common.annotations.VisibleForTesting;
-import javax.annotation.Nullable;
+import java.util.Optional;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.tags.ItemTags;
 import net.minecraft.world.Clearable;
 import net.minecraft.world.Container;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.RecordItem;
+import net.minecraft.world.item.JukeboxSong;
+import net.minecraft.world.item.JukeboxSongPlayer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.JukeboxBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -23,15 +21,48 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.ticks.ContainerSingleItem;
 
 public class JukeboxBlockEntity extends BlockEntity implements Clearable, ContainerSingleItem.BlockContainerSingleItem {
-	private static final int SONG_END_PADDING = 20;
+	public static final String SONG_ITEM_TAG_ID = "RecordItem";
+	public static final String TICKS_SINCE_SONG_STARTED_TAG_ID = "ticks_since_song_started";
 	private ItemStack item = ItemStack.EMPTY;
-	private int ticksSinceLastEvent;
-	private long tickCount;
-	private long recordStartedTick;
-	private boolean isPlaying;
+	private final JukeboxSongPlayer jukeboxSongPlayer = new JukeboxSongPlayer(this::onSongChanged, this.getBlockPos());
 
 	public JukeboxBlockEntity(BlockPos blockPos, BlockState blockState) {
 		super(BlockEntityType.JUKEBOX, blockPos, blockState);
+	}
+
+	public JukeboxSongPlayer getSongPlayer() {
+		return this.jukeboxSongPlayer;
+	}
+
+	public void onSongChanged() {
+		this.level.updateNeighborsAt(this.getBlockPos(), this.getBlockState().getBlock());
+		this.setChanged();
+	}
+
+	private void notifyItemChangedInJukebox(boolean bl) {
+		if (this.level != null && this.level.getBlockState(this.getBlockPos()) == this.getBlockState()) {
+			this.level.setBlock(this.getBlockPos(), this.getBlockState().setValue(JukeboxBlock.HAS_RECORD, Boolean.valueOf(bl)), 2);
+			this.level.gameEvent(GameEvent.BLOCK_CHANGE, this.getBlockPos(), GameEvent.Context.of(this.getBlockState()));
+		}
+	}
+
+	public void popOutTheItem() {
+		if (this.level != null && !this.level.isClientSide) {
+			BlockPos blockPos = this.getBlockPos();
+			ItemStack itemStack = this.getTheItem();
+			if (!itemStack.isEmpty()) {
+				this.removeTheItem();
+				Vec3 vec3 = Vec3.atLowerCornerWithOffset(blockPos, 0.5, 1.01, 0.5).offsetRandom(this.level.random, 0.7F);
+				ItemStack itemStack2 = itemStack.copy();
+				ItemEntity itemEntity = new ItemEntity(this.level, vec3.x(), vec3.y(), vec3.z(), itemStack2);
+				itemEntity.setDefaultPickUpDelay();
+				this.level.addFreshEntity(itemEntity);
+			}
+		}
+	}
+
+	public static void tick(Level level, BlockPos blockPos, BlockState blockState, JukeboxBlockEntity jukeboxBlockEntity) {
+		jukeboxBlockEntity.jukeboxSongPlayer.tick(level, blockState);
 	}
 
 	@Override
@@ -43,9 +74,10 @@ public class JukeboxBlockEntity extends BlockEntity implements Clearable, Contai
 			this.item = ItemStack.EMPTY;
 		}
 
-		this.isPlaying = compoundTag.getBoolean("IsPlaying");
-		this.recordStartedTick = compoundTag.getLong("RecordStartTick");
-		this.tickCount = compoundTag.getLong("TickCount");
+		if (compoundTag.contains("ticks_since_song_started", 4)) {
+			JukeboxSong.fromStack(provider, this.item)
+				.ifPresent(holder -> this.jukeboxSongPlayer.setSongWithoutPlaying(holder, compoundTag.getLong("ticks_since_song_started")));
+		}
 	}
 
 	@Override
@@ -55,60 +87,9 @@ public class JukeboxBlockEntity extends BlockEntity implements Clearable, Contai
 			compoundTag.put("RecordItem", this.getTheItem().save(provider));
 		}
 
-		compoundTag.putBoolean("IsPlaying", this.isPlaying);
-		compoundTag.putLong("RecordStartTick", this.recordStartedTick);
-		compoundTag.putLong("TickCount", this.tickCount);
-	}
-
-	public boolean isRecordPlaying() {
-		return !this.getTheItem().isEmpty() && this.isPlaying;
-	}
-
-	private void setHasRecordBlockState(@Nullable Entity entity, boolean bl) {
-		if (this.level.getBlockState(this.getBlockPos()) == this.getBlockState()) {
-			this.level.setBlock(this.getBlockPos(), this.getBlockState().setValue(JukeboxBlock.HAS_RECORD, Boolean.valueOf(bl)), 2);
-			this.level.gameEvent(GameEvent.BLOCK_CHANGE, this.getBlockPos(), GameEvent.Context.of(entity, this.getBlockState()));
+		if (this.jukeboxSongPlayer.getSong() != null) {
+			compoundTag.putLong("ticks_since_song_started", this.jukeboxSongPlayer.getTicksSinceSongStarted());
 		}
-	}
-
-	@VisibleForTesting
-	public void startPlaying() {
-		this.recordStartedTick = this.tickCount;
-		this.isPlaying = true;
-		this.level.updateNeighborsAt(this.getBlockPos(), this.getBlockState().getBlock());
-		this.level.levelEvent(null, 1010, this.getBlockPos(), Item.getId(this.getTheItem().getItem()));
-		this.setChanged();
-	}
-
-	private void stopPlaying() {
-		this.isPlaying = false;
-		this.level.gameEvent(GameEvent.JUKEBOX_STOP_PLAY, this.getBlockPos(), GameEvent.Context.of(this.getBlockState()));
-		this.level.updateNeighborsAt(this.getBlockPos(), this.getBlockState().getBlock());
-		this.level.levelEvent(1011, this.getBlockPos(), 0);
-		this.setChanged();
-	}
-
-	private void tick(Level level, BlockPos blockPos, BlockState blockState) {
-		this.ticksSinceLastEvent++;
-		if (this.isRecordPlaying() && this.getTheItem().getItem() instanceof RecordItem recordItem) {
-			if (this.shouldRecordStopPlaying(recordItem)) {
-				this.stopPlaying();
-			} else if (this.shouldSendJukeboxPlayingEvent()) {
-				this.ticksSinceLastEvent = 0;
-				level.gameEvent(GameEvent.JUKEBOX_PLAY, blockPos, GameEvent.Context.of(blockState));
-				this.spawnMusicParticles(level, blockPos);
-			}
-		}
-
-		this.tickCount++;
-	}
-
-	private boolean shouldRecordStopPlaying(RecordItem recordItem) {
-		return this.tickCount >= this.recordStartedTick + (long)recordItem.getLengthInTicks() + 20L;
-	}
-
-	private boolean shouldSendJukeboxPlayingEvent() {
-		return this.ticksSinceLastEvent >= 20;
 	}
 
 	@Override
@@ -119,23 +100,20 @@ public class JukeboxBlockEntity extends BlockEntity implements Clearable, Contai
 	@Override
 	public ItemStack splitTheItem(int i) {
 		ItemStack itemStack = this.item;
-		this.item = ItemStack.EMPTY;
-		if (!itemStack.isEmpty()) {
-			this.setHasRecordBlockState(null, false);
-			this.stopPlaying();
-		}
-
+		this.setTheItem(ItemStack.EMPTY);
 		return itemStack;
 	}
 
 	@Override
 	public void setTheItem(ItemStack itemStack) {
-		if (itemStack.is(ItemTags.MUSIC_DISCS) && this.level != null) {
-			this.item = itemStack;
-			this.setHasRecordBlockState(null, true);
-			this.startPlaying();
-		} else if (itemStack.isEmpty()) {
-			this.splitTheItem(1);
+		this.item = itemStack;
+		boolean bl = !this.item.isEmpty();
+		Optional<Holder<JukeboxSong>> optional = JukeboxSong.fromStack(this.level.registryAccess(), this.item);
+		this.notifyItemChangedInJukebox(bl);
+		if (bl && optional.isPresent()) {
+			this.jukeboxSongPlayer.play(this.level, (Holder<JukeboxSong>)optional.get());
+		} else {
+			this.jukeboxSongPlayer.stop(this.level, this.getBlockState());
 		}
 	}
 
@@ -151,7 +129,7 @@ public class JukeboxBlockEntity extends BlockEntity implements Clearable, Contai
 
 	@Override
 	public boolean canPlaceItem(int i, ItemStack itemStack) {
-		return itemStack.is(ItemTags.MUSIC_DISCS) && this.getItem(i).isEmpty();
+		return itemStack.has(DataComponents.JUKEBOX_PLAYABLE) && this.getItem(i).isEmpty();
 	}
 
 	@Override
@@ -159,37 +137,16 @@ public class JukeboxBlockEntity extends BlockEntity implements Clearable, Contai
 		return container.hasAnyMatching(ItemStack::isEmpty);
 	}
 
-	private void spawnMusicParticles(Level level, BlockPos blockPos) {
-		if (level instanceof ServerLevel serverLevel) {
-			Vec3 vec3 = Vec3.atBottomCenterOf(blockPos).add(0.0, 1.2F, 0.0);
-			float f = (float)level.getRandom().nextInt(4) / 24.0F;
-			serverLevel.sendParticles(ParticleTypes.NOTE, vec3.x(), vec3.y(), vec3.z(), 0, (double)f, 0.0, 0.0, 1.0);
-		}
-	}
-
-	public void popOutRecord() {
-		if (this.level != null && !this.level.isClientSide) {
-			BlockPos blockPos = this.getBlockPos();
-			ItemStack itemStack = this.getTheItem();
-			if (!itemStack.isEmpty()) {
-				this.removeTheItem();
-				Vec3 vec3 = Vec3.atLowerCornerWithOffset(blockPos, 0.5, 1.01, 0.5).offsetRandom(this.level.random, 0.7F);
-				ItemStack itemStack2 = itemStack.copy();
-				ItemEntity itemEntity = new ItemEntity(this.level, vec3.x(), vec3.y(), vec3.z(), itemStack2);
-				itemEntity.setDefaultPickUpDelay();
-				this.level.addFreshEntity(itemEntity);
-			}
-		}
-	}
-
-	public static void playRecordTick(Level level, BlockPos blockPos, BlockState blockState, JukeboxBlockEntity jukeboxBlockEntity) {
-		jukeboxBlockEntity.tick(level, blockPos, blockState);
+	@VisibleForTesting
+	public void setSongItemWithoutPlaying(ItemStack itemStack) {
+		this.item = itemStack;
+		JukeboxSong.fromStack(this.level.registryAccess(), itemStack).ifPresent(holder -> this.jukeboxSongPlayer.setSongWithoutPlaying(holder, 0L));
+		this.level.updateNeighborsAt(this.getBlockPos(), this.getBlockState().getBlock());
+		this.setChanged();
 	}
 
 	@VisibleForTesting
-	public void setRecordWithoutPlaying(ItemStack itemStack) {
-		this.item = itemStack;
-		this.level.updateNeighborsAt(this.getBlockPos(), this.getBlockState().getBlock());
-		this.setChanged();
+	public void tryForcePlaySong() {
+		JukeboxSong.fromStack(this.level.registryAccess(), this.getTheItem()).ifPresent(holder -> this.jukeboxSongPlayer.play(this.level, holder));
 	}
 }

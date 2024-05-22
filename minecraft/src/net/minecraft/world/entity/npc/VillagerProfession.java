@@ -79,7 +79,7 @@ public record VillagerProfession(
 	) {
 		return Registry.register(
 			BuiltInRegistries.VILLAGER_PROFESSION,
-			new ResourceLocation(string),
+			ResourceLocation.withDefaultNamespace(string),
 			new VillagerProfession(string, predicate, predicate2, immutableSet, immutableSet2, soundEvent)
 		);
 	}

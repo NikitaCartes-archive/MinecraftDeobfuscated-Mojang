@@ -10,7 +10,7 @@ import net.minecraft.world.entity.animal.Dolphin;
 
 @Environment(EnvType.CLIENT)
 public class DolphinRenderer extends MobRenderer<Dolphin, DolphinModel<Dolphin>> {
-	private static final ResourceLocation DOLPHIN_LOCATION = new ResourceLocation("textures/entity/dolphin.png");
+	private static final ResourceLocation DOLPHIN_LOCATION = ResourceLocation.withDefaultNamespace("textures/entity/dolphin.png");
 
 	public DolphinRenderer(EntityRendererProvider.Context context) {
 		super(context, new DolphinModel<>(context.bakeLayer(ModelLayers.DOLPHIN)), 0.7F);

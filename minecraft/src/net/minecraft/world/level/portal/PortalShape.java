@@ -16,7 +16,6 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.NetherPortalBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -198,27 +197,7 @@ public class PortalShape {
 		return new Vec3(g, f, h);
 	}
 
-	public static DimensionTransition createDimensionTransition(
-		ServerLevel serverLevel, BlockUtil.FoundRectangle foundRectangle, Direction.Axis axis, Vec3 vec3, Entity entity, Vec3 vec32, float f, float g
-	) {
-		BlockPos blockPos = foundRectangle.minCorner;
-		BlockState blockState = serverLevel.getBlockState(blockPos);
-		Direction.Axis axis2 = (Direction.Axis)blockState.getOptionalValue(BlockStateProperties.HORIZONTAL_AXIS).orElse(Direction.Axis.X);
-		double d = (double)foundRectangle.axis1Size;
-		double e = (double)foundRectangle.axis2Size;
-		EntityDimensions entityDimensions = entity.getDimensions(entity.getPose());
-		int i = axis == axis2 ? 0 : 90;
-		Vec3 vec33 = axis == axis2 ? vec32 : new Vec3(vec32.z, vec32.y, -vec32.x);
-		double h = (double)entityDimensions.width() / 2.0 + (d - (double)entityDimensions.width()) * vec3.x();
-		double j = (e - (double)entityDimensions.height()) * vec3.y();
-		double k = 0.5 + vec3.z();
-		boolean bl = axis2 == Direction.Axis.X;
-		Vec3 vec34 = new Vec3((double)blockPos.getX() + (bl ? h : k), (double)blockPos.getY() + j, (double)blockPos.getZ() + (bl ? k : h));
-		Vec3 vec35 = findCollisionFreePosition(vec34, serverLevel, entity, entityDimensions);
-		return new DimensionTransition(serverLevel, vec35, vec33, f + (float)i, g);
-	}
-
-	private static Vec3 findCollisionFreePosition(Vec3 vec3, ServerLevel serverLevel, Entity entity, EntityDimensions entityDimensions) {
+	public static Vec3 findCollisionFreePosition(Vec3 vec3, ServerLevel serverLevel, Entity entity, EntityDimensions entityDimensions) {
 		if (!(entityDimensions.width() > 4.0F) && !(entityDimensions.height() > 4.0F)) {
 			double d = (double)entityDimensions.height() / 2.0;
 			Vec3 vec32 = vec3.add(0.0, d, 0.0);

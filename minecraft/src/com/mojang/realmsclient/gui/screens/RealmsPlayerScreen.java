@@ -105,9 +105,9 @@ public class RealmsPlayerScreen extends RealmsScreen {
 		private static final Component NORMAL_USER_TEXT = Component.translatable("mco.configure.world.invites.normal.tooltip");
 		private static final Component OP_TEXT = Component.translatable("mco.configure.world.invites.ops.tooltip");
 		private static final Component REMOVE_TEXT = Component.translatable("mco.configure.world.invites.remove.tooltip");
-		private static final ResourceLocation MAKE_OP_SPRITE = new ResourceLocation("player_list/make_operator");
-		private static final ResourceLocation REMOVE_OP_SPRITE = new ResourceLocation("player_list/remove_operator");
-		private static final ResourceLocation REMOVE_PLAYER_SPRITE = new ResourceLocation("player_list/remove_player");
+		private static final ResourceLocation MAKE_OP_SPRITE = ResourceLocation.withDefaultNamespace("player_list/make_operator");
+		private static final ResourceLocation REMOVE_OP_SPRITE = ResourceLocation.withDefaultNamespace("player_list/remove_operator");
+		private static final ResourceLocation REMOVE_PLAYER_SPRITE = ResourceLocation.withDefaultNamespace("player_list/remove_player");
 		private static final int ICON_WIDTH = 8;
 		private static final int ICON_HEIGHT = 7;
 		private final PlayerInfo playerInfo;

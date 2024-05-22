@@ -9,9 +9,9 @@ import net.minecraft.util.RandomSource;
 
 @Environment(EnvType.CLIENT)
 public class LogoRenderer {
-	public static final ResourceLocation MINECRAFT_LOGO = new ResourceLocation("textures/gui/title/minecraft.png");
-	public static final ResourceLocation EASTER_EGG_LOGO = new ResourceLocation("textures/gui/title/minceraft.png");
-	public static final ResourceLocation MINECRAFT_EDITION = new ResourceLocation("textures/gui/title/edition.png");
+	public static final ResourceLocation MINECRAFT_LOGO = ResourceLocation.withDefaultNamespace("textures/gui/title/minecraft.png");
+	public static final ResourceLocation EASTER_EGG_LOGO = ResourceLocation.withDefaultNamespace("textures/gui/title/minceraft.png");
+	public static final ResourceLocation MINECRAFT_EDITION = ResourceLocation.withDefaultNamespace("textures/gui/title/edition.png");
 	public static final int LOGO_WIDTH = 256;
 	public static final int LOGO_HEIGHT = 44;
 	private static final int LOGO_TEXTURE_WIDTH = 256;

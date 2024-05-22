@@ -39,6 +39,7 @@ import net.minecraft.server.packs.resources.ResourceProvider;
 import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.entity.animal.WolfVariant;
 import net.minecraft.world.entity.decoration.PaintingVariant;
+import net.minecraft.world.item.JukeboxSong;
 import net.minecraft.world.item.armortrim.TrimMaterial;
 import net.minecraft.world.item.armortrim.TrimPattern;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -95,7 +96,8 @@ public class RegistryDataLoader {
 		new RegistryDataLoader.RegistryData<>(Registries.MULTI_NOISE_BIOME_SOURCE_PARAMETER_LIST, MultiNoiseBiomeSourceParameterList.DIRECT_CODEC),
 		new RegistryDataLoader.RegistryData<>(Registries.BANNER_PATTERN, BannerPattern.DIRECT_CODEC),
 		new RegistryDataLoader.RegistryData<>(Registries.ENCHANTMENT, Enchantment.DIRECT_CODEC),
-		new RegistryDataLoader.RegistryData<>(Registries.ENCHANTMENT_PROVIDER, EnchantmentProvider.DIRECT_CODEC)
+		new RegistryDataLoader.RegistryData<>(Registries.ENCHANTMENT_PROVIDER, EnchantmentProvider.DIRECT_CODEC),
+		new RegistryDataLoader.RegistryData<>(Registries.JUKEBOX_SONG, JukeboxSong.DIRECT_CODEC)
 	);
 	public static final List<RegistryDataLoader.RegistryData<?>> DIMENSION_REGISTRIES = List.of(
 		new RegistryDataLoader.RegistryData<>(Registries.LEVEL_STEM, LevelStem.CODEC)
@@ -110,7 +112,8 @@ public class RegistryDataLoader {
 		new RegistryDataLoader.RegistryData<>(Registries.DIMENSION_TYPE, DimensionType.DIRECT_CODEC),
 		new RegistryDataLoader.RegistryData<>(Registries.DAMAGE_TYPE, DamageType.DIRECT_CODEC),
 		new RegistryDataLoader.RegistryData<>(Registries.BANNER_PATTERN, BannerPattern.DIRECT_CODEC),
-		new RegistryDataLoader.RegistryData<>(Registries.ENCHANTMENT, Enchantment.DIRECT_CODEC)
+		new RegistryDataLoader.RegistryData<>(Registries.ENCHANTMENT, Enchantment.DIRECT_CODEC),
+		new RegistryDataLoader.RegistryData<>(Registries.JUKEBOX_SONG, JukeboxSong.DIRECT_CODEC)
 	);
 
 	public static RegistryAccess.Frozen load(ResourceManager resourceManager, RegistryAccess registryAccess, List<RegistryDataLoader.RegistryData<?>> list) {
@@ -197,10 +200,6 @@ public class RegistryDataLoader {
 		LOGGER.error("Registry loading errors:\n{}", stringWriter);
 	}
 
-	private static String registryDirPath(ResourceLocation resourceLocation) {
-		return resourceLocation.getPath();
-	}
-
 	private static <E> void loadElementFromResource(
 		WritableRegistry<E> writableRegistry,
 		Decoder<E> decoder,
@@ -240,7 +239,7 @@ public class RegistryDataLoader {
 		Decoder<E> decoder,
 		Map<ResourceKey<?>, Exception> map
 	) {
-		String string = registryDirPath(writableRegistry.key().location());
+		String string = Registries.elementsDirPath(writableRegistry.key());
 		FileToIdConverter fileToIdConverter = FileToIdConverter.json(string);
 		RegistryOps<JsonElement> registryOps = RegistryOps.create(JsonOps.INSTANCE, registryInfoLookup);
 
@@ -272,7 +271,7 @@ public class RegistryDataLoader {
 		if (list != null) {
 			RegistryOps<Tag> registryOps = RegistryOps.create(NbtOps.INSTANCE, registryInfoLookup);
 			RegistryOps<JsonElement> registryOps2 = RegistryOps.create(JsonOps.INSTANCE, registryInfoLookup);
-			String string = registryDirPath(writableRegistry.key().location());
+			String string = Registries.elementsDirPath(writableRegistry.key());
 			FileToIdConverter fileToIdConverter = FileToIdConverter.json(string);
 
 			for (RegistrySynchronization.PackedRegistryEntry packedRegistryEntry : list) {

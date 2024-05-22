@@ -12,9 +12,9 @@ import net.minecraft.util.Mth;
 @Environment(EnvType.CLIENT)
 public abstract class AbstractScrollWidget extends AbstractWidget implements Renderable, GuiEventListener {
 	private static final WidgetSprites BACKGROUND_SPRITES = new WidgetSprites(
-		new ResourceLocation("widget/text_field"), new ResourceLocation("widget/text_field_highlighted")
+		ResourceLocation.withDefaultNamespace("widget/text_field"), ResourceLocation.withDefaultNamespace("widget/text_field_highlighted")
 	);
-	private static final ResourceLocation SCROLLER_SPRITE = new ResourceLocation("widget/scroller");
+	private static final ResourceLocation SCROLLER_SPRITE = ResourceLocation.withDefaultNamespace("widget/scroller");
 	private static final int INNER_PADDING = 4;
 	private static final int SCROLL_BAR_WIDTH = 8;
 	private double scrollAmount;

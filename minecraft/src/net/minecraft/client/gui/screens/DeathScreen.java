@@ -17,7 +17,7 @@ import net.minecraft.resources.ResourceLocation;
 
 @Environment(EnvType.CLIENT)
 public class DeathScreen extends Screen {
-	private static final ResourceLocation DRAFT_REPORT_SPRITE = new ResourceLocation("icon/draft_report");
+	private static final ResourceLocation DRAFT_REPORT_SPRITE = ResourceLocation.withDefaultNamespace("icon/draft_report");
 	private int delayTicker;
 	private final Component causeOfDeath;
 	private final boolean hardcore;

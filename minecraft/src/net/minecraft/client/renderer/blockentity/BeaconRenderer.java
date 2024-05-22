@@ -10,13 +10,14 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.entity.BeaconBlockEntity;
 import net.minecraft.world.phys.Vec3;
 
 @Environment(EnvType.CLIENT)
 public class BeaconRenderer implements BlockEntityRenderer<BeaconBlockEntity> {
-	public static final ResourceLocation BEAM_LOCATION = new ResourceLocation("textures/entity/beacon_beam.png");
+	public static final ResourceLocation BEAM_LOCATION = ResourceLocation.withDefaultNamespace("textures/entity/beacon_beam.png");
 	public static final int MAX_RENDER_Y = 1024;
 
 	public BeaconRenderer(BlockEntityRendererProvider.Context context) {
@@ -34,77 +35,61 @@ public class BeaconRenderer implements BlockEntityRenderer<BeaconBlockEntity> {
 		}
 	}
 
-	private static void renderBeaconBeam(PoseStack poseStack, MultiBufferSource multiBufferSource, float f, long l, int i, int j, float[] fs) {
-		renderBeaconBeam(poseStack, multiBufferSource, BEAM_LOCATION, f, 1.0F, l, i, j, fs, 0.2F, 0.25F);
+	private static void renderBeaconBeam(PoseStack poseStack, MultiBufferSource multiBufferSource, float f, long l, int i, int j, int k) {
+		renderBeaconBeam(poseStack, multiBufferSource, BEAM_LOCATION, f, 1.0F, l, i, j, k, 0.2F, 0.25F);
 	}
 
 	public static void renderBeaconBeam(
-		PoseStack poseStack,
-		MultiBufferSource multiBufferSource,
-		ResourceLocation resourceLocation,
-		float f,
-		float g,
-		long l,
-		int i,
-		int j,
-		float[] fs,
-		float h,
-		float k
+		PoseStack poseStack, MultiBufferSource multiBufferSource, ResourceLocation resourceLocation, float f, float g, long l, int i, int j, int k, float h, float m
 	) {
-		int m = i + j;
+		int n = i + j;
 		poseStack.pushPose();
 		poseStack.translate(0.5, 0.0, 0.5);
-		float n = (float)Math.floorMod(l, 40) + f;
-		float o = j < 0 ? n : -n;
-		float p = Mth.frac(o * 0.2F - (float)Mth.floor(o * 0.1F));
-		float q = fs[0];
-		float r = fs[1];
-		float s = fs[2];
+		float o = (float)Math.floorMod(l, 40) + f;
+		float p = j < 0 ? o : -o;
+		float q = Mth.frac(p * 0.2F - (float)Mth.floor(p * 0.1F));
 		poseStack.pushPose();
-		poseStack.mulPose(Axis.YP.rotationDegrees(n * 2.25F - 45.0F));
-		float t = 0.0F;
+		poseStack.mulPose(Axis.YP.rotationDegrees(o * 2.25F - 45.0F));
+		float r = 0.0F;
+		float u = 0.0F;
+		float v = -h;
 		float w = 0.0F;
-		float x = -h;
-		float y = 0.0F;
+		float x = 0.0F;
+		float y = -h;
 		float z = 0.0F;
-		float aa = -h;
-		float ab = 0.0F;
-		float ac = 1.0F;
-		float ad = -1.0F + p;
-		float ae = (float)j * g * (0.5F / h) + ad;
+		float aa = 1.0F;
+		float ab = -1.0F + q;
+		float ac = (float)j * g * (0.5F / h) + ab;
 		renderPart(
-			poseStack,
-			multiBufferSource.getBuffer(RenderType.beaconBeam(resourceLocation, false)),
-			q,
-			r,
-			s,
-			1.0F,
-			i,
-			m,
-			0.0F,
-			h,
-			h,
-			0.0F,
-			x,
-			0.0F,
-			0.0F,
-			aa,
-			0.0F,
-			1.0F,
-			ae,
-			ad
+			poseStack, multiBufferSource.getBuffer(RenderType.beaconBeam(resourceLocation, false)), k, i, n, 0.0F, h, h, 0.0F, v, 0.0F, 0.0F, y, 0.0F, 1.0F, ac, ab
 		);
 		poseStack.popPose();
-		t = -k;
-		float u = -k;
-		w = -k;
-		x = -k;
-		ab = 0.0F;
-		ac = 1.0F;
-		ad = -1.0F + p;
-		ae = (float)j * g + ad;
+		r = -m;
+		float s = -m;
+		u = -m;
+		v = -m;
+		z = 0.0F;
+		aa = 1.0F;
+		ab = -1.0F + q;
+		ac = (float)j * g + ab;
 		renderPart(
-			poseStack, multiBufferSource.getBuffer(RenderType.beaconBeam(resourceLocation, true)), q, r, s, 0.125F, i, m, t, u, k, w, x, k, k, k, 0.0F, 1.0F, ae, ad
+			poseStack,
+			multiBufferSource.getBuffer(RenderType.beaconBeam(resourceLocation, true)),
+			FastColor.ARGB32.color(32, k),
+			i,
+			n,
+			r,
+			s,
+			m,
+			u,
+			v,
+			m,
+			m,
+			m,
+			0.0F,
+			1.0F,
+			ac,
+			ab
 		);
 		poseStack.popPose();
 	}
@@ -112,12 +97,12 @@ public class BeaconRenderer implements BlockEntityRenderer<BeaconBlockEntity> {
 	private static void renderPart(
 		PoseStack poseStack,
 		VertexConsumer vertexConsumer,
+		int i,
+		int j,
+		int k,
 		float f,
 		float g,
 		float h,
-		float i,
-		int j,
-		int k,
 		float l,
 		float m,
 		float n,
@@ -126,52 +111,31 @@ public class BeaconRenderer implements BlockEntityRenderer<BeaconBlockEntity> {
 		float q,
 		float r,
 		float s,
-		float t,
-		float u,
-		float v,
-		float w
+		float t
 	) {
 		PoseStack.Pose pose = poseStack.last();
-		renderQuad(pose, vertexConsumer, f, g, h, i, j, k, l, m, n, o, t, u, v, w);
-		renderQuad(pose, vertexConsumer, f, g, h, i, j, k, r, s, p, q, t, u, v, w);
-		renderQuad(pose, vertexConsumer, f, g, h, i, j, k, n, o, r, s, t, u, v, w);
-		renderQuad(pose, vertexConsumer, f, g, h, i, j, k, p, q, l, m, t, u, v, w);
+		renderQuad(pose, vertexConsumer, i, j, k, f, g, h, l, q, r, s, t);
+		renderQuad(pose, vertexConsumer, i, j, k, o, p, m, n, q, r, s, t);
+		renderQuad(pose, vertexConsumer, i, j, k, h, l, o, p, q, r, s, t);
+		renderQuad(pose, vertexConsumer, i, j, k, m, n, f, g, q, r, s, t);
 	}
 
 	private static void renderQuad(
-		PoseStack.Pose pose,
-		VertexConsumer vertexConsumer,
-		float f,
-		float g,
-		float h,
-		float i,
-		int j,
-		int k,
-		float l,
-		float m,
-		float n,
-		float o,
-		float p,
-		float q,
-		float r,
-		float s
+		PoseStack.Pose pose, VertexConsumer vertexConsumer, int i, int j, int k, float f, float g, float h, float l, float m, float n, float o, float p
 	) {
-		addVertex(pose, vertexConsumer, f, g, h, i, k, l, m, q, r);
-		addVertex(pose, vertexConsumer, f, g, h, i, j, l, m, q, s);
-		addVertex(pose, vertexConsumer, f, g, h, i, j, n, o, p, s);
-		addVertex(pose, vertexConsumer, f, g, h, i, k, n, o, p, r);
+		addVertex(pose, vertexConsumer, i, k, f, g, n, o);
+		addVertex(pose, vertexConsumer, i, j, f, g, n, p);
+		addVertex(pose, vertexConsumer, i, j, h, l, m, p);
+		addVertex(pose, vertexConsumer, i, k, h, l, m, o);
 	}
 
-	private static void addVertex(
-		PoseStack.Pose pose, VertexConsumer vertexConsumer, float f, float g, float h, float i, int j, float k, float l, float m, float n
-	) {
-		vertexConsumer.vertex(pose, k, (float)j, l)
-			.color(f, g, h, i)
-			.uv(m, n)
-			.overlayCoords(OverlayTexture.NO_OVERLAY)
-			.uv2(15728880)
-			.normal(pose, 0.0F, 1.0F, 0.0F)
-			.endVertex();
+	private static void addVertex(PoseStack.Pose pose, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h, float k) {
+		vertexConsumer.addVertex(pose, f, (float)j, g)
+			.setColor(i)
+			.setUv(h, k)
+			.setOverlay(OverlayTexture.NO_OVERLAY)
+			.setLight(15728880)
+			.setNormal(pose, 0.0F, 1.0F, 0.0F);
 	}
 
 	public boolean shouldRenderOffScreen(BeaconBlockEntity beaconBlockEntity) {

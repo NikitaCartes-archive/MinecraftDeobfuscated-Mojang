@@ -57,8 +57,8 @@ public class MapDecorationTypes {
 	}
 
 	private static Holder<MapDecorationType> register(String string, String string2, boolean bl, int i, boolean bl2, boolean bl3) {
-		ResourceKey<MapDecorationType> resourceKey = ResourceKey.create(Registries.MAP_DECORATION_TYPE, new ResourceLocation(string));
-		MapDecorationType mapDecorationType = new MapDecorationType(new ResourceLocation(string2), bl, i, bl3, bl2);
+		ResourceKey<MapDecorationType> resourceKey = ResourceKey.create(Registries.MAP_DECORATION_TYPE, ResourceLocation.withDefaultNamespace(string));
+		MapDecorationType mapDecorationType = new MapDecorationType(ResourceLocation.withDefaultNamespace(string2), bl, i, bl3, bl2);
 		return Registry.registerForHolder(BuiltInRegistries.MAP_DECORATION_TYPE, resourceKey, mapDecorationType);
 	}
 }

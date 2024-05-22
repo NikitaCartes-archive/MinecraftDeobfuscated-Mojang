@@ -1,6 +1,7 @@
 package net.minecraft.server.network;
 
 import net.minecraft.network.Connection;
+import net.minecraft.network.DisconnectionDetails;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.ping.ClientboundPongResponsePacket;
 import net.minecraft.network.protocol.ping.ServerboundPingRequestPacket;
@@ -21,7 +22,7 @@ public class ServerStatusPacketListenerImpl implements ServerStatusPacketListene
 	}
 
 	@Override
-	public void onDisconnect(Component component) {
+	public void onDisconnect(DisconnectionDetails disconnectionDetails) {
 	}
 
 	@Override

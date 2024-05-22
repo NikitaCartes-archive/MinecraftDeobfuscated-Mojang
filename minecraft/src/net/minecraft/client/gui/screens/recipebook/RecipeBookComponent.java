@@ -40,15 +40,15 @@ import net.minecraft.world.item.crafting.RecipeHolder;
 @Environment(EnvType.CLIENT)
 public class RecipeBookComponent implements PlaceRecipe<Ingredient>, Renderable, GuiEventListener, NarratableEntry, RecipeShownListener {
 	public static final WidgetSprites RECIPE_BUTTON_SPRITES = new WidgetSprites(
-		new ResourceLocation("recipe_book/button"), new ResourceLocation("recipe_book/button_highlighted")
+		ResourceLocation.withDefaultNamespace("recipe_book/button"), ResourceLocation.withDefaultNamespace("recipe_book/button_highlighted")
 	);
 	private static final WidgetSprites FILTER_BUTTON_SPRITES = new WidgetSprites(
-		new ResourceLocation("recipe_book/filter_enabled"),
-		new ResourceLocation("recipe_book/filter_disabled"),
-		new ResourceLocation("recipe_book/filter_enabled_highlighted"),
-		new ResourceLocation("recipe_book/filter_disabled_highlighted")
+		ResourceLocation.withDefaultNamespace("recipe_book/filter_enabled"),
+		ResourceLocation.withDefaultNamespace("recipe_book/filter_disabled"),
+		ResourceLocation.withDefaultNamespace("recipe_book/filter_enabled_highlighted"),
+		ResourceLocation.withDefaultNamespace("recipe_book/filter_disabled_highlighted")
 	);
-	protected static final ResourceLocation RECIPE_BOOK_LOCATION = new ResourceLocation("textures/gui/recipe_book.png");
+	protected static final ResourceLocation RECIPE_BOOK_LOCATION = ResourceLocation.withDefaultNamespace("textures/gui/recipe_book.png");
 	private static final Component SEARCH_HINT = Component.translatable("gui.recipebook.search_hint")
 		.withStyle(ChatFormatting.ITALIC)
 		.withStyle(ChatFormatting.GRAY);

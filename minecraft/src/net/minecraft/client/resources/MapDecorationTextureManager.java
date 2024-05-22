@@ -10,7 +10,7 @@ import net.minecraft.world.level.saveddata.maps.MapDecoration;
 @Environment(EnvType.CLIENT)
 public class MapDecorationTextureManager extends TextureAtlasHolder {
 	public MapDecorationTextureManager(TextureManager textureManager) {
-		super(textureManager, new ResourceLocation("textures/atlas/map_decorations.png"), new ResourceLocation("map_decorations"));
+		super(textureManager, ResourceLocation.withDefaultNamespace("textures/atlas/map_decorations.png"), ResourceLocation.withDefaultNamespace("map_decorations"));
 	}
 
 	public TextureAtlasSprite get(MapDecoration mapDecoration) {

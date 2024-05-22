@@ -8,12 +8,14 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.level.ItemLike;
 
 public class CreativeModeTab {
+	static final ResourceLocation DEFAULT_BACKGROUND = createTextureLocation("items");
 	private final Component displayName;
-	String backgroundSuffix = "items.png";
+	ResourceLocation backgroundTexture = DEFAULT_BACKGROUND;
 	boolean canScroll = true;
 	boolean showTitle = true;
 	boolean alignedRight = false;
@@ -43,6 +45,10 @@ public class CreativeModeTab {
 		this.type = type;
 	}
 
+	public static ResourceLocation createTextureLocation(String string) {
+		return ResourceLocation.withDefaultNamespace("textures/gui/container/creative_inventory/tab_" + string + ".png");
+	}
+
 	public static CreativeModeTab.Builder builder(CreativeModeTab.Row row, int i) {
 		return new CreativeModeTab.Builder(row, i);
 	}
@@ -59,8 +65,8 @@ public class CreativeModeTab {
 		return this.iconItemStack;
 	}
 
-	public String getBackgroundSuffix() {
-		return this.backgroundSuffix;
+	public ResourceLocation getBackgroundTexture() {
+		return this.backgroundTexture;
 	}
 
 	public boolean showTitle() {
@@ -129,7 +135,7 @@ public class CreativeModeTab {
 		private boolean showTitle = true;
 		private boolean alignedRight = false;
 		private CreativeModeTab.Type type = CreativeModeTab.Type.CATEGORY;
-		private String backgroundSuffix = "items.png";
+		private ResourceLocation backgroundTexture = CreativeModeTab.DEFAULT_BACKGROUND;
 
 		public Builder(CreativeModeTab.Row row, int i) {
 			this.row = row;
@@ -171,8 +177,8 @@ public class CreativeModeTab {
 			return this;
 		}
 
-		public CreativeModeTab.Builder backgroundSuffix(String string) {
-			this.backgroundSuffix = string;
+		public CreativeModeTab.Builder backgroundTexture(ResourceLocation resourceLocation) {
+			this.backgroundTexture = resourceLocation;
 			return this;
 		}
 
@@ -184,7 +190,7 @@ public class CreativeModeTab {
 				creativeModeTab.alignedRight = this.alignedRight;
 				creativeModeTab.showTitle = this.showTitle;
 				creativeModeTab.canScroll = this.canScroll;
-				creativeModeTab.backgroundSuffix = this.backgroundSuffix;
+				creativeModeTab.backgroundTexture = this.backgroundTexture;
 				return creativeModeTab;
 			}
 		}

@@ -1,6 +1,7 @@
 package net.minecraft.world.level.block.entity.trialspawner;
 
 import com.google.common.collect.Sets;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -15,6 +16,7 @@ import java.util.function.Function;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -27,6 +29,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.random.SimpleWeightedRandomList;
 import net.minecraft.util.random.WeightedEntry;
+import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
@@ -123,27 +126,24 @@ public class TrialSpawnerData {
 			if (!trialSpawner.getState().equals(TrialSpawnerState.COOLDOWN) || !trialSpawner.isOminous()) {
 				List<UUID> list = trialSpawner.getPlayerDetector()
 					.detect(serverLevel, trialSpawner.getEntitySelector(), blockPos, (double)trialSpawner.getRequiredPlayerRange(), true);
-				Player player = null;
-
-				for (UUID uUID : list) {
-					Player player2 = serverLevel.getPlayerByUUID(uUID);
-					if (player2 != null) {
-						if (player2.hasEffect(MobEffects.BAD_OMEN)) {
-							this.transformBadOmenIntoTrialOmen(player2, player2.getEffect(MobEffects.BAD_OMEN));
-							player = player2;
-						} else if (player2.hasEffect(MobEffects.TRIAL_OMEN)) {
-							player = player2;
+				boolean bl2;
+				if (!trialSpawner.isOminous() && !list.isEmpty()) {
+					Optional<Pair<Player, Holder<MobEffect>>> optional = findPlayerWithOminousEffect(serverLevel, list);
+					optional.ifPresent(pair -> {
+						Player player = (Player)pair.getFirst();
+						if (pair.getSecond() == MobEffects.BAD_OMEN) {
+							transformBadOmenIntoTrialOmen(player);
 						}
-					}
-				}
 
-				boolean bl2 = !trialSpawner.isOminous() && player != null;
-				if (!trialSpawner.getState().equals(TrialSpawnerState.COOLDOWN) || bl2) {
-					if (bl2) {
 						serverLevel.levelEvent(3020, BlockPos.containing(player.getEyePosition()), 0);
 						trialSpawner.applyOminous(serverLevel, blockPos);
-					}
+					});
+					bl2 = optional.isPresent();
+				} else {
+					bl2 = false;
+				}
 
+				if (!trialSpawner.getState().equals(TrialSpawnerState.COOLDOWN) || bl2) {
 					boolean bl3 = trialSpawner.getData().detectedPlayers.isEmpty();
 					List<UUID> list2 = bl3
 						? list
@@ -158,6 +158,26 @@ public class TrialSpawnerData {
 				}
 			}
 		}
+	}
+
+	private static Optional<Pair<Player, Holder<MobEffect>>> findPlayerWithOminousEffect(ServerLevel serverLevel, List<UUID> list) {
+		Player player = null;
+
+		for (UUID uUID : list) {
+			Player player2 = serverLevel.getPlayerByUUID(uUID);
+			if (player2 != null) {
+				Holder<MobEffect> holder = MobEffects.TRIAL_OMEN;
+				if (player2.hasEffect(holder)) {
+					return Optional.of(Pair.of(player2, holder));
+				}
+
+				if (player2.hasEffect(MobEffects.BAD_OMEN)) {
+					player = player2;
+				}
+			}
+		}
+
+		return Optional.ofNullable(player).map(playerx -> Pair.of(playerx, MobEffects.BAD_OMEN));
 	}
 
 	public void resetAfterBecomingOminous(TrialSpawner trialSpawner, ServerLevel serverLevel) {
@@ -178,11 +198,14 @@ public class TrialSpawnerData {
 		this.cooldownEndsAt = serverLevel.getGameTime() + trialSpawner.getOminousConfig().ticksBetweenItemSpawners();
 	}
 
-	private void transformBadOmenIntoTrialOmen(Player player, MobEffectInstance mobEffectInstance) {
-		int i = mobEffectInstance.getAmplifier() + 1;
-		int j = 18000 * i;
-		player.removeEffect(MobEffects.BAD_OMEN);
-		player.addEffect(new MobEffectInstance(MobEffects.TRIAL_OMEN, j, 0));
+	private static void transformBadOmenIntoTrialOmen(Player player) {
+		MobEffectInstance mobEffectInstance = player.getEffect(MobEffects.BAD_OMEN);
+		if (mobEffectInstance != null) {
+			int i = mobEffectInstance.getAmplifier() + 1;
+			int j = 18000 * i;
+			player.removeEffect(MobEffects.BAD_OMEN);
+			player.addEffect(new MobEffectInstance(MobEffects.TRIAL_OMEN, j, 0));
+		}
 	}
 
 	public boolean isReadyToOpenShutter(ServerLevel serverLevel, float f, int i) {

@@ -8,7 +8,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -415,7 +414,8 @@ public abstract class BlockBehaviour implements FeatureElement {
 		private final BlockBehaviour.StatePredicate isViewBlocking;
 		private final BlockBehaviour.StatePredicate hasPostProcess;
 		private final BlockBehaviour.StatePredicate emissiveRendering;
-		private final Optional<BlockBehaviour.OffsetFunction> offsetFunction;
+		@Nullable
+		private final BlockBehaviour.OffsetFunction offsetFunction;
 		private final boolean spawnTerrainParticles;
 		private final NoteBlockInstrument instrument;
 		private final boolean replaceable;
@@ -656,11 +656,12 @@ public abstract class BlockBehaviour implements FeatureElement {
 		}
 
 		public Vec3 getOffset(BlockGetter blockGetter, BlockPos blockPos) {
-			return (Vec3)this.offsetFunction.map(offsetFunction -> offsetFunction.evaluate(this.asState(), blockGetter, blockPos)).orElse(Vec3.ZERO);
+			BlockBehaviour.OffsetFunction offsetFunction = this.offsetFunction;
+			return offsetFunction != null ? offsetFunction.evaluate(this.asState(), blockGetter, blockPos) : Vec3.ZERO;
 		}
 
 		public boolean hasOffsetFunction() {
-			return this.offsetFunction.isPresent();
+			return this.offsetFunction != null;
 		}
 
 		public boolean triggerEvent(Level level, BlockPos blockPos, int i, int j) {
@@ -971,7 +972,8 @@ public abstract class BlockBehaviour implements FeatureElement {
 		BlockBehaviour.StatePredicate emissiveRendering = (blockState, blockGetter, blockPos) -> false;
 		boolean dynamicShape;
 		FeatureFlagSet requiredFeatures = FeatureFlags.VANILLA_SET;
-		Optional<BlockBehaviour.OffsetFunction> offsetFunction = Optional.empty();
+		@Nullable
+		BlockBehaviour.OffsetFunction offsetFunction;
 
 		private Properties() {
 		}
@@ -1185,32 +1187,26 @@ public abstract class BlockBehaviour implements FeatureElement {
 		}
 
 		public BlockBehaviour.Properties offsetType(BlockBehaviour.OffsetType offsetType) {
-			switch (offsetType) {
-				case XZ:
-					this.offsetFunction = Optional.of((BlockBehaviour.OffsetFunction)(blockState, blockGetter, blockPos) -> {
-						Block block = blockState.getBlock();
-						long l = Mth.getSeed(blockPos.getX(), 0, blockPos.getZ());
-						float f = block.getMaxHorizontalOffset();
-						double d = Mth.clamp(((double)((float)(l & 15L) / 15.0F) - 0.5) * 0.5, (double)(-f), (double)f);
-						double e = Mth.clamp(((double)((float)(l >> 8 & 15L) / 15.0F) - 0.5) * 0.5, (double)(-f), (double)f);
-						return new Vec3(d, 0.0, e);
-					});
-					break;
-				case XYZ:
-					this.offsetFunction = Optional.of((BlockBehaviour.OffsetFunction)(blockState, blockGetter, blockPos) -> {
-						Block block = blockState.getBlock();
-						long l = Mth.getSeed(blockPos.getX(), 0, blockPos.getZ());
-						double d = ((double)((float)(l >> 4 & 15L) / 15.0F) - 1.0) * (double)block.getMaxVerticalOffset();
-						float f = block.getMaxHorizontalOffset();
-						double e = Mth.clamp(((double)((float)(l & 15L) / 15.0F) - 0.5) * 0.5, (double)(-f), (double)f);
-						double g = Mth.clamp(((double)((float)(l >> 8 & 15L) / 15.0F) - 0.5) * 0.5, (double)(-f), (double)f);
-						return new Vec3(e, d, g);
-					});
-					break;
-				default:
-					this.offsetFunction = Optional.empty();
-			}
-
+			this.offsetFunction = switch (offsetType) {
+				case NONE -> null;
+				case XZ -> (blockState, blockGetter, blockPos) -> {
+				Block block = blockState.getBlock();
+				long l = Mth.getSeed(blockPos.getX(), 0, blockPos.getZ());
+				float f = block.getMaxHorizontalOffset();
+				double d = Mth.clamp(((double)((float)(l & 15L) / 15.0F) - 0.5) * 0.5, (double)(-f), (double)f);
+				double e = Mth.clamp(((double)((float)(l >> 8 & 15L) / 15.0F) - 0.5) * 0.5, (double)(-f), (double)f);
+				return new Vec3(d, 0.0, e);
+			};
+				case XYZ -> (blockState, blockGetter, blockPos) -> {
+				Block block = blockState.getBlock();
+				long l = Mth.getSeed(blockPos.getX(), 0, blockPos.getZ());
+				double d = ((double)((float)(l >> 4 & 15L) / 15.0F) - 1.0) * (double)block.getMaxVerticalOffset();
+				float f = block.getMaxHorizontalOffset();
+				double e = Mth.clamp(((double)((float)(l & 15L) / 15.0F) - 0.5) * 0.5, (double)(-f), (double)f);
+				double g = Mth.clamp(((double)((float)(l >> 8 & 15L) / 15.0F) - 0.5) * 0.5, (double)(-f), (double)f);
+				return new Vec3(e, d, g);
+			};
+			};
 			return this;
 		}
 

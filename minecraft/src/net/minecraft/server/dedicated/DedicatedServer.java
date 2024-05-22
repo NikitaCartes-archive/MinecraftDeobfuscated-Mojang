@@ -30,6 +30,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.ConsoleInput;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerInterface;
+import net.minecraft.server.ServerLinks;
 import net.minecraft.server.Services;
 import net.minecraft.server.WorldStem;
 import net.minecraft.server.gui.MinecraftServerGui;
@@ -313,8 +314,8 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface 
 	}
 
 	@Override
-	public boolean isNetherEnabled() {
-		return this.getProperties().allowNether;
+	public boolean isLevelEnabled(Level level) {
+		return level.dimension() == Level.NETHER ? this.getProperties().allowNether : true;
 	}
 
 	public void handleConsoleInput(String string, CommandSourceStack commandSourceStack) {
@@ -622,5 +623,11 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface 
 	@Override
 	public boolean acceptsTransfers() {
 		return this.settings.getProperties().acceptsTransfers;
+	}
+
+	@Override
+	public ServerLinks serverLinks() {
+		String string = this.settings.getProperties().bugReportLink;
+		return string.isEmpty() ? ServerLinks.EMPTY : new ServerLinks(List.of(ServerLinks.KnownLinkType.BUG_REPORT.create(string)));
 	}
 }

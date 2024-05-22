@@ -100,7 +100,9 @@ public class ApplyBonusCount extends LootItemConditionalFunction {
 					)
 					.apply(instance, ApplyBonusCount.BinomialWithBonusCount::new)
 		);
-		public static final ApplyBonusCount.FormulaType TYPE = new ApplyBonusCount.FormulaType(new ResourceLocation("binomial_with_bonus_count"), CODEC);
+		public static final ApplyBonusCount.FormulaType TYPE = new ApplyBonusCount.FormulaType(
+			ResourceLocation.withDefaultNamespace("binomial_with_bonus_count"), CODEC
+		);
 
 		@Override
 		public int calculateNewCount(RandomSource randomSource, int i, int j) {
@@ -130,7 +132,7 @@ public class ApplyBonusCount extends LootItemConditionalFunction {
 
 	static record OreDrops() implements ApplyBonusCount.Formula {
 		public static final Codec<ApplyBonusCount.OreDrops> CODEC = Codec.unit(ApplyBonusCount.OreDrops::new);
-		public static final ApplyBonusCount.FormulaType TYPE = new ApplyBonusCount.FormulaType(new ResourceLocation("ore_drops"), CODEC);
+		public static final ApplyBonusCount.FormulaType TYPE = new ApplyBonusCount.FormulaType(ResourceLocation.withDefaultNamespace("ore_drops"), CODEC);
 
 		@Override
 		public int calculateNewCount(RandomSource randomSource, int i, int j) {
@@ -157,7 +159,7 @@ public class ApplyBonusCount extends LootItemConditionalFunction {
 			instance -> instance.group(Codec.INT.fieldOf("bonusMultiplier").forGetter(ApplyBonusCount.UniformBonusCount::bonusMultiplier))
 					.apply(instance, ApplyBonusCount.UniformBonusCount::new)
 		);
-		public static final ApplyBonusCount.FormulaType TYPE = new ApplyBonusCount.FormulaType(new ResourceLocation("uniform_bonus_count"), CODEC);
+		public static final ApplyBonusCount.FormulaType TYPE = new ApplyBonusCount.FormulaType(ResourceLocation.withDefaultNamespace("uniform_bonus_count"), CODEC);
 
 		@Override
 		public int calculateNewCount(RandomSource randomSource, int i, int j) {

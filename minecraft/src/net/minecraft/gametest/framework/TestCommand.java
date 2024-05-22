@@ -370,7 +370,7 @@ public class TestCommand {
 
 	private static int exportTestStructure(CommandSourceStack commandSourceStack, String string) {
 		Path path = Paths.get(StructureUtils.testStructuresDir);
-		ResourceLocation resourceLocation = new ResourceLocation(string);
+		ResourceLocation resourceLocation = ResourceLocation.parse(string);
 		Path path2 = commandSourceStack.getLevel().getStructureManager().getPathToGeneratedStructure(resourceLocation, ".nbt");
 		Path path3 = NbtToSnbt.convertStructure(CachedOutput.NO_CACHE, path2, resourceLocation.getPath(), path);
 		if (path3 == null) {
@@ -391,7 +391,7 @@ public class TestCommand {
 	}
 
 	private static boolean verifyStructureExists(ServerLevel serverLevel, String string) {
-		if (serverLevel.getStructureManager().get(new ResourceLocation(string)).isEmpty()) {
+		if (serverLevel.getStructureManager().get(ResourceLocation.parse(string)).isEmpty()) {
 			say(serverLevel, "Test structure " + string + " could not be found", ChatFormatting.RED);
 			return false;
 		} else {
@@ -411,7 +411,7 @@ public class TestCommand {
 
 	private static int importTestStructure(CommandSourceStack commandSourceStack, String string) {
 		Path path = Paths.get(StructureUtils.testStructuresDir, string + ".snbt");
-		ResourceLocation resourceLocation = new ResourceLocation("minecraft", string);
+		ResourceLocation resourceLocation = ResourceLocation.withDefaultNamespace(string);
 		Path path2 = commandSourceStack.getLevel().getStructureManager().getPathToGeneratedStructure(resourceLocation, ".nbt");
 
 		try {

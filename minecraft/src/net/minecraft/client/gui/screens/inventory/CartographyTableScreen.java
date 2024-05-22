@@ -17,12 +17,12 @@ import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 
 @Environment(EnvType.CLIENT)
 public class CartographyTableScreen extends AbstractContainerScreen<CartographyTableMenu> {
-	private static final ResourceLocation ERROR_SPRITE = new ResourceLocation("container/cartography_table/error");
-	private static final ResourceLocation SCALED_MAP_SPRITE = new ResourceLocation("container/cartography_table/scaled_map");
-	private static final ResourceLocation DUPLICATED_MAP_SPRITE = new ResourceLocation("container/cartography_table/duplicated_map");
-	private static final ResourceLocation MAP_SPRITE = new ResourceLocation("container/cartography_table/map");
-	private static final ResourceLocation LOCKED_SPRITE = new ResourceLocation("container/cartography_table/locked");
-	private static final ResourceLocation BG_LOCATION = new ResourceLocation("textures/gui/container/cartography_table.png");
+	private static final ResourceLocation ERROR_SPRITE = ResourceLocation.withDefaultNamespace("container/cartography_table/error");
+	private static final ResourceLocation SCALED_MAP_SPRITE = ResourceLocation.withDefaultNamespace("container/cartography_table/scaled_map");
+	private static final ResourceLocation DUPLICATED_MAP_SPRITE = ResourceLocation.withDefaultNamespace("container/cartography_table/duplicated_map");
+	private static final ResourceLocation MAP_SPRITE = ResourceLocation.withDefaultNamespace("container/cartography_table/map");
+	private static final ResourceLocation LOCKED_SPRITE = ResourceLocation.withDefaultNamespace("container/cartography_table/locked");
+	private static final ResourceLocation BG_LOCATION = ResourceLocation.withDefaultNamespace("textures/gui/container/cartography_table.png");
 
 	public CartographyTableScreen(CartographyTableMenu cartographyTableMenu, Inventory inventory, Component component) {
 		super(cartographyTableMenu, inventory, component);

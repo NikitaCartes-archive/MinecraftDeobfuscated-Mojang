@@ -25,8 +25,8 @@ public class KnowledgeBookItem extends Item {
 	@Override
 	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
-		itemStack.consume(1, player);
 		List<ResourceLocation> list = itemStack.getOrDefault(DataComponents.RECIPES, List.of());
+		itemStack.consume(1, player);
 		if (list.isEmpty()) {
 			return InteractionResultHolder.fail(itemStack);
 		} else {

@@ -418,29 +418,31 @@ public final class ItemStack implements DataComponentHolder {
 
 	public void hurtAndBreak(int i, ServerLevel serverLevel, @Nullable ServerPlayer serverPlayer, Consumer<Item> consumer) {
 		if (this.isDamageableItem()) {
-			if (i > 0) {
-				i = EnchantmentHelper.processDurabilityChange(serverLevel, this, i);
-				if (i <= 0) {
-					return;
+			if (serverPlayer == null || !serverPlayer.hasInfiniteMaterials()) {
+				if (i > 0) {
+					i = EnchantmentHelper.processDurabilityChange(serverLevel, this, i);
+					if (i <= 0) {
+						return;
+					}
 				}
-			}
 
-			if (serverPlayer != null && i != 0) {
-				CriteriaTriggers.ITEM_DURABILITY_CHANGED.trigger(serverPlayer, this, this.getDamageValue() + i);
-			}
+				if (serverPlayer != null && i != 0) {
+					CriteriaTriggers.ITEM_DURABILITY_CHANGED.trigger(serverPlayer, this, this.getDamageValue() + i);
+				}
 
-			int j = this.getDamageValue() + i;
-			this.setDamageValue(j);
-			if (j >= this.getMaxDamage()) {
-				Item item = this.getItem();
-				this.shrink(1);
-				consumer.accept(item);
+				int j = this.getDamageValue() + i;
+				this.setDamageValue(j);
+				if (j >= this.getMaxDamage()) {
+					Item item = this.getItem();
+					this.shrink(1);
+					consumer.accept(item);
+				}
 			}
 		}
 	}
 
 	public void hurtAndBreak(int i, LivingEntity livingEntity, EquipmentSlot equipmentSlot) {
-		if (livingEntity.level() instanceof ServerLevel serverLevel && !livingEntity.hasInfiniteMaterials()) {
+		if (livingEntity.level() instanceof ServerLevel serverLevel) {
 			this.hurtAndBreak(
 				i, serverLevel, livingEntity instanceof ServerPlayer serverPlayer ? serverPlayer : null, item -> livingEntity.onEquippedItemBroken(item, equipmentSlot)
 			);
@@ -716,6 +718,7 @@ public final class ItemStack implements DataComponentHolder {
 				this.getItem().appendHoverText(this, tooltipContext, list, tooltipFlag);
 			}
 
+			this.addToTooltip(DataComponents.JUKEBOX_PLAYABLE, tooltipContext, consumer, tooltipFlag);
 			this.addToTooltip(DataComponents.TRIM, tooltipContext, consumer, tooltipFlag);
 			this.addToTooltip(DataComponents.STORED_ENCHANTMENTS, tooltipContext, consumer, tooltipFlag);
 			this.addToTooltip(DataComponents.ENCHANTMENTS, tooltipContext, consumer, tooltipFlag);
@@ -779,10 +782,10 @@ public final class ItemStack implements DataComponentHolder {
 		double d = attributeModifier.amount();
 		boolean bl = false;
 		if (player != null) {
-			if (attributeModifier.id() == Item.BASE_ATTACK_DAMAGE_UUID) {
+			if (attributeModifier.is(Item.BASE_ATTACK_DAMAGE_ID)) {
 				d += player.getAttributeBaseValue(Attributes.ATTACK_DAMAGE);
 				bl = true;
-			} else if (attributeModifier.id() == Item.BASE_ATTACK_SPEED_UUID) {
+			} else if (attributeModifier.is(Item.BASE_ATTACK_SPEED_ID)) {
 				d += player.getAttributeBaseValue(Attributes.ATTACK_SPEED);
 				bl = true;
 			}

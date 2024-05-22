@@ -44,23 +44,23 @@ public class ModelManager implements PreparableReloadListener, AutoCloseable {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final Map<ResourceLocation, ResourceLocation> VANILLA_ATLASES = Map.of(
 		Sheets.BANNER_SHEET,
-		new ResourceLocation("banner_patterns"),
+		ResourceLocation.withDefaultNamespace("banner_patterns"),
 		Sheets.BED_SHEET,
-		new ResourceLocation("beds"),
+		ResourceLocation.withDefaultNamespace("beds"),
 		Sheets.CHEST_SHEET,
-		new ResourceLocation("chests"),
+		ResourceLocation.withDefaultNamespace("chests"),
 		Sheets.SHIELD_SHEET,
-		new ResourceLocation("shield_patterns"),
+		ResourceLocation.withDefaultNamespace("shield_patterns"),
 		Sheets.SIGN_SHEET,
-		new ResourceLocation("signs"),
+		ResourceLocation.withDefaultNamespace("signs"),
 		Sheets.SHULKER_SHEET,
-		new ResourceLocation("shulker_boxes"),
+		ResourceLocation.withDefaultNamespace("shulker_boxes"),
 		Sheets.ARMOR_TRIMS_SHEET,
-		new ResourceLocation("armor_trims"),
+		ResourceLocation.withDefaultNamespace("armor_trims"),
 		Sheets.DECORATED_POT_SHEET,
-		new ResourceLocation("decorated_pot"),
+		ResourceLocation.withDefaultNamespace("decorated_pot"),
 		TextureAtlas.LOCATION_BLOCKS,
-		new ResourceLocation("blocks")
+		ResourceLocation.withDefaultNamespace("blocks")
 	);
 	private Map<ResourceLocation, BakedModel> bakedRegistry;
 	private final AtlasSet atlases;

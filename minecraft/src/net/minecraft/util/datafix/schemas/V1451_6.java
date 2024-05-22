@@ -32,8 +32,8 @@ public class V1451_6 extends NamespacedSchema {
 								return Pair.of("_special", string);
 							} else {
 								try {
-									ResourceLocation resourceLocation = ResourceLocation.of(string.substring(0, i), '.');
-									ResourceLocation resourceLocation2 = ResourceLocation.of(string.substring(i + 1), '.');
+									ResourceLocation resourceLocation = ResourceLocation.bySeparator(string.substring(0, i), '.');
+									ResourceLocation resourceLocation2 = ResourceLocation.bySeparator(string.substring(i + 1), '.');
 									return Pair.of(resourceLocation.toString(), resourceLocation2.toString());
 								} catch (Exception var4) {
 									return Pair.of("_special", string);

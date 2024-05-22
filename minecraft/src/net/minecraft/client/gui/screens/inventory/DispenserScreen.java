@@ -10,7 +10,7 @@ import net.minecraft.world.inventory.DispenserMenu;
 
 @Environment(EnvType.CLIENT)
 public class DispenserScreen extends AbstractContainerScreen<DispenserMenu> {
-	private static final ResourceLocation CONTAINER_LOCATION = new ResourceLocation("textures/gui/container/dispenser.png");
+	private static final ResourceLocation CONTAINER_LOCATION = ResourceLocation.withDefaultNamespace("textures/gui/container/dispenser.png");
 
 	public DispenserScreen(DispenserMenu dispenserMenu, Inventory inventory, Component component) {
 		super(dispenserMenu, inventory, component);

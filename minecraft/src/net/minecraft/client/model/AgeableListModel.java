@@ -42,26 +42,26 @@ public abstract class AgeableListModel<E extends Entity> extends EntityModel<E> 
 	}
 
 	@Override
-	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h, float k) {
+	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, int k) {
 		if (this.young) {
 			poseStack.pushPose();
 			if (this.scaleHead) {
-				float l = 1.5F / this.babyHeadScale;
-				poseStack.scale(l, l, l);
+				float f = 1.5F / this.babyHeadScale;
+				poseStack.scale(f, f, f);
 			}
 
 			poseStack.translate(0.0F, this.babyYHeadOffset / 16.0F, this.babyZHeadOffset / 16.0F);
-			this.headParts().forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, f, g, h, k));
+			this.headParts().forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, k));
 			poseStack.popPose();
 			poseStack.pushPose();
-			float l = 1.0F / this.babyBodyScale;
-			poseStack.scale(l, l, l);
+			float f = 1.0F / this.babyBodyScale;
+			poseStack.scale(f, f, f);
 			poseStack.translate(0.0F, this.bodyYOffset / 16.0F, 0.0F);
-			this.bodyParts().forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, f, g, h, k));
+			this.bodyParts().forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, k));
 			poseStack.popPose();
 		} else {
-			this.headParts().forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, f, g, h, k));
-			this.bodyParts().forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, f, g, h, k));
+			this.headParts().forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, k));
+			this.bodyParts().forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, k));
 		}
 	}
 

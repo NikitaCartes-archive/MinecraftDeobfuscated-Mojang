@@ -29,10 +29,10 @@ import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class RealmsConfigureWorldScreen extends RealmsScreen {
-	private static final ResourceLocation EXPIRED_SPRITE = new ResourceLocation("realm_status/expired");
-	private static final ResourceLocation EXPIRES_SOON_SPRITE = new ResourceLocation("realm_status/expires_soon");
-	private static final ResourceLocation OPEN_SPRITE = new ResourceLocation("realm_status/open");
-	private static final ResourceLocation CLOSED_SPRITE = new ResourceLocation("realm_status/closed");
+	private static final ResourceLocation EXPIRED_SPRITE = ResourceLocation.withDefaultNamespace("realm_status/expired");
+	private static final ResourceLocation EXPIRES_SOON_SPRITE = ResourceLocation.withDefaultNamespace("realm_status/expires_soon");
+	private static final ResourceLocation OPEN_SPRITE = ResourceLocation.withDefaultNamespace("realm_status/open");
+	private static final ResourceLocation CLOSED_SPRITE = ResourceLocation.withDefaultNamespace("realm_status/closed");
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final Component WORLD_LIST_TITLE = Component.translatable("mco.configure.worlds.title");
 	private static final Component TITLE = Component.translatable("mco.configure.world.title");

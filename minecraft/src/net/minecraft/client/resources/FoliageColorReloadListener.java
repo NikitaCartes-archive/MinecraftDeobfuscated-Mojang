@@ -11,7 +11,7 @@ import net.minecraft.world.level.FoliageColor;
 
 @Environment(EnvType.CLIENT)
 public class FoliageColorReloadListener extends SimplePreparableReloadListener<int[]> {
-	private static final ResourceLocation LOCATION = new ResourceLocation("textures/colormap/foliage.png");
+	private static final ResourceLocation LOCATION = ResourceLocation.withDefaultNamespace("textures/colormap/foliage.png");
 
 	protected int[] prepare(ResourceManager resourceManager, ProfilerFiller profilerFiller) {
 		try {

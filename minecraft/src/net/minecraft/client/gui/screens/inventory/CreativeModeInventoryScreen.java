@@ -52,45 +52,44 @@ import net.minecraft.world.item.TooltipFlag;
 
 @Environment(EnvType.CLIENT)
 public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<CreativeModeInventoryScreen.ItemPickerMenu> {
-	private static final ResourceLocation SCROLLER_SPRITE = new ResourceLocation("container/creative_inventory/scroller");
-	private static final ResourceLocation SCROLLER_DISABLED_SPRITE = new ResourceLocation("container/creative_inventory/scroller_disabled");
+	private static final ResourceLocation SCROLLER_SPRITE = ResourceLocation.withDefaultNamespace("container/creative_inventory/scroller");
+	private static final ResourceLocation SCROLLER_DISABLED_SPRITE = ResourceLocation.withDefaultNamespace("container/creative_inventory/scroller_disabled");
 	private static final ResourceLocation[] UNSELECTED_TOP_TABS = new ResourceLocation[]{
-		new ResourceLocation("container/creative_inventory/tab_top_unselected_1"),
-		new ResourceLocation("container/creative_inventory/tab_top_unselected_2"),
-		new ResourceLocation("container/creative_inventory/tab_top_unselected_3"),
-		new ResourceLocation("container/creative_inventory/tab_top_unselected_4"),
-		new ResourceLocation("container/creative_inventory/tab_top_unselected_5"),
-		new ResourceLocation("container/creative_inventory/tab_top_unselected_6"),
-		new ResourceLocation("container/creative_inventory/tab_top_unselected_7")
+		ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_top_unselected_1"),
+		ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_top_unselected_2"),
+		ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_top_unselected_3"),
+		ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_top_unselected_4"),
+		ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_top_unselected_5"),
+		ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_top_unselected_6"),
+		ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_top_unselected_7")
 	};
 	private static final ResourceLocation[] SELECTED_TOP_TABS = new ResourceLocation[]{
-		new ResourceLocation("container/creative_inventory/tab_top_selected_1"),
-		new ResourceLocation("container/creative_inventory/tab_top_selected_2"),
-		new ResourceLocation("container/creative_inventory/tab_top_selected_3"),
-		new ResourceLocation("container/creative_inventory/tab_top_selected_4"),
-		new ResourceLocation("container/creative_inventory/tab_top_selected_5"),
-		new ResourceLocation("container/creative_inventory/tab_top_selected_6"),
-		new ResourceLocation("container/creative_inventory/tab_top_selected_7")
+		ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_top_selected_1"),
+		ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_top_selected_2"),
+		ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_top_selected_3"),
+		ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_top_selected_4"),
+		ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_top_selected_5"),
+		ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_top_selected_6"),
+		ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_top_selected_7")
 	};
 	private static final ResourceLocation[] UNSELECTED_BOTTOM_TABS = new ResourceLocation[]{
-		new ResourceLocation("container/creative_inventory/tab_bottom_unselected_1"),
-		new ResourceLocation("container/creative_inventory/tab_bottom_unselected_2"),
-		new ResourceLocation("container/creative_inventory/tab_bottom_unselected_3"),
-		new ResourceLocation("container/creative_inventory/tab_bottom_unselected_4"),
-		new ResourceLocation("container/creative_inventory/tab_bottom_unselected_5"),
-		new ResourceLocation("container/creative_inventory/tab_bottom_unselected_6"),
-		new ResourceLocation("container/creative_inventory/tab_bottom_unselected_7")
+		ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_bottom_unselected_1"),
+		ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_bottom_unselected_2"),
+		ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_bottom_unselected_3"),
+		ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_bottom_unselected_4"),
+		ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_bottom_unselected_5"),
+		ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_bottom_unselected_6"),
+		ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_bottom_unselected_7")
 	};
 	private static final ResourceLocation[] SELECTED_BOTTOM_TABS = new ResourceLocation[]{
-		new ResourceLocation("container/creative_inventory/tab_bottom_selected_1"),
-		new ResourceLocation("container/creative_inventory/tab_bottom_selected_2"),
-		new ResourceLocation("container/creative_inventory/tab_bottom_selected_3"),
-		new ResourceLocation("container/creative_inventory/tab_bottom_selected_4"),
-		new ResourceLocation("container/creative_inventory/tab_bottom_selected_5"),
-		new ResourceLocation("container/creative_inventory/tab_bottom_selected_6"),
-		new ResourceLocation("container/creative_inventory/tab_bottom_selected_7")
+		ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_bottom_selected_1"),
+		ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_bottom_selected_2"),
+		ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_bottom_selected_3"),
+		ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_bottom_selected_4"),
+		ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_bottom_selected_5"),
+		ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_bottom_selected_6"),
+		ResourceLocation.withDefaultNamespace("container/creative_inventory/tab_bottom_selected_7")
 	};
-	private static final String GUI_CREATIVE_TAB_PREFIX = "textures/gui/container/creative_inventory/tab_";
 	private static final int NUM_ROWS = 5;
 	private static final int NUM_COLS = 9;
 	private static final int TAB_WIDTH = 26;
@@ -713,15 +712,7 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 			}
 		}
 
-		guiGraphics.blit(
-			new ResourceLocation("textures/gui/container/creative_inventory/tab_" + selectedTab.getBackgroundSuffix()),
-			this.leftPos,
-			this.topPos,
-			0,
-			0,
-			this.imageWidth,
-			this.imageHeight
-		);
+		guiGraphics.blit(selectedTab.getBackgroundTexture(), this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
 		this.searchBox.render(guiGraphics, i, j, f);
 		int k = this.leftPos + 175;
 		int l = this.topPos + 18;

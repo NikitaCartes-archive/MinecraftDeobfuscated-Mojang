@@ -7,6 +7,8 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Queues;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.BufferUploader;
+import com.mojang.blaze3d.vertex.MeshData;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
@@ -68,7 +70,7 @@ import org.slf4j.Logger;
 public class ParticleEngine implements PreparableReloadListener {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final FileToIdConverter PARTICLE_LISTER = FileToIdConverter.json("particles");
-	private static final ResourceLocation PARTICLES_ATLAS_INFO = new ResourceLocation("particles");
+	private static final ResourceLocation PARTICLES_ATLAS_INFO = ResourceLocation.withDefaultNamespace("particles");
 	private static final int MAX_PARTICLES_PER_LAYER = 16384;
 	private static final List<ParticleRenderType> RENDER_ORDER = ImmutableList.of(
 		ParticleRenderType.TERRAIN_SHEET,
@@ -443,26 +445,29 @@ public class ParticleEngine implements PreparableReloadListener {
 		RenderSystem.enableDepthTest();
 
 		for (ParticleRenderType particleRenderType : RENDER_ORDER) {
-			Iterable<Particle> iterable = (Iterable<Particle>)this.particles.get(particleRenderType);
-			if (iterable != null) {
+			Queue<Particle> queue = (Queue<Particle>)this.particles.get(particleRenderType);
+			if (queue != null && !queue.isEmpty()) {
 				RenderSystem.setShader(GameRenderer::getParticleShader);
 				Tesselator tesselator = Tesselator.getInstance();
-				BufferBuilder bufferBuilder = tesselator.getBuilder();
-				particleRenderType.begin(bufferBuilder, this.textureManager);
+				BufferBuilder bufferBuilder = particleRenderType.begin(tesselator, this.textureManager);
+				if (bufferBuilder != null) {
+					for (Particle particle : queue) {
+						try {
+							particle.render(bufferBuilder, camera, f);
+						} catch (Throwable var14) {
+							CrashReport crashReport = CrashReport.forThrowable(var14, "Rendering Particle");
+							CrashReportCategory crashReportCategory = crashReport.addCategory("Particle being rendered");
+							crashReportCategory.setDetail("Particle", particle::toString);
+							crashReportCategory.setDetail("Particle Type", particleRenderType::toString);
+							throw new ReportedException(crashReport);
+						}
+					}
 
-				for (Particle particle : iterable) {
-					try {
-						particle.render(bufferBuilder, camera, f);
-					} catch (Throwable var14) {
-						CrashReport crashReport = CrashReport.forThrowable(var14, "Rendering Particle");
-						CrashReportCategory crashReportCategory = crashReport.addCategory("Particle being rendered");
-						crashReportCategory.setDetail("Particle", particle::toString);
-						crashReportCategory.setDetail("Particle Type", particleRenderType::toString);
-						throw new ReportedException(crashReport);
+					MeshData meshData = bufferBuilder.build();
+					if (meshData != null) {
+						BufferUploader.drawWithShader(meshData);
 					}
 				}
-
-				particleRenderType.end(tesselator);
 			}
 		}
 

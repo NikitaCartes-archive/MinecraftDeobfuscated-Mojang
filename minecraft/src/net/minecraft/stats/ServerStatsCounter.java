@@ -100,7 +100,7 @@ public class ServerStatsCounter extends StatsCounter {
 							String string2 = (String)var7.next();
 							if (compoundTag2.contains(string2, 10)) {
 								Util.ifElse(
-									BuiltInRegistries.STAT_TYPE.getOptional(new ResourceLocation(string2)),
+									BuiltInRegistries.STAT_TYPE.getOptional(ResourceLocation.parse(string2)),
 									statType -> {
 										CompoundTag compoundTag2x = compoundTag2.getCompound(string2);
 

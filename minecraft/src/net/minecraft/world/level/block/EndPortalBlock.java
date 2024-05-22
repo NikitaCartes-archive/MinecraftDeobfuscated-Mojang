@@ -16,13 +16,16 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.TheEndPortalBlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.portal.DimensionTransition;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-public class EndPortalBlock extends BaseEntityBlock {
+public class EndPortalBlock extends BaseEntityBlock implements Portal {
 	public static final MapCodec<EndPortalBlock> CODEC = simpleCodec(EndPortalBlock::new);
 	protected static final VoxelShape SHAPE = Block.box(0.0, 6.0, 0.0, 16.0, 12.0, 16.0);
 
@@ -47,25 +50,52 @@ public class EndPortalBlock extends BaseEntityBlock {
 
 	@Override
 	protected void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
-		if (level instanceof ServerLevel
-			&& entity.canChangeDimensions()
+		if (entity.canChangeDimensions()
 			&& Shapes.joinIsNotEmpty(
 				Shapes.create(entity.getBoundingBox().move((double)(-blockPos.getX()), (double)(-blockPos.getY()), (double)(-blockPos.getZ()))),
 				blockState.getShape(level, blockPos),
 				BooleanOp.AND
 			)) {
-			ResourceKey<Level> resourceKey = level.dimension() == Level.END ? Level.OVERWORLD : Level.END;
-			ServerLevel serverLevel = ((ServerLevel)level).getServer().getLevel(resourceKey);
-			if (serverLevel == null) {
-				return;
-			}
-
-			if (level.dimension() == Level.END && entity instanceof ServerPlayer serverPlayer && !serverPlayer.seenCredits) {
+			if (!level.isClientSide && level.dimension() == Level.END && entity instanceof ServerPlayer serverPlayer && !serverPlayer.seenCredits) {
 				serverPlayer.showEndCredits();
 				return;
 			}
 
-			entity.changeDimension(() -> entity.findOrCreateDimensionEntryPoint(serverLevel));
+			entity.setAsInsidePortal(this, blockPos);
+		}
+	}
+
+	@Override
+	public DimensionTransition getPortalDestination(ServerLevel serverLevel, Entity entity, BlockPos blockPos) {
+		ResourceKey<Level> resourceKey = serverLevel.dimension() == Level.END ? Level.OVERWORLD : Level.END;
+		ServerLevel serverLevel2 = serverLevel.getServer().getLevel(resourceKey);
+		boolean bl = resourceKey == Level.END;
+		BlockPos blockPos2 = bl ? ServerLevel.END_SPAWN_POINT : serverLevel2.getSharedSpawnPos();
+		Vec3 vec3 = new Vec3((double)blockPos2.getX() + 0.5, (double)blockPos2.getY(), (double)blockPos2.getZ() + 0.5);
+		if (bl) {
+			this.createEndPlatform(serverLevel2, BlockPos.containing(vec3).below());
+		} else {
+			if (entity instanceof ServerPlayer serverPlayer) {
+				return serverPlayer.findRespawnPositionAndUseSpawnBlock(false);
+			}
+
+			int i = serverLevel2.getChunkAt(blockPos2).getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, blockPos2.getX(), blockPos2.getZ()) + 1;
+			vec3 = new Vec3(vec3.x, (double)i, vec3.z);
+		}
+
+		return new DimensionTransition(serverLevel2, vec3, entity.getDeltaMovement(), entity.getYRot(), entity.getXRot());
+	}
+
+	private void createEndPlatform(ServerLevel serverLevel, BlockPos blockPos) {
+		BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
+
+		for (int i = -2; i <= 2; i++) {
+			for (int j = -2; j <= 2; j++) {
+				for (int k = -1; k < 3; k++) {
+					BlockState blockState = k == -1 ? Blocks.OBSIDIAN.defaultBlockState() : Blocks.AIR.defaultBlockState();
+					serverLevel.setBlockAndUpdate(mutableBlockPos.set(blockPos).move(j, k, i), blockState);
+				}
+			}
 		}
 	}
 

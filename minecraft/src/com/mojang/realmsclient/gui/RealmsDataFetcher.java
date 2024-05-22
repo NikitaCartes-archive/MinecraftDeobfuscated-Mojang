@@ -5,6 +5,7 @@ import com.mojang.realmsclient.client.RealmsClient;
 import com.mojang.realmsclient.dto.RealmsNews;
 import com.mojang.realmsclient.dto.RealmsNotification;
 import com.mojang.realmsclient.dto.RealmsServer;
+import com.mojang.realmsclient.dto.RealmsServerPlayerLists;
 import com.mojang.realmsclient.gui.task.DataFetcher;
 import com.mojang.realmsclient.gui.task.RepeatedDelayStrategy;
 import com.mojang.realmsclient.util.RealmsPersistence;
@@ -24,6 +25,7 @@ public class RealmsDataFetcher {
 	public final DataFetcher.Task<Integer> pendingInvitesTask;
 	public final DataFetcher.Task<Boolean> trialAvailabilityTask;
 	public final DataFetcher.Task<RealmsNews> newsTask;
+	public final DataFetcher.Task<RealmsServerPlayerLists> onlinePlayersTask;
 	public final RealmsNewsManager newsManager = new RealmsNewsManager(new RealmsPersistence());
 
 	public RealmsDataFetcher(RealmsClient realmsClient) {
@@ -45,7 +47,10 @@ public class RealmsDataFetcher {
 			.createTask("trial availablity", realmsClient::trialAvailable, Duration.ofSeconds(60L), RepeatedDelayStrategy.exponentialBackoff(60));
 		this.newsTask = this.dataFetcher.createTask("unread news", realmsClient::getNews, Duration.ofMinutes(5L), RepeatedDelayStrategy.CONSTANT);
 		this.notificationsTask = this.dataFetcher.createTask("notifications", realmsClient::getNotifications, Duration.ofMinutes(5L), RepeatedDelayStrategy.CONSTANT);
-		this.tasks = List.of(this.notificationsTask, this.serverListUpdateTask, this.pendingInvitesTask, this.trialAvailabilityTask, this.newsTask);
+		this.onlinePlayersTask = this.dataFetcher.createTask("online players", realmsClient::getLiveStats, Duration.ofSeconds(10L), RepeatedDelayStrategy.CONSTANT);
+		this.tasks = List.of(
+			this.notificationsTask, this.serverListUpdateTask, this.pendingInvitesTask, this.trialAvailabilityTask, this.newsTask, this.onlinePlayersTask
+		);
 	}
 
 	public List<DataFetcher.Task<?>> getTasks() {

@@ -188,11 +188,12 @@ public final class BlockTags {
 	public static final TagKey<Block> BLOCKS_WIND_CHARGE_EXPLOSIONS = create("blocks_wind_charge_explosions");
 	public static final TagKey<Block> DOES_NOT_BLOCK_HOPPERS = create("does_not_block_hoppers");
 	public static final TagKey<Block> FIRE_ASPECT_LIGHTABLE = create("fire_aspect_lightable");
+	public static final TagKey<Block> AIR = create("air");
 
 	private BlockTags() {
 	}
 
 	private static TagKey<Block> create(String string) {
-		return TagKey.create(Registries.BLOCK, new ResourceLocation(string));
+		return TagKey.create(Registries.BLOCK, ResourceLocation.withDefaultNamespace(string));
 	}
 }

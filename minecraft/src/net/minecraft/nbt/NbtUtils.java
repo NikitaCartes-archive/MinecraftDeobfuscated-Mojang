@@ -147,7 +147,7 @@ public final class NbtUtils {
 		if (!compoundTag.contains("Name", 8)) {
 			return Blocks.AIR.defaultBlockState();
 		} else {
-			ResourceLocation resourceLocation = new ResourceLocation(compoundTag.getString("Name"));
+			ResourceLocation resourceLocation = ResourceLocation.parse(compoundTag.getString("Name"));
 			Optional<? extends Holder<Block>> optional = holderGetter.get(ResourceKey.create(Registries.BLOCK, resourceLocation));
 			if (optional.isEmpty()) {
 				return Blocks.AIR.defaultBlockState();

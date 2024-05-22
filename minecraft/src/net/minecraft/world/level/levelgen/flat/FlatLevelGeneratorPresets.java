@@ -37,7 +37,7 @@ public class FlatLevelGeneratorPresets {
 	}
 
 	private static ResourceKey<FlatLevelGeneratorPreset> register(String string) {
-		return ResourceKey.create(Registries.FLAT_LEVEL_GENERATOR_PRESET, new ResourceLocation(string));
+		return ResourceKey.create(Registries.FLAT_LEVEL_GENERATOR_PRESET, ResourceLocation.withDefaultNamespace(string));
 	}
 
 	static class Bootstrap {

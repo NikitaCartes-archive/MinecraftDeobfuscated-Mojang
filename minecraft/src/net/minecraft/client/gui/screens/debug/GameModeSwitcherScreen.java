@@ -23,9 +23,9 @@ import net.minecraft.world.level.block.Blocks;
 
 @Environment(EnvType.CLIENT)
 public class GameModeSwitcherScreen extends Screen {
-	static final ResourceLocation SLOT_SPRITE = new ResourceLocation("gamemode_switcher/slot");
-	static final ResourceLocation SELECTION_SPRITE = new ResourceLocation("gamemode_switcher/selection");
-	private static final ResourceLocation GAMEMODE_SWITCHER_LOCATION = new ResourceLocation("textures/gui/container/gamemode_switcher.png");
+	static final ResourceLocation SLOT_SPRITE = ResourceLocation.withDefaultNamespace("gamemode_switcher/slot");
+	static final ResourceLocation SELECTION_SPRITE = ResourceLocation.withDefaultNamespace("gamemode_switcher/selection");
+	private static final ResourceLocation GAMEMODE_SWITCHER_LOCATION = ResourceLocation.withDefaultNamespace("textures/gui/container/gamemode_switcher.png");
 	private static final int SPRITE_SHEET_WIDTH = 128;
 	private static final int SPRITE_SHEET_HEIGHT = 128;
 	private static final int SLOT_AREA = 26;

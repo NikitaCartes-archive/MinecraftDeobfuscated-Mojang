@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.minecraft.BlockUtil;
@@ -51,6 +50,7 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -132,9 +132,10 @@ import org.slf4j.Logger;
 public abstract class LivingEntity extends Entity implements Attackable {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final String TAG_ACTIVE_EFFECTS = "active_effects";
-	private static final UUID SPEED_MODIFIER_POWDER_SNOW_UUID = UUID.fromString("1eaf83ff-7207-4596-b37a-d7a07b3ec4ce");
+	private static final ResourceLocation SPEED_MODIFIER_POWDER_SNOW_ID = ResourceLocation.withDefaultNamespace("powder_snow");
+	private static final ResourceLocation SPRINTING_MODIFIER_ID = ResourceLocation.withDefaultNamespace("sprinting");
 	private static final AttributeModifier SPEED_MODIFIER_SPRINTING = new AttributeModifier(
-		UUID.fromString("662A6B8D-DA3E-4C1C-8813-96EA6097278D"), "Sprinting speed boost", 0.3F, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL
+		SPRINTING_MODIFIER_ID, 0.3F, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL
 	);
 	public static final int HAND_SLOTS = 2;
 	public static final int ARMOR_SLOTS = 4;
@@ -171,6 +172,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	public static final float EXTRA_RENDER_CULLING_SIZE_WITH_BIG_HAT = 0.5F;
 	public static final float DEFAULT_BABY_SCALE = 0.5F;
 	private static final float ITEM_USE_EFFECT_START_FRACTION = 0.21875F;
+	public static final String ATTRIBUTES_FIELD = "attributes";
 	private final AttributeMap attributes;
 	private final CombatTracker combatTracker = new CombatTracker(this);
 	private final Map<Holder<MobEffect>, MobEffectInstance> activeEffects = Maps.<Holder<MobEffect>, MobEffectInstance>newHashMap();
@@ -485,8 +487,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	protected void removeFrost() {
 		AttributeInstance attributeInstance = this.getAttribute(Attributes.MOVEMENT_SPEED);
 		if (attributeInstance != null) {
-			if (attributeInstance.getModifier(SPEED_MODIFIER_POWDER_SNOW_UUID) != null) {
-				attributeInstance.removeModifier(SPEED_MODIFIER_POWDER_SNOW_UUID);
+			if (attributeInstance.getModifier(SPEED_MODIFIER_POWDER_SNOW_ID) != null) {
+				attributeInstance.removeModifier(SPEED_MODIFIER_POWDER_SNOW_ID);
 			}
 		}
 	}
@@ -501,9 +503,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 				}
 
 				float f = -0.05F * this.getPercentFrozen();
-				attributeInstance.addTransientModifier(
-					new AttributeModifier(SPEED_MODIFIER_POWDER_SNOW_UUID, "Powder snow slow", (double)f, AttributeModifier.Operation.ADD_VALUE)
-				);
+				attributeInstance.addTransientModifier(new AttributeModifier(SPEED_MODIFIER_POWDER_SNOW_ID, (double)f, AttributeModifier.Operation.ADD_VALUE));
 			}
 		}
 	}
@@ -660,15 +660,19 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	@Override
 	public void remove(Entity.RemovalReason removalReason) {
 		if (removalReason == Entity.RemovalReason.KILLED || removalReason == Entity.RemovalReason.DISCARDED) {
-			for (MobEffectInstance mobEffectInstance : this.getActiveEffects()) {
-				mobEffectInstance.onMobRemoved(this, removalReason);
-			}
-
-			this.activeEffects.clear();
+			this.triggerOnDeathMobEffects(removalReason);
 		}
 
 		super.remove(removalReason);
 		this.brain.clearMemories();
+	}
+
+	protected void triggerOnDeathMobEffects(Entity.RemovalReason removalReason) {
+		for (MobEffectInstance mobEffectInstance : this.getActiveEffects()) {
+			mobEffectInstance.onMobRemoved(this, removalReason);
+		}
+
+		this.activeEffects.clear();
 	}
 
 	@Override
@@ -678,7 +682,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		compoundTag.putInt("HurtByTimestamp", this.lastHurtByMobTimestamp);
 		compoundTag.putShort("DeathTime", (short)this.deathTime);
 		compoundTag.putFloat("AbsorptionAmount", this.getAbsorptionAmount());
-		compoundTag.put("Attributes", this.getAttributes().save());
+		compoundTag.put("attributes", this.getAttributes().save());
 		if (!this.activeEffects.isEmpty()) {
 			ListTag listTag = new ListTag();
 
@@ -702,8 +706,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	@Override
 	public void readAdditionalSaveData(CompoundTag compoundTag) {
 		this.internalSetAbsorptionAmount(compoundTag.getFloat("AbsorptionAmount"));
-		if (compoundTag.contains("Attributes", 9) && this.level() != null && !this.level().isClientSide) {
-			this.getAttributes().load(compoundTag.getList("Attributes", 10));
+		if (compoundTag.contains("attributes", 9) && this.level() != null && !this.level().isClientSide) {
+			this.getAttributes().load(compoundTag.getList("attributes", 10));
 		}
 
 		if (compoundTag.contains("active_effects", 9)) {
@@ -2896,7 +2900,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	}
 
 	@Override
-	protected Vec3 getRelativePortalPosition(Direction.Axis axis, BlockUtil.FoundRectangle foundRectangle) {
+	public Vec3 getRelativePortalPosition(Direction.Axis axis, BlockUtil.FoundRectangle foundRectangle) {
 		return resetForwardDirectionOfRelativePortalPosition(super.getRelativePortalPosition(axis, foundRectangle));
 	}
 

@@ -43,11 +43,12 @@ import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class SoundManager extends SimplePreparableReloadListener<SoundManager.Preparations> {
-	public static final Sound EMPTY_SOUND = new Sound("minecraft:empty", ConstantFloat.of(1.0F), ConstantFloat.of(1.0F), 1, Sound.Type.FILE, false, false, 16);
-	public static final ResourceLocation INTENTIONALLY_EMPTY_SOUND_LOCATION = new ResourceLocation("minecraft", "intentionally_empty");
+	public static final ResourceLocation EMPTY_SOUND_LOCATION = ResourceLocation.withDefaultNamespace("empty");
+	public static final Sound EMPTY_SOUND = new Sound(EMPTY_SOUND_LOCATION, ConstantFloat.of(1.0F), ConstantFloat.of(1.0F), 1, Sound.Type.FILE, false, false, 16);
+	public static final ResourceLocation INTENTIONALLY_EMPTY_SOUND_LOCATION = ResourceLocation.withDefaultNamespace("intentionally_empty");
 	public static final WeighedSoundEvents INTENTIONALLY_EMPTY_SOUND_EVENT = new WeighedSoundEvents(INTENTIONALLY_EMPTY_SOUND_LOCATION, null);
 	public static final Sound INTENTIONALLY_EMPTY_SOUND = new Sound(
-		INTENTIONALLY_EMPTY_SOUND_LOCATION.toString(), ConstantFloat.of(1.0F), ConstantFloat.of(1.0F), 1, Sound.Type.FILE, false, false, 16
+		INTENTIONALLY_EMPTY_SOUND_LOCATION, ConstantFloat.of(1.0F), ConstantFloat.of(1.0F), 1, Sound.Type.FILE, false, false, 16
 	);
 	static final Logger LOGGER = LogUtils.getLogger();
 	private static final String SOUNDS_PATH = "sounds.json";
@@ -76,7 +77,7 @@ public class SoundManager extends SimplePreparableReloadListener<SoundManager.Pr
 			profilerFiller.push(string);
 
 			try {
-				for (Resource resource : resourceManager.getResourceStack(new ResourceLocation(string, "sounds.json"))) {
+				for (Resource resource : resourceManager.getResourceStack(ResourceLocation.fromNamespaceAndPath(string, "sounds.json"))) {
 					profilerFiller.push(resource.sourcePackId());
 
 					try {
@@ -88,7 +89,7 @@ public class SoundManager extends SimplePreparableReloadListener<SoundManager.Pr
 							profilerFiller.popPush("register");
 
 							for (Entry<String, SoundEventRegistration> entry : map.entrySet()) {
-								preparations.handleRegistration(new ResourceLocation(string, (String)entry.getKey()), (SoundEventRegistration)entry.getValue());
+								preparations.handleRegistration(ResourceLocation.fromNamespaceAndPath(string, (String)entry.getKey()), (SoundEventRegistration)entry.getValue());
 							}
 
 							profilerFiller.pop();
@@ -297,7 +298,7 @@ public class SoundManager extends SimplePreparableReloadListener<SoundManager.Pr
 								} else {
 									Sound sound = weighedSoundEvents.getSound(randomSource);
 									return new Sound(
-										sound.getLocation().toString(),
+										sound.getLocation(),
 										new MultipliedFloats(sound.getVolume(), sound.getVolume()),
 										new MultipliedFloats(sound.getPitch(), sound.getPitch()),
 										sound.getWeight(),

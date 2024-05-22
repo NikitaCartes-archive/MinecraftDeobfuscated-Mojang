@@ -209,7 +209,7 @@ public record Advancement(
 		}
 
 		public AdvancementHolder save(Consumer<AdvancementHolder> consumer, String string) {
-			AdvancementHolder advancementHolder = this.build(new ResourceLocation(string));
+			AdvancementHolder advancementHolder = this.build(ResourceLocation.parse(string));
 			consumer.accept(advancementHolder);
 			return advancementHolder;
 		}

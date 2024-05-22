@@ -24,7 +24,7 @@ public record CatVariant(ResourceLocation texture) {
 	public static final ResourceKey<CatVariant> ALL_BLACK = createKey("all_black");
 
 	private static ResourceKey<CatVariant> createKey(String string) {
-		return ResourceKey.create(Registries.CAT_VARIANT, new ResourceLocation(string));
+		return ResourceKey.create(Registries.CAT_VARIANT, ResourceLocation.withDefaultNamespace(string));
 	}
 
 	public static CatVariant bootstrap(Registry<CatVariant> registry) {
@@ -42,6 +42,6 @@ public record CatVariant(ResourceLocation texture) {
 	}
 
 	private static CatVariant register(Registry<CatVariant> registry, ResourceKey<CatVariant> resourceKey, String string) {
-		return Registry.register(registry, resourceKey, new CatVariant(new ResourceLocation(string)));
+		return Registry.register(registry, resourceKey, new CatVariant(ResourceLocation.withDefaultNamespace(string)));
 	}
 }

@@ -95,7 +95,7 @@ public class Stats {
 	public static final ResourceLocation INTERACT_WITH_SMITHING_TABLE = makeCustomStat("interact_with_smithing_table", StatFormatter.DEFAULT);
 
 	private static ResourceLocation makeCustomStat(String string, StatFormatter statFormatter) {
-		ResourceLocation resourceLocation = new ResourceLocation(string);
+		ResourceLocation resourceLocation = ResourceLocation.withDefaultNamespace(string);
 		Registry.register(BuiltInRegistries.CUSTOM_STAT, string, resourceLocation);
 		CUSTOM.get(resourceLocation, statFormatter);
 		return resourceLocation;

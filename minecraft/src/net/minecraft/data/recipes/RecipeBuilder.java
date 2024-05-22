@@ -9,7 +9,7 @@ import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.level.ItemLike;
 
 public interface RecipeBuilder {
-	ResourceLocation ROOT_RECIPE_ADVANCEMENT = new ResourceLocation("recipes/root");
+	ResourceLocation ROOT_RECIPE_ADVANCEMENT = ResourceLocation.withDefaultNamespace("recipes/root");
 
 	RecipeBuilder unlockedBy(String string, Criterion<?> criterion);
 
@@ -25,7 +25,7 @@ public interface RecipeBuilder {
 
 	default void save(RecipeOutput recipeOutput, String string) {
 		ResourceLocation resourceLocation = getDefaultRecipeId(this.getResult());
-		ResourceLocation resourceLocation2 = new ResourceLocation(string);
+		ResourceLocation resourceLocation2 = ResourceLocation.parse(string);
 		if (resourceLocation2.equals(resourceLocation)) {
 			throw new IllegalStateException("Recipe " + string + " should remove its 'save' argument as it is equal to default one");
 		} else {

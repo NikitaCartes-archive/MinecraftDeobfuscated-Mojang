@@ -12,7 +12,7 @@ import net.minecraft.world.entity.animal.Cod;
 
 @Environment(EnvType.CLIENT)
 public class CodRenderer extends MobRenderer<Cod, CodModel<Cod>> {
-	private static final ResourceLocation COD_LOCATION = new ResourceLocation("textures/entity/fish/cod.png");
+	private static final ResourceLocation COD_LOCATION = ResourceLocation.withDefaultNamespace("textures/entity/fish/cod.png");
 
 	public CodRenderer(EntityRendererProvider.Context context) {
 		super(context, new CodModel<>(context.bakeLayer(ModelLayers.COD)), 0.3F);

@@ -437,7 +437,7 @@ public class JigsawPlacement {
 
 		private static ResourceKey<StructureTemplatePool> readPoolKey(StructureTemplate.StructureBlockInfo structureBlockInfo, PoolAliasLookup poolAliasLookup) {
 			CompoundTag compoundTag = (CompoundTag)Objects.requireNonNull(structureBlockInfo.nbt(), () -> structureBlockInfo + " nbt was null");
-			ResourceKey<StructureTemplatePool> resourceKey = Pools.createKey(compoundTag.getString("pool"));
+			ResourceKey<StructureTemplatePool> resourceKey = Pools.parseKey(compoundTag.getString("pool"));
 			return poolAliasLookup.lookup(resourceKey);
 		}
 	}

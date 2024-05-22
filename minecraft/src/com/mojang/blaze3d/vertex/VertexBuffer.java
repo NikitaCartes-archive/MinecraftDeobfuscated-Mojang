@@ -1,7 +1,6 @@
 package com.mojang.blaze3d.vertex;
 
 import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.nio.ByteBuffer;
 import javax.annotation.Nullable;
@@ -33,24 +32,84 @@ public class VertexBuffer implements AutoCloseable {
 		this.arrayObjectId = GlStateManager._glGenVertexArrays();
 	}
 
-	public void upload(BufferBuilder.RenderedBuffer renderedBuffer) {
-		try {
-			if (!this.isInvalid()) {
+	public void upload(MeshData meshData) {
+		MeshData var2 = meshData;
+
+		label40: {
+			try {
+				if (this.isInvalid()) {
+					break label40;
+				}
+
 				RenderSystem.assertOnRenderThread();
-				BufferBuilder.DrawState drawState = renderedBuffer.drawState();
-				this.format = this.uploadVertexBuffer(drawState, renderedBuffer.vertexBuffer());
-				this.sequentialIndices = this.uploadIndexBuffer(drawState, renderedBuffer.indexBuffer());
+				MeshData.DrawState drawState = meshData.drawState();
+				this.format = this.uploadVertexBuffer(drawState, meshData.vertexBuffer());
+				this.sequentialIndices = this.uploadIndexBuffer(drawState, meshData.indexBuffer());
 				this.indexCount = drawState.indexCount();
 				this.indexType = drawState.indexType();
 				this.mode = drawState.mode();
-				return;
+			} catch (Throwable var6) {
+				if (meshData != null) {
+					try {
+						var2.close();
+					} catch (Throwable var5) {
+						var6.addSuppressed(var5);
+					}
+				}
+
+				throw var6;
 			}
-		} finally {
-			renderedBuffer.release();
+
+			if (meshData != null) {
+				meshData.close();
+			}
+
+			return;
+		}
+
+		if (meshData != null) {
+			meshData.close();
 		}
 	}
 
-	private VertexFormat uploadVertexBuffer(BufferBuilder.DrawState drawState, @Nullable ByteBuffer byteBuffer) {
+	public void uploadIndexBuffer(ByteBufferBuilder.Result result) {
+		ByteBufferBuilder.Result var2 = result;
+
+		label40: {
+			try {
+				if (this.isInvalid()) {
+					break label40;
+				}
+
+				RenderSystem.assertOnRenderThread();
+				GlStateManager._glBindBuffer(34963, this.indexBufferId);
+				RenderSystem.glBufferData(34963, result.byteBuffer(), this.usage.id);
+				this.sequentialIndices = null;
+			} catch (Throwable var6) {
+				if (result != null) {
+					try {
+						var2.close();
+					} catch (Throwable var5) {
+						var6.addSuppressed(var5);
+					}
+				}
+
+				throw var6;
+			}
+
+			if (result != null) {
+				result.close();
+			}
+
+			return;
+		}
+
+		if (result != null) {
+			result.close();
+		}
+	}
+
+	private VertexFormat uploadVertexBuffer(MeshData.DrawState drawState, @Nullable ByteBuffer byteBuffer) {
 		boolean bl = false;
 		if (!drawState.format().equals(this.format)) {
 			if (this.format != null) {
@@ -74,7 +133,7 @@ public class VertexBuffer implements AutoCloseable {
 	}
 
 	@Nullable
-	private RenderSystem.AutoStorageIndexBuffer uploadIndexBuffer(BufferBuilder.DrawState drawState, @Nullable ByteBuffer byteBuffer) {
+	private RenderSystem.AutoStorageIndexBuffer uploadIndexBuffer(MeshData.DrawState drawState, @Nullable ByteBuffer byteBuffer) {
 		if (byteBuffer != null) {
 			GlStateManager._glBindBuffer(34963, this.indexBufferId);
 			RenderSystem.glBufferData(34963, byteBuffer, this.usage.id);
@@ -117,61 +176,7 @@ public class VertexBuffer implements AutoCloseable {
 	}
 
 	private void _drawWithShader(Matrix4f matrix4f, Matrix4f matrix4f2, ShaderInstance shaderInstance) {
-		for (int i = 0; i < 12; i++) {
-			int j = RenderSystem.getShaderTexture(i);
-			shaderInstance.setSampler("Sampler" + i, j);
-		}
-
-		if (shaderInstance.MODEL_VIEW_MATRIX != null) {
-			shaderInstance.MODEL_VIEW_MATRIX.set(matrix4f);
-		}
-
-		if (shaderInstance.PROJECTION_MATRIX != null) {
-			shaderInstance.PROJECTION_MATRIX.set(matrix4f2);
-		}
-
-		if (shaderInstance.COLOR_MODULATOR != null) {
-			shaderInstance.COLOR_MODULATOR.set(RenderSystem.getShaderColor());
-		}
-
-		if (shaderInstance.GLINT_ALPHA != null) {
-			shaderInstance.GLINT_ALPHA.set(RenderSystem.getShaderGlintAlpha());
-		}
-
-		if (shaderInstance.FOG_START != null) {
-			shaderInstance.FOG_START.set(RenderSystem.getShaderFogStart());
-		}
-
-		if (shaderInstance.FOG_END != null) {
-			shaderInstance.FOG_END.set(RenderSystem.getShaderFogEnd());
-		}
-
-		if (shaderInstance.FOG_COLOR != null) {
-			shaderInstance.FOG_COLOR.set(RenderSystem.getShaderFogColor());
-		}
-
-		if (shaderInstance.FOG_SHAPE != null) {
-			shaderInstance.FOG_SHAPE.set(RenderSystem.getShaderFogShape().getIndex());
-		}
-
-		if (shaderInstance.TEXTURE_MATRIX != null) {
-			shaderInstance.TEXTURE_MATRIX.set(RenderSystem.getTextureMatrix());
-		}
-
-		if (shaderInstance.GAME_TIME != null) {
-			shaderInstance.GAME_TIME.set(RenderSystem.getShaderGameTime());
-		}
-
-		if (shaderInstance.SCREEN_SIZE != null) {
-			Window window = Minecraft.getInstance().getWindow();
-			shaderInstance.SCREEN_SIZE.set((float)window.getWidth(), (float)window.getHeight());
-		}
-
-		if (shaderInstance.LINE_WIDTH != null && (this.mode == VertexFormat.Mode.LINES || this.mode == VertexFormat.Mode.LINE_STRIP)) {
-			shaderInstance.LINE_WIDTH.set(RenderSystem.getShaderLineWidth());
-		}
-
-		RenderSystem.setupShaderLights(shaderInstance);
+		shaderInstance.setDefaultUniforms(this.mode, matrix4f, matrix4f2, Minecraft.getInstance().getWindow());
 		shaderInstance.apply();
 		this.draw();
 		shaderInstance.clear();

@@ -8,14 +8,12 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 import java.util.function.Function;
 import net.minecraft.Util;
 import net.minecraft.core.Holder;
-import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EquipmentSlotGroup;
@@ -83,10 +81,9 @@ public class SetAttributesFunction extends LootItemConditionalFunction {
 		RandomSource randomSource = lootContext.getRandom();
 
 		for (SetAttributesFunction.Modifier modifier : this.modifiers) {
-			UUID uUID = (UUID)modifier.id.orElseGet(UUID::randomUUID);
 			EquipmentSlotGroup equipmentSlotGroup = Util.getRandom(modifier.slots, randomSource);
 			itemAttributeModifiers = itemAttributeModifiers.withModifierAdded(
-				modifier.attribute, new AttributeModifier(uUID, modifier.name, (double)modifier.amount.getFloat(lootContext), modifier.operation), equipmentSlotGroup
+				modifier.attribute, new AttributeModifier(modifier.id, (double)modifier.amount.getFloat(lootContext), modifier.operation), equipmentSlotGroup
 			);
 		}
 
@@ -94,9 +91,9 @@ public class SetAttributesFunction extends LootItemConditionalFunction {
 	}
 
 	public static SetAttributesFunction.ModifierBuilder modifier(
-		String string, Holder<Attribute> holder, AttributeModifier.Operation operation, NumberProvider numberProvider
+		ResourceLocation resourceLocation, Holder<Attribute> holder, AttributeModifier.Operation operation, NumberProvider numberProvider
 	) {
-		return new SetAttributesFunction.ModifierBuilder(string, holder, operation, numberProvider);
+		return new SetAttributesFunction.ModifierBuilder(resourceLocation, holder, operation, numberProvider);
 	}
 
 	public static SetAttributesFunction.Builder setAttributes() {
@@ -131,7 +128,7 @@ public class SetAttributesFunction extends LootItemConditionalFunction {
 	}
 
 	static record Modifier(
-		String name, Holder<Attribute> attribute, AttributeModifier.Operation operation, NumberProvider amount, List<EquipmentSlotGroup> slots, Optional<UUID> id
+		ResourceLocation id, Holder<Attribute> attribute, AttributeModifier.Operation operation, NumberProvider amount, List<EquipmentSlotGroup> slots
 	) {
 		private static final Codec<List<EquipmentSlotGroup>> SLOTS_CODEC = ExtraCodecs.nonEmptyList(
 			Codec.either(EquipmentSlotGroup.CODEC, EquipmentSlotGroup.CODEC.listOf())
@@ -139,27 +136,25 @@ public class SetAttributesFunction extends LootItemConditionalFunction {
 		);
 		public static final Codec<SetAttributesFunction.Modifier> CODEC = RecordCodecBuilder.create(
 			instance -> instance.group(
-						Codec.STRING.fieldOf("name").forGetter(SetAttributesFunction.Modifier::name),
+						ResourceLocation.CODEC.fieldOf("id").forGetter(SetAttributesFunction.Modifier::id),
 						Attribute.CODEC.fieldOf("attribute").forGetter(SetAttributesFunction.Modifier::attribute),
 						AttributeModifier.Operation.CODEC.fieldOf("operation").forGetter(SetAttributesFunction.Modifier::operation),
 						NumberProviders.CODEC.fieldOf("amount").forGetter(SetAttributesFunction.Modifier::amount),
-						SLOTS_CODEC.fieldOf("slot").forGetter(SetAttributesFunction.Modifier::slots),
-						UUIDUtil.STRING_CODEC.optionalFieldOf("id").forGetter(SetAttributesFunction.Modifier::id)
+						SLOTS_CODEC.fieldOf("slot").forGetter(SetAttributesFunction.Modifier::slots)
 					)
 					.apply(instance, SetAttributesFunction.Modifier::new)
 		);
 	}
 
 	public static class ModifierBuilder {
-		private final String name;
+		private final ResourceLocation id;
 		private final Holder<Attribute> attribute;
 		private final AttributeModifier.Operation operation;
 		private final NumberProvider amount;
-		private Optional<UUID> id = Optional.empty();
 		private final Set<EquipmentSlotGroup> slots = EnumSet.noneOf(EquipmentSlotGroup.class);
 
-		public ModifierBuilder(String string, Holder<Attribute> holder, AttributeModifier.Operation operation, NumberProvider numberProvider) {
-			this.name = string;
+		public ModifierBuilder(ResourceLocation resourceLocation, Holder<Attribute> holder, AttributeModifier.Operation operation, NumberProvider numberProvider) {
+			this.id = resourceLocation;
 			this.attribute = holder;
 			this.operation = operation;
 			this.amount = numberProvider;
@@ -170,13 +165,8 @@ public class SetAttributesFunction extends LootItemConditionalFunction {
 			return this;
 		}
 
-		public SetAttributesFunction.ModifierBuilder withUuid(UUID uUID) {
-			this.id = Optional.of(uUID);
-			return this;
-		}
-
 		public SetAttributesFunction.Modifier build() {
-			return new SetAttributesFunction.Modifier(this.name, this.attribute, this.operation, this.amount, List.copyOf(this.slots), this.id);
+			return new SetAttributesFunction.Modifier(this.id, this.attribute, this.operation, this.amount, List.copyOf(this.slots));
 		}
 	}
 }

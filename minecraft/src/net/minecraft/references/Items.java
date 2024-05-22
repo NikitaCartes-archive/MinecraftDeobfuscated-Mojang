@@ -10,6 +10,6 @@ public class Items {
 	public static final ResourceKey<Item> MELON_SEEDS = createKey("melon_seeds");
 
 	private static ResourceKey<Item> createKey(String string) {
-		return ResourceKey.create(Registries.ITEM, new ResourceLocation(string));
+		return ResourceKey.create(Registries.ITEM, ResourceLocation.withDefaultNamespace(string));
 	}
 }

@@ -22,6 +22,7 @@ import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.CrashReportDetail;
 import net.minecraft.Util;
@@ -30,6 +31,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.DisconnectedScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.Connection;
+import net.minecraft.network.DisconnectionDetails;
 import net.minecraft.network.PacketSendListener;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -50,6 +52,7 @@ import net.minecraft.network.protocol.login.ServerboundKeyPacket;
 import net.minecraft.network.protocol.login.ServerboundLoginAcknowledgedPacket;
 import net.minecraft.realms.DisconnectedRealmsScreen;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.ServerLinks;
 import net.minecraft.util.Crypt;
 import net.minecraft.world.flag.FeatureFlags;
 import org.slf4j.Logger;
@@ -191,7 +194,9 @@ public class ClientHandshakePacketListenerImpl implements ClientLoginPacketListe
 						this.parent,
 						this.cookies,
 						null,
-						clientboundGameProfilePacket.strictErrorHandling()
+						clientboundGameProfilePacket.strictErrorHandling(),
+						Map.of(),
+						ServerLinks.EMPTY
 					)
 				)
 			);
@@ -202,12 +207,12 @@ public class ClientHandshakePacketListenerImpl implements ClientLoginPacketListe
 	}
 
 	@Override
-	public void onDisconnect(Component component) {
-		Component component2 = this.wasTransferredTo ? CommonComponents.TRANSFER_CONNECT_FAILED : CommonComponents.CONNECT_FAILED;
+	public void onDisconnect(DisconnectionDetails disconnectionDetails) {
+		Component component = this.wasTransferredTo ? CommonComponents.TRANSFER_CONNECT_FAILED : CommonComponents.CONNECT_FAILED;
 		if (this.serverData != null && this.serverData.isRealm()) {
-			this.minecraft.setScreen(new DisconnectedRealmsScreen(this.parent, component2, component));
+			this.minecraft.setScreen(new DisconnectedRealmsScreen(this.parent, component, disconnectionDetails.reason()));
 		} else {
-			this.minecraft.setScreen(new DisconnectedScreen(this.parent, component2, component));
+			this.minecraft.setScreen(new DisconnectedScreen(this.parent, component, disconnectionDetails));
 		}
 	}
 
@@ -245,7 +250,7 @@ public class ClientHandshakePacketListenerImpl implements ClientLoginPacketListe
 	}
 
 	@Override
-	public void fillListenerSpecificCrashDetails(CrashReportCategory crashReportCategory) {
+	public void fillListenerSpecificCrashDetails(CrashReport crashReport, CrashReportCategory crashReportCategory) {
 		crashReportCategory.setDetail("Server type", (CrashReportDetail<String>)(() -> this.serverData != null ? this.serverData.type().toString() : "<unknown>"));
 		crashReportCategory.setDetail("Login phase", (CrashReportDetail<String>)(() -> ((ClientHandshakePacketListenerImpl.State)this.state.get()).toString()));
 	}

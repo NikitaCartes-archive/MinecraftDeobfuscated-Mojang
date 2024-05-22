@@ -96,14 +96,14 @@ public class TurtleModel<T extends Turtle> extends QuadrupedModel<T> {
 	}
 
 	@Override
-	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h, float k) {
+	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, int k) {
 		boolean bl = this.eggBelly.visible;
 		if (bl) {
 			poseStack.pushPose();
 			poseStack.translate(0.0F, -0.08F, 0.0F);
 		}
 
-		super.renderToBuffer(poseStack, vertexConsumer, i, j, f, g, h, k);
+		super.renderToBuffer(poseStack, vertexConsumer, i, j, k);
 		if (bl) {
 			poseStack.popPose();
 		}

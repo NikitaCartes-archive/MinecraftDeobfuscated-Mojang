@@ -137,7 +137,7 @@ public class BannerRenderer implements BlockEntityRenderer<BannerBlockEntity> {
 	private static void renderPatternLayer(
 		PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j, ModelPart modelPart, Material material, DyeColor dyeColor
 	) {
-		float[] fs = dyeColor.getTextureDiffuseColors();
-		modelPart.render(poseStack, material.buffer(multiBufferSource, RenderType::entityNoOutline), i, j, fs[0], fs[1], fs[2], 1.0F);
+		int k = dyeColor.getTextureDiffuseColor();
+		modelPart.render(poseStack, material.buffer(multiBufferSource, RenderType::entityNoOutline), i, j, k);
 	}
 }

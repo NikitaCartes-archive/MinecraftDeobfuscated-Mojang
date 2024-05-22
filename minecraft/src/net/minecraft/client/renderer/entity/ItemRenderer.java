@@ -46,8 +46,8 @@ import net.minecraft.world.level.block.StainedGlassPaneBlock;
 
 @Environment(EnvType.CLIENT)
 public class ItemRenderer implements ResourceManagerReloadListener {
-	public static final ResourceLocation ENCHANTED_GLINT_ENTITY = new ResourceLocation("textures/misc/enchanted_glint_entity.png");
-	public static final ResourceLocation ENCHANTED_GLINT_ITEM = new ResourceLocation("textures/misc/enchanted_glint_item.png");
+	public static final ResourceLocation ENCHANTED_GLINT_ENTITY = ResourceLocation.withDefaultNamespace("textures/misc/enchanted_glint_entity.png");
+	public static final ResourceLocation ENCHANTED_GLINT_ITEM = ResourceLocation.withDefaultNamespace("textures/misc/enchanted_glint_item.png");
 	private static final Set<Item> IGNORED = Sets.<Item>newHashSet(Items.AIR);
 	public static final int GUI_SLOT_CENTER_X = 8;
 	public static final int GUI_SLOT_CENTER_Y = 8;
@@ -130,8 +130,8 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 			poseStack.translate(-0.5F, -0.5F, -0.5F);
 			if (!bakedModel.isCustomRenderer() && (!itemStack.is(Items.TRIDENT) || bl2)) {
 				boolean bl3;
-				if (itemDisplayContext != ItemDisplayContext.GUI && !itemDisplayContext.firstPerson() && itemStack.getItem() instanceof BlockItem) {
-					Block block = ((BlockItem)itemStack.getItem()).getBlock();
+				if (itemDisplayContext != ItemDisplayContext.GUI && !itemDisplayContext.firstPerson() && itemStack.getItem() instanceof BlockItem blockItem) {
+					Block block = blockItem.getBlock();
 					bl3 = !(block instanceof HalfTransparentBlock) && !(block instanceof StainedGlassPaneBlock);
 				} else {
 					bl3 = true;
@@ -147,11 +147,7 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 						MatrixUtil.mulComponentWise(pose.pose(), 0.75F);
 					}
 
-					if (bl3) {
-						vertexConsumer = getCompassFoilBufferDirect(multiBufferSource, renderType, pose);
-					} else {
-						vertexConsumer = getCompassFoilBuffer(multiBufferSource, renderType, pose);
-					}
+					vertexConsumer = getCompassFoilBuffer(multiBufferSource, renderType, pose);
 				} else if (bl3) {
 					vertexConsumer = getFoilBufferDirect(multiBufferSource, renderType, true, itemStack.hasFoil());
 				} else {
@@ -171,23 +167,15 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 		return itemStack.is(ItemTags.COMPASSES) || itemStack.is(Items.CLOCK);
 	}
 
-	public static VertexConsumer getArmorFoilBuffer(MultiBufferSource multiBufferSource, RenderType renderType, boolean bl, boolean bl2) {
-		return bl2
-			? VertexMultiConsumer.create(
-				multiBufferSource.getBuffer(bl ? RenderType.armorGlint() : RenderType.armorEntityGlint()), multiBufferSource.getBuffer(renderType)
-			)
+	public static VertexConsumer getArmorFoilBuffer(MultiBufferSource multiBufferSource, RenderType renderType, boolean bl) {
+		return bl
+			? VertexMultiConsumer.create(multiBufferSource.getBuffer(RenderType.armorEntityGlint()), multiBufferSource.getBuffer(renderType))
 			: multiBufferSource.getBuffer(renderType);
 	}
 
 	public static VertexConsumer getCompassFoilBuffer(MultiBufferSource multiBufferSource, RenderType renderType, PoseStack.Pose pose) {
 		return VertexMultiConsumer.create(
 			new SheetedDecalTextureGenerator(multiBufferSource.getBuffer(RenderType.glint()), pose, 0.0078125F), multiBufferSource.getBuffer(renderType)
-		);
-	}
-
-	public static VertexConsumer getCompassFoilBufferDirect(MultiBufferSource multiBufferSource, RenderType renderType, PoseStack.Pose pose) {
-		return VertexMultiConsumer.create(
-			new SheetedDecalTextureGenerator(multiBufferSource.getBuffer(RenderType.glintDirect()), pose, 0.0078125F), multiBufferSource.getBuffer(renderType)
 		);
 	}
 
@@ -203,9 +191,7 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 
 	public static VertexConsumer getFoilBufferDirect(MultiBufferSource multiBufferSource, RenderType renderType, boolean bl, boolean bl2) {
 		return bl2
-			? VertexMultiConsumer.create(
-				multiBufferSource.getBuffer(bl ? RenderType.glintDirect() : RenderType.entityGlintDirect()), multiBufferSource.getBuffer(renderType)
-			)
+			? VertexMultiConsumer.create(multiBufferSource.getBuffer(bl ? RenderType.glint() : RenderType.entityGlintDirect()), multiBufferSource.getBuffer(renderType))
 			: multiBufferSource.getBuffer(renderType);
 	}
 

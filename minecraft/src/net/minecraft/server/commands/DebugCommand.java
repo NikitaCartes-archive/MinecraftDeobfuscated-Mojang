@@ -110,7 +110,7 @@ public class DebugCommand {
 				int i = 0;
 
 				try {
-					Path path = minecraftServer.getFile("debug").toPath();
+					Path path = minecraftServer.getFile("debug");
 					Files.createDirectories(path);
 					final PrintWriter printWriter = new PrintWriter(Files.newBufferedWriter(path.resolve(string), StandardCharsets.UTF_8));
 					DebugCommand.Tracer tracer = new DebugCommand.Tracer(printWriter);

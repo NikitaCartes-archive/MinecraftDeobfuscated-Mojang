@@ -21,8 +21,8 @@ public abstract class ListModel<E extends Entity> extends EntityModel<E> {
 	}
 
 	@Override
-	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h, float k) {
-		this.parts().forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, f, g, h, k));
+	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, int k) {
+		this.parts().forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, k));
 	}
 
 	public abstract Iterable<ModelPart> parts();

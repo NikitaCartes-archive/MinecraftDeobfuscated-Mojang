@@ -8,19 +8,24 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 
 public class AttributeInstance {
+	private static final String BASE_FIELD = "base";
+	private static final String MODIFIERS_FIELD = "modifiers";
+	public static final String ID_FIELD = "id";
 	private final Holder<Attribute> attribute;
-	private final Map<AttributeModifier.Operation, Map<UUID, AttributeModifier>> modifiersByOperation = Maps.newEnumMap(AttributeModifier.Operation.class);
-	private final Map<UUID, AttributeModifier> modifierById = new Object2ObjectArrayMap<>();
-	private final Map<UUID, AttributeModifier> permanentModifiers = new Object2ObjectArrayMap<>();
+	private final Map<AttributeModifier.Operation, Map<ResourceLocation, AttributeModifier>> modifiersByOperation = Maps.newEnumMap(
+		AttributeModifier.Operation.class
+	);
+	private final Map<ResourceLocation, AttributeModifier> modifierById = new Object2ObjectArrayMap<>();
+	private final Map<ResourceLocation, AttributeModifier> permanentModifiers = new Object2ObjectArrayMap<>();
 	private double baseValue;
 	private boolean dirty = true;
 	private double cachedValue;
@@ -48,8 +53,8 @@ public class AttributeInstance {
 	}
 
 	@VisibleForTesting
-	Map<UUID, AttributeModifier> getModifiers(AttributeModifier.Operation operation) {
-		return (Map<UUID, AttributeModifier>)this.modifiersByOperation.computeIfAbsent(operation, operationx -> new Object2ObjectOpenHashMap());
+	Map<ResourceLocation, AttributeModifier> getModifiers(AttributeModifier.Operation operation) {
+		return (Map<ResourceLocation, AttributeModifier>)this.modifiersByOperation.computeIfAbsent(operation, operationx -> new Object2ObjectOpenHashMap());
 	}
 
 	public Set<AttributeModifier> getModifiers() {
@@ -57,12 +62,12 @@ public class AttributeInstance {
 	}
 
 	@Nullable
-	public AttributeModifier getModifier(UUID uUID) {
-		return (AttributeModifier)this.modifierById.get(uUID);
+	public AttributeModifier getModifier(ResourceLocation resourceLocation) {
+		return (AttributeModifier)this.modifierById.get(resourceLocation);
 	}
 
-	public boolean hasModifier(AttributeModifier attributeModifier) {
-		return this.modifierById.get(attributeModifier.id()) != null;
+	public boolean hasModifier(ResourceLocation resourceLocation) {
+		return this.modifierById.get(resourceLocation) != null;
 	}
 
 	private void addModifier(AttributeModifier attributeModifier) {
@@ -101,22 +106,22 @@ public class AttributeInstance {
 		this.removeModifier(attributeModifier.id());
 	}
 
-	public void removeModifier(UUID uUID) {
-		AttributeModifier attributeModifier = (AttributeModifier)this.modifierById.remove(uUID);
+	public void removeModifier(ResourceLocation resourceLocation) {
+		AttributeModifier attributeModifier = (AttributeModifier)this.modifierById.remove(resourceLocation);
 		if (attributeModifier != null) {
-			this.getModifiers(attributeModifier.operation()).remove(uUID);
-			this.permanentModifiers.remove(uUID);
+			this.getModifiers(attributeModifier.operation()).remove(resourceLocation);
+			this.permanentModifiers.remove(resourceLocation);
 			this.setDirty();
 		}
 	}
 
-	public boolean removePermanentModifier(UUID uUID) {
-		AttributeModifier attributeModifier = (AttributeModifier)this.permanentModifiers.remove(uUID);
+	public boolean removePermanentModifier(ResourceLocation resourceLocation) {
+		AttributeModifier attributeModifier = (AttributeModifier)this.permanentModifiers.remove(resourceLocation);
 		if (attributeModifier == null) {
 			return false;
 		} else {
 			this.getModifiers(attributeModifier.operation()).remove(attributeModifier.id());
-			this.modifierById.remove(uUID);
+			this.modifierById.remove(resourceLocation);
 			this.setDirty();
 			return true;
 		}
@@ -177,8 +182,8 @@ public class AttributeInstance {
 		ResourceKey<Attribute> resourceKey = (ResourceKey<Attribute>)this.attribute
 			.unwrapKey()
 			.orElseThrow(() -> new IllegalStateException("Tried to serialize unregistered attribute"));
-		compoundTag.putString("Name", resourceKey.location().toString());
-		compoundTag.putDouble("Base", this.baseValue);
+		compoundTag.putString("id", resourceKey.location().toString());
+		compoundTag.putDouble("base", this.baseValue);
 		if (!this.permanentModifiers.isEmpty()) {
 			ListTag listTag = new ListTag();
 
@@ -186,16 +191,16 @@ public class AttributeInstance {
 				listTag.add(attributeModifier.save());
 			}
 
-			compoundTag.put("Modifiers", listTag);
+			compoundTag.put("modifiers", listTag);
 		}
 
 		return compoundTag;
 	}
 
 	public void load(CompoundTag compoundTag) {
-		this.baseValue = compoundTag.getDouble("Base");
-		if (compoundTag.contains("Modifiers", 9)) {
-			ListTag listTag = compoundTag.getList("Modifiers", 10);
+		this.baseValue = compoundTag.getDouble("base");
+		if (compoundTag.contains("modifiers", 9)) {
+			ListTag listTag = compoundTag.getList("modifiers", 10);
 
 			for (int i = 0; i < listTag.size(); i++) {
 				AttributeModifier attributeModifier = AttributeModifier.load(listTag.getCompound(i));

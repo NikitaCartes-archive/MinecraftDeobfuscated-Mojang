@@ -17,6 +17,7 @@ import net.minecraft.advancements.AdvancementNode;
 import net.minecraft.advancements.AdvancementTree;
 import net.minecraft.advancements.TreeNodePosition;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -33,7 +34,7 @@ public class ServerAdvancementManager extends SimpleJsonResourceReloadListener {
 	private final HolderLookup.Provider registries;
 
 	public ServerAdvancementManager(HolderLookup.Provider provider) {
-		super(GSON, "advancements");
+		super(GSON, Registries.elementsDirPath(Registries.ADVANCEMENT));
 		this.registries = provider;
 	}
 

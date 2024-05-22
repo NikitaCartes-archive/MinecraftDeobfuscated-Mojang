@@ -38,6 +38,7 @@ import javax.annotation.Nullable;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.CrashReportDetail;
+import net.minecraft.ReportType;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -1433,7 +1434,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 		Writer writer2 = Files.newBufferedWriter(path.resolve("example_crash.txt"));
 
 		try {
-			writer2.write(crashReport.getFriendlyReport());
+			writer2.write(crashReport.getFriendlyReport(ReportType.TEST));
 		} catch (Throwable var21) {
 			if (writer2 != null) {
 				try {
@@ -1650,16 +1651,6 @@ public class ServerLevel extends Level implements WorldGenLevel {
 		} catch (Exception var6) {
 			return "";
 		}
-	}
-
-	public static void makeObsidianPlatform(ServerLevel serverLevel) {
-		BlockPos blockPos = END_SPAWN_POINT;
-		int i = blockPos.getX();
-		int j = blockPos.getY() - 2;
-		int k = blockPos.getZ();
-		BlockPos.betweenClosed(i - 2, j + 1, k - 2, i + 2, j + 3, k + 2)
-			.forEach(blockPosx -> serverLevel.setBlockAndUpdate(blockPosx, Blocks.AIR.defaultBlockState()));
-		BlockPos.betweenClosed(i - 2, j, k - 2, i + 2, j, k + 2).forEach(blockPosx -> serverLevel.setBlockAndUpdate(blockPosx, Blocks.OBSIDIAN.defaultBlockState()));
 	}
 
 	@Override

@@ -25,6 +25,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.animal.WolfVariants;
 import net.minecraft.world.entity.decoration.PaintingVariants;
+import net.minecraft.world.item.JukeboxSongs;
 import net.minecraft.world.item.armortrim.TrimMaterials;
 import net.minecraft.world.item.armortrim.TrimPatterns;
 import net.minecraft.world.item.enchantment.Enchantments;
@@ -64,7 +65,8 @@ public class VanillaRegistries {
 		.add(Registries.DAMAGE_TYPE, DamageTypes::bootstrap)
 		.add(Registries.BANNER_PATTERN, BannerPatterns::bootstrap)
 		.add(Registries.ENCHANTMENT, Enchantments::bootstrap)
-		.add(Registries.ENCHANTMENT_PROVIDER, VanillaEnchantmentProviders::bootstrap);
+		.add(Registries.ENCHANTMENT_PROVIDER, VanillaEnchantmentProviders::bootstrap)
+		.add(Registries.JUKEBOX_SONG, JukeboxSongs::bootstrap);
 
 	private static void validateThatAllBiomeFeaturesHaveBiomeFilter(HolderLookup.Provider provider) {
 		validateThatAllBiomeFeaturesHaveBiomeFilter(provider.lookupOrThrow(Registries.PLACED_FEATURE), provider.lookupOrThrow(Registries.BIOME));

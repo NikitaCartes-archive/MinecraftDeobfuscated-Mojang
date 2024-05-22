@@ -10,10 +10,10 @@ public class CookiePacketTypes {
 	public static final PacketType<ServerboundCookieResponsePacket> SERVERBOUND_COOKIE_RESPONSE = createServerbound("cookie_response");
 
 	private static <T extends Packet<ClientCookiePacketListener>> PacketType<T> createClientbound(String string) {
-		return new PacketType<>(PacketFlow.CLIENTBOUND, new ResourceLocation(string));
+		return new PacketType<>(PacketFlow.CLIENTBOUND, ResourceLocation.withDefaultNamespace(string));
 	}
 
 	private static <T extends Packet<ServerCookiePacketListener>> PacketType<T> createServerbound(String string) {
-		return new PacketType<>(PacketFlow.SERVERBOUND, new ResourceLocation(string));
+		return new PacketType<>(PacketFlow.SERVERBOUND, ResourceLocation.withDefaultNamespace(string));
 	}
 }

@@ -99,8 +99,8 @@ public class ObjectiveCriteria {
 			return i < 0
 				? Optional.empty()
 				: BuiltInRegistries.STAT_TYPE
-					.getOptional(ResourceLocation.of(string.substring(0, i), '.'))
-					.flatMap(statType -> getStat(statType, ResourceLocation.of(string.substring(i + 1), '.')));
+					.getOptional(ResourceLocation.bySeparator(string.substring(0, i), '.'))
+					.flatMap(statType -> getStat(statType, ResourceLocation.bySeparator(string.substring(i + 1), '.')));
 		}
 	}
 

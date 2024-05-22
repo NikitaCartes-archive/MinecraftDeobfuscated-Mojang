@@ -13,8 +13,8 @@ import org.joml.Matrix4f;
 
 @Environment(EnvType.CLIENT)
 public class TheEndPortalRenderer<T extends TheEndPortalBlockEntity> implements BlockEntityRenderer<T> {
-	public static final ResourceLocation END_SKY_LOCATION = new ResourceLocation("textures/environment/end_sky.png");
-	public static final ResourceLocation END_PORTAL_LOCATION = new ResourceLocation("textures/entity/end_portal.png");
+	public static final ResourceLocation END_SKY_LOCATION = ResourceLocation.withDefaultNamespace("textures/environment/end_sky.png");
+	public static final ResourceLocation END_PORTAL_LOCATION = ResourceLocation.withDefaultNamespace("textures/entity/end_portal.png");
 
 	public TheEndPortalRenderer(BlockEntityRendererProvider.Context context) {
 	}
@@ -50,10 +50,10 @@ public class TheEndPortalRenderer<T extends TheEndPortalBlockEntity> implements 
 		Direction direction
 	) {
 		if (theEndPortalBlockEntity.shouldRenderFace(direction)) {
-			vertexConsumer.vertex(matrix4f, f, h, j).endVertex();
-			vertexConsumer.vertex(matrix4f, g, h, k).endVertex();
-			vertexConsumer.vertex(matrix4f, g, i, l).endVertex();
-			vertexConsumer.vertex(matrix4f, f, i, m).endVertex();
+			vertexConsumer.addVertex(matrix4f, f, h, j);
+			vertexConsumer.addVertex(matrix4f, g, h, k);
+			vertexConsumer.addVertex(matrix4f, g, i, l);
+			vertexConsumer.addVertex(matrix4f, f, i, m);
 		}
 	}
 

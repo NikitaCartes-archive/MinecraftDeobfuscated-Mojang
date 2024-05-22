@@ -13,6 +13,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.TimeUtil;
@@ -79,7 +80,8 @@ public class PolarBear extends Animal implements NeutralMob {
 		super.registerGoals();
 		this.goalSelector.addGoal(0, new FloatGoal(this));
 		this.goalSelector.addGoal(1, new PolarBear.PolarBearMeleeAttackGoal());
-		this.goalSelector.addGoal(1, new PolarBear.PolarBearPanicGoal());
+		this.goalSelector
+			.addGoal(1, new PanicGoal(this, 2.0, pathfinderMob -> pathfinderMob.isBaby() ? DamageTypeTags.PANIC_CAUSES : DamageTypeTags.PANIC_ENVIRONMENTAL_CAUSES));
 		this.goalSelector.addGoal(4, new FollowParentGoal(this, 1.25));
 		this.goalSelector.addGoal(5, new RandomStrollGoal(this, 1.0));
 		this.goalSelector.addGoal(6, new LookAtPlayerGoal(this, Player.class, 6.0F));
@@ -324,17 +326,6 @@ public class PolarBear extends Animal implements NeutralMob {
 		public void stop() {
 			PolarBear.this.setStanding(false);
 			super.stop();
-		}
-	}
-
-	class PolarBearPanicGoal extends PanicGoal {
-		public PolarBearPanicGoal() {
-			super(PolarBear.this, 2.0);
-		}
-
-		@Override
-		protected boolean shouldPanic() {
-			return this.mob.getLastHurtByMob() != null && this.mob.isBaby() || this.mob.isOnFire();
 		}
 	}
 }

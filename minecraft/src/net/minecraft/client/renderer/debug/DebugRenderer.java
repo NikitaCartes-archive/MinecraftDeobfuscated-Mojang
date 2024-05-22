@@ -185,7 +185,7 @@ public class DebugRenderer {
 			poseStack.pushPose();
 			poseStack.translate((float)(d - j), (float)(e - k) + 0.07F, (float)(f - l));
 			poseStack.mulPose(camera.rotation());
-			poseStack.scale(-g, -g, g);
+			poseStack.scale(g, -g, g);
 			float m = bl ? (float)(-font.width(string)) / 2.0F : 0.0F;
 			m -= h / g;
 			font.drawInBatch(

@@ -10,7 +10,7 @@ import net.minecraft.world.inventory.HopperMenu;
 
 @Environment(EnvType.CLIENT)
 public class HopperScreen extends AbstractContainerScreen<HopperMenu> {
-	private static final ResourceLocation HOPPER_LOCATION = new ResourceLocation("textures/gui/container/hopper.png");
+	private static final ResourceLocation HOPPER_LOCATION = ResourceLocation.withDefaultNamespace("textures/gui/container/hopper.png");
 
 	public HopperScreen(HopperMenu hopperMenu, Inventory inventory, Component component) {
 		super(hopperMenu, inventory, component);

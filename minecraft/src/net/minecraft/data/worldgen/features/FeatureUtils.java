@@ -62,7 +62,7 @@ public class FeatureUtils {
 	}
 
 	public static ResourceKey<ConfiguredFeature<?, ?>> createKey(String string) {
-		return ResourceKey.create(Registries.CONFIGURED_FEATURE, new ResourceLocation(string));
+		return ResourceKey.create(Registries.CONFIGURED_FEATURE, ResourceLocation.withDefaultNamespace(string));
 	}
 
 	public static void register(

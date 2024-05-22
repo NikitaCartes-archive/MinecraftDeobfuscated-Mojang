@@ -98,7 +98,7 @@ public class PlayerSkinWidget extends AbstractWidget {
 			guiGraphics.pose().translate(0.0F, -1.5F, 0.0F);
 			PlayerModel<?> playerModel = playerSkin.model() == PlayerSkin.Model.SLIM ? this.slimModel : this.wideModel;
 			RenderType renderType = playerModel.renderType(playerSkin.texture());
-			playerModel.renderToBuffer(guiGraphics.pose(), guiGraphics.bufferSource().getBuffer(renderType), 15728880, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
+			playerModel.renderToBuffer(guiGraphics.pose(), guiGraphics.bufferSource().getBuffer(renderType), 15728880, OverlayTexture.NO_OVERLAY);
 			guiGraphics.pose().popPose();
 		}
 	}

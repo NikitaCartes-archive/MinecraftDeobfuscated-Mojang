@@ -13,9 +13,9 @@ import net.minecraft.resources.ResourceLocation;
 
 @Environment(EnvType.CLIENT)
 public class SpectatorMenu {
-	static final ResourceLocation CLOSE_SPRITE = new ResourceLocation("spectator/close");
-	static final ResourceLocation SCROLL_LEFT_SPRITE = new ResourceLocation("spectator/scroll_left");
-	static final ResourceLocation SCROLL_RIGHT_SPRITE = new ResourceLocation("spectator/scroll_right");
+	static final ResourceLocation CLOSE_SPRITE = ResourceLocation.withDefaultNamespace("spectator/close");
+	static final ResourceLocation SCROLL_LEFT_SPRITE = ResourceLocation.withDefaultNamespace("spectator/scroll_left");
+	static final ResourceLocation SCROLL_RIGHT_SPRITE = ResourceLocation.withDefaultNamespace("spectator/scroll_right");
 	private static final SpectatorMenuItem CLOSE_ITEM = new SpectatorMenu.CloseSpectatorItem();
 	private static final SpectatorMenuItem SCROLL_LEFT = new SpectatorMenu.ScrollMenuItem(-1, true);
 	private static final SpectatorMenuItem SCROLL_RIGHT_ENABLED = new SpectatorMenu.ScrollMenuItem(1, true);

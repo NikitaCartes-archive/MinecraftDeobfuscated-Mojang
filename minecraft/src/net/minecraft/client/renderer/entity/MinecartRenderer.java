@@ -20,7 +20,7 @@ import net.minecraft.world.phys.Vec3;
 
 @Environment(EnvType.CLIENT)
 public class MinecartRenderer<T extends AbstractMinecart> extends EntityRenderer<T> {
-	private static final ResourceLocation MINECART_LOCATION = new ResourceLocation("textures/entity/minecart.png");
+	private static final ResourceLocation MINECART_LOCATION = ResourceLocation.withDefaultNamespace("textures/entity/minecart.png");
 	protected final EntityModel<T> model;
 	private final BlockRenderDispatcher blockRenderer;
 
@@ -94,7 +94,7 @@ public class MinecartRenderer<T extends AbstractMinecart> extends EntityRenderer
 		poseStack.scale(-1.0F, -1.0F, 1.0F);
 		this.model.setupAnim(abstractMinecart, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F);
 		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(this.model.renderType(this.getTextureLocation(abstractMinecart)));
-		this.model.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
+		this.model.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY);
 		poseStack.popPose();
 	}
 

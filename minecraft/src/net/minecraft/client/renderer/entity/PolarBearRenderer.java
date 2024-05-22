@@ -10,7 +10,7 @@ import net.minecraft.world.entity.animal.PolarBear;
 
 @Environment(EnvType.CLIENT)
 public class PolarBearRenderer extends MobRenderer<PolarBear, PolarBearModel<PolarBear>> {
-	private static final ResourceLocation BEAR_LOCATION = new ResourceLocation("textures/entity/bear/polarbear.png");
+	private static final ResourceLocation BEAR_LOCATION = ResourceLocation.withDefaultNamespace("textures/entity/bear/polarbear.png");
 
 	public PolarBearRenderer(EntityRendererProvider.Context context) {
 		super(context, new PolarBearModel<>(context.bakeLayer(ModelLayers.POLAR_BEAR)), 0.9F);

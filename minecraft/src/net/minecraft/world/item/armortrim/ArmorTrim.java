@@ -38,7 +38,9 @@ public class ArmorTrim implements TooltipProvider {
 		armorTrim -> armorTrim.showInTooltip,
 		ArmorTrim::new
 	);
-	private static final Component UPGRADE_TITLE = Component.translatable(Util.makeDescriptionId("item", new ResourceLocation("smithing_template.upgrade")))
+	private static final Component UPGRADE_TITLE = Component.translatable(
+			Util.makeDescriptionId("item", ResourceLocation.withDefaultNamespace("smithing_template.upgrade"))
+		)
 		.withStyle(ChatFormatting.GRAY);
 	private final Holder<TrimMaterial> material;
 	private final Holder<TrimPattern> pattern;

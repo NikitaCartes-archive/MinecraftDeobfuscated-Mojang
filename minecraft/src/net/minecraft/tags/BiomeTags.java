@@ -80,6 +80,6 @@ public class BiomeTags {
 	}
 
 	private static TagKey<Biome> create(String string) {
-		return TagKey.create(Registries.BIOME, new ResourceLocation(string));
+		return TagKey.create(Registries.BIOME, ResourceLocation.withDefaultNamespace(string));
 	}
 }

@@ -12,7 +12,11 @@ public class Pools {
 	public static final ResourceKey<StructureTemplatePool> EMPTY = createKey("empty");
 
 	public static ResourceKey<StructureTemplatePool> createKey(String string) {
-		return ResourceKey.create(Registries.TEMPLATE_POOL, new ResourceLocation(string));
+		return ResourceKey.create(Registries.TEMPLATE_POOL, ResourceLocation.withDefaultNamespace(string));
+	}
+
+	public static ResourceKey<StructureTemplatePool> parseKey(String string) {
+		return ResourceKey.create(Registries.TEMPLATE_POOL, ResourceLocation.parse(string));
 	}
 
 	public static void register(BootstrapContext<StructureTemplatePool> bootstrapContext, String string, StructureTemplatePool structureTemplatePool) {

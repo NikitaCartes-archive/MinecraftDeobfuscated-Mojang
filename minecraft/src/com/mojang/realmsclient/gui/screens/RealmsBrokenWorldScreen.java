@@ -33,7 +33,7 @@ import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class RealmsBrokenWorldScreen extends RealmsScreen {
-	private static final ResourceLocation SLOT_FRAME_SPRITE = new ResourceLocation("widget/slot_frame");
+	private static final ResourceLocation SLOT_FRAME_SPRITE = ResourceLocation.withDefaultNamespace("widget/slot_frame");
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final int DEFAULT_BUTTON_WIDTH = 80;
 	private final Screen lastScreen;

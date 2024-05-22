@@ -12,7 +12,7 @@ import net.minecraft.world.level.block.entity.TheEndGatewayBlockEntity;
 
 @Environment(EnvType.CLIENT)
 public class TheEndGatewayRenderer extends TheEndPortalRenderer<TheEndGatewayBlockEntity> {
-	private static final ResourceLocation BEAM_LOCATION = new ResourceLocation("textures/entity/end_gateway_beam.png");
+	private static final ResourceLocation BEAM_LOCATION = ResourceLocation.withDefaultNamespace("textures/entity/end_gateway_beam.png");
 
 	public TheEndGatewayRenderer(BlockEntityRendererProvider.Context context) {
 		super(context);
@@ -24,9 +24,9 @@ public class TheEndGatewayRenderer extends TheEndPortalRenderer<TheEndGatewayBlo
 			double d = theEndGatewayBlockEntity.isSpawning() ? (double)theEndGatewayBlockEntity.getLevel().getMaxBuildHeight() : 50.0;
 			g = Mth.sin(g * (float) Math.PI);
 			int k = Mth.floor((double)g * d);
-			float[] fs = theEndGatewayBlockEntity.isSpawning() ? DyeColor.MAGENTA.getTextureDiffuseColors() : DyeColor.PURPLE.getTextureDiffuseColors();
-			long l = theEndGatewayBlockEntity.getLevel().getGameTime();
-			BeaconRenderer.renderBeaconBeam(poseStack, multiBufferSource, BEAM_LOCATION, f, g, l, -k, k * 2, fs, 0.15F, 0.175F);
+			int l = theEndGatewayBlockEntity.isSpawning() ? DyeColor.MAGENTA.getTextureDiffuseColor() : DyeColor.PURPLE.getTextureDiffuseColor();
+			long m = theEndGatewayBlockEntity.getLevel().getGameTime();
+			BeaconRenderer.renderBeaconBeam(poseStack, multiBufferSource, BEAM_LOCATION, f, g, m, -k, k * 2, l, 0.15F, 0.175F);
 		}
 
 		super.render(theEndGatewayBlockEntity, f, poseStack, multiBufferSource, i, j);

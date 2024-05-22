@@ -15,7 +15,7 @@ import net.minecraft.world.entity.projectile.ThrownTrident;
 
 @Environment(EnvType.CLIENT)
 public class ThrownTridentRenderer extends EntityRenderer<ThrownTrident> {
-	public static final ResourceLocation TRIDENT_LOCATION = new ResourceLocation("textures/entity/trident.png");
+	public static final ResourceLocation TRIDENT_LOCATION = ResourceLocation.withDefaultNamespace("textures/entity/trident.png");
 	private final TridentModel model;
 
 	public ThrownTridentRenderer(EntityRendererProvider.Context context) {
@@ -30,7 +30,7 @@ public class ThrownTridentRenderer extends EntityRenderer<ThrownTrident> {
 		VertexConsumer vertexConsumer = ItemRenderer.getFoilBufferDirect(
 			multiBufferSource, this.model.renderType(this.getTextureLocation(thrownTrident)), false, thrownTrident.isFoil()
 		);
-		this.model.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
+		this.model.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY);
 		poseStack.popPose();
 		super.render(thrownTrident, f, g, poseStack, multiBufferSource, i);
 	}

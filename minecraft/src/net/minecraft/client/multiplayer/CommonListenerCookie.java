@@ -10,6 +10,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.telemetry.WorldSessionTelemetryManager;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.ServerLinks;
 import net.minecraft.world.flag.FeatureFlagSet;
 
 @Environment(EnvType.CLIENT)
@@ -23,6 +24,8 @@ public record CommonListenerCookie(
 	@Nullable Screen postDisconnectScreen,
 	Map<ResourceLocation, byte[]> serverCookies,
 	@Nullable ChatComponent.State chatState,
-	@Deprecated(forRemoval = true) boolean strictErrorHandling
+	@Deprecated(forRemoval = true) boolean strictErrorHandling,
+	Map<String, String> customReportDetails,
+	ServerLinks serverLinks
 ) {
 }

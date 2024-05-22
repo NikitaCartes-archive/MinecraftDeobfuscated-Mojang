@@ -7,7 +7,6 @@ import com.mojang.logging.LogUtils;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 import javax.annotation.Nullable;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
@@ -19,6 +18,8 @@ import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
@@ -58,8 +59,8 @@ import org.slf4j.Logger;
 public class Item implements FeatureElement, ItemLike {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	public static final Map<Block, Item> BY_BLOCK = Maps.<Block, Item>newHashMap();
-	public static final UUID BASE_ATTACK_DAMAGE_UUID = UUID.fromString("CB3F55D3-645C-4F38-A497-9C13A33DB5CF");
-	public static final UUID BASE_ATTACK_SPEED_UUID = UUID.fromString("FA233E1C-4180-4865-B01B-BCCE9785ACA3");
+	public static final ResourceLocation BASE_ATTACK_DAMAGE_ID = ResourceLocation.withDefaultNamespace("base_attack_damage");
+	public static final ResourceLocation BASE_ATTACK_SPEED_ID = ResourceLocation.withDefaultNamespace("base_attack_speed");
 	public static final int DEFAULT_MAX_STACK_SIZE = 64;
 	public static final int ABSOLUTE_MAX_STACK_SIZE = 99;
 	public static final int MAX_BAR_WIDTH = 13;
@@ -371,6 +372,10 @@ public class Item implements FeatureElement, ItemLike {
 
 		public Item.Properties fireResistant() {
 			return this.component(DataComponents.FIRE_RESISTANT, Unit.INSTANCE);
+		}
+
+		public Item.Properties jukeboxPlayable(ResourceKey<JukeboxSong> resourceKey) {
+			return this.component(DataComponents.JUKEBOX_PLAYABLE, new JukeboxPlayable(new EitherHolder<>(resourceKey), true));
 		}
 
 		public Item.Properties requiredFeatures(FeatureFlag... featureFlags) {

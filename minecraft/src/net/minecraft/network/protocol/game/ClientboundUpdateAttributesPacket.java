@@ -6,12 +6,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import net.minecraft.core.Holder;
-import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketType;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -65,13 +65,13 @@ public class ClientboundUpdateAttributesPacket implements Packet<ClientGamePacke
 
 	public static record AttributeSnapshot(Holder<Attribute> attribute, double base, Collection<AttributeModifier> modifiers) {
 		public static final StreamCodec<ByteBuf, AttributeModifier> MODIFIER_STREAM_CODEC = StreamCodec.composite(
-			UUIDUtil.STREAM_CODEC,
+			ResourceLocation.STREAM_CODEC,
 			AttributeModifier::id,
 			ByteBufCodecs.DOUBLE,
 			AttributeModifier::amount,
 			AttributeModifier.Operation.STREAM_CODEC,
 			AttributeModifier::operation,
-			(uUID, double_, operation) -> new AttributeModifier(uUID, "Unknown synced attribute modifier", double_, operation)
+			AttributeModifier::new
 		);
 		public static final StreamCodec<RegistryFriendlyByteBuf, ClientboundUpdateAttributesPacket.AttributeSnapshot> STREAM_CODEC = StreamCodec.composite(
 			Attribute.STREAM_CODEC,

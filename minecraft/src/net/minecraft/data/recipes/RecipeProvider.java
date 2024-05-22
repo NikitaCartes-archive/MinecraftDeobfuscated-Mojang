@@ -22,6 +22,7 @@ import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.BlockFamilies;
 import net.minecraft.data.BlockFamily;
 import net.minecraft.data.CachedOutput;
@@ -68,8 +69,8 @@ public abstract class RecipeProvider implements DataProvider {
 		.build();
 
 	public RecipeProvider(PackOutput packOutput, CompletableFuture<HolderLookup.Provider> completableFuture) {
-		this.recipePathProvider = packOutput.createPathProvider(PackOutput.Target.DATA_PACK, "recipes");
-		this.advancementPathProvider = packOutput.createPathProvider(PackOutput.Target.DATA_PACK, "advancements");
+		this.recipePathProvider = packOutput.createRegistryElementsPathProvider(Registries.RECIPE);
+		this.advancementPathProvider = packOutput.createRegistryElementsPathProvider(Registries.ADVANCEMENT);
 		this.registries = completableFuture;
 	}
 
@@ -522,7 +523,7 @@ public abstract class RecipeProvider implements DataProvider {
 			.requires(itemLike2)
 			.group(string4)
 			.unlockedBy(getHasName(itemLike2), has(itemLike2))
-			.save(recipeOutput, new ResourceLocation(string3));
+			.save(recipeOutput, ResourceLocation.parse(string3));
 		ShapedRecipeBuilder.shaped(recipeCategory2, itemLike2)
 			.define('#', itemLike)
 			.pattern("###")
@@ -530,7 +531,7 @@ public abstract class RecipeProvider implements DataProvider {
 			.pattern("###")
 			.group(string2)
 			.unlockedBy(getHasName(itemLike), has(itemLike))
-			.save(recipeOutput, new ResourceLocation(string));
+			.save(recipeOutput, ResourceLocation.parse(string));
 	}
 
 	protected static void copySmithingTemplate(RecipeOutput recipeOutput, ItemLike itemLike, TagKey<Item> tagKey) {
@@ -549,6 +550,18 @@ public abstract class RecipeProvider implements DataProvider {
 		ShapedRecipeBuilder.shaped(RecipeCategory.MISC, itemLike, 2)
 			.define('#', Items.DIAMOND)
 			.define('C', itemLike2)
+			.define('S', itemLike)
+			.pattern("#S#")
+			.pattern("#C#")
+			.pattern("###")
+			.unlockedBy(getHasName(itemLike), has(itemLike))
+			.save(recipeOutput);
+	}
+
+	protected static void copySmithingTemplate(RecipeOutput recipeOutput, ItemLike itemLike, Ingredient ingredient) {
+		ShapedRecipeBuilder.shaped(RecipeCategory.MISC, itemLike, 2)
+			.define('#', Items.DIAMOND)
+			.define('C', ingredient)
 			.define('S', itemLike)
 			.pattern("#S#")
 			.pattern("#C#")

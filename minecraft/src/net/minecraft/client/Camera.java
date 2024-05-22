@@ -23,17 +23,20 @@ import org.joml.Vector3f;
 @Environment(EnvType.CLIENT)
 public class Camera {
 	private static final float DEFAULT_CAMERA_DISTANCE = 4.0F;
+	private static final Vector3f FORWARDS = new Vector3f(0.0F, 0.0F, -1.0F);
+	private static final Vector3f UP = new Vector3f(0.0F, 1.0F, 0.0F);
+	private static final Vector3f LEFT = new Vector3f(-1.0F, 0.0F, 0.0F);
 	private boolean initialized;
 	private BlockGetter level;
 	private Entity entity;
 	private Vec3 position = Vec3.ZERO;
 	private final BlockPos.MutableBlockPos blockPosition = new BlockPos.MutableBlockPos();
-	private final Vector3f forwards = new Vector3f(0.0F, 0.0F, 1.0F);
-	private final Vector3f up = new Vector3f(0.0F, 1.0F, 0.0F);
-	private final Vector3f left = new Vector3f(1.0F, 0.0F, 0.0F);
+	private final Vector3f forwards = new Vector3f(FORWARDS);
+	private final Vector3f up = new Vector3f(UP);
+	private final Vector3f left = new Vector3f(LEFT);
 	private float xRot;
 	private float yRot;
-	private final Quaternionf rotation = new Quaternionf(0.0F, 0.0F, 0.0F, 1.0F);
+	private final Quaternionf rotation = new Quaternionf();
 	private boolean detached;
 	private float eyeHeight;
 	private float eyeHeightOld;
@@ -58,11 +61,11 @@ public class Camera {
 			}
 
 			float g = entity instanceof LivingEntity livingEntity ? livingEntity.getScale() : 1.0F;
-			this.move(-this.getMaxZoom((double)(4.0F * g)), 0.0, 0.0);
+			this.move(-this.getMaxZoom(4.0F * g), 0.0F, 0.0F);
 		} else if (entity instanceof LivingEntity && ((LivingEntity)entity).isSleeping()) {
 			Direction direction = ((LivingEntity)entity).getBedOrientation();
 			this.setRotation(direction != null ? direction.toYRot() - 180.0F : 0.0F, 0.0F);
-			this.move(0.0, 0.3, 0.0);
+			this.move(0.0F, 0.3F, 0.0F);
 		}
 	}
 
@@ -73,46 +76,39 @@ public class Camera {
 		}
 	}
 
-	private double getMaxZoom(double d) {
+	private float getMaxZoom(float f) {
+		float g = 0.1F;
+
 		for (int i = 0; i < 8; i++) {
-			float f = (float)((i & 1) * 2 - 1);
-			float g = (float)((i >> 1 & 1) * 2 - 1);
-			float h = (float)((i >> 2 & 1) * 2 - 1);
-			f *= 0.1F;
-			g *= 0.1F;
-			h *= 0.1F;
-			Vec3 vec3 = this.position.add((double)f, (double)g, (double)h);
-			Vec3 vec32 = new Vec3(
-				this.position.x - (double)this.forwards.x() * d + (double)f,
-				this.position.y - (double)this.forwards.y() * d + (double)g,
-				this.position.z - (double)this.forwards.z() * d + (double)h
-			);
+			float h = (float)((i & 1) * 2 - 1);
+			float j = (float)((i >> 1 & 1) * 2 - 1);
+			float k = (float)((i >> 2 & 1) * 2 - 1);
+			Vec3 vec3 = this.position.add((double)(h * 0.1F), (double)(j * 0.1F), (double)(k * 0.1F));
+			Vec3 vec32 = vec3.add(new Vec3(this.forwards).scale((double)(-f)));
 			HitResult hitResult = this.level.clip(new ClipContext(vec3, vec32, ClipContext.Block.VISUAL, ClipContext.Fluid.NONE, this.entity));
 			if (hitResult.getType() != HitResult.Type.MISS) {
-				double e = hitResult.getLocation().distanceTo(this.position);
-				if (e < d) {
-					d = e;
+				float l = (float)hitResult.getLocation().distanceToSqr(this.position);
+				if (l < Mth.square(f)) {
+					f = Mth.sqrt(l);
 				}
 			}
 		}
 
-		return d;
+		return f;
 	}
 
-	protected void move(double d, double e, double f) {
-		double g = (double)this.forwards.x() * d + (double)this.up.x() * e + (double)this.left.x() * f;
-		double h = (double)this.forwards.y() * d + (double)this.up.y() * e + (double)this.left.y() * f;
-		double i = (double)this.forwards.z() * d + (double)this.up.z() * e + (double)this.left.z() * f;
-		this.setPosition(new Vec3(this.position.x + g, this.position.y + h, this.position.z + i));
+	protected void move(float f, float g, float h) {
+		Vector3f vector3f = new Vector3f(h, g, -f).rotate(this.rotation);
+		this.setPosition(new Vec3(this.position.x + (double)vector3f.x, this.position.y + (double)vector3f.y, this.position.z + (double)vector3f.z));
 	}
 
 	protected void setRotation(float f, float g) {
 		this.xRot = g;
 		this.yRot = f;
-		this.rotation.rotationYXZ(-f * (float) (Math.PI / 180.0), g * (float) (Math.PI / 180.0), 0.0F);
-		this.forwards.set(0.0F, 0.0F, 1.0F).rotate(this.rotation);
-		this.up.set(0.0F, 1.0F, 0.0F).rotate(this.rotation);
-		this.left.set(1.0F, 0.0F, 0.0F).rotate(this.rotation);
+		this.rotation.rotationYXZ((float) Math.PI - f * (float) (Math.PI / 180.0), -g * (float) (Math.PI / 180.0), 0.0F);
+		FORWARDS.rotate(this.rotation, this.forwards);
+		UP.rotate(this.rotation, this.up);
+		LEFT.rotate(this.rotation, this.left);
 	}
 
 	protected void setPosition(double d, double e, double f) {

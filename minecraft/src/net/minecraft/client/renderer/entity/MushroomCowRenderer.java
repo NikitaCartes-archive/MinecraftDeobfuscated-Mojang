@@ -15,8 +15,8 @@ import net.minecraft.world.entity.animal.MushroomCow;
 public class MushroomCowRenderer extends MobRenderer<MushroomCow, CowModel<MushroomCow>> {
 	private static final Map<MushroomCow.MushroomType, ResourceLocation> TEXTURES = Util.make(
 		Maps.<MushroomCow.MushroomType, ResourceLocation>newHashMap(), hashMap -> {
-			hashMap.put(MushroomCow.MushroomType.BROWN, new ResourceLocation("textures/entity/cow/brown_mooshroom.png"));
-			hashMap.put(MushroomCow.MushroomType.RED, new ResourceLocation("textures/entity/cow/red_mooshroom.png"));
+			hashMap.put(MushroomCow.MushroomType.BROWN, ResourceLocation.withDefaultNamespace("textures/entity/cow/brown_mooshroom.png"));
+			hashMap.put(MushroomCow.MushroomType.RED, ResourceLocation.withDefaultNamespace("textures/entity/cow/red_mooshroom.png"));
 		}
 	);
 

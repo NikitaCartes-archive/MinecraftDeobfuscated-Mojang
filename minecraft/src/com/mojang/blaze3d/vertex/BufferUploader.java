@@ -21,39 +21,29 @@ public class BufferUploader {
 		lastImmediateBuffer = null;
 	}
 
-	public static void drawWithShader(BufferBuilder.RenderedBuffer renderedBuffer) {
+	public static void drawWithShader(MeshData meshData) {
 		if (!RenderSystem.isOnRenderThreadOrInit()) {
-			RenderSystem.recordRenderCall(() -> _drawWithShader(renderedBuffer));
+			RenderSystem.recordRenderCall(() -> _drawWithShader(meshData));
 		} else {
-			_drawWithShader(renderedBuffer);
+			_drawWithShader(meshData);
 		}
 	}
 
-	private static void _drawWithShader(BufferBuilder.RenderedBuffer renderedBuffer) {
-		VertexBuffer vertexBuffer = upload(renderedBuffer);
-		if (vertexBuffer != null) {
-			vertexBuffer.drawWithShader(RenderSystem.getModelViewMatrix(), RenderSystem.getProjectionMatrix(), RenderSystem.getShader());
-		}
+	private static void _drawWithShader(MeshData meshData) {
+		VertexBuffer vertexBuffer = upload(meshData);
+		vertexBuffer.drawWithShader(RenderSystem.getModelViewMatrix(), RenderSystem.getProjectionMatrix(), RenderSystem.getShader());
 	}
 
-	public static void draw(BufferBuilder.RenderedBuffer renderedBuffer) {
-		VertexBuffer vertexBuffer = upload(renderedBuffer);
-		if (vertexBuffer != null) {
-			vertexBuffer.draw();
-		}
+	public static void draw(MeshData meshData) {
+		VertexBuffer vertexBuffer = upload(meshData);
+		vertexBuffer.draw();
 	}
 
-	@Nullable
-	private static VertexBuffer upload(BufferBuilder.RenderedBuffer renderedBuffer) {
+	private static VertexBuffer upload(MeshData meshData) {
 		RenderSystem.assertOnRenderThread();
-		if (renderedBuffer.isEmpty()) {
-			renderedBuffer.release();
-			return null;
-		} else {
-			VertexBuffer vertexBuffer = bindImmediateBuffer(renderedBuffer.drawState().format());
-			vertexBuffer.upload(renderedBuffer);
-			return vertexBuffer;
-		}
+		VertexBuffer vertexBuffer = bindImmediateBuffer(meshData.drawState().format());
+		vertexBuffer.upload(meshData);
+		return vertexBuffer;
 	}
 
 	private static VertexBuffer bindImmediateBuffer(VertexFormat vertexFormat) {

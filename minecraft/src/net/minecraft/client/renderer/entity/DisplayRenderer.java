@@ -215,10 +215,10 @@ public abstract class DisplayRenderer<T extends Display, S> extends EntityRender
 			matrix4f.translate(1.0F - (float)l / 2.0F, (float)(-m), 0.0F);
 			if (j != 0) {
 				VertexConsumer vertexConsumer = multiBufferSource.getBuffer(bl ? RenderType.textBackgroundSeeThrough() : RenderType.textBackground());
-				vertexConsumer.vertex(matrix4f, -1.0F, -1.0F, 0.0F).color(j).uv2(i).endVertex();
-				vertexConsumer.vertex(matrix4f, -1.0F, (float)m, 0.0F).color(j).uv2(i).endVertex();
-				vertexConsumer.vertex(matrix4f, (float)l, (float)m, 0.0F).color(j).uv2(i).endVertex();
-				vertexConsumer.vertex(matrix4f, (float)l, -1.0F, 0.0F).color(j).uv2(i).endVertex();
+				vertexConsumer.addVertex(matrix4f, -1.0F, -1.0F, 0.0F).setColor(j).setLight(i);
+				vertexConsumer.addVertex(matrix4f, -1.0F, (float)m, 0.0F).setColor(j).setLight(i);
+				vertexConsumer.addVertex(matrix4f, (float)l, (float)m, 0.0F).setColor(j).setLight(i);
+				vertexConsumer.addVertex(matrix4f, (float)l, -1.0F, 0.0F).setColor(j).setLight(i);
 			}
 
 			for (Display.TextDisplay.CachedLine cachedLine : cachedInfo.lines()) {

@@ -52,21 +52,17 @@ public abstract class SingleQuadParticle extends Particle {
 		float m = this.getV0();
 		float n = this.getV1();
 		int o = this.getLightColor(i);
-		this.renderVertex(vertexConsumer, quaternionf, f, g, h, -1.0F, -1.0F, j, l, n, o);
-		this.renderVertex(vertexConsumer, quaternionf, f, g, h, -1.0F, 1.0F, j, l, m, o);
-		this.renderVertex(vertexConsumer, quaternionf, f, g, h, 1.0F, 1.0F, j, k, m, o);
-		this.renderVertex(vertexConsumer, quaternionf, f, g, h, 1.0F, -1.0F, j, k, n, o);
+		this.renderVertex(vertexConsumer, quaternionf, f, g, h, 1.0F, -1.0F, j, l, n, o);
+		this.renderVertex(vertexConsumer, quaternionf, f, g, h, 1.0F, 1.0F, j, l, m, o);
+		this.renderVertex(vertexConsumer, quaternionf, f, g, h, -1.0F, 1.0F, j, k, m, o);
+		this.renderVertex(vertexConsumer, quaternionf, f, g, h, -1.0F, -1.0F, j, k, n, o);
 	}
 
 	private void renderVertex(
 		VertexConsumer vertexConsumer, Quaternionf quaternionf, float f, float g, float h, float i, float j, float k, float l, float m, int n
 	) {
 		Vector3f vector3f = new Vector3f(i, j, 0.0F).rotate(quaternionf).mul(k).add(f, g, h);
-		vertexConsumer.vertex((double)vector3f.x(), (double)vector3f.y(), (double)vector3f.z())
-			.uv(l, m)
-			.color(this.rCol, this.gCol, this.bCol, this.alpha)
-			.uv2(n)
-			.endVertex();
+		vertexConsumer.addVertex(vector3f.x(), vector3f.y(), vector3f.z()).setUv(l, m).setColor(this.rCol, this.gCol, this.bCol, this.alpha).setLight(n);
 	}
 
 	public float getQuadSize(float f) {

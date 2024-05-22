@@ -113,10 +113,10 @@ public class MapRenderer implements AutoCloseable {
 			float f = 0.0F;
 			Matrix4f matrix4f = poseStack.last().pose();
 			VertexConsumer vertexConsumer = multiBufferSource.getBuffer(this.renderType);
-			vertexConsumer.vertex(matrix4f, 0.0F, 128.0F, -0.01F).color(255, 255, 255, 255).uv(0.0F, 1.0F).uv2(i).endVertex();
-			vertexConsumer.vertex(matrix4f, 128.0F, 128.0F, -0.01F).color(255, 255, 255, 255).uv(1.0F, 1.0F).uv2(i).endVertex();
-			vertexConsumer.vertex(matrix4f, 128.0F, 0.0F, -0.01F).color(255, 255, 255, 255).uv(1.0F, 0.0F).uv2(i).endVertex();
-			vertexConsumer.vertex(matrix4f, 0.0F, 0.0F, -0.01F).color(255, 255, 255, 255).uv(0.0F, 0.0F).uv2(i).endVertex();
+			vertexConsumer.addVertex(matrix4f, 0.0F, 128.0F, -0.01F).setColor(-1).setUv(0.0F, 1.0F).setLight(i);
+			vertexConsumer.addVertex(matrix4f, 128.0F, 128.0F, -0.01F).setColor(-1).setUv(1.0F, 1.0F).setLight(i);
+			vertexConsumer.addVertex(matrix4f, 128.0F, 0.0F, -0.01F).setColor(-1).setUv(1.0F, 0.0F).setLight(i);
+			vertexConsumer.addVertex(matrix4f, 0.0F, 0.0F, -0.01F).setColor(-1).setUv(0.0F, 0.0F).setLight(i);
 			int l = 0;
 
 			for (MapDecoration mapDecoration : this.data.getDecorations()) {
@@ -134,10 +134,10 @@ public class MapRenderer implements AutoCloseable {
 					float n = textureAtlasSprite.getU1();
 					float o = textureAtlasSprite.getV1();
 					VertexConsumer vertexConsumer2 = multiBufferSource.getBuffer(RenderType.text(textureAtlasSprite.atlasLocation()));
-					vertexConsumer2.vertex(matrix4f2, -1.0F, 1.0F, (float)l * -0.001F).color(255, 255, 255, 255).uv(h, m).uv2(i).endVertex();
-					vertexConsumer2.vertex(matrix4f2, 1.0F, 1.0F, (float)l * -0.001F).color(255, 255, 255, 255).uv(n, m).uv2(i).endVertex();
-					vertexConsumer2.vertex(matrix4f2, 1.0F, -1.0F, (float)l * -0.001F).color(255, 255, 255, 255).uv(n, o).uv2(i).endVertex();
-					vertexConsumer2.vertex(matrix4f2, -1.0F, -1.0F, (float)l * -0.001F).color(255, 255, 255, 255).uv(h, o).uv2(i).endVertex();
+					vertexConsumer2.addVertex(matrix4f2, -1.0F, 1.0F, (float)l * -0.001F).setColor(-1).setUv(h, m).setLight(i);
+					vertexConsumer2.addVertex(matrix4f2, 1.0F, 1.0F, (float)l * -0.001F).setColor(-1).setUv(n, m).setLight(i);
+					vertexConsumer2.addVertex(matrix4f2, 1.0F, -1.0F, (float)l * -0.001F).setColor(-1).setUv(n, o).setLight(i);
+					vertexConsumer2.addVertex(matrix4f2, -1.0F, -1.0F, (float)l * -0.001F).setColor(-1).setUv(h, o).setLight(i);
 					poseStack.popPose();
 					if (mapDecoration.name().isPresent()) {
 						Font font = Minecraft.getInstance().font;

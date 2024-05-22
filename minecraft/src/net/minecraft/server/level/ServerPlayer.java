@@ -11,10 +11,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
-import net.minecraft.BlockUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
@@ -145,15 +143,12 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
-import net.minecraft.world.level.block.NetherPortalBlock;
 import net.minecraft.world.level.block.RespawnAnchorBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.CommandBlockEntity;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.portal.DimensionTransition;
 import net.minecraft.world.level.storage.LevelData;
@@ -173,10 +168,10 @@ public class ServerPlayer extends Player {
 	private static final int FLY_STAT_RECORDING_SPEED = 25;
 	public static final double INTERACTION_DISTANCE_VERIFICATION_BUFFER = 1.0;
 	private static final AttributeModifier CREATIVE_BLOCK_INTERACTION_RANGE_MODIFIER = new AttributeModifier(
-		UUID.fromString("736565d2-e1a7-403d-a3f8-1aeb3e302542"), "Creative block interaction range modifier", 0.5, AttributeModifier.Operation.ADD_VALUE
+		ResourceLocation.withDefaultNamespace("creative_mode_block_range"), 0.5, AttributeModifier.Operation.ADD_VALUE
 	);
 	private static final AttributeModifier CREATIVE_ENTITY_INTERACTION_RANGE_MODIFIER = new AttributeModifier(
-		UUID.fromString("98491ef6-97b1-4584-ae82-71a8cc85cf73"), "Creative entity interaction range modifier", 2.0, AttributeModifier.Operation.ADD_VALUE
+		ResourceLocation.withDefaultNamespace("creative_mode_entity_range"), 2.0, AttributeModifier.Operation.ADD_VALUE
 	);
 	public ServerGamePacketListenerImpl connection;
 	public final MinecraftServer server;
@@ -831,21 +826,6 @@ public class ServerPlayer extends Player {
 		}
 	}
 
-	@Nullable
-	@Override
-	public DimensionTransition findOrCreateDimensionEntryPoint(ServerLevel serverLevel) {
-		DimensionTransition dimensionTransition = super.findOrCreateDimensionEntryPoint(serverLevel);
-		if (dimensionTransition != null && this.level().dimension() == Level.OVERWORLD && dimensionTransition.newDimension().dimension() == Level.END) {
-			Vec3 vec3 = dimensionTransition.pos().add(0.0, -1.0, 0.0);
-			this.createEndPlatform(dimensionTransition.newDimension(), BlockPos.containing(vec3));
-			return new DimensionTransition(dimensionTransition.newDimension(), vec3, Vec3.ZERO, 90.0F, 0.0F);
-		} else {
-			return this.level().dimension() == Level.END && dimensionTransition.newDimension().dimension() == Level.OVERWORLD
-				? this.findRespawnPositionAndUseSpawnBlock(false)
-				: dimensionTransition;
-		}
-	}
-
 	public void showEndCredits() {
 		this.unRide();
 		this.serverLevel().removePlayerImmediately(this, Entity.RemovalReason.CHANGED_DIMENSION);
@@ -858,78 +838,56 @@ public class ServerPlayer extends Player {
 
 	@Nullable
 	@Override
-	public Entity changeDimension(Entity.DimensionTransitionSupplier dimensionTransitionSupplier) {
-		DimensionTransition dimensionTransition = dimensionTransitionSupplier.get();
-		if (dimensionTransition == null) {
-			return this;
+	public Entity changeDimension(DimensionTransition dimensionTransition) {
+		if (this.isRemoved()) {
+			return null;
 		} else {
 			if (dimensionTransition.missingRespawnBlock()) {
 				this.connection.send(new ClientboundGameEventPacket(ClientboundGameEventPacket.NO_RESPAWN_BLOCK_AVAILABLE, 0.0F));
 			}
 
-			ServerLevel serverLevel = dimensionTransition.newDimension();
-			this.isChangingDimension = true;
+			ServerLevel serverLevel = dimensionTransition.newLevel();
 			ServerLevel serverLevel2 = this.serverLevel();
 			ResourceKey<Level> resourceKey = serverLevel2.dimension();
-			LevelData levelData = serverLevel.getLevelData();
-			this.connection.send(new ClientboundRespawnPacket(this.createCommonSpawnInfo(serverLevel), (byte)3));
-			this.connection.send(new ClientboundChangeDifficultyPacket(levelData.getDifficulty(), levelData.isDifficultyLocked()));
-			PlayerList playerList = this.server.getPlayerList();
-			playerList.sendPlayerPermissionLevel(this);
-			serverLevel2.removePlayerImmediately(this, Entity.RemovalReason.CHANGED_DIMENSION);
-			this.unsetRemoved();
-			serverLevel2.getProfiler().push("moving");
-			if (resourceKey == Level.OVERWORLD && serverLevel.dimension() == Level.NETHER) {
-				this.enteredNetherPosition = this.position();
-			}
-
-			serverLevel2.getProfiler().pop();
-			serverLevel2.getProfiler().push("placing");
-			this.setServerLevel(serverLevel);
-			this.connection
-				.teleport(dimensionTransition.pos().x, dimensionTransition.pos().y, dimensionTransition.pos().z, dimensionTransition.yRot(), dimensionTransition.xRot());
-			this.connection.resetPosition();
-			serverLevel.addDuringTeleport(this);
-			serverLevel2.getProfiler().pop();
-			this.triggerDimensionChangeTriggers(serverLevel2);
-			this.connection.send(new ClientboundPlayerAbilitiesPacket(this.getAbilities()));
-			playerList.sendLevelInfo(this, serverLevel);
-			playerList.sendAllPlayerInfo(this);
-			playerList.sendActivePlayerEffects(this);
-			this.connection.send(new ClientboundLevelEventPacket(1032, BlockPos.ZERO, 0, false));
-			this.lastSentExp = -1;
-			this.lastSentHealth = -1.0F;
-			this.lastSentFood = -1;
-			return this;
-		}
-	}
-
-	private void createEndPlatform(ServerLevel serverLevel, BlockPos blockPos) {
-		BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
-
-		for (int i = -2; i <= 2; i++) {
-			for (int j = -2; j <= 2; j++) {
-				for (int k = -1; k < 3; k++) {
-					BlockState blockState = k == -1 ? Blocks.OBSIDIAN.defaultBlockState() : Blocks.AIR.defaultBlockState();
-					serverLevel.setBlockAndUpdate(mutableBlockPos.set(blockPos).move(j, k, i), blockState);
+			if (serverLevel.dimension() == resourceKey) {
+				this.connection
+					.teleport(dimensionTransition.pos().x, dimensionTransition.pos().y, dimensionTransition.pos().z, dimensionTransition.yRot(), dimensionTransition.xRot());
+				this.connection.resetPosition();
+				this.connection.send(new ClientboundLevelEventPacket(1032, BlockPos.ZERO, 0, false));
+				return this;
+			} else {
+				this.isChangingDimension = true;
+				LevelData levelData = serverLevel.getLevelData();
+				this.connection.send(new ClientboundRespawnPacket(this.createCommonSpawnInfo(serverLevel), (byte)3));
+				this.connection.send(new ClientboundChangeDifficultyPacket(levelData.getDifficulty(), levelData.isDifficultyLocked()));
+				PlayerList playerList = this.server.getPlayerList();
+				playerList.sendPlayerPermissionLevel(this);
+				serverLevel2.removePlayerImmediately(this, Entity.RemovalReason.CHANGED_DIMENSION);
+				this.unsetRemoved();
+				serverLevel2.getProfiler().push("moving");
+				if (resourceKey == Level.OVERWORLD && serverLevel.dimension() == Level.NETHER) {
+					this.enteredNetherPosition = this.position();
 				}
-			}
-		}
-	}
 
-	@Override
-	protected Optional<BlockUtil.FoundRectangle> getExitPortal(ServerLevel serverLevel, BlockPos blockPos, boolean bl, WorldBorder worldBorder) {
-		Optional<BlockUtil.FoundRectangle> optional = super.getExitPortal(serverLevel, blockPos, bl, worldBorder);
-		if (optional.isPresent()) {
-			return optional;
-		} else {
-			Direction.Axis axis = (Direction.Axis)this.level().getBlockState(this.portalEntrancePos).getOptionalValue(NetherPortalBlock.AXIS).orElse(Direction.Axis.X);
-			Optional<BlockUtil.FoundRectangle> optional2 = serverLevel.getPortalForcer().createPortal(blockPos, axis);
-			if (optional2.isEmpty()) {
-				LOGGER.error("Unable to create a portal, likely target out of worldborder");
+				serverLevel2.getProfiler().pop();
+				serverLevel2.getProfiler().push("placing");
+				this.setServerLevel(serverLevel);
+				this.connection
+					.teleport(dimensionTransition.pos().x, dimensionTransition.pos().y, dimensionTransition.pos().z, dimensionTransition.yRot(), dimensionTransition.xRot());
+				this.connection.resetPosition();
+				serverLevel.addDuringTeleport(this);
+				serverLevel2.getProfiler().pop();
+				this.triggerDimensionChangeTriggers(serverLevel2);
+				this.connection.send(new ClientboundPlayerAbilitiesPacket(this.getAbilities()));
+				playerList.sendLevelInfo(this, serverLevel);
+				playerList.sendAllPlayerInfo(this);
+				playerList.sendActivePlayerEffects(this);
+				this.connection.send(new ClientboundLevelEventPacket(1032, BlockPos.ZERO, 0, false));
+				this.lastSentExp = -1;
+				this.lastSentHealth = -1.0F;
+				this.lastSentFood = -1;
+				return this;
 			}
-
-			return optional2;
 		}
 	}
 
@@ -1067,7 +1025,7 @@ public class ServerPlayer extends Player {
 			BlockState blockState = this.level().getBlockState(blockPos);
 			if (this.spawnExtraParticlesOnFall && bl && this.fallDistance > 0.0F) {
 				Vec3 vec3 = blockPos.getCenter().add(0.0, 0.5, 0.0);
-				int i = (int)(50.0F * this.fallDistance);
+				int i = (int)Mth.clamp(50.0F * this.fallDistance, 0.0F, 200.0F);
 				this.serverLevel().sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, blockState), vec3.x, vec3.y, vec3.z, i, 0.3F, 0.3F, 0.3F, 0.15F);
 				this.spawnExtraParticlesOnFall = false;
 			}
@@ -1081,7 +1039,7 @@ public class ServerPlayer extends Player {
 		super.onExplosionHit(entity);
 		this.currentImpulseImpactPos = this.position();
 		this.currentExplosionCause = entity;
-		this.ignoreFallDamageFromCurrentImpulse = this.ignoreFallDamageFromCurrentImpulse || entity != null && entity.getType() == EntityType.WIND_CHARGE;
+		this.ignoreFallDamageFromCurrentImpulse = entity != null && entity.getType() == EntityType.WIND_CHARGE;
 	}
 
 	@Override
@@ -1366,6 +1324,7 @@ public class ServerPlayer extends Player {
 		this.gameMode.setGameModeForPlayer(serverPlayer.gameMode.getGameModeForPlayer(), serverPlayer.gameMode.getPreviousGameModeForPlayer());
 		this.onUpdateAbilities();
 		this.getAttributes().assignBaseValues(serverPlayer.getAttributes());
+		this.setHealth(this.getMaxHealth());
 		if (bl) {
 			this.getInventory().replaceWith(serverPlayer.getInventory());
 			this.setHealth(serverPlayer.getHealth());
@@ -1379,7 +1338,7 @@ public class ServerPlayer extends Player {
 			this.totalExperience = serverPlayer.totalExperience;
 			this.experienceProgress = serverPlayer.experienceProgress;
 			this.setScore(serverPlayer.getScore());
-			this.portalEntrancePos = serverPlayer.portalEntrancePos;
+			this.portalProcess = serverPlayer.portalProcess;
 		} else if (this.level().getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY) || serverPlayer.isSpectator()) {
 			this.getInventory().replaceWith(serverPlayer.getInventory());
 			this.experienceLevel = serverPlayer.experienceLevel;
@@ -1695,7 +1654,7 @@ public class ServerPlayer extends Player {
 		if (serverLevel == this.level()) {
 			this.connection.teleport(d, e, f, g, h);
 		} else {
-			this.changeDimension(() -> new DimensionTransition(serverLevel, new Vec3(d, e, f), Vec3.ZERO, g, h));
+			this.changeDimension(new DimensionTransition(serverLevel, new Vec3(d, e, f), Vec3.ZERO, g, h));
 		}
 	}
 

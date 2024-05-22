@@ -100,7 +100,6 @@ public final class ItemTags {
 	public static final TagKey<Item> CHEST_BOATS = bind("chest_boats");
 	public static final TagKey<Item> FISHES = bind("fishes");
 	public static final TagKey<Item> SIGNS = bind("signs");
-	public static final TagKey<Item> MUSIC_DISCS = bind("music_discs");
 	public static final TagKey<Item> CREEPER_DROP_MUSIC_DISCS = bind("creeper_drop_music_discs");
 	public static final TagKey<Item> COALS = bind("coals");
 	public static final TagKey<Item> ARROWS = bind("arrows");
@@ -158,6 +157,6 @@ public final class ItemTags {
 	}
 
 	private static TagKey<Item> bind(String string) {
-		return TagKey.create(Registries.ITEM, new ResourceLocation(string));
+		return TagKey.create(Registries.ITEM, ResourceLocation.withDefaultNamespace(string));
 	}
 }

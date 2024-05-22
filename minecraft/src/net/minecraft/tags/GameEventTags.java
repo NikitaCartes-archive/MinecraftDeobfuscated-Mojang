@@ -12,6 +12,6 @@ public class GameEventTags {
 	public static final TagKey<GameEvent> ALLAY_CAN_LISTEN = create("allay_can_listen");
 
 	private static TagKey<GameEvent> create(String string) {
-		return TagKey.create(Registries.GAME_EVENT, new ResourceLocation(string));
+		return TagKey.create(Registries.GAME_EVENT, ResourceLocation.withDefaultNamespace(string));
 	}
 }

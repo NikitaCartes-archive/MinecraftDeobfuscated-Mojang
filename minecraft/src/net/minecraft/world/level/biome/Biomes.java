@@ -71,6 +71,6 @@ public abstract class Biomes {
 	public static final ResourceKey<Biome> END_BARRENS = register("end_barrens");
 
 	private static ResourceKey<Biome> register(String string) {
-		return ResourceKey.create(Registries.BIOME, new ResourceLocation(string));
+		return ResourceKey.create(Registries.BIOME, ResourceLocation.withDefaultNamespace(string));
 	}
 }

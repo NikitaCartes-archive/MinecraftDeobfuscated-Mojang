@@ -20,7 +20,7 @@ public interface CustomPacketPayload {
 	}
 
 	static <T extends CustomPacketPayload> CustomPacketPayload.Type<T> createType(String string) {
-		return new CustomPacketPayload.Type<>(new ResourceLocation(string));
+		return new CustomPacketPayload.Type<>(ResourceLocation.withDefaultNamespace(string));
 	}
 
 	static <B extends FriendlyByteBuf> StreamCodec<B, CustomPacketPayload> codec(

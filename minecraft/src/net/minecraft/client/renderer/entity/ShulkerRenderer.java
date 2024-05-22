@@ -1,6 +1,7 @@
 package net.minecraft.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import java.util.function.UnaryOperator;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -18,12 +19,12 @@ import net.minecraft.world.phys.Vec3;
 
 @Environment(EnvType.CLIENT)
 public class ShulkerRenderer extends MobRenderer<Shulker, ShulkerModel<Shulker>> {
-	private static final ResourceLocation DEFAULT_TEXTURE_LOCATION = new ResourceLocation(
-		"textures/" + Sheets.DEFAULT_SHULKER_TEXTURE_LOCATION.texture().getPath() + ".png"
-	);
+	private static final ResourceLocation DEFAULT_TEXTURE_LOCATION = Sheets.DEFAULT_SHULKER_TEXTURE_LOCATION
+		.texture()
+		.withPath((UnaryOperator<String>)(string -> "textures/" + string + ".png"));
 	private static final ResourceLocation[] TEXTURE_LOCATION = (ResourceLocation[])Sheets.SHULKER_TEXTURE_LOCATION
 		.stream()
-		.map(material -> new ResourceLocation("textures/" + material.texture().getPath() + ".png"))
+		.map(material -> material.texture().withPath((UnaryOperator<String>)(string -> "textures/" + string + ".png")))
 		.toArray(ResourceLocation[]::new);
 
 	public ShulkerRenderer(EntityRendererProvider.Context context) {

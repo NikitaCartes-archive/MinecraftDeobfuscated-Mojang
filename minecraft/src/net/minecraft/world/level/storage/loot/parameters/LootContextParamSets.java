@@ -115,12 +115,19 @@ public class LootContextParamSets {
 		"enchanted_entity",
 		builder -> builder.required(LootContextParams.THIS_ENTITY).required(LootContextParams.ENCHANTMENT_LEVEL).required(LootContextParams.ORIGIN)
 	);
+	public static final LootContextParamSet HIT_BLOCK = register(
+		"hit_block",
+		builder -> builder.required(LootContextParams.THIS_ENTITY)
+				.required(LootContextParams.ENCHANTMENT_LEVEL)
+				.required(LootContextParams.ORIGIN)
+				.required(LootContextParams.BLOCK_STATE)
+	);
 
 	private static LootContextParamSet register(String string, Consumer<LootContextParamSet.Builder> consumer) {
 		LootContextParamSet.Builder builder = new LootContextParamSet.Builder();
 		consumer.accept(builder);
 		LootContextParamSet lootContextParamSet = builder.build();
-		ResourceLocation resourceLocation = new ResourceLocation(string);
+		ResourceLocation resourceLocation = ResourceLocation.withDefaultNamespace(string);
 		LootContextParamSet lootContextParamSet2 = REGISTRY.put(resourceLocation, lootContextParamSet);
 		if (lootContextParamSet2 != null) {
 			throw new IllegalStateException("Loot table parameter set " + resourceLocation + " is already registered");

@@ -1,6 +1,7 @@
 package net.minecraft.data.tags;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Predicate;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.PackOutput;
@@ -174,7 +175,8 @@ public class BiomeTagsProvider extends TagsProvider<Biome> {
 			.add(Biomes.DRIPSTONE_CAVES)
 			.add(Biomes.LUSH_CAVES);
 		this.tag(BiomeTags.HAS_STRONGHOLD).addTag(BiomeTags.IS_OVERWORLD);
-		this.tag(BiomeTags.HAS_TRIAL_CHAMBERS).addTag(BiomeTags.IS_OVERWORLD);
+		TagsProvider.TagAppender<Biome> tagAppender3 = this.tag(BiomeTags.HAS_TRIAL_CHAMBERS);
+		MultiNoiseBiomeSourceParameterList.Preset.OVERWORLD.usedBiomes().filter(Predicate.not(Biomes.DEEP_DARK::equals)).forEach(tagAppender3::add);
 		this.tag(BiomeTags.HAS_NETHER_FORTRESS).addTag(BiomeTags.IS_NETHER);
 		this.tag(BiomeTags.HAS_NETHER_FOSSIL).add(Biomes.SOUL_SAND_VALLEY);
 		this.tag(BiomeTags.HAS_BASTION_REMNANT).add(Biomes.CRIMSON_FOREST).add(Biomes.NETHER_WASTES).add(Biomes.SOUL_SAND_VALLEY).add(Biomes.WARPED_FOREST);

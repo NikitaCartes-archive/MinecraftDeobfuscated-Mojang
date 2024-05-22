@@ -39,10 +39,10 @@ import net.minecraft.world.level.block.Block;
 @Environment(EnvType.CLIENT)
 public class StatsScreen extends Screen {
 	private static final Component TITLE = Component.translatable("gui.stats");
-	static final ResourceLocation SLOT_SPRITE = new ResourceLocation("container/slot");
-	static final ResourceLocation HEADER_SPRITE = new ResourceLocation("statistics/header");
-	static final ResourceLocation SORT_UP_SPRITE = new ResourceLocation("statistics/sort_up");
-	static final ResourceLocation SORT_DOWN_SPRITE = new ResourceLocation("statistics/sort_down");
+	static final ResourceLocation SLOT_SPRITE = ResourceLocation.withDefaultNamespace("container/slot");
+	static final ResourceLocation HEADER_SPRITE = ResourceLocation.withDefaultNamespace("statistics/header");
+	static final ResourceLocation SORT_UP_SPRITE = ResourceLocation.withDefaultNamespace("statistics/sort_up");
+	static final ResourceLocation SORT_DOWN_SPRITE = ResourceLocation.withDefaultNamespace("statistics/sort_down");
 	private static final Component PENDING_TEXT = Component.translatable("multiplayer.downloadingStats");
 	static final Component NO_VALUE_DISPLAY = Component.translatable("stats.none");
 	private static final Component GENERAL_BUTTON = Component.translatable("stat.generalButton");
@@ -207,12 +207,12 @@ public class StatsScreen extends Screen {
 		private static final int SORT_DOWN = -1;
 		private static final int SORT_UP = 1;
 		private final ResourceLocation[] iconSprites = new ResourceLocation[]{
-			new ResourceLocation("statistics/block_mined"),
-			new ResourceLocation("statistics/item_broken"),
-			new ResourceLocation("statistics/item_crafted"),
-			new ResourceLocation("statistics/item_used"),
-			new ResourceLocation("statistics/item_picked_up"),
-			new ResourceLocation("statistics/item_dropped")
+			ResourceLocation.withDefaultNamespace("statistics/block_mined"),
+			ResourceLocation.withDefaultNamespace("statistics/item_broken"),
+			ResourceLocation.withDefaultNamespace("statistics/item_crafted"),
+			ResourceLocation.withDefaultNamespace("statistics/item_used"),
+			ResourceLocation.withDefaultNamespace("statistics/item_picked_up"),
+			ResourceLocation.withDefaultNamespace("statistics/item_dropped")
 		};
 		protected final List<StatType<Block>> blockColumns;
 		protected final List<StatType<Item>> itemColumns;

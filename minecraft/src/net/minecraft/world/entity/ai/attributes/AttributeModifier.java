@@ -2,28 +2,28 @@ package net.minecraft.world.entity.ai.attributes;
 
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.DataResult.Error;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.netty.buffer.ByteBuf;
-import java.util.UUID;
 import java.util.function.IntFunction;
 import javax.annotation.Nullable;
-import net.minecraft.core.UUIDUtil;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ByIdMap;
-import net.minecraft.util.Mth;
-import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringRepresentable;
 import org.slf4j.Logger;
 
-public record AttributeModifier(UUID id, String name, double amount, AttributeModifier.Operation operation) {
+public record AttributeModifier(ResourceLocation id, double amount, AttributeModifier.Operation operation) {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	public static final MapCodec<AttributeModifier> MAP_CODEC = RecordCodecBuilder.mapCodec(
 		instance -> instance.group(
-					UUIDUtil.CODEC.fieldOf("uuid").forGetter(AttributeModifier::id),
-					Codec.STRING.fieldOf("name").forGetter(attributeModifier -> attributeModifier.name),
+					ResourceLocation.CODEC.fieldOf("id").forGetter(AttributeModifier::id),
 					Codec.DOUBLE.fieldOf("amount").forGetter(AttributeModifier::amount),
 					AttributeModifier.Operation.CODEC.fieldOf("operation").forGetter(AttributeModifier::operation)
 				)
@@ -31,10 +31,8 @@ public record AttributeModifier(UUID id, String name, double amount, AttributeMo
 	);
 	public static final Codec<AttributeModifier> CODEC = MAP_CODEC.codec();
 	public static final StreamCodec<ByteBuf, AttributeModifier> STREAM_CODEC = StreamCodec.composite(
-		UUIDUtil.STREAM_CODEC,
+		ResourceLocation.STREAM_CODEC,
 		AttributeModifier::id,
-		ByteBufCodecs.STRING_UTF8,
-		attributeModifier -> attributeModifier.name,
 		ByteBufCodecs.DOUBLE,
 		AttributeModifier::amount,
 		AttributeModifier.Operation.STREAM_CODEC,
@@ -42,29 +40,24 @@ public record AttributeModifier(UUID id, String name, double amount, AttributeMo
 		AttributeModifier::new
 	);
 
-	public AttributeModifier(String string, double d, AttributeModifier.Operation operation) {
-		this(Mth.createInsecureUUID(RandomSource.createNewThreadLocalInstance()), string, d, operation);
-	}
-
 	public CompoundTag save() {
-		CompoundTag compoundTag = new CompoundTag();
-		compoundTag.putString("Name", this.name);
-		compoundTag.putDouble("Amount", this.amount);
-		compoundTag.putInt("Operation", this.operation.id());
-		compoundTag.putUUID("UUID", this.id);
-		return compoundTag;
+		DataResult<Tag> dataResult = CODEC.encode(this, NbtOps.INSTANCE, new CompoundTag());
+		return (CompoundTag)dataResult.getOrThrow();
 	}
 
 	@Nullable
 	public static AttributeModifier load(CompoundTag compoundTag) {
-		try {
-			UUID uUID = compoundTag.getUUID("UUID");
-			AttributeModifier.Operation operation = (AttributeModifier.Operation)AttributeModifier.Operation.BY_ID.apply(compoundTag.getInt("Operation"));
-			return new AttributeModifier(uUID, compoundTag.getString("Name"), compoundTag.getDouble("Amount"), operation);
-		} catch (Exception var3) {
-			LOGGER.warn("Unable to create attribute: {}", var3.getMessage());
+		DataResult<AttributeModifier> dataResult = CODEC.parse(NbtOps.INSTANCE, compoundTag);
+		if (dataResult.isSuccess()) {
+			return dataResult.getOrThrow();
+		} else {
+			LOGGER.warn("Unable to create attribute: {}", ((Error)dataResult.error().get()).message());
 			return null;
 		}
+	}
+
+	public boolean is(ResourceLocation resourceLocation) {
+		return resourceLocation.equals(this.id);
 	}
 
 	public static enum Operation implements StringRepresentable {

@@ -10,7 +10,7 @@ import net.minecraft.world.entity.monster.Pillager;
 
 @Environment(EnvType.CLIENT)
 public class PillagerRenderer extends IllagerRenderer<Pillager> {
-	private static final ResourceLocation PILLAGER = new ResourceLocation("textures/entity/illager/pillager.png");
+	private static final ResourceLocation PILLAGER = ResourceLocation.withDefaultNamespace("textures/entity/illager/pillager.png");
 
 	public PillagerRenderer(EntityRendererProvider.Context context) {
 		super(context, new IllagerModel<>(context.bakeLayer(ModelLayers.PILLAGER)), 0.5F);

@@ -60,10 +60,10 @@ public record DyedItemColor(int rgb, boolean showInTooltip) implements TooltipPr
 			}
 
 			for (DyeItem dyeItem : list) {
-				float[] fs = dyeItem.getDyeColor().getTextureDiffuseColors();
-				int q = (int)(fs[0] * 255.0F);
-				int r = (int)(fs[1] * 255.0F);
-				int s = (int)(fs[2] * 255.0F);
+				int p = dyeItem.getDyeColor().getTextureDiffuseColor();
+				int q = FastColor.ARGB32.red(p);
+				int r = FastColor.ARGB32.green(p);
+				int s = FastColor.ARGB32.blue(p);
 				l += Math.max(q, Math.max(r, s));
 				i += q;
 				j += r;

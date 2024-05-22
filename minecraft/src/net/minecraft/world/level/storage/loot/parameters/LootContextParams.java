@@ -24,6 +24,6 @@ public class LootContextParams {
 	public static final LootContextParam<Boolean> ENCHANTMENT_ACTIVE = create("enchantment_active");
 
 	private static <T> LootContextParam<T> create(String string) {
-		return new LootContextParam<>(new ResourceLocation(string));
+		return new LootContextParam<>(ResourceLocation.withDefaultNamespace(string));
 	}
 }

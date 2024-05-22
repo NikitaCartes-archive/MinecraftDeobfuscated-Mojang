@@ -89,7 +89,7 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 				Blocks.RED_NETHER_BRICKS,
 				Component.translatable("advancements.nether.root.title"),
 				Component.translatable("advancements.nether.root.description"),
-				new ResourceLocation("textures/gui/advancements/backgrounds/nether.png"),
+				ResourceLocation.withDefaultNamespace("textures/gui/advancements/backgrounds/nether.png"),
 				AdvancementType.TASK,
 				false,
 				false,

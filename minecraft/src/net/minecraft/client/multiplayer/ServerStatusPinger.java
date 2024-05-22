@@ -27,6 +27,7 @@ import net.minecraft.client.multiplayer.resolver.ResolvedServerAddress;
 import net.minecraft.client.multiplayer.resolver.ServerAddress;
 import net.minecraft.client.multiplayer.resolver.ServerNameResolver;
 import net.minecraft.network.Connection;
+import net.minecraft.network.DisconnectionDetails;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.ping.ClientboundPongResponsePacket;
@@ -115,9 +116,9 @@ public class ServerStatusPinger {
 				}
 
 				@Override
-				public void onDisconnect(Component component) {
+				public void onDisconnect(DisconnectionDetails disconnectionDetails) {
 					if (!this.success) {
-						ServerStatusPinger.this.onPingFailed(component, serverData);
+						ServerStatusPinger.this.onPingFailed(disconnectionDetails.reason(), serverData);
 						ServerStatusPinger.this.pingLegacyServer(inetSocketAddress, serverAddress, serverData);
 					}
 				}

@@ -355,7 +355,7 @@ public class EndCityPieces {
 		}
 
 		private static ResourceLocation makeResourceLocation(String string) {
-			return new ResourceLocation("end_city/" + string);
+			return ResourceLocation.withDefaultNamespace("end_city/" + string);
 		}
 
 		@Override

@@ -95,7 +95,7 @@ public class StructureUtils {
 		serverLevel.setBlockAndUpdate(blockPos, Blocks.STRUCTURE_BLOCK.defaultBlockState());
 		StructureBlockEntity structureBlockEntity = (StructureBlockEntity)serverLevel.getBlockEntity(blockPos);
 		structureBlockEntity.setIgnoreEntities(false);
-		structureBlockEntity.setStructureName(new ResourceLocation(string));
+		structureBlockEntity.setStructureName(ResourceLocation.parse(string));
 		structureBlockEntity.setStructureSize(vec3i);
 		structureBlockEntity.setMode(StructureMode.SAVE);
 		structureBlockEntity.setShowBoundingBox(true);
@@ -103,7 +103,7 @@ public class StructureUtils {
 
 	public static StructureBlockEntity prepareTestStructure(GameTestInfo gameTestInfo, BlockPos blockPos, Rotation rotation, ServerLevel serverLevel) {
 		Vec3i vec3i = ((StructureTemplate)serverLevel.getStructureManager()
-				.get(new ResourceLocation(gameTestInfo.getStructureName()))
+				.get(ResourceLocation.parse(gameTestInfo.getStructureName()))
 				.orElseThrow(() -> new IllegalStateException("Missing test structure: " + gameTestInfo.getStructureName())))
 			.getSize();
 		BoundingBox boundingBox = getStructureBoundingBox(blockPos, vec3i, rotation);
@@ -231,7 +231,7 @@ public class StructureUtils {
 		structureBlockEntity.setMode(StructureMode.LOAD);
 		structureBlockEntity.setRotation(rotation);
 		structureBlockEntity.setIgnoreEntities(false);
-		structureBlockEntity.setStructureName(new ResourceLocation(gameTestInfo.getStructureName()));
+		structureBlockEntity.setStructureName(ResourceLocation.parse(gameTestInfo.getStructureName()));
 		structureBlockEntity.setMetaData(gameTestInfo.getTestName());
 		if (!structureBlockEntity.loadStructureInfo(serverLevel)) {
 			throw new RuntimeException("Failed to load structure info for test: " + gameTestInfo.getTestName() + ". Structure name: " + gameTestInfo.getStructureName());

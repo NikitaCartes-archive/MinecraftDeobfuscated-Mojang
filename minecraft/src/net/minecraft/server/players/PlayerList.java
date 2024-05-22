@@ -434,7 +434,7 @@ public abstract class PlayerList {
 		this.players.remove(serverPlayer);
 		serverPlayer.serverLevel().removePlayerImmediately(serverPlayer, removalReason);
 		DimensionTransition dimensionTransition = serverPlayer.findRespawnPositionAndUseSpawnBlock(bl);
-		ServerLevel serverLevel = dimensionTransition.newDimension();
+		ServerLevel serverLevel = dimensionTransition.newLevel();
 		ServerPlayer serverPlayer2 = new ServerPlayer(this.server, serverLevel, serverPlayer.getGameProfile(), serverPlayer.clientInformation());
 		serverPlayer2.connection = serverPlayer.connection;
 		serverPlayer2.restoreFrom(serverPlayer, bl);

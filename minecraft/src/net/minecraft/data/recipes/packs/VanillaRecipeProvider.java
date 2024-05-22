@@ -2593,7 +2593,7 @@ public class VanillaRecipeProvider extends RecipeProvider {
 		copySmithingTemplate(recipeOutput, Items.RAISER_ARMOR_TRIM_SMITHING_TEMPLATE, Items.TERRACOTTA);
 		copySmithingTemplate(recipeOutput, Items.HOST_ARMOR_TRIM_SMITHING_TEMPLATE, Items.TERRACOTTA);
 		copySmithingTemplate(recipeOutput, Items.FLOW_ARMOR_TRIM_SMITHING_TEMPLATE, Items.BREEZE_ROD);
-		copySmithingTemplate(recipeOutput, Items.BOLT_ARMOR_TRIM_SMITHING_TEMPLATE, Items.COPPER_BLOCK);
+		copySmithingTemplate(recipeOutput, Items.BOLT_ARMOR_TRIM_SMITHING_TEMPLATE, Ingredient.of(Items.COPPER_BLOCK, Items.WAXED_COPPER_BLOCK));
 		threeByThreePacker(recipeOutput, RecipeCategory.BUILDING_BLOCKS, Blocks.BAMBOO_BLOCK, Items.BAMBOO);
 		planksFromLogs(recipeOutput, Blocks.BAMBOO_PLANKS, ItemTags.BAMBOO_BLOCKS, 2);
 		mosaicBuilder(recipeOutput, RecipeCategory.DECORATIONS, Blocks.BAMBOO_MOSAIC, Blocks.BAMBOO_SLAB);
@@ -2757,7 +2757,7 @@ public class VanillaRecipeProvider extends RecipeProvider {
 				Items.WAYFINDER_ARMOR_TRIM_SMITHING_TEMPLATE,
 				Items.WILD_ARMOR_TRIM_SMITHING_TEMPLATE
 			)
-			.map(item -> new VanillaRecipeProvider.TrimTemplate(item, new ResourceLocation(getItemName(item) + "_smithing_trim")));
+			.map(item -> new VanillaRecipeProvider.TrimTemplate(item, ResourceLocation.withDefaultNamespace(getItemName(item) + "_smithing_trim")));
 	}
 
 	public static record TrimTemplate(Item template, ResourceLocation id) {

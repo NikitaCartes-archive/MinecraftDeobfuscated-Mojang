@@ -81,13 +81,14 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
 import org.joml.Matrix4fStack;
+import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class GameRenderer implements AutoCloseable {
-	private static final ResourceLocation NAUSEA_LOCATION = new ResourceLocation("textures/misc/nausea.png");
-	private static final ResourceLocation BLUR_LOCATION = new ResourceLocation("shaders/post/blur.json");
+	private static final ResourceLocation NAUSEA_LOCATION = ResourceLocation.withDefaultNamespace("textures/misc/nausea.png");
+	private static final ResourceLocation BLUR_LOCATION = ResourceLocation.withDefaultNamespace("shaders/post/blur.json");
 	public static final int MAX_BLUR_RADIUS = 10;
 	static final Logger LOGGER = LogUtils.getLogger();
 	private static final boolean DEPTH_BUFFER_DEBUG = false;
@@ -128,14 +129,13 @@ public class GameRenderer implements AutoCloseable {
 	private PostChain blurEffect;
 	private boolean effectActive;
 	private final Camera mainCamera = new Camera();
+	@Nullable
 	public ShaderInstance blitShader;
 	private final Map<String, ShaderInstance> shaders = Maps.<String, ShaderInstance>newHashMap();
 	@Nullable
 	private static ShaderInstance positionShader;
 	@Nullable
 	private static ShaderInstance positionColorShader;
-	@Nullable
-	private static ShaderInstance positionColorTexShader;
 	@Nullable
 	private static ShaderInstance positionTexShader;
 	@Nullable
@@ -307,11 +307,11 @@ public class GameRenderer implements AutoCloseable {
 
 		this.postEffect = null;
 		if (entity instanceof Creeper) {
-			this.loadEffect(new ResourceLocation("shaders/post/creeper.json"));
+			this.loadEffect(ResourceLocation.withDefaultNamespace("shaders/post/creeper.json"));
 		} else if (entity instanceof Spider) {
-			this.loadEffect(new ResourceLocation("shaders/post/spider.json"));
+			this.loadEffect(ResourceLocation.withDefaultNamespace("shaders/post/spider.json"));
 		} else if (entity instanceof EnderMan) {
-			this.loadEffect(new ResourceLocation("shaders/post/invert.json"));
+			this.loadEffect(ResourceLocation.withDefaultNamespace("shaders/post/invert.json"));
 		}
 	}
 
@@ -351,10 +351,8 @@ public class GameRenderer implements AutoCloseable {
 	public void processBlurEffect(float f) {
 		float g = (float)this.minecraft.options.getMenuBackgroundBlurriness();
 		if (this.blurEffect != null && g >= 1.0F) {
-			RenderSystem.enableBlend();
 			this.blurEffect.setUniform("Radius", g);
 			this.blurEffect.process(f);
-			RenderSystem.disableBlend();
 		}
 	}
 
@@ -432,7 +430,6 @@ public class GameRenderer implements AutoCloseable {
 			rendertypeGuiOverlayShader = this.preloadShader(resourceProvider, "rendertype_gui_overlay", DefaultVertexFormat.POSITION_COLOR);
 			positionShader = this.preloadShader(resourceProvider, "position", DefaultVertexFormat.POSITION);
 			positionColorShader = this.preloadShader(resourceProvider, "position_color", DefaultVertexFormat.POSITION_COLOR);
-			positionColorTexShader = this.preloadShader(resourceProvider, "position_color_tex", DefaultVertexFormat.POSITION_COLOR_TEX);
 			positionTexShader = this.preloadShader(resourceProvider, "position_tex", DefaultVertexFormat.POSITION_TEX);
 			positionTexColorShader = this.preloadShader(resourceProvider, "position_tex_color", DefaultVertexFormat.POSITION_TEX_COLOR);
 			rendertypeTextShader = this.preloadShader(resourceProvider, "rendertype_text", DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP);
@@ -469,12 +466,6 @@ public class GameRenderer implements AutoCloseable {
 				Pair.of(
 					new ShaderInstance(resourceProvider, "position_color_lightmap", DefaultVertexFormat.POSITION_COLOR_LIGHTMAP),
 					shaderInstance -> positionColorLightmapShader = shaderInstance
-				)
-			);
-			list2.add(
-				Pair.of(
-					new ShaderInstance(resourceProvider, "position_color_tex", DefaultVertexFormat.POSITION_COLOR_TEX),
-					shaderInstance -> positionColorTexShader = shaderInstance
 				)
 			);
 			list2.add(
@@ -626,14 +617,8 @@ public class GameRenderer implements AutoCloseable {
 			);
 			list2.add(
 				Pair.of(
-					new ShaderInstance(resourceProvider, "rendertype_outline", DefaultVertexFormat.POSITION_COLOR_TEX),
+					new ShaderInstance(resourceProvider, "rendertype_outline", DefaultVertexFormat.POSITION_TEX_COLOR),
 					shaderInstance -> rendertypeOutlineShader = shaderInstance
-				)
-			);
-			list2.add(
-				Pair.of(
-					new ShaderInstance(resourceProvider, "rendertype_armor_glint", DefaultVertexFormat.POSITION_TEX),
-					shaderInstance -> rendertypeArmorGlintShader = shaderInstance
 				)
 			);
 			list2.add(
@@ -651,12 +636,6 @@ public class GameRenderer implements AutoCloseable {
 			list2.add(
 				Pair.of(
 					new ShaderInstance(resourceProvider, "rendertype_glint", DefaultVertexFormat.POSITION_TEX), shaderInstance -> rendertypeGlintShader = shaderInstance
-				)
-			);
-			list2.add(
-				Pair.of(
-					new ShaderInstance(resourceProvider, "rendertype_glint_direct", DefaultVertexFormat.POSITION_TEX),
-					shaderInstance -> rendertypeGlintDirectShader = shaderInstance
 				)
 			);
 			list2.add(
@@ -1105,9 +1084,7 @@ public class GameRenderer implements AutoCloseable {
 				}
 
 				if (!this.minecraft.options.hideGui) {
-					this.renderItemActivationAnimation(
-						this.minecraft.getWindow().getGuiScaledWidth(), this.minecraft.getWindow().getGuiScaledHeight(), deltaTracker.getGameTimeDeltaPartialTick(false)
-					);
+					this.renderItemActivationAnimation(guiGraphics, deltaTracker.getGameTimeDeltaPartialTick(false));
 				}
 
 				this.minecraft.gui.render(guiGraphics, deltaTracker);
@@ -1292,8 +1269,8 @@ public class GameRenderer implements AutoCloseable {
 		}
 
 		this.resetProjectionMatrix(matrix4f);
-		Matrix4f matrix4f2 = new Matrix4f()
-			.rotationXYZ(camera.getXRot() * (float) (Math.PI / 180.0), camera.getYRot() * (float) (Math.PI / 180.0) + (float) Math.PI, 0.0F);
+		Quaternionf quaternionf = camera.rotation().conjugate(new Quaternionf());
+		Matrix4f matrix4f2 = new Matrix4f().rotation(quaternionf);
 		this.minecraft
 			.levelRenderer
 			.prepareCullFrustum(camera.getPosition(), matrix4f2, this.getProjectionMatrix(Math.max(d, (double)this.minecraft.options.fov().get().intValue())));
@@ -1325,34 +1302,34 @@ public class GameRenderer implements AutoCloseable {
 		this.itemActivationOffY = this.random.nextFloat() * 2.0F - 1.0F;
 	}
 
-	private void renderItemActivationAnimation(int i, int j, float f) {
+	private void renderItemActivationAnimation(GuiGraphics guiGraphics, float f) {
 		if (this.itemActivationItem != null && this.itemActivationTicks > 0) {
-			int k = 40 - this.itemActivationTicks;
-			float g = ((float)k + f) / 40.0F;
+			int i = 40 - this.itemActivationTicks;
+			float g = ((float)i + f) / 40.0F;
 			float h = g * g;
-			float l = g * h;
-			float m = 10.25F * l * h - 24.95F * h * h + 25.5F * l - 13.8F * h + 4.0F * g;
-			float n = m * (float) Math.PI;
-			float o = this.itemActivationOffX * (float)(i / 4);
-			float p = this.itemActivationOffY * (float)(j / 4);
-			RenderSystem.enableDepthTest();
-			RenderSystem.disableCull();
+			float j = g * h;
+			float k = 10.25F * j * h - 24.95F * h * h + 25.5F * j - 13.8F * h + 4.0F * g;
+			float l = k * (float) Math.PI;
+			float m = this.itemActivationOffX * (float)(guiGraphics.guiWidth() / 4);
+			float n = this.itemActivationOffY * (float)(guiGraphics.guiHeight() / 4);
 			PoseStack poseStack = new PoseStack();
 			poseStack.pushPose();
-			poseStack.translate((float)(i / 2) + o * Mth.abs(Mth.sin(n * 2.0F)), (float)(j / 2) + p * Mth.abs(Mth.sin(n * 2.0F)), -50.0F);
-			float q = 50.0F + 175.0F * Mth.sin(n);
-			poseStack.scale(q, -q, q);
-			poseStack.mulPose(Axis.YP.rotationDegrees(900.0F * Mth.abs(Mth.sin(n))));
+			poseStack.translate(
+				(float)(guiGraphics.guiWidth() / 2) + m * Mth.abs(Mth.sin(l * 2.0F)), (float)(guiGraphics.guiHeight() / 2) + n * Mth.abs(Mth.sin(l * 2.0F)), -50.0F
+			);
+			float o = 50.0F + 175.0F * Mth.sin(l);
+			poseStack.scale(o, -o, o);
+			poseStack.mulPose(Axis.YP.rotationDegrees(900.0F * Mth.abs(Mth.sin(l))));
 			poseStack.mulPose(Axis.XP.rotationDegrees(6.0F * Mth.cos(g * 8.0F)));
 			poseStack.mulPose(Axis.ZP.rotationDegrees(6.0F * Mth.cos(g * 8.0F)));
-			MultiBufferSource.BufferSource bufferSource = this.renderBuffers.bufferSource();
-			this.minecraft
-				.getItemRenderer()
-				.renderStatic(this.itemActivationItem, ItemDisplayContext.FIXED, 15728880, OverlayTexture.NO_OVERLAY, poseStack, bufferSource, this.minecraft.level, 0);
+			guiGraphics.drawManaged(
+				() -> this.minecraft
+						.getItemRenderer()
+						.renderStatic(
+							this.itemActivationItem, ItemDisplayContext.FIXED, 15728880, OverlayTexture.NO_OVERLAY, poseStack, guiGraphics.bufferSource(), this.minecraft.level, 0
+						)
+			);
 			poseStack.popPose();
-			bufferSource.endBatch();
-			RenderSystem.enableCull();
-			RenderSystem.disableDepthTest();
 		}
 	}
 
@@ -1413,11 +1390,6 @@ public class GameRenderer implements AutoCloseable {
 	@Nullable
 	public static ShaderInstance getPositionColorShader() {
 		return positionColorShader;
-	}
-
-	@Nullable
-	public static ShaderInstance getPositionColorTexShader() {
-		return positionColorTexShader;
 	}
 
 	@Nullable

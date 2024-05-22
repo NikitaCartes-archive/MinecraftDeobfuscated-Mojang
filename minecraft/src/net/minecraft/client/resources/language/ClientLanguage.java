@@ -37,7 +37,7 @@ public class ClientLanguage extends Language {
 
 			for (String string3 : resourceManager.getNamespaces()) {
 				try {
-					ResourceLocation resourceLocation = new ResourceLocation(string3, string2);
+					ResourceLocation resourceLocation = ResourceLocation.fromNamespaceAndPath(string3, string2);
 					appendFrom(string, resourceManager.getResourceStack(resourceLocation), map);
 				} catch (Exception var10) {
 					LOGGER.warn("Skipped language file: {}:{} ({})", string3, string2, var10.toString());

@@ -39,6 +39,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.effects.EnchantmentValueEffect;
 import net.minecraft.world.item.enchantment.providers.EnchantmentProvider;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.mutable.MutableBoolean;
@@ -294,10 +295,11 @@ public class EnchantmentHelper {
 		Entity entity,
 		@Nullable EquipmentSlot equipmentSlot,
 		Vec3 vec3,
+		BlockState blockState,
 		Consumer<Item> consumer
 	) {
 		EnchantedItemInUse enchantedItemInUse = new EnchantedItemInUse(itemStack, equipmentSlot, livingEntity, consumer);
-		runIterationOnItem(itemStack, (holder, i) -> holder.value().onHitBlock(serverLevel, i, enchantedItemInUse, entity, vec3));
+		runIterationOnItem(itemStack, (holder, i) -> holder.value().onHitBlock(serverLevel, i, enchantedItemInUse, entity, vec3, blockState));
 	}
 
 	public static int modifyDurabilityToRepairFromXp(ServerLevel serverLevel, ItemStack itemStack, int i) {
@@ -352,7 +354,7 @@ public class EnchantmentHelper {
 	public static void forEachModifier(ItemStack itemStack, EquipmentSlotGroup equipmentSlotGroup, BiConsumer<Holder<Attribute>, AttributeModifier> biConsumer) {
 		runIterationOnItem(itemStack, (holder, i) -> holder.value().getEffects(EnchantmentEffectComponents.ATTRIBUTES).forEach(enchantmentAttributeEffect -> {
 				if (((Enchantment)holder.value()).definition().slots().contains(equipmentSlotGroup)) {
-					biConsumer.accept(enchantmentAttributeEffect.attribute(), enchantmentAttributeEffect.getModifier(i));
+					biConsumer.accept(enchantmentAttributeEffect.attribute(), enchantmentAttributeEffect.getModifier(i, equipmentSlotGroup));
 				}
 			}));
 	}
@@ -360,7 +362,7 @@ public class EnchantmentHelper {
 	public static void forEachModifier(ItemStack itemStack, EquipmentSlot equipmentSlot, BiConsumer<Holder<Attribute>, AttributeModifier> biConsumer) {
 		runIterationOnItem(itemStack, (holder, i) -> holder.value().getEffects(EnchantmentEffectComponents.ATTRIBUTES).forEach(enchantmentAttributeEffect -> {
 				if (((Enchantment)holder.value()).matchingSlot(equipmentSlot)) {
-					biConsumer.accept(enchantmentAttributeEffect.attribute(), enchantmentAttributeEffect.getModifier(i));
+					biConsumer.accept(enchantmentAttributeEffect.attribute(), enchantmentAttributeEffect.getModifier(i, equipmentSlot));
 				}
 			}));
 	}

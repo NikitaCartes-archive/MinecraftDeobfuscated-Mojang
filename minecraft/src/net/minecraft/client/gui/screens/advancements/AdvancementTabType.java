@@ -10,14 +10,14 @@ import net.minecraft.world.item.ItemStack;
 enum AdvancementTabType {
 	ABOVE(
 		new AdvancementTabType.Sprites(
-			new ResourceLocation("advancements/tab_above_left_selected"),
-			new ResourceLocation("advancements/tab_above_middle_selected"),
-			new ResourceLocation("advancements/tab_above_right_selected")
+			ResourceLocation.withDefaultNamespace("advancements/tab_above_left_selected"),
+			ResourceLocation.withDefaultNamespace("advancements/tab_above_middle_selected"),
+			ResourceLocation.withDefaultNamespace("advancements/tab_above_right_selected")
 		),
 		new AdvancementTabType.Sprites(
-			new ResourceLocation("advancements/tab_above_left"),
-			new ResourceLocation("advancements/tab_above_middle"),
-			new ResourceLocation("advancements/tab_above_right")
+			ResourceLocation.withDefaultNamespace("advancements/tab_above_left"),
+			ResourceLocation.withDefaultNamespace("advancements/tab_above_middle"),
+			ResourceLocation.withDefaultNamespace("advancements/tab_above_right")
 		),
 		28,
 		32,
@@ -25,14 +25,14 @@ enum AdvancementTabType {
 	),
 	BELOW(
 		new AdvancementTabType.Sprites(
-			new ResourceLocation("advancements/tab_below_left_selected"),
-			new ResourceLocation("advancements/tab_below_middle_selected"),
-			new ResourceLocation("advancements/tab_below_right_selected")
+			ResourceLocation.withDefaultNamespace("advancements/tab_below_left_selected"),
+			ResourceLocation.withDefaultNamespace("advancements/tab_below_middle_selected"),
+			ResourceLocation.withDefaultNamespace("advancements/tab_below_right_selected")
 		),
 		new AdvancementTabType.Sprites(
-			new ResourceLocation("advancements/tab_below_left"),
-			new ResourceLocation("advancements/tab_below_middle"),
-			new ResourceLocation("advancements/tab_below_right")
+			ResourceLocation.withDefaultNamespace("advancements/tab_below_left"),
+			ResourceLocation.withDefaultNamespace("advancements/tab_below_middle"),
+			ResourceLocation.withDefaultNamespace("advancements/tab_below_right")
 		),
 		28,
 		32,
@@ -40,14 +40,14 @@ enum AdvancementTabType {
 	),
 	LEFT(
 		new AdvancementTabType.Sprites(
-			new ResourceLocation("advancements/tab_left_top_selected"),
-			new ResourceLocation("advancements/tab_left_middle_selected"),
-			new ResourceLocation("advancements/tab_left_bottom_selected")
+			ResourceLocation.withDefaultNamespace("advancements/tab_left_top_selected"),
+			ResourceLocation.withDefaultNamespace("advancements/tab_left_middle_selected"),
+			ResourceLocation.withDefaultNamespace("advancements/tab_left_bottom_selected")
 		),
 		new AdvancementTabType.Sprites(
-			new ResourceLocation("advancements/tab_left_top"),
-			new ResourceLocation("advancements/tab_left_middle"),
-			new ResourceLocation("advancements/tab_left_bottom")
+			ResourceLocation.withDefaultNamespace("advancements/tab_left_top"),
+			ResourceLocation.withDefaultNamespace("advancements/tab_left_middle"),
+			ResourceLocation.withDefaultNamespace("advancements/tab_left_bottom")
 		),
 		32,
 		28,
@@ -55,14 +55,14 @@ enum AdvancementTabType {
 	),
 	RIGHT(
 		new AdvancementTabType.Sprites(
-			new ResourceLocation("advancements/tab_right_top_selected"),
-			new ResourceLocation("advancements/tab_right_middle_selected"),
-			new ResourceLocation("advancements/tab_right_bottom_selected")
+			ResourceLocation.withDefaultNamespace("advancements/tab_right_top_selected"),
+			ResourceLocation.withDefaultNamespace("advancements/tab_right_middle_selected"),
+			ResourceLocation.withDefaultNamespace("advancements/tab_right_bottom_selected")
 		),
 		new AdvancementTabType.Sprites(
-			new ResourceLocation("advancements/tab_right_top"),
-			new ResourceLocation("advancements/tab_right_middle"),
-			new ResourceLocation("advancements/tab_right_bottom")
+			ResourceLocation.withDefaultNamespace("advancements/tab_right_top"),
+			ResourceLocation.withDefaultNamespace("advancements/tab_right_middle"),
+			ResourceLocation.withDefaultNamespace("advancements/tab_right_bottom")
 		),
 		32,
 		28,

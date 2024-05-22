@@ -1,11 +1,10 @@
 package net.minecraft.client.renderer;
 
 import com.google.common.collect.ImmutableList;
-import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.MeshData;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import com.mojang.blaze3d.vertex.VertexSorting;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalDouble;
@@ -292,22 +291,6 @@ public abstract class RenderType extends RenderStateShard {
 			.setWriteMaskState(DEPTH_WRITE)
 			.createCompositeState(false)
 	);
-	private static final RenderType ARMOR_GLINT = create(
-		"armor_glint",
-		DefaultVertexFormat.POSITION_TEX,
-		VertexFormat.Mode.QUADS,
-		1536,
-		RenderType.CompositeState.builder()
-			.setShaderState(RENDERTYPE_ARMOR_GLINT_SHADER)
-			.setTextureState(new RenderStateShard.TextureStateShard(ItemRenderer.ENCHANTED_GLINT_ENTITY, true, false))
-			.setWriteMaskState(COLOR_WRITE)
-			.setCullState(NO_CULL)
-			.setDepthTestState(EQUAL_DEPTH_TEST)
-			.setTransparencyState(GLINT_TRANSPARENCY)
-			.setTexturingState(GLINT_TEXTURING)
-			.setLayeringState(VIEW_OFFSET_Z_LAYERING)
-			.createCompositeState(false)
-	);
 	private static final RenderType ARMOR_ENTITY_GLINT = create(
 		"armor_entity_glint",
 		DefaultVertexFormat.POSITION_TEX,
@@ -347,21 +330,6 @@ public abstract class RenderType extends RenderStateShard {
 		1536,
 		RenderType.CompositeState.builder()
 			.setShaderState(RENDERTYPE_GLINT_SHADER)
-			.setTextureState(new RenderStateShard.TextureStateShard(ItemRenderer.ENCHANTED_GLINT_ITEM, true, false))
-			.setWriteMaskState(COLOR_WRITE)
-			.setCullState(NO_CULL)
-			.setDepthTestState(EQUAL_DEPTH_TEST)
-			.setTransparencyState(GLINT_TRANSPARENCY)
-			.setTexturingState(GLINT_TEXTURING)
-			.createCompositeState(false)
-	);
-	private static final RenderType GLINT_DIRECT = create(
-		"glint_direct",
-		DefaultVertexFormat.POSITION_TEX,
-		VertexFormat.Mode.QUADS,
-		1536,
-		RenderType.CompositeState.builder()
-			.setShaderState(RENDERTYPE_GLINT_DIRECT_SHADER)
 			.setTextureState(new RenderStateShard.TextureStateShard(ItemRenderer.ENCHANTED_GLINT_ITEM, true, false))
 			.setWriteMaskState(COLOR_WRITE)
 			.setCullState(NO_CULL)
@@ -741,7 +709,6 @@ public abstract class RenderType extends RenderStateShard {
 	private final int bufferSize;
 	private final boolean affectsCrumbling;
 	private final boolean sortOnUpload;
-	private final Optional<RenderType> asOptional;
 
 	public static RenderType solid() {
 		return SOLID;
@@ -937,10 +904,6 @@ public abstract class RenderType extends RenderStateShard {
 		return (RenderType)RenderType.CompositeRenderType.OUTLINE.apply(resourceLocation, NO_CULL);
 	}
 
-	public static RenderType armorGlint() {
-		return ARMOR_GLINT;
-	}
-
 	public static RenderType armorEntityGlint() {
 		return ARMOR_ENTITY_GLINT;
 	}
@@ -951,10 +914,6 @@ public abstract class RenderType extends RenderStateShard {
 
 	public static RenderType glint() {
 		return GLINT;
-	}
-
-	public static RenderType glintDirect() {
-		return GLINT_DIRECT;
 	}
 
 	public static RenderType entityGlint() {
@@ -1101,7 +1060,6 @@ public abstract class RenderType extends RenderStateShard {
 		this.bufferSize = i;
 		this.affectsCrumbling = bl;
 		this.sortOnUpload = bl2;
-		this.asOptional = Optional.of(this);
 	}
 
 	static RenderType.CompositeRenderType create(String string, VertexFormat vertexFormat, VertexFormat.Mode mode, int i, RenderType.CompositeState compositeState) {
@@ -1114,17 +1072,10 @@ public abstract class RenderType extends RenderStateShard {
 		return new RenderType.CompositeRenderType(string, vertexFormat, mode, i, bl, bl2, compositeState);
 	}
 
-	public void end(BufferBuilder bufferBuilder, VertexSorting vertexSorting) {
-		if (bufferBuilder.building()) {
-			if (this.sortOnUpload) {
-				bufferBuilder.setQuadSorting(vertexSorting);
-			}
-
-			BufferBuilder.RenderedBuffer renderedBuffer = bufferBuilder.end();
-			this.setupRenderState();
-			BufferUploader.drawWithShader(renderedBuffer);
-			this.clearRenderState();
-		}
+	public void draw(MeshData meshData) {
+		this.setupRenderState();
+		BufferUploader.drawWithShader(meshData);
+		this.clearRenderState();
 	}
 
 	@Override
@@ -1164,8 +1115,8 @@ public abstract class RenderType extends RenderStateShard {
 		return !this.mode.connectedPrimitives;
 	}
 
-	public Optional<RenderType> asOptional() {
-		return this.asOptional;
+	public boolean sortOnUpload() {
+		return this.sortOnUpload;
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -1173,7 +1124,7 @@ public abstract class RenderType extends RenderStateShard {
 		static final BiFunction<ResourceLocation, RenderStateShard.CullStateShard, RenderType> OUTLINE = Util.memoize(
 			(BiFunction<ResourceLocation, RenderStateShard.CullStateShard, RenderType>)((resourceLocation, cullStateShard) -> RenderType.create(
 					"outline",
-					DefaultVertexFormat.POSITION_COLOR_TEX,
+					DefaultVertexFormat.POSITION_TEX_COLOR,
 					VertexFormat.Mode.QUADS,
 					1536,
 					RenderType.CompositeState.builder()

@@ -29,6 +29,6 @@ public class LootItemConditions {
 	public static final LootItemConditionType ENCHANTMENT_ACTIVE_CHECK = register("enchantment_active_check", EnchantmentActiveCheck.CODEC);
 
 	private static LootItemConditionType register(String string, MapCodec<? extends LootItemCondition> mapCodec) {
-		return Registry.register(BuiltInRegistries.LOOT_CONDITION_TYPE, new ResourceLocation(string), new LootItemConditionType(mapCodec));
+		return Registry.register(BuiltInRegistries.LOOT_CONDITION_TYPE, ResourceLocation.withDefaultNamespace(string), new LootItemConditionType(mapCodec));
 	}
 }

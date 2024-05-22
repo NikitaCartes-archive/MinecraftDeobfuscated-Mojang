@@ -65,9 +65,9 @@ public class JigsawBlockEditScreen extends Screen {
 			.send(
 				new ServerboundSetJigsawBlockPacket(
 					this.jigsawEntity.getBlockPos(),
-					new ResourceLocation(this.nameEdit.getValue()),
-					new ResourceLocation(this.targetEdit.getValue()),
-					new ResourceLocation(this.poolEdit.getValue()),
+					ResourceLocation.parse(this.nameEdit.getValue()),
+					ResourceLocation.parse(this.targetEdit.getValue()),
+					ResourceLocation.parse(this.poolEdit.getValue()),
 					this.finalStateEdit.getValue(),
 					this.joint,
 					this.parseAsInt(this.selectionPriorityEdit.getValue()),

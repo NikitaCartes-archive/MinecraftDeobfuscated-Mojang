@@ -11,7 +11,7 @@ import net.minecraft.world.level.GrassColor;
 
 @Environment(EnvType.CLIENT)
 public class GrassColorReloadListener extends SimplePreparableReloadListener<int[]> {
-	private static final ResourceLocation LOCATION = new ResourceLocation("textures/colormap/grass.png");
+	private static final ResourceLocation LOCATION = ResourceLocation.withDefaultNamespace("textures/colormap/grass.png");
 
 	protected int[] prepare(ResourceManager resourceManager, ProfilerFiller profilerFiller) {
 		try {

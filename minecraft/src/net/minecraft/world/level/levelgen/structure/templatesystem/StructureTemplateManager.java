@@ -49,7 +49,7 @@ import org.slf4j.Logger;
 
 public class StructureTemplateManager {
 	private static final Logger LOGGER = LogUtils.getLogger();
-	private static final String STRUCTURE_DIRECTORY_NAME = "structures";
+	public static final String STRUCTURE_DIRECTORY_NAME = "structure";
 	private static final String STRUCTURE_FILE_EXTENSION = ".nbt";
 	private static final String STRUCTURE_TEXT_FILE_EXTENSION = ".snbt";
 	private final Map<ResourceLocation, Optional<StructureTemplate>> structureRepository = Maps.<ResourceLocation, Optional<StructureTemplate>>newConcurrentMap();
@@ -58,7 +58,7 @@ public class StructureTemplateManager {
 	private final Path generatedDir;
 	private final List<StructureTemplateManager.Source> sources;
 	private final HolderGetter<Block> blockLookup;
-	private static final FileToIdConverter LISTER = new FileToIdConverter("structures", ".nbt");
+	private static final FileToIdConverter LISTER = new FileToIdConverter("structure", ".nbt");
 
 	public StructureTemplateManager(
 		ResourceManager resourceManager, LevelStorageSource.LevelStorageAccess levelStorageAccess, DataFixer dataFixer, HolderGetter<Block> holderGetter
@@ -154,7 +154,7 @@ public class StructureTemplateManager {
 	}
 
 	private Stream<ResourceLocation> listGeneratedInNamespace(Path path) {
-		Path path2 = path.resolve("structures");
+		Path path2 = path.resolve("structure");
 		return this.listFolderContents(path2, path.getFileName().toString(), ".nbt");
 	}
 
@@ -168,7 +168,7 @@ public class StructureTemplateManager {
 			try {
 				return Files.walk(path).filter(pathx -> pathx.toString().endsWith(string2)).mapMulti((path2, consumer) -> {
 					try {
-						consumer.accept(new ResourceLocation(string, (String)function.apply(this.relativize(path, path2))));
+						consumer.accept(ResourceLocation.fromNamespaceAndPath(string, (String)function.apply(this.relativize(path, path2))));
 					} catch (ResourceLocationException var7x) {
 						LOGGER.error("Invalid location while listing pack contents", (Throwable)var7x);
 					}
@@ -332,7 +332,7 @@ public class StructureTemplateManager {
 	public static Path createPathToStructure(Path path, ResourceLocation resourceLocation, String string) {
 		try {
 			Path path2 = path.resolve(resourceLocation.getNamespace());
-			Path path3 = path2.resolve("structures");
+			Path path3 = path2.resolve("structure");
 			return FileUtil.createPathToResource(path3, resourceLocation.getPath(), string);
 		} catch (InvalidPathException var5) {
 			throw new ResourceLocationException("Invalid resource path: " + resourceLocation, var5);

@@ -9,7 +9,7 @@ import net.minecraft.world.entity.monster.Ravager;
 
 @Environment(EnvType.CLIENT)
 public class RavagerRenderer extends MobRenderer<Ravager, RavagerModel> {
-	private static final ResourceLocation TEXTURE_LOCATION = new ResourceLocation("textures/entity/illager/ravager.png");
+	private static final ResourceLocation TEXTURE_LOCATION = ResourceLocation.withDefaultNamespace("textures/entity/illager/ravager.png");
 
 	public RavagerRenderer(EntityRendererProvider.Context context) {
 		super(context, new RavagerModel(context.bakeLayer(ModelLayers.RAVAGER)), 1.1F);

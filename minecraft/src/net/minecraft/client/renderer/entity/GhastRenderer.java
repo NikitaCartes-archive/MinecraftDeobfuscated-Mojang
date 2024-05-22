@@ -10,8 +10,8 @@ import net.minecraft.world.entity.monster.Ghast;
 
 @Environment(EnvType.CLIENT)
 public class GhastRenderer extends MobRenderer<Ghast, GhastModel<Ghast>> {
-	private static final ResourceLocation GHAST_LOCATION = new ResourceLocation("textures/entity/ghast/ghast.png");
-	private static final ResourceLocation GHAST_SHOOTING_LOCATION = new ResourceLocation("textures/entity/ghast/ghast_shooting.png");
+	private static final ResourceLocation GHAST_LOCATION = ResourceLocation.withDefaultNamespace("textures/entity/ghast/ghast.png");
+	private static final ResourceLocation GHAST_SHOOTING_LOCATION = ResourceLocation.withDefaultNamespace("textures/entity/ghast/ghast_shooting.png");
 
 	public GhastRenderer(EntityRendererProvider.Context context) {
 		super(context, new GhastModel<>(context.bakeLayer(ModelLayers.GHAST)), 1.5F);

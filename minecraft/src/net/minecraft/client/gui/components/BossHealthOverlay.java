@@ -19,34 +19,34 @@ public class BossHealthOverlay {
 	private static final int BAR_WIDTH = 182;
 	private static final int BAR_HEIGHT = 5;
 	private static final ResourceLocation[] BAR_BACKGROUND_SPRITES = new ResourceLocation[]{
-		new ResourceLocation("boss_bar/pink_background"),
-		new ResourceLocation("boss_bar/blue_background"),
-		new ResourceLocation("boss_bar/red_background"),
-		new ResourceLocation("boss_bar/green_background"),
-		new ResourceLocation("boss_bar/yellow_background"),
-		new ResourceLocation("boss_bar/purple_background"),
-		new ResourceLocation("boss_bar/white_background")
+		ResourceLocation.withDefaultNamespace("boss_bar/pink_background"),
+		ResourceLocation.withDefaultNamespace("boss_bar/blue_background"),
+		ResourceLocation.withDefaultNamespace("boss_bar/red_background"),
+		ResourceLocation.withDefaultNamespace("boss_bar/green_background"),
+		ResourceLocation.withDefaultNamespace("boss_bar/yellow_background"),
+		ResourceLocation.withDefaultNamespace("boss_bar/purple_background"),
+		ResourceLocation.withDefaultNamespace("boss_bar/white_background")
 	};
 	private static final ResourceLocation[] BAR_PROGRESS_SPRITES = new ResourceLocation[]{
-		new ResourceLocation("boss_bar/pink_progress"),
-		new ResourceLocation("boss_bar/blue_progress"),
-		new ResourceLocation("boss_bar/red_progress"),
-		new ResourceLocation("boss_bar/green_progress"),
-		new ResourceLocation("boss_bar/yellow_progress"),
-		new ResourceLocation("boss_bar/purple_progress"),
-		new ResourceLocation("boss_bar/white_progress")
+		ResourceLocation.withDefaultNamespace("boss_bar/pink_progress"),
+		ResourceLocation.withDefaultNamespace("boss_bar/blue_progress"),
+		ResourceLocation.withDefaultNamespace("boss_bar/red_progress"),
+		ResourceLocation.withDefaultNamespace("boss_bar/green_progress"),
+		ResourceLocation.withDefaultNamespace("boss_bar/yellow_progress"),
+		ResourceLocation.withDefaultNamespace("boss_bar/purple_progress"),
+		ResourceLocation.withDefaultNamespace("boss_bar/white_progress")
 	};
 	private static final ResourceLocation[] OVERLAY_BACKGROUND_SPRITES = new ResourceLocation[]{
-		new ResourceLocation("boss_bar/notched_6_background"),
-		new ResourceLocation("boss_bar/notched_10_background"),
-		new ResourceLocation("boss_bar/notched_12_background"),
-		new ResourceLocation("boss_bar/notched_20_background")
+		ResourceLocation.withDefaultNamespace("boss_bar/notched_6_background"),
+		ResourceLocation.withDefaultNamespace("boss_bar/notched_10_background"),
+		ResourceLocation.withDefaultNamespace("boss_bar/notched_12_background"),
+		ResourceLocation.withDefaultNamespace("boss_bar/notched_20_background")
 	};
 	private static final ResourceLocation[] OVERLAY_PROGRESS_SPRITES = new ResourceLocation[]{
-		new ResourceLocation("boss_bar/notched_6_progress"),
-		new ResourceLocation("boss_bar/notched_10_progress"),
-		new ResourceLocation("boss_bar/notched_12_progress"),
-		new ResourceLocation("boss_bar/notched_20_progress")
+		ResourceLocation.withDefaultNamespace("boss_bar/notched_6_progress"),
+		ResourceLocation.withDefaultNamespace("boss_bar/notched_10_progress"),
+		ResourceLocation.withDefaultNamespace("boss_bar/notched_12_progress"),
+		ResourceLocation.withDefaultNamespace("boss_bar/notched_20_progress")
 	};
 	private final Minecraft minecraft;
 	final Map<UUID, LerpingBossEvent> events = Maps.<UUID, LerpingBossEvent>newLinkedHashMap();

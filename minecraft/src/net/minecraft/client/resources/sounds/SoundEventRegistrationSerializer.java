@@ -11,6 +11,7 @@ import java.lang.reflect.Type;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.valueproviders.ConstantFloat;
 import net.minecraft.util.valueproviders.FloatProvider;
@@ -36,8 +37,8 @@ public class SoundEventRegistrationSerializer implements JsonDeserializer<SoundE
 			for (int i = 0; i < jsonArray.size(); i++) {
 				JsonElement jsonElement = jsonArray.get(i);
 				if (GsonHelper.isStringValue(jsonElement)) {
-					String string = GsonHelper.convertToString(jsonElement, "sound");
-					list.add(new Sound(string, DEFAULT_FLOAT, DEFAULT_FLOAT, 1, Sound.Type.FILE, false, false, 16));
+					ResourceLocation resourceLocation = ResourceLocation.parse(GsonHelper.convertToString(jsonElement, "sound"));
+					list.add(new Sound(resourceLocation, DEFAULT_FLOAT, DEFAULT_FLOAT, 1, Sound.Type.FILE, false, false, 16));
 				} else {
 					list.add(this.getSound(GsonHelper.convertToJsonObject(jsonElement, "sound")));
 				}
@@ -48,7 +49,7 @@ public class SoundEventRegistrationSerializer implements JsonDeserializer<SoundE
 	}
 
 	private Sound getSound(JsonObject jsonObject) {
-		String string = GsonHelper.getAsString(jsonObject, "name");
+		ResourceLocation resourceLocation = ResourceLocation.parse(GsonHelper.getAsString(jsonObject, "name"));
 		Sound.Type type = this.getType(jsonObject, Sound.Type.FILE);
 		float f = GsonHelper.getAsFloat(jsonObject, "volume", 1.0F);
 		Validate.isTrue(f > 0.0F, "Invalid volume");
@@ -59,7 +60,7 @@ public class SoundEventRegistrationSerializer implements JsonDeserializer<SoundE
 		boolean bl = GsonHelper.getAsBoolean(jsonObject, "preload", false);
 		boolean bl2 = GsonHelper.getAsBoolean(jsonObject, "stream", false);
 		int j = GsonHelper.getAsInt(jsonObject, "attenuation_distance", 16);
-		return new Sound(string, ConstantFloat.of(f), ConstantFloat.of(g), i, type, bl2, bl, j);
+		return new Sound(resourceLocation, ConstantFloat.of(f), ConstantFloat.of(g), i, type, bl2, bl, j);
 	}
 
 	private Sound.Type getType(JsonObject jsonObject, Sound.Type type) {

@@ -64,18 +64,26 @@ public class ConfirmLinkScreen extends ConfirmScreen {
 		}
 	}
 
-	public static void confirmLinkNow(Screen screen, String string) {
+	public static void confirmLinkNow(Screen screen, String string, boolean bl) {
 		Minecraft minecraft = Minecraft.getInstance();
-		minecraft.setScreen(new ConfirmLinkScreen(bl -> {
-			if (bl) {
+		minecraft.setScreen(new ConfirmLinkScreen(blx -> {
+			if (blx) {
 				Util.getPlatform().openUri(string);
 			}
 
 			minecraft.setScreen(screen);
-		}, string, true));
+		}, string, bl));
+	}
+
+	public static void confirmLinkNow(Screen screen, String string) {
+		confirmLinkNow(screen, string, true);
+	}
+
+	public static Button.OnPress confirmLink(Screen screen, String string, boolean bl) {
+		return button -> confirmLinkNow(screen, string, bl);
 	}
 
 	public static Button.OnPress confirmLink(Screen screen, String string) {
-		return button -> confirmLinkNow(screen, string);
+		return confirmLink(screen, string, true);
 	}
 }

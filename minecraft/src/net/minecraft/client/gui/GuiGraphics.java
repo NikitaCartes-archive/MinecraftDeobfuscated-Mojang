@@ -211,15 +211,11 @@ public class GuiGraphics {
 			l = o;
 		}
 
-		float f = (float)FastColor.ARGB32.alpha(n) / 255.0F;
-		float g = (float)FastColor.ARGB32.red(n) / 255.0F;
-		float h = (float)FastColor.ARGB32.green(n) / 255.0F;
-		float p = (float)FastColor.ARGB32.blue(n) / 255.0F;
 		VertexConsumer vertexConsumer = this.bufferSource.getBuffer(renderType);
-		vertexConsumer.vertex(matrix4f, (float)i, (float)j, (float)m).color(g, h, p, f).endVertex();
-		vertexConsumer.vertex(matrix4f, (float)i, (float)l, (float)m).color(g, h, p, f).endVertex();
-		vertexConsumer.vertex(matrix4f, (float)k, (float)l, (float)m).color(g, h, p, f).endVertex();
-		vertexConsumer.vertex(matrix4f, (float)k, (float)j, (float)m).color(g, h, p, f).endVertex();
+		vertexConsumer.addVertex(matrix4f, (float)i, (float)j, (float)m).setColor(n);
+		vertexConsumer.addVertex(matrix4f, (float)i, (float)l, (float)m).setColor(n);
+		vertexConsumer.addVertex(matrix4f, (float)k, (float)l, (float)m).setColor(n);
+		vertexConsumer.addVertex(matrix4f, (float)k, (float)j, (float)m).setColor(n);
 		this.flushIfUnmanaged();
 	}
 
@@ -238,28 +234,20 @@ public class GuiGraphics {
 	}
 
 	private void fillGradient(VertexConsumer vertexConsumer, int i, int j, int k, int l, int m, int n, int o) {
-		float f = (float)FastColor.ARGB32.alpha(n) / 255.0F;
-		float g = (float)FastColor.ARGB32.red(n) / 255.0F;
-		float h = (float)FastColor.ARGB32.green(n) / 255.0F;
-		float p = (float)FastColor.ARGB32.blue(n) / 255.0F;
-		float q = (float)FastColor.ARGB32.alpha(o) / 255.0F;
-		float r = (float)FastColor.ARGB32.red(o) / 255.0F;
-		float s = (float)FastColor.ARGB32.green(o) / 255.0F;
-		float t = (float)FastColor.ARGB32.blue(o) / 255.0F;
 		Matrix4f matrix4f = this.pose.last().pose();
-		vertexConsumer.vertex(matrix4f, (float)i, (float)j, (float)m).color(g, h, p, f).endVertex();
-		vertexConsumer.vertex(matrix4f, (float)i, (float)l, (float)m).color(r, s, t, q).endVertex();
-		vertexConsumer.vertex(matrix4f, (float)k, (float)l, (float)m).color(r, s, t, q).endVertex();
-		vertexConsumer.vertex(matrix4f, (float)k, (float)j, (float)m).color(g, h, p, f).endVertex();
+		vertexConsumer.addVertex(matrix4f, (float)i, (float)j, (float)m).setColor(n);
+		vertexConsumer.addVertex(matrix4f, (float)i, (float)l, (float)m).setColor(o);
+		vertexConsumer.addVertex(matrix4f, (float)k, (float)l, (float)m).setColor(o);
+		vertexConsumer.addVertex(matrix4f, (float)k, (float)j, (float)m).setColor(n);
 	}
 
 	public void fillRenderType(RenderType renderType, int i, int j, int k, int l, int m) {
 		Matrix4f matrix4f = this.pose.last().pose();
 		VertexConsumer vertexConsumer = this.bufferSource.getBuffer(renderType);
-		vertexConsumer.vertex(matrix4f, (float)i, (float)j, (float)m).endVertex();
-		vertexConsumer.vertex(matrix4f, (float)i, (float)l, (float)m).endVertex();
-		vertexConsumer.vertex(matrix4f, (float)k, (float)l, (float)m).endVertex();
-		vertexConsumer.vertex(matrix4f, (float)k, (float)j, (float)m).endVertex();
+		vertexConsumer.addVertex(matrix4f, (float)i, (float)j, (float)m);
+		vertexConsumer.addVertex(matrix4f, (float)i, (float)l, (float)m);
+		vertexConsumer.addVertex(matrix4f, (float)k, (float)l, (float)m);
+		vertexConsumer.addVertex(matrix4f, (float)k, (float)j, (float)m);
 		this.flushIfUnmanaged();
 	}
 
@@ -445,27 +433,25 @@ public class GuiGraphics {
 		RenderSystem.setShaderTexture(0, resourceLocation);
 		RenderSystem.setShader(GameRenderer::getPositionTexShader);
 		Matrix4f matrix4f = this.pose.last().pose();
-		BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
-		bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-		bufferBuilder.vertex(matrix4f, (float)i, (float)k, (float)m).uv(f, h).endVertex();
-		bufferBuilder.vertex(matrix4f, (float)i, (float)l, (float)m).uv(f, n).endVertex();
-		bufferBuilder.vertex(matrix4f, (float)j, (float)l, (float)m).uv(g, n).endVertex();
-		bufferBuilder.vertex(matrix4f, (float)j, (float)k, (float)m).uv(g, h).endVertex();
-		BufferUploader.drawWithShader(bufferBuilder.end());
+		BufferBuilder bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+		bufferBuilder.addVertex(matrix4f, (float)i, (float)k, (float)m).setUv(f, h);
+		bufferBuilder.addVertex(matrix4f, (float)i, (float)l, (float)m).setUv(f, n);
+		bufferBuilder.addVertex(matrix4f, (float)j, (float)l, (float)m).setUv(g, n);
+		bufferBuilder.addVertex(matrix4f, (float)j, (float)k, (float)m).setUv(g, h);
+		BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
 	}
 
 	void innerBlit(ResourceLocation resourceLocation, int i, int j, int k, int l, int m, float f, float g, float h, float n, float o, float p, float q, float r) {
 		RenderSystem.setShaderTexture(0, resourceLocation);
-		RenderSystem.setShader(GameRenderer::getPositionColorTexShader);
+		RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
 		RenderSystem.enableBlend();
 		Matrix4f matrix4f = this.pose.last().pose();
-		BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
-		bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_TEX);
-		bufferBuilder.vertex(matrix4f, (float)i, (float)k, (float)m).color(o, p, q, r).uv(f, h).endVertex();
-		bufferBuilder.vertex(matrix4f, (float)i, (float)l, (float)m).color(o, p, q, r).uv(f, n).endVertex();
-		bufferBuilder.vertex(matrix4f, (float)j, (float)l, (float)m).color(o, p, q, r).uv(g, n).endVertex();
-		bufferBuilder.vertex(matrix4f, (float)j, (float)k, (float)m).color(o, p, q, r).uv(g, h).endVertex();
-		BufferUploader.drawWithShader(bufferBuilder.end());
+		BufferBuilder bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+		bufferBuilder.addVertex(matrix4f, (float)i, (float)k, (float)m).setUv(f, h).setColor(o, p, q, r);
+		bufferBuilder.addVertex(matrix4f, (float)i, (float)l, (float)m).setUv(f, n).setColor(o, p, q, r);
+		bufferBuilder.addVertex(matrix4f, (float)j, (float)l, (float)m).setUv(g, n).setColor(o, p, q, r);
+		bufferBuilder.addVertex(matrix4f, (float)j, (float)k, (float)m).setUv(g, h).setColor(o, p, q, r);
+		BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
 		RenderSystem.disableBlend();
 	}
 

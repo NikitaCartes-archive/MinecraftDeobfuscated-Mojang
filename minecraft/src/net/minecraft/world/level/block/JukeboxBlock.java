@@ -5,11 +5,13 @@ import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.RecordItem;
+import net.minecraft.world.item.JukeboxPlayable;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -50,7 +52,7 @@ public class JukeboxBlock extends BaseEntityBlock {
 	@Override
 	protected InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
 		if ((Boolean)blockState.getValue(HAS_RECORD) && level.getBlockEntity(blockPos) instanceof JukeboxBlockEntity jukeboxBlockEntity) {
-			jukeboxBlockEntity.popOutRecord();
+			jukeboxBlockEntity.popOutTheItem();
 			return InteractionResult.sidedSuccess(level.isClientSide);
 		} else {
 			return InteractionResult.PASS;
@@ -58,10 +60,23 @@ public class JukeboxBlock extends BaseEntityBlock {
 	}
 
 	@Override
+	protected ItemInteractionResult useItemOn(
+		ItemStack itemStack, BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
+	) {
+		if ((Boolean)blockState.getValue(HAS_RECORD)) {
+			return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+		} else {
+			ItemStack itemStack2 = player.getItemInHand(interactionHand);
+			ItemInteractionResult itemInteractionResult = JukeboxPlayable.tryInsertIntoJukebox(level, blockPos, itemStack2, player);
+			return !itemInteractionResult.consumesAction() ? ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION : itemInteractionResult;
+		}
+	}
+
+	@Override
 	protected void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
 		if (!blockState.is(blockState2.getBlock())) {
 			if (level.getBlockEntity(blockPos) instanceof JukeboxBlockEntity jukeboxBlockEntity) {
-				jukeboxBlockEntity.popOutRecord();
+				jukeboxBlockEntity.popOutTheItem();
 			}
 
 			super.onRemove(blockState, level, blockPos, blockState2, bl);
@@ -80,7 +95,7 @@ public class JukeboxBlock extends BaseEntityBlock {
 
 	@Override
 	public int getSignal(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, Direction direction) {
-		if (blockGetter.getBlockEntity(blockPos) instanceof JukeboxBlockEntity jukeboxBlockEntity && jukeboxBlockEntity.isRecordPlaying()) {
+		if (blockGetter.getBlockEntity(blockPos) instanceof JukeboxBlockEntity jukeboxBlockEntity && jukeboxBlockEntity.getSongPlayer().isPlaying()) {
 			return 15;
 		}
 
@@ -94,12 +109,7 @@ public class JukeboxBlock extends BaseEntityBlock {
 
 	@Override
 	protected int getAnalogOutputSignal(BlockState blockState, Level level, BlockPos blockPos) {
-		if (level.getBlockEntity(blockPos) instanceof JukeboxBlockEntity jukeboxBlockEntity
-			&& jukeboxBlockEntity.getTheItem().getItem() instanceof RecordItem recordItem) {
-			return recordItem.getAnalogOutput();
-		}
-
-		return 0;
+		return level.getBlockEntity(blockPos) instanceof JukeboxBlockEntity jukeboxBlockEntity ? jukeboxBlockEntity.getSongPlayer().getComparatorOutput() : 0;
 	}
 
 	@Override
@@ -115,6 +125,6 @@ public class JukeboxBlock extends BaseEntityBlock {
 	@Nullable
 	@Override
 	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState blockState, BlockEntityType<T> blockEntityType) {
-		return blockState.getValue(HAS_RECORD) ? createTickerHelper(blockEntityType, BlockEntityType.JUKEBOX, JukeboxBlockEntity::playRecordTick) : null;
+		return blockState.getValue(HAS_RECORD) ? createTickerHelper(blockEntityType, BlockEntityType.JUKEBOX, JukeboxBlockEntity::tick) : null;
 	}
 }

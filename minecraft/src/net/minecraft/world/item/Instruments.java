@@ -21,7 +21,7 @@ public interface Instruments {
 	ResourceKey<Instrument> DREAM_GOAT_HORN = create("dream_goat_horn");
 
 	private static ResourceKey<Instrument> create(String string) {
-		return ResourceKey.create(Registries.INSTRUMENT, new ResourceLocation(string));
+		return ResourceKey.create(Registries.INSTRUMENT, ResourceLocation.withDefaultNamespace(string));
 	}
 
 	static Instrument bootstrap(Registry<Instrument> registry) {

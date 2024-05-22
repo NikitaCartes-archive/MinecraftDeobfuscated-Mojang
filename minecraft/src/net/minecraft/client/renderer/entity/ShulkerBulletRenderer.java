@@ -17,7 +17,7 @@ import net.minecraft.world.entity.projectile.ShulkerBullet;
 
 @Environment(EnvType.CLIENT)
 public class ShulkerBulletRenderer extends EntityRenderer<ShulkerBullet> {
-	private static final ResourceLocation TEXTURE_LOCATION = new ResourceLocation("textures/entity/shulker/spark.png");
+	private static final ResourceLocation TEXTURE_LOCATION = ResourceLocation.withDefaultNamespace("textures/entity/shulker/spark.png");
 	private static final RenderType RENDER_TYPE = RenderType.entityTranslucent(TEXTURE_LOCATION);
 	private final ShulkerBulletModel<ShulkerBullet> model;
 
@@ -42,10 +42,10 @@ public class ShulkerBulletRenderer extends EntityRenderer<ShulkerBullet> {
 		poseStack.scale(-0.5F, -0.5F, 0.5F);
 		this.model.setupAnim(shulkerBullet, 0.0F, 0.0F, 0.0F, h, j);
 		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(this.model.renderType(TEXTURE_LOCATION));
-		this.model.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
+		this.model.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY);
 		poseStack.scale(1.5F, 1.5F, 1.5F);
 		VertexConsumer vertexConsumer2 = multiBufferSource.getBuffer(RENDER_TYPE);
-		this.model.renderToBuffer(poseStack, vertexConsumer2, i, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 0.15F);
+		this.model.renderToBuffer(poseStack, vertexConsumer2, i, OverlayTexture.NO_OVERLAY, 654311423);
 		poseStack.popPose();
 		super.render(shulkerBullet, f, g, poseStack, multiBufferSource, i);
 	}

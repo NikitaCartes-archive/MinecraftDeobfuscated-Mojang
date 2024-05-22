@@ -18,12 +18,12 @@ import org.slf4j.Logger;
 
 public record PiecesContainer(List<StructurePiece> pieces) {
 	private static final Logger LOGGER = LogUtils.getLogger();
-	private static final ResourceLocation JIGSAW_RENAME = new ResourceLocation("jigsaw");
+	private static final ResourceLocation JIGSAW_RENAME = ResourceLocation.withDefaultNamespace("jigsaw");
 	private static final Map<ResourceLocation, ResourceLocation> RENAMES = ImmutableMap.<ResourceLocation, ResourceLocation>builder()
-		.put(new ResourceLocation("nvi"), JIGSAW_RENAME)
-		.put(new ResourceLocation("pcp"), JIGSAW_RENAME)
-		.put(new ResourceLocation("bastionremnant"), JIGSAW_RENAME)
-		.put(new ResourceLocation("runtime"), JIGSAW_RENAME)
+		.put(ResourceLocation.withDefaultNamespace("nvi"), JIGSAW_RENAME)
+		.put(ResourceLocation.withDefaultNamespace("pcp"), JIGSAW_RENAME)
+		.put(ResourceLocation.withDefaultNamespace("bastionremnant"), JIGSAW_RENAME)
+		.put(ResourceLocation.withDefaultNamespace("runtime"), JIGSAW_RENAME)
 		.build();
 
 	public PiecesContainer(final List<StructurePiece> pieces) {
@@ -60,7 +60,7 @@ public record PiecesContainer(List<StructurePiece> pieces) {
 		for (int i = 0; i < listTag.size(); i++) {
 			CompoundTag compoundTag = listTag.getCompound(i);
 			String string = compoundTag.getString("id").toLowerCase(Locale.ROOT);
-			ResourceLocation resourceLocation = new ResourceLocation(string);
+			ResourceLocation resourceLocation = ResourceLocation.parse(string);
 			ResourceLocation resourceLocation2 = (ResourceLocation)RENAMES.getOrDefault(resourceLocation, resourceLocation);
 			StructurePieceType structurePieceType = BuiltInRegistries.STRUCTURE_PIECE.get(resourceLocation2);
 			if (structurePieceType == null) {

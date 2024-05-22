@@ -9,6 +9,7 @@ import net.minecraft.CrashReportDetail;
 import net.minecraft.ReportedException;
 import net.minecraft.Util;
 import net.minecraft.network.Connection;
+import net.minecraft.network.DisconnectionDetails;
 import net.minecraft.network.PacketSendListener;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
@@ -59,7 +60,7 @@ public abstract class ServerCommonPacketListenerImpl implements ServerCommonPack
 	}
 
 	@Override
-	public void onDisconnect(Component component) {
+	public void onDisconnect(DisconnectionDetails disconnectionDetails) {
 		if (this.isSingleplayerOwner()) {
 			LOGGER.info("Stopping singleplayer server as player logged out");
 			this.server.halt(false);
@@ -159,7 +160,12 @@ public abstract class ServerCommonPacketListenerImpl implements ServerCommonPack
 	}
 
 	public void disconnect(Component component) {
-		this.connection.send(new ClientboundDisconnectPacket(component), PacketSendListener.thenRun(() -> this.connection.disconnect(component)));
+		this.disconnect(new DisconnectionDetails(component));
+	}
+
+	public void disconnect(DisconnectionDetails disconnectionDetails) {
+		this.connection
+			.send(new ClientboundDisconnectPacket(disconnectionDetails.reason()), PacketSendListener.thenRun(() -> this.connection.disconnect(disconnectionDetails)));
 		this.connection.setReadOnly();
 		this.server.executeBlocking(this.connection::handleDisconnection);
 	}

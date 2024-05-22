@@ -20,8 +20,8 @@ import org.slf4j.Logger;
 
 public class ServerFunctionManager {
 	private static final Logger LOGGER = LogUtils.getLogger();
-	private static final ResourceLocation TICK_FUNCTION_TAG = new ResourceLocation("tick");
-	private static final ResourceLocation LOAD_FUNCTION_TAG = new ResourceLocation("load");
+	private static final ResourceLocation TICK_FUNCTION_TAG = ResourceLocation.withDefaultNamespace("tick");
+	private static final ResourceLocation LOAD_FUNCTION_TAG = ResourceLocation.withDefaultNamespace("load");
 	private final MinecraftServer server;
 	private List<CommandFunction<CommandSourceStack>> ticking = ImmutableList.of();
 	private boolean postReload;

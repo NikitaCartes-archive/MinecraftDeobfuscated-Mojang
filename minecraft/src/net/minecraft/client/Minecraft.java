@@ -28,6 +28,7 @@ import com.mojang.blaze3d.systems.TimerQuery;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.MeshData;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexSorting;
@@ -70,6 +71,7 @@ import net.minecraft.CrashReportCategory;
 import net.minecraft.CrashReportDetail;
 import net.minecraft.FileUtil;
 import net.minecraft.Optionull;
+import net.minecraft.ReportType;
 import net.minecraft.ReportedException;
 import net.minecraft.SharedConstants;
 import net.minecraft.SystemReport;
@@ -198,6 +200,7 @@ import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.sounds.Music;
 import net.minecraft.sounds.Musics;
 import net.minecraft.tags.BiomeTags;
+import net.minecraft.util.FastColor;
 import net.minecraft.util.FileZipper;
 import net.minecraft.util.MemoryReserve;
 import net.minecraft.util.ModCheck;
@@ -252,10 +255,10 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	private static final Logger LOGGER = LogUtils.getLogger();
 	public static final boolean ON_OSX = Util.getPlatform() == Util.OS.OSX;
 	private static final int MAX_TICKS_PER_UPDATE = 10;
-	public static final ResourceLocation DEFAULT_FONT = new ResourceLocation("default");
-	public static final ResourceLocation UNIFORM_FONT = new ResourceLocation("uniform");
-	public static final ResourceLocation ALT_FONT = new ResourceLocation("alt");
-	private static final ResourceLocation REGIONAL_COMPLIANCIES = new ResourceLocation("regional_compliancies.json");
+	public static final ResourceLocation DEFAULT_FONT = ResourceLocation.withDefaultNamespace("default");
+	public static final ResourceLocation UNIFORM_FONT = ResourceLocation.withDefaultNamespace("uniform");
+	public static final ResourceLocation ALT_FONT = ResourceLocation.withDefaultNamespace("alt");
+	private static final ResourceLocation REGIONAL_COMPLIANCIES = ResourceLocation.withDefaultNamespace("regional_compliancies.json");
 	private static final CompletableFuture<Unit> RESOURCE_RELOAD_INITIAL_TASK = CompletableFuture.completedFuture(Unit.INSTANCE);
 	private static final Component SOCIAL_INTERACTIONS_NOT_AVAILABLE = Component.translatable("multiplayer.socialInteractions.not_available");
 	public static final String UPDATE_DRIVERS_ADVICE = "Please make sure you have up-to-date drivers (see aka.ms/mcdriver for instructions).";
@@ -850,18 +853,18 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	}
 
 	public static void crash(@Nullable Minecraft minecraft, File file, CrashReport crashReport) {
-		File file2 = new File(file, "crash-reports");
-		File file3 = new File(file2, "crash-" + Util.getFilenameFormattedDateTime() + "-client.txt");
-		Bootstrap.realStdoutPrintln(crashReport.getFriendlyReport());
+		Path path = file.toPath().resolve("crash-reports");
+		Path path2 = path.resolve("crash-" + Util.getFilenameFormattedDateTime() + "-client.txt");
+		Bootstrap.realStdoutPrintln(crashReport.getFriendlyReport(ReportType.CRASH));
 		if (minecraft != null) {
 			minecraft.soundManager.emergencyShutdown();
 		}
 
 		if (crashReport.getSaveFile() != null) {
-			Bootstrap.realStdoutPrintln("#@!@# Game crashed! Crash report saved to: #@!@# " + crashReport.getSaveFile());
+			Bootstrap.realStdoutPrintln("#@!@# Game crashed! Crash report saved to: #@!@# " + crashReport.getSaveFile().toAbsolutePath());
 			System.exit(-1);
-		} else if (crashReport.saveToFile(file3)) {
-			Bootstrap.realStdoutPrintln("#@!@# Game crashed! Crash report saved to: #@!@# " + file3.getAbsolutePath());
+		} else if (crashReport.saveToFile(path2, ReportType.CRASH)) {
+			Bootstrap.realStdoutPrintln("#@!@# Game crashed! Crash report saved to: #@!@# " + path2.toAbsolutePath());
 			System.exit(-1);
 		} else {
 			Bootstrap.realStdoutPrintln("#@?@# Game crashed! Crash report could not be saved. #@?@#");
@@ -1471,61 +1474,53 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 
 	private void renderFpsMeter(GuiGraphics guiGraphics, ProfileResults profileResults) {
 		List<ResultField> list = profileResults.getTimes(this.debugPath);
-		ResultField resultField = (ResultField)list.remove(0);
+		ResultField resultField = (ResultField)list.removeFirst();
 		RenderSystem.clear(256, ON_OSX);
 		RenderSystem.setShader(GameRenderer::getPositionColorShader);
 		Matrix4f matrix4f = new Matrix4f().setOrtho(0.0F, (float)this.window.getWidth(), (float)this.window.getHeight(), 0.0F, 1000.0F, 3000.0F);
 		RenderSystem.setProjectionMatrix(matrix4f, VertexSorting.ORTHOGRAPHIC_Z);
+		Tesselator tesselator = Tesselator.getInstance();
 		Matrix4fStack matrix4fStack = RenderSystem.getModelViewStack();
 		matrix4fStack.pushMatrix();
 		matrix4fStack.translation(0.0F, 0.0F, -2000.0F);
 		RenderSystem.applyModelViewMatrix();
-		RenderSystem.lineWidth(1.0F);
-		Tesselator tesselator = Tesselator.getInstance();
-		BufferBuilder bufferBuilder = tesselator.getBuilder();
 		int i = 160;
 		int j = this.window.getWidth() - 160 - 10;
 		int k = this.window.getHeight() - 320;
-		RenderSystem.enableBlend();
-		bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-		bufferBuilder.vertex((double)((float)j - 176.0F), (double)((float)k - 96.0F - 16.0F), 0.0).color(200, 0, 0, 0).endVertex();
-		bufferBuilder.vertex((double)((float)j - 176.0F), (double)(k + 320), 0.0).color(200, 0, 0, 0).endVertex();
-		bufferBuilder.vertex((double)((float)j + 176.0F), (double)(k + 320), 0.0).color(200, 0, 0, 0).endVertex();
-		bufferBuilder.vertex((double)((float)j + 176.0F), (double)((float)k - 96.0F - 16.0F), 0.0).color(200, 0, 0, 0).endVertex();
-		tesselator.end();
-		RenderSystem.disableBlend();
 		double d = 0.0;
 
 		for (ResultField resultField2 : list) {
 			int l = Mth.floor(resultField2.percentage / 4.0) + 1;
-			bufferBuilder.begin(VertexFormat.Mode.TRIANGLE_FAN, DefaultVertexFormat.POSITION_COLOR);
-			int m = resultField2.getColor();
-			int n = m >> 16 & 0xFF;
-			int o = m >> 8 & 0xFF;
-			int p = m & 0xFF;
-			bufferBuilder.vertex((double)j, (double)k, 0.0).color(n, o, p, 255).endVertex();
+			BufferBuilder bufferBuilder = tesselator.begin(VertexFormat.Mode.TRIANGLE_FAN, DefaultVertexFormat.POSITION_COLOR);
+			int m = FastColor.ARGB32.opaque(resultField2.getColor());
+			int n = FastColor.ARGB32.multiply(m, -8355712);
+			bufferBuilder.addVertex((float)j, (float)k, 0.0F).setColor(m);
 
-			for (int q = l; q >= 0; q--) {
-				float f = (float)((d + resultField2.percentage * (double)q / (double)l) * (float) (Math.PI * 2) / 100.0);
+			for (int o = l; o >= 0; o--) {
+				float f = (float)((d + resultField2.percentage * (double)o / (double)l) * (float) (Math.PI * 2) / 100.0);
 				float g = Mth.sin(f) * 160.0F;
 				float h = Mth.cos(f) * 160.0F * 0.5F;
-				bufferBuilder.vertex((double)((float)j + g), (double)((float)k - h), 0.0).color(n, o, p, 255).endVertex();
+				bufferBuilder.addVertex((float)j + g, (float)k - h, 0.0F).setColor(m);
 			}
 
-			tesselator.end();
-			bufferBuilder.begin(VertexFormat.Mode.TRIANGLE_STRIP, DefaultVertexFormat.POSITION_COLOR);
+			BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
+			bufferBuilder = tesselator.begin(VertexFormat.Mode.TRIANGLE_STRIP, DefaultVertexFormat.POSITION_COLOR);
 
-			for (int q = l; q >= 0; q--) {
-				float f = (float)((d + resultField2.percentage * (double)q / (double)l) * (float) (Math.PI * 2) / 100.0);
+			for (int o = l; o >= 0; o--) {
+				float f = (float)((d + resultField2.percentage * (double)o / (double)l) * (float) (Math.PI * 2) / 100.0);
 				float g = Mth.sin(f) * 160.0F;
 				float h = Mth.cos(f) * 160.0F * 0.5F;
 				if (!(h > 0.0F)) {
-					bufferBuilder.vertex((double)((float)j + g), (double)((float)k - h), 0.0).color(n >> 1, o >> 1, p >> 1, 255).endVertex();
-					bufferBuilder.vertex((double)((float)j + g), (double)((float)k - h + 10.0F), 0.0).color(n >> 1, o >> 1, p >> 1, 255).endVertex();
+					bufferBuilder.addVertex((float)j + g, (float)k - h, 0.0F).setColor(n);
+					bufferBuilder.addVertex((float)j + g, (float)k - h + 10.0F, 0.0F).setColor(n);
 				}
 			}
 
-			tesselator.end();
+			MeshData meshData = bufferBuilder.build();
+			if (meshData != null) {
+				BufferUploader.drawWithShader(meshData);
+			}
+
 			d += resultField2.percentage;
 		}
 
@@ -1543,26 +1538,26 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			string2 = string2 + string + " ";
 		}
 
-		int m = 16777215;
+		int p = 16777215;
 		guiGraphics.drawString(this.font, string2, j - 160, k - 80 - 16, 16777215);
 		string2 = decimalFormat.format(resultField.globalPercentage) + "%";
 		guiGraphics.drawString(this.font, string2, j + 160 - this.font.width(string2), k - 80 - 16, 16777215);
 
-		for (int r = 0; r < list.size(); r++) {
-			ResultField resultField3 = (ResultField)list.get(r);
+		for (int q = 0; q < list.size(); q++) {
+			ResultField resultField3 = (ResultField)list.get(q);
 			StringBuilder stringBuilder = new StringBuilder();
 			if ("unspecified".equals(resultField3.name)) {
 				stringBuilder.append("[?] ");
 			} else {
-				stringBuilder.append("[").append(r + 1).append("] ");
+				stringBuilder.append("[").append(q + 1).append("] ");
 			}
 
 			String string3 = stringBuilder.append(resultField3.name).toString();
-			guiGraphics.drawString(this.font, string3, j - 160, k + 80 + r * 8 + 20, resultField3.getColor());
+			guiGraphics.drawString(this.font, string3, j - 160, k + 80 + q * 8 + 20, resultField3.getColor());
 			string3 = decimalFormat.format(resultField3.percentage) + "%";
-			guiGraphics.drawString(this.font, string3, j + 160 - 50 - this.font.width(string3), k + 80 + r * 8 + 20, resultField3.getColor());
+			guiGraphics.drawString(this.font, string3, j + 160 - 50 - this.font.width(string3), k + 80 + q * 8 + 20, resultField3.getColor());
 			string3 = decimalFormat.format(resultField3.globalPercentage) + "%";
-			guiGraphics.drawString(this.font, string3, j + 160 - this.font.width(string3), k + 80 + r * 8 + 20, resultField3.getColor());
+			guiGraphics.drawString(this.font, string3, j + 160 - this.font.width(string3), k + 80 + q * 8 + 20, resultField3.getColor());
 		}
 
 		matrix4fStack.popMatrix();
@@ -2379,11 +2374,11 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		systemReport.setDetail(
 			"Window size", (Supplier<String>)(() -> minecraft != null ? minecraft.window.getWidth() + "x" + minecraft.window.getHeight() : "<not initialized>")
 		);
+		systemReport.setDetail("GFLW Platform", Window::getPlatform);
 		systemReport.setDetail("GL Caps", RenderSystem::getCapsString);
 		systemReport.setDetail(
 			"GL debug messages", (Supplier<String>)(() -> GlDebug.isDebugEnabled() ? String.join("\n", GlDebug.getLastOpenGlDebugMessages()) : "<disabled>")
 		);
-		systemReport.setDetail("Using VBOs", (Supplier<String>)(() -> "Yes"));
 		systemReport.setDetail("Is Modded", (Supplier<String>)(() -> checkModStatus().fullDescription()));
 		systemReport.setDetail("Universe", (Supplier<String>)(() -> minecraft != null ? Long.toHexString(minecraft.canary) : "404"));
 		systemReport.setDetail("Type", "Client (map_client.txt)");
@@ -2408,6 +2403,8 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		}
 
 		systemReport.setDetail("Locale", String.valueOf(Locale.getDefault()));
+		systemReport.setDetail("System encoding", (Supplier<String>)(() -> System.getProperty("sun.jnu.encoding", "<not set>")));
+		systemReport.setDetail("File encoding", (Supplier<String>)(() -> System.getProperty("file.encoding", "<not set>")));
 		systemReport.setDetail("CPU", GlUtil::getCpuInfo);
 		return systemReport;
 	}

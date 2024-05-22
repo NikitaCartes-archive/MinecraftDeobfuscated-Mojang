@@ -2,7 +2,6 @@ package net.minecraft.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Axis;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -15,7 +14,7 @@ import net.minecraft.world.entity.ExperienceOrb;
 
 @Environment(EnvType.CLIENT)
 public class ExperienceOrbRenderer extends EntityRenderer<ExperienceOrb> {
-	private static final ResourceLocation EXPERIENCE_ORB_LOCATION = new ResourceLocation("textures/entity/experience_orb.png");
+	private static final ResourceLocation EXPERIENCE_ORB_LOCATION = ResourceLocation.withDefaultNamespace("textures/entity/experience_orb.png");
 	private static final RenderType RENDER_TYPE = RenderType.itemEntityTranslucentCull(EXPERIENCE_ORB_LOCATION);
 
 	public ExperienceOrbRenderer(EntityRendererProvider.Context context) {
@@ -45,7 +44,6 @@ public class ExperienceOrbRenderer extends EntityRenderer<ExperienceOrb> {
 		int u = (int)((Mth.sin(r + (float) (Math.PI * 4.0 / 3.0)) + 1.0F) * 0.1F * 255.0F);
 		poseStack.translate(0.0F, 0.1F, 0.0F);
 		poseStack.mulPose(this.entityRenderDispatcher.cameraOrientation());
-		poseStack.mulPose(Axis.YP.rotationDegrees(180.0F));
 		float v = 0.3F;
 		poseStack.scale(0.3F, 0.3F, 0.3F);
 		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RENDER_TYPE);
@@ -59,13 +57,12 @@ public class ExperienceOrbRenderer extends EntityRenderer<ExperienceOrb> {
 	}
 
 	private static void vertex(VertexConsumer vertexConsumer, PoseStack.Pose pose, float f, float g, int i, int j, int k, float h, float l, int m) {
-		vertexConsumer.vertex(pose, f, g, 0.0F)
-			.color(i, j, k, 128)
-			.uv(h, l)
-			.overlayCoords(OverlayTexture.NO_OVERLAY)
-			.uv2(m)
-			.normal(pose, 0.0F, 1.0F, 0.0F)
-			.endVertex();
+		vertexConsumer.addVertex(pose, f, g, 0.0F)
+			.setColor(i, j, k, 128)
+			.setUv(h, l)
+			.setOverlay(OverlayTexture.NO_OVERLAY)
+			.setLight(m)
+			.setNormal(pose, 0.0F, 1.0F, 0.0F);
 	}
 
 	public ResourceLocation getTextureLocation(ExperienceOrb experienceOrb) {

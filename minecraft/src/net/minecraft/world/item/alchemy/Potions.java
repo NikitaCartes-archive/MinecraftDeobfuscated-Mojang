@@ -85,7 +85,7 @@ public class Potions {
 	public static final Holder<Potion> INFESTED = register("infested", new Potion("infested", new MobEffectInstance(MobEffects.INFESTED, 3600)));
 
 	private static Holder<Potion> register(String string, Potion potion) {
-		return Registry.registerForHolder(BuiltInRegistries.POTION, new ResourceLocation(string), potion);
+		return Registry.registerForHolder(BuiltInRegistries.POTION, ResourceLocation.withDefaultNamespace(string), potion);
 	}
 
 	public static Holder<Potion> bootstrap(Registry<Potion> registry) {

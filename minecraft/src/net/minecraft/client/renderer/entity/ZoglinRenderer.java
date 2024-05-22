@@ -9,7 +9,7 @@ import net.minecraft.world.entity.monster.Zoglin;
 
 @Environment(EnvType.CLIENT)
 public class ZoglinRenderer extends MobRenderer<Zoglin, HoglinModel<Zoglin>> {
-	private static final ResourceLocation ZOGLIN_LOCATION = new ResourceLocation("textures/entity/hoglin/zoglin.png");
+	private static final ResourceLocation ZOGLIN_LOCATION = ResourceLocation.withDefaultNamespace("textures/entity/hoglin/zoglin.png");
 
 	public ZoglinRenderer(EntityRendererProvider.Context context) {
 		super(context, new HoglinModel<>(context.bakeLayer(ModelLayers.ZOGLIN)), 0.7F);

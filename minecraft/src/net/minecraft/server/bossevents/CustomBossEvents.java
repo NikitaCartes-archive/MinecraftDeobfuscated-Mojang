@@ -48,7 +48,7 @@ public class CustomBossEvents {
 
 	public void load(CompoundTag compoundTag, HolderLookup.Provider provider) {
 		for (String string : compoundTag.getAllKeys()) {
-			ResourceLocation resourceLocation = new ResourceLocation(string);
+			ResourceLocation resourceLocation = ResourceLocation.parse(string);
 			this.events.put(resourceLocation, CustomBossEvent.load(compoundTag.getCompound(string), resourceLocation, provider));
 		}
 	}

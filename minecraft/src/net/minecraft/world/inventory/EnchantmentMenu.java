@@ -31,7 +31,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.EnchantingTableBlock;
 
 public class EnchantmentMenu extends AbstractContainerMenu {
-	static final ResourceLocation EMPTY_SLOT_LAPIS_LAZULI = new ResourceLocation("item/empty_slot_lapis_lazuli");
+	static final ResourceLocation EMPTY_SLOT_LAPIS_LAZULI = ResourceLocation.withDefaultNamespace("item/empty_slot_lapis_lazuli");
 	private final Container enchantSlots = new SimpleContainer(2) {
 		@Override
 		public void setChanged() {

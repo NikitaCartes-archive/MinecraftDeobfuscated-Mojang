@@ -17,7 +17,7 @@ public class GuiSpriteManager extends TextureAtlasHolder {
 	private static final Set<MetadataSectionSerializer<?>> METADATA_SECTIONS = Set.of(AnimationMetadataSection.SERIALIZER, GuiMetadataSection.TYPE);
 
 	public GuiSpriteManager(TextureManager textureManager) {
-		super(textureManager, new ResourceLocation("textures/atlas/gui.png"), new ResourceLocation("gui"), METADATA_SECTIONS);
+		super(textureManager, ResourceLocation.withDefaultNamespace("textures/atlas/gui.png"), ResourceLocation.withDefaultNamespace("gui"), METADATA_SECTIONS);
 	}
 
 	@Override

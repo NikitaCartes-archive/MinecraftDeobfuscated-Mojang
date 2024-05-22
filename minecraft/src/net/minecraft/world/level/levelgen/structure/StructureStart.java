@@ -44,7 +44,7 @@ public final class StructureStart {
 			return INVALID_START;
 		} else {
 			Registry<Structure> registry = structurePieceSerializationContext.registryAccess().registryOrThrow(Registries.STRUCTURE);
-			Structure structure = registry.get(new ResourceLocation(string));
+			Structure structure = registry.get(ResourceLocation.parse(string));
 			if (structure == null) {
 				LOGGER.error("Unknown stucture id: {}", string);
 				return null;

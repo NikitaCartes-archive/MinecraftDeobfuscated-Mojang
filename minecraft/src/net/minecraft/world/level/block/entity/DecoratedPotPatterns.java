@@ -67,7 +67,7 @@ public class DecoratedPotPatterns {
 	}
 
 	private static ResourceKey<DecoratedPotPattern> create(String string) {
-		return ResourceKey.create(Registries.DECORATED_POT_PATTERN, new ResourceLocation(string));
+		return ResourceKey.create(Registries.DECORATED_POT_PATTERN, ResourceLocation.withDefaultNamespace(string));
 	}
 
 	public static DecoratedPotPattern bootstrap(Registry<DecoratedPotPattern> registry) {
@@ -98,6 +98,6 @@ public class DecoratedPotPatterns {
 	}
 
 	private static DecoratedPotPattern register(Registry<DecoratedPotPattern> registry, ResourceKey<DecoratedPotPattern> resourceKey, String string) {
-		return Registry.register(registry, resourceKey, new DecoratedPotPattern(new ResourceLocation(string)));
+		return Registry.register(registry, resourceKey, new DecoratedPotPattern(ResourceLocation.withDefaultNamespace(string)));
 	}
 }

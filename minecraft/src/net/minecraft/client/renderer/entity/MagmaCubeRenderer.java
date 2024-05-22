@@ -13,7 +13,7 @@ import net.minecraft.world.entity.monster.MagmaCube;
 
 @Environment(EnvType.CLIENT)
 public class MagmaCubeRenderer extends MobRenderer<MagmaCube, LavaSlimeModel<MagmaCube>> {
-	private static final ResourceLocation MAGMACUBE_LOCATION = new ResourceLocation("textures/entity/slime/magmacube.png");
+	private static final ResourceLocation MAGMACUBE_LOCATION = ResourceLocation.withDefaultNamespace("textures/entity/slime/magmacube.png");
 
 	public MagmaCubeRenderer(EntityRendererProvider.Context context) {
 		super(context, new LavaSlimeModel<>(context.bakeLayer(ModelLayers.MAGMA_CUBE)), 0.25F);

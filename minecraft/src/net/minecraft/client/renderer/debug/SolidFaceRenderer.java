@@ -43,56 +43,53 @@ public class SolidFaceRenderer implements DebugRenderer.SimpleDebugRenderer {
 					float j = (float)(aABB2.maxX - d);
 					float k = (float)(aABB2.maxY - e);
 					float l = (float)(aABB2.maxZ - f);
-					float m = 1.0F;
-					float n = 0.0F;
-					float o = 0.0F;
-					float p = 0.5F;
+					int m = -2130771968;
 					if (blockState.isFaceSturdy(blockGetter, blockPos2, Direction.WEST)) {
 						VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.debugFilledBox());
-						vertexConsumer.vertex(matrix4f, g, h, i).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
-						vertexConsumer.vertex(matrix4f, g, h, l).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
-						vertexConsumer.vertex(matrix4f, g, k, i).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
-						vertexConsumer.vertex(matrix4f, g, k, l).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
+						vertexConsumer.addVertex(matrix4f, g, h, i).setColor(-2130771968);
+						vertexConsumer.addVertex(matrix4f, g, h, l).setColor(-2130771968);
+						vertexConsumer.addVertex(matrix4f, g, k, i).setColor(-2130771968);
+						vertexConsumer.addVertex(matrix4f, g, k, l).setColor(-2130771968);
 					}
 
 					if (blockState.isFaceSturdy(blockGetter, blockPos2, Direction.SOUTH)) {
 						VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.debugFilledBox());
-						vertexConsumer.vertex(matrix4f, g, k, l).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
-						vertexConsumer.vertex(matrix4f, g, h, l).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
-						vertexConsumer.vertex(matrix4f, j, k, l).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
-						vertexConsumer.vertex(matrix4f, j, h, l).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
+						vertexConsumer.addVertex(matrix4f, g, k, l).setColor(-2130771968);
+						vertexConsumer.addVertex(matrix4f, g, h, l).setColor(-2130771968);
+						vertexConsumer.addVertex(matrix4f, j, k, l).setColor(-2130771968);
+						vertexConsumer.addVertex(matrix4f, j, h, l).setColor(-2130771968);
 					}
 
 					if (blockState.isFaceSturdy(blockGetter, blockPos2, Direction.EAST)) {
 						VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.debugFilledBox());
-						vertexConsumer.vertex(matrix4f, j, h, l).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
-						vertexConsumer.vertex(matrix4f, j, h, i).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
-						vertexConsumer.vertex(matrix4f, j, k, l).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
-						vertexConsumer.vertex(matrix4f, j, k, i).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
+						vertexConsumer.addVertex(matrix4f, j, h, l).setColor(-2130771968);
+						vertexConsumer.addVertex(matrix4f, j, h, i).setColor(-2130771968);
+						vertexConsumer.addVertex(matrix4f, j, k, l).setColor(-2130771968);
+						vertexConsumer.addVertex(matrix4f, j, k, i).setColor(-2130771968);
 					}
 
 					if (blockState.isFaceSturdy(blockGetter, blockPos2, Direction.NORTH)) {
 						VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.debugFilledBox());
-						vertexConsumer.vertex(matrix4f, j, k, i).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
-						vertexConsumer.vertex(matrix4f, j, h, i).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
-						vertexConsumer.vertex(matrix4f, g, k, i).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
-						vertexConsumer.vertex(matrix4f, g, h, i).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
+						vertexConsumer.addVertex(matrix4f, j, k, i).setColor(-2130771968);
+						vertexConsumer.addVertex(matrix4f, j, h, i).setColor(-2130771968);
+						vertexConsumer.addVertex(matrix4f, g, k, i).setColor(-2130771968);
+						vertexConsumer.addVertex(matrix4f, g, h, i).setColor(-2130771968);
 					}
 
 					if (blockState.isFaceSturdy(blockGetter, blockPos2, Direction.DOWN)) {
 						VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.debugFilledBox());
-						vertexConsumer.vertex(matrix4f, g, h, i).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
-						vertexConsumer.vertex(matrix4f, j, h, i).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
-						vertexConsumer.vertex(matrix4f, g, h, l).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
-						vertexConsumer.vertex(matrix4f, j, h, l).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
+						vertexConsumer.addVertex(matrix4f, g, h, i).setColor(-2130771968);
+						vertexConsumer.addVertex(matrix4f, j, h, i).setColor(-2130771968);
+						vertexConsumer.addVertex(matrix4f, g, h, l).setColor(-2130771968);
+						vertexConsumer.addVertex(matrix4f, j, h, l).setColor(-2130771968);
 					}
 
 					if (blockState.isFaceSturdy(blockGetter, blockPos2, Direction.UP)) {
 						VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.debugFilledBox());
-						vertexConsumer.vertex(matrix4f, g, k, i).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
-						vertexConsumer.vertex(matrix4f, g, k, l).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
-						vertexConsumer.vertex(matrix4f, j, k, i).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
-						vertexConsumer.vertex(matrix4f, j, k, l).color(1.0F, 0.0F, 0.0F, 0.5F).endVertex();
+						vertexConsumer.addVertex(matrix4f, g, k, i).setColor(-2130771968);
+						vertexConsumer.addVertex(matrix4f, g, k, l).setColor(-2130771968);
+						vertexConsumer.addVertex(matrix4f, j, k, i).setColor(-2130771968);
+						vertexConsumer.addVertex(matrix4f, j, k, l).setColor(-2130771968);
 					}
 				}
 			}

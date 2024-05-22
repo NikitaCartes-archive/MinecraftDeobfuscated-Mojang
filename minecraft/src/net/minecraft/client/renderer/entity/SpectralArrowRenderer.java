@@ -7,7 +7,7 @@ import net.minecraft.world.entity.projectile.SpectralArrow;
 
 @Environment(EnvType.CLIENT)
 public class SpectralArrowRenderer extends ArrowRenderer<SpectralArrow> {
-	public static final ResourceLocation SPECTRAL_ARROW_LOCATION = new ResourceLocation("textures/entity/projectiles/spectral_arrow.png");
+	public static final ResourceLocation SPECTRAL_ARROW_LOCATION = ResourceLocation.withDefaultNamespace("textures/entity/projectiles/spectral_arrow.png");
 
 	public SpectralArrowRenderer(EntityRendererProvider.Context context) {
 		super(context);

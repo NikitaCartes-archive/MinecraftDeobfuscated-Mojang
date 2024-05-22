@@ -12,7 +12,7 @@ import net.minecraft.world.entity.monster.Creeper;
 
 @Environment(EnvType.CLIENT)
 public class CreeperRenderer extends MobRenderer<Creeper, CreeperModel<Creeper>> {
-	private static final ResourceLocation CREEPER_LOCATION = new ResourceLocation("textures/entity/creeper/creeper.png");
+	private static final ResourceLocation CREEPER_LOCATION = ResourceLocation.withDefaultNamespace("textures/entity/creeper/creeper.png");
 
 	public CreeperRenderer(EntityRendererProvider.Context context) {
 		super(context, new CreeperModel<>(context.bakeLayer(ModelLayers.CREEPER)), 0.5F);

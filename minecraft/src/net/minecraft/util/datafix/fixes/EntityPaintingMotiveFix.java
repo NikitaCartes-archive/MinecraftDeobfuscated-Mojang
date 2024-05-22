@@ -9,7 +9,7 @@ import com.mojang.serialization.Dynamic;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.datafix.schemas.NamespacedSchema;
 
 public class EntityPaintingMotiveFix extends NamedEntityFix {
 	private static final Map<String, String> MAP = DataFixUtils.make(Maps.<String, String>newHashMap(), hashMap -> {
@@ -26,7 +26,7 @@ public class EntityPaintingMotiveFix extends NamedEntityFix {
 		Optional<String> optional = dynamic.get("Motive").asString().result();
 		if (optional.isPresent()) {
 			String string = ((String)optional.get()).toLowerCase(Locale.ROOT);
-			return dynamic.set("Motive", dynamic.createString(new ResourceLocation((String)MAP.getOrDefault(string, string)).toString()));
+			return dynamic.set("Motive", dynamic.createString(NamespacedSchema.ensureNamespaced((String)MAP.getOrDefault(string, string))));
 		} else {
 			return dynamic;
 		}

@@ -43,6 +43,6 @@ public interface EnchantmentTags {
 	TagKey<Enchantment> TRADES_TAIGA_SPECIAL = create("trades/taiga_special");
 
 	private static TagKey<Enchantment> create(String string) {
-		return TagKey.create(Registries.ENCHANTMENT, new ResourceLocation(string));
+		return TagKey.create(Registries.ENCHANTMENT, ResourceLocation.withDefaultNamespace(string));
 	}
 }

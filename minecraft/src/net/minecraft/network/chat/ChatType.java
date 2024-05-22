@@ -37,7 +37,7 @@ public record ChatType(ChatTypeDecoration chat, ChatTypeDecoration narration) {
 	public static final ResourceKey<ChatType> EMOTE_COMMAND = create("emote_command");
 
 	private static ResourceKey<ChatType> create(String string) {
-		return ResourceKey.create(Registries.CHAT_TYPE, new ResourceLocation(string));
+		return ResourceKey.create(Registries.CHAT_TYPE, ResourceLocation.withDefaultNamespace(string));
 	}
 
 	public static void bootstrap(BootstrapContext<ChatType> bootstrapContext) {

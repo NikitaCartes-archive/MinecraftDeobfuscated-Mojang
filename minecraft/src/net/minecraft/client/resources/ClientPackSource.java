@@ -43,7 +43,7 @@ public class ClientPackSource extends BuiltInPackSource {
 	);
 	private static final PackSelectionConfig VANILLA_SELECTION_CONFIG = new PackSelectionConfig(true, Pack.Position.BOTTOM, false);
 	private static final PackSelectionConfig BUILT_IN_SELECTION_CONFIG = new PackSelectionConfig(false, Pack.Position.TOP, false);
-	private static final ResourceLocation PACKS_DIR = new ResourceLocation("minecraft", "resourcepacks");
+	private static final ResourceLocation PACKS_DIR = ResourceLocation.withDefaultNamespace("resourcepacks");
 	@Nullable
 	private final Path externalAssetDir;
 

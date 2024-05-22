@@ -27,7 +27,10 @@ public class ArmorMaterials {
 		0.0F,
 		0.0F,
 		() -> Ingredient.of(Items.LEATHER),
-		List.of(new ArmorMaterial.Layer(new ResourceLocation("leather"), "", true), new ArmorMaterial.Layer(new ResourceLocation("leather"), "_overlay", false))
+		List.of(
+			new ArmorMaterial.Layer(ResourceLocation.withDefaultNamespace("leather"), "", true),
+			new ArmorMaterial.Layer(ResourceLocation.withDefaultNamespace("leather"), "_overlay", false)
+		)
 	);
 	public static final Holder<ArmorMaterial> CHAIN = register("chainmail", Util.make(new EnumMap(ArmorItem.Type.class), enumMap -> {
 		enumMap.put(ArmorItem.Type.BOOTS, 1);
@@ -86,7 +89,7 @@ public class ArmorMaterials {
 	private static Holder<ArmorMaterial> register(
 		String string, EnumMap<ArmorItem.Type, Integer> enumMap, int i, Holder<SoundEvent> holder, float f, float g, Supplier<Ingredient> supplier
 	) {
-		List<ArmorMaterial.Layer> list = List.of(new ArmorMaterial.Layer(new ResourceLocation(string)));
+		List<ArmorMaterial.Layer> list = List.of(new ArmorMaterial.Layer(ResourceLocation.withDefaultNamespace(string)));
 		return register(string, enumMap, i, holder, f, g, supplier, list);
 	}
 
@@ -107,7 +110,7 @@ public class ArmorMaterials {
 		}
 
 		return Registry.registerForHolder(
-			BuiltInRegistries.ARMOR_MATERIAL, new ResourceLocation(string), new ArmorMaterial(enumMap2, i, holder, supplier, list, f, g)
+			BuiltInRegistries.ARMOR_MATERIAL, ResourceLocation.withDefaultNamespace(string), new ArmorMaterial(enumMap2, i, holder, supplier, list, f, g)
 		);
 	}
 }

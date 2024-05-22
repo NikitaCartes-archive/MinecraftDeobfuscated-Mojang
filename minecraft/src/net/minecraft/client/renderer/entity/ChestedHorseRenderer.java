@@ -15,7 +15,10 @@ import net.minecraft.world.entity.animal.horse.AbstractChestedHorse;
 public class ChestedHorseRenderer<T extends AbstractChestedHorse> extends AbstractHorseRenderer<T, ChestedHorseModel<T>> {
 	private static final Map<EntityType<?>, ResourceLocation> MAP = Maps.<EntityType<?>, ResourceLocation>newHashMap(
 		ImmutableMap.of(
-			EntityType.DONKEY, new ResourceLocation("textures/entity/horse/donkey.png"), EntityType.MULE, new ResourceLocation("textures/entity/horse/mule.png")
+			EntityType.DONKEY,
+			ResourceLocation.withDefaultNamespace("textures/entity/horse/donkey.png"),
+			EntityType.MULE,
+			ResourceLocation.withDefaultNamespace("textures/entity/horse/mule.png")
 		)
 	);
 

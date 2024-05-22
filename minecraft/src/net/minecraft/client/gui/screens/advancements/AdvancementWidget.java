@@ -23,7 +23,7 @@ import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
 public class AdvancementWidget {
-	private static final ResourceLocation TITLE_BOX_SPRITE = new ResourceLocation("advancements/title_box");
+	private static final ResourceLocation TITLE_BOX_SPRITE = ResourceLocation.withDefaultNamespace("advancements/title_box");
 	private static final int HEIGHT = 26;
 	private static final int BOX_X = 0;
 	private static final int BOX_WIDTH = 200;

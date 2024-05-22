@@ -48,6 +48,11 @@ public abstract class Projectile extends Entity implements TraceableEntity {
 		}
 	}
 
+	protected void disown() {
+		this.ownerUUID = null;
+		this.cachedOwner = null;
+	}
+
 	@Nullable
 	@Override
 	public Entity getOwner() {
@@ -162,9 +167,8 @@ public abstract class Projectile extends Entity implements TraceableEntity {
 			Entity entity = entityHitResult.getEntity();
 			ProjectileDeflection projectileDeflection = entity.deflection(this);
 			if (projectileDeflection != ProjectileDeflection.NONE) {
-				if (entity != this.lastDeflectedBy) {
+				if (entity != this.lastDeflectedBy && this.deflect(projectileDeflection, entity, this.getOwner(), false)) {
 					this.lastDeflectedBy = entity;
-					this.deflect(projectileDeflection, entity, this.getOwner(), false);
 				}
 
 				return projectileDeflection;
@@ -175,12 +179,14 @@ public abstract class Projectile extends Entity implements TraceableEntity {
 		return ProjectileDeflection.NONE;
 	}
 
-	public void deflect(ProjectileDeflection projectileDeflection, @Nullable Entity entity, @Nullable Entity entity2, boolean bl) {
+	public boolean deflect(ProjectileDeflection projectileDeflection, @Nullable Entity entity, @Nullable Entity entity2, boolean bl) {
 		if (!this.level().isClientSide) {
 			projectileDeflection.deflect(this, entity, this.random);
 			this.setOwner(entity2);
 			this.onDeflection(entity, bl);
 		}
+
+		return true;
 	}
 
 	protected void onDeflection(@Nullable Entity entity, boolean bl) {

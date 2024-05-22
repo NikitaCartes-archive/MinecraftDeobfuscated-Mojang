@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
@@ -25,10 +26,6 @@ public class TagManager implements PreparableReloadListener {
 
 	public List<TagManager.LoadResult<?>> getResult() {
 		return this.results;
-	}
-
-	public static String getTagDir(ResourceKey<? extends Registry<?>> resourceKey) {
-		return "tags/" + resourceKey.location().getPath();
 	}
 
 	@Override
@@ -56,7 +53,7 @@ public class TagManager implements PreparableReloadListener {
 	) {
 		ResourceKey<? extends Registry<T>> resourceKey = registryEntry.key();
 		Registry<T> registry = registryEntry.value();
-		TagLoader<Holder<T>> tagLoader = new TagLoader<>(registry::getHolder, getTagDir(resourceKey));
+		TagLoader<Holder<T>> tagLoader = new TagLoader<>(registry::getHolder, Registries.tagsDirPath(resourceKey));
 		return CompletableFuture.supplyAsync(() -> new TagManager.LoadResult<>(resourceKey, tagLoader.loadAndBuild(resourceManager)), executor);
 	}
 

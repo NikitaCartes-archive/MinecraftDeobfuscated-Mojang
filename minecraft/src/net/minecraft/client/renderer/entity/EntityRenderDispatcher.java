@@ -33,6 +33,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
+import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -53,7 +54,7 @@ import org.joml.Vector3f;
 
 @Environment(EnvType.CLIENT)
 public class EntityRenderDispatcher implements ResourceManagerReloadListener {
-	private static final RenderType SHADOW_RENDER_TYPE = RenderType.entityShadow(new ResourceLocation("textures/misc/shadow.png"));
+	private static final RenderType SHADOW_RENDER_TYPE = RenderType.entityShadow(ResourceLocation.withDefaultNamespace("textures/misc/shadow.png"));
 	private static final float MAX_SHADOW_RADIUS = 32.0F;
 	private static final float SHADOW_POWER_FALLOFF_Y = 0.5F;
 	private Map<EntityType<?>, EntityRenderer<?>> renderers = ImmutableMap.of();
@@ -236,11 +237,10 @@ public class EntityRenderDispatcher implements ResourceManagerReloadListener {
 
 		Vec3 vec32 = entity.getViewVector(f);
 		PoseStack.Pose pose = poseStack.last();
-		vertexConsumer.vertex(pose, 0.0F, entity.getEyeHeight(), 0.0F).color(0, 0, 255, 255).normal(pose, (float)vec32.x, (float)vec32.y, (float)vec32.z).endVertex();
-		vertexConsumer.vertex(pose, (float)(vec32.x * 2.0), (float)((double)entity.getEyeHeight() + vec32.y * 2.0), (float)(vec32.z * 2.0))
-			.color(0, 0, 255, 255)
-			.normal(pose, (float)vec32.x, (float)vec32.y, (float)vec32.z)
-			.endVertex();
+		vertexConsumer.addVertex(pose, 0.0F, entity.getEyeHeight(), 0.0F).setColor(-16776961).setNormal(pose, (float)vec32.x, (float)vec32.y, (float)vec32.z);
+		vertexConsumer.addVertex(pose, (float)(vec32.x * 2.0), (float)((double)entity.getEyeHeight() + vec32.y * 2.0), (float)(vec32.z * 2.0))
+			.setColor(0, 0, 255, 255)
+			.setNormal(pose, (float)vec32.x, (float)vec32.y, (float)vec32.z);
 	}
 
 	private void renderFlame(PoseStack poseStack, MultiBufferSource multiBufferSource, Entity entity, Quaternionf quaternionf) {
@@ -254,7 +254,7 @@ public class EntityRenderDispatcher implements ResourceManagerReloadListener {
 		float i = entity.getBbHeight() / f;
 		float j = 0.0F;
 		poseStack.mulPose(quaternionf);
-		poseStack.translate(0.0F, 0.0F, -0.3F + (float)((int)i) * 0.02F);
+		poseStack.translate(0.0F, 0.0F, 0.3F - (float)((int)i) * 0.02F);
 		float k = 0.0F;
 		int l = 0;
 		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(Sheets.cutoutBlockSheet());
@@ -271,21 +271,21 @@ public class EntityRenderDispatcher implements ResourceManagerReloadListener {
 				m = q;
 			}
 
-			fireVertex(pose, vertexConsumer, g - 0.0F, 0.0F - j, k, o, p);
-			fireVertex(pose, vertexConsumer, -g - 0.0F, 0.0F - j, k, m, p);
-			fireVertex(pose, vertexConsumer, -g - 0.0F, 1.4F - j, k, m, n);
-			fireVertex(pose, vertexConsumer, g - 0.0F, 1.4F - j, k, o, n);
+			fireVertex(pose, vertexConsumer, -g - 0.0F, 0.0F - j, k, o, p);
+			fireVertex(pose, vertexConsumer, g - 0.0F, 0.0F - j, k, m, p);
+			fireVertex(pose, vertexConsumer, g - 0.0F, 1.4F - j, k, m, n);
+			fireVertex(pose, vertexConsumer, -g - 0.0F, 1.4F - j, k, o, n);
 			i -= 0.45F;
 			j -= 0.45F;
 			g *= 0.9F;
-			k += 0.03F;
+			k -= 0.03F;
 		}
 
 		poseStack.popPose();
 	}
 
 	private static void fireVertex(PoseStack.Pose pose, VertexConsumer vertexConsumer, float f, float g, float h, float i, float j) {
-		vertexConsumer.vertex(pose, f, g, h).color(255, 255, 255, 255).uv(i, j).overlayCoords(0, 10).uv2(240).normal(pose, 0.0F, 1.0F, 0.0F).endVertex();
+		vertexConsumer.addVertex(pose, f, g, h).setColor(-1).setUv(i, j).setUv1(0, 10).setLight(240).setNormal(pose, 0.0F, 1.0F, 0.0F);
 	}
 
 	private static void renderShadow(PoseStack poseStack, MultiBufferSource multiBufferSource, Entity entity, float f, float g, LevelReader levelReader, float h) {
@@ -342,34 +342,35 @@ public class EntityRenderDispatcher implements ResourceManagerReloadListener {
 							j = 1.0F;
 						}
 
+						int k = FastColor.ARGB32.color(Mth.floor(j * 255.0F), 255, 255, 255);
 						AABB aABB = voxelShape.bounds();
-						double k = (double)blockPos.getX() + aABB.minX;
-						double l = (double)blockPos.getX() + aABB.maxX;
-						double m = (double)blockPos.getY() + aABB.minY;
-						double n = (double)blockPos.getZ() + aABB.minZ;
-						double o = (double)blockPos.getZ() + aABB.maxZ;
-						float p = (float)(k - d);
+						double l = (double)blockPos.getX() + aABB.minX;
+						double m = (double)blockPos.getX() + aABB.maxX;
+						double n = (double)blockPos.getY() + aABB.minY;
+						double o = (double)blockPos.getZ() + aABB.minZ;
+						double p = (double)blockPos.getZ() + aABB.maxZ;
 						float q = (float)(l - d);
-						float r = (float)(m - e);
-						float s = (float)(n - f);
+						float r = (float)(m - d);
+						float s = (float)(n - e);
 						float t = (float)(o - f);
-						float u = -p / 2.0F / g + 0.5F;
+						float u = (float)(p - f);
 						float v = -q / 2.0F / g + 0.5F;
-						float w = -s / 2.0F / g + 0.5F;
+						float w = -r / 2.0F / g + 0.5F;
 						float x = -t / 2.0F / g + 0.5F;
-						shadowVertex(pose, vertexConsumer, j, p, r, s, u, w);
-						shadowVertex(pose, vertexConsumer, j, p, r, t, u, x);
-						shadowVertex(pose, vertexConsumer, j, q, r, t, v, x);
-						shadowVertex(pose, vertexConsumer, j, q, r, s, v, w);
+						float y = -u / 2.0F / g + 0.5F;
+						shadowVertex(pose, vertexConsumer, k, q, s, t, v, x);
+						shadowVertex(pose, vertexConsumer, k, q, s, u, v, y);
+						shadowVertex(pose, vertexConsumer, k, r, s, u, w, y);
+						shadowVertex(pose, vertexConsumer, k, r, s, t, w, x);
 					}
 				}
 			}
 		}
 	}
 
-	private static void shadowVertex(PoseStack.Pose pose, VertexConsumer vertexConsumer, float f, float g, float h, float i, float j, float k) {
-		Vector3f vector3f = pose.pose().transformPosition(g, h, i, new Vector3f());
-		vertexConsumer.vertex(vector3f.x(), vector3f.y(), vector3f.z(), 1.0F, 1.0F, 1.0F, f, j, k, OverlayTexture.NO_OVERLAY, 15728880, 0.0F, 1.0F, 0.0F);
+	private static void shadowVertex(PoseStack.Pose pose, VertexConsumer vertexConsumer, int i, float f, float g, float h, float j, float k) {
+		Vector3f vector3f = pose.pose().transformPosition(f, g, h, new Vector3f());
+		vertexConsumer.addVertex(vector3f.x(), vector3f.y(), vector3f.z(), i, j, k, OverlayTexture.NO_OVERLAY, 15728880, 0.0F, 1.0F, 0.0F);
 	}
 
 	public void setLevel(@Nullable Level level) {

@@ -70,7 +70,7 @@ public class Noises {
 	public static final ResourceKey<NormalNoise.NoiseParameters> NETHER_STATE_SELECTOR = createKey("nether_state_selector");
 
 	private static ResourceKey<NormalNoise.NoiseParameters> createKey(String string) {
-		return ResourceKey.create(Registries.NOISE, new ResourceLocation(string));
+		return ResourceKey.create(Registries.NOISE, ResourceLocation.withDefaultNamespace(string));
 	}
 
 	public static NormalNoise instantiate(

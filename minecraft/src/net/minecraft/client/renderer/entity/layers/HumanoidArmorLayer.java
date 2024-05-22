@@ -57,23 +57,11 @@ public class HumanoidArmorLayer<T extends LivingEntity, M extends HumanoidModel<
 				this.setPartVisibility(humanoidModel, equipmentSlot);
 				boolean bl = this.usesInnerModel(equipmentSlot);
 				ArmorMaterial armorMaterial = armorItem.getMaterial().value();
-				int j = itemStack.is(ItemTags.DYEABLE) ? DyedItemColor.getOrDefault(itemStack, -6265536) : -1;
+				int j = itemStack.is(ItemTags.DYEABLE) ? FastColor.ARGB32.opaque(DyedItemColor.getOrDefault(itemStack, -6265536)) : -1;
 
 				for (ArmorMaterial.Layer layer : armorMaterial.layers()) {
-					float f;
-					float g;
-					float h;
-					if (layer.dyeable() && j != -1) {
-						f = (float)FastColor.ARGB32.red(j) / 255.0F;
-						g = (float)FastColor.ARGB32.green(j) / 255.0F;
-						h = (float)FastColor.ARGB32.blue(j) / 255.0F;
-					} else {
-						f = 1.0F;
-						g = 1.0F;
-						h = 1.0F;
-					}
-
-					this.renderModel(poseStack, multiBufferSource, i, humanoidModel, f, g, h, layer.texture(bl));
+					int k = layer.dyeable() ? j : -1;
+					this.renderModel(poseStack, multiBufferSource, i, humanoidModel, k, layer.texture(bl));
 				}
 
 				ArmorTrim armorTrim = itemStack.get(DataComponents.TRIM);
@@ -111,11 +99,9 @@ public class HumanoidArmorLayer<T extends LivingEntity, M extends HumanoidModel<
 		}
 	}
 
-	private void renderModel(
-		PoseStack poseStack, MultiBufferSource multiBufferSource, int i, A humanoidModel, float f, float g, float h, ResourceLocation resourceLocation
-	) {
+	private void renderModel(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, A humanoidModel, int j, ResourceLocation resourceLocation) {
 		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.armorCutoutNoCull(resourceLocation));
-		humanoidModel.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, f, g, h, 1.0F);
+		humanoidModel.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, j);
 	}
 
 	private void renderTrim(
@@ -123,11 +109,11 @@ public class HumanoidArmorLayer<T extends LivingEntity, M extends HumanoidModel<
 	) {
 		TextureAtlasSprite textureAtlasSprite = this.armorTrimAtlas.getSprite(bl ? armorTrim.innerTexture(holder) : armorTrim.outerTexture(holder));
 		VertexConsumer vertexConsumer = textureAtlasSprite.wrap(multiBufferSource.getBuffer(Sheets.armorTrimsSheet(armorTrim.pattern().value().decal())));
-		humanoidModel.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
+		humanoidModel.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY);
 	}
 
 	private void renderGlint(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, A humanoidModel) {
-		humanoidModel.renderToBuffer(poseStack, multiBufferSource.getBuffer(RenderType.armorEntityGlint()), i, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
+		humanoidModel.renderToBuffer(poseStack, multiBufferSource.getBuffer(RenderType.armorEntityGlint()), i, OverlayTexture.NO_OVERLAY);
 	}
 
 	private A getArmorModel(EquipmentSlot equipmentSlot) {

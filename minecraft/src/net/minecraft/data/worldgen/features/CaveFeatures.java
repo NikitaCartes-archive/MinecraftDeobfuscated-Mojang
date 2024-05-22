@@ -122,24 +122,24 @@ public class CaveFeatures {
 		HolderGetter<StructureProcessorList> holderGetter2 = bootstrapContext.lookup(Registries.PROCESSOR_LIST);
 		FeatureUtils.register(bootstrapContext, MONSTER_ROOM, Feature.MONSTER_ROOM);
 		List<ResourceLocation> list = List.of(
-			new ResourceLocation("fossil/spine_1"),
-			new ResourceLocation("fossil/spine_2"),
-			new ResourceLocation("fossil/spine_3"),
-			new ResourceLocation("fossil/spine_4"),
-			new ResourceLocation("fossil/skull_1"),
-			new ResourceLocation("fossil/skull_2"),
-			new ResourceLocation("fossil/skull_3"),
-			new ResourceLocation("fossil/skull_4")
+			ResourceLocation.withDefaultNamespace("fossil/spine_1"),
+			ResourceLocation.withDefaultNamespace("fossil/spine_2"),
+			ResourceLocation.withDefaultNamespace("fossil/spine_3"),
+			ResourceLocation.withDefaultNamespace("fossil/spine_4"),
+			ResourceLocation.withDefaultNamespace("fossil/skull_1"),
+			ResourceLocation.withDefaultNamespace("fossil/skull_2"),
+			ResourceLocation.withDefaultNamespace("fossil/skull_3"),
+			ResourceLocation.withDefaultNamespace("fossil/skull_4")
 		);
 		List<ResourceLocation> list2 = List.of(
-			new ResourceLocation("fossil/spine_1_coal"),
-			new ResourceLocation("fossil/spine_2_coal"),
-			new ResourceLocation("fossil/spine_3_coal"),
-			new ResourceLocation("fossil/spine_4_coal"),
-			new ResourceLocation("fossil/skull_1_coal"),
-			new ResourceLocation("fossil/skull_2_coal"),
-			new ResourceLocation("fossil/skull_3_coal"),
-			new ResourceLocation("fossil/skull_4_coal")
+			ResourceLocation.withDefaultNamespace("fossil/spine_1_coal"),
+			ResourceLocation.withDefaultNamespace("fossil/spine_2_coal"),
+			ResourceLocation.withDefaultNamespace("fossil/spine_3_coal"),
+			ResourceLocation.withDefaultNamespace("fossil/spine_4_coal"),
+			ResourceLocation.withDefaultNamespace("fossil/skull_1_coal"),
+			ResourceLocation.withDefaultNamespace("fossil/skull_2_coal"),
+			ResourceLocation.withDefaultNamespace("fossil/skull_3_coal"),
+			ResourceLocation.withDefaultNamespace("fossil/skull_4_coal")
 		);
 		Holder<StructureProcessorList> holder = holderGetter2.getOrThrow(ProcessorLists.FOSSIL_ROT);
 		FeatureUtils.register(

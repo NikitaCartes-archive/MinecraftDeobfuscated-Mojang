@@ -84,7 +84,7 @@ public class SurfaceRules {
 	}
 
 	public static SurfaceRules.ConditionSource verticalGradient(String string, VerticalAnchor verticalAnchor, VerticalAnchor verticalAnchor2) {
-		return new SurfaceRules.VerticalGradientConditionSource(new ResourceLocation(string), verticalAnchor, verticalAnchor2);
+		return new SurfaceRules.VerticalGradientConditionSource(ResourceLocation.parse(string), verticalAnchor, verticalAnchor2);
 	}
 
 	public static SurfaceRules.ConditionSource steep() {

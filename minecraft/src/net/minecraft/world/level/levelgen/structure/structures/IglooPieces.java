@@ -32,9 +32,9 @@ import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 
 public class IglooPieces {
 	public static final int GENERATION_HEIGHT = 90;
-	static final ResourceLocation STRUCTURE_LOCATION_IGLOO = new ResourceLocation("igloo/top");
-	private static final ResourceLocation STRUCTURE_LOCATION_LADDER = new ResourceLocation("igloo/middle");
-	private static final ResourceLocation STRUCTURE_LOCATION_LABORATORY = new ResourceLocation("igloo/bottom");
+	static final ResourceLocation STRUCTURE_LOCATION_IGLOO = ResourceLocation.withDefaultNamespace("igloo/top");
+	private static final ResourceLocation STRUCTURE_LOCATION_LADDER = ResourceLocation.withDefaultNamespace("igloo/middle");
+	private static final ResourceLocation STRUCTURE_LOCATION_LABORATORY = ResourceLocation.withDefaultNamespace("igloo/bottom");
 	static final Map<ResourceLocation, BlockPos> PIVOTS = ImmutableMap.of(
 		STRUCTURE_LOCATION_IGLOO, new BlockPos(3, 5, 5), STRUCTURE_LOCATION_LADDER, new BlockPos(1, 3, 1), STRUCTURE_LOCATION_LABORATORY, new BlockPos(3, 6, 7)
 	);
@@ -122,7 +122,7 @@ public class IglooPieces {
 			ChunkPos chunkPos,
 			BlockPos blockPos
 		) {
-			ResourceLocation resourceLocation = new ResourceLocation(this.templateName);
+			ResourceLocation resourceLocation = ResourceLocation.parse(this.templateName);
 			StructurePlaceSettings structurePlaceSettings = makeSettings(this.placeSettings.getRotation(), resourceLocation);
 			BlockPos blockPos2 = (BlockPos)IglooPieces.OFFSETS.get(resourceLocation);
 			BlockPos blockPos3 = this.templatePosition

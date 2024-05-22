@@ -1,12 +1,12 @@
 package net.minecraft.world.entity.monster;
 
-import java.util.UUID;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -42,9 +42,9 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.Vec3;
 
 public class Witch extends Raider implements RangedAttackMob {
-	private static final UUID SPEED_MODIFIER_DRINKING_UUID = UUID.fromString("5CD17E52-A79A-43D3-A529-90FDE04B181E");
+	private static final ResourceLocation SPEED_MODIFIER_DRINKING_ID = ResourceLocation.withDefaultNamespace("drinking");
 	private static final AttributeModifier SPEED_MODIFIER_DRINKING = new AttributeModifier(
-		SPEED_MODIFIER_DRINKING_UUID, "Drinking speed penalty", -0.25, AttributeModifier.Operation.ADD_VALUE
+		SPEED_MODIFIER_DRINKING_ID, -0.25, AttributeModifier.Operation.ADD_VALUE
 	);
 	private static final EntityDataAccessor<Boolean> DATA_USING_ITEM = SynchedEntityData.defineId(Witch.class, EntityDataSerializers.BOOLEAN);
 	private int usingTime;
@@ -155,7 +155,7 @@ public class Witch extends Raider implements RangedAttackMob {
 					}
 
 					AttributeInstance attributeInstance = this.getAttribute(Attributes.MOVEMENT_SPEED);
-					attributeInstance.removeModifier(SPEED_MODIFIER_DRINKING.id());
+					attributeInstance.removeModifier(SPEED_MODIFIER_DRINKING_ID);
 					attributeInstance.addTransientModifier(SPEED_MODIFIER_DRINKING);
 				}
 			}

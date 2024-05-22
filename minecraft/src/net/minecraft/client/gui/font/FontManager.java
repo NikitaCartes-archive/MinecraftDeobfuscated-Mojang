@@ -52,7 +52,7 @@ import org.slf4j.Logger;
 public class FontManager implements PreparableReloadListener, AutoCloseable {
 	static final Logger LOGGER = LogUtils.getLogger();
 	private static final String FONTS_PATH = "fonts.json";
-	public static final ResourceLocation MISSING_FONT = new ResourceLocation("minecraft", "missing");
+	public static final ResourceLocation MISSING_FONT = ResourceLocation.withDefaultNamespace("missing");
 	private static final FileToIdConverter FONT_DEFINITIONS = FileToIdConverter.json("font");
 	private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 	private final FontSet missingFontSet;

@@ -10,7 +10,7 @@ import net.minecraft.world.inventory.ShulkerBoxMenu;
 
 @Environment(EnvType.CLIENT)
 public class ShulkerBoxScreen extends AbstractContainerScreen<ShulkerBoxMenu> {
-	private static final ResourceLocation CONTAINER_TEXTURE = new ResourceLocation("textures/gui/container/shulker_box.png");
+	private static final ResourceLocation CONTAINER_TEXTURE = ResourceLocation.withDefaultNamespace("textures/gui/container/shulker_box.png");
 
 	public ShulkerBoxScreen(ShulkerBoxMenu shulkerBoxMenu, Inventory inventory, Component component) {
 		super(shulkerBoxMenu, inventory, component);

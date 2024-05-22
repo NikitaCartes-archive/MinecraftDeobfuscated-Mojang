@@ -23,7 +23,6 @@ import net.minecraft.tags.TagBuilder;
 import net.minecraft.tags.TagEntry;
 import net.minecraft.tags.TagFile;
 import net.minecraft.tags.TagKey;
-import net.minecraft.tags.TagManager;
 
 public abstract class TagsProvider<T> implements DataProvider {
 	protected final PackOutput.PathProvider pathProvider;
@@ -43,7 +42,7 @@ public abstract class TagsProvider<T> implements DataProvider {
 		CompletableFuture<HolderLookup.Provider> completableFuture,
 		CompletableFuture<TagsProvider.TagLookup<T>> completableFuture2
 	) {
-		this.pathProvider = packOutput.createPathProvider(PackOutput.Target.DATA_PACK, TagManager.getTagDir(resourceKey));
+		this.pathProvider = packOutput.createRegistryTagsPathProvider(resourceKey);
 		this.registryKey = resourceKey;
 		this.parentProvider = completableFuture2;
 		this.lookupProvider = completableFuture;

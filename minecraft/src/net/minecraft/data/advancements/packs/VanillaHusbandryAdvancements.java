@@ -138,7 +138,7 @@ public class VanillaHusbandryAdvancements implements AdvancementSubProvider {
 				Blocks.HAY_BLOCK,
 				Component.translatable("advancements.husbandry.root.title"),
 				Component.translatable("advancements.husbandry.root.description"),
-				new ResourceLocation("textures/gui/advancements/backgrounds/husbandry.png"),
+				ResourceLocation.withDefaultNamespace("textures/gui/advancements/backgrounds/husbandry.png"),
 				AdvancementType.TASK,
 				false,
 				false,

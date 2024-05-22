@@ -12,7 +12,7 @@ import org.apache.commons.lang3.math.Fraction;
 
 @Environment(EnvType.CLIENT)
 public class ClientBundleTooltip implements ClientTooltipComponent {
-	private static final ResourceLocation BACKGROUND_SPRITE = new ResourceLocation("container/bundle/background");
+	private static final ResourceLocation BACKGROUND_SPRITE = ResourceLocation.withDefaultNamespace("container/bundle/background");
 	private static final int MARGIN_Y = 4;
 	private static final int BORDER_WIDTH = 1;
 	private static final int SLOT_SIZE_X = 18;
@@ -86,8 +86,8 @@ public class ClientBundleTooltip implements ClientTooltipComponent {
 
 	@Environment(EnvType.CLIENT)
 	static enum Texture {
-		BLOCKED_SLOT(new ResourceLocation("container/bundle/blocked_slot"), 18, 20),
-		SLOT(new ResourceLocation("container/bundle/slot"), 18, 20);
+		BLOCKED_SLOT(ResourceLocation.withDefaultNamespace("container/bundle/blocked_slot"), 18, 20),
+		SLOT(ResourceLocation.withDefaultNamespace("container/bundle/slot"), 18, 20);
 
 		public final ResourceLocation sprite;
 		public final int w;

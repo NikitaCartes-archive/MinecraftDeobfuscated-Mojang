@@ -2,7 +2,6 @@ package net.minecraft.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Axis;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -20,7 +19,7 @@ import net.minecraft.world.phys.Vec3;
 
 @Environment(EnvType.CLIENT)
 public class FishingHookRenderer extends EntityRenderer<FishingHook> {
-	private static final ResourceLocation TEXTURE_LOCATION = new ResourceLocation("textures/entity/fishing_hook.png");
+	private static final ResourceLocation TEXTURE_LOCATION = ResourceLocation.withDefaultNamespace("textures/entity/fishing_hook.png");
 	private static final RenderType RENDER_TYPE = RenderType.entityCutout(TEXTURE_LOCATION);
 	private static final double VIEW_BOBBING_SCALE = 960.0;
 
@@ -35,7 +34,6 @@ public class FishingHookRenderer extends EntityRenderer<FishingHook> {
 			poseStack.pushPose();
 			poseStack.scale(0.5F, 0.5F, 0.5F);
 			poseStack.mulPose(this.entityRenderDispatcher.cameraOrientation());
-			poseStack.mulPose(Axis.YP.rotationDegrees(180.0F));
 			PoseStack.Pose pose = poseStack.last();
 			VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RENDER_TYPE);
 			vertex(vertexConsumer, pose, i, 0.0F, 0, 0, 1);
@@ -91,13 +89,12 @@ public class FishingHookRenderer extends EntityRenderer<FishingHook> {
 	}
 
 	private static void vertex(VertexConsumer vertexConsumer, PoseStack.Pose pose, int i, float f, int j, int k, int l) {
-		vertexConsumer.vertex(pose, f - 0.5F, (float)j - 0.5F, 0.0F)
-			.color(255, 255, 255, 255)
-			.uv((float)k, (float)l)
-			.overlayCoords(OverlayTexture.NO_OVERLAY)
-			.uv2(i)
-			.normal(pose, 0.0F, 1.0F, 0.0F)
-			.endVertex();
+		vertexConsumer.addVertex(pose, f - 0.5F, (float)j - 0.5F, 0.0F)
+			.setColor(-1)
+			.setUv((float)k, (float)l)
+			.setOverlay(OverlayTexture.NO_OVERLAY)
+			.setLight(i)
+			.setNormal(pose, 0.0F, 1.0F, 0.0F);
 	}
 
 	private static void stringVertex(float f, float g, float h, VertexConsumer vertexConsumer, PoseStack.Pose pose, float i, float j) {
@@ -111,7 +108,7 @@ public class FishingHookRenderer extends EntityRenderer<FishingHook> {
 		n /= q;
 		o /= q;
 		p /= q;
-		vertexConsumer.vertex(pose, k, l, m).color(0, 0, 0, 255).normal(pose, n, o, p).endVertex();
+		vertexConsumer.addVertex(pose, k, l, m).setColor(-16777216).setNormal(pose, n, o, p);
 	}
 
 	public ResourceLocation getTextureLocation(FishingHook fishingHook) {

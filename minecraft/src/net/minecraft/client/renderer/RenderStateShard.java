@@ -94,9 +94,6 @@ public abstract class RenderStateShard {
 		GameRenderer::getPositionColorLightmapShader
 	);
 	protected static final RenderStateShard.ShaderStateShard POSITION_SHADER = new RenderStateShard.ShaderStateShard(GameRenderer::getPositionShader);
-	protected static final RenderStateShard.ShaderStateShard POSITION_COLOR_TEX_SHADER = new RenderStateShard.ShaderStateShard(
-		GameRenderer::getPositionColorTexShader
-	);
 	protected static final RenderStateShard.ShaderStateShard POSITION_TEX_SHADER = new RenderStateShard.ShaderStateShard(GameRenderer::getPositionTexShader);
 	protected static final RenderStateShard.ShaderStateShard POSITION_COLOR_TEX_LIGHTMAP_SHADER = new RenderStateShard.ShaderStateShard(
 		GameRenderer::getPositionColorTexLightmapShader
@@ -175,9 +172,6 @@ public abstract class RenderStateShard {
 	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_OUTLINE_SHADER = new RenderStateShard.ShaderStateShard(
 		GameRenderer::getRendertypeOutlineShader
 	);
-	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_ARMOR_GLINT_SHADER = new RenderStateShard.ShaderStateShard(
-		GameRenderer::getRendertypeArmorGlintShader
-	);
 	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_ARMOR_ENTITY_GLINT_SHADER = new RenderStateShard.ShaderStateShard(
 		GameRenderer::getRendertypeArmorEntityGlintShader
 	);
@@ -186,9 +180,6 @@ public abstract class RenderStateShard {
 	);
 	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_GLINT_SHADER = new RenderStateShard.ShaderStateShard(
 		GameRenderer::getRendertypeGlintShader
-	);
-	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_GLINT_DIRECT_SHADER = new RenderStateShard.ShaderStateShard(
-		GameRenderer::getRendertypeGlintDirectShader
 	);
 	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_ENTITY_GLINT_SHADER = new RenderStateShard.ShaderStateShard(
 		GameRenderer::getRendertypeEntityGlintShader

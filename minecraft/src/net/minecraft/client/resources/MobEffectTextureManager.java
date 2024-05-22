@@ -13,7 +13,7 @@ import net.minecraft.world.effect.MobEffect;
 @Environment(EnvType.CLIENT)
 public class MobEffectTextureManager extends TextureAtlasHolder {
 	public MobEffectTextureManager(TextureManager textureManager) {
-		super(textureManager, new ResourceLocation("textures/atlas/mob_effects.png"), new ResourceLocation("mob_effects"));
+		super(textureManager, ResourceLocation.withDefaultNamespace("textures/atlas/mob_effects.png"), ResourceLocation.withDefaultNamespace("mob_effects"));
 	}
 
 	public TextureAtlasSprite get(Holder<MobEffect> holder) {

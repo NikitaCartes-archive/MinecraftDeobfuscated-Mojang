@@ -41,7 +41,7 @@ public class SmithingTransformRecipeBuilder {
 	}
 
 	public void save(RecipeOutput recipeOutput, String string) {
-		this.save(recipeOutput, new ResourceLocation(string));
+		this.save(recipeOutput, ResourceLocation.parse(string));
 	}
 
 	public void save(RecipeOutput recipeOutput, ResourceLocation resourceLocation) {

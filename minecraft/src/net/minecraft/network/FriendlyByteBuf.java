@@ -564,7 +564,7 @@ public class FriendlyByteBuf extends ByteBuf {
 	}
 
 	public ResourceLocation readResourceLocation() {
-		return new ResourceLocation(this.readUtf(32767));
+		return ResourceLocation.parse(this.readUtf(32767));
 	}
 
 	public FriendlyByteBuf writeResourceLocation(ResourceLocation resourceLocation) {

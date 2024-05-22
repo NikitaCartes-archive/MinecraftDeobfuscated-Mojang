@@ -197,9 +197,8 @@ public class PathfindingRenderer implements DebugRenderer.SimpleDebugRenderer {
 				int k = j >> 16 & 0xFF;
 				int l = j >> 8 & 0xFF;
 				int m = j & 0xFF;
-				vertexConsumer.vertex(poseStack.last(), (float)((double)node.x - d + 0.5), (float)((double)node.y - e + 0.5), (float)((double)node.z - f + 0.5))
-					.color(k, l, m, 255)
-					.endVertex();
+				vertexConsumer.addVertex(poseStack.last(), (float)((double)node.x - d + 0.5), (float)((double)node.y - e + 0.5), (float)((double)node.z - f + 0.5))
+					.setColor(k, l, m, 255);
 			}
 		}
 	}

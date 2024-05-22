@@ -11,7 +11,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AnimationState;
 import net.minecraft.world.entity.Entity;
@@ -72,7 +72,7 @@ public class Breeze extends Monster {
 
 	@Override
 	protected Brain<?> makeBrain(Dynamic<?> dynamic) {
-		return BreezeAi.makeBrain(this.brainProvider().makeBrain(dynamic));
+		return BreezeAi.makeBrain(this, this.brainProvider().makeBrain(dynamic));
 	}
 
 	@Override
@@ -186,9 +186,11 @@ public class Breeze extends Monster {
 
 	@Override
 	public ProjectileDeflection deflection(Projectile projectile) {
-		return projectile.getType() != EntityType.BREEZE_WIND_CHARGE && projectile.getType() != EntityType.WIND_CHARGE
-			? PROJECTILE_DEFLECTION
-			: ProjectileDeflection.NONE;
+		if (projectile.getType() != EntityType.BREEZE_WIND_CHARGE && projectile.getType() != EntityType.WIND_CHARGE) {
+			return this.getType().is(EntityTypeTags.DEFLECTS_PROJECTILES) ? PROJECTILE_DEFLECTION : ProjectileDeflection.NONE;
+		} else {
+			return ProjectileDeflection.NONE;
+		}
 	}
 
 	@Override
@@ -262,7 +264,7 @@ public class Breeze extends Monster {
 
 	@Override
 	public boolean isInvulnerableTo(DamageSource damageSource) {
-		return damageSource.is(DamageTypeTags.BREEZE_IMMUNE_TO) || damageSource.getEntity() instanceof Breeze || super.isInvulnerableTo(damageSource);
+		return damageSource.getEntity() instanceof Breeze || super.isInvulnerableTo(damageSource);
 	}
 
 	@Override

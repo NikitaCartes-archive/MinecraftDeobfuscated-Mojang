@@ -18,8 +18,8 @@ import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
 public class SpectatorGui implements SpectatorMenuListener {
-	private static final ResourceLocation HOTBAR_SPRITE = new ResourceLocation("hud/hotbar");
-	private static final ResourceLocation HOTBAR_SELECTION_SPRITE = new ResourceLocation("hud/hotbar_selection");
+	private static final ResourceLocation HOTBAR_SPRITE = ResourceLocation.withDefaultNamespace("hud/hotbar");
+	private static final ResourceLocation HOTBAR_SELECTION_SPRITE = ResourceLocation.withDefaultNamespace("hud/hotbar_selection");
 	private static final long FADE_OUT_DELAY = 5000L;
 	private static final long FADE_OUT_TIME = 2000L;
 	private final Minecraft minecraft;

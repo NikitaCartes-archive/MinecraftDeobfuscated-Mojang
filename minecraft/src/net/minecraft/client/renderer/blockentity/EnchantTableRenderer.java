@@ -17,7 +17,7 @@ import net.minecraft.world.level.block.entity.EnchantingTableBlockEntity;
 
 @Environment(EnvType.CLIENT)
 public class EnchantTableRenderer implements BlockEntityRenderer<EnchantingTableBlockEntity> {
-	public static final Material BOOK_LOCATION = new Material(TextureAtlas.LOCATION_BLOCKS, new ResourceLocation("entity/enchanting_table_book"));
+	public static final Material BOOK_LOCATION = new Material(TextureAtlas.LOCATION_BLOCKS, ResourceLocation.withDefaultNamespace("entity/enchanting_table_book"));
 	private final BookModel bookModel;
 
 	public EnchantTableRenderer(BlockEntityRendererProvider.Context context) {
@@ -48,7 +48,7 @@ public class EnchantTableRenderer implements BlockEntityRenderer<EnchantingTable
 		float o = Mth.lerp(f, enchantingTableBlockEntity.oOpen, enchantingTableBlockEntity.open);
 		this.bookModel.setupAnim(g, Mth.clamp(m, 0.0F, 1.0F), Mth.clamp(n, 0.0F, 1.0F), o);
 		VertexConsumer vertexConsumer = BOOK_LOCATION.buffer(multiBufferSource, RenderType::entitySolid);
-		this.bookModel.render(poseStack, vertexConsumer, i, j, 1.0F, 1.0F, 1.0F, 1.0F);
+		this.bookModel.render(poseStack, vertexConsumer, i, j, -1);
 		poseStack.popPose();
 	}
 }

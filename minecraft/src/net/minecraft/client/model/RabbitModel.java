@@ -109,19 +109,19 @@ public class RabbitModel<T extends Rabbit> extends EntityModel<T> {
 	}
 
 	@Override
-	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h, float k) {
+	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, int k) {
 		if (this.young) {
-			float l = 1.5F;
+			float f = 1.5F;
 			poseStack.pushPose();
 			poseStack.scale(0.56666666F, 0.56666666F, 0.56666666F);
 			poseStack.translate(0.0F, 1.375F, 0.125F);
-			ImmutableList.of(this.head, this.leftEar, this.rightEar, this.nose).forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, f, g, h, k));
+			ImmutableList.of(this.head, this.leftEar, this.rightEar, this.nose).forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, k));
 			poseStack.popPose();
 			poseStack.pushPose();
 			poseStack.scale(0.4F, 0.4F, 0.4F);
 			poseStack.translate(0.0F, 2.25F, 0.0F);
 			ImmutableList.of(this.leftRearFoot, this.rightRearFoot, this.leftHaunch, this.rightHaunch, this.body, this.leftFrontLeg, this.rightFrontLeg, this.tail)
-				.forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, f, g, h, k));
+				.forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, k));
 			poseStack.popPose();
 		} else {
 			poseStack.pushPose();
@@ -141,7 +141,7 @@ public class RabbitModel<T extends Rabbit> extends EntityModel<T> {
 					this.tail,
 					this.nose
 				)
-				.forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, f, g, h, k));
+				.forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, k));
 			poseStack.popPose();
 		}
 	}

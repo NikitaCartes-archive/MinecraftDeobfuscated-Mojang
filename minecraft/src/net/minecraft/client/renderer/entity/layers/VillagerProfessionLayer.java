@@ -30,11 +30,11 @@ import net.minecraft.world.entity.npc.VillagerType;
 @Environment(EnvType.CLIENT)
 public class VillagerProfessionLayer<T extends LivingEntity & VillagerDataHolder, M extends EntityModel<T> & VillagerHeadModel> extends RenderLayer<T, M> {
 	private static final Int2ObjectMap<ResourceLocation> LEVEL_LOCATIONS = Util.make(new Int2ObjectOpenHashMap<>(), int2ObjectOpenHashMap -> {
-		int2ObjectOpenHashMap.put(1, new ResourceLocation("stone"));
-		int2ObjectOpenHashMap.put(2, new ResourceLocation("iron"));
-		int2ObjectOpenHashMap.put(3, new ResourceLocation("gold"));
-		int2ObjectOpenHashMap.put(4, new ResourceLocation("emerald"));
-		int2ObjectOpenHashMap.put(5, new ResourceLocation("diamond"));
+		int2ObjectOpenHashMap.put(1, ResourceLocation.withDefaultNamespace("stone"));
+		int2ObjectOpenHashMap.put(2, ResourceLocation.withDefaultNamespace("iron"));
+		int2ObjectOpenHashMap.put(3, ResourceLocation.withDefaultNamespace("gold"));
+		int2ObjectOpenHashMap.put(4, ResourceLocation.withDefaultNamespace("emerald"));
+		int2ObjectOpenHashMap.put(5, ResourceLocation.withDefaultNamespace("diamond"));
 	});
 	private final Object2ObjectMap<VillagerType, VillagerMetaDataSection.Hat> typeHatCache = new Object2ObjectOpenHashMap<>();
 	private final Object2ObjectMap<VillagerProfession, VillagerMetaDataSection.Hat> professionHatCache = new Object2ObjectOpenHashMap<>();
@@ -57,16 +57,16 @@ public class VillagerProfessionLayer<T extends LivingEntity & VillagerDataHolder
 			M entityModel = this.getParentModel();
 			entityModel.hatVisible(hat2 == VillagerMetaDataSection.Hat.NONE || hat2 == VillagerMetaDataSection.Hat.PARTIAL && hat != VillagerMetaDataSection.Hat.FULL);
 			ResourceLocation resourceLocation = this.getResourceLocation("type", BuiltInRegistries.VILLAGER_TYPE.getKey(villagerType));
-			renderColoredCutoutModel(entityModel, resourceLocation, poseStack, multiBufferSource, i, livingEntity, 1.0F, 1.0F, 1.0F);
+			renderColoredCutoutModel(entityModel, resourceLocation, poseStack, multiBufferSource, i, livingEntity, -1);
 			entityModel.hatVisible(true);
 			if (villagerProfession != VillagerProfession.NONE && !livingEntity.isBaby()) {
 				ResourceLocation resourceLocation2 = this.getResourceLocation("profession", BuiltInRegistries.VILLAGER_PROFESSION.getKey(villagerProfession));
-				renderColoredCutoutModel(entityModel, resourceLocation2, poseStack, multiBufferSource, i, livingEntity, 1.0F, 1.0F, 1.0F);
+				renderColoredCutoutModel(entityModel, resourceLocation2, poseStack, multiBufferSource, i, livingEntity, -1);
 				if (villagerProfession != VillagerProfession.NITWIT) {
 					ResourceLocation resourceLocation3 = this.getResourceLocation(
 						"profession_level", LEVEL_LOCATIONS.get(Mth.clamp(villagerData.getLevel(), 1, LEVEL_LOCATIONS.size()))
 					);
-					renderColoredCutoutModel(entityModel, resourceLocation3, poseStack, multiBufferSource, i, livingEntity, 1.0F, 1.0F, 1.0F);
+					renderColoredCutoutModel(entityModel, resourceLocation3, poseStack, multiBufferSource, i, livingEntity, -1);
 				}
 			}
 		}

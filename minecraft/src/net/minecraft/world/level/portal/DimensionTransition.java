@@ -3,7 +3,7 @@ package net.minecraft.world.level.portal;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.phys.Vec3;
 
-public record DimensionTransition(ServerLevel newDimension, Vec3 pos, Vec3 speed, float yRot, float xRot, boolean missingRespawnBlock) {
+public record DimensionTransition(ServerLevel newLevel, Vec3 pos, Vec3 speed, float yRot, float xRot, boolean missingRespawnBlock) {
 	public DimensionTransition(ServerLevel serverLevel, Vec3 vec3, Vec3 vec32, float f, float g) {
 		this(serverLevel, vec3, vec32, f, g, false);
 	}

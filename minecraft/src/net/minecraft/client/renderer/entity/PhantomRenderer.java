@@ -12,7 +12,7 @@ import net.minecraft.world.entity.monster.Phantom;
 
 @Environment(EnvType.CLIENT)
 public class PhantomRenderer extends MobRenderer<Phantom, PhantomModel<Phantom>> {
-	private static final ResourceLocation PHANTOM_LOCATION = new ResourceLocation("textures/entity/phantom.png");
+	private static final ResourceLocation PHANTOM_LOCATION = ResourceLocation.withDefaultNamespace("textures/entity/phantom.png");
 
 	public PhantomRenderer(EntityRendererProvider.Context context) {
 		super(context, new PhantomModel<>(context.bakeLayer(ModelLayers.PHANTOM)), 0.75F);

@@ -19,7 +19,7 @@ import net.minecraft.resources.ResourceLocation;
 
 @Environment(EnvType.CLIENT)
 public class PopupScreen extends Screen {
-	private static final ResourceLocation BACKGROUND_SPRITE = new ResourceLocation("popup/background");
+	private static final ResourceLocation BACKGROUND_SPRITE = ResourceLocation.withDefaultNamespace("popup/background");
 	private static final int SPACING = 12;
 	private static final int BG_BORDER_WITH_SPACING = 18;
 	private static final int BUTTON_SPACING = 6;

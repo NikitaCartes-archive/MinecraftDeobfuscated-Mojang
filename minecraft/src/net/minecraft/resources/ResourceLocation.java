@@ -25,7 +25,7 @@ import org.apache.commons.lang3.StringUtils;
 
 public class ResourceLocation implements Comparable<ResourceLocation> {
 	public static final Codec<ResourceLocation> CODEC = Codec.STRING.<ResourceLocation>comapFlatMap(ResourceLocation::read, ResourceLocation::toString).stable();
-	public static final StreamCodec<ByteBuf, ResourceLocation> STREAM_CODEC = ByteBufCodecs.STRING_UTF8.map(ResourceLocation::new, ResourceLocation::toString);
+	public static final StreamCodec<ByteBuf, ResourceLocation> STREAM_CODEC = ByteBufCodecs.STRING_UTF8.map(ResourceLocation::parse, ResourceLocation::toString);
 	public static final SimpleCommandExceptionType ERROR_INVALID = new SimpleCommandExceptionType(Component.translatable("argument.id.invalid"));
 	public static final char NAMESPACE_SEPARATOR = ':';
 	public static final String DEFAULT_NAMESPACE = "minecraft";
@@ -38,26 +38,34 @@ public class ResourceLocation implements Comparable<ResourceLocation> {
 		this.path = string2;
 	}
 
-	public ResourceLocation(String string, String string2) {
+	protected ResourceLocation(String string, String string2) {
 		this(assertValidNamespace(string, string2), assertValidPath(string, string2), null);
+	}
+
+	public static ResourceLocation fromNamespaceAndPath(String string, String string2) {
+		return new ResourceLocation(string, string2);
 	}
 
 	private ResourceLocation(String[] strings) {
 		this(strings[0], strings[1]);
 	}
 
-	public ResourceLocation(String string) {
-		this(decompose(string, ':'));
+	public static ResourceLocation parse(String string) {
+		return bySeparator(string, ':');
 	}
 
-	public static ResourceLocation of(String string, char c) {
+	public static ResourceLocation bySeparator(String string, char c) {
 		return new ResourceLocation(decompose(string, c));
+	}
+
+	public static ResourceLocation withDefaultNamespace(String string) {
+		return new ResourceLocation("minecraft", string);
 	}
 
 	@Nullable
 	public static ResourceLocation tryParse(String string) {
 		try {
-			return new ResourceLocation(string);
+			return parse(string);
 		} catch (ResourceLocationException var2) {
 			return null;
 		}
@@ -87,7 +95,7 @@ public class ResourceLocation implements Comparable<ResourceLocation> {
 
 	public static DataResult<ResourceLocation> read(String string) {
 		try {
-			return DataResult.success(new ResourceLocation(string));
+			return DataResult.success(parse(string));
 		} catch (ResourceLocationException var2) {
 			return DataResult.error(() -> "Not a valid resource location: " + string + " " + var2.getMessage());
 		}
@@ -179,7 +187,7 @@ public class ResourceLocation implements Comparable<ResourceLocation> {
 		String string = readGreedy(stringReader);
 
 		try {
-			return new ResourceLocation(string);
+			return parse(string);
 		} catch (ResourceLocationException var4) {
 			stringReader.setCursor(i);
 			throw ERROR_INVALID.createWithContext(stringReader);
@@ -193,7 +201,7 @@ public class ResourceLocation implements Comparable<ResourceLocation> {
 			throw ERROR_INVALID.createWithContext(stringReader);
 		} else {
 			try {
-				return new ResourceLocation(string);
+				return parse(string);
 			} catch (ResourceLocationException var4) {
 				stringReader.setCursor(i);
 				throw ERROR_INVALID.createWithContext(stringReader);
@@ -259,7 +267,7 @@ public class ResourceLocation implements Comparable<ResourceLocation> {
 
 	public static class Serializer implements JsonDeserializer<ResourceLocation>, JsonSerializer<ResourceLocation> {
 		public ResourceLocation deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
-			return new ResourceLocation(GsonHelper.convertToString(jsonElement, "location"));
+			return ResourceLocation.parse(GsonHelper.convertToString(jsonElement, "location"));
 		}
 
 		public JsonElement serialize(ResourceLocation resourceLocation, Type type, JsonSerializationContext jsonSerializationContext) {

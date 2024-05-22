@@ -13,6 +13,6 @@ public class PoiTypeTags {
 	}
 
 	private static TagKey<PoiType> create(String string) {
-		return TagKey.create(Registries.POINT_OF_INTEREST_TYPE, new ResourceLocation(string));
+		return TagKey.create(Registries.POINT_OF_INTEREST_TYPE, ResourceLocation.withDefaultNamespace(string));
 	}
 }

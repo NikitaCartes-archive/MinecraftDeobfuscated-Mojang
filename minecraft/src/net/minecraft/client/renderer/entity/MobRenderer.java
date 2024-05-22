@@ -112,8 +112,8 @@ public abstract class MobRenderer<T extends Mob, M extends EntityModel<T>> exten
 		float z = f * r;
 		float aa = g > 0.0F ? g * r * r : g - g * (1.0F - r) * (1.0F - r);
 		float ab = h * r;
-		vertexConsumer.vertex(matrix4f, z - o, aa + n, ab + p).color(w, x, y, 1.0F).uv2(u).endVertex();
-		vertexConsumer.vertex(matrix4f, z + o, aa + m - n, ab - p).color(w, x, y, 1.0F).uv2(u).endVertex();
+		vertexConsumer.addVertex(matrix4f, z - o, aa + n, ab + p).setColor(w, x, y, 1.0F).setLight(u);
+		vertexConsumer.addVertex(matrix4f, z + o, aa + m - n, ab - p).setColor(w, x, y, 1.0F).setLight(u);
 	}
 
 	protected float getShadowRadius(T mob) {

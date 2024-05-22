@@ -14,6 +14,7 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.DeathScreen;
 import net.minecraft.client.gui.screens.ReceivingLevelScreen;
+import net.minecraft.client.gui.screens.WinScreen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.BookEditScreen;
 import net.minecraft.client.gui.screens.inventory.CommandBlockEditScreen;
@@ -76,6 +77,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.BaseCommandBlock;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.block.Portal;
 import net.minecraft.world.level.block.entity.CommandBlockEntity;
 import net.minecraft.world.level.block.entity.HangingSignBlockEntity;
 import net.minecraft.world.level.block.entity.JigsawBlockEntity;
@@ -658,7 +660,8 @@ public class LocalPlayer extends AbstractClientPlayer {
 		}
 
 		if (!(this.minecraft.screen instanceof ReceivingLevelScreen)) {
-			this.handleNetherPortalClient();
+			this.handleConfusionTransitionEffect(this.getActivePortalLocalTransition() == Portal.Transition.CONFUSION);
+			this.processPortalCooldown();
 		}
 
 		boolean bl = this.input.jumping;
@@ -818,6 +821,10 @@ public class LocalPlayer extends AbstractClientPlayer {
 		}
 	}
 
+	public Portal.Transition getActivePortalLocalTransition() {
+		return this.portalProcess == null ? Portal.Transition.NONE : this.portalProcess.getPortalLocalTransition();
+	}
+
 	@Override
 	protected void tickDeath() {
 		this.deathTime++;
@@ -826,11 +833,14 @@ public class LocalPlayer extends AbstractClientPlayer {
 		}
 	}
 
-	private void handleNetherPortalClient() {
+	private void handleConfusionTransitionEffect(boolean bl) {
 		this.oSpinningEffectIntensity = this.spinningEffectIntensity;
 		float f = 0.0F;
-		if (this.isInsidePortal) {
-			if (this.minecraft.screen != null && !this.minecraft.screen.isPauseScreen() && !(this.minecraft.screen instanceof DeathScreen)) {
+		if (bl && this.portalProcess != null && this.portalProcess.isInsidePortalThisTick()) {
+			if (this.minecraft.screen != null
+				&& !this.minecraft.screen.isPauseScreen()
+				&& !(this.minecraft.screen instanceof DeathScreen)
+				&& !(this.minecraft.screen instanceof WinScreen)) {
 				if (this.minecraft.screen instanceof AbstractContainerScreen) {
 					this.closeContainer();
 				}
@@ -843,7 +853,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 			}
 
 			f = 0.0125F;
-			this.isInsidePortal = false;
+			this.portalProcess.setAsInsidePortalThisTick(false);
 		} else if (this.hasEffect(MobEffects.CONFUSION) && !this.getEffect(MobEffects.CONFUSION).endsWithin(60)) {
 			f = 0.006666667F;
 		} else if (this.spinningEffectIntensity > 0.0F) {
@@ -851,7 +861,6 @@ public class LocalPlayer extends AbstractClientPlayer {
 		}
 
 		this.spinningEffectIntensity = Mth.clamp(this.spinningEffectIntensity + f, 0.0F, 1.0F);
-		this.processPortalCooldown();
 	}
 
 	@Override

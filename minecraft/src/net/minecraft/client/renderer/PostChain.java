@@ -172,7 +172,7 @@ public class PostChain implements AutoCloseable {
 								throw new ChainedJsonException("Render target '" + string6 + "' can't be used as depth buffer");
 							}
 
-							ResourceLocation resourceLocation = new ResourceLocation("textures/effect/" + string6 + ".png");
+							ResourceLocation resourceLocation = ResourceLocation.withDefaultNamespace("textures/effect/" + string6 + ".png");
 							this.resourceProvider
 								.getResource(resourceLocation)
 								.orElseThrow(() -> new ChainedJsonException("Render target or texture '" + string6 + "' does not exist"));

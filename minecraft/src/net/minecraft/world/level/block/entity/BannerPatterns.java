@@ -51,7 +51,7 @@ public class BannerPatterns {
 	public static final ResourceKey<BannerPattern> GUSTER = create("guster");
 
 	private static ResourceKey<BannerPattern> create(String string) {
-		return ResourceKey.create(Registries.BANNER_PATTERN, new ResourceLocation(string));
+		return ResourceKey.create(Registries.BANNER_PATTERN, ResourceLocation.withDefaultNamespace(string));
 	}
 
 	public static void bootstrap(BootstrapContext<BannerPattern> bootstrapContext) {

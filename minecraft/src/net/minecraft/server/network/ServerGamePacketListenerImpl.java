@@ -41,6 +41,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
+import net.minecraft.network.DisconnectionDetails;
 import net.minecraft.network.TickablePacketListener;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
@@ -458,7 +459,9 @@ public class ServerGamePacketListenerImpl
 				}
 
 				this.player.serverLevel().getChunkSource().move(this.player);
-				this.player.checkMovementStatistics(this.player.getX() - d, this.player.getY() - e, this.player.getZ() - f);
+				Vec3 vec3 = new Vec3(entity.getX() - d, entity.getY() - e, entity.getZ() - f);
+				this.player.setKnownMovement(vec3);
+				this.player.checkMovementStatistics(vec3.x, vec3.y, vec3.z);
 				this.clientVehicleIsFloating = m >= -0.03125 && !bl2 && !this.server.isFlightAllowed() && !entity.isNoGravity() && this.noBlocksAround(entity);
 				this.vehicleLastGoodX = entity.getX();
 				this.vehicleLastGoodY = entity.getY();
@@ -1159,10 +1162,10 @@ public class ServerGamePacketListenerImpl
 	}
 
 	@Override
-	public void onDisconnect(Component component) {
-		LOGGER.info("{} lost connection: {}", this.player.getName().getString(), component.getString());
+	public void onDisconnect(DisconnectionDetails disconnectionDetails) {
+		LOGGER.info("{} lost connection: {}", this.player.getName().getString(), disconnectionDetails.reason().getString());
 		this.removePlayerFromWorld();
-		super.onDisconnect(component);
+		super.onDisconnect(disconnectionDetails);
 	}
 
 	private void removePlayerFromWorld() {

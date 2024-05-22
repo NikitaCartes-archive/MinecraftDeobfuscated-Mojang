@@ -57,12 +57,18 @@ public class RandomizedIntStateProvider extends BlockStateProvider {
 	public BlockState getState(RandomSource randomSource, BlockPos blockPos) {
 		BlockState blockState = this.source.getState(randomSource, blockPos);
 		if (this.property == null || !blockState.hasProperty(this.property)) {
-			this.property = findProperty(blockState, this.propertyName);
+			IntegerProperty integerProperty = findProperty(blockState, this.propertyName);
+			if (integerProperty == null) {
+				return blockState;
+			}
+
+			this.property = integerProperty;
 		}
 
 		return blockState.setValue(this.property, Integer.valueOf(this.values.sample(randomSource)));
 	}
 
+	@Nullable
 	private static IntegerProperty findProperty(BlockState blockState, String string) {
 		Collection<Property<?>> collection = blockState.getProperties();
 		Optional<IntegerProperty> optional = collection.stream()
@@ -70,6 +76,6 @@ public class RandomizedIntStateProvider extends BlockStateProvider {
 			.filter(property -> property instanceof IntegerProperty)
 			.map(property -> (IntegerProperty)property)
 			.findAny();
-		return (IntegerProperty)optional.orElseThrow(() -> new IllegalArgumentException("Illegal property: " + string));
+		return (IntegerProperty)optional.orElse(null);
 	}
 }

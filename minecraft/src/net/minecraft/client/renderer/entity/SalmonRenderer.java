@@ -12,7 +12,7 @@ import net.minecraft.world.entity.animal.Salmon;
 
 @Environment(EnvType.CLIENT)
 public class SalmonRenderer extends MobRenderer<Salmon, SalmonModel<Salmon>> {
-	private static final ResourceLocation SALMON_LOCATION = new ResourceLocation("textures/entity/fish/salmon.png");
+	private static final ResourceLocation SALMON_LOCATION = ResourceLocation.withDefaultNamespace("textures/entity/fish/salmon.png");
 
 	public SalmonRenderer(EntityRendererProvider.Context context) {
 		super(context, new SalmonModel<>(context.bakeLayer(ModelLayers.SALMON)), 0.4F);

@@ -110,40 +110,40 @@ public class LightSectionDebugRenderer implements DebugRenderer.SimpleDebugRende
 		Matrix4f matrix4f = poseStack.last().pose();
 		switch (direction) {
 			case DOWN:
-				vertexConsumer.vertex(matrix4f, g, h, l).color(p, q, r, s).endVertex();
-				vertexConsumer.vertex(matrix4f, m, h, l).color(p, q, r, s).endVertex();
-				vertexConsumer.vertex(matrix4f, m, h, o).color(p, q, r, s).endVertex();
-				vertexConsumer.vertex(matrix4f, g, h, o).color(p, q, r, s).endVertex();
+				vertexConsumer.addVertex(matrix4f, g, h, l).setColor(p, q, r, s);
+				vertexConsumer.addVertex(matrix4f, m, h, l).setColor(p, q, r, s);
+				vertexConsumer.addVertex(matrix4f, m, h, o).setColor(p, q, r, s);
+				vertexConsumer.addVertex(matrix4f, g, h, o).setColor(p, q, r, s);
 				break;
 			case UP:
-				vertexConsumer.vertex(matrix4f, g, n, l).color(p, q, r, s).endVertex();
-				vertexConsumer.vertex(matrix4f, g, n, o).color(p, q, r, s).endVertex();
-				vertexConsumer.vertex(matrix4f, m, n, o).color(p, q, r, s).endVertex();
-				vertexConsumer.vertex(matrix4f, m, n, l).color(p, q, r, s).endVertex();
+				vertexConsumer.addVertex(matrix4f, g, n, l).setColor(p, q, r, s);
+				vertexConsumer.addVertex(matrix4f, g, n, o).setColor(p, q, r, s);
+				vertexConsumer.addVertex(matrix4f, m, n, o).setColor(p, q, r, s);
+				vertexConsumer.addVertex(matrix4f, m, n, l).setColor(p, q, r, s);
 				break;
 			case NORTH:
-				vertexConsumer.vertex(matrix4f, g, h, l).color(p, q, r, s).endVertex();
-				vertexConsumer.vertex(matrix4f, g, n, l).color(p, q, r, s).endVertex();
-				vertexConsumer.vertex(matrix4f, m, n, l).color(p, q, r, s).endVertex();
-				vertexConsumer.vertex(matrix4f, m, h, l).color(p, q, r, s).endVertex();
+				vertexConsumer.addVertex(matrix4f, g, h, l).setColor(p, q, r, s);
+				vertexConsumer.addVertex(matrix4f, g, n, l).setColor(p, q, r, s);
+				vertexConsumer.addVertex(matrix4f, m, n, l).setColor(p, q, r, s);
+				vertexConsumer.addVertex(matrix4f, m, h, l).setColor(p, q, r, s);
 				break;
 			case SOUTH:
-				vertexConsumer.vertex(matrix4f, g, h, o).color(p, q, r, s).endVertex();
-				vertexConsumer.vertex(matrix4f, m, h, o).color(p, q, r, s).endVertex();
-				vertexConsumer.vertex(matrix4f, m, n, o).color(p, q, r, s).endVertex();
-				vertexConsumer.vertex(matrix4f, g, n, o).color(p, q, r, s).endVertex();
+				vertexConsumer.addVertex(matrix4f, g, h, o).setColor(p, q, r, s);
+				vertexConsumer.addVertex(matrix4f, m, h, o).setColor(p, q, r, s);
+				vertexConsumer.addVertex(matrix4f, m, n, o).setColor(p, q, r, s);
+				vertexConsumer.addVertex(matrix4f, g, n, o).setColor(p, q, r, s);
 				break;
 			case WEST:
-				vertexConsumer.vertex(matrix4f, g, h, l).color(p, q, r, s).endVertex();
-				vertexConsumer.vertex(matrix4f, g, h, o).color(p, q, r, s).endVertex();
-				vertexConsumer.vertex(matrix4f, g, n, o).color(p, q, r, s).endVertex();
-				vertexConsumer.vertex(matrix4f, g, n, l).color(p, q, r, s).endVertex();
+				vertexConsumer.addVertex(matrix4f, g, h, l).setColor(p, q, r, s);
+				vertexConsumer.addVertex(matrix4f, g, h, o).setColor(p, q, r, s);
+				vertexConsumer.addVertex(matrix4f, g, n, o).setColor(p, q, r, s);
+				vertexConsumer.addVertex(matrix4f, g, n, l).setColor(p, q, r, s);
 				break;
 			case EAST:
-				vertexConsumer.vertex(matrix4f, m, h, l).color(p, q, r, s).endVertex();
-				vertexConsumer.vertex(matrix4f, m, n, l).color(p, q, r, s).endVertex();
-				vertexConsumer.vertex(matrix4f, m, n, o).color(p, q, r, s).endVertex();
-				vertexConsumer.vertex(matrix4f, m, h, o).color(p, q, r, s).endVertex();
+				vertexConsumer.addVertex(matrix4f, m, h, l).setColor(p, q, r, s);
+				vertexConsumer.addVertex(matrix4f, m, n, l).setColor(p, q, r, s);
+				vertexConsumer.addVertex(matrix4f, m, n, o).setColor(p, q, r, s);
+				vertexConsumer.addVertex(matrix4f, m, h, o).setColor(p, q, r, s);
 		}
 	}
 
@@ -157,8 +157,8 @@ public class LightSectionDebugRenderer implements DebugRenderer.SimpleDebugRende
 		float q = (float)((double)SectionPos.sectionToBlockCoord(m) - e);
 		float r = (float)((double)SectionPos.sectionToBlockCoord(n) - f);
 		Matrix4f matrix4f = poseStack.last().pose();
-		vertexConsumer.vertex(matrix4f, g, h, o).color(vector4f.x(), vector4f.y(), vector4f.z(), 1.0F).endVertex();
-		vertexConsumer.vertex(matrix4f, p, q, r).color(vector4f.x(), vector4f.y(), vector4f.z(), 1.0F).endVertex();
+		vertexConsumer.addVertex(matrix4f, g, h, o).setColor(vector4f.x(), vector4f.y(), vector4f.z(), 1.0F);
+		vertexConsumer.addVertex(matrix4f, p, q, r).setColor(vector4f.x(), vector4f.y(), vector4f.z(), 1.0F);
 	}
 
 	@Environment(EnvType.CLIENT)

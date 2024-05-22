@@ -48,12 +48,12 @@ public class LockIconButton extends Button {
 
 	@Environment(EnvType.CLIENT)
 	static enum Icon {
-		LOCKED(new ResourceLocation("widget/locked_button")),
-		LOCKED_HOVER(new ResourceLocation("widget/locked_button_highlighted")),
-		LOCKED_DISABLED(new ResourceLocation("widget/locked_button_disabled")),
-		UNLOCKED(new ResourceLocation("widget/unlocked_button")),
-		UNLOCKED_HOVER(new ResourceLocation("widget/unlocked_button_highlighted")),
-		UNLOCKED_DISABLED(new ResourceLocation("widget/unlocked_button_disabled"));
+		LOCKED(ResourceLocation.withDefaultNamespace("widget/locked_button")),
+		LOCKED_HOVER(ResourceLocation.withDefaultNamespace("widget/locked_button_highlighted")),
+		LOCKED_DISABLED(ResourceLocation.withDefaultNamespace("widget/locked_button_disabled")),
+		UNLOCKED(ResourceLocation.withDefaultNamespace("widget/unlocked_button")),
+		UNLOCKED_HOVER(ResourceLocation.withDefaultNamespace("widget/unlocked_button_highlighted")),
+		UNLOCKED_DISABLED(ResourceLocation.withDefaultNamespace("widget/unlocked_button_disabled"));
 
 		final ResourceLocation sprite;
 

@@ -23,20 +23,20 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemp
 
 public class NetherFossilPieces {
 	private static final ResourceLocation[] FOSSILS = new ResourceLocation[]{
-		new ResourceLocation("nether_fossils/fossil_1"),
-		new ResourceLocation("nether_fossils/fossil_2"),
-		new ResourceLocation("nether_fossils/fossil_3"),
-		new ResourceLocation("nether_fossils/fossil_4"),
-		new ResourceLocation("nether_fossils/fossil_5"),
-		new ResourceLocation("nether_fossils/fossil_6"),
-		new ResourceLocation("nether_fossils/fossil_7"),
-		new ResourceLocation("nether_fossils/fossil_8"),
-		new ResourceLocation("nether_fossils/fossil_9"),
-		new ResourceLocation("nether_fossils/fossil_10"),
-		new ResourceLocation("nether_fossils/fossil_11"),
-		new ResourceLocation("nether_fossils/fossil_12"),
-		new ResourceLocation("nether_fossils/fossil_13"),
-		new ResourceLocation("nether_fossils/fossil_14")
+		ResourceLocation.withDefaultNamespace("nether_fossils/fossil_1"),
+		ResourceLocation.withDefaultNamespace("nether_fossils/fossil_2"),
+		ResourceLocation.withDefaultNamespace("nether_fossils/fossil_3"),
+		ResourceLocation.withDefaultNamespace("nether_fossils/fossil_4"),
+		ResourceLocation.withDefaultNamespace("nether_fossils/fossil_5"),
+		ResourceLocation.withDefaultNamespace("nether_fossils/fossil_6"),
+		ResourceLocation.withDefaultNamespace("nether_fossils/fossil_7"),
+		ResourceLocation.withDefaultNamespace("nether_fossils/fossil_8"),
+		ResourceLocation.withDefaultNamespace("nether_fossils/fossil_9"),
+		ResourceLocation.withDefaultNamespace("nether_fossils/fossil_10"),
+		ResourceLocation.withDefaultNamespace("nether_fossils/fossil_11"),
+		ResourceLocation.withDefaultNamespace("nether_fossils/fossil_12"),
+		ResourceLocation.withDefaultNamespace("nether_fossils/fossil_13"),
+		ResourceLocation.withDefaultNamespace("nether_fossils/fossil_14")
 	};
 
 	public static void addPieces(

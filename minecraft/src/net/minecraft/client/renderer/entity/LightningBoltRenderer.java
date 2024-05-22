@@ -104,10 +104,10 @@ public class LightningBoltRenderer extends EntityRenderer<LightningBolt> {
 		boolean bl3,
 		boolean bl4
 	) {
-		vertexConsumer.vertex(matrix4f, f + (bl ? o : -o), (float)(i * 16), g + (bl2 ? o : -o)).color(k, l, m, 0.3F).endVertex();
-		vertexConsumer.vertex(matrix4f, h + (bl ? n : -n), (float)((i + 1) * 16), j + (bl2 ? n : -n)).color(k, l, m, 0.3F).endVertex();
-		vertexConsumer.vertex(matrix4f, h + (bl3 ? n : -n), (float)((i + 1) * 16), j + (bl4 ? n : -n)).color(k, l, m, 0.3F).endVertex();
-		vertexConsumer.vertex(matrix4f, f + (bl3 ? o : -o), (float)(i * 16), g + (bl4 ? o : -o)).color(k, l, m, 0.3F).endVertex();
+		vertexConsumer.addVertex(matrix4f, f + (bl ? o : -o), (float)(i * 16), g + (bl2 ? o : -o)).setColor(k, l, m, 0.3F);
+		vertexConsumer.addVertex(matrix4f, h + (bl ? n : -n), (float)((i + 1) * 16), j + (bl2 ? n : -n)).setColor(k, l, m, 0.3F);
+		vertexConsumer.addVertex(matrix4f, h + (bl3 ? n : -n), (float)((i + 1) * 16), j + (bl4 ? n : -n)).setColor(k, l, m, 0.3F);
+		vertexConsumer.addVertex(matrix4f, f + (bl3 ? o : -o), (float)(i * 16), g + (bl4 ? o : -o)).setColor(k, l, m, 0.3F);
 	}
 
 	public ResourceLocation getTextureLocation(LightningBolt lightningBolt) {

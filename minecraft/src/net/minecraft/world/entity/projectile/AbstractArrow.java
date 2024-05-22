@@ -451,13 +451,15 @@ public abstract class AbstractArrow extends Projectile {
 	}
 
 	protected void hitBlockEnchantmentEffects(ServerLevel serverLevel, BlockHitResult blockHitResult, ItemStack itemStack) {
+		Vec3 vec3 = blockHitResult.getBlockPos().clampLocationWithin(blockHitResult.getLocation());
 		EnchantmentHelper.onHitBlock(
 			serverLevel,
 			itemStack,
 			this.getOwner() instanceof LivingEntity livingEntity ? livingEntity : null,
 			this,
 			null,
-			blockHitResult.getLocation(),
+			vec3,
+			serverLevel.getBlockState(blockHitResult.getBlockPos()),
 			item -> this.firedFromWeapon = null
 		);
 	}
@@ -530,7 +532,7 @@ public abstract class AbstractArrow extends Projectile {
 		this.setPierceLevel(compoundTag.getByte("PierceLevel"));
 		if (compoundTag.contains("SoundEvent", 8)) {
 			this.soundEvent = (SoundEvent)BuiltInRegistries.SOUND_EVENT
-				.getOptional(new ResourceLocation(compoundTag.getString("SoundEvent")))
+				.getOptional(ResourceLocation.parse(compoundTag.getString("SoundEvent")))
 				.orElse(this.getDefaultHitGroundSoundEvent());
 		}
 

@@ -23,7 +23,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 
 public class ItemModelGenerators {
-	public static final ResourceLocation TRIM_TYPE_PREDICATE_ID = new ResourceLocation("trim_type");
+	public static final ResourceLocation TRIM_TYPE_PREDICATE_ID = ResourceLocation.withDefaultNamespace("trim_type");
 	private static final List<ItemModelGenerators.TrimModelData> GENERATED_TRIM_MODELS = List.of(
 		new ItemModelGenerators.TrimModelData("quartz", 0.1F, Map.of()),
 		new ItemModelGenerators.TrimModelData("iron", 0.2F, Map.of(ArmorMaterials.IRON, "iron_darker")),
@@ -130,7 +130,7 @@ public class ItemModelGenerators {
 				String string = trimModelData.name(armorItem.getMaterial());
 				ResourceLocation resourceLocation4 = this.getItemModelForTrimMaterial(resourceLocation, string);
 				String string2 = armorItem.getType().getName() + "_trim_" + string;
-				ResourceLocation resourceLocation5 = new ResourceLocation(string2).withPrefix("trims/items/");
+				ResourceLocation resourceLocation5 = ResourceLocation.withDefaultNamespace(string2).withPrefix("trims/items/");
 				if (armorItem.getMaterial().is(ArmorMaterials.LEATHER)) {
 					this.generateLayeredItem(resourceLocation4, resourceLocation2, resourceLocation3, resourceLocation5);
 				} else {

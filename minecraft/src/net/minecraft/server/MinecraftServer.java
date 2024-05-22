@@ -16,7 +16,6 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectArraySet;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
 import java.lang.management.ManagementFactory;
@@ -52,6 +51,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import javax.imageio.ImageIO;
 import net.minecraft.CrashReport;
+import net.minecraft.ReportType;
 import net.minecraft.ReportedException;
 import net.minecraft.SharedConstants;
 import net.minecraft.SystemReport;
@@ -717,9 +717,9 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 			LOGGER.error("Encountered an unexpected exception", var46);
 			CrashReport crashReport = constructOrExtractCrashReport(var46);
 			this.fillSystemReport(crashReport.getSystemReport());
-			File file = new File(new File(this.getServerDirectory(), "crash-reports"), "crash-" + Util.getFilenameFormattedDateTime() + "-server.txt");
-			if (crashReport.saveToFile(file)) {
-				LOGGER.error("This crash report has been saved to: {}", file.getAbsolutePath());
+			Path path = this.getServerDirectory().resolve("crash-reports").resolve("crash-" + Util.getFilenameFormattedDateTime() + "-server.txt");
+			if (crashReport.saveToFile(path, ReportType.CRASH)) {
+				LOGGER.error("This crash report has been saved to: {}", path.toAbsolutePath());
 			} else {
 				LOGGER.error("We were unable to save this crash report to disk.");
 			}
@@ -861,7 +861,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 	}
 
 	private Optional<ServerStatus.Favicon> loadStatusIcon() {
-		Optional<Path> optional = Optional.of(this.getFile("server-icon.png").toPath())
+		Optional<Path> optional = Optional.of(this.getFile("server-icon.png"))
 			.filter(path -> Files.isRegularFile(path, new LinkOption[0]))
 			.or(() -> this.storageSource.getIconFile().filter(path -> Files.isRegularFile(path, new LinkOption[0])));
 		return optional.flatMap(path -> {
@@ -883,8 +883,8 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		return this.storageSource.getIconFile();
 	}
 
-	public File getServerDirectory() {
-		return new File(".");
+	public Path getServerDirectory() {
+		return Path.of("");
 	}
 
 	public void onServerCrash(CrashReport crashReport) {
@@ -1059,7 +1059,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		this.profiler.pop();
 	}
 
-	public boolean isNetherEnabled() {
+	public boolean isLevelEnabled(Level level) {
 		return true;
 	}
 
@@ -1075,8 +1075,8 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		return !this.serverThread.isAlive();
 	}
 
-	public File getFile(String string) {
-		return new File(this.getServerDirectory(), string);
+	public Path getFile(String string) {
+		return this.getServerDirectory().resolve(string);
 	}
 
 	public final ServerLevel overworld() {
@@ -2057,6 +2057,10 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 
 	public PotionBrewing potionBrewing() {
 		return this.potionBrewing;
+	}
+
+	public ServerLinks serverLinks() {
+		return ServerLinks.EMPTY;
 	}
 
 	static record ReloadableResources(CloseableResourceManager resourceManager, ReloadableServerResources managers) implements AutoCloseable {

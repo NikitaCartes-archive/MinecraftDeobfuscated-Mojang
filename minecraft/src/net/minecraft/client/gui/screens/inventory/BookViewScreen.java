@@ -29,7 +29,7 @@ public class BookViewScreen extends Screen {
 	public static final int PAGE_TEXT_X_OFFSET = 36;
 	public static final int PAGE_TEXT_Y_OFFSET = 30;
 	public static final BookViewScreen.BookAccess EMPTY_ACCESS = new BookViewScreen.BookAccess(List.of());
-	public static final ResourceLocation BOOK_LOCATION = new ResourceLocation("textures/gui/book.png");
+	public static final ResourceLocation BOOK_LOCATION = ResourceLocation.withDefaultNamespace("textures/gui/book.png");
 	protected static final int TEXT_WIDTH = 114;
 	protected static final int TEXT_HEIGHT = 128;
 	protected static final int IMAGE_WIDTH = 192;

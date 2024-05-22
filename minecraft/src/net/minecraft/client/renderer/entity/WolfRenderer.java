@@ -9,6 +9,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.layers.WolfArmorLayer;
 import net.minecraft.client.renderer.entity.layers.WolfCollarLayer;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FastColor;
 import net.minecraft.world.entity.animal.Wolf;
 
 @Environment(EnvType.CLIENT)
@@ -26,12 +27,12 @@ public class WolfRenderer extends MobRenderer<Wolf, WolfModel<Wolf>> {
 	public void render(Wolf wolf, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
 		if (wolf.isWet()) {
 			float h = wolf.getWetShade(g);
-			this.model.setColor(h, h, h);
+			this.model.setColor(FastColor.ARGB32.colorFromFloat(1.0F, h, h, h));
 		}
 
 		super.render(wolf, f, g, poseStack, multiBufferSource, i);
 		if (wolf.isWet()) {
-			this.model.setColor(1.0F, 1.0F, 1.0F);
+			this.model.setColor(-1);
 		}
 	}
 

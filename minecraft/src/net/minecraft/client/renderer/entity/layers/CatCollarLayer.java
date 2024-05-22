@@ -13,7 +13,7 @@ import net.minecraft.world.entity.animal.Cat;
 
 @Environment(EnvType.CLIENT)
 public class CatCollarLayer extends RenderLayer<Cat, CatModel<Cat>> {
-	private static final ResourceLocation CAT_COLLAR_LOCATION = new ResourceLocation("textures/entity/cat/cat_collar.png");
+	private static final ResourceLocation CAT_COLLAR_LOCATION = ResourceLocation.withDefaultNamespace("textures/entity/cat/cat_collar.png");
 	private final CatModel<Cat> catModel;
 
 	public CatCollarLayer(RenderLayerParent<Cat, CatModel<Cat>> renderLayerParent, EntityModelSet entityModelSet) {
@@ -23,10 +23,8 @@ public class CatCollarLayer extends RenderLayer<Cat, CatModel<Cat>> {
 
 	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, Cat cat, float f, float g, float h, float j, float k, float l) {
 		if (cat.isTame()) {
-			float[] fs = cat.getCollarColor().getTextureDiffuseColors();
-			coloredCutoutModelCopyLayerRender(
-				this.getParentModel(), this.catModel, CAT_COLLAR_LOCATION, poseStack, multiBufferSource, i, cat, f, g, j, k, l, h, fs[0], fs[1], fs[2]
-			);
+			int m = cat.getCollarColor().getTextureDiffuseColor();
+			coloredCutoutModelCopyLayerRender(this.getParentModel(), this.catModel, CAT_COLLAR_LOCATION, poseStack, multiBufferSource, i, cat, f, g, j, k, l, h, m);
 		}
 	}
 }

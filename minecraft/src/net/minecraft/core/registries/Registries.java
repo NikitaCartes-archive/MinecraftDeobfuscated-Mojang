@@ -1,6 +1,7 @@
 package net.minecraft.core.registries;
 
 import com.mojang.serialization.MapCodec;
+import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.CriterionTrigger;
 import net.minecraft.advancements.critereon.EntitySubPredicate;
 import net.minecraft.advancements.critereon.ItemSubPredicate;
@@ -36,9 +37,11 @@ import net.minecraft.world.item.ArmorMaterial;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Instrument;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.JukeboxSong;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.armortrim.TrimMaterial;
 import net.minecraft.world.item.armortrim.TrimPattern;
+import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -107,7 +110,7 @@ import net.minecraft.world.level.storage.loot.providers.number.LootNumberProvide
 import net.minecraft.world.level.storage.loot.providers.score.LootScoreProviderType;
 
 public class Registries {
-	public static final ResourceLocation ROOT_REGISTRY_NAME = new ResourceLocation("root");
+	public static final ResourceLocation ROOT_REGISTRY_NAME = ResourceLocation.withDefaultNamespace("root");
 	public static final ResourceKey<Registry<Activity>> ACTIVITY = createRegistryKey("activity");
 	public static final ResourceKey<Registry<Attribute>> ATTRIBUTE = createRegistryKey("attribute");
 	public static final ResourceKey<Registry<BannerPattern>> BANNER_PATTERN = createRegistryKey("banner_pattern");
@@ -152,6 +155,7 @@ public class Registries {
 	public static final ResourceKey<Registry<Instrument>> INSTRUMENT = createRegistryKey("instrument");
 	public static final ResourceKey<Registry<IntProviderType<?>>> INT_PROVIDER_TYPE = createRegistryKey("int_provider_type");
 	public static final ResourceKey<Registry<Item>> ITEM = createRegistryKey("item");
+	public static final ResourceKey<Registry<JukeboxSong>> JUKEBOX_SONG = createRegistryKey("jukebox_song");
 	public static final ResourceKey<Registry<LootItemConditionType>> LOOT_CONDITION_TYPE = createRegistryKey("loot_condition_type");
 	public static final ResourceKey<Registry<LootItemFunctionType<?>>> LOOT_FUNCTION_TYPE = createRegistryKey("loot_function_type");
 	public static final ResourceKey<Registry<LootNbtProviderType>> LOOT_NBT_PROVIDER_TYPE = createRegistryKey("loot_nbt_provider_type");
@@ -227,6 +231,8 @@ public class Registries {
 	public static final ResourceKey<Registry<LootTable>> LOOT_TABLE = createRegistryKey("loot_table");
 	public static final ResourceKey<Registry<LootItemFunction>> ITEM_MODIFIER = createRegistryKey("item_modifier");
 	public static final ResourceKey<Registry<LootItemCondition>> PREDICATE = createRegistryKey("predicate");
+	public static final ResourceKey<Registry<Advancement>> ADVANCEMENT = createRegistryKey("advancement");
+	public static final ResourceKey<Registry<Recipe<?>>> RECIPE = createRegistryKey("recipe");
 
 	public static ResourceKey<Level> levelStemToLevel(ResourceKey<LevelStem> resourceKey) {
 		return ResourceKey.create(DIMENSION, resourceKey.location());
@@ -237,6 +243,14 @@ public class Registries {
 	}
 
 	private static <T> ResourceKey<Registry<T>> createRegistryKey(String string) {
-		return ResourceKey.createRegistryKey(new ResourceLocation(string));
+		return ResourceKey.createRegistryKey(ResourceLocation.withDefaultNamespace(string));
+	}
+
+	public static String elementsDirPath(ResourceKey<? extends Registry<?>> resourceKey) {
+		return resourceKey.location().getPath();
+	}
+
+	public static String tagsDirPath(ResourceKey<? extends Registry<?>> resourceKey) {
+		return "tags/" + resourceKey.location().getPath();
 	}
 }

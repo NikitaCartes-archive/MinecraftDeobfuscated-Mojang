@@ -22,6 +22,7 @@ import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
@@ -270,9 +271,9 @@ public class VaultBlockEntity extends BlockEntity {
 			VaultState vaultState = blockState.getValue(VaultBlock.STATE);
 			if (canEjectReward(vaultConfig, vaultState)) {
 				if (!isValidToInsert(vaultConfig, itemStack)) {
-					playInsertFailSound(serverLevel, vaultServerData, blockPos);
+					playInsertFailSound(serverLevel, vaultServerData, blockPos, SoundEvents.VAULT_INSERT_ITEM_FAIL);
 				} else if (vaultServerData.hasRewardedPlayer(player)) {
-					playInsertFailSound(serverLevel, vaultServerData, blockPos);
+					playInsertFailSound(serverLevel, vaultServerData, blockPos, SoundEvents.VAULT_REJECT_REWARDED_PLAYER);
 				} else {
 					List<ItemStack> list = resolveItemsToEject(serverLevel, vaultConfig, blockPos, player);
 					if (!list.isEmpty()) {
@@ -354,9 +355,9 @@ public class VaultBlockEntity extends BlockEntity {
 			return l % 20L == 0L && vaultState == VaultState.ACTIVE;
 		}
 
-		private static void playInsertFailSound(ServerLevel serverLevel, VaultServerData vaultServerData, BlockPos blockPos) {
+		private static void playInsertFailSound(ServerLevel serverLevel, VaultServerData vaultServerData, BlockPos blockPos, SoundEvent soundEvent) {
 			if (serverLevel.getGameTime() >= vaultServerData.getLastInsertFailTimestamp() + 15L) {
-				serverLevel.playSound(null, blockPos, SoundEvents.VAULT_INSERT_ITEM_FAIL, SoundSource.BLOCKS);
+				serverLevel.playSound(null, blockPos, soundEvent, SoundSource.BLOCKS);
 				vaultServerData.setLastInsertFailTimestamp(serverLevel.getGameTime());
 			}
 		}

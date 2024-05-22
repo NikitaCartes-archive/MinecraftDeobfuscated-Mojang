@@ -11,7 +11,7 @@ import net.minecraft.world.entity.animal.Squid;
 
 @Environment(EnvType.CLIENT)
 public class SquidRenderer<T extends Squid> extends MobRenderer<T, SquidModel<T>> {
-	private static final ResourceLocation SQUID_LOCATION = new ResourceLocation("textures/entity/squid/squid.png");
+	private static final ResourceLocation SQUID_LOCATION = ResourceLocation.withDefaultNamespace("textures/entity/squid/squid.png");
 
 	public SquidRenderer(EntityRendererProvider.Context context, SquidModel<T> squidModel) {
 		super(context, squidModel, 0.7F);

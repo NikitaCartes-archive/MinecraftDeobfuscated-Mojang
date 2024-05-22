@@ -24,7 +24,7 @@ import org.joml.Quaternionf;
 
 @Environment(EnvType.CLIENT)
 public class EndCrystalRenderer extends EntityRenderer<EndCrystal> {
-	private static final ResourceLocation END_CRYSTAL_LOCATION = new ResourceLocation("textures/entity/end_crystal/end_crystal.png");
+	private static final ResourceLocation END_CRYSTAL_LOCATION = ResourceLocation.withDefaultNamespace("textures/entity/end_crystal/end_crystal.png");
 	private static final RenderType RENDER_TYPE = RenderType.entityCutoutNoCull(END_CRYSTAL_LOCATION);
 	private static final float SIN_45 = (float)Math.sin(Math.PI / 4);
 	private static final String GLASS = "glass";

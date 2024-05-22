@@ -12,7 +12,7 @@ import net.minecraft.world.entity.monster.Witch;
 
 @Environment(EnvType.CLIENT)
 public class WitchRenderer extends MobRenderer<Witch, WitchModel<Witch>> {
-	private static final ResourceLocation WITCH_LOCATION = new ResourceLocation("textures/entity/witch.png");
+	private static final ResourceLocation WITCH_LOCATION = ResourceLocation.withDefaultNamespace("textures/entity/witch.png");
 
 	public WitchRenderer(EntityRendererProvider.Context context) {
 		super(context, new WitchModel<>(context.bakeLayer(ModelLayers.WITCH)), 0.5F);

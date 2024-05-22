@@ -11,11 +11,13 @@ import net.minecraft.world.entity.monster.warden.Warden;
 
 @Environment(EnvType.CLIENT)
 public class WardenRenderer extends MobRenderer<Warden, WardenModel<Warden>> {
-	private static final ResourceLocation TEXTURE = new ResourceLocation("textures/entity/warden/warden.png");
-	private static final ResourceLocation BIOLUMINESCENT_LAYER_TEXTURE = new ResourceLocation("textures/entity/warden/warden_bioluminescent_layer.png");
-	private static final ResourceLocation HEART_TEXTURE = new ResourceLocation("textures/entity/warden/warden_heart.png");
-	private static final ResourceLocation PULSATING_SPOTS_TEXTURE_1 = new ResourceLocation("textures/entity/warden/warden_pulsating_spots_1.png");
-	private static final ResourceLocation PULSATING_SPOTS_TEXTURE_2 = new ResourceLocation("textures/entity/warden/warden_pulsating_spots_2.png");
+	private static final ResourceLocation TEXTURE = ResourceLocation.withDefaultNamespace("textures/entity/warden/warden.png");
+	private static final ResourceLocation BIOLUMINESCENT_LAYER_TEXTURE = ResourceLocation.withDefaultNamespace(
+		"textures/entity/warden/warden_bioluminescent_layer.png"
+	);
+	private static final ResourceLocation HEART_TEXTURE = ResourceLocation.withDefaultNamespace("textures/entity/warden/warden_heart.png");
+	private static final ResourceLocation PULSATING_SPOTS_TEXTURE_1 = ResourceLocation.withDefaultNamespace("textures/entity/warden/warden_pulsating_spots_1.png");
+	private static final ResourceLocation PULSATING_SPOTS_TEXTURE_2 = ResourceLocation.withDefaultNamespace("textures/entity/warden/warden_pulsating_spots_2.png");
 
 	public WardenRenderer(EntityRendererProvider.Context context) {
 		super(context, new WardenModel<>(context.bakeLayer(ModelLayers.WARDEN)), 0.9F);

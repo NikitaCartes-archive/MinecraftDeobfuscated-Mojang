@@ -23,7 +23,6 @@ import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.InstrumentTags;
-import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.PaintingVariantTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.decoration.Painting;
@@ -42,6 +41,8 @@ import net.minecraft.world.level.block.LightBlock;
 import net.minecraft.world.level.block.SuspiciousEffectHolder;
 
 public class CreativeModeTabs {
+	private static final ResourceLocation INVENTORY_BACKGROUND = CreativeModeTab.createTextureLocation("inventory");
+	private static final ResourceLocation SEARCH_BACKGROUND = CreativeModeTab.createTextureLocation("item_search");
 	private static final ResourceKey<CreativeModeTab> BUILDING_BLOCKS = createKey("building_blocks");
 	private static final ResourceKey<CreativeModeTab> COLORED_BLOCKS = createKey("colored_blocks");
 	private static final ResourceKey<CreativeModeTab> NATURAL_BLOCKS = createKey("natural_blocks");
@@ -63,7 +64,7 @@ public class CreativeModeTabs {
 	private static CreativeModeTab.ItemDisplayParameters CACHED_PARAMETERS;
 
 	private static ResourceKey<CreativeModeTab> createKey(String string) {
-		return ResourceKey.create(Registries.CREATIVE_MODE_TAB, new ResourceLocation(string));
+		return ResourceKey.create(Registries.CREATIVE_MODE_TAB, ResourceLocation.withDefaultNamespace(string));
 	}
 
 	public static CreativeModeTab bootstrap(Registry<CreativeModeTab> registry) {
@@ -1230,7 +1231,7 @@ public class CreativeModeTabs {
 
 					output.acceptAll(set);
 				})
-				.backgroundSuffix("item_search.png")
+				.backgroundTexture(SEARCH_BACKGROUND)
 				.alignedRight()
 				.type(CreativeModeTab.Type.SEARCH)
 				.build()
@@ -1512,179 +1513,156 @@ public class CreativeModeTabs {
 			CreativeModeTab.builder(CreativeModeTab.Row.BOTTOM, 3)
 				.title(Component.translatable("itemGroup.ingredients"))
 				.icon(() -> new ItemStack(Items.IRON_INGOT))
-				.displayItems(
-					(itemDisplayParameters, output) -> {
-						output.accept(Items.COAL);
-						output.accept(Items.CHARCOAL);
-						output.accept(Items.RAW_IRON);
-						output.accept(Items.RAW_COPPER);
-						output.accept(Items.RAW_GOLD);
-						output.accept(Items.EMERALD);
-						output.accept(Items.LAPIS_LAZULI);
-						output.accept(Items.DIAMOND);
-						output.accept(Items.ANCIENT_DEBRIS);
-						output.accept(Items.QUARTZ);
-						output.accept(Items.AMETHYST_SHARD);
-						output.accept(Items.IRON_NUGGET);
-						output.accept(Items.GOLD_NUGGET);
-						output.accept(Items.IRON_INGOT);
-						output.accept(Items.COPPER_INGOT);
-						output.accept(Items.GOLD_INGOT);
-						output.accept(Items.NETHERITE_SCRAP);
-						output.accept(Items.NETHERITE_INGOT);
-						output.accept(Items.STICK);
-						output.accept(Items.FLINT);
-						output.accept(Items.WHEAT);
-						output.accept(Items.BONE);
-						output.accept(Items.BONE_MEAL);
-						output.accept(Items.STRING);
-						output.accept(Items.FEATHER);
-						output.accept(Items.SNOWBALL);
-						output.accept(Items.EGG);
-						output.accept(Items.LEATHER);
-						output.accept(Items.RABBIT_HIDE);
-						output.accept(Items.HONEYCOMB);
-						output.accept(Items.INK_SAC);
-						output.accept(Items.GLOW_INK_SAC);
-						output.accept(Items.TURTLE_SCUTE);
-						output.accept(Items.ARMADILLO_SCUTE);
-						output.accept(Items.SLIME_BALL);
-						output.accept(Items.CLAY_BALL);
-						output.accept(Items.PRISMARINE_SHARD);
-						output.accept(Items.PRISMARINE_CRYSTALS);
-						output.accept(Items.NAUTILUS_SHELL);
-						output.accept(Items.HEART_OF_THE_SEA);
-						output.accept(Items.FIRE_CHARGE);
-						output.accept(Items.BLAZE_ROD);
-						output.accept(Items.BREEZE_ROD);
-						output.accept(Items.HEAVY_CORE);
-						output.accept(Items.NETHER_STAR);
-						output.accept(Items.ENDER_PEARL);
-						output.accept(Items.ENDER_EYE);
-						output.accept(Items.SHULKER_SHELL);
-						output.accept(Items.POPPED_CHORUS_FRUIT);
-						output.accept(Items.ECHO_SHARD);
-						output.accept(Items.DISC_FRAGMENT_5);
-						output.accept(Items.WHITE_DYE);
-						output.accept(Items.LIGHT_GRAY_DYE);
-						output.accept(Items.GRAY_DYE);
-						output.accept(Items.BLACK_DYE);
-						output.accept(Items.BROWN_DYE);
-						output.accept(Items.RED_DYE);
-						output.accept(Items.ORANGE_DYE);
-						output.accept(Items.YELLOW_DYE);
-						output.accept(Items.LIME_DYE);
-						output.accept(Items.GREEN_DYE);
-						output.accept(Items.CYAN_DYE);
-						output.accept(Items.LIGHT_BLUE_DYE);
-						output.accept(Items.BLUE_DYE);
-						output.accept(Items.PURPLE_DYE);
-						output.accept(Items.MAGENTA_DYE);
-						output.accept(Items.PINK_DYE);
-						output.accept(Items.BOWL);
-						output.accept(Items.BRICK);
-						output.accept(Items.NETHER_BRICK);
-						output.accept(Items.PAPER);
-						output.accept(Items.BOOK);
-						output.accept(Items.FIREWORK_STAR);
-						output.accept(Items.GLASS_BOTTLE);
-						output.accept(Items.NETHER_WART);
-						output.accept(Items.REDSTONE);
-						output.accept(Items.GLOWSTONE_DUST);
-						output.accept(Items.GUNPOWDER);
-						output.accept(Items.DRAGON_BREATH);
-						output.accept(Items.FERMENTED_SPIDER_EYE);
-						output.accept(Items.BLAZE_POWDER);
-						output.accept(Items.SUGAR);
-						output.accept(Items.RABBIT_FOOT);
-						output.accept(Items.GLISTERING_MELON_SLICE);
-						output.accept(Items.SPIDER_EYE);
-						output.accept(Items.PUFFERFISH);
-						output.accept(Items.MAGMA_CREAM);
-						output.accept(Items.GOLDEN_CARROT);
-						output.accept(Items.GHAST_TEAR);
-						output.accept(Items.TURTLE_HELMET);
-						output.accept(Items.PHANTOM_MEMBRANE);
-						output.accept(Items.FLOWER_BANNER_PATTERN);
-						output.accept(Items.CREEPER_BANNER_PATTERN);
-						output.accept(Items.SKULL_BANNER_PATTERN);
-						output.accept(Items.MOJANG_BANNER_PATTERN);
-						output.accept(Items.GLOBE_BANNER_PATTERN);
-						output.accept(Items.PIGLIN_BANNER_PATTERN);
-						output.accept(Items.FLOW_BANNER_PATTERN);
-						output.accept(Items.GUSTER_BANNER_PATTERN);
-						output.accept(Items.ANGLER_POTTERY_SHERD);
-						output.accept(Items.ARCHER_POTTERY_SHERD);
-						output.accept(Items.ARMS_UP_POTTERY_SHERD);
-						output.accept(Items.BLADE_POTTERY_SHERD);
-						output.accept(Items.BREWER_POTTERY_SHERD);
-						output.accept(Items.BURN_POTTERY_SHERD);
-						output.accept(Items.DANGER_POTTERY_SHERD);
-						output.accept(Items.FLOW_POTTERY_SHERD);
-						output.accept(Items.EXPLORER_POTTERY_SHERD);
-						output.accept(Items.FRIEND_POTTERY_SHERD);
-						output.accept(Items.GUSTER_POTTERY_SHERD);
-						output.accept(Items.HEART_POTTERY_SHERD);
-						output.accept(Items.HEARTBREAK_POTTERY_SHERD);
-						output.accept(Items.HOWL_POTTERY_SHERD);
-						output.accept(Items.MINER_POTTERY_SHERD);
-						output.accept(Items.MOURNER_POTTERY_SHERD);
-						output.accept(Items.PLENTY_POTTERY_SHERD);
-						output.accept(Items.PRIZE_POTTERY_SHERD);
-						output.accept(Items.SCRAPE_POTTERY_SHERD);
-						output.accept(Items.SHEAF_POTTERY_SHERD);
-						output.accept(Items.SHELTER_POTTERY_SHERD);
-						output.accept(Items.SKULL_POTTERY_SHERD);
-						output.accept(Items.SNORT_POTTERY_SHERD);
-						output.accept(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE);
-						output.accept(Items.SENTRY_ARMOR_TRIM_SMITHING_TEMPLATE);
-						output.accept(Items.VEX_ARMOR_TRIM_SMITHING_TEMPLATE);
-						output.accept(Items.WILD_ARMOR_TRIM_SMITHING_TEMPLATE);
-						output.accept(Items.COAST_ARMOR_TRIM_SMITHING_TEMPLATE);
-						output.accept(Items.DUNE_ARMOR_TRIM_SMITHING_TEMPLATE);
-						output.accept(Items.WAYFINDER_ARMOR_TRIM_SMITHING_TEMPLATE);
-						output.accept(Items.RAISER_ARMOR_TRIM_SMITHING_TEMPLATE);
-						output.accept(Items.SHAPER_ARMOR_TRIM_SMITHING_TEMPLATE);
-						output.accept(Items.HOST_ARMOR_TRIM_SMITHING_TEMPLATE);
-						output.accept(Items.WARD_ARMOR_TRIM_SMITHING_TEMPLATE);
-						output.accept(Items.SILENCE_ARMOR_TRIM_SMITHING_TEMPLATE);
-						output.accept(Items.TIDE_ARMOR_TRIM_SMITHING_TEMPLATE);
-						output.accept(Items.SNOUT_ARMOR_TRIM_SMITHING_TEMPLATE);
-						output.accept(Items.RIB_ARMOR_TRIM_SMITHING_TEMPLATE);
-						output.accept(Items.EYE_ARMOR_TRIM_SMITHING_TEMPLATE);
-						output.accept(Items.SPIRE_ARMOR_TRIM_SMITHING_TEMPLATE);
-						output.accept(Items.FLOW_ARMOR_TRIM_SMITHING_TEMPLATE);
-						output.accept(Items.BOLT_ARMOR_TRIM_SMITHING_TEMPLATE);
-						output.accept(Items.EXPERIENCE_BOTTLE);
-						output.accept(Items.TRIAL_KEY);
-						output.accept(Items.OMINOUS_TRIAL_KEY);
-						Set<TagKey<Item>> set = Set.of(
-							ItemTags.FOOT_ARMOR_ENCHANTABLE,
-							ItemTags.LEG_ARMOR_ENCHANTABLE,
-							ItemTags.CHEST_ARMOR_ENCHANTABLE,
-							ItemTags.HEAD_ARMOR_ENCHANTABLE,
-							ItemTags.ARMOR_ENCHANTABLE,
-							ItemTags.SWORD_ENCHANTABLE,
-							ItemTags.SHARP_WEAPON_ENCHANTABLE,
-							ItemTags.MACE_ENCHANTABLE,
-							ItemTags.FIRE_ASPECT_ENCHANTABLE,
-							ItemTags.WEAPON_ENCHANTABLE,
-							ItemTags.MINING_ENCHANTABLE,
-							ItemTags.MINING_LOOT_ENCHANTABLE,
-							ItemTags.FISHING_ENCHANTABLE,
-							ItemTags.TRIDENT_ENCHANTABLE,
-							ItemTags.DURABILITY_ENCHANTABLE,
-							ItemTags.BOW_ENCHANTABLE,
-							ItemTags.EQUIPPABLE_ENCHANTABLE,
-							ItemTags.CROSSBOW_ENCHANTABLE,
-							ItemTags.VANISHING_ENCHANTABLE
-						);
-						itemDisplayParameters.holders().lookup(Registries.ENCHANTMENT).ifPresent(registryLookup -> {
-							generateEnchantmentBookTypesOnlyMaxLevel(output, registryLookup, set, CreativeModeTab.TabVisibility.PARENT_TAB_ONLY);
-							generateEnchantmentBookTypesAllLevels(output, registryLookup, set, CreativeModeTab.TabVisibility.SEARCH_TAB_ONLY);
-						});
-					}
-				)
+				.displayItems((itemDisplayParameters, output) -> {
+					output.accept(Items.COAL);
+					output.accept(Items.CHARCOAL);
+					output.accept(Items.RAW_IRON);
+					output.accept(Items.RAW_COPPER);
+					output.accept(Items.RAW_GOLD);
+					output.accept(Items.EMERALD);
+					output.accept(Items.LAPIS_LAZULI);
+					output.accept(Items.DIAMOND);
+					output.accept(Items.ANCIENT_DEBRIS);
+					output.accept(Items.QUARTZ);
+					output.accept(Items.AMETHYST_SHARD);
+					output.accept(Items.IRON_NUGGET);
+					output.accept(Items.GOLD_NUGGET);
+					output.accept(Items.IRON_INGOT);
+					output.accept(Items.COPPER_INGOT);
+					output.accept(Items.GOLD_INGOT);
+					output.accept(Items.NETHERITE_SCRAP);
+					output.accept(Items.NETHERITE_INGOT);
+					output.accept(Items.STICK);
+					output.accept(Items.FLINT);
+					output.accept(Items.WHEAT);
+					output.accept(Items.BONE);
+					output.accept(Items.BONE_MEAL);
+					output.accept(Items.STRING);
+					output.accept(Items.FEATHER);
+					output.accept(Items.SNOWBALL);
+					output.accept(Items.EGG);
+					output.accept(Items.LEATHER);
+					output.accept(Items.RABBIT_HIDE);
+					output.accept(Items.HONEYCOMB);
+					output.accept(Items.INK_SAC);
+					output.accept(Items.GLOW_INK_SAC);
+					output.accept(Items.TURTLE_SCUTE);
+					output.accept(Items.ARMADILLO_SCUTE);
+					output.accept(Items.SLIME_BALL);
+					output.accept(Items.CLAY_BALL);
+					output.accept(Items.PRISMARINE_SHARD);
+					output.accept(Items.PRISMARINE_CRYSTALS);
+					output.accept(Items.NAUTILUS_SHELL);
+					output.accept(Items.HEART_OF_THE_SEA);
+					output.accept(Items.FIRE_CHARGE);
+					output.accept(Items.BLAZE_ROD);
+					output.accept(Items.BREEZE_ROD);
+					output.accept(Items.HEAVY_CORE);
+					output.accept(Items.NETHER_STAR);
+					output.accept(Items.ENDER_PEARL);
+					output.accept(Items.ENDER_EYE);
+					output.accept(Items.SHULKER_SHELL);
+					output.accept(Items.POPPED_CHORUS_FRUIT);
+					output.accept(Items.ECHO_SHARD);
+					output.accept(Items.DISC_FRAGMENT_5);
+					output.accept(Items.WHITE_DYE);
+					output.accept(Items.LIGHT_GRAY_DYE);
+					output.accept(Items.GRAY_DYE);
+					output.accept(Items.BLACK_DYE);
+					output.accept(Items.BROWN_DYE);
+					output.accept(Items.RED_DYE);
+					output.accept(Items.ORANGE_DYE);
+					output.accept(Items.YELLOW_DYE);
+					output.accept(Items.LIME_DYE);
+					output.accept(Items.GREEN_DYE);
+					output.accept(Items.CYAN_DYE);
+					output.accept(Items.LIGHT_BLUE_DYE);
+					output.accept(Items.BLUE_DYE);
+					output.accept(Items.PURPLE_DYE);
+					output.accept(Items.MAGENTA_DYE);
+					output.accept(Items.PINK_DYE);
+					output.accept(Items.BOWL);
+					output.accept(Items.BRICK);
+					output.accept(Items.NETHER_BRICK);
+					output.accept(Items.PAPER);
+					output.accept(Items.BOOK);
+					output.accept(Items.FIREWORK_STAR);
+					output.accept(Items.GLASS_BOTTLE);
+					output.accept(Items.NETHER_WART);
+					output.accept(Items.REDSTONE);
+					output.accept(Items.GLOWSTONE_DUST);
+					output.accept(Items.GUNPOWDER);
+					output.accept(Items.DRAGON_BREATH);
+					output.accept(Items.FERMENTED_SPIDER_EYE);
+					output.accept(Items.BLAZE_POWDER);
+					output.accept(Items.SUGAR);
+					output.accept(Items.RABBIT_FOOT);
+					output.accept(Items.GLISTERING_MELON_SLICE);
+					output.accept(Items.SPIDER_EYE);
+					output.accept(Items.PUFFERFISH);
+					output.accept(Items.MAGMA_CREAM);
+					output.accept(Items.GOLDEN_CARROT);
+					output.accept(Items.GHAST_TEAR);
+					output.accept(Items.TURTLE_HELMET);
+					output.accept(Items.PHANTOM_MEMBRANE);
+					output.accept(Items.FLOWER_BANNER_PATTERN);
+					output.accept(Items.CREEPER_BANNER_PATTERN);
+					output.accept(Items.SKULL_BANNER_PATTERN);
+					output.accept(Items.MOJANG_BANNER_PATTERN);
+					output.accept(Items.GLOBE_BANNER_PATTERN);
+					output.accept(Items.PIGLIN_BANNER_PATTERN);
+					output.accept(Items.FLOW_BANNER_PATTERN);
+					output.accept(Items.GUSTER_BANNER_PATTERN);
+					output.accept(Items.ANGLER_POTTERY_SHERD);
+					output.accept(Items.ARCHER_POTTERY_SHERD);
+					output.accept(Items.ARMS_UP_POTTERY_SHERD);
+					output.accept(Items.BLADE_POTTERY_SHERD);
+					output.accept(Items.BREWER_POTTERY_SHERD);
+					output.accept(Items.BURN_POTTERY_SHERD);
+					output.accept(Items.DANGER_POTTERY_SHERD);
+					output.accept(Items.FLOW_POTTERY_SHERD);
+					output.accept(Items.EXPLORER_POTTERY_SHERD);
+					output.accept(Items.FRIEND_POTTERY_SHERD);
+					output.accept(Items.GUSTER_POTTERY_SHERD);
+					output.accept(Items.HEART_POTTERY_SHERD);
+					output.accept(Items.HEARTBREAK_POTTERY_SHERD);
+					output.accept(Items.HOWL_POTTERY_SHERD);
+					output.accept(Items.MINER_POTTERY_SHERD);
+					output.accept(Items.MOURNER_POTTERY_SHERD);
+					output.accept(Items.PLENTY_POTTERY_SHERD);
+					output.accept(Items.PRIZE_POTTERY_SHERD);
+					output.accept(Items.SCRAPE_POTTERY_SHERD);
+					output.accept(Items.SHEAF_POTTERY_SHERD);
+					output.accept(Items.SHELTER_POTTERY_SHERD);
+					output.accept(Items.SKULL_POTTERY_SHERD);
+					output.accept(Items.SNORT_POTTERY_SHERD);
+					output.accept(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE);
+					output.accept(Items.SENTRY_ARMOR_TRIM_SMITHING_TEMPLATE);
+					output.accept(Items.VEX_ARMOR_TRIM_SMITHING_TEMPLATE);
+					output.accept(Items.WILD_ARMOR_TRIM_SMITHING_TEMPLATE);
+					output.accept(Items.COAST_ARMOR_TRIM_SMITHING_TEMPLATE);
+					output.accept(Items.DUNE_ARMOR_TRIM_SMITHING_TEMPLATE);
+					output.accept(Items.WAYFINDER_ARMOR_TRIM_SMITHING_TEMPLATE);
+					output.accept(Items.RAISER_ARMOR_TRIM_SMITHING_TEMPLATE);
+					output.accept(Items.SHAPER_ARMOR_TRIM_SMITHING_TEMPLATE);
+					output.accept(Items.HOST_ARMOR_TRIM_SMITHING_TEMPLATE);
+					output.accept(Items.WARD_ARMOR_TRIM_SMITHING_TEMPLATE);
+					output.accept(Items.SILENCE_ARMOR_TRIM_SMITHING_TEMPLATE);
+					output.accept(Items.TIDE_ARMOR_TRIM_SMITHING_TEMPLATE);
+					output.accept(Items.SNOUT_ARMOR_TRIM_SMITHING_TEMPLATE);
+					output.accept(Items.RIB_ARMOR_TRIM_SMITHING_TEMPLATE);
+					output.accept(Items.EYE_ARMOR_TRIM_SMITHING_TEMPLATE);
+					output.accept(Items.SPIRE_ARMOR_TRIM_SMITHING_TEMPLATE);
+					output.accept(Items.FLOW_ARMOR_TRIM_SMITHING_TEMPLATE);
+					output.accept(Items.BOLT_ARMOR_TRIM_SMITHING_TEMPLATE);
+					output.accept(Items.EXPERIENCE_BOTTLE);
+					output.accept(Items.TRIAL_KEY);
+					output.accept(Items.OMINOUS_TRIAL_KEY);
+					itemDisplayParameters.holders().lookup(Registries.ENCHANTMENT).ifPresent(registryLookup -> {
+						generateEnchantmentBookTypesOnlyMaxLevel(output, registryLookup, CreativeModeTab.TabVisibility.PARENT_TAB_ONLY);
+						generateEnchantmentBookTypesAllLevels(output, registryLookup, CreativeModeTab.TabVisibility.SEARCH_TAB_ONLY);
+					});
+				})
 				.build()
 		);
 		Registry.register(
@@ -1823,7 +1801,7 @@ public class CreativeModeTabs {
 			CreativeModeTab.builder(CreativeModeTab.Row.BOTTOM, 6)
 				.title(Component.translatable("itemGroup.inventory"))
 				.icon(() -> new ItemStack(Blocks.CHEST))
-				.backgroundSuffix("inventory.png")
+				.backgroundTexture(INVENTORY_BACKGROUND)
 				.hideTitle()
 				.alignedRight()
 				.type(CreativeModeTab.Type.INVENTORY)
@@ -1859,19 +1837,17 @@ public class CreativeModeTabs {
 	}
 
 	private static void generateEnchantmentBookTypesOnlyMaxLevel(
-		CreativeModeTab.Output output, HolderLookup<Enchantment> holderLookup, Set<TagKey<Item>> set, CreativeModeTab.TabVisibility tabVisibility
+		CreativeModeTab.Output output, HolderLookup<Enchantment> holderLookup, CreativeModeTab.TabVisibility tabVisibility
 	) {
 		holderLookup.listElements()
-			.filter(reference -> ((Enchantment)reference.value()).getSupportedItems().unwrapKey().filter(set::contains).isPresent())
 			.map(reference -> EnchantedBookItem.createForEnchantment(new EnchantmentInstance(reference, ((Enchantment)reference.value()).getMaxLevel())))
 			.forEach(itemStack -> output.accept(itemStack, tabVisibility));
 	}
 
 	private static void generateEnchantmentBookTypesAllLevels(
-		CreativeModeTab.Output output, HolderLookup<Enchantment> holderLookup, Set<TagKey<Item>> set, CreativeModeTab.TabVisibility tabVisibility
+		CreativeModeTab.Output output, HolderLookup<Enchantment> holderLookup, CreativeModeTab.TabVisibility tabVisibility
 	) {
 		holderLookup.listElements()
-			.filter(reference -> ((Enchantment)reference.value()).getSupportedItems().unwrapKey().filter(set::contains).isPresent())
 			.flatMap(
 				reference -> IntStream.rangeClosed(((Enchantment)reference.value()).getMinLevel(), ((Enchantment)reference.value()).getMaxLevel())
 						.mapToObj(i -> EnchantedBookItem.createForEnchantment(new EnchantmentInstance(reference, i)))

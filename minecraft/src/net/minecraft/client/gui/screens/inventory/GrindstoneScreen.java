@@ -10,8 +10,8 @@ import net.minecraft.world.inventory.GrindstoneMenu;
 
 @Environment(EnvType.CLIENT)
 public class GrindstoneScreen extends AbstractContainerScreen<GrindstoneMenu> {
-	private static final ResourceLocation ERROR_SPRITE = new ResourceLocation("container/grindstone/error");
-	private static final ResourceLocation GRINDSTONE_LOCATION = new ResourceLocation("textures/gui/container/grindstone.png");
+	private static final ResourceLocation ERROR_SPRITE = ResourceLocation.withDefaultNamespace("container/grindstone/error");
+	private static final ResourceLocation GRINDSTONE_LOCATION = ResourceLocation.withDefaultNamespace("textures/gui/container/grindstone.png");
 
 	public GrindstoneScreen(GrindstoneMenu grindstoneMenu, Inventory inventory, Component component) {
 		super(grindstoneMenu, inventory, component);

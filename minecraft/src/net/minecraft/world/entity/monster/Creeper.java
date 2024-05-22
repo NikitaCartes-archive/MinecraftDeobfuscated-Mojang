@@ -235,8 +235,9 @@ public class Creeper extends Monster implements PowerableMob {
 			float f = this.isPowered() ? 2.0F : 1.0F;
 			this.dead = true;
 			this.level().explode(this, this.getX(), this.getY(), this.getZ(), (float)this.explosionRadius * f, Level.ExplosionInteraction.MOB);
-			this.discard();
 			this.spawnLingeringCloud();
+			this.triggerOnDeathMobEffects(Entity.RemovalReason.KILLED);
+			this.discard();
 		}
 	}
 

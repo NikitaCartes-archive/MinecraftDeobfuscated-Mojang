@@ -16,7 +16,7 @@ public record FrogVariant(ResourceLocation texture) {
 	public static final ResourceKey<FrogVariant> COLD = createKey("cold");
 
 	private static ResourceKey<FrogVariant> createKey(String string) {
-		return ResourceKey.create(Registries.FROG_VARIANT, new ResourceLocation(string));
+		return ResourceKey.create(Registries.FROG_VARIANT, ResourceLocation.withDefaultNamespace(string));
 	}
 
 	public static FrogVariant bootstrap(Registry<FrogVariant> registry) {
@@ -26,6 +26,6 @@ public record FrogVariant(ResourceLocation texture) {
 	}
 
 	private static FrogVariant register(Registry<FrogVariant> registry, ResourceKey<FrogVariant> resourceKey, String string) {
-		return Registry.register(registry, resourceKey, new FrogVariant(new ResourceLocation(string)));
+		return Registry.register(registry, resourceKey, new FrogVariant(ResourceLocation.withDefaultNamespace(string)));
 	}
 }

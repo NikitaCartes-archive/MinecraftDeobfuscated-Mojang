@@ -35,8 +35,8 @@ public final class RandomState {
 	private RandomState(NoiseGeneratorSettings noiseGeneratorSettings, HolderGetter<NormalNoise.NoiseParameters> holderGetter, long l) {
 		this.random = noiseGeneratorSettings.getRandomSource().newInstance(l).forkPositional();
 		this.noises = holderGetter;
-		this.aquiferRandom = this.random.fromHashOf(new ResourceLocation("aquifer")).forkPositional();
-		this.oreRandom = this.random.fromHashOf(new ResourceLocation("ore")).forkPositional();
+		this.aquiferRandom = this.random.fromHashOf(ResourceLocation.withDefaultNamespace("aquifer")).forkPositional();
+		this.oreRandom = this.random.fromHashOf(ResourceLocation.withDefaultNamespace("ore")).forkPositional();
 		this.noiseIntances = new ConcurrentHashMap();
 		this.positionalRandoms = new ConcurrentHashMap();
 		this.surfaceSystem = new SurfaceSystem(this, noiseGeneratorSettings.defaultBlock(), noiseGeneratorSettings.seaLevel(), this.random);
@@ -75,7 +75,7 @@ public final class RandomState {
 
 			private DensityFunction wrapNew(DensityFunction densityFunction) {
 				if (densityFunction instanceof BlendedNoise blendedNoise) {
-					RandomSource randomSource = bl ? this.newLegacyInstance(0L) : RandomState.this.random.fromHashOf(new ResourceLocation("terrain"));
+					RandomSource randomSource = bl ? this.newLegacyInstance(0L) : RandomState.this.random.fromHashOf(ResourceLocation.withDefaultNamespace("terrain"));
 					return blendedNoise.withNewRandom(randomSource);
 				} else {
 					return (DensityFunction)(densityFunction instanceof DensityFunctions.EndIslandDensityFunction

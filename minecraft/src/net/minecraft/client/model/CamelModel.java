@@ -159,15 +159,15 @@ public class CamelModel<T extends Camel> extends HierarchicalModel<T> {
 	}
 
 	@Override
-	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h, float k) {
+	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, int k) {
 		if (this.young) {
 			poseStack.pushPose();
 			poseStack.scale(0.45F, 0.45F, 0.45F);
 			poseStack.translate(0.0F, 1.834375F, 0.0F);
-			this.root().render(poseStack, vertexConsumer, i, j, f, g, h, k);
+			this.root().render(poseStack, vertexConsumer, i, j, k);
 			poseStack.popPose();
 		} else {
-			this.root().render(poseStack, vertexConsumer, i, j, f, g, h, k);
+			this.root().render(poseStack, vertexConsumer, i, j, k);
 		}
 	}
 

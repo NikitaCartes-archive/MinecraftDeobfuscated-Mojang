@@ -13,7 +13,7 @@ import net.minecraft.world.entity.boss.wither.WitherBoss;
 
 @Environment(EnvType.CLIENT)
 public class WitherArmorLayer extends EnergySwirlLayer<WitherBoss, WitherBossModel<WitherBoss>> {
-	private static final ResourceLocation WITHER_ARMOR_LOCATION = new ResourceLocation("textures/entity/wither/wither_armor.png");
+	private static final ResourceLocation WITHER_ARMOR_LOCATION = ResourceLocation.withDefaultNamespace("textures/entity/wither/wither_armor.png");
 	private final WitherBossModel<WitherBoss> model;
 
 	public WitherArmorLayer(RenderLayerParent<WitherBoss, WitherBossModel<WitherBoss>> renderLayerParent, EntityModelSet entityModelSet) {

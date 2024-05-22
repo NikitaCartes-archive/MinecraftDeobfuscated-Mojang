@@ -36,7 +36,7 @@ import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
 public class ChatSelectionScreen extends Screen {
-	static final ResourceLocation CHECKMARK_SPRITE = new ResourceLocation("icon/checkmark");
+	static final ResourceLocation CHECKMARK_SPRITE = ResourceLocation.withDefaultNamespace("icon/checkmark");
 	private static final Component TITLE = Component.translatable("gui.chatSelection.title");
 	private static final Component CONTEXT_INFO = Component.translatable("gui.chatSelection.context");
 	@Nullable

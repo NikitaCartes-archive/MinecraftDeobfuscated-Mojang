@@ -10,8 +10,8 @@ import net.minecraft.world.entity.monster.Bogged;
 
 @Environment(EnvType.CLIENT)
 public class BoggedRenderer extends SkeletonRenderer<Bogged> {
-	private static final ResourceLocation BOGGED_SKELETON_LOCATION = new ResourceLocation("textures/entity/skeleton/bogged.png");
-	private static final ResourceLocation BOGGED_OUTER_LAYER_LOCATION = new ResourceLocation("textures/entity/skeleton/bogged_overlay.png");
+	private static final ResourceLocation BOGGED_SKELETON_LOCATION = ResourceLocation.withDefaultNamespace("textures/entity/skeleton/bogged.png");
+	private static final ResourceLocation BOGGED_OUTER_LAYER_LOCATION = ResourceLocation.withDefaultNamespace("textures/entity/skeleton/bogged_overlay.png");
 
 	public BoggedRenderer(EntityRendererProvider.Context context) {
 		super(context, ModelLayers.BOGGED_INNER_ARMOR, ModelLayers.BOGGED_OUTER_ARMOR, new BoggedModel(context.bakeLayer(ModelLayers.BOGGED)));

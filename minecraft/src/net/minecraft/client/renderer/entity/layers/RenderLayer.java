@@ -35,31 +35,21 @@ public abstract class RenderLayer<T extends Entity, M extends EntityModel<T>> {
 		float j,
 		float k,
 		float l,
-		float m,
-		float n,
-		float o
+		int m
 	) {
 		if (!livingEntity.isInvisible()) {
 			entityModel.copyPropertiesTo(entityModel2);
 			entityModel2.prepareMobModel(livingEntity, f, g, l);
 			entityModel2.setupAnim(livingEntity, f, g, h, j, k);
-			renderColoredCutoutModel(entityModel2, resourceLocation, poseStack, multiBufferSource, i, livingEntity, m, n, o);
+			renderColoredCutoutModel(entityModel2, resourceLocation, poseStack, multiBufferSource, i, livingEntity, m);
 		}
 	}
 
 	protected static <T extends LivingEntity> void renderColoredCutoutModel(
-		EntityModel<T> entityModel,
-		ResourceLocation resourceLocation,
-		PoseStack poseStack,
-		MultiBufferSource multiBufferSource,
-		int i,
-		T livingEntity,
-		float f,
-		float g,
-		float h
+		EntityModel<T> entityModel, ResourceLocation resourceLocation, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T livingEntity, int j
 	) {
 		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entityCutoutNoCull(resourceLocation));
-		entityModel.renderToBuffer(poseStack, vertexConsumer, i, LivingEntityRenderer.getOverlayCoords(livingEntity, 0.0F), f, g, h, 1.0F);
+		entityModel.renderToBuffer(poseStack, vertexConsumer, i, LivingEntityRenderer.getOverlayCoords(livingEntity, 0.0F), j);
 	}
 
 	public M getParentModel() {

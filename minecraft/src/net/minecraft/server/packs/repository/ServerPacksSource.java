@@ -34,7 +34,7 @@ public class ServerPacksSource extends BuiltInPackSource {
 	);
 	private static final PackSelectionConfig VANILLA_SELECTION_CONFIG = new PackSelectionConfig(false, Pack.Position.BOTTOM, false);
 	private static final PackSelectionConfig FEATURE_SELECTION_CONFIG = new PackSelectionConfig(false, Pack.Position.TOP, false);
-	private static final ResourceLocation PACKS_DIR = new ResourceLocation("minecraft", "datapacks");
+	private static final ResourceLocation PACKS_DIR = ResourceLocation.withDefaultNamespace("datapacks");
 
 	public ServerPacksSource(DirectoryValidator directoryValidator) {
 		super(PackType.SERVER_DATA, createVanillaPackSource(), PACKS_DIR, directoryValidator);

@@ -14,7 +14,7 @@ public class DefaultedMappedRegistry<T> extends MappedRegistry<T> implements Def
 
 	public DefaultedMappedRegistry(String string, ResourceKey<? extends Registry<T>> resourceKey, Lifecycle lifecycle, boolean bl) {
 		super(resourceKey, lifecycle, bl);
-		this.defaultKey = new ResourceLocation(string);
+		this.defaultKey = ResourceLocation.parse(string);
 	}
 
 	@Override

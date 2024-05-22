@@ -7,7 +7,6 @@ import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
@@ -61,9 +60,9 @@ public class AttributeMap {
 		return this.attributes.get(holder) != null || this.supplier.hasAttribute(holder);
 	}
 
-	public boolean hasModifier(Holder<Attribute> holder, UUID uUID) {
+	public boolean hasModifier(Holder<Attribute> holder, ResourceLocation resourceLocation) {
 		AttributeInstance attributeInstance = (AttributeInstance)this.attributes.get(holder);
-		return attributeInstance != null ? attributeInstance.getModifier(uUID) != null : this.supplier.hasModifier(holder, uUID);
+		return attributeInstance != null ? attributeInstance.getModifier(resourceLocation) != null : this.supplier.hasModifier(holder, resourceLocation);
 	}
 
 	public double getValue(Holder<Attribute> holder) {
@@ -76,9 +75,9 @@ public class AttributeMap {
 		return attributeInstance != null ? attributeInstance.getBaseValue() : this.supplier.getBaseValue(holder);
 	}
 
-	public double getModifierValue(Holder<Attribute> holder, UUID uUID) {
+	public double getModifierValue(Holder<Attribute> holder, ResourceLocation resourceLocation) {
 		AttributeInstance attributeInstance = (AttributeInstance)this.attributes.get(holder);
-		return attributeInstance != null ? attributeInstance.getModifier(uUID).amount() : this.supplier.getModifierValue(holder, uUID);
+		return attributeInstance != null ? attributeInstance.getModifier(resourceLocation).amount() : this.supplier.getModifierValue(holder, resourceLocation);
 	}
 
 	public void addTransientAttributeModifiers(Multimap<Holder<Attribute>, AttributeModifier> multimap) {
@@ -131,7 +130,7 @@ public class AttributeMap {
 	public void load(ListTag listTag) {
 		for (int i = 0; i < listTag.size(); i++) {
 			CompoundTag compoundTag = listTag.getCompound(i);
-			String string = compoundTag.getString("Name");
+			String string = compoundTag.getString("id");
 			ResourceLocation resourceLocation = ResourceLocation.tryParse(string);
 			if (resourceLocation != null) {
 				Util.ifElse(BuiltInRegistries.ATTRIBUTE.getHolder(resourceLocation), reference -> {

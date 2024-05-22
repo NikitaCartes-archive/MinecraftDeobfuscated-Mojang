@@ -102,7 +102,7 @@ public class OminousItemSpawner extends Entity {
 			? (ItemStack)ItemStack.parse(this.registryAccess(), compoundTag.getCompound("item")).orElse(ItemStack.EMPTY)
 			: ItemStack.EMPTY;
 		this.setItem(itemStack);
-		compoundTag.getLong("spawn_item_after_ticks");
+		this.spawnItemAfterTicks = compoundTag.getLong("spawn_item_after_ticks");
 	}
 
 	@Override

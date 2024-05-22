@@ -27,8 +27,6 @@ public class SkeletonClothingLayer<T extends Mob & RangedAttackMob, M extends En
 	}
 
 	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T mob, float f, float g, float h, float j, float k, float l) {
-		coloredCutoutModelCopyLayerRender(
-			this.getParentModel(), this.layerModel, this.clothesLocation, poseStack, multiBufferSource, i, mob, f, g, j, k, l, h, 1.0F, 1.0F, 1.0F
-		);
+		coloredCutoutModelCopyLayerRender(this.getParentModel(), this.layerModel, this.clothesLocation, poseStack, multiBufferSource, i, mob, f, g, j, k, l, h, -1);
 	}
 }

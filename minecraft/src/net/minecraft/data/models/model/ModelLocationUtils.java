@@ -9,11 +9,11 @@ import net.minecraft.world.level.block.Block;
 public class ModelLocationUtils {
 	@Deprecated
 	public static ResourceLocation decorateBlockModelLocation(String string) {
-		return new ResourceLocation("minecraft", "block/" + string);
+		return ResourceLocation.withDefaultNamespace("block/" + string);
 	}
 
 	public static ResourceLocation decorateItemModelLocation(String string) {
-		return new ResourceLocation("minecraft", "item/" + string);
+		return ResourceLocation.withDefaultNamespace("item/" + string);
 	}
 
 	public static ResourceLocation getModelLocation(Block block, String string) {

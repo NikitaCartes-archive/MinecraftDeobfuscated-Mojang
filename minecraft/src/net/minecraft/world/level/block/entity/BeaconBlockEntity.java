@@ -2,7 +2,6 @@ package net.minecraft.world.level.block.entity;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -25,6 +24,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.util.FastColor;
 import net.minecraft.world.LockCode;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.Nameable;
@@ -39,7 +39,6 @@ import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BeaconBeamBlock;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
@@ -139,19 +138,16 @@ public class BeaconBlockEntity extends BlockEntity implements MenuProvider, Name
 
 		for (int m = 0; m < 10 && blockPos2.getY() <= l; m++) {
 			BlockState blockState2 = level.getBlockState(blockPos2);
-			Block block = blockState2.getBlock();
-			if (block instanceof BeaconBeamBlock) {
-				float[] fs = ((BeaconBeamBlock)block).getColor().getTextureDiffuseColors();
+			if (blockState2.getBlock() instanceof BeaconBeamBlock beaconBeamBlock) {
+				int n = beaconBeamBlock.getColor().getTextureDiffuseColor();
 				if (beaconBlockEntity.checkingBeamSections.size() <= 1) {
-					beaconBeamSection = new BeaconBlockEntity.BeaconBeamSection(fs);
+					beaconBeamSection = new BeaconBlockEntity.BeaconBeamSection(n);
 					beaconBlockEntity.checkingBeamSections.add(beaconBeamSection);
 				} else if (beaconBeamSection != null) {
-					if (Arrays.equals(fs, beaconBeamSection.color)) {
+					if (n == beaconBeamSection.color) {
 						beaconBeamSection.increaseHeight();
 					} else {
-						beaconBeamSection = new BeaconBlockEntity.BeaconBeamSection(
-							new float[]{(beaconBeamSection.color[0] + fs[0]) / 2.0F, (beaconBeamSection.color[1] + fs[1]) / 2.0F, (beaconBeamSection.color[2] + fs[2]) / 2.0F}
-						);
+						beaconBeamSection = new BeaconBlockEntity.BeaconBeamSection(FastColor.ARGB32.average(beaconBeamSection.color, n));
 						beaconBlockEntity.checkingBeamSections.add(beaconBeamSection);
 					}
 				}
@@ -375,11 +371,11 @@ public class BeaconBlockEntity extends BlockEntity implements MenuProvider, Name
 	}
 
 	public static class BeaconBeamSection {
-		final float[] color;
+		final int color;
 		private int height;
 
-		public BeaconBeamSection(float[] fs) {
-			this.color = fs;
+		public BeaconBeamSection(int i) {
+			this.color = i;
 			this.height = 1;
 		}
 
@@ -387,7 +383,7 @@ public class BeaconBlockEntity extends BlockEntity implements MenuProvider, Name
 			this.height++;
 		}
 
-		public float[] getColor() {
+		public int getColor() {
 			return this.color;
 		}
 

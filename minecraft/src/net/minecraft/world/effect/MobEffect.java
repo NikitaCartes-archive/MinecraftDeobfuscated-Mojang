@@ -4,7 +4,6 @@ import com.mojang.serialization.Codec;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.Map.Entry;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
@@ -20,6 +19,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
@@ -125,8 +125,8 @@ public class MobEffect implements FeatureElement {
 		return this.color;
 	}
 
-	public MobEffect addAttributeModifier(Holder<Attribute> holder, String string, double d, AttributeModifier.Operation operation) {
-		this.attributeModifiers.put(holder, new MobEffect.AttributeTemplate(UUID.fromString(string), d, operation));
+	public MobEffect addAttributeModifier(Holder<Attribute> holder, ResourceLocation resourceLocation, double d, AttributeModifier.Operation operation) {
+		this.attributeModifiers.put(holder, new MobEffect.AttributeTemplate(resourceLocation, d, operation));
 		return this;
 	}
 
@@ -136,7 +136,7 @@ public class MobEffect implements FeatureElement {
 	}
 
 	public void createModifiers(int i, BiConsumer<Holder<Attribute>, AttributeModifier> biConsumer) {
-		this.attributeModifiers.forEach((holder, attributeTemplate) -> biConsumer.accept(holder, attributeTemplate.create(this.getDescriptionId(), i)));
+		this.attributeModifiers.forEach((holder, attributeTemplate) -> biConsumer.accept(holder, attributeTemplate.create(i)));
 	}
 
 	public void removeAttributeModifiers(AttributeMap attributeMap) {
@@ -153,7 +153,7 @@ public class MobEffect implements FeatureElement {
 			AttributeInstance attributeInstance = attributeMap.getInstance((Holder<Attribute>)entry.getKey());
 			if (attributeInstance != null) {
 				attributeInstance.removeModifier(((MobEffect.AttributeTemplate)entry.getValue()).id());
-				attributeInstance.addPermanentModifier(((MobEffect.AttributeTemplate)entry.getValue()).create(this.getDescriptionId(), i));
+				attributeInstance.addPermanentModifier(((MobEffect.AttributeTemplate)entry.getValue()).create(i));
 			}
 		}
 	}
@@ -181,9 +181,9 @@ public class MobEffect implements FeatureElement {
 		return this.requiredFeatures;
 	}
 
-	static record AttributeTemplate(UUID id, double amount, AttributeModifier.Operation operation) {
-		public AttributeModifier create(String string, int i) {
-			return new AttributeModifier(this.id, string + " " + i, this.amount * (double)(i + 1), this.operation);
+	static record AttributeTemplate(ResourceLocation id, double amount, AttributeModifier.Operation operation) {
+		public AttributeModifier create(int i) {
+			return new AttributeModifier(this.id, this.amount * (double)(i + 1), this.operation);
 		}
 	}
 }

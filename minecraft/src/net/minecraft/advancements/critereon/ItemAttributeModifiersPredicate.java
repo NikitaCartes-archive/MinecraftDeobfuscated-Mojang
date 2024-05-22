@@ -3,14 +3,13 @@ package net.minecraft.advancements.critereon;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.function.Predicate;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.RegistryCodecs;
-import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -40,8 +39,7 @@ public record ItemAttributeModifiersPredicate(
 
 	public static record EntryPredicate(
 		Optional<HolderSet<Attribute>> attribute,
-		Optional<UUID> id,
-		Optional<String> name,
+		Optional<ResourceLocation> id,
 		MinMaxBounds.Doubles amount,
 		Optional<AttributeModifier.Operation> operation,
 		Optional<EquipmentSlotGroup> slot
@@ -49,8 +47,7 @@ public record ItemAttributeModifiersPredicate(
 		public static final Codec<ItemAttributeModifiersPredicate.EntryPredicate> CODEC = RecordCodecBuilder.create(
 			instance -> instance.group(
 						RegistryCodecs.homogeneousList(Registries.ATTRIBUTE).optionalFieldOf("attribute").forGetter(ItemAttributeModifiersPredicate.EntryPredicate::attribute),
-						UUIDUtil.LENIENT_CODEC.optionalFieldOf("uuid").forGetter(ItemAttributeModifiersPredicate.EntryPredicate::id),
-						Codec.STRING.optionalFieldOf("name").forGetter(ItemAttributeModifiersPredicate.EntryPredicate::name),
+						ResourceLocation.CODEC.optionalFieldOf("id").forGetter(ItemAttributeModifiersPredicate.EntryPredicate::id),
 						MinMaxBounds.Doubles.CODEC.optionalFieldOf("amount", MinMaxBounds.Doubles.ANY).forGetter(ItemAttributeModifiersPredicate.EntryPredicate::amount),
 						AttributeModifier.Operation.CODEC.optionalFieldOf("operation").forGetter(ItemAttributeModifiersPredicate.EntryPredicate::operation),
 						EquipmentSlotGroup.CODEC.optionalFieldOf("slot").forGetter(ItemAttributeModifiersPredicate.EntryPredicate::slot)
@@ -61,9 +58,7 @@ public record ItemAttributeModifiersPredicate(
 		public boolean test(ItemAttributeModifiers.Entry entry) {
 			if (this.attribute.isPresent() && !((HolderSet)this.attribute.get()).contains(entry.attribute())) {
 				return false;
-			} else if (this.id.isPresent() && !((UUID)this.id.get()).equals(entry.modifier().id())) {
-				return false;
-			} else if (this.name.isPresent() && !((String)this.name.get()).equals(entry.modifier().name())) {
+			} else if (this.id.isPresent() && !((ResourceLocation)this.id.get()).equals(entry.modifier().id())) {
 				return false;
 			} else if (!this.amount.matches(entry.modifier().amount())) {
 				return false;

@@ -34,7 +34,6 @@ import net.minecraft.stats.StatsCounter;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
-import net.minecraft.world.level.GameType;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -42,7 +41,7 @@ import net.minecraft.world.phys.Vec3;
 
 public record PlayerPredicate(
 	MinMaxBounds.Ints level,
-	Optional<GameType> gameType,
+	GameTypePredicate gameType,
 	List<PlayerPredicate.StatMatcher<?>> stats,
 	Object2BooleanMap<ResourceLocation> recipes,
 	Map<ResourceLocation, PlayerPredicate.AdvancementPredicate> advancements,
@@ -52,7 +51,7 @@ public record PlayerPredicate(
 	public static final MapCodec<PlayerPredicate> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> instance.group(
 					MinMaxBounds.Ints.CODEC.optionalFieldOf("level", MinMaxBounds.Ints.ANY).forGetter(PlayerPredicate::level),
-					GameType.CODEC.optionalFieldOf("gamemode").forGetter(PlayerPredicate::gameType),
+					GameTypePredicate.CODEC.optionalFieldOf("gamemode", GameTypePredicate.ANY).forGetter(PlayerPredicate::gameType),
 					PlayerPredicate.StatMatcher.CODEC.listOf().optionalFieldOf("stats", List.of()).forGetter(PlayerPredicate::stats),
 					ExtraCodecs.object2BooleanMap(ResourceLocation.CODEC).optionalFieldOf("recipes", Object2BooleanMaps.emptyMap()).forGetter(PlayerPredicate::recipes),
 					Codec.unboundedMap(ResourceLocation.CODEC, PlayerPredicate.AdvancementPredicate.CODEC)
@@ -69,7 +68,7 @@ public record PlayerPredicate(
 			return false;
 		} else if (!this.level.matches(serverPlayer.experienceLevel)) {
 			return false;
-		} else if (this.gameType.isPresent() && this.gameType.get() != serverPlayer.gameMode.getGameModeForPlayer()) {
+		} else if (!this.gameType.matches(serverPlayer.gameMode.getGameModeForPlayer())) {
 			return false;
 		} else {
 			StatsCounter statsCounter = serverPlayer.getStats();
@@ -170,7 +169,7 @@ public record PlayerPredicate(
 
 	public static class Builder {
 		private MinMaxBounds.Ints level = MinMaxBounds.Ints.ANY;
-		private Optional<GameType> gameType = Optional.empty();
+		private GameTypePredicate gameType = GameTypePredicate.ANY;
 		private final ImmutableList.Builder<PlayerPredicate.StatMatcher<?>> stats = ImmutableList.builder();
 		private final Object2BooleanMap<ResourceLocation> recipes = new Object2BooleanOpenHashMap<>();
 		private final Map<ResourceLocation, PlayerPredicate.AdvancementPredicate> advancements = Maps.<ResourceLocation, PlayerPredicate.AdvancementPredicate>newHashMap();
@@ -195,8 +194,8 @@ public record PlayerPredicate(
 			return this;
 		}
 
-		public PlayerPredicate.Builder setGameType(GameType gameType) {
-			this.gameType = Optional.of(gameType);
+		public PlayerPredicate.Builder setGameType(GameTypePredicate gameTypePredicate) {
+			this.gameType = gameTypePredicate;
 			return this;
 		}
 

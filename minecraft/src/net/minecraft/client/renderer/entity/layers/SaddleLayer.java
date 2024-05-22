@@ -31,7 +31,7 @@ public class SaddleLayer<T extends Entity & Saddleable, M extends EntityModel<T>
 			this.model.prepareMobModel(entity, f, g, h);
 			this.model.setupAnim(entity, f, g, j, k, l);
 			VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entityCutoutNoCull(this.textureLocation));
-			this.model.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
+			this.model.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY);
 		}
 	}
 }

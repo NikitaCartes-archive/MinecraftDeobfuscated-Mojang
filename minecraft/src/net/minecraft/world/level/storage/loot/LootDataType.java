@@ -15,17 +15,15 @@ import net.minecraft.world.level.storage.loot.functions.LootItemFunctions;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import org.slf4j.Logger;
 
-public record LootDataType<T>(ResourceKey<Registry<T>> registryKey, Codec<T> codec, String directory, LootDataType.Validator<T> validator) {
+public record LootDataType<T>(ResourceKey<Registry<T>> registryKey, Codec<T> codec, LootDataType.Validator<T> validator) {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	public static final LootDataType<LootItemCondition> PREDICATE = new LootDataType<>(
-		Registries.PREDICATE, LootItemCondition.DIRECT_CODEC, "predicates", createSimpleValidator()
+		Registries.PREDICATE, LootItemCondition.DIRECT_CODEC, createSimpleValidator()
 	);
 	public static final LootDataType<LootItemFunction> MODIFIER = new LootDataType<>(
-		Registries.ITEM_MODIFIER, LootItemFunctions.ROOT_CODEC, "item_modifiers", createSimpleValidator()
+		Registries.ITEM_MODIFIER, LootItemFunctions.ROOT_CODEC, createSimpleValidator()
 	);
-	public static final LootDataType<LootTable> TABLE = new LootDataType<>(
-		Registries.LOOT_TABLE, LootTable.DIRECT_CODEC, "loot_tables", createLootTableValidator()
-	);
+	public static final LootDataType<LootTable> TABLE = new LootDataType<>(Registries.LOOT_TABLE, LootTable.DIRECT_CODEC, createLootTableValidator());
 
 	public void runValidation(ValidationContext validationContext, ResourceKey<T> resourceKey, T object) {
 		this.validator.run(validationContext, resourceKey, object);
@@ -33,7 +31,7 @@ public record LootDataType<T>(ResourceKey<Registry<T>> registryKey, Codec<T> cod
 
 	public <V> Optional<T> deserialize(ResourceLocation resourceLocation, DynamicOps<V> dynamicOps, V object) {
 		DataResult<T> dataResult = this.codec.parse(dynamicOps, object);
-		dataResult.error().ifPresent(error -> LOGGER.error("Couldn't parse element {}:{} - {}", this.directory, resourceLocation, error.message()));
+		dataResult.error().ifPresent(error -> LOGGER.error("Couldn't parse element {}/{} - {}", this.registryKey.location(), resourceLocation, error.message()));
 		return dataResult.result();
 	}
 

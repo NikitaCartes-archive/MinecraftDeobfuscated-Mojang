@@ -137,15 +137,6 @@ public class VanillaItemTagsProvider extends ItemTagsProvider {
 				Items.MUSIC_DISC_11,
 				Items.MUSIC_DISC_WAIT
 			);
-		this.tag(ItemTags.MUSIC_DISCS)
-			.addTag(ItemTags.CREEPER_DROP_MUSIC_DISCS)
-			.add(Items.MUSIC_DISC_PIGSTEP)
-			.add(Items.MUSIC_DISC_OTHERSIDE)
-			.add(Items.MUSIC_DISC_5)
-			.add(Items.MUSIC_DISC_RELIC)
-			.add(Items.MUSIC_DISC_CREATOR)
-			.add(Items.MUSIC_DISC_CREATOR_MUSIC_BOX)
-			.add(Items.MUSIC_DISC_PRECIPICE);
 		this.tag(ItemTags.COALS).add(Items.COAL, Items.CHARCOAL);
 		this.tag(ItemTags.ARROWS).add(Items.ARROW, Items.TIPPED_ARROW, Items.SPECTRAL_ARROW);
 		this.tag(ItemTags.LECTERN_BOOKS).add(Items.WRITTEN_BOOK, Items.WRITABLE_BOOK);

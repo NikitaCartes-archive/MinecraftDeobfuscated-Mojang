@@ -10,7 +10,7 @@ import net.minecraft.world.entity.animal.Chicken;
 
 @Environment(EnvType.CLIENT)
 public class ChickenRenderer extends MobRenderer<Chicken, ChickenModel<Chicken>> {
-	private static final ResourceLocation CHICKEN_LOCATION = new ResourceLocation("textures/entity/chicken.png");
+	private static final ResourceLocation CHICKEN_LOCATION = ResourceLocation.withDefaultNamespace("textures/entity/chicken.png");
 
 	public ChickenRenderer(EntityRendererProvider.Context context) {
 		super(context, new ChickenModel<>(context.bakeLayer(ModelLayers.CHICKEN)), 0.3F);

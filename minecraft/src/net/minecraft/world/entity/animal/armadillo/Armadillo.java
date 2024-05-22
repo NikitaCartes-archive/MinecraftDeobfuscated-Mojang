@@ -16,6 +16,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.ByIdMap;
@@ -290,14 +291,10 @@ public class Armadillo extends Animal {
 				if (this.canStayRolledUp()) {
 					this.rollUp();
 				}
-			} else if (this.shouldPanic()) {
+			} else if (damageSource.is(DamageTypeTags.PANIC_ENVIRONMENTAL_CAUSES)) {
 				this.rollOut();
 			}
 		}
-	}
-
-	public boolean shouldPanic() {
-		return this.isOnFire() || this.isFreezing();
 	}
 
 	@Override
@@ -307,7 +304,7 @@ public class Armadillo extends Animal {
 			itemStack.hurtAndBreak(16, player, getSlotForHand(interactionHand));
 			return InteractionResult.sidedSuccess(this.level().isClientSide);
 		} else {
-			return super.mobInteract(player, interactionHand);
+			return this.isScared() ? InteractionResult.FAIL : super.mobInteract(player, interactionHand);
 		}
 	}
 

@@ -16,11 +16,11 @@ import net.minecraft.world.entity.animal.IronGolem;
 public class IronGolemCrackinessLayer extends RenderLayer<IronGolem, IronGolemModel<IronGolem>> {
 	private static final Map<Crackiness.Level, ResourceLocation> resourceLocations = ImmutableMap.of(
 		Crackiness.Level.LOW,
-		new ResourceLocation("textures/entity/iron_golem/iron_golem_crackiness_low.png"),
+		ResourceLocation.withDefaultNamespace("textures/entity/iron_golem/iron_golem_crackiness_low.png"),
 		Crackiness.Level.MEDIUM,
-		new ResourceLocation("textures/entity/iron_golem/iron_golem_crackiness_medium.png"),
+		ResourceLocation.withDefaultNamespace("textures/entity/iron_golem/iron_golem_crackiness_medium.png"),
 		Crackiness.Level.HIGH,
-		new ResourceLocation("textures/entity/iron_golem/iron_golem_crackiness_high.png")
+		ResourceLocation.withDefaultNamespace("textures/entity/iron_golem/iron_golem_crackiness_high.png")
 	);
 
 	public IronGolemCrackinessLayer(RenderLayerParent<IronGolem, IronGolemModel<IronGolem>> renderLayerParent) {
@@ -32,7 +32,7 @@ public class IronGolemCrackinessLayer extends RenderLayer<IronGolem, IronGolemMo
 			Crackiness.Level level = ironGolem.getCrackiness();
 			if (level != Crackiness.Level.NONE) {
 				ResourceLocation resourceLocation = (ResourceLocation)resourceLocations.get(level);
-				renderColoredCutoutModel(this.getParentModel(), resourceLocation, poseStack, multiBufferSource, i, ironGolem, 1.0F, 1.0F, 1.0F);
+				renderColoredCutoutModel(this.getParentModel(), resourceLocation, poseStack, multiBufferSource, i, ironGolem, -1);
 			}
 		}
 	}

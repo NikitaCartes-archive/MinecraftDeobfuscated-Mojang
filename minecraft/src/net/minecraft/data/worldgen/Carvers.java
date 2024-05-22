@@ -25,7 +25,7 @@ public class Carvers {
 	public static final ResourceKey<ConfiguredWorldCarver<?>> NETHER_CAVE = createKey("nether_cave");
 
 	private static ResourceKey<ConfiguredWorldCarver<?>> createKey(String string) {
-		return ResourceKey.create(Registries.CONFIGURED_CARVER, new ResourceLocation(string));
+		return ResourceKey.create(Registries.CONFIGURED_CARVER, ResourceLocation.withDefaultNamespace(string));
 	}
 
 	public static void bootstrap(BootstrapContext<ConfiguredWorldCarver<?>> bootstrapContext) {

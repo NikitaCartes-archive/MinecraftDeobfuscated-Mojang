@@ -111,7 +111,7 @@ public interface Registry<T> extends Keyable, IdMap<T> {
 	boolean containsKey(ResourceKey<T> resourceKey);
 
 	static <T> T register(Registry<? super T> registry, String string, T object) {
-		return register(registry, new ResourceLocation(string), object);
+		return register(registry, ResourceLocation.parse(string), object);
 	}
 
 	static <V, T extends V> T register(Registry<V> registry, ResourceLocation resourceLocation, T object) {

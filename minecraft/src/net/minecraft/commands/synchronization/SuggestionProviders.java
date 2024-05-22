@@ -18,20 +18,20 @@ import net.minecraft.world.entity.EntityType;
 
 public class SuggestionProviders {
 	private static final Map<ResourceLocation, SuggestionProvider<SharedSuggestionProvider>> PROVIDERS_BY_NAME = Maps.<ResourceLocation, SuggestionProvider<SharedSuggestionProvider>>newHashMap();
-	private static final ResourceLocation DEFAULT_NAME = new ResourceLocation("ask_server");
+	private static final ResourceLocation DEFAULT_NAME = ResourceLocation.withDefaultNamespace("ask_server");
 	public static final SuggestionProvider<SharedSuggestionProvider> ASK_SERVER = register(
 		DEFAULT_NAME, (commandContext, suggestionsBuilder) -> commandContext.getSource().customSuggestion(commandContext)
 	);
 	public static final SuggestionProvider<CommandSourceStack> ALL_RECIPES = register(
-		new ResourceLocation("all_recipes"),
+		ResourceLocation.withDefaultNamespace("all_recipes"),
 		(commandContext, suggestionsBuilder) -> SharedSuggestionProvider.suggestResource(commandContext.getSource().getRecipeNames(), suggestionsBuilder)
 	);
 	public static final SuggestionProvider<CommandSourceStack> AVAILABLE_SOUNDS = register(
-		new ResourceLocation("available_sounds"),
+		ResourceLocation.withDefaultNamespace("available_sounds"),
 		(commandContext, suggestionsBuilder) -> SharedSuggestionProvider.suggestResource(commandContext.getSource().getAvailableSounds(), suggestionsBuilder)
 	);
 	public static final SuggestionProvider<CommandSourceStack> SUMMONABLE_ENTITIES = register(
-		new ResourceLocation("summonable_entities"),
+		ResourceLocation.withDefaultNamespace("summonable_entities"),
 		(commandContext, suggestionsBuilder) -> SharedSuggestionProvider.suggestResource(
 				BuiltInRegistries.ENTITY_TYPE.stream().filter(entityType -> entityType.isEnabled(commandContext.getSource().enabledFeatures()) && entityType.canSummon()),
 				suggestionsBuilder,

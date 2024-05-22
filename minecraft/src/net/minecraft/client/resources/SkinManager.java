@@ -169,7 +169,7 @@ public class SkinManager {
 				case CAPE -> "capes";
 				case ELYTRA -> "elytra";
 			};
-			return new ResourceLocation(string2 + "/" + string);
+			return ResourceLocation.withDefaultNamespace(string2 + "/" + string);
 		}
 	}
 }

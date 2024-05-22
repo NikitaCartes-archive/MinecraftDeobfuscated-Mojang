@@ -15,7 +15,7 @@ import net.minecraft.world.entity.projectile.LlamaSpit;
 
 @Environment(EnvType.CLIENT)
 public class LlamaSpitRenderer extends EntityRenderer<LlamaSpit> {
-	private static final ResourceLocation LLAMA_SPIT_LOCATION = new ResourceLocation("textures/entity/llama/spit.png");
+	private static final ResourceLocation LLAMA_SPIT_LOCATION = ResourceLocation.withDefaultNamespace("textures/entity/llama/spit.png");
 	private final LlamaSpitModel<LlamaSpit> model;
 
 	public LlamaSpitRenderer(EntityRendererProvider.Context context) {
@@ -30,7 +30,7 @@ public class LlamaSpitRenderer extends EntityRenderer<LlamaSpit> {
 		poseStack.mulPose(Axis.ZP.rotationDegrees(Mth.lerp(g, llamaSpit.xRotO, llamaSpit.getXRot())));
 		this.model.setupAnim(llamaSpit, g, 0.0F, -0.1F, 0.0F, 0.0F);
 		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(this.model.renderType(LLAMA_SPIT_LOCATION));
-		this.model.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
+		this.model.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY);
 		poseStack.popPose();
 		super.render(llamaSpit, f, g, poseStack, multiBufferSource, i);
 	}

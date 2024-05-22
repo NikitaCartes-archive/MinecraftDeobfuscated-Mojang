@@ -21,9 +21,11 @@ import org.joml.Vector3f;
 
 @Environment(EnvType.CLIENT)
 public class SmithingScreen extends ItemCombinerScreen<SmithingMenu> {
-	private static final ResourceLocation ERROR_SPRITE = new ResourceLocation("container/smithing/error");
-	private static final ResourceLocation EMPTY_SLOT_SMITHING_TEMPLATE_ARMOR_TRIM = new ResourceLocation("item/empty_slot_smithing_template_armor_trim");
-	private static final ResourceLocation EMPTY_SLOT_SMITHING_TEMPLATE_NETHERITE_UPGRADE = new ResourceLocation(
+	private static final ResourceLocation ERROR_SPRITE = ResourceLocation.withDefaultNamespace("container/smithing/error");
+	private static final ResourceLocation EMPTY_SLOT_SMITHING_TEMPLATE_ARMOR_TRIM = ResourceLocation.withDefaultNamespace(
+		"item/empty_slot_smithing_template_armor_trim"
+	);
+	private static final ResourceLocation EMPTY_SLOT_SMITHING_TEMPLATE_NETHERITE_UPGRADE = ResourceLocation.withDefaultNamespace(
 		"item/empty_slot_smithing_template_netherite_upgrade"
 	);
 	private static final Component MISSING_TEMPLATE_TOOLTIP = Component.translatable("container.upgrade.missing_template_tooltip");
@@ -52,7 +54,7 @@ public class SmithingScreen extends ItemCombinerScreen<SmithingMenu> {
 	private ArmorStand armorStandPreview;
 
 	public SmithingScreen(SmithingMenu smithingMenu, Inventory inventory, Component component) {
-		super(smithingMenu, inventory, component, new ResourceLocation("textures/gui/container/smithing.png"));
+		super(smithingMenu, inventory, component, ResourceLocation.withDefaultNamespace("textures/gui/container/smithing.png"));
 		this.titleLabelX = 44;
 		this.titleLabelY = 15;
 	}

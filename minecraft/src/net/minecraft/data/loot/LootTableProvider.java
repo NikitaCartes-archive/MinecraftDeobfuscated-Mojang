@@ -46,7 +46,7 @@ public class LootTableProvider implements DataProvider {
 		List<LootTableProvider.SubProviderEntry> list,
 		CompletableFuture<HolderLookup.Provider> completableFuture
 	) {
-		this.pathProvider = packOutput.createPathProvider(PackOutput.Target.DATA_PACK, "loot_tables");
+		this.pathProvider = packOutput.createRegistryElementsPathProvider(Registries.LOOT_TABLE);
 		this.subProviders = list;
 		this.requiredTables = set;
 		this.registries = completableFuture;

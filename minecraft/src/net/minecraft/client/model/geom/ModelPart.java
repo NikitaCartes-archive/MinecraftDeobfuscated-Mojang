@@ -104,20 +104,20 @@ public final class ModelPart {
 	}
 
 	public void render(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j) {
-		this.render(poseStack, vertexConsumer, i, j, 1.0F, 1.0F, 1.0F, 1.0F);
+		this.render(poseStack, vertexConsumer, i, j, -1);
 	}
 
-	public void render(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h, float k) {
+	public void render(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, int k) {
 		if (this.visible) {
 			if (!this.cubes.isEmpty() || !this.children.isEmpty()) {
 				poseStack.pushPose();
 				this.translateAndRotate(poseStack);
 				if (!this.skipDraw) {
-					this.compile(poseStack.last(), vertexConsumer, i, j, f, g, h, k);
+					this.compile(poseStack.last(), vertexConsumer, i, j, k);
 				}
 
 				for (ModelPart modelPart : this.children.values()) {
-					modelPart.render(poseStack, vertexConsumer, i, j, f, g, h, k);
+					modelPart.render(poseStack, vertexConsumer, i, j, k);
 				}
 
 				poseStack.popPose();
@@ -156,9 +156,9 @@ public final class ModelPart {
 		}
 	}
 
-	private void compile(PoseStack.Pose pose, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h, float k) {
+	private void compile(PoseStack.Pose pose, VertexConsumer vertexConsumer, int i, int j, int k) {
 		for (ModelPart.Cube cube : this.cubes) {
-			cube.compile(pose, vertexConsumer, i, j, f, g, h, k);
+			cube.compile(pose, vertexConsumer, i, j, k);
 		}
 	}
 
@@ -268,22 +268,22 @@ public final class ModelPart {
 			}
 		}
 
-		public void compile(PoseStack.Pose pose, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h, float k) {
+		public void compile(PoseStack.Pose pose, VertexConsumer vertexConsumer, int i, int j, int k) {
 			Matrix4f matrix4f = pose.pose();
 			Vector3f vector3f = new Vector3f();
 
 			for (ModelPart.Polygon polygon : this.polygons) {
 				Vector3f vector3f2 = pose.transformNormal(polygon.normal, vector3f);
-				float l = vector3f2.x();
-				float m = vector3f2.y();
-				float n = vector3f2.z();
+				float f = vector3f2.x();
+				float g = vector3f2.y();
+				float h = vector3f2.z();
 
 				for (ModelPart.Vertex vertex : polygon.vertices) {
-					float o = vertex.pos.x() / 16.0F;
-					float p = vertex.pos.y() / 16.0F;
-					float q = vertex.pos.z() / 16.0F;
-					Vector3f vector3f3 = matrix4f.transformPosition(o, p, q, vector3f);
-					vertexConsumer.vertex(vector3f3.x(), vector3f3.y(), vector3f3.z(), f, g, h, k, vertex.u, vertex.v, j, i, l, m, n);
+					float l = vertex.pos.x() / 16.0F;
+					float m = vertex.pos.y() / 16.0F;
+					float n = vertex.pos.z() / 16.0F;
+					Vector3f vector3f3 = matrix4f.transformPosition(l, m, n, vector3f);
+					vertexConsumer.addVertex(vector3f3.x(), vector3f3.y(), vector3f3.z(), k, vertex.u, vertex.v, j, i, f, g, h);
 				}
 			}
 		}

@@ -25,7 +25,7 @@ import org.joml.Matrix4f;
 
 @Environment(EnvType.CLIENT)
 public class ScreenEffectRenderer {
-	private static final ResourceLocation UNDERWATER_LOCATION = new ResourceLocation("textures/misc/underwater.png");
+	private static final ResourceLocation UNDERWATER_LOCATION = ResourceLocation.withDefaultNamespace("textures/misc/underwater.png");
 
 	public static void renderScreenEffect(Minecraft minecraft, PoseStack poseStack) {
 		Player player = minecraft.player;
@@ -67,8 +67,7 @@ public class ScreenEffectRenderer {
 
 	private static void renderTex(TextureAtlasSprite textureAtlasSprite, PoseStack poseStack) {
 		RenderSystem.setShaderTexture(0, textureAtlasSprite.atlasLocation());
-		RenderSystem.setShader(GameRenderer::getPositionColorTexShader);
-		BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
+		RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
 		float f = 0.1F;
 		float g = -1.0F;
 		float h = 1.0F;
@@ -80,18 +79,17 @@ public class ScreenEffectRenderer {
 		float n = textureAtlasSprite.getV0();
 		float o = textureAtlasSprite.getV1();
 		Matrix4f matrix4f = poseStack.last().pose();
-		bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_TEX);
-		bufferBuilder.vertex(matrix4f, -1.0F, -1.0F, -0.5F).color(0.1F, 0.1F, 0.1F, 1.0F).uv(m, o).endVertex();
-		bufferBuilder.vertex(matrix4f, 1.0F, -1.0F, -0.5F).color(0.1F, 0.1F, 0.1F, 1.0F).uv(l, o).endVertex();
-		bufferBuilder.vertex(matrix4f, 1.0F, 1.0F, -0.5F).color(0.1F, 0.1F, 0.1F, 1.0F).uv(l, n).endVertex();
-		bufferBuilder.vertex(matrix4f, -1.0F, 1.0F, -0.5F).color(0.1F, 0.1F, 0.1F, 1.0F).uv(m, n).endVertex();
-		BufferUploader.drawWithShader(bufferBuilder.end());
+		BufferBuilder bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+		bufferBuilder.addVertex(matrix4f, -1.0F, -1.0F, -0.5F).setUv(m, o).setColor(0.1F, 0.1F, 0.1F, 1.0F);
+		bufferBuilder.addVertex(matrix4f, 1.0F, -1.0F, -0.5F).setUv(l, o).setColor(0.1F, 0.1F, 0.1F, 1.0F);
+		bufferBuilder.addVertex(matrix4f, 1.0F, 1.0F, -0.5F).setUv(l, n).setColor(0.1F, 0.1F, 0.1F, 1.0F);
+		bufferBuilder.addVertex(matrix4f, -1.0F, 1.0F, -0.5F).setUv(m, n).setColor(0.1F, 0.1F, 0.1F, 1.0F);
+		BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
 	}
 
 	private static void renderWater(Minecraft minecraft, PoseStack poseStack) {
 		RenderSystem.setShader(GameRenderer::getPositionTexShader);
 		RenderSystem.setShaderTexture(0, UNDERWATER_LOCATION);
-		BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
 		BlockPos blockPos = BlockPos.containing(minecraft.player.getX(), minecraft.player.getEyeY(), minecraft.player.getZ());
 		float f = LightTexture.getBrightness(minecraft.player.level().dimensionType(), minecraft.player.level().getMaxLocalRawBrightness(blockPos));
 		RenderSystem.enableBlend();
@@ -105,19 +103,18 @@ public class ScreenEffectRenderer {
 		float m = -minecraft.player.getYRot() / 64.0F;
 		float n = minecraft.player.getXRot() / 64.0F;
 		Matrix4f matrix4f = poseStack.last().pose();
-		bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-		bufferBuilder.vertex(matrix4f, -1.0F, -1.0F, -0.5F).uv(4.0F + m, 4.0F + n).endVertex();
-		bufferBuilder.vertex(matrix4f, 1.0F, -1.0F, -0.5F).uv(0.0F + m, 4.0F + n).endVertex();
-		bufferBuilder.vertex(matrix4f, 1.0F, 1.0F, -0.5F).uv(0.0F + m, 0.0F + n).endVertex();
-		bufferBuilder.vertex(matrix4f, -1.0F, 1.0F, -0.5F).uv(4.0F + m, 0.0F + n).endVertex();
-		BufferUploader.drawWithShader(bufferBuilder.end());
+		BufferBuilder bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+		bufferBuilder.addVertex(matrix4f, -1.0F, -1.0F, -0.5F).setUv(4.0F + m, 4.0F + n);
+		bufferBuilder.addVertex(matrix4f, 1.0F, -1.0F, -0.5F).setUv(0.0F + m, 4.0F + n);
+		bufferBuilder.addVertex(matrix4f, 1.0F, 1.0F, -0.5F).setUv(0.0F + m, 0.0F + n);
+		bufferBuilder.addVertex(matrix4f, -1.0F, 1.0F, -0.5F).setUv(4.0F + m, 0.0F + n);
+		BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
 		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 		RenderSystem.disableBlend();
 	}
 
 	private static void renderFire(Minecraft minecraft, PoseStack poseStack) {
-		BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
-		RenderSystem.setShader(GameRenderer::getPositionColorTexShader);
+		RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
 		RenderSystem.depthFunc(519);
 		RenderSystem.depthMask(false);
 		RenderSystem.enableBlend();
@@ -146,12 +143,12 @@ public class ScreenEffectRenderer {
 			poseStack.translate((float)(-(r * 2 - 1)) * 0.24F, -0.3F, 0.0F);
 			poseStack.mulPose(Axis.YP.rotationDegrees((float)(r * 2 - 1) * 10.0F));
 			Matrix4f matrix4f = poseStack.last().pose();
-			bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_TEX);
-			bufferBuilder.vertex(matrix4f, -0.5F, -0.5F, -0.5F).color(1.0F, 1.0F, 1.0F, 0.9F).uv(n, p).endVertex();
-			bufferBuilder.vertex(matrix4f, 0.5F, -0.5F, -0.5F).color(1.0F, 1.0F, 1.0F, 0.9F).uv(m, p).endVertex();
-			bufferBuilder.vertex(matrix4f, 0.5F, 0.5F, -0.5F).color(1.0F, 1.0F, 1.0F, 0.9F).uv(m, o).endVertex();
-			bufferBuilder.vertex(matrix4f, -0.5F, 0.5F, -0.5F).color(1.0F, 1.0F, 1.0F, 0.9F).uv(n, o).endVertex();
-			BufferUploader.drawWithShader(bufferBuilder.end());
+			BufferBuilder bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+			bufferBuilder.addVertex(matrix4f, -0.5F, -0.5F, -0.5F).setUv(n, p).setColor(1.0F, 1.0F, 1.0F, 0.9F);
+			bufferBuilder.addVertex(matrix4f, 0.5F, -0.5F, -0.5F).setUv(m, p).setColor(1.0F, 1.0F, 1.0F, 0.9F);
+			bufferBuilder.addVertex(matrix4f, 0.5F, 0.5F, -0.5F).setUv(m, o).setColor(1.0F, 1.0F, 1.0F, 0.9F);
+			bufferBuilder.addVertex(matrix4f, -0.5F, 0.5F, -0.5F).setUv(n, o).setColor(1.0F, 1.0F, 1.0F, 0.9F);
+			BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
 			poseStack.popPose();
 		}
 

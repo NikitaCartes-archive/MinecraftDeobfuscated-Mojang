@@ -61,7 +61,8 @@ public class ReloadableServerRegistries {
 			() -> {
 				WritableRegistry<T> writableRegistry = new MappedRegistry<>(lootDataType.registryKey(), Lifecycle.experimental());
 				Map<ResourceLocation, JsonElement> map = new HashMap();
-				SimpleJsonResourceReloadListener.scanDirectory(resourceManager, lootDataType.directory(), GSON, map);
+				String string = Registries.elementsDirPath(lootDataType.registryKey());
+				SimpleJsonResourceReloadListener.scanDirectory(resourceManager, string, GSON, map);
 				map.forEach(
 					(resourceLocation, jsonElement) -> lootDataType.deserialize(resourceLocation, registryOps, jsonElement)
 							.ifPresent(object -> writableRegistry.register(ResourceKey.create(lootDataType.registryKey(), resourceLocation), (T)object, DEFAULT_REGISTRATION_INFO))

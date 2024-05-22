@@ -10,6 +10,7 @@ import javax.annotation.Nullable;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.ByIdMap;
+import net.minecraft.util.FastColor;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.material.MapColor;
 import org.jetbrains.annotations.Contract;
@@ -41,7 +42,7 @@ public enum DyeColor implements StringRepresentable {
 	private final int id;
 	private final String name;
 	private final MapColor mapColor;
-	private final float[] textureDiffuseColors;
+	private final int textureDiffuseColor;
 	private final int fireworkColor;
 	private final int textColor;
 
@@ -50,10 +51,7 @@ public enum DyeColor implements StringRepresentable {
 		this.name = string2;
 		this.mapColor = mapColor;
 		this.textColor = m;
-		int n = (k & 0xFF0000) >> 16;
-		int o = (k & 0xFF00) >> 8;
-		int p = (k & 0xFF) >> 0;
-		this.textureDiffuseColors = new float[]{(float)n / 255.0F, (float)o / 255.0F, (float)p / 255.0F};
+		this.textureDiffuseColor = FastColor.ARGB32.opaque(k);
 		this.fireworkColor = l;
 	}
 
@@ -65,8 +63,8 @@ public enum DyeColor implements StringRepresentable {
 		return this.name;
 	}
 
-	public float[] getTextureDiffuseColors() {
-		return this.textureDiffuseColors;
+	public int getTextureDiffuseColor() {
+		return this.textureDiffuseColor;
 	}
 
 	public MapColor getMapColor() {

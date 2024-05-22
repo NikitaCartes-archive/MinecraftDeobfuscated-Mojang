@@ -20,10 +20,10 @@ import net.minecraft.world.entity.animal.horse.Markings;
 public class HorseMarkingLayer extends RenderLayer<Horse, HorseModel<Horse>> {
 	private static final Map<Markings, ResourceLocation> LOCATION_BY_MARKINGS = Util.make(Maps.newEnumMap(Markings.class), enumMap -> {
 		enumMap.put(Markings.NONE, null);
-		enumMap.put(Markings.WHITE, new ResourceLocation("textures/entity/horse/horse_markings_white.png"));
-		enumMap.put(Markings.WHITE_FIELD, new ResourceLocation("textures/entity/horse/horse_markings_whitefield.png"));
-		enumMap.put(Markings.WHITE_DOTS, new ResourceLocation("textures/entity/horse/horse_markings_whitedots.png"));
-		enumMap.put(Markings.BLACK_DOTS, new ResourceLocation("textures/entity/horse/horse_markings_blackdots.png"));
+		enumMap.put(Markings.WHITE, ResourceLocation.withDefaultNamespace("textures/entity/horse/horse_markings_white.png"));
+		enumMap.put(Markings.WHITE_FIELD, ResourceLocation.withDefaultNamespace("textures/entity/horse/horse_markings_whitefield.png"));
+		enumMap.put(Markings.WHITE_DOTS, ResourceLocation.withDefaultNamespace("textures/entity/horse/horse_markings_whitedots.png"));
+		enumMap.put(Markings.BLACK_DOTS, ResourceLocation.withDefaultNamespace("textures/entity/horse/horse_markings_blackdots.png"));
 	});
 
 	public HorseMarkingLayer(RenderLayerParent<Horse, HorseModel<Horse>> renderLayerParent) {
@@ -34,7 +34,7 @@ public class HorseMarkingLayer extends RenderLayer<Horse, HorseModel<Horse>> {
 		ResourceLocation resourceLocation = (ResourceLocation)LOCATION_BY_MARKINGS.get(horse.getMarkings());
 		if (resourceLocation != null && !horse.isInvisible()) {
 			VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entityTranslucent(resourceLocation));
-			this.getParentModel().renderToBuffer(poseStack, vertexConsumer, i, LivingEntityRenderer.getOverlayCoords(horse, 0.0F), 1.0F, 1.0F, 1.0F, 1.0F);
+			this.getParentModel().renderToBuffer(poseStack, vertexConsumer, i, LivingEntityRenderer.getOverlayCoords(horse, 0.0F));
 		}
 	}
 }

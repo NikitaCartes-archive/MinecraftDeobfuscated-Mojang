@@ -32,8 +32,10 @@ import org.joml.Matrix4f;
 
 @Environment(EnvType.CLIENT)
 public class ItemInHandRenderer {
-	private static final RenderType MAP_BACKGROUND = RenderType.text(new ResourceLocation("textures/map/map_background.png"));
-	private static final RenderType MAP_BACKGROUND_CHECKERBOARD = RenderType.text(new ResourceLocation("textures/map/map_background_checkerboard.png"));
+	private static final RenderType MAP_BACKGROUND = RenderType.text(ResourceLocation.withDefaultNamespace("textures/map/map_background.png"));
+	private static final RenderType MAP_BACKGROUND_CHECKERBOARD = RenderType.text(
+		ResourceLocation.withDefaultNamespace("textures/map/map_background_checkerboard.png")
+	);
 	private static final float ITEM_SWING_X_POS_SCALE = -0.4F;
 	private static final float ITEM_SWING_Y_POS_SCALE = 0.2F;
 	private static final float ITEM_SWING_Z_POS_SCALE = -0.2F;
@@ -227,10 +229,10 @@ public class ItemInHandRenderer {
 		MapItemSavedData mapItemSavedData = MapItem.getSavedData(mapId, this.minecraft.level);
 		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(mapItemSavedData == null ? MAP_BACKGROUND : MAP_BACKGROUND_CHECKERBOARD);
 		Matrix4f matrix4f = poseStack.last().pose();
-		vertexConsumer.vertex(matrix4f, -7.0F, 135.0F, 0.0F).color(255, 255, 255, 255).uv(0.0F, 1.0F).uv2(i).endVertex();
-		vertexConsumer.vertex(matrix4f, 135.0F, 135.0F, 0.0F).color(255, 255, 255, 255).uv(1.0F, 1.0F).uv2(i).endVertex();
-		vertexConsumer.vertex(matrix4f, 135.0F, -7.0F, 0.0F).color(255, 255, 255, 255).uv(1.0F, 0.0F).uv2(i).endVertex();
-		vertexConsumer.vertex(matrix4f, -7.0F, -7.0F, 0.0F).color(255, 255, 255, 255).uv(0.0F, 0.0F).uv2(i).endVertex();
+		vertexConsumer.addVertex(matrix4f, -7.0F, 135.0F, 0.0F).setColor(-1).setUv(0.0F, 1.0F).setLight(i);
+		vertexConsumer.addVertex(matrix4f, 135.0F, 135.0F, 0.0F).setColor(-1).setUv(1.0F, 1.0F).setLight(i);
+		vertexConsumer.addVertex(matrix4f, 135.0F, -7.0F, 0.0F).setColor(-1).setUv(1.0F, 0.0F).setLight(i);
+		vertexConsumer.addVertex(matrix4f, -7.0F, -7.0F, 0.0F).setColor(-1).setUv(0.0F, 0.0F).setLight(i);
 		if (mapItemSavedData != null) {
 			this.minecraft.gameRenderer.getMapRenderer().render(poseStack, multiBufferSource, mapId, mapItemSavedData, false, i);
 		}

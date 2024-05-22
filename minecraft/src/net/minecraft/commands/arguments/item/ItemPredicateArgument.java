@@ -62,7 +62,7 @@ public class ItemPredicateArgument implements ArgumentType<ItemPredicateArgument
 	static final Dynamic2CommandExceptionType ERROR_MALFORMED_PREDICATE = new Dynamic2CommandExceptionType(
 		(object, object2) -> Component.translatableEscape("arguments.item.predicate.malformed", object, object2)
 	);
-	private static final ResourceLocation COUNT_ID = new ResourceLocation("count");
+	private static final ResourceLocation COUNT_ID = ResourceLocation.withDefaultNamespace("count");
 	static final Map<ResourceLocation, ItemPredicateArgument.ComponentWrapper> PSEUDO_COMPONENTS = (Map<ResourceLocation, ItemPredicateArgument.ComponentWrapper>)Stream.of(
 			new ItemPredicateArgument.ComponentWrapper(COUNT_ID, itemStack -> true, MinMaxBounds.Ints.CODEC.map(ints -> itemStack -> ints.matches(itemStack.getCount())))
 		)

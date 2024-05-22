@@ -2,6 +2,7 @@ package net.minecraft.server.network;
 
 import net.minecraft.SharedConstants;
 import net.minecraft.network.Connection;
+import net.minecraft.network.DisconnectionDetails;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.handshake.ClientIntentionPacket;
 import net.minecraft.network.protocol.handshake.ServerHandshakePacketListener;
@@ -69,7 +70,7 @@ public class ServerHandshakePacketListenerImpl implements ServerHandshakePacketL
 	}
 
 	@Override
-	public void onDisconnect(Component component) {
+	public void onDisconnect(DisconnectionDetails disconnectionDetails) {
 	}
 
 	@Override

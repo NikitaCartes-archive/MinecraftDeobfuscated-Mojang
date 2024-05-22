@@ -36,7 +36,6 @@ public class OminousBottleItem extends Item {
 		if (!level.isClientSide) {
 			level.playSound(null, livingEntity.blockPosition(), SoundEvents.OMINOUS_BOTTLE_DISPOSE, livingEntity.getSoundSource(), 1.0F, 1.0F);
 			Integer integer = itemStack.getOrDefault(DataComponents.OMINOUS_BOTTLE_AMPLIFIER, Integer.valueOf(0));
-			livingEntity.removeEffect(MobEffects.BAD_OMEN);
 			livingEntity.addEffect(new MobEffectInstance(MobEffects.BAD_OMEN, 120000, integer, false, false, true));
 		}
 

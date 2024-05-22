@@ -29,7 +29,7 @@ public class TextureAtlas extends AbstractTexture implements Dumpable, Tickable 
 	@Deprecated
 	public static final ResourceLocation LOCATION_BLOCKS = InventoryMenu.BLOCK_ATLAS;
 	@Deprecated
-	public static final ResourceLocation LOCATION_PARTICLES = new ResourceLocation("textures/atlas/particles.png");
+	public static final ResourceLocation LOCATION_PARTICLES = ResourceLocation.withDefaultNamespace("textures/atlas/particles.png");
 	private List<SpriteContents> sprites = List.of();
 	private List<TextureAtlasSprite.Ticker> animatedTextures = List.of();
 	private Map<ResourceLocation, TextureAtlasSprite> texturesByName = Map.of();

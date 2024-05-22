@@ -15,7 +15,7 @@ import net.minecraft.resources.ResourceLocation;
 
 @Environment(EnvType.CLIENT)
 public class TridentModel extends Model {
-	public static final ResourceLocation TEXTURE = new ResourceLocation("textures/entity/trident.png");
+	public static final ResourceLocation TEXTURE = ResourceLocation.withDefaultNamespace("textures/entity/trident.png");
 	private final ModelPart root;
 
 	public TridentModel(ModelPart modelPart) {
@@ -37,7 +37,7 @@ public class TridentModel extends Model {
 	}
 
 	@Override
-	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h, float k) {
-		this.root.render(poseStack, vertexConsumer, i, j, f, g, h, k);
+	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, int k) {
+		this.root.render(poseStack, vertexConsumer, i, j, k);
 	}
 }

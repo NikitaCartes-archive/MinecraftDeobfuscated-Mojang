@@ -47,7 +47,7 @@ public record GuiMessageTag(int indicatorColor, @Nullable GuiMessageTag.Icon ico
 
 	@Environment(EnvType.CLIENT)
 	public static enum Icon {
-		CHAT_MODIFIED(new ResourceLocation("icon/chat_modified"), 9, 9);
+		CHAT_MODIFIED(ResourceLocation.withDefaultNamespace("icon/chat_modified"), 9, 9);
 
 		public final ResourceLocation sprite;
 		public final int width;

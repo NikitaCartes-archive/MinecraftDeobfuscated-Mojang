@@ -11,8 +11,8 @@ import net.minecraft.world.entity.monster.Vex;
 
 @Environment(EnvType.CLIENT)
 public class VexRenderer extends MobRenderer<Vex, VexModel> {
-	private static final ResourceLocation VEX_LOCATION = new ResourceLocation("textures/entity/illager/vex.png");
-	private static final ResourceLocation VEX_CHARGING_LOCATION = new ResourceLocation("textures/entity/illager/vex_charging.png");
+	private static final ResourceLocation VEX_LOCATION = ResourceLocation.withDefaultNamespace("textures/entity/illager/vex.png");
+	private static final ResourceLocation VEX_CHARGING_LOCATION = ResourceLocation.withDefaultNamespace("textures/entity/illager/vex_charging.png");
 
 	public VexRenderer(EntityRendererProvider.Context context) {
 		super(context, new VexModel(context.bakeLayer(ModelLayers.VEX)), 0.3F);

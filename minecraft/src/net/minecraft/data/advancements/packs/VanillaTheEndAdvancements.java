@@ -35,7 +35,7 @@ public class VanillaTheEndAdvancements implements AdvancementSubProvider {
 				Blocks.END_STONE,
 				Component.translatable("advancements.end.root.title"),
 				Component.translatable("advancements.end.root.description"),
-				new ResourceLocation("textures/gui/advancements/backgrounds/end.png"),
+				ResourceLocation.withDefaultNamespace("textures/gui/advancements/backgrounds/end.png"),
 				AdvancementType.TASK,
 				false,
 				false,

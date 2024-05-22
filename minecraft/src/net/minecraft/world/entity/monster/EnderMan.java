@@ -15,6 +15,7 @@ import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -67,9 +68,9 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 
 public class EnderMan extends Monster implements NeutralMob {
-	private static final UUID SPEED_MODIFIER_ATTACKING_UUID = UUID.fromString("020E0DFB-87AE-4653-9556-831010E291A0");
+	private static final ResourceLocation SPEED_MODIFIER_ATTACKING_ID = ResourceLocation.withDefaultNamespace("attacking");
 	private static final AttributeModifier SPEED_MODIFIER_ATTACKING = new AttributeModifier(
-		SPEED_MODIFIER_ATTACKING_UUID, "Attacking speed boost", 0.15F, AttributeModifier.Operation.ADD_VALUE
+		SPEED_MODIFIER_ATTACKING_ID, 0.15F, AttributeModifier.Operation.ADD_VALUE
 	);
 	private static final int DELAY_BETWEEN_CREEPY_STARE_SOUND = 400;
 	private static final int MIN_DEAGGRESSION_TIME = 600;
@@ -123,11 +124,11 @@ public class EnderMan extends Monster implements NeutralMob {
 			this.targetChangeTime = 0;
 			this.entityData.set(DATA_CREEPY, false);
 			this.entityData.set(DATA_STARED_AT, false);
-			attributeInstance.removeModifier(SPEED_MODIFIER_ATTACKING.id());
+			attributeInstance.removeModifier(SPEED_MODIFIER_ATTACKING_ID);
 		} else {
 			this.targetChangeTime = this.tickCount;
 			this.entityData.set(DATA_CREEPY, true);
-			if (!attributeInstance.hasModifier(SPEED_MODIFIER_ATTACKING)) {
+			if (!attributeInstance.hasModifier(SPEED_MODIFIER_ATTACKING_ID)) {
 				attributeInstance.addTransientModifier(SPEED_MODIFIER_ATTACKING);
 			}
 		}

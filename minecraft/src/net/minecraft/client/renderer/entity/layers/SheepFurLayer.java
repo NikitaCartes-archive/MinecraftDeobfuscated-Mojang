@@ -14,12 +14,13 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FastColor;
 import net.minecraft.world.entity.animal.Sheep;
 import net.minecraft.world.item.DyeColor;
 
 @Environment(EnvType.CLIENT)
 public class SheepFurLayer extends RenderLayer<Sheep, SheepModel<Sheep>> {
-	private static final ResourceLocation SHEEP_FUR_LOCATION = new ResourceLocation("textures/entity/sheep/sheep_fur.png");
+	private static final ResourceLocation SHEEP_FUR_LOCATION = ResourceLocation.withDefaultNamespace("textures/entity/sheep/sheep_fur.png");
 	private final SheepFurModel<Sheep> model;
 
 	public SheepFurLayer(RenderLayerParent<Sheep, SheepModel<Sheep>> renderLayerParent, EntityModelSet entityModelSet) {
@@ -37,12 +38,10 @@ public class SheepFurLayer extends RenderLayer<Sheep, SheepModel<Sheep>> {
 					this.model.prepareMobModel(sheep, f, g, h);
 					this.model.setupAnim(sheep, f, g, j, k, l);
 					VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.outline(SHEEP_FUR_LOCATION));
-					this.model.renderToBuffer(poseStack, vertexConsumer, i, LivingEntityRenderer.getOverlayCoords(sheep, 0.0F), 0.0F, 0.0F, 0.0F, 1.0F);
+					this.model.renderToBuffer(poseStack, vertexConsumer, i, LivingEntityRenderer.getOverlayCoords(sheep, 0.0F), -16777216);
 				}
 			} else {
-				float s;
-				float t;
-				float u;
+				int u;
 				if (sheep.hasCustomName() && "jeb_".equals(sheep.getName().getString())) {
 					int m = 25;
 					int n = sheep.tickCount / 25 + sheep.getId();
@@ -50,19 +49,14 @@ public class SheepFurLayer extends RenderLayer<Sheep, SheepModel<Sheep>> {
 					int p = n % o;
 					int q = (n + 1) % o;
 					float r = ((float)(sheep.tickCount % 25) + h) / 25.0F;
-					float[] fs = Sheep.getColorArray(DyeColor.byId(p));
-					float[] gs = Sheep.getColorArray(DyeColor.byId(q));
-					s = fs[0] * (1.0F - r) + gs[0] * r;
-					t = fs[1] * (1.0F - r) + gs[1] * r;
-					u = fs[2] * (1.0F - r) + gs[2] * r;
+					int s = Sheep.getColor(DyeColor.byId(p));
+					int t = Sheep.getColor(DyeColor.byId(q));
+					u = FastColor.ARGB32.lerp(r, s, t);
 				} else {
-					float[] hs = Sheep.getColorArray(sheep.getColor());
-					s = hs[0];
-					t = hs[1];
-					u = hs[2];
+					u = Sheep.getColor(sheep.getColor());
 				}
 
-				coloredCutoutModelCopyLayerRender(this.getParentModel(), this.model, SHEEP_FUR_LOCATION, poseStack, multiBufferSource, i, sheep, f, g, j, k, l, h, s, t, u);
+				coloredCutoutModelCopyLayerRender(this.getParentModel(), this.model, SHEEP_FUR_LOCATION, poseStack, multiBufferSource, i, sheep, f, g, j, k, l, h, u);
 			}
 		}
 	}

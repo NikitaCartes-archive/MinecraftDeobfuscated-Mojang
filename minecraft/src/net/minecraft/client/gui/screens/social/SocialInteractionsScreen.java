@@ -28,8 +28,8 @@ import net.minecraft.resources.ResourceLocation;
 @Environment(EnvType.CLIENT)
 public class SocialInteractionsScreen extends Screen {
 	private static final Component TITLE = Component.translatable("gui.socialInteractions.title");
-	private static final ResourceLocation BACKGROUND_SPRITE = new ResourceLocation("social_interactions/background");
-	private static final ResourceLocation SEARCH_SPRITE = new ResourceLocation("icon/search");
+	private static final ResourceLocation BACKGROUND_SPRITE = ResourceLocation.withDefaultNamespace("social_interactions/background");
+	private static final ResourceLocation SEARCH_SPRITE = ResourceLocation.withDefaultNamespace("icon/search");
 	private static final Component TAB_ALL = Component.translatable("gui.socialInteractions.tab_all");
 	private static final Component TAB_HIDDEN = Component.translatable("gui.socialInteractions.tab_hidden");
 	private static final Component TAB_BLOCKED = Component.translatable("gui.socialInteractions.tab_blocked");

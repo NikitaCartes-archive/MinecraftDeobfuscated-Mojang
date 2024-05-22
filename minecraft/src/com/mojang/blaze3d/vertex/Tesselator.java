@@ -7,7 +7,7 @@ import net.fabricmc.api.Environment;
 @Environment(EnvType.CLIENT)
 public class Tesselator {
 	private static final int MAX_BYTES = 786432;
-	private final BufferBuilder builder;
+	private final ByteBufferBuilder buffer;
 	@Nullable
 	private static Tesselator instance;
 
@@ -28,18 +28,18 @@ public class Tesselator {
 	}
 
 	public Tesselator(int i) {
-		this.builder = new BufferBuilder(i);
+		this.buffer = new ByteBufferBuilder(i);
 	}
 
 	public Tesselator() {
 		this(786432);
 	}
 
-	public void end() {
-		BufferUploader.drawWithShader(this.builder.end());
+	public BufferBuilder begin(VertexFormat.Mode mode, VertexFormat vertexFormat) {
+		return new BufferBuilder(this.buffer, mode, vertexFormat);
 	}
 
-	public BufferBuilder getBuilder() {
-		return this.builder;
+	public void clear() {
+		this.buffer.clear();
 	}
 }

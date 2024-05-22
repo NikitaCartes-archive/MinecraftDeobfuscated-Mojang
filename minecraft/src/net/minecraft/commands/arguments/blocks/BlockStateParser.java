@@ -69,7 +69,7 @@ public class BlockStateParser {
 	private final boolean allowNbt;
 	private final Map<Property<?>, Comparable<?>> properties = Maps.<Property<?>, Comparable<?>>newHashMap();
 	private final Map<String, String> vagueProperties = Maps.<String, String>newHashMap();
-	private ResourceLocation id = new ResourceLocation("");
+	private ResourceLocation id = ResourceLocation.withDefaultNamespace("");
 	@Nullable
 	private StateDefinition<Block, BlockState> definition;
 	@Nullable

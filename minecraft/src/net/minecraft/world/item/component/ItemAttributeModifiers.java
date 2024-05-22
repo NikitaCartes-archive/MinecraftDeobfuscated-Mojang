@@ -13,6 +13,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.ai.attributes.Attribute;
@@ -53,7 +54,7 @@ public record ItemAttributeModifiers(List<ItemAttributeModifiers.Entry> modifier
 		ImmutableList.Builder<ItemAttributeModifiers.Entry> builder = ImmutableList.builderWithExpectedSize(this.modifiers.size() + 1);
 
 		for (ItemAttributeModifiers.Entry entry : this.modifiers) {
-			if (!entry.modifier.id().equals(attributeModifier.id())) {
+			if (!entry.matches(holder, attributeModifier.id())) {
 				builder.add(entry);
 			}
 		}
@@ -130,5 +131,9 @@ public record ItemAttributeModifiers(List<ItemAttributeModifiers.Entry> modifier
 			ItemAttributeModifiers.Entry::slot,
 			ItemAttributeModifiers.Entry::new
 		);
+
+		public boolean matches(Holder<Attribute> holder, ResourceLocation resourceLocation) {
+			return holder.equals(this.attribute) && resourceLocation.equals(this.modifier);
+		}
 	}
 }

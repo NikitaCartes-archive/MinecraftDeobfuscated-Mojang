@@ -10,7 +10,7 @@ import net.minecraft.world.inventory.ChestMenu;
 
 @Environment(EnvType.CLIENT)
 public class ContainerScreen extends AbstractContainerScreen<ChestMenu> implements MenuAccess<ChestMenu> {
-	private static final ResourceLocation CONTAINER_BACKGROUND = new ResourceLocation("textures/gui/container/generic_54.png");
+	private static final ResourceLocation CONTAINER_BACKGROUND = ResourceLocation.withDefaultNamespace("textures/gui/container/generic_54.png");
 	private final int containerRows;
 
 	public ContainerScreen(ChestMenu chestMenu, Inventory inventory, Component component) {

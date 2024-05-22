@@ -263,6 +263,10 @@ public abstract class ChunkAccess implements BlockGetter, BiomeManager.NoiseBiom
 		return true;
 	}
 
+	public boolean isSectionEmpty(int i) {
+		return this.getSection(this.getSectionIndexFromSectionY(i)).hasOnlyAir();
+	}
+
 	public void setUnsaved(boolean bl) {
 		this.unsaved = bl;
 	}

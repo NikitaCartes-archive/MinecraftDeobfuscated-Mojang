@@ -14,11 +14,11 @@ import net.minecraft.world.entity.monster.breeze.Breeze;
 
 @Environment(EnvType.CLIENT)
 public class BreezeRenderer extends MobRenderer<Breeze, BreezeModel<Breeze>> {
-	private static final ResourceLocation TEXTURE_LOCATION = new ResourceLocation("textures/entity/breeze/breeze.png");
+	private static final ResourceLocation TEXTURE_LOCATION = ResourceLocation.withDefaultNamespace("textures/entity/breeze/breeze.png");
 
 	public BreezeRenderer(EntityRendererProvider.Context context) {
 		super(context, new BreezeModel<>(context.bakeLayer(ModelLayers.BREEZE)), 0.5F);
-		this.addLayer(new BreezeWindLayer(this));
+		this.addLayer(new BreezeWindLayer(context, this));
 		this.addLayer(new BreezeEyesLayer(this));
 	}
 

@@ -2,7 +2,6 @@ package net.minecraft.world.item.enchantment;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.function.Function;
 import net.minecraft.advancements.critereon.DamageSourcePredicate;
 import net.minecraft.advancements.critereon.EntityFlagsPredicate;
@@ -75,6 +74,7 @@ import net.minecraft.world.level.storage.loot.predicates.DamageSourceCondition;
 import net.minecraft.world.level.storage.loot.predicates.EnchantmentActiveCheck;
 import net.minecraft.world.level.storage.loot.predicates.InvertedLootItemCondition;
 import net.minecraft.world.level.storage.loot.predicates.LocationCheck;
+import net.minecraft.world.level.storage.loot.predicates.LootItemBlockStatePropertyCondition;
 import net.minecraft.world.level.storage.loot.predicates.LootItemEntityPropertyCondition;
 import net.minecraft.world.level.storage.loot.predicates.LootItemRandomChanceCondition;
 import net.minecraft.world.level.storage.loot.predicates.MatchTool;
@@ -167,11 +167,10 @@ public class Enchantments {
 				.withEffect(
 					EnchantmentEffectComponents.ATTRIBUTES,
 					new EnchantmentAttributeEffect(
-						"enchantment.fire_protection",
+						ResourceLocation.withDefaultNamespace("enchantment.fire_protection"),
 						Attributes.BURNING_TIME,
 						LevelBasedValue.perLevel(-0.15F),
-						AttributeModifier.Operation.ADD_MULTIPLIED_BASE,
-						UUID.fromString("b572ecd2-ac0c-4071-abde-9594af072a37")
+						AttributeModifier.Operation.ADD_MULTIPLIED_BASE
 					)
 				)
 		);
@@ -218,11 +217,10 @@ public class Enchantments {
 				.withEffect(
 					EnchantmentEffectComponents.ATTRIBUTES,
 					new EnchantmentAttributeEffect(
-						"enchantment.blast_protection",
+						ResourceLocation.withDefaultNamespace("enchantment.blast_protection"),
 						Attributes.EXPLOSION_KNOCKBACK_RESISTANCE,
 						LevelBasedValue.perLevel(0.15F),
-						AttributeModifier.Operation.ADD_VALUE,
-						UUID.fromString("40a9968f-5c66-4e2f-b7f4-2ec2f4b3e450")
+						AttributeModifier.Operation.ADD_VALUE
 					)
 				)
 		);
@@ -262,11 +260,10 @@ public class Enchantments {
 				.withEffect(
 					EnchantmentEffectComponents.ATTRIBUTES,
 					new EnchantmentAttributeEffect(
-						"enchantment.respiration",
+						ResourceLocation.withDefaultNamespace("enchantment.respiration"),
 						Attributes.OXYGEN_BONUS,
 						LevelBasedValue.perLevel(1.0F),
-						AttributeModifier.Operation.ADD_VALUE,
-						UUID.fromString("07a65791-f64d-4e79-86c7-f83932f007ec")
+						AttributeModifier.Operation.ADD_VALUE
 					)
 				)
 		);
@@ -281,11 +278,10 @@ public class Enchantments {
 				.withEffect(
 					EnchantmentEffectComponents.ATTRIBUTES,
 					new EnchantmentAttributeEffect(
-						"enchantment.aqua_affinity",
+						ResourceLocation.withDefaultNamespace("enchantment.aqua_affinity"),
 						Attributes.SUBMERGED_MINING_SPEED,
 						LevelBasedValue.perLevel(4.0F),
-						AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL,
-						UUID.fromString("60b1b7db-fffd-4ad0-817c-d6c6a93d8a45")
+						AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL
 					)
 				)
 		);
@@ -333,11 +329,10 @@ public class Enchantments {
 				.withEffect(
 					EnchantmentEffectComponents.ATTRIBUTES,
 					new EnchantmentAttributeEffect(
-						"enchantment.depth_strider",
+						ResourceLocation.withDefaultNamespace("enchantment.depth_strider"),
 						Attributes.WATER_MOVEMENT_EFFICIENCY,
 						LevelBasedValue.perLevel(0.33333334F),
-						AttributeModifier.Operation.ADD_VALUE,
-						UUID.fromString("11dc269a-4476-46c0-aff3-9e17d7eb6801")
+						AttributeModifier.Operation.ADD_VALUE
 					)
 				)
 		);
@@ -373,7 +368,10 @@ public class Enchantments {
 						new Vec3i(0, -1, 0),
 						Optional.of(
 							BlockPredicate.allOf(
-								BlockPredicate.matchesBlocks(new Vec3i(0, 1, 0), Blocks.AIR), BlockPredicate.matchesBlocks(Blocks.WATER), BlockPredicate.unobstructed()
+								BlockPredicate.matchesTag(new Vec3i(0, 1, 0), BlockTags.AIR),
+								BlockPredicate.matchesBlocks(Blocks.WATER),
+								BlockPredicate.matchesFluids(Fluids.WATER),
+								BlockPredicate.unobstructed()
 							)
 						),
 						BlockStateProvider.simple(Blocks.FROSTED_ICE),
@@ -418,11 +416,10 @@ public class Enchantments {
 				.withEffect(
 					EnchantmentEffectComponents.LOCATION_CHANGED,
 					new EnchantmentAttributeEffect(
-						"Soul speed boost",
+						ResourceLocation.withDefaultNamespace("enchantment.soul_speed"),
 						Attributes.MOVEMENT_SPEED,
 						LevelBasedValue.perLevel(0.0405F, 0.0105F),
-						AttributeModifier.Operation.ADD_VALUE,
-						UUID.fromString("87f46a96-686f-4796-b035-22e16ee9e038")
+						AttributeModifier.Operation.ADD_VALUE
 					),
 					AllOfCondition.allOf(
 						InvertedLootItemCondition.invert(
@@ -464,11 +461,10 @@ public class Enchantments {
 				.withEffect(
 					EnchantmentEffectComponents.LOCATION_CHANGED,
 					new EnchantmentAttributeEffect(
-						"Soul speed movement efficiency",
+						ResourceLocation.withDefaultNamespace("enchantment.soul_speed"),
 						Attributes.MOVEMENT_EFFICIENCY,
 						LevelBasedValue.constant(1.0F),
-						AttributeModifier.Operation.ADD_VALUE,
-						UUID.fromString("b9716dbd-50df-4080-850e-70347d24e687")
+						AttributeModifier.Operation.ADD_VALUE
 					),
 					LootItemEntityPropertyCondition.hasProperties(
 						LootContext.EntityTarget.THIS,
@@ -530,11 +526,10 @@ public class Enchantments {
 				.withEffect(
 					EnchantmentEffectComponents.ATTRIBUTES,
 					new EnchantmentAttributeEffect(
-						"enchantment.swift_sneak",
+						ResourceLocation.withDefaultNamespace("enchantment.swift_sneak"),
 						Attributes.SNEAKING_SPEED,
 						LevelBasedValue.perLevel(0.15F),
-						AttributeModifier.Operation.ADD_VALUE,
-						UUID.fromString("92437d00-c3a7-4f2e-8f6c-1f21585d5dd0")
+						AttributeModifier.Operation.ADD_VALUE
 					)
 				)
 		);
@@ -710,11 +705,10 @@ public class Enchantments {
 				.withEffect(
 					EnchantmentEffectComponents.ATTRIBUTES,
 					new EnchantmentAttributeEffect(
-						"enchantment.sweeping_edge",
+						ResourceLocation.withDefaultNamespace("enchantment.sweeping_edge"),
 						Attributes.SWEEPING_DAMAGE_RATIO,
 						new LevelBasedValue.Fraction(LevelBasedValue.perLevel(1.0F), LevelBasedValue.perLevel(2.0F, 1.0F)),
-						AttributeModifier.Operation.ADD_VALUE,
-						UUID.fromString("5d3d087b-debe-4037-b53e-d84f3ff51f17")
+						AttributeModifier.Operation.ADD_VALUE
 					)
 				)
 		);
@@ -735,11 +729,10 @@ public class Enchantments {
 				.withEffect(
 					EnchantmentEffectComponents.ATTRIBUTES,
 					new EnchantmentAttributeEffect(
-						"enchantment.efficiency",
+						ResourceLocation.withDefaultNamespace("enchantment.efficiency"),
 						Attributes.MINING_EFFICIENCY,
 						new LevelBasedValue.LevelsSquared(1.0F),
-						AttributeModifier.Operation.ADD_VALUE,
-						UUID.fromString("3ceb37c0-db62-46b5-bd02-785457b01d96")
+						AttributeModifier.Operation.ADD_VALUE
 					)
 				)
 		);
@@ -975,16 +968,9 @@ public class Enchantments {
 					),
 					AllOfCondition.allOf(
 						WeatherCheck.weather().setThundering(true),
-						LootItemEntityPropertyCondition.hasProperties(
-							LootContext.EntityTarget.THIS,
-							EntityPredicate.Builder.entity()
-								.of(EntityType.TRIDENT)
-								.located(
-									LocationPredicate.Builder.location()
-										.setCanSeeSky(true)
-										.setBlock(net.minecraft.advancements.critereon.BlockPredicate.Builder.block().of(Blocks.LIGHTNING_ROD))
-								)
-						)
+						LootItemEntityPropertyCondition.hasProperties(LootContext.EntityTarget.THIS, EntityPredicate.Builder.entity().of(EntityType.TRIDENT)),
+						LocationCheck.checkLocation(LocationPredicate.Builder.location().setCanSeeSky(true)),
+						LootItemBlockStatePropertyCondition.hasBlockStateProperties(Blocks.LIGHTNING_ROD)
 					)
 				)
 		);
@@ -1011,7 +997,8 @@ public class Enchantments {
 						Enchantment.dynamicCost(12, 20),
 						Enchantment.constantCost(50),
 						2,
-						EquipmentSlotGroup.MAINHAND
+						EquipmentSlotGroup.MAINHAND,
+						EquipmentSlotGroup.OFFHAND
 					)
 				)
 				.withSpecialEffect(EnchantmentEffectComponents.CROSSBOW_CHARGE_TIME, new AddValue(LevelBasedValue.perLevel(-0.25F)))
@@ -1129,6 +1116,6 @@ public class Enchantments {
 	}
 
 	private static ResourceKey<Enchantment> key(String string) {
-		return ResourceKey.create(Registries.ENCHANTMENT, new ResourceLocation(string));
+		return ResourceKey.create(Registries.ENCHANTMENT, ResourceLocation.withDefaultNamespace(string));
 	}
 }

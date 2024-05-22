@@ -42,6 +42,7 @@ public class EntitySelectorParser {
 	private static final char SELECTOR_RANDOM_PLAYERS = 'r';
 	private static final char SELECTOR_CURRENT_ENTITY = 's';
 	private static final char SELECTOR_ALL_ENTITIES = 'e';
+	private static final char SELECTOR_NEAREST_ENTITY = 'n';
 	public static final SimpleCommandExceptionType ERROR_INVALID_NAME_OR_UUID = new SimpleCommandExceptionType(Component.translatable("argument.entity.invalid"));
 	public static final DynamicCommandExceptionType ERROR_UNKNOWN_SELECTOR_TYPE = new DynamicCommandExceptionType(
 		object -> Component.translatableEscape("argument.entity.selector.unknown", object)
@@ -220,16 +221,20 @@ public class EntitySelectorParser {
 				this.maxResults = 1;
 				this.includesEntities = true;
 				this.currentEntity = true;
-			} else {
-				if (c != 'e') {
-					this.reader.setCursor(i);
-					throw ERROR_UNKNOWN_SELECTOR_TYPE.createWithContext(this.reader, "@" + c);
-				}
-
+			} else if (c == 'e') {
 				this.maxResults = Integer.MAX_VALUE;
 				this.includesEntities = true;
 				this.order = EntitySelector.ORDER_ARBITRARY;
 				this.predicate = Entity::isAlive;
+			} else {
+				if (c != 'n') {
+					this.reader.setCursor(i);
+					throw ERROR_UNKNOWN_SELECTOR_TYPE.createWithContext(this.reader, "@" + c);
+				}
+
+				this.maxResults = 1;
+				this.includesEntities = true;
+				this.order = ORDER_NEAREST;
 			}
 
 			this.suggestions = this::suggestOpenOptions;
@@ -467,6 +472,7 @@ public class EntitySelectorParser {
 		suggestionsBuilder.suggest("@r", Component.translatable("argument.entity.selector.randomPlayer"));
 		suggestionsBuilder.suggest("@s", Component.translatable("argument.entity.selector.self"));
 		suggestionsBuilder.suggest("@e", Component.translatable("argument.entity.selector.allEntities"));
+		suggestionsBuilder.suggest("@n", Component.translatable("argument.entity.selector.nearestEntity"));
 	}
 
 	private CompletableFuture<Suggestions> suggestNameOrSelector(SuggestionsBuilder suggestionsBuilder, Consumer<SuggestionsBuilder> consumer) {

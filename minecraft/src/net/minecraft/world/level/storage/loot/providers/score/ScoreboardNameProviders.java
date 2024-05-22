@@ -24,6 +24,6 @@ public class ScoreboardNameProviders {
 	public static final LootScoreProviderType CONTEXT = register("context", ContextScoreboardNameProvider.CODEC);
 
 	private static LootScoreProviderType register(String string, MapCodec<? extends ScoreboardNameProvider> mapCodec) {
-		return Registry.register(BuiltInRegistries.LOOT_SCORE_PROVIDER_TYPE, new ResourceLocation(string), new LootScoreProviderType(mapCodec));
+		return Registry.register(BuiltInRegistries.LOOT_SCORE_PROVIDER_TYPE, ResourceLocation.withDefaultNamespace(string), new LootScoreProviderType(mapCodec));
 	}
 }

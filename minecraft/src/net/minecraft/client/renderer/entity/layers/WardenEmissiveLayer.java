@@ -13,6 +13,8 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FastColor;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.monster.warden.Warden;
 
 @Environment(EnvType.CLIENT)
@@ -37,8 +39,9 @@ public class WardenEmissiveLayer<T extends Warden, M extends WardenModel<T>> ext
 		if (!warden.isInvisible()) {
 			this.onlyDrawSelectedParts();
 			VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entityTranslucentEmissive(this.texture));
-			this.getParentModel()
-				.renderToBuffer(poseStack, vertexConsumer, i, LivingEntityRenderer.getOverlayCoords(warden, 0.0F), 1.0F, 1.0F, 1.0F, this.alphaFunction.apply(warden, h, j));
+			float m = this.alphaFunction.apply(warden, h, j);
+			int n = FastColor.ARGB32.color(Mth.floor(m * 255.0F), 255, 255, 255);
+			this.getParentModel().renderToBuffer(poseStack, vertexConsumer, i, LivingEntityRenderer.getOverlayCoords(warden, 0.0F), n);
 			this.resetDrawForAllParts();
 		}
 	}

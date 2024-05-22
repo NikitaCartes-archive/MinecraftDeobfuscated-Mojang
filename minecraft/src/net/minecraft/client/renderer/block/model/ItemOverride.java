@@ -39,7 +39,7 @@ public class ItemOverride {
 	protected static class Deserializer implements JsonDeserializer<ItemOverride> {
 		public ItemOverride deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
 			JsonObject jsonObject = jsonElement.getAsJsonObject();
-			ResourceLocation resourceLocation = new ResourceLocation(GsonHelper.getAsString(jsonObject, "model"));
+			ResourceLocation resourceLocation = ResourceLocation.parse(GsonHelper.getAsString(jsonObject, "model"));
 			List<ItemOverride.Predicate> list = this.getPredicates(jsonObject);
 			return new ItemOverride(resourceLocation, list);
 		}
@@ -49,7 +49,7 @@ public class ItemOverride {
 			JsonObject jsonObject2 = GsonHelper.getAsJsonObject(jsonObject, "predicate");
 
 			for (Entry<String, JsonElement> entry : jsonObject2.entrySet()) {
-				map.put(new ResourceLocation((String)entry.getKey()), GsonHelper.convertToFloat((JsonElement)entry.getValue(), (String)entry.getKey()));
+				map.put(ResourceLocation.parse((String)entry.getKey()), GsonHelper.convertToFloat((JsonElement)entry.getValue(), (String)entry.getKey()));
 			}
 
 			return (List<ItemOverride.Predicate>)map.entrySet()

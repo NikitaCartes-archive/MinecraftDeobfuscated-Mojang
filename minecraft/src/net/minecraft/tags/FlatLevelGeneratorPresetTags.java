@@ -11,6 +11,6 @@ public class FlatLevelGeneratorPresetTags {
 	}
 
 	private static TagKey<FlatLevelGeneratorPreset> create(String string) {
-		return TagKey.create(Registries.FLAT_LEVEL_GENERATOR_PRESET, new ResourceLocation(string));
+		return TagKey.create(Registries.FLAT_LEVEL_GENERATOR_PRESET, ResourceLocation.withDefaultNamespace(string));
 	}
 }

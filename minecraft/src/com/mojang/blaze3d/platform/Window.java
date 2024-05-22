@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import javax.annotation.Nullable;
@@ -103,6 +104,20 @@ public final class Window implements AutoCloseable {
 		GLFW.glfwSetWindowSizeCallback(this.window, this::onResize);
 		GLFW.glfwSetWindowFocusCallback(this.window, this::onFocus);
 		GLFW.glfwSetCursorEnterCallback(this.window, this::onEnter);
+	}
+
+	public static String getPlatform() {
+		int i = GLFW.glfwGetPlatform();
+
+		return switch (i) {
+			case 0 -> "<error>";
+			case 393217 -> "win32";
+			case 393218 -> "cocoa";
+			case 393219 -> "wayland";
+			case 393220 -> "x11";
+			case 393221 -> "null";
+			default -> String.format(Locale.ROOT, "unknown (%08X)", i);
+		};
 	}
 
 	public int getRefreshRate() {

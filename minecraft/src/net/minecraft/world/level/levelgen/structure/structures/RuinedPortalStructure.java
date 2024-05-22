@@ -102,9 +102,9 @@ public class RuinedPortalStructure extends Structure {
 			properties.replaceWithBlackstone = setup4.replaceWithBlackstone();
 			ResourceLocation resourceLocation;
 			if (worldgenRandom.nextFloat() < 0.05F) {
-				resourceLocation = new ResourceLocation(STRUCTURE_LOCATION_GIANT_PORTALS[worldgenRandom.nextInt(STRUCTURE_LOCATION_GIANT_PORTALS.length)]);
+				resourceLocation = ResourceLocation.withDefaultNamespace(STRUCTURE_LOCATION_GIANT_PORTALS[worldgenRandom.nextInt(STRUCTURE_LOCATION_GIANT_PORTALS.length)]);
 			} else {
-				resourceLocation = new ResourceLocation(STRUCTURE_LOCATION_PORTALS[worldgenRandom.nextInt(STRUCTURE_LOCATION_PORTALS.length)]);
+				resourceLocation = ResourceLocation.withDefaultNamespace(STRUCTURE_LOCATION_PORTALS[worldgenRandom.nextInt(STRUCTURE_LOCATION_PORTALS.length)]);
 			}
 
 			StructureTemplate structureTemplate = generationContext.structureTemplateManager().getOrCreate(resourceLocation);

@@ -1,9 +1,13 @@
 package net.minecraft.world.entity.ai.goal;
 
 import java.util.EnumSet;
+import java.util.function.Function;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.util.DefaultRandomPos;
@@ -18,10 +22,20 @@ public class PanicGoal extends Goal {
 	protected double posY;
 	protected double posZ;
 	protected boolean isRunning;
+	private final Function<PathfinderMob, TagKey<DamageType>> panicCausingDamageTypes;
 
 	public PanicGoal(PathfinderMob pathfinderMob, double d) {
+		this(pathfinderMob, d, DamageTypeTags.PANIC_CAUSES);
+	}
+
+	public PanicGoal(PathfinderMob pathfinderMob, double d, TagKey<DamageType> tagKey) {
+		this(pathfinderMob, d, pathfinderMobx -> tagKey);
+	}
+
+	public PanicGoal(PathfinderMob pathfinderMob, double d, Function<PathfinderMob, TagKey<DamageType>> function) {
 		this.mob = pathfinderMob;
 		this.speedModifier = d;
+		this.panicCausingDamageTypes = function;
 		this.setFlags(EnumSet.of(Goal.Flag.MOVE));
 	}
 
@@ -45,7 +59,7 @@ public class PanicGoal extends Goal {
 	}
 
 	protected boolean shouldPanic() {
-		return this.mob.getLastHurtByMob() != null || this.mob.isFreezing() || this.mob.isOnFire();
+		return this.mob.getLastDamageSource() != null && this.mob.getLastDamageSource().is((TagKey<DamageType>)this.panicCausingDamageTypes.apply(this.mob));
 	}
 
 	protected boolean findRandomPosition() {

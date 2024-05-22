@@ -44,7 +44,7 @@ import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class PresetFlatWorldScreen extends Screen {
-	static final ResourceLocation SLOT_SPRITE = new ResourceLocation("container/slot");
+	static final ResourceLocation SLOT_SPRITE = ResourceLocation.withDefaultNamespace("container/slot");
 	static final Logger LOGGER = LogUtils.getLogger();
 	private static final int SLOT_BG_SIZE = 18;
 	private static final int SLOT_STAT_HEIGHT = 20;
@@ -91,7 +91,7 @@ public class PresetFlatWorldScreen extends Screen {
 
 		Optional<Holder.Reference<Block>> optional;
 		try {
-			optional = holderGetter.get(ResourceKey.create(Registries.BLOCK, new ResourceLocation(string2)));
+			optional = holderGetter.get(ResourceKey.create(Registries.BLOCK, ResourceLocation.parse(string2)));
 		} catch (Exception var10) {
 			LOGGER.error("Error while parsing flat world string", (Throwable)var10);
 			return null;
@@ -292,7 +292,7 @@ public class PresetFlatWorldScreen extends Screen {
 
 		@Environment(EnvType.CLIENT)
 		public class Entry extends ObjectSelectionList.Entry<PresetFlatWorldScreen.PresetsList.Entry> {
-			private static final ResourceLocation STATS_ICON_LOCATION = new ResourceLocation("textures/gui/container/stats_icons.png");
+			private static final ResourceLocation STATS_ICON_LOCATION = ResourceLocation.withDefaultNamespace("textures/gui/container/stats_icons.png");
 			private final FlatLevelGeneratorPreset preset;
 			private final Component name;
 

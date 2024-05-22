@@ -14,6 +14,6 @@ public class Blocks {
 	public static final ResourceKey<Block> ATTACHED_MELON_STEM = createKey("attached_melon_stem");
 
 	private static ResourceKey<Block> createKey(String string) {
-		return ResourceKey.create(Registries.BLOCK, new ResourceLocation(string));
+		return ResourceKey.create(Registries.BLOCK, ResourceLocation.withDefaultNamespace(string));
 	}
 }

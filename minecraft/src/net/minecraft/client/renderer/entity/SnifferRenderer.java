@@ -9,7 +9,7 @@ import net.minecraft.world.entity.animal.sniffer.Sniffer;
 
 @Environment(EnvType.CLIENT)
 public class SnifferRenderer extends MobRenderer<Sniffer, SnifferModel<Sniffer>> {
-	private static final ResourceLocation SNIFFER_LOCATION = new ResourceLocation("textures/entity/sniffer/sniffer.png");
+	private static final ResourceLocation SNIFFER_LOCATION = ResourceLocation.withDefaultNamespace("textures/entity/sniffer/sniffer.png");
 
 	public SnifferRenderer(EntityRendererProvider.Context context) {
 		super(context, new SnifferModel<>(context.bakeLayer(ModelLayers.SNIFFER)), 1.1F);

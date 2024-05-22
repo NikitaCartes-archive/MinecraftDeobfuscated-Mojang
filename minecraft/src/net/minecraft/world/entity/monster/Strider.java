@@ -2,7 +2,6 @@ package net.minecraft.world.entity.monster;
 
 import com.google.common.collect.Sets;
 import java.util.Set;
-import java.util.UUID;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -10,6 +9,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -72,9 +72,9 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 
 public class Strider extends Animal implements ItemSteerable, Saddleable {
-	private static final UUID SUFFOCATING_MODIFIER_UUID = UUID.fromString("9e362924-01de-4ddd-a2b2-d0f7a405a174");
+	private static final ResourceLocation SUFFOCATING_MODIFIER_ID = ResourceLocation.withDefaultNamespace("suffocating");
 	private static final AttributeModifier SUFFOCATING_MODIFIER = new AttributeModifier(
-		SUFFOCATING_MODIFIER_UUID, "Strider suffocating modifier", -0.34F, AttributeModifier.Operation.ADD_MULTIPLIED_BASE
+		SUFFOCATING_MODIFIER_ID, -0.34F, AttributeModifier.Operation.ADD_MULTIPLIED_BASE
 	);
 	private static final float SUFFOCATE_STEERING_MODIFIER = 0.35F;
 	private static final float STEERING_MODIFIER = 0.55F;
@@ -174,7 +174,7 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
 			if (bl) {
 				attributeInstance.addOrUpdateTransientModifier(SUFFOCATING_MODIFIER);
 			} else {
-				attributeInstance.removeModifier(SUFFOCATING_MODIFIER);
+				attributeInstance.removeModifier(SUFFOCATING_MODIFIER_ID);
 			}
 		}
 	}

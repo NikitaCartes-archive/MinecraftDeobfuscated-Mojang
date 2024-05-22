@@ -23,7 +23,7 @@ import net.minecraft.resources.ResourceLocation;
 
 @Environment(EnvType.CLIENT)
 public class AdvancementsScreen extends Screen implements ClientAdvancements.Listener {
-	private static final ResourceLocation WINDOW_LOCATION = new ResourceLocation("textures/gui/advancements/window.png");
+	private static final ResourceLocation WINDOW_LOCATION = ResourceLocation.withDefaultNamespace("textures/gui/advancements/window.png");
 	public static final int WINDOW_WIDTH = 252;
 	public static final int WINDOW_HEIGHT = 140;
 	private static final int WINDOW_INSIDE_X = 9;

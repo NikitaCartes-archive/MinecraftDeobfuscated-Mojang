@@ -2,7 +2,6 @@ package net.minecraft.client.renderer.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Axis;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -14,7 +13,7 @@ import net.minecraft.world.entity.projectile.DragonFireball;
 
 @Environment(EnvType.CLIENT)
 public class DragonFireballRenderer extends EntityRenderer<DragonFireball> {
-	private static final ResourceLocation TEXTURE_LOCATION = new ResourceLocation("textures/entity/enderdragon/dragon_fireball.png");
+	private static final ResourceLocation TEXTURE_LOCATION = ResourceLocation.withDefaultNamespace("textures/entity/enderdragon/dragon_fireball.png");
 	private static final RenderType RENDER_TYPE = RenderType.entityCutoutNoCull(TEXTURE_LOCATION);
 
 	public DragonFireballRenderer(EntityRendererProvider.Context context) {
@@ -29,7 +28,6 @@ public class DragonFireballRenderer extends EntityRenderer<DragonFireball> {
 		poseStack.pushPose();
 		poseStack.scale(2.0F, 2.0F, 2.0F);
 		poseStack.mulPose(this.entityRenderDispatcher.cameraOrientation());
-		poseStack.mulPose(Axis.YP.rotationDegrees(180.0F));
 		PoseStack.Pose pose = poseStack.last();
 		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RENDER_TYPE);
 		vertex(vertexConsumer, pose, i, 0.0F, 0, 0, 1);
@@ -41,13 +39,12 @@ public class DragonFireballRenderer extends EntityRenderer<DragonFireball> {
 	}
 
 	private static void vertex(VertexConsumer vertexConsumer, PoseStack.Pose pose, int i, float f, int j, int k, int l) {
-		vertexConsumer.vertex(pose, f - 0.5F, (float)j - 0.25F, 0.0F)
-			.color(255, 255, 255, 255)
-			.uv((float)k, (float)l)
-			.overlayCoords(OverlayTexture.NO_OVERLAY)
-			.uv2(i)
-			.normal(pose, 0.0F, 1.0F, 0.0F)
-			.endVertex();
+		vertexConsumer.addVertex(pose, f - 0.5F, (float)j - 0.25F, 0.0F)
+			.setColor(-1)
+			.setUv((float)k, (float)l)
+			.setOverlay(OverlayTexture.NO_OVERLAY)
+			.setLight(i)
+			.setNormal(pose, 0.0F, 1.0F, 0.0F);
 	}
 
 	public ResourceLocation getTextureLocation(DragonFireball dragonFireball) {

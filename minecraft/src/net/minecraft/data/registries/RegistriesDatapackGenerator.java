@@ -50,7 +50,7 @@ public class RegistriesDatapackGenerator implements DataProvider {
 		return provider.lookup(resourceKey)
 			.map(
 				registryLookup -> {
-					PackOutput.PathProvider pathProvider = this.output.createPathProvider(PackOutput.Target.DATA_PACK, resourceKey.location().getPath());
+					PackOutput.PathProvider pathProvider = this.output.createRegistryElementsPathProvider(resourceKey);
 					return CompletableFuture.allOf(
 						(CompletableFuture[])registryLookup.listElements()
 							.map(reference -> dumpValue(pathProvider.json(reference.key().location()), cachedOutput, dynamicOps, registryData.elementCodec(), (T)reference.value()))

@@ -2,10 +2,10 @@ package net.minecraft.world.entity.ai.attributes;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
-import java.util.UUID;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import net.minecraft.core.Holder;
+import net.minecraft.resources.ResourceLocation;
 
 public class AttributeSupplier {
 	private final Map<Holder<Attribute>, AttributeInstance> instances;
@@ -31,10 +31,10 @@ public class AttributeSupplier {
 		return this.getAttributeInstance(holder).getBaseValue();
 	}
 
-	public double getModifierValue(Holder<Attribute> holder, UUID uUID) {
-		AttributeModifier attributeModifier = this.getAttributeInstance(holder).getModifier(uUID);
+	public double getModifierValue(Holder<Attribute> holder, ResourceLocation resourceLocation) {
+		AttributeModifier attributeModifier = this.getAttributeInstance(holder).getModifier(resourceLocation);
 		if (attributeModifier == null) {
-			throw new IllegalArgumentException("Can't find modifier " + uUID + " on attribute " + holder.getRegisteredName());
+			throw new IllegalArgumentException("Can't find modifier " + resourceLocation + " on attribute " + holder.getRegisteredName());
 		} else {
 			return attributeModifier.amount();
 		}
@@ -60,9 +60,9 @@ public class AttributeSupplier {
 		return this.instances.containsKey(holder);
 	}
 
-	public boolean hasModifier(Holder<Attribute> holder, UUID uUID) {
+	public boolean hasModifier(Holder<Attribute> holder, ResourceLocation resourceLocation) {
 		AttributeInstance attributeInstance = (AttributeInstance)this.instances.get(holder);
-		return attributeInstance != null && attributeInstance.getModifier(uUID) != null;
+		return attributeInstance != null && attributeInstance.getModifier(resourceLocation) != null;
 	}
 
 	public static class Builder {

@@ -99,7 +99,7 @@ public class ServerRecipeBook extends RecipeBook {
 			String string = listTag.getString(i);
 
 			try {
-				ResourceLocation resourceLocation = new ResourceLocation(string);
+				ResourceLocation resourceLocation = ResourceLocation.parse(string);
 				Optional<RecipeHolder<?>> optional = recipeManager.byKey(resourceLocation);
 				if (optional.isEmpty()) {
 					LOGGER.error("Tried to load unrecognized recipe: {} removed now.", resourceLocation);

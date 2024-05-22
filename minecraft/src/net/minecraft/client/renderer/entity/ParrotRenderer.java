@@ -10,11 +10,11 @@ import net.minecraft.world.entity.animal.Parrot;
 
 @Environment(EnvType.CLIENT)
 public class ParrotRenderer extends MobRenderer<Parrot, ParrotModel> {
-	private static final ResourceLocation RED_BLUE = new ResourceLocation("textures/entity/parrot/parrot_red_blue.png");
-	private static final ResourceLocation BLUE = new ResourceLocation("textures/entity/parrot/parrot_blue.png");
-	private static final ResourceLocation GREEN = new ResourceLocation("textures/entity/parrot/parrot_green.png");
-	private static final ResourceLocation YELLOW_BLUE = new ResourceLocation("textures/entity/parrot/parrot_yellow_blue.png");
-	private static final ResourceLocation GREY = new ResourceLocation("textures/entity/parrot/parrot_grey.png");
+	private static final ResourceLocation RED_BLUE = ResourceLocation.withDefaultNamespace("textures/entity/parrot/parrot_red_blue.png");
+	private static final ResourceLocation BLUE = ResourceLocation.withDefaultNamespace("textures/entity/parrot/parrot_blue.png");
+	private static final ResourceLocation GREEN = ResourceLocation.withDefaultNamespace("textures/entity/parrot/parrot_green.png");
+	private static final ResourceLocation YELLOW_BLUE = ResourceLocation.withDefaultNamespace("textures/entity/parrot/parrot_yellow_blue.png");
+	private static final ResourceLocation GREY = ResourceLocation.withDefaultNamespace("textures/entity/parrot/parrot_grey.png");
 
 	public ParrotRenderer(EntityRendererProvider.Context context) {
 		super(context, new ParrotModel(context.bakeLayer(ModelLayers.PARROT)), 0.3F);

@@ -4,8 +4,8 @@ import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
 import com.mojang.authlib.GameProfile;
 import com.mojang.logging.LogUtils;
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.UUID;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
@@ -145,8 +145,8 @@ public class IntegratedServer extends MinecraftServer {
 	}
 
 	@Override
-	public File getServerDirectory() {
-		return this.minecraft.gameDirectory;
+	public Path getServerDirectory() {
+		return this.minecraft.gameDirectory.toPath();
 	}
 
 	@Override

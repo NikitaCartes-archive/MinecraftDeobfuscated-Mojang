@@ -1,7 +1,6 @@
 package net.minecraft.world.entity.animal;
 
 import com.mojang.serialization.Codec;
-import java.util.UUID;
 import java.util.function.IntFunction;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
@@ -74,10 +73,10 @@ public class Rabbit extends Animal implements VariantHolder<Rabbit.Variant> {
 	public static final double FLEE_SPEED_MOD = 2.2;
 	public static final double ATTACK_SPEED_MOD = 1.4;
 	private static final EntityDataAccessor<Integer> DATA_TYPE_ID = SynchedEntityData.defineId(Rabbit.class, EntityDataSerializers.INT);
-	private static final ResourceLocation KILLER_BUNNY = new ResourceLocation("killer_bunny");
+	private static final ResourceLocation KILLER_BUNNY = ResourceLocation.withDefaultNamespace("killer_bunny");
 	private static final int DEFAULT_ATTACK_POWER = 3;
 	private static final int EVIL_ATTACK_POWER_INCREMENT = 5;
-	private static final UUID EVIL_ATTACK_POWER_MODIFIER = UUID.fromString("6555be74-63b3-41f1-a245-77833b3c2562");
+	private static final ResourceLocation EVIL_ATTACK_POWER_MODIFIER = ResourceLocation.withDefaultNamespace("evil");
 	private static final int EVIL_ARMOR_VALUE = 8;
 	private static final int MORE_CARROTS_DELAY = 40;
 	private int jumpTicks;
@@ -354,7 +353,7 @@ public class Rabbit extends Animal implements VariantHolder<Rabbit.Variant> {
 			this.targetSelector.addGoal(2, new NearestAttackableTargetGoal(this, Player.class, true));
 			this.targetSelector.addGoal(2, new NearestAttackableTargetGoal(this, Wolf.class, true));
 			this.getAttribute(Attributes.ATTACK_DAMAGE)
-				.addOrUpdateTransientModifier(new AttributeModifier(EVIL_ATTACK_POWER_MODIFIER, "Evil rabbit strength", 5.0, AttributeModifier.Operation.ADD_VALUE));
+				.addOrUpdateTransientModifier(new AttributeModifier(EVIL_ATTACK_POWER_MODIFIER, 5.0, AttributeModifier.Operation.ADD_VALUE));
 			if (!this.hasCustomName()) {
 				this.setCustomName(Component.translatable(Util.makeDescriptionId("entity", KILLER_BUNNY)));
 			}

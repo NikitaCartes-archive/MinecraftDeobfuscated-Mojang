@@ -10,7 +10,7 @@ import net.minecraft.world.entity.GlowSquid;
 
 @Environment(EnvType.CLIENT)
 public class GlowSquidRenderer extends SquidRenderer<GlowSquid> {
-	private static final ResourceLocation GLOW_SQUID_LOCATION = new ResourceLocation("textures/entity/squid/glow_squid.png");
+	private static final ResourceLocation GLOW_SQUID_LOCATION = ResourceLocation.withDefaultNamespace("textures/entity/squid/glow_squid.png");
 
 	public GlowSquidRenderer(EntityRendererProvider.Context context, SquidModel<GlowSquid> squidModel) {
 		super(context, squidModel);

@@ -50,7 +50,7 @@ public class PlacementUtils {
 	}
 
 	public static ResourceKey<PlacedFeature> createKey(String string) {
-		return ResourceKey.create(Registries.PLACED_FEATURE, new ResourceLocation(string));
+		return ResourceKey.create(Registries.PLACED_FEATURE, ResourceLocation.withDefaultNamespace(string));
 	}
 
 	public static void register(

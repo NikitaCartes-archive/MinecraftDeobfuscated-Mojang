@@ -36,24 +36,24 @@ import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class ServerSelectionList extends ObjectSelectionList<ServerSelectionList.Entry> {
-	static final ResourceLocation INCOMPATIBLE_SPRITE = new ResourceLocation("server_list/incompatible");
-	static final ResourceLocation UNREACHABLE_SPRITE = new ResourceLocation("server_list/unreachable");
-	static final ResourceLocation PING_1_SPRITE = new ResourceLocation("server_list/ping_1");
-	static final ResourceLocation PING_2_SPRITE = new ResourceLocation("server_list/ping_2");
-	static final ResourceLocation PING_3_SPRITE = new ResourceLocation("server_list/ping_3");
-	static final ResourceLocation PING_4_SPRITE = new ResourceLocation("server_list/ping_4");
-	static final ResourceLocation PING_5_SPRITE = new ResourceLocation("server_list/ping_5");
-	static final ResourceLocation PINGING_1_SPRITE = new ResourceLocation("server_list/pinging_1");
-	static final ResourceLocation PINGING_2_SPRITE = new ResourceLocation("server_list/pinging_2");
-	static final ResourceLocation PINGING_3_SPRITE = new ResourceLocation("server_list/pinging_3");
-	static final ResourceLocation PINGING_4_SPRITE = new ResourceLocation("server_list/pinging_4");
-	static final ResourceLocation PINGING_5_SPRITE = new ResourceLocation("server_list/pinging_5");
-	static final ResourceLocation JOIN_HIGHLIGHTED_SPRITE = new ResourceLocation("server_list/join_highlighted");
-	static final ResourceLocation JOIN_SPRITE = new ResourceLocation("server_list/join");
-	static final ResourceLocation MOVE_UP_HIGHLIGHTED_SPRITE = new ResourceLocation("server_list/move_up_highlighted");
-	static final ResourceLocation MOVE_UP_SPRITE = new ResourceLocation("server_list/move_up");
-	static final ResourceLocation MOVE_DOWN_HIGHLIGHTED_SPRITE = new ResourceLocation("server_list/move_down_highlighted");
-	static final ResourceLocation MOVE_DOWN_SPRITE = new ResourceLocation("server_list/move_down");
+	static final ResourceLocation INCOMPATIBLE_SPRITE = ResourceLocation.withDefaultNamespace("server_list/incompatible");
+	static final ResourceLocation UNREACHABLE_SPRITE = ResourceLocation.withDefaultNamespace("server_list/unreachable");
+	static final ResourceLocation PING_1_SPRITE = ResourceLocation.withDefaultNamespace("server_list/ping_1");
+	static final ResourceLocation PING_2_SPRITE = ResourceLocation.withDefaultNamespace("server_list/ping_2");
+	static final ResourceLocation PING_3_SPRITE = ResourceLocation.withDefaultNamespace("server_list/ping_3");
+	static final ResourceLocation PING_4_SPRITE = ResourceLocation.withDefaultNamespace("server_list/ping_4");
+	static final ResourceLocation PING_5_SPRITE = ResourceLocation.withDefaultNamespace("server_list/ping_5");
+	static final ResourceLocation PINGING_1_SPRITE = ResourceLocation.withDefaultNamespace("server_list/pinging_1");
+	static final ResourceLocation PINGING_2_SPRITE = ResourceLocation.withDefaultNamespace("server_list/pinging_2");
+	static final ResourceLocation PINGING_3_SPRITE = ResourceLocation.withDefaultNamespace("server_list/pinging_3");
+	static final ResourceLocation PINGING_4_SPRITE = ResourceLocation.withDefaultNamespace("server_list/pinging_4");
+	static final ResourceLocation PINGING_5_SPRITE = ResourceLocation.withDefaultNamespace("server_list/pinging_5");
+	static final ResourceLocation JOIN_HIGHLIGHTED_SPRITE = ResourceLocation.withDefaultNamespace("server_list/join_highlighted");
+	static final ResourceLocation JOIN_SPRITE = ResourceLocation.withDefaultNamespace("server_list/join");
+	static final ResourceLocation MOVE_UP_HIGHLIGHTED_SPRITE = ResourceLocation.withDefaultNamespace("server_list/move_up_highlighted");
+	static final ResourceLocation MOVE_UP_SPRITE = ResourceLocation.withDefaultNamespace("server_list/move_up");
+	static final ResourceLocation MOVE_DOWN_HIGHLIGHTED_SPRITE = ResourceLocation.withDefaultNamespace("server_list/move_down_highlighted");
+	static final ResourceLocation MOVE_DOWN_SPRITE = ResourceLocation.withDefaultNamespace("server_list/move_down");
 	static final Logger LOGGER = LogUtils.getLogger();
 	static final ThreadPoolExecutor THREAD_POOL = new ScheduledThreadPoolExecutor(
 		5,

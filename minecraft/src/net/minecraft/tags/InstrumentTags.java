@@ -10,6 +10,6 @@ public interface InstrumentTags {
 	TagKey<Instrument> GOAT_HORNS = create("goat_horns");
 
 	private static TagKey<Instrument> create(String string) {
-		return TagKey.create(Registries.INSTRUMENT, new ResourceLocation(string));
+		return TagKey.create(Registries.INSTRUMENT, ResourceLocation.withDefaultNamespace(string));
 	}
 }

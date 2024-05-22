@@ -15,7 +15,9 @@ import net.minecraft.util.Mth;
 public abstract class AbstractButton extends AbstractWidget {
 	protected static final int TEXT_MARGIN = 2;
 	private static final WidgetSprites SPRITES = new WidgetSprites(
-		new ResourceLocation("widget/button"), new ResourceLocation("widget/button_disabled"), new ResourceLocation("widget/button_highlighted")
+		ResourceLocation.withDefaultNamespace("widget/button"),
+		ResourceLocation.withDefaultNamespace("widget/button_disabled"),
+		ResourceLocation.withDefaultNamespace("widget/button_highlighted")
 	);
 
 	public AbstractButton(int i, int j, int k, int l, Component component) {

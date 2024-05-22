@@ -20,8 +20,8 @@ import net.minecraft.world.entity.projectile.WitherSkull;
 
 @Environment(EnvType.CLIENT)
 public class WitherSkullRenderer extends EntityRenderer<WitherSkull> {
-	private static final ResourceLocation WITHER_INVULNERABLE_LOCATION = new ResourceLocation("textures/entity/wither/wither_invulnerable.png");
-	private static final ResourceLocation WITHER_LOCATION = new ResourceLocation("textures/entity/wither/wither.png");
+	private static final ResourceLocation WITHER_INVULNERABLE_LOCATION = ResourceLocation.withDefaultNamespace("textures/entity/wither/wither_invulnerable.png");
+	private static final ResourceLocation WITHER_LOCATION = ResourceLocation.withDefaultNamespace("textures/entity/wither/wither.png");
 	private final SkullModel model;
 
 	public WitherSkullRenderer(EntityRendererProvider.Context context) {
@@ -47,7 +47,7 @@ public class WitherSkullRenderer extends EntityRenderer<WitherSkull> {
 		float j = Mth.lerp(g, witherSkull.xRotO, witherSkull.getXRot());
 		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(this.model.renderType(this.getTextureLocation(witherSkull)));
 		this.model.setupAnim(0.0F, h, j);
-		this.model.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
+		this.model.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY);
 		poseStack.popPose();
 		super.render(witherSkull, f, g, poseStack, multiBufferSource, i);
 	}

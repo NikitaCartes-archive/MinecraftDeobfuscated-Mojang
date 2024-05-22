@@ -34,9 +34,7 @@ public class BoatRenderer extends EntityRenderer<Boat> {
 		super(context);
 		this.shadowRadius = 0.8F;
 		this.boatResources = (Map<Boat.Type, Pair<ResourceLocation, ListModel<Boat>>>)Stream.of(Boat.Type.values())
-			.collect(
-				ImmutableMap.toImmutableMap(type -> type, type -> Pair.of(new ResourceLocation(getTextureLocation(type, bl)), this.createBoatModel(context, type, bl)))
-			);
+			.collect(ImmutableMap.toImmutableMap(type -> type, type -> Pair.of(getTextureLocation(type, bl), this.createBoatModel(context, type, bl))));
 	}
 
 	private ListModel<Boat> createBoatModel(EntityRendererProvider.Context context, Boat.Type type, boolean bl) {
@@ -49,8 +47,10 @@ public class BoatRenderer extends EntityRenderer<Boat> {
 		}
 	}
 
-	private static String getTextureLocation(Boat.Type type, boolean bl) {
-		return bl ? "textures/entity/chest_boat/" + type.getName() + ".png" : "textures/entity/boat/" + type.getName() + ".png";
+	private static ResourceLocation getTextureLocation(Boat.Type type, boolean bl) {
+		return bl
+			? ResourceLocation.withDefaultNamespace("textures/entity/chest_boat/" + type.getName() + ".png")
+			: ResourceLocation.withDefaultNamespace("textures/entity/boat/" + type.getName() + ".png");
 	}
 
 	public void render(Boat boat, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
@@ -79,7 +79,7 @@ public class BoatRenderer extends EntityRenderer<Boat> {
 		poseStack.mulPose(Axis.YP.rotationDegrees(90.0F));
 		listModel.setupAnim(boat, g, 0.0F, -0.1F, 0.0F, 0.0F);
 		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(listModel.renderType(resourceLocation));
-		listModel.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
+		listModel.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY);
 		if (!boat.isUnderWater()) {
 			VertexConsumer vertexConsumer2 = multiBufferSource.getBuffer(RenderType.waterMask());
 			if (listModel instanceof WaterPatchModel waterPatchModel) {

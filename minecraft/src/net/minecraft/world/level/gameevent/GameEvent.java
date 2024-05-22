@@ -85,7 +85,7 @@ public record GameEvent(int notificationRadius) {
 	}
 
 	private static Holder.Reference<GameEvent> register(String string, int i) {
-		return Registry.registerForHolder(BuiltInRegistries.GAME_EVENT, new ResourceLocation(string), new GameEvent(i));
+		return Registry.registerForHolder(BuiltInRegistries.GAME_EVENT, ResourceLocation.withDefaultNamespace(string), new GameEvent(i));
 	}
 
 	public static record Context(@Nullable Entity sourceEntity, @Nullable BlockState affectedState) {

@@ -7,13 +7,11 @@ import java.util.List;
 import java.util.function.Consumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.realms.RealmsLabel;
@@ -30,10 +28,8 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
 	public static final List<GameType> GAME_MODES = ImmutableList.of(GameType.SURVIVAL, GameType.CREATIVE, GameType.ADVENTURE);
 	private static final Component NAME_LABEL = Component.translatable("mco.configure.world.edit.slot.name");
 	static final Component SPAWN_PROTECTION_TEXT = Component.translatable("mco.configure.world.spawnProtection");
-	private static final Component SPAWN_WARNING_TITLE = Component.translatable("mco.configure.world.spawn_toggle.title")
-		.withStyle(ChatFormatting.RED, ChatFormatting.BOLD);
 	private EditBox nameEdit;
-	protected final RealmsConfigureWorldScreen parent;
+	protected final RealmsConfigureWorldScreen parentScreen;
 	private int column1X;
 	private int columnWidth;
 	private final RealmsWorldOptions options;
@@ -55,7 +51,7 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
 		RealmsConfigureWorldScreen realmsConfigureWorldScreen, RealmsWorldOptions realmsWorldOptions, RealmsServer.WorldType worldType, int i
 	) {
 		super(Component.translatable("mco.configure.world.buttons.options"));
-		this.parent = realmsConfigureWorldScreen;
+		this.parentScreen = realmsConfigureWorldScreen;
 		this.options = realmsWorldOptions;
 		this.worldType = worldType;
 		this.difficulty = findByIndex(DIFFICULTIES, realmsWorldOptions.difficulty, 2);
@@ -82,13 +78,8 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
 	}
 
 	@Override
-	public boolean keyPressed(int i, int j, int k) {
-		if (i == 256) {
-			this.minecraft.setScreen(this.parent);
-			return true;
-		} else {
-			return super.keyPressed(i, j, k);
-		}
+	public void onClose() {
+		this.minecraft.setScreen(this.parentScreen);
 	}
 
 	private static <T> T findByIndex(List<T> list, int i, int j) {
@@ -223,9 +214,7 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
 				.bounds(this.column1X, row(13), this.columnWidth, 20)
 				.build()
 		);
-		this.addRenderableWidget(
-			Button.builder(CommonComponents.GUI_CANCEL, button -> this.minecraft.setScreen(this.parent)).bounds(i, row(13), this.columnWidth, 20).build()
-		);
+		this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, button -> this.onClose()).bounds(i, row(13), this.columnWidth, 20).build());
 	}
 
 	private CycleButton.OnValueChange<Boolean> confirmDangerousOption(Component component, Consumer<Boolean> consumer) {
@@ -233,13 +222,10 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
 			if (boolean_) {
 				consumer.accept(true);
 			} else {
-				this.minecraft.setScreen(new ConfirmScreen(bl -> {
-					if (bl) {
-						consumer.accept(false);
-					}
-
-					this.minecraft.setScreen(this);
-				}, SPAWN_WARNING_TITLE, component, CommonComponents.GUI_PROCEED, CommonComponents.GUI_CANCEL));
+				this.minecraft.setScreen(RealmsPopups.warningPopupScreen(this, component, popupScreen -> {
+					consumer.accept(false);
+					popupScreen.onClose();
+				}));
 			}
 		};
 	}
@@ -272,7 +258,7 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
 			&& this.worldType != RealmsServer.WorldType.EXPERIENCE
 			&& this.worldType != RealmsServer.WorldType.INSPIRATION) {
 			boolean bl = this.worldType == RealmsServer.WorldType.NORMAL && this.difficulty != Difficulty.PEACEFUL && this.spawnMonsters;
-			this.parent
+			this.parentScreen
 				.saveSlotSettings(
 					new RealmsWorldOptions(
 						this.pvp,
@@ -290,7 +276,7 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
 					)
 				);
 		} else {
-			this.parent
+			this.parentScreen
 				.saveSlotSettings(
 					new RealmsWorldOptions(
 						this.options.pvp,

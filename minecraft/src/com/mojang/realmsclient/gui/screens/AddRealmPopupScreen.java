@@ -24,10 +24,10 @@ import net.minecraft.server.packs.resources.ResourceManager;
 public class AddRealmPopupScreen extends RealmsScreen {
 	private static final Component POPUP_TEXT = Component.translatable("mco.selectServer.popup");
 	private static final Component CLOSE_TEXT = Component.translatable("mco.selectServer.close");
-	private static final ResourceLocation BACKGROUND_SPRITE = new ResourceLocation("popup/background");
-	private static final ResourceLocation TRIAL_AVAILABLE_SPRITE = new ResourceLocation("icon/trial_available");
+	private static final ResourceLocation BACKGROUND_SPRITE = ResourceLocation.withDefaultNamespace("popup/background");
+	private static final ResourceLocation TRIAL_AVAILABLE_SPRITE = ResourceLocation.withDefaultNamespace("icon/trial_available");
 	private static final WidgetSprites CROSS_BUTTON_SPRITES = new WidgetSprites(
-		new ResourceLocation("widget/cross_button"), new ResourceLocation("widget/cross_button_highlighted")
+		ResourceLocation.withDefaultNamespace("widget/cross_button"), ResourceLocation.withDefaultNamespace("widget/cross_button_highlighted")
 	);
 	private static final int BG_TEXTURE_WIDTH = 236;
 	private static final int BG_TEXTURE_HEIGHT = 34;

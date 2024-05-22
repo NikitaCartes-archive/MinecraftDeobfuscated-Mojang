@@ -18,8 +18,8 @@ import net.minecraft.world.entity.animal.TropicalFish;
 public class TropicalFishRenderer extends MobRenderer<TropicalFish, ColorableHierarchicalModel<TropicalFish>> {
 	private final ColorableHierarchicalModel<TropicalFish> modelA = this.getModel();
 	private final ColorableHierarchicalModel<TropicalFish> modelB;
-	private static final ResourceLocation MODEL_A_TEXTURE = new ResourceLocation("textures/entity/fish/tropical_a.png");
-	private static final ResourceLocation MODEL_B_TEXTURE = new ResourceLocation("textures/entity/fish/tropical_b.png");
+	private static final ResourceLocation MODEL_A_TEXTURE = ResourceLocation.withDefaultNamespace("textures/entity/fish/tropical_a.png");
+	private static final ResourceLocation MODEL_B_TEXTURE = ResourceLocation.withDefaultNamespace("textures/entity/fish/tropical_b.png");
 
 	public TropicalFishRenderer(EntityRendererProvider.Context context) {
 		super(context, new TropicalFishModelA<>(context.bakeLayer(ModelLayers.TROPICAL_FISH_SMALL)), 0.15F);
@@ -40,10 +40,9 @@ public class TropicalFishRenderer extends MobRenderer<TropicalFish, ColorableHie
 			case LARGE -> this.modelB;
 		};
 		this.model = colorableHierarchicalModel;
-		float[] fs = tropicalFish.getBaseColor().getTextureDiffuseColors();
-		colorableHierarchicalModel.setColor(fs[0], fs[1], fs[2]);
+		colorableHierarchicalModel.setColor(tropicalFish.getBaseColor().getTextureDiffuseColor());
 		super.render(tropicalFish, f, g, poseStack, multiBufferSource, i);
-		colorableHierarchicalModel.setColor(1.0F, 1.0F, 1.0F);
+		colorableHierarchicalModel.setColor(-1);
 	}
 
 	protected void setupRotations(TropicalFish tropicalFish, PoseStack poseStack, float f, float g, float h, float i) {

@@ -36,7 +36,7 @@ public class SimpleSoundInstance extends AbstractSoundInstance {
 		);
 	}
 
-	public static SimpleSoundInstance forRecord(SoundEvent soundEvent, Vec3 vec3) {
+	public static SimpleSoundInstance forJukeboxSong(SoundEvent soundEvent, Vec3 vec3) {
 		return new SimpleSoundInstance(
 			soundEvent, SoundSource.RECORDS, 4.0F, 1.0F, SoundInstance.createUnseededRandom(), false, 0, SoundInstance.Attenuation.LINEAR, vec3.x, vec3.y, vec3.z
 		);

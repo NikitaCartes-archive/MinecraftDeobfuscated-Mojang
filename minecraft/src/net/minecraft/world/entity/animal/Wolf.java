@@ -53,7 +53,6 @@ import net.minecraft.world.entity.ai.goal.FollowOwnerGoal;
 import net.minecraft.world.entity.ai.goal.LeapAtTargetGoal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
 import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
-import net.minecraft.world.entity.ai.goal.PanicGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.SitWhenOrderedToGoal;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
@@ -121,12 +120,12 @@ public class Wolf extends TamableAnimal implements NeutralMob, VariantHolder<Hol
 	@Override
 	protected void registerGoals() {
 		this.goalSelector.addGoal(1, new FloatGoal(this));
-		this.goalSelector.addGoal(1, new Wolf.WolfPanicGoal(1.5));
+		this.goalSelector.addGoal(1, new TamableAnimal.TamableAnimalPanicGoal(1.5, DamageTypeTags.PANIC_ENVIRONMENTAL_CAUSES));
 		this.goalSelector.addGoal(2, new SitWhenOrderedToGoal(this));
 		this.goalSelector.addGoal(3, new Wolf.WolfAvoidEntityGoal(this, Llama.class, 24.0F, 1.5, 1.5));
 		this.goalSelector.addGoal(4, new LeapAtTargetGoal(this, 0.4F));
 		this.goalSelector.addGoal(5, new MeleeAttackGoal(this, 1.0, true));
-		this.goalSelector.addGoal(6, new FollowOwnerGoal(this, 1.0, 10.0F, 2.0F, false));
+		this.goalSelector.addGoal(6, new FollowOwnerGoal(this, 1.0, 10.0F, 2.0F));
 		this.goalSelector.addGoal(7, new BreedGoal(this, 1.0));
 		this.goalSelector.addGoal(8, new WaterAvoidingRandomStrollGoal(this, 1.0));
 		this.goalSelector.addGoal(9, new BegGoal(this, 8.0F));
@@ -439,7 +438,7 @@ public class Wolf extends TamableAnimal implements NeutralMob, VariantHolder<Hol
 						return super.mobInteract(player, interactionHand);
 					}
 
-					if (itemStack.is(Items.WOLF_ARMOR) && this.isOwnedBy(player) && !this.hasArmor() && !this.isBaby()) {
+					if (itemStack.is(Items.WOLF_ARMOR) && this.isOwnedBy(player) && this.getBodyArmorItem().isEmpty() && !this.isBaby()) {
 						this.setBodyArmorItem(itemStack.copyWithCount(1));
 						itemStack.consume(1, player);
 						return InteractionResult.SUCCESS;
@@ -568,7 +567,7 @@ public class Wolf extends TamableAnimal implements NeutralMob, VariantHolder<Hol
 	}
 
 	public boolean hasArmor() {
-		return !this.getBodyArmorItem().isEmpty();
+		return this.getBodyArmorItem().is(Items.WOLF_ARMOR);
 	}
 
 	private void setCollarColor(DyeColor dyeColor) {
@@ -697,17 +696,6 @@ public class Wolf extends TamableAnimal implements NeutralMob, VariantHolder<Hol
 		public WolfPackData(Holder<WolfVariant> holder) {
 			super(false);
 			this.type = holder;
-		}
-	}
-
-	class WolfPanicGoal extends PanicGoal {
-		public WolfPanicGoal(final double d) {
-			super(Wolf.this, d);
-		}
-
-		@Override
-		protected boolean shouldPanic() {
-			return this.mob.isFreezing() || this.mob.isOnFire();
 		}
 	}
 }

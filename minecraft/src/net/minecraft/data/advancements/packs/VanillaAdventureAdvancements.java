@@ -22,7 +22,9 @@ import net.minecraft.advancements.critereon.EntityEquipmentPredicate;
 import net.minecraft.advancements.critereon.EntityPredicate;
 import net.minecraft.advancements.critereon.FallAfterExplosionTrigger;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
+import net.minecraft.advancements.critereon.ItemJukeboxPlayablePredicate;
 import net.minecraft.advancements.critereon.ItemPredicate;
+import net.minecraft.advancements.critereon.ItemSubPredicates;
 import net.minecraft.advancements.critereon.ItemUsedOnLocationTrigger;
 import net.minecraft.advancements.critereon.KilledByCrossbowTrigger;
 import net.minecraft.advancements.critereon.KilledTrigger;
@@ -153,7 +155,7 @@ public class VanillaAdventureAdvancements implements AdvancementSubProvider {
 				Items.MAP,
 				Component.translatable("advancements.adventure.root.title"),
 				Component.translatable("advancements.adventure.root.description"),
-				new ResourceLocation("textures/gui/advancements/backgrounds/adventure.png"),
+				ResourceLocation.withDefaultNamespace("textures/gui/advancements/backgrounds/adventure.png"),
 				AdvancementType.TASK,
 				false,
 				false,
@@ -533,7 +535,7 @@ public class VanillaAdventureAdvancements implements AdvancementSubProvider {
 					LocationPredicate.Builder.location()
 						.setBiomes(HolderSet.direct(provider.lookupOrThrow(Registries.BIOME).getOrThrow(Biomes.MEADOW)))
 						.setBlock(BlockPredicate.Builder.block().of(Blocks.JUKEBOX)),
-					ItemPredicate.Builder.item().of(ItemTags.MUSIC_DISCS)
+					ItemPredicate.Builder.item().withSubPredicate(ItemSubPredicates.JUKEBOX_PLAYABLE, ItemJukeboxPlayablePredicate.any())
 				)
 			)
 			.save(consumer, "adventure/play_jukebox_in_meadows");
@@ -630,7 +632,7 @@ public class VanillaAdventureAdvancements implements AdvancementSubProvider {
 			.addCriterion(
 				"pot_crafted_using_only_sherds",
 				RecipeCraftedTrigger.TriggerInstance.craftedItem(
-					new ResourceLocation("minecraft:decorated_pot"),
+					ResourceLocation.withDefaultNamespace("decorated_pot"),
 					List.of(
 						ItemPredicate.Builder.item().of(ItemTags.DECORATED_POT_SHERDS),
 						ItemPredicate.Builder.item().of(ItemTags.DECORATED_POT_SHERDS),
@@ -834,7 +836,7 @@ public class VanillaAdventureAdvancements implements AdvancementSubProvider {
 				true,
 				false
 			)
-			.addCriterion("crafter_crafted_crafter", RecipeCraftedTrigger.TriggerInstance.crafterCraftedItem(new ResourceLocation("minecraft:crafter")))
+			.addCriterion("crafter_crafted_crafter", RecipeCraftedTrigger.TriggerInstance.crafterCraftedItem(ResourceLocation.withDefaultNamespace("crafter")))
 			.save(consumer, "adventure/crafters_crafting_crafters");
 		Advancement.Builder.advancement()
 			.parent(advancementHolder13)

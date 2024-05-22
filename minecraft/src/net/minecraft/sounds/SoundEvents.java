@@ -872,25 +872,25 @@ public class SoundEvents {
 	public static final SoundEvent MULE_JUMP = register("entity.mule.jump");
 	public static final Holder.Reference<SoundEvent> MUSIC_CREATIVE = registerForHolder("music.creative");
 	public static final Holder.Reference<SoundEvent> MUSIC_CREDITS = registerForHolder("music.credits");
-	public static final SoundEvent MUSIC_DISC_5 = register("music_disc.5");
-	public static final SoundEvent MUSIC_DISC_11 = register("music_disc.11");
-	public static final SoundEvent MUSIC_DISC_13 = register("music_disc.13");
-	public static final SoundEvent MUSIC_DISC_BLOCKS = register("music_disc.blocks");
-	public static final SoundEvent MUSIC_DISC_CAT = register("music_disc.cat");
-	public static final SoundEvent MUSIC_DISC_CHIRP = register("music_disc.chirp");
-	public static final SoundEvent MUSIC_DISC_FAR = register("music_disc.far");
-	public static final SoundEvent MUSIC_DISC_MALL = register("music_disc.mall");
-	public static final SoundEvent MUSIC_DISC_MELLOHI = register("music_disc.mellohi");
-	public static final SoundEvent MUSIC_DISC_PIGSTEP = register("music_disc.pigstep");
-	public static final SoundEvent MUSIC_DISC_STAL = register("music_disc.stal");
-	public static final SoundEvent MUSIC_DISC_STRAD = register("music_disc.strad");
-	public static final SoundEvent MUSIC_DISC_WAIT = register("music_disc.wait");
-	public static final SoundEvent MUSIC_DISC_WARD = register("music_disc.ward");
-	public static final SoundEvent MUSIC_DISC_OTHERSIDE = register("music_disc.otherside");
-	public static final SoundEvent MUSIC_DISC_RELIC = register("music_disc.relic");
-	public static final SoundEvent MUSIC_DISC_CREATOR = register("music_disc.creator");
-	public static final SoundEvent MUSIC_DISC_CREATOR_MUSIC_BOX = register("music_disc.creator_music_box");
-	public static final SoundEvent MUSIC_DISC_PRECIPICE = register("music_disc.precipice");
+	public static final Holder.Reference<SoundEvent> MUSIC_DISC_5 = registerForHolder("music_disc.5");
+	public static final Holder.Reference<SoundEvent> MUSIC_DISC_11 = registerForHolder("music_disc.11");
+	public static final Holder.Reference<SoundEvent> MUSIC_DISC_13 = registerForHolder("music_disc.13");
+	public static final Holder.Reference<SoundEvent> MUSIC_DISC_BLOCKS = registerForHolder("music_disc.blocks");
+	public static final Holder.Reference<SoundEvent> MUSIC_DISC_CAT = registerForHolder("music_disc.cat");
+	public static final Holder.Reference<SoundEvent> MUSIC_DISC_CHIRP = registerForHolder("music_disc.chirp");
+	public static final Holder.Reference<SoundEvent> MUSIC_DISC_FAR = registerForHolder("music_disc.far");
+	public static final Holder.Reference<SoundEvent> MUSIC_DISC_MALL = registerForHolder("music_disc.mall");
+	public static final Holder.Reference<SoundEvent> MUSIC_DISC_MELLOHI = registerForHolder("music_disc.mellohi");
+	public static final Holder.Reference<SoundEvent> MUSIC_DISC_PIGSTEP = registerForHolder("music_disc.pigstep");
+	public static final Holder.Reference<SoundEvent> MUSIC_DISC_STAL = registerForHolder("music_disc.stal");
+	public static final Holder.Reference<SoundEvent> MUSIC_DISC_STRAD = registerForHolder("music_disc.strad");
+	public static final Holder.Reference<SoundEvent> MUSIC_DISC_WAIT = registerForHolder("music_disc.wait");
+	public static final Holder.Reference<SoundEvent> MUSIC_DISC_WARD = registerForHolder("music_disc.ward");
+	public static final Holder.Reference<SoundEvent> MUSIC_DISC_OTHERSIDE = registerForHolder("music_disc.otherside");
+	public static final Holder.Reference<SoundEvent> MUSIC_DISC_RELIC = registerForHolder("music_disc.relic");
+	public static final Holder.Reference<SoundEvent> MUSIC_DISC_CREATOR = registerForHolder("music_disc.creator");
+	public static final Holder.Reference<SoundEvent> MUSIC_DISC_CREATOR_MUSIC_BOX = registerForHolder("music_disc.creator_music_box");
+	public static final Holder.Reference<SoundEvent> MUSIC_DISC_PRECIPICE = registerForHolder("music_disc.precipice");
 	public static final Holder.Reference<SoundEvent> MUSIC_DRAGON = registerForHolder("music.dragon");
 	public static final Holder.Reference<SoundEvent> MUSIC_END = registerForHolder("music.end");
 	public static final Holder.Reference<SoundEvent> MUSIC_GAME = registerForHolder("music.game");
@@ -942,7 +942,7 @@ public class SoundEvents {
 	public static final SoundEvent NETHER_WOOD_PRESSURE_PLATE_CLICK_ON = register("block.nether_wood_pressure_plate.click_on");
 	public static final SoundEvent NETHER_WOOD_FENCE_GATE_CLOSE = register("block.nether_wood_fence_gate.close");
 	public static final SoundEvent NETHER_WOOD_FENCE_GATE_OPEN = register("block.nether_wood_fence_gate.open");
-	public static final SoundEvent EMPTY = register("minecraft:intentionally_empty");
+	public static final SoundEvent EMPTY = register("intentionally_empty");
 	public static final SoundEvent PACKED_MUD_BREAK = register("block.packed_mud.break");
 	public static final SoundEvent PACKED_MUD_FALL = register("block.packed_mud.fall");
 	public static final SoundEvent PACKED_MUD_HIT = register("block.packed_mud.hit");
@@ -1444,6 +1444,7 @@ public class SoundEvents {
 	public static final SoundEvent VAULT_CLOSE_SHUTTER = register("block.vault.close_shutter");
 	public static final SoundEvent VAULT_DEACTIVATE = register("block.vault.deactivate");
 	public static final SoundEvent VAULT_EJECT_ITEM = register("block.vault.eject_item");
+	public static final SoundEvent VAULT_REJECT_REWARDED_PLAYER = register("block.vault.reject_rewarded_player");
 	public static final SoundEvent VAULT_FALL = register("block.vault.fall");
 	public static final SoundEvent VAULT_HIT = register("block.vault.hit");
 	public static final SoundEvent VAULT_INSERT_ITEM = register("block.vault.insert_item");
@@ -1618,7 +1619,7 @@ public class SoundEvents {
 	}
 
 	private static SoundEvent register(String string) {
-		return register(new ResourceLocation(string));
+		return register(ResourceLocation.withDefaultNamespace(string));
 	}
 
 	private static SoundEvent register(ResourceLocation resourceLocation) {
@@ -1626,7 +1627,7 @@ public class SoundEvents {
 	}
 
 	private static Holder.Reference<SoundEvent> registerForHolder(String string) {
-		return registerForHolder(new ResourceLocation(string));
+		return registerForHolder(ResourceLocation.withDefaultNamespace(string));
 	}
 
 	private static Holder.Reference<SoundEvent> registerForHolder(ResourceLocation resourceLocation) {

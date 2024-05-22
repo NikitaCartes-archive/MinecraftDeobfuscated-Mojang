@@ -23,6 +23,7 @@ import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -41,7 +42,7 @@ public class RecipeManager extends SimpleJsonResourceReloadListener {
 	private boolean hasErrors;
 
 	public RecipeManager(HolderLookup.Provider provider) {
-		super(GSON, "recipes");
+		super(GSON, Registries.elementsDirPath(Registries.RECIPE));
 		this.registries = provider;
 	}
 

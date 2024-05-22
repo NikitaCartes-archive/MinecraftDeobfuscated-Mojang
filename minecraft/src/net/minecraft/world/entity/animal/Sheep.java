@@ -18,6 +18,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.DifficultyInstance;
@@ -80,24 +81,29 @@ public class Sheep extends Animal implements Shearable {
 		enumMap.put(DyeColor.RED, Blocks.RED_WOOL);
 		enumMap.put(DyeColor.BLACK, Blocks.BLACK_WOOL);
 	});
-	private static final Map<DyeColor, float[]> COLORARRAY_BY_COLOR = Maps.newEnumMap(
+	private static final Map<DyeColor, Integer> COLOR_BY_DYE = Maps.newEnumMap(
 		(Map)Arrays.stream(DyeColor.values()).collect(Collectors.toMap(dyeColor -> dyeColor, Sheep::createSheepColor))
 	);
 	private int eatAnimationTick;
 	private EatBlockGoal eatBlockGoal;
 
-	private static float[] createSheepColor(DyeColor dyeColor) {
+	private static int createSheepColor(DyeColor dyeColor) {
 		if (dyeColor == DyeColor.WHITE) {
-			return new float[]{0.9019608F, 0.9019608F, 0.9019608F};
+			return -1644826;
 		} else {
-			float[] fs = dyeColor.getTextureDiffuseColors();
+			int i = dyeColor.getTextureDiffuseColor();
 			float f = 0.75F;
-			return new float[]{fs[0] * 0.75F, fs[1] * 0.75F, fs[2] * 0.75F};
+			return FastColor.ARGB32.color(
+				255,
+				Mth.floor((float)FastColor.ARGB32.red(i) * 0.75F),
+				Mth.floor((float)FastColor.ARGB32.green(i) * 0.75F),
+				Mth.floor((float)FastColor.ARGB32.blue(i) * 0.75F)
+			);
 		}
 	}
 
-	public static float[] getColorArray(DyeColor dyeColor) {
-		return (float[])COLORARRAY_BY_COLOR.get(dyeColor);
+	public static int getColor(DyeColor dyeColor) {
+		return (Integer)COLOR_BY_DYE.get(dyeColor);
 	}
 
 	public Sheep(EntityType<? extends Sheep> entityType, Level level) {

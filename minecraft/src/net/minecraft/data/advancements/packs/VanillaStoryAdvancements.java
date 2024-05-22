@@ -36,7 +36,7 @@ public class VanillaStoryAdvancements implements AdvancementSubProvider {
 				Blocks.GRASS_BLOCK,
 				Component.translatable("advancements.story.root.title"),
 				Component.translatable("advancements.story.root.description"),
-				new ResourceLocation("textures/gui/advancements/backgrounds/stone.png"),
+				ResourceLocation.withDefaultNamespace("textures/gui/advancements/backgrounds/stone.png"),
 				AdvancementType.TASK,
 				false,
 				false,

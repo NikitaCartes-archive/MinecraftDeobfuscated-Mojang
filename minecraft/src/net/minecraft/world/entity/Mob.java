@@ -7,6 +7,7 @@ import com.mojang.datafixers.util.Either;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Predicate;
@@ -40,6 +41,7 @@ import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -103,6 +105,7 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Targeti
 	public static final int PRESERVE_ITEM_DROP_CHANCE = 2;
 	public static final int UPDATE_GOAL_SELECTOR_EVERY_N_TICKS = 2;
 	private static final double DEFAULT_ATTACK_REACH = Math.sqrt(2.04F) - 0.6F;
+	protected static final ResourceLocation RANDOM_SPAWN_BONUS_ID = ResourceLocation.withDefaultNamespace("random_spawn_bonus");
 	public int ambientSoundTime;
 	protected int xpReward;
 	protected LookControl lookControl;
@@ -505,7 +508,7 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Targeti
 
 		this.setLeftHanded(compoundTag.getBoolean("LeftHanded"));
 		if (compoundTag.contains("DeathLootTable", 8)) {
-			this.lootTable = ResourceKey.create(Registries.LOOT_TABLE, new ResourceLocation(compoundTag.getString("DeathLootTable")));
+			this.lootTable = ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.parse(compoundTag.getString("DeathLootTable")));
 			this.lootTableSeed = compoundTag.getLong("DeathLootTableSeed");
 		}
 
@@ -1135,10 +1138,13 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Targeti
 		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData
 	) {
 		RandomSource randomSource = serverLevelAccessor.getRandom();
-		this.getAttribute(Attributes.FOLLOW_RANGE)
-			.addPermanentModifier(
-				new AttributeModifier("Random spawn bonus", randomSource.triangle(0.0, 0.11485000000000001), AttributeModifier.Operation.ADD_MULTIPLIED_BASE)
+		AttributeInstance attributeInstance = (AttributeInstance)Objects.requireNonNull(this.getAttribute(Attributes.FOLLOW_RANGE));
+		if (!attributeInstance.hasModifier(RANDOM_SPAWN_BONUS_ID)) {
+			attributeInstance.addPermanentModifier(
+				new AttributeModifier(RANDOM_SPAWN_BONUS_ID, randomSource.triangle(0.0, 0.11485000000000001), AttributeModifier.Operation.ADD_MULTIPLIED_BASE)
 			);
+		}
+
 		this.setLeftHanded(randomSource.nextFloat() < 0.05F);
 		return spawnGroupData;
 	}

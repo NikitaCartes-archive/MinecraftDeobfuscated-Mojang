@@ -20,5 +20,9 @@ public abstract class Model {
 		return (RenderType)this.renderType.apply(resourceLocation);
 	}
 
-	public abstract void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, float f, float g, float h, float k);
+	public abstract void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, int k);
+
+	public final void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j) {
+		this.renderToBuffer(poseStack, vertexConsumer, i, j, -1);
+	}
 }

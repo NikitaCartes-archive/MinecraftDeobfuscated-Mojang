@@ -54,7 +54,7 @@ public class MultiNoiseBiomeSourceParameterList {
 
 	public static record Preset(ResourceLocation id, MultiNoiseBiomeSourceParameterList.Preset.SourceProvider provider) {
 		public static final MultiNoiseBiomeSourceParameterList.Preset NETHER = new MultiNoiseBiomeSourceParameterList.Preset(
-			new ResourceLocation("nether"),
+			ResourceLocation.withDefaultNamespace("nether"),
 			new MultiNoiseBiomeSourceParameterList.Preset.SourceProvider() {
 				@Override
 				public <T> Climate.ParameterList<T> apply(Function<ResourceKey<Biome>, T> function) {
@@ -71,7 +71,7 @@ public class MultiNoiseBiomeSourceParameterList {
 			}
 		);
 		public static final MultiNoiseBiomeSourceParameterList.Preset OVERWORLD = new MultiNoiseBiomeSourceParameterList.Preset(
-			new ResourceLocation("overworld"), new MultiNoiseBiomeSourceParameterList.Preset.SourceProvider() {
+			ResourceLocation.withDefaultNamespace("overworld"), new MultiNoiseBiomeSourceParameterList.Preset.SourceProvider() {
 				@Override
 				public <T> Climate.ParameterList<T> apply(Function<ResourceKey<Biome>, T> function) {
 					return MultiNoiseBiomeSourceParameterList.Preset.generateOverworldBiomes(function);

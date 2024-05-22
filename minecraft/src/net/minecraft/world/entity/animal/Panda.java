@@ -15,6 +15,7 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.ByIdMap;
 import net.minecraft.util.Mth;
@@ -989,13 +990,8 @@ public class Panda extends Animal {
 		private final Panda panda;
 
 		public PandaPanicGoal(Panda panda, double d) {
-			super(panda, d);
+			super(panda, d, DamageTypeTags.PANIC_ENVIRONMENTAL_CAUSES);
 			this.panda = panda;
-		}
-
-		@Override
-		protected boolean shouldPanic() {
-			return this.mob.isFreezing() || this.mob.isOnFire();
 		}
 
 		@Override

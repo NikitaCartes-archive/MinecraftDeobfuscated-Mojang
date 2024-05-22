@@ -2,19 +2,24 @@ package net.minecraft.client;
 
 import com.mojang.blaze3d.Blaze3D;
 import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.logging.LogUtils;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.util.Mth;
 import net.minecraft.util.SmoothDouble;
 import org.lwjgl.glfw.GLFWDropCallback;
+import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class MouseHandler {
+	private static final Logger LOGGER = LogUtils.getLogger();
 	private final Minecraft minecraft;
 	private boolean isLeftPressed;
 	private boolean isMiddlePressed;
@@ -161,9 +166,13 @@ public class MouseHandler {
 		}
 	}
 
-	private void onDrop(long l, List<Path> list) {
+	private void onDrop(long l, List<Path> list, int i) {
 		if (this.minecraft.screen != null) {
 			this.minecraft.screen.onFilesDrop(list);
+		}
+
+		if (i > 0) {
+			SystemToast.onFileDropFailure(this.minecraft, i);
 		}
 	}
 
@@ -174,13 +183,24 @@ public class MouseHandler {
 			(lx, i, j, k) -> this.minecraft.execute(() -> this.onPress(lx, i, j, k)),
 			(lx, d, e) -> this.minecraft.execute(() -> this.onScroll(lx, d, e)),
 			(lx, i, m) -> {
-				Path[] paths = new Path[i];
+				List<Path> list = new ArrayList(i);
+				int j = 0;
 
-				for (int j = 0; j < i; j++) {
-					paths[j] = Paths.get(GLFWDropCallback.getName(m, j));
+				for (int k = 0; k < i; k++) {
+					String string = GLFWDropCallback.getName(m, k);
+
+					try {
+						list.add(Paths.get(string));
+					} catch (InvalidPathException var11) {
+						j++;
+						LOGGER.error("Failed to parse path '{}'", string, var11);
+					}
 				}
 
-				this.minecraft.execute(() -> this.onDrop(lx, Arrays.asList(paths)));
+				if (!list.isEmpty()) {
+					int k = j;
+					this.minecraft.execute(() -> this.onDrop(lx, list, k));
+				}
 			}
 		);
 	}

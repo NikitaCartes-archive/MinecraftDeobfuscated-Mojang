@@ -10,10 +10,10 @@ public class StatusPacketTypes {
 	public static final PacketType<ServerboundStatusRequestPacket> SERVERBOUND_STATUS_REQUEST = createServerbound("status_request");
 
 	private static <T extends Packet<ClientStatusPacketListener>> PacketType<T> createClientbound(String string) {
-		return new PacketType<>(PacketFlow.CLIENTBOUND, new ResourceLocation(string));
+		return new PacketType<>(PacketFlow.CLIENTBOUND, ResourceLocation.withDefaultNamespace(string));
 	}
 
 	private static <T extends Packet<ServerStatusPacketListener>> PacketType<T> createServerbound(String string) {
-		return new PacketType<>(PacketFlow.SERVERBOUND, new ResourceLocation(string));
+		return new PacketType<>(PacketFlow.SERVERBOUND, ResourceLocation.withDefaultNamespace(string));
 	}
 }

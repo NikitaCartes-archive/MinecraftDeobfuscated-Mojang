@@ -8,12 +8,14 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import javax.annotation.Nullable;
 import net.minecraft.core.LayeredRegistryAccess;
 import net.minecraft.network.Connection;
+import net.minecraft.network.DisconnectionDetails;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.TickablePacketListener;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.PacketUtils;
 import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
 import net.minecraft.network.protocol.common.ClientboundDisconnectPacket;
+import net.minecraft.network.protocol.common.ClientboundServerLinksPacket;
 import net.minecraft.network.protocol.common.ServerboundClientInformationPacket;
 import net.minecraft.network.protocol.common.ServerboundResourcePackPacket;
 import net.minecraft.network.protocol.common.custom.BrandPayload;
@@ -24,6 +26,7 @@ import net.minecraft.network.protocol.configuration.ServerboundSelectKnownPacks;
 import net.minecraft.network.protocol.game.GameProtocols;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.RegistryLayer;
+import net.minecraft.server.ServerLinks;
 import net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.config.JoinWorldTask;
@@ -57,9 +60,9 @@ public class ServerConfigurationPacketListenerImpl extends ServerCommonPacketLis
 	}
 
 	@Override
-	public void onDisconnect(Component component) {
-		LOGGER.info("{} lost connection: {}", this.gameProfile, component.getString());
-		super.onDisconnect(component);
+	public void onDisconnect(DisconnectionDetails disconnectionDetails) {
+		LOGGER.info("{} lost connection: {}", this.gameProfile, disconnectionDetails.reason().getString());
+		super.onDisconnect(disconnectionDetails);
 	}
 
 	@Override
@@ -69,6 +72,11 @@ public class ServerConfigurationPacketListenerImpl extends ServerCommonPacketLis
 
 	public void startConfiguration() {
 		this.send(new ClientboundCustomPayloadPacket(new BrandPayload(this.server.getServerModName())));
+		ServerLinks serverLinks = this.server.serverLinks();
+		if (!serverLinks.isEmpty()) {
+			this.send(new ClientboundServerLinksPacket(serverLinks));
+		}
+
 		LayeredRegistryAccess<RegistryLayer> layeredRegistryAccess = this.server.registries();
 		List<KnownPack> list = this.server.getResourceManager().listPacks().flatMap(packResources -> packResources.location().knownPackInfo().stream()).toList();
 		this.send(new ClientboundUpdateEnabledFeaturesPacket(FeatureFlags.REGISTRY.toNames(this.server.getWorldData().enabledFeatures())));

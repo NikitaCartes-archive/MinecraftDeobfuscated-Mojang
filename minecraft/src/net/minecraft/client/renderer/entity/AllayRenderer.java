@@ -11,7 +11,7 @@ import net.minecraft.world.entity.animal.allay.Allay;
 
 @Environment(EnvType.CLIENT)
 public class AllayRenderer extends MobRenderer<Allay, AllayModel> {
-	private static final ResourceLocation ALLAY_TEXTURE = new ResourceLocation("textures/entity/allay/allay.png");
+	private static final ResourceLocation ALLAY_TEXTURE = ResourceLocation.withDefaultNamespace("textures/entity/allay/allay.png");
 
 	public AllayRenderer(EntityRendererProvider.Context context) {
 		super(context, new AllayModel(context.bakeLayer(ModelLayers.ALLAY)), 0.4F);

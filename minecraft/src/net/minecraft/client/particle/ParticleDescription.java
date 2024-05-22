@@ -29,7 +29,7 @@ public class ParticleDescription {
 		} else {
 			List<ResourceLocation> list = (List<ResourceLocation>)Streams.stream(jsonArray)
 				.map(jsonElement -> GsonHelper.convertToString(jsonElement, "texture"))
-				.map(ResourceLocation::new)
+				.map(ResourceLocation::parse)
 				.collect(ImmutableList.toImmutableList());
 			return new ParticleDescription(list);
 		}

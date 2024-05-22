@@ -10,7 +10,7 @@ import net.minecraft.world.entity.monster.Blaze;
 
 @Environment(EnvType.CLIENT)
 public class BlazeRenderer extends MobRenderer<Blaze, BlazeModel<Blaze>> {
-	private static final ResourceLocation BLAZE_LOCATION = new ResourceLocation("textures/entity/blaze.png");
+	private static final ResourceLocation BLAZE_LOCATION = ResourceLocation.withDefaultNamespace("textures/entity/blaze.png");
 
 	public BlazeRenderer(EntityRendererProvider.Context context) {
 		super(context, new BlazeModel<>(context.bakeLayer(ModelLayers.BLAZE)), 0.5F);

@@ -12,7 +12,7 @@ public class EmptyGlyph extends BakedGlyph {
 	public static final EmptyGlyph INSTANCE = new EmptyGlyph();
 
 	public EmptyGlyph() {
-		super(GlyphRenderTypes.createForColorTexture(new ResourceLocation("")), 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F);
+		super(GlyphRenderTypes.createForColorTexture(ResourceLocation.withDefaultNamespace("")), 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F);
 	}
 
 	@Override

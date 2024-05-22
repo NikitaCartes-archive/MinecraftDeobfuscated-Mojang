@@ -2,16 +2,14 @@ package net.minecraft.world.item;
 
 import com.google.common.base.Suppliers;
 import com.mojang.serialization.Codec;
-import java.util.EnumMap;
 import java.util.List;
-import java.util.UUID;
 import java.util.function.Supplier;
-import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.dispenser.BlockSource;
 import net.minecraft.core.dispenser.DefaultDispenseItemBehavior;
 import net.minecraft.core.dispenser.DispenseItemBehavior;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.InteractionHand;
@@ -31,13 +29,6 @@ import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.phys.AABB;
 
 public class ArmorItem extends Item implements Equipable {
-	private static final EnumMap<ArmorItem.Type, UUID> ARMOR_MODIFIER_UUID_PER_TYPE = Util.make(new EnumMap(ArmorItem.Type.class), enumMap -> {
-		enumMap.put(ArmorItem.Type.BOOTS, UUID.fromString("845DB27C-C624-495F-8C9F-6020A9A58B6B"));
-		enumMap.put(ArmorItem.Type.LEGGINGS, UUID.fromString("D8499B04-0E66-4726-AB29-64469D734E0D"));
-		enumMap.put(ArmorItem.Type.CHESTPLATE, UUID.fromString("9F3D476D-C118-4544-8365-64846904B48E"));
-		enumMap.put(ArmorItem.Type.HELMET, UUID.fromString("2AD3F246-FEE1-4E67-B886-69FD380BB150"));
-		enumMap.put(ArmorItem.Type.BODY, UUID.fromString("C1C72771-8B8E-BA4A-ACE0-81A93C8928B2"));
-	});
 	public static final DispenseItemBehavior DISPENSE_ITEM_BEHAVIOR = new DefaultDispenseItemBehavior() {
 		@Override
 		protected ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
@@ -73,29 +64,21 @@ public class ArmorItem extends Item implements Equipable {
 		this.material = holder;
 		this.type = type;
 		DispenserBlock.registerBehavior(this, DISPENSE_ITEM_BEHAVIOR);
-		this.defaultModifiers = Suppliers.memoize(
-			() -> {
-				int i = holder.value().getDefense(type);
-				float f = holder.value().toughness();
-				ItemAttributeModifiers.Builder builder = ItemAttributeModifiers.builder();
-				EquipmentSlotGroup equipmentSlotGroup = EquipmentSlotGroup.bySlot(type.getSlot());
-				UUID uUID = (UUID)ARMOR_MODIFIER_UUID_PER_TYPE.get(type);
-				builder.add(Attributes.ARMOR, new AttributeModifier(uUID, "Armor modifier", (double)i, AttributeModifier.Operation.ADD_VALUE), equipmentSlotGroup);
-				builder.add(
-					Attributes.ARMOR_TOUGHNESS, new AttributeModifier(uUID, "Armor toughness", (double)f, AttributeModifier.Operation.ADD_VALUE), equipmentSlotGroup
-				);
-				float g = holder.value().knockbackResistance();
-				if (g > 0.0F) {
-					builder.add(
-						Attributes.KNOCKBACK_RESISTANCE,
-						new AttributeModifier(uUID, "Armor knockback resistance", (double)g, AttributeModifier.Operation.ADD_VALUE),
-						equipmentSlotGroup
-					);
-				}
-
-				return builder.build();
+		this.defaultModifiers = Suppliers.memoize(() -> {
+			int i = holder.value().getDefense(type);
+			float f = holder.value().toughness();
+			ItemAttributeModifiers.Builder builder = ItemAttributeModifiers.builder();
+			EquipmentSlotGroup equipmentSlotGroup = EquipmentSlotGroup.bySlot(type.getSlot());
+			ResourceLocation resourceLocation = ResourceLocation.withDefaultNamespace("armor." + type.getName());
+			builder.add(Attributes.ARMOR, new AttributeModifier(resourceLocation, (double)i, AttributeModifier.Operation.ADD_VALUE), equipmentSlotGroup);
+			builder.add(Attributes.ARMOR_TOUGHNESS, new AttributeModifier(resourceLocation, (double)f, AttributeModifier.Operation.ADD_VALUE), equipmentSlotGroup);
+			float g = holder.value().knockbackResistance();
+			if (g > 0.0F) {
+				builder.add(Attributes.KNOCKBACK_RESISTANCE, new AttributeModifier(resourceLocation, (double)g, AttributeModifier.Operation.ADD_VALUE), equipmentSlotGroup);
 			}
-		);
+
+			return builder.build();
+		});
 	}
 
 	public ArmorItem.Type getType() {

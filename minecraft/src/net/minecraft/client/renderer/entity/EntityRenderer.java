@@ -89,7 +89,7 @@ public abstract class EntityRenderer<T extends Entity> {
 				poseStack.pushPose();
 				poseStack.translate(vec3.x, vec3.y + 0.5, vec3.z);
 				poseStack.mulPose(this.entityRenderDispatcher.cameraOrientation());
-				poseStack.scale(-0.025F, -0.025F, 0.025F);
+				poseStack.scale(0.025F, -0.025F, 0.025F);
 				Matrix4f matrix4f = poseStack.last().pose();
 				float g = Minecraft.getInstance().options.getBackgroundOpacity(0.25F);
 				int k = (int)(g * 255.0F) << 24;

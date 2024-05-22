@@ -9,7 +9,7 @@ import net.minecraft.world.entity.monster.Zombie;
 
 @Environment(EnvType.CLIENT)
 public abstract class AbstractZombieRenderer<T extends Zombie, M extends ZombieModel<T>> extends HumanoidMobRenderer<T, M> {
-	private static final ResourceLocation ZOMBIE_LOCATION = new ResourceLocation("textures/entity/zombie/zombie.png");
+	private static final ResourceLocation ZOMBIE_LOCATION = ResourceLocation.withDefaultNamespace("textures/entity/zombie/zombie.png");
 
 	protected AbstractZombieRenderer(EntityRendererProvider.Context context, M zombieModel, M zombieModel2, M zombieModel3) {
 		super(context, zombieModel, 0.5F);

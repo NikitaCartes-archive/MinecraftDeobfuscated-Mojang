@@ -8,9 +8,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.preprocessor.GlslPreprocessor;
 import com.mojang.blaze3d.shaders.AbstractUniform;
-import com.mojang.blaze3d.shaders.BlendMode;
 import com.mojang.blaze3d.shaders.Program;
 import com.mojang.blaze3d.shaders.ProgramManager;
 import com.mojang.blaze3d.shaders.Shader;
@@ -38,6 +38,7 @@ import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceProvider;
 import net.minecraft.util.GsonHelper;
 import org.apache.commons.io.IOUtils;
+import org.joml.Matrix4f;
 import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
@@ -59,7 +60,6 @@ public class ShaderInstance implements Shader, AutoCloseable {
 	private final int programId;
 	private final String name;
 	private boolean dirty;
-	private final BlendMode blend;
 	private final Program vertexProgram;
 	private final Program fragmentProgram;
 	private final VertexFormat vertexFormat;
@@ -97,7 +97,7 @@ public class ShaderInstance implements Shader, AutoCloseable {
 	public ShaderInstance(ResourceProvider resourceProvider, String string, VertexFormat vertexFormat) throws IOException {
 		this.name = string;
 		this.vertexFormat = vertexFormat;
-		ResourceLocation resourceLocation = new ResourceLocation("shaders/core/" + string + ".json");
+		ResourceLocation resourceLocation = ResourceLocation.withDefaultNamespace("shaders/core/" + string + ".json");
 
 		try {
 			Reader reader = resourceProvider.openAsReader(resourceLocation);
@@ -140,7 +140,6 @@ public class ShaderInstance implements Shader, AutoCloseable {
 					}
 				}
 
-				this.blend = parseBlendNode(GsonHelper.getAsJsonObject(jsonObject, "blend", null));
 				this.vertexProgram = getOrCreate(resourceProvider, Program.Type.VERTEX, string2);
 				this.fragmentProgram = getOrCreate(resourceProvider, Program.Type.FRAGMENT, string3);
 				this.programId = ProgramManager.createProgram();
@@ -197,7 +196,7 @@ public class ShaderInstance implements Shader, AutoCloseable {
 		Program program2;
 		if (program == null) {
 			String string2 = "shaders/core/" + string + type.getExtension();
-			Resource resource = resourceProvider.getResourceOrThrow(new ResourceLocation(string2));
+			Resource resource = resourceProvider.getResourceOrThrow(ResourceLocation.withDefaultNamespace(string2));
 			InputStream inputStream = resource.open();
 
 			try {
@@ -211,7 +210,7 @@ public class ShaderInstance implements Shader, AutoCloseable {
 						if (!this.importedPaths.add(string)) {
 							return null;
 						} else {
-							ResourceLocation resourceLocation = new ResourceLocation(string);
+							ResourceLocation resourceLocation = ResourceLocation.parse(string);
 
 							try {
 								Reader reader = resourceProvider.openAsReader(resourceLocation);
@@ -265,64 +264,6 @@ public class ShaderInstance implements Shader, AutoCloseable {
 		return program2;
 	}
 
-	public static BlendMode parseBlendNode(JsonObject jsonObject) {
-		if (jsonObject == null) {
-			return new BlendMode();
-		} else {
-			int i = 32774;
-			int j = 1;
-			int k = 0;
-			int l = 1;
-			int m = 0;
-			boolean bl = true;
-			boolean bl2 = false;
-			if (GsonHelper.isStringValue(jsonObject, "func")) {
-				i = BlendMode.stringToBlendFunc(jsonObject.get("func").getAsString());
-				if (i != 32774) {
-					bl = false;
-				}
-			}
-
-			if (GsonHelper.isStringValue(jsonObject, "srcrgb")) {
-				j = BlendMode.stringToBlendFactor(jsonObject.get("srcrgb").getAsString());
-				if (j != 1) {
-					bl = false;
-				}
-			}
-
-			if (GsonHelper.isStringValue(jsonObject, "dstrgb")) {
-				k = BlendMode.stringToBlendFactor(jsonObject.get("dstrgb").getAsString());
-				if (k != 0) {
-					bl = false;
-				}
-			}
-
-			if (GsonHelper.isStringValue(jsonObject, "srcalpha")) {
-				l = BlendMode.stringToBlendFactor(jsonObject.get("srcalpha").getAsString());
-				if (l != 1) {
-					bl = false;
-				}
-
-				bl2 = true;
-			}
-
-			if (GsonHelper.isStringValue(jsonObject, "dstalpha")) {
-				m = BlendMode.stringToBlendFactor(jsonObject.get("dstalpha").getAsString());
-				if (m != 0) {
-					bl = false;
-				}
-
-				bl2 = true;
-			}
-
-			if (bl) {
-				return new BlendMode();
-			} else {
-				return bl2 ? new BlendMode(j, k, l, m, i) : new BlendMode(j, k, i);
-			}
-		}
-	}
-
 	public void close() {
 		for (Uniform uniform : this.uniforms) {
 			uniform.close();
@@ -352,7 +293,6 @@ public class ShaderInstance implements Shader, AutoCloseable {
 		RenderSystem.assertOnRenderThread();
 		this.dirty = false;
 		lastAppliedShader = this;
-		this.blend.apply();
 		if (this.programId != lastProgramId) {
 			ProgramManager.glUseProgram(this.programId);
 			lastProgramId = this.programId;
@@ -527,5 +467,62 @@ public class ShaderInstance implements Shader, AutoCloseable {
 	@Override
 	public int getId() {
 		return this.programId;
+	}
+
+	public void setDefaultUniforms(VertexFormat.Mode mode, Matrix4f matrix4f, Matrix4f matrix4f2, Window window) {
+		for (int i = 0; i < 12; i++) {
+			int j = RenderSystem.getShaderTexture(i);
+			this.setSampler("Sampler" + i, j);
+		}
+
+		if (this.MODEL_VIEW_MATRIX != null) {
+			this.MODEL_VIEW_MATRIX.set(matrix4f);
+		}
+
+		if (this.PROJECTION_MATRIX != null) {
+			this.PROJECTION_MATRIX.set(matrix4f2);
+		}
+
+		if (this.COLOR_MODULATOR != null) {
+			this.COLOR_MODULATOR.set(RenderSystem.getShaderColor());
+		}
+
+		if (this.GLINT_ALPHA != null) {
+			this.GLINT_ALPHA.set(RenderSystem.getShaderGlintAlpha());
+		}
+
+		if (this.FOG_START != null) {
+			this.FOG_START.set(RenderSystem.getShaderFogStart());
+		}
+
+		if (this.FOG_END != null) {
+			this.FOG_END.set(RenderSystem.getShaderFogEnd());
+		}
+
+		if (this.FOG_COLOR != null) {
+			this.FOG_COLOR.set(RenderSystem.getShaderFogColor());
+		}
+
+		if (this.FOG_SHAPE != null) {
+			this.FOG_SHAPE.set(RenderSystem.getShaderFogShape().getIndex());
+		}
+
+		if (this.TEXTURE_MATRIX != null) {
+			this.TEXTURE_MATRIX.set(RenderSystem.getTextureMatrix());
+		}
+
+		if (this.GAME_TIME != null) {
+			this.GAME_TIME.set(RenderSystem.getShaderGameTime());
+		}
+
+		if (this.SCREEN_SIZE != null) {
+			this.SCREEN_SIZE.set((float)window.getWidth(), (float)window.getHeight());
+		}
+
+		if (this.LINE_WIDTH != null && (mode == VertexFormat.Mode.LINES || mode == VertexFormat.Mode.LINE_STRIP)) {
+			this.LINE_WIDTH.set(RenderSystem.getShaderLineWidth());
+		}
+
+		RenderSystem.setupShaderLights(this);
 	}
 }

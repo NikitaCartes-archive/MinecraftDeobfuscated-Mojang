@@ -6,9 +6,11 @@ import com.google.common.collect.ImmutableSet;
 import com.mojang.datafixers.util.Pair;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Predicate;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Unit;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.Brain;
@@ -54,10 +56,10 @@ public class BreezeAi {
 		MemoryModuleType.PATH
 	);
 
-	protected static Brain<?> makeBrain(Brain<Breeze> brain) {
+	protected static Brain<?> makeBrain(Breeze breeze, Brain<Breeze> brain) {
 		initCoreActivity(brain);
 		initIdleActivity(brain);
-		initFightActivity(brain);
+		initFightActivity(breeze, brain);
 		brain.setCoreActivities(Set.of(Activity.CORE));
 		brain.setDefaultActivity(Activity.FIGHT);
 		brain.useDefaultActivity();
@@ -80,11 +82,11 @@ public class BreezeAi {
 		);
 	}
 
-	private static void initFightActivity(Brain<Breeze> brain) {
+	private static void initFightActivity(Breeze breeze, Brain<Breeze> brain) {
 		brain.addActivityWithConditions(
 			Activity.FIGHT,
 			ImmutableList.of(
-				Pair.of(0, StopAttackingIfTargetInvalid.create()),
+				Pair.of(0, StopAttackingIfTargetInvalid.create((Predicate<LivingEntity>)(livingEntity -> !Sensor.isEntityAttackable(breeze, livingEntity)))),
 				Pair.of(1, new Shoot()),
 				Pair.of(2, new LongJump()),
 				Pair.of(3, new ShootWhenStuck()),

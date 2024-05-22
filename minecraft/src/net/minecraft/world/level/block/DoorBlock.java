@@ -176,8 +176,8 @@ public class DoorBlock extends Block {
 			+ (blockState2.isCollisionShapeFullBlock(blockGetter, blockPos4) ? -1 : 0)
 			+ (blockState3.isCollisionShapeFullBlock(blockGetter, blockPos5) ? 1 : 0)
 			+ (blockState4.isCollisionShapeFullBlock(blockGetter, blockPos6) ? 1 : 0);
-		boolean bl = blockState.is(this) && blockState.getValue(HALF) == DoubleBlockHalf.LOWER;
-		boolean bl2 = blockState3.is(this) && blockState3.getValue(HALF) == DoubleBlockHalf.LOWER;
+		boolean bl = blockState.getBlock() instanceof DoorBlock && blockState.getValue(HALF) == DoubleBlockHalf.LOWER;
+		boolean bl2 = blockState3.getBlock() instanceof DoorBlock && blockState3.getValue(HALF) == DoubleBlockHalf.LOWER;
 		if ((!bl || bl2) && i <= 0) {
 			if ((!bl2 || bl) && i >= 0) {
 				int j = direction.getStepX();

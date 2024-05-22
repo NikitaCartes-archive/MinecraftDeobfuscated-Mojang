@@ -19,6 +19,7 @@ import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.AdventureModePredicate;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Instrument;
+import net.minecraft.world.item.JukeboxPlayable;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.armortrim.ArmorTrim;
@@ -170,6 +171,9 @@ public class DataComponents {
 	);
 	public static final DataComponentType<Integer> OMINOUS_BOTTLE_AMPLIFIER = register(
 		"ominous_bottle_amplifier", builder -> builder.persistent(ExtraCodecs.intRange(0, 4)).networkSynchronized(ByteBufCodecs.VAR_INT)
+	);
+	public static final DataComponentType<JukeboxPlayable> JUKEBOX_PLAYABLE = register(
+		"jukebox_playable", builder -> builder.persistent(JukeboxPlayable.CODEC).networkSynchronized(JukeboxPlayable.STREAM_CODEC)
 	);
 	public static final DataComponentType<List<ResourceLocation>> RECIPES = register(
 		"recipes", builder -> builder.persistent(ResourceLocation.CODEC.listOf()).cacheEncoding()

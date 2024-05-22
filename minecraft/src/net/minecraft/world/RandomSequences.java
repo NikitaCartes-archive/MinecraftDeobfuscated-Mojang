@@ -87,7 +87,7 @@ public class RandomSequences extends SavedData {
 		for (String string : compoundTag2.getAllKeys()) {
 			try {
 				RandomSequence randomSequence = (RandomSequence)((Pair)RandomSequence.CODEC.decode(NbtOps.INSTANCE, compoundTag2.get(string)).result().get()).getFirst();
-				randomSequences.sequences.put(new ResourceLocation(string), randomSequence);
+				randomSequences.sequences.put(ResourceLocation.parse(string), randomSequence);
 			} catch (Exception var9) {
 				LOGGER.error("Failed to load random sequence {}", string, var9);
 			}

@@ -29,6 +29,7 @@ import net.minecraft.util.datafix.fixes.AddNewChoices;
 import net.minecraft.util.datafix.fixes.AdvancementsFix;
 import net.minecraft.util.datafix.fixes.AdvancementsRenameFix;
 import net.minecraft.util.datafix.fixes.AreaEffectCloudPotionFix;
+import net.minecraft.util.datafix.fixes.AttributeModifierIdFix;
 import net.minecraft.util.datafix.fixes.AttributesRename;
 import net.minecraft.util.datafix.fixes.BannerEntityCustomNameToOverrideComponentFix;
 import net.minecraft.util.datafix.fixes.BannerPatternFormatFix;
@@ -144,6 +145,7 @@ import net.minecraft.util.datafix.fixes.ItemWaterPotionFix;
 import net.minecraft.util.datafix.fixes.ItemWrittenBookPagesStrictJsonFix;
 import net.minecraft.util.datafix.fixes.JigsawPropertiesFix;
 import net.minecraft.util.datafix.fixes.JigsawRotationFix;
+import net.minecraft.util.datafix.fixes.JukeboxTicksSinceSongStartedFix;
 import net.minecraft.util.datafix.fixes.LeavesFix;
 import net.minecraft.util.datafix.fixes.LegacyDragonFightFix;
 import net.minecraft.util.datafix.fixes.LevelDataGeneratorOptionsFix;
@@ -1317,6 +1319,9 @@ public class DataFixers {
 		dataFixerBuilder.addFixer(new FeatureFlagRemoveFix(schema224, "Remove 1.21 feature toggle", Set.of("minecraft:update_1_21")));
 		Schema schema225 = dataFixerBuilder.addSchema(3943, SAME_NAMESPACED);
 		dataFixerBuilder.addFixer(new OptionsMenuBlurrinessFix(schema225));
+		Schema schema226 = dataFixerBuilder.addSchema(3945, SAME_NAMESPACED);
+		dataFixerBuilder.addFixer(new AttributeModifierIdFix(schema226));
+		dataFixerBuilder.addFixer(new JukeboxTicksSinceSongStartedFix(schema226));
 	}
 
 	private static UnaryOperator<String> createRenamerNoNamespace(Map<String, String> map) {
