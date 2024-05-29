@@ -3,6 +3,7 @@ package net.minecraft.world.damagesource;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 
 public class CombatRules {
@@ -13,16 +14,14 @@ public class CombatRules {
 	private static final int NUM_ARMOR_ITEMS = 4;
 
 	public static float getDamageAfterAbsorb(LivingEntity livingEntity, float f, DamageSource damageSource, float g, float h) {
+		float i = 2.0F + h / 4.0F;
+		float j = Mth.clamp(g - f / i, g * 0.2F, 20.0F);
+		float k = j / 25.0F;
+		ItemStack itemStack = damageSource.getWeaponItem();
 		float l;
-		label12: {
-			float i = 2.0F + h / 4.0F;
-			float j = Mth.clamp(g - f / i, g * 0.2F, 20.0F);
-			float k = j / 25.0F;
-			if (damageSource.getDirectEntity() instanceof LivingEntity livingEntity2 && livingEntity2.level() instanceof ServerLevel serverLevel) {
-				l = Mth.clamp(EnchantmentHelper.modifyArmorEffectiveness(serverLevel, livingEntity2.getMainHandItem(), livingEntity, damageSource, k), 0.0F, 1.0F);
-				break label12;
-			}
-
+		if (itemStack != null && livingEntity.level() instanceof ServerLevel serverLevel) {
+			l = Mth.clamp(EnchantmentHelper.modifyArmorEffectiveness(serverLevel, itemStack, livingEntity, damageSource, k), 0.0F, 1.0F);
+		} else {
 			l = k;
 		}
 

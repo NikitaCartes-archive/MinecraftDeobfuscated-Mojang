@@ -3,6 +3,7 @@ package net.minecraft.world.entity.projectile.windcharge;
 import java.util.Optional;
 import java.util.function.Function;
 import javax.annotation.Nullable;
+import net.minecraft.core.Vec3i;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerLevel;
@@ -28,6 +29,7 @@ public abstract class AbstractWindCharge extends AbstractHurtingProjectile imple
 	public static final ExplosionDamageCalculator EXPLOSION_DAMAGE_CALCULATOR = new SimpleExplosionDamageCalculator(
 		true, false, Optional.empty(), BuiltInRegistries.BLOCK.getTag(BlockTags.BLOCKS_WIND_CHARGE_EXPLOSIONS).map(Function.identity())
 	);
+	public static final double JUMP_SCALE = 0.25;
 
 	public AbstractWindCharge(EntityType<? extends AbstractWindCharge> entityType, Level level) {
 		super(entityType, level);
@@ -89,7 +91,7 @@ public abstract class AbstractWindCharge extends AbstractHurtingProjectile imple
 				EnchantmentHelper.doPostAttackEffects((ServerLevel)this.level(), livingEntity3, damageSource);
 			}
 
-			this.explode();
+			this.explode(this.position());
 		}
 	}
 
@@ -97,13 +99,16 @@ public abstract class AbstractWindCharge extends AbstractHurtingProjectile imple
 	public void push(double d, double e, double f) {
 	}
 
-	protected abstract void explode();
+	protected abstract void explode(Vec3 vec3);
 
 	@Override
 	protected void onHitBlock(BlockHitResult blockHitResult) {
 		super.onHitBlock(blockHitResult);
 		if (!this.level().isClientSide) {
-			this.explode();
+			Vec3i vec3i = blockHitResult.getDirection().getNormal();
+			Vec3 vec3 = Vec3.atLowerCornerOf(vec3i).multiply(0.25, 0.25, 0.25);
+			Vec3 vec32 = blockHitResult.getLocation().add(vec3);
+			this.explode(vec32);
 			this.discard();
 		}
 	}
@@ -145,10 +150,15 @@ public abstract class AbstractWindCharge extends AbstractHurtingProjectile imple
 	@Override
 	public void tick() {
 		if (!this.level().isClientSide && this.getBlockY() > this.level().getMaxBuildHeight() + 30) {
-			this.explode();
+			this.explode(this.position());
 			this.discard();
 		} else {
 			super.tick();
 		}
+	}
+
+	@Override
+	public boolean hurt(DamageSource damageSource, float f) {
+		return false;
 	}
 }

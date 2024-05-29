@@ -319,7 +319,7 @@ public class Panda extends Animal {
 	}
 
 	@Override
-	public boolean canBeLeashed(Player player) {
+	public boolean canBeLeashed() {
 		return false;
 	}
 

@@ -13,6 +13,7 @@ import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import net.minecraft.world.level.levelgen.structure.templatesystem.LiquidSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
 
@@ -77,11 +78,12 @@ public class ListPoolElement extends StructurePoolElement {
 		Rotation rotation,
 		BoundingBox boundingBox,
 		RandomSource randomSource,
+		LiquidSettings liquidSettings,
 		boolean bl
 	) {
 		for (StructurePoolElement structurePoolElement : this.elements) {
 			if (!structurePoolElement.place(
-				structureTemplateManager, worldGenLevel, structureManager, chunkGenerator, blockPos, blockPos2, rotation, boundingBox, randomSource, bl
+				structureTemplateManager, worldGenLevel, structureManager, chunkGenerator, blockPos, blockPos2, rotation, boundingBox, randomSource, liquidSettings, bl
 			)) {
 				return false;
 			}

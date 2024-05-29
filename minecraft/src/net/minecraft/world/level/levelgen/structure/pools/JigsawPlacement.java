@@ -35,6 +35,7 @@ import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePiecesBuilder;
 import net.minecraft.world.level.levelgen.structure.pools.alias.PoolAliasLookup;
 import net.minecraft.world.level.levelgen.structure.structures.JigsawStructure;
+import net.minecraft.world.level.levelgen.structure.templatesystem.LiquidSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
 import net.minecraft.world.phys.AABB;
@@ -57,7 +58,8 @@ public class JigsawPlacement {
 		Optional<Heightmap.Types> optional2,
 		int j,
 		PoolAliasLookup poolAliasLookup,
-		DimensionPadding dimensionPadding
+		DimensionPadding dimensionPadding,
+		LiquidSettings liquidSettings
 	) {
 		RegistryAccess registryAccess = generationContext.registryAccess();
 		ChunkGenerator chunkGenerator = generationContext.chunkGenerator();
@@ -99,7 +101,8 @@ public class JigsawPlacement {
 				blockPos3,
 				structurePoolElement.getGroundLevelDelta(),
 				rotation,
-				structurePoolElement.getBoundingBox(structureTemplateManager, blockPos3, rotation)
+				structurePoolElement.getBoundingBox(structureTemplateManager, blockPos3, rotation),
+				liquidSettings
 			);
 			BoundingBox boundingBox = poolElementStructurePiece.getBoundingBox();
 			int k = (boundingBox.maxX() + boundingBox.minX()) / 2;
@@ -142,7 +145,8 @@ public class JigsawPlacement {
 								poolElementStructurePiece,
 								list,
 								voxelShape,
-								poolAliasLookup
+								poolAliasLookup,
+								liquidSettings
 							);
 							list.forEach(structurePiecesBuilder::addPiece);
 						}
@@ -188,14 +192,17 @@ public class JigsawPlacement {
 		PoolElementStructurePiece poolElementStructurePiece,
 		List<PoolElementStructurePiece> list,
 		VoxelShape voxelShape,
-		PoolAliasLookup poolAliasLookup
+		PoolAliasLookup poolAliasLookup,
+		LiquidSettings liquidSettings
 	) {
 		JigsawPlacement.Placer placer = new JigsawPlacement.Placer(registry, i, chunkGenerator, structureTemplateManager, list, randomSource);
-		placer.tryPlacingChildren(poolElementStructurePiece, new MutableObject<>(voxelShape), 0, bl, levelHeightAccessor, randomState, poolAliasLookup);
+		placer.tryPlacingChildren(
+			poolElementStructurePiece, new MutableObject<>(voxelShape), 0, bl, levelHeightAccessor, randomState, poolAliasLookup, liquidSettings
+		);
 
 		while (placer.placing.hasNext()) {
 			JigsawPlacement.PieceState pieceState = placer.placing.next();
-			placer.tryPlacingChildren(pieceState.piece, pieceState.free, pieceState.depth, bl, levelHeightAccessor, randomState, poolAliasLookup);
+			placer.tryPlacingChildren(pieceState.piece, pieceState.free, pieceState.depth, bl, levelHeightAccessor, randomState, poolAliasLookup, liquidSettings);
 		}
 	}
 
@@ -227,7 +234,8 @@ public class JigsawPlacement {
 			Optional.empty(),
 			128,
 			PoolAliasLookup.EMPTY,
-			JigsawStructure.DEFAULT_DIMENSION_PADDING
+			JigsawStructure.DEFAULT_DIMENSION_PADDING,
+			JigsawStructure.DEFAULT_LIQUID_SETTINGS
 		);
 		if (optional.isPresent()) {
 			StructurePiecesBuilder structurePiecesBuilder = ((Structure.GenerationStub)optional.get()).getPiecesBuilder();
@@ -279,7 +287,8 @@ public class JigsawPlacement {
 			boolean bl,
 			LevelHeightAccessor levelHeightAccessor,
 			RandomState randomState,
-			PoolAliasLookup poolAliasLookup
+			PoolAliasLookup poolAliasLookup,
+			LiquidSettings liquidSettings
 		) {
 			StructurePoolElement structurePoolElement = poolElementStructurePiece.getElement();
 			BlockPos blockPos = poolElementStructurePiece.getPosition();
@@ -400,7 +409,7 @@ public class JigsawPlacement {
 												}
 
 												PoolElementStructurePiece poolElementStructurePiece2 = new PoolElementStructurePiece(
-													this.structureTemplateManager, structurePoolElement2, blockPos6, u, rotation2, boundingBox4
+													this.structureTemplateManager, structurePoolElement2, blockPos6, u, rotation2, boundingBox4, liquidSettings
 												);
 												int v;
 												if (bl2) {

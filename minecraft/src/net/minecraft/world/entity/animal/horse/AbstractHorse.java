@@ -217,10 +217,12 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 	}
 
 	@Override
-	protected void onLeashDistance(float f) {
+	public boolean handleLeashAtDistance(Entity entity, float f) {
 		if (f > 6.0F && this.isEating()) {
 			this.setEating(false);
 		}
+
+		return true;
 	}
 
 	public boolean isEating() {
@@ -245,8 +247,8 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 	}
 
 	@Override
-	public void equipSaddle(@Nullable SoundSource soundSource) {
-		this.inventory.setItem(0, new ItemStack(Items.SADDLE));
+	public void equipSaddle(ItemStack itemStack, @Nullable SoundSource soundSource) {
+		this.inventory.setItem(0, itemStack);
 	}
 
 	public void equipBodyArmor(Player player, ItemStack itemStack) {
@@ -315,8 +317,12 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 		}
 	}
 
-	protected int getInventorySize() {
-		return 1;
+	public final int getInventorySize() {
+		return getInventorySize(this.getInventoryColumns());
+	}
+
+	public static int getInventorySize(int i) {
+		return i * 3 + 1;
 	}
 
 	protected void createInventory() {
@@ -1121,5 +1127,9 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 
 	public final Container getBodyArmorAccess() {
 		return this.bodyArmorAccess;
+	}
+
+	public int getInventoryColumns() {
+		return 0;
 	}
 }

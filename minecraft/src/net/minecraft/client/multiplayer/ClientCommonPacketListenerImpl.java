@@ -1,9 +1,11 @@
 package net.minecraft.client.multiplayer;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.logging.LogUtils;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.nio.file.Path;
 import java.time.Duration;
@@ -106,7 +108,7 @@ public abstract class ClientCommonPacketListenerImpl implements ClientCommonPack
 		LOGGER.error("Failed to handle packet {}", packet, exception);
 		ClientCommonPacketListener.super.onPacketError(packet, exception);
 		Optional<Path> optional = this.storeDisconnectionReport(packet, exception);
-		Optional<String> optional2 = this.serverLinks.findKnownType(ServerLinks.KnownLinkType.BUG_REPORT).map(ServerLinks.Entry::url);
+		Optional<URI> optional2 = this.serverLinks.findKnownType(ServerLinks.KnownLinkType.BUG_REPORT).map(ServerLinks.Entry::link);
 		if (this.strictErrorHandling) {
 			this.connection.disconnect(new DisconnectionDetails(Component.translatable("disconnect.packetError"), optional, optional2));
 		}
@@ -115,7 +117,7 @@ public abstract class ClientCommonPacketListenerImpl implements ClientCommonPack
 	@Override
 	public DisconnectionDetails createDisconnectionInfo(Component component, Throwable throwable) {
 		Optional<Path> optional = this.storeDisconnectionReport(null, throwable);
-		Optional<String> optional2 = this.serverLinks.findKnownType(ServerLinks.KnownLinkType.BUG_REPORT).map(ServerLinks.Entry::url);
+		Optional<URI> optional2 = this.serverLinks.findKnownType(ServerLinks.KnownLinkType.BUG_REPORT).map(ServerLinks.Entry::link);
 		return new DisconnectionDetails(component, optional, optional2);
 	}
 
@@ -125,7 +127,7 @@ public abstract class ClientCommonPacketListenerImpl implements ClientCommonPack
 		Path path = this.minecraft.gameDirectory.toPath().resolve("debug");
 		Path path2 = path.resolve("disconnect-" + Util.getFilenameFormattedDateTime() + "-client.txt");
 		Optional<ServerLinks.Entry> optional = this.serverLinks.findKnownType(ServerLinks.KnownLinkType.BUG_REPORT);
-		List<String> list = (List<String>)optional.map(entry -> List.of("Server bug reporting link: " + entry.url())).orElse(List.of());
+		List<String> list = (List<String>)optional.map(entry -> List.of("Server bug reporting link: " + entry.link())).orElse(List.of());
 		return crashReport.saveToFile(path2, ReportType.NETWORK_PROTOCOL_ERROR, list) ? Optional.of(path2) : Optional.empty();
 	}
 
@@ -226,7 +228,19 @@ public abstract class ClientCommonPacketListenerImpl implements ClientCommonPack
 	@Override
 	public void handleServerLinks(ClientboundServerLinksPacket clientboundServerLinksPacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundServerLinksPacket, this, this.minecraft);
-		this.serverLinks = clientboundServerLinksPacket.links();
+		List<ServerLinks.UntrustedEntry> list = clientboundServerLinksPacket.links();
+		Builder<ServerLinks.Entry> builder = ImmutableList.builderWithExpectedSize(list.size());
+
+		for (ServerLinks.UntrustedEntry untrustedEntry : list) {
+			try {
+				URI uRI = Util.parseAndValidateUntrustedUri(untrustedEntry.link());
+				builder.add(new ServerLinks.Entry(untrustedEntry.type(), uRI));
+			} catch (Exception var7) {
+				LOGGER.warn("Received invalid link for type {}:{}", untrustedEntry.type(), untrustedEntry.link(), var7);
+			}
+		}
+
+		this.serverLinks = new ServerLinks(builder.build());
 	}
 
 	@Override

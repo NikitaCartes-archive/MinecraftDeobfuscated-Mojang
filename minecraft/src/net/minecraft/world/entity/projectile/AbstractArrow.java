@@ -464,8 +464,8 @@ public abstract class AbstractArrow extends Projectile {
 		);
 	}
 
-	@Nullable
-	protected ItemStack getWeaponItem() {
+	@Override
+	public ItemStack getWeaponItem() {
 		return this.firedFromWeapon;
 	}
 

@@ -179,7 +179,8 @@ public class ItemProperties {
 				} else {
 					return CrossbowItem.isCharged(itemStack)
 						? 0.0F
-						: (float)(itemStack.getUseDuration(livingEntity) - livingEntity.getUseItemRemainingTicks()) / (float)CrossbowItem.getChargeDuration(livingEntity);
+						: (float)(itemStack.getUseDuration(livingEntity) - livingEntity.getUseItemRemainingTicks())
+							/ (float)CrossbowItem.getChargeDuration(itemStack, livingEntity);
 				}
 			}
 		);

@@ -385,17 +385,15 @@ public class EnchantmentHelper {
 		return Math.max(0, mutableFloat.intValue());
 	}
 
-	public static float modifyCrossbowChargingTime(LivingEntity livingEntity, float f) {
+	public static float modifyCrossbowChargingTime(ItemStack itemStack, LivingEntity livingEntity, float f) {
 		MutableFloat mutableFloat = new MutableFloat(f);
-		runIterationOnEquipment(livingEntity, (holder, i, enchantedItemInUse) -> holder.value().modifyCrossbowChargeTime(livingEntity.getRandom(), i, mutableFloat));
+		runIterationOnItem(itemStack, (holder, i) -> holder.value().modifyCrossbowChargeTime(livingEntity.getRandom(), i, mutableFloat));
 		return Math.max(0.0F, mutableFloat.floatValue());
 	}
 
-	public static float getTridentSpinAttackStrength(LivingEntity livingEntity) {
+	public static float getTridentSpinAttackStrength(ItemStack itemStack, LivingEntity livingEntity) {
 		MutableFloat mutableFloat = new MutableFloat(0.0F);
-		runIterationOnEquipment(
-			livingEntity, (holder, i, enchantedItemInUse) -> holder.value().modifyTridentSpinAttackStrength(livingEntity.getRandom(), i, mutableFloat)
-		);
+		runIterationOnItem(itemStack, (holder, i) -> holder.value().modifyTridentSpinAttackStrength(livingEntity.getRandom(), i, mutableFloat));
 		return mutableFloat.floatValue();
 	}
 

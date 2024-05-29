@@ -2,7 +2,6 @@ package net.minecraft.client.gui.screens;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.logging.LogUtils;
@@ -12,8 +11,6 @@ import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Locale;
-import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
@@ -25,9 +22,11 @@ import net.minecraft.CrashReportDetail;
 import net.minecraft.ReportedException;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.NarratorStatus;
 import net.minecraft.client.gui.ComponentPath;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.TabOrderedElement;
 import net.minecraft.client.gui.components.Tooltip;
@@ -59,7 +58,6 @@ import org.slf4j.Logger;
 @Environment(EnvType.CLIENT)
 public abstract class Screen extends AbstractContainerEventHandler implements Renderable {
 	private static final Logger LOGGER = LogUtils.getLogger();
-	private static final Set<String> ALLOWED_PROTOCOLS = Sets.<String>newHashSet("http", "https");
 	private static final Component USAGE_NARRATION = Component.translatable("narrator.screen.usage");
 	protected static final CubeMap CUBE_MAP = new CubeMap(ResourceLocation.withDefaultNamespace("textures/gui/title/background/panorama"));
 	protected static final PanoramaRenderer PANORAMA = new PanoramaRenderer(CUBE_MAP);
@@ -79,8 +77,6 @@ public abstract class Screen extends AbstractContainerEventHandler implements Re
 	public int height;
 	private final List<Renderable> renderables = Lists.<Renderable>newArrayList();
 	protected Font font;
-	@Nullable
-	private URI clickedLink;
 	private static final long NARRATE_SUPPRESS_AFTER_INIT_TIME = TimeUnit.SECONDS.toMillis(2L);
 	private static final long NARRATE_DELAY_NARRATOR_ENABLED = NARRATE_SUPPRESS_AFTER_INIT_TIME;
 	private static final long NARRATE_DELAY_MOUSE_MOVE = 750L;
@@ -89,6 +85,8 @@ public abstract class Screen extends AbstractContainerEventHandler implements Re
 	private final ScreenNarrationCollector narrationState = new ScreenNarrationCollector();
 	private long narrationSuppressTime = Long.MIN_VALUE;
 	private long nextNarrationTime = Long.MAX_VALUE;
+	@Nullable
+	protected CycleButton<NarratorStatus> narratorButton;
 	@Nullable
 	private NarratableEntry lastNarratable;
 	@Nullable
@@ -268,38 +266,33 @@ public abstract class Screen extends AbstractContainerEventHandler implements Re
 					}
 
 					try {
-						URI uRI = new URI(clickEvent.getValue());
-						String string = uRI.getScheme();
-						if (string == null) {
-							throw new URISyntaxException(clickEvent.getValue(), "Missing protocol");
-						}
-
-						if (!ALLOWED_PROTOCOLS.contains(string.toLowerCase(Locale.ROOT))) {
-							throw new URISyntaxException(clickEvent.getValue(), "Unsupported protocol: " + string.toLowerCase(Locale.ROOT));
-						}
-
+						URI uRI = Util.parseAndValidateUntrustedUri(clickEvent.getValue());
 						if (this.minecraft.options.chatLinksPrompt().get()) {
-							this.clickedLink = uRI;
-							this.minecraft.setScreen(new ConfirmLinkScreen(this::confirmLink, clickEvent.getValue(), false));
+							this.minecraft.setScreen(new ConfirmLinkScreen(bl -> {
+								if (bl) {
+									Util.getPlatform().openUri(uRI);
+								}
+
+								this.minecraft.setScreen(this);
+							}, clickEvent.getValue(), false));
 						} else {
-							this.openLink(uRI);
+							Util.getPlatform().openUri(uRI);
 						}
-					} catch (URISyntaxException var5) {
-						LOGGER.error("Can't open url for {}", clickEvent, var5);
+					} catch (URISyntaxException var4) {
+						LOGGER.error("Can't open url for {}", clickEvent, var4);
 					}
 				} else if (clickEvent.getAction() == ClickEvent.Action.OPEN_FILE) {
-					URI uRIx = new File(clickEvent.getValue()).toURI();
-					this.openLink(uRIx);
+					Util.getPlatform().openFile(new File(clickEvent.getValue()));
 				} else if (clickEvent.getAction() == ClickEvent.Action.SUGGEST_COMMAND) {
 					this.insertText(StringUtil.filterText(clickEvent.getValue()), true);
 				} else if (clickEvent.getAction() == ClickEvent.Action.RUN_COMMAND) {
-					String string2 = StringUtil.filterText(clickEvent.getValue());
-					if (string2.startsWith("/")) {
-						if (!this.minecraft.player.connection.sendUnsignedCommand(string2.substring(1))) {
-							LOGGER.error("Not allowed to run command with signed argument from click event: '{}'", string2);
+					String string = StringUtil.filterText(clickEvent.getValue());
+					if (string.startsWith("/")) {
+						if (!this.minecraft.player.connection.sendUnsignedCommand(string.substring(1))) {
+							LOGGER.error("Not allowed to run command with signed argument from click event: '{}'", string);
 						}
 					} else {
-						LOGGER.error("Failed to run command without '/' prefix from click event: '{}'", string2);
+						LOGGER.error("Failed to run command without '/' prefix from click event: '{}'", string);
 					}
 				} else if (clickEvent.getAction() == ClickEvent.Action.COPY_TO_CLIPBOARD) {
 					this.minecraft.keyboardHandler.setClipboard(clickEvent.getValue());
@@ -394,19 +387,6 @@ public abstract class Screen extends AbstractContainerEventHandler implements Re
 
 	public boolean isPauseScreen() {
 		return true;
-	}
-
-	private void confirmLink(boolean bl) {
-		if (bl) {
-			this.openLink(this.clickedLink);
-		}
-
-		this.clickedLink = null;
-		this.minecraft.setScreen(this);
-	}
-
-	private void openLink(URI uRI) {
-		Util.getPlatform().openUri(uRI);
 	}
 
 	public static boolean hasControlDown() {
@@ -596,8 +576,14 @@ public abstract class Screen extends AbstractContainerEventHandler implements Re
 		return narratableSearchResult != null ? narratableSearchResult : narratableSearchResult2;
 	}
 
-	public void narrationEnabled() {
-		this.scheduleNarration(NARRATE_DELAY_NARRATOR_ENABLED, false);
+	public void updateNarratorStatus(boolean bl) {
+		if (bl) {
+			this.scheduleNarration(NARRATE_DELAY_NARRATOR_ENABLED, false);
+		}
+
+		if (this.narratorButton != null) {
+			this.narratorButton.setValue(this.minecraft.options.narrator().get());
+		}
 	}
 
 	protected void clearTooltipForNextRenderPass() {

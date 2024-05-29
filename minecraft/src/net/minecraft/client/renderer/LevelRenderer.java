@@ -2184,6 +2184,61 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 		vertexConsumer.addVertex(matrix4f, i, j, k).setColor(l, m, n, o);
 	}
 
+	public static void renderFace(
+		PoseStack poseStack,
+		VertexConsumer vertexConsumer,
+		Direction direction,
+		float f,
+		float g,
+		float h,
+		float i,
+		float j,
+		float k,
+		float l,
+		float m,
+		float n,
+		float o
+	) {
+		Matrix4f matrix4f = poseStack.last().pose();
+		switch (direction) {
+			case DOWN:
+				vertexConsumer.addVertex(matrix4f, f, g, h).setColor(l, m, n, o);
+				vertexConsumer.addVertex(matrix4f, i, g, h).setColor(l, m, n, o);
+				vertexConsumer.addVertex(matrix4f, i, g, k).setColor(l, m, n, o);
+				vertexConsumer.addVertex(matrix4f, f, g, k).setColor(l, m, n, o);
+				break;
+			case UP:
+				vertexConsumer.addVertex(matrix4f, f, j, h).setColor(l, m, n, o);
+				vertexConsumer.addVertex(matrix4f, f, j, k).setColor(l, m, n, o);
+				vertexConsumer.addVertex(matrix4f, i, j, k).setColor(l, m, n, o);
+				vertexConsumer.addVertex(matrix4f, i, j, h).setColor(l, m, n, o);
+				break;
+			case NORTH:
+				vertexConsumer.addVertex(matrix4f, f, g, h).setColor(l, m, n, o);
+				vertexConsumer.addVertex(matrix4f, f, j, h).setColor(l, m, n, o);
+				vertexConsumer.addVertex(matrix4f, i, j, h).setColor(l, m, n, o);
+				vertexConsumer.addVertex(matrix4f, i, g, h).setColor(l, m, n, o);
+				break;
+			case SOUTH:
+				vertexConsumer.addVertex(matrix4f, f, g, k).setColor(l, m, n, o);
+				vertexConsumer.addVertex(matrix4f, i, g, k).setColor(l, m, n, o);
+				vertexConsumer.addVertex(matrix4f, i, j, k).setColor(l, m, n, o);
+				vertexConsumer.addVertex(matrix4f, f, j, k).setColor(l, m, n, o);
+				break;
+			case WEST:
+				vertexConsumer.addVertex(matrix4f, f, g, h).setColor(l, m, n, o);
+				vertexConsumer.addVertex(matrix4f, f, g, k).setColor(l, m, n, o);
+				vertexConsumer.addVertex(matrix4f, f, j, k).setColor(l, m, n, o);
+				vertexConsumer.addVertex(matrix4f, f, j, h).setColor(l, m, n, o);
+				break;
+			case EAST:
+				vertexConsumer.addVertex(matrix4f, i, g, h).setColor(l, m, n, o);
+				vertexConsumer.addVertex(matrix4f, i, j, h).setColor(l, m, n, o);
+				vertexConsumer.addVertex(matrix4f, i, j, k).setColor(l, m, n, o);
+				vertexConsumer.addVertex(matrix4f, i, g, k).setColor(l, m, n, o);
+		}
+	}
+
 	public void blockChanged(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState, BlockState blockState2, int i) {
 		this.setBlockDirty(blockPos, (i & 8) != 0);
 	}

@@ -242,15 +242,12 @@ public class Slime extends Mob implements Enemy {
 	}
 
 	protected void dealDamage(LivingEntity livingEntity) {
-		if (this.isAlive()) {
-			int i = this.getSize();
-			if (this.distanceToSqr(livingEntity) < 0.6 * (double)i * 0.6 * (double)i && this.hasLineOfSight(livingEntity)) {
-				DamageSource damageSource = this.damageSources().mobAttack(this);
-				if (livingEntity.hurt(damageSource, this.getAttackDamage())) {
-					this.playSound(SoundEvents.SLIME_ATTACK, 1.0F, (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
-					if (this.level() instanceof ServerLevel serverLevel) {
-						EnchantmentHelper.doPostAttackEffects(serverLevel, livingEntity, damageSource);
-					}
+		if (this.isAlive() && this.isWithinMeleeAttackRange(livingEntity) && this.hasLineOfSight(livingEntity)) {
+			DamageSource damageSource = this.damageSources().mobAttack(this);
+			if (livingEntity.hurt(damageSource, this.getAttackDamage())) {
+				this.playSound(SoundEvents.SLIME_ATTACK, 1.0F, (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
+				if (this.level() instanceof ServerLevel serverLevel) {
+					EnchantmentHelper.doPostAttackEffects(serverLevel, livingEntity, damageSource);
 				}
 			}
 		}

@@ -56,7 +56,7 @@ public interface ProblemReporter {
 				String string = (String)multimap.asMap()
 					.entrySet()
 					.stream()
-					.map(entry -> "  at " + (String)entry.getKey() + ": " + String.join("; ", (Iterable)entry.getValue()))
+					.map(entry -> " at " + (String)entry.getKey() + ": " + String.join("; ", (Iterable)entry.getValue()))
 					.collect(Collectors.joining("\n"));
 				return Optional.of(string);
 			} else {

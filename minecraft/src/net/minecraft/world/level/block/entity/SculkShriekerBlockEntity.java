@@ -1,7 +1,6 @@
 package net.minecraft.world.level.block.entity;
 
 import com.mojang.logging.LogUtils;
-import com.mojang.serialization.Dynamic;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import java.util.OptionalInt;
@@ -12,6 +11,8 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
@@ -82,10 +83,11 @@ public class SculkShriekerBlockEntity extends BlockEntity implements GameEventLi
 			this.warningLevel = compoundTag.getInt("warning_level");
 		}
 
+		RegistryOps<Tag> registryOps = provider.createSerializationContext(NbtOps.INSTANCE);
 		if (compoundTag.contains("listener", 10)) {
 			VibrationSystem.Data.CODEC
-				.parse(new Dynamic<>(NbtOps.INSTANCE, compoundTag.getCompound("listener")))
-				.resultOrPartial(LOGGER::error)
+				.parse(registryOps, compoundTag.getCompound("listener"))
+				.resultOrPartial(string -> LOGGER.error("Failed to parse vibration listener for Sculk Shrieker: '{}'", string))
 				.ifPresent(data -> this.vibrationData = data);
 		}
 	}
@@ -94,7 +96,11 @@ public class SculkShriekerBlockEntity extends BlockEntity implements GameEventLi
 	protected void saveAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
 		super.saveAdditional(compoundTag, provider);
 		compoundTag.putInt("warning_level", this.warningLevel);
-		VibrationSystem.Data.CODEC.encodeStart(NbtOps.INSTANCE, this.vibrationData).resultOrPartial(LOGGER::error).ifPresent(tag -> compoundTag.put("listener", tag));
+		RegistryOps<Tag> registryOps = provider.createSerializationContext(NbtOps.INSTANCE);
+		VibrationSystem.Data.CODEC
+			.encodeStart(registryOps, this.vibrationData)
+			.resultOrPartial(string -> LOGGER.error("Failed to encode vibration listener for Sculk Shrieker: '{}'", string))
+			.ifPresent(tag -> compoundTag.put("listener", tag));
 	}
 
 	@Nullable

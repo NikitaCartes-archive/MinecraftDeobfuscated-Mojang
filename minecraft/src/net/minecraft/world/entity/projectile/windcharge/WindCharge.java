@@ -18,7 +18,7 @@ import net.minecraft.world.phys.Vec3;
 
 public class WindCharge extends AbstractWindCharge {
 	private static final ExplosionDamageCalculator EXPLOSION_DAMAGE_CALCULATOR = new SimpleExplosionDamageCalculator(
-		true, false, Optional.of(1.1F), BuiltInRegistries.BLOCK.getTag(BlockTags.BLOCKS_WIND_CHARGE_EXPLOSIONS).map(Function.identity())
+		true, false, Optional.of(1.22F), BuiltInRegistries.BLOCK.getTag(BlockTags.BLOCKS_WIND_CHARGE_EXPLOSIONS).map(Function.identity())
 	);
 	private static final float RADIUS = 1.2F;
 	private int noDeflectTicks = 5;
@@ -49,15 +49,15 @@ public class WindCharge extends AbstractWindCharge {
 	}
 
 	@Override
-	protected void explode() {
+	protected void explode(Vec3 vec3) {
 		this.level()
 			.explode(
 				this,
 				null,
 				EXPLOSION_DAMAGE_CALCULATOR,
-				this.getX(),
-				this.getY(),
-				this.getZ(),
+				vec3.x(),
+				vec3.y(),
+				vec3.z(),
 				1.2F,
 				false,
 				Level.ExplosionInteraction.TRIGGER,

@@ -62,7 +62,7 @@ public class ModelManager implements PreparableReloadListener, AutoCloseable {
 		TextureAtlas.LOCATION_BLOCKS,
 		ResourceLocation.withDefaultNamespace("blocks")
 	);
-	private Map<ResourceLocation, BakedModel> bakedRegistry;
+	private Map<ModelResourceLocation, BakedModel> bakedRegistry;
 	private final AtlasSet atlases;
 	private final BlockModelShaper blockModelShaper;
 	private final BlockColors blockColors;
@@ -100,7 +100,7 @@ public class ModelManager implements PreparableReloadListener, AutoCloseable {
 	) {
 		profilerFiller.startTick();
 		CompletableFuture<Map<ResourceLocation, BlockModel>> completableFuture = loadBlockModels(resourceManager, executor);
-		CompletableFuture<Map<ResourceLocation, List<ModelBakery.LoadedJson>>> completableFuture2 = loadBlockStates(resourceManager, executor);
+		CompletableFuture<Map<ResourceLocation, List<BlockStateModelLoader.LoadedJson>>> completableFuture2 = loadBlockStates(resourceManager, executor);
 		CompletableFuture<ModelBakery> completableFuture3 = completableFuture.thenCombineAsync(
 			completableFuture2, (mapx, map2) -> new ModelBakery(this.blockColors, profilerFiller, mapx, map2), executor
 		);
@@ -165,16 +165,18 @@ public class ModelManager implements PreparableReloadListener, AutoCloseable {
 			);
 	}
 
-	private static CompletableFuture<Map<ResourceLocation, List<ModelBakery.LoadedJson>>> loadBlockStates(ResourceManager resourceManager, Executor executor) {
-		return CompletableFuture.supplyAsync(() -> ModelBakery.BLOCKSTATE_LISTER.listMatchingResourceStacks(resourceManager), executor)
+	private static CompletableFuture<Map<ResourceLocation, List<BlockStateModelLoader.LoadedJson>>> loadBlockStates(
+		ResourceManager resourceManager, Executor executor
+	) {
+		return CompletableFuture.supplyAsync(() -> BlockStateModelLoader.BLOCKSTATE_LISTER.listMatchingResourceStacks(resourceManager), executor)
 			.thenCompose(
 				map -> {
-					List<CompletableFuture<Pair<ResourceLocation, List<ModelBakery.LoadedJson>>>> list = new ArrayList(map.size());
+					List<CompletableFuture<Pair<ResourceLocation, List<BlockStateModelLoader.LoadedJson>>>> list = new ArrayList(map.size());
 
 					for (Entry<ResourceLocation, List<Resource>> entry : map.entrySet()) {
 						list.add(CompletableFuture.supplyAsync(() -> {
 							List<Resource> listx = (List<Resource>)entry.getValue();
-							List<ModelBakery.LoadedJson> list2 = new ArrayList(listx.size());
+							List<BlockStateModelLoader.LoadedJson> list2 = new ArrayList(listx.size());
 
 							for (Resource resource : listx) {
 								try {
@@ -182,7 +184,7 @@ public class ModelManager implements PreparableReloadListener, AutoCloseable {
 
 									try {
 										JsonObject jsonObject = GsonHelper.parse(reader);
-										list2.add(new ModelBakery.LoadedJson(resource.sourcePackId(), jsonObject));
+										list2.add(new BlockStateModelLoader.LoadedJson(resource.sourcePackId(), jsonObject));
 									} catch (Throwable var9) {
 										if (reader != null) {
 											try {
@@ -216,22 +218,22 @@ public class ModelManager implements PreparableReloadListener, AutoCloseable {
 	private ModelManager.ReloadState loadModels(ProfilerFiller profilerFiller, Map<ResourceLocation, AtlasSet.StitchResult> map, ModelBakery modelBakery) {
 		profilerFiller.push("load");
 		profilerFiller.popPush("baking");
-		Multimap<ResourceLocation, Material> multimap = HashMultimap.create();
-		modelBakery.bakeModels((resourceLocation, material) -> {
+		Multimap<ModelResourceLocation, Material> multimap = HashMultimap.create();
+		modelBakery.bakeModels((modelResourceLocation, material) -> {
 			AtlasSet.StitchResult stitchResult = (AtlasSet.StitchResult)map.get(material.atlasLocation());
 			TextureAtlasSprite textureAtlasSprite = stitchResult.getSprite(material.texture());
 			if (textureAtlasSprite != null) {
 				return textureAtlasSprite;
 			} else {
-				multimap.put(resourceLocation, material);
+				multimap.put(modelResourceLocation, material);
 				return stitchResult.missing();
 			}
 		});
 		multimap.asMap()
 			.forEach(
-				(resourceLocation, collection) -> LOGGER.warn(
+				(modelResourceLocation, collection) -> LOGGER.warn(
 						"Missing textures in model {}:\n{}",
-						resourceLocation,
+						modelResourceLocation,
 						collection.stream()
 							.sorted(Material.COMPARATOR)
 							.map(material -> "    " + material.atlasLocation() + ":" + material.texture())
@@ -239,8 +241,8 @@ public class ModelManager implements PreparableReloadListener, AutoCloseable {
 					)
 			);
 		profilerFiller.popPush("dispatch");
-		Map<ResourceLocation, BakedModel> map2 = modelBakery.getBakedTopLevelModels();
-		BakedModel bakedModel = (BakedModel)map2.get(ModelBakery.MISSING_MODEL_LOCATION);
+		Map<ModelResourceLocation, BakedModel> map2 = modelBakery.getBakedTopLevelModels();
+		BakedModel bakedModel = (BakedModel)map2.get(ModelBakery.MISSING_MODEL_VARIANT);
 		Map<BlockState, BakedModel> map3 = new IdentityHashMap();
 
 		for (Block block : BuiltInRegistries.BLOCK) {

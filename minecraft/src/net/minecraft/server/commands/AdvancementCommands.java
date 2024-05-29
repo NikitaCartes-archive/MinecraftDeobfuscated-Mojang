@@ -26,7 +26,7 @@ import net.minecraft.server.level.ServerPlayer;
 public class AdvancementCommands {
 	private static final DynamicCommandExceptionType ERROR_NO_ACTION_PERFORMED = new DynamicCommandExceptionType(object -> (Component)object);
 	private static final Dynamic2CommandExceptionType ERROR_CRITERION_NOT_FOUND = new Dynamic2CommandExceptionType(
-		(object, object2) -> Component.translatable("commands.advancement.criterionNotFound", object, object2)
+		(object, object2) -> Component.translatableEscape("commands.advancement.criterionNotFound", object, object2)
 	);
 	private static final SuggestionProvider<CommandSourceStack> SUGGEST_ADVANCEMENTS = (commandContext, suggestionsBuilder) -> {
 		Collection<AdvancementHolder> collection = commandContext.getSource().getServer().getAdvancements().getAllAdvancements();

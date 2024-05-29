@@ -20,7 +20,7 @@ public abstract class VoxelShape {
 	@Nullable
 	private VoxelShape[] faces;
 
-	VoxelShape(DiscreteVoxelShape discreteVoxelShape) {
+	protected VoxelShape(DiscreteVoxelShape discreteVoxelShape) {
 		this.shape = discreteVoxelShape;
 	}
 

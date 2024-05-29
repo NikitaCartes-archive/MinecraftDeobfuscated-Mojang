@@ -4,11 +4,9 @@ import com.google.common.collect.Maps;
 import com.mojang.logging.LogUtils;
 import com.mojang.math.Transformation;
 import java.util.Map;
-import java.util.function.Supplier;
 import net.minecraft.Util;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
-import org.joml.Vector3f;
 import org.slf4j.Logger;
 
 public class BlockMath {
@@ -41,12 +39,12 @@ public class BlockMath {
 		return new Transformation(matrix4f);
 	}
 
-	public static Transformation getUVLockTransform(Transformation transformation, Direction direction, Supplier<String> supplier) {
+	public static Transformation getUVLockTransform(Transformation transformation, Direction direction) {
 		Direction direction2 = Direction.rotate(transformation.getMatrix(), direction);
 		Transformation transformation2 = transformation.inverse();
 		if (transformation2 == null) {
-			LOGGER.warn((String)supplier.get());
-			return new Transformation(null, null, new Vector3f(0.0F, 0.0F, 0.0F), null);
+			LOGGER.debug("Failed to invert transformation {}", transformation);
+			return Transformation.identity();
 		} else {
 			Transformation transformation3 = ((Transformation)VANILLA_UV_TRANSFORM_GLOBAL_TO_LOCAL.get(direction))
 				.compose(transformation2)

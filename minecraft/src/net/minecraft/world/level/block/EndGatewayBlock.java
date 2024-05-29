@@ -8,6 +8,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.projectile.ThrownEnderpearl;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
@@ -102,9 +103,15 @@ public class EndGatewayBlock extends BaseEntityBlock implements Portal {
 	public DimensionTransition getPortalDestination(ServerLevel serverLevel, Entity entity, BlockPos blockPos) {
 		if (serverLevel.getBlockEntity(blockPos) instanceof TheEndGatewayBlockEntity theEndGatewayBlockEntity) {
 			Vec3 vec3 = theEndGatewayBlockEntity.getPortalPosition(serverLevel, blockPos);
-			return vec3 != null ? new DimensionTransition(serverLevel, vec3, entity.getDeltaMovement(), entity.getYRot(), entity.getXRot()) : null;
+			return vec3 != null
+				? new DimensionTransition(serverLevel, vec3, calculateExitMovement(entity), entity.getYRot(), entity.getXRot(), DimensionTransition.PLACE_PORTAL_TICKET)
+				: null;
 		} else {
 			return null;
 		}
+	}
+
+	private static Vec3 calculateExitMovement(Entity entity) {
+		return entity instanceof ThrownEnderpearl ? new Vec3(0.0, -1.0, 0.0) : entity.getDeltaMovement();
 	}
 }

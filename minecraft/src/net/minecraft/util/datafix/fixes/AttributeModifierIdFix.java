@@ -24,7 +24,7 @@ public class AttributeModifierIdFix extends DataFix {
 		.put(UUID.fromString("91AEAA56-376B-4498-935B-2F7F68070635"), "minecraft:effect.speed")
 		.put(UUID.fromString("7107DE5E-7CE8-4030-940E-514C1F160890"), "minecraft:effect.slowness")
 		.put(UUID.fromString("AF8B6E3F-3328-4C0A-AA36-5BA2BB9DBEF3"), "minecraft:effect.haste")
-		.put(UUID.fromString("55FCED67-E92A-486E-9800-B47F202C4386"), "minecraft:effect.minining_fatigue")
+		.put(UUID.fromString("55FCED67-E92A-486E-9800-B47F202C4386"), "minecraft:effect.mining_fatigue")
 		.put(UUID.fromString("648D7064-6A60-4F59-8ABE-C2C23A6DD7A9"), "minecraft:effect.strength")
 		.put(UUID.fromString("C0105BF3-AEF8-46B0-9EBC-92943757CCBE"), "minecraft:effect.jump_boost")
 		.put(UUID.fromString("22653B89-116E-49DC-9B6B-9971489B5BE5"), "minecraft:effect.weakness")
@@ -141,7 +141,7 @@ public class AttributeModifierIdFix extends DataFix {
 
 	private static Dynamic<?> fixItemStackComponents(Dynamic<?> dynamic) {
 		return dynamic.update(
-			"attribute_modifiers",
+			"minecraft:attribute_modifiers",
 			dynamicx -> dynamicx.update(
 					"modifiers",
 					dynamicxx -> DataFixUtils.orElse(

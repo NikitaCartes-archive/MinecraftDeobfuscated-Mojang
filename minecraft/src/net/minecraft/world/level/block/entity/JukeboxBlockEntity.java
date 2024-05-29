@@ -65,6 +65,10 @@ public class JukeboxBlockEntity extends BlockEntity implements Clearable, Contai
 		jukeboxBlockEntity.jukeboxSongPlayer.tick(level, blockState);
 	}
 
+	public int getComparatorOutput() {
+		return (Integer)JukeboxSong.fromStack(this.level.registryAccess(), this.item).map(Holder::value).map(JukeboxSong::comparatorOutput).orElse(0);
+	}
+
 	@Override
 	protected void loadAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
 		super.loadAdditional(compoundTag, provider);

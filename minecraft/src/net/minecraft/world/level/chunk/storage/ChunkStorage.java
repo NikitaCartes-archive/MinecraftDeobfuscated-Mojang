@@ -130,4 +130,8 @@ public class ChunkStorage implements AutoCloseable {
 	public ChunkScanAccess chunkScanner() {
 		return this.worker;
 	}
+
+	protected RegionStorageInfo storageInfo() {
+		return this.worker.storageInfo();
+	}
 }

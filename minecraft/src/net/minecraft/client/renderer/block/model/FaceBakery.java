@@ -10,7 +10,6 @@ import net.minecraft.client.resources.model.ModelState;
 import net.minecraft.core.BlockMath;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
@@ -35,12 +34,11 @@ public class FaceBakery {
 		Direction direction,
 		ModelState modelState,
 		@Nullable BlockElementRotation blockElementRotation,
-		boolean bl,
-		ResourceLocation resourceLocation
+		boolean bl
 	) {
-		BlockFaceUV blockFaceUV = blockElementFace.uv;
+		BlockFaceUV blockFaceUV = blockElementFace.uv();
 		if (modelState.isUvLocked()) {
-			blockFaceUV = recomputeUVs(blockElementFace.uv, direction, modelState.getRotation(), resourceLocation);
+			blockFaceUV = recomputeUVs(blockElementFace.uv(), direction, modelState.getRotation());
 		}
 
 		float[] fs = new float[blockFaceUV.uvs.length];
@@ -61,11 +59,11 @@ public class FaceBakery {
 			this.recalculateWinding(is, direction2);
 		}
 
-		return new BakedQuad(is, blockElementFace.tintIndex, direction2, textureAtlasSprite, bl);
+		return new BakedQuad(is, blockElementFace.tintIndex(), direction2, textureAtlasSprite, bl);
 	}
 
-	public static BlockFaceUV recomputeUVs(BlockFaceUV blockFaceUV, Direction direction, Transformation transformation, ResourceLocation resourceLocation) {
-		Matrix4f matrix4f = BlockMath.getUVLockTransform(transformation, direction, () -> "Unable to resolve UVLock for model: " + resourceLocation).getMatrix();
+	public static BlockFaceUV recomputeUVs(BlockFaceUV blockFaceUV, Direction direction, Transformation transformation) {
+		Matrix4f matrix4f = BlockMath.getUVLockTransform(transformation, direction).getMatrix();
 		float f = blockFaceUV.getU(blockFaceUV.getReverseIndex(0));
 		float g = blockFaceUV.getV(blockFaceUV.getReverseIndex(0));
 		Vector4f vector4f = matrix4f.transform(new Vector4f(f / 16.0F, g / 16.0F, 0.0F, 1.0F));

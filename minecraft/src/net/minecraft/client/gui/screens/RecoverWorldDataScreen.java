@@ -23,6 +23,7 @@ import net.minecraft.nbt.ReportedNbtException;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.util.CommonLinks;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import org.slf4j.Logger;
 
@@ -65,7 +66,7 @@ public class RecoverWorldDataScreen extends Screen {
 		this.layout.addChild(this.messageWidget.setCentered(true));
 		this.layout.addChild(this.issuesWidget);
 		LinearLayout linearLayout = LinearLayout.horizontal().spacing(5);
-		linearLayout.addChild(Button.builder(BUGTRACKER_BUTTON, ConfirmLinkScreen.confirmLink(this, "https://aka.ms/snapshotbugs?ref=game")).size(120, 20).build());
+		linearLayout.addChild(Button.builder(BUGTRACKER_BUTTON, ConfirmLinkScreen.confirmLink(this, CommonLinks.SNAPSHOT_BUGS_FEEDBACK)).size(120, 20).build());
 		linearLayout.addChild(
 				Button.builder(RESTORE_BUTTON, button -> this.attemptRestore(minecraft)).size(120, 20).tooltip(bl ? null : Tooltip.create(NO_FALLBACK_TOOLTIP)).build()
 			)

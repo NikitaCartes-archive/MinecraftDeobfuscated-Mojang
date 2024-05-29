@@ -146,10 +146,8 @@ public class CommandBlock extends BaseEntityBlock implements GameMasterBlock {
 					commandBlockEntity.setAutomatic(this.automatic);
 				}
 
-				if (commandBlockEntity.getMode() == CommandBlockEntity.Mode.SEQUENCE) {
-					boolean bl = level.hasNeighborSignal(blockPos);
-					commandBlockEntity.setPowered(bl);
-				}
+				boolean bl = level.hasNeighborSignal(blockPos);
+				commandBlockEntity.setPowered(bl);
 			}
 		}
 	}

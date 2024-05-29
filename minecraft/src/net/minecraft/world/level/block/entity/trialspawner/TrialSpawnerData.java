@@ -34,6 +34,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -93,6 +94,7 @@ public class TrialSpawnerData {
 		this.nextMobSpawnsAt = 0L;
 		this.cooldownEndsAt = 0L;
 		this.currentMobs.clear();
+		this.nextSpawnData = Optional.empty();
 	}
 
 	public boolean hasMobToSpawn(TrialSpawner trialSpawner, RandomSource randomSource) {
@@ -184,6 +186,10 @@ public class TrialSpawnerData {
 		this.currentMobs.stream().map(serverLevel::getEntity).forEach(entity -> {
 			if (entity != null) {
 				serverLevel.levelEvent(3012, entity.blockPosition(), TrialSpawner.FlameParticle.NORMAL.encode());
+				if (entity instanceof Mob mob) {
+					mob.dropPreservedEquipment();
+				}
+
 				entity.remove(Entity.RemovalReason.DISCARDED);
 			}
 		});

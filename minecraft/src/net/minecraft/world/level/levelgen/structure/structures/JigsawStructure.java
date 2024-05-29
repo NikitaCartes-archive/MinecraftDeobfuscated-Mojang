@@ -20,9 +20,11 @@ import net.minecraft.world.level.levelgen.structure.pools.JigsawPlacement;
 import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
 import net.minecraft.world.level.levelgen.structure.pools.alias.PoolAliasBinding;
 import net.minecraft.world.level.levelgen.structure.pools.alias.PoolAliasLookup;
+import net.minecraft.world.level.levelgen.structure.templatesystem.LiquidSettings;
 
 public final class JigsawStructure extends Structure {
 	public static final DimensionPadding DEFAULT_DIMENSION_PADDING = DimensionPadding.ZERO;
+	public static final LiquidSettings DEFAULT_LIQUID_SETTINGS = LiquidSettings.APPLY_WATERLOGGING;
 	public static final int MAX_TOTAL_STRUCTURE_RANGE = 128;
 	public static final int MIN_DEPTH = 0;
 	public static final int MAX_DEPTH = 20;
@@ -37,7 +39,8 @@ public final class JigsawStructure extends Structure {
 						Heightmap.Types.CODEC.optionalFieldOf("project_start_to_heightmap").forGetter(jigsawStructure -> jigsawStructure.projectStartToHeightmap),
 						Codec.intRange(1, 128).fieldOf("max_distance_from_center").forGetter(jigsawStructure -> jigsawStructure.maxDistanceFromCenter),
 						Codec.list(PoolAliasBinding.CODEC).optionalFieldOf("pool_aliases", List.of()).forGetter(jigsawStructure -> jigsawStructure.poolAliases),
-						DimensionPadding.CODEC.optionalFieldOf("dimension_padding", DEFAULT_DIMENSION_PADDING).forGetter(jigsawStructure -> jigsawStructure.dimensionPadding)
+						DimensionPadding.CODEC.optionalFieldOf("dimension_padding", DEFAULT_DIMENSION_PADDING).forGetter(jigsawStructure -> jigsawStructure.dimensionPadding),
+						LiquidSettings.CODEC.optionalFieldOf("liquid_settings", DEFAULT_LIQUID_SETTINGS).forGetter(jigsawStructure -> jigsawStructure.liquidSettings)
 					)
 					.apply(instance, JigsawStructure::new)
 		)
@@ -51,6 +54,7 @@ public final class JigsawStructure extends Structure {
 	private final int maxDistanceFromCenter;
 	private final List<PoolAliasBinding> poolAliases;
 	private final DimensionPadding dimensionPadding;
+	private final LiquidSettings liquidSettings;
 
 	private static DataResult<JigsawStructure> verifyRange(JigsawStructure jigsawStructure) {
 		int i = switch (jigsawStructure.terrainAdaptation()) {
@@ -72,7 +76,8 @@ public final class JigsawStructure extends Structure {
 		Optional<Heightmap.Types> optional2,
 		int j,
 		List<PoolAliasBinding> list,
-		DimensionPadding dimensionPadding
+		DimensionPadding dimensionPadding,
+		LiquidSettings liquidSettings
 	) {
 		super(structureSettings);
 		this.startPool = holder;
@@ -84,16 +89,19 @@ public final class JigsawStructure extends Structure {
 		this.maxDistanceFromCenter = j;
 		this.poolAliases = list;
 		this.dimensionPadding = dimensionPadding;
+		this.liquidSettings = liquidSettings;
 	}
 
 	public JigsawStructure(
 		Structure.StructureSettings structureSettings, Holder<StructureTemplatePool> holder, int i, HeightProvider heightProvider, boolean bl, Heightmap.Types types
 	) {
-		this(structureSettings, holder, Optional.empty(), i, heightProvider, bl, Optional.of(types), 80, List.of(), DEFAULT_DIMENSION_PADDING);
+		this(
+			structureSettings, holder, Optional.empty(), i, heightProvider, bl, Optional.of(types), 80, List.of(), DEFAULT_DIMENSION_PADDING, DEFAULT_LIQUID_SETTINGS
+		);
 	}
 
 	public JigsawStructure(Structure.StructureSettings structureSettings, Holder<StructureTemplatePool> holder, int i, HeightProvider heightProvider, boolean bl) {
-		this(structureSettings, holder, Optional.empty(), i, heightProvider, bl, Optional.empty(), 80, List.of(), DEFAULT_DIMENSION_PADDING);
+		this(structureSettings, holder, Optional.empty(), i, heightProvider, bl, Optional.empty(), 80, List.of(), DEFAULT_DIMENSION_PADDING, DEFAULT_LIQUID_SETTINGS);
 	}
 
 	@Override
@@ -112,7 +120,8 @@ public final class JigsawStructure extends Structure {
 			this.projectStartToHeightmap,
 			this.maxDistanceFromCenter,
 			PoolAliasLookup.create(this.poolAliases, blockPos, generationContext.seed()),
-			this.dimensionPadding
+			this.dimensionPadding,
+			this.liquidSettings
 		);
 	}
 

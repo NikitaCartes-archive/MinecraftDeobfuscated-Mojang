@@ -184,7 +184,7 @@ public class SystemToast implements Toast {
 		addOrUpdate(
 			minecraft.getToasts(),
 			SystemToast.SystemToastId.CHUNK_LOAD_FAILURE,
-			Component.translatable("chunk.toast.loadFailure", chunkPos).withStyle(ChatFormatting.RED),
+			Component.translatable("chunk.toast.loadFailure", Component.translationArg(chunkPos)).withStyle(ChatFormatting.RED),
 			Component.translatable("chunk.toast.checkLog")
 		);
 	}
@@ -193,7 +193,7 @@ public class SystemToast implements Toast {
 		addOrUpdate(
 			minecraft.getToasts(),
 			SystemToast.SystemToastId.CHUNK_SAVE_FAILURE,
-			Component.translatable("chunk.toast.saveFailure", chunkPos).withStyle(ChatFormatting.RED),
+			Component.translatable("chunk.toast.saveFailure", Component.translationArg(chunkPos)).withStyle(ChatFormatting.RED),
 			Component.translatable("chunk.toast.checkLog")
 		);
 	}

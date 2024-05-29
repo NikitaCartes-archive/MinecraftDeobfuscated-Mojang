@@ -129,6 +129,10 @@ public class BlockPos extends Vec3i {
 		return Vec3.atCenterOf(this);
 	}
 
+	public Vec3 getBottomCenter() {
+		return Vec3.atBottomCenterOf(this);
+	}
+
 	public BlockPos offset(Vec3i vec3i) {
 		return this.offset(vec3i.getX(), vec3i.getY(), vec3i.getZ());
 	}

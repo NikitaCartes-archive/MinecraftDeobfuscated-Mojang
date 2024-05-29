@@ -64,6 +64,7 @@ public class GameTestServer extends MinecraftServer {
 		gameRules.getRule(GameRules.RULE_DOMOBSPAWNING).set(false, null);
 		gameRules.getRule(GameRules.RULE_WEATHER_CYCLE).set(false, null);
 		gameRules.getRule(GameRules.RULE_RANDOMTICKING).set(0, null);
+		gameRules.getRule(GameRules.RULE_DOFIRETICK).set(false, null);
 	});
 	private static final WorldOptions WORLD_OPTIONS = new WorldOptions(0L, false, false);
 	@Nullable
@@ -231,7 +232,7 @@ public class GameTestServer extends MinecraftServer {
 			serverLevel.random.nextIntBetweenInclusive(-14999992, 14999992), -59, serverLevel.random.nextIntBetweenInclusive(-14999992, 14999992)
 		);
 		GameTestRunner gameTestRunner = GameTestRunner.Builder.fromBatches(this.testBatches, serverLevel)
-			.newStructureSpawner(new StructureGridSpawner(blockPos, 8))
+			.newStructureSpawner(new StructureGridSpawner(blockPos, 8, false))
 			.build();
 		Collection<GameTestInfo> collection = gameTestRunner.getTestInfos();
 		this.testTracker = new MultipleTestTracker(collection);

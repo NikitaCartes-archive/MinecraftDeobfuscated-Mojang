@@ -1,6 +1,7 @@
 package net.minecraft.client.gui.screens;
 
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
+import java.net.URI;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
@@ -24,6 +25,14 @@ public class ConfirmLinkScreen extends ConfirmScreen {
 
 	public ConfirmLinkScreen(BooleanConsumer booleanConsumer, Component component, String string, boolean bl) {
 		this(booleanConsumer, component, confirmMessage(bl, string), string, bl ? CommonComponents.GUI_CANCEL : CommonComponents.GUI_NO, bl);
+	}
+
+	public ConfirmLinkScreen(BooleanConsumer booleanConsumer, Component component, URI uRI, boolean bl) {
+		this(booleanConsumer, component, uRI.toString(), bl);
+	}
+
+	public ConfirmLinkScreen(BooleanConsumer booleanConsumer, Component component, Component component2, URI uRI, Component component3, boolean bl) {
+		this(booleanConsumer, component, component2, uRI.toString(), component3, true);
 	}
 
 	public ConfirmLinkScreen(BooleanConsumer booleanConsumer, Component component, Component component2, String string, Component component3, boolean bl) {
@@ -75,6 +84,21 @@ public class ConfirmLinkScreen extends ConfirmScreen {
 		}, string, bl));
 	}
 
+	public static void confirmLinkNow(Screen screen, URI uRI, boolean bl) {
+		Minecraft minecraft = Minecraft.getInstance();
+		minecraft.setScreen(new ConfirmLinkScreen(blx -> {
+			if (blx) {
+				Util.getPlatform().openUri(uRI);
+			}
+
+			minecraft.setScreen(screen);
+		}, uRI.toString(), bl));
+	}
+
+	public static void confirmLinkNow(Screen screen, URI uRI) {
+		confirmLinkNow(screen, uRI, true);
+	}
+
 	public static void confirmLinkNow(Screen screen, String string) {
 		confirmLinkNow(screen, string, true);
 	}
@@ -83,7 +107,15 @@ public class ConfirmLinkScreen extends ConfirmScreen {
 		return button -> confirmLinkNow(screen, string, bl);
 	}
 
+	public static Button.OnPress confirmLink(Screen screen, URI uRI, boolean bl) {
+		return button -> confirmLinkNow(screen, uRI, bl);
+	}
+
 	public static Button.OnPress confirmLink(Screen screen, String string) {
 		return confirmLink(screen, string, true);
+	}
+
+	public static Button.OnPress confirmLink(Screen screen, URI uRI) {
+		return confirmLink(screen, uRI, true);
 	}
 }

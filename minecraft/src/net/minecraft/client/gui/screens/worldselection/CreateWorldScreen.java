@@ -419,7 +419,7 @@ public class CreateWorldScreen extends Screen {
 				Util.backgroundExecutor(),
 				this.minecraft
 			)
-			.thenApplyAsync(worldCreationContext -> {
+			.thenApply(worldCreationContext -> {
 				worldCreationContext.validate();
 				return worldCreationContext;
 			})

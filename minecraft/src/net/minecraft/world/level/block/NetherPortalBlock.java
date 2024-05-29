@@ -129,23 +129,42 @@ public class NetherPortalBlock extends Block implements Portal {
 
 	@Nullable
 	private DimensionTransition getExitPortal(ServerLevel serverLevel, Entity entity, BlockPos blockPos, BlockPos blockPos2, boolean bl, WorldBorder worldBorder) {
-		Optional<BlockUtil.FoundRectangle> optional = serverLevel.getPortalForcer().findPortalAround(blockPos2, bl, worldBorder);
-		if (optional.isEmpty()) {
+		Optional<BlockPos> optional = serverLevel.getPortalForcer().findClosestPortalPosition(blockPos2, bl, worldBorder);
+		BlockUtil.FoundRectangle foundRectangle;
+		DimensionTransition.PostDimensionTransition postDimensionTransition;
+		if (optional.isPresent()) {
+			BlockPos blockPos3 = (BlockPos)optional.get();
+			BlockState blockState = serverLevel.getBlockState(blockPos3);
+			foundRectangle = BlockUtil.getLargestRectangleAround(
+				blockPos3,
+				blockState.getValue(BlockStateProperties.HORIZONTAL_AXIS),
+				21,
+				Direction.Axis.Y,
+				21,
+				blockPosx -> serverLevel.getBlockState(blockPosx) == blockState
+			);
+			postDimensionTransition = DimensionTransition.PLAY_NETHER_SOUND.then(entityx -> entityx.placePortalTicket(blockPos3));
+		} else {
 			Direction.Axis axis = (Direction.Axis)entity.level().getBlockState(blockPos).getOptionalValue(AXIS).orElse(Direction.Axis.X);
 			Optional<BlockUtil.FoundRectangle> optional2 = serverLevel.getPortalForcer().createPortal(blockPos2, axis);
 			if (optional2.isEmpty()) {
 				LOGGER.error("Unable to create a portal, likely target out of worldborder");
 				return null;
-			} else {
-				return getDimensionTransitionFromExit(entity, blockPos, (BlockUtil.FoundRectangle)optional2.get(), serverLevel);
 			}
-		} else {
-			return (DimensionTransition)optional.map(foundRectangle -> getDimensionTransitionFromExit(entity, blockPos, foundRectangle, serverLevel)).orElse(null);
+
+			foundRectangle = (BlockUtil.FoundRectangle)optional2.get();
+			postDimensionTransition = DimensionTransition.PLAY_NETHER_SOUND.then(DimensionTransition.PLACE_PORTAL_TICKET);
 		}
+
+		return getDimensionTransitionFromExit(entity, blockPos, foundRectangle, serverLevel, postDimensionTransition);
 	}
 
 	private static DimensionTransition getDimensionTransitionFromExit(
-		Entity entity, BlockPos blockPos, BlockUtil.FoundRectangle foundRectangle, ServerLevel serverLevel
+		Entity entity,
+		BlockPos blockPos,
+		BlockUtil.FoundRectangle foundRectangle,
+		ServerLevel serverLevel,
+		DimensionTransition.PostDimensionTransition postDimensionTransition
 	) {
 		BlockState blockState = entity.level().getBlockState(blockPos);
 		Direction.Axis axis;
@@ -161,11 +180,21 @@ public class NetherPortalBlock extends Block implements Portal {
 			vec3 = new Vec3(0.5, 0.0, 0.0);
 		}
 
-		return createDimensionTransition(serverLevel, foundRectangle, axis, vec3, entity, entity.getDeltaMovement(), entity.getYRot(), entity.getXRot());
+		return createDimensionTransition(
+			serverLevel, foundRectangle, axis, vec3, entity, entity.getDeltaMovement(), entity.getYRot(), entity.getXRot(), postDimensionTransition
+		);
 	}
 
 	private static DimensionTransition createDimensionTransition(
-		ServerLevel serverLevel, BlockUtil.FoundRectangle foundRectangle, Direction.Axis axis, Vec3 vec3, Entity entity, Vec3 vec32, float f, float g
+		ServerLevel serverLevel,
+		BlockUtil.FoundRectangle foundRectangle,
+		Direction.Axis axis,
+		Vec3 vec3,
+		Entity entity,
+		Vec3 vec32,
+		float f,
+		float g,
+		DimensionTransition.PostDimensionTransition postDimensionTransition
 	) {
 		BlockPos blockPos = foundRectangle.minCorner;
 		BlockState blockState = serverLevel.getBlockState(blockPos);
@@ -181,7 +210,7 @@ public class NetherPortalBlock extends Block implements Portal {
 		boolean bl = axis2 == Direction.Axis.X;
 		Vec3 vec34 = new Vec3((double)blockPos.getX() + (bl ? h : k), (double)blockPos.getY() + j, (double)blockPos.getZ() + (bl ? k : h));
 		Vec3 vec35 = PortalShape.findCollisionFreePosition(vec34, serverLevel, entity, entityDimensions);
-		return new DimensionTransition(serverLevel, vec35, vec33, f + (float)i, g);
+		return new DimensionTransition(serverLevel, vec35, vec33, f + (float)i, g, postDimensionTransition);
 	}
 
 	@Override

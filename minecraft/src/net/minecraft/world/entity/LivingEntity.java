@@ -20,7 +20,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.Map.Entry;
 import java.util.function.Predicate;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import net.minecraft.BlockUtil;
 import net.minecraft.Util;
@@ -1397,7 +1399,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 
 	protected float getKnockback(Entity entity, DamageSource damageSource) {
 		float f = (float)this.getAttributeValue(Attributes.ATTACK_KNOCKBACK);
-		return this.level() instanceof ServerLevel serverLevel ? EnchantmentHelper.modifyKnockback(serverLevel, this.getMainHandItem(), entity, damageSource, f) : f;
+		return this.level() instanceof ServerLevel serverLevel ? EnchantmentHelper.modifyKnockback(serverLevel, this.getWeaponItem(), entity, damageSource, f) : f;
 	}
 
 	protected void dropFromLootTable(DamageSource damageSource, boolean bl) {
@@ -1512,14 +1514,12 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	}
 
 	private boolean trapdoorUsableAsLadder(BlockPos blockPos, BlockState blockState) {
-		if ((Boolean)blockState.getValue(TrapDoorBlock.OPEN)) {
+		if (!(Boolean)blockState.getValue(TrapDoorBlock.OPEN)) {
+			return false;
+		} else {
 			BlockState blockState2 = this.level().getBlockState(blockPos.below());
-			if (blockState2.is(Blocks.LADDER) && blockState2.getValue(LadderBlock.FACING) == blockState.getValue(TrapDoorBlock.FACING)) {
-				return true;
-			}
+			return blockState2.is(Blocks.LADDER) && blockState2.getValue(LadderBlock.FACING) == blockState.getValue(TrapDoorBlock.FACING);
 		}
-
-		return false;
 	}
 
 	@Override
@@ -1884,6 +1884,12 @@ public abstract class LivingEntity extends Entity implements Attackable {
 
 	public ItemStack getOffhandItem() {
 		return this.getItemBySlot(EquipmentSlot.OFFHAND);
+	}
+
+	@Nonnull
+	@Override
+	public ItemStack getWeaponItem() {
+		return this.getMainHandItem();
 	}
 
 	public boolean isHolding(Item item) {
@@ -2451,17 +2457,23 @@ public abstract class LivingEntity extends Entity implements Attackable {
 						EnchantmentHelper.stopLocationBasedEffects(itemStack, this, equipmentSlot);
 					});
 				}
+			}
+		}
 
-				if (!itemStack2.isEmpty()) {
-					itemStack2.forEachModifier(equipmentSlot, (holder, attributeModifier) -> {
-						AttributeInstance attributeInstance = attributeMap.getInstance(holder);
+		if (map != null) {
+			for (Entry<EquipmentSlot, ItemStack> entry : map.entrySet()) {
+				EquipmentSlot equipmentSlot2 = (EquipmentSlot)entry.getKey();
+				ItemStack itemStack3 = (ItemStack)entry.getValue();
+				if (!itemStack3.isEmpty()) {
+					itemStack3.forEachModifier(equipmentSlot2, (holder, attributeModifier) -> {
+						AttributeInstance attributeInstance = this.attributes.getInstance(holder);
 						if (attributeInstance != null) {
 							attributeInstance.removeModifier(attributeModifier.id());
 							attributeInstance.addTransientModifier(attributeModifier);
 						}
 
 						if (this.level() instanceof ServerLevel serverLevel) {
-							EnchantmentHelper.runLocationChangedEffects(serverLevel, itemStack2, this, equipmentSlot);
+							EnchantmentHelper.runLocationChangedEffects(serverLevel, itemStack3, this, equipmentSlot2);
 						}
 					});
 				}
@@ -3030,6 +3042,11 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		this.yBodyRotO = this.yBodyRot;
 	}
 
+	@Override
+	public float getPreciseBodyRotation(float f) {
+		return Mth.lerp(f, this.yBodyRotO, this.yBodyRot);
+	}
+
 	protected void triggerItemUseEffects(ItemStack itemStack, int i) {
 		if (!itemStack.isEmpty() && this.isUsingItem()) {
 			if (itemStack.getUseAnimation() == UseAnim.DRINK) {
@@ -3465,7 +3482,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	}
 
 	public boolean canDisableShield() {
-		return this.getMainHandItem().getItem() instanceof AxeItem;
+		return this.getWeaponItem().getItem() instanceof AxeItem;
 	}
 
 	@Override

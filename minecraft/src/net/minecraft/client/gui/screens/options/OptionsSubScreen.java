@@ -6,6 +6,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Options;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.OptionsList;
 import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
 import net.minecraft.client.gui.screens.Screen;
@@ -44,6 +45,10 @@ public abstract class OptionsSubScreen extends Screen {
 	protected void addContents() {
 		this.list = this.layout.addToContents(new OptionsList(this.minecraft, this.width, this));
 		this.addOptions();
+		if (this.list.findOption(this.options.narrator()) instanceof CycleButton cycleButton) {
+			this.narratorButton = cycleButton;
+			this.narratorButton.active = this.minecraft.getNarrator().isActive();
+		}
 	}
 
 	protected abstract void addOptions();

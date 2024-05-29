@@ -217,7 +217,7 @@ public class Item implements FeatureElement, ItemLike {
 	}
 
 	public String toString() {
-		return BuiltInRegistries.ITEM.getKey(this).getPath();
+		return BuiltInRegistries.ITEM.wrapAsHolder(this).getRegisteredName();
 	}
 
 	protected String getOrCreateDescriptionId() {

@@ -1746,7 +1746,6 @@ public class VanillaBlockTagsProvider extends IntrinsicHolderTagsProvider<Block>
 		this.tag(BlockTags.CAMEL_SAND_STEP_SOUND_BLOCKS).addTag(BlockTags.SAND).addTag(BlockTags.CONCRETE_POWDER);
 		this.tag(BlockTags.DOES_NOT_BLOCK_HOPPERS).addTag(BlockTags.BEEHIVES);
 		this.tag(BlockTags.BLOCKS_WIND_CHARGE_EXPLOSIONS).add(Blocks.BARRIER, Blocks.BEDROCK);
-		this.tag(BlockTags.FIRE_ASPECT_LIGHTABLE).addTag(BlockTags.CANDLES).addTag(BlockTags.CANDLE_CAKES).addTag(BlockTags.CAMPFIRES);
 		this.tag(BlockTags.AIR).add(Blocks.AIR, Blocks.VOID_AIR, Blocks.CAVE_AIR);
 	}
 }

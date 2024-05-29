@@ -20,6 +20,7 @@ import net.minecraft.data.info.BiomeParametersDumpReport;
 import net.minecraft.data.info.BlockListReport;
 import net.minecraft.data.info.CommandsReport;
 import net.minecraft.data.info.ItemListReport;
+import net.minecraft.data.info.PacketReport;
 import net.minecraft.data.info.RegistryDumpReport;
 import net.minecraft.data.loot.packs.TradeRebalanceLootTableProvider;
 import net.minecraft.data.loot.packs.VanillaLootTableProvider;
@@ -148,6 +149,7 @@ public class Main {
 		packGenerator3.addProvider(bindRegistries(BlockListReport::new, completableFuture));
 		packGenerator3.addProvider(bindRegistries(CommandsReport::new, completableFuture));
 		packGenerator3.addProvider(RegistryDumpReport::new);
+		packGenerator3.addProvider(PacketReport::new);
 		packGenerator3 = dataGenerator.getBuiltinDatapack(bl2, "bundle");
 		packGenerator3.addProvider(bindRegistries(BundleRecipeProvider::new, completableFuture));
 		packGenerator3.addProvider(

@@ -12,29 +12,28 @@ public class SharedConstants {
 	@Deprecated
 	public static final boolean SNAPSHOT = true;
 	@Deprecated
-	public static final int WORLD_VERSION = 3947;
+	public static final int WORLD_VERSION = 3948;
 	@Deprecated
 	public static final String SERIES = "main";
 	@Deprecated
-	public static final String VERSION_STRING = "24w21b";
+	public static final String VERSION_STRING = "1.21-pre1";
 	@Deprecated
 	public static final int RELEASE_NETWORK_PROTOCOL_VERSION = 767;
 	@Deprecated
-	public static final int SNAPSHOT_NETWORK_PROTOCOL_VERSION = 198;
+	public static final int SNAPSHOT_NETWORK_PROTOCOL_VERSION = 199;
 	public static final int SNBT_NAG_VERSION = 3937;
 	private static final int SNAPSHOT_PROTOCOL_BIT = 30;
 	public static final boolean CRASH_EAGERLY = true;
 	@Deprecated
 	public static final int RESOURCE_PACK_FORMAT = 34;
 	@Deprecated
-	public static final int DATA_PACK_FORMAT = 45;
+	public static final int DATA_PACK_FORMAT = 46;
 	@Deprecated
 	public static final int LANGUAGE_FORMAT = 1;
 	public static final int REPORT_FORMAT_VERSION = 1;
 	public static final String DATA_VERSION_TAG = "DataVersion";
 	public static final boolean FIX_TNT_DUPE = false;
 	public static final boolean FIX_SAND_DUPE = false;
-	public static final boolean ALLOW_ENDER_PEARL_CROSS_DIMENSION_TELEPORT = false;
 	public static final boolean USE_DEBUG_FEATURES = false;
 	public static final boolean DEBUG_OPEN_INCOMPATIBLE_WORLDS = false;
 	public static final boolean DEBUG_ALLOW_LOW_SIM_DISTANCE = false;
@@ -161,7 +160,7 @@ public class SharedConstants {
 	}
 
 	public static int getProtocolVersion() {
-		return 1073742022;
+		return 1073742023;
 	}
 
 	public static boolean debugVoidTerrain(ChunkPos chunkPos) {

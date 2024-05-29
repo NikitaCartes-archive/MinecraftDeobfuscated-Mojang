@@ -6,6 +6,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Optional;
 import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.ValidationContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSet;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
@@ -15,7 +16,8 @@ public record ConditionalEffect<T>(T effect, Optional<LootItemCondition> require
 			.validate(
 				lootItemCondition -> {
 					ProblemReporter.Collector collector = new ProblemReporter.Collector();
-					lootContextParamSet.validateUser(collector, lootItemCondition);
+					ValidationContext validationContext = new ValidationContext(collector, lootContextParamSet);
+					lootItemCondition.validate(validationContext);
 					return (DataResult)collector.getReport()
 						.map(string -> DataResult.error(() -> "Validation error in enchantment effect condition: " + string))
 						.orElseGet(() -> DataResult.success(lootItemCondition));

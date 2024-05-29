@@ -8,6 +8,7 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.Direction;
@@ -100,51 +101,9 @@ public class LightSectionDebugRenderer implements DebugRenderer.SimpleDebugRende
 		float g = (float)((double)SectionPos.sectionToBlockCoord(i) - d);
 		float h = (float)((double)SectionPos.sectionToBlockCoord(j) - e);
 		float l = (float)((double)SectionPos.sectionToBlockCoord(k) - f);
-		float m = g + 16.0F;
-		float n = h + 16.0F;
-		float o = l + 16.0F;
-		float p = vector4f.x();
-		float q = vector4f.y();
-		float r = vector4f.z();
-		float s = vector4f.w();
-		Matrix4f matrix4f = poseStack.last().pose();
-		switch (direction) {
-			case DOWN:
-				vertexConsumer.addVertex(matrix4f, g, h, l).setColor(p, q, r, s);
-				vertexConsumer.addVertex(matrix4f, m, h, l).setColor(p, q, r, s);
-				vertexConsumer.addVertex(matrix4f, m, h, o).setColor(p, q, r, s);
-				vertexConsumer.addVertex(matrix4f, g, h, o).setColor(p, q, r, s);
-				break;
-			case UP:
-				vertexConsumer.addVertex(matrix4f, g, n, l).setColor(p, q, r, s);
-				vertexConsumer.addVertex(matrix4f, g, n, o).setColor(p, q, r, s);
-				vertexConsumer.addVertex(matrix4f, m, n, o).setColor(p, q, r, s);
-				vertexConsumer.addVertex(matrix4f, m, n, l).setColor(p, q, r, s);
-				break;
-			case NORTH:
-				vertexConsumer.addVertex(matrix4f, g, h, l).setColor(p, q, r, s);
-				vertexConsumer.addVertex(matrix4f, g, n, l).setColor(p, q, r, s);
-				vertexConsumer.addVertex(matrix4f, m, n, l).setColor(p, q, r, s);
-				vertexConsumer.addVertex(matrix4f, m, h, l).setColor(p, q, r, s);
-				break;
-			case SOUTH:
-				vertexConsumer.addVertex(matrix4f, g, h, o).setColor(p, q, r, s);
-				vertexConsumer.addVertex(matrix4f, m, h, o).setColor(p, q, r, s);
-				vertexConsumer.addVertex(matrix4f, m, n, o).setColor(p, q, r, s);
-				vertexConsumer.addVertex(matrix4f, g, n, o).setColor(p, q, r, s);
-				break;
-			case WEST:
-				vertexConsumer.addVertex(matrix4f, g, h, l).setColor(p, q, r, s);
-				vertexConsumer.addVertex(matrix4f, g, h, o).setColor(p, q, r, s);
-				vertexConsumer.addVertex(matrix4f, g, n, o).setColor(p, q, r, s);
-				vertexConsumer.addVertex(matrix4f, g, n, l).setColor(p, q, r, s);
-				break;
-			case EAST:
-				vertexConsumer.addVertex(matrix4f, m, h, l).setColor(p, q, r, s);
-				vertexConsumer.addVertex(matrix4f, m, n, l).setColor(p, q, r, s);
-				vertexConsumer.addVertex(matrix4f, m, n, o).setColor(p, q, r, s);
-				vertexConsumer.addVertex(matrix4f, m, h, o).setColor(p, q, r, s);
-		}
+		LevelRenderer.renderFace(
+			poseStack, vertexConsumer, direction, g, h, l, g + 16.0F, h + 16.0F, l + 16.0F, vector4f.x(), vector4f.y(), vector4f.z(), vector4f.w()
+		);
 	}
 
 	private static void renderEdge(

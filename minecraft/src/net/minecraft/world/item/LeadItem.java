@@ -4,7 +4,8 @@ import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.Leashable;
 import net.minecraft.world.entity.decoration.LeashFenceKnotEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.UseOnContext;
@@ -42,15 +43,21 @@ public class LeadItem extends Item {
 		int j = blockPos.getY();
 		int k = blockPos.getZ();
 		AABB aABB = new AABB((double)i - 7.0, (double)j - 7.0, (double)k - 7.0, (double)i + 7.0, (double)j + 7.0, (double)k + 7.0);
-		List<Mob> list = level.getEntitiesOfClass(Mob.class, aABB, mobx -> mobx.getLeashHolder() == player);
+		List<Entity> list = level.getEntitiesOfClass(Entity.class, aABB, entityx -> {
+			if (entityx instanceof Leashable leashable && leashable.getLeashHolder() == player) {
+				return true;
+			}
 
-		for (Mob mob : list) {
+			return false;
+		});
+
+		for (Entity entity : list) {
 			if (leashFenceKnotEntity == null) {
 				leashFenceKnotEntity = LeashFenceKnotEntity.getOrCreateKnot(level, blockPos);
 				leashFenceKnotEntity.playPlacementSound();
 			}
 
-			mob.setLeashedTo(leashFenceKnotEntity, true);
+			((Leashable)entity).setLeashedTo(leashFenceKnotEntity, true);
 		}
 
 		if (!list.isEmpty()) {

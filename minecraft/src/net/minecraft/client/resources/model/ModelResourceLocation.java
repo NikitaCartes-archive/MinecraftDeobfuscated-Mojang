@@ -1,34 +1,26 @@
 package net.minecraft.client.resources.model;
 
-import com.google.common.annotations.VisibleForTesting;
 import java.util.Locale;
-import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
 
 @Environment(EnvType.CLIENT)
-public class ModelResourceLocation extends ResourceLocation {
-	@VisibleForTesting
-	static final char VARIANT_SEPARATOR = '#';
-	private final String variant;
+public record ModelResourceLocation(ResourceLocation id, String variant) {
+	public static final String INVENTORY_VARIANT = "inventory";
 
-	private ModelResourceLocation(String string, String string2, String string3, @Nullable ResourceLocation.Dummy dummy) {
-		super(string, string2, dummy);
-		this.variant = string3;
-	}
-
-	public ModelResourceLocation(String string, String string2, String string3) {
-		super(string, string2);
-		this.variant = lowercaseVariant(string3);
-	}
-
-	public ModelResourceLocation(ResourceLocation resourceLocation, String string) {
-		this(resourceLocation.getNamespace(), resourceLocation.getPath(), lowercaseVariant(string), null);
+	public ModelResourceLocation(ResourceLocation id, String variant) {
+		variant = lowercaseVariant(variant);
+		this.id = id;
+		this.variant = variant;
 	}
 
 	public static ModelResourceLocation vanilla(String string, String string2) {
-		return new ModelResourceLocation("minecraft", string, string2);
+		return new ModelResourceLocation(ResourceLocation.withDefaultNamespace(string), string2);
+	}
+
+	public static ModelResourceLocation inventory(ResourceLocation resourceLocation) {
+		return new ModelResourceLocation(resourceLocation, "inventory");
 	}
 
 	private static String lowercaseVariant(String string) {
@@ -39,25 +31,7 @@ public class ModelResourceLocation extends ResourceLocation {
 		return this.variant;
 	}
 
-	@Override
-	public boolean equals(Object object) {
-		if (this == object) {
-			return true;
-		} else if (object instanceof ModelResourceLocation && super.equals(object)) {
-			ModelResourceLocation modelResourceLocation = (ModelResourceLocation)object;
-			return this.variant.equals(modelResourceLocation.variant);
-		} else {
-			return false;
-		}
-	}
-
-	@Override
-	public int hashCode() {
-		return 31 * super.hashCode() + this.variant.hashCode();
-	}
-
-	@Override
 	public String toString() {
-		return super.toString() + "#" + this.variant;
+		return this.id + "#" + this.variant;
 	}
 }

@@ -7,12 +7,10 @@ import net.minecraft.advancements.critereon.DamageSourcePredicate;
 import net.minecraft.advancements.critereon.EntityFlagsPredicate;
 import net.minecraft.advancements.critereon.EntityPredicate;
 import net.minecraft.advancements.critereon.EntityTypePredicate;
-import net.minecraft.advancements.critereon.FluidPredicate;
 import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.advancements.critereon.LocationPredicate;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.advancements.critereon.MovementPredicate;
-import net.minecraft.advancements.critereon.StatePropertiesPredicate;
 import net.minecraft.advancements.critereon.TagPredicate;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.HolderSet;
@@ -40,7 +38,6 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.component.BlockItemStateProperties;
 import net.minecraft.world.item.enchantment.effects.AddValue;
 import net.minecraft.world.item.enchantment.effects.AllOf;
 import net.minecraft.world.item.enchantment.effects.ApplyMobEffect;
@@ -54,15 +51,12 @@ import net.minecraft.world.item.enchantment.effects.MultiplyValue;
 import net.minecraft.world.item.enchantment.effects.PlaySoundEffect;
 import net.minecraft.world.item.enchantment.effects.RemoveBinomial;
 import net.minecraft.world.item.enchantment.effects.ReplaceDisc;
-import net.minecraft.world.item.enchantment.effects.SetBlockProperties;
 import net.minecraft.world.item.enchantment.effects.SetValue;
 import net.minecraft.world.item.enchantment.effects.SpawnParticlesEffect;
 import net.minecraft.world.item.enchantment.effects.SummonEntityEffect;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.CandleBlock;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate;
 import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvider;
@@ -653,22 +647,6 @@ public class Enchantments {
 					new Ignite(LevelBasedValue.perLevel(4.0F)),
 					DamageSourceCondition.hasDamageSource(DamageSourcePredicate.Builder.damageType().isDirect(true))
 				)
-				.withEffect(
-					EnchantmentEffectComponents.HIT_BLOCK,
-					AllOf.entityEffects(
-						new SetBlockProperties(BlockItemStateProperties.EMPTY.with(CandleBlock.LIT, true), Vec3i.ZERO, Optional.of(GameEvent.BLOCK_CHANGE)),
-						new DamageItem(LevelBasedValue.constant(1.0F))
-					),
-					LocationCheck.checkLocation(
-						LocationPredicate.Builder.location()
-							.setBlock(
-								net.minecraft.advancements.critereon.BlockPredicate.Builder.block()
-									.of(BlockTags.FIRE_ASPECT_LIGHTABLE)
-									.setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(BlockStateProperties.LIT, false))
-							)
-							.setFluid(FluidPredicate.Builder.fluid().of(Fluids.EMPTY))
-					)
-				)
 		);
 		register(
 			bootstrapContext,
@@ -1065,7 +1043,7 @@ public class Enchantments {
 					new ExplodeEffect(
 						false,
 						Optional.empty(),
-						Optional.of(LevelBasedValue.perLevel(0.5F, 0.25F)),
+						Optional.of(LevelBasedValue.lookup(List.of(1.2F, 1.75F, 2.2F), LevelBasedValue.perLevel(1.5F, 0.35F))),
 						holderGetter4.get(BlockTags.BLOCKS_WIND_CHARGE_EXPLOSIONS).map(Function.identity()),
 						Vec3.ZERO,
 						LevelBasedValue.constant(3.5F),

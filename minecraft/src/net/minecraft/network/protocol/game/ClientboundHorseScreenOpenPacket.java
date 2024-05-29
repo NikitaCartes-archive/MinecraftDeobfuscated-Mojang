@@ -10,24 +10,24 @@ public class ClientboundHorseScreenOpenPacket implements Packet<ClientGamePacket
 		ClientboundHorseScreenOpenPacket::write, ClientboundHorseScreenOpenPacket::new
 	);
 	private final int containerId;
-	private final int size;
+	private final int inventoryColumns;
 	private final int entityId;
 
 	public ClientboundHorseScreenOpenPacket(int i, int j, int k) {
 		this.containerId = i;
-		this.size = j;
+		this.inventoryColumns = j;
 		this.entityId = k;
 	}
 
 	private ClientboundHorseScreenOpenPacket(FriendlyByteBuf friendlyByteBuf) {
 		this.containerId = friendlyByteBuf.readUnsignedByte();
-		this.size = friendlyByteBuf.readVarInt();
+		this.inventoryColumns = friendlyByteBuf.readVarInt();
 		this.entityId = friendlyByteBuf.readInt();
 	}
 
 	private void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeByte(this.containerId);
-		friendlyByteBuf.writeVarInt(this.size);
+		friendlyByteBuf.writeVarInt(this.inventoryColumns);
 		friendlyByteBuf.writeInt(this.entityId);
 	}
 
@@ -44,8 +44,8 @@ public class ClientboundHorseScreenOpenPacket implements Packet<ClientGamePacket
 		return this.containerId;
 	}
 
-	public int getSize() {
-		return this.size;
+	public int getInventoryColumns() {
+		return this.inventoryColumns;
 	}
 
 	public int getEntityId() {

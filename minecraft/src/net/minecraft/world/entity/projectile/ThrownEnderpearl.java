@@ -17,7 +17,6 @@ import net.minecraft.world.level.portal.DimensionTransition;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.Nullable;
 
 public class ThrownEnderpearl extends ThrowableItemProjectile {
 	public ThrownEnderpearl(EntityType<? extends ThrownEnderpearl> entityType, Level level) {
@@ -52,31 +51,50 @@ public class ThrownEnderpearl extends ThrowableItemProjectile {
 
 		if (this.level() instanceof ServerLevel serverLevel && !this.isRemoved()) {
 			Entity entity = this.getOwner();
-			if (entity instanceof ServerPlayer serverPlayer) {
-				if (serverPlayer.connection.isAcceptingMessages() && serverPlayer.canChangeDimensions()) {
-					if (this.random.nextFloat() < 0.05F && serverLevel.getGameRules().getBoolean(GameRules.RULE_DOMOBSPAWNING)) {
-						Endermite endermite = EntityType.ENDERMITE.create(serverLevel);
-						if (endermite != null) {
-							endermite.moveTo(entity.getX(), entity.getY(), entity.getZ(), entity.getYRot(), entity.getXRot());
-							serverLevel.addFreshEntity(endermite);
+			if (entity != null && isAllowedToTeleportOwner(entity, serverLevel)) {
+				if (entity.isPassenger()) {
+					this.unRide();
+				}
+
+				if (entity instanceof ServerPlayer serverPlayer) {
+					if (serverPlayer.connection.isAcceptingMessages()) {
+						if (this.random.nextFloat() < 0.05F && serverLevel.getGameRules().getBoolean(GameRules.RULE_DOMOBSPAWNING)) {
+							Endermite endermite = EntityType.ENDERMITE.create(serverLevel);
+							if (endermite != null) {
+								endermite.moveTo(entity.getX(), entity.getY(), entity.getZ(), entity.getYRot(), entity.getXRot());
+								serverLevel.addFreshEntity(endermite);
+							}
 						}
-					}
 
-					if (entity.isPassenger()) {
-						this.unRide();
+						entity.changeDimension(
+							new DimensionTransition(serverLevel, this.position(), entity.getDeltaMovement(), entity.getYRot(), entity.getXRot(), DimensionTransition.DO_NOTHING)
+						);
+						entity.resetFallDistance();
+						entity.hurt(this.damageSources().fall(), 5.0F);
+						this.playSound(serverLevel, this.position());
 					}
-
-					entity.changeDimension(new DimensionTransition(serverLevel, this.position(), entity.getDeltaMovement(), entity.getYRot(), entity.getXRot()));
+				} else {
+					entity.changeDimension(
+						new DimensionTransition(serverLevel, this.position(), entity.getDeltaMovement(), entity.getYRot(), entity.getXRot(), DimensionTransition.DO_NOTHING)
+					);
 					entity.resetFallDistance();
-					entity.hurt(this.damageSources().fall(), 5.0F);
 					this.playSound(serverLevel, this.position());
 				}
-			} else if (entity != null) {
-				entity.changeDimension(new DimensionTransition(serverLevel, this.position(), entity.getDeltaMovement(), entity.getYRot(), entity.getXRot()));
-				entity.resetFallDistance();
+
+				this.discard();
+				return;
 			}
 
 			this.discard();
+			return;
+		}
+	}
+
+	private static boolean isAllowedToTeleportOwner(Entity entity, Level level) {
+		if (entity.level().dimension() == level.dimension()) {
+			return !(entity instanceof LivingEntity livingEntity) ? entity.isAlive() : livingEntity.isAlive() && !livingEntity.isSleeping();
+		} else {
+			return entity.canChangeDimensions();
 		}
 	}
 
@@ -88,16 +106,6 @@ public class ThrownEnderpearl extends ThrowableItemProjectile {
 		} else {
 			super.tick();
 		}
-	}
-
-	@Nullable
-	@Override
-	public Entity changeDimension(DimensionTransition dimensionTransition) {
-		if (this.level().dimension() != dimensionTransition.newLevel().dimension()) {
-			this.disown();
-		}
-
-		return super.changeDimension(dimensionTransition);
 	}
 
 	private void playSound(Level level, Vec3 vec3) {

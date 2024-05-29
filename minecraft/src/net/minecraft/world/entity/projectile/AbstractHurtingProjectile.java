@@ -8,6 +8,7 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerEntity;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -154,11 +155,22 @@ public abstract class AbstractHurtingProjectile extends Projectile {
 	}
 
 	@Override
-	public Packet<ClientGamePacketListener> getAddEntityPacket() {
+	public Packet<ClientGamePacketListener> getAddEntityPacket(ServerEntity serverEntity) {
 		Entity entity = this.getOwner();
 		int i = entity == null ? 0 : entity.getId();
+		Vec3 vec3 = serverEntity.getPositionBase();
 		return new ClientboundAddEntityPacket(
-			this.getId(), this.getUUID(), this.getX(), this.getY(), this.getZ(), this.getXRot(), this.getYRot(), this.getType(), i, this.getDeltaMovement(), 0.0
+			this.getId(),
+			this.getUUID(),
+			vec3.x(),
+			vec3.y(),
+			vec3.z(),
+			serverEntity.getLastSentXRot(),
+			serverEntity.getLastSentYRot(),
+			this.getType(),
+			i,
+			serverEntity.getLastSentMovement(),
+			0.0
 		);
 	}
 

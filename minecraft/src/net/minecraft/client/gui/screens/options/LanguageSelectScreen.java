@@ -2,7 +2,6 @@ package net.minecraft.client.gui.screens.options;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
@@ -20,7 +19,7 @@ import net.minecraft.network.chat.Component;
 
 @Environment(EnvType.CLIENT)
 public class LanguageSelectScreen extends OptionsSubScreen {
-	private static final Component WARNING_LABEL = Component.translatable("options.languageAccuracyWarning").withStyle(ChatFormatting.GRAY);
+	private static final Component WARNING_LABEL = Component.translatable("options.languageAccuracyWarning").withColor(-4539718);
 	private static final int FOOTER_HEIGHT = 53;
 	private LanguageSelectScreen.LanguageSelectionList languageSelectionList;
 	final LanguageManager languageManager;
@@ -104,7 +103,7 @@ public class LanguageSelectScreen extends OptionsSubScreen {
 
 			@Override
 			public void render(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-				guiGraphics.drawCenteredString(LanguageSelectScreen.this.font, this.language, LanguageSelectionList.this.width / 2, j + 1, -1);
+				guiGraphics.drawCenteredString(LanguageSelectScreen.this.font, this.language, LanguageSelectionList.this.width / 2, j + m / 2 - 9 / 2, -1);
 			}
 
 			@Override

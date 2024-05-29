@@ -5,6 +5,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import java.util.List;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.util.Mth;
@@ -23,7 +24,8 @@ public interface LevelBasedValue {
 		Registry.register(registry, "clamped", LevelBasedValue.Clamped.CODEC);
 		Registry.register(registry, "fraction", LevelBasedValue.Fraction.CODEC);
 		Registry.register(registry, "levels_squared", LevelBasedValue.LevelsSquared.CODEC);
-		return Registry.register(registry, "linear", LevelBasedValue.Linear.CODEC);
+		Registry.register(registry, "linear", LevelBasedValue.Linear.CODEC);
+		return Registry.register(registry, "lookup", LevelBasedValue.Lookup.CODEC);
 	}
 
 	static LevelBasedValue.Constant constant(float f) {
@@ -36,6 +38,10 @@ public interface LevelBasedValue {
 
 	static LevelBasedValue.Linear perLevel(float f) {
 		return perLevel(f, f);
+	}
+
+	static LevelBasedValue.Lookup lookup(List<Float> list, LevelBasedValue levelBasedValue) {
+		return new LevelBasedValue.Lookup(list, levelBasedValue);
 	}
 
 	float calculate(int i);
@@ -138,6 +144,26 @@ public interface LevelBasedValue {
 
 		@Override
 		public MapCodec<LevelBasedValue.Linear> codec() {
+			return CODEC;
+		}
+	}
+
+	public static record Lookup(List<Float> values, LevelBasedValue fallback) implements LevelBasedValue {
+		public static final MapCodec<LevelBasedValue.Lookup> CODEC = RecordCodecBuilder.mapCodec(
+			instance -> instance.group(
+						Codec.FLOAT.listOf().fieldOf("values").forGetter(LevelBasedValue.Lookup::values),
+						LevelBasedValue.CODEC.fieldOf("fallback").forGetter(LevelBasedValue.Lookup::fallback)
+					)
+					.apply(instance, LevelBasedValue.Lookup::new)
+		);
+
+		@Override
+		public float calculate(int i) {
+			return i <= this.values.size() ? (Float)this.values.get(i - 1) : this.fallback.calculate(i);
+		}
+
+		@Override
+		public MapCodec<LevelBasedValue.Lookup> codec() {
 			return CODEC;
 		}
 	}

@@ -5,7 +5,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.animal.horse.AbstractChestedHorse;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.animal.horse.Llama;
 import net.minecraft.world.entity.player.Inventory;
@@ -19,12 +18,14 @@ public class HorseInventoryScreen extends AbstractContainerScreen<HorseInventory
 	private static final ResourceLocation ARMOR_SLOT_SPRITE = ResourceLocation.withDefaultNamespace("container/horse/armor_slot");
 	private static final ResourceLocation HORSE_INVENTORY_LOCATION = ResourceLocation.withDefaultNamespace("textures/gui/container/horse.png");
 	private final AbstractHorse horse;
+	private final int inventoryColumns;
 	private float xMouse;
 	private float yMouse;
 
-	public HorseInventoryScreen(HorseInventoryMenu horseInventoryMenu, Inventory inventory, AbstractHorse abstractHorse) {
+	public HorseInventoryScreen(HorseInventoryMenu horseInventoryMenu, Inventory inventory, AbstractHorse abstractHorse, int i) {
 		super(horseInventoryMenu, inventory, abstractHorse.getDisplayName());
 		this.horse = abstractHorse;
+		this.inventoryColumns = i;
 	}
 
 	@Override
@@ -32,8 +33,8 @@ public class HorseInventoryScreen extends AbstractContainerScreen<HorseInventory
 		int k = (this.width - this.imageWidth) / 2;
 		int l = (this.height - this.imageHeight) / 2;
 		guiGraphics.blit(HORSE_INVENTORY_LOCATION, k, l, 0, 0, this.imageWidth, this.imageHeight);
-		if (this.horse instanceof AbstractChestedHorse abstractChestedHorse && abstractChestedHorse.hasChest()) {
-			guiGraphics.blitSprite(CHEST_SLOTS_SPRITE, 90, 54, 0, 0, k + 79, l + 17, abstractChestedHorse.getInventoryColumns() * 18, 54);
+		if (this.inventoryColumns > 0) {
+			guiGraphics.blitSprite(CHEST_SLOTS_SPRITE, 90, 54, 0, 0, k + 79, l + 17, this.inventoryColumns * 18, 54);
 		}
 
 		if (this.horse.isSaddleable()) {

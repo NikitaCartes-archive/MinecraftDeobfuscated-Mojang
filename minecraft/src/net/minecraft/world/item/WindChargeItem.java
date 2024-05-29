@@ -1,6 +1,5 @@
 package net.minecraft.world.item;
 
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Position;
 import net.minecraft.sounds.SoundEvents;
@@ -26,12 +25,7 @@ public class WindChargeItem extends Item implements ProjectileItem {
 	@Override
 	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand) {
 		if (!level.isClientSide()) {
-			Vec3 vec3 = player.getEyePosition().add(player.getForward().scale(0.8F));
-			if (!level.getBlockState(BlockPos.containing(vec3)).canBeReplaced()) {
-				vec3 = player.getEyePosition().add(player.getForward().scale(0.05F));
-			}
-
-			WindCharge windCharge = new WindCharge(player, level, vec3.x(), vec3.y(), vec3.z());
+			WindCharge windCharge = new WindCharge(player, level, player.position().x(), player.getEyePosition().y(), player.position().z());
 			windCharge.shootFromRotation(player, player.getXRot(), player.getYRot(), 0.0F, 1.5F, 1.0F);
 			level.addFreshEntity(windCharge);
 		}

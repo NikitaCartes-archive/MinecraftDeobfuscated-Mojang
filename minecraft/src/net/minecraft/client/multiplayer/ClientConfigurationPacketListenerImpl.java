@@ -121,7 +121,7 @@ public class ClientConfigurationPacketListenerImpl extends ClientCommonPacketLis
 		);
 		this.connection
 			.setupInboundProtocol(
-				GameProtocols.CLIENTBOUND.bind(RegistryFriendlyByteBuf.decorator(frozen)),
+				GameProtocols.CLIENTBOUND_TEMPLATE.bind(RegistryFriendlyByteBuf.decorator(frozen)),
 				new ClientPacketListener(
 					this.minecraft,
 					this.connection,
@@ -142,7 +142,7 @@ public class ClientConfigurationPacketListenerImpl extends ClientCommonPacketLis
 				)
 			);
 		this.connection.send(ServerboundFinishConfigurationPacket.INSTANCE);
-		this.connection.setupOutboundProtocol(GameProtocols.SERVERBOUND.bind(RegistryFriendlyByteBuf.decorator(frozen)));
+		this.connection.setupOutboundProtocol(GameProtocols.SERVERBOUND_TEMPLATE.bind(RegistryFriendlyByteBuf.decorator(frozen)));
 	}
 
 	@Override

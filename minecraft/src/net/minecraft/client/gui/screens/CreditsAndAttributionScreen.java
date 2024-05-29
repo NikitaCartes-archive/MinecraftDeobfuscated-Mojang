@@ -7,6 +7,7 @@ import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
 import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.CommonLinks;
 
 @Environment(EnvType.CLIENT)
 public class CreditsAndAttributionScreen extends Screen {
@@ -30,8 +31,8 @@ public class CreditsAndAttributionScreen extends Screen {
 		LinearLayout linearLayout = this.layout.addToContents(LinearLayout.vertical()).spacing(8);
 		linearLayout.defaultCellSetting().alignHorizontallyCenter();
 		linearLayout.addChild(Button.builder(CREDITS_BUTTON, button -> this.openCreditsScreen()).width(210).build());
-		linearLayout.addChild(Button.builder(ATTRIBUTION_BUTTON, ConfirmLinkScreen.confirmLink(this, "https://aka.ms/MinecraftJavaAttribution")).width(210).build());
-		linearLayout.addChild(Button.builder(LICENSES_BUTTON, ConfirmLinkScreen.confirmLink(this, "https://aka.ms/MinecraftJavaLicenses")).width(210).build());
+		linearLayout.addChild(Button.builder(ATTRIBUTION_BUTTON, ConfirmLinkScreen.confirmLink(this, CommonLinks.ATTRIBUTION)).width(210).build());
+		linearLayout.addChild(Button.builder(LICENSES_BUTTON, ConfirmLinkScreen.confirmLink(this, CommonLinks.LICENSES)).width(210).build());
 		this.layout.addToFooter(Button.builder(CommonComponents.GUI_DONE, button -> this.onClose()).width(200).build());
 		this.layout.arrangeElements();
 		this.layout.visitWidgets(this::addRenderableWidget);

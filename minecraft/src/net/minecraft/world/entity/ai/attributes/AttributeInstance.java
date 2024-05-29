@@ -106,22 +106,13 @@ public class AttributeInstance {
 		this.removeModifier(attributeModifier.id());
 	}
 
-	public void removeModifier(ResourceLocation resourceLocation) {
+	public boolean removeModifier(ResourceLocation resourceLocation) {
 		AttributeModifier attributeModifier = (AttributeModifier)this.modifierById.remove(resourceLocation);
-		if (attributeModifier != null) {
-			this.getModifiers(attributeModifier.operation()).remove(resourceLocation);
-			this.permanentModifiers.remove(resourceLocation);
-			this.setDirty();
-		}
-	}
-
-	public boolean removePermanentModifier(ResourceLocation resourceLocation) {
-		AttributeModifier attributeModifier = (AttributeModifier)this.permanentModifiers.remove(resourceLocation);
 		if (attributeModifier == null) {
 			return false;
 		} else {
-			this.getModifiers(attributeModifier.operation()).remove(attributeModifier.id());
-			this.modifierById.remove(resourceLocation);
+			this.getModifiers(attributeModifier.operation()).remove(resourceLocation);
+			this.permanentModifiers.remove(resourceLocation);
 			this.setDirty();
 			return true;
 		}

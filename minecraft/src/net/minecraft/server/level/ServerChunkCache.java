@@ -254,7 +254,7 @@ public class ServerChunkCache extends ChunkSource {
 	public LightChunk getChunkForLighting(int i, int j) {
 		long l = ChunkPos.asLong(i, j);
 		ChunkHolder chunkHolder = this.getVisibleChunkIfPresent(l);
-		return chunkHolder == null ? null : chunkHolder.getChunkIfPresentUnchecked(ChunkStatus.INITIALIZE_LIGHT);
+		return chunkHolder == null ? null : chunkHolder.getChunkIfPresentUnchecked(ChunkStatus.INITIALIZE_LIGHT.getParent());
 	}
 
 	public Level getLevel() {

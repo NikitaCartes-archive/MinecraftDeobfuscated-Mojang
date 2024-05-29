@@ -14,6 +14,7 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -165,6 +166,22 @@ public class TestCommand {
 				.then(runWithRetryOptions(Commands.literal("runclosest"), testFinder::nearest))
 				.then(runWithRetryOptions(Commands.literal("runthat"), testFinder::lookedAt))
 				.then(runWithRetryOptionsAndBuildInfo(Commands.literal("runfailed").then(argumentBuilder), testFinder::failedTests))
+				.then(
+					Commands.literal("verify")
+						.then(
+							Commands.argument("testName", TestFunctionArgument.testFunctionArgument())
+								.executes(commandContext -> testFinder.byArgument(commandContext, "testName").verify())
+						)
+				)
+				.then(
+					Commands.literal("verifyclass")
+						.then(
+							Commands.argument("testClassName", TestClassNameArgument.testClassName())
+								.executes(
+									commandContext -> testFinder.allTestsInClass(commandContext, TestClassNameArgument.getTestClassName(commandContext, "testClassName")).verify()
+								)
+						)
+				)
 				.then(
 					Commands.literal("locate")
 						.then(
@@ -371,7 +388,7 @@ public class TestCommand {
 	private static int exportTestStructure(CommandSourceStack commandSourceStack, String string) {
 		Path path = Paths.get(StructureUtils.testStructuresDir);
 		ResourceLocation resourceLocation = ResourceLocation.parse(string);
-		Path path2 = commandSourceStack.getLevel().getStructureManager().getPathToGeneratedStructure(resourceLocation, ".nbt");
+		Path path2 = commandSourceStack.getLevel().getStructureManager().createAndValidatePathToGeneratedStructure(resourceLocation, ".nbt");
 		Path path3 = NbtToSnbt.convertStructure(CachedOutput.NO_CACHE, path2, resourceLocation.getPath(), path);
 		if (path3 == null) {
 			say(commandSourceStack, "Failed to export " + path2);
@@ -412,7 +429,7 @@ public class TestCommand {
 	private static int importTestStructure(CommandSourceStack commandSourceStack, String string) {
 		Path path = Paths.get(StructureUtils.testStructuresDir, string + ".snbt");
 		ResourceLocation resourceLocation = ResourceLocation.withDefaultNamespace(string);
-		Path path2 = commandSourceStack.getLevel().getStructureManager().getPathToGeneratedStructure(resourceLocation, ".nbt");
+		Path path2 = commandSourceStack.getLevel().getStructureManager().createAndValidatePathToGeneratedStructure(resourceLocation, ".nbt");
 
 		try {
 			BufferedReader bufferedReader = Files.newBufferedReader(path);
@@ -523,6 +540,45 @@ public class TestCommand {
 			return mutableBoolean.getValue() ? 0 : 1;
 		}
 
+		int verify() {
+			TestCommand.stopTests();
+			CommandSourceStack commandSourceStack = this.finder.source();
+			ServerLevel serverLevel = commandSourceStack.getLevel();
+			BlockPos blockPos = TestCommand.createTestPositionAround(commandSourceStack);
+			Collection<GameTestInfo> collection = Stream.concat(
+					TestCommand.toGameTestInfos(commandSourceStack, RetryOptions.noRetries(), this.finder),
+					TestCommand.toGameTestInfo(commandSourceStack, RetryOptions.noRetries(), this.finder, 0)
+				)
+				.toList();
+			int i = 10;
+			GameTestRunner.clearMarkers(serverLevel);
+			GameTestRegistry.forgetFailedTests();
+			Collection<GameTestBatch> collection2 = new ArrayList();
+
+			for (GameTestInfo gameTestInfo : collection) {
+				for (Rotation rotation : Rotation.values()) {
+					Collection<GameTestInfo> collection3 = new ArrayList();
+
+					for (int j = 0; j < 100; j++) {
+						GameTestInfo gameTestInfo2 = new GameTestInfo(gameTestInfo.getTestFunction(), rotation, serverLevel, new RetryOptions(1, true));
+						collection3.add(gameTestInfo2);
+					}
+
+					GameTestBatch gameTestBatch = GameTestBatchFactory.toGameTestBatch(collection3, gameTestInfo.getTestFunction().batchName(), (long)rotation.ordinal());
+					collection2.add(gameTestBatch);
+				}
+			}
+
+			StructureGridSpawner structureGridSpawner = new StructureGridSpawner(blockPos, 10, true);
+			GameTestRunner gameTestRunner = GameTestRunner.Builder.fromBatches(collection2, serverLevel)
+				.batcher(GameTestBatchFactory.fromGameTestInfo(100))
+				.newStructureSpawner(structureGridSpawner)
+				.existingStructureSpawner(structureGridSpawner)
+				.haltOnError(true)
+				.build();
+			return TestCommand.trackAndStartRunner(commandSourceStack, serverLevel, gameTestRunner);
+		}
+
 		public int run(RetryOptions retryOptions, int i, int j) {
 			TestCommand.stopTests();
 			CommandSourceStack commandSourceStack = this.finder.source();
@@ -539,7 +595,9 @@ public class TestCommand {
 				GameTestRunner.clearMarkers(serverLevel);
 				GameTestRegistry.forgetFailedTests();
 				TestCommand.say(commandSourceStack, "Running " + collection.size() + " tests...");
-				GameTestRunner gameTestRunner = GameTestRunner.Builder.fromInfo(collection, serverLevel).newStructureSpawner(new StructureGridSpawner(blockPos, j)).build();
+				GameTestRunner gameTestRunner = GameTestRunner.Builder.fromInfo(collection, serverLevel)
+					.newStructureSpawner(new StructureGridSpawner(blockPos, j, false))
+					.build();
 				return TestCommand.trackAndStartRunner(commandSourceStack, serverLevel, gameTestRunner);
 			}
 		}

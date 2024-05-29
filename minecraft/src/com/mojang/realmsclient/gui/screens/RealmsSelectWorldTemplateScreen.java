@@ -35,6 +35,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.realms.RealmsObjectSelectionList;
 import net.minecraft.realms.RealmsScreen;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.CommonLinks;
 import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
@@ -177,7 +178,7 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
 											if (RealmsSelectWorldTemplateScreen.this.worldTemplateList.isEmpty()) {
 												String string = I18n.get("mco.template.select.none", "%link");
 												TextRenderingUtils.LineSegment lineSegment = TextRenderingUtils.LineSegment.link(
-													I18n.get("mco.template.select.none.linkTitle"), "https://aka.ms/MinecraftRealmsContentCreator"
+													I18n.get("mco.template.select.none.linkTitle"), CommonLinks.REALMS_CONTENT_CREATION.toString()
 												);
 												RealmsSelectWorldTemplateScreen.this.noTemplatesMessage = TextRenderingUtils.decompose(string, lineSegment);
 											}

@@ -2,7 +2,7 @@ package net.minecraft.client.renderer;
 
 import com.mojang.blaze3d.vertex.ByteBufferBuilder;
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
-import java.util.SortedMap;
+import java.util.SequencedMap;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
@@ -18,27 +18,29 @@ public class RenderBuffers {
 
 	public RenderBuffers(int i) {
 		this.sectionBufferPool = SectionBufferBuilderPool.allocate(i);
-		SortedMap<RenderType, ByteBufferBuilder> sortedMap = Util.make(new Object2ObjectLinkedOpenHashMap<>(), object2ObjectLinkedOpenHashMap -> {
-			object2ObjectLinkedOpenHashMap.put(Sheets.solidBlockSheet(), this.fixedBufferPack.buffer(RenderType.solid()));
-			object2ObjectLinkedOpenHashMap.put(Sheets.cutoutBlockSheet(), this.fixedBufferPack.buffer(RenderType.cutout()));
-			object2ObjectLinkedOpenHashMap.put(Sheets.bannerSheet(), this.fixedBufferPack.buffer(RenderType.cutoutMipped()));
-			object2ObjectLinkedOpenHashMap.put(Sheets.translucentCullBlockSheet(), this.fixedBufferPack.buffer(RenderType.translucent()));
-			put(object2ObjectLinkedOpenHashMap, Sheets.shieldSheet());
-			put(object2ObjectLinkedOpenHashMap, Sheets.bedSheet());
-			put(object2ObjectLinkedOpenHashMap, Sheets.shulkerBoxSheet());
-			put(object2ObjectLinkedOpenHashMap, Sheets.signSheet());
-			put(object2ObjectLinkedOpenHashMap, Sheets.hangingSignSheet());
-			object2ObjectLinkedOpenHashMap.put(Sheets.chestSheet(), new ByteBufferBuilder(786432));
-			put(object2ObjectLinkedOpenHashMap, RenderType.armorEntityGlint());
-			put(object2ObjectLinkedOpenHashMap, RenderType.glint());
-			put(object2ObjectLinkedOpenHashMap, RenderType.glintTranslucent());
-			put(object2ObjectLinkedOpenHashMap, RenderType.entityGlint());
-			put(object2ObjectLinkedOpenHashMap, RenderType.entityGlintDirect());
-			put(object2ObjectLinkedOpenHashMap, RenderType.waterMask());
-			ModelBakery.DESTROY_TYPES.forEach(renderType -> put(object2ObjectLinkedOpenHashMap, renderType));
-		});
+		SequencedMap<RenderType, ByteBufferBuilder> sequencedMap = Util.make(
+			new Object2ObjectLinkedOpenHashMap<RenderType, ByteBufferBuilder>(), object2ObjectLinkedOpenHashMap -> {
+				object2ObjectLinkedOpenHashMap.put(Sheets.solidBlockSheet(), this.fixedBufferPack.buffer(RenderType.solid()));
+				object2ObjectLinkedOpenHashMap.put(Sheets.cutoutBlockSheet(), this.fixedBufferPack.buffer(RenderType.cutout()));
+				object2ObjectLinkedOpenHashMap.put(Sheets.bannerSheet(), this.fixedBufferPack.buffer(RenderType.cutoutMipped()));
+				object2ObjectLinkedOpenHashMap.put(Sheets.translucentCullBlockSheet(), this.fixedBufferPack.buffer(RenderType.translucent()));
+				put(object2ObjectLinkedOpenHashMap, Sheets.shieldSheet());
+				put(object2ObjectLinkedOpenHashMap, Sheets.bedSheet());
+				put(object2ObjectLinkedOpenHashMap, Sheets.shulkerBoxSheet());
+				put(object2ObjectLinkedOpenHashMap, Sheets.signSheet());
+				put(object2ObjectLinkedOpenHashMap, Sheets.hangingSignSheet());
+				object2ObjectLinkedOpenHashMap.put(Sheets.chestSheet(), new ByteBufferBuilder(786432));
+				put(object2ObjectLinkedOpenHashMap, RenderType.armorEntityGlint());
+				put(object2ObjectLinkedOpenHashMap, RenderType.glint());
+				put(object2ObjectLinkedOpenHashMap, RenderType.glintTranslucent());
+				put(object2ObjectLinkedOpenHashMap, RenderType.entityGlint());
+				put(object2ObjectLinkedOpenHashMap, RenderType.entityGlintDirect());
+				put(object2ObjectLinkedOpenHashMap, RenderType.waterMask());
+				ModelBakery.DESTROY_TYPES.forEach(renderType -> put(object2ObjectLinkedOpenHashMap, renderType));
+			}
+		);
 		this.crumblingBufferSource = MultiBufferSource.immediate(new ByteBufferBuilder(1536));
-		this.bufferSource = MultiBufferSource.immediateWithBuffers(sortedMap, new ByteBufferBuilder(786432));
+		this.bufferSource = MultiBufferSource.immediateWithBuffers(sequencedMap, new ByteBufferBuilder(786432));
 		this.outlineBufferSource = new OutlineBufferSource(this.bufferSource);
 	}
 

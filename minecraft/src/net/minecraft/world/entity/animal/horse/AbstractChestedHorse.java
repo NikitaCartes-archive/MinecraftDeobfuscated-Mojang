@@ -25,7 +25,6 @@ import net.minecraft.world.level.block.Blocks;
 
 public abstract class AbstractChestedHorse extends AbstractHorse {
 	private static final EntityDataAccessor<Boolean> DATA_ID_CHEST = SynchedEntityData.defineId(AbstractChestedHorse.class, EntityDataSerializers.BOOLEAN);
-	public static final int INV_CHEST_COUNT = 15;
 	private final EntityDimensions babyDimensions;
 
 	protected AbstractChestedHorse(EntityType<? extends AbstractChestedHorse> entityType, Level level) {
@@ -57,11 +56,6 @@ public abstract class AbstractChestedHorse extends AbstractHorse {
 
 	public void setChest(boolean bl) {
 		this.entityData.set(DATA_ID_CHEST, bl);
-	}
-
-	@Override
-	protected int getInventorySize() {
-		return this.hasChest() ? 16 : super.getInventorySize();
 	}
 
 	@Override
@@ -190,7 +184,8 @@ public abstract class AbstractChestedHorse extends AbstractHorse {
 		this.playSound(SoundEvents.DONKEY_CHEST, 1.0F, (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
 	}
 
+	@Override
 	public int getInventoryColumns() {
-		return 5;
+		return this.hasChest() ? 5 : 0;
 	}
 }

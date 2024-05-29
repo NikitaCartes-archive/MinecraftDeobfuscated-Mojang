@@ -7,7 +7,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CommonButtons;
 import net.minecraft.client.gui.components.CycleButton;
@@ -34,8 +33,6 @@ public class AccessibilityOnboardingScreen extends Screen {
 	private final Runnable onClose;
 	@Nullable
 	private FocusableTextWidget textWidget;
-	@Nullable
-	private AbstractWidget narratorButton;
 	private final HeaderAndFooterLayout layout = new HeaderAndFooterLayout(this, this.initTitleYPos(), 33);
 
 	public AccessibilityOnboardingScreen(Options options, Runnable runnable) {
@@ -51,9 +48,12 @@ public class AccessibilityOnboardingScreen extends Screen {
 		LinearLayout linearLayout = this.layout.addToContents(LinearLayout.vertical());
 		linearLayout.defaultCellSetting().alignHorizontallyCenter().padding(4);
 		this.textWidget = linearLayout.addChild(new FocusableTextWidget(this.width, this.title, this.font), layoutSettings -> layoutSettings.padding(8));
-		this.narratorButton = this.options.narrator().createButton(this.options);
-		this.narratorButton.active = this.narratorAvailable;
-		linearLayout.addChild(this.narratorButton);
+		if (this.options.narrator().createButton(this.options) instanceof CycleButton cycleButton) {
+			this.narratorButton = cycleButton;
+			this.narratorButton.active = this.narratorAvailable;
+			linearLayout.addChild(this.narratorButton);
+		}
+
 		linearLayout.addChild(CommonButtons.accessibility(150, button -> this.closeAndSetScreen(new AccessibilityOptionsScreen(this, this.minecraft.options)), false));
 		linearLayout.addChild(
 			CommonButtons.language(
@@ -123,12 +123,6 @@ public class AccessibilityOnboardingScreen extends Screen {
 				Narrator.getNarrator().say(ONBOARDING_NARRATOR_MESSAGE.getString(), true);
 				this.hasNarrated = true;
 			}
-		}
-	}
-
-	public void updateNarratorButton() {
-		if (this.narratorButton instanceof CycleButton) {
-			((CycleButton)this.narratorButton).setValue(this.options.narrator().get());
 		}
 	}
 }

@@ -2,7 +2,6 @@ package net.minecraft.world.inventory;
 
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.animal.horse.AbstractChestedHorse;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -16,14 +15,14 @@ public class HorseInventoryMenu extends AbstractContainerMenu {
 	private static final int SLOT_BODY_ARMOR = 1;
 	private static final int SLOT_HORSE_INVENTORY_START = 2;
 
-	public HorseInventoryMenu(int i, Inventory inventory, Container container, AbstractHorse abstractHorse) {
+	public HorseInventoryMenu(int i, Inventory inventory, Container container, AbstractHorse abstractHorse, int j) {
 		super(null, i);
 		this.horseContainer = container;
 		this.armorContainer = abstractHorse.getBodyArmorAccess();
 		this.horse = abstractHorse;
-		int j = 3;
+		int k = 3;
 		container.startOpen(inventory.player);
-		int k = -18;
+		int l = -18;
 		this.addSlot(new Slot(container, 0, 8, 18) {
 			@Override
 			public boolean mayPlace(ItemStack itemStack) {
@@ -46,22 +45,22 @@ public class HorseInventoryMenu extends AbstractContainerMenu {
 				return abstractHorse.canUseSlot(EquipmentSlot.BODY);
 			}
 		});
-		if (this.hasChest(abstractHorse)) {
-			for (int l = 0; l < 3; l++) {
-				for (int m = 0; m < ((AbstractChestedHorse)abstractHorse).getInventoryColumns(); m++) {
-					this.addSlot(new Slot(container, 1 + m + l * ((AbstractChestedHorse)abstractHorse).getInventoryColumns(), 80 + m * 18, 18 + l * 18));
+		if (j > 0) {
+			for (int m = 0; m < 3; m++) {
+				for (int n = 0; n < j; n++) {
+					this.addSlot(new Slot(container, 1 + n + m * j, 80 + n * 18, 18 + m * 18));
 				}
 			}
 		}
 
-		for (int l = 0; l < 3; l++) {
-			for (int m = 0; m < 9; m++) {
-				this.addSlot(new Slot(inventory, m + l * 9 + 9, 8 + m * 18, 102 + l * 18 + -18));
+		for (int m = 0; m < 3; m++) {
+			for (int n = 0; n < 9; n++) {
+				this.addSlot(new Slot(inventory, n + m * 9 + 9, 8 + n * 18, 102 + m * 18 + -18));
 			}
 		}
 
-		for (int l = 0; l < 9; l++) {
-			this.addSlot(new Slot(inventory, l, 8 + l * 18, 142));
+		for (int m = 0; m < 9; m++) {
+			this.addSlot(new Slot(inventory, m, 8 + m * 18, 142));
 		}
 	}
 
@@ -72,14 +71,6 @@ public class HorseInventoryMenu extends AbstractContainerMenu {
 			&& this.armorContainer.stillValid(player)
 			&& this.horse.isAlive()
 			&& player.canInteractWithEntity(this.horse, 4.0);
-	}
-
-	private boolean hasChest(AbstractHorse abstractHorse) {
-		if (abstractHorse instanceof AbstractChestedHorse abstractChestedHorse && abstractChestedHorse.hasChest()) {
-			return true;
-		}
-
-		return false;
 	}
 
 	@Override

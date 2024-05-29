@@ -16,7 +16,6 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.TheEndPortalBlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.portal.DimensionTransition;
 import net.minecraft.world.phys.Vec3;
@@ -71,19 +70,21 @@ public class EndPortalBlock extends BaseEntityBlock implements Portal {
 		ServerLevel serverLevel2 = serverLevel.getServer().getLevel(resourceKey);
 		boolean bl = resourceKey == Level.END;
 		BlockPos blockPos2 = bl ? ServerLevel.END_SPAWN_POINT : serverLevel2.getSharedSpawnPos();
-		Vec3 vec3 = new Vec3((double)blockPos2.getX() + 0.5, (double)blockPos2.getY(), (double)blockPos2.getZ() + 0.5);
+		Vec3 vec3 = blockPos2.getBottomCenter();
 		if (bl) {
 			this.createEndPlatform(serverLevel2, BlockPos.containing(vec3).below());
+			if (entity instanceof ServerPlayer) {
+				vec3 = vec3.subtract(0.0, 1.0, 0.0);
+			}
 		} else {
 			if (entity instanceof ServerPlayer serverPlayer) {
-				return serverPlayer.findRespawnPositionAndUseSpawnBlock(false);
+				return serverPlayer.findRespawnPositionAndUseSpawnBlock(false, DimensionTransition.DO_NOTHING);
 			}
 
-			int i = serverLevel2.getChunkAt(blockPos2).getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, blockPos2.getX(), blockPos2.getZ()) + 1;
-			vec3 = new Vec3(vec3.x, (double)i, vec3.z);
+			vec3 = entity.adjustSpawnLocation(serverLevel2, blockPos2).getBottomCenter();
 		}
 
-		return new DimensionTransition(serverLevel2, vec3, entity.getDeltaMovement(), entity.getYRot(), entity.getXRot());
+		return new DimensionTransition(serverLevel2, vec3, entity.getDeltaMovement(), entity.getYRot(), entity.getXRot(), DimensionTransition.PLACE_PORTAL_TICKET);
 	}
 
 	private void createEndPlatform(ServerLevel serverLevel, BlockPos blockPos) {
@@ -92,8 +93,12 @@ public class EndPortalBlock extends BaseEntityBlock implements Portal {
 		for (int i = -2; i <= 2; i++) {
 			for (int j = -2; j <= 2; j++) {
 				for (int k = -1; k < 3; k++) {
-					BlockState blockState = k == -1 ? Blocks.OBSIDIAN.defaultBlockState() : Blocks.AIR.defaultBlockState();
-					serverLevel.setBlockAndUpdate(mutableBlockPos.set(blockPos).move(j, k, i), blockState);
+					BlockPos blockPos2 = mutableBlockPos.set(blockPos).move(j, k, i);
+					Block block = k == -1 ? Blocks.OBSIDIAN : Blocks.AIR;
+					if (!serverLevel.getBlockState(blockPos2).is(block)) {
+						serverLevel.destroyBlock(blockPos2, true, null);
+						serverLevel.setBlockAndUpdate(blockPos2, block.defaultBlockState());
+					}
 				}
 			}
 		}

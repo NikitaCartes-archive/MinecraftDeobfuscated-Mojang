@@ -167,7 +167,7 @@ public class Pig extends Animal implements ItemSteerable, Saddleable {
 	}
 
 	@Override
-	public void equipSaddle(@Nullable SoundSource soundSource) {
+	public void equipSaddle(ItemStack itemStack, @Nullable SoundSource soundSource) {
 		this.steering.setSaddle(true);
 		if (soundSource != null) {
 			this.level().playSound(null, this, SoundEvents.PIG_SADDLE, soundSource, 0.5F, 1.0F);

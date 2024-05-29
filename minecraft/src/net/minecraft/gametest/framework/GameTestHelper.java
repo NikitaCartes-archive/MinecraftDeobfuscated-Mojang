@@ -857,6 +857,10 @@ public class GameTestHelper {
 		return StructureTemplate.transform(vec3.subtract(vec32), Mirror.NONE, this.testInfo.getRotation(), this.testInfo.getStructureBlockPos());
 	}
 
+	public Rotation getTestRotation() {
+		return this.testInfo.getRotation();
+	}
+
 	public void assertTrue(boolean bl, String string) {
 		if (!bl) {
 			throw new GameTestAssertException(string);

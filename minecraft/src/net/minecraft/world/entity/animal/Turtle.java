@@ -324,7 +324,7 @@ public class Turtle extends Animal {
 	}
 
 	@Override
-	public boolean canBeLeashed(Player player) {
+	public boolean canBeLeashed() {
 		return false;
 	}
 

@@ -14,6 +14,7 @@ import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerEntity;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -546,9 +547,9 @@ public class FishingHook extends Projectile {
 	}
 
 	@Override
-	public Packet<ClientGamePacketListener> getAddEntityPacket() {
+	public Packet<ClientGamePacketListener> getAddEntityPacket(ServerEntity serverEntity) {
 		Entity entity = this.getOwner();
-		return new ClientboundAddEntityPacket(this, entity == null ? this.getId() : entity.getId());
+		return new ClientboundAddEntityPacket(this, serverEntity, entity == null ? this.getId() : entity.getId());
 	}
 
 	@Override

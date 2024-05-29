@@ -14,6 +14,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.realms.RealmsScreen;
+import net.minecraft.util.CommonLinks;
 
 @Environment(EnvType.CLIENT)
 public class RealmsParentalConsentScreen extends RealmsScreen {
@@ -36,7 +37,7 @@ public class RealmsParentalConsentScreen extends RealmsScreen {
 		this.layout.addChild(this.textWidget);
 		LinearLayout linearLayout = this.layout.addChild(LinearLayout.horizontal().spacing(8));
 		Component component = Component.translatable("mco.account.privacy.info.button");
-		linearLayout.addChild(Button.builder(component, ConfirmLinkScreen.confirmLink(this, "https://aka.ms/MinecraftGDPR")).build());
+		linearLayout.addChild(Button.builder(component, ConfirmLinkScreen.confirmLink(this, CommonLinks.GDPR)).build());
 		linearLayout.addChild(Button.builder(CommonComponents.GUI_BACK, button -> this.onClose()).build());
 		this.layout.visitWidgets(guiEventListener -> {
 			AbstractWidget var10000 = this.addRenderableWidget(guiEventListener);

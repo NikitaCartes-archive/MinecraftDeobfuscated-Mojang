@@ -109,7 +109,7 @@ public class JukeboxBlock extends BaseEntityBlock {
 
 	@Override
 	protected int getAnalogOutputSignal(BlockState blockState, Level level, BlockPos blockPos) {
-		return level.getBlockEntity(blockPos) instanceof JukeboxBlockEntity jukeboxBlockEntity ? jukeboxBlockEntity.getSongPlayer().getComparatorOutput() : 0;
+		return level.getBlockEntity(blockPos) instanceof JukeboxBlockEntity jukeboxBlockEntity ? jukeboxBlockEntity.getComparatorOutput() : 0;
 	}
 
 	@Override

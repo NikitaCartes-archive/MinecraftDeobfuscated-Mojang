@@ -318,6 +318,7 @@ public class Zombie extends Monster {
 							AttributeInstance attributeInstance = this.getAttribute(Attributes.SPAWN_REINFORCEMENTS_CHANCE);
 							AttributeModifier attributeModifier = attributeInstance.getModifier(REINFORCEMENT_CALLER_CHARGE_ID);
 							double d = attributeModifier != null ? attributeModifier.amount() : 0.0;
+							attributeInstance.removeModifier(REINFORCEMENT_CALLER_CHARGE_ID);
 							attributeInstance.addPermanentModifier(new AttributeModifier(REINFORCEMENT_CALLER_CHARGE_ID, d - 0.05, AttributeModifier.Operation.ADD_VALUE));
 							zombie.getAttribute(Attributes.SPAWN_REINFORCEMENTS_CHANCE).addPermanentModifier(ZOMBIE_REINFORCEMENT_CALLEE_CHARGE);
 							break;

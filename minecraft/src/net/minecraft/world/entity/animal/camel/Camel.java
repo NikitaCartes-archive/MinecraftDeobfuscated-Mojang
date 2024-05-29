@@ -366,10 +366,12 @@ public class Camel extends AbstractHorse implements PlayerRideableJumping, Saddl
 	}
 
 	@Override
-	protected void onLeashDistance(float f) {
+	public boolean handleLeashAtDistance(Entity entity, float f) {
 		if (f > 6.0F && this.isCamelSitting() && !this.isInPoseTransition() && this.canCamelChangePose()) {
 			this.standUp();
 		}
+
+		return true;
 	}
 
 	public boolean canCamelChangePose() {

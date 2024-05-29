@@ -29,7 +29,7 @@ import net.minecraft.network.protocol.ping.PingPacketTypes;
 import net.minecraft.network.protocol.ping.ServerboundPingRequestPacket;
 
 public class GameProtocols {
-	public static final ProtocolInfo.Unbound<ServerGamePacketListener, RegistryFriendlyByteBuf> SERVERBOUND = ProtocolInfoBuilder.serverboundProtocolUnbound(
+	public static final ProtocolInfo.Unbound<ServerGamePacketListener, RegistryFriendlyByteBuf> SERVERBOUND_TEMPLATE = ProtocolInfoBuilder.serverboundProtocol(
 		ConnectionProtocol.PLAY,
 		protocolInfoBuilder -> protocolInfoBuilder.addPacket(GamePacketTypes.SERVERBOUND_ACCEPT_TELEPORTATION, ServerboundAcceptTeleportationPacket.STREAM_CODEC)
 				.addPacket(GamePacketTypes.SERVERBOUND_BLOCK_ENTITY_TAG_QUERY, ServerboundBlockEntityTagQueryPacket.STREAM_CODEC)
@@ -90,7 +90,7 @@ public class GameProtocols {
 				.addPacket(GamePacketTypes.SERVERBOUND_USE_ITEM_ON, ServerboundUseItemOnPacket.STREAM_CODEC)
 				.addPacket(GamePacketTypes.SERVERBOUND_USE_ITEM, ServerboundUseItemPacket.STREAM_CODEC)
 	);
-	public static final ProtocolInfo.Unbound<ClientGamePacketListener, RegistryFriendlyByteBuf> CLIENTBOUND = ProtocolInfoBuilder.clientboundProtocolUnbound(
+	public static final ProtocolInfo.Unbound<ClientGamePacketListener, RegistryFriendlyByteBuf> CLIENTBOUND_TEMPLATE = ProtocolInfoBuilder.clientboundProtocol(
 		ConnectionProtocol.PLAY,
 		protocolInfoBuilder -> protocolInfoBuilder.withBundlePacket(
 					GamePacketTypes.CLIENTBOUND_BUNDLE, ClientboundBundlePacket::new, new ClientboundBundleDelimiterPacket()

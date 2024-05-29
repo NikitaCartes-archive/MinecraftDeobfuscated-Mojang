@@ -245,6 +245,9 @@ public abstract class Structure {
 	public static record StructureSettings(
 		HolderSet<Biome> biomes, Map<MobCategory, StructureSpawnOverride> spawnOverrides, GenerationStep.Decoration step, TerrainAdjustment terrainAdaptation
 	) {
+		static final Structure.StructureSettings DEFAULT = new Structure.StructureSettings(
+			HolderSet.direct(), Map.of(), GenerationStep.Decoration.SURFACE_STRUCTURES, TerrainAdjustment.NONE
+		);
 		public static final MapCodec<Structure.StructureSettings> CODEC = RecordCodecBuilder.mapCodec(
 			instance -> instance.group(
 						RegistryCodecs.homogeneousList(Registries.BIOME).fieldOf("biomes").forGetter(Structure.StructureSettings::biomes),
@@ -252,9 +255,46 @@ public abstract class Structure {
 							.fieldOf("spawn_overrides")
 							.forGetter(Structure.StructureSettings::spawnOverrides),
 						GenerationStep.Decoration.CODEC.fieldOf("step").forGetter(Structure.StructureSettings::step),
-						TerrainAdjustment.CODEC.optionalFieldOf("terrain_adaptation", TerrainAdjustment.NONE).forGetter(Structure.StructureSettings::terrainAdaptation)
+						TerrainAdjustment.CODEC.optionalFieldOf("terrain_adaptation", DEFAULT.terrainAdaptation).forGetter(Structure.StructureSettings::terrainAdaptation)
 					)
 					.apply(instance, Structure.StructureSettings::new)
 		);
+
+		public StructureSettings(HolderSet<Biome> holderSet) {
+			this(holderSet, DEFAULT.spawnOverrides, DEFAULT.step, DEFAULT.terrainAdaptation);
+		}
+
+		public static class Builder {
+			private final HolderSet<Biome> biomes;
+			private Map<MobCategory, StructureSpawnOverride> spawnOverrides;
+			private GenerationStep.Decoration step;
+			private TerrainAdjustment terrainAdaption;
+
+			public Builder(HolderSet<Biome> holderSet) {
+				this.spawnOverrides = Structure.StructureSettings.DEFAULT.spawnOverrides;
+				this.step = Structure.StructureSettings.DEFAULT.step;
+				this.terrainAdaption = Structure.StructureSettings.DEFAULT.terrainAdaptation;
+				this.biomes = holderSet;
+			}
+
+			public Structure.StructureSettings.Builder spawnOverrides(Map<MobCategory, StructureSpawnOverride> map) {
+				this.spawnOverrides = map;
+				return this;
+			}
+
+			public Structure.StructureSettings.Builder generationStep(GenerationStep.Decoration decoration) {
+				this.step = decoration;
+				return this;
+			}
+
+			public Structure.StructureSettings.Builder terrainAdapation(TerrainAdjustment terrainAdjustment) {
+				this.terrainAdaption = terrainAdjustment;
+				return this;
+			}
+
+			public Structure.StructureSettings build() {
+				return new Structure.StructureSettings(this.biomes, this.spawnOverrides, this.step, this.terrainAdaption);
+			}
+		}
 	}
 }

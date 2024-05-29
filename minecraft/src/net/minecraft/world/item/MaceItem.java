@@ -28,7 +28,7 @@ import net.minecraft.world.phys.Vec3;
 
 public class MaceItem extends Item {
 	private static final int DEFAULT_ATTACK_DAMAGE = 5;
-	private static final float DEFAULT_ATTACK_SPEED = -3.5F;
+	private static final float DEFAULT_ATTACK_SPEED = -3.4F;
 	public static final float SMASH_ATTACK_FALL_THRESHOLD = 1.5F;
 	private static final float SMASH_ATTACK_HEAVY_THRESHOLD = 5.0F;
 	public static final float SMASH_ATTACK_KNOCKBACK_RADIUS = 3.5F;
@@ -41,7 +41,7 @@ public class MaceItem extends Item {
 	public static ItemAttributeModifiers createAttributes() {
 		return ItemAttributeModifiers.builder()
 			.add(Attributes.ATTACK_DAMAGE, new AttributeModifier(BASE_ATTACK_DAMAGE_ID, 5.0, AttributeModifier.Operation.ADD_VALUE), EquipmentSlotGroup.MAINHAND)
-			.add(Attributes.ATTACK_SPEED, new AttributeModifier(BASE_ATTACK_SPEED_ID, -3.5, AttributeModifier.Operation.ADD_VALUE), EquipmentSlotGroup.MAINHAND)
+			.add(Attributes.ATTACK_SPEED, new AttributeModifier(BASE_ATTACK_SPEED_ID, -3.4F, AttributeModifier.Operation.ADD_VALUE), EquipmentSlotGroup.MAINHAND)
 			.build();
 	}
 
@@ -64,7 +64,7 @@ public class MaceItem extends Item {
 		if (livingEntity2 instanceof ServerPlayer serverPlayer && canSmashAttack(serverPlayer)) {
 			ServerLevel serverLevel = (ServerLevel)livingEntity2.level();
 			serverPlayer.currentImpulseImpactPos = serverPlayer.position();
-			serverPlayer.ignoreFallDamageFromCurrentImpulse = true;
+			serverPlayer.setIgnoreFallDamageFromCurrentImpulse(true);
 			serverPlayer.setDeltaMovement(serverPlayer.getDeltaMovement().with(Direction.Axis.Y, 0.01F));
 			serverPlayer.connection.send(new ClientboundSetEntityMotionPacket(serverPlayer));
 			if (livingEntity.onGround()) {
@@ -112,7 +112,7 @@ public class MaceItem extends Item {
 				}
 
 				return livingEntity.level() instanceof ServerLevel serverLevel
-					? j + EnchantmentHelper.modifyFallBasedDamage(serverLevel, livingEntity.getMainHandItem(), entity, damageSource, 0.0F) * i
+					? j + EnchantmentHelper.modifyFallBasedDamage(serverLevel, livingEntity.getWeaponItem(), entity, damageSource, 0.0F) * i
 					: j;
 			}
 		} else {

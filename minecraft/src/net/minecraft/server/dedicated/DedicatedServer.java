@@ -10,6 +10,7 @@ import java.io.InputStreamReader;
 import java.io.Writer;
 import java.net.InetAddress;
 import java.net.Proxy;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -79,6 +80,7 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface 
 	private RemoteSampleLogger tickTimeLogger;
 	@Nullable
 	private DebugSampleSubscriptionTracker debugSampleSubscriptionTracker;
+	private final ServerLinks serverLinks;
 
 	public DedicatedServer(
 		Thread thread,
@@ -94,6 +96,7 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface 
 		this.settings = dedicatedServerSettings;
 		this.rconConsoleSource = new RconConsoleSource(this);
 		this.textFilterClient = TextFilterClient.createFromConfig(dedicatedServerSettings.getProperties().textFilteringConfig);
+		this.serverLinks = createServerLinks(dedicatedServerSettings);
 	}
 
 	@Override
@@ -627,7 +630,25 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface 
 
 	@Override
 	public ServerLinks serverLinks() {
-		String string = this.settings.getProperties().bugReportLink;
-		return string.isEmpty() ? ServerLinks.EMPTY : new ServerLinks(List.of(ServerLinks.KnownLinkType.BUG_REPORT.create(string)));
+		return this.serverLinks;
+	}
+
+	private static ServerLinks createServerLinks(DedicatedServerSettings dedicatedServerSettings) {
+		Optional<URI> optional = parseBugReportLink(dedicatedServerSettings.getProperties());
+		return (ServerLinks)optional.map(uRI -> new ServerLinks(List.of(ServerLinks.KnownLinkType.BUG_REPORT.create(uRI)))).orElse(ServerLinks.EMPTY);
+	}
+
+	private static Optional<URI> parseBugReportLink(DedicatedServerProperties dedicatedServerProperties) {
+		String string = dedicatedServerProperties.bugReportLink;
+		if (string.isEmpty()) {
+			return Optional.empty();
+		} else {
+			try {
+				return Optional.of(Util.parseAndValidateUntrustedUri(string));
+			} catch (Exception var3) {
+				LOGGER.warn("Failed to parse bug link {}", string, var3);
+				return Optional.empty();
+			}
+		}
 	}
 }

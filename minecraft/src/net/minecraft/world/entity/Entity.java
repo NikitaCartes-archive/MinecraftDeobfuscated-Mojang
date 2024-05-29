@@ -59,6 +59,7 @@ import net.minecraft.network.syncher.SyncedDataHolder;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerEntity;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.TicketType;
@@ -84,6 +85,7 @@ import net.minecraft.world.entity.projectile.ProjectileDeflection;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.ClipContext;
@@ -106,6 +108,7 @@ import net.minecraft.world.level.entity.EntityAccess;
 import net.minecraft.world.level.entity.EntityInLevelCallback;
 import net.minecraft.world.level.gameevent.DynamicGameEventListener;
 import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.PushReaction;
@@ -471,6 +474,10 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 		}
 
 		this.firstTick = false;
+		if (!this.level().isClientSide && this instanceof Leashable) {
+			Leashable.tickLeash((Entity)((Leashable)this));
+		}
+
 		this.level().getProfiler().pop();
 	}
 
@@ -1026,6 +1033,13 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 	protected void onInsideBlock(BlockState blockState) {
 	}
 
+	public BlockPos adjustSpawnLocation(ServerLevel serverLevel, BlockPos blockPos) {
+		BlockPos blockPos2 = serverLevel.getSharedSpawnPos();
+		Vec3 vec3 = blockPos2.getCenter();
+		int i = serverLevel.getChunkAt(blockPos2).getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, blockPos2.getX(), blockPos2.getZ()) + 1;
+		return BlockPos.containing(vec3.x, (double)i, vec3.z);
+	}
+
 	public void gameEvent(Holder<GameEvent> holder, @Nullable Entity entity) {
 		this.level().gameEvent(entity, holder, this.position);
 	}
@@ -1391,7 +1405,11 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 	}
 
 	public void moveTo(BlockPos blockPos, float f, float g) {
-		this.moveTo((double)blockPos.getX() + 0.5, (double)blockPos.getY(), (double)blockPos.getZ() + 0.5, f, g);
+		this.moveTo(blockPos.getBottomCenter(), f, g);
+	}
+
+	public void moveTo(Vec3 vec3, float f, float g) {
+		this.moveTo(vec3.x, vec3.y, vec3.z, f, g);
 	}
 
 	public void moveTo(double d, double e, double f, float g, float h) {
@@ -1869,6 +1887,21 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 	}
 
 	public InteractionResult interact(Player player, InteractionHand interactionHand) {
+		if (this.isAlive() && this instanceof Leashable leashable) {
+			if (leashable.getLeashHolder() == player) {
+				leashable.dropLeash(true, !player.hasInfiniteMaterials());
+				this.gameEvent(GameEvent.ENTITY_INTERACT, player);
+				return InteractionResult.sidedSuccess(this.level().isClientSide);
+			}
+
+			ItemStack itemStack = player.getItemInHand(interactionHand);
+			if (itemStack.is(Items.LEAD) && leashable.canHaveALeashAttachedToIt()) {
+				leashable.setLeashedTo(player, true);
+				itemStack.shrink(1);
+				return InteractionResult.sidedSuccess(this.level().isClientSide);
+			}
+		}
+
 		return InteractionResult.PASS;
 	}
 
@@ -2101,11 +2134,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 					this.setPortalCooldown();
 					DimensionTransition dimensionTransition = this.portalProcess.getPortalDestination(serverLevel, this);
 					if (dimensionTransition != null && serverLevel.getServer().isLevelEnabled(dimensionTransition.newLevel())) {
-						Entity entity = this.changeDimension(dimensionTransition);
-						if (entity != null && entity.level() instanceof ServerLevel serverLevel2) {
-							BlockPos blockPos = BlockPos.containing(entity.position);
-							serverLevel2.getChunkSource().addRegionTicket(TicketType.PORTAL, new ChunkPos(blockPos), 3, blockPos);
-						}
+						this.changeDimension(dimensionTransition);
 					}
 
 					serverLevel.getProfiler().pop();
@@ -2497,35 +2526,46 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 			List<Entity> list2 = new ArrayList();
 
 			for (Entity entity : list) {
-				list2.add(entity.changeDimension(dimensionTransition));
+				Entity entity2 = entity.changeDimension(dimensionTransition);
+				if (entity2 != null) {
+					list2.add(entity2);
+				}
 			}
 
 			serverLevel.getProfiler().push("changeDimension");
-			Entity entity2 = serverLevel2.dimension() == serverLevel.dimension() ? this : this.getType().create(serverLevel2);
-			if (entity2 != null) {
-				if (this != entity2) {
-					entity2.restoreFrom(this);
+			Entity entity3 = serverLevel2.dimension() == serverLevel.dimension() ? this : this.getType().create(serverLevel2);
+			if (entity3 != null) {
+				if (this != entity3) {
+					entity3.restoreFrom(this);
 					this.removeAfterChangingDimensions();
 				}
 
-				entity2.moveTo(dimensionTransition.pos().x, dimensionTransition.pos().y, dimensionTransition.pos().z, dimensionTransition.yRot(), entity2.getXRot());
-				entity2.setDeltaMovement(dimensionTransition.speed());
-				if (this != entity2) {
-					serverLevel2.addDuringTeleport(entity2);
+				entity3.moveTo(dimensionTransition.pos().x, dimensionTransition.pos().y, dimensionTransition.pos().z, dimensionTransition.yRot(), entity3.getXRot());
+				entity3.setDeltaMovement(dimensionTransition.speed());
+				if (this != entity3) {
+					serverLevel2.addDuringTeleport(entity3);
 				}
 
-				for (Entity entity3 : list2) {
-					entity3.startRiding(entity2, true);
+				for (Entity entity2 : list2) {
+					entity2.startRiding(entity3, true);
 				}
+
+				serverLevel.resetEmptyTime();
+				serverLevel2.resetEmptyTime();
+				dimensionTransition.postDimensionTransition().onTransition(entity3);
 			}
 
-			serverLevel.resetEmptyTime();
-			serverLevel2.resetEmptyTime();
 			serverLevel.getProfiler().pop();
-			return entity2;
+			return entity3;
 		}
 
 		return null;
+	}
+
+	public void placePortalTicket(BlockPos blockPos) {
+		if (this.level() instanceof ServerLevel serverLevel) {
+			serverLevel.getChunkSource().addRegionTicket(TicketType.PORTAL, new ChunkPos(blockPos), 3, blockPos);
+		}
 	}
 
 	protected void removeAfterChangingDimensions() {
@@ -2537,9 +2577,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 	}
 
 	public boolean canChangeDimensions() {
-		return !this.isPassenger()
-			&& this.isAlive()
-			&& (!this.isVehicle() || this.level.getGameRules().getRule(GameRules.RULE_ENTITIES_WITH_PASSENGERS_CAN_USE_PORTALS).get());
+		return !this.isPassenger() && this.isAlive();
 	}
 
 	public float getBlockExplosionResistance(
@@ -3036,6 +3074,10 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 		this.yRotO = this.getYRot();
 	}
 
+	public float getPreciseBodyRotation(float f) {
+		return Mth.lerp(f, this.yRotO, this.yRot);
+	}
+
 	public boolean updateFluidHeightAndDoFluidPushing(TagKey<Fluid> tagKey, double d) {
 		if (this.touchingUnloadedChunk()) {
 			return false;
@@ -3089,7 +3131,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 				}
 
 				Vec3 vec33 = this.getDeltaMovement();
-				vec3 = vec3.scale(d * 1.0);
+				vec3 = vec3.scale(d);
 				double g = 0.003;
 				if (Math.abs(vec33.x) < 0.003 && Math.abs(vec33.z) < 0.003 && vec3.length() < 0.0045000000000000005) {
 					vec3 = vec3.normalize().scale(0.0045000000000000005);
@@ -3128,8 +3170,8 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 		return this.dimensions.height();
 	}
 
-	public Packet<ClientGamePacketListener> getAddEntityPacket() {
-		return new ClientboundAddEntityPacket(this);
+	public Packet<ClientGamePacketListener> getAddEntityPacket(ServerEntity serverEntity) {
+		return new ClientboundAddEntityPacket(this, serverEntity);
 	}
 
 	public EntityDimensions getDimensions(Pose pose) {
@@ -3414,6 +3456,11 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 		}
 
 		return this.getDeltaMovement();
+	}
+
+	@Nullable
+	public ItemStack getWeaponItem() {
+		return null;
 	}
 
 	@FunctionalInterface

@@ -24,6 +24,7 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.CommonLinks;
 
 @Environment(EnvType.CLIENT)
 public class SocialInteractionsScreen extends Screen {
@@ -126,7 +127,7 @@ public class SocialInteractionsScreen extends Screen {
 		this.addRenderableWidget(this.searchBox);
 		this.addWidget(this.socialInteractionsPlayerList);
 		this.blockingHintButton = this.addRenderableWidget(
-			Button.builder(BLOCKING_HINT, ConfirmLinkScreen.confirmLink(this, "https://aka.ms/javablocking"))
+			Button.builder(BLOCKING_HINT, ConfirmLinkScreen.confirmLink(this, CommonLinks.BLOCKING_HELP))
 				.bounds(this.width / 2 - 100, 64 + this.windowHeight(), 200, 20)
 				.build()
 		);

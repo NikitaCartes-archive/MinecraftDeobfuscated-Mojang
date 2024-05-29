@@ -18,6 +18,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.chat.report.ReportReason;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.CommonLinks;
 
 @Environment(EnvType.CLIENT)
 public class ReportReasonSelectionScreen extends Screen {
@@ -52,7 +53,7 @@ public class ReportReasonSelectionScreen extends Screen {
 		this.reasonSelectionList.setSelected(entry);
 		linearLayout.addChild(SpacerElement.height(this.descriptionHeight()));
 		LinearLayout linearLayout2 = this.layout.addToFooter(LinearLayout.horizontal().spacing(8));
-		linearLayout2.addChild(Button.builder(READ_INFO_LABEL, ConfirmLinkScreen.confirmLink(this, "https://aka.ms/aboutjavareporting")).build());
+		linearLayout2.addChild(Button.builder(READ_INFO_LABEL, ConfirmLinkScreen.confirmLink(this, CommonLinks.REPORTING_HELP)).build());
 		linearLayout2.addChild(Button.builder(CommonComponents.GUI_DONE, button -> {
 			ReportReasonSelectionScreen.ReasonSelectionList.Entry entryx = this.reasonSelectionList.getSelected();
 			if (entryx != null) {

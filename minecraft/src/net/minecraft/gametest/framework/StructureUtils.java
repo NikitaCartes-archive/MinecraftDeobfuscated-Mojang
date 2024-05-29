@@ -175,14 +175,7 @@ public class StructureUtils {
 		BlockPos.betweenClosedStream(boundingBox2).forEach(blockPos -> clearBlock(i, blockPos, serverLevel));
 		serverLevel.getBlockTicks().clearArea(boundingBox2);
 		serverLevel.clearBlockEvents(boundingBox2);
-		AABB aABB = new AABB(
-			(double)boundingBox2.minX(),
-			(double)boundingBox2.minY(),
-			(double)boundingBox2.minZ(),
-			(double)boundingBox2.maxX(),
-			(double)boundingBox2.maxY(),
-			(double)boundingBox2.maxZ()
-		);
+		AABB aABB = AABB.of(boundingBox2);
 		List<Entity> list = serverLevel.getEntitiesOfClass(Entity.class, aABB, entity -> !(entity instanceof Player));
 		list.forEach(Entity::discard);
 	}

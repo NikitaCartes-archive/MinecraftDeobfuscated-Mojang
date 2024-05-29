@@ -416,7 +416,7 @@ public class ItemInHandRenderer {
 					poseStack.mulPose(Axis.YP.rotationDegrees((float)k * 65.3F));
 					poseStack.mulPose(Axis.ZP.rotationDegrees((float)k * -9.785F));
 					float l = (float)itemStack.getUseDuration(abstractClientPlayer) - ((float)abstractClientPlayer.getUseItemRemainingTicks() - f + 1.0F);
-					float m = l / (float)CrossbowItem.getChargeDuration(abstractClientPlayer);
+					float m = l / (float)CrossbowItem.getChargeDuration(itemStack, abstractClientPlayer);
 					if (m > 1.0F) {
 						m = 1.0F;
 					}

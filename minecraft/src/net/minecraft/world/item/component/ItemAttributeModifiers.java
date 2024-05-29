@@ -133,7 +133,7 @@ public record ItemAttributeModifiers(List<ItemAttributeModifiers.Entry> modifier
 		);
 
 		public boolean matches(Holder<Attribute> holder, ResourceLocation resourceLocation) {
-			return holder.equals(this.attribute) && resourceLocation.equals(this.modifier);
+			return holder.equals(this.attribute) && this.modifier.is(resourceLocation);
 		}
 	}
 }

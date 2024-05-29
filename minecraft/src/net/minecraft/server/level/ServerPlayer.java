@@ -51,7 +51,6 @@ import net.minecraft.network.protocol.game.ClientboundEntityEventPacket;
 import net.minecraft.network.protocol.game.ClientboundGameEventPacket;
 import net.minecraft.network.protocol.game.ClientboundHorseScreenOpenPacket;
 import net.minecraft.network.protocol.game.ClientboundHurtAnimationPacket;
-import net.minecraft.network.protocol.game.ClientboundLevelEventPacket;
 import net.minecraft.network.protocol.game.ClientboundMerchantOffersPacket;
 import net.minecraft.network.protocol.game.ClientboundOpenBookPacket;
 import net.minecraft.network.protocol.game.ClientboundOpenScreenPacket;
@@ -284,13 +283,15 @@ public class ServerPlayer extends Player {
 		this.server = minecraftServer;
 		this.stats = minecraftServer.getPlayerList().getPlayerStats(this);
 		this.advancements = minecraftServer.getPlayerList().getPlayerAdvancements(this);
-		this.fudgeSpawnLocation(serverLevel);
+		this.moveTo(this.adjustSpawnLocation(serverLevel, serverLevel.getSharedSpawnPos()), 0.0F, 0.0F);
 		this.updateOptions(clientInformation);
 		this.object = null;
 	}
 
-	private void fudgeSpawnLocation(ServerLevel serverLevel) {
-		BlockPos blockPos = serverLevel.getSharedSpawnPos();
+	@Override
+	public BlockPos adjustSpawnLocation(ServerLevel serverLevel, BlockPos blockPos) {
+		AABB aABB = this.getBoundingBox().move(this.getBoundingBox().getCenter().scale(-1.0));
+		BlockPos blockPos2 = blockPos;
 		if (serverLevel.dimensionType().hasSkyLight() && serverLevel.getServer().getWorldData().getGameType() != GameType.ADVENTURE) {
 			int i = Math.max(0, this.server.getSpawnRadius(serverLevel));
 			int j = Mth.floor(serverLevel.getWorldBorder().getDistanceToBorder((double)blockPos.getX(), (double)blockPos.getZ()));
@@ -312,21 +313,20 @@ public class ServerPlayer extends Player {
 				int q = (o + n * p) % k;
 				int r = q % (i * 2 + 1);
 				int s = q / (i * 2 + 1);
-				BlockPos blockPos2 = PlayerRespawnLogic.getOverworldRespawnPos(serverLevel, blockPos.getX() + r - i, blockPos.getZ() + s - i);
-				if (blockPos2 != null) {
-					this.moveTo(blockPos2, 0.0F, 0.0F);
-					if (serverLevel.noCollision(this)) {
-						break;
-					}
+				blockPos2 = PlayerRespawnLogic.getOverworldRespawnPos(serverLevel, blockPos.getX() + r - i, blockPos.getZ() + s - i);
+				if (blockPos2 != null && serverLevel.noCollision(this, aABB.move(blockPos2))) {
+					return blockPos2;
 				}
 			}
-		} else {
-			this.moveTo(blockPos, 0.0F, 0.0F);
 
-			while (!serverLevel.noCollision(this) && this.getY() < (double)(serverLevel.getMaxBuildHeight() - 1)) {
-				this.setPos(this.getX(), this.getY() + 1.0, this.getZ());
-			}
+			blockPos2 = blockPos;
 		}
+
+		while (!serverLevel.noCollision(this, aABB.move(blockPos2)) && this.getY() < (double)(serverLevel.getMaxBuildHeight() - 1)) {
+			blockPos2 = BlockPos.containing(blockPos2.getCenter().add(0.0, 1.0, 0.0));
+		}
+
+		return blockPos2;
 	}
 
 	private int getCoprime(int i) {
@@ -779,7 +779,7 @@ public class ServerPlayer extends Player {
 		return this.server.isPvpAllowed();
 	}
 
-	public DimensionTransition findRespawnPositionAndUseSpawnBlock(boolean bl) {
+	public DimensionTransition findRespawnPositionAndUseSpawnBlock(boolean bl, DimensionTransition.PostDimensionTransition postDimensionTransition) {
 		BlockPos blockPos = this.getRespawnPosition();
 		float f = this.getRespawnAngle();
 		boolean bl2 = this.isRespawnForced();
@@ -788,12 +788,12 @@ public class ServerPlayer extends Player {
 			Optional<ServerPlayer.RespawnPosAngle> optional = findRespawnAndUseSpawnBlock(serverLevel, blockPos, f, bl2, bl);
 			if (optional.isPresent()) {
 				ServerPlayer.RespawnPosAngle respawnPosAngle = (ServerPlayer.RespawnPosAngle)optional.get();
-				return new DimensionTransition(serverLevel, respawnPosAngle.position(), Vec3.ZERO, respawnPosAngle.yaw(), 0.0F);
+				return new DimensionTransition(serverLevel, respawnPosAngle.position(), Vec3.ZERO, respawnPosAngle.yaw(), 0.0F, postDimensionTransition);
 			} else {
-				return DimensionTransition.missingRespawnBlock(this.server.overworld());
+				return DimensionTransition.missingRespawnBlock(this.server.overworld(), this, postDimensionTransition);
 			}
 		} else {
-			return new DimensionTransition(this.server.overworld());
+			return new DimensionTransition(this.server.overworld(), this, postDimensionTransition);
 		}
 	}
 
@@ -853,7 +853,7 @@ public class ServerPlayer extends Player {
 				this.connection
 					.teleport(dimensionTransition.pos().x, dimensionTransition.pos().y, dimensionTransition.pos().z, dimensionTransition.yRot(), dimensionTransition.xRot());
 				this.connection.resetPosition();
-				this.connection.send(new ClientboundLevelEventPacket(1032, BlockPos.ZERO, 0, false));
+				dimensionTransition.postDimensionTransition().onTransition(this);
 				return this;
 			} else {
 				this.isChangingDimension = true;
@@ -882,7 +882,7 @@ public class ServerPlayer extends Player {
 				playerList.sendLevelInfo(this, serverLevel);
 				playerList.sendAllPlayerInfo(this);
 				playerList.sendActivePlayerEffects(this);
-				this.connection.send(new ClientboundLevelEventPacket(1032, BlockPos.ZERO, 0, false));
+				dimensionTransition.postDimensionTransition().onTransition(this);
 				this.lastSentExp = -1;
 				this.lastSentHealth = -1.0F;
 				this.lastSentFood = -1;
@@ -1039,7 +1039,7 @@ public class ServerPlayer extends Player {
 		super.onExplosionHit(entity);
 		this.currentImpulseImpactPos = this.position();
 		this.currentExplosionCause = entity;
-		this.ignoreFallDamageFromCurrentImpulse = entity != null && entity.getType() == EntityType.WIND_CHARGE;
+		this.setIgnoreFallDamageFromCurrentImpulse(entity != null && entity.getType() == EntityType.WIND_CHARGE);
 	}
 
 	@Override
@@ -1097,8 +1097,9 @@ public class ServerPlayer extends Player {
 		}
 
 		this.nextContainerCounter();
-		this.connection.send(new ClientboundHorseScreenOpenPacket(this.containerCounter, container.getContainerSize(), abstractHorse.getId()));
-		this.containerMenu = new HorseInventoryMenu(this.containerCounter, this.getInventory(), container, abstractHorse);
+		int i = abstractHorse.getInventoryColumns();
+		this.connection.send(new ClientboundHorseScreenOpenPacket(this.containerCounter, i, abstractHorse.getId()));
+		this.containerMenu = new HorseInventoryMenu(this.containerCounter, this.getInventory(), container, abstractHorse, i);
 		this.initMenu(this.containerMenu);
 	}
 
@@ -1654,7 +1655,7 @@ public class ServerPlayer extends Player {
 		if (serverLevel == this.level()) {
 			this.connection.teleport(d, e, f, g, h);
 		} else {
-			this.changeDimension(new DimensionTransition(serverLevel, new Vec3(d, e, f), Vec3.ZERO, g, h));
+			this.changeDimension(new DimensionTransition(serverLevel, new Vec3(d, e, f), Vec3.ZERO, g, h, DimensionTransition.DO_NOTHING));
 		}
 	}
 
@@ -1912,7 +1913,7 @@ public class ServerPlayer extends Player {
 
 	@Override
 	protected float getEnchantedDamage(Entity entity, float f, DamageSource damageSource) {
-		return EnchantmentHelper.modifyDamage(this.serverLevel(), this.getMainHandItem(), entity, damageSource, f);
+		return EnchantmentHelper.modifyDamage(this.serverLevel(), this.getWeaponItem(), entity, damageSource, f);
 	}
 
 	@Override

@@ -79,9 +79,7 @@ public class EditWorldScreen extends Screen {
 			buttonx.active = false;
 		}).width(200).build()).active = levelStorageAccess.getIconFile().filter(path -> Files.isRegularFile(path, new LinkOption[0])).isPresent();
 		this.layout
-			.addChild(
-				Button.builder(FOLDER_BUTTON, buttonx -> Util.getPlatform().openFile(levelStorageAccess.getLevelPath(LevelResource.ROOT).toFile())).width(200).build()
-			);
+			.addChild(Button.builder(FOLDER_BUTTON, buttonx -> Util.getPlatform().openPath(levelStorageAccess.getLevelPath(LevelResource.ROOT))).width(200).build());
 		this.layout.addChild(Button.builder(BACKUP_BUTTON, buttonx -> {
 			boolean bl = makeBackupAndShowToast(levelStorageAccess);
 			this.callback.accept(!bl);
@@ -96,7 +94,7 @@ public class EditWorldScreen extends Screen {
 				throw new RuntimeException(var5x);
 			}
 
-			Util.getPlatform().openFile(path.toFile());
+			Util.getPlatform().openPath(path);
 		}).width(200).build());
 		this.layout.addChild(Button.builder(OPTIMIZE_BUTTON, buttonx -> minecraft.setScreen(new BackupConfirmScreen(() -> minecraft.setScreen(this), (bl, bl2) -> {
 				if (bl) {

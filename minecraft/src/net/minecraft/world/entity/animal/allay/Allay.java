@@ -16,10 +16,12 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.protocol.game.DebugPackets;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -459,7 +461,11 @@ public class Allay extends PathfinderMob implements InventoryCarrier, VibrationS
 	public void addAdditionalSaveData(CompoundTag compoundTag) {
 		super.addAdditionalSaveData(compoundTag);
 		this.writeInventoryToTag(compoundTag, this.registryAccess());
-		VibrationSystem.Data.CODEC.encodeStart(NbtOps.INSTANCE, this.vibrationData).resultOrPartial(LOGGER::error).ifPresent(tag -> compoundTag.put("listener", tag));
+		RegistryOps<Tag> registryOps = this.registryAccess().createSerializationContext(NbtOps.INSTANCE);
+		VibrationSystem.Data.CODEC
+			.encodeStart(registryOps, this.vibrationData)
+			.resultOrPartial(string -> LOGGER.error("Failed to encode vibration listener for Allay: '{}'", string))
+			.ifPresent(tag -> compoundTag.put("listener", tag));
 		compoundTag.putLong("DuplicationCooldown", this.duplicationCooldown);
 		compoundTag.putBoolean("CanDuplicate", this.canDuplicate());
 	}
@@ -468,10 +474,11 @@ public class Allay extends PathfinderMob implements InventoryCarrier, VibrationS
 	public void readAdditionalSaveData(CompoundTag compoundTag) {
 		super.readAdditionalSaveData(compoundTag);
 		this.readInventoryFromTag(compoundTag, this.registryAccess());
+		RegistryOps<Tag> registryOps = this.registryAccess().createSerializationContext(NbtOps.INSTANCE);
 		if (compoundTag.contains("listener", 10)) {
 			VibrationSystem.Data.CODEC
-				.parse(new Dynamic<>(NbtOps.INSTANCE, compoundTag.getCompound("listener")))
-				.resultOrPartial(LOGGER::error)
+				.parse(registryOps, compoundTag.getCompound("listener"))
+				.resultOrPartial(string -> LOGGER.error("Failed to parse vibration listener for Allay: '{}'", string))
 				.ifPresent(data -> this.vibrationData = data);
 		}
 

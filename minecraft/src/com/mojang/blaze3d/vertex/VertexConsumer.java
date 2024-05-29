@@ -107,6 +107,10 @@ public interface VertexConsumer {
 		return this.addVertex(vector3f.x(), vector3f.y(), vector3f.z());
 	}
 
+	default VertexConsumer addVertex(PoseStack.Pose pose, Vector3f vector3f) {
+		return this.addVertex(pose, vector3f.x(), vector3f.y(), vector3f.z());
+	}
+
 	default VertexConsumer addVertex(PoseStack.Pose pose, float f, float g, float h) {
 		return this.addVertex(pose.pose(), f, g, h);
 	}

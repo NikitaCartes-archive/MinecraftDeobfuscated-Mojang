@@ -17,9 +17,8 @@ public class SaddleItem extends Item {
 	public InteractionResult interactLivingEntity(ItemStack itemStack, Player player, LivingEntity livingEntity, InteractionHand interactionHand) {
 		if (livingEntity instanceof Saddleable saddleable && livingEntity.isAlive() && !saddleable.isSaddled() && saddleable.isSaddleable()) {
 			if (!player.level().isClientSide) {
-				saddleable.equipSaddle(SoundSource.NEUTRAL);
+				saddleable.equipSaddle(itemStack.split(1), SoundSource.NEUTRAL);
 				livingEntity.level().gameEvent(livingEntity, GameEvent.EQUIP, livingEntity.position());
-				itemStack.shrink(1);
 			}
 
 			return InteractionResult.sidedSuccess(player.level().isClientSide);

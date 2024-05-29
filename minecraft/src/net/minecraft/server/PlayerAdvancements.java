@@ -166,7 +166,7 @@ public class PlayerAdvancements {
 			if (writer != null) {
 				writer.close();
 			}
-		} catch (IOException var7) {
+		} catch (JsonIOException | IOException var7) {
 			LOGGER.error("Couldn't save player advancements to {}", this.playerSavePath, var7);
 		}
 	}

@@ -157,4 +157,8 @@ public final class RegionFileStorage implements AutoCloseable {
 			regionFile.flush();
 		}
 	}
+
+	public RegionStorageInfo info() {
+		return this.info;
+	}
 }

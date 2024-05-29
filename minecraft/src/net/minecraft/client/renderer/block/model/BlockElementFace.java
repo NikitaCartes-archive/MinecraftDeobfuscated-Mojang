@@ -13,19 +13,8 @@ import net.minecraft.core.Direction;
 import net.minecraft.util.GsonHelper;
 
 @Environment(EnvType.CLIENT)
-public class BlockElementFace {
+public record BlockElementFace(@Nullable Direction cullForDirection, int tintIndex, String texture, BlockFaceUV uv) {
 	public static final int NO_TINT = -1;
-	public final Direction cullForDirection;
-	public final int tintIndex;
-	public final String texture;
-	public final BlockFaceUV uv;
-
-	public BlockElementFace(@Nullable Direction direction, int i, String string, BlockFaceUV blockFaceUV) {
-		this.cullForDirection = direction;
-		this.tintIndex = i;
-		this.texture = string;
-		this.uv = blockFaceUV;
-	}
 
 	@Environment(EnvType.CLIENT)
 	protected static class Deserializer implements JsonDeserializer<BlockElementFace> {

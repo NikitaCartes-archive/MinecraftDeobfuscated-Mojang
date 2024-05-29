@@ -10,11 +10,14 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
+import net.minecraft.gametest.framework.StructureUtils;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.StructureBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.StructureMode;
+import net.minecraft.world.phys.shapes.BitSetDiscreteVoxelShape;
+import net.minecraft.world.phys.shapes.DiscreteVoxelShape;
 
 @Environment(EnvType.CLIENT)
 public class StructureBlockRenderer implements BlockEntityRenderer<StructureBlockEntity> {
@@ -80,26 +83,27 @@ public class StructureBlockRenderer implements BlockEntityRenderer<StructureBloc
 					float q = 1.0F;
 					float r = 0.9F;
 					float s = 0.5F;
-					VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.lines());
 					if (structureBlockEntity.getMode() == StructureMode.SAVE || structureBlockEntity.getShowBoundingBox()) {
+						VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.lines());
 						LevelRenderer.renderLineBox(poseStack, vertexConsumer, m, g, n, o, h, p, 0.9F, 0.9F, 0.9F, 1.0F, 0.5F, 0.5F, 0.5F);
 					}
 
 					if (structureBlockEntity.getMode() == StructureMode.SAVE && structureBlockEntity.getShowAir()) {
-						this.renderInvisibleBlocks(structureBlockEntity, vertexConsumer, blockPos, poseStack);
+						this.renderInvisibleBlocks(structureBlockEntity, multiBufferSource, poseStack);
 					}
 				}
 			}
 		}
 	}
 
-	private void renderInvisibleBlocks(StructureBlockEntity structureBlockEntity, VertexConsumer vertexConsumer, BlockPos blockPos, PoseStack poseStack) {
+	private void renderInvisibleBlocks(StructureBlockEntity structureBlockEntity, MultiBufferSource multiBufferSource, PoseStack poseStack) {
 		BlockGetter blockGetter = structureBlockEntity.getLevel();
-		BlockPos blockPos2 = structureBlockEntity.getBlockPos();
-		BlockPos blockPos3 = blockPos2.offset(blockPos);
+		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.lines());
+		BlockPos blockPos = structureBlockEntity.getBlockPos();
+		BlockPos blockPos2 = StructureUtils.getStructureOrigin(structureBlockEntity);
 
-		for (BlockPos blockPos4 : BlockPos.betweenClosed(blockPos3, blockPos3.offset(structureBlockEntity.getStructureSize()).offset(-1, -1, -1))) {
-			BlockState blockState = blockGetter.getBlockState(blockPos4);
+		for (BlockPos blockPos3 : BlockPos.betweenClosed(blockPos2, blockPos2.offset(structureBlockEntity.getStructureSize()).offset(-1, -1, -1))) {
+			BlockState blockState = blockGetter.getBlockState(blockPos3);
 			boolean bl = blockState.isAir();
 			boolean bl2 = blockState.is(Blocks.STRUCTURE_VOID);
 			boolean bl3 = blockState.is(Blocks.BARRIER);
@@ -107,12 +111,12 @@ public class StructureBlockRenderer implements BlockEntityRenderer<StructureBloc
 			boolean bl5 = bl2 || bl3 || bl4;
 			if (bl || bl5) {
 				float f = bl ? 0.05F : 0.0F;
-				double d = (double)((float)(blockPos4.getX() - blockPos2.getX()) + 0.45F - f);
-				double e = (double)((float)(blockPos4.getY() - blockPos2.getY()) + 0.45F - f);
-				double g = (double)((float)(blockPos4.getZ() - blockPos2.getZ()) + 0.45F - f);
-				double h = (double)((float)(blockPos4.getX() - blockPos2.getX()) + 0.55F + f);
-				double i = (double)((float)(blockPos4.getY() - blockPos2.getY()) + 0.55F + f);
-				double j = (double)((float)(blockPos4.getZ() - blockPos2.getZ()) + 0.55F + f);
+				double d = (double)((float)(blockPos3.getX() - blockPos.getX()) + 0.45F - f);
+				double e = (double)((float)(blockPos3.getY() - blockPos.getY()) + 0.45F - f);
+				double g = (double)((float)(blockPos3.getZ() - blockPos.getZ()) + 0.45F - f);
+				double h = (double)((float)(blockPos3.getX() - blockPos.getX()) + 0.55F + f);
+				double i = (double)((float)(blockPos3.getY() - blockPos.getY()) + 0.55F + f);
+				double j = (double)((float)(blockPos3.getZ() - blockPos.getZ()) + 0.55F + f);
 				if (bl) {
 					LevelRenderer.renderLineBox(poseStack, vertexConsumer, d, e, g, h, i, j, 0.5F, 0.5F, 1.0F, 1.0F, 0.5F, 0.5F, 1.0F);
 				} else if (bl2) {
@@ -123,6 +127,33 @@ public class StructureBlockRenderer implements BlockEntityRenderer<StructureBloc
 					LevelRenderer.renderLineBox(poseStack, vertexConsumer, d, e, g, h, i, j, 1.0F, 1.0F, 0.0F, 1.0F, 1.0F, 1.0F, 0.0F);
 				}
 			}
+		}
+	}
+
+	private void renderStructureVoids(StructureBlockEntity structureBlockEntity, VertexConsumer vertexConsumer, PoseStack poseStack) {
+		BlockGetter blockGetter = structureBlockEntity.getLevel();
+		if (blockGetter != null) {
+			BlockPos blockPos = structureBlockEntity.getBlockPos();
+			BlockPos blockPos2 = StructureUtils.getStructureOrigin(structureBlockEntity);
+			Vec3i vec3i = structureBlockEntity.getStructureSize();
+			DiscreteVoxelShape discreteVoxelShape = new BitSetDiscreteVoxelShape(vec3i.getX(), vec3i.getY(), vec3i.getZ());
+
+			for (BlockPos blockPos3 : BlockPos.betweenClosed(blockPos2, blockPos2.offset(vec3i).offset(-1, -1, -1))) {
+				if (blockGetter.getBlockState(blockPos3).is(Blocks.STRUCTURE_VOID)) {
+					discreteVoxelShape.fill(blockPos3.getX() - blockPos2.getX(), blockPos3.getY() - blockPos2.getY(), blockPos3.getZ() - blockPos2.getZ());
+				}
+			}
+
+			discreteVoxelShape.forAllFaces((direction, i, j, k) -> {
+				float f = 0.48F;
+				float g = (float)(i + blockPos2.getX() - blockPos.getX()) + 0.5F - 0.48F;
+				float h = (float)(j + blockPos2.getY() - blockPos.getY()) + 0.5F - 0.48F;
+				float l = (float)(k + blockPos2.getZ() - blockPos.getZ()) + 0.5F - 0.48F;
+				float m = (float)(i + blockPos2.getX() - blockPos.getX()) + 0.5F + 0.48F;
+				float n = (float)(j + blockPos2.getY() - blockPos.getY()) + 0.5F + 0.48F;
+				float o = (float)(k + blockPos2.getZ() - blockPos.getZ()) + 0.5F + 0.48F;
+				LevelRenderer.renderFace(poseStack, vertexConsumer, direction, g, h, l, m, n, o, 0.75F, 0.75F, 1.0F, 0.2F);
+			});
 		}
 	}
 

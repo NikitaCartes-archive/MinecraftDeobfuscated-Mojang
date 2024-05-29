@@ -102,7 +102,7 @@ class ReportGameListener implements GameTestListener {
 	}
 
 	public static void reportPassed(GameTestInfo gameTestInfo, String string) {
-		spawnBeacon(gameTestInfo, Blocks.LIME_STAINED_GLASS);
+		updateBeaconGlass(gameTestInfo, Blocks.LIME_STAINED_GLASS);
 		visualizePassedTest(gameTestInfo, string);
 	}
 
@@ -112,7 +112,7 @@ class ReportGameListener implements GameTestListener {
 	}
 
 	protected static void reportFailure(GameTestInfo gameTestInfo, Throwable throwable) {
-		spawnBeacon(gameTestInfo, gameTestInfo.isRequired() ? Blocks.RED_STAINED_GLASS : Blocks.ORANGE_STAINED_GLASS);
+		updateBeaconGlass(gameTestInfo, gameTestInfo.isRequired() ? Blocks.RED_STAINED_GLASS : Blocks.ORANGE_STAINED_GLASS);
 		spawnLectern(gameTestInfo, Util.describeError(throwable));
 		visualizeFailedTest(gameTestInfo, throwable);
 	}
@@ -131,18 +131,30 @@ class ReportGameListener implements GameTestListener {
 
 	protected static void spawnBeacon(GameTestInfo gameTestInfo, Block block) {
 		ServerLevel serverLevel = gameTestInfo.getLevel();
-		BlockPos blockPos = gameTestInfo.getStructureBlockPos();
-		BlockPos blockPos2 = new BlockPos(-1, -2, -1);
-		BlockPos blockPos3 = StructureTemplate.transform(blockPos.offset(blockPos2), Mirror.NONE, gameTestInfo.getRotation(), blockPos);
-		serverLevel.setBlockAndUpdate(blockPos3, Blocks.BEACON.defaultBlockState().rotate(gameTestInfo.getRotation()));
-		BlockPos blockPos4 = blockPos3.offset(0, 1, 0);
-		serverLevel.setBlockAndUpdate(blockPos4, block.defaultBlockState());
+		BlockPos blockPos = getBeaconPos(gameTestInfo);
+		serverLevel.setBlockAndUpdate(blockPos, Blocks.BEACON.defaultBlockState().rotate(gameTestInfo.getRotation()));
+		updateBeaconGlass(gameTestInfo, block);
 
 		for (int i = -1; i <= 1; i++) {
 			for (int j = -1; j <= 1; j++) {
-				BlockPos blockPos5 = blockPos3.offset(i, -1, j);
-				serverLevel.setBlockAndUpdate(blockPos5, Blocks.IRON_BLOCK.defaultBlockState());
+				BlockPos blockPos2 = blockPos.offset(i, -1, j);
+				serverLevel.setBlockAndUpdate(blockPos2, Blocks.IRON_BLOCK.defaultBlockState());
 			}
+		}
+	}
+
+	private static BlockPos getBeaconPos(GameTestInfo gameTestInfo) {
+		BlockPos blockPos = gameTestInfo.getStructureBlockPos();
+		BlockPos blockPos2 = new BlockPos(-1, -2, -1);
+		return StructureTemplate.transform(blockPos.offset(blockPos2), Mirror.NONE, gameTestInfo.getRotation(), blockPos);
+	}
+
+	private static void updateBeaconGlass(GameTestInfo gameTestInfo, Block block) {
+		ServerLevel serverLevel = gameTestInfo.getLevel();
+		BlockPos blockPos = getBeaconPos(gameTestInfo);
+		if (serverLevel.getBlockState(blockPos).is(Blocks.BEACON)) {
+			BlockPos blockPos2 = blockPos.offset(0, 1, 0);
+			serverLevel.setBlockAndUpdate(blockPos2, block.defaultBlockState());
 		}
 	}
 

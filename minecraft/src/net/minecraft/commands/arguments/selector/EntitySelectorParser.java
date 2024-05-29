@@ -7,6 +7,7 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -18,6 +19,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.ToDoubleFunction;
 import javax.annotation.Nullable;
+import net.minecraft.Util;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.advancements.critereon.WrappedMinMaxBounds;
 import net.minecraft.commands.arguments.selector.options.EntitySelectorOptions;
@@ -88,7 +90,7 @@ public class EntitySelectorParser {
 	private Double deltaZ;
 	private WrappedMinMaxBounds rotX = WrappedMinMaxBounds.ANY;
 	private WrappedMinMaxBounds rotY = WrappedMinMaxBounds.ANY;
-	private Predicate<Entity> predicate = entity -> true;
+	private final List<Predicate<Entity>> predicates = new ArrayList();
 	private BiConsumer<Vec3, List<? extends Entity>> order = EntitySelector.ORDER_ARBITRARY;
 	private boolean currentEntity;
 	@Nullable
@@ -145,7 +147,7 @@ public class EntitySelectorParser {
 			this.maxResults,
 			this.includesEntities,
 			this.worldLimited,
-			this.predicate,
+			Util.allOf(this.predicates),
 			this.distance,
 			function,
 			aABB,
@@ -173,15 +175,15 @@ public class EntitySelectorParser {
 
 	private void finalizePredicates() {
 		if (this.rotX != WrappedMinMaxBounds.ANY) {
-			this.predicate = this.predicate.and(this.createRotationPredicate(this.rotX, Entity::getXRot));
+			this.predicates.add(this.createRotationPredicate(this.rotX, Entity::getXRot));
 		}
 
 		if (this.rotY != WrappedMinMaxBounds.ANY) {
-			this.predicate = this.predicate.and(this.createRotationPredicate(this.rotY, Entity::getYRot));
+			this.predicates.add(this.createRotationPredicate(this.rotY, Entity::getYRot));
 		}
 
 		if (!this.level.isAny()) {
-			this.predicate = this.predicate.and(entity -> !(entity instanceof ServerPlayer) ? false : this.level.matches(((ServerPlayer)entity).experienceLevel));
+			this.predicates.add((Predicate)entity -> !(entity instanceof ServerPlayer) ? false : this.level.matches(((ServerPlayer)entity).experienceLevel));
 		}
 	}
 
@@ -202,39 +204,53 @@ public class EntitySelectorParser {
 		} else {
 			int i = this.reader.getCursor();
 			char c = this.reader.read();
-			if (c == 'p') {
-				this.maxResults = 1;
-				this.includesEntities = false;
-				this.order = ORDER_NEAREST;
-				this.limitToType(EntityType.PLAYER);
-			} else if (c == 'a') {
-				this.maxResults = Integer.MAX_VALUE;
-				this.includesEntities = false;
-				this.order = EntitySelector.ORDER_ARBITRARY;
-				this.limitToType(EntityType.PLAYER);
-			} else if (c == 'r') {
-				this.maxResults = 1;
-				this.includesEntities = false;
-				this.order = ORDER_RANDOM;
-				this.limitToType(EntityType.PLAYER);
-			} else if (c == 's') {
-				this.maxResults = 1;
-				this.includesEntities = true;
-				this.currentEntity = true;
-			} else if (c == 'e') {
-				this.maxResults = Integer.MAX_VALUE;
-				this.includesEntities = true;
-				this.order = EntitySelector.ORDER_ARBITRARY;
-				this.predicate = Entity::isAlive;
-			} else {
-				if (c != 'n') {
+
+			if (switch (c) {
+				case 'a' -> {
+					this.maxResults = Integer.MAX_VALUE;
+					this.includesEntities = false;
+					this.order = EntitySelector.ORDER_ARBITRARY;
+					this.limitToType(EntityType.PLAYER);
+					yield false;
+				}
+				default -> {
 					this.reader.setCursor(i);
 					throw ERROR_UNKNOWN_SELECTOR_TYPE.createWithContext(this.reader, "@" + c);
 				}
-
-				this.maxResults = 1;
-				this.includesEntities = true;
-				this.order = ORDER_NEAREST;
+				case 'e' -> {
+					this.maxResults = Integer.MAX_VALUE;
+					this.includesEntities = true;
+					this.order = EntitySelector.ORDER_ARBITRARY;
+					yield true;
+				}
+				case 'n' -> {
+					this.maxResults = 1;
+					this.includesEntities = true;
+					this.order = ORDER_NEAREST;
+					yield true;
+				}
+				case 'p' -> {
+					this.maxResults = 1;
+					this.includesEntities = false;
+					this.order = ORDER_NEAREST;
+					this.limitToType(EntityType.PLAYER);
+					yield false;
+				}
+				case 'r' -> {
+					this.maxResults = 1;
+					this.includesEntities = false;
+					this.order = ORDER_RANDOM;
+					this.limitToType(EntityType.PLAYER);
+					yield false;
+				}
+				case 's' -> {
+					this.maxResults = 1;
+					this.includesEntities = true;
+					this.currentEntity = true;
+					yield false;
+				}
+			}) {
+				this.predicates.add(Entity::isAlive);
 			}
 
 			this.suggestions = this::suggestOpenOptions;
@@ -339,7 +355,7 @@ public class EntitySelectorParser {
 	}
 
 	public void addPredicate(Predicate<Entity> predicate) {
-		this.predicate = this.predicate.and(predicate);
+		this.predicates.add(predicate);
 	}
 
 	public void setWorldLimited() {

@@ -4,6 +4,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.SlotAccess;
@@ -68,5 +69,10 @@ public abstract class Fireball extends AbstractHurtingProjectile implements Item
 	@Override
 	public SlotAccess getSlot(int i) {
 		return i == 0 ? SlotAccess.of(this::getItem, this::setItem) : super.getSlot(i);
+	}
+
+	@Override
+	public boolean hurt(DamageSource damageSource, float f) {
+		return false;
 	}
 }

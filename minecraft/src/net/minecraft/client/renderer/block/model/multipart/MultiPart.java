@@ -84,11 +84,11 @@ public class MultiPart implements UnbakedModel {
 
 	@Nullable
 	@Override
-	public BakedModel bake(ModelBaker modelBaker, Function<Material, TextureAtlasSprite> function, ModelState modelState, ResourceLocation resourceLocation) {
+	public BakedModel bake(ModelBaker modelBaker, Function<Material, TextureAtlasSprite> function, ModelState modelState) {
 		MultiPartBakedModel.Builder builder = new MultiPartBakedModel.Builder();
 
 		for (Selector selector : this.getSelectors()) {
-			BakedModel bakedModel = selector.getVariant().bake(modelBaker, function, modelState, resourceLocation);
+			BakedModel bakedModel = selector.getVariant().bake(modelBaker, function, modelState);
 			if (bakedModel != null) {
 				builder.add(selector.getPredicate(this.definition), bakedModel);
 			}

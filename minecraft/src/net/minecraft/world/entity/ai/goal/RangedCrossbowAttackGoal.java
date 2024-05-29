@@ -110,7 +110,7 @@ public class RangedCrossbowAttackGoal<T extends Monster & RangedAttackMob & Cros
 
 				int i = this.mob.getTicksUsingItem();
 				ItemStack itemStack = this.mob.getUseItem();
-				if (i >= CrossbowItem.getChargeDuration(this.mob)) {
+				if (i >= CrossbowItem.getChargeDuration(itemStack, this.mob)) {
 					this.mob.releaseUsingItem();
 					this.crossbowState = RangedCrossbowAttackGoal.CrossbowState.CHARGED;
 					this.attackDelay = 20 + this.mob.getRandom().nextInt(20);

@@ -66,6 +66,7 @@ public class PrimedTnt extends Entity implements TraceableEntity {
 
 	@Override
 	public void tick() {
+		this.handlePortal();
 		this.applyGravity();
 		this.move(MoverType.SELF, this.getDeltaMovement());
 		this.setDeltaMovement(this.getDeltaMovement().scale(0.98));

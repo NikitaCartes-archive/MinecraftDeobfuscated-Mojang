@@ -60,20 +60,29 @@ public class AdvancementWidget {
 		this.title = Language.getInstance().getVisualOrder(minecraft.font.substrByWidth(displayInfo.getTitle(), 163));
 		this.x = Mth.floor(displayInfo.getX() * 28.0F);
 		this.y = Mth.floor(displayInfo.getY() * 27.0F);
-		int i = advancementNode.advancement().requirements().size();
-		int j = String.valueOf(i).length();
-		int k = i > 1 ? minecraft.font.width("  ") + minecraft.font.width("0") * j * 2 + minecraft.font.width("/") : 0;
-		int l = 29 + minecraft.font.width(this.title) + k;
+		int i = this.getMaxProgressWidth();
+		int j = 29 + minecraft.font.width(this.title) + i;
 		this.description = Language.getInstance()
 			.getVisualOrder(
-				this.findOptimalLines(ComponentUtils.mergeStyles(displayInfo.getDescription().copy(), Style.EMPTY.withColor(displayInfo.getType().getChatColor())), l)
+				this.findOptimalLines(ComponentUtils.mergeStyles(displayInfo.getDescription().copy(), Style.EMPTY.withColor(displayInfo.getType().getChatColor())), j)
 			);
 
 		for (FormattedCharSequence formattedCharSequence : this.description) {
-			l = Math.max(l, minecraft.font.width(formattedCharSequence));
+			j = Math.max(j, minecraft.font.width(formattedCharSequence));
 		}
 
-		this.width = l + 3 + 5;
+		this.width = j + 3 + 5;
+	}
+
+	private int getMaxProgressWidth() {
+		int i = this.advancementNode.advancement().requirements().size();
+		if (i <= 1) {
+			return 0;
+		} else {
+			int j = 8;
+			Component component = Component.translatable("advancements.progress", i, i);
+			return this.minecraft.font.width(component) + 8;
+		}
 	}
 
 	private static float getMaxWidth(StringSplitter stringSplitter, List<FormattedText> list) {

@@ -40,6 +40,7 @@ public class SectionStorage<R> implements AutoCloseable {
 	private final Function<Runnable, Codec<R>> codec;
 	private final Function<Runnable, R> factory;
 	private final RegistryAccess registryAccess;
+	private final ChunkIOErrorReporter errorReporter;
 	protected final LevelHeightAccessor levelHeightAccessor;
 
 	public SectionStorage(
@@ -47,12 +48,14 @@ public class SectionStorage<R> implements AutoCloseable {
 		Function<Runnable, Codec<R>> function,
 		Function<Runnable, R> function2,
 		RegistryAccess registryAccess,
+		ChunkIOErrorReporter chunkIOErrorReporter,
 		LevelHeightAccessor levelHeightAccessor
 	) {
 		this.simpleRegionStorage = simpleRegionStorage;
 		this.codec = function;
 		this.factory = function2;
 		this.registryAccess = registryAccess;
+		this.errorReporter = chunkIOErrorReporter;
 		this.levelHeightAccessor = levelHeightAccessor;
 	}
 
@@ -121,6 +124,7 @@ public class SectionStorage<R> implements AutoCloseable {
 		return this.simpleRegionStorage.read(chunkPos).exceptionally(throwable -> {
 			if (throwable instanceof IOException iOException) {
 				LOGGER.error("Error reading chunk {} data from disk", chunkPos, iOException);
+				this.errorReporter.reportChunkLoadFailure(iOException, this.simpleRegionStorage.storageInfo(), chunkPos);
 				return Optional.empty();
 			} else {
 				throw new CompletionException(throwable);
@@ -162,7 +166,10 @@ public class SectionStorage<R> implements AutoCloseable {
 		Dynamic<Tag> dynamic = this.writeColumn(chunkPos, registryOps);
 		Tag tag = dynamic.getValue();
 		if (tag instanceof CompoundTag) {
-			this.simpleRegionStorage.write(chunkPos, (CompoundTag)tag);
+			this.simpleRegionStorage.write(chunkPos, (CompoundTag)tag).exceptionally(throwable -> {
+				this.errorReporter.reportChunkSaveFailure(throwable, this.simpleRegionStorage.storageInfo(), chunkPos);
+				return null;
+			});
 		} else {
 			LOGGER.error("Expected compound tag, got {}", tag);
 		}

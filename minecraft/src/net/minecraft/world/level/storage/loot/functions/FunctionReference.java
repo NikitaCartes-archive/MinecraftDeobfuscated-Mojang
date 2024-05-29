@@ -34,7 +34,9 @@ public class FunctionReference extends LootItemConditionalFunction {
 
 	@Override
 	public void validate(ValidationContext validationContext) {
-		if (validationContext.hasVisitedElement(this.name)) {
+		if (!validationContext.allowsReferences()) {
+			validationContext.reportProblem("Uses reference to " + this.name.location() + ", but references are not allowed");
+		} else if (validationContext.hasVisitedElement(this.name)) {
 			validationContext.reportProblem("Function " + this.name.location() + " is recursively called");
 		} else {
 			super.validate(validationContext);

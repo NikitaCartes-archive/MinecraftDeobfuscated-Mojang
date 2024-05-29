@@ -22,6 +22,7 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
 import java.net.Proxy;
+import java.nio.file.FileStore;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
@@ -51,6 +52,9 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import javax.imageio.ImageIO;
 import net.minecraft.CrashReport;
+import net.minecraft.CrashReportCategory;
+import net.minecraft.CrashReportDetail;
+import net.minecraft.FileUtil;
 import net.minecraft.ReportType;
 import net.minecraft.ReportedException;
 import net.minecraft.SharedConstants;
@@ -145,6 +149,8 @@ import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.border.BorderChangeListener;
 import net.minecraft.world.level.border.WorldBorder;
+import net.minecraft.world.level.chunk.storage.ChunkIOErrorReporter;
+import net.minecraft.world.level.chunk.storage.RegionStorageInfo;
 import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.PatrolSpawner;
@@ -165,7 +171,7 @@ import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import org.slf4j.Logger;
 
-public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTask> implements ServerInfo, CommandSource, AutoCloseable {
+public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTask> implements ServerInfo, ChunkIOErrorReporter, CommandSource, AutoCloseable {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	public static final String VANILLA_BRAND = "vanilla";
 	private static final float AVERAGE_TICK_TIME_SMOOTHING = 0.8F;
@@ -2049,10 +2055,43 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		return false;
 	}
 
-	public void reportChunkLoadFailure(ChunkPos chunkPos) {
+	private void storeChunkIoError(CrashReport crashReport, ChunkPos chunkPos, RegionStorageInfo regionStorageInfo) {
+		Util.ioPool().execute(() -> {
+			try {
+				Path path = this.getFile("debug");
+				FileUtil.createDirectoriesSafe(path);
+				String string = FileUtil.sanitizeName(regionStorageInfo.level());
+				Path path2 = path.resolve("chunk-" + string + "-" + Util.getFilenameFormattedDateTime() + "-server.txt");
+				FileStore fileStore = Files.getFileStore(path);
+				long l = fileStore.getUsableSpace();
+				if (l < 8192L) {
+					LOGGER.warn("Not storing chunk IO report due to low space on drive {}", fileStore.name());
+					return;
+				}
+
+				CrashReportCategory crashReportCategory = crashReport.addCategory("Chunk Info");
+				crashReportCategory.setDetail("Level", regionStorageInfo::level);
+				crashReportCategory.setDetail("Dimension", (CrashReportDetail<String>)(() -> regionStorageInfo.dimension().location().toString()));
+				crashReportCategory.setDetail("Storage", regionStorageInfo::type);
+				crashReportCategory.setDetail("Position", chunkPos::toString);
+				crashReport.saveToFile(path2, ReportType.CHUNK_IO_ERROR);
+				LOGGER.info("Saved details to {}", crashReport.getSaveFile());
+			} catch (Exception var11) {
+				LOGGER.warn("Failed to store chunk IO exception", (Throwable)var11);
+			}
+		});
 	}
 
-	public void reportChunkSaveFailure(ChunkPos chunkPos) {
+	@Override
+	public void reportChunkLoadFailure(Throwable throwable, RegionStorageInfo regionStorageInfo, ChunkPos chunkPos) {
+		LOGGER.error("Failed to load chunk {},{}", chunkPos.x, chunkPos.z, throwable);
+		this.storeChunkIoError(CrashReport.forThrowable(throwable, "Chunk load failure"), chunkPos, regionStorageInfo);
+	}
+
+	@Override
+	public void reportChunkSaveFailure(Throwable throwable, RegionStorageInfo regionStorageInfo, ChunkPos chunkPos) {
+		LOGGER.error("Failed to save chunk {},{}", chunkPos.x, chunkPos.z, throwable);
+		this.storeChunkIoError(CrashReport.forThrowable(throwable, "Chunk save failure"), chunkPos, regionStorageInfo);
 	}
 
 	public PotionBrewing potionBrewing() {

@@ -35,6 +35,10 @@ public class GameTestBatchFactory {
 	}
 
 	public static GameTestRunner.GameTestBatcher fromGameTestInfo() {
+		return fromGameTestInfo(50);
+	}
+
+	public static GameTestRunner.GameTestBatcher fromGameTestInfo(int i) {
 		return collection -> {
 			Map<String, List<GameTestInfo>> map = (Map<String, List<GameTestInfo>>)collection.stream()
 				.filter(Objects::nonNull)
@@ -42,14 +46,14 @@ public class GameTestBatchFactory {
 			return map.entrySet().stream().flatMap(entry -> {
 				String string = (String)entry.getKey();
 				List<GameTestInfo> list = (List<GameTestInfo>)entry.getValue();
-				return Streams.mapWithIndex(Lists.partition(list, 50).stream(), (listx, l) -> toGameTestBatch(List.copyOf(listx), string, l));
+				return Streams.mapWithIndex(Lists.partition(list, i).stream(), (listx, l) -> toGameTestBatch(List.copyOf(listx), string, l));
 			}).toList();
 		};
 	}
 
-	private static GameTestBatch toGameTestBatch(List<GameTestInfo> list, String string, long l) {
+	public static GameTestBatch toGameTestBatch(Collection<GameTestInfo> collection, String string, long l) {
 		Consumer<ServerLevel> consumer = GameTestRegistry.getBeforeBatchFunction(string);
 		Consumer<ServerLevel> consumer2 = GameTestRegistry.getAfterBatchFunction(string);
-		return new GameTestBatch(string + ":" + l, list, consumer, consumer2);
+		return new GameTestBatch(string + ":" + l, collection, consumer, consumer2);
 	}
 }

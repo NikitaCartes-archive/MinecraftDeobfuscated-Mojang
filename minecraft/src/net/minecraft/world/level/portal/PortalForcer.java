@@ -5,6 +5,7 @@ import java.util.Optional;
 import net.minecraft.BlockUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
@@ -19,8 +20,8 @@ import net.minecraft.world.level.levelgen.Heightmap;
 
 public class PortalForcer {
 	public static final int TICKET_RADIUS = 3;
-	private static final int SEARCH_RADIUS = 128;
-	private static final int CREATE_RADIUS = 16;
+	private static final int NETHER_PORTAL_RADIUS = 16;
+	private static final int OVERWORLD_PORTAL_RADIUS = 128;
 	private static final int FRAME_HEIGHT = 5;
 	private static final int FRAME_WIDTH = 4;
 	private static final int FRAME_BOX = 3;
@@ -37,29 +38,15 @@ public class PortalForcer {
 		this.level = serverLevel;
 	}
 
-	public Optional<BlockUtil.FoundRectangle> findPortalAround(BlockPos blockPos, boolean bl, WorldBorder worldBorder) {
+	public Optional<BlockPos> findClosestPortalPosition(BlockPos blockPos, boolean bl, WorldBorder worldBorder) {
 		PoiManager poiManager = this.level.getPoiManager();
 		int i = bl ? 16 : 128;
 		poiManager.ensureLoadedAndValid(this.level, blockPos, i);
-		Optional<PoiRecord> optional = poiManager.getInSquare(holder -> holder.is(PoiTypes.NETHER_PORTAL), blockPos, i, PoiManager.Occupancy.ANY)
-			.filter(poiRecord -> worldBorder.isWithinBounds(poiRecord.getPos()))
-			.sorted(Comparator.comparingDouble(poiRecord -> poiRecord.getPos().distSqr(blockPos)).thenComparingInt(poiRecord -> poiRecord.getPos().getY()))
-			.filter(poiRecord -> this.level.getBlockState(poiRecord.getPos()).hasProperty(BlockStateProperties.HORIZONTAL_AXIS))
-			.findFirst();
-		return optional.map(
-			poiRecord -> {
-				BlockPos blockPosx = poiRecord.getPos();
-				BlockState blockState = this.level.getBlockState(blockPosx);
-				return BlockUtil.getLargestRectangleAround(
-					blockPosx,
-					blockState.getValue(BlockStateProperties.HORIZONTAL_AXIS),
-					21,
-					Direction.Axis.Y,
-					21,
-					blockPosxx -> this.level.getBlockState(blockPosxx) == blockState
-				);
-			}
-		);
+		return poiManager.getInSquare(holder -> holder.is(PoiTypes.NETHER_PORTAL), blockPos, i, PoiManager.Occupancy.ANY)
+			.map(PoiRecord::getPos)
+			.filter(worldBorder::isWithinBounds)
+			.filter(blockPosx -> this.level.getBlockState(blockPosx).hasProperty(BlockStateProperties.HORIZONTAL_AXIS))
+			.min(Comparator.comparingDouble(blockPos2 -> blockPos2.distSqr(blockPos)).thenComparingInt(Vec3i::getY));
 	}
 
 	public Optional<BlockUtil.FoundRectangle> createPortal(BlockPos blockPos, Direction.Axis axis) {

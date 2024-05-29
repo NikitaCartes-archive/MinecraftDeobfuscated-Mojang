@@ -131,8 +131,7 @@ public interface DispenseItemBehavior {
 							livingEntity -> !(livingEntity instanceof Saddleable saddleable) ? false : !saddleable.isSaddled() && saddleable.isSaddleable()
 						);
 					if (!list.isEmpty()) {
-						((Saddleable)list.get(0)).equipSaddle(SoundSource.BLOCKS);
-						itemStack.shrink(1);
+						((Saddleable)list.get(0)).equipSaddle(itemStack.split(1), SoundSource.BLOCKS);
 						this.setSuccess(true);
 						return itemStack;
 					} else {

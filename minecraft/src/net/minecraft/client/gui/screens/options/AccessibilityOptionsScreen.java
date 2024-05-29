@@ -12,6 +12,7 @@ import net.minecraft.client.gui.screens.ConfirmLinkScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.CommonLinks;
 
 @Environment(EnvType.CLIENT)
 public class AccessibilityOptionsScreen extends OptionsSubScreen {
@@ -30,6 +31,7 @@ public class AccessibilityOptionsScreen extends OptionsSubScreen {
 			options.chatLineSpacing(),
 			options.chatDelay(),
 			options.notificationDisplayTime(),
+			options.bobView(),
 			options.toggleCrouch(),
 			options.toggleSprint(),
 			options.screenEffectScale(),
@@ -69,8 +71,7 @@ public class AccessibilityOptionsScreen extends OptionsSubScreen {
 	protected void addFooter() {
 		LinearLayout linearLayout = this.layout.addToFooter(LinearLayout.horizontal().spacing(8));
 		linearLayout.addChild(
-			Button.builder(Component.translatable("options.accessibility.link"), ConfirmLinkScreen.confirmLink(this, "https://aka.ms/MinecraftJavaAccessibility"))
-				.build()
+			Button.builder(Component.translatable("options.accessibility.link"), ConfirmLinkScreen.confirmLink(this, CommonLinks.ACCESSIBILITY_HELP)).build()
 		);
 		linearLayout.addChild(Button.builder(CommonComponents.GUI_DONE, button -> this.minecraft.setScreen(this.lastScreen)).build());
 	}

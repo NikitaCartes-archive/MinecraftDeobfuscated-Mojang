@@ -226,8 +226,8 @@ public class StructureTemplate {
 				&& this.size.getY() >= 1
 				&& this.size.getZ() >= 1) {
 				BoundingBox boundingBox = structurePlaceSettings.getBoundingBox();
-				List<BlockPos> list2 = Lists.<BlockPos>newArrayListWithCapacity(structurePlaceSettings.shouldKeepLiquids() ? list.size() : 0);
-				List<BlockPos> list3 = Lists.<BlockPos>newArrayListWithCapacity(structurePlaceSettings.shouldKeepLiquids() ? list.size() : 0);
+				List<BlockPos> list2 = Lists.<BlockPos>newArrayListWithCapacity(structurePlaceSettings.shouldApplyWaterlogging() ? list.size() : 0);
+				List<BlockPos> list3 = Lists.<BlockPos>newArrayListWithCapacity(structurePlaceSettings.shouldApplyWaterlogging() ? list.size() : 0);
 				List<Pair<BlockPos, CompoundTag>> list4 = Lists.<Pair<BlockPos, CompoundTag>>newArrayListWithCapacity(list.size());
 				int j = Integer.MAX_VALUE;
 				int k = Integer.MAX_VALUE;
@@ -239,7 +239,7 @@ public class StructureTemplate {
 				for (StructureTemplate.StructureBlockInfo structureBlockInfo : processBlockInfos(serverLevelAccessor, blockPos, blockPos2, structurePlaceSettings, list)) {
 					BlockPos blockPos3 = structureBlockInfo.pos;
 					if (boundingBox == null || boundingBox.isInside(blockPos3)) {
-						FluidState fluidState = structurePlaceSettings.shouldKeepLiquids() ? serverLevelAccessor.getFluidState(blockPos3) : null;
+						FluidState fluidState = structurePlaceSettings.shouldApplyWaterlogging() ? serverLevelAccessor.getFluidState(blockPos3) : null;
 						BlockState blockState = structureBlockInfo.state.mirror(structurePlaceSettings.getMirror()).rotate(structurePlaceSettings.getRotation());
 						if (structureBlockInfo.nbt != null) {
 							BlockEntity blockEntity = serverLevelAccessor.getBlockEntity(blockPos3);

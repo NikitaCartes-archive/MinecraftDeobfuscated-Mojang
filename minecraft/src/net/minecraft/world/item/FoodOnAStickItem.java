@@ -5,6 +5,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ItemSteerable;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -28,13 +29,9 @@ public class FoodOnAStickItem<T extends Entity & ItemSteerable> extends Item {
 		} else {
 			Entity entity = player.getControlledVehicle();
 			if (player.isPassenger() && entity instanceof ItemSteerable itemSteerable && entity.getType() == this.canInteractWith && itemSteerable.boost()) {
-				itemStack.hurtAndBreak(this.consumeItemDamage, player, LivingEntity.getSlotForHand(interactionHand));
-				if (itemStack.isEmpty()) {
-					ItemStack itemStack2 = itemStack.transmuteCopyIgnoreEmpty(Items.FISHING_ROD, 1);
-					return InteractionResultHolder.success(itemStack2);
-				}
-
-				return InteractionResultHolder.success(itemStack);
+				EquipmentSlot equipmentSlot = LivingEntity.getSlotForHand(interactionHand);
+				ItemStack itemStack2 = itemStack.hurtAndConvertOnBreak(this.consumeItemDamage, Items.FISHING_ROD, player, equipmentSlot);
+				return InteractionResultHolder.success(itemStack2);
 			}
 
 			player.awardStat(Stats.ITEM_USED.get(this));

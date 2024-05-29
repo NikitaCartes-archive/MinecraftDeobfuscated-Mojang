@@ -1,13 +1,14 @@
 package net.minecraft.client.renderer;
 
-import com.google.common.collect.ImmutableMap;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.ByteBufferBuilder;
 import com.mojang.blaze3d.vertex.MeshData;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import it.unimi.dsi.fastutil.objects.Object2ObjectSortedMaps;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.SequencedMap;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -15,11 +16,11 @@ import net.fabricmc.api.Environment;
 @Environment(EnvType.CLIENT)
 public interface MultiBufferSource {
 	static MultiBufferSource.BufferSource immediate(ByteBufferBuilder byteBufferBuilder) {
-		return immediateWithBuffers(ImmutableMap.of(), byteBufferBuilder);
+		return immediateWithBuffers(Object2ObjectSortedMaps.<RenderType, ByteBufferBuilder>emptyMap(), byteBufferBuilder);
 	}
 
-	static MultiBufferSource.BufferSource immediateWithBuffers(Map<RenderType, ByteBufferBuilder> map, ByteBufferBuilder byteBufferBuilder) {
-		return new MultiBufferSource.BufferSource(byteBufferBuilder, map);
+	static MultiBufferSource.BufferSource immediateWithBuffers(SequencedMap<RenderType, ByteBufferBuilder> sequencedMap, ByteBufferBuilder byteBufferBuilder) {
+		return new MultiBufferSource.BufferSource(byteBufferBuilder, sequencedMap);
 	}
 
 	VertexConsumer getBuffer(RenderType renderType);
@@ -27,14 +28,14 @@ public interface MultiBufferSource {
 	@Environment(EnvType.CLIENT)
 	public static class BufferSource implements MultiBufferSource {
 		protected final ByteBufferBuilder sharedBuffer;
-		protected final Map<RenderType, ByteBufferBuilder> fixedBuffers;
+		protected final SequencedMap<RenderType, ByteBufferBuilder> fixedBuffers;
 		protected final Map<RenderType, BufferBuilder> startedBuilders = new HashMap();
 		@Nullable
 		protected RenderType lastSharedType;
 
-		protected BufferSource(ByteBufferBuilder byteBufferBuilder, Map<RenderType, ByteBufferBuilder> map) {
+		protected BufferSource(ByteBufferBuilder byteBufferBuilder, SequencedMap<RenderType, ByteBufferBuilder> sequencedMap) {
 			this.sharedBuffer = byteBufferBuilder;
-			this.fixedBuffers = map;
+			this.fixedBuffers = sequencedMap;
 		}
 
 		@Override
@@ -66,16 +67,18 @@ public interface MultiBufferSource {
 		}
 
 		public void endLastBatch() {
-			if (this.lastSharedType != null && !this.fixedBuffers.containsKey(this.lastSharedType)) {
+			if (this.lastSharedType != null) {
 				this.endBatch(this.lastSharedType);
+				this.lastSharedType = null;
 			}
-
-			this.lastSharedType = null;
 		}
 
 		public void endBatch() {
-			this.startedBuilders.forEach(this::endBatch);
-			this.startedBuilders.clear();
+			this.endLastBatch();
+
+			for (RenderType renderType : this.fixedBuffers.keySet()) {
+				this.endBatch(renderType);
+			}
 		}
 
 		public void endBatch(RenderType renderType) {

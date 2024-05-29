@@ -26,7 +26,7 @@ public class AnimationUtils {
 		modelPart3.yRot = bl ? -0.8F : 0.8F;
 		modelPart3.xRot = -0.97079635F;
 		modelPart4.xRot = modelPart3.xRot;
-		float f = (float)CrossbowItem.getChargeDuration(livingEntity);
+		float f = (float)CrossbowItem.getChargeDuration(livingEntity.getUseItem(), livingEntity);
 		float g = Mth.clamp((float)livingEntity.getTicksUsingItem(), 0.0F, f);
 		float h = g / f;
 		modelPart4.yRot = Mth.lerp(h, 0.4F, 0.85F) * (float)(bl ? 1 : -1);

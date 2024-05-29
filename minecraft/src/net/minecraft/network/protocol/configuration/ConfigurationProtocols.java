@@ -1,6 +1,7 @@
 package net.minecraft.network.protocol.configuration;
 
 import net.minecraft.network.ConnectionProtocol;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.ProtocolInfo;
 import net.minecraft.network.protocol.ProtocolInfoBuilder;
 import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
@@ -25,7 +26,7 @@ import net.minecraft.network.protocol.cookie.CookiePacketTypes;
 import net.minecraft.network.protocol.cookie.ServerboundCookieResponsePacket;
 
 public class ConfigurationProtocols {
-	public static final ProtocolInfo<ServerConfigurationPacketListener> SERVERBOUND = ProtocolInfoBuilder.serverboundProtocol(
+	public static final ProtocolInfo.Unbound<ServerConfigurationPacketListener, FriendlyByteBuf> SERVERBOUND_TEMPLATE = ProtocolInfoBuilder.serverboundProtocol(
 		ConnectionProtocol.CONFIGURATION,
 		protocolInfoBuilder -> protocolInfoBuilder.addPacket(CommonPacketTypes.SERVERBOUND_CLIENT_INFORMATION, ServerboundClientInformationPacket.STREAM_CODEC)
 				.addPacket(CookiePacketTypes.SERVERBOUND_COOKIE_RESPONSE, ServerboundCookieResponsePacket.STREAM_CODEC)
@@ -36,7 +37,8 @@ public class ConfigurationProtocols {
 				.addPacket(CommonPacketTypes.SERVERBOUND_RESOURCE_PACK, ServerboundResourcePackPacket.STREAM_CODEC)
 				.addPacket(ConfigurationPacketTypes.SERVERBOUND_SELECT_KNOWN_PACKS, ServerboundSelectKnownPacks.STREAM_CODEC)
 	);
-	public static final ProtocolInfo<ClientConfigurationPacketListener> CLIENTBOUND = ProtocolInfoBuilder.clientboundProtocol(
+	public static final ProtocolInfo<ServerConfigurationPacketListener> SERVERBOUND = SERVERBOUND_TEMPLATE.bind(FriendlyByteBuf::new);
+	public static final ProtocolInfo.Unbound<ClientConfigurationPacketListener, FriendlyByteBuf> CLIENTBOUND_TEMPLATE = ProtocolInfoBuilder.clientboundProtocol(
 		ConnectionProtocol.CONFIGURATION,
 		protocolInfoBuilder -> protocolInfoBuilder.addPacket(CookiePacketTypes.CLIENTBOUND_COOKIE_REQUEST, ClientboundCookieRequestPacket.STREAM_CODEC)
 				.addPacket(CommonPacketTypes.CLIENTBOUND_CUSTOM_PAYLOAD, ClientboundCustomPayloadPacket.CONFIG_STREAM_CODEC)
@@ -56,4 +58,5 @@ public class ConfigurationProtocols {
 				.addPacket(CommonPacketTypes.CLIENTBOUND_CUSTOM_REPORT_DETAILS, ClientboundCustomReportDetailsPacket.STREAM_CODEC)
 				.addPacket(CommonPacketTypes.CLIENTBOUND_SERVER_LINKS, ClientboundServerLinksPacket.STREAM_CODEC)
 	);
+	public static final ProtocolInfo<ClientConfigurationPacketListener> CLIENTBOUND = CLIENTBOUND_TEMPLATE.bind(FriendlyByteBuf::new);
 }

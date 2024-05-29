@@ -200,9 +200,6 @@ public class GameRules {
 			serverLevel.setDefaultSpawnPos(serverLevel.getSharedSpawnPos(), serverLevel.getSharedSpawnAngle());
 		})
 	);
-	public static final GameRules.Key<GameRules.BooleanValue> RULE_ENTITIES_WITH_PASSENGERS_CAN_USE_PORTALS = register(
-		"entitiesWithPassengersCanUsePortals", GameRules.Category.MOBS, GameRules.BooleanValue.create(false)
-	);
 	private final Map<GameRules.Key<?>, GameRules.Value<?>> rules;
 
 	private static <T extends GameRules.Value<T>> GameRules.Key<T> register(String string, GameRules.Category category, GameRules.Type<T> type) {

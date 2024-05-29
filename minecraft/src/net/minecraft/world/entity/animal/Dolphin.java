@@ -343,7 +343,7 @@ public class Dolphin extends WaterAnimal {
 	}
 
 	@Override
-	public boolean canBeLeashed(Player player) {
+	public boolean canBeLeashed() {
 		return true;
 	}
 

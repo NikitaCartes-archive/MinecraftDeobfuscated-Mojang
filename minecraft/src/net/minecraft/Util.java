@@ -26,10 +26,8 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
@@ -46,6 +44,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.Map.Entry;
 import java.util.concurrent.BlockingQueue;
@@ -95,6 +94,7 @@ public class Util {
 	private static final ExecutorService DOWNLOAD_POOL = makeIoExecutor("Download-", true);
 	private static final DateTimeFormatter FILENAME_DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH.mm.ss", Locale.ROOT);
 	public static final int LINEAR_LOOKUP_THRESHOLD = 8;
+	private static final Set<String> ALLOWED_UNTRUSTED_LINK_PROTOCOLS = Set.of("http", "https");
 	public static final long NANOS_PER_MILLI = 1000000L;
 	public static TimeSource.NanoTimeSource timeSource = System::nanoTime;
 	public static final Ticker TICKER = new Ticker() {
@@ -384,6 +384,21 @@ public class Util {
 			return Util.OS.LINUX;
 		} else {
 			return string.contains("unix") ? Util.OS.LINUX : Util.OS.UNKNOWN;
+		}
+	}
+
+	public static URI parseAndValidateUntrustedUri(String string) throws URISyntaxException {
+		URI uRI = new URI(string);
+		String string2 = uRI.getScheme();
+		if (string2 == null) {
+			throw new URISyntaxException(string, "Missing protocol in URI: " + string);
+		} else {
+			String string3 = string2.toLowerCase(Locale.ROOT);
+			if (!ALLOWED_UNTRUSTED_LINK_PROTOCOLS.contains(string3)) {
+				throw new URISyntaxException(string, "Unsupported protocol in URI: " + string);
+			} else {
+				return uRI;
+			}
 		}
 	}
 
@@ -924,14 +939,14 @@ public class Util {
 		SOLARIS("solaris"),
 		WINDOWS("windows") {
 			@Override
-			protected String[] getOpenUrlArguments(URL uRL) {
-				return new String[]{"rundll32", "url.dll,FileProtocolHandler", uRL.toString()};
+			protected String[] getOpenUriArguments(URI uRI) {
+				return new String[]{"rundll32", "url.dll,FileProtocolHandler", uRI.toString()};
 			}
 		},
 		OSX("mac") {
 			@Override
-			protected String[] getOpenUrlArguments(URL uRL) {
-				return new String[]{"open", uRL.toString()};
+			protected String[] getOpenUriArguments(URI uRI) {
+				return new String[]{"open", uRI.toString()};
 			}
 		},
 		UNKNOWN("unknown");
@@ -942,36 +957,28 @@ public class Util {
 			this.telemetryName = string2;
 		}
 
-		public void openUrl(URL uRL) {
+		public void openUri(URI uRI) {
 			try {
-				Process process = (Process)AccessController.doPrivileged(() -> Runtime.getRuntime().exec(this.getOpenUrlArguments(uRL)));
+				Process process = (Process)AccessController.doPrivileged(() -> Runtime.getRuntime().exec(this.getOpenUriArguments(uRI)));
 				process.getInputStream().close();
 				process.getErrorStream().close();
 				process.getOutputStream().close();
 			} catch (IOException | PrivilegedActionException var3) {
-				Util.LOGGER.error("Couldn't open url '{}'", uRL, var3);
-			}
-		}
-
-		public void openUri(URI uRI) {
-			try {
-				this.openUrl(uRI.toURL());
-			} catch (MalformedURLException var3) {
-				Util.LOGGER.error("Couldn't open uri '{}'", uRI, var3);
+				Util.LOGGER.error("Couldn't open location '{}'", uRI, var3);
 			}
 		}
 
 		public void openFile(File file) {
-			try {
-				this.openUrl(file.toURI().toURL());
-			} catch (MalformedURLException var3) {
-				Util.LOGGER.error("Couldn't open file '{}'", file, var3);
-			}
+			this.openUri(file.toURI());
 		}
 
-		protected String[] getOpenUrlArguments(URL uRL) {
-			String string = uRL.toString();
-			if ("file".equals(uRL.getProtocol())) {
+		public void openPath(Path path) {
+			this.openUri(path.toUri());
+		}
+
+		protected String[] getOpenUriArguments(URI uRI) {
+			String string = uRI.toString();
+			if ("file".equals(uRI.getScheme())) {
 				string = string.replace("file:", "file://");
 			}
 
@@ -980,8 +987,8 @@ public class Util {
 
 		public void openUri(String string) {
 			try {
-				this.openUrl(new URI(string).toURL());
-			} catch (MalformedURLException | IllegalArgumentException | URISyntaxException var3) {
+				this.openUri(new URI(string));
+			} catch (IllegalArgumentException | URISyntaxException var3) {
 				Util.LOGGER.error("Couldn't open uri '{}'", string, var3);
 			}
 		}

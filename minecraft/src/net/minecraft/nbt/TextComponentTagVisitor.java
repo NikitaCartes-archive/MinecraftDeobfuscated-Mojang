@@ -162,7 +162,7 @@ public class TextComponentTagVisitor implements TagVisitor {
 		if (listTag.isEmpty()) {
 			this.result.append("[]");
 		} else if (this.depth >= 64) {
-			this.result.append("[" + FOLDED + "]");
+			this.result.append("[").append(FOLDED).append("]");
 		} else if (INLINE_ELEMENT_TYPES.contains(listTag.getElementType()) && listTag.size() <= 8) {
 			this.result.append("[");
 
@@ -192,7 +192,7 @@ public class TextComponentTagVisitor implements TagVisitor {
 			}
 
 			if (listTag.size() > 128) {
-				this.result.append(string + FOLDED);
+				this.result.append(string).append(FOLDED);
 			}
 
 			if (!this.indentation.isEmpty()) {
@@ -208,7 +208,7 @@ public class TextComponentTagVisitor implements TagVisitor {
 		if (compoundTag.isEmpty()) {
 			this.result.append("{}");
 		} else if (this.depth >= 64) {
-			this.result.append("{" + FOLDED + "}");
+			this.result.append("{").append(FOLDED).append("}");
 		} else {
 			this.result.append("{");
 			Collection<String> collection = compoundTag.getAllKeys();

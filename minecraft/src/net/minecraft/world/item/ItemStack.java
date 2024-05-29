@@ -449,6 +449,20 @@ public final class ItemStack implements DataComponentHolder {
 		}
 	}
 
+	public ItemStack hurtAndConvertOnBreak(int i, ItemLike itemLike, LivingEntity livingEntity, EquipmentSlot equipmentSlot) {
+		this.hurtAndBreak(i, livingEntity, equipmentSlot);
+		if (this.isEmpty()) {
+			ItemStack itemStack = this.transmuteCopyIgnoreEmpty(itemLike, this.getCount());
+			if (itemStack.isDamageableItem()) {
+				itemStack.setDamageValue(0);
+			}
+
+			return itemStack;
+		} else {
+			return this;
+		}
+	}
+
 	public boolean isBarVisible() {
 		return this.getItem().isBarVisible(this);
 	}
@@ -526,7 +540,7 @@ public final class ItemStack implements DataComponentHolder {
 		return this.isEmpty() ? EMPTY : this.transmuteCopyIgnoreEmpty(itemLike, i);
 	}
 
-	public ItemStack transmuteCopyIgnoreEmpty(ItemLike itemLike, int i) {
+	private ItemStack transmuteCopyIgnoreEmpty(ItemLike itemLike, int i) {
 		return new ItemStack(itemLike.asItem().builtInRegistryHolder(), i, this.components.asPatch());
 	}
 

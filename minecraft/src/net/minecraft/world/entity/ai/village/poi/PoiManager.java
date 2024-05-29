@@ -33,6 +33,7 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
+import net.minecraft.world.level.chunk.storage.ChunkIOErrorReporter;
 import net.minecraft.world.level.chunk.storage.RegionStorageInfo;
 import net.minecraft.world.level.chunk.storage.SectionStorage;
 import net.minecraft.world.level.chunk.storage.SimpleRegionStorage;
@@ -44,13 +45,20 @@ public class PoiManager extends SectionStorage<PoiSection> {
 	private final LongSet loadedChunks = new LongOpenHashSet();
 
 	public PoiManager(
-		RegionStorageInfo regionStorageInfo, Path path, DataFixer dataFixer, boolean bl, RegistryAccess registryAccess, LevelHeightAccessor levelHeightAccessor
+		RegionStorageInfo regionStorageInfo,
+		Path path,
+		DataFixer dataFixer,
+		boolean bl,
+		RegistryAccess registryAccess,
+		ChunkIOErrorReporter chunkIOErrorReporter,
+		LevelHeightAccessor levelHeightAccessor
 	) {
 		super(
 			new SimpleRegionStorage(regionStorageInfo, path, dataFixer, bl, DataFixTypes.POI_CHUNK),
 			PoiSection::codec,
 			PoiSection::new,
 			registryAccess,
+			chunkIOErrorReporter,
 			levelHeightAccessor
 		);
 		this.distanceTracker = new PoiManager.DistanceTracker();

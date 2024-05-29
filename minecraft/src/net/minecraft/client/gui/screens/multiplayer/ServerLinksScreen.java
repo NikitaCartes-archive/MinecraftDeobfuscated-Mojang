@@ -84,7 +84,7 @@ public class ServerLinksScreen extends Screen {
 		final AbstractWidget button;
 
 		LinkListEntry(Screen screen, ServerLinks.Entry entry) {
-			this.button = Button.builder(entry.displayName(), ConfirmLinkScreen.confirmLink(screen, entry.url(), false)).width(310).build();
+			this.button = Button.builder(entry.displayName(), ConfirmLinkScreen.confirmLink(screen, entry.link(), false)).width(310).build();
 		}
 
 		@Override

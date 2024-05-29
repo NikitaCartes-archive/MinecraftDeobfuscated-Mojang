@@ -1,6 +1,7 @@
 package net.minecraft.client.gui.screens;
 
 import com.mojang.realmsclient.RealmsMainScreen;
+import java.net.URI;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
@@ -23,6 +24,7 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.ServerLinks;
+import net.minecraft.util.CommonLinks;
 
 @Environment(EnvType.CLIENT)
 public class PauseScreen extends Screen {
@@ -105,11 +107,9 @@ public class PauseScreen extends Screen {
 
 	static void addFeedbackButtons(Screen screen, GridLayout.RowHelper rowHelper) {
 		rowHelper.addChild(
-			openLinkButton(
-				screen, SEND_FEEDBACK, SharedConstants.getCurrentVersion().isStable() ? "https://aka.ms/javafeedback?ref=game" : "https://aka.ms/snapshotfeedback?ref=game"
-			)
+			openLinkButton(screen, SEND_FEEDBACK, SharedConstants.getCurrentVersion().isStable() ? CommonLinks.RELEASE_FEEDBACK : CommonLinks.SNAPSHOT_FEEDBACK)
 		);
-		rowHelper.addChild(openLinkButton(screen, REPORT_BUGS, "https://aka.ms/snapshotbugs?ref=game")).active = !SharedConstants.getCurrentVersion()
+		rowHelper.addChild(openLinkButton(screen, REPORT_BUGS, CommonLinks.SNAPSHOT_BUGS_FEEDBACK)).active = !SharedConstants.getCurrentVersion()
 			.getDataVersion()
 			.isSideSeries();
 	}
@@ -158,8 +158,8 @@ public class PauseScreen extends Screen {
 		return Button.builder(component, button -> this.minecraft.setScreen((Screen)supplier.get())).width(98).build();
 	}
 
-	private static Button openLinkButton(Screen screen, Component component, String string) {
-		return Button.builder(component, ConfirmLinkScreen.confirmLink(screen, string)).width(98).build();
+	private static Button openLinkButton(Screen screen, Component component, URI uRI) {
+		return Button.builder(component, ConfirmLinkScreen.confirmLink(screen, uRI)).width(98).build();
 	}
 
 	@Environment(EnvType.CLIENT)

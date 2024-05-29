@@ -22,12 +22,16 @@ public class FileUtil {
 	private static final Pattern RESERVED_WINDOWS_FILENAMES = Pattern.compile(".*\\.|(?:COM|CLOCK\\$|CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(?:\\..*)?", 2);
 	private static final Pattern STRICT_PATH_SEGMENT_CHECK = Pattern.compile("[-._a-z0-9]+");
 
-	public static String findAvailableName(Path path, String string, String string2) throws IOException {
+	public static String sanitizeName(String string) {
 		for (char c : SharedConstants.ILLEGAL_FILE_CHARACTERS) {
 			string = string.replace(c, '_');
 		}
 
-		string = string.replaceAll("[./\"]", "_");
+		return string.replaceAll("[./\"]", "_");
+	}
+
+	public static String findAvailableName(Path path, String string, String string2) throws IOException {
+		string = sanitizeName(string);
 		if (RESERVED_WINDOWS_FILENAMES.matcher(string).matches()) {
 			string = "_" + string + "_";
 		}

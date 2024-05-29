@@ -19,11 +19,9 @@ import net.minecraft.Util;
 import net.minecraft.client.gui.components.ChatComponent;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.gui.screens.AccessibilityOnboardingScreen;
 import net.minecraft.client.gui.screens.PauseScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.debug.GameModeSwitcherScreen;
-import net.minecraft.client.gui.screens.options.ChatOptionsScreen;
 import net.minecraft.client.gui.screens.options.controls.KeyBindsScreen;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.player.LocalPlayer;
@@ -392,16 +390,8 @@ public class KeyboardHandler {
 						boolean bl3 = this.minecraft.options.narrator().get() == NarratorStatus.OFF;
 						this.minecraft.options.narrator().set(NarratorStatus.byId(this.minecraft.options.narrator().get().getId() + 1));
 						this.minecraft.options.save();
-						if (screen instanceof AccessibilityOnboardingScreen accessibilityOnboardingScreen) {
-							accessibilityOnboardingScreen.updateNarratorButton();
-						}
-
-						if (screen instanceof ChatOptionsScreen chatOptionsScreen) {
-							chatOptionsScreen.updateNarratorButton();
-						}
-
-						if (bl3 && screen != null) {
-							screen.narrationEnabled();
+						if (screen != null) {
+							screen.updateNarratorStatus(bl3);
 						}
 					}
 
@@ -425,19 +415,19 @@ public class KeyboardHandler {
 			}
 
 			InputConstants.Key key;
-			boolean bl3x;
+			boolean bl3;
 			boolean var10000;
-			label191: {
+			label180: {
 				key = InputConstants.getKey(i, j);
-				bl3x = this.minecraft.screen == null;
-				label151:
-				if (!bl3x) {
+				bl3 = this.minecraft.screen == null;
+				label141:
+				if (!bl3) {
 					if (this.minecraft.screen instanceof PauseScreen pauseScreen && !pauseScreen.showsPauseMenu()) {
-						break label151;
+						break label141;
 					}
 
 					var10000 = false;
-					break label191;
+					break label180;
 				}
 
 				var10000 = true;
@@ -476,7 +466,7 @@ public class KeyboardHandler {
 					}
 				}
 
-				if (bl3x) {
+				if (bl3) {
 					if (bl5) {
 						KeyMapping.set(key, false);
 					} else {

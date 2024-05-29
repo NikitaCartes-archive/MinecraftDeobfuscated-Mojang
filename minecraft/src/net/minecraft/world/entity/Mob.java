@@ -3,13 +3,13 @@ package net.minecraft.world.entity;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
-import com.mojang.datafixers.util.Either;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.UUID;
+import java.util.Set;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
@@ -22,8 +22,6 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.FloatTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.NbtUtils;
-import net.minecraft.network.protocol.game.ClientboundSetEntityLinkPacket;
 import net.minecraft.network.protocol.game.DebugPackets;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -55,7 +53,6 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.ai.sensing.Sensing;
-import net.minecraft.world.entity.decoration.LeashFenceKnotEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
@@ -89,7 +86,7 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.AABB;
 
-public abstract class Mob extends LivingEntity implements EquipmentUser, Targeting {
+public abstract class Mob extends LivingEntity implements EquipmentUser, Leashable, Targeting {
 	private static final EntityDataAccessor<Byte> DATA_MOB_FLAGS_ID = SynchedEntityData.defineId(Mob.class, EntityDataSerializers.BYTE);
 	private static final int MOB_FLAG_NO_AI = 1;
 	private static final int MOB_FLAG_LEFTHANDED = 2;
@@ -100,8 +97,8 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Targeti
 	public static final float MAX_PICKUP_LOOT_CHANCE = 0.55F;
 	public static final float MAX_ENCHANTED_ARMOR_CHANCE = 0.5F;
 	public static final float MAX_ENCHANTED_WEAPON_CHANCE = 0.25F;
-	public static final String LEASH_TAG = "leash";
 	public static final float DEFAULT_EQUIPMENT_DROP_CHANCE = 0.085F;
+	public static final float PRESERVE_ITEM_DROP_CHANCE_THRESHOLD = 1.0F;
 	public static final int PRESERVE_ITEM_DROP_CHANCE = 2;
 	public static final int UPDATE_GOAL_SELECTOR_EVERY_N_TICKS = 2;
 	private static final double DEFAULT_ATTACK_REACH = Math.sqrt(2.04F) - 0.6F;
@@ -131,10 +128,7 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Targeti
 	private ResourceKey<LootTable> lootTable;
 	private long lootTableSeed;
 	@Nullable
-	private Entity leashHolder;
-	private int delayedLeashHolderId;
-	@Nullable
-	private Either<UUID, BlockPos> delayedLeashInfo;
+	private Leashable.LeashData leashData;
 	private BlockPos restrictCenter = BlockPos.ZERO;
 	private float restrictRadius = -1.0F;
 
@@ -348,11 +342,8 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Targeti
 	@Override
 	public void tick() {
 		super.tick();
-		if (!this.level().isClientSide) {
-			this.tickLeash();
-			if (this.tickCount % 5 == 0) {
-				this.updateControlFlags();
-			}
+		if (!this.level().isClientSide && this.tickCount % 5 == 0) {
+			this.updateControlFlags();
 		}
 	}
 
@@ -421,21 +412,7 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Targeti
 			compoundTag.putFloat("body_armor_drop_chance", this.bodyArmorDropChance);
 		}
 
-		Either<UUID, BlockPos> either = this.delayedLeashInfo;
-		if (this.leashHolder instanceof LivingEntity) {
-			either = Either.left(this.leashHolder.getUUID());
-		} else if (this.leashHolder instanceof LeashFenceKnotEntity leashFenceKnotEntity) {
-			either = Either.right(leashFenceKnotEntity.getPos());
-		}
-
-		if (either != null) {
-			compoundTag.put("leash", either.map(uUID -> {
-				CompoundTag compoundTagx = new CompoundTag();
-				compoundTagx.putUUID("UUID", uUID);
-				return compoundTagx;
-			}, NbtUtils::writeBlockPos));
-		}
-
+		this.writeLeashData(compoundTag, this.leashData);
 		compoundTag.putBoolean("LeftHanded", this.isLeftHanded());
 		if (this.lootTable != null) {
 			compoundTag.putString("DeathLootTable", this.lootTable.location().toString());
@@ -498,14 +475,7 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Targeti
 			this.bodyArmorItem = ItemStack.EMPTY;
 		}
 
-		if (compoundTag.contains("leash", 10)) {
-			this.delayedLeashInfo = Either.left(compoundTag.getCompound("leash").getUUID("UUID"));
-		} else if (compoundTag.contains("leash", 11)) {
-			this.delayedLeashInfo = (Either<UUID, BlockPos>)NbtUtils.readBlockPos(compoundTag, "leash").map(Either::right).orElse(null);
-		} else {
-			this.delayedLeashInfo = null;
-		}
-
+		this.leashData = this.readLeashData(compoundTag);
 		this.setLeftHanded(compoundTag.getBoolean("LeftHanded"));
 		if (compoundTag.contains("DeathLootTable", 8)) {
 			this.lootTable = ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.parse(compoundTag.getString("DeathLootTable")));
@@ -991,6 +961,31 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Targeti
 		};
 	}
 
+	public void dropPreservedEquipment() {
+		this.dropPreservedEquipment(itemStack -> true);
+	}
+
+	public Set<EquipmentSlot> dropPreservedEquipment(Predicate<ItemStack> predicate) {
+		Set<EquipmentSlot> set = new HashSet();
+
+		for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
+			ItemStack itemStack = this.getItemBySlot(equipmentSlot);
+			if (!itemStack.isEmpty()) {
+				if (!predicate.test(itemStack)) {
+					set.add(equipmentSlot);
+				} else {
+					double d = (double)this.getEquipmentDropChance(equipmentSlot);
+					if (d > 1.0) {
+						this.setItemSlot(equipmentSlot, ItemStack.EMPTY);
+						this.spawnAtLocation(itemStack);
+					}
+				}
+			}
+		}
+
+		return set;
+	}
+
 	private LootParams createEquipmentParams(ServerLevel serverLevel) {
 		return new LootParams.Builder(serverLevel)
 			.withParameter(LootContextParams.ORIGIN, this.position())
@@ -1189,22 +1184,23 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Targeti
 	public final InteractionResult interact(Player player, InteractionHand interactionHand) {
 		if (!this.isAlive()) {
 			return InteractionResult.PASS;
-		} else if (this.getLeashHolder() == player) {
-			this.dropLeash(true, !player.hasInfiniteMaterials());
-			this.gameEvent(GameEvent.ENTITY_INTERACT, player);
-			return InteractionResult.sidedSuccess(this.level().isClientSide);
 		} else {
 			InteractionResult interactionResult = this.checkAndHandleImportantInteractions(player, interactionHand);
 			if (interactionResult.consumesAction()) {
 				this.gameEvent(GameEvent.ENTITY_INTERACT, player);
 				return interactionResult;
 			} else {
-				interactionResult = this.mobInteract(player, interactionHand);
-				if (interactionResult.consumesAction()) {
-					this.gameEvent(GameEvent.ENTITY_INTERACT, player);
-					return interactionResult;
+				InteractionResult interactionResult2 = super.interact(player, interactionHand);
+				if (interactionResult2 != InteractionResult.PASS) {
+					return interactionResult2;
 				} else {
-					return super.interact(player, interactionHand);
+					interactionResult = this.mobInteract(player, interactionHand);
+					if (interactionResult.consumesAction()) {
+						this.gameEvent(GameEvent.ENTITY_INTERACT, player);
+						return interactionResult;
+					} else {
+						return InteractionResult.PASS;
+					}
 				}
 			}
 		}
@@ -1212,32 +1208,26 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Targeti
 
 	private InteractionResult checkAndHandleImportantInteractions(Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
-		if (itemStack.is(Items.LEAD) && this.canBeLeashed(player)) {
-			this.setLeashedTo(player, true);
-			itemStack.shrink(1);
-			return InteractionResult.sidedSuccess(this.level().isClientSide);
-		} else {
-			if (itemStack.is(Items.NAME_TAG)) {
-				InteractionResult interactionResult = itemStack.interactLivingEntity(player, this, interactionHand);
-				if (interactionResult.consumesAction()) {
-					return interactionResult;
-				}
+		if (itemStack.is(Items.NAME_TAG)) {
+			InteractionResult interactionResult = itemStack.interactLivingEntity(player, this, interactionHand);
+			if (interactionResult.consumesAction()) {
+				return interactionResult;
 			}
+		}
 
-			if (itemStack.getItem() instanceof SpawnEggItem) {
-				if (this.level() instanceof ServerLevel) {
-					SpawnEggItem spawnEggItem = (SpawnEggItem)itemStack.getItem();
-					Optional<Mob> optional = spawnEggItem.spawnOffspringFromSpawnEgg(
-						player, this, (EntityType<? extends Mob>)this.getType(), (ServerLevel)this.level(), this.position(), itemStack
-					);
-					optional.ifPresent(mob -> this.onOffspringSpawnedFromEgg(player, mob));
-					return optional.isPresent() ? InteractionResult.SUCCESS : InteractionResult.PASS;
-				} else {
-					return InteractionResult.CONSUME;
-				}
+		if (itemStack.getItem() instanceof SpawnEggItem) {
+			if (this.level() instanceof ServerLevel) {
+				SpawnEggItem spawnEggItem = (SpawnEggItem)itemStack.getItem();
+				Optional<Mob> optional = spawnEggItem.spawnOffspringFromSpawnEgg(
+					player, this, (EntityType<? extends Mob>)this.getType(), (ServerLevel)this.level(), this.position(), itemStack
+				);
+				optional.ifPresent(mob -> this.onOffspringSpawnedFromEgg(player, mob));
+				return optional.isPresent() ? InteractionResult.SUCCESS : InteractionResult.PASS;
 			} else {
-				return InteractionResult.PASS;
+				return InteractionResult.CONSUME;
 			}
+		} else {
+			return InteractionResult.PASS;
 		}
 	}
 
@@ -1324,69 +1314,34 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Targeti
 		}
 	}
 
-	protected void tickLeash() {
-		if (this.delayedLeashInfo != null) {
-			this.restoreLeashFromSave();
-		}
-
-		if (this.leashHolder != null) {
-			if (!this.isAlive() || !this.leashHolder.isAlive()) {
-				this.dropLeash(true, true);
-			}
-		}
-	}
-
-	public void dropLeash(boolean bl, boolean bl2) {
-		if (this.leashHolder != null) {
-			this.leashHolder = null;
-			this.delayedLeashInfo = null;
-			this.clearRestriction();
-			if (!this.level().isClientSide && bl2) {
-				this.spawnAtLocation(Items.LEAD);
-			}
-
-			if (!this.level().isClientSide && bl && this.level() instanceof ServerLevel) {
-				((ServerLevel)this.level()).getChunkSource().broadcast(this, new ClientboundSetEntityLinkPacket(this, null));
-			}
-		}
-	}
-
-	public boolean canBeLeashed(Player player) {
-		return !this.isLeashed() && !(this instanceof Enemy);
-	}
-
-	public boolean isLeashed() {
-		return this.leashHolder != null;
-	}
-
-	public boolean mayBeLeashed() {
-		return this.isLeashed() || this.delayedLeashInfo != null;
-	}
-
 	@Nullable
-	public Entity getLeashHolder() {
-		if (this.leashHolder == null && this.delayedLeashHolderId != 0 && this.level().isClientSide) {
-			this.leashHolder = this.level().getEntity(this.delayedLeashHolderId);
-		}
-
-		return this.leashHolder;
+	@Override
+	public Leashable.LeashData getLeashData() {
+		return this.leashData;
 	}
 
-	public void setLeashedTo(Entity entity, boolean bl) {
-		this.leashHolder = entity;
-		this.delayedLeashInfo = null;
-		if (!this.level().isClientSide && bl && this.level() instanceof ServerLevel) {
-			((ServerLevel)this.level()).getChunkSource().broadcast(this, new ClientboundSetEntityLinkPacket(this, this.leashHolder));
-		}
+	@Override
+	public void setLeashData(@Nullable Leashable.LeashData leashData) {
+		this.leashData = leashData;
+	}
 
-		if (this.isPassenger()) {
-			this.stopRiding();
+	@Override
+	public void dropLeash(boolean bl, boolean bl2) {
+		Leashable.super.dropLeash(bl, bl2);
+		if (this.getLeashData() == null) {
+			this.clearRestriction();
 		}
 	}
 
-	public void setDelayedLeashHolderId(int i) {
-		this.delayedLeashHolderId = i;
-		this.dropLeash(false, false);
+	@Override
+	public void leashTooFarBehaviour() {
+		Leashable.super.leashTooFarBehaviour();
+		this.goalSelector.disableControlFlag(Goal.Flag.MOVE);
+	}
+
+	@Override
+	public boolean canBeLeashed() {
+		return !(this instanceof Enemy);
 	}
 
 	@Override
@@ -1397,28 +1352,6 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Targeti
 		}
 
 		return bl2;
-	}
-
-	private void restoreLeashFromSave() {
-		if (this.delayedLeashInfo != null && this.level() instanceof ServerLevel serverLevel) {
-			Optional<UUID> optional = this.delayedLeashInfo.left();
-			Optional<BlockPos> optional2 = this.delayedLeashInfo.right();
-			if (optional.isPresent()) {
-				Entity entity = serverLevel.getEntity((UUID)optional.get());
-				if (entity != null) {
-					this.setLeashedTo(entity, true);
-					return;
-				}
-			} else if (optional2.isPresent()) {
-				this.setLeashedTo(LeashFenceKnotEntity.getOrCreateKnot(this.level(), (BlockPos)optional2.get()), true);
-				return;
-			}
-
-			if (this.tickCount > 100) {
-				this.spawnAtLocation(Items.LEAD);
-				this.delayedLeashInfo = null;
-			}
-		}
 	}
 
 	@Override
@@ -1486,7 +1419,7 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Targeti
 		float f = (float)this.getAttributeValue(Attributes.ATTACK_DAMAGE);
 		DamageSource damageSource = this.damageSources().mobAttack(this);
 		if (this.level() instanceof ServerLevel serverLevel) {
-			f = EnchantmentHelper.modifyDamage(serverLevel, this.getMainHandItem(), entity, damageSource, f);
+			f = EnchantmentHelper.modifyDamage(serverLevel, this.getWeaponItem(), entity, damageSource, f);
 		}
 
 		boolean bl = entity.hurt(damageSource, f);

@@ -30,6 +30,7 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.templatesystem.BlockIgnoreProcessor;
 import net.minecraft.world.level.levelgen.structure.templatesystem.JigsawReplacementProcessor;
+import net.minecraft.world.level.levelgen.structure.templatesystem.LiquidSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorList;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorType;
@@ -41,10 +42,11 @@ public class SinglePoolElement extends StructurePoolElement {
 		SinglePoolElement::encodeTemplate, ResourceLocation.CODEC.map(Either::left)
 	);
 	public static final MapCodec<SinglePoolElement> CODEC = RecordCodecBuilder.mapCodec(
-		instance -> instance.group(templateCodec(), processorsCodec(), projectionCodec()).apply(instance, SinglePoolElement::new)
+		instance -> instance.group(templateCodec(), processorsCodec(), projectionCodec(), overrideLiquidSettingsCodec()).apply(instance, SinglePoolElement::new)
 	);
 	protected final Either<ResourceLocation, StructureTemplate> template;
 	protected final Holder<StructureProcessorList> processors;
+	protected final Optional<LiquidSettings> overrideLiquidSettings;
 
 	private static <T> DataResult<T> encodeTemplate(Either<ResourceLocation, StructureTemplate> either, DynamicOps<T> dynamicOps, T object) {
 		Optional<ResourceLocation> optional = either.left();
@@ -57,16 +59,24 @@ public class SinglePoolElement extends StructurePoolElement {
 		return StructureProcessorType.LIST_CODEC.fieldOf("processors").forGetter(singlePoolElement -> singlePoolElement.processors);
 	}
 
+	protected static <E extends SinglePoolElement> RecordCodecBuilder<E, Optional<LiquidSettings>> overrideLiquidSettingsCodec() {
+		return LiquidSettings.CODEC.optionalFieldOf("override_liquid_settings").forGetter(singlePoolElement -> singlePoolElement.overrideLiquidSettings);
+	}
+
 	protected static <E extends SinglePoolElement> RecordCodecBuilder<E, Either<ResourceLocation, StructureTemplate>> templateCodec() {
 		return TEMPLATE_CODEC.fieldOf("location").forGetter(singlePoolElement -> singlePoolElement.template);
 	}
 
 	protected SinglePoolElement(
-		Either<ResourceLocation, StructureTemplate> either, Holder<StructureProcessorList> holder, StructureTemplatePool.Projection projection
+		Either<ResourceLocation, StructureTemplate> either,
+		Holder<StructureProcessorList> holder,
+		StructureTemplatePool.Projection projection,
+		Optional<LiquidSettings> optional
 	) {
 		super(projection);
 		this.template = either;
 		this.processors = holder;
+		this.overrideLiquidSettings = optional;
 	}
 
 	@Override
@@ -139,10 +149,11 @@ public class SinglePoolElement extends StructurePoolElement {
 		Rotation rotation,
 		BoundingBox boundingBox,
 		RandomSource randomSource,
+		LiquidSettings liquidSettings,
 		boolean bl
 	) {
 		StructureTemplate structureTemplate = this.getTemplate(structureTemplateManager);
-		StructurePlaceSettings structurePlaceSettings = this.getSettings(rotation, boundingBox, bl);
+		StructurePlaceSettings structurePlaceSettings = this.getSettings(rotation, boundingBox, liquidSettings, bl);
 		if (!structureTemplate.placeInWorld(worldGenLevel, blockPos, blockPos2, structurePlaceSettings, randomSource, 18)) {
 			return false;
 		} else {
@@ -156,7 +167,7 @@ public class SinglePoolElement extends StructurePoolElement {
 		}
 	}
 
-	protected StructurePlaceSettings getSettings(Rotation rotation, BoundingBox boundingBox, boolean bl) {
+	protected StructurePlaceSettings getSettings(Rotation rotation, BoundingBox boundingBox, LiquidSettings liquidSettings, boolean bl) {
 		StructurePlaceSettings structurePlaceSettings = new StructurePlaceSettings();
 		structurePlaceSettings.setBoundingBox(boundingBox);
 		structurePlaceSettings.setRotation(rotation);
@@ -164,6 +175,7 @@ public class SinglePoolElement extends StructurePoolElement {
 		structurePlaceSettings.setIgnoreEntities(false);
 		structurePlaceSettings.addProcessor(BlockIgnoreProcessor.STRUCTURE_BLOCK);
 		structurePlaceSettings.setFinalizeEntities(true);
+		structurePlaceSettings.setLiquidSettings((LiquidSettings)this.overrideLiquidSettings.orElse(liquidSettings));
 		if (!bl) {
 			structurePlaceSettings.addProcessor(JigsawReplacementProcessor.INSTANCE);
 		}

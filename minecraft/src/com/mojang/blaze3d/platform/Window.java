@@ -32,6 +32,8 @@ import org.slf4j.Logger;
 @Environment(EnvType.CLIENT)
 public final class Window implements AutoCloseable {
 	private static final Logger LOGGER = LogUtils.getLogger();
+	public static final int BASE_WIDTH = 320;
+	public static final int BASE_HEIGHT = 240;
 	private final GLFWErrorCallback defaultErrorCallback = GLFWErrorCallback.create(this::defaultErrorCallback);
 	private final WindowEventHandler eventHandler;
 	private final ScreenManager screenManager;
@@ -97,6 +99,8 @@ public final class Window implements AutoCloseable {
 
 		GLFW.glfwMakeContextCurrent(this.window);
 		GL.createCapabilities();
+		int i = RenderSystem.maxSupportedTextureSize();
+		GLFW.glfwSetWindowSizeLimits(this.window, -1, -1, i, i);
 		this.setMode();
 		this.refreshFramebufferSize();
 		GLFW.glfwSetFramebufferSizeCallback(this.window, this::onFramebufferResize);

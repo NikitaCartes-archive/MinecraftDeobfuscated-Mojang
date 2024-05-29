@@ -1,6 +1,5 @@
 package net.minecraft.client.gui.screens.telemetry;
 
-import java.nio.file.Path;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -19,6 +18,7 @@ import net.minecraft.client.gui.screens.ConfirmLinkScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.CommonLinks;
 
 @Environment(EnvType.CLIENT)
 public class TelemetryInfoScreen extends Screen {
@@ -113,16 +113,15 @@ public class TelemetryInfoScreen extends Screen {
 	}
 
 	private void openPrivacyStatementLink(Button button) {
-		ConfirmLinkScreen.confirmLinkNow(this, "http://go.microsoft.com/fwlink/?LinkId=521839");
+		ConfirmLinkScreen.confirmLinkNow(this, CommonLinks.PRIVACY_STATEMENT);
 	}
 
 	private void openFeedbackLink(Button button) {
-		ConfirmLinkScreen.confirmLinkNow(this, "https://aka.ms/javafeedback?ref=game");
+		ConfirmLinkScreen.confirmLinkNow(this, CommonLinks.RELEASE_FEEDBACK);
 	}
 
 	private void openDataFolder(Button button) {
-		Path path = this.minecraft.getTelemetryManager().getLogDirectory();
-		Util.getPlatform().openUri(path.toUri());
+		Util.getPlatform().openPath(this.minecraft.getTelemetryManager().getLogDirectory());
 	}
 
 	@Override

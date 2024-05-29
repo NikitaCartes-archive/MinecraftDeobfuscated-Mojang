@@ -52,6 +52,11 @@ public class NestedLootTable extends LootPoolSingletonContainer {
 		Optional<ResourceKey<LootTable>> optional = this.contents.left();
 		if (optional.isPresent()) {
 			ResourceKey<LootTable> resourceKey = (ResourceKey<LootTable>)optional.get();
+			if (!validationContext.allowsReferences()) {
+				validationContext.reportProblem("Uses reference to " + resourceKey.location() + ", but references are not allowed");
+				return;
+			}
+
 			if (validationContext.hasVisitedElement(resourceKey)) {
 				validationContext.reportProblem("Table " + resourceKey.location() + " is recursively called");
 				return;

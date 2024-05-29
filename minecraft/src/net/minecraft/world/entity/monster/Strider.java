@@ -146,7 +146,7 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
 	}
 
 	@Override
-	public void equipSaddle(@Nullable SoundSource soundSource) {
+	public void equipSaddle(ItemStack itemStack, @Nullable SoundSource soundSource) {
 		this.steering.setSaddle(true);
 		if (soundSource != null) {
 			this.level().playSound(null, this, SoundEvents.STRIDER_SADDLE, soundSource, 0.5F, 1.0F);
@@ -467,7 +467,7 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
 				if (mob != null) {
 					spawnGroupData = this.spawnJockey(serverLevelAccessor, difficultyInstance, mob, new Zombie.ZombieGroupData(Zombie.getSpawnAsBabyOdds(randomSource), false));
 					mob.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.WARPED_FUNGUS_ON_A_STICK));
-					this.equipSaddle(null);
+					this.equipSaddle(new ItemStack(Items.SADDLE), null);
 				}
 			} else if (randomSource.nextInt(10) == 0) {
 				AgeableMob ageableMob = EntityType.STRIDER.create(serverLevelAccessor.getLevel());

@@ -175,10 +175,14 @@ public class JigsawBlockEditScreen extends Screen {
 		this.renderTransparentBackground(guiGraphics);
 	}
 
+	public static boolean isValidResourceLocation(String string) {
+		return ResourceLocation.tryParse(string) != null;
+	}
+
 	private void updateValidity() {
-		boolean bl = ResourceLocation.isValidResourceLocation(this.nameEdit.getValue())
-			&& ResourceLocation.isValidResourceLocation(this.targetEdit.getValue())
-			&& ResourceLocation.isValidResourceLocation(this.poolEdit.getValue());
+		boolean bl = isValidResourceLocation(this.nameEdit.getValue())
+			&& isValidResourceLocation(this.targetEdit.getValue())
+			&& isValidResourceLocation(this.poolEdit.getValue());
 		this.doneButton.active = bl;
 		this.generateButton.active = bl;
 	}

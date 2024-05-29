@@ -253,8 +253,8 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ExperienceOrb;
+import net.minecraft.world.entity.Leashable;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.RelativeMovement;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeMap;
@@ -1026,9 +1026,8 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 	@Override
 	public void handleEntityLinkPacket(ClientboundSetEntityLinkPacket clientboundSetEntityLinkPacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundSetEntityLinkPacket, this, this.minecraft);
-		Entity entity = this.level.getEntity(clientboundSetEntityLinkPacket.getSourceId());
-		if (entity instanceof Mob) {
-			((Mob)entity).setDelayedLeashHolderId(clientboundSetEntityLinkPacket.getDestId());
+		if (this.level.getEntity(clientboundSetEntityLinkPacket.getSourceId()) instanceof Leashable leashable) {
+			leashable.setDelayedLeashHolderId(clientboundSetEntityLinkPacket.getDestId());
 		}
 	}
 
@@ -1228,12 +1227,13 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 		PacketUtils.ensureRunningOnSameThread(clientboundHorseScreenOpenPacket, this, this.minecraft);
 		if (this.level.getEntity(clientboundHorseScreenOpenPacket.getEntityId()) instanceof AbstractHorse abstractHorse) {
 			LocalPlayer localPlayer = this.minecraft.player;
-			SimpleContainer simpleContainer = new SimpleContainer(clientboundHorseScreenOpenPacket.getSize());
+			int i = clientboundHorseScreenOpenPacket.getInventoryColumns();
+			SimpleContainer simpleContainer = new SimpleContainer(AbstractHorse.getInventorySize(i));
 			HorseInventoryMenu horseInventoryMenu = new HorseInventoryMenu(
-				clientboundHorseScreenOpenPacket.getContainerId(), localPlayer.getInventory(), simpleContainer, abstractHorse
+				clientboundHorseScreenOpenPacket.getContainerId(), localPlayer.getInventory(), simpleContainer, abstractHorse, i
 			);
 			localPlayer.containerMenu = horseInventoryMenu;
-			this.minecraft.setScreen(new HorseInventoryScreen(horseInventoryMenu, localPlayer.getInventory(), abstractHorse));
+			this.minecraft.setScreen(new HorseInventoryScreen(horseInventoryMenu, localPlayer.getInventory(), abstractHorse, i));
 		}
 	}
 

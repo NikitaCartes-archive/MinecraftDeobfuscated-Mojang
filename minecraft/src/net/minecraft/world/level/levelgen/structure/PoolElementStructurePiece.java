@@ -21,6 +21,8 @@ import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSeriali
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceType;
 import net.minecraft.world.level.levelgen.structure.pools.JigsawJunction;
 import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElement;
+import net.minecraft.world.level.levelgen.structure.structures.JigsawStructure;
+import net.minecraft.world.level.levelgen.structure.templatesystem.LiquidSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
 import org.slf4j.Logger;
 
@@ -32,6 +34,7 @@ public class PoolElementStructurePiece extends StructurePiece {
 	protected final Rotation rotation;
 	private final List<JigsawJunction> junctions = Lists.<JigsawJunction>newArrayList();
 	private final StructureTemplateManager structureTemplateManager;
+	private final LiquidSettings liquidSettings;
 
 	public PoolElementStructurePiece(
 		StructureTemplateManager structureTemplateManager,
@@ -39,7 +42,8 @@ public class PoolElementStructurePiece extends StructurePiece {
 		BlockPos blockPos,
 		int i,
 		Rotation rotation,
-		BoundingBox boundingBox
+		BoundingBox boundingBox,
+		LiquidSettings liquidSettings
 	) {
 		super(StructurePieceType.JIGSAW, 0, boundingBox);
 		this.structureTemplateManager = structureTemplateManager;
@@ -47,6 +51,7 @@ public class PoolElementStructurePiece extends StructurePiece {
 		this.position = blockPos;
 		this.groundLevelDelta = i;
 		this.rotation = rotation;
+		this.liquidSettings = liquidSettings;
 	}
 
 	public PoolElementStructurePiece(StructurePieceSerializationContext structurePieceSerializationContext, CompoundTag compoundTag) {
@@ -63,6 +68,10 @@ public class PoolElementStructurePiece extends StructurePiece {
 		ListTag listTag = compoundTag.getList("junctions", 10);
 		this.junctions.clear();
 		listTag.forEach(tag -> this.junctions.add(JigsawJunction.deserialize(new Dynamic<>(dynamicOps, tag))));
+		this.liquidSettings = (LiquidSettings)LiquidSettings.CODEC
+			.parse(NbtOps.INSTANCE, compoundTag.get("liquid_settings"))
+			.result()
+			.orElse(JigsawStructure.DEFAULT_LIQUID_SETTINGS);
 	}
 
 	@Override
@@ -81,6 +90,9 @@ public class PoolElementStructurePiece extends StructurePiece {
 		}
 
 		compoundTag.put("junctions", listTag);
+		if (this.liquidSettings != JigsawStructure.DEFAULT_LIQUID_SETTINGS) {
+			compoundTag.put("liquid_settings", LiquidSettings.CODEC.encodeStart(NbtOps.INSTANCE, this.liquidSettings).getOrThrow());
+		}
 	}
 
 	@Override
@@ -106,7 +118,19 @@ public class PoolElementStructurePiece extends StructurePiece {
 		boolean bl
 	) {
 		this.element
-			.place(this.structureTemplateManager, worldGenLevel, structureManager, chunkGenerator, this.position, blockPos, this.rotation, boundingBox, randomSource, bl);
+			.place(
+				this.structureTemplateManager,
+				worldGenLevel,
+				structureManager,
+				chunkGenerator,
+				this.position,
+				blockPos,
+				this.rotation,
+				boundingBox,
+				randomSource,
+				this.liquidSettings,
+				bl
+			);
 	}
 
 	@Override

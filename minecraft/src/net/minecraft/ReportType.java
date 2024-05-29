@@ -78,7 +78,7 @@ public record ReportType(String header, List<String> nuggets) {
 	public static final ReportType NETWORK_PROTOCOL_ERROR = new ReportType(
 		"Minecraft Network Protocol Error Report",
 		List.of(
-			"0xBADFOOD",
+			"0xBADF00D",
 			"+'${`%&NO CARRIER",
 			"Please insert The Internet CD #4",
 			"Sabotage!",
@@ -97,6 +97,25 @@ public record ReportType(String header, List<String> nuggets) {
 			"Don't worry, I'll be fine",
 			"Maybe this time it will work!",
 			"I heard pigeons are more reliable"
+		)
+	);
+	public static final ReportType CHUNK_IO_ERROR = new ReportType(
+		"Minecraft Chunk IO Error Report",
+		List.of(
+			"I have failed you!",
+			"Let's not do it again...",
+			"Worst magic trick ever!",
+			"Remember to backup your worlds regularly",
+			"Pirates stole your chunk!",
+			"Ker-chunk!",
+			"Ideally, this shouldn't be here",
+			"Let's hope it wasn't anything important",
+			"Computers were a mistake",
+			"Welp",
+			"Not my proudest moment",
+			"Who needs blocks in a block game, right?",
+			"This chunk is no more...it has ceased to be...this is an EX-chunk",
+			"loss.mca"
 		)
 	);
 

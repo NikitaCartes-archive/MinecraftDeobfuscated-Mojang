@@ -81,10 +81,11 @@ public class ChunkSerializer {
 	public static final String BLOCK_LIGHT_TAG = "BlockLight";
 	public static final String SKY_LIGHT_TAG = "SkyLight";
 
-	public static ProtoChunk read(ServerLevel serverLevel, PoiManager poiManager, ChunkPos chunkPos, CompoundTag compoundTag) {
+	public static ProtoChunk read(ServerLevel serverLevel, PoiManager poiManager, RegionStorageInfo regionStorageInfo, ChunkPos chunkPos, CompoundTag compoundTag) {
 		ChunkPos chunkPos2 = new ChunkPos(compoundTag.getInt("xPos"), compoundTag.getInt("zPos"));
 		if (!Objects.equals(chunkPos, chunkPos2)) {
 			LOGGER.error("Chunk file at {} is in the wrong location; relocating. (Expected {}, got {})", chunkPos, chunkPos, chunkPos2);
+			serverLevel.getServer().reportMisplacedChunk(chunkPos2, chunkPos, regionStorageInfo);
 		}
 
 		UpgradeData upgradeData = compoundTag.contains("UpgradeData", 10) ? new UpgradeData(compoundTag.getCompound("UpgradeData"), serverLevel) : UpgradeData.EMPTY;
@@ -263,7 +264,7 @@ public class ChunkSerializer {
 	}
 
 	private static void logErrors(ChunkPos chunkPos, int i, String string) {
-		LOGGER.error("Recoverable errors when loading section [" + chunkPos.x + ", " + i + ", " + chunkPos.z + "]: " + string);
+		LOGGER.error("Recoverable errors when loading section [{}, {}, {}]: {}", chunkPos.x, i, chunkPos.z, string);
 	}
 
 	private static Codec<PalettedContainerRO<Holder<Biome>>> makeBiomeCodec(Registry<Biome> registry) {

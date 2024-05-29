@@ -24,7 +24,9 @@ public record ConditionReference(ResourceKey<LootItemCondition> name) implements
 
 	@Override
 	public void validate(ValidationContext validationContext) {
-		if (validationContext.hasVisitedElement(this.name)) {
+		if (!validationContext.allowsReferences()) {
+			validationContext.reportProblem("Uses reference to " + this.name.location() + ", but references are not allowed");
+		} else if (validationContext.hasVisitedElement(this.name)) {
 			validationContext.reportProblem("Condition " + this.name.location() + " is recursively called");
 		} else {
 			LootItemCondition.super.validate(validationContext);

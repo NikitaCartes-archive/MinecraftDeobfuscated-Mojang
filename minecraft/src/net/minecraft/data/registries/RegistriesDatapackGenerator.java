@@ -1,7 +1,6 @@
 package net.minecraft.data.registries;
 
 import com.google.gson.JsonElement;
-import com.mojang.logging.LogUtils;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.Encoder;
 import com.mojang.serialization.JsonOps;
@@ -15,10 +14,8 @@ import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.RegistryDataLoader;
 import net.minecraft.resources.ResourceKey;
-import org.slf4j.Logger;
 
 public class RegistriesDatapackGenerator implements DataProvider {
-	private static final Logger LOGGER = LogUtils.getLogger();
 	private final PackOutput output;
 	private final CompletableFuture<HolderLookup.Provider> registries;
 
@@ -61,9 +58,11 @@ public class RegistriesDatapackGenerator implements DataProvider {
 	}
 
 	private static <E> CompletableFuture<?> dumpValue(Path path, CachedOutput cachedOutput, DynamicOps<JsonElement> dynamicOps, Encoder<E> encoder, E object) {
-		Optional<JsonElement> optional = encoder.encodeStart(dynamicOps, object)
-			.resultOrPartial(string -> LOGGER.error("Couldn't serialize element {}: {}", path, string));
-		return optional.isPresent() ? DataProvider.saveStable(cachedOutput, (JsonElement)optional.get(), path) : CompletableFuture.completedFuture(null);
+		return encoder.encodeStart(dynamicOps, object)
+			.mapOrElse(
+				jsonElement -> DataProvider.saveStable(cachedOutput, jsonElement, path),
+				error -> CompletableFuture.failedFuture(new IllegalStateException("Couldn't generate file '" + path + "': " + error.message()))
+			);
 	}
 
 	@Override

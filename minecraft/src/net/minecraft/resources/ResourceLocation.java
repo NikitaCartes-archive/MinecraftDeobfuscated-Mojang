@@ -21,9 +21,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.GsonHelper;
-import org.apache.commons.lang3.StringUtils;
 
-public class ResourceLocation implements Comparable<ResourceLocation> {
+public final class ResourceLocation implements Comparable<ResourceLocation> {
 	public static final Codec<ResourceLocation> CODEC = Codec.STRING.<ResourceLocation>comapFlatMap(ResourceLocation::read, ResourceLocation::toString).stable();
 	public static final StreamCodec<ByteBuf, ResourceLocation> STREAM_CODEC = ByteBufCodecs.STRING_UTF8.map(ResourceLocation::parse, ResourceLocation::toString);
 	public static final SimpleCommandExceptionType ERROR_INVALID = new SimpleCommandExceptionType(Component.translatable("argument.id.invalid"));
@@ -33,64 +32,72 @@ public class ResourceLocation implements Comparable<ResourceLocation> {
 	private final String namespace;
 	private final String path;
 
-	protected ResourceLocation(String string, String string2, @Nullable ResourceLocation.Dummy dummy) {
+	private ResourceLocation(String string, String string2) {
+		assert isValidNamespace(string);
+
+		assert isValidPath(string2);
+
 		this.namespace = string;
 		this.path = string2;
 	}
 
-	protected ResourceLocation(String string, String string2) {
-		this(assertValidNamespace(string, string2), assertValidPath(string, string2), null);
+	private static ResourceLocation createUntrusted(String string, String string2) {
+		return new ResourceLocation(assertValidNamespace(string, string2), assertValidPath(string, string2));
 	}
 
 	public static ResourceLocation fromNamespaceAndPath(String string, String string2) {
-		return new ResourceLocation(string, string2);
-	}
-
-	private ResourceLocation(String[] strings) {
-		this(strings[0], strings[1]);
+		return createUntrusted(string, string2);
 	}
 
 	public static ResourceLocation parse(String string) {
 		return bySeparator(string, ':');
 	}
 
-	public static ResourceLocation bySeparator(String string, char c) {
-		return new ResourceLocation(decompose(string, c));
-	}
-
 	public static ResourceLocation withDefaultNamespace(String string) {
-		return new ResourceLocation("minecraft", string);
+		return new ResourceLocation("minecraft", assertValidPath("minecraft", string));
 	}
 
 	@Nullable
 	public static ResourceLocation tryParse(String string) {
-		try {
-			return parse(string);
-		} catch (ResourceLocationException var2) {
-			return null;
-		}
+		return tryBySeparator(string, ':');
 	}
 
 	@Nullable
 	public static ResourceLocation tryBuild(String string, String string2) {
-		try {
-			return new ResourceLocation(string, string2);
-		} catch (ResourceLocationException var3) {
-			return null;
+		return isValidNamespace(string) && isValidPath(string2) ? new ResourceLocation(string, string2) : null;
+	}
+
+	public static ResourceLocation bySeparator(String string, char c) {
+		int i = string.indexOf(c);
+		if (i >= 0) {
+			String string2 = string.substring(i + 1);
+			if (i != 0) {
+				String string3 = string.substring(0, i);
+				return createUntrusted(string3, string2);
+			} else {
+				return withDefaultNamespace(string2);
+			}
+		} else {
+			return withDefaultNamespace(string);
 		}
 	}
 
-	protected static String[] decompose(String string, char c) {
-		String[] strings = new String[]{"minecraft", string};
+	@Nullable
+	public static ResourceLocation tryBySeparator(String string, char c) {
 		int i = string.indexOf(c);
 		if (i >= 0) {
-			strings[1] = string.substring(i + 1);
-			if (i >= 1) {
-				strings[0] = string.substring(0, i);
+			String string2 = string.substring(i + 1);
+			if (!isValidPath(string2)) {
+				return null;
+			} else if (i != 0) {
+				String string3 = string.substring(0, i);
+				return isValidNamespace(string3) ? new ResourceLocation(string3, string2) : null;
+			} else {
+				return new ResourceLocation("minecraft", string2);
 			}
+		} else {
+			return isValidPath(string) ? new ResourceLocation("minecraft", string) : null;
 		}
-
-		return strings;
 	}
 
 	public static DataResult<ResourceLocation> read(String string) {
@@ -110,7 +117,7 @@ public class ResourceLocation implements Comparable<ResourceLocation> {
 	}
 
 	public ResourceLocation withPath(String string) {
-		return new ResourceLocation(this.namespace, assertValidPath(this.namespace, string), null);
+		return new ResourceLocation(this.namespace, assertValidPath(this.namespace, string));
 	}
 
 	public ResourceLocation withPath(UnaryOperator<String> unaryOperator) {
@@ -249,20 +256,12 @@ public class ResourceLocation implements Comparable<ResourceLocation> {
 		return c == '_' || c == '-' || c >= 'a' && c <= 'z' || c >= '0' && c <= '9' || c == '.';
 	}
 
-	public static boolean isValidResourceLocation(String string) {
-		String[] strings = decompose(string, ':');
-		return isValidNamespace(StringUtils.isEmpty(strings[0]) ? "minecraft" : strings[0]) && isValidPath(strings[1]);
-	}
-
 	private static String assertValidPath(String string, String string2) {
 		if (!isValidPath(string2)) {
 			throw new ResourceLocationException("Non [a-z0-9/._-] character in path of location: " + string + ":" + string2);
 		} else {
 			return string2;
 		}
-	}
-
-	protected interface Dummy {
 	}
 
 	public static class Serializer implements JsonDeserializer<ResourceLocation>, JsonSerializer<ResourceLocation> {

@@ -403,7 +403,7 @@ public class ServerGamePacketListenerImpl
 			serverboundMoveVehiclePacket.getXRot()
 		)) {
 			this.disconnect(Component.translatable("multiplayer.disconnect.invalid_vehicle_movement"));
-		} else {
+		} else if (!this.updateAwaitingTeleport()) {
 			Entity entity = this.player.getRootVehicle();
 			if (entity != this.player && entity.getControllingPassenger() == this.player && entity == this.lastVehicle) {
 				ServerLevel serverLevel = this.player.serverLevel();
@@ -860,15 +860,7 @@ public class ServerGamePacketListenerImpl
 					this.resetPosition();
 				}
 
-				if (this.awaitingPositionFromClient != null) {
-					if (this.tickCount - this.awaitingTeleportTime > 20) {
-						this.awaitingTeleportTime = this.tickCount;
-						this.teleport(
-							this.awaitingPositionFromClient.x, this.awaitingPositionFromClient.y, this.awaitingPositionFromClient.z, this.player.getYRot(), this.player.getXRot()
-						);
-					}
-				} else {
-					this.awaitingTeleportTime = this.tickCount;
+				if (!this.updateAwaitingTeleport()) {
 					double d = clampHorizontal(serverboundMovePlayerPacket.getX(this.player.getX()));
 					double e = clampVertical(serverboundMovePlayerPacket.getY(this.player.getY()));
 					double f = clampHorizontal(serverboundMovePlayerPacket.getZ(this.player.getZ()));
@@ -963,7 +955,7 @@ public class ServerGamePacketListenerImpl
 								}
 
 								if (serverboundMovePlayerPacket.isOnGround() || this.player.hasLandedInLiquid() || this.player.onClimbable() || this.player.isSpectator() || bl || bl5) {
-									this.player.resetCurrentImpulseContext();
+									this.player.tryResetCurrentImpulseContext();
 								}
 
 								this.player.checkMovementStatistics(this.player.getX() - i, this.player.getY() - j, this.player.getZ() - k);
@@ -978,6 +970,22 @@ public class ServerGamePacketListenerImpl
 					}
 				}
 			}
+		}
+	}
+
+	private boolean updateAwaitingTeleport() {
+		if (this.awaitingPositionFromClient != null) {
+			if (this.tickCount - this.awaitingTeleportTime > 20) {
+				this.awaitingTeleportTime = this.tickCount;
+				this.teleport(
+					this.awaitingPositionFromClient.x, this.awaitingPositionFromClient.y, this.awaitingPositionFromClient.z, this.player.getYRot(), this.player.getXRot()
+				);
+			}
+
+			return true;
+		} else {
+			this.awaitingTeleportTime = this.tickCount;
+			return false;
 		}
 	}
 

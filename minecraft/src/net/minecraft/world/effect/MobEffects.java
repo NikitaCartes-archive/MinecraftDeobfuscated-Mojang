@@ -35,7 +35,7 @@ public class MobEffects {
 		"mining_fatigue",
 		new MobEffect(MobEffectCategory.HARMFUL, 4866583)
 			.addAttributeModifier(
-				Attributes.ATTACK_SPEED, ResourceLocation.withDefaultNamespace("effect.minining_fatigue"), -0.1F, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL
+				Attributes.ATTACK_SPEED, ResourceLocation.withDefaultNamespace("effect.mining_fatigue"), -0.1F, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL
 			)
 	);
 	public static final Holder<MobEffect> DAMAGE_BOOST = register(
