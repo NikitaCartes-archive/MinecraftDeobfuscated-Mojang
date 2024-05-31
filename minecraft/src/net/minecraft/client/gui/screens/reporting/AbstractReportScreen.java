@@ -8,8 +8,13 @@ import java.util.function.Consumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
+import net.minecraft.Optionull;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.Checkbox;
 import net.minecraft.client.gui.components.MultiLineEditBox;
+import net.minecraft.client.gui.components.StringWidget;
+import net.minecraft.client.gui.layouts.FrameLayout;
 import net.minecraft.client.gui.layouts.Layout;
 import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.client.gui.screens.GenericWaitingScreen;
@@ -35,13 +40,18 @@ public abstract class AbstractReportScreen<B extends Report.Builder<?>> extends 
 	private static final Component DESCRIBE_PLACEHOLDER = Component.translatable("gui.abuseReport.describe");
 	protected static final Component MORE_COMMENTS_LABEL = Component.translatable("gui.abuseReport.more_comments");
 	private static final Component MORE_COMMENTS_NARRATION = Component.translatable("gui.abuseReport.comments");
+	private static final Component ATTESTATION_CHECKBOX = Component.translatable("gui.abuseReport.attestation");
+	protected static final int BUTTON_WIDTH = 120;
 	protected static final int MARGIN = 20;
 	protected static final int SCREEN_WIDTH = 280;
 	protected static final int SPACING = 8;
 	private static final Logger LOGGER = LogUtils.getLogger();
 	protected final Screen lastScreen;
 	protected final ReportingContext reportingContext;
+	protected final LinearLayout layout = LinearLayout.vertical().spacing(8);
 	protected B reportBuilder;
+	private Checkbox attestation;
+	protected Button sendButton;
 
 	protected AbstractReportScreen(Component component, Screen screen, ReportingContext reportingContext, B builder) {
 		super(component);
@@ -57,6 +67,48 @@ public abstract class AbstractReportScreen<B extends Report.Builder<?>> extends 
 		multiLineEditBox.setCharacterLimit(abuseReportLimits.maxOpinionCommentsLength());
 		multiLineEditBox.setValueListener(consumer);
 		return multiLineEditBox;
+	}
+
+	@Override
+	protected void init() {
+		this.layout.defaultCellSetting().alignHorizontallyCenter();
+		this.createHeader();
+		this.addContent();
+		this.createFooter();
+		this.onReportChanged();
+		this.layout.visitWidgets(guiEventListener -> {
+			AbstractWidget var10000 = this.addRenderableWidget(guiEventListener);
+		});
+		this.repositionElements();
+	}
+
+	protected void createHeader() {
+		this.layout.addChild(new StringWidget(this.title, this.font));
+	}
+
+	protected abstract void addContent();
+
+	protected void createFooter() {
+		this.attestation = this.layout
+			.addChild(Checkbox.builder(ATTESTATION_CHECKBOX, this.font).selected(this.reportBuilder.attested()).maxWidth(280).onValueChange((checkbox, bl) -> {
+				this.reportBuilder.setAttested(bl);
+				this.onReportChanged();
+			}).build());
+		LinearLayout linearLayout = this.layout.addChild(LinearLayout.horizontal().spacing(8));
+		linearLayout.addChild(Button.builder(CommonComponents.GUI_BACK, button -> this.onClose()).width(120).build());
+		this.sendButton = linearLayout.addChild(Button.builder(SEND_REPORT, button -> this.sendReport()).width(120).build());
+	}
+
+	protected void onReportChanged() {
+		Report.CannotBuildReason cannotBuildReason = this.reportBuilder.checkBuildable();
+		this.sendButton.active = cannotBuildReason == null && this.attestation.selected();
+		this.sendButton.setTooltip(Optionull.map(cannotBuildReason, Report.CannotBuildReason::tooltip));
+	}
+
+	@Override
+	protected void repositionElements() {
+		this.layout.arrangeElements();
+		FrameLayout.centerInRectangle(this.layout, this.getRectangle());
 	}
 
 	protected void sendReport() {

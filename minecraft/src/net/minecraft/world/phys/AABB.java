@@ -412,6 +412,18 @@ public class AABB {
 		return new Vec3(Mth.lerp(0.5, this.minX, this.maxX), Mth.lerp(0.5, this.minY, this.maxY), Mth.lerp(0.5, this.minZ, this.maxZ));
 	}
 
+	public Vec3 getBottomCenter() {
+		return new Vec3(Mth.lerp(0.5, this.minX, this.maxX), this.minY, Mth.lerp(0.5, this.minZ, this.maxZ));
+	}
+
+	public Vec3 getMinPosition() {
+		return new Vec3(this.minX, this.minY, this.minZ);
+	}
+
+	public Vec3 getMaxPosition() {
+		return new Vec3(this.maxX, this.maxY, this.maxZ);
+	}
+
 	public static AABB ofSize(Vec3 vec3, double d, double e, double f) {
 		return new AABB(vec3.x - d / 2.0, vec3.y - e / 2.0, vec3.z - f / 2.0, vec3.x + d / 2.0, vec3.y + e / 2.0, vec3.z + f / 2.0);
 	}

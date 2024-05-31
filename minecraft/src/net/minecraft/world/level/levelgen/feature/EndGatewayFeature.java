@@ -4,7 +4,6 @@ import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.TheEndGatewayBlockEntity;
 import net.minecraft.world.level.levelgen.feature.configurations.EndGatewayConfiguration;
 
@@ -28,10 +27,8 @@ public class EndGatewayFeature extends Feature<EndGatewayConfiguration> {
 				BlockPos blockPos3 = blockPos2.immutable();
 				this.setBlock(worldGenLevel, blockPos3, Blocks.END_GATEWAY.defaultBlockState());
 				endGatewayConfiguration.getExit().ifPresent(blockPos2x -> {
-					BlockEntity blockEntity = worldGenLevel.getBlockEntity(blockPos3);
-					if (blockEntity instanceof TheEndGatewayBlockEntity theEndGatewayBlockEntity) {
+					if (worldGenLevel.getBlockEntity(blockPos3) instanceof TheEndGatewayBlockEntity theEndGatewayBlockEntity) {
 						theEndGatewayBlockEntity.setExitPosition(blockPos2x, endGatewayConfiguration.isExitExact());
-						blockEntity.setChanged();
 					}
 				});
 			} else if (bl2) {

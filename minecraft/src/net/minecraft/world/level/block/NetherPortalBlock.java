@@ -99,7 +99,7 @@ public class NetherPortalBlock extends Block implements Portal {
 
 	@Override
 	protected void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
-		if (entity.canChangeDimensions()) {
+		if (entity.canUsePortal(false)) {
 			entity.setAsInsidePortal(this, blockPos);
 		}
 	}
@@ -143,7 +143,7 @@ public class NetherPortalBlock extends Block implements Portal {
 				21,
 				blockPosx -> serverLevel.getBlockState(blockPosx) == blockState
 			);
-			postDimensionTransition = DimensionTransition.PLAY_NETHER_SOUND.then(entityx -> entityx.placePortalTicket(blockPos3));
+			postDimensionTransition = DimensionTransition.PLAY_PORTAL_SOUND.then(entityx -> entityx.placePortalTicket(blockPos3));
 		} else {
 			Direction.Axis axis = (Direction.Axis)entity.level().getBlockState(blockPos).getOptionalValue(AXIS).orElse(Direction.Axis.X);
 			Optional<BlockUtil.FoundRectangle> optional2 = serverLevel.getPortalForcer().createPortal(blockPos2, axis);
@@ -153,7 +153,7 @@ public class NetherPortalBlock extends Block implements Portal {
 			}
 
 			foundRectangle = (BlockUtil.FoundRectangle)optional2.get();
-			postDimensionTransition = DimensionTransition.PLAY_NETHER_SOUND.then(DimensionTransition.PLACE_PORTAL_TICKET);
+			postDimensionTransition = DimensionTransition.PLAY_PORTAL_SOUND.then(DimensionTransition.PLACE_PORTAL_TICKET);
 		}
 
 		return getDimensionTransitionFromExit(entity, blockPos, foundRectangle, serverLevel, postDimensionTransition);

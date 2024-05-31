@@ -546,8 +546,16 @@ public abstract class RenderType extends RenderStateShard {
 			.setShaderState(RENDERTYPE_LIGHTNING_SHADER)
 			.setWriteMaskState(COLOR_WRITE)
 			.setTransparencyState(LIGHTNING_TRANSPARENCY)
-			.setOutputState(WEATHER_TARGET)
 			.createCompositeState(false)
+	);
+	private static final RenderType DRAGON_RAYS_DEPTH = create(
+		"dragon_rays_depth",
+		DefaultVertexFormat.POSITION,
+		VertexFormat.Mode.TRIANGLES,
+		1536,
+		false,
+		false,
+		RenderType.CompositeState.builder().setShaderState(RenderStateShard.POSITION_SHADER).setWriteMaskState(DEPTH_WRITE).createCompositeState(false)
 	);
 	private static final RenderType TRIPWIRE = create("tripwire", DefaultVertexFormat.BLOCK, VertexFormat.Mode.QUADS, 1536, true, true, tripwireState());
 	private static final RenderType END_PORTAL = create(
@@ -995,6 +1003,10 @@ public abstract class RenderType extends RenderStateShard {
 
 	public static RenderType dragonRays() {
 		return DRAGON_RAYS;
+	}
+
+	public static RenderType dragonRaysDepth() {
+		return DRAGON_RAYS_DEPTH;
 	}
 
 	private static RenderType.CompositeState tripwireState() {

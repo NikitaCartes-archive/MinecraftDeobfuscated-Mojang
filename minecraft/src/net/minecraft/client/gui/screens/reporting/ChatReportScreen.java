@@ -4,30 +4,20 @@ import it.unimi.dsi.fastutil.ints.IntSet;
 import java.util.UUID;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.Optionull;
-import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.MultiLineEditBox;
-import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.client.gui.layouts.CommonLayouts;
-import net.minecraft.client.gui.layouts.FrameLayout;
-import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.chat.report.ChatReport;
-import net.minecraft.client.multiplayer.chat.report.Report;
 import net.minecraft.client.multiplayer.chat.report.ReportReason;
 import net.minecraft.client.multiplayer.chat.report.ReportingContext;
-import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 
 @Environment(EnvType.CLIENT)
 public class ChatReportScreen extends AbstractReportScreen<ChatReport.Builder> {
-	private static final int BUTTON_WIDTH = 120;
 	private static final Component TITLE = Component.translatable("gui.chatReport.title");
 	private static final Component SELECT_CHAT_MESSAGE = Component.translatable("gui.chatReport.select_chat");
-	private final LinearLayout layout = LinearLayout.vertical().spacing(8);
 	private MultiLineEditBox commentBox;
-	private Button sendButton;
 	private Button selectMessagesButton;
 	private Button selectReasonButton;
 
@@ -44,9 +34,7 @@ public class ChatReportScreen extends AbstractReportScreen<ChatReport.Builder> {
 	}
 
 	@Override
-	protected void init() {
-		this.layout.defaultCellSetting().alignHorizontallyCenter();
-		this.layout.addChild(new StringWidget(this.title, this.font));
+	protected void addContent() {
 		this.selectMessagesButton = this.layout
 			.addChild(
 				Button.builder(
@@ -72,23 +60,10 @@ public class ChatReportScreen extends AbstractReportScreen<ChatReport.Builder> {
 			this.onReportChanged();
 		});
 		this.layout.addChild(CommonLayouts.labeledElement(this.font, this.commentBox, MORE_COMMENTS_LABEL, layoutSettings -> layoutSettings.paddingBottom(12)));
-		LinearLayout linearLayout = this.layout.addChild(LinearLayout.horizontal().spacing(8));
-		linearLayout.addChild(Button.builder(CommonComponents.GUI_BACK, button -> this.onClose()).width(120).build());
-		this.sendButton = linearLayout.addChild(Button.builder(SEND_REPORT, button -> this.sendReport()).width(120).build());
-		this.layout.visitWidgets(guiEventListener -> {
-			AbstractWidget var10000 = this.addRenderableWidget(guiEventListener);
-		});
-		this.repositionElements();
-		this.onReportChanged();
 	}
 
 	@Override
-	protected void repositionElements() {
-		this.layout.arrangeElements();
-		FrameLayout.centerInRectangle(this.layout, this.getRectangle());
-	}
-
-	private void onReportChanged() {
+	protected void onReportChanged() {
 		IntSet intSet = this.reportBuilder.reportedMessages();
 		if (intSet.isEmpty()) {
 			this.selectMessagesButton.setMessage(SELECT_CHAT_MESSAGE);
@@ -103,9 +78,7 @@ public class ChatReportScreen extends AbstractReportScreen<ChatReport.Builder> {
 			this.selectReasonButton.setMessage(SELECT_REASON);
 		}
 
-		Report.CannotBuildReason cannotBuildReason = this.reportBuilder.checkBuildable();
-		this.sendButton.active = cannotBuildReason == null;
-		this.sendButton.setTooltip(Optionull.map(cannotBuildReason, Report.CannotBuildReason::tooltip));
+		super.onReportChanged();
 	}
 
 	@Override

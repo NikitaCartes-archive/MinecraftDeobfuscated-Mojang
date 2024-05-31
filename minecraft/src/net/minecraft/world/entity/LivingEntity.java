@@ -3249,8 +3249,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	}
 
 	@Override
-	public boolean canChangeDimensions() {
-		return super.canChangeDimensions() && !this.isSleeping();
+	public boolean canUsePortal(boolean bl) {
+		return super.canUsePortal(bl) && !this.isSleeping();
 	}
 
 	public Optional<BlockPos> getSleepingPos() {

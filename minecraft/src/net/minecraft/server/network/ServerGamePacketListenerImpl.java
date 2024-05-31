@@ -946,9 +946,9 @@ public class ServerGamePacketListenerImpl
 									&& !bl5
 									&& this.noBlocksAround(this.player);
 								this.player.serverLevel().getChunkSource().move(this.player);
-								this.player.doCheckFallDamage(this.player.getX() - i, this.player.getY() - j, this.player.getZ() - k, serverboundMovePlayerPacket.isOnGround());
 								Vec3 vec3 = new Vec3(this.player.getX() - i, this.player.getY() - j, this.player.getZ() - k);
 								this.player.setOnGroundWithMovement(serverboundMovePlayerPacket.isOnGround(), vec3);
+								this.player.doCheckFallDamage(this.player.getX() - i, this.player.getY() - j, this.player.getZ() - k, serverboundMovePlayerPacket.isOnGround());
 								this.player.setKnownMovement(vec3);
 								if (bl2) {
 									this.player.resetFallDistance();

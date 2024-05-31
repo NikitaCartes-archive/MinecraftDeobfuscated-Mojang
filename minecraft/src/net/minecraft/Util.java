@@ -312,40 +312,42 @@ public class Util {
 	}
 
 	public static <T> Predicate<T> allOf(List<? extends Predicate<T>> list) {
-		List<Predicate<T>> list2 = List.copyOf(list);
-
-		return switch (list2.size()) {
+		return switch (list.size()) {
 			case 0 -> object -> true;
-			case 1 -> (Predicate)list2.get(0);
-			case 2 -> ((Predicate)list2.get(0)).and((Predicate)list2.get(1));
-			default -> object -> {
-			for (Predicate<T> predicate : list2) {
-				if (!predicate.test(object)) {
-					return false;
-				}
-			}
+			case 1 -> (Predicate)list.get(0);
+			case 2 -> ((Predicate)list.get(0)).and((Predicate)list.get(1));
+			default -> {
+				Predicate<T>[] predicates = (Predicate<T>[])list.toArray(Predicate[]::new);
+				yield object -> {
+					for (Predicate<T> predicate : predicates) {
+						if (!predicate.test(object)) {
+							return false;
+						}
+					}
 
-			return true;
-		};
+					return true;
+				};
+			}
 		};
 	}
 
 	public static <T> Predicate<T> anyOf(List<? extends Predicate<T>> list) {
-		List<Predicate<T>> list2 = List.copyOf(list);
-
-		return switch (list2.size()) {
+		return switch (list.size()) {
 			case 0 -> object -> false;
-			case 1 -> (Predicate)list2.get(0);
-			case 2 -> ((Predicate)list2.get(0)).or((Predicate)list2.get(1));
-			default -> object -> {
-			for (Predicate<T> predicate : list2) {
-				if (predicate.test(object)) {
-					return true;
-				}
-			}
+			case 1 -> (Predicate)list.get(0);
+			case 2 -> ((Predicate)list.get(0)).or((Predicate)list.get(1));
+			default -> {
+				Predicate<T>[] predicates = (Predicate<T>[])list.toArray(Predicate[]::new);
+				yield object -> {
+					for (Predicate<T> predicate : predicates) {
+						if (predicate.test(object)) {
+							return true;
+						}
+					}
 
-			return false;
-		};
+					return false;
+				};
+			}
 		};
 	}
 

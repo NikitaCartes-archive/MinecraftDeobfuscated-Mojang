@@ -129,7 +129,7 @@ public class TransferableSelectionList extends ObjectSelectionList<TransferableS
 		}
 
 		private static MultiLineLabel cacheDescription(Minecraft minecraft, Component component) {
-			return MultiLineLabel.create(minecraft.font, component, 157, 2);
+			return MultiLineLabel.create(minecraft.font, 157, 2, component);
 		}
 
 		@Override

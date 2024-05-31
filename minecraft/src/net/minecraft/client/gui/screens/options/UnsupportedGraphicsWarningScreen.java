@@ -11,7 +11,6 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
-import net.minecraft.network.chat.FormattedText;
 
 @Environment(EnvType.CLIENT)
 public class UnsupportedGraphicsWarningScreen extends Screen {
@@ -19,7 +18,7 @@ public class UnsupportedGraphicsWarningScreen extends Screen {
 	private static final int BUTTON_MARGIN = 5;
 	private static final int BUTTON_HEIGHT = 20;
 	private final Component narrationMessage;
-	private final FormattedText message;
+	private final List<Component> message;
 	private final ImmutableList<UnsupportedGraphicsWarningScreen.ButtonOption> buttonOptions;
 	private MultiLineLabel messageLines = MultiLineLabel.EMPTY;
 	private int contentTop;
@@ -29,7 +28,7 @@ public class UnsupportedGraphicsWarningScreen extends Screen {
 		Component component, List<Component> list, ImmutableList<UnsupportedGraphicsWarningScreen.ButtonOption> immutableList
 	) {
 		super(component);
-		this.message = FormattedText.composite(list);
+		this.message = list;
 		this.narrationMessage = CommonComponents.joinForNarration(component, ComponentUtils.formatList(list, CommonComponents.EMPTY));
 		this.buttonOptions = immutableList;
 	}
@@ -47,7 +46,7 @@ public class UnsupportedGraphicsWarningScreen extends Screen {
 
 		int i = 5 + this.buttonWidth + 5;
 		int j = i * this.buttonOptions.size();
-		this.messageLines = MultiLineLabel.create(this.font, this.message, j);
+		this.messageLines = MultiLineLabel.create(this.font, j, (Component[])this.message.toArray(new Component[0]));
 		int k = this.messageLines.getLineCount() * 9;
 		this.contentTop = (int)((double)this.height / 2.0 - (double)k / 2.0);
 		int l = this.contentTop + k + 9 * 2;

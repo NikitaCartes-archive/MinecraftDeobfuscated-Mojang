@@ -70,6 +70,9 @@ public abstract class ProjectileWeaponItem extends Item {
 				this.shootProjectile(livingEntity, projectile, l, f, g, m, livingEntity2);
 				serverLevel.addFreshEntity(projectile);
 				itemStack.hurtAndBreak(this.getDurabilityUse(itemStack2), livingEntity, LivingEntity.getSlotForHand(interactionHand));
+				if (itemStack.isEmpty()) {
+					break;
+				}
 			}
 		}
 	}

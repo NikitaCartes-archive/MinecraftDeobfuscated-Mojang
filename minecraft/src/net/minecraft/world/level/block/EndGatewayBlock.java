@@ -1,6 +1,5 @@
 package net.minecraft.world.level.block;
 
-import com.mojang.logging.LogUtils;
 import com.mojang.serialization.MapCodec;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
@@ -21,12 +20,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.portal.DimensionTransition;
 import net.minecraft.world.phys.Vec3;
-import org.slf4j.Logger;
 
 public class EndGatewayBlock extends BaseEntityBlock implements Portal {
 	public static final MapCodec<EndGatewayBlock> CODEC = simpleCodec(EndGatewayBlock::new);
-	private static final Logger LOGGER = LogUtils.getLogger();
-	private static final int GATEWAY_HEIGHT_ABOVE_SURFACE = 10;
 
 	@Override
 	public MapCodec<EndGatewayBlock> codec() {
@@ -89,7 +85,7 @@ public class EndGatewayBlock extends BaseEntityBlock implements Portal {
 
 	@Override
 	protected void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
-		if (entity.canChangeDimensions()
+		if (entity.canUsePortal(false)
 			&& !level.isClientSide
 			&& level.getBlockEntity(blockPos) instanceof TheEndGatewayBlockEntity theEndGatewayBlockEntity
 			&& !theEndGatewayBlockEntity.isCoolingDown()) {

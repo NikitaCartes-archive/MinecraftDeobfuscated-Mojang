@@ -91,7 +91,7 @@ public interface Leashable {
 
 			if (entity.tickCount > 100) {
 				entity.spawnAtLocation(Items.LEAD);
-				leashData.delayedLeashInfo = null;
+				entity.setLeashData(null);
 			}
 		}
 	}

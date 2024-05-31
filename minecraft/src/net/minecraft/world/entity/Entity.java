@@ -2129,12 +2129,16 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 		if (this.level() instanceof ServerLevel serverLevel) {
 			this.processPortalCooldown();
 			if (this.portalProcess != null) {
-				if (this.portalProcess.processPortalTeleportation(serverLevel, this, this.canChangeDimensions())) {
+				if (this.portalProcess.processPortalTeleportation(serverLevel, this, this.canUsePortal(false))) {
 					serverLevel.getProfiler().push("portal");
 					this.setPortalCooldown();
 					DimensionTransition dimensionTransition = this.portalProcess.getPortalDestination(serverLevel, this);
-					if (dimensionTransition != null && serverLevel.getServer().isLevelEnabled(dimensionTransition.newLevel())) {
-						this.changeDimension(dimensionTransition);
+					if (dimensionTransition != null) {
+						ServerLevel serverLevel2 = dimensionTransition.newLevel();
+						if (serverLevel.getServer().isLevelEnabled(serverLevel2)
+							&& (serverLevel2.dimension() == serverLevel.dimension() || this.canChangeDimensions(serverLevel, serverLevel2))) {
+							this.changeDimension(dimensionTransition);
+						}
 					}
 
 					serverLevel.getProfiler().pop();
@@ -2570,14 +2574,21 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 
 	protected void removeAfterChangingDimensions() {
 		this.setRemoved(Entity.RemovalReason.CHANGED_DIMENSION);
+		if (this instanceof Leashable leashable) {
+			leashable.dropLeash(true, false);
+		}
 	}
 
 	public Vec3 getRelativePortalPosition(Direction.Axis axis, BlockUtil.FoundRectangle foundRectangle) {
 		return PortalShape.getRelativePosition(foundRectangle, axis, this.position(), this.getDimensions(this.getPose()));
 	}
 
-	public boolean canChangeDimensions() {
-		return !this.isPassenger() && this.isAlive();
+	public boolean canUsePortal(boolean bl) {
+		return (bl || !this.isPassenger()) && this.isAlive();
+	}
+
+	public boolean canChangeDimensions(Level level, Level level2) {
+		return true;
 	}
 
 	public float getBlockExplosionResistance(

@@ -29,6 +29,7 @@ public class NameReport extends Report {
 	public NameReport copy() {
 		NameReport nameReport = new NameReport(this.reportId, this.createdAt, this.reportedProfileId, this.reportedName);
 		nameReport.comments = this.comments;
+		nameReport.attested = this.attested;
 		return nameReport;
 	}
 
@@ -55,7 +56,7 @@ public class NameReport extends Report {
 		@Nullable
 		@Override
 		public Report.CannotBuildReason checkBuildable() {
-			return this.report.comments.length() > this.limits.maxOpinionCommentsLength() ? Report.CannotBuildReason.COMMENT_TOO_LONG : null;
+			return this.report.comments.length() > this.limits.maxOpinionCommentsLength() ? Report.CannotBuildReason.COMMENT_TOO_LONG : super.checkBuildable();
 		}
 
 		@Override

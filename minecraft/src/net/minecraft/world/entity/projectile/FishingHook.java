@@ -542,7 +542,7 @@ public class FishingHook extends Projectile {
 	}
 
 	@Override
-	public boolean canChangeDimensions() {
+	public boolean canUsePortal(boolean bl) {
 		return false;
 	}
 

@@ -15,13 +15,11 @@ import net.fabricmc.api.Environment;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CommonButtons;
 import net.minecraft.client.gui.components.LogoRenderer;
-import net.minecraft.client.gui.components.MultiLineLabel;
 import net.minecraft.client.gui.components.PlainTextButton;
 import net.minecraft.client.gui.components.SplashRenderer;
 import net.minecraft.client.gui.components.SpriteIconButton;
@@ -61,8 +59,6 @@ public class TitleScreen extends Screen {
 	private float panoramaFade = 1.0F;
 	private boolean fading;
 	private long fadeInStart;
-	@Nullable
-	private TitleScreen.WarningLabel warningLabel;
 	private final LogoRenderer logoRenderer;
 
 	public TitleScreen() {
@@ -285,10 +281,6 @@ public class TitleScreen extends Screen {
 		if ((k & -67108864) != 0) {
 			super.render(guiGraphics, i, j, f);
 			this.logoRenderer.renderLogo(guiGraphics, this.width, g);
-			if (this.warningLabel != null) {
-				this.warningLabel.render(guiGraphics, k);
-			}
-
 			if (this.splash != null && !this.minecraft.options.hideSplashTexts().get()) {
 				this.splash.render(guiGraphics, this.width, this.font, k);
 			}
@@ -360,13 +352,5 @@ public class TitleScreen extends Screen {
 		}
 
 		this.minecraft.setScreen(this);
-	}
-
-	@Environment(EnvType.CLIENT)
-	static record WarningLabel(Font font, MultiLineLabel label, int x, int y) {
-		public void render(GuiGraphics guiGraphics, int i) {
-			this.label.renderBackgroundCentered(guiGraphics, this.x, this.y, 9, 2, 2097152 | Math.min(i, 1426063360));
-			this.label.renderCentered(guiGraphics, this.x, this.y, 9, 16777215 | i);
-		}
 	}
 }

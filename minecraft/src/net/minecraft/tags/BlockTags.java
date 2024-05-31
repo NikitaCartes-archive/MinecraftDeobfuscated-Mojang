@@ -13,6 +13,7 @@ public final class BlockTags {
 	public static final TagKey<Block> BUTTONS = create("buttons");
 	public static final TagKey<Block> WOOL_CARPETS = create("wool_carpets");
 	public static final TagKey<Block> WOODEN_DOORS = create("wooden_doors");
+	public static final TagKey<Block> MOB_INTERACTABLE_DOORS = create("mob_interactable_doors");
 	public static final TagKey<Block> WOODEN_STAIRS = create("wooden_stairs");
 	public static final TagKey<Block> WOODEN_SLABS = create("wooden_slabs");
 	public static final TagKey<Block> WOODEN_FENCES = create("wooden_fences");

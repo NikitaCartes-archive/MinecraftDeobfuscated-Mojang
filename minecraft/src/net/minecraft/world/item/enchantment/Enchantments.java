@@ -1054,7 +1054,7 @@ public class Enchantments {
 						SoundEvents.WIND_CHARGE_BURST
 					),
 					LootItemEntityPropertyCondition.hasProperties(
-						LootContext.EntityTarget.ATTACKER,
+						LootContext.EntityTarget.DIRECT_ATTACKER,
 						EntityPredicate.Builder.entity()
 							.flags(EntityFlagsPredicate.Builder.flags().setIsFlying(false))
 							.moving(MovementPredicate.fallDistance(MinMaxBounds.Doubles.atLeast(1.5)))

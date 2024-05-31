@@ -60,9 +60,9 @@ public record SpawnParticlesEffect(
 		float g = entity.getBbHeight();
 		serverLevel.sendParticles(
 			this.particle,
-			this.horizontalPosition.getCoordinate(vec3.x(), f, randomSource),
-			this.verticalPosition.getCoordinate(vec3.y(), g, randomSource),
-			this.horizontalPosition.getCoordinate(vec3.z(), f, randomSource),
+			this.horizontalPosition.getCoordinate(vec3.x(), vec3.x(), f, randomSource),
+			this.verticalPosition.getCoordinate(vec3.y(), vec3.y() + (double)(g / 2.0F), g, randomSource),
+			this.horizontalPosition.getCoordinate(vec3.z(), vec3.z(), f, randomSource),
 			0,
 			this.horizontalVelocity.getVelocity(vec32.x(), randomSource),
 			this.verticalVelocity.getVelocity(vec32.y(), randomSource),
@@ -91,14 +91,14 @@ public record SpawnParticlesEffect(
 						: DataResult.success(positionSource)
 			);
 
-		public double getCoordinate(double d, float f, RandomSource randomSource) {
-			return this.type.getCoordinate(d, f * this.scale, randomSource) + (double)this.offset;
+		public double getCoordinate(double d, double e, float f, RandomSource randomSource) {
+			return this.type.getCoordinate(d, e, f * this.scale, randomSource) + (double)this.offset;
 		}
 	}
 
 	public static enum PositionSourceType implements StringRepresentable {
-		ENTITY_POSITION("entity_position", (d, f, randomSource) -> d),
-		BOUNDING_BOX("in_bounding_box", (d, f, randomSource) -> d + (randomSource.nextDouble() - 0.5) * (double)f);
+		ENTITY_POSITION("entity_position", (d, e, f, randomSource) -> d),
+		BOUNDING_BOX("in_bounding_box", (d, e, f, randomSource) -> e + (randomSource.nextDouble() - 0.5) * (double)f);
 
 		public static final Codec<SpawnParticlesEffect.PositionSourceType> CODEC = StringRepresentable.fromEnum(SpawnParticlesEffect.PositionSourceType::values);
 		private final String id;
@@ -109,8 +109,8 @@ public record SpawnParticlesEffect(
 			this.source = coordinateSource;
 		}
 
-		public double getCoordinate(double d, float f, RandomSource randomSource) {
-			return this.source.getCoordinate(d, f, randomSource);
+		public double getCoordinate(double d, double e, float f, RandomSource randomSource) {
+			return this.source.getCoordinate(d, e, f, randomSource);
 		}
 
 		@Override
@@ -120,7 +120,7 @@ public record SpawnParticlesEffect(
 
 		@FunctionalInterface
 		interface CoordinateSource {
-			double getCoordinate(double d, float f, RandomSource randomSource);
+			double getCoordinate(double d, double e, float f, RandomSource randomSource);
 		}
 	}
 

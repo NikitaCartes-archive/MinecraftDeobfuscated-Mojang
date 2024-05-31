@@ -1079,6 +1079,11 @@ public class Options {
 		return this.soundDevice;
 	}
 
+	public void onboardingAccessibilityFinished() {
+		this.onboardAccessibility = false;
+		this.save();
+	}
+
 	public Options(Minecraft minecraft, File file) {
 		this.minecraft = minecraft;
 		this.optionsFile = new File(file, "options.txt");

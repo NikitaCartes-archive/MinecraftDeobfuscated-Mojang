@@ -12,7 +12,6 @@ import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
 public class Checkbox extends AbstractButton {
@@ -25,11 +24,27 @@ public class Checkbox extends AbstractButton {
 	private static final int BOX_PADDING = 8;
 	private boolean selected;
 	private final Checkbox.OnValueChange onValueChange;
+	private final MultiLineTextWidget textWidget;
 
-	Checkbox(int i, int j, Component component, Font font, boolean bl, Checkbox.OnValueChange onValueChange) {
-		super(i, j, getBoxSize(font) + 4 + font.width(component), getBoxSize(font), component);
+	Checkbox(int i, int j, int k, Component component, Font font, boolean bl, Checkbox.OnValueChange onValueChange) {
+		super(i, j, 0, 0, component);
+		this.width = this.getAdjustedWidth(k, component, font);
+		this.textWidget = new MultiLineTextWidget(component, font).setMaxWidth(this.width).setColor(14737632);
+		this.height = this.getAdjustedHeight(font);
 		this.selected = bl;
 		this.onValueChange = onValueChange;
+	}
+
+	private int getAdjustedWidth(int i, Component component, Font font) {
+		return Math.min(getDefaultWidth(component, font), i);
+	}
+
+	private int getAdjustedHeight(Font font) {
+		return Math.max(getBoxSize(font), this.textWidget.getHeight());
+	}
+
+	static int getDefaultWidth(Component component, Font font) {
+		return getBoxSize(font) + 4 + font.width(component);
 	}
 
 	public static Checkbox.Builder builder(Component component, Font font) {
@@ -77,17 +92,18 @@ public class Checkbox extends AbstractButton {
 		}
 
 		int k = getBoxSize(font);
-		int l = this.getX() + k + 4;
-		int m = this.getY() + (this.height >> 1) - (9 >> 1);
 		guiGraphics.blitSprite(resourceLocation, this.getX(), this.getY(), k, k);
-		guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
-		guiGraphics.drawString(font, this.getMessage(), l, m, 14737632 | Mth.ceil(this.alpha * 255.0F) << 24);
+		int l = this.getX() + k + 4;
+		int m = this.getY() + k / 2 - this.textWidget.getHeight() / 2;
+		this.textWidget.setPosition(l, m);
+		this.textWidget.renderWidget(guiGraphics, i, j, f);
 	}
 
 	@Environment(EnvType.CLIENT)
 	public static class Builder {
 		private final Component message;
 		private final Font font;
+		private int maxWidth;
 		private int x = 0;
 		private int y = 0;
 		private Checkbox.OnValueChange onValueChange = Checkbox.OnValueChange.NOP;
@@ -100,6 +116,7 @@ public class Checkbox extends AbstractButton {
 		Builder(Component component, Font font) {
 			this.message = component;
 			this.font = font;
+			this.maxWidth = Checkbox.getDefaultWidth(component, font);
 		}
 
 		public Checkbox.Builder pos(int i, int j) {
@@ -130,12 +147,17 @@ public class Checkbox extends AbstractButton {
 			return this;
 		}
 
+		public Checkbox.Builder maxWidth(int i) {
+			this.maxWidth = i;
+			return this;
+		}
+
 		public Checkbox build() {
 			Checkbox.OnValueChange onValueChange = this.option == null ? this.onValueChange : (checkboxx, bl) -> {
 				this.option.set(bl);
 				this.onValueChange.onValueChange(checkboxx, bl);
 			};
-			Checkbox checkbox = new Checkbox(this.x, this.y, this.message, this.font, this.selected, onValueChange);
+			Checkbox checkbox = new Checkbox(this.x, this.y, this.maxWidth, this.message, this.font, this.selected, onValueChange);
 			checkbox.setTooltip(this.tooltip);
 			return checkbox;
 		}

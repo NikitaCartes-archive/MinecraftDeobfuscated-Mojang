@@ -22,6 +22,7 @@ public interface PlacementModifierType<P extends PlacementModifier> {
 	PlacementModifierType<InSquarePlacement> IN_SQUARE = register("in_square", InSquarePlacement.CODEC);
 	PlacementModifierType<RandomOffsetPlacement> RANDOM_OFFSET = register("random_offset", RandomOffsetPlacement.CODEC);
 	PlacementModifierType<CarvingMaskPlacement> CARVING_MASK_PLACEMENT = register("carving_mask", CarvingMaskPlacement.CODEC);
+	PlacementModifierType<FixedPlacement> FIXED_PLACEMENT = register("fixed_placement", FixedPlacement.CODEC);
 
 	MapCodec<P> codec();
 

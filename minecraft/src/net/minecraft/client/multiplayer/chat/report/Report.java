@@ -20,6 +20,7 @@ public abstract class Report {
 	protected String comments = "";
 	@Nullable
 	protected ReportReason reason;
+	protected boolean attested;
 
 	public Report(UUID uUID, Instant instant, UUID uUID2) {
 		this.reportId = uUID;
@@ -57,6 +58,10 @@ public abstract class Report {
 			return this.report.comments;
 		}
 
+		public boolean attested() {
+			return this.report().attested;
+		}
+
 		public void setComments(String string) {
 			this.report.comments = string;
 		}
@@ -70,10 +75,16 @@ public abstract class Report {
 			this.report.reason = reportReason;
 		}
 
+		public void setAttested(boolean bl) {
+			this.report.attested = bl;
+		}
+
 		public abstract boolean hasContent();
 
 		@Nullable
-		public abstract Report.CannotBuildReason checkBuildable();
+		public Report.CannotBuildReason checkBuildable() {
+			return !this.report().attested ? Report.CannotBuildReason.NOT_ATTESTED : null;
+		}
 
 		public abstract Either<Report.Result, Report.CannotBuildReason> build(ReportingContext reportingContext);
 	}
@@ -86,6 +97,7 @@ public abstract class Report {
 		);
 		public static final Report.CannotBuildReason TOO_MANY_MESSAGES = new Report.CannotBuildReason(Component.translatable("gui.chatReport.send.too_many_messages"));
 		public static final Report.CannotBuildReason COMMENT_TOO_LONG = new Report.CannotBuildReason(Component.translatable("gui.abuseReport.send.comment_too_long"));
+		public static final Report.CannotBuildReason NOT_ATTESTED = new Report.CannotBuildReason(Component.translatable("gui.abuseReport.send.not_attested"));
 
 		public Tooltip tooltip() {
 			return Tooltip.create(this.message);

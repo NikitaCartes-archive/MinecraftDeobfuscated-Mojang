@@ -89,16 +89,18 @@ public class AccessibilityOnboardingScreen extends Screen {
 
 	@Override
 	public void onClose() {
-		this.close(this.onClose);
+		this.close(true, this.onClose);
 	}
 
 	private void closeAndSetScreen(Screen screen) {
-		this.close(() -> this.minecraft.setScreen(screen));
+		this.close(false, () -> this.minecraft.setScreen(screen));
 	}
 
-	private void close(Runnable runnable) {
-		this.options.onboardAccessibility = false;
-		this.options.save();
+	private void close(boolean bl, Runnable runnable) {
+		if (bl) {
+			this.options.onboardingAccessibilityFinished();
+		}
+
 		Narrator.getNarrator().clear();
 		runnable.run();
 	}

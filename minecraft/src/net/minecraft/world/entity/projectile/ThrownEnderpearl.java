@@ -53,7 +53,7 @@ public class ThrownEnderpearl extends ThrowableItemProjectile {
 			Entity entity = this.getOwner();
 			if (entity != null && isAllowedToTeleportOwner(entity, serverLevel)) {
 				if (entity.isPassenger()) {
-					this.unRide();
+					entity.unRide();
 				}
 
 				if (entity instanceof ServerPlayer serverPlayer) {
@@ -94,7 +94,7 @@ public class ThrownEnderpearl extends ThrowableItemProjectile {
 		if (entity.level().dimension() == level.dimension()) {
 			return !(entity instanceof LivingEntity livingEntity) ? entity.isAlive() : livingEntity.isAlive() && !livingEntity.isSleeping();
 		} else {
-			return entity.canChangeDimensions();
+			return entity.canUsePortal(true);
 		}
 	}
 
@@ -110,5 +110,12 @@ public class ThrownEnderpearl extends ThrowableItemProjectile {
 
 	private void playSound(Level level, Vec3 vec3) {
 		level.playSound(null, vec3.x, vec3.y, vec3.z, SoundEvents.PLAYER_TELEPORT, SoundSource.PLAYERS);
+	}
+
+	@Override
+	public boolean canChangeDimensions(Level level, Level level2) {
+		return level.dimension() == Level.END && this.getOwner() instanceof ServerPlayer serverPlayer
+			? super.canChangeDimensions(level, level2) && serverPlayer.seenCredits
+			: super.canChangeDimensions(level, level2);
 	}
 }

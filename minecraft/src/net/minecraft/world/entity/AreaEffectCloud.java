@@ -217,7 +217,7 @@ public class AreaEffectCloud extends Entity implements TraceableEntity {
 					List<LivingEntity> list2 = this.level().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox());
 					if (!list2.isEmpty()) {
 						for (LivingEntity livingEntity : list2) {
-							if (!this.victims.containsKey(livingEntity) && livingEntity.isAffectedByPotions()) {
+							if (!this.victims.containsKey(livingEntity) && livingEntity.isAffectedByPotions() && !list.stream().noneMatch(livingEntity::canBeAffected)) {
 								double m = livingEntity.getX() - this.getX();
 								double n = livingEntity.getZ() - this.getZ();
 								double o = m * m + n * n;

@@ -24,7 +24,7 @@ public class MultiLineTextWidget extends AbstractStringWidget {
 		super(i, j, 0, 0, component, font);
 		this.cache = Util.singleKeyCache(
 			cacheKey -> cacheKey.maxRows.isPresent()
-					? MultiLineLabel.create(font, cacheKey.message, cacheKey.maxWidth, cacheKey.maxRows.getAsInt())
+					? MultiLineLabel.create(font, cacheKey.maxWidth, cacheKey.maxRows.getAsInt(), cacheKey.message)
 					: MultiLineLabel.create(font, cacheKey.message, cacheKey.maxWidth)
 		);
 		this.active = false;

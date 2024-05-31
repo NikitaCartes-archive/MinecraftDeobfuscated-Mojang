@@ -19,7 +19,6 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.ToDoubleFunction;
 import javax.annotation.Nullable;
-import net.minecraft.Util;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.advancements.critereon.WrappedMinMaxBounds;
 import net.minecraft.commands.arguments.selector.options.EntitySelectorOptions;
@@ -147,7 +146,7 @@ public class EntitySelectorParser {
 			this.maxResults,
 			this.includesEntities,
 			this.worldLimited,
-			Util.allOf(this.predicates),
+			List.copyOf(this.predicates),
 			this.distance,
 			function,
 			aABB,

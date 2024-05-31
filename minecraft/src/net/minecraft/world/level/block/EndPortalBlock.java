@@ -16,6 +16,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.TheEndPortalBlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.feature.EndPlatformFeature;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.portal.DimensionTransition;
 import net.minecraft.world.phys.Vec3;
@@ -49,7 +50,7 @@ public class EndPortalBlock extends BaseEntityBlock implements Portal {
 
 	@Override
 	protected void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
-		if (entity.canChangeDimensions()
+		if (entity.canUsePortal(false)
 			&& Shapes.joinIsNotEmpty(
 				Shapes.create(entity.getBoundingBox().move((double)(-blockPos.getX()), (double)(-blockPos.getY()), (double)(-blockPos.getZ()))),
 				blockState.getShape(level, blockPos),
@@ -72,7 +73,7 @@ public class EndPortalBlock extends BaseEntityBlock implements Portal {
 		BlockPos blockPos2 = bl ? ServerLevel.END_SPAWN_POINT : serverLevel2.getSharedSpawnPos();
 		Vec3 vec3 = blockPos2.getBottomCenter();
 		if (bl) {
-			this.createEndPlatform(serverLevel2, BlockPos.containing(vec3).below());
+			EndPlatformFeature.createEndPlatform(serverLevel2, BlockPos.containing(vec3).below(), true);
 			if (entity instanceof ServerPlayer) {
 				vec3 = vec3.subtract(0.0, 1.0, 0.0);
 			}
@@ -84,24 +85,14 @@ public class EndPortalBlock extends BaseEntityBlock implements Portal {
 			vec3 = entity.adjustSpawnLocation(serverLevel2, blockPos2).getBottomCenter();
 		}
 
-		return new DimensionTransition(serverLevel2, vec3, entity.getDeltaMovement(), entity.getYRot(), entity.getXRot(), DimensionTransition.PLACE_PORTAL_TICKET);
-	}
-
-	private void createEndPlatform(ServerLevel serverLevel, BlockPos blockPos) {
-		BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
-
-		for (int i = -2; i <= 2; i++) {
-			for (int j = -2; j <= 2; j++) {
-				for (int k = -1; k < 3; k++) {
-					BlockPos blockPos2 = mutableBlockPos.set(blockPos).move(j, k, i);
-					Block block = k == -1 ? Blocks.OBSIDIAN : Blocks.AIR;
-					if (!serverLevel.getBlockState(blockPos2).is(block)) {
-						serverLevel.destroyBlock(blockPos2, true, null);
-						serverLevel.setBlockAndUpdate(blockPos2, block.defaultBlockState());
-					}
-				}
-			}
-		}
+		return new DimensionTransition(
+			serverLevel2,
+			vec3,
+			entity.getDeltaMovement(),
+			entity.getYRot(),
+			entity.getXRot(),
+			DimensionTransition.PLAY_PORTAL_SOUND.then(DimensionTransition.PLACE_PORTAL_TICKET)
+		);
 	}
 
 	@Override

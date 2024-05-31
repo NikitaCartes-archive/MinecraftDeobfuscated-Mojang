@@ -452,7 +452,7 @@ public final class ItemStack implements DataComponentHolder {
 	public ItemStack hurtAndConvertOnBreak(int i, ItemLike itemLike, LivingEntity livingEntity, EquipmentSlot equipmentSlot) {
 		this.hurtAndBreak(i, livingEntity, equipmentSlot);
 		if (this.isEmpty()) {
-			ItemStack itemStack = this.transmuteCopyIgnoreEmpty(itemLike, this.getCount());
+			ItemStack itemStack = this.transmuteCopyIgnoreEmpty(itemLike, 1);
 			if (itemStack.isDamageableItem()) {
 				itemStack.setDamageValue(0);
 			}

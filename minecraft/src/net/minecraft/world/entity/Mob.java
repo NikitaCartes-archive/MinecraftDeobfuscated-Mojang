@@ -1481,7 +1481,6 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Leashab
 	@Override
 	protected void removeAfterChangingDimensions() {
 		super.removeAfterChangingDimensions();
-		this.dropLeash(true, false);
 		this.getAllSlots().forEach(itemStack -> {
 			if (!itemStack.isEmpty()) {
 				itemStack.setCount(0);

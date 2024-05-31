@@ -18,7 +18,7 @@ public record DimensionTransition(
 ) {
 	public static final DimensionTransition.PostDimensionTransition DO_NOTHING = entity -> {
 	};
-	public static final DimensionTransition.PostDimensionTransition PLAY_NETHER_SOUND = DimensionTransition::playNetherSound;
+	public static final DimensionTransition.PostDimensionTransition PLAY_PORTAL_SOUND = DimensionTransition::playPortalSound;
 	public static final DimensionTransition.PostDimensionTransition PLACE_PORTAL_TICKET = DimensionTransition::placePortalTicket;
 
 	public DimensionTransition(
@@ -31,7 +31,7 @@ public record DimensionTransition(
 		this(serverLevel, findAdjustedSharedSpawnPos(serverLevel, entity), Vec3.ZERO, 0.0F, 0.0F, false, postDimensionTransition);
 	}
 
-	private static void playNetherSound(Entity entity) {
+	private static void playPortalSound(Entity entity) {
 		if (entity instanceof ServerPlayer serverPlayer) {
 			serverPlayer.connection.send(new ClientboundLevelEventPacket(1032, BlockPos.ZERO, 0, false));
 		}

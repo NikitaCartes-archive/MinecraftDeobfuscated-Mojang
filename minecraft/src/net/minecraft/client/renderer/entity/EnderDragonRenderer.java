@@ -71,47 +71,10 @@ public class EnderDragonRenderer extends EntityRenderer<EnderDragon> {
 		this.model.renderToBuffer(poseStack, vertexConsumer3, i, OverlayTexture.NO_OVERLAY);
 		if (enderDragon.dragonDeathTime > 0) {
 			float m = ((float)enderDragon.dragonDeathTime + g) / 200.0F;
-			float n = Math.min(m > 0.8F ? (m - 0.8F) / 0.2F : 0.0F, 1.0F);
-			int o = FastColor.ARGB32.colorFromFloat(1.0F - n, 1.0F, 1.0F, 1.0F);
-			int p = 16711935;
-			RandomSource randomSource = RandomSource.create(432L);
-			VertexConsumer vertexConsumer4 = multiBufferSource.getBuffer(RenderType.dragonRays());
 			poseStack.pushPose();
 			poseStack.translate(0.0F, -1.0F, -2.0F);
-			Vector3f vector3f = new Vector3f();
-			Vector3f vector3f2 = new Vector3f();
-			Vector3f vector3f3 = new Vector3f();
-			Vector3f vector3f4 = new Vector3f();
-			Quaternionf quaternionf = new Quaternionf();
-			int q = Mth.floor((m + m * m) / 2.0F * 60.0F);
-
-			for (int r = 0; r < q; r++) {
-				quaternionf.rotationXYZ(
-						randomSource.nextFloat() * (float) (Math.PI * 2), randomSource.nextFloat() * (float) (Math.PI * 2), randomSource.nextFloat() * (float) (Math.PI * 2)
-					)
-					.rotateXYZ(
-						randomSource.nextFloat() * (float) (Math.PI * 2),
-						randomSource.nextFloat() * (float) (Math.PI * 2),
-						randomSource.nextFloat() * (float) (Math.PI * 2) + m * (float) (Math.PI / 2)
-					);
-				poseStack.mulPose(quaternionf);
-				float s = randomSource.nextFloat() * 20.0F + 5.0F + n * 10.0F;
-				float t = randomSource.nextFloat() * 2.0F + 1.0F + n * 2.0F;
-				vector3f2.set(-HALF_SQRT_3 * t, s, -0.5F * t);
-				vector3f3.set(HALF_SQRT_3 * t, s, -0.5F * t);
-				vector3f4.set(0.0F, s, t);
-				PoseStack.Pose pose = poseStack.last();
-				vertexConsumer4.addVertex(pose, vector3f).setColor(o);
-				vertexConsumer4.addVertex(pose, vector3f2).setColor(16711935);
-				vertexConsumer4.addVertex(pose, vector3f3).setColor(16711935);
-				vertexConsumer4.addVertex(pose, vector3f).setColor(o);
-				vertexConsumer4.addVertex(pose, vector3f3).setColor(16711935);
-				vertexConsumer4.addVertex(pose, vector3f4).setColor(16711935);
-				vertexConsumer4.addVertex(pose, vector3f).setColor(o);
-				vertexConsumer4.addVertex(pose, vector3f4).setColor(16711935);
-				vertexConsumer4.addVertex(pose, vector3f2).setColor(16711935);
-			}
-
+			renderRays(poseStack, m, multiBufferSource.getBuffer(RenderType.dragonRays()));
+			renderRays(poseStack, m, multiBufferSource.getBuffer(RenderType.dragonRaysDepth()));
 			poseStack.popPose();
 		}
 
@@ -120,12 +83,55 @@ public class EnderDragonRenderer extends EntityRenderer<EnderDragon> {
 			poseStack.pushPose();
 			float m = (float)(enderDragon.nearestCrystal.getX() - Mth.lerp((double)g, enderDragon.xo, enderDragon.getX()));
 			float n = (float)(enderDragon.nearestCrystal.getY() - Mth.lerp((double)g, enderDragon.yo, enderDragon.getY()));
-			float u = (float)(enderDragon.nearestCrystal.getZ() - Mth.lerp((double)g, enderDragon.zo, enderDragon.getZ()));
-			renderCrystalBeams(m, n + EndCrystalRenderer.getY(enderDragon.nearestCrystal, g), u, g, enderDragon.tickCount, poseStack, multiBufferSource, i);
+			float o = (float)(enderDragon.nearestCrystal.getZ() - Mth.lerp((double)g, enderDragon.zo, enderDragon.getZ()));
+			renderCrystalBeams(m, n + EndCrystalRenderer.getY(enderDragon.nearestCrystal, g), o, g, enderDragon.tickCount, poseStack, multiBufferSource, i);
 			poseStack.popPose();
 		}
 
 		super.render(enderDragon, f, g, poseStack, multiBufferSource, i);
+	}
+
+	private static void renderRays(PoseStack poseStack, float f, VertexConsumer vertexConsumer) {
+		poseStack.pushPose();
+		float g = Math.min(f > 0.8F ? (f - 0.8F) / 0.2F : 0.0F, 1.0F);
+		int i = FastColor.ARGB32.colorFromFloat(1.0F - g, 1.0F, 1.0F, 1.0F);
+		int j = 16711935;
+		RandomSource randomSource = RandomSource.create(432L);
+		Vector3f vector3f = new Vector3f();
+		Vector3f vector3f2 = new Vector3f();
+		Vector3f vector3f3 = new Vector3f();
+		Vector3f vector3f4 = new Vector3f();
+		Quaternionf quaternionf = new Quaternionf();
+		int k = Mth.floor((f + f * f) / 2.0F * 60.0F);
+
+		for (int l = 0; l < k; l++) {
+			quaternionf.rotationXYZ(
+					randomSource.nextFloat() * (float) (Math.PI * 2), randomSource.nextFloat() * (float) (Math.PI * 2), randomSource.nextFloat() * (float) (Math.PI * 2)
+				)
+				.rotateXYZ(
+					randomSource.nextFloat() * (float) (Math.PI * 2),
+					randomSource.nextFloat() * (float) (Math.PI * 2),
+					randomSource.nextFloat() * (float) (Math.PI * 2) + f * (float) (Math.PI / 2)
+				);
+			poseStack.mulPose(quaternionf);
+			float h = randomSource.nextFloat() * 20.0F + 5.0F + g * 10.0F;
+			float m = randomSource.nextFloat() * 2.0F + 1.0F + g * 2.0F;
+			vector3f2.set(-HALF_SQRT_3 * m, h, -0.5F * m);
+			vector3f3.set(HALF_SQRT_3 * m, h, -0.5F * m);
+			vector3f4.set(0.0F, h, m);
+			PoseStack.Pose pose = poseStack.last();
+			vertexConsumer.addVertex(pose, vector3f).setColor(i);
+			vertexConsumer.addVertex(pose, vector3f2).setColor(16711935);
+			vertexConsumer.addVertex(pose, vector3f3).setColor(16711935);
+			vertexConsumer.addVertex(pose, vector3f).setColor(i);
+			vertexConsumer.addVertex(pose, vector3f3).setColor(16711935);
+			vertexConsumer.addVertex(pose, vector3f4).setColor(16711935);
+			vertexConsumer.addVertex(pose, vector3f).setColor(i);
+			vertexConsumer.addVertex(pose, vector3f4).setColor(16711935);
+			vertexConsumer.addVertex(pose, vector3f2).setColor(16711935);
+		}
+
+		poseStack.popPose();
 	}
 
 	public static void renderCrystalBeams(float f, float g, float h, float i, int j, PoseStack poseStack, MultiBufferSource multiBufferSource, int k) {

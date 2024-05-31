@@ -1,41 +1,34 @@
 package net.minecraft.client.gui.components;
 
-import com.google.common.collect.ImmutableList;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.FormattedText;
 import net.minecraft.util.FormattedCharSequence;
 
 @Environment(EnvType.CLIENT)
 public interface MultiLineLabel {
 	MultiLineLabel EMPTY = new MultiLineLabel() {
 		@Override
-		public int renderCentered(GuiGraphics guiGraphics, int i, int j) {
-			return j;
+		public void renderCentered(GuiGraphics guiGraphics, int i, int j) {
 		}
 
 		@Override
-		public int renderCentered(GuiGraphics guiGraphics, int i, int j, int k, int l) {
-			return j;
+		public void renderCentered(GuiGraphics guiGraphics, int i, int j, int k, int l) {
 		}
 
 		@Override
-		public int renderLeftAligned(GuiGraphics guiGraphics, int i, int j, int k, int l) {
-			return j;
+		public void renderLeftAligned(GuiGraphics guiGraphics, int i, int j, int k, int l) {
 		}
 
 		@Override
 		public int renderLeftAlignedNoShadow(GuiGraphics guiGraphics, int i, int j, int k, int l) {
 			return j;
-		}
-
-		@Override
-		public void renderBackgroundCentered(GuiGraphics guiGraphics, int i, int j, int k, int l, int m) {
 		}
 
 		@Override
@@ -49,134 +42,109 @@ public interface MultiLineLabel {
 		}
 	};
 
-	static MultiLineLabel create(Font font, FormattedText formattedText, int i) {
-		return createFixed(
-			font,
-			(List<MultiLineLabel.TextWithWidth>)font.split(formattedText, i)
-				.stream()
-				.map(formattedCharSequence -> new MultiLineLabel.TextWithWidth(formattedCharSequence, font.width(formattedCharSequence)))
-				.collect(ImmutableList.toImmutableList())
-		);
-	}
-
-	static MultiLineLabel create(Font font, FormattedText formattedText, int i, int j) {
-		return createFixed(
-			font,
-			(List<MultiLineLabel.TextWithWidth>)font.split(formattedText, i)
-				.stream()
-				.limit((long)j)
-				.map(formattedCharSequence -> new MultiLineLabel.TextWithWidth(formattedCharSequence, font.width(formattedCharSequence)))
-				.collect(ImmutableList.toImmutableList())
-		);
-	}
-
 	static MultiLineLabel create(Font font, Component... components) {
-		return createFixed(
-			font,
-			(List<MultiLineLabel.TextWithWidth>)Arrays.stream(components)
-				.map(Component::getVisualOrderText)
-				.map(formattedCharSequence -> new MultiLineLabel.TextWithWidth(formattedCharSequence, font.width(formattedCharSequence)))
-				.collect(ImmutableList.toImmutableList())
-		);
+		return create(font, Integer.MAX_VALUE, Integer.MAX_VALUE, components);
 	}
 
-	static MultiLineLabel create(Font font, List<Component> list) {
-		return createFixed(
-			font,
-			(List<MultiLineLabel.TextWithWidth>)list.stream()
-				.map(Component::getVisualOrderText)
-				.map(formattedCharSequence -> new MultiLineLabel.TextWithWidth(formattedCharSequence, font.width(formattedCharSequence)))
-				.collect(ImmutableList.toImmutableList())
-		);
+	static MultiLineLabel create(Font font, int i, Component... components) {
+		return create(font, i, Integer.MAX_VALUE, components);
 	}
 
-	static MultiLineLabel createFixed(Font font, List<MultiLineLabel.TextWithWidth> list) {
-		return list.isEmpty() ? EMPTY : new MultiLineLabel() {
-			private final int width = list.stream().mapToInt(textWithWidth -> textWithWidth.width).max().orElse(0);
+	static MultiLineLabel create(Font font, Component component, int i) {
+		return create(font, i, Integer.MAX_VALUE, component);
+	}
+
+	static MultiLineLabel create(Font font, int i, int j, Component... components) {
+		return components.length == 0 ? EMPTY : new MultiLineLabel() {
+			@Nullable
+			private List<MultiLineLabel.TextAndWidth> cachedTextAndWidth;
+			@Nullable
+			private Language splitWithLanguage;
 
 			@Override
-			public int renderCentered(GuiGraphics guiGraphics, int i, int j) {
-				return this.renderCentered(guiGraphics, i, j, 9, 16777215);
+			public void renderCentered(GuiGraphics guiGraphics, int i, int j) {
+				this.renderCentered(guiGraphics, i, j, 9, -1);
 			}
 
 			@Override
-			public int renderCentered(GuiGraphics guiGraphics, int i, int j, int k, int l) {
+			public void renderCentered(GuiGraphics guiGraphics, int i, int j, int k, int l) {
 				int m = j;
 
-				for (MultiLineLabel.TextWithWidth textWithWidth : list) {
-					guiGraphics.drawString(font, textWithWidth.text, i - textWithWidth.width / 2, m, l);
+				for (MultiLineLabel.TextAndWidth textAndWidth : this.getSplitMessage()) {
+					guiGraphics.drawCenteredString(font, textAndWidth.text, i, m, l);
 					m += k;
 				}
-
-				return m;
 			}
 
 			@Override
-			public int renderLeftAligned(GuiGraphics guiGraphics, int i, int j, int k, int l) {
+			public void renderLeftAligned(GuiGraphics guiGraphics, int i, int j, int k, int l) {
 				int m = j;
 
-				for (MultiLineLabel.TextWithWidth textWithWidth : list) {
-					guiGraphics.drawString(font, textWithWidth.text, i, m, l);
+				for (MultiLineLabel.TextAndWidth textAndWidth : this.getSplitMessage()) {
+					guiGraphics.drawString(font, textAndWidth.text, i, m, l);
 					m += k;
 				}
-
-				return m;
 			}
 
 			@Override
 			public int renderLeftAlignedNoShadow(GuiGraphics guiGraphics, int i, int j, int k, int l) {
 				int m = j;
 
-				for (MultiLineLabel.TextWithWidth textWithWidth : list) {
-					guiGraphics.drawString(font, textWithWidth.text, i, m, l, false);
+				for (MultiLineLabel.TextAndWidth textAndWidth : this.getSplitMessage()) {
+					guiGraphics.drawString(font, textAndWidth.text, i, m, l, false);
 					m += k;
 				}
 
 				return m;
 			}
 
-			@Override
-			public void renderBackgroundCentered(GuiGraphics guiGraphics, int i, int j, int k, int l, int m) {
-				int n = list.stream().mapToInt(textWithWidth -> textWithWidth.width).max().orElse(0);
-				if (n > 0) {
-					guiGraphics.fill(i - n / 2 - l, j - l, i + n / 2 + l, j + list.size() * k + l, m);
+			private List<MultiLineLabel.TextAndWidth> getSplitMessage() {
+				Language language = Language.getInstance();
+				if (this.cachedTextAndWidth != null && language == this.splitWithLanguage) {
+					return this.cachedTextAndWidth;
+				} else {
+					this.splitWithLanguage = language;
+					List<FormattedCharSequence> list = new ArrayList();
+
+					for (Component component : components) {
+						list.addAll(font.split(component, i));
+					}
+
+					this.cachedTextAndWidth = new ArrayList();
+
+					for (FormattedCharSequence formattedCharSequence : list.subList(0, Math.min(list.size(), j))) {
+						this.cachedTextAndWidth.add(new MultiLineLabel.TextAndWidth(formattedCharSequence, font.width(formattedCharSequence)));
+					}
+
+					return this.cachedTextAndWidth;
 				}
 			}
 
 			@Override
 			public int getLineCount() {
-				return list.size();
+				return this.getSplitMessage().size();
 			}
 
 			@Override
 			public int getWidth() {
-				return this.width;
+				return Math.min(i, this.getSplitMessage().stream().mapToInt(MultiLineLabel.TextAndWidth::width).max().orElse(0));
 			}
 		};
 	}
 
-	int renderCentered(GuiGraphics guiGraphics, int i, int j);
+	void renderCentered(GuiGraphics guiGraphics, int i, int j);
 
-	int renderCentered(GuiGraphics guiGraphics, int i, int j, int k, int l);
+	void renderCentered(GuiGraphics guiGraphics, int i, int j, int k, int l);
 
-	int renderLeftAligned(GuiGraphics guiGraphics, int i, int j, int k, int l);
+	void renderLeftAligned(GuiGraphics guiGraphics, int i, int j, int k, int l);
 
 	int renderLeftAlignedNoShadow(GuiGraphics guiGraphics, int i, int j, int k, int l);
-
-	void renderBackgroundCentered(GuiGraphics guiGraphics, int i, int j, int k, int l, int m);
 
 	int getLineCount();
 
 	int getWidth();
 
 	@Environment(EnvType.CLIENT)
-	public static class TextWithWidth {
-		final FormattedCharSequence text;
-		final int width;
-
-		TextWithWidth(FormattedCharSequence formattedCharSequence, int i) {
-			this.text = formattedCharSequence;
-			this.width = i;
-		}
+	public static record TextAndWidth(FormattedCharSequence text, int width) {
 	}
 }

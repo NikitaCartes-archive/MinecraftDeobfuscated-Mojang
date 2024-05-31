@@ -103,6 +103,7 @@ import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.NeutralMob;
+import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.RelativeMovement;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -283,14 +284,14 @@ public class ServerPlayer extends Player {
 		this.server = minecraftServer;
 		this.stats = minecraftServer.getPlayerList().getPlayerStats(this);
 		this.advancements = minecraftServer.getPlayerList().getPlayerAdvancements(this);
-		this.moveTo(this.adjustSpawnLocation(serverLevel, serverLevel.getSharedSpawnPos()), 0.0F, 0.0F);
+		this.moveTo(this.adjustSpawnLocation(serverLevel, serverLevel.getSharedSpawnPos()).getBottomCenter(), 0.0F, 0.0F);
 		this.updateOptions(clientInformation);
 		this.object = null;
 	}
 
 	@Override
 	public BlockPos adjustSpawnLocation(ServerLevel serverLevel, BlockPos blockPos) {
-		AABB aABB = this.getBoundingBox().move(this.getBoundingBox().getCenter().scale(-1.0));
+		AABB aABB = this.getDimensions(Pose.STANDING).makeBoundingBox(Vec3.ZERO);
 		BlockPos blockPos2 = blockPos;
 		if (serverLevel.dimensionType().hasSkyLight() && serverLevel.getServer().getWorldData().getGameType() != GameType.ADVENTURE) {
 			int i = Math.max(0, this.server.getSpawnRadius(serverLevel));
@@ -314,7 +315,7 @@ public class ServerPlayer extends Player {
 				int r = q % (i * 2 + 1);
 				int s = q / (i * 2 + 1);
 				blockPos2 = PlayerRespawnLogic.getOverworldRespawnPos(serverLevel, blockPos.getX() + r - i, blockPos.getZ() + s - i);
-				if (blockPos2 != null && serverLevel.noCollision(this, aABB.move(blockPos2))) {
+				if (blockPos2 != null && serverLevel.noCollision(this, aABB.move(blockPos2.getBottomCenter()))) {
 					return blockPos2;
 				}
 			}
@@ -322,8 +323,12 @@ public class ServerPlayer extends Player {
 			blockPos2 = blockPos;
 		}
 
-		while (!serverLevel.noCollision(this, aABB.move(blockPos2)) && this.getY() < (double)(serverLevel.getMaxBuildHeight() - 1)) {
-			blockPos2 = BlockPos.containing(blockPos2.getCenter().add(0.0, 1.0, 0.0));
+		while (!serverLevel.noCollision(this, aABB.move(blockPos2.getBottomCenter())) && blockPos2.getY() < serverLevel.getMaxBuildHeight() - 1) {
+			blockPos2 = blockPos2.above();
+		}
+
+		while (serverLevel.noCollision(this, aABB.move(blockPos2.below().getBottomCenter())) && blockPos2.getY() > serverLevel.getMinBuildHeight() + 1) {
+			blockPos2 = blockPos2.below();
 		}
 
 		return blockPos2;

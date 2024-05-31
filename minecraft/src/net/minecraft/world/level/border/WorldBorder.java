@@ -10,6 +10,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -29,33 +30,44 @@ public class WorldBorder {
 	public static final WorldBorder.Settings DEFAULT_SETTINGS = new WorldBorder.Settings(0.0, 0.0, 0.2, 5.0, 5, 15, 5.999997E7F, 0L, 0.0);
 
 	public boolean isWithinBounds(BlockPos blockPos) {
-		return (double)(blockPos.getX() + 1) > this.getMinX()
-			&& (double)blockPos.getX() < this.getMaxX()
-			&& (double)(blockPos.getZ() + 1) > this.getMinZ()
-			&& (double)blockPos.getZ() < this.getMaxZ();
+		return this.isWithinBounds((double)blockPos.getX(), (double)blockPos.getZ());
+	}
+
+	public boolean isWithinBounds(Vec3 vec3) {
+		return this.isWithinBounds(vec3.x, vec3.z);
 	}
 
 	public boolean isWithinBounds(ChunkPos chunkPos) {
-		return (double)chunkPos.getMaxBlockX() > this.getMinX()
-			&& (double)chunkPos.getMinBlockX() < this.getMaxX()
-			&& (double)chunkPos.getMaxBlockZ() > this.getMinZ()
-			&& (double)chunkPos.getMinBlockZ() < this.getMaxZ();
-	}
-
-	public boolean isWithinBounds(double d, double e) {
-		return d > this.getMinX() && d < this.getMaxX() && e > this.getMinZ() && e < this.getMaxZ();
-	}
-
-	public boolean isWithinBounds(double d, double e, double f) {
-		return d > this.getMinX() - f && d < this.getMaxX() + f && e > this.getMinZ() - f && e < this.getMaxZ() + f;
+		return this.isWithinBounds((double)chunkPos.getMinBlockX(), (double)chunkPos.getMinBlockZ())
+			&& this.isWithinBounds((double)chunkPos.getMaxBlockX(), (double)chunkPos.getMaxBlockZ());
 	}
 
 	public boolean isWithinBounds(AABB aABB) {
-		return aABB.maxX > this.getMinX() && aABB.minX < this.getMaxX() && aABB.maxZ > this.getMinZ() && aABB.minZ < this.getMaxZ();
+		return this.isWithinBounds(aABB.minX, aABB.minZ, aABB.maxX - 1.0E-5F, aABB.maxZ - 1.0E-5F);
+	}
+
+	private boolean isWithinBounds(double d, double e, double f, double g) {
+		return this.isWithinBounds(d, e) && this.isWithinBounds(f, g);
+	}
+
+	public boolean isWithinBounds(double d, double e) {
+		return this.isWithinBounds(d, e, 0.0);
+	}
+
+	public boolean isWithinBounds(double d, double e, double f) {
+		return d >= this.getMinX() - f && d < this.getMaxX() + f && e >= this.getMinZ() - f && e < this.getMaxZ() + f;
+	}
+
+	public BlockPos clampToBounds(BlockPos blockPos) {
+		return this.clampToBounds((double)blockPos.getX(), (double)blockPos.getY(), (double)blockPos.getZ());
+	}
+
+	public BlockPos clampToBounds(Vec3 vec3) {
+		return this.clampToBounds(vec3.x(), vec3.y(), vec3.z());
 	}
 
 	public BlockPos clampToBounds(double d, double e, double f) {
-		return BlockPos.containing(Mth.clamp(d, this.getMinX(), this.getMaxX()), e, Mth.clamp(f, this.getMinZ(), this.getMaxZ()));
+		return BlockPos.containing(Mth.clamp(d, this.getMinX(), this.getMaxX() - 1.0), e, Mth.clamp(f, this.getMinZ(), this.getMaxZ() - 1.0));
 	}
 
 	public double getDistanceToBorder(Entity entity) {

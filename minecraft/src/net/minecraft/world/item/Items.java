@@ -120,7 +120,7 @@ public class Items {
 	public static final Item RAW_IRON_BLOCK = registerBlock(Blocks.RAW_IRON_BLOCK);
 	public static final Item RAW_COPPER_BLOCK = registerBlock(Blocks.RAW_COPPER_BLOCK);
 	public static final Item RAW_GOLD_BLOCK = registerBlock(Blocks.RAW_GOLD_BLOCK);
-	public static final Item HEAVY_CORE = registerBlock(Blocks.HEAVY_CORE);
+	public static final Item HEAVY_CORE = registerBlock(new BlockItem(Blocks.HEAVY_CORE, new Item.Properties().rarity(Rarity.EPIC)));
 	public static final Item AMETHYST_BLOCK = registerBlock(Blocks.AMETHYST_BLOCK);
 	public static final Item BUDDING_AMETHYST = registerBlock(Blocks.BUDDING_AMETHYST);
 	public static final Item IRON_BLOCK = registerBlock(Blocks.IRON_BLOCK);
@@ -1499,7 +1499,13 @@ public class Items {
 	);
 	public static final Item MACE = registerItem(
 		"mace",
-		new MaceItem(new Item.Properties().durability(500).component(DataComponents.TOOL, MaceItem.createToolProperties()).attributes(MaceItem.createAttributes()))
+		new MaceItem(
+			new Item.Properties()
+				.rarity(Rarity.EPIC)
+				.durability(500)
+				.component(DataComponents.TOOL, MaceItem.createToolProperties())
+				.attributes(MaceItem.createAttributes())
+		)
 	);
 	public static final Item ITEM_FRAME = registerItem("item_frame", new ItemFrameItem(EntityType.ITEM_FRAME, new Item.Properties()));
 	public static final Item GLOW_ITEM_FRAME = registerItem("glow_item_frame", new ItemFrameItem(EntityType.GLOW_ITEM_FRAME, new Item.Properties()));
@@ -1778,7 +1784,11 @@ public class Items {
 	public static final Item TRIDENT = registerItem(
 		"trident",
 		new TridentItem(
-			new Item.Properties().durability(250).attributes(TridentItem.createAttributes()).component(DataComponents.TOOL, TridentItem.createToolProperties())
+			new Item.Properties()
+				.rarity(Rarity.EPIC)
+				.durability(250)
+				.attributes(TridentItem.createAttributes())
+				.component(DataComponents.TOOL, TridentItem.createToolProperties())
 		)
 	);
 	public static final Item PHANTOM_MEMBRANE = registerItem("phantom_membrane", new Item(new Item.Properties()));
@@ -1810,13 +1820,13 @@ public class Items {
 		"globe_banner_pattern", new BannerPatternItem(BannerPatternTags.PATTERN_ITEM_GLOBE, new Item.Properties().stacksTo(1))
 	);
 	public static final Item PIGLIN_BANNER_PATTERN = registerItem(
-		"piglin_banner_pattern", new BannerPatternItem(BannerPatternTags.PATTERN_ITEM_PIGLIN, new Item.Properties().stacksTo(1))
+		"piglin_banner_pattern", new BannerPatternItem(BannerPatternTags.PATTERN_ITEM_PIGLIN, new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON))
 	);
 	public static final Item FLOW_BANNER_PATTERN = registerItem(
-		"flow_banner_pattern", new BannerPatternItem(BannerPatternTags.PATTERN_ITEM_FLOW, new Item.Properties().stacksTo(1))
+		"flow_banner_pattern", new BannerPatternItem(BannerPatternTags.PATTERN_ITEM_FLOW, new Item.Properties().stacksTo(1).rarity(Rarity.RARE))
 	);
 	public static final Item GUSTER_BANNER_PATTERN = registerItem(
-		"guster_banner_pattern", new BannerPatternItem(BannerPatternTags.PATTERN_ITEM_GUSTER, new Item.Properties().stacksTo(1))
+		"guster_banner_pattern", new BannerPatternItem(BannerPatternTags.PATTERN_ITEM_GUSTER, new Item.Properties().stacksTo(1).rarity(Rarity.RARE))
 	);
 	public static final Item GOAT_HORN = registerItem("goat_horn", new InstrumentItem(new Item.Properties().stacksTo(1), InstrumentTags.GOAT_HORNS));
 	public static final Item COMPOSTER = registerBlock(Blocks.COMPOSTER);
