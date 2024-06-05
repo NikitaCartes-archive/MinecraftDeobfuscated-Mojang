@@ -84,7 +84,7 @@ public class ItemFrameRenderer<T extends ItemFrame> extends EntityRenderer<T> {
 		}
 
 		if (!itemStack.isEmpty()) {
-			MapId mapId = itemFrame.getFramedMapId();
+			MapId mapId = itemFrame.getFramedMapId(itemStack);
 			if (bl) {
 				poseStack.translate(0.0F, 0.0F, 0.5F);
 			} else {

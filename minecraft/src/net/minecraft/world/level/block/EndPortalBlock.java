@@ -2,6 +2,7 @@ package net.minecraft.world.level.block;
 
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
@@ -69,30 +70,31 @@ public class EndPortalBlock extends BaseEntityBlock implements Portal {
 	public DimensionTransition getPortalDestination(ServerLevel serverLevel, Entity entity, BlockPos blockPos) {
 		ResourceKey<Level> resourceKey = serverLevel.dimension() == Level.END ? Level.OVERWORLD : Level.END;
 		ServerLevel serverLevel2 = serverLevel.getServer().getLevel(resourceKey);
-		boolean bl = resourceKey == Level.END;
-		BlockPos blockPos2 = bl ? ServerLevel.END_SPAWN_POINT : serverLevel2.getSharedSpawnPos();
-		Vec3 vec3 = blockPos2.getBottomCenter();
-		if (bl) {
-			EndPlatformFeature.createEndPlatform(serverLevel2, BlockPos.containing(vec3).below(), true);
-			if (entity instanceof ServerPlayer) {
-				vec3 = vec3.subtract(0.0, 1.0, 0.0);
-			}
+		if (serverLevel2 == null) {
+			return null;
 		} else {
-			if (entity instanceof ServerPlayer serverPlayer) {
-				return serverPlayer.findRespawnPositionAndUseSpawnBlock(false, DimensionTransition.DO_NOTHING);
+			boolean bl = resourceKey == Level.END;
+			BlockPos blockPos2 = bl ? ServerLevel.END_SPAWN_POINT : serverLevel2.getSharedSpawnPos();
+			Vec3 vec3 = blockPos2.getBottomCenter();
+			float f = entity.getYRot();
+			if (bl) {
+				EndPlatformFeature.createEndPlatform(serverLevel2, BlockPos.containing(vec3).below(), true);
+				f = Direction.WEST.toYRot();
+				if (entity instanceof ServerPlayer) {
+					vec3 = vec3.subtract(0.0, 1.0, 0.0);
+				}
+			} else {
+				if (entity instanceof ServerPlayer serverPlayer) {
+					return serverPlayer.findRespawnPositionAndUseSpawnBlock(false, DimensionTransition.DO_NOTHING);
+				}
+
+				vec3 = entity.adjustSpawnLocation(serverLevel2, blockPos2).getBottomCenter();
 			}
 
-			vec3 = entity.adjustSpawnLocation(serverLevel2, blockPos2).getBottomCenter();
+			return new DimensionTransition(
+				serverLevel2, vec3, entity.getDeltaMovement(), f, entity.getXRot(), DimensionTransition.PLAY_PORTAL_SOUND.then(DimensionTransition.PLACE_PORTAL_TICKET)
+			);
 		}
-
-		return new DimensionTransition(
-			serverLevel2,
-			vec3,
-			entity.getDeltaMovement(),
-			entity.getYRot(),
-			entity.getXRot(),
-			DimensionTransition.PLAY_PORTAL_SOUND.then(DimensionTransition.PLACE_PORTAL_TICKET)
-		);
 	}
 
 	@Override

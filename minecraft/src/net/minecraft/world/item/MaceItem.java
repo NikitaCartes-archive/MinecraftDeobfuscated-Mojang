@@ -63,7 +63,14 @@ public class MaceItem extends Item {
 	public boolean hurtEnemy(ItemStack itemStack, LivingEntity livingEntity, LivingEntity livingEntity2) {
 		if (livingEntity2 instanceof ServerPlayer serverPlayer && canSmashAttack(serverPlayer)) {
 			ServerLevel serverLevel = (ServerLevel)livingEntity2.level();
-			serverPlayer.currentImpulseImpactPos = serverPlayer.position();
+			if (serverPlayer.isIgnoringFallDamageFromCurrentImpulse() && serverPlayer.currentImpulseImpactPos != null) {
+				if (serverPlayer.currentImpulseImpactPos.y > serverPlayer.position().y) {
+					serverPlayer.currentImpulseImpactPos = serverPlayer.position();
+				}
+			} else {
+				serverPlayer.currentImpulseImpactPos = serverPlayer.position();
+			}
+
 			serverPlayer.setIgnoreFallDamageFromCurrentImpulse(true);
 			serverPlayer.setDeltaMovement(serverPlayer.getDeltaMovement().with(Direction.Axis.Y, 0.01F));
 			serverPlayer.connection.send(new ClientboundSetEntityMotionPacket(serverPlayer));

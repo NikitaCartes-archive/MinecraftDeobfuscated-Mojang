@@ -708,6 +708,12 @@ public class GameTestHelper {
 		this.succeedWhen(() -> this.assertEntityData(blockPos, entityType, function, object));
 	}
 
+	public void assertEntityPosition(Entity entity, AABB aABB, String string) {
+		if (!aABB.contains(this.relativeVec(entity.position()))) {
+			this.fail(string);
+		}
+	}
+
 	public <E extends Entity> void assertEntityProperty(E entity, Predicate<E> predicate, String string) {
 		if (!predicate.test(entity)) {
 			throw new GameTestAssertException("Entity " + entity + " failed " + string + " test");

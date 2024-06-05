@@ -895,7 +895,8 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 			for (float g : fs) {
 				Vec3 vec33 = collideWithShapes(new Vec3(vec3.x, (double)g, vec3.z), aABB2, list2);
 				if (vec33.horizontalDistanceSqr() > vec32.horizontalDistanceSqr()) {
-					return vec33;
+					double d = aABB.minY - aABB2.minY;
+					return vec33.add(0.0, -d, 0.0);
 				}
 			}
 		}

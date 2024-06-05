@@ -210,7 +210,7 @@ public class ItemFrame extends HangingEntity {
 	}
 
 	private void removeFramedMap(ItemStack itemStack) {
-		MapId mapId = this.getFramedMapId();
+		MapId mapId = this.getFramedMapId(itemStack);
 		if (mapId != null) {
 			MapItemSavedData mapItemSavedData = MapItem.getSavedData(mapId, this.level());
 			if (mapItemSavedData != null) {
@@ -227,8 +227,8 @@ public class ItemFrame extends HangingEntity {
 	}
 
 	@Nullable
-	public MapId getFramedMapId() {
-		return this.getItem().get(DataComponents.MAP_ID);
+	public MapId getFramedMapId(ItemStack itemStack) {
+		return itemStack.get(DataComponents.MAP_ID);
 	}
 
 	public boolean hasFramedMap() {

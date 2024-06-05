@@ -14,6 +14,8 @@ import net.minecraft.world.item.Items;
 
 public interface Leashable {
 	String LEASH_TAG = "leash";
+	double LEASH_TOO_FAR_DIST = 10.0;
+	double LEASH_ELASTIC_DIST = 6.0;
 
 	@Nullable
 	Leashable.LeashData getLeashData();
@@ -60,17 +62,19 @@ public interface Leashable {
 	default void writeLeashData(CompoundTag compoundTag, @Nullable Leashable.LeashData leashData) {
 		if (leashData != null) {
 			Either<UUID, BlockPos> either = leashData.delayedLeashInfo;
-			if (leashData.leashHolder instanceof LivingEntity) {
-				either = Either.left(leashData.leashHolder.getUUID());
-			} else if (leashData.leashHolder instanceof LeashFenceKnotEntity leashFenceKnotEntity) {
+			if (leashData.leashHolder instanceof LeashFenceKnotEntity leashFenceKnotEntity) {
 				either = Either.right(leashFenceKnotEntity.getPos());
+			} else if (leashData.leashHolder != null) {
+				either = Either.left(leashData.leashHolder.getUUID());
 			}
 
-			compoundTag.put("leash", either.map(uUID -> {
-				CompoundTag compoundTagx = new CompoundTag();
-				compoundTagx.putUUID("UUID", uUID);
-				return compoundTagx;
-			}, NbtUtils::writeBlockPos));
+			if (either != null) {
+				compoundTag.put("leash", either.map(uUID -> {
+					CompoundTag compoundTagx = new CompoundTag();
+					compoundTagx.putUUID("UUID", uUID);
+					return compoundTagx;
+				}, NbtUtils::writeBlockPos));
+			}
 		}
 	}
 
@@ -132,13 +136,10 @@ public interface Leashable {
 					return;
 				}
 
-				if (f > 10.0F) {
+				if ((double)f > 10.0) {
 					entity.leashTooFarBehaviour();
-				} else if (f > 6.0F) {
-					double d = (entity2.getX() - entity.getX()) / (double)f;
-					double e = (entity2.getY() - entity.getY()) / (double)f;
-					double g = (entity2.getZ() - entity.getZ()) / (double)f;
-					entity.setDeltaMovement(entity.getDeltaMovement().add(Math.copySign(d * d * 0.4, d), Math.copySign(e * e * 0.4, e), Math.copySign(g * g * 0.4, g)));
+				} else if ((double)f > 6.0) {
+					entity.elasticRangeLeashBehaviour(entity2, f);
 					entity.checkSlowFallDistance();
 				} else {
 					entity.closeRangeLeashBehaviour(entity2);
@@ -156,6 +157,17 @@ public interface Leashable {
 	}
 
 	default void closeRangeLeashBehaviour(Entity entity) {
+	}
+
+	default void elasticRangeLeashBehaviour(Entity entity, float f) {
+		legacyElasticRangeLeashBehaviour((Entity)this, entity, f);
+	}
+
+	private static <E extends Entity & Leashable> void legacyElasticRangeLeashBehaviour(E entity, Entity entity2, float f) {
+		double d = (entity2.getX() - entity.getX()) / (double)f;
+		double e = (entity2.getY() - entity.getY()) / (double)f;
+		double g = (entity2.getZ() - entity.getZ()) / (double)f;
+		entity.setDeltaMovement(entity.getDeltaMovement().add(Math.copySign(d * d * 0.4, d), Math.copySign(e * e * 0.4, e), Math.copySign(g * g * 0.4, g)));
 	}
 
 	default void setLeashedTo(Entity entity, boolean bl) {

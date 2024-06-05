@@ -12,22 +12,22 @@ public class SharedConstants {
 	@Deprecated
 	public static final boolean SNAPSHOT = true;
 	@Deprecated
-	public static final int WORLD_VERSION = 3949;
+	public static final int WORLD_VERSION = 3950;
 	@Deprecated
 	public static final String SERIES = "main";
 	@Deprecated
-	public static final String VERSION_STRING = "1.21-pre2";
+	public static final String VERSION_STRING = "1.21-pre3";
 	@Deprecated
 	public static final int RELEASE_NETWORK_PROTOCOL_VERSION = 767;
 	@Deprecated
-	public static final int SNAPSHOT_NETWORK_PROTOCOL_VERSION = 200;
+	public static final int SNAPSHOT_NETWORK_PROTOCOL_VERSION = 201;
 	public static final int SNBT_NAG_VERSION = 3937;
 	private static final int SNAPSHOT_PROTOCOL_BIT = 30;
 	public static final boolean CRASH_EAGERLY = true;
 	@Deprecated
 	public static final int RESOURCE_PACK_FORMAT = 34;
 	@Deprecated
-	public static final int DATA_PACK_FORMAT = 47;
+	public static final int DATA_PACK_FORMAT = 48;
 	@Deprecated
 	public static final int LANGUAGE_FORMAT = 1;
 	public static final int REPORT_FORMAT_VERSION = 1;
@@ -44,6 +44,7 @@ public class SharedConstants {
 	public static final boolean DEBUG_WATER = false;
 	public static final boolean DEBUG_HEIGHTMAP = false;
 	public static final boolean DEBUG_COLLISION = false;
+	public static final boolean DEBUG_SHOW_LOCAL_SERVER_ENTITY_HIT_BOXES = false;
 	public static final boolean DEBUG_SUPPORT_BLOCKS = false;
 	public static final boolean DEBUG_SHAPES = false;
 	public static final boolean DEBUG_NEIGHBORSUPDATE = false;
@@ -160,7 +161,7 @@ public class SharedConstants {
 	}
 
 	public static int getProtocolVersion() {
-		return 1073742024;
+		return 1073742025;
 	}
 
 	public static boolean debugVoidTerrain(ChunkPos chunkPos) {

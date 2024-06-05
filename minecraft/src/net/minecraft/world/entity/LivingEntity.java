@@ -1,5 +1,6 @@
 package net.minecraft.world.entity;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -2028,7 +2029,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		return this.hasEffect(MobEffects.JUMP) ? 0.1F * ((float)this.getEffect(MobEffects.JUMP).getAmplifier() + 1.0F) : 0.0F;
 	}
 
-	protected void jumpFromGround() {
+	@VisibleForTesting
+	public void jumpFromGround() {
 		float f = this.getJumpPower();
 		if (!(f <= 1.0E-5F)) {
 			Vec3 vec3 = this.getDeltaMovement();

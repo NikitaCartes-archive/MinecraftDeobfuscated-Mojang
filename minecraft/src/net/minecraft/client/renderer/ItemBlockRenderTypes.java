@@ -274,7 +274,6 @@ public class ItemBlockRenderTypes {
 		hashMap.put(Blocks.SPORE_BLOSSOM, renderType3);
 		hashMap.put(Blocks.FLOWERING_AZALEA, renderType3);
 		hashMap.put(Blocks.AZALEA, renderType3);
-		hashMap.put(Blocks.MOSS_CARPET, renderType3);
 		hashMap.put(Blocks.PINK_PETALS, renderType3);
 		hashMap.put(Blocks.BIG_DRIPLEAF, renderType3);
 		hashMap.put(Blocks.BIG_DRIPLEAF_STEM, renderType3);

@@ -24,13 +24,16 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.culling.Frustum;
+import net.minecraft.client.renderer.debug.DebugRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.resources.PlayerSkin;
 import net.minecraft.client.resources.model.ModelBakery;
+import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraft.util.FastColor;
@@ -163,7 +166,7 @@ public class EntityRenderDispatcher implements ResourceManagerReloadListener {
 			}
 
 			if (this.renderHitBoxes && !entity.isInvisible() && !Minecraft.getInstance().showOnlyReducedInfo()) {
-				renderHitbox(poseStack, multiBufferSource.getBuffer(RenderType.lines()), entity, h);
+				renderHitbox(poseStack, multiBufferSource.getBuffer(RenderType.lines()), entity, h, 1.0F, 1.0F, 1.0F);
 			}
 
 			poseStack.popPose();
@@ -180,20 +183,46 @@ public class EntityRenderDispatcher implements ResourceManagerReloadListener {
 		}
 	}
 
-	private static void renderHitbox(PoseStack poseStack, VertexConsumer vertexConsumer, Entity entity, float f) {
+	private static void renderServerSideHitbox(PoseStack poseStack, Entity entity, MultiBufferSource multiBufferSource) {
+		Entity entity2 = getServerSideEntity(entity);
+		if (entity2 == null) {
+			DebugRenderer.renderFloatingText(poseStack, multiBufferSource, "Missing", entity.getX(), entity.getBoundingBox().maxY + 1.5, entity.getZ(), -65536);
+		} else {
+			poseStack.pushPose();
+			poseStack.translate(entity2.getX() - entity.getX(), entity2.getY() - entity.getY(), entity2.getZ() - entity.getZ());
+			renderHitbox(poseStack, multiBufferSource.getBuffer(RenderType.lines()), entity2, 1.0F, 0.0F, 1.0F, 0.0F);
+			renderVector(poseStack, multiBufferSource.getBuffer(RenderType.lines()), new Vector3f(), entity2.getDeltaMovement(), -256);
+			poseStack.popPose();
+		}
+	}
+
+	@Nullable
+	private static Entity getServerSideEntity(Entity entity) {
+		IntegratedServer integratedServer = Minecraft.getInstance().getSingleplayerServer();
+		if (integratedServer != null) {
+			ServerLevel serverLevel = integratedServer.getLevel(entity.level().dimension());
+			if (serverLevel != null) {
+				return serverLevel.getEntity(entity.getId());
+			}
+		}
+
+		return null;
+	}
+
+	private static void renderHitbox(PoseStack poseStack, VertexConsumer vertexConsumer, Entity entity, float f, float g, float h, float i) {
 		AABB aABB = entity.getBoundingBox().move(-entity.getX(), -entity.getY(), -entity.getZ());
-		LevelRenderer.renderLineBox(poseStack, vertexConsumer, aABB, 1.0F, 1.0F, 1.0F, 1.0F);
+		LevelRenderer.renderLineBox(poseStack, vertexConsumer, aABB, g, h, i, 1.0F);
 		if (entity instanceof EnderDragon) {
 			double d = -Mth.lerp((double)f, entity.xOld, entity.getX());
 			double e = -Mth.lerp((double)f, entity.yOld, entity.getY());
-			double g = -Mth.lerp((double)f, entity.zOld, entity.getZ());
+			double j = -Mth.lerp((double)f, entity.zOld, entity.getZ());
 
 			for (EnderDragonPart enderDragonPart : ((EnderDragon)entity).getSubEntities()) {
 				poseStack.pushPose();
-				double h = d + Mth.lerp((double)f, enderDragonPart.xOld, enderDragonPart.getX());
-				double i = e + Mth.lerp((double)f, enderDragonPart.yOld, enderDragonPart.getY());
-				double j = g + Mth.lerp((double)f, enderDragonPart.zOld, enderDragonPart.getZ());
-				poseStack.translate(h, i, j);
+				double k = d + Mth.lerp((double)f, enderDragonPart.xOld, enderDragonPart.getX());
+				double l = e + Mth.lerp((double)f, enderDragonPart.yOld, enderDragonPart.getY());
+				double m = j + Mth.lerp((double)f, enderDragonPart.zOld, enderDragonPart.getZ());
+				poseStack.translate(k, l, m);
 				LevelRenderer.renderLineBox(
 					poseStack,
 					vertexConsumer,
@@ -208,7 +237,7 @@ public class EntityRenderDispatcher implements ResourceManagerReloadListener {
 		}
 
 		if (entity instanceof LivingEntity) {
-			float k = 0.01F;
+			float n = 0.01F;
 			LevelRenderer.renderLineBox(
 				poseStack,
 				vertexConsumer,
@@ -227,20 +256,23 @@ public class EntityRenderDispatcher implements ResourceManagerReloadListener {
 
 		Entity entity2 = entity.getVehicle();
 		if (entity2 != null) {
-			float l = Math.min(entity2.getBbWidth(), entity.getBbWidth()) / 2.0F;
-			float m = 0.0625F;
+			float o = Math.min(entity2.getBbWidth(), entity.getBbWidth()) / 2.0F;
+			float p = 0.0625F;
 			Vec3 vec3 = entity2.getPassengerRidingPosition(entity).subtract(entity.position());
 			LevelRenderer.renderLineBox(
-				poseStack, vertexConsumer, vec3.x - (double)l, vec3.y, vec3.z - (double)l, vec3.x + (double)l, vec3.y + 0.0625, vec3.z + (double)l, 1.0F, 1.0F, 0.0F, 1.0F
+				poseStack, vertexConsumer, vec3.x - (double)o, vec3.y, vec3.z - (double)o, vec3.x + (double)o, vec3.y + 0.0625, vec3.z + (double)o, 1.0F, 1.0F, 0.0F, 1.0F
 			);
 		}
 
-		Vec3 vec32 = entity.getViewVector(f);
+		renderVector(poseStack, vertexConsumer, new Vector3f(0.0F, entity.getEyeHeight(), 0.0F), entity.getViewVector(f).scale(2.0), -16776961);
+	}
+
+	private static void renderVector(PoseStack poseStack, VertexConsumer vertexConsumer, Vector3f vector3f, Vec3 vec3, int i) {
 		PoseStack.Pose pose = poseStack.last();
-		vertexConsumer.addVertex(pose, 0.0F, entity.getEyeHeight(), 0.0F).setColor(-16776961).setNormal(pose, (float)vec32.x, (float)vec32.y, (float)vec32.z);
-		vertexConsumer.addVertex(pose, (float)(vec32.x * 2.0), (float)((double)entity.getEyeHeight() + vec32.y * 2.0), (float)(vec32.z * 2.0))
-			.setColor(0, 0, 255, 255)
-			.setNormal(pose, (float)vec32.x, (float)vec32.y, (float)vec32.z);
+		vertexConsumer.addVertex(pose, vector3f).setColor(i).setNormal(pose, (float)vec3.x, (float)vec3.y, (float)vec3.z);
+		vertexConsumer.addVertex(pose, (float)((double)vector3f.x() + vec3.x), (float)((double)vector3f.y() + vec3.y), (float)((double)vector3f.z() + vec3.z))
+			.setColor(i)
+			.setNormal(pose, (float)vec3.x, (float)vec3.y, (float)vec3.z);
 	}
 
 	private void renderFlame(PoseStack poseStack, MultiBufferSource multiBufferSource, Entity entity, Quaternionf quaternionf) {

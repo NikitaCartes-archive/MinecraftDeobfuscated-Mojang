@@ -120,11 +120,15 @@ public class NetherPortalBlock extends Block implements Portal {
 	public DimensionTransition getPortalDestination(ServerLevel serverLevel, Entity entity, BlockPos blockPos) {
 		ResourceKey<Level> resourceKey = serverLevel.dimension() == Level.NETHER ? Level.OVERWORLD : Level.NETHER;
 		ServerLevel serverLevel2 = serverLevel.getServer().getLevel(resourceKey);
-		boolean bl = serverLevel2.dimension() == Level.NETHER;
-		WorldBorder worldBorder = serverLevel2.getWorldBorder();
-		double d = DimensionType.getTeleportationScale(serverLevel.dimensionType(), serverLevel2.dimensionType());
-		BlockPos blockPos2 = worldBorder.clampToBounds(entity.getX() * d, entity.getY(), entity.getZ() * d);
-		return this.getExitPortal(serverLevel2, entity, blockPos, blockPos2, bl, worldBorder);
+		if (serverLevel2 == null) {
+			return null;
+		} else {
+			boolean bl = serverLevel2.dimension() == Level.NETHER;
+			WorldBorder worldBorder = serverLevel2.getWorldBorder();
+			double d = DimensionType.getTeleportationScale(serverLevel.dimensionType(), serverLevel2.dimensionType());
+			BlockPos blockPos2 = worldBorder.clampToBounds(entity.getX() * d, entity.getY(), entity.getZ() * d);
+			return this.getExitPortal(serverLevel2, entity, blockPos, blockPos2, bl, worldBorder);
+		}
 	}
 
 	@Nullable

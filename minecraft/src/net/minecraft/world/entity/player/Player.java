@@ -1485,13 +1485,24 @@ public abstract class Player extends LivingEntity {
 				this.awardStat(Stats.FALL_ONE_CM, (int)Math.round((double)f * 100.0));
 			}
 
+			boolean bl;
 			if (this.ignoreFallDamageFromCurrentImpulse && this.currentImpulseImpactPos != null) {
 				double d = this.currentImpulseImpactPos.y;
 				this.tryResetCurrentImpulseContext();
-				return d < this.getY() ? false : super.causeFallDamage((float)(d - this.getY()), g, damageSource);
+				if (d < this.getY()) {
+					return false;
+				}
+
+				bl = super.causeFallDamage((float)(d - this.getY()), g, damageSource);
 			} else {
-				return super.causeFallDamage(f, g, damageSource);
+				bl = super.causeFallDamage(f, g, damageSource);
 			}
+
+			if (bl) {
+				this.resetCurrentImpulseContext();
+			}
+
+			return bl;
 		}
 	}
 
@@ -2118,6 +2129,10 @@ public abstract class Player extends LivingEntity {
 		} else {
 			this.currentImpulseContextResetGraceTime = 0;
 		}
+	}
+
+	public boolean isIgnoringFallDamageFromCurrentImpulse() {
+		return this.ignoreFallDamageFromCurrentImpulse;
 	}
 
 	public void tryResetCurrentImpulseContext() {

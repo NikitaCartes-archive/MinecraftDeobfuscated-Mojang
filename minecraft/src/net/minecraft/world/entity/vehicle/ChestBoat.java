@@ -82,8 +82,15 @@ public class ChestBoat extends Boat implements HasCustomInventoryScreen, Contain
 
 	@Override
 	public InteractionResult interact(Player player, InteractionHand interactionHand) {
+		if (!player.isSecondaryUseActive()) {
+			InteractionResult interactionResult = super.interact(player, interactionHand);
+			if (interactionResult != InteractionResult.PASS) {
+				return interactionResult;
+			}
+		}
+
 		if (this.canAddPassenger(player) && !player.isSecondaryUseActive()) {
-			return super.interact(player, interactionHand);
+			return InteractionResult.PASS;
 		} else {
 			InteractionResult interactionResult = this.interactWithContainerVehicle(player);
 			if (interactionResult.consumesAction()) {

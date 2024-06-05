@@ -93,7 +93,7 @@ import net.minecraft.world.Container;
 import net.minecraft.world.entity.Attackable;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.Leashable;
 import net.minecraft.world.entity.OwnableEntity;
 import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.Targeting;
@@ -1007,7 +1007,10 @@ public class ExecuteCommand {
 			)
 			.then(
 				Commands.literal("leasher")
-					.fork(commandNode, expandOneToOneEntityRelation(entity -> entity instanceof Mob mob ? Optional.ofNullable(mob.getLeashHolder()) : Optional.empty()))
+					.fork(
+						commandNode,
+						expandOneToOneEntityRelation(entity -> entity instanceof Leashable leashable ? Optional.ofNullable(leashable.getLeashHolder()) : Optional.empty())
+					)
 			)
 			.then(
 				Commands.literal("target")

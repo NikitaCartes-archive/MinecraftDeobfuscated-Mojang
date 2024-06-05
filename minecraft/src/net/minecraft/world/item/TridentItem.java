@@ -72,44 +72,46 @@ public class TridentItem extends Item implements ProjectileItem {
 			if (j >= 10) {
 				float f = EnchantmentHelper.getTridentSpinAttackStrength(itemStack, player);
 				if (!(f > 0.0F) || player.isInWaterOrRain()) {
-					Holder<SoundEvent> holder = (Holder<SoundEvent>)EnchantmentHelper.pickHighestLevel(itemStack, EnchantmentEffectComponents.TRIDENT_SOUND)
-						.orElse(SoundEvents.TRIDENT_THROW);
-					if (!level.isClientSide) {
-						itemStack.hurtAndBreak(1, player, LivingEntity.getSlotForHand(livingEntity.getUsedItemHand()));
-						if (f == 0.0F) {
-							ThrownTrident thrownTrident = new ThrownTrident(level, player, itemStack);
-							thrownTrident.shootFromRotation(player, player.getXRot(), player.getYRot(), 0.0F, 2.5F, 1.0F);
-							if (player.hasInfiniteMaterials()) {
-								thrownTrident.pickup = AbstractArrow.Pickup.CREATIVE_ONLY;
-							}
+					if (!isTooDamagedToUse(itemStack)) {
+						Holder<SoundEvent> holder = (Holder<SoundEvent>)EnchantmentHelper.pickHighestLevel(itemStack, EnchantmentEffectComponents.TRIDENT_SOUND)
+							.orElse(SoundEvents.TRIDENT_THROW);
+						if (!level.isClientSide) {
+							itemStack.hurtAndBreak(1, player, LivingEntity.getSlotForHand(livingEntity.getUsedItemHand()));
+							if (f == 0.0F) {
+								ThrownTrident thrownTrident = new ThrownTrident(level, player, itemStack);
+								thrownTrident.shootFromRotation(player, player.getXRot(), player.getYRot(), 0.0F, 2.5F, 1.0F);
+								if (player.hasInfiniteMaterials()) {
+									thrownTrident.pickup = AbstractArrow.Pickup.CREATIVE_ONLY;
+								}
 
-							level.addFreshEntity(thrownTrident);
-							level.playSound(null, thrownTrident, holder.value(), SoundSource.PLAYERS, 1.0F, 1.0F);
-							if (!player.hasInfiniteMaterials()) {
-								player.getInventory().removeItem(itemStack);
+								level.addFreshEntity(thrownTrident);
+								level.playSound(null, thrownTrident, holder.value(), SoundSource.PLAYERS, 1.0F, 1.0F);
+								if (!player.hasInfiniteMaterials()) {
+									player.getInventory().removeItem(itemStack);
+								}
 							}
 						}
-					}
 
-					player.awardStat(Stats.ITEM_USED.get(this));
-					if (f > 0.0F) {
-						float g = player.getYRot();
-						float h = player.getXRot();
-						float k = -Mth.sin(g * (float) (Math.PI / 180.0)) * Mth.cos(h * (float) (Math.PI / 180.0));
-						float l = -Mth.sin(h * (float) (Math.PI / 180.0));
-						float m = Mth.cos(g * (float) (Math.PI / 180.0)) * Mth.cos(h * (float) (Math.PI / 180.0));
-						float n = Mth.sqrt(k * k + l * l + m * m);
-						k *= f / n;
-						l *= f / n;
-						m *= f / n;
-						player.push((double)k, (double)l, (double)m);
-						player.startAutoSpinAttack(20, 8.0F, itemStack);
-						if (player.onGround()) {
-							float o = 1.1999999F;
-							player.move(MoverType.SELF, new Vec3(0.0, 1.1999999F, 0.0));
+						player.awardStat(Stats.ITEM_USED.get(this));
+						if (f > 0.0F) {
+							float g = player.getYRot();
+							float h = player.getXRot();
+							float k = -Mth.sin(g * (float) (Math.PI / 180.0)) * Mth.cos(h * (float) (Math.PI / 180.0));
+							float l = -Mth.sin(h * (float) (Math.PI / 180.0));
+							float m = Mth.cos(g * (float) (Math.PI / 180.0)) * Mth.cos(h * (float) (Math.PI / 180.0));
+							float n = Mth.sqrt(k * k + l * l + m * m);
+							k *= f / n;
+							l *= f / n;
+							m *= f / n;
+							player.push((double)k, (double)l, (double)m);
+							player.startAutoSpinAttack(20, 8.0F, itemStack);
+							if (player.onGround()) {
+								float o = 1.1999999F;
+								player.move(MoverType.SELF, new Vec3(0.0, 1.1999999F, 0.0));
+							}
+
+							level.playSound(null, player, holder.value(), SoundSource.PLAYERS, 1.0F, 1.0F);
 						}
-
-						level.playSound(null, player, holder.value(), SoundSource.PLAYERS, 1.0F, 1.0F);
 					}
 				}
 			}
@@ -119,7 +121,7 @@ public class TridentItem extends Item implements ProjectileItem {
 	@Override
 	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
-		if (itemStack.getDamageValue() >= itemStack.getMaxDamage() - 1) {
+		if (isTooDamagedToUse(itemStack)) {
 			return InteractionResultHolder.fail(itemStack);
 		} else if (EnchantmentHelper.getTridentSpinAttackStrength(itemStack, player) > 0.0F && !player.isInWaterOrRain()) {
 			return InteractionResultHolder.fail(itemStack);
@@ -127,6 +129,10 @@ public class TridentItem extends Item implements ProjectileItem {
 			player.startUsingItem(interactionHand);
 			return InteractionResultHolder.consume(itemStack);
 		}
+	}
+
+	private static boolean isTooDamagedToUse(ItemStack itemStack) {
+		return itemStack.getDamageValue() >= itemStack.getMaxDamage() - 1;
 	}
 
 	@Override

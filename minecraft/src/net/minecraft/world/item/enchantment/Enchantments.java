@@ -50,7 +50,7 @@ import net.minecraft.world.item.enchantment.effects.Ignite;
 import net.minecraft.world.item.enchantment.effects.MultiplyValue;
 import net.minecraft.world.item.enchantment.effects.PlaySoundEffect;
 import net.minecraft.world.item.enchantment.effects.RemoveBinomial;
-import net.minecraft.world.item.enchantment.effects.ReplaceDisc;
+import net.minecraft.world.item.enchantment.effects.ReplaceDisk;
 import net.minecraft.world.item.enchantment.effects.SetValue;
 import net.minecraft.world.item.enchantment.effects.SpawnParticlesEffect;
 import net.minecraft.world.item.enchantment.effects.SummonEntityEffect;
@@ -356,7 +356,7 @@ public class Enchantments {
 				)
 				.withEffect(
 					EnchantmentEffectComponents.LOCATION_CHANGED,
-					new ReplaceDisc(
+					new ReplaceDisk(
 						new LevelBasedValue.Clamped(LevelBasedValue.perLevel(3.0F, 1.0F), 0.0F, 16.0F),
 						LevelBasedValue.constant(1.0F),
 						new Vec3i(0, -1, 0),

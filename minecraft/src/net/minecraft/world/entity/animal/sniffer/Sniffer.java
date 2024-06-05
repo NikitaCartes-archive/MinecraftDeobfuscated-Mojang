@@ -321,7 +321,7 @@ public class Sniffer extends Animal {
 	}
 
 	@Override
-	protected void jumpFromGround() {
+	public void jumpFromGround() {
 		super.jumpFromGround();
 		double d = this.moveControl.getSpeedModifier();
 		if (d > 0.0) {

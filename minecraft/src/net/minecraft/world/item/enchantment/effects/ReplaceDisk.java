@@ -17,7 +17,7 @@ import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate;
 import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvider;
 import net.minecraft.world.phys.Vec3;
 
-public record ReplaceDisc(
+public record ReplaceDisk(
 	LevelBasedValue radius,
 	LevelBasedValue height,
 	Vec3i offset,
@@ -25,16 +25,16 @@ public record ReplaceDisc(
 	BlockStateProvider blockState,
 	Optional<Holder<GameEvent>> triggerGameEvent
 ) implements EnchantmentEntityEffect {
-	public static final MapCodec<ReplaceDisc> CODEC = RecordCodecBuilder.mapCodec(
+	public static final MapCodec<ReplaceDisk> CODEC = RecordCodecBuilder.mapCodec(
 		instance -> instance.group(
-					LevelBasedValue.CODEC.fieldOf("radius").forGetter(ReplaceDisc::radius),
-					LevelBasedValue.CODEC.fieldOf("height").forGetter(ReplaceDisc::height),
-					Vec3i.CODEC.optionalFieldOf("offset", Vec3i.ZERO).forGetter(ReplaceDisc::offset),
-					BlockPredicate.CODEC.optionalFieldOf("predicate").forGetter(ReplaceDisc::predicate),
-					BlockStateProvider.CODEC.fieldOf("block_state").forGetter(ReplaceDisc::blockState),
-					GameEvent.CODEC.optionalFieldOf("trigger_game_event").forGetter(ReplaceDisc::triggerGameEvent)
+					LevelBasedValue.CODEC.fieldOf("radius").forGetter(ReplaceDisk::radius),
+					LevelBasedValue.CODEC.fieldOf("height").forGetter(ReplaceDisk::height),
+					Vec3i.CODEC.optionalFieldOf("offset", Vec3i.ZERO).forGetter(ReplaceDisk::offset),
+					BlockPredicate.CODEC.optionalFieldOf("predicate").forGetter(ReplaceDisk::predicate),
+					BlockStateProvider.CODEC.fieldOf("block_state").forGetter(ReplaceDisk::blockState),
+					GameEvent.CODEC.optionalFieldOf("trigger_game_event").forGetter(ReplaceDisk::triggerGameEvent)
 				)
-				.apply(instance, ReplaceDisc::new)
+				.apply(instance, ReplaceDisk::new)
 	);
 
 	@Override
@@ -54,7 +54,7 @@ public record ReplaceDisc(
 	}
 
 	@Override
-	public MapCodec<ReplaceDisc> codec() {
+	public MapCodec<ReplaceDisk> codec() {
 		return CODEC;
 	}
 }

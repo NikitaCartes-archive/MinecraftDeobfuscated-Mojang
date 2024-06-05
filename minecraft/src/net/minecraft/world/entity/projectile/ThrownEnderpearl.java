@@ -13,6 +13,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.portal.DimensionTransition;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -117,5 +119,13 @@ public class ThrownEnderpearl extends ThrowableItemProjectile {
 		return level.dimension() == Level.END && this.getOwner() instanceof ServerPlayer serverPlayer
 			? super.canChangeDimensions(level, level2) && serverPlayer.seenCredits
 			: super.canChangeDimensions(level, level2);
+	}
+
+	@Override
+	protected void onInsideBlock(BlockState blockState) {
+		super.onInsideBlock(blockState);
+		if (blockState.is(Blocks.END_GATEWAY) && this.getOwner() instanceof ServerPlayer serverPlayer) {
+			serverPlayer.onInsideBlock(blockState);
+		}
 	}
 }

@@ -49,6 +49,7 @@ public class MapItemSavedData extends SavedData {
 	private static final int HALF_MAP_SIZE = 64;
 	public static final int MAX_SCALE = 4;
 	public static final int TRACKED_DECORATION_LIMIT = 256;
+	private static final String FRAME_PREFIX = "frame-";
 	public final int centerX;
 	public final int centerZ;
 	public final ResourceKey<Level> dimension;
@@ -137,7 +138,7 @@ public class MapItemSavedData extends SavedData {
 				mapItemSavedData.addDecoration(
 					MapDecorationTypes.FRAME,
 					null,
-					"frame-" + mapFrame.getEntityId(),
+					getFrameKey(mapFrame.getEntityId()),
 					(double)mapFrame.getPos().getX(),
 					(double)mapFrame.getPos().getZ(),
 					(double)mapFrame.getRotation(),
@@ -236,14 +237,14 @@ public class MapItemSavedData extends SavedData {
 			BlockPos blockPos = itemFrame.getPos();
 			MapFrame mapFrame = (MapFrame)this.frameMarkers.get(MapFrame.frameId(blockPos));
 			if (mapFrame != null && itemFrame.getId() != mapFrame.getEntityId() && this.frameMarkers.containsKey(mapFrame.getId())) {
-				this.removeDecoration("frame-" + mapFrame.getEntityId());
+				this.removeDecoration(getFrameKey(mapFrame.getEntityId()));
 			}
 
 			MapFrame mapFrame2 = new MapFrame(blockPos, itemFrame.getDirection().get2DDataValue() * 90, itemFrame.getId());
 			this.addDecoration(
 				MapDecorationTypes.FRAME,
 				player.level(),
-				"frame-" + itemFrame.getId(),
+				getFrameKey(itemFrame.getId()),
 				(double)blockPos.getX(),
 				(double)blockPos.getZ(),
 				(double)(itemFrame.getDirection().get2DDataValue() * 90),
@@ -425,7 +426,7 @@ public class MapItemSavedData extends SavedData {
 	}
 
 	public void removedFromFrame(BlockPos blockPos, int i) {
-		this.removeDecoration("frame-" + i);
+		this.removeDecoration(getFrameKey(i));
 		this.frameMarkers.remove(MapFrame.frameId(blockPos));
 	}
 
@@ -473,6 +474,10 @@ public class MapItemSavedData extends SavedData {
 
 	public boolean isTrackedCountOverLimit(int i) {
 		return this.trackedDecorationCount >= i;
+	}
+
+	private static String getFrameKey(int i) {
+		return "frame-" + i;
 	}
 
 	public class HoldingPlayer {

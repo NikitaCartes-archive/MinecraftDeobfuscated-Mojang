@@ -92,6 +92,12 @@ public class AttributeInstance {
 		this.addModifier(attributeModifier);
 	}
 
+	public void addOrReplacePermanentModifier(AttributeModifier attributeModifier) {
+		this.removeModifier(attributeModifier.id());
+		this.addModifier(attributeModifier);
+		this.permanentModifiers.put(attributeModifier.id(), attributeModifier);
+	}
+
 	public void addPermanentModifier(AttributeModifier attributeModifier) {
 		this.addModifier(attributeModifier);
 		this.permanentModifiers.put(attributeModifier.id(), attributeModifier);

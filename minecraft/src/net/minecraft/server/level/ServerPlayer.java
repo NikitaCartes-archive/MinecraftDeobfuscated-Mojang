@@ -478,7 +478,7 @@ public class ServerPlayer extends Player {
 	}
 
 	@Override
-	protected void onInsideBlock(BlockState blockState) {
+	public void onInsideBlock(BlockState blockState) {
 		CriteriaTriggers.ENTER_BLOCK.trigger(this, blockState);
 	}
 

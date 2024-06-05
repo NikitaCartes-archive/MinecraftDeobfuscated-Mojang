@@ -437,6 +437,14 @@ public class Boat extends VehicleEntity implements Leashable, VariantHolder<Boat
 		return new Vec3(0.0, (double)(0.88F * this.getEyeHeight()), (double)(this.getBbWidth() * 0.64F));
 	}
 
+	@Override
+	public void elasticRangeLeashBehaviour(Entity entity, float f) {
+		Vec3 vec3 = entity.position().subtract(this.position()).normalize().scale((double)f - 6.0);
+		Vec3 vec32 = this.getDeltaMovement();
+		boolean bl = vec32.dot(vec3) > 0.0;
+		this.setDeltaMovement(vec32.add(vec3.scale(bl ? 0.15F : 0.2F)));
+	}
+
 	private Boat.Status getStatus() {
 		Boat.Status status = this.isUnderwater();
 		if (status != null) {

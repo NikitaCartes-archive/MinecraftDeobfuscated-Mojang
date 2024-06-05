@@ -1,6 +1,7 @@
 package net.minecraft.world.item;
 
 import java.util.List;
+import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionResult;
@@ -38,26 +39,15 @@ public class LeadItem extends Item {
 
 	public static InteractionResult bindPlayerMobs(Player player, Level level, BlockPos blockPos) {
 		LeashFenceKnotEntity leashFenceKnotEntity = null;
-		double d = 7.0;
-		int i = blockPos.getX();
-		int j = blockPos.getY();
-		int k = blockPos.getZ();
-		AABB aABB = new AABB((double)i - 7.0, (double)j - 7.0, (double)k - 7.0, (double)i + 7.0, (double)j + 7.0, (double)k + 7.0);
-		List<Entity> list = level.getEntitiesOfClass(Entity.class, aABB, entityx -> {
-			if (entityx instanceof Leashable leashable && leashable.getLeashHolder() == player) {
-				return true;
-			}
+		List<Leashable> list = leashableInArea(level, blockPos, leashablex -> leashablex.getLeashHolder() == player);
 
-			return false;
-		});
-
-		for (Entity entity : list) {
+		for (Leashable leashable : list) {
 			if (leashFenceKnotEntity == null) {
 				leashFenceKnotEntity = LeashFenceKnotEntity.getOrCreateKnot(level, blockPos);
 				leashFenceKnotEntity.playPlacementSound();
 			}
 
-			((Leashable)entity).setLeashedTo(leashFenceKnotEntity, true);
+			leashable.setLeashedTo(leashFenceKnotEntity, true);
 		}
 
 		if (!list.isEmpty()) {
@@ -66,5 +56,20 @@ public class LeadItem extends Item {
 		} else {
 			return InteractionResult.PASS;
 		}
+	}
+
+	public static List<Leashable> leashableInArea(Level level, BlockPos blockPos, Predicate<Leashable> predicate) {
+		double d = 7.0;
+		int i = blockPos.getX();
+		int j = blockPos.getY();
+		int k = blockPos.getZ();
+		AABB aABB = new AABB((double)i - 7.0, (double)j - 7.0, (double)k - 7.0, (double)i + 7.0, (double)j + 7.0, (double)k + 7.0);
+		return level.getEntitiesOfClass(Entity.class, aABB, entity -> {
+			if (entity instanceof Leashable leashable && predicate.test(leashable)) {
+				return true;
+			}
+
+			return false;
+		}).stream().map(Leashable.class::cast).toList();
 	}
 }

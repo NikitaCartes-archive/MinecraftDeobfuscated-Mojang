@@ -330,7 +330,7 @@ public class Slime extends Mob implements Enemy {
 	}
 
 	@Override
-	protected void jumpFromGround() {
+	public void jumpFromGround() {
 		Vec3 vec3 = this.getDeltaMovement();
 		this.setDeltaMovement(vec3.x, (double)this.getJumpPower(), vec3.z);
 		this.hasImpulse = true;
