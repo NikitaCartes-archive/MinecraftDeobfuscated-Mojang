@@ -1019,7 +1019,6 @@ public class ServerGamePacketListenerImpl
 		}
 
 		this.awaitingTeleportTime = this.tickCount;
-		this.player.resetCurrentImpulseContext();
 		this.player.absMoveTo(d, e, f, g, h);
 		this.player.connection.send(new ClientboundPlayerPositionPacket(d - i, e - j, f - k, g - l, h - m, set, this.awaitingTeleport));
 	}

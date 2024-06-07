@@ -163,7 +163,7 @@ public class Enchantments {
 					new EnchantmentAttributeEffect(
 						ResourceLocation.withDefaultNamespace("enchantment.fire_protection"),
 						Attributes.BURNING_TIME,
-						LevelBasedValue.perLevel(-0.15F),
+						LevelBasedValue.perLevel(-0.0375F),
 						AttributeModifier.Operation.ADD_MULTIPLIED_BASE
 					)
 				)
@@ -213,7 +213,7 @@ public class Enchantments {
 					new EnchantmentAttributeEffect(
 						ResourceLocation.withDefaultNamespace("enchantment.blast_protection"),
 						Attributes.EXPLOSION_KNOCKBACK_RESISTANCE,
-						LevelBasedValue.perLevel(0.15F),
+						LevelBasedValue.perLevel(0.0375F),
 						AttributeModifier.Operation.ADD_VALUE
 					)
 				)
@@ -532,7 +532,7 @@ public class Enchantments {
 			SHARPNESS,
 			Enchantment.enchantment(
 					Enchantment.definition(
-						holderGetter3.getOrThrow(ItemTags.WEAPON_ENCHANTABLE),
+						holderGetter3.getOrThrow(ItemTags.SHARP_WEAPON_ENCHANTABLE),
 						holderGetter3.getOrThrow(ItemTags.SWORD_ENCHANTABLE),
 						10,
 						5,

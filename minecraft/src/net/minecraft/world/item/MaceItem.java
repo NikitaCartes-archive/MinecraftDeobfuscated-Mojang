@@ -93,6 +93,9 @@ public class MaceItem extends Item {
 	@Override
 	public void postHurtEnemy(ItemStack itemStack, LivingEntity livingEntity, LivingEntity livingEntity2) {
 		itemStack.hurtAndBreak(1, livingEntity2, EquipmentSlot.MAINHAND);
+		if (canSmashAttack(livingEntity2)) {
+			livingEntity2.resetFallDistance();
+		}
 	}
 
 	@Override

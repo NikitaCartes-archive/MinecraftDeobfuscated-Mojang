@@ -1493,7 +1493,8 @@ public abstract class Player extends LivingEntity {
 					return false;
 				}
 
-				bl = super.causeFallDamage((float)(d - this.getY()), g, damageSource);
+				float h = Math.min(f, (float)(d - this.getY()));
+				bl = super.causeFallDamage(h, g, damageSource);
 			} else {
 				bl = super.causeFallDamage(f, g, damageSource);
 			}

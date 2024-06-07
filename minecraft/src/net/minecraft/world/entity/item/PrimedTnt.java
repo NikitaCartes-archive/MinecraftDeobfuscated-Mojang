@@ -1,6 +1,8 @@
 package net.minecraft.world.entity.item;
 
+import java.util.Optional;
 import javax.annotation.Nullable;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
@@ -13,9 +15,14 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.TraceableEntity;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Explosion;
+import net.minecraft.world.level.ExplosionDamageCalculator;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.portal.DimensionTransition;
 
 public class PrimedTnt extends Entity implements TraceableEntity {
 	private static final EntityDataAccessor<Integer> DATA_FUSE_ID = SynchedEntityData.defineId(PrimedTnt.class, EntityDataSerializers.INT);
@@ -23,8 +30,22 @@ public class PrimedTnt extends Entity implements TraceableEntity {
 	private static final int DEFAULT_FUSE_TIME = 80;
 	private static final String TAG_BLOCK_STATE = "block_state";
 	public static final String TAG_FUSE = "fuse";
+	private static final ExplosionDamageCalculator USED_PORTAL_DAMAGE_CALCULATOR = new ExplosionDamageCalculator() {
+		@Override
+		public boolean shouldBlockExplode(Explosion explosion, BlockGetter blockGetter, BlockPos blockPos, BlockState blockState, float f) {
+			return blockState.is(Blocks.NETHER_PORTAL) ? false : super.shouldBlockExplode(explosion, blockGetter, blockPos, blockState, f);
+		}
+
+		@Override
+		public Optional<Float> getBlockExplosionResistance(
+			Explosion explosion, BlockGetter blockGetter, BlockPos blockPos, BlockState blockState, FluidState fluidState
+		) {
+			return blockState.is(Blocks.NETHER_PORTAL) ? Optional.empty() : super.getBlockExplosionResistance(explosion, blockGetter, blockPos, blockState, fluidState);
+		}
+	};
 	@Nullable
 	private LivingEntity owner;
+	private boolean usedPortal;
 
 	public PrimedTnt(EntityType<? extends PrimedTnt> entityType, Level level) {
 		super(entityType, level);
@@ -91,7 +112,18 @@ public class PrimedTnt extends Entity implements TraceableEntity {
 
 	private void explode() {
 		float f = 4.0F;
-		this.level().explode(this, this.getX(), this.getY(0.0625), this.getZ(), 4.0F, Level.ExplosionInteraction.TNT);
+		this.level()
+			.explode(
+				this,
+				Explosion.getDefaultDamageSource(this.level(), this),
+				this.usedPortal ? USED_PORTAL_DAMAGE_CALCULATOR : null,
+				this.getX(),
+				this.getY(0.0625),
+				this.getZ(),
+				4.0F,
+				false,
+				Level.ExplosionInteraction.TNT
+			);
 	}
 
 	@Override
@@ -135,5 +167,20 @@ public class PrimedTnt extends Entity implements TraceableEntity {
 
 	public BlockState getBlockState() {
 		return this.entityData.get(DATA_BLOCK_STATE_ID);
+	}
+
+	private void setUsedPortal(boolean bl) {
+		this.usedPortal = bl;
+	}
+
+	@Nullable
+	@Override
+	public Entity changeDimension(DimensionTransition dimensionTransition) {
+		Entity entity = super.changeDimension(dimensionTransition);
+		if (entity instanceof PrimedTnt primedTnt) {
+			primedTnt.setUsedPortal(true);
+		}
+
+		return entity;
 	}
 }

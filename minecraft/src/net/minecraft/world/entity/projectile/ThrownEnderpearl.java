@@ -72,6 +72,7 @@ public class ThrownEnderpearl extends ThrowableItemProjectile {
 							new DimensionTransition(serverLevel, this.position(), entity.getDeltaMovement(), entity.getYRot(), entity.getXRot(), DimensionTransition.DO_NOTHING)
 						);
 						entity.resetFallDistance();
+						serverPlayer.resetCurrentImpulseContext();
 						entity.hurt(this.damageSources().fall(), 5.0F);
 						this.playSound(serverLevel, this.position());
 					}
