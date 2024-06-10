@@ -1890,14 +1890,20 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 	public InteractionResult interact(Player player, InteractionHand interactionHand) {
 		if (this.isAlive() && this instanceof Leashable leashable) {
 			if (leashable.getLeashHolder() == player) {
-				leashable.dropLeash(true, !player.hasInfiniteMaterials());
-				this.gameEvent(GameEvent.ENTITY_INTERACT, player);
+				if (!this.level().isClientSide()) {
+					leashable.dropLeash(true, !player.hasInfiniteMaterials());
+					this.gameEvent(GameEvent.ENTITY_INTERACT, player);
+				}
+
 				return InteractionResult.sidedSuccess(this.level().isClientSide);
 			}
 
 			ItemStack itemStack = player.getItemInHand(interactionHand);
 			if (itemStack.is(Items.LEAD) && leashable.canHaveALeashAttachedToIt()) {
-				leashable.setLeashedTo(player, true);
+				if (!this.level().isClientSide()) {
+					leashable.setLeashedTo(player, true);
+				}
+
 				itemStack.shrink(1);
 				return InteractionResult.sidedSuccess(this.level().isClientSide);
 			}

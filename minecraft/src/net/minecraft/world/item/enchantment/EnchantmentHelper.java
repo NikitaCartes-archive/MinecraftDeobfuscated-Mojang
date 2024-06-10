@@ -197,7 +197,7 @@ public class EnchantmentHelper {
 
 	public static void doPostAttackEffects(ServerLevel serverLevel, Entity entity, DamageSource damageSource) {
 		if (damageSource.getEntity() instanceof LivingEntity livingEntity) {
-			doPostAttackEffectsWithItemSource(serverLevel, entity, damageSource, livingEntity.getMainHandItem());
+			doPostAttackEffectsWithItemSource(serverLevel, entity, damageSource, livingEntity.getWeaponItem());
 		} else {
 			doPostAttackEffectsWithItemSource(serverLevel, entity, damageSource, null);
 		}

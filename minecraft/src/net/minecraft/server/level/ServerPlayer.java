@@ -1857,6 +1857,7 @@ public class ServerPlayer extends Player {
 	@Override
 	public boolean startRiding(Entity entity, boolean bl) {
 		if (super.startRiding(entity, bl)) {
+			this.setKnownMovement(Vec3.ZERO);
 			entity.positionRider(this);
 			this.connection.teleport(this.getX(), this.getY(), this.getZ(), this.getYRot(), this.getXRot());
 			if (entity instanceof LivingEntity livingEntity) {
@@ -1909,7 +1910,8 @@ public class ServerPlayer extends Player {
 
 	@Override
 	public Vec3 getKnownMovement() {
-		return this.lastKnownClientMovement;
+		Entity entity = this.getVehicle();
+		return entity != null && entity.getControllingPassenger() != this ? entity.getKnownMovement() : this.lastKnownClientMovement;
 	}
 
 	public void setKnownMovement(Vec3 vec3) {

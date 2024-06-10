@@ -163,7 +163,7 @@ public class Enchantments {
 					new EnchantmentAttributeEffect(
 						ResourceLocation.withDefaultNamespace("enchantment.fire_protection"),
 						Attributes.BURNING_TIME,
-						LevelBasedValue.perLevel(-0.0375F),
+						LevelBasedValue.perLevel(-0.15F),
 						AttributeModifier.Operation.ADD_MULTIPLIED_BASE
 					)
 				)
@@ -213,7 +213,7 @@ public class Enchantments {
 					new EnchantmentAttributeEffect(
 						ResourceLocation.withDefaultNamespace("enchantment.blast_protection"),
 						Attributes.EXPLOSION_KNOCKBACK_RESISTANCE,
-						LevelBasedValue.perLevel(0.0375F),
+						LevelBasedValue.perLevel(0.15F),
 						AttributeModifier.Operation.ADD_VALUE
 					)
 				)
