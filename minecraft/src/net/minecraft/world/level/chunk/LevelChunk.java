@@ -291,6 +291,11 @@ public class LevelChunk extends ChunkAccess {
 
 					if (blockState.hasBlockEntity()) {
 						BlockEntity blockEntity = this.getBlockEntity(blockPos, LevelChunk.EntityCreationType.CHECK);
+						if (blockEntity != null && !blockEntity.isValidBlockState(blockState)) {
+							this.removeBlockEntity(blockPos);
+							blockEntity = null;
+						}
+
 						if (blockEntity == null) {
 							blockEntity = ((EntityBlock)block).newBlockEntity(blockPos, blockState);
 							if (blockEntity != null) {

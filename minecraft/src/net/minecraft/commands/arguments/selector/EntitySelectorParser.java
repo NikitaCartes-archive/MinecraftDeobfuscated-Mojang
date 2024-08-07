@@ -21,6 +21,7 @@ import java.util.function.ToDoubleFunction;
 import javax.annotation.Nullable;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.advancements.critereon.WrappedMinMaxBounds;
+import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.selector.options.EntitySelectorOptions;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -113,13 +114,17 @@ public class EntitySelectorParser {
 	private boolean hasAdvancements;
 	private boolean usesSelectors;
 
-	public EntitySelectorParser(StringReader stringReader) {
-		this(stringReader, true);
-	}
-
 	public EntitySelectorParser(StringReader stringReader, boolean bl) {
 		this.reader = stringReader;
 		this.allowSelectors = bl;
+	}
+
+	public static <S> boolean allowSelectors(S object) {
+		if (object instanceof SharedSuggestionProvider sharedSuggestionProvider && sharedSuggestionProvider.hasPermission(2)) {
+			return true;
+		}
+
+		return false;
 	}
 
 	public EntitySelector getSelector() {

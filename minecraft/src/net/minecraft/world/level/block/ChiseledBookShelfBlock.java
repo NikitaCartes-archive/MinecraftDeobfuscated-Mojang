@@ -187,19 +187,28 @@ public class ChiseledBookShelfBlock extends BaseEntityBlock {
 	@Override
 	protected void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
 		if (!blockState.is(blockState2.getBlock())) {
-			if (level.getBlockEntity(blockPos) instanceof ChiseledBookShelfBlockEntity chiseledBookShelfBlockEntity && !chiseledBookShelfBlockEntity.isEmpty()) {
-				for (int i = 0; i < 6; i++) {
-					ItemStack itemStack = chiseledBookShelfBlockEntity.getItem(i);
-					if (!itemStack.isEmpty()) {
-						Containers.dropItemStack(level, (double)blockPos.getX(), (double)blockPos.getY(), (double)blockPos.getZ(), itemStack);
+			boolean bl2;
+			label32: {
+				if (level.getBlockEntity(blockPos) instanceof ChiseledBookShelfBlockEntity chiseledBookShelfBlockEntity && !chiseledBookShelfBlockEntity.isEmpty()) {
+					for (int i = 0; i < 6; i++) {
+						ItemStack itemStack = chiseledBookShelfBlockEntity.getItem(i);
+						if (!itemStack.isEmpty()) {
+							Containers.dropItemStack(level, (double)blockPos.getX(), (double)blockPos.getY(), (double)blockPos.getZ(), itemStack);
+						}
 					}
+
+					chiseledBookShelfBlockEntity.clearContent();
+					bl2 = true;
+					break label32;
 				}
 
-				chiseledBookShelfBlockEntity.clearContent();
-				level.updateNeighbourForOutputSignal(blockPos, this);
+				bl2 = false;
 			}
 
 			super.onRemove(blockState, level, blockPos, blockState2, bl);
+			if (bl2) {
+				level.updateNeighbourForOutputSignal(blockPos, this);
+			}
 		}
 	}
 

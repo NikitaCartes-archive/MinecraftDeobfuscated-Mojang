@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.Set;
 import javax.annotation.Nullable;
 import net.minecraft.CrashReportCategory;
-import net.minecraft.CrashReportDetail;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponentMap;
@@ -40,7 +39,18 @@ public abstract class BlockEntity {
 	public BlockEntity(BlockEntityType<?> blockEntityType, BlockPos blockPos, BlockState blockState) {
 		this.type = blockEntityType;
 		this.worldPosition = blockPos.immutable();
+		this.validateBlockState(blockState);
 		this.blockState = blockState;
+	}
+
+	private void validateBlockState(BlockState blockState) {
+		if (!this.isValidBlockState(blockState)) {
+			throw new IllegalStateException("Invalid block entity " + this.getNameForReporting() + " state at " + this.worldPosition + ", got " + blockState);
+		}
+	}
+
+	public boolean isValidBlockState(BlockState blockState) {
+		return this.type.isValid(blockState);
 	}
 
 	public static BlockPos getPosFromTag(CompoundTag compoundTag) {
@@ -216,13 +226,15 @@ public abstract class BlockEntity {
 	}
 
 	public void fillCrashReportCategory(CrashReportCategory crashReportCategory) {
-		crashReportCategory.setDetail(
-			"Name", (CrashReportDetail<String>)(() -> BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(this.getType()) + " // " + this.getClass().getCanonicalName())
-		);
+		crashReportCategory.setDetail("Name", this::getNameForReporting);
 		if (this.level != null) {
 			CrashReportCategory.populateBlockDetails(crashReportCategory, this.level, this.worldPosition, this.getBlockState());
 			CrashReportCategory.populateBlockDetails(crashReportCategory, this.level, this.worldPosition, this.level.getBlockState(this.worldPosition));
 		}
+	}
+
+	private String getNameForReporting() {
+		return BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(this.getType()) + " // " + this.getClass().getCanonicalName();
 	}
 
 	public boolean onlyOpCanSetNbt() {
@@ -235,6 +247,7 @@ public abstract class BlockEntity {
 
 	@Deprecated
 	public void setBlockState(BlockState blockState) {
+		this.validateBlockState(blockState);
 		this.blockState = blockState;
 	}
 

@@ -34,9 +34,17 @@ public class GameProfileArgument implements ArgumentType<GameProfileArgument.Res
 		return new GameProfileArgument();
 	}
 
+	public <S> GameProfileArgument.Result parse(StringReader stringReader, S object) throws CommandSyntaxException {
+		return parse(stringReader, EntitySelectorParser.allowSelectors(object));
+	}
+
 	public GameProfileArgument.Result parse(StringReader stringReader) throws CommandSyntaxException {
+		return parse(stringReader, true);
+	}
+
+	private static GameProfileArgument.Result parse(StringReader stringReader, boolean bl) throws CommandSyntaxException {
 		if (stringReader.canRead() && stringReader.peek() == '@') {
-			EntitySelectorParser entitySelectorParser = new EntitySelectorParser(stringReader);
+			EntitySelectorParser entitySelectorParser = new EntitySelectorParser(stringReader, bl);
 			EntitySelector entitySelector = entitySelectorParser.parse();
 			if (entitySelector.includesEntities()) {
 				throw EntityArgument.ERROR_ONLY_PLAYERS_ALLOWED.createWithContext(stringReader);
@@ -60,19 +68,18 @@ public class GameProfileArgument implements ArgumentType<GameProfileArgument.Res
 
 	@Override
 	public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> commandContext, SuggestionsBuilder suggestionsBuilder) {
-		if (commandContext.getSource() instanceof SharedSuggestionProvider) {
+		if (commandContext.getSource() instanceof SharedSuggestionProvider sharedSuggestionProvider) {
 			StringReader stringReader = new StringReader(suggestionsBuilder.getInput());
 			stringReader.setCursor(suggestionsBuilder.getStart());
-			EntitySelectorParser entitySelectorParser = new EntitySelectorParser(stringReader);
+			EntitySelectorParser entitySelectorParser = new EntitySelectorParser(stringReader, EntitySelectorParser.allowSelectors(sharedSuggestionProvider));
 
 			try {
 				entitySelectorParser.parse();
-			} catch (CommandSyntaxException var6) {
+			} catch (CommandSyntaxException var7) {
 			}
 
 			return entitySelectorParser.fillSuggestions(
-				suggestionsBuilder,
-				suggestionsBuilderx -> SharedSuggestionProvider.suggest(((SharedSuggestionProvider)commandContext.getSource()).getOnlinePlayerNames(), suggestionsBuilderx)
+				suggestionsBuilder, suggestionsBuilderx -> SharedSuggestionProvider.suggest(sharedSuggestionProvider.getOnlinePlayerNames(), suggestionsBuilderx)
 			);
 		} else {
 			return Suggestions.empty();

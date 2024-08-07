@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
+import javax.annotation.Nullable;
 import net.minecraft.commands.CommandSigningContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.selector.EntitySelector;
@@ -77,6 +78,10 @@ public class MessageArgument implements SignedArgument<MessageArgument.Message> 
 		return MessageArgument.Message.parseText(stringReader, true);
 	}
 
+	public <S> MessageArgument.Message parse(StringReader stringReader, @Nullable S object) throws CommandSyntaxException {
+		return MessageArgument.Message.parseText(stringReader, EntitySelectorParser.allowSelectors(object));
+	}
+
 	@Override
 	public Collection<String> getExamples() {
 		return EXAMPLES;
@@ -85,7 +90,7 @@ public class MessageArgument implements SignedArgument<MessageArgument.Message> 
 	public static record Message(String text, MessageArgument.Part[] parts) {
 
 		Component resolveComponent(CommandSourceStack commandSourceStack) throws CommandSyntaxException {
-			return this.toComponent(commandSourceStack, commandSourceStack.hasPermission(2));
+			return this.toComponent(commandSourceStack, EntitySelectorParser.allowSelectors(commandSourceStack));
 		}
 
 		public Component toComponent(CommandSourceStack commandSourceStack, boolean bl) throws CommandSyntaxException {
@@ -137,7 +142,7 @@ public class MessageArgument implements SignedArgument<MessageArgument.Message> 
 								j = stringReader.getCursor();
 
 								try {
-									EntitySelectorParser entitySelectorParser = new EntitySelectorParser(stringReader);
+									EntitySelectorParser entitySelectorParser = new EntitySelectorParser(stringReader, true);
 									entitySelector = entitySelectorParser.parse();
 									break;
 								} catch (CommandSyntaxException var8) {

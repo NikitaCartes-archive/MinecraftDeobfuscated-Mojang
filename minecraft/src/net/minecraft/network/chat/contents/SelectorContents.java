@@ -47,7 +47,7 @@ public class SelectorContents implements ComponentContents {
 		EntitySelector entitySelector = null;
 
 		try {
-			EntitySelectorParser entitySelectorParser = new EntitySelectorParser(new StringReader(string));
+			EntitySelectorParser entitySelectorParser = new EntitySelectorParser(new StringReader(string), true);
 			entitySelector = entitySelectorParser.parse();
 		} catch (CommandSyntaxException var3) {
 			LOGGER.warn("Invalid selector component: {}: {}", string, var3.getMessage());

@@ -93,8 +93,16 @@ public class EntityArgument implements ArgumentType<EntitySelector> {
 	}
 
 	public EntitySelector parse(StringReader stringReader) throws CommandSyntaxException {
+		return this.parse(stringReader, true);
+	}
+
+	public <S> EntitySelector parse(StringReader stringReader, S object) throws CommandSyntaxException {
+		return this.parse(stringReader, EntitySelectorParser.allowSelectors(object));
+	}
+
+	private EntitySelector parse(StringReader stringReader, boolean bl) throws CommandSyntaxException {
 		int i = 0;
-		EntitySelectorParser entitySelectorParser = new EntitySelectorParser(stringReader);
+		EntitySelectorParser entitySelectorParser = new EntitySelectorParser(stringReader, bl);
 		EntitySelector entitySelector = entitySelectorParser.parse();
 		if (entitySelector.getMaxResults() > 1 && this.single) {
 			if (this.playersOnly) {
@@ -117,7 +125,7 @@ public class EntityArgument implements ArgumentType<EntitySelector> {
 		if (commandContext.getSource() instanceof SharedSuggestionProvider sharedSuggestionProvider) {
 			StringReader stringReader = new StringReader(suggestionsBuilder.getInput());
 			stringReader.setCursor(suggestionsBuilder.getStart());
-			EntitySelectorParser entitySelectorParser = new EntitySelectorParser(stringReader, sharedSuggestionProvider.hasPermission(2));
+			EntitySelectorParser entitySelectorParser = new EntitySelectorParser(stringReader, EntitySelectorParser.allowSelectors(sharedSuggestionProvider));
 
 			try {
 				entitySelectorParser.parse();

@@ -13,9 +13,9 @@
 		"url": "https://libraries.minecraft.net/com/mojang/blocklist/1.0.10/blocklist-1.0.10.jar"
 	},
 	{
-		"sha1sum": "73e324f2ee541493a5179abf367237faa782ed21",
-		"name": "brigadier-1.2.9.jar",
-		"url": "https://libraries.minecraft.net/com/mojang/brigadier/1.2.9/brigadier-1.2.9.jar"
+		"sha1sum": "d15b53a14cf20fdcaa98f731af5dda654452c010",
+		"name": "brigadier-1.3.10.jar",
+		"url": "https://libraries.minecraft.net/com/mojang/brigadier/1.3.10/brigadier-1.3.10.jar"
 	},
 	{
 		"sha1sum": "4e3eb3d79888d76b54e28b350915b5dc3919c9de",

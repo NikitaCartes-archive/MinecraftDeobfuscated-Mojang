@@ -213,11 +213,10 @@ public class LecternBlock extends BaseEntityBlock {
 				this.popBook(blockState, level, blockPos);
 			}
 
+			super.onRemove(blockState, level, blockPos, blockState2, bl);
 			if ((Boolean)blockState.getValue(POWERED)) {
 				level.updateNeighborsAt(blockPos.below(), this);
 			}
-
-			super.onRemove(blockState, level, blockPos, blockState2, bl);
 		}
 	}
 

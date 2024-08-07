@@ -39,7 +39,7 @@ public class ScoreContents implements ComponentContents {
 	@Nullable
 	private static EntitySelector parseSelector(String string) {
 		try {
-			return new EntitySelectorParser(new StringReader(string)).parse();
+			return new EntitySelectorParser(new StringReader(string), true).parse();
 		} catch (CommandSyntaxException var2) {
 			return null;
 		}

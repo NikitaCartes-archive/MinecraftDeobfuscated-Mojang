@@ -32,7 +32,7 @@ public class ScoreHolderArgument implements ArgumentType<ScoreHolderArgument.Res
 	public static final SuggestionProvider<CommandSourceStack> SUGGEST_SCORE_HOLDERS = (commandContext, suggestionsBuilder) -> {
 		StringReader stringReader = new StringReader(suggestionsBuilder.getInput());
 		stringReader.setCursor(suggestionsBuilder.getStart());
-		EntitySelectorParser entitySelectorParser = new EntitySelectorParser(stringReader);
+		EntitySelectorParser entitySelectorParser = new EntitySelectorParser(stringReader, EntitySelectorParser.allowSelectors(commandContext.getSource()));
 
 		try {
 			entitySelectorParser.parse();
@@ -82,8 +82,16 @@ public class ScoreHolderArgument implements ArgumentType<ScoreHolderArgument.Res
 	}
 
 	public ScoreHolderArgument.Result parse(StringReader stringReader) throws CommandSyntaxException {
+		return this.parse(stringReader, true);
+	}
+
+	public <S> ScoreHolderArgument.Result parse(StringReader stringReader, S object) throws CommandSyntaxException {
+		return this.parse(stringReader, EntitySelectorParser.allowSelectors(object));
+	}
+
+	private ScoreHolderArgument.Result parse(StringReader stringReader, boolean bl) throws CommandSyntaxException {
 		if (stringReader.canRead() && stringReader.peek() == '@') {
-			EntitySelectorParser entitySelectorParser = new EntitySelectorParser(stringReader);
+			EntitySelectorParser entitySelectorParser = new EntitySelectorParser(stringReader, bl);
 			EntitySelector entitySelector = entitySelectorParser.parse();
 			if (!this.multiple && entitySelector.getMaxResults() > 1) {
 				throw EntityArgument.ERROR_NOT_SINGLE_ENTITY.createWithContext(stringReader);
@@ -141,7 +149,7 @@ public class ScoreHolderArgument implements ArgumentType<ScoreHolderArgument.Res
 								return scoreHolder != null ? List.of(scoreHolder) : list;
 							}
 						};
-					} catch (IllegalArgumentException var6) {
+					} catch (IllegalArgumentException var7) {
 						return (commandSourceStack, supplier) -> {
 							MinecraftServer minecraftServer = commandSourceStack.getServer();
 							ServerPlayer serverPlayer = minecraftServer.getPlayerList().getPlayerByName(string);

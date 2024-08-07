@@ -28,7 +28,7 @@ public record EntityDataSource(String selectorPattern, @Nullable EntitySelector 
 	@Nullable
 	private static EntitySelector compileSelector(String string) {
 		try {
-			EntitySelectorParser entitySelectorParser = new EntitySelectorParser(new StringReader(string));
+			EntitySelectorParser entitySelectorParser = new EntitySelectorParser(new StringReader(string), true);
 			return entitySelectorParser.parse();
 		} catch (CommandSyntaxException var2) {
 			return null;
