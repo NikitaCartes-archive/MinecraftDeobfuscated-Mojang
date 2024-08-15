@@ -83,7 +83,7 @@ public class ServerFunctionManager {
 	}
 
 	private void postReload(ServerFunctionLibrary serverFunctionLibrary) {
-		this.ticking = ImmutableList.copyOf(serverFunctionLibrary.getTag(TICK_FUNCTION_TAG));
+		this.ticking = List.copyOf(serverFunctionLibrary.getTag(TICK_FUNCTION_TAG));
 		this.postReload = true;
 	}
 
@@ -95,7 +95,7 @@ public class ServerFunctionManager {
 		return this.library.getFunction(resourceLocation);
 	}
 
-	public Collection<CommandFunction<CommandSourceStack>> getTag(ResourceLocation resourceLocation) {
+	public List<CommandFunction<CommandSourceStack>> getTag(ResourceLocation resourceLocation) {
 		return this.library.getTag(resourceLocation);
 	}
 

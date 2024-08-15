@@ -3,21 +3,24 @@ package net.minecraft.client.renderer.entity.layers;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.CreeperModel;
-import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
+import net.minecraft.client.renderer.entity.state.CreeperRenderState;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.monster.Creeper;
 
 @Environment(EnvType.CLIENT)
-public class CreeperPowerLayer extends EnergySwirlLayer<Creeper, CreeperModel<Creeper>> {
+public class CreeperPowerLayer extends EnergySwirlLayer<CreeperRenderState, CreeperModel> {
 	private static final ResourceLocation POWER_LOCATION = ResourceLocation.withDefaultNamespace("textures/entity/creeper/creeper_armor.png");
-	private final CreeperModel<Creeper> model;
+	private final CreeperModel model;
 
-	public CreeperPowerLayer(RenderLayerParent<Creeper, CreeperModel<Creeper>> renderLayerParent, EntityModelSet entityModelSet) {
+	public CreeperPowerLayer(RenderLayerParent<CreeperRenderState, CreeperModel> renderLayerParent, EntityModelSet entityModelSet) {
 		super(renderLayerParent);
-		this.model = new CreeperModel<>(entityModelSet.bakeLayer(ModelLayers.CREEPER_ARMOR));
+		this.model = new CreeperModel(entityModelSet.bakeLayer(ModelLayers.CREEPER_ARMOR));
+	}
+
+	protected boolean isPowered(CreeperRenderState creeperRenderState) {
+		return creeperRenderState.isPowered;
 	}
 
 	@Override
@@ -30,8 +33,7 @@ public class CreeperPowerLayer extends EnergySwirlLayer<Creeper, CreeperModel<Cr
 		return POWER_LOCATION;
 	}
 
-	@Override
-	protected EntityModel<Creeper> model() {
+	protected CreeperModel model() {
 		return this.model;
 	}
 }

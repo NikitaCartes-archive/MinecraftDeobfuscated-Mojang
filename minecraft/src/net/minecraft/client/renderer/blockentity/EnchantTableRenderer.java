@@ -48,7 +48,7 @@ public class EnchantTableRenderer implements BlockEntityRenderer<EnchantingTable
 		float o = Mth.lerp(f, enchantingTableBlockEntity.oOpen, enchantingTableBlockEntity.open);
 		this.bookModel.setupAnim(g, Mth.clamp(m, 0.0F, 1.0F), Mth.clamp(n, 0.0F, 1.0F), o);
 		VertexConsumer vertexConsumer = BOOK_LOCATION.buffer(multiBufferSource, RenderType::entitySolid);
-		this.bookModel.render(poseStack, vertexConsumer, i, j, -1);
+		this.bookModel.renderToBuffer(poseStack, vertexConsumer, i, j);
 		poseStack.popPose();
 	}
 }

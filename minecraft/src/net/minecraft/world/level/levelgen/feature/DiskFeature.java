@@ -40,14 +40,21 @@ public class DiskFeature extends Feature<DiskConfiguration> {
 		DiskConfiguration diskConfiguration, WorldGenLevel worldGenLevel, RandomSource randomSource, int i, int j, BlockPos.MutableBlockPos mutableBlockPos
 	) {
 		boolean bl = false;
+		boolean bl2 = false;
 
 		for (int k = i; k > j; k--) {
 			mutableBlockPos.setY(k);
 			if (diskConfiguration.target().test(worldGenLevel, mutableBlockPos)) {
 				BlockState blockState = diskConfiguration.stateProvider().getState(worldGenLevel, randomSource, mutableBlockPos);
 				worldGenLevel.setBlock(mutableBlockPos, blockState, 2);
-				this.markAboveForPostProcessing(worldGenLevel, mutableBlockPos);
+				if (!bl2) {
+					this.markAboveForPostProcessing(worldGenLevel, mutableBlockPos);
+				}
+
 				bl = true;
+				bl2 = true;
+			} else {
+				bl2 = false;
 			}
 		}
 

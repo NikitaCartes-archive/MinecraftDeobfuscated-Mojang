@@ -15,6 +15,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
 import net.minecraft.world.level.ServerLevelAccessor;
@@ -109,7 +110,7 @@ public class SpikeFeature extends Feature<SpikeConfiguration> {
 			}
 		}
 
-		EndCrystal endCrystal = EntityType.END_CRYSTAL.create(serverLevelAccessor.getLevel());
+		EndCrystal endCrystal = EntityType.END_CRYSTAL.create(serverLevelAccessor.getLevel(), EntitySpawnReason.STRUCTURE);
 		if (endCrystal != null) {
 			endCrystal.setBeamTarget(spikeConfiguration.getCrystalBeamTarget());
 			endCrystal.setInvulnerable(spikeConfiguration.isCrystalInvulnerable());

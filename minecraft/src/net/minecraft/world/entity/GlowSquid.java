@@ -7,6 +7,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.RandomSource;
@@ -15,6 +16,7 @@ import net.minecraft.world.entity.animal.Squid;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Blocks;
+import org.jetbrains.annotations.Nullable;
 
 public class GlowSquid extends Squid {
 	private static final EntityDataAccessor<Integer> DATA_DARK_TICKS_REMAINING = SynchedEntityData.defineId(GlowSquid.class, EntityDataSerializers.INT);
@@ -32,6 +34,12 @@ public class GlowSquid extends Squid {
 	protected void defineSynchedData(SynchedEntityData.Builder builder) {
 		super.defineSynchedData(builder);
 		builder.define(DATA_DARK_TICKS_REMAINING, 0);
+	}
+
+	@Nullable
+	@Override
+	public AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
+		return EntityType.GLOW_SQUID.create(serverLevel, EntitySpawnReason.BREEDING);
 	}
 
 	@Override
@@ -98,7 +106,7 @@ public class GlowSquid extends Squid {
 	public static boolean checkGlowSquidSpawnRules(
 		EntityType<? extends LivingEntity> entityType,
 		ServerLevelAccessor serverLevelAccessor,
-		MobSpawnType mobSpawnType,
+		EntitySpawnReason entitySpawnReason,
 		BlockPos blockPos,
 		RandomSource randomSource
 	) {

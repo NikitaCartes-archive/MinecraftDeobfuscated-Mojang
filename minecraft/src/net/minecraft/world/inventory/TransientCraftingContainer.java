@@ -4,7 +4,7 @@ import java.util.List;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.player.StackedContents;
+import net.minecraft.world.entity.player.StackedItemContents;
 import net.minecraft.world.item.ItemStack;
 
 public class TransientCraftingContainer implements CraftingContainer {
@@ -17,7 +17,7 @@ public class TransientCraftingContainer implements CraftingContainer {
 		this(abstractContainerMenu, i, j, NonNullList.withSize(i * j, ItemStack.EMPTY));
 	}
 
-	public TransientCraftingContainer(AbstractContainerMenu abstractContainerMenu, int i, int j, NonNullList<ItemStack> nonNullList) {
+	private TransientCraftingContainer(AbstractContainerMenu abstractContainerMenu, int i, int j, NonNullList<ItemStack> nonNullList) {
 		this.items = nonNullList;
 		this.menu = abstractContainerMenu;
 		this.width = i;
@@ -96,9 +96,9 @@ public class TransientCraftingContainer implements CraftingContainer {
 	}
 
 	@Override
-	public void fillStackedContents(StackedContents stackedContents) {
+	public void fillStackedContents(StackedItemContents stackedItemContents) {
 		for (ItemStack itemStack : this.items) {
-			stackedContents.accountSimpleStack(itemStack);
+			stackedItemContents.accountSimpleStack(itemStack);
 		}
 	}
 }

@@ -9,11 +9,11 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.client.renderer.entity.state.IronGolemRenderState;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.animal.IronGolem;
 
 @Environment(EnvType.CLIENT)
-public class IronGolemModel<T extends IronGolem> extends HierarchicalModel<T> {
+public class IronGolemModel extends EntityModel<IronGolemRenderState> {
 	private final ModelPart root;
 	private final ModelPart head;
 	private final ModelPart rightArm;
@@ -67,30 +67,30 @@ public class IronGolemModel<T extends IronGolem> extends HierarchicalModel<T> {
 		return this.root;
 	}
 
-	public void setupAnim(T ironGolem, float f, float g, float h, float i, float j) {
-		this.head.yRot = i * (float) (Math.PI / 180.0);
-		this.head.xRot = j * (float) (Math.PI / 180.0);
-		this.rightLeg.xRot = -1.5F * Mth.triangleWave(f, 13.0F) * g;
-		this.leftLeg.xRot = 1.5F * Mth.triangleWave(f, 13.0F) * g;
-		this.rightLeg.yRot = 0.0F;
-		this.leftLeg.yRot = 0.0F;
-	}
-
-	public void prepareMobModel(T ironGolem, float f, float g, float h) {
-		int i = ironGolem.getAttackAnimationTick();
-		if (i > 0) {
-			this.rightArm.xRot = -2.0F + 1.5F * Mth.triangleWave((float)i - h, 10.0F);
-			this.leftArm.xRot = -2.0F + 1.5F * Mth.triangleWave((float)i - h, 10.0F);
+	public void setupAnim(IronGolemRenderState ironGolemRenderState) {
+		float f = ironGolemRenderState.attackTicksRemaining;
+		float g = ironGolemRenderState.walkAnimationSpeed;
+		float h = ironGolemRenderState.walkAnimationPos;
+		if (f > 0.0F) {
+			this.rightArm.xRot = -2.0F + 1.5F * Mth.triangleWave(f, 10.0F);
+			this.leftArm.xRot = -2.0F + 1.5F * Mth.triangleWave(f, 10.0F);
 		} else {
-			int j = ironGolem.getOfferFlowerTick();
-			if (j > 0) {
-				this.rightArm.xRot = -0.8F + 0.025F * Mth.triangleWave((float)j, 70.0F);
+			int i = ironGolemRenderState.offerFlowerTick;
+			if (i > 0) {
+				this.rightArm.xRot = -0.8F + 0.025F * Mth.triangleWave((float)i, 70.0F);
 				this.leftArm.xRot = 0.0F;
 			} else {
-				this.rightArm.xRot = (-0.2F + 1.5F * Mth.triangleWave(f, 13.0F)) * g;
-				this.leftArm.xRot = (-0.2F - 1.5F * Mth.triangleWave(f, 13.0F)) * g;
+				this.rightArm.xRot = (-0.2F + 1.5F * Mth.triangleWave(h, 13.0F)) * g;
+				this.leftArm.xRot = (-0.2F - 1.5F * Mth.triangleWave(h, 13.0F)) * g;
 			}
 		}
+
+		this.head.yRot = ironGolemRenderState.yRot * (float) (Math.PI / 180.0);
+		this.head.xRot = ironGolemRenderState.xRot * (float) (Math.PI / 180.0);
+		this.rightLeg.xRot = -1.5F * Mth.triangleWave(h, 13.0F) * g;
+		this.leftLeg.xRot = 1.5F * Mth.triangleWave(h, 13.0F) * g;
+		this.rightLeg.yRot = 0.0F;
+		this.leftLeg.yRot = 0.0F;
 	}
 
 	public ModelPart getFlowerHoldingArm() {

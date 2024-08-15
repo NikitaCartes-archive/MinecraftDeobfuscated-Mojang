@@ -31,6 +31,7 @@ public class AnvilMenu extends ItemCombinerMenu {
 	@Nullable
 	private String itemName;
 	private final DataSlot cost = DataSlot.standalone();
+	private boolean onlyRenaming = false;
 	private static final int COST_FAIL = 0;
 	private static final int COST_BASE = 1;
 	private static final int COST_ADDED_BASE = 1;
@@ -77,7 +78,6 @@ public class AnvilMenu extends ItemCombinerMenu {
 			player.giveExperienceLevels(-this.cost.get());
 		}
 
-		this.inputSlots.setItem(0, ItemStack.EMPTY);
 		if (this.repairItemCountCost > 0) {
 			ItemStack itemStack2 = this.inputSlots.getItem(1);
 			if (!itemStack2.isEmpty() && itemStack2.getCount() > this.repairItemCountCost) {
@@ -86,11 +86,12 @@ public class AnvilMenu extends ItemCombinerMenu {
 			} else {
 				this.inputSlots.setItem(1, ItemStack.EMPTY);
 			}
-		} else {
+		} else if (!this.onlyRenaming) {
 			this.inputSlots.setItem(1, ItemStack.EMPTY);
 		}
 
 		this.cost.set(0);
+		this.inputSlots.setItem(0, ItemStack.EMPTY);
 		this.access.execute((level, blockPos) -> {
 			BlockState blockState = level.getBlockState(blockPos);
 			if (!player.hasInfiniteMaterials() && blockState.is(BlockTags.ANVIL) && player.getRandom().nextFloat() < 0.12F) {
@@ -111,6 +112,7 @@ public class AnvilMenu extends ItemCombinerMenu {
 	@Override
 	public void createResult() {
 		ItemStack itemStack = this.inputSlots.getItem(0);
+		this.onlyRenaming = false;
 		this.cost.set(1);
 		int i = 0;
 		long l = 0L;
@@ -124,7 +126,7 @@ public class AnvilMenu extends ItemCombinerMenu {
 			this.repairItemCountCost = 0;
 			if (!itemStack3.isEmpty()) {
 				boolean bl = itemStack3.has(DataComponents.STORED_ENCHANTMENTS);
-				if (itemStack2.isDamageableItem() && itemStack2.getItem().isValidRepairItem(itemStack, itemStack3)) {
+				if (itemStack2.isDamageableItem() && itemStack.isValidRepairItem(itemStack3)) {
 					int k = Math.min(itemStack2.getDamageValue(), itemStack2.getMaxDamage() / 4);
 					if (k <= 0) {
 						this.resultSlots.setItem(0, ItemStack.EMPTY);
@@ -233,8 +235,12 @@ public class AnvilMenu extends ItemCombinerMenu {
 				itemStack2 = ItemStack.EMPTY;
 			}
 
-			if (j == i && j > 0 && this.cost.get() >= 40) {
-				this.cost.set(39);
+			if (j == i && j > 0) {
+				if (this.cost.get() >= 40) {
+					this.cost.set(39);
+				}
+
+				this.onlyRenaming = true;
 			}
 
 			if (this.cost.get() >= 40 && !this.player.getAbilities().instabuild) {

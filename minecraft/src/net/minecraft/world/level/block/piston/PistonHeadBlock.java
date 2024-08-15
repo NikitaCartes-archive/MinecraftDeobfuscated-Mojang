@@ -2,6 +2,7 @@ package net.minecraft.world.level.block.piston;
 
 import com.mojang.serialization.MapCodec;
 import java.util.Arrays;
+import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.player.Player;
@@ -23,6 +24,8 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.PistonType;
 import net.minecraft.world.level.pathfinder.PathComputationType;
+import net.minecraft.world.level.redstone.ExperimentalRedstoneUtils;
+import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -144,9 +147,13 @@ public class PistonHeadBlock extends DirectionalBlock {
 	}
 
 	@Override
-	protected void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
+	protected void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, @Nullable Orientation orientation, boolean bl) {
 		if (blockState.canSurvive(level, blockPos)) {
-			level.neighborChanged(blockPos.relative(((Direction)blockState.getValue(FACING)).getOpposite()), block, blockPos2);
+			level.neighborChanged(
+				blockPos.relative(((Direction)blockState.getValue(FACING)).getOpposite()),
+				block,
+				ExperimentalRedstoneUtils.withFront(orientation, ((Direction)blockState.getValue(FACING)).getOpposite())
+			);
 		}
 	}
 

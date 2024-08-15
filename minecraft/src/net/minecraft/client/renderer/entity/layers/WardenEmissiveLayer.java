@@ -5,29 +5,28 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.WardenModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
+import net.minecraft.client.renderer.entity.state.WardenRenderState;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FastColor;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.monster.warden.Warden;
 
 @Environment(EnvType.CLIENT)
-public class WardenEmissiveLayer<T extends Warden, M extends WardenModel<T>> extends RenderLayer<T, M> {
+public class WardenEmissiveLayer extends RenderLayer<WardenRenderState, WardenModel> {
 	private final ResourceLocation texture;
-	private final WardenEmissiveLayer.AlphaFunction<T> alphaFunction;
-	private final WardenEmissiveLayer.DrawSelector<T, M> drawSelector;
+	private final WardenEmissiveLayer.AlphaFunction alphaFunction;
+	private final WardenEmissiveLayer.DrawSelector drawSelector;
 
 	public WardenEmissiveLayer(
-		RenderLayerParent<T, M> renderLayerParent,
+		RenderLayerParent<WardenRenderState, WardenModel> renderLayerParent,
 		ResourceLocation resourceLocation,
-		WardenEmissiveLayer.AlphaFunction<T> alphaFunction,
-		WardenEmissiveLayer.DrawSelector<T, M> drawSelector
+		WardenEmissiveLayer.AlphaFunction alphaFunction,
+		WardenEmissiveLayer.DrawSelector drawSelector
 	) {
 		super(renderLayerParent);
 		this.texture = resourceLocation;
@@ -35,13 +34,13 @@ public class WardenEmissiveLayer<T extends Warden, M extends WardenModel<T>> ext
 		this.drawSelector = drawSelector;
 	}
 
-	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T warden, float f, float g, float h, float j, float k, float l) {
-		if (!warden.isInvisible()) {
+	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, WardenRenderState wardenRenderState, float f, float g) {
+		if (!wardenRenderState.isInvisible) {
 			this.onlyDrawSelectedParts();
 			VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entityTranslucentEmissive(this.texture));
-			float m = this.alphaFunction.apply(warden, h, j);
-			int n = FastColor.ARGB32.color(Mth.floor(m * 255.0F), 255, 255, 255);
-			this.getParentModel().renderToBuffer(poseStack, vertexConsumer, i, LivingEntityRenderer.getOverlayCoords(warden, 0.0F), n);
+			float h = this.alphaFunction.apply(wardenRenderState, wardenRenderState.ageInTicks);
+			int j = ARGB.color(Mth.floor(h * 255.0F), 255, 255, 255);
+			this.getParentModel().renderToBuffer(poseStack, vertexConsumer, i, LivingEntityRenderer.getOverlayCoords(wardenRenderState, 0.0F), j);
 			this.resetDrawForAllParts();
 		}
 	}
@@ -57,12 +56,12 @@ public class WardenEmissiveLayer<T extends Warden, M extends WardenModel<T>> ext
 	}
 
 	@Environment(EnvType.CLIENT)
-	public interface AlphaFunction<T extends Warden> {
-		float apply(T warden, float f, float g);
+	public interface AlphaFunction {
+		float apply(WardenRenderState wardenRenderState, float f);
 	}
 
 	@Environment(EnvType.CLIENT)
-	public interface DrawSelector<T extends Warden, M extends EntityModel<T>> {
-		List<ModelPart> getPartsToDraw(M entityModel);
+	public interface DrawSelector {
+		List<ModelPart> getPartsToDraw(WardenModel wardenModel);
 	}
 }

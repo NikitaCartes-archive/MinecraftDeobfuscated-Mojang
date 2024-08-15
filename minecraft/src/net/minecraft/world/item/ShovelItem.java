@@ -31,8 +31,8 @@ public class ShovelItem extends DiggerItem {
 			.build()
 	);
 
-	public ShovelItem(Tier tier, Item.Properties properties) {
-		super(tier, BlockTags.MINEABLE_WITH_SHOVEL, properties);
+	public ShovelItem(ToolMaterial toolMaterial, float f, float g, Item.Properties properties) {
+		super(toolMaterial, BlockTags.MINEABLE_WITH_SHOVEL, f, g, properties);
 	}
 
 	@Override
@@ -67,7 +67,7 @@ public class ShovelItem extends DiggerItem {
 					}
 				}
 
-				return InteractionResult.sidedSuccess(level.isClientSide);
+				return InteractionResult.SUCCESS;
 			} else {
 				return InteractionResult.PASS;
 			}

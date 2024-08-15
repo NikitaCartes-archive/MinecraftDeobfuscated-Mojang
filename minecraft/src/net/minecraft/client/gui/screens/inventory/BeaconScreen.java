@@ -12,6 +12,7 @@ import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.CommonComponents;
@@ -130,7 +131,7 @@ public class BeaconScreen extends AbstractContainerScreen<BeaconMenu> {
 	protected void renderBg(GuiGraphics guiGraphics, float f, int i, int j) {
 		int k = (this.width - this.imageWidth) / 2;
 		int l = (this.height - this.imageHeight) / 2;
-		guiGraphics.blit(BEACON_LOCATION, k, l, 0, 0, this.imageWidth, this.imageHeight);
+		guiGraphics.blit(RenderType::guiTextured, BEACON_LOCATION, k, l, 0.0F, 0.0F, this.imageWidth, this.imageHeight, 256, 256);
 		guiGraphics.pose().pushPose();
 		guiGraphics.pose().translate(0.0F, 0.0F, 100.0F);
 		guiGraphics.renderItem(new ItemStack(Items.NETHERITE_INGOT), k + 20, l + 109);
@@ -227,7 +228,7 @@ public class BeaconScreen extends AbstractContainerScreen<BeaconMenu> {
 
 		@Override
 		protected void renderIcon(GuiGraphics guiGraphics) {
-			guiGraphics.blit(this.getX() + 2, this.getY() + 2, 0, 18, 18, this.sprite);
+			guiGraphics.blitSprite(RenderType::guiTextured, this.sprite, this.getX() + 2, this.getY() + 2, 18, 18);
 		}
 
 		@Override
@@ -267,7 +268,7 @@ public class BeaconScreen extends AbstractContainerScreen<BeaconMenu> {
 				resourceLocation = BeaconScreen.BUTTON_SPRITE;
 			}
 
-			guiGraphics.blitSprite(resourceLocation, this.getX(), this.getY(), this.width, this.height);
+			guiGraphics.blitSprite(RenderType::guiTextured, resourceLocation, this.getX(), this.getY(), this.width, this.height);
 			this.renderIcon(guiGraphics);
 		}
 
@@ -298,7 +299,7 @@ public class BeaconScreen extends AbstractContainerScreen<BeaconMenu> {
 
 		@Override
 		protected void renderIcon(GuiGraphics guiGraphics) {
-			guiGraphics.blitSprite(this.sprite, this.getX() + 2, this.getY() + 2, 18, 18);
+			guiGraphics.blitSprite(RenderType::guiTextured, this.sprite, this.getX() + 2, this.getY() + 2, 18, 18);
 		}
 	}
 

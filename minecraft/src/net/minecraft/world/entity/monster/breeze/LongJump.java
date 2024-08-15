@@ -18,6 +18,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.util.Unit;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.behavior.LongJumpUtil;
 import net.minecraft.world.entity.ai.behavior.Swim;
@@ -33,7 +34,9 @@ public class LongJump extends Behavior<Breeze> {
 	private static final int JUMP_COOLDOWN_TICKS = 10;
 	private static final int JUMP_COOLDOWN_WHEN_HURT_TICKS = 2;
 	private static final int INHALING_DURATION_TICKS = Math.round(10.0F);
-	private static final float MAX_JUMP_VELOCITY = 1.4F;
+	private static final float DEFAULT_FOLLOW_RANGE = 24.0F;
+	private static final float DEFAULT_MAX_JUMP_VELOCITY = 1.4F;
+	private static final float MAX_JUMP_VELOCITY_MULTIPLIER = 0.058333334F;
 	private static final ObjectArrayList<Integer> ALLOWED_ANGLES = new ObjectArrayList<>(Lists.newArrayList(40, 55, 60, 75, 80));
 
 	@VisibleForTesting
@@ -184,7 +187,7 @@ public class LongJump extends Behavior<Breeze> {
 	}
 
 	private static boolean outOfAggroRange(Breeze breeze, LivingEntity livingEntity) {
-		return !livingEntity.closerThan(breeze, 24.0);
+		return !livingEntity.closerThan(breeze, breeze.getAttributeValue(Attributes.FOLLOW_RANGE));
 	}
 
 	private static boolean tooCloseForJump(Breeze breeze, LivingEntity livingEntity) {
@@ -206,7 +209,8 @@ public class LongJump extends Behavior<Breeze> {
 
 	private static Optional<Vec3> calculateOptimalJumpVector(Breeze breeze, RandomSource randomSource, Vec3 vec3) {
 		for (int i : Util.shuffledCopy(ALLOWED_ANGLES, randomSource)) {
-			Optional<Vec3> optional = LongJumpUtil.calculateJumpVectorForAngle(breeze, vec3, 1.4F, i, false);
+			float f = 0.058333334F * (float)breeze.getAttributeValue(Attributes.FOLLOW_RANGE);
+			Optional<Vec3> optional = LongJumpUtil.calculateJumpVectorForAngle(breeze, vec3, f, i, false);
 			if (optional.isPresent()) {
 				return optional;
 			}

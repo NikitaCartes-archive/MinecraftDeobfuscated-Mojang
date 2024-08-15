@@ -1,6 +1,5 @@
 package net.minecraft.client.model;
 
-import com.google.common.collect.ImmutableList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
@@ -9,11 +8,12 @@ import net.minecraft.client.model.geom.builders.CubeDeformation;
 import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Entity;
 
 @Environment(EnvType.CLIENT)
-public class QuadrupedModel<T extends Entity> extends AgeableListModel<T> {
+public class QuadrupedModel<T extends LivingEntityRenderState> extends EntityModel<T> {
+	protected final ModelPart root;
 	protected final ModelPart head;
 	protected final ModelPart body;
 	protected final ModelPart rightHindLeg;
@@ -21,8 +21,8 @@ public class QuadrupedModel<T extends Entity> extends AgeableListModel<T> {
 	protected final ModelPart rightFrontLeg;
 	protected final ModelPart leftFrontLeg;
 
-	protected QuadrupedModel(ModelPart modelPart, boolean bl, float f, float g, float h, float i, int j) {
-		super(bl, f, g, h, i, (float)j);
+	protected QuadrupedModel(ModelPart modelPart) {
+		this.root = modelPart;
 		this.head = modelPart.getChild("head");
 		this.body = modelPart.getChild("body");
 		this.rightHindLeg = modelPart.getChild("right_hind_leg");
@@ -50,23 +50,19 @@ public class QuadrupedModel<T extends Entity> extends AgeableListModel<T> {
 		return meshDefinition;
 	}
 
-	@Override
-	protected Iterable<ModelPart> headParts() {
-		return ImmutableList.<ModelPart>of(this.head);
-	}
-
-	@Override
-	protected Iterable<ModelPart> bodyParts() {
-		return ImmutableList.<ModelPart>of(this.body, this.rightHindLeg, this.leftHindLeg, this.rightFrontLeg, this.leftFrontLeg);
-	}
-
-	@Override
-	public void setupAnim(T entity, float f, float g, float h, float i, float j) {
-		this.head.xRot = j * (float) (Math.PI / 180.0);
-		this.head.yRot = i * (float) (Math.PI / 180.0);
+	public void setupAnim(T livingEntityRenderState) {
+		this.head.xRot = livingEntityRenderState.xRot * (float) (Math.PI / 180.0);
+		this.head.yRot = livingEntityRenderState.yRot * (float) (Math.PI / 180.0);
+		float f = livingEntityRenderState.walkAnimationPos;
+		float g = livingEntityRenderState.walkAnimationSpeed;
 		this.rightHindLeg.xRot = Mth.cos(f * 0.6662F) * 1.4F * g;
 		this.leftHindLeg.xRot = Mth.cos(f * 0.6662F + (float) Math.PI) * 1.4F * g;
 		this.rightFrontLeg.xRot = Mth.cos(f * 0.6662F + (float) Math.PI) * 1.4F * g;
 		this.leftFrontLeg.xRot = Mth.cos(f * 0.6662F) * 1.4F * g;
+	}
+
+	@Override
+	public ModelPart root() {
+		return this.root;
 	}
 }

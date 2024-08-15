@@ -1,33 +1,25 @@
 package net.minecraft.world.level.block.entity;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap.Entry;
 import java.util.List;
-import java.util.Map;
 import javax.annotation.Nullable;
-import net.minecraft.SharedConstants;
-import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.tags.ItemTags;
-import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.player.StackedContents;
+import net.minecraft.world.entity.player.StackedItemContents;
 import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.inventory.RecipeCraftingHolder;
 import net.minecraft.world.inventory.StackedContentsCompatible;
@@ -39,7 +31,6 @@ import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.crafting.SingleRecipeInput;
-import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.AbstractFurnaceBlock;
 import net.minecraft.world.level.block.Blocks;
@@ -60,13 +51,12 @@ public abstract class AbstractFurnaceBlockEntity extends BaseContainerBlockEntit
 	public static final int NUM_DATA_VALUES = 4;
 	public static final int BURN_TIME_STANDARD = 200;
 	public static final int BURN_COOL_SPEED = 2;
+	public static final int UNKNOWN_LIT_DURATION = 0;
 	protected NonNullList<ItemStack> items = NonNullList.withSize(3, ItemStack.EMPTY);
 	int litTime;
-	int litDuration;
+	int litDuration = 0;
 	int cookingProgress;
 	int cookingTotalTime;
-	@Nullable
-	private static volatile Map<Item, Integer> fuelCache;
 	protected final ContainerData dataAccess = new ContainerData() {
 		@Override
 		public int get(int i) {
@@ -116,107 +106,6 @@ public abstract class AbstractFurnaceBlockEntity extends BaseContainerBlockEntit
 		this.quickCheck = RecipeManager.createCheck(recipeType);
 	}
 
-	public static void invalidateCache() {
-		fuelCache = null;
-	}
-
-	public static Map<Item, Integer> getFuel() {
-		Map<Item, Integer> map = fuelCache;
-		if (map != null) {
-			return map;
-		} else {
-			Map<Item, Integer> map2 = Maps.<Item, Integer>newLinkedHashMap();
-			add(map2, Items.LAVA_BUCKET, 20000);
-			add(map2, Blocks.COAL_BLOCK, 16000);
-			add(map2, Items.BLAZE_ROD, 2400);
-			add(map2, Items.COAL, 1600);
-			add(map2, Items.CHARCOAL, 1600);
-			add(map2, ItemTags.LOGS, 300);
-			add(map2, ItemTags.BAMBOO_BLOCKS, 300);
-			add(map2, ItemTags.PLANKS, 300);
-			add(map2, Blocks.BAMBOO_MOSAIC, 300);
-			add(map2, ItemTags.WOODEN_STAIRS, 300);
-			add(map2, Blocks.BAMBOO_MOSAIC_STAIRS, 300);
-			add(map2, ItemTags.WOODEN_SLABS, 150);
-			add(map2, Blocks.BAMBOO_MOSAIC_SLAB, 150);
-			add(map2, ItemTags.WOODEN_TRAPDOORS, 300);
-			add(map2, ItemTags.WOODEN_PRESSURE_PLATES, 300);
-			add(map2, ItemTags.WOODEN_FENCES, 300);
-			add(map2, ItemTags.FENCE_GATES, 300);
-			add(map2, Blocks.NOTE_BLOCK, 300);
-			add(map2, Blocks.BOOKSHELF, 300);
-			add(map2, Blocks.CHISELED_BOOKSHELF, 300);
-			add(map2, Blocks.LECTERN, 300);
-			add(map2, Blocks.JUKEBOX, 300);
-			add(map2, Blocks.CHEST, 300);
-			add(map2, Blocks.TRAPPED_CHEST, 300);
-			add(map2, Blocks.CRAFTING_TABLE, 300);
-			add(map2, Blocks.DAYLIGHT_DETECTOR, 300);
-			add(map2, ItemTags.BANNERS, 300);
-			add(map2, Items.BOW, 300);
-			add(map2, Items.FISHING_ROD, 300);
-			add(map2, Blocks.LADDER, 300);
-			add(map2, ItemTags.SIGNS, 200);
-			add(map2, ItemTags.HANGING_SIGNS, 800);
-			add(map2, Items.WOODEN_SHOVEL, 200);
-			add(map2, Items.WOODEN_SWORD, 200);
-			add(map2, Items.WOODEN_HOE, 200);
-			add(map2, Items.WOODEN_AXE, 200);
-			add(map2, Items.WOODEN_PICKAXE, 200);
-			add(map2, ItemTags.WOODEN_DOORS, 200);
-			add(map2, ItemTags.BOATS, 1200);
-			add(map2, ItemTags.WOOL, 100);
-			add(map2, ItemTags.WOODEN_BUTTONS, 100);
-			add(map2, Items.STICK, 100);
-			add(map2, ItemTags.SAPLINGS, 100);
-			add(map2, Items.BOWL, 100);
-			add(map2, ItemTags.WOOL_CARPETS, 67);
-			add(map2, Blocks.DRIED_KELP_BLOCK, 4001);
-			add(map2, Items.CROSSBOW, 300);
-			add(map2, Blocks.BAMBOO, 50);
-			add(map2, Blocks.DEAD_BUSH, 100);
-			add(map2, Blocks.SCAFFOLDING, 50);
-			add(map2, Blocks.LOOM, 300);
-			add(map2, Blocks.BARREL, 300);
-			add(map2, Blocks.CARTOGRAPHY_TABLE, 300);
-			add(map2, Blocks.FLETCHING_TABLE, 300);
-			add(map2, Blocks.SMITHING_TABLE, 300);
-			add(map2, Blocks.COMPOSTER, 300);
-			add(map2, Blocks.AZALEA, 100);
-			add(map2, Blocks.FLOWERING_AZALEA, 100);
-			add(map2, Blocks.MANGROVE_ROOTS, 300);
-			fuelCache = map2;
-			return map2;
-		}
-	}
-
-	private static boolean isNeverAFurnaceFuel(Item item) {
-		return item.builtInRegistryHolder().is(ItemTags.NON_FLAMMABLE_WOOD);
-	}
-
-	private static void add(Map<Item, Integer> map, TagKey<Item> tagKey, int i) {
-		for (Holder<Item> holder : BuiltInRegistries.ITEM.getTagOrEmpty(tagKey)) {
-			if (!isNeverAFurnaceFuel(holder.value())) {
-				map.put(holder.value(), i);
-			}
-		}
-	}
-
-	private static void add(Map<Item, Integer> map, ItemLike itemLike, int i) {
-		Item item = itemLike.asItem();
-		if (isNeverAFurnaceFuel(item)) {
-			if (SharedConstants.IS_RUNNING_IN_IDE) {
-				throw (IllegalStateException)Util.pauseInIde(
-					new IllegalStateException(
-						"A developer tried to explicitly make fire resistant item " + item.getName(null).getString() + " a furnace fuel. That will not work!"
-					)
-				);
-			}
-		} else {
-			map.put(item, i);
-		}
-	}
-
 	private boolean isLit() {
 		return this.litTime > 0;
 	}
@@ -229,7 +118,7 @@ public abstract class AbstractFurnaceBlockEntity extends BaseContainerBlockEntit
 		this.litTime = compoundTag.getShort("BurnTime");
 		this.cookingProgress = compoundTag.getShort("CookTime");
 		this.cookingTotalTime = compoundTag.getShort("CookTimeTotal");
-		this.litDuration = this.getBurnDuration(this.items.get(1));
+		this.litDuration = 0;
 		CompoundTag compoundTag2 = compoundTag.getCompound("RecipesUsed");
 
 		for (String string : compoundTag2.getAllKeys()) {
@@ -260,6 +149,10 @@ public abstract class AbstractFurnaceBlockEntity extends BaseContainerBlockEntit
 		ItemStack itemStack2 = abstractFurnaceBlockEntity.items.get(0);
 		boolean bl3 = !itemStack2.isEmpty();
 		boolean bl4 = !itemStack.isEmpty();
+		if (abstractFurnaceBlockEntity.litDuration == 0) {
+			abstractFurnaceBlockEntity.litDuration = abstractFurnaceBlockEntity.getBurnDuration(level.fuelValues(), itemStack);
+		}
+
 		if (abstractFurnaceBlockEntity.isLit() || bl4 && bl3) {
 			RecipeHolder<?> recipeHolder;
 			if (bl3) {
@@ -270,7 +163,7 @@ public abstract class AbstractFurnaceBlockEntity extends BaseContainerBlockEntit
 
 			int i = abstractFurnaceBlockEntity.getMaxStackSize();
 			if (!abstractFurnaceBlockEntity.isLit() && canBurn(level.registryAccess(), recipeHolder, abstractFurnaceBlockEntity.items, i)) {
-				abstractFurnaceBlockEntity.litTime = abstractFurnaceBlockEntity.getBurnDuration(itemStack);
+				abstractFurnaceBlockEntity.litTime = abstractFurnaceBlockEntity.getBurnDuration(level.fuelValues(), itemStack);
 				abstractFurnaceBlockEntity.litDuration = abstractFurnaceBlockEntity.litTime;
 				if (abstractFurnaceBlockEntity.isLit()) {
 					bl2 = true;
@@ -356,13 +249,8 @@ public abstract class AbstractFurnaceBlockEntity extends BaseContainerBlockEntit
 		}
 	}
 
-	protected int getBurnDuration(ItemStack itemStack) {
-		if (itemStack.isEmpty()) {
-			return 0;
-		} else {
-			Item item = itemStack.getItem();
-			return (Integer)getFuel().getOrDefault(item, 0);
-		}
+	protected int getBurnDuration(FuelValues fuelValues, ItemStack itemStack) {
+		return fuelValues.burnDuration(itemStack);
 	}
 
 	private static int getTotalCookTime(Level level, AbstractFurnaceBlockEntity abstractFurnaceBlockEntity) {
@@ -371,10 +259,6 @@ public abstract class AbstractFurnaceBlockEntity extends BaseContainerBlockEntit
 			.getRecipeFor(singleRecipeInput, level)
 			.map(recipeHolder -> ((AbstractCookingRecipe)recipeHolder.value()).getCookingTime())
 			.orElse(200);
-	}
-
-	public static boolean isFuel(ItemStack itemStack) {
-		return getFuel().containsKey(itemStack.getItem());
 	}
 
 	@Override
@@ -432,7 +316,7 @@ public abstract class AbstractFurnaceBlockEntity extends BaseContainerBlockEntit
 			return true;
 		} else {
 			ItemStack itemStack2 = this.items.get(1);
-			return isFuel(itemStack) || itemStack.is(Items.BUCKET) && !itemStack2.is(Items.BUCKET);
+			return this.level.fuelValues().isFuel(itemStack) || itemStack.is(Items.BUCKET) && !itemStack2.is(Items.BUCKET);
 		}
 	}
 
@@ -491,9 +375,9 @@ public abstract class AbstractFurnaceBlockEntity extends BaseContainerBlockEntit
 	}
 
 	@Override
-	public void fillStackedContents(StackedContents stackedContents) {
+	public void fillStackedContents(StackedItemContents stackedItemContents) {
 		for (ItemStack itemStack : this.items) {
-			stackedContents.accountStack(itemStack);
+			stackedItemContents.accountStack(itemStack);
 		}
 	}
 }

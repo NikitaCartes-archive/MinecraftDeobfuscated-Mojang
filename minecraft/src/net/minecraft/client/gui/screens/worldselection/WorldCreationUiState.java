@@ -45,7 +45,7 @@ public class WorldCreationUiState {
 	private WorldCreationUiState.WorldTypeEntry worldType;
 	private final List<WorldCreationUiState.WorldTypeEntry> normalPresetList = new ArrayList();
 	private final List<WorldCreationUiState.WorldTypeEntry> altPresetList = new ArrayList();
-	private GameRules gameRules = new GameRules();
+	private GameRules gameRules;
 
 	public WorldCreationUiState(Path path, WorldCreationContext worldCreationContext, Optional<ResourceKey<WorldPreset>> optional, OptionalLong optionalLong) {
 		this.savesFolder = path;
@@ -56,6 +56,7 @@ public class WorldCreationUiState {
 		this.generateStructures = worldCreationContext.options().generateStructures();
 		this.bonusChest = worldCreationContext.options().generateBonusChest();
 		this.targetFolder = this.findResultFolder(this.name);
+		this.gameRules = new GameRules(worldCreationContext.dataConfiguration().enabledFeatures());
 	}
 
 	public void addListener(Consumer<WorldCreationUiState> consumer) {

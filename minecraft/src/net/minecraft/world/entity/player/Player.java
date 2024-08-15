@@ -3,6 +3,7 @@ package net.minecraft.world.entity.player;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import com.google.common.math.IntMath;
 import com.mojang.authlib.GameProfile;
 import com.mojang.datafixers.util.Either;
 import com.mojang.logging.LogUtils;
@@ -43,6 +44,7 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Unit;
 import net.minecraft.world.Container;
@@ -58,6 +60,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityAttachment;
 import net.minecraft.world.entity.EntityAttachments;
 import net.minecraft.world.entity.EntityDimensions;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.HumanoidArm;
@@ -87,8 +90,8 @@ import net.minecraft.world.item.ElytraItem;
 import net.minecraft.world.item.ItemCooldowns;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.MaceItem;
 import net.minecraft.world.item.ProjectileWeaponItem;
-import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.enchantment.EnchantmentEffectComponents;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
@@ -527,6 +530,10 @@ public abstract class Player extends LivingEntity {
 
 		this.inventory.tick();
 		this.oBob = this.bob;
+		if (this.abilities.flying && !this.isPassenger()) {
+			this.resetFallDistance();
+		}
+
 		super.aiStep();
 		this.setSpeed((float)this.getAttributeValue(Attributes.MOVEMENT_SPEED));
 		float f;
@@ -680,6 +687,9 @@ public abstract class Player extends LivingEntity {
 		return SoundEvents.PLAYER_DEATH;
 	}
 
+	public void handleCreativeModeItemDrop(ItemStack itemStack) {
+	}
+
 	@Nullable
 	public ItemEntity drop(ItemStack itemStack, boolean bl) {
 		return this.drop(itemStack, false, bl);
@@ -687,41 +697,11 @@ public abstract class Player extends LivingEntity {
 
 	@Nullable
 	public ItemEntity drop(ItemStack itemStack, boolean bl, boolean bl2) {
-		if (itemStack.isEmpty()) {
-			return null;
-		} else {
-			if (this.level().isClientSide) {
-				this.swing(InteractionHand.MAIN_HAND);
-			}
-
-			double d = this.getEyeY() - 0.3F;
-			ItemEntity itemEntity = new ItemEntity(this.level(), this.getX(), d, this.getZ(), itemStack);
-			itemEntity.setPickUpDelay(40);
-			if (bl2) {
-				itemEntity.setThrower(this);
-			}
-
-			if (bl) {
-				float f = this.random.nextFloat() * 0.5F;
-				float g = this.random.nextFloat() * (float) (Math.PI * 2);
-				itemEntity.setDeltaMovement((double)(-Mth.sin(g) * f), 0.2F, (double)(Mth.cos(g) * f));
-			} else {
-				float f = 0.3F;
-				float g = Mth.sin(this.getXRot() * (float) (Math.PI / 180.0));
-				float h = Mth.cos(this.getXRot() * (float) (Math.PI / 180.0));
-				float i = Mth.sin(this.getYRot() * (float) (Math.PI / 180.0));
-				float j = Mth.cos(this.getYRot() * (float) (Math.PI / 180.0));
-				float k = this.random.nextFloat() * (float) (Math.PI * 2);
-				float l = 0.02F * this.random.nextFloat();
-				itemEntity.setDeltaMovement(
-					(double)(-i * h * 0.3F) + Math.cos((double)k) * (double)l,
-					(double)(-g * 0.3F + 0.1F + (this.random.nextFloat() - this.random.nextFloat()) * 0.1F),
-					(double)(j * h * 0.3F) + Math.sin((double)k) * (double)l
-				);
-			}
-
-			return itemEntity;
+		if (!itemStack.isEmpty() && this.level().isClientSide) {
+			this.swing(InteractionHand.MAIN_HAND);
 		}
+
+		return null;
 	}
 
 	public float getDestroySpeed(BlockState blockState) {
@@ -1123,7 +1103,13 @@ public abstract class Player extends LivingEntity {
 			if (!entity.skipAttackInteraction(this)) {
 				float f = this.isAutoSpinAttack() ? this.autoSpinAttackDmg : (float)this.getAttributeValue(Attributes.ATTACK_DAMAGE);
 				ItemStack itemStack = this.getWeaponItem();
-				DamageSource damageSource = this.damageSources().playerAttack(this);
+				DamageSource damageSource;
+				if (itemStack.getItem() == Items.MACE && MaceItem.canSmashAttack(this)) {
+					damageSource = this.damageSources().mace(this);
+				} else {
+					damageSource = this.damageSources().playerAttack(this);
+				}
+
 				float g = this.getEnchantedDamage(entity, f, damageSource) - f;
 				float h = this.getAttackStrengthScale(0.5F);
 				f *= 0.2F + h * h * 0.8F;
@@ -1162,10 +1148,10 @@ public abstract class Player extends LivingEntity {
 
 					float i = f + g;
 					boolean bl4 = false;
-					double d = (double)(this.walkDist - this.walkDistO);
-					if (bl && !bl3 && !bl2 && this.onGround() && d < (double)this.getSpeed()) {
-						ItemStack itemStack2 = this.getItemInHand(InteractionHand.MAIN_HAND);
-						if (itemStack2.getItem() instanceof SwordItem) {
+					if (bl && !bl3 && !bl2 && this.onGround()) {
+						double d = this.getKnownMovement().horizontalDistanceSqr();
+						double e = (double)this.getSpeed() * 2.5;
+						if (d < Mth.square(e) && this.getItemInHand(InteractionHand.MAIN_HAND).is(ItemTags.SWORDS)) {
 							bl4 = true;
 						}
 					}
@@ -1423,39 +1409,32 @@ public abstract class Player extends LivingEntity {
 	}
 
 	@Override
-	public void jumpFromGround() {
-		super.jumpFromGround();
-		this.awardStat(Stats.JUMP);
-		if (this.isSprinting()) {
-			this.causeFoodExhaustion(0.2F);
+	public void travel(Vec3 vec3) {
+		if (this.isPassenger()) {
+			super.travel(vec3);
 		} else {
-			this.causeFoodExhaustion(0.05F);
+			if (this.isSwimming()) {
+				double d = this.getLookAngle().y;
+				double e = d < -0.2 ? 0.085 : 0.06;
+				if (d <= 0.0 || this.jumping || !this.level().getFluidState(BlockPos.containing(this.getX(), this.getY() + 1.0 - 0.1, this.getZ())).isEmpty()) {
+					Vec3 vec32 = this.getDeltaMovement();
+					this.setDeltaMovement(vec32.add(0.0, (d - vec32.y) * e, 0.0));
+				}
+			}
+
+			if (this.getAbilities().flying) {
+				double d = this.getDeltaMovement().y;
+				super.travel(vec3);
+				this.setDeltaMovement(this.getDeltaMovement().with(Direction.Axis.Y, d * 0.6));
+			} else {
+				super.travel(vec3);
+			}
 		}
 	}
 
 	@Override
-	public void travel(Vec3 vec3) {
-		if (this.isSwimming() && !this.isPassenger()) {
-			double d = this.getLookAngle().y;
-			double e = d < -0.2 ? 0.085 : 0.06;
-			if (d <= 0.0
-				|| this.jumping
-				|| !this.level().getBlockState(BlockPos.containing(this.getX(), this.getY() + 1.0 - 0.1, this.getZ())).getFluidState().isEmpty()) {
-				Vec3 vec32 = this.getDeltaMovement();
-				this.setDeltaMovement(vec32.add(0.0, (d - vec32.y) * e, 0.0));
-			}
-		}
-
-		if (this.abilities.flying && !this.isPassenger()) {
-			double d = this.getDeltaMovement().y;
-			super.travel(vec3);
-			Vec3 vec33 = this.getDeltaMovement();
-			this.setDeltaMovement(vec33.x, d * 0.6, vec33.z);
-			this.resetFallDistance();
-			this.setSharedFlag(7, false);
-		} else {
-			super.travel(vec3);
-		}
+	protected boolean canContinueToGlide(ItemStack itemStack) {
+		return !this.abilities.flying && super.canContinueToGlide(itemStack);
 	}
 
 	@Override
@@ -1485,25 +1464,26 @@ public abstract class Player extends LivingEntity {
 				this.awardStat(Stats.FALL_ONE_CM, (int)Math.round((double)f * 100.0));
 			}
 
-			boolean bl;
-			if (this.ignoreFallDamageFromCurrentImpulse && this.currentImpulseImpactPos != null) {
-				double d = this.currentImpulseImpactPos.y;
-				this.tryResetCurrentImpulseContext();
-				if (d < this.getY()) {
-					return false;
-				}
-
-				float h = Math.min(f, (float)(d - this.getY()));
-				bl = super.causeFallDamage(h, g, damageSource);
-			} else {
-				bl = super.causeFallDamage(f, g, damageSource);
-			}
-
+			boolean bl = this.currentImpulseImpactPos != null && this.ignoreFallDamageFromCurrentImpulse;
+			float h;
 			if (bl) {
-				this.resetCurrentImpulseContext();
+				h = Math.min(f, (float)(this.currentImpulseImpactPos.y - this.getY()));
+				boolean bl2 = h <= 0.0F;
+				if (bl2) {
+					this.resetCurrentImpulseContext();
+				} else {
+					this.tryResetCurrentImpulseContext();
+				}
+			} else {
+				h = f;
 			}
 
-			return bl;
+			if (h > 0.0F && super.causeFallDamage(h, g, damageSource)) {
+				this.resetCurrentImpulseContext();
+				return true;
+			} else {
+				return false;
+			}
 		}
 	}
 
@@ -1614,7 +1594,7 @@ public abstract class Player extends LivingEntity {
 	}
 
 	public void giveExperienceLevels(int i) {
-		this.experienceLevel += i;
+		this.experienceLevel = IntMath.saturatedAdd(this.experienceLevel, i);
 		if (this.experienceLevel < 0) {
 			this.experienceLevel = 0;
 			this.experienceProgress = 0.0F;
@@ -1785,7 +1765,7 @@ public abstract class Player extends LivingEntity {
 
 	private void respawnEntityOnShoulder(CompoundTag compoundTag) {
 		if (!this.level().isClientSide && !compoundTag.isEmpty()) {
-			EntityType.create(compoundTag, this.level()).ifPresent(entity -> {
+			EntityType.create(compoundTag, this.level(), EntitySpawnReason.LOAD).ifPresent(entity -> {
 				if (entity instanceof TamableAnimal) {
 					((TamableAnimal)entity).setOwnerUUID(this.uuid);
 				}
@@ -2147,6 +2127,10 @@ public abstract class Player extends LivingEntity {
 		this.currentExplosionCause = null;
 		this.currentImpulseImpactPos = null;
 		this.ignoreFallDamageFromCurrentImpulse = false;
+	}
+
+	public boolean shouldRotateWithMinecart() {
+		return false;
 	}
 
 	public static enum BedSleepingProblem {

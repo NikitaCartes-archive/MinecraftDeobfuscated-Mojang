@@ -147,11 +147,7 @@ public class TextureAtlas extends AbstractTexture implements Dumpable, Tickable 
 
 	@Override
 	public void tick() {
-		if (!RenderSystem.isOnRenderThread()) {
-			RenderSystem.recordRenderCall(this::cycleAnimationFrames);
-		} else {
-			this.cycleAnimationFrames();
-		}
+		this.cycleAnimationFrames();
 	}
 
 	public TextureAtlasSprite getSprite(ResourceLocation resourceLocation) {

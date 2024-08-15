@@ -34,7 +34,7 @@ public class HugeBrownMushroomFeature extends AbstractHugeMushroomFeature {
 				boolean bl6 = bl3 || bl4;
 				if (!bl5 || !bl6) {
 					mutableBlockPos.setWithOffset(blockPos, k, i, l);
-					if (!levelAccessor.getBlockState(mutableBlockPos).isSolidRender(levelAccessor, mutableBlockPos)) {
+					if (!levelAccessor.getBlockState(mutableBlockPos).isSolidRender()) {
 						boolean bl7 = bl || bl6 && k == 1 - j;
 						boolean bl8 = bl2 || bl6 && k == j - 1;
 						boolean bl9 = bl3 || bl5 && l == 1 - j;

@@ -10,24 +10,24 @@ import net.minecraft.world.level.ChunkPos;
 
 public class SharedConstants {
 	@Deprecated
-	public static final boolean SNAPSHOT = false;
+	public static final boolean SNAPSHOT = true;
 	@Deprecated
-	public static final int WORLD_VERSION = 3955;
+	public static final int WORLD_VERSION = 4058;
 	@Deprecated
 	public static final String SERIES = "main";
 	@Deprecated
-	public static final String VERSION_STRING = "1.21.1";
+	public static final String VERSION_STRING = "24w33a";
 	@Deprecated
-	public static final int RELEASE_NETWORK_PROTOCOL_VERSION = 767;
+	public static final int RELEASE_NETWORK_PROTOCOL_VERSION = 768;
 	@Deprecated
-	public static final int SNAPSHOT_NETWORK_PROTOCOL_VERSION = 204;
-	public static final int SNBT_NAG_VERSION = 3937;
+	public static final int SNAPSHOT_NETWORK_PROTOCOL_VERSION = 205;
+	public static final int SNBT_NAG_VERSION = 4053;
 	private static final int SNAPSHOT_PROTOCOL_BIT = 30;
-	public static final boolean CRASH_EAGERLY = false;
+	public static final boolean CRASH_EAGERLY = true;
 	@Deprecated
-	public static final int RESOURCE_PACK_FORMAT = 34;
+	public static final int RESOURCE_PACK_FORMAT = 35;
 	@Deprecated
-	public static final int DATA_PACK_FORMAT = 48;
+	public static final int DATA_PACK_FORMAT = 49;
 	@Deprecated
 	public static final int LANGUAGE_FORMAT = 1;
 	public static final int REPORT_FORMAT_VERSION = 1;
@@ -48,6 +48,7 @@ public class SharedConstants {
 	public static final boolean DEBUG_SUPPORT_BLOCKS = false;
 	public static final boolean DEBUG_SHAPES = false;
 	public static final boolean DEBUG_NEIGHBORSUPDATE = false;
+	public static final boolean DEBUG_EXPERIMENTAL_REDSTONEWIRE_UPDATE_ORDER = false;
 	public static final boolean DEBUG_STRUCTURES = false;
 	public static final boolean DEBUG_LIGHT = false;
 	public static final boolean DEBUG_SKY_LIGHT_SECTIONS = false;
@@ -161,7 +162,7 @@ public class SharedConstants {
 	}
 
 	public static int getProtocolVersion() {
-		return 767;
+		return 1073742029;
 	}
 
 	public static boolean debugVoidTerrain(ChunkPos chunkPos) {

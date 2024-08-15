@@ -22,6 +22,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import net.minecraft.Util;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.RegistrationInfo;
 import net.minecraft.core.Registry;
@@ -36,9 +37,12 @@ import net.minecraft.server.packs.repository.KnownPack;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceProvider;
+import net.minecraft.tags.TagLoader;
+import net.minecraft.tags.TagNetworkSerialization;
 import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.entity.animal.WolfVariant;
 import net.minecraft.world.entity.decoration.PaintingVariant;
+import net.minecraft.world.item.Instrument;
 import net.minecraft.world.item.JukeboxSong;
 import net.minecraft.world.item.armortrim.TrimMaterial;
 import net.minecraft.world.item.armortrim.TrimPattern;
@@ -97,7 +101,8 @@ public class RegistryDataLoader {
 		new RegistryDataLoader.RegistryData<>(Registries.BANNER_PATTERN, BannerPattern.DIRECT_CODEC),
 		new RegistryDataLoader.RegistryData<>(Registries.ENCHANTMENT, Enchantment.DIRECT_CODEC),
 		new RegistryDataLoader.RegistryData<>(Registries.ENCHANTMENT_PROVIDER, EnchantmentProvider.DIRECT_CODEC),
-		new RegistryDataLoader.RegistryData<>(Registries.JUKEBOX_SONG, JukeboxSong.DIRECT_CODEC)
+		new RegistryDataLoader.RegistryData<>(Registries.JUKEBOX_SONG, JukeboxSong.DIRECT_CODEC),
+		new RegistryDataLoader.RegistryData<>(Registries.INSTRUMENT, Instrument.DIRECT_CODEC)
 	);
 	public static final List<RegistryDataLoader.RegistryData<?>> DIMENSION_REGISTRIES = List.of(
 		new RegistryDataLoader.RegistryData<>(Registries.LEVEL_STEM, LevelStem.CODEC)
@@ -113,32 +118,35 @@ public class RegistryDataLoader {
 		new RegistryDataLoader.RegistryData<>(Registries.DAMAGE_TYPE, DamageType.DIRECT_CODEC),
 		new RegistryDataLoader.RegistryData<>(Registries.BANNER_PATTERN, BannerPattern.DIRECT_CODEC),
 		new RegistryDataLoader.RegistryData<>(Registries.ENCHANTMENT, Enchantment.DIRECT_CODEC),
-		new RegistryDataLoader.RegistryData<>(Registries.JUKEBOX_SONG, JukeboxSong.DIRECT_CODEC)
+		new RegistryDataLoader.RegistryData<>(Registries.JUKEBOX_SONG, JukeboxSong.DIRECT_CODEC),
+		new RegistryDataLoader.RegistryData<>(Registries.INSTRUMENT, Instrument.DIRECT_CODEC)
 	);
 
-	public static RegistryAccess.Frozen load(ResourceManager resourceManager, RegistryAccess registryAccess, List<RegistryDataLoader.RegistryData<?>> list) {
-		return load((loader, registryInfoLookup) -> loader.loadFromResources(resourceManager, registryInfoLookup), registryAccess, list);
+	public static RegistryAccess.Frozen load(
+		ResourceManager resourceManager, List<HolderLookup.RegistryLookup<?>> list, List<RegistryDataLoader.RegistryData<?>> list2
+	) {
+		return load((loader, registryInfoLookup) -> loader.loadFromResources(resourceManager, registryInfoLookup), list, list2);
 	}
 
 	public static RegistryAccess.Frozen load(
-		Map<ResourceKey<? extends Registry<?>>, List<RegistrySynchronization.PackedRegistryEntry>> map,
+		Map<ResourceKey<? extends Registry<?>>, RegistryDataLoader.NetworkedRegistryData> map,
 		ResourceProvider resourceProvider,
-		RegistryAccess registryAccess,
-		List<RegistryDataLoader.RegistryData<?>> list
+		List<HolderLookup.RegistryLookup<?>> list,
+		List<RegistryDataLoader.RegistryData<?>> list2
 	) {
-		return load((loader, registryInfoLookup) -> loader.loadFromNetwork(map, resourceProvider, registryInfoLookup), registryAccess, list);
+		return load((loader, registryInfoLookup) -> loader.loadFromNetwork(map, resourceProvider, registryInfoLookup), list, list2);
 	}
 
 	private static RegistryAccess.Frozen load(
-		RegistryDataLoader.LoadingFunction loadingFunction, RegistryAccess registryAccess, List<RegistryDataLoader.RegistryData<?>> list
+		RegistryDataLoader.LoadingFunction loadingFunction, List<HolderLookup.RegistryLookup<?>> list, List<RegistryDataLoader.RegistryData<?>> list2
 	) {
 		Map<ResourceKey<?>, Exception> map = new HashMap();
-		List<RegistryDataLoader.Loader<?>> list2 = (List<RegistryDataLoader.Loader<?>>)list.stream()
+		List<RegistryDataLoader.Loader<?>> list3 = (List<RegistryDataLoader.Loader<?>>)list2.stream()
 			.map(registryData -> registryData.create(Lifecycle.stable(), map))
 			.collect(Collectors.toUnmodifiableList());
-		RegistryOps.RegistryInfoLookup registryInfoLookup = createContext(registryAccess, list2);
-		list2.forEach(loader -> loadingFunction.apply(loader, registryInfoLookup));
-		list2.forEach(loader -> {
+		RegistryOps.RegistryInfoLookup registryInfoLookup = createContext(list, list3);
+		list3.forEach(loader -> loadingFunction.apply(loader, registryInfoLookup));
+		list3.forEach(loader -> {
 			Registry<?> registry = loader.registry();
 
 			try {
@@ -155,14 +163,14 @@ public class RegistryDataLoader {
 			logErrors(map);
 			throw new IllegalStateException("Failed to load registries due to above errors");
 		} else {
-			return new RegistryAccess.ImmutableRegistryAccess(list2.stream().map(RegistryDataLoader.Loader::registry).toList()).freeze();
+			return new RegistryAccess.ImmutableRegistryAccess(list3.stream().map(RegistryDataLoader.Loader::registry).toList()).freeze();
 		}
 	}
 
-	private static RegistryOps.RegistryInfoLookup createContext(RegistryAccess registryAccess, List<RegistryDataLoader.Loader<?>> list) {
+	private static RegistryOps.RegistryInfoLookup createContext(List<HolderLookup.RegistryLookup<?>> list, List<RegistryDataLoader.Loader<?>> list2) {
 		final Map<ResourceKey<? extends Registry<?>>, RegistryOps.RegistryInfo<?>> map = new HashMap();
-		registryAccess.registries().forEach(registryEntry -> map.put(registryEntry.key(), createInfoForContextRegistry(registryEntry.value())));
-		list.forEach(loader -> map.put(loader.registry.key(), createInfoForNewRegistry(loader.registry)));
+		list.forEach(registryLookup -> map.put(registryLookup.key(), createInfoForContextRegistry(registryLookup)));
+		list2.forEach(loader -> map.put(loader.registry.key(), createInfoForNewRegistry(loader.registry)));
 		return new RegistryOps.RegistryInfoLookup() {
 			@Override
 			public <T> Optional<RegistryOps.RegistryInfo<T>> lookup(ResourceKey<? extends Registry<? extends T>> resourceKey) {
@@ -175,8 +183,8 @@ public class RegistryDataLoader {
 		return new RegistryOps.RegistryInfo<>(writableRegistry.asLookup(), writableRegistry.createRegistrationLookup(), writableRegistry.registryLifecycle());
 	}
 
-	private static <T> RegistryOps.RegistryInfo<T> createInfoForContextRegistry(Registry<T> registry) {
-		return new RegistryOps.RegistryInfo<>(registry.asLookup(), registry.asTagAddingLookup(), registry.registryLifecycle());
+	private static <T> RegistryOps.RegistryInfo<T> createInfoForContextRegistry(HolderLookup.RegistryLookup<T> registryLookup) {
+		return new RegistryOps.RegistryInfo<>(registryLookup, registryLookup, registryLookup.registryLifecycle());
 	}
 
 	private static void logErrors(Map<ResourceKey<?>, Exception> map) {
@@ -257,24 +265,26 @@ public class RegistryDataLoader {
 				);
 			}
 		}
+
+		TagLoader.loadTagsForRegistry(resourceManager, writableRegistry);
 	}
 
 	static <E> void loadContentsFromNetwork(
-		Map<ResourceKey<? extends Registry<?>>, List<RegistrySynchronization.PackedRegistryEntry>> map,
+		Map<ResourceKey<? extends Registry<?>>, RegistryDataLoader.NetworkedRegistryData> map,
 		ResourceProvider resourceProvider,
 		RegistryOps.RegistryInfoLookup registryInfoLookup,
 		WritableRegistry<E> writableRegistry,
 		Decoder<E> decoder,
 		Map<ResourceKey<?>, Exception> map2
 	) {
-		List<RegistrySynchronization.PackedRegistryEntry> list = (List<RegistrySynchronization.PackedRegistryEntry>)map.get(writableRegistry.key());
-		if (list != null) {
+		RegistryDataLoader.NetworkedRegistryData networkedRegistryData = (RegistryDataLoader.NetworkedRegistryData)map.get(writableRegistry.key());
+		if (networkedRegistryData != null) {
 			RegistryOps<Tag> registryOps = RegistryOps.create(NbtOps.INSTANCE, registryInfoLookup);
 			RegistryOps<JsonElement> registryOps2 = RegistryOps.create(JsonOps.INSTANCE, registryInfoLookup);
 			String string = Registries.elementsDirPath(writableRegistry.key());
 			FileToIdConverter fileToIdConverter = FileToIdConverter.json(string);
 
-			for (RegistrySynchronization.PackedRegistryEntry packedRegistryEntry : list) {
+			for (RegistrySynchronization.PackedRegistryEntry packedRegistryEntry : networkedRegistryData.elements) {
 				ResourceKey<E> resourceKey = ResourceKey.create(writableRegistry.key(), packedRegistryEntry.id());
 				Optional<Tag> optional = packedRegistryEntry.data();
 				if (optional.isPresent()) {
@@ -296,6 +306,8 @@ public class RegistryDataLoader {
 					}
 				}
 			}
+
+			TagLoader.loadTagsFromNetwork(networkedRegistryData.tags, writableRegistry);
 		}
 	}
 
@@ -306,7 +318,7 @@ public class RegistryDataLoader {
 		}
 
 		public void loadFromNetwork(
-			Map<ResourceKey<? extends Registry<?>>, List<RegistrySynchronization.PackedRegistryEntry>> map,
+			Map<ResourceKey<? extends Registry<?>>, RegistryDataLoader.NetworkedRegistryData> map,
 			ResourceProvider resourceProvider,
 			RegistryOps.RegistryInfoLookup registryInfoLookup
 		) {
@@ -317,6 +329,9 @@ public class RegistryDataLoader {
 	@FunctionalInterface
 	interface LoadingFunction {
 		void apply(RegistryDataLoader.Loader<?> loader, RegistryOps.RegistryInfoLookup registryInfoLookup);
+	}
+
+	public static record NetworkedRegistryData(List<RegistrySynchronization.PackedRegistryEntry> elements, TagNetworkSerialization.NetworkPayload tags) {
 	}
 
 	public static record RegistryData<T>(ResourceKey<? extends Registry<T>> key, Codec<T> elementCodec, boolean requiredNonEmpty) {

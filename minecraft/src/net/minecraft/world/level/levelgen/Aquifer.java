@@ -50,14 +50,7 @@ public interface Aquifer {
 		Aquifer.FluidStatus computeFluid(int i, int j, int k);
 	}
 
-	public static final class FluidStatus {
-		final int fluidLevel;
-		final BlockState fluidType;
-
-		public FluidStatus(int i, BlockState blockState) {
-			this.fluidLevel = i;
-			this.fluidType = blockState;
-		}
+	public static record FluidStatus(int fluidLevel, BlockState fluidType) {
 
 		public BlockState at(int i) {
 			return i < this.fluidLevel ? this.fluidType : Blocks.AIR.defaultBlockState();
@@ -158,72 +151,89 @@ public interface Aquifer {
 					int o = Integer.MAX_VALUE;
 					int p = Integer.MAX_VALUE;
 					int q = Integer.MAX_VALUE;
-					long r = 0L;
+					int r = Integer.MAX_VALUE;
 					long s = 0L;
 					long t = 0L;
+					long u = 0L;
+					long v = 0L;
 
-					for (int u = 0; u <= 1; u++) {
-						for (int v = -1; v <= 1; v++) {
-							for (int w = 0; w <= 1; w++) {
-								int x = l + u;
-								int y = m + v;
-								int z = n + w;
-								int aa = this.getIndex(x, y, z);
-								long ab = this.aquiferLocationCache[aa];
-								long ac;
-								if (ab != Long.MAX_VALUE) {
-									ac = ab;
+					for (int w = 0; w <= 1; w++) {
+						for (int x = -1; x <= 1; x++) {
+							for (int y = 0; y <= 1; y++) {
+								int z = l + w;
+								int aa = m + x;
+								int ab = n + y;
+								int ac = this.getIndex(z, aa, ab);
+								long ad = this.aquiferLocationCache[ac];
+								long ae;
+								if (ad != Long.MAX_VALUE) {
+									ae = ad;
 								} else {
-									RandomSource randomSource = this.positionalRandomFactory.at(x, y, z);
-									ac = BlockPos.asLong(x * 16 + randomSource.nextInt(10), y * 12 + randomSource.nextInt(9), z * 16 + randomSource.nextInt(10));
-									this.aquiferLocationCache[aa] = ac;
+									RandomSource randomSource = this.positionalRandomFactory.at(z, aa, ab);
+									ae = BlockPos.asLong(z * 16 + randomSource.nextInt(10), aa * 12 + randomSource.nextInt(9), ab * 16 + randomSource.nextInt(10));
+									this.aquiferLocationCache[ac] = ae;
 								}
 
-								int ad = BlockPos.getX(ac) - i;
-								int ae = BlockPos.getY(ac) - j;
-								int af = BlockPos.getZ(ac) - k;
-								int ag = ad * ad + ae * ae + af * af;
-								if (o >= ag) {
+								int af = BlockPos.getX(ae) - i;
+								int ag = BlockPos.getY(ae) - j;
+								int ah = BlockPos.getZ(ae) - k;
+								int ai = af * af + ag * ag + ah * ah;
+								if (o >= ai) {
+									v = u;
+									u = t;
 									t = s;
-									s = r;
-									r = ac;
+									s = ae;
+									r = q;
 									q = p;
 									p = o;
-									o = ag;
-								} else if (p >= ag) {
-									t = s;
-									s = ac;
+									o = ai;
+								} else if (p >= ai) {
+									v = u;
+									u = t;
+									t = ae;
+									r = q;
 									q = p;
-									p = ag;
-								} else if (q >= ag) {
-									t = ac;
-									q = ag;
+									p = ai;
+								} else if (q >= ai) {
+									v = u;
+									u = ae;
+									r = q;
+									q = ai;
+								} else if (r >= ai) {
+									v = ae;
+									r = ai;
 								}
 							}
 						}
 					}
 
-					Aquifer.FluidStatus fluidStatus2 = this.getAquiferStatus(r);
+					Aquifer.FluidStatus fluidStatus2 = this.getAquiferStatus(s);
 					double e = similarity(o, p);
 					BlockState blockState = fluidStatus2.at(j);
 					if (e <= 0.0) {
-						this.shouldScheduleFluidUpdate = e >= FLOWING_UPDATE_SIMULARITY;
+						if (e >= FLOWING_UPDATE_SIMULARITY) {
+							Aquifer.FluidStatus fluidStatus3 = this.getAquiferStatus(t);
+							this.shouldScheduleFluidUpdate = !fluidStatus2.equals(fluidStatus3);
+						} else {
+							this.shouldScheduleFluidUpdate = false;
+						}
+
 						return blockState;
 					} else if (blockState.is(Blocks.WATER) && this.globalFluidPicker.computeFluid(i, j - 1, k).at(j - 1).is(Blocks.LAVA)) {
 						this.shouldScheduleFluidUpdate = true;
 						return blockState;
 					} else {
 						MutableDouble mutableDouble = new MutableDouble(Double.NaN);
-						Aquifer.FluidStatus fluidStatus3 = this.getAquiferStatus(s);
-						double f = e * this.calculatePressure(functionContext, mutableDouble, fluidStatus2, fluidStatus3);
+						Aquifer.FluidStatus fluidStatus4 = this.getAquiferStatus(t);
+						double f = e * this.calculatePressure(functionContext, mutableDouble, fluidStatus2, fluidStatus4);
 						if (d + f > 0.0) {
 							this.shouldScheduleFluidUpdate = false;
 							return null;
 						} else {
-							Aquifer.FluidStatus fluidStatus4 = this.getAquiferStatus(t);
+							Aquifer.FluidStatus fluidStatus5 = this.getAquiferStatus(u);
 							double g = similarity(o, q);
 							if (g > 0.0) {
-								double h = e * g * this.calculatePressure(functionContext, mutableDouble, fluidStatus2, fluidStatus4);
+								double h = e * g * this.calculatePressure(functionContext, mutableDouble, fluidStatus2, fluidStatus5);
 								if (d + h > 0.0) {
 									this.shouldScheduleFluidUpdate = false;
 									return null;
@@ -232,14 +242,24 @@ public interface Aquifer {
 
 							double h = similarity(p, q);
 							if (h > 0.0) {
-								double ah = e * h * this.calculatePressure(functionContext, mutableDouble, fluidStatus3, fluidStatus4);
-								if (d + ah > 0.0) {
+								double aj = e * h * this.calculatePressure(functionContext, mutableDouble, fluidStatus4, fluidStatus5);
+								if (d + aj > 0.0) {
 									this.shouldScheduleFluidUpdate = false;
 									return null;
 								}
 							}
 
-							this.shouldScheduleFluidUpdate = true;
+							boolean bl = !fluidStatus2.equals(fluidStatus4);
+							boolean bl2 = h >= FLOWING_UPDATE_SIMULARITY && !fluidStatus4.equals(fluidStatus5);
+							boolean bl3 = g >= FLOWING_UPDATE_SIMULARITY && !fluidStatus2.equals(fluidStatus5);
+							if (!bl && !bl2 && !bl3) {
+								this.shouldScheduleFluidUpdate = g >= FLOWING_UPDATE_SIMULARITY
+									&& similarity(o, r) >= FLOWING_UPDATE_SIMULARITY
+									&& !fluidStatus2.equals(this.getAquiferStatus(v));
+							} else {
+								this.shouldScheduleFluidUpdate = true;
+							}
+
 							return blockState;
 						}
 					}

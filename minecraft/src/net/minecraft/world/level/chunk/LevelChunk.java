@@ -163,8 +163,8 @@ public class LevelChunk extends ChunkAccess {
 	}
 
 	@Override
-	public ChunkAccess.TicksToSave getTicksForSerialization() {
-		return new ChunkAccess.TicksToSave(this.blockTicks, this.fluidTicks);
+	public ChunkAccess.PackedTicks getTicksForSerialization(long l) {
+		return new ChunkAccess.PackedTicks(this.blockTicks.pack(l), this.fluidTicks.pack(l));
 	}
 
 	@Override
@@ -266,7 +266,7 @@ public class LevelChunk extends ChunkAccess {
 					this.level.getChunkSource().getLightEngine().updateSectionStatus(blockPos, bl3);
 				}
 
-				if (LightEngine.hasDifferentLightProperties(this, blockPos, blockState2, blockState)) {
+				if (LightEngine.hasDifferentLightProperties(blockState2, blockState)) {
 					ProfilerFiller profilerFiller = this.level.getProfiler();
 					profilerFiller.push("updateSkyLightSources");
 					this.skyLightSources.update(this, j, i, l);
@@ -292,6 +292,9 @@ public class LevelChunk extends ChunkAccess {
 					if (blockState.hasBlockEntity()) {
 						BlockEntity blockEntity = this.getBlockEntity(blockPos, LevelChunk.EntityCreationType.CHECK);
 						if (blockEntity != null && !blockEntity.isValidBlockState(blockState)) {
+							LOGGER.warn(
+								"Found mismatched block entity @ {}: type = {}, state = {}", blockPos, blockEntity.getType().builtInRegistryHolder().key().location(), blockState
+							);
 							this.removeBlockEntity(blockPos);
 							blockEntity = null;
 						}
@@ -537,12 +540,14 @@ public class LevelChunk extends ChunkAccess {
 					BlockState blockState = this.getBlockState(blockPos);
 					FluidState fluidState = blockState.getFluidState();
 					if (!fluidState.isEmpty()) {
-						fluidState.tick(this.level, blockPos);
+						fluidState.tick(this.level, blockPos, blockState);
 					}
 
 					if (!(blockState.getBlock() instanceof LiquidBlock)) {
 						BlockState blockState2 = Block.updateFromNeighbourShapes(blockState, this.level, blockPos);
-						this.level.setBlock(blockPos, blockState2, 20);
+						if (blockState2 != blockState) {
+							this.level.setBlock(blockPos, blockState2, 20);
+						}
 					}
 				}
 

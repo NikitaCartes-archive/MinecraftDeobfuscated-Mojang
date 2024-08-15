@@ -28,6 +28,7 @@ public class DamageTypeTagsProvider extends TagsProvider<DamageType> {
 				DamageTypes.DRAGON_BREATH,
 				DamageTypes.STARVE,
 				DamageTypes.FALL,
+				DamageTypes.ENDER_PEARL,
 				DamageTypes.FREEZE,
 				DamageTypes.STALAGMITE,
 				DamageTypes.MAGIC,
@@ -65,7 +66,7 @@ public class DamageTypeTagsProvider extends TagsProvider<DamageType> {
 			);
 		this.tag(DamageTypeTags.WITCH_RESISTANT_TO).add(DamageTypes.MAGIC, DamageTypes.INDIRECT_MAGIC, DamageTypes.SONIC_BOOM, DamageTypes.THORNS);
 		this.tag(DamageTypeTags.IS_EXPLOSION).add(DamageTypes.FIREWORKS, DamageTypes.EXPLOSION, DamageTypes.PLAYER_EXPLOSION, DamageTypes.BAD_RESPAWN_POINT);
-		this.tag(DamageTypeTags.IS_FALL).add(DamageTypes.FALL, DamageTypes.STALAGMITE);
+		this.tag(DamageTypeTags.IS_FALL).add(DamageTypes.FALL, DamageTypes.ENDER_PEARL, DamageTypes.STALAGMITE);
 		this.tag(DamageTypeTags.IS_DROWNING).add(DamageTypes.DROWN);
 		this.tag(DamageTypeTags.IS_FREEZING).add(DamageTypes.FREEZE);
 		this.tag(DamageTypeTags.IS_LIGHTNING).add(DamageTypes.LIGHTNING_BOLT);
@@ -94,6 +95,7 @@ public class DamageTypeTagsProvider extends TagsProvider<DamageType> {
 				DamageTypes.STARVE,
 				DamageTypes.CACTUS,
 				DamageTypes.FALL,
+				DamageTypes.ENDER_PEARL,
 				DamageTypes.FLY_INTO_WALL,
 				DamageTypes.FELL_OUT_OF_WORLD,
 				DamageTypes.GENERIC,
@@ -110,7 +112,7 @@ public class DamageTypeTagsProvider extends TagsProvider<DamageType> {
 			);
 		this.tag(DamageTypeTags.ALWAYS_KILLS_ARMOR_STANDS)
 			.add(DamageTypes.ARROW, DamageTypes.TRIDENT, DamageTypes.FIREBALL, DamageTypes.WITHER_SKULL, DamageTypes.WIND_CHARGE);
-		this.tag(DamageTypeTags.CAN_BREAK_ARMOR_STAND).add(DamageTypes.PLAYER_ATTACK, DamageTypes.PLAYER_EXPLOSION);
+		this.tag(DamageTypeTags.CAN_BREAK_ARMOR_STAND).add(DamageTypes.PLAYER_EXPLOSION).addTag(DamageTypeTags.IS_PLAYER_ATTACK);
 		this.tag(DamageTypeTags.BYPASSES_WOLF_ARMOR)
 			.addTag(DamageTypeTags.BYPASSES_INVULNERABILITY)
 			.add(
@@ -126,7 +128,7 @@ public class DamageTypeTagsProvider extends TagsProvider<DamageType> {
 				DamageTypes.THORNS,
 				DamageTypes.WITHER
 			);
-		this.tag(DamageTypeTags.IS_PLAYER_ATTACK).add(DamageTypes.PLAYER_ATTACK);
+		this.tag(DamageTypeTags.IS_PLAYER_ATTACK).add(DamageTypes.PLAYER_ATTACK, DamageTypes.MACE_SMASH);
 		this.tag(DamageTypeTags.BURN_FROM_STEPPING).add(DamageTypes.CAMPFIRE, DamageTypes.HOT_FLOOR);
 		this.tag(DamageTypeTags.PANIC_ENVIRONMENTAL_CAUSES)
 			.add(DamageTypes.CACTUS, DamageTypes.FREEZE, DamageTypes.HOT_FLOOR, DamageTypes.IN_FIRE, DamageTypes.LAVA, DamageTypes.LIGHTNING_BOLT, DamageTypes.ON_FIRE);
@@ -142,7 +144,6 @@ public class DamageTypeTagsProvider extends TagsProvider<DamageType> {
 				DamageTypes.MAGIC,
 				DamageTypes.MOB_ATTACK,
 				DamageTypes.MOB_PROJECTILE,
-				DamageTypes.PLAYER_ATTACK,
 				DamageTypes.PLAYER_EXPLOSION,
 				DamageTypes.SONIC_BOOM,
 				DamageTypes.STING,
@@ -152,6 +153,8 @@ public class DamageTypeTagsProvider extends TagsProvider<DamageType> {
 				DamageTypes.WIND_CHARGE,
 				DamageTypes.WITHER,
 				DamageTypes.WITHER_SKULL
-			);
+			)
+			.addTag(DamageTypeTags.IS_PLAYER_ATTACK);
+		this.tag(DamageTypeTags.IS_MACE_SMASH).add(DamageTypes.MACE_SMASH);
 	}
 }

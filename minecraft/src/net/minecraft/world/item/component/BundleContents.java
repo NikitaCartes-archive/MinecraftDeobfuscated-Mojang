@@ -25,16 +25,19 @@ public final class BundleContents implements TooltipComponent {
 		.map(BundleContents::new, bundleContents -> bundleContents.items);
 	private static final Fraction BUNDLE_IN_BUNDLE_WEIGHT = Fraction.getFraction(1, 16);
 	private static final int NO_STACK_INDEX = -1;
+	public static final int NO_SELECTED_ITEM_INDEX = -1;
 	final List<ItemStack> items;
 	final Fraction weight;
+	final int selectedItem;
 
-	BundleContents(List<ItemStack> list, Fraction fraction) {
+	BundleContents(List<ItemStack> list, Fraction fraction, int i) {
 		this.items = list;
 		this.weight = fraction;
+		this.selectedItem = i;
 	}
 
 	public BundleContents(List<ItemStack> list) {
-		this(list, computeContentWeight(list));
+		this(list, computeContentWeight(list), -1);
 	}
 
 	private static Fraction computeContentWeight(List<ItemStack> list) {
@@ -55,6 +58,18 @@ public final class BundleContents implements TooltipComponent {
 			List<BeehiveBlockEntity.Occupant> list = itemStack.getOrDefault(DataComponents.BEES, List.of());
 			return !list.isEmpty() ? Fraction.ONE : Fraction.getFraction(1, itemStack.getMaxStackSize());
 		}
+	}
+
+	public static boolean canItemBeInBundle(ItemStack itemStack) {
+		return !itemStack.isEmpty() && itemStack.getItem().canFitInsideContainerItems();
+	}
+
+	public int getNumberOfItemsToShow() {
+		int i = this.size();
+		int j = i > 8 ? 7 : 8;
+		int k = i % 4;
+		int l = k == 0 ? 0 : 4 - k;
+		return Math.min(i, j - l);
 	}
 
 	public ItemStack getItemUnsafe(int i) {
@@ -85,6 +100,14 @@ public final class BundleContents implements TooltipComponent {
 		return this.items.isEmpty();
 	}
 
+	public int getSelectedItem() {
+		return this.selectedItem;
+	}
+
+	public boolean hasSelectedItem() {
+		return this.selectedItem != -1;
+	}
+
 	public boolean equals(Object object) {
 		if (this == object) {
 			return true;
@@ -106,15 +129,18 @@ public final class BundleContents implements TooltipComponent {
 	public static class Mutable {
 		private final List<ItemStack> items;
 		private Fraction weight;
+		private int selectedItem;
 
 		public Mutable(BundleContents bundleContents) {
 			this.items = new ArrayList(bundleContents.items);
 			this.weight = bundleContents.weight;
+			this.selectedItem = bundleContents.selectedItem;
 		}
 
 		public BundleContents.Mutable clearItems() {
 			this.items.clear();
 			this.weight = Fraction.ZERO;
+			this.selectedItem = -1;
 			return this;
 		}
 
@@ -138,7 +164,9 @@ public final class BundleContents implements TooltipComponent {
 		}
 
 		public int tryInsert(ItemStack itemStack) {
-			if (!itemStack.isEmpty() && itemStack.getItem().canFitInsideContainerItems()) {
+			if (!BundleContents.canItemBeInBundle(itemStack)) {
+				return 0;
+			} else {
 				int i = Math.min(itemStack.getCount(), this.getMaxAmountToAdd(itemStack));
 				if (i == 0) {
 					return 0;
@@ -156,15 +184,17 @@ public final class BundleContents implements TooltipComponent {
 
 					return i;
 				}
-			} else {
-				return 0;
 			}
 		}
 
 		public int tryTransfer(Slot slot, Player player) {
 			ItemStack itemStack = slot.getItem();
 			int i = this.getMaxAmountToAdd(itemStack);
-			return this.tryInsert(slot.safeTake(itemStack.getCount(), i, player));
+			return BundleContents.canItemBeInBundle(itemStack) ? this.tryInsert(slot.safeTake(itemStack.getCount(), i, player)) : 0;
+		}
+
+		public void setSelectedItem(int i) {
+			this.selectedItem = this.selectedItem != i && i < this.items.size() ? i : -1;
 		}
 
 		@Nullable
@@ -172,8 +202,10 @@ public final class BundleContents implements TooltipComponent {
 			if (this.items.isEmpty()) {
 				return null;
 			} else {
-				ItemStack itemStack = ((ItemStack)this.items.remove(0)).copy();
+				int i = this.selectedItem != -1 && this.selectedItem < this.items.size() ? this.selectedItem : 0;
+				ItemStack itemStack = ((ItemStack)this.items.remove(i)).copy();
 				this.weight = this.weight.subtract(BundleContents.getWeight(itemStack).multiplyBy(Fraction.getFraction(itemStack.getCount(), 1)));
+				this.setSelectedItem(-1);
 				return itemStack;
 			}
 		}
@@ -183,7 +215,7 @@ public final class BundleContents implements TooltipComponent {
 		}
 
 		public BundleContents toImmutable() {
-			return new BundleContents(List.copyOf(this.items), this.weight);
+			return new BundleContents(List.copyOf(this.items), this.weight, this.selectedItem);
 		}
 	}
 }

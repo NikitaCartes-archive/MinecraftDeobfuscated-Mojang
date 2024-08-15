@@ -8,6 +8,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.entity.animal.SnowGolem;
@@ -61,14 +62,14 @@ public class CarvedPumpkinBlock extends HorizontalDirectionalBlock {
 	private void trySpawnGolem(Level level, BlockPos blockPos) {
 		BlockPattern.BlockPatternMatch blockPatternMatch = this.getOrCreateSnowGolemFull().find(level, blockPos);
 		if (blockPatternMatch != null) {
-			SnowGolem snowGolem = EntityType.SNOW_GOLEM.create(level);
+			SnowGolem snowGolem = EntityType.SNOW_GOLEM.create(level, EntitySpawnReason.TRIGGERED);
 			if (snowGolem != null) {
 				spawnGolemInWorld(level, blockPatternMatch, snowGolem, blockPatternMatch.getBlock(0, 2, 0).getPos());
 			}
 		} else {
 			BlockPattern.BlockPatternMatch blockPatternMatch2 = this.getOrCreateIronGolemFull().find(level, blockPos);
 			if (blockPatternMatch2 != null) {
-				IronGolem ironGolem = EntityType.IRON_GOLEM.create(level);
+				IronGolem ironGolem = EntityType.IRON_GOLEM.create(level, EntitySpawnReason.TRIGGERED);
 				if (ironGolem != null) {
 					ironGolem.setPlayerCreated(true);
 					spawnGolemInWorld(level, blockPatternMatch2, ironGolem, blockPatternMatch2.getBlock(1, 2, 0).getPos());

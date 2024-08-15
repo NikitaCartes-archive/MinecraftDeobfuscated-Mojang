@@ -5,8 +5,8 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelLayers;
-import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
@@ -28,12 +28,12 @@ import net.minecraft.world.level.block.state.properties.BedPart;
 
 @Environment(EnvType.CLIENT)
 public class BedRenderer implements BlockEntityRenderer<BedBlockEntity> {
-	private final ModelPart headRoot;
-	private final ModelPart footRoot;
+	private final Model headModel;
+	private final Model footModel;
 
 	public BedRenderer(BlockEntityRendererProvider.Context context) {
-		this.headRoot = context.bakeLayer(ModelLayers.BED_HEAD);
-		this.footRoot = context.bakeLayer(ModelLayers.BED_FOOT);
+		this.headModel = new Model.Simple(context.bakeLayer(ModelLayers.BED_HEAD), RenderType::entitySolid);
+		this.footModel = new Model.Simple(context.bakeLayer(ModelLayers.BED_FOOT), RenderType::entitySolid);
 	}
 
 	public static LayerDefinition createHeadLayer() {
@@ -87,7 +87,7 @@ public class BedRenderer implements BlockEntityRenderer<BedBlockEntity> {
 			this.renderPiece(
 				poseStack,
 				multiBufferSource,
-				blockState.getValue(BedBlock.PART) == BedPart.HEAD ? this.headRoot : this.footRoot,
+				blockState.getValue(BedBlock.PART) == BedPart.HEAD ? this.headModel : this.footModel,
 				blockState.getValue(BedBlock.FACING),
 				material,
 				k,
@@ -95,13 +95,13 @@ public class BedRenderer implements BlockEntityRenderer<BedBlockEntity> {
 				false
 			);
 		} else {
-			this.renderPiece(poseStack, multiBufferSource, this.headRoot, Direction.SOUTH, material, i, j, false);
-			this.renderPiece(poseStack, multiBufferSource, this.footRoot, Direction.SOUTH, material, i, j, true);
+			this.renderPiece(poseStack, multiBufferSource, this.headModel, Direction.SOUTH, material, i, j, false);
+			this.renderPiece(poseStack, multiBufferSource, this.footModel, Direction.SOUTH, material, i, j, true);
 		}
 	}
 
 	private void renderPiece(
-		PoseStack poseStack, MultiBufferSource multiBufferSource, ModelPart modelPart, Direction direction, Material material, int i, int j, boolean bl
+		PoseStack poseStack, MultiBufferSource multiBufferSource, Model model, Direction direction, Material material, int i, int j, boolean bl
 	) {
 		poseStack.pushPose();
 		poseStack.translate(0.0F, 0.5625F, bl ? -1.0F : 0.0F);
@@ -110,7 +110,7 @@ public class BedRenderer implements BlockEntityRenderer<BedBlockEntity> {
 		poseStack.mulPose(Axis.ZP.rotationDegrees(180.0F + direction.toYRot()));
 		poseStack.translate(-0.5F, -0.5F, -0.5F);
 		VertexConsumer vertexConsumer = material.buffer(multiBufferSource, RenderType::entitySolid);
-		modelPart.render(poseStack, vertexConsumer, i, j);
+		model.renderToBuffer(poseStack, vertexConsumer, i, j);
 		poseStack.popPose();
 	}
 }

@@ -100,7 +100,7 @@ public class Interaction extends Entity implements Attackable, Targeting {
 	public void onSyncedDataUpdated(EntityDataAccessor<?> entityDataAccessor) {
 		super.onSyncedDataUpdated(entityDataAccessor);
 		if (DATA_HEIGHT_ID.equals(entityDataAccessor) || DATA_WIDTH_ID.equals(entityDataAccessor)) {
-			this.setBoundingBox(this.makeBoundingBox());
+			this.refreshDimensions();
 		}
 	}
 

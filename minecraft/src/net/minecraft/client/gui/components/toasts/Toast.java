@@ -2,6 +2,7 @@ package net.minecraft.client.gui.components.toasts;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.sounds.SoundManager;
@@ -12,9 +13,14 @@ import net.minecraft.util.Mth;
 @Environment(EnvType.CLIENT)
 public interface Toast {
 	Object NO_TOKEN = new Object();
+	int DEFAULT_WIDTH = 160;
 	int SLOT_HEIGHT = 32;
 
-	Toast.Visibility render(GuiGraphics guiGraphics, ToastComponent toastComponent, long l);
+	Toast.Visibility getWantedVisibility();
+
+	void update(ToastManager toastManager, long l);
+
+	void render(GuiGraphics guiGraphics, Font font, long l);
 
 	default Object getToken() {
 		return NO_TOKEN;
@@ -28,7 +34,7 @@ public interface Toast {
 		return 32;
 	}
 
-	default int slotCount() {
+	default int occcupiedSlotCount() {
 		return Mth.positiveCeilDiv(this.height(), 32);
 	}
 

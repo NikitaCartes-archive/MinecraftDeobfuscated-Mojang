@@ -5,6 +5,7 @@ import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import java.util.List;
+import java.util.Objects;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -36,8 +37,6 @@ import net.minecraft.stats.StatsCounter;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionResultHolder;
-import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.HasCustomInventoryScreen;
 import net.minecraft.world.entity.player.Player;
@@ -296,7 +295,7 @@ public class MultiPlayerGameMode {
 		BlockPos blockPos = blockHitResult.getBlockPos();
 		ItemStack itemStack = localPlayer.getItemInHand(interactionHand);
 		if (this.localPlayerMode == GameType.SPECTATOR) {
-			return InteractionResult.SUCCESS;
+			return InteractionResult.CONSUME;
 		} else {
 			boolean bl = !localPlayer.getMainHandItem().isEmpty() || !localPlayer.getOffhandItem().isEmpty();
 			boolean bl2 = localPlayer.isSecondaryUseActive() && bl;
@@ -306,33 +305,33 @@ public class MultiPlayerGameMode {
 					return InteractionResult.FAIL;
 				}
 
-				ItemInteractionResult itemInteractionResult = blockState.useItemOn(
+				InteractionResult interactionResult = blockState.useItemOn(
 					localPlayer.getItemInHand(interactionHand), this.minecraft.level, localPlayer, interactionHand, blockHitResult
 				);
-				if (itemInteractionResult.consumesAction()) {
-					return itemInteractionResult.result();
+				if (interactionResult.consumesAction()) {
+					return interactionResult;
 				}
 
-				if (itemInteractionResult == ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION && interactionHand == InteractionHand.MAIN_HAND) {
-					InteractionResult interactionResult = blockState.useWithoutItem(this.minecraft.level, localPlayer, blockHitResult);
-					if (interactionResult.consumesAction()) {
-						return interactionResult;
+				if (interactionResult instanceof InteractionResult.TryEmptyHandInteraction && interactionHand == InteractionHand.MAIN_HAND) {
+					InteractionResult interactionResult2 = blockState.useWithoutItem(this.minecraft.level, localPlayer, blockHitResult);
+					if (interactionResult2.consumesAction()) {
+						return interactionResult2;
 					}
 				}
 			}
 
 			if (!itemStack.isEmpty() && !localPlayer.getCooldowns().isOnCooldown(itemStack.getItem())) {
 				UseOnContext useOnContext = new UseOnContext(localPlayer, interactionHand, blockHitResult);
-				InteractionResult interactionResult2;
+				InteractionResult interactionResult3;
 				if (this.localPlayerMode.isCreative()) {
 					int i = itemStack.getCount();
-					interactionResult2 = itemStack.useOn(useOnContext);
+					interactionResult3 = itemStack.useOn(useOnContext);
 					itemStack.setCount(i);
 				} else {
-					interactionResult2 = itemStack.useOn(useOnContext);
+					interactionResult3 = itemStack.useOn(useOnContext);
 				}
 
-				return interactionResult2;
+				return interactionResult3;
 			} else {
 				return InteractionResult.PASS;
 			}
@@ -352,13 +351,19 @@ public class MultiPlayerGameMode {
 					mutableObject.setValue(InteractionResult.PASS);
 					return serverboundUseItemPacket;
 				} else {
-					InteractionResultHolder<ItemStack> interactionResultHolder = itemStack.use(this.minecraft.level, player, interactionHand);
-					ItemStack itemStack2 = interactionResultHolder.getObject();
+					InteractionResult interactionResult = itemStack.use(this.minecraft.level, player, interactionHand);
+					ItemStack itemStack2;
+					if (interactionResult instanceof InteractionResult.Success success) {
+						itemStack2 = (ItemStack)Objects.requireNonNullElseGet(success.heldItemTransformedTo(), () -> player.getItemInHand(interactionHand));
+					} else {
+						itemStack2 = player.getItemInHand(interactionHand);
+					}
+
 					if (itemStack2 != itemStack) {
 						player.setItemInHand(interactionHand, itemStack2);
 					}
 
-					mutableObject.setValue(interactionResultHolder.getResult());
+					mutableObject.setValue(interactionResult);
 					return serverboundUseItemPacket;
 				}
 			});
@@ -386,14 +391,14 @@ public class MultiPlayerGameMode {
 	public InteractionResult interact(Player player, Entity entity, InteractionHand interactionHand) {
 		this.ensureHasSentCarriedItem();
 		this.connection.send(ServerboundInteractPacket.createInteractionPacket(entity, player.isShiftKeyDown(), interactionHand));
-		return this.localPlayerMode == GameType.SPECTATOR ? InteractionResult.PASS : player.interactOn(entity, interactionHand);
+		return (InteractionResult)(this.localPlayerMode == GameType.SPECTATOR ? InteractionResult.PASS : player.interactOn(entity, interactionHand));
 	}
 
 	public InteractionResult interactAt(Player player, Entity entity, EntityHitResult entityHitResult, InteractionHand interactionHand) {
 		this.ensureHasSentCarriedItem();
 		Vec3 vec3 = entityHitResult.getLocation().subtract(entity.getX(), entity.getY(), entity.getZ());
 		this.connection.send(ServerboundInteractPacket.createInteractionPacket(entity, player.isShiftKeyDown(), interactionHand, vec3));
-		return this.localPlayerMode == GameType.SPECTATOR ? InteractionResult.PASS : entity.interactAt(player, vec3, interactionHand);
+		return (InteractionResult)(this.localPlayerMode == GameType.SPECTATOR ? InteractionResult.PASS : entity.interactAt(player, vec3, interactionHand));
 	}
 
 	public void handleInventoryMouseClick(int i, int j, int k, ClickType clickType, Player player) {

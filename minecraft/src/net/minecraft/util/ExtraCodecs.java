@@ -110,7 +110,7 @@ public class ExtraCodecs {
 		return floatList;
 	});
 	public static final Codec<Integer> ARGB_COLOR_CODEC = Codec.withAlternative(
-		Codec.INT, VECTOR4F, vector4f -> FastColor.ARGB32.colorFromFloat(vector4f.w(), vector4f.x(), vector4f.y(), vector4f.z())
+		Codec.INT, VECTOR4F, vector4f -> ARGB.colorFromFloat(vector4f.w(), vector4f.x(), vector4f.y(), vector4f.z())
 	);
 	public static final Codec<Integer> UNSIGNED_BYTE = Codec.BYTE
 		.flatComapMap(

@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import net.minecraft.core.Holder;
-import net.minecraft.core.HolderSet;
 import net.minecraft.core.LayeredRegistryAccess;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistrySynchronization;
@@ -24,17 +23,16 @@ public class TagNetworkSerialization {
 	) {
 		return (Map<ResourceKey<? extends Registry<?>>, TagNetworkSerialization.NetworkPayload>)RegistrySynchronization.networkSafeRegistries(layeredRegistryAccess)
 			.map(registryEntry -> Pair.of(registryEntry.key(), serializeToNetwork(registryEntry.value())))
-			.filter(pair -> ((TagNetworkSerialization.NetworkPayload)pair.getSecond()).size() > 0)
+			.filter(pair -> !((TagNetworkSerialization.NetworkPayload)pair.getSecond()).isEmpty())
 			.collect(Collectors.toMap(Pair::getFirst, Pair::getSecond));
 	}
 
 	private static <T> TagNetworkSerialization.NetworkPayload serializeToNetwork(Registry<T> registry) {
 		Map<ResourceLocation, IntList> map = new HashMap();
-		registry.getTags().forEach(pair -> {
-			HolderSet<T> holderSet = (HolderSet<T>)pair.getSecond();
-			IntList intList = new IntArrayList(holderSet.size());
+		registry.getTags().forEach(named -> {
+			IntList intList = new IntArrayList(named.size());
 
-			for (Holder<T> holder : holderSet) {
+			for (Holder<T> holder : named) {
 				if (holder.kind() != Holder.Kind.REFERENCE) {
 					throw new IllegalStateException("Can't serialize unregistered value " + holder);
 				}
@@ -42,25 +40,24 @@ public class TagNetworkSerialization {
 				intList.add(registry.getId(holder.value()));
 			}
 
-			map.put(((TagKey)pair.getFirst()).location(), intList);
+			map.put(named.key().location(), intList);
 		});
 		return new TagNetworkSerialization.NetworkPayload(map);
 	}
 
-	static <T> void deserializeTagsFromNetwork(
-		ResourceKey<? extends Registry<T>> resourceKey,
-		Registry<T> registry,
-		TagNetworkSerialization.NetworkPayload networkPayload,
-		TagNetworkSerialization.TagOutput<T> tagOutput
-	) {
+	static <T> TagLoader.LoadResult<T> deserializeTagsFromNetwork(Registry<T> registry, TagNetworkSerialization.NetworkPayload networkPayload) {
+		ResourceKey<? extends Registry<T>> resourceKey = registry.key();
+		Map<TagKey<T>, List<Holder<T>>> map = new HashMap();
 		networkPayload.tags.forEach((resourceLocation, intList) -> {
 			TagKey<T> tagKey = TagKey.create(resourceKey, resourceLocation);
 			List<Holder<T>> list = (List<Holder<T>>)intList.intStream().mapToObj(registry::getHolder).flatMap(Optional::stream).collect(Collectors.toUnmodifiableList());
-			tagOutput.accept(tagKey, list);
+			map.put(tagKey, list);
 		});
+		return new TagLoader.LoadResult<>(resourceKey, map);
 	}
 
 	public static final class NetworkPayload {
+		public static final TagNetworkSerialization.NetworkPayload EMPTY = new TagNetworkSerialization.NetworkPayload(Map.of());
 		final Map<ResourceLocation, IntList> tags;
 
 		NetworkPayload(Map<ResourceLocation, IntList> map) {
@@ -75,21 +72,12 @@ public class TagNetworkSerialization {
 			return new TagNetworkSerialization.NetworkPayload(friendlyByteBuf.readMap(FriendlyByteBuf::readResourceLocation, FriendlyByteBuf::readIntIdList));
 		}
 
-		public int size() {
-			return this.tags.size();
+		public boolean isEmpty() {
+			return this.tags.isEmpty();
 		}
 
-		public <T> void applyToRegistry(Registry<T> registry) {
-			if (this.size() != 0) {
-				Map<TagKey<T>, List<Holder<T>>> map = new HashMap(this.size());
-				TagNetworkSerialization.deserializeTagsFromNetwork(registry.key(), registry, this, map::put);
-				registry.bindTags(map);
-			}
+		public <T> TagLoader.LoadResult<T> resolve(Registry<T> registry) {
+			return TagNetworkSerialization.deserializeTagsFromNetwork(registry, this);
 		}
-	}
-
-	@FunctionalInterface
-	public interface TagOutput<T> {
-		void accept(TagKey<T> tagKey, List<Holder<T>> list);
 	}
 }

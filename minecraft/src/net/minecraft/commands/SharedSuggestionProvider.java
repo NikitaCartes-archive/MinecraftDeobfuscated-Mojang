@@ -20,7 +20,6 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagKey;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.level.Level;
 
@@ -61,7 +60,7 @@ public interface SharedSuggestionProvider {
 		Registry<?> registry, SharedSuggestionProvider.ElementSuggestionType elementSuggestionType, SuggestionsBuilder suggestionsBuilder
 	) {
 		if (elementSuggestionType.shouldSuggestTags()) {
-			suggestResource(registry.getTagNames().map(TagKey::location), suggestionsBuilder, "#");
+			suggestResource(registry.getTags().map(named -> named.key().location()), suggestionsBuilder, "#");
 		}
 
 		if (elementSuggestionType.shouldSuggestElements()) {

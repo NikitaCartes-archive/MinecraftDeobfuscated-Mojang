@@ -6,7 +6,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.client.renderer.ItemInHandRenderer;
+import net.minecraft.client.renderer.MapRenderer;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.resources.model.ModelManager;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -15,14 +15,14 @@ import net.minecraft.world.entity.Entity;
 @FunctionalInterface
 @Environment(EnvType.CLIENT)
 public interface EntityRendererProvider<T extends Entity> {
-	EntityRenderer<T> create(EntityRendererProvider.Context context);
+	EntityRenderer<T, ?> create(EntityRendererProvider.Context context);
 
 	@Environment(EnvType.CLIENT)
 	public static class Context {
 		private final EntityRenderDispatcher entityRenderDispatcher;
 		private final ItemRenderer itemRenderer;
+		private final MapRenderer mapRenderer;
 		private final BlockRenderDispatcher blockRenderDispatcher;
-		private final ItemInHandRenderer itemInHandRenderer;
 		private final ResourceManager resourceManager;
 		private final EntityModelSet modelSet;
 		private final Font font;
@@ -30,16 +30,16 @@ public interface EntityRendererProvider<T extends Entity> {
 		public Context(
 			EntityRenderDispatcher entityRenderDispatcher,
 			ItemRenderer itemRenderer,
+			MapRenderer mapRenderer,
 			BlockRenderDispatcher blockRenderDispatcher,
-			ItemInHandRenderer itemInHandRenderer,
 			ResourceManager resourceManager,
 			EntityModelSet entityModelSet,
 			Font font
 		) {
 			this.entityRenderDispatcher = entityRenderDispatcher;
 			this.itemRenderer = itemRenderer;
+			this.mapRenderer = mapRenderer;
 			this.blockRenderDispatcher = blockRenderDispatcher;
-			this.itemInHandRenderer = itemInHandRenderer;
 			this.resourceManager = resourceManager;
 			this.modelSet = entityModelSet;
 			this.font = font;
@@ -53,12 +53,12 @@ public interface EntityRendererProvider<T extends Entity> {
 			return this.itemRenderer;
 		}
 
-		public BlockRenderDispatcher getBlockRenderDispatcher() {
-			return this.blockRenderDispatcher;
+		public MapRenderer getMapRenderer() {
+			return this.mapRenderer;
 		}
 
-		public ItemInHandRenderer getItemInHandRenderer() {
-			return this.itemInHandRenderer;
+		public BlockRenderDispatcher getBlockRenderDispatcher() {
+			return this.blockRenderDispatcher;
 		}
 
 		public ResourceManager getResourceManager() {

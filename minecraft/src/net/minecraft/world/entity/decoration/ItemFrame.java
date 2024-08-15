@@ -215,7 +215,6 @@ public class ItemFrame extends HangingEntity {
 			MapItemSavedData mapItemSavedData = MapItem.getSavedData(mapId, this.level());
 			if (mapItemSavedData != null) {
 				mapItemSavedData.removedFromFrame(this.pos, this.getId());
-				mapItemSavedData.setDirty(true);
 			}
 		}
 
@@ -344,29 +343,27 @@ public class ItemFrame extends HangingEntity {
 		boolean bl2 = !itemStack.isEmpty();
 		if (this.fixed) {
 			return InteractionResult.PASS;
-		} else if (!this.level().isClientSide) {
-			if (!bl) {
-				if (bl2 && !this.isRemoved()) {
-					if (itemStack.is(Items.FILLED_MAP)) {
-						MapItemSavedData mapItemSavedData = MapItem.getSavedData(itemStack, this.level());
-						if (mapItemSavedData != null && mapItemSavedData.isTrackedCountOverLimit(256)) {
-							return InteractionResult.FAIL;
-						}
+		} else if (!bl) {
+			if (bl2 && !this.isRemoved()) {
+				if (itemStack.is(Items.FILLED_MAP)) {
+					MapItemSavedData mapItemSavedData = MapItem.getSavedData(itemStack, this.level());
+					if (mapItemSavedData != null && mapItemSavedData.isTrackedCountOverLimit(256)) {
+						return InteractionResult.FAIL;
 					}
-
-					this.setItem(itemStack);
-					this.gameEvent(GameEvent.BLOCK_CHANGE, player);
-					itemStack.consume(1, player);
 				}
-			} else {
-				this.playSound(this.getRotateItemSound(), 1.0F, 1.0F);
-				this.setRotation(this.getRotation() + 1);
-				this.gameEvent(GameEvent.BLOCK_CHANGE, player);
-			}
 
-			return InteractionResult.CONSUME;
+				this.setItem(itemStack);
+				this.gameEvent(GameEvent.BLOCK_CHANGE, player);
+				itemStack.consume(1, player);
+				return InteractionResult.SUCCESS;
+			} else {
+				return InteractionResult.PASS;
+			}
 		} else {
-			return !bl && !bl2 ? InteractionResult.PASS : InteractionResult.SUCCESS;
+			this.playSound(this.getRotateItemSound(), 1.0F, 1.0F);
+			this.setRotation(this.getRotation() + 1);
+			this.gameEvent(GameEvent.BLOCK_CHANGE, player);
+			return InteractionResult.SUCCESS;
 		}
 	}
 

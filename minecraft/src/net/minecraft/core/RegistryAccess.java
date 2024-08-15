@@ -2,7 +2,6 @@ package net.minecraft.core;
 
 import com.google.common.collect.ImmutableMap;
 import com.mojang.logging.LogUtils;
-import com.mojang.serialization.Lifecycle;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -30,8 +29,8 @@ public interface RegistryAccess extends HolderLookup.Provider {
 	Stream<RegistryAccess.RegistryEntry<?>> registries();
 
 	@Override
-	default Stream<ResourceKey<? extends Registry<?>>> listRegistries() {
-		return this.registries().map(RegistryAccess.RegistryEntry::key);
+	default Stream<ResourceKey<? extends Registry<?>>> listRegistryKeys() {
+		return this.registries().map(registryEntry -> registryEntry.key);
 	}
 
 	static RegistryAccess.Frozen fromRegistryOfRegistries(Registry<? extends Registry<?>> registry) {
@@ -62,10 +61,6 @@ public interface RegistryAccess extends HolderLookup.Provider {
 		}
 
 		return new FrozenAccess(this.registries().map(RegistryAccess.RegistryEntry::freeze));
-	}
-
-	default Lifecycle allRegistriesLifecycle() {
-		return (Lifecycle)this.registries().map(registryEntry -> registryEntry.value.registryLifecycle()).reduce(Lifecycle.stable(), Lifecycle::add);
 	}
 
 	public interface Frozen extends RegistryAccess {

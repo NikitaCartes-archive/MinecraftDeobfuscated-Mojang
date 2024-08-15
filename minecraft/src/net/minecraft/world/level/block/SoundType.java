@@ -701,6 +701,9 @@ public class SoundType {
 	public static final SoundType COBWEB = new SoundType(
 		1.0F, 1.0F, SoundEvents.COBWEB_BREAK, SoundEvents.COBWEB_STEP, SoundEvents.COBWEB_PLACE, SoundEvents.COBWEB_HIT, SoundEvents.COBWEB_FALL
 	);
+	public static final SoundType SPAWNER = new SoundType(
+		1.0F, 1.0F, SoundEvents.SPAWNER_BREAK, SoundEvents.SPAWNER_STEP, SoundEvents.SPAWNER_PLACE, SoundEvents.SPAWNER_HIT, SoundEvents.SPAWNER_FALL
+	);
 	public final float volume;
 	public final float pitch;
 	private final SoundEvent breakSound;

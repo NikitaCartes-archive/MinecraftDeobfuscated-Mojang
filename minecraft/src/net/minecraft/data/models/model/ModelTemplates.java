@@ -134,6 +134,8 @@ public class ModelTemplates {
 	public static final ModelTemplate HANGING_LANTERN = create("template_hanging_lantern", "_hanging", TextureSlot.LANTERN);
 	public static final ModelTemplate TORCH = create("template_torch", TextureSlot.TORCH);
 	public static final ModelTemplate WALL_TORCH = create("template_torch_wall", TextureSlot.TORCH);
+	public static final ModelTemplate REDSTONE_TORCH = create("template_redstone_torch", TextureSlot.TORCH);
+	public static final ModelTemplate REDSTONE_WALL_TORCH = create("template_redstone_torch_wall", TextureSlot.TORCH);
 	public static final ModelTemplate PISTON = create("template_piston", TextureSlot.PLATFORM, TextureSlot.BOTTOM, TextureSlot.SIDE);
 	public static final ModelTemplate PISTON_HEAD = create("template_piston_head", TextureSlot.PLATFORM, TextureSlot.SIDE, TextureSlot.UNSTICKY);
 	public static final ModelTemplate PISTON_HEAD_SHORT = create("template_piston_head_short", TextureSlot.PLATFORM, TextureSlot.SIDE, TextureSlot.UNSTICKY);

@@ -8,11 +8,11 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.client.renderer.entity.state.PhantomRenderState;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.monster.Phantom;
 
 @Environment(EnvType.CLIENT)
-public class PhantomModel<T extends Phantom> extends HierarchicalModel<T> {
+public class PhantomModel extends EntityModel<PhantomRenderState> {
 	private static final String TAIL_BASE = "tail_base";
 	private static final String TAIL_TIP = "tail_tip";
 	private final ModelPart root;
@@ -79,14 +79,14 @@ public class PhantomModel<T extends Phantom> extends HierarchicalModel<T> {
 		return this.root;
 	}
 
-	public void setupAnim(T phantom, float f, float g, float h, float i, float j) {
-		float k = ((float)phantom.getUniqueFlapTickOffset() + h) * 7.448451F * (float) (Math.PI / 180.0);
-		float l = 16.0F;
-		this.leftWingBase.zRot = Mth.cos(k) * 16.0F * (float) (Math.PI / 180.0);
-		this.leftWingTip.zRot = Mth.cos(k) * 16.0F * (float) (Math.PI / 180.0);
+	public void setupAnim(PhantomRenderState phantomRenderState) {
+		float f = phantomRenderState.flapTime * 7.448451F * (float) (Math.PI / 180.0);
+		float g = 16.0F;
+		this.leftWingBase.zRot = Mth.cos(f) * 16.0F * (float) (Math.PI / 180.0);
+		this.leftWingTip.zRot = Mth.cos(f) * 16.0F * (float) (Math.PI / 180.0);
 		this.rightWingBase.zRot = -this.leftWingBase.zRot;
 		this.rightWingTip.zRot = -this.leftWingTip.zRot;
-		this.tailBase.xRot = -(5.0F + Mth.cos(k * 2.0F) * 5.0F) * (float) (Math.PI / 180.0);
-		this.tailTip.xRot = -(5.0F + Mth.cos(k * 2.0F) * 5.0F) * (float) (Math.PI / 180.0);
+		this.tailBase.xRot = -(5.0F + Mth.cos(f * 2.0F) * 5.0F) * (float) (Math.PI / 180.0);
+		this.tailTip.xRot = -(5.0F + Mth.cos(f * 2.0F) * 5.0F) * (float) (Math.PI / 180.0);
 	}
 }

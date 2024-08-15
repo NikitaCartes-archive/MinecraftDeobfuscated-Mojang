@@ -7,7 +7,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.util.FastColor;
+import net.minecraft.util.ARGB;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkPos;
 import org.joml.Matrix4f;
@@ -15,8 +15,8 @@ import org.joml.Matrix4f;
 @Environment(EnvType.CLIENT)
 public class ChunkBorderRenderer implements DebugRenderer.SimpleDebugRenderer {
 	private final Minecraft minecraft;
-	private static final int CELL_BORDER = FastColor.ARGB32.color(255, 0, 155, 155);
-	private static final int YELLOW = FastColor.ARGB32.color(255, 255, 255, 0);
+	private static final int CELL_BORDER = ARGB.color(255, 0, 155, 155);
+	private static final int YELLOW = ARGB.color(255, 255, 255, 0);
 
 	public ChunkBorderRenderer(Minecraft minecraft) {
 		this.minecraft = minecraft;

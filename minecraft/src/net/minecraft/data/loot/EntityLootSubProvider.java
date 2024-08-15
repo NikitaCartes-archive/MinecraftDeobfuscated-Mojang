@@ -20,6 +20,7 @@ import net.minecraft.advancements.critereon.ItemEnchantmentsPredicate;
 import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.advancements.critereon.ItemSubPredicates;
 import net.minecraft.advancements.critereon.MinMaxBounds;
+import net.minecraft.core.HolderGetter;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -146,16 +147,18 @@ public abstract class EntityLootSubProvider implements LootTableSubProvider {
 		return SPECIAL_LOOT_TABLE_TYPES.contains(entityType) || entityType.getCategory() != MobCategory.MISC;
 	}
 
-	protected LootItemCondition.Builder killedByFrog() {
-		return DamageSourceCondition.hasDamageSource(DamageSourcePredicate.Builder.damageType().source(EntityPredicate.Builder.entity().of(EntityType.FROG)));
+	protected LootItemCondition.Builder killedByFrog(HolderGetter<EntityType<?>> holderGetter) {
+		return DamageSourceCondition.hasDamageSource(
+			DamageSourcePredicate.Builder.damageType().source(EntityPredicate.Builder.entity().of(holderGetter, EntityType.FROG))
+		);
 	}
 
-	protected LootItemCondition.Builder killedByFrogVariant(ResourceKey<FrogVariant> resourceKey) {
+	protected LootItemCondition.Builder killedByFrogVariant(HolderGetter<EntityType<?>> holderGetter, ResourceKey<FrogVariant> resourceKey) {
 		return DamageSourceCondition.hasDamageSource(
 			DamageSourcePredicate.Builder.damageType()
 				.source(
 					EntityPredicate.Builder.entity()
-						.of(EntityType.FROG)
+						.of(holderGetter, EntityType.FROG)
 						.subPredicate(EntitySubPredicates.frogVariant(BuiltInRegistries.FROG_VARIANT.getHolderOrThrow(resourceKey)))
 				)
 		);

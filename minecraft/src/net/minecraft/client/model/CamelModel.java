@@ -1,7 +1,5 @@
 package net.minecraft.client.model;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.animation.definitions.CamelAnimation;
@@ -11,16 +9,16 @@ import net.minecraft.client.model.geom.builders.CubeDeformation;
 import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.MeshTransformer;
 import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.client.renderer.entity.state.CamelRenderState;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.animal.camel.Camel;
 
 @Environment(EnvType.CLIENT)
-public class CamelModel<T extends Camel> extends HierarchicalModel<T> {
+public class CamelModel extends EntityModel<CamelRenderState> {
 	private static final float MAX_WALK_ANIMATION_SPEED = 2.0F;
 	private static final float WALK_ANIMATION_SCALE_FACTOR = 2.5F;
-	private static final float BABY_SCALE = 0.45F;
-	private static final float BABY_Y_OFFSET = 29.35F;
+	public static final MeshTransformer BABY_TRANSFORMER = MeshTransformer.scaling(0.45F);
 	private static final String SADDLE = "saddle";
 	private static final String BRIDLE = "bridle";
 	private static final String REINS = "reins";
@@ -120,34 +118,33 @@ public class CamelModel<T extends Camel> extends HierarchicalModel<T> {
 		return LayerDefinition.create(meshDefinition, 128, 128);
 	}
 
-	public void setupAnim(T camel, float f, float g, float h, float i, float j) {
+	public void setupAnim(CamelRenderState camelRenderState) {
 		this.root().getAllParts().forEach(ModelPart::resetPose);
-		this.applyHeadRotation(camel, i, j, h);
-		this.toggleInvisibleParts(camel);
-		this.animateWalk(CamelAnimation.CAMEL_WALK, f, g, 2.0F, 2.5F);
-		this.animate(camel.sitAnimationState, CamelAnimation.CAMEL_SIT, h, 1.0F);
-		this.animate(camel.sitPoseAnimationState, CamelAnimation.CAMEL_SIT_POSE, h, 1.0F);
-		this.animate(camel.sitUpAnimationState, CamelAnimation.CAMEL_STANDUP, h, 1.0F);
-		this.animate(camel.idleAnimationState, CamelAnimation.CAMEL_IDLE, h, 1.0F);
-		this.animate(camel.dashAnimationState, CamelAnimation.CAMEL_DASH, h, 1.0F);
+		this.applyHeadRotation(camelRenderState, camelRenderState.yRot, camelRenderState.xRot);
+		this.toggleInvisibleParts(camelRenderState);
+		this.animateWalk(CamelAnimation.CAMEL_WALK, camelRenderState.walkAnimationPos, camelRenderState.walkAnimationSpeed, 2.0F, 2.5F);
+		this.animate(camelRenderState.sitAnimationState, CamelAnimation.CAMEL_SIT, camelRenderState.ageInTicks, 1.0F);
+		this.animate(camelRenderState.sitPoseAnimationState, CamelAnimation.CAMEL_SIT_POSE, camelRenderState.ageInTicks, 1.0F);
+		this.animate(camelRenderState.sitUpAnimationState, CamelAnimation.CAMEL_STANDUP, camelRenderState.ageInTicks, 1.0F);
+		this.animate(camelRenderState.idleAnimationState, CamelAnimation.CAMEL_IDLE, camelRenderState.ageInTicks, 1.0F);
+		this.animate(camelRenderState.dashAnimationState, CamelAnimation.CAMEL_DASH, camelRenderState.ageInTicks, 1.0F);
 	}
 
-	private void applyHeadRotation(T camel, float f, float g, float h) {
+	private void applyHeadRotation(CamelRenderState camelRenderState, float f, float g) {
 		f = Mth.clamp(f, -30.0F, 30.0F);
 		g = Mth.clamp(g, -25.0F, 45.0F);
-		if (camel.getJumpCooldown() > 0) {
-			float i = h - (float)camel.tickCount;
-			float j = 45.0F * ((float)camel.getJumpCooldown() - i) / 55.0F;
-			g = Mth.clamp(g + j, -25.0F, 70.0F);
+		if (camelRenderState.jumpCooldown > 0.0F) {
+			float h = 45.0F * camelRenderState.jumpCooldown / 55.0F;
+			g = Mth.clamp(g + h, -25.0F, 70.0F);
 		}
 
 		this.head.yRot = f * (float) (Math.PI / 180.0);
 		this.head.xRot = g * (float) (Math.PI / 180.0);
 	}
 
-	private void toggleInvisibleParts(T camel) {
-		boolean bl = camel.isSaddled();
-		boolean bl2 = camel.isVehicle();
+	private void toggleInvisibleParts(CamelRenderState camelRenderState) {
+		boolean bl = camelRenderState.isSaddled;
+		boolean bl2 = camelRenderState.isRidden;
 
 		for (ModelPart modelPart : this.saddleParts) {
 			modelPart.visible = bl;
@@ -155,19 +152,6 @@ public class CamelModel<T extends Camel> extends HierarchicalModel<T> {
 
 		for (ModelPart modelPart : this.ridingParts) {
 			modelPart.visible = bl2 && bl;
-		}
-	}
-
-	@Override
-	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, int k) {
-		if (this.young) {
-			poseStack.pushPose();
-			poseStack.scale(0.45F, 0.45F, 0.45F);
-			poseStack.translate(0.0F, 1.834375F, 0.0F);
-			this.root().render(poseStack, vertexConsumer, i, j, k);
-			poseStack.popPose();
-		} else {
-			this.root().render(poseStack, vertexConsumer, i, j, k);
 		}
 	}
 

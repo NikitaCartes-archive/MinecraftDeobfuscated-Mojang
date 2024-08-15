@@ -105,7 +105,7 @@ public abstract class AbstractWindCharge extends AbstractHurtingProjectile imple
 	protected void onHitBlock(BlockHitResult blockHitResult) {
 		super.onHitBlock(blockHitResult);
 		if (!this.level().isClientSide) {
-			Vec3i vec3i = blockHitResult.getDirection().getNormal();
+			Vec3i vec3i = blockHitResult.getDirection().getUnitVec3i();
 			Vec3 vec3 = Vec3.atLowerCornerOf(vec3i).multiply(0.25, 0.25, 0.25);
 			Vec3 vec32 = blockHitResult.getLocation().add(vec3);
 			this.explode(vec32);

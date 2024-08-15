@@ -7,7 +7,7 @@ import net.minecraft.client.color.block.BlockColors;
 import net.minecraft.core.IdMapper;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.util.FastColor;
+import net.minecraft.util.ARGB;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -50,7 +50,7 @@ public class ItemColors {
 				if (j == 0) {
 					return -7697782;
 				} else if (j == 1) {
-					return FastColor.ARGB32.opaque(intList.getInt(0));
+					return ARGB.opaque(intList.getInt(0));
 				} else {
 					int k = 0;
 					int l = 0;
@@ -58,17 +58,17 @@ public class ItemColors {
 
 					for (int n = 0; n < j; n++) {
 						int o = intList.getInt(n);
-						k += FastColor.ARGB32.red(o);
-						l += FastColor.ARGB32.green(o);
-						m += FastColor.ARGB32.blue(o);
+						k += ARGB.red(o);
+						l += ARGB.green(o);
+						m += ARGB.blue(o);
 					}
 
-					return FastColor.ARGB32.color(k / j, l / j, m / j);
+					return ARGB.color(k / j, l / j, m / j);
 				}
 			}
 		}, Items.FIREWORK_STAR);
 		itemColors.register(
-			(itemStack, i) -> i > 0 ? -1 : FastColor.ARGB32.opaque(itemStack.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY).getColor()),
+			(itemStack, i) -> i > 0 ? -1 : ARGB.opaque(itemStack.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY).getColor()),
 			Items.POTION,
 			Items.SPLASH_POTION,
 			Items.LINGERING_POTION,
@@ -76,7 +76,7 @@ public class ItemColors {
 		);
 
 		for (SpawnEggItem spawnEggItem : SpawnEggItem.eggs()) {
-			itemColors.register((itemStack, i) -> FastColor.ARGB32.opaque(spawnEggItem.getColor(i)), spawnEggItem);
+			itemColors.register((itemStack, i) -> ARGB.opaque(spawnEggItem.getColor(i)), spawnEggItem);
 		}
 
 		itemColors.register(
@@ -98,7 +98,7 @@ public class ItemColors {
 		);
 		itemColors.register((itemStack, i) -> FoliageColor.getMangroveColor(), Blocks.MANGROVE_LEAVES);
 		itemColors.register(
-			(itemStack, i) -> i == 0 ? -1 : FastColor.ARGB32.opaque(itemStack.getOrDefault(DataComponents.MAP_COLOR, MapItemColor.DEFAULT).rgb()), Items.FILLED_MAP
+			(itemStack, i) -> i == 0 ? -1 : ARGB.opaque(itemStack.getOrDefault(DataComponents.MAP_COLOR, MapItemColor.DEFAULT).rgb()), Items.FILLED_MAP
 		);
 		return itemColors;
 	}

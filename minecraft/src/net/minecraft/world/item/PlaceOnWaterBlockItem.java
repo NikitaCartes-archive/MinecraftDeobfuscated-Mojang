@@ -2,7 +2,6 @@ package net.minecraft.world.item;
 
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.ClipContext;
@@ -21,10 +20,9 @@ public class PlaceOnWaterBlockItem extends BlockItem {
 	}
 
 	@Override
-	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand) {
+	public InteractionResult use(Level level, Player player, InteractionHand interactionHand) {
 		BlockHitResult blockHitResult = getPlayerPOVHitResult(level, player, ClipContext.Fluid.SOURCE_ONLY);
 		BlockHitResult blockHitResult2 = blockHitResult.withPosition(blockHitResult.getBlockPos().above());
-		InteractionResult interactionResult = super.useOn(new UseOnContext(player, interactionHand, blockHitResult2));
-		return new InteractionResultHolder<>(interactionResult, player.getItemInHand(interactionHand));
+		return super.useOn(new UseOnContext(player, interactionHand, blockHitResult2));
 	}
 }

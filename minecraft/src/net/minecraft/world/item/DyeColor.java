@@ -9,8 +9,8 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.ByIdMap;
-import net.minecraft.util.FastColor;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.material.MapColor;
 import org.jetbrains.annotations.Contract;
@@ -51,7 +51,7 @@ public enum DyeColor implements StringRepresentable {
 		this.name = string2;
 		this.mapColor = mapColor;
 		this.textColor = m;
-		this.textureDiffuseColor = FastColor.ARGB32.opaque(k);
+		this.textureDiffuseColor = ARGB.opaque(k);
 		this.fireworkColor = l;
 	}
 

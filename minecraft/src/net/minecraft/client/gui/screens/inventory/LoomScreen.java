@@ -10,6 +10,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BannerRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.ModelBakery;
@@ -87,26 +88,27 @@ public class LoomScreen extends AbstractContainerScreen<LoomMenu> {
 	protected void renderBg(GuiGraphics guiGraphics, float f, int i, int j) {
 		int k = this.leftPos;
 		int l = this.topPos;
-		guiGraphics.blit(BG_LOCATION, k, l, 0, 0, this.imageWidth, this.imageHeight);
+		guiGraphics.blit(RenderType::guiTextured, BG_LOCATION, k, l, 0.0F, 0.0F, this.imageWidth, this.imageHeight, 256, 256);
 		Slot slot = this.menu.getBannerSlot();
 		Slot slot2 = this.menu.getDyeSlot();
 		Slot slot3 = this.menu.getPatternSlot();
 		Slot slot4 = this.menu.getResultSlot();
 		if (!slot.hasItem()) {
-			guiGraphics.blitSprite(BANNER_SLOT_SPRITE, k + slot.x, l + slot.y, 16, 16);
+			guiGraphics.blitSprite(RenderType::guiTextured, BANNER_SLOT_SPRITE, k + slot.x, l + slot.y, 16, 16);
 		}
 
 		if (!slot2.hasItem()) {
-			guiGraphics.blitSprite(DYE_SLOT_SPRITE, k + slot2.x, l + slot2.y, 16, 16);
+			guiGraphics.blitSprite(RenderType::guiTextured, DYE_SLOT_SPRITE, k + slot2.x, l + slot2.y, 16, 16);
 		}
 
 		if (!slot3.hasItem()) {
-			guiGraphics.blitSprite(PATTERN_SLOT_SPRITE, k + slot3.x, l + slot3.y, 16, 16);
+			guiGraphics.blitSprite(RenderType::guiTextured, PATTERN_SLOT_SPRITE, k + slot3.x, l + slot3.y, 16, 16);
 		}
 
 		int m = (int)(41.0F * this.scrollOffs);
 		ResourceLocation resourceLocation = this.displayPatterns ? SCROLLER_SPRITE : SCROLLER_DISABLED_SPRITE;
-		guiGraphics.blitSprite(resourceLocation, k + 119, l + 13 + m, 12, 15);
+		guiGraphics.blitSprite(RenderType::guiTextured, resourceLocation, k + 119, l + 13 + m, 12, 15);
+		guiGraphics.flush();
 		Lighting.setupForFlatItems();
 		if (this.resultBannerPatterns != null && !this.hasMaxPatterns) {
 			guiGraphics.pose().pushPose();
@@ -130,9 +132,8 @@ public class LoomScreen extends AbstractContainerScreen<LoomMenu> {
 				this.resultBannerPatterns
 			);
 			guiGraphics.pose().popPose();
-			guiGraphics.flush();
 		} else if (this.hasMaxPatterns) {
-			guiGraphics.blitSprite(ERROR_SPRITE, k + slot4.x - 5, l + slot4.y - 5, 26, 26);
+			guiGraphics.blitSprite(RenderType::guiTextured, ERROR_SPRITE, k + slot4.x - 5, l + slot4.y - 5, 26, 26);
 		}
 
 		if (this.displayPatterns) {
@@ -161,12 +162,13 @@ public class LoomScreen extends AbstractContainerScreen<LoomMenu> {
 						resourceLocation2 = PATTERN_SPRITE;
 					}
 
-					guiGraphics.blitSprite(resourceLocation2, t, u, 14, 14);
+					guiGraphics.blitSprite(RenderType::guiTextured, resourceLocation2, t, u, 14, 14);
 					this.renderPattern(guiGraphics, (Holder<BannerPattern>)list.get(s), t, u);
 				}
 			}
 		}
 
+		guiGraphics.flush();
 		Lighting.setupFor3DItems();
 	}
 

@@ -33,7 +33,7 @@ public class TallGrassBlock extends BushBlock implements BonemealableBlock {
 
 	@Override
 	public boolean isValidBonemealTarget(LevelReader levelReader, BlockPos blockPos, BlockState blockState) {
-		return true;
+		return getGrownBlock(blockState).defaultBlockState().canSurvive(levelReader, blockPos) && levelReader.isEmptyBlock(blockPos.above());
 	}
 
 	@Override
@@ -43,9 +43,10 @@ public class TallGrassBlock extends BushBlock implements BonemealableBlock {
 
 	@Override
 	public void performBonemeal(ServerLevel serverLevel, RandomSource randomSource, BlockPos blockPos, BlockState blockState) {
-		DoublePlantBlock doublePlantBlock = (DoublePlantBlock)(blockState.is(Blocks.FERN) ? Blocks.LARGE_FERN : Blocks.TALL_GRASS);
-		if (doublePlantBlock.defaultBlockState().canSurvive(serverLevel, blockPos) && serverLevel.isEmptyBlock(blockPos.above())) {
-			DoublePlantBlock.placeAt(serverLevel, doublePlantBlock.defaultBlockState(), blockPos, 2);
-		}
+		DoublePlantBlock.placeAt(serverLevel, getGrownBlock(blockState).defaultBlockState(), blockPos, 2);
+	}
+
+	private static DoublePlantBlock getGrownBlock(BlockState blockState) {
+		return (DoublePlantBlock)(blockState.is(Blocks.FERN) ? Blocks.LARGE_FERN : Blocks.TALL_GRASS);
 	}
 }

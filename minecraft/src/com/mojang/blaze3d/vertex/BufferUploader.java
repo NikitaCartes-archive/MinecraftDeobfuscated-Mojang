@@ -22,25 +22,18 @@ public class BufferUploader {
 	}
 
 	public static void drawWithShader(MeshData meshData) {
-		if (!RenderSystem.isOnRenderThreadOrInit()) {
-			RenderSystem.recordRenderCall(() -> _drawWithShader(meshData));
-		} else {
-			_drawWithShader(meshData);
-		}
-	}
-
-	private static void _drawWithShader(MeshData meshData) {
+		RenderSystem.assertOnRenderThread();
 		VertexBuffer vertexBuffer = upload(meshData);
 		vertexBuffer.drawWithShader(RenderSystem.getModelViewMatrix(), RenderSystem.getProjectionMatrix(), RenderSystem.getShader());
 	}
 
 	public static void draw(MeshData meshData) {
+		RenderSystem.assertOnRenderThread();
 		VertexBuffer vertexBuffer = upload(meshData);
 		vertexBuffer.draw();
 	}
 
 	private static VertexBuffer upload(MeshData meshData) {
-		RenderSystem.assertOnRenderThread();
 		VertexBuffer vertexBuffer = bindImmediateBuffer(meshData.drawState().format());
 		vertexBuffer.upload(meshData);
 		return vertexBuffer;

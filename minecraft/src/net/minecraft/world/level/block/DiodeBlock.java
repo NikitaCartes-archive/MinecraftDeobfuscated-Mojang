@@ -1,6 +1,7 @@
 package net.minecraft.world.level.block;
 
 import com.mojang.serialization.MapCodec;
+import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -17,6 +18,8 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.redstone.ExperimentalRedstoneUtils;
+import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.ticks.TickPriority;
@@ -78,7 +81,7 @@ public abstract class DiodeBlock extends HorizontalDirectionalBlock {
 	}
 
 	@Override
-	protected void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
+	protected void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, @Nullable Orientation orientation, boolean bl) {
 		if (blockState.canSurvive(level, blockPos)) {
 			this.checkTickOnNeighbor(level, blockPos, blockState);
 		} else {
@@ -173,8 +176,9 @@ public abstract class DiodeBlock extends HorizontalDirectionalBlock {
 	protected void updateNeighborsInFront(Level level, BlockPos blockPos, BlockState blockState) {
 		Direction direction = blockState.getValue(FACING);
 		BlockPos blockPos2 = blockPos.relative(direction.getOpposite());
-		level.neighborChanged(blockPos2, this, blockPos);
-		level.updateNeighborsAtExceptFromFacing(blockPos2, this, direction);
+		Orientation orientation = ExperimentalRedstoneUtils.randomOrientation(level, direction.getOpposite(), Direction.UP);
+		level.neighborChanged(blockPos2, this, orientation);
+		level.updateNeighborsAtExceptFromFacing(blockPos2, this, direction, orientation);
 	}
 
 	protected boolean sideInputDiodesOnly() {

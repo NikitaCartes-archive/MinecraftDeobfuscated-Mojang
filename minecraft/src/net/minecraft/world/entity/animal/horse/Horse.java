@@ -19,9 +19,9 @@ import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.EntityAttachment;
 import net.minecraft.world.entity.EntityAttachments;
 import net.minecraft.world.entity.EntityDimensions;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.VariantHolder;
@@ -150,7 +150,7 @@ public class Horse extends AbstractHorse implements VariantHolder<Variant> {
 
 				if (!this.isTamed()) {
 					this.makeMad();
-					return InteractionResult.sidedSuccess(this.level().isClientSide);
+					return InteractionResult.SUCCESS;
 				}
 			}
 
@@ -173,7 +173,7 @@ public class Horse extends AbstractHorse implements VariantHolder<Variant> {
 	@Override
 	public AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
 		if (ageableMob instanceof Donkey) {
-			Mule mule = EntityType.MULE.create(serverLevel);
+			Mule mule = EntityType.MULE.create(serverLevel, EntitySpawnReason.BREEDING);
 			if (mule != null) {
 				this.setOffspringAttributes(ageableMob, mule);
 			}
@@ -181,7 +181,7 @@ public class Horse extends AbstractHorse implements VariantHolder<Variant> {
 			return mule;
 		} else {
 			Horse horse = (Horse)ageableMob;
-			Horse horse2 = EntityType.HORSE.create(serverLevel);
+			Horse horse2 = EntityType.HORSE.create(serverLevel, EntitySpawnReason.BREEDING);
 			if (horse2 != null) {
 				int i = this.random.nextInt(9);
 				Variant variant;
@@ -228,7 +228,7 @@ public class Horse extends AbstractHorse implements VariantHolder<Variant> {
 	@Nullable
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData
+		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, EntitySpawnReason entitySpawnReason, @Nullable SpawnGroupData spawnGroupData
 	) {
 		RandomSource randomSource = serverLevelAccessor.getRandom();
 		Variant variant;
@@ -240,7 +240,7 @@ public class Horse extends AbstractHorse implements VariantHolder<Variant> {
 		}
 
 		this.setVariantAndMarkings(variant, Util.getRandom(Markings.values(), randomSource));
-		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData);
+		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, entitySpawnReason, spawnGroupData);
 	}
 
 	@Override

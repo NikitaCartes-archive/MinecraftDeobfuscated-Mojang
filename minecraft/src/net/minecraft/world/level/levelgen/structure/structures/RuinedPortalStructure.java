@@ -134,7 +134,8 @@ public class RuinedPortalStructure extends Structure {
 								blockPos4,
 								generationContext.chunkGenerator()
 									.getBiomeSource()
-									.getNoiseBiome(QuartPos.fromBlock(blockPos4.getX()), QuartPos.fromBlock(blockPos4.getY()), QuartPos.fromBlock(blockPos4.getZ()), randomState.sampler())
+									.getNoiseBiome(QuartPos.fromBlock(blockPos4.getX()), QuartPos.fromBlock(blockPos4.getY()), QuartPos.fromBlock(blockPos4.getZ()), randomState.sampler()),
+								chunkGenerator.getSeaLevel()
 							);
 						}
 
@@ -165,8 +166,8 @@ public class RuinedPortalStructure extends Structure {
 		}
 	}
 
-	private static boolean isCold(BlockPos blockPos, Holder<Biome> holder) {
-		return holder.value().coldEnoughToSnow(blockPos);
+	private static boolean isCold(BlockPos blockPos, Holder<Biome> holder, int i) {
+		return holder.value().coldEnoughToSnow(blockPos, i);
 	}
 
 	private static int findSuitableY(

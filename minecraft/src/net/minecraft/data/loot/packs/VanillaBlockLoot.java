@@ -100,6 +100,7 @@ public class VanillaBlockLoot extends BlockLootSubProvider {
 	@Override
 	protected void generate() {
 		HolderLookup.RegistryLookup<Enchantment> registryLookup = this.registries.lookupOrThrow(Registries.ENCHANTMENT);
+		HolderLookup.RegistryLookup<Item> registryLookup2 = this.registries.lookupOrThrow(Registries.ITEM);
 		this.dropSelf(Blocks.GRANITE);
 		this.dropSelf(Blocks.POLISHED_GRANITE);
 		this.dropSelf(Blocks.DIORITE);
@@ -1156,12 +1157,12 @@ public class VanillaBlockLoot extends BlockLootSubProvider {
 					)
 				)
 		);
-		this.add(Blocks.NETHER_SPROUTS, itemLike -> BlockLootSubProvider.createShearsOnlyDrop(itemLike));
-		this.add(Blocks.SEAGRASS, itemLike -> BlockLootSubProvider.createShearsOnlyDrop(itemLike));
-		this.add(Blocks.VINE, itemLike -> BlockLootSubProvider.createShearsOnlyDrop(itemLike));
-		this.add(Blocks.GLOW_LICHEN, block -> this.createMultifaceBlockDrops(block, HAS_SHEARS));
-		this.add(Blocks.HANGING_ROOTS, itemLike -> BlockLootSubProvider.createShearsOnlyDrop(itemLike));
-		this.add(Blocks.SMALL_DRIPLEAF, itemLike -> BlockLootSubProvider.createShearsOnlyDrop(itemLike));
+		this.add(Blocks.NETHER_SPROUTS, itemLike -> this.createShearsOnlyDrop(itemLike));
+		this.add(Blocks.SEAGRASS, itemLike -> this.createShearsOnlyDrop(itemLike));
+		this.add(Blocks.VINE, itemLike -> this.createShearsOnlyDrop(itemLike));
+		this.add(Blocks.GLOW_LICHEN, block -> this.createMultifaceBlockDrops(block, this.hasShears()));
+		this.add(Blocks.HANGING_ROOTS, itemLike -> this.createShearsOnlyDrop(itemLike));
+		this.add(Blocks.SMALL_DRIPLEAF, itemLike -> this.createShearsOnlyDrop(itemLike));
 		this.add(Blocks.MANGROVE_LEAVES, block -> this.createMangroveLeavesDrops(block));
 		this.add(Blocks.TALL_SEAGRASS, this.createDoublePlantShearsDrop(Blocks.SEAGRASS));
 		this.add(Blocks.LARGE_FERN, block -> this.createDoublePlantWithSeedDrops(block, Blocks.FERN));
@@ -1336,7 +1337,7 @@ public class VanillaBlockLoot extends BlockLootSubProvider {
 					LootItem.lootTableItem(Items.AMETHYST_SHARD)
 						.apply(SetItemCountFunction.setCount(ConstantValue.exactly(4.0F)))
 						.apply(ApplyBonusCount.addOreBonusCount(registryLookup.getOrThrow(Enchantments.FORTUNE)))
-						.when(MatchTool.toolMatches(ItemPredicate.Builder.item().of(ItemTags.CLUSTER_MAX_HARVESTABLES)))
+						.when(MatchTool.toolMatches(ItemPredicate.Builder.item().of(registryLookup2, ItemTags.CLUSTER_MAX_HARVESTABLES)))
 						.otherwise(
 							(LootPoolEntryContainer.Builder<?>)this.applyExplosionDecay(
 								block, LootItem.lootTableItem(Items.AMETHYST_SHARD).apply(SetItemCountFunction.setCount(ConstantValue.exactly(2.0F)))

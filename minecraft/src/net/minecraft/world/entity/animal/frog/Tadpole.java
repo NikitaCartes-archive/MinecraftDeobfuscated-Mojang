@@ -16,9 +16,8 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgeableMob;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -30,6 +29,7 @@ import net.minecraft.world.entity.ai.navigation.WaterBoundPathNavigation;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.animal.AbstractFish;
+import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.Bucketable;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -103,7 +103,7 @@ public class Tadpole extends AbstractFish {
 	}
 
 	public static AttributeSupplier.Builder createAttributes() {
-		return Mob.createMobAttributes().add(Attributes.MOVEMENT_SPEED, 1.0).add(Attributes.MAX_HEALTH, 6.0);
+		return Animal.createAnimalAttributes().add(Attributes.MOVEMENT_SPEED, 1.0).add(Attributes.MAX_HEALTH, 6.0);
 	}
 
 	@Override
@@ -149,7 +149,7 @@ public class Tadpole extends AbstractFish {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
 		if (this.isFood(itemStack)) {
 			this.feed(player, itemStack);
-			return InteractionResult.sidedSuccess(this.level().isClientSide);
+			return InteractionResult.SUCCESS;
 		} else {
 			return (InteractionResult)Bucketable.bucketMobPickup(player, interactionHand, this).orElse(super.mobInteract(player, interactionHand));
 		}
@@ -225,10 +225,10 @@ public class Tadpole extends AbstractFish {
 
 	private void ageUp() {
 		if (this.level() instanceof ServerLevel serverLevel) {
-			Frog frog = EntityType.FROG.create(this.level());
+			Frog frog = EntityType.FROG.create(this.level(), EntitySpawnReason.CONVERSION);
 			if (frog != null) {
 				frog.moveTo(this.getX(), this.getY(), this.getZ(), this.getYRot(), this.getXRot());
-				frog.finalizeSpawn(serverLevel, this.level().getCurrentDifficultyAt(frog.blockPosition()), MobSpawnType.CONVERSION, null);
+				frog.finalizeSpawn(serverLevel, this.level().getCurrentDifficultyAt(frog.blockPosition()), EntitySpawnReason.CONVERSION, null);
 				frog.setNoAi(this.isNoAi());
 				if (this.hasCustomName()) {
 					frog.setCustomName(this.getCustomName());

@@ -2,11 +2,12 @@ package net.minecraft.world.item;
 
 import net.minecraft.core.Direction;
 import net.minecraft.core.Position;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.ThrownExperienceBottle;
@@ -18,7 +19,7 @@ public class ExperienceBottleItem extends Item implements ProjectileItem {
 	}
 
 	@Override
-	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand) {
+	public InteractionResult use(Level level, Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
 		level.playSound(
 			null,
@@ -30,23 +31,18 @@ public class ExperienceBottleItem extends Item implements ProjectileItem {
 			0.5F,
 			0.4F / (level.getRandom().nextFloat() * 0.4F + 0.8F)
 		);
-		if (!level.isClientSide) {
-			ThrownExperienceBottle thrownExperienceBottle = new ThrownExperienceBottle(level, player);
-			thrownExperienceBottle.setItem(itemStack);
-			thrownExperienceBottle.shootFromRotation(player, player.getXRot(), player.getYRot(), -20.0F, 0.7F, 1.0F);
-			level.addFreshEntity(thrownExperienceBottle);
+		if (level instanceof ServerLevel serverLevel) {
+			Projectile.spawnProjectileFromRotation(ThrownExperienceBottle::new, serverLevel, itemStack, player, -20.0F, 0.7F, 1.0F);
 		}
 
 		player.awardStat(Stats.ITEM_USED.get(this));
 		itemStack.consume(1, player);
-		return InteractionResultHolder.sidedSuccess(itemStack, level.isClientSide());
+		return InteractionResult.SUCCESS;
 	}
 
 	@Override
 	public Projectile asProjectile(Level level, Position position, ItemStack itemStack, Direction direction) {
-		ThrownExperienceBottle thrownExperienceBottle = new ThrownExperienceBottle(level, position.x(), position.y(), position.z());
-		thrownExperienceBottle.setItem(itemStack);
-		return thrownExperienceBottle;
+		return new ThrownExperienceBottle(level, position.x(), position.y(), position.z(), itemStack);
 	}
 
 	@Override

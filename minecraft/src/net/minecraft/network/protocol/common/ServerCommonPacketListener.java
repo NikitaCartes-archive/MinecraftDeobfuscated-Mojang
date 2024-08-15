@@ -1,9 +1,8 @@
 package net.minecraft.network.protocol.common;
 
 import net.minecraft.network.protocol.cookie.ServerCookiePacketListener;
-import net.minecraft.network.protocol.game.ServerPacketListener;
 
-public interface ServerCommonPacketListener extends ServerCookiePacketListener, ServerPacketListener {
+public interface ServerCommonPacketListener extends ServerCookiePacketListener {
 	void handleKeepAlive(ServerboundKeepAlivePacket serverboundKeepAlivePacket);
 
 	void handlePong(ServerboundPongPacket serverboundPongPacket);

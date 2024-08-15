@@ -29,7 +29,7 @@ public class RecipeBookPage {
 	private final List<RecipeButton> buttons = Lists.<RecipeButton>newArrayListWithCapacity(20);
 	@Nullable
 	private RecipeButton hoveredButton;
-	private final OverlayRecipeComponent overlay = new OverlayRecipeComponent();
+	private final OverlayRecipeComponent overlay;
 	private Minecraft minecraft;
 	private final List<RecipeShownListener> showListeners = Lists.<RecipeShownListener>newArrayList();
 	private List<RecipeCollection> recipeCollections = ImmutableList.of();
@@ -42,10 +42,13 @@ public class RecipeBookPage {
 	private RecipeHolder<?> lastClickedRecipe;
 	@Nullable
 	private RecipeCollection lastClickedRecipeCollection;
+	private boolean isFiltering;
 
-	public RecipeBookPage() {
+	public RecipeBookPage(SlotSelectTime slotSelectTime, boolean bl) {
+		this.overlay = new OverlayRecipeComponent(slotSelectTime, bl);
+
 		for (int i = 0; i < 20; i++) {
-			this.buttons.add(new RecipeButton());
+			this.buttons.add(new RecipeButton(slotSelectTime));
 		}
 	}
 
@@ -68,8 +71,9 @@ public class RecipeBookPage {
 		this.showListeners.add(recipeBookComponent);
 	}
 
-	public void updateCollections(List<RecipeCollection> list, boolean bl) {
+	public void updateCollections(List<RecipeCollection> list, boolean bl, boolean bl2) {
 		this.recipeCollections = list;
+		this.isFiltering = bl2;
 		this.totalPages = (int)Math.ceil((double)list.size() / 20.0);
 		if (this.totalPages <= this.currentPage || bl) {
 			this.currentPage = 0;
@@ -85,7 +89,7 @@ public class RecipeBookPage {
 			RecipeButton recipeButton = (RecipeButton)this.buttons.get(j);
 			if (i + j < this.recipeCollections.size()) {
 				RecipeCollection recipeCollection = (RecipeCollection)this.recipeCollections.get(i + j);
-				recipeButton.init(recipeCollection, this);
+				recipeButton.init(recipeCollection, this.isFiltering, this);
 				recipeButton.visible = true;
 			} else {
 				recipeButton.visible = false;
@@ -169,7 +173,9 @@ public class RecipeBookPage {
 						this.lastClickedRecipeCollection = recipeButton.getCollection();
 					} else if (i == 1 && !this.overlay.isVisible() && !recipeButton.isOnlyOption()) {
 						this.overlay
-							.init(this.minecraft, recipeButton.getCollection(), recipeButton.getX(), recipeButton.getY(), j + l / 2, k + 13 + m / 2, (float)recipeButton.getWidth());
+							.init(
+								recipeButton.getCollection(), this.isFiltering, recipeButton.getX(), recipeButton.getY(), j + l / 2, k + 13 + m / 2, (float)recipeButton.getWidth()
+							);
 					}
 
 					return true;
@@ -184,10 +190,6 @@ public class RecipeBookPage {
 		for (RecipeShownListener recipeShownListener : this.showListeners) {
 			recipeShownListener.recipesShown(list);
 		}
-	}
-
-	public Minecraft getMinecraft() {
-		return this.minecraft;
 	}
 
 	public RecipeBook getRecipeBook() {

@@ -8,6 +8,7 @@ import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import java.io.Reader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +16,7 @@ import java.util.Objects;
 import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import net.fabricmc.api.EnvType;
@@ -24,10 +26,12 @@ import net.minecraft.client.color.block.BlockColors;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.block.BlockModelShaper;
 import net.minecraft.client.renderer.block.model.BlockModel;
+import net.minecraft.client.renderer.block.model.BlockModelDefinition;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.Resource;
@@ -36,12 +40,15 @@ import net.minecraft.util.GsonHelper;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.material.FluidState;
 import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class ModelManager implements PreparableReloadListener, AutoCloseable {
 	private static final Logger LOGGER = LogUtils.getLogger();
+	private static final FileToIdConverter BLOCKSTATE_LISTER = FileToIdConverter.json("blockstates");
+	private static final FileToIdConverter MODEL_LISTER = FileToIdConverter.json("models");
 	private static final Map<ResourceLocation, ResourceLocation> VANILLA_ATLASES = Map.of(
 		Sheets.BANNER_SHEET,
 		ResourceLocation.withDefaultNamespace("banner_patterns"),
@@ -99,21 +106,31 @@ public class ModelManager implements PreparableReloadListener, AutoCloseable {
 		Executor executor2
 	) {
 		profilerFiller.startTick();
-		CompletableFuture<Map<ResourceLocation, BlockModel>> completableFuture = loadBlockModels(resourceManager, executor);
-		CompletableFuture<Map<ResourceLocation, List<BlockStateModelLoader.LoadedJson>>> completableFuture2 = loadBlockStates(resourceManager, executor);
-		CompletableFuture<ModelBakery> completableFuture3 = completableFuture.thenCombineAsync(
-			completableFuture2, (mapx, map2) -> new ModelBakery(this.blockColors, profilerFiller, mapx, map2), executor
+		UnbakedModel unbakedModel = MissingBlockModel.missingModel();
+		BlockStateModelLoader blockStateModelLoader = new BlockStateModelLoader(unbakedModel);
+		CompletableFuture<Map<ResourceLocation, UnbakedModel>> completableFuture = loadBlockModels(resourceManager, executor);
+		CompletableFuture<BlockStateModelLoader.LoadedModels> completableFuture2 = loadBlockStates(blockStateModelLoader, resourceManager, executor);
+		CompletableFuture<ModelDiscovery> completableFuture3 = completableFuture2.thenCombineAsync(
+			completableFuture, (loadedModels, mapx) -> this.discoverModelDependencies(unbakedModel, mapx, loadedModels), executor
+		);
+		CompletableFuture<Object2IntMap<BlockState>> completableFuture4 = completableFuture2.thenApplyAsync(
+			loadedModels -> buildModelGroups(this.blockColors, loadedModels), executor
 		);
 		Map<ResourceLocation, CompletableFuture<AtlasSet.StitchResult>> map = this.atlases.scheduleLoad(resourceManager, this.maxMipmapLevels, executor);
-		return CompletableFuture.allOf((CompletableFuture[])Stream.concat(map.values().stream(), Stream.of(completableFuture3)).toArray(CompletableFuture[]::new))
+		return CompletableFuture.allOf(
+				(CompletableFuture[])Stream.concat(map.values().stream(), Stream.of(completableFuture3, completableFuture4)).toArray(CompletableFuture[]::new)
+			)
 			.thenApplyAsync(
-				void_ -> this.loadModels(
-						profilerFiller,
-						(Map<ResourceLocation, AtlasSet.StitchResult>)map.entrySet()
-							.stream()
-							.collect(Collectors.toMap(Entry::getKey, entry -> (AtlasSet.StitchResult)((CompletableFuture)entry.getValue()).join())),
-						(ModelBakery)completableFuture3.join()
-					),
+				void_ -> {
+					Map<ResourceLocation, AtlasSet.StitchResult> map2 = (Map<ResourceLocation, AtlasSet.StitchResult>)map.entrySet()
+						.stream()
+						.collect(Collectors.toMap(Entry::getKey, entry -> (AtlasSet.StitchResult)((CompletableFuture)entry.getValue()).join()));
+					ModelDiscovery modelDiscovery = (ModelDiscovery)completableFuture3.join();
+					Object2IntMap<BlockState> object2IntMap = (Object2IntMap<BlockState>)completableFuture4.join();
+					return this.loadModels(
+						profilerFiller, map2, new ModelBakery(modelDiscovery.getTopModels(), modelDiscovery.getReferencedModels(), unbakedModel), object2IntMap
+					);
+				},
 				executor
 			)
 			.thenCompose(reloadState -> reloadState.readyForUpload.thenApply(void_ -> reloadState))
@@ -121,39 +138,43 @@ public class ModelManager implements PreparableReloadListener, AutoCloseable {
 			.thenAcceptAsync(reloadState -> this.apply(reloadState, profilerFiller2), executor2);
 	}
 
-	private static CompletableFuture<Map<ResourceLocation, BlockModel>> loadBlockModels(ResourceManager resourceManager, Executor executor) {
-		return CompletableFuture.supplyAsync(() -> ModelBakery.MODEL_LISTER.listMatchingResources(resourceManager), executor)
+	private static CompletableFuture<Map<ResourceLocation, UnbakedModel>> loadBlockModels(ResourceManager resourceManager, Executor executor) {
+		return CompletableFuture.supplyAsync(() -> MODEL_LISTER.listMatchingResources(resourceManager), executor)
 			.thenCompose(
 				map -> {
 					List<CompletableFuture<Pair<ResourceLocation, BlockModel>>> list = new ArrayList(map.size());
 
 					for (Entry<ResourceLocation, Resource> entry : map.entrySet()) {
 						list.add(CompletableFuture.supplyAsync(() -> {
+							ResourceLocation resourceLocation = MODEL_LISTER.fileToId((ResourceLocation)entry.getKey());
+
 							try {
 								Reader reader = ((Resource)entry.getValue()).openAsReader();
 
-								Pair var2x;
+								Pair var4x;
 								try {
-									var2x = Pair.of((ResourceLocation)entry.getKey(), BlockModel.fromStream(reader));
-								} catch (Throwable var5) {
+									BlockModel blockModel = BlockModel.fromStream(reader);
+									blockModel.name = resourceLocation.toString();
+									var4x = Pair.of(resourceLocation, blockModel);
+								} catch (Throwable var6) {
 									if (reader != null) {
 										try {
 											reader.close();
-										} catch (Throwable var4x) {
-											var5.addSuppressed(var4x);
+										} catch (Throwable var5) {
+											var6.addSuppressed(var5);
 										}
 									}
 
-									throw var5;
+									throw var6;
 								}
 
 								if (reader != null) {
 									reader.close();
 								}
 
-								return var2x;
-							} catch (Exception var6) {
-								LOGGER.error("Failed to load model {}", entry.getKey(), var6);
+								return var4x;
+							} catch (Exception var7) {
+								LOGGER.error("Failed to load model {}", entry.getKey(), var7);
 								return null;
 							}
 						}, executor));
@@ -165,57 +186,88 @@ public class ModelManager implements PreparableReloadListener, AutoCloseable {
 			);
 	}
 
-	private static CompletableFuture<Map<ResourceLocation, List<BlockStateModelLoader.LoadedJson>>> loadBlockStates(
-		ResourceManager resourceManager, Executor executor
+	private ModelDiscovery discoverModelDependencies(
+		UnbakedModel unbakedModel, Map<ResourceLocation, UnbakedModel> map, BlockStateModelLoader.LoadedModels loadedModels
 	) {
-		return CompletableFuture.supplyAsync(() -> BlockStateModelLoader.BLOCKSTATE_LISTER.listMatchingResourceStacks(resourceManager), executor)
-			.thenCompose(
-				map -> {
-					List<CompletableFuture<Pair<ResourceLocation, List<BlockStateModelLoader.LoadedJson>>>> list = new ArrayList(map.size());
-
-					for (Entry<ResourceLocation, List<Resource>> entry : map.entrySet()) {
-						list.add(CompletableFuture.supplyAsync(() -> {
-							List<Resource> listx = (List<Resource>)entry.getValue();
-							List<BlockStateModelLoader.LoadedJson> list2 = new ArrayList(listx.size());
-
-							for (Resource resource : listx) {
-								try {
-									Reader reader = resource.openAsReader();
-
-									try {
-										JsonObject jsonObject = GsonHelper.parse(reader);
-										list2.add(new BlockStateModelLoader.LoadedJson(resource.sourcePackId(), jsonObject));
-									} catch (Throwable var9) {
-										if (reader != null) {
-											try {
-												reader.close();
-											} catch (Throwable var8) {
-												var9.addSuppressed(var8);
-											}
-										}
-
-										throw var9;
-									}
-
-									if (reader != null) {
-										reader.close();
-									}
-								} catch (Exception var10) {
-									LOGGER.error("Failed to load blockstate {} from pack {}", entry.getKey(), resource.sourcePackId(), var10);
-								}
-							}
-
-							return Pair.of((ResourceLocation)entry.getKey(), list2);
-						}, executor));
-					}
-
-					return Util.sequence(list)
-						.thenApply(listx -> (Map)listx.stream().filter(Objects::nonNull).collect(Collectors.toUnmodifiableMap(Pair::getFirst, Pair::getSecond)));
-				}
-			);
+		ModelDiscovery modelDiscovery = new ModelDiscovery(map, unbakedModel);
+		modelDiscovery.registerStandardModels(loadedModels);
+		modelDiscovery.discoverDependencies();
+		return modelDiscovery;
 	}
 
-	private ModelManager.ReloadState loadModels(ProfilerFiller profilerFiller, Map<ResourceLocation, AtlasSet.StitchResult> map, ModelBakery modelBakery) {
+	private static CompletableFuture<BlockStateModelLoader.LoadedModels> loadBlockStates(
+		BlockStateModelLoader blockStateModelLoader, ResourceManager resourceManager, Executor executor
+	) {
+		Function<ResourceLocation, StateDefinition<Block, BlockState>> function = BlockStateModelLoader.definitionLocationToBlockMapper();
+		return CompletableFuture.supplyAsync(() -> BLOCKSTATE_LISTER.listMatchingResourceStacks(resourceManager), executor).thenCompose(map -> {
+			List<CompletableFuture<BlockStateModelLoader.LoadedModels>> list = new ArrayList(map.size());
+
+			for (Entry<ResourceLocation, List<Resource>> entry : map.entrySet()) {
+				list.add(CompletableFuture.supplyAsync(() -> {
+					ResourceLocation resourceLocation = BLOCKSTATE_LISTER.fileToId((ResourceLocation)entry.getKey());
+					StateDefinition<Block, BlockState> stateDefinition = (StateDefinition<Block, BlockState>)function.apply(resourceLocation);
+					if (stateDefinition == null) {
+						LOGGER.debug("Discovered unknown block state definition {}, ignoring", resourceLocation);
+						return null;
+					} else {
+						List<Resource> listx = (List<Resource>)entry.getValue();
+						List<BlockStateModelLoader.LoadedBlockModelDefinition> list2 = new ArrayList(listx.size());
+
+						for (Resource resource : listx) {
+							try {
+								Reader reader = resource.openAsReader();
+
+								try {
+									JsonObject jsonObject = GsonHelper.parse(reader);
+									BlockModelDefinition blockModelDefinition = BlockModelDefinition.fromJsonElement(jsonObject);
+									list2.add(new BlockStateModelLoader.LoadedBlockModelDefinition(resource.sourcePackId(), blockModelDefinition));
+								} catch (Throwable var14) {
+									if (reader != null) {
+										try {
+											reader.close();
+										} catch (Throwable var13) {
+											var14.addSuppressed(var13);
+										}
+									}
+
+									throw var14;
+								}
+
+								if (reader != null) {
+									reader.close();
+								}
+							} catch (Exception var15) {
+								LOGGER.error("Failed to load blockstate definition {} from pack {}", resourceLocation, resource.sourcePackId(), var15);
+							}
+						}
+
+						try {
+							return blockStateModelLoader.loadBlockStateDefinitionStack(resourceLocation, stateDefinition, list2);
+						} catch (Exception var12) {
+							LOGGER.error("Failed to load blockstate definition {}", resourceLocation, var12);
+							return null;
+						}
+					}
+				}, executor));
+			}
+
+			return Util.sequence(list).thenApply(listx -> {
+				Map<ModelResourceLocation, BlockStateModelLoader.LoadedModel> mapx = new HashMap();
+
+				for (BlockStateModelLoader.LoadedModels loadedModels : listx) {
+					if (loadedModels != null) {
+						mapx.putAll(loadedModels.models());
+					}
+				}
+
+				return new BlockStateModelLoader.LoadedModels(mapx);
+			});
+		});
+	}
+
+	private ModelManager.ReloadState loadModels(
+		ProfilerFiller profilerFiller, Map<ResourceLocation, AtlasSet.StitchResult> map, ModelBakery modelBakery, Object2IntMap<BlockState> object2IntMap
+	) {
 		profilerFiller.push("load");
 		profilerFiller.popPush("baking");
 		Multimap<ModelResourceLocation, Material> multimap = HashMultimap.create();
@@ -242,7 +294,7 @@ public class ModelManager implements PreparableReloadListener, AutoCloseable {
 			);
 		profilerFiller.popPush("dispatch");
 		Map<ModelResourceLocation, BakedModel> map2 = modelBakery.getBakedTopLevelModels();
-		BakedModel bakedModel = (BakedModel)map2.get(ModelBakery.MISSING_MODEL_VARIANT);
+		BakedModel bakedModel = (BakedModel)map2.get(MissingBlockModel.VARIANT);
 		Map<BlockState, BakedModel> map3 = new IdentityHashMap();
 
 		for (Block block : BuiltInRegistries.BLOCK) {
@@ -258,7 +310,11 @@ public class ModelManager implements PreparableReloadListener, AutoCloseable {
 		);
 		profilerFiller.pop();
 		profilerFiller.endTick();
-		return new ModelManager.ReloadState(modelBakery, bakedModel, map3, map, completableFuture);
+		return new ModelManager.ReloadState(modelBakery, object2IntMap, bakedModel, map3, map, completableFuture);
+	}
+
+	private static Object2IntMap<BlockState> buildModelGroups(BlockColors blockColors, BlockStateModelLoader.LoadedModels loadedModels) {
+		return ModelGroupCollector.build(blockColors, loadedModels);
 	}
 
 	private void apply(ModelManager.ReloadState reloadState, ProfilerFiller profilerFiller) {
@@ -267,7 +323,7 @@ public class ModelManager implements PreparableReloadListener, AutoCloseable {
 		reloadState.atlasPreparations.values().forEach(AtlasSet.StitchResult::upload);
 		ModelBakery modelBakery = reloadState.modelBakery;
 		this.bakedRegistry = modelBakery.getBakedTopLevelModels();
-		this.modelGroups = modelBakery.getModelGroups();
+		this.modelGroups = reloadState.modelGroups;
 		this.missingModel = reloadState.missingModel;
 		profilerFiller.popPush("cache");
 		this.blockModelShaper.replaceCache(reloadState.modelCache);
@@ -308,6 +364,7 @@ public class ModelManager implements PreparableReloadListener, AutoCloseable {
 	@Environment(EnvType.CLIENT)
 	static record ReloadState(
 		ModelBakery modelBakery,
+		Object2IntMap<BlockState> modelGroups,
 		BakedModel missingModel,
 		Map<BlockState, BakedModel> modelCache,
 		Map<ResourceLocation, AtlasSet.StitchResult> atlasPreparations,

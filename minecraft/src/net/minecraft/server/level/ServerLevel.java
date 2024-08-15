@@ -86,6 +86,7 @@ import net.minecraft.world.RandomSequences;
 import net.minecraft.world.TickRateManager;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
@@ -97,12 +98,9 @@ import net.minecraft.world.entity.ai.village.ReputationEventType;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.entity.ai.village.poi.PoiTypes;
-import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.world.entity.animal.WaterAnimal;
 import net.minecraft.world.entity.animal.horse.SkeletonHorse;
 import net.minecraft.world.entity.boss.EnderDragonPart;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
-import net.minecraft.world.entity.npc.Npc;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.raid.Raid;
 import net.minecraft.world.entity.raid.Raids;
@@ -118,12 +116,14 @@ import net.minecraft.world.level.ForcedChunksSavedData;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.NaturalSpawner;
+import net.minecraft.world.level.ServerExplosion;
 import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SnowLayerBlock;
+import net.minecraft.world.level.block.entity.FuelValues;
 import net.minecraft.world.level.block.entity.TickingBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
@@ -154,6 +154,8 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.pathfinder.PathTypeCache;
 import net.minecraft.world.level.portal.PortalForcer;
+import net.minecraft.world.level.redstone.ExperimentalRedstoneUtils;
+import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.level.saveddata.maps.MapId;
 import net.minecraft.world.level.saveddata.maps.MapIndex;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
@@ -335,6 +337,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 			this.getWorldBorder().tick();
 			profilerFiller.popPush("weather");
 			this.advanceWeatherCycle();
+			profilerFiller.pop();
 		}
 
 		int i = this.getGameRules().getInt(GameRules.RULE_PLAYERS_SLEEPING_PERCENTAGE);
@@ -355,7 +358,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 			this.tickTime();
 		}
 
-		profilerFiller.popPush("tickPending");
+		profilerFiller.push("tickPending");
 		if (!this.isDebug() && bl) {
 			long l = this.getGameTime();
 			profilerFiller.push("blockTicks");
@@ -394,13 +397,11 @@ public class ServerLevel extends Level implements WorldGenLevel {
 
 			this.entityTickList.forEach(entity -> {
 				if (!entity.isRemoved()) {
-					if (this.shouldDiscardEntity(entity)) {
-						entity.discard();
-					} else if (!tickRateManager.isEntityFrozen(entity)) {
+					if (!tickRateManager.isEntityFrozen(entity)) {
 						profilerFiller.push("checkDespawn");
 						entity.checkDespawn();
 						profilerFiller.pop();
-						if (this.chunkSource.chunkMap.getDistanceManager().inEntityTickingRange(entity.chunkPosition().toLong())) {
+						if (entity instanceof ServerPlayer || this.chunkSource.chunkMap.getDistanceManager().inEntityTickingRange(entity.chunkPosition().toLong())) {
 							Entity entity2 = entity.getVehicle();
 							if (entity2 != null) {
 								if (!entity2.isRemoved() && entity2.hasPassenger(entity)) {
@@ -435,7 +436,9 @@ public class ServerLevel extends Level implements WorldGenLevel {
 		if (this.tickTime) {
 			long l = this.levelData.getGameTime() + 1L;
 			this.serverLevelData.setGameTime(l);
+			this.getProfiler().push("scheduledFunctions");
 			this.serverLevelData.getScheduledEvents().tick(this.server, l);
+			this.getProfiler().pop();
 			if (this.levelData.getGameRules().getBoolean(GameRules.RULE_DAYLIGHT)) {
 				this.setDayTime(this.levelData.getDayTime() + 1L);
 			}
@@ -450,12 +453,6 @@ public class ServerLevel extends Level implements WorldGenLevel {
 		for (CustomSpawner customSpawner : this.customSpawners) {
 			customSpawner.tick(this, bl, bl2);
 		}
-	}
-
-	private boolean shouldDiscardEntity(Entity entity) {
-		return this.server.isSpawningAnimals() || !(entity instanceof Animal) && !(entity instanceof WaterAnimal)
-			? !this.server.areNpcsEnabled() && entity instanceof Npc
-			: true;
 	}
 
 	private void wakeUpAllPlayers() {
@@ -479,7 +476,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 					&& this.random.nextDouble() < (double)difficultyInstance.getEffectiveDifficulty() * 0.01
 					&& !this.getBlockState(blockPos.below()).is(Blocks.LIGHTNING_ROD);
 				if (bl2) {
-					SkeletonHorse skeletonHorse = EntityType.SKELETON_HORSE.create(this);
+					SkeletonHorse skeletonHorse = EntityType.SKELETON_HORSE.create(this, EntitySpawnReason.EVENT);
 					if (skeletonHorse != null) {
 						skeletonHorse.setTrap(true);
 						skeletonHorse.setAge(0);
@@ -488,7 +485,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 					}
 				}
 
-				LightningBolt lightningBolt = EntityType.LIGHTNING_BOLT.create(this);
+				LightningBolt lightningBolt = EntityType.LIGHTNING_BOLT.create(this, EntitySpawnReason.EVENT);
 				if (lightningBolt != null) {
 					lightningBolt.moveTo(Vec3.atBottomCenterOf(blockPos));
 					lightningBolt.setVisualOnly(bl2);
@@ -562,7 +559,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 				}
 			}
 
-			Biome.Precipitation precipitation = biome.getPrecipitationAt(blockPos3);
+			Biome.Precipitation precipitation = biome.getPrecipitationAt(blockPos3, this.getSeaLevel());
 			if (precipitation != Biome.Precipitation.NONE) {
 				BlockState blockState3 = this.getBlockState(blockPos3);
 				blockState3.getBlock().handlePrecipitation(blockState3, this, blockPos3, precipitation);
@@ -737,9 +734,10 @@ public class ServerLevel extends Level implements WorldGenLevel {
 	}
 
 	private void tickFluid(BlockPos blockPos, Fluid fluid) {
-		FluidState fluidState = this.getFluidState(blockPos);
+		BlockState blockState = this.getBlockState(blockPos);
+		FluidState fluidState = blockState.getFluidState();
 		if (fluidState.is(fluid)) {
-			fluidState.tick(this, blockPos);
+			fluidState.tick(this, blockPos, blockState);
 		}
 	}
 
@@ -794,7 +792,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 				progressListener.progressStartNoAbort(Component.translatable("menu.savingLevel"));
 			}
 
-			this.saveLevelData();
+			this.saveLevelData(bl);
 			if (progressListener != null) {
 				progressListener.progressStage(Component.translatable("menu.savingChunks"));
 			}
@@ -808,12 +806,17 @@ public class ServerLevel extends Level implements WorldGenLevel {
 		}
 	}
 
-	private void saveLevelData() {
+	private void saveLevelData(boolean bl) {
 		if (this.dragonFight != null) {
 			this.server.getWorldData().setEndDragonFightData(this.dragonFight.saveData());
 		}
 
-		this.getChunkSource().getDataStorage().save();
+		DimensionDataStorage dimensionDataStorage = this.getChunkSource().getDataStorage();
+		if (bl) {
+			dimensionDataStorage.saveAndJoin();
+		} else {
+			dimensionDataStorage.scheduleSave();
+		}
 	}
 
 	public <T extends Entity> List<? extends T> getEntities(EntityTypeTest<Entity, T> entityTypeTest, Predicate<? super T> predicate) {
@@ -1037,22 +1040,27 @@ public class ServerLevel extends Level implements WorldGenLevel {
 
 	@Override
 	public void updateNeighborsAt(BlockPos blockPos, Block block) {
-		this.neighborUpdater.updateNeighborsAtExceptFromFacing(blockPos, block, null);
+		this.updateNeighborsAt(blockPos, block, ExperimentalRedstoneUtils.randomOrientation(this, null, null));
 	}
 
 	@Override
-	public void updateNeighborsAtExceptFromFacing(BlockPos blockPos, Block block, Direction direction) {
-		this.neighborUpdater.updateNeighborsAtExceptFromFacing(blockPos, block, direction);
+	public void updateNeighborsAt(BlockPos blockPos, Block block, @Nullable Orientation orientation) {
+		this.neighborUpdater.updateNeighborsAtExceptFromFacing(blockPos, block, null, orientation);
 	}
 
 	@Override
-	public void neighborChanged(BlockPos blockPos, Block block, BlockPos blockPos2) {
-		this.neighborUpdater.neighborChanged(blockPos, block, blockPos2);
+	public void updateNeighborsAtExceptFromFacing(BlockPos blockPos, Block block, Direction direction, @Nullable Orientation orientation) {
+		this.neighborUpdater.updateNeighborsAtExceptFromFacing(blockPos, block, direction, orientation);
 	}
 
 	@Override
-	public void neighborChanged(BlockState blockState, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
-		this.neighborUpdater.neighborChanged(blockState, blockPos, block, blockPos2, bl);
+	public void neighborChanged(BlockPos blockPos, Block block, @Nullable Orientation orientation) {
+		this.neighborUpdater.neighborChanged(blockPos, block, orientation);
+	}
+
+	@Override
+	public void neighborChanged(BlockState blockState, BlockPos blockPos, Block block, @Nullable Orientation orientation, boolean bl) {
+		this.neighborUpdater.neighborChanged(blockState, blockPos, block, orientation, bl);
 	}
 
 	@Override
@@ -1070,7 +1078,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 	}
 
 	@Override
-	public Explosion explode(
+	public void explode(
 		@Nullable Entity entity,
 		@Nullable DamageSource damageSource,
 		@Nullable ExplosionDamageCalculator explosionDamageCalculator,
@@ -1084,34 +1092,30 @@ public class ServerLevel extends Level implements WorldGenLevel {
 		ParticleOptions particleOptions2,
 		Holder<SoundEvent> holder
 	) {
-		Explosion explosion = this.explode(
-			entity, damageSource, explosionDamageCalculator, d, e, f, g, bl, explosionInteraction, false, particleOptions, particleOptions2, holder
-		);
-		if (!explosion.interactsWithBlocks()) {
-			explosion.clearToBlow();
-		}
+		Explosion.BlockInteraction blockInteraction = switch (explosionInteraction) {
+			case NONE -> Explosion.BlockInteraction.KEEP;
+			case BLOCK -> this.getDestroyType(GameRules.RULE_BLOCK_EXPLOSION_DROP_DECAY);
+			case MOB -> this.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)
+			? this.getDestroyType(GameRules.RULE_MOB_EXPLOSION_DROP_DECAY)
+			: Explosion.BlockInteraction.KEEP;
+			case TNT -> this.getDestroyType(GameRules.RULE_TNT_EXPLOSION_DROP_DECAY);
+			case TRIGGER -> Explosion.BlockInteraction.TRIGGER_BLOCK;
+		};
+		Vec3 vec3 = new Vec3(d, e, f);
+		ServerExplosion serverExplosion = new ServerExplosion(this, entity, damageSource, explosionDamageCalculator, vec3, g, bl, blockInteraction);
+		serverExplosion.explode();
+		ParticleOptions particleOptions3 = serverExplosion.isSmall() ? particleOptions : particleOptions2;
 
 		for (ServerPlayer serverPlayer : this.players) {
-			if (serverPlayer.distanceToSqr(d, e, f) < 4096.0) {
-				serverPlayer.connection
-					.send(
-						new ClientboundExplodePacket(
-							d,
-							e,
-							f,
-							g,
-							explosion.getToBlow(),
-							(Vec3)explosion.getHitPlayers().get(serverPlayer),
-							explosion.getBlockInteraction(),
-							explosion.getSmallExplosionParticles(),
-							explosion.getLargeExplosionParticles(),
-							explosion.getExplosionSound()
-						)
-					);
+			if (serverPlayer.distanceToSqr(vec3) < 4096.0) {
+				Optional<Vec3> optional = Optional.ofNullable((Vec3)serverExplosion.getHitPlayers().get(serverPlayer));
+				serverPlayer.connection.send(new ClientboundExplodePacket(vec3, optional, particleOptions3, holder));
 			}
 		}
+	}
 
-		return explosion;
+	private Explosion.BlockInteraction getDestroyType(GameRules.Key<GameRules.BooleanValue> key) {
+		return this.getGameRules().getBoolean(key) ? Explosion.BlockInteraction.DESTROY_WITH_DECAY : Explosion.BlockInteraction.DESTROY;
 	}
 
 	@Override
@@ -1719,6 +1723,11 @@ public class ServerLevel extends Level implements WorldGenLevel {
 		return this.server.potionBrewing();
 	}
 
+	@Override
+	public FuelValues fuelValues() {
+		return this.server.fuelValues();
+	}
+
 	public RandomSource getRandomSequence(ResourceLocation resourceLocation) {
 		return this.randomSequences.get(resourceLocation);
 	}
@@ -1732,6 +1741,11 @@ public class ServerLevel extends Level implements WorldGenLevel {
 		CrashReportCategory crashReportCategory = super.fillReportDetails(crashReport);
 		crashReportCategory.setDetail("Loaded entity count", (CrashReportDetail<String>)(() -> String.valueOf(this.entityManager.count())));
 		return crashReportCategory;
+	}
+
+	@Override
+	public int getSeaLevel() {
+		return this.chunkSource.getGenerator().getSeaLevel();
 	}
 
 	final class EntityCallbacks implements LevelCallback<Entity> {

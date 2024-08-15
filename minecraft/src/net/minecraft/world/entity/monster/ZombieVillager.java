@@ -25,9 +25,9 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.village.ReputationEventType;
@@ -153,7 +153,7 @@ public class ZombieVillager extends Zombie implements VillagerDataHolder {
 					this.startConverting(player.getUUID(), this.random.nextInt(2401) + 3600);
 				}
 
-				return InteractionResult.SUCCESS;
+				return InteractionResult.SUCCESS_SERVER;
 			} else {
 				return InteractionResult.CONSUME;
 			}
@@ -226,7 +226,7 @@ public class ZombieVillager extends Zombie implements VillagerDataHolder {
 			}
 
 			villager.setVillagerXp(this.villagerXp);
-			villager.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(villager.blockPosition()), MobSpawnType.CONVERSION, null);
+			villager.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(villager.blockPosition()), EntitySpawnReason.CONVERSION, null);
 			villager.refreshBrain(serverLevel);
 			if (this.conversionStarter != null) {
 				Player player = serverLevel.getPlayerByUUID(this.conversionStarter);
@@ -309,10 +309,10 @@ public class ZombieVillager extends Zombie implements VillagerDataHolder {
 	@Nullable
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData
+		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, EntitySpawnReason entitySpawnReason, @Nullable SpawnGroupData spawnGroupData
 	) {
 		this.setVillagerData(this.getVillagerData().setType(VillagerType.byBiome(serverLevelAccessor.getBiome(this.blockPosition()))));
-		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData);
+		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, entitySpawnReason, spawnGroupData);
 	}
 
 	@Override

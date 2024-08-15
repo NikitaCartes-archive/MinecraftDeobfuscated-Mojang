@@ -48,16 +48,7 @@ public class CrafterMenu extends AbstractContainerMenu implements ContainerListe
 			}
 		}
 
-		for (int i = 0; i < 3; i++) {
-			for (int j = 0; j < 9; j++) {
-				this.addSlot(new Slot(inventory, j + i * 9 + 9, 8 + j * 18, 84 + i * 18));
-			}
-		}
-
-		for (int i = 0; i < 9; i++) {
-			this.addSlot(new Slot(inventory, i, 8 + i * 18, 142));
-		}
-
+		this.addStandardInventorySlots(inventory, 8, 84);
 		this.addSlot(new NonInteractiveResultSlot(this.resultContainer, 0, 134, 35));
 		this.addDataSlots(this.containerData);
 		this.refreshRecipeResult();

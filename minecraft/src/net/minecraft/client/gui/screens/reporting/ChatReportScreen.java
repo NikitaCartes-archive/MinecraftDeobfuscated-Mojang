@@ -10,6 +10,7 @@ import net.minecraft.client.gui.layouts.CommonLayouts;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.chat.report.ChatReport;
 import net.minecraft.client.multiplayer.chat.report.ReportReason;
+import net.minecraft.client.multiplayer.chat.report.ReportType;
 import net.minecraft.client.multiplayer.chat.report.ReportingContext;
 import net.minecraft.network.chat.Component;
 
@@ -47,7 +48,7 @@ public class ChatReportScreen extends AbstractReportScreen<ChatReport.Builder> {
 					.build()
 			);
 		this.selectReasonButton = Button.builder(
-				SELECT_REASON, button -> this.minecraft.setScreen(new ReportReasonSelectionScreen(this, this.reportBuilder.reason(), reportReason -> {
+				SELECT_REASON, button -> this.minecraft.setScreen(new ReportReasonSelectionScreen(this, this.reportBuilder.reason(), ReportType.CHAT, reportReason -> {
 						this.reportBuilder.setReason(reportReason);
 						this.onReportChanged();
 					}))

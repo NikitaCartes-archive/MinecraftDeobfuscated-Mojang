@@ -5,15 +5,17 @@ import com.mojang.math.Axis;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.entity.state.OminousItemSpawnerRenderState;
 import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.OminousItemSpawner;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
 
 @Environment(EnvType.CLIENT)
-public class OminousItemSpawnerRenderer extends EntityRenderer<OminousItemSpawner> {
+public class OminousItemSpawnerRenderer extends EntityRenderer<OminousItemSpawner, OminousItemSpawnerRenderState> {
 	private static final float ROTATION_SPEED = 40.0F;
 	private static final int TICKS_SCALING = 50;
 	private final ItemRenderer itemRenderer;
@@ -23,24 +25,35 @@ public class OminousItemSpawnerRenderer extends EntityRenderer<OminousItemSpawne
 		this.itemRenderer = context.getItemRenderer();
 	}
 
-	public ResourceLocation getTextureLocation(OminousItemSpawner ominousItemSpawner) {
+	public ResourceLocation getTextureLocation(OminousItemSpawnerRenderState ominousItemSpawnerRenderState) {
 		return TextureAtlas.LOCATION_BLOCKS;
 	}
 
-	public void render(OminousItemSpawner ominousItemSpawner, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
+	public OminousItemSpawnerRenderState createRenderState() {
+		return new OminousItemSpawnerRenderState();
+	}
+
+	public void extractRenderState(OminousItemSpawner ominousItemSpawner, OminousItemSpawnerRenderState ominousItemSpawnerRenderState, float f) {
+		super.extractRenderState(ominousItemSpawner, ominousItemSpawnerRenderState, f);
 		ItemStack itemStack = ominousItemSpawner.getItem();
-		if (!itemStack.isEmpty()) {
+		ominousItemSpawnerRenderState.item = itemStack;
+		ominousItemSpawnerRenderState.itemModel = !itemStack.isEmpty() ? this.itemRenderer.getModel(itemStack, ominousItemSpawner.level(), null, 0) : null;
+	}
+
+	public void render(OminousItemSpawnerRenderState ominousItemSpawnerRenderState, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
+		BakedModel bakedModel = ominousItemSpawnerRenderState.itemModel;
+		if (bakedModel != null) {
 			poseStack.pushPose();
-			if (ominousItemSpawner.tickCount <= 50) {
-				float h = Math.min((float)ominousItemSpawner.tickCount + g, 50.0F) / 50.0F;
-				poseStack.scale(h, h, h);
+			if (ominousItemSpawnerRenderState.ageInTicks <= 50.0F) {
+				float f = Math.min(ominousItemSpawnerRenderState.ageInTicks, 50.0F) / 50.0F;
+				poseStack.scale(f, f, f);
 			}
 
-			Level level = ominousItemSpawner.level();
-			float j = Mth.wrapDegrees((float)(level.getGameTime() - 1L)) * 40.0F;
-			float k = Mth.wrapDegrees((float)level.getGameTime()) * 40.0F;
-			poseStack.mulPose(Axis.YP.rotationDegrees(Mth.rotLerp(g, j, k)));
-			ItemEntityRenderer.renderMultipleFromCount(this.itemRenderer, poseStack, multiBufferSource, 15728880, itemStack, level.random, level);
+			float f = Mth.wrapDegrees(ominousItemSpawnerRenderState.ageInTicks * 40.0F);
+			poseStack.mulPose(Axis.YP.rotationDegrees(f));
+			ItemEntityRenderer.renderMultipleFromCount(
+				this.itemRenderer, poseStack, multiBufferSource, 15728880, ominousItemSpawnerRenderState.item, bakedModel, bakedModel.isGui3d(), RandomSource.create()
+			);
 			poseStack.popPose();
 		}
 	}

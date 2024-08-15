@@ -16,6 +16,7 @@ import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
+import net.minecraft.CrashReportDetail;
 import net.minecraft.ReportedException;
 import net.minecraft.Util;
 import net.minecraft.advancements.CriteriaTriggers;
@@ -64,6 +65,7 @@ import net.minecraft.network.protocol.game.ClientboundRemoveMobEffectPacket;
 import net.minecraft.network.protocol.game.ClientboundRespawnPacket;
 import net.minecraft.network.protocol.game.ClientboundServerDataPacket;
 import net.minecraft.network.protocol.game.ClientboundSetCameraPacket;
+import net.minecraft.network.protocol.game.ClientboundSetCursorItemPacket;
 import net.minecraft.network.protocol.game.ClientboundSetExperiencePacket;
 import net.minecraft.network.protocol.game.ClientboundSetHealthPacket;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
@@ -93,6 +95,7 @@ import net.minecraft.world.Container;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
@@ -190,6 +193,7 @@ public class ServerPlayer extends Player {
 	private int lastSentExp = -99999999;
 	private int spawnInvulnerableTime = 60;
 	private ChatVisiblity chatVisibility = ChatVisiblity.FULL;
+	private ParticleStatus particleStatus = ParticleStatus.ALL;
 	private boolean canChatColor = true;
 	private long lastActionTime = Util.getMillis();
 	@Nullable
@@ -243,7 +247,7 @@ public class ServerPlayer extends Player {
 
 		@Override
 		public void sendCarriedChange(AbstractContainerMenu abstractContainerMenu, ItemStack itemStack) {
-			ServerPlayer.this.connection.send(new ClientboundContainerSetSlotPacket(-1, abstractContainerMenu.incrementStateId(), -1, itemStack));
+			ServerPlayer.this.connection.send(new ClientboundSetCursorItemPacket(itemStack.copy()));
 		}
 
 		@Override
@@ -314,24 +318,43 @@ public class ServerPlayer extends Player {
 				int q = (o + n * p) % k;
 				int r = q % (i * 2 + 1);
 				int s = q / (i * 2 + 1);
-				blockPos2 = PlayerRespawnLogic.getOverworldRespawnPos(serverLevel, blockPos.getX() + r - i, blockPos.getZ() + s - i);
-				if (blockPos2 != null && serverLevel.noCollision(this, aABB.move(blockPos2.getBottomCenter()))) {
-					return blockPos2;
+				int t = blockPos.getX() + r - i;
+				int u = blockPos.getZ() + s - i;
+
+				try {
+					blockPos2 = PlayerRespawnLogic.getOverworldRespawnPos(serverLevel, t, u);
+					if (blockPos2 != null && this.noCollisionNoLiquid(serverLevel, aABB.move(blockPos2.getBottomCenter()))) {
+						return blockPos2;
+					}
+				} catch (Exception var25) {
+					int v = p;
+					int w = i;
+					CrashReport crashReport = CrashReport.forThrowable(var25, "Searching for spawn");
+					CrashReportCategory crashReportCategory = crashReport.addCategory("Spawn Lookup");
+					crashReportCategory.setDetail("Origin", blockPos::toString);
+					crashReportCategory.setDetail("Radius", (CrashReportDetail<String>)(() -> Integer.toString(w)));
+					crashReportCategory.setDetail("Candidate", (CrashReportDetail<String>)(() -> "[" + t + "," + u + "]"));
+					crashReportCategory.setDetail("Progress", (CrashReportDetail<String>)(() -> v + " out of " + k));
+					throw new ReportedException(crashReport);
 				}
 			}
 
 			blockPos2 = blockPos;
 		}
 
-		while (!serverLevel.noCollision(this, aABB.move(blockPos2.getBottomCenter())) && blockPos2.getY() < serverLevel.getMaxBuildHeight() - 1) {
+		while (!this.noCollisionNoLiquid(serverLevel, aABB.move(blockPos2.getBottomCenter())) && blockPos2.getY() < serverLevel.getMaxBuildHeight() - 1) {
 			blockPos2 = blockPos2.above();
 		}
 
-		while (serverLevel.noCollision(this, aABB.move(blockPos2.below().getBottomCenter())) && blockPos2.getY() > serverLevel.getMinBuildHeight() + 1) {
+		while (this.noCollisionNoLiquid(serverLevel, aABB.move(blockPos2.below().getBottomCenter())) && blockPos2.getY() > serverLevel.getMinBuildHeight() + 1) {
 			blockPos2 = blockPos2.below();
 		}
 
 		return blockPos2;
+	}
+
+	private boolean noCollisionNoLiquid(ServerLevel serverLevel, AABB aABB) {
+		return serverLevel.noCollision(this, aABB, true);
 	}
 
 	private int getCoprime(int i) {
@@ -809,7 +832,7 @@ public class ServerPlayer extends Player {
 			)
 		 {
 			Optional<Vec3> optional = RespawnAnchorBlock.findStandUpPosition(EntityType.PLAYER, serverLevel, blockPos);
-			if (!bl && !bl2 && optional.isPresent()) {
+			if (!bl && bl2 && optional.isPresent()) {
 				serverLevel.setBlock(
 					blockPos, blockState.setValue(RespawnAnchorBlock.CHARGE, Integer.valueOf((Integer)blockState.getValue(RespawnAnchorBlock.CHARGE) - 1)), 3
 				);
@@ -842,8 +865,7 @@ public class ServerPlayer extends Player {
 	}
 
 	@Nullable
-	@Override
-	public Entity changeDimension(DimensionTransition dimensionTransition) {
+	public Player changeDimension(DimensionTransition dimensionTransition) {
 		if (this.isRemoved()) {
 			return null;
 		} else {
@@ -854,6 +876,7 @@ public class ServerPlayer extends Player {
 			ServerLevel serverLevel = dimensionTransition.newLevel();
 			ServerLevel serverLevel2 = this.serverLevel();
 			ResourceKey<Level> resourceKey = serverLevel2.dimension();
+			this.teleportSetPosition(dimensionTransition);
 			if (serverLevel.dimension() == resourceKey) {
 				this.connection
 					.teleport(dimensionTransition.pos().x, dimensionTransition.pos().y, dimensionTransition.pos().z, dimensionTransition.yRot(), dimensionTransition.xRot());
@@ -883,6 +906,7 @@ public class ServerPlayer extends Player {
 				serverLevel.addDuringTeleport(this);
 				serverLevel2.getProfiler().pop();
 				this.triggerDimensionChangeTriggers(serverLevel2);
+				this.stopUsingItem();
 				this.connection.send(new ClientboundPlayerAbilitiesPacket(this.getAbilities()));
 				playerList.sendLevelInfo(this, serverLevel);
 				playerList.sendAllPlayerInfo(this);
@@ -1009,7 +1033,7 @@ public class ServerPlayer extends Player {
 
 	@Override
 	public boolean isInvulnerableTo(DamageSource damageSource) {
-		return super.isInvulnerableTo(damageSource) || this.isChangingDimension();
+		return super.isInvulnerableTo(damageSource) || this.isChangingDimension() && !damageSource.is(DamageTypes.ENDER_PEARL);
 	}
 
 	@Override
@@ -1137,30 +1161,6 @@ public class ServerPlayer extends Player {
 		this.containerMenu = this.inventoryMenu;
 	}
 
-	public void setPlayerInput(float f, float g, boolean bl, boolean bl2) {
-		if (this.isPassenger()) {
-			if (f >= -1.0F && f <= 1.0F) {
-				this.xxa = f;
-			}
-
-			if (g >= -1.0F && g <= 1.0F) {
-				this.zza = g;
-			}
-
-			this.jumping = bl;
-			this.setShiftKeyDown(bl2);
-		}
-	}
-
-	@Override
-	public void travel(Vec3 vec3) {
-		double d = this.getX();
-		double e = this.getY();
-		double f = this.getZ();
-		super.travel(vec3);
-		this.checkMovementStatistics(this.getX() - d, this.getY() - e, this.getZ() - f);
-	}
-
 	@Override
 	public void rideTick() {
 		double d = this.getX();
@@ -1278,6 +1278,17 @@ public class ServerPlayer extends Player {
 	}
 
 	@Override
+	public void jumpFromGround() {
+		super.jumpFromGround();
+		this.awardStat(Stats.JUMP);
+		if (this.isSprinting()) {
+			this.causeFoodExhaustion(0.2F);
+		} else {
+			this.causeFoodExhaustion(0.05F);
+		}
+	}
+
+	@Override
 	public void giveExperiencePoints(int i) {
 		super.giveExperiencePoints(i);
 		this.lastSentExp = -1;
@@ -1329,10 +1340,9 @@ public class ServerPlayer extends Player {
 		this.chatSession = serverPlayer.chatSession;
 		this.gameMode.setGameModeForPlayer(serverPlayer.gameMode.getGameModeForPlayer(), serverPlayer.gameMode.getPreviousGameModeForPlayer());
 		this.onUpdateAbilities();
-		this.getAttributes().assignBaseValues(serverPlayer.getAttributes());
-		this.setHealth(this.getMaxHealth());
 		if (bl) {
-			this.getInventory().replaceWith(serverPlayer.getInventory());
+			this.getAttributes().assignBaseValues(serverPlayer.getAttributes());
+			this.getAttributes().assignPermanentModifiers(serverPlayer.getAttributes());
 			this.setHealth(serverPlayer.getHealth());
 			this.foodData = serverPlayer.foodData;
 
@@ -1340,17 +1350,22 @@ public class ServerPlayer extends Player {
 				this.addEffect(new MobEffectInstance(mobEffectInstance));
 			}
 
-			this.experienceLevel = serverPlayer.experienceLevel;
-			this.totalExperience = serverPlayer.totalExperience;
-			this.experienceProgress = serverPlayer.experienceProgress;
-			this.setScore(serverPlayer.getScore());
-			this.portalProcess = serverPlayer.portalProcess;
-		} else if (this.level().getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY) || serverPlayer.isSpectator()) {
 			this.getInventory().replaceWith(serverPlayer.getInventory());
 			this.experienceLevel = serverPlayer.experienceLevel;
 			this.totalExperience = serverPlayer.totalExperience;
 			this.experienceProgress = serverPlayer.experienceProgress;
 			this.setScore(serverPlayer.getScore());
+			this.portalProcess = serverPlayer.portalProcess;
+		} else {
+			this.getAttributes().assignBaseValues(serverPlayer.getAttributes());
+			this.setHealth(this.getMaxHealth());
+			if (this.level().getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY) || serverPlayer.isSpectator()) {
+				this.getInventory().replaceWith(serverPlayer.getInventory());
+				this.experienceLevel = serverPlayer.experienceLevel;
+				this.totalExperience = serverPlayer.totalExperience;
+				this.experienceProgress = serverPlayer.experienceProgress;
+				this.setScore(serverPlayer.getScore());
+			}
 		}
 
 		this.enchantmentSeed = serverPlayer.enchantmentSeed;
@@ -1409,20 +1424,14 @@ public class ServerPlayer extends Player {
 	}
 
 	@Override
-	public boolean teleportTo(ServerLevel serverLevel, double d, double e, double f, Set<RelativeMovement> set, float g, float h) {
+	public boolean teleportTo(ServerLevel serverLevel, double d, double e, double f, Set<RelativeMovement> set, float g, float h, boolean bl) {
 		ChunkPos chunkPos = new ChunkPos(BlockPos.containing(d, e, f));
 		serverLevel.getChunkSource().addRegionTicket(TicketType.POST_TELEPORT, chunkPos, 1, this.getId());
-		this.stopRiding();
 		if (this.isSleeping()) {
 			this.stopSleepInBed(true, true);
 		}
 
-		if (serverLevel == this.level()) {
-			this.connection.teleport(d, e, f, g, h, set);
-		} else {
-			this.teleportTo(serverLevel, d, e, f, g, h);
-		}
-
+		this.teleportTo(serverLevel, d, e, f, g, h, bl);
 		this.setYHeadRot(g);
 		return true;
 	}
@@ -1527,6 +1536,7 @@ public class ServerPlayer extends Player {
 		this.canChatColor = clientInformation.chatColors();
 		this.textFilteringEnabled = clientInformation.textFilteringEnabled();
 		this.allowsListing = clientInformation.allowsListing();
+		this.particleStatus = clientInformation.particleStatus();
 		this.getEntityData().set(DATA_PLAYER_MODE_CUSTOMISATION, (byte)clientInformation.modelCustomisation());
 		this.getEntityData().set(DATA_PLAYER_MAIN_HAND, (byte)clientInformation.mainHand().getId());
 	}
@@ -1535,7 +1545,15 @@ public class ServerPlayer extends Player {
 		int i = this.getEntityData().get(DATA_PLAYER_MODE_CUSTOMISATION);
 		HumanoidArm humanoidArm = (HumanoidArm)HumanoidArm.BY_ID.apply(this.getEntityData().get(DATA_PLAYER_MAIN_HAND));
 		return new ClientInformation(
-			this.language, this.requestedViewDistance, this.chatVisibility, this.canChatColor, i, humanoidArm, this.textFilteringEnabled, this.allowsListing
+			this.language,
+			this.requestedViewDistance,
+			this.chatVisibility,
+			this.canChatColor,
+			i,
+			humanoidArm,
+			this.textFilteringEnabled,
+			this.allowsListing,
+			this.particleStatus
 		);
 	}
 
@@ -1599,7 +1617,7 @@ public class ServerPlayer extends Player {
 		this.camera = (Entity)(entity == null ? this : entity);
 		if (entity2 != this.camera) {
 			if (this.camera.level() instanceof ServerLevel serverLevel) {
-				this.teleportTo(serverLevel, this.camera.getX(), this.camera.getY(), this.camera.getZ(), Set.of(), this.getYRot(), this.getXRot());
+				this.teleportTo(serverLevel, this.camera.getX(), this.camera.getY(), this.camera.getZ(), Set.of(), this.getYRot(), this.getXRot(), false);
 			}
 
 			if (entity != null) {
@@ -1636,6 +1654,10 @@ public class ServerPlayer extends Player {
 		return null;
 	}
 
+	public int getTabListOrder() {
+		return 0;
+	}
+
 	@Override
 	public void swing(InteractionHand interactionHand) {
 		super.swing(interactionHand);
@@ -1654,14 +1676,13 @@ public class ServerPlayer extends Player {
 		return this.advancements;
 	}
 
-	public void teleportTo(ServerLevel serverLevel, double d, double e, double f, float g, float h) {
-		this.setCamera(this);
-		this.stopRiding();
-		if (serverLevel == this.level()) {
-			this.connection.teleport(d, e, f, g, h);
-		} else {
-			this.changeDimension(new DimensionTransition(serverLevel, new Vec3(d, e, f), Vec3.ZERO, g, h, DimensionTransition.DO_NOTHING));
+	public void teleportTo(ServerLevel serverLevel, double d, double e, double f, float g, float h, boolean bl) {
+		if (bl) {
+			this.setCamera(this);
 		}
+
+		this.stopRiding();
+		this.changeDimension(new DimensionTransition(serverLevel, new Vec3(d, e, f), Vec3.ZERO, g, h, DimensionTransition.DO_NOTHING));
 	}
 
 	@Nullable
@@ -1734,7 +1755,7 @@ public class ServerPlayer extends Player {
 
 	@Override
 	public ItemEntity drop(ItemStack itemStack, boolean bl, boolean bl2) {
-		ItemEntity itemEntity = super.drop(itemStack, bl, bl2);
+		ItemEntity itemEntity = this.createItemStackToDrop(itemStack, bl, bl2);
 		if (itemEntity == null) {
 			return null;
 		} else {
@@ -1746,6 +1767,41 @@ public class ServerPlayer extends Player {
 				}
 
 				this.awardStat(Stats.DROP);
+			}
+
+			return itemEntity;
+		}
+	}
+
+	@Nullable
+	private ItemEntity createItemStackToDrop(ItemStack itemStack, boolean bl, boolean bl2) {
+		if (itemStack.isEmpty()) {
+			return null;
+		} else {
+			double d = this.getEyeY() - 0.3F;
+			ItemEntity itemEntity = new ItemEntity(this.level(), this.getX(), d, this.getZ(), itemStack);
+			itemEntity.setPickUpDelay(40);
+			if (bl2) {
+				itemEntity.setThrower(this);
+			}
+
+			if (bl) {
+				float f = this.random.nextFloat() * 0.5F;
+				float g = this.random.nextFloat() * (float) (Math.PI * 2);
+				itemEntity.setDeltaMovement((double)(-Mth.sin(g) * f), 0.2F, (double)(Mth.cos(g) * f));
+			} else {
+				float f = 0.3F;
+				float g = Mth.sin(this.getXRot() * (float) (Math.PI / 180.0));
+				float h = Mth.cos(this.getXRot() * (float) (Math.PI / 180.0));
+				float i = Mth.sin(this.getYRot() * (float) (Math.PI / 180.0));
+				float j = Mth.cos(this.getYRot() * (float) (Math.PI / 180.0));
+				float k = this.random.nextFloat() * (float) (Math.PI * 2);
+				float l = 0.02F * this.random.nextFloat();
+				itemEntity.setDeltaMovement(
+					(double)(-i * h * 0.3F) + Math.cos((double)k) * (double)l,
+					(double)(-g * 0.3F + 0.1F + (this.random.nextFloat() - this.random.nextFloat()) * 0.1F),
+					(double)(j * h * 0.3F) + Math.sin((double)k) * (double)l
+				);
 			}
 
 			return itemEntity;
@@ -1857,7 +1913,6 @@ public class ServerPlayer extends Player {
 	@Override
 	public boolean startRiding(Entity entity, boolean bl) {
 		if (super.startRiding(entity, bl)) {
-			this.setKnownMovement(Vec3.ZERO);
 			entity.positionRider(this);
 			this.connection.teleport(this.getX(), this.getY(), this.getZ(), this.getYRot(), this.getXRot());
 			if (entity instanceof LivingEntity livingEntity) {
@@ -1891,7 +1946,8 @@ public class ServerPlayer extends Player {
 			serverLevel.isDebug(),
 			serverLevel.isFlat(),
 			this.getLastDeathLocation(),
-			this.getPortalCooldown()
+			this.getPortalCooldown(),
+			serverLevel.getSeaLevel()
 		);
 	}
 

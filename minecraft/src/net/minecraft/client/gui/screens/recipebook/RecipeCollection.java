@@ -1,15 +1,16 @@
 package net.minecraft.client.gui.screens.recipebook;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Predicate;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.stats.RecipeBook;
-import net.minecraft.world.entity.player.StackedContents;
+import net.minecraft.world.entity.player.StackedItemContents;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeHolder;
 
@@ -62,7 +63,7 @@ public class RecipeCollection {
 		}
 	}
 
-	public void canCraft(StackedContents stackedContents, int i, int j, RecipeBook recipeBook) {
+	public void selectMatchingRecipes(StackedItemContents stackedItemContents, int i, int j, RecipeBook recipeBook) {
 		for (RecipeHolder<?> recipeHolder : this.recipes) {
 			boolean bl = recipeHolder.value().canCraftInDimensions(i, j) && recipeBook.contains(recipeHolder);
 			if (bl) {
@@ -71,7 +72,7 @@ public class RecipeCollection {
 				this.fitsDimensions.remove(recipeHolder);
 			}
 
-			if (bl && stackedContents.canCraft(recipeHolder.value(), null)) {
+			if (bl && stackedItemContents.canCraft(recipeHolder.value(), null)) {
 				this.craftable.add(recipeHolder);
 			} else {
 				this.craftable.remove(recipeHolder);
@@ -95,24 +96,16 @@ public class RecipeCollection {
 		return this.recipes;
 	}
 
-	public List<RecipeHolder<?>> getRecipes(boolean bl) {
-		List<RecipeHolder<?>> list = Lists.<RecipeHolder<?>>newArrayList();
-		Set<RecipeHolder<?>> set = bl ? this.craftable : this.fitsDimensions;
+	public List<RecipeHolder<?>> getFittingRecipes(RecipeCollection.CraftableStatus craftableStatus) {
+		Predicate<RecipeHolder<?>> predicate = switch (craftableStatus) {
+			case ANY -> this.fitsDimensions::contains;
+			case CRAFTABLE -> this.craftable::contains;
+			case NOT_CRAFTABLE -> recipeHolderx -> this.fitsDimensions.contains(recipeHolderx) && !this.craftable.contains(recipeHolderx);
+		};
+		List<RecipeHolder<?>> list = new ArrayList();
 
 		for (RecipeHolder<?> recipeHolder : this.recipes) {
-			if (set.contains(recipeHolder)) {
-				list.add(recipeHolder);
-			}
-		}
-
-		return list;
-	}
-
-	public List<RecipeHolder<?>> getDisplayRecipes(boolean bl) {
-		List<RecipeHolder<?>> list = Lists.<RecipeHolder<?>>newArrayList();
-
-		for (RecipeHolder<?> recipeHolder : this.recipes) {
-			if (this.fitsDimensions.contains(recipeHolder) && this.craftable.contains(recipeHolder) == bl) {
+			if (predicate.test(recipeHolder)) {
 				list.add(recipeHolder);
 			}
 		}
@@ -122,5 +115,12 @@ public class RecipeCollection {
 
 	public boolean hasSingleResultItem() {
 		return this.singleResultItem;
+	}
+
+	@Environment(EnvType.CLIENT)
+	public static enum CraftableStatus {
+		ANY,
+		CRAFTABLE,
+		NOT_CRAFTABLE;
 	}
 }

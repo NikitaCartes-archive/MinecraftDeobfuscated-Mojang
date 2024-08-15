@@ -6,11 +6,9 @@ import com.google.common.collect.ImmutableSet;
 import com.mojang.datafixers.util.Pair;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Predicate;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Unit;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.Brain;
@@ -32,7 +30,7 @@ public class BreezeAi {
 	public static final float SPEED_MULTIPLIER_WHEN_SLIDING = 0.6F;
 	public static final float JUMP_CIRCLE_INNER_RADIUS = 4.0F;
 	public static final float JUMP_CIRCLE_MIDDLE_RADIUS = 8.0F;
-	public static final float JUMP_CIRCLE_OUTER_RADIUS = 20.0F;
+	public static final float JUMP_CIRCLE_OUTER_RADIUS = 24.0F;
 	static final List<SensorType<? extends Sensor<? super Breeze>>> SENSOR_TYPES = ImmutableList.of(
 		SensorType.NEAREST_LIVING_ENTITIES, SensorType.HURT_BY, SensorType.NEAREST_PLAYERS, SensorType.BREEZE_ATTACK_ENTITY_SENSOR
 	);
@@ -55,6 +53,7 @@ public class BreezeAi {
 		MemoryModuleType.HURT_BY_ENTITY,
 		MemoryModuleType.PATH
 	);
+	private static final int TICKS_TO_REMEMBER_SEEN_TARGET = 100;
 
 	protected static Brain<?> makeBrain(Breeze breeze, Brain<Breeze> brain) {
 		initCoreActivity(brain);
@@ -86,7 +85,7 @@ public class BreezeAi {
 		brain.addActivityWithConditions(
 			Activity.FIGHT,
 			ImmutableList.of(
-				Pair.of(0, StopAttackingIfTargetInvalid.create((Predicate<LivingEntity>)(livingEntity -> !Sensor.isEntityAttackable(breeze, livingEntity)))),
+				Pair.of(0, StopAttackingIfTargetInvalid.create(Sensor.wasEntityAttackableLastNTicks(breeze, 100).negate())),
 				Pair.of(1, new Shoot()),
 				Pair.of(2, new LongJump()),
 				Pair.of(3, new ShootWhenStuck()),

@@ -47,16 +47,7 @@ public class BrewingStandMenu extends AbstractContainerMenu {
 		this.ingredientSlot = this.addSlot(new BrewingStandMenu.IngredientsSlot(potionBrewing, container, 3, 79, 17));
 		this.addSlot(new BrewingStandMenu.FuelSlot(container, 4, 17, 17));
 		this.addDataSlots(containerData);
-
-		for (int j = 0; j < 3; j++) {
-			for (int k = 0; k < 9; k++) {
-				this.addSlot(new Slot(inventory, k + j * 9 + 9, 8 + k * 18, 84 + j * 18));
-			}
-		}
-
-		for (int j = 0; j < 9; j++) {
-			this.addSlot(new Slot(inventory, j, 8 + j * 18, 142));
-		}
+		this.addStandardInventorySlots(inventory, 8, 84);
 	}
 
 	@Override

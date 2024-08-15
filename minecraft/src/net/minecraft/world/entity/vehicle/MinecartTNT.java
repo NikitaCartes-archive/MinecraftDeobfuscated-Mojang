@@ -8,6 +8,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.projectile.AbstractArrow;
@@ -22,7 +23,10 @@ import net.minecraft.world.level.material.FluidState;
 
 public class MinecartTNT extends AbstractMinecart {
 	private static final byte EVENT_PRIME = 10;
+	private static final String TAG_EXPLOSION_POWER = "explosion_power";
+	private static final float DEFAULT_EXPLOSION_POWER_BASE = 4.0F;
 	private int fuse = -1;
+	private float explosionPowerBase = 4.0F;
 
 	public MinecartTNT(EntityType<? extends MinecartTNT> entityType, Level level) {
 		super(entityType, level);
@@ -44,6 +48,7 @@ public class MinecartTNT extends AbstractMinecart {
 
 	@Override
 	public void tick() {
+		double d = this.getDeltaMovement().horizontalDistanceSqr();
 		super.tick();
 		if (this.fuse > 0) {
 			this.fuse--;
@@ -53,9 +58,9 @@ public class MinecartTNT extends AbstractMinecart {
 		}
 
 		if (this.horizontalCollision) {
-			double d = this.getDeltaMovement().horizontalDistanceSqr();
-			if (d >= 0.01F) {
-				this.explode(d);
+			double e = this.getDeltaMovement().horizontalDistanceSqr();
+			if (d >= 0.01F && e <= 0.01F) {
+				this.explode(e);
 			}
 		}
 	}
@@ -173,12 +178,19 @@ public class MinecartTNT extends AbstractMinecart {
 		if (compoundTag.contains("TNTFuse", 99)) {
 			this.fuse = compoundTag.getInt("TNTFuse");
 		}
+
+		if (compoundTag.contains("explosion_power", 99)) {
+			this.explosionPowerBase = Mth.clamp(compoundTag.getFloat("explosion_power"), 0.0F, 128.0F);
+		}
 	}
 
 	@Override
 	protected void addAdditionalSaveData(CompoundTag compoundTag) {
 		super.addAdditionalSaveData(compoundTag);
 		compoundTag.putInt("TNTFuse", this.fuse);
+		if (this.explosionPowerBase != 4.0F) {
+			compoundTag.putFloat("explosion_power", this.explosionPowerBase);
+		}
 	}
 
 	@Override

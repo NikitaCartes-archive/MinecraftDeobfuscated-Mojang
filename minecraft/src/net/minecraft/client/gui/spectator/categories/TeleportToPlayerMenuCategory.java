@@ -12,8 +12,10 @@ import net.minecraft.client.gui.spectator.SpectatorMenu;
 import net.minecraft.client.gui.spectator.SpectatorMenuCategory;
 import net.minecraft.client.gui.spectator.SpectatorMenuItem;
 import net.minecraft.client.multiplayer.PlayerInfo;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.ARGB;
 import net.minecraft.world.level.GameType;
 
 @Environment(EnvType.CLIENT)
@@ -57,8 +59,8 @@ public class TeleportToPlayerMenuCategory implements SpectatorMenuCategory, Spec
 	}
 
 	@Override
-	public void renderIcon(GuiGraphics guiGraphics, float f, int i) {
-		guiGraphics.blitSprite(TELEPORT_TO_PLAYER_SPRITE, 0, 0, 16, 16);
+	public void renderIcon(GuiGraphics guiGraphics, float f, float g) {
+		guiGraphics.blitSprite(RenderType::guiTextured, TELEPORT_TO_PLAYER_SPRITE, 0, 0, 16, 16, ARGB.colorFromFloat(g, f, f, f));
 	}
 
 	@Override

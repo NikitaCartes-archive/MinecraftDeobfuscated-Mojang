@@ -53,6 +53,7 @@ import net.minecraft.world.level.block.BaseFireBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.FuelValues;
 import net.minecraft.world.level.block.entity.TickingBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.border.WorldBorder;
@@ -69,6 +70,7 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.redstone.CollectingNeighborUpdater;
 import net.minecraft.world.level.redstone.NeighborUpdater;
+import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.level.saveddata.maps.MapId;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.minecraft.world.level.storage.LevelData;
@@ -304,13 +306,16 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 	public void updateNeighborsAt(BlockPos blockPos, Block block) {
 	}
 
-	public void updateNeighborsAtExceptFromFacing(BlockPos blockPos, Block block, Direction direction) {
+	public void updateNeighborsAt(BlockPos blockPos, Block block, @Nullable Orientation orientation) {
 	}
 
-	public void neighborChanged(BlockPos blockPos, Block block, BlockPos blockPos2) {
+	public void updateNeighborsAtExceptFromFacing(BlockPos blockPos, Block block, Direction direction, @Nullable Orientation orientation) {
 	}
 
-	public void neighborChanged(BlockState blockState, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
+	public void neighborChanged(BlockPos blockPos, Block block, @Nullable Orientation orientation) {
+	}
+
+	public void neighborChanged(BlockState blockState, BlockPos blockPos, Block block, @Nullable Orientation orientation, boolean bl) {
 	}
 
 	@Override
@@ -482,8 +487,8 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 		return this.shouldTickBlocksAt(ChunkPos.asLong(blockPos));
 	}
 
-	public Explosion explode(@Nullable Entity entity, double d, double e, double f, float g, Level.ExplosionInteraction explosionInteraction) {
-		return this.explode(
+	public void explode(@Nullable Entity entity, double d, double e, double f, float g, Level.ExplosionInteraction explosionInteraction) {
+		this.explode(
 			entity,
 			Explosion.getDefaultDamageSource(this, entity),
 			null,
@@ -499,8 +504,8 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 		);
 	}
 
-	public Explosion explode(@Nullable Entity entity, double d, double e, double f, float g, boolean bl, Level.ExplosionInteraction explosionInteraction) {
-		return this.explode(
+	public void explode(@Nullable Entity entity, double d, double e, double f, float g, boolean bl, Level.ExplosionInteraction explosionInteraction) {
+		this.explode(
 			entity,
 			Explosion.getDefaultDamageSource(this, entity),
 			null,
@@ -516,7 +521,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 		);
 	}
 
-	public Explosion explode(
+	public void explode(
 		@Nullable Entity entity,
 		@Nullable DamageSource damageSource,
 		@Nullable ExplosionDamageCalculator explosionDamageCalculator,
@@ -525,7 +530,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 		boolean bl,
 		Level.ExplosionInteraction explosionInteraction
 	) {
-		return this.explode(
+		this.explode(
 			entity,
 			damageSource,
 			explosionDamageCalculator,
@@ -541,7 +546,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 		);
 	}
 
-	public Explosion explode(
+	public void explode(
 		@Nullable Entity entity,
 		@Nullable DamageSource damageSource,
 		@Nullable ExplosionDamageCalculator explosionDamageCalculator,
@@ -552,7 +557,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 		boolean bl,
 		Level.ExplosionInteraction explosionInteraction
 	) {
-		return this.explode(
+		this.explode(
 			entity,
 			damageSource,
 			explosionDamageCalculator,
@@ -568,7 +573,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 		);
 	}
 
-	public Explosion explode(
+	public abstract void explode(
 		@Nullable Entity entity,
 		@Nullable DamageSource damageSource,
 		@Nullable ExplosionDamageCalculator explosionDamageCalculator,
@@ -581,45 +586,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 		ParticleOptions particleOptions,
 		ParticleOptions particleOptions2,
 		Holder<SoundEvent> holder
-	) {
-		return this.explode(entity, damageSource, explosionDamageCalculator, d, e, f, g, bl, explosionInteraction, true, particleOptions, particleOptions2, holder);
-	}
-
-	public Explosion explode(
-		@Nullable Entity entity,
-		@Nullable DamageSource damageSource,
-		@Nullable ExplosionDamageCalculator explosionDamageCalculator,
-		double d,
-		double e,
-		double f,
-		float g,
-		boolean bl,
-		Level.ExplosionInteraction explosionInteraction,
-		boolean bl2,
-		ParticleOptions particleOptions,
-		ParticleOptions particleOptions2,
-		Holder<SoundEvent> holder
-	) {
-		Explosion.BlockInteraction blockInteraction = switch (explosionInteraction) {
-			case NONE -> Explosion.BlockInteraction.KEEP;
-			case BLOCK -> this.getDestroyType(GameRules.RULE_BLOCK_EXPLOSION_DROP_DECAY);
-			case MOB -> this.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)
-			? this.getDestroyType(GameRules.RULE_MOB_EXPLOSION_DROP_DECAY)
-			: Explosion.BlockInteraction.KEEP;
-			case TNT -> this.getDestroyType(GameRules.RULE_TNT_EXPLOSION_DROP_DECAY);
-			case TRIGGER -> Explosion.BlockInteraction.TRIGGER_BLOCK;
-		};
-		Explosion explosion = new Explosion(
-			this, entity, damageSource, explosionDamageCalculator, d, e, f, g, bl, blockInteraction, particleOptions, particleOptions2, holder
-		);
-		explosion.explode();
-		explosion.finalizeExplosion(bl2);
-		return explosion;
-	}
-
-	private Explosion.BlockInteraction getDestroyType(GameRules.Key<GameRules.BooleanValue> key) {
-		return this.getGameRules().getBoolean(key) ? Explosion.BlockInteraction.DESTROY_WITH_DECAY : Explosion.BlockInteraction.DESTROY;
-	}
+	);
 
 	public abstract String gatherChunkSourceStats();
 
@@ -676,8 +643,8 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 		this.skyDarken = (int)((1.0 - f * d * e) * 11.0);
 	}
 
-	public void setSpawnSettings(boolean bl, boolean bl2) {
-		this.getChunkSource().setSpawnSettings(bl, bl2);
+	public void setSpawnSettings(boolean bl) {
+		this.getChunkSource().setSpawnSettings(bl);
 	}
 
 	public BlockPos getSharedSpawnPos() {
@@ -780,11 +747,6 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 		}
 	}
 
-	@Override
-	public int getSeaLevel() {
-		return 63;
-	}
-
 	public void disconnect() {
 	}
 
@@ -858,7 +820,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 			return false;
 		} else {
 			Biome biome = this.getBiome(blockPos).value();
-			return biome.getPrecipitationAt(blockPos) == Biome.Precipitation.RAIN;
+			return biome.getPrecipitationAt(blockPos, this.getSeaLevel()) == Biome.Precipitation.RAIN;
 		}
 	}
 
@@ -900,12 +862,12 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 			if (this.hasChunkAt(blockPos2)) {
 				BlockState blockState = this.getBlockState(blockPos2);
 				if (blockState.is(Blocks.COMPARATOR)) {
-					this.neighborChanged(blockState, blockPos2, block, blockPos, false);
+					this.neighborChanged(blockState, blockPos2, block, null, false);
 				} else if (blockState.isRedstoneConductor(this, blockPos2)) {
 					blockPos2 = blockPos2.relative(direction);
 					blockState = this.getBlockState(blockPos2);
 					if (blockState.is(Blocks.COMPARATOR)) {
-						this.neighborChanged(blockState, blockPos2, block, blockPos, false);
+						this.neighborChanged(blockState, blockPos2, block, null, false);
 					}
 				}
 			}
@@ -1016,6 +978,8 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 
 	public abstract PotionBrewing potionBrewing();
 
+	public abstract FuelValues fuelValues();
+
 	public static enum ExplosionInteraction implements StringRepresentable {
 		NONE("none"),
 		BLOCK("block"),
@@ -1026,7 +990,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 		public static final Codec<Level.ExplosionInteraction> CODEC = StringRepresentable.fromEnum(Level.ExplosionInteraction::values);
 		private final String id;
 
-		private ExplosionInteraction(String string2) {
+		private ExplosionInteraction(final String string2) {
 			this.id = string2;
 		}
 

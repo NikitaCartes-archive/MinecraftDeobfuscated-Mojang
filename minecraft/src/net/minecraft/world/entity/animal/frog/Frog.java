@@ -20,6 +20,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.EntityTypeTags;
@@ -32,10 +33,10 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.AnimationState;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
@@ -234,13 +235,18 @@ public class Frog extends Animal implements VariantHolder<Holder<FrogVariant>> {
 			g = Math.min(f * 25.0F, 1.0F);
 		}
 
-		this.walkAnimation.update(g, 0.4F);
+		this.walkAnimation.update(g, 0.4F, this.isBaby() ? 3.0F : 1.0F);
+	}
+
+	@Override
+	public void playEatingSound() {
+		this.level().playSound(null, this, SoundEvents.FROG_EAT, SoundSource.NEUTRAL, 2.0F, 1.0F);
 	}
 
 	@Nullable
 	@Override
 	public AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
-		Frog frog = EntityType.FROG.create(serverLevel);
+		Frog frog = EntityType.FROG.create(serverLevel, EntitySpawnReason.BREEDING);
 		if (frog != null) {
 			FrogAi.initMemories(frog, serverLevel.getRandom());
 		}
@@ -265,7 +271,7 @@ public class Frog extends Animal implements VariantHolder<Holder<FrogVariant>> {
 
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData
+		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, EntitySpawnReason entitySpawnReason, @Nullable SpawnGroupData spawnGroupData
 	) {
 		Holder<Biome> holder = serverLevelAccessor.getBiome(this.blockPosition());
 		if (holder.is(BiomeTags.SPAWNS_COLD_VARIANT_FROGS)) {
@@ -277,11 +283,11 @@ public class Frog extends Animal implements VariantHolder<Holder<FrogVariant>> {
 		}
 
 		FrogAi.initMemories(this, serverLevelAccessor.getRandom());
-		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData);
+		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, entitySpawnReason, spawnGroupData);
 	}
 
 	public static AttributeSupplier.Builder createAttributes() {
-		return Mob.createMobAttributes()
+		return Animal.createAnimalAttributes()
 			.add(Attributes.MOVEMENT_SPEED, 1.0)
 			.add(Attributes.MAX_HEALTH, 10.0)
 			.add(Attributes.ATTACK_DAMAGE, 10.0)
@@ -363,7 +369,7 @@ public class Frog extends Animal implements VariantHolder<Holder<FrogVariant>> {
 	}
 
 	public static boolean checkFrogSpawnRules(
-		EntityType<? extends Animal> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, RandomSource randomSource
+		EntityType<? extends Animal> entityType, LevelAccessor levelAccessor, EntitySpawnReason entitySpawnReason, BlockPos blockPos, RandomSource randomSource
 	) {
 		return levelAccessor.getBlockState(blockPos.below()).is(BlockTags.FROGS_SPAWNABLE_ON) && isBrightEnoughToSpawn(levelAccessor, blockPos);
 	}

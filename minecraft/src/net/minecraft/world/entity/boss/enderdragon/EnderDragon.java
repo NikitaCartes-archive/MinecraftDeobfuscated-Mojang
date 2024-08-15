@@ -60,8 +60,7 @@ public class EnderDragon extends Mob implements Enemy {
 	private static final float SITTING_ALLOWED_DAMAGE_PERCENTAGE = 0.25F;
 	private static final String DRAGON_DEATH_TIME_KEY = "DragonDeathTime";
 	private static final String DRAGON_PHASE_KEY = "DragonPhase";
-	public final double[][] positions = new double[64][3];
-	public int posPointer = -1;
+	public final DragonFlightHistory flightHistory = new DragonFlightHistory();
 	private final EnderDragonPart[] subEntities;
 	public final EnderDragonPart head;
 	private final EnderDragonPart neck;
@@ -101,7 +100,6 @@ public class EnderDragon extends Mob implements Enemy {
 		this.subEntities = new EnderDragonPart[]{this.head, this.neck, this.body, this.tail1, this.tail2, this.tail3, this.wing1, this.wing2};
 		this.setHealth(this.getMaxHealth());
 		this.noPhysics = true;
-		this.noCulling = true;
 		this.phaseManager = new EnderDragonPhaseManager(this);
 	}
 
@@ -142,25 +140,6 @@ public class EnderDragon extends Mob implements Enemy {
 	protected void defineSynchedData(SynchedEntityData.Builder builder) {
 		super.defineSynchedData(builder);
 		builder.define(DATA_PHASE, EnderDragonPhase.HOVERING.getId());
-	}
-
-	public double[] getLatencyPos(int i, float f) {
-		if (this.isDeadOrDying()) {
-			f = 0.0F;
-		}
-
-		f = 1.0F - f;
-		int j = this.posPointer - i & 63;
-		int k = this.posPointer - i - 1 & 63;
-		double[] ds = new double[3];
-		double d = this.positions[j][0];
-		double e = Mth.wrapDegrees(this.positions[k][0] - d);
-		ds[0] = d + e * (double)f;
-		d = this.positions[j][1];
-		e = this.positions[k][1] - d;
-		ds[1] = d + e * (double)f;
-		ds[2] = Mth.lerp((double)f, this.positions[j][2], this.positions[k][2]);
-		return ds;
 	}
 
 	@Override
@@ -207,19 +186,7 @@ public class EnderDragon extends Mob implements Enemy {
 			if (this.isNoAi()) {
 				this.flapTime = 0.5F;
 			} else {
-				if (this.posPointer < 0) {
-					for (int i = 0; i < this.positions.length; i++) {
-						this.positions[i][0] = (double)this.getYRot();
-						this.positions[i][1] = this.getY();
-					}
-				}
-
-				if (++this.posPointer == this.positions.length) {
-					this.posPointer = 0;
-				}
-
-				this.positions[this.posPointer][0] = (double)this.getYRot();
-				this.positions[this.posPointer][1] = this.getY();
+				this.flightHistory.record(this.getY(), this.getYRot());
 				if (this.level().isClientSide) {
 					if (this.lerpSteps > 0) {
 						this.lerpPositionAndRotationStep(this.lerpSteps, this.lerpX, this.lerpY, this.lerpZ, this.lerpYRot, this.lerpXRot);
@@ -239,12 +206,12 @@ public class EnderDragon extends Mob implements Enemy {
 					if (vec32 != null) {
 						double d = vec32.x - this.getX();
 						double e = vec32.y - this.getY();
-						double j = vec32.z - this.getZ();
-						double k = d * d + e * e + j * j;
-						float l = dragonPhaseInstance.getFlySpeed();
-						double m = Math.sqrt(d * d + j * j);
-						if (m > 0.0) {
-							e = Mth.clamp(e / m, (double)(-l), (double)l);
+						double i = vec32.z - this.getZ();
+						double j = d * d + e * e + i * i;
+						float k = dragonPhaseInstance.getFlySpeed();
+						double l = Math.sqrt(d * d + i * i);
+						if (l > 0.0) {
+							e = Mth.clamp(e / l, (double)(-k), (double)k);
 						}
 
 						this.setDeltaMovement(this.getDeltaMovement().add(0.0, e * 0.01, 0.0));
@@ -254,17 +221,17 @@ public class EnderDragon extends Mob implements Enemy {
 								(double)Mth.sin(this.getYRot() * (float) (Math.PI / 180.0)), this.getDeltaMovement().y, (double)(-Mth.cos(this.getYRot() * (float) (Math.PI / 180.0)))
 							)
 							.normalize();
-						float n = Math.max(((float)vec34.dot(vec33) + 0.5F) / 1.5F, 0.0F);
-						if (Math.abs(d) > 1.0E-5F || Math.abs(j) > 1.0E-5F) {
-							float o = Mth.clamp(Mth.wrapDegrees(180.0F - (float)Mth.atan2(d, j) * (180.0F / (float)Math.PI) - this.getYRot()), -50.0F, 50.0F);
+						float m = Math.max(((float)vec34.dot(vec33) + 0.5F) / 1.5F, 0.0F);
+						if (Math.abs(d) > 1.0E-5F || Math.abs(i) > 1.0E-5F) {
+							float n = Mth.clamp(Mth.wrapDegrees(180.0F - (float)Mth.atan2(d, i) * (180.0F / (float)Math.PI) - this.getYRot()), -50.0F, 50.0F);
 							this.yRotA *= 0.8F;
-							this.yRotA = this.yRotA + o * dragonPhaseInstance.getTurnSpeed();
+							this.yRotA = this.yRotA + n * dragonPhaseInstance.getTurnSpeed();
 							this.setYRot(this.getYRot() + this.yRotA * 0.1F);
 						}
 
-						float o = (float)(2.0 / (k + 1.0));
-						float p = 0.06F;
-						this.moveRelative(0.06F * (n * o + (1.0F - o)), new Vec3(0.0, 0.0, -1.0));
+						float n = (float)(2.0 / (j + 1.0));
+						float o = 0.06F;
+						this.moveRelative(0.06F * (m * n + (1.0F - n)), new Vec3(0.0, 0.0, -1.0));
 						if (this.inWall) {
 							this.move(MoverType.SELF, this.getDeltaMovement().scale(0.8F));
 						} else {
@@ -272,27 +239,31 @@ public class EnderDragon extends Mob implements Enemy {
 						}
 
 						Vec3 vec35 = this.getDeltaMovement().normalize();
-						double q = 0.8 + 0.15 * (vec35.dot(vec34) + 1.0) / 2.0;
-						this.setDeltaMovement(this.getDeltaMovement().multiply(q, 0.91F, q));
+						double p = 0.8 + 0.15 * (vec35.dot(vec34) + 1.0) / 2.0;
+						this.setDeltaMovement(this.getDeltaMovement().multiply(p, 0.91F, p));
 					}
+				}
+
+				if (!this.level().isClientSide()) {
+					this.applyEffectsFromBlocks();
 				}
 
 				this.yBodyRot = this.getYRot();
 				Vec3[] vec3s = new Vec3[this.subEntities.length];
 
-				for (int r = 0; r < this.subEntities.length; r++) {
-					vec3s[r] = new Vec3(this.subEntities[r].getX(), this.subEntities[r].getY(), this.subEntities[r].getZ());
+				for (int q = 0; q < this.subEntities.length; q++) {
+					vec3s[q] = new Vec3(this.subEntities[q].getX(), this.subEntities[q].getY(), this.subEntities[q].getZ());
 				}
 
-				float s = (float)(this.getLatencyPos(5, 1.0F)[1] - this.getLatencyPos(10, 1.0F)[1]) * 10.0F * (float) (Math.PI / 180.0);
-				float t = Mth.cos(s);
-				float u = Mth.sin(s);
-				float v = this.getYRot() * (float) (Math.PI / 180.0);
-				float w = Mth.sin(v);
-				float x = Mth.cos(v);
-				this.tickPart(this.body, (double)(w * 0.5F), 0.0, (double)(-x * 0.5F));
-				this.tickPart(this.wing1, (double)(x * 4.5F), 2.0, (double)(w * 4.5F));
-				this.tickPart(this.wing2, (double)(x * -4.5F), 2.0, (double)(w * -4.5F));
+				float r = (float)(this.flightHistory.get(5).y() - this.flightHistory.get(10).y()) * 10.0F * (float) (Math.PI / 180.0);
+				float s = Mth.cos(r);
+				float t = Mth.sin(r);
+				float u = this.getYRot() * (float) (Math.PI / 180.0);
+				float v = Mth.sin(u);
+				float w = Mth.cos(u);
+				this.tickPart(this.body, (double)(v * 0.5F), 0.0, (double)(-w * 0.5F));
+				this.tickPart(this.wing1, (double)(w * 4.5F), 2.0, (double)(v * 4.5F));
+				this.tickPart(this.wing2, (double)(w * -4.5F), 2.0, (double)(v * -4.5F));
 				if (this.level() instanceof ServerLevel serverLevel2 && this.hurtTime == 0) {
 					this.knockBack(
 						serverLevel2,
@@ -306,34 +277,36 @@ public class EnderDragon extends Mob implements Enemy {
 					this.hurt(serverLevel2.getEntities(this, this.neck.getBoundingBox().inflate(1.0), EntitySelector.NO_CREATIVE_OR_SPECTATOR));
 				}
 
-				float y = Mth.sin(this.getYRot() * (float) (Math.PI / 180.0) - this.yRotA * 0.01F);
-				float z = Mth.cos(this.getYRot() * (float) (Math.PI / 180.0) - this.yRotA * 0.01F);
-				float aa = this.getHeadYOffset();
-				this.tickPart(this.head, (double)(y * 6.5F * t), (double)(aa + u * 6.5F), (double)(-z * 6.5F * t));
-				this.tickPart(this.neck, (double)(y * 5.5F * t), (double)(aa + u * 5.5F), (double)(-z * 5.5F * t));
-				double[] ds = this.getLatencyPos(5, 1.0F);
+				float x = Mth.sin(this.getYRot() * (float) (Math.PI / 180.0) - this.yRotA * 0.01F);
+				float y = Mth.cos(this.getYRot() * (float) (Math.PI / 180.0) - this.yRotA * 0.01F);
+				float z = this.getHeadYOffset();
+				this.tickPart(this.head, (double)(x * 6.5F * s), (double)(z + t * 6.5F), (double)(-y * 6.5F * s));
+				this.tickPart(this.neck, (double)(x * 5.5F * s), (double)(z + t * 5.5F), (double)(-y * 5.5F * s));
+				DragonFlightHistory.Sample sample = this.flightHistory.get(5);
 
-				for (int ab = 0; ab < 3; ab++) {
+				for (int aa = 0; aa < 3; aa++) {
 					EnderDragonPart enderDragonPart = null;
-					if (ab == 0) {
+					if (aa == 0) {
 						enderDragonPart = this.tail1;
 					}
 
-					if (ab == 1) {
+					if (aa == 1) {
 						enderDragonPart = this.tail2;
 					}
 
-					if (ab == 2) {
+					if (aa == 2) {
 						enderDragonPart = this.tail3;
 					}
 
-					double[] es = this.getLatencyPos(12 + ab * 2, 1.0F);
-					float ac = this.getYRot() * (float) (Math.PI / 180.0) + this.rotWrap(es[0] - ds[0]) * (float) (Math.PI / 180.0);
-					float nx = Mth.sin(ac);
-					float o = Mth.cos(ac);
-					float p = 1.5F;
-					float ad = (float)(ab + 1) * 2.0F;
-					this.tickPart(enderDragonPart, (double)(-(w * 1.5F + nx * ad) * t), es[1] - ds[1] - (double)((ad + 1.5F) * u) + 1.5, (double)((x * 1.5F + o * ad) * t));
+					DragonFlightHistory.Sample sample2 = this.flightHistory.get(12 + aa * 2);
+					float ab = this.getYRot() * (float) (Math.PI / 180.0) + this.rotWrap((double)(sample2.yRot() - sample.yRot())) * (float) (Math.PI / 180.0);
+					float mx = Mth.sin(ab);
+					float n = Mth.cos(ab);
+					float o = 1.5F;
+					float ac = (float)(aa + 1) * 2.0F;
+					this.tickPart(
+						enderDragonPart, (double)(-(v * 1.5F + mx * ac) * s), sample2.y() - sample.y() - (double)((ac + 1.5F) * t) + 1.5, (double)((w * 1.5F + n * ac) * s)
+					);
 				}
 
 				if (!this.level().isClientSide) {
@@ -343,13 +316,13 @@ public class EnderDragon extends Mob implements Enemy {
 					}
 				}
 
-				for (int ab = 0; ab < this.subEntities.length; ab++) {
-					this.subEntities[ab].xo = vec3s[ab].x;
-					this.subEntities[ab].yo = vec3s[ab].y;
-					this.subEntities[ab].zo = vec3s[ab].z;
-					this.subEntities[ab].xOld = vec3s[ab].x;
-					this.subEntities[ab].yOld = vec3s[ab].y;
-					this.subEntities[ab].zOld = vec3s[ab].z;
+				for (int aa = 0; aa < this.subEntities.length; aa++) {
+					this.subEntities[aa].xo = vec3s[aa].x;
+					this.subEntities[aa].yo = vec3s[aa].y;
+					this.subEntities[aa].zo = vec3s[aa].z;
+					this.subEntities[aa].xOld = vec3s[aa].x;
+					this.subEntities[aa].yOld = vec3s[aa].y;
+					this.subEntities[aa].zOld = vec3s[aa].z;
 				}
 			}
 		}
@@ -363,9 +336,9 @@ public class EnderDragon extends Mob implements Enemy {
 		if (this.phaseManager.getCurrentPhase().isSitting()) {
 			return -1.0F;
 		} else {
-			double[] ds = this.getLatencyPos(5, 1.0F);
-			double[] es = this.getLatencyPos(0, 1.0F);
-			return (float)(ds[1] - es[1]);
+			DragonFlightHistory.Sample sample = this.flightHistory.get(5);
+			DragonFlightHistory.Sample sample2 = this.flightHistory.get(0);
+			return (float)(sample.y() - sample2.y());
 		}
 	}
 
@@ -583,7 +556,7 @@ public class EnderDragon extends Mob implements Enemy {
 					m = Mth.floor(20.0F * Mth.sin(2.0F * ((float) -Math.PI + (float) (Math.PI / 4) * (float)var7)));
 				}
 
-				int n = Math.max(this.level().getSeaLevel() + 10, this.level().getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, new BlockPos(l, 0, m)).getY() + j);
+				int n = Math.max(73, this.level().getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, new BlockPos(l, 0, m)).getY() + j);
 				this.nodes[i] = new Node(l, n, m);
 			}
 
@@ -785,25 +758,6 @@ public class EnderDragon extends Mob implements Enemy {
 	@Override
 	protected float getSoundVolume() {
 		return 5.0F;
-	}
-
-	public float getHeadPartYOffset(int i, double[] ds, double[] es) {
-		DragonPhaseInstance dragonPhaseInstance = this.phaseManager.getCurrentPhase();
-		EnderDragonPhase<? extends DragonPhaseInstance> enderDragonPhase = dragonPhaseInstance.getPhase();
-		double e;
-		if (enderDragonPhase == EnderDragonPhase.LANDING || enderDragonPhase == EnderDragonPhase.TAKEOFF) {
-			BlockPos blockPos = this.level().getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, EndPodiumFeature.getLocation(this.fightOrigin));
-			double d = Math.max(Math.sqrt(blockPos.distToCenterSqr(this.position())) / 4.0, 1.0);
-			e = (double)i / d;
-		} else if (dragonPhaseInstance.isSitting()) {
-			e = (double)i;
-		} else if (i == 6) {
-			e = 0.0;
-		} else {
-			e = es[1] - ds[1];
-		}
-
-		return (float)e;
 	}
 
 	public Vec3 getHeadLookVector(float f) {

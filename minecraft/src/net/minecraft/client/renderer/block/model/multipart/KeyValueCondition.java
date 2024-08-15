@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Util;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
@@ -45,10 +45,7 @@ public class KeyValueCondition implements Condition {
 				if (list.size() == 1) {
 					predicate = this.getBlockStatePredicate(stateDefinition, property, string);
 				} else {
-					List<Predicate<BlockState>> list2 = (List<Predicate<BlockState>>)list.stream()
-						.map(stringx -> this.getBlockStatePredicate(stateDefinition, property, stringx))
-						.collect(Collectors.toList());
-					predicate = blockState -> list2.stream().anyMatch(predicatex -> predicatex.test(blockState));
+					predicate = Util.anyOf(list.stream().map(stringx -> this.getBlockStatePredicate(stateDefinition, property, stringx)).toList());
 				}
 
 				return bl ? predicate.negate() : predicate;

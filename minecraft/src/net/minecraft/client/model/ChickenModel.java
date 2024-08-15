@@ -1,6 +1,6 @@
 package net.minecraft.client.model;
 
-import com.google.common.collect.ImmutableList;
+import java.util.Set;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
@@ -8,15 +8,17 @@ import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.MeshTransformer;
 import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.client.renderer.entity.state.ChickenRenderState;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Entity;
 
 @Environment(EnvType.CLIENT)
-public class ChickenModel<T extends Entity> extends AgeableListModel<T> {
+public class ChickenModel extends EntityModel<ChickenRenderState> {
 	public static final String RED_THING = "red_thing";
+	public static final MeshTransformer BABY_TRANSFORMER = new BabyModelTransform(Set.of("head", "beak", "red_thing"));
+	private final ModelPart root;
 	private final ModelPart head;
-	private final ModelPart body;
 	private final ModelPart rightLeg;
 	private final ModelPart leftLeg;
 	private final ModelPart rightWing;
@@ -25,10 +27,10 @@ public class ChickenModel<T extends Entity> extends AgeableListModel<T> {
 	private final ModelPart redThing;
 
 	public ChickenModel(ModelPart modelPart) {
+		this.root = modelPart;
 		this.head = modelPart.getChild("head");
 		this.beak = modelPart.getChild("beak");
 		this.redThing = modelPart.getChild("red_thing");
-		this.body = modelPart.getChild("body");
 		this.rightLeg = modelPart.getChild("right_leg");
 		this.leftLeg = modelPart.getChild("left_leg");
 		this.rightWing = modelPart.getChild("right_wing");
@@ -66,26 +68,23 @@ public class ChickenModel<T extends Entity> extends AgeableListModel<T> {
 	}
 
 	@Override
-	protected Iterable<ModelPart> headParts() {
-		return ImmutableList.<ModelPart>of(this.head, this.beak, this.redThing);
+	public ModelPart root() {
+		return this.root;
 	}
 
-	@Override
-	protected Iterable<ModelPart> bodyParts() {
-		return ImmutableList.<ModelPart>of(this.body, this.rightLeg, this.leftLeg, this.rightWing, this.leftWing);
-	}
-
-	@Override
-	public void setupAnim(T entity, float f, float g, float h, float i, float j) {
-		this.head.xRot = j * (float) (Math.PI / 180.0);
-		this.head.yRot = i * (float) (Math.PI / 180.0);
+	public void setupAnim(ChickenRenderState chickenRenderState) {
+		float f = (Mth.sin(chickenRenderState.flap) + 1.0F) * chickenRenderState.flapSpeed;
+		this.head.xRot = chickenRenderState.xRot * (float) (Math.PI / 180.0);
+		this.head.yRot = chickenRenderState.yRot * (float) (Math.PI / 180.0);
 		this.beak.xRot = this.head.xRot;
 		this.beak.yRot = this.head.yRot;
 		this.redThing.xRot = this.head.xRot;
 		this.redThing.yRot = this.head.yRot;
-		this.rightLeg.xRot = Mth.cos(f * 0.6662F) * 1.4F * g;
-		this.leftLeg.xRot = Mth.cos(f * 0.6662F + (float) Math.PI) * 1.4F * g;
-		this.rightWing.zRot = h;
-		this.leftWing.zRot = -h;
+		float g = chickenRenderState.walkAnimationSpeed;
+		float h = chickenRenderState.walkAnimationPos;
+		this.rightLeg.xRot = Mth.cos(h * 0.6662F) * 1.4F * g;
+		this.leftLeg.xRot = Mth.cos(h * 0.6662F + (float) Math.PI) * 1.4F * g;
+		this.rightWing.zRot = f;
+		this.leftWing.zRot = -f;
 	}
 }

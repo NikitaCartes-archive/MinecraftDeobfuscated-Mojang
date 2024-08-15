@@ -12,6 +12,7 @@ import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import com.google.gson.stream.JsonReader;
 import com.mojang.brigadier.Message;
+import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.JsonOps;
 import java.io.StringReader;
 import java.lang.reflect.Type;
@@ -23,6 +24,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import javax.annotation.Nullable;
+import net.minecraft.commands.arguments.selector.SelectorPattern;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.network.chat.contents.DataSource;
 import net.minecraft.network.chat.contents.KeybindContents;
@@ -188,12 +190,16 @@ public interface Component extends Message, FormattedText {
 		return MutableComponent.create(new NbtContents(string, bl, optional, dataSource));
 	}
 
-	static MutableComponent score(String string, String string2) {
-		return MutableComponent.create(new ScoreContents(string, string2));
+	static MutableComponent score(SelectorPattern selectorPattern, String string) {
+		return MutableComponent.create(new ScoreContents(Either.left(selectorPattern), string));
 	}
 
-	static MutableComponent selector(String string, Optional<Component> optional) {
-		return MutableComponent.create(new SelectorContents(string, optional));
+	static MutableComponent score(String string, String string2) {
+		return MutableComponent.create(new ScoreContents(Either.right(string), string2));
+	}
+
+	static MutableComponent selector(SelectorPattern selectorPattern, Optional<Component> optional) {
+		return MutableComponent.create(new SelectorContents(selectorPattern, optional));
 	}
 
 	static Component translationArg(Date date) {

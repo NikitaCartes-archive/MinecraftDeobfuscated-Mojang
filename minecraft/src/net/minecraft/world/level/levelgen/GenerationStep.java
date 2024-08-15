@@ -4,27 +4,6 @@ import com.mojang.serialization.Codec;
 import net.minecraft.util.StringRepresentable;
 
 public class GenerationStep {
-	public static enum Carving implements StringRepresentable {
-		AIR("air"),
-		LIQUID("liquid");
-
-		public static final Codec<GenerationStep.Carving> CODEC = StringRepresentable.fromEnum(GenerationStep.Carving::values);
-		private final String name;
-
-		private Carving(final String string2) {
-			this.name = string2;
-		}
-
-		public String getName() {
-			return this.name;
-		}
-
-		@Override
-		public String getSerializedName() {
-			return this.name;
-		}
-	}
-
 	public static enum Decoration implements StringRepresentable {
 		RAW_GENERATION("raw_generation"),
 		LAKES("lakes"),

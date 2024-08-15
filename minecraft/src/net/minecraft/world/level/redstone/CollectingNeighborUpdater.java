@@ -7,6 +7,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -31,18 +32,18 @@ public class CollectingNeighborUpdater implements NeighborUpdater {
 	}
 
 	@Override
-	public void neighborChanged(BlockPos blockPos, Block block, BlockPos blockPos2) {
-		this.addAndRun(blockPos, new CollectingNeighborUpdater.SimpleNeighborUpdate(blockPos, block, blockPos2.immutable()));
+	public void neighborChanged(BlockPos blockPos, Block block, @Nullable Orientation orientation) {
+		this.addAndRun(blockPos, new CollectingNeighborUpdater.SimpleNeighborUpdate(blockPos, block, orientation));
 	}
 
 	@Override
-	public void neighborChanged(BlockState blockState, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
-		this.addAndRun(blockPos, new CollectingNeighborUpdater.FullNeighborUpdate(blockState, blockPos.immutable(), block, blockPos2.immutable(), bl));
+	public void neighborChanged(BlockState blockState, BlockPos blockPos, Block block, @Nullable Orientation orientation, boolean bl) {
+		this.addAndRun(blockPos, new CollectingNeighborUpdater.FullNeighborUpdate(blockState, blockPos.immutable(), block, orientation, bl));
 	}
 
 	@Override
-	public void updateNeighborsAtExceptFromFacing(BlockPos blockPos, Block block, @Nullable Direction direction) {
-		this.addAndRun(blockPos, new CollectingNeighborUpdater.MultiNeighborUpdate(blockPos.immutable(), block, direction));
+	public void updateNeighborsAtExceptFromFacing(BlockPos blockPos, Block block, @Nullable Direction direction, @Nullable Orientation orientation) {
+		this.addAndRun(blockPos, new CollectingNeighborUpdater.MultiNeighborUpdate(blockPos.immutable(), block, orientation, direction));
 	}
 
 	private void addAndRun(BlockPos blockPos, CollectingNeighborUpdater.NeighborUpdates neighborUpdates) {
@@ -88,11 +89,11 @@ public class CollectingNeighborUpdater implements NeighborUpdater {
 		}
 	}
 
-	static record FullNeighborUpdate(BlockState state, BlockPos pos, Block block, BlockPos neighborPos, boolean movedByPiston)
+	static record FullNeighborUpdate(BlockState state, BlockPos pos, Block block, @Nullable Orientation orientation, boolean movedByPiston)
 		implements CollectingNeighborUpdater.NeighborUpdates {
 		@Override
 		public boolean runNext(Level level) {
-			NeighborUpdater.executeUpdate(level, this.state, this.pos, this.block, this.neighborPos, this.movedByPiston);
+			NeighborUpdater.executeUpdate(level, this.state, this.pos, this.block, this.orientation, this.movedByPiston);
 			return false;
 		}
 	}
@@ -101,12 +102,15 @@ public class CollectingNeighborUpdater implements NeighborUpdater {
 		private final BlockPos sourcePos;
 		private final Block sourceBlock;
 		@Nullable
+		private Orientation orientation;
+		@Nullable
 		private final Direction skipDirection;
 		private int idx = 0;
 
-		MultiNeighborUpdate(BlockPos blockPos, Block block, @Nullable Direction direction) {
+		MultiNeighborUpdate(BlockPos blockPos, Block block, @Nullable Orientation orientation, @Nullable Direction direction) {
 			this.sourcePos = blockPos;
 			this.sourceBlock = block;
+			this.orientation = orientation;
 			this.skipDirection = direction;
 			if (NeighborUpdater.UPDATE_ORDER[this.idx] == direction) {
 				this.idx++;
@@ -115,9 +119,19 @@ public class CollectingNeighborUpdater implements NeighborUpdater {
 
 		@Override
 		public boolean runNext(Level level) {
-			BlockPos blockPos = this.sourcePos.relative(NeighborUpdater.UPDATE_ORDER[this.idx++]);
+			Direction direction = NeighborUpdater.UPDATE_ORDER[this.idx++];
+			BlockPos blockPos = this.sourcePos.relative(direction);
 			BlockState blockState = level.getBlockState(blockPos);
-			NeighborUpdater.executeUpdate(level, blockState, blockPos, this.sourceBlock, this.sourcePos, false);
+			Orientation orientation = null;
+			if (level.enabledFeatures().contains(FeatureFlags.REDSTONE_EXPERIMENTS)) {
+				if (this.orientation == null) {
+					this.orientation = ExperimentalRedstoneUtils.randomOrientation(level, this.skipDirection == null ? null : this.skipDirection.getOpposite(), null);
+				}
+
+				orientation = this.orientation.withFront(direction);
+			}
+
+			NeighborUpdater.executeUpdate(level, blockState, blockPos, this.sourceBlock, orientation, false);
 			if (this.idx < NeighborUpdater.UPDATE_ORDER.length && NeighborUpdater.UPDATE_ORDER[this.idx] == this.skipDirection) {
 				this.idx++;
 			}
@@ -139,11 +153,11 @@ public class CollectingNeighborUpdater implements NeighborUpdater {
 		}
 	}
 
-	static record SimpleNeighborUpdate(BlockPos pos, Block block, BlockPos neighborPos) implements CollectingNeighborUpdater.NeighborUpdates {
+	static record SimpleNeighborUpdate(BlockPos pos, Block block, @Nullable Orientation orientation) implements CollectingNeighborUpdater.NeighborUpdates {
 		@Override
 		public boolean runNext(Level level) {
 			BlockState blockState = level.getBlockState(this.pos);
-			NeighborUpdater.executeUpdate(level, blockState, this.pos, this.block, this.neighborPos, false);
+			NeighborUpdater.executeUpdate(level, blockState, this.pos, this.block, this.orientation, false);
 			return false;
 		}
 	}

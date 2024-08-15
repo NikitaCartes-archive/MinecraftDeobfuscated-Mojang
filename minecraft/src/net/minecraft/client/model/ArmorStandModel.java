@@ -1,7 +1,5 @@
 package net.minecraft.client.model;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -12,9 +10,8 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
-import net.minecraft.util.Mth;
+import net.minecraft.client.renderer.entity.state.ArmorStandRenderState;
 import net.minecraft.world.entity.HumanoidArm;
-import net.minecraft.world.entity.decoration.ArmorStand;
 
 @Environment(EnvType.CLIENT)
 public class ArmorStandModel extends ArmorStandArmorModel {
@@ -64,32 +61,24 @@ public class ArmorStandModel extends ArmorStandArmorModel {
 		return LayerDefinition.create(meshDefinition, 64, 64);
 	}
 
-	public void prepareMobModel(ArmorStand armorStand, float f, float g, float h) {
+	@Override
+	public void setupAnim(ArmorStandRenderState armorStandRenderState) {
 		this.basePlate.xRot = 0.0F;
-		this.basePlate.yRot = (float) (Math.PI / 180.0) * -Mth.rotLerp(h, armorStand.yRotO, armorStand.getYRot());
+		this.basePlate.yRot = (float) (Math.PI / 180.0) * -armorStandRenderState.yRot;
 		this.basePlate.zRot = 0.0F;
-	}
-
-	@Override
-	public void setupAnim(ArmorStand armorStand, float f, float g, float h, float i, float j) {
-		super.setupAnim(armorStand, f, g, h, i, j);
-		this.leftArm.visible = armorStand.isShowArms();
-		this.rightArm.visible = armorStand.isShowArms();
-		this.basePlate.visible = !armorStand.isNoBasePlate();
-		this.rightBodyStick.xRot = (float) (Math.PI / 180.0) * armorStand.getBodyPose().getX();
-		this.rightBodyStick.yRot = (float) (Math.PI / 180.0) * armorStand.getBodyPose().getY();
-		this.rightBodyStick.zRot = (float) (Math.PI / 180.0) * armorStand.getBodyPose().getZ();
-		this.leftBodyStick.xRot = (float) (Math.PI / 180.0) * armorStand.getBodyPose().getX();
-		this.leftBodyStick.yRot = (float) (Math.PI / 180.0) * armorStand.getBodyPose().getY();
-		this.leftBodyStick.zRot = (float) (Math.PI / 180.0) * armorStand.getBodyPose().getZ();
-		this.shoulderStick.xRot = (float) (Math.PI / 180.0) * armorStand.getBodyPose().getX();
-		this.shoulderStick.yRot = (float) (Math.PI / 180.0) * armorStand.getBodyPose().getY();
-		this.shoulderStick.zRot = (float) (Math.PI / 180.0) * armorStand.getBodyPose().getZ();
-	}
-
-	@Override
-	protected Iterable<ModelPart> bodyParts() {
-		return Iterables.concat(super.bodyParts(), ImmutableList.of(this.rightBodyStick, this.leftBodyStick, this.shoulderStick, this.basePlate));
+		super.setupAnim(armorStandRenderState);
+		this.leftArm.visible = armorStandRenderState.showArms;
+		this.rightArm.visible = armorStandRenderState.showArms;
+		this.basePlate.visible = armorStandRenderState.showBasePlate;
+		this.rightBodyStick.xRot = (float) (Math.PI / 180.0) * armorStandRenderState.bodyPose.getX();
+		this.rightBodyStick.yRot = (float) (Math.PI / 180.0) * armorStandRenderState.bodyPose.getY();
+		this.rightBodyStick.zRot = (float) (Math.PI / 180.0) * armorStandRenderState.bodyPose.getZ();
+		this.leftBodyStick.xRot = (float) (Math.PI / 180.0) * armorStandRenderState.bodyPose.getX();
+		this.leftBodyStick.yRot = (float) (Math.PI / 180.0) * armorStandRenderState.bodyPose.getY();
+		this.leftBodyStick.zRot = (float) (Math.PI / 180.0) * armorStandRenderState.bodyPose.getZ();
+		this.shoulderStick.xRot = (float) (Math.PI / 180.0) * armorStandRenderState.bodyPose.getX();
+		this.shoulderStick.yRot = (float) (Math.PI / 180.0) * armorStandRenderState.bodyPose.getY();
+		this.shoulderStick.zRot = (float) (Math.PI / 180.0) * armorStandRenderState.bodyPose.getZ();
 	}
 
 	@Override

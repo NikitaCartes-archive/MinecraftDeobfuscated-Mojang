@@ -2,11 +2,11 @@ package net.minecraft.core.dispenser;
 
 import net.minecraft.core.Direction;
 import net.minecraft.core.Position;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ProjectileItem;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.DispenserBlock;
 
 public class ProjectileDispenseBehavior extends DefaultDispenseItemBehavior {
@@ -24,20 +24,19 @@ public class ProjectileDispenseBehavior extends DefaultDispenseItemBehavior {
 
 	@Override
 	public ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
-		Level level = blockSource.level();
+		ServerLevel serverLevel = blockSource.level();
 		Direction direction = blockSource.state().getValue(DispenserBlock.FACING);
 		Position position = this.dispenseConfig.positionFunction().getDispensePosition(blockSource, direction);
-		Projectile projectile = this.projectileItem.asProjectile(level, position, itemStack, direction);
-		this.projectileItem
-			.shoot(
-				projectile,
-				(double)direction.getStepX(),
-				(double)direction.getStepY(),
-				(double)direction.getStepZ(),
-				this.dispenseConfig.power(),
-				this.dispenseConfig.uncertainty()
-			);
-		level.addFreshEntity(projectile);
+		Projectile.spawnProjectileUsingShoot(
+			this.projectileItem.asProjectile(serverLevel, position, itemStack, direction),
+			serverLevel,
+			itemStack,
+			(double)direction.getStepX(),
+			(double)direction.getStepY(),
+			(double)direction.getStepZ(),
+			this.dispenseConfig.power(),
+			this.dispenseConfig.uncertainty()
+		);
 		itemStack.shrink(1);
 		return itemStack;
 	}

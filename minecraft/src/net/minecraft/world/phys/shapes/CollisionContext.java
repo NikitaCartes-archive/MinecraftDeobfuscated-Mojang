@@ -11,7 +11,11 @@ public interface CollisionContext {
 	}
 
 	static CollisionContext of(Entity entity) {
-		return new EntityCollisionContext(entity);
+		return new EntityCollisionContext(entity, false);
+	}
+
+	static CollisionContext of(Entity entity, boolean bl) {
+		return new EntityCollisionContext(entity, bl);
 	}
 
 	boolean isDescending();

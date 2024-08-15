@@ -3,6 +3,7 @@ package net.minecraft.client.gui.components;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -43,7 +44,7 @@ public class LockIconButton extends Button {
 			icon = this.locked ? LockIconButton.Icon.LOCKED : LockIconButton.Icon.UNLOCKED;
 		}
 
-		guiGraphics.blitSprite(icon.sprite, this.getX(), this.getY(), this.width, this.height);
+		guiGraphics.blitSprite(RenderType::guiTextured, icon.sprite, this.getX(), this.getY(), this.width, this.height);
 	}
 
 	@Environment(EnvType.CLIENT)

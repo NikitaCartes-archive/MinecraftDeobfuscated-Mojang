@@ -3,9 +3,8 @@ package net.minecraft.world.item;
 import java.util.List;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -43,15 +42,9 @@ public class ShieldItem extends Item implements Equipable {
 	}
 
 	@Override
-	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand) {
-		ItemStack itemStack = player.getItemInHand(interactionHand);
+	public InteractionResult use(Level level, Player player, InteractionHand interactionHand) {
 		player.startUsingItem(interactionHand);
-		return InteractionResultHolder.consume(itemStack);
-	}
-
-	@Override
-	public boolean isValidRepairItem(ItemStack itemStack, ItemStack itemStack2) {
-		return itemStack2.is(ItemTags.PLANKS) || super.isValidRepairItem(itemStack, itemStack2);
+		return InteractionResult.CONSUME;
 	}
 
 	@Override

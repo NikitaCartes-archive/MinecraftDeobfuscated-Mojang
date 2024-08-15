@@ -19,12 +19,12 @@ public class Snowball extends ThrowableItemProjectile {
 		super(entityType, level);
 	}
 
-	public Snowball(Level level, LivingEntity livingEntity) {
-		super(EntityType.SNOWBALL, livingEntity, level);
+	public Snowball(Level level, LivingEntity livingEntity, ItemStack itemStack) {
+		super(EntityType.SNOWBALL, livingEntity, level, itemStack);
 	}
 
-	public Snowball(Level level, double d, double e, double f) {
-		super(EntityType.SNOWBALL, d, e, f, level);
+	public Snowball(Level level, double d, double e, double f, ItemStack itemStack) {
+		super(EntityType.SNOWBALL, d, e, f, level, itemStack);
 	}
 
 	@Override

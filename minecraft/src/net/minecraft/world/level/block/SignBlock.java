@@ -13,7 +13,6 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.SignApplicator;
@@ -79,7 +78,7 @@ public abstract class SignBlock extends BaseEntityBlock implements SimpleWaterlo
 	}
 
 	@Override
-	protected ItemInteractionResult useItemOn(
+	protected InteractionResult useItemOn(
 		ItemStack itemStack, BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
 	) {
 		if (level.getBlockEntity(blockPos) instanceof SignBlockEntity signBlockEntity) {
@@ -93,18 +92,18 @@ public abstract class SignBlock extends BaseEntityBlock implements SimpleWaterlo
 						player.awardStat(Stats.ITEM_USED.get(itemStack.getItem()));
 						level.gameEvent(GameEvent.BLOCK_CHANGE, signBlockEntity.getBlockPos(), GameEvent.Context.of(player, signBlockEntity.getBlockState()));
 						itemStack.consume(1, player);
-						return ItemInteractionResult.SUCCESS;
+						return InteractionResult.SUCCESS;
 					} else {
-						return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+						return InteractionResult.TRY_WITH_EMPTY_HAND;
 					}
 				} else {
-					return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+					return InteractionResult.TRY_WITH_EMPTY_HAND;
 				}
 			} else {
-				return !bl && !signBlockEntity.isWaxed() ? ItemInteractionResult.CONSUME : ItemInteractionResult.SUCCESS;
+				return !bl && !signBlockEntity.isWaxed() ? InteractionResult.CONSUME : InteractionResult.SUCCESS;
 			}
 		} else {
-			return ItemInteractionResult.SKIP_DEFAULT_BLOCK_INTERACTION;
+			return InteractionResult.PASS;
 		}
 	}
 
@@ -119,12 +118,12 @@ public abstract class SignBlock extends BaseEntityBlock implements SimpleWaterlo
 			boolean bl2 = signBlockEntity.executeClickCommandsIfPresent(player, level, blockPos, bl);
 			if (signBlockEntity.isWaxed()) {
 				level.playSound(null, signBlockEntity.getBlockPos(), signBlockEntity.getSignInteractionFailedSoundEvent(), SoundSource.BLOCKS);
-				return InteractionResult.SUCCESS;
+				return InteractionResult.SUCCESS_SERVER;
 			} else if (bl2) {
-				return InteractionResult.SUCCESS;
+				return InteractionResult.SUCCESS_SERVER;
 			} else if (!this.otherPlayerIsEditingSign(player, signBlockEntity) && player.mayBuild() && this.hasEditableText(player, signBlockEntity, bl)) {
 				this.openTextEdit(player, signBlockEntity, bl);
-				return InteractionResult.SUCCESS;
+				return InteractionResult.SUCCESS_SERVER;
 			} else {
 				return InteractionResult.PASS;
 			}

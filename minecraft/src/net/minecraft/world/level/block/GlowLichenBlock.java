@@ -8,7 +8,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.BlockPlaceContext;
-import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
@@ -82,7 +81,7 @@ public class GlowLichenBlock extends MultifaceBlock implements BonemealableBlock
 	}
 
 	@Override
-	protected boolean propagatesSkylightDown(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
+	protected boolean propagatesSkylightDown(BlockState blockState) {
 		return blockState.getFluidState().isEmpty();
 	}
 

@@ -2,8 +2,9 @@ package net.minecraft.world.item.crafting;
 
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
+import javax.annotation.Nullable;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
@@ -17,26 +18,23 @@ import net.minecraft.world.item.armortrim.TrimMaterial;
 import net.minecraft.world.item.armortrim.TrimMaterials;
 import net.minecraft.world.item.armortrim.TrimPattern;
 import net.minecraft.world.item.armortrim.TrimPatterns;
-import net.minecraft.world.level.Level;
 
 public class SmithingTrimRecipe implements SmithingRecipe {
-	final Ingredient template;
-	final Ingredient base;
-	final Ingredient addition;
+	final Optional<Ingredient> template;
+	final Optional<Ingredient> base;
+	final Optional<Ingredient> addition;
+	@Nullable
+	private PlacementInfo placementInfo;
 
-	public SmithingTrimRecipe(Ingredient ingredient, Ingredient ingredient2, Ingredient ingredient3) {
-		this.template = ingredient;
-		this.base = ingredient2;
-		this.addition = ingredient3;
-	}
-
-	public boolean matches(SmithingRecipeInput smithingRecipeInput, Level level) {
-		return this.template.test(smithingRecipeInput.template()) && this.base.test(smithingRecipeInput.base()) && this.addition.test(smithingRecipeInput.addition());
+	public SmithingTrimRecipe(Optional<Ingredient> optional, Optional<Ingredient> optional2, Optional<Ingredient> optional3) {
+		this.template = optional;
+		this.base = optional2;
+		this.addition = optional3;
 	}
 
 	public ItemStack assemble(SmithingRecipeInput smithingRecipeInput, HolderLookup.Provider provider) {
 		ItemStack itemStack = smithingRecipeInput.base();
-		if (this.base.test(itemStack)) {
+		if (Ingredient.testOptionalIngredient(this.base, itemStack)) {
 			Optional<Holder.Reference<TrimMaterial>> optional = TrimMaterials.getFromIngredient(provider, smithingRecipeInput.addition());
 			Optional<Holder.Reference<TrimPattern>> optional2 = TrimPatterns.getFromTemplate(provider, smithingRecipeInput.template());
 			if (optional.isPresent() && optional2.isPresent()) {
@@ -68,17 +66,17 @@ public class SmithingTrimRecipe implements SmithingRecipe {
 
 	@Override
 	public boolean isTemplateIngredient(ItemStack itemStack) {
-		return this.template.test(itemStack);
+		return Ingredient.testOptionalIngredient(this.template, itemStack);
 	}
 
 	@Override
 	public boolean isBaseIngredient(ItemStack itemStack) {
-		return this.base.test(itemStack);
+		return Ingredient.testOptionalIngredient(this.base, itemStack);
 	}
 
 	@Override
 	public boolean isAdditionIngredient(ItemStack itemStack) {
-		return this.addition.test(itemStack);
+		return Ingredient.testOptionalIngredient(this.addition, itemStack);
 	}
 
 	@Override
@@ -87,21 +85,31 @@ public class SmithingTrimRecipe implements SmithingRecipe {
 	}
 
 	@Override
-	public boolean isIncomplete() {
-		return Stream.of(this.template, this.base, this.addition).anyMatch(Ingredient::isEmpty);
+	public PlacementInfo placementInfo() {
+		if (this.placementInfo == null) {
+			this.placementInfo = PlacementInfo.createFromOptionals(List.of(this.template, this.base, this.addition));
+		}
+
+		return this.placementInfo;
 	}
 
 	public static class Serializer implements RecipeSerializer<SmithingTrimRecipe> {
 		private static final MapCodec<SmithingTrimRecipe> CODEC = RecordCodecBuilder.mapCodec(
 			instance -> instance.group(
-						Ingredient.CODEC.fieldOf("template").forGetter(smithingTrimRecipe -> smithingTrimRecipe.template),
-						Ingredient.CODEC.fieldOf("base").forGetter(smithingTrimRecipe -> smithingTrimRecipe.base),
-						Ingredient.CODEC.fieldOf("addition").forGetter(smithingTrimRecipe -> smithingTrimRecipe.addition)
+						Ingredient.CODEC.optionalFieldOf("template").forGetter(smithingTrimRecipe -> smithingTrimRecipe.template),
+						Ingredient.CODEC.optionalFieldOf("base").forGetter(smithingTrimRecipe -> smithingTrimRecipe.base),
+						Ingredient.CODEC.optionalFieldOf("addition").forGetter(smithingTrimRecipe -> smithingTrimRecipe.addition)
 					)
 					.apply(instance, SmithingTrimRecipe::new)
 		);
-		public static final StreamCodec<RegistryFriendlyByteBuf, SmithingTrimRecipe> STREAM_CODEC = StreamCodec.of(
-			SmithingTrimRecipe.Serializer::toNetwork, SmithingTrimRecipe.Serializer::fromNetwork
+		public static final StreamCodec<RegistryFriendlyByteBuf, SmithingTrimRecipe> STREAM_CODEC = StreamCodec.composite(
+			Ingredient.OPTIONAL_CONTENTS_STREAM_CODEC,
+			smithingTrimRecipe -> smithingTrimRecipe.template,
+			Ingredient.OPTIONAL_CONTENTS_STREAM_CODEC,
+			smithingTrimRecipe -> smithingTrimRecipe.base,
+			Ingredient.OPTIONAL_CONTENTS_STREAM_CODEC,
+			smithingTrimRecipe -> smithingTrimRecipe.addition,
+			SmithingTrimRecipe::new
 		);
 
 		@Override
@@ -112,19 +120,6 @@ public class SmithingTrimRecipe implements SmithingRecipe {
 		@Override
 		public StreamCodec<RegistryFriendlyByteBuf, SmithingTrimRecipe> streamCodec() {
 			return STREAM_CODEC;
-		}
-
-		private static SmithingTrimRecipe fromNetwork(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
-			Ingredient ingredient = Ingredient.CONTENTS_STREAM_CODEC.decode(registryFriendlyByteBuf);
-			Ingredient ingredient2 = Ingredient.CONTENTS_STREAM_CODEC.decode(registryFriendlyByteBuf);
-			Ingredient ingredient3 = Ingredient.CONTENTS_STREAM_CODEC.decode(registryFriendlyByteBuf);
-			return new SmithingTrimRecipe(ingredient, ingredient2, ingredient3);
-		}
-
-		private static void toNetwork(RegistryFriendlyByteBuf registryFriendlyByteBuf, SmithingTrimRecipe smithingTrimRecipe) {
-			Ingredient.CONTENTS_STREAM_CODEC.encode(registryFriendlyByteBuf, smithingTrimRecipe.template);
-			Ingredient.CONTENTS_STREAM_CODEC.encode(registryFriendlyByteBuf, smithingTrimRecipe.base);
-			Ingredient.CONTENTS_STREAM_CODEC.encode(registryFriendlyByteBuf, smithingTrimRecipe.addition);
 		}
 	}
 }

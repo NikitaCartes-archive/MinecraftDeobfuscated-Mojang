@@ -1,8 +1,6 @@
 package net.minecraft.client.model;
 
-import com.google.common.collect.ImmutableList;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
+import java.util.Set;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
@@ -10,47 +8,49 @@ import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.MeshTransformer;
 import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.client.renderer.entity.state.RabbitRenderState;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.animal.Rabbit;
 
 @Environment(EnvType.CLIENT)
-public class RabbitModel<T extends Rabbit> extends EntityModel<T> {
+public class RabbitModel extends EntityModel<RabbitRenderState> {
 	private static final float REAR_JUMP_ANGLE = 50.0F;
 	private static final float FRONT_JUMP_ANGLE = -40.0F;
+	private static final float NEW_SCALE = 0.6F;
+	private static final MeshTransformer ADULT_TRANSFORMER = MeshTransformer.scaling(0.6F);
+	private static final MeshTransformer BABY_TRANSFORMER = new BabyModelTransform(
+		true, 22.0F, 2.0F, 2.65F, 2.5F, 36.0F, Set.of("head", "left_ear", "right_ear", "nose")
+	);
 	private static final String LEFT_HAUNCH = "left_haunch";
 	private static final String RIGHT_HAUNCH = "right_haunch";
+	private final ModelPart root;
 	private final ModelPart leftRearFoot;
 	private final ModelPart rightRearFoot;
 	private final ModelPart leftHaunch;
 	private final ModelPart rightHaunch;
-	private final ModelPart body;
 	private final ModelPart leftFrontLeg;
 	private final ModelPart rightFrontLeg;
 	private final ModelPart head;
 	private final ModelPart rightEar;
 	private final ModelPart leftEar;
-	private final ModelPart tail;
 	private final ModelPart nose;
-	private float jumpRotation;
-	private static final float NEW_SCALE = 0.6F;
 
 	public RabbitModel(ModelPart modelPart) {
+		this.root = modelPart;
 		this.leftRearFoot = modelPart.getChild("left_hind_foot");
 		this.rightRearFoot = modelPart.getChild("right_hind_foot");
 		this.leftHaunch = modelPart.getChild("left_haunch");
 		this.rightHaunch = modelPart.getChild("right_haunch");
-		this.body = modelPart.getChild("body");
 		this.leftFrontLeg = modelPart.getChild("left_front_leg");
 		this.rightFrontLeg = modelPart.getChild("right_front_leg");
 		this.head = modelPart.getChild("head");
 		this.rightEar = modelPart.getChild("right_ear");
 		this.leftEar = modelPart.getChild("left_ear");
-		this.tail = modelPart.getChild("tail");
 		this.nose = modelPart.getChild("nose");
 	}
 
-	public static LayerDefinition createBodyLayer() {
+	public static LayerDefinition createBodyLayer(boolean bl) {
 		MeshDefinition meshDefinition = new MeshDefinition();
 		PartDefinition partDefinition = meshDefinition.getRoot();
 		partDefinition.addOrReplaceChild(
@@ -105,68 +105,29 @@ public class RabbitModel<T extends Rabbit> extends EntityModel<T> {
 		partDefinition.addOrReplaceChild(
 			"nose", CubeListBuilder.create().texOffs(32, 9).addBox(-0.5F, -2.5F, -5.5F, 1.0F, 1.0F, 1.0F), PartPose.offset(0.0F, 16.0F, -1.0F)
 		);
-		return LayerDefinition.create(meshDefinition, 64, 32);
+		return LayerDefinition.create(meshDefinition, 64, 32).apply(bl ? BABY_TRANSFORMER : ADULT_TRANSFORMER);
 	}
 
 	@Override
-	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, int k) {
-		if (this.young) {
-			float f = 1.5F;
-			poseStack.pushPose();
-			poseStack.scale(0.56666666F, 0.56666666F, 0.56666666F);
-			poseStack.translate(0.0F, 1.375F, 0.125F);
-			ImmutableList.of(this.head, this.leftEar, this.rightEar, this.nose).forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, k));
-			poseStack.popPose();
-			poseStack.pushPose();
-			poseStack.scale(0.4F, 0.4F, 0.4F);
-			poseStack.translate(0.0F, 2.25F, 0.0F);
-			ImmutableList.of(this.leftRearFoot, this.rightRearFoot, this.leftHaunch, this.rightHaunch, this.body, this.leftFrontLeg, this.rightFrontLeg, this.tail)
-				.forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, k));
-			poseStack.popPose();
-		} else {
-			poseStack.pushPose();
-			poseStack.scale(0.6F, 0.6F, 0.6F);
-			poseStack.translate(0.0F, 1.0F, 0.0F);
-			ImmutableList.of(
-					this.leftRearFoot,
-					this.rightRearFoot,
-					this.leftHaunch,
-					this.rightHaunch,
-					this.body,
-					this.leftFrontLeg,
-					this.rightFrontLeg,
-					this.head,
-					this.rightEar,
-					this.leftEar,
-					this.tail,
-					this.nose
-				)
-				.forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, k));
-			poseStack.popPose();
-		}
+	public ModelPart root() {
+		return this.root;
 	}
 
-	public void setupAnim(T rabbit, float f, float g, float h, float i, float j) {
-		float k = h - (float)rabbit.tickCount;
-		this.nose.xRot = j * (float) (Math.PI / 180.0);
-		this.head.xRot = j * (float) (Math.PI / 180.0);
-		this.rightEar.xRot = j * (float) (Math.PI / 180.0);
-		this.leftEar.xRot = j * (float) (Math.PI / 180.0);
-		this.nose.yRot = i * (float) (Math.PI / 180.0);
-		this.head.yRot = i * (float) (Math.PI / 180.0);
+	public void setupAnim(RabbitRenderState rabbitRenderState) {
+		this.nose.xRot = rabbitRenderState.xRot * (float) (Math.PI / 180.0);
+		this.head.xRot = rabbitRenderState.xRot * (float) (Math.PI / 180.0);
+		this.rightEar.xRot = rabbitRenderState.xRot * (float) (Math.PI / 180.0);
+		this.leftEar.xRot = rabbitRenderState.xRot * (float) (Math.PI / 180.0);
+		this.nose.yRot = rabbitRenderState.yRot * (float) (Math.PI / 180.0);
+		this.head.yRot = rabbitRenderState.yRot * (float) (Math.PI / 180.0);
 		this.rightEar.yRot = this.nose.yRot - (float) (Math.PI / 12);
 		this.leftEar.yRot = this.nose.yRot + (float) (Math.PI / 12);
-		this.jumpRotation = Mth.sin(rabbit.getJumpCompletion(k) * (float) Math.PI);
-		this.leftHaunch.xRot = (this.jumpRotation * 50.0F - 21.0F) * (float) (Math.PI / 180.0);
-		this.rightHaunch.xRot = (this.jumpRotation * 50.0F - 21.0F) * (float) (Math.PI / 180.0);
-		this.leftRearFoot.xRot = this.jumpRotation * 50.0F * (float) (Math.PI / 180.0);
-		this.rightRearFoot.xRot = this.jumpRotation * 50.0F * (float) (Math.PI / 180.0);
-		this.leftFrontLeg.xRot = (this.jumpRotation * -40.0F - 11.0F) * (float) (Math.PI / 180.0);
-		this.rightFrontLeg.xRot = (this.jumpRotation * -40.0F - 11.0F) * (float) (Math.PI / 180.0);
-	}
-
-	public void prepareMobModel(T rabbit, float f, float g, float h) {
-		super.prepareMobModel(rabbit, f, g, h);
-		this.jumpRotation = Mth.sin(rabbit.getJumpCompletion(h) * (float) Math.PI);
+		float f = Mth.sin(rabbitRenderState.jumpCompletion * (float) Math.PI);
+		this.leftHaunch.xRot = (f * 50.0F - 21.0F) * (float) (Math.PI / 180.0);
+		this.rightHaunch.xRot = (f * 50.0F - 21.0F) * (float) (Math.PI / 180.0);
+		this.leftRearFoot.xRot = f * 50.0F * (float) (Math.PI / 180.0);
+		this.rightRearFoot.xRot = f * 50.0F * (float) (Math.PI / 180.0);
+		this.leftFrontLeg.xRot = (f * -40.0F - 11.0F) * (float) (Math.PI / 180.0);
+		this.rightFrontLeg.xRot = (f * -40.0F - 11.0F) * (float) (Math.PI / 180.0);
 	}
 }

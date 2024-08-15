@@ -10,7 +10,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FastColor;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.entity.BeaconBlockEntity;
 import net.minecraft.world.phys.Vec3;
@@ -73,23 +73,7 @@ public class BeaconRenderer implements BlockEntityRenderer<BeaconBlockEntity> {
 		ab = -1.0F + q;
 		ac = (float)j * g + ab;
 		renderPart(
-			poseStack,
-			multiBufferSource.getBuffer(RenderType.beaconBeam(resourceLocation, true)),
-			FastColor.ARGB32.color(32, k),
-			i,
-			n,
-			r,
-			s,
-			m,
-			u,
-			v,
-			m,
-			m,
-			m,
-			0.0F,
-			1.0F,
-			ac,
-			ab
+			poseStack, multiBufferSource.getBuffer(RenderType.beaconBeam(resourceLocation, true)), ARGB.color(32, k), i, n, r, s, m, u, v, m, m, m, 0.0F, 1.0F, ac, ab
 		);
 		poseStack.popPose();
 	}

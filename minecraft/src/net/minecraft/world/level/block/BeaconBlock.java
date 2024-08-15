@@ -46,16 +46,12 @@ public class BeaconBlock extends BaseEntityBlock implements BeaconBeamBlock {
 
 	@Override
 	protected InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
-		if (level.isClientSide) {
-			return InteractionResult.SUCCESS;
-		} else {
-			if (level.getBlockEntity(blockPos) instanceof BeaconBlockEntity beaconBlockEntity) {
-				player.openMenu(beaconBlockEntity);
-				player.awardStat(Stats.INTERACT_WITH_BEACON);
-			}
-
-			return InteractionResult.CONSUME;
+		if (!level.isClientSide && level.getBlockEntity(blockPos) instanceof BeaconBlockEntity beaconBlockEntity) {
+			player.openMenu(beaconBlockEntity);
+			player.awardStat(Stats.INTERACT_WITH_BEACON);
 		}
+
+		return InteractionResult.SUCCESS;
 	}
 
 	@Override

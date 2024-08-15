@@ -55,14 +55,16 @@ public class EntitySubPredicates {
 			Boat.Type.CODEC, entity -> entity instanceof Boat boat ? Optional.of(boat.getVariant()) : Optional.empty()
 		)
 	);
-	public static final EntitySubPredicates.EntityVariantPredicateType<Fox.Type> FOX = register(
+	public static final EntitySubPredicates.EntityVariantPredicateType<Fox.Variant> FOX = register(
 		"fox",
-		EntitySubPredicates.EntityVariantPredicateType.create(Fox.Type.CODEC, entity -> entity instanceof Fox fox ? Optional.of(fox.getVariant()) : Optional.empty())
+		EntitySubPredicates.EntityVariantPredicateType.create(
+			Fox.Variant.CODEC, entity -> entity instanceof Fox fox ? Optional.of(fox.getVariant()) : Optional.empty()
+		)
 	);
-	public static final EntitySubPredicates.EntityVariantPredicateType<MushroomCow.MushroomType> MOOSHROOM = register(
+	public static final EntitySubPredicates.EntityVariantPredicateType<MushroomCow.Variant> MOOSHROOM = register(
 		"mooshroom",
 		EntitySubPredicates.EntityVariantPredicateType.create(
-			MushroomCow.MushroomType.CODEC, entity -> entity instanceof MushroomCow mushroomCow ? Optional.of(mushroomCow.getVariant()) : Optional.empty()
+			MushroomCow.Variant.CODEC, entity -> entity instanceof MushroomCow mushroomCow ? Optional.of(mushroomCow.getVariant()) : Optional.empty()
 		)
 	);
 	public static final EntitySubPredicates.EntityVariantPredicateType<Rabbit.Variant> RABBIT = register(

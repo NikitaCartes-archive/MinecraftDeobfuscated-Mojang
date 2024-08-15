@@ -9,12 +9,13 @@ import net.minecraft.client.model.HorseModel;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.entity.layers.HorseArmorLayer;
 import net.minecraft.client.renderer.entity.layers.HorseMarkingLayer;
+import net.minecraft.client.renderer.entity.state.HorseRenderState;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.animal.horse.Horse;
 import net.minecraft.world.entity.animal.horse.Variant;
 
 @Environment(EnvType.CLIENT)
-public final class HorseRenderer extends AbstractHorseRenderer<Horse, HorseModel<Horse>> {
+public final class HorseRenderer extends AbstractHorseRenderer<Horse, HorseRenderState, HorseModel> {
 	private static final Map<Variant, ResourceLocation> LOCATION_BY_VARIANT = Util.make(Maps.newEnumMap(Variant.class), enumMap -> {
 		enumMap.put(Variant.WHITE, ResourceLocation.withDefaultNamespace("textures/entity/horse/horse_white.png"));
 		enumMap.put(Variant.CREAMY, ResourceLocation.withDefaultNamespace("textures/entity/horse/horse_creamy.png"));
@@ -26,12 +27,23 @@ public final class HorseRenderer extends AbstractHorseRenderer<Horse, HorseModel
 	});
 
 	public HorseRenderer(EntityRendererProvider.Context context) {
-		super(context, new HorseModel<>(context.bakeLayer(ModelLayers.HORSE)), 1.1F);
+		super(context, new HorseModel(context.bakeLayer(ModelLayers.HORSE)), new HorseModel(context.bakeLayer(ModelLayers.HORSE_BABY)), 1.1F);
 		this.addLayer(new HorseMarkingLayer(this));
 		this.addLayer(new HorseArmorLayer(this, context.getModelSet()));
 	}
 
-	public ResourceLocation getTextureLocation(Horse horse) {
-		return (ResourceLocation)LOCATION_BY_VARIANT.get(horse.getVariant());
+	public ResourceLocation getTextureLocation(HorseRenderState horseRenderState) {
+		return (ResourceLocation)LOCATION_BY_VARIANT.get(horseRenderState.variant);
+	}
+
+	public HorseRenderState createRenderState() {
+		return new HorseRenderState();
+	}
+
+	public void extractRenderState(Horse horse, HorseRenderState horseRenderState, float f) {
+		super.extractRenderState(horse, horseRenderState, f);
+		horseRenderState.variant = horse.getVariant();
+		horseRenderState.markings = horse.getMarkings();
+		horseRenderState.bodyArmorItem = horse.getBodyArmorItem().copy();
 	}
 }

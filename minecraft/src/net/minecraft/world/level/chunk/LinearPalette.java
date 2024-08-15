@@ -113,7 +113,7 @@ public class LinearPalette<T> implements Palette<T> {
 	}
 
 	@Override
-	public Palette<T> copy() {
-		return new LinearPalette<>(this.registry, (T[])((Object[])this.values.clone()), this.resizeHandler, this.bits, this.size);
+	public Palette<T> copy(PaletteResize<T> paletteResize) {
+		return new LinearPalette<>(this.registry, (T[])((Object[])this.values.clone()), paletteResize, this.bits, this.size);
 	}
 }

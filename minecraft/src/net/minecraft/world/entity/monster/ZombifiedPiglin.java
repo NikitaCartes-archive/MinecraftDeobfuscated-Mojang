@@ -16,10 +16,10 @@ import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntitySelector;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.NeutralMob;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
@@ -172,7 +172,7 @@ public class ZombifiedPiglin extends Zombie implements NeutralMob {
 	}
 
 	public static boolean checkZombifiedPiglinSpawnRules(
-		EntityType<ZombifiedPiglin> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, RandomSource randomSource
+		EntityType<ZombifiedPiglin> entityType, LevelAccessor levelAccessor, EntitySpawnReason entitySpawnReason, BlockPos blockPos, RandomSource randomSource
 	) {
 		return levelAccessor.getDifficulty() != Difficulty.PEACEFUL && !levelAccessor.getBlockState(blockPos.below()).is(Blocks.NETHER_WART_BLOCK);
 	}

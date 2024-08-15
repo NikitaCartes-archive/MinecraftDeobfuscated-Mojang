@@ -50,10 +50,10 @@ import net.minecraft.network.protocol.game.ClientboundSetBorderLerpSizePacket;
 import net.minecraft.network.protocol.game.ClientboundSetBorderSizePacket;
 import net.minecraft.network.protocol.game.ClientboundSetBorderWarningDelayPacket;
 import net.minecraft.network.protocol.game.ClientboundSetBorderWarningDistancePacket;
-import net.minecraft.network.protocol.game.ClientboundSetCarriedItemPacket;
 import net.minecraft.network.protocol.game.ClientboundSetChunkCacheRadiusPacket;
 import net.minecraft.network.protocol.game.ClientboundSetDefaultSpawnPositionPacket;
 import net.minecraft.network.protocol.game.ClientboundSetExperiencePacket;
+import net.minecraft.network.protocol.game.ClientboundSetHeldSlotPacket;
 import net.minecraft.network.protocol.game.ClientboundSetPlayerTeamPacket;
 import net.minecraft.network.protocol.game.ClientboundSetSimulationDistancePacket;
 import net.minecraft.network.protocol.game.ClientboundSetTimePacket;
@@ -79,6 +79,7 @@ import net.minecraft.stats.Stats;
 import net.minecraft.tags.TagNetworkSerialization;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -200,8 +201,8 @@ public abstract class PlayerList {
 		);
 		serverGamePacketListenerImpl.send(new ClientboundChangeDifficultyPacket(levelData.getDifficulty(), levelData.isDifficultyLocked()));
 		serverGamePacketListenerImpl.send(new ClientboundPlayerAbilitiesPacket(serverPlayer.getAbilities()));
-		serverGamePacketListenerImpl.send(new ClientboundSetCarriedItemPacket(serverPlayer.getInventory().selected));
-		serverGamePacketListenerImpl.send(new ClientboundUpdateRecipesPacket(this.server.getRecipeManager().getOrderedRecipes()));
+		serverGamePacketListenerImpl.send(new ClientboundSetHeldSlotPacket(serverPlayer.getInventory().selected));
+		serverGamePacketListenerImpl.send(new ClientboundUpdateRecipesPacket(this.server.getRecipeManager().getSynchronizedRecipes()));
 		this.sendPlayerPermissionLevel(serverPlayer);
 		serverPlayer.getStats().markAllDirty();
 		serverPlayer.getRecipeBook().sendInitialRecipeBook(serverPlayer);
@@ -232,7 +233,7 @@ public abstract class PlayerList {
 		if (optional.isPresent() && ((CompoundTag)optional.get()).contains("RootVehicle", 10)) {
 			CompoundTag compoundTag = ((CompoundTag)optional.get()).getCompound("RootVehicle");
 			Entity entity = EntityType.loadEntityRecursive(
-				compoundTag.getCompound("Entity"), serverLevel2, entityx -> !serverLevel2.addWithUUID(entityx) ? null : entityx
+				compoundTag.getCompound("Entity"), serverLevel2, EntitySpawnReason.LOAD, entityx -> !serverLevel2.addWithUUID(entityx) ? null : entityx
 			);
 			if (entity != null) {
 				UUID uUID;
@@ -435,7 +436,7 @@ public abstract class PlayerList {
 	public ServerPlayer respawn(ServerPlayer serverPlayer, boolean bl, Entity.RemovalReason removalReason) {
 		this.players.remove(serverPlayer);
 		serverPlayer.serverLevel().removePlayerImmediately(serverPlayer, removalReason);
-		DimensionTransition dimensionTransition = serverPlayer.findRespawnPositionAndUseSpawnBlock(bl, DimensionTransition.DO_NOTHING);
+		DimensionTransition dimensionTransition = serverPlayer.findRespawnPositionAndUseSpawnBlock(!bl, DimensionTransition.DO_NOTHING);
 		ServerLevel serverLevel = dimensionTransition.newLevel();
 		ServerPlayer serverPlayer2 = new ServerPlayer(this.server, serverLevel, serverPlayer.getGameProfile(), serverPlayer.clientInformation());
 		serverPlayer2.connection = serverPlayer.connection;
@@ -473,9 +474,10 @@ public abstract class PlayerList {
 		this.playersByUUID.put(serverPlayer2.getUUID(), serverPlayer2);
 		serverPlayer2.initInventoryMenu();
 		serverPlayer2.setHealth(serverPlayer2.getHealth());
-		if (!bl) {
-			BlockPos blockPos = BlockPos.containing(dimensionTransition.pos());
-			BlockState blockState = serverLevel.getBlockState(blockPos);
+		BlockPos blockPos = serverPlayer2.getRespawnPosition();
+		ServerLevel serverLevel3 = this.server.getLevel(serverPlayer2.getRespawnDimension());
+		if (!bl && blockPos != null && serverLevel3 != null) {
+			BlockState blockState = serverLevel3.getBlockState(blockPos);
 			if (blockState.is(Blocks.RESPAWN_ANCHOR)) {
 				serverPlayer2.connection
 					.send(
@@ -692,7 +694,7 @@ public abstract class PlayerList {
 	public void sendAllPlayerInfo(ServerPlayer serverPlayer) {
 		serverPlayer.inventoryMenu.sendAllDataToRemote();
 		serverPlayer.resetSentInfo();
-		serverPlayer.connection.send(new ClientboundSetCarriedItemPacket(serverPlayer.getInventory().selected));
+		serverPlayer.connection.send(new ClientboundSetHeldSlotPacket(serverPlayer.getInventory().selected));
 	}
 
 	public int getPlayerCount() {
@@ -871,7 +873,7 @@ public abstract class PlayerList {
 		}
 
 		this.broadcastAll(new ClientboundUpdateTagsPacket(TagNetworkSerialization.serializeTagsToNetwork(this.registries)));
-		ClientboundUpdateRecipesPacket clientboundUpdateRecipesPacket = new ClientboundUpdateRecipesPacket(this.server.getRecipeManager().getOrderedRecipes());
+		ClientboundUpdateRecipesPacket clientboundUpdateRecipesPacket = new ClientboundUpdateRecipesPacket(this.server.getRecipeManager().getSynchronizedRecipes());
 
 		for (ServerPlayer serverPlayer : this.players) {
 			serverPlayer.connection.send(clientboundUpdateRecipesPacket);

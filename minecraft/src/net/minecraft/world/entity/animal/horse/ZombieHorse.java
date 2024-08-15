@@ -13,8 +13,8 @@ import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.EntityAttachment;
 import net.minecraft.world.entity.EntityAttachments;
 import net.minecraft.world.entity.EntityDimensions;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -38,11 +38,11 @@ public class ZombieHorse extends AbstractHorse {
 	}
 
 	public static boolean checkZombieHorseSpawnRules(
-		EntityType<? extends Animal> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, RandomSource randomSource
+		EntityType<? extends Animal> entityType, LevelAccessor levelAccessor, EntitySpawnReason entitySpawnReason, BlockPos blockPos, RandomSource randomSource
 	) {
-		return !MobSpawnType.isSpawner(mobSpawnType)
-			? Animal.checkAnimalSpawnRules(entityType, levelAccessor, mobSpawnType, blockPos, randomSource)
-			: MobSpawnType.ignoresLightRequirements(mobSpawnType) || isBrightEnoughToSpawn(levelAccessor, blockPos);
+		return !EntitySpawnReason.isSpawner(entitySpawnReason)
+			? Animal.checkAnimalSpawnRules(entityType, levelAccessor, entitySpawnReason, blockPos, randomSource)
+			: EntitySpawnReason.ignoresLightRequirements(entitySpawnReason) || isBrightEnoughToSpawn(levelAccessor, blockPos);
 	}
 
 	@Override
@@ -68,12 +68,12 @@ public class ZombieHorse extends AbstractHorse {
 	@Nullable
 	@Override
 	public AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
-		return EntityType.ZOMBIE_HORSE.create(serverLevel);
+		return EntityType.ZOMBIE_HORSE.create(serverLevel, EntitySpawnReason.BREEDING);
 	}
 
 	@Override
 	public InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
-		return !this.isTamed() ? InteractionResult.PASS : super.mobInteract(player, interactionHand);
+		return (InteractionResult)(!this.isTamed() ? InteractionResult.PASS : super.mobInteract(player, interactionHand));
 	}
 
 	@Override

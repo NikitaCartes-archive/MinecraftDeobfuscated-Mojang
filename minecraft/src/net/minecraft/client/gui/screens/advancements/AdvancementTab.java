@@ -11,6 +11,7 @@ import net.minecraft.advancements.AdvancementNode;
 import net.minecraft.advancements.DisplayInfo;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -104,7 +105,7 @@ public class AdvancementTab {
 
 		for (int o = -1; o <= 15; o++) {
 			for (int p = -1; p <= 8; p++) {
-				guiGraphics.blit(resourceLocation, m + 16 * o, n + 16 * p, 0.0F, 0.0F, 16, 16, 16, 16);
+				guiGraphics.blit(RenderType::guiTextured, resourceLocation, m + 16 * o, n + 16 * p, 0.0F, 0.0F, 16, 16, 16, 16);
 			}
 		}
 

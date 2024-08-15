@@ -1,7 +1,6 @@
 package net.minecraft.client.gui.components;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.AbstractList;
 import java.util.Collection;
 import java.util.List;
@@ -20,6 +19,7 @@ import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.navigation.ScreenDirection;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -184,14 +184,11 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 				m = this.getY();
 			}
 
-			RenderSystem.enableBlend();
-			guiGraphics.blitSprite(SCROLLER_BACKGROUND_SPRITE, k, this.getY(), 6, this.getHeight());
-			guiGraphics.blitSprite(SCROLLER_SPRITE, k, m, 6, l);
-			RenderSystem.disableBlend();
+			guiGraphics.blitSprite(RenderType::guiTextured, SCROLLER_BACKGROUND_SPRITE, k, this.getY(), 6, this.getHeight());
+			guiGraphics.blitSprite(RenderType::guiTextured, SCROLLER_SPRITE, k, m, 6, l);
 		}
 
 		this.renderDecorations(guiGraphics, i, j);
-		RenderSystem.disableBlend();
 	}
 
 	protected boolean scrollbarVisible() {
@@ -199,18 +196,16 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 	}
 
 	protected void renderListSeparators(GuiGraphics guiGraphics) {
-		RenderSystem.enableBlend();
 		ResourceLocation resourceLocation = this.minecraft.level == null ? Screen.HEADER_SEPARATOR : Screen.INWORLD_HEADER_SEPARATOR;
 		ResourceLocation resourceLocation2 = this.minecraft.level == null ? Screen.FOOTER_SEPARATOR : Screen.INWORLD_FOOTER_SEPARATOR;
-		guiGraphics.blit(resourceLocation, this.getX(), this.getY() - 2, 0.0F, 0.0F, this.getWidth(), 2, 32, 2);
-		guiGraphics.blit(resourceLocation2, this.getX(), this.getBottom(), 0.0F, 0.0F, this.getWidth(), 2, 32, 2);
-		RenderSystem.disableBlend();
+		guiGraphics.blit(RenderType::guiTextured, resourceLocation, this.getX(), this.getY() - 2, 0.0F, 0.0F, this.getWidth(), 2, 32, 2);
+		guiGraphics.blit(RenderType::guiTextured, resourceLocation2, this.getX(), this.getBottom(), 0.0F, 0.0F, this.getWidth(), 2, 32, 2);
 	}
 
 	protected void renderListBackground(GuiGraphics guiGraphics) {
-		RenderSystem.enableBlend();
 		ResourceLocation resourceLocation = this.minecraft.level == null ? MENU_LIST_BACKGROUND : INWORLD_MENU_LIST_BACKGROUND;
 		guiGraphics.blit(
+			RenderType::guiTextured,
 			resourceLocation,
 			this.getX(),
 			this.getY(),
@@ -221,7 +216,6 @@ public abstract class AbstractSelectionList<E extends AbstractSelectionList.Entr
 			32,
 			32
 		);
-		RenderSystem.disableBlend();
 	}
 
 	protected void enableScissor(GuiGraphics guiGraphics) {

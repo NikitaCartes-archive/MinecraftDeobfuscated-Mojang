@@ -11,13 +11,12 @@ import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.entity.state.VexRenderState;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.HumanoidArm;
-import net.minecraft.world.entity.monster.Vex;
-import net.minecraft.world.item.ItemStack;
 
 @Environment(EnvType.CLIENT)
-public class VexModel extends HierarchicalModel<Vex> implements ArmedModel {
+public class VexModel extends EntityModel<VexRenderState> implements ArmedModel {
 	private final ModelPart root;
 	private final ModelPart body;
 	private final ModelPart rightArm;
@@ -76,21 +75,21 @@ public class VexModel extends HierarchicalModel<Vex> implements ArmedModel {
 		return LayerDefinition.create(meshDefinition, 32, 32);
 	}
 
-	public void setupAnim(Vex vex, float f, float g, float h, float i, float j) {
+	public void setupAnim(VexRenderState vexRenderState) {
 		this.root().getAllParts().forEach(ModelPart::resetPose);
-		this.head.yRot = i * (float) (Math.PI / 180.0);
-		this.head.xRot = j * (float) (Math.PI / 180.0);
-		float k = Mth.cos(h * 5.5F * (float) (Math.PI / 180.0)) * 0.1F;
-		this.rightArm.zRot = (float) (Math.PI / 5) + k;
-		this.leftArm.zRot = -((float) (Math.PI / 5) + k);
-		if (vex.isCharging()) {
+		this.head.yRot = vexRenderState.yRot * (float) (Math.PI / 180.0);
+		this.head.xRot = vexRenderState.xRot * (float) (Math.PI / 180.0);
+		float f = Mth.cos(vexRenderState.ageInTicks * 5.5F * (float) (Math.PI / 180.0)) * 0.1F;
+		this.rightArm.zRot = (float) (Math.PI / 5) + f;
+		this.leftArm.zRot = -((float) (Math.PI / 5) + f);
+		if (vexRenderState.isCharging) {
 			this.body.xRot = 0.0F;
-			this.setArmsCharging(vex.getMainHandItem(), vex.getOffhandItem(), k);
+			this.setArmsCharging(!vexRenderState.rightHandItem.isEmpty(), !vexRenderState.leftHandItem.isEmpty(), f);
 		} else {
 			this.body.xRot = (float) (Math.PI / 20);
 		}
 
-		this.leftWing.yRot = 1.0995574F + Mth.cos(h * 45.836624F * (float) (Math.PI / 180.0)) * (float) (Math.PI / 180.0) * 16.2F;
+		this.leftWing.yRot = 1.0995574F + Mth.cos(vexRenderState.ageInTicks * 45.836624F * (float) (Math.PI / 180.0)) * (float) (Math.PI / 180.0) * 16.2F;
 		this.rightWing.yRot = -this.leftWing.yRot;
 		this.leftWing.xRot = 0.47123888F;
 		this.leftWing.zRot = -0.47123888F;
@@ -98,8 +97,8 @@ public class VexModel extends HierarchicalModel<Vex> implements ArmedModel {
 		this.rightWing.zRot = 0.47123888F;
 	}
 
-	private void setArmsCharging(ItemStack itemStack, ItemStack itemStack2, float f) {
-		if (itemStack.isEmpty() && itemStack2.isEmpty()) {
+	private void setArmsCharging(boolean bl, boolean bl2, float f) {
+		if (!bl && !bl2) {
 			this.rightArm.xRot = -1.2217305F;
 			this.rightArm.yRot = (float) (Math.PI / 12);
 			this.rightArm.zRot = -0.47123888F - f;
@@ -107,13 +106,13 @@ public class VexModel extends HierarchicalModel<Vex> implements ArmedModel {
 			this.leftArm.yRot = (float) (-Math.PI / 12);
 			this.leftArm.zRot = 0.47123888F + f;
 		} else {
-			if (!itemStack.isEmpty()) {
+			if (bl) {
 				this.rightArm.xRot = (float) (Math.PI * 7.0 / 6.0);
 				this.rightArm.yRot = (float) (Math.PI / 12);
 				this.rightArm.zRot = -0.47123888F - f;
 			}
 
-			if (!itemStack2.isEmpty()) {
+			if (bl2) {
 				this.leftArm.xRot = (float) (Math.PI * 7.0 / 6.0);
 				this.leftArm.yRot = (float) (-Math.PI / 12);
 				this.leftArm.zRot = 0.47123888F + f;

@@ -7,7 +7,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
 public class ChestMenu extends AbstractContainerMenu {
-	private static final int SLOTS_PER_ROW = 9;
 	private final Container container;
 	private final int containerRows;
 
@@ -53,22 +52,17 @@ public class ChestMenu extends AbstractContainerMenu {
 		this.container = container;
 		this.containerRows = j;
 		container.startOpen(inventory.player);
-		int k = (this.containerRows - 4) * 18;
+		int k = 18;
+		this.addChestGrid(container, 8, 18);
+		int l = 18 + this.containerRows * 18 + 13;
+		this.addStandardInventorySlots(inventory, 8, l);
+	}
 
-		for (int l = 0; l < this.containerRows; l++) {
-			for (int m = 0; m < 9; m++) {
-				this.addSlot(new Slot(container, m + l * 9, 8 + m * 18, 18 + l * 18));
+	private void addChestGrid(Container container, int i, int j) {
+		for (int k = 0; k < this.containerRows; k++) {
+			for (int l = 0; l < 9; l++) {
+				this.addSlot(new Slot(container, l + k * 9, i + l * 18, j + k * 18));
 			}
-		}
-
-		for (int l = 0; l < 3; l++) {
-			for (int m = 0; m < 9; m++) {
-				this.addSlot(new Slot(inventory, m + l * 9 + 9, 8 + m * 18, 103 + l * 18 + k));
-			}
-		}
-
-		for (int l = 0; l < 9; l++) {
-			this.addSlot(new Slot(inventory, l, 8 + l * 18, 161 + k));
 		}
 	}
 

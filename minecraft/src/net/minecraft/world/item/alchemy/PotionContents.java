@@ -19,7 +19,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.util.FastColor;
+import net.minecraft.util.ARGB;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffectUtil;
@@ -118,14 +118,14 @@ public record PotionContents(Optional<Holder<Potion>> potion, Optional<Integer> 
 			if (mobEffectInstance.isVisible()) {
 				int m = mobEffectInstance.getEffect().value().getColor();
 				int n = mobEffectInstance.getAmplifier() + 1;
-				i += n * FastColor.ARGB32.red(m);
-				j += n * FastColor.ARGB32.green(m);
-				k += n * FastColor.ARGB32.blue(m);
+				i += n * ARGB.red(m);
+				j += n * ARGB.green(m);
+				k += n * ARGB.blue(m);
 				l += n;
 			}
 		}
 
-		return l == 0 ? OptionalInt.empty() : OptionalInt.of(FastColor.ARGB32.color(i / l, j / l, k / l));
+		return l == 0 ? OptionalInt.empty() : OptionalInt.of(ARGB.color(i / l, j / l, k / l));
 	}
 
 	public boolean hasEffects() {

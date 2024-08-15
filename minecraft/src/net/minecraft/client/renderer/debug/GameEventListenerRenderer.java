@@ -10,9 +10,9 @@ import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.ShapeRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceKey;
@@ -57,7 +57,7 @@ public class GameEventListenerRenderer implements DebugRenderer.SimpleDebugRende
 					double jx = vec3x.x() + (double)trackedListener.getListenerRadius();
 					double kx = vec3x.y() + (double)trackedListener.getListenerRadius();
 					double lx = vec3x.z() + (double)trackedListener.getListenerRadius();
-					LevelRenderer.renderVoxelShape(poseStack, vertexConsumer, Shapes.create(new AABB(gx, hx, ix, jx, kx, lx)), -d, -e, -f, 1.0F, 1.0F, 0.0F, 0.35F, true);
+					DebugRenderer.renderVoxelShape(poseStack, vertexConsumer, Shapes.create(new AABB(gx, hx, ix, jx, kx, lx)), -d, -e, -f, 1.0F, 1.0F, 0.0F, 0.35F, true);
 				});
 			}
 
@@ -66,7 +66,7 @@ public class GameEventListenerRenderer implements DebugRenderer.SimpleDebugRende
 			for (GameEventListenerRenderer.TrackedListener trackedListener2 : this.trackedListeners) {
 				trackedListener2.getPosition(level)
 					.ifPresent(
-						vec3x -> LevelRenderer.addChainedFilledBoxVertices(
+						vec3x -> ShapeRenderer.addChainedFilledBoxVertices(
 								poseStack,
 								vertexConsumer2,
 								vec3x.x() - 0.25 - d,

@@ -1,8 +1,7 @@
 package net.minecraft.client.model;
 
-import com.google.common.collect.ImmutableList;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
+import java.util.Map.Entry;
+import java.util.function.UnaryOperator;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
@@ -11,14 +10,16 @@ import net.minecraft.client.model.geom.builders.CubeDeformation;
 import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.MeshTransformer;
 import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.client.renderer.entity.state.LlamaRenderState;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.animal.horse.AbstractChestedHorse;
 
 @Environment(EnvType.CLIENT)
-public class LlamaModel<T extends AbstractChestedHorse> extends EntityModel<T> {
+public class LlamaModel extends EntityModel<LlamaRenderState> {
+	public static final MeshTransformer BABY_TRANSFORMER = LlamaModel::transformToBaby;
+	private final ModelPart root;
 	private final ModelPart head;
-	private final ModelPart body;
 	private final ModelPart rightHindLeg;
 	private final ModelPart leftHindLeg;
 	private final ModelPart rightFrontLeg;
@@ -27,8 +28,8 @@ public class LlamaModel<T extends AbstractChestedHorse> extends EntityModel<T> {
 	private final ModelPart leftChest;
 
 	public LlamaModel(ModelPart modelPart) {
+		this.root = modelPart;
 		this.head = modelPart.getChild("head");
-		this.body = modelPart.getChild("body");
 		this.rightChest = modelPart.getChild("right_chest");
 		this.leftChest = modelPart.getChild("left_chest");
 		this.rightHindLeg = modelPart.getChild("right_hind_leg");
@@ -78,43 +79,45 @@ public class LlamaModel<T extends AbstractChestedHorse> extends EntityModel<T> {
 		return LayerDefinition.create(meshDefinition, 128, 64);
 	}
 
-	public void setupAnim(T abstractChestedHorse, float f, float g, float h, float i, float j) {
-		this.head.xRot = j * (float) (Math.PI / 180.0);
-		this.head.yRot = i * (float) (Math.PI / 180.0);
-		this.rightHindLeg.xRot = Mth.cos(f * 0.6662F) * 1.4F * g;
-		this.leftHindLeg.xRot = Mth.cos(f * 0.6662F + (float) Math.PI) * 1.4F * g;
-		this.rightFrontLeg.xRot = Mth.cos(f * 0.6662F + (float) Math.PI) * 1.4F * g;
-		this.leftFrontLeg.xRot = Mth.cos(f * 0.6662F) * 1.4F * g;
-		boolean bl = !abstractChestedHorse.isBaby() && abstractChestedHorse.hasChest();
-		this.rightChest.visible = bl;
-		this.leftChest.visible = bl;
+	private static MeshDefinition transformToBaby(MeshDefinition meshDefinition) {
+		float f = 2.0F;
+		float g = 0.7F;
+		float h = 1.1F;
+		UnaryOperator<PartPose> unaryOperator = partPose -> partPose.translated(0.0F, 21.0F, 3.52F).scaled(0.71428573F, 0.64935064F, 0.7936508F);
+		UnaryOperator<PartPose> unaryOperator2 = partPose -> partPose.translated(0.0F, 33.0F, 0.0F).scaled(0.625F, 0.45454544F, 0.45454544F);
+		UnaryOperator<PartPose> unaryOperator3 = partPose -> partPose.translated(0.0F, 33.0F, 0.0F).scaled(0.45454544F, 0.41322312F, 0.45454544F);
+		MeshDefinition meshDefinition2 = new MeshDefinition();
+
+		for (Entry<String, PartDefinition> entry : meshDefinition.getRoot().getChildren()) {
+			String string = (String)entry.getKey();
+			PartDefinition partDefinition = (PartDefinition)entry.getValue();
+
+			UnaryOperator<PartPose> unaryOperator4 = switch (string) {
+				case "head" -> unaryOperator;
+				case "body" -> unaryOperator2;
+				default -> unaryOperator3;
+			};
+			meshDefinition2.getRoot().addOrReplaceChild(string, partDefinition.transformed(unaryOperator4));
+		}
+
+		return meshDefinition2;
+	}
+
+	public void setupAnim(LlamaRenderState llamaRenderState) {
+		this.head.xRot = llamaRenderState.xRot * (float) (Math.PI / 180.0);
+		this.head.yRot = llamaRenderState.yRot * (float) (Math.PI / 180.0);
+		float f = llamaRenderState.walkAnimationSpeed;
+		float g = llamaRenderState.walkAnimationPos;
+		this.rightHindLeg.xRot = Mth.cos(g * 0.6662F) * 1.4F * f;
+		this.leftHindLeg.xRot = Mth.cos(g * 0.6662F + (float) Math.PI) * 1.4F * f;
+		this.rightFrontLeg.xRot = Mth.cos(g * 0.6662F + (float) Math.PI) * 1.4F * f;
+		this.leftFrontLeg.xRot = Mth.cos(g * 0.6662F) * 1.4F * f;
+		this.rightChest.visible = llamaRenderState.hasChest;
+		this.leftChest.visible = llamaRenderState.hasChest;
 	}
 
 	@Override
-	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, int k) {
-		if (this.young) {
-			float f = 2.0F;
-			poseStack.pushPose();
-			float g = 0.7F;
-			poseStack.scale(0.71428573F, 0.64935064F, 0.7936508F);
-			poseStack.translate(0.0F, 1.3125F, 0.22F);
-			this.head.render(poseStack, vertexConsumer, i, j, k);
-			poseStack.popPose();
-			poseStack.pushPose();
-			float h = 1.1F;
-			poseStack.scale(0.625F, 0.45454544F, 0.45454544F);
-			poseStack.translate(0.0F, 2.0625F, 0.0F);
-			this.body.render(poseStack, vertexConsumer, i, j, k);
-			poseStack.popPose();
-			poseStack.pushPose();
-			poseStack.scale(0.45454544F, 0.41322312F, 0.45454544F);
-			poseStack.translate(0.0F, 2.0625F, 0.0F);
-			ImmutableList.of(this.rightHindLeg, this.leftHindLeg, this.rightFrontLeg, this.leftFrontLeg, this.rightChest, this.leftChest)
-				.forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, k));
-			poseStack.popPose();
-		} else {
-			ImmutableList.of(this.head, this.body, this.rightHindLeg, this.leftHindLeg, this.rightFrontLeg, this.leftFrontLeg, this.rightChest, this.leftChest)
-				.forEach(modelPart -> modelPart.render(poseStack, vertexConsumer, i, j, k));
-		}
+	public ModelPart root() {
+		return this.root;
 	}
 }

@@ -3557,14 +3557,15 @@ public class BlockModelGenerators {
 	private void createRedstoneTorch() {
 		TextureMapping textureMapping = TextureMapping.torch(Blocks.REDSTONE_TORCH);
 		TextureMapping textureMapping2 = TextureMapping.torch(TextureMapping.getBlockTexture(Blocks.REDSTONE_TORCH, "_off"));
-		ResourceLocation resourceLocation = ModelTemplates.TORCH.create(Blocks.REDSTONE_TORCH, textureMapping, this.modelOutput);
-		ResourceLocation resourceLocation2 = ModelTemplates.TORCH.createWithSuffix(Blocks.REDSTONE_TORCH, "_off", textureMapping2, this.modelOutput);
+		ResourceLocation resourceLocation = ModelTemplates.REDSTONE_TORCH.create(Blocks.REDSTONE_TORCH, textureMapping, this.modelOutput);
+		ResourceLocation resourceLocation2 = ModelTemplates.REDSTONE_TORCH.createWithSuffix(Blocks.REDSTONE_TORCH, "_off", textureMapping2, this.modelOutput);
 		this.blockStateOutput
 			.accept(
 				MultiVariantGenerator.multiVariant(Blocks.REDSTONE_TORCH).with(createBooleanModelDispatch(BlockStateProperties.LIT, resourceLocation, resourceLocation2))
 			);
-		ResourceLocation resourceLocation3 = ModelTemplates.WALL_TORCH.create(Blocks.REDSTONE_WALL_TORCH, textureMapping, this.modelOutput);
-		ResourceLocation resourceLocation4 = ModelTemplates.WALL_TORCH.createWithSuffix(Blocks.REDSTONE_WALL_TORCH, "_off", textureMapping2, this.modelOutput);
+		ResourceLocation resourceLocation3 = ModelTemplates.REDSTONE_WALL_TORCH.create(Blocks.REDSTONE_WALL_TORCH, textureMapping, this.modelOutput);
+		ResourceLocation resourceLocation4 = ModelTemplates.REDSTONE_WALL_TORCH
+			.createWithSuffix(Blocks.REDSTONE_WALL_TORCH, "_off", textureMapping2, this.modelOutput);
 		this.blockStateOutput
 			.accept(
 				MultiVariantGenerator.multiVariant(Blocks.REDSTONE_WALL_TORCH)

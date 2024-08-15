@@ -6,13 +6,14 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
+import net.minecraft.client.renderer.entity.state.TntRenderState;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.item.PrimedTnt;
 
 @Environment(EnvType.CLIENT)
-public class TntRenderer extends EntityRenderer<PrimedTnt> {
+public class TntRenderer extends EntityRenderer<PrimedTnt, TntRenderState> {
 	private final BlockRenderDispatcher blockRenderer;
 
 	public TntRenderer(EntityRendererProvider.Context context) {
@@ -21,28 +22,41 @@ public class TntRenderer extends EntityRenderer<PrimedTnt> {
 		this.blockRenderer = context.getBlockRenderDispatcher();
 	}
 
-	public void render(PrimedTnt primedTnt, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
+	public void render(TntRenderState tntRenderState, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
 		poseStack.pushPose();
 		poseStack.translate(0.0F, 0.5F, 0.0F);
-		int j = primedTnt.getFuse();
-		if ((float)j - g + 1.0F < 10.0F) {
-			float h = 1.0F - ((float)j - g + 1.0F) / 10.0F;
-			h = Mth.clamp(h, 0.0F, 1.0F);
-			h *= h;
-			h *= h;
-			float k = 1.0F + h * 0.3F;
-			poseStack.scale(k, k, k);
+		float f = tntRenderState.fuseRemainingInTicks;
+		if (tntRenderState.fuseRemainingInTicks < 10.0F) {
+			float g = 1.0F - tntRenderState.fuseRemainingInTicks / 10.0F;
+			g = Mth.clamp(g, 0.0F, 1.0F);
+			g *= g;
+			g *= g;
+			float h = 1.0F + g * 0.3F;
+			poseStack.scale(h, h, h);
 		}
 
 		poseStack.mulPose(Axis.YP.rotationDegrees(-90.0F));
 		poseStack.translate(-0.5F, -0.5F, 0.5F);
 		poseStack.mulPose(Axis.YP.rotationDegrees(90.0F));
-		TntMinecartRenderer.renderWhiteSolidBlock(this.blockRenderer, primedTnt.getBlockState(), poseStack, multiBufferSource, i, j / 5 % 2 == 0);
+		if (tntRenderState.blockState != null) {
+			TntMinecartRenderer.renderWhiteSolidBlock(this.blockRenderer, tntRenderState.blockState, poseStack, multiBufferSource, i, (int)f / 5 % 2 == 0);
+		}
+
 		poseStack.popPose();
-		super.render(primedTnt, f, g, poseStack, multiBufferSource, i);
+		super.render(tntRenderState, poseStack, multiBufferSource, i);
 	}
 
-	public ResourceLocation getTextureLocation(PrimedTnt primedTnt) {
+	public ResourceLocation getTextureLocation(TntRenderState tntRenderState) {
 		return TextureAtlas.LOCATION_BLOCKS;
+	}
+
+	public TntRenderState createRenderState() {
+		return new TntRenderState();
+	}
+
+	public void extractRenderState(PrimedTnt primedTnt, TntRenderState tntRenderState, float f) {
+		super.extractRenderState(primedTnt, tntRenderState, f);
+		tntRenderState.fuseRemainingInTicks = (float)primedTnt.getFuse() - f + 1.0F;
+		tntRenderState.blockState = primedTnt.getBlockState();
 	}
 }

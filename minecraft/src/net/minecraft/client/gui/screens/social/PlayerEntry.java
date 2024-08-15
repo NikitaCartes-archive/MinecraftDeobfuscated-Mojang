@@ -23,12 +23,13 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.reporting.ReportPlayerScreen;
 import net.minecraft.client.multiplayer.chat.report.ReportingContext;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.resources.PlayerSkin;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FastColor;
+import net.minecraft.util.ARGB;
 
 @Environment(EnvType.CLIENT)
 public class PlayerEntry extends ContainerObjectSelectionList.Entry<PlayerEntry> {
@@ -75,12 +76,12 @@ public class PlayerEntry extends ContainerObjectSelectionList.Entry<PlayerEntry>
 	private static final Component REPORT_PLAYER_TOOLTIP = Component.translatable("gui.socialInteractions.tooltip.report");
 	private static final int SKIN_SIZE = 24;
 	private static final int PADDING = 4;
-	public static final int SKIN_SHADE = FastColor.ARGB32.color(190, 0, 0, 0);
+	public static final int SKIN_SHADE = ARGB.color(190, 0, 0, 0);
 	private static final int CHAT_TOGGLE_ICON_SIZE = 20;
-	public static final int BG_FILL = FastColor.ARGB32.color(255, 74, 74, 74);
-	public static final int BG_FILL_REMOVED = FastColor.ARGB32.color(255, 48, 48, 48);
-	public static final int PLAYERNAME_COLOR = FastColor.ARGB32.color(255, 255, 255, 255);
-	public static final int PLAYER_STATUS_COLOR = FastColor.ARGB32.color(140, 255, 255, 255);
+	public static final int BG_FILL = ARGB.color(255, 74, 74, 74);
+	public static final int BG_FILL_REMOVED = ARGB.color(255, 48, 48, 48);
+	public static final int PLAYERNAME_COLOR = ARGB.color(255, 255, 255, 255);
+	public static final int PLAYER_STATUS_COLOR = ARGB.color(140, 255, 255, 255);
 
 	public PlayerEntry(Minecraft minecraft, SocialInteractionsScreen socialInteractionsScreen, UUID uUID, String string, Supplier<PlayerSkin> supplier, boolean bl) {
 		this.minecraft = minecraft;
@@ -192,7 +193,7 @@ public class PlayerEntry extends ContainerObjectSelectionList.Entry<PlayerEntry>
 		}
 
 		if (this.hasDraftReport && this.reportButton != null) {
-			guiGraphics.blitSprite(DRAFT_REPORT_SPRITE, this.reportButton.getX() + 5, this.reportButton.getY() + 1, 15, 15);
+			guiGraphics.blitSprite(RenderType::guiTextured, DRAFT_REPORT_SPRITE, this.reportButton.getX() + 5, this.reportButton.getY() + 1, 15, 15);
 		}
 	}
 

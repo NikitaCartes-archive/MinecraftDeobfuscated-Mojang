@@ -1,10 +1,11 @@
 package net.minecraft.client.gui.components.toasts;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -21,45 +22,66 @@ public class TutorialToast implements Toast {
 	@Nullable
 	private final Component message;
 	private Toast.Visibility visibility = Toast.Visibility.SHOW;
-	private long lastProgressTime;
-	private float lastProgress;
+	private long lastSmoothingTime;
+	private float smoothedProgress;
 	private float progress;
 	private final boolean progressable;
+	private final int timeToDisplayMs;
 
-	public TutorialToast(TutorialToast.Icons icons, Component component, @Nullable Component component2, boolean bl) {
+	public TutorialToast(TutorialToast.Icons icons, Component component, @Nullable Component component2, boolean bl, int i) {
 		this.icon = icons;
 		this.title = component;
 		this.message = component2;
 		this.progressable = bl;
+		this.timeToDisplayMs = i;
+	}
+
+	public TutorialToast(TutorialToast.Icons icons, Component component, @Nullable Component component2, boolean bl) {
+		this(icons, component, component2, bl, 0);
 	}
 
 	@Override
-	public Toast.Visibility render(GuiGraphics guiGraphics, ToastComponent toastComponent, long l) {
-		guiGraphics.blitSprite(BACKGROUND_SPRITE, 0, 0, this.width(), this.height());
+	public Toast.Visibility getWantedVisibility() {
+		return this.visibility;
+	}
+
+	@Override
+	public void update(ToastManager toastManager, long l) {
+		if (this.timeToDisplayMs > 0) {
+			this.progress = Math.min((float)l / (float)this.timeToDisplayMs, 1.0F);
+			this.smoothedProgress = this.progress;
+			this.lastSmoothingTime = l;
+			if (l > (long)this.timeToDisplayMs) {
+				this.hide();
+			}
+		} else if (this.progressable) {
+			this.smoothedProgress = Mth.clampedLerp(this.smoothedProgress, this.progress, (float)(l - this.lastSmoothingTime) / 100.0F);
+			this.lastSmoothingTime = l;
+		}
+	}
+
+	@Override
+	public void render(GuiGraphics guiGraphics, Font font, long l) {
+		guiGraphics.blitSprite(RenderType::guiTextured, BACKGROUND_SPRITE, 0, 0, this.width(), this.height());
 		this.icon.render(guiGraphics, 6, 6);
 		if (this.message == null) {
-			guiGraphics.drawString(toastComponent.getMinecraft().font, this.title, 30, 12, -11534256, false);
+			guiGraphics.drawString(font, this.title, 30, 12, -11534256, false);
 		} else {
-			guiGraphics.drawString(toastComponent.getMinecraft().font, this.title, 30, 7, -11534256, false);
-			guiGraphics.drawString(toastComponent.getMinecraft().font, this.message, 30, 18, -16777216, false);
+			guiGraphics.drawString(font, this.title, 30, 7, -11534256, false);
+			guiGraphics.drawString(font, this.message, 30, 18, -16777216, false);
 		}
 
 		if (this.progressable) {
 			guiGraphics.fill(3, 28, 157, 29, -1);
-			float f = Mth.clampedLerp(this.lastProgress, this.progress, (float)(l - this.lastProgressTime) / 100.0F);
 			int i;
-			if (this.progress >= this.lastProgress) {
+			if (this.progress >= this.smoothedProgress) {
 				i = -16755456;
 			} else {
 				i = -11206656;
 			}
 
-			guiGraphics.fill(3, 28, (int)(3.0F + 154.0F * f), 29, i);
-			this.lastProgress = f;
-			this.lastProgressTime = l;
+			guiGraphics.fill(3, 28, (int)(3.0F + 154.0F * this.smoothedProgress), 29, i);
 		}
-
-		return this.visibility;
 	}
 
 	public void hide() {
@@ -87,8 +109,7 @@ public class TutorialToast implements Toast {
 		}
 
 		public void render(GuiGraphics guiGraphics, int i, int j) {
-			RenderSystem.enableBlend();
-			guiGraphics.blitSprite(this.sprite, i, j, 20, 20);
+			guiGraphics.blitSprite(RenderType::guiTextured, this.sprite, i, j, 20, 20);
 		}
 	}
 }

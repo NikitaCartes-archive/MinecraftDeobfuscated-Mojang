@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -48,8 +48,6 @@ public class DedicatedServerProperties extends Settings<DedicatedServerPropertie
 	public final boolean onlineMode = this.get("online-mode", true);
 	public final boolean preventProxyConnections = this.get("prevent-proxy-connections", false);
 	public final String serverIp = this.get("server-ip", "");
-	public final boolean spawnAnimals = this.get("spawn-animals", true);
-	public final boolean spawnNpcs = this.get("spawn-npcs", true);
 	public final boolean pvp = this.get("pvp", true);
 	public final boolean allowFlight = this.get("allow-flight", false);
 	public final String motd = this.get("motd", "A Minecraft Server");
@@ -92,12 +90,14 @@ public class DedicatedServerProperties extends Settings<DedicatedServerPropertie
 	public final boolean hideOnlinePlayers = this.get("hide-online-players", false);
 	public final int entityBroadcastRangePercentage = this.get("entity-broadcast-range-percentage", integer -> Mth.clamp(integer, 10, 1000), 100);
 	public final String textFilteringConfig = this.get("text-filtering-config", "");
+	public final int textFilteringVersion = this.get("text-filtering-version", 0);
 	public final Optional<MinecraftServer.ServerResourcePackInfo> serverResourcePackInfo;
 	public final DataPackConfig initialDataPackConfiguration;
 	public final Settings<DedicatedServerProperties>.MutableValue<Integer> playerIdleTimeout = this.getMutable("player-idle-timeout", 0);
 	public final Settings<DedicatedServerProperties>.MutableValue<Boolean> whiteList = this.getMutable("white-list", false);
 	public final boolean enforceSecureProfile = this.get("enforce-secure-profile", true);
 	public final boolean logIPs = this.get("log-ips", true);
+	public final int pauseWhenEmptySeconds = this.get("pause-when-empty-seconds", 60);
 	private final DedicatedServerProperties.WorldDimensionData worldDimensionData;
 	public final WorldOptions worldOptions;
 	public boolean acceptsTransfers = this.get("accepts-transfers", false);
@@ -196,8 +196,8 @@ public class DedicatedServerProperties extends Settings<DedicatedServerPropertie
 		return new DataPackConfig(list, list2);
 	}
 
-	public WorldDimensions createDimensions(RegistryAccess registryAccess) {
-		return this.worldDimensionData.create(registryAccess);
+	public WorldDimensions createDimensions(HolderLookup.Provider provider) {
+		return this.worldDimensionData.create(provider);
 	}
 
 	static record WorldDimensionData(JsonObject generatorSettings, String levelType) {
@@ -205,27 +205,27 @@ public class DedicatedServerProperties extends Settings<DedicatedServerPropertie
 			"default", WorldPresets.NORMAL, "largebiomes", WorldPresets.LARGE_BIOMES
 		);
 
-		public WorldDimensions create(RegistryAccess registryAccess) {
-			Registry<WorldPreset> registry = registryAccess.registryOrThrow(Registries.WORLD_PRESET);
-			Holder.Reference<WorldPreset> reference = (Holder.Reference<WorldPreset>)registry.getHolder(WorldPresets.NORMAL)
-				.or(() -> registry.holders().findAny())
+		public WorldDimensions create(HolderLookup.Provider provider) {
+			HolderLookup<WorldPreset> holderLookup = provider.lookupOrThrow(Registries.WORLD_PRESET);
+			Holder.Reference<WorldPreset> reference = (Holder.Reference<WorldPreset>)holderLookup.get(WorldPresets.NORMAL)
+				.or(() -> holderLookup.listElements().findAny())
 				.orElseThrow(() -> new IllegalStateException("Invalid datapack contents: can't find default preset"));
 			Holder<WorldPreset> holder = (Holder<WorldPreset>)Optional.ofNullable(ResourceLocation.tryParse(this.levelType))
 				.map(resourceLocation -> ResourceKey.create(Registries.WORLD_PRESET, resourceLocation))
 				.or(() -> Optional.ofNullable((ResourceKey)LEGACY_PRESET_NAMES.get(this.levelType)))
-				.flatMap(registry::getHolder)
+				.flatMap(holderLookup::get)
 				.orElseGet(() -> {
 					DedicatedServerProperties.LOGGER.warn("Failed to parse level-type {}, defaulting to {}", this.levelType, reference.key().location());
 					return reference;
 				});
 			WorldDimensions worldDimensions = holder.value().createWorldDimensions();
 			if (holder.is(WorldPresets.FLAT)) {
-				RegistryOps<JsonElement> registryOps = registryAccess.createSerializationContext(JsonOps.INSTANCE);
+				RegistryOps<JsonElement> registryOps = provider.createSerializationContext(JsonOps.INSTANCE);
 				Optional<FlatLevelGeneratorSettings> optional = FlatLevelGeneratorSettings.CODEC
 					.parse(new Dynamic<>(registryOps, this.generatorSettings()))
 					.resultOrPartial(DedicatedServerProperties.LOGGER::error);
 				if (optional.isPresent()) {
-					return worldDimensions.replaceOverworldGenerator(registryAccess, new FlatLevelSource((FlatLevelGeneratorSettings)optional.get()));
+					return worldDimensions.replaceOverworldGenerator(provider, new FlatLevelSource((FlatLevelGeneratorSettings)optional.get()));
 				}
 			}
 

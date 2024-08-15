@@ -15,19 +15,7 @@ public class PoiRecord {
 	private int freeTickets;
 	private final Runnable setDirty;
 
-	public static Codec<PoiRecord> codec(Runnable runnable) {
-		return RecordCodecBuilder.create(
-			instance -> instance.group(
-						BlockPos.CODEC.fieldOf("pos").forGetter(poiRecord -> poiRecord.pos),
-						RegistryFixedCodec.create(Registries.POINT_OF_INTEREST_TYPE).fieldOf("type").forGetter(poiRecord -> poiRecord.poiType),
-						Codec.INT.fieldOf("free_tickets").orElse(0).forGetter(poiRecord -> poiRecord.freeTickets),
-						RecordCodecBuilder.point(runnable)
-					)
-					.apply(instance, PoiRecord::new)
-		);
-	}
-
-	private PoiRecord(BlockPos blockPos, Holder<PoiType> holder, int i, Runnable runnable) {
+	PoiRecord(BlockPos blockPos, Holder<PoiType> holder, int i, Runnable runnable) {
 		this.pos = blockPos.immutable();
 		this.poiType = holder;
 		this.freeTickets = i;
@@ -36,6 +24,10 @@ public class PoiRecord {
 
 	public PoiRecord(BlockPos blockPos, Holder<PoiType> holder, Runnable runnable) {
 		this(blockPos, holder, holder.value().maxTickets(), runnable);
+	}
+
+	public PoiRecord.Packed pack() {
+		return new PoiRecord.Packed(this.pos, this.poiType, this.freeTickets);
 	}
 
 	@Deprecated
@@ -90,5 +82,20 @@ public class PoiRecord {
 
 	public int hashCode() {
 		return this.pos.hashCode();
+	}
+
+	public static record Packed(BlockPos pos, Holder<PoiType> poiType, int freeTickets) {
+		public static final Codec<PoiRecord.Packed> CODEC = RecordCodecBuilder.create(
+			instance -> instance.group(
+						BlockPos.CODEC.fieldOf("pos").forGetter(PoiRecord.Packed::pos),
+						RegistryFixedCodec.create(Registries.POINT_OF_INTEREST_TYPE).fieldOf("type").forGetter(PoiRecord.Packed::poiType),
+						Codec.INT.fieldOf("free_tickets").orElse(0).forGetter(PoiRecord.Packed::freeTickets)
+					)
+					.apply(instance, PoiRecord.Packed::new)
+		);
+
+		public PoiRecord unpack(Runnable runnable) {
+			return new PoiRecord(this.pos, this.poiType, this.freeTickets, runnable);
+		}
 	}
 }

@@ -41,9 +41,9 @@ import net.minecraft.world.entity.AnimationState;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntitySelector;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.Brain;
@@ -83,6 +83,7 @@ public class Warden extends Monster implements VibrationSystem {
 	private static final float KNOCKBACK_RESISTANCE = 1.0F;
 	private static final float ATTACK_KNOCKBACK = 1.5F;
 	private static final int ATTACK_DAMAGE = 30;
+	private static final int FOLLOW_RANGE = 24;
 	private static final EntityDataAccessor<Integer> CLIENT_ANGER_LEVEL = SynchedEntityData.defineId(Warden.class, EntityDataSerializers.INT);
 	private static final int DARKNESS_DISPLAY_LIMIT = 200;
 	private static final int DARKNESS_DURATION = 260;
@@ -181,7 +182,8 @@ public class Warden extends Monster implements VibrationSystem {
 			.add(Attributes.MOVEMENT_SPEED, 0.3F)
 			.add(Attributes.KNOCKBACK_RESISTANCE, 1.0)
 			.add(Attributes.ATTACK_KNOCKBACK, 1.5)
-			.add(Attributes.ATTACK_DAMAGE, 30.0);
+			.add(Attributes.ATTACK_DAMAGE, 30.0)
+			.add(Attributes.FOLLOW_RANGE, 24.0);
 	}
 
 	@Override
@@ -322,7 +324,7 @@ public class Warden extends Monster implements VibrationSystem {
 	}
 
 	private void clientDiggingParticles(AnimationState animationState) {
-		if ((float)animationState.getAccumulatedTime() < 4500.0F) {
+		if ((float)animationState.getTimeInMillis((float)this.tickCount) < 4500.0F) {
 			RandomSource randomSource = this.getRandom();
 			BlockState blockState = this.getBlockStateOn();
 			if (blockState.getRenderShape() != RenderShape.INVISIBLE) {
@@ -497,16 +499,16 @@ public class Warden extends Monster implements VibrationSystem {
 	@Nullable
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData
+		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, EntitySpawnReason entitySpawnReason, @Nullable SpawnGroupData spawnGroupData
 	) {
 		this.getBrain().setMemoryWithExpiry(MemoryModuleType.DIG_COOLDOWN, Unit.INSTANCE, 1200L);
-		if (mobSpawnType == MobSpawnType.TRIGGERED) {
+		if (entitySpawnReason == EntitySpawnReason.TRIGGERED) {
 			this.setPose(Pose.EMERGING);
 			this.getBrain().setMemoryWithExpiry(MemoryModuleType.IS_EMERGING, Unit.INSTANCE, (long)WardenAi.EMERGE_DURATION);
 			this.playSound(SoundEvents.WARDEN_AGITATED, 5.0F, 1.0F);
 		}
 
-		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData);
+		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, entitySpawnReason, spawnGroupData);
 	}
 
 	@Override

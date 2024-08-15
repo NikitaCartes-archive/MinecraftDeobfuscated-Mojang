@@ -50,7 +50,9 @@ public class BannerRenderer implements BlockEntityRenderer<BannerBlockEntity> {
 	public static LayerDefinition createBodyLayer() {
 		MeshDefinition meshDefinition = new MeshDefinition();
 		PartDefinition partDefinition = meshDefinition.getRoot();
-		partDefinition.addOrReplaceChild("flag", CubeListBuilder.create().texOffs(0, 0).addBox(-10.0F, 0.0F, -2.0F, 20.0F, 40.0F, 1.0F), PartPose.ZERO);
+		partDefinition.addOrReplaceChild(
+			"flag", CubeListBuilder.create().texOffs(0, 0).addBox(-10.0F, 0.0F, -2.0F, 20.0F, 40.0F, 1.0F), PartPose.offset(0.0F, -32.0F, 0.0F)
+		);
 		partDefinition.addOrReplaceChild("pole", CubeListBuilder.create().texOffs(44, 0).addBox(-1.0F, -30.0F, -1.0F, 2.0F, 42.0F, 2.0F), PartPose.ZERO);
 		partDefinition.addOrReplaceChild("bar", CubeListBuilder.create().texOffs(0, 42).addBox(-10.0F, -32.0F, -1.0F, 20.0F, 2.0F, 2.0F), PartPose.ZERO);
 		return LayerDefinition.create(meshDefinition, 64, 64);
@@ -90,7 +92,6 @@ public class BannerRenderer implements BlockEntityRenderer<BannerBlockEntity> {
 		BlockPos blockPos = bannerBlockEntity.getBlockPos();
 		float k = ((float)Math.floorMod((long)(blockPos.getX() * 7 + blockPos.getY() * 9 + blockPos.getZ() * 13) + l, 100L) + f) / 100.0F;
 		this.flag.xRot = (-0.0125F + 0.01F * Mth.cos((float) (Math.PI * 2) * k)) * (float) Math.PI;
-		this.flag.y = -32.0F;
 		renderPatterns(
 			poseStack, multiBufferSource, i, j, this.flag, ModelBakery.BANNER_BASE, true, bannerBlockEntity.getBaseColor(), bannerBlockEntity.getPatterns()
 		);
@@ -109,7 +110,7 @@ public class BannerRenderer implements BlockEntityRenderer<BannerBlockEntity> {
 		DyeColor dyeColor,
 		BannerPatternLayers bannerPatternLayers
 	) {
-		renderPatterns(poseStack, multiBufferSource, i, j, modelPart, material, bl, dyeColor, bannerPatternLayers, false);
+		renderPatterns(poseStack, multiBufferSource, i, j, modelPart, material, bl, dyeColor, bannerPatternLayers, false, true);
 	}
 
 	public static void renderPatterns(
@@ -122,9 +123,10 @@ public class BannerRenderer implements BlockEntityRenderer<BannerBlockEntity> {
 		boolean bl,
 		DyeColor dyeColor,
 		BannerPatternLayers bannerPatternLayers,
-		boolean bl2
+		boolean bl2,
+		boolean bl3
 	) {
-		modelPart.render(poseStack, material.buffer(multiBufferSource, RenderType::entitySolid, bl2), i, j);
+		modelPart.render(poseStack, material.buffer(multiBufferSource, RenderType::entitySolid, bl3, bl2), i, j);
 		renderPatternLayer(poseStack, multiBufferSource, i, j, modelPart, bl ? Sheets.BANNER_BASE : Sheets.SHIELD_BASE, dyeColor);
 
 		for (int k = 0; k < 16 && k < bannerPatternLayers.layers().size(); k++) {

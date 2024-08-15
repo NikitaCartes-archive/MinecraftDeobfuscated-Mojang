@@ -1,8 +1,6 @@
 package net.minecraft.locale;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMap.Builder;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -12,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -33,19 +32,21 @@ public abstract class Language {
 	private static volatile Language instance = loadDefault();
 
 	private static Language loadDefault() {
-		Builder<String, String> builder = ImmutableMap.builder();
-		BiConsumer<String, String> biConsumer = builder::put;
+		DeprecatedTranslationsInfo deprecatedTranslationsInfo = DeprecatedTranslationsInfo.loadFromDefaultResource();
+		Map<String, String> map = new HashMap();
+		BiConsumer<String, String> biConsumer = map::put;
 		parseTranslations(biConsumer, "/assets/minecraft/lang/en_us.json");
-		final Map<String, String> map = builder.build();
+		deprecatedTranslationsInfo.applyToMap(map);
+		final Map<String, String> map2 = Map.copyOf(map);
 		return new Language() {
 			@Override
 			public String getOrDefault(String string, String string2) {
-				return (String)map.getOrDefault(string, string2);
+				return (String)map2.getOrDefault(string, string2);
 			}
 
 			@Override
 			public boolean has(String string) {
-				return map.containsKey(string);
+				return map2.containsKey(string);
 			}
 
 			@Override

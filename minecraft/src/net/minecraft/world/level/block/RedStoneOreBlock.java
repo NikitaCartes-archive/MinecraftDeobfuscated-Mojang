@@ -8,7 +8,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.ItemInteractionResult;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
@@ -51,7 +51,7 @@ public class RedStoneOreBlock extends Block {
 	}
 
 	@Override
-	protected ItemInteractionResult useItemOn(
+	protected InteractionResult useItemOn(
 		ItemStack itemStack, BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
 	) {
 		if (level.isClientSide) {
@@ -60,9 +60,9 @@ public class RedStoneOreBlock extends Block {
 			interact(blockState, level, blockPos);
 		}
 
-		return itemStack.getItem() instanceof BlockItem && new BlockPlaceContext(player, interactionHand, itemStack, blockHitResult).canPlace()
-			? ItemInteractionResult.SKIP_DEFAULT_BLOCK_INTERACTION
-			: ItemInteractionResult.SUCCESS;
+		return (InteractionResult)(itemStack.getItem() instanceof BlockItem && new BlockPlaceContext(player, interactionHand, itemStack, blockHitResult).canPlace()
+			? InteractionResult.PASS
+			: InteractionResult.SUCCESS);
 	}
 
 	private static void interact(BlockState blockState, Level level, BlockPos blockPos) {
@@ -105,7 +105,7 @@ public class RedStoneOreBlock extends Block {
 
 		for (Direction direction : Direction.values()) {
 			BlockPos blockPos2 = blockPos.relative(direction);
-			if (!level.getBlockState(blockPos2).isSolidRender(level, blockPos2)) {
+			if (!level.getBlockState(blockPos2).isSolidRender()) {
 				Direction.Axis axis = direction.getAxis();
 				double e = axis == Direction.Axis.X ? 0.5 + 0.5625 * (double)direction.getStepX() : (double)randomSource.nextFloat();
 				double f = axis == Direction.Axis.Y ? 0.5 + 0.5625 * (double)direction.getStepY() : (double)randomSource.nextFloat();

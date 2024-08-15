@@ -2,20 +2,20 @@ package net.minecraft.client.model;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.MeshTransformer;
 import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.client.renderer.entity.state.GuardianRenderState;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.monster.Guardian;
 import net.minecraft.world.phys.Vec3;
 
 @Environment(EnvType.CLIENT)
-public class GuardianModel extends HierarchicalModel<Guardian> {
+public class GuardianModel extends EntityModel<GuardianRenderState> {
+	public static final MeshTransformer ELDER_GUARDIAN_SCALE = MeshTransformer.scaling(2.35F);
 	private static final float[] SPIKE_X_ROT = new float[]{1.75F, 0.25F, 0.0F, 0.0F, 0.5F, 0.5F, 0.5F, 0.5F, 1.25F, 0.75F, 0.0F, 0.0F};
 	private static final float[] SPIKE_Y_ROT = new float[]{0.0F, 0.0F, 0.0F, 0.0F, 0.25F, 1.75F, 1.25F, 0.75F, 0.0F, 0.0F, 0.0F, 0.0F};
 	private static final float[] SPIKE_Z_ROT = new float[]{0.0F, 0.0F, 0.25F, 1.75F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.75F, 1.25F};
@@ -99,44 +99,44 @@ public class GuardianModel extends HierarchicalModel<Guardian> {
 		return LayerDefinition.create(meshDefinition, 64, 64);
 	}
 
+	public static LayerDefinition createElderGuardianLayer() {
+		return createBodyLayer().apply(ELDER_GUARDIAN_SCALE);
+	}
+
 	@Override
 	public ModelPart root() {
 		return this.root;
 	}
 
-	public void setupAnim(Guardian guardian, float f, float g, float h, float i, float j) {
-		float k = h - (float)guardian.tickCount;
-		this.head.yRot = i * (float) (Math.PI / 180.0);
-		this.head.xRot = j * (float) (Math.PI / 180.0);
-		float l = (1.0F - guardian.getSpikesAnimation(k)) * 0.55F;
-		this.setupSpikes(h, l);
-		Entity entity = Minecraft.getInstance().getCameraEntity();
-		if (guardian.hasActiveAttackTarget()) {
-			entity = guardian.getActiveAttackTarget();
-		}
-
-		if (entity != null) {
-			Vec3 vec3 = entity.getEyePosition(0.0F);
-			Vec3 vec32 = guardian.getEyePosition(0.0F);
-			double d = vec3.y - vec32.y;
+	public void setupAnim(GuardianRenderState guardianRenderState) {
+		this.head.yRot = guardianRenderState.yRot * (float) (Math.PI / 180.0);
+		this.head.xRot = guardianRenderState.xRot * (float) (Math.PI / 180.0);
+		float f = (1.0F - guardianRenderState.spikesAnimation) * 0.55F;
+		this.setupSpikes(guardianRenderState.ageInTicks, f);
+		if (guardianRenderState.lookAtPosition != null && guardianRenderState.lookDirection != null) {
+			double d = guardianRenderState.lookAtPosition.y - guardianRenderState.eyePosition.y;
 			if (d > 0.0) {
 				this.eye.y = 0.0F;
 			} else {
 				this.eye.y = 1.0F;
 			}
 
-			Vec3 vec33 = guardian.getViewVector(0.0F);
-			vec33 = new Vec3(vec33.x, 0.0, vec33.z);
-			Vec3 vec34 = new Vec3(vec32.x - vec3.x, 0.0, vec32.z - vec3.z).normalize().yRot((float) (Math.PI / 2));
-			double e = vec33.dot(vec34);
+			Vec3 vec3 = guardianRenderState.lookDirection;
+			vec3 = new Vec3(vec3.x, 0.0, vec3.z);
+			Vec3 vec32 = new Vec3(
+					guardianRenderState.eyePosition.x - guardianRenderState.lookAtPosition.x, 0.0, guardianRenderState.eyePosition.z - guardianRenderState.lookAtPosition.z
+				)
+				.normalize()
+				.yRot((float) (Math.PI / 2));
+			double e = vec3.dot(vec32);
 			this.eye.x = Mth.sqrt((float)Math.abs(e)) * 2.0F * (float)Math.signum(e);
 		}
 
 		this.eye.visible = true;
-		float m = guardian.getTailAnimation(k);
-		this.tailParts[0].yRot = Mth.sin(m) * (float) Math.PI * 0.05F;
-		this.tailParts[1].yRot = Mth.sin(m) * (float) Math.PI * 0.1F;
-		this.tailParts[2].yRot = Mth.sin(m) * (float) Math.PI * 0.15F;
+		float g = guardianRenderState.tailAnimation;
+		this.tailParts[0].yRot = Mth.sin(g) * (float) Math.PI * 0.05F;
+		this.tailParts[1].yRot = Mth.sin(g) * (float) Math.PI * 0.1F;
+		this.tailParts[2].yRot = Mth.sin(g) * (float) Math.PI * 0.15F;
 	}
 
 	private void setupSpikes(float f, float g) {

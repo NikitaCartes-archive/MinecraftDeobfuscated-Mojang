@@ -438,44 +438,51 @@ public record Enchantment(Component description, Enchantment.EnchantmentDefiniti
 	}
 
 	public void runLocationChangedEffects(ServerLevel serverLevel, int i, EnchantedItemInUse enchantedItemInUse, LivingEntity livingEntity) {
-		if (enchantedItemInUse.inSlot() != null && !this.matchingSlot(enchantedItemInUse.inSlot())) {
-			Set<EnchantmentLocationBasedEffect> set = (Set<EnchantmentLocationBasedEffect>)livingEntity.activeLocationDependentEnchantments().remove(this);
-			if (set != null) {
-				set.forEach(enchantmentLocationBasedEffectx -> enchantmentLocationBasedEffectx.onDeactivated(enchantedItemInUse, livingEntity, livingEntity.position(), i));
-			}
-		} else {
-			Set<EnchantmentLocationBasedEffect> set = (Set<EnchantmentLocationBasedEffect>)livingEntity.activeLocationDependentEnchantments().get(this);
+		EquipmentSlot equipmentSlot = enchantedItemInUse.inSlot();
+		if (equipmentSlot != null) {
+			Map<Enchantment, Set<EnchantmentLocationBasedEffect>> map = livingEntity.activeLocationDependentEnchantments(equipmentSlot);
+			if (!this.matchingSlot(equipmentSlot)) {
+				Set<EnchantmentLocationBasedEffect> set = (Set<EnchantmentLocationBasedEffect>)map.remove(this);
+				if (set != null) {
+					set.forEach(enchantmentLocationBasedEffectx -> enchantmentLocationBasedEffectx.onDeactivated(enchantedItemInUse, livingEntity, livingEntity.position(), i));
+				}
+			} else {
+				Set<EnchantmentLocationBasedEffect> set = (Set<EnchantmentLocationBasedEffect>)map.get(this);
 
-			for (ConditionalEffect<EnchantmentLocationBasedEffect> conditionalEffect : this.getEffects(EnchantmentEffectComponents.LOCATION_CHANGED)) {
-				EnchantmentLocationBasedEffect enchantmentLocationBasedEffect = conditionalEffect.effect();
-				boolean bl = set != null && set.contains(enchantmentLocationBasedEffect);
-				if (conditionalEffect.matches(locationContext(serverLevel, i, livingEntity, bl))) {
-					if (!bl) {
-						if (set == null) {
-							set = new ObjectArraySet<>();
-							livingEntity.activeLocationDependentEnchantments().put(this, set);
+				for (ConditionalEffect<EnchantmentLocationBasedEffect> conditionalEffect : this.getEffects(EnchantmentEffectComponents.LOCATION_CHANGED)) {
+					EnchantmentLocationBasedEffect enchantmentLocationBasedEffect = conditionalEffect.effect();
+					boolean bl = set != null && set.contains(enchantmentLocationBasedEffect);
+					if (conditionalEffect.matches(locationContext(serverLevel, i, livingEntity, bl))) {
+						if (!bl) {
+							if (set == null) {
+								set = new ObjectArraySet<>();
+								map.put(this, set);
+							}
+
+							set.add(enchantmentLocationBasedEffect);
 						}
 
-						set.add(enchantmentLocationBasedEffect);
+						enchantmentLocationBasedEffect.onChangedBlock(serverLevel, i, enchantedItemInUse, livingEntity, livingEntity.position(), !bl);
+					} else if (set != null && set.remove(enchantmentLocationBasedEffect)) {
+						enchantmentLocationBasedEffect.onDeactivated(enchantedItemInUse, livingEntity, livingEntity.position(), i);
 					}
-
-					enchantmentLocationBasedEffect.onChangedBlock(serverLevel, i, enchantedItemInUse, livingEntity, livingEntity.position(), !bl);
-				} else if (set != null && set.remove(enchantmentLocationBasedEffect)) {
-					enchantmentLocationBasedEffect.onDeactivated(enchantedItemInUse, livingEntity, livingEntity.position(), i);
 				}
-			}
 
-			if (set != null && set.isEmpty()) {
-				livingEntity.activeLocationDependentEnchantments().remove(this);
+				if (set != null && set.isEmpty()) {
+					map.remove(this);
+				}
 			}
 		}
 	}
 
 	public void stopLocationBasedEffects(int i, EnchantedItemInUse enchantedItemInUse, LivingEntity livingEntity) {
-		Set<EnchantmentLocationBasedEffect> set = (Set<EnchantmentLocationBasedEffect>)livingEntity.activeLocationDependentEnchantments().remove(this);
-		if (set != null) {
-			for (EnchantmentLocationBasedEffect enchantmentLocationBasedEffect : set) {
-				enchantmentLocationBasedEffect.onDeactivated(enchantedItemInUse, livingEntity, livingEntity.position(), i);
+		EquipmentSlot equipmentSlot = enchantedItemInUse.inSlot();
+		if (equipmentSlot != null) {
+			Set<EnchantmentLocationBasedEffect> set = (Set<EnchantmentLocationBasedEffect>)livingEntity.activeLocationDependentEnchantments(equipmentSlot).remove(this);
+			if (set != null) {
+				for (EnchantmentLocationBasedEffect enchantmentLocationBasedEffect : set) {
+					enchantmentLocationBasedEffect.onDeactivated(enchantedItemInUse, livingEntity, livingEntity.position(), i);
+				}
 			}
 		}
 	}

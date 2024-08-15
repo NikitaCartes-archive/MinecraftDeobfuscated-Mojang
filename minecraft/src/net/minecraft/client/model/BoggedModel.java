@@ -9,10 +9,10 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
-import net.minecraft.world.entity.monster.Bogged;
+import net.minecraft.client.renderer.entity.state.BoggedRenderState;
 
 @Environment(EnvType.CLIENT)
-public class BoggedModel extends SkeletonModel<Bogged> {
+public class BoggedModel extends SkeletonModel<BoggedRenderState> {
 	private final ModelPart mushrooms;
 
 	public BoggedModel(ModelPart modelPart) {
@@ -24,7 +24,7 @@ public class BoggedModel extends SkeletonModel<Bogged> {
 		MeshDefinition meshDefinition = HumanoidModel.createMesh(CubeDeformation.NONE, 0.0F);
 		PartDefinition partDefinition = meshDefinition.getRoot();
 		SkeletonModel.createDefaultSkeletonMesh(partDefinition);
-		PartDefinition partDefinition2 = partDefinition.getChild("head").addOrReplaceChild("mushrooms", CubeListBuilder.create(), PartPose.ZERO);
+		PartDefinition partDefinition2 = partDefinition.getChild("head").clearChild("mushrooms");
 		partDefinition2.addOrReplaceChild(
 			"red_mushroom_1",
 			CubeListBuilder.create().texOffs(50, 16).addBox(-3.0F, -3.0F, 0.0F, 6.0F, 4.0F, 0.0F),
@@ -58,8 +58,8 @@ public class BoggedModel extends SkeletonModel<Bogged> {
 		return LayerDefinition.create(meshDefinition, 64, 32);
 	}
 
-	public void prepareMobModel(Bogged bogged, float f, float g, float h) {
-		this.mushrooms.visible = !bogged.isSheared();
-		super.prepareMobModel(bogged, f, g, h);
+	public void setupAnim(BoggedRenderState boggedRenderState) {
+		super.setupAnim(boggedRenderState);
+		this.mushrooms.visible = !boggedRenderState.isSheared;
 	}
 }

@@ -20,13 +20,13 @@ public class ClientboundHorseScreenOpenPacket implements Packet<ClientGamePacket
 	}
 
 	private ClientboundHorseScreenOpenPacket(FriendlyByteBuf friendlyByteBuf) {
-		this.containerId = friendlyByteBuf.readUnsignedByte();
+		this.containerId = friendlyByteBuf.readContainerId();
 		this.inventoryColumns = friendlyByteBuf.readVarInt();
 		this.entityId = friendlyByteBuf.readInt();
 	}
 
 	private void write(FriendlyByteBuf friendlyByteBuf) {
-		friendlyByteBuf.writeByte(this.containerId);
+		friendlyByteBuf.writeContainerId(this.containerId);
 		friendlyByteBuf.writeVarInt(this.inventoryColumns);
 		friendlyByteBuf.writeInt(this.entityId);
 	}

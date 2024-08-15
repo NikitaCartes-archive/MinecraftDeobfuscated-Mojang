@@ -31,26 +31,18 @@ public class PoiSection {
 	private final Runnable setDirty;
 	private boolean isValid;
 
-	public static Codec<PoiSection> codec(Runnable runnable) {
-		return RecordCodecBuilder.<PoiSection>create(
-				instance -> instance.group(
-							RecordCodecBuilder.point(runnable),
-							Codec.BOOL.lenientOptionalFieldOf("Valid", Boolean.valueOf(false)).forGetter(poiSection -> poiSection.isValid),
-							PoiRecord.codec(runnable).listOf().fieldOf("Records").forGetter(poiSection -> ImmutableList.copyOf(poiSection.records.values()))
-						)
-						.apply(instance, PoiSection::new)
-			)
-			.orElseGet(Util.prefix("Failed to read POI section: ", LOGGER::error), () -> new PoiSection(runnable, false, ImmutableList.of()));
-	}
-
 	public PoiSection(Runnable runnable) {
 		this(runnable, true, ImmutableList.of());
 	}
 
-	private PoiSection(Runnable runnable, boolean bl, List<PoiRecord> list) {
+	PoiSection(Runnable runnable, boolean bl, List<PoiRecord> list) {
 		this.setDirty = runnable;
 		this.isValid = bl;
 		list.forEach(this::add);
+	}
+
+	public PoiSection.Packed pack() {
+		return new PoiSection.Packed(this.isValid, this.records.values().stream().map(PoiRecord::pack).toList());
 	}
 
 	public Stream<PoiRecord> getRecords(Predicate<Holder<PoiType>> predicate, PoiManager.Occupancy occupancy) {
@@ -148,5 +140,19 @@ public class PoiSection {
 
 	boolean isValid() {
 		return this.isValid;
+	}
+
+	public static record Packed(boolean isValid, List<PoiRecord.Packed> records) {
+		public static final Codec<PoiSection.Packed> CODEC = RecordCodecBuilder.create(
+			instance -> instance.group(
+						Codec.BOOL.lenientOptionalFieldOf("Valid", Boolean.valueOf(false)).forGetter(PoiSection.Packed::isValid),
+						PoiRecord.Packed.CODEC.listOf().fieldOf("Records").forGetter(PoiSection.Packed::records)
+					)
+					.apply(instance, PoiSection.Packed::new)
+		);
+
+		public PoiSection unpack(Runnable runnable) {
+			return new PoiSection(runnable, this.isValid, this.records.stream().map(packed -> packed.unpack(runnable)).toList());
+		}
 	}
 }

@@ -26,13 +26,13 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ItemBasedSteering;
 import net.minecraft.world.entity.ItemSteerable;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.Saddleable;
 import net.minecraft.world.entity.SpawnGroupData;
@@ -95,7 +95,7 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
 	}
 
 	public static boolean checkStriderSpawnRules(
-		EntityType<Strider> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, RandomSource randomSource
+		EntityType<Strider> entityType, LevelAccessor levelAccessor, EntitySpawnReason entitySpawnReason, BlockPos blockPos, RandomSource randomSource
 	) {
 		BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
 
@@ -287,7 +287,6 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
 
 	@Override
 	protected void checkFallDamage(double d, boolean bl, BlockState blockState, BlockPos blockPos) {
-		this.checkInsideBlocks();
 		if (this.isInLava()) {
 			this.resetFallDistance();
 		} else {
@@ -349,7 +348,7 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
 	}
 
 	public static AttributeSupplier.Builder createAttributes() {
-		return Mob.createMobAttributes().add(Attributes.MOVEMENT_SPEED, 0.175F).add(Attributes.FOLLOW_RANGE, 16.0);
+		return Animal.createAnimalAttributes().add(Attributes.MOVEMENT_SPEED, 0.175F);
 	}
 
 	@Override
@@ -398,7 +397,7 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
 
 	@Nullable
 	public Strider getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
-		return EntityType.STRIDER.create(serverLevel);
+		return EntityType.STRIDER.create(serverLevel, EntitySpawnReason.BREEDING);
 	}
 
 	@Override
@@ -422,12 +421,12 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
 				player.startRiding(this);
 			}
 
-			return InteractionResult.sidedSuccess(this.level().isClientSide);
+			return InteractionResult.SUCCESS;
 		} else {
 			InteractionResult interactionResult = super.mobInteract(player, interactionHand);
 			if (!interactionResult.consumesAction()) {
 				ItemStack itemStack = player.getItemInHand(interactionHand);
-				return itemStack.is(Items.SADDLE) ? itemStack.interactLivingEntity(player, this, interactionHand) : InteractionResult.PASS;
+				return (InteractionResult)(itemStack.is(Items.SADDLE) ? itemStack.interactLivingEntity(player, this, interactionHand) : InteractionResult.PASS);
 			} else {
 				if (bl && !this.isSilent()) {
 					this.level()
@@ -456,21 +455,21 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
 	@Nullable
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData
+		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, EntitySpawnReason entitySpawnReason, @Nullable SpawnGroupData spawnGroupData
 	) {
 		if (this.isBaby()) {
-			return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData);
+			return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, entitySpawnReason, spawnGroupData);
 		} else {
 			RandomSource randomSource = serverLevelAccessor.getRandom();
 			if (randomSource.nextInt(30) == 0) {
-				Mob mob = EntityType.ZOMBIFIED_PIGLIN.create(serverLevelAccessor.getLevel());
+				Mob mob = EntityType.ZOMBIFIED_PIGLIN.create(serverLevelAccessor.getLevel(), EntitySpawnReason.JOCKEY);
 				if (mob != null) {
 					spawnGroupData = this.spawnJockey(serverLevelAccessor, difficultyInstance, mob, new Zombie.ZombieGroupData(Zombie.getSpawnAsBabyOdds(randomSource), false));
 					mob.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.WARPED_FUNGUS_ON_A_STICK));
 					this.equipSaddle(new ItemStack(Items.SADDLE), null);
 				}
 			} else if (randomSource.nextInt(10) == 0) {
-				AgeableMob ageableMob = EntityType.STRIDER.create(serverLevelAccessor.getLevel());
+				AgeableMob ageableMob = EntityType.STRIDER.create(serverLevelAccessor.getLevel(), EntitySpawnReason.JOCKEY);
 				if (ageableMob != null) {
 					ageableMob.setAge(-24000);
 					spawnGroupData = this.spawnJockey(serverLevelAccessor, difficultyInstance, ageableMob, null);
@@ -479,7 +478,7 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
 				spawnGroupData = new AgeableMob.AgeableMobGroupData(0.5F);
 			}
 
-			return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData);
+			return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, entitySpawnReason, spawnGroupData);
 		}
 	}
 
@@ -487,7 +486,7 @@ public class Strider extends Animal implements ItemSteerable, Saddleable {
 		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, Mob mob, @Nullable SpawnGroupData spawnGroupData
 	) {
 		mob.moveTo(this.getX(), this.getY(), this.getZ(), this.getYRot(), 0.0F);
-		mob.finalizeSpawn(serverLevelAccessor, difficultyInstance, MobSpawnType.JOCKEY, spawnGroupData);
+		mob.finalizeSpawn(serverLevelAccessor, difficultyInstance, EntitySpawnReason.JOCKEY, spawnGroupData);
 		mob.startRiding(this, true);
 		return new AgeableMob.AgeableMobGroupData(0.0F);
 	}

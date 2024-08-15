@@ -55,13 +55,9 @@ public class BrainDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 	private static final int MAX_RENDER_DIST_FOR_POI_INFO = 30;
 	private static final int MAX_TARGETING_DIST = 8;
 	private static final float TEXT_SCALE = 0.02F;
-	private static final int WHITE = -1;
-	private static final int YELLOW = -256;
 	private static final int CYAN = -16711681;
-	private static final int GREEN = -16711936;
 	private static final int GRAY = -3355444;
 	private static final int PINK = -98404;
-	private static final int RED = -65536;
 	private static final int ORANGE = -23296;
 	private final Minecraft minecraft;
 	private final Map<BlockPos, BrainDebugRenderer.PoiInfo> pois = Maps.<BlockPos, BrainDebugRenderer.PoiInfo>newHashMap();

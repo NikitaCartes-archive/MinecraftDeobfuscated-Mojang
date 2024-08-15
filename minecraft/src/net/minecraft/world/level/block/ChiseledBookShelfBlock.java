@@ -15,7 +15,6 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -69,25 +68,25 @@ public class ChiseledBookShelfBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	protected ItemInteractionResult useItemOn(
+	protected InteractionResult useItemOn(
 		ItemStack itemStack, BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
 	) {
 		if (level.getBlockEntity(blockPos) instanceof ChiseledBookShelfBlockEntity chiseledBookShelfBlockEntity) {
 			if (!itemStack.is(ItemTags.BOOKSHELF_BOOKS)) {
-				return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+				return InteractionResult.TRY_WITH_EMPTY_HAND;
 			} else {
 				OptionalInt optionalInt = this.getHitSlot(blockHitResult, blockState);
 				if (optionalInt.isEmpty()) {
-					return ItemInteractionResult.SKIP_DEFAULT_BLOCK_INTERACTION;
+					return InteractionResult.PASS;
 				} else if ((Boolean)blockState.getValue((Property)SLOT_OCCUPIED_PROPERTIES.get(optionalInt.getAsInt()))) {
-					return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+					return InteractionResult.TRY_WITH_EMPTY_HAND;
 				} else {
 					addBook(level, blockPos, player, chiseledBookShelfBlockEntity, itemStack, optionalInt.getAsInt());
-					return ItemInteractionResult.sidedSuccess(level.isClientSide);
+					return InteractionResult.SUCCESS;
 				}
 			}
 		} else {
-			return ItemInteractionResult.SKIP_DEFAULT_BLOCK_INTERACTION;
+			return InteractionResult.PASS;
 		}
 	}
 
@@ -101,7 +100,7 @@ public class ChiseledBookShelfBlock extends BaseEntityBlock {
 				return InteractionResult.CONSUME;
 			} else {
 				removeBook(level, blockPos, player, chiseledBookShelfBlockEntity, optionalInt.getAsInt());
-				return InteractionResult.sidedSuccess(level.isClientSide);
+				return InteractionResult.SUCCESS;
 			}
 		} else {
 			return InteractionResult.PASS;

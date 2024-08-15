@@ -7,19 +7,21 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.chars.CharArraySet;
 import it.unimi.dsi.fastutil.chars.CharSet;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import net.minecraft.Util;
-import net.minecraft.core.NonNullList;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.ItemStack;
 
 public final class ShapedRecipePattern {
 	private static final int MAX_SIZE = 3;
+	public static final char EMPTY_SLOT = ' ';
 	public static final MapCodec<ShapedRecipePattern> MAP_CODEC = ShapedRecipePattern.Data.MAP_CODEC
 		.flatXmap(
 			ShapedRecipePattern::unpack,
@@ -27,31 +29,33 @@ public final class ShapedRecipePattern {
 					.map(DataResult::success)
 					.orElseGet(() -> DataResult.error(() -> "Cannot encode unpacked recipe"))
 		);
-	public static final StreamCodec<RegistryFriendlyByteBuf, ShapedRecipePattern> STREAM_CODEC = StreamCodec.ofMember(
-		ShapedRecipePattern::toNetwork, ShapedRecipePattern::fromNetwork
+	public static final StreamCodec<RegistryFriendlyByteBuf, ShapedRecipePattern> STREAM_CODEC = StreamCodec.composite(
+		ByteBufCodecs.VAR_INT,
+		shapedRecipePattern -> shapedRecipePattern.width,
+		ByteBufCodecs.VAR_INT,
+		shapedRecipePattern -> shapedRecipePattern.height,
+		Ingredient.OPTIONAL_CONTENTS_STREAM_CODEC.apply(ByteBufCodecs.list()),
+		shapedRecipePattern -> shapedRecipePattern.ingredients,
+		ShapedRecipePattern::createFromNetwork
 	);
 	private final int width;
 	private final int height;
-	private final NonNullList<Ingredient> ingredients;
+	private final List<Optional<Ingredient>> ingredients;
 	private final Optional<ShapedRecipePattern.Data> data;
 	private final int ingredientCount;
 	private final boolean symmetrical;
 
-	public ShapedRecipePattern(int i, int j, NonNullList<Ingredient> nonNullList, Optional<ShapedRecipePattern.Data> optional) {
+	public ShapedRecipePattern(int i, int j, List<Optional<Ingredient>> list, Optional<ShapedRecipePattern.Data> optional) {
 		this.width = i;
 		this.height = j;
-		this.ingredients = nonNullList;
+		this.ingredients = list;
 		this.data = optional;
-		int k = 0;
+		this.ingredientCount = (int)list.stream().flatMap(Optional::stream).count();
+		this.symmetrical = Util.isSymmetrical(i, j, list);
+	}
 
-		for (Ingredient ingredient : nonNullList) {
-			if (!ingredient.isEmpty()) {
-				k++;
-			}
-		}
-
-		this.ingredientCount = k;
-		this.symmetrical = Util.isSymmetrical(i, j, nonNullList);
+	private static ShapedRecipePattern createFromNetwork(Integer integer, Integer integer2, List<Optional<Ingredient>> list) {
+		return new ShapedRecipePattern(integer, integer2, list, Optional.empty());
 	}
 
 	public static ShapedRecipePattern of(Map<Character, Ingredient> map, String... strings) {
@@ -67,27 +71,32 @@ public final class ShapedRecipePattern {
 		String[] strings = shrink(data.pattern);
 		int i = strings[0].length();
 		int j = strings.length;
-		NonNullList<Ingredient> nonNullList = NonNullList.withSize(i * j, Ingredient.EMPTY);
+		List<Optional<Ingredient>> list = new ArrayList(i * j);
 		CharSet charSet = new CharArraySet(data.key.keySet());
 
-		for (int k = 0; k < strings.length; k++) {
-			String string = strings[k];
+		for (String string : strings) {
+			for (int k = 0; k < string.length(); k++) {
+				char c = string.charAt(k);
+				Optional<Ingredient> optional;
+				if (c == ' ') {
+					optional = Optional.empty();
+				} else {
+					Ingredient ingredient = (Ingredient)data.key.get(c);
+					if (ingredient == null) {
+						return DataResult.error(() -> "Pattern references symbol '" + c + "' but it's not defined in the key");
+					}
 
-			for (int l = 0; l < string.length(); l++) {
-				char c = string.charAt(l);
-				Ingredient ingredient = c == ' ' ? Ingredient.EMPTY : (Ingredient)data.key.get(c);
-				if (ingredient == null) {
-					return DataResult.error(() -> "Pattern references symbol '" + c + "' but it's not defined in the key");
+					optional = Optional.of(ingredient);
 				}
 
 				charSet.remove(c);
-				nonNullList.set(l + i * k, ingredient);
+				list.add(optional);
 			}
 		}
 
 		return !charSet.isEmpty()
 			? DataResult.error(() -> "Key defines symbols that aren't used in pattern: " + charSet)
-			: DataResult.success(new ShapedRecipePattern(i, j, nonNullList, Optional.of(data)));
+			: DataResult.success(new ShapedRecipePattern(i, j, list, Optional.of(data)));
 	}
 
 	@VisibleForTesting
@@ -99,8 +108,8 @@ public final class ShapedRecipePattern {
 
 		for (int m = 0; m < list.size(); m++) {
 			String string = (String)list.get(m);
-			i = Math.min(i, firstNonSpace(string));
-			int n = lastNonSpace(string);
+			i = Math.min(i, firstNonEmpty(string));
+			int n = lastNonEmpty(string);
 			j = Math.max(j, n);
 			if (n < 0) {
 				if (k == m) {
@@ -126,7 +135,7 @@ public final class ShapedRecipePattern {
 		}
 	}
 
-	private static int firstNonSpace(String string) {
+	private static int firstNonEmpty(String string) {
 		int i = 0;
 
 		while (i < string.length() && string.charAt(i) == ' ') {
@@ -136,7 +145,7 @@ public final class ShapedRecipePattern {
 		return i;
 	}
 
-	private static int lastNonSpace(String string) {
+	private static int lastNonEmpty(String string) {
 		int i = string.length() - 1;
 
 		while (i >= 0 && string.charAt(i) == ' ') {
@@ -167,38 +176,21 @@ public final class ShapedRecipePattern {
 	private boolean matches(CraftingInput craftingInput, boolean bl) {
 		for (int i = 0; i < this.height; i++) {
 			for (int j = 0; j < this.width; j++) {
-				Ingredient ingredient;
+				Optional<Ingredient> optional;
 				if (bl) {
-					ingredient = this.ingredients.get(this.width - j - 1 + i * this.width);
+					optional = (Optional<Ingredient>)this.ingredients.get(this.width - j - 1 + i * this.width);
 				} else {
-					ingredient = this.ingredients.get(j + i * this.width);
+					optional = (Optional<Ingredient>)this.ingredients.get(j + i * this.width);
 				}
 
 				ItemStack itemStack = craftingInput.getItem(j, i);
-				if (!ingredient.test(itemStack)) {
+				if (!Ingredient.testOptionalIngredient(optional, itemStack)) {
 					return false;
 				}
 			}
 		}
 
 		return true;
-	}
-
-	private void toNetwork(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
-		registryFriendlyByteBuf.writeVarInt(this.width);
-		registryFriendlyByteBuf.writeVarInt(this.height);
-
-		for (Ingredient ingredient : this.ingredients) {
-			Ingredient.CONTENTS_STREAM_CODEC.encode(registryFriendlyByteBuf, ingredient);
-		}
-	}
-
-	private static ShapedRecipePattern fromNetwork(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
-		int i = registryFriendlyByteBuf.readVarInt();
-		int j = registryFriendlyByteBuf.readVarInt();
-		NonNullList<Ingredient> nonNullList = NonNullList.withSize(i * j, Ingredient.EMPTY);
-		nonNullList.replaceAll(ingredient -> Ingredient.CONTENTS_STREAM_CODEC.decode(registryFriendlyByteBuf));
-		return new ShapedRecipePattern(i, j, nonNullList, Optional.empty());
 	}
 
 	public int width() {
@@ -209,7 +201,7 @@ public final class ShapedRecipePattern {
 		return this.height;
 	}
 
-	public NonNullList<Ingredient> ingredients() {
+	public List<Optional<Ingredient>> ingredients() {
 		return this.ingredients;
 	}
 
@@ -244,7 +236,7 @@ public final class ShapedRecipePattern {
 		}, String::valueOf);
 		public static final MapCodec<ShapedRecipePattern.Data> MAP_CODEC = RecordCodecBuilder.mapCodec(
 			instance -> instance.group(
-						ExtraCodecs.strictUnboundedMap(SYMBOL_CODEC, Ingredient.CODEC_NONEMPTY).fieldOf("key").forGetter(data -> data.key),
+						ExtraCodecs.strictUnboundedMap(SYMBOL_CODEC, Ingredient.CODEC).fieldOf("key").forGetter(data -> data.key),
 						PATTERN_CODEC.fieldOf("pattern").forGetter(data -> data.pattern)
 					)
 					.apply(instance, ShapedRecipePattern.Data::new)

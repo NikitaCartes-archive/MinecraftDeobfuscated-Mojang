@@ -8,11 +8,11 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.client.renderer.entity.state.StriderRenderState;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.monster.Strider;
 
 @Environment(EnvType.CLIENT)
-public class StriderModel<T extends Strider> extends HierarchicalModel<T> {
+public class StriderModel extends EntityModel<StriderRenderState> {
 	private static final String RIGHT_BOTTOM_BRISTLE = "right_bottom_bristle";
 	private static final String RIGHT_MIDDLE_BRISTLE = "right_middle_bristle";
 	private static final String RIGHT_TOP_BRISTLE = "right_top_bristle";
@@ -88,17 +88,18 @@ public class StriderModel<T extends Strider> extends HierarchicalModel<T> {
 		return LayerDefinition.create(meshDefinition, 64, 128);
 	}
 
-	public void setupAnim(Strider strider, float f, float g, float h, float i, float j) {
-		g = Math.min(0.25F, g);
-		if (!strider.isVehicle()) {
-			this.body.xRot = j * (float) (Math.PI / 180.0);
-			this.body.yRot = i * (float) (Math.PI / 180.0);
+	public void setupAnim(StriderRenderState striderRenderState) {
+		float f = striderRenderState.walkAnimationPos;
+		float g = Math.min(striderRenderState.walkAnimationSpeed, 0.25F);
+		if (!striderRenderState.isRidden) {
+			this.body.xRot = striderRenderState.xRot * (float) (Math.PI / 180.0);
+			this.body.yRot = striderRenderState.yRot * (float) (Math.PI / 180.0);
 		} else {
 			this.body.xRot = 0.0F;
 			this.body.yRot = 0.0F;
 		}
 
-		float k = 1.5F;
+		float h = 1.5F;
 		this.body.zRot = 0.1F * Mth.sin(f * 1.5F) * 4.0F * g;
 		this.body.y = 2.0F;
 		this.body.y = this.body.y - 2.0F * Mth.cos(f * 1.5F) * 2.0F * g;
@@ -114,21 +115,21 @@ public class StriderModel<T extends Strider> extends HierarchicalModel<T> {
 		this.leftTopBristle.zRot = 0.87266463F;
 		this.leftMiddleBristle.zRot = 1.134464F;
 		this.leftBottomBristle.zRot = 1.2217305F;
-		float l = Mth.cos(f * 1.5F + (float) Math.PI) * g;
-		this.rightBottomBristle.zRot += l * 1.3F;
-		this.rightMiddleBristle.zRot += l * 1.2F;
-		this.rightTopBristle.zRot += l * 0.6F;
-		this.leftTopBristle.zRot += l * 0.6F;
-		this.leftMiddleBristle.zRot += l * 1.2F;
-		this.leftBottomBristle.zRot += l * 1.3F;
-		float m = 1.0F;
-		float n = 1.0F;
-		this.rightBottomBristle.zRot = this.rightBottomBristle.zRot + 0.05F * Mth.sin(h * 1.0F * -0.4F);
-		this.rightMiddleBristle.zRot = this.rightMiddleBristle.zRot + 0.1F * Mth.sin(h * 1.0F * 0.2F);
-		this.rightTopBristle.zRot = this.rightTopBristle.zRot + 0.1F * Mth.sin(h * 1.0F * 0.4F);
-		this.leftTopBristle.zRot = this.leftTopBristle.zRot + 0.1F * Mth.sin(h * 1.0F * 0.4F);
-		this.leftMiddleBristle.zRot = this.leftMiddleBristle.zRot + 0.1F * Mth.sin(h * 1.0F * 0.2F);
-		this.leftBottomBristle.zRot = this.leftBottomBristle.zRot + 0.05F * Mth.sin(h * 1.0F * -0.4F);
+		float i = Mth.cos(f * 1.5F + (float) Math.PI) * g;
+		this.rightBottomBristle.zRot += i * 1.3F;
+		this.rightMiddleBristle.zRot += i * 1.2F;
+		this.rightTopBristle.zRot += i * 0.6F;
+		this.leftTopBristle.zRot += i * 0.6F;
+		this.leftMiddleBristle.zRot += i * 1.2F;
+		this.leftBottomBristle.zRot += i * 1.3F;
+		float j = 1.0F;
+		float k = 1.0F;
+		this.rightBottomBristle.zRot = this.rightBottomBristle.zRot + 0.05F * Mth.sin(striderRenderState.ageInTicks * 1.0F * -0.4F);
+		this.rightMiddleBristle.zRot = this.rightMiddleBristle.zRot + 0.1F * Mth.sin(striderRenderState.ageInTicks * 1.0F * 0.2F);
+		this.rightTopBristle.zRot = this.rightTopBristle.zRot + 0.1F * Mth.sin(striderRenderState.ageInTicks * 1.0F * 0.4F);
+		this.leftTopBristle.zRot = this.leftTopBristle.zRot + 0.1F * Mth.sin(striderRenderState.ageInTicks * 1.0F * 0.4F);
+		this.leftMiddleBristle.zRot = this.leftMiddleBristle.zRot + 0.1F * Mth.sin(striderRenderState.ageInTicks * 1.0F * 0.2F);
+		this.leftBottomBristle.zRot = this.leftBottomBristle.zRot + 0.05F * Mth.sin(striderRenderState.ageInTicks * 1.0F * -0.4F);
 	}
 
 	@Override

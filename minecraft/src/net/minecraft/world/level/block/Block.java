@@ -93,9 +93,9 @@ public class Block extends BlockBehaviour implements ItemLike {
 	private String descriptionId;
 	@Nullable
 	private Item item;
-	private static final int CACHE_SIZE = 2048;
-	private static final ThreadLocal<Object2ByteLinkedOpenHashMap<Block.BlockStatePairKey>> OCCLUSION_CACHE = ThreadLocal.withInitial(() -> {
-		Object2ByteLinkedOpenHashMap<Block.BlockStatePairKey> object2ByteLinkedOpenHashMap = new Object2ByteLinkedOpenHashMap<Block.BlockStatePairKey>(2048, 0.25F) {
+	private static final int CACHE_SIZE = 256;
+	private static final ThreadLocal<Object2ByteLinkedOpenHashMap<Block.ShapePairKey>> OCCLUSION_CACHE = ThreadLocal.withInitial(() -> {
+		Object2ByteLinkedOpenHashMap<Block.ShapePairKey> object2ByteLinkedOpenHashMap = new Object2ByteLinkedOpenHashMap<Block.ShapePairKey>(256, 0.25F) {
 			@Override
 			protected void rehash(int i) {
 			}
@@ -200,33 +200,34 @@ public class Block extends BlockBehaviour implements ItemLike {
 			|| blockState.is(BlockTags.SHULKER_BOXES);
 	}
 
-	public static boolean shouldRenderFace(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, Direction direction, BlockPos blockPos2) {
-		BlockState blockState2 = blockGetter.getBlockState(blockPos2);
-		if (blockState.skipRendering(blockState2, direction)) {
+	public static boolean shouldRenderFace(BlockState blockState, BlockState blockState2, Direction direction) {
+		VoxelShape voxelShape = blockState2.getFaceOcclusionShape(direction.getOpposite());
+		if (voxelShape == Shapes.block()) {
 			return false;
-		} else if (blockState2.canOcclude()) {
-			Block.BlockStatePairKey blockStatePairKey = new Block.BlockStatePairKey(blockState, blockState2, direction);
-			Object2ByteLinkedOpenHashMap<Block.BlockStatePairKey> object2ByteLinkedOpenHashMap = (Object2ByteLinkedOpenHashMap<Block.BlockStatePairKey>)OCCLUSION_CACHE.get();
-			byte b = object2ByteLinkedOpenHashMap.getAndMoveToFirst(blockStatePairKey);
-			if (b != 127) {
-				return b != 0;
+		} else if (blockState.skipRendering(blockState2, direction)) {
+			return false;
+		} else if (voxelShape == Shapes.empty()) {
+			return true;
+		} else {
+			VoxelShape voxelShape2 = blockState.getFaceOcclusionShape(direction);
+			if (voxelShape2 == Shapes.empty()) {
+				return true;
 			} else {
-				VoxelShape voxelShape = blockState.getFaceOcclusionShape(blockGetter, blockPos, direction);
-				if (voxelShape.isEmpty()) {
-					return true;
+				Block.ShapePairKey shapePairKey = new Block.ShapePairKey(voxelShape2, voxelShape);
+				Object2ByteLinkedOpenHashMap<Block.ShapePairKey> object2ByteLinkedOpenHashMap = (Object2ByteLinkedOpenHashMap<Block.ShapePairKey>)OCCLUSION_CACHE.get();
+				byte b = object2ByteLinkedOpenHashMap.getAndMoveToFirst(shapePairKey);
+				if (b != 127) {
+					return b != 0;
 				} else {
-					VoxelShape voxelShape2 = blockState2.getFaceOcclusionShape(blockGetter, blockPos2, direction.getOpposite());
-					boolean bl = Shapes.joinIsNotEmpty(voxelShape, voxelShape2, BooleanOp.ONLY_FIRST);
-					if (object2ByteLinkedOpenHashMap.size() == 2048) {
+					boolean bl = Shapes.joinIsNotEmpty(voxelShape2, voxelShape, BooleanOp.ONLY_FIRST);
+					if (object2ByteLinkedOpenHashMap.size() == 256) {
 						object2ByteLinkedOpenHashMap.removeLastByte();
 					}
 
-					object2ByteLinkedOpenHashMap.putAndMoveToFirst(blockStatePairKey, (byte)(bl ? 1 : 0));
+					object2ByteLinkedOpenHashMap.putAndMoveToFirst(shapePairKey, (byte)(bl ? 1 : 0));
 					return bl;
 				}
 			}
-		} else {
-			return true;
 		}
 	}
 
@@ -339,7 +340,7 @@ public class Block extends BlockBehaviour implements ItemLike {
 		return this.explosionResistance;
 	}
 
-	public void wasExploded(Level level, BlockPos blockPos, Explosion explosion) {
+	public void wasExploded(ServerLevel serverLevel, BlockPos blockPos, Explosion explosion) {
 	}
 
 	public void stepOn(Level level, BlockPos blockPos, BlockState blockState, Entity entity) {
@@ -379,7 +380,7 @@ public class Block extends BlockBehaviour implements ItemLike {
 		entity.causeFallDamage(f, 1.0F, entity.damageSources().fall());
 	}
 
-	public void updateEntityAfterFallOn(BlockGetter blockGetter, Entity entity) {
+	public void updateEntityMovementAfterFallOn(BlockGetter blockGetter, Entity entity) {
 		entity.setDeltaMovement(entity.getDeltaMovement().multiply(1.0, 0.0, 1.0));
 	}
 
@@ -520,6 +521,20 @@ public class Block extends BlockBehaviour implements ItemLike {
 			int i = this.first.hashCode();
 			i = 31 * i + this.second.hashCode();
 			return 31 * i + this.direction.hashCode();
+		}
+	}
+
+	static record ShapePairKey(VoxelShape first, VoxelShape second) {
+		public boolean equals(Object object) {
+			if (object instanceof Block.ShapePairKey shapePairKey && this.first == shapePairKey.first && this.second == shapePairKey.second) {
+				return true;
+			}
+
+			return false;
+		}
+
+		public int hashCode() {
+			return System.identityHashCode(this.first) * 31 + System.identityHashCode(this.second);
 		}
 	}
 }

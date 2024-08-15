@@ -17,6 +17,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
 public class EyeOfEnder extends Entity implements ItemSupplier {
+	private static final float MIN_CAMERA_DISTANCE_SQUARED = 12.25F;
 	private static final EntityDataAccessor<ItemStack> DATA_ITEM_STACK = SynchedEntityData.defineId(EyeOfEnder.class, EntityDataSerializers.ITEM_STACK);
 	private double tx;
 	private double ty;
@@ -53,13 +54,17 @@ public class EyeOfEnder extends Entity implements ItemSupplier {
 
 	@Override
 	public boolean shouldRenderAtSqrDistance(double d) {
-		double e = this.getBoundingBox().getSize() * 4.0;
-		if (Double.isNaN(e)) {
-			e = 4.0;
-		}
+		if (this.tickCount < 2 && d < 12.25) {
+			return false;
+		} else {
+			double e = this.getBoundingBox().getSize() * 4.0;
+			if (Double.isNaN(e)) {
+				e = 4.0;
+			}
 
-		e *= 64.0;
-		return d < e * e;
+			e *= 64.0;
+			return d < e * e;
+		}
 	}
 
 	public void signalTo(BlockPos blockPos) {

@@ -9,7 +9,7 @@ public class CampfireCookingRecipe extends AbstractCookingRecipe {
 	}
 
 	@Override
-	public ItemStack getToastSymbol() {
+	public ItemStack getCategoryIconItem() {
 		return new ItemStack(Blocks.CAMPFIRE);
 	}
 

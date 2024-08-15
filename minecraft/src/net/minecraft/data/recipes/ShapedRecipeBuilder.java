@@ -12,6 +12,7 @@ import net.minecraft.advancements.AdvancementRequirements;
 import net.minecraft.advancements.AdvancementRewards;
 import net.minecraft.advancements.Criterion;
 import net.minecraft.advancements.critereon.RecipeUnlockedTrigger;
+import net.minecraft.core.HolderGetter;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
@@ -22,6 +23,7 @@ import net.minecraft.world.item.crafting.ShapedRecipePattern;
 import net.minecraft.world.level.ItemLike;
 
 public class ShapedRecipeBuilder implements RecipeBuilder {
+	private final HolderGetter<Item> items;
 	private final RecipeCategory category;
 	private final Item result;
 	private final int count;
@@ -32,22 +34,23 @@ public class ShapedRecipeBuilder implements RecipeBuilder {
 	private String group;
 	private boolean showNotification = true;
 
-	public ShapedRecipeBuilder(RecipeCategory recipeCategory, ItemLike itemLike, int i) {
+	private ShapedRecipeBuilder(HolderGetter<Item> holderGetter, RecipeCategory recipeCategory, ItemLike itemLike, int i) {
+		this.items = holderGetter;
 		this.category = recipeCategory;
 		this.result = itemLike.asItem();
 		this.count = i;
 	}
 
-	public static ShapedRecipeBuilder shaped(RecipeCategory recipeCategory, ItemLike itemLike) {
-		return shaped(recipeCategory, itemLike, 1);
+	public static ShapedRecipeBuilder shaped(HolderGetter<Item> holderGetter, RecipeCategory recipeCategory, ItemLike itemLike) {
+		return shaped(holderGetter, recipeCategory, itemLike, 1);
 	}
 
-	public static ShapedRecipeBuilder shaped(RecipeCategory recipeCategory, ItemLike itemLike, int i) {
-		return new ShapedRecipeBuilder(recipeCategory, itemLike, i);
+	public static ShapedRecipeBuilder shaped(HolderGetter<Item> holderGetter, RecipeCategory recipeCategory, ItemLike itemLike, int i) {
+		return new ShapedRecipeBuilder(holderGetter, recipeCategory, itemLike, i);
 	}
 
 	public ShapedRecipeBuilder define(Character character, TagKey<Item> tagKey) {
-		return this.define(character, Ingredient.of(tagKey));
+		return this.define(character, Ingredient.of(this.items.getOrThrow(tagKey)));
 	}
 
 	public ShapedRecipeBuilder define(Character character, ItemLike itemLike) {

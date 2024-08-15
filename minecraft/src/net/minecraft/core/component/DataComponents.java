@@ -46,7 +46,9 @@ import net.minecraft.world.item.component.Tool;
 import net.minecraft.world.item.component.Unbreakable;
 import net.minecraft.world.item.component.WritableBookContent;
 import net.minecraft.world.item.component.WrittenBookContent;
+import net.minecraft.world.item.enchantment.Enchantable;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
+import net.minecraft.world.item.enchantment.Repairable;
 import net.minecraft.world.level.block.entity.BannerPatternLayers;
 import net.minecraft.world.level.block.entity.BeehiveBlockEntity;
 import net.minecraft.world.level.block.entity.PotDecorations;
@@ -116,6 +118,12 @@ public class DataComponents {
 	);
 	public static final DataComponentType<Tool> TOOL = register(
 		"tool", builder -> builder.persistent(Tool.CODEC).networkSynchronized(Tool.STREAM_CODEC).cacheEncoding()
+	);
+	public static final DataComponentType<Enchantable> ENCHANTABLE = register(
+		"enchantable", builder -> builder.persistent(Enchantable.CODEC).networkSynchronized(Enchantable.STREAM_CODEC).cacheEncoding()
+	);
+	public static final DataComponentType<Repairable> REPAIRABLE = register(
+		"repairable", builder -> builder.persistent(Repairable.CODEC).networkSynchronized(Repairable.STREAM_CODEC).cacheEncoding()
 	);
 	public static final DataComponentType<ItemEnchantments> STORED_ENCHANTMENTS = register(
 		"stored_enchantments", builder -> builder.persistent(ItemEnchantments.CODEC).networkSynchronized(ItemEnchantments.STREAM_CODEC).cacheEncoding()

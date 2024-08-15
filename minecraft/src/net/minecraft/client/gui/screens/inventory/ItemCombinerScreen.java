@@ -3,6 +3,7 @@ package net.minecraft.client.gui.screens.inventory;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
@@ -48,7 +49,7 @@ public abstract class ItemCombinerScreen<T extends ItemCombinerMenu> extends Abs
 
 	@Override
 	protected void renderBg(GuiGraphics guiGraphics, float f, int i, int j) {
-		guiGraphics.blit(this.menuResource, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
+		guiGraphics.blit(RenderType::guiTextured, this.menuResource, this.leftPos, this.topPos, 0.0F, 0.0F, this.imageWidth, this.imageHeight, 256, 256);
 		this.renderErrorIcon(guiGraphics, this.leftPos, this.topPos);
 	}
 

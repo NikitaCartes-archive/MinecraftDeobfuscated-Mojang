@@ -7,9 +7,11 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.spectator.categories.SpectatorPage;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.ARGB;
 
 @Environment(EnvType.CLIENT)
 public class SpectatorMenu {
@@ -35,7 +37,7 @@ public class SpectatorMenu {
 		}
 
 		@Override
-		public void renderIcon(GuiGraphics guiGraphics, float f, int i) {
+		public void renderIcon(GuiGraphics guiGraphics, float f, float g) {
 		}
 
 		@Override
@@ -126,8 +128,8 @@ public class SpectatorMenu {
 		}
 
 		@Override
-		public void renderIcon(GuiGraphics guiGraphics, float f, int i) {
-			guiGraphics.blitSprite(SpectatorMenu.CLOSE_SPRITE, 0, 0, 16, 16);
+		public void renderIcon(GuiGraphics guiGraphics, float f, float g) {
+			guiGraphics.blitSprite(RenderType::guiTextured, SpectatorMenu.CLOSE_SPRITE, 0, 0, 16, 16, ARGB.colorFromFloat(g, f, f, f));
 		}
 
 		@Override
@@ -157,11 +159,12 @@ public class SpectatorMenu {
 		}
 
 		@Override
-		public void renderIcon(GuiGraphics guiGraphics, float f, int i) {
+		public void renderIcon(GuiGraphics guiGraphics, float f, float g) {
+			int i = ARGB.colorFromFloat(g, f, f, f);
 			if (this.direction < 0) {
-				guiGraphics.blitSprite(SpectatorMenu.SCROLL_LEFT_SPRITE, 0, 0, 16, 16);
+				guiGraphics.blitSprite(RenderType::guiTextured, SpectatorMenu.SCROLL_LEFT_SPRITE, 0, 0, 16, 16, i);
 			} else {
-				guiGraphics.blitSprite(SpectatorMenu.SCROLL_RIGHT_SPRITE, 0, 0, 16, 16);
+				guiGraphics.blitSprite(RenderType::guiTextured, SpectatorMenu.SCROLL_RIGHT_SPRITE, 0, 0, 16, 16, i);
 			}
 		}
 

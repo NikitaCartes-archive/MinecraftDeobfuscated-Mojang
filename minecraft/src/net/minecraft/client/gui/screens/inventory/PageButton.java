@@ -4,6 +4,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.network.chat.CommonComponents;
@@ -34,7 +35,7 @@ public class PageButton extends Button {
 			resourceLocation = this.isHoveredOrFocused() ? PAGE_BACKWARD_HIGHLIGHTED_SPRITE : PAGE_BACKWARD_SPRITE;
 		}
 
-		guiGraphics.blitSprite(resourceLocation, this.getX(), this.getY(), 23, 13);
+		guiGraphics.blitSprite(RenderType::guiTextured, resourceLocation, this.getX(), this.getY(), 23, 13);
 	}
 
 	@Override

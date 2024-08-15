@@ -1,7 +1,9 @@
 package net.minecraft.client.renderer;
 
-import com.google.common.collect.Lists;
+import com.mojang.blaze3d.framegraph.FrameGraphBuilder;
+import com.mojang.blaze3d.framegraph.FramePass;
 import com.mojang.blaze3d.pipeline.RenderTarget;
+import com.mojang.blaze3d.resource.ResourceHandle;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.BufferUploader;
@@ -9,31 +11,26 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.function.IntSupplier;
+import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.texture.AbstractTexture;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceProvider;
 import org.joml.Matrix4f;
 
 @Environment(EnvType.CLIENT)
 public class PostPass implements AutoCloseable {
 	private final EffectInstance effect;
-	public final RenderTarget inTarget;
-	public final RenderTarget outTarget;
-	private final List<IntSupplier> auxAssets = Lists.<IntSupplier>newArrayList();
-	private final List<String> auxNames = Lists.<String>newArrayList();
-	private final List<Integer> auxWidths = Lists.<Integer>newArrayList();
-	private final List<Integer> auxHeights = Lists.<Integer>newArrayList();
-	private Matrix4f shaderOrthoMatrix;
-	private final int filterMode;
+	public final ResourceLocation outputTargetId;
+	private final List<PostPass.Input> inputs = new ArrayList();
 
-	public PostPass(ResourceProvider resourceProvider, String string, RenderTarget renderTarget, RenderTarget renderTarget2, boolean bl) throws IOException {
+	public PostPass(ResourceProvider resourceProvider, String string, ResourceLocation resourceLocation) throws IOException {
 		this.effect = new EffectInstance(resourceProvider, string);
-		this.inTarget = renderTarget;
-		this.outTarget = renderTarget2;
-		this.filterMode = bl ? 9729 : 9728;
+		this.outputTargetId = resourceLocation;
 	}
 
 	public void close() {
@@ -44,54 +41,55 @@ public class PostPass implements AutoCloseable {
 		return this.effect.getName();
 	}
 
-	public void addAuxAsset(String string, IntSupplier intSupplier, int i, int j) {
-		this.auxNames.add(this.auxNames.size(), string);
-		this.auxAssets.add(this.auxAssets.size(), intSupplier);
-		this.auxWidths.add(this.auxWidths.size(), i);
-		this.auxHeights.add(this.auxHeights.size(), j);
+	public void addInput(PostPass.Input input) {
+		this.inputs.add(input);
 	}
 
-	public void setOrthoMatrix(Matrix4f matrix4f) {
-		this.shaderOrthoMatrix = matrix4f;
-	}
+	public void addToFrame(FrameGraphBuilder frameGraphBuilder, Map<ResourceLocation, ResourceHandle<RenderTarget>> map, Matrix4f matrix4f, float f) {
+		FramePass framePass = frameGraphBuilder.addPass(this.getName());
 
-	public void process(float f) {
-		this.inTarget.unbindWrite();
-		float g = (float)this.outTarget.width;
-		float h = (float)this.outTarget.height;
-		RenderSystem.viewport(0, 0, (int)g, (int)h);
-		this.effect.setSampler("DiffuseSampler", this.inTarget::getColorTextureId);
-
-		for (int i = 0; i < this.auxAssets.size(); i++) {
-			this.effect.setSampler((String)this.auxNames.get(i), (IntSupplier)this.auxAssets.get(i));
-			this.effect.safeGetUniform("AuxSize" + i).set((float)((Integer)this.auxWidths.get(i)).intValue(), (float)((Integer)this.auxHeights.get(i)).intValue());
+		for (PostPass.Input input : this.inputs) {
+			input.addToPass(framePass, map);
 		}
 
-		this.effect.safeGetUniform("ProjMat").set(this.shaderOrthoMatrix);
-		this.effect.safeGetUniform("InSize").set((float)this.inTarget.width, (float)this.inTarget.height);
-		this.effect.safeGetUniform("OutSize").set(g, h);
-		this.effect.safeGetUniform("Time").set(f);
-		Minecraft minecraft = Minecraft.getInstance();
-		this.effect.safeGetUniform("ScreenSize").set((float)minecraft.getWindow().getWidth(), (float)minecraft.getWindow().getHeight());
-		this.effect.apply();
-		this.outTarget.clear(Minecraft.ON_OSX);
-		this.outTarget.bindWrite(false);
-		RenderSystem.depthFunc(519);
-		BufferBuilder bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
-		bufferBuilder.addVertex(0.0F, 0.0F, 500.0F);
-		bufferBuilder.addVertex(g, 0.0F, 500.0F);
-		bufferBuilder.addVertex(g, h, 500.0F);
-		bufferBuilder.addVertex(0.0F, h, 500.0F);
-		BufferUploader.draw(bufferBuilder.buildOrThrow());
-		RenderSystem.depthFunc(515);
-		this.effect.clear();
-		this.outTarget.unbindWrite();
-		this.inTarget.unbindRead();
+		ResourceHandle<RenderTarget> resourceHandle = (ResourceHandle<RenderTarget>)map.computeIfPresent(
+			this.outputTargetId, (resourceLocation, resourceHandlex) -> framePass.readsAndWrites(resourceHandlex)
+		);
+		if (resourceHandle == null) {
+			throw new IllegalStateException("Missing handle for target " + this.outputTargetId);
+		} else {
+			framePass.executes(() -> {
+				RenderTarget renderTarget = resourceHandle.get();
+				RenderSystem.viewport(0, 0, renderTarget.width, renderTarget.height);
 
-		for (Object object : this.auxAssets) {
-			if (object instanceof RenderTarget) {
-				((RenderTarget)object).unbindRead();
-			}
+				for (PostPass.Input inputx : this.inputs) {
+					inputx.bindTo(this.effect, map);
+				}
+
+				this.effect.safeGetUniform("ProjMat").set(matrix4f);
+				this.effect.safeGetUniform("OutSize").set((float)renderTarget.width, (float)renderTarget.height);
+				this.effect.safeGetUniform("Time").set(f);
+				Minecraft minecraft = Minecraft.getInstance();
+				this.effect.safeGetUniform("ScreenSize").set((float)minecraft.getWindow().getWidth(), (float)minecraft.getWindow().getHeight());
+				this.effect.apply();
+				renderTarget.setClearColor(0.0F, 0.0F, 0.0F, 0.0F);
+				renderTarget.clear();
+				renderTarget.bindWrite(false);
+				RenderSystem.depthFunc(519);
+				BufferBuilder bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
+				bufferBuilder.addVertex(0.0F, 0.0F, 500.0F);
+				bufferBuilder.addVertex((float)renderTarget.width, 0.0F, 500.0F);
+				bufferBuilder.addVertex((float)renderTarget.width, (float)renderTarget.height, 500.0F);
+				bufferBuilder.addVertex(0.0F, (float)renderTarget.height, 500.0F);
+				BufferUploader.draw(bufferBuilder.buildOrThrow());
+				RenderSystem.depthFunc(515);
+				this.effect.clear();
+				renderTarget.unbindWrite();
+
+				for (PostPass.Input input2 : this.inputs) {
+					input2.cleanup(map);
+				}
+			});
 		}
 	}
 
@@ -99,7 +97,59 @@ public class PostPass implements AutoCloseable {
 		return this.effect;
 	}
 
-	public int getFilterMode() {
-		return this.filterMode;
+	@Environment(EnvType.CLIENT)
+	public interface Input {
+		void addToPass(FramePass framePass, Map<ResourceLocation, ResourceHandle<RenderTarget>> map);
+
+		void bindTo(EffectInstance effectInstance, Map<ResourceLocation, ResourceHandle<RenderTarget>> map);
+
+		default void cleanup(Map<ResourceLocation, ResourceHandle<RenderTarget>> map) {
+		}
+	}
+
+	@Environment(EnvType.CLIENT)
+	public static record TargetInput(String samplerName, ResourceLocation targetId, boolean depthBuffer, boolean bilinear) implements PostPass.Input {
+		private ResourceHandle<RenderTarget> getHandle(Map<ResourceLocation, ResourceHandle<RenderTarget>> map) {
+			ResourceHandle<RenderTarget> resourceHandle = (ResourceHandle<RenderTarget>)map.get(this.targetId);
+			if (resourceHandle == null) {
+				throw new IllegalStateException("Missing handle for target " + this.targetId);
+			} else {
+				return resourceHandle;
+			}
+		}
+
+		@Override
+		public void addToPass(FramePass framePass, Map<ResourceLocation, ResourceHandle<RenderTarget>> map) {
+			framePass.reads(this.getHandle(map));
+		}
+
+		@Override
+		public void bindTo(EffectInstance effectInstance, Map<ResourceLocation, ResourceHandle<RenderTarget>> map) {
+			ResourceHandle<RenderTarget> resourceHandle = this.getHandle(map);
+			RenderTarget renderTarget = resourceHandle.get();
+			renderTarget.setFilterMode(this.bilinear ? 9729 : 9728);
+			effectInstance.setSampler(this.samplerName + "Sampler", this.depthBuffer ? renderTarget::getDepthTextureId : renderTarget::getColorTextureId);
+			effectInstance.safeGetUniform(this.samplerName + "Size").set((float)renderTarget.width, (float)renderTarget.height);
+		}
+
+		@Override
+		public void cleanup(Map<ResourceLocation, ResourceHandle<RenderTarget>> map) {
+			if (this.bilinear) {
+				this.getHandle(map).get().setFilterMode(9728);
+			}
+		}
+	}
+
+	@Environment(EnvType.CLIENT)
+	public static record TextureInput(String samplerName, AbstractTexture texture, int width, int height) implements PostPass.Input {
+		@Override
+		public void addToPass(FramePass framePass, Map<ResourceLocation, ResourceHandle<RenderTarget>> map) {
+		}
+
+		@Override
+		public void bindTo(EffectInstance effectInstance, Map<ResourceLocation, ResourceHandle<RenderTarget>> map) {
+			effectInstance.setSampler(this.samplerName + "Sampler", this.texture::getId);
+			effectInstance.safeGetUniform(this.samplerName + "Size").set((float)this.width, (float)this.height);
+		}
 	}
 }

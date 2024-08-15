@@ -6,13 +6,14 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
+import net.minecraft.client.renderer.entity.state.MinecartTntRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.vehicle.MinecartTNT;
 import net.minecraft.world.level.block.state.BlockState;
 
 @Environment(EnvType.CLIENT)
-public class TntMinecartRenderer extends MinecartRenderer<MinecartTNT> {
+public class TntMinecartRenderer extends AbstractMinecartRenderer<MinecartTNT, MinecartTntRenderState> {
 	private final BlockRenderDispatcher blockRenderer;
 
 	public TntMinecartRenderer(EntityRendererProvider.Context context) {
@@ -20,10 +21,12 @@ public class TntMinecartRenderer extends MinecartRenderer<MinecartTNT> {
 		this.blockRenderer = context.getBlockRenderDispatcher();
 	}
 
-	protected void renderMinecartContents(MinecartTNT minecartTNT, float f, BlockState blockState, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
-		int j = minecartTNT.getFuse();
-		if (j > -1 && (float)j - f + 1.0F < 10.0F) {
-			float g = 1.0F - ((float)j - f + 1.0F) / 10.0F;
+	protected void renderMinecartContents(
+		MinecartTntRenderState minecartTntRenderState, BlockState blockState, PoseStack poseStack, MultiBufferSource multiBufferSource, int i
+	) {
+		float f = minecartTntRenderState.fuseRemainingInTicks;
+		if (f > -1.0F && f < 10.0F) {
+			float g = 1.0F - f / 10.0F;
 			g = Mth.clamp(g, 0.0F, 1.0F);
 			g *= g;
 			g *= g;
@@ -31,7 +34,7 @@ public class TntMinecartRenderer extends MinecartRenderer<MinecartTNT> {
 			poseStack.scale(h, h, h);
 		}
 
-		renderWhiteSolidBlock(this.blockRenderer, blockState, poseStack, multiBufferSource, i, j > -1 && j / 5 % 2 == 0);
+		renderWhiteSolidBlock(this.blockRenderer, blockState, poseStack, multiBufferSource, i, f > -1.0F && (int)f / 5 % 2 == 0);
 	}
 
 	public static void renderWhiteSolidBlock(
@@ -45,5 +48,14 @@ public class TntMinecartRenderer extends MinecartRenderer<MinecartTNT> {
 		}
 
 		blockRenderDispatcher.renderSingleBlock(blockState, poseStack, multiBufferSource, i, j);
+	}
+
+	public MinecartTntRenderState createRenderState() {
+		return new MinecartTntRenderState();
+	}
+
+	public void extractRenderState(MinecartTNT minecartTNT, MinecartTntRenderState minecartTntRenderState, float f) {
+		super.extractRenderState(minecartTNT, minecartTntRenderState, f);
+		minecartTntRenderState.fuseRemainingInTicks = minecartTNT.getFuse() > -1 ? (float)minecartTNT.getFuse() - f + 1.0F : -1.0F;
 	}
 }

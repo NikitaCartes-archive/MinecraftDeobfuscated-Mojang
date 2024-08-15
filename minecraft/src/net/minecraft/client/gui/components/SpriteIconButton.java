@@ -5,6 +5,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
@@ -94,7 +95,7 @@ public abstract class SpriteIconButton extends Button {
 			super.renderWidget(guiGraphics, i, j, f);
 			int k = this.getX() + this.getWidth() / 2 - this.spriteWidth / 2;
 			int l = this.getY() + this.getHeight() / 2 - this.spriteHeight / 2;
-			guiGraphics.blitSprite(this.sprite, k, l, this.spriteWidth, this.spriteHeight);
+			guiGraphics.blitSprite(RenderType::guiTextured, this.sprite, k, l, this.spriteWidth, this.spriteHeight);
 		}
 
 		@Override
@@ -115,7 +116,7 @@ public abstract class SpriteIconButton extends Button {
 			super.renderWidget(guiGraphics, i, j, f);
 			int k = this.getX() + this.getWidth() - this.spriteWidth - 2;
 			int l = this.getY() + this.getHeight() / 2 - this.spriteHeight / 2;
-			guiGraphics.blitSprite(this.sprite, k, l, this.spriteWidth, this.spriteHeight);
+			guiGraphics.blitSprite(RenderType::guiTextured, this.sprite, k, l, this.spriteWidth, this.spriteHeight);
 		}
 
 		@Override

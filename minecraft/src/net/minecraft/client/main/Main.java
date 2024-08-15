@@ -158,7 +158,7 @@ public class Main {
 			String string7 = parseArgument(optionSet, optionSpec27);
 			File file2 = optionSet.has(optionSpec7) ? parseArgument(optionSet, optionSpec7) : new File(file, "assets/");
 			File file3 = optionSet.has(optionSpec8) ? parseArgument(optionSet, optionSpec8) : new File(file, "resourcepacks/");
-			UUID uUID = optionSet.has(optionSpec14)
+			UUID uUID = hasValidUuid(optionSpec14, optionSet, logger)
 				? UndashedUuid.fromStringLenient(optionSpec14.value(optionSet))
 				: UUIDUtil.createOfflinePlayerUUID(optionSpec13.value(optionSet));
 			String string8 = optionSet.has(optionSpec25) ? optionSpec25.value(optionSet) : null;
@@ -265,6 +265,20 @@ public class Main {
 
 	private static boolean stringHasValue(@Nullable String string) {
 		return string != null && !string.isEmpty();
+	}
+
+	private static boolean hasValidUuid(OptionSpec<String> optionSpec, OptionSet optionSet, Logger logger) {
+		return optionSet.has(optionSpec) && isUuidValid(optionSpec, optionSet, logger);
+	}
+
+	private static boolean isUuidValid(OptionSpec<String> optionSpec, OptionSet optionSet, Logger logger) {
+		try {
+			UndashedUuid.fromStringLenient(optionSpec.value(optionSet));
+			return true;
+		} catch (IllegalArgumentException var4) {
+			logger.warn("Invalid UUID: '{}", optionSpec.value(optionSet));
+			return false;
+		}
 	}
 
 	static {

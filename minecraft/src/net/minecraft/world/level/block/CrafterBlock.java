@@ -34,6 +34,7 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
@@ -75,7 +76,7 @@ public class CrafterBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	protected void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
+	protected void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, @Nullable Orientation orientation, boolean bl) {
 		boolean bl2 = level.hasNeighborSignal(blockPos);
 		boolean bl3 = (Boolean)blockState.getValue(TRIGGERED);
 		BlockEntity blockEntity = level.getBlockEntity(blockPos);
@@ -142,16 +143,11 @@ public class CrafterBlock extends BaseEntityBlock {
 
 	@Override
 	protected InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
-		if (level.isClientSide) {
-			return InteractionResult.SUCCESS;
-		} else {
-			BlockEntity blockEntity = level.getBlockEntity(blockPos);
-			if (blockEntity instanceof CrafterBlockEntity) {
-				player.openMenu((CrafterBlockEntity)blockEntity);
-			}
-
-			return InteractionResult.CONSUME;
+		if (!level.isClientSide && level.getBlockEntity(blockPos) instanceof CrafterBlockEntity crafterBlockEntity) {
+			player.openMenu(crafterBlockEntity);
 		}
+
+		return InteractionResult.SUCCESS;
 	}
 
 	protected void dispenseFrom(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos) {

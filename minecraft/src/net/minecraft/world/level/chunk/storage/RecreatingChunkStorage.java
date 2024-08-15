@@ -4,6 +4,7 @@ import com.mojang.datafixers.DataFixer;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.ChunkPos;
 import org.apache.commons.io.FileUtils;
@@ -21,9 +22,9 @@ public class RecreatingChunkStorage extends ChunkStorage {
 	}
 
 	@Override
-	public CompletableFuture<Void> write(ChunkPos chunkPos, CompoundTag compoundTag) {
+	public CompletableFuture<Void> write(ChunkPos chunkPos, Supplier<CompoundTag> supplier) {
 		this.handleLegacyStructureIndex(chunkPos);
-		return this.writeWorker.store(chunkPos, compoundTag);
+		return this.writeWorker.store(chunkPos, supplier);
 	}
 
 	@Override

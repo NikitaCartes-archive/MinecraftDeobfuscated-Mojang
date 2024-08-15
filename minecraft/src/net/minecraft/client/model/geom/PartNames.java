@@ -85,4 +85,10 @@ public class PartNames {
 	public static final String RODS = "rods";
 	public static final String MUSHROOMS = "mushrooms";
 	public static final String BONE = "bone";
+	public static final String LEFT_PADDLE = "left_paddle";
+	public static final String RIGHT_PADDLE = "right_paddle";
+	public static final String BOTTOM = "bottom";
+	public static final String CHEST_BOTTOM = "chest_bottom";
+	public static final String CHEST_LID = "chest_lid";
+	public static final String CHEST_LOCK = "chest_lock";
 }

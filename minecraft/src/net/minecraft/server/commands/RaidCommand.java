@@ -17,9 +17,9 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.raid.Raid;
 import net.minecraft.world.entity.raid.Raider;
 import net.minecraft.world.entity.raid.Raids;
@@ -89,18 +89,18 @@ public class RaidCommand {
 
 	private static int spawnLeader(CommandSourceStack commandSourceStack) {
 		commandSourceStack.sendSuccess(() -> Component.literal("Spawned a raid captain"), false);
-		Raider raider = EntityType.PILLAGER.create(commandSourceStack.getLevel());
+		Raider raider = EntityType.PILLAGER.create(commandSourceStack.getLevel(), EntitySpawnReason.COMMAND);
 		if (raider == null) {
 			commandSourceStack.sendFailure(Component.literal("Pillager failed to spawn"));
 			return 0;
 		} else {
 			raider.setPatrolLeader(true);
-			raider.setItemSlot(EquipmentSlot.HEAD, Raid.getLeaderBannerInstance(commandSourceStack.registryAccess().lookupOrThrow(Registries.BANNER_PATTERN)));
+			raider.setItemSlot(EquipmentSlot.HEAD, Raid.getOminousBannerInstance(commandSourceStack.registryAccess().lookupOrThrow(Registries.BANNER_PATTERN)));
 			raider.setPos(commandSourceStack.getPosition().x, commandSourceStack.getPosition().y, commandSourceStack.getPosition().z);
 			raider.finalizeSpawn(
 				commandSourceStack.getLevel(),
 				commandSourceStack.getLevel().getCurrentDifficultyAt(BlockPos.containing(commandSourceStack.getPosition())),
-				MobSpawnType.COMMAND,
+				EntitySpawnReason.COMMAND,
 				null
 			);
 			commandSourceStack.getLevel().addFreshEntityWithPassengers(raider);

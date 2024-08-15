@@ -38,6 +38,7 @@ public interface DamageTypeTags {
 	TagKey<DamageType> BURN_FROM_STEPPING = create("burn_from_stepping");
 	TagKey<DamageType> PANIC_CAUSES = create("panic_causes");
 	TagKey<DamageType> PANIC_ENVIRONMENTAL_CAUSES = create("panic_environmental_causes");
+	TagKey<DamageType> IS_MACE_SMASH = create("mace_smash");
 
 	private static TagKey<DamageType> create(String string) {
 		return TagKey.create(Registries.DAMAGE_TYPE, ResourceLocation.withDefaultNamespace(string));

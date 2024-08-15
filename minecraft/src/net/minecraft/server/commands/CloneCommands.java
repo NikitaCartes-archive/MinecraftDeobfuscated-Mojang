@@ -261,7 +261,7 @@ public class CloneCommands {
 									);
 									list2.add(new CloneCommands.CloneBlockInfo(blockPos7, blockState, cloneBlockEntityInfo));
 									deque.addLast(blockPos6);
-								} else if (!blockState.isSolidRender(serverLevel, blockPos6) && !blockState.isCollisionShapeFullBlock(serverLevel, blockPos6)) {
+								} else if (!blockState.isSolidRender() && !blockState.isCollisionShapeFullBlock(serverLevel, blockPos6)) {
 									list3.add(new CloneCommands.CloneBlockInfo(blockPos7, blockState, null));
 									deque.addFirst(blockPos6);
 								} else {

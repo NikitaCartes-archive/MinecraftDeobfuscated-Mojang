@@ -1,6 +1,8 @@
 package net.minecraft.world.level;
 
+import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -35,10 +37,6 @@ public interface BlockGetter extends LevelHeightAccessor {
 		return this.getBlockState(blockPos).getLightEmission();
 	}
 
-	default int getMaxLightLevel() {
-		return 15;
-	}
-
 	default Stream<BlockState> getBlockStates(AABB aABB) {
 		return BlockPos.betweenClosedStream(aABB).map(this::getBlockState);
 	}
@@ -53,14 +51,14 @@ public interface BlockGetter extends LevelHeightAccessor {
 				Vec3 vec3 = clipBlockStateContextx.getFrom().subtract(clipBlockStateContextx.getTo());
 				return clipBlockStateContextx.isTargetBlock().test(blockState)
 					? new BlockHitResult(
-						clipBlockStateContextx.getTo(), Direction.getNearest(vec3.x, vec3.y, vec3.z), BlockPos.containing(clipBlockStateContextx.getTo()), false
+						clipBlockStateContextx.getTo(), Direction.getApproximateNearest(vec3.x, vec3.y, vec3.z), BlockPos.containing(clipBlockStateContextx.getTo()), false
 					)
 					: null;
 			},
 			clipBlockStateContextx -> {
 				Vec3 vec3 = clipBlockStateContextx.getFrom().subtract(clipBlockStateContextx.getTo());
 				return BlockHitResult.miss(
-					clipBlockStateContextx.getTo(), Direction.getNearest(vec3.x, vec3.y, vec3.z), BlockPos.containing(clipBlockStateContextx.getTo())
+					clipBlockStateContextx.getTo(), Direction.getApproximateNearest(vec3.x, vec3.y, vec3.z), BlockPos.containing(clipBlockStateContextx.getTo())
 				);
 			}
 		);
@@ -81,7 +79,7 @@ public interface BlockGetter extends LevelHeightAccessor {
 			return d <= e ? blockHitResult : blockHitResult2;
 		}, clipContextx -> {
 			Vec3 vec3 = clipContextx.getFrom().subtract(clipContextx.getTo());
-			return BlockHitResult.miss(clipContextx.getTo(), Direction.getNearest(vec3.x, vec3.y, vec3.z), BlockPos.containing(clipContextx.getTo()));
+			return BlockHitResult.miss(clipContextx.getTo(), Direction.getApproximateNearest(vec3.x, vec3.y, vec3.z), BlockPos.containing(clipContextx.getTo()));
 		});
 	}
 
@@ -169,6 +167,80 @@ public interface BlockGetter extends LevelHeightAccessor {
 				}
 
 				return (T)function.apply(object);
+			}
+		}
+	}
+
+	static Iterable<BlockPos> boxTraverseBlocks(Vec3 vec3, Vec3 vec32, AABB aABB) {
+		AABB aABB2 = aABB.inflate(1.0E-5F);
+		Vec3 vec33 = vec32.subtract(vec3);
+		Iterable<BlockPos> iterable = BlockPos.betweenClosed(aABB2);
+		if (vec33.lengthSqr() < (double)Mth.square(0.99999F)) {
+			return iterable;
+		} else {
+			Set<BlockPos> set = new ObjectOpenHashSet<>();
+
+			for (BlockPos blockPos : iterable) {
+				set.add(blockPos.immutable());
+			}
+
+			Vec3 vec34 = vec33.normalize().scale(1.0E-7);
+			Vec3 vec35 = aABB.getMinPosition().add(vec34);
+			Vec3 vec36 = aABB.getMinPosition().subtract(vec33).subtract(vec34);
+			addCollisionsAlongTravel(set, vec36, vec35, aABB2);
+			return set;
+		}
+	}
+
+	private static void addCollisionsAlongTravel(Set<BlockPos> set, Vec3 vec3, Vec3 vec32, AABB aABB) {
+		Vec3 vec33 = vec32.subtract(vec3);
+		int i = Mth.floor(vec3.x);
+		int j = Mth.floor(vec3.y);
+		int k = Mth.floor(vec3.z);
+		int l = Mth.sign(vec33.x);
+		int m = Mth.sign(vec33.y);
+		int n = Mth.sign(vec33.z);
+		double d = l == 0 ? Double.MAX_VALUE : (double)l / vec33.x;
+		double e = m == 0 ? Double.MAX_VALUE : (double)m / vec33.y;
+		double f = n == 0 ? Double.MAX_VALUE : (double)n / vec33.z;
+		double g = d * (l > 0 ? 1.0 - Mth.frac(vec3.x) : Mth.frac(vec3.x));
+		double h = e * (m > 0 ? 1.0 - Mth.frac(vec3.y) : Mth.frac(vec3.y));
+		double o = f * (n > 0 ? 1.0 - Mth.frac(vec3.z) : Mth.frac(vec3.z));
+
+		while (g <= 1.0 || h <= 1.0 || o <= 1.0) {
+			if (g < h) {
+				if (g < o) {
+					i += l;
+					g += d;
+				} else {
+					k += n;
+					o += f;
+				}
+			} else if (h < o) {
+				j += m;
+				h += e;
+			} else {
+				k += n;
+				o += f;
+			}
+
+			Optional<Vec3> optional = AABB.clip((double)i, (double)j, (double)k, (double)(i + 1), (double)(j + 1), (double)(k + 1), vec3, vec32);
+			if (!optional.isEmpty()) {
+				Vec3 vec34 = (Vec3)optional.get();
+				double p = Mth.clamp(vec34.x, (double)i + 1.0E-5F, (double)i + 1.0 - 1.0E-5F);
+				double q = Mth.clamp(vec34.y, (double)j + 1.0E-5F, (double)j + 1.0 - 1.0E-5F);
+				double r = Mth.clamp(vec34.z, (double)k + 1.0E-5F, (double)k + 1.0 - 1.0E-5F);
+				int s = Mth.floor(p + aABB.getXsize());
+				int t = Mth.floor(q + aABB.getYsize());
+				int u = Mth.floor(r + aABB.getZsize());
+
+				for (int v = i; v <= s; v++) {
+					for (int w = j; w <= t; w++) {
+						for (int x = k; x <= u; x++) {
+							set.add(new BlockPos(v, w, x));
+						}
+					}
+				}
 			}
 		}
 	}

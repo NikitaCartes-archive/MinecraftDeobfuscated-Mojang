@@ -8,7 +8,6 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -91,14 +90,14 @@ public class SweetBerryBushBlock extends BushBlock implements BonemealableBlock 
 	}
 
 	@Override
-	protected ItemInteractionResult useItemOn(
+	protected InteractionResult useItemOn(
 		ItemStack itemStack, BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
 	) {
 		int i = (Integer)blockState.getValue(AGE);
 		boolean bl = i == 3;
-		return !bl && itemStack.is(Items.BONE_MEAL)
-			? ItemInteractionResult.SKIP_DEFAULT_BLOCK_INTERACTION
-			: super.useItemOn(itemStack, blockState, level, blockPos, player, interactionHand, blockHitResult);
+		return (InteractionResult)(!bl && itemStack.is(Items.BONE_MEAL)
+			? InteractionResult.PASS
+			: super.useItemOn(itemStack, blockState, level, blockPos, player, interactionHand, blockHitResult));
 	}
 
 	@Override
@@ -112,7 +111,7 @@ public class SweetBerryBushBlock extends BushBlock implements BonemealableBlock 
 			BlockState blockState2 = blockState.setValue(AGE, Integer.valueOf(1));
 			level.setBlock(blockPos, blockState2, 2);
 			level.gameEvent(GameEvent.BLOCK_CHANGE, blockPos, GameEvent.Context.of(player, blockState2));
-			return InteractionResult.sidedSuccess(level.isClientSide);
+			return InteractionResult.SUCCESS;
 		} else {
 			return super.useWithoutItem(blockState, level, blockPos, player, blockHitResult);
 		}

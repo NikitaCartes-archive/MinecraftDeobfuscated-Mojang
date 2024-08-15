@@ -1,5 +1,6 @@
 package net.minecraft.world.inventory;
 
+import java.util.List;
 import java.util.Optional;
 import javax.annotation.Nullable;
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
@@ -7,7 +8,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.player.StackedContents;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.CraftingRecipe;
@@ -16,16 +16,17 @@ import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 
-public class CraftingMenu extends RecipeBookMenu<CraftingInput, CraftingRecipe> {
+public class CraftingMenu extends AbstractCraftingMenu {
+	private static final int CRAFTING_GRID_WIDTH = 3;
+	private static final int CRAFTING_GRID_HEIGHT = 3;
 	public static final int RESULT_SLOT = 0;
 	private static final int CRAFT_SLOT_START = 1;
+	private static final int CRAFT_SLOT_COUNT = 9;
 	private static final int CRAFT_SLOT_END = 10;
 	private static final int INV_SLOT_START = 10;
 	private static final int INV_SLOT_END = 37;
 	private static final int USE_ROW_SLOT_START = 37;
 	private static final int USE_ROW_SLOT_END = 46;
-	private final CraftingContainer craftSlots = new TransientCraftingContainer(this, 3, 3);
-	private final ResultContainer resultSlots = new ResultContainer();
 	private final ContainerLevelAccess access;
 	private final Player player;
 	private boolean placingRecipe;
@@ -35,26 +36,12 @@ public class CraftingMenu extends RecipeBookMenu<CraftingInput, CraftingRecipe> 
 	}
 
 	public CraftingMenu(int i, Inventory inventory, ContainerLevelAccess containerLevelAccess) {
-		super(MenuType.CRAFTING, i);
+		super(MenuType.CRAFTING, i, 3, 3);
 		this.access = containerLevelAccess;
 		this.player = inventory.player;
-		this.addSlot(new ResultSlot(inventory.player, this.craftSlots, this.resultSlots, 0, 124, 35));
-
-		for (int j = 0; j < 3; j++) {
-			for (int k = 0; k < 3; k++) {
-				this.addSlot(new Slot(this.craftSlots, k + j * 3, 30 + k * 18, 17 + j * 18));
-			}
-		}
-
-		for (int j = 0; j < 3; j++) {
-			for (int k = 0; k < 9; k++) {
-				this.addSlot(new Slot(inventory, k + j * 9 + 9, 8 + k * 18, 84 + j * 18));
-			}
-		}
-
-		for (int j = 0; j < 9; j++) {
-			this.addSlot(new Slot(inventory, j, 8 + j * 18, 142));
-		}
+		this.addResultSlot(this.player, 124, 35);
+		this.addCraftingGridSlots(30, 17);
+		this.addStandardInventorySlots(inventory, 8, 84);
 	}
 
 	protected static void slotChangedCraftingGrid(
@@ -104,22 +91,6 @@ public class CraftingMenu extends RecipeBookMenu<CraftingInput, CraftingRecipe> 
 	public void finishPlacingRecipe(RecipeHolder<CraftingRecipe> recipeHolder) {
 		this.placingRecipe = false;
 		this.access.execute((level, blockPos) -> slotChangedCraftingGrid(this, level, this.player, this.craftSlots, this.resultSlots, recipeHolder));
-	}
-
-	@Override
-	public void fillCraftSlotsStackedContents(StackedContents stackedContents) {
-		this.craftSlots.fillStackedContents(stackedContents);
-	}
-
-	@Override
-	public void clearCraftingContent() {
-		this.craftSlots.clearContent();
-		this.resultSlots.clearContent();
-	}
-
-	@Override
-	public boolean recipeMatches(RecipeHolder<CraftingRecipe> recipeHolder) {
-		return recipeHolder.value().matches(this.craftSlots.asCraftInput(), this.player.level());
 	}
 
 	@Override
@@ -186,23 +157,13 @@ public class CraftingMenu extends RecipeBookMenu<CraftingInput, CraftingRecipe> 
 	}
 
 	@Override
-	public int getResultSlotIndex() {
-		return 0;
+	public Slot getResultSlot() {
+		return this.slots.get(0);
 	}
 
 	@Override
-	public int getGridWidth() {
-		return this.craftSlots.getWidth();
-	}
-
-	@Override
-	public int getGridHeight() {
-		return this.craftSlots.getHeight();
-	}
-
-	@Override
-	public int getSize() {
-		return 10;
+	public List<Slot> getInputGridSlots() {
+		return this.slots.subList(1, 10);
 	}
 
 	@Override
@@ -211,7 +172,7 @@ public class CraftingMenu extends RecipeBookMenu<CraftingInput, CraftingRecipe> 
 	}
 
 	@Override
-	public boolean shouldMoveToInventory(int i) {
-		return i != this.getResultSlotIndex();
+	protected Player owner() {
+		return this.player;
 	}
 }

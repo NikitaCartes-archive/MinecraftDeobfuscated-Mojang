@@ -11,16 +11,18 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.TriState;
 import org.apache.commons.lang3.tuple.Triple;
 import org.joml.Matrix4f;
 import org.joml.Matrix4fStack;
 
 @Environment(EnvType.CLIENT)
 public abstract class RenderStateShard {
-	private static final float VIEW_SCALE_Z_EPSILON = 0.99975586F;
+	private static final float VIEW_SCALE_Z_EPSILON = 2.4414062E-4F;
 	public static final double MAX_ENCHANTMENT_GLINT_SPEED_MILLIS = 8.0;
 	protected final String name;
 	private final Runnable setupState;
@@ -89,6 +91,53 @@ public abstract class RenderStateShard {
 			RenderSystem.defaultBlendFunc();
 		}
 	);
+	protected static final RenderStateShard.TransparencyStateShard VIGNETTE_TRANSPARENCY = new RenderStateShard.TransparencyStateShard(
+		"vignette_transparency", () -> {
+			RenderSystem.enableBlend();
+			RenderSystem.blendFunc(GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE_MINUS_SRC_COLOR);
+		}, () -> {
+			RenderSystem.disableBlend();
+			RenderSystem.defaultBlendFunc();
+		}
+	);
+	protected static final RenderStateShard.TransparencyStateShard CROSSHAIR_TRANSPARENCY = new RenderStateShard.TransparencyStateShard(
+		"crosshair_transparency",
+		() -> {
+			RenderSystem.enableBlend();
+			RenderSystem.blendFuncSeparate(
+				GlStateManager.SourceFactor.ONE_MINUS_DST_COLOR,
+				GlStateManager.DestFactor.ONE_MINUS_SRC_COLOR,
+				GlStateManager.SourceFactor.ONE,
+				GlStateManager.DestFactor.ZERO
+			);
+		},
+		() -> {
+			RenderSystem.disableBlend();
+			RenderSystem.defaultBlendFunc();
+		}
+	);
+	protected static final RenderStateShard.TransparencyStateShard MOJANG_LOGO_TRANSPARENCY = new RenderStateShard.TransparencyStateShard(
+		"mojang_logo_transparency", () -> {
+			RenderSystem.enableBlend();
+			RenderSystem.blendFunc(770, 1);
+		}, () -> {
+			RenderSystem.disableBlend();
+			RenderSystem.defaultBlendFunc();
+		}
+	);
+	protected static final RenderStateShard.TransparencyStateShard NAUSEA_OVERLAY_TRANSPARENCY = new RenderStateShard.TransparencyStateShard(
+		"nausea_overlay_transparency",
+		() -> {
+			RenderSystem.enableBlend();
+			RenderSystem.blendFuncSeparate(
+				GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE
+			);
+		},
+		() -> {
+			RenderSystem.disableBlend();
+			RenderSystem.defaultBlendFunc();
+		}
+	);
 	protected static final RenderStateShard.ShaderStateShard NO_SHADER = new RenderStateShard.ShaderStateShard();
 	protected static final RenderStateShard.ShaderStateShard POSITION_COLOR_LIGHTMAP_SHADER = new RenderStateShard.ShaderStateShard(
 		GameRenderer::getPositionColorLightmapShader
@@ -99,6 +148,9 @@ public abstract class RenderStateShard {
 		GameRenderer::getPositionColorTexLightmapShader
 	);
 	protected static final RenderStateShard.ShaderStateShard POSITION_COLOR_SHADER = new RenderStateShard.ShaderStateShard(GameRenderer::getPositionColorShader);
+	protected static final RenderStateShard.ShaderStateShard POSITION_TEXTURE_COLOR_SHADER = new RenderStateShard.ShaderStateShard(
+		GameRenderer::getPositionTexColorShader
+	);
 	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_SOLID_SHADER = new RenderStateShard.ShaderStateShard(
 		GameRenderer::getRendertypeSolidShader
 	);
@@ -238,9 +290,11 @@ public abstract class RenderStateShard {
 		GameRenderer::getRendertypeBreezeWindShader
 	);
 	protected static final RenderStateShard.TextureStateShard BLOCK_SHEET_MIPPED = new RenderStateShard.TextureStateShard(
-		TextureAtlas.LOCATION_BLOCKS, false, true
+		TextureAtlas.LOCATION_BLOCKS, TriState.FALSE, true
 	);
-	protected static final RenderStateShard.TextureStateShard BLOCK_SHEET = new RenderStateShard.TextureStateShard(TextureAtlas.LOCATION_BLOCKS, false, false);
+	protected static final RenderStateShard.TextureStateShard BLOCK_SHEET = new RenderStateShard.TextureStateShard(
+		TextureAtlas.LOCATION_BLOCKS, TriState.FALSE, false
+	);
 	protected static final RenderStateShard.EmptyTextureStateShard NO_TEXTURE = new RenderStateShard.EmptyTextureStateShard();
 	protected static final RenderStateShard.TexturingStateShard DEFAULT_TEXTURING = new RenderStateShard.TexturingStateShard("default_texturing", () -> {
 	}, () -> {
@@ -280,23 +334,34 @@ public abstract class RenderStateShard {
 		Matrix4fStack matrix4fStack = RenderSystem.getModelViewStack();
 		matrix4fStack.pushMatrix();
 		matrix4fStack.scale(0.99975586F, 0.99975586F, 0.99975586F);
-		RenderSystem.applyModelViewMatrix();
 	}, () -> {
 		Matrix4fStack matrix4fStack = RenderSystem.getModelViewStack();
 		matrix4fStack.popMatrix();
-		RenderSystem.applyModelViewMatrix();
 	});
-	protected static final RenderStateShard.OutputStateShard MAIN_TARGET = new RenderStateShard.OutputStateShard("main_target", () -> {
-	}, () -> {
-	});
+	protected static final RenderStateShard.LayeringStateShard VIEW_OFFSET_Z_LAYERING_FORWARD = new RenderStateShard.LayeringStateShard(
+		"view_offset_z_layering_forward", () -> {
+			Matrix4fStack matrix4fStack = RenderSystem.getModelViewStack();
+			matrix4fStack.pushMatrix();
+			matrix4fStack.scale(1.0002441F, 1.0002441F, 1.0002441F);
+		}, () -> {
+			Matrix4fStack matrix4fStack = RenderSystem.getModelViewStack();
+			matrix4fStack.popMatrix();
+		}
+	);
+	protected static final RenderStateShard.OutputStateShard MAIN_TARGET = new RenderStateShard.OutputStateShard(
+		"main_target", () -> Minecraft.getInstance().getMainRenderTarget().bindWrite(false), () -> {
+		}
+	);
 	protected static final RenderStateShard.OutputStateShard OUTLINE_TARGET = new RenderStateShard.OutputStateShard(
 		"outline_target",
-		() -> Minecraft.getInstance().levelRenderer.entityTarget().bindWrite(false),
+		() -> Minecraft.getInstance().levelRenderer.entityOutlineTarget().bindWrite(false),
 		() -> Minecraft.getInstance().getMainRenderTarget().bindWrite(false)
 	);
 	protected static final RenderStateShard.OutputStateShard TRANSLUCENT_TARGET = new RenderStateShard.OutputStateShard("translucent_target", () -> {
 		if (Minecraft.useShaderTransparency()) {
 			Minecraft.getInstance().levelRenderer.getTranslucentTarget().bindWrite(false);
+		} else {
+			Minecraft.getInstance().getMainRenderTarget().bindWrite(false);
 		}
 	}, () -> {
 		if (Minecraft.useShaderTransparency()) {
@@ -306,6 +371,8 @@ public abstract class RenderStateShard {
 	protected static final RenderStateShard.OutputStateShard PARTICLES_TARGET = new RenderStateShard.OutputStateShard("particles_target", () -> {
 		if (Minecraft.useShaderTransparency()) {
 			Minecraft.getInstance().levelRenderer.getParticlesTarget().bindWrite(false);
+		} else {
+			Minecraft.getInstance().getMainRenderTarget().bindWrite(false);
 		}
 	}, () -> {
 		if (Minecraft.useShaderTransparency()) {
@@ -315,6 +382,8 @@ public abstract class RenderStateShard {
 	protected static final RenderStateShard.OutputStateShard WEATHER_TARGET = new RenderStateShard.OutputStateShard("weather_target", () -> {
 		if (Minecraft.useShaderTransparency()) {
 			Minecraft.getInstance().levelRenderer.getWeatherTarget().bindWrite(false);
+		} else {
+			Minecraft.getInstance().getMainRenderTarget().bindWrite(false);
 		}
 	}, () -> {
 		if (Minecraft.useShaderTransparency()) {
@@ -324,6 +393,8 @@ public abstract class RenderStateShard {
 	protected static final RenderStateShard.OutputStateShard CLOUDS_TARGET = new RenderStateShard.OutputStateShard("clouds_target", () -> {
 		if (Minecraft.useShaderTransparency()) {
 			Minecraft.getInstance().levelRenderer.getCloudsTarget().bindWrite(false);
+		} else {
+			Minecraft.getInstance().getMainRenderTarget().bindWrite(false);
 		}
 	}, () -> {
 		if (Minecraft.useShaderTransparency()) {
@@ -333,6 +404,8 @@ public abstract class RenderStateShard {
 	protected static final RenderStateShard.OutputStateShard ITEM_ENTITY_TARGET = new RenderStateShard.OutputStateShard("item_entity_target", () -> {
 		if (Minecraft.useShaderTransparency()) {
 			Minecraft.getInstance().levelRenderer.getItemEntityTarget().bindWrite(false);
+		} else {
+			Minecraft.getInstance().getMainRenderTarget().bindWrite(false);
 		}
 	}, () -> {
 		if (Minecraft.useShaderTransparency()) {
@@ -600,19 +673,20 @@ public abstract class RenderStateShard {
 	@Environment(EnvType.CLIENT)
 	protected static class TextureStateShard extends RenderStateShard.EmptyTextureStateShard {
 		private final Optional<ResourceLocation> texture;
-		private final boolean blur;
+		private final TriState blur;
 		private final boolean mipmap;
 
-		public TextureStateShard(ResourceLocation resourceLocation, boolean bl, boolean bl2) {
+		public TextureStateShard(ResourceLocation resourceLocation, TriState triState, boolean bl) {
 			super(() -> {
 				TextureManager textureManager = Minecraft.getInstance().getTextureManager();
-				textureManager.getTexture(resourceLocation).setFilter(bl, bl2);
+				AbstractTexture abstractTexture = textureManager.getTexture(resourceLocation);
+				abstractTexture.setFilter(triState.toBoolean(abstractTexture.getDefaultBlur()), bl);
 				RenderSystem.setShaderTexture(0, resourceLocation);
 			}, () -> {
 			});
 			this.texture = Optional.of(resourceLocation);
-			this.blur = bl;
-			this.mipmap = bl2;
+			this.blur = triState;
+			this.mipmap = bl;
 		}
 
 		@Override

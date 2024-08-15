@@ -20,7 +20,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
-import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.blending.BlendingData;
 import net.minecraft.world.level.levelgen.structure.Structure;
@@ -61,11 +60,6 @@ public class ImposterProtoChunk extends ProtoChunk {
 	@Override
 	public FluidState getFluidState(BlockPos blockPos) {
 		return this.wrapped.getFluidState(blockPos);
-	}
-
-	@Override
-	public int getMaxLightLevel() {
-		return this.wrapped.getMaxLightLevel();
 	}
 
 	@Override
@@ -229,8 +223,8 @@ public class ImposterProtoChunk extends ProtoChunk {
 	}
 
 	@Override
-	public ChunkAccess.TicksToSave getTicksForSerialization() {
-		return this.wrapped.getTicksForSerialization();
+	public ChunkAccess.PackedTicks getTicksForSerialization(long l) {
+		return this.wrapped.getTicksForSerialization(l);
 	}
 
 	@Nullable
@@ -240,23 +234,18 @@ public class ImposterProtoChunk extends ProtoChunk {
 	}
 
 	@Override
-	public void setBlendingData(BlendingData blendingData) {
-		this.wrapped.setBlendingData(blendingData);
-	}
-
-	@Override
-	public CarvingMask getCarvingMask(GenerationStep.Carving carving) {
+	public CarvingMask getCarvingMask() {
 		if (this.allowWrites) {
-			return super.getCarvingMask(carving);
+			return super.getCarvingMask();
 		} else {
 			throw (UnsupportedOperationException)Util.pauseInIde(new UnsupportedOperationException("Meaningless in this context"));
 		}
 	}
 
 	@Override
-	public CarvingMask getOrCreateCarvingMask(GenerationStep.Carving carving) {
+	public CarvingMask getOrCreateCarvingMask() {
 		if (this.allowWrites) {
-			return super.getOrCreateCarvingMask(carving);
+			return super.getOrCreateCarvingMask();
 		} else {
 			throw (UnsupportedOperationException)Util.pauseInIde(new UnsupportedOperationException("Meaningless in this context"));
 		}

@@ -13,9 +13,12 @@ import java.util.function.Function;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.screens.LoadingOverlay;
 import net.minecraft.client.renderer.blockentity.TheEndPortalRenderer;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.TriState;
 
 @Environment(EnvType.CLIENT)
 public abstract class RenderType extends RenderStateShard {
@@ -75,7 +78,7 @@ public abstract class RenderType extends RenderStateShard {
 		(Function<ResourceLocation, RenderType>)(resourceLocation -> {
 			RenderType.CompositeState compositeState = RenderType.CompositeState.builder()
 				.setShaderState(RENDERTYPE_ENTITY_SOLID_SHADER)
-				.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false))
+				.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, TriState.FALSE, false))
 				.setTransparencyState(NO_TRANSPARENCY)
 				.setLightmapState(LIGHTMAP)
 				.setOverlayState(OVERLAY)
@@ -83,11 +86,24 @@ public abstract class RenderType extends RenderStateShard {
 			return create("entity_solid", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 1536, true, false, compositeState);
 		})
 	);
+	private static final Function<ResourceLocation, RenderType> ENTITY_SOLID_Z_OFFSET_FORWARD = Util.memoize(
+		(Function<ResourceLocation, RenderType>)(resourceLocation -> {
+			RenderType.CompositeState compositeState = RenderType.CompositeState.builder()
+				.setShaderState(RENDERTYPE_ENTITY_SOLID_SHADER)
+				.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, TriState.FALSE, false))
+				.setTransparencyState(NO_TRANSPARENCY)
+				.setLightmapState(LIGHTMAP)
+				.setOverlayState(OVERLAY)
+				.setLayeringState(VIEW_OFFSET_Z_LAYERING_FORWARD)
+				.createCompositeState(true);
+			return create("entity_solid_z_offset_forward", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 1536, true, false, compositeState);
+		})
+	);
 	private static final Function<ResourceLocation, RenderType> ENTITY_CUTOUT = Util.memoize(
 		(Function<ResourceLocation, RenderType>)(resourceLocation -> {
 			RenderType.CompositeState compositeState = RenderType.CompositeState.builder()
 				.setShaderState(RENDERTYPE_ENTITY_CUTOUT_SHADER)
-				.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false))
+				.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, TriState.FALSE, false))
 				.setTransparencyState(NO_TRANSPARENCY)
 				.setLightmapState(LIGHTMAP)
 				.setOverlayState(OVERLAY)
@@ -99,7 +115,7 @@ public abstract class RenderType extends RenderStateShard {
 		(BiFunction<ResourceLocation, Boolean, RenderType>)((resourceLocation, boolean_) -> {
 			RenderType.CompositeState compositeState = RenderType.CompositeState.builder()
 				.setShaderState(RENDERTYPE_ENTITY_CUTOUT_NO_CULL_SHADER)
-				.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false))
+				.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, TriState.FALSE, false))
 				.setTransparencyState(NO_TRANSPARENCY)
 				.setCullState(NO_CULL)
 				.setLightmapState(LIGHTMAP)
@@ -112,7 +128,7 @@ public abstract class RenderType extends RenderStateShard {
 		(BiFunction<ResourceLocation, Boolean, RenderType>)((resourceLocation, boolean_) -> {
 			RenderType.CompositeState compositeState = RenderType.CompositeState.builder()
 				.setShaderState(RENDERTYPE_ENTITY_CUTOUT_NO_CULL_Z_OFFSET_SHADER)
-				.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false))
+				.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, TriState.FALSE, false))
 				.setTransparencyState(NO_TRANSPARENCY)
 				.setCullState(NO_CULL)
 				.setLightmapState(LIGHTMAP)
@@ -126,12 +142,12 @@ public abstract class RenderType extends RenderStateShard {
 		(Function<ResourceLocation, RenderType>)(resourceLocation -> {
 			RenderType.CompositeState compositeState = RenderType.CompositeState.builder()
 				.setShaderState(RENDERTYPE_ITEM_ENTITY_TRANSLUCENT_CULL_SHADER)
-				.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false))
+				.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, TriState.FALSE, false))
 				.setTransparencyState(TRANSLUCENT_TRANSPARENCY)
 				.setOutputState(ITEM_ENTITY_TARGET)
 				.setLightmapState(LIGHTMAP)
 				.setOverlayState(OVERLAY)
-				.setWriteMaskState(RenderStateShard.COLOR_DEPTH_WRITE)
+				.setWriteMaskState(COLOR_DEPTH_WRITE)
 				.createCompositeState(true);
 			return create("item_entity_translucent_cull", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 1536, true, true, compositeState);
 		})
@@ -140,7 +156,7 @@ public abstract class RenderType extends RenderStateShard {
 		(Function<ResourceLocation, RenderType>)(resourceLocation -> {
 			RenderType.CompositeState compositeState = RenderType.CompositeState.builder()
 				.setShaderState(RENDERTYPE_ENTITY_TRANSLUCENT_CULL_SHADER)
-				.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false))
+				.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, TriState.FALSE, false))
 				.setTransparencyState(TRANSLUCENT_TRANSPARENCY)
 				.setLightmapState(LIGHTMAP)
 				.setOverlayState(OVERLAY)
@@ -152,7 +168,7 @@ public abstract class RenderType extends RenderStateShard {
 		(BiFunction<ResourceLocation, Boolean, RenderType>)((resourceLocation, boolean_) -> {
 			RenderType.CompositeState compositeState = RenderType.CompositeState.builder()
 				.setShaderState(RENDERTYPE_ENTITY_TRANSLUCENT_SHADER)
-				.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false))
+				.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, TriState.FALSE, false))
 				.setTransparencyState(TRANSLUCENT_TRANSPARENCY)
 				.setCullState(NO_CULL)
 				.setLightmapState(LIGHTMAP)
@@ -165,7 +181,7 @@ public abstract class RenderType extends RenderStateShard {
 		(BiFunction<ResourceLocation, Boolean, RenderType>)((resourceLocation, boolean_) -> {
 			RenderType.CompositeState compositeState = RenderType.CompositeState.builder()
 				.setShaderState(RENDERTYPE_ENTITY_TRANSLUCENT_EMISSIVE_SHADER)
-				.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false))
+				.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, TriState.FALSE, false))
 				.setTransparencyState(TRANSLUCENT_TRANSPARENCY)
 				.setCullState(NO_CULL)
 				.setWriteMaskState(COLOR_WRITE)
@@ -178,7 +194,7 @@ public abstract class RenderType extends RenderStateShard {
 		(Function<ResourceLocation, RenderType>)(resourceLocation -> {
 			RenderType.CompositeState compositeState = RenderType.CompositeState.builder()
 				.setShaderState(RENDERTYPE_ENTITY_SMOOTH_CUTOUT_SHADER)
-				.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false))
+				.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, TriState.FALSE, false))
 				.setCullState(NO_CULL)
 				.setLightmapState(LIGHTMAP)
 				.createCompositeState(true);
@@ -189,7 +205,7 @@ public abstract class RenderType extends RenderStateShard {
 		(BiFunction<ResourceLocation, Boolean, RenderType>)((resourceLocation, boolean_) -> {
 			RenderType.CompositeState compositeState = RenderType.CompositeState.builder()
 				.setShaderState(RENDERTYPE_BEACON_BEAM_SHADER)
-				.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false))
+				.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, TriState.FALSE, false))
 				.setTransparencyState(boolean_ ? TRANSLUCENT_TRANSPARENCY : NO_TRANSPARENCY)
 				.setWriteMaskState(boolean_ ? COLOR_WRITE : COLOR_DEPTH_WRITE)
 				.createCompositeState(false);
@@ -200,7 +216,7 @@ public abstract class RenderType extends RenderStateShard {
 		(Function<ResourceLocation, RenderType>)(resourceLocation -> {
 			RenderType.CompositeState compositeState = RenderType.CompositeState.builder()
 				.setShaderState(RENDERTYPE_ENTITY_DECAL_SHADER)
-				.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false))
+				.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, TriState.FALSE, false))
 				.setDepthTestState(EQUAL_DEPTH_TEST)
 				.setCullState(NO_CULL)
 				.setLightmapState(LIGHTMAP)
@@ -213,7 +229,7 @@ public abstract class RenderType extends RenderStateShard {
 		(Function<ResourceLocation, RenderType>)(resourceLocation -> {
 			RenderType.CompositeState compositeState = RenderType.CompositeState.builder()
 				.setShaderState(RENDERTYPE_ENTITY_NO_OUTLINE_SHADER)
-				.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false))
+				.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, TriState.FALSE, false))
 				.setTransparencyState(TRANSLUCENT_TRANSPARENCY)
 				.setCullState(NO_CULL)
 				.setLightmapState(LIGHTMAP)
@@ -227,7 +243,7 @@ public abstract class RenderType extends RenderStateShard {
 		(Function<ResourceLocation, RenderType>)(resourceLocation -> {
 			RenderType.CompositeState compositeState = RenderType.CompositeState.builder()
 				.setShaderState(RENDERTYPE_ENTITY_SHADOW_SHADER)
-				.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false))
+				.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, TriState.FALSE, false))
 				.setTransparencyState(TRANSLUCENT_TRANSPARENCY)
 				.setCullState(CULL)
 				.setLightmapState(LIGHTMAP)
@@ -243,7 +259,7 @@ public abstract class RenderType extends RenderStateShard {
 		(Function<ResourceLocation, RenderType>)(resourceLocation -> {
 			RenderType.CompositeState compositeState = RenderType.CompositeState.builder()
 				.setShaderState(RENDERTYPE_ENTITY_ALPHA_SHADER)
-				.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false))
+				.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, TriState.FALSE, false))
 				.setCullState(NO_CULL)
 				.createCompositeState(true);
 			return create("entity_alpha", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 1536, compositeState);
@@ -251,7 +267,7 @@ public abstract class RenderType extends RenderStateShard {
 	);
 	private static final BiFunction<ResourceLocation, RenderStateShard.TransparencyStateShard, RenderType> EYES = Util.memoize(
 		(BiFunction<ResourceLocation, RenderStateShard.TransparencyStateShard, RenderType>)((resourceLocation, transparencyStateShard) -> {
-			RenderStateShard.TextureStateShard textureStateShard = new RenderStateShard.TextureStateShard(resourceLocation, false, false);
+			RenderStateShard.TextureStateShard textureStateShard = new RenderStateShard.TextureStateShard(resourceLocation, TriState.FALSE, false);
 			return create(
 				"eyes",
 				DefaultVertexFormat.NEW_ENTITY,
@@ -298,7 +314,7 @@ public abstract class RenderType extends RenderStateShard {
 		1536,
 		RenderType.CompositeState.builder()
 			.setShaderState(RENDERTYPE_ARMOR_ENTITY_GLINT_SHADER)
-			.setTextureState(new RenderStateShard.TextureStateShard(ItemRenderer.ENCHANTED_GLINT_ENTITY, true, false))
+			.setTextureState(new RenderStateShard.TextureStateShard(ItemRenderer.ENCHANTED_GLINT_ENTITY, TriState.DEFAULT, false))
 			.setWriteMaskState(COLOR_WRITE)
 			.setCullState(NO_CULL)
 			.setDepthTestState(EQUAL_DEPTH_TEST)
@@ -314,7 +330,7 @@ public abstract class RenderType extends RenderStateShard {
 		1536,
 		RenderType.CompositeState.builder()
 			.setShaderState(RENDERTYPE_GLINT_TRANSLUCENT_SHADER)
-			.setTextureState(new RenderStateShard.TextureStateShard(ItemRenderer.ENCHANTED_GLINT_ITEM, true, false))
+			.setTextureState(new RenderStateShard.TextureStateShard(ItemRenderer.ENCHANTED_GLINT_ITEM, TriState.DEFAULT, false))
 			.setWriteMaskState(COLOR_WRITE)
 			.setCullState(NO_CULL)
 			.setDepthTestState(EQUAL_DEPTH_TEST)
@@ -330,7 +346,7 @@ public abstract class RenderType extends RenderStateShard {
 		1536,
 		RenderType.CompositeState.builder()
 			.setShaderState(RENDERTYPE_GLINT_SHADER)
-			.setTextureState(new RenderStateShard.TextureStateShard(ItemRenderer.ENCHANTED_GLINT_ITEM, true, false))
+			.setTextureState(new RenderStateShard.TextureStateShard(ItemRenderer.ENCHANTED_GLINT_ITEM, TriState.DEFAULT, false))
 			.setWriteMaskState(COLOR_WRITE)
 			.setCullState(NO_CULL)
 			.setDepthTestState(EQUAL_DEPTH_TEST)
@@ -345,7 +361,7 @@ public abstract class RenderType extends RenderStateShard {
 		1536,
 		RenderType.CompositeState.builder()
 			.setShaderState(RENDERTYPE_ENTITY_GLINT_SHADER)
-			.setTextureState(new RenderStateShard.TextureStateShard(ItemRenderer.ENCHANTED_GLINT_ENTITY, true, false))
+			.setTextureState(new RenderStateShard.TextureStateShard(ItemRenderer.ENCHANTED_GLINT_ENTITY, TriState.DEFAULT, false))
 			.setWriteMaskState(COLOR_WRITE)
 			.setCullState(NO_CULL)
 			.setDepthTestState(EQUAL_DEPTH_TEST)
@@ -361,7 +377,7 @@ public abstract class RenderType extends RenderStateShard {
 		1536,
 		RenderType.CompositeState.builder()
 			.setShaderState(RENDERTYPE_ENTITY_GLINT_DIRECT_SHADER)
-			.setTextureState(new RenderStateShard.TextureStateShard(ItemRenderer.ENCHANTED_GLINT_ENTITY, true, false))
+			.setTextureState(new RenderStateShard.TextureStateShard(ItemRenderer.ENCHANTED_GLINT_ENTITY, TriState.DEFAULT, false))
 			.setWriteMaskState(COLOR_WRITE)
 			.setCullState(NO_CULL)
 			.setDepthTestState(EQUAL_DEPTH_TEST)
@@ -371,7 +387,7 @@ public abstract class RenderType extends RenderStateShard {
 	);
 	private static final Function<ResourceLocation, RenderType> CRUMBLING = Util.memoize(
 		(Function<ResourceLocation, RenderType>)(resourceLocation -> {
-			RenderStateShard.TextureStateShard textureStateShard = new RenderStateShard.TextureStateShard(resourceLocation, false, false);
+			RenderStateShard.TextureStateShard textureStateShard = new RenderStateShard.TextureStateShard(resourceLocation, TriState.FALSE, false);
 			return create(
 				"crumbling",
 				DefaultVertexFormat.BLOCK,
@@ -396,10 +412,10 @@ public abstract class RenderType extends RenderStateShard {
 				VertexFormat.Mode.QUADS,
 				786432,
 				false,
-				true,
+				false,
 				RenderType.CompositeState.builder()
 					.setShaderState(RENDERTYPE_TEXT_SHADER)
-					.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false))
+					.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, TriState.FALSE, false))
 					.setTransparencyState(TRANSLUCENT_TRANSPARENCY)
 					.setLightmapState(LIGHTMAP)
 					.createCompositeState(false)
@@ -429,7 +445,7 @@ public abstract class RenderType extends RenderStateShard {
 				true,
 				RenderType.CompositeState.builder()
 					.setShaderState(RENDERTYPE_TEXT_INTENSITY_SHADER)
-					.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false))
+					.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, TriState.FALSE, false))
 					.setTransparencyState(TRANSLUCENT_TRANSPARENCY)
 					.setLightmapState(LIGHTMAP)
 					.createCompositeState(false)
@@ -445,7 +461,7 @@ public abstract class RenderType extends RenderStateShard {
 				true,
 				RenderType.CompositeState.builder()
 					.setShaderState(RENDERTYPE_TEXT_SHADER)
-					.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false))
+					.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, TriState.FALSE, false))
 					.setTransparencyState(TRANSLUCENT_TRANSPARENCY)
 					.setLightmapState(LIGHTMAP)
 					.setLayeringState(POLYGON_OFFSET_LAYERING)
@@ -462,7 +478,7 @@ public abstract class RenderType extends RenderStateShard {
 				true,
 				RenderType.CompositeState.builder()
 					.setShaderState(RENDERTYPE_TEXT_INTENSITY_SHADER)
-					.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false))
+					.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, TriState.FALSE, false))
 					.setTransparencyState(TRANSLUCENT_TRANSPARENCY)
 					.setLightmapState(LIGHTMAP)
 					.setLayeringState(POLYGON_OFFSET_LAYERING)
@@ -479,7 +495,7 @@ public abstract class RenderType extends RenderStateShard {
 				true,
 				RenderType.CompositeState.builder()
 					.setShaderState(RENDERTYPE_TEXT_SEE_THROUGH_SHADER)
-					.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false))
+					.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, TriState.FALSE, false))
 					.setTransparencyState(TRANSLUCENT_TRANSPARENCY)
 					.setLightmapState(LIGHTMAP)
 					.setDepthTestState(NO_DEPTH_TEST)
@@ -513,7 +529,7 @@ public abstract class RenderType extends RenderStateShard {
 				true,
 				RenderType.CompositeState.builder()
 					.setShaderState(RENDERTYPE_TEXT_INTENSITY_SEE_THROUGH_SHADER)
-					.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false))
+					.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, TriState.FALSE, false))
 					.setTransparencyState(TRANSLUCENT_TRANSPARENCY)
 					.setLightmapState(LIGHTMAP)
 					.setDepthTestState(NO_DEPTH_TEST)
@@ -555,7 +571,7 @@ public abstract class RenderType extends RenderStateShard {
 		1536,
 		false,
 		false,
-		RenderType.CompositeState.builder().setShaderState(RenderStateShard.POSITION_SHADER).setWriteMaskState(DEPTH_WRITE).createCompositeState(false)
+		RenderType.CompositeState.builder().setShaderState(POSITION_SHADER).setWriteMaskState(DEPTH_WRITE).createCompositeState(false)
 	);
 	private static final RenderType TRIPWIRE = create("tripwire", DefaultVertexFormat.BLOCK, VertexFormat.Mode.QUADS, 1536, true, true, tripwireState());
 	private static final RenderType END_PORTAL = create(
@@ -592,8 +608,9 @@ public abstract class RenderType extends RenderStateShard {
 			)
 			.createCompositeState(false)
 	);
-	private static final RenderType CLOUDS = createClouds(false);
-	private static final RenderType CLOUDS_DEPTH_ONLY = createClouds(true);
+	private static final RenderType FLAT_CLOUDS = createClouds(false, false);
+	private static final RenderType CLOUDS = createClouds(false, true);
+	private static final RenderType CLOUDS_DEPTH_ONLY = createClouds(true, true);
 	public static final RenderType.CompositeRenderType LINES = create(
 		"lines",
 		DefaultVertexFormat.POSITION_COLOR_NORMAL,
@@ -664,6 +681,19 @@ public abstract class RenderType extends RenderStateShard {
 			.setCullState(NO_CULL)
 			.createCompositeState(false)
 	);
+	private static final RenderType.CompositeRenderType DEBUG_TRIANGLE_FAN = create(
+		"debug_triangle_fan",
+		DefaultVertexFormat.POSITION_COLOR,
+		VertexFormat.Mode.TRIANGLE_FAN,
+		1536,
+		false,
+		true,
+		RenderType.CompositeState.builder()
+			.setShaderState(POSITION_COLOR_SHADER)
+			.setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+			.setCullState(NO_CULL)
+			.createCompositeState(false)
+	);
 	private static final RenderType.CompositeRenderType DEBUG_STRUCTURE_QUADS = create(
 		"debug_structure_quads",
 		DefaultVertexFormat.POSITION_COLOR,
@@ -716,6 +746,48 @@ public abstract class RenderType extends RenderStateShard {
 			.setWriteMaskState(COLOR_WRITE)
 			.createCompositeState(false)
 	);
+	private static final Function<ResourceLocation, RenderType> GUI_TEXTURED_OVERLAY = Util.memoize(
+		(Function<ResourceLocation, RenderType>)(resourceLocation -> create(
+				"gui_textured_overlay",
+				DefaultVertexFormat.POSITION_TEX_COLOR,
+				VertexFormat.Mode.QUADS,
+				1536,
+				RenderType.CompositeState.builder()
+					.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, TriState.DEFAULT, false))
+					.setShaderState(POSITION_TEXTURE_COLOR_SHADER)
+					.setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+					.setDepthTestState(NO_DEPTH_TEST)
+					.setWriteMaskState(COLOR_WRITE)
+					.createCompositeState(false)
+			))
+	);
+	private static final Function<ResourceLocation, RenderType> GUI_OPAQUE_TEXTURED_BACKGROUND = Util.memoize(
+		(Function<ResourceLocation, RenderType>)(resourceLocation -> create(
+				"gui_opaque_textured_background",
+				DefaultVertexFormat.POSITION_TEX_COLOR,
+				VertexFormat.Mode.QUADS,
+				786432,
+				RenderType.CompositeState.builder()
+					.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, TriState.FALSE, false))
+					.setShaderState(POSITION_TEXTURE_COLOR_SHADER)
+					.setTransparencyState(NO_TRANSPARENCY)
+					.setDepthTestState(LEQUAL_DEPTH_TEST)
+					.createCompositeState(false)
+			))
+	);
+	private static final RenderType.CompositeRenderType GUI_NAUSEA_OVERLAY = create(
+		"gui_nausea_overlay",
+		DefaultVertexFormat.POSITION_TEX_COLOR,
+		VertexFormat.Mode.QUADS,
+		1536,
+		RenderType.CompositeState.builder()
+			.setTextureState(new RenderStateShard.TextureStateShard(Gui.NAUSEA_LOCATION, TriState.DEFAULT, false))
+			.setShaderState(POSITION_TEXTURE_COLOR_SHADER)
+			.setTransparencyState(NAUSEA_OVERLAY_TRANSPARENCY)
+			.setDepthTestState(NO_DEPTH_TEST)
+			.setWriteMaskState(COLOR_WRITE)
+			.createCompositeState(false)
+	);
 	private static final RenderType.CompositeRenderType GUI_TEXT_HIGHLIGHT = create(
 		"gui_text_highlight",
 		DefaultVertexFormat.POSITION_COLOR,
@@ -737,6 +809,61 @@ public abstract class RenderType extends RenderStateShard {
 			.setShaderState(RENDERTYPE_GUI_GHOST_RECIPE_OVERLAY_SHADER)
 			.setTransparencyState(TRANSLUCENT_TRANSPARENCY)
 			.setDepthTestState(GREATER_DEPTH_TEST)
+			.setWriteMaskState(COLOR_WRITE)
+			.createCompositeState(false)
+	);
+	private static final Function<ResourceLocation, RenderType> GUI_TEXTURED = Util.memoize(
+		(Function<ResourceLocation, RenderType>)(resourceLocation -> create(
+				"gui_textured",
+				DefaultVertexFormat.POSITION_TEX_COLOR,
+				VertexFormat.Mode.QUADS,
+				786432,
+				RenderType.CompositeState.builder()
+					.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, TriState.FALSE, false))
+					.setShaderState(POSITION_TEXTURE_COLOR_SHADER)
+					.setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+					.setDepthTestState(LEQUAL_DEPTH_TEST)
+					.createCompositeState(false)
+			))
+	);
+	private static final Function<ResourceLocation, RenderType> VIGNETTE = Util.memoize(
+		(Function<ResourceLocation, RenderType>)(resourceLocation -> create(
+				"vignette",
+				DefaultVertexFormat.POSITION_TEX_COLOR,
+				VertexFormat.Mode.QUADS,
+				786432,
+				RenderType.CompositeState.builder()
+					.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, TriState.DEFAULT, false))
+					.setShaderState(POSITION_TEXTURE_COLOR_SHADER)
+					.setTransparencyState(VIGNETTE_TRANSPARENCY)
+					.setDepthTestState(NO_DEPTH_TEST)
+					.setWriteMaskState(COLOR_WRITE)
+					.createCompositeState(false)
+			))
+	);
+	private static final Function<ResourceLocation, RenderType> CROSSHAIR = Util.memoize(
+		(Function<ResourceLocation, RenderType>)(resourceLocation -> create(
+				"crosshair",
+				DefaultVertexFormat.POSITION_TEX_COLOR,
+				VertexFormat.Mode.QUADS,
+				786432,
+				RenderType.CompositeState.builder()
+					.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, TriState.FALSE, false))
+					.setShaderState(POSITION_TEXTURE_COLOR_SHADER)
+					.setTransparencyState(CROSSHAIR_TRANSPARENCY)
+					.createCompositeState(false)
+			))
+	);
+	private static final RenderType.CompositeRenderType MOJANG_LOGO = create(
+		"mojang_logo",
+		DefaultVertexFormat.POSITION_TEX_COLOR,
+		VertexFormat.Mode.QUADS,
+		786432,
+		RenderType.CompositeState.builder()
+			.setTextureState(new RenderStateShard.TextureStateShard(LoadingOverlay.MOJANG_STUDIOS_LOGO_LOCATION, TriState.DEFAULT, false))
+			.setShaderState(POSITION_TEXTURE_COLOR_SHADER)
+			.setTransparencyState(MOJANG_LOGO_TRANSPARENCY)
+			.setDepthTestState(NO_DEPTH_TEST)
 			.setWriteMaskState(COLOR_WRITE)
 			.createCompositeState(false)
 	);
@@ -790,7 +917,7 @@ public abstract class RenderType extends RenderStateShard {
 	private static RenderType.CompositeRenderType createArmorCutoutNoCull(String string, ResourceLocation resourceLocation, boolean bl) {
 		RenderType.CompositeState compositeState = RenderType.CompositeState.builder()
 			.setShaderState(RENDERTYPE_ARMOR_CUTOUT_NO_CULL_SHADER)
-			.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false))
+			.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, TriState.FALSE, false))
 			.setTransparencyState(NO_TRANSPARENCY)
 			.setCullState(NO_CULL)
 			.setLightmapState(LIGHTMAP)
@@ -811,6 +938,10 @@ public abstract class RenderType extends RenderStateShard {
 
 	public static RenderType entitySolid(ResourceLocation resourceLocation) {
 		return (RenderType)ENTITY_SOLID.apply(resourceLocation);
+	}
+
+	public static RenderType entitySolidZOffsetForward(ResourceLocation resourceLocation) {
+		return (RenderType)ENTITY_SOLID_Z_OFFSET_FORWARD.apply(resourceLocation);
 	}
 
 	public static RenderType entityCutout(ResourceLocation resourceLocation) {
@@ -899,7 +1030,7 @@ public abstract class RenderType extends RenderStateShard {
 			true,
 			RenderType.CompositeState.builder()
 				.setShaderState(RENDERTYPE_BREEZE_WIND_SHADER)
-				.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false))
+				.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, TriState.FALSE, false))
 				.setTexturingState(new RenderStateShard.OffsetTexturingStateShard(f, g))
 				.setTransparencyState(TRANSLUCENT_TRANSPARENCY)
 				.setCullState(NO_CULL)
@@ -919,7 +1050,7 @@ public abstract class RenderType extends RenderStateShard {
 			true,
 			RenderType.CompositeState.builder()
 				.setShaderState(RENDERTYPE_ENERGY_SWIRL_SHADER)
-				.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false))
+				.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, TriState.FALSE, false))
 				.setTexturingState(new RenderStateShard.OffsetTexturingStateShard(f, g))
 				.setTransparencyState(ADDITIVE_TRANSPARENCY)
 				.setCullState(NO_CULL)
@@ -1031,23 +1162,26 @@ public abstract class RenderType extends RenderStateShard {
 		return END_GATEWAY;
 	}
 
-	private static RenderType.CompositeRenderType createClouds(boolean bl) {
+	private static RenderType.CompositeRenderType createClouds(boolean bl, boolean bl2) {
 		return create(
 			"clouds",
-			DefaultVertexFormat.POSITION_TEX_COLOR_NORMAL,
+			DefaultVertexFormat.POSITION_COLOR,
 			VertexFormat.Mode.QUADS,
 			786432,
 			false,
 			false,
 			RenderType.CompositeState.builder()
 				.setShaderState(RENDERTYPE_CLOUDS_SHADER)
-				.setTextureState(new RenderStateShard.TextureStateShard(LevelRenderer.CLOUDS_LOCATION, false, false))
 				.setTransparencyState(TRANSLUCENT_TRANSPARENCY)
-				.setCullState(NO_CULL)
+				.setCullState(bl2 ? CULL : NO_CULL)
 				.setWriteMaskState(bl ? DEPTH_WRITE : COLOR_DEPTH_WRITE)
 				.setOutputState(CLOUDS_TARGET)
 				.createCompositeState(true)
 		);
+	}
+
+	public static RenderType flatClouds() {
+		return FLAT_CLOUDS;
 	}
 
 	public static RenderType clouds() {
@@ -1078,6 +1212,10 @@ public abstract class RenderType extends RenderStateShard {
 		return DEBUG_QUADS;
 	}
 
+	public static RenderType debugTriangleFan() {
+		return DEBUG_TRIANGLE_FAN;
+	}
+
 	public static RenderType debugStructureQuads() {
 		return DEBUG_STRUCTURE_QUADS;
 	}
@@ -1094,12 +1232,40 @@ public abstract class RenderType extends RenderStateShard {
 		return GUI_OVERLAY;
 	}
 
+	public static RenderType guiTexturedOverlay(ResourceLocation resourceLocation) {
+		return (RenderType)GUI_TEXTURED_OVERLAY.apply(resourceLocation);
+	}
+
+	public static RenderType guiOpaqueTexturedBackground(ResourceLocation resourceLocation) {
+		return (RenderType)GUI_OPAQUE_TEXTURED_BACKGROUND.apply(resourceLocation);
+	}
+
+	public static RenderType guiNauseaOverlay() {
+		return GUI_NAUSEA_OVERLAY;
+	}
+
 	public static RenderType guiTextHighlight() {
 		return GUI_TEXT_HIGHLIGHT;
 	}
 
 	public static RenderType guiGhostRecipeOverlay() {
 		return GUI_GHOST_RECIPE_OVERLAY;
+	}
+
+	public static RenderType guiTextured(ResourceLocation resourceLocation) {
+		return (RenderType)GUI_TEXTURED.apply(resourceLocation);
+	}
+
+	public static RenderType vignette(ResourceLocation resourceLocation) {
+		return (RenderType)VIGNETTE.apply(resourceLocation);
+	}
+
+	public static RenderType crosshair(ResourceLocation resourceLocation) {
+		return (RenderType)CROSSHAIR.apply(resourceLocation);
+	}
+
+	public static RenderType mojangLogo() {
+		return MOJANG_LOGO;
 	}
 
 	public RenderType(String string, VertexFormat vertexFormat, VertexFormat.Mode mode, int i, boolean bl, boolean bl2, Runnable runnable, Runnable runnable2) {
@@ -1178,7 +1344,7 @@ public abstract class RenderType extends RenderStateShard {
 					1536,
 					RenderType.CompositeState.builder()
 						.setShaderState(RENDERTYPE_OUTLINE_SHADER)
-						.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, false, false))
+						.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, TriState.FALSE, false))
 						.setCullState(cullStateShard)
 						.setDepthTestState(NO_DEPTH_TEST)
 						.setOutputState(OUTLINE_TARGET)

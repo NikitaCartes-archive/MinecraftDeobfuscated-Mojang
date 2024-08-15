@@ -4,6 +4,7 @@ import java.util.function.BooleanSupplier;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Util;
 import net.minecraft.client.GameNarrator;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderType;
@@ -25,7 +26,7 @@ public class ReceivingLevelScreen extends Screen {
 		super(GameNarrator.NO_TITLE);
 		this.levelReceived = booleanSupplier;
 		this.reason = reason;
-		this.createdAt = System.currentTimeMillis();
+		this.createdAt = Util.getMillis();
 	}
 
 	@Override
@@ -41,21 +42,21 @@ public class ReceivingLevelScreen extends Screen {
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
 		super.render(guiGraphics, i, j, f);
-		guiGraphics.drawCenteredString(this.font, DOWNLOADING_TERRAIN_TEXT, this.width / 2, this.height / 2 - 50, 16777215);
+		guiGraphics.drawCenteredString(this.font, DOWNLOADING_TERRAIN_TEXT, this.width / 2, this.height / 2 - 50, -1);
 	}
 
 	@Override
 	public void renderBackground(GuiGraphics guiGraphics, int i, int j, float f) {
 		switch (this.reason) {
 			case NETHER_PORTAL:
-				guiGraphics.blit(0, 0, -90, guiGraphics.guiWidth(), guiGraphics.guiHeight(), this.getNetherPortalSprite());
+				guiGraphics.blitSprite(RenderType::guiOpaqueTexturedBackground, this.getNetherPortalSprite(), 0, 0, guiGraphics.guiWidth(), guiGraphics.guiHeight());
 				break;
 			case END_PORTAL:
 				guiGraphics.fillRenderType(RenderType.endPortal(), 0, 0, this.width, this.height, 0);
 				break;
 			case OTHER:
 				this.renderPanorama(guiGraphics, f);
-				this.renderBlurredBackground(f);
+				this.renderBlurredBackground();
 				this.renderMenuBackground(guiGraphics);
 		}
 	}
@@ -71,7 +72,7 @@ public class ReceivingLevelScreen extends Screen {
 
 	@Override
 	public void tick() {
-		if (this.levelReceived.getAsBoolean() || System.currentTimeMillis() > this.createdAt + 30000L) {
+		if (this.levelReceived.getAsBoolean() || Util.getMillis() > this.createdAt + 30000L) {
 			this.onClose();
 		}
 	}

@@ -11,10 +11,13 @@ import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
+import com.mojang.logging.LogUtils;
 import java.io.Reader;
 import java.lang.reflect.Type;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.Map.Entry;
 import javax.annotation.Nullable;
@@ -22,49 +25,38 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.block.model.multipart.MultiPart;
 import net.minecraft.client.renderer.block.model.multipart.Selector;
+import net.minecraft.client.resources.model.UnbakedModel;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
+import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class BlockModelDefinition {
-	private final Map<String, MultiVariant> variants = Maps.<String, MultiVariant>newLinkedHashMap();
-	private MultiPart multiPart;
+	private static final Logger LOGGER = LogUtils.getLogger();
+	public static final Gson GSON = new GsonBuilder()
+		.registerTypeAdapter(BlockModelDefinition.class, new BlockModelDefinition.Deserializer())
+		.registerTypeAdapter(Variant.class, new Variant.Deserializer())
+		.registerTypeAdapter(MultiVariant.class, new MultiVariant.Deserializer())
+		.registerTypeAdapter(MultiPart.Definition.class, new MultiPart.Deserializer())
+		.registerTypeAdapter(Selector.class, new Selector.Deserializer())
+		.create();
+	private final Map<String, MultiVariant> variants;
+	@Nullable
+	private final MultiPart.Definition multiPart;
 
-	public static BlockModelDefinition fromStream(BlockModelDefinition.Context context, Reader reader) {
-		return GsonHelper.fromJson(context.gson, reader, BlockModelDefinition.class);
+	public static BlockModelDefinition fromStream(Reader reader) {
+		return GsonHelper.fromJson(GSON, reader, BlockModelDefinition.class);
 	}
 
-	public static BlockModelDefinition fromJsonElement(BlockModelDefinition.Context context, JsonElement jsonElement) {
-		return context.gson.fromJson(jsonElement, BlockModelDefinition.class);
+	public static BlockModelDefinition fromJsonElement(JsonElement jsonElement) {
+		return GSON.fromJson(jsonElement, BlockModelDefinition.class);
 	}
 
-	public BlockModelDefinition(Map<String, MultiVariant> map, MultiPart multiPart) {
-		this.multiPart = multiPart;
-		this.variants.putAll(map);
-	}
-
-	public BlockModelDefinition(List<BlockModelDefinition> list) {
-		BlockModelDefinition blockModelDefinition = null;
-
-		for (BlockModelDefinition blockModelDefinition2 : list) {
-			if (blockModelDefinition2.isMultiPart()) {
-				this.variants.clear();
-				blockModelDefinition = blockModelDefinition2;
-			}
-
-			this.variants.putAll(blockModelDefinition2.variants);
-		}
-
-		if (blockModelDefinition != null) {
-			this.multiPart = blockModelDefinition.multiPart;
-		}
-	}
-
-	@VisibleForTesting
-	public boolean hasVariant(String string) {
-		return this.variants.get(string) != null;
+	public BlockModelDefinition(Map<String, MultiVariant> map, @Nullable MultiPart.Definition definition) {
+		this.multiPart = definition;
+		this.variants = map;
 	}
 
 	@VisibleForTesting
@@ -81,58 +73,56 @@ public class BlockModelDefinition {
 		if (this == object) {
 			return true;
 		} else {
-			if (object instanceof BlockModelDefinition blockModelDefinition && this.variants.equals(blockModelDefinition.variants)) {
-				return this.isMultiPart() ? this.multiPart.equals(blockModelDefinition.multiPart) : !blockModelDefinition.isMultiPart();
-			}
-
-			return false;
+			return !(object instanceof BlockModelDefinition blockModelDefinition)
+				? false
+				: this.variants.equals(blockModelDefinition.variants) && Objects.equals(this.multiPart, blockModelDefinition.multiPart);
 		}
 	}
 
 	public int hashCode() {
-		return 31 * this.variants.hashCode() + (this.isMultiPart() ? this.multiPart.hashCode() : 0);
-	}
-
-	public Map<String, MultiVariant> getVariants() {
-		return this.variants;
+		return 31 * this.variants.hashCode() + (this.multiPart != null ? this.multiPart.hashCode() : 0);
 	}
 
 	@VisibleForTesting
 	public Set<MultiVariant> getMultiVariants() {
 		Set<MultiVariant> set = Sets.<MultiVariant>newHashSet(this.variants.values());
-		if (this.isMultiPart()) {
+		if (this.multiPart != null) {
 			set.addAll(this.multiPart.getMultiVariants());
 		}
 
 		return set;
 	}
 
-	public boolean isMultiPart() {
-		return this.multiPart != null;
-	}
-
-	public MultiPart getMultiPart() {
+	@Nullable
+	public MultiPart.Definition getMultiPart() {
 		return this.multiPart;
 	}
 
-	@Environment(EnvType.CLIENT)
-	public static final class Context {
-		protected final Gson gson = new GsonBuilder()
-			.registerTypeAdapter(BlockModelDefinition.class, new BlockModelDefinition.Deserializer())
-			.registerTypeAdapter(Variant.class, new Variant.Deserializer())
-			.registerTypeAdapter(MultiVariant.class, new MultiVariant.Deserializer())
-			.registerTypeAdapter(MultiPart.class, new MultiPart.Deserializer(this))
-			.registerTypeAdapter(Selector.class, new Selector.Deserializer())
-			.create();
-		private StateDefinition<Block, BlockState> definition;
-
-		public StateDefinition<Block, BlockState> getDefinition() {
-			return this.definition;
+	public Map<BlockState, UnbakedBlockStateModel> instantiate(StateDefinition<Block, BlockState> stateDefinition, String string) {
+		Map<BlockState, UnbakedBlockStateModel> map = new IdentityHashMap();
+		List<BlockState> list = stateDefinition.getPossibleStates();
+		MultiPart multiPart;
+		if (this.multiPart != null) {
+			multiPart = this.multiPart.instantiate(stateDefinition);
+			list.forEach(blockState -> map.put(blockState, multiPart));
+		} else {
+			multiPart = null;
 		}
 
-		public void setDefinition(StateDefinition<Block, BlockState> stateDefinition) {
-			this.definition = stateDefinition;
-		}
+		this.variants.forEach((string2, multiVariant) -> {
+			try {
+				list.stream().filter(VariantSelector.predicate(stateDefinition, string2)).forEach(blockState -> {
+					UnbakedModel unbakedModel = (UnbakedModel)map.put(blockState, multiVariant);
+					if (unbakedModel != null && unbakedModel != multiPart) {
+						String stringxx = (String)((Entry)this.variants.entrySet().stream().filter(entry -> entry.getValue() == unbakedModel).findFirst().get()).getKey();
+						throw new RuntimeException("Overlapping definition with: " + stringxx);
+					}
+				});
+			} catch (Exception var9) {
+				LOGGER.warn("Exception loading blockstate definition: '{}' for variant: '{}': {}", string, string2, var9.getMessage());
+			}
+		});
+		return map;
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -140,9 +130,9 @@ public class BlockModelDefinition {
 		public BlockModelDefinition deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
 			JsonObject jsonObject = jsonElement.getAsJsonObject();
 			Map<String, MultiVariant> map = this.getVariants(jsonDeserializationContext, jsonObject);
-			MultiPart multiPart = this.getMultiPart(jsonDeserializationContext, jsonObject);
-			if (!map.isEmpty() || multiPart != null && !multiPart.getMultiVariants().isEmpty()) {
-				return new BlockModelDefinition(map, multiPart);
+			MultiPart.Definition definition = this.getMultiPart(jsonDeserializationContext, jsonObject);
+			if (!map.isEmpty() || definition != null && !definition.getMultiVariants().isEmpty()) {
+				return new BlockModelDefinition(map, definition);
 			} else {
 				throw new JsonParseException("Neither 'variants' nor 'multipart' found");
 			}
@@ -162,17 +152,17 @@ public class BlockModelDefinition {
 		}
 
 		@Nullable
-		protected MultiPart getMultiPart(JsonDeserializationContext jsonDeserializationContext, JsonObject jsonObject) {
+		protected MultiPart.Definition getMultiPart(JsonDeserializationContext jsonDeserializationContext, JsonObject jsonObject) {
 			if (!jsonObject.has("multipart")) {
 				return null;
 			} else {
 				JsonArray jsonArray = GsonHelper.getAsJsonArray(jsonObject, "multipart");
-				return jsonDeserializationContext.deserialize(jsonArray, MultiPart.class);
+				return jsonDeserializationContext.deserialize(jsonArray, MultiPart.Definition.class);
 			}
 		}
 	}
 
 	@Environment(EnvType.CLIENT)
-	protected class MissingVariantException extends RuntimeException {
+	protected static class MissingVariantException extends RuntimeException {
 	}
 }

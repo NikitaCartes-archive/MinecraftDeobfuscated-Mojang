@@ -10,12 +10,13 @@ import net.minecraft.Util;
 import net.minecraft.client.model.PandaModel;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.entity.layers.PandaHoldsItemLayer;
+import net.minecraft.client.renderer.entity.state.PandaRenderState;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.animal.Panda;
 
 @Environment(EnvType.CLIENT)
-public class PandaRenderer extends MobRenderer<Panda, PandaModel<Panda>> {
+public class PandaRenderer extends AgeableMobRenderer<Panda, PandaRenderState, PandaModel> {
 	private static final Map<Panda.Gene, ResourceLocation> TEXTURES = Util.make(Maps.newEnumMap(Panda.Gene.class), enumMap -> {
 		enumMap.put(Panda.Gene.NORMAL, ResourceLocation.withDefaultNamespace("textures/entity/panda/panda.png"));
 		enumMap.put(Panda.Gene.LAZY, ResourceLocation.withDefaultNamespace("textures/entity/panda/lazy_panda.png"));
@@ -27,70 +28,90 @@ public class PandaRenderer extends MobRenderer<Panda, PandaModel<Panda>> {
 	});
 
 	public PandaRenderer(EntityRendererProvider.Context context) {
-		super(context, new PandaModel<>(context.bakeLayer(ModelLayers.PANDA)), 0.9F);
-		this.addLayer(new PandaHoldsItemLayer(this, context.getItemInHandRenderer()));
+		super(context, new PandaModel(context.bakeLayer(ModelLayers.PANDA)), new PandaModel(context.bakeLayer(ModelLayers.PANDA_BABY)), 0.9F);
+		this.addLayer(new PandaHoldsItemLayer(this, context.getItemRenderer()));
 	}
 
-	public ResourceLocation getTextureLocation(Panda panda) {
-		return (ResourceLocation)TEXTURES.getOrDefault(panda.getVariant(), (ResourceLocation)TEXTURES.get(Panda.Gene.NORMAL));
+	public ResourceLocation getTextureLocation(PandaRenderState pandaRenderState) {
+		return (ResourceLocation)TEXTURES.getOrDefault(pandaRenderState.variant, (ResourceLocation)TEXTURES.get(Panda.Gene.NORMAL));
 	}
 
-	protected void setupRotations(Panda panda, PoseStack poseStack, float f, float g, float h, float i) {
-		super.setupRotations(panda, poseStack, f, g, h, i);
-		if (panda.rollCounter > 0) {
-			int j = panda.rollCounter;
-			int k = j + 1;
-			float l = 7.0F;
-			float m = panda.isBaby() ? 0.3F : 0.8F;
-			if (j < 8) {
-				float n = (float)(90 * j) / 7.0F;
-				float o = (float)(90 * k) / 7.0F;
-				float p = this.getAngle(n, o, k, h, 8.0F);
-				poseStack.translate(0.0F, (m + 0.2F) * (p / 90.0F), 0.0F);
-				poseStack.mulPose(Axis.XP.rotationDegrees(-p));
-			} else if (j < 16) {
-				float n = ((float)j - 8.0F) / 7.0F;
-				float o = 90.0F + 90.0F * n;
-				float q = 90.0F + 90.0F * ((float)k - 8.0F) / 7.0F;
-				float p = this.getAngle(o, q, k, h, 16.0F);
-				poseStack.translate(0.0F, m + 0.2F + (m - 0.2F) * (p - 90.0F) / 90.0F, 0.0F);
-				poseStack.mulPose(Axis.XP.rotationDegrees(-p));
-			} else if ((float)j < 24.0F) {
-				float n = ((float)j - 16.0F) / 7.0F;
-				float o = 180.0F + 90.0F * n;
-				float q = 180.0F + 90.0F * ((float)k - 16.0F) / 7.0F;
-				float p = this.getAngle(o, q, k, h, 24.0F);
-				poseStack.translate(0.0F, m + m * (270.0F - p) / 90.0F, 0.0F);
-				poseStack.mulPose(Axis.XP.rotationDegrees(-p));
-			} else if (j < 32) {
-				float n = ((float)j - 24.0F) / 7.0F;
-				float o = 270.0F + 90.0F * n;
-				float q = 270.0F + 90.0F * ((float)k - 24.0F) / 7.0F;
-				float p = this.getAngle(o, q, k, h, 32.0F);
-				poseStack.translate(0.0F, m * ((360.0F - p) / 90.0F), 0.0F);
-				poseStack.mulPose(Axis.XP.rotationDegrees(-p));
+	public PandaRenderState createRenderState() {
+		return new PandaRenderState();
+	}
+
+	public void extractRenderState(Panda panda, PandaRenderState pandaRenderState, float f) {
+		super.extractRenderState(panda, pandaRenderState, f);
+		pandaRenderState.variant = panda.getVariant();
+		pandaRenderState.isUnhappy = panda.getUnhappyCounter() > 0;
+		pandaRenderState.isSneezing = panda.isSneezing();
+		pandaRenderState.sneezeTime = panda.getSneezeCounter();
+		pandaRenderState.isEating = panda.isEating();
+		pandaRenderState.isScared = panda.isScared();
+		pandaRenderState.isSitting = panda.isSitting();
+		pandaRenderState.sitAmount = panda.getSitAmount(f);
+		pandaRenderState.lieOnBackAmount = panda.getLieOnBackAmount(f);
+		pandaRenderState.rollAmount = panda.isBaby() ? 0.0F : panda.getRollAmount(f);
+		pandaRenderState.rollTime = panda.rollCounter > 0 ? (float)panda.rollCounter + f : 0.0F;
+	}
+
+	protected void setupRotations(PandaRenderState pandaRenderState, PoseStack poseStack, float f, float g) {
+		super.setupRotations(pandaRenderState, poseStack, f, g);
+		if (pandaRenderState.rollTime > 0.0F) {
+			float h = Mth.frac(pandaRenderState.rollTime);
+			int i = Mth.floor(pandaRenderState.rollTime);
+			int j = i + 1;
+			float k = 7.0F;
+			float l = pandaRenderState.isBaby ? 0.3F : 0.8F;
+			if ((float)i < 8.0F) {
+				float m = 90.0F * (float)i / 7.0F;
+				float n = 90.0F * (float)j / 7.0F;
+				float o = this.getAngle(m, n, j, h, 8.0F);
+				poseStack.translate(0.0F, (l + 0.2F) * (o / 90.0F), 0.0F);
+				poseStack.mulPose(Axis.XP.rotationDegrees(-o));
+			} else if ((float)i < 16.0F) {
+				float m = ((float)i - 8.0F) / 7.0F;
+				float n = 90.0F + 90.0F * m;
+				float p = 90.0F + 90.0F * ((float)j - 8.0F) / 7.0F;
+				float o = this.getAngle(n, p, j, h, 16.0F);
+				poseStack.translate(0.0F, l + 0.2F + (l - 0.2F) * (o - 90.0F) / 90.0F, 0.0F);
+				poseStack.mulPose(Axis.XP.rotationDegrees(-o));
+			} else if ((float)i < 24.0F) {
+				float m = ((float)i - 16.0F) / 7.0F;
+				float n = 180.0F + 90.0F * m;
+				float p = 180.0F + 90.0F * ((float)j - 16.0F) / 7.0F;
+				float o = this.getAngle(n, p, j, h, 24.0F);
+				poseStack.translate(0.0F, l + l * (270.0F - o) / 90.0F, 0.0F);
+				poseStack.mulPose(Axis.XP.rotationDegrees(-o));
+			} else if (i < 32) {
+				float m = ((float)i - 24.0F) / 7.0F;
+				float n = 270.0F + 90.0F * m;
+				float p = 270.0F + 90.0F * ((float)j - 24.0F) / 7.0F;
+				float o = this.getAngle(n, p, j, h, 32.0F);
+				poseStack.translate(0.0F, l * ((360.0F - o) / 90.0F), 0.0F);
+				poseStack.mulPose(Axis.XP.rotationDegrees(-o));
 			}
 		}
 
-		float r = panda.getSitAmount(h);
-		if (r > 0.0F) {
-			poseStack.translate(0.0F, 0.8F * r, 0.0F);
-			poseStack.mulPose(Axis.XP.rotationDegrees(Mth.lerp(r, panda.getXRot(), panda.getXRot() + 90.0F)));
-			poseStack.translate(0.0F, -1.0F * r, 0.0F);
-			if (panda.isScared()) {
-				float s = (float)(Math.cos((double)panda.tickCount * 1.25) * Math.PI * 0.05F);
-				poseStack.mulPose(Axis.YP.rotationDegrees(s));
-				if (panda.isBaby()) {
+		float h = pandaRenderState.sitAmount;
+		if (h > 0.0F) {
+			poseStack.translate(0.0F, 0.8F * h, 0.0F);
+			poseStack.mulPose(Axis.XP.rotationDegrees(Mth.lerp(h, pandaRenderState.xRot, pandaRenderState.xRot + 90.0F)));
+			poseStack.translate(0.0F, -1.0F * h, 0.0F);
+			if (pandaRenderState.isScared) {
+				float q = (float)(Math.cos((double)(pandaRenderState.ageInTicks * 1.25F)) * Math.PI * 0.05F);
+				poseStack.mulPose(Axis.YP.rotationDegrees(q));
+				if (pandaRenderState.isBaby) {
 					poseStack.translate(0.0F, 0.8F, 0.55F);
 				}
 			}
 		}
 
-		float s = panda.getLieOnBackAmount(h);
-		if (s > 0.0F) {
-			float l = panda.isBaby() ? 0.5F : 1.3F;
-			poseStack.translate(0.0F, l * s, 0.0F);
-			poseStack.mulPose(Axis.XP.rotationDegrees(Mth.lerp(s, panda.getXRot(), panda.getXRot() + 180.0F)));
+		float q = pandaRenderState.lieOnBackAmount;
+		if (q > 0.0F) {
+			float r = pandaRenderState.isBaby ? 0.5F : 1.3F;
+			poseStack.translate(0.0F, r * q, 0.0F);
+			poseStack.mulPose(Axis.XP.rotationDegrees(Mth.lerp(q, pandaRenderState.xRot, pandaRenderState.xRot + 180.0F)));
 		}
 	}
 

@@ -30,9 +30,6 @@ public interface RecipeSerializer<T extends Recipe<?>> {
 	RecipeSerializer<ShulkerBoxColoring> SHULKER_BOX_COLORING = register(
 		"crafting_special_shulkerboxcoloring", new SimpleCraftingRecipeSerializer<>(ShulkerBoxColoring::new)
 	);
-	RecipeSerializer<SuspiciousStewRecipe> SUSPICIOUS_STEW = register(
-		"crafting_special_suspiciousstew", new SimpleCraftingRecipeSerializer<>(SuspiciousStewRecipe::new)
-	);
 	RecipeSerializer<RepairItemRecipe> REPAIR_ITEM = register("crafting_special_repairitem", new SimpleCraftingRecipeSerializer<>(RepairItemRecipe::new));
 	RecipeSerializer<SmeltingRecipe> SMELTING_RECIPE = register("smelting", new SimpleCookingSerializer<>(SmeltingRecipe::new, 200));
 	RecipeSerializer<BlastingRecipe> BLASTING_RECIPE = register("blasting", new SimpleCookingSerializer<>(BlastingRecipe::new, 100));

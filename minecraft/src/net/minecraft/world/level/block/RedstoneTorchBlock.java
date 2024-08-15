@@ -5,6 +5,7 @@ import com.mojang.serialization.MapCodec;
 import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
+import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.DustParticleOptions;
@@ -17,6 +18,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.redstone.ExperimentalRedstoneUtils;
+import net.minecraft.world.level.redstone.Orientation;
 
 public class RedstoneTorchBlock extends BaseTorchBlock {
 	public static final MapCodec<RedstoneTorchBlock> CODEC = simpleCodec(RedstoneTorchBlock::new);
@@ -39,17 +42,21 @@ public class RedstoneTorchBlock extends BaseTorchBlock {
 
 	@Override
 	protected void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
+		this.notifyNeighbors(level, blockPos, blockState);
+	}
+
+	private void notifyNeighbors(Level level, BlockPos blockPos, BlockState blockState) {
+		Orientation orientation = this.randomOrientation(level, blockState);
+
 		for (Direction direction : Direction.values()) {
-			level.updateNeighborsAt(blockPos.relative(direction), this);
+			level.updateNeighborsAt(blockPos.relative(direction), this, ExperimentalRedstoneUtils.withFront(orientation, direction));
 		}
 	}
 
 	@Override
 	protected void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
 		if (!bl) {
-			for (Direction direction : Direction.values()) {
-				level.updateNeighborsAt(blockPos.relative(direction), this);
-			}
+			this.notifyNeighbors(level, blockPos, blockState);
 		}
 	}
 
@@ -85,7 +92,7 @@ public class RedstoneTorchBlock extends BaseTorchBlock {
 	}
 
 	@Override
-	protected void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
+	protected void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, @Nullable Orientation orientation, boolean bl) {
 		if ((Boolean)blockState.getValue(LIT) == this.hasNeighborSignal(level, blockPos, blockState) && !level.getBlockTicks().willTickThisTick(blockPos, this)) {
 			level.scheduleTick(blockPos, this, 2);
 		}
@@ -133,6 +140,11 @@ public class RedstoneTorchBlock extends BaseTorchBlock {
 		}
 
 		return false;
+	}
+
+	@Nullable
+	protected Orientation randomOrientation(Level level, BlockState blockState) {
+		return ExperimentalRedstoneUtils.randomOrientation(level, null, Direction.UP);
 	}
 
 	public static class Toggle {

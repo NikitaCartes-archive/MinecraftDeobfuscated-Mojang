@@ -6,14 +6,11 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
-import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.EntitySelector;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
@@ -98,8 +95,7 @@ public class WardenSpawnTracker {
 
 	private static List<ServerPlayer> getNearbyPlayers(ServerLevel serverLevel, BlockPos blockPos) {
 		Vec3 vec3 = Vec3.atCenterOf(blockPos);
-		Predicate<ServerPlayer> predicate = serverPlayer -> serverPlayer.position().closerThan(vec3, 16.0);
-		return serverLevel.getPlayers(predicate.and(LivingEntity::isAlive).and(EntitySelector.NO_SPECTATORS));
+		return serverLevel.getPlayers(serverPlayer -> !serverPlayer.isSpectator() && serverPlayer.position().closerThan(vec3, 16.0) && serverPlayer.isAlive());
 	}
 
 	private void increaseWarningLevel() {

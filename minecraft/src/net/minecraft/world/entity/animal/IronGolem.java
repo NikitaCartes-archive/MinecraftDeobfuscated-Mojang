@@ -271,7 +271,7 @@ public class IronGolem extends AbstractGolem implements NeutralMob {
 				float g = 1.0F + (this.random.nextFloat() - this.random.nextFloat()) * 0.2F;
 				this.playSound(SoundEvents.IRON_GOLEM_REPAIR, 1.0F, g);
 				itemStack.consume(1, player);
-				return InteractionResult.sidedSuccess(this.level().isClientSide);
+				return InteractionResult.SUCCESS;
 			}
 		}
 	}

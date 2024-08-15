@@ -5,6 +5,7 @@ import java.util.function.BiConsumer;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
@@ -101,11 +102,13 @@ public abstract class AbstractCandleBlock extends Block {
 	}
 
 	@Override
-	protected void onExplosionHit(BlockState blockState, Level level, BlockPos blockPos, Explosion explosion, BiConsumer<ItemStack, BlockPos> biConsumer) {
+	protected void onExplosionHit(
+		BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Explosion explosion, BiConsumer<ItemStack, BlockPos> biConsumer
+	) {
 		if (explosion.canTriggerBlocks() && (Boolean)blockState.getValue(LIT)) {
-			extinguish(null, blockState, level, blockPos);
+			extinguish(null, blockState, serverLevel, blockPos);
 		}
 
-		super.onExplosionHit(blockState, level, blockPos, explosion, biConsumer);
+		super.onExplosionHit(blockState, serverLevel, blockPos, explosion, biConsumer);
 	}
 }

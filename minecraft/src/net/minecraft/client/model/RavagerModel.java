@@ -8,11 +8,11 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.client.renderer.entity.state.RavagerRenderState;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.monster.Ravager;
 
 @Environment(EnvType.CLIENT)
-public class RavagerModel extends HierarchicalModel<Ravager> {
+public class RavagerModel extends EntityModel<RavagerRenderState> {
 	private final ModelPart root;
 	private final ModelPart head;
 	private final ModelPart mouth;
@@ -83,53 +83,47 @@ public class RavagerModel extends HierarchicalModel<Ravager> {
 		return this.root;
 	}
 
-	public void setupAnim(Ravager ravager, float f, float g, float h, float i, float j) {
-		this.head.xRot = j * (float) (Math.PI / 180.0);
-		this.head.yRot = i * (float) (Math.PI / 180.0);
-		float k = 0.4F * g;
-		this.rightHindLeg.xRot = Mth.cos(f * 0.6662F) * k;
-		this.leftHindLeg.xRot = Mth.cos(f * 0.6662F + (float) Math.PI) * k;
-		this.rightFrontLeg.xRot = Mth.cos(f * 0.6662F + (float) Math.PI) * k;
-		this.leftFrontLeg.xRot = Mth.cos(f * 0.6662F) * k;
-	}
-
-	public void prepareMobModel(Ravager ravager, float f, float g, float h) {
-		super.prepareMobModel(ravager, f, g, h);
-		int i = ravager.getStunnedTick();
-		int j = ravager.getRoarTick();
-		int k = 20;
-		int l = ravager.getAttackTick();
-		int m = 10;
-		if (l > 0) {
-			float n = Mth.triangleWave((float)l - h, 10.0F);
-			float o = (1.0F + n) * 0.5F;
-			float p = o * o * o * 12.0F;
-			float q = p * Mth.sin(this.neck.xRot);
-			this.neck.z = -6.5F + p;
-			this.neck.y = -7.0F - q;
-			float r = Mth.sin(((float)l - h) / 10.0F * (float) Math.PI * 0.25F);
-			this.mouth.xRot = (float) (Math.PI / 2) * r;
-			if (l > 5) {
-				this.mouth.xRot = Mth.sin(((float)(-4 + l) - h) / 4.0F) * (float) Math.PI * 0.4F;
+	public void setupAnim(RavagerRenderState ravagerRenderState) {
+		float f = ravagerRenderState.stunnedTicksRemaining;
+		float g = ravagerRenderState.attackTicksRemaining;
+		int i = 10;
+		if (g > 0.0F) {
+			float h = Mth.triangleWave(g, 10.0F);
+			float j = (1.0F + h) * 0.5F;
+			float k = j * j * j * 12.0F;
+			float l = k * Mth.sin(this.neck.xRot);
+			this.neck.z = -6.5F + k;
+			this.neck.y = -7.0F - l;
+			if (g > 5.0F) {
+				this.mouth.xRot = Mth.sin((-4.0F + g) / 4.0F) * (float) Math.PI * 0.4F;
 			} else {
-				this.mouth.xRot = (float) (Math.PI / 20) * Mth.sin((float) Math.PI * ((float)l - h) / 10.0F);
+				this.mouth.xRot = (float) (Math.PI / 20) * Mth.sin((float) Math.PI * g / 10.0F);
 			}
 		} else {
-			float n = -1.0F;
-			float o = -1.0F * Mth.sin(this.neck.xRot);
+			float h = -1.0F;
+			float j = -1.0F * Mth.sin(this.neck.xRot);
 			this.neck.x = 0.0F;
-			this.neck.y = -7.0F - o;
+			this.neck.y = -7.0F - j;
 			this.neck.z = 5.5F;
-			boolean bl = i > 0;
+			boolean bl = f > 0.0F;
 			this.neck.xRot = bl ? 0.21991149F : 0.0F;
 			this.mouth.xRot = (float) Math.PI * (bl ? 0.05F : 0.01F);
 			if (bl) {
-				double d = (double)i / 40.0;
+				double d = (double)f / 40.0;
 				this.neck.x = (float)Math.sin(d * 10.0) * 3.0F;
-			} else if (j > 0) {
-				float q = Mth.sin(((float)(20 - j) - h) / 20.0F * (float) Math.PI * 0.25F);
-				this.mouth.xRot = (float) (Math.PI / 2) * q;
+			} else if ((double)ravagerRenderState.roarAnimation > 0.0) {
+				float l = Mth.sin(ravagerRenderState.roarAnimation * (float) Math.PI * 0.25F);
+				this.mouth.xRot = (float) (Math.PI / 2) * l;
 			}
 		}
+
+		this.head.xRot = ravagerRenderState.xRot * (float) (Math.PI / 180.0);
+		this.head.yRot = ravagerRenderState.yRot * (float) (Math.PI / 180.0);
+		float hx = ravagerRenderState.walkAnimationPos;
+		float jx = 0.4F * ravagerRenderState.walkAnimationSpeed;
+		this.rightHindLeg.xRot = Mth.cos(hx * 0.6662F) * jx;
+		this.leftHindLeg.xRot = Mth.cos(hx * 0.6662F + (float) Math.PI) * jx;
+		this.rightFrontLeg.xRot = Mth.cos(hx * 0.6662F + (float) Math.PI) * jx;
+		this.leftFrontLeg.xRot = Mth.cos(hx * 0.6662F) * jx;
 	}
 }

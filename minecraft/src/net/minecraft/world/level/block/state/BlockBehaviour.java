@@ -15,6 +15,7 @@ import java.util.function.Supplier;
 import java.util.function.ToIntFunction;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
@@ -31,7 +32,6 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -70,6 +70,7 @@ import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.pathfinder.PathComputationType;
+import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.LootTable;
@@ -153,8 +154,7 @@ public abstract class BlockBehaviour implements FeatureElement {
 		return false;
 	}
 
-	protected void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
-		DebugPackets.sendNeighborsUpdatePacket(level, blockPos);
+	protected void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, @Nullable Orientation orientation, boolean bl) {
 	}
 
 	protected void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
@@ -166,12 +166,14 @@ public abstract class BlockBehaviour implements FeatureElement {
 		}
 	}
 
-	protected void onExplosionHit(BlockState blockState, Level level, BlockPos blockPos, Explosion explosion, BiConsumer<ItemStack, BlockPos> biConsumer) {
+	protected void onExplosionHit(
+		BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Explosion explosion, BiConsumer<ItemStack, BlockPos> biConsumer
+	) {
 		if (!blockState.isAir() && explosion.getBlockInteraction() != Explosion.BlockInteraction.TRIGGER_BLOCK) {
 			Block block = blockState.getBlock();
 			boolean bl = explosion.getIndirectSourceEntity() instanceof Player;
-			if (block.dropFromExplosion(explosion) && level instanceof ServerLevel serverLevel) {
-				BlockEntity blockEntity = blockState.hasBlockEntity() ? level.getBlockEntity(blockPos) : null;
+			if (block.dropFromExplosion(explosion)) {
+				BlockEntity blockEntity = blockState.hasBlockEntity() ? serverLevel.getBlockEntity(blockPos) : null;
 				LootParams.Builder builder = new LootParams.Builder(serverLevel)
 					.withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(blockPos))
 					.withParameter(LootContextParams.TOOL, ItemStack.EMPTY)
@@ -185,8 +187,8 @@ public abstract class BlockBehaviour implements FeatureElement {
 				blockState.getDrops(builder).forEach(itemStack -> biConsumer.accept(itemStack, blockPos));
 			}
 
-			level.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 3);
-			block.wasExploded(level, blockPos, explosion);
+			serverLevel.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 3);
+			block.wasExploded(serverLevel, blockPos, explosion);
 		}
 	}
 
@@ -194,10 +196,10 @@ public abstract class BlockBehaviour implements FeatureElement {
 		return InteractionResult.PASS;
 	}
 
-	protected ItemInteractionResult useItemOn(
+	protected InteractionResult useItemOn(
 		ItemStack itemStack, BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
 	) {
-		return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+		return InteractionResult.TRY_WITH_EMPTY_HAND;
 	}
 
 	protected boolean triggerEvent(BlockState blockState, Level level, BlockPos blockPos, int i, int j) {
@@ -269,8 +271,8 @@ public abstract class BlockBehaviour implements FeatureElement {
 		return Mth.getSeed(blockPos);
 	}
 
-	protected VoxelShape getOcclusionShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
-		return blockState.getShape(blockGetter, blockPos);
+	protected VoxelShape getOcclusionShape(BlockState blockState) {
+		return blockState.getShape(EmptyBlockGetter.INSTANCE, BlockPos.ZERO);
 	}
 
 	protected VoxelShape getBlockSupportShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
@@ -281,11 +283,11 @@ public abstract class BlockBehaviour implements FeatureElement {
 		return Shapes.empty();
 	}
 
-	protected int getLightBlock(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
-		if (blockState.isSolidRender(blockGetter, blockPos)) {
-			return blockGetter.getMaxLightLevel();
+	protected int getLightBlock(BlockState blockState) {
+		if (blockState.isSolidRender()) {
+			return 15;
 		} else {
-			return blockState.propagatesSkylightDown(blockGetter, blockPos) ? 0 : 1;
+			return blockState.propagatesSkylightDown() ? 0 : 1;
 		}
 	}
 
@@ -316,10 +318,6 @@ public abstract class BlockBehaviour implements FeatureElement {
 
 	protected boolean isCollisionShapeFullBlock(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
 		return Block.isShapeFullBlock(blockState.getCollisionShape(blockGetter, blockPos));
-	}
-
-	protected boolean isOcclusionShapeFullBlock(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
-		return Block.isShapeFullBlock(blockState.getOcclusionShape(blockGetter, blockPos));
 	}
 
 	protected VoxelShape getVisualShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
@@ -371,8 +369,8 @@ public abstract class BlockBehaviour implements FeatureElement {
 	protected void onProjectileHit(Level level, BlockState blockState, BlockHitResult blockHitResult, Projectile projectile) {
 	}
 
-	protected boolean propagatesSkylightDown(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
-		return !Block.isShapeFullBlock(blockState.getShape(blockGetter, blockPos)) && blockState.getFluidState().isEmpty();
+	protected boolean propagatesSkylightDown(BlockState blockState) {
+		return !Block.isShapeFullBlock(blockState.getShape(EmptyBlockGetter.INSTANCE, BlockPos.ZERO)) && blockState.getFluidState().isEmpty();
 	}
 
 	protected boolean isRandomlyTicking(BlockState blockState) {
@@ -396,6 +394,13 @@ public abstract class BlockBehaviour implements FeatureElement {
 	}
 
 	public abstract static class BlockStateBase extends StateHolder<Block, BlockState> {
+		private static final Direction[] DIRECTIONS = Direction.values();
+		private static final VoxelShape[] EMPTY_OCCLUSION_SHAPES = Util.make(
+			new VoxelShape[DIRECTIONS.length], voxelShapes -> Arrays.fill(voxelShapes, Shapes.empty())
+		);
+		private static final VoxelShape[] FULL_BLOCK_OCCLUSION_SHAPES = Util.make(
+			new VoxelShape[DIRECTIONS.length], voxelShapes -> Arrays.fill(voxelShapes, Shapes.block())
+		);
 		private final int lightEmission;
 		private final boolean useShapeForLightOcclusion;
 		private final boolean isAir;
@@ -420,9 +425,14 @@ public abstract class BlockBehaviour implements FeatureElement {
 		private final NoteBlockInstrument instrument;
 		private final boolean replaceable;
 		@Nullable
-		protected BlockBehaviour.BlockStateBase.Cache cache;
+		private BlockBehaviour.BlockStateBase.Cache cache;
 		private FluidState fluidState = Fluids.EMPTY.defaultFluidState();
 		private boolean isRandomlyTicking;
+		private boolean solidRender;
+		private VoxelShape occlusionShape;
+		private VoxelShape[] occlusionShapesByFace;
+		private boolean propagatesSkylightDown;
+		private int lightBlock;
 
 		protected BlockStateBase(Block block, Reference2ObjectArrayMap<Property<?>, Comparable<?>> reference2ObjectArrayMap, MapCodec<BlockState> mapCodec) {
 			super(block, reference2ObjectArrayMap, mapCodec);
@@ -474,6 +484,22 @@ public abstract class BlockBehaviour implements FeatureElement {
 			}
 
 			this.legacySolid = this.calculateSolid();
+			this.occlusionShape = this.canOcclude ? this.owner.getOcclusionShape(this.asState()) : Shapes.empty();
+			this.solidRender = Block.isShapeFullBlock(this.occlusionShape);
+			if (this.occlusionShape.isEmpty()) {
+				this.occlusionShapesByFace = EMPTY_OCCLUSION_SHAPES;
+			} else if (this.solidRender) {
+				this.occlusionShapesByFace = FULL_BLOCK_OCCLUSION_SHAPES;
+			} else {
+				this.occlusionShapesByFace = new VoxelShape[DIRECTIONS.length];
+
+				for (Direction direction : DIRECTIONS) {
+					this.occlusionShapesByFace[direction.ordinal()] = this.occlusionShape.getFaceShape(direction);
+				}
+			}
+
+			this.propagatesSkylightDown = this.owner.propagatesSkylightDown(this.asState());
+			this.lightBlock = this.owner.getLightBlock(this.asState());
 		}
 
 		public Block getBlock() {
@@ -499,22 +525,20 @@ public abstract class BlockBehaviour implements FeatureElement {
 			return this.getBlock().properties.isValidSpawn.test(this.asState(), blockGetter, blockPos, entityType);
 		}
 
-		public boolean propagatesSkylightDown(BlockGetter blockGetter, BlockPos blockPos) {
-			return this.cache != null ? this.cache.propagatesSkylightDown : this.getBlock().propagatesSkylightDown(this.asState(), blockGetter, blockPos);
+		public boolean propagatesSkylightDown() {
+			return this.propagatesSkylightDown;
 		}
 
-		public int getLightBlock(BlockGetter blockGetter, BlockPos blockPos) {
-			return this.cache != null ? this.cache.lightBlock : this.getBlock().getLightBlock(this.asState(), blockGetter, blockPos);
+		public int getLightBlock() {
+			return this.lightBlock;
 		}
 
-		public VoxelShape getFaceOcclusionShape(BlockGetter blockGetter, BlockPos blockPos, Direction direction) {
-			return this.cache != null && this.cache.occlusionShapes != null
-				? this.cache.occlusionShapes[direction.ordinal()]
-				: Shapes.getFaceShape(this.getOcclusionShape(blockGetter, blockPos), direction);
+		public VoxelShape getFaceOcclusionShape(Direction direction) {
+			return this.occlusionShapesByFace[direction.ordinal()];
 		}
 
-		public VoxelShape getOcclusionShape(BlockGetter blockGetter, BlockPos blockPos) {
-			return this.getBlock().getOcclusionShape(this.asState(), blockGetter, blockPos);
+		public VoxelShape getOcclusionShape() {
+			return this.occlusionShape;
 		}
 
 		public boolean hasLargeCollisionShape() {
@@ -602,13 +626,8 @@ public abstract class BlockBehaviour implements FeatureElement {
 			return this.pushReaction;
 		}
 
-		public boolean isSolidRender(BlockGetter blockGetter, BlockPos blockPos) {
-			if (this.cache != null) {
-				return this.cache.solidRender;
-			} else {
-				BlockState blockState = this.asState();
-				return blockState.canOcclude() ? Block.isShapeFullBlock(blockState.getOcclusionShape(blockGetter, blockPos)) : false;
-			}
+		public boolean isSolidRender() {
+			return this.solidRender;
 		}
 
 		public boolean canOcclude() {
@@ -655,9 +674,9 @@ public abstract class BlockBehaviour implements FeatureElement {
 			return Block.isFaceFull(this.getCollisionShape(blockGetter, blockPos, CollisionContext.of(entity)), direction);
 		}
 
-		public Vec3 getOffset(BlockGetter blockGetter, BlockPos blockPos) {
+		public Vec3 getOffset(BlockPos blockPos) {
 			BlockBehaviour.OffsetFunction offsetFunction = this.offsetFunction;
-			return offsetFunction != null ? offsetFunction.evaluate(this.asState(), blockGetter, blockPos) : Vec3.ZERO;
+			return offsetFunction != null ? offsetFunction.evaluate(this.asState(), blockPos) : Vec3.ZERO;
 		}
 
 		public boolean hasOffsetFunction() {
@@ -668,8 +687,9 @@ public abstract class BlockBehaviour implements FeatureElement {
 			return this.getBlock().triggerEvent(this.asState(), level, blockPos, i, j);
 		}
 
-		public void handleNeighborChanged(Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
-			this.getBlock().neighborChanged(this.asState(), level, blockPos, block, blockPos2, bl);
+		public void handleNeighborChanged(Level level, BlockPos blockPos, Block block, @Nullable Orientation orientation, boolean bl) {
+			DebugPackets.sendNeighborsUpdatePacket(level, blockPos);
+			this.getBlock().neighborChanged(this.asState(), level, blockPos, block, orientation, bl);
 		}
 
 		public final void updateNeighbourShapes(LevelAccessor levelAccessor, BlockPos blockPos, int i) {
@@ -701,8 +721,8 @@ public abstract class BlockBehaviour implements FeatureElement {
 			this.getBlock().onRemove(this.asState(), level, blockPos, blockState, bl);
 		}
 
-		public void onExplosionHit(Level level, BlockPos blockPos, Explosion explosion, BiConsumer<ItemStack, BlockPos> biConsumer) {
-			this.getBlock().onExplosionHit(this.asState(), level, blockPos, explosion, biConsumer);
+		public void onExplosionHit(ServerLevel serverLevel, BlockPos blockPos, Explosion explosion, BiConsumer<ItemStack, BlockPos> biConsumer) {
+			this.getBlock().onExplosionHit(this.asState(), serverLevel, blockPos, explosion, biConsumer);
 		}
 
 		public void tick(ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
@@ -725,7 +745,7 @@ public abstract class BlockBehaviour implements FeatureElement {
 			return this.getBlock().getDrops(this.asState(), builder);
 		}
 
-		public ItemInteractionResult useItemOn(ItemStack itemStack, Level level, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
+		public InteractionResult useItemOn(ItemStack itemStack, Level level, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult) {
 			return this.getBlock().useItemOn(itemStack, this.asState(), level, blockHitResult.getBlockPos(), player, interactionHand, blockHitResult);
 		}
 
@@ -864,11 +884,6 @@ public abstract class BlockBehaviour implements FeatureElement {
 		static final class Cache {
 			private static final Direction[] DIRECTIONS = Direction.values();
 			private static final int SUPPORT_TYPE_COUNT = SupportType.values().length;
-			protected final boolean solidRender;
-			final boolean propagatesSkylightDown;
-			final int lightBlock;
-			@Nullable
-			final VoxelShape[] occlusionShapes;
 			protected final VoxelShape collisionShape;
 			protected final boolean largeCollisionShape;
 			private final boolean[] faceSturdy;
@@ -876,20 +891,6 @@ public abstract class BlockBehaviour implements FeatureElement {
 
 			Cache(BlockState blockState) {
 				Block block = blockState.getBlock();
-				this.solidRender = blockState.isSolidRender(EmptyBlockGetter.INSTANCE, BlockPos.ZERO);
-				this.propagatesSkylightDown = block.propagatesSkylightDown(blockState, EmptyBlockGetter.INSTANCE, BlockPos.ZERO);
-				this.lightBlock = block.getLightBlock(blockState, EmptyBlockGetter.INSTANCE, BlockPos.ZERO);
-				if (!blockState.canOcclude()) {
-					this.occlusionShapes = null;
-				} else {
-					this.occlusionShapes = new VoxelShape[DIRECTIONS.length];
-					VoxelShape voxelShape = block.getOcclusionShape(blockState, EmptyBlockGetter.INSTANCE, BlockPos.ZERO);
-
-					for (Direction direction : DIRECTIONS) {
-						this.occlusionShapes[direction.ordinal()] = Shapes.getFaceShape(voxelShape, direction);
-					}
-				}
-
 				this.collisionShape = block.getCollisionShape(blockState, EmptyBlockGetter.INSTANCE, BlockPos.ZERO, CollisionContext.empty());
 				if (!this.collisionShape.isEmpty() && blockState.hasOffsetFunction()) {
 					throw new IllegalStateException(
@@ -902,11 +903,9 @@ public abstract class BlockBehaviour implements FeatureElement {
 						.anyMatch(axis -> this.collisionShape.min(axis) < 0.0 || this.collisionShape.max(axis) > 1.0);
 					this.faceSturdy = new boolean[DIRECTIONS.length * SUPPORT_TYPE_COUNT];
 
-					for (Direction direction2 : DIRECTIONS) {
+					for (Direction direction : DIRECTIONS) {
 						for (SupportType supportType : SupportType.values()) {
-							this.faceSturdy[getFaceSupportIndex(direction2, supportType)] = supportType.isSupporting(
-								blockState, EmptyBlockGetter.INSTANCE, BlockPos.ZERO, direction2
-							);
+							this.faceSturdy[getFaceSupportIndex(direction, supportType)] = supportType.isSupporting(blockState, EmptyBlockGetter.INSTANCE, BlockPos.ZERO, direction);
 						}
 					}
 
@@ -925,7 +924,7 @@ public abstract class BlockBehaviour implements FeatureElement {
 	}
 
 	public interface OffsetFunction {
-		Vec3 evaluate(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos);
+		Vec3 evaluate(BlockState blockState, BlockPos blockPos);
 	}
 
 	public static enum OffsetType {
@@ -1189,7 +1188,7 @@ public abstract class BlockBehaviour implements FeatureElement {
 		public BlockBehaviour.Properties offsetType(BlockBehaviour.OffsetType offsetType) {
 			this.offsetFunction = switch (offsetType) {
 				case NONE -> null;
-				case XZ -> (blockState, blockGetter, blockPos) -> {
+				case XZ -> (blockState, blockPos) -> {
 				Block block = blockState.getBlock();
 				long l = Mth.getSeed(blockPos.getX(), 0, blockPos.getZ());
 				float f = block.getMaxHorizontalOffset();
@@ -1197,7 +1196,7 @@ public abstract class BlockBehaviour implements FeatureElement {
 				double e = Mth.clamp(((double)((float)(l >> 8 & 15L) / 15.0F) - 0.5) * 0.5, (double)(-f), (double)f);
 				return new Vec3(d, 0.0, e);
 			};
-				case XYZ -> (blockState, blockGetter, blockPos) -> {
+				case XYZ -> (blockState, blockPos) -> {
 				Block block = blockState.getBlock();
 				long l = Mth.getSeed(blockPos.getX(), 0, blockPos.getZ());
 				double d = ((double)((float)(l >> 4 & 15L) / 15.0F) - 1.0) * (double)block.getMaxVerticalOffset();

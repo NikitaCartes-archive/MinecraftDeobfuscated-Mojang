@@ -16,6 +16,7 @@ import net.minecraft.client.gui.layouts.SpacerElement;
 import net.minecraft.client.gui.screens.ConfirmLinkScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.chat.report.ReportReason;
+import net.minecraft.client.multiplayer.chat.report.ReportType;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.CommonLinks;
@@ -36,12 +37,14 @@ public class ReportReasonSelectionScreen extends Screen {
 	ReportReason currentlySelectedReason;
 	private final Consumer<ReportReason> onSelectedReason;
 	final HeaderAndFooterLayout layout = new HeaderAndFooterLayout(this);
+	final ReportType reportType;
 
-	public ReportReasonSelectionScreen(@Nullable Screen screen, @Nullable ReportReason reportReason, Consumer<ReportReason> consumer) {
+	public ReportReasonSelectionScreen(@Nullable Screen screen, @Nullable ReportReason reportReason, ReportType reportType, Consumer<ReportReason> consumer) {
 		super(REASON_TITLE);
 		this.lastScreen = screen;
 		this.currentlySelectedReason = reportReason;
 		this.onSelectedReason = consumer;
+		this.reportType = reportType;
 	}
 
 	@Override
@@ -140,7 +143,9 @@ public class ReportReasonSelectionScreen extends Screen {
 			);
 
 			for (ReportReason reportReason : ReportReason.values()) {
-				this.addEntry(new ReportReasonSelectionScreen.ReasonSelectionList.Entry(reportReason));
+				if (!ReportReason.getIncompatibleCategories(ReportReasonSelectionScreen.this.reportType).contains(reportReason)) {
+					this.addEntry(new ReportReasonSelectionScreen.ReasonSelectionList.Entry(reportReason));
+				}
 			}
 		}
 

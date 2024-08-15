@@ -1,7 +1,5 @@
 package net.minecraft.client.model;
 
-import com.google.common.collect.ImmutableList;
-import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
@@ -10,15 +8,16 @@ import net.minecraft.client.model.geom.builders.CubeDeformation;
 import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.MeshTransformer;
 import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.client.renderer.entity.state.AxolotlRenderState;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.LerpingModel;
-import net.minecraft.world.entity.animal.axolotl.Axolotl;
-import org.joml.Vector3f;
 
 @Environment(EnvType.CLIENT)
-public class AxolotlModel<T extends Axolotl & LerpingModel> extends AgeableListModel<T> {
+public class AxolotlModel extends EntityModel<AxolotlRenderState> {
 	public static final float SWIMMING_LEG_XROT = 1.8849558F;
+	public static final MeshTransformer BABY_TRANSFORMER = MeshTransformer.scaling(0.5F);
+	private final ModelPart root;
 	private final ModelPart tail;
 	private final ModelPart leftHindLeg;
 	private final ModelPart rightHindLeg;
@@ -31,7 +30,7 @@ public class AxolotlModel<T extends Axolotl & LerpingModel> extends AgeableListM
 	private final ModelPart rightGills;
 
 	public AxolotlModel(ModelPart modelPart) {
-		super(true, 8.0F, 3.35F);
+		this.root = modelPart;
 		this.body = modelPart.getChild("body");
 		this.head = this.body.getChild("head");
 		this.rightHindLeg = this.body.getChild("right_hind_leg");
@@ -74,206 +73,146 @@ public class AxolotlModel<T extends Axolotl & LerpingModel> extends AgeableListM
 		return LayerDefinition.create(meshDefinition, 64, 64);
 	}
 
-	@Override
-	protected Iterable<ModelPart> headParts() {
-		return ImmutableList.<ModelPart>of();
-	}
-
-	@Override
-	protected Iterable<ModelPart> bodyParts() {
-		return ImmutableList.<ModelPart>of(this.body);
-	}
-
-	public void setupAnim(T axolotl, float f, float g, float h, float i, float j) {
-		this.setupInitialAnimationValues(axolotl, i, j);
-		if (axolotl.isPlayingDead()) {
-			this.setupPlayDeadAnimation(i);
-			this.saveAnimationValues(axolotl);
-		} else {
-			boolean bl = g > 1.0E-5F || axolotl.getXRot() != axolotl.xRotO || axolotl.getYRot() != axolotl.yRotO;
-			if (axolotl.isInWaterOrBubble()) {
-				if (bl) {
-					this.setupSwimmingAnimation(h, j);
-				} else {
-					this.setupWaterHoveringAnimation(h);
-				}
-
-				this.saveAnimationValues(axolotl);
-			} else {
-				if (axolotl.onGround()) {
-					if (bl) {
-						this.setupGroundCrawlingAnimation(h, i);
-					} else {
-						this.setupLayStillOnGroundAnimation(h, i);
-					}
-				}
-
-				this.saveAnimationValues(axolotl);
-			}
-		}
-	}
-
-	private void saveAnimationValues(T axolotl) {
-		Map<String, Vector3f> map = axolotl.getModelRotationValues();
-		map.put("body", this.getRotationVector(this.body));
-		map.put("head", this.getRotationVector(this.head));
-		map.put("right_hind_leg", this.getRotationVector(this.rightHindLeg));
-		map.put("left_hind_leg", this.getRotationVector(this.leftHindLeg));
-		map.put("right_front_leg", this.getRotationVector(this.rightFrontLeg));
-		map.put("left_front_leg", this.getRotationVector(this.leftFrontLeg));
-		map.put("tail", this.getRotationVector(this.tail));
-		map.put("top_gills", this.getRotationVector(this.topGills));
-		map.put("left_gills", this.getRotationVector(this.leftGills));
-		map.put("right_gills", this.getRotationVector(this.rightGills));
-	}
-
-	private Vector3f getRotationVector(ModelPart modelPart) {
-		return new Vector3f(modelPart.xRot, modelPart.yRot, modelPart.zRot);
-	}
-
-	private void setRotationFromVector(ModelPart modelPart, Vector3f vector3f) {
-		modelPart.setRotation(vector3f.x(), vector3f.y(), vector3f.z());
-	}
-
-	private void setupInitialAnimationValues(T axolotl, float f, float g) {
-		this.body.x = 0.0F;
-		this.head.y = 0.0F;
-		this.body.y = 20.0F;
-		Map<String, Vector3f> map = axolotl.getModelRotationValues();
-		if (map.isEmpty()) {
-			this.body.setRotation(g * (float) (Math.PI / 180.0), f * (float) (Math.PI / 180.0), 0.0F);
-			this.head.setRotation(0.0F, 0.0F, 0.0F);
-			this.leftHindLeg.setRotation(0.0F, 0.0F, 0.0F);
-			this.rightHindLeg.setRotation(0.0F, 0.0F, 0.0F);
-			this.leftFrontLeg.setRotation(0.0F, 0.0F, 0.0F);
-			this.rightFrontLeg.setRotation(0.0F, 0.0F, 0.0F);
-			this.leftGills.setRotation(0.0F, 0.0F, 0.0F);
-			this.rightGills.setRotation(0.0F, 0.0F, 0.0F);
-			this.topGills.setRotation(0.0F, 0.0F, 0.0F);
-			this.tail.setRotation(0.0F, 0.0F, 0.0F);
-		} else {
-			this.setRotationFromVector(this.body, (Vector3f)map.get("body"));
-			this.setRotationFromVector(this.head, (Vector3f)map.get("head"));
-			this.setRotationFromVector(this.leftHindLeg, (Vector3f)map.get("left_hind_leg"));
-			this.setRotationFromVector(this.rightHindLeg, (Vector3f)map.get("right_hind_leg"));
-			this.setRotationFromVector(this.leftFrontLeg, (Vector3f)map.get("left_front_leg"));
-			this.setRotationFromVector(this.rightFrontLeg, (Vector3f)map.get("right_front_leg"));
-			this.setRotationFromVector(this.leftGills, (Vector3f)map.get("left_gills"));
-			this.setRotationFromVector(this.rightGills, (Vector3f)map.get("right_gills"));
-			this.setRotationFromVector(this.topGills, (Vector3f)map.get("top_gills"));
-			this.setRotationFromVector(this.tail, (Vector3f)map.get("tail"));
-		}
-	}
-
-	private float lerpTo(float f, float g) {
-		return this.lerpTo(0.05F, f, g);
-	}
-
-	private float lerpTo(float f, float g, float h) {
-		return Mth.rotLerp(f, g, h);
-	}
-
-	private void lerpPart(ModelPart modelPart, float f, float g, float h) {
-		modelPart.setRotation(this.lerpTo(modelPart.xRot, f), this.lerpTo(modelPart.yRot, g), this.lerpTo(modelPart.zRot, h));
+	public void setupAnim(AxolotlRenderState axolotlRenderState) {
+		this.root().getAllParts().forEach(ModelPart::resetPose);
+		float f = axolotlRenderState.playingDeadFactor;
+		float g = axolotlRenderState.inWaterFactor;
+		float h = axolotlRenderState.onGroundFactor;
+		float i = axolotlRenderState.movingFactor;
+		float j = 1.0F - i;
+		float k = 1.0F - Math.min(h, i);
+		this.body.yRot = this.body.yRot + axolotlRenderState.yRot * (float) (Math.PI / 180.0);
+		this.setupSwimmingAnimation(axolotlRenderState.ageInTicks, axolotlRenderState.xRot, Math.min(i, g));
+		this.setupWaterHoveringAnimation(axolotlRenderState.ageInTicks, Math.min(j, g));
+		this.setupGroundCrawlingAnimation(axolotlRenderState.ageInTicks, Math.min(i, h));
+		this.setupLayStillOnGroundAnimation(axolotlRenderState.ageInTicks, Math.min(j, h));
+		this.setupPlayDeadAnimation(f);
+		this.applyMirrorLegRotations(k);
 	}
 
 	private void setupLayStillOnGroundAnimation(float f, float g) {
-		float h = f * 0.09F;
-		float i = Mth.sin(h);
-		float j = Mth.cos(h);
-		float k = i * i - 2.0F * i;
-		float l = j * j - 3.0F * i;
-		this.head.xRot = this.lerpTo(this.head.xRot, -0.09F * k);
-		this.head.yRot = this.lerpTo(this.head.yRot, 0.0F);
-		this.head.zRot = this.lerpTo(this.head.zRot, -0.2F);
-		this.tail.yRot = this.lerpTo(this.tail.yRot, -0.1F + 0.1F * k);
-		this.topGills.xRot = this.lerpTo(this.topGills.xRot, 0.6F + 0.05F * l);
-		this.leftGills.yRot = this.lerpTo(this.leftGills.yRot, -this.topGills.xRot);
-		this.rightGills.yRot = this.lerpTo(this.rightGills.yRot, -this.leftGills.yRot);
-		this.lerpPart(this.leftHindLeg, 1.1F, 1.0F, 0.0F);
-		this.lerpPart(this.leftFrontLeg, 0.8F, 2.3F, -0.5F);
-		this.applyMirrorLegRotations();
-		this.body.xRot = this.lerpTo(0.2F, this.body.xRot, 0.0F);
-		this.body.yRot = this.lerpTo(this.body.yRot, g * (float) (Math.PI / 180.0));
-		this.body.zRot = this.lerpTo(this.body.zRot, 0.0F);
+		if (!(g <= 1.0E-5F)) {
+			float h = f * 0.09F;
+			float i = Mth.sin(h);
+			float j = Mth.cos(h);
+			float k = i * i - 2.0F * i;
+			float l = j * j - 3.0F * i;
+			this.head.xRot += -0.09F * k * g;
+			this.head.zRot += -0.2F * g;
+			this.tail.yRot += (-0.1F + 0.1F * k) * g;
+			float m = (0.6F + 0.05F * l) * g;
+			this.topGills.xRot += m;
+			this.leftGills.yRot -= m;
+			this.rightGills.yRot += m;
+			this.leftHindLeg.xRot += 1.1F * g;
+			this.leftHindLeg.yRot += 1.0F * g;
+			this.leftFrontLeg.xRot += 0.8F * g;
+			this.leftFrontLeg.yRot += 2.3F * g;
+			this.leftFrontLeg.zRot -= 0.5F * g;
+		}
 	}
 
 	private void setupGroundCrawlingAnimation(float f, float g) {
-		float h = f * 0.11F;
-		float i = Mth.cos(h);
-		float j = (i * i - 2.0F * i) / 5.0F;
-		float k = 0.7F * i;
-		this.head.xRot = this.lerpTo(this.head.xRot, 0.0F);
-		this.head.yRot = this.lerpTo(this.head.yRot, 0.09F * i);
-		this.head.zRot = this.lerpTo(this.head.zRot, 0.0F);
-		this.tail.yRot = this.lerpTo(this.tail.yRot, this.head.yRot);
-		this.topGills.xRot = this.lerpTo(this.topGills.xRot, 0.6F - 0.08F * (i * i + 2.0F * Mth.sin(h)));
-		this.leftGills.yRot = this.lerpTo(this.leftGills.yRot, -this.topGills.xRot);
-		this.rightGills.yRot = this.lerpTo(this.rightGills.yRot, -this.leftGills.yRot);
-		this.lerpPart(this.leftHindLeg, 0.9424779F, 1.5F - j, -0.1F);
-		this.lerpPart(this.leftFrontLeg, 1.0995574F, (float) (Math.PI / 2) - k, 0.0F);
-		this.lerpPart(this.rightHindLeg, this.leftHindLeg.xRot, -1.0F - j, 0.0F);
-		this.lerpPart(this.rightFrontLeg, this.leftFrontLeg.xRot, (float) (-Math.PI / 2) - k, 0.0F);
-		this.body.xRot = this.lerpTo(0.2F, this.body.xRot, 0.0F);
-		this.body.yRot = this.lerpTo(this.body.yRot, g * (float) (Math.PI / 180.0));
-		this.body.zRot = this.lerpTo(this.body.zRot, 0.0F);
+		if (!(g <= 1.0E-5F)) {
+			float h = f * 0.11F;
+			float i = Mth.cos(h);
+			float j = (i * i - 2.0F * i) / 5.0F;
+			float k = 0.7F * i;
+			float l = 0.09F * i * g;
+			this.head.yRot += l;
+			this.tail.yRot += l;
+			float m = (0.6F - 0.08F * (i * i + 2.0F * Mth.sin(h))) * g;
+			this.topGills.xRot += m;
+			this.leftGills.yRot -= m;
+			this.rightGills.yRot += m;
+			float n = 0.9424779F * g;
+			float o = 1.0995574F * g;
+			this.leftHindLeg.xRot += n;
+			this.leftHindLeg.yRot += (1.5F - j) * g;
+			this.leftHindLeg.zRot += -0.1F * g;
+			this.leftFrontLeg.xRot += o;
+			this.leftFrontLeg.yRot += ((float) (Math.PI / 2) - k) * g;
+			this.rightHindLeg.xRot += n;
+			this.rightHindLeg.yRot += (-1.0F - j) * g;
+			this.rightFrontLeg.xRot += o;
+			this.rightFrontLeg.yRot += ((float) (-Math.PI / 2) - k) * g;
+		}
 	}
 
-	private void setupWaterHoveringAnimation(float f) {
-		float g = f * 0.075F;
-		float h = Mth.cos(g);
-		float i = Mth.sin(g) * 0.15F;
-		this.body.xRot = this.lerpTo(this.body.xRot, -0.15F + 0.075F * h);
-		this.body.y -= i;
-		this.head.xRot = this.lerpTo(this.head.xRot, -this.body.xRot);
-		this.topGills.xRot = this.lerpTo(this.topGills.xRot, 0.2F * h);
-		this.leftGills.yRot = this.lerpTo(this.leftGills.yRot, -0.3F * h - 0.19F);
-		this.rightGills.yRot = this.lerpTo(this.rightGills.yRot, -this.leftGills.yRot);
-		this.lerpPart(this.leftHindLeg, (float) (Math.PI * 3.0 / 4.0) - h * 0.11F, 0.47123894F, 1.7278761F);
-		this.lerpPart(this.leftFrontLeg, (float) (Math.PI / 4) - h * 0.2F, 2.042035F, 0.0F);
-		this.applyMirrorLegRotations();
-		this.tail.yRot = this.lerpTo(this.tail.yRot, 0.5F * h);
-		this.head.yRot = this.lerpTo(this.head.yRot, 0.0F);
-		this.head.zRot = this.lerpTo(this.head.zRot, 0.0F);
+	private void setupWaterHoveringAnimation(float f, float g) {
+		if (!(g <= 1.0E-5F)) {
+			float h = f * 0.075F;
+			float i = Mth.cos(h);
+			float j = Mth.sin(h) * 0.15F;
+			float k = (-0.15F + 0.075F * i) * g;
+			this.body.xRot += k;
+			this.body.y -= j * g;
+			this.head.xRot -= k;
+			this.topGills.xRot += 0.2F * i * g;
+			float l = (-0.3F * i - 0.19F) * g;
+			this.leftGills.yRot += l;
+			this.rightGills.yRot -= l;
+			this.leftHindLeg.xRot += ((float) (Math.PI * 3.0 / 4.0) - i * 0.11F) * g;
+			this.leftHindLeg.yRot += 0.47123894F * g;
+			this.leftHindLeg.zRot += 1.7278761F * g;
+			this.leftFrontLeg.xRot += ((float) (Math.PI / 4) - i * 0.2F) * g;
+			this.leftFrontLeg.yRot += 2.042035F * g;
+			this.tail.yRot += 0.5F * i * g;
+		}
 	}
 
-	private void setupSwimmingAnimation(float f, float g) {
-		float h = f * 0.33F;
-		float i = Mth.sin(h);
-		float j = Mth.cos(h);
-		float k = 0.13F * i;
-		this.body.xRot = this.lerpTo(0.1F, this.body.xRot, g * (float) (Math.PI / 180.0) + k);
-		this.head.xRot = -k * 1.8F;
-		this.body.y -= 0.45F * j;
-		this.topGills.xRot = this.lerpTo(this.topGills.xRot, -0.5F * i - 0.8F);
-		this.leftGills.yRot = this.lerpTo(this.leftGills.yRot, 0.3F * i + 0.9F);
-		this.rightGills.yRot = this.lerpTo(this.rightGills.yRot, -this.leftGills.yRot);
-		this.tail.yRot = this.lerpTo(this.tail.yRot, 0.3F * Mth.cos(h * 0.9F));
-		this.lerpPart(this.leftHindLeg, 1.8849558F, -0.4F * i, (float) (Math.PI / 2));
-		this.lerpPart(this.leftFrontLeg, 1.8849558F, -0.2F * j - 0.1F, (float) (Math.PI / 2));
-		this.applyMirrorLegRotations();
-		this.head.yRot = this.lerpTo(this.head.yRot, 0.0F);
-		this.head.zRot = this.lerpTo(this.head.zRot, 0.0F);
+	private void setupSwimmingAnimation(float f, float g, float h) {
+		if (!(h <= 1.0E-5F)) {
+			float i = f * 0.33F;
+			float j = Mth.sin(i);
+			float k = Mth.cos(i);
+			float l = 0.13F * j;
+			this.body.xRot += (g * (float) (Math.PI / 180.0) + l) * h;
+			this.head.xRot -= l * 1.8F * h;
+			this.body.y -= 0.45F * k * h;
+			this.topGills.xRot += (-0.5F * j - 0.8F) * h;
+			float m = (0.3F * j + 0.9F) * h;
+			this.leftGills.yRot += m;
+			this.rightGills.yRot -= m;
+			this.tail.yRot = this.tail.yRot + 0.3F * Mth.cos(i * 0.9F) * h;
+			this.leftHindLeg.xRot += 1.8849558F * h;
+			this.leftHindLeg.yRot += -0.4F * j * h;
+			this.leftHindLeg.zRot += (float) (Math.PI / 2) * h;
+			this.leftFrontLeg.xRot += 1.8849558F * h;
+			this.leftFrontLeg.yRot += (-0.2F * k - 0.1F) * h;
+			this.leftFrontLeg.zRot += (float) (Math.PI / 2) * h;
+		}
 	}
 
 	private void setupPlayDeadAnimation(float f) {
-		this.lerpPart(this.leftHindLeg, 1.4137167F, 1.0995574F, (float) (Math.PI / 4));
-		this.lerpPart(this.leftFrontLeg, (float) (Math.PI / 4), 2.042035F, 0.0F);
-		this.body.xRot = this.lerpTo(this.body.xRot, -0.15F);
-		this.body.zRot = this.lerpTo(this.body.zRot, 0.35F);
-		this.applyMirrorLegRotations();
-		this.body.yRot = this.lerpTo(this.body.yRot, f * (float) (Math.PI / 180.0));
-		this.head.xRot = this.lerpTo(this.head.xRot, 0.0F);
-		this.head.yRot = this.lerpTo(this.head.yRot, 0.0F);
-		this.head.zRot = this.lerpTo(this.head.zRot, 0.0F);
-		this.tail.yRot = this.lerpTo(this.tail.yRot, 0.0F);
-		this.lerpPart(this.topGills, 0.0F, 0.0F, 0.0F);
-		this.lerpPart(this.leftGills, 0.0F, 0.0F, 0.0F);
-		this.lerpPart(this.rightGills, 0.0F, 0.0F, 0.0F);
+		if (!(f <= 1.0E-5F)) {
+			this.leftHindLeg.xRot += 1.4137167F * f;
+			this.leftHindLeg.yRot += 1.0995574F * f;
+			this.leftHindLeg.zRot += (float) (Math.PI / 4) * f;
+			this.leftFrontLeg.xRot += (float) (Math.PI / 4) * f;
+			this.leftFrontLeg.yRot += 2.042035F * f;
+			this.body.xRot += -0.15F * f;
+			this.body.zRot += 0.35F * f;
+		}
 	}
 
-	private void applyMirrorLegRotations() {
-		this.lerpPart(this.rightHindLeg, this.leftHindLeg.xRot, -this.leftHindLeg.yRot, -this.leftHindLeg.zRot);
-		this.lerpPart(this.rightFrontLeg, this.leftFrontLeg.xRot, -this.leftFrontLeg.yRot, -this.leftFrontLeg.zRot);
+	private void applyMirrorLegRotations(float f) {
+		if (!(f <= 1.0E-5F)) {
+			this.rightHindLeg.xRot = this.rightHindLeg.xRot + this.leftHindLeg.xRot * f;
+			ModelPart var2 = this.rightHindLeg;
+			var2.yRot = var2.yRot + -this.leftHindLeg.yRot * f;
+			var2 = this.rightHindLeg;
+			var2.zRot = var2.zRot + -this.leftHindLeg.zRot * f;
+			this.rightFrontLeg.xRot = this.rightFrontLeg.xRot + this.leftFrontLeg.xRot * f;
+			var2 = this.rightFrontLeg;
+			var2.yRot = var2.yRot + -this.leftFrontLeg.yRot * f;
+			var2 = this.rightFrontLeg;
+			var2.zRot = var2.zRot + -this.leftFrontLeg.zRot * f;
+		}
+	}
+
+	@Override
+	public ModelPart root() {
+		return this.root;
 	}
 }

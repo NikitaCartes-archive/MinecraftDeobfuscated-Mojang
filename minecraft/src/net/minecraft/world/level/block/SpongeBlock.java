@@ -1,6 +1,7 @@
 package net.minecraft.world.level.block;
 
 import com.mojang.serialization.MapCodec;
+import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.sounds.SoundEvents;
@@ -11,6 +12,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.redstone.Orientation;
 
 public class SpongeBlock extends Block {
 	public static final MapCodec<SpongeBlock> CODEC = simpleCodec(SpongeBlock::new);
@@ -35,9 +37,9 @@ public class SpongeBlock extends Block {
 	}
 
 	@Override
-	protected void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
+	protected void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, @Nullable Orientation orientation, boolean bl) {
 		this.tryAbsorbWater(level, blockPos);
-		super.neighborChanged(blockState, level, blockPos, block, blockPos2, bl);
+		super.neighborChanged(blockState, level, blockPos, block, orientation, bl);
 	}
 
 	protected void tryAbsorbWater(Level level, BlockPos blockPos) {

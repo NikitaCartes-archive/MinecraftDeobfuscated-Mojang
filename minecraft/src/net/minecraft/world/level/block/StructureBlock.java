@@ -17,6 +17,7 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.StructureMode;
+import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.phys.BlockHitResult;
 
 public class StructureBlock extends BaseEntityBlock implements GameMasterBlock {
@@ -42,7 +43,7 @@ public class StructureBlock extends BaseEntityBlock implements GameMasterBlock {
 	protected InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
 		BlockEntity blockEntity = level.getBlockEntity(blockPos);
 		if (blockEntity instanceof StructureBlockEntity) {
-			return ((StructureBlockEntity)blockEntity).usedBy(player) ? InteractionResult.sidedSuccess(level.isClientSide) : InteractionResult.PASS;
+			return (InteractionResult)(((StructureBlockEntity)blockEntity).usedBy(player) ? InteractionResult.SUCCESS : InteractionResult.PASS);
 		} else {
 			return InteractionResult.PASS;
 		}
@@ -71,7 +72,7 @@ public class StructureBlock extends BaseEntityBlock implements GameMasterBlock {
 	}
 
 	@Override
-	protected void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
+	protected void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, @Nullable Orientation orientation, boolean bl) {
 		if (level instanceof ServerLevel) {
 			if (level.getBlockEntity(blockPos) instanceof StructureBlockEntity structureBlockEntity) {
 				boolean bl2 = level.hasNeighborSignal(blockPos);

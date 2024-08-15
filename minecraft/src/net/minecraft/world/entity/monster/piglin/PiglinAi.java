@@ -539,7 +539,7 @@ public class PiglinAi {
 			holdInOffhand(piglin, itemStack2);
 			admireGoldItem(piglin);
 			stopWalking(piglin);
-			return InteractionResult.CONSUME;
+			return InteractionResult.SUCCESS;
 		} else {
 			return InteractionResult.PASS;
 		}

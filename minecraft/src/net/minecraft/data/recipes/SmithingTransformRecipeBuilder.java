@@ -2,6 +2,7 @@ package net.minecraft.data.recipes;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementRequirements;
 import net.minecraft.advancements.AdvancementRewards;
@@ -51,7 +52,9 @@ public class SmithingTransformRecipeBuilder {
 			.rewards(AdvancementRewards.Builder.recipe(resourceLocation))
 			.requirements(AdvancementRequirements.Strategy.OR);
 		this.criteria.forEach(builder::addCriterion);
-		SmithingTransformRecipe smithingTransformRecipe = new SmithingTransformRecipe(this.template, this.base, this.addition, new ItemStack(this.result));
+		SmithingTransformRecipe smithingTransformRecipe = new SmithingTransformRecipe(
+			Optional.of(this.template), Optional.of(this.base), Optional.of(this.addition), new ItemStack(this.result)
+		);
 		recipeOutput.accept(resourceLocation, smithingTransformRecipe, builder.build(resourceLocation.withPrefix("recipes/" + this.category.getFolderName() + "/")));
 	}
 

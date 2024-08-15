@@ -4,8 +4,8 @@ import com.mojang.serialization.MapCodec;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.ExtraCodecs;
-import net.minecraft.util.FastColor;
 
 public class ColorParticleOption implements ParticleOptions {
 	private final ParticleType<ColorParticleOption> type;
@@ -32,19 +32,19 @@ public class ColorParticleOption implements ParticleOptions {
 	}
 
 	public float getRed() {
-		return (float)FastColor.ARGB32.red(this.color) / 255.0F;
+		return (float)ARGB.red(this.color) / 255.0F;
 	}
 
 	public float getGreen() {
-		return (float)FastColor.ARGB32.green(this.color) / 255.0F;
+		return (float)ARGB.green(this.color) / 255.0F;
 	}
 
 	public float getBlue() {
-		return (float)FastColor.ARGB32.blue(this.color) / 255.0F;
+		return (float)ARGB.blue(this.color) / 255.0F;
 	}
 
 	public float getAlpha() {
-		return (float)FastColor.ARGB32.alpha(this.color) / 255.0F;
+		return (float)ARGB.alpha(this.color) / 255.0F;
 	}
 
 	public static ColorParticleOption create(ParticleType<ColorParticleOption> particleType, int i) {
@@ -52,6 +52,6 @@ public class ColorParticleOption implements ParticleOptions {
 	}
 
 	public static ColorParticleOption create(ParticleType<ColorParticleOption> particleType, float f, float g, float h) {
-		return create(particleType, FastColor.ARGB32.colorFromFloat(1.0F, f, g, h));
+		return create(particleType, ARGB.colorFromFloat(1.0F, f, g, h));
 	}
 }

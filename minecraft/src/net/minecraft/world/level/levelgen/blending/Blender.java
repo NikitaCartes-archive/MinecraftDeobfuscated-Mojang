@@ -6,7 +6,6 @@ import com.google.common.collect.ImmutableMap.Builder;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -26,7 +25,6 @@ import net.minecraft.world.level.chunk.CarvingMask;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ProtoChunk;
 import net.minecraft.world.level.levelgen.DensityFunction;
-import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.XoroshiroRandomSource;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
@@ -119,7 +117,7 @@ public class Blender {
 				.forEach(
 					(long_, blendingData) -> blendingData.iterateHeights(
 							QuartPos.fromSection(ChunkPos.getX(long_)), QuartPos.fromSection(ChunkPos.getZ(long_)), (kx, lx, dx) -> {
-								double ex = Mth.length((double)(k - kx), (double)(l - lx));
+								double ex = (double)Mth.length((float)(k - kx), (float)(l - lx));
 								if (!(ex > (double)HEIGHT_BLENDING_RANGE_CELLS)) {
 									if (ex < mutableDouble3.doubleValue()) {
 										mutableDouble3.setValue(ex);
@@ -233,7 +231,7 @@ public class Blender {
 			.forEach(
 				(long_, blendingData) -> blendingData.iterateBiomes(
 						QuartPos.fromSection(ChunkPos.getX(long_)), j, QuartPos.fromSection(ChunkPos.getZ(long_)), (kxx, l, holder) -> {
-							double dx = Mth.length((double)(i - kxx), (double)(k - l));
+							double dx = (double)Mth.length((float)(i - kxx), (float)(k - l));
 							if (!(dx > (double)HEIGHT_BLENDING_RANGE_CELLS)) {
 								if (dx < mutableDouble.doubleValue()) {
 									mutableObject.setValue(holder);
@@ -327,7 +325,7 @@ public class Blender {
 				double f = (double)k + 0.5 + SHIFT_NOISE.getValue((double)k, (double)ix, (double)jx) * 4.0;
 				return distanceGetter.getDistance(d, e, f) < 4.0;
 			};
-			Stream.of(GenerationStep.Carving.values()).map(protoChunk::getOrCreateCarvingMask).forEach(carvingMask -> carvingMask.setAdditionalMask(mask));
+			protoChunk.getOrCreateCarvingMask().setAdditionalMask(mask);
 		}
 	}
 

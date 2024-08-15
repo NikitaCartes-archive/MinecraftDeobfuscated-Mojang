@@ -8,9 +8,9 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.ShapeRenderer;
 import net.minecraft.core.Direction;
 import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.LightLayer;
@@ -101,7 +101,7 @@ public class LightSectionDebugRenderer implements DebugRenderer.SimpleDebugRende
 		float g = (float)((double)SectionPos.sectionToBlockCoord(i) - d);
 		float h = (float)((double)SectionPos.sectionToBlockCoord(j) - e);
 		float l = (float)((double)SectionPos.sectionToBlockCoord(k) - f);
-		LevelRenderer.renderFace(
+		ShapeRenderer.renderFace(
 			poseStack, vertexConsumer, direction, g, h, l, g + 16.0F, h + 16.0F, l + 16.0F, vector4f.x(), vector4f.y(), vector4f.z(), vector4f.w()
 		);
 	}

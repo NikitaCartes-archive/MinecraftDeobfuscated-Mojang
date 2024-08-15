@@ -3,7 +3,6 @@ package net.minecraft.server.level;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
 import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.longs.Long2ByteMap;
 import it.unimi.dsi.fastutil.longs.Long2ByteOpenHashMap;
@@ -20,6 +19,7 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectMap.Entry;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
+import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -46,7 +46,7 @@ public abstract class DistanceManager {
 	private final DistanceManager.FixedPlayerDistanceChunkTracker naturalSpawnChunkCounter = new DistanceManager.FixedPlayerDistanceChunkTracker(8);
 	private final TickingTracker tickingTicketsTracker = new TickingTracker();
 	private final DistanceManager.PlayerTicketTracker playerTicketManager = new DistanceManager.PlayerTicketTracker(32);
-	final Set<ChunkHolder> chunksToUpdateFutures = Sets.<ChunkHolder>newHashSet();
+	final Set<ChunkHolder> chunksToUpdateFutures = new ReferenceOpenHashSet<>();
 	final ChunkTaskPriorityQueueSorter ticketThrottler;
 	final ProcessorHandle<ChunkTaskPriorityQueueSorter.Message<Runnable>> ticketThrottlerInput;
 	final ProcessorHandle<ChunkTaskPriorityQueueSorter.Release> ticketThrottlerReleaser;
@@ -114,8 +114,14 @@ public abstract class DistanceManager {
 		}
 
 		if (!this.chunksToUpdateFutures.isEmpty()) {
-			this.chunksToUpdateFutures.forEach(chunkHolderx -> chunkHolderx.updateHighestAllowedStatus(chunkMap));
-			this.chunksToUpdateFutures.forEach(chunkHolderx -> chunkHolderx.updateFutures(chunkMap, this.mainThreadExecutor));
+			for (ChunkHolder chunkHolder : this.chunksToUpdateFutures) {
+				chunkHolder.updateHighestAllowedStatus(chunkMap);
+			}
+
+			for (ChunkHolder chunkHolder : this.chunksToUpdateFutures) {
+				chunkHolder.updateFutures(chunkMap, this.mainThreadExecutor);
+			}
+
 			this.chunksToUpdateFutures.clear();
 			return true;
 		} else {
@@ -125,12 +131,12 @@ public abstract class DistanceManager {
 				while (longIterator.hasNext()) {
 					long l = longIterator.nextLong();
 					if (this.getTickets(l).stream().anyMatch(ticket -> ticket.getType() == TicketType.PLAYER)) {
-						ChunkHolder chunkHolder = chunkMap.getUpdatingChunkIfPresent(l);
-						if (chunkHolder == null) {
+						ChunkHolder chunkHolder2 = chunkMap.getUpdatingChunkIfPresent(l);
+						if (chunkHolder2 == null) {
 							throw new IllegalStateException();
 						}
 
-						CompletableFuture<ChunkResult<LevelChunk>> completableFuture = chunkHolder.getEntityTickingChunkFuture();
+						CompletableFuture<ChunkResult<LevelChunk>> completableFuture = chunkHolder2.getEntityTickingChunkFuture();
 						completableFuture.thenAccept(
 							chunkResult -> this.mainThreadExecutor.execute(() -> this.ticketThrottlerReleaser.tell(ChunkTaskPriorityQueueSorter.release(() -> {
 									}, l, false)))
@@ -266,6 +272,11 @@ public abstract class DistanceManager {
 		return this.naturalSpawnChunkCounter.chunks.containsKey(l);
 	}
 
+	public LongIterator getSpawnCandidateChunks() {
+		this.naturalSpawnChunkCounter.runAllUpdates();
+		return this.naturalSpawnChunkCounter.chunks.keySet().iterator();
+	}
+
 	public String getDebugStatus() {
 		return this.ticketThrottler.getDebugStatus();
 	}
@@ -303,6 +314,10 @@ public abstract class DistanceManager {
 	@VisibleForTesting
 	TickingTracker tickingTracker() {
 		return this.tickingTicketsTracker;
+	}
+
+	public LongSet getTickingChunks() {
+		return this.tickingTicketsTracker.getTickingChunks();
 	}
 
 	public void removeTicketsOnClosing() {

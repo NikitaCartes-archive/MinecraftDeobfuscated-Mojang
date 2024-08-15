@@ -1,23 +1,33 @@
 package net.minecraft.client.renderer;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Sets;
+import com.google.common.collect.ImmutableList.Builder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
+import com.mojang.blaze3d.framegraph.FrameGraphBuilder;
 import com.mojang.blaze3d.pipeline.RenderTarget;
-import com.mojang.blaze3d.pipeline.TextureTarget;
+import com.mojang.blaze3d.resource.GraphicsResourceAllocator;
+import com.mojang.blaze3d.resource.RenderTargetDescriptor;
+import com.mojang.blaze3d.resource.ResourceHandle;
 import com.mojang.blaze3d.shaders.Uniform;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.serialization.JsonOps;
 import java.io.IOException;
 import java.io.Reader;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.Map.Entry;
+import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.Minecraft;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.ResourceLocation;
@@ -29,78 +39,54 @@ import org.joml.Matrix4f;
 
 @Environment(EnvType.CLIENT)
 public class PostChain implements AutoCloseable {
-	private static final String MAIN_RENDER_TARGET = "minecraft:main";
-	private final RenderTarget screenTarget;
-	private final ResourceProvider resourceProvider;
-	private final String name;
-	private final List<PostPass> passes = Lists.<PostPass>newArrayList();
-	private final Map<String, RenderTarget> customRenderTargets = Maps.<String, RenderTarget>newHashMap();
-	private final List<RenderTarget> fullSizedTargets = Lists.<RenderTarget>newArrayList();
-	private Matrix4f shaderOrthoMatrix;
-	private int screenWidth;
-	private int screenHeight;
+	public static final ResourceLocation MAIN_TARGET_ID = ResourceLocation.withDefaultNamespace("main");
+	private final ResourceLocation id;
+	private final List<PostPass> passes;
+	private final Map<ResourceLocation, PostChainConfig.InternalTarget> internalTargets;
+	private final Set<ResourceLocation> externalTargets;
 	private float time;
-	private float lastStamp;
 
-	public PostChain(TextureManager textureManager, ResourceProvider resourceProvider, RenderTarget renderTarget, ResourceLocation resourceLocation) throws IOException, JsonSyntaxException {
-		this.resourceProvider = resourceProvider;
-		this.screenTarget = renderTarget;
-		this.time = 0.0F;
-		this.lastStamp = 0.0F;
-		this.screenWidth = renderTarget.viewWidth;
-		this.screenHeight = renderTarget.viewHeight;
-		this.name = resourceLocation.toString();
-		this.updateOrthoMatrix();
-		this.load(textureManager, resourceLocation);
+	private PostChain(ResourceLocation resourceLocation, List<PostPass> list, Map<ResourceLocation, PostChainConfig.InternalTarget> map, Set<ResourceLocation> set) {
+		this.id = resourceLocation;
+		this.passes = list;
+		this.internalTargets = map;
+		this.externalTargets = set;
 	}
 
-	private void load(TextureManager textureManager, ResourceLocation resourceLocation) throws IOException, JsonSyntaxException {
-		Resource resource = this.resourceProvider.getResourceOrThrow(resourceLocation);
+	public static PostChain load(ResourceProvider resourceProvider, TextureManager textureManager, ResourceLocation resourceLocation, Set<ResourceLocation> set) throws IOException, JsonSyntaxException {
+		Resource resource = resourceProvider.getResourceOrThrow(resourceLocation);
 
 		try {
 			Reader reader = resource.openAsReader();
 
+			PostChain var18;
 			try {
 				JsonObject jsonObject = GsonHelper.parse(reader);
-				if (GsonHelper.isArrayNode(jsonObject, "targets")) {
-					JsonArray jsonArray = jsonObject.getAsJsonArray("targets");
-					int i = 0;
-
-					for (JsonElement jsonElement : jsonArray) {
-						try {
-							this.parseTargetNode(jsonElement);
-						} catch (Exception var14) {
-							ChainedJsonException chainedJsonException = ChainedJsonException.forException(var14);
-							chainedJsonException.prependJsonKey("targets[" + i + "]");
-							throw chainedJsonException;
-						}
-
-						i++;
-					}
+				PostChainConfig postChainConfig = PostChainConfig.CODEC.parse(JsonOps.INSTANCE, jsonObject).getOrThrow(JsonSyntaxException::new);
+				Stream<ResourceLocation> stream = postChainConfig.passes()
+					.stream()
+					.flatMap(passx -> passx.inputs().stream())
+					.flatMap(input -> input.referencedTargets().stream());
+				Set<ResourceLocation> set2 = (Set<ResourceLocation>)stream.filter(resourceLocationx -> !postChainConfig.internalTargets().containsKey(resourceLocationx))
+					.collect(Collectors.toSet());
+				Set<ResourceLocation> set3 = Sets.<ResourceLocation>difference(set2, set);
+				if (!set3.isEmpty()) {
+					throw new ChainedJsonException("Referenced external targets are not available in this context: " + set3);
 				}
 
-				if (GsonHelper.isArrayNode(jsonObject, "passes")) {
-					JsonArray jsonArray = jsonObject.getAsJsonArray("passes");
-					int i = 0;
+				Builder<PostPass> builder = ImmutableList.builder();
 
-					for (JsonElement jsonElement : jsonArray) {
-						try {
-							this.parsePassNode(textureManager, jsonElement);
-						} catch (Exception var13) {
-							ChainedJsonException chainedJsonException = ChainedJsonException.forException(var13);
-							chainedJsonException.prependJsonKey("passes[" + i + "]");
-							throw chainedJsonException;
-						}
-
-						i++;
-					}
+				for (PostChainConfig.Pass pass : postChainConfig.passes()) {
+					builder.add(createPass(resourceProvider, textureManager, pass));
 				}
+
+				var18 = new PostChain(resourceLocation, builder.build(), postChainConfig.internalTargets(), set2);
 			} catch (Throwable var15) {
 				if (reader != null) {
 					try {
 						reader.close();
-					} catch (Throwable var12) {
-						var15.addSuppressed(var12);
+					} catch (Throwable var14) {
+						var15.addSuppressed(var14);
 					}
 				}
 
@@ -110,239 +96,265 @@ public class PostChain implements AutoCloseable {
 			if (reader != null) {
 				reader.close();
 			}
+
+			return var18;
 		} catch (Exception var16) {
-			ChainedJsonException chainedJsonException2 = ChainedJsonException.forException(var16);
-			chainedJsonException2.setFilenameAndFlush(resourceLocation.getPath() + " (" + resource.sourcePackId() + ")");
-			throw chainedJsonException2;
+			ChainedJsonException chainedJsonException = ChainedJsonException.forException(var16);
+			chainedJsonException.setFilenameAndFlush(resourceLocation.getPath() + " (" + resource.sourcePackId() + ")");
+			throw chainedJsonException;
 		}
 	}
 
-	private void parseTargetNode(JsonElement jsonElement) throws ChainedJsonException {
-		if (GsonHelper.isStringValue(jsonElement)) {
-			this.addTempTarget(jsonElement.getAsString(), this.screenWidth, this.screenHeight);
-		} else {
-			JsonObject jsonObject = GsonHelper.convertToJsonObject(jsonElement, "target");
-			String string = GsonHelper.getAsString(jsonObject, "name");
-			int i = GsonHelper.getAsInt(jsonObject, "width", this.screenWidth);
-			int j = GsonHelper.getAsInt(jsonObject, "height", this.screenHeight);
-			if (this.customRenderTargets.containsKey(string)) {
-				throw new ChainedJsonException(string + " is already defined");
-			}
+	// $VF: Inserted dummy exception handlers to handle obfuscated exceptions
+	private static PostPass createPass(ResourceProvider resourceProvider, TextureManager textureManager, PostChainConfig.Pass pass) throws IOException {
+		PostPass postPass = new PostPass(resourceProvider, pass.name(), pass.outputTarget());
 
-			this.addTempTarget(string, i, j);
-		}
-	}
+		for (PostChainConfig.Input input : pass.inputs()) {
+			Objects.requireNonNull(input);
+			Throwable var43;
+			switch (input) {
+				case PostChainConfig.TextureInput var8:
+					PostChainConfig.TextureInput var51 = var8;
 
-	private void parsePassNode(TextureManager textureManager, JsonElement jsonElement) throws IOException {
-		JsonObject jsonObject = GsonHelper.convertToJsonObject(jsonElement, "pass");
-		String string = GsonHelper.getAsString(jsonObject, "name");
-		String string2 = GsonHelper.getAsString(jsonObject, "intarget");
-		String string3 = GsonHelper.getAsString(jsonObject, "outtarget");
-		RenderTarget renderTarget = this.getRenderTarget(string2);
-		RenderTarget renderTarget2 = this.getRenderTarget(string3);
-		boolean bl = GsonHelper.getAsBoolean(jsonObject, "use_linear_filter", false);
-		if (renderTarget == null) {
-			throw new ChainedJsonException("Input target '" + string2 + "' does not exist");
-		} else if (renderTarget2 == null) {
-			throw new ChainedJsonException("Output target '" + string3 + "' does not exist");
-		} else {
-			PostPass postPass = this.addPass(string, renderTarget, renderTarget2, bl);
-			JsonArray jsonArray = GsonHelper.getAsJsonArray(jsonObject, "auxtargets", null);
-			if (jsonArray != null) {
-				int i = 0;
-
-				for (JsonElement jsonElement2 : jsonArray) {
 					try {
-						JsonObject jsonObject2 = GsonHelper.convertToJsonObject(jsonElement2, "auxtarget");
-						String string4 = GsonHelper.getAsString(jsonObject2, "name");
-						String string5 = GsonHelper.getAsString(jsonObject2, "id");
-						boolean bl2;
-						String string6;
-						if (string5.endsWith(":depth")) {
-							bl2 = true;
-							string6 = string5.substring(0, string5.lastIndexOf(58));
-						} else {
-							bl2 = false;
-							string6 = string5;
-						}
-
-						RenderTarget renderTarget3 = this.getRenderTarget(string6);
-						if (renderTarget3 == null) {
-							if (bl2) {
-								throw new ChainedJsonException("Render target '" + string6 + "' can't be used as depth buffer");
-							}
-
-							ResourceLocation resourceLocation = ResourceLocation.withDefaultNamespace("textures/effect/" + string6 + ".png");
-							this.resourceProvider
-								.getResource(resourceLocation)
-								.orElseThrow(() -> new ChainedJsonException("Render target or texture '" + string6 + "' does not exist"));
-							RenderSystem.setShaderTexture(0, resourceLocation);
-							textureManager.bindForSetup(resourceLocation);
-							AbstractTexture abstractTexture = textureManager.getTexture(resourceLocation);
-							int j = GsonHelper.getAsInt(jsonObject2, "width");
-							int k = GsonHelper.getAsInt(jsonObject2, "height");
-							boolean bl3 = GsonHelper.getAsBoolean(jsonObject2, "bilinear");
-							if (bl3) {
-								RenderSystem.texParameter(3553, 10241, 9729);
-								RenderSystem.texParameter(3553, 10240, 9729);
-							} else {
-								RenderSystem.texParameter(3553, 10241, 9728);
-								RenderSystem.texParameter(3553, 10240, 9728);
-							}
-
-							postPass.addAuxAsset(string4, abstractTexture::getId, j, k);
-						} else if (bl2) {
-							postPass.addAuxAsset(string4, renderTarget3::getDepthTextureId, renderTarget3.width, renderTarget3.height);
-						} else {
-							postPass.addAuxAsset(string4, renderTarget3::getColorTextureId, renderTarget3.width, renderTarget3.height);
-						}
-					} catch (Exception var27) {
-						ChainedJsonException chainedJsonException = ChainedJsonException.forException(var27);
-						chainedJsonException.prependJsonKey("auxtargets[" + i + "]");
-						throw chainedJsonException;
+						var52 = var51.samplerName();
+					} catch (Throwable var28) {
+						var43 = var28;
+						boolean var64 = false;
+						break;
 					}
 
-					i++;
-				}
-			}
+					String var33 = var52;
+					PostChainConfig.TextureInput var53 = var8;
 
-			JsonArray jsonArray2 = GsonHelper.getAsJsonArray(jsonObject, "uniforms", null);
-			if (jsonArray2 != null) {
-				int l = 0;
-
-				for (JsonElement jsonElement3 : jsonArray2) {
 					try {
-						this.parseUniformNode(jsonElement3);
-					} catch (Exception var26) {
-						ChainedJsonException chainedJsonException2 = ChainedJsonException.forException(var26);
-						chainedJsonException2.prependJsonKey("uniforms[" + l + "]");
-						throw chainedJsonException2;
+						var54 = var53.location();
+					} catch (Throwable var27) {
+						var43 = var27;
+						boolean var65 = false;
+						break;
 					}
 
-					l++;
-				}
-			}
-		}
-	}
+					ResourceLocation var34 = var54;
+					ResourceLocation resourceLocation = var34;
+					PostChainConfig.TextureInput var55 = var8;
 
-	private void parseUniformNode(JsonElement jsonElement) throws ChainedJsonException {
-		JsonObject jsonObject = GsonHelper.convertToJsonObject(jsonElement, "uniform");
-		String string = GsonHelper.getAsString(jsonObject, "name");
-		Uniform uniform = ((PostPass)this.passes.get(this.passes.size() - 1)).getEffect().getUniform(string);
-		if (uniform == null) {
-			throw new ChainedJsonException("Uniform '" + string + "' does not exist");
-		} else {
-			float[] fs = new float[4];
-			int i = 0;
+					try {
+						var56 = var55.width();
+					} catch (Throwable var26) {
+						var43 = var26;
+						boolean var66 = false;
+						break;
+					}
 
-			for (JsonElement jsonElement2 : GsonHelper.getAsJsonArray(jsonObject, "values")) {
-				try {
-					fs[i] = GsonHelper.convertToFloat(jsonElement2, "value");
-				} catch (Exception var12) {
-					ChainedJsonException chainedJsonException = ChainedJsonException.forException(var12);
-					chainedJsonException.prependJsonKey("values[" + i + "]");
-					throw chainedJsonException;
-				}
+					int var35 = var56;
+					PostChainConfig.TextureInput var57 = var8;
 
-				i++;
-			}
+					try {
+						var58 = var57.height();
+					} catch (Throwable var25) {
+						var43 = var25;
+						boolean var67 = false;
+						break;
+					}
 
-			switch (i) {
-				case 0:
+					int var36 = var58;
+					PostChainConfig.TextureInput var59 = var8;
+
+					try {
+						var60 = var59.bilinear();
+					} catch (Throwable var24) {
+						var43 = var24;
+						boolean var68 = false;
+						break;
+					}
+
+					boolean var37 = var60;
+					ResourceLocation resourceLocation2x = resourceLocation.withPath((UnaryOperator<String>)(string -> "textures/effect/" + string + ".png"));
+					resourceProvider.getResource(resourceLocation2x).orElseThrow(() -> new ChainedJsonException("Texture '" + resourceLocation + "' does not exist"));
+					RenderSystem.setShaderTexture(0, resourceLocation2x);
+					textureManager.bindForSetup(resourceLocation2x);
+					AbstractTexture abstractTexture = textureManager.getTexture(resourceLocation2x);
+					if (var37) {
+						RenderSystem.texParameter(3553, 10241, 9729);
+						RenderSystem.texParameter(3553, 10240, 9729);
+					} else {
+						RenderSystem.texParameter(3553, 10241, 9728);
+						RenderSystem.texParameter(3553, 10240, 9728);
+					}
+
+					postPass.addInput(new PostPass.TextureInput(var33, abstractTexture, var35, var36));
+					continue;
+				case PostChainConfig.TargetInput resourceLocation2:
+					PostChainConfig.TargetInput var10000 = resourceLocation2;
+
+					try {
+						var44 = var10000.samplerName();
+					} catch (Throwable var23) {
+						var43 = var23;
+						boolean var10001 = false;
+						break;
+					}
+
+					String var19 = var44;
+					PostChainConfig.TargetInput var45 = resourceLocation2;
+
+					try {
+						var46 = var45.targetId();
+					} catch (Throwable var22) {
+						var43 = var22;
+						boolean var61 = false;
+						break;
+					}
+
+					ResourceLocation var40 = var46;
+					PostChainConfig.TargetInput var47 = resourceLocation2;
+
+					try {
+						var48 = var47.useDepthBuffer();
+					} catch (Throwable var21) {
+						var43 = var21;
+						boolean var62 = false;
+						break;
+					}
+
+					boolean var41 = var48;
+					PostChainConfig.TargetInput var49 = resourceLocation2;
+
+					try {
+						var50 = var49.bilinear();
+					} catch (Throwable var20) {
+						var43 = var20;
+						boolean var63 = false;
+						break;
+					}
+
+					boolean var42 = var50;
+					postPass.addInput(new PostPass.TargetInput(var19, var40, var41, var42));
+					continue;
 				default:
-					break;
-				case 1:
-					uniform.set(fs[0]);
-					break;
-				case 2:
-					uniform.set(fs[0], fs[1]);
-					break;
-				case 3:
-					uniform.set(fs[0], fs[1], fs[2]);
-					break;
-				case 4:
-					uniform.set(fs[0], fs[1], fs[2], fs[3]);
+					throw new MatchException(null, null);
 			}
+
+			Throwable var29 = var43;
+			throw new MatchException(var29.toString(), var29);
 		}
+
+		for (PostChainConfig.Uniform uniform : pass.uniforms()) {
+			String string3 = uniform.name();
+			Uniform uniform2 = postPass.getEffect().getUniform(string3);
+			if (uniform2 == null) {
+				throw new ChainedJsonException("Uniform '" + string3 + "' does not exist");
+			}
+
+			storeUniform(uniform2, uniform.values());
+		}
+
+		return postPass;
 	}
 
-	public RenderTarget getTempTarget(String string) {
-		return (RenderTarget)this.customRenderTargets.get(string);
-	}
-
-	public void addTempTarget(String string, int i, int j) {
-		RenderTarget renderTarget = new TextureTarget(i, j, true, Minecraft.ON_OSX);
-		renderTarget.setClearColor(0.0F, 0.0F, 0.0F, 0.0F);
-		this.customRenderTargets.put(string, renderTarget);
-		if (i == this.screenWidth && j == this.screenHeight) {
-			this.fullSizedTargets.add(renderTarget);
+	private static void storeUniform(Uniform uniform, List<Float> list) {
+		switch (list.size()) {
+			case 0:
+			default:
+				break;
+			case 1:
+				uniform.set((Float)list.getFirst());
+				break;
+			case 2:
+				uniform.set((Float)list.get(0), (Float)list.get(1));
+				break;
+			case 3:
+				uniform.set((Float)list.get(0), (Float)list.get(1), (Float)list.get(2));
+				break;
+			case 4:
+				uniform.set((Float)list.get(0), (Float)list.get(1), (Float)list.get(2), (Float)list.get(3));
 		}
 	}
 
 	public void close() {
-		for (RenderTarget renderTarget : this.customRenderTargets.values()) {
-			renderTarget.destroyBuffers();
-		}
-
 		for (PostPass postPass : this.passes) {
 			postPass.close();
 		}
-
-		this.passes.clear();
 	}
 
-	public PostPass addPass(String string, RenderTarget renderTarget, RenderTarget renderTarget2, boolean bl) throws IOException {
-		PostPass postPass = new PostPass(this.resourceProvider, string, renderTarget, renderTarget2, bl);
-		this.passes.add(this.passes.size(), postPass);
-		return postPass;
-	}
-
-	private void updateOrthoMatrix() {
-		this.shaderOrthoMatrix = new Matrix4f().setOrtho(0.0F, (float)this.screenTarget.width, 0.0F, (float)this.screenTarget.height, 0.1F, 1000.0F);
-	}
-
-	public void resize(int i, int j) {
-		this.screenWidth = this.screenTarget.width;
-		this.screenHeight = this.screenTarget.height;
-		this.updateOrthoMatrix();
-
-		for (PostPass postPass : this.passes) {
-			postPass.setOrthoMatrix(this.shaderOrthoMatrix);
-		}
-
-		for (RenderTarget renderTarget : this.fullSizedTargets) {
-			renderTarget.resize(i, j, Minecraft.ON_OSX);
-		}
-	}
-
-	private void setFilterMode(int i) {
-		this.screenTarget.setFilterMode(i);
-
-		for (RenderTarget renderTarget : this.customRenderTargets.values()) {
-			renderTarget.setFilterMode(i);
-		}
-	}
-
-	public void process(float f) {
-		this.time += f;
+	// $VF: Inserted dummy exception handlers to handle obfuscated exceptions
+	public void addToFrame(FrameGraphBuilder frameGraphBuilder, DeltaTracker deltaTracker, int i, int j, PostChain.TargetBundle targetBundle) {
+		Matrix4f matrix4f = new Matrix4f().setOrtho(0.0F, (float)i, 0.0F, (float)j, 0.1F, 1000.0F);
+		this.time = this.time + deltaTracker.getRealtimeDeltaTicks();
 
 		while (this.time > 20.0F) {
 			this.time -= 20.0F;
 		}
 
-		int i = 9728;
+		Map<ResourceLocation, ResourceHandle<RenderTarget>> map = new HashMap(this.internalTargets.size() + this.externalTargets.size());
 
-		for (PostPass postPass : this.passes) {
-			int j = postPass.getFilterMode();
-			if (i != j) {
-				this.setFilterMode(j);
-				i = j;
-			}
-
-			postPass.process(this.time / 20.0F);
+		for (ResourceLocation resourceLocation : this.externalTargets) {
+			map.put(resourceLocation, targetBundle.getOrThrow(resourceLocation));
 		}
 
-		this.setFilterMode(9728);
+		for (Entry<ResourceLocation, PostChainConfig.InternalTarget> entry : this.internalTargets.entrySet()) {
+			ResourceLocation resourceLocation2 = (ResourceLocation)entry.getKey();
+			PostChainConfig.InternalTarget var36;
+			Objects.requireNonNull(var36);
+			Object var12 = var36;
+
+			var36 = (PostChainConfig.InternalTarget)entry.getValue();
+			RenderTargetDescriptor renderTargetDescriptor = switch (var12) {
+				case PostChainConfig.FixedSizedTarget var14 -> {
+					PostChainConfig.FixedSizedTarget var30 = var14;
+
+					int var27;
+					label59: {
+						label85: {
+							try {
+								var32 = var30.width();
+							} catch (Throwable var19) {
+								var31 = var19;
+								boolean var10001 = false;
+								break label85;
+							}
+
+							var27 = var32;
+							PostChainConfig.FixedSizedTarget var33 = var14;
+
+							try {
+								var34 = var33.height();
+								break label59;
+							} catch (Throwable var18) {
+								var31 = var18;
+								boolean var35 = false;
+							}
+						}
+
+						Throwable var21 = var31;
+						throw new MatchException(var21.toString(), var21);
+					}
+
+					int var28 = var34;
+					yield new RenderTargetDescriptor(var27, var28, true);
+				}
+				case PostChainConfig.FullScreenTarget var17 -> new RenderTargetDescriptor(i, j, true);
+				default -> throw new MatchException(null, null);
+			};
+			map.put(resourceLocation2, frameGraphBuilder.createInternal(resourceLocation2.toString(), renderTargetDescriptor));
+		}
+
+		for (PostPass postPass : this.passes) {
+			postPass.addToFrame(frameGraphBuilder, map, matrix4f, this.time / 20.0F);
+		}
+
+		for (ResourceLocation resourceLocation : this.externalTargets) {
+			targetBundle.replace(resourceLocation, (ResourceHandle<RenderTarget>)map.get(resourceLocation));
+		}
+	}
+
+	@Deprecated
+	public void process(RenderTarget renderTarget, GraphicsResourceAllocator graphicsResourceAllocator, DeltaTracker deltaTracker) {
+		FrameGraphBuilder frameGraphBuilder = new FrameGraphBuilder();
+		PostChain.TargetBundle targetBundle = PostChain.TargetBundle.of(MAIN_TARGET_ID, frameGraphBuilder.importExternal("main", renderTarget));
+		this.addToFrame(frameGraphBuilder, deltaTracker, renderTarget.width, renderTarget.height, targetBundle);
+		frameGraphBuilder.execute(graphicsResourceAllocator);
 	}
 
 	public void setUniform(String string, float f) {
@@ -351,16 +363,45 @@ public class PostChain implements AutoCloseable {
 		}
 	}
 
-	public final String getName() {
-		return this.name;
+	public final ResourceLocation getId() {
+		return this.id;
 	}
 
-	@Nullable
-	private RenderTarget getRenderTarget(@Nullable String string) {
-		if (string == null) {
-			return null;
-		} else {
-			return string.equals("minecraft:main") ? this.screenTarget : (RenderTarget)this.customRenderTargets.get(string);
+	@Environment(EnvType.CLIENT)
+	public interface TargetBundle {
+		static PostChain.TargetBundle of(ResourceLocation resourceLocation, ResourceHandle<RenderTarget> resourceHandle) {
+			return new PostChain.TargetBundle() {
+				private ResourceHandle<RenderTarget> handle = resourceHandle;
+
+				@Override
+				public void replace(ResourceLocation resourceLocation, ResourceHandle<RenderTarget> resourceHandle) {
+					if (resourceLocation.equals(resourceLocation)) {
+						this.handle = resourceHandle;
+					} else {
+						throw new IllegalArgumentException("No target with id " + resourceLocation);
+					}
+				}
+
+				@Nullable
+				@Override
+				public ResourceHandle<RenderTarget> get(ResourceLocation resourceLocation) {
+					return resourceLocation.equals(resourceLocation) ? this.handle : null;
+				}
+			};
+		}
+
+		void replace(ResourceLocation resourceLocation, ResourceHandle<RenderTarget> resourceHandle);
+
+		@Nullable
+		ResourceHandle<RenderTarget> get(ResourceLocation resourceLocation);
+
+		default ResourceHandle<RenderTarget> getOrThrow(ResourceLocation resourceLocation) {
+			ResourceHandle<RenderTarget> resourceHandle = this.get(resourceLocation);
+			if (resourceHandle == null) {
+				throw new IllegalArgumentException("Missing target with id " + resourceLocation);
+			} else {
+				return resourceHandle;
+			}
 		}
 	}
 }

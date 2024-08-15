@@ -251,7 +251,7 @@ public class PointedDripstoneBlock extends Block implements Fallable, SimpleWate
 	}
 
 	@Override
-	protected VoxelShape getOcclusionShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
+	protected VoxelShape getOcclusionShape(BlockState blockState) {
 		return Shapes.empty();
 	}
 
@@ -275,7 +275,7 @@ public class PointedDripstoneBlock extends Block implements Fallable, SimpleWate
 			voxelShape = BASE_SHAPE;
 		}
 
-		Vec3 vec3 = blockState.getOffset(blockGetter, blockPos);
+		Vec3 vec3 = blockState.getOffset(blockPos);
 		return voxelShape.move(vec3.x, 0.0, vec3.z);
 	}
 
@@ -403,7 +403,7 @@ public class PointedDripstoneBlock extends Block implements Fallable, SimpleWate
 	}
 
 	private static void spawnDripParticle(Level level, BlockPos blockPos, BlockState blockState, Fluid fluid) {
-		Vec3 vec3 = blockState.getOffset(level, blockPos);
+		Vec3 vec3 = blockState.getOffset(blockPos);
 		double d = 0.0625;
 		double e = (double)blockPos.getX() + 0.5 + vec3.x;
 		double f = (double)((float)(blockPos.getY() + 1) - 0.6875F) - 0.0625;
@@ -605,7 +605,7 @@ public class PointedDripstoneBlock extends Block implements Fallable, SimpleWate
 	private static boolean canDripThrough(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState) {
 		if (blockState.isAir()) {
 			return true;
-		} else if (blockState.isSolidRender(blockGetter, blockPos)) {
+		} else if (blockState.isSolidRender()) {
 			return false;
 		} else if (!blockState.getFluidState().isEmpty()) {
 			return false;

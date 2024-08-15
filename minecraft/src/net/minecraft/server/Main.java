@@ -200,7 +200,7 @@ public class Main {
 												dedicatedServerProperties.hardcore,
 												dedicatedServerProperties.difficulty,
 												false,
-												new GameRules(),
+												new GameRules(dataLoadContext.dataConfiguration().enabledFeatures()),
 												dataLoadContext.dataConfiguration()
 											);
 											worldOptions = optionSet.has(optionSpec4) ? dedicatedServerProperties.worldOptions.withBonusChest(true) : dedicatedServerProperties.worldOptions;
@@ -306,28 +306,30 @@ public class Main {
 		boolean bl2
 	) {
 		LOGGER.info("Forcing world upgrade!");
-		WorldUpgrader worldUpgrader = new WorldUpgrader(levelStorageAccess, dataFixer, registryAccess, bl, bl2);
-		Component component = null;
 
-		while (!worldUpgrader.isFinished()) {
-			Component component2 = worldUpgrader.getStatus();
-			if (component != component2) {
-				component = component2;
-				LOGGER.info(worldUpgrader.getStatus().getString());
-			}
+		try (WorldUpgrader worldUpgrader = new WorldUpgrader(levelStorageAccess, dataFixer, registryAccess, bl, bl2)) {
+			Component component = null;
 
-			int i = worldUpgrader.getTotalChunks();
-			if (i > 0) {
-				int j = worldUpgrader.getConverted() + worldUpgrader.getSkipped();
-				LOGGER.info("{}% completed ({} / {} chunks)...", Mth.floor((float)j / (float)i * 100.0F), j, i);
-			}
+			while (!worldUpgrader.isFinished()) {
+				Component component2 = worldUpgrader.getStatus();
+				if (component != component2) {
+					component = component2;
+					LOGGER.info(worldUpgrader.getStatus().getString());
+				}
 
-			if (!booleanSupplier.getAsBoolean()) {
-				worldUpgrader.cancel();
-			} else {
-				try {
-					Thread.sleep(1000L);
-				} catch (InterruptedException var11) {
+				int i = worldUpgrader.getTotalChunks();
+				if (i > 0) {
+					int j = worldUpgrader.getConverted() + worldUpgrader.getSkipped();
+					LOGGER.info("{}% completed ({} / {} chunks)...", Mth.floor((float)j / (float)i * 100.0F), j, i);
+				}
+
+				if (!booleanSupplier.getAsBoolean()) {
+					worldUpgrader.cancel();
+				} else {
+					try {
+						Thread.sleep(1000L);
+					} catch (InterruptedException var12) {
+					}
 				}
 			}
 		}

@@ -2,19 +2,19 @@ package net.minecraft.world.level.block;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.mojang.serialization.MapCodec;
 import java.util.Map;
-import java.util.Set;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -28,11 +28,16 @@ import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.block.state.properties.RedstoneSide;
+import net.minecraft.world.level.redstone.DefaultRedstoneWireEvaluator;
+import net.minecraft.world.level.redstone.ExperimentalRedstoneUtils;
+import net.minecraft.world.level.redstone.ExperimentalRedstoneWireEvaluator;
+import net.minecraft.world.level.redstone.Orientation;
+import net.minecraft.world.level.redstone.RedstoneWireEvaluator;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import org.joml.Vector3f;
 
 public class RedStoneWireBlock extends Block {
 	public static final MapCodec<RedStoneWireBlock> CODEC = simpleCodec(RedStoneWireBlock::new);
@@ -75,17 +80,18 @@ public class RedStoneWireBlock extends Block {
 		)
 	);
 	private static final Map<BlockState, VoxelShape> SHAPES_CACHE = Maps.<BlockState, VoxelShape>newHashMap();
-	private static final Vec3[] COLORS = Util.make(new Vec3[16], vec3s -> {
+	private static final Vector3f[] COLORS = Util.make(new Vector3f[16], vector3fs -> {
 		for (int i = 0; i <= 15; i++) {
 			float f = (float)i / 15.0F;
 			float g = f * 0.6F + (f > 0.0F ? 0.4F : 0.3F);
 			float h = Mth.clamp(f * f * 0.7F - 0.5F, 0.0F, 1.0F);
 			float j = Mth.clamp(f * f * 0.6F - 0.7F, 0.0F, 1.0F);
-			vec3s[i] = new Vec3((double)g, (double)h, (double)j);
+			vector3fs[i] = new Vector3f(g, h, j);
 		}
 	});
 	private static final float PARTICLE_DENSITY = 0.2F;
 	private final BlockState crossState;
+	private final RedstoneWireEvaluator evaluator = new DefaultRedstoneWireEvaluator(this);
 	private boolean shouldSignal = true;
 
 	@Override
@@ -281,50 +287,19 @@ public class RedStoneWireBlock extends Block {
 		return blockState.isFaceSturdy(blockGetter, blockPos, Direction.UP) || blockState.is(Blocks.HOPPER);
 	}
 
-	private void updatePowerStrength(Level level, BlockPos blockPos, BlockState blockState) {
-		int i = this.calculateTargetStrength(level, blockPos);
-		if ((Integer)blockState.getValue(POWER) != i) {
-			if (level.getBlockState(blockPos) == blockState) {
-				level.setBlock(blockPos, blockState.setValue(POWER, Integer.valueOf(i)), 2);
-			}
-
-			Set<BlockPos> set = Sets.<BlockPos>newHashSet();
-			set.add(blockPos);
-
-			for (Direction direction : Direction.values()) {
-				set.add(blockPos.relative(direction));
-			}
-
-			for (BlockPos blockPos2 : set) {
-				level.updateNeighborsAt(blockPos2, this);
-			}
+	private void updatePowerStrength(Level level, BlockPos blockPos, BlockState blockState, @Nullable Orientation orientation) {
+		if (useExperimentalEvaluator(level)) {
+			new ExperimentalRedstoneWireEvaluator(this).updatePowerStrength(level, blockPos, blockState, orientation);
+		} else {
+			this.evaluator.updatePowerStrength(level, blockPos, blockState, orientation);
 		}
 	}
 
-	private int calculateTargetStrength(Level level, BlockPos blockPos) {
+	public int getBlockSignal(Level level, BlockPos blockPos) {
 		this.shouldSignal = false;
 		int i = level.getBestNeighborSignal(blockPos);
 		this.shouldSignal = true;
-		int j = 0;
-		if (i < 15) {
-			for (Direction direction : Direction.Plane.HORIZONTAL) {
-				BlockPos blockPos2 = blockPos.relative(direction);
-				BlockState blockState = level.getBlockState(blockPos2);
-				j = Math.max(j, this.getWireSignal(blockState));
-				BlockPos blockPos3 = blockPos.above();
-				if (blockState.isRedstoneConductor(level, blockPos2) && !level.getBlockState(blockPos3).isRedstoneConductor(level, blockPos3)) {
-					j = Math.max(j, this.getWireSignal(level.getBlockState(blockPos2.above())));
-				} else if (!blockState.isRedstoneConductor(level, blockPos2)) {
-					j = Math.max(j, this.getWireSignal(level.getBlockState(blockPos2.below())));
-				}
-			}
-		}
-
-		return Math.max(i, j - 1);
-	}
-
-	private int getWireSignal(BlockState blockState) {
-		return blockState.is(this) ? (Integer)blockState.getValue(POWER) : 0;
+		return i;
 	}
 
 	private void checkCornerChangeAt(Level level, BlockPos blockPos) {
@@ -340,7 +315,7 @@ public class RedStoneWireBlock extends Block {
 	@Override
 	protected void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
 		if (!blockState2.is(blockState.getBlock()) && !level.isClientSide) {
-			this.updatePowerStrength(level, blockPos, blockState);
+			this.updatePowerStrength(level, blockPos, blockState, null);
 
 			for (Direction direction : Direction.Plane.VERTICAL) {
 				level.updateNeighborsAt(blockPos.relative(direction), this);
@@ -359,7 +334,7 @@ public class RedStoneWireBlock extends Block {
 					level.updateNeighborsAt(blockPos.relative(direction), this);
 				}
 
-				this.updatePowerStrength(level, blockPos, blockState);
+				this.updatePowerStrength(level, blockPos, blockState, null);
 				this.updateNeighborsOfNeighboringWires(level, blockPos);
 			}
 		}
@@ -381,15 +356,21 @@ public class RedStoneWireBlock extends Block {
 	}
 
 	@Override
-	protected void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
+	protected void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, @Nullable Orientation orientation, boolean bl) {
 		if (!level.isClientSide) {
-			if (blockState.canSurvive(level, blockPos)) {
-				this.updatePowerStrength(level, blockPos, blockState);
-			} else {
-				dropResources(blockState, level, blockPos);
-				level.removeBlock(blockPos, false);
+			if (block != this || !useExperimentalEvaluator(level)) {
+				if (blockState.canSurvive(level, blockPos)) {
+					this.updatePowerStrength(level, blockPos, blockState, orientation);
+				} else {
+					dropResources(blockState, level, blockPos);
+					level.removeBlock(blockPos, false);
+				}
 			}
 		}
+	}
+
+	private static boolean useExperimentalEvaluator(Level level) {
+		return level.enabledFeatures().contains(FeatureFlags.REDSTONE_EXPERIMENTS);
 	}
 
 	@Override
@@ -436,12 +417,12 @@ public class RedStoneWireBlock extends Block {
 	}
 
 	public static int getColorForPower(int i) {
-		Vec3 vec3 = COLORS[i];
-		return Mth.color((float)vec3.x(), (float)vec3.y(), (float)vec3.z());
+		Vector3f vector3f = COLORS[i];
+		return ARGB.colorFromFloat(0.0F, vector3f.x(), vector3f.y(), vector3f.z());
 	}
 
 	private void spawnParticlesAlongLine(
-		Level level, RandomSource randomSource, BlockPos blockPos, Vec3 vec3, Direction direction, Direction direction2, float f, float g
+		Level level, RandomSource randomSource, BlockPos blockPos, Vector3f vector3f, Direction direction, Direction direction2, float f, float g
 	) {
 		float h = g - f;
 		if (!(randomSource.nextFloat() >= 0.2F * h)) {
@@ -451,7 +432,7 @@ public class RedStoneWireBlock extends Block {
 			double e = 0.5 + (double)(0.4375F * (float)direction.getStepY()) + (double)(j * (float)direction2.getStepY());
 			double k = 0.5 + (double)(0.4375F * (float)direction.getStepZ()) + (double)(j * (float)direction2.getStepZ());
 			level.addParticle(
-				new DustParticleOptions(vec3.toVector3f(), 1.0F), (double)blockPos.getX() + d, (double)blockPos.getY() + e, (double)blockPos.getZ() + k, 0.0, 0.0, 0.0
+				new DustParticleOptions(vector3f, 1.0F), (double)blockPos.getX() + d, (double)blockPos.getY() + e, (double)blockPos.getZ() + k, 0.0, 0.0, 0.0
 			);
 		}
 	}
@@ -537,12 +518,16 @@ public class RedStoneWireBlock extends Block {
 	}
 
 	private void updatesOnShapeChange(Level level, BlockPos blockPos, BlockState blockState, BlockState blockState2) {
+		Orientation orientation = ExperimentalRedstoneUtils.randomOrientation(level, null, Direction.UP);
+
 		for (Direction direction : Direction.Plane.HORIZONTAL) {
 			BlockPos blockPos2 = blockPos.relative(direction);
 			if (((RedstoneSide)blockState.getValue((Property)PROPERTY_BY_DIRECTION.get(direction))).isConnected()
 					!= ((RedstoneSide)blockState2.getValue((Property)PROPERTY_BY_DIRECTION.get(direction))).isConnected()
 				&& level.getBlockState(blockPos2).isRedstoneConductor(level, blockPos2)) {
-				level.updateNeighborsAtExceptFromFacing(blockPos2, blockState2.getBlock(), direction.getOpposite());
+				level.updateNeighborsAtExceptFromFacing(
+					blockPos2, blockState2.getBlock(), direction.getOpposite(), ExperimentalRedstoneUtils.withFront(orientation, direction)
+				);
 			}
 		}
 	}

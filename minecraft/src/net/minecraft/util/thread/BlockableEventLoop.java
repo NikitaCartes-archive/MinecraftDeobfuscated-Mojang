@@ -11,6 +11,7 @@ import java.util.concurrent.locks.LockSupport;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 import javax.annotation.CheckReturnValue;
+import net.minecraft.ReportedException;
 import net.minecraft.util.profiling.metrics.MetricCategory;
 import net.minecraft.util.profiling.metrics.MetricSampler;
 import net.minecraft.util.profiling.metrics.MetricsRegistry;
@@ -18,6 +19,7 @@ import net.minecraft.util.profiling.metrics.ProfilerMeasured;
 import org.slf4j.Logger;
 
 public abstract class BlockableEventLoop<R extends Runnable> implements ProfilerMeasured, ProcessorHandle<R>, Executor {
+	public static final long BLOCK_TIME_NANOS = 100000L;
 	private final String name;
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private final Queue<R> pendingRunnables = Queues.<R>newConcurrentLinkedQueue();
@@ -132,7 +134,7 @@ public abstract class BlockableEventLoop<R extends Runnable> implements Profiler
 		}
 	}
 
-	public void waitForTasks() {
+	protected void waitForTasks() {
 		Thread.yield();
 		LockSupport.parkNanos("waiting for tasks", 100000L);
 	}
@@ -142,11 +144,18 @@ public abstract class BlockableEventLoop<R extends Runnable> implements Profiler
 			runnable.run();
 		} catch (Exception var3) {
 			LOGGER.error(LogUtils.FATAL_MARKER, "Error executing task on {}", this.name(), var3);
+			throw var3;
 		}
 	}
 
 	@Override
 	public List<MetricSampler> profiledMetrics() {
 		return ImmutableList.of(MetricSampler.create(this.name + "-pending-tasks", MetricCategory.EVENT_LOOPS, this::getPendingTasksCount));
+	}
+
+	public static boolean isNonRecoverable(Throwable throwable) {
+		return throwable instanceof ReportedException reportedException
+			? isNonRecoverable(reportedException.getCause())
+			: throwable instanceof OutOfMemoryError || throwable instanceof StackOverflowError;
 	}
 }

@@ -18,6 +18,7 @@ public interface DamageTypes {
 	ResourceKey<DamageType> STARVE = ResourceKey.create(Registries.DAMAGE_TYPE, ResourceLocation.withDefaultNamespace("starve"));
 	ResourceKey<DamageType> CACTUS = ResourceKey.create(Registries.DAMAGE_TYPE, ResourceLocation.withDefaultNamespace("cactus"));
 	ResourceKey<DamageType> FALL = ResourceKey.create(Registries.DAMAGE_TYPE, ResourceLocation.withDefaultNamespace("fall"));
+	ResourceKey<DamageType> ENDER_PEARL = ResourceKey.create(Registries.DAMAGE_TYPE, ResourceLocation.withDefaultNamespace("ender_pearl"));
 	ResourceKey<DamageType> FLY_INTO_WALL = ResourceKey.create(Registries.DAMAGE_TYPE, ResourceLocation.withDefaultNamespace("fly_into_wall"));
 	ResourceKey<DamageType> FELL_OUT_OF_WORLD = ResourceKey.create(Registries.DAMAGE_TYPE, ResourceLocation.withDefaultNamespace("out_of_world"));
 	ResourceKey<DamageType> GENERIC = ResourceKey.create(Registries.DAMAGE_TYPE, ResourceLocation.withDefaultNamespace("generic"));
@@ -53,6 +54,7 @@ public interface DamageTypes {
 	ResourceKey<DamageType> BAD_RESPAWN_POINT = ResourceKey.create(Registries.DAMAGE_TYPE, ResourceLocation.withDefaultNamespace("bad_respawn_point"));
 	ResourceKey<DamageType> OUTSIDE_BORDER = ResourceKey.create(Registries.DAMAGE_TYPE, ResourceLocation.withDefaultNamespace("outside_border"));
 	ResourceKey<DamageType> GENERIC_KILL = ResourceKey.create(Registries.DAMAGE_TYPE, ResourceLocation.withDefaultNamespace("generic_kill"));
+	ResourceKey<DamageType> MACE_SMASH = ResourceKey.create(Registries.DAMAGE_TYPE, ResourceLocation.withDefaultNamespace("mace_smash"));
 
 	static void bootstrap(BootstrapContext<DamageType> bootstrapContext) {
 		bootstrapContext.register(IN_FIRE, new DamageType("inFire", 0.1F, DamageEffects.BURNING));
@@ -68,6 +70,9 @@ public interface DamageTypes {
 		bootstrapContext.register(CACTUS, new DamageType("cactus", 0.1F));
 		bootstrapContext.register(
 			FALL, new DamageType("fall", DamageScaling.WHEN_CAUSED_BY_LIVING_NON_PLAYER, 0.0F, DamageEffects.HURT, DeathMessageType.FALL_VARIANTS)
+		);
+		bootstrapContext.register(
+			ENDER_PEARL, new DamageType("fall", DamageScaling.WHEN_CAUSED_BY_LIVING_NON_PLAYER, 0.0F, DamageEffects.HURT, DeathMessageType.FALL_VARIANTS)
 		);
 		bootstrapContext.register(FLY_INTO_WALL, new DamageType("flyIntoWall", 0.0F));
 		bootstrapContext.register(FELL_OUT_OF_WORLD, new DamageType("outOfWorld", 0.0F));
@@ -106,5 +111,6 @@ public interface DamageTypes {
 		bootstrapContext.register(OUTSIDE_BORDER, new DamageType("outsideBorder", 0.0F));
 		bootstrapContext.register(GENERIC_KILL, new DamageType("genericKill", 0.0F));
 		bootstrapContext.register(WIND_CHARGE, new DamageType("mob", 0.1F));
+		bootstrapContext.register(MACE_SMASH, new DamageType("mace_smash", 0.1F));
 	}
 }

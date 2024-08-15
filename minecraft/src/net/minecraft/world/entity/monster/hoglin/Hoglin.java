@@ -23,9 +23,9 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -48,7 +48,6 @@ import net.minecraft.world.level.block.state.BlockState;
 
 public class Hoglin extends Animal implements Enemy, HoglinBase {
 	private static final EntityDataAccessor<Boolean> DATA_IMMUNE_TO_ZOMBIFICATION = SynchedEntityData.defineId(Hoglin.class, EntityDataSerializers.BOOLEAN);
-	private static final float PROBABILITY_OF_SPAWNING_AS_BABY = 0.2F;
 	private static final int MAX_HEALTH = 40;
 	private static final float MOVEMENT_SPEED_WHEN_FIGHTING = 0.3F;
 	private static final int ATTACK_KNOCKBACK = 1;
@@ -191,7 +190,7 @@ public class Hoglin extends Animal implements Enemy, HoglinBase {
 	}
 
 	public static boolean checkHoglinSpawnRules(
-		EntityType<Hoglin> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, RandomSource randomSource
+		EntityType<Hoglin> entityType, LevelAccessor levelAccessor, EntitySpawnReason entitySpawnReason, BlockPos blockPos, RandomSource randomSource
 	) {
 		return !levelAccessor.getBlockState(blockPos.below()).is(Blocks.NETHER_WART_BLOCK);
 	}
@@ -199,13 +198,13 @@ public class Hoglin extends Animal implements Enemy, HoglinBase {
 	@Nullable
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData
+		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, EntitySpawnReason entitySpawnReason, @Nullable SpawnGroupData spawnGroupData
 	) {
 		if (serverLevelAccessor.getRandom().nextFloat() < 0.2F) {
 			this.setBaby(true);
 		}
 
-		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData);
+		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, entitySpawnReason, spawnGroupData);
 	}
 
 	@Override
@@ -323,7 +322,7 @@ public class Hoglin extends Animal implements Enemy, HoglinBase {
 	@Nullable
 	@Override
 	public AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
-		Hoglin hoglin = EntityType.HOGLIN.create(serverLevel);
+		Hoglin hoglin = EntityType.HOGLIN.create(serverLevel, EntitySpawnReason.BREEDING);
 		if (hoglin != null) {
 			hoglin.setPersistenceRequired();
 		}

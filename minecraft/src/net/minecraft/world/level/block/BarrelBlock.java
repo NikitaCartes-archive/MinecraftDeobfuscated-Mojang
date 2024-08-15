@@ -41,18 +41,13 @@ public class BarrelBlock extends BaseEntityBlock {
 
 	@Override
 	protected InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
-		if (level.isClientSide) {
-			return InteractionResult.SUCCESS;
-		} else {
-			BlockEntity blockEntity = level.getBlockEntity(blockPos);
-			if (blockEntity instanceof BarrelBlockEntity) {
-				player.openMenu((BarrelBlockEntity)blockEntity);
-				player.awardStat(Stats.OPEN_BARREL);
-				PiglinAi.angerNearbyPiglins(player, true);
-			}
-
-			return InteractionResult.CONSUME;
+		if (!level.isClientSide && level.getBlockEntity(blockPos) instanceof BarrelBlockEntity barrelBlockEntity) {
+			player.openMenu(barrelBlockEntity);
+			player.awardStat(Stats.OPEN_BARREL);
+			PiglinAi.angerNearbyPiglins(player, true);
 		}
+
+		return InteractionResult.SUCCESS;
 	}
 
 	@Override

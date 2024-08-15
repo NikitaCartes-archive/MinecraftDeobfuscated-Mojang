@@ -20,6 +20,7 @@ import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.DefaultAttributes;
+import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.GameRules;
@@ -70,7 +71,8 @@ public class Bootstrap {
 
 	private static void checkGameruleTranslations(Set<String> set) {
 		final Language language = Language.getInstance();
-		GameRules.visitGameRuleTypes(new GameRules.GameRuleTypeVisitor() {
+		GameRules gameRules = new GameRules(FeatureFlags.REGISTRY.allFlags());
+		gameRules.visitGameRuleTypes(new GameRules.GameRuleTypeVisitor() {
 			@Override
 			public <T extends GameRules.Value<T>> void visit(GameRules.Key<T> key, GameRules.Type<T> type) {
 				if (!language.has(key.getDescriptionId())) {

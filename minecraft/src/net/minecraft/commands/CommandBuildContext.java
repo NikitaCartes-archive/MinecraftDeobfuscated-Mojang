@@ -11,8 +11,8 @@ public interface CommandBuildContext extends HolderLookup.Provider {
 	static CommandBuildContext simple(HolderLookup.Provider provider, FeatureFlagSet featureFlagSet) {
 		return new CommandBuildContext() {
 			@Override
-			public Stream<ResourceKey<? extends Registry<?>>> listRegistries() {
-				return provider.listRegistries();
+			public Stream<ResourceKey<? extends Registry<?>>> listRegistryKeys() {
+				return provider.listRegistryKeys();
 			}
 
 			@Override

@@ -8,7 +8,7 @@ import net.minecraft.network.protocol.PacketType;
 
 public record ServerboundContainerButtonClickPacket(int containerId, int buttonId) implements Packet<ServerGamePacketListener> {
 	public static final StreamCodec<FriendlyByteBuf, ServerboundContainerButtonClickPacket> STREAM_CODEC = StreamCodec.composite(
-		ByteBufCodecs.VAR_INT,
+		ByteBufCodecs.CONTAINER_ID,
 		ServerboundContainerButtonClickPacket::containerId,
 		ByteBufCodecs.VAR_INT,
 		ServerboundContainerButtonClickPacket::buttonId,

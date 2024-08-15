@@ -16,12 +16,14 @@ import it.unimi.dsi.fastutil.objects.Reference2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectMap;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
+import java.util.EnumMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.Map.Entry;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -128,6 +130,8 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.Scoreboard;
 import org.slf4j.Logger;
@@ -202,6 +206,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	public float yBodyRotO;
 	public float yHeadRot;
 	public float yHeadRotO;
+	public final ElytraAnimationState elytraAnimationState = new ElytraAnimationState(this);
 	@Nullable
 	protected Player lastHurtByPlayer;
 	protected int lastHurtByPlayerTime;
@@ -252,7 +257,9 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	private float swimAmountO;
 	protected Brain<?> brain;
 	private boolean skipDropExperience;
-	private final Reference2ObjectMap<Enchantment, Set<EnchantmentLocationBasedEffect>> activeLocationDependentEnchantments = new Reference2ObjectArrayMap<>();
+	private final EnumMap<EquipmentSlot, Reference2ObjectMap<Enchantment, Set<EnchantmentLocationBasedEffect>>> activeLocationDependentEnchantments = new EnumMap(
+		EquipmentSlot.class
+	);
 	protected float appliedScale = 1.0F;
 
 	protected LivingEntity(EntityType<? extends LivingEntity> entityType, Level level) {
@@ -523,7 +530,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		return this.isBaby() ? 0.5F : 1.0F;
 	}
 
-	public float getScale() {
+	public final float getScale() {
 		AttributeMap attributeMap = this.getAttributes();
 		return attributeMap == null ? 1.0F : this.sanitizeScale((float)attributeMap.getValue(Attributes.SCALE));
 	}
@@ -1037,7 +1044,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		set.clear();
 	}
 
-	private void onAttributeUpdated(Holder<Attribute> holder) {
+	protected void onAttributeUpdated(Holder<Attribute> holder) {
 		if (holder.is(Attributes.MAX_HEALTH)) {
 			float f = this.getMaxHealth();
 			if (this.getHealth() > f) {
@@ -1086,6 +1093,10 @@ public abstract class LivingEntity extends Entity implements Attackable {
 			}
 
 			this.noActionTime = 0;
+			if (f < 0.0F) {
+				f = 0.0F;
+			}
+
 			float g = f;
 			boolean bl = false;
 			float h = 0.0F;
@@ -1110,6 +1121,10 @@ public abstract class LivingEntity extends Entity implements Attackable {
 			}
 
 			this.walkAnimation.setSpeed(1.5F);
+			if (Float.isNaN(f) || Float.isInfinite(f)) {
+				f = Float.MAX_VALUE;
+			}
+
 			boolean bl2 = true;
 			if ((float)this.invulnerableTime > 10.0F && !damageSource.is(DamageTypeTags.BYPASSES_COOLDOWN)) {
 				if (f <= this.lastHurt) {
@@ -1420,6 +1435,20 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		lootTable.getRandomItems(lootParams, this.getLootTableSeed(), this::spawnAtLocation);
 	}
 
+	protected void dropFromShearingLootTable(ResourceKey<LootTable> resourceKey, Consumer<ItemStack> consumer) {
+		if (this.level() instanceof ServerLevel serverLevel) {
+			LootTable lootTable = serverLevel.getServer().reloadableRegistries().getLootTable(resourceKey);
+			LootParams lootParams = new LootParams.Builder(serverLevel)
+				.withParameter(LootContextParams.ORIGIN, this.position())
+				.withParameter(LootContextParams.THIS_ENTITY, this)
+				.create(LootContextParamSets.SHEARING);
+
+			for (ItemStack itemStack : lootTable.getRandomItems(lootParams)) {
+				consumer.accept(itemStack);
+			}
+		}
+	}
+
 	public void knockback(double d, double e, double f) {
 		d *= 1.0 - this.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE);
 		if (!(d <= 0.0)) {
@@ -1476,8 +1505,9 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		}
 	}
 
-	public Map<Enchantment, Set<EnchantmentLocationBasedEffect>> activeLocationDependentEnchantments() {
-		return this.activeLocationDependentEnchantments;
+	public Map<Enchantment, Set<EnchantmentLocationBasedEffect>> activeLocationDependentEnchantments(EquipmentSlot equipmentSlot) {
+		return (Map<Enchantment, Set<EnchantmentLocationBasedEffect>>)this.activeLocationDependentEnchantments
+			.computeIfAbsent(equipmentSlot, equipmentSlotx -> new Reference2ObjectArrayMap());
 	}
 
 	public LivingEntity.Fallsounds getFallSounds() {
@@ -1887,6 +1917,10 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		return this.getItemBySlot(EquipmentSlot.OFFHAND);
 	}
 
+	public ItemStack getItemHeldByArm(HumanoidArm humanoidArm) {
+		return this.getMainArm() == humanoidArm ? this.getMainHandItem() : this.getOffhandItem();
+	}
+
 	@Nonnull
 	@Override
 	public ItemStack getWeaponItem() {
@@ -2007,6 +2041,16 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		} else {
 			double d = Math.max(this.getY(), entity.getY());
 			vec3 = new Vec3(this.getX(), d, this.getZ());
+			boolean bl = this.getBbWidth() <= 4.0F && this.getBbHeight() <= 4.0F;
+			if (bl) {
+				double e = (double)this.getBbHeight() / 2.0;
+				Vec3 vec32 = vec3.add(0.0, e, 0.0);
+				VoxelShape voxelShape = Shapes.create(AABB.ofSize(vec32, (double)this.getBbWidth(), (double)this.getBbHeight(), (double)this.getBbWidth()));
+				vec3 = (Vec3)this.level()
+					.findFreePosition(this, voxelShape, vec32, (double)this.getBbWidth(), (double)this.getBbHeight(), (double)this.getBbWidth())
+					.map(vec3x -> vec3x.add(0.0, -e, 0.0))
+					.orElse(vec3);
+			}
 		}
 
 		this.dismountTo(vec3.x, vec3.y, vec3.z);
@@ -2034,7 +2078,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		float f = this.getJumpPower();
 		if (!(f <= 1.0E-5F)) {
 			Vec3 vec3 = this.getDeltaMovement();
-			this.setDeltaMovement(vec3.x, (double)f, vec3.z);
+			this.setDeltaMovement(vec3.x, Math.max((double)f, vec3.y), vec3.z);
 			if (this.isSprinting()) {
 				float g = this.getYRot() * (float) (Math.PI / 180.0);
 				this.addDeltaMovement(new Vec3((double)(-Mth.sin(g)) * 0.2, 0.0, (double)Mth.cos(g) * 0.2));
@@ -2065,131 +2109,146 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		return this.getAttributeValue(Attributes.GRAVITY);
 	}
 
+	protected double getEffectiveGravity() {
+		boolean bl = this.getDeltaMovement().y <= 0.0;
+		return bl && this.hasEffect(MobEffects.SLOW_FALLING) ? Math.min(this.getGravity(), 0.01) : this.getGravity();
+	}
+
 	public void travel(Vec3 vec3) {
 		if (this.isControlledByLocalInstance()) {
-			double d = this.getGravity();
-			boolean bl = this.getDeltaMovement().y <= 0.0;
-			if (bl && this.hasEffect(MobEffects.SLOW_FALLING)) {
-				d = Math.min(d, 0.01);
+			FluidState fluidState = this.level().getFluidState(this.blockPosition());
+			if ((this.isInWater() || this.isInLava()) && this.isAffectedByFluids() && !this.canStandOnFluid(fluidState)) {
+				this.travelInFluid(vec3);
+			} else if (this.isFallFlying()) {
+				this.travelFallFlying();
+			} else {
+				this.travelInAir(vec3);
+			}
+		}
+	}
+
+	private void travelInAir(Vec3 vec3) {
+		BlockPos blockPos = this.getBlockPosBelowThatAffectsMyMovement();
+		float f = this.onGround() ? this.level().getBlockState(blockPos).getBlock().getFriction() : 1.0F;
+		float g = f * 0.91F;
+		Vec3 vec32 = this.handleRelativeFrictionAndCalculateMovement(vec3, f);
+		double d = vec32.y;
+		MobEffectInstance mobEffectInstance = this.getEffect(MobEffects.LEVITATION);
+		if (mobEffectInstance != null) {
+			d += (0.05 * (double)(mobEffectInstance.getAmplifier() + 1) - vec32.y) * 0.2;
+		} else if (!this.level().isClientSide || this.level().hasChunkAt(blockPos)) {
+			d -= this.getEffectiveGravity();
+		} else if (this.getY() > (double)this.level().getMinBuildHeight()) {
+			d = -0.1;
+		} else {
+			d = 0.0;
+		}
+
+		if (this.shouldDiscardFriction()) {
+			this.setDeltaMovement(vec32.x, d, vec32.z);
+		} else {
+			float h = this instanceof FlyingAnimal ? g : 0.98F;
+			this.setDeltaMovement(vec32.x * (double)g, d * (double)h, vec32.z * (double)g);
+		}
+	}
+
+	private void travelInFluid(Vec3 vec3) {
+		boolean bl = this.getDeltaMovement().y <= 0.0;
+		double d = this.getY();
+		double e = this.getEffectiveGravity();
+		if (this.isInWater()) {
+			float f = this.isSprinting() ? 0.9F : this.getWaterSlowDown();
+			float g = 0.02F;
+			float h = (float)this.getAttributeValue(Attributes.WATER_MOVEMENT_EFFICIENCY);
+			if (!this.onGround()) {
+				h *= 0.5F;
 			}
 
-			FluidState fluidState = this.level().getFluidState(this.blockPosition());
-			if (this.isInWater() && this.isAffectedByFluids() && !this.canStandOnFluid(fluidState)) {
-				double e = this.getY();
-				float f = this.isSprinting() ? 0.9F : this.getWaterSlowDown();
-				float g = 0.02F;
-				float h = (float)this.getAttributeValue(Attributes.WATER_MOVEMENT_EFFICIENCY);
-				if (!this.onGround()) {
-					h *= 0.5F;
-				}
+			if (h > 0.0F) {
+				f += (0.54600006F - f) * h;
+				g += (this.getSpeed() - g) * h;
+			}
 
-				if (h > 0.0F) {
-					f += (0.54600006F - f) * h;
-					g += (this.getSpeed() - g) * h;
-				}
+			if (this.hasEffect(MobEffects.DOLPHINS_GRACE)) {
+				f = 0.96F;
+			}
 
-				if (this.hasEffect(MobEffects.DOLPHINS_GRACE)) {
-					f = 0.96F;
-				}
+			this.moveRelative(g, vec3);
+			this.move(MoverType.SELF, this.getDeltaMovement());
+			Vec3 vec32 = this.getDeltaMovement();
+			if (this.horizontalCollision && this.onClimbable()) {
+				vec32 = new Vec3(vec32.x, 0.2, vec32.z);
+			}
 
-				this.moveRelative(g, vec3);
-				this.move(MoverType.SELF, this.getDeltaMovement());
-				Vec3 vec32 = this.getDeltaMovement();
-				if (this.horizontalCollision && this.onClimbable()) {
-					vec32 = new Vec3(vec32.x, 0.2, vec32.z);
-				}
-
-				this.setDeltaMovement(vec32.multiply((double)f, 0.8F, (double)f));
-				Vec3 vec33 = this.getFluidFallingAdjustedMovement(d, bl, this.getDeltaMovement());
+			vec32 = vec32.multiply((double)f, 0.8F, (double)f);
+			this.setDeltaMovement(this.getFluidFallingAdjustedMovement(e, bl, vec32));
+		} else {
+			this.moveRelative(0.02F, vec3);
+			this.move(MoverType.SELF, this.getDeltaMovement());
+			if (this.getFluidHeight(FluidTags.LAVA) <= this.getFluidJumpThreshold()) {
+				this.setDeltaMovement(this.getDeltaMovement().multiply(0.5, 0.8F, 0.5));
+				Vec3 vec33 = this.getFluidFallingAdjustedMovement(e, bl, this.getDeltaMovement());
 				this.setDeltaMovement(vec33);
-				if (this.horizontalCollision && this.isFree(vec33.x, vec33.y + 0.6F - this.getY() + e, vec33.z)) {
-					this.setDeltaMovement(vec33.x, 0.3F, vec33.z);
-				}
-			} else if (this.isInLava() && this.isAffectedByFluids() && !this.canStandOnFluid(fluidState)) {
-				double ex = this.getY();
-				this.moveRelative(0.02F, vec3);
-				this.move(MoverType.SELF, this.getDeltaMovement());
-				if (this.getFluidHeight(FluidTags.LAVA) <= this.getFluidJumpThreshold()) {
-					this.setDeltaMovement(this.getDeltaMovement().multiply(0.5, 0.8F, 0.5));
-					Vec3 vec34 = this.getFluidFallingAdjustedMovement(d, bl, this.getDeltaMovement());
-					this.setDeltaMovement(vec34);
-				} else {
-					this.setDeltaMovement(this.getDeltaMovement().scale(0.5));
-				}
-
-				if (d != 0.0) {
-					this.setDeltaMovement(this.getDeltaMovement().add(0.0, -d / 4.0, 0.0));
-				}
-
-				Vec3 vec34 = this.getDeltaMovement();
-				if (this.horizontalCollision && this.isFree(vec34.x, vec34.y + 0.6F - this.getY() + ex, vec34.z)) {
-					this.setDeltaMovement(vec34.x, 0.3F, vec34.z);
-				}
-			} else if (this.isFallFlying()) {
-				this.checkSlowFallDistance();
-				Vec3 vec35 = this.getDeltaMovement();
-				Vec3 vec36 = this.getLookAngle();
-				float fx = this.getXRot() * (float) (Math.PI / 180.0);
-				double i = Math.sqrt(vec36.x * vec36.x + vec36.z * vec36.z);
-				double j = vec35.horizontalDistance();
-				double k = vec36.length();
-				double l = Math.cos((double)fx);
-				l = l * l * Math.min(1.0, k / 0.4);
-				vec35 = this.getDeltaMovement().add(0.0, d * (-1.0 + l * 0.75), 0.0);
-				if (vec35.y < 0.0 && i > 0.0) {
-					double m = vec35.y * -0.1 * l;
-					vec35 = vec35.add(vec36.x * m / i, m, vec36.z * m / i);
-				}
-
-				if (fx < 0.0F && i > 0.0) {
-					double m = j * (double)(-Mth.sin(fx)) * 0.04;
-					vec35 = vec35.add(-vec36.x * m / i, m * 3.2, -vec36.z * m / i);
-				}
-
-				if (i > 0.0) {
-					vec35 = vec35.add((vec36.x / i * j - vec35.x) * 0.1, 0.0, (vec36.z / i * j - vec35.z) * 0.1);
-				}
-
-				this.setDeltaMovement(vec35.multiply(0.99F, 0.98F, 0.99F));
-				this.move(MoverType.SELF, this.getDeltaMovement());
-				if (this.horizontalCollision && !this.level().isClientSide) {
-					double m = this.getDeltaMovement().horizontalDistance();
-					double n = j - m;
-					float o = (float)(n * 10.0 - 3.0);
-					if (o > 0.0F) {
-						this.playSound(this.getFallDamageSound((int)o), 1.0F, 1.0F);
-						this.hurt(this.damageSources().flyIntoWall(), o);
-					}
-				}
-
-				if (this.onGround() && !this.level().isClientSide) {
-					this.setSharedFlag(7, false);
-				}
 			} else {
-				BlockPos blockPos = this.getBlockPosBelowThatAffectsMyMovement();
-				float p = this.level().getBlockState(blockPos).getBlock().getFriction();
-				float fxx = this.onGround() ? p * 0.91F : 0.91F;
-				Vec3 vec37 = this.handleRelativeFrictionAndCalculateMovement(vec3, p);
-				double q = vec37.y;
-				if (this.hasEffect(MobEffects.LEVITATION)) {
-					q += (0.05 * (double)(this.getEffect(MobEffects.LEVITATION).getAmplifier() + 1) - vec37.y) * 0.2;
-				} else if (!this.level().isClientSide || this.level().hasChunkAt(blockPos)) {
-					q -= d;
-				} else if (this.getY() > (double)this.level().getMinBuildHeight()) {
-					q = -0.1;
-				} else {
-					q = 0.0;
-				}
+				this.setDeltaMovement(this.getDeltaMovement().scale(0.5));
+			}
 
-				if (this.shouldDiscardFriction()) {
-					this.setDeltaMovement(vec37.x, q, vec37.z);
-				} else {
-					this.setDeltaMovement(vec37.x * (double)fxx, this instanceof FlyingAnimal ? q * (double)fxx : q * 0.98F, vec37.z * (double)fxx);
-				}
+			if (e != 0.0) {
+				this.setDeltaMovement(this.getDeltaMovement().add(0.0, -e / 4.0, 0.0));
 			}
 		}
 
-		this.calculateEntityAnimation(this instanceof FlyingAnimal);
+		Vec3 vec33 = this.getDeltaMovement();
+		if (this.horizontalCollision && this.isFree(vec33.x, vec33.y + 0.6F - this.getY() + d, vec33.z)) {
+			this.setDeltaMovement(vec33.x, 0.3F, vec33.z);
+		}
+	}
+
+	private void travelFallFlying() {
+		Vec3 vec3 = this.getDeltaMovement();
+		double d = vec3.horizontalDistance();
+		this.setDeltaMovement(this.updateFallFlyingMovement(vec3));
+		this.move(MoverType.SELF, this.getDeltaMovement());
+		if (!this.level().isClientSide) {
+			double e = this.getDeltaMovement().horizontalDistance();
+			this.handleFallFlyingCollisions(d, e);
+		}
+	}
+
+	private Vec3 updateFallFlyingMovement(Vec3 vec3) {
+		Vec3 vec32 = this.getLookAngle();
+		float f = this.getXRot() * (float) (Math.PI / 180.0);
+		double d = Math.sqrt(vec32.x * vec32.x + vec32.z * vec32.z);
+		double e = vec3.horizontalDistance();
+		double g = this.getEffectiveGravity();
+		double h = Mth.square(Math.cos((double)f));
+		vec3 = vec3.add(0.0, g * (-1.0 + h * 0.75), 0.0);
+		if (vec3.y < 0.0 && d > 0.0) {
+			double i = vec3.y * -0.1 * h;
+			vec3 = vec3.add(vec32.x * i / d, i, vec32.z * i / d);
+		}
+
+		if (f < 0.0F && d > 0.0) {
+			double i = e * (double)(-Mth.sin(f)) * 0.04;
+			vec3 = vec3.add(-vec32.x * i / d, i * 3.2, -vec32.z * i / d);
+		}
+
+		if (d > 0.0) {
+			vec3 = vec3.add((vec32.x / d * e - vec3.x) * 0.1, 0.0, (vec32.z / d * e - vec3.z) * 0.1);
+		}
+
+		return vec3.multiply(0.99F, 0.98F, 0.99F);
+	}
+
+	private void handleFallFlyingCollisions(double d, double e) {
+		if (this.horizontalCollision) {
+			double f = d - e;
+			float g = (float)(f * 10.0 - 3.0);
+			if (g > 0.0F) {
+				this.playSound(this.getFallDamageSound((int)g), 1.0F, 1.0F);
+				this.hurt(this.damageSources().flyIntoWall(), g);
+			}
+		}
 	}
 
 	private void travelRidden(Player player, Vec3 vec3) {
@@ -2199,9 +2258,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 			this.setSpeed(this.getRiddenSpeed(player));
 			this.travel(vec32);
 		} else {
-			this.calculateEntityAnimation(false);
 			this.setDeltaMovement(Vec3.ZERO);
-			this.tryCheckInsideBlocks();
 		}
 	}
 
@@ -2218,15 +2275,19 @@ public abstract class LivingEntity extends Entity implements Attackable {
 
 	public void calculateEntityAnimation(boolean bl) {
 		float f = (float)Mth.length(this.getX() - this.xo, bl ? this.getY() - this.yo : 0.0, this.getZ() - this.zo);
-		this.updateWalkAnimation(f);
+		if (!this.isPassenger() && this.isAlive()) {
+			this.updateWalkAnimation(f);
+		} else {
+			this.walkAnimation.stop();
+		}
 	}
 
 	protected void updateWalkAnimation(float f) {
 		float g = Math.min(f * 4.0F, 1.0F);
-		this.walkAnimation.update(g, 0.4F);
+		this.walkAnimation.update(g, 0.4F, this.isBaby() ? 3.0F : 1.0F);
 	}
 
-	public Vec3 handleRelativeFrictionAndCalculateMovement(Vec3 vec3, float f) {
+	private Vec3 handleRelativeFrictionAndCalculateMovement(Vec3 vec3, float f) {
 		this.moveRelative(this.getFrictionInfluencedSpeed(f), vec3);
 		this.setDeltaMovement(this.handleOnClimbable(this.getDeltaMovement()));
 		this.move(MoverType.SELF, this.getDeltaMovement());
@@ -2419,6 +2480,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
 			this.appliedScale = l;
 			this.refreshDimensions();
 		}
+
+		this.elytraAnimationState.tick();
 	}
 
 	private void detectEquipmentUpdates() {
@@ -2450,14 +2513,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 				map.put(equipmentSlot, itemStack2);
 				AttributeMap attributeMap = this.getAttributes();
 				if (!itemStack.isEmpty()) {
-					itemStack.forEachModifier(equipmentSlot, (holder, attributeModifier) -> {
-						AttributeInstance attributeInstance = attributeMap.getInstance(holder);
-						if (attributeInstance != null) {
-							attributeInstance.removeModifier(attributeModifier);
-						}
-
-						EnchantmentHelper.stopLocationBasedEffects(itemStack, this, equipmentSlot);
-					});
+					this.stopLocationBasedEffects(itemStack, equipmentSlot, attributeMap);
 				}
 			}
 		}
@@ -2466,18 +2522,17 @@ public abstract class LivingEntity extends Entity implements Attackable {
 			for (Entry<EquipmentSlot, ItemStack> entry : map.entrySet()) {
 				EquipmentSlot equipmentSlot2 = (EquipmentSlot)entry.getKey();
 				ItemStack itemStack3 = (ItemStack)entry.getValue();
-				if (!itemStack3.isEmpty()) {
+				if (!itemStack3.isEmpty() && !itemStack3.isBroken()) {
 					itemStack3.forEachModifier(equipmentSlot2, (holder, attributeModifier) -> {
 						AttributeInstance attributeInstance = this.attributes.getInstance(holder);
 						if (attributeInstance != null) {
 							attributeInstance.removeModifier(attributeModifier.id());
 							attributeInstance.addTransientModifier(attributeModifier);
 						}
-
-						if (this.level() instanceof ServerLevel serverLevel) {
-							EnchantmentHelper.runLocationChangedEffects(serverLevel, itemStack3, this, equipmentSlot2);
-						}
 					});
+					if (this.level() instanceof ServerLevel serverLevel) {
+						EnchantmentHelper.runLocationChangedEffects(serverLevel, itemStack3, this, equipmentSlot2);
+					}
 				}
 			}
 		}
@@ -2642,22 +2697,30 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		this.level().getProfiler().push("travel");
 		this.xxa *= 0.98F;
 		this.zza *= 0.98F;
-		this.updateFallFlying();
+		if (this.isFallFlying()) {
+			this.updateFallFlying();
+		}
+
 		AABB aABB = this.getBoundingBox();
 		Vec3 vec32 = new Vec3((double)this.xxa, (double)this.yya, (double)this.zza);
 		if (this.hasEffect(MobEffects.SLOW_FALLING) || this.hasEffect(MobEffects.LEVITATION)) {
 			this.resetFallDistance();
 		}
 
-		label104: {
+		label115: {
 			if (this.getControllingPassenger() instanceof Player player && this.isAlive()) {
 				this.travelRidden(player, vec32);
-				break label104;
+				break label115;
 			}
 
 			this.travel(vec32);
 		}
 
+		if (!this.level().isClientSide() || this.isControlledByLocalInstance()) {
+			this.applyEffectsFromBlocks();
+		}
+
+		this.calculateEntityAnimation(this instanceof FlyingAnimal);
 		this.level().getProfiler().pop();
 		this.level().getProfiler().push("freezing");
 		if (!this.level().isClientSide && !this.isDeadOrDying()) {
@@ -2693,31 +2756,31 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		return false;
 	}
 
-	private void updateFallFlying() {
-		boolean bl = this.getSharedFlag(7);
-		if (bl && !this.onGround() && !this.isPassenger() && !this.hasEffect(MobEffects.LEVITATION)) {
-			ItemStack itemStack = this.getItemBySlot(EquipmentSlot.CHEST);
-			if (itemStack.is(Items.ELYTRA) && ElytraItem.isFlyEnabled(itemStack)) {
-				bl = true;
-				int i = this.fallFlyTicks + 1;
-				if (!this.level().isClientSide && i % 10 == 0) {
-					int j = i / 10;
-					if (j % 2 == 0) {
-						itemStack.hurtAndBreak(1, this, EquipmentSlot.CHEST);
-					}
-
-					this.gameEvent(GameEvent.ELYTRA_GLIDE);
-				}
-			} else {
-				bl = false;
-			}
-		} else {
-			bl = false;
-		}
-
+	protected void updateFallFlying() {
+		this.checkSlowFallDistance();
 		if (!this.level().isClientSide) {
-			this.setSharedFlag(7, bl);
+			ItemStack itemStack = this.getItemBySlot(EquipmentSlot.CHEST);
+			if (!this.canContinueToGlide(itemStack)) {
+				this.setSharedFlag(7, false);
+				return;
+			}
+
+			int i = this.fallFlyTicks + 1;
+			if (i % 10 == 0) {
+				int j = i / 10;
+				if (j % 2 == 0) {
+					itemStack.hurtAndBreak(1, this, EquipmentSlot.CHEST);
+				}
+
+				this.gameEvent(GameEvent.ELYTRA_GLIDE);
+			}
 		}
+	}
+
+	protected boolean canContinueToGlide(ItemStack itemStack) {
+		return !this.onGround() && !this.isPassenger() && !this.hasEffect(MobEffects.LEVITATION)
+			? itemStack.is(Items.ELYTRA) && ElytraItem.isFlyEnabled(itemStack)
+			: false;
 	}
 
 	protected void serverAiStep() {
@@ -3380,20 +3443,21 @@ public abstract class LivingEntity extends Entity implements Attackable {
 
 	public void onEquippedItemBroken(Item item, EquipmentSlot equipmentSlot) {
 		this.level().broadcastEntityEvent(this, entityEventForEquipmentBreak(equipmentSlot));
+		this.stopLocationBasedEffects(this.getItemBySlot(equipmentSlot), equipmentSlot, this.attributes);
+	}
+
+	private void stopLocationBasedEffects(ItemStack itemStack, EquipmentSlot equipmentSlot, AttributeMap attributeMap) {
+		itemStack.forEachModifier(equipmentSlot, (holder, attributeModifier) -> {
+			AttributeInstance attributeInstance = attributeMap.getInstance(holder);
+			if (attributeInstance != null) {
+				attributeInstance.removeModifier(attributeModifier);
+			}
+		});
+		EnchantmentHelper.stopLocationBasedEffects(itemStack, this, equipmentSlot);
 	}
 
 	public static EquipmentSlot getSlotForHand(InteractionHand interactionHand) {
 		return interactionHand == InteractionHand.MAIN_HAND ? EquipmentSlot.MAINHAND : EquipmentSlot.OFFHAND;
-	}
-
-	@Override
-	public AABB getBoundingBoxForCulling() {
-		if (this.getItemBySlot(EquipmentSlot.HEAD).is(Items.DRAGON_HEAD)) {
-			float f = 0.5F;
-			return this.getBoundingBox().inflate(0.5, 0.5, 0.5);
-		} else {
-			return super.getBoundingBoxForCulling();
-		}
 	}
 
 	public EquipmentSlot getEquipmentSlotForItem(ItemStack itemStack) {

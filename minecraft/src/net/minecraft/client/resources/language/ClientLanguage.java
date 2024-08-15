@@ -1,15 +1,15 @@
 package net.minecraft.client.resources.language;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 import com.mojang.logging.LogUtils;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.locale.DeprecatedTranslationsInfo;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.resources.ResourceLocation;
@@ -30,7 +30,7 @@ public class ClientLanguage extends Language {
 	}
 
 	public static ClientLanguage loadFrom(ResourceManager resourceManager, List<String> list, boolean bl) {
-		Map<String, String> map = Maps.<String, String>newHashMap();
+		Map<String, String> map = new HashMap();
 
 		for (String string : list) {
 			String string2 = String.format(Locale.ROOT, "lang/%s.json", string);
@@ -45,7 +45,8 @@ public class ClientLanguage extends Language {
 			}
 		}
 
-		return new ClientLanguage(ImmutableMap.copyOf(map), bl);
+		DeprecatedTranslationsInfo.loadFromDefaultResource().applyToMap(map);
+		return new ClientLanguage(Map.copyOf(map), bl);
 	}
 
 	private static void appendFrom(String string, List<Resource> list, Map<String, String> map) {

@@ -99,7 +99,7 @@ public abstract class AbstractFish extends WaterAnimal implements Bucketable {
 
 	@Override
 	public void travel(Vec3 vec3) {
-		if (this.isEffectiveAi() && this.isInWater()) {
+		if (this.isControlledByLocalInstance() && this.isInWater()) {
 			this.moveRelative(0.01F, vec3);
 			this.move(MoverType.SELF, this.getDeltaMovement());
 			this.setDeltaMovement(this.getDeltaMovement().scale(0.9));

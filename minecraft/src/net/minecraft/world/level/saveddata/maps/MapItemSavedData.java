@@ -2,6 +2,7 @@ package net.minecraft.world.level.saveddata.maps;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Dynamic;
 import io.netty.buffer.ByteBuf;
@@ -79,7 +80,6 @@ public class MapItemSavedData extends SavedData {
 		this.trackingPosition = bl;
 		this.unlimitedTracking = bl2;
 		this.locked = bl3;
-		this.setDirty();
 	}
 
 	public static MapItemSavedData createFresh(double d, double e, byte b, boolean bl, boolean bl2, ResourceKey<Level> resourceKey) {
@@ -183,7 +183,6 @@ public class MapItemSavedData extends SavedData {
 		mapItemSavedData.decorations.putAll(this.decorations);
 		mapItemSavedData.trackedDecorationCount = this.trackedDecorationCount;
 		System.arraycopy(this.colors, 0, mapItemSavedData.colors, 0, this.colors.length);
-		mapItemSavedData.setDirty();
 		return mapItemSavedData;
 	}
 
@@ -286,65 +285,88 @@ public class MapItemSavedData extends SavedData {
 		int i = 1 << this.scale;
 		float g = (float)(d - (double)this.centerX) / (float)i;
 		float h = (float)(e - (double)this.centerZ) / (float)i;
-		byte b = (byte)((int)((double)(g * 2.0F) + 0.5));
-		byte c = (byte)((int)((double)(h * 2.0F) + 0.5));
-		int j = 63;
-		byte k;
-		if (g >= -63.0F && h >= -63.0F && g <= 63.0F && h <= 63.0F) {
-			f += f < 0.0 ? -8.0 : 8.0;
-			k = (byte)((int)(f * 16.0 / 360.0));
-			if (this.dimension == Level.NETHER && levelAccessor != null) {
-				int l = (int)(levelAccessor.getLevelData().getDayTime() / 10L);
-				k = (byte)(l * l * 34187121 + l * 121 >> 15 & 15);
-			}
+		MapItemSavedData.MapDecorationLocation mapDecorationLocation = this.calculateDecorationLocationAndType(holder, levelAccessor, f, g, h);
+		if (mapDecorationLocation == null) {
+			this.removeDecoration(string);
 		} else {
-			if (!holder.is(MapDecorationTypes.PLAYER)) {
-				this.removeDecoration(string);
-				return;
-			}
-
-			int l = 320;
-			if (Math.abs(g) < 320.0F && Math.abs(h) < 320.0F) {
-				holder = MapDecorationTypes.PLAYER_OFF_MAP;
-			} else {
-				if (!this.unlimitedTracking) {
-					this.removeDecoration(string);
-					return;
+			MapDecoration mapDecoration = new MapDecoration(
+				mapDecorationLocation.type(), mapDecorationLocation.x(), mapDecorationLocation.y(), mapDecorationLocation.rot(), Optional.ofNullable(component)
+			);
+			MapDecoration mapDecoration2 = (MapDecoration)this.decorations.put(string, mapDecoration);
+			if (!mapDecoration.equals(mapDecoration2)) {
+				if (mapDecoration2 != null && mapDecoration2.type().value().trackCount()) {
+					this.trackedDecorationCount--;
 				}
 
-				holder = MapDecorationTypes.PLAYER_OFF_LIMITS;
-			}
+				if (mapDecorationLocation.type().value().trackCount()) {
+					this.trackedDecorationCount++;
+				}
 
-			k = 0;
-			if (g <= -63.0F) {
-				b = -128;
-			}
-
-			if (h <= -63.0F) {
-				c = -128;
-			}
-
-			if (g >= 63.0F) {
-				b = 127;
-			}
-
-			if (h >= 63.0F) {
-				c = 127;
+				this.setDecorationsDirty();
 			}
 		}
+	}
 
-		MapDecoration mapDecoration = new MapDecoration(holder, b, c, k, Optional.ofNullable(component));
-		MapDecoration mapDecoration2 = (MapDecoration)this.decorations.put(string, mapDecoration);
-		if (!mapDecoration.equals(mapDecoration2)) {
-			if (mapDecoration2 != null && mapDecoration2.type().value().trackCount()) {
-				this.trackedDecorationCount--;
-			}
+	@Nullable
+	private MapItemSavedData.MapDecorationLocation calculateDecorationLocationAndType(
+		Holder<MapDecorationType> holder, @Nullable LevelAccessor levelAccessor, double d, float f, float g
+	) {
+		byte b = clampMapCoordinate(f);
+		byte c = clampMapCoordinate(g);
+		if (holder.is(MapDecorationTypes.PLAYER)) {
+			Pair<Holder<MapDecorationType>, Byte> pair = this.playerDecorationTypeAndRotation(holder, levelAccessor, d, f, g);
+			return pair == null ? null : new MapItemSavedData.MapDecorationLocation(pair.getFirst(), b, c, pair.getSecond());
+		} else {
+			return !isInsideMap(f, g) && !this.unlimitedTracking
+				? null
+				: new MapItemSavedData.MapDecorationLocation(holder, b, c, this.calculateRotation(levelAccessor, d));
+		}
+	}
 
-			if (holder.value().trackCount()) {
-				this.trackedDecorationCount++;
-			}
+	@Nullable
+	private Pair<Holder<MapDecorationType>, Byte> playerDecorationTypeAndRotation(
+		Holder<MapDecorationType> holder, @Nullable LevelAccessor levelAccessor, double d, float f, float g
+	) {
+		if (isInsideMap(f, g)) {
+			return Pair.of(holder, this.calculateRotation(levelAccessor, d));
+		} else {
+			Holder<MapDecorationType> holder2 = this.decorationTypeForPlayerOutsideMap(f, g);
+			return holder2 == null ? null : Pair.of(holder2, (byte)0);
+		}
+	}
 
-			this.setDecorationsDirty();
+	private byte calculateRotation(@Nullable LevelAccessor levelAccessor, double d) {
+		if (this.dimension == Level.NETHER && levelAccessor != null) {
+			int i = (int)(levelAccessor.getLevelData().getDayTime() / 10L);
+			return (byte)(i * i * 34187121 + i * 121 >> 15 & 15);
+		} else {
+			double e = d < 0.0 ? d - 8.0 : d + 8.0;
+			return (byte)((int)(e * 16.0 / 360.0));
+		}
+	}
+
+	private static boolean isInsideMap(float f, float g) {
+		int i = 63;
+		return f >= -63.0F && g >= -63.0F && f <= 63.0F && g <= 63.0F;
+	}
+
+	@Nullable
+	private Holder<MapDecorationType> decorationTypeForPlayerOutsideMap(float f, float g) {
+		int i = 320;
+		boolean bl = Math.abs(f) < 320.0F && Math.abs(g) < 320.0F;
+		if (bl) {
+			return MapDecorationTypes.PLAYER_OFF_MAP;
+		} else {
+			return this.unlimitedTracking ? MapDecorationTypes.PLAYER_OFF_LIMITS : null;
+		}
+	}
+
+	private static byte clampMapCoordinate(float f) {
+		int i = 63;
+		if (f <= -63.0F) {
+			return -128;
+		} else {
+			return f >= 63.0F ? 127 : (byte)((int)((double)(f * 2.0F) + 0.5));
 		}
 	}
 
@@ -428,6 +450,7 @@ public class MapItemSavedData extends SavedData {
 	public void removedFromFrame(BlockPos blockPos, int i) {
 		this.removeDecoration(getFrameKey(i));
 		this.frameMarkers.remove(MapFrame.frameId(blockPos));
+		this.setDirty();
 	}
 
 	public boolean updateColor(int i, int j, byte b) {
@@ -552,6 +575,9 @@ public class MapItemSavedData extends SavedData {
 		private void markDecorationsDirty() {
 			this.dirtyDecorations = true;
 		}
+	}
+
+	static record MapDecorationLocation(Holder<MapDecorationType> type, byte x, byte y, byte rot) {
 	}
 
 	public static record MapPatch(int startX, int startY, int width, int height, byte[] mapColors) {

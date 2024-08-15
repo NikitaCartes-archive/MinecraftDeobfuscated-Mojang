@@ -8,7 +8,6 @@ import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.SectionPos;
-import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -29,7 +28,6 @@ public abstract class LightEngine<M extends DataLayerStorageMap<M>, S extends La
 	private final LongOpenHashSet blockNodesToCheck = new LongOpenHashSet(512, 0.5F);
 	private final LongArrayFIFOQueue decreaseQueue = new LongArrayFIFOQueue();
 	private final LongArrayFIFOQueue increaseQueue = new LongArrayFIFOQueue();
-	private final BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
 	private static final int CACHE_SIZE = 2;
 	private final long[] lastChunkPos = new long[2];
 	private final LightChunk[] lastChunk = new LightChunk[2];
@@ -40,31 +38,29 @@ public abstract class LightEngine<M extends DataLayerStorageMap<M>, S extends La
 		this.clearChunkCache();
 	}
 
-	public static boolean hasDifferentLightProperties(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState, BlockState blockState2) {
+	public static boolean hasDifferentLightProperties(BlockState blockState, BlockState blockState2) {
 		return blockState2 == blockState
 			? false
-			: blockState2.getLightBlock(blockGetter, blockPos) != blockState.getLightBlock(blockGetter, blockPos)
+			: blockState2.getLightBlock() != blockState.getLightBlock()
 				|| blockState2.getLightEmission() != blockState.getLightEmission()
 				|| blockState2.useShapeForLightOcclusion()
 				|| blockState.useShapeForLightOcclusion();
 	}
 
-	public static int getLightBlockInto(
-		BlockGetter blockGetter, BlockState blockState, BlockPos blockPos, BlockState blockState2, BlockPos blockPos2, Direction direction, int i
-	) {
+	public static int getLightBlockInto(BlockState blockState, BlockState blockState2, Direction direction, int i) {
 		boolean bl = isEmptyShape(blockState);
 		boolean bl2 = isEmptyShape(blockState2);
 		if (bl && bl2) {
 			return i;
 		} else {
-			VoxelShape voxelShape = bl ? Shapes.empty() : blockState.getOcclusionShape(blockGetter, blockPos);
-			VoxelShape voxelShape2 = bl2 ? Shapes.empty() : blockState2.getOcclusionShape(blockGetter, blockPos2);
+			VoxelShape voxelShape = bl ? Shapes.empty() : blockState.getOcclusionShape();
+			VoxelShape voxelShape2 = bl2 ? Shapes.empty() : blockState2.getOcclusionShape();
 			return Shapes.mergedFaceOccludes(voxelShape, voxelShape2, direction) ? 16 : i;
 		}
 	}
 
-	public static VoxelShape getOcclusionShape(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState, Direction direction) {
-		return isEmptyShape(blockState) ? Shapes.empty() : blockState.getFaceOcclusionShape(blockGetter, blockPos, direction);
+	public static VoxelShape getOcclusionShape(BlockState blockState, Direction direction) {
+		return isEmptyShape(blockState) ? Shapes.empty() : blockState.getFaceOcclusionShape(direction);
 	}
 
 	protected static boolean isEmptyShape(BlockState blockState) {
@@ -78,18 +74,14 @@ public abstract class LightEngine<M extends DataLayerStorageMap<M>, S extends La
 		return lightChunk == null ? Blocks.BEDROCK.defaultBlockState() : lightChunk.getBlockState(blockPos);
 	}
 
-	protected int getOpacity(BlockState blockState, BlockPos blockPos) {
-		return Math.max(1, blockState.getLightBlock(this.chunkSource.getLevel(), blockPos));
+	protected int getOpacity(BlockState blockState) {
+		return Math.max(1, blockState.getLightBlock());
 	}
 
-	protected boolean shapeOccludes(long l, BlockState blockState, long m, BlockState blockState2, Direction direction) {
-		VoxelShape voxelShape = this.getOcclusionShape(blockState, l, direction);
-		VoxelShape voxelShape2 = this.getOcclusionShape(blockState2, m, direction.getOpposite());
+	protected boolean shapeOccludes(BlockState blockState, BlockState blockState2, Direction direction) {
+		VoxelShape voxelShape = getOcclusionShape(blockState, direction);
+		VoxelShape voxelShape2 = getOcclusionShape(blockState2, direction.getOpposite());
 		return Shapes.faceShapeOccludes(voxelShape, voxelShape2);
-	}
-
-	protected VoxelShape getOcclusionShape(BlockState blockState, long l, Direction direction) {
-		return getOcclusionShape(this.chunkSource.getLevel(), this.mutablePos.set(l), blockState, direction);
 	}
 
 	@Nullable

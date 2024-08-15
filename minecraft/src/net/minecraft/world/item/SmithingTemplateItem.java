@@ -5,10 +5,8 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.flag.FeatureFlag;
-import net.minecraft.world.item.armortrim.TrimPattern;
 
 public class SmithingTemplateItem extends Item {
 	private static final ChatFormatting TITLE_FORMAT = ChatFormatting.GRAY;
@@ -21,8 +19,8 @@ public class SmithingTemplateItem extends Item {
 			Util.makeDescriptionId("item", ResourceLocation.withDefaultNamespace("smithing_template.applies_to"))
 		)
 		.withStyle(TITLE_FORMAT);
-	private static final Component NETHERITE_UPGRADE = Component.translatable(
-			Util.makeDescriptionId("upgrade", ResourceLocation.withDefaultNamespace("netherite_upgrade"))
+	private static final Component SMITHING_TEMPLATE_SUFFIX = Component.translatable(
+			Util.makeDescriptionId("item", ResourceLocation.withDefaultNamespace("smithing_template"))
 		)
 		.withStyle(TITLE_FORMAT);
 	private static final Component ARMOR_TRIM_APPLIES_TO = Component.translatable(
@@ -71,41 +69,35 @@ public class SmithingTemplateItem extends Item {
 	private static final ResourceLocation EMPTY_SLOT_AMETHYST_SHARD = ResourceLocation.withDefaultNamespace("item/empty_slot_amethyst_shard");
 	private final Component appliesTo;
 	private final Component ingredients;
-	private final Component upgradeDescription;
 	private final Component baseSlotDescription;
 	private final Component additionsSlotDescription;
 	private final List<ResourceLocation> baseSlotEmptyIcons;
 	private final List<ResourceLocation> additionalSlotEmptyIcons;
 
 	public SmithingTemplateItem(
+		Item.Properties properties,
 		Component component,
 		Component component2,
 		Component component3,
 		Component component4,
-		Component component5,
 		List<ResourceLocation> list,
 		List<ResourceLocation> list2,
 		FeatureFlag... featureFlags
 	) {
-		super(new Item.Properties().requiredFeatures(featureFlags));
+		super(properties.requiredFeatures(featureFlags));
 		this.appliesTo = component;
 		this.ingredients = component2;
-		this.upgradeDescription = component3;
-		this.baseSlotDescription = component4;
-		this.additionsSlotDescription = component5;
+		this.baseSlotDescription = component3;
+		this.additionsSlotDescription = component4;
 		this.baseSlotEmptyIcons = list;
 		this.additionalSlotEmptyIcons = list2;
 	}
 
-	public static SmithingTemplateItem createArmorTrimTemplate(ResourceKey<TrimPattern> resourceKey, FeatureFlag... featureFlags) {
-		return createArmorTrimTemplate(resourceKey.location(), featureFlags);
-	}
-
-	public static SmithingTemplateItem createArmorTrimTemplate(ResourceLocation resourceLocation, FeatureFlag... featureFlags) {
+	public static SmithingTemplateItem createArmorTrimTemplate(Item.Properties properties, FeatureFlag... featureFlags) {
 		return new SmithingTemplateItem(
+			properties,
 			ARMOR_TRIM_APPLIES_TO,
 			ARMOR_TRIM_INGREDIENTS,
-			Component.translatable(Util.makeDescriptionId("trim_pattern", resourceLocation)).withStyle(TITLE_FORMAT),
 			ARMOR_TRIM_BASE_SLOT_DESCRIPTION,
 			ARMOR_TRIM_ADDITIONS_SLOT_DESCRIPTION,
 			createTrimmableArmorIconList(),
@@ -114,11 +106,11 @@ public class SmithingTemplateItem extends Item {
 		);
 	}
 
-	public static SmithingTemplateItem createNetheriteUpgradeTemplate() {
+	public static SmithingTemplateItem createNetheriteUpgradeTemplate(Item.Properties properties) {
 		return new SmithingTemplateItem(
+			properties,
 			NETHERITE_UPGRADE_APPLIES_TO,
 			NETHERITE_UPGRADE_INGREDIENTS,
-			NETHERITE_UPGRADE,
 			NETHERITE_UPGRADE_BASE_SLOT_DESCRIPTION,
 			NETHERITE_UPGRADE_ADDITIONS_SLOT_DESCRIPTION,
 			createNetheriteUpgradeIconList(),
@@ -157,7 +149,7 @@ public class SmithingTemplateItem extends Item {
 	@Override
 	public void appendHoverText(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Component> list, TooltipFlag tooltipFlag) {
 		super.appendHoverText(itemStack, tooltipContext, list, tooltipFlag);
-		list.add(this.upgradeDescription);
+		list.add(SMITHING_TEMPLATE_SUFFIX);
 		list.add(CommonComponents.EMPTY);
 		list.add(APPLIES_TO_TITLE);
 		list.add(CommonComponents.space().append(this.appliesTo));

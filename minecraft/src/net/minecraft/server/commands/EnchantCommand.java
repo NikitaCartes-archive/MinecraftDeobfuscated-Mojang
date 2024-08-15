@@ -82,7 +82,7 @@ public class EnchantCommand {
 							itemStack.enchant(holder, i);
 							j++;
 						} else if (collection.size() == 1) {
-							throw ERROR_INCOMPATIBLE.create(itemStack.getItem().getName(itemStack).getString());
+							throw ERROR_INCOMPATIBLE.create(itemStack.getHoverName().getString());
 						}
 					} else if (collection.size() == 1) {
 						throw ERROR_NO_ITEM.create(livingEntity.getName().getString());

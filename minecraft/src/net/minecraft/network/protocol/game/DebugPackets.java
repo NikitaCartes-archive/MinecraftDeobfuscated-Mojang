@@ -18,6 +18,7 @@ import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.network.protocol.common.custom.GameTestAddMarkerDebugPayload;
 import net.minecraft.network.protocol.common.custom.GameTestClearMarkersDebugPayload;
+import net.minecraft.network.protocol.common.custom.RedstoneWireOrientationsDebugPayload;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Nameable;
@@ -79,6 +80,12 @@ public class DebugPackets {
 	}
 
 	public static void sendNeighborsUpdatePacket(Level level, BlockPos blockPos) {
+	}
+
+	public static void sendWireUpdates(Level level, RedstoneWireOrientationsDebugPayload redstoneWireOrientationsDebugPayload) {
+		if (level instanceof ServerLevel serverLevel) {
+			sendPacketToAllPlayers(serverLevel, redstoneWireOrientationsDebugPayload);
+		}
 	}
 
 	public static void sendStructurePacket(WorldGenLevel worldGenLevel, StructureStart structureStart) {

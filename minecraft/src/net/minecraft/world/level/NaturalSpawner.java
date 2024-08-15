@@ -4,6 +4,8 @@ import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMaps;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -23,10 +25,10 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.util.VisibleForDebug;
 import net.minecraft.util.random.WeightedRandomList;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobCategory;
-import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.SpawnPlacements;
 import net.minecraft.world.entity.player.Player;
@@ -94,14 +96,26 @@ public final class NaturalSpawner {
 		return chunkAccess.getNoiseBiome(QuartPos.fromBlock(blockPos.getX()), QuartPos.fromBlock(blockPos.getY()), QuartPos.fromBlock(blockPos.getZ())).value();
 	}
 
-	public static void spawnForChunk(ServerLevel serverLevel, LevelChunk levelChunk, NaturalSpawner.SpawnState spawnState, boolean bl, boolean bl2, boolean bl3) {
-		serverLevel.getProfiler().push("spawner");
+	public static List<MobCategory> getFilteredSpawningCategories(NaturalSpawner.SpawnState spawnState, boolean bl, boolean bl2, boolean bl3) {
+		List<MobCategory> list = new ArrayList(SPAWNING_CATEGORIES.length);
 
 		for (MobCategory mobCategory : SPAWNING_CATEGORIES) {
 			if ((bl || !mobCategory.isFriendly())
 				&& (bl2 || mobCategory.isFriendly())
 				&& (bl3 || !mobCategory.isPersistent())
-				&& spawnState.canSpawnForCategory(mobCategory, levelChunk.getPos())) {
+				&& spawnState.canSpawnForCategoryGlobal(mobCategory)) {
+				list.add(mobCategory);
+			}
+		}
+
+		return list;
+	}
+
+	public static void spawnForChunk(ServerLevel serverLevel, LevelChunk levelChunk, NaturalSpawner.SpawnState spawnState, List<MobCategory> list) {
+		serverLevel.getProfiler().push("spawner");
+
+		for (MobCategory mobCategory : list) {
+			if (spawnState.canSpawnForCategoryLocal(mobCategory, levelChunk.getPos())) {
 				spawnCategoryForChunk(mobCategory, serverLevel, levelChunk, spawnState::canSpawn, spawnState::afterSpawn);
 			}
 		}
@@ -186,7 +200,7 @@ public final class NaturalSpawner {
 
 								mob.moveTo(d, (double)i, e, serverLevel.random.nextFloat() * 360.0F, 0.0F);
 								if (isValidPositionForMob(serverLevel, mob, f)) {
-									spawnGroupData = mob.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(mob.blockPosition()), MobSpawnType.NATURAL, spawnGroupData);
+									spawnGroupData = mob.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(mob.blockPosition()), EntitySpawnReason.NATURAL, spawnGroupData);
 									j++;
 									p++;
 									serverLevel.addFreshEntityWithPassengers(mob);
@@ -241,7 +255,7 @@ public final class NaturalSpawner {
 		} else if (!SpawnPlacements.isSpawnPositionOk(entityType, serverLevel, mutableBlockPos)) {
 			return false;
 		} else {
-			return !SpawnPlacements.checkSpawnRules(entityType, serverLevel, MobSpawnType.NATURAL, mutableBlockPos, serverLevel.random)
+			return !SpawnPlacements.checkSpawnRules(entityType, serverLevel, EntitySpawnReason.NATURAL, mutableBlockPos, serverLevel.random)
 				? false
 				: serverLevel.noCollision(
 					entityType.getSpawnAABB((double)mutableBlockPos.getX() + 0.5, (double)mutableBlockPos.getY(), (double)mutableBlockPos.getZ() + 0.5)
@@ -252,7 +266,7 @@ public final class NaturalSpawner {
 	@Nullable
 	private static Mob getMobForSpawn(ServerLevel serverLevel, EntityType<?> entityType) {
 		try {
-			Entity var3 = entityType.create(serverLevel);
+			Entity var3 = entityType.create(serverLevel, EntitySpawnReason.NATURAL);
 			if (var3 instanceof Mob) {
 				return (Mob)var3;
 			}
@@ -268,7 +282,7 @@ public final class NaturalSpawner {
 	private static boolean isValidPositionForMob(ServerLevel serverLevel, Mob mob, double d) {
 		return d > (double)(mob.getType().getCategory().getDespawnDistance() * mob.getType().getCategory().getDespawnDistance()) && mob.removeWhenFarAway(d)
 			? false
-			: mob.checkSpawnRules(serverLevel, MobSpawnType.NATURAL) && mob.checkSpawnObstruction(serverLevel);
+			: mob.checkSpawnRules(serverLevel, EntitySpawnReason.NATURAL) && mob.checkSpawnObstruction(serverLevel);
 	}
 
 	private static Optional<MobSpawnSettings.SpawnerData> getRandomSpawnMobAt(
@@ -372,7 +386,7 @@ public final class NaturalSpawner {
 									|| !SpawnPlacements.checkSpawnRules(
 										spawnerData.type,
 										serverLevelAccessor,
-										MobSpawnType.CHUNK_GENERATION,
+										EntitySpawnReason.CHUNK_GENERATION,
 										BlockPos.containing(d, (double)blockPos.getY(), e),
 										serverLevelAccessor.getRandom()
 									)) {
@@ -381,7 +395,7 @@ public final class NaturalSpawner {
 
 								Entity entity;
 								try {
-									entity = spawnerData.type.create(serverLevelAccessor.getLevel());
+									entity = spawnerData.type.create(serverLevelAccessor.getLevel(), EntitySpawnReason.NATURAL);
 								} catch (Exception var27) {
 									LOGGER.warn("Failed to create mob", (Throwable)var27);
 									continue;
@@ -393,10 +407,10 @@ public final class NaturalSpawner {
 
 								entity.moveTo(d, (double)blockPos.getY(), e, randomSource.nextFloat() * 360.0F, 0.0F);
 								if (entity instanceof Mob mob
-									&& mob.checkSpawnRules(serverLevelAccessor, MobSpawnType.CHUNK_GENERATION)
+									&& mob.checkSpawnRules(serverLevelAccessor, EntitySpawnReason.CHUNK_GENERATION)
 									&& mob.checkSpawnObstruction(serverLevelAccessor)) {
 									spawnGroupData = mob.finalizeSpawn(
-										serverLevelAccessor, serverLevelAccessor.getCurrentDifficultyAt(mob.blockPosition()), MobSpawnType.CHUNK_GENERATION, spawnGroupData
+										serverLevelAccessor, serverLevelAccessor.getCurrentDifficultyAt(mob.blockPosition()), EntitySpawnReason.CHUNK_GENERATION, spawnGroupData
 									);
 									serverLevelAccessor.addFreshEntityWithPassengers(mob);
 									bl = true;
@@ -515,9 +529,13 @@ public final class NaturalSpawner {
 			return this.unmodifiableMobCategoryCounts;
 		}
 
-		boolean canSpawnForCategory(MobCategory mobCategory, ChunkPos chunkPos) {
+		boolean canSpawnForCategoryGlobal(MobCategory mobCategory) {
 			int i = mobCategory.getMaxInstancesPerChunk() * this.spawnableChunkCount / NaturalSpawner.MAGIC_NUMBER;
-			return this.mobCategoryCounts.getInt(mobCategory) >= i ? false : this.localMobCapCalculator.canSpawn(mobCategory, chunkPos);
+			return this.mobCategoryCounts.getInt(mobCategory) < i;
+		}
+
+		boolean canSpawnForCategoryLocal(MobCategory mobCategory, ChunkPos chunkPos) {
+			return this.localMobCapCalculator.canSpawn(mobCategory, chunkPos);
 		}
 	}
 }

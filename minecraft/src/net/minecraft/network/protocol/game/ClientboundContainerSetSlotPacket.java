@@ -10,8 +10,6 @@ public class ClientboundContainerSetSlotPacket implements Packet<ClientGamePacke
 	public static final StreamCodec<RegistryFriendlyByteBuf, ClientboundContainerSetSlotPacket> STREAM_CODEC = Packet.codec(
 		ClientboundContainerSetSlotPacket::write, ClientboundContainerSetSlotPacket::new
 	);
-	public static final int CARRIED_ITEM = -1;
-	public static final int PLAYER_INVENTORY = -2;
 	private final int containerId;
 	private final int stateId;
 	private final int slot;
@@ -25,14 +23,14 @@ public class ClientboundContainerSetSlotPacket implements Packet<ClientGamePacke
 	}
 
 	private ClientboundContainerSetSlotPacket(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
-		this.containerId = registryFriendlyByteBuf.readByte();
+		this.containerId = registryFriendlyByteBuf.readContainerId();
 		this.stateId = registryFriendlyByteBuf.readVarInt();
 		this.slot = registryFriendlyByteBuf.readShort();
 		this.itemStack = ItemStack.OPTIONAL_STREAM_CODEC.decode(registryFriendlyByteBuf);
 	}
 
 	private void write(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
-		registryFriendlyByteBuf.writeByte(this.containerId);
+		registryFriendlyByteBuf.writeContainerId(this.containerId);
 		registryFriendlyByteBuf.writeVarInt(this.stateId);
 		registryFriendlyByteBuf.writeShort(this.slot);
 		ItemStack.OPTIONAL_STREAM_CODEC.encode(registryFriendlyByteBuf, this.itemStack);

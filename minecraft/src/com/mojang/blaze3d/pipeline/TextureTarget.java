@@ -6,9 +6,9 @@ import net.fabricmc.api.Environment;
 
 @Environment(EnvType.CLIENT)
 public class TextureTarget extends RenderTarget {
-	public TextureTarget(int i, int j, boolean bl, boolean bl2) {
+	public TextureTarget(int i, int j, boolean bl) {
 		super(bl);
 		RenderSystem.assertOnRenderThreadOrInit();
-		this.resize(i, j, bl2);
+		this.resize(i, j);
 	}
 }

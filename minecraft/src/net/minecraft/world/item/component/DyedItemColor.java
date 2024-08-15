@@ -12,7 +12,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.tags.ItemTags;
-import net.minecraft.util.FastColor;
+import net.minecraft.util.ARGB;
 import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -34,7 +34,7 @@ public record DyedItemColor(int rgb, boolean showInTooltip) implements TooltipPr
 
 	public static int getOrDefault(ItemStack itemStack, int i) {
 		DyedItemColor dyedItemColor = itemStack.get(DataComponents.DYED_COLOR);
-		return dyedItemColor != null ? FastColor.ARGB32.opaque(dyedItemColor.rgb()) : i;
+		return dyedItemColor != null ? ARGB.opaque(dyedItemColor.rgb()) : i;
 	}
 
 	public static ItemStack applyDyes(ItemStack itemStack, List<DyeItem> list) {
@@ -49,9 +49,9 @@ public record DyedItemColor(int rgb, boolean showInTooltip) implements TooltipPr
 			int m = 0;
 			DyedItemColor dyedItemColor = itemStack2.get(DataComponents.DYED_COLOR);
 			if (dyedItemColor != null) {
-				int n = FastColor.ARGB32.red(dyedItemColor.rgb());
-				int o = FastColor.ARGB32.green(dyedItemColor.rgb());
-				int p = FastColor.ARGB32.blue(dyedItemColor.rgb());
+				int n = ARGB.red(dyedItemColor.rgb());
+				int o = ARGB.green(dyedItemColor.rgb());
+				int p = ARGB.blue(dyedItemColor.rgb());
 				l += Math.max(n, Math.max(o, p));
 				i += n;
 				j += o;
@@ -61,9 +61,9 @@ public record DyedItemColor(int rgb, boolean showInTooltip) implements TooltipPr
 
 			for (DyeItem dyeItem : list) {
 				int p = dyeItem.getDyeColor().getTextureDiffuseColor();
-				int q = FastColor.ARGB32.red(p);
-				int r = FastColor.ARGB32.green(p);
-				int s = FastColor.ARGB32.blue(p);
+				int q = ARGB.red(p);
+				int r = ARGB.green(p);
+				int s = ARGB.blue(p);
 				l += Math.max(q, Math.max(r, s));
 				i += q;
 				j += r;
@@ -79,7 +79,7 @@ public record DyedItemColor(int rgb, boolean showInTooltip) implements TooltipPr
 			n = (int)((float)n * f / g);
 			o = (int)((float)o * f / g);
 			p = (int)((float)p * f / g);
-			int s = FastColor.ARGB32.color(0, n, o, p);
+			int s = ARGB.color(0, n, o, p);
 			boolean bl = dyedItemColor == null || dyedItemColor.showInTooltip();
 			itemStack2.set(DataComponents.DYED_COLOR, new DyedItemColor(s, bl));
 			return itemStack2;

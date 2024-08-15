@@ -1,6 +1,5 @@
 package net.minecraft.client.gui.components;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -11,6 +10,7 @@ import net.minecraft.client.gui.components.tabs.TabManager;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -39,9 +39,7 @@ public class TabButton extends AbstractWidget {
 
 	@Override
 	public void renderWidget(GuiGraphics guiGraphics, int i, int j, float f) {
-		RenderSystem.enableBlend();
-		guiGraphics.blitSprite(SPRITES.get(this.isSelected(), this.isHoveredOrFocused()), this.getX(), this.getY(), this.width, this.height);
-		RenderSystem.disableBlend();
+		guiGraphics.blitSprite(RenderType::guiTextured, SPRITES.get(this.isSelected(), this.isHoveredOrFocused()), this.getX(), this.getY(), this.width, this.height);
 		Font font = Minecraft.getInstance().font;
 		int k = this.active ? -1 : -6250336;
 		this.renderString(guiGraphics, font, k);

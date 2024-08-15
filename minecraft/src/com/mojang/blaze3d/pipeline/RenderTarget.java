@@ -38,22 +38,14 @@ public abstract class RenderTarget {
 		this.depthBufferId = -1;
 	}
 
-	public void resize(int i, int j, boolean bl) {
-		if (!RenderSystem.isOnRenderThread()) {
-			RenderSystem.recordRenderCall(() -> this._resize(i, j, bl));
-		} else {
-			this._resize(i, j, bl);
-		}
-	}
-
-	private void _resize(int i, int j, boolean bl) {
+	public void resize(int i, int j) {
 		RenderSystem.assertOnRenderThreadOrInit();
 		GlStateManager._enableDepthTest();
 		if (this.frameBufferId >= 0) {
 			this.destroyBuffers();
 		}
 
-		this.createBuffers(i, j, bl);
+		this.createBuffers(i, j);
 		GlStateManager._glBindFramebuffer(36160, 0);
 	}
 
@@ -86,7 +78,7 @@ public abstract class RenderTarget {
 		GlStateManager._glBindFramebuffer(36160, 0);
 	}
 
-	public void createBuffers(int i, int j, boolean bl) {
+	public void createBuffers(int i, int j) {
 		RenderSystem.assertOnRenderThreadOrInit();
 		int k = RenderSystem.maxSupportedTextureSize();
 		if (i > 0 && i <= k && j > 0 && j <= k) {
@@ -119,7 +111,7 @@ public abstract class RenderTarget {
 			}
 
 			this.checkStatus();
-			this.clear(bl);
+			this.clear();
 			this.unbindRead();
 		} else {
 			throw new IllegalArgumentException("Window " + i + "x" + j + " size out of bounds (max. size: " + k + ")");
@@ -174,14 +166,6 @@ public abstract class RenderTarget {
 	}
 
 	public void bindWrite(boolean bl) {
-		if (!RenderSystem.isOnRenderThread()) {
-			RenderSystem.recordRenderCall(() -> this._bindWrite(bl));
-		} else {
-			this._bindWrite(bl);
-		}
-	}
-
-	private void _bindWrite(boolean bl) {
 		RenderSystem.assertOnRenderThreadOrInit();
 		GlStateManager._glBindFramebuffer(36160, this.frameBufferId);
 		if (bl) {
@@ -190,11 +174,8 @@ public abstract class RenderTarget {
 	}
 
 	public void unbindWrite() {
-		if (!RenderSystem.isOnRenderThread()) {
-			RenderSystem.recordRenderCall(() -> GlStateManager._glBindFramebuffer(36160, 0));
-		} else {
-			GlStateManager._glBindFramebuffer(36160, 0);
-		}
+		RenderSystem.assertOnRenderThreadOrInit();
+		GlStateManager._glBindFramebuffer(36160, 0);
 	}
 
 	public void setClearColor(float f, float g, float h, float i) {
@@ -224,7 +205,7 @@ public abstract class RenderTarget {
 
 		Minecraft minecraft = Minecraft.getInstance();
 		ShaderInstance shaderInstance = (ShaderInstance)Objects.requireNonNull(minecraft.gameRenderer.blitShader, "Blit shader not loaded");
-		shaderInstance.setSampler("DiffuseSampler", this.colorTextureId);
+		shaderInstance.setSampler("InSampler", this.colorTextureId);
 		shaderInstance.apply();
 		BufferBuilder bufferBuilder = RenderSystem.renderThreadTesselator().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLIT_SCREEN);
 		bufferBuilder.addVertex(0.0F, 0.0F, 0.0F);
@@ -237,7 +218,7 @@ public abstract class RenderTarget {
 		GlStateManager._colorMask(true, true, true, true);
 	}
 
-	public void clear(boolean bl) {
+	public void clear() {
 		RenderSystem.assertOnRenderThreadOrInit();
 		this.bindWrite(true);
 		GlStateManager._clearColor(this.clearChannels[0], this.clearChannels[1], this.clearChannels[2], this.clearChannels[3]);
@@ -247,7 +228,7 @@ public abstract class RenderTarget {
 			i |= 256;
 		}
 
-		GlStateManager._clear(i, bl);
+		GlStateManager._clear(i);
 		this.unbindWrite();
 	}
 

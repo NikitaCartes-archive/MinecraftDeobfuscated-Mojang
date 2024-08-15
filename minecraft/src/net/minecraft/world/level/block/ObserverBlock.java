@@ -14,6 +14,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.redstone.ExperimentalRedstoneUtils;
+import net.minecraft.world.level.redstone.Orientation;
 
 public class ObserverBlock extends DirectionalBlock {
 	public static final MapCodec<ObserverBlock> CODEC = simpleCodec(ObserverBlock::new);
@@ -76,8 +78,9 @@ public class ObserverBlock extends DirectionalBlock {
 	protected void updateNeighborsInFront(Level level, BlockPos blockPos, BlockState blockState) {
 		Direction direction = blockState.getValue(FACING);
 		BlockPos blockPos2 = blockPos.relative(direction.getOpposite());
-		level.neighborChanged(blockPos2, this, blockPos);
-		level.updateNeighborsAtExceptFromFacing(blockPos2, this, direction);
+		Orientation orientation = ExperimentalRedstoneUtils.randomOrientation(level, direction.getOpposite(), null);
+		level.neighborChanged(blockPos2, this, orientation);
+		level.updateNeighborsAtExceptFromFacing(blockPos2, this, direction, orientation);
 	}
 
 	@Override

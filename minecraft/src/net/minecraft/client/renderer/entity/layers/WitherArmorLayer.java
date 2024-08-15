@@ -2,23 +2,26 @@ package net.minecraft.client.renderer.entity.layers;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.WitherBossModel;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
+import net.minecraft.client.renderer.entity.state.WitherRenderState;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.boss.wither.WitherBoss;
 
 @Environment(EnvType.CLIENT)
-public class WitherArmorLayer extends EnergySwirlLayer<WitherBoss, WitherBossModel<WitherBoss>> {
+public class WitherArmorLayer extends EnergySwirlLayer<WitherRenderState, WitherBossModel> {
 	private static final ResourceLocation WITHER_ARMOR_LOCATION = ResourceLocation.withDefaultNamespace("textures/entity/wither/wither_armor.png");
-	private final WitherBossModel<WitherBoss> model;
+	private final WitherBossModel model;
 
-	public WitherArmorLayer(RenderLayerParent<WitherBoss, WitherBossModel<WitherBoss>> renderLayerParent, EntityModelSet entityModelSet) {
+	public WitherArmorLayer(RenderLayerParent<WitherRenderState, WitherBossModel> renderLayerParent, EntityModelSet entityModelSet) {
 		super(renderLayerParent);
-		this.model = new WitherBossModel<>(entityModelSet.bakeLayer(ModelLayers.WITHER_ARMOR));
+		this.model = new WitherBossModel(entityModelSet.bakeLayer(ModelLayers.WITHER_ARMOR));
+	}
+
+	protected boolean isPowered(WitherRenderState witherRenderState) {
+		return witherRenderState.isPowered;
 	}
 
 	@Override
@@ -31,8 +34,7 @@ public class WitherArmorLayer extends EnergySwirlLayer<WitherBoss, WitherBossMod
 		return WITHER_ARMOR_LOCATION;
 	}
 
-	@Override
-	protected EntityModel<WitherBoss> model() {
+	protected WitherBossModel model() {
 		return this.model;
 	}
 }

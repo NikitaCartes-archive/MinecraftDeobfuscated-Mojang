@@ -5,24 +5,22 @@ import com.mojang.math.Axis;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.WitchModel;
-import net.minecraft.client.renderer.ItemInHandRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.client.renderer.entity.state.WitchRenderState;
 import net.minecraft.world.item.Items;
 
 @Environment(EnvType.CLIENT)
-public class WitchItemLayer<T extends LivingEntity> extends CrossedArmsItemLayer<T, WitchModel<T>> {
-	public WitchItemLayer(RenderLayerParent<T, WitchModel<T>> renderLayerParent, ItemInHandRenderer itemInHandRenderer) {
-		super(renderLayerParent, itemInHandRenderer);
+public class WitchItemLayer extends CrossedArmsItemLayer<WitchRenderState, WitchModel> {
+	public WitchItemLayer(RenderLayerParent<WitchRenderState, WitchModel> renderLayerParent, ItemRenderer itemRenderer) {
+		super(renderLayerParent, itemRenderer);
 	}
 
-	@Override
-	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T livingEntity, float f, float g, float h, float j, float k, float l) {
-		ItemStack itemStack = livingEntity.getMainHandItem();
+	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, WitchRenderState witchRenderState, float f, float g) {
 		poseStack.pushPose();
-		if (itemStack.is(Items.POTION)) {
+		if (witchRenderState.rightHandItem.is(Items.POTION)) {
+			this.getParentModel().root().translateAndRotate(poseStack);
 			this.getParentModel().getHead().translateAndRotate(poseStack);
 			this.getParentModel().getNose().translateAndRotate(poseStack);
 			poseStack.translate(0.0625F, 0.25F, 0.0F);
@@ -32,7 +30,7 @@ public class WitchItemLayer<T extends LivingEntity> extends CrossedArmsItemLayer
 			poseStack.translate(0.0F, -0.4F, 0.4F);
 		}
 
-		super.render(poseStack, multiBufferSource, i, livingEntity, f, g, h, j, k, l);
+		super.render(poseStack, multiBufferSource, i, witchRenderState, f, g);
 		poseStack.popPose();
 	}
 }

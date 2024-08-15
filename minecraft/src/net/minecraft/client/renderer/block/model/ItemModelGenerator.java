@@ -47,7 +47,7 @@ public class ItemModelGenerator {
 		map.put(Direction.SOUTH, new BlockElementFace(null, i, string, new BlockFaceUV(new float[]{0.0F, 0.0F, 16.0F, 16.0F}, 0)));
 		map.put(Direction.NORTH, new BlockElementFace(null, i, string, new BlockFaceUV(new float[]{16.0F, 0.0F, 0.0F, 16.0F}, 0)));
 		List<BlockElement> list = Lists.<BlockElement>newArrayList();
-		list.add(new BlockElement(new Vector3f(0.0F, 0.0F, 7.5F), new Vector3f(16.0F, 16.0F, 8.5F), map, null, true));
+		list.add(new BlockElement(new Vector3f(0.0F, 0.0F, 7.5F), new Vector3f(16.0F, 16.0F, 8.5F), map));
 		list.addAll(this.createSideElements(spriteContents, string, i));
 		return list;
 	}
@@ -124,16 +124,16 @@ public class ItemModelGenerator {
 			map.put(spanFacing.getDirection(), new BlockElementFace(null, i, string, new BlockFaceUV(new float[]{m, o, n, p}, 0)));
 			switch (spanFacing) {
 				case UP:
-					list.add(new BlockElement(new Vector3f(h, j, 7.5F), new Vector3f(k, j, 8.5F), map, null, true));
+					list.add(new BlockElement(new Vector3f(h, j, 7.5F), new Vector3f(k, j, 8.5F), map));
 					break;
 				case DOWN:
-					list.add(new BlockElement(new Vector3f(h, l, 7.5F), new Vector3f(k, l, 8.5F), map, null, true));
+					list.add(new BlockElement(new Vector3f(h, l, 7.5F), new Vector3f(k, l, 8.5F), map));
 					break;
 				case LEFT:
-					list.add(new BlockElement(new Vector3f(h, j, 7.5F), new Vector3f(h, l, 8.5F), map, null, true));
+					list.add(new BlockElement(new Vector3f(h, j, 7.5F), new Vector3f(h, l, 8.5F), map));
 					break;
 				case RIGHT:
-					list.add(new BlockElement(new Vector3f(k, j, 7.5F), new Vector3f(k, l, 8.5F), map, null, true));
+					list.add(new BlockElement(new Vector3f(k, j, 7.5F), new Vector3f(k, l, 8.5F), map));
 			}
 		}
 

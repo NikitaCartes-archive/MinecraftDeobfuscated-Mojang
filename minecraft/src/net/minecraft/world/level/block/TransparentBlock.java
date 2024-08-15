@@ -32,7 +32,7 @@ public class TransparentBlock extends HalfTransparentBlock {
 	}
 
 	@Override
-	protected boolean propagatesSkylightDown(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
+	protected boolean propagatesSkylightDown(BlockState blockState) {
 		return true;
 	}
 }

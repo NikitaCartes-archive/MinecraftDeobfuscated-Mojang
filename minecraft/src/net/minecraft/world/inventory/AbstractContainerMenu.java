@@ -27,6 +27,7 @@ import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.flag.FeatureFlagSet;
+import net.minecraft.world.item.BundleItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -42,6 +43,8 @@ public abstract class AbstractContainerMenu {
 	public static final int QUICKCRAFT_HEADER_CONTINUE = 1;
 	public static final int QUICKCRAFT_HEADER_END = 2;
 	public static final int CARRIED_SLOT_SIZE = Integer.MAX_VALUE;
+	public static final int SLOTS_PER_ROW = 9;
+	public static final int SLOT_SIZE = 18;
 	private final NonNullList<ItemStack> lastSlots = NonNullList.create();
 	public final NonNullList<Slot> slots = NonNullList.create();
 	private final List<DataSlot> dataSlots = Lists.<DataSlot>newArrayList();
@@ -64,6 +67,27 @@ public abstract class AbstractContainerMenu {
 	protected AbstractContainerMenu(@Nullable MenuType<?> menuType, int i) {
 		this.menuType = menuType;
 		this.containerId = i;
+	}
+
+	protected void addInventoryHotbarSlots(Container container, int i, int j) {
+		for (int k = 0; k < 9; k++) {
+			this.addSlot(new Slot(container, k, i + k * 18, j));
+		}
+	}
+
+	protected void addInventoryExtendedSlots(Container container, int i, int j) {
+		for (int k = 0; k < 3; k++) {
+			for (int l = 0; l < 9; l++) {
+				this.addSlot(new Slot(container, l + (k + 1) * 9, i + l * 18, j + k * 18));
+			}
+		}
+	}
+
+	protected void addStandardInventorySlots(Container container, int i, int j) {
+		this.addInventoryExtendedSlots(container, i, j);
+		int k = 4;
+		int l = 58;
+		this.addInventoryHotbarSlots(container, i, j + 58);
 	}
 
 	protected static boolean stillValid(ContainerLevelAccess containerLevelAccess, Player player, Block block) {
@@ -278,6 +302,13 @@ public abstract class AbstractContainerMenu {
 
 	public abstract ItemStack quickMoveStack(Player player, int i);
 
+	public void setSelectedBundleItemIndex(int i, int j) {
+		if (i >= 0 && i < this.slots.size()) {
+			ItemStack itemStack = this.slots.get(i).getItem();
+			BundleItem.toggleSelectedItem(itemStack, j);
+		}
+	}
+
 	public void clicked(int i, int j, ClickType clickType, Player player) {
 		try {
 			this.doClick(i, j, clickType, player);
@@ -481,6 +512,14 @@ public abstract class AbstractContainerMenu {
 			int l = j == 0 ? 1 : slot3.getItem().getCount();
 			ItemStack itemStack = slot3.safeTake(l, Integer.MAX_VALUE, player);
 			player.drop(itemStack, true);
+			if (j == 1) {
+				while (!itemStack.isEmpty() && ItemStack.isSameItem(slot3.getItem(), itemStack)) {
+					itemStack = slot3.safeTake(l, Integer.MAX_VALUE, player);
+					player.drop(itemStack, true);
+				}
+			}
+
+			player.handleCreativeModeItemDrop(itemStack);
 		} else if (clickType == ClickType.PICKUP_ALL && i >= 0) {
 			Slot slot3 = this.slots.get(i);
 			ItemStack itemStack2 = this.getCarried();

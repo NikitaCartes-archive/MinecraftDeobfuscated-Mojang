@@ -76,18 +76,17 @@ public class DaylightDetectorBlock extends BaseEntityBlock {
 
 	@Override
 	protected InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
-		if (player.mayBuild()) {
-			if (level.isClientSide) {
-				return InteractionResult.SUCCESS;
-			} else {
+		if (!player.mayBuild()) {
+			return super.useWithoutItem(blockState, level, blockPos, player, blockHitResult);
+		} else {
+			if (!level.isClientSide) {
 				BlockState blockState2 = blockState.cycle(INVERTED);
 				level.setBlock(blockPos, blockState2, 2);
 				level.gameEvent(GameEvent.BLOCK_CHANGE, blockPos, GameEvent.Context.of(player, blockState2));
 				updateSignalStrength(blockState2, level, blockPos);
-				return InteractionResult.CONSUME;
 			}
-		} else {
-			return super.useWithoutItem(blockState, level, blockPos, player, blockHitResult);
+
+			return InteractionResult.SUCCESS;
 		}
 	}
 

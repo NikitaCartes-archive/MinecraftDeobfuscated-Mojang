@@ -11,8 +11,6 @@ import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionResultHolder;
-import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
@@ -279,12 +277,18 @@ public class ServerPlayerGameMode {
 		} else {
 			int i = itemStack.getCount();
 			int j = itemStack.getDamageValue();
-			InteractionResultHolder<ItemStack> interactionResultHolder = itemStack.use(level, serverPlayer, interactionHand);
-			ItemStack itemStack2 = interactionResultHolder.getObject();
+			InteractionResult interactionResult = itemStack.use(level, serverPlayer, interactionHand);
+			ItemStack itemStack2;
+			if (interactionResult instanceof InteractionResult.Success success) {
+				itemStack2 = (ItemStack)Objects.requireNonNullElse(success.heldItemTransformedTo(), serverPlayer.getItemInHand(interactionHand));
+			} else {
+				itemStack2 = serverPlayer.getItemInHand(interactionHand);
+			}
+
 			if (itemStack2 == itemStack && itemStack2.getCount() == i && itemStack2.getUseDuration(serverPlayer) <= 0 && itemStack2.getDamageValue() == j) {
-				return interactionResultHolder.getResult();
-			} else if (interactionResultHolder.getResult() == InteractionResult.FAIL && itemStack2.getUseDuration(serverPlayer) > 0 && !serverPlayer.isUsingItem()) {
-				return interactionResultHolder.getResult();
+				return interactionResult;
+			} else if (interactionResult instanceof InteractionResult.Fail && itemStack2.getUseDuration(serverPlayer) > 0 && !serverPlayer.isUsingItem()) {
+				return interactionResult;
 			} else {
 				if (itemStack != itemStack2) {
 					serverPlayer.setItemInHand(interactionHand, itemStack2);
@@ -298,7 +302,7 @@ public class ServerPlayerGameMode {
 					serverPlayer.inventoryMenu.sendAllDataToRemote();
 				}
 
-				return interactionResultHolder.getResult();
+				return interactionResult;
 			}
 		}
 	}
@@ -312,7 +316,7 @@ public class ServerPlayerGameMode {
 			MenuProvider menuProvider = blockState.getMenuProvider(level, blockPos);
 			if (menuProvider != null) {
 				serverPlayer.openMenu(menuProvider);
-				return InteractionResult.SUCCESS;
+				return InteractionResult.CONSUME;
 			} else {
 				return InteractionResult.PASS;
 			}
@@ -321,39 +325,39 @@ public class ServerPlayerGameMode {
 			boolean bl2 = serverPlayer.isSecondaryUseActive() && bl;
 			ItemStack itemStack2 = itemStack.copy();
 			if (!bl2) {
-				ItemInteractionResult itemInteractionResult = blockState.useItemOn(
+				InteractionResult interactionResult = blockState.useItemOn(
 					serverPlayer.getItemInHand(interactionHand), level, serverPlayer, interactionHand, blockHitResult
 				);
-				if (itemInteractionResult.consumesAction()) {
+				if (interactionResult.consumesAction()) {
 					CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger(serverPlayer, blockPos, itemStack2);
-					return itemInteractionResult.result();
+					return interactionResult;
 				}
 
-				if (itemInteractionResult == ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION && interactionHand == InteractionHand.MAIN_HAND) {
-					InteractionResult interactionResult = blockState.useWithoutItem(level, serverPlayer, blockHitResult);
-					if (interactionResult.consumesAction()) {
+				if (interactionResult instanceof InteractionResult.TryEmptyHandInteraction && interactionHand == InteractionHand.MAIN_HAND) {
+					InteractionResult interactionResult2 = blockState.useWithoutItem(level, serverPlayer, blockHitResult);
+					if (interactionResult2.consumesAction()) {
 						CriteriaTriggers.DEFAULT_BLOCK_USE.trigger(serverPlayer, blockPos);
-						return interactionResult;
+						return interactionResult2;
 					}
 				}
 			}
 
 			if (!itemStack.isEmpty() && !serverPlayer.getCooldowns().isOnCooldown(itemStack.getItem())) {
 				UseOnContext useOnContext = new UseOnContext(serverPlayer, interactionHand, blockHitResult);
-				InteractionResult interactionResult;
+				InteractionResult interactionResult2;
 				if (this.isCreative()) {
 					int i = itemStack.getCount();
-					interactionResult = itemStack.useOn(useOnContext);
+					interactionResult2 = itemStack.useOn(useOnContext);
 					itemStack.setCount(i);
 				} else {
-					interactionResult = itemStack.useOn(useOnContext);
+					interactionResult2 = itemStack.useOn(useOnContext);
 				}
 
-				if (interactionResult.consumesAction()) {
+				if (interactionResult2.consumesAction()) {
 					CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger(serverPlayer, blockPos, itemStack2);
 				}
 
-				return interactionResult;
+				return interactionResult2;
 			} else {
 				return InteractionResult.PASS;
 			}

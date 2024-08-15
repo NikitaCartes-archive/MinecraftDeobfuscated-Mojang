@@ -8,10 +8,10 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -104,17 +104,21 @@ public abstract class Monster extends PathfinderMob implements Enemy {
 	}
 
 	public static boolean checkMonsterSpawnRules(
-		EntityType<? extends Monster> entityType, ServerLevelAccessor serverLevelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, RandomSource randomSource
+		EntityType<? extends Monster> entityType,
+		ServerLevelAccessor serverLevelAccessor,
+		EntitySpawnReason entitySpawnReason,
+		BlockPos blockPos,
+		RandomSource randomSource
 	) {
 		return serverLevelAccessor.getDifficulty() != Difficulty.PEACEFUL
-			&& (MobSpawnType.ignoresLightRequirements(mobSpawnType) || isDarkEnoughToSpawn(serverLevelAccessor, blockPos, randomSource))
-			&& checkMobSpawnRules(entityType, serverLevelAccessor, mobSpawnType, blockPos, randomSource);
+			&& (EntitySpawnReason.ignoresLightRequirements(entitySpawnReason) || isDarkEnoughToSpawn(serverLevelAccessor, blockPos, randomSource))
+			&& checkMobSpawnRules(entityType, serverLevelAccessor, entitySpawnReason, blockPos, randomSource);
 	}
 
 	public static boolean checkAnyLightMonsterSpawnRules(
-		EntityType<? extends Monster> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, RandomSource randomSource
+		EntityType<? extends Monster> entityType, LevelAccessor levelAccessor, EntitySpawnReason entitySpawnReason, BlockPos blockPos, RandomSource randomSource
 	) {
-		return levelAccessor.getDifficulty() != Difficulty.PEACEFUL && checkMobSpawnRules(entityType, levelAccessor, mobSpawnType, blockPos, randomSource);
+		return levelAccessor.getDifficulty() != Difficulty.PEACEFUL && checkMobSpawnRules(entityType, levelAccessor, entitySpawnReason, blockPos, randomSource);
 	}
 
 	public static AttributeSupplier.Builder createMonsterAttributes() {

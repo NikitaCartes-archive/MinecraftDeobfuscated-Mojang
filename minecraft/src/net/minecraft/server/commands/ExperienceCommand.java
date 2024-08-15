@@ -29,13 +29,13 @@ public class ExperienceCommand {
 				.then(
 					Commands.literal("add")
 						.then(
-							Commands.argument("targets", EntityArgument.players())
+							Commands.argument("target", EntityArgument.players())
 								.then(
 									Commands.argument("amount", IntegerArgumentType.integer())
 										.executes(
 											commandContext -> addExperience(
 													commandContext.getSource(),
-													EntityArgument.getPlayers(commandContext, "targets"),
+													EntityArgument.getPlayers(commandContext, "target"),
 													IntegerArgumentType.getInteger(commandContext, "amount"),
 													ExperienceCommand.Type.POINTS
 												)
@@ -45,7 +45,7 @@ public class ExperienceCommand {
 												.executes(
 													commandContext -> addExperience(
 															commandContext.getSource(),
-															EntityArgument.getPlayers(commandContext, "targets"),
+															EntityArgument.getPlayers(commandContext, "target"),
 															IntegerArgumentType.getInteger(commandContext, "amount"),
 															ExperienceCommand.Type.POINTS
 														)
@@ -56,7 +56,7 @@ public class ExperienceCommand {
 												.executes(
 													commandContext -> addExperience(
 															commandContext.getSource(),
-															EntityArgument.getPlayers(commandContext, "targets"),
+															EntityArgument.getPlayers(commandContext, "target"),
 															IntegerArgumentType.getInteger(commandContext, "amount"),
 															ExperienceCommand.Type.LEVELS
 														)
@@ -68,13 +68,13 @@ public class ExperienceCommand {
 				.then(
 					Commands.literal("set")
 						.then(
-							Commands.argument("targets", EntityArgument.players())
+							Commands.argument("target", EntityArgument.players())
 								.then(
 									Commands.argument("amount", IntegerArgumentType.integer(0))
 										.executes(
 											commandContext -> setExperience(
 													commandContext.getSource(),
-													EntityArgument.getPlayers(commandContext, "targets"),
+													EntityArgument.getPlayers(commandContext, "target"),
 													IntegerArgumentType.getInteger(commandContext, "amount"),
 													ExperienceCommand.Type.POINTS
 												)
@@ -84,7 +84,7 @@ public class ExperienceCommand {
 												.executes(
 													commandContext -> setExperience(
 															commandContext.getSource(),
-															EntityArgument.getPlayers(commandContext, "targets"),
+															EntityArgument.getPlayers(commandContext, "target"),
 															IntegerArgumentType.getInteger(commandContext, "amount"),
 															ExperienceCommand.Type.POINTS
 														)
@@ -95,7 +95,7 @@ public class ExperienceCommand {
 												.executes(
 													commandContext -> setExperience(
 															commandContext.getSource(),
-															EntityArgument.getPlayers(commandContext, "targets"),
+															EntityArgument.getPlayers(commandContext, "target"),
 															IntegerArgumentType.getInteger(commandContext, "amount"),
 															ExperienceCommand.Type.LEVELS
 														)
@@ -107,17 +107,17 @@ public class ExperienceCommand {
 				.then(
 					Commands.literal("query")
 						.then(
-							Commands.argument("targets", EntityArgument.player())
+							Commands.argument("target", EntityArgument.player())
 								.then(
 									Commands.literal("points")
 										.executes(
-											commandContext -> queryExperience(commandContext.getSource(), EntityArgument.getPlayer(commandContext, "targets"), ExperienceCommand.Type.POINTS)
+											commandContext -> queryExperience(commandContext.getSource(), EntityArgument.getPlayer(commandContext, "target"), ExperienceCommand.Type.POINTS)
 										)
 								)
 								.then(
 									Commands.literal("levels")
 										.executes(
-											commandContext -> queryExperience(commandContext.getSource(), EntityArgument.getPlayer(commandContext, "targets"), ExperienceCommand.Type.LEVELS)
+											commandContext -> queryExperience(commandContext.getSource(), EntityArgument.getPlayer(commandContext, "target"), ExperienceCommand.Type.LEVELS)
 										)
 								)
 						)

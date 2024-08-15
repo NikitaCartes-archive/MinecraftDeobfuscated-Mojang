@@ -1,20 +1,21 @@
 package net.minecraft.world.inventory;
 
+import java.util.List;
+import net.minecraft.recipebook.ServerPlaceRecipe;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.player.StackedContents;
+import net.minecraft.world.entity.player.StackedItemContents;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.AbstractCookingRecipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.crafting.SingleRecipeInput;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
 
-public abstract class AbstractFurnaceMenu extends RecipeBookMenu<SingleRecipeInput, AbstractCookingRecipe> {
+public abstract class AbstractFurnaceMenu extends RecipeBookMenu {
 	public static final int INGREDIENT_SLOT = 0;
 	public static final int FUEL_SLOT = 1;
 	public static final int RESULT_SLOT = 2;
@@ -24,7 +25,7 @@ public abstract class AbstractFurnaceMenu extends RecipeBookMenu<SingleRecipeInp
 	private static final int INV_SLOT_END = 30;
 	private static final int USE_ROW_SLOT_START = 30;
 	private static final int USE_ROW_SLOT_END = 39;
-	private final Container container;
+	final Container container;
 	private final ContainerData data;
 	protected final Level level;
 	private final RecipeType<? extends AbstractCookingRecipe> recipeType;
@@ -56,56 +57,19 @@ public abstract class AbstractFurnaceMenu extends RecipeBookMenu<SingleRecipeInp
 		this.addSlot(new Slot(container, 0, 56, 17));
 		this.addSlot(new FurnaceFuelSlot(this, container, 1, 56, 53));
 		this.addSlot(new FurnaceResultSlot(inventory.player, container, 2, 116, 35));
-
-		for (int j = 0; j < 3; j++) {
-			for (int k = 0; k < 9; k++) {
-				this.addSlot(new Slot(inventory, k + j * 9 + 9, 8 + k * 18, 84 + j * 18));
-			}
-		}
-
-		for (int j = 0; j < 9; j++) {
-			this.addSlot(new Slot(inventory, j, 8 + j * 18, 142));
-		}
-
+		this.addStandardInventorySlots(inventory, 8, 84);
 		this.addDataSlots(containerData);
 	}
 
 	@Override
-	public void fillCraftSlotsStackedContents(StackedContents stackedContents) {
+	public void fillCraftSlotsStackedContents(StackedItemContents stackedItemContents) {
 		if (this.container instanceof StackedContentsCompatible) {
-			((StackedContentsCompatible)this.container).fillStackedContents(stackedContents);
+			((StackedContentsCompatible)this.container).fillStackedContents(stackedItemContents);
 		}
 	}
 
-	@Override
-	public void clearCraftingContent() {
-		this.getSlot(0).set(ItemStack.EMPTY);
-		this.getSlot(2).set(ItemStack.EMPTY);
-	}
-
-	@Override
-	public boolean recipeMatches(RecipeHolder<AbstractCookingRecipe> recipeHolder) {
-		return recipeHolder.value().matches(new SingleRecipeInput(this.container.getItem(0)), this.level);
-	}
-
-	@Override
-	public int getResultSlotIndex() {
-		return 2;
-	}
-
-	@Override
-	public int getGridWidth() {
-		return 1;
-	}
-
-	@Override
-	public int getGridHeight() {
-		return 1;
-	}
-
-	@Override
-	public int getSize() {
-		return 3;
+	public Slot getResultSlot() {
+		return this.slots.get(2);
 	}
 
 	@Override
@@ -167,7 +131,7 @@ public abstract class AbstractFurnaceMenu extends RecipeBookMenu<SingleRecipeInp
 	}
 
 	protected boolean isFuel(ItemStack itemStack) {
-		return AbstractFurnaceBlockEntity.isFuel(itemStack);
+		return this.level.fuelValues().isFuel(itemStack);
 	}
 
 	public float getBurnProgress() {
@@ -195,7 +159,23 @@ public abstract class AbstractFurnaceMenu extends RecipeBookMenu<SingleRecipeInp
 	}
 
 	@Override
-	public boolean shouldMoveToInventory(int i) {
-		return i != 1;
+	public RecipeBookMenu.PostPlaceAction handlePlacement(boolean bl, boolean bl2, RecipeHolder<?> recipeHolder, Inventory inventory) {
+		final List<Slot> list = List.of(this.getSlot(0), this.getSlot(2));
+		return ServerPlaceRecipe.placeRecipe(new ServerPlaceRecipe.CraftingMenuAccess<AbstractCookingRecipe>() {
+			@Override
+			public void fillCraftSlotsStackedContents(StackedItemContents stackedItemContents) {
+				AbstractFurnaceMenu.this.fillCraftSlotsStackedContents(stackedItemContents);
+			}
+
+			@Override
+			public void clearCraftingContent() {
+				list.forEach(slot -> slot.set(ItemStack.EMPTY));
+			}
+
+			@Override
+			public boolean recipeMatches(RecipeHolder<AbstractCookingRecipe> recipeHolder) {
+				return recipeHolder.value().matches(new SingleRecipeInput(AbstractFurnaceMenu.this.container.getItem(0)), AbstractFurnaceMenu.this.level);
+			}
+		}, 1, 1, List.of(this.getSlot(0)), list, inventory, (RecipeHolder<AbstractCookingRecipe>)recipeHolder, bl, bl2);
 	}
 }

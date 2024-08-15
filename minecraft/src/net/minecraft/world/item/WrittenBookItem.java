@@ -9,7 +9,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.StringUtil;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.component.WrittenBookContent;
 import net.minecraft.world.level.Level;
@@ -17,19 +17,6 @@ import net.minecraft.world.level.Level;
 public class WrittenBookItem extends Item {
 	public WrittenBookItem(Item.Properties properties) {
 		super(properties);
-	}
-
-	@Override
-	public Component getName(ItemStack itemStack) {
-		WrittenBookContent writtenBookContent = itemStack.get(DataComponents.WRITTEN_BOOK_CONTENT);
-		if (writtenBookContent != null) {
-			String string = writtenBookContent.title().raw();
-			if (!StringUtil.isBlank(string)) {
-				return Component.literal(string);
-			}
-		}
-
-		return super.getName(itemStack);
 	}
 
 	@Override
@@ -45,11 +32,11 @@ public class WrittenBookItem extends Item {
 	}
 
 	@Override
-	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand) {
+	public InteractionResult use(Level level, Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
 		player.openItemGui(itemStack, interactionHand);
 		player.awardStat(Stats.ITEM_USED.get(this));
-		return InteractionResultHolder.sidedSuccess(itemStack, level.isClientSide());
+		return InteractionResult.SUCCESS;
 	}
 
 	public static boolean resolveBookComponents(ItemStack itemStack, CommandSourceStack commandSourceStack, @Nullable Player player) {

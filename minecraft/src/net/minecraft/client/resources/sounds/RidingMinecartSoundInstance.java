@@ -7,6 +7,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
+import net.minecraft.world.entity.vehicle.NewMinecartBehavior;
 
 @Environment(EnvType.CLIENT)
 public class RidingMinecartSoundInstance extends AbstractTickableSoundInstance {
@@ -39,7 +40,8 @@ public class RidingMinecartSoundInstance extends AbstractTickableSoundInstance {
 
 	@Override
 	public void tick() {
-		if (this.minecart.isRemoved() || !this.player.isPassenger() || this.player.getVehicle() != this.minecart) {
+		boolean bl = !this.minecart.isOnRails() && this.minecart.getBehavior() instanceof NewMinecartBehavior;
+		if (this.minecart.isRemoved() || !this.player.isPassenger() || this.player.getVehicle() != this.minecart || bl) {
 			this.stop();
 		} else if (this.underwaterSound != this.player.isUnderWater()) {
 			this.volume = 0.0F;

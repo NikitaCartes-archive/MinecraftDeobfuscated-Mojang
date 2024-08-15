@@ -10,10 +10,10 @@ import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.world.entity.ambient.Bat;
+import net.minecraft.client.renderer.entity.state.BatRenderState;
 
 @Environment(EnvType.CLIENT)
-public class BatModel extends HierarchicalModel<Bat> {
+public class BatModel extends EntityModel<BatRenderState> {
 	private final ModelPart root;
 	private final ModelPart head;
 	private final ModelPart body;
@@ -73,14 +73,14 @@ public class BatModel extends HierarchicalModel<Bat> {
 		return this.root;
 	}
 
-	public void setupAnim(Bat bat, float f, float g, float h, float i, float j) {
+	public void setupAnim(BatRenderState batRenderState) {
 		this.root().getAllParts().forEach(ModelPart::resetPose);
-		if (bat.isResting()) {
-			this.applyHeadRotation(i);
+		if (batRenderState.isResting) {
+			this.applyHeadRotation(batRenderState.yRot);
 		}
 
-		this.animate(bat.flyAnimationState, BatAnimation.BAT_FLYING, h, 1.0F);
-		this.animate(bat.restAnimationState, BatAnimation.BAT_RESTING, h, 1.0F);
+		this.animate(batRenderState.flyAnimationState, BatAnimation.BAT_FLYING, batRenderState.ageInTicks, 1.0F);
+		this.animate(batRenderState.restAnimationState, BatAnimation.BAT_RESTING, batRenderState.ageInTicks, 1.0F);
 	}
 
 	private void applyHeadRotation(float f) {

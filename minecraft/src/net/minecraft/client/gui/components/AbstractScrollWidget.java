@@ -1,16 +1,15 @@
 package net.minecraft.client.gui.components;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
-public abstract class AbstractScrollWidget extends AbstractWidget implements Renderable, GuiEventListener {
+public abstract class AbstractScrollWidget extends AbstractWidget {
 	private static final WidgetSprites BACKGROUND_SPRITES = new WidgetSprites(
 		ResourceLocation.withDefaultNamespace("widget/text_field"), ResourceLocation.withDefaultNamespace("widget/text_field_highlighted")
 	);
@@ -151,16 +150,14 @@ public abstract class AbstractScrollWidget extends AbstractWidget implements Ren
 
 	protected void renderBorder(GuiGraphics guiGraphics, int i, int j, int k, int l) {
 		ResourceLocation resourceLocation = BACKGROUND_SPRITES.get(this.isActive(), this.isFocused());
-		guiGraphics.blitSprite(resourceLocation, i, j, k, l);
+		guiGraphics.blitSprite(RenderType::guiTextured, resourceLocation, i, j, k, l);
 	}
 
 	private void renderScrollBar(GuiGraphics guiGraphics) {
 		int i = this.getScrollBarHeight();
 		int j = this.getX() + this.width;
 		int k = Math.max(this.getY(), (int)this.scrollAmount * (this.height - i) / this.getMaxScrollAmount() + this.getY());
-		RenderSystem.enableBlend();
-		guiGraphics.blitSprite(SCROLLER_SPRITE, j, k, 8, i);
-		RenderSystem.disableBlend();
+		guiGraphics.blitSprite(RenderType::guiTextured, SCROLLER_SPRITE, j, k, 8, i);
 	}
 
 	protected boolean withinContentAreaTopBottom(int i, int j) {

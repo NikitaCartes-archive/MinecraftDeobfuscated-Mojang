@@ -13,7 +13,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.BlockAndTintGetter;
-import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.HalfTransparentBlock;
@@ -44,28 +43,29 @@ public class LiquidBlockRenderer {
 		return fluidState2.getType().isSame(fluidState.getType());
 	}
 
-	private static boolean isFaceOccludedByState(BlockGetter blockGetter, Direction direction, float f, BlockPos blockPos, BlockState blockState) {
-		if (blockState.canOcclude()) {
-			VoxelShape voxelShape = Shapes.box(0.0, 0.0, 0.0, 1.0, (double)f, 1.0);
-			VoxelShape voxelShape2 = blockState.getOcclusionShape(blockGetter, blockPos);
-			return Shapes.blockOccudes(voxelShape, voxelShape2, direction);
-		} else {
+	private static boolean isFaceOccludedByState(Direction direction, float f, BlockState blockState) {
+		VoxelShape voxelShape = blockState.getFaceOcclusionShape(direction.getOpposite());
+		if (voxelShape == Shapes.empty()) {
 			return false;
+		} else if (voxelShape == Shapes.block()) {
+			boolean bl = f == 1.0F;
+			return direction != Direction.UP || bl;
+		} else {
+			VoxelShape voxelShape2 = Shapes.box(0.0, 0.0, 0.0, 1.0, (double)f, 1.0);
+			return Shapes.blockOccudes(voxelShape2, voxelShape, direction);
 		}
 	}
 
-	private static boolean isFaceOccludedByNeighbor(BlockGetter blockGetter, BlockPos blockPos, Direction direction, float f, BlockState blockState) {
-		return isFaceOccludedByState(blockGetter, direction, f, blockPos.relative(direction), blockState);
+	private static boolean isFaceOccludedByNeighbor(Direction direction, float f, BlockState blockState) {
+		return isFaceOccludedByState(direction, f, blockState);
 	}
 
-	private static boolean isFaceOccludedBySelf(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState, Direction direction) {
-		return isFaceOccludedByState(blockGetter, direction.getOpposite(), 1.0F, blockPos, blockState);
+	private static boolean isFaceOccludedBySelf(BlockState blockState, Direction direction) {
+		return isFaceOccludedByState(direction.getOpposite(), 1.0F, blockState);
 	}
 
-	public static boolean shouldRenderFace(
-		BlockAndTintGetter blockAndTintGetter, BlockPos blockPos, FluidState fluidState, BlockState blockState, Direction direction, FluidState fluidState2
-	) {
-		return !isFaceOccludedBySelf(blockAndTintGetter, blockPos, blockState, direction) && !isNeighborSameFluid(fluidState, fluidState2);
+	public static boolean shouldRenderFace(FluidState fluidState, BlockState blockState, Direction direction, FluidState fluidState2) {
+		return !isFaceOccludedBySelf(blockState, direction) && !isNeighborSameFluid(fluidState, fluidState2);
 	}
 
 	public void tesselate(BlockAndTintGetter blockAndTintGetter, BlockPos blockPos, VertexConsumer vertexConsumer, BlockState blockState, FluidState fluidState) {
@@ -88,12 +88,11 @@ public class LiquidBlockRenderer {
 		BlockState blockState7 = blockAndTintGetter.getBlockState(blockPos.relative(Direction.EAST));
 		FluidState fluidState7 = blockState7.getFluidState();
 		boolean bl2 = !isNeighborSameFluid(fluidState, fluidState3);
-		boolean bl3 = shouldRenderFace(blockAndTintGetter, blockPos, fluidState, blockState, Direction.DOWN, fluidState2)
-			&& !isFaceOccludedByNeighbor(blockAndTintGetter, blockPos, Direction.DOWN, 0.8888889F, blockState2);
-		boolean bl4 = shouldRenderFace(blockAndTintGetter, blockPos, fluidState, blockState, Direction.NORTH, fluidState4);
-		boolean bl5 = shouldRenderFace(blockAndTintGetter, blockPos, fluidState, blockState, Direction.SOUTH, fluidState5);
-		boolean bl6 = shouldRenderFace(blockAndTintGetter, blockPos, fluidState, blockState, Direction.WEST, fluidState6);
-		boolean bl7 = shouldRenderFace(blockAndTintGetter, blockPos, fluidState, blockState, Direction.EAST, fluidState7);
+		boolean bl3 = shouldRenderFace(fluidState, blockState, Direction.DOWN, fluidState2) && !isFaceOccludedByNeighbor(Direction.DOWN, 0.8888889F, blockState2);
+		boolean bl4 = shouldRenderFace(fluidState, blockState, Direction.NORTH, fluidState4);
+		boolean bl5 = shouldRenderFace(fluidState, blockState, Direction.SOUTH, fluidState5);
+		boolean bl6 = shouldRenderFace(fluidState, blockState, Direction.WEST, fluidState6);
+		boolean bl7 = shouldRenderFace(fluidState, blockState, Direction.EAST, fluidState7);
 		if (bl2 || bl3 || bl7 || bl6 || bl4 || bl5) {
 			float j = blockAndTintGetter.getShade(Direction.DOWN, true);
 			float k = blockAndTintGetter.getShade(Direction.UP, true);
@@ -126,7 +125,7 @@ public class LiquidBlockRenderer {
 			float u = (float)(blockPos.getZ() & 15);
 			float v = 0.001F;
 			float w = bl3 ? 0.001F : 0.0F;
-			if (bl2 && !isFaceOccludedByNeighbor(blockAndTintGetter, blockPos, Direction.UP, Math.min(Math.min(p, r), Math.min(q, o)), blockState3)) {
+			if (bl2 && !isFaceOccludedByNeighbor(Direction.UP, Math.min(Math.min(p, r), Math.min(q, o)), blockState3)) {
 				p -= 0.001F;
 				r -= 0.001F;
 				q -= 0.001F;
@@ -256,8 +255,7 @@ public class LiquidBlockRenderer {
 						bl8 = bl7;
 				}
 
-				if (bl8
-					&& !isFaceOccludedByNeighbor(blockAndTintGetter, blockPos, direction, Math.max(adx, yx), blockAndTintGetter.getBlockState(blockPos.relative(direction)))) {
+				if (bl8 && !isFaceOccludedByNeighbor(direction, Math.max(adx, yx), blockAndTintGetter.getBlockState(blockPos.relative(direction)))) {
 					BlockPos blockPos2 = blockPos.relative(direction);
 					TextureAtlasSprite textureAtlasSprite2 = textureAtlasSprites[1];
 					if (!bl) {

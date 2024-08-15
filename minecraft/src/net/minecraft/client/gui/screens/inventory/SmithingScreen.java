@@ -6,6 +6,7 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -131,7 +132,7 @@ public class SmithingScreen extends ItemCombinerScreen<SmithingMenu> {
 	@Override
 	protected void renderErrorIcon(GuiGraphics guiGraphics, int i, int j) {
 		if (this.hasRecipeError()) {
-			guiGraphics.blitSprite(ERROR_SPRITE, i + 65, j + 46, 28, 21);
+			guiGraphics.blitSprite(RenderType::guiTextured, ERROR_SPRITE, i + 65, j + 46, 28, 21);
 		}
 	}
 

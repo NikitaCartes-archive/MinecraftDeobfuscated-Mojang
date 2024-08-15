@@ -9,13 +9,14 @@ import net.minecraft.client.model.geom.builders.CubeDeformation;
 import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.MeshTransformer;
 import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.client.renderer.entity.state.ArmadilloRenderState;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.animal.armadillo.Armadillo;
 
 @Environment(EnvType.CLIENT)
-public class ArmadilloModel extends AgeableHierarchicalModel<Armadillo> {
-	private static final float BABY_Y_OFFSET = 16.02F;
+public class ArmadilloModel extends EntityModel<ArmadilloRenderState> {
+	public static final MeshTransformer BABY_TRANSFORMER = MeshTransformer.scaling(0.6F);
 	private static final float MAX_DOWN_HEAD_ROTATION_EXTENT = 25.0F;
 	private static final float MAX_UP_HEAD_ROTATION_EXTENT = 22.5F;
 	private static final float MAX_WALK_ANIMATION_SPEED = 16.5F;
@@ -32,7 +33,6 @@ public class ArmadilloModel extends AgeableHierarchicalModel<Armadillo> {
 	private final ModelPart tail;
 
 	public ArmadilloModel(ModelPart modelPart) {
-		super(0.6F, 16.02F);
 		this.root = modelPart;
 		this.body = modelPart.getChild("body");
 		this.rightHindLeg = modelPart.getChild("right_hind_leg");
@@ -110,9 +110,9 @@ public class ArmadilloModel extends AgeableHierarchicalModel<Armadillo> {
 		return this.root;
 	}
 
-	public void setupAnim(Armadillo armadillo, float f, float g, float h, float i, float j) {
+	public void setupAnim(ArmadilloRenderState armadilloRenderState) {
 		this.root().getAllParts().forEach(ModelPart::resetPose);
-		if (armadillo.shouldHideInShell()) {
+		if (armadilloRenderState.isHidingInShell) {
 			this.body.skipDraw = true;
 			this.leftHindLeg.visible = false;
 			this.rightHindLeg.visible = false;
@@ -124,13 +124,13 @@ public class ArmadilloModel extends AgeableHierarchicalModel<Armadillo> {
 			this.rightHindLeg.visible = true;
 			this.tail.visible = true;
 			this.cube.visible = false;
-			this.head.xRot = Mth.clamp(j, -22.5F, 25.0F) * (float) (Math.PI / 180.0);
-			this.head.yRot = Mth.clamp(i, -32.5F, 32.5F) * (float) (Math.PI / 180.0);
+			this.head.xRot = Mth.clamp(armadilloRenderState.xRot, -22.5F, 25.0F) * (float) (Math.PI / 180.0);
+			this.head.yRot = Mth.clamp(armadilloRenderState.yRot, -32.5F, 32.5F) * (float) (Math.PI / 180.0);
 		}
 
-		this.animateWalk(ArmadilloAnimation.ARMADILLO_WALK, f, g, 16.5F, 2.5F);
-		this.animate(armadillo.rollOutAnimationState, ArmadilloAnimation.ARMADILLO_ROLL_OUT, h, 1.0F);
-		this.animate(armadillo.rollUpAnimationState, ArmadilloAnimation.ARMADILLO_ROLL_UP, h, 1.0F);
-		this.animate(armadillo.peekAnimationState, ArmadilloAnimation.ARMADILLO_PEEK, h, 1.0F);
+		this.animateWalk(ArmadilloAnimation.ARMADILLO_WALK, armadilloRenderState.walkAnimationPos, armadilloRenderState.walkAnimationSpeed, 16.5F, 2.5F);
+		this.animate(armadilloRenderState.rollOutAnimationState, ArmadilloAnimation.ARMADILLO_ROLL_OUT, armadilloRenderState.ageInTicks, 1.0F);
+		this.animate(armadilloRenderState.rollUpAnimationState, ArmadilloAnimation.ARMADILLO_ROLL_UP, armadilloRenderState.ageInTicks, 1.0F);
+		this.animate(armadilloRenderState.peekAnimationState, ArmadilloAnimation.ARMADILLO_PEEK, armadilloRenderState.ageInTicks, 1.0F);
 	}
 }

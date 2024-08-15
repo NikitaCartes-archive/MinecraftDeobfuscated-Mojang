@@ -40,7 +40,7 @@ public class HugeExplosionParticle extends TextureSheetParticle {
 
 	@Override
 	public ParticleRenderType getRenderType() {
-		return ParticleRenderType.PARTICLE_SHEET_LIT;
+		return ParticleRenderType.PARTICLE_SHEET_OPAQUE;
 	}
 
 	@Environment(EnvType.CLIENT)

@@ -5,13 +5,14 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Position;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.LivingEntity;
@@ -75,20 +76,17 @@ public class TridentItem extends Item implements ProjectileItem {
 					if (!isTooDamagedToUse(itemStack)) {
 						Holder<SoundEvent> holder = (Holder<SoundEvent>)EnchantmentHelper.pickHighestLevel(itemStack, EnchantmentEffectComponents.TRIDENT_SOUND)
 							.orElse(SoundEvents.TRIDENT_THROW);
-						if (!level.isClientSide) {
-							itemStack.hurtAndBreak(1, player, LivingEntity.getSlotForHand(livingEntity.getUsedItemHand()));
+						if (level instanceof ServerLevel serverLevel) {
+							itemStack.hurtWithoutBreaking(1, player);
 							if (f == 0.0F) {
-								ThrownTrident thrownTrident = new ThrownTrident(level, player, itemStack);
-								thrownTrident.shootFromRotation(player, player.getXRot(), player.getYRot(), 0.0F, 2.5F, 1.0F);
+								ThrownTrident thrownTrident = Projectile.spawnProjectileFromRotation(ThrownTrident::new, serverLevel, itemStack, player, 0.0F, 2.5F, 1.0F);
 								if (player.hasInfiniteMaterials()) {
 									thrownTrident.pickup = AbstractArrow.Pickup.CREATIVE_ONLY;
-								}
-
-								level.addFreshEntity(thrownTrident);
-								level.playSound(null, thrownTrident, holder.value(), SoundSource.PLAYERS, 1.0F, 1.0F);
-								if (!player.hasInfiniteMaterials()) {
+								} else {
 									player.getInventory().removeItem(itemStack);
 								}
+
+								level.playSound(null, thrownTrident, holder.value(), SoundSource.PLAYERS, 1.0F, 1.0F);
 							}
 						}
 
@@ -119,15 +117,15 @@ public class TridentItem extends Item implements ProjectileItem {
 	}
 
 	@Override
-	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand) {
+	public InteractionResult use(Level level, Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
 		if (isTooDamagedToUse(itemStack)) {
-			return InteractionResultHolder.fail(itemStack);
+			return InteractionResult.FAIL;
 		} else if (EnchantmentHelper.getTridentSpinAttackStrength(itemStack, player) > 0.0F && !player.isInWaterOrRain()) {
-			return InteractionResultHolder.fail(itemStack);
+			return InteractionResult.FAIL;
 		} else {
 			player.startUsingItem(interactionHand);
-			return InteractionResultHolder.consume(itemStack);
+			return InteractionResult.CONSUME;
 		}
 	}
 
@@ -143,11 +141,6 @@ public class TridentItem extends Item implements ProjectileItem {
 	@Override
 	public void postHurtEnemy(ItemStack itemStack, LivingEntity livingEntity, LivingEntity livingEntity2) {
 		itemStack.hurtAndBreak(1, livingEntity2, EquipmentSlot.MAINHAND);
-	}
-
-	@Override
-	public int getEnchantmentValue() {
-		return 1;
 	}
 
 	@Override

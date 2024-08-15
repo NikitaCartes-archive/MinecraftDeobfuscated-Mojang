@@ -20,12 +20,12 @@ import net.minecraft.world.level.GameType;
 public class ShareToLanScreen extends Screen {
 	private static final int PORT_LOWER_BOUND = 1024;
 	private static final int PORT_HIGHER_BOUND = 65535;
-	private static final Component ALLOW_COMMANDS_LABEL = Component.translatable("selectWorld.allowCommands.new");
+	private static final Component ALLOW_COMMANDS_LABEL = Component.translatable("selectWorld.allowCommands");
 	private static final Component GAME_MODE_LABEL = Component.translatable("selectWorld.gameMode");
 	private static final Component INFO_TEXT = Component.translatable("lanServer.otherPlayers");
 	private static final Component PORT_INFO_TEXT = Component.translatable("lanServer.port");
-	private static final Component PORT_UNAVAILABLE = Component.translatable("lanServer.port.unavailable.new", 1024, 65535);
-	private static final Component INVALID_PORT = Component.translatable("lanServer.port.invalid.new", 1024, 65535);
+	private static final Component PORT_UNAVAILABLE = Component.translatable("lanServer.port.unavailable", 1024, 65535);
+	private static final Component INVALID_PORT = Component.translatable("lanServer.port.invalid", 1024, 65535);
 	private static final int INVALID_PORT_COLOR = 16733525;
 	private final Screen lastScreen;
 	private GameType gameMode = GameType.SURVIVAL;

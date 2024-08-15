@@ -9,6 +9,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -112,7 +113,12 @@ public class DeathScreen extends Screen {
 
 		if (this.exitToTitleButton != null && this.minecraft.getReportingContext().hasDraftReport()) {
 			guiGraphics.blitSprite(
-				DRAFT_REPORT_SPRITE, this.exitToTitleButton.getX() + this.exitToTitleButton.getWidth() - 17, this.exitToTitleButton.getY() + 3, 15, 15
+				RenderType::guiTextured,
+				DRAFT_REPORT_SPRITE,
+				this.exitToTitleButton.getX() + this.exitToTitleButton.getWidth() - 17,
+				this.exitToTitleButton.getY() + 3,
+				15,
+				15
 			);
 		}
 	}

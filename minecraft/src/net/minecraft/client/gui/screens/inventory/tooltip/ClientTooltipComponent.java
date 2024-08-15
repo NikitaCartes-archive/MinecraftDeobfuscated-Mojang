@@ -1,5 +1,6 @@
 package net.minecraft.client.gui.screens.inventory.tooltip;
 
+import java.util.Objects;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.Font;
@@ -17,18 +18,22 @@ public interface ClientTooltipComponent {
 	}
 
 	static ClientTooltipComponent create(TooltipComponent tooltipComponent) {
-		if (tooltipComponent instanceof BundleTooltip bundleTooltip) {
-			return new ClientBundleTooltip(bundleTooltip.contents());
-		} else if (tooltipComponent instanceof ClientActivePlayersTooltip.ActivePlayersTooltip activePlayersTooltip) {
-			return new ClientActivePlayersTooltip(activePlayersTooltip);
-		} else {
-			throw new IllegalArgumentException("Unknown TooltipComponent");
-		}
+		Objects.requireNonNull(tooltipComponent);
+
+		return (ClientTooltipComponent)(switch (tooltipComponent) {
+			case BundleTooltip bundleTooltip -> new ClientBundleTooltip(bundleTooltip.contents());
+			case ClientActivePlayersTooltip.ActivePlayersTooltip activePlayersTooltip -> new ClientActivePlayersTooltip(activePlayersTooltip);
+			default -> throw new IllegalArgumentException("Unknown TooltipComponent");
+		});
 	}
 
-	int getHeight();
+	int getHeight(Font font);
 
 	int getWidth(Font font);
+
+	default boolean showTooltipWithItemInHand() {
+		return false;
+	}
 
 	default void renderText(Font font, int i, int j, Matrix4f matrix4f, MultiBufferSource.BufferSource bufferSource) {
 	}

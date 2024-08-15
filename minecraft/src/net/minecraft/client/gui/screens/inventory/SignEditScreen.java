@@ -5,6 +5,7 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.model.Model;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.blockentity.SignRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -20,7 +21,7 @@ public class SignEditScreen extends AbstractSignEditScreen {
 	public static final float MAGIC_TEXT_SCALE = 0.9765628F;
 	private static final Vector3f TEXT_SCALE = new Vector3f(0.9765628F, 0.9765628F, 0.9765628F);
 	@Nullable
-	private SignRenderer.SignModel signModel;
+	private Model signModel;
 
 	public SignEditScreen(SignBlockEntity signBlockEntity, boolean bl, boolean bl2) {
 		super(signBlockEntity, bl, bl2);
@@ -29,7 +30,8 @@ public class SignEditScreen extends AbstractSignEditScreen {
 	@Override
 	protected void init() {
 		super.init();
-		this.signModel = SignRenderer.createSignModel(this.minecraft.getEntityModels(), this.woodType);
+		boolean bl = this.sign.getBlockState().getBlock() instanceof StandingSignBlock;
+		this.signModel = SignRenderer.createSignModel(this.minecraft.getEntityModels(), this.woodType, bl);
 	}
 
 	@Override
@@ -42,15 +44,13 @@ public class SignEditScreen extends AbstractSignEditScreen {
 	}
 
 	@Override
-	protected void renderSignBackground(GuiGraphics guiGraphics, BlockState blockState) {
+	protected void renderSignBackground(GuiGraphics guiGraphics) {
 		if (this.signModel != null) {
-			boolean bl = blockState.getBlock() instanceof StandingSignBlock;
 			guiGraphics.pose().translate(0.0F, 31.0F, 0.0F);
 			guiGraphics.pose().scale(62.500004F, 62.500004F, -62.500004F);
 			Material material = Sheets.getSignMaterial(this.woodType);
 			VertexConsumer vertexConsumer = material.buffer(guiGraphics.bufferSource(), this.signModel::renderType);
-			this.signModel.stick.visible = bl;
-			this.signModel.root.render(guiGraphics.pose(), vertexConsumer, 15728880, OverlayTexture.NO_OVERLAY);
+			this.signModel.renderToBuffer(guiGraphics.pose(), vertexConsumer, 15728880, OverlayTexture.NO_OVERLAY);
 		}
 	}
 

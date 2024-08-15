@@ -56,11 +56,6 @@ public class PowderSnowBlock extends Block implements BucketPickup {
 	}
 
 	@Override
-	protected VoxelShape getOcclusionShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
-		return Shapes.empty();
-	}
-
-	@Override
 	protected void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
 		if (!(entity instanceof LivingEntity) || entity.getInBlockState().is(this)) {
 			entity.makeStuckInBlock(blockState, new Vec3(0.9F, 1.5, 0.9F));

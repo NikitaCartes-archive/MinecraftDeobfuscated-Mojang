@@ -7,6 +7,7 @@ import net.minecraft.client.Options;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.MultiLineLabel;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.CommonLinks;
@@ -14,6 +15,8 @@ import net.minecraft.util.CommonLinks;
 @Environment(EnvType.CLIENT)
 public class DemoIntroScreen extends Screen {
 	private static final ResourceLocation DEMO_BACKGROUND_LOCATION = ResourceLocation.withDefaultNamespace("textures/gui/demo_background.png");
+	private static final int BACKGROUND_TEXTURE_WIDTH = 256;
+	private static final int BACKGROUND_TEXTURE_HEIGHT = 256;
 	private MultiLineLabel movementMessage = MultiLineLabel.EMPTY;
 	private MultiLineLabel durationMessage = MultiLineLabel.EMPTY;
 
@@ -54,7 +57,7 @@ public class DemoIntroScreen extends Screen {
 		super.renderBackground(guiGraphics, i, j, f);
 		int k = (this.width - 248) / 2;
 		int l = (this.height - 166) / 2;
-		guiGraphics.blit(DEMO_BACKGROUND_LOCATION, k, l, 0, 0, 248, 166);
+		guiGraphics.blit(RenderType::guiTextured, DEMO_BACKGROUND_LOCATION, k, l, 0.0F, 0.0F, 248, 166, 256, 256);
 	}
 
 	@Override

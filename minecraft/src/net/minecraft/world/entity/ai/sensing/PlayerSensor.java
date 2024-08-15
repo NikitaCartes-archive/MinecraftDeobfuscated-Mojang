@@ -10,6 +10,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.Brain;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.player.Player;
 
@@ -24,7 +25,7 @@ public class PlayerSensor extends Sensor<LivingEntity> {
 		List<Player> list = (List<Player>)serverLevel.players()
 			.stream()
 			.filter(EntitySelector.NO_SPECTATORS)
-			.filter(serverPlayer -> livingEntity.closerThan(serverPlayer, 16.0))
+			.filter(serverPlayer -> livingEntity.closerThan(serverPlayer, this.getFollowDistance(livingEntity)))
 			.sorted(Comparator.comparingDouble(livingEntity::distanceToSqr))
 			.collect(Collectors.toList());
 		Brain<?> brain = livingEntity.getBrain();
@@ -33,5 +34,9 @@ public class PlayerSensor extends Sensor<LivingEntity> {
 		brain.setMemory(MemoryModuleType.NEAREST_VISIBLE_PLAYER, list2.isEmpty() ? null : (Player)list2.get(0));
 		Optional<Player> optional = list2.stream().filter(player -> isEntityAttackable(livingEntity, player)).findFirst();
 		brain.setMemory(MemoryModuleType.NEAREST_VISIBLE_ATTACKABLE_PLAYER, optional);
+	}
+
+	protected double getFollowDistance(LivingEntity livingEntity) {
+		return livingEntity.getAttributeValue(Attributes.FOLLOW_RANGE);
 	}
 }

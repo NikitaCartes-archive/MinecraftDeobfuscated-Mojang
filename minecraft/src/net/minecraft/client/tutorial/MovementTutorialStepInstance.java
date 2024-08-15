@@ -1,5 +1,6 @@
 package net.minecraft.client.tutorial;
 
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.components.toasts.TutorialToast;
@@ -20,7 +21,9 @@ public class MovementTutorialStepInstance implements TutorialStepInstance {
 	private static final Component LOOK_TITLE = Component.translatable("tutorial.look.title");
 	private static final Component LOOK_DESCRIPTION = Component.translatable("tutorial.look.description");
 	private final Tutorial tutorial;
+	@Nullable
 	private TutorialToast moveToast;
+	@Nullable
 	private TutorialToast lookToast;
 	private int timeWaiting;
 	private int timeMoved;
@@ -84,10 +87,10 @@ public class MovementTutorialStepInstance implements TutorialStepInstance {
 		if (this.timeWaiting >= 100) {
 			if (this.moveCompleted == -1 && this.moveToast == null) {
 				this.moveToast = new TutorialToast(TutorialToast.Icons.MOVEMENT_KEYS, MOVE_TITLE, MOVE_DESCRIPTION, true);
-				this.tutorial.getMinecraft().getToasts().addToast(this.moveToast);
+				this.tutorial.getMinecraft().getToastManager().addToast(this.moveToast);
 			} else if (this.moveCompleted != -1 && this.timeWaiting - this.moveCompleted >= 20 && this.lookCompleted == -1 && this.lookToast == null) {
 				this.lookToast = new TutorialToast(TutorialToast.Icons.MOUSE, LOOK_TITLE, LOOK_DESCRIPTION, true);
-				this.tutorial.getMinecraft().getToasts().addToast(this.lookToast);
+				this.tutorial.getMinecraft().getToastManager().addToast(this.lookToast);
 			}
 		}
 	}

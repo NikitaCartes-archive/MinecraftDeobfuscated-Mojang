@@ -3,7 +3,6 @@ package net.minecraft.client.gui.screens;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.InputConstants;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.logging.LogUtils;
 import java.io.File;
 import java.net.URI;
@@ -43,6 +42,7 @@ import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipPositione
 import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
 import net.minecraft.client.renderer.CubeMap;
 import net.minecraft.client.renderer.PanoramaRenderer;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
@@ -353,12 +353,12 @@ public abstract class Screen extends AbstractContainerEventHandler implements Re
 			this.renderPanorama(guiGraphics, f);
 		}
 
-		this.renderBlurredBackground(f);
+		this.renderBlurredBackground();
 		this.renderMenuBackground(guiGraphics);
 	}
 
-	protected void renderBlurredBackground(float f) {
-		this.minecraft.gameRenderer.processBlurEffect(f);
+	protected void renderBlurredBackground() {
+		this.minecraft.gameRenderer.processBlurEffect();
 		this.minecraft.getMainRenderTarget().bindWrite(false);
 	}
 
@@ -376,9 +376,7 @@ public abstract class Screen extends AbstractContainerEventHandler implements Re
 
 	public static void renderMenuBackgroundTexture(GuiGraphics guiGraphics, ResourceLocation resourceLocation, int i, int j, float f, float g, int k, int l) {
 		int m = 32;
-		RenderSystem.enableBlend();
-		guiGraphics.blit(resourceLocation, i, j, 0, f, g, k, l, 32, 32);
-		RenderSystem.disableBlend();
+		guiGraphics.blit(RenderType::guiTextured, resourceLocation, i, j, f, g, k, l, 32, 32);
 	}
 
 	public void renderTransparentBackground(GuiGraphics guiGraphics) {

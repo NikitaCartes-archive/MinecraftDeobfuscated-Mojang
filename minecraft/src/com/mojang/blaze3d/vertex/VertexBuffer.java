@@ -168,14 +168,7 @@ public class VertexBuffer implements AutoCloseable {
 	}
 
 	public void drawWithShader(Matrix4f matrix4f, Matrix4f matrix4f2, ShaderInstance shaderInstance) {
-		if (!RenderSystem.isOnRenderThread()) {
-			RenderSystem.recordRenderCall(() -> this._drawWithShader(new Matrix4f(matrix4f), new Matrix4f(matrix4f2), shaderInstance));
-		} else {
-			this._drawWithShader(matrix4f, matrix4f2, shaderInstance);
-		}
-	}
-
-	private void _drawWithShader(Matrix4f matrix4f, Matrix4f matrix4f2, ShaderInstance shaderInstance) {
+		RenderSystem.assertOnRenderThread();
 		shaderInstance.setDefaultUniforms(this.mode, matrix4f, matrix4f2, Minecraft.getInstance().getWindow());
 		shaderInstance.apply();
 		this.draw();

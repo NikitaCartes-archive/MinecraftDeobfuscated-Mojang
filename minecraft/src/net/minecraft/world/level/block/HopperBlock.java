@@ -24,6 +24,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.pathfinder.PathComputationType;
+import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -124,21 +125,16 @@ public class HopperBlock extends BaseEntityBlock {
 
 	@Override
 	protected InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
-		if (level.isClientSide) {
-			return InteractionResult.SUCCESS;
-		} else {
-			BlockEntity blockEntity = level.getBlockEntity(blockPos);
-			if (blockEntity instanceof HopperBlockEntity) {
-				player.openMenu((HopperBlockEntity)blockEntity);
-				player.awardStat(Stats.INSPECT_HOPPER);
-			}
-
-			return InteractionResult.CONSUME;
+		if (!level.isClientSide && level.getBlockEntity(blockPos) instanceof HopperBlockEntity hopperBlockEntity) {
+			player.openMenu(hopperBlockEntity);
+			player.awardStat(Stats.INSPECT_HOPPER);
 		}
+
+		return InteractionResult.SUCCESS;
 	}
 
 	@Override
-	protected void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
+	protected void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, @Nullable Orientation orientation, boolean bl) {
 		this.checkPoweredState(level, blockPos, blockState);
 	}
 

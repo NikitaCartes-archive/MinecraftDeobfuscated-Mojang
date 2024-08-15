@@ -40,6 +40,7 @@ public class StructureFeatureIndexSavedData extends SavedData {
 	public void addIndex(long l) {
 		this.all.add(l);
 		this.remaining.add(l);
+		this.setDirty();
 	}
 
 	public boolean hasStartIndex(long l) {
@@ -51,7 +52,9 @@ public class StructureFeatureIndexSavedData extends SavedData {
 	}
 
 	public void removeIndex(long l) {
-		this.remaining.remove(l);
+		if (this.remaining.remove(l)) {
+			this.setDirty();
+		}
 	}
 
 	public LongSet getAll() {

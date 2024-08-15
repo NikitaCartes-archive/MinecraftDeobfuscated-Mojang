@@ -8,26 +8,23 @@ import net.minecraft.client.model.geom.builders.CubeDeformation;
 import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.client.renderer.entity.state.VillagerRenderState;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.npc.AbstractVillager;
 
 @Environment(EnvType.CLIENT)
-public class VillagerModel<T extends Entity> extends HierarchicalModel<T> implements HeadedModel, VillagerHeadModel {
+public class VillagerModel extends EntityModel<VillagerRenderState> implements HeadedModel, VillagerHeadModel {
 	private final ModelPart root;
 	private final ModelPart head;
 	private final ModelPart hat;
 	private final ModelPart hatRim;
 	private final ModelPart rightLeg;
 	private final ModelPart leftLeg;
-	protected final ModelPart nose;
 
 	public VillagerModel(ModelPart modelPart) {
 		this.root = modelPart;
 		this.head = modelPart.getChild("head");
 		this.hat = this.head.getChild("hat");
 		this.hatRim = this.hat.getChild("hat_rim");
-		this.nose = this.head.getChild("nose");
 		this.rightLeg = modelPart.getChild("right_leg");
 		this.leftLeg = modelPart.getChild("left_leg");
 	}
@@ -79,24 +76,18 @@ public class VillagerModel<T extends Entity> extends HierarchicalModel<T> implem
 		return this.root;
 	}
 
-	@Override
-	public void setupAnim(T entity, float f, float g, float h, float i, float j) {
-		boolean bl = false;
-		if (entity instanceof AbstractVillager) {
-			bl = ((AbstractVillager)entity).getUnhappyCounter() > 0;
-		}
-
-		this.head.yRot = i * (float) (Math.PI / 180.0);
-		this.head.xRot = j * (float) (Math.PI / 180.0);
-		if (bl) {
-			this.head.zRot = 0.3F * Mth.sin(0.45F * h);
+	public void setupAnim(VillagerRenderState villagerRenderState) {
+		this.head.yRot = villagerRenderState.yRot * (float) (Math.PI / 180.0);
+		this.head.xRot = villagerRenderState.xRot * (float) (Math.PI / 180.0);
+		if (villagerRenderState.isUnhappy) {
+			this.head.zRot = 0.3F * Mth.sin(0.45F * villagerRenderState.ageInTicks);
 			this.head.xRot = 0.4F;
 		} else {
 			this.head.zRot = 0.0F;
 		}
 
-		this.rightLeg.xRot = Mth.cos(f * 0.6662F) * 1.4F * g * 0.5F;
-		this.leftLeg.xRot = Mth.cos(f * 0.6662F + (float) Math.PI) * 1.4F * g * 0.5F;
+		this.rightLeg.xRot = Mth.cos(villagerRenderState.walkAnimationPos * 0.6662F) * 1.4F * villagerRenderState.walkAnimationSpeed * 0.5F;
+		this.leftLeg.xRot = Mth.cos(villagerRenderState.walkAnimationPos * 0.6662F + (float) Math.PI) * 1.4F * villagerRenderState.walkAnimationSpeed * 0.5F;
 		this.rightLeg.yRot = 0.0F;
 		this.leftLeg.yRot = 0.0F;
 	}

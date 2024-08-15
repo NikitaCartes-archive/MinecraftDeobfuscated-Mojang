@@ -3,13 +3,8 @@ package net.minecraft.world.ticks;
 import com.google.common.collect.Lists;
 import it.unimi.dsi.fastutil.objects.ObjectOpenCustomHashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
-import net.minecraft.world.level.ChunkPos;
 
 public class ProtoChunkTicks<T> implements SerializableTickContainer<T>, TickContainerAccess<T> {
 	private final List<SavedTick<T>> ticks = Lists.<SavedTick<T>>newArrayList();
@@ -38,23 +33,17 @@ public class ProtoChunkTicks<T> implements SerializableTickContainer<T>, TickCon
 	}
 
 	@Override
-	public Tag save(long l, Function<T, String> function) {
-		ListTag listTag = new ListTag();
-
-		for (SavedTick<T> savedTick : this.ticks) {
-			listTag.add(savedTick.save(function));
-		}
-
-		return listTag;
+	public List<SavedTick<T>> pack(long l) {
+		return this.ticks;
 	}
 
 	public List<SavedTick<T>> scheduledTicks() {
 		return List.copyOf(this.ticks);
 	}
 
-	public static <T> ProtoChunkTicks<T> load(ListTag listTag, Function<String, Optional<T>> function, ChunkPos chunkPos) {
+	public static <T> ProtoChunkTicks<T> load(List<SavedTick<T>> list) {
 		ProtoChunkTicks<T> protoChunkTicks = new ProtoChunkTicks<>();
-		SavedTick.loadTickList(listTag, function, chunkPos, protoChunkTicks::schedule);
+		list.forEach(protoChunkTicks::schedule);
 		return protoChunkTicks;
 	}
 }

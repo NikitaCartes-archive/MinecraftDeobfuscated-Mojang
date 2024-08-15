@@ -56,6 +56,8 @@ import org.slf4j.Logger;
 public class TestCommand {
 	public static final int STRUCTURE_BLOCK_NEARBY_SEARCH_RADIUS = 15;
 	public static final int STRUCTURE_BLOCK_FULL_SEARCH_RADIUS = 200;
+	public static final int VERIFY_TEST_GRID_AXIS_SIZE = 10;
+	public static final int VERIFY_TEST_BATCH_SIZE = 100;
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final int DEFAULT_CLEAR_RADIUS = 200;
 	private static final int MAX_CLEAR_RADIUS = 1024;
@@ -550,7 +552,6 @@ public class TestCommand {
 					TestCommand.toGameTestInfo(commandSourceStack, RetryOptions.noRetries(), this.finder, 0)
 				)
 				.toList();
-			int i = 10;
 			GameTestRunner.clearMarkers(serverLevel);
 			GameTestRegistry.forgetFailedTests();
 			Collection<GameTestBatch> collection2 = new ArrayList();
@@ -559,7 +560,7 @@ public class TestCommand {
 				for (Rotation rotation : Rotation.values()) {
 					Collection<GameTestInfo> collection3 = new ArrayList();
 
-					for (int j = 0; j < 100; j++) {
+					for (int i = 0; i < 100; i++) {
 						GameTestInfo gameTestInfo2 = new GameTestInfo(gameTestInfo.getTestFunction(), rotation, serverLevel, new RetryOptions(1, true));
 						collection3.add(gameTestInfo2);
 					}

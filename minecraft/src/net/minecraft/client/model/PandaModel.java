@@ -1,5 +1,6 @@
 package net.minecraft.client.model;
 
+import java.util.Set;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
@@ -7,18 +8,17 @@ import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.MeshTransformer;
 import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.client.renderer.entity.state.PandaRenderState;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.animal.Panda;
 
 @Environment(EnvType.CLIENT)
-public class PandaModel<T extends Panda> extends QuadrupedModel<T> {
-	private float sitAmount;
-	private float lieOnBackAmount;
-	private float rollAmount;
+public class PandaModel extends QuadrupedModel<PandaRenderState> {
+	public static final MeshTransformer BABY_TRANSFORMER = new BabyModelTransform(true, 23.0F, 4.8F, 2.7F, 3.0F, 49.0F, Set.of("head"));
 
 	public PandaModel(ModelPart modelPart) {
-		super(modelPart, true, 23.0F, 4.8F, 2.7F, 3.0F, 49);
+		super(modelPart);
 	}
 
 	public static LayerDefinition createBodyLayer() {
@@ -52,52 +52,40 @@ public class PandaModel<T extends Panda> extends QuadrupedModel<T> {
 		return LayerDefinition.create(meshDefinition, 64, 64);
 	}
 
-	public void prepareMobModel(T panda, float f, float g, float h) {
-		super.prepareMobModel(panda, f, g, h);
-		this.sitAmount = panda.getSitAmount(h);
-		this.lieOnBackAmount = panda.getLieOnBackAmount(h);
-		this.rollAmount = panda.isBaby() ? 0.0F : panda.getRollAmount(h);
-	}
-
-	public void setupAnim(T panda, float f, float g, float h, float i, float j) {
-		super.setupAnim(panda, f, g, h, i, j);
-		boolean bl = panda.getUnhappyCounter() > 0;
-		boolean bl2 = panda.isSneezing();
-		int k = panda.getSneezeCounter();
-		boolean bl3 = panda.isEating();
-		boolean bl4 = panda.isScared();
-		if (bl) {
-			this.head.yRot = 0.35F * Mth.sin(0.6F * h);
-			this.head.zRot = 0.35F * Mth.sin(0.6F * h);
-			this.rightFrontLeg.xRot = -0.75F * Mth.sin(0.3F * h);
-			this.leftFrontLeg.xRot = 0.75F * Mth.sin(0.3F * h);
+	public void setupAnim(PandaRenderState pandaRenderState) {
+		super.setupAnim(pandaRenderState);
+		if (pandaRenderState.isUnhappy) {
+			this.head.yRot = 0.35F * Mth.sin(0.6F * pandaRenderState.ageInTicks);
+			this.head.zRot = 0.35F * Mth.sin(0.6F * pandaRenderState.ageInTicks);
+			this.rightFrontLeg.xRot = -0.75F * Mth.sin(0.3F * pandaRenderState.ageInTicks);
+			this.leftFrontLeg.xRot = 0.75F * Mth.sin(0.3F * pandaRenderState.ageInTicks);
 		} else {
 			this.head.zRot = 0.0F;
 		}
 
-		if (bl2) {
-			if (k < 15) {
-				this.head.xRot = (float) (-Math.PI / 4) * (float)k / 14.0F;
-			} else if (k < 20) {
-				float l = (float)((k - 15) / 5);
-				this.head.xRot = (float) (-Math.PI / 4) + (float) (Math.PI / 4) * l;
+		if (pandaRenderState.isSneezing) {
+			if (pandaRenderState.sneezeTime < 15) {
+				this.head.xRot = (float) (-Math.PI / 4) * (float)pandaRenderState.sneezeTime / 14.0F;
+			} else if (pandaRenderState.sneezeTime < 20) {
+				float f = (float)((pandaRenderState.sneezeTime - 15) / 5);
+				this.head.xRot = (float) (-Math.PI / 4) + (float) (Math.PI / 4) * f;
 			}
 		}
 
-		if (this.sitAmount > 0.0F) {
-			this.body.xRot = ModelUtils.rotlerpRad(this.body.xRot, 1.7407963F, this.sitAmount);
-			this.head.xRot = ModelUtils.rotlerpRad(this.head.xRot, (float) (Math.PI / 2), this.sitAmount);
+		if (pandaRenderState.sitAmount > 0.0F) {
+			this.body.xRot = Mth.rotLerpRad(pandaRenderState.sitAmount, this.body.xRot, 1.7407963F);
+			this.head.xRot = Mth.rotLerpRad(pandaRenderState.sitAmount, this.head.xRot, (float) (Math.PI / 2));
 			this.rightFrontLeg.zRot = -0.27079642F;
 			this.leftFrontLeg.zRot = 0.27079642F;
 			this.rightHindLeg.zRot = 0.5707964F;
 			this.leftHindLeg.zRot = -0.5707964F;
-			if (bl3) {
-				this.head.xRot = (float) (Math.PI / 2) + 0.2F * Mth.sin(h * 0.6F);
-				this.rightFrontLeg.xRot = -0.4F - 0.2F * Mth.sin(h * 0.6F);
-				this.leftFrontLeg.xRot = -0.4F - 0.2F * Mth.sin(h * 0.6F);
+			if (pandaRenderState.isEating) {
+				this.head.xRot = (float) (Math.PI / 2) + 0.2F * Mth.sin(pandaRenderState.ageInTicks * 0.6F);
+				this.rightFrontLeg.xRot = -0.4F - 0.2F * Mth.sin(pandaRenderState.ageInTicks * 0.6F);
+				this.leftFrontLeg.xRot = -0.4F - 0.2F * Mth.sin(pandaRenderState.ageInTicks * 0.6F);
 			}
 
-			if (bl4) {
+			if (pandaRenderState.isScared) {
 				this.head.xRot = 2.1707964F;
 				this.rightFrontLeg.xRot = -0.9F;
 				this.leftFrontLeg.xRot = -0.9F;
@@ -109,20 +97,20 @@ public class PandaModel<T extends Panda> extends QuadrupedModel<T> {
 			this.leftFrontLeg.zRot = 0.0F;
 		}
 
-		if (this.lieOnBackAmount > 0.0F) {
-			this.rightHindLeg.xRot = -0.6F * Mth.sin(h * 0.15F);
-			this.leftHindLeg.xRot = 0.6F * Mth.sin(h * 0.15F);
-			this.rightFrontLeg.xRot = 0.3F * Mth.sin(h * 0.25F);
-			this.leftFrontLeg.xRot = -0.3F * Mth.sin(h * 0.25F);
-			this.head.xRot = ModelUtils.rotlerpRad(this.head.xRot, (float) (Math.PI / 2), this.lieOnBackAmount);
+		if (pandaRenderState.lieOnBackAmount > 0.0F) {
+			this.rightHindLeg.xRot = -0.6F * Mth.sin(pandaRenderState.ageInTicks * 0.15F);
+			this.leftHindLeg.xRot = 0.6F * Mth.sin(pandaRenderState.ageInTicks * 0.15F);
+			this.rightFrontLeg.xRot = 0.3F * Mth.sin(pandaRenderState.ageInTicks * 0.25F);
+			this.leftFrontLeg.xRot = -0.3F * Mth.sin(pandaRenderState.ageInTicks * 0.25F);
+			this.head.xRot = Mth.rotLerpRad(pandaRenderState.lieOnBackAmount, this.head.xRot, (float) (Math.PI / 2));
 		}
 
-		if (this.rollAmount > 0.0F) {
-			this.head.xRot = ModelUtils.rotlerpRad(this.head.xRot, 2.0561945F, this.rollAmount);
-			this.rightHindLeg.xRot = -0.5F * Mth.sin(h * 0.5F);
-			this.leftHindLeg.xRot = 0.5F * Mth.sin(h * 0.5F);
-			this.rightFrontLeg.xRot = 0.5F * Mth.sin(h * 0.5F);
-			this.leftFrontLeg.xRot = -0.5F * Mth.sin(h * 0.5F);
+		if (pandaRenderState.rollAmount > 0.0F) {
+			this.head.xRot = Mth.rotLerpRad(pandaRenderState.rollAmount, this.head.xRot, 2.0561945F);
+			this.rightHindLeg.xRot = -0.5F * Mth.sin(pandaRenderState.ageInTicks * 0.5F);
+			this.leftHindLeg.xRot = 0.5F * Mth.sin(pandaRenderState.ageInTicks * 0.5F);
+			this.rightFrontLeg.xRot = 0.5F * Mth.sin(pandaRenderState.ageInTicks * 0.5F);
+			this.leftFrontLeg.xRot = -0.5F * Mth.sin(pandaRenderState.ageInTicks * 0.5F);
 		}
 	}
 }

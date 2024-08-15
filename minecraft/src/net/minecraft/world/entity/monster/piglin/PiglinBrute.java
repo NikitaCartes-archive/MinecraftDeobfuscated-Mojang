@@ -10,10 +10,10 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -32,6 +32,7 @@ public class PiglinBrute extends AbstractPiglin {
 	private static final int MAX_HEALTH = 50;
 	private static final float MOVEMENT_SPEED_WHEN_FIGHTING = 0.35F;
 	private static final int ATTACK_DAMAGE = 7;
+	private static final double TARGETING_RANGE = 12.0;
 	protected static final ImmutableList<SensorType<? extends Sensor<? super PiglinBrute>>> SENSOR_TYPES = ImmutableList.of(
 		SensorType.NEAREST_LIVING_ENTITIES, SensorType.NEAREST_PLAYERS, SensorType.NEAREST_ITEMS, SensorType.HURT_BY, SensorType.PIGLIN_BRUTE_SPECIFIC_SENSOR
 	);
@@ -63,17 +64,21 @@ public class PiglinBrute extends AbstractPiglin {
 	}
 
 	public static AttributeSupplier.Builder createAttributes() {
-		return Monster.createMonsterAttributes().add(Attributes.MAX_HEALTH, 50.0).add(Attributes.MOVEMENT_SPEED, 0.35F).add(Attributes.ATTACK_DAMAGE, 7.0);
+		return Monster.createMonsterAttributes()
+			.add(Attributes.MAX_HEALTH, 50.0)
+			.add(Attributes.MOVEMENT_SPEED, 0.35F)
+			.add(Attributes.ATTACK_DAMAGE, 7.0)
+			.add(Attributes.FOLLOW_RANGE, 12.0);
 	}
 
 	@Nullable
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData
+		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, EntitySpawnReason entitySpawnReason, @Nullable SpawnGroupData spawnGroupData
 	) {
 		PiglinBruteAi.initMemories(this);
 		this.populateDefaultEquipmentSlots(serverLevelAccessor.getRandom(), difficultyInstance);
-		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData);
+		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, entitySpawnReason, spawnGroupData);
 	}
 
 	@Override

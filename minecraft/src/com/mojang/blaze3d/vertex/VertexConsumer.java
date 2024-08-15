@@ -6,7 +6,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.core.Vec3i;
-import net.minecraft.util.FastColor;
+import net.minecraft.util.ARGB;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.lwjgl.system.MemoryStack;
@@ -39,11 +39,11 @@ public interface VertexConsumer {
 	}
 
 	default VertexConsumer setColor(int i) {
-		return this.setColor(FastColor.ARGB32.red(i), FastColor.ARGB32.green(i), FastColor.ARGB32.blue(i), FastColor.ARGB32.alpha(i));
+		return this.setColor(ARGB.red(i), ARGB.green(i), ARGB.blue(i), ARGB.alpha(i));
 	}
 
 	default VertexConsumer setWhiteAlpha(int i) {
-		return this.setColor(FastColor.ARGB32.color(i, -1));
+		return this.setColor(ARGB.color(i, -1));
 	}
 
 	default VertexConsumer setLight(int i) {
@@ -60,7 +60,7 @@ public interface VertexConsumer {
 
 	default void putBulkData(PoseStack.Pose pose, BakedQuad bakedQuad, float[] fs, float f, float g, float h, float i, int[] is, int j, boolean bl) {
 		int[] js = bakedQuad.getVertices();
-		Vec3i vec3i = bakedQuad.getDirection().getNormal();
+		Vec3i vec3i = bakedQuad.getDirection().getUnitVec3i();
 		Matrix4f matrix4f = pose.pose();
 		Vector3f vector3f = pose.transformNormal((float)vec3i.getX(), (float)vec3i.getY(), (float)vec3i.getZ(), new Vector3f());
 		int k = 8;
@@ -93,7 +93,7 @@ public interface VertexConsumer {
 					w = fs[n] * h * 255.0F;
 				}
 
-				int x = FastColor.ARGB32.color(m, (int)u, (int)v, (int)w);
+				int x = ARGB.color(m, (int)u, (int)v, (int)w);
 				int y = is[n];
 				float t = byteBuffer.getFloat(16);
 				float z = byteBuffer.getFloat(20);
@@ -123,5 +123,9 @@ public interface VertexConsumer {
 	default VertexConsumer setNormal(PoseStack.Pose pose, float f, float g, float h) {
 		Vector3f vector3f = pose.transformNormal(f, g, h, new Vector3f());
 		return this.setNormal(vector3f.x(), vector3f.y(), vector3f.z());
+	}
+
+	default VertexConsumer setNormal(PoseStack.Pose pose, Vector3f vector3f) {
+		return this.setNormal(pose, vector3f.x(), vector3f.y(), vector3f.z());
 	}
 }

@@ -1,14 +1,15 @@
 package net.minecraft.client.gui.components;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.navigation.CommonInputs;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
@@ -29,11 +30,15 @@ public abstract class AbstractButton extends AbstractWidget {
 	@Override
 	protected void renderWidget(GuiGraphics guiGraphics, int i, int j, float f) {
 		Minecraft minecraft = Minecraft.getInstance();
-		guiGraphics.setColor(1.0F, 1.0F, 1.0F, this.alpha);
-		RenderSystem.enableBlend();
-		RenderSystem.enableDepthTest();
-		guiGraphics.blitSprite(SPRITES.get(this.active, this.isHoveredOrFocused()), this.getX(), this.getY(), this.getWidth(), this.getHeight());
-		guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
+		guiGraphics.blitSprite(
+			RenderType::guiTextured,
+			SPRITES.get(this.active, this.isHoveredOrFocused()),
+			this.getX(),
+			this.getY(),
+			this.getWidth(),
+			this.getHeight(),
+			ARGB.white(this.alpha)
+		);
 		int k = this.active ? 16777215 : 10526880;
 		this.renderString(guiGraphics, minecraft.font, k | Mth.ceil(this.alpha * 255.0F) << 24);
 	}

@@ -16,6 +16,7 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBundlePacket;
 import net.minecraft.network.protocol.game.ClientboundMoveEntityPacket;
+import net.minecraft.network.protocol.game.ClientboundMoveMinecartPacket;
 import net.minecraft.network.protocol.game.ClientboundProjectilePowerPacket;
 import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
 import net.minecraft.network.protocol.game.ClientboundRotateHeadPacket;
@@ -37,6 +38,8 @@ import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
+import net.minecraft.world.entity.vehicle.AbstractMinecart;
+import net.minecraft.world.entity.vehicle.NewMinecartBehavior;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.MapItem;
 import net.minecraft.world.level.saveddata.maps.MapId;
@@ -129,84 +132,93 @@ public class ServerEntity {
 				this.sendDirtyEntityData();
 				this.wasRiding = true;
 			} else {
-				this.teleportDelay++;
-				int i = Mth.floor(this.entity.getYRot() * 256.0F / 360.0F);
-				int j = Mth.floor(this.entity.getXRot() * 256.0F / 360.0F);
-				Vec3 vec3 = this.entity.trackingPosition();
-				boolean bl2 = this.positionCodec.delta(vec3).lengthSqr() >= 7.6293945E-6F;
-				Packet<?> packet2 = null;
-				boolean bl3 = bl2 || this.tickCount % 60 == 0;
-				boolean bl4 = Math.abs(i - this.lastSentYRot) >= 1 || Math.abs(j - this.lastSentXRot) >= 1;
-				boolean bl5 = false;
-				boolean bl6 = false;
-				long l = this.positionCodec.encodeX(vec3);
-				long m = this.positionCodec.encodeY(vec3);
-				long n = this.positionCodec.encodeZ(vec3);
-				boolean bl7 = l < -32768L || l > 32767L || m < -32768L || m > 32767L || n < -32768L || n > 32767L;
-				if (bl7 || this.teleportDelay > 400 || this.wasRiding || this.wasOnGround != this.entity.onGround()) {
-					this.wasOnGround = this.entity.onGround();
-					this.teleportDelay = 0;
-					packet2 = new ClientboundTeleportEntityPacket(this.entity);
-					bl5 = true;
-					bl6 = true;
-				} else if ((!bl3 || !bl4) && !(this.entity instanceof AbstractArrow)) {
-					if (bl3) {
-						packet2 = new ClientboundMoveEntityPacket.Pos(this.entity.getId(), (short)((int)l), (short)((int)m), (short)((int)n), this.entity.onGround());
+				label205: {
+					if (this.entity instanceof AbstractMinecart abstractMinecart && abstractMinecart.getBehavior() instanceof NewMinecartBehavior newMinecartBehavior) {
+						this.handleMinecartPosRot(newMinecartBehavior);
+						break label205;
+					}
+
+					this.teleportDelay++;
+					int i = Mth.floor(this.entity.getYRot() * 256.0F / 360.0F);
+					int j = Mth.floor(this.entity.getXRot() * 256.0F / 360.0F);
+					Vec3 vec3 = this.entity.trackingPosition();
+					boolean bl2 = this.positionCodec.delta(vec3).lengthSqr() >= 7.6293945E-6F;
+					Packet<?> packet = null;
+					boolean bl3 = bl2 || this.tickCount % 60 == 0;
+					boolean bl4 = Math.abs(i - this.lastSentYRot) >= 1 || Math.abs(j - this.lastSentXRot) >= 1;
+					boolean bl5 = false;
+					boolean bl6 = false;
+					long l = this.positionCodec.encodeX(vec3);
+					long m = this.positionCodec.encodeY(vec3);
+					long n = this.positionCodec.encodeZ(vec3);
+					boolean bl7 = l < -32768L || l > 32767L || m < -32768L || m > 32767L || n < -32768L || n > 32767L;
+					if (bl7 || this.teleportDelay > 400 || this.wasRiding || this.wasOnGround != this.entity.onGround()) {
+						this.wasOnGround = this.entity.onGround();
+						this.teleportDelay = 0;
+						packet = new ClientboundTeleportEntityPacket(this.entity);
 						bl5 = true;
-					} else if (bl4) {
-						packet2 = new ClientboundMoveEntityPacket.Rot(this.entity.getId(), (byte)i, (byte)j, this.entity.onGround());
+						bl6 = true;
+					} else if ((!bl3 || !bl4) && !(this.entity instanceof AbstractArrow)) {
+						if (bl3) {
+							packet = new ClientboundMoveEntityPacket.Pos(this.entity.getId(), (short)((int)l), (short)((int)m), (short)((int)n), this.entity.onGround());
+							bl5 = true;
+						} else if (bl4) {
+							packet = new ClientboundMoveEntityPacket.Rot(this.entity.getId(), (byte)i, (byte)j, this.entity.onGround());
+							bl6 = true;
+						}
+					} else {
+						packet = new ClientboundMoveEntityPacket.PosRot(
+							this.entity.getId(), (short)((int)l), (short)((int)m), (short)((int)n), (byte)i, (byte)j, this.entity.onGround()
+						);
+						bl5 = true;
 						bl6 = true;
 					}
-				} else {
-					packet2 = new ClientboundMoveEntityPacket.PosRot(
-						this.entity.getId(), (short)((int)l), (short)((int)m), (short)((int)n), (byte)i, (byte)j, this.entity.onGround()
-					);
-					bl5 = true;
-					bl6 = true;
-				}
 
-				if ((this.trackDelta || this.entity.hasImpulse || this.entity instanceof LivingEntity && ((LivingEntity)this.entity).isFallFlying()) && this.tickCount > 0) {
-					Vec3 vec32 = this.entity.getDeltaMovement();
-					double d = vec32.distanceToSqr(this.lastSentMovement);
-					if (d > 1.0E-7 || d > 0.0 && vec32.lengthSqr() == 0.0) {
-						this.lastSentMovement = vec32;
-						if (this.entity instanceof AbstractHurtingProjectile abstractHurtingProjectile) {
-							this.broadcast
-								.accept(
-									new ClientboundBundlePacket(
-										List.of(
-											new ClientboundSetEntityMotionPacket(this.entity.getId(), this.lastSentMovement),
-											new ClientboundProjectilePowerPacket(abstractHurtingProjectile.getId(), abstractHurtingProjectile.accelerationPower)
+					if ((this.trackDelta || this.entity.hasImpulse || this.entity instanceof LivingEntity && ((LivingEntity)this.entity).isFallFlying()) && this.tickCount > 0
+						)
+					 {
+						Vec3 vec32 = this.entity.getDeltaMovement();
+						double d = vec32.distanceToSqr(this.lastSentMovement);
+						if (d > 1.0E-7 || d > 0.0 && vec32.lengthSqr() == 0.0) {
+							this.lastSentMovement = vec32;
+							if (this.entity instanceof AbstractHurtingProjectile abstractHurtingProjectile) {
+								this.broadcast
+									.accept(
+										new ClientboundBundlePacket(
+											List.of(
+												new ClientboundSetEntityMotionPacket(this.entity.getId(), this.lastSentMovement),
+												new ClientboundProjectilePowerPacket(abstractHurtingProjectile.getId(), abstractHurtingProjectile.accelerationPower)
+											)
 										)
-									)
-								);
-						} else {
-							this.broadcast.accept(new ClientboundSetEntityMotionPacket(this.entity.getId(), this.lastSentMovement));
+									);
+							} else {
+								this.broadcast.accept(new ClientboundSetEntityMotionPacket(this.entity.getId(), this.lastSentMovement));
+							}
 						}
 					}
-				}
 
-				if (packet2 != null) {
-					this.broadcast.accept(packet2);
-				}
+					if (packet != null) {
+						this.broadcast.accept(packet);
+					}
 
-				this.sendDirtyEntityData();
-				if (bl5) {
-					this.positionCodec.setBase(vec3);
-				}
+					this.sendDirtyEntityData();
+					if (bl5) {
+						this.positionCodec.setBase(vec3);
+					}
 
-				if (bl6) {
-					this.lastSentYRot = i;
-					this.lastSentXRot = j;
-				}
+					if (bl6) {
+						this.lastSentYRot = i;
+						this.lastSentXRot = j;
+					}
 
-				this.wasRiding = false;
+					this.wasRiding = false;
+				}
 			}
 
-			int ix = Mth.floor(this.entity.getYHeadRot() * 256.0F / 360.0F);
-			if (Math.abs(ix - this.lastSentYHeadRot) >= 1) {
-				this.broadcast.accept(new ClientboundRotateHeadPacket(this.entity, (byte)ix));
-				this.lastSentYHeadRot = ix;
+			int k = Mth.floor(this.entity.getYHeadRot() * 256.0F / 360.0F);
+			if (Math.abs(k - this.lastSentYHeadRot) >= 1) {
+				this.broadcast.accept(new ClientboundRotateHeadPacket(this.entity, (byte)k));
+				this.lastSentYHeadRot = k;
 			}
 
 			this.entity.hasImpulse = false;
@@ -217,6 +229,36 @@ public class ServerEntity {
 			this.entity.hurtMarked = false;
 			this.broadcastAndSend(new ClientboundSetEntityMotionPacket(this.entity));
 		}
+	}
+
+	private void handleMinecartPosRot(NewMinecartBehavior newMinecartBehavior) {
+		this.sendDirtyEntityData();
+		int i = Mth.floor(this.entity.getYRot() * 256.0F / 360.0F);
+		int j = Mth.floor(this.entity.getXRot() * 256.0F / 360.0F);
+		if (newMinecartBehavior.lerpSteps.isEmpty()) {
+			Vec3 vec3 = this.entity.getDeltaMovement();
+			double d = vec3.distanceToSqr(this.lastSentMovement);
+			Vec3 vec32 = this.entity.trackingPosition();
+			boolean bl = this.positionCodec.delta(vec32).lengthSqr() >= 7.6293945E-6F;
+			boolean bl2 = bl || this.tickCount % 60 == 0;
+			boolean bl3 = Math.abs(i - this.lastSentYRot) >= 1 || Math.abs(j - this.lastSentXRot) >= 1;
+			if (bl2 || bl3 || d > 1.0E-7) {
+				this.broadcast
+					.accept(
+						new ClientboundMoveMinecartPacket(
+							this.entity.getId(),
+							List.of(new NewMinecartBehavior.MinecartStep(this.entity.position(), this.entity.getDeltaMovement(), this.entity.getYRot(), this.entity.getXRot(), 1.0F))
+						)
+					);
+			}
+		} else {
+			this.broadcast.accept(new ClientboundMoveMinecartPacket(this.entity.getId(), List.copyOf(newMinecartBehavior.lerpSteps)));
+			newMinecartBehavior.lerpSteps.clear();
+		}
+
+		this.lastSentYRot = i;
+		this.lastSentXRot = j;
+		this.positionCodec.setBase(this.entity.position());
 	}
 
 	private static Stream<Entity> removedPassengers(List<Entity> list, List<Entity> list2) {

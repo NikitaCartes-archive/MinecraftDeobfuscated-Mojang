@@ -1,6 +1,7 @@
 package net.minecraft.world.entity.monster.piglin;
 
 import javax.annotation.Nullable;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.DebugPackets;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -15,7 +16,6 @@ import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.ai.util.GoalUtils;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.ZombifiedPiglin;
-import net.minecraft.world.item.TieredItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.pathfinder.PathType;
 
@@ -112,7 +112,7 @@ public abstract class AbstractPiglin extends Monster {
 	}
 
 	protected boolean isHoldingMeleeWeapon() {
-		return this.getMainHandItem().getItem() instanceof TieredItem;
+		return this.getMainHandItem().has(DataComponents.TOOL);
 	}
 
 	@Override

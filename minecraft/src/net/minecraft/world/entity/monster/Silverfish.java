@@ -10,8 +10,8 @@ import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.ClimbOnTopOfPowderSnowGoal;
@@ -110,13 +110,15 @@ public class Silverfish extends Monster {
 	}
 
 	public static boolean checkSilverfishSpawnRules(
-		EntityType<Silverfish> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, RandomSource randomSource
+		EntityType<Silverfish> entityType, LevelAccessor levelAccessor, EntitySpawnReason entitySpawnReason, BlockPos blockPos, RandomSource randomSource
 	) {
-		if (checkAnyLightMonsterSpawnRules(entityType, levelAccessor, mobSpawnType, blockPos, randomSource)) {
+		if (!checkAnyLightMonsterSpawnRules(entityType, levelAccessor, entitySpawnReason, blockPos, randomSource)) {
+			return false;
+		} else if (EntitySpawnReason.isSpawner(entitySpawnReason)) {
+			return true;
+		} else {
 			Player player = levelAccessor.getNearestPlayer((double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5, 5.0, true);
 			return player == null;
-		} else {
-			return false;
 		}
 	}
 

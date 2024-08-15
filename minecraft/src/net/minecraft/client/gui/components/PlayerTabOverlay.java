@@ -1,7 +1,6 @@
 package net.minecraft.client.gui.components;
 
 import com.mojang.authlib.GameProfile;
-import com.mojang.blaze3d.systems.RenderSystem;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -19,6 +18,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.multiplayer.PlayerInfo;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
@@ -54,7 +54,8 @@ public class PlayerTabOverlay {
 	private static final ResourceLocation HEART_FULL_SPRITE = ResourceLocation.withDefaultNamespace("hud/heart/full");
 	private static final ResourceLocation HEART_ABSORBING_HALF_BLINKING_SPRITE = ResourceLocation.withDefaultNamespace("hud/heart/absorbing_half_blinking");
 	private static final ResourceLocation HEART_HALF_SPRITE = ResourceLocation.withDefaultNamespace("hud/heart/half");
-	private static final Comparator<PlayerInfo> PLAYER_COMPARATOR = Comparator.comparingInt(playerInfo -> playerInfo.getGameMode() == GameType.SPECTATOR ? 1 : 0)
+	private static final Comparator<PlayerInfo> PLAYER_COMPARATOR = Comparator.comparingInt(playerInfo -> -playerInfo.getTabListOrder())
+		.thenComparingInt(playerInfo -> playerInfo.getGameMode() == GameType.SPECTATOR ? 1 : 0)
 		.thenComparing(playerInfo -> Optionull.mapOrDefault(playerInfo.getTeam(), PlayerTeam::getName, ""))
 		.thenComparing(playerInfo -> playerInfo.getProfile().getName(), String::compareToIgnoreCase);
 	public static final int MAX_ROWS_PER_COL = 20;
@@ -196,7 +197,6 @@ public class PlayerTabOverlay {
 			int z = s + v * n + v * 5;
 			int aa = t + y * 9;
 			guiGraphics.fill(z, aa, z + n, aa + 8, w);
-			RenderSystem.enableBlend();
 			if (x < list.size()) {
 				PlayerInfo playerInfo2 = (PlayerInfo)list.get(x);
 				PlayerTabOverlay.ScoreDisplayEntry scoreDisplayEntry = (PlayerTabOverlay.ScoreDisplayEntry)list2.get(x);
@@ -205,7 +205,7 @@ public class PlayerTabOverlay {
 					Player player = this.minecraft.level.getPlayerByUUID(gameProfile.getId());
 					boolean bl2 = player != null && LivingEntityRenderer.isEntityUpsideDown(player);
 					boolean bl3 = player != null && player.isModelPartShown(PlayerModelPart.HAT);
-					PlayerFaceRenderer.draw(guiGraphics, playerInfo2.getSkin().texture(), z, aa, 8, bl3, bl2);
+					PlayerFaceRenderer.draw(guiGraphics, playerInfo2.getSkin().texture(), z, aa, 8, bl3, bl2, -1);
 					z += 9;
 				}
 
@@ -252,7 +252,7 @@ public class PlayerTabOverlay {
 
 		guiGraphics.pose().pushPose();
 		guiGraphics.pose().translate(0.0F, 0.0F, 100.0F);
-		guiGraphics.blitSprite(resourceLocation, j + i - 11, k, 10, 8);
+		guiGraphics.blitSprite(RenderType::guiTextured, resourceLocation, j + i - 11, k, 10, 8);
 		guiGraphics.pose().popPose();
 	}
 
@@ -292,27 +292,27 @@ public class PlayerTabOverlay {
 				ResourceLocation resourceLocation = bl ? HEART_CONTAINER_BLINKING_SPRITE : HEART_CONTAINER_SPRITE;
 
 				for (int p = m; p < n; p++) {
-					guiGraphics.blitSprite(resourceLocation, j + p * o, i, 9, 9);
+					guiGraphics.blitSprite(RenderType::guiTextured, resourceLocation, j + p * o, i, 9, 9);
 				}
 
 				for (int p = 0; p < m; p++) {
-					guiGraphics.blitSprite(resourceLocation, j + p * o, i, 9, 9);
+					guiGraphics.blitSprite(RenderType::guiTextured, resourceLocation, j + p * o, i, 9, 9);
 					if (bl) {
 						if (p * 2 + 1 < healthState.displayedValue()) {
-							guiGraphics.blitSprite(HEART_FULL_BLINKING_SPRITE, j + p * o, i, 9, 9);
+							guiGraphics.blitSprite(RenderType::guiTextured, HEART_FULL_BLINKING_SPRITE, j + p * o, i, 9, 9);
 						}
 
 						if (p * 2 + 1 == healthState.displayedValue()) {
-							guiGraphics.blitSprite(HEART_HALF_BLINKING_SPRITE, j + p * o, i, 9, 9);
+							guiGraphics.blitSprite(RenderType::guiTextured, HEART_HALF_BLINKING_SPRITE, j + p * o, i, 9, 9);
 						}
 					}
 
 					if (p * 2 + 1 < l) {
-						guiGraphics.blitSprite(p >= 10 ? HEART_ABSORBING_FULL_BLINKING_SPRITE : HEART_FULL_SPRITE, j + p * o, i, 9, 9);
+						guiGraphics.blitSprite(RenderType::guiTextured, p >= 10 ? HEART_ABSORBING_FULL_BLINKING_SPRITE : HEART_FULL_SPRITE, j + p * o, i, 9, 9);
 					}
 
 					if (p * 2 + 1 == l) {
-						guiGraphics.blitSprite(p >= 10 ? HEART_ABSORBING_HALF_BLINKING_SPRITE : HEART_HALF_SPRITE, j + p * o, i, 9, 9);
+						guiGraphics.blitSprite(RenderType::guiTextured, p >= 10 ? HEART_ABSORBING_HALF_BLINKING_SPRITE : HEART_HALF_SPRITE, j + p * o, i, 9, 9);
 					}
 				}
 			}

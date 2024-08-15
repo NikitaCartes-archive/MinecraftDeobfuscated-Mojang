@@ -4,14 +4,13 @@ import com.google.common.primitives.Doubles;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import it.unimi.dsi.fastutil.doubles.DoubleArrays;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.DoubleStream;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -46,7 +45,7 @@ public class BlendingData {
 	private static final int CELL_HORIZONTAL_MAX_INDEX_OUTSIDE = QUARTS_PER_SECTION;
 	private static final int CELL_COLUMN_INSIDE_COUNT = 2 * CELL_HORIZONTAL_MAX_INDEX_INSIDE + 1;
 	private static final int CELL_COLUMN_OUTSIDE_COUNT = 2 * CELL_HORIZONTAL_MAX_INDEX_OUTSIDE + 1;
-	private static final int CELL_COLUMN_COUNT = CELL_COLUMN_INSIDE_COUNT + CELL_COLUMN_OUTSIDE_COUNT;
+	static final int CELL_COLUMN_COUNT = CELL_COLUMN_INSIDE_COUNT + CELL_COLUMN_OUTSIDE_COUNT;
 	private final LevelHeightAccessor areaWithOldGeneration;
 	private static final List<Block> SURFACE_BLOCKS = List.of(
 		Blocks.PODZOL,
@@ -66,28 +65,9 @@ public class BlendingData {
 	private final double[] heights;
 	private final List<List<Holder<Biome>>> biomes;
 	private final transient double[][] densities;
-	private static final Codec<double[]> DOUBLE_ARRAY_CODEC = Codec.DOUBLE.listOf().xmap(Doubles::toArray, Doubles::asList);
-	public static final Codec<BlendingData> CODEC = RecordCodecBuilder.create(
-			instance -> instance.group(
-						Codec.INT.fieldOf("min_section").forGetter(blendingData -> blendingData.areaWithOldGeneration.getMinSection()),
-						Codec.INT.fieldOf("max_section").forGetter(blendingData -> blendingData.areaWithOldGeneration.getMaxSection()),
-						DOUBLE_ARRAY_CODEC.lenientOptionalFieldOf("heights")
-							.forGetter(
-								blendingData -> DoubleStream.of(blendingData.heights).anyMatch(d -> d != Double.MAX_VALUE) ? Optional.of(blendingData.heights) : Optional.empty()
-							)
-					)
-					.apply(instance, BlendingData::new)
-		)
-		.comapFlatMap(BlendingData::validateArraySize, Function.identity());
-
-	private static DataResult<BlendingData> validateArraySize(BlendingData blendingData) {
-		return blendingData.heights.length != CELL_COLUMN_COUNT
-			? DataResult.error(() -> "heights has to be of length " + CELL_COLUMN_COUNT)
-			: DataResult.success(blendingData);
-	}
 
 	private BlendingData(int i, int j, Optional<double[]> optional) {
-		this.heights = (double[])optional.orElse(Util.make(new double[CELL_COLUMN_COUNT], ds -> Arrays.fill(ds, Double.MAX_VALUE)));
+		this.heights = (double[])optional.orElseGet(() -> Util.make(new double[CELL_COLUMN_COUNT], ds -> Arrays.fill(ds, Double.MAX_VALUE)));
 		this.densities = new double[CELL_COLUMN_COUNT][];
 		ObjectArrayList<List<Holder<Biome>>> objectArrayList = new ObjectArrayList<>(CELL_COLUMN_COUNT);
 		objectArrayList.size(CELL_COLUMN_COUNT);
@@ -95,6 +75,26 @@ public class BlendingData {
 		int k = SectionPos.sectionToBlockCoord(i);
 		int l = SectionPos.sectionToBlockCoord(j) - k;
 		this.areaWithOldGeneration = LevelHeightAccessor.create(k, l);
+	}
+
+	@Nullable
+	public static BlendingData unpack(@Nullable BlendingData.Packed packed) {
+		return packed == null ? null : new BlendingData(packed.minSection(), packed.maxSection(), packed.heights());
+	}
+
+	public BlendingData.Packed pack() {
+		boolean bl = false;
+
+		for (double d : this.heights) {
+			if (d != Double.MAX_VALUE) {
+				bl = true;
+				break;
+			}
+		}
+
+		return new BlendingData.Packed(
+			this.areaWithOldGeneration.getMinSection(), this.areaWithOldGeneration.getMaxSection(), bl ? Optional.of(DoubleArrays.copy(this.heights)) : Optional.empty()
+		);
 	}
 
 	@Nullable
@@ -394,5 +394,24 @@ public class BlendingData {
 
 	protected interface HeightConsumer {
 		void consume(int i, int j, double d);
+	}
+
+	public static record Packed(int minSection, int maxSection, Optional<double[]> heights) {
+		private static final Codec<double[]> DOUBLE_ARRAY_CODEC = Codec.DOUBLE.listOf().xmap(Doubles::toArray, Doubles::asList);
+		public static final Codec<BlendingData.Packed> CODEC = RecordCodecBuilder.<BlendingData.Packed>create(
+				instance -> instance.group(
+							Codec.INT.fieldOf("min_section").forGetter(BlendingData.Packed::minSection),
+							Codec.INT.fieldOf("max_section").forGetter(BlendingData.Packed::maxSection),
+							DOUBLE_ARRAY_CODEC.lenientOptionalFieldOf("heights").forGetter(BlendingData.Packed::heights)
+						)
+						.apply(instance, BlendingData.Packed::new)
+			)
+			.validate(BlendingData.Packed::validateArraySize);
+
+		private static DataResult<BlendingData.Packed> validateArraySize(BlendingData.Packed packed) {
+			return packed.heights.isPresent() && ((double[])packed.heights.get()).length != BlendingData.CELL_COLUMN_COUNT
+				? DataResult.error(() -> "heights has to be of length " + BlendingData.CELL_COLUMN_COUNT)
+				: DataResult.success(packed);
+		}
 	}
 }

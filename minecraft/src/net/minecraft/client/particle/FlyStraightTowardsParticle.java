@@ -4,7 +4,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.particles.SimpleParticleType;
-import net.minecraft.util.FastColor;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
@@ -63,9 +63,9 @@ public class FlyStraightTowardsParticle extends TextureSheetParticle {
 			this.x = this.xStart + this.xd * (double)g;
 			this.y = this.yStart + this.yd * (double)g;
 			this.z = this.zStart + this.zd * (double)g;
-			int i = FastColor.ARGB32.lerp(f, this.startColor, this.endColor);
-			this.setColor((float)FastColor.ARGB32.red(i) / 255.0F, (float)FastColor.ARGB32.green(i) / 255.0F, (float)FastColor.ARGB32.blue(i) / 255.0F);
-			this.setAlpha((float)FastColor.ARGB32.alpha(i) / 255.0F);
+			int i = ARGB.lerp(f, this.startColor, this.endColor);
+			this.setColor((float)ARGB.red(i) / 255.0F, (float)ARGB.green(i) / 255.0F, (float)ARGB.blue(i) / 255.0F);
+			this.setAlpha((float)ARGB.alpha(i) / 255.0F);
 		}
 	}
 

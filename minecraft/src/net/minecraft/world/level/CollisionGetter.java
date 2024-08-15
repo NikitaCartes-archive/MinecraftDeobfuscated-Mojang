@@ -6,10 +6,13 @@ import java.util.Optional;
 import java.util.stream.StreamSupport;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -44,7 +47,11 @@ public interface CollisionGetter extends BlockGetter {
 	}
 
 	default boolean noCollision(@Nullable Entity entity, AABB aABB) {
-		for (VoxelShape voxelShape : this.getBlockCollisions(entity, aABB)) {
+		return this.noCollision(entity, aABB, false);
+	}
+
+	default boolean noCollision(@Nullable Entity entity, AABB aABB, boolean bl) {
+		for (VoxelShape voxelShape : bl ? this.getBlockAndLiquidCollisions(entity, aABB) : this.getBlockCollisions(entity, aABB)) {
 			if (!voxelShape.isEmpty()) {
 				return false;
 			}
@@ -82,10 +89,27 @@ public interface CollisionGetter extends BlockGetter {
 		return () -> new BlockCollisions(this, entity, aABB, false, (mutableBlockPos, voxelShape) -> voxelShape);
 	}
 
+	default Iterable<VoxelShape> getBlockAndLiquidCollisions(@Nullable Entity entity, AABB aABB) {
+		return () -> new BlockCollisions(this, CollisionContext.of(entity, true), aABB, false, (mutableBlockPos, voxelShape) -> voxelShape);
+	}
+
 	@Nullable
 	private VoxelShape borderCollision(Entity entity, AABB aABB) {
 		WorldBorder worldBorder = this.getWorldBorder();
 		return worldBorder.isInsideCloseToBorder(entity, aABB) ? worldBorder.getCollisionShape() : null;
+	}
+
+	default HitResult clipIncludingBorder(ClipContext clipContext) {
+		HitResult hitResult = this.clip(clipContext);
+		WorldBorder worldBorder = this.getWorldBorder();
+		if (worldBorder.isWithinBounds(clipContext.getFrom()) && !worldBorder.isWithinBounds(hitResult.getLocation())) {
+			Vec3 vec3 = hitResult.getLocation().subtract(clipContext.getFrom());
+			Direction direction = Direction.getApproximateNearest(vec3.x, vec3.y, vec3.z);
+			Vec3 vec32 = worldBorder.clampVec3ToBound(hitResult.getLocation());
+			return new BlockHitResult(vec32, direction, BlockPos.containing(vec32), false);
+		} else {
+			return hitResult;
+		}
 	}
 
 	default boolean collidesWithSuffocatingBlock(@Nullable Entity entity, AABB aABB) {

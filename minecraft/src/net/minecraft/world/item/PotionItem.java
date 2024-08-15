@@ -15,7 +15,6 @@ import net.minecraft.stats.Stats;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.alchemy.Potion;
@@ -111,7 +110,7 @@ public class PotionItem extends Item {
 			level.playSound(null, blockPos, SoundEvents.BOTTLE_EMPTY, SoundSource.BLOCKS, 1.0F, 1.0F);
 			level.gameEvent(null, GameEvent.FLUID_PLACE, blockPos);
 			level.setBlockAndUpdate(blockPos, Blocks.MUD.defaultBlockState());
-			return InteractionResult.sidedSuccess(level.isClientSide);
+			return InteractionResult.SUCCESS;
 		} else {
 			return InteractionResult.PASS;
 		}
@@ -128,7 +127,7 @@ public class PotionItem extends Item {
 	}
 
 	@Override
-	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand) {
+	public InteractionResult use(Level level, Player player, InteractionHand interactionHand) {
 		return ItemUtils.startUsingInstantly(level, player, interactionHand);
 	}
 

@@ -4,18 +4,14 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.BufferUploader;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.blaze3d.vertex.VertexFormat;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
@@ -33,7 +29,6 @@ import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipPositione
 import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
 import net.minecraft.client.gui.screens.inventory.tooltip.TooltipRenderUtil;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -45,7 +40,7 @@ import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FastColor;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
@@ -66,7 +61,6 @@ public class GuiGraphics {
 	private final MultiBufferSource.BufferSource bufferSource;
 	private final GuiGraphics.ScissorStack scissorStack = new GuiGraphics.ScissorStack();
 	private final GuiSpriteManager sprites;
-	private boolean managed;
 
 	private GuiGraphics(Minecraft minecraft, PoseStack poseStack, MultiBufferSource.BufferSource bufferSource) {
 		this.minecraft = minecraft;
@@ -77,29 +71,6 @@ public class GuiGraphics {
 
 	public GuiGraphics(Minecraft minecraft, MultiBufferSource.BufferSource bufferSource) {
 		this(minecraft, new PoseStack(), bufferSource);
-	}
-
-	@Deprecated
-	public void drawManaged(Runnable runnable) {
-		this.flush();
-		this.managed = true;
-		runnable.run();
-		this.managed = false;
-		this.flush();
-	}
-
-	@Deprecated
-	private void flushIfUnmanaged() {
-		if (!this.managed) {
-			this.flush();
-		}
-	}
-
-	@Deprecated
-	private void flushIfManaged() {
-		if (this.managed) {
-			this.flush();
-		}
 	}
 
 	public int guiWidth() {
@@ -119,9 +90,7 @@ public class GuiGraphics {
 	}
 
 	public void flush() {
-		RenderSystem.disableDepthTest();
 		this.bufferSource.endBatch();
-		RenderSystem.enableDepthTest();
 	}
 
 	public void hLine(int i, int j, int k, int l) {
@@ -165,7 +134,7 @@ public class GuiGraphics {
 	}
 
 	private void applyScissor(@Nullable ScreenRectangle screenRectangle) {
-		this.flushIfManaged();
+		this.flush();
 		if (screenRectangle != null) {
 			Window window = Minecraft.getInstance().getWindow();
 			int i = window.getHeight();
@@ -178,11 +147,6 @@ public class GuiGraphics {
 		} else {
 			RenderSystem.disableScissor();
 		}
-	}
-
-	public void setColor(float f, float g, float h, float i) {
-		this.flushIfManaged();
-		RenderSystem.setShaderColor(f, g, h, i);
 	}
 
 	public void fill(int i, int j, int k, int l, int m) {
@@ -216,7 +180,6 @@ public class GuiGraphics {
 		vertexConsumer.addVertex(matrix4f, (float)i, (float)l, (float)m).setColor(n);
 		vertexConsumer.addVertex(matrix4f, (float)k, (float)l, (float)m).setColor(n);
 		vertexConsumer.addVertex(matrix4f, (float)k, (float)j, (float)m).setColor(n);
-		this.flushIfUnmanaged();
 	}
 
 	public void fillGradient(int i, int j, int k, int l, int m, int n) {
@@ -230,7 +193,6 @@ public class GuiGraphics {
 	public void fillGradient(RenderType renderType, int i, int j, int k, int l, int m, int n, int o) {
 		VertexConsumer vertexConsumer = this.bufferSource.getBuffer(renderType);
 		this.fillGradient(vertexConsumer, i, j, k, l, o, m, n);
-		this.flushIfUnmanaged();
 	}
 
 	private void fillGradient(VertexConsumer vertexConsumer, int i, int j, int k, int l, int m, int n, int o) {
@@ -248,7 +210,6 @@ public class GuiGraphics {
 		vertexConsumer.addVertex(matrix4f, (float)i, (float)l, (float)m);
 		vertexConsumer.addVertex(matrix4f, (float)k, (float)l, (float)m);
 		vertexConsumer.addVertex(matrix4f, (float)k, (float)j, (float)m);
-		this.flushIfUnmanaged();
 	}
 
 	public void drawCenteredString(Font font, String string, int i, int j, int k) {
@@ -269,15 +230,11 @@ public class GuiGraphics {
 	}
 
 	public int drawString(Font font, @Nullable String string, int i, int j, int k, boolean bl) {
-		if (string == null) {
-			return 0;
-		} else {
-			int l = font.drawInBatch(
+		return string == null
+			? 0
+			: font.drawInBatch(
 				string, (float)i, (float)j, k, bl, this.pose.last().pose(), this.bufferSource, Font.DisplayMode.NORMAL, 0, 15728880, font.isBidirectional()
 			);
-			this.flushIfUnmanaged();
-			return l;
-		}
 	}
 
 	public int drawString(Font font, FormattedCharSequence formattedCharSequence, int i, int j, int k) {
@@ -285,9 +242,7 @@ public class GuiGraphics {
 	}
 
 	public int drawString(Font font, FormattedCharSequence formattedCharSequence, int i, int j, int k, boolean bl) {
-		int l = font.drawInBatch(formattedCharSequence, (float)i, (float)j, k, bl, this.pose.last().pose(), this.bufferSource, Font.DisplayMode.NORMAL, 0, 15728880);
-		this.flushIfUnmanaged();
-		return l;
+		return font.drawInBatch(formattedCharSequence, (float)i, (float)j, k, bl, this.pose.last().pose(), this.bufferSource, Font.DisplayMode.NORMAL, 0, 15728880);
 	}
 
 	public int drawString(Font font, Component component, int i, int j, int k) {
@@ -309,33 +264,10 @@ public class GuiGraphics {
 		int m = this.minecraft.options.getBackgroundColor(0.0F);
 		if (m != 0) {
 			int n = 2;
-			this.fill(i - 2, j - 2, i + k + 2, j + 9 + 2, FastColor.ARGB32.multiply(m, l));
+			this.fill(i - 2, j - 2, i + k + 2, j + 9 + 2, ARGB.multiply(m, l));
 		}
 
 		return this.drawString(font, component, i, j, l, true);
-	}
-
-	public void blit(int i, int j, int k, int l, int m, TextureAtlasSprite textureAtlasSprite) {
-		this.blitSprite(textureAtlasSprite, i, j, k, l, m);
-	}
-
-	public void blit(int i, int j, int k, int l, int m, TextureAtlasSprite textureAtlasSprite, float f, float g, float h, float n) {
-		this.innerBlit(
-			textureAtlasSprite.atlasLocation(),
-			i,
-			i + l,
-			j,
-			j + m,
-			k,
-			textureAtlasSprite.getU0(),
-			textureAtlasSprite.getU1(),
-			textureAtlasSprite.getV0(),
-			textureAtlasSprite.getV1(),
-			f,
-			g,
-			h,
-			n
-		);
 	}
 
 	public void renderOutline(int i, int j, int k, int l, int m) {
@@ -345,181 +277,241 @@ public class GuiGraphics {
 		this.fill(i + k - 1, j + 1, i + k, j + l - 1, m);
 	}
 
-	public void blitSprite(ResourceLocation resourceLocation, int i, int j, int k, int l) {
-		this.blitSprite(resourceLocation, i, j, 0, k, l);
+	public void blitSprite(Function<ResourceLocation, RenderType> function, ResourceLocation resourceLocation, int i, int j, int k, int l) {
+		this.blitSprite(function, resourceLocation, i, j, k, l, -1);
 	}
 
-	public void blitSprite(ResourceLocation resourceLocation, int i, int j, int k, int l, int m) {
+	public void blitSprite(Function<ResourceLocation, RenderType> function, ResourceLocation resourceLocation, int i, int j, int k, int l, int m) {
 		TextureAtlasSprite textureAtlasSprite = this.sprites.getSprite(resourceLocation);
 		GuiSpriteScaling guiSpriteScaling = this.sprites.getSpriteScaling(textureAtlasSprite);
 		if (guiSpriteScaling instanceof GuiSpriteScaling.Stretch) {
-			this.blitSprite(textureAtlasSprite, i, j, k, l, m);
+			this.blitSprite(function, textureAtlasSprite, i, j, k, l, m);
 		} else if (guiSpriteScaling instanceof GuiSpriteScaling.Tile tile) {
-			this.blitTiledSprite(textureAtlasSprite, i, j, k, l, m, 0, 0, tile.width(), tile.height(), tile.width(), tile.height());
+			this.blitTiledSprite(function, textureAtlasSprite, i, j, k, l, 0, 0, tile.width(), tile.height(), tile.width(), tile.height(), m);
 		} else if (guiSpriteScaling instanceof GuiSpriteScaling.NineSlice nineSlice) {
-			this.blitNineSlicedSprite(textureAtlasSprite, nineSlice, i, j, k, l, m);
+			this.blitNineSlicedSprite(function, textureAtlasSprite, nineSlice, i, j, k, l, m);
 		}
 	}
 
-	public void blitSprite(ResourceLocation resourceLocation, int i, int j, int k, int l, int m, int n, int o, int p) {
-		this.blitSprite(resourceLocation, i, j, k, l, m, n, 0, o, p);
-	}
-
-	public void blitSprite(ResourceLocation resourceLocation, int i, int j, int k, int l, int m, int n, int o, int p, int q) {
+	public void blitSprite(
+		Function<ResourceLocation, RenderType> function, ResourceLocation resourceLocation, int i, int j, int k, int l, int m, int n, int o, int p
+	) {
 		TextureAtlasSprite textureAtlasSprite = this.sprites.getSprite(resourceLocation);
 		GuiSpriteScaling guiSpriteScaling = this.sprites.getSpriteScaling(textureAtlasSprite);
 		if (guiSpriteScaling instanceof GuiSpriteScaling.Stretch) {
-			this.blitSprite(textureAtlasSprite, i, j, k, l, m, n, o, p, q);
+			this.blitSprite(function, textureAtlasSprite, i, j, k, l, m, n, o, p, -1);
 		} else {
-			this.blitSprite(textureAtlasSprite, m, n, o, p, q);
+			this.blitSprite(function, textureAtlasSprite, m, n, o, p);
 		}
 	}
 
-	private void blitSprite(TextureAtlasSprite textureAtlasSprite, int i, int j, int k, int l, int m, int n, int o, int p, int q) {
-		if (p != 0 && q != 0) {
-			this.innerBlit(
-				textureAtlasSprite.atlasLocation(),
-				m,
-				m + p,
-				n,
-				n + q,
-				o,
-				textureAtlasSprite.getU((float)k / (float)i),
-				textureAtlasSprite.getU((float)(k + p) / (float)i),
-				textureAtlasSprite.getV((float)l / (float)j),
-				textureAtlasSprite.getV((float)(l + q) / (float)j)
-			);
-		}
+	public void blitSprite(Function<ResourceLocation, RenderType> function, TextureAtlasSprite textureAtlasSprite, int i, int j, int k, int l) {
+		this.blitSprite(function, textureAtlasSprite, i, j, k, l, -1);
 	}
 
-	private void blitSprite(TextureAtlasSprite textureAtlasSprite, int i, int j, int k, int l, int m) {
-		if (l != 0 && m != 0) {
+	public void blitSprite(Function<ResourceLocation, RenderType> function, TextureAtlasSprite textureAtlasSprite, int i, int j, int k, int l, int m) {
+		if (k != 0 && l != 0) {
 			this.innerBlit(
+				function,
 				textureAtlasSprite.atlasLocation(),
 				i,
-				i + l,
+				i + k,
 				j,
-				j + m,
-				k,
+				j + l,
 				textureAtlasSprite.getU0(),
 				textureAtlasSprite.getU1(),
 				textureAtlasSprite.getV0(),
-				textureAtlasSprite.getV1()
+				textureAtlasSprite.getV1(),
+				m
 			);
 		}
 	}
 
-	public void blit(ResourceLocation resourceLocation, int i, int j, int k, int l, int m, int n) {
-		this.blit(resourceLocation, i, j, 0, (float)k, (float)l, m, n, 256, 256);
+	private void blitSprite(
+		Function<ResourceLocation, RenderType> function, TextureAtlasSprite textureAtlasSprite, int i, int j, int k, int l, int m, int n, int o, int p, int q
+	) {
+		if (o != 0 && p != 0) {
+			this.innerBlit(
+				function,
+				textureAtlasSprite.atlasLocation(),
+				m,
+				m + o,
+				n,
+				n + p,
+				textureAtlasSprite.getU((float)k / (float)i),
+				textureAtlasSprite.getU((float)(k + o) / (float)i),
+				textureAtlasSprite.getV((float)l / (float)j),
+				textureAtlasSprite.getV((float)(l + p) / (float)j),
+				q
+			);
+		}
 	}
 
-	public void blit(ResourceLocation resourceLocation, int i, int j, int k, float f, float g, int l, int m, int n, int o) {
-		this.blit(resourceLocation, i, i + l, j, j + m, k, l, m, f, g, n, o);
-	}
-
-	public void blit(ResourceLocation resourceLocation, int i, int j, int k, int l, float f, float g, int m, int n, int o, int p) {
-		this.blit(resourceLocation, i, i + k, j, j + l, 0, m, n, f, g, o, p);
-	}
-
-	public void blit(ResourceLocation resourceLocation, int i, int j, float f, float g, int k, int l, int m, int n) {
-		this.blit(resourceLocation, i, j, k, l, f, g, k, l, m, n);
-	}
-
-	void blit(ResourceLocation resourceLocation, int i, int j, int k, int l, int m, int n, int o, float f, float g, int p, int q) {
-		this.innerBlit(resourceLocation, i, j, k, l, m, (f + 0.0F) / (float)p, (f + (float)n) / (float)p, (g + 0.0F) / (float)q, (g + (float)o) / (float)q);
-	}
-
-	void innerBlit(ResourceLocation resourceLocation, int i, int j, int k, int l, int m, float f, float g, float h, float n) {
-		RenderSystem.setShaderTexture(0, resourceLocation);
-		RenderSystem.setShader(GameRenderer::getPositionTexShader);
-		Matrix4f matrix4f = this.pose.last().pose();
-		BufferBuilder bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-		bufferBuilder.addVertex(matrix4f, (float)i, (float)k, (float)m).setUv(f, h);
-		bufferBuilder.addVertex(matrix4f, (float)i, (float)l, (float)m).setUv(f, n);
-		bufferBuilder.addVertex(matrix4f, (float)j, (float)l, (float)m).setUv(g, n);
-		bufferBuilder.addVertex(matrix4f, (float)j, (float)k, (float)m).setUv(g, h);
-		BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
-	}
-
-	void innerBlit(ResourceLocation resourceLocation, int i, int j, int k, int l, int m, float f, float g, float h, float n, float o, float p, float q, float r) {
-		RenderSystem.setShaderTexture(0, resourceLocation);
-		RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
-		RenderSystem.enableBlend();
-		Matrix4f matrix4f = this.pose.last().pose();
-		BufferBuilder bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-		bufferBuilder.addVertex(matrix4f, (float)i, (float)k, (float)m).setUv(f, h).setColor(o, p, q, r);
-		bufferBuilder.addVertex(matrix4f, (float)i, (float)l, (float)m).setUv(f, n).setColor(o, p, q, r);
-		bufferBuilder.addVertex(matrix4f, (float)j, (float)l, (float)m).setUv(g, n).setColor(o, p, q, r);
-		bufferBuilder.addVertex(matrix4f, (float)j, (float)k, (float)m).setUv(g, h).setColor(o, p, q, r);
-		BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
-		RenderSystem.disableBlend();
-	}
-
-	private void blitNineSlicedSprite(TextureAtlasSprite textureAtlasSprite, GuiSpriteScaling.NineSlice nineSlice, int i, int j, int k, int l, int m) {
+	private void blitNineSlicedSprite(
+		Function<ResourceLocation, RenderType> function,
+		TextureAtlasSprite textureAtlasSprite,
+		GuiSpriteScaling.NineSlice nineSlice,
+		int i,
+		int j,
+		int k,
+		int l,
+		int m
+	) {
 		GuiSpriteScaling.NineSlice.Border border = nineSlice.border();
-		int n = Math.min(border.left(), l / 2);
-		int o = Math.min(border.right(), l / 2);
-		int p = Math.min(border.top(), m / 2);
-		int q = Math.min(border.bottom(), m / 2);
-		if (l == nineSlice.width() && m == nineSlice.height()) {
-			this.blitSprite(textureAtlasSprite, nineSlice.width(), nineSlice.height(), 0, 0, i, j, k, l, m);
-		} else if (m == nineSlice.height()) {
-			this.blitSprite(textureAtlasSprite, nineSlice.width(), nineSlice.height(), 0, 0, i, j, k, n, m);
+		int n = Math.min(border.left(), k / 2);
+		int o = Math.min(border.right(), k / 2);
+		int p = Math.min(border.top(), l / 2);
+		int q = Math.min(border.bottom(), l / 2);
+		if (k == nineSlice.width() && l == nineSlice.height()) {
+			this.blitSprite(function, textureAtlasSprite, nineSlice.width(), nineSlice.height(), 0, 0, i, j, k, l, m);
+		} else if (l == nineSlice.height()) {
+			this.blitSprite(function, textureAtlasSprite, nineSlice.width(), nineSlice.height(), 0, 0, i, j, n, l, m);
 			this.blitTiledSprite(
-				textureAtlasSprite, i + n, j, k, l - o - n, m, n, 0, nineSlice.width() - o - n, nineSlice.height(), nineSlice.width(), nineSlice.height()
+				function, textureAtlasSprite, i + n, j, k - o - n, l, n, 0, nineSlice.width() - o - n, nineSlice.height(), nineSlice.width(), nineSlice.height(), m
 			);
-			this.blitSprite(textureAtlasSprite, nineSlice.width(), nineSlice.height(), nineSlice.width() - o, 0, i + l - o, j, k, o, m);
-		} else if (l == nineSlice.width()) {
-			this.blitSprite(textureAtlasSprite, nineSlice.width(), nineSlice.height(), 0, 0, i, j, k, l, p);
+			this.blitSprite(function, textureAtlasSprite, nineSlice.width(), nineSlice.height(), nineSlice.width() - o, 0, i + k - o, j, o, l, m);
+		} else if (k == nineSlice.width()) {
+			this.blitSprite(function, textureAtlasSprite, nineSlice.width(), nineSlice.height(), 0, 0, i, j, k, p, m);
 			this.blitTiledSprite(
-				textureAtlasSprite, i, j + p, k, l, m - q - p, 0, p, nineSlice.width(), nineSlice.height() - q - p, nineSlice.width(), nineSlice.height()
+				function, textureAtlasSprite, i, j + p, k, l - q - p, 0, p, nineSlice.width(), nineSlice.height() - q - p, nineSlice.width(), nineSlice.height(), m
 			);
-			this.blitSprite(textureAtlasSprite, nineSlice.width(), nineSlice.height(), 0, nineSlice.height() - q, i, j + m - q, k, l, q);
+			this.blitSprite(function, textureAtlasSprite, nineSlice.width(), nineSlice.height(), 0, nineSlice.height() - q, i, j + l - q, k, q, m);
 		} else {
-			this.blitSprite(textureAtlasSprite, nineSlice.width(), nineSlice.height(), 0, 0, i, j, k, n, p);
-			this.blitTiledSprite(textureAtlasSprite, i + n, j, k, l - o - n, p, n, 0, nineSlice.width() - o - n, p, nineSlice.width(), nineSlice.height());
-			this.blitSprite(textureAtlasSprite, nineSlice.width(), nineSlice.height(), nineSlice.width() - o, 0, i + l - o, j, k, o, p);
-			this.blitSprite(textureAtlasSprite, nineSlice.width(), nineSlice.height(), 0, nineSlice.height() - q, i, j + m - q, k, n, q);
+			this.blitSprite(function, textureAtlasSprite, nineSlice.width(), nineSlice.height(), 0, 0, i, j, n, p, m);
+			this.blitTiledSprite(function, textureAtlasSprite, i + n, j, k - o - n, p, n, 0, nineSlice.width() - o - n, p, nineSlice.width(), nineSlice.height(), m);
+			this.blitSprite(function, textureAtlasSprite, nineSlice.width(), nineSlice.height(), nineSlice.width() - o, 0, i + k - o, j, o, p, m);
+			this.blitSprite(function, textureAtlasSprite, nineSlice.width(), nineSlice.height(), 0, nineSlice.height() - q, i, j + l - q, n, q, m);
 			this.blitTiledSprite(
-				textureAtlasSprite, i + n, j + m - q, k, l - o - n, q, n, nineSlice.height() - q, nineSlice.width() - o - n, q, nineSlice.width(), nineSlice.height()
+				function,
+				textureAtlasSprite,
+				i + n,
+				j + l - q,
+				k - o - n,
+				q,
+				n,
+				nineSlice.height() - q,
+				nineSlice.width() - o - n,
+				q,
+				nineSlice.width(),
+				nineSlice.height(),
+				m
 			);
-			this.blitSprite(textureAtlasSprite, nineSlice.width(), nineSlice.height(), nineSlice.width() - o, nineSlice.height() - q, i + l - o, j + m - q, k, o, q);
-			this.blitTiledSprite(textureAtlasSprite, i, j + p, k, n, m - q - p, 0, p, n, nineSlice.height() - q - p, nineSlice.width(), nineSlice.height());
+			this.blitSprite(
+				function, textureAtlasSprite, nineSlice.width(), nineSlice.height(), nineSlice.width() - o, nineSlice.height() - q, i + k - o, j + l - q, o, q, m
+			);
+			this.blitTiledSprite(function, textureAtlasSprite, i, j + p, n, l - q - p, 0, p, n, nineSlice.height() - q - p, nineSlice.width(), nineSlice.height(), m);
 			this.blitTiledSprite(
+				function,
 				textureAtlasSprite,
 				i + n,
 				j + p,
-				k,
-				l - o - n,
-				m - q - p,
+				k - o - n,
+				l - q - p,
 				n,
 				p,
 				nineSlice.width() - o - n,
 				nineSlice.height() - q - p,
 				nineSlice.width(),
-				nineSlice.height()
+				nineSlice.height(),
+				m
 			);
 			this.blitTiledSprite(
-				textureAtlasSprite, i + l - o, j + p, k, n, m - q - p, nineSlice.width() - o, p, o, nineSlice.height() - q - p, nineSlice.width(), nineSlice.height()
+				function,
+				textureAtlasSprite,
+				i + k - o,
+				j + p,
+				n,
+				l - q - p,
+				nineSlice.width() - o,
+				p,
+				o,
+				nineSlice.height() - q - p,
+				nineSlice.width(),
+				nineSlice.height(),
+				m
 			);
 		}
 	}
 
-	private void blitTiledSprite(TextureAtlasSprite textureAtlasSprite, int i, int j, int k, int l, int m, int n, int o, int p, int q, int r, int s) {
-		if (l > 0 && m > 0) {
-			if (p > 0 && q > 0) {
-				for (int t = 0; t < l; t += p) {
-					int u = Math.min(p, l - t);
+	private void blitTiledSprite(
+		Function<ResourceLocation, RenderType> function,
+		TextureAtlasSprite textureAtlasSprite,
+		int i,
+		int j,
+		int k,
+		int l,
+		int m,
+		int n,
+		int o,
+		int p,
+		int q,
+		int r,
+		int s
+	) {
+		if (k > 0 && l > 0) {
+			if (o > 0 && p > 0) {
+				for (int t = 0; t < k; t += o) {
+					int u = Math.min(o, k - t);
 
-					for (int v = 0; v < m; v += q) {
-						int w = Math.min(q, m - v);
-						this.blitSprite(textureAtlasSprite, r, s, n, o, i + t, j + v, k, u, w);
+					for (int v = 0; v < l; v += p) {
+						int w = Math.min(p, l - v);
+						this.blitSprite(function, textureAtlasSprite, q, r, m, n, i + t, j + v, u, w, s);
 					}
 				}
 			} else {
-				throw new IllegalArgumentException("Tiled sprite texture size must be positive, got " + p + "x" + q);
+				throw new IllegalArgumentException("Tiled sprite texture size must be positive, got " + o + "x" + p);
 			}
 		}
+	}
+
+	public void blit(
+		Function<ResourceLocation, RenderType> function, ResourceLocation resourceLocation, int i, int j, float f, float g, int k, int l, int m, int n, int o
+	) {
+		this.blit(function, resourceLocation, i, j, f, g, k, l, k, l, m, n, o);
+	}
+
+	public void blit(
+		Function<ResourceLocation, RenderType> function, ResourceLocation resourceLocation, int i, int j, float f, float g, int k, int l, int m, int n
+	) {
+		this.blit(function, resourceLocation, i, j, f, g, k, l, k, l, m, n);
+	}
+
+	public void blit(
+		Function<ResourceLocation, RenderType> function, ResourceLocation resourceLocation, int i, int j, float f, float g, int k, int l, int m, int n, int o, int p
+	) {
+		this.blit(function, resourceLocation, i, j, f, g, k, l, m, n, o, p, -1);
+	}
+
+	public void blit(
+		Function<ResourceLocation, RenderType> function,
+		ResourceLocation resourceLocation,
+		int i,
+		int j,
+		float f,
+		float g,
+		int k,
+		int l,
+		int m,
+		int n,
+		int o,
+		int p,
+		int q
+	) {
+		this.innerBlit(
+			function, resourceLocation, i, i + k, j, j + l, (f + 0.0F) / (float)o, (f + (float)m) / (float)o, (g + 0.0F) / (float)p, (g + (float)n) / (float)p, q
+		);
+	}
+
+	private void innerBlit(
+		Function<ResourceLocation, RenderType> function, ResourceLocation resourceLocation, int i, int j, int k, int l, float f, float g, float h, float m, int n
+	) {
+		RenderType renderType = (RenderType)function.apply(resourceLocation);
+		Matrix4f matrix4f = this.pose.last().pose();
+		VertexConsumer vertexConsumer = this.bufferSource.getBuffer(renderType);
+		vertexConsumer.addVertex(matrix4f, (float)i, (float)k, 0.0F).setUv(f, h).setColor(n);
+		vertexConsumer.addVertex(matrix4f, (float)i, (float)l, 0.0F).setUv(f, m).setColor(n);
+		vertexConsumer.addVertex(matrix4f, (float)j, (float)l, 0.0F).setUv(g, m).setColor(n);
+		vertexConsumer.addVertex(matrix4f, (float)j, (float)k, 0.0F).setUv(g, h).setColor(n);
 	}
 
 	public void renderItem(ItemStack itemStack, int i, int j) {
@@ -560,6 +552,7 @@ public class GuiGraphics {
 				this.pose.scale(16.0F, -16.0F, 16.0F);
 				boolean bl = !bakedModel.usesBlockLight();
 				if (bl) {
+					this.flush();
 					Lighting.setupForFlatItems();
 				}
 
@@ -602,13 +595,13 @@ public class GuiGraphics {
 				int m = i + 2;
 				int n = j + 13;
 				this.fill(RenderType.guiOverlay(), m, n, m + 13, n + 2, -16777216);
-				this.fill(RenderType.guiOverlay(), m, n, m + k, n + 1, l | 0xFF000000);
+				this.fill(RenderType.guiOverlay(), m, n, m + k, n + 1, ARGB.opaque(l));
 			}
 
 			LocalPlayer localPlayer = this.minecraft.player;
 			float f = localPlayer == null
 				? 0.0F
-				: localPlayer.getCooldowns().getCooldownPercent(itemStack.getItem(), this.minecraft.getTimer().getGameTimeDeltaPartialTick(true));
+				: localPlayer.getCooldowns().getCooldownPercent(itemStack.getItem(), this.minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(true));
 			if (f > 0.0F) {
 				int m = j + Mth.floor(16.0F * (1.0F - f));
 				int n = m + Mth.ceil(16.0F * f);
@@ -663,24 +656,22 @@ public class GuiGraphics {
 					k = m;
 				}
 
-				l += clientTooltipComponent.getHeight();
+				l += clientTooltipComponent.getHeight(font);
 			}
 
-			int n = k;
-			int o = l;
-			Vector2ic vector2ic = clientTooltipPositioner.positionTooltip(this.guiWidth(), this.guiHeight(), i, j, n, o);
+			Vector2ic vector2ic = clientTooltipPositioner.positionTooltip(this.guiWidth(), this.guiHeight(), i, j, k, l);
 			int p = vector2ic.x();
 			int q = vector2ic.y();
 			this.pose.pushPose();
 			int r = 400;
-			this.drawManaged(() -> TooltipRenderUtil.renderTooltipBackground(this, p, q, n, o, 400));
+			TooltipRenderUtil.renderTooltipBackground(this, p, q, k, l, 400);
 			this.pose.translate(0.0F, 0.0F, 400.0F);
 			int s = q;
 
 			for (int t = 0; t < list.size(); t++) {
 				ClientTooltipComponent clientTooltipComponent2 = (ClientTooltipComponent)list.get(t);
 				clientTooltipComponent2.renderText(font, p, s, this.pose.last().pose(), this.bufferSource);
-				s += clientTooltipComponent2.getHeight() + (t == 0 ? 2 : 0);
+				s += clientTooltipComponent2.getHeight(font) + (t == 0 ? 2 : 0);
 			}
 
 			s = q;
@@ -688,7 +679,7 @@ public class GuiGraphics {
 			for (int t = 0; t < list.size(); t++) {
 				ClientTooltipComponent clientTooltipComponent2 = (ClientTooltipComponent)list.get(t);
 				clientTooltipComponent2.renderImage(font, p, s, this);
-				s += clientTooltipComponent2.getHeight() + (t == 0 ? 2 : 0);
+				s += clientTooltipComponent2.getHeight(font) + (t == 0 ? 2 : 0);
 			}
 
 			this.pose.popPose();

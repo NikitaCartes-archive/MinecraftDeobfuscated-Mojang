@@ -7,14 +7,6 @@ import java.util.concurrent.CompletableFuture;
 public interface TextFilter {
 	TextFilter DUMMY = new TextFilter() {
 		@Override
-		public void join() {
-		}
-
-		@Override
-		public void leave() {
-		}
-
-		@Override
 		public CompletableFuture<FilteredText> processStreamMessage(String string) {
 			return CompletableFuture.completedFuture(FilteredText.passThrough(string));
 		}
@@ -25,9 +17,11 @@ public interface TextFilter {
 		}
 	};
 
-	void join();
+	default void join() {
+	}
 
-	void leave();
+	default void leave() {
+	}
 
 	CompletableFuture<FilteredText> processStreamMessage(String string);
 

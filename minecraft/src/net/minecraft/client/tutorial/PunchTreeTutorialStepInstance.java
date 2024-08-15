@@ -1,5 +1,6 @@
 package net.minecraft.client.tutorial;
 
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.components.toasts.TutorialToast;
@@ -18,6 +19,7 @@ public class PunchTreeTutorialStepInstance implements TutorialStepInstance {
 	private static final Component TITLE = Component.translatable("tutorial.punch_tree.title");
 	private static final Component DESCRIPTION = Component.translatable("tutorial.punch_tree.description", Tutorial.key("attack"));
 	private final Tutorial tutorial;
+	@Nullable
 	private TutorialToast toast;
 	private int timeWaiting;
 	private int resetCount;
@@ -49,7 +51,7 @@ public class PunchTreeTutorialStepInstance implements TutorialStepInstance {
 
 			if ((this.timeWaiting >= 600 || this.resetCount > 3) && this.toast == null) {
 				this.toast = new TutorialToast(TutorialToast.Icons.TREE, TITLE, DESCRIPTION, true);
-				this.tutorial.getMinecraft().getToasts().addToast(this.toast);
+				this.tutorial.getMinecraft().getToastManager().addToast(this.toast);
 			}
 		}
 	}

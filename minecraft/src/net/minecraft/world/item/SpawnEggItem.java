@@ -15,12 +15,11 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.item.component.CustomData;
@@ -53,7 +52,7 @@ public class SpawnEggItem extends Item {
 	@Override
 	public InteractionResult useOn(UseOnContext useOnContext) {
 		Level level = useOnContext.getLevel();
-		if (!(level instanceof ServerLevel)) {
+		if (level.isClientSide) {
 			return InteractionResult.SUCCESS;
 		} else {
 			ItemStack itemStack = useOnContext.getItemInHand();
@@ -66,7 +65,7 @@ public class SpawnEggItem extends Item {
 				level.sendBlockUpdated(blockPos, blockState, blockState, 3);
 				level.gameEvent(useOnContext.getPlayer(), GameEvent.BLOCK_CHANGE, blockPos);
 				itemStack.shrink(1);
-				return InteractionResult.CONSUME;
+				return InteractionResult.SUCCESS;
 			} else {
 				BlockPos blockPos2;
 				if (blockState.getCollisionShape(level, blockPos).isEmpty()) {
@@ -81,7 +80,7 @@ public class SpawnEggItem extends Item {
 						itemStack,
 						useOnContext.getPlayer(),
 						blockPos2,
-						MobSpawnType.SPAWN_EGG,
+						EntitySpawnReason.SPAWN_EGG,
 						true,
 						!Objects.equals(blockPos, blockPos2) && direction == Direction.UP
 					)
@@ -90,36 +89,36 @@ public class SpawnEggItem extends Item {
 					level.gameEvent(useOnContext.getPlayer(), GameEvent.ENTITY_PLACE, blockPos);
 				}
 
-				return InteractionResult.CONSUME;
+				return InteractionResult.SUCCESS;
 			}
 		}
 	}
 
 	@Override
-	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand) {
+	public InteractionResult use(Level level, Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
 		BlockHitResult blockHitResult = getPlayerPOVHitResult(level, player, ClipContext.Fluid.SOURCE_ONLY);
 		if (blockHitResult.getType() != HitResult.Type.BLOCK) {
-			return InteractionResultHolder.pass(itemStack);
-		} else if (!(level instanceof ServerLevel)) {
-			return InteractionResultHolder.success(itemStack);
+			return InteractionResult.PASS;
+		} else if (level.isClientSide) {
+			return InteractionResult.SUCCESS;
 		} else {
 			BlockPos blockPos = blockHitResult.getBlockPos();
 			if (!(level.getBlockState(blockPos).getBlock() instanceof LiquidBlock)) {
-				return InteractionResultHolder.pass(itemStack);
+				return InteractionResult.PASS;
 			} else if (level.mayInteract(player, blockPos) && player.mayUseItemAt(blockPos, blockHitResult.getDirection(), itemStack)) {
 				EntityType<?> entityType = this.getType(itemStack);
-				Entity entity = entityType.spawn((ServerLevel)level, itemStack, player, blockPos, MobSpawnType.SPAWN_EGG, false, false);
+				Entity entity = entityType.spawn((ServerLevel)level, itemStack, player, blockPos, EntitySpawnReason.SPAWN_EGG, false, false);
 				if (entity == null) {
-					return InteractionResultHolder.pass(itemStack);
+					return InteractionResult.PASS;
 				} else {
 					itemStack.consume(1, player);
 					player.awardStat(Stats.ITEM_USED.get(this));
 					level.gameEvent(player, GameEvent.ENTITY_PLACE, entity.position());
-					return InteractionResultHolder.consume(itemStack);
+					return InteractionResult.SUCCESS;
 				}
 			} else {
-				return InteractionResultHolder.fail(itemStack);
+				return InteractionResult.FAIL;
 			}
 		}
 	}
@@ -161,7 +160,7 @@ public class SpawnEggItem extends Item {
 			if (mob instanceof AgeableMob) {
 				mob2 = ((AgeableMob)mob).getBreedOffspring(serverLevel, (AgeableMob)mob);
 			} else {
-				mob2 = entityType.create(serverLevel);
+				mob2 = entityType.create(serverLevel, EntitySpawnReason.SPAWN_EGG);
 			}
 
 			if (mob2 == null) {

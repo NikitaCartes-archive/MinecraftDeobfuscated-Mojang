@@ -1,7 +1,8 @@
 package net.minecraft.client.resources.model;
 
-import com.google.common.collect.Lists;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Nullable;
@@ -89,10 +90,11 @@ public class SimpleBakedModel implements BakedModel {
 
 	@Environment(EnvType.CLIENT)
 	public static class Builder {
-		private final List<BakedQuad> unculledFaces = Lists.<BakedQuad>newArrayList();
-		private final Map<Direction, List<BakedQuad>> culledFaces = Maps.newEnumMap(Direction.class);
+		private final ImmutableList.Builder<BakedQuad> unculledFaces = ImmutableList.builder();
+		private final EnumMap<Direction, ImmutableList.Builder<BakedQuad>> culledFaces = Maps.newEnumMap(Direction.class);
 		private final ItemOverrides overrides;
 		private final boolean hasAmbientOcclusion;
+		@Nullable
 		private TextureAtlasSprite particleIcon;
 		private final boolean usesBlockLight;
 		private final boolean isGui3d;
@@ -103,19 +105,19 @@ public class SimpleBakedModel implements BakedModel {
 		}
 
 		private Builder(boolean bl, boolean bl2, boolean bl3, ItemTransforms itemTransforms, ItemOverrides itemOverrides) {
-			for (Direction direction : Direction.values()) {
-				this.culledFaces.put(direction, Lists.newArrayList());
-			}
-
 			this.overrides = itemOverrides;
 			this.hasAmbientOcclusion = bl;
 			this.usesBlockLight = bl2;
 			this.isGui3d = bl3;
 			this.transforms = itemTransforms;
+
+			for (Direction direction : Direction.values()) {
+				this.culledFaces.put(direction, ImmutableList.builder());
+			}
 		}
 
 		public SimpleBakedModel.Builder addCulledFace(Direction direction, BakedQuad bakedQuad) {
-			((List)this.culledFaces.get(direction)).add(bakedQuad);
+			((ImmutableList.Builder)this.culledFaces.get(direction)).add(bakedQuad);
 			return this;
 		}
 
@@ -137,8 +139,16 @@ public class SimpleBakedModel implements BakedModel {
 			if (this.particleIcon == null) {
 				throw new RuntimeException("Missing particle!");
 			} else {
+				Map<Direction, List<BakedQuad>> map = Maps.transformValues(this.culledFaces, ImmutableList.Builder::build);
 				return new SimpleBakedModel(
-					this.unculledFaces, this.culledFaces, this.hasAmbientOcclusion, this.usesBlockLight, this.isGui3d, this.particleIcon, this.transforms, this.overrides
+					this.unculledFaces.build(),
+					new EnumMap(map),
+					this.hasAmbientOcclusion,
+					this.usesBlockLight,
+					this.isGui3d,
+					this.particleIcon,
+					this.transforms,
+					this.overrides
 				);
 			}
 		}

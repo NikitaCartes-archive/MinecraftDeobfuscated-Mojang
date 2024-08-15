@@ -96,17 +96,17 @@ public class StructureUtils {
 		StructureBlockEntity structureBlockEntity = (StructureBlockEntity)serverLevel.getBlockEntity(blockPos);
 		structureBlockEntity.setIgnoreEntities(false);
 		structureBlockEntity.setStructureName(ResourceLocation.parse(string));
+		structureBlockEntity.setMetaData(string);
 		structureBlockEntity.setStructureSize(vec3i);
 		structureBlockEntity.setMode(StructureMode.SAVE);
 		structureBlockEntity.setShowBoundingBox(true);
 	}
 
-	public static StructureBlockEntity prepareTestStructure(GameTestInfo gameTestInfo, BlockPos blockPos, Rotation rotation, ServerLevel serverLevel) {
+	public static BlockPos getStartCorner(GameTestInfo gameTestInfo, BlockPos blockPos, Rotation rotation, ServerLevel serverLevel) {
 		Vec3i vec3i = ((StructureTemplate)serverLevel.getStructureManager()
 				.get(ResourceLocation.parse(gameTestInfo.getStructureName()))
 				.orElseThrow(() -> new IllegalStateException("Missing test structure: " + gameTestInfo.getStructureName())))
 			.getSize();
-		BoundingBox boundingBox = getStructureBoundingBox(blockPos, vec3i, rotation);
 		BlockPos blockPos2;
 		if (rotation == Rotation.NONE) {
 			blockPos2 = blockPos;
@@ -122,6 +122,16 @@ public class StructureUtils {
 			blockPos2 = blockPos.offset(0, 0, vec3i.getX() - 1);
 		}
 
+		return blockPos2;
+	}
+
+	public static StructureBlockEntity prepareTestStructure(GameTestInfo gameTestInfo, BlockPos blockPos, Rotation rotation, ServerLevel serverLevel) {
+		Vec3i vec3i = ((StructureTemplate)serverLevel.getStructureManager()
+				.get(ResourceLocation.parse(gameTestInfo.getStructureName()))
+				.orElseThrow(() -> new IllegalStateException("Missing test structure: " + gameTestInfo.getStructureName())))
+			.getSize();
+		BoundingBox boundingBox = getStructureBoundingBox(blockPos, vec3i, rotation);
+		BlockPos blockPos2 = getStartCorner(gameTestInfo, blockPos, rotation, serverLevel);
 		forceLoadChunks(boundingBox, serverLevel);
 		clearSpaceForStructure(boundingBox, serverLevel);
 		return createStructureBlock(gameTestInfo, blockPos2.below(), rotation, serverLevel);

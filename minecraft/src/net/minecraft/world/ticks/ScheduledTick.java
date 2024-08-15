@@ -51,4 +51,8 @@ public record ScheduledTick<T>(T type, BlockPos pos, long triggerTick, TickPrior
 	public static <T> ScheduledTick<T> probe(T object, BlockPos blockPos) {
 		return new ScheduledTick<>(object, blockPos, 0L, TickPriority.NORMAL, 0L);
 	}
+
+	public SavedTick<T> toSavedTick(long l) {
+		return new SavedTick<>(this.type, this.pos, (int)(this.triggerTick - l), this.priority);
+	}
 }

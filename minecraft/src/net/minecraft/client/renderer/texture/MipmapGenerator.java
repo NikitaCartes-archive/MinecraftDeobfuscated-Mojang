@@ -4,6 +4,7 @@ import com.mojang.blaze3d.platform.NativeImage;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
+import net.minecraft.util.ARGB;
 
 @Environment(EnvType.CLIENT)
 public class MipmapGenerator {
@@ -36,14 +37,14 @@ public class MipmapGenerator {
 
 					for (int m = 0; m < k; m++) {
 						for (int n = 0; n < l; n++) {
-							nativeImage2.setPixelRGBA(
+							nativeImage2.setPixel(
 								m,
 								n,
 								alphaBlend(
-									nativeImage.getPixelRGBA(m * 2 + 0, n * 2 + 0),
-									nativeImage.getPixelRGBA(m * 2 + 1, n * 2 + 0),
-									nativeImage.getPixelRGBA(m * 2 + 0, n * 2 + 1),
-									nativeImage.getPixelRGBA(m * 2 + 1, n * 2 + 1),
+									nativeImage.getPixel(m * 2 + 0, n * 2 + 0),
+									nativeImage.getPixel(m * 2 + 1, n * 2 + 0),
+									nativeImage.getPixel(m * 2 + 0, n * 2 + 1),
+									nativeImage.getPixel(m * 2 + 1, n * 2 + 1),
 									bl
 								)
 							);
@@ -61,7 +62,7 @@ public class MipmapGenerator {
 	private static boolean hasTransparentPixel(NativeImage nativeImage) {
 		for (int i = 0; i < nativeImage.getWidth(); i++) {
 			for (int j = 0; j < nativeImage.getHeight(); j++) {
-				if (nativeImage.getPixelRGBA(i, j) >> 24 == 0) {
+				if (ARGB.alpha(nativeImage.getPixel(i, j)) == 0) {
 					return true;
 				}
 			}
@@ -116,13 +117,13 @@ public class MipmapGenerator {
 				n = 0;
 			}
 
-			return n << 24 | o << 16 | p << 8 | q;
+			return ARGB.color(n, o, p, q);
 		} else {
 			int r = gammaBlend(i, j, k, l, 24);
 			int s = gammaBlend(i, j, k, l, 16);
 			int t = gammaBlend(i, j, k, l, 8);
 			int u = gammaBlend(i, j, k, l, 0);
-			return r << 24 | s << 16 | t << 8 | u;
+			return ARGB.color(r, s, t, u);
 		}
 	}
 

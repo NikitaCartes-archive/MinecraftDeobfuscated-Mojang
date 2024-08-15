@@ -221,9 +221,10 @@ public class ShulkerBullet extends Projectile {
 			if (hitResult.getType() != HitResult.Type.MISS) {
 				this.hitTargetOrDeflectSelf(hitResult);
 			}
+
+			this.applyEffectsFromBlocks();
 		}
 
-		this.checkInsideBlocks();
 		Vec3 vec3 = this.getDeltaMovement();
 		this.setPos(this.getX() + vec3.x, this.getY() + vec3.y, this.getZ() + vec3.z);
 		ProjectileUtil.rotateTowardsMovement(this, 0.5F);

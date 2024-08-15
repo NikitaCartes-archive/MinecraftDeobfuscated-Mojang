@@ -2,24 +2,28 @@ package net.minecraft.client.renderer.debug;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import java.util.List;
 import java.util.Optional;
-import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.ShapeRenderer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 @Environment(EnvType.CLIENT)
 public class DebugRenderer {
@@ -29,7 +33,8 @@ public class DebugRenderer {
 	public final DebugRenderer.SimpleDebugRenderer heightMapRenderer;
 	public final DebugRenderer.SimpleDebugRenderer collisionBoxRenderer;
 	public final DebugRenderer.SimpleDebugRenderer supportBlockRenderer;
-	public final DebugRenderer.SimpleDebugRenderer neighborsUpdateRenderer;
+	public final NeighborsUpdateRenderer neighborsUpdateRenderer;
+	public final RedstoneWireOrientationsRenderer redstoneWireOrientationsRenderer;
 	public final StructureRenderer structureRenderer;
 	public final DebugRenderer.SimpleDebugRenderer lightDebugRenderer;
 	public final DebugRenderer.SimpleDebugRenderer worldGenAttemptRenderer;
@@ -44,6 +49,7 @@ public class DebugRenderer {
 	public final GameEventListenerRenderer gameEventListenerRenderer;
 	public final LightSectionDebugRenderer skyLightSectionDebugRenderer;
 	public final BreezeDebugRenderer breezeDebugRenderer;
+	public final ChunkCullingDebugRenderer chunkCullingDebugRenderer;
 	private boolean renderChunkborder;
 
 	public DebugRenderer(Minecraft minecraft) {
@@ -53,6 +59,7 @@ public class DebugRenderer {
 		this.collisionBoxRenderer = new CollisionBoxRenderer(minecraft);
 		this.supportBlockRenderer = new SupportBlockRenderer(minecraft);
 		this.neighborsUpdateRenderer = new NeighborsUpdateRenderer(minecraft);
+		this.redstoneWireOrientationsRenderer = new RedstoneWireOrientationsRenderer(minecraft);
 		this.structureRenderer = new StructureRenderer(minecraft);
 		this.lightDebugRenderer = new LightDebugRenderer(minecraft);
 		this.worldGenAttemptRenderer = new WorldGenAttemptRenderer();
@@ -67,6 +74,7 @@ public class DebugRenderer {
 		this.gameEventListenerRenderer = new GameEventListenerRenderer(minecraft);
 		this.skyLightSectionDebugRenderer = new LightSectionDebugRenderer(minecraft, LightLayer.SKY);
 		this.breezeDebugRenderer = new BreezeDebugRenderer(minecraft);
+		this.chunkCullingDebugRenderer = new ChunkCullingDebugRenderer(minecraft);
 	}
 
 	public void clear() {
@@ -91,6 +99,7 @@ public class DebugRenderer {
 		this.gameEventListenerRenderer.clear();
 		this.skyLightSectionDebugRenderer.clear();
 		this.breezeDebugRenderer.clear();
+		this.chunkCullingDebugRenderer.clear();
 	}
 
 	public boolean switchRenderChunkborder() {
@@ -106,6 +115,10 @@ public class DebugRenderer {
 		this.gameTestDebugRenderer.render(poseStack, bufferSource, d, e, f);
 	}
 
+	public void renderAfterTranslucents(PoseStack poseStack, MultiBufferSource.BufferSource bufferSource, double d, double e, double f) {
+		this.chunkCullingDebugRenderer.render(poseStack, bufferSource, d, e, f);
+	}
+
 	public static Optional<Entity> getTargetedEntity(@Nullable Entity entity, int i) {
 		if (entity == null) {
 			return Optional.empty();
@@ -115,8 +128,7 @@ public class DebugRenderer {
 			Vec3 vec33 = vec3.add(vec32);
 			AABB aABB = entity.getBoundingBox().expandTowards(vec32).inflate(1.0);
 			int j = i * i;
-			Predicate<Entity> predicate = entityx -> !entityx.isSpectator() && entityx.isPickable();
-			EntityHitResult entityHitResult = ProjectileUtil.getEntityHitResult(entity, vec3, vec33, aABB, predicate, (double)j);
+			EntityHitResult entityHitResult = ProjectileUtil.getEntityHitResult(entity, vec3, vec33, aABB, EntitySelector.CAN_BE_PICKED, (double)j);
 			if (entityHitResult == null) {
 				return Optional.empty();
 			} else {
@@ -157,7 +169,7 @@ public class DebugRenderer {
 		PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f, double g, double h, double i, float j, float k, float l, float m
 	) {
 		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.debugFilledBox());
-		LevelRenderer.addChainedFilledBoxVertices(poseStack, vertexConsumer, d, e, f, g, h, i, j, k, l, m);
+		ShapeRenderer.addChainedFilledBoxVertices(poseStack, vertexConsumer, d, e, f, g, h, i, j, k, l, m);
 	}
 
 	public static void renderFloatingText(PoseStack poseStack, MultiBufferSource multiBufferSource, String string, int i, int j, int k, int l) {
@@ -192,6 +204,48 @@ public class DebugRenderer {
 				string, m, 0.0F, i, false, poseStack.last().pose(), multiBufferSource, bl2 ? Font.DisplayMode.SEE_THROUGH : Font.DisplayMode.NORMAL, 0, 15728880
 			);
 			poseStack.popPose();
+		}
+	}
+
+	private static Vec3 mixColor(float f) {
+		float g = 5.99999F;
+		int i = (int)(Mth.clamp(f, 0.0F, 1.0F) * 5.99999F);
+		float h = f * 5.99999F - (float)i;
+
+		return switch (i) {
+			case 0 -> new Vec3(1.0, (double)h, 0.0);
+			case 1 -> new Vec3((double)(1.0F - h), 1.0, 0.0);
+			case 2 -> new Vec3(0.0, 1.0, (double)h);
+			case 3 -> new Vec3(0.0, 1.0 - (double)h, 1.0);
+			case 4 -> new Vec3((double)h, 0.0, 1.0);
+			case 5 -> new Vec3(1.0, 0.0, 1.0 - (double)h);
+			default -> throw new IllegalStateException("Unexpected value: " + i);
+		};
+	}
+
+	private static Vec3 shiftHue(float f, float g, float h, float i) {
+		Vec3 vec3 = mixColor(i).scale((double)f);
+		Vec3 vec32 = mixColor((i + 0.33333334F) % 1.0F).scale((double)g);
+		Vec3 vec33 = mixColor((i + 0.6666667F) % 1.0F).scale((double)h);
+		Vec3 vec34 = vec3.add(vec32).add(vec33);
+		double d = Math.max(Math.max(1.0, vec34.x), Math.max(vec34.y, vec34.z));
+		return new Vec3(vec34.x / d, vec34.y / d, vec34.z / d);
+	}
+
+	public static void renderVoxelShape(
+		PoseStack poseStack, VertexConsumer vertexConsumer, VoxelShape voxelShape, double d, double e, double f, float g, float h, float i, float j, boolean bl
+	) {
+		List<AABB> list = voxelShape.toAabbs();
+		if (!list.isEmpty()) {
+			int k = bl ? list.size() : list.size() * 8;
+			ShapeRenderer.renderShape(poseStack, vertexConsumer, Shapes.create((AABB)list.get(0)), d, e, f, g, h, i, j);
+
+			for (int l = 1; l < list.size(); l++) {
+				AABB aABB = (AABB)list.get(l);
+				float m = (float)l / (float)k;
+				Vec3 vec3 = shiftHue(g, h, i, m);
+				ShapeRenderer.renderShape(poseStack, vertexConsumer, Shapes.create(aABB), d, e, f, (float)vec3.x, (float)vec3.y, (float)vec3.z, j);
+			}
 		}
 	}
 

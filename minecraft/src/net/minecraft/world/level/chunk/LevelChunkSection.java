@@ -24,6 +24,14 @@ public class LevelChunkSection {
 	private final PalettedContainer<BlockState> states;
 	private PalettedContainerRO<Holder<Biome>> biomes;
 
+	private LevelChunkSection(LevelChunkSection levelChunkSection) {
+		this.nonEmptyBlockCount = levelChunkSection.nonEmptyBlockCount;
+		this.tickingBlockCount = levelChunkSection.tickingBlockCount;
+		this.tickingFluidCount = levelChunkSection.tickingFluidCount;
+		this.states = levelChunkSection.states.copy();
+		this.biomes = levelChunkSection.biomes.copy();
+	}
+
 	public LevelChunkSection(PalettedContainer<BlockState> palettedContainer, PalettedContainerRO<Holder<Biome>> palettedContainerRO) {
 		this.states = palettedContainer;
 		this.biomes = palettedContainerRO;
@@ -190,5 +198,9 @@ public class LevelChunkSection {
 		}
 
 		this.biomes = palettedContainer;
+	}
+
+	public LevelChunkSection copy() {
+		return new LevelChunkSection(this);
 	}
 }

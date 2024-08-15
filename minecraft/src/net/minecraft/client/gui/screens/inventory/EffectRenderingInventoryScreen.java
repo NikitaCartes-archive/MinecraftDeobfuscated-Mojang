@@ -7,6 +7,7 @@ import java.util.Optional;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.MobEffectTextureManager;
 import net.minecraft.core.Holder;
@@ -84,9 +85,9 @@ public abstract class EffectRenderingInventoryScreen<T extends AbstractContainer
 
 		for (MobEffectInstance mobEffectInstance : iterable) {
 			if (bl) {
-				guiGraphics.blitSprite(EFFECT_BACKGROUND_LARGE_SPRITE, i, k, 120, 32);
+				guiGraphics.blitSprite(RenderType::guiTextured, EFFECT_BACKGROUND_LARGE_SPRITE, i, k, 120, 32);
 			} else {
-				guiGraphics.blitSprite(EFFECT_BACKGROUND_SMALL_SPRITE, i, k, 32, 32);
+				guiGraphics.blitSprite(RenderType::guiTextured, EFFECT_BACKGROUND_SMALL_SPRITE, i, k, 32, 32);
 			}
 
 			k += j;
@@ -100,7 +101,7 @@ public abstract class EffectRenderingInventoryScreen<T extends AbstractContainer
 		for (MobEffectInstance mobEffectInstance : iterable) {
 			Holder<MobEffect> holder = mobEffectInstance.getEffect();
 			TextureAtlasSprite textureAtlasSprite = mobEffectTextureManager.get(holder);
-			guiGraphics.blit(i + (bl ? 6 : 7), k + 7, 0, 18, 18, textureAtlasSprite);
+			guiGraphics.blitSprite(RenderType::guiTextured, textureAtlasSprite, i + (bl ? 6 : 7), k + 7, 18, 18);
 			k += j;
 		}
 	}

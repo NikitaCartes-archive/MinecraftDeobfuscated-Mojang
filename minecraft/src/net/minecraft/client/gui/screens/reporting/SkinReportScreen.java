@@ -11,6 +11,7 @@ import net.minecraft.client.gui.layouts.CommonLayouts;
 import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.chat.report.ReportReason;
+import net.minecraft.client.multiplayer.chat.report.ReportType;
 import net.minecraft.client.multiplayer.chat.report.ReportingContext;
 import net.minecraft.client.multiplayer.chat.report.SkinReport;
 import net.minecraft.client.resources.PlayerSkin;
@@ -43,7 +44,7 @@ public class SkinReportScreen extends AbstractReportScreen<SkinReport.Builder> {
 		linearLayout.addChild(new PlayerSkinWidget(85, 120, this.minecraft.getEntityModels(), this.reportBuilder.report().getSkinGetter()));
 		LinearLayout linearLayout2 = linearLayout.addChild(LinearLayout.vertical().spacing(8));
 		this.selectReasonButton = Button.builder(
-				SELECT_REASON, button -> this.minecraft.setScreen(new ReportReasonSelectionScreen(this, this.reportBuilder.reason(), reportReason -> {
+				SELECT_REASON, button -> this.minecraft.setScreen(new ReportReasonSelectionScreen(this, this.reportBuilder.reason(), ReportType.SKIN, reportReason -> {
 						this.reportBuilder.setReason(reportReason);
 						this.onReportChanged();
 					}))

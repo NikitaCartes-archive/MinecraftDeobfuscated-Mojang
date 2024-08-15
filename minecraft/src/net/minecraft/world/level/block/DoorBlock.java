@@ -6,6 +6,7 @@ import java.util.function.BiConsumer;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionResult;
@@ -31,6 +32,7 @@ import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.pathfinder.PathComputationType;
+import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -106,15 +108,17 @@ public class DoorBlock extends Block {
 	}
 
 	@Override
-	protected void onExplosionHit(BlockState blockState, Level level, BlockPos blockPos, Explosion explosion, BiConsumer<ItemStack, BlockPos> biConsumer) {
+	protected void onExplosionHit(
+		BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Explosion explosion, BiConsumer<ItemStack, BlockPos> biConsumer
+	) {
 		if (explosion.canTriggerBlocks()
 			&& blockState.getValue(HALF) == DoubleBlockHalf.LOWER
 			&& this.type.canOpenByWindCharge()
 			&& !(Boolean)blockState.getValue(POWERED)) {
-			this.setOpen(null, level, blockState, blockPos, !this.isOpen(blockState));
+			this.setOpen(null, serverLevel, blockState, blockPos, !this.isOpen(blockState));
 		}
 
-		super.onExplosionHit(blockState, level, blockPos, explosion, biConsumer);
+		super.onExplosionHit(blockState, serverLevel, blockPos, explosion, biConsumer);
 	}
 
 	@Override
@@ -203,7 +207,7 @@ public class DoorBlock extends Block {
 			level.setBlock(blockPos, blockState, 10);
 			this.playSound(player, level, blockPos, (Boolean)blockState.getValue(OPEN));
 			level.gameEvent(player, this.isOpen(blockState) ? GameEvent.BLOCK_OPEN : GameEvent.BLOCK_CLOSE, blockPos);
-			return InteractionResult.sidedSuccess(level.isClientSide);
+			return InteractionResult.SUCCESS;
 		}
 	}
 
@@ -220,7 +224,7 @@ public class DoorBlock extends Block {
 	}
 
 	@Override
-	protected void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
+	protected void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, @Nullable Orientation orientation, boolean bl) {
 		boolean bl2 = level.hasNeighborSignal(blockPos)
 			|| level.hasNeighborSignal(blockPos.relative(blockState.getValue(HALF) == DoubleBlockHalf.LOWER ? Direction.UP : Direction.DOWN));
 		if (!this.defaultBlockState().is(block) && bl2 != (Boolean)blockState.getValue(POWERED)) {

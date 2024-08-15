@@ -25,12 +25,10 @@ import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.AnimationState;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobSpawnType;
-import net.minecraft.world.entity.PlayerRideableJumping;
 import net.minecraft.world.entity.Pose;
-import net.minecraft.world.entity.Saddleable;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -50,7 +48,7 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 
-public class Camel extends AbstractHorse implements PlayerRideableJumping, Saddleable {
+public class Camel extends AbstractHorse {
 	public static final float BABY_SCALE = 0.45F;
 	public static final int DASH_COOLDOWN_TICKS = 55;
 	public static final int MAX_HEAD_Y_ROT = 30;
@@ -117,11 +115,11 @@ public class Camel extends AbstractHorse implements PlayerRideableJumping, Saddl
 
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData
+		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, EntitySpawnReason entitySpawnReason, @Nullable SpawnGroupData spawnGroupData
 	) {
 		CamelAi.initMemories(this, serverLevelAccessor.getRandom());
 		this.resetLastPoseChangeTickToFullStand(serverLevelAccessor.getLevel().getGameTime());
-		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData);
+		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, entitySpawnReason, spawnGroupData);
 	}
 
 	@Override
@@ -217,7 +215,7 @@ public class Camel extends AbstractHorse implements PlayerRideableJumping, Saddl
 			g = 0.0F;
 		}
 
-		this.walkAnimation.update(g, 0.2F);
+		this.walkAnimation.update(g, 0.2F, this.isBaby() ? 3.0F : 1.0F);
 	}
 
 	@Override
@@ -348,7 +346,7 @@ public class Camel extends AbstractHorse implements PlayerRideableJumping, Saddl
 		ItemStack itemStack = player.getItemInHand(interactionHand);
 		if (player.isSecondaryUseActive() && !this.isBaby()) {
 			this.openCustomInventoryScreen(player);
-			return InteractionResult.sidedSuccess(this.level().isClientSide);
+			return InteractionResult.SUCCESS;
 		} else {
 			InteractionResult interactionResult = itemStack.interactLivingEntity(player, this, interactionHand);
 			if (interactionResult.consumesAction()) {
@@ -360,7 +358,7 @@ public class Camel extends AbstractHorse implements PlayerRideableJumping, Saddl
 					this.doPlayerRide(player);
 				}
 
-				return InteractionResult.sidedSuccess(this.level().isClientSide);
+				return InteractionResult.SUCCESS;
 			}
 		}
 	}
@@ -436,7 +434,7 @@ public class Camel extends AbstractHorse implements PlayerRideableJumping, Saddl
 
 	@Nullable
 	public Camel getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
-		return EntityType.CAMEL.create(serverLevel);
+		return EntityType.CAMEL.create(serverLevel, EntitySpawnReason.BREEDING);
 	}
 
 	@Nullable

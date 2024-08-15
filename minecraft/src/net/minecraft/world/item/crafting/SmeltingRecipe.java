@@ -9,7 +9,7 @@ public class SmeltingRecipe extends AbstractCookingRecipe {
 	}
 
 	@Override
-	public ItemStack getToastSymbol() {
+	public ItemStack getCategoryIconItem() {
 		return new ItemStack(Blocks.FURNACE);
 	}
 

@@ -5,12 +5,13 @@ import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
 public class TemptGoal extends Goal {
-	private static final TargetingConditions TEMP_TARGETING = TargetingConditions.forNonCombat().range(10.0).ignoreLineOfSight();
+	private static final TargetingConditions TEMPT_TARGETING = TargetingConditions.forNonCombat().ignoreLineOfSight();
 	private final TargetingConditions targetingConditions;
 	protected final PathfinderMob mob;
 	private final double speedModifier;
@@ -32,7 +33,7 @@ public class TemptGoal extends Goal {
 		this.items = predicate;
 		this.canScare = bl;
 		this.setFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.LOOK));
-		this.targetingConditions = TEMP_TARGETING.copy().selector(this::shouldFollow);
+		this.targetingConditions = TEMPT_TARGETING.copy().selector(this::shouldFollow);
 	}
 
 	@Override
@@ -41,7 +42,7 @@ public class TemptGoal extends Goal {
 			this.calmDown--;
 			return false;
 		} else {
-			this.player = this.mob.level().getNearestPlayer(this.targetingConditions, this.mob);
+			this.player = this.mob.level().getNearestPlayer(this.targetingConditions.range(this.mob.getAttributeValue(Attributes.TEMPT_RANGE)), this.mob);
 			return this.player != null;
 		}
 	}

@@ -6,6 +6,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -28,6 +29,7 @@ import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.monster.RangedAttackMob;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.Snowball;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -36,6 +38,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.phys.Vec3;
 
 public class SnowGolem extends AbstractGolem implements Shearable, RangedAttackMob {
@@ -113,15 +116,16 @@ public class SnowGolem extends AbstractGolem implements Shearable, RangedAttackM
 
 	@Override
 	public void performRangedAttack(LivingEntity livingEntity, float f) {
-		Snowball snowball = new Snowball(this.level(), this);
-		double d = livingEntity.getEyeY() - 1.1F;
-		double e = livingEntity.getX() - this.getX();
-		double g = d - snowball.getY();
-		double h = livingEntity.getZ() - this.getZ();
-		double i = Math.sqrt(e * e + h * h) * 0.2F;
-		snowball.shoot(e, g + i, h, 1.6F, 12.0F);
+		double d = livingEntity.getX() - this.getX();
+		double e = livingEntity.getEyeY() - 1.1F;
+		double g = livingEntity.getZ() - this.getZ();
+		double h = Math.sqrt(d * d + g * g) * 0.2F;
+		if (this.level() instanceof ServerLevel serverLevel) {
+			ItemStack itemStack = new ItemStack(Items.SNOWBALL);
+			Projectile.spawnProjectileUsingShoot(Snowball::new, serverLevel, itemStack, this, d, e + h, g, 1.6F, 12.0F);
+		}
+
 		this.playSound(SoundEvents.SNOW_GOLEM_SHOOT, 1.0F, 0.4F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
-		this.level().addFreshEntity(snowball);
 	}
 
 	@Override
@@ -134,7 +138,7 @@ public class SnowGolem extends AbstractGolem implements Shearable, RangedAttackM
 				itemStack.hurtAndBreak(1, player, getSlotForHand(interactionHand));
 			}
 
-			return InteractionResult.sidedSuccess(this.level().isClientSide);
+			return InteractionResult.SUCCESS;
 		} else {
 			return InteractionResult.PASS;
 		}
@@ -145,7 +149,7 @@ public class SnowGolem extends AbstractGolem implements Shearable, RangedAttackM
 		this.level().playSound(null, this, SoundEvents.SNOW_GOLEM_SHEAR, soundSource, 1.0F, 1.0F);
 		if (!this.level().isClientSide()) {
 			this.setPumpkin(false);
-			this.spawnAtLocation(new ItemStack(Items.CARVED_PUMPKIN), this.getEyeHeight());
+			this.dropFromShearingLootTable(BuiltInLootTables.SHEAR_SNOW_GOLEM, itemStack -> this.spawnAtLocation(itemStack, this.getEyeHeight()));
 		}
 	}
 

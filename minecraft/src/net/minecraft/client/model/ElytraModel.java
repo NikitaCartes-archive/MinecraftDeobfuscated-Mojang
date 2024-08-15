@@ -1,6 +1,5 @@
 package net.minecraft.client.model;
 
-import com.google.common.collect.ImmutableList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
@@ -9,17 +8,19 @@ import net.minecraft.client.model.geom.builders.CubeDeformation;
 import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.MeshTransformer;
 import net.minecraft.client.model.geom.builders.PartDefinition;
-import net.minecraft.client.player.AbstractClientPlayer;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
 
 @Environment(EnvType.CLIENT)
-public class ElytraModel<T extends LivingEntity> extends AgeableListModel<T> {
+public class ElytraModel extends EntityModel<HumanoidRenderState> {
+	public static final MeshTransformer BABY_TRANSFORMER = MeshTransformer.scaling(0.5F);
+	private final ModelPart root;
 	private final ModelPart rightWing;
 	private final ModelPart leftWing;
 
 	public ElytraModel(ModelPart modelPart) {
+		this.root = modelPart;
 		this.leftWing = modelPart.getChild("left_wing");
 		this.rightWing = modelPart.getChild("right_wing");
 	}
@@ -41,55 +42,19 @@ public class ElytraModel<T extends LivingEntity> extends AgeableListModel<T> {
 		return LayerDefinition.create(meshDefinition, 64, 32);
 	}
 
-	@Override
-	protected Iterable<ModelPart> headParts() {
-		return ImmutableList.<ModelPart>of();
-	}
-
-	@Override
-	protected Iterable<ModelPart> bodyParts() {
-		return ImmutableList.<ModelPart>of(this.leftWing, this.rightWing);
-	}
-
-	public void setupAnim(T livingEntity, float f, float g, float h, float i, float j) {
-		float k = (float) (Math.PI / 12);
-		float l = (float) (-Math.PI / 12);
-		float m = 0.0F;
-		float n = 0.0F;
-		if (livingEntity.isFallFlying()) {
-			float o = 1.0F;
-			Vec3 vec3 = livingEntity.getDeltaMovement();
-			if (vec3.y < 0.0) {
-				Vec3 vec32 = vec3.normalize();
-				o = 1.0F - (float)Math.pow(-vec32.y, 1.5);
-			}
-
-			k = o * (float) (Math.PI / 9) + (1.0F - o) * k;
-			l = o * (float) (-Math.PI / 2) + (1.0F - o) * l;
-		} else if (livingEntity.isCrouching()) {
-			k = (float) (Math.PI * 2.0 / 9.0);
-			l = (float) (-Math.PI / 4);
-			m = 3.0F;
-			n = 0.08726646F;
-		}
-
-		this.leftWing.y = m;
-		if (livingEntity instanceof AbstractClientPlayer abstractClientPlayer) {
-			abstractClientPlayer.elytraRotX = abstractClientPlayer.elytraRotX + (k - abstractClientPlayer.elytraRotX) * 0.1F;
-			abstractClientPlayer.elytraRotY = abstractClientPlayer.elytraRotY + (n - abstractClientPlayer.elytraRotY) * 0.1F;
-			abstractClientPlayer.elytraRotZ = abstractClientPlayer.elytraRotZ + (l - abstractClientPlayer.elytraRotZ) * 0.1F;
-			this.leftWing.xRot = abstractClientPlayer.elytraRotX;
-			this.leftWing.yRot = abstractClientPlayer.elytraRotY;
-			this.leftWing.zRot = abstractClientPlayer.elytraRotZ;
-		} else {
-			this.leftWing.xRot = k;
-			this.leftWing.zRot = l;
-			this.leftWing.yRot = n;
-		}
-
+	public void setupAnim(HumanoidRenderState humanoidRenderState) {
+		this.leftWing.y = humanoidRenderState.isCrouching ? 3.0F : 0.0F;
+		this.leftWing.xRot = humanoidRenderState.elytraRotX;
+		this.leftWing.zRot = humanoidRenderState.elytraRotZ;
+		this.leftWing.yRot = humanoidRenderState.elytraRotY;
 		this.rightWing.yRot = -this.leftWing.yRot;
 		this.rightWing.y = this.leftWing.y;
 		this.rightWing.xRot = this.leftWing.xRot;
 		this.rightWing.zRot = -this.leftWing.zRot;
+	}
+
+	@Override
+	public ModelPart root() {
+		return this.root;
 	}
 }

@@ -1,7 +1,7 @@
 package net.minecraft.world.level.chunk;
 
 import com.google.common.collect.Lists;
-import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+import it.unimi.dsi.fastutil.shorts.ShortList;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
@@ -23,7 +23,6 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.levelgen.BelowZeroRetrogen;
-import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.blending.BlendingData;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
@@ -43,7 +42,8 @@ public class ProtoChunk extends ChunkAccess {
 	private volatile LevelLightEngine lightEngine;
 	private volatile ChunkStatus status = ChunkStatus.EMPTY;
 	private final List<CompoundTag> entities = Lists.<CompoundTag>newArrayList();
-	private final Map<GenerationStep.Carving, CarvingMask> carvingMasks = new Object2ObjectArrayMap<>();
+	@Nullable
+	private CarvingMask carvingMask;
 	@Nullable
 	private BelowZeroRetrogen belowZeroRetrogen;
 	private final ProtoChunkTicks<Block> blockTicks;
@@ -81,8 +81,8 @@ public class ProtoChunk extends ChunkAccess {
 	}
 
 	@Override
-	public ChunkAccess.TicksToSave getTicksForSerialization() {
-		return new ChunkAccess.TicksToSave(this.blockTicks, this.fluidTicks);
+	public ChunkAccess.PackedTicks getTicksForSerialization(long l) {
+		return new ChunkAccess.PackedTicks(this.blockTicks.pack(l), this.fluidTicks.pack(l));
 	}
 
 	@Override
@@ -132,7 +132,7 @@ public class ProtoChunk extends ChunkAccess {
 						this.lightEngine.updateSectionStatus(blockPos, bl3);
 					}
 
-					if (LightEngine.hasDifferentLightProperties(this, blockPos, blockState2, blockState)) {
+					if (LightEngine.hasDifferentLightProperties(blockState2, blockState)) {
 						this.skyLightSources.update(this, m, j, o);
 						this.lightEngine.checkBlock(blockPos);
 					}
@@ -261,8 +261,8 @@ public class ProtoChunk extends ChunkAccess {
 	}
 
 	@Override
-	public void addPackedPostProcess(short s, int i) {
-		ChunkAccess.getOrCreateOffsetList(this.postProcessing, i).add(s);
+	public void addPackedPostProcess(ShortList shortList, int i) {
+		ChunkAccess.getOrCreateOffsetList(this.postProcessing, i).addAll(shortList);
 	}
 
 	public Map<BlockPos, CompoundTag> getBlockEntityNbts() {
@@ -283,16 +283,20 @@ public class ProtoChunk extends ChunkAccess {
 	}
 
 	@Nullable
-	public CarvingMask getCarvingMask(GenerationStep.Carving carving) {
-		return (CarvingMask)this.carvingMasks.get(carving);
+	public CarvingMask getCarvingMask() {
+		return this.carvingMask;
 	}
 
-	public CarvingMask getOrCreateCarvingMask(GenerationStep.Carving carving) {
-		return (CarvingMask)this.carvingMasks.computeIfAbsent(carving, carvingx -> new CarvingMask(this.getHeight(), this.getMinBuildHeight()));
+	public CarvingMask getOrCreateCarvingMask() {
+		if (this.carvingMask == null) {
+			this.carvingMask = new CarvingMask(this.getHeight(), this.getMinBuildHeight());
+		}
+
+		return this.carvingMask;
 	}
 
-	public void setCarvingMask(GenerationStep.Carving carving, CarvingMask carvingMask) {
-		this.carvingMasks.put(carving, carvingMask);
+	public void setCarvingMask(CarvingMask carvingMask) {
+		this.carvingMask = carvingMask;
 	}
 
 	public void setLightEngine(LevelLightEngine levelLightEngine) {

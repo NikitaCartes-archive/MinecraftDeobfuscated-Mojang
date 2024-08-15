@@ -13,7 +13,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.EquipmentSlotGroup;
@@ -23,7 +23,6 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
-import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.phys.AABB;
@@ -96,11 +95,11 @@ public class ArmorItem extends Item implements Equipable {
 
 	@Override
 	public boolean isValidRepairItem(ItemStack itemStack, ItemStack itemStack2) {
-		return ((Ingredient)this.material.value().repairIngredient().get()).test(itemStack2) || super.isValidRepairItem(itemStack, itemStack2);
+		return this.material.value().repairIngredient().test(itemStack2) || super.isValidRepairItem(itemStack, itemStack2);
 	}
 
 	@Override
-	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand) {
+	public InteractionResult use(Level level, Player player, InteractionHand interactionHand) {
 		return this.swapWithEquipmentSlot(this, level, player, interactionHand);
 	}
 

@@ -13,6 +13,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
+import net.minecraft.client.renderer.state.MapRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceLocation;
@@ -107,6 +108,7 @@ public class ItemInHandRenderer {
 	private static final float BOW_CHARGE_Z_SCALE = 0.2F;
 	private static final float BOW_MIN_SHAKE_CHARGE = 0.1F;
 	private final Minecraft minecraft;
+	private final MapRenderState mapRenderState = new MapRenderState();
 	private ItemStack mainHandItem = ItemStack.EMPTY;
 	private ItemStack offHandItem = ItemStack.EMPTY;
 	private float mainHandHeight;
@@ -162,10 +164,11 @@ public class ItemInHandRenderer {
 		poseStack.mulPose(Axis.XP.rotationDegrees(45.0F));
 		poseStack.mulPose(Axis.ZP.rotationDegrees(f * -41.0F));
 		poseStack.translate(f * 0.3F, -1.1F, 0.45F);
+		ResourceLocation resourceLocation = this.minecraft.player.getSkin().texture();
 		if (humanoidArm == HumanoidArm.RIGHT) {
-			playerRenderer.renderRightHand(poseStack, multiBufferSource, i, this.minecraft.player);
+			playerRenderer.renderRightHand(poseStack, multiBufferSource, i, resourceLocation);
 		} else {
-			playerRenderer.renderLeftHand(poseStack, multiBufferSource, i, this.minecraft.player);
+			playerRenderer.renderLeftHand(poseStack, multiBufferSource, i, resourceLocation);
 		}
 
 		poseStack.popPose();
@@ -234,7 +237,9 @@ public class ItemInHandRenderer {
 		vertexConsumer.addVertex(matrix4f, 135.0F, -7.0F, 0.0F).setColor(-1).setUv(1.0F, 0.0F).setLight(i);
 		vertexConsumer.addVertex(matrix4f, -7.0F, -7.0F, 0.0F).setColor(-1).setUv(0.0F, 0.0F).setLight(i);
 		if (mapItemSavedData != null) {
-			this.minecraft.gameRenderer.getMapRenderer().render(poseStack, multiBufferSource, mapId, mapItemSavedData, false, i);
+			MapRenderer mapRenderer = this.minecraft.getMapRenderer();
+			mapRenderer.extractRenderState(mapId, mapItemSavedData, this.mapRenderState);
+			mapRenderer.render(this.mapRenderState, poseStack, multiBufferSource, false, i);
 		}
 	}
 
@@ -258,10 +263,11 @@ public class ItemInHandRenderer {
 		poseStack.mulPose(Axis.YP.rotationDegrees(h * -135.0F));
 		poseStack.translate(h * 5.6F, 0.0F, 0.0F);
 		PlayerRenderer playerRenderer = (PlayerRenderer)this.entityRenderDispatcher.<AbstractClientPlayer>getRenderer(abstractClientPlayer);
+		ResourceLocation resourceLocation = abstractClientPlayer.getSkin().texture();
 		if (bl) {
-			playerRenderer.renderRightHand(poseStack, multiBufferSource, i, abstractClientPlayer);
+			playerRenderer.renderRightHand(poseStack, multiBufferSource, i, resourceLocation);
 		} else {
-			playerRenderer.renderLeftHand(poseStack, multiBufferSource, i, abstractClientPlayer);
+			playerRenderer.renderLeftHand(poseStack, multiBufferSource, i, resourceLocation);
 		}
 	}
 
@@ -325,7 +331,7 @@ public class ItemInHandRenderer {
 	public void renderHandsWithItems(float f, PoseStack poseStack, MultiBufferSource.BufferSource bufferSource, LocalPlayer localPlayer, int i) {
 		float g = localPlayer.getAttackAnim(f);
 		InteractionHand interactionHand = MoreObjects.firstNonNull(localPlayer.swingingArm, InteractionHand.MAIN_HAND);
-		float h = Mth.lerp(f, localPlayer.xRotO, localPlayer.getXRot());
+		float h = localPlayer.getXRot(f);
 		ItemInHandRenderer.HandRenderSelection handRenderSelection = evaluateWhichHandsToRender(localPlayer);
 		float j = Mth.lerp(f, localPlayer.xBobO, localPlayer.xBob);
 		float k = Mth.lerp(f, localPlayer.yBobO, localPlayer.yBob);

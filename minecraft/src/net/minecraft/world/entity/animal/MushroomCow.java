@@ -11,6 +11,7 @@ import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -22,9 +23,9 @@ import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.AgeableMob;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LightningBolt;
-import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.Shearable;
 import net.minecraft.world.entity.VariantHolder;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -40,8 +41,10 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SuspiciousEffectHolder;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.storage.loot.BuiltInLootTables;
+import net.minecraft.world.level.storage.loot.LootTable;
 
-public class MushroomCow extends Cow implements Shearable, VariantHolder<MushroomCow.MushroomType> {
+public class MushroomCow extends Cow implements Shearable, VariantHolder<MushroomCow.Variant> {
 	private static final EntityDataAccessor<String> DATA_TYPE = SynchedEntityData.defineId(MushroomCow.class, EntityDataSerializers.STRING);
 	private static final int MUTATE_CHANCE = 1024;
 	private static final String TAG_STEW_EFFECTS = "stew_effects";
@@ -60,7 +63,7 @@ public class MushroomCow extends Cow implements Shearable, VariantHolder<Mushroo
 	}
 
 	public static boolean checkMushroomSpawnRules(
-		EntityType<MushroomCow> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, RandomSource randomSource
+		EntityType<MushroomCow> entityType, LevelAccessor levelAccessor, EntitySpawnReason entitySpawnReason, BlockPos blockPos, RandomSource randomSource
 	) {
 		return levelAccessor.getBlockState(blockPos.below()).is(BlockTags.MOOSHROOMS_SPAWNABLE_ON) && isBrightEnoughToSpawn(levelAccessor, blockPos);
 	}
@@ -69,7 +72,7 @@ public class MushroomCow extends Cow implements Shearable, VariantHolder<Mushroo
 	public void thunderHit(ServerLevel serverLevel, LightningBolt lightningBolt) {
 		UUID uUID = lightningBolt.getUUID();
 		if (!uUID.equals(this.lastLightningBoltUUID)) {
-			this.setVariant(this.getVariant() == MushroomCow.MushroomType.RED ? MushroomCow.MushroomType.BROWN : MushroomCow.MushroomType.RED);
+			this.setVariant(this.getVariant() == MushroomCow.Variant.RED ? MushroomCow.Variant.BROWN : MushroomCow.Variant.RED);
 			this.lastLightningBoltUUID = uUID;
 			this.playSound(SoundEvents.MOOSHROOM_CONVERT, 2.0F, 1.0F);
 		}
@@ -78,7 +81,7 @@ public class MushroomCow extends Cow implements Shearable, VariantHolder<Mushroo
 	@Override
 	protected void defineSynchedData(SynchedEntityData.Builder builder) {
 		super.defineSynchedData(builder);
-		builder.define(DATA_TYPE, MushroomCow.MushroomType.RED.type);
+		builder.define(DATA_TYPE, MushroomCow.Variant.RED.type);
 	}
 
 	@Override
@@ -106,7 +109,7 @@ public class MushroomCow extends Cow implements Shearable, VariantHolder<Mushroo
 			}
 
 			this.playSound(soundEvent, 1.0F, 1.0F);
-			return InteractionResult.sidedSuccess(this.level().isClientSide);
+			return InteractionResult.SUCCESS;
 		} else if (itemStack.is(Items.SHEARS) && this.readyForShearing()) {
 			this.shear(SoundSource.PLAYERS);
 			this.gameEvent(GameEvent.SHEAR, player);
@@ -114,8 +117,8 @@ public class MushroomCow extends Cow implements Shearable, VariantHolder<Mushroo
 				itemStack.hurtAndBreak(1, player, getSlotForHand(interactionHand));
 			}
 
-			return InteractionResult.sidedSuccess(this.level().isClientSide);
-		} else if (this.getVariant() == MushroomCow.MushroomType.BROWN && itemStack.is(ItemTags.SMALL_FLOWERS)) {
+			return InteractionResult.SUCCESS;
+		} else if (this.getVariant() == MushroomCow.Variant.BROWN && itemStack.is(ItemTags.SMALL_FLOWERS)) {
 			if (this.stewEffects != null) {
 				for (int i = 0; i < 2; i++) {
 					this.level()
@@ -154,7 +157,7 @@ public class MushroomCow extends Cow implements Shearable, VariantHolder<Mushroo
 				this.playSound(SoundEvents.MOOSHROOM_EAT, 2.0F, 1.0F);
 			}
 
-			return InteractionResult.sidedSuccess(this.level().isClientSide);
+			return InteractionResult.SUCCESS;
 		} else {
 			return super.mobInteract(player, interactionHand);
 		}
@@ -164,7 +167,7 @@ public class MushroomCow extends Cow implements Shearable, VariantHolder<Mushroo
 	public void shear(SoundSource soundSource) {
 		this.level().playSound(null, this, SoundEvents.MOOSHROOM_SHEAR, soundSource, 1.0F, 1.0F);
 		if (!this.level().isClientSide()) {
-			Cow cow = EntityType.COW.create(this.level());
+			Cow cow = EntityType.COW.create(this.level(), EntitySpawnReason.CONVERSION);
 			if (cow != null) {
 				((ServerLevel)this.level()).sendParticles(ParticleTypes.EXPLOSION, this.getX(), this.getY(0.5), this.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
 				this.discard();
@@ -182,11 +185,11 @@ public class MushroomCow extends Cow implements Shearable, VariantHolder<Mushroo
 
 				cow.setInvulnerable(this.isInvulnerable());
 				this.level().addFreshEntity(cow);
-
-				for (int i = 0; i < 5; i++) {
-					this.level()
-						.addFreshEntity(new ItemEntity(this.level(), this.getX(), this.getY(1.0), this.getZ(), new ItemStack(this.getVariant().blockState.getBlock())));
-				}
+				this.dropFromShearingLootTable(this.getVariant().lootTable(), itemStack -> {
+					for (int i = 0; i < itemStack.getCount(); i++) {
+						this.level().addFreshEntity(new ItemEntity(this.level(), this.getX(), this.getY(1.0), this.getZ(), itemStack.copyWithCount(1)));
+					}
+				});
 			}
 		}
 	}
@@ -208,7 +211,7 @@ public class MushroomCow extends Cow implements Shearable, VariantHolder<Mushroo
 	@Override
 	public void readAdditionalSaveData(CompoundTag compoundTag) {
 		super.readAdditionalSaveData(compoundTag);
-		this.setVariant(MushroomCow.MushroomType.byType(compoundTag.getString("Type")));
+		this.setVariant(MushroomCow.Variant.byName(compoundTag.getString("Type")));
 		if (compoundTag.contains("stew_effects", 9)) {
 			SuspiciousStewEffects.CODEC
 				.parse(NbtOps.INSTANCE, compoundTag.get("stew_effects"))
@@ -221,48 +224,50 @@ public class MushroomCow extends Cow implements Shearable, VariantHolder<Mushroo
 		return suspiciousEffectHolder != null ? Optional.of(suspiciousEffectHolder.getSuspiciousEffects()) : Optional.empty();
 	}
 
-	public void setVariant(MushroomCow.MushroomType mushroomType) {
-		this.entityData.set(DATA_TYPE, mushroomType.type);
+	public void setVariant(MushroomCow.Variant variant) {
+		this.entityData.set(DATA_TYPE, variant.type);
 	}
 
-	public MushroomCow.MushroomType getVariant() {
-		return MushroomCow.MushroomType.byType(this.entityData.get(DATA_TYPE));
+	public MushroomCow.Variant getVariant() {
+		return MushroomCow.Variant.byName(this.entityData.get(DATA_TYPE));
 	}
 
 	@Nullable
 	public MushroomCow getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
-		MushroomCow mushroomCow = EntityType.MOOSHROOM.create(serverLevel);
+		MushroomCow mushroomCow = EntityType.MOOSHROOM.create(serverLevel, EntitySpawnReason.BREEDING);
 		if (mushroomCow != null) {
-			mushroomCow.setVariant(this.getOffspringType((MushroomCow)ageableMob));
+			mushroomCow.setVariant(this.getOffspringVariant((MushroomCow)ageableMob));
 		}
 
 		return mushroomCow;
 	}
 
-	private MushroomCow.MushroomType getOffspringType(MushroomCow mushroomCow) {
-		MushroomCow.MushroomType mushroomType = this.getVariant();
-		MushroomCow.MushroomType mushroomType2 = mushroomCow.getVariant();
-		MushroomCow.MushroomType mushroomType3;
-		if (mushroomType == mushroomType2 && this.random.nextInt(1024) == 0) {
-			mushroomType3 = mushroomType == MushroomCow.MushroomType.BROWN ? MushroomCow.MushroomType.RED : MushroomCow.MushroomType.BROWN;
+	private MushroomCow.Variant getOffspringVariant(MushroomCow mushroomCow) {
+		MushroomCow.Variant variant = this.getVariant();
+		MushroomCow.Variant variant2 = mushroomCow.getVariant();
+		MushroomCow.Variant variant3;
+		if (variant == variant2 && this.random.nextInt(1024) == 0) {
+			variant3 = variant == MushroomCow.Variant.BROWN ? MushroomCow.Variant.RED : MushroomCow.Variant.BROWN;
 		} else {
-			mushroomType3 = this.random.nextBoolean() ? mushroomType : mushroomType2;
+			variant3 = this.random.nextBoolean() ? variant : variant2;
 		}
 
-		return mushroomType3;
+		return variant3;
 	}
 
-	public static enum MushroomType implements StringRepresentable {
-		RED("red", Blocks.RED_MUSHROOM.defaultBlockState()),
-		BROWN("brown", Blocks.BROWN_MUSHROOM.defaultBlockState());
+	public static enum Variant implements StringRepresentable {
+		RED("red", Blocks.RED_MUSHROOM.defaultBlockState(), BuiltInLootTables.SHEAR_RED_MOOSHROOM),
+		BROWN("brown", Blocks.BROWN_MUSHROOM.defaultBlockState(), BuiltInLootTables.SHEAR_BROWN_MOOSHROOM);
 
-		public static final StringRepresentable.EnumCodec<MushroomCow.MushroomType> CODEC = StringRepresentable.fromEnum(MushroomCow.MushroomType::values);
+		public static final StringRepresentable.EnumCodec<MushroomCow.Variant> CODEC = StringRepresentable.fromEnum(MushroomCow.Variant::values);
 		final String type;
-		final BlockState blockState;
+		private final BlockState blockState;
+		private final ResourceKey<LootTable> lootTable;
 
-		private MushroomType(final String string2, final BlockState blockState) {
+		private Variant(final String string2, final BlockState blockState, final ResourceKey<LootTable> resourceKey) {
 			this.type = string2;
 			this.blockState = blockState;
+			this.lootTable = resourceKey;
 		}
 
 		public BlockState getBlockState() {
@@ -274,8 +279,12 @@ public class MushroomCow extends Cow implements Shearable, VariantHolder<Mushroo
 			return this.type;
 		}
 
-		static MushroomCow.MushroomType byType(String string) {
-			return (MushroomCow.MushroomType)CODEC.byName(string, RED);
+		public ResourceKey<LootTable> lootTable() {
+			return this.lootTable;
+		}
+
+		static MushroomCow.Variant byName(String string) {
+			return (MushroomCow.Variant)CODEC.byName(string, RED);
 		}
 	}
 }

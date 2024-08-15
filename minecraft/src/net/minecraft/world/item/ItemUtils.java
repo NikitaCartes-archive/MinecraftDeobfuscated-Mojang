@@ -1,15 +1,15 @@
 package net.minecraft.world.item;
 
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
 public class ItemUtils {
-	public static InteractionResultHolder<ItemStack> startUsingInstantly(Level level, Player player, InteractionHand interactionHand) {
+	public static InteractionResult startUsingInstantly(Level level, Player player, InteractionHand interactionHand) {
 		player.startUsingItem(interactionHand);
-		return InteractionResultHolder.consume(player.getItemInHand(interactionHand));
+		return InteractionResult.CONSUME;
 	}
 
 	public static ItemStack createFilledResult(ItemStack itemStack, Player player, ItemStack itemStack2, boolean bl) {

@@ -82,17 +82,7 @@ public class StonecutterMenu extends AbstractContainerMenu {
 				return List.of(StonecutterMenu.this.inputSlot.getItem());
 			}
 		});
-
-		for (int j = 0; j < 3; j++) {
-			for (int k = 0; k < 9; k++) {
-				this.addSlot(new Slot(inventory, k + j * 9 + 9, 8 + k * 18, 84 + j * 18));
-			}
-		}
-
-		for (int j = 0; j < 9; j++) {
-			this.addSlot(new Slot(inventory, j, 8 + j * 18, 142));
-		}
-
+		this.addStandardInventorySlots(inventory, 8, 84);
 		this.addDataSlot(this.selectedRecipeIndex);
 	}
 

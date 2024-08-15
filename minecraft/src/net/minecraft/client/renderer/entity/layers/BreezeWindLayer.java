@@ -11,24 +11,23 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.BreezeRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
+import net.minecraft.client.renderer.entity.state.BreezeRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.monster.breeze.Breeze;
 
 @Environment(EnvType.CLIENT)
-public class BreezeWindLayer extends RenderLayer<Breeze, BreezeModel<Breeze>> {
+public class BreezeWindLayer extends RenderLayer<BreezeRenderState, BreezeModel> {
 	private static final ResourceLocation TEXTURE_LOCATION = ResourceLocation.withDefaultNamespace("textures/entity/breeze/breeze_wind.png");
-	private final BreezeModel<Breeze> model;
+	private final BreezeModel model;
 
-	public BreezeWindLayer(EntityRendererProvider.Context context, RenderLayerParent<Breeze, BreezeModel<Breeze>> renderLayerParent) {
+	public BreezeWindLayer(EntityRendererProvider.Context context, RenderLayerParent<BreezeRenderState, BreezeModel> renderLayerParent) {
 		super(renderLayerParent);
-		this.model = new BreezeModel<>(context.bakeLayer(ModelLayers.BREEZE_WIND));
+		this.model = new BreezeModel(context.bakeLayer(ModelLayers.BREEZE_WIND));
 	}
 
-	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, Breeze breeze, float f, float g, float h, float j, float k, float l) {
-		float m = (float)breeze.tickCount + h;
-		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.breezeWind(TEXTURE_LOCATION, this.xOffset(m) % 1.0F, 0.0F));
-		this.model.setupAnim(breeze, f, g, j, k, l);
+	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, BreezeRenderState breezeRenderState, float f, float g) {
+		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.breezeWind(TEXTURE_LOCATION, this.xOffset(breezeRenderState.ageInTicks) % 1.0F, 0.0F));
+		this.model.setupAnim(breezeRenderState);
 		BreezeRenderer.enable(this.model, this.model.wind()).renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY);
 	}
 

@@ -14,11 +14,11 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.FlyingMob;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.MoveControl;
@@ -123,11 +123,11 @@ public class Ghast extends FlyingMob implements Enemy {
 	}
 
 	public static boolean checkGhastSpawnRules(
-		EntityType<Ghast> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, RandomSource randomSource
+		EntityType<Ghast> entityType, LevelAccessor levelAccessor, EntitySpawnReason entitySpawnReason, BlockPos blockPos, RandomSource randomSource
 	) {
 		return levelAccessor.getDifficulty() != Difficulty.PEACEFUL
 			&& randomSource.nextInt(20) == 0
-			&& checkMobSpawnRules(entityType, levelAccessor, mobSpawnType, blockPos, randomSource);
+			&& checkMobSpawnRules(entityType, levelAccessor, entitySpawnReason, blockPos, randomSource);
 	}
 
 	@Override

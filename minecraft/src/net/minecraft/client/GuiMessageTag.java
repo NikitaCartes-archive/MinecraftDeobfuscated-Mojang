@@ -5,6 +5,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -60,7 +61,7 @@ public record GuiMessageTag(int indicatorColor, @Nullable GuiMessageTag.Icon ico
 		}
 
 		public void draw(GuiGraphics guiGraphics, int i, int j) {
-			guiGraphics.blitSprite(this.sprite, i, j, this.width, this.height);
+			guiGraphics.blitSprite(RenderType::guiTextured, this.sprite, i, j, this.width, this.height);
 		}
 	}
 }

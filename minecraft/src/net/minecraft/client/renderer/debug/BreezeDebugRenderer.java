@@ -12,7 +12,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.protocol.common.custom.BreezeDebugPayload;
-import net.minecraft.util.FastColor;
+import net.minecraft.util.ARGB;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -20,11 +20,11 @@ import org.joml.Matrix4f;
 
 @Environment(EnvType.CLIENT)
 public class BreezeDebugRenderer {
-	private static final int JUMP_TARGET_LINE_COLOR = FastColor.ARGB32.color(255, 255, 100, 255);
-	private static final int TARGET_LINE_COLOR = FastColor.ARGB32.color(255, 100, 255, 255);
-	private static final int INNER_CIRCLE_COLOR = FastColor.ARGB32.color(255, 0, 255, 0);
-	private static final int MIDDLE_CIRCLE_COLOR = FastColor.ARGB32.color(255, 255, 165, 0);
-	private static final int OUTER_CIRCLE_COLOR = FastColor.ARGB32.color(255, 255, 0, 0);
+	private static final int JUMP_TARGET_LINE_COLOR = ARGB.color(255, 255, 100, 255);
+	private static final int TARGET_LINE_COLOR = ARGB.color(255, 100, 255, 255);
+	private static final int INNER_CIRCLE_COLOR = ARGB.color(255, 0, 255, 0);
+	private static final int MIDDLE_CIRCLE_COLOR = ARGB.color(255, 255, 165, 0);
+	private static final int OUTER_CIRCLE_COLOR = ARGB.color(255, 255, 0, 0);
 	private static final int CIRCLE_VERTICES = 20;
 	private static final float SEGMENT_SIZE_RADIANS = (float) (Math.PI / 10);
 	private final Minecraft minecraft;
@@ -43,13 +43,13 @@ public class BreezeDebugRenderer {
 					Optional<BreezeDebugPayload.BreezeInfo> optional = Optional.ofNullable((BreezeDebugPayload.BreezeInfo)this.perEntity.get(breeze.getId()));
 					optional.map(BreezeDebugPayload.BreezeInfo::attackTarget)
 						.map(integer -> localPlayer.level().getEntity(integer))
-						.map(entity -> entity.getPosition(this.minecraft.getTimer().getGameTimeDeltaPartialTick(true)))
+						.map(entity -> entity.getPosition(this.minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(true)))
 						.ifPresent(vec3 -> {
 							drawLine(poseStack, multiBufferSource, d, e, f, breeze.position(), vec3, TARGET_LINE_COLOR);
 							Vec3 vec32 = vec3.add(0.0, 0.01F, 0.0);
 							drawCircle(poseStack.last().pose(), d, e, f, multiBufferSource.getBuffer(RenderType.debugLineStrip(2.0)), vec32, 4.0F, INNER_CIRCLE_COLOR);
 							drawCircle(poseStack.last().pose(), d, e, f, multiBufferSource.getBuffer(RenderType.debugLineStrip(2.0)), vec32, 8.0F, MIDDLE_CIRCLE_COLOR);
-							drawCircle(poseStack.last().pose(), d, e, f, multiBufferSource.getBuffer(RenderType.debugLineStrip(2.0)), vec32, 20.0F, OUTER_CIRCLE_COLOR);
+							drawCircle(poseStack.last().pose(), d, e, f, multiBufferSource.getBuffer(RenderType.debugLineStrip(2.0)), vec32, 24.0F, OUTER_CIRCLE_COLOR);
 						});
 					optional.map(BreezeDebugPayload.BreezeInfo::jumpTarget)
 						.ifPresent(

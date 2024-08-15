@@ -7,42 +7,47 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.model.CatModel;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.entity.layers.CatCollarLayer;
-import net.minecraft.core.BlockPos;
+import net.minecraft.client.renderer.entity.state.CatRenderState;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.animal.Cat;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.phys.AABB;
 
 @Environment(EnvType.CLIENT)
-public class CatRenderer extends MobRenderer<Cat, CatModel<Cat>> {
+public class CatRenderer extends AgeableMobRenderer<Cat, CatRenderState, CatModel> {
 	public CatRenderer(EntityRendererProvider.Context context) {
-		super(context, new CatModel<>(context.bakeLayer(ModelLayers.CAT)), 0.4F);
+		super(context, new CatModel(context.bakeLayer(ModelLayers.CAT)), new CatModel(context.bakeLayer(ModelLayers.CAT_BABY)), 0.4F);
 		this.addLayer(new CatCollarLayer(this, context.getModelSet()));
 	}
 
-	public ResourceLocation getTextureLocation(Cat cat) {
-		return cat.getTextureId();
+	public ResourceLocation getTextureLocation(CatRenderState catRenderState) {
+		return catRenderState.texture;
 	}
 
-	protected void scale(Cat cat, PoseStack poseStack, float f) {
-		super.scale(cat, poseStack, f);
-		poseStack.scale(0.8F, 0.8F, 0.8F);
+	public CatRenderState createRenderState() {
+		return new CatRenderState();
 	}
 
-	protected void setupRotations(Cat cat, PoseStack poseStack, float f, float g, float h, float i) {
-		super.setupRotations(cat, poseStack, f, g, h, i);
-		float j = cat.getLieDownAmount(h);
-		if (j > 0.0F) {
-			poseStack.translate(0.4F * j, 0.15F * j, 0.1F * j);
-			poseStack.mulPose(Axis.ZP.rotationDegrees(Mth.rotLerp(j, 0.0F, 90.0F)));
-			BlockPos blockPos = cat.blockPosition();
+	public void extractRenderState(Cat cat, CatRenderState catRenderState, float f) {
+		super.extractRenderState(cat, catRenderState, f);
+		catRenderState.texture = cat.getVariant().value().texture();
+		catRenderState.isCrouching = cat.isCrouching();
+		catRenderState.isSprinting = cat.isSprinting();
+		catRenderState.isSitting = cat.isInSittingPose();
+		catRenderState.lieDownAmount = cat.getLieDownAmount(f);
+		catRenderState.lieDownAmountTail = cat.getLieDownAmountTail(f);
+		catRenderState.relaxStateOneAmount = cat.getRelaxStateOneAmount(f);
+		catRenderState.isLyingOnTopOfSleepingPlayer = cat.isLyingOnTopOfSleepingPlayer();
+		catRenderState.collarColor = cat.isTame() ? cat.getCollarColor() : null;
+	}
 
-			for (Player player : cat.level().getEntitiesOfClass(Player.class, new AABB(blockPos).inflate(2.0, 2.0, 2.0))) {
-				if (player.isSleeping()) {
-					poseStack.translate(0.15F * j, 0.0F, 0.0F);
-					break;
-				}
+	protected void setupRotations(CatRenderState catRenderState, PoseStack poseStack, float f, float g) {
+		super.setupRotations(catRenderState, poseStack, f, g);
+		float h = catRenderState.lieDownAmount;
+		if (h > 0.0F) {
+			poseStack.translate(0.4F * h, 0.15F * h, 0.1F * h);
+			poseStack.mulPose(Axis.ZP.rotationDegrees(Mth.rotLerp(h, 0.0F, 90.0F)));
+			if (catRenderState.isLyingOnTopOfSleepingPlayer) {
+				poseStack.translate(0.15F * h, 0.0F, 0.0F);
 			}
 		}
 	}

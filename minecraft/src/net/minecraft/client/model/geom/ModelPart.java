@@ -55,15 +55,15 @@ public final class ModelPart {
 	}
 
 	public void loadPose(PartPose partPose) {
-		this.x = partPose.x;
-		this.y = partPose.y;
-		this.z = partPose.z;
-		this.xRot = partPose.xRot;
-		this.yRot = partPose.yRot;
-		this.zRot = partPose.zRot;
-		this.xScale = 1.0F;
-		this.yScale = 1.0F;
-		this.zScale = 1.0F;
+		this.x = partPose.x();
+		this.y = partPose.y();
+		this.z = partPose.z();
+		this.xRot = partPose.xRot();
+		this.yRot = partPose.yRot();
+		this.zRot = partPose.zRot();
+		this.xScale = partPose.xScale();
+		this.yScale = partPose.yScale();
+		this.zScale = partPose.zScale();
 	}
 
 	public void copyFrom(ModelPart modelPart) {
@@ -123,6 +123,13 @@ public final class ModelPart {
 				poseStack.popPose();
 			}
 		}
+	}
+
+	public void rotateBy(Quaternionf quaternionf) {
+		Quaternionf quaternionf2 = new Quaternionf().rotationZYX(this.zRot, this.yRot, this.xRot);
+		Quaternionf quaternionf3 = quaternionf2.mul(quaternionf);
+		Vector3f vector3f = quaternionf3.getEulerAnglesXYZ(new Vector3f());
+		this.setRotation(vector3f.x, vector3f.y, vector3f.z);
 	}
 
 	public void visit(PoseStack poseStack, ModelPart.Visitor visitor) {

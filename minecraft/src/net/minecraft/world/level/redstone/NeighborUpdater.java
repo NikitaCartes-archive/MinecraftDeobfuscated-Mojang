@@ -19,14 +19,14 @@ public interface NeighborUpdater {
 
 	void shapeUpdate(Direction direction, BlockState blockState, BlockPos blockPos, BlockPos blockPos2, int i, int j);
 
-	void neighborChanged(BlockPos blockPos, Block block, BlockPos blockPos2);
+	void neighborChanged(BlockPos blockPos, Block block, @Nullable Orientation orientation);
 
-	void neighborChanged(BlockState blockState, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl);
+	void neighborChanged(BlockState blockState, BlockPos blockPos, Block block, @Nullable Orientation orientation, boolean bl);
 
-	default void updateNeighborsAtExceptFromFacing(BlockPos blockPos, Block block, @Nullable Direction direction) {
+	default void updateNeighborsAtExceptFromFacing(BlockPos blockPos, Block block, @Nullable Direction direction, @Nullable Orientation orientation) {
 		for (Direction direction2 : UPDATE_ORDER) {
 			if (direction2 != direction) {
-				this.neighborChanged(blockPos.relative(direction2), block, blockPos);
+				this.neighborChanged(blockPos.relative(direction2), block, null);
 			}
 		}
 	}
@@ -37,9 +37,9 @@ public interface NeighborUpdater {
 		Block.updateOrDestroy(blockState2, blockState3, levelAccessor, blockPos, i, j);
 	}
 
-	static void executeUpdate(Level level, BlockState blockState, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
+	static void executeUpdate(Level level, BlockState blockState, BlockPos blockPos, Block block, @Nullable Orientation orientation, boolean bl) {
 		try {
-			blockState.handleNeighborChanged(level, blockPos, block, blockPos2, bl);
+			blockState.handleNeighborChanged(level, blockPos, block, orientation, bl);
 		} catch (Throwable var9) {
 			CrashReport crashReport = CrashReport.forThrowable(var9, "Exception while updating neighbours");
 			CrashReportCategory crashReportCategory = crashReport.addCategory("Block being updated");

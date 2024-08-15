@@ -22,6 +22,8 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.phys.AABB;
 
 public class EntitySectionStorage<T extends EntityAccess> {
+	public static final int CHONKY_ENTITY_SEARCH_GRACE = 2;
+	public static final int MAX_NON_CHONKY_ENTITY_SIZE = 4;
 	private final Class<T> entityClass;
 	private final Long2ObjectFunction<Visibility> intialSectionVisibility;
 	private final Long2ObjectMap<EntitySection<T>> sections = new Long2ObjectOpenHashMap<>();
@@ -33,25 +35,24 @@ public class EntitySectionStorage<T extends EntityAccess> {
 	}
 
 	public void forEachAccessibleNonEmptySection(AABB aABB, AbortableIterationConsumer<EntitySection<T>> abortableIterationConsumer) {
-		int i = 2;
-		int j = SectionPos.posToSectionCoord(aABB.minX - 2.0);
-		int k = SectionPos.posToSectionCoord(aABB.minY - 4.0);
-		int l = SectionPos.posToSectionCoord(aABB.minZ - 2.0);
-		int m = SectionPos.posToSectionCoord(aABB.maxX + 2.0);
-		int n = SectionPos.posToSectionCoord(aABB.maxY + 0.0);
-		int o = SectionPos.posToSectionCoord(aABB.maxZ + 2.0);
+		int i = SectionPos.posToSectionCoord(aABB.minX - 2.0);
+		int j = SectionPos.posToSectionCoord(aABB.minY - 4.0);
+		int k = SectionPos.posToSectionCoord(aABB.minZ - 2.0);
+		int l = SectionPos.posToSectionCoord(aABB.maxX + 2.0);
+		int m = SectionPos.posToSectionCoord(aABB.maxY + 0.0);
+		int n = SectionPos.posToSectionCoord(aABB.maxZ + 2.0);
 
-		for (int p = j; p <= m; p++) {
-			long q = SectionPos.asLong(p, 0, 0);
-			long r = SectionPos.asLong(p, -1, -1);
-			LongIterator longIterator = this.sectionIds.subSet(q, r + 1L).iterator();
+		for (int o = i; o <= l; o++) {
+			long p = SectionPos.asLong(o, 0, 0);
+			long q = SectionPos.asLong(o, -1, -1);
+			LongIterator longIterator = this.sectionIds.subSet(p, q + 1L).iterator();
 
 			while (longIterator.hasNext()) {
-				long s = longIterator.nextLong();
-				int t = SectionPos.y(s);
-				int u = SectionPos.z(s);
-				if (t >= k && t <= n && u >= l && u <= o) {
-					EntitySection<T> entitySection = this.sections.get(s);
+				long r = longIterator.nextLong();
+				int s = SectionPos.y(r);
+				int t = SectionPos.z(r);
+				if (s >= j && s <= m && t >= k && t <= n) {
+					EntitySection<T> entitySection = this.sections.get(r);
 					if (entitySection != null
 						&& !entitySection.isEmpty()
 						&& entitySection.getStatus().isAccessible()

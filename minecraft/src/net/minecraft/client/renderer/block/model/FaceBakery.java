@@ -34,7 +34,8 @@ public class FaceBakery {
 		Direction direction,
 		ModelState modelState,
 		@Nullable BlockElementRotation blockElementRotation,
-		boolean bl
+		boolean bl,
+		int i
 	) {
 		BlockFaceUV blockFaceUV = blockElementFace.uv();
 		if (modelState.isUvLocked()) {
@@ -50,16 +51,14 @@ public class FaceBakery {
 		blockFaceUV.uvs[2] = Mth.lerp(f, blockFaceUV.uvs[2], g);
 		blockFaceUV.uvs[1] = Mth.lerp(f, blockFaceUV.uvs[1], h);
 		blockFaceUV.uvs[3] = Mth.lerp(f, blockFaceUV.uvs[3], h);
-		int[] is = this.makeVertices(
-			blockFaceUV, textureAtlasSprite, direction, this.setupShape(vector3f, vector3f2), modelState.getRotation(), blockElementRotation, bl
-		);
+		int[] is = this.makeVertices(blockFaceUV, textureAtlasSprite, direction, this.setupShape(vector3f, vector3f2), modelState.getRotation(), blockElementRotation);
 		Direction direction2 = calculateFacing(is);
 		System.arraycopy(fs, 0, blockFaceUV.uvs, 0, fs.length);
 		if (blockElementRotation == null) {
 			this.recalculateWinding(is, direction2);
 		}
 
-		return new BakedQuad(is, blockElementFace.tintIndex(), direction2, textureAtlasSprite, bl);
+		return new BakedQuad(is, blockElementFace.tintIndex(), direction2, textureAtlasSprite, bl, i);
 	}
 
 	public static BlockFaceUV recomputeUVs(BlockFaceUV blockFaceUV, Direction direction, Transformation transformation) {
@@ -107,13 +106,12 @@ public class FaceBakery {
 		Direction direction,
 		float[] fs,
 		Transformation transformation,
-		@Nullable BlockElementRotation blockElementRotation,
-		boolean bl
+		@Nullable BlockElementRotation blockElementRotation
 	) {
 		int[] is = new int[32];
 
 		for (int i = 0; i < 4; i++) {
-			this.bakeVertex(is, i, direction, blockFaceUV, fs, textureAtlasSprite, transformation, blockElementRotation, bl);
+			this.bakeVertex(is, i, direction, blockFaceUV, fs, textureAtlasSprite, transformation, blockElementRotation);
 		}
 
 		return is;
@@ -138,8 +136,7 @@ public class FaceBakery {
 		float[] fs,
 		TextureAtlasSprite textureAtlasSprite,
 		Transformation transformation,
-		@Nullable BlockElementRotation blockElementRotation,
-		boolean bl
+		@Nullable BlockElementRotation blockElementRotation
 	) {
 		FaceInfo.VertexInfo vertexInfo = FaceInfo.fromFacing(direction).getVertexInfo(i);
 		Vector3f vector3f = new Vector3f(fs[vertexInfo.xFace], fs[vertexInfo.yFace], fs[vertexInfo.zFace]);
@@ -222,7 +219,7 @@ public class FaceBakery {
 			float f = 0.0F;
 
 			for (Direction direction2 : Direction.values()) {
-				Vec3i vec3i = direction2.getNormal();
+				Vec3i vec3i = direction2.getUnitVec3i();
 				Vector3f vector3f7 = new Vector3f((float)vec3i.getX(), (float)vec3i.getY(), (float)vec3i.getZ());
 				float g = vector3f6.dot(vector3f7);
 				if (g >= 0.0F && g > f) {

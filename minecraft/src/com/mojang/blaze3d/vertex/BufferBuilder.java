@@ -5,7 +5,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.util.FastColor;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 import org.lwjgl.system.MemoryUtil;
 
@@ -126,7 +126,7 @@ public class BufferBuilder implements VertexConsumer {
 	}
 
 	private static void putRgba(long l, int i) {
-		int j = FastColor.ABGR32.fromArgb32(i);
+		int j = ARGB.toABGR(i);
 		MemoryUtil.memPutInt(l, IS_LITTLE_ENDIAN ? j : Integer.reverseBytes(j));
 	}
 

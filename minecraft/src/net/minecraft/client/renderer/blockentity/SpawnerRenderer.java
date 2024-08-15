@@ -47,7 +47,7 @@ public class SpawnerRenderer implements BlockEntityRenderer<SpawnerBlockEntity> 
 		poseStack.translate(0.0F, -0.2F, 0.0F);
 		poseStack.mulPose(Axis.XP.rotationDegrees(-30.0F));
 		poseStack.scale(g, g, g);
-		entityRenderDispatcher.render(entity, 0.0, 0.0, 0.0, 0.0F, f, poseStack, multiBufferSource, i);
+		entityRenderDispatcher.render(entity, 0.0, 0.0, 0.0, f, poseStack, multiBufferSource, i);
 		poseStack.popPose();
 	}
 }

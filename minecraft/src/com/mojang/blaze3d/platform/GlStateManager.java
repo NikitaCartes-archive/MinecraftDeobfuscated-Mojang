@@ -39,6 +39,8 @@ public class GlStateManager {
 	private static final GlStateManager.ColorLogicState COLOR_LOGIC = new GlStateManager.ColorLogicState();
 	private static final GlStateManager.StencilState STENCIL = new GlStateManager.StencilState();
 	private static final GlStateManager.ScissorState SCISSOR = new GlStateManager.ScissorState();
+	private static final GlStateManager.FramebufferState READ_FRAMEBUFFER = new GlStateManager.FramebufferState();
+	private static final GlStateManager.FramebufferState DRAW_FRAMEBUFFER = new GlStateManager.FramebufferState();
 	private static int activeTexture;
 	private static final GlStateManager.TextureState[] TEXTURES = (GlStateManager.TextureState[])IntStream.range(0, 12)
 		.mapToObj(i -> new GlStateManager.TextureState())
@@ -333,7 +335,16 @@ public class GlStateManager {
 
 	public static void _glBindFramebuffer(int i, int j) {
 		RenderSystem.assertOnRenderThreadOrInit();
-		GL30.glBindFramebuffer(i, j);
+
+		boolean bl = switch (i) {
+			case 36008 -> READ_FRAMEBUFFER.update(j);
+			case 36009 -> DRAW_FRAMEBUFFER.update(j);
+			case 36160 -> READ_FRAMEBUFFER.update(j) | DRAW_FRAMEBUFFER.update(j);
+			default -> true;
+		};
+		if (bl) {
+			GL30.glBindFramebuffer(i, j);
+		}
 	}
 
 	public static void _glBlitFrameBuffer(int i, int j, int k, int l, int m, int n, int o, int p, int q, int r) {
@@ -651,10 +662,10 @@ public class GlStateManager {
 		GL11.glClearStencil(i);
 	}
 
-	public static void _clear(int i, boolean bl) {
+	public static void _clear(int i) {
 		RenderSystem.assertOnRenderThreadOrInit();
 		GL11.glClear(i);
-		if (bl) {
+		if (MacosUtil.IS_MACOS) {
 			_getError();
 		}
 	}
@@ -807,6 +818,20 @@ public class GlStateManager {
 
 		private DestFactor(final int j) {
 			this.value = j;
+		}
+	}
+
+	@Environment(EnvType.CLIENT)
+	static class FramebufferState {
+		public int binding;
+
+		public boolean update(int i) {
+			if (i != this.binding) {
+				this.binding = i;
+				return true;
+			} else {
+				return false;
+			}
 		}
 	}
 

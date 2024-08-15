@@ -8,11 +8,11 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Entity;
 
 @Environment(EnvType.CLIENT)
-public class CodModel<T extends Entity> extends HierarchicalModel<T> {
+public class CodModel extends EntityModel<LivingEntityRenderState> {
 	private final ModelPart root;
 	private final ModelPart tailFin;
 
@@ -58,13 +58,8 @@ public class CodModel<T extends Entity> extends HierarchicalModel<T> {
 		return this.root;
 	}
 
-	@Override
-	public void setupAnim(T entity, float f, float g, float h, float i, float j) {
-		float k = 1.0F;
-		if (!entity.isInWater()) {
-			k = 1.5F;
-		}
-
-		this.tailFin.yRot = -k * 0.45F * Mth.sin(0.6F * h);
+	public void setupAnim(LivingEntityRenderState livingEntityRenderState) {
+		float f = livingEntityRenderState.isInWater ? 1.0F : 1.5F;
+		this.tailFin.yRot = -f * 0.45F * Mth.sin(0.6F * livingEntityRenderState.ageInTicks);
 	}
 }

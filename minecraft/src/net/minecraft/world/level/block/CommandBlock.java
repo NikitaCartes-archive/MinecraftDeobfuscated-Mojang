@@ -4,6 +4,7 @@ import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
@@ -26,6 +27,7 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.phys.BlockHitResult;
 import org.slf4j.Logger;
 
@@ -58,18 +60,25 @@ public class CommandBlock extends BaseEntityBlock implements GameMasterBlock {
 	}
 
 	@Override
-	protected void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
+	protected void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, @Nullable Orientation orientation, boolean bl) {
 		if (!level.isClientSide) {
 			if (level.getBlockEntity(blockPos) instanceof CommandBlockEntity commandBlockEntity) {
-				boolean bl2 = level.hasNeighborSignal(blockPos);
-				boolean bl3 = commandBlockEntity.isPowered();
-				commandBlockEntity.setPowered(bl2);
-				if (!bl3 && !commandBlockEntity.isAutomatic() && commandBlockEntity.getMode() != CommandBlockEntity.Mode.SEQUENCE) {
-					if (bl2) {
-						commandBlockEntity.markConditionMet();
-						level.scheduleTick(blockPos, this, 1);
-					}
+				this.setPoweredAndUpdate(level, blockPos, commandBlockEntity, level.hasNeighborSignal(blockPos));
+			}
+		}
+	}
+
+	private void setPoweredAndUpdate(Level level, BlockPos blockPos, CommandBlockEntity commandBlockEntity, boolean bl) {
+		boolean bl2 = commandBlockEntity.isPowered();
+		if (bl != bl2) {
+			commandBlockEntity.setPowered(bl);
+			if (bl) {
+				if (commandBlockEntity.isAutomatic() || commandBlockEntity.getMode() == CommandBlockEntity.Mode.SEQUENCE) {
+					return;
 				}
+
+				commandBlockEntity.markConditionMet();
+				level.scheduleTick(blockPos, this, 1);
 			}
 		}
 	}
@@ -119,7 +128,7 @@ public class CommandBlock extends BaseEntityBlock implements GameMasterBlock {
 		BlockEntity blockEntity = level.getBlockEntity(blockPos);
 		if (blockEntity instanceof CommandBlockEntity && player.canUseGameMasterBlocks()) {
 			player.openCommandBlock((CommandBlockEntity)blockEntity);
-			return InteractionResult.sidedSuccess(level.isClientSide);
+			return InteractionResult.SUCCESS;
 		} else {
 			return InteractionResult.PASS;
 		}
@@ -147,7 +156,7 @@ public class CommandBlock extends BaseEntityBlock implements GameMasterBlock {
 				}
 
 				boolean bl = level.hasNeighborSignal(blockPos);
-				commandBlockEntity.setPowered(bl);
+				this.setPoweredAndUpdate(level, blockPos, commandBlockEntity, bl);
 			}
 		}
 	}

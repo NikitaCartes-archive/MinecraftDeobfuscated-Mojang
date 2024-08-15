@@ -174,6 +174,10 @@ public class SurfaceSystem {
 		return !blockState.isAir() && blockState.getFluidState().isEmpty();
 	}
 
+	public int getSeaLevel() {
+		return this.seaLevel;
+	}
+
 	@Deprecated
 	public Optional<BlockState> topMaterial(
 		SurfaceRules.RuleSource ruleSource,
@@ -239,7 +243,7 @@ public class SurfaceSystem {
 			double g = 1.5;
 			double h = Math.abs(this.icebergPillarRoofNoise.getValue((double)j * 1.17, 0.0, (double)k * 1.17) * 1.5);
 			double m = Math.min(e * e * 1.2, Math.ceil(h * 40.0) + 14.0);
-			if (biome.shouldMeltFrozenOceanIcebergSlightly(mutableBlockPos.set(j, 63, k))) {
+			if (biome.shouldMeltFrozenOceanIcebergSlightly(mutableBlockPos.set(j, this.seaLevel, k), this.seaLevel)) {
 				m -= 2.0;
 			}
 

@@ -10,10 +10,10 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
-import net.minecraft.world.entity.animal.frog.Frog;
+import net.minecraft.client.renderer.entity.state.FrogRenderState;
 
 @Environment(EnvType.CLIENT)
-public class FrogModel<T extends Frog> extends HierarchicalModel<T> {
+public class FrogModel extends EntityModel<FrogRenderState> {
 	private static final float MAX_WALK_ANIMATION_SPEED = 1.5F;
 	private static final float MAX_SWIM_ANIMATION_SPEED = 1.0F;
 	private static final float WALK_ANIMATION_SCALE_FACTOR = 2.5F;
@@ -97,19 +97,19 @@ public class FrogModel<T extends Frog> extends HierarchicalModel<T> {
 		return LayerDefinition.create(meshDefinition, 48, 48);
 	}
 
-	public void setupAnim(T frog, float f, float g, float h, float i, float j) {
+	public void setupAnim(FrogRenderState frogRenderState) {
 		this.root().getAllParts().forEach(ModelPart::resetPose);
-		this.animate(frog.jumpAnimationState, FrogAnimation.FROG_JUMP, h);
-		this.animate(frog.croakAnimationState, FrogAnimation.FROG_CROAK, h);
-		this.animate(frog.tongueAnimationState, FrogAnimation.FROG_TONGUE, h);
-		if (frog.isInWaterOrBubble()) {
-			this.animateWalk(FrogAnimation.FROG_SWIM, f, g, 1.0F, 2.5F);
+		this.animate(frogRenderState.jumpAnimationState, FrogAnimation.FROG_JUMP, frogRenderState.ageInTicks);
+		this.animate(frogRenderState.croakAnimationState, FrogAnimation.FROG_CROAK, frogRenderState.ageInTicks);
+		this.animate(frogRenderState.tongueAnimationState, FrogAnimation.FROG_TONGUE, frogRenderState.ageInTicks);
+		if (frogRenderState.isSwimming) {
+			this.animateWalk(FrogAnimation.FROG_SWIM, frogRenderState.walkAnimationPos, frogRenderState.walkAnimationSpeed, 1.0F, 2.5F);
 		} else {
-			this.animateWalk(FrogAnimation.FROG_WALK, f, g, 1.5F, 2.5F);
+			this.animateWalk(FrogAnimation.FROG_WALK, frogRenderState.walkAnimationPos, frogRenderState.walkAnimationSpeed, 1.5F, 2.5F);
 		}
 
-		this.animate(frog.swimIdleAnimationState, FrogAnimation.FROG_IDLE_WATER, h);
-		this.croakingBody.visible = frog.croakAnimationState.isStarted();
+		this.animate(frogRenderState.swimIdleAnimationState, FrogAnimation.FROG_IDLE_WATER, frogRenderState.ageInTicks);
+		this.croakingBody.visible = frogRenderState.croakAnimationState.isStarted();
 	}
 
 	@Override

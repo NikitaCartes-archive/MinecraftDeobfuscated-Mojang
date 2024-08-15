@@ -16,6 +16,7 @@ import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.advancements.critereon.LocationPredicate;
 import net.minecraft.advancements.critereon.PlayerTrigger;
 import net.minecraft.advancements.critereon.TagPredicate;
+import net.minecraft.core.HolderGetter;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.advancements.AdvancementSubProvider;
@@ -23,6 +24,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -31,6 +33,7 @@ import net.minecraft.world.level.levelgen.structure.BuiltinStructures;
 public class VanillaStoryAdvancements implements AdvancementSubProvider {
 	@Override
 	public void generate(HolderLookup.Provider provider, Consumer<AdvancementHolder> consumer) {
+		HolderGetter<Item> holderGetter = provider.lookupOrThrow(Registries.ITEM);
 		AdvancementHolder advancementHolder = Advancement.Builder.advancement()
 			.display(
 				Blocks.GRASS_BLOCK,
@@ -56,7 +59,7 @@ public class VanillaStoryAdvancements implements AdvancementSubProvider {
 				true,
 				false
 			)
-			.addCriterion("get_stone", InventoryChangeTrigger.TriggerInstance.hasItems(ItemPredicate.Builder.item().of(ItemTags.STONE_TOOL_MATERIALS)))
+			.addCriterion("get_stone", InventoryChangeTrigger.TriggerInstance.hasItems(ItemPredicate.Builder.item().of(holderGetter, ItemTags.STONE_TOOL_MATERIALS)))
 			.save(consumer, "story/mine_stone");
 		AdvancementHolder advancementHolder3 = Advancement.Builder.advancement()
 			.parent(advancementHolder2)

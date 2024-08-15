@@ -94,7 +94,7 @@ public interface ContainerEntity extends Container, MenuProvider {
 
 	default InteractionResult interactWithContainerVehicle(Player player) {
 		player.openMenu(this);
-		return !player.level().isClientSide ? InteractionResult.CONSUME : InteractionResult.SUCCESS;
+		return InteractionResult.SUCCESS;
 	}
 
 	default void unpackChestVehicleLootTable(@Nullable Player player) {

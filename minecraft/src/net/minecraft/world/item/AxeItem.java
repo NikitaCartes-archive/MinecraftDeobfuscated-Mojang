@@ -50,8 +50,8 @@ public class AxeItem extends DiggerItem {
 		.put(Blocks.BAMBOO_BLOCK, Blocks.STRIPPED_BAMBOO_BLOCK)
 		.build();
 
-	public AxeItem(Tier tier, Item.Properties properties) {
-		super(tier, BlockTags.MINEABLE_WITH_AXE, properties);
+	public AxeItem(ToolMaterial toolMaterial, float f, float g, Item.Properties properties) {
+		super(toolMaterial, BlockTags.MINEABLE_WITH_AXE, f, g, properties);
 	}
 
 	@Override
@@ -77,7 +77,7 @@ public class AxeItem extends DiggerItem {
 					itemStack.hurtAndBreak(1, player, LivingEntity.getSlotForHand(useOnContext.getHand()));
 				}
 
-				return InteractionResult.sidedSuccess(level.isClientSide);
+				return InteractionResult.SUCCESS;
 			}
 		}
 	}

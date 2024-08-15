@@ -10,14 +10,14 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.Brain;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
 public class TemptingSensor extends Sensor<PathfinderMob> {
-	public static final int TEMPTATION_RANGE = 10;
-	private static final TargetingConditions TEMPT_TARGETING = TargetingConditions.forNonCombat().range(10.0).ignoreLineOfSight();
+	private static final TargetingConditions TEMPT_TARGETING = TargetingConditions.forNonCombat().ignoreLineOfSight();
 	private final Predicate<ItemStack> temptations;
 
 	public TemptingSensor(Predicate<ItemStack> predicate) {
@@ -26,11 +26,11 @@ public class TemptingSensor extends Sensor<PathfinderMob> {
 
 	protected void doTick(ServerLevel serverLevel, PathfinderMob pathfinderMob) {
 		Brain<?> brain = pathfinderMob.getBrain();
+		TargetingConditions targetingConditions = TEMPT_TARGETING.copy().range((double)((float)pathfinderMob.getAttributeValue(Attributes.TEMPT_RANGE)));
 		List<Player> list = (List<Player>)serverLevel.players()
 			.stream()
 			.filter(EntitySelector.NO_SPECTATORS)
-			.filter(serverPlayer -> TEMPT_TARGETING.test(pathfinderMob, serverPlayer))
-			.filter(serverPlayer -> pathfinderMob.closerThan(serverPlayer, 10.0))
+			.filter(serverPlayer -> targetingConditions.test(pathfinderMob, serverPlayer))
 			.filter(this::playerHoldingTemptation)
 			.filter(serverPlayer -> !pathfinderMob.hasPassenger(serverPlayer))
 			.sorted(Comparator.comparingDouble(pathfinderMob::distanceToSqr))

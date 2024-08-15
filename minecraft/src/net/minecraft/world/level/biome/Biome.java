@@ -99,33 +99,34 @@ public final class Biome {
 		return this.climateSettings.hasPrecipitation();
 	}
 
-	public Biome.Precipitation getPrecipitationAt(BlockPos blockPos) {
+	public Biome.Precipitation getPrecipitationAt(BlockPos blockPos, int i) {
 		if (!this.hasPrecipitation()) {
 			return Biome.Precipitation.NONE;
 		} else {
-			return this.coldEnoughToSnow(blockPos) ? Biome.Precipitation.SNOW : Biome.Precipitation.RAIN;
+			return this.coldEnoughToSnow(blockPos, i) ? Biome.Precipitation.SNOW : Biome.Precipitation.RAIN;
 		}
 	}
 
-	private float getHeightAdjustedTemperature(BlockPos blockPos) {
+	private float getHeightAdjustedTemperature(BlockPos blockPos, int i) {
 		float f = this.climateSettings.temperatureModifier.modifyTemperature(blockPos, this.getBaseTemperature());
-		if (blockPos.getY() > 80) {
+		int j = i + 17;
+		if (blockPos.getY() > j) {
 			float g = (float)(TEMPERATURE_NOISE.getValue((double)((float)blockPos.getX() / 8.0F), (double)((float)blockPos.getZ() / 8.0F), false) * 8.0);
-			return f - (g + (float)blockPos.getY() - 80.0F) * 0.05F / 40.0F;
+			return f - (g + (float)blockPos.getY() - (float)j) * 0.05F / 40.0F;
 		} else {
 			return f;
 		}
 	}
 
 	@Deprecated
-	private float getTemperature(BlockPos blockPos) {
+	private float getTemperature(BlockPos blockPos, int i) {
 		long l = blockPos.asLong();
 		Long2FloatLinkedOpenHashMap long2FloatLinkedOpenHashMap = (Long2FloatLinkedOpenHashMap)this.temperatureCache.get();
 		float f = long2FloatLinkedOpenHashMap.get(l);
 		if (!Float.isNaN(f)) {
 			return f;
 		} else {
-			float g = this.getHeightAdjustedTemperature(blockPos);
+			float g = this.getHeightAdjustedTemperature(blockPos, i);
 			if (long2FloatLinkedOpenHashMap.size() == 1024) {
 				long2FloatLinkedOpenHashMap.removeFirstFloat();
 			}
@@ -140,7 +141,7 @@ public final class Biome {
 	}
 
 	public boolean shouldFreeze(LevelReader levelReader, BlockPos blockPos, boolean bl) {
-		if (this.warmEnoughToRain(blockPos)) {
+		if (this.warmEnoughToRain(blockPos, levelReader.getSeaLevel())) {
 			return false;
 		} else {
 			if (blockPos.getY() >= levelReader.getMinBuildHeight()
@@ -167,20 +168,20 @@ public final class Biome {
 		}
 	}
 
-	public boolean coldEnoughToSnow(BlockPos blockPos) {
-		return !this.warmEnoughToRain(blockPos);
+	public boolean coldEnoughToSnow(BlockPos blockPos, int i) {
+		return !this.warmEnoughToRain(blockPos, i);
 	}
 
-	public boolean warmEnoughToRain(BlockPos blockPos) {
-		return this.getTemperature(blockPos) >= 0.15F;
+	public boolean warmEnoughToRain(BlockPos blockPos, int i) {
+		return this.getTemperature(blockPos, i) >= 0.15F;
 	}
 
-	public boolean shouldMeltFrozenOceanIcebergSlightly(BlockPos blockPos) {
-		return this.getTemperature(blockPos) > 0.1F;
+	public boolean shouldMeltFrozenOceanIcebergSlightly(BlockPos blockPos, int i) {
+		return this.getTemperature(blockPos, i) > 0.1F;
 	}
 
 	public boolean shouldSnow(LevelReader levelReader, BlockPos blockPos) {
-		if (this.warmEnoughToRain(blockPos)) {
+		if (this.warmEnoughToRain(blockPos, levelReader.getSeaLevel())) {
 			return false;
 		} else {
 			if (blockPos.getY() >= levelReader.getMinBuildHeight()

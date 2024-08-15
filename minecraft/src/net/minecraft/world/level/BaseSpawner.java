@@ -17,9 +17,9 @@ import net.minecraft.util.random.WeightedEntry;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySelector;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.SpawnPlacements;
 import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.level.gameevent.GameEvent;
@@ -115,11 +115,11 @@ public abstract class BaseSpawner {
 							if (!customSpawnRules.isValidPosition(blockPos2, serverLevel)) {
 								continue;
 							}
-						} else if (!SpawnPlacements.checkSpawnRules((EntityType)optional.get(), serverLevel, MobSpawnType.SPAWNER, blockPos2, serverLevel.getRandom())) {
+						} else if (!SpawnPlacements.checkSpawnRules((EntityType)optional.get(), serverLevel, EntitySpawnReason.SPAWNER, blockPos2, serverLevel.getRandom())) {
 							continue;
 						}
 
-						Entity entity = EntityType.loadEntityRecursive(compoundTag, serverLevel, entityx -> {
+						Entity entity = EntityType.loadEntityRecursive(compoundTag, serverLevel, EntitySpawnReason.SPAWNER, entityx -> {
 							entityx.moveTo(d, e, f, entityx.getYRot(), entityx.getXRot());
 							return entityx;
 						});
@@ -149,13 +149,15 @@ public abstract class BaseSpawner {
 
 						entity.moveTo(entity.getX(), entity.getY(), entity.getZ(), randomSource.nextFloat() * 360.0F, 0.0F);
 						if (entity instanceof Mob mob) {
-							if (spawnData.getCustomSpawnRules().isEmpty() && !mob.checkSpawnRules(serverLevel, MobSpawnType.SPAWNER) || !mob.checkSpawnObstruction(serverLevel)) {
+							if (spawnData.getCustomSpawnRules().isEmpty() && !mob.checkSpawnRules(serverLevel, EntitySpawnReason.SPAWNER) || !mob.checkSpawnObstruction(serverLevel)
+								)
+							 {
 								continue;
 							}
 
 							boolean bl2 = spawnData.getEntityToSpawn().size() == 1 && spawnData.getEntityToSpawn().contains("id", 8);
 							if (bl2) {
-								((Mob)entity).finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(entity.blockPosition()), MobSpawnType.SPAWNER, null);
+								((Mob)entity).finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(entity.blockPosition()), EntitySpawnReason.SPAWNER, null);
 							}
 
 							spawnData.getEquipment().ifPresent(mob::equip);
@@ -262,7 +264,7 @@ public abstract class BaseSpawner {
 				return null;
 			}
 
-			this.displayEntity = EntityType.loadEntityRecursive(compoundTag, level, Function.identity());
+			this.displayEntity = EntityType.loadEntityRecursive(compoundTag, level, EntitySpawnReason.SPAWNER, Function.identity());
 			if (compoundTag.size() == 1 && this.displayEntity instanceof Mob) {
 			}
 		}

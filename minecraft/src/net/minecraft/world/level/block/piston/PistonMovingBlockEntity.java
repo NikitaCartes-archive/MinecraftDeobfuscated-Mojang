@@ -24,6 +24,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.PistonType;
 import net.minecraft.world.level.material.PushReaction;
+import net.minecraft.world.level.redstone.ExperimentalRedstoneUtils;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -181,6 +182,7 @@ public class PistonMovingBlockEntity extends BlockEntity {
 	private static void moveEntityByPiston(Direction direction, Entity entity, double d, Direction direction2) {
 		NOCLIP.set(direction);
 		entity.move(MoverType.PISTON, new Vec3(d * (double)direction2.getStepX(), d * (double)direction2.getStepY(), d * (double)direction2.getStepZ()));
+		entity.applyEffectsFromBlocks();
 		NOCLIP.set(null);
 	}
 
@@ -273,9 +275,14 @@ public class PistonMovingBlockEntity extends BlockEntity {
 				}
 
 				this.level.setBlock(this.worldPosition, blockState, 3);
-				this.level.neighborChanged(this.worldPosition, blockState.getBlock(), this.worldPosition);
+				this.level
+					.neighborChanged(this.worldPosition, blockState.getBlock(), ExperimentalRedstoneUtils.randomOrientation(this.level, this.getPushDirection(), null));
 			}
 		}
+	}
+
+	public Direction getPushDirection() {
+		return this.extending ? this.direction : this.direction.getOpposite();
 	}
 
 	public static void tick(Level level, BlockPos blockPos, BlockState blockState, PistonMovingBlockEntity pistonMovingBlockEntity) {
@@ -298,7 +305,9 @@ public class PistonMovingBlockEntity extends BlockEntity {
 						}
 
 						level.setBlock(blockPos, blockState2, 67);
-						level.neighborChanged(blockPos, blockState2.getBlock(), blockPos);
+						level.neighborChanged(
+							blockPos, blockState2.getBlock(), ExperimentalRedstoneUtils.randomOrientation(level, pistonMovingBlockEntity.getPushDirection(), null)
+						);
 					}
 				}
 			}

@@ -47,6 +47,6 @@ public class RealmsUtil {
 		Minecraft minecraft = Minecraft.getInstance();
 		ProfileResult profileResult = minecraft.getMinecraftSessionService().fetchProfile(uUID, false);
 		PlayerSkin playerSkin = profileResult != null ? minecraft.getSkinManager().getInsecureSkin(profileResult.profile()) : DefaultPlayerSkin.get(uUID);
-		PlayerFaceRenderer.draw(guiGraphics, playerSkin.texture(), i, j, k);
+		PlayerFaceRenderer.draw(guiGraphics, playerSkin, i, j, k);
 	}
 }

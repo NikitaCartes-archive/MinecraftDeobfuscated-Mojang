@@ -60,7 +60,7 @@ public class KeyBindsScreen extends OptionsSubScreen {
 	@Override
 	public boolean mouseClicked(double d, double e, int i) {
 		if (this.selectedKey != null) {
-			this.options.setKey(this.selectedKey, InputConstants.Type.MOUSE.getOrCreate(i));
+			this.selectedKey.setKey(InputConstants.Type.MOUSE.getOrCreate(i));
 			this.selectedKey = null;
 			this.keyBindsList.resetMappingAndUpdateButtons();
 			return true;
@@ -73,9 +73,9 @@ public class KeyBindsScreen extends OptionsSubScreen {
 	public boolean keyPressed(int i, int j, int k) {
 		if (this.selectedKey != null) {
 			if (i == 256) {
-				this.options.setKey(this.selectedKey, InputConstants.UNKNOWN);
+				this.selectedKey.setKey(InputConstants.UNKNOWN);
 			} else {
-				this.options.setKey(this.selectedKey, InputConstants.getKey(i, j));
+				this.selectedKey.setKey(InputConstants.getKey(i, j));
 			}
 
 			this.selectedKey = null;

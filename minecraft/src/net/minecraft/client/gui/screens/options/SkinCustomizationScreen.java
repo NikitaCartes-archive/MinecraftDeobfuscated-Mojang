@@ -26,7 +26,7 @@ public class SkinCustomizationScreen extends OptionsSubScreen {
 		for (PlayerModelPart playerModelPart : PlayerModelPart.values()) {
 			list.add(
 				CycleButton.onOffBuilder(this.options.isModelPartEnabled(playerModelPart))
-					.create(playerModelPart.getName(), (cycleButton, boolean_) -> this.options.toggleModelPart(playerModelPart, boolean_))
+					.create(playerModelPart.getName(), (cycleButton, boolean_) -> this.options.setModelPart(playerModelPart, boolean_))
 			);
 		}
 

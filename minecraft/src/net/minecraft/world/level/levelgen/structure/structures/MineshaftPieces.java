@@ -431,7 +431,7 @@ public class MineshaftPieces {
 
 					for (int p = 0; p <= m; p++) {
 						BlockState blockState3 = this.getBlock(worldGenLevel, 1, -1, p, boundingBox);
-						if (!blockState3.isAir() && blockState3.isSolidRender(worldGenLevel, this.getWorldPos(1, -1, p))) {
+						if (!blockState3.isAir() && blockState3.isSolidRender()) {
 							float f = this.isInterior(worldGenLevel, 1, 0, p, boundingBox) ? 0.7F : 0.9F;
 							this.maybeGenerateBlock(worldGenLevel, boundingBox, randomSource, f, 1, 0, p, blockState2);
 						}

@@ -26,15 +26,14 @@ public final class MissingTextureAtlasSprite {
 
 	private static NativeImage generateMissingImage(int i, int j) {
 		NativeImage nativeImage = new NativeImage(i, j, false);
-		int k = -16777216;
-		int l = -524040;
+		int k = -524040;
 
-		for (int m = 0; m < j; m++) {
-			for (int n = 0; n < i; n++) {
-				if (m < j / 2 ^ n < i / 2) {
-					nativeImage.setPixelRGBA(n, m, -524040);
+		for (int l = 0; l < j; l++) {
+			for (int m = 0; m < i; m++) {
+				if (l < j / 2 ^ m < i / 2) {
+					nativeImage.setPixel(m, l, -524040);
 				} else {
-					nativeImage.setPixelRGBA(n, m, -16777216);
+					nativeImage.setPixel(m, l, -16777216);
 				}
 			}
 		}

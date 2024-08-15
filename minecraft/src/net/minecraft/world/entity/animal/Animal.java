@@ -16,9 +16,12 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgeableMob;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ExperienceOrb;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockAndTintGetter;
@@ -39,6 +42,10 @@ public abstract class Animal extends AgeableMob {
 		super(entityType, level);
 		this.setPathfindingMalus(PathType.DANGER_FIRE, 16.0F);
 		this.setPathfindingMalus(PathType.DAMAGE_FIRE, -1.0F);
+	}
+
+	public static AttributeSupplier.Builder createAnimalAttributes() {
+		return Mob.createMobAttributes().add(Attributes.TEMPT_RANGE, 10.0);
 	}
 
 	@Override
@@ -96,9 +103,9 @@ public abstract class Animal extends AgeableMob {
 	}
 
 	public static boolean checkAnimalSpawnRules(
-		EntityType<? extends Animal> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, RandomSource randomSource
+		EntityType<? extends Animal> entityType, LevelAccessor levelAccessor, EntitySpawnReason entitySpawnReason, BlockPos blockPos, RandomSource randomSource
 	) {
-		boolean bl = MobSpawnType.ignoresLightRequirements(mobSpawnType) || isBrightEnoughToSpawn(levelAccessor, blockPos);
+		boolean bl = EntitySpawnReason.ignoresLightRequirements(entitySpawnReason) || isBrightEnoughToSpawn(levelAccessor, blockPos);
 		return levelAccessor.getBlockState(blockPos.below()).is(BlockTags.ANIMALS_SPAWNABLE_ON) && bl;
 	}
 
@@ -131,21 +138,22 @@ public abstract class Animal extends AgeableMob {
 			if (!this.level().isClientSide && i == 0 && this.canFallInLove()) {
 				this.usePlayerItem(player, interactionHand, itemStack);
 				this.setInLove(player);
-				return InteractionResult.SUCCESS;
+				this.playEatingSound();
+				return InteractionResult.SUCCESS_SERVER;
 			}
 
 			if (this.isBaby()) {
 				this.usePlayerItem(player, interactionHand, itemStack);
 				this.ageUp(getSpeedUpSecondsWhenFeeding(-i), true);
-				return InteractionResult.sidedSuccess(this.level().isClientSide);
-			}
-
-			if (this.level().isClientSide) {
-				return InteractionResult.CONSUME;
+				this.playEatingSound();
+				return InteractionResult.SUCCESS;
 			}
 		}
 
 		return super.mobInteract(player, interactionHand);
+	}
+
+	protected void playEatingSound() {
 	}
 
 	protected void usePlayerItem(Player player, InteractionHand interactionHand, ItemStack itemStack) {

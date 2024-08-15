@@ -4,12 +4,12 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.server.level.ChunkTaskPriorityQueueSorter;
 import net.minecraft.server.level.GenerationChunkHolder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ThreadedLevelLightEngine;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.util.StaticCache2D;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.ChunkAccess;
@@ -17,7 +17,6 @@ import net.minecraft.world.level.chunk.ImposterProtoChunk;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.ProtoChunk;
 import net.minecraft.world.level.levelgen.BelowZeroRetrogen;
-import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.blending.Blender;
 
@@ -128,8 +127,7 @@ public class ChunkStatusTasks {
 				serverLevel.getChunkSource().randomState(),
 				serverLevel.getBiomeManager(),
 				serverLevel.structureManager().forWorldGenRegion(worldGenRegion),
-				chunkAccess,
-				GenerationStep.Carving.AIR
+				chunkAccess
 			);
 		return CompletableFuture.completedFuture(chunkAccess);
 	}
@@ -180,33 +178,29 @@ public class ChunkStatusTasks {
 	) {
 		ChunkPos chunkPos = chunkAccess.getPos();
 		GenerationChunkHolder generationChunkHolder = staticCache2D.get(chunkPos.x, chunkPos.z);
-		return CompletableFuture.supplyAsync(
-			() -> {
-				ProtoChunk protoChunk = (ProtoChunk)chunkAccess;
-				ServerLevel serverLevel = worldGenContext.level();
-				LevelChunk levelChunk;
-				if (protoChunk instanceof ImposterProtoChunk) {
-					levelChunk = ((ImposterProtoChunk)protoChunk).getWrapped();
-				} else {
-					levelChunk = new LevelChunk(serverLevel, protoChunk, levelChunkx -> postLoadProtoChunk(serverLevel, protoChunk.getEntities()));
-					generationChunkHolder.replaceProtoChunk(new ImposterProtoChunk(levelChunk, false));
-				}
+		return CompletableFuture.supplyAsync(() -> {
+			ProtoChunk protoChunk = (ProtoChunk)chunkAccess;
+			ServerLevel serverLevel = worldGenContext.level();
+			LevelChunk levelChunk;
+			if (protoChunk instanceof ImposterProtoChunk imposterProtoChunk) {
+				levelChunk = imposterProtoChunk.getWrapped();
+			} else {
+				levelChunk = new LevelChunk(serverLevel, protoChunk, levelChunkx -> postLoadProtoChunk(serverLevel, protoChunk.getEntities()));
+				generationChunkHolder.replaceProtoChunk(new ImposterProtoChunk(levelChunk, false));
+			}
 
-				levelChunk.setFullStatus(generationChunkHolder::getFullStatus);
-				levelChunk.runPostLoad();
-				levelChunk.setLoaded(true);
-				levelChunk.registerAllBlockEntitiesAfterLevelLoad();
-				levelChunk.registerTickContainerInLevel(serverLevel);
-				return levelChunk;
-			},
-			runnable -> worldGenContext.mainThreadMailBox()
-					.tell(ChunkTaskPriorityQueueSorter.message(runnable, chunkPos.toLong(), generationChunkHolder::getTicketLevel))
-		);
+			levelChunk.setFullStatus(generationChunkHolder::getFullStatus);
+			levelChunk.runPostLoad();
+			levelChunk.setLoaded(true);
+			levelChunk.registerAllBlockEntitiesAfterLevelLoad();
+			levelChunk.registerTickContainerInLevel(serverLevel);
+			return levelChunk;
+		}, worldGenContext.mainThreadExecutor());
 	}
 
 	private static void postLoadProtoChunk(ServerLevel serverLevel, List<CompoundTag> list) {
 		if (!list.isEmpty()) {
-			serverLevel.addWorldGenChunkEntities(EntityType.loadEntitiesRecursive(list, serverLevel));
+			serverLevel.addWorldGenChunkEntities(EntityType.loadEntitiesRecursive(list, serverLevel, EntitySpawnReason.LOAD));
 		}
 	}
 }

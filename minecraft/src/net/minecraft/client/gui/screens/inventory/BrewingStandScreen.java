@@ -3,6 +3,7 @@ package net.minecraft.client.gui.screens.inventory;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -37,23 +38,23 @@ public class BrewingStandScreen extends AbstractContainerScreen<BrewingStandMenu
 	protected void renderBg(GuiGraphics guiGraphics, float f, int i, int j) {
 		int k = (this.width - this.imageWidth) / 2;
 		int l = (this.height - this.imageHeight) / 2;
-		guiGraphics.blit(BREWING_STAND_LOCATION, k, l, 0, 0, this.imageWidth, this.imageHeight);
+		guiGraphics.blit(RenderType::guiTextured, BREWING_STAND_LOCATION, k, l, 0.0F, 0.0F, this.imageWidth, this.imageHeight, 256, 256);
 		int m = this.menu.getFuel();
 		int n = Mth.clamp((18 * m + 20 - 1) / 20, 0, 18);
 		if (n > 0) {
-			guiGraphics.blitSprite(FUEL_LENGTH_SPRITE, 18, 4, 0, 0, k + 60, l + 44, n, 4);
+			guiGraphics.blitSprite(RenderType::guiTextured, FUEL_LENGTH_SPRITE, 18, 4, 0, 0, k + 60, l + 44, n, 4);
 		}
 
 		int o = this.menu.getBrewingTicks();
 		if (o > 0) {
 			int p = (int)(28.0F * (1.0F - (float)o / 400.0F));
 			if (p > 0) {
-				guiGraphics.blitSprite(BREW_PROGRESS_SPRITE, 9, 28, 0, 0, k + 97, l + 16, 9, p);
+				guiGraphics.blitSprite(RenderType::guiTextured, BREW_PROGRESS_SPRITE, 9, 28, 0, 0, k + 97, l + 16, 9, p);
 			}
 
 			p = BUBBLELENGTHS[o / 2 % 7];
 			if (p > 0) {
-				guiGraphics.blitSprite(BUBBLES_SPRITE, 12, 29, 0, 29 - p, k + 63, l + 14 + 29 - p, 12, p);
+				guiGraphics.blitSprite(RenderType::guiTextured, BUBBLES_SPRITE, 12, 29, 0, 29 - p, k + 63, l + 14 + 29 - p, 12, p);
 			}
 		}
 	}

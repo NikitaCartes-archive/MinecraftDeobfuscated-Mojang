@@ -2,6 +2,7 @@ package net.minecraft.world.level.block;
 
 import com.mojang.serialization.MapCodec;
 import java.util.List;
+import java.util.function.BiConsumer;
 import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.advancements.CriteriaTriggers;
@@ -9,6 +10,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -18,7 +20,7 @@ import net.minecraft.tags.EnchantmentTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.ItemInteractionResult;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.Bee;
@@ -35,6 +37,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.BlockItemStateProperties;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -96,6 +99,14 @@ public class BeehiveBlock extends BaseEntityBlock {
 		}
 	}
 
+	@Override
+	protected void onExplosionHit(
+		BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Explosion explosion, BiConsumer<ItemStack, BlockPos> biConsumer
+	) {
+		super.onExplosionHit(blockState, serverLevel, blockPos, explosion, biConsumer);
+		this.angerNearbyBees(serverLevel, blockPos);
+	}
+
 	private void angerNearbyBees(Level level, BlockPos blockPos) {
 		AABB aABB = new AABB(blockPos).inflate(8.0, 6.0, 8.0);
 		List<Bee> list = level.getEntitiesOfClass(Bee.class, aABB);
@@ -119,7 +130,7 @@ public class BeehiveBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	protected ItemInteractionResult useItemOn(
+	protected InteractionResult useItemOn(
 		ItemStack itemStack, BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
 	) {
 		int i = (Integer)blockState.getValue(HONEY_LEVEL);
@@ -161,7 +172,7 @@ public class BeehiveBlock extends BaseEntityBlock {
 				this.resetHoneyLevel(level, blockState, blockPos);
 			}
 
-			return ItemInteractionResult.sidedSuccess(level.isClientSide);
+			return InteractionResult.SUCCESS;
 		} else {
 			return super.useItemOn(itemStack, blockState, level, blockPos, player, interactionHand, blockHitResult);
 		}

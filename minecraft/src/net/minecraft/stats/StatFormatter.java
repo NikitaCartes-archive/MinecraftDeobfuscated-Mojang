@@ -34,7 +34,7 @@ public interface StatFormatter {
 		} else if (f > 0.5) {
 			return DECIMAL_FORMAT.format(f) + " h";
 		} else {
-			return e > 0.5 ? DECIMAL_FORMAT.format(e) + " m" : d + " s";
+			return e > 0.5 ? DECIMAL_FORMAT.format(e) + " min" : d + " s";
 		}
 	};
 

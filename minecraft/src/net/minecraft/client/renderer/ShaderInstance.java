@@ -92,7 +92,7 @@ public class ShaderInstance implements Shader, AutoCloseable {
 	@Nullable
 	public final Uniform GAME_TIME;
 	@Nullable
-	public final Uniform CHUNK_OFFSET;
+	public final Uniform MODEL_OFFSET;
 
 	public ShaderInstance(ResourceProvider resourceProvider, String string, VertexFormat vertexFormat) throws IOException {
 		this.name = string;
@@ -188,7 +188,7 @@ public class ShaderInstance implements Shader, AutoCloseable {
 		this.FOG_SHAPE = this.getUniform("FogShape");
 		this.LINE_WIDTH = this.getUniform("LineWidth");
 		this.GAME_TIME = this.getUniform("GameTime");
-		this.CHUNK_OFFSET = this.getUniform("ChunkOffset");
+		this.MODEL_OFFSET = this.getUniform("ModelOffset");
 	}
 
 	private static Program getOrCreate(ResourceProvider resourceProvider, Program.Type type, String string) throws IOException {
@@ -491,20 +491,21 @@ public class ShaderInstance implements Shader, AutoCloseable {
 			this.GLINT_ALPHA.set(RenderSystem.getShaderGlintAlpha());
 		}
 
+		FogParameters fogParameters = RenderSystem.getShaderFog();
 		if (this.FOG_START != null) {
-			this.FOG_START.set(RenderSystem.getShaderFogStart());
+			this.FOG_START.set(fogParameters.start());
 		}
 
 		if (this.FOG_END != null) {
-			this.FOG_END.set(RenderSystem.getShaderFogEnd());
+			this.FOG_END.set(fogParameters.end());
 		}
 
 		if (this.FOG_COLOR != null) {
-			this.FOG_COLOR.set(RenderSystem.getShaderFogColor());
+			this.FOG_COLOR.set(fogParameters.red(), fogParameters.green(), fogParameters.blue(), fogParameters.alpha());
 		}
 
 		if (this.FOG_SHAPE != null) {
-			this.FOG_SHAPE.set(RenderSystem.getShaderFogShape().getIndex());
+			this.FOG_SHAPE.set(fogParameters.shape().getIndex());
 		}
 
 		if (this.TEXTURE_MATRIX != null) {

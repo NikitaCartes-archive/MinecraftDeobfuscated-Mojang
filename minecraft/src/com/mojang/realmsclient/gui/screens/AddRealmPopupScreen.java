@@ -6,7 +6,6 @@ import java.util.List;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.FittingMultiLineTextWidget;
@@ -15,6 +14,7 @@ import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.gui.screens.ConfirmLinkScreen;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.realms.RealmsScreen;
 import net.minecraft.resources.ResourceLocation;
@@ -116,7 +116,9 @@ public class AddRealmPopupScreen extends RealmsScreen {
 		int i = 8;
 		guiGraphics.pose().pushPose();
 		guiGraphics.pose().translate(0.0F, 0.0F, 110.0F);
-		guiGraphics.blitSprite(TRIAL_AVAILABLE_SPRITE, button.getX() + button.getWidth() - 8 - 4, button.getY() + button.getHeight() / 2 - 4, 8, 8);
+		guiGraphics.blitSprite(
+			RenderType::guiTextured, TRIAL_AVAILABLE_SPRITE, button.getX() + button.getWidth() - 8 - 4, button.getY() + button.getHeight() / 2 - 4, 8, 8
+		);
 		guiGraphics.pose().popPose();
 	}
 
@@ -124,12 +126,14 @@ public class AddRealmPopupScreen extends RealmsScreen {
 	public void renderBackground(GuiGraphics guiGraphics, int i, int j, float f) {
 		this.backgroundScreen.render(guiGraphics, -1, -1, f);
 		guiGraphics.flush();
-		RenderSystem.clear(256, Minecraft.ON_OSX);
+		RenderSystem.clear(256);
 		this.clearTooltipForNextRenderPass();
 		this.renderTransparentBackground(guiGraphics);
-		guiGraphics.blitSprite(BACKGROUND_SPRITE, this.left(), this.top(), 320, 172);
+		guiGraphics.blitSprite(RenderType::guiTextured, BACKGROUND_SPRITE, this.left(), this.top(), 320, 172);
 		if (!carouselImages.isEmpty()) {
-			guiGraphics.blit((ResourceLocation)carouselImages.get(this.carouselIndex), this.left() + 10, this.top() + 10, 0, 0.0F, 0.0F, 195, 152, 195, 152);
+			guiGraphics.blit(
+				RenderType::guiTextured, (ResourceLocation)carouselImages.get(this.carouselIndex), this.left() + 10, this.top() + 10, 0.0F, 0.0F, 195, 152, 195, 152
+			);
 		}
 	}
 

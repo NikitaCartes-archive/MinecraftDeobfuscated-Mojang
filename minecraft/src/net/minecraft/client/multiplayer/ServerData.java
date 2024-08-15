@@ -77,7 +77,7 @@ public class ServerData {
 			}
 		}
 
-		if (compoundTag.contains("acceptTextures", 1)) {
+		if (compoundTag.contains("acceptTextures", 99)) {
 			if (compoundTag.getBoolean("acceptTextures")) {
 				serverData.setResourcePackStatus(ServerData.ServerPackStatus.ENABLED);
 			} else {

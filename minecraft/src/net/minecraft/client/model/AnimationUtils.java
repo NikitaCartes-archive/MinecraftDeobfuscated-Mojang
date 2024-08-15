@@ -5,9 +5,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.HumanoidArm;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
-import net.minecraft.world.item.CrossbowItem;
 
 @Environment(EnvType.CLIENT)
 public class AnimationUtils {
@@ -20,27 +17,26 @@ public class AnimationUtils {
 		modelPart5.xRot = -1.5F + modelPart3.xRot;
 	}
 
-	public static void animateCrossbowCharge(ModelPart modelPart, ModelPart modelPart2, LivingEntity livingEntity, boolean bl) {
+	public static void animateCrossbowCharge(ModelPart modelPart, ModelPart modelPart2, float f, int i, boolean bl) {
 		ModelPart modelPart3 = bl ? modelPart : modelPart2;
 		ModelPart modelPart4 = bl ? modelPart2 : modelPart;
 		modelPart3.yRot = bl ? -0.8F : 0.8F;
 		modelPart3.xRot = -0.97079635F;
 		modelPart4.xRot = modelPart3.xRot;
-		float f = (float)CrossbowItem.getChargeDuration(livingEntity.getUseItem(), livingEntity);
-		float g = Mth.clamp((float)livingEntity.getTicksUsingItem(), 0.0F, f);
+		float g = Mth.clamp((float)i, 0.0F, f);
 		float h = g / f;
 		modelPart4.yRot = Mth.lerp(h, 0.4F, 0.85F) * (float)(bl ? 1 : -1);
 		modelPart4.xRot = Mth.lerp(h, modelPart4.xRot, (float) (-Math.PI / 2));
 	}
 
-	public static <T extends Mob> void swingWeaponDown(ModelPart modelPart, ModelPart modelPart2, T mob, float f, float g) {
+	public static void swingWeaponDown(ModelPart modelPart, ModelPart modelPart2, HumanoidArm humanoidArm, float f, float g) {
 		float h = Mth.sin(f * (float) Math.PI);
 		float i = Mth.sin((1.0F - (1.0F - f) * (1.0F - f)) * (float) Math.PI);
 		modelPart.zRot = 0.0F;
 		modelPart2.zRot = 0.0F;
 		modelPart.yRot = (float) (Math.PI / 20);
 		modelPart2.yRot = (float) (-Math.PI / 20);
-		if (mob.getMainArm() == HumanoidArm.RIGHT) {
+		if (humanoidArm == HumanoidArm.RIGHT) {
 			modelPart.xRot = -1.8849558F + Mth.cos(g * 0.09F) * 0.15F;
 			modelPart2.xRot = -0.0F + Mth.cos(g * 0.19F) * 0.5F;
 			modelPart.xRot += h * 2.2F - i * 0.4F;

@@ -17,13 +17,13 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgeableMob;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ItemBasedSteering;
 import net.minecraft.world.entity.ItemSteerable;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.Saddleable;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -69,7 +69,7 @@ public class Pig extends Animal implements ItemSteerable, Saddleable {
 	}
 
 	public static AttributeSupplier.Builder createAttributes() {
-		return Mob.createMobAttributes().add(Attributes.MAX_HEALTH, 10.0).add(Attributes.MOVEMENT_SPEED, 0.25);
+		return Animal.createAnimalAttributes().add(Attributes.MAX_HEALTH, 10.0).add(Attributes.MOVEMENT_SPEED, 0.25);
 	}
 
 	@Nullable
@@ -136,12 +136,12 @@ public class Pig extends Animal implements ItemSteerable, Saddleable {
 				player.startRiding(this);
 			}
 
-			return InteractionResult.sidedSuccess(this.level().isClientSide);
+			return InteractionResult.SUCCESS;
 		} else {
 			InteractionResult interactionResult = super.mobInteract(player, interactionHand);
 			if (!interactionResult.consumesAction()) {
 				ItemStack itemStack = player.getItemInHand(interactionHand);
-				return itemStack.is(Items.SADDLE) ? itemStack.interactLivingEntity(player, this, interactionHand) : InteractionResult.PASS;
+				return (InteractionResult)(itemStack.is(Items.SADDLE) ? itemStack.interactLivingEntity(player, this, interactionHand) : InteractionResult.PASS);
 			} else {
 				return interactionResult;
 			}
@@ -207,7 +207,7 @@ public class Pig extends Animal implements ItemSteerable, Saddleable {
 	@Override
 	public void thunderHit(ServerLevel serverLevel, LightningBolt lightningBolt) {
 		if (serverLevel.getDifficulty() != Difficulty.PEACEFUL) {
-			ZombifiedPiglin zombifiedPiglin = EntityType.ZOMBIFIED_PIGLIN.create(serverLevel);
+			ZombifiedPiglin zombifiedPiglin = EntityType.ZOMBIFIED_PIGLIN.create(serverLevel, EntitySpawnReason.CONVERSION);
 			if (zombifiedPiglin != null) {
 				zombifiedPiglin.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.GOLDEN_SWORD));
 				zombifiedPiglin.moveTo(this.getX(), this.getY(), this.getZ(), this.getYRot(), this.getXRot());
@@ -254,7 +254,7 @@ public class Pig extends Animal implements ItemSteerable, Saddleable {
 
 	@Nullable
 	public Pig getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
-		return EntityType.PIG.create(serverLevel);
+		return EntityType.PIG.create(serverLevel, EntitySpawnReason.BREEDING);
 	}
 
 	@Override

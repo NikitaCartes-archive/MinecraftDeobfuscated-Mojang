@@ -30,7 +30,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceMetadata;
-import net.minecraft.util.FastColor;
+import net.minecraft.util.ARGB;
 import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
@@ -92,26 +92,26 @@ public class PalettedPermutations implements SpriteSource {
 
 			for (int i = 0; i < is.length; i++) {
 				int j = is[i];
-				if (FastColor.ABGR32.alpha(j) != 0) {
-					int2IntMap.put(FastColor.ABGR32.transparent(j), js[i]);
+				if (ARGB.alpha(j) != 0) {
+					int2IntMap.put(ARGB.transparent(j), js[i]);
 				}
 			}
 
 			return ix -> {
-				int jx = FastColor.ABGR32.alpha(ix);
+				int jx = ARGB.alpha(ix);
 				if (jx == 0) {
 					return ix;
 				} else {
-					int k = FastColor.ABGR32.transparent(ix);
-					int l = int2IntMap.getOrDefault(k, FastColor.ABGR32.opaque(k));
-					int m = FastColor.ABGR32.alpha(l);
-					return FastColor.ABGR32.color(jx * m / 255, l);
+					int k = ARGB.transparent(ix);
+					int l = int2IntMap.getOrDefault(k, ARGB.opaque(k));
+					int m = ARGB.alpha(l);
+					return ARGB.color(jx * m / 255, l);
 				}
 			};
 		}
 	}
 
-	public static int[] loadPaletteEntryFromImage(ResourceManager resourceManager, ResourceLocation resourceLocation) {
+	private static int[] loadPaletteEntryFromImage(ResourceManager resourceManager, ResourceLocation resourceLocation) {
 		Optional<Resource> optional = resourceManager.getResource(TEXTURE_ID_CONVERTER.idToFile(resourceLocation));
 		if (optional.isEmpty()) {
 			LOGGER.error("Failed to load palette image {}", resourceLocation);
@@ -122,7 +122,7 @@ public class PalettedPermutations implements SpriteSource {
 
 				int[] var5;
 				try (NativeImage nativeImage = NativeImage.read(inputStream)) {
-					var5 = nativeImage.getPixelsRGBA();
+					var5 = nativeImage.getPixels();
 				} catch (Throwable var10) {
 					if (inputStream != null) {
 						try {

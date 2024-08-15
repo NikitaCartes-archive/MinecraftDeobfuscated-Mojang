@@ -33,7 +33,7 @@ import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
-import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -116,6 +116,12 @@ public class EnchantmentHelper {
 		} else {
 			return i;
 		}
+	}
+
+	public static ItemStack createBook(EnchantmentInstance enchantmentInstance) {
+		ItemStack itemStack = new ItemStack(Items.ENCHANTED_BOOK);
+		itemStack.enchant(enchantmentInstance.enchantment, enchantmentInstance.level);
+		return itemStack;
 	}
 
 	private static void runIterationOnItem(ItemStack itemStack, EnchantmentHelper.EnchantmentVisitor enchantmentVisitor) {
@@ -282,10 +288,10 @@ public class EnchantmentHelper {
 		return Math.max(0, mutableFloat.intValue());
 	}
 
-	public static void onProjectileSpawned(ServerLevel serverLevel, ItemStack itemStack, AbstractArrow abstractArrow, Consumer<Item> consumer) {
-		LivingEntity livingEntity2 = abstractArrow.getOwner() instanceof LivingEntity livingEntity ? livingEntity : null;
+	public static void onProjectileSpawned(ServerLevel serverLevel, ItemStack itemStack, Projectile projectile, Consumer<Item> consumer) {
+		LivingEntity livingEntity2 = projectile.getOwner() instanceof LivingEntity livingEntity ? livingEntity : null;
 		EnchantedItemInUse enchantedItemInUse = new EnchantedItemInUse(itemStack, null, livingEntity2, consumer);
-		runIterationOnItem(itemStack, (holder, i) -> holder.value().onProjectileSpawned(serverLevel, i, enchantedItemInUse, abstractArrow));
+		runIterationOnItem(itemStack, (holder, i) -> holder.value().onProjectileSpawned(serverLevel, i, enchantedItemInUse, projectile));
 	}
 
 	public static void onHitBlock(
@@ -466,20 +472,18 @@ public class EnchantmentHelper {
 	}
 
 	public static int getEnchantmentCost(RandomSource randomSource, int i, int j, ItemStack itemStack) {
-		Item item = itemStack.getItem();
-		int k = item.getEnchantmentValue();
-		if (k <= 0) {
+		if (itemStack.getEnchantmentValue() <= 0) {
 			return 0;
 		} else {
 			if (j > 15) {
 				j = 15;
 			}
 
-			int l = randomSource.nextInt(8) + 1 + (j >> 1) + randomSource.nextInt(j + 1);
+			int k = randomSource.nextInt(8) + 1 + (j >> 1) + randomSource.nextInt(j + 1);
 			if (i == 0) {
-				return Math.max(l / 3, 1);
+				return Math.max(k / 3, 1);
 			} else {
-				return i == 1 ? l * 2 / 3 + 1 : Math.max(l, j * 2);
+				return i == 1 ? k * 2 / 3 + 1 : Math.max(k, j * 2);
 			}
 		}
 	}
@@ -511,8 +515,7 @@ public class EnchantmentHelper {
 
 	public static List<EnchantmentInstance> selectEnchantment(RandomSource randomSource, ItemStack itemStack, int i, Stream<Holder<Enchantment>> stream) {
 		List<EnchantmentInstance> list = Lists.<EnchantmentInstance>newArrayList();
-		Item item = itemStack.getItem();
-		int j = item.getEnchantmentValue();
+		int j = itemStack.getEnchantmentValue();
 		if (j <= 0) {
 			return list;
 		} else {

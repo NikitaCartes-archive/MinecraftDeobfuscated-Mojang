@@ -44,7 +44,7 @@ public final class ProjectileUtil {
 
 	private static HitResult getHitResult(Vec3 vec3, Entity entity, Predicate<Entity> predicate, Vec3 vec32, Level level, float f, ClipContext.Block block) {
 		Vec3 vec33 = vec3.add(vec32);
-		HitResult hitResult = level.clip(new ClipContext(vec3, vec33, block, ClipContext.Fluid.NONE, entity));
+		HitResult hitResult = level.clipIncludingBorder(new ClipContext(vec3, vec33, block, ClipContext.Fluid.NONE, entity));
 		if (hitResult.getType() != HitResult.Type.MISS) {
 			vec33 = hitResult.getLocation();
 		}

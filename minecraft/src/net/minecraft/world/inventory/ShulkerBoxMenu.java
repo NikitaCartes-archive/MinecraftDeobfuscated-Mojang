@@ -28,15 +28,7 @@ public class ShulkerBoxMenu extends AbstractContainerMenu {
 			}
 		}
 
-		for (int l = 0; l < 3; l++) {
-			for (int m = 0; m < 9; m++) {
-				this.addSlot(new Slot(inventory, m + l * 9 + 9, 8 + m * 18, 84 + l * 18));
-			}
-		}
-
-		for (int l = 0; l < 9; l++) {
-			this.addSlot(new Slot(inventory, l, 8 + l * 18, 142));
-		}
+		this.addStandardInventorySlots(inventory, 8, 84);
 	}
 
 	@Override

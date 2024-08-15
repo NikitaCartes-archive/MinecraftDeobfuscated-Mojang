@@ -1,6 +1,5 @@
 package net.minecraft.client.resources.model;
 
-import java.util.Collection;
 import java.util.function.Function;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
@@ -10,10 +9,21 @@ import net.minecraft.resources.ResourceLocation;
 
 @Environment(EnvType.CLIENT)
 public interface UnbakedModel {
-	Collection<ResourceLocation> getDependencies();
-
-	void resolveParents(Function<ResourceLocation, UnbakedModel> function);
+	void resolveDependencies(UnbakedModel.Resolver resolver, UnbakedModel.ResolutionContext resolutionContext);
 
 	@Nullable
 	BakedModel bake(ModelBaker modelBaker, Function<Material, TextureAtlasSprite> function, ModelState modelState);
+
+	@Environment(EnvType.CLIENT)
+	public static enum ResolutionContext {
+		TOP,
+		OVERRIDE;
+	}
+
+	@Environment(EnvType.CLIENT)
+	public interface Resolver {
+		UnbakedModel resolve(ResourceLocation resourceLocation);
+
+		UnbakedModel resolveForOverride(ResourceLocation resourceLocation);
+	}
 }

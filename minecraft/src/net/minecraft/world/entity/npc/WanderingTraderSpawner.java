@@ -7,8 +7,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.SpawnPlacementType;
 import net.minecraft.world.entity.SpawnPlacements;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
@@ -100,7 +100,7 @@ public class WanderingTraderSpawner implements CustomSpawner {
 					return false;
 				}
 
-				WanderingTrader wanderingTrader = EntityType.WANDERING_TRADER.spawn(serverLevel, blockPos3, MobSpawnType.EVENT);
+				WanderingTrader wanderingTrader = EntityType.WANDERING_TRADER.spawn(serverLevel, blockPos3, EntitySpawnReason.EVENT);
 				if (wanderingTrader != null) {
 					for (int j = 0; j < 2; j++) {
 						this.tryToSpawnLlamaFor(serverLevel, wanderingTrader, 4);
@@ -121,7 +121,7 @@ public class WanderingTraderSpawner implements CustomSpawner {
 	private void tryToSpawnLlamaFor(ServerLevel serverLevel, WanderingTrader wanderingTrader, int i) {
 		BlockPos blockPos = this.findSpawnPositionNear(serverLevel, wanderingTrader.blockPosition(), i);
 		if (blockPos != null) {
-			TraderLlama traderLlama = EntityType.TRADER_LLAMA.spawn(serverLevel, blockPos, MobSpawnType.EVENT);
+			TraderLlama traderLlama = EntityType.TRADER_LLAMA.spawn(serverLevel, blockPos, EntitySpawnReason.EVENT);
 			if (traderLlama != null) {
 				traderLlama.setLeashedTo(wanderingTrader, true);
 			}

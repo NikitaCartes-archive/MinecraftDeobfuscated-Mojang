@@ -162,11 +162,12 @@ public class ItemModelGenerators {
 		this.generateFlatItem(Items.BLAZE_ROD, ModelTemplates.FLAT_HANDHELD_ITEM);
 		this.generateFlatItem(Items.BLUE_DYE, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.BONE_MEAL, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.BORDURE_INDENTED_BANNER_PATTERN, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.BOOK, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.BOWL, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.BREAD, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.BRICK, ModelTemplates.FLAT_ITEM);
-		this.generateFlatItem(Items.BREEZE_ROD, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.BREEZE_ROD, ModelTemplates.FLAT_HANDHELD_ITEM);
 		this.generateFlatItem(Items.BROWN_DYE, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.BUCKET, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.CARROT_ON_A_STICK, ModelTemplates.FLAT_HANDHELD_ROD_ITEM);
@@ -213,6 +214,7 @@ public class ItemModelGenerators {
 		this.generateFlatItem(Items.END_CRYSTAL, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.EXPERIENCE_BOTTLE, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.FERMENTED_SPIDER_EYE, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.FIELD_MASONED_BANNER_PATTERN, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.FIREWORK_ROCKET, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.FIRE_CHARGE, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.FLINT, ModelTemplates.FLAT_ITEM);
@@ -435,6 +437,7 @@ public class ItemModelGenerators {
 		this.generateFlatItem(Items.TRIAL_KEY, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.OMINOUS_TRIAL_KEY, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.OMINOUS_BOTTLE, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.BUNDLE, ModelTemplates.FLAT_ITEM);
 	}
 
 	static record TrimModelData(String name, float itemModelIndex, Map<Holder<ArmorMaterial>, String> overrideArmorMaterials) {

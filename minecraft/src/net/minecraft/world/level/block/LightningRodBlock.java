@@ -20,6 +20,7 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.level.redstone.ExperimentalRedstoneUtils;
 
 public class LightningRodBlock extends RodBlock implements SimpleWaterloggedBlock {
 	public static final MapCodec<LightningRodBlock> CODEC = simpleCodec(LightningRodBlock::new);
@@ -82,7 +83,8 @@ public class LightningRodBlock extends RodBlock implements SimpleWaterloggedBloc
 	}
 
 	private void updateNeighbours(BlockState blockState, Level level, BlockPos blockPos) {
-		level.updateNeighborsAt(blockPos.relative(((Direction)blockState.getValue(FACING)).getOpposite()), this);
+		Direction direction = ((Direction)blockState.getValue(FACING)).getOpposite();
+		level.updateNeighborsAt(blockPos.relative(direction), this, ExperimentalRedstoneUtils.randomOrientation(level, direction, null));
 	}
 
 	@Override

@@ -1,11 +1,15 @@
 package net.minecraft.world.level.storage.loot;
 
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import net.minecraft.Util;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.DyeColor;
 
 public class BuiltInLootTables {
 	private static final Set<ResourceKey<LootTable>> LOCATIONS = new HashSet();
@@ -74,22 +78,12 @@ public class BuiltInLootTables {
 	public static final ResourceKey<LootTable> EQUIPMENT_TRIAL_CHAMBER = register("equipment/trial_chamber");
 	public static final ResourceKey<LootTable> EQUIPMENT_TRIAL_CHAMBER_RANGED = register("equipment/trial_chamber_ranged");
 	public static final ResourceKey<LootTable> EQUIPMENT_TRIAL_CHAMBER_MELEE = register("equipment/trial_chamber_melee");
-	public static final ResourceKey<LootTable> SHEEP_WHITE = register("entities/sheep/white");
-	public static final ResourceKey<LootTable> SHEEP_ORANGE = register("entities/sheep/orange");
-	public static final ResourceKey<LootTable> SHEEP_MAGENTA = register("entities/sheep/magenta");
-	public static final ResourceKey<LootTable> SHEEP_LIGHT_BLUE = register("entities/sheep/light_blue");
-	public static final ResourceKey<LootTable> SHEEP_YELLOW = register("entities/sheep/yellow");
-	public static final ResourceKey<LootTable> SHEEP_LIME = register("entities/sheep/lime");
-	public static final ResourceKey<LootTable> SHEEP_PINK = register("entities/sheep/pink");
-	public static final ResourceKey<LootTable> SHEEP_GRAY = register("entities/sheep/gray");
-	public static final ResourceKey<LootTable> SHEEP_LIGHT_GRAY = register("entities/sheep/light_gray");
-	public static final ResourceKey<LootTable> SHEEP_CYAN = register("entities/sheep/cyan");
-	public static final ResourceKey<LootTable> SHEEP_PURPLE = register("entities/sheep/purple");
-	public static final ResourceKey<LootTable> SHEEP_BLUE = register("entities/sheep/blue");
-	public static final ResourceKey<LootTable> SHEEP_BROWN = register("entities/sheep/brown");
-	public static final ResourceKey<LootTable> SHEEP_GREEN = register("entities/sheep/green");
-	public static final ResourceKey<LootTable> SHEEP_RED = register("entities/sheep/red");
-	public static final ResourceKey<LootTable> SHEEP_BLACK = register("entities/sheep/black");
+	public static final Map<DyeColor, ResourceKey<LootTable>> SHEEP_BY_DYE = Util.make(
+		new EnumMap(DyeColor.class), enumMap -> makeDyeKeyMap(enumMap, "entities/sheep")
+	);
+	public static final Map<DyeColor, ResourceKey<LootTable>> SHEAR_SHEEP_BY_DYE = Util.make(
+		new EnumMap(DyeColor.class), enumMap -> makeDyeKeyMap(enumMap, "shearing/sheep")
+	);
 	public static final ResourceKey<LootTable> FISHING = register("gameplay/fishing");
 	public static final ResourceKey<LootTable> FISHING_JUNK = register("gameplay/fishing/junk");
 	public static final ResourceKey<LootTable> FISHING_TREASURE = register("gameplay/fishing/treasure");
@@ -117,12 +111,21 @@ public class BuiltInLootTables {
 	public static final ResourceKey<LootTable> SPAWNER_OMINOUS_TRIAL_CHAMBER_CONSUMABLES = register("spawners/ominous/trial_chamber/consumables");
 	public static final ResourceKey<LootTable> SPAWNER_TRIAL_ITEMS_TO_DROP_WHEN_OMINOUS = register("spawners/trial_chamber/items_to_drop_when_ominous");
 	public static final ResourceKey<LootTable> BOGGED_SHEAR = register("shearing/bogged");
+	public static final ResourceKey<LootTable> SHEAR_RED_MOOSHROOM = register("shearing/mooshroom/red");
+	public static final ResourceKey<LootTable> SHEAR_BROWN_MOOSHROOM = register("shearing/mooshroom/brown");
+	public static final ResourceKey<LootTable> SHEAR_SNOW_GOLEM = register("shearing/snow_golem");
 	public static final ResourceKey<LootTable> DESERT_WELL_ARCHAEOLOGY = register("archaeology/desert_well");
 	public static final ResourceKey<LootTable> DESERT_PYRAMID_ARCHAEOLOGY = register("archaeology/desert_pyramid");
 	public static final ResourceKey<LootTable> TRAIL_RUINS_ARCHAEOLOGY_COMMON = register("archaeology/trail_ruins_common");
 	public static final ResourceKey<LootTable> TRAIL_RUINS_ARCHAEOLOGY_RARE = register("archaeology/trail_ruins_rare");
 	public static final ResourceKey<LootTable> OCEAN_RUIN_WARM_ARCHAEOLOGY = register("archaeology/ocean_ruin_warm");
 	public static final ResourceKey<LootTable> OCEAN_RUIN_COLD_ARCHAEOLOGY = register("archaeology/ocean_ruin_cold");
+
+	private static void makeDyeKeyMap(EnumMap<DyeColor, ResourceKey<LootTable>> enumMap, String string) {
+		for (DyeColor dyeColor : DyeColor.values()) {
+			enumMap.put(dyeColor, register(string + "/" + dyeColor.getName()));
+		}
+	}
 
 	private static ResourceKey<LootTable> register(String string) {
 		return register(ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.withDefaultNamespace(string)));

@@ -9,6 +9,7 @@ import net.minecraft.client.gui.components.MultiLineLabel;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
@@ -145,7 +146,7 @@ public class TransferableSelectionList extends ObjectSelectionList<TransferableS
 				guiGraphics.fill(k - 1, j - 1, p, j + m + 1, -8978432);
 			}
 
-			guiGraphics.blit(this.pack.getIconTexture(), k, j, 0.0F, 0.0F, 32, 32, 32, 32);
+			guiGraphics.blit(RenderType::guiTextured, this.pack.getIconTexture(), k, j, 0.0F, 0.0F, 32, 32, 32, 32);
 			FormattedCharSequence formattedCharSequence = this.nameDisplayCache;
 			MultiLineLabel multiLineLabel = this.descriptionDisplayCache;
 			if (this.showHoverOverlay() && (this.minecraft.options.touchscreen().get() || bl || this.parent.getSelected() == this && this.parent.isFocused())) {
@@ -159,32 +160,32 @@ public class TransferableSelectionList extends ObjectSelectionList<TransferableS
 
 				if (this.pack.canSelect()) {
 					if (q < 32) {
-						guiGraphics.blitSprite(TransferableSelectionList.SELECT_HIGHLIGHTED_SPRITE, k, j, 32, 32);
+						guiGraphics.blitSprite(RenderType::guiTextured, TransferableSelectionList.SELECT_HIGHLIGHTED_SPRITE, k, j, 32, 32);
 					} else {
-						guiGraphics.blitSprite(TransferableSelectionList.SELECT_SPRITE, k, j, 32, 32);
+						guiGraphics.blitSprite(RenderType::guiTextured, TransferableSelectionList.SELECT_SPRITE, k, j, 32, 32);
 					}
 				} else {
 					if (this.pack.canUnselect()) {
 						if (q < 16) {
-							guiGraphics.blitSprite(TransferableSelectionList.UNSELECT_HIGHLIGHTED_SPRITE, k, j, 32, 32);
+							guiGraphics.blitSprite(RenderType::guiTextured, TransferableSelectionList.UNSELECT_HIGHLIGHTED_SPRITE, k, j, 32, 32);
 						} else {
-							guiGraphics.blitSprite(TransferableSelectionList.UNSELECT_SPRITE, k, j, 32, 32);
+							guiGraphics.blitSprite(RenderType::guiTextured, TransferableSelectionList.UNSELECT_SPRITE, k, j, 32, 32);
 						}
 					}
 
 					if (this.pack.canMoveUp()) {
 						if (q < 32 && q > 16 && r < 16) {
-							guiGraphics.blitSprite(TransferableSelectionList.MOVE_UP_HIGHLIGHTED_SPRITE, k, j, 32, 32);
+							guiGraphics.blitSprite(RenderType::guiTextured, TransferableSelectionList.MOVE_UP_HIGHLIGHTED_SPRITE, k, j, 32, 32);
 						} else {
-							guiGraphics.blitSprite(TransferableSelectionList.MOVE_UP_SPRITE, k, j, 32, 32);
+							guiGraphics.blitSprite(RenderType::guiTextured, TransferableSelectionList.MOVE_UP_SPRITE, k, j, 32, 32);
 						}
 					}
 
 					if (this.pack.canMoveDown()) {
 						if (q < 32 && q > 16 && r > 16) {
-							guiGraphics.blitSprite(TransferableSelectionList.MOVE_DOWN_HIGHLIGHTED_SPRITE, k, j, 32, 32);
+							guiGraphics.blitSprite(RenderType::guiTextured, TransferableSelectionList.MOVE_DOWN_HIGHLIGHTED_SPRITE, k, j, 32, 32);
 						} else {
-							guiGraphics.blitSprite(TransferableSelectionList.MOVE_DOWN_SPRITE, k, j, 32, 32);
+							guiGraphics.blitSprite(RenderType::guiTextured, TransferableSelectionList.MOVE_DOWN_SPRITE, k, j, 32, 32);
 						}
 					}
 				}

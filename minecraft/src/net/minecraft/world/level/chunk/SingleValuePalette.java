@@ -84,7 +84,7 @@ public class SingleValuePalette<T> implements Palette<T> {
 	}
 
 	@Override
-	public Palette<T> copy() {
+	public Palette<T> copy(PaletteResize<T> paletteResize) {
 		if (this.value == null) {
 			throw new IllegalStateException("Use of an uninitialized palette");
 		} else {

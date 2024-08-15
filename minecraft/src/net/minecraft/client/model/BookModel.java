@@ -1,7 +1,5 @@
 package net.minecraft.client.model;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
@@ -58,15 +56,6 @@ public class BookModel extends Model {
 		return LayerDefinition.create(meshDefinition, 64, 32);
 	}
 
-	@Override
-	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, int k) {
-		this.render(poseStack, vertexConsumer, i, j, k);
-	}
-
-	public void render(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, int k) {
-		this.root.render(poseStack, vertexConsumer, i, j, k);
-	}
-
 	public void setupAnim(float f, float g, float h, float i) {
 		float j = (Mth.sin(f * 0.02F) * 0.1F + 1.25F) * i;
 		this.leftLid.yRot = (float) Math.PI + j;
@@ -79,5 +68,10 @@ public class BookModel extends Model {
 		this.rightPages.x = Mth.sin(j);
 		this.flipPage1.x = Mth.sin(j);
 		this.flipPage2.x = Mth.sin(j);
+	}
+
+	@Override
+	public ModelPart root() {
+		return this.root;
 	}
 }

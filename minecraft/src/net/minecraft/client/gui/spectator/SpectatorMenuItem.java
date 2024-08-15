@@ -11,7 +11,7 @@ public interface SpectatorMenuItem {
 
 	Component getName();
 
-	void renderIcon(GuiGraphics guiGraphics, float f, int i);
+	void renderIcon(GuiGraphics guiGraphics, float f, float g);
 
 	boolean isEnabled();
 }

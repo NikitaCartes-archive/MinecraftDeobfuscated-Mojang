@@ -1,12 +1,12 @@
 package net.minecraft.world.entity.vehicle;
 
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
@@ -14,7 +14,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.FurnaceBlock;
@@ -23,10 +22,11 @@ import net.minecraft.world.phys.Vec3;
 
 public class MinecartFurnace extends AbstractMinecart {
 	private static final EntityDataAccessor<Boolean> DATA_ID_FUEL = SynchedEntityData.defineId(MinecartFurnace.class, EntityDataSerializers.BOOLEAN);
+	private static final int FUEL_TICKS_PER_ITEM = 3600;
+	private static final int MAX_FUEL_TICKS = 32000;
 	private int fuel;
 	public double xPush;
 	public double zPush;
-	private static final Ingredient INGREDIENT = Ingredient.of(Items.COAL, Items.CHARCOAL);
 
 	public MinecartFurnace(EntityType<? extends MinecartFurnace> entityType, Level level) {
 		super(entityType, level);
@@ -70,7 +70,7 @@ public class MinecartFurnace extends AbstractMinecart {
 
 	@Override
 	protected double getMaxSpeed() {
-		return (this.isInWater() ? 3.0 : 4.0) / 20.0;
+		return this.isInWater() ? super.getMaxSpeed() * 0.75 : super.getMaxSpeed() * 0.5;
 	}
 
 	@Override
@@ -79,10 +79,10 @@ public class MinecartFurnace extends AbstractMinecart {
 	}
 
 	@Override
-	protected void moveAlongTrack(BlockPos blockPos, BlockState blockState) {
+	protected void moveAlongTrack() {
 		double d = 1.0E-4;
 		double e = 0.001;
-		super.moveAlongTrack(blockPos, blockState);
+		super.moveAlongTrack();
 		Vec3 vec3 = this.getDeltaMovement();
 		double f = vec3.horizontalDistanceSqr();
 		double g = this.xPush * this.xPush + this.zPush * this.zPush;
@@ -95,29 +95,28 @@ public class MinecartFurnace extends AbstractMinecart {
 	}
 
 	@Override
-	protected void applyNaturalSlowdown() {
+	protected Vec3 applyNaturalSlowdown(Vec3 vec3) {
 		double d = this.xPush * this.xPush + this.zPush * this.zPush;
+		Vec3 vec32;
 		if (d > 1.0E-7) {
 			d = Math.sqrt(d);
 			this.xPush /= d;
 			this.zPush /= d;
-			Vec3 vec3 = this.getDeltaMovement().multiply(0.8, 0.0, 0.8).add(this.xPush, 0.0, this.zPush);
+			vec32 = vec3.multiply(0.8, 0.0, 0.8).add(this.xPush, 0.0, this.zPush);
 			if (this.isInWater()) {
-				vec3 = vec3.scale(0.1);
+				vec32 = vec32.scale(0.1);
 			}
-
-			this.setDeltaMovement(vec3);
 		} else {
-			this.setDeltaMovement(this.getDeltaMovement().multiply(0.98, 0.0, 0.98));
+			vec32 = vec3.multiply(0.98, 0.0, 0.98);
 		}
 
-		super.applyNaturalSlowdown();
+		return super.applyNaturalSlowdown(vec32);
 	}
 
 	@Override
 	public InteractionResult interact(Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
-		if (INGREDIENT.test(itemStack) && this.fuel + 3600 <= 32000) {
+		if (itemStack.is(ItemTags.FURNACE_MINECART_FUEL) && this.fuel + 3600 <= 32000) {
 			itemStack.consume(1, player);
 			this.fuel += 3600;
 		}
@@ -127,7 +126,7 @@ public class MinecartFurnace extends AbstractMinecart {
 			this.zPush = this.getZ() - player.getZ();
 		}
 
-		return InteractionResult.sidedSuccess(this.level().isClientSide);
+		return InteractionResult.SUCCESS;
 	}
 
 	@Override

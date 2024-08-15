@@ -2,12 +2,13 @@ package net.minecraft.world.entity.projectile;
 
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 public abstract class ThrowableProjectile extends Projectile {
+	private static final float MIN_CAMERA_DISTANCE_SQUARED = 12.25F;
+
 	protected ThrowableProjectile(EntityType<? extends ThrowableProjectile> entityType, Level level) {
 		super(entityType, level);
 	}
@@ -17,20 +18,19 @@ public abstract class ThrowableProjectile extends Projectile {
 		this.setPos(d, e, f);
 	}
 
-	protected ThrowableProjectile(EntityType<? extends ThrowableProjectile> entityType, LivingEntity livingEntity, Level level) {
-		this(entityType, livingEntity.getX(), livingEntity.getEyeY() - 0.1F, livingEntity.getZ(), level);
-		this.setOwner(livingEntity);
-	}
-
 	@Override
 	public boolean shouldRenderAtSqrDistance(double d) {
-		double e = this.getBoundingBox().getSize() * 4.0;
-		if (Double.isNaN(e)) {
-			e = 4.0;
-		}
+		if (this.tickCount < 2 && d < 12.25) {
+			return false;
+		} else {
+			double e = this.getBoundingBox().getSize() * 4.0;
+			if (Double.isNaN(e)) {
+				e = 4.0;
+			}
 
-		e *= 64.0;
-		return d < e * e;
+			e *= 64.0;
+			return d < e * e;
+		}
 	}
 
 	@Override
@@ -46,7 +46,6 @@ public abstract class ThrowableProjectile extends Projectile {
 			this.hitTargetOrDeflectSelf(hitResult);
 		}
 
-		this.checkInsideBlocks();
 		Vec3 vec3 = this.getDeltaMovement();
 		double d = this.getX() + vec3.x;
 		double e = this.getY() + vec3.y;
@@ -67,6 +66,7 @@ public abstract class ThrowableProjectile extends Projectile {
 		this.setDeltaMovement(vec3.scale((double)h));
 		this.applyGravity();
 		this.setPos(d, e, f);
+		this.checkInsideBlocks();
 	}
 
 	@Override

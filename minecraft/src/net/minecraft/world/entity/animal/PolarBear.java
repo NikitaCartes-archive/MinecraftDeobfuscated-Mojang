@@ -22,10 +22,10 @@ import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.EntityDimensions;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.NeutralMob;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
@@ -67,7 +67,7 @@ public class PolarBear extends Animal implements NeutralMob {
 	@Nullable
 	@Override
 	public AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
-		return EntityType.POLAR_BEAR.create(serverLevel);
+		return EntityType.POLAR_BEAR.create(serverLevel, EntitySpawnReason.BREEDING);
 	}
 
 	@Override
@@ -94,7 +94,7 @@ public class PolarBear extends Animal implements NeutralMob {
 	}
 
 	public static AttributeSupplier.Builder createAttributes() {
-		return Mob.createMobAttributes()
+		return Animal.createAnimalAttributes()
 			.add(Attributes.MAX_HEALTH, 30.0)
 			.add(Attributes.FOLLOW_RANGE, 20.0)
 			.add(Attributes.MOVEMENT_SPEED, 0.25)
@@ -102,11 +102,11 @@ public class PolarBear extends Animal implements NeutralMob {
 	}
 
 	public static boolean checkPolarBearSpawnRules(
-		EntityType<PolarBear> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, RandomSource randomSource
+		EntityType<PolarBear> entityType, LevelAccessor levelAccessor, EntitySpawnReason entitySpawnReason, BlockPos blockPos, RandomSource randomSource
 	) {
 		Holder<Biome> holder = levelAccessor.getBiome(blockPos);
 		return !holder.is(BiomeTags.POLAR_BEARS_SPAWN_ON_ALTERNATE_BLOCKS)
-			? checkAnimalSpawnRules(entityType, levelAccessor, mobSpawnType, blockPos, randomSource)
+			? checkAnimalSpawnRules(entityType, levelAccessor, entitySpawnReason, blockPos, randomSource)
 			: isBrightEnoughToSpawn(levelAccessor, blockPos) && levelAccessor.getBlockState(blockPos.below()).is(BlockTags.POLAR_BEARS_SPAWNABLE_ON_ALTERNATE);
 	}
 
@@ -236,13 +236,13 @@ public class PolarBear extends Animal implements NeutralMob {
 
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData
+		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, EntitySpawnReason entitySpawnReason, @Nullable SpawnGroupData spawnGroupData
 	) {
 		if (spawnGroupData == null) {
 			spawnGroupData = new AgeableMob.AgeableMobGroupData(1.0F);
 		}
 
-		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData);
+		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, entitySpawnReason, spawnGroupData);
 	}
 
 	class PolarBearAttackPlayersGoal extends NearestAttackableTargetGoal<Player> {

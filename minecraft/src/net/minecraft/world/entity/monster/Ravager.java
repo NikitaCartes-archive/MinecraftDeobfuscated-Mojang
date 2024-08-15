@@ -42,14 +42,16 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 public class Ravager extends Raider {
-	private static final Predicate<Entity> NO_RAVAGER_AND_ALIVE = entity -> entity.isAlive() && !(entity instanceof Ravager);
+	private static final Predicate<Entity> ROAR_TARGET = entity -> entity.isAlive()
+			&& !(entity instanceof Ravager)
+			&& (entity.level().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) || !entity.getType().equals(EntityType.ARMOR_STAND));
 	private static final double BASE_MOVEMENT_SPEED = 0.3;
 	private static final double ATTACK_MOVEMENT_SPEED = 0.35;
 	private static final int STUNNED_COLOR = 8356754;
 	private static final float STUNNED_COLOR_BLUE = 0.57254905F;
 	private static final float STUNNED_COLOR_GREEN = 0.5137255F;
 	private static final float STUNNED_COLOR_RED = 0.49803922F;
-	private static final int ATTACK_DURATION = 10;
+	public static final int ATTACK_DURATION = 10;
 	public static final int STUN_DURATION = 40;
 	private int attackTick;
 	private int stunnedTick;
@@ -212,7 +214,7 @@ public class Ravager extends Raider {
 
 	private void roar() {
 		if (this.isAlive()) {
-			for (LivingEntity livingEntity : this.level().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(4.0), NO_RAVAGER_AND_ALIVE)) {
+			for (LivingEntity livingEntity : this.level().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(4.0), ROAR_TARGET)) {
 				if (!(livingEntity instanceof AbstractIllager)) {
 					livingEntity.hurt(this.damageSources().mobAttack(this), 6.0F);
 				}

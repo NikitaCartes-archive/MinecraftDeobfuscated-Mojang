@@ -17,6 +17,7 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.pathfinder.PathComputationType;
+import net.minecraft.world.level.redstone.Orientation;
 
 public abstract class AbstractSkullBlock extends BaseEntityBlock implements Equipable {
 	public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
@@ -77,7 +78,7 @@ public abstract class AbstractSkullBlock extends BaseEntityBlock implements Equi
 	}
 
 	@Override
-	protected void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
+	protected void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, @Nullable Orientation orientation, boolean bl) {
 		if (!level.isClientSide) {
 			boolean bl2 = level.hasNeighborSignal(blockPos);
 			if (bl2 != (Boolean)blockState.getValue(POWERED)) {

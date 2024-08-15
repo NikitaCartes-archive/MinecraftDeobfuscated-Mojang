@@ -77,7 +77,7 @@ public class LevelTicks<T> implements LevelTickAccess<T> {
 		long l = ChunkPos.asLong(scheduledTick.pos());
 		LevelChunkTicks<T> levelChunkTicks = this.allContainers.get(l);
 		if (levelChunkTicks == null) {
-			Util.pauseInIde((T)(new IllegalStateException("Trying to schedule tick in not loaded position " + scheduledTick.pos())));
+			Util.logAndPauseIfInIde("Trying to schedule tick in not loaded position " + scheduledTick.pos());
 		} else {
 			levelChunkTicks.schedule(scheduledTick);
 		}

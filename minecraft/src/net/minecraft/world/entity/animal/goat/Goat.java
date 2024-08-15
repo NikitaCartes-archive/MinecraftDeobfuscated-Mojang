@@ -4,9 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Dynamic;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Holder;
-import net.minecraft.core.HolderSet;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.DebugPackets;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -28,9 +26,8 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.EntityDimensions;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.Brain;
@@ -103,8 +100,12 @@ public class Goat extends Animal {
 	public ItemStack createHorn() {
 		RandomSource randomSource = RandomSource.create((long)this.getUUID().hashCode());
 		TagKey<Instrument> tagKey = this.isScreamingGoat() ? InstrumentTags.SCREAMING_GOAT_HORNS : InstrumentTags.REGULAR_GOAT_HORNS;
-		HolderSet<Instrument> holderSet = BuiltInRegistries.INSTRUMENT.getOrCreateTag(tagKey);
-		return InstrumentItem.create(Items.GOAT_HORN, (Holder<Instrument>)holderSet.getRandomElement(randomSource).get());
+		return (ItemStack)this.level()
+			.registryAccess()
+			.registryOrThrow(Registries.INSTRUMENT)
+			.getRandomElementOf(tagKey, randomSource)
+			.map(holder -> InstrumentItem.create(Items.GOAT_HORN, holder))
+			.orElseGet(() -> new ItemStack(Items.GOAT_HORN));
 	}
 
 	@Override
@@ -118,7 +119,7 @@ public class Goat extends Animal {
 	}
 
 	public static AttributeSupplier.Builder createAttributes() {
-		return Mob.createMobAttributes().add(Attributes.MAX_HEALTH, 10.0).add(Attributes.MOVEMENT_SPEED, 0.2F).add(Attributes.ATTACK_DAMAGE, 2.0);
+		return Animal.createAnimalAttributes().add(Attributes.MAX_HEALTH, 10.0).add(Attributes.MOVEMENT_SPEED, 0.2F).add(Attributes.ATTACK_DAMAGE, 2.0);
 	}
 
 	@Override
@@ -163,7 +164,7 @@ public class Goat extends Animal {
 
 	@Nullable
 	public Goat getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
-		Goat goat = EntityType.GOAT.create(serverLevel);
+		Goat goat = EntityType.GOAT.create(serverLevel, EntitySpawnReason.BREEDING);
 		if (goat != null) {
 			GoatAi.initMemories(goat, serverLevel.getRandom());
 			AgeableMob ageableMob2 = (AgeableMob)(serverLevel.getRandom().nextBoolean() ? this : ageableMob);
@@ -204,8 +205,16 @@ public class Goat extends Animal {
 	}
 
 	@Override
-	public SoundEvent getEatingSound(ItemStack itemStack) {
-		return this.isScreamingGoat() ? SoundEvents.GOAT_SCREAMING_EAT : SoundEvents.GOAT_EAT;
+	protected void playEatingSound() {
+		this.level()
+			.playSound(
+				null,
+				this,
+				this.isScreamingGoat() ? SoundEvents.GOAT_SCREAMING_EAT : SoundEvents.GOAT_EAT,
+				SoundSource.NEUTRAL,
+				1.0F,
+				Mth.randomBetween(this.level().random, 0.8F, 1.2F)
+			);
 	}
 
 	@Override
@@ -220,11 +229,11 @@ public class Goat extends Animal {
 			player.playSound(this.getMilkingSound(), 1.0F, 1.0F);
 			ItemStack itemStack2 = ItemUtils.createFilledResult(itemStack, player, Items.MILK_BUCKET.getDefaultInstance());
 			player.setItemInHand(interactionHand, itemStack2);
-			return InteractionResult.sidedSuccess(this.level().isClientSide);
+			return InteractionResult.SUCCESS;
 		} else {
 			InteractionResult interactionResult = super.mobInteract(player, interactionHand);
 			if (interactionResult.consumesAction() && this.isFood(itemStack)) {
-				this.level().playSound(null, this, this.getEatingSound(itemStack), SoundSource.NEUTRAL, 1.0F, Mth.randomBetween(this.level().random, 0.8F, 1.2F));
+				this.playEatingSound();
 			}
 
 			return interactionResult;
@@ -233,7 +242,7 @@ public class Goat extends Animal {
 
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData
+		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, EntitySpawnReason entitySpawnReason, @Nullable SpawnGroupData spawnGroupData
 	) {
 		RandomSource randomSource = serverLevelAccessor.getRandom();
 		GoatAi.initMemories(this, randomSource);
@@ -244,7 +253,7 @@ public class Goat extends Animal {
 			this.entityData.set(entityDataAccessor, false);
 		}
 
-		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData);
+		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, entitySpawnReason, spawnGroupData);
 	}
 
 	@Override
@@ -363,7 +372,7 @@ public class Goat extends Animal {
 	}
 
 	public static boolean checkGoatSpawnRules(
-		EntityType<? extends Animal> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, RandomSource randomSource
+		EntityType<? extends Animal> entityType, LevelAccessor levelAccessor, EntitySpawnReason entitySpawnReason, BlockPos blockPos, RandomSource randomSource
 	) {
 		return levelAccessor.getBlockState(blockPos.below()).is(BlockTags.GOATS_SPAWNABLE_ON) && isBrightEnoughToSpawn(levelAccessor, blockPos);
 	}

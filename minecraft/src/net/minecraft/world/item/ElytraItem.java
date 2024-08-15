@@ -4,7 +4,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -21,12 +21,7 @@ public class ElytraItem extends Item implements Equipable {
 	}
 
 	@Override
-	public boolean isValidRepairItem(ItemStack itemStack, ItemStack itemStack2) {
-		return itemStack2.is(Items.PHANTOM_MEMBRANE);
-	}
-
-	@Override
-	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand) {
+	public InteractionResult use(Level level, Player player, InteractionHand interactionHand) {
 		return this.swapWithEquipmentSlot(this, level, player, interactionHand);
 	}
 

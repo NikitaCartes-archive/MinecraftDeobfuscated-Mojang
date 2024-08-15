@@ -14,10 +14,11 @@ import net.minecraft.client.gui.spectator.SpectatorMenu;
 import net.minecraft.client.gui.spectator.SpectatorMenuCategory;
 import net.minecraft.client.gui.spectator.SpectatorMenuItem;
 import net.minecraft.client.multiplayer.PlayerInfo;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.resources.PlayerSkin;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.Mth;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.scores.PlayerTeam;
@@ -63,8 +64,8 @@ public class TeleportToTeamMenuCategory implements SpectatorMenuCategory, Specta
 	}
 
 	@Override
-	public void renderIcon(GuiGraphics guiGraphics, float f, int i) {
-		guiGraphics.blitSprite(TELEPORT_TO_TEAM_SPRITE, 0, 0, 16, 16);
+	public void renderIcon(GuiGraphics guiGraphics, float f, float g) {
+		guiGraphics.blitSprite(RenderType::guiTextured, TELEPORT_TO_TEAM_SPRITE, 0, 0, 16, 16, ARGB.colorFromFloat(g, f, f, f));
 	}
 
 	@Override
@@ -114,18 +115,16 @@ public class TeleportToTeamMenuCategory implements SpectatorMenuCategory, Specta
 		}
 
 		@Override
-		public void renderIcon(GuiGraphics guiGraphics, float f, int i) {
+		public void renderIcon(GuiGraphics guiGraphics, float f, float g) {
 			Integer integer = this.team.getColor().getColor();
 			if (integer != null) {
-				float g = (float)(integer >> 16 & 0xFF) / 255.0F;
-				float h = (float)(integer >> 8 & 0xFF) / 255.0F;
+				float h = (float)(integer >> 16 & 0xFF) / 255.0F;
+				float i = (float)(integer >> 8 & 0xFF) / 255.0F;
 				float j = (float)(integer & 0xFF) / 255.0F;
-				guiGraphics.fill(1, 1, 15, 15, Mth.color(g * f, h * f, j * f) | i << 24);
+				guiGraphics.fill(1, 1, 15, 15, ARGB.colorFromFloat(g, h * f, i * f, j * f));
 			}
 
-			guiGraphics.setColor(f, f, f, (float)i / 255.0F);
-			PlayerFaceRenderer.draw(guiGraphics, (PlayerSkin)this.iconSkin.get(), 2, 2, 12);
-			guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
+			PlayerFaceRenderer.draw(guiGraphics, (PlayerSkin)this.iconSkin.get(), 2, 2, 12, ARGB.colorFromFloat(g, f, f, f));
 		}
 
 		@Override

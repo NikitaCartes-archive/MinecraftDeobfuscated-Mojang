@@ -4,6 +4,7 @@ import com.mojang.logging.LogUtils;
 import com.mojang.serialization.MapCodec;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import java.util.Map;
+import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -35,6 +36,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import org.slf4j.Logger;
@@ -70,21 +72,12 @@ public class DispenserBlock extends BaseEntityBlock {
 
 	@Override
 	protected InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
-		if (level.isClientSide) {
-			return InteractionResult.SUCCESS;
-		} else {
-			BlockEntity blockEntity = level.getBlockEntity(blockPos);
-			if (blockEntity instanceof DispenserBlockEntity) {
-				player.openMenu((DispenserBlockEntity)blockEntity);
-				if (blockEntity instanceof DropperBlockEntity) {
-					player.awardStat(Stats.INSPECT_DROPPER);
-				} else {
-					player.awardStat(Stats.INSPECT_DISPENSER);
-				}
-			}
-
-			return InteractionResult.CONSUME;
+		if (!level.isClientSide && level.getBlockEntity(blockPos) instanceof DispenserBlockEntity dispenserBlockEntity) {
+			player.openMenu(dispenserBlockEntity);
+			player.awardStat(dispenserBlockEntity instanceof DropperBlockEntity ? Stats.INSPECT_DROPPER : Stats.INSPECT_DISPENSER);
 		}
+
+		return InteractionResult.SUCCESS;
 	}
 
 	protected void dispenseFrom(ServerLevel serverLevel, BlockState blockState, BlockPos blockPos) {
@@ -114,7 +107,7 @@ public class DispenserBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	protected void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
+	protected void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, @Nullable Orientation orientation, boolean bl) {
 		boolean bl2 = level.hasNeighborSignal(blockPos) || level.hasNeighborSignal(blockPos.above());
 		boolean bl3 = (Boolean)blockState.getValue(TRIGGERED);
 		if (bl2 && !bl3) {

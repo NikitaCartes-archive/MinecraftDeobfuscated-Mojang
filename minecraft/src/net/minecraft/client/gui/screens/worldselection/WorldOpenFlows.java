@@ -33,10 +33,10 @@ import net.minecraft.client.gui.screens.RecoverWorldDataScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.server.DownloadedPackSource;
 import net.minecraft.commands.Commands;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.LayeredRegistryAccess;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.NbtException;
 import net.minecraft.nbt.ReportedNbtException;
@@ -78,7 +78,7 @@ public class WorldOpenFlows {
 	}
 
 	public void createFreshLevel(
-		String string, LevelSettings levelSettings, WorldOptions worldOptions, Function<RegistryAccess, WorldDimensions> function, Screen screen
+		String string, LevelSettings levelSettings, WorldOptions worldOptions, Function<HolderLookup.Provider, WorldDimensions> function, Screen screen
 	) {
 		this.minecraft.forceSetScreen(new GenericMessageScreen(Component.translatable("selectWorld.data_read")));
 		LevelStorageSource.LevelStorageAccess levelStorageAccess = this.createWorldAccess(string);

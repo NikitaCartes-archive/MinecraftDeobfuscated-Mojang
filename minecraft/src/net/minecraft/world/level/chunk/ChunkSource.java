@@ -42,7 +42,7 @@ public abstract class ChunkSource implements LightChunkGetter, AutoCloseable {
 
 	public abstract LevelLightEngine getLightEngine();
 
-	public void setSpawnSettings(boolean bl, boolean bl2) {
+	public void setSpawnSettings(boolean bl) {
 	}
 
 	public void updateChunkForced(ChunkPos chunkPos, boolean bl) {

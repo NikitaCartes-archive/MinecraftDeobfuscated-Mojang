@@ -140,6 +140,10 @@ public class FireworkRocketEntity extends Projectile implements ItemSupplier {
 
 			Vec3 vec33 = this.getDeltaMovement();
 			this.move(MoverType.SELF, vec33);
+			if (!this.level().isClientSide()) {
+				this.applyEffectsFromBlocks();
+			}
+
 			this.setDeltaMovement(vec33);
 		}
 

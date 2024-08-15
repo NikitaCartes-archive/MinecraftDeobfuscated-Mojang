@@ -16,7 +16,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.phys.BlockHitResult;
 
-public class CaveVinesBlock extends GrowingPlantHeadBlock implements BonemealableBlock, CaveVines {
+public class CaveVinesBlock extends GrowingPlantHeadBlock implements CaveVines {
 	public static final MapCodec<CaveVinesBlock> CODEC = simpleCodec(CaveVinesBlock::new);
 	private static final float CHANCE_OF_BERRIES_ON_GROWTH = 0.11F;
 

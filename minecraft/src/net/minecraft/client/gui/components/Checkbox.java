@@ -1,6 +1,5 @@
 package net.minecraft.client.gui.components;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -10,8 +9,10 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.ARGB;
 
 @Environment(EnvType.CLIENT)
 public class Checkbox extends AbstractButton {
@@ -80,10 +81,7 @@ public class Checkbox extends AbstractButton {
 	@Override
 	public void renderWidget(GuiGraphics guiGraphics, int i, int j, float f) {
 		Minecraft minecraft = Minecraft.getInstance();
-		RenderSystem.enableDepthTest();
 		Font font = minecraft.font;
-		guiGraphics.setColor(1.0F, 1.0F, 1.0F, this.alpha);
-		RenderSystem.enableBlend();
 		ResourceLocation resourceLocation;
 		if (this.selected) {
 			resourceLocation = this.isFocused() ? CHECKBOX_SELECTED_HIGHLIGHTED_SPRITE : CHECKBOX_SELECTED_SPRITE;
@@ -92,7 +90,7 @@ public class Checkbox extends AbstractButton {
 		}
 
 		int k = getBoxSize(font);
-		guiGraphics.blitSprite(resourceLocation, this.getX(), this.getY(), k, k);
+		guiGraphics.blitSprite(RenderType::guiTextured, resourceLocation, this.getX(), this.getY(), k, k, ARGB.white(this.alpha));
 		int l = this.getX() + k + 4;
 		int m = this.getY() + k / 2 - this.textWidget.getHeight() / 2;
 		this.textWidget.setPosition(l, m);

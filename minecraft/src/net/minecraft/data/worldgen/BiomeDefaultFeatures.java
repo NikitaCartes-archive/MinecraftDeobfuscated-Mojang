@@ -13,9 +13,9 @@ import net.minecraft.world.level.levelgen.GenerationStep;
 
 public class BiomeDefaultFeatures {
 	public static void addDefaultCarversAndLakes(BiomeGenerationSettings.Builder builder) {
-		builder.addCarver(GenerationStep.Carving.AIR, Carvers.CAVE);
-		builder.addCarver(GenerationStep.Carving.AIR, Carvers.CAVE_EXTRA_UNDERGROUND);
-		builder.addCarver(GenerationStep.Carving.AIR, Carvers.CANYON);
+		builder.addCarver(Carvers.CAVE);
+		builder.addCarver(Carvers.CAVE_EXTRA_UNDERGROUND);
+		builder.addCarver(Carvers.CANYON);
 		builder.addFeature(GenerationStep.Decoration.LAKES, MiscOverworldPlacements.LAKE_LAVA_UNDERGROUND);
 		builder.addFeature(GenerationStep.Decoration.LAKES, MiscOverworldPlacements.LAKE_LAVA_SURFACE);
 	}
@@ -348,10 +348,6 @@ public class BiomeDefaultFeatures {
 
 	public static void addColdOceanExtraVegetation(BiomeGenerationSettings.Builder builder) {
 		builder.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, AquaticPlacements.KELP_COLD);
-	}
-
-	public static void addDefaultSeagrass(BiomeGenerationSettings.Builder builder) {
-		builder.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, AquaticPlacements.SEAGRASS_SIMPLE);
 	}
 
 	public static void addLukeWarmKelp(BiomeGenerationSettings.Builder builder) {

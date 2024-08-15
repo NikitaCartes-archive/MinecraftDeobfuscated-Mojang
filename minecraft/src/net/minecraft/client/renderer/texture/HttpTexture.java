@@ -18,6 +18,7 @@ import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.util.ARGB;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 
@@ -190,8 +191,8 @@ public class HttpTexture extends SimpleTexture {
 	private static void doNotchTransparencyHack(NativeImage nativeImage, int i, int j, int k, int l) {
 		for (int m = i; m < k; m++) {
 			for (int n = j; n < l; n++) {
-				int o = nativeImage.getPixelRGBA(m, n);
-				if ((o >> 24 & 0xFF) < 128) {
+				int o = nativeImage.getPixel(m, n);
+				if (ARGB.alpha(o) < 128) {
 					return;
 				}
 			}
@@ -199,7 +200,7 @@ public class HttpTexture extends SimpleTexture {
 
 		for (int m = i; m < k; m++) {
 			for (int nx = j; nx < l; nx++) {
-				nativeImage.setPixelRGBA(m, nx, nativeImage.getPixelRGBA(m, nx) & 16777215);
+				nativeImage.setPixel(m, nx, nativeImage.getPixel(m, nx) & 16777215);
 			}
 		}
 	}
@@ -207,7 +208,7 @@ public class HttpTexture extends SimpleTexture {
 	private static void setNoAlpha(NativeImage nativeImage, int i, int j, int k, int l) {
 		for (int m = i; m < k; m++) {
 			for (int n = j; n < l; n++) {
-				nativeImage.setPixelRGBA(m, n, nativeImage.getPixelRGBA(m, n) | 0xFF000000);
+				nativeImage.setPixel(m, n, ARGB.opaque(nativeImage.getPixel(m, n)));
 			}
 		}
 	}

@@ -4,6 +4,7 @@ import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.util.ARGB;
 
 @Environment(EnvType.CLIENT)
 public class OverlayTexture implements AutoCloseable {
@@ -20,10 +21,10 @@ public class OverlayTexture implements AutoCloseable {
 		for (int i = 0; i < 16; i++) {
 			for (int j = 0; j < 16; j++) {
 				if (i < 8) {
-					nativeImage.setPixelRGBA(j, i, -1308622593);
+					nativeImage.setPixel(j, i, -1291911168);
 				} else {
 					int k = (int)((1.0F - (float)j / 15.0F * 0.75F) * 255.0F);
-					nativeImage.setPixelRGBA(j, i, k << 24 | 16777215);
+					nativeImage.setPixel(j, i, ARGB.color(k, -1));
 				}
 			}
 		}

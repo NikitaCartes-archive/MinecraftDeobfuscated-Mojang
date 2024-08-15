@@ -120,13 +120,7 @@ public abstract class ChunkGenerator {
 	}
 
 	public abstract void applyCarvers(
-		WorldGenRegion worldGenRegion,
-		long l,
-		RandomState randomState,
-		BiomeManager biomeManager,
-		StructureManager structureManager,
-		ChunkAccess chunkAccess,
-		GenerationStep.Carving carving
+		WorldGenRegion worldGenRegion, long l, RandomState randomState, BiomeManager biomeManager, StructureManager structureManager, ChunkAccess chunkAccess
 	);
 
 	@Nullable

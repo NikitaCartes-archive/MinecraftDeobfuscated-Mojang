@@ -5,7 +5,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.util.FastColor;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 import net.minecraft.util.debugchart.SampleStorage;
 
@@ -24,6 +24,10 @@ public abstract class AbstractDebugChart {
 
 	public int getWidth(int i) {
 		return Math.min(this.sampleStorage.capacity() + 2, i);
+	}
+
+	public int getFullHeight() {
+		return 60 + 9;
 	}
 
 	public void drawChart(GuiGraphics guiGraphics, int i, int j) {
@@ -96,6 +100,6 @@ public abstract class AbstractDebugChart {
 
 	protected int getSampleColor(double d, double e, int i, double f, int j, double g, int k) {
 		d = Mth.clamp(d, e, g);
-		return d < f ? FastColor.ARGB32.lerp((float)((d - e) / (f - e)), i, j) : FastColor.ARGB32.lerp((float)((d - f) / (g - f)), j, k);
+		return d < f ? ARGB.lerp((float)((d - e) / (f - e)), i, j) : ARGB.lerp((float)((d - f) / (g - f)), j, k);
 	}
 }

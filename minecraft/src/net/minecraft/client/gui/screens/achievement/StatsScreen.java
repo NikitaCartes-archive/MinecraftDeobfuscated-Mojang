@@ -18,6 +18,7 @@ import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
 import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -277,18 +278,18 @@ public class StatsScreen extends Screen {
 
 			for (int k = 0; k < this.iconSprites.length; k++) {
 				ResourceLocation resourceLocation = this.headerPressed == k ? StatsScreen.SLOT_SPRITE : StatsScreen.HEADER_SPRITE;
-				guiGraphics.blitSprite(resourceLocation, i + this.getColumnX(k) - 18, j + 1, 0, 18, 18);
+				guiGraphics.blitSprite(RenderType::guiTextured, resourceLocation, i + this.getColumnX(k) - 18, j + 1, 18, 18);
 			}
 
 			if (this.sortColumn != null) {
 				int k = this.getColumnX(this.getColumnIndex(this.sortColumn)) - 36;
 				ResourceLocation resourceLocation = this.sortOrder == 1 ? StatsScreen.SORT_UP_SPRITE : StatsScreen.SORT_DOWN_SPRITE;
-				guiGraphics.blitSprite(resourceLocation, i + k, j + 1, 0, 18, 18);
+				guiGraphics.blitSprite(RenderType::guiTextured, resourceLocation, i + k, j + 1, 18, 18);
 			}
 
 			for (int k = 0; k < this.iconSprites.length; k++) {
 				int l = this.headerPressed == k ? 1 : 0;
-				guiGraphics.blitSprite(this.iconSprites[k], i + this.getColumnX(k) - 18 + l, j + 1 + l, 0, 18, 18);
+				guiGraphics.blitSprite(RenderType::guiTextured, this.iconSprites[k], i + this.getColumnX(k) - 18 + l, j + 1 + l, 18, 18);
 			}
 		}
 
@@ -391,7 +392,7 @@ public class StatsScreen extends Screen {
 
 			@Override
 			public void render(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-				guiGraphics.blitSprite(StatsScreen.SLOT_SPRITE, k, j, 0, 18, 18);
+				guiGraphics.blitSprite(RenderType::guiTextured, StatsScreen.SLOT_SPRITE, k, j, 18, 18);
 				guiGraphics.renderFakeItem(this.item.getDefaultInstance(), k + 1, j + 1);
 				if (StatsScreen.this.itemStatsList != null) {
 					for (int p = 0; p < StatsScreen.this.itemStatsList.blockColumns.size(); p++) {

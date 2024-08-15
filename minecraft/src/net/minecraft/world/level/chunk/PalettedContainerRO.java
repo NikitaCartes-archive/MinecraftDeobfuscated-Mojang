@@ -22,6 +22,8 @@ public interface PalettedContainerRO<T> {
 
 	void count(PalettedContainer.CountConsumer<T> countConsumer);
 
+	PalettedContainer<T> copy();
+
 	PalettedContainer<T> recreate();
 
 	PalettedContainerRO.PackedData<T> pack(IdMap<T> idMap, PalettedContainer.Strategy strategy);

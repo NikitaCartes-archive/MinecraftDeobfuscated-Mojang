@@ -78,6 +78,12 @@ public class PalettedContainer<T> implements PaletteResize<T>, PalettedContainer
 		this.data = data;
 	}
 
+	private PalettedContainer(PalettedContainer<T> palettedContainer) {
+		this.registry = palettedContainer.registry;
+		this.strategy = palettedContainer.strategy;
+		this.data = palettedContainer.data.copy(this);
+	}
+
 	public PalettedContainer(IdMap<T> idMap, T object, PalettedContainer.Strategy strategy) {
 		this.strategy = strategy;
 		this.registry = idMap;
@@ -268,8 +274,9 @@ public class PalettedContainer<T> implements PaletteResize<T>, PalettedContainer
 		return this.data.palette.maybeHas(predicate);
 	}
 
+	@Override
 	public PalettedContainer<T> copy() {
-		return new PalettedContainer<>(this.registry, this.strategy, this.data.copy());
+		return new PalettedContainer<>(this);
 	}
 
 	@Override
@@ -320,8 +327,8 @@ public class PalettedContainer<T> implements PaletteResize<T>, PalettedContainer
 			friendlyByteBuf.writeLongArray(this.storage.getRaw());
 		}
 
-		public PalettedContainer.Data<T> copy() {
-			return new PalettedContainer.Data<>(this.configuration, this.storage.copy(), this.palette.copy());
+		public PalettedContainer.Data<T> copy(PaletteResize<T> paletteResize) {
+			return new PalettedContainer.Data<>(this.configuration, this.storage.copy(), this.palette.copy(paletteResize));
 		}
 	}
 

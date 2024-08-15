@@ -97,12 +97,11 @@ public class EnchantingTableBlock extends BaseEntityBlock {
 
 	@Override
 	protected InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
-		if (level.isClientSide) {
-			return InteractionResult.SUCCESS;
-		} else {
+		if (!level.isClientSide) {
 			player.openMenu(blockState.getMenuProvider(level, blockPos));
-			return InteractionResult.CONSUME;
 		}
+
+		return InteractionResult.SUCCESS;
 	}
 
 	@Nullable

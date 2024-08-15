@@ -62,13 +62,13 @@ import net.minecraft.network.protocol.configuration.ConfigurationProtocols;
 import net.minecraft.network.protocol.game.ClientboundBlockChangedAckPacket;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundCommandSuggestionsPacket;
-import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraft.network.protocol.game.ClientboundDisguisedChatPacket;
 import net.minecraft.network.protocol.game.ClientboundMoveVehiclePacket;
+import net.minecraft.network.protocol.game.ClientboundPlaceGhostRecipePacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerChatPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
-import net.minecraft.network.protocol.game.ClientboundSetCarriedItemPacket;
+import net.minecraft.network.protocol.game.ClientboundSetHeldSlotPacket;
 import net.minecraft.network.protocol.game.ClientboundStartConfigurationPacket;
 import net.minecraft.network.protocol.game.ClientboundSystemChatPacket;
 import net.minecraft.network.protocol.game.ClientboundTagQueryPacket;
@@ -83,6 +83,7 @@ import net.minecraft.network.protocol.game.ServerboundChatPacket;
 import net.minecraft.network.protocol.game.ServerboundChatSessionUpdatePacket;
 import net.minecraft.network.protocol.game.ServerboundChunkBatchReceivedPacket;
 import net.minecraft.network.protocol.game.ServerboundClientCommandPacket;
+import net.minecraft.network.protocol.game.ServerboundClientTickEndPacket;
 import net.minecraft.network.protocol.game.ServerboundCommandSuggestionPacket;
 import net.minecraft.network.protocol.game.ServerboundConfigurationAcknowledgedPacket;
 import net.minecraft.network.protocol.game.ServerboundContainerButtonClickPacket;
@@ -108,6 +109,7 @@ import net.minecraft.network.protocol.game.ServerboundRecipeBookChangeSettingsPa
 import net.minecraft.network.protocol.game.ServerboundRecipeBookSeenRecipePacket;
 import net.minecraft.network.protocol.game.ServerboundRenameItemPacket;
 import net.minecraft.network.protocol.game.ServerboundSeenAdvancementsPacket;
+import net.minecraft.network.protocol.game.ServerboundSelectBundleItemPacket;
 import net.minecraft.network.protocol.game.ServerboundSelectTradePacket;
 import net.minecraft.network.protocol.game.ServerboundSetBeaconPacket;
 import net.minecraft.network.protocol.game.ServerboundSetCarriedItemPacket;
@@ -148,6 +150,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.ProfilePublicKey;
 import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.inventory.AnvilMenu;
 import net.minecraft.world.inventory.BeaconMenu;
@@ -227,6 +230,7 @@ public class ServerGamePacketListenerImpl
 	private int aboveGroundVehicleTickCount;
 	private int receivedMovePacketCount;
 	private int knownMovePacketCount;
+	private boolean receivedMovementThisTick;
 	@Nullable
 	private RemoteChatSession chatSession;
 	private SignedMessageChain.Decoder signedMessageDecoder;
@@ -370,14 +374,13 @@ public class ServerGamePacketListenerImpl
 
 	@Override
 	public void handlePlayerInput(ServerboundPlayerInputPacket serverboundPlayerInputPacket) {
-		PacketUtils.ensureRunningOnSameThread(serverboundPlayerInputPacket, this, this.player.serverLevel());
-		this.player
-			.setPlayerInput(
-				serverboundPlayerInputPacket.getXxa(),
-				serverboundPlayerInputPacket.getZza(),
-				serverboundPlayerInputPacket.isJumping(),
-				serverboundPlayerInputPacket.isShiftKeyDown()
+		if (this.player.isPassenger()
+			&& this.player.getVehicle() instanceof AbstractMinecart abstractMinecart
+			&& ((double)serverboundPlayerInputPacket.getXxa() != 0.0 || (double)serverboundPlayerInputPacket.getZza() != 0.0)) {
+			abstractMinecart.setPassengerMoveIntentFromInput(
+				this.player, new Vec3((double)serverboundPlayerInputPacket.getXxa(), 0.0, (double)serverboundPlayerInputPacket.getZza())
 			);
+		}
 	}
 
 	private static boolean containsInvalidValues(double d, double e, double f, float g, float h) {
@@ -460,7 +463,7 @@ public class ServerGamePacketListenerImpl
 
 				this.player.serverLevel().getChunkSource().move(this.player);
 				Vec3 vec3 = new Vec3(entity.getX() - d, entity.getY() - e, entity.getZ() - f);
-				this.player.setKnownMovement(vec3);
+				this.handlePlayerKnownMovement(vec3);
 				this.player.checkMovementStatistics(vec3.x, vec3.y, vec3.z);
 				this.clientVehicleIsFloating = m >= -0.03125 && !bl2 && !this.server.isFlightAllowed() && !entity.isNoGravity() && this.noBlocksAround(entity);
 				this.vehicleLastGoodX = entity.getX();
@@ -502,6 +505,11 @@ public class ServerGamePacketListenerImpl
 	public void handleRecipeBookSeenRecipePacket(ServerboundRecipeBookSeenRecipePacket serverboundRecipeBookSeenRecipePacket) {
 		PacketUtils.ensureRunningOnSameThread(serverboundRecipeBookSeenRecipePacket, this, this.player.serverLevel());
 		this.server.getRecipeManager().byKey(serverboundRecipeBookSeenRecipePacket.getRecipe()).ifPresent(this.player.getRecipeBook()::removeHighlight);
+	}
+
+	@Override
+	public void handleBundleItemSelectedPacket(ServerboundSelectBundleItemPacket serverboundSelectBundleItemPacket) {
+		this.player.containerMenu.setSelectedBundleItemIndex(serverboundSelectBundleItemPacket.slotId(), serverboundSelectBundleItemPacket.selectedItemIndex());
 	}
 
 	@Override
@@ -633,17 +641,10 @@ public class ServerGamePacketListenerImpl
 	public void handlePickItem(ServerboundPickItemPacket serverboundPickItemPacket) {
 		PacketUtils.ensureRunningOnSameThread(serverboundPickItemPacket, this, this.player.serverLevel());
 		this.player.getInventory().pickSlot(serverboundPickItemPacket.getSlot());
-		this.player
-			.connection
-			.send(
-				new ClientboundContainerSetSlotPacket(-2, 0, this.player.getInventory().selected, this.player.getInventory().getItem(this.player.getInventory().selected))
-			);
-		this.player
-			.connection
-			.send(
-				new ClientboundContainerSetSlotPacket(-2, 0, serverboundPickItemPacket.getSlot(), this.player.getInventory().getItem(serverboundPickItemPacket.getSlot()))
-			);
-		this.player.connection.send(new ClientboundSetCarriedItemPacket(this.player.getInventory().selected));
+		int i = this.player.getInventory().selected;
+		this.player.connection.send(this.player.getInventory().createInventoryUpdatePacket(i));
+		this.player.connection.send(this.player.getInventory().createInventoryUpdatePacket(serverboundPickItemPacket.getSlot()));
+		this.player.connection.send(new ClientboundSetHeldSlotPacket(i));
 	}
 
 	@Override
@@ -947,9 +948,9 @@ public class ServerGamePacketListenerImpl
 									&& this.noBlocksAround(this.player);
 								this.player.serverLevel().getChunkSource().move(this.player);
 								Vec3 vec3 = new Vec3(this.player.getX() - i, this.player.getY() - j, this.player.getZ() - k);
-								this.player.setOnGroundWithMovement(serverboundMovePlayerPacket.isOnGround(), vec3);
+								this.player.setOnGroundWithMovement(serverboundMovePlayerPacket.isOnGround(), serverboundMovePlayerPacket.horizontalCollision(), vec3);
 								this.player.doCheckFallDamage(this.player.getX() - i, this.player.getY() - j, this.player.getZ() - k, serverboundMovePlayerPacket.isOnGround());
-								this.player.setKnownMovement(vec3);
+								this.handlePlayerKnownMovement(vec3);
 								if (bl2) {
 									this.player.resetFallDistance();
 								}
@@ -1106,7 +1107,7 @@ public class ServerGamePacketListenerImpl
 							if (direction == Direction.UP && !interactionResult.consumesAction() && blockPos.getY() >= i - 1 && wasBlockPlacementAttempt(this.player, itemStack)) {
 								Component component = Component.translatable("build.tooHigh", i - 1).withStyle(ChatFormatting.RED);
 								this.player.sendSystemMessage(component, true);
-							} else if (interactionResult.shouldSwing()) {
+							} else if (interactionResult instanceof InteractionResult.Success success && success.swingSource() == InteractionResult.SwingSource.SERVER) {
 								this.player.swing(interactionHand, true);
 							}
 						}
@@ -1139,8 +1140,8 @@ public class ServerGamePacketListenerImpl
 				this.player.absRotateTo(f, g);
 			}
 
-			InteractionResult interactionResult = this.player.gameMode.useItem(this.player, serverLevel, itemStack, interactionHand);
-			if (interactionResult.shouldSwing()) {
+			if (this.player.gameMode.useItem(this.player, serverLevel, itemStack, interactionHand) instanceof InteractionResult.Success success
+				&& success.swingSource() == InteractionResult.SwingSource.SERVER) {
 				this.player.swing(interactionHand, true);
 			}
 		}
@@ -1153,7 +1154,7 @@ public class ServerGamePacketListenerImpl
 			for (ServerLevel serverLevel : this.server.getAllLevels()) {
 				Entity entity = serverboundTeleportToEntityPacket.getEntity(serverLevel);
 				if (entity != null) {
-					this.player.teleportTo(serverLevel, entity.getX(), entity.getY(), entity.getZ(), entity.getYRot(), entity.getXRot());
+					this.player.teleportTo(serverLevel, entity.getX(), entity.getY(), entity.getZ(), entity.getYRot(), entity.getXRot(), true);
 					return;
 				}
 			}
@@ -1527,55 +1528,52 @@ public class ServerGamePacketListenerImpl
 
 			AABB aABB = entity.getBoundingBox();
 			if (this.player.canInteractWithEntity(aABB, 1.0)) {
-				serverboundInteractPacket.dispatch(
-					new ServerboundInteractPacket.Handler() {
-						private void performInteraction(InteractionHand interactionHand, ServerGamePacketListenerImpl.EntityInteraction entityInteraction) {
-							ItemStack itemStack = ServerGamePacketListenerImpl.this.player.getItemInHand(interactionHand);
-							if (itemStack.isItemEnabled(serverLevel.enabledFeatures())) {
-								ItemStack itemStack2 = itemStack.copy();
-								InteractionResult interactionResult = entityInteraction.run(ServerGamePacketListenerImpl.this.player, entity, interactionHand);
-								if (interactionResult.consumesAction()) {
-									CriteriaTriggers.PLAYER_INTERACTED_WITH_ENTITY
-										.trigger(ServerGamePacketListenerImpl.this.player, interactionResult.indicateItemUse() ? itemStack2 : ItemStack.EMPTY, entity);
-									if (interactionResult.shouldSwing()) {
-										ServerGamePacketListenerImpl.this.player.swing(interactionHand, true);
-									}
+				serverboundInteractPacket.dispatch(new ServerboundInteractPacket.Handler() {
+					private void performInteraction(InteractionHand interactionHand, ServerGamePacketListenerImpl.EntityInteraction entityInteraction) {
+						ItemStack itemStack = ServerGamePacketListenerImpl.this.player.getItemInHand(interactionHand);
+						if (itemStack.isItemEnabled(serverLevel.enabledFeatures())) {
+							ItemStack itemStack2 = itemStack.copy();
+							if (entityInteraction.run(ServerGamePacketListenerImpl.this.player, entity, interactionHand) instanceof InteractionResult.Success success) {
+								ItemStack itemStack3 = success.wasItemInteraction() ? itemStack2 : ItemStack.EMPTY;
+								CriteriaTriggers.PLAYER_INTERACTED_WITH_ENTITY.trigger(ServerGamePacketListenerImpl.this.player, itemStack3, entity);
+								if (success.swingSource() == InteractionResult.SwingSource.SERVER) {
+									ServerGamePacketListenerImpl.this.player.swing(interactionHand, true);
 								}
 							}
 						}
+					}
 
-						@Override
-						public void onInteraction(InteractionHand interactionHand) {
-							this.performInteraction(interactionHand, Player::interactOn);
-						}
+					@Override
+					public void onInteraction(InteractionHand interactionHand) {
+						this.performInteraction(interactionHand, Player::interactOn);
+					}
 
-						@Override
-						public void onInteraction(InteractionHand interactionHand, Vec3 vec3) {
-							this.performInteraction(interactionHand, (serverPlayer, entityxx, interactionHandx) -> entityxx.interactAt(serverPlayer, vec3, interactionHandx));
-						}
+					@Override
+					public void onInteraction(InteractionHand interactionHand, Vec3 vec3) {
+						this.performInteraction(interactionHand, (serverPlayer, entityxx, interactionHandx) -> entityxx.interactAt(serverPlayer, vec3, interactionHandx));
+					}
 
-						@Override
-						public void onAttack() {
-							label23:
-							if (!(entity instanceof ItemEntity) && !(entity instanceof ExperienceOrb) && entity != ServerGamePacketListenerImpl.this.player) {
-								if (entity instanceof AbstractArrow abstractArrow && !abstractArrow.isAttackable()) {
-									break label23;
-								}
+					@Override
+					public void onAttack() {
+						label23:
+						if (!(entity instanceof ItemEntity) && !(entity instanceof ExperienceOrb) && entity != ServerGamePacketListenerImpl.this.player) {
+							if (entity instanceof AbstractArrow abstractArrow && !abstractArrow.isAttackable()) {
+								break label23;
+							}
 
-								ItemStack itemStack = ServerGamePacketListenerImpl.this.player.getItemInHand(InteractionHand.MAIN_HAND);
-								if (!itemStack.isItemEnabled(serverLevel.enabledFeatures())) {
-									return;
-								}
-
-								ServerGamePacketListenerImpl.this.player.attack(entity);
+							ItemStack itemStack = ServerGamePacketListenerImpl.this.player.getItemInHand(InteractionHand.MAIN_HAND);
+							if (!itemStack.isItemEnabled(serverLevel.enabledFeatures())) {
 								return;
 							}
 
-							ServerGamePacketListenerImpl.this.disconnect(Component.translatable("multiplayer.disconnect.invalid_entity_attacked"));
-							ServerGamePacketListenerImpl.LOGGER.warn("Player {} tried to attack an invalid entity", ServerGamePacketListenerImpl.this.player.getName().getString());
+							ServerGamePacketListenerImpl.this.player.attack(entity);
+							return;
 						}
+
+						ServerGamePacketListenerImpl.this.disconnect(Component.translatable("multiplayer.disconnect.invalid_entity_attacked"));
+						ServerGamePacketListenerImpl.LOGGER.warn("Player {} tried to attack an invalid entity", ServerGamePacketListenerImpl.this.player.getName().getString());
 					}
-				);
+				});
 			}
 		}
 	}
@@ -1652,18 +1650,29 @@ public class ServerGamePacketListenerImpl
 	public void handlePlaceRecipe(ServerboundPlaceRecipePacket serverboundPlaceRecipePacket) {
 		PacketUtils.ensureRunningOnSameThread(serverboundPlaceRecipePacket, this, this.player.serverLevel());
 		this.player.resetLastActionTime();
-		if (!this.player.isSpectator()
-			&& this.player.containerMenu.containerId == serverboundPlaceRecipePacket.getContainerId()
-			&& this.player.containerMenu instanceof RecipeBookMenu) {
+		if (!this.player.isSpectator() && this.player.containerMenu.containerId == serverboundPlaceRecipePacket.getContainerId()) {
 			if (!this.player.containerMenu.stillValid(this.player)) {
 				LOGGER.debug("Player {} interacted with invalid menu {}", this.player, this.player.containerMenu);
-			} else {
-				this.server
-					.getRecipeManager()
-					.byKey(serverboundPlaceRecipePacket.getRecipe())
-					.ifPresent(
-						recipeHolder -> ((RecipeBookMenu)this.player.containerMenu).handlePlacement(serverboundPlaceRecipePacket.isShiftDown(), recipeHolder, this.player)
-					);
+			} else if (this.player.getRecipeBook().contains(serverboundPlaceRecipePacket.getRecipe())) {
+				if (this.player.containerMenu instanceof RecipeBookMenu recipeBookMenu) {
+					this.server
+						.getRecipeManager()
+						.byKey(serverboundPlaceRecipePacket.getRecipe())
+						.ifPresent(
+							recipeHolder -> {
+								if (recipeHolder.value().placementInfo().isImpossibleToPlace()) {
+									LOGGER.debug("Player {} tried to place impossible recipe {}", this.player, recipeHolder.id());
+								} else {
+									RecipeBookMenu.PostPlaceAction postPlaceAction = recipeBookMenu.handlePlacement(
+										serverboundPlaceRecipePacket.isUseMaxItems(), this.player.isCreative(), recipeHolder, this.player.getInventory()
+									);
+									if (postPlaceAction == RecipeBookMenu.PostPlaceAction.PLACE_GHOST_RECIPE) {
+										this.player.connection.send(new ClientboundPlaceGhostRecipePacket(this.player.containerMenu.containerId, recipeHolder));
+									}
+								}
+							}
+						);
+				}
 			}
 		}
 	}
@@ -1831,6 +1840,22 @@ public class ServerGamePacketListenerImpl
 
 	@Override
 	public void handleCustomPayload(ServerboundCustomPayloadPacket serverboundCustomPayloadPacket) {
+	}
+
+	@Override
+	public void handleClientTickEnd(ServerboundClientTickEndPacket serverboundClientTickEndPacket) {
+		PacketUtils.ensureRunningOnSameThread(serverboundClientTickEndPacket, this, this.player.serverLevel());
+		if (!this.receivedMovementThisTick) {
+			this.player.setKnownMovement(Vec3.ZERO);
+		}
+
+		this.receivedMovementThisTick = false;
+	}
+
+	private void handlePlayerKnownMovement(Vec3 vec3) {
+		this.player.setKnownMovement(vec3);
+		this.player.resetLastActionTime();
+		this.receivedMovementThisTick = true;
 	}
 
 	@Override

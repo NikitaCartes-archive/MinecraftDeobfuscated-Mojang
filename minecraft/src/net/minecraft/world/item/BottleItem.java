@@ -9,7 +9,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.AreaEffectCloud;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.player.Player;
@@ -27,7 +27,7 @@ public class BottleItem extends Item {
 	}
 
 	@Override
-	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand) {
+	public InteractionResult use(Level level, Player player, InteractionHand interactionHand) {
 		List<AreaEffectCloud> list = level.getEntitiesOfClass(
 			AreaEffectCloud.class,
 			player.getBoundingBox().inflate(2.0),
@@ -43,28 +43,27 @@ public class BottleItem extends Item {
 				CriteriaTriggers.PLAYER_INTERACTED_WITH_ENTITY.trigger(serverPlayer, itemStack, areaEffectCloud);
 			}
 
-			return InteractionResultHolder.sidedSuccess(this.turnBottleIntoItem(itemStack, player, new ItemStack(Items.DRAGON_BREATH)), level.isClientSide());
+			return InteractionResult.SUCCESS.heldItemTransformedTo(this.turnBottleIntoItem(itemStack, player, new ItemStack(Items.DRAGON_BREATH)));
 		} else {
 			BlockHitResult blockHitResult = getPlayerPOVHitResult(level, player, ClipContext.Fluid.SOURCE_ONLY);
 			if (blockHitResult.getType() == HitResult.Type.MISS) {
-				return InteractionResultHolder.pass(itemStack);
+				return InteractionResult.PASS;
 			} else {
 				if (blockHitResult.getType() == HitResult.Type.BLOCK) {
 					BlockPos blockPos = blockHitResult.getBlockPos();
 					if (!level.mayInteract(player, blockPos)) {
-						return InteractionResultHolder.pass(itemStack);
+						return InteractionResult.PASS;
 					}
 
 					if (level.getFluidState(blockPos).is(FluidTags.WATER)) {
 						level.playSound(player, player.getX(), player.getY(), player.getZ(), SoundEvents.BOTTLE_FILL, SoundSource.NEUTRAL, 1.0F, 1.0F);
 						level.gameEvent(player, GameEvent.FLUID_PICKUP, blockPos);
-						return InteractionResultHolder.sidedSuccess(
-							this.turnBottleIntoItem(itemStack, player, PotionContents.createItemStack(Items.POTION, Potions.WATER)), level.isClientSide()
-						);
+						return InteractionResult.SUCCESS
+							.heldItemTransformedTo(this.turnBottleIntoItem(itemStack, player, PotionContents.createItemStack(Items.POTION, Potions.WATER)));
 					}
 				}
 
-				return InteractionResultHolder.pass(itemStack);
+				return InteractionResult.PASS;
 			}
 		}
 	}

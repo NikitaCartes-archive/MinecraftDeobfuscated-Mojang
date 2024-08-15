@@ -2,11 +2,17 @@ package net.minecraft;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
 
 public class Optionull {
+	@Deprecated
+	public static <T> T orElse(@Nullable T object, T object2) {
+		return (T)Objects.requireNonNullElse(object, object2);
+	}
+
 	@Nullable
 	public static <T, R> R map(@Nullable T object, Function<T, R> function) {
 		return (R)(object == null ? null : function.apply(object));

@@ -25,10 +25,10 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntitySelector;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
@@ -143,7 +143,7 @@ public class Zombie extends Monster {
 	}
 
 	public void setCanBreakDoors(boolean bl) {
-		if (this.supportsBreakDoorGoal() && GoalUtils.hasGroundPathNavigation(this)) {
+		if (GoalUtils.hasGroundPathNavigation(this)) {
 			if (this.canBreakDoors != bl) {
 				this.canBreakDoors = bl;
 				((GroundPathNavigation)this.getNavigation()).setCanOpenDoors(bl);
@@ -157,10 +157,6 @@ public class Zombie extends Monster {
 			this.goalSelector.removeGoal(this.breakDoorGoal);
 			this.canBreakDoors = false;
 		}
-	}
-
-	protected boolean supportsBreakDoorGoal() {
-		return true;
 	}
 
 	@Override
@@ -269,7 +265,7 @@ public class Zombie extends Monster {
 		Zombie zombie = this.convertTo(entityType, true);
 		if (zombie != null) {
 			zombie.handleAttributes(zombie.level().getCurrentDifficultyAt(zombie.blockPosition()).getSpecialMultiplier());
-			zombie.setCanBreakDoors(zombie.supportsBreakDoorGoal() && this.canBreakDoors());
+			zombie.setCanBreakDoors(this.canBreakDoors());
 		}
 	}
 
@@ -281,10 +277,7 @@ public class Zombie extends Monster {
 	public boolean hurt(DamageSource damageSource, float f) {
 		if (!super.hurt(damageSource, f)) {
 			return false;
-		} else if (!(this.level() instanceof ServerLevel)) {
-			return false;
-		} else {
-			ServerLevel serverLevel = (ServerLevel)this.level();
+		} else if (this.level() instanceof ServerLevel serverLevel) {
 			LivingEntity livingEntity = this.getTarget();
 			if (livingEntity == null && damageSource.getEntity() instanceof LivingEntity) {
 				livingEntity = (LivingEntity)damageSource.getEntity();
@@ -297,23 +290,26 @@ public class Zombie extends Monster {
 				int i = Mth.floor(this.getX());
 				int j = Mth.floor(this.getY());
 				int k = Mth.floor(this.getZ());
-				Zombie zombie = new Zombie(this.level());
+				EntityType<? extends Zombie> entityType = this.getType();
+				Zombie zombie = entityType.create(this.level(), EntitySpawnReason.REINFORCEMENT);
+				if (zombie == null) {
+					return true;
+				}
 
 				for (int l = 0; l < 50; l++) {
 					int m = i + Mth.nextInt(this.random, 7, 40) * Mth.nextInt(this.random, -1, 1);
 					int n = j + Mth.nextInt(this.random, 7, 40) * Mth.nextInt(this.random, -1, 1);
 					int o = k + Mth.nextInt(this.random, 7, 40) * Mth.nextInt(this.random, -1, 1);
 					BlockPos blockPos = new BlockPos(m, n, o);
-					EntityType<?> entityType = zombie.getType();
 					if (SpawnPlacements.isSpawnPositionOk(entityType, this.level(), blockPos)
-						&& SpawnPlacements.checkSpawnRules(entityType, serverLevel, MobSpawnType.REINFORCEMENT, blockPos, this.level().random)) {
+						&& SpawnPlacements.checkSpawnRules(entityType, serverLevel, EntitySpawnReason.REINFORCEMENT, blockPos, this.level().random)) {
 						zombie.setPos((double)m, (double)n, (double)o);
 						if (!this.level().hasNearbyAlivePlayer((double)m, (double)n, (double)o, 7.0)
 							&& this.level().isUnobstructed(zombie)
 							&& this.level().noCollision(zombie)
 							&& !this.level().containsAnyLiquid(zombie.getBoundingBox())) {
 							zombie.setTarget(livingEntity);
-							zombie.finalizeSpawn(serverLevel, this.level().getCurrentDifficultyAt(zombie.blockPosition()), MobSpawnType.REINFORCEMENT, null);
+							zombie.finalizeSpawn(serverLevel, this.level().getCurrentDifficultyAt(zombie.blockPosition()), EntitySpawnReason.REINFORCEMENT, null);
 							serverLevel.addFreshEntityWithPassengers(zombie);
 							AttributeInstance attributeInstance = this.getAttribute(Attributes.SPAWN_REINFORCEMENTS_CHANCE);
 							AttributeModifier attributeModifier = attributeInstance.getModifier(REINFORCEMENT_CALLER_CHARGE_ID);
@@ -328,6 +324,8 @@ public class Zombie extends Monster {
 			}
 
 			return true;
+		} else {
+			return false;
 		}
 	}
 
@@ -366,6 +364,11 @@ public class Zombie extends Monster {
 	@Override
 	protected void playStepSound(BlockPos blockPos, BlockState blockState) {
 		this.playSound(this.getStepSound(), 0.15F, 1.0F);
+	}
+
+	@Override
+	public EntityType<? extends Zombie> getType() {
+		return (EntityType<? extends Zombie>)super.getType();
 	}
 
 	@Override
@@ -412,7 +415,7 @@ public class Zombie extends Monster {
 			ZombieVillager zombieVillager = villager.convertTo(EntityType.ZOMBIE_VILLAGER, false);
 			if (zombieVillager != null) {
 				zombieVillager.finalizeSpawn(
-					serverLevel, serverLevel.getCurrentDifficultyAt(zombieVillager.blockPosition()), MobSpawnType.CONVERSION, new Zombie.ZombieGroupData(false, true)
+					serverLevel, serverLevel.getCurrentDifficultyAt(zombieVillager.blockPosition()), EntitySpawnReason.CONVERSION, new Zombie.ZombieGroupData(false, true)
 				);
 				zombieVillager.setVillagerData(villager.getVillagerData());
 				zombieVillager.setGossips(villager.getGossips().store(NbtOps.INSTANCE));
@@ -447,10 +450,10 @@ public class Zombie extends Monster {
 	@Nullable
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData
+		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, EntitySpawnReason entitySpawnReason, @Nullable SpawnGroupData spawnGroupData
 	) {
 		RandomSource randomSource = serverLevelAccessor.getRandom();
-		spawnGroupData = super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData);
+		spawnGroupData = super.finalizeSpawn(serverLevelAccessor, difficultyInstance, entitySpawnReason, spawnGroupData);
 		float f = difficultyInstance.getSpecialMultiplier();
 		this.setCanPickUpLoot(randomSource.nextFloat() < 0.55F * f);
 		if (spawnGroupData == null) {
@@ -471,10 +474,10 @@ public class Zombie extends Monster {
 							this.startRiding(chicken);
 						}
 					} else if ((double)randomSource.nextFloat() < 0.05) {
-						Chicken chicken2 = EntityType.CHICKEN.create(this.level());
+						Chicken chicken2 = EntityType.CHICKEN.create(this.level(), EntitySpawnReason.JOCKEY);
 						if (chicken2 != null) {
 							chicken2.moveTo(this.getX(), this.getY(), this.getZ(), this.getYRot(), 0.0F);
-							chicken2.finalizeSpawn(serverLevelAccessor, difficultyInstance, MobSpawnType.JOCKEY, null);
+							chicken2.finalizeSpawn(serverLevelAccessor, difficultyInstance, EntitySpawnReason.JOCKEY, null);
 							chicken2.setChickenJockey(true);
 							this.startRiding(chicken2);
 							serverLevelAccessor.addFreshEntity(chicken2);
@@ -483,7 +486,7 @@ public class Zombie extends Monster {
 				}
 			}
 
-			this.setCanBreakDoors(this.supportsBreakDoorGoal() && randomSource.nextFloat() < f * 0.1F);
+			this.setCanBreakDoors(randomSource.nextFloat() < f * 0.1F);
 			this.populateDefaultEquipmentSlots(randomSource, difficultyInstance);
 			this.populateDefaultEquipmentEnchantments(serverLevelAccessor, randomSource, difficultyInstance);
 		}
@@ -523,7 +526,7 @@ public class Zombie extends Monster {
 				.addOrReplacePermanentModifier(
 					new AttributeModifier(LEADER_ZOMBIE_BONUS_ID, this.random.nextDouble() * 3.0 + 1.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL)
 				);
-			this.setCanBreakDoors(this.supportsBreakDoorGoal());
+			this.setCanBreakDoors(true);
 		}
 	}
 

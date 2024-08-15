@@ -29,8 +29,9 @@ import net.minecraft.util.datafix.fixes.AddNewChoices;
 import net.minecraft.util.datafix.fixes.AdvancementsFix;
 import net.minecraft.util.datafix.fixes.AdvancementsRenameFix;
 import net.minecraft.util.datafix.fixes.AreaEffectCloudPotionFix;
+import net.minecraft.util.datafix.fixes.AttributeIdPrefixFix;
 import net.minecraft.util.datafix.fixes.AttributeModifierIdFix;
-import net.minecraft.util.datafix.fixes.AttributesRename;
+import net.minecraft.util.datafix.fixes.AttributesRenameLegacy;
 import net.minecraft.util.datafix.fixes.BannerEntityCustomNameToOverrideComponentFix;
 import net.minecraft.util.datafix.fixes.BannerPatternFormatFix;
 import net.minecraft.util.datafix.fixes.BedItemColorFix;
@@ -54,6 +55,7 @@ import net.minecraft.util.datafix.fixes.BlockNameFlatteningFix;
 import net.minecraft.util.datafix.fixes.BlockPosFormatAndRenamesFix;
 import net.minecraft.util.datafix.fixes.BlockRenameFix;
 import net.minecraft.util.datafix.fixes.BlockStateStructureTemplateFix;
+import net.minecraft.util.datafix.fixes.CarvingStepRemoveFix;
 import net.minecraft.util.datafix.fixes.CatTypeFix;
 import net.minecraft.util.datafix.fixes.CauldronRenameFix;
 import net.minecraft.util.datafix.fixes.CavesAndCliffsRenames;
@@ -165,6 +167,7 @@ import net.minecraft.util.datafix.fixes.NewVillageFix;
 import net.minecraft.util.datafix.fixes.ObjectiveDisplayNameFix;
 import net.minecraft.util.datafix.fixes.ObjectiveRenderTypeFix;
 import net.minecraft.util.datafix.fixes.OminousBannerBlockEntityRenameFix;
+import net.minecraft.util.datafix.fixes.OminousBannerRarityFix;
 import net.minecraft.util.datafix.fixes.OminousBannerRenameFix;
 import net.minecraft.util.datafix.fixes.OptionsAccessibilityOnboardFix;
 import net.minecraft.util.datafix.fixes.OptionsAddTextBackgroundFix;
@@ -442,7 +445,7 @@ public class DataFixers {
 				schema42,
 				false,
 				Set.of(
-					"minecraft:note_block",
+					"minecraft:noteblock",
 					"minecraft:flower_pot",
 					"minecraft:dandelion",
 					"minecraft:poppy",
@@ -780,7 +783,7 @@ public class DataFixers {
 		dataFixerBuilder.addFixer(new AddNewChoices(schema111, "Added Zoglin", References.ENTITY));
 		Schema schema112 = dataFixerBuilder.addSchema(2523, SAME_NAMESPACED);
 		dataFixerBuilder.addFixer(
-			new AttributesRename(
+			new AttributesRenameLegacy(
 				schema112,
 				"Attribute renames",
 				createRenamerNoNamespace(
@@ -1282,7 +1285,7 @@ public class DataFixers {
 		dataFixerBuilder.addFixer(new BlockPosFormatAndRenamesFix(schema209));
 		Schema schema210 = dataFixerBuilder.addSchema(3814, SAME_NAMESPACED);
 		dataFixerBuilder.addFixer(
-			new AttributesRename(schema210, "Rename jump strength attribute", createRenamer("minecraft:horse.jump_strength", "minecraft:generic.jump_strength"))
+			new AttributesRenameLegacy(schema210, "Rename jump strength attribute", createRenamer("minecraft:horse.jump_strength", "minecraft:generic.jump_strength"))
 		);
 		Schema schema211 = dataFixerBuilder.addSchema(3816, V3816::new);
 		dataFixerBuilder.addFixer(new AddNewChoices(schema211, "Added Bogged", References.ENTITY));
@@ -1322,6 +1325,12 @@ public class DataFixers {
 		Schema schema226 = dataFixerBuilder.addSchema(3945, SAME_NAMESPACED);
 		dataFixerBuilder.addFixer(new AttributeModifierIdFix(schema226));
 		dataFixerBuilder.addFixer(new JukeboxTicksSinceSongStartedFix(schema226));
+		Schema schema227 = dataFixerBuilder.addSchema(4054, SAME_NAMESPACED);
+		dataFixerBuilder.addFixer(new OminousBannerRarityFix(schema227));
+		Schema schema228 = dataFixerBuilder.addSchema(4055, SAME_NAMESPACED);
+		dataFixerBuilder.addFixer(new AttributeIdPrefixFix(schema228));
+		Schema schema229 = dataFixerBuilder.addSchema(4057, SAME_NAMESPACED);
+		dataFixerBuilder.addFixer(new CarvingStepRemoveFix(schema229));
 	}
 
 	private static UnaryOperator<String> createRenamerNoNamespace(Map<String, String> map) {

@@ -22,6 +22,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Contract;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
@@ -46,6 +47,7 @@ public enum Direction implements StringRepresentable {
 	private final Direction.Axis axis;
 	private final Direction.AxisDirection axisDirection;
 	private final Vec3i normal;
+	private final Vec3 normalVec3;
 	private static final Direction[] VALUES = values();
 	private static final Direction[] BY_3D_DATA = (Direction[])Arrays.stream(VALUES)
 		.sorted(Comparator.comparingInt(direction -> direction.data3d))
@@ -65,6 +67,7 @@ public enum Direction implements StringRepresentable {
 		this.axis = axis;
 		this.axisDirection = axisDirection;
 		this.normal = vec3i;
+		this.normalVec3 = Vec3.atLowerCornerOf(vec3i);
 	}
 
 	public static Direction[] orderedByNearest(Entity entity) {
@@ -103,9 +106,9 @@ public enum Direction implements StringRepresentable {
 	}
 
 	public static Direction rotate(Matrix4f matrix4f, Direction direction) {
-		Vec3i vec3i = direction.getNormal();
+		Vec3i vec3i = direction.getUnitVec3i();
 		Vector4f vector4f = matrix4f.transform(new Vector4f((float)vec3i.getX(), (float)vec3i.getY(), (float)vec3i.getZ(), 0.0F));
-		return getNearest(vector4f.x(), vector4f.y(), vector4f.z());
+		return getApproximateNearest(vector4f.x(), vector4f.y(), vector4f.z());
 	}
 
 	public static Collection<Direction> allShuffled(RandomSource randomSource) {
@@ -114,6 +117,16 @@ public enum Direction implements StringRepresentable {
 
 	public static Stream<Direction> stream() {
 		return Stream.of(VALUES);
+	}
+
+	public static float getYRot(Direction direction) {
+		return switch (direction) {
+			case NORTH -> 180.0F;
+			case SOUTH -> 0.0F;
+			case WEST -> 90.0F;
+			case EAST -> -90.0F;
+			default -> throw new IllegalStateException("No y-Rot for vertical axis: " + direction);
+		};
 	}
 
 	public Quaternionf getRotation() {
@@ -264,35 +277,6 @@ public enum Direction implements StringRepresentable {
 		return BY_2D_DATA[Mth.abs(i % BY_2D_DATA.length)];
 	}
 
-	@Nullable
-	public static Direction fromDelta(int i, int j, int k) {
-		if (i == 0) {
-			if (j == 0) {
-				if (k > 0) {
-					return SOUTH;
-				}
-
-				if (k < 0) {
-					return NORTH;
-				}
-			} else if (k == 0) {
-				if (j > 0) {
-					return UP;
-				}
-
-				return DOWN;
-			}
-		} else if (j == 0 && k == 0) {
-			if (i > 0) {
-				return EAST;
-			}
-
-			return WEST;
-		}
-
-		return null;
-	}
-
 	public static Direction fromYRot(double d) {
 		return from2DDataValue(Mth.floor(d / 90.0 + 0.5) & 3);
 	}
@@ -313,11 +297,11 @@ public enum Direction implements StringRepresentable {
 		return Util.getRandom(VALUES, randomSource);
 	}
 
-	public static Direction getNearest(double d, double e, double f) {
-		return getNearest((float)d, (float)e, (float)f);
+	public static Direction getApproximateNearest(double d, double e, double f) {
+		return getApproximateNearest((float)d, (float)e, (float)f);
 	}
 
-	public static Direction getNearest(float f, float g, float h) {
+	public static Direction getApproximateNearest(float f, float g, float h) {
 		Direction direction = NORTH;
 		float i = Float.MIN_VALUE;
 
@@ -332,8 +316,31 @@ public enum Direction implements StringRepresentable {
 		return direction;
 	}
 
-	public static Direction getNearest(Vec3 vec3) {
-		return getNearest(vec3.x, vec3.y, vec3.z);
+	public static Direction getApproximateNearest(Vec3 vec3) {
+		return getApproximateNearest(vec3.x, vec3.y, vec3.z);
+	}
+
+	@Nullable
+	@Contract("_,_,_,!null->!null;_,_,_,_->_")
+	public static Direction getNearest(int i, int j, int k, @Nullable Direction direction) {
+		int l = Math.abs(i);
+		int m = Math.abs(j);
+		int n = Math.abs(k);
+		if (l > n && l > m) {
+			return i < 0 ? WEST : EAST;
+		} else if (n > l && n > m) {
+			return k < 0 ? NORTH : SOUTH;
+		} else if (m > l && m > n) {
+			return j < 0 ? DOWN : UP;
+		} else {
+			return direction;
+		}
+	}
+
+	@Nullable
+	@Contract("_,!null->!null;_,_->_")
+	public static Direction getNearest(Vec3i vec3i, @Nullable Direction direction) {
+		return getNearest(vec3i.getX(), vec3i.getY(), vec3i.getZ(), direction);
 	}
 
 	public String toString() {
@@ -359,8 +366,12 @@ public enum Direction implements StringRepresentable {
 		throw new IllegalArgumentException("No such direction: " + axisDirection + " " + axis);
 	}
 
-	public Vec3i getNormal() {
+	public Vec3i getUnitVec3i() {
 		return this.normal;
+	}
+
+	public Vec3 getUnitVec3() {
+		return this.normalVec3;
 	}
 
 	public boolean isFacingAngle(float f) {

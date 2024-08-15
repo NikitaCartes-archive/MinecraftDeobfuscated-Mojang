@@ -6,8 +6,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.player.Player;
@@ -98,7 +98,7 @@ public class VillageSiege implements CustomSpawner {
 			Zombie zombie;
 			try {
 				zombie = new Zombie(serverLevel);
-				zombie.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(zombie.blockPosition()), MobSpawnType.EVENT, null);
+				zombie.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(zombie.blockPosition()), EntitySpawnReason.EVENT, null);
 			} catch (Exception var5) {
 				LOGGER.warn("Failed to create zombie for village siege at {}", vec3, var5);
 				return;
@@ -116,7 +116,8 @@ public class VillageSiege implements CustomSpawner {
 			int k = blockPos.getZ() + serverLevel.random.nextInt(16) - 8;
 			int l = serverLevel.getHeight(Heightmap.Types.WORLD_SURFACE, j, k);
 			BlockPos blockPos2 = new BlockPos(j, l, k);
-			if (serverLevel.isVillage(blockPos2) && Monster.checkMonsterSpawnRules(EntityType.ZOMBIE, serverLevel, MobSpawnType.EVENT, blockPos2, serverLevel.random)) {
+			if (serverLevel.isVillage(blockPos2)
+				&& Monster.checkMonsterSpawnRules(EntityType.ZOMBIE, serverLevel, EntitySpawnReason.EVENT, blockPos2, serverLevel.random)) {
 				return Vec3.atBottomCenterOf(blockPos2);
 			}
 		}

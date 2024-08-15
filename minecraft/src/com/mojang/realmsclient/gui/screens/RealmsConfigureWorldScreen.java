@@ -20,6 +20,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.realms.RealmsScreen;
@@ -365,7 +366,7 @@ public class RealmsConfigureWorldScreen extends RealmsScreen {
 	}
 
 	private void drawRealmStatus(GuiGraphics guiGraphics, int i, int j, int k, int l, ResourceLocation resourceLocation, Supplier<Component> supplier) {
-		guiGraphics.blitSprite(resourceLocation, i, j, 10, 28);
+		guiGraphics.blitSprite(RenderType::guiTextured, resourceLocation, i, j, 10, 28);
 		if (k >= i && k <= i + 9 && l >= j && l <= j + 27) {
 			this.setTooltipForNextRenderPass((Component)supplier.get());
 		}

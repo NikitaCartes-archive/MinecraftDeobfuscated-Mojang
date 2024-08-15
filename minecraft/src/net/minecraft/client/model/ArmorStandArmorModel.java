@@ -9,10 +9,10 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
-import net.minecraft.world.entity.decoration.ArmorStand;
+import net.minecraft.client.renderer.entity.state.ArmorStandRenderState;
 
 @Environment(EnvType.CLIENT)
-public class ArmorStandArmorModel extends HumanoidModel<ArmorStand> {
+public class ArmorStandArmorModel extends HumanoidModel<ArmorStandRenderState> {
 	public ArmorStandArmorModel(ModelPart modelPart) {
 		super(modelPart);
 	}
@@ -41,25 +41,24 @@ public class ArmorStandArmorModel extends HumanoidModel<ArmorStand> {
 		return LayerDefinition.create(meshDefinition, 64, 32);
 	}
 
-	public void setupAnim(ArmorStand armorStand, float f, float g, float h, float i, float j) {
-		this.head.xRot = (float) (Math.PI / 180.0) * armorStand.getHeadPose().getX();
-		this.head.yRot = (float) (Math.PI / 180.0) * armorStand.getHeadPose().getY();
-		this.head.zRot = (float) (Math.PI / 180.0) * armorStand.getHeadPose().getZ();
-		this.body.xRot = (float) (Math.PI / 180.0) * armorStand.getBodyPose().getX();
-		this.body.yRot = (float) (Math.PI / 180.0) * armorStand.getBodyPose().getY();
-		this.body.zRot = (float) (Math.PI / 180.0) * armorStand.getBodyPose().getZ();
-		this.leftArm.xRot = (float) (Math.PI / 180.0) * armorStand.getLeftArmPose().getX();
-		this.leftArm.yRot = (float) (Math.PI / 180.0) * armorStand.getLeftArmPose().getY();
-		this.leftArm.zRot = (float) (Math.PI / 180.0) * armorStand.getLeftArmPose().getZ();
-		this.rightArm.xRot = (float) (Math.PI / 180.0) * armorStand.getRightArmPose().getX();
-		this.rightArm.yRot = (float) (Math.PI / 180.0) * armorStand.getRightArmPose().getY();
-		this.rightArm.zRot = (float) (Math.PI / 180.0) * armorStand.getRightArmPose().getZ();
-		this.leftLeg.xRot = (float) (Math.PI / 180.0) * armorStand.getLeftLegPose().getX();
-		this.leftLeg.yRot = (float) (Math.PI / 180.0) * armorStand.getLeftLegPose().getY();
-		this.leftLeg.zRot = (float) (Math.PI / 180.0) * armorStand.getLeftLegPose().getZ();
-		this.rightLeg.xRot = (float) (Math.PI / 180.0) * armorStand.getRightLegPose().getX();
-		this.rightLeg.yRot = (float) (Math.PI / 180.0) * armorStand.getRightLegPose().getY();
-		this.rightLeg.zRot = (float) (Math.PI / 180.0) * armorStand.getRightLegPose().getZ();
-		this.hat.copyFrom(this.head);
+	public void setupAnim(ArmorStandRenderState armorStandRenderState) {
+		this.head.xRot = (float) (Math.PI / 180.0) * armorStandRenderState.headPose.getX();
+		this.head.yRot = (float) (Math.PI / 180.0) * armorStandRenderState.headPose.getY();
+		this.head.zRot = (float) (Math.PI / 180.0) * armorStandRenderState.headPose.getZ();
+		this.body.xRot = (float) (Math.PI / 180.0) * armorStandRenderState.bodyPose.getX();
+		this.body.yRot = (float) (Math.PI / 180.0) * armorStandRenderState.bodyPose.getY();
+		this.body.zRot = (float) (Math.PI / 180.0) * armorStandRenderState.bodyPose.getZ();
+		this.leftArm.xRot = (float) (Math.PI / 180.0) * armorStandRenderState.leftArmPose.getX();
+		this.leftArm.yRot = (float) (Math.PI / 180.0) * armorStandRenderState.leftArmPose.getY();
+		this.leftArm.zRot = (float) (Math.PI / 180.0) * armorStandRenderState.leftArmPose.getZ();
+		this.rightArm.xRot = (float) (Math.PI / 180.0) * armorStandRenderState.rightArmPose.getX();
+		this.rightArm.yRot = (float) (Math.PI / 180.0) * armorStandRenderState.rightArmPose.getY();
+		this.rightArm.zRot = (float) (Math.PI / 180.0) * armorStandRenderState.rightArmPose.getZ();
+		this.leftLeg.xRot = (float) (Math.PI / 180.0) * armorStandRenderState.leftLegPose.getX();
+		this.leftLeg.yRot = (float) (Math.PI / 180.0) * armorStandRenderState.leftLegPose.getY();
+		this.leftLeg.zRot = (float) (Math.PI / 180.0) * armorStandRenderState.leftLegPose.getZ();
+		this.rightLeg.xRot = (float) (Math.PI / 180.0) * armorStandRenderState.rightLegPose.getX();
+		this.rightLeg.yRot = (float) (Math.PI / 180.0) * armorStandRenderState.rightLegPose.getY();
+		this.rightLeg.zRot = (float) (Math.PI / 180.0) * armorStandRenderState.rightLegPose.getZ();
 	}
 }

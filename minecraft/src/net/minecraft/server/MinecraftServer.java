@@ -44,6 +44,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.LockSupport;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -74,6 +75,7 @@ import net.minecraft.gametest.framework.GameTestTicker;
 import net.minecraft.network.chat.ChatDecorator;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.PacketType;
 import net.minecraft.network.protocol.game.ClientboundChangeDifficultyPacket;
 import net.minecraft.network.protocol.game.ClientboundSetTimePacket;
 import net.minecraft.network.protocol.status.ServerStatus;
@@ -102,6 +104,7 @@ import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.server.players.ServerOpListEntry;
 import net.minecraft.server.players.UserWhiteList;
+import net.minecraft.tags.TagLoader;
 import net.minecraft.util.Crypt;
 import net.minecraft.util.CryptException;
 import net.minecraft.util.ModCheck;
@@ -147,6 +150,7 @@ import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.WorldDataConfiguration;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.FuelValues;
 import net.minecraft.world.level.border.BorderChangeListener;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.chunk.storage.ChunkIOErrorReporter;
@@ -171,7 +175,7 @@ import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import org.slf4j.Logger;
 
-public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTask> implements ServerInfo, ChunkIOErrorReporter, CommandSource, AutoCloseable {
+public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTask> implements ServerInfo, ChunkIOErrorReporter, CommandSource {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	public static final String VANILLA_BRAND = "vanilla";
 	private static final float AVERAGE_TICK_TIME_SMOOTHING = 0.8F;
@@ -189,7 +193,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 	private static final int MAX_TICK_LATENCY = 3;
 	public static final int ABSOLUTE_MAX_WORLD_SIZE = 29999984;
 	public static final LevelSettings DEMO_SETTINGS = new LevelSettings(
-		"Demo World", GameType.SURVIVAL, false, Difficulty.NORMAL, false, new GameRules(), WorldDataConfiguration.DEFAULT
+		"Demo World", GameType.SURVIVAL, false, Difficulty.NORMAL, false, new GameRules(FeatureFlags.DEFAULT_FLAGS), WorldDataConfiguration.DEFAULT
 	);
 	public static final GameProfile ANONYMOUS_PLAYER_PROFILE = new GameProfile(Util.NIL_UUID, "Anonymous Player");
 	protected final LevelStorageSource.LevelStorageAccess storageSource;
@@ -245,6 +249,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 	private long taskExecutionStartNanos = Util.getNanos();
 	private long idleTimeNanos;
 	private long nextTickTimeNanos = Util.getNanos();
+	private boolean waitingForNextTick = false;
 	private long delayedTasksMaxNextTickTimeNanos;
 	private boolean mayHaveDelayedTasks;
 	private final PackRepository packRepository;
@@ -263,8 +268,11 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 	private final ServerTickRateManager tickRateManager;
 	protected final WorldData worldData;
 	private final PotionBrewing potionBrewing;
+	private FuelValues fuelValues;
+	private int emptyTicks;
 	private volatile boolean isSaving;
 	private static final AtomicReference<RuntimeException> fatalException = new AtomicReference();
+	private final SuppressedExceptionCollector suppressedExceptions = new SuppressedExceptionCollector();
 
 	public static <S extends MinecraftServer> S spin(Function<Thread, S> function) {
 		AtomicReference<S> atomicReference = new AtomicReference();
@@ -320,6 +328,8 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 			this.serverThread = thread;
 			this.executor = Util.backgroundExecutor();
 			this.potionBrewing = PotionBrewing.bootstrap(this.worldData.enabledFeatures());
+			this.resources.managers.getRecipeManager().logImpossibleRecipes();
+			this.fuelValues = FuelValues.vanillaBurnTimes(this.registries.compositeAccess(), this.worldData.enabledFeatures());
 		}
 	}
 
@@ -817,14 +827,21 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 
 	protected void waitUntilNextTick() {
 		this.runAllTasks();
-		this.managedBlock(() -> !this.haveTime());
+		this.waitingForNextTick = true;
+
+		try {
+			this.managedBlock(() -> !this.haveTime());
+		} finally {
+			this.waitingForNextTick = false;
+		}
 	}
 
 	@Override
 	public void waitForTasks() {
 		boolean bl = this.isTickTimeLoggingEnabled();
 		long l = bl ? Util.getNanos() : 0L;
-		super.waitForTasks();
+		long m = this.waitingForNextTick ? this.nextTickTimeNanos - Util.getNanos() : 100000L;
+		LockSupport.parkNanos("waiting for tasks", m);
 		if (bl) {
 			this.idleTimeNanos = this.idleTimeNanos + (Util.getNanos() - l);
 		}
@@ -905,6 +922,25 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 
 	public void tickServer(BooleanSupplier booleanSupplier) {
 		long l = Util.getNanos();
+		int i = this.pauseWhileEmptySeconds() * 20;
+		if (i > 0) {
+			if (this.playerList.getPlayerCount() == 0 && !this.tickRateManager.isSprinting()) {
+				this.emptyTicks++;
+			} else {
+				this.emptyTicks = 0;
+			}
+
+			if (this.emptyTicks >= i) {
+				if (this.emptyTicks == i) {
+					LOGGER.info("Server empty for {} seconds, pausing", this.pauseWhileEmptySeconds());
+					this.autoSave();
+				}
+
+				this.tickConnection();
+				return;
+			}
+		}
+
 		this.tickCount++;
 		this.tickRateManager.tick();
 		this.tickChildren(booleanSupplier);
@@ -915,23 +951,27 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 
 		this.ticksUntilAutosave--;
 		if (this.ticksUntilAutosave <= 0) {
-			this.ticksUntilAutosave = this.computeNextAutosaveInterval();
-			LOGGER.debug("Autosave started");
-			this.profiler.push("save");
-			this.saveEverything(true, false, false);
-			this.profiler.pop();
-			LOGGER.debug("Autosave finished");
+			this.autoSave();
 		}
 
 		this.profiler.push("tallying");
 		long m = Util.getNanos() - l;
-		int i = this.tickCount % 100;
-		this.aggregatedTickTimesNanos = this.aggregatedTickTimesNanos - this.tickTimesNanos[i];
+		int j = this.tickCount % 100;
+		this.aggregatedTickTimesNanos = this.aggregatedTickTimesNanos - this.tickTimesNanos[j];
 		this.aggregatedTickTimesNanos += m;
-		this.tickTimesNanos[i] = m;
+		this.tickTimesNanos[j] = m;
 		this.smoothedTickTimeMillis = this.smoothedTickTimeMillis * 0.8F + (float)m / (float)TimeUtil.NANOSECONDS_PER_MILLISECOND * 0.19999999F;
 		this.logTickMethodTime(l);
 		this.profiler.pop();
+	}
+
+	private void autoSave() {
+		this.ticksUntilAutosave = this.computeNextAutosaveInterval();
+		LOGGER.debug("Autosave started");
+		this.profiler.push("save");
+		this.saveEverything(true, false, false);
+		this.profiler.pop();
+		LOGGER.debug("Autosave finished");
 	}
 
 	private void logTickMethodTime(long l) {
@@ -995,7 +1035,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		}
 	}
 
-	public void tickChildren(BooleanSupplier booleanSupplier) {
+	protected void tickChildren(BooleanSupplier booleanSupplier) {
 		this.getPlayerList().getPlayers().forEach(serverPlayerx -> serverPlayerx.connection.suspendFlushing());
 		this.profiler.push("commandFunctions");
 		this.getFunctions().tick();
@@ -1024,7 +1064,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		}
 
 		this.profiler.popPush("connection");
-		this.getConnection().tick();
+		this.tickConnection();
 		this.profiler.popPush("players");
 		this.playerList.tick();
 		if (SharedConstants.IS_RUNNING_IN_IDE && this.tickRateManager.runsNormally()) {
@@ -1045,6 +1085,10 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		}
 
 		this.profiler.pop();
+	}
+
+	public void tickConnection() {
+		this.getConnection().tick();
 	}
 
 	private void synchronizeTime(ServerLevel serverLevel) {
@@ -1146,6 +1190,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		);
 		systemReport.setDetail("World Generation", (Supplier<String>)(() -> this.worldData.worldGenSettingsLifecycle().toString()));
 		systemReport.setDetail("World Seed", (Supplier<String>)(() -> String.valueOf(this.worldData.worldGenOptions().seed())));
+		systemReport.setDetail("Suppressed Exceptions", this.suppressedExceptions::dump);
 		if (this.serverId != null) {
 			systemReport.setDetail("Server Id", (Supplier<String>)(() -> this.serverId));
 		}
@@ -1213,7 +1258,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 
 	private void updateMobSpawningFlags() {
 		for (ServerLevel serverLevel : this.getAllLevels()) {
-			serverLevel.setSpawnSettings(this.isSpawningMonsters(), this.isSpawningAnimals());
+			serverLevel.setSpawnSettings(this.isSpawningMonsters());
 		}
 	}
 
@@ -1265,14 +1310,6 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 
 	public void setPreventProxyConnections(boolean bl) {
 		this.preventProxyConnections = bl;
-	}
-
-	public boolean isSpawningAnimals() {
-		return true;
-	}
-
-	public boolean areNpcsEnabled() {
-		return true;
 	}
 
 	public abstract boolean isEpollEnabled();
@@ -1460,9 +1497,11 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 			.thenCompose(
 				immutableList -> {
 					CloseableResourceManager closeableResourceManager = new MultiPackResourceManager(PackType.SERVER_DATA, immutableList);
+					List<Registry.PendingTags<?>> list = TagLoader.loadTagsForExistingRegistries(closeableResourceManager, this.registries.compositeAccess());
 					return ReloadableServerResources.loadResources(
 							closeableResourceManager,
 							this.registries,
+							list,
 							this.worldData.enabledFeatures(),
 							this.isDedicatedServer() ? Commands.CommandSelection.DEDICATED : Commands.CommandSelection.INTEGRATED,
 							this.getFunctionCompilationLevel(),
@@ -1483,11 +1522,13 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 				this.packRepository.setSelected(collection);
 				WorldDataConfiguration worldDataConfiguration = new WorldDataConfiguration(getSelectedPacks(this.packRepository, true), this.worldData.enabledFeatures());
 				this.worldData.setDataConfiguration(worldDataConfiguration);
-				this.resources.managers.updateRegistryTags();
+				this.resources.managers.updateStaticRegistryTags();
+				this.resources.managers.getRecipeManager().logImpossibleRecipes();
 				this.getPlayerList().saveAll();
 				this.getPlayerList().reloadResources();
 				this.functionManager.replaceLibrary(this.resources.managers.getFunctionLibrary());
 				this.structureTemplateManager.onResourceManagerReload(this.resources.resourceManager);
+				this.fuelValues = FuelValues.vanillaBurnTimes(this.registries.compositeAccess(), this.worldData.enabledFeatures());
 			}, this);
 		if (this.isSameThread()) {
 			this.managedBlock(completableFuture::isDone);
@@ -1774,7 +1815,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		try {
 			final List<String> list = Lists.<String>newArrayList();
 			final GameRules gameRules = this.getGameRules();
-			GameRules.visitGameRuleTypes(new GameRules.GameRuleTypeVisitor() {
+			gameRules.visitGameRuleTypes(new GameRules.GameRuleTypeVisitor() {
 				@Override
 				public <T extends GameRules.Value<T>> void visit(GameRules.Key<T> key, GameRules.Type<T> type) {
 					list.add(String.format(Locale.ROOT, "%s=%s\n", key.getId(), gameRules.getRule(key)));
@@ -2085,21 +2126,35 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 	@Override
 	public void reportChunkLoadFailure(Throwable throwable, RegionStorageInfo regionStorageInfo, ChunkPos chunkPos) {
 		LOGGER.error("Failed to load chunk {},{}", chunkPos.x, chunkPos.z, throwable);
+		this.suppressedExceptions.addEntry("chunk/load", throwable);
 		this.storeChunkIoError(CrashReport.forThrowable(throwable, "Chunk load failure"), chunkPos, regionStorageInfo);
 	}
 
 	@Override
 	public void reportChunkSaveFailure(Throwable throwable, RegionStorageInfo regionStorageInfo, ChunkPos chunkPos) {
 		LOGGER.error("Failed to save chunk {},{}", chunkPos.x, chunkPos.z, throwable);
+		this.suppressedExceptions.addEntry("chunk/save", throwable);
 		this.storeChunkIoError(CrashReport.forThrowable(throwable, "Chunk save failure"), chunkPos, regionStorageInfo);
+	}
+
+	public void reportPacketHandlingException(Throwable throwable, PacketType<?> packetType) {
+		this.suppressedExceptions.addEntry("packet/" + packetType.toString(), throwable);
 	}
 
 	public PotionBrewing potionBrewing() {
 		return this.potionBrewing;
 	}
 
+	public FuelValues fuelValues() {
+		return this.fuelValues;
+	}
+
 	public ServerLinks serverLinks() {
 		return ServerLinks.EMPTY;
+	}
+
+	protected int pauseWhileEmptySeconds() {
+		return 0;
 	}
 
 	static record ReloadableResources(CloseableResourceManager resourceManager, ReloadableServerResources managers) implements AutoCloseable {

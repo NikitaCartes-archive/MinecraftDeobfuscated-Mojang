@@ -55,10 +55,10 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.Mth;
 import net.minecraft.util.NullOps;
+import net.minecraft.util.StringUtil;
 import net.minecraft.util.Unit;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -78,10 +78,13 @@ import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.item.component.TooltipProvider;
+import net.minecraft.world.item.component.WrittenBookContent;
 import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.item.enchantment.Enchantable;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
+import net.minecraft.world.item.enchantment.Repairable;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -163,9 +166,6 @@ public final class ItemStack implements DataComponentHolder {
 	public static final StreamCodec<RegistryFriendlyByteBuf, List<ItemStack>> OPTIONAL_LIST_STREAM_CODEC = OPTIONAL_STREAM_CODEC.apply(
 		ByteBufCodecs.collection(NonNullList::createWithCapacity)
 	);
-	public static final StreamCodec<RegistryFriendlyByteBuf, List<ItemStack>> LIST_STREAM_CODEC = STREAM_CODEC.apply(
-		ByteBufCodecs.collection(NonNullList::createWithCapacity)
-	);
 	private static final Logger LOGGER = LogUtils.getLogger();
 	public static final ItemStack EMPTY = new ItemStack((Void)null);
 	private static final Component DISABLED_ITEM_TOOLTIP = Component.translatable("item.disabled").withStyle(ChatFormatting.RED);
@@ -214,6 +214,10 @@ public final class ItemStack implements DataComponentHolder {
 	@Override
 	public DataComponentMap getComponents() {
 		return (DataComponentMap)(!this.isEmpty() ? this.components : DataComponentMap.EMPTY);
+	}
+
+	public void clearComponents() {
+		this.components.clearPatch();
 	}
 
 	public DataComponentMap getPrototype() {
@@ -348,7 +352,7 @@ public final class ItemStack implements DataComponentHolder {
 		} else {
 			Item item = this.getItem();
 			InteractionResult interactionResult = item.useOn(useOnContext);
-			if (player != null && interactionResult.indicateItemUse()) {
+			if (player != null && interactionResult instanceof InteractionResult.Success success && success.wasItemInteraction()) {
 				player.awardStat(Stats.ITEM_USED.get(item));
 			}
 
@@ -360,7 +364,7 @@ public final class ItemStack implements DataComponentHolder {
 		return this.getItem().getDestroySpeed(this, blockState);
 	}
 
-	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand) {
+	public InteractionResult use(Level level, Player player, InteractionHand interactionHand) {
 		return this.getItem().use(level, player, interactionHand);
 	}
 
@@ -416,28 +420,50 @@ public final class ItemStack implements DataComponentHolder {
 		return this.getOrDefault(DataComponents.MAX_DAMAGE, Integer.valueOf(0));
 	}
 
+	public boolean isBroken() {
+		return this.isDamageableItem() && this.getDamageValue() >= this.getMaxDamage();
+	}
+
 	public void hurtAndBreak(int i, ServerLevel serverLevel, @Nullable ServerPlayer serverPlayer, Consumer<Item> consumer) {
-		if (this.isDamageableItem()) {
-			if (serverPlayer == null || !serverPlayer.hasInfiniteMaterials()) {
-				if (i > 0) {
-					i = EnchantmentHelper.processDurabilityChange(serverLevel, this, i);
-					if (i <= 0) {
-						return;
-					}
-				}
+		int j = this.processDurabilityChange(i, serverLevel, serverPlayer);
+		if (j > 0) {
+			this.applyDamage(this.getDamageValue() + j, serverPlayer, consumer);
+		}
+	}
 
-				if (serverPlayer != null && i != 0) {
-					CriteriaTriggers.ITEM_DURABILITY_CHANGED.trigger(serverPlayer, this, this.getDamageValue() + i);
-				}
+	private int processDurabilityChange(int i, ServerLevel serverLevel, @Nullable ServerPlayer serverPlayer) {
+		if (!this.isDamageableItem()) {
+			return 0;
+		} else if (serverPlayer != null && serverPlayer.hasInfiniteMaterials()) {
+			return 0;
+		} else {
+			return i > 0 ? EnchantmentHelper.processDurabilityChange(serverLevel, this, i) : i;
+		}
+	}
 
-				int j = this.getDamageValue() + i;
-				this.setDamageValue(j);
-				if (j >= this.getMaxDamage()) {
-					Item item = this.getItem();
-					this.shrink(1);
-					consumer.accept(item);
-				}
+	private void applyDamage(int i, @Nullable ServerPlayer serverPlayer, Consumer<Item> consumer) {
+		if (serverPlayer != null) {
+			CriteriaTriggers.ITEM_DURABILITY_CHANGED.trigger(serverPlayer, this, i);
+		}
+
+		this.setDamageValue(i);
+		if (this.isBroken()) {
+			Item item = this.getItem();
+			this.shrink(1);
+			consumer.accept(item);
+		}
+	}
+
+	public void hurtWithoutBreaking(int i, Player player) {
+		if (player instanceof ServerPlayer serverPlayer) {
+			int j = this.processDurabilityChange(i, serverPlayer.serverLevel(), serverPlayer);
+			if (j <= 0) {
+				return;
 			}
+
+			int k = Math.min(this.getDamageValue() + j, this.getMaxDamage() - 1);
+			this.applyDamage(k, serverPlayer, item -> {
+			});
 		}
 	}
 
@@ -483,18 +509,21 @@ public final class ItemStack implements DataComponentHolder {
 		return this.getItem().overrideOtherStackedOnMe(this, itemStack, slot, clickAction, player, slotAccess);
 	}
 
-	public boolean hurtEnemy(LivingEntity livingEntity, Player player) {
+	public boolean hurtEnemy(LivingEntity livingEntity, LivingEntity livingEntity2) {
 		Item item = this.getItem();
-		if (item.hurtEnemy(this, livingEntity, player)) {
-			player.awardStat(Stats.ITEM_USED.get(item));
+		if (item.hurtEnemy(this, livingEntity, livingEntity2)) {
+			if (livingEntity2 instanceof Player player) {
+				player.awardStat(Stats.ITEM_USED.get(item));
+			}
+
 			return true;
 		} else {
 			return false;
 		}
 	}
 
-	public void postHurtEnemy(LivingEntity livingEntity, Player player) {
-		this.getItem().postHurtEnemy(this, livingEntity, player);
+	public void postHurtEnemy(LivingEntity livingEntity, LivingEntity livingEntity2) {
+		this.getItem().postHurtEnemy(this, livingEntity, livingEntity2);
 	}
 
 	public void mineBlock(Level level, BlockState blockState, BlockPos blockPos, Player player) {
@@ -691,6 +720,14 @@ public final class ItemStack implements DataComponentHolder {
 	}
 
 	public Component getHoverName() {
+		WrittenBookContent writtenBookContent = this.get(DataComponents.WRITTEN_BOOK_CONTENT);
+		if (writtenBookContent != null) {
+			String string = writtenBookContent.title().raw();
+			if (!StringUtil.isBlank(string)) {
+				return Component.literal(string);
+			}
+		}
+
 		Component component = this.get(DataComponents.CUSTOM_NAME);
 		if (component != null) {
 			return component;
@@ -867,7 +904,9 @@ public final class ItemStack implements DataComponentHolder {
 	}
 
 	public boolean isEnchantable() {
-		if (!this.getItem().isEnchantable(this)) {
+		if (!this.has(DataComponents.ENCHANTABLE)) {
+			return false;
+		} else if (!this.getItem().isEnchantable(this)) {
 			return false;
 		} else {
 			ItemEnchantments itemEnchantments = this.get(DataComponents.ENCHANTMENTS);
@@ -1018,5 +1057,15 @@ public final class ItemStack implements DataComponentHolder {
 
 	public boolean canBeHurtBy(DamageSource damageSource) {
 		return !this.has(DataComponents.FIRE_RESISTANT) || !damageSource.is(DamageTypeTags.IS_FIRE);
+	}
+
+	public boolean isValidRepairItem(ItemStack itemStack) {
+		Repairable repairable = this.get(DataComponents.REPAIRABLE);
+		return repairable != null ? repairable.isValidRepairItem(itemStack) : this.getItem().isValidRepairItem(this, itemStack);
+	}
+
+	public int getEnchantmentValue() {
+		Enchantable enchantable = this.get(DataComponents.ENCHANTABLE);
+		return enchantable != null ? enchantable.value() : this.getItem().getEnchantmentValue();
 	}
 }

@@ -6,9 +6,9 @@ import java.util.Map.Entry;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.ShapeRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.ChunkPos;
@@ -47,7 +47,7 @@ public class HeightMapRenderer implements DebugRenderer.SimpleDebugRenderer {
 							int m = SectionPos.sectionToBlockCoord(chunkPos.x, k);
 							int n = SectionPos.sectionToBlockCoord(chunkPos.z, l);
 							float g = (float)((double)((float)levelAccessor.getHeight(types, m, n) + (float)types.ordinal() * 0.09375F) - e);
-							LevelRenderer.addChainedFilledBoxVertices(
+							ShapeRenderer.addChainedFilledBoxVertices(
 								poseStack,
 								vertexConsumer,
 								(double)((float)m + 0.25F) - d,

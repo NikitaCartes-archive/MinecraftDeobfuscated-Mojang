@@ -24,10 +24,10 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -132,8 +132,8 @@ public class Slime extends Mob implements Enemy {
 
 	@Override
 	public void tick() {
-		this.squish = this.squish + (this.targetSquish - this.squish) * 0.5F;
 		this.oSquish = this.squish;
+		this.squish = this.squish + (this.targetSquish - this.squish) * 0.5F;
 		super.tick();
 		if (this.onGround() && !this.wasOnGround) {
 			float f = this.getDimensions(this.getPose()).width() * 2.0F;
@@ -207,7 +207,7 @@ public class Slime extends Mob implements Enemy {
 			for (int l = 0; l < k; l++) {
 				float h = ((float)(l % 2) - 0.5F) * g;
 				float m = ((float)(l / 2) - 0.5F) * g;
-				Slime slime = this.getType().create(this.level());
+				Slime slime = this.getType().create(this.level(), EntitySpawnReason.TRIGGERED);
 				if (slime != null) {
 					if (this.isPersistenceRequired()) {
 						slime.setPersistenceRequired();
@@ -281,38 +281,34 @@ public class Slime extends Mob implements Enemy {
 	}
 
 	public static boolean checkSlimeSpawnRules(
-		EntityType<Slime> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, RandomSource randomSource
+		EntityType<Slime> entityType, LevelAccessor levelAccessor, EntitySpawnReason entitySpawnReason, BlockPos blockPos, RandomSource randomSource
 	) {
-		if (MobSpawnType.isSpawner(mobSpawnType)) {
-			return checkMobSpawnRules(entityType, levelAccessor, mobSpawnType, blockPos, randomSource);
-		} else {
-			if (levelAccessor.getDifficulty() != Difficulty.PEACEFUL) {
-				if (mobSpawnType == MobSpawnType.SPAWNER) {
-					return checkMobSpawnRules(entityType, levelAccessor, mobSpawnType, blockPos, randomSource);
-				}
-
-				if (levelAccessor.getBiome(blockPos).is(BiomeTags.ALLOWS_SURFACE_SLIME_SPAWNS)
-					&& blockPos.getY() > 50
-					&& blockPos.getY() < 70
-					&& randomSource.nextFloat() < 0.5F
-					&& randomSource.nextFloat() < levelAccessor.getMoonBrightness()
-					&& levelAccessor.getMaxLocalRawBrightness(blockPos) <= randomSource.nextInt(8)) {
-					return checkMobSpawnRules(entityType, levelAccessor, mobSpawnType, blockPos, randomSource);
-				}
-
-				if (!(levelAccessor instanceof WorldGenLevel)) {
-					return false;
-				}
-
-				ChunkPos chunkPos = new ChunkPos(blockPos);
-				boolean bl = WorldgenRandom.seedSlimeChunk(chunkPos.x, chunkPos.z, ((WorldGenLevel)levelAccessor).getSeed(), 987234911L).nextInt(10) == 0;
-				if (randomSource.nextInt(10) == 0 && bl && blockPos.getY() < 40) {
-					return checkMobSpawnRules(entityType, levelAccessor, mobSpawnType, blockPos, randomSource);
-				}
+		if (levelAccessor.getDifficulty() != Difficulty.PEACEFUL) {
+			if (EntitySpawnReason.isSpawner(entitySpawnReason)) {
+				return checkMobSpawnRules(entityType, levelAccessor, entitySpawnReason, blockPos, randomSource);
 			}
 
-			return false;
+			if (levelAccessor.getBiome(blockPos).is(BiomeTags.ALLOWS_SURFACE_SLIME_SPAWNS)
+				&& blockPos.getY() > 50
+				&& blockPos.getY() < 70
+				&& randomSource.nextFloat() < 0.5F
+				&& randomSource.nextFloat() < levelAccessor.getMoonBrightness()
+				&& levelAccessor.getMaxLocalRawBrightness(blockPos) <= randomSource.nextInt(8)) {
+				return checkMobSpawnRules(entityType, levelAccessor, entitySpawnReason, blockPos, randomSource);
+			}
+
+			if (!(levelAccessor instanceof WorldGenLevel)) {
+				return false;
+			}
+
+			ChunkPos chunkPos = new ChunkPos(blockPos);
+			boolean bl = WorldgenRandom.seedSlimeChunk(chunkPos.x, chunkPos.z, ((WorldGenLevel)levelAccessor).getSeed(), 987234911L).nextInt(10) == 0;
+			if (randomSource.nextInt(10) == 0 && bl && blockPos.getY() < 40) {
+				return checkMobSpawnRules(entityType, levelAccessor, entitySpawnReason, blockPos, randomSource);
+			}
 		}
+
+		return false;
 	}
 
 	@Override
@@ -339,7 +335,7 @@ public class Slime extends Mob implements Enemy {
 	@Nullable
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData
+		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, EntitySpawnReason entitySpawnReason, @Nullable SpawnGroupData spawnGroupData
 	) {
 		RandomSource randomSource = serverLevelAccessor.getRandom();
 		int i = randomSource.nextInt(3);
@@ -349,7 +345,7 @@ public class Slime extends Mob implements Enemy {
 
 		int j = 1 << i;
 		this.setSize(j, true);
-		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData);
+		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, entitySpawnReason, spawnGroupData);
 	}
 
 	float getSoundPitch() {

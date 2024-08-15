@@ -10,10 +10,10 @@ import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.world.entity.projectile.windcharge.AbstractWindCharge;
+import net.minecraft.client.renderer.entity.state.EntityRenderState;
 
 @Environment(EnvType.CLIENT)
-public class WindChargeModel extends HierarchicalModel<AbstractWindCharge> {
+public class WindChargeModel extends EntityModel<EntityRenderState> {
 	private static final int ROTATION_SPEED = 16;
 	private final ModelPart bone;
 	private final ModelPart windCharge;
@@ -47,9 +47,10 @@ public class WindChargeModel extends HierarchicalModel<AbstractWindCharge> {
 		return LayerDefinition.create(meshDefinition, 64, 32);
 	}
 
-	public void setupAnim(AbstractWindCharge abstractWindCharge, float f, float g, float h, float i, float j) {
-		this.windCharge.yRot = -h * 16.0F * (float) (Math.PI / 180.0);
-		this.wind.yRot = h * 16.0F * (float) (Math.PI / 180.0);
+	@Override
+	public void setupAnim(EntityRenderState entityRenderState) {
+		this.windCharge.yRot = -entityRenderState.ageInTicks * 16.0F * (float) (Math.PI / 180.0);
+		this.wind.yRot = entityRenderState.ageInTicks * 16.0F * (float) (Math.PI / 180.0);
 	}
 
 	@Override

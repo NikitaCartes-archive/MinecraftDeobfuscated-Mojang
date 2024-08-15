@@ -25,7 +25,7 @@ public abstract class AbstractHugeMushroomFeature extends Feature<HugeMushroomFe
 	) {
 		for (int j = 0; j < i; j++) {
 			mutableBlockPos.set(blockPos).move(Direction.UP, j);
-			if (!levelAccessor.getBlockState(mutableBlockPos).isSolidRender(levelAccessor, mutableBlockPos)) {
+			if (!levelAccessor.getBlockState(mutableBlockPos).isSolidRender()) {
 				this.setBlock(levelAccessor, mutableBlockPos, hugeMushroomFeatureConfiguration.stemProvider.getState(randomSource, blockPos));
 			}
 		}

@@ -3,8 +3,8 @@ package net.minecraft.world.item.crafting;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import javax.annotation.Nullable;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.NonNullList;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -16,6 +16,8 @@ public abstract class SingleItemRecipe implements Recipe<SingleRecipeInput> {
 	private final RecipeType<?> type;
 	private final RecipeSerializer<?> serializer;
 	protected final String group;
+	@Nullable
+	private PlacementInfo placementInfo;
 
 	public SingleItemRecipe(RecipeType<?> recipeType, RecipeSerializer<?> recipeSerializer, String string, Ingredient ingredient, ItemStack itemStack) {
 		this.type = recipeType;
@@ -46,10 +48,12 @@ public abstract class SingleItemRecipe implements Recipe<SingleRecipeInput> {
 	}
 
 	@Override
-	public NonNullList<Ingredient> getIngredients() {
-		NonNullList<Ingredient> nonNullList = NonNullList.create();
-		nonNullList.add(this.ingredient);
-		return nonNullList;
+	public PlacementInfo placementInfo() {
+		if (this.placementInfo == null) {
+			this.placementInfo = PlacementInfo.create(this.ingredient);
+		}
+
+		return this.placementInfo;
 	}
 
 	@Override
@@ -75,7 +79,7 @@ public abstract class SingleItemRecipe implements Recipe<SingleRecipeInput> {
 			this.codec = RecordCodecBuilder.mapCodec(
 				instance -> instance.group(
 							Codec.STRING.optionalFieldOf("group", "").forGetter(singleItemRecipe -> singleItemRecipe.group),
-							Ingredient.CODEC_NONEMPTY.fieldOf("ingredient").forGetter(singleItemRecipe -> singleItemRecipe.ingredient),
+							Ingredient.CODEC.fieldOf("ingredient").forGetter(singleItemRecipe -> singleItemRecipe.ingredient),
 							ItemStack.STRICT_CODEC.fieldOf("result").forGetter(singleItemRecipe -> singleItemRecipe.result)
 						)
 						.apply(instance, factory::create)

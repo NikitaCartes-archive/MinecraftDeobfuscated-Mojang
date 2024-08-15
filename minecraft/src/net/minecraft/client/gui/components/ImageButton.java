@@ -3,6 +3,7 @@ package net.minecraft.client.gui.components;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -27,6 +28,6 @@ public class ImageButton extends Button {
 	@Override
 	public void renderWidget(GuiGraphics guiGraphics, int i, int j, float f) {
 		ResourceLocation resourceLocation = this.sprites.get(this.isActive(), this.isHoveredOrFocused());
-		guiGraphics.blitSprite(resourceLocation, this.getX(), this.getY(), this.width, this.height);
+		guiGraphics.blitSprite(RenderType::guiTextured, resourceLocation, this.getX(), this.getY(), this.width, this.height);
 	}
 }

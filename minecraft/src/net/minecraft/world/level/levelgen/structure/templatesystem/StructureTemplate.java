@@ -28,9 +28,9 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.Clearable;
 import net.minecraft.world.RandomizableContainer;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.decoration.Painting;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.EmptyBlockGetter;
@@ -446,23 +446,27 @@ public class StructureTemplate {
 				listTag.add(DoubleTag.valueOf(vec32.z));
 				compoundTag.put("Pos", listTag);
 				compoundTag.remove("UUID");
-				createEntityIgnoreException(serverLevelAccessor, compoundTag).ifPresent(entity -> {
-					float f = entity.rotate(rotation);
-					f += entity.mirror(mirror) - entity.getYRot();
-					entity.moveTo(vec32.x, vec32.y, vec32.z, f, entity.getXRot());
-					if (bl && entity instanceof Mob) {
-						((Mob)entity).finalizeSpawn(serverLevelAccessor, serverLevelAccessor.getCurrentDifficultyAt(BlockPos.containing(vec32)), MobSpawnType.STRUCTURE, null);
-					}
+				createEntityIgnoreException(serverLevelAccessor, compoundTag)
+					.ifPresent(
+						entity -> {
+							float f = entity.rotate(rotation);
+							f += entity.mirror(mirror) - entity.getYRot();
+							entity.moveTo(vec32.x, vec32.y, vec32.z, f, entity.getXRot());
+							if (bl && entity instanceof Mob) {
+								((Mob)entity)
+									.finalizeSpawn(serverLevelAccessor, serverLevelAccessor.getCurrentDifficultyAt(BlockPos.containing(vec32)), EntitySpawnReason.STRUCTURE, null);
+							}
 
-					serverLevelAccessor.addFreshEntityWithPassengers(entity);
-				});
+							serverLevelAccessor.addFreshEntityWithPassengers(entity);
+						}
+					);
 			}
 		}
 	}
 
 	private static Optional<Entity> createEntityIgnoreException(ServerLevelAccessor serverLevelAccessor, CompoundTag compoundTag) {
 		try {
-			return EntityType.create(compoundTag, serverLevelAccessor.getLevel());
+			return EntityType.create(compoundTag, serverLevelAccessor.getLevel(), EntitySpawnReason.STRUCTURE);
 		} catch (Exception var3) {
 			return Optional.empty();
 		}

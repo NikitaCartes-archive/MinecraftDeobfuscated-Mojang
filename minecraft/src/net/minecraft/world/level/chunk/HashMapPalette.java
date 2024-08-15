@@ -111,7 +111,7 @@ public class HashMapPalette<T> implements Palette<T> {
 	}
 
 	@Override
-	public Palette<T> copy() {
-		return new HashMapPalette<>(this.registry, this.bits, this.resizeHandler, this.values.copy());
+	public Palette<T> copy(PaletteResize<T> paletteResize) {
+		return new HashMapPalette<>(this.registry, this.bits, paletteResize, this.values.copy());
 	}
 }

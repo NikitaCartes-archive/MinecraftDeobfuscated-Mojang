@@ -1,6 +1,7 @@
 package net.minecraft.world.level.block;
 
 import com.mojang.serialization.MapCodec;
+import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -15,6 +16,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.redstone.Orientation;
 
 public class FrostedIceBlock extends IceBlock {
 	public static final MapCodec<FrostedIceBlock> CODEC = simpleCodec(FrostedIceBlock::new);
@@ -41,7 +43,7 @@ public class FrostedIceBlock extends IceBlock {
 	@Override
 	protected void tick(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
 		if ((randomSource.nextInt(3) == 0 || this.fewerNeigboursThan(serverLevel, blockPos, 4))
-			&& serverLevel.getMaxLocalRawBrightness(blockPos) > 11 - (Integer)blockState.getValue(AGE) - blockState.getLightBlock(serverLevel, blockPos)
+			&& serverLevel.getMaxLocalRawBrightness(blockPos) > 11 - (Integer)blockState.getValue(AGE) - blockState.getLightBlock()
 			&& this.slightlyMelt(blockState, serverLevel, blockPos)) {
 			BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 
@@ -69,12 +71,12 @@ public class FrostedIceBlock extends IceBlock {
 	}
 
 	@Override
-	protected void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
+	protected void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, @Nullable Orientation orientation, boolean bl) {
 		if (block.defaultBlockState().is(this) && this.fewerNeigboursThan(level, blockPos, 2)) {
 			this.melt(blockState, level, blockPos);
 		}
 
-		super.neighborChanged(blockState, level, blockPos, block, blockPos2, bl);
+		super.neighborChanged(blockState, level, blockPos, block, orientation, bl);
 	}
 
 	private boolean fewerNeigboursThan(BlockGetter blockGetter, BlockPos blockPos, int i) {

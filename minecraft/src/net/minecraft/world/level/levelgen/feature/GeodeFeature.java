@@ -8,7 +8,6 @@ import java.util.function.Predicate;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
@@ -63,7 +62,7 @@ public class GeodeFeature extends Feature<GeodeConfiguration> {
 			int q = geodeConfiguration.outerWallDistance.sample(randomSource);
 			BlockPos blockPos2 = blockPos.offset(o, p, q);
 			BlockState blockState = worldGenLevel.getBlockState(blockPos2);
-			if (blockState.isAir() || blockState.is(BlockTags.GEODE_INVALID_BLOCKS)) {
+			if (blockState.isAir() || blockState.is(geodeBlockSettings.invalidBlocks)) {
 				if (++m > geodeConfiguration.invalidBlocksThreshold) {
 					return false;
 				}

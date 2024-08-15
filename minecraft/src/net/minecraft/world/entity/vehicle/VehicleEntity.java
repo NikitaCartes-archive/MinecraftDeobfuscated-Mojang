@@ -96,5 +96,10 @@ public abstract class VehicleEntity extends Entity {
 		this.destroy(this.getDropItem());
 	}
 
+	@Override
+	public int getDimensionChangingDelay() {
+		return 10;
+	}
+
 	abstract Item getDropItem();
 }

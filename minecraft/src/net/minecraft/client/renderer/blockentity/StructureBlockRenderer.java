@@ -5,9 +5,9 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.ShapeRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.gametest.framework.StructureUtils;
@@ -85,7 +85,7 @@ public class StructureBlockRenderer implements BlockEntityRenderer<StructureBloc
 					float s = 0.5F;
 					if (structureBlockEntity.getMode() == StructureMode.SAVE || structureBlockEntity.getShowBoundingBox()) {
 						VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.lines());
-						LevelRenderer.renderLineBox(poseStack, vertexConsumer, m, g, n, o, h, p, 0.9F, 0.9F, 0.9F, 1.0F, 0.5F, 0.5F, 0.5F);
+						ShapeRenderer.renderLineBox(poseStack, vertexConsumer, m, g, n, o, h, p, 0.9F, 0.9F, 0.9F, 1.0F, 0.5F, 0.5F, 0.5F);
 					}
 
 					if (structureBlockEntity.getMode() == StructureMode.SAVE && structureBlockEntity.getShowAir()) {
@@ -118,13 +118,13 @@ public class StructureBlockRenderer implements BlockEntityRenderer<StructureBloc
 				double i = (double)((float)(blockPos3.getY() - blockPos.getY()) + 0.55F + f);
 				double j = (double)((float)(blockPos3.getZ() - blockPos.getZ()) + 0.55F + f);
 				if (bl) {
-					LevelRenderer.renderLineBox(poseStack, vertexConsumer, d, e, g, h, i, j, 0.5F, 0.5F, 1.0F, 1.0F, 0.5F, 0.5F, 1.0F);
+					ShapeRenderer.renderLineBox(poseStack, vertexConsumer, d, e, g, h, i, j, 0.5F, 0.5F, 1.0F, 1.0F, 0.5F, 0.5F, 1.0F);
 				} else if (bl2) {
-					LevelRenderer.renderLineBox(poseStack, vertexConsumer, d, e, g, h, i, j, 1.0F, 0.75F, 0.75F, 1.0F, 1.0F, 0.75F, 0.75F);
+					ShapeRenderer.renderLineBox(poseStack, vertexConsumer, d, e, g, h, i, j, 1.0F, 0.75F, 0.75F, 1.0F, 1.0F, 0.75F, 0.75F);
 				} else if (bl3) {
-					LevelRenderer.renderLineBox(poseStack, vertexConsumer, d, e, g, h, i, j, 1.0F, 0.0F, 0.0F, 1.0F, 1.0F, 0.0F, 0.0F);
+					ShapeRenderer.renderLineBox(poseStack, vertexConsumer, d, e, g, h, i, j, 1.0F, 0.0F, 0.0F, 1.0F, 1.0F, 0.0F, 0.0F);
 				} else if (bl4) {
-					LevelRenderer.renderLineBox(poseStack, vertexConsumer, d, e, g, h, i, j, 1.0F, 1.0F, 0.0F, 1.0F, 1.0F, 1.0F, 0.0F);
+					ShapeRenderer.renderLineBox(poseStack, vertexConsumer, d, e, g, h, i, j, 1.0F, 1.0F, 0.0F, 1.0F, 1.0F, 1.0F, 0.0F);
 				}
 			}
 		}
@@ -152,7 +152,7 @@ public class StructureBlockRenderer implements BlockEntityRenderer<StructureBloc
 				float m = (float)(i + blockPos2.getX() - blockPos.getX()) + 0.5F + 0.48F;
 				float n = (float)(j + blockPos2.getY() - blockPos.getY()) + 0.5F + 0.48F;
 				float o = (float)(k + blockPos2.getZ() - blockPos.getZ()) + 0.5F + 0.48F;
-				LevelRenderer.renderFace(poseStack, vertexConsumer, direction, g, h, l, m, n, o, 0.75F, 0.75F, 1.0F, 0.2F);
+				ShapeRenderer.renderFace(poseStack, vertexConsumer, direction, g, h, l, m, n, o, 0.75F, 0.75F, 1.0F, 0.2F);
 			});
 		}
 	}

@@ -16,6 +16,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.redstone.ExperimentalRedstoneUtils;
+import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
@@ -101,5 +103,11 @@ public class RedstoneWallTorchBlock extends RedstoneTorchBlock {
 	@Override
 	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
 		builder.add(FACING, LIT);
+	}
+
+	@Nullable
+	@Override
+	protected Orientation randomOrientation(Level level, BlockState blockState) {
+		return ExperimentalRedstoneUtils.randomOrientation(level, ((Direction)blockState.getValue(FACING)).getOpposite(), Direction.UP);
 	}
 }

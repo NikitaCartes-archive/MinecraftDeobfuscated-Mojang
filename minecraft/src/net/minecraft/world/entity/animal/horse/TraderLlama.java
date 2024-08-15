@@ -6,9 +6,9 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.PanicGoal;
@@ -34,7 +34,7 @@ public class TraderLlama extends Llama {
 	@Nullable
 	@Override
 	protected Llama makeNewLlama() {
-		return EntityType.TRADER_LLAMA.create(this.level());
+		return EntityType.TRADER_LLAMA.create(this.level(), EntitySpawnReason.BREEDING);
 	}
 
 	@Override
@@ -103,9 +103,9 @@ public class TraderLlama extends Llama {
 	@Nullable
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData
+		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, EntitySpawnReason entitySpawnReason, @Nullable SpawnGroupData spawnGroupData
 	) {
-		if (mobSpawnType == MobSpawnType.EVENT) {
+		if (entitySpawnReason == EntitySpawnReason.EVENT) {
 			this.setAge(0);
 		}
 
@@ -113,7 +113,7 @@ public class TraderLlama extends Llama {
 			spawnGroupData = new AgeableMob.AgeableMobGroupData(false);
 		}
 
-		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData);
+		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, entitySpawnReason, spawnGroupData);
 	}
 
 	protected static class TraderLlamaDefendWanderingTraderGoal extends TargetGoal {

@@ -27,6 +27,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -35,6 +36,7 @@ import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Explosion;
+import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.Block;
@@ -47,12 +49,12 @@ import net.minecraft.world.phys.Vec3;
 public class ArmorStand extends LivingEntity {
 	public static final int WOBBLE_TIME = 5;
 	private static final boolean ENABLE_ARMS = true;
-	private static final Rotations DEFAULT_HEAD_POSE = new Rotations(0.0F, 0.0F, 0.0F);
-	private static final Rotations DEFAULT_BODY_POSE = new Rotations(0.0F, 0.0F, 0.0F);
-	private static final Rotations DEFAULT_LEFT_ARM_POSE = new Rotations(-10.0F, 0.0F, -10.0F);
-	private static final Rotations DEFAULT_RIGHT_ARM_POSE = new Rotations(-15.0F, 0.0F, 10.0F);
-	private static final Rotations DEFAULT_LEFT_LEG_POSE = new Rotations(-1.0F, 0.0F, -1.0F);
-	private static final Rotations DEFAULT_RIGHT_LEG_POSE = new Rotations(1.0F, 0.0F, 1.0F);
+	public static final Rotations DEFAULT_HEAD_POSE = new Rotations(0.0F, 0.0F, 0.0F);
+	public static final Rotations DEFAULT_BODY_POSE = new Rotations(0.0F, 0.0F, 0.0F);
+	public static final Rotations DEFAULT_LEFT_ARM_POSE = new Rotations(-10.0F, 0.0F, -10.0F);
+	public static final Rotations DEFAULT_RIGHT_ARM_POSE = new Rotations(-15.0F, 0.0F, 10.0F);
+	public static final Rotations DEFAULT_LEFT_LEG_POSE = new Rotations(-1.0F, 0.0F, -1.0F);
+	public static final Rotations DEFAULT_RIGHT_LEG_POSE = new Rotations(1.0F, 0.0F, 1.0F);
 	private static final EntityDimensions MARKER_DIMENSIONS = EntityDimensions.fixed(0.0F, 0.0F);
 	private static final EntityDimensions BABY_DIMENSIONS = EntityType.ARMOR_STAND.getDimensions().scale(0.5F).withEyeHeight(0.9875F);
 	private static final double FEET_OFFSET = 0.1;
@@ -193,9 +195,9 @@ public class ArmorStand extends LivingEntity {
 		compoundTag.put("HandItems", listTag2);
 		compoundTag.putBoolean("Invisible", this.isInvisible());
 		compoundTag.putBoolean("Small", this.isSmall());
-		compoundTag.putBoolean("ShowArms", this.isShowArms());
+		compoundTag.putBoolean("ShowArms", this.showArms());
 		compoundTag.putInt("DisabledSlots", this.disabledSlots);
-		compoundTag.putBoolean("NoBasePlate", this.isNoBasePlate());
+		compoundTag.putBoolean("NoBasePlate", !this.showBasePlate());
 		if (this.isMarker()) {
 			compoundTag.putBoolean("Marker", this.isMarker());
 		}
@@ -305,26 +307,26 @@ public class ArmorStand extends LivingEntity {
 		} else if (player.isSpectator()) {
 			return InteractionResult.SUCCESS;
 		} else if (player.level().isClientSide) {
-			return InteractionResult.CONSUME;
+			return InteractionResult.SUCCESS_SERVER;
 		} else {
 			EquipmentSlot equipmentSlot = this.getEquipmentSlotForItem(itemStack);
 			if (itemStack.isEmpty()) {
 				EquipmentSlot equipmentSlot2 = this.getClickedSlot(vec3);
 				EquipmentSlot equipmentSlot3 = this.isDisabled(equipmentSlot2) ? equipmentSlot : equipmentSlot2;
 				if (this.hasItemInSlot(equipmentSlot3) && this.swapItem(player, equipmentSlot3, itemStack, interactionHand)) {
-					return InteractionResult.SUCCESS;
+					return InteractionResult.SUCCESS_SERVER;
 				}
 			} else {
 				if (this.isDisabled(equipmentSlot)) {
 					return InteractionResult.FAIL;
 				}
 
-				if (equipmentSlot.getType() == EquipmentSlot.Type.HAND && !this.isShowArms()) {
+				if (equipmentSlot.getType() == EquipmentSlot.Type.HAND && !this.showArms()) {
 					return InteractionResult.FAIL;
 				}
 
 				if (this.swapItem(player, equipmentSlot, itemStack, interactionHand)) {
-					return InteractionResult.SUCCESS;
+					return InteractionResult.SUCCESS_SERVER;
 				}
 			}
 
@@ -353,7 +355,7 @@ public class ArmorStand extends LivingEntity {
 	}
 
 	private boolean isDisabled(EquipmentSlot equipmentSlot) {
-		return (this.disabledSlots & 1 << equipmentSlot.getFilterFlag()) != 0 || equipmentSlot.getType() == EquipmentSlot.Type.HAND && !this.isShowArms();
+		return (this.disabledSlots & 1 << equipmentSlot.getFilterFlag()) != 0 || equipmentSlot.getType() == EquipmentSlot.Type.HAND && !this.showArms();
 	}
 
 	private boolean swapItem(Player player, EquipmentSlot equipmentSlot, ItemStack itemStack, InteractionHand interactionHand) {
@@ -381,60 +383,60 @@ public class ArmorStand extends LivingEntity {
 	public boolean hurt(DamageSource damageSource, float f) {
 		if (this.isRemoved()) {
 			return false;
-		} else if (this.level() instanceof ServerLevel serverLevel) {
-			if (damageSource.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
-				this.kill();
-				return false;
-			} else if (this.isInvulnerableTo(damageSource) || this.invisible || this.isMarker()) {
-				return false;
-			} else if (damageSource.is(DamageTypeTags.IS_EXPLOSION)) {
-				this.brokenByAnything(serverLevel, damageSource);
-				this.kill();
-				return false;
-			} else if (damageSource.is(DamageTypeTags.IGNITES_ARMOR_STANDS)) {
-				if (this.isOnFire()) {
-					this.causeDamage(serverLevel, damageSource, 0.15F);
-				} else {
-					this.igniteForSeconds(5.0F);
-				}
+		} else if (!(this.level() instanceof ServerLevel serverLevel)) {
+			return false;
+		} else if (!this.level().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) && damageSource.getEntity() instanceof Mob) {
+			return false;
+		} else if (damageSource.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
+			this.kill();
+			return false;
+		} else if (this.isInvulnerableTo(damageSource) || this.invisible || this.isMarker()) {
+			return false;
+		} else if (damageSource.is(DamageTypeTags.IS_EXPLOSION)) {
+			this.brokenByAnything(serverLevel, damageSource);
+			this.kill();
+			return false;
+		} else if (damageSource.is(DamageTypeTags.IGNITES_ARMOR_STANDS)) {
+			if (this.isOnFire()) {
+				this.causeDamage(serverLevel, damageSource, 0.15F);
+			} else {
+				this.igniteForSeconds(5.0F);
+			}
 
-				return false;
-			} else if (damageSource.is(DamageTypeTags.BURNS_ARMOR_STANDS) && this.getHealth() > 0.5F) {
-				this.causeDamage(serverLevel, damageSource, 4.0F);
+			return false;
+		} else if (damageSource.is(DamageTypeTags.BURNS_ARMOR_STANDS) && this.getHealth() > 0.5F) {
+			this.causeDamage(serverLevel, damageSource, 4.0F);
+			return false;
+		} else {
+			boolean bl = damageSource.is(DamageTypeTags.CAN_BREAK_ARMOR_STAND);
+			boolean bl2 = damageSource.is(DamageTypeTags.ALWAYS_KILLS_ARMOR_STANDS);
+			if (!bl && !bl2) {
 				return false;
 			} else {
-				boolean bl = damageSource.is(DamageTypeTags.CAN_BREAK_ARMOR_STAND);
-				boolean bl2 = damageSource.is(DamageTypeTags.ALWAYS_KILLS_ARMOR_STANDS);
-				if (!bl && !bl2) {
+				if (damageSource.getEntity() instanceof Player player && !player.getAbilities().mayBuild) {
 					return false;
-				} else {
-					if (damageSource.getEntity() instanceof Player player && !player.getAbilities().mayBuild) {
-						return false;
-					}
+				}
 
-					if (damageSource.isCreativePlayer()) {
-						this.playBrokenSound();
+				if (damageSource.isCreativePlayer()) {
+					this.playBrokenSound();
+					this.showBreakingParticles();
+					this.kill();
+					return true;
+				} else {
+					long l = serverLevel.getGameTime();
+					if (l - this.lastHit > 5L && !bl2) {
+						serverLevel.broadcastEntityEvent(this, (byte)32);
+						this.gameEvent(GameEvent.ENTITY_DAMAGE, damageSource.getEntity());
+						this.lastHit = l;
+					} else {
+						this.brokenByPlayer(serverLevel, damageSource);
 						this.showBreakingParticles();
 						this.kill();
-						return true;
-					} else {
-						long l = serverLevel.getGameTime();
-						if (l - this.lastHit > 5L && !bl2) {
-							serverLevel.broadcastEntityEvent(this, (byte)32);
-							this.gameEvent(GameEvent.ENTITY_DAMAGE, damageSource.getEntity());
-							this.lastHit = l;
-						} else {
-							this.brokenByPlayer(serverLevel, damageSource);
-							this.showBreakingParticles();
-							this.kill();
-						}
-
-						return true;
 					}
+
+					return true;
 				}
 			}
-		} else {
-			return false;
 		}
 	}
 
@@ -606,7 +608,7 @@ public class ArmorStand extends LivingEntity {
 
 	@Override
 	public boolean ignoreExplosion(Explosion explosion) {
-		return this.isInvisible();
+		return explosion.shouldAffectBlocklikeEntities() ? this.isInvisible() : true;
 	}
 
 	@Override
@@ -631,7 +633,7 @@ public class ArmorStand extends LivingEntity {
 		this.entityData.set(DATA_CLIENT_FLAGS, this.setBit(this.entityData.get(DATA_CLIENT_FLAGS), 4, bl));
 	}
 
-	public boolean isShowArms() {
+	public boolean showArms() {
 		return (this.entityData.get(DATA_CLIENT_FLAGS) & 4) != 0;
 	}
 
@@ -639,8 +641,8 @@ public class ArmorStand extends LivingEntity {
 		this.entityData.set(DATA_CLIENT_FLAGS, this.setBit(this.entityData.get(DATA_CLIENT_FLAGS), 8, bl));
 	}
 
-	public boolean isNoBasePlate() {
-		return (this.entityData.get(DATA_CLIENT_FLAGS) & 8) != 0;
+	public boolean showBasePlate() {
+		return (this.entityData.get(DATA_CLIENT_FLAGS) & 8) == 0;
 	}
 
 	private void setMarker(boolean bl) {

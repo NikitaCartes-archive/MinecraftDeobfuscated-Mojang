@@ -47,13 +47,9 @@ public class BeeDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 	private static final int MAX_TARGETING_DIST = 8;
 	private static final int HIVE_TIMEOUT = 20;
 	private static final float TEXT_SCALE = 0.02F;
-	private static final int WHITE = -1;
-	private static final int YELLOW = -256;
 	private static final int ORANGE = -23296;
-	private static final int GREEN = -16711936;
 	private static final int GRAY = -3355444;
 	private static final int PINK = -98404;
-	private static final int RED = -65536;
 	private final Minecraft minecraft;
 	private final Map<BlockPos, BeeDebugRenderer.HiveDebugInfo> hives = new HashMap();
 	private final Map<UUID, BeeDebugPayload.BeeInfo> beeInfosPerEntity = new HashMap();
@@ -238,7 +234,7 @@ public class BeeDebugRenderer implements DebugRenderer.SimpleDebugRenderer {
 		}
 
 		if (beeInfo.travelTicks() > 0) {
-			int j = beeInfo.travelTicks() < 600 ? -3355444 : -23296;
+			int j = beeInfo.travelTicks() < 2400 ? -3355444 : -23296;
 			renderTextOverMob(poseStack, multiBufferSource, beeInfo.pos(), i++, "Travelling: " + beeInfo.travelTicks() + " ticks", j, 0.02F);
 		}
 	}

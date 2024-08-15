@@ -4,8 +4,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.animal.Cat;
 import net.minecraft.world.entity.monster.Witch;
 import net.minecraft.world.level.ChunkPos;
@@ -98,11 +98,11 @@ public class SwampHutPiece extends ScatteredFeaturePiece {
 				BlockPos blockPos2 = this.getWorldPos(2, 2, 5);
 				if (boundingBox.isInside(blockPos2)) {
 					this.spawnedWitch = true;
-					Witch witch = EntityType.WITCH.create(worldGenLevel.getLevel());
+					Witch witch = EntityType.WITCH.create(worldGenLevel.getLevel(), EntitySpawnReason.STRUCTURE);
 					if (witch != null) {
 						witch.setPersistenceRequired();
 						witch.moveTo((double)blockPos2.getX() + 0.5, (double)blockPos2.getY(), (double)blockPos2.getZ() + 0.5, 0.0F, 0.0F);
-						witch.finalizeSpawn(worldGenLevel, worldGenLevel.getCurrentDifficultyAt(blockPos2), MobSpawnType.STRUCTURE, null);
+						witch.finalizeSpawn(worldGenLevel, worldGenLevel.getCurrentDifficultyAt(blockPos2), EntitySpawnReason.STRUCTURE, null);
 						worldGenLevel.addFreshEntityWithPassengers(witch);
 					}
 				}
@@ -117,11 +117,11 @@ public class SwampHutPiece extends ScatteredFeaturePiece {
 			BlockPos blockPos = this.getWorldPos(2, 2, 5);
 			if (boundingBox.isInside(blockPos)) {
 				this.spawnedCat = true;
-				Cat cat = EntityType.CAT.create(serverLevelAccessor.getLevel());
+				Cat cat = EntityType.CAT.create(serverLevelAccessor.getLevel(), EntitySpawnReason.STRUCTURE);
 				if (cat != null) {
 					cat.setPersistenceRequired();
 					cat.moveTo((double)blockPos.getX() + 0.5, (double)blockPos.getY(), (double)blockPos.getZ() + 0.5, 0.0F, 0.0F);
-					cat.finalizeSpawn(serverLevelAccessor, serverLevelAccessor.getCurrentDifficultyAt(blockPos), MobSpawnType.STRUCTURE, null);
+					cat.finalizeSpawn(serverLevelAccessor, serverLevelAccessor.getCurrentDifficultyAt(blockPos), EntitySpawnReason.STRUCTURE, null);
 					serverLevelAccessor.addFreshEntityWithPassengers(cat);
 				}
 			}

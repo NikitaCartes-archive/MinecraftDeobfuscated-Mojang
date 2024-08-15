@@ -6,10 +6,10 @@ import net.minecraft.core.Position;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.dispenser.BlockSource;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.FireworkRocketEntity;
@@ -30,39 +30,41 @@ public class FireworkRocketItem extends Item implements ProjectileItem {
 	@Override
 	public InteractionResult useOn(UseOnContext useOnContext) {
 		Level level = useOnContext.getLevel();
-		if (!level.isClientSide) {
+		if (level instanceof ServerLevel serverLevel) {
 			ItemStack itemStack = useOnContext.getItemInHand();
 			Vec3 vec3 = useOnContext.getClickLocation();
 			Direction direction = useOnContext.getClickedFace();
-			FireworkRocketEntity fireworkRocketEntity = new FireworkRocketEntity(
-				level,
-				useOnContext.getPlayer(),
-				vec3.x + (double)direction.getStepX() * 0.15,
-				vec3.y + (double)direction.getStepY() * 0.15,
-				vec3.z + (double)direction.getStepZ() * 0.15,
+			Projectile.spawnProjectile(
+				new FireworkRocketEntity(
+					level,
+					useOnContext.getPlayer(),
+					vec3.x + (double)direction.getStepX() * 0.15,
+					vec3.y + (double)direction.getStepY() * 0.15,
+					vec3.z + (double)direction.getStepZ() * 0.15,
+					itemStack
+				),
+				serverLevel,
 				itemStack
 			);
-			level.addFreshEntity(fireworkRocketEntity);
 			itemStack.shrink(1);
 		}
 
-		return InteractionResult.sidedSuccess(level.isClientSide);
+		return InteractionResult.SUCCESS;
 	}
 
 	@Override
-	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand) {
+	public InteractionResult use(Level level, Player player, InteractionHand interactionHand) {
 		if (player.isFallFlying()) {
 			ItemStack itemStack = player.getItemInHand(interactionHand);
-			if (!level.isClientSide) {
-				FireworkRocketEntity fireworkRocketEntity = new FireworkRocketEntity(level, itemStack, player);
-				level.addFreshEntity(fireworkRocketEntity);
+			if (level instanceof ServerLevel serverLevel) {
+				Projectile.spawnProjectile(new FireworkRocketEntity(level, itemStack, player), serverLevel, itemStack);
 				itemStack.consume(1, player);
 				player.awardStat(Stats.ITEM_USED.get(this));
 			}
 
-			return InteractionResultHolder.sidedSuccess(player.getItemInHand(interactionHand), level.isClientSide());
+			return InteractionResult.SUCCESS;
 		} else {
-			return InteractionResultHolder.pass(player.getItemInHand(interactionHand));
+			return InteractionResult.PASS;
 		}
 	}
 

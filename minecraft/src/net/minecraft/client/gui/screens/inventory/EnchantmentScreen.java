@@ -2,7 +2,6 @@ package net.minecraft.client.gui.screens.inventory;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.Lighting;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import java.util.List;
@@ -13,6 +12,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.model.BookModel;
 import net.minecraft.client.model.geom.ModelLayers;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
@@ -51,7 +51,6 @@ public class EnchantmentScreen extends AbstractContainerScreen<EnchantmentMenu> 
 	private static final ResourceLocation ENCHANTING_BOOK_LOCATION = ResourceLocation.withDefaultNamespace("textures/entity/enchanting_table_book.png");
 	private final RandomSource random = RandomSource.create();
 	private BookModel bookModel;
-	public int time;
 	public float flip;
 	public float oFlip;
 	public float flipT;
@@ -97,7 +96,7 @@ public class EnchantmentScreen extends AbstractContainerScreen<EnchantmentMenu> 
 	protected void renderBg(GuiGraphics guiGraphics, float f, int i, int j) {
 		int k = (this.width - this.imageWidth) / 2;
 		int l = (this.height - this.imageHeight) / 2;
-		guiGraphics.blit(ENCHANTING_TABLE_LOCATION, k, l, 0, 0, this.imageWidth, this.imageHeight);
+		guiGraphics.blit(RenderType::guiTextured, ENCHANTING_TABLE_LOCATION, k, l, 0.0F, 0.0F, this.imageWidth, this.imageHeight, 256, 256);
 		this.renderBook(guiGraphics, k, l, f);
 		EnchantmentNames.getInstance().initSeed((long)this.menu.getEnchantmentSeed());
 		int m = this.menu.getGoldCount();
@@ -107,34 +106,28 @@ public class EnchantmentScreen extends AbstractContainerScreen<EnchantmentMenu> 
 			int p = o + 20;
 			int q = this.menu.costs[n];
 			if (q == 0) {
-				RenderSystem.enableBlend();
-				guiGraphics.blitSprite(ENCHANTMENT_SLOT_DISABLED_SPRITE, o, l + 14 + 19 * n, 108, 19);
-				RenderSystem.disableBlend();
+				guiGraphics.blitSprite(RenderType::guiTextured, ENCHANTMENT_SLOT_DISABLED_SPRITE, o, l + 14 + 19 * n, 108, 19);
 			} else {
 				String string = q + "";
 				int r = 86 - this.font.width(string);
 				FormattedText formattedText = EnchantmentNames.getInstance().getRandomName(this.font, r);
 				int s = 6839882;
 				if ((m < n + 1 || this.minecraft.player.experienceLevel < q) && !this.minecraft.player.getAbilities().instabuild) {
-					RenderSystem.enableBlend();
-					guiGraphics.blitSprite(ENCHANTMENT_SLOT_DISABLED_SPRITE, o, l + 14 + 19 * n, 108, 19);
-					guiGraphics.blitSprite(DISABLED_LEVEL_SPRITES[n], o + 1, l + 15 + 19 * n, 16, 16);
-					RenderSystem.disableBlend();
+					guiGraphics.blitSprite(RenderType::guiTextured, ENCHANTMENT_SLOT_DISABLED_SPRITE, o, l + 14 + 19 * n, 108, 19);
+					guiGraphics.blitSprite(RenderType::guiTextured, DISABLED_LEVEL_SPRITES[n], o + 1, l + 15 + 19 * n, 16, 16);
 					guiGraphics.drawWordWrap(this.font, formattedText, p, l + 16 + 19 * n, r, (s & 16711422) >> 1);
 					s = 4226832;
 				} else {
 					int t = i - (k + 60);
 					int u = j - (l + 14 + 19 * n);
-					RenderSystem.enableBlend();
 					if (t >= 0 && u >= 0 && t < 108 && u < 19) {
-						guiGraphics.blitSprite(ENCHANTMENT_SLOT_HIGHLIGHTED_SPRITE, o, l + 14 + 19 * n, 108, 19);
+						guiGraphics.blitSprite(RenderType::guiTextured, ENCHANTMENT_SLOT_HIGHLIGHTED_SPRITE, o, l + 14 + 19 * n, 108, 19);
 						s = 16777088;
 					} else {
-						guiGraphics.blitSprite(ENCHANTMENT_SLOT_SPRITE, o, l + 14 + 19 * n, 108, 19);
+						guiGraphics.blitSprite(RenderType::guiTextured, ENCHANTMENT_SLOT_SPRITE, o, l + 14 + 19 * n, 108, 19);
 					}
 
-					guiGraphics.blitSprite(ENABLED_LEVEL_SPRITES[n], o + 1, l + 15 + 19 * n, 16, 16);
-					RenderSystem.disableBlend();
+					guiGraphics.blitSprite(RenderType::guiTextured, ENABLED_LEVEL_SPRITES[n], o + 1, l + 15 + 19 * n, 16, 16);
 					guiGraphics.drawWordWrap(this.font, formattedText, p, l + 16 + 19 * n, r, s);
 					s = 8453920;
 				}
@@ -147,6 +140,7 @@ public class EnchantmentScreen extends AbstractContainerScreen<EnchantmentMenu> 
 	private void renderBook(GuiGraphics guiGraphics, int i, int j, float f) {
 		float g = Mth.lerp(f, this.oOpen, this.open);
 		float h = Mth.lerp(f, this.oFlip, this.flip);
+		guiGraphics.flush();
 		Lighting.setupForEntityInInventory();
 		guiGraphics.pose().pushPose();
 		guiGraphics.pose().translate((float)i + 33.0F, (float)j + 31.0F, 100.0F);
@@ -169,7 +163,8 @@ public class EnchantmentScreen extends AbstractContainerScreen<EnchantmentMenu> 
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-		super.render(guiGraphics, i, j, f);
+		float g = this.minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(false);
+		super.render(guiGraphics, i, j, g);
 		this.renderTooltip(guiGraphics, i, j);
 		boolean bl = this.minecraft.player.getAbilities().instabuild;
 		int k = this.menu.getGoldCount();
@@ -228,7 +223,6 @@ public class EnchantmentScreen extends AbstractContainerScreen<EnchantmentMenu> 
 			} while (this.flip <= this.flipT + 1.0F && this.flip >= this.flipT - 1.0F);
 		}
 
-		this.time++;
 		this.oFlip = this.flip;
 		this.oOpen = this.open;
 		boolean bl = false;

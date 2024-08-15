@@ -51,6 +51,10 @@ public record DimensionTransition(
 		return entity.adjustSpawnLocation(serverLevel, serverLevel.getSharedSpawnPos()).getBottomCenter();
 	}
 
+	public DimensionTransition withRotation(float f, float g) {
+		return new DimensionTransition(this.newLevel(), this.pos(), this.speed(), f, g, this.missingRespawnBlock(), this.postDimensionTransition());
+	}
+
 	@FunctionalInterface
 	public interface PostDimensionTransition {
 		void onTransition(Entity entity);

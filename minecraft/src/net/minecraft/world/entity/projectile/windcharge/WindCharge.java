@@ -7,6 +7,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
@@ -21,6 +22,7 @@ public class WindCharge extends AbstractWindCharge {
 		true, false, Optional.of(1.22F), BuiltInRegistries.BLOCK.getTag(BlockTags.BLOCKS_WIND_CHARGE_EXPLOSIONS).map(Function.identity())
 	);
 	private static final float RADIUS = 1.2F;
+	private static final float MIN_CAMERA_DISTANCE_SQUARED = Mth.square(3.5F);
 	private int noDeflectTicks = 5;
 
 	public WindCharge(EntityType<? extends AbstractWindCharge> entityType, Level level) {
@@ -65,5 +67,10 @@ public class WindCharge extends AbstractWindCharge {
 				ParticleTypes.GUST_EMITTER_LARGE,
 				SoundEvents.WIND_CHARGE_BURST
 			);
+	}
+
+	@Override
+	public boolean shouldRenderAtSqrDistance(double d) {
+		return this.tickCount < 2 && d < (double)MIN_CAMERA_DISTANCE_SQUARED ? false : super.shouldRenderAtSqrDistance(d);
 	}
 }

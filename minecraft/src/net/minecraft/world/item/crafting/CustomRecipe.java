@@ -24,4 +24,9 @@ public abstract class CustomRecipe implements CraftingRecipe {
 	public CraftingBookCategory category() {
 		return this.category;
 	}
+
+	@Override
+	public PlacementInfo placementInfo() {
+		return PlacementInfo.NOT_PLACEABLE;
+	}
 }

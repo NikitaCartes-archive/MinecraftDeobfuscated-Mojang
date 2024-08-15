@@ -2,7 +2,6 @@ package net.minecraft.client.gui.screens.worldselection;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.platform.NativeImage;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import java.io.IOException;
@@ -45,6 +44,7 @@ import net.minecraft.client.gui.screens.LoadingDotsText;
 import net.minecraft.client.gui.screens.NoticeWithLinkScreen;
 import net.minecraft.client.gui.screens.ProgressScreen;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.nbt.NbtException;
@@ -284,7 +284,7 @@ public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.E
 	}
 
 	@Environment(EnvType.CLIENT)
-	public final class WorldListEntry extends WorldSelectionList.Entry implements AutoCloseable {
+	public final class WorldListEntry extends WorldSelectionList.Entry {
 		private static final int ICON_WIDTH = 32;
 		private static final int ICON_HEIGHT = 32;
 		private final Minecraft minecraft;
@@ -364,9 +364,7 @@ public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.E
 			guiGraphics.drawString(this.minecraft.font, string, k + 32 + 3, j + 1, 16777215, false);
 			guiGraphics.drawString(this.minecraft.font, string2, k + 32 + 3, j + 9 + 3, -8355712, false);
 			guiGraphics.drawString(this.minecraft.font, component, k + 32 + 3, j + 9 + 9 + 3, -8355712, false);
-			RenderSystem.enableBlend();
-			guiGraphics.blit(this.icon.textureLocation(), k, j, 0.0F, 0.0F, 32, 32, 32, 32);
-			RenderSystem.disableBlend();
+			guiGraphics.blit(RenderType::guiTextured, this.icon.textureLocation(), k, j, 0.0F, 0.0F, 32, 32, 32, 32);
 			if (this.minecraft.options.touchscreen().get() || bl) {
 				guiGraphics.fill(k, j, k + 32, j + 32, -1601138544);
 				int q = n - k;
@@ -376,30 +374,30 @@ public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.E
 				ResourceLocation resourceLocation3 = bl2 ? WorldSelectionList.ERROR_HIGHLIGHTED_SPRITE : WorldSelectionList.ERROR_SPRITE;
 				ResourceLocation resourceLocation4 = bl2 ? WorldSelectionList.MARKED_JOIN_HIGHLIGHTED_SPRITE : WorldSelectionList.MARKED_JOIN_SPRITE;
 				if (this.summary instanceof LevelSummary.SymlinkLevelSummary || this.summary instanceof LevelSummary.CorruptedLevelSummary) {
-					guiGraphics.blitSprite(resourceLocation3, k, j, 32, 32);
-					guiGraphics.blitSprite(resourceLocation4, k, j, 32, 32);
+					guiGraphics.blitSprite(RenderType::guiTextured, resourceLocation3, k, j, 32, 32);
+					guiGraphics.blitSprite(RenderType::guiTextured, resourceLocation4, k, j, 32, 32);
 					return;
 				}
 
 				if (this.summary.isLocked()) {
-					guiGraphics.blitSprite(resourceLocation3, k, j, 32, 32);
+					guiGraphics.blitSprite(RenderType::guiTextured, resourceLocation3, k, j, 32, 32);
 					if (bl2) {
 						this.screen.setTooltipForNextRenderPass(this.minecraft.font.split(WorldSelectionList.WORLD_LOCKED_TOOLTIP, 175));
 					}
 				} else if (this.summary.requiresManualConversion()) {
-					guiGraphics.blitSprite(resourceLocation3, k, j, 32, 32);
+					guiGraphics.blitSprite(RenderType::guiTextured, resourceLocation3, k, j, 32, 32);
 					if (bl2) {
 						this.screen.setTooltipForNextRenderPass(this.minecraft.font.split(WorldSelectionList.WORLD_REQUIRES_CONVERSION, 175));
 					}
 				} else if (!this.summary.isCompatible()) {
-					guiGraphics.blitSprite(resourceLocation3, k, j, 32, 32);
+					guiGraphics.blitSprite(RenderType::guiTextured, resourceLocation3, k, j, 32, 32);
 					if (bl2) {
 						this.screen.setTooltipForNextRenderPass(this.minecraft.font.split(WorldSelectionList.INCOMPATIBLE_VERSION_TOOLTIP, 175));
 					}
 				} else if (this.summary.shouldBackup()) {
-					guiGraphics.blitSprite(resourceLocation4, k, j, 32, 32);
+					guiGraphics.blitSprite(RenderType::guiTextured, resourceLocation4, k, j, 32, 32);
 					if (this.summary.isDowngrade()) {
-						guiGraphics.blitSprite(resourceLocation3, k, j, 32, 32);
+						guiGraphics.blitSprite(RenderType::guiTextured, resourceLocation3, k, j, 32, 32);
 						if (bl2) {
 							this.screen
 								.setTooltipForNextRenderPass(
@@ -407,7 +405,7 @@ public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.E
 								);
 						}
 					} else if (!SharedConstants.getCurrentVersion().isStable()) {
-						guiGraphics.blitSprite(resourceLocation2, k, j, 32, 32);
+						guiGraphics.blitSprite(RenderType::guiTextured, resourceLocation2, k, j, 32, 32);
 						if (bl2) {
 							this.screen
 								.setTooltipForNextRenderPass(
@@ -416,7 +414,7 @@ public class WorldSelectionList extends ObjectSelectionList<WorldSelectionList.E
 						}
 					}
 				} else {
-					guiGraphics.blitSprite(resourceLocation, k, j, 32, 32);
+					guiGraphics.blitSprite(RenderType::guiTextured, resourceLocation, k, j, 32, 32);
 				}
 			}
 		}

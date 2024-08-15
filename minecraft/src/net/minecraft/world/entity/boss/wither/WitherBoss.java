@@ -30,7 +30,6 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.PowerableMob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.FlyingMoveControl;
@@ -57,7 +56,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
-public class WitherBoss extends Monster implements PowerableMob, RangedAttackMob {
+public class WitherBoss extends Monster implements RangedAttackMob {
 	private static final EntityDataAccessor<Integer> DATA_TARGET_A = SynchedEntityData.defineId(WitherBoss.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Integer> DATA_TARGET_B = SynchedEntityData.defineId(WitherBoss.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Integer> DATA_TARGET_C = SynchedEntityData.defineId(WitherBoss.class, EntityDataSerializers.INT);
@@ -433,7 +432,7 @@ public class WitherBoss extends Monster implements PowerableMob, RangedAttackMob
 			witherSkull.setDangerous(true);
 		}
 
-		witherSkull.setPosRaw(g, h, j);
+		witherSkull.setPos(g, h, j);
 		this.level().addFreshEntity(witherSkull);
 	}
 
@@ -507,12 +506,12 @@ public class WitherBoss extends Monster implements PowerableMob, RangedAttackMob
 			.add(Attributes.ARMOR, 4.0);
 	}
 
-	public float getHeadYRot(int i) {
-		return this.yRotHeads[i];
+	public float[] getHeadYRots() {
+		return this.yRotHeads;
 	}
 
-	public float getHeadXRot(int i) {
-		return this.xRotHeads[i];
+	public float[] getHeadXRots() {
+		return this.xRotHeads;
 	}
 
 	public int getInvulnerableTicks() {
@@ -531,7 +530,6 @@ public class WitherBoss extends Monster implements PowerableMob, RangedAttackMob
 		this.entityData.set((EntityDataAccessor<Integer>)DATA_TARGETS.get(i), j);
 	}
 
-	@Override
 	public boolean isPowered() {
 		return this.getHealth() <= this.getMaxHealth() / 2.0F;
 	}

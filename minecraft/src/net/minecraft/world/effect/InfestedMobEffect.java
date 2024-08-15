@@ -6,6 +6,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.Silverfish;
@@ -37,7 +38,7 @@ class InfestedMobEffect extends MobEffect {
 	}
 
 	private void spawnSilverfish(Level level, LivingEntity livingEntity, double d, double e, double f) {
-		Silverfish silverfish = EntityType.SILVERFISH.create(level);
+		Silverfish silverfish = EntityType.SILVERFISH.create(level, EntitySpawnReason.TRIGGERED);
 		if (silverfish != null) {
 			RandomSource randomSource = livingEntity.getRandom();
 			float g = (float) (Math.PI / 2);

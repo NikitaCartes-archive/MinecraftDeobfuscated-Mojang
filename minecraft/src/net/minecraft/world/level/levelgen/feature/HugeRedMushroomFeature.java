@@ -36,7 +36,7 @@ public class HugeRedMushroomFeature extends AbstractHugeMushroomFeature {
 					boolean bl6 = bl3 || bl4;
 					if (j >= i || bl5 != bl6) {
 						mutableBlockPos.setWithOffset(blockPos, m, j, n);
-						if (!levelAccessor.getBlockState(mutableBlockPos).isSolidRender(levelAccessor, mutableBlockPos)) {
+						if (!levelAccessor.getBlockState(mutableBlockPos).isSolidRender()) {
 							BlockState blockState = hugeMushroomFeatureConfiguration.capProvider.getState(randomSource, blockPos);
 							if (blockState.hasProperty(HugeMushroomBlock.WEST)
 								&& blockState.hasProperty(HugeMushroomBlock.EAST)

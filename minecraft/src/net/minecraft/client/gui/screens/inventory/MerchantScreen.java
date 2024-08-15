@@ -1,10 +1,10 @@
 package net.minecraft.client.gui.screens.inventory;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ServerboundSelectTradePacket;
@@ -105,7 +105,7 @@ public class MerchantScreen extends AbstractContainerScreen<MerchantMenu> {
 	protected void renderBg(GuiGraphics guiGraphics, float f, int i, int j) {
 		int k = (this.width - this.imageWidth) / 2;
 		int l = (this.height - this.imageHeight) / 2;
-		guiGraphics.blit(VILLAGER_LOCATION, k, l, 0, 0.0F, 0.0F, this.imageWidth, this.imageHeight, 512, 256);
+		guiGraphics.blit(RenderType::guiTextured, VILLAGER_LOCATION, k, l, 0.0F, 0.0F, this.imageWidth, this.imageHeight, 512, 256);
 		MerchantOffers merchantOffers = this.menu.getOffers();
 		if (!merchantOffers.isEmpty()) {
 			int m = this.shopItem;
@@ -115,7 +115,7 @@ public class MerchantScreen extends AbstractContainerScreen<MerchantMenu> {
 
 			MerchantOffer merchantOffer = (MerchantOffer)merchantOffers.get(m);
 			if (merchantOffer.isOutOfStock()) {
-				guiGraphics.blitSprite(OUT_OF_STOCK_SPRITE, this.leftPos + 83 + 99, this.topPos + 35, 0, 28, 21);
+				guiGraphics.blitSprite(RenderType::guiTextured, OUT_OF_STOCK_SPRITE, this.leftPos + 83 + 99, this.topPos + 35, 28, 21);
 			}
 		}
 	}
@@ -124,17 +124,17 @@ public class MerchantScreen extends AbstractContainerScreen<MerchantMenu> {
 		int k = this.menu.getTraderLevel();
 		int l = this.menu.getTraderXp();
 		if (k < 5) {
-			guiGraphics.blitSprite(EXPERIENCE_BAR_BACKGROUND_SPRITE, i + 136, j + 16, 0, 102, 5);
+			guiGraphics.blitSprite(RenderType::guiTextured, EXPERIENCE_BAR_BACKGROUND_SPRITE, i + 136, j + 16, 102, 5);
 			int m = VillagerData.getMinXpPerLevel(k);
 			if (l >= m && VillagerData.canLevelUp(k)) {
 				int n = 102;
 				float f = 102.0F / (float)(VillagerData.getMaxXpPerLevel(k) - m);
 				int o = Math.min(Mth.floor(f * (float)(l - m)), 102);
-				guiGraphics.blitSprite(EXPERIENCE_BAR_CURRENT_SPRITE, 102, 5, 0, 0, i + 136, j + 16, 0, o, 5);
+				guiGraphics.blitSprite(RenderType::guiTextured, EXPERIENCE_BAR_CURRENT_SPRITE, 102, 5, 0, 0, i + 136, j + 16, o, 5);
 				int p = this.menu.getFutureTraderXp();
 				if (p > 0) {
 					int q = Math.min(Mth.floor((float)p * f), 102 - o);
-					guiGraphics.blitSprite(EXPERIENCE_BAR_RESULT_SPRITE, 102, 5, o, 0, i + 136 + o, j + 16, 0, q, 5);
+					guiGraphics.blitSprite(RenderType::guiTextured, EXPERIENCE_BAR_RESULT_SPRITE, 102, 5, o, 0, i + 136 + o, j + 16, q, 5);
 				}
 			}
 		}
@@ -151,9 +151,9 @@ public class MerchantScreen extends AbstractContainerScreen<MerchantMenu> {
 				o = 113;
 			}
 
-			guiGraphics.blitSprite(SCROLLER_SPRITE, i + 94, j + 18 + o, 0, 6, 27);
+			guiGraphics.blitSprite(RenderType::guiTextured, SCROLLER_SPRITE, i + 94, j + 18 + o, 6, 27);
 		} else {
-			guiGraphics.blitSprite(SCROLLER_DISABLED_SPRITE, i + 94, j + 18, 0, 6, 27);
+			guiGraphics.blitSprite(RenderType::guiTextured, SCROLLER_DISABLED_SPRITE, i + 94, j + 18, 6, 27);
 		}
 	}
 
@@ -212,19 +212,16 @@ public class MerchantScreen extends AbstractContainerScreen<MerchantMenu> {
 
 				tradeOfferButton.visible = tradeOfferButton.index < this.menu.getOffers().size();
 			}
-
-			RenderSystem.enableDepthTest();
 		}
 
 		this.renderTooltip(guiGraphics, i, j);
 	}
 
 	private void renderButtonArrows(GuiGraphics guiGraphics, MerchantOffer merchantOffer, int i, int j) {
-		RenderSystem.enableBlend();
 		if (merchantOffer.isOutOfStock()) {
-			guiGraphics.blitSprite(TRADE_ARROW_OUT_OF_STOCK_SPRITE, i + 5 + 35 + 20, j + 3, 0, 10, 9);
+			guiGraphics.blitSprite(RenderType::guiTextured, TRADE_ARROW_OUT_OF_STOCK_SPRITE, i + 5 + 35 + 20, j + 3, 10, 9);
 		} else {
-			guiGraphics.blitSprite(TRADE_ARROW_SPRITE, i + 5 + 35 + 20, j + 3, 0, 10, 9);
+			guiGraphics.blitSprite(RenderType::guiTextured, TRADE_ARROW_SPRITE, i + 5 + 35 + 20, j + 3, 10, 9);
 		}
 	}
 
@@ -237,7 +234,7 @@ public class MerchantScreen extends AbstractContainerScreen<MerchantMenu> {
 			guiGraphics.renderItemDecorations(this.font, itemStack, i + 14, j, itemStack.getCount() == 1 ? "1" : null);
 			guiGraphics.pose().pushPose();
 			guiGraphics.pose().translate(0.0F, 0.0F, 300.0F);
-			guiGraphics.blitSprite(DISCOUNT_STRIKETHRUOGH_SPRITE, i + 7, j + 12, 0, 9, 2);
+			guiGraphics.blitSprite(RenderType::guiTextured, DISCOUNT_STRIKETHRUOGH_SPRITE, i + 7, j + 12, 9, 2);
 			guiGraphics.pose().popPose();
 		}
 	}

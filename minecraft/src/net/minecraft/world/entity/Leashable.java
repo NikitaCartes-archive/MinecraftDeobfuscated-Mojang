@@ -11,6 +11,7 @@ import net.minecraft.network.protocol.game.ClientboundSetEntityLinkPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.decoration.LeashFenceKnotEntity;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.GameRules;
 
 public interface Leashable {
 	String LEASH_TAG = "leash";
@@ -126,7 +127,7 @@ public interface Leashable {
 
 		if (leashData != null && leashData.leashHolder != null) {
 			if (!entity.isAlive() || !leashData.leashHolder.isAlive()) {
-				dropLeash(entity, true, true);
+				dropLeash(entity, true, entity.level().getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS));
 			}
 
 			Entity entity2 = entity.getLeashHolder();

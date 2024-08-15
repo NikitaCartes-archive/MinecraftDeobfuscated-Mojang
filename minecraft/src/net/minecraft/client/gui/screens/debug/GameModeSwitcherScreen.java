@@ -2,7 +2,6 @@ package net.minecraft.client.gui.screens.debug;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.InputConstants;
-import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -14,6 +13,7 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
@@ -74,10 +74,9 @@ public class GameModeSwitcherScreen extends Screen {
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
 		if (!this.checkToClose()) {
 			guiGraphics.pose().pushPose();
-			RenderSystem.enableBlend();
 			int k = this.width / 2 - 62;
 			int l = this.height / 2 - 31 - 27;
-			guiGraphics.blit(GAMEMODE_SWITCHER_LOCATION, k, l, 0.0F, 0.0F, 125, 75, 128, 128);
+			guiGraphics.blit(RenderType::guiTextured, GAMEMODE_SWITCHER_LOCATION, k, l, 0.0F, 0.0F, 125, 75, 128, 128);
 			guiGraphics.pose().popPose();
 			super.render(guiGraphics, i, j, f);
 			guiGraphics.drawCenteredString(this.font, this.currentlyHovered.getName(), this.width / 2, this.height / 2 - 31 - 20, -1);
@@ -228,11 +227,11 @@ public class GameModeSwitcherScreen extends Screen {
 		}
 
 		private void drawSlot(GuiGraphics guiGraphics) {
-			guiGraphics.blitSprite(GameModeSwitcherScreen.SLOT_SPRITE, this.getX(), this.getY(), 26, 26);
+			guiGraphics.blitSprite(RenderType::guiTextured, GameModeSwitcherScreen.SLOT_SPRITE, this.getX(), this.getY(), 26, 26);
 		}
 
 		private void drawSelection(GuiGraphics guiGraphics) {
-			guiGraphics.blitSprite(GameModeSwitcherScreen.SELECTION_SPRITE, this.getX(), this.getY(), 26, 26);
+			guiGraphics.blitSprite(RenderType::guiTextured, GameModeSwitcherScreen.SELECTION_SPRITE, this.getX(), this.getY(), 26, 26);
 		}
 	}
 }

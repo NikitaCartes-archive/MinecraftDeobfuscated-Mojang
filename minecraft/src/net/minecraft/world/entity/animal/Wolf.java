@@ -34,11 +34,10 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.Crackiness;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.NeutralMob;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.TamableAnimal;
@@ -70,13 +69,11 @@ import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Ghast;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodProperties;
-import net.minecraft.world.item.ArmorMaterials;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.enchantment.EnchantmentEffectComponents;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
@@ -100,6 +97,7 @@ public class Wolf extends TamableAnimal implements NeutralMob, VariantHolder<Hol
 	private static final float START_HEALTH = 8.0F;
 	private static final float TAME_HEALTH = 40.0F;
 	private static final float ARMOR_REPAIR_UNIT = 0.125F;
+	public static final float DEFAULT_TAIL_ANGLE = (float) (Math.PI / 5);
 	private float interestedAngle;
 	private float interestedAngleO;
 	private boolean isWet;
@@ -159,7 +157,7 @@ public class Wolf extends TamableAnimal implements NeutralMob, VariantHolder<Hol
 	}
 
 	public static AttributeSupplier.Builder createAttributes() {
-		return Mob.createMobAttributes().add(Attributes.MOVEMENT_SPEED, 0.3F).add(Attributes.MAX_HEALTH, 8.0).add(Attributes.ATTACK_DAMAGE, 4.0);
+		return Animal.createAnimalAttributes().add(Attributes.MOVEMENT_SPEED, 0.3F).add(Attributes.MAX_HEALTH, 8.0).add(Attributes.ATTACK_DAMAGE, 4.0);
 	}
 
 	@Override
@@ -203,7 +201,7 @@ public class Wolf extends TamableAnimal implements NeutralMob, VariantHolder<Hol
 	@Nullable
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData
+		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, EntitySpawnReason entitySpawnReason, @Nullable SpawnGroupData spawnGroupData
 	) {
 		Holder<Biome> holder = serverLevelAccessor.getBiome(this.blockPosition());
 		Holder<WolfVariant> holder2;
@@ -215,7 +213,7 @@ public class Wolf extends TamableAnimal implements NeutralMob, VariantHolder<Hol
 		}
 
 		this.setVariant(holder2);
-		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData);
+		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, entitySpawnReason, spawnGroupData);
 	}
 
 	@Override
@@ -321,23 +319,12 @@ public class Wolf extends TamableAnimal implements NeutralMob, VariantHolder<Hol
 		super.die(damageSource);
 	}
 
-	public boolean isWet() {
-		return this.isWet;
-	}
-
 	public float getWetShade(float f) {
-		return Math.min(0.75F + Mth.lerp(f, this.shakeAnimO, this.shakeAnim) / 2.0F * 0.25F, 1.0F);
+		return !this.isWet ? 1.0F : Math.min(0.75F + Mth.lerp(f, this.shakeAnimO, this.shakeAnim) / 2.0F * 0.25F, 1.0F);
 	}
 
-	public float getBodyRollAngle(float f, float g) {
-		float h = (Mth.lerp(f, this.shakeAnimO, this.shakeAnim) + g) / 1.8F;
-		if (h < 0.0F) {
-			h = 0.0F;
-		} else if (h > 1.0F) {
-			h = 1.0F;
-		}
-
-		return Mth.sin(h * (float) Math.PI) * Mth.sin(h * (float) Math.PI * 11.0F) * 0.15F * (float) Math.PI;
+	public float getShakeAnim(float f) {
+		return Mth.lerp(f, this.shakeAnimO, this.shakeAnim);
 	}
 
 	public float getHeadRollAngle(float f) {
@@ -418,74 +405,69 @@ public class Wolf extends TamableAnimal implements NeutralMob, VariantHolder<Hol
 	public InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
 		Item item = itemStack.getItem();
-		if (!this.level().isClientSide || this.isBaby() && this.isFood(itemStack)) {
-			if (this.isTame()) {
-				if (this.isFood(itemStack) && this.getHealth() < this.getMaxHealth()) {
-					itemStack.consume(1, player);
-					FoodProperties foodProperties = itemStack.get(DataComponents.FOOD);
-					float f = foodProperties != null ? (float)foodProperties.nutrition() : 1.0F;
-					this.heal(2.0F * f);
-					return InteractionResult.sidedSuccess(this.level().isClientSide());
-				} else {
-					if (item instanceof DyeItem dyeItem && this.isOwnedBy(player)) {
-						DyeColor dyeColor = dyeItem.getDyeColor();
-						if (dyeColor != this.getCollarColor()) {
-							this.setCollarColor(dyeColor);
-							itemStack.consume(1, player);
-							return InteractionResult.SUCCESS;
-						}
-
-						return super.mobInteract(player, interactionHand);
-					}
-
-					if (itemStack.is(Items.WOLF_ARMOR) && this.isOwnedBy(player) && this.getBodyArmorItem().isEmpty() && !this.isBaby()) {
-						this.setBodyArmorItem(itemStack.copyWithCount(1));
-						itemStack.consume(1, player);
-						return InteractionResult.SUCCESS;
-					} else if (itemStack.is(Items.SHEARS)
-						&& this.isOwnedBy(player)
-						&& this.hasArmor()
-						&& (!EnchantmentHelper.has(this.getBodyArmorItem(), EnchantmentEffectComponents.PREVENT_ARMOR_CHANGE) || player.isCreative())) {
-						itemStack.hurtAndBreak(1, player, getSlotForHand(interactionHand));
-						this.playSound(SoundEvents.ARMOR_UNEQUIP_WOLF);
-						ItemStack itemStack2 = this.getBodyArmorItem();
-						this.setBodyArmorItem(ItemStack.EMPTY);
-						this.spawnAtLocation(itemStack2);
-						return InteractionResult.SUCCESS;
-					} else if (((Ingredient)ArmorMaterials.ARMADILLO.value().repairIngredient().get()).test(itemStack)
-						&& this.isInSittingPose()
-						&& this.hasArmor()
-						&& this.isOwnedBy(player)
-						&& this.getBodyArmorItem().isDamaged()) {
-						itemStack.shrink(1);
-						this.playSound(SoundEvents.WOLF_ARMOR_REPAIR);
-						ItemStack itemStack2 = this.getBodyArmorItem();
-						int i = (int)((float)itemStack2.getMaxDamage() * 0.125F);
-						itemStack2.setDamageValue(Math.max(0, itemStack2.getDamageValue() - i));
-						return InteractionResult.SUCCESS;
-					} else {
-						InteractionResult interactionResult = super.mobInteract(player, interactionHand);
-						if (!interactionResult.consumesAction() && this.isOwnedBy(player)) {
-							this.setOrderedToSit(!this.isOrderedToSit());
-							this.jumping = false;
-							this.navigation.stop();
-							this.setTarget(null);
-							return InteractionResult.SUCCESS_NO_ITEM_USED;
-						} else {
-							return interactionResult;
-						}
-					}
-				}
-			} else if (itemStack.is(Items.BONE) && !this.isAngry()) {
+		if (this.isTame()) {
+			if (this.isFood(itemStack) && this.getHealth() < this.getMaxHealth()) {
 				itemStack.consume(1, player);
-				this.tryToTame(player);
+				FoodProperties foodProperties = itemStack.get(DataComponents.FOOD);
+				float f = foodProperties != null ? (float)foodProperties.nutrition() : 1.0F;
+				this.heal(2.0F * f);
 				return InteractionResult.SUCCESS;
 			} else {
-				return super.mobInteract(player, interactionHand);
+				if (item instanceof DyeItem dyeItem && this.isOwnedBy(player)) {
+					DyeColor dyeColor = dyeItem.getDyeColor();
+					if (dyeColor != this.getCollarColor()) {
+						this.setCollarColor(dyeColor);
+						itemStack.consume(1, player);
+						return InteractionResult.SUCCESS;
+					}
+
+					return super.mobInteract(player, interactionHand);
+				}
+
+				if (itemStack.is(Items.WOLF_ARMOR) && this.isOwnedBy(player) && this.getBodyArmorItem().isEmpty() && !this.isBaby()) {
+					this.setBodyArmorItem(itemStack.copyWithCount(1));
+					itemStack.consume(1, player);
+					return InteractionResult.SUCCESS;
+				} else if (itemStack.is(Items.SHEARS)
+					&& this.isOwnedBy(player)
+					&& this.hasArmor()
+					&& (!EnchantmentHelper.has(this.getBodyArmorItem(), EnchantmentEffectComponents.PREVENT_ARMOR_CHANGE) || player.isCreative())) {
+					itemStack.hurtAndBreak(1, player, getSlotForHand(interactionHand));
+					this.playSound(SoundEvents.ARMOR_UNEQUIP_WOLF);
+					ItemStack itemStack2 = this.getBodyArmorItem();
+					this.setBodyArmorItem(ItemStack.EMPTY);
+					this.spawnAtLocation(itemStack2);
+					return InteractionResult.SUCCESS;
+				} else if (this.isInSittingPose()
+					&& this.hasArmor()
+					&& this.isOwnedBy(player)
+					&& this.getBodyArmorItem().isDamaged()
+					&& this.getBodyArmorItem().isValidRepairItem(itemStack)) {
+					itemStack.shrink(1);
+					this.playSound(SoundEvents.WOLF_ARMOR_REPAIR);
+					ItemStack itemStack2 = this.getBodyArmorItem();
+					int i = (int)((float)itemStack2.getMaxDamage() * 0.125F);
+					itemStack2.setDamageValue(Math.max(0, itemStack2.getDamageValue() - i));
+					return InteractionResult.SUCCESS;
+				} else {
+					InteractionResult interactionResult = super.mobInteract(player, interactionHand);
+					if (!interactionResult.consumesAction() && this.isOwnedBy(player)) {
+						this.setOrderedToSit(!this.isOrderedToSit());
+						this.jumping = false;
+						this.navigation.stop();
+						this.setTarget(null);
+						return InteractionResult.SUCCESS.withoutItem();
+					} else {
+						return interactionResult;
+					}
+				}
 			}
+		} else if (!this.level().isClientSide && itemStack.is(Items.BONE) && !this.isAngry()) {
+			itemStack.consume(1, player);
+			this.tryToTame(player);
+			return InteractionResult.SUCCESS_SERVER;
 		} else {
-			boolean bl = this.isOwnedBy(player) || this.isTame() || itemStack.is(Items.BONE) && !this.isTame() && !this.isAngry();
-			return bl ? InteractionResult.CONSUME : InteractionResult.PASS;
+			return super.mobInteract(player, interactionHand);
 		}
 	}
 
@@ -576,7 +558,7 @@ public class Wolf extends TamableAnimal implements NeutralMob, VariantHolder<Hol
 
 	@Nullable
 	public Wolf getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
-		Wolf wolf = EntityType.WOLF.create(serverLevel);
+		Wolf wolf = EntityType.WOLF.create(serverLevel, EntitySpawnReason.BREEDING);
 		if (wolf != null && ageableMob instanceof Wolf wolf2) {
 			if (this.random.nextBoolean()) {
 				wolf.setVariant(this.getVariant());
@@ -655,7 +637,7 @@ public class Wolf extends TamableAnimal implements NeutralMob, VariantHolder<Hol
 	}
 
 	public static boolean checkWolfSpawnRules(
-		EntityType<Wolf> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, RandomSource randomSource
+		EntityType<Wolf> entityType, LevelAccessor levelAccessor, EntitySpawnReason entitySpawnReason, BlockPos blockPos, RandomSource randomSource
 	) {
 		return levelAccessor.getBlockState(blockPos.below()).is(BlockTags.WOLVES_SPAWNABLE_ON) && isBrightEnoughToSpawn(levelAccessor, blockPos);
 	}

@@ -1,7 +1,6 @@
 package net.minecraft.client.gui.screens;
 
 import com.mojang.authlib.minecraft.BanDetails;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.logging.LogUtils;
 import com.mojang.realmsclient.RealmsMainScreen;
 import com.mojang.realmsclient.gui.screens.RealmsNotificationsScreen;
@@ -298,7 +297,6 @@ public class TitleScreen extends Screen {
 
 			guiGraphics.drawString(this.font, string, 2, this.height - 10, 16777215 | k);
 			if (this.realmsNotificationsEnabled() && g >= 1.0F) {
-				RenderSystem.enableDepthTest();
 				this.realmsNotificationsScreen.render(guiGraphics, i, j, f);
 			}
 		}

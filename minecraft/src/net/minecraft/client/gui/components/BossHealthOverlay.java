@@ -1,13 +1,13 @@
 package net.minecraft.client.gui.components;
 
 import com.google.common.collect.Maps;
-import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.Map;
 import java.util.UUID;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundBossEventPacket;
 import net.minecraft.resources.ResourceLocation;
@@ -90,13 +90,10 @@ public class BossHealthOverlay {
 	private void drawBar(
 		GuiGraphics guiGraphics, int i, int j, BossEvent bossEvent, int k, ResourceLocation[] resourceLocations, ResourceLocation[] resourceLocations2
 	) {
-		RenderSystem.enableBlend();
-		guiGraphics.blitSprite(resourceLocations[bossEvent.getColor().ordinal()], 182, 5, 0, 0, i, j, k, 5);
+		guiGraphics.blitSprite(RenderType::guiTextured, resourceLocations[bossEvent.getColor().ordinal()], 182, 5, 0, 0, i, j, k, 5);
 		if (bossEvent.getOverlay() != BossEvent.BossBarOverlay.PROGRESS) {
-			guiGraphics.blitSprite(resourceLocations2[bossEvent.getOverlay().ordinal() - 1], 182, 5, 0, 0, i, j, k, 5);
+			guiGraphics.blitSprite(RenderType::guiTextured, resourceLocations2[bossEvent.getOverlay().ordinal() - 1], 182, 5, 0, 0, i, j, k, 5);
 		}
-
-		RenderSystem.disableBlend();
 	}
 
 	public void update(ClientboundBossEventPacket clientboundBossEventPacket) {

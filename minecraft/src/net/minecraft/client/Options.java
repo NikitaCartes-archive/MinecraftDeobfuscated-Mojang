@@ -61,12 +61,13 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.protocol.common.ServerboundClientInformationPacket;
 import net.minecraft.server.level.ClientInformation;
+import net.minecraft.server.level.ParticleStatus;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.Mth;
 import net.minecraft.util.datafix.DataFixTypes;
@@ -133,7 +134,23 @@ public class Options {
 		new OptionInstance.IntRange(1, 26).xmap(i -> i * 10, integer -> integer / 10),
 		Codec.intRange(10, 260),
 		120,
-		integer -> Minecraft.getInstance().getWindow().setFramerateLimit(integer)
+		integer -> Minecraft.getInstance().getFramerateLimitTracker().setFramerateLimit(integer)
+	);
+	private static final Component INACTIVITY_FPS_LIMIT_TOOLTIP_MINIMIZED = Component.translatable("options.inactivityFpsLimit.minimized.tooltip");
+	private static final Component INACTIVITY_FPS_LIMIT_TOOLTIP_AFK = Component.translatable("options.inactivityFpsLimit.afk.tooltip");
+	private final OptionInstance<InactivityFpsLimit> inactivityFpsLimit = new OptionInstance<>(
+		"options.inactivityFpsLimit",
+		inactivityFpsLimit -> {
+			return switch (inactivityFpsLimit) {
+				case MINIMIZED -> Tooltip.create(INACTIVITY_FPS_LIMIT_TOOLTIP_MINIMIZED);
+				case AFK -> Tooltip.create(INACTIVITY_FPS_LIMIT_TOOLTIP_AFK);
+			};
+		},
+		OptionInstance.forOptionEnum(),
+		new OptionInstance.Enum<>(Arrays.asList(InactivityFpsLimit.values()), InactivityFpsLimit.CODEC),
+		InactivityFpsLimit.AFK,
+		inactivityFpsLimit -> {
+		}
 	);
 	private final OptionInstance<CloudStatus> cloudStatus = new OptionInstance<>(
 		"options.renderClouds",
@@ -147,7 +164,7 @@ public class Options {
 			if (Minecraft.useShaderTransparency()) {
 				RenderTarget renderTarget = Minecraft.getInstance().levelRenderer.getCloudsTarget();
 				if (renderTarget != null) {
-					renderTarget.clear(Minecraft.ON_OSX);
+					renderTarget.clear();
 				}
 			}
 		}
@@ -292,7 +309,8 @@ public class Options {
 		OptionInstance.forOptionEnum(),
 		new OptionInstance.Enum<>(Arrays.asList(HumanoidArm.values()), HumanoidArm.CODEC),
 		HumanoidArm.RIGHT,
-		humanoidArm -> this.broadcastOptions()
+		humanoidArm -> {
+		}
 	);
 	public int overrideWidth;
 	public int overrideHeight;
@@ -371,7 +389,6 @@ public class Options {
 	);
 	public TutorialSteps tutorialStep = TutorialSteps.MOVEMENT;
 	public boolean joinedFirstServer = false;
-	public boolean hideBundleTutorial = false;
 	private final OptionInstance<Integer> biomeBlendRadius = new OptionInstance<>(
 		"options.biomeBlendRadius", OptionInstance.noTooltip(), (component, integer) -> {
 			int i = integer * 2 + 1;
@@ -396,6 +413,10 @@ public class Options {
 	});
 	public int glDebugVerbosity = 1;
 	private final OptionInstance<Boolean> autoJump = OptionInstance.createBoolean("options.autoJump", false);
+	private static final Component ACCESSIBILITY_TOOLTIP_ROTATE_WITH_MINECART = Component.translatable("options.rotateWithMinecart.tooltip");
+	private final OptionInstance<Boolean> rotateWithMinecart = OptionInstance.createBoolean(
+		"options.rotateWithMinecart", OptionInstance.cachedConstantTooltip(ACCESSIBILITY_TOOLTIP_ROTATE_WITH_MINECART), false
+	);
 	private final OptionInstance<Boolean> operatorItemsTab = OptionInstance.createBoolean("options.operatorItemsTab", false);
 	private final OptionInstance<Boolean> autoSuggestions = OptionInstance.createBoolean("options.autoSuggestCommands", true);
 	private final OptionInstance<Boolean> chatColors = OptionInstance.createBoolean("options.chat.color", true);
@@ -422,7 +443,8 @@ public class Options {
 	);
 	private static final Component ALLOW_SERVER_LISTING_TOOLTIP = Component.translatable("options.allowServerListing.tooltip");
 	private final OptionInstance<Boolean> allowServerListing = OptionInstance.createBoolean(
-		"options.allowServerListing", OptionInstance.cachedConstantTooltip(ALLOW_SERVER_LISTING_TOOLTIP), true, boolean_ -> this.broadcastOptions()
+		"options.allowServerListing", OptionInstance.cachedConstantTooltip(ALLOW_SERVER_LISTING_TOOLTIP), true, boolean_ -> {
+		}
 	);
 	private final OptionInstance<Boolean> reducedDebugInfo = OptionInstance.createBoolean("options.reducedDebugInfo", false);
 	private final Map<SoundSource, OptionInstance<Double>> soundSourceVolumes = Util.make(new EnumMap(SoundSource.class), enumMap -> {
@@ -763,6 +785,10 @@ public class Options {
 		return this.framerateLimit;
 	}
 
+	public OptionInstance<InactivityFpsLimit> inactivityFpsLimit() {
+		return this.inactivityFpsLimit;
+	}
+
 	public OptionInstance<CloudStatus> cloudStatus() {
 		return this.cloudStatus;
 	}
@@ -894,6 +920,10 @@ public class Options {
 
 	public OptionInstance<Boolean> autoJump() {
 		return this.autoJump;
+	}
+
+	public OptionInstance<Boolean> rotateWithMinecart() {
+		return this.rotateWithMinecart;
 	}
 
 	public OptionInstance<Boolean> operatorItemsTab() {
@@ -1114,16 +1144,11 @@ public class Options {
 	}
 
 	public int getBackgroundColor(float f) {
-		return (int)(this.getBackgroundOpacity(f) * 255.0F) << 24 & 0xFF000000;
+		return ARGB.colorFromFloat(this.getBackgroundOpacity(f), 0.0F, 0.0F, 0.0F);
 	}
 
 	public int getBackgroundColor(int i) {
-		return this.backgroundForChatOnly.get() ? i : (int)(this.textBackgroundOpacity.get() * 255.0) << 24 & 0xFF000000;
-	}
-
-	public void setKey(KeyMapping keyMapping, InputConstants.Key key) {
-		keyMapping.setKey(key);
-		this.save();
+		return this.backgroundForChatOnly.get() ? i : ARGB.colorFromFloat(this.textBackgroundOpacity.get().floatValue(), 0.0F, 0.0F, 0.0F);
 	}
 
 	private void processDumpedOptions(Options.OptionAccess optionAccess) {
@@ -1145,6 +1170,7 @@ public class Options {
 		optionAccess.process("graphicsMode", this.graphicsMode);
 		optionAccess.process("guiScale", this.guiScale);
 		optionAccess.process("maxFps", this.framerateLimit);
+		optionAccess.process("inactivityFpsLimit", this.inactivityFpsLimit);
 		optionAccess.process("mipmapLevels", this.mipmapLevels);
 		optionAccess.process("narrator", this.narrator);
 		optionAccess.process("particles", this.particles);
@@ -1159,6 +1185,7 @@ public class Options {
 	private void processOptions(Options.FieldAccess fieldAccess) {
 		this.processDumpedOptions(fieldAccess);
 		fieldAccess.process("autoJump", this.autoJump);
+		fieldAccess.process("rotateWithMinecart", this.rotateWithMinecart);
 		fieldAccess.process("operatorItemsTab", this.operatorItemsTab);
 		fieldAccess.process("autoSuggestions", this.autoSuggestions);
 		fieldAccess.process("chatColors", this.chatColors);
@@ -1210,7 +1237,6 @@ public class Options {
 		this.skipMultiplayerWarning = fieldAccess.process("skipMultiplayerWarning", this.skipMultiplayerWarning);
 		fieldAccess.process("hideMatchedNames", this.hideMatchedNames);
 		this.joinedFirstServer = fieldAccess.process("joinedFirstServer", this.joinedFirstServer);
-		this.hideBundleTutorial = fieldAccess.process("hideBundleTutorial", this.hideBundleTutorial);
 		this.syncWrites = fieldAccess.process("syncChunkWrites", this.syncWrites);
 		fieldAccess.process("showAutosaveIndicator", this.showAutosaveIndicator);
 		fieldAccess.process("allowServerListing", this.allowServerListing);
@@ -1359,10 +1385,6 @@ public class Options {
 				this.fullscreenVideoModeString = compoundTag2.getString("fullscreenResolution");
 			}
 
-			if (this.minecraft.getWindow() != null) {
-				this.minecraft.getWindow().setFramerateLimit(this.framerateLimit.get());
-			}
-
 			KeyMapping.resetMapping();
 		} catch (Exception var7) {
 			LOGGER.error("Failed to load options", (Throwable)var7);
@@ -1484,17 +1506,18 @@ public class Options {
 			i,
 			this.mainHand.get(),
 			this.minecraft.isTextFilteringEnabled(),
-			this.allowServerListing.get()
+			this.allowServerListing.get(),
+			this.particles.get()
 		);
 	}
 
 	public void broadcastOptions() {
 		if (this.minecraft.player != null) {
-			this.minecraft.player.connection.send(new ServerboundClientInformationPacket(this.buildPlayerInformation()));
+			this.minecraft.player.connection.broadcastClientInformation(this.buildPlayerInformation());
 		}
 	}
 
-	private void setModelPart(PlayerModelPart playerModelPart, boolean bl) {
+	public void setModelPart(PlayerModelPart playerModelPart, boolean bl) {
 		if (bl) {
 			this.modelParts.add(playerModelPart);
 		} else {
@@ -1504,11 +1527,6 @@ public class Options {
 
 	public boolean isModelPartEnabled(PlayerModelPart playerModelPart) {
 		return this.modelParts.contains(playerModelPart);
-	}
-
-	public void toggleModelPart(PlayerModelPart playerModelPart, boolean bl) {
-		this.setModelPart(playerModelPart, bl);
-		this.broadcastOptions();
 	}
 
 	public CloudStatus getCloudsType() {

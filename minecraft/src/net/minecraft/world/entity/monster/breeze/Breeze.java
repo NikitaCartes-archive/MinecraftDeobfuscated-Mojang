@@ -95,7 +95,7 @@ public class Breeze extends Monster {
 					this.shoot.startIfStopped(this.tickCount);
 					break;
 				case INHALING:
-					this.longJump.startIfStopped(this.tickCount);
+					this.inhale.startIfStopped(this.tickCount);
 					break;
 				case SLIDING:
 					this.slide.startIfStopped(this.tickCount);
@@ -125,6 +125,7 @@ public class Breeze extends Monster {
 				this.emitGroundParticles(20);
 				break;
 			case LONG_JUMPING:
+				this.longJump.startIfStopped(this.tickCount);
 				this.emitJumpTrailParticles();
 		}
 

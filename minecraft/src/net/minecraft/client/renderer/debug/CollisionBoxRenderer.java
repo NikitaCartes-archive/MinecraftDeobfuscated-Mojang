@@ -9,7 +9,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.world.entity.Entity;
@@ -37,7 +36,7 @@ public class CollisionBoxRenderer implements DebugRenderer.SimpleDebugRenderer {
 		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.lines());
 
 		for (VoxelShape voxelShape : this.shapes) {
-			LevelRenderer.renderVoxelShape(poseStack, vertexConsumer, voxelShape, -d, -e, -f, 1.0F, 1.0F, 1.0F, 1.0F, true);
+			DebugRenderer.renderVoxelShape(poseStack, vertexConsumer, voxelShape, -d, -e, -f, 1.0F, 1.0F, 1.0F, 1.0F, true);
 		}
 	}
 }

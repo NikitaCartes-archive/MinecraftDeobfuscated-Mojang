@@ -10,6 +10,7 @@ import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -28,8 +29,10 @@ public class PrimedTnt extends Entity implements TraceableEntity {
 	private static final EntityDataAccessor<Integer> DATA_FUSE_ID = SynchedEntityData.defineId(PrimedTnt.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<BlockState> DATA_BLOCK_STATE_ID = SynchedEntityData.defineId(PrimedTnt.class, EntityDataSerializers.BLOCK_STATE);
 	private static final int DEFAULT_FUSE_TIME = 80;
+	private static final float DEFAULT_EXPLOSION_POWER = 4.0F;
 	private static final String TAG_BLOCK_STATE = "block_state";
-	public static final String TAG_FUSE = "fuse";
+	private static final String TAG_FUSE = "fuse";
+	private static final String TAG_EXPLOSION_POWER = "explosion_power";
 	private static final ExplosionDamageCalculator USED_PORTAL_DAMAGE_CALCULATOR = new ExplosionDamageCalculator() {
 		@Override
 		public boolean shouldBlockExplode(Explosion explosion, BlockGetter blockGetter, BlockPos blockPos, BlockState blockState, float f) {
@@ -46,6 +49,7 @@ public class PrimedTnt extends Entity implements TraceableEntity {
 	@Nullable
 	private LivingEntity owner;
 	private boolean usedPortal;
+	private float explosionPower = 4.0F;
 
 	public PrimedTnt(EntityType<? extends PrimedTnt> entityType, Level level) {
 		super(entityType, level);
@@ -90,6 +94,10 @@ public class PrimedTnt extends Entity implements TraceableEntity {
 		this.handlePortal();
 		this.applyGravity();
 		this.move(MoverType.SELF, this.getDeltaMovement());
+		if (!this.level().isClientSide()) {
+			this.applyEffectsFromBlocks();
+		}
+
 		this.setDeltaMovement(this.getDeltaMovement().scale(0.98));
 		if (this.onGround()) {
 			this.setDeltaMovement(this.getDeltaMovement().multiply(0.7, -0.5, 0.7));
@@ -111,7 +119,6 @@ public class PrimedTnt extends Entity implements TraceableEntity {
 	}
 
 	private void explode() {
-		float f = 4.0F;
 		this.level()
 			.explode(
 				this,
@@ -120,7 +127,7 @@ public class PrimedTnt extends Entity implements TraceableEntity {
 				this.getX(),
 				this.getY(0.0625),
 				this.getZ(),
-				4.0F,
+				this.explosionPower,
 				false,
 				Level.ExplosionInteraction.TNT
 			);
@@ -130,6 +137,9 @@ public class PrimedTnt extends Entity implements TraceableEntity {
 	protected void addAdditionalSaveData(CompoundTag compoundTag) {
 		compoundTag.putShort("fuse", (short)this.getFuse());
 		compoundTag.put("block_state", NbtUtils.writeBlockState(this.getBlockState()));
+		if (this.explosionPower != 4.0F) {
+			compoundTag.putFloat("explosion_power", this.explosionPower);
+		}
 	}
 
 	@Override
@@ -137,6 +147,10 @@ public class PrimedTnt extends Entity implements TraceableEntity {
 		this.setFuse(compoundTag.getShort("fuse"));
 		if (compoundTag.contains("block_state", 10)) {
 			this.setBlockState(NbtUtils.readBlockState(this.level().holderLookup(Registries.BLOCK), compoundTag.getCompound("block_state")));
+		}
+
+		if (compoundTag.contains("explosion_power", 99)) {
+			this.explosionPower = Mth.clamp(compoundTag.getFloat("explosion_power"), 0.0F, 128.0F);
 		}
 	}
 

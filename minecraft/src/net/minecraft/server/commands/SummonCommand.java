@@ -17,9 +17,9 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
@@ -82,7 +82,7 @@ public class SummonCommand {
 			CompoundTag compoundTag2 = compoundTag.copy();
 			compoundTag2.putString("id", reference.key().location().toString());
 			ServerLevel serverLevel = commandSourceStack.getLevel();
-			Entity entity = EntityType.loadEntityRecursive(compoundTag2, serverLevel, entityx -> {
+			Entity entity = EntityType.loadEntityRecursive(compoundTag2, serverLevel, EntitySpawnReason.COMMAND, entityx -> {
 				entityx.moveTo(vec3.x, vec3.y, vec3.z, entityx.getYRot(), entityx.getXRot());
 				return entityx;
 			});
@@ -91,7 +91,9 @@ public class SummonCommand {
 			} else {
 				if (bl && entity instanceof Mob) {
 					((Mob)entity)
-						.finalizeSpawn(commandSourceStack.getLevel(), commandSourceStack.getLevel().getCurrentDifficultyAt(entity.blockPosition()), MobSpawnType.COMMAND, null);
+						.finalizeSpawn(
+							commandSourceStack.getLevel(), commandSourceStack.getLevel().getCurrentDifficultyAt(entity.blockPosition()), EntitySpawnReason.COMMAND, null
+						);
 				}
 
 				if (!serverLevel.tryAddFreshEntityWithPassengers(entity)) {

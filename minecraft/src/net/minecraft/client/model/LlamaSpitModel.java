@@ -8,10 +8,10 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
-import net.minecraft.world.entity.Entity;
+import net.minecraft.client.renderer.entity.state.EntityRenderState;
 
 @Environment(EnvType.CLIENT)
-public class LlamaSpitModel<T extends Entity> extends HierarchicalModel<T> {
+public class LlamaSpitModel extends EntityModel<EntityRenderState> {
 	private static final String MAIN = "main";
 	private final ModelPart root;
 
@@ -40,7 +40,7 @@ public class LlamaSpitModel<T extends Entity> extends HierarchicalModel<T> {
 	}
 
 	@Override
-	public void setupAnim(T entity, float f, float g, float h, float i, float j) {
+	public void setupAnim(EntityRenderState entityRenderState) {
 	}
 
 	@Override

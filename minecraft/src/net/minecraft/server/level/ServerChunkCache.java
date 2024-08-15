@@ -1,18 +1,22 @@
 package net.minecraft.server.level;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Lists;
 import com.mojang.datafixers.DataFixer;
-import java.io.File;
+import com.mojang.logging.LogUtils;
+import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
+import net.minecraft.FileUtil;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
@@ -23,6 +27,7 @@ import net.minecraft.util.VisibleForDebug;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.util.thread.BlockableEventLoop;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.GameRules;
@@ -43,9 +48,10 @@ import net.minecraft.world.level.levelgen.RandomState;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
 import net.minecraft.world.level.storage.DimensionDataStorage;
 import net.minecraft.world.level.storage.LevelStorageSource;
+import org.slf4j.Logger;
 
 public class ServerChunkCache extends ChunkSource {
-	private static final List<ChunkStatus> CHUNK_STATUSES = ChunkStatus.getStatusList();
+	private static final Logger LOGGER = LogUtils.getLogger();
 	private final DistanceManager distanceManager;
 	final ServerLevel level;
 	final Thread mainThread;
@@ -60,6 +66,8 @@ public class ServerChunkCache extends ChunkSource {
 	private final long[] lastChunkPos = new long[4];
 	private final ChunkStatus[] lastChunkStatus = new ChunkStatus[4];
 	private final ChunkAccess[] lastChunk = new ChunkAccess[4];
+	private final List<LevelChunk> tickingChunks = new ArrayList();
+	private final Set<ChunkHolder> chunkHoldersToBroadcast = new ReferenceOpenHashSet<>();
 	@Nullable
 	@VisibleForDebug
 	private NaturalSpawner.SpawnState lastSpawnState;
@@ -81,9 +89,15 @@ public class ServerChunkCache extends ChunkSource {
 		this.level = serverLevel;
 		this.mainThreadProcessor = new ServerChunkCache.MainThreadExecutor(serverLevel);
 		this.mainThread = Thread.currentThread();
-		File file = levelStorageAccess.getDimensionPath(serverLevel.dimension()).resolve("data").toFile();
-		file.mkdirs();
-		this.dataStorage = new DimensionDataStorage(file, dataFixer, serverLevel.registryAccess());
+		Path path = levelStorageAccess.getDimensionPath(serverLevel.dimension()).resolve("data");
+
+		try {
+			FileUtil.createDirectoriesSafe(path);
+		} catch (IOException var15) {
+			LOGGER.error("Failed to create dimension data storage directory", (Throwable)var15);
+		}
+
+		this.dataStorage = new DimensionDataStorage(path, dataFixer, serverLevel.registryAccess());
 		this.chunkMap = new ChunkMap(
 			serverLevel,
 			levelStorageAccess,
@@ -278,11 +292,11 @@ public class ServerChunkCache extends ChunkSource {
 	}
 
 	public boolean isPositionTicking(long l) {
-		ChunkHolder chunkHolder = this.getVisibleChunkIfPresent(l);
-		if (chunkHolder == null) {
+		if (!this.level.shouldTickBlocksAt(l)) {
 			return false;
 		} else {
-			return !this.level.shouldTickBlocksAt(l) ? false : ((ChunkResult)chunkHolder.getTickingChunkFuture().getNow(ChunkHolder.UNLOADED_LEVEL_CHUNK)).isSuccess();
+			ChunkHolder chunkHolder = this.getVisibleChunkIfPresent(l);
+			return chunkHolder == null ? false : ((ChunkResult)chunkHolder.getTickingChunkFuture().getNow(ChunkHolder.UNLOADED_LEVEL_CHUNK)).isSuccess();
 		}
 	}
 
@@ -294,6 +308,7 @@ public class ServerChunkCache extends ChunkSource {
 	@Override
 	public void close() throws IOException {
 		this.save(true);
+		this.dataStorage.close();
 		this.lightEngine.close();
 		this.chunkMap.close();
 	}
@@ -325,54 +340,82 @@ public class ServerChunkCache extends ChunkSource {
 		if (!this.level.isDebug()) {
 			ProfilerFiller profilerFiller = this.level.getProfiler();
 			profilerFiller.push("pollingChunks");
-			profilerFiller.push("filteringLoadedChunks");
-			List<ServerChunkCache.ChunkAndHolder> list = Lists.<ServerChunkCache.ChunkAndHolder>newArrayListWithCapacity(this.chunkMap.size());
-
-			for (ChunkHolder chunkHolder : this.chunkMap.getChunks()) {
-				LevelChunk levelChunk = chunkHolder.getTickingChunk();
-				if (levelChunk != null) {
-					list.add(new ServerChunkCache.ChunkAndHolder(levelChunk, chunkHolder));
-				}
-			}
-
 			if (this.level.tickRateManager().runsNormally()) {
-				profilerFiller.popPush("naturalSpawnCount");
-				int i = this.distanceManager.getNaturalSpawnChunkCount();
-				NaturalSpawner.SpawnState spawnState = NaturalSpawner.createState(
-					i, this.level.getAllEntities(), this::getFullChunk, new LocalMobCapCalculator(this.chunkMap)
-				);
-				this.lastSpawnState = spawnState;
-				profilerFiller.popPush("spawnAndTick");
-				boolean bl = this.level.getGameRules().getBoolean(GameRules.RULE_DOMOBSPAWNING);
-				Util.shuffle(list, this.level.random);
-				int j = this.level.getGameRules().getInt(GameRules.RULE_RANDOMTICKING);
-				boolean bl2 = this.level.getLevelData().getGameTime() % 400L == 0L;
+				List<LevelChunk> list = this.tickingChunks;
 
-				for (ServerChunkCache.ChunkAndHolder chunkAndHolder : list) {
-					LevelChunk levelChunk2 = chunkAndHolder.chunk;
-					ChunkPos chunkPos = levelChunk2.getPos();
-					if (this.level.isNaturalSpawningAllowed(chunkPos) && this.chunkMap.anyPlayerCloseEnoughForSpawning(chunkPos)) {
-						levelChunk2.incrementInhabitedTime(m);
-						if (bl && (this.spawnEnemies || this.spawnFriendlies) && this.level.getWorldBorder().isWithinBounds(chunkPos)) {
-							NaturalSpawner.spawnForChunk(this.level, levelChunk2, spawnState, this.spawnFriendlies, this.spawnEnemies, bl2);
-						}
-
-						if (this.level.shouldTickBlocksAt(chunkPos.toLong())) {
-							this.level.tickChunk(levelChunk2, j);
-						}
-					}
-				}
-
-				profilerFiller.popPush("customSpawners");
-				if (bl) {
-					this.level.tickCustomSpawners(this.spawnEnemies, this.spawnFriendlies);
+				try {
+					profilerFiller.push("filteringTickingChunks");
+					this.collectTickingChunks(list);
+					profilerFiller.popPush("shuffleChunks");
+					Util.shuffle(list, this.level.random);
+					this.tickChunks(profilerFiller, m, list);
+					profilerFiller.pop();
+				} finally {
+					list.clear();
 				}
 			}
 
-			profilerFiller.popPush("broadcast");
-			list.forEach(chunkAndHolderx -> chunkAndHolderx.holder.broadcastChanges(chunkAndHolderx.chunk));
+			this.broadcastChangedChunks(profilerFiller);
 			profilerFiller.pop();
-			profilerFiller.pop();
+		}
+	}
+
+	private void broadcastChangedChunks(ProfilerFiller profilerFiller) {
+		profilerFiller.push("broadcast");
+
+		for (ChunkHolder chunkHolder : this.chunkHoldersToBroadcast) {
+			LevelChunk levelChunk = chunkHolder.getTickingChunk();
+			if (levelChunk != null) {
+				chunkHolder.broadcastChanges(levelChunk);
+			}
+		}
+
+		this.chunkHoldersToBroadcast.clear();
+		profilerFiller.pop();
+	}
+
+	private void collectTickingChunks(List<LevelChunk> list) {
+		this.chunkMap.forEachSpawnCandidateChunk(chunkHolder -> {
+			LevelChunk levelChunk = chunkHolder.getTickingChunk();
+			if (levelChunk != null && this.level.isNaturalSpawningAllowed(chunkHolder.getPos())) {
+				list.add(levelChunk);
+			}
+		});
+	}
+
+	private void tickChunks(ProfilerFiller profilerFiller, long l, List<LevelChunk> list) {
+		profilerFiller.popPush("naturalSpawnCount");
+		int i = this.distanceManager.getNaturalSpawnChunkCount();
+		NaturalSpawner.SpawnState spawnState = NaturalSpawner.createState(
+			i, this.level.getAllEntities(), this::getFullChunk, new LocalMobCapCalculator(this.chunkMap)
+		);
+		this.lastSpawnState = spawnState;
+		profilerFiller.popPush("spawnAndTick");
+		boolean bl = this.level.getGameRules().getBoolean(GameRules.RULE_DOMOBSPAWNING);
+		int j = this.level.getGameRules().getInt(GameRules.RULE_RANDOMTICKING);
+		List<MobCategory> list2;
+		if (bl && (this.spawnEnemies || this.spawnFriendlies)) {
+			boolean bl2 = this.level.getLevelData().getGameTime() % 400L == 0L;
+			list2 = NaturalSpawner.getFilteredSpawningCategories(spawnState, this.spawnFriendlies, this.spawnEnemies, bl2);
+		} else {
+			list2 = List.of();
+		}
+
+		for (LevelChunk levelChunk : list) {
+			ChunkPos chunkPos = levelChunk.getPos();
+			levelChunk.incrementInhabitedTime(l);
+			if (!list2.isEmpty() && this.level.getWorldBorder().isWithinBounds(chunkPos)) {
+				NaturalSpawner.spawnForChunk(this.level, levelChunk, spawnState, list2);
+			}
+
+			if (this.level.shouldTickBlocksAt(chunkPos.toLong())) {
+				this.level.tickChunk(levelChunk, j);
+			}
+		}
+
+		profilerFiller.popPush("customSpawners");
+		if (bl) {
+			this.level.tickCustomSpawners(this.spawnEnemies, this.spawnFriendlies);
 		}
 	}
 
@@ -414,8 +457,8 @@ public class ServerChunkCache extends ChunkSource {
 		int i = SectionPos.blockToSectionCoord(blockPos.getX());
 		int j = SectionPos.blockToSectionCoord(blockPos.getZ());
 		ChunkHolder chunkHolder = this.getVisibleChunkIfPresent(ChunkPos.asLong(i, j));
-		if (chunkHolder != null) {
-			chunkHolder.blockChanged(blockPos);
+		if (chunkHolder != null && chunkHolder.blockChanged(blockPos)) {
+			this.chunkHoldersToBroadcast.add(chunkHolder);
 		}
 	}
 
@@ -423,8 +466,8 @@ public class ServerChunkCache extends ChunkSource {
 	public void onLightUpdate(LightLayer lightLayer, SectionPos sectionPos) {
 		this.mainThreadProcessor.execute(() -> {
 			ChunkHolder chunkHolder = this.getVisibleChunkIfPresent(sectionPos.chunk().toLong());
-			if (chunkHolder != null) {
-				chunkHolder.sectionLightChanged(lightLayer, sectionPos.y());
+			if (chunkHolder != null && chunkHolder.sectionLightChanged(lightLayer, sectionPos.y())) {
+				this.chunkHoldersToBroadcast.add(chunkHolder);
 			}
 		});
 	}
@@ -473,9 +516,9 @@ public class ServerChunkCache extends ChunkSource {
 	}
 
 	@Override
-	public void setSpawnSettings(boolean bl, boolean bl2) {
+	public void setSpawnSettings(boolean bl) {
 		this.spawnEnemies = bl;
-		this.spawnFriendlies = bl2;
+		this.spawnFriendlies = this.spawnFriendlies;
 	}
 
 	public String getChunkDebugData(ChunkPos chunkPos) {

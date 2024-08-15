@@ -2,7 +2,6 @@ package net.minecraft.client.renderer.texture;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.platform.NativeImage;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
@@ -22,6 +21,7 @@ import net.minecraft.client.resources.metadata.animation.AnimationMetadataSectio
 import net.minecraft.client.resources.metadata.animation.FrameSize;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceMetadata;
+import net.minecraft.util.ARGB;
 import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
@@ -172,7 +172,7 @@ public class SpriteContents implements Stitcher.Entry, AutoCloseable {
 			m = k + this.animatedTexture.getFrameY(i) * this.height;
 		}
 
-		return (this.originalImage.getPixelRGBA(l, m) >> 24 & 0xFF) == 0;
+		return ARGB.alpha(this.originalImage.getPixel(l, m)) == 0;
 	}
 
 	public void uploadFirstFrame(int i, int j) {
@@ -249,7 +249,7 @@ public class SpriteContents implements Stitcher.Entry, AutoCloseable {
 			SpriteContents.AnimatedTexture animatedTexture = ticker.animationInfo;
 			List<SpriteContents.FrameInfo> list = animatedTexture.frames;
 			SpriteContents.FrameInfo frameInfo = (SpriteContents.FrameInfo)list.get(ticker.frame);
-			double d = 1.0 - (double)ticker.subFrame / (double)frameInfo.time;
+			float f = (float)ticker.subFrame / (float)frameInfo.time;
 			int k = frameInfo.index;
 			int l = ((SpriteContents.FrameInfo)list.get((ticker.frame + 1) % list.size())).index;
 			if (k != l) {
@@ -261,10 +261,7 @@ public class SpriteContents implements Stitcher.Entry, AutoCloseable {
 						for (int q = 0; q < n; q++) {
 							int r = this.getPixel(animatedTexture, k, m, q, p);
 							int s = this.getPixel(animatedTexture, l, m, q, p);
-							int t = this.mix(d, r >> 16 & 0xFF, s >> 16 & 0xFF);
-							int u = this.mix(d, r >> 8 & 0xFF, s >> 8 & 0xFF);
-							int v = this.mix(d, r & 0xFF, s & 0xFF);
-							this.activeFrame[m].setPixelRGBA(q, p, r & 0xFF000000 | t << 16 | u << 8 | v);
+							this.activeFrame[m].setPixel(q, p, ARGB.lerp(f, r, s));
 						}
 					}
 				}
@@ -275,11 +272,7 @@ public class SpriteContents implements Stitcher.Entry, AutoCloseable {
 
 		private int getPixel(SpriteContents.AnimatedTexture animatedTexture, int i, int j, int k, int l) {
 			return SpriteContents.this.byMipLevel[j]
-				.getPixelRGBA(k + (animatedTexture.getFrameX(i) * SpriteContents.this.width >> j), l + (animatedTexture.getFrameY(i) * SpriteContents.this.height >> j));
-		}
-
-		private int mix(double d, int i, int j) {
-			return (int)(d * (double)i + (1.0 - d) * (double)j);
+				.getPixel(k + (animatedTexture.getFrameX(i) * SpriteContents.this.width >> j), l + (animatedTexture.getFrameY(i) * SpriteContents.this.height >> j));
 		}
 
 		public void close() {
@@ -315,11 +308,7 @@ public class SpriteContents implements Stitcher.Entry, AutoCloseable {
 					this.animationInfo.uploadFrame(i, j, l);
 				}
 			} else if (this.interpolationData != null) {
-				if (!RenderSystem.isOnRenderThread()) {
-					RenderSystem.recordRenderCall(() -> this.interpolationData.uploadInterpolatedFrame(i, j, this));
-				} else {
-					this.interpolationData.uploadInterpolatedFrame(i, j, this);
-				}
+				this.interpolationData.uploadInterpolatedFrame(i, j, this);
 			}
 		}
 

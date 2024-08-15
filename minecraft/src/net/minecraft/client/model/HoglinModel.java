@@ -1,6 +1,6 @@
 package net.minecraft.client.model;
 
-import com.google.common.collect.ImmutableList;
+import java.util.Set;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
@@ -9,15 +9,17 @@ import net.minecraft.client.model.geom.builders.CubeDeformation;
 import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.MeshTransformer;
 import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.client.renderer.entity.state.HoglinRenderState;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.monster.hoglin.HoglinBase;
 
 @Environment(EnvType.CLIENT)
-public class HoglinModel<T extends Mob & HoglinBase> extends AgeableListModel<T> {
+public class HoglinModel extends EntityModel<HoglinRenderState> {
+	public static final MeshTransformer BABY_TRANSFORMER = new BabyModelTransform(true, 8.0F, 6.0F, 1.9F, 2.0F, 24.0F, Set.of("head"));
 	private static final float DEFAULT_HEAD_X_ROT = 0.87266463F;
 	private static final float ATTACK_HEAD_X_ROT_END = (float) (-Math.PI / 9);
+	private final ModelPart root;
 	private final ModelPart head;
 	private final ModelPart rightEar;
 	private final ModelPart leftEar;
@@ -29,7 +31,7 @@ public class HoglinModel<T extends Mob & HoglinBase> extends AgeableListModel<T>
 	private final ModelPart mane;
 
 	public HoglinModel(ModelPart modelPart) {
-		super(true, 8.0F, 6.0F, 1.9F, 2.0F, 24.0F);
+		this.root = modelPart;
 		this.body = modelPart.getChild("body");
 		this.mane = this.body.getChild("mane");
 		this.head = modelPart.getChild("head");
@@ -41,7 +43,7 @@ public class HoglinModel<T extends Mob & HoglinBase> extends AgeableListModel<T>
 		this.leftHindLeg = modelPart.getChild("left_hind_leg");
 	}
 
-	public static LayerDefinition createBodyLayer() {
+	private static MeshDefinition createMesh() {
 		MeshDefinition meshDefinition = new MeshDefinition();
 		PartDefinition partDefinition = meshDefinition.getRoot();
 		PartDefinition partDefinition2 = partDefinition.addOrReplaceChild(
@@ -50,7 +52,7 @@ public class HoglinModel<T extends Mob & HoglinBase> extends AgeableListModel<T>
 		partDefinition2.addOrReplaceChild(
 			"mane",
 			CubeListBuilder.create().texOffs(90, 33).addBox(0.0F, 0.0F, -9.0F, 0.0F, 10.0F, 19.0F, new CubeDeformation(0.001F)),
-			PartPose.offset(0.0F, -14.0F, -5.0F)
+			PartPose.offset(0.0F, -14.0F, -7.0F)
 		);
 		PartDefinition partDefinition3 = partDefinition.addOrReplaceChild(
 			"head",
@@ -87,37 +89,47 @@ public class HoglinModel<T extends Mob & HoglinBase> extends AgeableListModel<T>
 		partDefinition.addOrReplaceChild(
 			"left_hind_leg", CubeListBuilder.create().texOffs(0, 45).addBox(-2.5F, 0.0F, -2.5F, 5.0F, 11.0F, 5.0F), PartPose.offset(5.0F, 13.0F, 10.0F)
 		);
+		return meshDefinition;
+	}
+
+	public static LayerDefinition createBodyLayer() {
+		MeshDefinition meshDefinition = createMesh();
 		return LayerDefinition.create(meshDefinition, 128, 64);
 	}
 
-	@Override
-	protected Iterable<ModelPart> headParts() {
-		return ImmutableList.<ModelPart>of(this.head);
+	public static LayerDefinition createBabyLayer() {
+		MeshDefinition meshDefinition = createMesh();
+		PartDefinition partDefinition = meshDefinition.getRoot().getChild("body");
+		partDefinition.addOrReplaceChild(
+			"mane",
+			CubeListBuilder.create().texOffs(90, 33).addBox(0.0F, 0.0F, -9.0F, 0.0F, 10.0F, 19.0F, new CubeDeformation(0.001F)),
+			PartPose.offset(0.0F, -14.0F, -3.0F)
+		);
+		return LayerDefinition.create(meshDefinition, 128, 64).apply(BABY_TRANSFORMER);
 	}
 
 	@Override
-	protected Iterable<ModelPart> bodyParts() {
-		return ImmutableList.<ModelPart>of(this.body, this.rightFrontLeg, this.leftFrontLeg, this.rightHindLeg, this.leftHindLeg);
+	public ModelPart root() {
+		return this.root;
 	}
 
-	public void setupAnim(T mob, float f, float g, float h, float i, float j) {
-		this.rightEar.zRot = (float) (-Math.PI * 2.0 / 9.0) - g * Mth.sin(f);
-		this.leftEar.zRot = (float) (Math.PI * 2.0 / 9.0) + g * Mth.sin(f);
-		this.head.yRot = i * (float) (Math.PI / 180.0);
-		int k = mob.getAttackAnimationRemainingTicks();
-		float l = 1.0F - (float)Mth.abs(10 - 2 * k) / 10.0F;
-		this.head.xRot = Mth.lerp(l, 0.87266463F, (float) (-Math.PI / 9));
-		if (mob.isBaby()) {
-			this.head.y = Mth.lerp(l, 2.0F, 5.0F);
-			this.mane.z = -3.0F;
-		} else {
-			this.head.y = 2.0F;
-			this.mane.z = -7.0F;
+	public void setupAnim(HoglinRenderState hoglinRenderState) {
+		this.head.resetPose();
+		this.mane.resetPose();
+		float f = hoglinRenderState.walkAnimationSpeed;
+		float g = hoglinRenderState.walkAnimationPos;
+		this.rightEar.zRot = (float) (-Math.PI * 2.0 / 9.0) - f * Mth.sin(g);
+		this.leftEar.zRot = (float) (Math.PI * 2.0 / 9.0) + f * Mth.sin(g);
+		this.head.yRot = hoglinRenderState.yRot * (float) (Math.PI / 180.0);
+		float h = 1.0F - (float)Mth.abs(10 - 2 * hoglinRenderState.attackAnimationRemainingTicks) / 10.0F;
+		this.head.xRot = Mth.lerp(h, 0.87266463F, (float) (-Math.PI / 9));
+		if (hoglinRenderState.isBaby) {
+			this.head.y += h * 2.5F;
 		}
 
-		float m = 1.2F;
-		this.rightFrontLeg.xRot = Mth.cos(f) * 1.2F * g;
-		this.leftFrontLeg.xRot = Mth.cos(f + (float) Math.PI) * 1.2F * g;
+		float i = 1.2F;
+		this.rightFrontLeg.xRot = Mth.cos(g) * 1.2F * f;
+		this.leftFrontLeg.xRot = Mth.cos(g + (float) Math.PI) * 1.2F * f;
 		this.rightHindLeg.xRot = this.leftFrontLeg.xRot;
 		this.leftHindLeg.xRot = this.rightFrontLeg.xRot;
 	}

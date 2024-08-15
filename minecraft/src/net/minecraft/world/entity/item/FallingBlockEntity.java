@@ -134,6 +134,7 @@ public class FallingBlockEntity extends Entity {
 			this.time++;
 			this.applyGravity();
 			this.move(MoverType.SELF, this.getDeltaMovement());
+			this.applyEffectsFromBlocks();
 			this.handlePortal();
 			if (!this.level().isClientSide && (this.isAlive() || this.forceTickAfterTeleportToDuplicate)) {
 				BlockPos blockPos = this.blockPosition();

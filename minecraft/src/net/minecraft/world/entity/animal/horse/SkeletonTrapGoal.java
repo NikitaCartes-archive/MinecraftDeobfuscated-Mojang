@@ -4,10 +4,10 @@ import javax.annotation.Nullable;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LightningBolt;
-import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.monster.Skeleton;
 import net.minecraft.world.item.ItemStack;
@@ -35,7 +35,7 @@ public class SkeletonTrapGoal extends Goal {
 		this.horse.setTrap(false);
 		this.horse.setTamed(true);
 		this.horse.setAge(0);
-		LightningBolt lightningBolt = EntityType.LIGHTNING_BOLT.create(serverLevel);
+		LightningBolt lightningBolt = EntityType.LIGHTNING_BOLT.create(serverLevel, EntitySpawnReason.TRIGGERED);
 		if (lightningBolt != null) {
 			lightningBolt.moveTo(this.horse.getX(), this.horse.getY(), this.horse.getZ());
 			lightningBolt.setVisualOnly(true);
@@ -62,9 +62,9 @@ public class SkeletonTrapGoal extends Goal {
 
 	@Nullable
 	private AbstractHorse createHorse(DifficultyInstance difficultyInstance) {
-		SkeletonHorse skeletonHorse = EntityType.SKELETON_HORSE.create(this.horse.level());
+		SkeletonHorse skeletonHorse = EntityType.SKELETON_HORSE.create(this.horse.level(), EntitySpawnReason.TRIGGERED);
 		if (skeletonHorse != null) {
-			skeletonHorse.finalizeSpawn((ServerLevel)this.horse.level(), difficultyInstance, MobSpawnType.TRIGGERED, null);
+			skeletonHorse.finalizeSpawn((ServerLevel)this.horse.level(), difficultyInstance, EntitySpawnReason.TRIGGERED, null);
 			skeletonHorse.setPos(this.horse.getX(), this.horse.getY(), this.horse.getZ());
 			skeletonHorse.invulnerableTime = 60;
 			skeletonHorse.setPersistenceRequired();
@@ -77,9 +77,9 @@ public class SkeletonTrapGoal extends Goal {
 
 	@Nullable
 	private Skeleton createSkeleton(DifficultyInstance difficultyInstance, AbstractHorse abstractHorse) {
-		Skeleton skeleton = EntityType.SKELETON.create(abstractHorse.level());
+		Skeleton skeleton = EntityType.SKELETON.create(abstractHorse.level(), EntitySpawnReason.TRIGGERED);
 		if (skeleton != null) {
-			skeleton.finalizeSpawn((ServerLevel)abstractHorse.level(), difficultyInstance, MobSpawnType.TRIGGERED, null);
+			skeleton.finalizeSpawn((ServerLevel)abstractHorse.level(), difficultyInstance, EntitySpawnReason.TRIGGERED, null);
 			skeleton.setPos(abstractHorse.getX(), abstractHorse.getY(), abstractHorse.getZ());
 			skeleton.invulnerableTime = 60;
 			skeleton.setPersistenceRequired();

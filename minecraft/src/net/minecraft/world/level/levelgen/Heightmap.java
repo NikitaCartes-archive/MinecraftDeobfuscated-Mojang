@@ -36,35 +36,37 @@ public class Heightmap {
 	}
 
 	public static void primeHeightmaps(ChunkAccess chunkAccess, Set<Heightmap.Types> set) {
-		int i = set.size();
-		ObjectList<Heightmap> objectList = new ObjectArrayList<>(i);
-		ObjectListIterator<Heightmap> objectListIterator = objectList.iterator();
-		int j = chunkAccess.getHighestSectionPosition() + 16;
-		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
+		if (!set.isEmpty()) {
+			int i = set.size();
+			ObjectList<Heightmap> objectList = new ObjectArrayList<>(i);
+			ObjectListIterator<Heightmap> objectListIterator = objectList.iterator();
+			int j = chunkAccess.getHighestSectionPosition() + 16;
+			BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 
-		for (int k = 0; k < 16; k++) {
-			for (int l = 0; l < 16; l++) {
-				for (Heightmap.Types types : set) {
-					objectList.add(chunkAccess.getOrCreateHeightmapUnprimed(types));
-				}
+			for (int k = 0; k < 16; k++) {
+				for (int l = 0; l < 16; l++) {
+					for (Heightmap.Types types : set) {
+						objectList.add(chunkAccess.getOrCreateHeightmapUnprimed(types));
+					}
 
-				for (int m = j - 1; m >= chunkAccess.getMinBuildHeight(); m--) {
-					mutableBlockPos.set(k, m, l);
-					BlockState blockState = chunkAccess.getBlockState(mutableBlockPos);
-					if (!blockState.is(Blocks.AIR)) {
-						while (objectListIterator.hasNext()) {
-							Heightmap heightmap = (Heightmap)objectListIterator.next();
-							if (heightmap.isOpaque.test(blockState)) {
-								heightmap.setHeight(k, l, m + 1);
-								objectListIterator.remove();
+					for (int m = j - 1; m >= chunkAccess.getMinBuildHeight(); m--) {
+						mutableBlockPos.set(k, m, l);
+						BlockState blockState = chunkAccess.getBlockState(mutableBlockPos);
+						if (!blockState.is(Blocks.AIR)) {
+							while (objectListIterator.hasNext()) {
+								Heightmap heightmap = (Heightmap)objectListIterator.next();
+								if (heightmap.isOpaque.test(blockState)) {
+									heightmap.setHeight(k, l, m + 1);
+									objectListIterator.remove();
+								}
 							}
-						}
 
-						if (objectList.isEmpty()) {
-							break;
-						}
+							if (objectList.isEmpty()) {
+								break;
+							}
 
-						objectListIterator.back(i);
+							objectListIterator.back(i);
+						}
 					}
 				}
 			}

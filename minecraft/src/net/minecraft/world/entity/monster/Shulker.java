@@ -23,10 +23,10 @@ import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySelector;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.VariantHolder;
@@ -68,7 +68,7 @@ public class Shulker extends AbstractGolem implements VariantHolder<Optional<Dye
 	private static final int OTHER_SHULKER_LIMIT = 5;
 	private static final float PEEK_PER_TICK = 0.05F;
 	static final Vector3f FORWARD = Util.make(() -> {
-		Vec3i vec3i = Direction.SOUTH.getNormal();
+		Vec3i vec3i = Direction.SOUTH.getUnitVec3i();
 		return new Vector3f((float)vec3i.getX(), (float)vec3i.getY(), (float)vec3i.getZ());
 	});
 	private static final float MAX_SCALE = 3.0F;
@@ -286,12 +286,12 @@ public class Shulker extends AbstractGolem implements VariantHolder<Optional<Dye
 	@Nullable
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData
+		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, EntitySpawnReason entitySpawnReason, @Nullable SpawnGroupData spawnGroupData
 	) {
 		this.setYRot(0.0F);
 		this.yHeadRot = this.getYRot();
 		this.setOldPosAndRot();
-		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData);
+		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, entitySpawnReason, spawnGroupData);
 	}
 
 	@Override
@@ -447,7 +447,7 @@ public class Shulker extends AbstractGolem implements VariantHolder<Optional<Dye
 			int i = this.level().getEntities(EntityType.SHULKER, aABB.inflate(8.0), Entity::isAlive).size();
 			float f = (float)(i - 1) / 5.0F;
 			if (!(this.level().random.nextFloat() < f)) {
-				Shulker shulker = EntityType.SHULKER.create(this.level());
+				Shulker shulker = EntityType.SHULKER.create(this.level(), EntitySpawnReason.BREEDING);
 				if (shulker != null) {
 					shulker.setVariant(this.getVariant());
 					shulker.moveTo(vec3);
@@ -524,17 +524,19 @@ public class Shulker extends AbstractGolem implements VariantHolder<Optional<Dye
 	public void push(Entity entity) {
 	}
 
-	public Optional<Vec3> getRenderPosition(float f) {
+	@Nullable
+	public Vec3 getRenderPosition(float f) {
 		if (this.clientOldAttachPosition != null && this.clientSideTeleportInterpolation > 0) {
 			double d = (double)((float)this.clientSideTeleportInterpolation - f) / 6.0;
 			d *= d;
+			d *= (double)this.getScale();
 			BlockPos blockPos = this.blockPosition();
 			double e = (double)(blockPos.getX() - this.clientOldAttachPosition.getX()) * d;
 			double g = (double)(blockPos.getY() - this.clientOldAttachPosition.getY()) * d;
 			double h = (double)(blockPos.getZ() - this.clientOldAttachPosition.getZ()) * d;
-			return Optional.of(new Vec3(-e, -g, -h));
+			return new Vec3(-e, -g, -h);
 		} else {
-			return Optional.empty();
+			return null;
 		}
 	}
 
@@ -654,7 +656,7 @@ public class Shulker extends AbstractGolem implements VariantHolder<Optional<Dye
 		protected Optional<Float> getYRotD() {
 			Direction direction = Shulker.this.getAttachFace().getOpposite();
 			Vector3f vector3f = direction.getRotation().transform(new Vector3f(Shulker.FORWARD));
-			Vec3i vec3i = direction.getNormal();
+			Vec3i vec3i = direction.getUnitVec3i();
 			Vector3f vector3f2 = new Vector3f((float)vec3i.getX(), (float)vec3i.getY(), (float)vec3i.getZ());
 			vector3f2.cross(vector3f);
 			double d = this.wantedX - this.mob.getX();

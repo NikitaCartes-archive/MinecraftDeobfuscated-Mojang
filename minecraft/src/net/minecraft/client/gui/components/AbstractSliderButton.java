@@ -1,6 +1,5 @@
 package net.minecraft.client.gui.components;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.InputType;
@@ -9,10 +8,12 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.navigation.CommonInputs;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
@@ -60,13 +61,16 @@ public abstract class AbstractSliderButton extends AbstractWidget {
 	@Override
 	public void renderWidget(GuiGraphics guiGraphics, int i, int j, float f) {
 		Minecraft minecraft = Minecraft.getInstance();
-		guiGraphics.setColor(1.0F, 1.0F, 1.0F, this.alpha);
-		RenderSystem.enableBlend();
-		RenderSystem.defaultBlendFunc();
-		RenderSystem.enableDepthTest();
-		guiGraphics.blitSprite(this.getSprite(), this.getX(), this.getY(), this.getWidth(), this.getHeight());
-		guiGraphics.blitSprite(this.getHandleSprite(), this.getX() + (int)(this.value * (double)(this.width - 8)), this.getY(), 8, this.getHeight());
-		guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
+		guiGraphics.blitSprite(RenderType::guiTextured, this.getSprite(), this.getX(), this.getY(), this.getWidth(), this.getHeight(), ARGB.white(this.alpha));
+		guiGraphics.blitSprite(
+			RenderType::guiTextured,
+			this.getHandleSprite(),
+			this.getX() + (int)(this.value * (double)(this.width - 8)),
+			this.getY(),
+			8,
+			this.getHeight(),
+			ARGB.white(this.alpha)
+		);
 		int k = this.active ? 16777215 : 10526880;
 		this.renderScrollingString(guiGraphics, minecraft.font, 2, k | Mth.ceil(this.alpha * 255.0F) << 24);
 	}

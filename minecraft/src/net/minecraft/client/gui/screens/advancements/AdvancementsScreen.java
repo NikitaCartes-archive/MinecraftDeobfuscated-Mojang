@@ -1,7 +1,6 @@
 package net.minecraft.client.gui.screens.advancements;
 
 import com.google.common.collect.Maps;
-import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.Map;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
@@ -16,6 +15,7 @@ import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ClientAdvancements;
 import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ServerboundSeenAdvancementsPacket;
@@ -32,6 +32,8 @@ public class AdvancementsScreen extends Screen implements ClientAdvancements.Lis
 	public static final int WINDOW_INSIDE_HEIGHT = 113;
 	private static final int WINDOW_TITLE_X = 8;
 	private static final int WINDOW_TITLE_Y = 6;
+	private static final int BACKGROUND_TEXTURE_WIDTH = 256;
+	private static final int BACKGROUND_TEXTURE_HEIGHT = 256;
 	public static final int BACKGROUND_TILE_WIDTH = 16;
 	public static final int BACKGROUND_TILE_HEIGHT = 16;
 	public static final int BACKGROUND_TILE_COUNT_X = 14;
@@ -175,8 +177,7 @@ public class AdvancementsScreen extends Screen implements ClientAdvancements.Lis
 	}
 
 	public void renderWindow(GuiGraphics guiGraphics, int i, int j) {
-		RenderSystem.enableBlend();
-		guiGraphics.blit(WINDOW_LOCATION, i, j, 0, 0, 252, 140);
+		guiGraphics.blit(RenderType::guiTextured, WINDOW_LOCATION, i, j, 0.0F, 0.0F, 252, 140, 256, 256);
 		if (this.tabs.size() > 1) {
 			for (AdvancementTab advancementTab : this.tabs.values()) {
 				advancementTab.drawTab(guiGraphics, i, j, advancementTab == this.selectedTab);
@@ -194,9 +195,7 @@ public class AdvancementsScreen extends Screen implements ClientAdvancements.Lis
 		if (this.selectedTab != null) {
 			guiGraphics.pose().pushPose();
 			guiGraphics.pose().translate((float)(k + 9), (float)(l + 18), 400.0F);
-			RenderSystem.enableDepthTest();
 			this.selectedTab.drawTooltips(guiGraphics, i - k - 9, j - l - 18, k, l);
-			RenderSystem.disableDepthTest();
 			guiGraphics.pose().popPose();
 		}
 

@@ -9,15 +9,27 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.client.renderer.entity.state.WitchRenderState;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Entity;
 
 @Environment(EnvType.CLIENT)
-public class WitchModel<T extends Entity> extends VillagerModel<T> {
-	private boolean holdingItem;
+public class WitchModel extends EntityModel<WitchRenderState> implements HeadedModel, VillagerHeadModel {
+	protected final ModelPart nose;
+	private final ModelPart root;
+	private final ModelPart head;
+	private final ModelPart hat;
+	private final ModelPart hatRim;
+	private final ModelPart rightLeg;
+	private final ModelPart leftLeg;
 
 	public WitchModel(ModelPart modelPart) {
-		super(modelPart);
+		this.root = modelPart;
+		this.head = modelPart.getChild("head");
+		this.hat = this.head.getChild("hat");
+		this.hatRim = this.hat.getChild("hat_rim");
+		this.nose = this.head.getChild("nose");
+		this.rightLeg = modelPart.getChild("right_leg");
+		this.leftLeg = modelPart.getChild("left_leg");
 	}
 
 	public static LayerDefinition createBodyLayer() {
@@ -51,15 +63,20 @@ public class WitchModel<T extends Entity> extends VillagerModel<T> {
 		return LayerDefinition.create(meshDefinition, 64, 128);
 	}
 
-	@Override
-	public void setupAnim(T entity, float f, float g, float h, float i, float j) {
-		super.setupAnim(entity, f, g, h, i, j);
+	public void setupAnim(WitchRenderState witchRenderState) {
+		this.head.yRot = witchRenderState.yRot * (float) (Math.PI / 180.0);
+		this.head.xRot = witchRenderState.xRot * (float) (Math.PI / 180.0);
+		this.head.zRot = 0.0F;
+		this.rightLeg.xRot = Mth.cos(witchRenderState.walkAnimationPos * 0.6662F) * 1.4F * witchRenderState.walkAnimationSpeed * 0.5F;
+		this.leftLeg.xRot = Mth.cos(witchRenderState.walkAnimationPos * 0.6662F + (float) Math.PI) * 1.4F * witchRenderState.walkAnimationSpeed * 0.5F;
+		this.rightLeg.yRot = 0.0F;
+		this.leftLeg.yRot = 0.0F;
 		this.nose.setPos(0.0F, -2.0F, 0.0F);
-		float k = 0.01F * (float)(entity.getId() % 10);
-		this.nose.xRot = Mth.sin((float)entity.tickCount * k) * 4.5F * (float) (Math.PI / 180.0);
+		float f = 0.01F * (float)(witchRenderState.entityId % 10);
+		this.nose.xRot = Mth.sin(witchRenderState.ageInTicks * f) * 4.5F * (float) (Math.PI / 180.0);
 		this.nose.yRot = 0.0F;
-		this.nose.zRot = Mth.cos((float)entity.tickCount * k) * 2.5F * (float) (Math.PI / 180.0);
-		if (this.holdingItem) {
+		this.nose.zRot = Mth.cos(witchRenderState.ageInTicks * f) * 2.5F * (float) (Math.PI / 180.0);
+		if (witchRenderState.isHoldingItem) {
 			this.nose.setPos(0.0F, 1.0F, -1.5F);
 			this.nose.xRot = -0.9F;
 		}
@@ -69,7 +86,20 @@ public class WitchModel<T extends Entity> extends VillagerModel<T> {
 		return this.nose;
 	}
 
-	public void setHoldingItem(boolean bl) {
-		this.holdingItem = bl;
+	@Override
+	public ModelPart root() {
+		return this.root;
+	}
+
+	@Override
+	public ModelPart getHead() {
+		return this.head;
+	}
+
+	@Override
+	public void hatVisible(boolean bl) {
+		this.head.visible = bl;
+		this.hat.visible = bl;
+		this.hatRim.visible = bl;
 	}
 }

@@ -7,25 +7,35 @@ import net.minecraft.client.model.VillagerModel;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.entity.layers.CrossedArmsItemLayer;
 import net.minecraft.client.renderer.entity.layers.CustomHeadLayer;
+import net.minecraft.client.renderer.entity.state.VillagerRenderState;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.npc.WanderingTrader;
 
 @Environment(EnvType.CLIENT)
-public class WanderingTraderRenderer extends MobRenderer<WanderingTrader, VillagerModel<WanderingTrader>> {
+public class WanderingTraderRenderer extends MobRenderer<WanderingTrader, VillagerRenderState, VillagerModel> {
 	private static final ResourceLocation VILLAGER_BASE_SKIN = ResourceLocation.withDefaultNamespace("textures/entity/wandering_trader.png");
 
 	public WanderingTraderRenderer(EntityRendererProvider.Context context) {
-		super(context, new VillagerModel<>(context.bakeLayer(ModelLayers.WANDERING_TRADER)), 0.5F);
-		this.addLayer(new CustomHeadLayer<>(this, context.getModelSet(), context.getItemInHandRenderer()));
-		this.addLayer(new CrossedArmsItemLayer<>(this, context.getItemInHandRenderer()));
+		super(context, new VillagerModel(context.bakeLayer(ModelLayers.WANDERING_TRADER)), 0.5F);
+		this.addLayer(new CustomHeadLayer<>(this, context.getModelSet(), context.getItemRenderer()));
+		this.addLayer(new CrossedArmsItemLayer<>(this, context.getItemRenderer()));
 	}
 
-	public ResourceLocation getTextureLocation(WanderingTrader wanderingTrader) {
+	public ResourceLocation getTextureLocation(VillagerRenderState villagerRenderState) {
 		return VILLAGER_BASE_SKIN;
 	}
 
-	protected void scale(WanderingTrader wanderingTrader, PoseStack poseStack, float f) {
-		float g = 0.9375F;
+	protected void scale(VillagerRenderState villagerRenderState, PoseStack poseStack) {
+		float f = 0.9375F;
 		poseStack.scale(0.9375F, 0.9375F, 0.9375F);
+	}
+
+	public VillagerRenderState createRenderState() {
+		return new VillagerRenderState();
+	}
+
+	public void extractRenderState(WanderingTrader wanderingTrader, VillagerRenderState villagerRenderState, float f) {
+		super.extractRenderState(wanderingTrader, villagerRenderState, f);
+		villagerRenderState.isUnhappy = wanderingTrader.getUnhappyCounter() > 0;
 	}
 }

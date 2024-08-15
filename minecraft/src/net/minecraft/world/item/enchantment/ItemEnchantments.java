@@ -29,7 +29,7 @@ import net.minecraft.world.item.component.TooltipProvider;
 
 public class ItemEnchantments implements TooltipProvider {
 	public static final ItemEnchantments EMPTY = new ItemEnchantments(new Object2IntOpenHashMap<>(), true);
-	private static final Codec<Integer> LEVEL_CODEC = Codec.intRange(0, 255);
+	private static final Codec<Integer> LEVEL_CODEC = Codec.intRange(1, 255);
 	private static final Codec<Object2IntOpenHashMap<Holder<Enchantment>>> LEVELS_CODEC = Codec.unboundedMap(Enchantment.CODEC, LEVEL_CODEC)
 		.xmap(Object2IntOpenHashMap::new, Function.identity());
 	private static final Codec<ItemEnchantments> FULL_CODEC = RecordCodecBuilder.create(

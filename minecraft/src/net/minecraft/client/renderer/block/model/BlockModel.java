@@ -4,7 +4,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializationContext;
@@ -15,17 +14,12 @@ import com.google.gson.JsonParseException;
 import com.mojang.datafixers.util.Either;
 import com.mojang.logging.LogUtils;
 import java.io.Reader;
-import java.io.StringReader;
 import java.lang.reflect.Type;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.Map.Entry;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -36,9 +30,9 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.BuiltInModel;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.client.resources.model.ModelBaker;
-import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.client.resources.model.ModelState;
 import net.minecraft.client.resources.model.SimpleBakedModel;
+import net.minecraft.client.resources.model.SpecialModels;
 import net.minecraft.client.resources.model.UnbakedModel;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
@@ -80,10 +74,6 @@ public class BlockModel implements UnbakedModel {
 
 	public static BlockModel fromStream(Reader reader) {
 		return GsonHelper.fromJson(GSON, reader, BlockModel.class);
-	}
-
-	public static BlockModel fromString(String string) {
-		return fromStream(new StringReader(string));
 	}
 
 	public BlockModel(
@@ -132,64 +122,23 @@ public class BlockModel implements UnbakedModel {
 		return this.overrides;
 	}
 
-	private ItemOverrides getItemOverrides(ModelBaker modelBaker, BlockModel blockModel) {
+	private ItemOverrides bakeItemOverrides(ModelBaker modelBaker, BlockModel blockModel) {
 		return this.overrides.isEmpty() ? ItemOverrides.EMPTY : new ItemOverrides(modelBaker, blockModel, this.overrides);
 	}
 
 	@Override
-	public Collection<ResourceLocation> getDependencies() {
-		Set<ResourceLocation> set = Sets.<ResourceLocation>newHashSet();
-
-		for (ItemOverride itemOverride : this.overrides) {
-			set.add(itemOverride.getModel());
-		}
-
+	public void resolveDependencies(UnbakedModel.Resolver resolver, UnbakedModel.ResolutionContext resolutionContext) {
 		if (this.parentLocation != null) {
-			set.add(this.parentLocation);
-		}
-
-		return set;
-	}
-
-	@Override
-	public void resolveParents(Function<ResourceLocation, UnbakedModel> function) {
-		Set<UnbakedModel> set = Sets.<UnbakedModel>newLinkedHashSet();
-
-		for (BlockModel blockModel = this; blockModel.parentLocation != null && blockModel.parent == null; blockModel = blockModel.parent) {
-			set.add(blockModel);
-			UnbakedModel unbakedModel = (UnbakedModel)function.apply(blockModel.parentLocation);
-			if (unbakedModel == null) {
-				LOGGER.warn("No parent '{}' while loading model '{}'", this.parentLocation, blockModel);
-			}
-
-			if (set.contains(unbakedModel)) {
-				LOGGER.warn(
-					"Found 'parent' loop while loading model '{}' in chain: {} -> {}",
-					blockModel,
-					set.stream().map(Object::toString).collect(Collectors.joining(" -> ")),
-					this.parentLocation
-				);
-				unbakedModel = null;
-			}
-
-			if (unbakedModel == null) {
-				blockModel.parentLocation = ModelBakery.MISSING_MODEL_LOCATION;
-				unbakedModel = (UnbakedModel)function.apply(blockModel.parentLocation);
-			}
-
-			if (!(unbakedModel instanceof BlockModel)) {
+			if (!(resolver.resolve(this.parentLocation) instanceof BlockModel blockModel)) {
 				throw new IllegalStateException("BlockModel parent has to be a block model.");
 			}
 
-			blockModel.parent = (BlockModel)unbakedModel;
+			this.parent = blockModel;
 		}
 
-		this.overrides.forEach(itemOverride -> {
-			UnbakedModel unbakedModelx = (UnbakedModel)function.apply(itemOverride.getModel());
-			if (!Objects.equals(unbakedModelx, this)) {
-				unbakedModelx.resolveParents(function);
-			}
-		});
+		if (resolutionContext != UnbakedModel.ResolutionContext.OVERRIDE) {
+			this.overrides.forEach(itemOverride -> resolver.resolveForOverride(itemOverride.getModel()));
+		}
 	}
 
 	@Override
@@ -199,10 +148,10 @@ public class BlockModel implements UnbakedModel {
 
 	public BakedModel bake(ModelBaker modelBaker, BlockModel blockModel, Function<Material, TextureAtlasSprite> function, ModelState modelState, boolean bl) {
 		TextureAtlasSprite textureAtlasSprite = (TextureAtlasSprite)function.apply(this.getMaterial("particle"));
-		if (this.getRootModel() == ModelBakery.BLOCK_ENTITY_MARKER) {
-			return new BuiltInModel(this.getTransforms(), this.getItemOverrides(modelBaker, blockModel), textureAtlasSprite, this.getGuiLight().lightLikeBlock());
+		if (this.getRootModel() == SpecialModels.BLOCK_ENTITY_MARKER) {
+			return new BuiltInModel(this.getTransforms(), this.bakeItemOverrides(modelBaker, blockModel), textureAtlasSprite, this.getGuiLight().lightLikeBlock());
 		} else {
-			SimpleBakedModel.Builder builder = new SimpleBakedModel.Builder(this, this.getItemOverrides(modelBaker, blockModel), bl).particle(textureAtlasSprite);
+			SimpleBakedModel.Builder builder = new SimpleBakedModel.Builder(this, this.bakeItemOverrides(modelBaker, blockModel), bl).particle(textureAtlasSprite);
 
 			for (BlockElement blockElement : this.getElements()) {
 				for (Direction direction : blockElement.faces.keySet()) {
@@ -227,7 +176,15 @@ public class BlockModel implements UnbakedModel {
 		BlockElement blockElement, BlockElementFace blockElementFace, TextureAtlasSprite textureAtlasSprite, Direction direction, ModelState modelState
 	) {
 		return FACE_BAKERY.bakeQuad(
-			blockElement.from, blockElement.to, blockElementFace, textureAtlasSprite, direction, modelState, blockElement.rotation, blockElement.shade
+			blockElement.from,
+			blockElement.to,
+			blockElementFace,
+			textureAtlasSprite,
+			direction,
+			modelState,
+			blockElement.rotation,
+			blockElement.shade,
+			blockElement.lightEmission
 		);
 	}
 

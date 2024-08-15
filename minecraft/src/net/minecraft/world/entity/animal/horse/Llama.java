@@ -24,15 +24,14 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityAttachment;
 import net.minecraft.world.entity.EntityAttachments;
 import net.minecraft.world.entity.EntityDimensions;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.VariantHolder;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.BreedGoal;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.FollowParentGoal;
@@ -51,6 +50,7 @@ import net.minecraft.world.entity.animal.Wolf;
 import net.minecraft.world.entity.monster.RangedAttackMob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.LlamaSpit;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -78,6 +78,7 @@ public class Llama extends AbstractChestedHorse implements VariantHolder<Llama.V
 
 	public Llama(EntityType<? extends Llama> entityType, Level level) {
 		super(entityType, level);
+		this.getNavigation().setRequiredPathLength(40.0F);
 	}
 
 	public boolean isTraderLlama() {
@@ -129,7 +130,7 @@ public class Llama extends AbstractChestedHorse implements VariantHolder<Llama.V
 	}
 
 	public static AttributeSupplier.Builder createAttributes() {
-		return createBaseChestedHorseAttributes().add(Attributes.FOLLOW_RANGE, 40.0);
+		return createBaseChestedHorseAttributes();
 	}
 
 	@Override
@@ -221,7 +222,7 @@ public class Llama extends AbstractChestedHorse implements VariantHolder<Llama.V
 	@Nullable
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData
+		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, EntitySpawnReason entitySpawnReason, @Nullable SpawnGroupData spawnGroupData
 	) {
 		RandomSource randomSource = serverLevelAccessor.getRandom();
 		this.setRandomStrength(randomSource);
@@ -234,7 +235,7 @@ public class Llama extends AbstractChestedHorse implements VariantHolder<Llama.V
 		}
 
 		this.setVariant(variant);
-		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData);
+		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, entitySpawnReason, spawnGroupData);
 	}
 
 	@Override
@@ -339,7 +340,7 @@ public class Llama extends AbstractChestedHorse implements VariantHolder<Llama.V
 
 	@Nullable
 	protected Llama makeNewLlama() {
-		return EntityType.LLAMA.create(this.level());
+		return EntityType.LLAMA.create(this.level(), EntitySpawnReason.BREEDING);
 	}
 
 	private void spit(LivingEntity livingEntity) {
@@ -348,7 +349,10 @@ public class Llama extends AbstractChestedHorse implements VariantHolder<Llama.V
 		double e = livingEntity.getY(0.3333333333333333) - llamaSpit.getY();
 		double f = livingEntity.getZ() - this.getZ();
 		double g = Math.sqrt(d * d + f * f) * 0.2F;
-		llamaSpit.shoot(d, e + g, f, 1.5F, 10.0F);
+		if (this.level() instanceof ServerLevel serverLevel) {
+			Projectile.spawnProjectileUsingShoot(llamaSpit, serverLevel, ItemStack.EMPTY, d, e + g, f, 1.5F, 10.0F);
+		}
+
 		if (!this.isSilent()) {
 			this.level()
 				.playSound(
@@ -363,7 +367,6 @@ public class Llama extends AbstractChestedHorse implements VariantHolder<Llama.V
 				);
 		}
 
-		this.level().addFreshEntity(llamaSpit);
 		this.didSpit = true;
 	}
 

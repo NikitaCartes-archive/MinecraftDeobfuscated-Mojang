@@ -26,7 +26,7 @@ public abstract class PathfinderMob extends Mob {
 	}
 
 	@Override
-	public boolean checkSpawnRules(LevelAccessor levelAccessor, MobSpawnType mobSpawnType) {
+	public boolean checkSpawnRules(LevelAccessor levelAccessor, EntitySpawnReason entitySpawnReason) {
 		return this.getWalkTargetValue(this.blockPosition(), levelAccessor) >= 0.0F;
 	}
 

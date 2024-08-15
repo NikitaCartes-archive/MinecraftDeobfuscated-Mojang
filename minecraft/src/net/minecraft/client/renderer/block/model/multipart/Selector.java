@@ -27,14 +27,8 @@ public class Selector {
 	private final MultiVariant variant;
 
 	public Selector(Condition condition, MultiVariant multiVariant) {
-		if (condition == null) {
-			throw new IllegalArgumentException("Missing condition for selector");
-		} else if (multiVariant == null) {
-			throw new IllegalArgumentException("Missing variant for selector");
-		} else {
-			this.condition = condition;
-			this.variant = multiVariant;
-		}
+		this.condition = condition;
+		this.variant = multiVariant;
 	}
 
 	public MultiVariant getVariant() {
@@ -43,14 +37,6 @@ public class Selector {
 
 	public Predicate<BlockState> getPredicate(StateDefinition<Block, BlockState> stateDefinition) {
 		return this.condition.getPredicate(stateDefinition);
-	}
-
-	public boolean equals(Object object) {
-		return this == object;
-	}
-
-	public int hashCode() {
-		return System.identityHashCode(this);
 	}
 
 	@Environment(EnvType.CLIENT)

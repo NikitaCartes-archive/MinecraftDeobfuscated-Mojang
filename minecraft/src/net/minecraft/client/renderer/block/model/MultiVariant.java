@@ -7,10 +7,8 @@ import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 import java.lang.reflect.Type;
-import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -21,55 +19,29 @@ import net.minecraft.client.resources.model.ModelBaker;
 import net.minecraft.client.resources.model.ModelState;
 import net.minecraft.client.resources.model.UnbakedModel;
 import net.minecraft.client.resources.model.WeightedBakedModel;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.state.BlockState;
 
 @Environment(EnvType.CLIENT)
-public class MultiVariant implements UnbakedModel {
-	private final List<Variant> variants;
-
-	public MultiVariant(List<Variant> list) {
-		this.variants = list;
-	}
-
-	public List<Variant> getVariants() {
-		return this.variants;
-	}
-
-	public boolean equals(Object object) {
-		if (this == object) {
-			return true;
-		} else {
-			return object instanceof MultiVariant multiVariant ? this.variants.equals(multiVariant.variants) : false;
-		}
-	}
-
-	public int hashCode() {
-		return this.variants.hashCode();
+public record MultiVariant(List<Variant> variants) implements UnbakedBlockStateModel {
+	@Override
+	public Object visualEqualityGroup(BlockState blockState) {
+		return this;
 	}
 
 	@Override
-	public Collection<ResourceLocation> getDependencies() {
-		return (Collection<ResourceLocation>)this.getVariants().stream().map(Variant::getModelLocation).collect(Collectors.toSet());
-	}
-
-	@Override
-	public void resolveParents(Function<ResourceLocation, UnbakedModel> function) {
-		this.getVariants()
-			.stream()
-			.map(Variant::getModelLocation)
-			.distinct()
-			.forEach(resourceLocation -> ((UnbakedModel)function.apply(resourceLocation)).resolveParents(function));
+	public void resolveDependencies(UnbakedModel.Resolver resolver, UnbakedModel.ResolutionContext resolutionContext) {
+		this.variants.forEach(variant -> resolver.resolve(variant.getModelLocation()));
 	}
 
 	@Nullable
 	@Override
 	public BakedModel bake(ModelBaker modelBaker, Function<Material, TextureAtlasSprite> function, ModelState modelState) {
-		if (this.getVariants().isEmpty()) {
+		if (this.variants.isEmpty()) {
 			return null;
 		} else {
 			WeightedBakedModel.Builder builder = new WeightedBakedModel.Builder();
 
-			for (Variant variant : this.getVariants()) {
+			for (Variant variant : this.variants) {
 				BakedModel bakedModel = modelBaker.bake(variant.getModelLocation(), variant);
 				builder.add(bakedModel, variant.getWeight());
 			}

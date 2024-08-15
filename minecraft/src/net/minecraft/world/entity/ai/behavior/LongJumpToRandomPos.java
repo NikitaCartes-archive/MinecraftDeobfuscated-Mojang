@@ -54,7 +54,7 @@ public class LongJumpToRandomPos<E extends Mob> extends Behavior<E> {
 	public static <E extends Mob> boolean defaultAcceptableLandingSpot(E mob, BlockPos blockPos) {
 		Level level = mob.level();
 		BlockPos blockPos2 = blockPos.below();
-		return level.getBlockState(blockPos2).isSolidRender(level, blockPos2) && mob.getPathfindingMalus(WalkNodeEvaluator.getPathTypeStatic(mob, blockPos)) == 0.0F;
+		return level.getBlockState(blockPos2).isSolidRender() && mob.getPathfindingMalus(WalkNodeEvaluator.getPathTypeStatic(mob, blockPos)) == 0.0F;
 	}
 
 	public LongJumpToRandomPos(UniformInt uniformInt, int i, int j, float f, Function<E, SoundEvent> function, BiPredicate<E, BlockPos> biPredicate) {

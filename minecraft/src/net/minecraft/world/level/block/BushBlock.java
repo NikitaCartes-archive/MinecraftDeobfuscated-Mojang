@@ -39,7 +39,7 @@ public abstract class BushBlock extends Block {
 	}
 
 	@Override
-	protected boolean propagatesSkylightDown(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
+	protected boolean propagatesSkylightDown(BlockState blockState) {
 		return blockState.getFluidState().isEmpty();
 	}
 

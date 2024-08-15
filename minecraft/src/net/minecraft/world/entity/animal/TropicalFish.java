@@ -21,8 +21,8 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.VariantHolder;
 import net.minecraft.world.item.DyeColor;
@@ -179,9 +179,9 @@ public class TropicalFish extends AbstractSchoolingFish implements VariantHolder
 	@Nullable
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData
+		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, EntitySpawnReason entitySpawnReason, @Nullable SpawnGroupData spawnGroupData
 	) {
-		spawnGroupData = super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData);
+		spawnGroupData = super.finalizeSpawn(serverLevelAccessor, difficultyInstance, entitySpawnReason, spawnGroupData);
 		RandomSource randomSource = serverLevelAccessor.getRandom();
 		TropicalFish.Variant variant;
 		if (spawnGroupData instanceof TropicalFish.TropicalFishGroupData tropicalFishGroupData) {
@@ -204,13 +204,13 @@ public class TropicalFish extends AbstractSchoolingFish implements VariantHolder
 	}
 
 	public static boolean checkTropicalFishSpawnRules(
-		EntityType<TropicalFish> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, RandomSource randomSource
+		EntityType<TropicalFish> entityType, LevelAccessor levelAccessor, EntitySpawnReason entitySpawnReason, BlockPos blockPos, RandomSource randomSource
 	) {
 		return levelAccessor.getFluidState(blockPos.below()).is(FluidTags.WATER)
 			&& levelAccessor.getBlockState(blockPos.above()).is(Blocks.WATER)
 			&& (
 				levelAccessor.getBiome(blockPos).is(BiomeTags.ALLOWS_TROPICAL_FISH_SPAWNS_AT_ANY_HEIGHT)
-					|| WaterAnimal.checkSurfaceWaterAnimalSpawnRules(entityType, levelAccessor, mobSpawnType, blockPos, randomSource)
+					|| WaterAnimal.checkSurfaceWaterAnimalSpawnRules(entityType, levelAccessor, entitySpawnReason, blockPos, randomSource)
 			);
 	}
 

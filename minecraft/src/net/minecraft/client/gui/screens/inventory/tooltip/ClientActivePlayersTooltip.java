@@ -21,7 +21,7 @@ public class ClientActivePlayersTooltip implements ClientTooltipComponent {
 	}
 
 	@Override
-	public int getHeight() {
+	public int getHeight(Font font) {
 		return this.activePlayers.size() * 12 + 2;
 	}
 

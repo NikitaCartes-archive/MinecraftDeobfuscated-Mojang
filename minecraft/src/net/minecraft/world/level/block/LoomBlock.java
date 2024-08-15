@@ -32,13 +32,12 @@ public class LoomBlock extends HorizontalDirectionalBlock {
 
 	@Override
 	protected InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
-		if (level.isClientSide) {
-			return InteractionResult.SUCCESS;
-		} else {
+		if (!level.isClientSide) {
 			player.openMenu(blockState.getMenuProvider(level, blockPos));
 			player.awardStat(Stats.INTERACT_WITH_LOOM);
-			return InteractionResult.CONSUME;
 		}
+
+		return InteractionResult.SUCCESS;
 	}
 
 	@Override

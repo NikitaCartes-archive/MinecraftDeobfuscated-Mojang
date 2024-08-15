@@ -106,6 +106,7 @@ public abstract class ClientCommonPacketListenerImpl implements ClientCommonPack
 	@Override
 	public void onPacketError(Packet packet, Exception exception) {
 		LOGGER.error("Failed to handle packet {}", packet, exception);
+		ClientCommonPacketListener.super.onPacketError(packet, exception);
 		Optional<Path> optional = this.storeDisconnectionReport(packet, exception);
 		Optional<URI> optional2 = this.serverLinks.findKnownType(ServerLinks.KnownLinkType.BUG_REPORT).map(ServerLinks.Entry::link);
 		if (this.strictErrorHandling) {

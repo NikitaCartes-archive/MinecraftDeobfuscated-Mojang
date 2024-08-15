@@ -31,11 +31,11 @@ import net.minecraft.world.entity.EntityAttachment;
 import net.minecraft.world.entity.EntityAttachments;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntitySelector;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -252,7 +252,7 @@ public class Panda extends Animal {
 	@Nullable
 	@Override
 	public AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
-		Panda panda = EntityType.PANDA.create(serverLevel);
+		Panda panda = EntityType.PANDA.create(serverLevel, EntitySpawnReason.BREEDING);
 		if (panda != null) {
 			if (ageableMob instanceof Panda panda2) {
 				panda.setGeneFromParents(this, panda2);
@@ -286,7 +286,7 @@ public class Panda extends Animal {
 	}
 
 	public static AttributeSupplier.Builder createAttributes() {
-		return Mob.createMobAttributes().add(Attributes.MOVEMENT_SPEED, 0.15F).add(Attributes.ATTACK_DAMAGE, 6.0);
+		return Animal.createAnimalAttributes().add(Attributes.MOVEMENT_SPEED, 0.15F).add(Attributes.ATTACK_DAMAGE, 6.0);
 	}
 
 	public Panda.Gene getVariant() {
@@ -562,7 +562,7 @@ public class Panda extends Animal {
 	@Nullable
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData
+		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, EntitySpawnReason entitySpawnReason, @Nullable SpawnGroupData spawnGroupData
 	) {
 		RandomSource randomSource = serverLevelAccessor.getRandom();
 		this.setMainGene(Panda.Gene.getRandom(randomSource));
@@ -572,7 +572,7 @@ public class Panda extends Animal {
 			spawnGroupData = new AgeableMob.AgeableMobGroupData(0.2F);
 		}
 
-		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData);
+		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, entitySpawnReason, spawnGroupData);
 	}
 
 	public void setGeneFromParents(Panda panda, @Nullable Panda panda2) {
@@ -630,7 +630,7 @@ public class Panda extends Animal {
 			return InteractionResult.PASS;
 		} else if (this.isOnBack()) {
 			this.setOnBack(false);
-			return InteractionResult.sidedSuccess(this.level().isClientSide);
+			return InteractionResult.SUCCESS;
 		} else if (this.isFood(itemStack)) {
 			if (this.getTarget() != null) {
 				this.gotBamboo = true;
@@ -658,7 +658,7 @@ public class Panda extends Animal {
 				this.usePlayerItem(player, interactionHand, itemStack);
 			}
 
-			return InteractionResult.SUCCESS;
+			return InteractionResult.SUCCESS_SERVER;
 		} else {
 			return InteractionResult.PASS;
 		}

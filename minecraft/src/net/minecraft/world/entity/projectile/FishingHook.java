@@ -68,7 +68,6 @@ public class FishingHook extends Projectile {
 
 	private FishingHook(EntityType<? extends FishingHook> entityType, Level level, int i, int j) {
 		super(entityType, level);
-		this.noCulling = true;
 		this.luck = Math.max(0, i);
 		this.lureSpeed = Math.max(0, j);
 	}
@@ -77,7 +76,7 @@ public class FishingHook extends Projectile {
 		this(entityType, level, 0, 0);
 	}
 
-	public FishingHook(Player player, Level level, int i, int j) {
+	public FishingHook(Player player, Level level, int i, int j, ItemStack itemStack) {
 		this(EntityType.FISHING_BOBBER, level, i, j);
 		this.setOwner(player);
 		float f = player.getXRot();
@@ -225,6 +224,10 @@ public class FishingHook extends Projectile {
 			}
 
 			this.move(MoverType.SELF, this.getDeltaMovement());
+			if (!this.level().isClientSide()) {
+				this.applyEffectsFromBlocks();
+			}
+
 			this.updateRotation();
 			if (this.currentState == FishingHook.FishHookState.FLYING && (this.onGround() || this.horizontalCollision)) {
 				this.setDeltaMovement(Vec3.ZERO);

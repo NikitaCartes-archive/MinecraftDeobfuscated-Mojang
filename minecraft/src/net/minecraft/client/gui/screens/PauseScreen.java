@@ -20,6 +20,7 @@ import net.minecraft.client.gui.screens.multiplayer.ServerLinksScreen;
 import net.minecraft.client.gui.screens.options.OptionsScreen;
 import net.minecraft.client.gui.screens.social.SocialInteractionsScreen;
 import net.minecraft.client.multiplayer.ServerData;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -143,7 +144,14 @@ public class PauseScreen extends Screen {
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
 		super.render(guiGraphics, i, j, f);
 		if (this.showPauseMenu && this.minecraft != null && this.minecraft.getReportingContext().hasDraftReport() && this.disconnectButton != null) {
-			guiGraphics.blitSprite(DRAFT_REPORT_SPRITE, this.disconnectButton.getX() + this.disconnectButton.getWidth() - 17, this.disconnectButton.getY() + 3, 15, 15);
+			guiGraphics.blitSprite(
+				RenderType::guiTextured,
+				DRAFT_REPORT_SPRITE,
+				this.disconnectButton.getX() + this.disconnectButton.getWidth() - 17,
+				this.disconnectButton.getY() + 3,
+				15,
+				15
+			);
 		}
 	}
 

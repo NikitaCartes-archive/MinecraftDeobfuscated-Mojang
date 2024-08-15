@@ -21,7 +21,7 @@ public class ClientTextTooltip implements ClientTooltipComponent {
 	}
 
 	@Override
-	public int getHeight() {
+	public int getHeight(Font font) {
 		return 10;
 	}
 

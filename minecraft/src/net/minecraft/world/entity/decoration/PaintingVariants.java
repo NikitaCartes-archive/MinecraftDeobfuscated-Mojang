@@ -1,7 +1,10 @@
 package net.minecraft.world.entity.decoration;
 
+import java.util.Optional;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.BootstrapContext;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 
@@ -77,16 +80,16 @@ public class PaintingVariants {
 		register(bootstrapContext, STAGE, 2, 2);
 		register(bootstrapContext, VOID, 2, 2);
 		register(bootstrapContext, SKULL_AND_ROSES, 2, 2);
-		register(bootstrapContext, WITHER, 2, 2);
+		register(bootstrapContext, WITHER, 2, 2, false);
 		register(bootstrapContext, FIGHTERS, 4, 2);
 		register(bootstrapContext, POINTER, 4, 4);
 		register(bootstrapContext, PIGSCENE, 4, 4);
 		register(bootstrapContext, BURNING_SKULL, 4, 4);
 		register(bootstrapContext, SKELETON, 4, 3);
-		register(bootstrapContext, EARTH, 2, 2);
-		register(bootstrapContext, WIND, 2, 2);
-		register(bootstrapContext, WATER, 2, 2);
-		register(bootstrapContext, FIRE, 2, 2);
+		register(bootstrapContext, EARTH, 2, 2, false);
+		register(bootstrapContext, WIND, 2, 2, false);
+		register(bootstrapContext, WATER, 2, 2, false);
+		register(bootstrapContext, FIRE, 2, 2, false);
 		register(bootstrapContext, DONKEY_KONG, 4, 3);
 		register(bootstrapContext, BAROQUE, 2, 2);
 		register(bootstrapContext, HUMBLE, 2, 2);
@@ -111,7 +114,20 @@ public class PaintingVariants {
 	}
 
 	private static void register(BootstrapContext<PaintingVariant> bootstrapContext, ResourceKey<PaintingVariant> resourceKey, int i, int j) {
-		bootstrapContext.register(resourceKey, new PaintingVariant(i, j, resourceKey.location()));
+		register(bootstrapContext, resourceKey, i, j, true);
+	}
+
+	private static void register(BootstrapContext<PaintingVariant> bootstrapContext, ResourceKey<PaintingVariant> resourceKey, int i, int j, boolean bl) {
+		bootstrapContext.register(
+			resourceKey,
+			new PaintingVariant(
+				i,
+				j,
+				resourceKey.location(),
+				Optional.of(Component.translatable(resourceKey.location().toLanguageKey("painting", "title")).withStyle(ChatFormatting.YELLOW)),
+				bl ? Optional.of(Component.translatable(resourceKey.location().toLanguageKey("painting", "author")).withStyle(ChatFormatting.GRAY)) : Optional.empty()
+			)
+		);
 	}
 
 	private static ResourceKey<PaintingVariant> create(String string) {

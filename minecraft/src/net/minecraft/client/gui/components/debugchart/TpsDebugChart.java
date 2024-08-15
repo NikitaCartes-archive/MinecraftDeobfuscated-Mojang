@@ -13,9 +13,6 @@ import net.minecraft.util.debugchart.TpsDebugDimensions;
 
 @Environment(EnvType.CLIENT)
 public class TpsDebugChart extends AbstractDebugChart {
-	private static final int RED = -65536;
-	private static final int YELLOW = -256;
-	private static final int GREEN = -16711936;
 	private static final int TICK_METHOD_COLOR = -6745839;
 	private static final int TASK_COLOR = -4548257;
 	private static final int OTHER_COLOR = -10547572;
@@ -29,7 +26,7 @@ public class TpsDebugChart extends AbstractDebugChart {
 	@Override
 	protected void renderAdditionalLinesAndLabels(GuiGraphics guiGraphics, int i, int j, int k) {
 		float f = (float)TimeUtil.MILLISECONDS_PER_SECOND / (Float)this.msptSupplier.get();
-		this.drawStringWithShade(guiGraphics, String.format("%.1f TPS", f), i + 1, k - 60 + 1);
+		this.drawStringWithShade(guiGraphics, String.format(Locale.ROOT, "%.1f TPS", f), i + 1, k - 60 + 1);
 	}
 
 	@Override

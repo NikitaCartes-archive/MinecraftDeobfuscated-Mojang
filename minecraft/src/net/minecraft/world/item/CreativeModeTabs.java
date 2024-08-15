@@ -35,6 +35,7 @@ import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.component.Fireworks;
 import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.EnchantmentInstance;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LightBlock;
@@ -1103,7 +1104,7 @@ public class CreativeModeTabs {
 						output.accept(Items.PURPLE_BANNER);
 						output.accept(Items.MAGENTA_BANNER);
 						output.accept(Items.PINK_BANNER);
-						output.accept(Raid.getLeaderBannerInstance(itemDisplayParameters.holders().lookupOrThrow(Registries.BANNER_PATTERN)));
+						output.accept(Raid.getOminousBannerInstance(itemDisplayParameters.holders().lookupOrThrow(Registries.BANNER_PATTERN)));
 						output.accept(Items.SKELETON_SKULL);
 						output.accept(Items.WITHER_SKELETON_SKULL);
 						output.accept(Items.PLAYER_HEAD);
@@ -1605,6 +1606,8 @@ public class CreativeModeTabs {
 					output.accept(Items.GHAST_TEAR);
 					output.accept(Items.TURTLE_HELMET);
 					output.accept(Items.PHANTOM_MEMBRANE);
+					output.accept(Items.FIELD_MASONED_BANNER_PATTERN);
+					output.accept(Items.BORDURE_INDENTED_BANNER_PATTERN);
 					output.accept(Items.FLOWER_BANNER_PATTERN);
 					output.accept(Items.CREEPER_BANNER_PATTERN);
 					output.accept(Items.SKULL_BANNER_PATTERN);
@@ -1840,7 +1843,7 @@ public class CreativeModeTabs {
 		CreativeModeTab.Output output, HolderLookup<Enchantment> holderLookup, CreativeModeTab.TabVisibility tabVisibility
 	) {
 		holderLookup.listElements()
-			.map(reference -> EnchantedBookItem.createForEnchantment(new EnchantmentInstance(reference, ((Enchantment)reference.value()).getMaxLevel())))
+			.map(reference -> EnchantmentHelper.createBook(new EnchantmentInstance(reference, ((Enchantment)reference.value()).getMaxLevel())))
 			.forEach(itemStack -> output.accept(itemStack, tabVisibility));
 	}
 
@@ -1850,7 +1853,7 @@ public class CreativeModeTabs {
 		holderLookup.listElements()
 			.flatMap(
 				reference -> IntStream.rangeClosed(((Enchantment)reference.value()).getMinLevel(), ((Enchantment)reference.value()).getMaxLevel())
-						.mapToObj(i -> EnchantedBookItem.createForEnchantment(new EnchantmentInstance(reference, i)))
+						.mapToObj(i -> EnchantmentHelper.createBook(new EnchantmentInstance(reference, i)))
 			)
 			.forEach(itemStack -> output.accept(itemStack, tabVisibility));
 	}

@@ -9,6 +9,7 @@ import net.minecraft.world.phys.Vec3;
 
 public interface HoglinBase {
 	int ATTACK_ANIMATION_DURATION = 10;
+	float PROBABILITY_OF_SPAWNING_AS_BABY = 0.2F;
 
 	int getAttackAnimationRemainingTicks();
 

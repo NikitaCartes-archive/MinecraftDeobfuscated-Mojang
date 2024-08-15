@@ -8,6 +8,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -35,6 +36,8 @@ import net.minecraft.world.level.block.state.properties.PistonType;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.pathfinder.PathComputationType;
+import net.minecraft.world.level.redstone.ExperimentalRedstoneUtils;
+import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -99,7 +102,7 @@ public class PistonBaseBlock extends DirectionalBlock {
 	}
 
 	@Override
-	protected void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
+	protected void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, @Nullable Orientation orientation, boolean bl) {
 		if (!level.isClientSide) {
 			this.checkIfExtend(level, blockPos, blockState);
 		}
@@ -355,21 +358,22 @@ public class PistonBaseBlock extends DirectionalBlock {
 				blockState5.updateIndirectNeighbourShapes(level, blockPos6, 2);
 			}
 
+			Orientation orientation = ExperimentalRedstoneUtils.randomOrientation(level, pistonStructureResolver.getPushDirection(), null);
 			i = 0;
 
 			for (int k = list3.size() - 1; k >= 0; k--) {
-				BlockState blockState2 = blockStates[i++];
-				BlockPos blockPos6 = (BlockPos)list3.get(k);
-				blockState2.updateIndirectNeighbourShapes(level, blockPos6, 2);
-				level.updateNeighborsAt(blockPos6, blockState2.getBlock());
+				BlockState blockState3 = blockStates[i++];
+				BlockPos blockPos7 = (BlockPos)list3.get(k);
+				blockState3.updateIndirectNeighbourShapes(level, blockPos7, 2);
+				level.updateNeighborsAt(blockPos7, blockState3.getBlock(), orientation);
 			}
 
 			for (int k = list.size() - 1; k >= 0; k--) {
-				level.updateNeighborsAt((BlockPos)list.get(k), blockStates[i++].getBlock());
+				level.updateNeighborsAt((BlockPos)list.get(k), blockStates[i++].getBlock(), orientation);
 			}
 
 			if (bl) {
-				level.updateNeighborsAt(blockPos2, Blocks.PISTON_HEAD);
+				level.updateNeighborsAt(blockPos2, Blocks.PISTON_HEAD, orientation);
 			}
 
 			return true;

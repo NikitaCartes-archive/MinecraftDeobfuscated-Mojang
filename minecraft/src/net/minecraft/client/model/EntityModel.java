@@ -4,14 +4,12 @@ import java.util.function.Function;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.Entity;
 
 @Environment(EnvType.CLIENT)
-public abstract class EntityModel<T extends Entity> extends Model {
-	public float attackTime;
-	public boolean riding;
-	public boolean young = true;
+public abstract class EntityModel<T extends EntityRenderState> extends Model {
+	public static final float MODEL_Y_OFFSET = -1.501F;
 
 	protected EntityModel() {
 		this(RenderType::entityCutoutNoCull);
@@ -21,14 +19,5 @@ public abstract class EntityModel<T extends Entity> extends Model {
 		super(function);
 	}
 
-	public abstract void setupAnim(T entity, float f, float g, float h, float i, float j);
-
-	public void prepareMobModel(T entity, float f, float g, float h) {
-	}
-
-	public void copyPropertiesTo(EntityModel<T> entityModel) {
-		entityModel.attackTime = this.attackTime;
-		entityModel.riding = this.riding;
-		entityModel.young = this.young;
-	}
+	public abstract void setupAnim(T entityRenderState);
 }

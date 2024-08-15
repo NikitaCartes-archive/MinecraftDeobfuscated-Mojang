@@ -9,6 +9,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -199,7 +200,7 @@ public class CreateFlatWorldScreen extends Screen {
 			}
 
 			private void blitSlotBg(GuiGraphics guiGraphics, int i, int j) {
-				guiGraphics.blitSprite(CreateFlatWorldScreen.SLOT_SPRITE, i, j, 0, 18, 18);
+				guiGraphics.blitSprite(RenderType::guiTextured, CreateFlatWorldScreen.SLOT_SPRITE, i, j, 18, 18);
 			}
 		}
 	}

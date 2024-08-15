@@ -28,10 +28,11 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.CommonListenerCookie;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.ItemInteractionResult;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -119,7 +120,7 @@ public class GameTestHelper {
 
 	public <E extends Entity> E spawn(EntityType<E> entityType, Vec3 vec3) {
 		ServerLevel serverLevel = this.getLevel();
-		E entity = entityType.create(serverLevel);
+		E entity = entityType.create(serverLevel, EntitySpawnReason.STRUCTURE);
 		if (entity == null) {
 			throw new NullPointerException("Failed to create entity " + entityType.builtInRegistryHolder().key().location());
 		} else {
@@ -234,11 +235,9 @@ public class GameTestHelper {
 		BlockPos blockPos2 = this.absolutePos(blockPos);
 		BlockState blockState = this.getLevel().getBlockState(blockPos2);
 		InteractionHand interactionHand = InteractionHand.MAIN_HAND;
-		ItemInteractionResult itemInteractionResult = blockState.useItemOn(
-			player.getItemInHand(interactionHand), this.getLevel(), player, interactionHand, blockHitResult
-		);
-		if (!itemInteractionResult.consumesAction()) {
-			if (itemInteractionResult != ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION
+		InteractionResult interactionResult = blockState.useItemOn(player.getItemInHand(interactionHand), this.getLevel(), player, interactionHand, blockHitResult);
+		if (!interactionResult.consumesAction()) {
+			if (!(interactionResult instanceof InteractionResult.TryEmptyHandInteraction)
 				|| !blockState.useWithoutItem(this.getLevel(), player, blockHitResult).consumesAction()) {
 				UseOnContext useOnContext = new UseOnContext(player, interactionHand, blockHitResult);
 				player.getItemInHand(interactionHand).useOn(useOnContext);
@@ -442,11 +441,12 @@ public class GameTestHelper {
 		}
 	}
 
-	public void assertEntityPresent(EntityType<?> entityType, Vec3 vec3, Vec3 vec32) {
-		List<? extends Entity> list = this.getLevel().getEntities(entityType, new AABB(vec3, vec32), Entity::isAlive);
+	public void assertEntityPresent(EntityType<?> entityType, AABB aABB) {
+		AABB aABB2 = this.absoluteAABB(aABB);
+		List<? extends Entity> list = this.getLevel().getEntities(entityType, aABB2, Entity::isAlive);
 		if (list.isEmpty()) {
 			throw new GameTestAssertPosException(
-				"Expected " + entityType.toShortString() + " between ", BlockPos.containing(vec3), BlockPos.containing(vec32), this.testInfo.getTick()
+				"Expected " + entityType.toShortString(), BlockPos.containing(aABB2.getCenter()), BlockPos.containing(aABB.getCenter()), this.testInfo.getTick()
 			);
 		}
 	}
@@ -583,11 +583,12 @@ public class GameTestHelper {
 		}
 	}
 
-	public void assertEntityNotPresent(EntityType<?> entityType, Vec3 vec3, Vec3 vec32) {
-		List<? extends Entity> list = this.getLevel().getEntities(entityType, new AABB(vec3, vec32), Entity::isAlive);
+	public void assertEntityNotPresent(EntityType<?> entityType, AABB aABB) {
+		AABB aABB2 = this.absoluteAABB(aABB);
+		List<? extends Entity> list = this.getLevel().getEntities(entityType, aABB2, Entity::isAlive);
 		if (!list.isEmpty()) {
 			throw new GameTestAssertPosException(
-				"Did not expect " + entityType.toShortString() + " between ", BlockPos.containing(vec3), BlockPos.containing(vec32), this.testInfo.getTick()
+				"Did not expect " + entityType.toShortString(), BlockPos.containing(aABB2.getCenter()), BlockPos.containing(aABB.getCenter()), this.testInfo.getTick()
 			);
 		}
 	}
@@ -853,6 +854,18 @@ public class GameTestHelper {
 		return blockPos3.subtract(blockPos2);
 	}
 
+	public AABB absoluteAABB(AABB aABB) {
+		Vec3 vec3 = this.absoluteVec(aABB.getMinPosition());
+		Vec3 vec32 = this.absoluteVec(aABB.getMaxPosition());
+		return new AABB(vec3, vec32);
+	}
+
+	public AABB relativeAABB(AABB aABB) {
+		Vec3 vec3 = this.relativeVec(aABB.getMinPosition());
+		Vec3 vec32 = this.relativeVec(aABB.getMaxPosition());
+		return new AABB(vec3, vec32);
+	}
+
 	public Vec3 absoluteVec(Vec3 vec3) {
 		Vec3 vec32 = Vec3.atLowerCornerOf(this.testInfo.getStructureBlockPos());
 		return StructureTemplate.transform(vec32.add(vec3), Mirror.NONE, this.testInfo.getRotation(), this.testInfo.getStructureBlockPos());
@@ -895,11 +908,18 @@ public class GameTestHelper {
 
 	private AABB getRelativeBounds() {
 		AABB aABB = this.testInfo.getStructureBounds();
-		return aABB.move(BlockPos.ZERO.subtract(this.absolutePos(BlockPos.ZERO)));
+		Rotation rotation = this.testInfo.getRotation();
+		switch (rotation) {
+			case COUNTERCLOCKWISE_90:
+			case CLOCKWISE_90:
+				return new AABB(0.0, 0.0, 0.0, aABB.getZsize(), aABB.getYsize(), aABB.getXsize());
+			default:
+				return new AABB(0.0, 0.0, 0.0, aABB.getXsize(), aABB.getYsize(), aABB.getZsize());
+		}
 	}
 
 	public void forEveryBlockInStructure(Consumer<BlockPos> consumer) {
-		AABB aABB = this.getRelativeBounds().contract(1.0, 1.0, 1.0);
+		AABB aABB = this.getRelativeBounds().contract(1.0, -1.0, 1.0);
 		BlockPos.MutableBlockPos.betweenClosedStream(aABB).forEach(consumer);
 	}
 

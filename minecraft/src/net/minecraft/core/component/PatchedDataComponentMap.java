@@ -119,6 +119,11 @@ public final class PatchedDataComponentMap implements DataComponentMap {
 		this.patch.putAll(dataComponentPatch.map);
 	}
 
+	public void clearPatch() {
+		this.ensureMapOwnership();
+		this.patch.clear();
+	}
+
 	public void setAll(DataComponentMap dataComponentMap) {
 		for (TypedDataComponent<?> typedDataComponent : dataComponentMap) {
 			typedDataComponent.applyTo(this);

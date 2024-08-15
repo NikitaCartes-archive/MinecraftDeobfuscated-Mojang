@@ -14,6 +14,8 @@ import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.util.Mth;
 import net.minecraft.util.SmoothDouble;
+import net.minecraft.world.entity.player.Inventory;
+import org.joml.Vector2i;
 import org.lwjgl.glfw.GLFWDropCallback;
 import org.slf4j.Logger;
 
@@ -35,17 +37,18 @@ public class MouseHandler {
 	private final SmoothDouble smoothTurnY = new SmoothDouble();
 	private double accumulatedDX;
 	private double accumulatedDY;
-	private double accumulatedScrollX;
-	private double accumulatedScrollY;
+	private final ScrollWheelHandler scrollWheelHandler;
 	private double lastHandleMovementTime = Double.MIN_VALUE;
 	private boolean mouseGrabbed;
 
 	public MouseHandler(Minecraft minecraft) {
 		this.minecraft = minecraft;
+		this.scrollWheelHandler = new ScrollWheelHandler();
 	}
 
 	private void onPress(long l, int i, int j, int k) {
 		if (l == this.minecraft.getWindow().getWindow()) {
+			this.minecraft.getFramerateLimitTracker().onInputReceived();
 			if (this.minecraft.screen != null) {
 				this.minecraft.setLastInputType(InputType.MOUSE);
 			}
@@ -121,6 +124,7 @@ public class MouseHandler {
 
 	private void onScroll(long l, double d, double e) {
 		if (l == Minecraft.getInstance().getWindow().getWindow()) {
+			this.minecraft.getFramerateLimitTracker().onInputReceived();
 			boolean bl = this.minecraft.options.discreteMouseScroll().get();
 			double f = this.minecraft.options.mouseWheelSensitivity().get();
 			double g = (bl ? Math.signum(d) : d) * f;
@@ -132,34 +136,22 @@ public class MouseHandler {
 					this.minecraft.screen.mouseScrolled(i, j, g, h);
 					this.minecraft.screen.afterMouseAction();
 				} else if (this.minecraft.player != null) {
-					if (this.accumulatedScrollX != 0.0 && Math.signum(g) != Math.signum(this.accumulatedScrollX)) {
-						this.accumulatedScrollX = 0.0;
-					}
-
-					if (this.accumulatedScrollY != 0.0 && Math.signum(h) != Math.signum(this.accumulatedScrollY)) {
-						this.accumulatedScrollY = 0.0;
-					}
-
-					this.accumulatedScrollX += g;
-					this.accumulatedScrollY += h;
-					int k = (int)this.accumulatedScrollX;
-					int m = (int)this.accumulatedScrollY;
-					if (k == 0 && m == 0) {
+					Vector2i vector2i = this.scrollWheelHandler.onMouseScroll(g, h);
+					if (vector2i.x == 0 && vector2i.y == 0) {
 						return;
 					}
 
-					this.accumulatedScrollX -= (double)k;
-					this.accumulatedScrollY -= (double)m;
-					int n = m == 0 ? -k : m;
+					int k = vector2i.y == 0 ? -vector2i.x : vector2i.y;
 					if (this.minecraft.player.isSpectator()) {
 						if (this.minecraft.gui.getSpectatorGui().isMenuActive()) {
-							this.minecraft.gui.getSpectatorGui().onMouseScrolled(-n);
+							this.minecraft.gui.getSpectatorGui().onMouseScrolled(-k);
 						} else {
-							float o = Mth.clamp(this.minecraft.player.getAbilities().getFlyingSpeed() + (float)m * 0.005F, 0.0F, 0.2F);
-							this.minecraft.player.getAbilities().setFlyingSpeed(o);
+							float m = Mth.clamp(this.minecraft.player.getAbilities().getFlyingSpeed() + (float)vector2i.y * 0.005F, 0.0F, 0.2F);
+							this.minecraft.player.getAbilities().setFlyingSpeed(m);
 						}
 					} else {
-						this.minecraft.player.getInventory().swapPaint((double)n);
+						Inventory inventory = this.minecraft.player.getInventory();
+						inventory.setSelectedHotbarSlot(ScrollWheelHandler.getNextScrollWheelSelection((double)k, inventory.selected, Inventory.getSelectionSize()));
 					}
 				}
 			}
@@ -167,6 +159,7 @@ public class MouseHandler {
 	}
 
 	private void onDrop(long l, List<Path> list, int i) {
+		this.minecraft.getFramerateLimitTracker().onInputReceived();
 		if (this.minecraft.screen != null) {
 			this.minecraft.screen.onFilesDrop(list);
 		}
@@ -229,7 +222,12 @@ public class MouseHandler {
 		this.lastHandleMovementTime = d;
 		if (this.minecraft.isWindowActive()) {
 			Screen screen = this.minecraft.screen;
-			if (screen != null && this.minecraft.getOverlay() == null && (this.accumulatedDX != 0.0 || this.accumulatedDY != 0.0)) {
+			boolean bl = this.accumulatedDX != 0.0 || this.accumulatedDY != 0.0;
+			if (bl) {
+				this.minecraft.getFramerateLimitTracker().onInputReceived();
+			}
+
+			if (screen != null && this.minecraft.getOverlay() == null && bl) {
 				double f = this.xpos * (double)this.minecraft.getWindow().getGuiScaledWidth() / (double)this.minecraft.getWindow().getScreenWidth();
 				double g = this.ypos * (double)this.minecraft.getWindow().getGuiScaledHeight() / (double)this.minecraft.getWindow().getScreenHeight();
 				Screen.wrapScreenError(() -> screen.mouseMoved(f, g), "mouseMoved event handler", screen.getClass().getCanonicalName());

@@ -31,20 +31,19 @@ public class SimpleTexture extends AbstractTexture {
 		textureImage.throwIfError();
 		TextureMetadataSection textureMetadataSection = textureImage.getTextureMetadata();
 		boolean bl;
-		boolean bl2;
 		if (textureMetadataSection != null) {
-			bl = textureMetadataSection.isBlur();
-			bl2 = textureMetadataSection.isClamp();
+			this.defaultBlur = textureMetadataSection.isBlur();
+			bl = textureMetadataSection.isClamp();
 		} else {
+			this.defaultBlur = false;
 			bl = false;
-			bl2 = false;
 		}
 
 		NativeImage nativeImage = textureImage.getImage();
 		if (!RenderSystem.isOnRenderThreadOrInit()) {
-			RenderSystem.recordRenderCall(() -> this.doLoad(nativeImage, bl, bl2));
+			RenderSystem.recordRenderCall(() -> this.doLoad(nativeImage, this.defaultBlur, bl));
 		} else {
-			this.doLoad(nativeImage, bl, bl2);
+			this.doLoad(nativeImage, this.defaultBlur, bl);
 		}
 	}
 

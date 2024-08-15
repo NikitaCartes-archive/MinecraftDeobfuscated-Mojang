@@ -6,9 +6,9 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.ShapeRenderer;
 import net.minecraft.core.BlockPos;
 
 @Environment(EnvType.CLIENT)
@@ -37,7 +37,7 @@ public class WorldGenAttemptRenderer implements DebugRenderer.SimpleDebugRendere
 			BlockPos blockPos = (BlockPos)this.toRender.get(i);
 			Float float_ = (Float)this.scales.get(i);
 			float g = float_ / 2.0F;
-			LevelRenderer.addChainedFilledBoxVertices(
+			ShapeRenderer.addChainedFilledBoxVertices(
 				poseStack,
 				vertexConsumer,
 				(double)((float)blockPos.getX() + 0.5F - g) - d,

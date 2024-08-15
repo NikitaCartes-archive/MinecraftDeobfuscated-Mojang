@@ -5,7 +5,7 @@ import java.util.Objects;
 import java.util.Optional;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
-import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.resources.ResourceKey;
@@ -63,12 +63,12 @@ public class WorldPresets {
 		});
 	}
 
-	public static WorldDimensions createNormalWorldDimensions(RegistryAccess registryAccess) {
-		return registryAccess.registryOrThrow(Registries.WORLD_PRESET).getHolderOrThrow(NORMAL).value().createWorldDimensions();
+	public static WorldDimensions createNormalWorldDimensions(HolderLookup.Provider provider) {
+		return provider.lookupOrThrow(Registries.WORLD_PRESET).getOrThrow(NORMAL).value().createWorldDimensions();
 	}
 
-	public static LevelStem getNormalOverworld(RegistryAccess registryAccess) {
-		return (LevelStem)registryAccess.registryOrThrow(Registries.WORLD_PRESET).getHolderOrThrow(NORMAL).value().overworld().orElseThrow();
+	public static LevelStem getNormalOverworld(HolderLookup.Provider provider) {
+		return (LevelStem)provider.lookupOrThrow(Registries.WORLD_PRESET).getOrThrow(NORMAL).value().overworld().orElseThrow();
 	}
 
 	static class Bootstrap {

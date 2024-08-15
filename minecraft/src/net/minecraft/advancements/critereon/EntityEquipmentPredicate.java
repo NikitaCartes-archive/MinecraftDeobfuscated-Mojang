@@ -10,6 +10,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.raid.Raid;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.entity.BannerPattern;
 
@@ -35,10 +36,12 @@ public record EntityEquipmentPredicate(
 				.apply(instance, EntityEquipmentPredicate::new)
 	);
 
-	public static EntityEquipmentPredicate captainPredicate(HolderGetter<BannerPattern> holderGetter) {
+	public static EntityEquipmentPredicate captainPredicate(HolderGetter<Item> holderGetter, HolderGetter<BannerPattern> holderGetter2) {
 		return EntityEquipmentPredicate.Builder.equipment()
 			.head(
-				ItemPredicate.Builder.item().of(Items.WHITE_BANNER).hasComponents(DataComponentPredicate.allOf(Raid.getLeaderBannerInstance(holderGetter).getComponents()))
+				ItemPredicate.Builder.item()
+					.of(holderGetter, Items.WHITE_BANNER)
+					.hasComponents(DataComponentPredicate.allOf(Raid.getOminousBannerInstance(holderGetter2).getComponents()))
 			)
 			.build();
 	}

@@ -203,7 +203,7 @@ public abstract class TamableAnimal extends Animal implements OwnableEntity {
 	}
 
 	@Override
-	public boolean isAlliedTo(Entity entity) {
+	protected boolean considersEntityAsAlly(Entity entity) {
 		if (this.isTame()) {
 			LivingEntity livingEntity = this.getOwner();
 			if (entity == livingEntity) {
@@ -211,11 +211,11 @@ public abstract class TamableAnimal extends Animal implements OwnableEntity {
 			}
 
 			if (livingEntity != null) {
-				return livingEntity.isAlliedTo(entity);
+				return livingEntity.considersEntityAsAlly(entity);
 			}
 		}
 
-		return super.isAlliedTo(entity);
+		return super.considersEntityAsAlly(entity);
 	}
 
 	@Override

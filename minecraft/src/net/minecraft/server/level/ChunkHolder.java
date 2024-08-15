@@ -120,9 +120,12 @@ public class ChunkHolder extends GenerationChunkHolder {
 		}
 	}
 
-	public void blockChanged(BlockPos blockPos) {
+	public boolean blockChanged(BlockPos blockPos) {
 		LevelChunk levelChunk = this.getTickingChunk();
-		if (levelChunk != null) {
+		if (levelChunk == null) {
+			return false;
+		} else {
+			boolean bl = this.hasChangedSections;
 			int i = this.levelHeightAccessor.getSectionIndex(blockPos.getY());
 			if (this.changedBlocksPerSection[i] == null) {
 				this.hasChangedSections = true;
@@ -130,24 +133,33 @@ public class ChunkHolder extends GenerationChunkHolder {
 			}
 
 			this.changedBlocksPerSection[i].add(SectionPos.sectionRelativePos(blockPos));
+			return !bl;
 		}
 	}
 
-	public void sectionLightChanged(LightLayer lightLayer, int i) {
+	public boolean sectionLightChanged(LightLayer lightLayer, int i) {
 		ChunkAccess chunkAccess = this.getChunkIfPresent(ChunkStatus.INITIALIZE_LIGHT);
-		if (chunkAccess != null) {
+		if (chunkAccess == null) {
+			return false;
+		} else {
 			chunkAccess.setUnsaved(true);
 			LevelChunk levelChunk = this.getTickingChunk();
-			if (levelChunk != null) {
+			if (levelChunk == null) {
+				return false;
+			} else {
 				int j = this.lightEngine.getMinLightSection();
 				int k = this.lightEngine.getMaxLightSection();
 				if (i >= j && i <= k) {
+					BitSet bitSet = lightLayer == LightLayer.SKY ? this.skyChangedLightSectionFilter : this.blockChangedLightSectionFilter;
 					int l = i - j;
-					if (lightLayer == LightLayer.SKY) {
-						this.skyChangedLightSectionFilter.set(l);
+					if (!bitSet.get(l)) {
+						bitSet.set(l);
+						return true;
 					} else {
-						this.blockChangedLightSectionFilter.set(l);
+						return false;
 					}
+				} else {
+					return false;
 				}
 			}
 		}

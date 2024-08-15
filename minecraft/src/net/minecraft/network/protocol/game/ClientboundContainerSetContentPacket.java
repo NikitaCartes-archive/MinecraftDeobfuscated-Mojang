@@ -30,14 +30,14 @@ public class ClientboundContainerSetContentPacket implements Packet<ClientGamePa
 	}
 
 	private ClientboundContainerSetContentPacket(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
-		this.containerId = registryFriendlyByteBuf.readUnsignedByte();
+		this.containerId = registryFriendlyByteBuf.readContainerId();
 		this.stateId = registryFriendlyByteBuf.readVarInt();
 		this.items = ItemStack.OPTIONAL_LIST_STREAM_CODEC.decode(registryFriendlyByteBuf);
 		this.carriedItem = ItemStack.OPTIONAL_STREAM_CODEC.decode(registryFriendlyByteBuf);
 	}
 
 	private void write(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
-		registryFriendlyByteBuf.writeByte(this.containerId);
+		registryFriendlyByteBuf.writeContainerId(this.containerId);
 		registryFriendlyByteBuf.writeVarInt(this.stateId);
 		ItemStack.OPTIONAL_LIST_STREAM_CODEC.encode(registryFriendlyByteBuf, this.items);
 		ItemStack.OPTIONAL_STREAM_CODEC.encode(registryFriendlyByteBuf, this.carriedItem);

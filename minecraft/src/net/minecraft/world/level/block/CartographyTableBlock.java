@@ -31,13 +31,12 @@ public class CartographyTableBlock extends Block {
 
 	@Override
 	protected InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
-		if (level.isClientSide) {
-			return InteractionResult.SUCCESS;
-		} else {
+		if (!level.isClientSide) {
 			player.openMenu(blockState.getMenuProvider(level, blockPos));
 			player.awardStat(Stats.INTERACT_WITH_CARTOGRAPHY_TABLE);
-			return InteractionResult.CONSUME;
 		}
+
+		return InteractionResult.SUCCESS;
 	}
 
 	@Nullable

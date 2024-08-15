@@ -8,10 +8,10 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
-import net.minecraft.world.entity.Entity;
+import net.minecraft.client.renderer.entity.state.ShulkerBulletRenderState;
 
 @Environment(EnvType.CLIENT)
-public class ShulkerBulletModel<T extends Entity> extends HierarchicalModel<T> {
+public class ShulkerBulletModel extends EntityModel<ShulkerBulletRenderState> {
 	private static final String MAIN = "main";
 	private final ModelPart root;
 	private final ModelPart main;
@@ -43,9 +43,8 @@ public class ShulkerBulletModel<T extends Entity> extends HierarchicalModel<T> {
 		return this.root;
 	}
 
-	@Override
-	public void setupAnim(T entity, float f, float g, float h, float i, float j) {
-		this.main.yRot = i * (float) (Math.PI / 180.0);
-		this.main.xRot = j * (float) (Math.PI / 180.0);
+	public void setupAnim(ShulkerBulletRenderState shulkerBulletRenderState) {
+		this.main.yRot = shulkerBulletRenderState.yRot * (float) (Math.PI / 180.0);
+		this.main.xRot = shulkerBulletRenderState.xRot * (float) (Math.PI / 180.0);
 	}
 }

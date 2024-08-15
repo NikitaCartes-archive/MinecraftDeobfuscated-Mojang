@@ -181,7 +181,7 @@ public class PeriodicNotificationManager
 						this.minecraft
 							.execute(
 								() -> SystemToast.add(
-										Minecraft.getInstance().getToasts(),
+										Minecraft.getInstance().getToastManager(),
 										SystemToast.SystemToastId.PERIODIC_NOTIFICATION,
 										Component.translatable(notification.title, n),
 										Component.translatable(notification.message, n)

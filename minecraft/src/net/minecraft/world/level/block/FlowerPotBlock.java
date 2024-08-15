@@ -10,7 +10,6 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
@@ -53,7 +52,7 @@ public class FlowerPotBlock extends Block {
 	}
 
 	@Override
-	protected ItemInteractionResult useItemOn(
+	protected InteractionResult useItemOn(
 		ItemStack itemStack, BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
 	) {
 		BlockState blockState2 = (itemStack.getItem() instanceof BlockItem blockItem
@@ -61,15 +60,15 @@ public class FlowerPotBlock extends Block {
 				: Blocks.AIR)
 			.defaultBlockState();
 		if (blockState2.isAir()) {
-			return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+			return InteractionResult.TRY_WITH_EMPTY_HAND;
 		} else if (!this.isEmpty()) {
-			return ItemInteractionResult.CONSUME;
+			return InteractionResult.CONSUME;
 		} else {
 			level.setBlock(blockPos, blockState2, 3);
 			level.gameEvent(player, GameEvent.BLOCK_CHANGE, blockPos);
 			player.awardStat(Stats.POT_FLOWER);
 			itemStack.consume(1, player);
-			return ItemInteractionResult.sidedSuccess(level.isClientSide);
+			return InteractionResult.SUCCESS;
 		}
 	}
 
@@ -85,7 +84,7 @@ public class FlowerPotBlock extends Block {
 
 			level.setBlock(blockPos, Blocks.FLOWER_POT.defaultBlockState(), 3);
 			level.gameEvent(player, GameEvent.BLOCK_CHANGE, blockPos);
-			return InteractionResult.sidedSuccess(level.isClientSide);
+			return InteractionResult.SUCCESS;
 		}
 	}
 

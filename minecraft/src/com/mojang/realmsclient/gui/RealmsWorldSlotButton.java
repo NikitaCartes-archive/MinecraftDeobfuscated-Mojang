@@ -1,6 +1,5 @@
 package com.mojang.realmsclient.gui;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.realmsclient.RealmsMainScreen;
 import com.mojang.realmsclient.dto.RealmsServer;
 import com.mojang.realmsclient.dto.RealmsWorldOptions;
@@ -13,10 +12,12 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.ARGB;
 
 @Environment(EnvType.CLIENT)
 public class RealmsWorldSlotButton extends Button {
@@ -98,26 +99,22 @@ public class RealmsWorldSlotButton extends Button {
 				resourceLocation = EMPTY_SLOT_LOCATION;
 			}
 
+			int m = -1;
 			if (this.state.isCurrentlyActiveSlot) {
-				guiGraphics.setColor(0.56F, 0.56F, 0.56F, 1.0F);
+				m = ARGB.colorFromFloat(1.0F, 0.56F, 0.56F, 0.56F);
 			}
 
-			guiGraphics.blit(resourceLocation, k + 3, l + 3, 0.0F, 0.0F, 74, 74, 74, 74);
-			boolean bl2 = bl && this.state.action != RealmsWorldSlotButton.Action.NOTHING;
-			if (bl2) {
-				guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
+			guiGraphics.blit(RenderType::guiTextured, resourceLocation, k + 3, l + 3, 0.0F, 0.0F, 74, 74, 74, 74, 74, 74, m);
+			if (bl && this.state.action != RealmsWorldSlotButton.Action.NOTHING) {
+				guiGraphics.blitSprite(RenderType::guiTextured, SLOT_FRAME_SPRITE, k, l, 80, 80);
 			} else if (this.state.isCurrentlyActiveSlot) {
-				guiGraphics.setColor(0.8F, 0.8F, 0.8F, 1.0F);
+				guiGraphics.blitSprite(RenderType::guiTextured, SLOT_FRAME_SPRITE, k, l, 80, 80, ARGB.colorFromFloat(1.0F, 0.8F, 0.8F, 0.8F));
 			} else {
-				guiGraphics.setColor(0.56F, 0.56F, 0.56F, 1.0F);
+				guiGraphics.blitSprite(RenderType::guiTextured, SLOT_FRAME_SPRITE, k, l, 80, 80, ARGB.colorFromFloat(1.0F, 0.56F, 0.56F, 0.56F));
 			}
 
-			guiGraphics.blitSprite(SLOT_FRAME_SPRITE, k, l, 80, 80);
-			guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
 			if (this.state.isCurrentlyActiveSlot) {
-				RenderSystem.enableBlend();
-				guiGraphics.blitSprite(CHECKMARK_SPRITE, k + 67, l + 4, 9, 8);
-				RenderSystem.disableBlend();
+				guiGraphics.blitSprite(RenderType::guiTextured, CHECKMARK_SPRITE, k + 67, l + 4, 9, 8);
 			}
 
 			Font font = Minecraft.getInstance().font;

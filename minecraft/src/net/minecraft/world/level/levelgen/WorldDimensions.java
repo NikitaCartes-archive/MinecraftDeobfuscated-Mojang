@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.RegistrationInfo;
 import net.minecraft.core.Registry;
@@ -59,17 +60,17 @@ public record WorldDimensions(Map<ResourceKey<LevelStem>, LevelStem> dimensions)
 		return Stream.concat(BUILTIN_ORDER.stream(), stream.filter(resourceKey -> !BUILTIN_ORDER.contains(resourceKey)));
 	}
 
-	public WorldDimensions replaceOverworldGenerator(RegistryAccess registryAccess, ChunkGenerator chunkGenerator) {
-		Registry<DimensionType> registry = registryAccess.registryOrThrow(Registries.DIMENSION_TYPE);
-		Map<ResourceKey<LevelStem>, LevelStem> map = withOverworld(registry, this.dimensions, chunkGenerator);
+	public WorldDimensions replaceOverworldGenerator(HolderLookup.Provider provider, ChunkGenerator chunkGenerator) {
+		HolderLookup<DimensionType> holderLookup = provider.lookupOrThrow(Registries.DIMENSION_TYPE);
+		Map<ResourceKey<LevelStem>, LevelStem> map = withOverworld(holderLookup, this.dimensions, chunkGenerator);
 		return new WorldDimensions(map);
 	}
 
 	public static Map<ResourceKey<LevelStem>, LevelStem> withOverworld(
-		Registry<DimensionType> registry, Map<ResourceKey<LevelStem>, LevelStem> map, ChunkGenerator chunkGenerator
+		HolderLookup<DimensionType> holderLookup, Map<ResourceKey<LevelStem>, LevelStem> map, ChunkGenerator chunkGenerator
 	) {
 		LevelStem levelStem = (LevelStem)map.get(LevelStem.OVERWORLD);
-		Holder<DimensionType> holder = (Holder<DimensionType>)(levelStem == null ? registry.getHolderOrThrow(BuiltinDimensionTypes.OVERWORLD) : levelStem.type());
+		Holder<DimensionType> holder = (Holder<DimensionType>)(levelStem == null ? holderLookup.getOrThrow(BuiltinDimensionTypes.OVERWORLD) : levelStem.type());
 		return withOverworld(map, holder, chunkGenerator);
 	}
 

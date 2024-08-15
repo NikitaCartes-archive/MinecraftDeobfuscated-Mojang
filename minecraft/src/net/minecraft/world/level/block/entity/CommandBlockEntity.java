@@ -182,6 +182,8 @@ public class CommandBlockEntity extends BlockEntity {
 	public void removeComponentsFromTag(CompoundTag compoundTag) {
 		super.removeComponentsFromTag(compoundTag);
 		compoundTag.remove("CustomName");
+		compoundTag.remove("conditionMet");
+		compoundTag.remove("powered");
 	}
 
 	public static enum Mode {

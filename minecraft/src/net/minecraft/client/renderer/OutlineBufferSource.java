@@ -6,7 +6,7 @@ import com.mojang.blaze3d.vertex.VertexMultiConsumer;
 import java.util.Optional;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.util.FastColor;
+import net.minecraft.util.ARGB;
 
 @Environment(EnvType.CLIENT)
 public class OutlineBufferSource implements MultiBufferSource {
@@ -55,7 +55,7 @@ public class OutlineBufferSource implements MultiBufferSource {
 	@Environment(EnvType.CLIENT)
 	static record EntityOutlineGenerator(VertexConsumer delegate, int color) implements VertexConsumer {
 		public EntityOutlineGenerator(VertexConsumer vertexConsumer, int i, int j, int k, int l) {
-			this(vertexConsumer, FastColor.ARGB32.color(l, i, j, k));
+			this(vertexConsumer, ARGB.color(l, i, j, k));
 		}
 
 		@Override

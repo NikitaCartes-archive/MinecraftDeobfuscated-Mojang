@@ -62,7 +62,7 @@ public class CactusBlock extends Block {
 					serverLevel.setBlockAndUpdate(blockPos2, this.defaultBlockState());
 					BlockState blockState2 = blockState.setValue(AGE, Integer.valueOf(0));
 					serverLevel.setBlock(blockPos, blockState2, 4);
-					serverLevel.neighborChanged(blockState2, blockPos2, this, blockPos, false);
+					serverLevel.neighborChanged(blockState2, blockPos2, this, null, false);
 				} else {
 					serverLevel.setBlock(blockPos, blockState.setValue(AGE, Integer.valueOf(j + 1)), 4);
 				}

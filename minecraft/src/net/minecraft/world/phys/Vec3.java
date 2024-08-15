@@ -1,12 +1,15 @@
 package net.minecraft.world.phys;
 
 import com.mojang.serialization.Codec;
+import io.netty.buffer.ByteBuf;
 import java.util.EnumSet;
 import java.util.List;
 import net.minecraft.Util;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Position;
 import net.minecraft.core.Vec3i;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import org.joml.Vector3f;
@@ -18,6 +21,15 @@ public class Vec3 implements Position {
 			list -> Util.fixedSize(list, 3).map(listx -> new Vec3((Double)listx.get(0), (Double)listx.get(1), (Double)listx.get(2))),
 			vec3 -> List.of(vec3.x(), vec3.y(), vec3.z())
 		);
+	public static final StreamCodec<ByteBuf, Vec3> STREAM_CODEC = new StreamCodec<ByteBuf, Vec3>() {
+		public Vec3 decode(ByteBuf byteBuf) {
+			return FriendlyByteBuf.readVec3(byteBuf);
+		}
+
+		public void encode(ByteBuf byteBuf, Vec3 vec3) {
+			FriendlyByteBuf.writeVec3(byteBuf, vec3);
+		}
+	};
 	public static final Vec3 ZERO = new Vec3(0.0, 0.0, 0.0);
 	public final double x;
 	public final double y;
@@ -60,13 +72,17 @@ public class Vec3 implements Position {
 		this((double)vector3f.x(), (double)vector3f.y(), (double)vector3f.z());
 	}
 
+	public Vec3(Vec3i vec3i) {
+		this((double)vec3i.getX(), (double)vec3i.getY(), (double)vec3i.getZ());
+	}
+
 	public Vec3 vectorTo(Vec3 vec3) {
 		return new Vec3(vec3.x - this.x, vec3.y - this.y, vec3.z - this.z);
 	}
 
 	public Vec3 normalize() {
 		double d = Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
-		return d < 1.0E-4 ? ZERO : new Vec3(this.x / d, this.y / d, this.z / d);
+		return d < 1.0E-5F ? ZERO : new Vec3(this.x / d, this.y / d, this.z / d);
 	}
 
 	public double dot(Vec3 vec3) {
@@ -81,8 +97,16 @@ public class Vec3 implements Position {
 		return this.subtract(vec3.x, vec3.y, vec3.z);
 	}
 
+	public Vec3 subtract(double d) {
+		return this.subtract(d, d, d);
+	}
+
 	public Vec3 subtract(double d, double e, double f) {
 		return this.add(-d, -e, -f);
+	}
+
+	public Vec3 add(double d) {
+		return this.add(d, d, d);
 	}
 
 	public Vec3 add(Vec3 vec3) {
@@ -139,6 +163,10 @@ public class Vec3 implements Position {
 
 	public Vec3 multiply(double d, double e, double f) {
 		return new Vec3(this.x * d, this.y * e, this.z * f);
+	}
+
+	public Vec3 horizontal() {
+		return new Vec3(this.x, 0.0, this.z);
 	}
 
 	public Vec3 offsetRandom(RandomSource randomSource, float f) {
@@ -250,7 +278,7 @@ public class Vec3 implements Position {
 	}
 
 	public Vec3 relative(Direction direction, double d) {
-		Vec3i vec3i = direction.getNormal();
+		Vec3i vec3i = direction.getUnitVec3i();
 		return new Vec3(this.x + d * (double)vec3i.getX(), this.y + d * (double)vec3i.getY(), this.z + d * (double)vec3i.getZ());
 	}
 

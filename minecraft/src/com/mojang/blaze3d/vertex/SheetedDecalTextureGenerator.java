@@ -62,7 +62,7 @@ public class SheetedDecalTextureGenerator implements VertexConsumer {
 	public VertexConsumer setNormal(float f, float g, float h) {
 		this.delegate.setNormal(f, g, h);
 		Vector3f vector3f = this.normalInversePose.transform(f, g, h, this.normal);
-		Direction direction = Direction.getNearest(vector3f.x(), vector3f.y(), vector3f.z());
+		Direction direction = Direction.getApproximateNearest(vector3f.x(), vector3f.y(), vector3f.z());
 		Vector3f vector3f2 = this.cameraInversePose.transformPosition(this.x, this.y, this.z, this.worldPos);
 		vector3f2.rotateY((float) Math.PI);
 		vector3f2.rotateX((float) (-Math.PI / 2));

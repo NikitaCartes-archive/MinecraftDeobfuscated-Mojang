@@ -6,6 +6,7 @@ import java.util.Deque;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
+import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
@@ -26,6 +27,10 @@ public class PoseStack {
 	public void translate(float f, float g, float h) {
 		PoseStack.Pose pose = (PoseStack.Pose)this.poseStack.getLast();
 		pose.pose.translate(f, g, h);
+	}
+
+	public void translate(Vec3 vec3) {
+		this.translate(vec3.x, vec3.y, vec3.z);
 	}
 
 	public void scale(float f, float g, float h) {

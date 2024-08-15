@@ -9,9 +9,9 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.ShapeRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -84,8 +84,8 @@ public class SupportBlockRenderer implements DebugRenderer.SimpleDebugRenderer {
 		double n = k + 1.0 + 4.0 * g;
 		double o = l + 1.0 + 4.0 * g;
 		double p = m + 1.0 + 4.0 * g;
-		LevelRenderer.renderLineBox(poseStack, multiBufferSource.getBuffer(RenderType.lines()), k, l, m, n, o, p, h, i, j, 0.4F);
-		LevelRenderer.renderVoxelShape(
+		ShapeRenderer.renderLineBox(poseStack, multiBufferSource.getBuffer(RenderType.lines()), k, l, m, n, o, p, h, i, j, 0.4F);
+		DebugRenderer.renderVoxelShape(
 			poseStack,
 			multiBufferSource.getBuffer(RenderType.lines()),
 			this.minecraft

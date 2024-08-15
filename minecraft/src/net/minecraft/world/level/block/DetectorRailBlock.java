@@ -118,7 +118,7 @@ public class DetectorRailBlock extends BaseRailBlock {
 
 		for (BlockPos blockPos2 : railState.getConnections()) {
 			BlockState blockState2 = level.getBlockState(blockPos2);
-			level.neighborChanged(blockState2, blockPos2, blockState2.getBlock(), blockPos, false);
+			level.neighborChanged(blockState2, blockPos2, blockState2.getBlock(), null, false);
 		}
 	}
 

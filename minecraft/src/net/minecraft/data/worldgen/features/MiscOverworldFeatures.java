@@ -86,7 +86,7 @@ public class MiscOverworldFeatures {
 				new RuleBasedBlockStateProvider(
 					BlockStateProvider.simple(Blocks.SAND),
 					List.of(
-						new RuleBasedBlockStateProvider.Rule(BlockPredicate.matchesBlocks(Direction.DOWN.getNormal(), Blocks.AIR), BlockStateProvider.simple(Blocks.SANDSTONE))
+						new RuleBasedBlockStateProvider.Rule(BlockPredicate.matchesBlocks(Direction.DOWN.getUnitVec3i(), Blocks.AIR), BlockStateProvider.simple(Blocks.SANDSTONE))
 					)
 				),
 				BlockPredicate.matchesBlocks(List.of(Blocks.DIRT, Blocks.GRASS_BLOCK)),
@@ -105,7 +105,7 @@ public class MiscOverworldFeatures {
 					List.of(
 						new RuleBasedBlockStateProvider.Rule(
 							BlockPredicate.not(
-								BlockPredicate.anyOf(BlockPredicate.solid(Direction.UP.getNormal()), BlockPredicate.matchesFluids(Direction.UP.getNormal(), Fluids.WATER))
+								BlockPredicate.anyOf(BlockPredicate.solid(Direction.UP.getUnitVec3i()), BlockPredicate.matchesFluids(Direction.UP.getUnitVec3i(), Fluids.WATER))
 							),
 							BlockStateProvider.simple(Blocks.GRASS_BLOCK)
 						)

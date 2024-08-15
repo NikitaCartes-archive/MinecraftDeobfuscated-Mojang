@@ -4,6 +4,7 @@ import java.util.EnumSet;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BiomeTags;
@@ -14,10 +15,10 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.SpawnGroupData;
@@ -39,6 +40,7 @@ import net.minecraft.world.entity.animal.Turtle;
 import net.minecraft.world.entity.animal.axolotl.Axolotl;
 import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.ThrownTrident;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -88,9 +90,9 @@ public class Drowned extends Zombie implements RangedAttackMob {
 
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData
+		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, EntitySpawnReason entitySpawnReason, @Nullable SpawnGroupData spawnGroupData
 	) {
-		spawnGroupData = super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData);
+		spawnGroupData = super.finalizeSpawn(serverLevelAccessor, difficultyInstance, entitySpawnReason, spawnGroupData);
 		if (this.getItemBySlot(EquipmentSlot.OFFHAND).isEmpty() && serverLevelAccessor.getRandom().nextFloat() < 0.03F) {
 			this.setItemSlot(EquipmentSlot.OFFHAND, new ItemStack(Items.NAUTILUS_SHELL));
 			this.setGuaranteedDrop(EquipmentSlot.OFFHAND);
@@ -100,16 +102,16 @@ public class Drowned extends Zombie implements RangedAttackMob {
 	}
 
 	public static boolean checkDrownedSpawnRules(
-		EntityType<Drowned> entityType, ServerLevelAccessor serverLevelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, RandomSource randomSource
+		EntityType<Drowned> entityType, ServerLevelAccessor serverLevelAccessor, EntitySpawnReason entitySpawnReason, BlockPos blockPos, RandomSource randomSource
 	) {
-		if (!serverLevelAccessor.getFluidState(blockPos.below()).is(FluidTags.WATER) && !MobSpawnType.isSpawner(mobSpawnType)) {
+		if (!serverLevelAccessor.getFluidState(blockPos.below()).is(FluidTags.WATER) && !EntitySpawnReason.isSpawner(entitySpawnReason)) {
 			return false;
 		} else {
 			Holder<Biome> holder = serverLevelAccessor.getBiome(blockPos);
 			boolean bl = serverLevelAccessor.getDifficulty() != Difficulty.PEACEFUL
-				&& (MobSpawnType.ignoresLightRequirements(mobSpawnType) || isDarkEnoughToSpawn(serverLevelAccessor, blockPos, randomSource))
-				&& (MobSpawnType.isSpawner(mobSpawnType) || serverLevelAccessor.getFluidState(blockPos).is(FluidTags.WATER));
-			if (bl && MobSpawnType.isSpawner(mobSpawnType)) {
+				&& (EntitySpawnReason.ignoresLightRequirements(entitySpawnReason) || isDarkEnoughToSpawn(serverLevelAccessor, blockPos, randomSource))
+				&& (EntitySpawnReason.isSpawner(entitySpawnReason) || serverLevelAccessor.getFluidState(blockPos).is(FluidTags.WATER));
+			if (bl && EntitySpawnReason.isSpawner(entitySpawnReason)) {
 				return true;
 			} else {
 				return holder.is(BiomeTags.MORE_FREQUENT_DROWNED_SPAWNS)
@@ -121,11 +123,6 @@ public class Drowned extends Zombie implements RangedAttackMob {
 
 	private static boolean isDeepEnoughToSpawn(LevelAccessor levelAccessor, BlockPos blockPos) {
 		return blockPos.getY() < levelAccessor.getSeaLevel() - 5;
-	}
-
-	@Override
-	protected boolean supportsBreakDoorGoal() {
-		return false;
 	}
 
 	@Override
@@ -255,14 +252,20 @@ public class Drowned extends Zombie implements RangedAttackMob {
 
 	@Override
 	public void performRangedAttack(LivingEntity livingEntity, float f) {
-		ThrownTrident thrownTrident = new ThrownTrident(this.level(), this, new ItemStack(Items.TRIDENT));
+		ItemStack itemStack = this.getMainHandItem();
+		ItemStack itemStack2 = itemStack.is(Items.TRIDENT) ? itemStack : new ItemStack(Items.TRIDENT);
+		ThrownTrident thrownTrident = new ThrownTrident(this.level(), this, itemStack2);
 		double d = livingEntity.getX() - this.getX();
 		double e = livingEntity.getY(0.3333333333333333) - thrownTrident.getY();
 		double g = livingEntity.getZ() - this.getZ();
 		double h = Math.sqrt(d * d + g * g);
-		thrownTrident.shoot(d, e + h * 0.2F, g, 1.6F, (float)(14 - this.level().getDifficulty().getId() * 4));
+		if (this.level() instanceof ServerLevel serverLevel) {
+			Projectile.spawnProjectileUsingShoot(
+				thrownTrident, serverLevel, itemStack2, d, e + h * 0.2F, g, 1.6F, (float)(14 - this.level().getDifficulty().getId() * 4)
+			);
+		}
+
 		this.playSound(SoundEvents.DROWNED_SHOOT, 1.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
-		this.level().addFreshEntity(thrownTrident);
 	}
 
 	public void setSearchingForLand(boolean bl) {

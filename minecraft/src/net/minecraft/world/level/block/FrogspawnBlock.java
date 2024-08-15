@@ -10,6 +10,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.frog.Tadpole;
 import net.minecraft.world.level.BlockGetter;
@@ -106,7 +107,7 @@ public class FrogspawnBlock extends Block {
 		int i = randomSource.nextInt(2, 6);
 
 		for (int j = 1; j <= i; j++) {
-			Tadpole tadpole = EntityType.TADPOLE.create(serverLevel);
+			Tadpole tadpole = EntityType.TADPOLE.create(serverLevel, EntitySpawnReason.BREEDING);
 			if (tadpole != null) {
 				double d = (double)blockPos.getX() + this.getRandomTadpolePositionOffset(randomSource);
 				double e = (double)blockPos.getZ() + this.getRandomTadpolePositionOffset(randomSource);

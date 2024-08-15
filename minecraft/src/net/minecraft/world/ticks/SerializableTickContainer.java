@@ -1,8 +1,7 @@
 package net.minecraft.world.ticks;
 
-import java.util.function.Function;
-import net.minecraft.nbt.Tag;
+import java.util.List;
 
 public interface SerializableTickContainer<T> {
-	Tag save(long l, Function<T, String> function);
+	List<SavedTick<T>> pack(long l);
 }

@@ -11,6 +11,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.projectile.FireworkRocketEntity;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.raid.Raid;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
@@ -51,10 +52,9 @@ public class CelebrateVillagersSurvivedRaid extends Behavior<Villager> {
 			DyeColor dyeColor = Util.getRandom(DyeColor.values(), randomSource);
 			int i = randomSource.nextInt(3);
 			ItemStack itemStack = this.getFirework(dyeColor, i);
-			FireworkRocketEntity fireworkRocketEntity = new FireworkRocketEntity(
-				villager.level(), villager, villager.getX(), villager.getEyeY(), villager.getZ(), itemStack
+			Projectile.spawnProjectile(
+				new FireworkRocketEntity(villager.level(), villager, villager.getX(), villager.getEyeY(), villager.getZ(), itemStack), serverLevel, itemStack
 			);
-			villager.level().addFreshEntity(fireworkRocketEntity);
 		}
 	}
 

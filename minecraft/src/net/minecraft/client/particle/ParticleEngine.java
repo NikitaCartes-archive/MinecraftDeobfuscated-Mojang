@@ -37,7 +37,6 @@ import net.minecraft.ReportedException;
 import net.minecraft.Util;
 import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.texture.SpriteLoader;
 import net.minecraft.client.renderer.texture.TextureAtlas;
@@ -73,11 +72,7 @@ public class ParticleEngine implements PreparableReloadListener {
 	private static final ResourceLocation PARTICLES_ATLAS_INFO = ResourceLocation.withDefaultNamespace("particles");
 	private static final int MAX_PARTICLES_PER_LAYER = 16384;
 	private static final List<ParticleRenderType> RENDER_ORDER = ImmutableList.of(
-		ParticleRenderType.TERRAIN_SHEET,
-		ParticleRenderType.PARTICLE_SHEET_OPAQUE,
-		ParticleRenderType.PARTICLE_SHEET_LIT,
-		ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT,
-		ParticleRenderType.CUSTOM
+		ParticleRenderType.TERRAIN_SHEET, ParticleRenderType.PARTICLE_SHEET_OPAQUE, ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT, ParticleRenderType.CUSTOM
 	);
 	protected ClientLevel level;
 	private final Map<ParticleRenderType, Queue<Particle>> particles = Maps.<ParticleRenderType, Queue<Particle>>newIdentityHashMap();
@@ -447,7 +442,6 @@ public class ParticleEngine implements PreparableReloadListener {
 		for (ParticleRenderType particleRenderType : RENDER_ORDER) {
 			Queue<Particle> queue = (Queue<Particle>)this.particles.get(particleRenderType);
 			if (queue != null && !queue.isEmpty()) {
-				RenderSystem.setShader(GameRenderer::getParticleShader);
 				Tesselator tesselator = Tesselator.getInstance();
 				BufferBuilder bufferBuilder = particleRenderType.begin(tesselator, this.textureManager);
 				if (bufferBuilder != null) {

@@ -34,6 +34,7 @@ import net.minecraft.advancements.critereon.PlayerTrigger;
 import net.minecraft.advancements.critereon.StatePropertiesPredicate;
 import net.minecraft.advancements.critereon.SummonedEntityTrigger;
 import net.minecraft.advancements.critereon.TagPredicate;
+import net.minecraft.core.HolderGetter;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.advancements.AdvancementSubProvider;
@@ -44,9 +45,11 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.monster.piglin.PiglinAi;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.MultiNoiseBiomeSourceParameterList;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.RespawnAnchorBlock;
 import net.minecraft.world.level.levelgen.structure.BuiltinStructures;
@@ -55,35 +58,11 @@ import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.predicates.LootItemEntityPropertyCondition;
 
 public class VanillaNetherAdvancements implements AdvancementSubProvider {
-	private static final ContextAwarePredicate DISTRACT_PIGLIN_PLAYER_ARMOR_PREDICATE = ContextAwarePredicate.create(
-		LootItemEntityPropertyCondition.hasProperties(
-				LootContext.EntityTarget.THIS,
-				EntityPredicate.Builder.entity().equipment(EntityEquipmentPredicate.Builder.equipment().head(ItemPredicate.Builder.item().of(Items.GOLDEN_HELMET)))
-			)
-			.invert()
-			.build(),
-		LootItemEntityPropertyCondition.hasProperties(
-				LootContext.EntityTarget.THIS,
-				EntityPredicate.Builder.entity().equipment(EntityEquipmentPredicate.Builder.equipment().chest(ItemPredicate.Builder.item().of(Items.GOLDEN_CHESTPLATE)))
-			)
-			.invert()
-			.build(),
-		LootItemEntityPropertyCondition.hasProperties(
-				LootContext.EntityTarget.THIS,
-				EntityPredicate.Builder.entity().equipment(EntityEquipmentPredicate.Builder.equipment().legs(ItemPredicate.Builder.item().of(Items.GOLDEN_LEGGINGS)))
-			)
-			.invert()
-			.build(),
-		LootItemEntityPropertyCondition.hasProperties(
-				LootContext.EntityTarget.THIS,
-				EntityPredicate.Builder.entity().equipment(EntityEquipmentPredicate.Builder.equipment().feet(ItemPredicate.Builder.item().of(Items.GOLDEN_BOOTS)))
-			)
-			.invert()
-			.build()
-	);
-
 	@Override
 	public void generate(HolderLookup.Provider provider, Consumer<AdvancementHolder> consumer) {
+		HolderGetter<EntityType<?>> holderGetter = provider.lookupOrThrow(Registries.ENTITY_TYPE);
+		HolderGetter<Item> holderGetter2 = provider.lookupOrThrow(Registries.ITEM);
+		HolderGetter<Block> holderGetter3 = provider.lookupOrThrow(Registries.BLOCK);
 		AdvancementHolder advancementHolder = Advancement.Builder.advancement()
 			.display(
 				Blocks.RED_NETHER_BRICKS,
@@ -113,10 +92,10 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 			.addCriterion(
 				"killed_ghast",
 				KilledTrigger.TriggerInstance.playerKilledEntity(
-					EntityPredicate.Builder.entity().of(EntityType.GHAST),
+					EntityPredicate.Builder.entity().of(holderGetter, EntityType.GHAST),
 					DamageSourcePredicate.Builder.damageType()
 						.tag(TagPredicate.is(DamageTypeTags.IS_PROJECTILE))
-						.direct(EntityPredicate.Builder.entity().of(EntityType.FIREBALL))
+						.direct(EntityPredicate.Builder.entity().of(holderGetter, EntityType.FIREBALL))
 				)
 			)
 			.save(consumer, "nether/return_to_sender");
@@ -170,7 +149,7 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 			.addCriterion(
 				"killed_ghast",
 				KilledTrigger.TriggerInstance.playerKilledEntity(
-					EntityPredicate.Builder.entity().of(EntityType.GHAST).located(LocationPredicate.Builder.inDimension(Level.OVERWORLD))
+					EntityPredicate.Builder.entity().of(holderGetter, EntityType.GHAST).located(LocationPredicate.Builder.inDimension(Level.OVERWORLD))
 				)
 			)
 			.save(consumer, "nether/uneasy_alliance");
@@ -200,7 +179,7 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 				true,
 				false
 			)
-			.addCriterion("summoned", SummonedEntityTrigger.TriggerInstance.summonedEntity(EntityPredicate.Builder.entity().of(EntityType.WITHER)))
+			.addCriterion("summoned", SummonedEntityTrigger.TriggerInstance.summonedEntity(EntityPredicate.Builder.entity().of(holderGetter, EntityType.WITHER)))
 			.save(consumer, "nether/summon_wither");
 		AdvancementHolder advancementHolder6 = Advancement.Builder.advancement()
 			.parent(advancementHolder3)
@@ -395,7 +374,8 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 			.addCriterion(
 				"use_lodestone",
 				ItemUsedOnLocationTrigger.TriggerInstance.itemUsedOnBlock(
-					LocationPredicate.Builder.location().setBlock(BlockPredicate.Builder.block().of(Blocks.LODESTONE)), ItemPredicate.Builder.item().of(Items.COMPASS)
+					LocationPredicate.Builder.location().setBlock(BlockPredicate.Builder.block().of(holderGetter3, Blocks.LODESTONE)),
+					ItemPredicate.Builder.item().of(holderGetter2, Items.COMPASS)
 				)
 			)
 			.save(consumer, "nether/use_lodestone");
@@ -431,10 +411,10 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 					LocationPredicate.Builder.location()
 						.setBlock(
 							BlockPredicate.Builder.block()
-								.of(Blocks.RESPAWN_ANCHOR)
+								.of(holderGetter3, Blocks.RESPAWN_ANCHOR)
 								.setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(RespawnAnchorBlock.CHARGE, 4))
 						),
-					ItemPredicate.Builder.item().of(Blocks.GLOWSTONE)
+					ItemPredicate.Builder.item().of(holderGetter2, Blocks.GLOWSTONE)
 				)
 			)
 			.save(consumer, "nether/charge_respawn_anchor");
@@ -453,8 +433,8 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 			.addCriterion(
 				"used_warped_fungus_on_a_stick",
 				ItemDurabilityTrigger.TriggerInstance.changedDurability(
-					Optional.of(EntityPredicate.wrap(EntityPredicate.Builder.entity().vehicle(EntityPredicate.Builder.entity().of(EntityType.STRIDER)))),
-					Optional.of(ItemPredicate.Builder.item().of(Items.WARPED_FUNGUS_ON_A_STICK).build()),
+					Optional.of(EntityPredicate.wrap(EntityPredicate.Builder.entity().vehicle(EntityPredicate.Builder.entity().of(holderGetter, EntityType.STRIDER)))),
+					Optional.of(ItemPredicate.Builder.item().of(holderGetter2, Items.WARPED_FUNGUS_ON_A_STICK).build()),
 					MinMaxBounds.Ints.ANY
 				)
 			)
@@ -476,7 +456,7 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 				DistanceTrigger.TriggerInstance.rideEntityInLava(
 					EntityPredicate.Builder.entity()
 						.located(LocationPredicate.Builder.inDimension(Level.OVERWORLD))
-						.vehicle(EntityPredicate.Builder.entity().of(EntityType.STRIDER)),
+						.vehicle(EntityPredicate.Builder.entity().of(holderGetter, EntityType.STRIDER)),
 					DistancePredicate.horizontal(MinMaxBounds.Doubles.atLeast(50.0))
 				)
 			)
@@ -532,6 +512,36 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 			.addCriterion("loot_bastion_hoglin_stable", LootTableTrigger.TriggerInstance.lootTableUsed(BuiltInLootTables.BASTION_HOGLIN_STABLE))
 			.addCriterion("loot_bastion_bridge", LootTableTrigger.TriggerInstance.lootTableUsed(BuiltInLootTables.BASTION_BRIDGE))
 			.save(consumer, "nether/loot_bastion");
+		ContextAwarePredicate contextAwarePredicate = ContextAwarePredicate.create(
+			LootItemEntityPropertyCondition.hasProperties(
+					LootContext.EntityTarget.THIS,
+					EntityPredicate.Builder.entity()
+						.equipment(EntityEquipmentPredicate.Builder.equipment().head(ItemPredicate.Builder.item().of(holderGetter2, Items.GOLDEN_HELMET)))
+				)
+				.invert()
+				.build(),
+			LootItemEntityPropertyCondition.hasProperties(
+					LootContext.EntityTarget.THIS,
+					EntityPredicate.Builder.entity()
+						.equipment(EntityEquipmentPredicate.Builder.equipment().chest(ItemPredicate.Builder.item().of(holderGetter2, Items.GOLDEN_CHESTPLATE)))
+				)
+				.invert()
+				.build(),
+			LootItemEntityPropertyCondition.hasProperties(
+					LootContext.EntityTarget.THIS,
+					EntityPredicate.Builder.entity()
+						.equipment(EntityEquipmentPredicate.Builder.equipment().legs(ItemPredicate.Builder.item().of(holderGetter2, Items.GOLDEN_LEGGINGS)))
+				)
+				.invert()
+				.build(),
+			LootItemEntityPropertyCondition.hasProperties(
+					LootContext.EntityTarget.THIS,
+					EntityPredicate.Builder.entity()
+						.equipment(EntityEquipmentPredicate.Builder.equipment().feet(ItemPredicate.Builder.item().of(holderGetter2, Items.GOLDEN_BOOTS)))
+				)
+				.invert()
+				.build()
+		);
 		Advancement.Builder.advancement()
 			.parent(advancementHolder)
 			.requirements(AdvancementRequirements.Strategy.OR)
@@ -548,17 +558,21 @@ public class VanillaNetherAdvancements implements AdvancementSubProvider {
 			.addCriterion(
 				"distract_piglin",
 				PickedUpItemTrigger.TriggerInstance.thrownItemPickedUpByEntity(
-					DISTRACT_PIGLIN_PLAYER_ARMOR_PREDICATE,
-					Optional.of(ItemPredicate.Builder.item().of(ItemTags.PIGLIN_LOVED).build()),
-					Optional.of(EntityPredicate.wrap(EntityPredicate.Builder.entity().of(EntityType.PIGLIN).flags(EntityFlagsPredicate.Builder.flags().setIsBaby(false))))
+					contextAwarePredicate,
+					Optional.of(ItemPredicate.Builder.item().of(holderGetter2, ItemTags.PIGLIN_LOVED).build()),
+					Optional.of(
+						EntityPredicate.wrap(EntityPredicate.Builder.entity().of(holderGetter, EntityType.PIGLIN).flags(EntityFlagsPredicate.Builder.flags().setIsBaby(false)))
+					)
 				)
 			)
 			.addCriterion(
 				"distract_piglin_directly",
 				PlayerInteractTrigger.TriggerInstance.itemUsedOnEntity(
-					Optional.of(DISTRACT_PIGLIN_PLAYER_ARMOR_PREDICATE),
-					ItemPredicate.Builder.item().of(PiglinAi.BARTERING_ITEM),
-					Optional.of(EntityPredicate.wrap(EntityPredicate.Builder.entity().of(EntityType.PIGLIN).flags(EntityFlagsPredicate.Builder.flags().setIsBaby(false))))
+					Optional.of(contextAwarePredicate),
+					ItemPredicate.Builder.item().of(holderGetter2, PiglinAi.BARTERING_ITEM),
+					Optional.of(
+						EntityPredicate.wrap(EntityPredicate.Builder.entity().of(holderGetter, EntityType.PIGLIN).flags(EntityFlagsPredicate.Builder.flags().setIsBaby(false)))
+					)
 				)
 			)
 			.save(consumer, "nether/distract_piglin");

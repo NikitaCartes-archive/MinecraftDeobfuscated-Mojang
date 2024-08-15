@@ -8,7 +8,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeManager;
@@ -23,12 +23,12 @@ public class KnowledgeBookItem extends Item {
 	}
 
 	@Override
-	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand) {
+	public InteractionResult use(Level level, Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
 		List<ResourceLocation> list = itemStack.getOrDefault(DataComponents.RECIPES, List.of());
 		itemStack.consume(1, player);
 		if (list.isEmpty()) {
-			return InteractionResultHolder.fail(itemStack);
+			return InteractionResult.FAIL;
 		} else {
 			if (!level.isClientSide) {
 				RecipeManager recipeManager = level.getServer().getRecipeManager();
@@ -38,7 +38,7 @@ public class KnowledgeBookItem extends Item {
 					Optional<RecipeHolder<?>> optional = recipeManager.byKey(resourceLocation);
 					if (!optional.isPresent()) {
 						LOGGER.error("Invalid recipe: {}", resourceLocation);
-						return InteractionResultHolder.fail(itemStack);
+						return InteractionResult.FAIL;
 					}
 
 					list2.add((RecipeHolder)optional.get());
@@ -48,7 +48,7 @@ public class KnowledgeBookItem extends Item {
 				player.awardStat(Stats.ITEM_USED.get(this));
 			}
 
-			return InteractionResultHolder.sidedSuccess(itemStack, level.isClientSide());
+			return InteractionResult.SUCCESS;
 		}
 	}
 }

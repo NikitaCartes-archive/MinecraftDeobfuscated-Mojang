@@ -14,6 +14,10 @@ public class LayerDefinition {
 		this.material = materialDefinition;
 	}
 
+	public LayerDefinition apply(MeshTransformer meshTransformer) {
+		return new LayerDefinition(meshTransformer.apply(this.mesh), this.material);
+	}
+
 	public ModelPart bakeRoot() {
 		return this.mesh.getRoot().bake(this.material.xTexSize, this.material.yTexSize);
 	}

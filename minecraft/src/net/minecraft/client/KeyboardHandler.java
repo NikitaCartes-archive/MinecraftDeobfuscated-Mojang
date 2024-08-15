@@ -333,6 +333,7 @@ public class KeyboardHandler {
 
 	public void keyPress(long l, int i, int j, int k, int m) {
 		if (l == this.minecraft.getWindow().getWindow()) {
+			this.minecraft.getFramerateLimitTracker().onInputReceived();
 			boolean bl = InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 292);
 			if (this.debugCrashKeyTime > 0L) {
 				if (!InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), 67) || !bl) {
@@ -462,7 +463,7 @@ public class KeyboardHandler {
 					}
 
 					if (this.minecraft.getDebugOverlay().showProfilerChart() && !bl && i >= 48 && i <= 57) {
-						this.minecraft.debugFpsMeterKeyPress(i - 48);
+						this.minecraft.getDebugOverlay().getProfilerPieChart().profilerPieChartKeyPress(i - 48);
 					}
 				}
 

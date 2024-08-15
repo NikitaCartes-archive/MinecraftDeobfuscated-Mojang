@@ -17,7 +17,6 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
@@ -73,17 +72,19 @@ public class RespawnAnchorBlock extends Block {
 	}
 
 	@Override
-	protected ItemInteractionResult useItemOn(
+	protected InteractionResult useItemOn(
 		ItemStack itemStack, BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
 	) {
 		if (isRespawnFuel(itemStack) && canBeCharged(blockState)) {
 			charge(player, level, blockPos, blockState);
 			itemStack.consume(1, player);
-			return ItemInteractionResult.sidedSuccess(level.isClientSide);
+			return InteractionResult.SUCCESS;
 		} else {
-			return interactionHand == InteractionHand.MAIN_HAND && isRespawnFuel(player.getItemInHand(InteractionHand.OFF_HAND)) && canBeCharged(blockState)
-				? ItemInteractionResult.SKIP_DEFAULT_BLOCK_INTERACTION
-				: ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+			return (InteractionResult)(interactionHand == InteractionHand.MAIN_HAND
+					&& isRespawnFuel(player.getItemInHand(InteractionHand.OFF_HAND))
+					&& canBeCharged(blockState)
+				? InteractionResult.PASS
+				: InteractionResult.TRY_WITH_EMPTY_HAND);
 		}
 	}
 
@@ -96,7 +97,7 @@ public class RespawnAnchorBlock extends Block {
 				this.explode(blockState, level, blockPos);
 			}
 
-			return InteractionResult.sidedSuccess(level.isClientSide);
+			return InteractionResult.SUCCESS;
 		} else {
 			if (!level.isClientSide) {
 				ServerPlayer serverPlayer = (ServerPlayer)player;
@@ -112,7 +113,7 @@ public class RespawnAnchorBlock extends Block {
 						1.0F,
 						1.0F
 					);
-					return InteractionResult.SUCCESS;
+					return InteractionResult.SUCCESS_SERVER;
 				}
 			}
 

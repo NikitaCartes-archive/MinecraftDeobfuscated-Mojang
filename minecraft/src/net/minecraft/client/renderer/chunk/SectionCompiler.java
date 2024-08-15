@@ -54,7 +54,7 @@ public class SectionCompiler {
 
 		for (BlockPos blockPos3 : BlockPos.betweenClosed(blockPos, blockPos2)) {
 			BlockState blockState = renderChunkRegion.getBlockState(blockPos3);
-			if (blockState.isSolidRender(renderChunkRegion, blockPos3)) {
+			if (blockState.isSolidRender()) {
 				visGraph.setOpaque(blockPos3);
 			}
 

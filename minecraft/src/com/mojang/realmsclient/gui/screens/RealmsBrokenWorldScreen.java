@@ -23,11 +23,13 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.realms.RealmsScreen;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 import org.slf4j.Logger;
 
@@ -244,22 +246,16 @@ public class RealmsBrokenWorldScreen extends RealmsScreen {
 			resourceLocation = RealmsTextureManager.worldTemplate(String.valueOf(this.serverData.minigameId), this.serverData.minigameImage);
 		}
 
-		if (!bl) {
-			guiGraphics.setColor(0.56F, 0.56F, 0.56F, 1.0F);
-		} else if (bl) {
-			float f = 0.9F + 0.1F * Mth.cos((float)this.animTick * 0.2F);
-			guiGraphics.setColor(f, f, f, 1.0F);
-		}
-
-		guiGraphics.blit(resourceLocation, i + 3, j + 3, 0.0F, 0.0F, 74, 74, 74, 74);
 		if (bl) {
-			guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
+			float f = 0.9F + 0.1F * Mth.cos((float)this.animTick * 0.2F);
+			guiGraphics.blit(RenderType::guiTextured, resourceLocation, i + 3, j + 3, 0.0F, 0.0F, 74, 74, 74, 74, 74, 74, ARGB.colorFromFloat(1.0F, f, f, f));
+			guiGraphics.blitSprite(RenderType::guiTextured, SLOT_FRAME_SPRITE, i, j, 80, 80);
 		} else {
-			guiGraphics.setColor(0.56F, 0.56F, 0.56F, 1.0F);
+			int o = ARGB.colorFromFloat(1.0F, 0.56F, 0.56F, 0.56F);
+			guiGraphics.blit(RenderType::guiTextured, resourceLocation, i + 3, j + 3, 0.0F, 0.0F, 74, 74, 74, 74, 74, 74, o);
+			guiGraphics.blitSprite(RenderType::guiTextured, SLOT_FRAME_SPRITE, i, j, 80, 80, o);
 		}
 
-		guiGraphics.blitSprite(SLOT_FRAME_SPRITE, i, j, 80, 80);
 		guiGraphics.drawCenteredString(this.font, string, i + 40, j + 66, -1);
-		guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
 	}
 }

@@ -33,6 +33,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.debugchart.BandwidthDebugChart;
 import net.minecraft.client.gui.components.debugchart.FpsDebugChart;
 import net.minecraft.client.gui.components.debugchart.PingDebugChart;
+import net.minecraft.client.gui.components.debugchart.ProfilerPieChart;
 import net.minecraft.client.gui.components.debugchart.TpsDebugChart;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.renderer.PostChain;
@@ -110,6 +111,7 @@ public class DebugScreenOverlay {
 	private final TpsDebugChart tpsChart;
 	private final PingDebugChart pingChart;
 	private final BandwidthDebugChart bandwidthChart;
+	private final ProfilerPieChart profilerPieChart;
 
 	public DebugScreenOverlay(Minecraft minecraft) {
 		this.minecraft = minecraft;
@@ -119,6 +121,7 @@ public class DebugScreenOverlay {
 		this.tpsChart = new TpsDebugChart(this.font, this.tickTimeLogger, () -> minecraft.level.tickRateManager().millisecondsPerTick());
 		this.pingChart = new PingDebugChart(this.font, this.pingLogger);
 		this.bandwidthChart = new BandwidthDebugChart(this.font, this.bandwidthLogger);
+		this.profilerPieChart = new ProfilerPieChart(this.font);
 	}
 
 	public void clearChunkCache() {
@@ -131,30 +134,36 @@ public class DebugScreenOverlay {
 		Entity entity = this.minecraft.getCameraEntity();
 		this.block = entity.pick(20.0, 0.0F, false);
 		this.liquid = entity.pick(20.0, 0.0F, true);
-		guiGraphics.drawManaged(() -> {
-			this.drawGameInformation(guiGraphics);
-			this.drawSystemInformation(guiGraphics);
-			if (this.renderFpsCharts) {
-				int i = guiGraphics.guiWidth();
-				int j = i / 2;
-				this.fpsChart.drawChart(guiGraphics, 0, this.fpsChart.getWidth(j));
-				if (this.tickTimeLogger.size() > 0) {
-					int k = this.tpsChart.getWidth(j);
-					this.tpsChart.drawChart(guiGraphics, i - k, k);
-				}
+		this.drawGameInformation(guiGraphics);
+		this.drawSystemInformation(guiGraphics);
+		this.profilerPieChart.setBottomOffset(10);
+		if (this.renderFpsCharts) {
+			int i = guiGraphics.guiWidth();
+			int j = i / 2;
+			this.fpsChart.drawChart(guiGraphics, 0, this.fpsChart.getWidth(j));
+			if (this.tickTimeLogger.size() > 0) {
+				int k = this.tpsChart.getWidth(j);
+				this.tpsChart.drawChart(guiGraphics, i - k, k);
 			}
 
-			if (this.renderNetworkCharts) {
-				int i = guiGraphics.guiWidth();
-				int j = i / 2;
-				if (!this.minecraft.isLocalServer()) {
-					this.bandwidthChart.drawChart(guiGraphics, 0, this.bandwidthChart.getWidth(j));
-				}
+			this.profilerPieChart.setBottomOffset(this.tpsChart.getFullHeight());
+		}
 
-				int k = this.pingChart.getWidth(j);
-				this.pingChart.drawChart(guiGraphics, i - k, k);
+		if (this.renderNetworkCharts) {
+			int i = guiGraphics.guiWidth();
+			int j = i / 2;
+			if (!this.minecraft.isLocalServer()) {
+				this.bandwidthChart.drawChart(guiGraphics, 0, this.bandwidthChart.getWidth(j));
 			}
-		});
+
+			int k = this.pingChart.getWidth(j);
+			this.pingChart.drawChart(guiGraphics, i - k, k);
+			this.profilerPieChart.setBottomOffset(this.pingChart.getFullHeight());
+		}
+
+		this.minecraft.getProfiler().push("profilerPie");
+		this.profilerPieChart.render(guiGraphics);
+		this.minecraft.getProfiler().pop();
 		this.minecraft.getProfiler().pop();
 	}
 
@@ -421,7 +430,7 @@ public class DebugScreenOverlay {
 
 			PostChain postChain = this.minecraft.gameRenderer.currentEffect();
 			if (postChain != null) {
-				list.add("Shader: " + postChain.getName());
+				list.add("Shader: " + postChain.getId());
 			}
 
 			list.add(
@@ -614,6 +623,10 @@ public class DebugScreenOverlay {
 
 	public LocalSampleLogger getBandwidthLogger() {
 		return this.bandwidthLogger;
+	}
+
+	public ProfilerPieChart getProfilerPieChart() {
+		return this.profilerPieChart;
 	}
 
 	public void logRemoteSample(long[] ls, RemoteDebugSampleType remoteDebugSampleType) {

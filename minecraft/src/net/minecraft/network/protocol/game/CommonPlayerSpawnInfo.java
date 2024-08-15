@@ -21,7 +21,8 @@ public record CommonPlayerSpawnInfo(
 	boolean isDebug,
 	boolean isFlat,
 	Optional<GlobalPos> lastDeathLocation,
-	int portalCooldown
+	int portalCooldown,
+	int seaLevel
 ) {
 	public CommonPlayerSpawnInfo(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
 		this(
@@ -33,6 +34,7 @@ public record CommonPlayerSpawnInfo(
 			registryFriendlyByteBuf.readBoolean(),
 			registryFriendlyByteBuf.readBoolean(),
 			registryFriendlyByteBuf.readOptional(FriendlyByteBuf::readGlobalPos),
+			registryFriendlyByteBuf.readVarInt(),
 			registryFriendlyByteBuf.readVarInt()
 		);
 	}
@@ -47,5 +49,6 @@ public record CommonPlayerSpawnInfo(
 		registryFriendlyByteBuf.writeBoolean(this.isFlat);
 		registryFriendlyByteBuf.writeOptional(this.lastDeathLocation, FriendlyByteBuf::writeGlobalPos);
 		registryFriendlyByteBuf.writeVarInt(this.portalCooldown);
+		registryFriendlyByteBuf.writeVarInt(this.seaLevel);
 	}
 }

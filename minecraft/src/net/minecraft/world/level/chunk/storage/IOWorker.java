@@ -1,15 +1,14 @@
 package net.minecraft.world.level.chunk.storage;
 
-import com.google.common.collect.Maps;
 import com.mojang.datafixers.util.Either;
 import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.longs.Long2ObjectLinkedOpenHashMap;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.BitSet;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.LinkedHashMap;
 import java.util.Optional;
+import java.util.SequencedMap;
 import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -33,7 +32,7 @@ public class IOWorker implements ChunkScanAccess, AutoCloseable {
 	private final AtomicBoolean shutdownRequested = new AtomicBoolean();
 	private final ProcessorMailbox<StrictQueue.IntRunnable> mailbox;
 	private final RegionFileStorage storage;
-	private final Map<ChunkPos, IOWorker.PendingStore> pendingWrites = Maps.<ChunkPos, IOWorker.PendingStore>newLinkedHashMap();
+	private final SequencedMap<ChunkPos, IOWorker.PendingStore> pendingWrites = new LinkedHashMap();
 	private final Long2ObjectLinkedOpenHashMap<CompletableFuture<BitSet>> regionCacheForBlender = new Long2ObjectLinkedOpenHashMap<>();
 	private static final int REGION_CACHE_SIZE = 1024;
 
@@ -118,8 +117,13 @@ public class IOWorker implements ChunkScanAccess, AutoCloseable {
 	}
 
 	public CompletableFuture<Void> store(ChunkPos chunkPos, @Nullable CompoundTag compoundTag) {
+		return this.store(chunkPos, () -> compoundTag);
+	}
+
+	public CompletableFuture<Void> store(ChunkPos chunkPos, Supplier<CompoundTag> supplier) {
 		return this.submitTask(
 				() -> {
+					CompoundTag compoundTag = (CompoundTag)supplier.get();
 					IOWorker.PendingStore pendingStore = (IOWorker.PendingStore)this.pendingWrites
 						.computeIfAbsent(chunkPos, chunkPosxx -> new IOWorker.PendingStore(compoundTag));
 					pendingStore.data = compoundTag;
@@ -198,10 +202,8 @@ public class IOWorker implements ChunkScanAccess, AutoCloseable {
 	}
 
 	private void storePendingChunk() {
-		if (!this.pendingWrites.isEmpty()) {
-			Iterator<Entry<ChunkPos, IOWorker.PendingStore>> iterator = this.pendingWrites.entrySet().iterator();
-			Entry<ChunkPos, IOWorker.PendingStore> entry = (Entry<ChunkPos, IOWorker.PendingStore>)iterator.next();
-			iterator.remove();
+		Entry<ChunkPos, IOWorker.PendingStore> entry = this.pendingWrites.pollFirstEntry();
+		if (entry != null) {
 			this.runStore((ChunkPos)entry.getKey(), (IOWorker.PendingStore)entry.getValue());
 			this.tellStorePending();
 		}

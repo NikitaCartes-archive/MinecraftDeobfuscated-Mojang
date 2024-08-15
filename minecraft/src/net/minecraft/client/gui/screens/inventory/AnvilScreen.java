@@ -5,6 +5,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ServerboundRenameItemPacket;
@@ -114,7 +115,9 @@ public class AnvilScreen extends ItemCombinerScreen<AnvilMenu> {
 	@Override
 	protected void renderBg(GuiGraphics guiGraphics, float f, int i, int j) {
 		super.renderBg(guiGraphics, f, i, j);
-		guiGraphics.blitSprite(this.menu.getSlot(0).hasItem() ? TEXT_FIELD_SPRITE : TEXT_FIELD_DISABLED_SPRITE, this.leftPos + 59, this.topPos + 20, 110, 16);
+		guiGraphics.blitSprite(
+			RenderType::guiTextured, this.menu.getSlot(0).hasItem() ? TEXT_FIELD_SPRITE : TEXT_FIELD_DISABLED_SPRITE, this.leftPos + 59, this.topPos + 20, 110, 16
+		);
 	}
 
 	@Override
@@ -125,7 +128,7 @@ public class AnvilScreen extends ItemCombinerScreen<AnvilMenu> {
 	@Override
 	protected void renderErrorIcon(GuiGraphics guiGraphics, int i, int j) {
 		if ((this.menu.getSlot(0).hasItem() || this.menu.getSlot(1).hasItem()) && !this.menu.getSlot(this.menu.getResultSlot()).hasItem()) {
-			guiGraphics.blitSprite(ERROR_SPRITE, i + 99, j + 45, 28, 21);
+			guiGraphics.blitSprite(RenderType::guiTextured, ERROR_SPRITE, i + 99, j + 45, 28, 21);
 		}
 	}
 

@@ -10,16 +10,14 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.client.renderer.entity.state.SkeletonRenderState;
 import net.minecraft.util.Mth;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
-import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.monster.RangedAttackMob;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
 @Environment(EnvType.CLIENT)
-public class SkeletonModel<T extends Mob & RangedAttackMob> extends HumanoidModel<T> {
+public class SkeletonModel<S extends SkeletonRenderState> extends HumanoidModel<S> {
 	public SkeletonModel(ModelPart modelPart) {
 		super(modelPart);
 	}
@@ -46,41 +44,34 @@ public class SkeletonModel<T extends Mob & RangedAttackMob> extends HumanoidMode
 		);
 	}
 
-	public void prepareMobModel(T mob, float f, float g, float h) {
-		this.rightArmPose = HumanoidModel.ArmPose.EMPTY;
-		this.leftArmPose = HumanoidModel.ArmPose.EMPTY;
-		ItemStack itemStack = mob.getItemInHand(InteractionHand.MAIN_HAND);
-		if (itemStack.is(Items.BOW) && mob.isAggressive()) {
-			if (mob.getMainArm() == HumanoidArm.RIGHT) {
-				this.rightArmPose = HumanoidModel.ArmPose.BOW_AND_ARROW;
-			} else {
-				this.leftArmPose = HumanoidModel.ArmPose.BOW_AND_ARROW;
-			}
-		}
-
-		super.prepareMobModel(mob, f, g, h);
+	protected HumanoidModel.ArmPose getArmPose(S skeletonRenderState, HumanoidArm humanoidArm) {
+		return skeletonRenderState.getMainHandItem().is(Items.BOW) && skeletonRenderState.isAggressive && skeletonRenderState.mainArm == humanoidArm
+			? HumanoidModel.ArmPose.BOW_AND_ARROW
+			: HumanoidModel.ArmPose.EMPTY;
 	}
 
-	public void setupAnim(T mob, float f, float g, float h, float i, float j) {
-		super.setupAnim(mob, f, g, h, i, j);
-		ItemStack itemStack = mob.getMainHandItem();
-		if (mob.isAggressive() && (itemStack.isEmpty() || !itemStack.is(Items.BOW))) {
-			float k = Mth.sin(this.attackTime * (float) Math.PI);
-			float l = Mth.sin((1.0F - (1.0F - this.attackTime) * (1.0F - this.attackTime)) * (float) Math.PI);
+	public void setupAnim(S skeletonRenderState) {
+		super.setupAnim(skeletonRenderState);
+		ItemStack itemStack = skeletonRenderState.getMainHandItem();
+		if (skeletonRenderState.isAggressive && !itemStack.is(Items.BOW)) {
+			float f = skeletonRenderState.attackTime;
+			float g = Mth.sin(f * (float) Math.PI);
+			float h = Mth.sin((1.0F - (1.0F - f) * (1.0F - f)) * (float) Math.PI);
 			this.rightArm.zRot = 0.0F;
 			this.leftArm.zRot = 0.0F;
-			this.rightArm.yRot = -(0.1F - k * 0.6F);
-			this.leftArm.yRot = 0.1F - k * 0.6F;
+			this.rightArm.yRot = -(0.1F - g * 0.6F);
+			this.leftArm.yRot = 0.1F - g * 0.6F;
 			this.rightArm.xRot = (float) (-Math.PI / 2);
 			this.leftArm.xRot = (float) (-Math.PI / 2);
-			this.rightArm.xRot -= k * 1.2F - l * 0.4F;
-			this.leftArm.xRot -= k * 1.2F - l * 0.4F;
-			AnimationUtils.bobArms(this.rightArm, this.leftArm, h);
+			this.rightArm.xRot -= g * 1.2F - h * 0.4F;
+			this.leftArm.xRot -= g * 1.2F - h * 0.4F;
+			AnimationUtils.bobArms(this.rightArm, this.leftArm, skeletonRenderState.ageInTicks);
 		}
 	}
 
 	@Override
 	public void translateToHand(HumanoidArm humanoidArm, PoseStack poseStack) {
+		this.root().translateAndRotate(poseStack);
 		float f = humanoidArm == HumanoidArm.RIGHT ? 1.0F : -1.0F;
 		ModelPart modelPart = this.getArm(humanoidArm);
 		modelPart.x += f;

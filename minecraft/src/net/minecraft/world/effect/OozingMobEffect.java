@@ -8,6 +8,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.Slime;
@@ -44,7 +45,7 @@ class OozingMobEffect extends MobEffect {
 	}
 
 	private void spawnSlimeOffspring(Level level, double d, double e, double f) {
-		Slime slime = EntityType.SLIME.create(level);
+		Slime slime = EntityType.SLIME.create(level, EntitySpawnReason.TRIGGERED);
 		if (slime != null) {
 			slime.setSize(2, true);
 			slime.moveTo(d, e, f, level.getRandom().nextFloat() * 360.0F, 0.0F);

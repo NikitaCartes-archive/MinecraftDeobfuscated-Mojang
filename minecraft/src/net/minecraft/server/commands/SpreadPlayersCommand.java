@@ -247,7 +247,8 @@ public class SpreadPlayersCommand {
 				(double)Mth.floor(position.z) + 0.5,
 				Set.of(),
 				entity.getYRot(),
-				entity.getXRot()
+				entity.getXRot(),
+				true
 			);
 			double e = Double.MAX_VALUE;
 

@@ -3,6 +3,7 @@ package net.minecraft.client.gui.screens.advancements;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
@@ -98,7 +99,7 @@ enum AdvancementTabType {
 			resourceLocation = sprites.middle();
 		}
 
-		guiGraphics.blitSprite(resourceLocation, i + this.getX(k), j + this.getY(k), this.width, this.height);
+		guiGraphics.blitSprite(RenderType::guiTextured, resourceLocation, i + this.getX(k), j + this.getY(k), this.width, this.height);
 	}
 
 	public void drawIcon(GuiGraphics guiGraphics, int i, int j, int k, ItemStack itemStack) {

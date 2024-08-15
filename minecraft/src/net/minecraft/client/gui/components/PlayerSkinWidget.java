@@ -83,20 +83,18 @@ public class PlayerSkinWidget extends AbstractWidget {
 	}
 
 	@Environment(EnvType.CLIENT)
-	static record Model(PlayerModel<?> wideModel, PlayerModel<?> slimModel) {
+	static record Model(PlayerModel wideModel, PlayerModel slimModel) {
 		public static PlayerSkinWidget.Model bake(EntityModelSet entityModelSet) {
-			PlayerModel<?> playerModel = new PlayerModel(entityModelSet.bakeLayer(ModelLayers.PLAYER), false);
-			PlayerModel<?> playerModel2 = new PlayerModel(entityModelSet.bakeLayer(ModelLayers.PLAYER_SLIM), true);
-			playerModel.young = false;
-			playerModel2.young = false;
+			PlayerModel playerModel = new PlayerModel(entityModelSet.bakeLayer(ModelLayers.PLAYER), false);
+			PlayerModel playerModel2 = new PlayerModel(entityModelSet.bakeLayer(ModelLayers.PLAYER_SLIM), true);
 			return new PlayerSkinWidget.Model(playerModel, playerModel2);
 		}
 
 		public void render(GuiGraphics guiGraphics, PlayerSkin playerSkin) {
 			guiGraphics.pose().pushPose();
 			guiGraphics.pose().scale(1.0F, 1.0F, -1.0F);
-			guiGraphics.pose().translate(0.0F, -1.5F, 0.0F);
-			PlayerModel<?> playerModel = playerSkin.model() == PlayerSkin.Model.SLIM ? this.slimModel : this.wideModel;
+			guiGraphics.pose().translate(0.0F, -1.501F, 0.0F);
+			PlayerModel playerModel = playerSkin.model() == PlayerSkin.Model.SLIM ? this.slimModel : this.wideModel;
 			RenderType renderType = playerModel.renderType(playerSkin.texture());
 			playerModel.renderToBuffer(guiGraphics.pose(), guiGraphics.bufferSource().getBuffer(renderType), 15728880, OverlayTexture.NO_OVERLAY);
 			guiGraphics.pose().popPose();

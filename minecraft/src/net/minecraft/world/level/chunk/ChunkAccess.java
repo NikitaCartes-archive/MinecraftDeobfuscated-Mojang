@@ -11,6 +11,7 @@ import it.unimi.dsi.fastutil.shorts.ShortList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
@@ -33,7 +34,6 @@ import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.biome.Biome;
@@ -54,11 +54,11 @@ import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.lighting.ChunkSkyLightSources;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraft.world.ticks.SerializableTickContainer;
+import net.minecraft.world.ticks.SavedTick;
 import net.minecraft.world.ticks.TickContainerAccess;
 import org.slf4j.Logger;
 
-public abstract class ChunkAccess implements BlockGetter, BiomeManager.NoiseBiomeSource, LightChunk, StructureAccess {
+public abstract class ChunkAccess implements BiomeManager.NoiseBiomeSource, LightChunk, StructureAccess {
 	public static final int NO_FILLED_SECTION = -1;
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final LongSet EMPTY_REFERENCE_SET = new LongOpenHashSet();
@@ -298,8 +298,8 @@ public abstract class ChunkAccess implements BlockGetter, BiomeManager.NoiseBiom
 		return this.postProcessing;
 	}
 
-	public void addPackedPostProcess(short s, int i) {
-		getOrCreateOffsetList(this.getPostProcessing(), i).add(s);
+	public void addPackedPostProcess(ShortList shortList, int i) {
+		getOrCreateOffsetList(this.getPostProcessing(), i).addAll(shortList);
 	}
 
 	public void setBlockEntityNbt(CompoundTag compoundTag) {
@@ -345,7 +345,7 @@ public abstract class ChunkAccess implements BlockGetter, BiomeManager.NoiseBiom
 
 	public abstract TickContainerAccess<Fluid> getFluidTicks();
 
-	public abstract ChunkAccess.TicksToSave getTicksForSerialization();
+	public abstract ChunkAccess.PackedTicks getTicksForSerialization(long l);
 
 	public UpgradeData getUpgradeData() {
 		return this.upgradeData;
@@ -358,10 +358,6 @@ public abstract class ChunkAccess implements BlockGetter, BiomeManager.NoiseBiom
 	@Nullable
 	public BlendingData getBlendingData() {
 		return this.blendingData;
-	}
-
-	public void setBlendingData(BlendingData blendingData) {
-		this.blendingData = blendingData;
 	}
 
 	public long getInhabitedTime() {
@@ -475,6 +471,6 @@ public abstract class ChunkAccess implements BlockGetter, BiomeManager.NoiseBiom
 		return this.skyLightSources;
 	}
 
-	public static record TicksToSave(SerializableTickContainer<Block> blocks, SerializableTickContainer<Fluid> fluids) {
+	public static record PackedTicks(List<SavedTick<Block>> blocks, List<SavedTick<Fluid>> fluids) {
 	}
 }

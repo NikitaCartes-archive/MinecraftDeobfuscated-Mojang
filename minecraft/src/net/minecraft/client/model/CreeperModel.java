@@ -9,11 +9,11 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.client.renderer.entity.state.CreeperRenderState;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Entity;
 
 @Environment(EnvType.CLIENT)
-public class CreeperModel<T extends Entity> extends HierarchicalModel<T> {
+public class CreeperModel extends EntityModel<CreeperRenderState> {
 	private final ModelPart root;
 	private final ModelPart head;
 	private final ModelPart rightHindLeg;
@@ -53,13 +53,14 @@ public class CreeperModel<T extends Entity> extends HierarchicalModel<T> {
 		return this.root;
 	}
 
-	@Override
-	public void setupAnim(T entity, float f, float g, float h, float i, float j) {
-		this.head.yRot = i * (float) (Math.PI / 180.0);
-		this.head.xRot = j * (float) (Math.PI / 180.0);
-		this.rightHindLeg.xRot = Mth.cos(f * 0.6662F) * 1.4F * g;
-		this.leftHindLeg.xRot = Mth.cos(f * 0.6662F + (float) Math.PI) * 1.4F * g;
-		this.rightFrontLeg.xRot = Mth.cos(f * 0.6662F + (float) Math.PI) * 1.4F * g;
-		this.leftFrontLeg.xRot = Mth.cos(f * 0.6662F) * 1.4F * g;
+	public void setupAnim(CreeperRenderState creeperRenderState) {
+		this.head.yRot = creeperRenderState.yRot * (float) (Math.PI / 180.0);
+		this.head.xRot = creeperRenderState.xRot * (float) (Math.PI / 180.0);
+		float f = creeperRenderState.walkAnimationSpeed;
+		float g = creeperRenderState.walkAnimationPos;
+		this.rightHindLeg.xRot = Mth.cos(g * 0.6662F) * 1.4F * f;
+		this.leftHindLeg.xRot = Mth.cos(g * 0.6662F + (float) Math.PI) * 1.4F * f;
+		this.rightFrontLeg.xRot = Mth.cos(g * 0.6662F + (float) Math.PI) * 1.4F * f;
+		this.leftFrontLeg.xRot = Mth.cos(g * 0.6662F) * 1.4F * f;
 	}
 }

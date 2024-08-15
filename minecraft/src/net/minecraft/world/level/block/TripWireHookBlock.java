@@ -24,6 +24,8 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.redstone.ExperimentalRedstoneUtils;
+import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
@@ -175,10 +177,8 @@ public class TripWireHookBlock extends Block {
 				for (int l = 1; l < j; l++) {
 					BlockPos blockPos3 = blockPos.relative(direction, l);
 					BlockState blockState5 = blockStates[l];
-					if (blockState5 != null) {
+					if (blockState5 != null && !level.getBlockState(blockPos3).isAir()) {
 						level.setBlock(blockPos3, blockState5.trySetValue(ATTACHED, Boolean.valueOf(bl5)), 3);
-						if (!level.getBlockState(blockPos3).isAir()) {
-						}
 					}
 				}
 			}
@@ -207,8 +207,10 @@ public class TripWireHookBlock extends Block {
 	}
 
 	private static void notifyNeighbors(Block block, Level level, BlockPos blockPos, Direction direction) {
-		level.updateNeighborsAt(blockPos, block);
-		level.updateNeighborsAt(blockPos.relative(direction.getOpposite()), block);
+		Direction direction2 = direction.getOpposite();
+		Orientation orientation = ExperimentalRedstoneUtils.randomOrientation(level, direction2, Direction.UP);
+		level.updateNeighborsAt(blockPos, block, orientation);
+		level.updateNeighborsAt(blockPos.relative(direction2), block, orientation);
 	}
 
 	@Override
@@ -221,8 +223,7 @@ public class TripWireHookBlock extends Block {
 			}
 
 			if (bl3) {
-				level.updateNeighborsAt(blockPos, this);
-				level.updateNeighborsAt(blockPos.relative(((Direction)blockState.getValue(FACING)).getOpposite()), this);
+				notifyNeighbors(this, level, blockPos, blockState.getValue(FACING));
 			}
 
 			super.onRemove(blockState, level, blockPos, blockState2, bl);

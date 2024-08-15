@@ -15,15 +15,16 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AnimationState;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
 
 public class Bat extends AmbientCreature {
@@ -217,9 +218,9 @@ public class Bat extends AmbientCreature {
 	}
 
 	public static boolean checkBatSpawnRules(
-		EntityType<Bat> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, RandomSource randomSource
+		EntityType<Bat> entityType, LevelAccessor levelAccessor, EntitySpawnReason entitySpawnReason, BlockPos blockPos, RandomSource randomSource
 	) {
-		if (blockPos.getY() >= levelAccessor.getSeaLevel()) {
+		if (blockPos.getY() >= levelAccessor.getHeightmapPos(Heightmap.Types.WORLD_SURFACE, blockPos).getY()) {
 			return false;
 		} else {
 			int i = levelAccessor.getMaxLocalRawBrightness(blockPos);
@@ -230,7 +231,7 @@ public class Bat extends AmbientCreature {
 				return false;
 			}
 
-			return i > randomSource.nextInt(j) ? false : checkMobSpawnRules(entityType, levelAccessor, mobSpawnType, blockPos, randomSource);
+			return i > randomSource.nextInt(j) ? false : checkMobSpawnRules(entityType, levelAccessor, entitySpawnReason, blockPos, randomSource);
 		}
 	}
 

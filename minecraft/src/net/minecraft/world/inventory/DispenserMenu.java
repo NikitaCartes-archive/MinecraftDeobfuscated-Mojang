@@ -23,21 +23,16 @@ public class DispenserMenu extends AbstractContainerMenu {
 		checkContainerSize(container, 9);
 		this.dispenser = container;
 		container.startOpen(inventory.player);
+		this.add3x3GridSlots(container, 62, 17);
+		this.addStandardInventorySlots(inventory, 8, 84);
+	}
 
-		for (int j = 0; j < 3; j++) {
-			for (int k = 0; k < 3; k++) {
-				this.addSlot(new Slot(container, k + j * 3, 62 + k * 18, 17 + j * 18));
+	protected void add3x3GridSlots(Container container, int i, int j) {
+		for (int k = 0; k < 3; k++) {
+			for (int l = 0; l < 3; l++) {
+				int m = l + k * 3;
+				this.addSlot(new Slot(container, m, i + l * 18, j + k * 18));
 			}
-		}
-
-		for (int j = 0; j < 3; j++) {
-			for (int k = 0; k < 9; k++) {
-				this.addSlot(new Slot(inventory, k + j * 9 + 9, 8 + k * 18, 84 + j * 18));
-			}
-		}
-
-		for (int j = 0; j < 9; j++) {
-			this.addSlot(new Slot(inventory, j, 8 + j * 18, 142));
 		}
 	}
 

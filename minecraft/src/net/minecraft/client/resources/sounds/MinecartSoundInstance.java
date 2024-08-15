@@ -6,6 +6,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
+import net.minecraft.world.entity.vehicle.NewMinecartBehavior;
 
 @Environment(EnvType.CLIENT)
 public class MinecartSoundInstance extends AbstractTickableSoundInstance {
@@ -40,9 +41,8 @@ public class MinecartSoundInstance extends AbstractTickableSoundInstance {
 
 	@Override
 	public void tick() {
-		if (this.minecart.isRemoved()) {
-			this.stop();
-		} else {
+		boolean bl = !this.minecart.isOnRails() && this.minecart.getBehavior() instanceof NewMinecartBehavior;
+		if (!this.minecart.isRemoved() && !bl) {
 			this.x = (double)((float)this.minecart.getX());
 			this.y = (double)((float)this.minecart.getY());
 			this.z = (double)((float)this.minecart.getZ());
@@ -54,6 +54,8 @@ public class MinecartSoundInstance extends AbstractTickableSoundInstance {
 				this.pitch = 0.0F;
 				this.volume = 0.0F;
 			}
+		} else {
+			this.stop();
 		}
 	}
 }

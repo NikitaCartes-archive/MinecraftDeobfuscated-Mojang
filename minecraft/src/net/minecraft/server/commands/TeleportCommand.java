@@ -266,7 +266,7 @@ public class TeleportCommand {
 		} else {
 			float i = Mth.wrapDegrees(g);
 			float j = Mth.wrapDegrees(h);
-			if (entity.teleportTo(serverLevel, d, e, f, set, i, j)) {
+			if (entity.teleportTo(serverLevel, d, e, f, set, i, j, true)) {
 				if (lookAt != null) {
 					lookAt.perform(commandSourceStack, entity);
 				}

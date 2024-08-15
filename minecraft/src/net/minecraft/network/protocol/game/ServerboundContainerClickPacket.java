@@ -38,7 +38,7 @@ public class ServerboundContainerClickPacket implements Packet<ServerGamePacketL
 	}
 
 	private ServerboundContainerClickPacket(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
-		this.containerId = registryFriendlyByteBuf.readByte();
+		this.containerId = registryFriendlyByteBuf.readContainerId();
 		this.stateId = registryFriendlyByteBuf.readVarInt();
 		this.slotNum = registryFriendlyByteBuf.readShort();
 		this.buttonNum = registryFriendlyByteBuf.readByte();
@@ -48,7 +48,7 @@ public class ServerboundContainerClickPacket implements Packet<ServerGamePacketL
 	}
 
 	private void write(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
-		registryFriendlyByteBuf.writeByte(this.containerId);
+		registryFriendlyByteBuf.writeContainerId(this.containerId);
 		registryFriendlyByteBuf.writeVarInt(this.stateId);
 		registryFriendlyByteBuf.writeShort(this.slotNum);
 		registryFriendlyByteBuf.writeByte(this.buttonNum);

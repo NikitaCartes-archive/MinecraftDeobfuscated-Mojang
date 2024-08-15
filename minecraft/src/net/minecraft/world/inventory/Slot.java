@@ -130,15 +130,19 @@ public class Slot {
 		if (!itemStack.isEmpty() && this.mayPlace(itemStack)) {
 			ItemStack itemStack2 = this.getItem();
 			int j = Math.min(Math.min(i, itemStack.getCount()), this.getMaxStackSize(itemStack) - itemStack2.getCount());
-			if (itemStack2.isEmpty()) {
-				this.setByPlayer(itemStack.split(j));
-			} else if (ItemStack.isSameItemSameComponents(itemStack2, itemStack)) {
-				itemStack.shrink(j);
-				itemStack2.grow(j);
-				this.setByPlayer(itemStack2);
-			}
+			if (j <= 0) {
+				return itemStack;
+			} else {
+				if (itemStack2.isEmpty()) {
+					this.setByPlayer(itemStack.split(j));
+				} else if (ItemStack.isSameItemSameComponents(itemStack2, itemStack)) {
+					itemStack.shrink(j);
+					itemStack2.grow(j);
+					this.setByPlayer(itemStack2);
+				}
 
-			return itemStack;
+				return itemStack;
+			}
 		} else {
 			return itemStack;
 		}

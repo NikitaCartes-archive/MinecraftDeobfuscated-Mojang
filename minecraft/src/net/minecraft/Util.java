@@ -311,42 +311,134 @@ public class Util {
 		return resourceLocation == null ? "[unregistered]" : resourceLocation.toString();
 	}
 
-	public static <T> Predicate<T> allOf(List<? extends Predicate<T>> list) {
-		return switch (list.size()) {
-			case 0 -> object -> true;
-			case 1 -> (Predicate)list.get(0);
-			case 2 -> ((Predicate)list.get(0)).and((Predicate)list.get(1));
-			default -> {
-				Predicate<T>[] predicates = (Predicate<T>[])list.toArray(Predicate[]::new);
-				yield object -> {
-					for (Predicate<T> predicate : predicates) {
-						if (!predicate.test(object)) {
-							return false;
-						}
-					}
+	public static <T> Predicate<T> allOf() {
+		return object -> true;
+	}
 
-					return true;
-				};
+	public static <T> Predicate<T> allOf(Predicate<? super T> predicate) {
+		return (Predicate<T>)predicate;
+	}
+
+	public static <T> Predicate<T> allOf(Predicate<? super T> predicate, Predicate<? super T> predicate2) {
+		return object -> predicate.test(object) && predicate2.test(object);
+	}
+
+	public static <T> Predicate<T> allOf(Predicate<? super T> predicate, Predicate<? super T> predicate2, Predicate<? super T> predicate3) {
+		return object -> predicate.test(object) && predicate2.test(object) && predicate3.test(object);
+	}
+
+	public static <T> Predicate<T> allOf(
+		Predicate<? super T> predicate, Predicate<? super T> predicate2, Predicate<? super T> predicate3, Predicate<? super T> predicate4
+	) {
+		return object -> predicate.test(object) && predicate2.test(object) && predicate3.test(object) && predicate4.test(object);
+	}
+
+	public static <T> Predicate<T> allOf(
+		Predicate<? super T> predicate,
+		Predicate<? super T> predicate2,
+		Predicate<? super T> predicate3,
+		Predicate<? super T> predicate4,
+		Predicate<? super T> predicate5
+	) {
+		return object -> predicate.test(object) && predicate2.test(object) && predicate3.test(object) && predicate4.test(object) && predicate5.test(object);
+	}
+
+	@SafeVarargs
+	public static <T> Predicate<T> allOf(Predicate<? super T>... predicates) {
+		return object -> {
+			for (Predicate<? super T> predicate : predicates) {
+				if (!predicate.test(object)) {
+					return false;
+				}
+			}
+
+			return true;
+		};
+	}
+
+	public static <T> Predicate<T> allOf(List<? extends Predicate<? super T>> list) {
+		return switch (list.size()) {
+			case 0 -> allOf();
+			case 1 -> allOf((Predicate<? super T>)list.get(0));
+			case 2 -> allOf((Predicate<? super T>)list.get(0), (Predicate<? super T>)list.get(1));
+			case 3 -> allOf((Predicate<? super T>)list.get(0), (Predicate<? super T>)list.get(1), (Predicate<? super T>)list.get(2));
+			case 4 -> allOf((Predicate<? super T>)list.get(0), (Predicate<? super T>)list.get(1), (Predicate<? super T>)list.get(2), (Predicate<? super T>)list.get(3));
+			case 5 -> allOf(
+			(Predicate<? super T>)list.get(0),
+			(Predicate<? super T>)list.get(1),
+			(Predicate<? super T>)list.get(2),
+			(Predicate<? super T>)list.get(3),
+			(Predicate<? super T>)list.get(4)
+		);
+			default -> {
+				Predicate<? super T>[] predicates = (Predicate<? super T>[])list.toArray(Predicate[]::new);
+				yield allOf(predicates);
 			}
 		};
 	}
 
-	public static <T> Predicate<T> anyOf(List<? extends Predicate<T>> list) {
-		return switch (list.size()) {
-			case 0 -> object -> false;
-			case 1 -> (Predicate)list.get(0);
-			case 2 -> ((Predicate)list.get(0)).or((Predicate)list.get(1));
-			default -> {
-				Predicate<T>[] predicates = (Predicate<T>[])list.toArray(Predicate[]::new);
-				yield object -> {
-					for (Predicate<T> predicate : predicates) {
-						if (predicate.test(object)) {
-							return true;
-						}
-					}
+	public static <T> Predicate<T> anyOf() {
+		return object -> false;
+	}
 
-					return false;
-				};
+	public static <T> Predicate<T> anyOf(Predicate<? super T> predicate) {
+		return (Predicate<T>)predicate;
+	}
+
+	public static <T> Predicate<T> anyOf(Predicate<? super T> predicate, Predicate<? super T> predicate2) {
+		return object -> predicate.test(object) || predicate2.test(object);
+	}
+
+	public static <T> Predicate<T> anyOf(Predicate<? super T> predicate, Predicate<? super T> predicate2, Predicate<? super T> predicate3) {
+		return object -> predicate.test(object) || predicate2.test(object) || predicate3.test(object);
+	}
+
+	public static <T> Predicate<T> anyOf(
+		Predicate<? super T> predicate, Predicate<? super T> predicate2, Predicate<? super T> predicate3, Predicate<? super T> predicate4
+	) {
+		return object -> predicate.test(object) || predicate2.test(object) || predicate3.test(object) || predicate4.test(object);
+	}
+
+	public static <T> Predicate<T> anyOf(
+		Predicate<? super T> predicate,
+		Predicate<? super T> predicate2,
+		Predicate<? super T> predicate3,
+		Predicate<? super T> predicate4,
+		Predicate<? super T> predicate5
+	) {
+		return object -> predicate.test(object) || predicate2.test(object) || predicate3.test(object) || predicate4.test(object) || predicate5.test(object);
+	}
+
+	@SafeVarargs
+	public static <T> Predicate<T> anyOf(Predicate<? super T>... predicates) {
+		return object -> {
+			for (Predicate<? super T> predicate : predicates) {
+				if (predicate.test(object)) {
+					return true;
+				}
+			}
+
+			return false;
+		};
+	}
+
+	public static <T> Predicate<T> anyOf(List<? extends Predicate<? super T>> list) {
+		return switch (list.size()) {
+			case 0 -> anyOf();
+			case 1 -> anyOf((Predicate<? super T>)list.get(0));
+			case 2 -> anyOf((Predicate<? super T>)list.get(0), (Predicate<? super T>)list.get(1));
+			case 3 -> anyOf((Predicate<? super T>)list.get(0), (Predicate<? super T>)list.get(1), (Predicate<? super T>)list.get(2));
+			case 4 -> anyOf((Predicate<? super T>)list.get(0), (Predicate<? super T>)list.get(1), (Predicate<? super T>)list.get(2), (Predicate<? super T>)list.get(3));
+			case 5 -> anyOf(
+			(Predicate<? super T>)list.get(0),
+			(Predicate<? super T>)list.get(1),
+			(Predicate<? super T>)list.get(2),
+			(Predicate<? super T>)list.get(3),
+			(Predicate<? super T>)list.get(4)
+		);
+			default -> {
+				Predicate<? super T>[] predicates = (Predicate<? super T>[])list.toArray(Predicate[]::new);
+				yield anyOf(predicates);
 			}
 		};
 	}

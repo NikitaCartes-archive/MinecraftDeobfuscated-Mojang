@@ -12,12 +12,12 @@ import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.entity.state.AllayRenderState;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.HumanoidArm;
-import net.minecraft.world.entity.animal.allay.Allay;
 
 @Environment(EnvType.CLIENT)
-public class AllayModel extends HierarchicalModel<Allay> implements ArmedModel {
+public class AllayModel extends EntityModel<AllayRenderState> implements ArmedModel {
 	private final ModelPart root;
 	private final ModelPart head;
 	private final ModelPart body;
@@ -84,45 +84,46 @@ public class AllayModel extends HierarchicalModel<Allay> implements ArmedModel {
 		return LayerDefinition.create(meshDefinition, 32, 32);
 	}
 
-	public void setupAnim(Allay allay, float f, float g, float h, float i, float j) {
+	public void setupAnim(AllayRenderState allayRenderState) {
 		this.root().getAllParts().forEach(ModelPart::resetPose);
-		float k = h * 20.0F * (float) (Math.PI / 180.0) + f;
-		float l = Mth.cos(k) * (float) Math.PI * 0.15F + g;
-		float m = h - (float)allay.tickCount;
-		float n = h * 9.0F * (float) (Math.PI / 180.0);
-		float o = Math.min(g / 0.3F, 1.0F);
-		float p = 1.0F - o;
-		float q = allay.getHoldingItemAnimationProgress(m);
-		if (allay.isDancing()) {
-			float r = h * 8.0F * (float) (Math.PI / 180.0) + g;
-			float s = Mth.cos(r) * 16.0F * (float) (Math.PI / 180.0);
-			float t = allay.getSpinningProgress(m);
-			float u = Mth.cos(r) * 14.0F * (float) (Math.PI / 180.0);
-			float v = Mth.cos(r) * 30.0F * (float) (Math.PI / 180.0);
-			this.root.yRot = allay.isSpinning() ? (float) (Math.PI * 4) * t : this.root.yRot;
-			this.root.zRot = s * (1.0F - t);
-			this.head.yRot = v * (1.0F - t);
-			this.head.zRot = u * (1.0F - t);
+		float f = allayRenderState.walkAnimationSpeed;
+		float g = allayRenderState.walkAnimationPos;
+		float h = allayRenderState.ageInTicks * 20.0F * (float) (Math.PI / 180.0) + g;
+		float i = Mth.cos(h) * (float) Math.PI * 0.15F + f;
+		float j = allayRenderState.ageInTicks * 9.0F * (float) (Math.PI / 180.0);
+		float k = Math.min(f / 0.3F, 1.0F);
+		float l = 1.0F - k;
+		float m = allayRenderState.holdingAnimationProgress;
+		if (allayRenderState.isDancing) {
+			float n = allayRenderState.ageInTicks * 8.0F * (float) (Math.PI / 180.0) + f;
+			float o = Mth.cos(n) * 16.0F * (float) (Math.PI / 180.0);
+			float p = allayRenderState.spinningProgress;
+			float q = Mth.cos(n) * 14.0F * (float) (Math.PI / 180.0);
+			float r = Mth.cos(n) * 30.0F * (float) (Math.PI / 180.0);
+			this.root.yRot = allayRenderState.isSpinning ? (float) (Math.PI * 4) * p : this.root.yRot;
+			this.root.zRot = o * (1.0F - p);
+			this.head.yRot = r * (1.0F - p);
+			this.head.zRot = q * (1.0F - p);
 		} else {
-			this.head.xRot = j * (float) (Math.PI / 180.0);
-			this.head.yRot = i * (float) (Math.PI / 180.0);
+			this.head.xRot = allayRenderState.xRot * (float) (Math.PI / 180.0);
+			this.head.yRot = allayRenderState.yRot * (float) (Math.PI / 180.0);
 		}
 
-		this.right_wing.xRot = 0.43633232F * (1.0F - o);
-		this.right_wing.yRot = (float) (-Math.PI / 4) + l;
-		this.left_wing.xRot = 0.43633232F * (1.0F - o);
-		this.left_wing.yRot = (float) (Math.PI / 4) - l;
-		this.body.xRot = o * (float) (Math.PI / 4);
-		float r = q * Mth.lerp(o, (float) (-Math.PI / 3), -1.134464F);
-		this.root.y = this.root.y + (float)Math.cos((double)n) * 0.25F * p;
-		this.right_arm.xRot = r;
-		this.left_arm.xRot = r;
-		float s = p * (1.0F - q);
-		float t = 0.43633232F - Mth.cos(n + (float) (Math.PI * 3.0 / 2.0)) * (float) Math.PI * 0.075F * s;
-		this.left_arm.zRot = -t;
-		this.right_arm.zRot = t;
-		this.right_arm.yRot = 0.27925268F * q;
-		this.left_arm.yRot = -0.27925268F * q;
+		this.right_wing.xRot = 0.43633232F * (1.0F - k);
+		this.right_wing.yRot = (float) (-Math.PI / 4) + i;
+		this.left_wing.xRot = 0.43633232F * (1.0F - k);
+		this.left_wing.yRot = (float) (Math.PI / 4) - i;
+		this.body.xRot = k * (float) (Math.PI / 4);
+		float n = m * Mth.lerp(k, (float) (-Math.PI / 3), -1.134464F);
+		this.root.y = this.root.y + (float)Math.cos((double)j) * 0.25F * l;
+		this.right_arm.xRot = n;
+		this.left_arm.xRot = n;
+		float o = l * (1.0F - m);
+		float p = 0.43633232F - Mth.cos(j + (float) (Math.PI * 3.0 / 2.0)) * (float) Math.PI * 0.075F * o;
+		this.left_arm.zRot = -p;
+		this.right_arm.zRot = p;
+		this.right_arm.yRot = 0.27925268F * m;
+		this.left_arm.yRot = -0.27925268F * m;
 	}
 
 	@Override

@@ -24,7 +24,7 @@ import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-public class PathNavigationRegion implements BlockGetter, CollisionGetter {
+public class PathNavigationRegion implements CollisionGetter {
 	protected final int centerX;
 	protected final int centerZ;
 	protected final ChunkAccess[][] chunks;

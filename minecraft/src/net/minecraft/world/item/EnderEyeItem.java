@@ -11,7 +11,6 @@ import net.minecraft.tags.StructureTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.EyeOfEnder;
@@ -61,7 +60,7 @@ public class EnderEyeItem extends Item {
 				level.globalLevelEvent(1038, blockPos2.offset(1, 0, 1), 0);
 			}
 
-			return InteractionResult.CONSUME;
+			return InteractionResult.SUCCESS;
 		}
 	}
 
@@ -71,35 +70,35 @@ public class EnderEyeItem extends Item {
 	}
 
 	@Override
-	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand) {
+	public InteractionResult use(Level level, Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
 		BlockHitResult blockHitResult = getPlayerPOVHitResult(level, player, ClipContext.Fluid.NONE);
 		if (blockHitResult.getType() == HitResult.Type.BLOCK && level.getBlockState(blockHitResult.getBlockPos()).is(Blocks.END_PORTAL_FRAME)) {
-			return InteractionResultHolder.pass(itemStack);
+			return InteractionResult.PASS;
 		} else {
 			player.startUsingItem(interactionHand);
 			if (level instanceof ServerLevel serverLevel) {
 				BlockPos blockPos = serverLevel.findNearestMapStructure(StructureTags.EYE_OF_ENDER_LOCATED, player.blockPosition(), 100, false);
-				if (blockPos != null) {
-					EyeOfEnder eyeOfEnder = new EyeOfEnder(level, player.getX(), player.getY(0.5), player.getZ());
-					eyeOfEnder.setItem(itemStack);
-					eyeOfEnder.signalTo(blockPos);
-					level.gameEvent(GameEvent.PROJECTILE_SHOOT, eyeOfEnder.position(), GameEvent.Context.of(player));
-					level.addFreshEntity(eyeOfEnder);
-					if (player instanceof ServerPlayer serverPlayer) {
-						CriteriaTriggers.USED_ENDER_EYE.trigger(serverPlayer, blockPos);
-					}
-
-					float f = Mth.lerp(level.random.nextFloat(), 0.33F, 0.5F);
-					level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENDER_EYE_LAUNCH, SoundSource.NEUTRAL, 1.0F, f);
-					itemStack.consume(1, player);
-					player.awardStat(Stats.ITEM_USED.get(this));
-					player.swing(interactionHand, true);
-					return InteractionResultHolder.success(itemStack);
+				if (blockPos == null) {
+					return InteractionResult.CONSUME;
 				}
+
+				EyeOfEnder eyeOfEnder = new EyeOfEnder(level, player.getX(), player.getY(0.5), player.getZ());
+				eyeOfEnder.setItem(itemStack);
+				eyeOfEnder.signalTo(blockPos);
+				level.gameEvent(GameEvent.PROJECTILE_SHOOT, eyeOfEnder.position(), GameEvent.Context.of(player));
+				level.addFreshEntity(eyeOfEnder);
+				if (player instanceof ServerPlayer serverPlayer) {
+					CriteriaTriggers.USED_ENDER_EYE.trigger(serverPlayer, blockPos);
+				}
+
+				float f = Mth.lerp(level.random.nextFloat(), 0.33F, 0.5F);
+				level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENDER_EYE_LAUNCH, SoundSource.NEUTRAL, 1.0F, f);
+				itemStack.consume(1, player);
+				player.awardStat(Stats.ITEM_USED.get(this));
 			}
 
-			return InteractionResultHolder.consume(itemStack);
+			return InteractionResult.SUCCESS_SERVER;
 		}
 	}
 }

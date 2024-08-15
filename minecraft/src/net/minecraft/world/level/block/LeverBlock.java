@@ -6,6 +6,7 @@ import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
@@ -23,6 +24,8 @@ import net.minecraft.world.level.block.state.properties.AttachFace;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.redstone.ExperimentalRedstoneUtils;
+import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -96,21 +99,22 @@ public class LeverBlock extends FaceAttachedHorizontalDirectionalBlock {
 			if ((Boolean)blockState2.getValue(POWERED)) {
 				makeParticle(blockState2, level, blockPos, 1.0F);
 			}
-
-			return InteractionResult.SUCCESS;
 		} else {
 			this.pull(blockState, level, blockPos, null);
-			return InteractionResult.CONSUME;
 		}
+
+		return InteractionResult.SUCCESS;
 	}
 
 	@Override
-	protected void onExplosionHit(BlockState blockState, Level level, BlockPos blockPos, Explosion explosion, BiConsumer<ItemStack, BlockPos> biConsumer) {
+	protected void onExplosionHit(
+		BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Explosion explosion, BiConsumer<ItemStack, BlockPos> biConsumer
+	) {
 		if (explosion.canTriggerBlocks()) {
-			this.pull(blockState, level, blockPos, null);
+			this.pull(blockState, serverLevel, blockPos, null);
 		}
 
-		super.onExplosionHit(blockState, level, blockPos, explosion, biConsumer);
+		super.onExplosionHit(blockState, serverLevel, blockPos, explosion, biConsumer);
 	}
 
 	public void pull(BlockState blockState, Level level, BlockPos blockPos, @Nullable Player player) {
@@ -169,8 +173,10 @@ public class LeverBlock extends FaceAttachedHorizontalDirectionalBlock {
 	}
 
 	private void updateNeighbours(BlockState blockState, Level level, BlockPos blockPos) {
-		level.updateNeighborsAt(blockPos, this);
-		level.updateNeighborsAt(blockPos.relative(getConnectedDirection(blockState).getOpposite()), this);
+		Direction direction = getConnectedDirection(blockState).getOpposite();
+		Orientation orientation = ExperimentalRedstoneUtils.randomOrientation(level, direction, direction.getAxis().isHorizontal() ? Direction.UP : null);
+		level.updateNeighborsAt(blockPos, this, orientation);
+		level.updateNeighborsAt(blockPos.relative(direction), this, orientation);
 	}
 
 	@Override

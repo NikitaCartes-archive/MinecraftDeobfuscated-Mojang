@@ -4,9 +4,9 @@ import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LeavesBlock;
@@ -16,7 +16,7 @@ import net.minecraft.world.level.block.state.BlockState;
 
 public class SpawnUtil {
 	public static <T extends Mob> Optional<T> trySpawnMob(
-		EntityType<T> entityType, MobSpawnType mobSpawnType, ServerLevel serverLevel, BlockPos blockPos, int i, int j, int k, SpawnUtil.Strategy strategy
+		EntityType<T> entityType, EntitySpawnReason entitySpawnReason, ServerLevel serverLevel, BlockPos blockPos, int i, int j, int k, SpawnUtil.Strategy strategy
 	) {
 		BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
 
@@ -25,9 +25,9 @@ public class SpawnUtil {
 			int n = Mth.randomBetweenInclusive(serverLevel.random, -j, j);
 			mutableBlockPos.setWithOffset(blockPos, m, k, n);
 			if (serverLevel.getWorldBorder().isWithinBounds(mutableBlockPos) && moveToPossibleSpawnPosition(serverLevel, k, mutableBlockPos, strategy)) {
-				T mob = (T)entityType.create(serverLevel, null, mutableBlockPos, mobSpawnType, false, false);
+				T mob = (T)entityType.create(serverLevel, null, mutableBlockPos, entitySpawnReason, false, false);
 				if (mob != null) {
-					if (mob.checkSpawnRules(serverLevel, mobSpawnType) && mob.checkSpawnObstruction(serverLevel)) {
+					if (mob.checkSpawnRules(serverLevel, entitySpawnReason) && mob.checkSpawnObstruction(serverLevel)) {
 						serverLevel.addFreshEntityWithPassengers(mob);
 						return Optional.of(mob);
 					}

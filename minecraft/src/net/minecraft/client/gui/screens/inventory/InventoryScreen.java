@@ -8,8 +8,10 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ImageButton;
+import net.minecraft.client.gui.screens.recipebook.CraftingRecipeBookComponent;
 import net.minecraft.client.gui.screens.recipebook.RecipeBookComponent;
 import net.minecraft.client.gui.screens.recipebook.RecipeUpdateListener;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.LivingEntity;
@@ -24,13 +26,14 @@ import org.joml.Vector3f;
 public class InventoryScreen extends EffectRenderingInventoryScreen<InventoryMenu> implements RecipeUpdateListener {
 	private float xMouse;
 	private float yMouse;
-	private final RecipeBookComponent recipeBookComponent = new RecipeBookComponent();
+	private final RecipeBookComponent<?> recipeBookComponent;
 	private boolean widthTooNarrow;
 	private boolean buttonClicked;
 
 	public InventoryScreen(Player player) {
 		super(player.inventoryMenu, player.getInventory(), Component.translatable("container.crafting"));
 		this.titleLabelX = 97;
+		this.recipeBookComponent = new CraftingRecipeBookComponent(player.inventoryMenu);
 	}
 
 	@Override
@@ -55,7 +58,7 @@ public class InventoryScreen extends EffectRenderingInventoryScreen<InventoryMen
 		} else {
 			super.init();
 			this.widthTooNarrow = this.width < 379;
-			this.recipeBookComponent.init(this.width, this.height, this.minecraft, this.widthTooNarrow, this.menu);
+			this.recipeBookComponent.init(this.width, this.height, this.minecraft, this.widthTooNarrow);
 			this.leftPos = this.recipeBookComponent.updateScreenPosition(this.width, this.imageWidth);
 			this.addRenderableWidget(new ImageButton(this.leftPos + 104, this.height / 2 - 22, 20, 18, RecipeBookComponent.RECIPE_BUTTON_SPRITES, button -> {
 				this.recipeBookComponent.toggleVisibility();
@@ -80,11 +83,11 @@ public class InventoryScreen extends EffectRenderingInventoryScreen<InventoryMen
 		} else {
 			super.render(guiGraphics, i, j, f);
 			this.recipeBookComponent.render(guiGraphics, i, j, f);
-			this.recipeBookComponent.renderGhostRecipe(guiGraphics, this.leftPos, this.topPos, false, f);
+			this.recipeBookComponent.renderGhostRecipe(guiGraphics, this.leftPos, this.topPos, false);
 		}
 
 		this.renderTooltip(guiGraphics, i, j);
-		this.recipeBookComponent.renderTooltip(guiGraphics, this.leftPos, this.topPos, i, j);
+		this.recipeBookComponent.renderTooltip(guiGraphics, i, j, this.hoveredSlot);
 		this.xMouse = (float)i;
 		this.yMouse = (float)j;
 	}
@@ -93,7 +96,7 @@ public class InventoryScreen extends EffectRenderingInventoryScreen<InventoryMen
 	protected void renderBg(GuiGraphics guiGraphics, float f, int i, int j) {
 		int k = this.leftPos;
 		int l = this.topPos;
-		guiGraphics.blit(INVENTORY_LOCATION, k, l, 0, 0, this.imageWidth, this.imageHeight);
+		guiGraphics.blit(RenderType::guiTextured, INVENTORY_LOCATION, k, l, 0.0F, 0.0F, this.imageWidth, this.imageHeight, 256, 256);
 		renderEntityInInventoryFollowsMouse(guiGraphics, k + 26, l + 8, k + 75, l + 78, 30, 0.0625F, this.xMouse, this.yMouse, this.minecraft.player);
 	}
 
@@ -138,6 +141,7 @@ public class InventoryScreen extends EffectRenderingInventoryScreen<InventoryMen
 		guiGraphics.pose().scale(h, h, -h);
 		guiGraphics.pose().translate(vector3f.x, vector3f.y, vector3f.z);
 		guiGraphics.pose().mulPose(quaternionf);
+		guiGraphics.flush();
 		Lighting.setupForEntityInInventory();
 		EntityRenderDispatcher entityRenderDispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
 		if (quaternionf2 != null) {
@@ -145,9 +149,7 @@ public class InventoryScreen extends EffectRenderingInventoryScreen<InventoryMen
 		}
 
 		entityRenderDispatcher.setRenderShadow(false);
-		RenderSystem.runAsFancy(
-			() -> entityRenderDispatcher.render(livingEntity, 0.0, 0.0, 0.0, 0.0F, 1.0F, guiGraphics.pose(), guiGraphics.bufferSource(), 15728880)
-		);
+		RenderSystem.runAsFancy(() -> entityRenderDispatcher.render(livingEntity, 0.0, 0.0, 0.0, 1.0F, guiGraphics.pose(), guiGraphics.bufferSource(), 15728880));
 		guiGraphics.flush();
 		entityRenderDispatcher.setRenderShadow(true);
 		guiGraphics.pose().popPose();

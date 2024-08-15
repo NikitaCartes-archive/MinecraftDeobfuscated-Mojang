@@ -30,10 +30,9 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.EntitySelector;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.TamableAnimal;
@@ -89,16 +88,13 @@ public class Cat extends TamableAnimal implements VariantHolder<Holder<CatVarian
 	private float lieDownAmountO;
 	private float lieDownAmountTail;
 	private float lieDownAmountOTail;
+	private boolean isLyingOnTopOfSleepingPlayer;
 	private float relaxStateOneAmount;
 	private float relaxStateOneAmountO;
 
 	public Cat(EntityType<? extends Cat> entityType, Level level) {
 		super(entityType, level);
 		this.reassessTameGoals();
-	}
-
-	public ResourceLocation getTextureId() {
-		return this.getVariant().value().texture();
 	}
 
 	@Override
@@ -235,16 +231,12 @@ public class Cat extends TamableAnimal implements VariantHolder<Holder<CatVarian
 	}
 
 	public static AttributeSupplier.Builder createAttributes() {
-		return Mob.createMobAttributes().add(Attributes.MAX_HEALTH, 10.0).add(Attributes.MOVEMENT_SPEED, 0.3F).add(Attributes.ATTACK_DAMAGE, 3.0);
+		return Animal.createAnimalAttributes().add(Attributes.MAX_HEALTH, 10.0).add(Attributes.MOVEMENT_SPEED, 0.3F).add(Attributes.ATTACK_DAMAGE, 3.0);
 	}
 
 	@Override
-	protected void usePlayerItem(Player player, InteractionHand interactionHand, ItemStack itemStack) {
-		if (this.isFood(itemStack)) {
-			this.playSound(SoundEvents.CAT_EAT, 1.0F, 1.0F);
-		}
-
-		super.usePlayerItem(player, interactionHand, itemStack);
+	protected void playEatingSound() {
+		this.playSound(SoundEvents.CAT_EAT, 1.0F, 1.0F);
 	}
 
 	@Override
@@ -264,6 +256,21 @@ public class Cat extends TamableAnimal implements VariantHolder<Holder<CatVarian
 
 		this.updateLieDownAmount();
 		this.updateRelaxStateOneAmount();
+		this.isLyingOnTopOfSleepingPlayer = false;
+		if (this.isLying()) {
+			BlockPos blockPos = this.blockPosition();
+
+			for (Player player : this.level().getEntitiesOfClass(Player.class, new AABB(blockPos).inflate(2.0, 2.0, 2.0))) {
+				if (player.isSleeping()) {
+					this.isLyingOnTopOfSleepingPlayer = true;
+					break;
+				}
+			}
+		}
+	}
+
+	public boolean isLyingOnTopOfSleepingPlayer() {
+		return this.isLyingOnTopOfSleepingPlayer;
 	}
 
 	private void updateLieDownAmount() {
@@ -301,7 +308,7 @@ public class Cat extends TamableAnimal implements VariantHolder<Holder<CatVarian
 
 	@Nullable
 	public Cat getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
-		Cat cat = EntityType.CAT.create(serverLevel);
+		Cat cat = EntityType.CAT.create(serverLevel, EntitySpawnReason.BREEDING);
 		if (cat != null && ageableMob instanceof Cat cat2) {
 			if (this.random.nextBoolean()) {
 				cat.setVariant(this.getVariant());
@@ -335,9 +342,9 @@ public class Cat extends TamableAnimal implements VariantHolder<Holder<CatVarian
 	@Nullable
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData
+		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, EntitySpawnReason entitySpawnReason, @Nullable SpawnGroupData spawnGroupData
 	) {
-		spawnGroupData = super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData);
+		spawnGroupData = super.finalizeSpawn(serverLevelAccessor, difficultyInstance, entitySpawnReason, spawnGroupData);
 		boolean bl = serverLevelAccessor.getMoonBrightness() > 0.9F;
 		TagKey<CatVariant> tagKey = bl ? CatVariantTags.FULL_MOON_SPAWNS : CatVariantTags.DEFAULT_SPAWNS;
 		BuiltInRegistries.CAT_VARIANT.getRandomElementOf(tagKey, serverLevelAccessor.getRandom()).ifPresent(this::setVariant);
@@ -365,22 +372,23 @@ public class Cat extends TamableAnimal implements VariantHolder<Holder<CatVarian
 							this.setPersistenceRequired();
 						}
 
-						return InteractionResult.sidedSuccess(this.level().isClientSide());
+						return InteractionResult.SUCCESS;
 					}
 				} else if (this.isFood(itemStack) && this.getHealth() < this.getMaxHealth()) {
 					if (!this.level().isClientSide()) {
 						this.usePlayerItem(player, interactionHand, itemStack);
 						FoodProperties foodProperties = itemStack.get(DataComponents.FOOD);
 						this.heal(foodProperties != null ? (float)foodProperties.nutrition() : 1.0F);
+						this.playEatingSound();
 					}
 
-					return InteractionResult.sidedSuccess(this.level().isClientSide());
+					return InteractionResult.SUCCESS;
 				}
 
 				InteractionResult interactionResult = super.mobInteract(player, interactionHand);
 				if (!interactionResult.consumesAction()) {
 					this.setOrderedToSit(!this.isOrderedToSit());
-					return InteractionResult.sidedSuccess(this.level().isClientSide());
+					return InteractionResult.SUCCESS;
 				}
 
 				return interactionResult;
@@ -390,9 +398,10 @@ public class Cat extends TamableAnimal implements VariantHolder<Holder<CatVarian
 				this.usePlayerItem(player, interactionHand, itemStack);
 				this.tryToTame(player);
 				this.setPersistenceRequired();
+				this.playEatingSound();
 			}
 
-			return InteractionResult.sidedSuccess(this.level().isClientSide());
+			return InteractionResult.SUCCESS;
 		}
 
 		InteractionResult interactionResult = super.mobInteract(player, interactionHand);

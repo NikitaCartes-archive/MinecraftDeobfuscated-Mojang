@@ -44,6 +44,8 @@ public class BookEditScreen extends Screen {
 	private static final int TEXT_HEIGHT = 128;
 	private static final int IMAGE_WIDTH = 192;
 	private static final int IMAGE_HEIGHT = 192;
+	private static final int BACKGROUND_TEXTURE_WIDTH = 256;
+	private static final int BACKGROUND_TEXTURE_HEIGHT = 256;
 	private static final Component EDIT_TITLE_LABEL = Component.translatable("book.editTitle");
 	private static final Component FINALIZE_WARNING_LABEL = Component.translatable("book.finalizeWarning");
 	private static final FormattedCharSequence BLACK_CURSOR = FormattedCharSequence.forward("_", Style.EMPTY.withColor(ChatFormatting.BLACK));
@@ -406,7 +408,7 @@ public class BookEditScreen extends Screen {
 	@Override
 	public void renderBackground(GuiGraphics guiGraphics, int i, int j, float f) {
 		this.renderTransparentBackground(guiGraphics);
-		guiGraphics.blit(BookViewScreen.BOOK_LOCATION, (this.width - 192) / 2, 2, 0, 0, 192, 192);
+		guiGraphics.blit(RenderType::guiTextured, BookViewScreen.BOOK_LOCATION, (this.width - 192) / 2, 2, 0.0F, 0.0F, 192, 192, 256, 256);
 	}
 
 	private void renderCursor(GuiGraphics guiGraphics, BookEditScreen.Pos2i pos2i, boolean bl) {

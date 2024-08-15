@@ -25,7 +25,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.StringUtil;
 
 @Environment(EnvType.CLIENT)
-public class EditBox extends AbstractWidget implements Renderable {
+public class EditBox extends AbstractWidget {
 	private static final WidgetSprites SPRITES = new WidgetSprites(
 		ResourceLocation.withDefaultNamespace("widget/text_field"), ResourceLocation.withDefaultNamespace("widget/text_field_highlighted")
 	);
@@ -369,7 +369,7 @@ public class EditBox extends AbstractWidget implements Renderable {
 		if (this.isVisible()) {
 			if (this.isBordered()) {
 				ResourceLocation resourceLocation = SPRITES.get(this.isActive(), this.isFocused());
-				guiGraphics.blitSprite(resourceLocation, this.getX(), this.getY(), this.getWidth(), this.getHeight());
+				guiGraphics.blitSprite(RenderType::guiTextured, resourceLocation, this.getX(), this.getY(), this.getWidth(), this.getHeight());
 			}
 
 			int k = this.isEditable ? this.textColor : this.textColorUneditable;

@@ -27,7 +27,11 @@ public interface HolderLookup<T> extends HolderGetter<T> {
 	}
 
 	public interface Provider {
-		Stream<ResourceKey<? extends Registry<?>>> listRegistries();
+		Stream<ResourceKey<? extends Registry<?>>> listRegistryKeys();
+
+		default Stream<HolderLookup.RegistryLookup<?>> listRegistries() {
+			return this.listRegistryKeys().map(this::lookupOrThrow);
+		}
 
 		<T> Optional<HolderLookup.RegistryLookup<T>> lookup(ResourceKey<? extends Registry<? extends T>> resourceKey);
 
@@ -55,7 +59,7 @@ public interface HolderLookup<T> extends HolderGetter<T> {
 			);
 			return new HolderLookup.Provider() {
 				@Override
-				public Stream<ResourceKey<? extends Registry<?>>> listRegistries() {
+				public Stream<ResourceKey<? extends Registry<?>>> listRegistryKeys() {
 					return map.keySet().stream();
 				}
 
@@ -64,6 +68,10 @@ public interface HolderLookup<T> extends HolderGetter<T> {
 					return Optional.ofNullable((HolderLookup.RegistryLookup)map.get(resourceKey));
 				}
 			};
+		}
+
+		default Lifecycle allRegistriesLifecycle() {
+			return (Lifecycle)this.listRegistries().map(HolderLookup.RegistryLookup::registryLifecycle).reduce(Lifecycle.stable(), Lifecycle::add);
 		}
 	}
 

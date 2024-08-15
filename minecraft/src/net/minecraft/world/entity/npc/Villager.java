@@ -11,7 +11,6 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
@@ -47,12 +46,12 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.ReputationEventHandler;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.Brain;
@@ -95,9 +94,6 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 	public static final int BREEDING_FOOD_THRESHOLD = 12;
 	public static final Map<Item, Integer> FOOD_POINTS = ImmutableMap.of(Items.BREAD, 4, Items.POTATO, 1, Items.CARROT, 1, Items.BEETROOT, 1);
 	private static final int TRADES_PER_LEVEL = 2;
-	private static final Set<Item> WANTED_ITEMS = ImmutableSet.of(
-		Items.BREAD, Items.POTATO, Items.CARROT, Items.WHEAT, Items.WHEAT_SEEDS, Items.BEETROOT, Items.BEETROOT_SEEDS, Items.TORCHFLOWER_SEEDS, Items.PITCHER_POD
-	);
 	private static final int MAX_GOSSIP_TOPICS = 10;
 	private static final int GOSSIP_COOLDOWN = 1200;
 	private static final int GOSSIP_DECAY_INTERVAL = 24000;
@@ -183,6 +179,7 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 		super(entityType, level);
 		((GroundPathNavigation)this.getNavigation()).setCanOpenDoors(true);
 		this.getNavigation().setCanFloat(true);
+		this.getNavigation().setRequiredPathLength(48.0F);
 		this.setCanPickUpLoot(true);
 		this.setVillagerData(this.getVillagerData().setType(villagerType).setProfession(VillagerProfession.NONE));
 	}
@@ -252,7 +249,7 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 	}
 
 	public static AttributeSupplier.Builder createAttributes() {
-		return Mob.createMobAttributes().add(Attributes.MOVEMENT_SPEED, 0.5).add(Attributes.FOLLOW_RANGE, 48.0);
+		return Mob.createMobAttributes().add(Attributes.MOVEMENT_SPEED, 0.5);
 	}
 
 	public boolean assignProfessionWhenSpawned() {
@@ -317,7 +314,7 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 			return super.mobInteract(player, interactionHand);
 		} else if (this.isBaby()) {
 			this.setUnhappy();
-			return InteractionResult.sidedSuccess(this.level().isClientSide);
+			return InteractionResult.SUCCESS;
 		} else {
 			if (!this.level().isClientSide) {
 				boolean bl = this.getOffers().isEmpty();
@@ -336,7 +333,7 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 				this.startTrading(player);
 			}
 
-			return InteractionResult.sidedSuccess(this.level().isClientSide);
+			return InteractionResult.SUCCESS;
 		}
 	}
 
@@ -748,24 +745,24 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 	@Nullable
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData
+		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, EntitySpawnReason entitySpawnReason, @Nullable SpawnGroupData spawnGroupData
 	) {
-		if (mobSpawnType == MobSpawnType.BREEDING) {
+		if (entitySpawnReason == EntitySpawnReason.BREEDING) {
 			this.setVillagerData(this.getVillagerData().setProfession(VillagerProfession.NONE));
 		}
 
-		if (mobSpawnType == MobSpawnType.COMMAND
-			|| mobSpawnType == MobSpawnType.SPAWN_EGG
-			|| MobSpawnType.isSpawner(mobSpawnType)
-			|| mobSpawnType == MobSpawnType.DISPENSER) {
+		if (entitySpawnReason == EntitySpawnReason.COMMAND
+			|| entitySpawnReason == EntitySpawnReason.SPAWN_EGG
+			|| EntitySpawnReason.isSpawner(entitySpawnReason)
+			|| entitySpawnReason == EntitySpawnReason.DISPENSER) {
 			this.setVillagerData(this.getVillagerData().setType(VillagerType.byBiome(serverLevelAccessor.getBiome(this.blockPosition()))));
 		}
 
-		if (mobSpawnType == MobSpawnType.STRUCTURE) {
+		if (entitySpawnReason == EntitySpawnReason.STRUCTURE) {
 			this.assignProfessionWhenSpawned = true;
 		}
 
-		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData);
+		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, entitySpawnReason, spawnGroupData);
 	}
 
 	@Nullable
@@ -781,7 +778,7 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 		}
 
 		Villager villager = new Villager(EntityType.VILLAGER, serverLevel, villagerType);
-		villager.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(villager.blockPosition()), MobSpawnType.BREEDING, null);
+		villager.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(villager.blockPosition()), EntitySpawnReason.BREEDING, null);
 		return villager;
 	}
 
@@ -789,10 +786,10 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 	public void thunderHit(ServerLevel serverLevel, LightningBolt lightningBolt) {
 		if (serverLevel.getDifficulty() != Difficulty.PEACEFUL) {
 			LOGGER.info("Villager {} was struck by lightning {}.", this, lightningBolt);
-			Witch witch = EntityType.WITCH.create(serverLevel);
+			Witch witch = EntityType.WITCH.create(serverLevel, EntitySpawnReason.CONVERSION);
 			if (witch != null) {
 				witch.moveTo(this.getX(), this.getY(), this.getZ(), this.getYRot(), this.getXRot());
-				witch.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(witch.blockPosition()), MobSpawnType.CONVERSION, null);
+				witch.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(witch.blockPosition()), EntitySpawnReason.CONVERSION, null);
 				witch.setNoAi(this.isNoAi());
 				if (this.hasCustomName()) {
 					witch.setCustomName(this.getCustomName());
@@ -819,7 +816,8 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 	@Override
 	public boolean wantsToPickUp(ItemStack itemStack) {
 		Item item = itemStack.getItem();
-		return (WANTED_ITEMS.contains(item) || this.getVillagerData().getProfession().requestedItems().contains(item)) && this.getInventory().canAddItem(itemStack);
+		return (itemStack.is(ItemTags.VILLAGER_PICKS_UP) || this.getVillagerData().getProfession().requestedItems().contains(item))
+			&& this.getInventory().canAddItem(itemStack);
 	}
 
 	public boolean hasExcessFood() {
@@ -886,7 +884,7 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 			List<Villager> list2 = (List<Villager>)list.stream().filter(villager -> villager.wantsToSpawnGolem(l)).limit(5L).collect(Collectors.toList());
 			if (list2.size() >= i) {
 				if (!SpawnUtil.trySpawnMob(
-						EntityType.IRON_GOLEM, MobSpawnType.MOB_SUMMONED, serverLevel, this.blockPosition(), 10, 8, 6, SpawnUtil.Strategy.LEGACY_IRON_GOLEM
+						EntityType.IRON_GOLEM, EntitySpawnReason.MOB_SUMMONED, serverLevel, this.blockPosition(), 10, 8, 6, SpawnUtil.Strategy.LEGACY_IRON_GOLEM
 					)
 					.isEmpty()) {
 					list.forEach(GolemSensor::golemDetected);

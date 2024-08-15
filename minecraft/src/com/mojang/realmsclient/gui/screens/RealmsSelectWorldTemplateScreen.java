@@ -29,6 +29,7 @@ import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
 import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.client.gui.screens.ConfirmLinkScreen;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -301,8 +302,10 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
 
 		@Override
 		public void render(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-			guiGraphics.blit(RealmsTextureManager.worldTemplate(this.template.id, this.template.image), k + 1, j + 1 + 1, 0.0F, 0.0F, 38, 38, 38, 38);
-			guiGraphics.blitSprite(RealmsSelectWorldTemplateScreen.SLOT_FRAME_SPRITE, k, j + 1, 40, 40);
+			guiGraphics.blit(
+				RenderType::guiTextured, RealmsTextureManager.worldTemplate(this.template.id, this.template.image), k + 1, j + 1 + 1, 0.0F, 0.0F, 38, 38, 38, 38
+			);
+			guiGraphics.blitSprite(RenderType::guiTextured, RealmsSelectWorldTemplateScreen.SLOT_FRAME_SPRITE, k, j + 1, 40, 40);
 			int p = 5;
 			int q = RealmsSelectWorldTemplateScreen.this.font.width(this.template.version);
 			if (this.websiteButton != null) {

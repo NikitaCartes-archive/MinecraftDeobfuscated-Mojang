@@ -80,7 +80,7 @@ public class BedBlock extends HorizontalDirectionalBlock implements EntityBlock 
 	@Override
 	protected InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
 		if (level.isClientSide) {
-			return InteractionResult.CONSUME;
+			return InteractionResult.SUCCESS_SERVER;
 		} else {
 			if (blockState.getValue(PART) != BedPart.HEAD) {
 				blockPos = blockPos.relative(blockState.getValue(FACING));
@@ -99,20 +99,20 @@ public class BedBlock extends HorizontalDirectionalBlock implements EntityBlock 
 
 				Vec3 vec3 = blockPos.getCenter();
 				level.explode(null, level.damageSources().badRespawnPointExplosion(vec3), null, vec3, 5.0F, true, Level.ExplosionInteraction.BLOCK);
-				return InteractionResult.SUCCESS;
+				return InteractionResult.SUCCESS_SERVER;
 			} else if ((Boolean)blockState.getValue(OCCUPIED)) {
 				if (!this.kickVillagerOutOfBed(level, blockPos)) {
 					player.displayClientMessage(Component.translatable("block.minecraft.bed.occupied"), true);
 				}
 
-				return InteractionResult.SUCCESS;
+				return InteractionResult.SUCCESS_SERVER;
 			} else {
 				player.startSleepInBed(blockPos).ifLeft(bedSleepingProblem -> {
 					if (bedSleepingProblem.getMessage() != null) {
 						player.displayClientMessage(bedSleepingProblem.getMessage(), true);
 					}
 				});
-				return InteractionResult.SUCCESS;
+				return InteractionResult.SUCCESS_SERVER;
 			}
 		}
 	}
@@ -137,9 +137,9 @@ public class BedBlock extends HorizontalDirectionalBlock implements EntityBlock 
 	}
 
 	@Override
-	public void updateEntityAfterFallOn(BlockGetter blockGetter, Entity entity) {
+	public void updateEntityMovementAfterFallOn(BlockGetter blockGetter, Entity entity) {
 		if (entity.isSuppressingBounce()) {
-			super.updateEntityAfterFallOn(blockGetter, entity);
+			super.updateEntityMovementAfterFallOn(blockGetter, entity);
 		} else {
 			this.bounceUp(entity);
 		}

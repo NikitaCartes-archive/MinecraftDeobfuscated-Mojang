@@ -87,7 +87,7 @@ public class TreePlacements {
 		PlacementUtils.register(bootstrapContext, SPRUCE_CHECKED, holder7, PlacementUtils.filteredByBlockSurvival(Blocks.SPRUCE_SAPLING));
 		PlacementUtils.register(bootstrapContext, MANGROVE_CHECKED, holder8, PlacementUtils.filteredByBlockSurvival(Blocks.MANGROVE_PROPAGULE));
 		PlacementUtils.register(bootstrapContext, CHERRY_CHECKED, holder9, PlacementUtils.filteredByBlockSurvival(Blocks.CHERRY_SAPLING));
-		BlockPredicate blockPredicate = BlockPredicate.matchesBlocks(Direction.DOWN.getNormal(), Blocks.SNOW_BLOCK, Blocks.POWDER_SNOW);
+		BlockPredicate blockPredicate = BlockPredicate.matchesBlocks(Direction.DOWN.getUnitVec3i(), Blocks.SNOW_BLOCK, Blocks.POWDER_SNOW);
 		List<PlacementModifier> list = List.of(
 			EnvironmentScanPlacement.scanningFor(Direction.UP, BlockPredicate.not(BlockPredicate.matchesBlocks(Blocks.POWDER_SNOW)), 8),
 			BlockPredicateFilter.forPredicate(blockPredicate)

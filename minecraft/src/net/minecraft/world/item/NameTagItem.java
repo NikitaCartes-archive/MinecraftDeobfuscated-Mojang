@@ -26,7 +26,7 @@ public class NameTagItem extends Item {
 				itemStack.shrink(1);
 			}
 
-			return InteractionResult.sidedSuccess(player.level().isClientSide);
+			return InteractionResult.SUCCESS;
 		} else {
 			return InteractionResult.PASS;
 		}

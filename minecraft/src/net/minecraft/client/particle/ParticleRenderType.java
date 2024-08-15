@@ -20,6 +20,7 @@ public interface ParticleRenderType {
 			RenderSystem.enableBlend();
 			RenderSystem.defaultBlendFunc();
 			RenderSystem.depthMask(true);
+			RenderSystem.setShader(GameRenderer::getParticleShader);
 			RenderSystem.setShaderTexture(0, TextureAtlas.LOCATION_BLOCKS);
 			return tesselator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.PARTICLE);
 		}
@@ -46,6 +47,7 @@ public interface ParticleRenderType {
 		@Override
 		public BufferBuilder begin(Tesselator tesselator, TextureManager textureManager) {
 			RenderSystem.depthMask(true);
+			RenderSystem.setShader(GameRenderer::getParticleShader);
 			RenderSystem.setShaderTexture(0, TextureAtlas.LOCATION_PARTICLES);
 			RenderSystem.enableBlend();
 			RenderSystem.defaultBlendFunc();
@@ -54,19 +56,6 @@ public interface ParticleRenderType {
 
 		public String toString() {
 			return "PARTICLE_SHEET_TRANSLUCENT";
-		}
-	};
-	ParticleRenderType PARTICLE_SHEET_LIT = new ParticleRenderType() {
-		@Override
-		public BufferBuilder begin(Tesselator tesselator, TextureManager textureManager) {
-			RenderSystem.disableBlend();
-			RenderSystem.depthMask(true);
-			RenderSystem.setShaderTexture(0, TextureAtlas.LOCATION_PARTICLES);
-			return tesselator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.PARTICLE);
-		}
-
-		public String toString() {
-			return "PARTICLE_SHEET_LIT";
 		}
 	};
 	ParticleRenderType CUSTOM = new ParticleRenderType() {

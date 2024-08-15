@@ -1,7 +1,6 @@
 package net.minecraft.client.gui.screens.advancements;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
@@ -12,6 +11,7 @@ import net.minecraft.advancements.DisplayInfo;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.StringSplitter;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
@@ -158,7 +158,7 @@ public class AdvancementWidget {
 				advancementWidgetType = AdvancementWidgetType.UNOBTAINED;
 			}
 
-			guiGraphics.blitSprite(advancementWidgetType.frameSprite(this.display.getType()), i + this.x + 3, j + this.y, 26, 26);
+			guiGraphics.blitSprite(RenderType::guiTextured, advancementWidgetType.frameSprite(this.display.getType()), i + this.x + 3, j + this.y, 26, 26);
 			guiGraphics.renderFakeItem(this.display.getIcon(), i + this.x + 8, j + this.y + 5);
 		}
 
@@ -211,7 +211,6 @@ public class AdvancementWidget {
 		}
 
 		int o = this.width - n;
-		RenderSystem.enableBlend();
 		int p = j + this.y;
 		int q;
 		if (bl) {
@@ -223,15 +222,15 @@ public class AdvancementWidget {
 		int r = 32 + this.description.size() * 9;
 		if (!this.description.isEmpty()) {
 			if (bl2) {
-				guiGraphics.blitSprite(TITLE_BOX_SPRITE, q, p + 26 - r, this.width, r);
+				guiGraphics.blitSprite(RenderType::guiTextured, TITLE_BOX_SPRITE, q, p + 26 - r, this.width, r);
 			} else {
-				guiGraphics.blitSprite(TITLE_BOX_SPRITE, q, p, this.width, r);
+				guiGraphics.blitSprite(RenderType::guiTextured, TITLE_BOX_SPRITE, q, p, this.width, r);
 			}
 		}
 
-		guiGraphics.blitSprite(advancementWidgetType.boxSprite(), 200, 26, 0, 0, q, p, n, 26);
-		guiGraphics.blitSprite(advancementWidgetType2.boxSprite(), 200, 26, 200 - o, 0, q + n, p, o, 26);
-		guiGraphics.blitSprite(advancementWidgetType3.frameSprite(this.display.getType()), i + this.x + 3, j + this.y, 26, 26);
+		guiGraphics.blitSprite(RenderType::guiTextured, advancementWidgetType.boxSprite(), 200, 26, 0, 0, q, p, n, 26);
+		guiGraphics.blitSprite(RenderType::guiTextured, advancementWidgetType2.boxSprite(), 200, 26, 200 - o, 0, q + n, p, o, 26);
+		guiGraphics.blitSprite(RenderType::guiTextured, advancementWidgetType3.frameSprite(this.display.getType()), i + this.x + 3, j + this.y, 26, 26);
 		if (bl) {
 			guiGraphics.drawString(this.minecraft.font, this.title, q + 5, j + this.y + 9, -1);
 			if (component != null) {

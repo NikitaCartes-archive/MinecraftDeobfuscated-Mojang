@@ -43,7 +43,7 @@ public class GenericMessageScreen extends Screen {
 	@Override
 	public void renderBackground(GuiGraphics guiGraphics, int i, int j, float f) {
 		this.renderPanorama(guiGraphics, f);
-		this.renderBlurredBackground(f);
+		this.renderBlurredBackground();
 		this.renderMenuBackground(guiGraphics);
 	}
 }

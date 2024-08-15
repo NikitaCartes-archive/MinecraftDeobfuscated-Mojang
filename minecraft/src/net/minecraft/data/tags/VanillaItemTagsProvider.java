@@ -204,7 +204,12 @@ public class VanillaItemTagsProvider extends ItemTagsProvider {
 				Items.WARPED_HANGING_SIGN,
 				Items.CRIMSON_HANGING_SIGN
 			);
+		this.tag(ItemTags.WOODEN_TOOL_MATERIALS).addTag(ItemTags.PLANKS);
 		this.tag(ItemTags.STONE_TOOL_MATERIALS).add(Items.COBBLESTONE, Items.BLACKSTONE, Items.COBBLED_DEEPSLATE);
+		this.tag(ItemTags.IRON_TOOL_MATERIALS).add(Items.IRON_INGOT);
+		this.tag(ItemTags.GOLD_TOOL_MATERIALS).add(Items.GOLD_INGOT);
+		this.tag(ItemTags.DIAMOND_TOOL_MATERIALS).add(Items.DIAMOND);
+		this.tag(ItemTags.NETHERITE_TOOL_MATERIALS).add(Items.NETHERITE_INGOT);
 		this.tag(ItemTags.STONE_CRAFTING_MATERIALS).add(Items.COBBLESTONE, Items.BLACKSTONE, Items.COBBLED_DEEPSLATE);
 		this.tag(ItemTags.FREEZE_IMMUNE_WEARABLES)
 			.add(Items.LEATHER_BOOTS, Items.LEATHER_LEGGINGS, Items.LEATHER_CHESTPLATE, Items.LEATHER_HELMET, Items.LEATHER_HORSE_ARMOR);
@@ -320,6 +325,7 @@ public class VanillaItemTagsProvider extends ItemTagsProvider {
 		this.tag(ItemTags.SNIFFER_FOOD).add(Items.TORCHFLOWER_SEEDS);
 		this.tag(ItemTags.VILLAGER_PLANTABLE_SEEDS)
 			.add(Items.WHEAT_SEEDS, Items.POTATO, Items.CARROT, Items.BEETROOT_SEEDS, Items.TORCHFLOWER_SEEDS, Items.PITCHER_POD);
+		this.tag(ItemTags.VILLAGER_PICKS_UP).addTag(ItemTags.VILLAGER_PLANTABLE_SEEDS).add(Items.BREAD, Items.WHEAT, Items.BEETROOT);
 		this.tag(ItemTags.FOOT_ARMOR_ENCHANTABLE).addTag(ItemTags.FOOT_ARMOR);
 		this.tag(ItemTags.LEG_ARMOR_ENCHANTABLE).addTag(ItemTags.LEG_ARMOR);
 		this.tag(ItemTags.CHEST_ARMOR_ENCHANTABLE).addTag(ItemTags.CHEST_ARMOR);
@@ -372,6 +378,7 @@ public class VanillaItemTagsProvider extends ItemTagsProvider {
 		this.tag(ItemTags.VANISHING_ENCHANTABLE).addTag(ItemTags.DURABILITY_ENCHANTABLE).add(Items.COMPASS).add(Items.CARVED_PUMPKIN).addTag(ItemTags.SKULLS);
 		this.tag(ItemTags.DYEABLE)
 			.add(Items.LEATHER_HELMET, Items.LEATHER_CHESTPLATE, Items.LEATHER_LEGGINGS, Items.LEATHER_BOOTS, Items.LEATHER_HORSE_ARMOR, Items.WOLF_ARMOR);
+		this.tag(ItemTags.FURNACE_MINECART_FUEL).add(Items.COAL, Items.CHARCOAL);
 		this.tag(ItemTags.MEAT)
 			.add(
 				Items.BEEF,
@@ -386,7 +393,9 @@ public class VanillaItemTagsProvider extends ItemTagsProvider {
 				Items.RABBIT,
 				Items.ROTTEN_FLESH
 			);
-		this.tag(ItemTags.WOLF_FOOD).addTag(ItemTags.MEAT);
+		this.tag(ItemTags.WOLF_FOOD)
+			.addTag(ItemTags.MEAT)
+			.add(Items.COD, Items.COOKED_COD, Items.SALMON, Items.COOKED_SALMON, Items.TROPICAL_FISH, Items.PUFFERFISH, Items.RABBIT_STEW);
 		this.tag(ItemTags.OCELOT_FOOD).add(Items.COD, Items.SALMON);
 		this.tag(ItemTags.CAT_FOOD).add(Items.COD, Items.SALMON);
 		this.tag(ItemTags.HORSE_FOOD)

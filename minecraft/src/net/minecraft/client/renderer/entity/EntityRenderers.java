@@ -33,8 +33,8 @@ public class EntityRenderers {
 		PROVIDERS.put(entityType, entityRendererProvider);
 	}
 
-	public static Map<EntityType<?>, EntityRenderer<?>> createEntityRenderers(EntityRendererProvider.Context context) {
-		Builder<EntityType<?>, EntityRenderer<?>> builder = ImmutableMap.builder();
+	public static Map<EntityType<?>, EntityRenderer<?, ?>> createEntityRenderers(EntityRendererProvider.Context context) {
+		Builder<EntityType<?>, EntityRenderer<?, ?>> builder = ImmutableMap.builder();
 		PROVIDERS.forEach((entityType, entityRendererProvider) -> {
 			try {
 				builder.put(entityType, entityRendererProvider.create(context));
@@ -45,8 +45,8 @@ public class EntityRenderers {
 		return builder.build();
 	}
 
-	public static Map<PlayerSkin.Model, EntityRenderer<? extends Player>> createPlayerRenderers(EntityRendererProvider.Context context) {
-		Builder<PlayerSkin.Model, EntityRenderer<? extends Player>> builder = ImmutableMap.builder();
+	public static Map<PlayerSkin.Model, EntityRenderer<? extends Player, ?>> createPlayerRenderers(EntityRendererProvider.Context context) {
+		Builder<PlayerSkin.Model, EntityRenderer<? extends Player, ?>> builder = ImmutableMap.builder();
 		PLAYER_PROVIDERS.forEach((model, entityRendererProvider) -> {
 			try {
 				builder.put(model, entityRendererProvider.create(context));
@@ -86,17 +86,17 @@ public class EntityRenderers {
 		register(EntityType.BREEZE, BreezeRenderer::new);
 		register(EntityType.BREEZE_WIND_CHARGE, WindChargeRenderer::new);
 		register(EntityType.CAT, CatRenderer::new);
-		register(EntityType.CAMEL, context -> new CamelRenderer(context, ModelLayers.CAMEL));
+		register(EntityType.CAMEL, CamelRenderer::new);
 		register(EntityType.CAVE_SPIDER, CaveSpiderRenderer::new);
 		register(EntityType.CHEST_BOAT, context -> new BoatRenderer(context, true));
-		register(EntityType.CHEST_MINECART, context -> new MinecartRenderer<>(context, ModelLayers.CHEST_MINECART));
+		register(EntityType.CHEST_MINECART, context -> new MinecartRenderer(context, ModelLayers.CHEST_MINECART));
 		register(EntityType.CHICKEN, ChickenRenderer::new);
 		register(EntityType.COD, CodRenderer::new);
-		register(EntityType.COMMAND_BLOCK_MINECART, context -> new MinecartRenderer<>(context, ModelLayers.COMMAND_BLOCK_MINECART));
+		register(EntityType.COMMAND_BLOCK_MINECART, context -> new MinecartRenderer(context, ModelLayers.COMMAND_BLOCK_MINECART));
 		register(EntityType.COW, CowRenderer::new);
 		register(EntityType.CREEPER, CreeperRenderer::new);
 		register(EntityType.DOLPHIN, DolphinRenderer::new);
-		register(EntityType.DONKEY, context -> new ChestedHorseRenderer<>(context, 0.87F, ModelLayers.DONKEY));
+		register(EntityType.DONKEY, context -> new DonkeyRenderer<>(context, 0.87F, ModelLayers.DONKEY, ModelLayers.DONKEY_BABY, false));
 		register(EntityType.DRAGON_FIREBALL, DragonFireballRenderer::new);
 		register(EntityType.DROWNED, DrownedRenderer::new);
 		register(EntityType.EGG, ThrownItemRenderer::new);
@@ -117,15 +117,20 @@ public class EntityRenderers {
 		register(EntityType.FISHING_BOBBER, FishingHookRenderer::new);
 		register(EntityType.FOX, FoxRenderer::new);
 		register(EntityType.FROG, FrogRenderer::new);
-		register(EntityType.FURNACE_MINECART, context -> new MinecartRenderer<>(context, ModelLayers.FURNACE_MINECART));
+		register(EntityType.FURNACE_MINECART, context -> new MinecartRenderer(context, ModelLayers.FURNACE_MINECART));
 		register(EntityType.GHAST, GhastRenderer::new);
 		register(EntityType.GIANT, context -> new GiantMobRenderer(context, 6.0F));
 		register(EntityType.GLOW_ITEM_FRAME, ItemFrameRenderer::new);
-		register(EntityType.GLOW_SQUID, context -> new GlowSquidRenderer(context, new SquidModel<>(context.bakeLayer(ModelLayers.GLOW_SQUID))));
+		register(
+			EntityType.GLOW_SQUID,
+			context -> new GlowSquidRenderer(
+					context, new SquidModel(context.bakeLayer(ModelLayers.GLOW_SQUID)), new SquidModel(context.bakeLayer(ModelLayers.GLOW_SQUID_BABY))
+				)
+		);
 		register(EntityType.GOAT, GoatRenderer::new);
 		register(EntityType.GUARDIAN, GuardianRenderer::new);
 		register(EntityType.HOGLIN, HoglinRenderer::new);
-		register(EntityType.HOPPER_MINECART, context -> new MinecartRenderer<>(context, ModelLayers.HOPPER_MINECART));
+		register(EntityType.HOPPER_MINECART, context -> new MinecartRenderer(context, ModelLayers.HOPPER_MINECART));
 		register(EntityType.HORSE, HorseRenderer::new);
 		register(EntityType.HUSK, HuskRenderer::new);
 		register(EntityType.ILLUSIONER, IllusionerRenderer::new);
@@ -137,23 +142,42 @@ public class EntityRenderers {
 		register(EntityType.OMINOUS_ITEM_SPAWNER, OminousItemSpawnerRenderer::new);
 		register(EntityType.LEASH_KNOT, LeashKnotRenderer::new);
 		register(EntityType.LIGHTNING_BOLT, LightningBoltRenderer::new);
-		register(EntityType.LLAMA, context -> new LlamaRenderer(context, ModelLayers.LLAMA));
+		register(EntityType.LLAMA, context -> new LlamaRenderer(context, ModelLayers.LLAMA, ModelLayers.LLAMA_BABY));
 		register(EntityType.LLAMA_SPIT, LlamaSpitRenderer::new);
 		register(EntityType.MAGMA_CUBE, MagmaCubeRenderer::new);
 		register(EntityType.MARKER, NoopRenderer::new);
-		register(EntityType.MINECART, context -> new MinecartRenderer<>(context, ModelLayers.MINECART));
+		register(EntityType.MINECART, context -> new MinecartRenderer(context, ModelLayers.MINECART));
 		register(EntityType.MOOSHROOM, MushroomCowRenderer::new);
-		register(EntityType.MULE, context -> new ChestedHorseRenderer<>(context, 0.92F, ModelLayers.MULE));
+		register(EntityType.MULE, context -> new DonkeyRenderer<>(context, 0.92F, ModelLayers.MULE, ModelLayers.MULE_BABY, true));
 		register(EntityType.OCELOT, OcelotRenderer::new);
 		register(EntityType.PAINTING, PaintingRenderer::new);
 		register(EntityType.PANDA, PandaRenderer::new);
 		register(EntityType.PARROT, ParrotRenderer::new);
 		register(EntityType.PHANTOM, PhantomRenderer::new);
 		register(EntityType.PIG, PigRenderer::new);
-		register(EntityType.PIGLIN, context -> new PiglinRenderer(context, ModelLayers.PIGLIN, ModelLayers.PIGLIN_INNER_ARMOR, ModelLayers.PIGLIN_OUTER_ARMOR, false));
+		register(
+			EntityType.PIGLIN,
+			context -> new PiglinRenderer(
+					context,
+					ModelLayers.PIGLIN,
+					ModelLayers.PIGLIN_BABY,
+					ModelLayers.PIGLIN_INNER_ARMOR,
+					ModelLayers.PIGLIN_OUTER_ARMOR,
+					ModelLayers.PIGLIN_BABY_INNER_ARMOR,
+					ModelLayers.PIGLIN_BABY_OUTER_ARMOR
+				)
+		);
 		register(
 			EntityType.PIGLIN_BRUTE,
-			context -> new PiglinRenderer(context, ModelLayers.PIGLIN_BRUTE, ModelLayers.PIGLIN_BRUTE_INNER_ARMOR, ModelLayers.PIGLIN_BRUTE_OUTER_ARMOR, false)
+			context -> new PiglinRenderer(
+					context,
+					ModelLayers.PIGLIN_BRUTE,
+					ModelLayers.PIGLIN_BRUTE,
+					ModelLayers.PIGLIN_BRUTE_INNER_ARMOR,
+					ModelLayers.PIGLIN_BRUTE_OUTER_ARMOR,
+					ModelLayers.PIGLIN_BRUTE_INNER_ARMOR,
+					ModelLayers.PIGLIN_BRUTE_OUTER_ARMOR
+				)
 		);
 		register(EntityType.PILLAGER, PillagerRenderer::new);
 		register(EntityType.POLAR_BEAR, PolarBearRenderer::new);
@@ -167,23 +191,26 @@ public class EntityRenderers {
 		register(EntityType.SHULKER_BULLET, ShulkerBulletRenderer::new);
 		register(EntityType.SILVERFISH, SilverfishRenderer::new);
 		register(EntityType.SKELETON, SkeletonRenderer::new);
-		register(EntityType.SKELETON_HORSE, context -> new UndeadHorseRenderer(context, ModelLayers.SKELETON_HORSE));
+		register(EntityType.SKELETON_HORSE, context -> new UndeadHorseRenderer(context, ModelLayers.SKELETON_HORSE, ModelLayers.SKELETON_HORSE_BABY, true));
 		register(EntityType.SLIME, SlimeRenderer::new);
 		register(EntityType.SMALL_FIREBALL, context -> new ThrownItemRenderer<>(context, 0.75F, true));
 		register(EntityType.SNIFFER, SnifferRenderer::new);
 		register(EntityType.SNOWBALL, ThrownItemRenderer::new);
 		register(EntityType.SNOW_GOLEM, SnowGolemRenderer::new);
-		register(EntityType.SPAWNER_MINECART, context -> new MinecartRenderer<>(context, ModelLayers.SPAWNER_MINECART));
+		register(EntityType.SPAWNER_MINECART, context -> new MinecartRenderer(context, ModelLayers.SPAWNER_MINECART));
 		register(EntityType.SPECTRAL_ARROW, SpectralArrowRenderer::new);
 		register(EntityType.SPIDER, SpiderRenderer::new);
-		register(EntityType.SQUID, context -> new SquidRenderer<>(context, new SquidModel<>(context.bakeLayer(ModelLayers.SQUID))));
+		register(
+			EntityType.SQUID,
+			context -> new SquidRenderer<>(context, new SquidModel(context.bakeLayer(ModelLayers.SQUID)), new SquidModel(context.bakeLayer(ModelLayers.SQUID_BABY)))
+		);
 		register(EntityType.STRAY, StrayRenderer::new);
 		register(EntityType.STRIDER, StriderRenderer::new);
 		register(EntityType.TADPOLE, TadpoleRenderer::new);
 		register(EntityType.TEXT_DISPLAY, DisplayRenderer.TextDisplayRenderer::new);
 		register(EntityType.TNT, TntRenderer::new);
 		register(EntityType.TNT_MINECART, TntMinecartRenderer::new);
-		register(EntityType.TRADER_LLAMA, context -> new LlamaRenderer(context, ModelLayers.TRADER_LLAMA));
+		register(EntityType.TRADER_LLAMA, context -> new LlamaRenderer(context, ModelLayers.TRADER_LLAMA, ModelLayers.TRADER_LLAMA_BABY));
 		register(EntityType.TRIDENT, ThrownTridentRenderer::new);
 		register(EntityType.TROPICAL_FISH, TropicalFishRenderer::new);
 		register(EntityType.TURTLE, TurtleRenderer::new);
@@ -200,12 +227,18 @@ public class EntityRenderers {
 		register(EntityType.WOLF, WolfRenderer::new);
 		register(EntityType.ZOGLIN, ZoglinRenderer::new);
 		register(EntityType.ZOMBIE, ZombieRenderer::new);
-		register(EntityType.ZOMBIE_HORSE, context -> new UndeadHorseRenderer(context, ModelLayers.ZOMBIE_HORSE));
+		register(EntityType.ZOMBIE_HORSE, context -> new UndeadHorseRenderer(context, ModelLayers.ZOMBIE_HORSE, ModelLayers.ZOMBIE_HORSE_BABY, false));
 		register(EntityType.ZOMBIE_VILLAGER, ZombieVillagerRenderer::new);
 		register(
 			EntityType.ZOMBIFIED_PIGLIN,
-			context -> new PiglinRenderer(
-					context, ModelLayers.ZOMBIFIED_PIGLIN, ModelLayers.ZOMBIFIED_PIGLIN_INNER_ARMOR, ModelLayers.ZOMBIFIED_PIGLIN_OUTER_ARMOR, true
+			context -> new ZombifiedPiglinRenderer(
+					context,
+					ModelLayers.ZOMBIFIED_PIGLIN,
+					ModelLayers.ZOMBIFIED_PIGLIN_BABY,
+					ModelLayers.ZOMBIFIED_PIGLIN_INNER_ARMOR,
+					ModelLayers.ZOMBIFIED_PIGLIN_OUTER_ARMOR,
+					ModelLayers.ZOMBIFIED_PIGLIN_BABY_INNER_ARMOR,
+					ModelLayers.ZOMBIFIED_PIGLIN_BABY_OUTER_ARMOR
 				)
 		);
 	}

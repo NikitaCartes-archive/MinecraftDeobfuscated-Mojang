@@ -9,26 +9,27 @@ import net.minecraft.client.model.geom.builders.CubeDeformation;
 import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.MeshTransformer;
 import net.minecraft.client.model.geom.builders.PartDefinition;
-import net.minecraft.world.entity.animal.sniffer.Sniffer;
+import net.minecraft.client.renderer.entity.state.SnifferRenderState;
 
 @Environment(EnvType.CLIENT)
-public class SnifferModel<T extends Sniffer> extends AgeableHierarchicalModel<T> {
+public class SnifferModel extends EntityModel<SnifferRenderState> {
+	public static final MeshTransformer BABY_TRANSFORMER = MeshTransformer.scaling(0.5F);
 	private static final float WALK_ANIMATION_SPEED_MAX = 9.0F;
 	private static final float WALK_ANIMATION_SCALE_FACTOR = 100.0F;
 	private final ModelPart root;
 	private final ModelPart head;
 
 	public SnifferModel(ModelPart modelPart) {
-		super(0.5F, 24.0F);
-		this.root = modelPart.getChild("root");
-		this.head = this.root.getChild("bone").getChild("body").getChild("head");
+		this.root = modelPart;
+		this.head = modelPart.getChild("bone").getChild("body").getChild("head");
 	}
 
 	public static LayerDefinition createBodyLayer() {
 		MeshDefinition meshDefinition = new MeshDefinition();
-		PartDefinition partDefinition = meshDefinition.getRoot().addOrReplaceChild("root", CubeListBuilder.create(), PartPose.offset(0.0F, 5.0F, 0.0F));
-		PartDefinition partDefinition2 = partDefinition.addOrReplaceChild("bone", CubeListBuilder.create(), PartPose.offset(0.0F, 0.0F, 0.0F));
+		PartDefinition partDefinition = meshDefinition.getRoot();
+		PartDefinition partDefinition2 = partDefinition.addOrReplaceChild("bone", CubeListBuilder.create(), PartPose.offset(0.0F, 5.0F, 0.0F));
 		PartDefinition partDefinition3 = partDefinition2.addOrReplaceChild(
 			"body",
 			CubeListBuilder.create()
@@ -102,22 +103,22 @@ public class SnifferModel<T extends Sniffer> extends AgeableHierarchicalModel<T>
 		return LayerDefinition.create(meshDefinition, 192, 192);
 	}
 
-	public void setupAnim(T sniffer, float f, float g, float h, float i, float j) {
+	public void setupAnim(SnifferRenderState snifferRenderState) {
 		this.root().getAllParts().forEach(ModelPart::resetPose);
-		this.head.xRot = j * (float) (Math.PI / 180.0);
-		this.head.yRot = i * (float) (Math.PI / 180.0);
-		if (sniffer.isSearching()) {
-			this.animateWalk(SnifferAnimation.SNIFFER_SNIFF_SEARCH, f, g, 9.0F, 100.0F);
+		this.head.xRot = snifferRenderState.xRot * (float) (Math.PI / 180.0);
+		this.head.yRot = snifferRenderState.yRot * (float) (Math.PI / 180.0);
+		if (snifferRenderState.isSearching) {
+			this.animateWalk(SnifferAnimation.SNIFFER_SNIFF_SEARCH, snifferRenderState.walkAnimationPos, snifferRenderState.walkAnimationSpeed, 9.0F, 100.0F);
 		} else {
-			this.animateWalk(SnifferAnimation.SNIFFER_WALK, f, g, 9.0F, 100.0F);
+			this.animateWalk(SnifferAnimation.SNIFFER_WALK, snifferRenderState.walkAnimationPos, snifferRenderState.walkAnimationSpeed, 9.0F, 100.0F);
 		}
 
-		this.animate(sniffer.diggingAnimationState, SnifferAnimation.SNIFFER_DIG, h);
-		this.animate(sniffer.sniffingAnimationState, SnifferAnimation.SNIFFER_LONGSNIFF, h);
-		this.animate(sniffer.risingAnimationState, SnifferAnimation.SNIFFER_STAND_UP, h);
-		this.animate(sniffer.feelingHappyAnimationState, SnifferAnimation.SNIFFER_HAPPY, h);
-		this.animate(sniffer.scentingAnimationState, SnifferAnimation.SNIFFER_SNIFFSNIFF, h);
-		if (this.young) {
+		this.animate(snifferRenderState.diggingAnimationState, SnifferAnimation.SNIFFER_DIG, snifferRenderState.ageInTicks);
+		this.animate(snifferRenderState.sniffingAnimationState, SnifferAnimation.SNIFFER_LONGSNIFF, snifferRenderState.ageInTicks);
+		this.animate(snifferRenderState.risingAnimationState, SnifferAnimation.SNIFFER_STAND_UP, snifferRenderState.ageInTicks);
+		this.animate(snifferRenderState.feelingHappyAnimationState, SnifferAnimation.SNIFFER_HAPPY, snifferRenderState.ageInTicks);
+		this.animate(snifferRenderState.scentingAnimationState, SnifferAnimation.SNIFFER_SNIFFSNIFF, snifferRenderState.ageInTicks);
+		if (snifferRenderState.isBaby) {
 			this.applyStatic(SnifferAnimation.BABY_TRANSFORM);
 		}
 	}

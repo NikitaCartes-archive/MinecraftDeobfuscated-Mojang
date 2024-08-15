@@ -106,7 +106,12 @@ public final class ItemTags {
 	public static final TagKey<Item> LECTERN_BOOKS = bind("lectern_books");
 	public static final TagKey<Item> BOOKSHELF_BOOKS = bind("bookshelf_books");
 	public static final TagKey<Item> BEACON_PAYMENT_ITEMS = bind("beacon_payment_items");
+	public static final TagKey<Item> WOODEN_TOOL_MATERIALS = bind("wooden_tool_materials");
 	public static final TagKey<Item> STONE_TOOL_MATERIALS = bind("stone_tool_materials");
+	public static final TagKey<Item> IRON_TOOL_MATERIALS = bind("iron_tool_materials");
+	public static final TagKey<Item> GOLD_TOOL_MATERIALS = bind("gold_tool_materials");
+	public static final TagKey<Item> DIAMOND_TOOL_MATERIALS = bind("diamond_tool_materials");
+	public static final TagKey<Item> NETHERITE_TOOL_MATERIALS = bind("netherite_tool_materials");
 	public static final TagKey<Item> STONE_CRAFTING_MATERIALS = bind("stone_crafting_materials");
 	public static final TagKey<Item> FREEZE_IMMUNE_WEARABLES = bind("freeze_immune_wearables");
 	public static final TagKey<Item> DAMPENS_VIBRATIONS = bind("dampens_vibrations");
@@ -132,7 +137,9 @@ public final class ItemTags {
 	public static final TagKey<Item> SHOVELS = bind("shovels");
 	public static final TagKey<Item> BREAKS_DECORATED_POTS = bind("breaks_decorated_pots");
 	public static final TagKey<Item> VILLAGER_PLANTABLE_SEEDS = bind("villager_plantable_seeds");
+	public static final TagKey<Item> VILLAGER_PICKS_UP = bind("villager_picks_up");
 	public static final TagKey<Item> DYEABLE = bind("dyeable");
+	public static final TagKey<Item> FURNACE_MINECART_FUEL = bind("furnace_minecart_fuel");
 	public static final TagKey<Item> FOOT_ARMOR_ENCHANTABLE = bind("enchantable/foot_armor");
 	public static final TagKey<Item> LEG_ARMOR_ENCHANTABLE = bind("enchantable/leg_armor");
 	public static final TagKey<Item> CHEST_ARMOR_ENCHANTABLE = bind("enchantable/chest_armor");

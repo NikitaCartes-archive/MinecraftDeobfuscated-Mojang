@@ -1,7 +1,6 @@
 package net.minecraft.core;
 
 import com.mojang.datafixers.DataFixUtils;
-import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
@@ -9,7 +8,6 @@ import com.mojang.serialization.Keyable;
 import com.mojang.serialization.Lifecycle;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.Map.Entry;
@@ -19,6 +17,7 @@ import javax.annotation.Nullable;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
+import net.minecraft.tags.TagLoader;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.RandomSource;
 
@@ -159,15 +158,7 @@ public interface Registry<T> extends Keyable, IdMap<T> {
 		return this.getTag(tagKey).flatMap(named -> named.getRandomElement(randomSource));
 	}
 
-	HolderSet.Named<T> getOrCreateTag(TagKey<T> tagKey);
-
-	Stream<Pair<TagKey<T>, HolderSet.Named<T>>> getTags();
-
-	Stream<TagKey<T>> getTagNames();
-
-	void resetTags();
-
-	void bindTags(Map<TagKey<T>, List<Holder<T>>> map);
+	Stream<HolderSet.Named<T>> getTags();
 
 	default IdMap<Holder<T>> asHolderIdMap() {
 		return new IdMap<Holder<T>>() {
@@ -195,22 +186,13 @@ public interface Registry<T> extends Keyable, IdMap<T> {
 
 	HolderLookup.RegistryLookup<T> asLookup();
 
-	default HolderLookup.RegistryLookup<T> asTagAddingLookup() {
-		return new HolderLookup.RegistryLookup.Delegate<T>() {
-			@Override
-			public HolderLookup.RegistryLookup<T> parent() {
-				return Registry.this.asLookup();
-			}
+	Registry.PendingTags<T> prepareTagReload(TagLoader.LoadResult<T> loadResult);
 
-			@Override
-			public Optional<HolderSet.Named<T>> get(TagKey<T> tagKey) {
-				return Optional.of(this.getOrThrow(tagKey));
-			}
+	public interface PendingTags<T> {
+		ResourceKey<? extends Registry<? extends T>> key();
 
-			@Override
-			public HolderSet.Named<T> getOrThrow(TagKey<T> tagKey) {
-				return Registry.this.getOrCreateTag(tagKey);
-			}
-		};
+		HolderLookup.RegistryLookup<T> lookup();
+
+		void apply();
 	}
 }

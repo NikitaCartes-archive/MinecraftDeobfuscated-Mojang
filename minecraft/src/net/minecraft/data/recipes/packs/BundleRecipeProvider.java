@@ -6,23 +6,37 @@ import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.data.recipes.RecipeProvider;
-import net.minecraft.data.recipes.ShapedRecipeBuilder;
 import net.minecraft.world.item.Items;
 
 public class BundleRecipeProvider extends RecipeProvider {
-	public BundleRecipeProvider(PackOutput packOutput, CompletableFuture<HolderLookup.Provider> completableFuture) {
-		super(packOutput, completableFuture);
+	BundleRecipeProvider(HolderLookup.Provider provider, RecipeOutput recipeOutput) {
+		super(provider, recipeOutput);
 	}
 
 	@Override
-	protected void buildRecipes(RecipeOutput recipeOutput) {
-		ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, Items.BUNDLE)
-			.define('#', Items.RABBIT_HIDE)
+	protected void buildRecipes() {
+		this.shaped(RecipeCategory.TOOLS, Items.BUNDLE)
 			.define('-', Items.STRING)
-			.pattern("-#-")
-			.pattern("# #")
-			.pattern("###")
-			.unlockedBy("has_string", has(Items.STRING))
-			.save(recipeOutput);
+			.define('#', Items.LEATHER)
+			.pattern("-")
+			.pattern("#")
+			.unlockedBy("has_string", this.has(Items.STRING))
+			.save(this.output);
+	}
+
+	public static class Runner extends RecipeProvider.Runner {
+		public Runner(PackOutput packOutput, CompletableFuture<HolderLookup.Provider> completableFuture) {
+			super(packOutput, completableFuture);
+		}
+
+		@Override
+		protected RecipeProvider createRecipeProvider(HolderLookup.Provider provider, RecipeOutput recipeOutput) {
+			return new BundleRecipeProvider(provider, recipeOutput);
+		}
+
+		@Override
+		public String getName() {
+			return "Bundle Recipes";
+		}
 	}
 }

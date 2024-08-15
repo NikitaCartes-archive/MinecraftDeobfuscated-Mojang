@@ -122,7 +122,7 @@ public class SeaPickleBlock extends BushBlock implements BonemealableBlock, Simp
 
 	@Override
 	public boolean isValidBonemealTarget(LevelReader levelReader, BlockPos blockPos, BlockState blockState) {
-		return true;
+		return !isDead(blockState) && levelReader.getBlockState(blockPos.below()).is(BlockTags.CORAL_BLOCKS);
 	}
 
 	@Override
@@ -132,42 +132,40 @@ public class SeaPickleBlock extends BushBlock implements BonemealableBlock, Simp
 
 	@Override
 	public void performBonemeal(ServerLevel serverLevel, RandomSource randomSource, BlockPos blockPos, BlockState blockState) {
-		if (!isDead(blockState) && serverLevel.getBlockState(blockPos.below()).is(BlockTags.CORAL_BLOCKS)) {
-			int i = 5;
-			int j = 1;
-			int k = 2;
-			int l = 0;
-			int m = blockPos.getX() - 2;
-			int n = 0;
+		int i = 5;
+		int j = 1;
+		int k = 2;
+		int l = 0;
+		int m = blockPos.getX() - 2;
+		int n = 0;
 
-			for (int o = 0; o < 5; o++) {
-				for (int p = 0; p < j; p++) {
-					int q = 2 + blockPos.getY() - 1;
+		for (int o = 0; o < 5; o++) {
+			for (int p = 0; p < j; p++) {
+				int q = 2 + blockPos.getY() - 1;
 
-					for (int r = q - 2; r < q; r++) {
-						BlockPos blockPos2 = new BlockPos(m + o, r, blockPos.getZ() - n + p);
-						if (blockPos2 != blockPos && randomSource.nextInt(6) == 0 && serverLevel.getBlockState(blockPos2).is(Blocks.WATER)) {
-							BlockState blockState2 = serverLevel.getBlockState(blockPos2.below());
-							if (blockState2.is(BlockTags.CORAL_BLOCKS)) {
-								serverLevel.setBlock(blockPos2, Blocks.SEA_PICKLE.defaultBlockState().setValue(PICKLES, Integer.valueOf(randomSource.nextInt(4) + 1)), 3);
-							}
+				for (int r = q - 2; r < q; r++) {
+					BlockPos blockPos2 = new BlockPos(m + o, r, blockPos.getZ() - n + p);
+					if (blockPos2 != blockPos && randomSource.nextInt(6) == 0 && serverLevel.getBlockState(blockPos2).is(Blocks.WATER)) {
+						BlockState blockState2 = serverLevel.getBlockState(blockPos2.below());
+						if (blockState2.is(BlockTags.CORAL_BLOCKS)) {
+							serverLevel.setBlock(blockPos2, Blocks.SEA_PICKLE.defaultBlockState().setValue(PICKLES, Integer.valueOf(randomSource.nextInt(4) + 1)), 3);
 						}
 					}
 				}
-
-				if (l < 2) {
-					j += 2;
-					n++;
-				} else {
-					j -= 2;
-					n--;
-				}
-
-				l++;
 			}
 
-			serverLevel.setBlock(blockPos, blockState.setValue(PICKLES, Integer.valueOf(4)), 2);
+			if (l < 2) {
+				j += 2;
+				n++;
+			} else {
+				j -= 2;
+				n--;
+			}
+
+			l++;
 		}
+
+		serverLevel.setBlock(blockPos, blockState.setValue(PICKLES, Integer.valueOf(4)), 2);
 	}
 
 	@Override

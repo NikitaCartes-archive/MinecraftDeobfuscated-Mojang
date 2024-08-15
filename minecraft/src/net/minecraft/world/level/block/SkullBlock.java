@@ -45,7 +45,7 @@ public class SkullBlock extends AbstractSkullBlock {
 	}
 
 	@Override
-	protected VoxelShape getOcclusionShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
+	protected VoxelShape getOcclusionShape(BlockState blockState) {
 		return Shapes.empty();
 	}
 

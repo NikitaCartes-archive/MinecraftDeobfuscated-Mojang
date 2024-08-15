@@ -1,6 +1,5 @@
 package net.minecraft.client.model;
 
-import com.google.common.collect.ImmutableList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
@@ -9,16 +8,17 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.animal.frog.Tadpole;
 
 @Environment(EnvType.CLIENT)
-public class TadpoleModel<T extends Tadpole> extends AgeableListModel<T> {
+public class TadpoleModel extends EntityModel<LivingEntityRenderState> {
 	private final ModelPart root;
 	private final ModelPart tail;
 
 	public TadpoleModel(ModelPart modelPart) {
-		super(true, 8.0F, 3.35F);
+		super(RenderType::entityCutoutNoCull);
 		this.root = modelPart;
 		this.tail = modelPart.getChild("tail");
 	}
@@ -39,17 +39,12 @@ public class TadpoleModel<T extends Tadpole> extends AgeableListModel<T> {
 	}
 
 	@Override
-	protected Iterable<ModelPart> headParts() {
-		return ImmutableList.<ModelPart>of(this.root);
+	public ModelPart root() {
+		return this.root;
 	}
 
-	@Override
-	protected Iterable<ModelPart> bodyParts() {
-		return ImmutableList.<ModelPart>of(this.tail);
-	}
-
-	public void setupAnim(T tadpole, float f, float g, float h, float i, float j) {
-		float k = tadpole.isInWater() ? 1.0F : 1.5F;
-		this.tail.yRot = -k * 0.25F * Mth.sin(0.3F * h);
+	public void setupAnim(LivingEntityRenderState livingEntityRenderState) {
+		float f = livingEntityRenderState.isInWater ? 1.0F : 1.5F;
+		this.tail.yRot = -f * 0.25F * Mth.sin(0.3F * livingEntityRenderState.ageInTicks);
 	}
 }

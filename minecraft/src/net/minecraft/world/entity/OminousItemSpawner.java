@@ -6,6 +6,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -66,29 +67,40 @@ public class OminousItemSpawner extends Entity {
 	}
 
 	private void spawnItem() {
-		Level level = this.level();
-		ItemStack itemStack = this.getItem();
-		if (!itemStack.isEmpty()) {
-			Entity entity;
-			if (itemStack.getItem() instanceof ProjectileItem projectileItem) {
-				Direction direction = Direction.DOWN;
-				Projectile projectile = projectileItem.asProjectile(level, this.position(), itemStack, direction);
-				projectile.setOwner(this);
-				ProjectileItem.DispenseConfig dispenseConfig = projectileItem.createDispenseConfig();
-				projectileItem.shoot(
-					projectile, (double)direction.getStepX(), (double)direction.getStepY(), (double)direction.getStepZ(), dispenseConfig.power(), dispenseConfig.uncertainty()
-				);
-				dispenseConfig.overrideDispenseEvent().ifPresent(i -> level.levelEvent(i, this.blockPosition(), 0));
-				entity = projectile;
-			} else {
-				entity = new ItemEntity(level, this.getX(), this.getY(), this.getZ(), itemStack);
-			}
+		if (this.level() instanceof ServerLevel serverLevel) {
+			ItemStack itemStack = this.getItem();
+			if (!itemStack.isEmpty()) {
+				Entity entity;
+				if (itemStack.getItem() instanceof ProjectileItem projectileItem) {
+					entity = this.spawnProjectile(serverLevel, projectileItem, itemStack);
+				} else {
+					entity = new ItemEntity(serverLevel, this.getX(), this.getY(), this.getZ(), itemStack);
+					serverLevel.addFreshEntity(entity);
+				}
 
-			level.addFreshEntity(entity);
-			level.levelEvent(3021, this.blockPosition(), 1);
-			level.gameEvent(entity, GameEvent.ENTITY_PLACE, this.position());
-			this.setItem(ItemStack.EMPTY);
+				serverLevel.levelEvent(3021, this.blockPosition(), 1);
+				serverLevel.gameEvent(entity, GameEvent.ENTITY_PLACE, this.position());
+				this.setItem(ItemStack.EMPTY);
+			}
 		}
+	}
+
+	private Entity spawnProjectile(ServerLevel serverLevel, ProjectileItem projectileItem, ItemStack itemStack) {
+		ProjectileItem.DispenseConfig dispenseConfig = projectileItem.createDispenseConfig();
+		dispenseConfig.overrideDispenseEvent().ifPresent(i -> serverLevel.levelEvent(i, this.blockPosition(), 0));
+		Direction direction = Direction.DOWN;
+		Projectile projectile = Projectile.spawnProjectileUsingShoot(
+			projectileItem.asProjectile(serverLevel, this.position(), itemStack, direction),
+			serverLevel,
+			itemStack,
+			(double)direction.getStepX(),
+			(double)direction.getStepY(),
+			(double)direction.getStepZ(),
+			dispenseConfig.power(),
+			dispenseConfig.uncertainty()
+		);
+		projectile.setOwner(this);
+		return projectile;
 	}
 
 	@Override

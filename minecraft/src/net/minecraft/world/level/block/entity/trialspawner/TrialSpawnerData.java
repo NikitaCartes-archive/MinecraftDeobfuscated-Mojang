@@ -33,6 +33,7 @@ import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
@@ -89,12 +90,16 @@ public class TrialSpawnerData {
 	}
 
 	public void reset() {
+		this.currentMobs.clear();
+		this.nextSpawnData = Optional.empty();
+		this.resetStatistics();
+	}
+
+	public void resetStatistics() {
 		this.detectedPlayers.clear();
 		this.totalMobsSpawned = 0;
 		this.nextMobSpawnsAt = 0L;
 		this.cooldownEndsAt = 0L;
-		this.currentMobs.clear();
-		this.nextSpawnData = Optional.empty();
 	}
 
 	public boolean hasMobToSpawn(TrialSpawner trialSpawner, RandomSource randomSource) {
@@ -254,7 +259,7 @@ public class TrialSpawnerData {
 			if (this.displayEntity == null) {
 				CompoundTag compoundTag = this.getOrCreateNextSpawnData(trialSpawner, level.getRandom()).getEntityToSpawn();
 				if (compoundTag.contains("id", 8)) {
-					this.displayEntity = EntityType.loadEntityRecursive(compoundTag, level, Function.identity());
+					this.displayEntity = EntityType.loadEntityRecursive(compoundTag, level, EntitySpawnReason.TRIAL_SPAWNER, Function.identity());
 				}
 			}
 

@@ -161,7 +161,7 @@ public abstract class VoxelShape {
 							this.findIndex(Direction.Axis.Y, vec34.y - (double)blockPos.getY()),
 							this.findIndex(Direction.Axis.Z, vec34.z - (double)blockPos.getZ())
 						)
-					? new BlockHitResult(vec34, Direction.getNearest(vec33.x, vec33.y, vec33.z).getOpposite(), blockPos, true)
+					? new BlockHitResult(vec34, Direction.getApproximateNearest(vec33.x, vec33.y, vec33.z).getOpposite(), blockPos, true)
 					: AABB.clip(this.toAabbs(), vec3, vec32, blockPos);
 			}
 		}
@@ -205,14 +205,33 @@ public abstract class VoxelShape {
 
 	private VoxelShape calculateFace(Direction direction) {
 		Direction.Axis axis = direction.getAxis();
-		DoubleList doubleList = this.getCoords(axis);
-		if (doubleList.size() == 2 && DoubleMath.fuzzyEquals(doubleList.getDouble(0), 0.0, 1.0E-7) && DoubleMath.fuzzyEquals(doubleList.getDouble(1), 1.0, 1.0E-7)) {
+		if (this.isCubeLikeAlong(axis)) {
 			return this;
 		} else {
 			Direction.AxisDirection axisDirection = direction.getAxisDirection();
 			int i = this.findIndex(axis, axisDirection == Direction.AxisDirection.POSITIVE ? 0.9999999 : 1.0E-7);
-			return new SliceShape(this, axis, i);
+			SliceShape sliceShape = new SliceShape(this, axis, i);
+			if (sliceShape.isEmpty()) {
+				return Shapes.empty();
+			} else {
+				return (VoxelShape)(sliceShape.isCubeLike() ? Shapes.block() : sliceShape);
+			}
 		}
+	}
+
+	protected boolean isCubeLike() {
+		for (Direction.Axis axis : Direction.Axis.VALUES) {
+			if (!this.isCubeLikeAlong(axis)) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	private boolean isCubeLikeAlong(Direction.Axis axis) {
+		DoubleList doubleList = this.getCoords(axis);
+		return doubleList.size() == 2 && DoubleMath.fuzzyEquals(doubleList.getDouble(0), 0.0, 1.0E-7) && DoubleMath.fuzzyEquals(doubleList.getDouble(1), 1.0, 1.0E-7);
 	}
 
 	public double collide(Direction.Axis axis, AABB aABB, double d) {

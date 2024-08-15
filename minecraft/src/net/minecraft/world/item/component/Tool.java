@@ -4,16 +4,12 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.RegistryCodecs;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.tags.TagKey;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -76,34 +72,16 @@ public record Tool(List<Tool.Rule> rules, float defaultMiningSpeed, int damagePe
 			Tool.Rule::new
 		);
 
-		public static Tool.Rule minesAndDrops(List<Block> list, float f) {
-			return forBlocks(list, Optional.of(f), Optional.of(true));
+		public static Tool.Rule minesAndDrops(HolderSet<Block> holderSet, float f) {
+			return new Tool.Rule(holderSet, Optional.of(f), Optional.of(true));
 		}
 
-		public static Tool.Rule minesAndDrops(TagKey<Block> tagKey, float f) {
-			return forTag(tagKey, Optional.of(f), Optional.of(true));
+		public static Tool.Rule deniesDrops(HolderSet<Block> holderSet) {
+			return new Tool.Rule(holderSet, Optional.empty(), Optional.of(false));
 		}
 
-		public static Tool.Rule deniesDrops(TagKey<Block> tagKey) {
-			return forTag(tagKey, Optional.empty(), Optional.of(false));
-		}
-
-		public static Tool.Rule overrideSpeed(TagKey<Block> tagKey, float f) {
-			return forTag(tagKey, Optional.of(f), Optional.empty());
-		}
-
-		public static Tool.Rule overrideSpeed(List<Block> list, float f) {
-			return forBlocks(list, Optional.of(f), Optional.empty());
-		}
-
-		private static Tool.Rule forTag(TagKey<Block> tagKey, Optional<Float> optional, Optional<Boolean> optional2) {
-			return new Tool.Rule(BuiltInRegistries.BLOCK.getOrCreateTag(tagKey), optional, optional2);
-		}
-
-		private static Tool.Rule forBlocks(List<Block> list, Optional<Float> optional, Optional<Boolean> optional2) {
-			return new Tool.Rule(
-				HolderSet.direct((List<? extends Holder<Block>>)list.stream().map(Block::builtInRegistryHolder).collect(Collectors.toList())), optional, optional2
-			);
+		public static Tool.Rule overrideSpeed(HolderSet<Block> holderSet, float f) {
+			return new Tool.Rule(holderSet, Optional.of(f), Optional.empty());
 		}
 	}
 }

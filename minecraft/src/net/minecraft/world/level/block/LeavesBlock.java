@@ -72,7 +72,7 @@ public class LeavesBlock extends Block implements SimpleWaterloggedBlock {
 	}
 
 	@Override
-	protected int getLightBlock(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
+	protected int getLightBlock(BlockState blockState) {
 		return 1;
 	}
 

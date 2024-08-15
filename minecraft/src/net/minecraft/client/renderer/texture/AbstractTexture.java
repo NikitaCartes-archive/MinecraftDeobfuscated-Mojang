@@ -14,13 +14,10 @@ import net.minecraft.server.packs.resources.ResourceManager;
 public abstract class AbstractTexture implements AutoCloseable {
 	public static final int NOT_ASSIGNED = -1;
 	protected int id = -1;
-	protected boolean blur;
-	protected boolean mipmap;
+	protected boolean defaultBlur;
 
 	public void setFilter(boolean bl, boolean bl2) {
 		RenderSystem.assertOnRenderThreadOrInit();
-		this.blur = bl;
-		this.mipmap = bl2;
 		int i;
 		int j;
 		if (bl) {
@@ -57,6 +54,10 @@ public abstract class AbstractTexture implements AutoCloseable {
 			TextureUtil.releaseTextureId(this.id);
 			this.id = -1;
 		}
+	}
+
+	public boolean getDefaultBlur() {
+		return this.defaultBlur;
 	}
 
 	public abstract void load(ResourceManager resourceManager) throws IOException;

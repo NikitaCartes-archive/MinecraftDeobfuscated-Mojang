@@ -10,8 +10,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.monster.ElderGuardian;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.StructureManager;
@@ -1534,11 +1534,11 @@ public class OceanMonumentPieces {
 		protected void spawnElder(WorldGenLevel worldGenLevel, BoundingBox boundingBox, int i, int j, int k) {
 			BlockPos blockPos = this.getWorldPos(i, j, k);
 			if (boundingBox.isInside(blockPos)) {
-				ElderGuardian elderGuardian = EntityType.ELDER_GUARDIAN.create(worldGenLevel.getLevel());
+				ElderGuardian elderGuardian = EntityType.ELDER_GUARDIAN.create(worldGenLevel.getLevel(), EntitySpawnReason.STRUCTURE);
 				if (elderGuardian != null) {
 					elderGuardian.heal(elderGuardian.getMaxHealth());
 					elderGuardian.moveTo((double)blockPos.getX() + 0.5, (double)blockPos.getY(), (double)blockPos.getZ() + 0.5, 0.0F, 0.0F);
-					elderGuardian.finalizeSpawn(worldGenLevel, worldGenLevel.getCurrentDifficultyAt(elderGuardian.blockPosition()), MobSpawnType.STRUCTURE, null);
+					elderGuardian.finalizeSpawn(worldGenLevel, worldGenLevel.getCurrentDifficultyAt(elderGuardian.blockPosition()), EntitySpawnReason.STRUCTURE, null);
 					worldGenLevel.addFreshEntityWithPassengers(elderGuardian);
 				}
 			}

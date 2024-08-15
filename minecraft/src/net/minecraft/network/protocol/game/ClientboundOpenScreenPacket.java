@@ -12,7 +12,7 @@ import net.minecraft.world.inventory.MenuType;
 
 public class ClientboundOpenScreenPacket implements Packet<ClientGamePacketListener> {
 	public static final StreamCodec<RegistryFriendlyByteBuf, ClientboundOpenScreenPacket> STREAM_CODEC = StreamCodec.composite(
-		ByteBufCodecs.VAR_INT,
+		ByteBufCodecs.CONTAINER_ID,
 		ClientboundOpenScreenPacket::getContainerId,
 		ByteBufCodecs.registry(Registries.MENU),
 		ClientboundOpenScreenPacket::getType,

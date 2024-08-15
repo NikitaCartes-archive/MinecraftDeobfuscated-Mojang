@@ -19,12 +19,14 @@ public abstract class ThrowableItemProjectile extends ThrowableProjectile implem
 		super(entityType, level);
 	}
 
-	public ThrowableItemProjectile(EntityType<? extends ThrowableItemProjectile> entityType, double d, double e, double f, Level level) {
+	public ThrowableItemProjectile(EntityType<? extends ThrowableItemProjectile> entityType, double d, double e, double f, Level level, ItemStack itemStack) {
 		super(entityType, d, e, f, level);
+		this.setItem(itemStack);
 	}
 
-	public ThrowableItemProjectile(EntityType<? extends ThrowableItemProjectile> entityType, LivingEntity livingEntity, Level level) {
-		super(entityType, livingEntity, level);
+	public ThrowableItemProjectile(EntityType<? extends ThrowableItemProjectile> entityType, LivingEntity livingEntity, Level level, ItemStack itemStack) {
+		this(entityType, livingEntity.getX(), livingEntity.getEyeY() - 0.1F, livingEntity.getZ(), level, itemStack);
+		this.setOwner(livingEntity);
 	}
 
 	public void setItem(ItemStack itemStack) {

@@ -4,6 +4,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import java.util.Arrays;
+import java.util.Locale;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -54,13 +55,13 @@ public class TickCommand {
 	}
 
 	private static String nanosToMilisString(long l) {
-		return String.format("%.1f", (float)l / (float)TimeUtil.NANOSECONDS_PER_MILLISECOND);
+		return String.format(Locale.ROOT, "%.1f", (float)l / (float)TimeUtil.NANOSECONDS_PER_MILLISECOND);
 	}
 
 	private static int setTickingRate(CommandSourceStack commandSourceStack, float f) {
 		ServerTickRateManager serverTickRateManager = commandSourceStack.getServer().tickRateManager();
 		serverTickRateManager.setTickRate(f);
-		String string = String.format("%.1f", f);
+		String string = String.format(Locale.ROOT, "%.1f", f);
 		commandSourceStack.sendSuccess(() -> Component.translatable("commands.tick.rate.success", string), true);
 		return (int)f;
 	}
@@ -69,7 +70,7 @@ public class TickCommand {
 		ServerTickRateManager serverTickRateManager = commandSourceStack.getServer().tickRateManager();
 		String string = nanosToMilisString(commandSourceStack.getServer().getAverageTickTimeNanos());
 		float f = serverTickRateManager.tickrate();
-		String string2 = String.format("%.1f", f);
+		String string2 = String.format(Locale.ROOT, "%.1f", f);
 		if (serverTickRateManager.isSprinting()) {
 			commandSourceStack.sendSuccess(() -> Component.translatable("commands.tick.status.sprinting"), false);
 			commandSourceStack.sendSuccess(() -> Component.translatable("commands.tick.query.rate.sprinting", string2, string), false);

@@ -1,18 +1,15 @@
 package net.minecraft.client.gui.screens.recipebook;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.ClientRecipeBook;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.RecipeBookCategories;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.StateSwitchingButton;
 import net.minecraft.client.gui.components.WidgetSprites;
-import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.inventory.RecipeBookMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeHolder;
 
@@ -31,16 +28,14 @@ public class RecipeBookTabButton extends StateSwitchingButton {
 		this.initTextureValues(SPRITES);
 	}
 
-	public void startAnimation(Minecraft minecraft) {
-		ClientRecipeBook clientRecipeBook = minecraft.player.getRecipeBook();
-		List<RecipeCollection> list = clientRecipeBook.getCollection(this.category);
-		if (minecraft.player.containerMenu instanceof RecipeBookMenu) {
-			for (RecipeCollection recipeCollection : list) {
-				for (RecipeHolder<?> recipeHolder : recipeCollection.getRecipes(clientRecipeBook.isFiltering((RecipeBookMenu<?, ?>)minecraft.player.containerMenu))) {
-					if (clientRecipeBook.willHighlight(recipeHolder)) {
-						this.animationTime = 15.0F;
-						return;
-					}
+	public void startAnimation(ClientRecipeBook clientRecipeBook, boolean bl) {
+		RecipeCollection.CraftableStatus craftableStatus = bl ? RecipeCollection.CraftableStatus.CRAFTABLE : RecipeCollection.CraftableStatus.ANY;
+
+		for (RecipeCollection recipeCollection : clientRecipeBook.getCollection(this.category)) {
+			for (RecipeHolder<?> recipeHolder : recipeCollection.getFittingRecipes(craftableStatus)) {
+				if (clientRecipeBook.willHighlight(recipeHolder)) {
+					this.animationTime = 15.0F;
+					return;
 				}
 			}
 		}
@@ -57,17 +52,14 @@ public class RecipeBookTabButton extends StateSwitchingButton {
 				guiGraphics.pose().translate((float)(-(this.getX() + 8)), (float)(-(this.getY() + 12)), 0.0F);
 			}
 
-			Minecraft minecraft = Minecraft.getInstance();
-			RenderSystem.disableDepthTest();
 			ResourceLocation resourceLocation = this.sprites.get(true, this.isStateTriggered);
 			int k = this.getX();
 			if (this.isStateTriggered) {
 				k -= 2;
 			}
 
-			guiGraphics.blitSprite(resourceLocation, k, this.getY(), this.width, this.height);
-			RenderSystem.enableDepthTest();
-			this.renderIcon(guiGraphics, minecraft.getItemRenderer());
+			guiGraphics.blitSprite(RenderType::guiTextured, resourceLocation, k, this.getY(), this.width, this.height);
+			this.renderIcon(guiGraphics);
 			if (this.animationTime > 0.0F) {
 				guiGraphics.pose().popPose();
 				this.animationTime -= f;
@@ -75,7 +67,7 @@ public class RecipeBookTabButton extends StateSwitchingButton {
 		}
 	}
 
-	private void renderIcon(GuiGraphics guiGraphics, ItemRenderer itemRenderer) {
+	private void renderIcon(GuiGraphics guiGraphics) {
 		List<ItemStack> list = this.category.getIconItems();
 		int i = this.isStateTriggered ? -2 : 0;
 		if (list.size() == 1) {
@@ -93,12 +85,11 @@ public class RecipeBookTabButton extends StateSwitchingButton {
 	public boolean updateVisibility(ClientRecipeBook clientRecipeBook) {
 		List<RecipeCollection> list = clientRecipeBook.getCollection(this.category);
 		this.visible = false;
-		if (list != null) {
-			for (RecipeCollection recipeCollection : list) {
-				if (recipeCollection.hasKnownRecipes() && recipeCollection.hasFitting()) {
-					this.visible = true;
-					break;
-				}
+
+		for (RecipeCollection recipeCollection : list) {
+			if (recipeCollection.hasKnownRecipes() && recipeCollection.hasFitting()) {
+				this.visible = true;
+				break;
 			}
 		}
 

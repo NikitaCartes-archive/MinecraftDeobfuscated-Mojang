@@ -10,12 +10,14 @@ import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import java.util.Collection;
+import java.util.Optional;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.TimeArgument;
 import net.minecraft.commands.arguments.item.FunctionArgument;
 import net.minecraft.commands.functions.CommandFunction;
+import net.minecraft.commands.functions.MacroFunction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -28,6 +30,7 @@ public class ScheduleCommand {
 	private static final DynamicCommandExceptionType ERROR_CANT_REMOVE = new DynamicCommandExceptionType(
 		object -> Component.translatableEscape("commands.schedule.cleared.failure", object)
 	);
+	private static final SimpleCommandExceptionType ERROR_MACRO = new SimpleCommandExceptionType(Component.translatableEscape("commands.schedule.macro"));
 	private static final SuggestionProvider<CommandSourceStack> SUGGEST_SCHEDULE = (commandContext, suggestionsBuilder) -> SharedSuggestionProvider.suggest(
 			commandContext.getSource().getServer().getWorldData().overworldData().getScheduledEvents().getEventsIds(), suggestionsBuilder
 		);
@@ -99,7 +102,12 @@ public class ScheduleCommand {
 			long l = commandSourceStack.getLevel().getGameTime() + (long)i;
 			ResourceLocation resourceLocation = pair.getFirst();
 			TimerQueue<MinecraftServer> timerQueue = commandSourceStack.getServer().getWorldData().overworldData().getScheduledEvents();
-			pair.getSecond().ifLeft(commandFunction -> {
+			Optional<CommandFunction<CommandSourceStack>> optional = pair.getSecond().left();
+			if (optional.isPresent()) {
+				if (optional.get() instanceof MacroFunction) {
+					throw ERROR_MACRO.create();
+				}
+
 				String string = resourceLocation.toString();
 				if (bl) {
 					timerQueue.remove(string);
@@ -107,7 +115,7 @@ public class ScheduleCommand {
 
 				timerQueue.schedule(string, l, new FunctionCallback(resourceLocation));
 				commandSourceStack.sendSuccess(() -> Component.translatable("commands.schedule.created.function", Component.translationArg(resourceLocation), i, l), true);
-			}).ifRight(collection -> {
+			} else {
 				String string = "#" + resourceLocation;
 				if (bl) {
 					timerQueue.remove(string);
@@ -115,7 +123,8 @@ public class ScheduleCommand {
 
 				timerQueue.schedule(string, l, new FunctionTagCallback(resourceLocation));
 				commandSourceStack.sendSuccess(() -> Component.translatable("commands.schedule.created.tag", Component.translationArg(resourceLocation), i, l), true);
-			});
+			}
+
 			return Math.floorMod(l, Integer.MAX_VALUE);
 		}
 	}

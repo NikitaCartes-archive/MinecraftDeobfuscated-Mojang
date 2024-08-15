@@ -16,10 +16,13 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.valueproviders.UniformInt;
+import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -43,9 +46,10 @@ import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.monster.hoglin.HoglinBase;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
 
-public class Zoglin extends Monster implements Enemy, HoglinBase {
+public class Zoglin extends Monster implements HoglinBase {
 	private static final EntityDataAccessor<Boolean> DATA_BABY_ID = SynchedEntityData.defineId(Zoglin.class, EntityDataSerializers.BOOLEAN);
 	private static final int MAX_HEALTH = 40;
 	private static final int ATTACK_KNOCKBACK = 1;
@@ -152,6 +156,18 @@ public class Zoglin extends Monster implements Enemy, HoglinBase {
 		if (DATA_BABY_ID.equals(entityDataAccessor)) {
 			this.refreshDimensions();
 		}
+	}
+
+	@Nullable
+	@Override
+	public SpawnGroupData finalizeSpawn(
+		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, EntitySpawnReason entitySpawnReason, @Nullable SpawnGroupData spawnGroupData
+	) {
+		if (serverLevelAccessor.getRandom().nextFloat() < 0.2F) {
+			this.setBaby(true);
+		}
+
+		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, entitySpawnReason, spawnGroupData);
 	}
 
 	public static AttributeSupplier.Builder createAttributes() {

@@ -31,10 +31,11 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraft.tags.ItemTags;
-import net.minecraft.util.FastColor;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.BundleItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
@@ -123,43 +124,85 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 					bakedModel = this.itemModelShaper.getModelManager().getModel(TRIDENT_MODEL);
 				} else if (itemStack.is(Items.SPYGLASS)) {
 					bakedModel = this.itemModelShaper.getModelManager().getModel(SPYGLASS_MODEL);
+				} else if (itemStack.is(Items.BUNDLE) && BundleItem.hasSelectedItem(itemStack)) {
+					this.renderBundleWithSelectedItem(itemStack, itemDisplayContext, bl, poseStack, multiBufferSource, i, j, bl2);
+					poseStack.popPose();
+					return;
 				}
 			}
 
 			bakedModel.getTransforms().getTransform(itemDisplayContext).apply(bl, poseStack);
 			poseStack.translate(-0.5F, -0.5F, -0.5F);
-			if (!bakedModel.isCustomRenderer() && (!itemStack.is(Items.TRIDENT) || bl2)) {
-				boolean bl3;
-				if (itemDisplayContext != ItemDisplayContext.GUI && !itemDisplayContext.firstPerson() && itemStack.getItem() instanceof BlockItem blockItem) {
-					Block block = blockItem.getBlock();
-					bl3 = !(block instanceof HalfTransparentBlock) && !(block instanceof StainedGlassPaneBlock);
-				} else {
-					bl3 = true;
-				}
+			this.renderItem(itemStack, itemDisplayContext, poseStack, multiBufferSource, i, j, bakedModel, bl2);
+			poseStack.popPose();
+		}
+	}
 
-				RenderType renderType = ItemBlockRenderTypes.getRenderType(itemStack, bl3);
-				VertexConsumer vertexConsumer;
-				if (hasAnimatedTexture(itemStack) && itemStack.hasFoil()) {
-					PoseStack.Pose pose = poseStack.last().copy();
-					if (itemDisplayContext == ItemDisplayContext.GUI) {
-						MatrixUtil.mulComponentWise(pose.pose(), 0.5F);
-					} else if (itemDisplayContext.firstPerson()) {
-						MatrixUtil.mulComponentWise(pose.pose(), 0.75F);
-					}
+	private void renderBundleWithSelectedItem(
+		ItemStack itemStack, ItemDisplayContext itemDisplayContext, boolean bl, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int j, boolean bl2
+	) {
+		if (itemStack.getItem() instanceof BundleItem bundleItem) {
+			poseStack.pushPose();
+			BakedModel bakedModel = this.itemModelShaper.getModelManager().getModel(getBundleOpenBackModelLocation(bundleItem));
+			bakedModel.getTransforms().getTransform(itemDisplayContext).apply(bl, poseStack);
+			poseStack.translate(-0.5F, -0.5F, -1.5F);
+			this.renderItem(itemStack, itemDisplayContext, poseStack, multiBufferSource, i, j, bakedModel, bl2);
+			poseStack.popPose();
+			poseStack.pushPose();
+			ItemStack itemStack2 = BundleItem.getSelectedItemStack(itemStack);
+			BakedModel bakedModel2 = this.itemModelShaper.getItemModel(itemStack2);
+			bakedModel2.getTransforms().getTransform(itemDisplayContext).apply(bl, poseStack);
+			poseStack.translate(-0.5F, -0.5F, -0.5F);
+			this.renderItem(itemStack2, itemDisplayContext, poseStack, multiBufferSource, i, j, bakedModel2, bl2);
+			poseStack.popPose();
+			poseStack.pushPose();
+			BakedModel bakedModel3 = this.itemModelShaper.getModelManager().getModel(getBundleOpenFrontModelLocation(bundleItem));
+			bakedModel3.getTransforms().getTransform(itemDisplayContext).apply(bl, poseStack);
+			poseStack.translate(-0.5F, -0.5F, 0.5F);
+			this.renderItem(itemStack, itemDisplayContext, poseStack, multiBufferSource, i, j, bakedModel3, bl2);
+			poseStack.popPose();
+		}
+	}
 
-					vertexConsumer = getCompassFoilBuffer(multiBufferSource, renderType, pose);
-				} else if (bl3) {
-					vertexConsumer = getFoilBufferDirect(multiBufferSource, renderType, true, itemStack.hasFoil());
-				} else {
-					vertexConsumer = getFoilBuffer(multiBufferSource, renderType, true, itemStack.hasFoil());
-				}
-
-				this.renderModelLists(bakedModel, itemStack, i, j, poseStack, vertexConsumer);
+	private void renderItem(
+		ItemStack itemStack,
+		ItemDisplayContext itemDisplayContext,
+		PoseStack poseStack,
+		MultiBufferSource multiBufferSource,
+		int i,
+		int j,
+		BakedModel bakedModel,
+		boolean bl
+	) {
+		if (!bakedModel.isCustomRenderer() && (!itemStack.is(Items.TRIDENT) || bl)) {
+			boolean bl2;
+			if (itemDisplayContext != ItemDisplayContext.GUI && !itemDisplayContext.firstPerson() && itemStack.getItem() instanceof BlockItem blockItem) {
+				Block block = blockItem.getBlock();
+				bl2 = !(block instanceof HalfTransparentBlock) && !(block instanceof StainedGlassPaneBlock);
 			} else {
-				this.blockEntityRenderer.renderByItem(itemStack, itemDisplayContext, poseStack, multiBufferSource, i, j);
+				bl2 = true;
 			}
 
-			poseStack.popPose();
+			RenderType renderType = ItemBlockRenderTypes.getRenderType(itemStack, bl2);
+			VertexConsumer vertexConsumer;
+			if (hasAnimatedTexture(itemStack) && itemStack.hasFoil()) {
+				PoseStack.Pose pose = poseStack.last().copy();
+				if (itemDisplayContext == ItemDisplayContext.GUI) {
+					MatrixUtil.mulComponentWise(pose.pose(), 0.5F);
+				} else if (itemDisplayContext.firstPerson()) {
+					MatrixUtil.mulComponentWise(pose.pose(), 0.75F);
+				}
+
+				vertexConsumer = getCompassFoilBuffer(multiBufferSource, renderType, pose);
+			} else if (bl2) {
+				vertexConsumer = getFoilBufferDirect(multiBufferSource, renderType, true, itemStack.hasFoil());
+			} else {
+				vertexConsumer = getFoilBuffer(multiBufferSource, renderType, true, itemStack.hasFoil());
+			}
+
+			this.renderModelLists(bakedModel, itemStack, i, j, poseStack, vertexConsumer);
+		} else {
+			this.blockEntityRenderer.renderByItem(itemStack, itemDisplayContext, poseStack, multiBufferSource, i, j);
 		}
 	}
 
@@ -205,10 +248,10 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 				k = this.itemColors.getColor(itemStack, bakedQuad.getTintIndex());
 			}
 
-			float f = (float)FastColor.ARGB32.alpha(k) / 255.0F;
-			float g = (float)FastColor.ARGB32.red(k) / 255.0F;
-			float h = (float)FastColor.ARGB32.green(k) / 255.0F;
-			float l = (float)FastColor.ARGB32.blue(k) / 255.0F;
+			float f = (float)ARGB.alpha(k) / 255.0F;
+			float g = (float)ARGB.red(k) / 255.0F;
+			float h = (float)ARGB.green(k) / 255.0F;
+			float l = (float)ARGB.blue(k) / 255.0F;
 			vertexConsumer.putBulkData(pose, bakedQuad, g, h, l, f, i, j);
 		}
 	}
@@ -226,6 +269,14 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 		ClientLevel clientLevel = level instanceof ClientLevel ? (ClientLevel)level : null;
 		BakedModel bakedModel2 = bakedModel.getOverrides().resolve(bakedModel, itemStack, clientLevel, livingEntity, i);
 		return bakedModel2 == null ? this.itemModelShaper.getModelManager().getMissingModel() : bakedModel2;
+	}
+
+	public static ModelResourceLocation getBundleOpenFrontModelLocation(BundleItem bundleItem) {
+		return ModelResourceLocation.inventory(ResourceLocation.withDefaultNamespace(bundleItem.getOpenBundleModelFrontLocation()));
+	}
+
+	public static ModelResourceLocation getBundleOpenBackModelLocation(BundleItem bundleItem) {
+		return ModelResourceLocation.inventory(ResourceLocation.withDefaultNamespace(bundleItem.getOpenBundleModelBackLocation()));
 	}
 
 	public void renderStatic(
@@ -262,5 +313,10 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 	@Override
 	public void onResourceManagerReload(ResourceManager resourceManager) {
 		this.itemModelShaper.rebuildCache();
+	}
+
+	@Nullable
+	public BakedModel resolveItemModel(ItemStack itemStack, LivingEntity livingEntity, ItemDisplayContext itemDisplayContext) {
+		return itemStack.isEmpty() ? null : this.getModel(itemStack, livingEntity.level(), livingEntity, livingEntity.getId() + itemDisplayContext.ordinal());
 	}
 }

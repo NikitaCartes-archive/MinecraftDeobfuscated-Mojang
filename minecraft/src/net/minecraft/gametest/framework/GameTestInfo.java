@@ -335,7 +335,7 @@ public class GameTestInfo {
 		return gameTestInfo;
 	}
 
-	private BlockPos getOrCalculateNorthwestCorner() {
+	public BlockPos getOrCalculateNorthwestCorner() {
 		if (this.northWestCorner == null) {
 			BoundingBox boundingBox = StructureUtils.getStructureBoundingBox(this.getStructureBlockEntity());
 			this.northWestCorner = new BlockPos(boundingBox.minX(), boundingBox.minY(), boundingBox.minZ());

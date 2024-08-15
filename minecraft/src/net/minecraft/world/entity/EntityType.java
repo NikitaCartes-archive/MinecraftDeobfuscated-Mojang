@@ -836,7 +836,13 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 
 	@Nullable
 	public T spawn(
-		ServerLevel serverLevel, @Nullable ItemStack itemStack, @Nullable Player player, BlockPos blockPos, MobSpawnType mobSpawnType, boolean bl, boolean bl2
+		ServerLevel serverLevel,
+		@Nullable ItemStack itemStack,
+		@Nullable Player player,
+		BlockPos blockPos,
+		EntitySpawnReason entitySpawnReason,
+		boolean bl,
+		boolean bl2
 	) {
 		Consumer<T> consumer;
 		if (itemStack != null) {
@@ -846,7 +852,7 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 			};
 		}
 
-		return this.spawn(serverLevel, consumer, blockPos, mobSpawnType, bl, bl2);
+		return this.spawn(serverLevel, consumer, blockPos, entitySpawnReason, bl, bl2);
 	}
 
 	public static <T extends Entity> Consumer<T> createDefaultStackConfig(ServerLevel serverLevel, ItemStack itemStack, @Nullable Player player) {
@@ -873,13 +879,13 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 	}
 
 	@Nullable
-	public T spawn(ServerLevel serverLevel, BlockPos blockPos, MobSpawnType mobSpawnType) {
-		return this.spawn(serverLevel, null, blockPos, mobSpawnType, false, false);
+	public T spawn(ServerLevel serverLevel, BlockPos blockPos, EntitySpawnReason entitySpawnReason) {
+		return this.spawn(serverLevel, null, blockPos, entitySpawnReason, false, false);
 	}
 
 	@Nullable
-	public T spawn(ServerLevel serverLevel, @Nullable Consumer<T> consumer, BlockPos blockPos, MobSpawnType mobSpawnType, boolean bl, boolean bl2) {
-		T entity = this.create(serverLevel, consumer, blockPos, mobSpawnType, bl, bl2);
+	public T spawn(ServerLevel serverLevel, @Nullable Consumer<T> consumer, BlockPos blockPos, EntitySpawnReason entitySpawnReason, boolean bl, boolean bl2) {
+		T entity = this.create(serverLevel, consumer, blockPos, entitySpawnReason, bl, bl2);
 		if (entity != null) {
 			serverLevel.addFreshEntityWithPassengers(entity);
 		}
@@ -888,8 +894,8 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 	}
 
 	@Nullable
-	public T create(ServerLevel serverLevel, @Nullable Consumer<T> consumer, BlockPos blockPos, MobSpawnType mobSpawnType, boolean bl, boolean bl2) {
-		T entity = this.create(serverLevel);
+	public T create(ServerLevel serverLevel, @Nullable Consumer<T> consumer, BlockPos blockPos, EntitySpawnReason entitySpawnReason, boolean bl, boolean bl2) {
+		T entity = this.create(serverLevel, entitySpawnReason);
 		if (entity == null) {
 			return null;
 		} else {
@@ -907,7 +913,7 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 			if (entity instanceof Mob mob) {
 				mob.yHeadRot = mob.getYRot();
 				mob.yBodyRot = mob.getYRot();
-				mob.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(mob.blockPosition()), mobSpawnType, null);
+				mob.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(mob.blockPosition()), entitySpawnReason, null);
 				mob.playAmbientSound();
 			}
 
@@ -1006,13 +1012,13 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 	}
 
 	@Nullable
-	public T create(Level level) {
+	public T create(Level level, EntitySpawnReason entitySpawnReason) {
 		return !this.isEnabled(level.enabledFeatures()) ? null : this.factory.create(this, level);
 	}
 
-	public static Optional<Entity> create(CompoundTag compoundTag, Level level) {
+	public static Optional<Entity> create(CompoundTag compoundTag, Level level, EntitySpawnReason entitySpawnReason) {
 		return Util.ifElse(
-			by(compoundTag).map(entityType -> entityType.create(level)),
+			by(compoundTag).map(entityType -> entityType.create(level, entitySpawnReason)),
 			entity -> entity.load(compoundTag),
 			() -> LOGGER.warn("Skipping Entity with id {}", compoundTag.getString("id"))
 		);
@@ -1043,13 +1049,13 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 	}
 
 	@Nullable
-	public static Entity loadEntityRecursive(CompoundTag compoundTag, Level level, Function<Entity, Entity> function) {
-		return (Entity)loadStaticEntity(compoundTag, level).map(function).map(entity -> {
+	public static Entity loadEntityRecursive(CompoundTag compoundTag, Level level, EntitySpawnReason entitySpawnReason, Function<Entity, Entity> function) {
+		return (Entity)loadStaticEntity(compoundTag, level, entitySpawnReason).map(function).map(entity -> {
 			if (compoundTag.contains("Passengers", 9)) {
 				ListTag listTag = compoundTag.getList("Passengers", 10);
 
 				for (int i = 0; i < listTag.size(); i++) {
-					Entity entity2 = loadEntityRecursive(listTag.getCompound(i), level, function);
+					Entity entity2 = loadEntityRecursive(listTag.getCompound(i), level, entitySpawnReason, function);
 					if (entity2 != null) {
 						entity2.startRiding(entity, true);
 					}
@@ -1060,11 +1066,11 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 		}).orElse(null);
 	}
 
-	public static Stream<Entity> loadEntitiesRecursive(List<? extends Tag> list, Level level) {
+	public static Stream<Entity> loadEntitiesRecursive(List<? extends Tag> list, Level level, EntitySpawnReason entitySpawnReason) {
 		final Spliterator<? extends Tag> spliterator = list.spliterator();
 		return StreamSupport.stream(new Spliterator<Entity>() {
 			public boolean tryAdvance(Consumer<? super Entity> consumer) {
-				return spliterator.tryAdvance(tag -> EntityType.loadEntityRecursive((CompoundTag)tag, level, entity -> {
+				return spliterator.tryAdvance(tag -> EntityType.loadEntityRecursive((CompoundTag)tag, level, entitySpawnReason, entity -> {
 						consumer.accept(entity);
 						return entity;
 					}));
@@ -1084,11 +1090,11 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 		}, false);
 	}
 
-	private static Optional<Entity> loadStaticEntity(CompoundTag compoundTag, Level level) {
+	private static Optional<Entity> loadStaticEntity(CompoundTag compoundTag, Level level, EntitySpawnReason entitySpawnReason) {
 		try {
-			return create(compoundTag, level);
-		} catch (RuntimeException var3) {
-			LOGGER.warn("Exception loading entity: ", (Throwable)var3);
+			return create(compoundTag, level, entitySpawnReason);
+		} catch (RuntimeException var4) {
+			LOGGER.warn("Exception loading entity: ", (Throwable)var4);
 			return Optional.empty();
 		}
 	}

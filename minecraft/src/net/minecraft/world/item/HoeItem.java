@@ -38,8 +38,8 @@ public class HoeItem extends DiggerItem {
 		)
 	);
 
-	public HoeItem(Tier tier, Item.Properties properties) {
-		super(tier, BlockTags.MINEABLE_WITH_HOE, properties);
+	public HoeItem(ToolMaterial toolMaterial, float f, float g, Item.Properties properties) {
+		super(toolMaterial, BlockTags.MINEABLE_WITH_HOE, f, g, properties);
 	}
 
 	@Override
@@ -64,7 +64,7 @@ public class HoeItem extends DiggerItem {
 					}
 				}
 
-				return InteractionResult.sidedSuccess(level.isClientSide);
+				return InteractionResult.SUCCESS;
 			} else {
 				return InteractionResult.PASS;
 			}

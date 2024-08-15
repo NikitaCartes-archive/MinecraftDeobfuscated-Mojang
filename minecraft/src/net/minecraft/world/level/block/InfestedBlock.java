@@ -9,6 +9,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.EnchantmentTags;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.monster.Silverfish;
 import net.minecraft.world.item.ItemStack;
@@ -48,7 +49,7 @@ public class InfestedBlock extends Block {
 	}
 
 	private void spawnInfestation(ServerLevel serverLevel, BlockPos blockPos) {
-		Silverfish silverfish = EntityType.SILVERFISH.create(serverLevel);
+		Silverfish silverfish = EntityType.SILVERFISH.create(serverLevel, EntitySpawnReason.TRIGGERED);
 		if (silverfish != null) {
 			silverfish.moveTo((double)blockPos.getX() + 0.5, (double)blockPos.getY(), (double)blockPos.getZ() + 0.5, 0.0F, 0.0F);
 			serverLevel.addFreshEntity(silverfish);

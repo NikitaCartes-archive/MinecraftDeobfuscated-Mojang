@@ -12,9 +12,9 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.Tuple;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ChestBlock;
@@ -1230,16 +1230,16 @@ public class WoodlandMansionPieces {
 				List<Mob> list = new ArrayList();
 				switch (string) {
 					case "Mage":
-						list.add(EntityType.EVOKER.create(serverLevelAccessor.getLevel()));
+						list.add(EntityType.EVOKER.create(serverLevelAccessor.getLevel(), EntitySpawnReason.STRUCTURE));
 						break;
 					case "Warrior":
-						list.add(EntityType.VINDICATOR.create(serverLevelAccessor.getLevel()));
+						list.add(EntityType.VINDICATOR.create(serverLevelAccessor.getLevel(), EntitySpawnReason.STRUCTURE));
 						break;
 					case "Group of Allays":
 						int i = serverLevelAccessor.getRandom().nextInt(3) + 1;
 
 						for (int j = 0; j < i; j++) {
-							list.add(EntityType.ALLAY.create(serverLevelAccessor.getLevel()));
+							list.add(EntityType.ALLAY.create(serverLevelAccessor.getLevel(), EntitySpawnReason.STRUCTURE));
 						}
 						break;
 					default:
@@ -1250,7 +1250,7 @@ public class WoodlandMansionPieces {
 					if (mob != null) {
 						mob.setPersistenceRequired();
 						mob.moveTo(blockPos, 0.0F, 0.0F);
-						mob.finalizeSpawn(serverLevelAccessor, serverLevelAccessor.getCurrentDifficultyAt(mob.blockPosition()), MobSpawnType.STRUCTURE, null);
+						mob.finalizeSpawn(serverLevelAccessor, serverLevelAccessor.getCurrentDifficultyAt(mob.blockPosition()), EntitySpawnReason.STRUCTURE, null);
 						serverLevelAccessor.addFreshEntityWithPassengers(mob);
 						serverLevelAccessor.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 2);
 					}

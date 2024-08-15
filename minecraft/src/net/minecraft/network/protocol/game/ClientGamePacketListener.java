@@ -78,6 +78,8 @@ public interface ClientGamePacketListener extends ClientPongPacketListener, Clie
 
 	void handleMoveEntity(ClientboundMoveEntityPacket clientboundMoveEntityPacket);
 
+	void handleMinecartAlongTrack(ClientboundMoveMinecartPacket clientboundMoveMinecartPacket);
+
 	void handleMovePlayer(ClientboundPlayerPositionPacket clientboundPlayerPositionPacket);
 
 	void handleParticleEvent(ClientboundLevelParticlesPacket clientboundLevelParticlesPacket);
@@ -96,7 +98,7 @@ public interface ClientGamePacketListener extends ClientPongPacketListener, Clie
 
 	void handleRotateMob(ClientboundRotateHeadPacket clientboundRotateHeadPacket);
 
-	void handleSetCarriedItem(ClientboundSetCarriedItemPacket clientboundSetCarriedItemPacket);
+	void handleSetHeldSlot(ClientboundSetHeldSlotPacket clientboundSetHeldSlotPacket);
 
 	void handleSetDisplayObjective(ClientboundSetDisplayObjectivePacket clientboundSetDisplayObjectivePacket);
 
@@ -227,4 +229,8 @@ public interface ClientGamePacketListener extends ClientPongPacketListener, Clie
 	void handleDebugSample(ClientboundDebugSamplePacket clientboundDebugSamplePacket);
 
 	void handleProjectilePowerPacket(ClientboundProjectilePowerPacket clientboundProjectilePowerPacket);
+
+	void handleSetCursorItem(ClientboundSetCursorItemPacket clientboundSetCursorItemPacket);
+
+	void handleSetPlayerInventory(ClientboundSetPlayerInventoryPacket clientboundSetPlayerInventoryPacket);
 }

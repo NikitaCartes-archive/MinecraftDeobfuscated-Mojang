@@ -302,6 +302,7 @@ public class Boat extends VehicleEntity implements Leashable, VariantHolder<Boat
 			this.setDeltaMovement(Vec3.ZERO);
 		}
 
+		this.applyEffectsFromBlocks();
 		this.tickBubbleColumn();
 
 		for (int i = 0; i <= 1; i++) {
@@ -325,7 +326,6 @@ public class Boat extends VehicleEntity implements Leashable, VariantHolder<Boat
 			}
 		}
 
-		this.checkInsideBlocks();
 		List<Entity> list = this.level().getEntities(this, this.getBoundingBox().inflate(0.2F, -0.01F, 0.2F), EntitySelector.pushableBy(this));
 		if (!list.isEmpty()) {
 			boolean bl = !this.level().isClientSide && !(this.getControllingPassenger() instanceof Player);
@@ -764,16 +764,10 @@ public class Boat extends VehicleEntity implements Leashable, VariantHolder<Boat
 		InteractionResult interactionResult = super.interact(player, interactionHand);
 		if (interactionResult != InteractionResult.PASS) {
 			return interactionResult;
-		} else if (player.isSecondaryUseActive()) {
-			return InteractionResult.PASS;
-		} else if (this.outOfControlTicks < 60.0F) {
-			if (!this.level().isClientSide) {
-				return player.startRiding(this) ? InteractionResult.CONSUME : InteractionResult.PASS;
-			} else {
-				return InteractionResult.SUCCESS;
-			}
 		} else {
-			return InteractionResult.PASS;
+			return (InteractionResult)(player.isSecondaryUseActive() || !(this.outOfControlTicks < 60.0F) || !this.level().isClientSide && !player.startRiding(this)
+				? InteractionResult.PASS
+				: InteractionResult.SUCCESS);
 		}
 	}
 

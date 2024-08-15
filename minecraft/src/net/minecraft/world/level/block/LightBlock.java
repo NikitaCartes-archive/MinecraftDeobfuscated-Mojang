@@ -53,7 +53,7 @@ public class LightBlock extends Block implements SimpleWaterloggedBlock {
 	protected InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
 		if (!level.isClientSide && player.canUseGameMasterBlocks()) {
 			level.setBlock(blockPos, blockState.cycle(LEVEL), 2);
-			return InteractionResult.SUCCESS;
+			return InteractionResult.SUCCESS_SERVER;
 		} else {
 			return InteractionResult.CONSUME;
 		}
@@ -65,7 +65,7 @@ public class LightBlock extends Block implements SimpleWaterloggedBlock {
 	}
 
 	@Override
-	protected boolean propagatesSkylightDown(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
+	protected boolean propagatesSkylightDown(BlockState blockState) {
 		return blockState.getFluidState().isEmpty();
 	}
 

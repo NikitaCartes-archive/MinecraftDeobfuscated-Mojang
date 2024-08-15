@@ -2,7 +2,7 @@ package net.minecraft.world.item;
 
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -22,20 +22,20 @@ public class FoodOnAStickItem<T extends Entity & ItemSteerable> extends Item {
 	}
 
 	@Override
-	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand interactionHand) {
+	public InteractionResult use(Level level, Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
 		if (level.isClientSide) {
-			return InteractionResultHolder.pass(itemStack);
+			return InteractionResult.PASS;
 		} else {
 			Entity entity = player.getControlledVehicle();
 			if (player.isPassenger() && entity instanceof ItemSteerable itemSteerable && entity.getType() == this.canInteractWith && itemSteerable.boost()) {
 				EquipmentSlot equipmentSlot = LivingEntity.getSlotForHand(interactionHand);
 				ItemStack itemStack2 = itemStack.hurtAndConvertOnBreak(this.consumeItemDamage, Items.FISHING_ROD, player, equipmentSlot);
-				return InteractionResultHolder.success(itemStack2);
+				return InteractionResult.SUCCESS_SERVER.heldItemTransformedTo(itemStack2);
 			}
 
 			player.awardStat(Stats.ITEM_USED.get(this));
-			return InteractionResultHolder.pass(itemStack);
+			return InteractionResult.PASS;
 		}
 	}
 }

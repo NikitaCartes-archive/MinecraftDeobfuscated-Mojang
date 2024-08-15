@@ -8,7 +8,6 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -42,7 +41,7 @@ public class ServerFunctionLibrary implements PreparableReloadListener {
 	private static final FileToIdConverter LISTER = new FileToIdConverter(Registries.elementsDirPath(TYPE_KEY), ".mcfunction");
 	private volatile Map<ResourceLocation, CommandFunction<CommandSourceStack>> functions = ImmutableMap.of();
 	private final TagLoader<CommandFunction<CommandSourceStack>> tagsLoader = new TagLoader<>(this::getFunction, Registries.tagsDirPath(TYPE_KEY));
-	private volatile Map<ResourceLocation, Collection<CommandFunction<CommandSourceStack>>> tags = Map.of();
+	private volatile Map<ResourceLocation, List<CommandFunction<CommandSourceStack>>> tags = Map.of();
 	private final int functionCompilationLevel;
 	private final CommandDispatcher<CommandSourceStack> dispatcher;
 
@@ -54,8 +53,8 @@ public class ServerFunctionLibrary implements PreparableReloadListener {
 		return this.functions;
 	}
 
-	public Collection<CommandFunction<CommandSourceStack>> getTag(ResourceLocation resourceLocation) {
-		return (Collection<CommandFunction<CommandSourceStack>>)this.tags.getOrDefault(resourceLocation, List.of());
+	public List<CommandFunction<CommandSourceStack>> getTag(ResourceLocation resourceLocation) {
+		return (List<CommandFunction<CommandSourceStack>>)this.tags.getOrDefault(resourceLocation, List.of());
 	}
 
 	public Iterable<ResourceLocation> getAvailableTags() {

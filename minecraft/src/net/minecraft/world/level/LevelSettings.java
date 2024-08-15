@@ -32,7 +32,7 @@ public final class LevelSettings {
 			dynamic.get("hardcore").asBoolean(false),
 			(Difficulty)dynamic.get("Difficulty").asNumber().map(number -> Difficulty.byId(number.byteValue())).result().orElse(Difficulty.NORMAL),
 			dynamic.get("allowCommands").asBoolean(gameType == GameType.CREATIVE),
-			new GameRules(dynamic.get("GameRules")),
+			new GameRules(worldDataConfiguration.enabledFeatures(), dynamic.get("GameRules")),
 			worldDataConfiguration
 		);
 	}
@@ -78,6 +78,14 @@ public final class LevelSettings {
 	}
 
 	public LevelSettings copy() {
-		return new LevelSettings(this.levelName, this.gameType, this.hardcore, this.difficulty, this.allowCommands, this.gameRules.copy(), this.dataConfiguration);
+		return new LevelSettings(
+			this.levelName,
+			this.gameType,
+			this.hardcore,
+			this.difficulty,
+			this.allowCommands,
+			this.gameRules.copy(this.dataConfiguration.enabledFeatures()),
+			this.dataConfiguration
+		);
 	}
 }

@@ -11,12 +11,12 @@ public record ServerboundContainerSlotStateChangedPacket(int slotId, int contain
 	);
 
 	private ServerboundContainerSlotStateChangedPacket(FriendlyByteBuf friendlyByteBuf) {
-		this(friendlyByteBuf.readVarInt(), friendlyByteBuf.readVarInt(), friendlyByteBuf.readBoolean());
+		this(friendlyByteBuf.readVarInt(), friendlyByteBuf.readContainerId(), friendlyByteBuf.readBoolean());
 	}
 
 	private void write(FriendlyByteBuf friendlyByteBuf) {
 		friendlyByteBuf.writeVarInt(this.slotId);
-		friendlyByteBuf.writeVarInt(this.containerId);
+		friendlyByteBuf.writeContainerId(this.containerId);
 		friendlyByteBuf.writeBoolean(this.newState);
 	}
 

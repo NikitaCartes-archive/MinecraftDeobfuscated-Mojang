@@ -16,7 +16,7 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.ItemInteractionResult;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -87,7 +87,7 @@ public class CampfireBlock extends BaseEntityBlock implements SimpleWaterloggedB
 	}
 
 	@Override
-	protected ItemInteractionResult useItemOn(
+	protected InteractionResult useItemOn(
 		ItemStack itemStack, BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
 	) {
 		if (level.getBlockEntity(blockPos) instanceof CampfireBlockEntity campfireBlockEntity) {
@@ -97,14 +97,14 @@ public class CampfireBlock extends BaseEntityBlock implements SimpleWaterloggedB
 				if (!level.isClientSide
 					&& campfireBlockEntity.placeFood(player, itemStack2, ((CampfireCookingRecipe)((RecipeHolder)optional.get()).value()).getCookingTime())) {
 					player.awardStat(Stats.INTERACT_WITH_CAMPFIRE);
-					return ItemInteractionResult.SUCCESS;
+					return InteractionResult.SUCCESS_SERVER;
 				}
 
-				return ItemInteractionResult.CONSUME;
+				return InteractionResult.CONSUME;
 			}
 		}
 
-		return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+		return InteractionResult.TRY_WITH_EMPTY_HAND;
 	}
 
 	@Override

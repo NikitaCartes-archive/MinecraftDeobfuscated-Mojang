@@ -5,9 +5,11 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.ARGB;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 
@@ -52,7 +54,7 @@ public class CyclingSlotBackground {
 
 	private void renderIcon(Slot slot, ResourceLocation resourceLocation, float f, GuiGraphics guiGraphics, int i, int j) {
 		TextureAtlasSprite textureAtlasSprite = (TextureAtlasSprite)Minecraft.getInstance().getTextureAtlas(TextureAtlas.LOCATION_BLOCKS).apply(resourceLocation);
-		guiGraphics.blit(i + slot.x, j + slot.y, 0, 16, 16, textureAtlasSprite, 1.0F, 1.0F, 1.0F, f);
+		guiGraphics.blitSprite(RenderType::guiTextured, textureAtlasSprite, i + slot.x, j + slot.y, 16, 16, ARGB.white(f));
 	}
 
 	private float getIconTransitionTransparency(float f) {

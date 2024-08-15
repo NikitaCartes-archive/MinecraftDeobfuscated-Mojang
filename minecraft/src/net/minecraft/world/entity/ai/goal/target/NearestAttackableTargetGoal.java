@@ -50,7 +50,7 @@ public class NearestAttackableTargetGoal<T extends LivingEntity> extends TargetG
 	}
 
 	protected AABB getTargetSearchArea(double d) {
-		return this.mob.getBoundingBox().inflate(d, 4.0, d);
+		return this.mob.getBoundingBox().inflate(d, d, d);
 	}
 
 	protected void findTarget() {
@@ -59,14 +59,14 @@ public class NearestAttackableTargetGoal<T extends LivingEntity> extends TargetG
 				.level()
 				.getNearestEntity(
 					this.mob.level().getEntitiesOfClass(this.targetType, this.getTargetSearchArea(this.getFollowDistance()), livingEntity -> true),
-					this.targetConditions,
+					this.getTargetConditions(),
 					this.mob,
 					this.mob.getX(),
 					this.mob.getEyeY(),
 					this.mob.getZ()
 				);
 		} else {
-			this.target = this.mob.level().getNearestPlayer(this.targetConditions, this.mob, this.mob.getX(), this.mob.getEyeY(), this.mob.getZ());
+			this.target = this.mob.level().getNearestPlayer(this.getTargetConditions(), this.mob, this.mob.getX(), this.mob.getEyeY(), this.mob.getZ());
 		}
 	}
 
@@ -78,5 +78,9 @@ public class NearestAttackableTargetGoal<T extends LivingEntity> extends TargetG
 
 	public void setTarget(@Nullable LivingEntity livingEntity) {
 		this.target = livingEntity;
+	}
+
+	private TargetingConditions getTargetConditions() {
+		return this.targetConditions.range(this.getFollowDistance());
 	}
 }

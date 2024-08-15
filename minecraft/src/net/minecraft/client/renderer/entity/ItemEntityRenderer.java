@@ -6,6 +6,7 @@ import com.mojang.math.Axis;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.entity.state.ItemEntityRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.resources.model.BakedModel;
@@ -19,7 +20,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
 @Environment(EnvType.CLIENT)
-public class ItemEntityRenderer extends EntityRenderer<ItemEntity> {
+public class ItemEntityRenderer extends EntityRenderer<ItemEntity, ItemEntityRenderState> {
 	private static final float ITEM_BUNDLE_OFFSET_SCALE = 0.15F;
 	private static final float FLAT_ITEM_BUNDLE_OFFSET_X = 0.0F;
 	private static final float FLAT_ITEM_BUNDLE_OFFSET_Y = 0.0F;
@@ -34,25 +35,40 @@ public class ItemEntityRenderer extends EntityRenderer<ItemEntity> {
 		this.shadowStrength = 0.75F;
 	}
 
-	public ResourceLocation getTextureLocation(ItemEntity itemEntity) {
+	public ResourceLocation getTextureLocation(ItemEntityRenderState itemEntityRenderState) {
 		return TextureAtlas.LOCATION_BLOCKS;
 	}
 
-	public void render(ItemEntity itemEntity, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
-		poseStack.pushPose();
+	public ItemEntityRenderState createRenderState() {
+		return new ItemEntityRenderState();
+	}
+
+	public void extractRenderState(ItemEntity itemEntity, ItemEntityRenderState itemEntityRenderState, float f) {
+		super.extractRenderState(itemEntity, itemEntityRenderState, f);
+		itemEntityRenderState.ageInTicks = (float)itemEntity.getAge() + f;
+		itemEntityRenderState.bobOffset = itemEntity.bobOffs;
 		ItemStack itemStack = itemEntity.getItem();
-		this.random.setSeed((long)getSeedForItemStack(itemStack));
-		BakedModel bakedModel = this.itemRenderer.getModel(itemStack, itemEntity.level(), null, itemEntity.getId());
-		boolean bl = bakedModel.isGui3d();
-		float h = 0.25F;
-		float j = Mth.sin(((float)itemEntity.getAge() + g) / 10.0F + itemEntity.bobOffs) * 0.1F + 0.1F;
-		float k = bakedModel.getTransforms().getTransform(ItemDisplayContext.GROUND).scale.y();
-		poseStack.translate(0.0F, j + 0.25F * k, 0.0F);
-		float l = itemEntity.getSpin(g);
-		poseStack.mulPose(Axis.YP.rotation(l));
-		renderMultipleFromCount(this.itemRenderer, poseStack, multiBufferSource, i, itemStack, bakedModel, bl, this.random);
-		poseStack.popPose();
-		super.render(itemEntity, f, g, poseStack, multiBufferSource, i);
+		itemEntityRenderState.item = itemStack;
+		itemEntityRenderState.itemModel = this.itemRenderer.getModel(itemStack, itemEntity.level(), null, itemEntity.getId());
+	}
+
+	public void render(ItemEntityRenderState itemEntityRenderState, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
+		BakedModel bakedModel = itemEntityRenderState.itemModel;
+		if (bakedModel != null) {
+			poseStack.pushPose();
+			ItemStack itemStack = itemEntityRenderState.item;
+			this.random.setSeed((long)getSeedForItemStack(itemStack));
+			boolean bl = bakedModel.isGui3d();
+			float f = 0.25F;
+			float g = Mth.sin(itemEntityRenderState.ageInTicks / 10.0F + itemEntityRenderState.bobOffset) * 0.1F + 0.1F;
+			float h = bakedModel.getTransforms().getTransform(ItemDisplayContext.GROUND).scale.y();
+			poseStack.translate(0.0F, g + 0.25F * h, 0.0F);
+			float j = ItemEntity.getSpin(itemEntityRenderState.ageInTicks, itemEntityRenderState.bobOffset);
+			poseStack.mulPose(Axis.YP.rotation(j));
+			renderMultipleFromCount(this.itemRenderer, poseStack, multiBufferSource, i, itemStack, bakedModel, bl, this.random);
+			poseStack.popPose();
+			super.render(itemEntityRenderState, poseStack, multiBufferSource, i);
+		}
 	}
 
 	public static int getSeedForItemStack(ItemStack itemStack) {

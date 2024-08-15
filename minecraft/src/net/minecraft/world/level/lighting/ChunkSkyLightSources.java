@@ -60,7 +60,7 @@ public class ChunkSkyLightSources {
 			} else {
 				for (int n = 15; n >= 0; n--) {
 					BlockState blockState2 = levelChunkSection.getBlockState(j, n, k);
-					if (isEdgeOccluded(chunkAccess, mutableBlockPos, blockState, mutableBlockPos2, blockState2)) {
+					if (isEdgeOccluded(blockState, blockState2)) {
 						return mutableBlockPos.getY();
 					}
 
@@ -97,7 +97,7 @@ public class ChunkSkyLightSources {
 
 	private boolean updateEdge(BlockGetter blockGetter, int i, int j, BlockPos blockPos, BlockState blockState, BlockPos blockPos2, BlockState blockState2) {
 		int k = blockPos.getY();
-		if (isEdgeOccluded(blockGetter, blockPos, blockState, blockPos2, blockState2)) {
+		if (isEdgeOccluded(blockState, blockState2)) {
 			if (k > j) {
 				this.set(i, k);
 				return true;
@@ -117,7 +117,7 @@ public class ChunkSkyLightSources {
 
 		while (mutableBlockPos2.getY() >= this.minY) {
 			BlockState blockState3 = blockGetter.getBlockState(mutableBlockPos2);
-			if (isEdgeOccluded(blockGetter, mutableBlockPos, blockState2, mutableBlockPos2, blockState3)) {
+			if (isEdgeOccluded(blockState2, blockState3)) {
 				return mutableBlockPos.getY();
 			}
 
@@ -129,12 +129,12 @@ public class ChunkSkyLightSources {
 		return this.minY;
 	}
 
-	private static boolean isEdgeOccluded(BlockGetter blockGetter, BlockPos blockPos, BlockState blockState, BlockPos blockPos2, BlockState blockState2) {
-		if (blockState2.getLightBlock(blockGetter, blockPos2) != 0) {
+	private static boolean isEdgeOccluded(BlockState blockState, BlockState blockState2) {
+		if (blockState2.getLightBlock() != 0) {
 			return true;
 		} else {
-			VoxelShape voxelShape = LightEngine.getOcclusionShape(blockGetter, blockPos, blockState, Direction.DOWN);
-			VoxelShape voxelShape2 = LightEngine.getOcclusionShape(blockGetter, blockPos2, blockState2, Direction.UP);
+			VoxelShape voxelShape = LightEngine.getOcclusionShape(blockState, Direction.DOWN);
+			VoxelShape voxelShape2 = LightEngine.getOcclusionShape(blockState2, Direction.UP);
 			return Shapes.faceShapeOccludes(voxelShape, voxelShape2);
 		}
 	}

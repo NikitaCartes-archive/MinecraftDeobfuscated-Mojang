@@ -40,6 +40,7 @@ import net.minecraft.CrashReportCategory;
 import net.minecraft.FileUtil;
 import net.minecraft.ReportedException;
 import net.minecraft.Util;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
@@ -150,14 +151,14 @@ public class LevelStorageSource {
 	}
 
 	public static LevelDataAndDimensions getLevelDataAndDimensions(
-		Dynamic<?> dynamic, WorldDataConfiguration worldDataConfiguration, Registry<LevelStem> registry, RegistryAccess.Frozen frozen
+		Dynamic<?> dynamic, WorldDataConfiguration worldDataConfiguration, Registry<LevelStem> registry, HolderLookup.Provider provider
 	) {
-		Dynamic<?> dynamic2 = RegistryOps.injectRegistryContext(dynamic, frozen);
+		Dynamic<?> dynamic2 = RegistryOps.injectRegistryContext(dynamic, provider);
 		Dynamic<?> dynamic3 = dynamic2.get("WorldGenSettings").orElseEmptyMap();
 		WorldGenSettings worldGenSettings = WorldGenSettings.CODEC.parse(dynamic3).getOrThrow();
 		LevelSettings levelSettings = LevelSettings.parse(dynamic2, worldDataConfiguration);
 		WorldDimensions.Complete complete = worldGenSettings.dimensions().bake(registry);
-		Lifecycle lifecycle = complete.lifecycle().add(frozen.allRegistriesLifecycle());
+		Lifecycle lifecycle = complete.lifecycle().add(provider.allRegistriesLifecycle());
 		PrimaryLevelData primaryLevelData = PrimaryLevelData.parse(dynamic2, levelSettings, complete.specialWorldProperty(), worldGenSettings.options(), lifecycle);
 		return new LevelDataAndDimensions(primaryLevelData, complete);
 	}

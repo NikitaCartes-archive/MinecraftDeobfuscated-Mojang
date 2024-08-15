@@ -103,21 +103,15 @@ public class ShulkerBoxBlock extends BaseEntityBlock {
 
 	@Override
 	protected InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
-		if (level.isClientSide) {
-			return InteractionResult.SUCCESS;
-		} else if (player.isSpectator()) {
-			return InteractionResult.CONSUME;
-		} else if (level.getBlockEntity(blockPos) instanceof ShulkerBoxBlockEntity shulkerBoxBlockEntity) {
-			if (canOpen(blockState, level, blockPos, shulkerBoxBlockEntity)) {
-				player.openMenu(shulkerBoxBlockEntity);
-				player.awardStat(Stats.OPEN_SHULKER_BOX);
-				PiglinAi.angerNearbyPiglins(player, true);
-			}
-
-			return InteractionResult.CONSUME;
-		} else {
-			return InteractionResult.PASS;
+		if (!level.isClientSide
+			&& level.getBlockEntity(blockPos) instanceof ShulkerBoxBlockEntity shulkerBoxBlockEntity
+			&& canOpen(blockState, level, blockPos, shulkerBoxBlockEntity)) {
+			player.openMenu(shulkerBoxBlockEntity);
+			player.awardStat(Stats.OPEN_SHULKER_BOX);
+			PiglinAi.angerNearbyPiglins(player, true);
 		}
+
+		return InteractionResult.SUCCESS;
 	}
 
 	private static boolean canOpen(BlockState blockState, Level level, BlockPos blockPos, ShulkerBoxBlockEntity shulkerBoxBlockEntity) {
@@ -221,7 +215,7 @@ public class ShulkerBoxBlock extends BaseEntityBlock {
 	}
 
 	@Override
-	protected boolean propagatesSkylightDown(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
+	protected boolean propagatesSkylightDown(BlockState blockState) {
 		return false;
 	}
 

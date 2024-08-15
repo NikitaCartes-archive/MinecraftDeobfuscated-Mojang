@@ -60,7 +60,7 @@ public class ClientRecipeBook extends RecipeBook {
 
 		for (RecipeHolder<?> recipeHolder : iterable) {
 			Recipe<?> recipe = recipeHolder.value();
-			if (!recipe.isSpecial() && !recipe.isIncomplete()) {
+			if (!recipe.isSpecial() && !recipe.placementInfo().isImpossibleToPlace()) {
 				RecipeBookCategories recipeBookCategories = getCategory(recipeHolder);
 				String string = recipe.getGroup();
 				if (string.isEmpty()) {

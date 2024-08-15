@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.entity.state.ThrownItemRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.core.BlockPos;
@@ -11,10 +12,10 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.ItemSupplier;
 import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.world.item.ItemStack;
 
 @Environment(EnvType.CLIENT)
-public class ThrownItemRenderer<T extends Entity & ItemSupplier> extends EntityRenderer<T> {
-	private static final float MIN_CAMERA_DISTANCE_SQUARED = 12.25F;
+public class ThrownItemRenderer<T extends Entity & ItemSupplier> extends EntityRenderer<T, ThrownItemRenderState> {
 	private final ItemRenderer itemRenderer;
 	private final float scale;
 	private final boolean fullBright;
@@ -35,21 +36,33 @@ public class ThrownItemRenderer<T extends Entity & ItemSupplier> extends EntityR
 		return this.fullBright ? 15 : super.getBlockLightLevel(entity, blockPos);
 	}
 
-	@Override
-	public void render(T entity, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
-		if (entity.tickCount >= 2 || !(this.entityRenderDispatcher.camera.getEntity().distanceToSqr(entity) < 12.25)) {
-			poseStack.pushPose();
-			poseStack.scale(this.scale, this.scale, this.scale);
-			poseStack.mulPose(this.entityRenderDispatcher.cameraOrientation());
+	public void render(ThrownItemRenderState thrownItemRenderState, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
+		poseStack.pushPose();
+		poseStack.scale(this.scale, this.scale, this.scale);
+		poseStack.mulPose(this.entityRenderDispatcher.cameraOrientation());
+		if (thrownItemRenderState.itemModel != null) {
 			this.itemRenderer
-				.renderStatic(entity.getItem(), ItemDisplayContext.GROUND, i, OverlayTexture.NO_OVERLAY, poseStack, multiBufferSource, entity.level(), entity.getId());
-			poseStack.popPose();
-			super.render(entity, f, g, poseStack, multiBufferSource, i);
+				.render(
+					thrownItemRenderState.item, ItemDisplayContext.GROUND, false, poseStack, multiBufferSource, i, OverlayTexture.NO_OVERLAY, thrownItemRenderState.itemModel
+				);
 		}
+
+		poseStack.popPose();
+		super.render(thrownItemRenderState, poseStack, multiBufferSource, i);
 	}
 
-	@Override
-	public ResourceLocation getTextureLocation(Entity entity) {
+	public ThrownItemRenderState createRenderState() {
+		return new ThrownItemRenderState();
+	}
+
+	public void extractRenderState(T entity, ThrownItemRenderState thrownItemRenderState, float f) {
+		super.extractRenderState(entity, thrownItemRenderState, f);
+		ItemStack itemStack = entity.getItem();
+		thrownItemRenderState.itemModel = !itemStack.isEmpty() ? this.itemRenderer.getModel(itemStack, entity.level(), null, entity.getId()) : null;
+		thrownItemRenderState.item = itemStack;
+	}
+
+	public ResourceLocation getTextureLocation(ThrownItemRenderState thrownItemRenderState) {
 		return TextureAtlas.LOCATION_BLOCKS;
 	}
 }

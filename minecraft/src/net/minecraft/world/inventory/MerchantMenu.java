@@ -42,16 +42,7 @@ public class MerchantMenu extends AbstractContainerMenu {
 		this.addSlot(new Slot(this.tradeContainer, 0, 136, 37));
 		this.addSlot(new Slot(this.tradeContainer, 1, 162, 37));
 		this.addSlot(new MerchantResultSlot(inventory.player, merchant, this.tradeContainer, 2, 220, 37));
-
-		for (int j = 0; j < 3; j++) {
-			for (int k = 0; k < 9; k++) {
-				this.addSlot(new Slot(inventory, k + j * 9 + 9, 108 + k * 18, 84 + j * 18));
-			}
-		}
-
-		for (int j = 0; j < 9; j++) {
-			this.addSlot(new Slot(inventory, j, 108 + j * 18, 142));
-		}
+		this.addStandardInventorySlots(inventory, 108, 84);
 	}
 
 	public void setShowProgressBar(boolean bl) {

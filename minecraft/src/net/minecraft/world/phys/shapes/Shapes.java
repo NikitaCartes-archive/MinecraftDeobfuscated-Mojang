@@ -230,25 +230,6 @@ public final class Shapes {
 		}
 	}
 
-	public static VoxelShape getFaceShape(VoxelShape voxelShape, Direction direction) {
-		if (voxelShape == block()) {
-			return block();
-		} else {
-			Direction.Axis axis = direction.getAxis();
-			boolean bl;
-			int i;
-			if (direction.getAxisDirection() == Direction.AxisDirection.POSITIVE) {
-				bl = DoubleMath.fuzzyEquals(voxelShape.max(axis), 1.0, 1.0E-7);
-				i = voxelShape.shape.getSize(axis) - 1;
-			} else {
-				bl = DoubleMath.fuzzyEquals(voxelShape.min(axis), 0.0, 1.0E-7);
-				i = 0;
-			}
-
-			return (VoxelShape)(!bl ? empty() : new SliceShape(voxelShape, axis, i));
-		}
-	}
-
 	public static boolean mergedFaceOccludes(VoxelShape voxelShape, VoxelShape voxelShape2, Direction direction) {
 		if (voxelShape != block() && voxelShape2 != block()) {
 			Direction.Axis axis = direction.getAxis();

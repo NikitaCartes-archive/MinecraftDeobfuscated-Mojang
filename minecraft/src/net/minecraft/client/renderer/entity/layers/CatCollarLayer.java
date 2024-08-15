@@ -8,23 +8,28 @@ import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
+import net.minecraft.client.renderer.entity.state.CatRenderState;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.animal.Cat;
+import net.minecraft.world.item.DyeColor;
 
 @Environment(EnvType.CLIENT)
-public class CatCollarLayer extends RenderLayer<Cat, CatModel<Cat>> {
+public class CatCollarLayer extends RenderLayer<CatRenderState, CatModel> {
 	private static final ResourceLocation CAT_COLLAR_LOCATION = ResourceLocation.withDefaultNamespace("textures/entity/cat/cat_collar.png");
-	private final CatModel<Cat> catModel;
+	private final CatModel adultModel;
+	private final CatModel babyModel;
 
-	public CatCollarLayer(RenderLayerParent<Cat, CatModel<Cat>> renderLayerParent, EntityModelSet entityModelSet) {
+	public CatCollarLayer(RenderLayerParent<CatRenderState, CatModel> renderLayerParent, EntityModelSet entityModelSet) {
 		super(renderLayerParent);
-		this.catModel = new CatModel<>(entityModelSet.bakeLayer(ModelLayers.CAT_COLLAR));
+		this.adultModel = new CatModel(entityModelSet.bakeLayer(ModelLayers.CAT_COLLAR));
+		this.babyModel = new CatModel(entityModelSet.bakeLayer(ModelLayers.CAT_BABY_COLLAR));
 	}
 
-	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, Cat cat, float f, float g, float h, float j, float k, float l) {
-		if (cat.isTame()) {
-			int m = cat.getCollarColor().getTextureDiffuseColor();
-			coloredCutoutModelCopyLayerRender(this.getParentModel(), this.catModel, CAT_COLLAR_LOCATION, poseStack, multiBufferSource, i, cat, f, g, j, k, l, h, m);
+	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, CatRenderState catRenderState, float f, float g) {
+		DyeColor dyeColor = catRenderState.collarColor;
+		if (dyeColor != null) {
+			int j = dyeColor.getTextureDiffuseColor();
+			CatModel catModel = catRenderState.isBaby ? this.babyModel : this.adultModel;
+			coloredCutoutModelCopyLayerRender(catModel, CAT_COLLAR_LOCATION, poseStack, multiBufferSource, i, catRenderState, j);
 		}
 	}
 }

@@ -55,39 +55,41 @@ public class MaceItem extends Item {
 	}
 
 	@Override
-	public int getEnchantmentValue() {
-		return 15;
-	}
-
-	@Override
 	public boolean hurtEnemy(ItemStack itemStack, LivingEntity livingEntity, LivingEntity livingEntity2) {
-		if (livingEntity2 instanceof ServerPlayer serverPlayer && canSmashAttack(serverPlayer)) {
+		if (canSmashAttack(livingEntity2)) {
 			ServerLevel serverLevel = (ServerLevel)livingEntity2.level();
-			if (serverPlayer.isIgnoringFallDamageFromCurrentImpulse() && serverPlayer.currentImpulseImpactPos != null) {
-				if (serverPlayer.currentImpulseImpactPos.y > serverPlayer.position().y) {
-					serverPlayer.currentImpulseImpactPos = serverPlayer.position();
-				}
-			} else {
-				serverPlayer.currentImpulseImpactPos = serverPlayer.position();
+			livingEntity2.setDeltaMovement(livingEntity2.getDeltaMovement().with(Direction.Axis.Y, 0.01F));
+			if (livingEntity2 instanceof ServerPlayer serverPlayer) {
+				serverPlayer.currentImpulseImpactPos = this.calculateImpactPosition(serverPlayer);
+				serverPlayer.setIgnoreFallDamageFromCurrentImpulse(true);
+				serverPlayer.connection.send(new ClientboundSetEntityMotionPacket(serverPlayer));
 			}
 
-			serverPlayer.setIgnoreFallDamageFromCurrentImpulse(true);
-			serverPlayer.setDeltaMovement(serverPlayer.getDeltaMovement().with(Direction.Axis.Y, 0.01F));
-			serverPlayer.connection.send(new ClientboundSetEntityMotionPacket(serverPlayer));
 			if (livingEntity.onGround()) {
-				serverPlayer.setSpawnExtraParticlesOnFall(true);
-				SoundEvent soundEvent = serverPlayer.fallDistance > 5.0F ? SoundEvents.MACE_SMASH_GROUND_HEAVY : SoundEvents.MACE_SMASH_GROUND;
-				serverLevel.playSound(null, serverPlayer.getX(), serverPlayer.getY(), serverPlayer.getZ(), soundEvent, serverPlayer.getSoundSource(), 1.0F, 1.0F);
+				if (livingEntity2 instanceof ServerPlayer serverPlayer) {
+					serverPlayer.setSpawnExtraParticlesOnFall(true);
+				}
+
+				SoundEvent soundEvent = livingEntity2.fallDistance > 5.0F ? SoundEvents.MACE_SMASH_GROUND_HEAVY : SoundEvents.MACE_SMASH_GROUND;
+				serverLevel.playSound(null, livingEntity2.getX(), livingEntity2.getY(), livingEntity2.getZ(), soundEvent, livingEntity2.getSoundSource(), 1.0F, 1.0F);
 			} else {
 				serverLevel.playSound(
-					null, serverPlayer.getX(), serverPlayer.getY(), serverPlayer.getZ(), SoundEvents.MACE_SMASH_AIR, serverPlayer.getSoundSource(), 1.0F, 1.0F
+					null, livingEntity2.getX(), livingEntity2.getY(), livingEntity2.getZ(), SoundEvents.MACE_SMASH_AIR, livingEntity2.getSoundSource(), 1.0F, 1.0F
 				);
 			}
 
-			knockback(serverLevel, serverPlayer, livingEntity);
+			knockback(serverLevel, livingEntity2, livingEntity);
 		}
 
 		return true;
+	}
+
+	private Vec3 calculateImpactPosition(ServerPlayer serverPlayer) {
+		return serverPlayer.isIgnoringFallDamageFromCurrentImpulse()
+				&& serverPlayer.currentImpulseImpactPos != null
+				&& serverPlayer.currentImpulseImpactPos.y <= serverPlayer.position().y
+			? serverPlayer.currentImpulseImpactPos
+			: serverPlayer.position();
 	}
 
 	@Override
@@ -96,11 +98,6 @@ public class MaceItem extends Item {
 		if (canSmashAttack(livingEntity2)) {
 			livingEntity2.resetFallDistance();
 		}
-	}
-
-	@Override
-	public boolean isValidRepairItem(ItemStack itemStack, ItemStack itemStack2) {
-		return itemStack2.is(Items.BREEZE_ROD);
 	}
 
 	@Override
@@ -130,11 +127,11 @@ public class MaceItem extends Item {
 		}
 	}
 
-	private static void knockback(Level level, Player player, Entity entity) {
-		level.levelEvent(2013, entity.getOnPos(), 750);
-		level.getEntitiesOfClass(LivingEntity.class, entity.getBoundingBox().inflate(3.5), knockbackPredicate(player, entity)).forEach(livingEntity -> {
-			Vec3 vec3 = livingEntity.position().subtract(entity.position());
-			double d = getKnockbackPower(player, livingEntity, vec3);
+	private static void knockback(Level level, Entity entity, Entity entity2) {
+		level.levelEvent(2013, entity2.getOnPos(), 750);
+		level.getEntitiesOfClass(LivingEntity.class, entity2.getBoundingBox().inflate(3.5), knockbackPredicate(entity, entity2)).forEach(livingEntity -> {
+			Vec3 vec3 = livingEntity.position().subtract(entity2.position());
+			double d = getKnockbackPower(entity, livingEntity, vec3);
 			Vec3 vec32 = vec3.normalize().scale(d);
 			if (d > 0.0) {
 				livingEntity.push(vec32.x, 0.7F, vec32.z);
@@ -145,7 +142,7 @@ public class MaceItem extends Item {
 		});
 	}
 
-	private static Predicate<LivingEntity> knockbackPredicate(Player player, Entity entity) {
+	private static Predicate<LivingEntity> knockbackPredicate(Entity entity, Entity entity2) {
 		return livingEntity -> {
 			boolean bl;
 			boolean bl2;
@@ -153,9 +150,9 @@ public class MaceItem extends Item {
 			boolean var10000;
 			label62: {
 				bl = !livingEntity.isSpectator();
-				bl2 = livingEntity != player && livingEntity != entity;
-				bl3 = !player.isAlliedTo(livingEntity);
-				if (livingEntity instanceof TamableAnimal tamableAnimal && tamableAnimal.isTame() && player.getUUID().equals(tamableAnimal.getOwnerUUID())) {
+				bl2 = livingEntity != entity && livingEntity != entity2;
+				bl3 = !entity.isAlliedTo(livingEntity);
+				if (livingEntity instanceof TamableAnimal tamableAnimal && tamableAnimal.isTame() && entity.getUUID().equals(tamableAnimal.getOwnerUUID())) {
 					var10000 = true;
 					break label62;
 				}
@@ -175,13 +172,13 @@ public class MaceItem extends Item {
 			}
 
 			boolean bl5 = var10000;
-			boolean bl6 = entity.distanceToSqr(livingEntity) <= Math.pow(3.5, 2.0);
+			boolean bl6 = entity2.distanceToSqr(livingEntity) <= Math.pow(3.5, 2.0);
 			return bl && bl2 && bl3 && bl4 && bl5 && bl6;
 		};
 	}
 
-	private static double getKnockbackPower(Player player, LivingEntity livingEntity, Vec3 vec3) {
-		return (3.5 - vec3.length()) * 0.7F * (double)(player.fallDistance > 5.0F ? 2 : 1) * (1.0 - livingEntity.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE));
+	private static double getKnockbackPower(Entity entity, LivingEntity livingEntity, Vec3 vec3) {
+		return (3.5 - vec3.length()) * 0.7F * (double)(entity.fallDistance > 5.0F ? 2 : 1) * (1.0 - livingEntity.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE));
 	}
 
 	public static boolean canSmashAttack(LivingEntity livingEntity) {

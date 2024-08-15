@@ -20,9 +20,9 @@ import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.Brightness;
 import net.minecraft.util.ByIdMap;
-import net.minecraft.util.FastColor;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.util.StringRepresentable;
@@ -88,6 +88,7 @@ public abstract class Display extends Entity {
 	private int interpolationDuration;
 	private float lastProgress;
 	private AABB cullingBoundingBox;
+	private boolean noCulling = true;
 	protected boolean updateRenderState;
 	private boolean updateStartTick;
 	private boolean updateInterpolationDuration;
@@ -99,7 +100,6 @@ public abstract class Display extends Entity {
 	public Display(EntityType<?> entityType, Level level) {
 		super(entityType, level);
 		this.noPhysics = true;
-		this.noCulling = true;
 		this.cullingBoundingBox = this.getBoundingBox();
 	}
 
@@ -320,9 +320,12 @@ public abstract class Display extends Entity {
 		return this.posRotInterpolationTarget != null ? (float)this.posRotInterpolationTarget.targetYRot : this.getYRot();
 	}
 
-	@Override
 	public AABB getBoundingBoxForCulling() {
 		return this.cullingBoundingBox;
+	}
+
+	public boolean affectedByCulling() {
+		return !this.noCulling;
 	}
 
 	@Override
@@ -456,16 +459,12 @@ public abstract class Display extends Entity {
 	private void updateCulling() {
 		float f = this.getWidth();
 		float g = this.getHeight();
-		if (f != 0.0F && g != 0.0F) {
-			this.noCulling = false;
-			float h = f / 2.0F;
-			double d = this.getX();
-			double e = this.getY();
-			double i = this.getZ();
-			this.cullingBoundingBox = new AABB(d - (double)h, e, i - (double)h, d + (double)h, e + (double)g, i + (double)h);
-		} else {
-			this.noCulling = true;
-		}
+		this.noCulling = f == 0.0F || g == 0.0F;
+		float h = f / 2.0F;
+		double d = this.getX();
+		double e = this.getY();
+		double i = this.getZ();
+		this.cullingBoundingBox = new AABB(d - (double)h, e, i - (double)h, d + (double)h, e + (double)g, i + (double)h);
 	}
 
 	@Override
@@ -595,7 +594,7 @@ public abstract class Display extends Entity {
 	static record ColorInterpolator(int previous, int current) implements Display.IntInterpolator {
 		@Override
 		public int get(float f) {
-			return FastColor.ARGB32.lerp(f, this.previous, this.current);
+			return ARGB.lerp(f, this.previous, this.current);
 		}
 	}
 

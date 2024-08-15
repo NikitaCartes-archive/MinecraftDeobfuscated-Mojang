@@ -63,7 +63,7 @@ public final class FluidState extends StateHolder<Fluid, FluidState> {
 			for (int j = -1; j <= 1; j++) {
 				BlockPos blockPos2 = blockPos.offset(i, 0, j);
 				FluidState fluidState = blockGetter.getFluidState(blockPos2);
-				if (!fluidState.getType().isSame(this.getType()) && !blockGetter.getBlockState(blockPos2).isSolidRender(blockGetter, blockPos2)) {
+				if (!fluidState.getType().isSame(this.getType()) && !blockGetter.getBlockState(blockPos2).isSolidRender()) {
 					return true;
 				}
 			}
@@ -72,8 +72,8 @@ public final class FluidState extends StateHolder<Fluid, FluidState> {
 		return false;
 	}
 
-	public void tick(Level level, BlockPos blockPos) {
-		this.getType().tick(level, blockPos, this);
+	public void tick(Level level, BlockPos blockPos, BlockState blockState) {
+		this.getType().tick(level, blockPos, blockState, this);
 	}
 
 	public void animateTick(Level level, BlockPos blockPos, RandomSource randomSource) {

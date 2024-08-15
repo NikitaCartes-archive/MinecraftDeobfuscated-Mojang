@@ -3,11 +3,12 @@ package net.minecraft.world.level.block;
 import com.mojang.serialization.MapCodec;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.ItemInteractionResult;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.PrimedTnt;
@@ -24,6 +25,7 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.phys.BlockHitResult;
 
 public class TntBlock extends Block {
@@ -51,7 +53,7 @@ public class TntBlock extends Block {
 	}
 
 	@Override
-	protected void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
+	protected void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, @Nullable Orientation orientation, boolean bl) {
 		if (level.hasNeighborSignal(blockPos)) {
 			explode(level, blockPos);
 			level.removeBlock(blockPos, false);
@@ -68,15 +70,13 @@ public class TntBlock extends Block {
 	}
 
 	@Override
-	public void wasExploded(Level level, BlockPos blockPos, Explosion explosion) {
-		if (!level.isClientSide) {
-			PrimedTnt primedTnt = new PrimedTnt(
-				level, (double)blockPos.getX() + 0.5, (double)blockPos.getY(), (double)blockPos.getZ() + 0.5, explosion.getIndirectSourceEntity()
-			);
-			int i = primedTnt.getFuse();
-			primedTnt.setFuse((short)(level.random.nextInt(i / 4) + i / 8));
-			level.addFreshEntity(primedTnt);
-		}
+	public void wasExploded(ServerLevel serverLevel, BlockPos blockPos, Explosion explosion) {
+		PrimedTnt primedTnt = new PrimedTnt(
+			serverLevel, (double)blockPos.getX() + 0.5, (double)blockPos.getY(), (double)blockPos.getZ() + 0.5, explosion.getIndirectSourceEntity()
+		);
+		int i = primedTnt.getFuse();
+		primedTnt.setFuse((short)(serverLevel.random.nextInt(i / 4) + i / 8));
+		serverLevel.addFreshEntity(primedTnt);
 	}
 
 	public static void explode(Level level, BlockPos blockPos) {
@@ -93,7 +93,7 @@ public class TntBlock extends Block {
 	}
 
 	@Override
-	protected ItemInteractionResult useItemOn(
+	protected InteractionResult useItemOn(
 		ItemStack itemStack, BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
 	) {
 		if (!itemStack.is(Items.FLINT_AND_STEEL) && !itemStack.is(Items.FIRE_CHARGE)) {
@@ -109,7 +109,7 @@ public class TntBlock extends Block {
 			}
 
 			player.awardStat(Stats.ITEM_USED.get(item));
-			return ItemInteractionResult.sidedSuccess(level.isClientSide);
+			return InteractionResult.SUCCESS;
 		}
 	}
 

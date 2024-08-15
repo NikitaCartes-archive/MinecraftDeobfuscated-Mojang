@@ -3,10 +3,13 @@ package net.minecraft.world.level.storage.loot.functions;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
+import java.util.Optional;
+import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Instrument;
-import net.minecraft.world.item.InstrumentItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
@@ -31,7 +34,12 @@ public class SetInstrumentFunction extends LootItemConditionalFunction {
 
 	@Override
 	public ItemStack run(ItemStack itemStack, LootContext lootContext) {
-		InstrumentItem.setRandom(itemStack, this.options, lootContext.getRandom());
+		Registry<Instrument> registry = lootContext.getLevel().registryAccess().registryOrThrow(Registries.INSTRUMENT);
+		Optional<Holder<Instrument>> optional = registry.getRandomElementOf(this.options, lootContext.getRandom());
+		if (optional.isPresent()) {
+			itemStack.set(DataComponents.INSTRUMENT, (Holder<Instrument>)optional.get());
+		}
+
 		return itemStack;
 	}
 

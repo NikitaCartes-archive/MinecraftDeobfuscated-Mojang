@@ -67,7 +67,7 @@ public class CompassItem extends Item {
 				}
 			}
 
-			return InteractionResult.sidedSuccess(level.isClientSide);
+			return InteractionResult.SUCCESS;
 		}
 	}
 

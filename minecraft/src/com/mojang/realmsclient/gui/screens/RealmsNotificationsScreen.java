@@ -12,6 +12,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.GameNarrator;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.TitleScreen;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.realms.RealmsScreen;
 import net.minecraft.resources.ResourceLocation;
 
@@ -130,23 +131,23 @@ public class RealmsNotificationsScreen extends RealmsScreen {
 		int m = k + 48 + 2;
 		int n = l - 3;
 		if (hasUnseenNotifications) {
-			guiGraphics.blitSprite(UNSEEN_NOTIFICATION_SPRITE, n - 12, m + 3, 10, 10);
+			guiGraphics.blitSprite(RenderType::guiTextured, UNSEEN_NOTIFICATION_SPRITE, n - 12, m + 3, 10, 10);
 			n -= 16;
 		}
 
 		if (this.currentConfiguration != null && this.currentConfiguration.showOldNotifications()) {
 			if (hasUnreadNews) {
-				guiGraphics.blitSprite(NEWS_SPRITE, n - 14, m + 1, 14, 14);
+				guiGraphics.blitSprite(RenderType::guiTextured, NEWS_SPRITE, n - 14, m + 1, 14, 14);
 				n -= 16;
 			}
 
 			if (i != 0) {
-				guiGraphics.blitSprite(INVITE_SPRITE, n - 14, m + 1, 14, 14);
+				guiGraphics.blitSprite(RenderType::guiTextured, INVITE_SPRITE, n - 14, m + 1, 14, 14);
 				n -= 16;
 			}
 
 			if (trialAvailable) {
-				guiGraphics.blitSprite(TRIAL_AVAILABLE_SPRITE, n - 10, m + 4, 8, 8);
+				guiGraphics.blitSprite(RenderType::guiTextured, TRIAL_AVAILABLE_SPRITE, n - 10, m + 4, 8, 8);
 			}
 		}
 	}

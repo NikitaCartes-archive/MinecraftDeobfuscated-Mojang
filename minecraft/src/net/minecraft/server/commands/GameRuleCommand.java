@@ -6,24 +6,30 @@ import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.level.GameRules;
 
 public class GameRuleCommand {
 	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
 		final LiteralArgumentBuilder<CommandSourceStack> literalArgumentBuilder = Commands.literal("gamerule")
 			.requires(commandSourceStack -> commandSourceStack.hasPermission(2));
-		GameRules.visitGameRuleTypes(
-			new GameRules.GameRuleTypeVisitor() {
-				@Override
-				public <T extends GameRules.Value<T>> void visit(GameRules.Key<T> key, GameRules.Type<T> type) {
-					literalArgumentBuilder.then(
-						Commands.literal(key.getId())
-							.executes(commandContext -> GameRuleCommand.queryRule(commandContext.getSource(), key))
-							.then(type.createArgument("value").executes(commandContext -> GameRuleCommand.setRule(commandContext, key)))
-					);
+		new GameRules(FeatureFlags.REGISTRY.allFlags())
+			.visitGameRuleTypes(
+				new GameRules.GameRuleTypeVisitor() {
+					@Override
+					public <T extends GameRules.Value<T>> void visit(GameRules.Key<T> key, GameRules.Type<T> type) {
+						LiteralArgumentBuilder<CommandSourceStack> literalArgumentBuilder = Commands.literal(key.getId());
+						if (!type.requiredFeatures().isEmpty()) {
+							literalArgumentBuilder.requires(commandSourceStack -> type.requiredFeatures().isSubsetOf(commandSourceStack.enabledFeatures()));
+						}
+
+						literalArgumentBuilder.then(
+							literalArgumentBuilder.executes(commandContext -> GameRuleCommand.queryRule(commandContext.getSource(), key))
+								.then(type.createArgument("value").executes(commandContext -> GameRuleCommand.setRule(commandContext, key)))
+						);
+					}
 				}
-			}
-		);
+			);
 		commandDispatcher.register(literalArgumentBuilder);
 	}
 

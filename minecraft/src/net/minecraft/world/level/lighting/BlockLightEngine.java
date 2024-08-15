@@ -55,13 +55,13 @@ public final class BlockLightEngine extends LightEngine<BlockLightSectionStorage
 					if (k > j) {
 						this.mutablePos.set(n);
 						BlockState blockState2 = this.getState(this.mutablePos);
-						int o = i - this.getOpacity(blockState2, this.mutablePos);
+						int o = i - this.getOpacity(blockState2);
 						if (o > j) {
 							if (blockState == null) {
 								blockState = LightEngine.QueueEntry.isFromEmptyShape(m) ? Blocks.AIR.defaultBlockState() : this.getState(this.mutablePos.set(l));
 							}
 
-							if (!this.shapeOccludes(l, blockState, n, blockState2, direction)) {
+							if (!this.shapeOccludes(blockState, blockState2, direction)) {
 								this.storage.setStoredLevel(n, o);
 								if (o > 1) {
 									this.enqueueIncrease(n, LightEngine.QueueEntry.increaseSkipOneDirection(o, isEmptyShape(blockState2), direction.getOpposite()));

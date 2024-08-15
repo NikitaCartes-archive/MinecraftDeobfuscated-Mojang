@@ -1,7 +1,5 @@
 package net.minecraft.client.model;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableList.Builder;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
@@ -10,31 +8,22 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.client.renderer.entity.state.BoatRenderState;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.vehicle.Boat;
 
 @Environment(EnvType.CLIENT)
-public class RaftModel extends ListModel<Boat> {
-	private static final String LEFT_PADDLE = "left_paddle";
-	private static final String RIGHT_PADDLE = "right_paddle";
-	private static final String BOTTOM = "bottom";
+public class RaftModel extends EntityModel<BoatRenderState> {
+	private final ModelPart root;
 	private final ModelPart leftPaddle;
 	private final ModelPart rightPaddle;
-	private final ImmutableList<ModelPart> parts;
 
 	public RaftModel(ModelPart modelPart) {
+		this.root = modelPart;
 		this.leftPaddle = modelPart.getChild("left_paddle");
 		this.rightPaddle = modelPart.getChild("right_paddle");
-		this.parts = this.createPartsBuilder(modelPart).build();
 	}
 
-	protected Builder<ModelPart> createPartsBuilder(ModelPart modelPart) {
-		Builder<ModelPart> builder = new Builder<>();
-		builder.add(modelPart.getChild("bottom"), this.leftPaddle, this.rightPaddle);
-		return builder;
-	}
-
-	public static void createChildren(PartDefinition partDefinition) {
+	public static void addCommonParts(PartDefinition partDefinition) {
 		partDefinition.addOrReplaceChild(
 			"bottom",
 			CubeListBuilder.create().texOffs(0, 0).addBox(-14.0F, -11.0F, -4.0F, 28.0F, 20.0F, 4.0F).texOffs(0, 0).addBox(-14.0F, -9.0F, -8.0F, 28.0F, 16.0F, 4.0F),
@@ -56,26 +45,48 @@ public class RaftModel extends ListModel<Boat> {
 		);
 	}
 
-	public static LayerDefinition createBodyModel() {
+	public static LayerDefinition createRaftModel() {
 		MeshDefinition meshDefinition = new MeshDefinition();
 		PartDefinition partDefinition = meshDefinition.getRoot();
-		createChildren(partDefinition);
+		addCommonParts(partDefinition);
 		return LayerDefinition.create(meshDefinition, 128, 64);
 	}
 
-	public void setupAnim(Boat boat, float f, float g, float h, float i, float j) {
-		animatePaddle(boat, 0, this.leftPaddle, f);
-		animatePaddle(boat, 1, this.rightPaddle, f);
+	public static LayerDefinition createChestRaftModel() {
+		MeshDefinition meshDefinition = new MeshDefinition();
+		PartDefinition partDefinition = meshDefinition.getRoot();
+		addCommonParts(partDefinition);
+		partDefinition.addOrReplaceChild(
+			"chest_bottom",
+			CubeListBuilder.create().texOffs(0, 76).addBox(0.0F, 0.0F, 0.0F, 12.0F, 8.0F, 12.0F),
+			PartPose.offsetAndRotation(-2.0F, -10.1F, -6.0F, 0.0F, (float) (-Math.PI / 2), 0.0F)
+		);
+		partDefinition.addOrReplaceChild(
+			"chest_lid",
+			CubeListBuilder.create().texOffs(0, 59).addBox(0.0F, 0.0F, 0.0F, 12.0F, 4.0F, 12.0F),
+			PartPose.offsetAndRotation(-2.0F, -14.1F, -6.0F, 0.0F, (float) (-Math.PI / 2), 0.0F)
+		);
+		partDefinition.addOrReplaceChild(
+			"chest_lock",
+			CubeListBuilder.create().texOffs(0, 59).addBox(0.0F, 0.0F, 0.0F, 2.0F, 4.0F, 1.0F),
+			PartPose.offsetAndRotation(-1.0F, -11.1F, -1.0F, 0.0F, (float) (-Math.PI / 2), 0.0F)
+		);
+		return LayerDefinition.create(meshDefinition, 128, 128);
 	}
 
-	public ImmutableList<ModelPart> parts() {
-		return this.parts;
+	public void setupAnim(BoatRenderState boatRenderState) {
+		animatePaddle(boatRenderState.rowingTimeLeft, 0, this.leftPaddle);
+		animatePaddle(boatRenderState.rowingTimeRight, 1, this.rightPaddle);
 	}
 
-	private static void animatePaddle(Boat boat, int i, ModelPart modelPart, float f) {
-		float g = boat.getRowingTime(i, f);
-		modelPart.xRot = Mth.clampedLerp((float) (-Math.PI / 3), (float) (-Math.PI / 12), (Mth.sin(-g) + 1.0F) / 2.0F);
-		modelPart.yRot = Mth.clampedLerp((float) (-Math.PI / 4), (float) (Math.PI / 4), (Mth.sin(-g + 1.0F) + 1.0F) / 2.0F);
+	@Override
+	public ModelPart root() {
+		return this.root;
+	}
+
+	private static void animatePaddle(float f, int i, ModelPart modelPart) {
+		modelPart.xRot = Mth.clampedLerp((float) (-Math.PI / 3), (float) (-Math.PI / 12), (Mth.sin(-f) + 1.0F) / 2.0F);
+		modelPart.yRot = Mth.clampedLerp((float) (-Math.PI / 4), (float) (Math.PI / 4), (Mth.sin(-f + 1.0F) + 1.0F) / 2.0F);
 		if (i == 1) {
 			modelPart.yRot = (float) Math.PI - modelPart.yRot;
 		}

@@ -1,21 +1,20 @@
 package net.minecraft.world.inventory;
 
 import com.mojang.datafixers.util.Pair;
+import java.util.List;
 import java.util.Map;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.player.StackedContents;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.CraftingInput;
-import net.minecraft.world.item.crafting.CraftingRecipe;
-import net.minecraft.world.item.crafting.RecipeHolder;
 
-public class InventoryMenu extends RecipeBookMenu<CraftingInput, CraftingRecipe> {
+public class InventoryMenu extends AbstractCraftingMenu {
 	public static final int CONTAINER_ID = 0;
 	public static final int RESULT_SLOT = 0;
+	private static final int CRAFTING_GRID_WIDTH = 2;
+	private static final int CRAFTING_GRID_HEIGHT = 2;
 	public static final int CRAFT_SLOT_START = 1;
 	public static final int CRAFT_SLOT_COUNT = 4;
 	public static final int CRAFT_SLOT_END = 5;
@@ -44,22 +43,15 @@ public class InventoryMenu extends RecipeBookMenu<CraftingInput, CraftingRecipe>
 		EMPTY_ARMOR_SLOT_HELMET
 	);
 	private static final EquipmentSlot[] SLOT_IDS = new EquipmentSlot[]{EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
-	private final CraftingContainer craftSlots = new TransientCraftingContainer(this, 2, 2);
-	private final ResultContainer resultSlots = new ResultContainer();
 	public final boolean active;
 	private final Player owner;
 
 	public InventoryMenu(Inventory inventory, boolean bl, Player player) {
-		super(null, 0);
+		super(null, 0, 2, 2);
 		this.active = bl;
 		this.owner = player;
-		this.addSlot(new ResultSlot(inventory.player, this.craftSlots, this.resultSlots, 0, 154, 28));
-
-		for (int i = 0; i < 2; i++) {
-			for (int j = 0; j < 2; j++) {
-				this.addSlot(new Slot(this.craftSlots, j + i * 2, 98 + j * 18, 18 + i * 18));
-			}
-		}
+		this.addResultSlot(player, 154, 28);
+		this.addCraftingGridSlots(98, 18);
 
 		for (int i = 0; i < 4; i++) {
 			EquipmentSlot equipmentSlot = SLOT_IDS[i];
@@ -67,16 +59,7 @@ public class InventoryMenu extends RecipeBookMenu<CraftingInput, CraftingRecipe>
 			this.addSlot(new ArmorSlot(inventory, player, equipmentSlot, 39 - i, 8, 8 + i * 18, resourceLocation));
 		}
 
-		for (int i = 0; i < 3; i++) {
-			for (int j = 0; j < 9; j++) {
-				this.addSlot(new Slot(inventory, j + (i + 1) * 9, 8 + j * 18, 84 + i * 18));
-			}
-		}
-
-		for (int i = 0; i < 9; i++) {
-			this.addSlot(new Slot(inventory, i, 8 + i * 18, 142));
-		}
-
+		this.addStandardInventorySlots(inventory, 8, 84);
 		this.addSlot(new Slot(inventory, 40, 77, 62) {
 			@Override
 			public void setByPlayer(ItemStack itemStack, ItemStack itemStack2) {
@@ -93,22 +76,6 @@ public class InventoryMenu extends RecipeBookMenu<CraftingInput, CraftingRecipe>
 
 	public static boolean isHotbarSlot(int i) {
 		return i >= 36 && i < 45 || i == 45;
-	}
-
-	@Override
-	public void fillCraftSlotsStackedContents(StackedContents stackedContents) {
-		this.craftSlots.fillStackedContents(stackedContents);
-	}
-
-	@Override
-	public void clearCraftingContent() {
-		this.resultSlots.clearContent();
-		this.craftSlots.clearContent();
-	}
-
-	@Override
-	public boolean recipeMatches(RecipeHolder<CraftingRecipe> recipeHolder) {
-		return recipeHolder.value().matches(this.craftSlots.asCraftInput(), this.owner.level());
 	}
 
 	@Override
@@ -198,23 +165,13 @@ public class InventoryMenu extends RecipeBookMenu<CraftingInput, CraftingRecipe>
 	}
 
 	@Override
-	public int getResultSlotIndex() {
-		return 0;
+	public Slot getResultSlot() {
+		return this.slots.get(0);
 	}
 
 	@Override
-	public int getGridWidth() {
-		return this.craftSlots.getWidth();
-	}
-
-	@Override
-	public int getGridHeight() {
-		return this.craftSlots.getHeight();
-	}
-
-	@Override
-	public int getSize() {
-		return 5;
+	public List<Slot> getInputGridSlots() {
+		return this.slots.subList(1, 5);
 	}
 
 	public CraftingContainer getCraftSlots() {
@@ -227,7 +184,7 @@ public class InventoryMenu extends RecipeBookMenu<CraftingInput, CraftingRecipe>
 	}
 
 	@Override
-	public boolean shouldMoveToInventory(int i) {
-		return i != this.getResultSlotIndex();
+	protected Player owner() {
+		return this.owner;
 	}
 }

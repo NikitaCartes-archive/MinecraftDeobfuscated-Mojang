@@ -74,7 +74,6 @@ import net.minecraft.world.level.storage.loot.providers.number.NumberProvider;
 import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
 
 public abstract class BlockLootSubProvider implements LootTableSubProvider {
-	protected static final LootItemCondition.Builder HAS_SHEARS = MatchTool.toolMatches(ItemPredicate.Builder.item().of(Items.SHEARS));
 	protected final HolderLookup.Provider registries;
 	protected final Set<Item> explosionResistant;
 	protected final FeatureFlagSet enabledFeatures;
@@ -97,8 +96,12 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
 		return this.hasSilkTouch().invert();
 	}
 
+	protected LootItemCondition.Builder hasShears() {
+		return MatchTool.toolMatches(ItemPredicate.Builder.item().of(this.registries.lookupOrThrow(Registries.ITEM), Items.SHEARS));
+	}
+
 	private LootItemCondition.Builder hasShearsOrSilkTouch() {
-		return HAS_SHEARS.or(this.hasSilkTouch());
+		return this.hasShears().or(this.hasSilkTouch());
 	}
 
 	private LootItemCondition.Builder doesNotHaveShearsOrSilkTouch() {
@@ -143,7 +146,7 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
 	}
 
 	protected LootTable.Builder createShearsDispatchTable(Block block, LootPoolEntryContainer.Builder<?> builder) {
-		return createSelfDropDispatchTable(block, HAS_SHEARS, builder);
+		return createSelfDropDispatchTable(block, this.hasShears(), builder);
 	}
 
 	protected LootTable.Builder createSilkTouchOrShearsDispatchTable(Block block, LootPoolEntryContainer.Builder<?> builder) {
@@ -316,6 +319,7 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
 										.include(DataComponents.ITEM_NAME)
 										.include(DataComponents.HIDE_ADDITIONAL_TOOLTIP)
 										.include(DataComponents.BANNER_PATTERNS)
+										.include(DataComponents.RARITY)
 								)
 						)
 				)
@@ -432,8 +436,8 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
 			);
 	}
 
-	protected static LootTable.Builder createShearsOnlyDrop(ItemLike itemLike) {
-		return LootTable.lootTable().withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F)).when(HAS_SHEARS).add(LootItem.lootTableItem(itemLike)));
+	protected LootTable.Builder createShearsOnlyDrop(ItemLike itemLike) {
+		return LootTable.lootTable().withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F)).when(this.hasShears()).add(LootItem.lootTableItem(itemLike)));
 	}
 
 	protected LootTable.Builder createMultifaceBlockDrops(Block block, LootItemCondition.Builder builder) {
@@ -524,13 +528,14 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
 
 	protected LootTable.Builder createDoublePlantShearsDrop(Block block) {
 		return LootTable.lootTable()
-			.withPool(LootPool.lootPool().when(HAS_SHEARS).add(LootItem.lootTableItem(block).apply(SetItemCountFunction.setCount(ConstantValue.exactly(2.0F)))));
+			.withPool(LootPool.lootPool().when(this.hasShears()).add(LootItem.lootTableItem(block).apply(SetItemCountFunction.setCount(ConstantValue.exactly(2.0F)))));
 	}
 
 	protected LootTable.Builder createDoublePlantWithSeedDrops(Block block, Block block2) {
+		HolderLookup.RegistryLookup<Block> registryLookup = this.registries.lookupOrThrow(Registries.BLOCK);
 		LootPoolEntryContainer.Builder<?> builder = LootItem.lootTableItem(block2)
 			.apply(SetItemCountFunction.setCount(ConstantValue.exactly(2.0F)))
-			.when(HAS_SHEARS)
+			.when(this.hasShears())
 			.otherwise(
 				((LootPoolSingletonContainer.Builder)this.applyExplosionCondition(block, LootItem.lootTableItem(Items.WHEAT_SEEDS)))
 					.when(LootItemRandomChanceCondition.randomChance(0.125F))
@@ -548,7 +553,7 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
 							LocationPredicate.Builder.location()
 								.setBlock(
 									BlockPredicate.Builder.block()
-										.of(block)
+										.of(registryLookup, block)
 										.setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(DoublePlantBlock.HALF, DoubleBlockHalf.UPPER))
 								),
 							new BlockPos(0, 1, 0)
@@ -567,7 +572,7 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
 							LocationPredicate.Builder.location()
 								.setBlock(
 									BlockPredicate.Builder.block()
-										.of(block)
+										.of(registryLookup, block)
 										.setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(DoublePlantBlock.HALF, DoubleBlockHalf.LOWER))
 								),
 							new BlockPos(0, -1, 0)

@@ -23,68 +23,73 @@ import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.resources.language.LanguageInfo;
 import net.minecraft.client.resources.language.LanguageManager;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ServerboundRecipeBookChangeSettingsPacket;
-import net.minecraft.recipebook.PlaceRecipe;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.player.StackedContents;
+import net.minecraft.stats.RecipeBook;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.player.StackedItemContents;
+import net.minecraft.world.inventory.AbstractFurnaceMenu;
 import net.minecraft.world.inventory.RecipeBookMenu;
 import net.minecraft.world.inventory.RecipeBookType;
 import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeHolder;
 
 @Environment(EnvType.CLIENT)
-public class RecipeBookComponent implements PlaceRecipe<Ingredient>, Renderable, GuiEventListener, NarratableEntry, RecipeShownListener {
+public abstract class RecipeBookComponent<T extends RecipeBookMenu> implements Renderable, GuiEventListener, NarratableEntry, RecipeShownListener {
 	public static final WidgetSprites RECIPE_BUTTON_SPRITES = new WidgetSprites(
 		ResourceLocation.withDefaultNamespace("recipe_book/button"), ResourceLocation.withDefaultNamespace("recipe_book/button_highlighted")
 	);
-	private static final WidgetSprites FILTER_BUTTON_SPRITES = new WidgetSprites(
-		ResourceLocation.withDefaultNamespace("recipe_book/filter_enabled"),
-		ResourceLocation.withDefaultNamespace("recipe_book/filter_disabled"),
-		ResourceLocation.withDefaultNamespace("recipe_book/filter_enabled_highlighted"),
-		ResourceLocation.withDefaultNamespace("recipe_book/filter_disabled_highlighted")
-	);
 	protected static final ResourceLocation RECIPE_BOOK_LOCATION = ResourceLocation.withDefaultNamespace("textures/gui/recipe_book.png");
+	private static final int BACKGROUND_TEXTURE_WIDTH = 256;
+	private static final int BACKGROUND_TEXTURE_HEIGHT = 256;
 	private static final Component SEARCH_HINT = Component.translatable("gui.recipebook.search_hint")
 		.withStyle(ChatFormatting.ITALIC)
 		.withStyle(ChatFormatting.GRAY);
 	public static final int IMAGE_WIDTH = 147;
 	public static final int IMAGE_HEIGHT = 166;
 	private static final int OFFSET_X_POSITION = 86;
-	private static final Component ONLY_CRAFTABLES_TOOLTIP = Component.translatable("gui.recipebook.toggleRecipes.craftable");
 	private static final Component ALL_RECIPES_TOOLTIP = Component.translatable("gui.recipebook.toggleRecipes.all");
+	private static final int TICKS_TO_SWAP_SLOT = 30;
 	private int xOffset;
 	private int width;
 	private int height;
-	protected final GhostRecipe ghostRecipe = new GhostRecipe();
+	private float time;
+	@Nullable
+	private RecipeHolder<?> ghostRecipe;
+	private final GhostSlots ghostSlots;
 	private final List<RecipeBookTabButton> tabButtons = Lists.<RecipeBookTabButton>newArrayList();
 	@Nullable
 	private RecipeBookTabButton selectedTab;
 	protected StateSwitchingButton filterButton;
-	protected RecipeBookMenu<?, ?> menu;
+	protected final T menu;
 	protected Minecraft minecraft;
 	@Nullable
 	private EditBox searchBox;
 	private String lastSearch = "";
 	private ClientRecipeBook book;
-	private final RecipeBookPage recipeBookPage = new RecipeBookPage();
-	private final StackedContents stackedContents = new StackedContents();
+	private final RecipeBookPage recipeBookPage;
+	private final StackedItemContents stackedContents = new StackedItemContents();
 	private int timesInventoryChanged;
 	private boolean ignoreTextInput;
 	private boolean visible;
 	private boolean widthTooNarrow;
 
-	public void init(int i, int j, Minecraft minecraft, boolean bl, RecipeBookMenu<?, ?> recipeBookMenu) {
+	public RecipeBookComponent(T recipeBookMenu) {
+		this.menu = recipeBookMenu;
+		SlotSelectTime slotSelectTime = () -> Mth.floor(this.time / 30.0F);
+		this.ghostSlots = new GhostSlots(slotSelectTime);
+		this.recipeBookPage = new RecipeBookPage(slotSelectTime, recipeBookMenu instanceof AbstractFurnaceMenu);
+	}
+
+	public void init(int i, int j, Minecraft minecraft, boolean bl) {
 		this.minecraft = minecraft;
 		this.width = i;
 		this.height = j;
-		this.menu = recipeBookMenu;
 		this.widthTooNarrow = bl;
-		minecraft.player.containerMenu = recipeBookMenu;
 		this.book = minecraft.player.getRecipeBook();
 		this.timesInventoryChanged = minecraft.player.getInventory().getTimesChanged();
 		this.visible = this.isVisibleAccordingToBookData();
@@ -93,7 +98,8 @@ public class RecipeBookComponent implements PlaceRecipe<Ingredient>, Renderable,
 		}
 	}
 
-	public void initVisuals() {
+	private void initVisuals() {
+		boolean bl = this.isFiltering();
 		this.xOffset = this.widthTooNarrow ? 0 : 86;
 		int i = (this.width - 147) / 2 - this.xOffset;
 		int j = (this.height - 166) / 2;
@@ -109,7 +115,7 @@ public class RecipeBookComponent implements PlaceRecipe<Ingredient>, Renderable,
 		this.searchBox.setHint(SEARCH_HINT);
 		this.recipeBookPage.init(this.minecraft, i, j);
 		this.recipeBookPage.addListener(this);
-		this.filterButton = new StateSwitchingButton(i + 110, j + 12, 26, 16, this.book.isFiltering(this.menu));
+		this.filterButton = new StateSwitchingButton(i + 110, j + 12, 26, 16, bl);
 		this.updateFilterButtonTooltip();
 		this.initFilterButtonTextures();
 		this.tabButtons.clear();
@@ -131,17 +137,15 @@ public class RecipeBookComponent implements PlaceRecipe<Ingredient>, Renderable,
 		}
 
 		this.selectedTab.setStateTriggered(true);
-		this.updateCollections(false);
-		this.updateTabs();
+		this.updateCollections(false, bl);
+		this.updateTabs(bl);
 	}
 
 	private void updateFilterButtonTooltip() {
 		this.filterButton.setTooltip(this.filterButton.isStateTriggered() ? Tooltip.create(this.getRecipeFilterName()) : Tooltip.create(ALL_RECIPES_TOOLTIP));
 	}
 
-	protected void initFilterButtonTextures() {
-		this.filterButton.initTextureValues(FILTER_BUTTON_SPRITES);
-	}
+	protected abstract void initFilterButtonTextures();
 
 	public int updateScreenPosition(int i, int j) {
 		int k;
@@ -180,18 +184,22 @@ public class RecipeBookComponent implements PlaceRecipe<Ingredient>, Renderable,
 		this.sendUpdateSettings();
 	}
 
+	protected abstract boolean isCraftingSlot(Slot slot);
+
 	public void slotClicked(@Nullable Slot slot) {
-		if (slot != null && slot.index < this.menu.getSize()) {
-			this.ghostRecipe.clear();
+		if (slot != null && this.isCraftingSlot(slot)) {
+			this.clearGhostRecipe();
 			if (this.isVisible()) {
 				this.updateStackedContents();
 			}
 		}
 	}
 
-	private void updateCollections(boolean bl) {
+	protected abstract void selectMatchingRecipes(RecipeCollection recipeCollection, StackedItemContents stackedItemContents, RecipeBook recipeBook);
+
+	private void updateCollections(boolean bl, boolean bl2) {
 		List<RecipeCollection> list = this.book.getCollection(this.selectedTab.getCategory());
-		list.forEach(recipeCollection -> recipeCollection.canCraft(this.stackedContents, this.menu.getGridWidth(), this.menu.getGridHeight(), this.book));
+		list.forEach(recipeCollection -> this.selectMatchingRecipes(recipeCollection, this.stackedContents, this.book));
 		List<RecipeCollection> list2 = Lists.<RecipeCollection>newArrayList(list);
 		list2.removeIf(recipeCollection -> !recipeCollection.hasKnownRecipes());
 		list2.removeIf(recipeCollection -> !recipeCollection.hasFitting());
@@ -204,14 +212,14 @@ public class RecipeBookComponent implements PlaceRecipe<Ingredient>, Renderable,
 			}
 		}
 
-		if (this.book.isFiltering(this.menu)) {
+		if (bl2) {
 			list2.removeIf(recipeCollection -> !recipeCollection.hasCraftable());
 		}
 
-		this.recipeBookPage.updateCollections(list2, bl);
+		this.recipeBookPage.updateCollections(list2, bl, bl2);
 	}
 
-	private void updateTabs() {
+	private void updateTabs(boolean bl) {
 		int i = (this.width - 147) / 2 - this.xOffset - 30;
 		int j = (this.height - 166) / 2 + 3;
 		int k = 27;
@@ -224,7 +232,7 @@ public class RecipeBookComponent implements PlaceRecipe<Ingredient>, Renderable,
 				recipeBookTabButton.setPosition(i, j + 27 * l++);
 			} else if (recipeBookTabButton.updateVisibility(this.book)) {
 				recipeBookTabButton.setPosition(i, j + 27 * l++);
-				recipeBookTabButton.startAnimation(this.minecraft);
+				recipeBookTabButton.startAnimation(this.book, bl);
 			}
 		}
 	}
@@ -247,17 +255,25 @@ public class RecipeBookComponent implements PlaceRecipe<Ingredient>, Renderable,
 		this.stackedContents.clear();
 		this.minecraft.player.getInventory().fillStackedContents(this.stackedContents);
 		this.menu.fillCraftSlotsStackedContents(this.stackedContents);
-		this.updateCollections(false);
+		this.updateCollections(false, this.isFiltering());
+	}
+
+	private boolean isFiltering() {
+		return this.book.isFiltering(this.menu.getRecipeBookType());
 	}
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
 		if (this.isVisible()) {
+			if (!Screen.hasControlDown()) {
+				this.time += f;
+			}
+
 			guiGraphics.pose().pushPose();
 			guiGraphics.pose().translate(0.0F, 0.0F, 100.0F);
 			int k = (this.width - 147) / 2 - this.xOffset;
 			int l = (this.height - 166) / 2;
-			guiGraphics.blit(RECIPE_BOOK_LOCATION, k, l, 1, 1, 147, 166);
+			guiGraphics.blit(RenderType::guiTextured, RECIPE_BOOK_LOCATION, k, l, 1.0F, 1.0F, 147, 166, 256, 256);
 			this.searchBox.render(guiGraphics, i, j, f);
 
 			for (RecipeBookTabButton recipeBookTabButton : this.tabButtons) {
@@ -270,36 +286,17 @@ public class RecipeBookComponent implements PlaceRecipe<Ingredient>, Renderable,
 		}
 	}
 
-	public void renderTooltip(GuiGraphics guiGraphics, int i, int j, int k, int l) {
+	public void renderTooltip(GuiGraphics guiGraphics, int i, int j, @Nullable Slot slot) {
 		if (this.isVisible()) {
-			this.recipeBookPage.renderTooltip(guiGraphics, k, l);
-			this.renderGhostRecipeTooltip(guiGraphics, i, j, k, l);
+			this.recipeBookPage.renderTooltip(guiGraphics, i, j);
+			this.ghostSlots.renderTooltip(guiGraphics, this.minecraft, i, j, slot);
 		}
 	}
 
-	protected Component getRecipeFilterName() {
-		return ONLY_CRAFTABLES_TOOLTIP;
-	}
+	protected abstract Component getRecipeFilterName();
 
-	private void renderGhostRecipeTooltip(GuiGraphics guiGraphics, int i, int j, int k, int l) {
-		ItemStack itemStack = null;
-
-		for (int m = 0; m < this.ghostRecipe.size(); m++) {
-			GhostRecipe.GhostIngredient ghostIngredient = this.ghostRecipe.get(m);
-			int n = ghostIngredient.getX() + i;
-			int o = ghostIngredient.getY() + j;
-			if (k >= n && l >= o && k < n + 16 && l < o + 16) {
-				itemStack = ghostIngredient.getItem();
-			}
-		}
-
-		if (itemStack != null && this.minecraft.screen != null) {
-			guiGraphics.renderComponentTooltip(this.minecraft.font, Screen.getTooltipFromItem(this.minecraft, itemStack), k, l);
-		}
-	}
-
-	public void renderGhostRecipe(GuiGraphics guiGraphics, int i, int j, boolean bl, float f) {
-		this.ghostRecipe.render(guiGraphics, this.minecraft, i, j, bl, f);
+	public void renderGhostRecipe(GuiGraphics guiGraphics, int i, int j, boolean bl) {
+		this.ghostSlots.render(guiGraphics, this.minecraft, i, j, bl);
 	}
 
 	@Override
@@ -309,11 +306,11 @@ public class RecipeBookComponent implements PlaceRecipe<Ingredient>, Renderable,
 				RecipeHolder<?> recipeHolder = this.recipeBookPage.getLastClickedRecipe();
 				RecipeCollection recipeCollection = this.recipeBookPage.getLastClickedRecipeCollection();
 				if (recipeHolder != null && recipeCollection != null) {
-					if (!recipeCollection.isCraftable(recipeHolder) && this.ghostRecipe.getRecipe() == recipeHolder) {
+					if (!recipeCollection.isCraftable(recipeHolder) && this.ghostRecipe == recipeHolder) {
 						return false;
 					}
 
-					this.ghostRecipe.clear();
+					this.clearGhostRecipe();
 					this.minecraft.gameMode.handlePlaceRecipe(this.minecraft.player.containerMenu.containerId, recipeHolder, Screen.hasShiftDown());
 					if (!this.isOffsetNextToMainGUI()) {
 						this.setVisible(false);
@@ -331,7 +328,7 @@ public class RecipeBookComponent implements PlaceRecipe<Ingredient>, Renderable,
 					this.filterButton.setStateTriggered(bl);
 					this.updateFilterButtonTooltip();
 					this.sendUpdateSettings();
-					this.updateCollections(false);
+					this.updateCollections(false, bl);
 					return true;
 				} else {
 					for (RecipeBookTabButton recipeBookTabButton : this.tabButtons) {
@@ -343,7 +340,7 @@ public class RecipeBookComponent implements PlaceRecipe<Ingredient>, Renderable,
 
 								this.selectedTab = recipeBookTabButton;
 								this.selectedTab.setStateTriggered(true);
-								this.updateCollections(true);
+								this.updateCollections(true, this.isFiltering());
 							}
 
 							return true;
@@ -435,7 +432,7 @@ public class RecipeBookComponent implements PlaceRecipe<Ingredient>, Renderable,
 		String string = this.searchBox.getValue().toLowerCase(Locale.ROOT);
 		this.pirateSpeechForThePeople(string);
 		if (!string.equals(this.lastSearch)) {
-			this.updateCollections(false);
+			this.updateCollections(false, this.isFiltering());
 			this.lastSearch = string;
 		}
 	}
@@ -461,9 +458,9 @@ public class RecipeBookComponent implements PlaceRecipe<Ingredient>, Renderable,
 	}
 
 	public void recipesUpdated() {
-		this.updateTabs();
+		this.updateTabs(this.isFiltering());
 		if (this.isVisible()) {
-			this.updateCollections(false);
+			this.updateCollections(false, this.isFiltering());
 		}
 	}
 
@@ -474,21 +471,18 @@ public class RecipeBookComponent implements PlaceRecipe<Ingredient>, Renderable,
 		}
 	}
 
-	public void setupGhostRecipe(RecipeHolder<?> recipeHolder, List<Slot> list) {
-		ItemStack itemStack = recipeHolder.value().getResultItem(this.minecraft.level.registryAccess());
-		this.ghostRecipe.setRecipe(recipeHolder);
-		this.ghostRecipe.addIngredient(Ingredient.of(itemStack), ((Slot)list.get(0)).x, ((Slot)list.get(0)).y);
-		this.placeRecipe(
-			this.menu.getGridWidth(), this.menu.getGridHeight(), this.menu.getResultSlotIndex(), recipeHolder, recipeHolder.value().getIngredients().iterator(), 0
-		);
+	private void clearGhostRecipe() {
+		this.ghostRecipe = null;
+		this.ghostSlots.clear();
 	}
 
-	public void addItemToSlot(Ingredient ingredient, int i, int j, int k, int l) {
-		if (!ingredient.isEmpty()) {
-			Slot slot = this.menu.slots.get(i);
-			this.ghostRecipe.addIngredient(ingredient, slot.x, slot.y);
-		}
+	public void setupGhostRecipe(RecipeHolder<?> recipeHolder) {
+		this.ghostRecipe = recipeHolder;
+		this.ghostSlots.clear();
+		this.setupGhostRecipeSlots(this.ghostSlots, recipeHolder);
 	}
+
+	protected abstract void setupGhostRecipeSlots(GhostSlots ghostSlots, RecipeHolder<?> recipeHolder);
 
 	protected void sendUpdateSettings() {
 		if (this.minecraft.getConnection() != null) {

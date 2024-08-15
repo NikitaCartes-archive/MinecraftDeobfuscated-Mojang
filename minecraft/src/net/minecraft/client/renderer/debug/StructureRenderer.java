@@ -10,9 +10,9 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.ShapeRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.common.custom.StructuresDebugPayload;
 import net.minecraft.resources.ResourceKey;
@@ -39,7 +39,7 @@ public class StructureRenderer implements DebugRenderer.SimpleDebugRenderer {
 		if (this.postMainBoxes.containsKey(resourceKey)) {
 			for (BoundingBox boundingBox : ((Map)this.postMainBoxes.get(resourceKey)).values()) {
 				if (blockPos.closerThan(boundingBox.getCenter(), 500.0)) {
-					LevelRenderer.renderLineBox(
+					ShapeRenderer.renderLineBox(
 						poseStack,
 						vertexConsumer,
 						(double)boundingBox.minX() - d,
@@ -66,7 +66,7 @@ public class StructureRenderer implements DebugRenderer.SimpleDebugRenderer {
 				BoundingBox boundingBox2 = pieceInfo.boundingBox();
 				if (blockPos.closerThan(boundingBox2.getCenter(), 500.0)) {
 					if (pieceInfo.isStart()) {
-						LevelRenderer.renderLineBox(
+						ShapeRenderer.renderLineBox(
 							poseStack,
 							vertexConsumer,
 							(double)boundingBox2.minX() - d,
@@ -84,7 +84,7 @@ public class StructureRenderer implements DebugRenderer.SimpleDebugRenderer {
 							0.0F
 						);
 					} else {
-						LevelRenderer.renderLineBox(
+						ShapeRenderer.renderLineBox(
 							poseStack,
 							vertexConsumer,
 							(double)boundingBox2.minX() - d,

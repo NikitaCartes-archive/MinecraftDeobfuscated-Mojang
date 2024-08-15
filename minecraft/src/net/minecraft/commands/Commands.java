@@ -443,8 +443,8 @@ public class Commands {
 	public static CommandBuildContext createValidationContext(HolderLookup.Provider provider) {
 		return new CommandBuildContext() {
 			@Override
-			public Stream<ResourceKey<? extends Registry<?>>> listRegistries() {
-				return provider.listRegistries();
+			public Stream<ResourceKey<? extends Registry<?>>> listRegistryKeys() {
+				return provider.listRegistryKeys();
 			}
 
 			@Override

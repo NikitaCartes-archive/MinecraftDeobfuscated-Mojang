@@ -10,12 +10,10 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.stats.RecipeBook;
-import net.minecraft.util.Mth;
-import net.minecraft.world.inventory.RecipeBookMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeHolder;
 
@@ -27,28 +25,24 @@ public class RecipeButton extends AbstractWidget {
 	private static final ResourceLocation SLOT_UNCRAFTABLE_SPRITE = ResourceLocation.withDefaultNamespace("recipe_book/slot_uncraftable");
 	private static final float ANIMATION_TIME = 15.0F;
 	private static final int BACKGROUND_SIZE = 25;
-	public static final int TICKS_TO_SWAP = 30;
 	private static final Component MORE_RECIPES_TOOLTIP = Component.translatable("gui.recipebook.moreRecipes");
-	private RecipeBookMenu<?, ?> menu;
-	private RecipeBook book;
 	private RecipeCollection collection;
-	private float time;
+	private List<RecipeHolder<?>> recipes = List.of();
+	private final SlotSelectTime slotSelectTime;
 	private float animationTime;
-	private int currentIndex;
 
-	public RecipeButton() {
+	public RecipeButton(SlotSelectTime slotSelectTime) {
 		super(0, 0, 25, 25, CommonComponents.EMPTY);
+		this.slotSelectTime = slotSelectTime;
 	}
 
-	public void init(RecipeCollection recipeCollection, RecipeBookPage recipeBookPage) {
+	public void init(RecipeCollection recipeCollection, boolean bl, RecipeBookPage recipeBookPage) {
 		this.collection = recipeCollection;
-		this.menu = (RecipeBookMenu<?, ?>)recipeBookPage.getMinecraft().player.containerMenu;
-		this.book = recipeBookPage.getRecipeBook();
-		List<RecipeHolder<?>> list = recipeCollection.getRecipes(this.book.isFiltering(this.menu));
+		this.recipes = recipeCollection.getFittingRecipes(bl ? RecipeCollection.CraftableStatus.CRAFTABLE : RecipeCollection.CraftableStatus.ANY);
 
-		for (RecipeHolder<?> recipeHolder : list) {
-			if (this.book.willHighlight(recipeHolder)) {
-				recipeBookPage.recipesShown(list);
+		for (RecipeHolder<?> recipeHolder : this.recipes) {
+			if (recipeBookPage.getRecipeBook().willHighlight(recipeHolder)) {
+				recipeBookPage.recipesShown(this.recipes);
 				this.animationTime = 15.0F;
 				break;
 			}
@@ -61,18 +55,14 @@ public class RecipeButton extends AbstractWidget {
 
 	@Override
 	public void renderWidget(GuiGraphics guiGraphics, int i, int j, float f) {
-		if (!Screen.hasControlDown()) {
-			this.time += f;
-		}
-
 		ResourceLocation resourceLocation;
 		if (this.collection.hasCraftable()) {
-			if (this.collection.getRecipes(this.book.isFiltering(this.menu)).size() > 1) {
+			if (this.hasMultipleRecipes()) {
 				resourceLocation = SLOT_MANY_CRAFTABLE_SPRITE;
 			} else {
 				resourceLocation = SLOT_CRAFTABLE_SPRITE;
 			}
-		} else if (this.collection.getRecipes(this.book.isFiltering(this.menu)).size() > 1) {
+		} else if (this.hasMultipleRecipes()) {
 			resourceLocation = SLOT_MANY_UNCRAFTABLE_SPRITE;
 		} else {
 			resourceLocation = SLOT_UNCRAFTABLE_SPRITE;
@@ -88,12 +78,10 @@ public class RecipeButton extends AbstractWidget {
 			this.animationTime -= f;
 		}
 
-		guiGraphics.blitSprite(resourceLocation, this.getX(), this.getY(), this.width, this.height);
-		List<RecipeHolder<?>> list = this.getOrderedRecipes();
-		this.currentIndex = Mth.floor(this.time / 30.0F) % list.size();
-		ItemStack itemStack = ((RecipeHolder)list.get(this.currentIndex)).value().getResultItem(this.collection.registryAccess());
+		guiGraphics.blitSprite(RenderType::guiTextured, resourceLocation, this.getX(), this.getY(), this.width, this.height);
+		ItemStack itemStack = this.getRecipe().value().getResultItem(this.collection.registryAccess());
 		int k = 4;
-		if (this.collection.hasSingleResultItem() && this.getOrderedRecipes().size() > 1) {
+		if (this.collection.hasSingleResultItem() && this.hasMultipleRecipes()) {
 			guiGraphics.renderItem(itemStack, this.getX() + k + 1, this.getY() + k + 1, 0, 10);
 			k--;
 		}
@@ -104,28 +92,23 @@ public class RecipeButton extends AbstractWidget {
 		}
 	}
 
-	private List<RecipeHolder<?>> getOrderedRecipes() {
-		List<RecipeHolder<?>> list = this.collection.getDisplayRecipes(true);
-		if (!this.book.isFiltering(this.menu)) {
-			list.addAll(this.collection.getDisplayRecipes(false));
-		}
-
-		return list;
+	private boolean hasMultipleRecipes() {
+		return this.recipes.size() > 1;
 	}
 
 	public boolean isOnlyOption() {
-		return this.getOrderedRecipes().size() == 1;
+		return this.recipes.size() == 1;
 	}
 
 	public RecipeHolder<?> getRecipe() {
-		List<RecipeHolder<?>> list = this.getOrderedRecipes();
-		return (RecipeHolder<?>)list.get(this.currentIndex);
+		int i = this.slotSelectTime.currentIndex() % this.recipes.size();
+		return (RecipeHolder<?>)this.recipes.get(i);
 	}
 
 	public List<Component> getTooltipText() {
-		ItemStack itemStack = ((RecipeHolder)this.getOrderedRecipes().get(this.currentIndex)).value().getResultItem(this.collection.registryAccess());
+		ItemStack itemStack = this.getRecipe().value().getResultItem(this.collection.registryAccess());
 		List<Component> list = Lists.<Component>newArrayList(Screen.getTooltipFromItem(Minecraft.getInstance(), itemStack));
-		if (this.collection.getRecipes(this.book.isFiltering(this.menu)).size() > 1) {
+		if (this.hasMultipleRecipes()) {
 			list.add(MORE_RECIPES_TOOLTIP);
 		}
 
@@ -134,9 +117,9 @@ public class RecipeButton extends AbstractWidget {
 
 	@Override
 	public void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {
-		ItemStack itemStack = ((RecipeHolder)this.getOrderedRecipes().get(this.currentIndex)).value().getResultItem(this.collection.registryAccess());
+		ItemStack itemStack = this.getRecipe().value().getResultItem(this.collection.registryAccess());
 		narrationElementOutput.add(NarratedElementType.TITLE, Component.translatable("narration.recipe", itemStack.getHoverName()));
-		if (this.collection.getRecipes(this.book.isFiltering(this.menu)).size() > 1) {
+		if (this.hasMultipleRecipes()) {
 			narrationElementOutput.add(
 				NarratedElementType.USAGE, Component.translatable("narration.button.usage.hovered"), Component.translatable("narration.recipe.usage.more")
 			);

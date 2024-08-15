@@ -14,7 +14,7 @@ public class StonecutterRecipe extends SingleItemRecipe {
 	}
 
 	@Override
-	public ItemStack getToastSymbol() {
+	public ItemStack getCategoryIconItem() {
 		return new ItemStack(Blocks.STONECUTTER);
 	}
 }

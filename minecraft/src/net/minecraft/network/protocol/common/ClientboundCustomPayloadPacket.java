@@ -26,6 +26,7 @@ import net.minecraft.network.protocol.common.custom.PoiAddedDebugPayload;
 import net.minecraft.network.protocol.common.custom.PoiRemovedDebugPayload;
 import net.minecraft.network.protocol.common.custom.PoiTicketCountDebugPayload;
 import net.minecraft.network.protocol.common.custom.RaidsDebugPayload;
+import net.minecraft.network.protocol.common.custom.RedstoneWireOrientationsDebugPayload;
 import net.minecraft.network.protocol.common.custom.StructuresDebugPayload;
 import net.minecraft.network.protocol.common.custom.VillageSectionsDebugPayload;
 import net.minecraft.network.protocol.common.custom.WorldGenAttemptDebugPayload;
@@ -52,6 +53,7 @@ public record ClientboundCustomPayloadPacket(CustomPacketPayload payload) implem
 					new CustomPacketPayload.TypeAndCodec<>(PoiRemovedDebugPayload.TYPE, PoiRemovedDebugPayload.STREAM_CODEC),
 					new CustomPacketPayload.TypeAndCodec<>(PoiTicketCountDebugPayload.TYPE, PoiTicketCountDebugPayload.STREAM_CODEC),
 					new CustomPacketPayload.TypeAndCodec<>(RaidsDebugPayload.TYPE, RaidsDebugPayload.STREAM_CODEC),
+					new CustomPacketPayload.TypeAndCodec<>(RedstoneWireOrientationsDebugPayload.TYPE, RedstoneWireOrientationsDebugPayload.STREAM_CODEC),
 					new CustomPacketPayload.TypeAndCodec<>(StructuresDebugPayload.TYPE, StructuresDebugPayload.STREAM_CODEC),
 					new CustomPacketPayload.TypeAndCodec<>(VillageSectionsDebugPayload.TYPE, VillageSectionsDebugPayload.STREAM_CODEC),
 					new CustomPacketPayload.TypeAndCodec<>(WorldGenAttemptDebugPayload.TYPE, WorldGenAttemptDebugPayload.STREAM_CODEC)

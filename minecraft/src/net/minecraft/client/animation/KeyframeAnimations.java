@@ -5,18 +5,18 @@ import java.util.Optional;
 import java.util.Map.Entry;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.model.HierarchicalModel;
+import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.util.Mth;
 import org.joml.Vector3f;
 
 @Environment(EnvType.CLIENT)
 public class KeyframeAnimations {
-	public static void animate(HierarchicalModel<?> hierarchicalModel, AnimationDefinition animationDefinition, long l, float f, Vector3f vector3f) {
+	public static void animate(Model model, AnimationDefinition animationDefinition, long l, float f, Vector3f vector3f) {
 		float g = getElapsedSeconds(animationDefinition, l);
 
 		for (Entry<String, List<AnimationChannel>> entry : animationDefinition.boneAnimations().entrySet()) {
-			Optional<ModelPart> optional = hierarchicalModel.getAnyDescendantWithName((String)entry.getKey());
+			Optional<ModelPart> optional = model.getAnyDescendantWithName((String)entry.getKey());
 			List<AnimationChannel> list = (List<AnimationChannel>)entry.getValue();
 			optional.ifPresent(modelPart -> list.forEach(animationChannel -> {
 					Keyframe[] keyframes = animationChannel.keyframes();

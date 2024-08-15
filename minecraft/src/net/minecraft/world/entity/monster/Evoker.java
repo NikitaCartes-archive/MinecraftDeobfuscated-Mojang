@@ -12,10 +12,10 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
@@ -97,15 +97,17 @@ public class Evoker extends SpellcasterIllager {
 	}
 
 	@Override
-	public boolean isAlliedTo(Entity entity) {
-		if (entity == null) {
-			return false;
-		} else if (entity == this) {
+	protected boolean considersEntityAsAlly(Entity entity) {
+		if (entity == this) {
 			return true;
-		} else if (super.isAlliedTo(entity)) {
+		} else if (super.considersEntityAsAlly(entity)) {
 			return true;
 		} else {
-			return entity instanceof Vex vex ? this.isAlliedTo(vex.getOwner()) : false;
+			if (entity instanceof Vex vex && vex.getOwner() != null) {
+				return this.considersEntityAsAlly(vex.getOwner());
+			}
+
+			return false;
 		}
 	}
 
@@ -260,10 +262,10 @@ public class Evoker extends SpellcasterIllager {
 
 			for (int i = 0; i < 3; i++) {
 				BlockPos blockPos = Evoker.this.blockPosition().offset(-2 + Evoker.this.random.nextInt(5), 1, -2 + Evoker.this.random.nextInt(5));
-				Vex vex = EntityType.VEX.create(Evoker.this.level());
+				Vex vex = EntityType.VEX.create(Evoker.this.level(), EntitySpawnReason.MOB_SUMMONED);
 				if (vex != null) {
 					vex.moveTo(blockPos, 0.0F, 0.0F);
-					vex.finalizeSpawn(serverLevel, Evoker.this.level().getCurrentDifficultyAt(blockPos), MobSpawnType.MOB_SUMMONED, null);
+					vex.finalizeSpawn(serverLevel, Evoker.this.level().getCurrentDifficultyAt(blockPos), EntitySpawnReason.MOB_SUMMONED, null);
 					vex.setOwner(Evoker.this);
 					vex.setBoundOrigin(blockPos);
 					vex.setLimitedLife(20 * (30 + Evoker.this.random.nextInt(90)));

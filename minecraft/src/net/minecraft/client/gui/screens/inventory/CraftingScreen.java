@@ -4,8 +4,10 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ImageButton;
+import net.minecraft.client.gui.screens.recipebook.CraftingRecipeBookComponent;
 import net.minecraft.client.gui.screens.recipebook.RecipeBookComponent;
 import net.minecraft.client.gui.screens.recipebook.RecipeUpdateListener;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
@@ -16,18 +18,19 @@ import net.minecraft.world.inventory.Slot;
 @Environment(EnvType.CLIENT)
 public class CraftingScreen extends AbstractContainerScreen<CraftingMenu> implements RecipeUpdateListener {
 	private static final ResourceLocation CRAFTING_TABLE_LOCATION = ResourceLocation.withDefaultNamespace("textures/gui/container/crafting_table.png");
-	private final RecipeBookComponent recipeBookComponent = new RecipeBookComponent();
+	private final RecipeBookComponent<?> recipeBookComponent;
 	private boolean widthTooNarrow;
 
 	public CraftingScreen(CraftingMenu craftingMenu, Inventory inventory, Component component) {
 		super(craftingMenu, inventory, component);
+		this.recipeBookComponent = new CraftingRecipeBookComponent(craftingMenu);
 	}
 
 	@Override
 	protected void init() {
 		super.init();
 		this.widthTooNarrow = this.width < 379;
-		this.recipeBookComponent.init(this.width, this.height, this.minecraft, this.widthTooNarrow, this.menu);
+		this.recipeBookComponent.init(this.width, this.height, this.minecraft, this.widthTooNarrow);
 		this.leftPos = this.recipeBookComponent.updateScreenPosition(this.width, this.imageWidth);
 		this.addRenderableWidget(new ImageButton(this.leftPos + 5, this.height / 2 - 49, 20, 18, RecipeBookComponent.RECIPE_BUTTON_SPRITES, button -> {
 			this.recipeBookComponent.toggleVisibility();
@@ -52,18 +55,18 @@ public class CraftingScreen extends AbstractContainerScreen<CraftingMenu> implem
 		} else {
 			super.render(guiGraphics, i, j, f);
 			this.recipeBookComponent.render(guiGraphics, i, j, f);
-			this.recipeBookComponent.renderGhostRecipe(guiGraphics, this.leftPos, this.topPos, true, f);
+			this.recipeBookComponent.renderGhostRecipe(guiGraphics, this.leftPos, this.topPos, true);
 		}
 
 		this.renderTooltip(guiGraphics, i, j);
-		this.recipeBookComponent.renderTooltip(guiGraphics, this.leftPos, this.topPos, i, j);
+		this.recipeBookComponent.renderTooltip(guiGraphics, i, j, this.hoveredSlot);
 	}
 
 	@Override
 	protected void renderBg(GuiGraphics guiGraphics, float f, int i, int j) {
 		int k = this.leftPos;
 		int l = (this.height - this.imageHeight) / 2;
-		guiGraphics.blit(CRAFTING_TABLE_LOCATION, k, l, 0, 0, this.imageWidth, this.imageHeight);
+		guiGraphics.blit(RenderType::guiTextured, CRAFTING_TABLE_LOCATION, k, l, 0.0F, 0.0F, this.imageWidth, this.imageHeight, 256, 256);
 	}
 
 	@Override

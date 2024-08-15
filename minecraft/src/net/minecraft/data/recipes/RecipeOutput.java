@@ -10,4 +10,6 @@ public interface RecipeOutput {
 	void accept(ResourceLocation resourceLocation, Recipe<?> recipe, @Nullable AdvancementHolder advancementHolder);
 
 	Advancement.Builder advancement();
+
+	void includeRootAdvancement();
 }

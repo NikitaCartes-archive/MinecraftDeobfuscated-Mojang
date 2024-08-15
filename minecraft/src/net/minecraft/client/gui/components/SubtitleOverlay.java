@@ -17,6 +17,7 @@ import net.minecraft.client.sounds.SoundEventListener;
 import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.client.sounds.WeighedSoundEvents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 
@@ -88,22 +89,21 @@ public class SubtitleOverlay implements SoundEventListener {
 						float g = 1.0F;
 						int o = this.minecraft.font.width(component);
 						int p = Mth.floor(Mth.clampedLerp(255.0F, 75.0F, (float)(Util.getMillis() - soundPlayedAt.time) / (float)(3000.0 * d)));
-						int q = p << 16 | p << 8 | p;
 						guiGraphics.pose().pushPose();
 						guiGraphics.pose()
 							.translate((float)guiGraphics.guiWidth() - (float)l * 1.0F - 2.0F, (float)(guiGraphics.guiHeight() - 35) - (float)(i * (m + 1)) * 1.0F, 0.0F);
 						guiGraphics.pose().scale(1.0F, 1.0F, 1.0F);
 						guiGraphics.fill(-l - 1, -n - 1, l + 1, n + 1, this.minecraft.options.getBackgroundColor(0.8F));
-						int r = q + -16777216;
+						int q = ARGB.color(255, p, p, p);
 						if (!bl) {
 							if (e > 0.0) {
-								guiGraphics.drawString(this.minecraft.font, ">", l - this.minecraft.font.width(">"), -n, r);
+								guiGraphics.drawString(this.minecraft.font, ">", l - this.minecraft.font.width(">"), -n, q);
 							} else if (e < 0.0) {
-								guiGraphics.drawString(this.minecraft.font, "<", -l, -n, r);
+								guiGraphics.drawString(this.minecraft.font, "<", -l, -n, q);
 							}
 						}
 
-						guiGraphics.drawString(this.minecraft.font, component, -o / 2, -n, r);
+						guiGraphics.drawString(this.minecraft.font, component, -o / 2, -n, q);
 						guiGraphics.pose().popPose();
 						i++;
 					}

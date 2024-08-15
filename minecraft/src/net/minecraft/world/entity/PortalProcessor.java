@@ -7,7 +7,7 @@ import net.minecraft.world.level.block.Portal;
 import net.minecraft.world.level.portal.DimensionTransition;
 
 public class PortalProcessor {
-	private Portal portal;
+	private final Portal portal;
 	private BlockPos entryPosition;
 	private int portalTime;
 	private boolean insidePortalThisTick;

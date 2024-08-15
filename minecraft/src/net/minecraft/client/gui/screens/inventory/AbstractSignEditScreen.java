@@ -15,6 +15,7 @@ import net.minecraft.client.renderer.blockentity.SignRenderer;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ServerboundSignUpdatePacket;
+import net.minecraft.util.ARGB;
 import net.minecraft.world.level.block.SignBlock;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.entity.SignText;
@@ -24,7 +25,7 @@ import org.joml.Vector3f;
 
 @Environment(EnvType.CLIENT)
 public abstract class AbstractSignEditScreen extends Screen {
-	private final SignBlockEntity sign;
+	protected final SignBlockEntity sign;
 	private SignText text;
 	private final String[] messages;
 	private final boolean isFrontText;
@@ -100,9 +101,11 @@ public abstract class AbstractSignEditScreen extends Screen {
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
 		super.render(guiGraphics, i, j, f);
+		guiGraphics.flush();
 		Lighting.setupForFlatItems();
 		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 40, 16777215);
 		this.renderSign(guiGraphics);
+		guiGraphics.flush();
 		Lighting.setupFor3DItems();
 	}
 
@@ -131,7 +134,7 @@ public abstract class AbstractSignEditScreen extends Screen {
 		return false;
 	}
 
-	protected abstract void renderSignBackground(GuiGraphics guiGraphics, BlockState blockState);
+	protected abstract void renderSignBackground(GuiGraphics guiGraphics);
 
 	protected abstract Vector3f getSignTextScale();
 
@@ -140,11 +143,10 @@ public abstract class AbstractSignEditScreen extends Screen {
 	}
 
 	private void renderSign(GuiGraphics guiGraphics) {
-		BlockState blockState = this.sign.getBlockState();
 		guiGraphics.pose().pushPose();
-		this.offsetSign(guiGraphics, blockState);
+		this.offsetSign(guiGraphics, this.sign.getBlockState());
 		guiGraphics.pose().pushPose();
-		this.renderSignBackground(guiGraphics, blockState);
+		this.renderSignBackground(guiGraphics);
 		guiGraphics.pose().popPose();
 		this.renderSignText(guiGraphics);
 		guiGraphics.pose().popPose();
@@ -186,7 +188,7 @@ public abstract class AbstractSignEditScreen extends Screen {
 				int o = this.font.width(string.substring(0, Math.max(Math.min(j, string.length()), 0)));
 				int p = o - this.font.width(string) / 2;
 				if (bl && j < string.length()) {
-					guiGraphics.fill(p, m - 1, p + 1, m + this.sign.getTextLineHeight(), 0xFF000000 | i);
+					guiGraphics.fill(p, m - 1, p + 1, m + this.sign.getTextLineHeight(), ARGB.opaque(i));
 				}
 
 				if (k != j) {

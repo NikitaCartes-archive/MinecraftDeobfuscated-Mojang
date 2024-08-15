@@ -9,56 +9,53 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
+import net.minecraft.client.renderer.entity.state.EntityRenderState;
+import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
 
 @Environment(EnvType.CLIENT)
-public abstract class RenderLayer<T extends Entity, M extends EntityModel<T>> {
-	private final RenderLayerParent<T, M> renderer;
+public abstract class RenderLayer<S extends EntityRenderState, M extends EntityModel<? super S>> {
+	private final RenderLayerParent<S, M> renderer;
 
-	public RenderLayer(RenderLayerParent<T, M> renderLayerParent) {
+	public RenderLayer(RenderLayerParent<S, M> renderLayerParent) {
 		this.renderer = renderLayerParent;
 	}
 
-	protected static <T extends LivingEntity> void coloredCutoutModelCopyLayerRender(
-		EntityModel<T> entityModel,
-		EntityModel<T> entityModel2,
+	protected static <S extends LivingEntityRenderState> void coloredCutoutModelCopyLayerRender(
+		EntityModel<S> entityModel,
 		ResourceLocation resourceLocation,
 		PoseStack poseStack,
 		MultiBufferSource multiBufferSource,
 		int i,
-		T livingEntity,
-		float f,
-		float g,
-		float h,
-		float j,
-		float k,
-		float l,
-		int m
+		S livingEntityRenderState,
+		int j
 	) {
-		if (!livingEntity.isInvisible()) {
-			entityModel.copyPropertiesTo(entityModel2);
-			entityModel2.prepareMobModel(livingEntity, f, g, l);
-			entityModel2.setupAnim(livingEntity, f, g, h, j, k);
-			renderColoredCutoutModel(entityModel2, resourceLocation, poseStack, multiBufferSource, i, livingEntity, m);
+		if (!livingEntityRenderState.isInvisible) {
+			entityModel.setupAnim(livingEntityRenderState);
+			renderColoredCutoutModel(entityModel, resourceLocation, poseStack, multiBufferSource, i, livingEntityRenderState, j);
 		}
 	}
 
-	protected static <T extends LivingEntity> void renderColoredCutoutModel(
-		EntityModel<T> entityModel, ResourceLocation resourceLocation, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T livingEntity, int j
+	protected static void renderColoredCutoutModel(
+		EntityModel<?> entityModel,
+		ResourceLocation resourceLocation,
+		PoseStack poseStack,
+		MultiBufferSource multiBufferSource,
+		int i,
+		LivingEntityRenderState livingEntityRenderState,
+		int j
 	) {
 		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entityCutoutNoCull(resourceLocation));
-		entityModel.renderToBuffer(poseStack, vertexConsumer, i, LivingEntityRenderer.getOverlayCoords(livingEntity, 0.0F), j);
+		entityModel.renderToBuffer(poseStack, vertexConsumer, i, LivingEntityRenderer.getOverlayCoords(livingEntityRenderState, 0.0F), j);
 	}
 
 	public M getParentModel() {
 		return this.renderer.getModel();
 	}
 
-	protected ResourceLocation getTextureLocation(T entity) {
-		return this.renderer.getTextureLocation(entity);
+	protected ResourceLocation getTextureLocation(S entityRenderState) {
+		return this.renderer.getTextureLocation(entityRenderState);
 	}
 
-	public abstract void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T entity, float f, float g, float h, float j, float k, float l);
+	public abstract void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, S entityRenderState, float f, float g);
 }

@@ -1,10 +1,11 @@
 package net.minecraft.client.gui.components;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.RandomSource;
 
 @Environment(EnvType.CLIENT)
@@ -34,14 +35,12 @@ public class LogoRenderer {
 	}
 
 	public void renderLogo(GuiGraphics guiGraphics, int i, float f, int j) {
-		guiGraphics.setColor(1.0F, 1.0F, 1.0F, this.keepLogoThroughFade ? 1.0F : f);
-		RenderSystem.enableBlend();
 		int k = i / 2 - 128;
-		guiGraphics.blit(this.showEasterEgg ? EASTER_EGG_LOGO : MINECRAFT_LOGO, k, j, 0.0F, 0.0F, 256, 44, 256, 64);
-		int l = i / 2 - 64;
-		int m = j + 44 - 7;
-		guiGraphics.blit(MINECRAFT_EDITION, l, m, 0.0F, 0.0F, 128, 14, 128, 16);
-		guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
-		RenderSystem.disableBlend();
+		float g = this.keepLogoThroughFade ? 1.0F : f;
+		int l = ARGB.white(g);
+		guiGraphics.blit(RenderType::guiTextured, this.showEasterEgg ? EASTER_EGG_LOGO : MINECRAFT_LOGO, k, j, 0.0F, 0.0F, 256, 44, 256, 64, l);
+		int m = i / 2 - 64;
+		int n = j + 44 - 7;
+		guiGraphics.blit(RenderType::guiTextured, MINECRAFT_EDITION, m, n, 0.0F, 0.0F, 128, 14, 128, 16, l);
 	}
 }

@@ -6,8 +6,11 @@ import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.advancements.critereon.RaiderPredicate;
 import net.minecraft.advancements.critereon.SlimePredicate;
 import net.minecraft.advancements.critereon.TagPredicate;
+import net.minecraft.core.HolderGetter;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.loot.EntityLootSubProvider;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.tags.ItemTags;
@@ -45,6 +48,7 @@ public class VanillaEntityLoot extends EntityLootSubProvider {
 
 	@Override
 	public void generate() {
+		HolderGetter<EntityType<?>> holderGetter = this.registries.lookupOrThrow(Registries.ENTITY_TYPE);
 		this.add(EntityType.ALLAY, LootTable.lootTable());
 		this.add(EntityType.ARMADILLO, LootTable.lootTable());
 		this.add(EntityType.ARMOR_STAND, LootTable.lootTable());
@@ -206,7 +210,11 @@ public class VanillaEntityLoot extends EntityLootSubProvider {
 				.withPool(
 					LootPool.lootPool()
 						.add(TagEntry.expandTag(ItemTags.CREEPER_DROP_MUSIC_DISCS))
-						.when(LootItemEntityPropertyCondition.hasProperties(LootContext.EntityTarget.ATTACKER, EntityPredicate.Builder.entity().of(EntityTypeTags.SKELETONS)))
+						.when(
+							LootItemEntityPropertyCondition.hasProperties(
+								LootContext.EntityTarget.ATTACKER, EntityPredicate.Builder.entity().of(holderGetter, EntityTypeTags.SKELETONS)
+							)
+						)
 				)
 		);
 		this.add(
@@ -458,7 +466,7 @@ public class VanillaEntityLoot extends EntityLootSubProvider {
 							LootItem.lootTableItem(Items.MAGMA_CREAM)
 								.apply(SetItemCountFunction.setCount(UniformGenerator.between(-2.0F, 1.0F)))
 								.apply(EnchantedCountIncreaseFunction.lootingMultiplier(this.registries, UniformGenerator.between(0.0F, 1.0F)))
-								.when(this.killedByFrog().invert())
+								.when(this.killedByFrog(holderGetter).invert())
 								.when(
 									LootItemEntityPropertyCondition.hasProperties(
 										LootContext.EntityTarget.THIS, EntityPredicate.Builder.entity().subPredicate(SlimePredicate.sized(MinMaxBounds.Ints.atLeast(2)))
@@ -468,17 +476,17 @@ public class VanillaEntityLoot extends EntityLootSubProvider {
 						.add(
 							LootItem.lootTableItem(Items.PEARLESCENT_FROGLIGHT)
 								.apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F)))
-								.when(this.killedByFrogVariant(FrogVariant.WARM))
+								.when(this.killedByFrogVariant(holderGetter, FrogVariant.WARM))
 						)
 						.add(
 							LootItem.lootTableItem(Items.VERDANT_FROGLIGHT)
 								.apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F)))
-								.when(this.killedByFrogVariant(FrogVariant.COLD))
+								.when(this.killedByFrogVariant(holderGetter, FrogVariant.COLD))
 						)
 						.add(
 							LootItem.lootTableItem(Items.OCHRE_FROGLIGHT)
 								.apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F)))
-								.when(this.killedByFrogVariant(FrogVariant.TEMPERATE))
+								.when(this.killedByFrogVariant(holderGetter, FrogVariant.TEMPERATE))
 						)
 				)
 		);
@@ -683,22 +691,10 @@ public class VanillaEntityLoot extends EntityLootSubProvider {
 						)
 				)
 		);
-		this.add(EntityType.SHEEP, BuiltInLootTables.SHEEP_BLACK, createSheepTable(Blocks.BLACK_WOOL));
-		this.add(EntityType.SHEEP, BuiltInLootTables.SHEEP_BLUE, createSheepTable(Blocks.BLUE_WOOL));
-		this.add(EntityType.SHEEP, BuiltInLootTables.SHEEP_BROWN, createSheepTable(Blocks.BROWN_WOOL));
-		this.add(EntityType.SHEEP, BuiltInLootTables.SHEEP_CYAN, createSheepTable(Blocks.CYAN_WOOL));
-		this.add(EntityType.SHEEP, BuiltInLootTables.SHEEP_GRAY, createSheepTable(Blocks.GRAY_WOOL));
-		this.add(EntityType.SHEEP, BuiltInLootTables.SHEEP_GREEN, createSheepTable(Blocks.GREEN_WOOL));
-		this.add(EntityType.SHEEP, BuiltInLootTables.SHEEP_LIGHT_BLUE, createSheepTable(Blocks.LIGHT_BLUE_WOOL));
-		this.add(EntityType.SHEEP, BuiltInLootTables.SHEEP_LIGHT_GRAY, createSheepTable(Blocks.LIGHT_GRAY_WOOL));
-		this.add(EntityType.SHEEP, BuiltInLootTables.SHEEP_LIME, createSheepTable(Blocks.LIME_WOOL));
-		this.add(EntityType.SHEEP, BuiltInLootTables.SHEEP_MAGENTA, createSheepTable(Blocks.MAGENTA_WOOL));
-		this.add(EntityType.SHEEP, BuiltInLootTables.SHEEP_ORANGE, createSheepTable(Blocks.ORANGE_WOOL));
-		this.add(EntityType.SHEEP, BuiltInLootTables.SHEEP_PINK, createSheepTable(Blocks.PINK_WOOL));
-		this.add(EntityType.SHEEP, BuiltInLootTables.SHEEP_PURPLE, createSheepTable(Blocks.PURPLE_WOOL));
-		this.add(EntityType.SHEEP, BuiltInLootTables.SHEEP_RED, createSheepTable(Blocks.RED_WOOL));
-		this.add(EntityType.SHEEP, BuiltInLootTables.SHEEP_WHITE, createSheepTable(Blocks.WHITE_WOOL));
-		this.add(EntityType.SHEEP, BuiltInLootTables.SHEEP_YELLOW, createSheepTable(Blocks.YELLOW_WOOL));
+		LootData.WOOL_ITEM_BY_DYE
+			.forEach(
+				(dyeColor, itemLike) -> this.add(EntityType.SHEEP, (ResourceKey<LootTable>)BuiltInLootTables.SHEEP_BY_DYE.get(dyeColor), createSheepTable(itemLike))
+			);
 		this.add(
 			EntityType.SHULKER,
 			LootTable.lootTable()
@@ -755,9 +751,9 @@ public class VanillaEntityLoot extends EntityLootSubProvider {
 							LootItem.lootTableItem(Items.SLIME_BALL)
 								.apply(SetItemCountFunction.setCount(UniformGenerator.between(0.0F, 2.0F)))
 								.apply(EnchantedCountIncreaseFunction.lootingMultiplier(this.registries, UniformGenerator.between(0.0F, 1.0F)))
-								.when(this.killedByFrog().invert())
+								.when(this.killedByFrog(holderGetter).invert())
 						)
-						.add(LootItem.lootTableItem(Items.SLIME_BALL).apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F))).when(this.killedByFrog()))
+						.add(LootItem.lootTableItem(Items.SLIME_BALL).apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F))).when(this.killedByFrog(holderGetter)))
 						.when(
 							LootItemEntityPropertyCondition.hasProperties(
 								LootContext.EntityTarget.THIS, EntityPredicate.Builder.entity().subPredicate(SlimePredicate.sized(MinMaxBounds.Ints.exactly(1)))

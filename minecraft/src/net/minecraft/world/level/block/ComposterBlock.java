@@ -15,7 +15,6 @@ import net.minecraft.stats.Stats;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.WorldlyContainerHolder;
@@ -230,7 +229,7 @@ public class ComposterBlock extends Block implements WorldlyContainerHolder {
 	}
 
 	@Override
-	protected ItemInteractionResult useItemOn(
+	protected InteractionResult useItemOn(
 		ItemStack itemStack, BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
 	) {
 		int i = (Integer)blockState.getValue(LEVEL);
@@ -242,7 +241,7 @@ public class ComposterBlock extends Block implements WorldlyContainerHolder {
 				itemStack.consume(1, player);
 			}
 
-			return ItemInteractionResult.sidedSuccess(level.isClientSide);
+			return InteractionResult.SUCCESS;
 		} else {
 			return super.useItemOn(itemStack, blockState, level, blockPos, player, interactionHand, blockHitResult);
 		}
@@ -253,7 +252,7 @@ public class ComposterBlock extends Block implements WorldlyContainerHolder {
 		int i = (Integer)blockState.getValue(LEVEL);
 		if (i == 8) {
 			extractProduce(player, blockState, level, blockPos);
-			return InteractionResult.sidedSuccess(level.isClientSide);
+			return InteractionResult.SUCCESS;
 		} else {
 			return InteractionResult.PASS;
 		}

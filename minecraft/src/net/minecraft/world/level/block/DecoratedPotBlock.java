@@ -21,7 +21,6 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -100,12 +99,12 @@ public class DecoratedPotBlock extends BaseEntityBlock implements SimpleWaterlog
 	}
 
 	@Override
-	protected ItemInteractionResult useItemOn(
+	protected InteractionResult useItemOn(
 		ItemStack itemStack, BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
 	) {
 		if (level.getBlockEntity(blockPos) instanceof DecoratedPotBlockEntity decoratedPotBlockEntity) {
 			if (level.isClientSide) {
-				return ItemInteractionResult.CONSUME;
+				return InteractionResult.SUCCESS;
 			} else {
 				ItemStack itemStack2 = decoratedPotBlockEntity.getTheItem();
 				if (!itemStack.isEmpty()
@@ -131,13 +130,13 @@ public class DecoratedPotBlock extends BaseEntityBlock implements SimpleWaterlog
 
 					decoratedPotBlockEntity.setChanged();
 					level.gameEvent(player, GameEvent.BLOCK_CHANGE, blockPos);
-					return ItemInteractionResult.SUCCESS;
+					return InteractionResult.SUCCESS;
 				} else {
-					return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+					return InteractionResult.TRY_WITH_EMPTY_HAND;
 				}
 			}
 		} else {
-			return ItemInteractionResult.SKIP_DEFAULT_BLOCK_INTERACTION;
+			return InteractionResult.PASS;
 		}
 	}
 

@@ -27,6 +27,7 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.util.VisibleForDebug;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.Bee;
 import net.minecraft.world.entity.player.Player;
@@ -399,7 +400,7 @@ public class BeehiveBlockEntity extends BlockEntity {
 		public Entity createEntity(Level level, BlockPos blockPos) {
 			CompoundTag compoundTag = this.entityData.copyTag();
 			BeehiveBlockEntity.IGNORED_BEE_TAGS.forEach(compoundTag::remove);
-			Entity entity = EntityType.loadEntityRecursive(compoundTag, level, entityx -> entityx);
+			Entity entity = EntityType.loadEntityRecursive(compoundTag, level, EntitySpawnReason.LOAD, entityx -> entityx);
 			if (entity != null && entity.getType().is(EntityTypeTags.BEEHIVE_INHABITORS)) {
 				entity.setNoGravity(true);
 				if (entity instanceof Bee bee) {

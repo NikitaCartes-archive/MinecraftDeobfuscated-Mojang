@@ -435,14 +435,22 @@ public class FriendlyByteBuf extends ByteBuf {
 		byteBuf.writeFloat(quaternionf.w);
 	}
 
+	public static Vec3 readVec3(ByteBuf byteBuf) {
+		return new Vec3(byteBuf.readDouble(), byteBuf.readDouble(), byteBuf.readDouble());
+	}
+
 	public Vec3 readVec3() {
-		return new Vec3(this.readDouble(), this.readDouble(), this.readDouble());
+		return readVec3(this);
+	}
+
+	public static void writeVec3(ByteBuf byteBuf, Vec3 vec3) {
+		byteBuf.writeDouble(vec3.x());
+		byteBuf.writeDouble(vec3.y());
+		byteBuf.writeDouble(vec3.z());
 	}
 
 	public void writeVec3(Vec3 vec3) {
-		this.writeDouble(vec3.x());
-		this.writeDouble(vec3.y());
-		this.writeDouble(vec3.z());
+		writeVec3(this, vec3);
 	}
 
 	public <T extends Enum<T>> T readEnum(Class<T> class_) {
@@ -660,6 +668,22 @@ public class FriendlyByteBuf extends ByteBuf {
 			byte[] bs = bitSet.toByteArray();
 			this.writeBytes(Arrays.copyOf(bs, Mth.positiveCeilDiv(i, 8)));
 		}
+	}
+
+	public static int readContainerId(ByteBuf byteBuf) {
+		return VarInt.read(byteBuf);
+	}
+
+	public int readContainerId() {
+		return readContainerId(this.source);
+	}
+
+	public static void writeContainerId(ByteBuf byteBuf, int i) {
+		VarInt.write(byteBuf, i);
+	}
+
+	public void writeContainerId(int i) {
+		writeContainerId(this.source, i);
 	}
 
 	@Override

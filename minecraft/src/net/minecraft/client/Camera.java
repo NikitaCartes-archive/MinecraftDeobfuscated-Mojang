@@ -9,6 +9,8 @@ import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.vehicle.Minecart;
+import net.minecraft.world.entity.vehicle.NewMinecartBehavior;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.block.Blocks;
@@ -49,12 +51,25 @@ public class Camera {
 		this.entity = entity;
 		this.detached = bl;
 		this.partialTickTime = f;
-		this.setRotation(entity.getViewYRot(f), entity.getViewXRot(f));
-		this.setPosition(
-			Mth.lerp((double)f, entity.xo, entity.getX()),
-			Mth.lerp((double)f, entity.yo, entity.getY()) + (double)Mth.lerp(f, this.eyeHeightOld, this.eyeHeight),
-			Mth.lerp((double)f, entity.zo, entity.getZ())
-		);
+		if (entity.isPassenger()
+			&& entity.getVehicle() instanceof Minecart minecart
+			&& minecart.getBehavior() instanceof NewMinecartBehavior newMinecartBehavior
+			&& newMinecartBehavior.cartHasPosRotLerp()) {
+			Vec3 vec3 = minecart.getPassengerRidingPosition(entity)
+				.subtract(minecart.position())
+				.subtract(entity.getVehicleAttachmentPoint(minecart))
+				.add(new Vec3(0.0, (double)Mth.lerp(f, this.eyeHeightOld, this.eyeHeight), 0.0));
+			this.setRotation(entity.getViewYRot(f), entity.getViewXRot(f));
+			this.setPosition(newMinecartBehavior.getCartLerpPosition(f).add(vec3));
+		} else {
+			this.setRotation(entity.getViewYRot(f), entity.getViewXRot(f));
+			this.setPosition(
+				Mth.lerp((double)f, entity.xo, entity.getX()),
+				Mth.lerp((double)f, entity.yo, entity.getY()) + (double)Mth.lerp(f, this.eyeHeightOld, this.eyeHeight),
+				Mth.lerp((double)f, entity.zo, entity.getZ())
+			);
+		}
+
 		if (bl) {
 			if (bl2) {
 				this.setRotation(this.yRot + 180.0F, -this.xRot);

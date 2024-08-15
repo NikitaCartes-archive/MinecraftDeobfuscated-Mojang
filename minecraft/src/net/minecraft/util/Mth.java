@@ -187,6 +187,19 @@ public class Mth {
 		return j;
 	}
 
+	public static float wrapDegrees(long l) {
+		float f = (float)(l % 360L);
+		if (f >= 180.0F) {
+			f -= 360.0F;
+		}
+
+		if (f < -180.0F) {
+			f += 360.0F;
+		}
+
+		return f;
+	}
+
 	public static float wrapDegrees(float f) {
 		float g = f % 360.0F;
 		if (g >= 180.0F) {
@@ -262,10 +275,6 @@ public class Mth {
 
 	public static int log2(int i) {
 		return ceillog2(i) - (isPowerOfTwo(i) ? 0 : 1);
-	}
-
-	public static int color(float f, float g, float h) {
-		return FastColor.ARGB32.color(0, floor(f * 255.0F), floor(g * 255.0F), floor(h * 255.0F));
 	}
 
 	public static float frac(float f) {
@@ -467,7 +476,7 @@ public class Mth {
 				throw new RuntimeException("Something went wrong when converting from HSV to RGB. Input was " + f + ", " + g + ", " + h);
 		}
 
-		return FastColor.ARGB32.color(i, clamp((int)(o * 255.0F), 0, 255), clamp((int)(p * 255.0F), 0, 255), clamp((int)(q * 255.0F), 0, 255));
+		return ARGB.color(i, clamp((int)(o * 255.0F), 0, 255), clamp((int)(p * 255.0F), 0, 255), clamp((int)(q * 255.0F), 0, 255));
 	}
 
 	public static int murmurHash3Mixer(int i) {
@@ -508,6 +517,10 @@ public class Mth {
 		return g + f * (h - g);
 	}
 
+	public static Vec3 lerp(double d, Vec3 vec3, Vec3 vec32) {
+		return new Vec3(lerp(d, vec3.x, vec32.x), lerp(d, vec3.y, vec32.y), lerp(d, vec3.z, vec32.z));
+	}
+
 	public static double lerp(double d, double e, double f) {
 		return e + d * (f - e);
 	}
@@ -546,6 +559,20 @@ public class Mth {
 
 	public static double rotLerp(double d, double e, double f) {
 		return e + d * wrapDegrees(f - e);
+	}
+
+	public static float rotLerpRad(float f, float g, float h) {
+		float i = h - g;
+
+		while (i < (float) -Math.PI) {
+			i += (float) (Math.PI * 2);
+		}
+
+		while (i >= (float) Math.PI) {
+			i -= (float) (Math.PI * 2);
+		}
+
+		return g + f * i;
 	}
 
 	public static float triangleWave(float f, float g) {
@@ -616,6 +643,10 @@ public class Mth {
 		return Math.sqrt(lengthSquared(d, e));
 	}
 
+	public static float length(float f, float g) {
+		return (float)Math.sqrt(lengthSquared((double)f, (double)g));
+	}
+
 	public static double lengthSquared(double d, double e, double f) {
 		return d * d + e * e + f * f;
 	}
@@ -668,6 +699,10 @@ public class Mth {
 
 	public static int mulAndTruncate(Fraction fraction, int i) {
 		return fraction.getNumerator() * i / fraction.getDenominator();
+	}
+
+	public static float easeInOutSine(float f) {
+		return -(cos((float) Math.PI * f) - 1.0F) / 2.0F;
 	}
 
 	static {

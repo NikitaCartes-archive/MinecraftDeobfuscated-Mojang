@@ -29,15 +29,21 @@ public class BlockElement {
 	public final Map<Direction, BlockElementFace> faces;
 	public final BlockElementRotation rotation;
 	public final boolean shade;
+	public final int lightEmission;
+
+	public BlockElement(Vector3f vector3f, Vector3f vector3f2, Map<Direction, BlockElementFace> map) {
+		this(vector3f, vector3f2, map, null, true, 0);
+	}
 
 	public BlockElement(
-		Vector3f vector3f, Vector3f vector3f2, Map<Direction, BlockElementFace> map, @Nullable BlockElementRotation blockElementRotation, boolean bl
+		Vector3f vector3f, Vector3f vector3f2, Map<Direction, BlockElementFace> map, @Nullable BlockElementRotation blockElementRotation, boolean bl, int i
 	) {
 		this.from = vector3f;
 		this.to = vector3f2;
 		this.faces = map;
 		this.rotation = blockElementRotation;
 		this.shade = bl;
+		this.lightEmission = i;
 		this.fillUvs();
 	}
 
@@ -69,6 +75,7 @@ public class BlockElement {
 	@Environment(EnvType.CLIENT)
 	protected static class Deserializer implements JsonDeserializer<BlockElement> {
 		private static final boolean DEFAULT_SHADE = true;
+		private static final int DEFAULT_LIGHT_EMISSION = 0;
 
 		public BlockElement deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
 			JsonObject jsonObject = jsonElement.getAsJsonObject();
@@ -80,7 +87,19 @@ public class BlockElement {
 				throw new JsonParseException("Expected shade to be a Boolean");
 			} else {
 				boolean bl = GsonHelper.getAsBoolean(jsonObject, "shade", true);
-				return new BlockElement(vector3f, vector3f2, map, blockElementRotation, bl);
+				int i = 0;
+				if (jsonObject.has("light_emission")) {
+					boolean bl2 = GsonHelper.isNumberValue(jsonObject, "light_emission");
+					if (bl2) {
+						i = GsonHelper.getAsInt(jsonObject, "light_emission");
+					}
+
+					if (!bl2 || i < 0 || i > 15) {
+						throw new JsonParseException("Expected light_emission to be an Integer between (inclusive) 0 and 15");
+					}
+				}
+
+				return new BlockElement(vector3f, vector3f2, map, blockElementRotation, bl, i);
 			}
 		}
 

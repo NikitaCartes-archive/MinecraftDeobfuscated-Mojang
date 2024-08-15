@@ -1,24 +1,24 @@
 package net.minecraft.client.renderer.block.model.multipart;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntList;
 import java.lang.reflect.Type;
-import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.renderer.block.model.BlockModelDefinition;
 import net.minecraft.client.renderer.block.model.MultiVariant;
+import net.minecraft.client.renderer.block.model.UnbakedBlockStateModel;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.Material;
@@ -26,60 +26,41 @@ import net.minecraft.client.resources.model.ModelBaker;
 import net.minecraft.client.resources.model.ModelState;
 import net.minecraft.client.resources.model.MultiPartBakedModel;
 import net.minecraft.client.resources.model.UnbakedModel;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 
 @Environment(EnvType.CLIENT)
-public class MultiPart implements UnbakedModel {
-	private final StateDefinition<Block, BlockState> definition;
-	private final List<Selector> selectors;
+public class MultiPart implements UnbakedBlockStateModel {
+	private final List<MultiPart.InstantiatedSelector> selectors;
 
-	public MultiPart(StateDefinition<Block, BlockState> stateDefinition, List<Selector> list) {
-		this.definition = stateDefinition;
+	MultiPart(List<MultiPart.InstantiatedSelector> list) {
 		this.selectors = list;
 	}
 
-	public List<Selector> getSelectors() {
-		return this.selectors;
-	}
+	@Override
+	public Object visualEqualityGroup(BlockState blockState) {
+		IntList intList = new IntArrayList();
 
-	public Set<MultiVariant> getMultiVariants() {
-		Set<MultiVariant> set = Sets.<MultiVariant>newHashSet();
-
-		for (Selector selector : this.selectors) {
-			set.add(selector.getVariant());
+		for (int i = 0; i < this.selectors.size(); i++) {
+			if (((MultiPart.InstantiatedSelector)this.selectors.get(i)).predicate.test(blockState)) {
+				intList.add(i);
+			}
 		}
 
-		return set;
-	}
-
-	public boolean equals(Object object) {
-		if (this == object) {
-			return true;
-		} else {
-			return !(object instanceof MultiPart multiPart)
-				? false
-				: Objects.equals(this.definition, multiPart.definition) && Objects.equals(this.selectors, multiPart.selectors);
+		@Environment(EnvType.CLIENT)
+		record Key(MultiPart model, IntList selectors) {
+			Key(IntList selectors) {
+				this.selectors = selectors;
+			}
 		}
-	}
 
-	public int hashCode() {
-		return Objects.hash(new Object[]{this.definition, this.selectors});
+		return new Key(intList);
 	}
 
 	@Override
-	public Collection<ResourceLocation> getDependencies() {
-		return (Collection<ResourceLocation>)this.getSelectors()
-			.stream()
-			.flatMap(selector -> selector.getVariant().getDependencies().stream())
-			.collect(Collectors.toSet());
-	}
-
-	@Override
-	public void resolveParents(Function<ResourceLocation, UnbakedModel> function) {
-		this.getSelectors().forEach(selector -> selector.getVariant().resolveParents(function));
+	public void resolveDependencies(UnbakedModel.Resolver resolver, UnbakedModel.ResolutionContext resolutionContext) {
+		this.selectors.forEach(instantiatedSelector -> instantiatedSelector.variant.resolveDependencies(resolver, resolutionContext));
 	}
 
 	@Nullable
@@ -87,10 +68,10 @@ public class MultiPart implements UnbakedModel {
 	public BakedModel bake(ModelBaker modelBaker, Function<Material, TextureAtlasSprite> function, ModelState modelState) {
 		MultiPartBakedModel.Builder builder = new MultiPartBakedModel.Builder();
 
-		for (Selector selector : this.getSelectors()) {
-			BakedModel bakedModel = selector.getVariant().bake(modelBaker, function, modelState);
+		for (MultiPart.InstantiatedSelector instantiatedSelector : this.selectors) {
+			BakedModel bakedModel = instantiatedSelector.variant.bake(modelBaker, function, modelState);
 			if (bakedModel != null) {
-				builder.add(selector.getPredicate(this.definition), bakedModel);
+				builder.add(instantiatedSelector.predicate, bakedModel);
 			}
 		}
 
@@ -98,15 +79,24 @@ public class MultiPart implements UnbakedModel {
 	}
 
 	@Environment(EnvType.CLIENT)
-	public static class Deserializer implements JsonDeserializer<MultiPart> {
-		private final BlockModelDefinition.Context context;
-
-		public Deserializer(BlockModelDefinition.Context context) {
-			this.context = context;
+	public static record Definition(List<Selector> selectors) {
+		public MultiPart instantiate(StateDefinition<Block, BlockState> stateDefinition) {
+			List<MultiPart.InstantiatedSelector> list = this.selectors
+				.stream()
+				.map(selector -> new MultiPart.InstantiatedSelector(selector.getPredicate(stateDefinition), selector.getVariant()))
+				.toList();
+			return new MultiPart(list);
 		}
 
-		public MultiPart deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
-			return new MultiPart(this.context.getDefinition(), this.getSelectors(jsonDeserializationContext, jsonElement.getAsJsonArray()));
+		public Set<MultiVariant> getMultiVariants() {
+			return (Set<MultiVariant>)this.selectors.stream().map(Selector::getVariant).collect(Collectors.toSet());
+		}
+	}
+
+	@Environment(EnvType.CLIENT)
+	public static class Deserializer implements JsonDeserializer<MultiPart.Definition> {
+		public MultiPart.Definition deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
+			return new MultiPart.Definition(this.getSelectors(jsonDeserializationContext, jsonElement.getAsJsonArray()));
 		}
 
 		private List<Selector> getSelectors(JsonDeserializationContext jsonDeserializationContext, JsonArray jsonArray) {
@@ -118,5 +108,9 @@ public class MultiPart implements UnbakedModel {
 
 			return list;
 		}
+	}
+
+	@Environment(EnvType.CLIENT)
+	static record InstantiatedSelector(Predicate<BlockState> predicate, MultiVariant variant) {
 	}
 }

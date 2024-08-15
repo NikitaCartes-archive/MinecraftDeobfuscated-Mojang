@@ -11,11 +11,11 @@ import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.entity.state.BreezeRenderState;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.monster.breeze.Breeze;
 
 @Environment(EnvType.CLIENT)
-public class BreezeModel<T extends Breeze> extends HierarchicalModel<T> {
+public class BreezeModel extends EntityModel<BreezeRenderState> {
 	private static final float WIND_TOP_SPEED = 0.6F;
 	private static final float WIND_MIDDLE_SPEED = 0.8F;
 	private static final float WIND_BOTTOM_SPEED = 1.0F;
@@ -109,21 +109,22 @@ public class BreezeModel<T extends Breeze> extends HierarchicalModel<T> {
 		return LayerDefinition.create(meshDefinition, i, j);
 	}
 
-	public void setupAnim(T breeze, float f, float g, float h, float i, float j) {
+	public void setupAnim(BreezeRenderState breezeRenderState) {
 		this.root().getAllParts().forEach(ModelPart::resetPose);
-		float k = h * (float) Math.PI * -0.1F;
-		this.windTop.x = Mth.cos(k) * 1.0F * 0.6F;
-		this.windTop.z = Mth.sin(k) * 1.0F * 0.6F;
-		this.windMid.x = Mth.sin(k) * 0.5F * 0.8F;
-		this.windMid.z = Mth.cos(k) * 0.8F;
-		this.windBottom.x = Mth.cos(k) * -0.25F * 1.0F;
-		this.windBottom.z = Mth.sin(k) * -0.25F * 1.0F;
-		this.head.y = 4.0F + Mth.cos(k) / 4.0F;
-		this.rods.yRot = h * (float) Math.PI * 0.1F;
-		this.animate(breeze.shoot, BreezeAnimation.SHOOT, h);
-		this.animate(breeze.slide, BreezeAnimation.SLIDE, h);
-		this.animate(breeze.slideBack, BreezeAnimation.SLIDE_BACK, h);
-		this.animate(breeze.longJump, BreezeAnimation.JUMP, h);
+		float f = breezeRenderState.ageInTicks * (float) Math.PI * -0.1F;
+		this.windTop.x = Mth.cos(f) * 1.0F * 0.6F;
+		this.windTop.z = Mth.sin(f) * 1.0F * 0.6F;
+		this.windMid.x = Mth.sin(f) * 0.5F * 0.8F;
+		this.windMid.z = Mth.cos(f) * 0.8F;
+		this.windBottom.x = Mth.cos(f) * -0.25F * 1.0F;
+		this.windBottom.z = Mth.sin(f) * -0.25F * 1.0F;
+		this.head.y = 4.0F + Mth.cos(f) / 4.0F;
+		this.rods.yRot = breezeRenderState.ageInTicks * (float) Math.PI * 0.1F;
+		this.animate(breezeRenderState.shoot, BreezeAnimation.SHOOT, breezeRenderState.ageInTicks);
+		this.animate(breezeRenderState.slide, BreezeAnimation.SLIDE, breezeRenderState.ageInTicks);
+		this.animate(breezeRenderState.slideBack, BreezeAnimation.SLIDE_BACK, breezeRenderState.ageInTicks);
+		this.animate(breezeRenderState.inhale, BreezeAnimation.INHALE, breezeRenderState.ageInTicks);
+		this.animate(breezeRenderState.longJump, BreezeAnimation.JUMP, breezeRenderState.ageInTicks);
 	}
 
 	@Override

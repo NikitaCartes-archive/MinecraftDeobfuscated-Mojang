@@ -5,6 +5,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -53,10 +54,10 @@ public class StonecutterScreen extends AbstractContainerScreen<StonecutterMenu> 
 	protected void renderBg(GuiGraphics guiGraphics, float f, int i, int j) {
 		int k = this.leftPos;
 		int l = this.topPos;
-		guiGraphics.blit(BG_LOCATION, k, l, 0, 0, this.imageWidth, this.imageHeight);
+		guiGraphics.blit(RenderType::guiTextured, BG_LOCATION, k, l, 0.0F, 0.0F, this.imageWidth, this.imageHeight, 256, 256);
 		int m = (int)(41.0F * this.scrollOffs);
 		ResourceLocation resourceLocation = this.isScrollBarActive() ? SCROLLER_SPRITE : SCROLLER_DISABLED_SPRITE;
-		guiGraphics.blitSprite(resourceLocation, k + 119, l + 15 + m, 12, 15);
+		guiGraphics.blitSprite(RenderType::guiTextured, resourceLocation, k + 119, l + 15 + m, 12, 15);
 		int n = this.leftPos + 52;
 		int o = this.topPos + 14;
 		int p = this.startIndex + 12;
@@ -99,7 +100,7 @@ public class StonecutterScreen extends AbstractContainerScreen<StonecutterMenu> 
 				resourceLocation = RECIPE_SPRITE;
 			}
 
-			guiGraphics.blitSprite(resourceLocation, p, r - 1, 16, 18);
+			guiGraphics.blitSprite(RenderType::guiTextured, resourceLocation, p, r - 1, 16, 18);
 		}
 	}
 

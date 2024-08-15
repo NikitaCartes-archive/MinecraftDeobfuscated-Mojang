@@ -13,7 +13,8 @@ public record ClientInformation(
 	int modelCustomisation,
 	HumanoidArm mainHand,
 	boolean textFilteringEnabled,
-	boolean allowsListing
+	boolean allowsListing,
+	ParticleStatus particleStatus
 ) {
 	public static final int MAX_LANGUAGE_LENGTH = 16;
 
@@ -26,7 +27,8 @@ public record ClientInformation(
 			friendlyByteBuf.readUnsignedByte(),
 			friendlyByteBuf.readEnum(HumanoidArm.class),
 			friendlyByteBuf.readBoolean(),
-			friendlyByteBuf.readBoolean()
+			friendlyByteBuf.readBoolean(),
+			friendlyByteBuf.readEnum(ParticleStatus.class)
 		);
 	}
 
@@ -39,9 +41,10 @@ public record ClientInformation(
 		friendlyByteBuf.writeEnum(this.mainHand);
 		friendlyByteBuf.writeBoolean(this.textFilteringEnabled);
 		friendlyByteBuf.writeBoolean(this.allowsListing);
+		friendlyByteBuf.writeEnum(this.particleStatus);
 	}
 
 	public static ClientInformation createDefault() {
-		return new ClientInformation("en_us", 2, ChatVisiblity.FULL, true, 0, Player.DEFAULT_MAIN_HAND, false, false);
+		return new ClientInformation("en_us", 2, ChatVisiblity.FULL, true, 0, Player.DEFAULT_MAIN_HAND, false, false, ParticleStatus.ALL);
 	}
 }

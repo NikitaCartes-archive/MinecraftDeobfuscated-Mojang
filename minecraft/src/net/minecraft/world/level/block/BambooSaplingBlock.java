@@ -37,7 +37,7 @@ public class BambooSaplingBlock extends Block implements BonemealableBlock {
 
 	@Override
 	protected VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
-		Vec3 vec3 = blockState.getOffset(blockGetter, blockPos);
+		Vec3 vec3 = blockState.getOffset(blockPos);
 		return SAPLING_SHAPE.move(vec3.x, vec3.y, vec3.z);
 	}
 

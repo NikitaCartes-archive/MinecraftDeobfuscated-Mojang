@@ -268,13 +268,7 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 
 	@Override
 	public void applyCarvers(
-		WorldGenRegion worldGenRegion,
-		long l,
-		RandomState randomState,
-		BiomeManager biomeManager,
-		StructureManager structureManager,
-		ChunkAccess chunkAccess,
-		GenerationStep.Carving carving
+		WorldGenRegion worldGenRegion, long l, RandomState randomState, BiomeManager biomeManager, StructureManager structureManager, ChunkAccess chunkAccess
 	) {
 		BiomeManager biomeManager2 = biomeManager.withDifferentSource((ix, jx, kx) -> this.biomeSource.getNoiseBiome(ix, jx, kx, randomState.sampler()));
 		WorldgenRandom worldgenRandom = new WorldgenRandom(new LegacyRandomSource(RandomSupport.generateUniqueSeed()));
@@ -287,7 +281,7 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 		CarvingContext carvingContext = new CarvingContext(
 			this, worldGenRegion.registryAccess(), chunkAccess.getHeightAccessorForGeneration(), noiseChunk, randomState, this.settings.value().surfaceRule()
 		);
-		CarvingMask carvingMask = ((ProtoChunk)chunkAccess).getOrCreateCarvingMask(carving);
+		CarvingMask carvingMask = ((ProtoChunk)chunkAccess).getOrCreateCarvingMask();
 
 		for (int j = -8; j <= 8; j++) {
 			for (int k = -8; k <= 8; k++) {
@@ -298,7 +292,7 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 							this.biomeSource.getNoiseBiome(QuartPos.fromBlock(chunkPos2.getMinBlockX()), 0, QuartPos.fromBlock(chunkPos2.getMinBlockZ()), randomState.sampler())
 						)
 				);
-				Iterable<Holder<ConfiguredWorldCarver<?>>> iterable = biomeGenerationSettings.getCarvers(carving);
+				Iterable<Holder<ConfiguredWorldCarver<?>>> iterable = biomeGenerationSettings.getCarvers();
 				int m = 0;
 
 				for (Holder<ConfiguredWorldCarver<?>> holder : iterable) {

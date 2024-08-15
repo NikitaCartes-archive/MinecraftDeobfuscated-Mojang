@@ -8,30 +8,34 @@ import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
+import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
+import net.minecraft.client.renderer.entity.state.SaddleableRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.Saddleable;
 
 @Environment(EnvType.CLIENT)
-public class SaddleLayer<T extends Entity & Saddleable, M extends EntityModel<T>> extends RenderLayer<T, M> {
+public class SaddleLayer<S extends LivingEntityRenderState & SaddleableRenderState, M extends EntityModel<? super S>> extends RenderLayer<S, M> {
 	private final ResourceLocation textureLocation;
-	private final M model;
+	private final M adultModel;
+	private final M babyModel;
 
-	public SaddleLayer(RenderLayerParent<T, M> renderLayerParent, M entityModel, ResourceLocation resourceLocation) {
+	public SaddleLayer(RenderLayerParent<S, M> renderLayerParent, M entityModel, M entityModel2, ResourceLocation resourceLocation) {
 		super(renderLayerParent);
-		this.model = entityModel;
+		this.adultModel = entityModel;
+		this.babyModel = entityModel2;
 		this.textureLocation = resourceLocation;
 	}
 
-	@Override
-	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T entity, float f, float g, float h, float j, float k, float l) {
-		if (entity.isSaddled()) {
-			this.getParentModel().copyPropertiesTo(this.model);
-			this.model.prepareMobModel(entity, f, g, h);
-			this.model.setupAnim(entity, f, g, j, k, l);
+	public SaddleLayer(RenderLayerParent<S, M> renderLayerParent, M entityModel, ResourceLocation resourceLocation) {
+		this(renderLayerParent, entityModel, entityModel, resourceLocation);
+	}
+
+	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, S livingEntityRenderState, float f, float g) {
+		if (livingEntityRenderState.isSaddled()) {
+			M entityModel = livingEntityRenderState.isBaby ? this.babyModel : this.adultModel;
+			entityModel.setupAnim(livingEntityRenderState);
 			VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entityCutoutNoCull(this.textureLocation));
-			this.model.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY);
+			entityModel.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY);
 		}
 	}
 }

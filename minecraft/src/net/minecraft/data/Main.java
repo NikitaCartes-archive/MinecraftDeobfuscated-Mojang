@@ -19,6 +19,7 @@ import net.minecraft.data.advancements.packs.VanillaAdvancementProvider;
 import net.minecraft.data.info.BiomeParametersDumpReport;
 import net.minecraft.data.info.BlockListReport;
 import net.minecraft.data.info.CommandsReport;
+import net.minecraft.data.info.DatapackStructureReport;
 import net.minecraft.data.info.ItemListReport;
 import net.minecraft.data.info.PacketReport;
 import net.minecraft.data.info.RegistryDumpReport;
@@ -122,7 +123,7 @@ public class Main {
 		packGenerator3.addProvider(bindRegistries(RegistriesDatapackGenerator::new, completableFuture));
 		packGenerator3.addProvider(bindRegistries(VanillaAdvancementProvider::create, completableFuture));
 		packGenerator3.addProvider(bindRegistries(VanillaLootTableProvider::create, completableFuture));
-		packGenerator3.addProvider(bindRegistries(VanillaRecipeProvider::new, completableFuture));
+		packGenerator3.addProvider(bindRegistries(VanillaRecipeProvider.Runner::new, completableFuture));
 		TagsProvider<Block> tagsProvider = packGenerator3.addProvider(bindRegistries(VanillaBlockTagsProvider::new, completableFuture));
 		TagsProvider<Item> tagsProvider2 = packGenerator3.addProvider(
 			packOutput -> new VanillaItemTagsProvider(packOutput, completableFuture, tagsProvider.contentsGetter())
@@ -150,8 +151,9 @@ public class Main {
 		packGenerator3.addProvider(bindRegistries(CommandsReport::new, completableFuture));
 		packGenerator3.addProvider(RegistryDumpReport::new);
 		packGenerator3.addProvider(PacketReport::new);
+		packGenerator3.addProvider(DatapackStructureReport::new);
 		packGenerator3 = dataGenerator.getBuiltinDatapack(bl2, "bundle");
-		packGenerator3.addProvider(bindRegistries(BundleRecipeProvider::new, completableFuture));
+		packGenerator3.addProvider(bindRegistries(BundleRecipeProvider.Runner::new, completableFuture));
 		packGenerator3.addProvider(
 			packOutput -> PackMetadataGenerator.forFeaturePack(packOutput, Component.translatable("dataPack.bundle.description"), FeatureFlagSet.of(FeatureFlags.BUNDLE))
 		);
@@ -167,6 +169,18 @@ public class Main {
 		packGenerator4.addProvider(bindRegistries(TradeRebalanceLootTableProvider::create, completableFuture));
 		packGenerator4.addProvider(bindRegistries(TradeRebalanceStructureTagsProvider::new, completableFuture));
 		packGenerator4.addProvider(bindRegistries(TradeRebalanceEnchantmentTagsProvider::new, completableFuture));
+		packGenerator3 = dataGenerator.getBuiltinDatapack(bl2, "redstone_experiments");
+		packGenerator3.addProvider(
+			packOutput -> PackMetadataGenerator.forFeaturePack(
+					packOutput, Component.translatable("dataPack.redstone_experiments.description"), FeatureFlagSet.of(FeatureFlags.REDSTONE_EXPERIMENTS)
+				)
+		);
+		packGenerator3 = dataGenerator.getBuiltinDatapack(bl2, "minecart_improvements");
+		packGenerator3.addProvider(
+			packOutput -> PackMetadataGenerator.forFeaturePack(
+					packOutput, Component.translatable("dataPack.minecart_improvements.description"), FeatureFlagSet.of(FeatureFlags.MINECART_IMPROVEMENTS)
+				)
+		);
 		return dataGenerator;
 	}
 }

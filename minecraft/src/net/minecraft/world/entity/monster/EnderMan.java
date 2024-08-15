@@ -517,7 +517,7 @@ public class EnderMan extends Monster implements NeutralMob {
 
 		@Override
 		public boolean canUse() {
-			this.pendingTarget = this.enderman.level().getNearestPlayer(this.startAggroTargetConditions, this.enderman);
+			this.pendingTarget = this.enderman.level().getNearestPlayer(this.startAggroTargetConditions.range(this.getFollowDistance()), this.enderman);
 			return this.pendingTarget != null;
 		}
 

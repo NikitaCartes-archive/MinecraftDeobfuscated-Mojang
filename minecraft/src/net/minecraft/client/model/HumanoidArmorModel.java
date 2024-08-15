@@ -8,10 +8,10 @@ import net.minecraft.client.model.geom.builders.CubeDeformation;
 import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
-import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
 
 @Environment(EnvType.CLIENT)
-public class HumanoidArmorModel<T extends LivingEntity> extends HumanoidModel<T> {
+public class HumanoidArmorModel<S extends HumanoidRenderState> extends HumanoidModel<S> {
 	public HumanoidArmorModel(ModelPart modelPart) {
 		super(modelPart);
 	}

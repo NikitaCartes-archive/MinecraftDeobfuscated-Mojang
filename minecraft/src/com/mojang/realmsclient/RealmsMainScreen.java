@@ -71,6 +71,7 @@ import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.screens.ConfirmLinkScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientActivePlayersTooltip;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -749,7 +750,7 @@ public class RealmsMainScreen extends RealmsScreen {
 
 		@Override
 		public void render(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
-			guiGraphics.blitSprite(RealmsMainScreen.NEW_REALM_SPRITE, k - 5, j + m / 2 - 10, 40, 20);
+			guiGraphics.blitSprite(RenderType::guiTextured, RealmsMainScreen.NEW_REALM_SPRITE, k - 5, j + m / 2 - 10, 40, 20);
 			int p = j + m / 2 - 9 / 2;
 			guiGraphics.drawString(RealmsMainScreen.this.font, START_SNAPSHOT_REALM, k + 40 - 2, p - 5, 8388479);
 			guiGraphics.drawString(RealmsMainScreen.this.font, Component.translatable("mco.snapshot.description", this.parent.name), k + 40 - 2, p + 5, -8355712);
@@ -894,7 +895,7 @@ public class RealmsMainScreen extends RealmsScreen {
 		}
 
 		private void drawRealmStatus(GuiGraphics guiGraphics, int i, int j, int k, int l, ResourceLocation resourceLocation, Supplier<Component> supplier) {
-			guiGraphics.blitSprite(resourceLocation, i, j, 10, 28);
+			guiGraphics.blitSprite(RenderType::guiTextured, resourceLocation, i, j, 10, 28);
 			if (RealmsMainScreen.this.realmSelectionList.isMouseOver((double)k, (double)l) && k >= i && k <= i + 10 && l >= j && l <= j + 28) {
 				RealmsMainScreen.this.setTooltipForNextRenderPass((Component)supplier.get());
 			}
@@ -990,7 +991,9 @@ public class RealmsMainScreen extends RealmsScreen {
 		}
 
 		private void drawNotificationCounter(GuiGraphics guiGraphics) {
-			guiGraphics.blitSprite(NOTIFICATION_ICONS[Math.min(this.notificationCount, 6) - 1], this.getX() + this.getWidth() - 5, this.getY() - 3, 8, 8);
+			guiGraphics.blitSprite(
+				RenderType::guiTextured, NOTIFICATION_ICONS[Math.min(this.notificationCount, 6) - 1], this.getX() + this.getWidth() - 5, this.getY() - 3, 8, 8
+			);
 		}
 	}
 
@@ -1170,7 +1173,7 @@ public class RealmsMainScreen extends RealmsScreen {
 		@Override
 		public void render(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, int n, int o, boolean bl, float f) {
 			if (this.serverData.state == RealmsServer.State.UNINITIALIZED) {
-				guiGraphics.blitSprite(RealmsMainScreen.NEW_REALM_SPRITE, k - 5, j + m / 2 - 10, 40, 20);
+				guiGraphics.blitSprite(RenderType::guiTextured, RealmsMainScreen.NEW_REALM_SPRITE, k - 5, j + m / 2 - 10, 40, 20);
 				int p = j + m / 2 - 9 / 2;
 				guiGraphics.drawString(RealmsMainScreen.this.font, RealmsMainScreen.SERVER_UNITIALIZED_TEXT, k + 40 - 2, p, 8388479);
 			} else {

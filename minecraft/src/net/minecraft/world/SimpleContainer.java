@@ -8,7 +8,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.player.StackedContents;
+import net.minecraft.world.entity.player.StackedItemContents;
 import net.minecraft.world.inventory.StackedContentsCompatible;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -169,9 +169,9 @@ public class SimpleContainer implements Container, StackedContentsCompatible {
 	}
 
 	@Override
-	public void fillStackedContents(StackedContents stackedContents) {
+	public void fillStackedContents(StackedItemContents stackedItemContents) {
 		for (ItemStack itemStack : this.items) {
-			stackedContents.accountStack(itemStack);
+			stackedItemContents.accountStack(itemStack);
 		}
 	}
 

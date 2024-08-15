@@ -9,11 +9,11 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Entity;
 
 @Environment(EnvType.CLIENT)
-public class SnowGolemModel<T extends Entity> extends HierarchicalModel<T> {
+public class SnowGolemModel extends EntityModel<LivingEntityRenderState> {
 	private static final String UPPER_BODY = "upper_body";
 	private final ModelPart root;
 	private final ModelPart upperBody;
@@ -49,19 +49,18 @@ public class SnowGolemModel<T extends Entity> extends HierarchicalModel<T> {
 		return LayerDefinition.create(meshDefinition, 64, 64);
 	}
 
-	@Override
-	public void setupAnim(T entity, float f, float g, float h, float i, float j) {
-		this.head.yRot = i * (float) (Math.PI / 180.0);
-		this.head.xRot = j * (float) (Math.PI / 180.0);
-		this.upperBody.yRot = i * (float) (Math.PI / 180.0) * 0.25F;
-		float k = Mth.sin(this.upperBody.yRot);
-		float l = Mth.cos(this.upperBody.yRot);
+	public void setupAnim(LivingEntityRenderState livingEntityRenderState) {
+		this.head.yRot = livingEntityRenderState.yRot * (float) (Math.PI / 180.0);
+		this.head.xRot = livingEntityRenderState.xRot * (float) (Math.PI / 180.0);
+		this.upperBody.yRot = livingEntityRenderState.yRot * (float) (Math.PI / 180.0) * 0.25F;
+		float f = Mth.sin(this.upperBody.yRot);
+		float g = Mth.cos(this.upperBody.yRot);
 		this.leftArm.yRot = this.upperBody.yRot;
 		this.rightArm.yRot = this.upperBody.yRot + (float) Math.PI;
-		this.leftArm.x = l * 5.0F;
-		this.leftArm.z = -k * 5.0F;
-		this.rightArm.x = -l * 5.0F;
-		this.rightArm.z = k * 5.0F;
+		this.leftArm.x = g * 5.0F;
+		this.leftArm.z = -f * 5.0F;
+		this.rightArm.x = -g * 5.0F;
+		this.rightArm.z = f * 5.0F;
 	}
 
 	@Override

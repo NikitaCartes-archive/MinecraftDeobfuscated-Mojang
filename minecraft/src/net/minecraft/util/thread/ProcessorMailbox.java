@@ -15,7 +15,7 @@ import net.minecraft.util.profiling.metrics.MetricsRegistry;
 import net.minecraft.util.profiling.metrics.ProfilerMeasured;
 import org.slf4j.Logger;
 
-public class ProcessorMailbox<T> implements ProfilerMeasured, ProcessorHandle<T>, AutoCloseable, Runnable {
+public class ProcessorMailbox<T> implements ProfilerMeasured, ProcessorHandle<T>, Runnable {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final int CLOSED_BIT = 1;
 	private static final int SCHEDULED_BIT = 2;

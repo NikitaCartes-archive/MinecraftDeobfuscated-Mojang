@@ -5,7 +5,9 @@ import com.google.common.collect.Maps;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Map.Entry;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -25,12 +27,20 @@ public class PartDefinition {
 
 	public PartDefinition addOrReplaceChild(String string, CubeListBuilder cubeListBuilder, PartPose partPose) {
 		PartDefinition partDefinition = new PartDefinition(cubeListBuilder.getCubes(), partPose);
+		return this.addOrReplaceChild(string, partDefinition);
+	}
+
+	public PartDefinition addOrReplaceChild(String string, PartDefinition partDefinition) {
 		PartDefinition partDefinition2 = (PartDefinition)this.children.put(string, partDefinition);
 		if (partDefinition2 != null) {
 			partDefinition.children.putAll(partDefinition2.children);
 		}
 
 		return partDefinition;
+	}
+
+	public PartDefinition clearChild(String string) {
+		return this.addOrReplaceChild(string, CubeListBuilder.create(), PartPose.ZERO);
 	}
 
 	public ModelPart bake(int i, int j) {
@@ -52,5 +62,15 @@ public class PartDefinition {
 
 	public PartDefinition getChild(String string) {
 		return (PartDefinition)this.children.get(string);
+	}
+
+	public Set<Entry<String, PartDefinition>> getChildren() {
+		return this.children.entrySet();
+	}
+
+	public PartDefinition transformed(UnaryOperator<PartPose> unaryOperator) {
+		PartDefinition partDefinition = new PartDefinition(this.cubes, (PartPose)unaryOperator.apply(this.partPose));
+		partDefinition.children.putAll(this.children);
+		return partDefinition;
 	}
 }

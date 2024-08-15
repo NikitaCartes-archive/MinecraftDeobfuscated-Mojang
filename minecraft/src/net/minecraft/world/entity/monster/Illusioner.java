@@ -10,11 +10,11 @@ import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -28,19 +28,19 @@ import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.entity.raid.Raider;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 public class Illusioner extends SpellcasterIllager implements RangedAttackMob {
 	private static final int NUM_ILLUSIONS = 4;
 	private static final int ILLUSION_TRANSITION_TICKS = 3;
-	private static final int ILLUSION_SPREAD = 3;
+	public static final int ILLUSION_SPREAD = 3;
 	private int clientSideIllusionTicks;
 	private final Vec3[][] clientSideIllusionOffsets;
 
@@ -78,15 +78,10 @@ public class Illusioner extends SpellcasterIllager implements RangedAttackMob {
 
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData
+		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, EntitySpawnReason entitySpawnReason, @Nullable SpawnGroupData spawnGroupData
 	) {
 		this.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.BOW));
-		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData);
-	}
-
-	@Override
-	public AABB getBoundingBoxForCulling() {
-		return this.getBoundingBox().inflate(3.0, 0.0, 3.0);
+		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, entitySpawnReason, spawnGroupData);
 	}
 
 	@Override
@@ -182,9 +177,11 @@ public class Illusioner extends SpellcasterIllager implements RangedAttackMob {
 		double e = livingEntity.getY(0.3333333333333333) - abstractArrow.getY();
 		double g = livingEntity.getZ() - this.getZ();
 		double h = Math.sqrt(d * d + g * g);
-		abstractArrow.shoot(d, e + h * 0.2F, g, 1.6F, (float)(14 - this.level().getDifficulty().getId() * 4));
+		if (this.level() instanceof ServerLevel serverLevel) {
+			Projectile.spawnProjectileUsingShoot(abstractArrow, serverLevel, itemStack2, d, e + h * 0.2F, g, 1.6F, (float)(14 - serverLevel.getDifficulty().getId() * 4));
+		}
+
 		this.playSound(SoundEvents.SKELETON_SHOOT, 1.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
-		this.level().addFreshEntity(abstractArrow);
 	}
 
 	@Override

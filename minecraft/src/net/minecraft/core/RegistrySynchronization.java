@@ -19,7 +19,7 @@ import net.minecraft.server.RegistryLayer;
 import net.minecraft.server.packs.repository.KnownPack;
 
 public class RegistrySynchronization {
-	public static final Set<ResourceKey<? extends Registry<?>>> NETWORKABLE_REGISTRIES = (Set<ResourceKey<? extends Registry<?>>>)RegistryDataLoader.SYNCHRONIZED_REGISTRIES
+	private static final Set<ResourceKey<? extends Registry<?>>> NETWORKABLE_REGISTRIES = (Set<ResourceKey<? extends Registry<?>>>)RegistryDataLoader.SYNCHRONIZED_REGISTRIES
 		.stream()
 		.map(RegistryDataLoader.RegistryData::key)
 		.collect(Collectors.toUnmodifiableSet());
@@ -67,7 +67,7 @@ public class RegistrySynchronization {
 	}
 
 	private static Stream<RegistryAccess.RegistryEntry<?>> ownedNetworkableRegistries(RegistryAccess registryAccess) {
-		return registryAccess.registries().filter(registryEntry -> NETWORKABLE_REGISTRIES.contains(registryEntry.key()));
+		return registryAccess.registries().filter(registryEntry -> isNetworkable(registryEntry.key()));
 	}
 
 	public static Stream<RegistryAccess.RegistryEntry<?>> networkedRegistries(LayeredRegistryAccess<RegistryLayer> layeredRegistryAccess) {
@@ -78,6 +78,10 @@ public class RegistrySynchronization {
 		Stream<RegistryAccess.RegistryEntry<?>> stream = layeredRegistryAccess.getLayer(RegistryLayer.STATIC).registries();
 		Stream<RegistryAccess.RegistryEntry<?>> stream2 = networkedRegistries(layeredRegistryAccess);
 		return Stream.concat(stream2, stream);
+	}
+
+	public static boolean isNetworkable(ResourceKey<? extends Registry<?>> resourceKey) {
+		return NETWORKABLE_REGISTRIES.contains(resourceKey);
 	}
 
 	public static record PackedRegistryEntry(ResourceLocation id, Optional<Tag> data) {

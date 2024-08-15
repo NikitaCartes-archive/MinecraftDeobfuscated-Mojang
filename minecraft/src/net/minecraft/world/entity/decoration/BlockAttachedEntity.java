@@ -9,8 +9,11 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LightningBolt;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Explosion;
+import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.slf4j.Logger;
@@ -65,6 +68,8 @@ public abstract class BlockAttachedEntity extends Entity {
 	public boolean hurt(DamageSource damageSource, float f) {
 		if (this.isInvulnerableTo(damageSource)) {
 			return false;
+		} else if (!this.level().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) && damageSource.getEntity() instanceof Mob) {
+			return false;
 		} else {
 			if (!this.isRemoved() && !this.level().isClientSide) {
 				this.kill();
@@ -74,6 +79,11 @@ public abstract class BlockAttachedEntity extends Entity {
 
 			return true;
 		}
+	}
+
+	@Override
+	public boolean ignoreExplosion(Explosion explosion) {
+		return explosion.shouldAffectBlocklikeEntities() ? super.ignoreExplosion(explosion) : true;
 	}
 
 	@Override

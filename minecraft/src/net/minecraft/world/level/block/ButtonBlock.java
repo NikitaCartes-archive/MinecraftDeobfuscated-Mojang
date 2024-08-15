@@ -28,6 +28,8 @@ import net.minecraft.world.level.block.state.properties.BlockSetType;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.redstone.ExperimentalRedstoneUtils;
+import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -113,17 +115,19 @@ public class ButtonBlock extends FaceAttachedHorizontalDirectionalBlock {
 			return InteractionResult.CONSUME;
 		} else {
 			this.press(blockState, level, blockPos, player);
-			return InteractionResult.sidedSuccess(level.isClientSide);
+			return InteractionResult.SUCCESS;
 		}
 	}
 
 	@Override
-	protected void onExplosionHit(BlockState blockState, Level level, BlockPos blockPos, Explosion explosion, BiConsumer<ItemStack, BlockPos> biConsumer) {
+	protected void onExplosionHit(
+		BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, Explosion explosion, BiConsumer<ItemStack, BlockPos> biConsumer
+	) {
 		if (explosion.canTriggerBlocks() && !(Boolean)blockState.getValue(POWERED)) {
-			this.press(blockState, level, blockPos, null);
+			this.press(blockState, serverLevel, blockPos, null);
 		}
 
-		super.onExplosionHit(blockState, level, blockPos, explosion, biConsumer);
+		super.onExplosionHit(blockState, serverLevel, blockPos, explosion, biConsumer);
 	}
 
 	public void press(BlockState blockState, Level level, BlockPos blockPos, @Nullable Player player) {
@@ -204,8 +208,10 @@ public class ButtonBlock extends FaceAttachedHorizontalDirectionalBlock {
 	}
 
 	private void updateNeighbours(BlockState blockState, Level level, BlockPos blockPos) {
-		level.updateNeighborsAt(blockPos, this);
-		level.updateNeighborsAt(blockPos.relative(getConnectedDirection(blockState).getOpposite()), this);
+		Direction direction = getConnectedDirection(blockState).getOpposite();
+		Orientation orientation = ExperimentalRedstoneUtils.randomOrientation(level, direction, direction.getAxis().isHorizontal() ? Direction.UP : null);
+		level.updateNeighborsAt(blockPos, this, orientation);
+		level.updateNeighborsAt(blockPos.relative(direction), this, orientation);
 	}
 
 	@Override

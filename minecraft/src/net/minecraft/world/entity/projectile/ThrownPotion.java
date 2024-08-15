@@ -32,7 +32,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 
-public class ThrownPotion extends ThrowableItemProjectile implements ItemSupplier {
+public class ThrownPotion extends ThrowableItemProjectile {
 	public static final double SPLASH_RANGE = 4.0;
 	private static final double SPLASH_RANGE_SQ = 16.0;
 	public static final Predicate<LivingEntity> WATER_SENSITIVE_OR_ON_FIRE = livingEntity -> livingEntity.isSensitiveToWater() || livingEntity.isOnFire();
@@ -41,12 +41,12 @@ public class ThrownPotion extends ThrowableItemProjectile implements ItemSupplie
 		super(entityType, level);
 	}
 
-	public ThrownPotion(Level level, LivingEntity livingEntity) {
-		super(EntityType.POTION, livingEntity, level);
+	public ThrownPotion(Level level, LivingEntity livingEntity, ItemStack itemStack) {
+		super(EntityType.POTION, livingEntity, level, itemStack);
 	}
 
-	public ThrownPotion(Level level, double d, double e, double f) {
-		super(EntityType.POTION, d, e, f, level);
+	public ThrownPotion(Level level, double d, double e, double f, ItemStack itemStack) {
+		super(EntityType.POTION, d, e, f, level, itemStack);
 	}
 
 	@Override

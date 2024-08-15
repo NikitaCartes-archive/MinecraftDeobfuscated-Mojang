@@ -33,12 +33,12 @@ public class EntityCollisionContext implements CollisionContext {
 	}
 
 	@Deprecated
-	protected EntityCollisionContext(Entity entity) {
+	protected EntityCollisionContext(Entity entity, boolean bl) {
 		this(
 			entity.isDescending(),
 			entity.getY(),
 			entity instanceof LivingEntity ? ((LivingEntity)entity).getMainHandItem() : ItemStack.EMPTY,
-			entity instanceof LivingEntity ? ((LivingEntity)entity)::canStandOnFluid : fluidState -> false,
+			bl ? fluidState -> true : (entity instanceof LivingEntity ? ((LivingEntity)entity)::canStandOnFluid : fluidState -> false),
 			entity
 		);
 	}

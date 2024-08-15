@@ -9,11 +9,11 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.client.renderer.entity.state.TropicalFishRenderState;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Entity;
 
 @Environment(EnvType.CLIENT)
-public class TropicalFishModelB<T extends Entity> extends ColorableHierarchicalModel<T> {
+public class TropicalFishModelB extends EntityModel<TropicalFishRenderState> {
 	private final ModelPart root;
 	private final ModelPart tail;
 
@@ -56,13 +56,8 @@ public class TropicalFishModelB<T extends Entity> extends ColorableHierarchicalM
 		return this.root;
 	}
 
-	@Override
-	public void setupAnim(T entity, float f, float g, float h, float i, float j) {
-		float k = 1.0F;
-		if (!entity.isInWater()) {
-			k = 1.5F;
-		}
-
-		this.tail.yRot = -k * 0.45F * Mth.sin(0.6F * h);
+	public void setupAnim(TropicalFishRenderState tropicalFishRenderState) {
+		float f = tropicalFishRenderState.isInWater ? 1.0F : 1.5F;
+		this.tail.yRot = -f * 0.45F * Mth.sin(0.6F * tropicalFishRenderState.ageInTicks);
 	}
 }

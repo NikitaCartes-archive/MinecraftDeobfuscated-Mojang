@@ -8,11 +8,11 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.layouts.FrameLayout;
 import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -101,9 +101,11 @@ public class PopupScreen extends Screen {
 	public void renderBackground(GuiGraphics guiGraphics, int i, int j, float f) {
 		this.backgroundScreen.render(guiGraphics, -1, -1, f);
 		guiGraphics.flush();
-		RenderSystem.clear(256, Minecraft.ON_OSX);
+		RenderSystem.clear(256);
 		this.renderTransparentBackground(guiGraphics);
-		guiGraphics.blitSprite(BACKGROUND_SPRITE, this.layout.getX() - 18, this.layout.getY() - 18, this.layout.getWidth() + 36, this.layout.getHeight() + 36);
+		guiGraphics.blitSprite(
+			RenderType::guiTextured, BACKGROUND_SPRITE, this.layout.getX() - 18, this.layout.getY() - 18, this.layout.getWidth() + 36, this.layout.getHeight() + 36
+		);
 	}
 
 	@Override

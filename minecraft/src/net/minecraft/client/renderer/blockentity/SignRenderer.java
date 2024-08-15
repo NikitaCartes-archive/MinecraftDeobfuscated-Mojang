@@ -12,8 +12,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.EntityModelSet;
+import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelLayers;
-import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
@@ -25,7 +25,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.core.BlockPos;
-import net.minecraft.util.FastColor;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
@@ -40,18 +40,20 @@ import net.minecraft.world.phys.Vec3;
 
 @Environment(EnvType.CLIENT)
 public class SignRenderer implements BlockEntityRenderer<SignBlockEntity> {
-	private static final String STICK = "stick";
 	private static final int BLACK_TEXT_OUTLINE_COLOR = -988212;
 	private static final int OUTLINE_RENDER_DISTANCE = Mth.square(16);
 	private static final float RENDER_SCALE = 0.6666667F;
 	private static final Vec3 TEXT_OFFSET = new Vec3(0.0, 0.33333334F, 0.046666667F);
-	private final Map<WoodType, SignRenderer.SignModel> signModels;
+	private final Map<WoodType, SignRenderer.Models> signModels;
 	private final Font font;
 
 	public SignRenderer(BlockEntityRendererProvider.Context context) {
-		this.signModels = (Map<WoodType, SignRenderer.SignModel>)WoodType.values()
+		this.signModels = (Map<WoodType, SignRenderer.Models>)WoodType.values()
 			.collect(
-				ImmutableMap.toImmutableMap(woodType -> woodType, woodType -> new SignRenderer.SignModel(context.bakeLayer(ModelLayers.createSignModelName(woodType))))
+				ImmutableMap.toImmutableMap(
+					woodType -> woodType,
+					woodType -> new SignRenderer.Models(createSignModel(context.getModelSet(), woodType, true), createSignModel(context.getModelSet(), woodType, false))
+				)
 			);
 		this.font = context.getFont();
 	}
@@ -60,9 +62,9 @@ public class SignRenderer implements BlockEntityRenderer<SignBlockEntity> {
 		BlockState blockState = signBlockEntity.getBlockState();
 		SignBlock signBlock = (SignBlock)blockState.getBlock();
 		WoodType woodType = SignBlock.getWoodType(signBlock);
-		SignRenderer.SignModel signModel = (SignRenderer.SignModel)this.signModels.get(woodType);
-		signModel.stick.visible = blockState.getBlock() instanceof StandingSignBlock;
-		this.renderSignWithText(signBlockEntity, poseStack, multiBufferSource, i, j, blockState, signBlock, woodType, signModel);
+		SignRenderer.Models models = (SignRenderer.Models)this.signModels.get(woodType);
+		Model model = blockState.getBlock() instanceof StandingSignBlock ? models.standing() : models.wall();
+		this.renderSignWithText(signBlockEntity, poseStack, multiBufferSource, i, j, blockState, signBlock, woodType, model);
 	}
 
 	public float getSignModelRenderScale() {
@@ -124,13 +126,8 @@ public class SignRenderer implements BlockEntityRenderer<SignBlockEntity> {
 		poseStack.scale(f, -f, -f);
 		Material material = this.getSignMaterial(woodType);
 		VertexConsumer vertexConsumer = material.buffer(multiBufferSource, model::renderType);
-		this.renderSignModel(poseStack, i, j, model, vertexConsumer);
+		model.renderToBuffer(poseStack, vertexConsumer, i, j);
 		poseStack.popPose();
-	}
-
-	void renderSignModel(PoseStack poseStack, int i, int j, Model model, VertexConsumer vertexConsumer) {
-		SignRenderer.SignModel signModel = (SignRenderer.SignModel)model;
-		signModel.root.render(poseStack, vertexConsumer, i, j);
 	}
 
 	Material getSignMaterial(WoodType woodType) {
@@ -179,7 +176,7 @@ public class SignRenderer implements BlockEntityRenderer<SignBlockEntity> {
 		}
 
 		float f = 0.015625F * this.getSignTextRenderScale();
-		poseStack.translate(vec3.x, vec3.y, vec3.z);
+		poseStack.translate(vec3);
 		poseStack.scale(f, -f, f);
 	}
 
@@ -208,39 +205,30 @@ public class SignRenderer implements BlockEntityRenderer<SignBlockEntity> {
 			return -988212;
 		} else {
 			double d = 0.4;
-			int j = (int)((double)FastColor.ARGB32.red(i) * 0.4);
-			int k = (int)((double)FastColor.ARGB32.green(i) * 0.4);
-			int l = (int)((double)FastColor.ARGB32.blue(i) * 0.4);
-			return FastColor.ARGB32.color(0, j, k, l);
+			int j = (int)((double)ARGB.red(i) * 0.4);
+			int k = (int)((double)ARGB.green(i) * 0.4);
+			int l = (int)((double)ARGB.blue(i) * 0.4);
+			return ARGB.color(0, j, k, l);
 		}
 	}
 
-	public static SignRenderer.SignModel createSignModel(EntityModelSet entityModelSet, WoodType woodType) {
-		return new SignRenderer.SignModel(entityModelSet.bakeLayer(ModelLayers.createSignModelName(woodType)));
+	public static Model createSignModel(EntityModelSet entityModelSet, WoodType woodType, boolean bl) {
+		ModelLayerLocation modelLayerLocation = bl ? ModelLayers.createStandingSignModelName(woodType) : ModelLayers.createWallSignModelName(woodType);
+		return new Model.Simple(entityModelSet.bakeLayer(modelLayerLocation), RenderType::entityCutoutNoCull);
 	}
 
-	public static LayerDefinition createSignLayer() {
+	public static LayerDefinition createSignLayer(boolean bl) {
 		MeshDefinition meshDefinition = new MeshDefinition();
 		PartDefinition partDefinition = meshDefinition.getRoot();
 		partDefinition.addOrReplaceChild("sign", CubeListBuilder.create().texOffs(0, 0).addBox(-12.0F, -14.0F, -1.0F, 24.0F, 12.0F, 2.0F), PartPose.ZERO);
-		partDefinition.addOrReplaceChild("stick", CubeListBuilder.create().texOffs(0, 14).addBox(-1.0F, -2.0F, -1.0F, 2.0F, 14.0F, 2.0F), PartPose.ZERO);
+		if (bl) {
+			partDefinition.addOrReplaceChild("stick", CubeListBuilder.create().texOffs(0, 14).addBox(-1.0F, -2.0F, -1.0F, 2.0F, 14.0F, 2.0F), PartPose.ZERO);
+		}
+
 		return LayerDefinition.create(meshDefinition, 64, 32);
 	}
 
 	@Environment(EnvType.CLIENT)
-	public static final class SignModel extends Model {
-		public final ModelPart root;
-		public final ModelPart stick;
-
-		public SignModel(ModelPart modelPart) {
-			super(RenderType::entityCutoutNoCull);
-			this.root = modelPart;
-			this.stick = modelPart.getChild("stick");
-		}
-
-		@Override
-		public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, int k) {
-			this.root.render(poseStack, vertexConsumer, i, j, k);
-		}
+	static record Models(Model standing, Model wall) {
 	}
 }

@@ -20,9 +20,7 @@ public class HorseInventoryMenu extends AbstractContainerMenu {
 		this.horseContainer = container;
 		this.armorContainer = abstractHorse.getBodyArmorAccess();
 		this.horse = abstractHorse;
-		int k = 3;
 		container.startOpen(inventory.player);
-		int l = -18;
 		this.addSlot(new Slot(container, 0, 8, 18) {
 			@Override
 			public boolean mayPlace(ItemStack itemStack) {
@@ -46,22 +44,14 @@ public class HorseInventoryMenu extends AbstractContainerMenu {
 			}
 		});
 		if (j > 0) {
-			for (int m = 0; m < 3; m++) {
-				for (int n = 0; n < j; n++) {
-					this.addSlot(new Slot(container, 1 + n + m * j, 80 + n * 18, 18 + m * 18));
+			for (int k = 0; k < 3; k++) {
+				for (int l = 0; l < j; l++) {
+					this.addSlot(new Slot(container, 1 + l + k * j, 80 + l * 18, 18 + k * 18));
 				}
 			}
 		}
 
-		for (int m = 0; m < 3; m++) {
-			for (int n = 0; n < 9; n++) {
-				this.addSlot(new Slot(inventory, n + m * 9 + 9, 8 + n * 18, 102 + m * 18 + -18));
-			}
-		}
-
-		for (int m = 0; m < 9; m++) {
-			this.addSlot(new Slot(inventory, m, 8 + m * 18, 142));
-		}
+		this.addStandardInventorySlots(inventory, 8, 84);
 	}
 
 	@Override

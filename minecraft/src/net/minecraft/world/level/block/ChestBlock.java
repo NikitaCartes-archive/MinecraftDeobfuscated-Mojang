@@ -234,18 +234,16 @@ public class ChestBlock extends AbstractChestBlock<ChestBlockEntity> implements 
 
 	@Override
 	protected InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
-		if (level.isClientSide) {
-			return InteractionResult.SUCCESS;
-		} else {
+		if (!level.isClientSide) {
 			MenuProvider menuProvider = this.getMenuProvider(blockState, level, blockPos);
 			if (menuProvider != null) {
 				player.openMenu(menuProvider);
 				player.awardStat(this.getOpenChestStat());
 				PiglinAi.angerNearbyPiglins(player, true);
 			}
-
-			return InteractionResult.CONSUME;
 		}
+
+		return InteractionResult.SUCCESS;
 	}
 
 	protected Stat<ResourceLocation> getOpenChestStat() {

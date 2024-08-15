@@ -9,10 +9,10 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
-import net.minecraft.world.entity.monster.Zombie;
+import net.minecraft.client.renderer.entity.state.ZombieVillagerRenderState;
 
 @Environment(EnvType.CLIENT)
-public class ZombieVillagerModel<T extends Zombie> extends HumanoidModel<T> implements VillagerHeadModel {
+public class ZombieVillagerModel<S extends ZombieVillagerRenderState> extends HumanoidModel<S> implements VillagerHeadModel {
 	private final ModelPart hatRim = this.hat.getChild("hat_rim");
 
 	public ZombieVillagerModel(ModelPart modelPart) {
@@ -22,15 +22,15 @@ public class ZombieVillagerModel<T extends Zombie> extends HumanoidModel<T> impl
 	public static LayerDefinition createBodyLayer() {
 		MeshDefinition meshDefinition = HumanoidModel.createMesh(CubeDeformation.NONE, 0.0F);
 		PartDefinition partDefinition = meshDefinition.getRoot();
-		partDefinition.addOrReplaceChild(
+		PartDefinition partDefinition2 = partDefinition.addOrReplaceChild(
 			"head",
 			new CubeListBuilder().texOffs(0, 0).addBox(-4.0F, -10.0F, -4.0F, 8.0F, 10.0F, 8.0F).texOffs(24, 0).addBox(-1.0F, -3.0F, -6.0F, 2.0F, 4.0F, 2.0F),
 			PartPose.ZERO
 		);
-		PartDefinition partDefinition2 = partDefinition.addOrReplaceChild(
+		PartDefinition partDefinition3 = partDefinition2.addOrReplaceChild(
 			"hat", CubeListBuilder.create().texOffs(32, 0).addBox(-4.0F, -10.0F, -4.0F, 8.0F, 10.0F, 8.0F, new CubeDeformation(0.5F)), PartPose.ZERO
 		);
-		partDefinition2.addOrReplaceChild(
+		partDefinition3.addOrReplaceChild(
 			"hat_rim", CubeListBuilder.create().texOffs(30, 47).addBox(-8.0F, -8.0F, -6.0F, 16.0F, 16.0F, 1.0F), PartPose.rotation((float) (-Math.PI / 2), 0.0F, 0.0F)
 		);
 		partDefinition.addOrReplaceChild(
@@ -60,7 +60,7 @@ public class ZombieVillagerModel<T extends Zombie> extends HumanoidModel<T> impl
 	public static LayerDefinition createArmorLayer(CubeDeformation cubeDeformation) {
 		MeshDefinition meshDefinition = HumanoidModel.createMesh(cubeDeformation, 0.0F);
 		PartDefinition partDefinition = meshDefinition.getRoot();
-		partDefinition.addOrReplaceChild(
+		PartDefinition partDefinition2 = partDefinition.addOrReplaceChild(
 			"head", CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -10.0F, -4.0F, 8.0F, 8.0F, 8.0F, cubeDeformation), PartPose.ZERO
 		);
 		partDefinition.addOrReplaceChild(
@@ -76,13 +76,14 @@ public class ZombieVillagerModel<T extends Zombie> extends HumanoidModel<T> impl
 			CubeListBuilder.create().texOffs(0, 16).mirror().addBox(-2.0F, 0.0F, -2.0F, 4.0F, 12.0F, 4.0F, cubeDeformation.extend(0.1F)),
 			PartPose.offset(2.0F, 12.0F, 0.0F)
 		);
-		partDefinition.getChild("hat").addOrReplaceChild("hat_rim", CubeListBuilder.create(), PartPose.ZERO);
+		partDefinition2.getChild("hat").addOrReplaceChild("hat_rim", CubeListBuilder.create(), PartPose.ZERO);
 		return LayerDefinition.create(meshDefinition, 64, 32);
 	}
 
-	public void setupAnim(T zombie, float f, float g, float h, float i, float j) {
-		super.setupAnim(zombie, f, g, h, i, j);
-		AnimationUtils.animateZombieArms(this.leftArm, this.rightArm, zombie.isAggressive(), this.attackTime, h);
+	public void setupAnim(S zombieVillagerRenderState) {
+		super.setupAnim(zombieVillagerRenderState);
+		float f = zombieVillagerRenderState.attackTime;
+		AnimationUtils.animateZombieArms(this.leftArm, this.rightArm, zombieVillagerRenderState.isAggressive, f, zombieVillagerRenderState.ageInTicks);
 	}
 
 	@Override

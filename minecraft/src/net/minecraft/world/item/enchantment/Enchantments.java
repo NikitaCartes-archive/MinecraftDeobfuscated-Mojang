@@ -125,6 +125,7 @@ public class Enchantments {
 		HolderGetter<Enchantment> holderGetter2 = bootstrapContext.lookup(Registries.ENCHANTMENT);
 		HolderGetter<Item> holderGetter3 = bootstrapContext.lookup(Registries.ITEM);
 		HolderGetter<Block> holderGetter4 = bootstrapContext.lookup(Registries.BLOCK);
+		HolderGetter<EntityType<?>> holderGetter5 = bootstrapContext.lookup(Registries.ENTITY_TYPE);
 		register(
 			bootstrapContext,
 			PROTECTION,
@@ -391,7 +392,8 @@ public class Enchantments {
 			.flags(EntityFlagsPredicate.Builder.flags().setIsFlying(false).setOnGround(true))
 			.moving(MovementPredicate.horizontalSpeed(MinMaxBounds.Doubles.atLeast(1.0E-5F)))
 			.movementAffectedBy(
-				LocationPredicate.Builder.location().setBlock(net.minecraft.advancements.critereon.BlockPredicate.Builder.block().of(BlockTags.SOUL_SPEED_BLOCKS))
+				LocationPredicate.Builder.location()
+					.setBlock(net.minecraft.advancements.critereon.BlockPredicate.Builder.block().of(holderGetter4, BlockTags.SOUL_SPEED_BLOCKS))
 			);
 		register(
 			bootstrapContext,
@@ -430,7 +432,8 @@ public class Enchantments {
 										LootContext.EntityTarget.THIS,
 										EntityPredicate.Builder.entity()
 											.movementAffectedBy(
-												LocationPredicate.Builder.location().setBlock(net.minecraft.advancements.critereon.BlockPredicate.Builder.block().of(BlockTags.SOUL_SPEED_BLOCKS))
+												LocationPredicate.Builder.location()
+													.setBlock(net.minecraft.advancements.critereon.BlockPredicate.Builder.block().of(holderGetter4, BlockTags.SOUL_SPEED_BLOCKS))
 											)
 									),
 									LootItemEntityPropertyCondition.hasProperties(
@@ -444,7 +447,8 @@ public class Enchantments {
 									LootContext.EntityTarget.THIS,
 									EntityPredicate.Builder.entity()
 										.movementAffectedBy(
-											LocationPredicate.Builder.location().setBlock(net.minecraft.advancements.critereon.BlockPredicate.Builder.block().of(BlockTags.SOUL_SPEED_BLOCKS))
+											LocationPredicate.Builder.location()
+												.setBlock(net.minecraft.advancements.critereon.BlockPredicate.Builder.block().of(holderGetter4, BlockTags.SOUL_SPEED_BLOCKS))
 										)
 										.flags(EntityFlagsPredicate.Builder.flags().setIsFlying(false))
 								)
@@ -464,7 +468,8 @@ public class Enchantments {
 						LootContext.EntityTarget.THIS,
 						EntityPredicate.Builder.entity()
 							.movementAffectedBy(
-								LocationPredicate.Builder.location().setBlock(net.minecraft.advancements.critereon.BlockPredicate.Builder.block().of(BlockTags.SOUL_SPEED_BLOCKS))
+								LocationPredicate.Builder.location()
+									.setBlock(net.minecraft.advancements.critereon.BlockPredicate.Builder.block().of(holderGetter4, BlockTags.SOUL_SPEED_BLOCKS))
 							)
 					)
 				)
@@ -478,7 +483,8 @@ public class Enchantments {
 							EntityPredicate.Builder.entity()
 								.flags(EntityFlagsPredicate.Builder.flags().setOnGround(true))
 								.movementAffectedBy(
-									LocationPredicate.Builder.location().setBlock(net.minecraft.advancements.critereon.BlockPredicate.Builder.block().of(BlockTags.SOUL_SPEED_BLOCKS))
+									LocationPredicate.Builder.location()
+										.setBlock(net.minecraft.advancements.critereon.BlockPredicate.Builder.block().of(holderGetter4, BlockTags.SOUL_SPEED_BLOCKS))
 								)
 						)
 					)
@@ -565,7 +571,7 @@ public class Enchantments {
 					EnchantmentEffectComponents.DAMAGE,
 					new AddValue(LevelBasedValue.perLevel(2.5F)),
 					LootItemEntityPropertyCondition.hasProperties(
-						LootContext.EntityTarget.THIS, EntityPredicate.Builder.entity().entityType(EntityTypePredicate.of(EntityTypeTags.SENSITIVE_TO_SMITE))
+						LootContext.EntityTarget.THIS, EntityPredicate.Builder.entity().entityType(EntityTypePredicate.of(holderGetter5, EntityTypeTags.SENSITIVE_TO_SMITE))
 					)
 				)
 		);
@@ -589,7 +595,8 @@ public class Enchantments {
 					EnchantmentEffectComponents.DAMAGE,
 					new AddValue(LevelBasedValue.perLevel(2.5F)),
 					LootItemEntityPropertyCondition.hasProperties(
-						LootContext.EntityTarget.THIS, EntityPredicate.Builder.entity().entityType(EntityTypePredicate.of(EntityTypeTags.SENSITIVE_TO_BANE_OF_ARTHROPODS))
+						LootContext.EntityTarget.THIS,
+						EntityPredicate.Builder.entity().entityType(EntityTypePredicate.of(holderGetter5, EntityTypeTags.SENSITIVE_TO_BANE_OF_ARTHROPODS))
 					)
 				)
 				.withEffect(
@@ -604,7 +611,8 @@ public class Enchantments {
 						LevelBasedValue.constant(3.0F)
 					),
 					LootItemEntityPropertyCondition.hasProperties(
-							LootContext.EntityTarget.THIS, EntityPredicate.Builder.entity().entityType(EntityTypePredicate.of(EntityTypeTags.SENSITIVE_TO_BANE_OF_ARTHROPODS))
+							LootContext.EntityTarget.THIS,
+							EntityPredicate.Builder.entity().entityType(EntityTypePredicate.of(holderGetter5, EntityTypeTags.SENSITIVE_TO_BANE_OF_ARTHROPODS))
 						)
 						.and(DamageSourceCondition.hasDamageSource(DamageSourcePredicate.Builder.damageType().isDirect(true)))
 				)
@@ -668,7 +676,7 @@ public class Enchantments {
 					EnchantmentTarget.VICTIM,
 					new AddValue(LevelBasedValue.perLevel(0.01F)),
 					LootItemEntityPropertyCondition.hasProperties(
-						LootContext.EntityTarget.ATTACKER, EntityPredicate.Builder.entity().entityType(EntityTypePredicate.of(EntityType.PLAYER))
+						LootContext.EntityTarget.ATTACKER, EntityPredicate.Builder.entity().entityType(EntityTypePredicate.of(holderGetter5, EntityType.PLAYER))
 					)
 				)
 		);
@@ -742,12 +750,12 @@ public class Enchantments {
 				.withEffect(
 					EnchantmentEffectComponents.ITEM_DAMAGE,
 					new RemoveBinomial(new LevelBasedValue.Fraction(LevelBasedValue.perLevel(2.0F), LevelBasedValue.perLevel(10.0F, 5.0F))),
-					MatchTool.toolMatches(ItemPredicate.Builder.item().of(ItemTags.ARMOR_ENCHANTABLE))
+					MatchTool.toolMatches(ItemPredicate.Builder.item().of(holderGetter3, ItemTags.ARMOR_ENCHANTABLE))
 				)
 				.withEffect(
 					EnchantmentEffectComponents.ITEM_DAMAGE,
 					new RemoveBinomial(new LevelBasedValue.Fraction(LevelBasedValue.perLevel(1.0F), LevelBasedValue.perLevel(2.0F, 1.0F))),
-					InvertedLootItemCondition.invert(MatchTool.toolMatches(ItemPredicate.Builder.item().of(ItemTags.ARMOR_ENCHANTABLE)))
+					InvertedLootItemCondition.invert(MatchTool.toolMatches(ItemPredicate.Builder.item().of(holderGetter3, ItemTags.ARMOR_ENCHANTABLE)))
 				)
 		);
 		register(
@@ -783,7 +791,9 @@ public class Enchantments {
 				.withEffect(
 					EnchantmentEffectComponents.DAMAGE,
 					new AddValue(LevelBasedValue.perLevel(0.5F)),
-					LootItemEntityPropertyCondition.hasProperties(LootContext.EntityTarget.DIRECT_ATTACKER, EntityPredicate.Builder.entity().of(EntityTypeTags.ARROWS).build())
+					LootItemEntityPropertyCondition.hasProperties(
+						LootContext.EntityTarget.DIRECT_ATTACKER, EntityPredicate.Builder.entity().of(holderGetter5, EntityTypeTags.ARROWS).build()
+					)
 				)
 		);
 		register(
@@ -803,7 +813,9 @@ public class Enchantments {
 				.withEffect(
 					EnchantmentEffectComponents.KNOCKBACK,
 					new AddValue(LevelBasedValue.perLevel(1.0F)),
-					LootItemEntityPropertyCondition.hasProperties(LootContext.EntityTarget.DIRECT_ATTACKER, EntityPredicate.Builder.entity().of(EntityTypeTags.ARROWS).build())
+					LootItemEntityPropertyCondition.hasProperties(
+						LootContext.EntityTarget.DIRECT_ATTACKER, EntityPredicate.Builder.entity().of(holderGetter5, EntityTypeTags.ARROWS).build()
+					)
 				)
 		);
 		register(
@@ -826,7 +838,9 @@ public class Enchantments {
 				)
 				.exclusiveWith(holderGetter2.getOrThrow(EnchantmentTags.BOW_EXCLUSIVE))
 				.withEffect(
-					EnchantmentEffectComponents.AMMO_USE, new SetValue(LevelBasedValue.constant(0.0F)), MatchTool.toolMatches(ItemPredicate.Builder.item().of(Items.ARROW))
+					EnchantmentEffectComponents.AMMO_USE,
+					new SetValue(LevelBasedValue.constant(0.0F)),
+					MatchTool.toolMatches(ItemPredicate.Builder.item().of(holderGetter3, Items.ARROW))
 				)
 		);
 		register(
@@ -896,7 +910,8 @@ public class Enchantments {
 					EnchantmentEffectComponents.DAMAGE,
 					new AddValue(LevelBasedValue.perLevel(2.5F)),
 					LootItemEntityPropertyCondition.hasProperties(
-						LootContext.EntityTarget.THIS, EntityPredicate.Builder.entity().entityType(EntityTypePredicate.of(EntityTypeTags.SENSITIVE_TO_IMPALING)).build()
+						LootContext.EntityTarget.THIS,
+						EntityPredicate.Builder.entity().entityType(EntityTypePredicate.of(holderGetter5, EntityTypeTags.SENSITIVE_TO_IMPALING)).build()
 					)
 				)
 		);
@@ -935,7 +950,9 @@ public class Enchantments {
 						LootItemEntityPropertyCondition.hasProperties(
 							LootContext.EntityTarget.THIS, EntityPredicate.Builder.entity().located(LocationPredicate.Builder.location().setCanSeeSky(true))
 						),
-						LootItemEntityPropertyCondition.hasProperties(LootContext.EntityTarget.DIRECT_ATTACKER, EntityPredicate.Builder.entity().of(EntityType.TRIDENT))
+						LootItemEntityPropertyCondition.hasProperties(
+							LootContext.EntityTarget.DIRECT_ATTACKER, EntityPredicate.Builder.entity().of(holderGetter5, EntityType.TRIDENT)
+						)
 					)
 				)
 				.withEffect(
@@ -946,7 +963,7 @@ public class Enchantments {
 					),
 					AllOfCondition.allOf(
 						WeatherCheck.weather().setThundering(true),
-						LootItemEntityPropertyCondition.hasProperties(LootContext.EntityTarget.THIS, EntityPredicate.Builder.entity().of(EntityType.TRIDENT)),
+						LootItemEntityPropertyCondition.hasProperties(LootContext.EntityTarget.THIS, EntityPredicate.Builder.entity().of(holderGetter5, EntityType.TRIDENT)),
 						LocationCheck.checkLocation(LocationPredicate.Builder.location().setCanSeeSky(true)),
 						LootItemBlockStatePropertyCondition.hasBlockStateProperties(Blocks.LIGHTNING_ROD)
 					)

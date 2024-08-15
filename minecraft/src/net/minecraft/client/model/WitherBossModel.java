@@ -9,11 +9,11 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.client.renderer.entity.state.WitherRenderState;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.boss.wither.WitherBoss;
 
 @Environment(EnvType.CLIENT)
-public class WitherBossModel<T extends WitherBoss> extends HierarchicalModel<T> {
+public class WitherBossModel extends EntityModel<WitherRenderState> {
 	private static final String RIBCAGE = "ribcage";
 	private static final String CENTER_HEAD = "center_head";
 	private static final String RIGHT_HEAD = "right_head";
@@ -75,22 +75,19 @@ public class WitherBossModel<T extends WitherBoss> extends HierarchicalModel<T> 
 		return this.root;
 	}
 
-	public void setupAnim(T witherBoss, float f, float g, float h, float i, float j) {
-		float k = Mth.cos(h * 0.1F);
-		this.ribcage.xRot = (0.065F + 0.05F * k) * (float) Math.PI;
+	public void setupAnim(WitherRenderState witherRenderState) {
+		setupHeadRotation(witherRenderState, this.rightHead, 0);
+		setupHeadRotation(witherRenderState, this.leftHead, 1);
+		float f = Mth.cos(witherRenderState.ageInTicks * 0.1F);
+		this.ribcage.xRot = (0.065F + 0.05F * f) * (float) Math.PI;
 		this.tail.setPos(-2.0F, 6.9F + Mth.cos(this.ribcage.xRot) * 10.0F, -0.5F + Mth.sin(this.ribcage.xRot) * 10.0F);
-		this.tail.xRot = (0.265F + 0.1F * k) * (float) Math.PI;
-		this.centerHead.yRot = i * (float) (Math.PI / 180.0);
-		this.centerHead.xRot = j * (float) (Math.PI / 180.0);
+		this.tail.xRot = (0.265F + 0.1F * f) * (float) Math.PI;
+		this.centerHead.yRot = witherRenderState.yRot * (float) (Math.PI / 180.0);
+		this.centerHead.xRot = witherRenderState.xRot * (float) (Math.PI / 180.0);
 	}
 
-	public void prepareMobModel(T witherBoss, float f, float g, float h) {
-		setupHeadRotation(witherBoss, this.rightHead, 0);
-		setupHeadRotation(witherBoss, this.leftHead, 1);
-	}
-
-	private static <T extends WitherBoss> void setupHeadRotation(T witherBoss, ModelPart modelPart, int i) {
-		modelPart.yRot = (witherBoss.getHeadYRot(i) - witherBoss.yBodyRot) * (float) (Math.PI / 180.0);
-		modelPart.xRot = witherBoss.getHeadXRot(i) * (float) (Math.PI / 180.0);
+	private static void setupHeadRotation(WitherRenderState witherRenderState, ModelPart modelPart, int i) {
+		modelPart.yRot = (witherRenderState.yHeadRots[i] - witherRenderState.bodyRot) * (float) (Math.PI / 180.0);
+		modelPart.xRot = witherRenderState.xHeadRots[i] * (float) (Math.PI / 180.0);
 	}
 }

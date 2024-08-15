@@ -141,7 +141,7 @@ public class BlockEntityWithoutLevelRenderer implements ResourceManagerReloadLis
 				poseStack.scale(1.0F, -1.0F, -1.0F);
 				Material material = bl ? ModelBakery.SHIELD_BASE : ModelBakery.NO_PATTERN_SHIELD;
 				VertexConsumer vertexConsumer = material.sprite()
-					.wrap(ItemRenderer.getFoilBufferDirect(multiBufferSource, this.shieldModel.renderType(material.atlasLocation()), true, itemStack.hasFoil()));
+					.wrap(ItemRenderer.getFoilBufferDirect(multiBufferSource, this.shieldModel.renderType(material.atlasLocation()), false, itemStack.hasFoil()));
 				this.shieldModel.handle().render(poseStack, vertexConsumer, i, j);
 				if (bl) {
 					BannerRenderer.renderPatterns(
@@ -154,7 +154,8 @@ public class BlockEntityWithoutLevelRenderer implements ResourceManagerReloadLis
 						false,
 						(DyeColor)Objects.requireNonNullElse(dyeColor2, DyeColor.WHITE),
 						bannerPatternLayers,
-						itemStack.hasFoil()
+						itemStack.hasFoil(),
+						false
 					);
 				} else {
 					this.shieldModel.plate().render(poseStack, vertexConsumer, i, j);

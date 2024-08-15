@@ -6,11 +6,11 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
+import net.minecraft.core.HolderGetter;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.RegistryCodecs;
 import net.minecraft.core.component.DataComponentHolder;
 import net.minecraft.core.component.DataComponentPredicate;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
@@ -61,13 +61,13 @@ public record ItemPredicate(
 			return new ItemPredicate.Builder();
 		}
 
-		public ItemPredicate.Builder of(ItemLike... itemLikes) {
+		public ItemPredicate.Builder of(HolderGetter<Item> holderGetter, ItemLike... itemLikes) {
 			this.items = Optional.of(HolderSet.direct(itemLike -> itemLike.asItem().builtInRegistryHolder(), itemLikes));
 			return this;
 		}
 
-		public ItemPredicate.Builder of(TagKey<Item> tagKey) {
-			this.items = Optional.of(BuiltInRegistries.ITEM.getOrCreateTag(tagKey));
+		public ItemPredicate.Builder of(HolderGetter<Item> holderGetter, TagKey<Item> tagKey) {
+			this.items = Optional.of(holderGetter.getOrThrow(tagKey));
 			return this;
 		}
 

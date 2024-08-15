@@ -1,7 +1,5 @@
 package net.minecraft.client.model;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
@@ -46,7 +44,7 @@ public class ShieldModel extends Model {
 	}
 
 	@Override
-	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, int k) {
-		this.root.render(poseStack, vertexConsumer, i, j, k);
+	public ModelPart root() {
+		return this.root;
 	}
 }

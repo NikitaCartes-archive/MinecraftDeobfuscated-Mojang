@@ -16,6 +16,7 @@ import net.minecraft.advancements.critereon.LocationPredicate;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.advancements.critereon.PlayerTrigger;
 import net.minecraft.advancements.critereon.SummonedEntityTrigger;
+import net.minecraft.core.HolderGetter;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.advancements.AdvancementSubProvider;
@@ -30,6 +31,7 @@ import net.minecraft.world.level.levelgen.structure.BuiltinStructures;
 public class VanillaTheEndAdvancements implements AdvancementSubProvider {
 	@Override
 	public void generate(HolderLookup.Provider provider, Consumer<AdvancementHolder> consumer) {
+		HolderGetter<EntityType<?>> holderGetter = provider.lookupOrThrow(Registries.ENTITY_TYPE);
 		AdvancementHolder advancementHolder = Advancement.Builder.advancement()
 			.display(
 				Blocks.END_STONE,
@@ -55,7 +57,7 @@ public class VanillaTheEndAdvancements implements AdvancementSubProvider {
 				true,
 				false
 			)
-			.addCriterion("killed_dragon", KilledTrigger.TriggerInstance.playerKilledEntity(EntityPredicate.Builder.entity().of(EntityType.ENDER_DRAGON)))
+			.addCriterion("killed_dragon", KilledTrigger.TriggerInstance.playerKilledEntity(EntityPredicate.Builder.entity().of(holderGetter, EntityType.ENDER_DRAGON)))
 			.save(consumer, "end/kill_dragon");
 		AdvancementHolder advancementHolder3 = Advancement.Builder.advancement()
 			.parent(advancementHolder2)
@@ -83,7 +85,9 @@ public class VanillaTheEndAdvancements implements AdvancementSubProvider {
 				true,
 				false
 			)
-			.addCriterion("summoned_dragon", SummonedEntityTrigger.TriggerInstance.summonedEntity(EntityPredicate.Builder.entity().of(EntityType.ENDER_DRAGON)))
+			.addCriterion(
+				"summoned_dragon", SummonedEntityTrigger.TriggerInstance.summonedEntity(EntityPredicate.Builder.entity().of(holderGetter, EntityType.ENDER_DRAGON))
+			)
 			.save(consumer, "end/respawn_dragon");
 		AdvancementHolder advancementHolder4 = Advancement.Builder.advancement()
 			.parent(advancementHolder3)

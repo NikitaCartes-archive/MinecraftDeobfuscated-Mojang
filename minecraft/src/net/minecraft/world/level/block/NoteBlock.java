@@ -13,7 +13,6 @@ import net.minecraft.stats.Stats;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -30,6 +29,7 @@ import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.phys.BlockHitResult;
 
 public class NoteBlock extends Block {
@@ -78,7 +78,7 @@ public class NoteBlock extends Block {
 	}
 
 	@Override
-	protected void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, BlockPos blockPos2, boolean bl) {
+	protected void neighborChanged(BlockState blockState, Level level, BlockPos blockPos, Block block, @Nullable Orientation orientation, boolean bl) {
 		boolean bl2 = level.hasNeighborSignal(blockPos);
 		if (bl2 != (Boolean)blockState.getValue(POWERED)) {
 			if (bl2) {
@@ -97,25 +97,24 @@ public class NoteBlock extends Block {
 	}
 
 	@Override
-	protected ItemInteractionResult useItemOn(
+	protected InteractionResult useItemOn(
 		ItemStack itemStack, BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult
 	) {
-		return itemStack.is(ItemTags.NOTE_BLOCK_TOP_INSTRUMENTS) && blockHitResult.getDirection() == Direction.UP
-			? ItemInteractionResult.SKIP_DEFAULT_BLOCK_INTERACTION
-			: super.useItemOn(itemStack, blockState, level, blockPos, player, interactionHand, blockHitResult);
+		return (InteractionResult)(itemStack.is(ItemTags.NOTE_BLOCK_TOP_INSTRUMENTS) && blockHitResult.getDirection() == Direction.UP
+			? InteractionResult.PASS
+			: super.useItemOn(itemStack, blockState, level, blockPos, player, interactionHand, blockHitResult));
 	}
 
 	@Override
 	protected InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
-		if (level.isClientSide) {
-			return InteractionResult.SUCCESS;
-		} else {
+		if (!level.isClientSide) {
 			blockState = blockState.cycle(NOTE);
 			level.setBlock(blockPos, blockState, 3);
 			this.playNote(player, blockState, level, blockPos);
 			player.awardStat(Stats.TUNE_NOTEBLOCK);
-			return InteractionResult.CONSUME;
 		}
+
+		return InteractionResult.SUCCESS;
 	}
 
 	@Override

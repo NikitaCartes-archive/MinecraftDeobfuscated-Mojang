@@ -6,7 +6,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.gui.components.toasts.SystemToast;
-import net.minecraft.client.gui.components.toasts.ToastComponent;
+import net.minecraft.client.gui.components.toasts.ToastManager;
 import net.minecraft.client.main.SilentInitException;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -67,18 +67,16 @@ public class GameNarrator {
 	public void updateNarratorStatus(NarratorStatus narratorStatus) {
 		this.clear();
 		this.narrator.say(Component.translatable("options.narrator").append(" : ").append(narratorStatus.getName()).getString(), true);
-		ToastComponent toastComponent = Minecraft.getInstance().getToasts();
+		ToastManager toastManager = Minecraft.getInstance().getToastManager();
 		if (this.narrator.active()) {
 			if (narratorStatus == NarratorStatus.OFF) {
-				SystemToast.addOrUpdate(toastComponent, SystemToast.SystemToastId.NARRATOR_TOGGLE, Component.translatable("narrator.toast.disabled"), null);
+				SystemToast.addOrUpdate(toastManager, SystemToast.SystemToastId.NARRATOR_TOGGLE, Component.translatable("narrator.toast.disabled"), null);
 			} else {
-				SystemToast.addOrUpdate(
-					toastComponent, SystemToast.SystemToastId.NARRATOR_TOGGLE, Component.translatable("narrator.toast.enabled"), narratorStatus.getName()
-				);
+				SystemToast.addOrUpdate(toastManager, SystemToast.SystemToastId.NARRATOR_TOGGLE, Component.translatable("narrator.toast.enabled"), narratorStatus.getName());
 			}
 		} else {
 			SystemToast.addOrUpdate(
-				toastComponent,
+				toastManager,
 				SystemToast.SystemToastId.NARRATOR_TOGGLE,
 				Component.translatable("narrator.toast.disabled"),
 				Component.translatable("options.narrator.notavailable")

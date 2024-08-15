@@ -22,10 +22,10 @@ import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.Brain;
@@ -42,6 +42,7 @@ import net.minecraft.world.entity.monster.CrossbowAttackMob;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.npc.InventoryCarrier;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ProjectileWeaponItem;
@@ -191,7 +192,7 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob, Invento
 	}
 
 	public static boolean checkPiglinSpawnRules(
-		EntityType<Piglin> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, RandomSource randomSource
+		EntityType<Piglin> entityType, LevelAccessor levelAccessor, EntitySpawnReason entitySpawnReason, BlockPos blockPos, RandomSource randomSource
 	) {
 		return !levelAccessor.getBlockState(blockPos.below()).is(Blocks.NETHER_WART_BLOCK);
 	}
@@ -199,10 +200,10 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob, Invento
 	@Nullable
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData
+		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, EntitySpawnReason entitySpawnReason, @Nullable SpawnGroupData spawnGroupData
 	) {
 		RandomSource randomSource = serverLevelAccessor.getRandom();
-		if (mobSpawnType != MobSpawnType.STRUCTURE) {
+		if (entitySpawnReason != EntitySpawnReason.STRUCTURE) {
 			if (randomSource.nextFloat() < 0.2F) {
 				this.setBaby(true);
 			} else if (this.isAdult()) {
@@ -213,7 +214,7 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob, Invento
 		PiglinAi.initMemories(this, serverLevelAccessor.getRandom());
 		this.populateDefaultEquipmentSlots(randomSource, difficultyInstance);
 		this.populateDefaultEquipmentEnchantments(serverLevelAccessor, randomSource, difficultyInstance);
-		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData);
+		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, entitySpawnReason, spawnGroupData);
 	}
 
 	@Override
@@ -266,7 +267,7 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob, Invento
 			return PiglinAi.mobInteract(this, player, interactionHand);
 		} else {
 			boolean bl = PiglinAi.canAdmire(this, player.getItemInHand(interactionHand)) && this.getArmPose() != PiglinArmPose.ADMIRING_ITEM;
-			return bl ? InteractionResult.SUCCESS : InteractionResult.PASS;
+			return (InteractionResult)(bl ? InteractionResult.SUCCESS : InteractionResult.PASS);
 		}
 	}
 
@@ -351,7 +352,7 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob, Invento
 		} else if (this.isChargingCrossbow()) {
 			return PiglinArmPose.CROSSBOW_CHARGE;
 		} else {
-			return this.isAggressive() && this.isHolding(Items.CROSSBOW) ? PiglinArmPose.CROSSBOW_HOLD : PiglinArmPose.DEFAULT;
+			return this.isHolding(Items.CROSSBOW) && CrossbowItem.isCharged(this.getWeaponItem()) ? PiglinArmPose.CROSSBOW_HOLD : PiglinArmPose.DEFAULT;
 		}
 	}
 

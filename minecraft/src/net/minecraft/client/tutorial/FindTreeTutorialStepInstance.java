@@ -1,5 +1,6 @@
 package net.minecraft.client.tutorial;
 
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.components.toasts.TutorialToast;
@@ -23,6 +24,7 @@ public class FindTreeTutorialStepInstance implements TutorialStepInstance {
 	private static final Component TITLE = Component.translatable("tutorial.find_tree.title");
 	private static final Component DESCRIPTION = Component.translatable("tutorial.find_tree.description");
 	private final Tutorial tutorial;
+	@Nullable
 	private TutorialToast toast;
 	private int timeWaiting;
 
@@ -46,7 +48,7 @@ public class FindTreeTutorialStepInstance implements TutorialStepInstance {
 
 			if (this.timeWaiting >= 6000 && this.toast == null) {
 				this.toast = new TutorialToast(TutorialToast.Icons.TREE, TITLE, DESCRIPTION, false);
-				this.tutorial.getMinecraft().getToasts().addToast(this.toast);
+				this.tutorial.getMinecraft().getToastManager().addToast(this.toast);
 			}
 		}
 	}

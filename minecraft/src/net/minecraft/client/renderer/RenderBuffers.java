@@ -36,12 +36,15 @@ public class RenderBuffers {
 				put(object2ObjectLinkedOpenHashMap, RenderType.entityGlint());
 				put(object2ObjectLinkedOpenHashMap, RenderType.entityGlintDirect());
 				put(object2ObjectLinkedOpenHashMap, RenderType.waterMask());
-				ModelBakery.DESTROY_TYPES.forEach(renderType -> put(object2ObjectLinkedOpenHashMap, renderType));
 			}
 		);
-		this.crumblingBufferSource = MultiBufferSource.immediate(new ByteBufferBuilder(1536));
 		this.bufferSource = MultiBufferSource.immediateWithBuffers(sequencedMap, new ByteBufferBuilder(786432));
 		this.outlineBufferSource = new OutlineBufferSource(this.bufferSource);
+		SequencedMap<RenderType, ByteBufferBuilder> sequencedMap2 = Util.make(
+			new Object2ObjectLinkedOpenHashMap<RenderType, ByteBufferBuilder>(),
+			object2ObjectLinkedOpenHashMap -> ModelBakery.DESTROY_TYPES.forEach(renderType -> put(object2ObjectLinkedOpenHashMap, renderType))
+		);
+		this.crumblingBufferSource = MultiBufferSource.immediateWithBuffers(sequencedMap2, new ByteBufferBuilder(0));
 	}
 
 	private static void put(Object2ObjectLinkedOpenHashMap<RenderType, ByteBufferBuilder> object2ObjectLinkedOpenHashMap, RenderType renderType) {

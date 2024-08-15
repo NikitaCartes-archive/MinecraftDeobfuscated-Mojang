@@ -4,23 +4,8 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
 @Environment(EnvType.CLIENT)
-public class PartPose {
+public record PartPose(float x, float y, float z, float xRot, float yRot, float zRot, float xScale, float yScale, float zScale) {
 	public static final PartPose ZERO = offsetAndRotation(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F);
-	public final float x;
-	public final float y;
-	public final float z;
-	public final float xRot;
-	public final float yRot;
-	public final float zRot;
-
-	private PartPose(float f, float g, float h, float i, float j, float k) {
-		this.x = f;
-		this.y = g;
-		this.z = h;
-		this.xRot = i;
-		this.yRot = j;
-		this.zRot = k;
-	}
 
 	public static PartPose offset(float f, float g, float h) {
 		return offsetAndRotation(f, g, h, 0.0F, 0.0F, 0.0F);
@@ -31,6 +16,22 @@ public class PartPose {
 	}
 
 	public static PartPose offsetAndRotation(float f, float g, float h, float i, float j, float k) {
-		return new PartPose(f, g, h, i, j, k);
+		return new PartPose(f, g, h, i, j, k, 1.0F, 1.0F, 1.0F);
+	}
+
+	public PartPose translated(float f, float g, float h) {
+		return new PartPose(this.x + f, this.y + g, this.z + h, this.xRot, this.yRot, this.zRot, this.xScale, this.yScale, this.zScale);
+	}
+
+	public PartPose withScale(float f) {
+		return new PartPose(this.x, this.y, this.z, this.xRot, this.yRot, this.zRot, f, f, f);
+	}
+
+	public PartPose scaled(float f) {
+		return f == 1.0F ? this : this.scaled(f, f, f);
+	}
+
+	public PartPose scaled(float f, float g, float h) {
+		return new PartPose(this.x * f, this.y * g, this.z * h, this.xRot, this.yRot, this.zRot, this.xScale * f, this.yScale * g, this.zScale * h);
 	}
 }

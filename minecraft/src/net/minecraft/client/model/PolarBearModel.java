@@ -1,5 +1,6 @@
 package net.minecraft.client.model;
 
+import java.util.Set;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
@@ -7,13 +8,16 @@ import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.MeshTransformer;
 import net.minecraft.client.model.geom.builders.PartDefinition;
-import net.minecraft.world.entity.animal.PolarBear;
+import net.minecraft.client.renderer.entity.state.PolarBearRenderState;
 
 @Environment(EnvType.CLIENT)
-public class PolarBearModel<T extends PolarBear> extends QuadrupedModel<T> {
+public class PolarBearModel extends QuadrupedModel<PolarBearRenderState> {
+	public static final MeshTransformer BABY_TRANSFORMER = new BabyModelTransform(true, 16.0F, 4.0F, 2.25F, 2.0F, 24.0F, Set.of("head"));
+
 	public PolarBearModel(ModelPart modelPart) {
-		super(modelPart, true, 16.0F, 4.0F, 2.25F, 2.0F, 24);
+		super(modelPart);
 	}
 
 	public static LayerDefinition createBodyLayer() {
@@ -45,31 +49,29 @@ public class PolarBearModel<T extends PolarBear> extends QuadrupedModel<T> {
 		CubeListBuilder cubeListBuilder2 = CubeListBuilder.create().texOffs(50, 40).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 10.0F, 6.0F);
 		partDefinition.addOrReplaceChild("right_front_leg", cubeListBuilder2, PartPose.offset(-3.5F, 14.0F, -8.0F));
 		partDefinition.addOrReplaceChild("left_front_leg", cubeListBuilder2, PartPose.offset(3.5F, 14.0F, -8.0F));
-		return LayerDefinition.create(meshDefinition, 128, 64);
+		return LayerDefinition.create(meshDefinition, 128, 64).apply(MeshTransformer.scaling(1.2F));
 	}
 
-	public void setupAnim(T polarBear, float f, float g, float h, float i, float j) {
-		super.setupAnim(polarBear, f, g, h, i, j);
-		float k = h - (float)polarBear.tickCount;
-		float l = polarBear.getStandingAnimationScale(k);
-		l *= l;
-		float m = 1.0F - l;
-		this.body.xRot = (float) (Math.PI / 2) - l * (float) Math.PI * 0.35F;
-		this.body.y = 9.0F * m + 11.0F * l;
-		this.rightFrontLeg.y = 14.0F * m - 6.0F * l;
-		this.rightFrontLeg.z = -8.0F * m - 4.0F * l;
-		this.rightFrontLeg.xRot -= l * (float) Math.PI * 0.45F;
+	public void setupAnim(PolarBearRenderState polarBearRenderState) {
+		super.setupAnim(polarBearRenderState);
+		float f = polarBearRenderState.standScale * polarBearRenderState.standScale;
+		float g = 1.0F - f;
+		this.body.xRot = (float) (Math.PI / 2) - f * (float) Math.PI * 0.35F;
+		this.body.y = 9.0F * g + 11.0F * f;
+		this.rightFrontLeg.y = 14.0F * g - 6.0F * f;
+		this.rightFrontLeg.z = -8.0F * g - 4.0F * f;
+		this.rightFrontLeg.xRot -= f * (float) Math.PI * 0.45F;
 		this.leftFrontLeg.y = this.rightFrontLeg.y;
 		this.leftFrontLeg.z = this.rightFrontLeg.z;
-		this.leftFrontLeg.xRot -= l * (float) Math.PI * 0.45F;
-		if (this.young) {
-			this.head.y = 10.0F * m - 9.0F * l;
-			this.head.z = -16.0F * m - 7.0F * l;
+		this.leftFrontLeg.xRot -= f * (float) Math.PI * 0.45F;
+		if (polarBearRenderState.isBaby) {
+			this.head.y = 10.0F * g - 9.0F * f;
+			this.head.z = -16.0F * g - 7.0F * f;
 		} else {
-			this.head.y = 10.0F * m - 14.0F * l;
-			this.head.z = -16.0F * m - 3.0F * l;
+			this.head.y = 10.0F * g - 14.0F * f;
+			this.head.z = -16.0F * g - 3.0F * f;
 		}
 
-		this.head.xRot += l * (float) Math.PI * 0.15F;
+		this.head.xRot += f * (float) Math.PI * 0.15F;
 	}
 }

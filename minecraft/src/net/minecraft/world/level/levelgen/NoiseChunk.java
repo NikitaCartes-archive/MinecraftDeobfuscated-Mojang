@@ -1,10 +1,9 @@
 package net.minecraft.world.level.levelgen;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import com.google.common.collect.ImmutableList.Builder;
 import it.unimi.dsi.fastutil.longs.Long2IntMap;
 import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -147,17 +146,17 @@ public class NoiseChunk implements DensityFunction.ContextProvider, DensityFunct
 			this.aquifer = Aquifer.create(this, new ChunkPos(n, o), noiseRouter2, randomState.aquiferRandom(), noiseSettings.minY(), noiseSettings.height(), fluidPicker);
 		}
 
-		Builder<NoiseChunk.BlockStateFiller> builder = ImmutableList.builder();
+		List<NoiseChunk.BlockStateFiller> list = new ArrayList();
 		DensityFunction densityFunction = DensityFunctions.cacheAllInCell(
 				DensityFunctions.add(noiseRouter2.finalDensity(), DensityFunctions.BeardifierMarker.INSTANCE)
 			)
 			.mapAll(this::wrap);
-		builder.add(functionContext -> this.aquifer.computeSubstance(functionContext, densityFunction.compute(functionContext)));
+		list.add((NoiseChunk.BlockStateFiller)functionContext -> this.aquifer.computeSubstance(functionContext, densityFunction.compute(functionContext)));
 		if (noiseGeneratorSettings.oreVeinsEnabled()) {
-			builder.add(OreVeinifier.create(noiseRouter2.veinToggle(), noiseRouter2.veinRidged(), noiseRouter2.veinGap(), randomState.oreRandom()));
+			list.add(OreVeinifier.create(noiseRouter2.veinToggle(), noiseRouter2.veinRidged(), noiseRouter2.veinGap(), randomState.oreRandom()));
 		}
 
-		this.blockStateRule = new MaterialRuleList(builder.build());
+		this.blockStateRule = new MaterialRuleList((NoiseChunk.BlockStateFiller[])list.toArray(new NoiseChunk.BlockStateFiller[0]));
 		this.initialDensityNoJaggedness = noiseRouter2.initialDensityWithoutJaggedness();
 	}
 
@@ -283,7 +282,10 @@ public class NoiseChunk implements DensityFunction.ContextProvider, DensityFunct
 	}
 
 	public void selectCellYZ(int i, int j) {
-		this.interpolators.forEach(noiseInterpolator -> noiseInterpolator.selectCellYZ(i, j));
+		for (NoiseChunk.NoiseInterpolator noiseInterpolator : this.interpolators) {
+			noiseInterpolator.selectCellYZ(i, j);
+		}
+
 		this.fillingCell = true;
 		this.cellStartBlockY = (i + this.cellNoiseMinY) * this.cellHeight;
 		this.cellStartBlockZ = (this.firstCellZ + j) * this.cellWidth;
@@ -299,18 +301,27 @@ public class NoiseChunk implements DensityFunction.ContextProvider, DensityFunct
 
 	public void updateForY(int i, double d) {
 		this.inCellY = i - this.cellStartBlockY;
-		this.interpolators.forEach(noiseInterpolator -> noiseInterpolator.updateForY(d));
+
+		for (NoiseChunk.NoiseInterpolator noiseInterpolator : this.interpolators) {
+			noiseInterpolator.updateForY(d);
+		}
 	}
 
 	public void updateForX(int i, double d) {
 		this.inCellX = i - this.cellStartBlockX;
-		this.interpolators.forEach(noiseInterpolator -> noiseInterpolator.updateForX(d));
+
+		for (NoiseChunk.NoiseInterpolator noiseInterpolator : this.interpolators) {
+			noiseInterpolator.updateForX(d);
+		}
 	}
 
 	public void updateForZ(int i, double d) {
 		this.inCellZ = i - this.cellStartBlockZ;
 		this.interpolationCounter++;
-		this.interpolators.forEach(noiseInterpolator -> noiseInterpolator.updateForZ(d));
+
+		for (NoiseChunk.NoiseInterpolator noiseInterpolator : this.interpolators) {
+			noiseInterpolator.updateForZ(d);
+		}
 	}
 
 	public void stopInterpolation() {

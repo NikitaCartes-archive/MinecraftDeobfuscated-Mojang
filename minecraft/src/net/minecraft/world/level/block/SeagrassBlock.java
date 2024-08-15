@@ -67,7 +67,7 @@ public class SeagrassBlock extends BushBlock implements BonemealableBlock, Liqui
 
 	@Override
 	public boolean isValidBonemealTarget(LevelReader levelReader, BlockPos blockPos, BlockState blockState) {
-		return true;
+		return levelReader.getBlockState(blockPos.above()).is(Blocks.WATER);
 	}
 
 	@Override
@@ -85,10 +85,8 @@ public class SeagrassBlock extends BushBlock implements BonemealableBlock, Liqui
 		BlockState blockState2 = Blocks.TALL_SEAGRASS.defaultBlockState();
 		BlockState blockState3 = blockState2.setValue(TallSeagrassBlock.HALF, DoubleBlockHalf.UPPER);
 		BlockPos blockPos2 = blockPos.above();
-		if (serverLevel.getBlockState(blockPos2).is(Blocks.WATER)) {
-			serverLevel.setBlock(blockPos, blockState2, 2);
-			serverLevel.setBlock(blockPos2, blockState3, 2);
-		}
+		serverLevel.setBlock(blockPos, blockState2, 2);
+		serverLevel.setBlock(blockPos2, blockState3, 2);
 	}
 
 	@Override

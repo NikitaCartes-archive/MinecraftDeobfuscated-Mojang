@@ -47,6 +47,7 @@ import org.slf4j.Logger;
 
 public class JigsawPlacement {
 	static final Logger LOGGER = LogUtils.getLogger();
+	private static final int UNSET_HEIGHT = Integer.MIN_VALUE;
 
 	public static Optional<Structure.GenerationStub> addPieces(
 		Structure.GenerationContext generationContext,
@@ -307,7 +308,7 @@ public class JigsawPlacement {
 				BlockPos blockPos2 = structureBlockInfo.pos();
 				BlockPos blockPos3 = blockPos2.relative(direction);
 				int k = blockPos2.getY() - j;
-				int l = -1;
+				int l = Integer.MIN_VALUE;
 				ResourceKey<StructureTemplatePool> resourceKey = readPoolKey(structureBlockInfo, poolAliasLookup);
 				Optional<? extends Holder<StructureTemplatePool>> optional = this.pools.getHolder(resourceKey);
 				if (optional.isEmpty()) {
@@ -383,7 +384,7 @@ public class JigsawPlacement {
 											if (bl2 && bl4) {
 												r = j + q;
 											} else {
-												if (l == -1) {
+												if (l == Integer.MIN_VALUE) {
 													l = this.chunkGenerator.getFirstFreeHeight(blockPos2.getX(), blockPos2.getZ(), Heightmap.Types.WORLD_SURFACE_WG, levelHeightAccessor, randomState);
 												}
 
@@ -417,7 +418,7 @@ public class JigsawPlacement {
 												} else if (bl4) {
 													v = r + p;
 												} else {
-													if (l == -1) {
+													if (l == Integer.MIN_VALUE) {
 														l = this.chunkGenerator
 															.getFirstFreeHeight(blockPos2.getX(), blockPos2.getZ(), Heightmap.Types.WORLD_SURFACE_WG, levelHeightAccessor, randomState);
 													}

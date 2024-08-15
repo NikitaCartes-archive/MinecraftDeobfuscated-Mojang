@@ -5,6 +5,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Optional;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.advancements.Criterion;
+import net.minecraft.core.HolderGetter;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
@@ -54,11 +55,13 @@ public class PlayerTrigger extends SimpleCriterionTrigger<PlayerTrigger.TriggerI
 			return CriteriaTriggers.TICK.createCriterion(new PlayerTrigger.TriggerInstance(Optional.empty()));
 		}
 
-		public static Criterion<PlayerTrigger.TriggerInstance> walkOnBlockWithEquipment(Block block, Item item) {
+		public static Criterion<PlayerTrigger.TriggerInstance> walkOnBlockWithEquipment(
+			HolderGetter<Block> holderGetter, HolderGetter<Item> holderGetter2, Block block, Item item
+		) {
 			return located(
 				EntityPredicate.Builder.entity()
-					.equipment(EntityEquipmentPredicate.Builder.equipment().feet(ItemPredicate.Builder.item().of(item)))
-					.steppingOn(LocationPredicate.Builder.location().setBlock(BlockPredicate.Builder.block().of(block)))
+					.equipment(EntityEquipmentPredicate.Builder.equipment().feet(ItemPredicate.Builder.item().of(holderGetter2, item)))
+					.steppingOn(LocationPredicate.Builder.location().setBlock(BlockPredicate.Builder.block().of(holderGetter, block)))
 			);
 		}
 	}

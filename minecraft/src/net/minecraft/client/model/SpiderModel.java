@@ -8,11 +8,11 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Entity;
 
 @Environment(EnvType.CLIENT)
-public class SpiderModel<T extends Entity> extends HierarchicalModel<T> {
+public class SpiderModel extends EntityModel<LivingEntityRenderState> {
 	private static final String BODY_0 = "body0";
 	private static final String BODY_1 = "body1";
 	private static final String RIGHT_MIDDLE_FRONT_LEG = "right_middle_front_leg";
@@ -58,14 +58,32 @@ public class SpiderModel<T extends Entity> extends HierarchicalModel<T> {
 		);
 		CubeListBuilder cubeListBuilder = CubeListBuilder.create().texOffs(18, 0).addBox(-15.0F, -1.0F, -1.0F, 16.0F, 2.0F, 2.0F);
 		CubeListBuilder cubeListBuilder2 = CubeListBuilder.create().texOffs(18, 0).mirror().addBox(-1.0F, -1.0F, -1.0F, 16.0F, 2.0F, 2.0F);
-		partDefinition.addOrReplaceChild("right_hind_leg", cubeListBuilder, PartPose.offset(-4.0F, 15.0F, 2.0F));
-		partDefinition.addOrReplaceChild("left_hind_leg", cubeListBuilder2, PartPose.offset(4.0F, 15.0F, 2.0F));
-		partDefinition.addOrReplaceChild("right_middle_hind_leg", cubeListBuilder, PartPose.offset(-4.0F, 15.0F, 1.0F));
-		partDefinition.addOrReplaceChild("left_middle_hind_leg", cubeListBuilder2, PartPose.offset(4.0F, 15.0F, 1.0F));
-		partDefinition.addOrReplaceChild("right_middle_front_leg", cubeListBuilder, PartPose.offset(-4.0F, 15.0F, 0.0F));
-		partDefinition.addOrReplaceChild("left_middle_front_leg", cubeListBuilder2, PartPose.offset(4.0F, 15.0F, 0.0F));
-		partDefinition.addOrReplaceChild("right_front_leg", cubeListBuilder, PartPose.offset(-4.0F, 15.0F, -1.0F));
-		partDefinition.addOrReplaceChild("left_front_leg", cubeListBuilder2, PartPose.offset(4.0F, 15.0F, -1.0F));
+		float f = (float) (Math.PI / 4);
+		float g = (float) (Math.PI / 8);
+		partDefinition.addOrReplaceChild(
+			"right_hind_leg", cubeListBuilder, PartPose.offsetAndRotation(-4.0F, 15.0F, 2.0F, 0.0F, (float) (Math.PI / 4), (float) (-Math.PI / 4))
+		);
+		partDefinition.addOrReplaceChild(
+			"left_hind_leg", cubeListBuilder2, PartPose.offsetAndRotation(4.0F, 15.0F, 2.0F, 0.0F, (float) (-Math.PI / 4), (float) (Math.PI / 4))
+		);
+		partDefinition.addOrReplaceChild(
+			"right_middle_hind_leg", cubeListBuilder, PartPose.offsetAndRotation(-4.0F, 15.0F, 1.0F, 0.0F, (float) (Math.PI / 8), -0.58119464F)
+		);
+		partDefinition.addOrReplaceChild(
+			"left_middle_hind_leg", cubeListBuilder2, PartPose.offsetAndRotation(4.0F, 15.0F, 1.0F, 0.0F, (float) (-Math.PI / 8), 0.58119464F)
+		);
+		partDefinition.addOrReplaceChild(
+			"right_middle_front_leg", cubeListBuilder, PartPose.offsetAndRotation(-4.0F, 15.0F, 0.0F, 0.0F, (float) (-Math.PI / 8), -0.58119464F)
+		);
+		partDefinition.addOrReplaceChild(
+			"left_middle_front_leg", cubeListBuilder2, PartPose.offsetAndRotation(4.0F, 15.0F, 0.0F, 0.0F, (float) (Math.PI / 8), 0.58119464F)
+		);
+		partDefinition.addOrReplaceChild(
+			"right_front_leg", cubeListBuilder, PartPose.offsetAndRotation(-4.0F, 15.0F, -1.0F, 0.0F, (float) (-Math.PI / 4), (float) (-Math.PI / 4))
+		);
+		partDefinition.addOrReplaceChild(
+			"left_front_leg", cubeListBuilder2, PartPose.offsetAndRotation(4.0F, 15.0F, -1.0F, 0.0F, (float) (Math.PI / 4), (float) (Math.PI / 4))
+		);
 		return LayerDefinition.create(meshDefinition, 64, 32);
 	}
 
@@ -74,52 +92,35 @@ public class SpiderModel<T extends Entity> extends HierarchicalModel<T> {
 		return this.root;
 	}
 
-	@Override
-	public void setupAnim(T entity, float f, float g, float h, float i, float j) {
-		this.head.yRot = i * (float) (Math.PI / 180.0);
-		this.head.xRot = j * (float) (Math.PI / 180.0);
-		float k = (float) (Math.PI / 4);
-		this.rightHindLeg.zRot = (float) (-Math.PI / 4);
-		this.leftHindLeg.zRot = (float) (Math.PI / 4);
-		this.rightMiddleHindLeg.zRot = -0.58119464F;
-		this.leftMiddleHindLeg.zRot = 0.58119464F;
-		this.rightMiddleFrontLeg.zRot = -0.58119464F;
-		this.leftMiddleFrontLeg.zRot = 0.58119464F;
-		this.rightFrontLeg.zRot = (float) (-Math.PI / 4);
-		this.leftFrontLeg.zRot = (float) (Math.PI / 4);
-		float l = -0.0F;
-		float m = (float) (Math.PI / 8);
-		this.rightHindLeg.yRot = (float) (Math.PI / 4);
-		this.leftHindLeg.yRot = (float) (-Math.PI / 4);
-		this.rightMiddleHindLeg.yRot = (float) (Math.PI / 8);
-		this.leftMiddleHindLeg.yRot = (float) (-Math.PI / 8);
-		this.rightMiddleFrontLeg.yRot = (float) (-Math.PI / 8);
-		this.leftMiddleFrontLeg.yRot = (float) (Math.PI / 8);
-		this.rightFrontLeg.yRot = (float) (-Math.PI / 4);
-		this.leftFrontLeg.yRot = (float) (Math.PI / 4);
-		float n = -(Mth.cos(f * 0.6662F * 2.0F + 0.0F) * 0.4F) * g;
-		float o = -(Mth.cos(f * 0.6662F * 2.0F + (float) Math.PI) * 0.4F) * g;
-		float p = -(Mth.cos(f * 0.6662F * 2.0F + (float) (Math.PI / 2)) * 0.4F) * g;
-		float q = -(Mth.cos(f * 0.6662F * 2.0F + (float) (Math.PI * 3.0 / 2.0)) * 0.4F) * g;
-		float r = Math.abs(Mth.sin(f * 0.6662F + 0.0F) * 0.4F) * g;
-		float s = Math.abs(Mth.sin(f * 0.6662F + (float) Math.PI) * 0.4F) * g;
-		float t = Math.abs(Mth.sin(f * 0.6662F + (float) (Math.PI / 2)) * 0.4F) * g;
-		float u = Math.abs(Mth.sin(f * 0.6662F + (float) (Math.PI * 3.0 / 2.0)) * 0.4F) * g;
-		this.rightHindLeg.yRot += n;
-		this.leftHindLeg.yRot += -n;
-		this.rightMiddleHindLeg.yRot += o;
-		this.leftMiddleHindLeg.yRot += -o;
-		this.rightMiddleFrontLeg.yRot += p;
-		this.leftMiddleFrontLeg.yRot += -p;
-		this.rightFrontLeg.yRot += q;
-		this.leftFrontLeg.yRot += -q;
-		this.rightHindLeg.zRot += r;
-		this.leftHindLeg.zRot += -r;
-		this.rightMiddleHindLeg.zRot += s;
-		this.leftMiddleHindLeg.zRot += -s;
-		this.rightMiddleFrontLeg.zRot += t;
-		this.leftMiddleFrontLeg.zRot += -t;
-		this.rightFrontLeg.zRot += u;
-		this.leftFrontLeg.zRot += -u;
+	public void setupAnim(LivingEntityRenderState livingEntityRenderState) {
+		this.root.getAllParts().forEach(ModelPart::resetPose);
+		this.head.yRot = livingEntityRenderState.yRot * (float) (Math.PI / 180.0);
+		this.head.xRot = livingEntityRenderState.xRot * (float) (Math.PI / 180.0);
+		float f = livingEntityRenderState.walkAnimationPos * 0.6662F;
+		float g = livingEntityRenderState.walkAnimationSpeed;
+		float h = -(Mth.cos(f * 2.0F + 0.0F) * 0.4F) * g;
+		float i = -(Mth.cos(f * 2.0F + (float) Math.PI) * 0.4F) * g;
+		float j = -(Mth.cos(f * 2.0F + (float) (Math.PI / 2)) * 0.4F) * g;
+		float k = -(Mth.cos(f * 2.0F + (float) (Math.PI * 3.0 / 2.0)) * 0.4F) * g;
+		float l = Math.abs(Mth.sin(f + 0.0F) * 0.4F) * g;
+		float m = Math.abs(Mth.sin(f + (float) Math.PI) * 0.4F) * g;
+		float n = Math.abs(Mth.sin(f + (float) (Math.PI / 2)) * 0.4F) * g;
+		float o = Math.abs(Mth.sin(f + (float) (Math.PI * 3.0 / 2.0)) * 0.4F) * g;
+		this.rightHindLeg.yRot += h;
+		this.leftHindLeg.yRot -= h;
+		this.rightMiddleHindLeg.yRot += i;
+		this.leftMiddleHindLeg.yRot -= i;
+		this.rightMiddleFrontLeg.yRot += j;
+		this.leftMiddleFrontLeg.yRot -= j;
+		this.rightFrontLeg.yRot += k;
+		this.leftFrontLeg.yRot -= k;
+		this.rightHindLeg.zRot += l;
+		this.leftHindLeg.zRot -= l;
+		this.rightMiddleHindLeg.zRot += m;
+		this.leftMiddleHindLeg.zRot -= m;
+		this.rightMiddleFrontLeg.zRot += n;
+		this.leftMiddleFrontLeg.zRot -= n;
+		this.rightFrontLeg.zRot += o;
+		this.leftFrontLeg.zRot -= o;
 	}
 }

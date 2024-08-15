@@ -3,6 +3,7 @@ package net.minecraft.world.entity.projectile;
 import com.google.common.base.MoreObjects;
 import it.unimi.dsi.fastutil.doubles.DoubleDoubleImmutablePair;
 import java.util.UUID;
+import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -15,14 +16,19 @@ import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.TraceableEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -54,12 +60,17 @@ public abstract class Projectile extends Entity implements TraceableEntity {
 	public Entity getOwner() {
 		if (this.cachedOwner != null && !this.cachedOwner.isRemoved()) {
 			return this.cachedOwner;
-		} else if (this.ownerUUID != null && this.level() instanceof ServerLevel serverLevel) {
-			this.cachedOwner = serverLevel.getEntity(this.ownerUUID);
+		} else if (this.ownerUUID != null) {
+			this.cachedOwner = this.findOwner(this.ownerUUID);
 			return this.cachedOwner;
 		} else {
 			return null;
 		}
+	}
+
+	@Nullable
+	protected Entity findOwner(UUID uUID) {
+		return this.level() instanceof ServerLevel serverLevel ? serverLevel.getEntity(uUID) : null;
 	}
 
 	public Entity getEffectSource() {
@@ -119,15 +130,11 @@ public abstract class Projectile extends Entity implements TraceableEntity {
 	private boolean checkLeftOwner() {
 		Entity entity = this.getOwner();
 		if (entity != null) {
-			for (Entity entity2 : this.level()
-				.getEntities(this, this.getBoundingBox().expandTowards(this.getDeltaMovement()).inflate(1.0), entityx -> !entityx.isSpectator() && entityx.isPickable())) {
-				if (entity2.getRootVehicle() == entity.getRootVehicle()) {
-					return false;
-				}
-			}
+			AABB aABB = this.getBoundingBox().expandTowards(this.getDeltaMovement()).inflate(1.0);
+			return entity.getRootVehicle().getSelfAndPassengers().filter(EntitySelector.CAN_BE_PICKED).noneMatch(entityx -> aABB.intersects(entityx.getBoundingBox()));
+		} else {
+			return true;
 		}
-
-		return true;
 	}
 
 	public Vec3 getMovementToShoot(double d, double e, double f, float g, float h) {
@@ -155,6 +162,60 @@ public abstract class Projectile extends Entity implements TraceableEntity {
 		this.shoot((double)k, (double)l, (double)m, i, j);
 		Vec3 vec3 = entity.getKnownMovement();
 		this.setDeltaMovement(this.getDeltaMovement().add(vec3.x, entity.onGround() ? 0.0 : vec3.y, vec3.z));
+	}
+
+	public static <T extends Projectile> T spawnProjectileFromRotation(
+		Projectile.ProjectileFactory<T> projectileFactory, ServerLevel serverLevel, ItemStack itemStack, LivingEntity livingEntity, float f, float g, float h
+	) {
+		return spawnProjectile(
+			projectileFactory.create(serverLevel, livingEntity, itemStack),
+			serverLevel,
+			itemStack,
+			projectile -> projectile.shootFromRotation(livingEntity, livingEntity.getXRot(), livingEntity.getYRot(), f, g, h)
+		);
+	}
+
+	public static <T extends Projectile> T spawnProjectileUsingShoot(
+		Projectile.ProjectileFactory<T> projectileFactory,
+		ServerLevel serverLevel,
+		ItemStack itemStack,
+		LivingEntity livingEntity,
+		double d,
+		double e,
+		double f,
+		float g,
+		float h
+	) {
+		return spawnProjectile(projectileFactory.create(serverLevel, livingEntity, itemStack), serverLevel, itemStack, projectile -> projectile.shoot(d, e, f, g, h));
+	}
+
+	public static <T extends Projectile> T spawnProjectileUsingShoot(
+		T projectile, ServerLevel serverLevel, ItemStack itemStack, double d, double e, double f, float g, float h
+	) {
+		return spawnProjectile(projectile, serverLevel, itemStack, projectile2 -> projectile.shoot(d, e, f, g, h));
+	}
+
+	public static <T extends Projectile> T spawnProjectile(T projectile, ServerLevel serverLevel, ItemStack itemStack) {
+		return spawnProjectile(projectile, serverLevel, itemStack, projectilex -> {
+		});
+	}
+
+	public static <T extends Projectile> T spawnProjectile(T projectile, ServerLevel serverLevel, ItemStack itemStack, Consumer<T> consumer) {
+		consumer.accept(projectile);
+		serverLevel.addFreshEntity(projectile);
+		projectile.applyOnProjectileSpawned(serverLevel, itemStack);
+		return projectile;
+	}
+
+	public void applyOnProjectileSpawned(ServerLevel serverLevel, ItemStack itemStack) {
+		EnchantmentHelper.onProjectileSpawned(serverLevel, itemStack, this, item -> {
+		});
+		if (this instanceof AbstractArrow abstractArrow) {
+			ItemStack itemStack2 = abstractArrow.getWeaponItem();
+			if (itemStack2 != null && !itemStack2.isEmpty() && !itemStack.getItem().equals(itemStack2.getItem())) {
+				EnchantmentHelper.onProjectileSpawned(serverLevel, itemStack2, this, abstractArrow::onItemBreak);
+			}
+		}
 	}
 
 	protected ProjectileDeflection hitTargetOrDeflectSelf(HitResult hitResult) {
@@ -186,6 +247,9 @@ public abstract class Projectile extends Entity implements TraceableEntity {
 	}
 
 	protected void onDeflection(@Nullable Entity entity, boolean bl) {
+	}
+
+	protected void onItemBreak(Item item) {
 	}
 
 	protected void onHit(HitResult hitResult) {
@@ -295,5 +359,15 @@ public abstract class Projectile extends Entity implements TraceableEntity {
 		double d = this.getDeltaMovement().x;
 		double e = this.getDeltaMovement().z;
 		return DoubleDoubleImmutablePair.of(d, e);
+	}
+
+	@Override
+	public int getDimensionChangingDelay() {
+		return 2;
+	}
+
+	@FunctionalInterface
+	public interface ProjectileFactory<T extends Projectile> {
+		T create(ServerLevel serverLevel, LivingEntity livingEntity, ItemStack itemStack);
 	}
 }

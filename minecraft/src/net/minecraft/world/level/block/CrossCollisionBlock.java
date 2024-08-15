@@ -86,7 +86,7 @@ public abstract class CrossCollisionBlock extends Block implements SimpleWaterlo
 	}
 
 	@Override
-	protected boolean propagatesSkylightDown(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
+	protected boolean propagatesSkylightDown(BlockState blockState) {
 		return !(Boolean)blockState.getValue(WATERLOGGED);
 	}
 

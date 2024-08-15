@@ -43,12 +43,9 @@ public class BlockItem extends Item {
 	@Override
 	public InteractionResult useOn(UseOnContext useOnContext) {
 		InteractionResult interactionResult = this.place(new BlockPlaceContext(useOnContext));
-		if (!interactionResult.consumesAction() && useOnContext.getItemInHand().has(DataComponents.FOOD)) {
-			InteractionResult interactionResult2 = super.use(useOnContext.getLevel(), useOnContext.getPlayer(), useOnContext.getHand()).getResult();
-			return interactionResult2 == InteractionResult.CONSUME ? InteractionResult.CONSUME_PARTIAL : interactionResult2;
-		} else {
-			return interactionResult;
-		}
+		return !interactionResult.consumesAction() && useOnContext.getItemInHand().has(DataComponents.FOOD)
+			? super.use(useOnContext.getLevel(), useOnContext.getPlayer(), useOnContext.getHand())
+			: interactionResult;
 	}
 
 	public InteractionResult place(BlockPlaceContext blockPlaceContext) {
@@ -86,7 +83,7 @@ public class BlockItem extends Item {
 					level.playSound(player, blockPos, this.getPlaceSound(blockState2), SoundSource.BLOCKS, (soundType.getVolume() + 1.0F) / 2.0F, soundType.getPitch() * 0.8F);
 					level.gameEvent(GameEvent.BLOCK_PLACE, blockPos, GameEvent.Context.of(player, blockState2));
 					itemStack.consume(1, player);
-					return InteractionResult.sidedSuccess(level.isClientSide);
+					return InteractionResult.SUCCESS_SERVER;
 				}
 			}
 		}

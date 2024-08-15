@@ -9,9 +9,9 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
@@ -65,34 +65,38 @@ public abstract class PatrollingMonster extends Monster {
 	@Nullable
 	@Override
 	public SpawnGroupData finalizeSpawn(
-		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData
+		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, EntitySpawnReason entitySpawnReason, @Nullable SpawnGroupData spawnGroupData
 	) {
-		if (mobSpawnType != MobSpawnType.PATROL
-			&& mobSpawnType != MobSpawnType.EVENT
-			&& mobSpawnType != MobSpawnType.STRUCTURE
+		if (entitySpawnReason != EntitySpawnReason.PATROL
+			&& entitySpawnReason != EntitySpawnReason.EVENT
+			&& entitySpawnReason != EntitySpawnReason.STRUCTURE
 			&& serverLevelAccessor.getRandom().nextFloat() < 0.06F
 			&& this.canBeLeader()) {
 			this.patrolLeader = true;
 		}
 
 		if (this.isPatrolLeader()) {
-			this.setItemSlot(EquipmentSlot.HEAD, Raid.getLeaderBannerInstance(this.registryAccess().lookupOrThrow(Registries.BANNER_PATTERN)));
+			this.setItemSlot(EquipmentSlot.HEAD, Raid.getOminousBannerInstance(this.registryAccess().lookupOrThrow(Registries.BANNER_PATTERN)));
 			this.setDropChance(EquipmentSlot.HEAD, 2.0F);
 		}
 
-		if (mobSpawnType == MobSpawnType.PATROL) {
+		if (entitySpawnReason == EntitySpawnReason.PATROL) {
 			this.patrolling = true;
 		}
 
-		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, mobSpawnType, spawnGroupData);
+		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, entitySpawnReason, spawnGroupData);
 	}
 
 	public static boolean checkPatrollingMonsterSpawnRules(
-		EntityType<? extends PatrollingMonster> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, RandomSource randomSource
+		EntityType<? extends PatrollingMonster> entityType,
+		LevelAccessor levelAccessor,
+		EntitySpawnReason entitySpawnReason,
+		BlockPos blockPos,
+		RandomSource randomSource
 	) {
 		return levelAccessor.getBrightness(LightLayer.BLOCK, blockPos) > 8
 			? false
-			: checkAnyLightMonsterSpawnRules(entityType, levelAccessor, mobSpawnType, blockPos, randomSource);
+			: checkAnyLightMonsterSpawnRules(entityType, levelAccessor, entitySpawnReason, blockPos, randomSource);
 	}
 
 	@Override

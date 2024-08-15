@@ -1,9 +1,6 @@
 package net.minecraft.client.model;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
+import java.util.Set;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
@@ -11,17 +8,19 @@ import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.MeshTransformer;
 import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.client.renderer.entity.state.TurtleRenderState;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.animal.Turtle;
 
 @Environment(EnvType.CLIENT)
-public class TurtleModel<T extends Turtle> extends QuadrupedModel<T> {
+public class TurtleModel extends QuadrupedModel<TurtleRenderState> {
 	private static final String EGG_BELLY = "egg_belly";
+	public static final MeshTransformer BABY_TRANSFORMER = new BabyModelTransform(true, 120.0F, 0.0F, 9.0F, 6.0F, 120.0F, Set.of("head"));
 	private final ModelPart eggBelly;
 
 	public TurtleModel(ModelPart modelPart) {
-		super(modelPart, true, 120.0F, 0.0F, 9.0F, 6.0F, 120);
+		super(modelPart);
 		this.eggBelly = modelPart.getChild("egg_belly");
 	}
 
@@ -61,13 +60,10 @@ public class TurtleModel<T extends Turtle> extends QuadrupedModel<T> {
 		return LayerDefinition.create(meshDefinition, 128, 64);
 	}
 
-	@Override
-	protected Iterable<ModelPart> bodyParts() {
-		return Iterables.concat(super.bodyParts(), ImmutableList.of(this.eggBelly));
-	}
-
-	public void setupAnim(T turtle, float f, float g, float h, float i, float j) {
-		super.setupAnim(turtle, f, g, h, i, j);
+	public void setupAnim(TurtleRenderState turtleRenderState) {
+		super.setupAnim(turtleRenderState);
+		float f = turtleRenderState.walkAnimationPos;
+		float g = turtleRenderState.walkAnimationSpeed;
 		this.rightHindLeg.xRot = Mth.cos(f * 0.6662F * 0.6F) * 0.5F * g;
 		this.leftHindLeg.xRot = Mth.cos(f * 0.6662F * 0.6F + (float) Math.PI) * 0.5F * g;
 		this.rightFrontLeg.zRot = Mth.cos(f * 0.6662F * 0.6F + (float) Math.PI) * 0.5F * g;
@@ -78,13 +74,13 @@ public class TurtleModel<T extends Turtle> extends QuadrupedModel<T> {
 		this.leftFrontLeg.yRot = 0.0F;
 		this.rightHindLeg.yRot = 0.0F;
 		this.leftHindLeg.yRot = 0.0F;
-		if (!turtle.isInWater() && turtle.onGround()) {
-			float k = turtle.isLayingEgg() ? 4.0F : 1.0F;
-			float l = turtle.isLayingEgg() ? 2.0F : 1.0F;
-			float m = 5.0F;
-			this.rightFrontLeg.yRot = Mth.cos(k * f * 5.0F + (float) Math.PI) * 8.0F * g * l;
+		if (turtleRenderState.isOnLand) {
+			float h = turtleRenderState.isLayingEgg ? 4.0F : 1.0F;
+			float i = turtleRenderState.isLayingEgg ? 2.0F : 1.0F;
+			float j = 5.0F;
+			this.rightFrontLeg.yRot = Mth.cos(h * f * 5.0F + (float) Math.PI) * 8.0F * g * i;
 			this.rightFrontLeg.zRot = 0.0F;
-			this.leftFrontLeg.yRot = Mth.cos(k * f * 5.0F) * 8.0F * g * l;
+			this.leftFrontLeg.yRot = Mth.cos(h * f * 5.0F) * 8.0F * g * i;
 			this.leftFrontLeg.zRot = 0.0F;
 			this.rightHindLeg.yRot = Mth.cos(f * 5.0F + (float) Math.PI) * 3.0F * g;
 			this.rightHindLeg.xRot = 0.0F;
@@ -92,20 +88,10 @@ public class TurtleModel<T extends Turtle> extends QuadrupedModel<T> {
 			this.leftHindLeg.xRot = 0.0F;
 		}
 
-		this.eggBelly.visible = !this.young && turtle.hasEgg();
-	}
-
-	@Override
-	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int i, int j, int k) {
-		boolean bl = this.eggBelly.visible;
-		if (bl) {
-			poseStack.pushPose();
-			poseStack.translate(0.0F, -0.08F, 0.0F);
-		}
-
-		super.renderToBuffer(poseStack, vertexConsumer, i, j, k);
-		if (bl) {
-			poseStack.popPose();
+		this.eggBelly.visible = turtleRenderState.hasEgg;
+		this.root.resetPose();
+		if (this.eggBelly.visible) {
+			this.root.y--;
 		}
 	}
 }

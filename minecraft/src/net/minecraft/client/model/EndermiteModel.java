@@ -8,11 +8,11 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Entity;
 
 @Environment(EnvType.CLIENT)
-public class EndermiteModel<T extends Entity> extends HierarchicalModel<T> {
+public class EndermiteModel extends EntityModel<EntityRenderState> {
 	private static final int BODY_COUNT = 4;
 	private static final int[][] BODY_SIZES = new int[][]{{4, 3, 2}, {6, 4, 5}, {3, 3, 1}, {1, 2, 1}};
 	private static final int[][] BODY_TEXS = new int[][]{{0, 0}, {0, 5}, {0, 14}, {0, 18}};
@@ -59,10 +59,13 @@ public class EndermiteModel<T extends Entity> extends HierarchicalModel<T> {
 	}
 
 	@Override
-	public void setupAnim(T entity, float f, float g, float h, float i, float j) {
-		for (int k = 0; k < this.bodyParts.length; k++) {
-			this.bodyParts[k].yRot = Mth.cos(h * 0.9F + (float)k * 0.15F * (float) Math.PI) * (float) Math.PI * 0.01F * (float)(1 + Math.abs(k - 2));
-			this.bodyParts[k].x = Mth.sin(h * 0.9F + (float)k * 0.15F * (float) Math.PI) * (float) Math.PI * 0.1F * (float)Math.abs(k - 2);
+	public void setupAnim(EntityRenderState entityRenderState) {
+		for (int i = 0; i < this.bodyParts.length; i++) {
+			this.bodyParts[i].yRot = Mth.cos(entityRenderState.ageInTicks * 0.9F + (float)i * 0.15F * (float) Math.PI)
+				* (float) Math.PI
+				* 0.01F
+				* (float)(1 + Math.abs(i - 2));
+			this.bodyParts[i].x = Mth.sin(entityRenderState.ageInTicks * 0.9F + (float)i * 0.15F * (float) Math.PI) * (float) Math.PI * 0.1F * (float)Math.abs(i - 2);
 		}
 	}
 }

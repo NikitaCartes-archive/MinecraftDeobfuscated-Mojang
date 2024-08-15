@@ -53,7 +53,7 @@ public abstract class Fluid {
 	protected void animateTick(Level level, BlockPos blockPos, FluidState fluidState, RandomSource randomSource) {
 	}
 
-	protected void tick(Level level, BlockPos blockPos, FluidState fluidState) {
+	protected void tick(Level level, BlockPos blockPos, BlockState blockState, FluidState fluidState) {
 	}
 
 	protected void randomTick(Level level, BlockPos blockPos, FluidState fluidState, RandomSource randomSource) {

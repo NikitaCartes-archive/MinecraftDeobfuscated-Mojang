@@ -27,7 +27,7 @@ public enum SpecialGlyphs implements GlyphInfo {
 
 		for (int k = 0; k < j; k++) {
 			for (int l = 0; l < i; l++) {
-				nativeImage.setPixelRGBA(l, k, pixelProvider.getColor(l, k));
+				nativeImage.setPixel(l, k, pixelProvider.getColor(l, k));
 			}
 		}
 

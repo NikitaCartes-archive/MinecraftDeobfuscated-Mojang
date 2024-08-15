@@ -102,7 +102,7 @@ public class RegistrySetBuilder {
 		stream.forEach(registryLookup -> map.put(registryLookup.key(), Entry.createForNewRegistry(universalOwner, registryLookup)));
 		return new HolderLookup.Provider() {
 			@Override
-			public Stream<ResourceKey<? extends Registry<?>>> listRegistries() {
+			public Stream<ResourceKey<? extends Registry<?>>> listRegistryKeys() {
 				return map.keySet().stream();
 			}
 
@@ -198,9 +198,9 @@ public class RegistrySetBuilder {
 			.stream()
 			.map(registryStub -> registryStub.collectRegisteredValues(buildState))
 			.forEach(registryContents -> map.put(registryContents.key, registryContents));
-		Set<ResourceKey<? extends Registry<?>>> set = (Set<ResourceKey<? extends Registry<?>>>)registryAccess.listRegistries()
+		Set<ResourceKey<? extends Registry<?>>> set = (Set<ResourceKey<? extends Registry<?>>>)registryAccess.listRegistryKeys()
 			.collect(Collectors.toUnmodifiableSet());
-		provider.listRegistries()
+		provider.listRegistryKeys()
 			.filter(resourceKey -> !set.contains(resourceKey))
 			.forEach(resourceKey -> map.putIfAbsent(resourceKey, new RegistrySetBuilder.RegistryContents(resourceKey, Lifecycle.stable(), Map.of())));
 		Stream<HolderLookup.RegistryLookup<?>> stream = map.values().stream().map(registryContents -> registryContents.buildAsLookup(buildState.owner));

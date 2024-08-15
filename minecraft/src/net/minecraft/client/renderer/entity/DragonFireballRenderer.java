@@ -6,13 +6,14 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.projectile.DragonFireball;
 
 @Environment(EnvType.CLIENT)
-public class DragonFireballRenderer extends EntityRenderer<DragonFireball> {
+public class DragonFireballRenderer extends EntityRenderer<DragonFireball, EntityRenderState> {
 	private static final ResourceLocation TEXTURE_LOCATION = ResourceLocation.withDefaultNamespace("textures/entity/enderdragon/dragon_fireball.png");
 	private static final RenderType RENDER_TYPE = RenderType.entityCutoutNoCull(TEXTURE_LOCATION);
 
@@ -24,7 +25,8 @@ public class DragonFireballRenderer extends EntityRenderer<DragonFireball> {
 		return 15;
 	}
 
-	public void render(DragonFireball dragonFireball, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
+	@Override
+	public void render(EntityRenderState entityRenderState, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
 		poseStack.pushPose();
 		poseStack.scale(2.0F, 2.0F, 2.0F);
 		poseStack.mulPose(this.entityRenderDispatcher.cameraOrientation());
@@ -35,7 +37,7 @@ public class DragonFireballRenderer extends EntityRenderer<DragonFireball> {
 		vertex(vertexConsumer, pose, i, 1.0F, 1, 1, 0);
 		vertex(vertexConsumer, pose, i, 0.0F, 1, 0, 0);
 		poseStack.popPose();
-		super.render(dragonFireball, f, g, poseStack, multiBufferSource, i);
+		super.render(entityRenderState, poseStack, multiBufferSource, i);
 	}
 
 	private static void vertex(VertexConsumer vertexConsumer, PoseStack.Pose pose, int i, float f, int j, int k, int l) {
@@ -47,7 +49,13 @@ public class DragonFireballRenderer extends EntityRenderer<DragonFireball> {
 			.setNormal(pose, 0.0F, 1.0F, 0.0F);
 	}
 
-	public ResourceLocation getTextureLocation(DragonFireball dragonFireball) {
+	@Override
+	public ResourceLocation getTextureLocation(EntityRenderState entityRenderState) {
 		return TEXTURE_LOCATION;
+	}
+
+	@Override
+	public EntityRenderState createRenderState() {
+		return new EntityRenderState();
 	}
 }

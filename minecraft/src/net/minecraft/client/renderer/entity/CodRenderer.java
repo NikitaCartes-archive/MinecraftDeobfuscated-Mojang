@@ -6,27 +6,33 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.CodModel;
 import net.minecraft.client.model.geom.ModelLayers;
+import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.animal.Cod;
 
 @Environment(EnvType.CLIENT)
-public class CodRenderer extends MobRenderer<Cod, CodModel<Cod>> {
+public class CodRenderer extends MobRenderer<Cod, LivingEntityRenderState, CodModel> {
 	private static final ResourceLocation COD_LOCATION = ResourceLocation.withDefaultNamespace("textures/entity/fish/cod.png");
 
 	public CodRenderer(EntityRendererProvider.Context context) {
-		super(context, new CodModel<>(context.bakeLayer(ModelLayers.COD)), 0.3F);
+		super(context, new CodModel(context.bakeLayer(ModelLayers.COD)), 0.3F);
 	}
 
-	public ResourceLocation getTextureLocation(Cod cod) {
+	public ResourceLocation getTextureLocation(LivingEntityRenderState livingEntityRenderState) {
 		return COD_LOCATION;
 	}
 
-	protected void setupRotations(Cod cod, PoseStack poseStack, float f, float g, float h, float i) {
-		super.setupRotations(cod, poseStack, f, g, h, i);
-		float j = 4.3F * Mth.sin(0.6F * f);
-		poseStack.mulPose(Axis.YP.rotationDegrees(j));
-		if (!cod.isInWater()) {
+	public LivingEntityRenderState createRenderState() {
+		return new LivingEntityRenderState();
+	}
+
+	@Override
+	protected void setupRotations(LivingEntityRenderState livingEntityRenderState, PoseStack poseStack, float f, float g) {
+		super.setupRotations(livingEntityRenderState, poseStack, f, g);
+		float h = 4.3F * Mth.sin(0.6F * livingEntityRenderState.ageInTicks);
+		poseStack.mulPose(Axis.YP.rotationDegrees(h));
+		if (!livingEntityRenderState.isInWater) {
 			poseStack.translate(0.1F, 0.1F, -0.1F);
 			poseStack.mulPose(Axis.ZP.rotationDegrees(90.0F));
 		}

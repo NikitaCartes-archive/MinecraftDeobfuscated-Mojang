@@ -16,7 +16,7 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.stats.Stats;
-import net.minecraft.world.ItemInteractionResult;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.component.TooltipProvider;
 import net.minecraft.world.level.Level;
@@ -58,10 +58,10 @@ public record JukeboxPlayable(EitherHolder<JukeboxSong> song, boolean showInTool
 		return new JukeboxPlayable(this.song, bl);
 	}
 
-	public static ItemInteractionResult tryInsertIntoJukebox(Level level, BlockPos blockPos, ItemStack itemStack, Player player) {
+	public static InteractionResult tryInsertIntoJukebox(Level level, BlockPos blockPos, ItemStack itemStack, Player player) {
 		JukeboxPlayable jukeboxPlayable = itemStack.get(DataComponents.JUKEBOX_PLAYABLE);
 		if (jukeboxPlayable == null) {
-			return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+			return InteractionResult.TRY_WITH_EMPTY_HAND;
 		} else {
 			BlockState blockState = level.getBlockState(blockPos);
 			if (blockState.is(Blocks.JUKEBOX) && !(Boolean)blockState.getValue(JukeboxBlock.HAS_RECORD)) {
@@ -75,9 +75,9 @@ public record JukeboxPlayable(EitherHolder<JukeboxSong> song, boolean showInTool
 					player.awardStat(Stats.PLAY_RECORD);
 				}
 
-				return ItemInteractionResult.sidedSuccess(level.isClientSide);
+				return InteractionResult.SUCCESS;
 			} else {
-				return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+				return InteractionResult.TRY_WITH_EMPTY_HAND;
 			}
 		}
 	}

@@ -1,28 +1,37 @@
 package net.minecraft.client.renderer;
 
-import com.mojang.blaze3d.platform.NativeImage;
+import com.mojang.blaze3d.pipeline.TextureTarget;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.BufferUploader;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.logging.LogUtils;
+import java.io.IOException;
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.texture.DynamicTexture;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.ResourceProvider;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.dimension.DimensionType;
 import org.joml.Vector3f;
+import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class LightTexture implements AutoCloseable {
 	public static final int FULL_BRIGHT = 15728880;
 	public static final int FULL_SKY = 15728640;
 	public static final int FULL_BLOCK = 240;
-	private final DynamicTexture lightTexture;
-	private final NativeImage lightPixels;
-	private final ResourceLocation lightTextureLocation;
+	private static final int TEXTURE_SIZE = 16;
+	private static final Logger LOGGER = LogUtils.getLogger();
+	@Nullable
+	private ShaderInstance shader;
+	private final TextureTarget target;
 	private boolean updateLightTexture;
 	private float blockLightRedFlicker;
 	private final GameRenderer renderer;
@@ -31,21 +40,32 @@ public class LightTexture implements AutoCloseable {
 	public LightTexture(GameRenderer gameRenderer, Minecraft minecraft) {
 		this.renderer = gameRenderer;
 		this.minecraft = minecraft;
-		this.lightTexture = new DynamicTexture(16, 16, false);
-		this.lightTextureLocation = this.minecraft.getTextureManager().register("light_map", this.lightTexture);
-		this.lightPixels = this.lightTexture.getPixels();
+		this.target = new TextureTarget(16, 16, false);
+		this.target.setFilterMode(9729);
+		this.target.setClearColor(1.0F, 1.0F, 1.0F, 1.0F);
+		this.target.clear();
+	}
 
-		for (int i = 0; i < 16; i++) {
-			for (int j = 0; j < 16; j++) {
-				this.lightPixels.setPixelRGBA(j, i, -1);
-			}
+	public void loadShader(ResourceProvider resourceProvider) {
+		if (this.shader != null) {
+			this.shader.close();
 		}
 
-		this.lightTexture.upload();
+		try {
+			this.shader = new ShaderInstance(resourceProvider, "lightmap", DefaultVertexFormat.BLIT_SCREEN);
+		} catch (IOException var3) {
+			LOGGER.error("Failed to load lightmap shader", (Throwable)var3);
+			this.shader = null;
+		}
 	}
 
 	public void close() {
-		this.lightTexture.close();
+		if (this.shader != null) {
+			this.shader.close();
+			this.shader = null;
+		}
+
+		this.target.destroyBuffers();
 	}
 
 	public void tick() {
@@ -59,10 +79,7 @@ public class LightTexture implements AutoCloseable {
 	}
 
 	public void turnOnLightLayer() {
-		RenderSystem.setShaderTexture(2, this.lightTextureLocation);
-		this.minecraft.getTextureManager().bindForSetup(this.lightTextureLocation);
-		RenderSystem.texParameter(3553, 10241, 9729);
-		RenderSystem.texParameter(3553, 10240, 9729);
+		RenderSystem.setShaderTexture(2, this.target.getColorTextureId());
 	}
 
 	private float getDarknessGamma(float f) {
@@ -76,7 +93,7 @@ public class LightTexture implements AutoCloseable {
 	}
 
 	public void updateLightTexture(float f) {
-		if (this.updateLightTexture) {
+		if (this.updateLightTexture && this.shader != null) {
 			this.updateLightTexture = false;
 			this.minecraft.getProfiler().push("lightTex");
 			ClientLevel clientLevel = this.minecraft.level;
@@ -104,80 +121,41 @@ public class LightTexture implements AutoCloseable {
 
 				Vector3f vector3f = new Vector3f(g, g, 1.0F).lerp(new Vector3f(1.0F, 1.0F, 1.0F), 0.35F);
 				float n = this.blockLightRedFlicker + 1.5F;
-				Vector3f vector3f2 = new Vector3f();
-
-				for (int o = 0; o < 16; o++) {
-					for (int p = 0; p < 16; p++) {
-						float q = getBrightness(clientLevel.dimensionType(), o) * h;
-						float r = getBrightness(clientLevel.dimensionType(), p) * n;
-						float t = r * ((r * 0.6F + 0.4F) * 0.6F + 0.4F);
-						float u = r * (r * r * 0.6F + 0.4F);
-						vector3f2.set(r, t, u);
-						boolean bl = clientLevel.effects().forceBrightLightmap();
-						if (bl) {
-							vector3f2.lerp(new Vector3f(0.99F, 1.12F, 1.0F), 0.25F);
-							clampColor(vector3f2);
-						} else {
-							Vector3f vector3f3 = new Vector3f(vector3f).mul(q);
-							vector3f2.add(vector3f3);
-							vector3f2.lerp(new Vector3f(0.75F, 0.75F, 0.75F), 0.04F);
-							if (this.renderer.getDarkenWorldAmount(f) > 0.0F) {
-								float v = this.renderer.getDarkenWorldAmount(f);
-								Vector3f vector3f4 = new Vector3f(vector3f2).mul(0.7F, 0.6F, 0.6F);
-								vector3f2.lerp(vector3f4, v);
-							}
-						}
-
-						if (m > 0.0F) {
-							float w = Math.max(vector3f2.x(), Math.max(vector3f2.y(), vector3f2.z()));
-							if (w < 1.0F) {
-								float v = 1.0F / w;
-								Vector3f vector3f4 = new Vector3f(vector3f2).mul(v);
-								vector3f2.lerp(vector3f4, m);
-							}
-						}
-
-						if (!bl) {
-							if (k > 0.0F) {
-								vector3f2.add(-k, -k, -k);
-							}
-
-							clampColor(vector3f2);
-						}
-
-						float w = this.minecraft.options.gamma().get().floatValue();
-						Vector3f vector3f5 = new Vector3f(this.notGamma(vector3f2.x), this.notGamma(vector3f2.y), this.notGamma(vector3f2.z));
-						vector3f2.lerp(vector3f5, Math.max(0.0F, w - j));
-						vector3f2.lerp(new Vector3f(0.75F, 0.75F, 0.75F), 0.04F);
-						clampColor(vector3f2);
-						vector3f2.mul(255.0F);
-						int x = 255;
-						int y = (int)vector3f2.x();
-						int z = (int)vector3f2.y();
-						int aa = (int)vector3f2.z();
-						this.lightPixels.setPixelRGBA(p, o, 0xFF000000 | aa << 16 | z << 8 | y);
-					}
-				}
-
-				this.lightTexture.upload();
+				float o = clientLevel.dimensionType().ambientLight();
+				boolean bl = clientLevel.effects().forceBrightLightmap();
+				float p = this.minecraft.options.gamma().get().floatValue();
+				this.shader.safeGetUniform("AmbientLightFactor").set(o);
+				this.shader.safeGetUniform("SkyFactor").set(h);
+				this.shader.safeGetUniform("BlockFactor").set(n);
+				this.shader.safeGetUniform("UseBrightLightmap").set(bl ? 1 : 0);
+				this.shader.safeGetUniform("SkyLightColor").set(vector3f);
+				this.shader.safeGetUniform("NightVisionFactor").set(m);
+				this.shader.safeGetUniform("DarknessScale").set(k);
+				this.shader.safeGetUniform("DarkenWorldFactor").set(this.renderer.getDarkenWorldAmount(f));
+				this.shader.safeGetUniform("BrightnessFactor").set(Math.max(0.0F, p - j));
+				this.shader.apply();
+				this.target.bindWrite(true);
+				BufferBuilder bufferBuilder = RenderSystem.renderThreadTesselator().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLIT_SCREEN);
+				bufferBuilder.addVertex(0.0F, 0.0F, 0.0F);
+				bufferBuilder.addVertex(1.0F, 0.0F, 0.0F);
+				bufferBuilder.addVertex(1.0F, 1.0F, 0.0F);
+				bufferBuilder.addVertex(0.0F, 1.0F, 0.0F);
+				BufferUploader.draw(bufferBuilder.buildOrThrow());
+				this.shader.clear();
+				this.target.unbindWrite();
 				this.minecraft.getProfiler().pop();
 			}
 		}
 	}
 
-	private static void clampColor(Vector3f vector3f) {
-		vector3f.set(Mth.clamp(vector3f.x, 0.0F, 1.0F), Mth.clamp(vector3f.y, 0.0F, 1.0F), Mth.clamp(vector3f.z, 0.0F, 1.0F));
-	}
-
-	private float notGamma(float f) {
-		float g = 1.0F - f;
-		return 1.0F - g * g * g * g;
-	}
-
 	public static float getBrightness(DimensionType dimensionType, int i) {
-		float f = (float)i / 15.0F;
-		float g = f / (4.0F - 3.0F * f);
-		return Mth.lerp(dimensionType.ambientLight(), g, 1.0F);
+		return getBrightness(dimensionType.ambientLight(), i);
+	}
+
+	public static float getBrightness(float f, int i) {
+		float g = (float)i / 15.0F;
+		float h = g / (4.0F - 3.0F * g);
+		return Mth.lerp(f, h, 1.0F);
 	}
 
 	public static int pack(int i, int j) {
@@ -185,10 +163,16 @@ public class LightTexture implements AutoCloseable {
 	}
 
 	public static int block(int i) {
-		return i >> 4 & 65535;
+		return i >>> 4 & 15;
 	}
 
 	public static int sky(int i) {
-		return i >> 20 & 65535;
+		return i >>> 20 & 15;
+	}
+
+	public static int lightCoordsWithEmission(int i, int j) {
+		int k = Math.max(sky(i), j);
+		int l = Math.max(block(i), j);
+		return pack(l, k);
 	}
 }

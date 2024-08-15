@@ -12,9 +12,9 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LightningBolt;
-import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.item.enchantment.EnchantedItemInUse;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
@@ -34,7 +34,7 @@ public record SummonEntityEffect(HolderSet<EntityType<?>> entityTypes, boolean j
 		if (Level.isInSpawnableBounds(blockPos)) {
 			Optional<Holder<EntityType<?>>> optional = this.entityTypes().getRandomElement(serverLevel.getRandom());
 			if (!optional.isEmpty()) {
-				Entity entity2 = ((EntityType)((Holder)optional.get()).value()).spawn(serverLevel, blockPos, MobSpawnType.TRIGGERED);
+				Entity entity2 = ((EntityType)((Holder)optional.get()).value()).spawn(serverLevel, blockPos, EntitySpawnReason.TRIGGERED);
 				if (entity2 != null) {
 					if (entity2 instanceof LightningBolt lightningBolt && enchantedItemInUse.owner() instanceof ServerPlayer serverPlayer) {
 						lightningBolt.setCause(serverPlayer);

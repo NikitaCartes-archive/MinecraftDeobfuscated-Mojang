@@ -383,7 +383,6 @@ public class OverworldBiomes {
 		builder.addSpawn(MobCategory.WATER_AMBIENT, new MobSpawnSettings.SpawnerData(EntityType.SALMON, 15, 1, 5));
 		BiomeGenerationSettings.Builder builder2 = baseOceanGeneration(holderGetter, holderGetter2);
 		builder2.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, bl ? AquaticPlacements.SEAGRASS_DEEP_COLD : AquaticPlacements.SEAGRASS_COLD);
-		BiomeDefaultFeatures.addDefaultSeagrass(builder2);
 		BiomeDefaultFeatures.addColdOceanExtraVegetation(builder2);
 		return baseOcean(builder, 4020182, 329011, builder2);
 	}
@@ -394,7 +393,6 @@ public class OverworldBiomes {
 		builder.addSpawn(MobCategory.WATER_CREATURE, new MobSpawnSettings.SpawnerData(EntityType.DOLPHIN, 1, 1, 2));
 		BiomeGenerationSettings.Builder builder2 = baseOceanGeneration(holderGetter, holderGetter2);
 		builder2.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, bl ? AquaticPlacements.SEAGRASS_DEEP : AquaticPlacements.SEAGRASS_NORMAL);
-		BiomeDefaultFeatures.addDefaultSeagrass(builder2);
 		BiomeDefaultFeatures.addColdOceanExtraVegetation(builder2);
 		return baseOcean(builder, 4159204, 329011, builder2);
 	}
@@ -412,10 +410,6 @@ public class OverworldBiomes {
 			.addSpawn(MobCategory.WATER_CREATURE, new MobSpawnSettings.SpawnerData(EntityType.DOLPHIN, 2, 1, 2));
 		BiomeGenerationSettings.Builder builder2 = baseOceanGeneration(holderGetter, holderGetter2);
 		builder2.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, bl ? AquaticPlacements.SEAGRASS_DEEP_WARM : AquaticPlacements.SEAGRASS_WARM);
-		if (bl) {
-			BiomeDefaultFeatures.addDefaultSeagrass(builder2);
-		}
-
 		BiomeDefaultFeatures.addLukeWarmKelp(builder2);
 		return baseOcean(builder, 4566514, 267827, builder2);
 	}
@@ -850,9 +844,9 @@ public class OverworldBiomes {
 	public static Biome deepDark(HolderGetter<PlacedFeature> holderGetter, HolderGetter<ConfiguredWorldCarver<?>> holderGetter2) {
 		MobSpawnSettings.Builder builder = new MobSpawnSettings.Builder();
 		BiomeGenerationSettings.Builder builder2 = new BiomeGenerationSettings.Builder(holderGetter, holderGetter2);
-		builder2.addCarver(GenerationStep.Carving.AIR, Carvers.CAVE);
-		builder2.addCarver(GenerationStep.Carving.AIR, Carvers.CAVE_EXTRA_UNDERGROUND);
-		builder2.addCarver(GenerationStep.Carving.AIR, Carvers.CANYON);
+		builder2.addCarver(Carvers.CAVE);
+		builder2.addCarver(Carvers.CAVE_EXTRA_UNDERGROUND);
+		builder2.addCarver(Carvers.CANYON);
 		BiomeDefaultFeatures.addDefaultCrystalFormations(builder2);
 		BiomeDefaultFeatures.addDefaultMonsterRoom(builder2);
 		BiomeDefaultFeatures.addDefaultUndergroundVariety(builder2);

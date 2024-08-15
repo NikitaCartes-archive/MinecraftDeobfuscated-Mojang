@@ -304,16 +304,20 @@ public class AABB {
 	}
 
 	public Optional<Vec3> clip(Vec3 vec3, Vec3 vec32) {
+		return clip(this.minX, this.minY, this.minZ, this.maxX, this.maxY, this.maxZ, vec3, vec32);
+	}
+
+	public static Optional<Vec3> clip(double d, double e, double f, double g, double h, double i, Vec3 vec3, Vec3 vec32) {
 		double[] ds = new double[]{1.0};
-		double d = vec32.x - vec3.x;
-		double e = vec32.y - vec3.y;
-		double f = vec32.z - vec3.z;
-		Direction direction = getDirection(this, vec3, ds, null, d, e, f);
+		double j = vec32.x - vec3.x;
+		double k = vec32.y - vec3.y;
+		double l = vec32.z - vec3.z;
+		Direction direction = getDirection(d, e, f, g, h, i, vec3, ds, null, j, k, l);
 		if (direction == null) {
 			return Optional.empty();
 		} else {
-			double g = ds[0];
-			return Optional.of(vec3.add(g * d, g * e, g * f));
+			double m = ds[0];
+			return Optional.of(vec3.add(m * j, m * k, m * l));
 		}
 	}
 
@@ -339,22 +343,29 @@ public class AABB {
 
 	@Nullable
 	private static Direction getDirection(AABB aABB, Vec3 vec3, double[] ds, @Nullable Direction direction, double d, double e, double f) {
-		if (d > 1.0E-7) {
-			direction = clipPoint(ds, direction, d, e, f, aABB.minX, aABB.minY, aABB.maxY, aABB.minZ, aABB.maxZ, Direction.WEST, vec3.x, vec3.y, vec3.z);
-		} else if (d < -1.0E-7) {
-			direction = clipPoint(ds, direction, d, e, f, aABB.maxX, aABB.minY, aABB.maxY, aABB.minZ, aABB.maxZ, Direction.EAST, vec3.x, vec3.y, vec3.z);
+		return getDirection(aABB.minX, aABB.minY, aABB.minZ, aABB.maxX, aABB.maxY, aABB.maxZ, vec3, ds, direction, d, e, f);
+	}
+
+	@Nullable
+	private static Direction getDirection(
+		double d, double e, double f, double g, double h, double i, Vec3 vec3, double[] ds, @Nullable Direction direction, double j, double k, double l
+	) {
+		if (j > 1.0E-7) {
+			direction = clipPoint(ds, direction, j, k, l, d, e, h, f, i, Direction.WEST, vec3.x, vec3.y, vec3.z);
+		} else if (j < -1.0E-7) {
+			direction = clipPoint(ds, direction, j, k, l, g, e, h, f, i, Direction.EAST, vec3.x, vec3.y, vec3.z);
 		}
 
-		if (e > 1.0E-7) {
-			direction = clipPoint(ds, direction, e, f, d, aABB.minY, aABB.minZ, aABB.maxZ, aABB.minX, aABB.maxX, Direction.DOWN, vec3.y, vec3.z, vec3.x);
-		} else if (e < -1.0E-7) {
-			direction = clipPoint(ds, direction, e, f, d, aABB.maxY, aABB.minZ, aABB.maxZ, aABB.minX, aABB.maxX, Direction.UP, vec3.y, vec3.z, vec3.x);
+		if (k > 1.0E-7) {
+			direction = clipPoint(ds, direction, k, l, j, e, f, i, d, g, Direction.DOWN, vec3.y, vec3.z, vec3.x);
+		} else if (k < -1.0E-7) {
+			direction = clipPoint(ds, direction, k, l, j, h, f, i, d, g, Direction.UP, vec3.y, vec3.z, vec3.x);
 		}
 
-		if (f > 1.0E-7) {
-			direction = clipPoint(ds, direction, f, d, e, aABB.minZ, aABB.minX, aABB.maxX, aABB.minY, aABB.maxY, Direction.NORTH, vec3.z, vec3.x, vec3.y);
-		} else if (f < -1.0E-7) {
-			direction = clipPoint(ds, direction, f, d, e, aABB.maxZ, aABB.minX, aABB.maxX, aABB.minY, aABB.maxY, Direction.SOUTH, vec3.z, vec3.x, vec3.y);
+		if (l > 1.0E-7) {
+			direction = clipPoint(ds, direction, l, j, k, f, d, g, e, h, Direction.NORTH, vec3.z, vec3.x, vec3.y);
+		} else if (l < -1.0E-7) {
+			direction = clipPoint(ds, direction, l, j, k, i, d, g, e, h, Direction.SOUTH, vec3.z, vec3.x, vec3.y);
 		}
 
 		return direction;
@@ -410,10 +421,6 @@ public class AABB {
 
 	public Vec3 getCenter() {
 		return new Vec3(Mth.lerp(0.5, this.minX, this.maxX), Mth.lerp(0.5, this.minY, this.maxY), Mth.lerp(0.5, this.minZ, this.maxZ));
-	}
-
-	public Vec3 getBottomCenter() {
-		return new Vec3(Mth.lerp(0.5, this.minX, this.maxX), this.minY, Mth.lerp(0.5, this.minZ, this.maxZ));
 	}
 
 	public Vec3 getMinPosition() {

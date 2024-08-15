@@ -17,6 +17,7 @@ import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.commands.synchronization.ArgumentTypeInfos;
 import net.minecraft.core.DefaultedMappedRegistry;
 import net.minecraft.core.DefaultedRegistry;
+import net.minecraft.core.HolderGetter;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.RegistrationInfo;
 import net.minecraft.core.Registry;
@@ -56,8 +57,6 @@ import net.minecraft.world.item.ArmorMaterial;
 import net.minecraft.world.item.ArmorMaterials;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
-import net.minecraft.world.item.Instrument;
-import net.minecraft.world.item.Instruments;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.Potion;
@@ -245,7 +244,6 @@ public class BuiltInRegistries {
 	);
 	public static final Registry<CatVariant> CAT_VARIANT = registerSimple(Registries.CAT_VARIANT, CatVariant::bootstrap);
 	public static final Registry<FrogVariant> FROG_VARIANT = registerSimple(Registries.FROG_VARIANT, FrogVariant::bootstrap);
-	public static final Registry<Instrument> INSTRUMENT = registerSimple(Registries.INSTRUMENT, Instruments::bootstrap);
 	public static final Registry<DecoratedPotPattern> DECORATED_POT_PATTERN = registerSimple(Registries.DECORATED_POT_PATTERN, DecoratedPotPatterns::bootstrap);
 	public static final Registry<CreativeModeTab> CREATIVE_MODE_TAB = registerSimple(Registries.CREATIVE_MODE_TAB, CreativeModeTabs::bootstrap);
 	public static final Registry<CriterionTrigger<?>> TRIGGER_TYPES = registerSimple(Registries.TRIGGER_TYPE, CriteriaTriggers::bootstrap);
@@ -329,6 +327,7 @@ public class BuiltInRegistries {
 		REGISTRY.freeze();
 
 		for (Registry<?> registry : REGISTRY) {
+			bindBootstrappedTagsToEmpty(registry);
 			registry.freeze();
 		}
 	}
@@ -344,6 +343,14 @@ public class BuiltInRegistries {
 				Validate.notNull(registry2.get(resourceLocation), "Missing default of DefaultedMappedRegistry: " + resourceLocation);
 			}
 		});
+	}
+
+	public static <T> HolderGetter<T> acquireBootstrapRegistrationLookup(Registry<T> registry) {
+		return ((WritableRegistry)registry).createRegistrationLookup();
+	}
+
+	private static void bindBootstrappedTagsToEmpty(Registry<?> registry) {
+		((MappedRegistry)registry).bindAllTagsToEmpty();
 	}
 
 	@FunctionalInterface

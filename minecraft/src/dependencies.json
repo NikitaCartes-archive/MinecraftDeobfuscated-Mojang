@@ -3,9 +3,19 @@
 		"name": "Java 21"
 	},
 	{
-		"sha1sum": "de8bc95660e1b2fe8793fd427a7a10dcec5b3ea7",
-		"name": "authlib-6.0.54.jar",
-		"url": "https://libraries.minecraft.net/com/mojang/authlib/6.0.54/authlib-6.0.54.jar"
+		"sha1sum": "aca011492dfe9c26f4e0659028a4fe0970829dd8",
+		"name": "accessors-smart-2.5.0.jar",
+		"url": "https://libraries.minecraft.net/net/minidev/accessors-smart/2.5.0/accessors-smart-2.5.0.jar"
+	},
+	{
+		"sha1sum": "8e6300ef51c1d801a7ed62d07cd221aca3a90640",
+		"name": "asm-9.3.jar",
+		"url": "https://libraries.minecraft.net/org/ow2/asm/asm/9.3/asm-9.3.jar"
+	},
+	{
+		"sha1sum": "f0e9077d577b4c3c4d310d5fe704b4eb95a359fe",
+		"name": "authlib-6.0.55.jar",
+		"url": "https://libraries.minecraft.net/com/mojang/authlib/6.0.55/authlib-6.0.55.jar"
 	},
 	{
 		"sha1sum": "5c685c5ffa94c4cd39496c7184c1d122e515ecef",
@@ -41,6 +51,11 @@
 		"sha1sum": "4bfc12adfe4842bf07b657f0369c4cb522955686",
 		"name": "commons-logging-1.2.jar",
 		"url": "https://libraries.minecraft.net/commons-logging/commons-logging/1.2/commons-logging-1.2.jar"
+	},
+	{
+		"sha1sum": "e3aa0be212d7a42839a8f3f506f5b990bcce0222",
+		"name": "content-type-2.3.jar",
+		"url": "https://libraries.minecraft.net/com/nimbusds/content-type/2.3/content-type-2.3.jar"
 	},
 	{
 		"sha1sum": "67d4de6d7f95d89bcf5862995fb854ebaec02a34",
@@ -83,9 +98,29 @@
 		"url": "https://libraries.minecraft.net/com/ibm/icu/icu4j/73.2/icu4j-73.2.jar"
 	},
 	{
+		"sha1sum": "858c6cc78e1f08a885b1613e1d817c829df70a6e",
+		"name": "jackson-annotations-2.13.4.jar",
+		"url": "https://libraries.minecraft.net/com/fasterxml/jackson/core/jackson-annotations/2.13.4/jackson-annotations-2.13.4.jar"
+	},
+	{
+		"sha1sum": "0cf934c681294b97ef6d80082faeefbe1edadf56",
+		"name": "jackson-core-2.13.4.jar",
+		"url": "https://libraries.minecraft.net/com/fasterxml/jackson/core/jackson-core/2.13.4/jackson-core-2.13.4.jar"
+	},
+	{
+		"sha1sum": "325c06bdfeb628cfb80ebaaf1a26cc1eb558a585",
+		"name": "jackson-databind-2.13.4.2.jar",
+		"url": "https://libraries.minecraft.net/com/fasterxml/jackson/core/jackson-databind/2.13.4.2/jackson-databind-2.13.4.2.jar"
+	},
+	{
 		"sha1sum": "1227f9e0666314f9de41477e3ec277e542ed7f7b",
 		"name": "java-objc-bridge-1.1.jar",
 		"url": "https://libraries.minecraft.net/ca/weblite/java-objc-bridge/1.1/java-objc-bridge-1.1.jar"
+	},
+	{
+		"sha1sum": "ef31541dd28ae2cefdd17c7ebf352d93e9058c63",
+		"name": "jcip-annotations-1.0-1.jar",
+		"url": "https://libraries.minecraft.net/com/github/stephenc/jcip/jcip-annotations/1.0-1/jcip-annotations-1.0-1.jar"
 	},
 	{
 		"sha1sum": "67bf3eaea4f0718cb376a181a629e5f88fa1c9dd",
@@ -111,6 +146,16 @@
 		"sha1sum": "8872d22b293e8f5d7d56ff92be966e6dc28ebdc6",
 		"name": "jorbis-0.0.17.jar",
 		"url": "https://libraries.minecraft.net/org/jcraft/jorbis/0.0.17/jorbis-0.0.17.jar"
+	},
+	{
+		"sha1sum": "57a64f421b472849c40e77d2e7cce3a141b41e99",
+		"name": "json-smart-2.5.0.jar",
+		"url": "https://libraries.minecraft.net/net/minidev/json-smart/2.5.0/json-smart-2.5.0.jar"
+	},
+	{
+		"sha1sum": "97c73ecd70bc7e8eefb26c5eea84f251a63f1031",
+		"name": "lang-tag-1.7.jar",
+		"url": "https://libraries.minecraft.net/com/nimbusds/lang-tag/1.7/lang-tag-1.7.jar"
 	},
 	{
 		"sha1sum": "bea6fede6328fabafd7e68363161a7ea6605abd1",
@@ -418,6 +463,11 @@
 		"url": "https://libraries.minecraft.net/org/lz4/lz4-java/1.8.0/lz4-java-1.8.0.jar"
 	},
 	{
+		"sha1sum": "52fd60d5dc3f0fb3ed5c19b63f6f2312cd1f6add",
+		"name": "msal4j-1.15.0.jar",
+		"url": "https://libraries.minecraft.net/com/microsoft/azure/msal4j/1.15.0/msal4j-1.15.0.jar"
+	},
+	{
 		"sha1sum": "f8f3d8644afa5e6e1a40a3a6aeb9d9aa970ecb4f",
 		"name": "netty-buffer-4.1.97.Final.jar",
 		"url": "https://libraries.minecraft.net/io/netty/netty-buffer/4.1.97.Final/netty-buffer-4.1.97.Final.jar"
@@ -466,6 +516,16 @@
 		"sha1sum": "d469d84265ab70095b01b40886cabdd433b6e664",
 		"name": "netty-transport-native-unix-common-4.1.97.Final.jar",
 		"url": "https://libraries.minecraft.net/io/netty/netty-transport-native-unix-common/4.1.97.Final/netty-transport-native-unix-common-4.1.97.Final.jar"
+	},
+	{
+		"sha1sum": "700f71ffefd60c16bd8ce711a956967ea9071cec",
+		"name": "nimbus-jose-jwt-9.37.3.jar",
+		"url": "https://libraries.minecraft.net/com/nimbusds/nimbus-jose-jwt/9.37.3/nimbus-jose-jwt-9.37.3.jar"
+	},
+	{
+		"sha1sum": "fa9a2e447e2cef4dfda40a854dd7ec35624a7799",
+		"name": "oauth2-oidc-sdk-11.9.1.jar",
+		"url": "https://libraries.minecraft.net/com/nimbusds/oauth2-oidc-sdk/11.9.1/oauth2-oidc-sdk-11.9.1.jar"
 	},
 	{
 		"sha1sum": "b1d8ab82d11d92fd639b56d639f8f46f739dd5fa",

@@ -1,5 +1,6 @@
 package net.minecraft.client.model;
 
+import java.util.Set;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.geom.ModelPart;
@@ -7,13 +8,16 @@ import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.MeshTransformer;
 import net.minecraft.client.model.geom.builders.PartDefinition;
-import net.minecraft.world.entity.animal.goat.Goat;
+import net.minecraft.client.renderer.entity.state.GoatRenderState;
 
 @Environment(EnvType.CLIENT)
-public class GoatModel<T extends Goat> extends QuadrupedModel<T> {
+public class GoatModel extends QuadrupedModel<GoatRenderState> {
+	public static final MeshTransformer BABY_TRANSFORMER = new BabyModelTransform(true, 19.0F, 1.0F, 2.5F, 2.0F, 24.0F, Set.of("head"));
+
 	public GoatModel(ModelPart modelPart) {
-		super(modelPart, true, 19.0F, 1.0F, 2.5F, 2.0F, 24);
+		super(modelPart);
 	}
 
 	public static LayerDefinition createBodyLayer() {
@@ -62,13 +66,12 @@ public class GoatModel<T extends Goat> extends QuadrupedModel<T> {
 		return LayerDefinition.create(meshDefinition, 64, 64);
 	}
 
-	public void setupAnim(T goat, float f, float g, float h, float i, float j) {
-		this.head.getChild("left_horn").visible = goat.hasLeftHorn();
-		this.head.getChild("right_horn").visible = goat.hasRightHorn();
-		super.setupAnim(goat, f, g, h, i, j);
-		float k = goat.getRammingXHeadRot();
-		if (k != 0.0F) {
-			this.head.xRot = k;
+	public void setupAnim(GoatRenderState goatRenderState) {
+		this.head.getChild("left_horn").visible = goatRenderState.hasLeftHorn;
+		this.head.getChild("right_horn").visible = goatRenderState.hasRightHorn;
+		super.setupAnim(goatRenderState);
+		if (goatRenderState.rammingXHeadRot != 0.0F) {
+			this.head.xRot = goatRenderState.rammingXHeadRot;
 		}
 	}
 }

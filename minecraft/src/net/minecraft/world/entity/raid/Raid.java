@@ -14,7 +14,6 @@ import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
-import net.minecraft.ChatFormatting;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderGetter;
@@ -42,15 +41,16 @@ import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.SpawnPlacementType;
 import net.minecraft.world.entity.SpawnPlacements;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.Rarity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BannerPattern;
@@ -67,7 +67,7 @@ public class Raid {
 	private static final int VILLAGE_SEARCH_RADIUS = 32;
 	private static final int RAID_TIMEOUT_TICKS = 48000;
 	private static final int NUM_SPAWN_ATTEMPTS = 3;
-	private static final Component OMINOUS_BANNER_PATTERN_NAME = Component.translatable("block.minecraft.ominous_banner").withStyle(ChatFormatting.GOLD);
+	private static final Component OMINOUS_BANNER_PATTERN_NAME = Component.translatable("block.minecraft.ominous_banner");
 	private static final String RAIDERS_REMAINING = "event.minecraft.raid.raiders_remaining";
 	public static final int VILLAGE_RADIUS_BUFFER = 16;
 	private static final int POST_RAID_TICK_LIMIT = 40;
@@ -465,6 +465,9 @@ public class Raid {
 
 		for (Raider raider2 : set) {
 			this.removeFromRaid(raider2, true);
+			if (raider2.isPatrolLeader()) {
+				this.removeLeader(raider2.getWave());
+			}
 		}
 	}
 
@@ -498,7 +501,7 @@ public class Raid {
 			int k = 0;
 
 			for (int l = 0; l < j; l++) {
-				Raider raider = raiderType.entityType.create(this.level);
+				Raider raider = raiderType.entityType.create(this.level, EntitySpawnReason.EVENT);
 				if (raider == null) {
 					break;
 				}
@@ -513,12 +516,12 @@ public class Raid {
 				if (raiderType.entityType == EntityType.RAVAGER) {
 					Raider raider2 = null;
 					if (i == this.getNumGroups(Difficulty.NORMAL)) {
-						raider2 = EntityType.PILLAGER.create(this.level);
+						raider2 = EntityType.PILLAGER.create(this.level, EntitySpawnReason.EVENT);
 					} else if (i >= this.getNumGroups(Difficulty.HARD)) {
 						if (k == 0) {
-							raider2 = EntityType.EVOKER.create(this.level);
+							raider2 = EntityType.EVOKER.create(this.level, EntitySpawnReason.EVENT);
 						} else {
-							raider2 = EntityType.VINDICATOR.create(this.level);
+							raider2 = EntityType.VINDICATOR.create(this.level, EntitySpawnReason.EVENT);
 						}
 					}
 
@@ -547,7 +550,7 @@ public class Raid {
 			raider.setTicksOutsideRaid(0);
 			if (!bl && blockPos != null) {
 				raider.setPos((double)blockPos.getX() + 0.5, (double)blockPos.getY() + 1.0, (double)blockPos.getZ() + 0.5);
-				raider.finalizeSpawn(this.level, this.level.getCurrentDifficultyAt(blockPos), MobSpawnType.EVENT, null);
+				raider.finalizeSpawn(this.level, this.level.getCurrentDifficultyAt(blockPos), EntitySpawnReason.EVENT, null);
 				raider.applyRaidBuffs(this.level, i, false);
 				raider.setOnGround(true);
 				this.level.addFreshEntityWithPassengers(raider);
@@ -599,7 +602,7 @@ public class Raid {
 		this.level.getRaids().setDirty();
 	}
 
-	public static ItemStack getLeaderBannerInstance(HolderGetter<BannerPattern> holderGetter) {
+	public static ItemStack getOminousBannerInstance(HolderGetter<BannerPattern> holderGetter) {
 		ItemStack itemStack = new ItemStack(Items.WHITE_BANNER);
 		BannerPatternLayers bannerPatternLayers = new BannerPatternLayers.Builder()
 			.addIfRegistered(holderGetter, BannerPatterns.RHOMBUS_MIDDLE, DyeColor.CYAN)
@@ -614,6 +617,7 @@ public class Raid {
 		itemStack.set(DataComponents.BANNER_PATTERNS, bannerPatternLayers);
 		itemStack.set(DataComponents.HIDE_ADDITIONAL_TOOLTIP, Unit.INSTANCE);
 		itemStack.set(DataComponents.ITEM_NAME, OMINOUS_BANNER_PATTERN_NAME);
+		itemStack.set(DataComponents.RARITY, Rarity.UNCOMMON);
 		return itemStack;
 	}
 
@@ -633,16 +637,18 @@ public class Raid {
 			int m = this.center.getX() + Mth.floor(Mth.cos(f) * 32.0F * (float)k) + this.level.random.nextInt(5);
 			int n = this.center.getZ() + Mth.floor(Mth.sin(f) * 32.0F * (float)k) + this.level.random.nextInt(5);
 			int o = this.level.getHeight(Heightmap.Types.WORLD_SURFACE, m, n);
-			mutableBlockPos.set(m, o, n);
-			if (!this.level.isVillage(mutableBlockPos) || i >= 2) {
-				int p = 10;
-				if (this.level.hasChunksAt(mutableBlockPos.getX() - 10, mutableBlockPos.getZ() - 10, mutableBlockPos.getX() + 10, mutableBlockPos.getZ() + 10)
-					&& this.level.isPositionEntityTicking(mutableBlockPos)
-					&& (
-						spawnPlacementType.isSpawnPositionOk(this.level, mutableBlockPos, EntityType.RAVAGER)
-							|| this.level.getBlockState(mutableBlockPos.below()).is(Blocks.SNOW) && this.level.getBlockState(mutableBlockPos).isAir()
-					)) {
-					return mutableBlockPos;
+			if (Mth.abs(o - this.center.getY()) <= 32 * k) {
+				mutableBlockPos.set(m, o, n);
+				if (!this.level.isVillage(mutableBlockPos) || i >= 2) {
+					int p = 10;
+					if (this.level.hasChunksAt(mutableBlockPos.getX() - 10, mutableBlockPos.getZ() - 10, mutableBlockPos.getX() + 10, mutableBlockPos.getZ() + 10)
+						&& this.level.isPositionEntityTicking(mutableBlockPos)
+						&& (
+							spawnPlacementType.isSpawnPositionOk(this.level, mutableBlockPos, EntityType.RAVAGER)
+								|| this.level.getBlockState(mutableBlockPos.below()).is(Blocks.SNOW) && this.level.getBlockState(mutableBlockPos).isAir()
+						)) {
+						return mutableBlockPos;
+					}
 				}
 			}
 		}
@@ -683,7 +689,7 @@ public class Raid {
 
 	public void setLeader(int i, Raider raider) {
 		this.groupToLeaderMap.put(i, raider);
-		raider.setItemSlot(EquipmentSlot.HEAD, getLeaderBannerInstance(raider.registryAccess().lookupOrThrow(Registries.BANNER_PATTERN)));
+		raider.setItemSlot(EquipmentSlot.HEAD, getOminousBannerInstance(raider.registryAccess().lookupOrThrow(Registries.BANNER_PATTERN)));
 		raider.setDropChance(EquipmentSlot.HEAD, 2.0F);
 	}
 

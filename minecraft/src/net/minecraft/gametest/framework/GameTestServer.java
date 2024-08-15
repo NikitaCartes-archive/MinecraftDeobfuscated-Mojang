@@ -36,6 +36,7 @@ import net.minecraft.util.datafix.DataFixers;
 import net.minecraft.util.debugchart.LocalSampleLogger;
 import net.minecraft.util.debugchart.SampleLogger;
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.level.DataPackConfig;
 import net.minecraft.world.level.GameRules;
@@ -55,12 +56,13 @@ public class GameTestServer extends MinecraftServer {
 	private static final int PROGRESS_REPORT_INTERVAL = 20;
 	private static final int TEST_POSITION_RANGE = 14999992;
 	private static final Services NO_SERVICES = new Services(null, ServicesKeySet.EMPTY, null, null);
+	private static final FeatureFlagSet ENABLED_FEATURES = FeatureFlags.REGISTRY.allFlags().subtract(FeatureFlagSet.of(FeatureFlags.REDSTONE_EXPERIMENTS));
 	private final LocalSampleLogger sampleLogger = new LocalSampleLogger(4);
 	private List<GameTestBatch> testBatches = new ArrayList();
 	private final List<TestFunction> testFunctions;
 	private final BlockPos spawnPos;
 	private final Stopwatch stopwatch = Stopwatch.createUnstarted();
-	private static final GameRules TEST_GAME_RULES = Util.make(new GameRules(), gameRules -> {
+	private static final GameRules TEST_GAME_RULES = Util.make(new GameRules(ENABLED_FEATURES), gameRules -> {
 		gameRules.getRule(GameRules.RULE_DOMOBSPAWNING).set(false, null);
 		gameRules.getRule(GameRules.RULE_WEATHER_CYCLE).set(false, null);
 		gameRules.getRule(GameRules.RULE_RANDOMTICKING).set(0, null);
@@ -82,7 +84,7 @@ public class GameTestServer extends MinecraftServer {
 		} else {
 			packRepository.reload();
 			WorldDataConfiguration worldDataConfiguration = new WorldDataConfiguration(
-				new DataPackConfig(new ArrayList(packRepository.getAvailableIds()), List.of()), FeatureFlags.REGISTRY.allFlags()
+				new DataPackConfig(new ArrayList(packRepository.getAvailableIds()), List.of()), ENABLED_FEATURES
 			);
 			LevelSettings levelSettings = new LevelSettings("Test Level", GameType.CREATIVE, false, Difficulty.NORMAL, true, TEST_GAME_RULES, worldDataConfiguration);
 			WorldLoader.PackConfig packConfig = new WorldLoader.PackConfig(packRepository, worldDataConfiguration, false, true);
@@ -97,8 +99,8 @@ public class GameTestServer extends MinecraftServer {
 								dataLoadContext -> {
 									Registry<LevelStem> registry = new MappedRegistry<>(Registries.LEVEL_STEM, Lifecycle.stable()).freeze();
 									WorldDimensions.Complete complete = dataLoadContext.datapackWorldgen()
-										.registryOrThrow(Registries.WORLD_PRESET)
-										.getHolderOrThrow(WorldPresets.FLAT)
+										.lookupOrThrow(Registries.WORLD_PRESET)
+										.getOrThrow(WorldPresets.FLAT)
 										.value()
 										.createWorldDimensions()
 										.bake(registry);
@@ -185,7 +187,9 @@ public class GameTestServer extends MinecraftServer {
 
 			if (this.testTracker.hasFailedOptional()) {
 				LOGGER.info("{} optional tests failed", this.testTracker.getFailedOptionalCount());
-				this.testTracker.getFailedOptional().forEach(gameTestInfo -> LOGGER.info("   - {}", gameTestInfo.getTestName()));
+				this.testTracker
+					.getFailedOptional()
+					.forEach(gameTestInfo -> LOGGER.info("   - {} with rotation: {}", gameTestInfo.getTestName(), gameTestInfo.getRotation()));
 			}
 
 			LOGGER.info("====================================================");

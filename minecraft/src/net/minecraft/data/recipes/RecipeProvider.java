@@ -10,17 +10,21 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.BiFunction;
+import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.advancements.Criterion;
 import net.minecraft.advancements.critereon.EnterBlockTrigger;
+import net.minecraft.advancements.critereon.ImpossibleTrigger;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
 import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.advancements.critereon.MinMaxBounds;
+import net.minecraft.core.HolderGetter;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponentPatch;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.BlockFamilies;
@@ -45,108 +49,81 @@ import net.minecraft.world.item.crafting.SmeltingRecipe;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.SuspiciousEffectHolder;
 
-public abstract class RecipeProvider implements DataProvider {
-	final PackOutput.PathProvider recipePathProvider;
-	final PackOutput.PathProvider advancementPathProvider;
-	private final CompletableFuture<HolderLookup.Provider> registries;
-	private static final Map<BlockFamily.Variant, BiFunction<ItemLike, ItemLike, RecipeBuilder>> SHAPE_BUILDERS = ImmutableMap.<BlockFamily.Variant, BiFunction<ItemLike, ItemLike, RecipeBuilder>>builder()
-		.put(BlockFamily.Variant.BUTTON, (itemLike, itemLike2) -> buttonBuilder(itemLike, Ingredient.of(itemLike2)))
-		.put(BlockFamily.Variant.CHISELED, (itemLike, itemLike2) -> chiseledBuilder(RecipeCategory.BUILDING_BLOCKS, itemLike, Ingredient.of(itemLike2)))
-		.put(BlockFamily.Variant.CUT, (itemLike, itemLike2) -> cutBuilder(RecipeCategory.BUILDING_BLOCKS, itemLike, Ingredient.of(itemLike2)))
-		.put(BlockFamily.Variant.DOOR, (itemLike, itemLike2) -> doorBuilder(itemLike, Ingredient.of(itemLike2)))
-		.put(BlockFamily.Variant.CUSTOM_FENCE, (itemLike, itemLike2) -> fenceBuilder(itemLike, Ingredient.of(itemLike2)))
-		.put(BlockFamily.Variant.FENCE, (itemLike, itemLike2) -> fenceBuilder(itemLike, Ingredient.of(itemLike2)))
-		.put(BlockFamily.Variant.CUSTOM_FENCE_GATE, (itemLike, itemLike2) -> fenceGateBuilder(itemLike, Ingredient.of(itemLike2)))
-		.put(BlockFamily.Variant.FENCE_GATE, (itemLike, itemLike2) -> fenceGateBuilder(itemLike, Ingredient.of(itemLike2)))
-		.put(BlockFamily.Variant.SIGN, (itemLike, itemLike2) -> signBuilder(itemLike, Ingredient.of(itemLike2)))
-		.put(BlockFamily.Variant.SLAB, (itemLike, itemLike2) -> slabBuilder(RecipeCategory.BUILDING_BLOCKS, itemLike, Ingredient.of(itemLike2)))
-		.put(BlockFamily.Variant.STAIRS, (itemLike, itemLike2) -> stairBuilder(itemLike, Ingredient.of(itemLike2)))
-		.put(BlockFamily.Variant.PRESSURE_PLATE, (itemLike, itemLike2) -> pressurePlateBuilder(RecipeCategory.REDSTONE, itemLike, Ingredient.of(itemLike2)))
-		.put(BlockFamily.Variant.POLISHED, (itemLike, itemLike2) -> polishedBuilder(RecipeCategory.BUILDING_BLOCKS, itemLike, Ingredient.of(itemLike2)))
-		.put(BlockFamily.Variant.TRAPDOOR, (itemLike, itemLike2) -> trapdoorBuilder(itemLike, Ingredient.of(itemLike2)))
-		.put(BlockFamily.Variant.WALL, (itemLike, itemLike2) -> wallBuilder(RecipeCategory.DECORATIONS, itemLike, Ingredient.of(itemLike2)))
+public abstract class RecipeProvider {
+	protected final HolderLookup.Provider registries;
+	private final HolderGetter<Item> items;
+	protected final RecipeOutput output;
+	private static final Map<BlockFamily.Variant, RecipeProvider.FamilyRecipeProvider> SHAPE_BUILDERS = ImmutableMap.<BlockFamily.Variant, RecipeProvider.FamilyRecipeProvider>builder()
+		.put(BlockFamily.Variant.BUTTON, (recipeProvider, itemLike, itemLike2) -> recipeProvider.buttonBuilder(itemLike, Ingredient.of(itemLike2)))
+		.put(
+			BlockFamily.Variant.CHISELED,
+			(recipeProvider, itemLike, itemLike2) -> recipeProvider.chiseledBuilder(RecipeCategory.BUILDING_BLOCKS, itemLike, Ingredient.of(itemLike2))
+		)
+		.put(
+			BlockFamily.Variant.CUT,
+			(recipeProvider, itemLike, itemLike2) -> recipeProvider.cutBuilder(RecipeCategory.BUILDING_BLOCKS, itemLike, Ingredient.of(itemLike2))
+		)
+		.put(BlockFamily.Variant.DOOR, (recipeProvider, itemLike, itemLike2) -> recipeProvider.doorBuilder(itemLike, Ingredient.of(itemLike2)))
+		.put(BlockFamily.Variant.CUSTOM_FENCE, (recipeProvider, itemLike, itemLike2) -> recipeProvider.fenceBuilder(itemLike, Ingredient.of(itemLike2)))
+		.put(BlockFamily.Variant.FENCE, (recipeProvider, itemLike, itemLike2) -> recipeProvider.fenceBuilder(itemLike, Ingredient.of(itemLike2)))
+		.put(BlockFamily.Variant.CUSTOM_FENCE_GATE, (recipeProvider, itemLike, itemLike2) -> recipeProvider.fenceGateBuilder(itemLike, Ingredient.of(itemLike2)))
+		.put(BlockFamily.Variant.FENCE_GATE, (recipeProvider, itemLike, itemLike2) -> recipeProvider.fenceGateBuilder(itemLike, Ingredient.of(itemLike2)))
+		.put(BlockFamily.Variant.SIGN, (recipeProvider, itemLike, itemLike2) -> recipeProvider.signBuilder(itemLike, Ingredient.of(itemLike2)))
+		.put(
+			BlockFamily.Variant.SLAB,
+			(recipeProvider, itemLike, itemLike2) -> recipeProvider.slabBuilder(RecipeCategory.BUILDING_BLOCKS, itemLike, Ingredient.of(itemLike2))
+		)
+		.put(BlockFamily.Variant.STAIRS, (recipeProvider, itemLike, itemLike2) -> recipeProvider.stairBuilder(itemLike, Ingredient.of(itemLike2)))
+		.put(
+			BlockFamily.Variant.PRESSURE_PLATE,
+			(recipeProvider, itemLike, itemLike2) -> recipeProvider.pressurePlateBuilder(RecipeCategory.REDSTONE, itemLike, Ingredient.of(itemLike2))
+		)
+		.put(
+			BlockFamily.Variant.POLISHED,
+			(recipeProvider, itemLike, itemLike2) -> recipeProvider.polishedBuilder(RecipeCategory.BUILDING_BLOCKS, itemLike, Ingredient.of(itemLike2))
+		)
+		.put(BlockFamily.Variant.TRAPDOOR, (recipeProvider, itemLike, itemLike2) -> recipeProvider.trapdoorBuilder(itemLike, Ingredient.of(itemLike2)))
+		.put(
+			BlockFamily.Variant.WALL,
+			(recipeProvider, itemLike, itemLike2) -> recipeProvider.wallBuilder(RecipeCategory.DECORATIONS, itemLike, Ingredient.of(itemLike2))
+		)
 		.build();
 
-	public RecipeProvider(PackOutput packOutput, CompletableFuture<HolderLookup.Provider> completableFuture) {
-		this.recipePathProvider = packOutput.createRegistryElementsPathProvider(Registries.RECIPE);
-		this.advancementPathProvider = packOutput.createRegistryElementsPathProvider(Registries.ADVANCEMENT);
-		this.registries = completableFuture;
+	protected RecipeProvider(HolderLookup.Provider provider, RecipeOutput recipeOutput) {
+		this.registries = provider;
+		this.items = provider.lookupOrThrow(Registries.ITEM);
+		this.output = recipeOutput;
 	}
 
-	@Override
-	public final CompletableFuture<?> run(CachedOutput cachedOutput) {
-		return this.registries.thenCompose(provider -> this.run(cachedOutput, provider));
+	protected abstract void buildRecipes();
+
+	protected void generateForEnabledBlockFamilies(FeatureFlagSet featureFlagSet) {
+		BlockFamilies.getAllFamilies().filter(BlockFamily::shouldGenerateRecipe).forEach(blockFamily -> this.generateRecipes(blockFamily, featureFlagSet));
 	}
 
-	protected CompletableFuture<?> run(CachedOutput cachedOutput, HolderLookup.Provider provider) {
-		final Set<ResourceLocation> set = Sets.<ResourceLocation>newHashSet();
-		final List<CompletableFuture<?>> list = new ArrayList();
-		this.buildRecipes(
-			new RecipeOutput() {
-				@Override
-				public void accept(ResourceLocation resourceLocation, Recipe<?> recipe, @Nullable AdvancementHolder advancementHolder) {
-					if (!set.add(resourceLocation)) {
-						throw new IllegalStateException("Duplicate recipe " + resourceLocation);
-					} else {
-						list.add(DataProvider.saveStable(cachedOutput, provider, Recipe.CODEC, recipe, RecipeProvider.this.recipePathProvider.json(resourceLocation)));
-						if (advancementHolder != null) {
-							list.add(
-								DataProvider.saveStable(
-									cachedOutput, provider, Advancement.CODEC, advancementHolder.value(), RecipeProvider.this.advancementPathProvider.json(advancementHolder.id())
-								)
-							);
-						}
-					}
-				}
-
-				@Override
-				public Advancement.Builder advancement() {
-					return Advancement.Builder.recipeAdvancement().parent(RecipeBuilder.ROOT_RECIPE_ADVANCEMENT);
-				}
-			}
-		);
-		return CompletableFuture.allOf((CompletableFuture[])list.toArray(CompletableFuture[]::new));
+	protected void oneToOneConversionRecipe(ItemLike itemLike, ItemLike itemLike2, @Nullable String string) {
+		this.oneToOneConversionRecipe(itemLike, itemLike2, string, 1);
 	}
 
-	protected CompletableFuture<?> buildAdvancement(CachedOutput cachedOutput, HolderLookup.Provider provider, AdvancementHolder advancementHolder) {
-		return DataProvider.saveStable(
-			cachedOutput, provider, Advancement.CODEC, advancementHolder.value(), this.advancementPathProvider.json(advancementHolder.id())
-		);
-	}
-
-	protected abstract void buildRecipes(RecipeOutput recipeOutput);
-
-	protected static void generateForEnabledBlockFamilies(RecipeOutput recipeOutput, FeatureFlagSet featureFlagSet) {
-		BlockFamilies.getAllFamilies().filter(BlockFamily::shouldGenerateRecipe).forEach(blockFamily -> generateRecipes(recipeOutput, blockFamily, featureFlagSet));
-	}
-
-	protected static void oneToOneConversionRecipe(RecipeOutput recipeOutput, ItemLike itemLike, ItemLike itemLike2, @Nullable String string) {
-		oneToOneConversionRecipe(recipeOutput, itemLike, itemLike2, string, 1);
-	}
-
-	protected static void oneToOneConversionRecipe(RecipeOutput recipeOutput, ItemLike itemLike, ItemLike itemLike2, @Nullable String string, int i) {
-		ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, itemLike, i)
+	protected void oneToOneConversionRecipe(ItemLike itemLike, ItemLike itemLike2, @Nullable String string, int i) {
+		this.shapeless(RecipeCategory.MISC, itemLike, i)
 			.requires(itemLike2)
 			.group(string)
-			.unlockedBy(getHasName(itemLike2), has(itemLike2))
-			.save(recipeOutput, getConversionRecipeName(itemLike, itemLike2));
+			.unlockedBy(getHasName(itemLike2), this.has(itemLike2))
+			.save(this.output, getConversionRecipeName(itemLike, itemLike2));
 	}
 
-	protected static void oreSmelting(
-		RecipeOutput recipeOutput, List<ItemLike> list, RecipeCategory recipeCategory, ItemLike itemLike, float f, int i, String string
-	) {
-		oreCooking(recipeOutput, RecipeSerializer.SMELTING_RECIPE, SmeltingRecipe::new, list, recipeCategory, itemLike, f, i, string, "_from_smelting");
+	protected void oreSmelting(List<ItemLike> list, RecipeCategory recipeCategory, ItemLike itemLike, float f, int i, String string) {
+		this.oreCooking(RecipeSerializer.SMELTING_RECIPE, SmeltingRecipe::new, list, recipeCategory, itemLike, f, i, string, "_from_smelting");
 	}
 
-	protected static void oreBlasting(
-		RecipeOutput recipeOutput, List<ItemLike> list, RecipeCategory recipeCategory, ItemLike itemLike, float f, int i, String string
-	) {
-		oreCooking(recipeOutput, RecipeSerializer.BLASTING_RECIPE, BlastingRecipe::new, list, recipeCategory, itemLike, f, i, string, "_from_blasting");
+	protected void oreBlasting(List<ItemLike> list, RecipeCategory recipeCategory, ItemLike itemLike, float f, int i, String string) {
+		this.oreCooking(RecipeSerializer.BLASTING_RECIPE, BlastingRecipe::new, list, recipeCategory, itemLike, f, i, string, "_from_blasting");
 	}
 
-	private static <T extends AbstractCookingRecipe> void oreCooking(
-		RecipeOutput recipeOutput,
+	private <T extends AbstractCookingRecipe> void oreCooking(
 		RecipeSerializer<T> recipeSerializer,
 		AbstractCookingRecipe.Factory<T> factory,
 		List<ItemLike> list,
@@ -160,133 +137,125 @@ public abstract class RecipeProvider implements DataProvider {
 		for (ItemLike itemLike2 : list) {
 			SimpleCookingRecipeBuilder.generic(Ingredient.of(itemLike2), recipeCategory, itemLike, f, i, recipeSerializer, factory)
 				.group(string)
-				.unlockedBy(getHasName(itemLike2), has(itemLike2))
-				.save(recipeOutput, getItemName(itemLike) + string2 + "_" + getItemName(itemLike2));
+				.unlockedBy(getHasName(itemLike2), this.has(itemLike2))
+				.save(this.output, getItemName(itemLike) + string2 + "_" + getItemName(itemLike2));
 		}
 	}
 
-	protected static void netheriteSmithing(RecipeOutput recipeOutput, Item item, RecipeCategory recipeCategory, Item item2) {
+	protected void netheriteSmithing(Item item, RecipeCategory recipeCategory, Item item2) {
 		SmithingTransformRecipeBuilder.smithing(
-				Ingredient.of(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE), Ingredient.of(item), Ingredient.of(Items.NETHERITE_INGOT), recipeCategory, item2
+				Ingredient.of(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE), Ingredient.of(item), this.tag(ItemTags.NETHERITE_TOOL_MATERIALS), recipeCategory, item2
 			)
-			.unlocks("has_netherite_ingot", has(Items.NETHERITE_INGOT))
-			.save(recipeOutput, getItemName(item2) + "_smithing");
+			.unlocks("has_netherite_ingot", this.has(ItemTags.NETHERITE_TOOL_MATERIALS))
+			.save(this.output, getItemName(item2) + "_smithing");
 	}
 
-	protected static void trimSmithing(RecipeOutput recipeOutput, Item item, ResourceLocation resourceLocation) {
-		SmithingTrimRecipeBuilder.smithingTrim(
-				Ingredient.of(item), Ingredient.of(ItemTags.TRIMMABLE_ARMOR), Ingredient.of(ItemTags.TRIM_MATERIALS), RecipeCategory.MISC
-			)
-			.unlocks("has_smithing_trim_template", has(item))
-			.save(recipeOutput, resourceLocation);
+	protected void trimSmithing(Item item, ResourceLocation resourceLocation) {
+		SmithingTrimRecipeBuilder.smithingTrim(Ingredient.of(item), this.tag(ItemTags.TRIMMABLE_ARMOR), this.tag(ItemTags.TRIM_MATERIALS), RecipeCategory.MISC)
+			.unlocks("has_smithing_trim_template", this.has(item))
+			.save(this.output, resourceLocation);
 	}
 
-	protected static void twoByTwoPacker(RecipeOutput recipeOutput, RecipeCategory recipeCategory, ItemLike itemLike, ItemLike itemLike2) {
-		ShapedRecipeBuilder.shaped(recipeCategory, itemLike, 1)
+	protected void twoByTwoPacker(RecipeCategory recipeCategory, ItemLike itemLike, ItemLike itemLike2) {
+		this.shaped(recipeCategory, itemLike, 1)
 			.define('#', itemLike2)
 			.pattern("##")
 			.pattern("##")
-			.unlockedBy(getHasName(itemLike2), has(itemLike2))
-			.save(recipeOutput);
+			.unlockedBy(getHasName(itemLike2), this.has(itemLike2))
+			.save(this.output);
 	}
 
-	protected static void threeByThreePacker(RecipeOutput recipeOutput, RecipeCategory recipeCategory, ItemLike itemLike, ItemLike itemLike2, String string) {
-		ShapelessRecipeBuilder.shapeless(recipeCategory, itemLike).requires(itemLike2, 9).unlockedBy(string, has(itemLike2)).save(recipeOutput);
+	protected void threeByThreePacker(RecipeCategory recipeCategory, ItemLike itemLike, ItemLike itemLike2, String string) {
+		this.shapeless(recipeCategory, itemLike).requires(itemLike2, 9).unlockedBy(string, this.has(itemLike2)).save(this.output);
 	}
 
-	protected static void threeByThreePacker(RecipeOutput recipeOutput, RecipeCategory recipeCategory, ItemLike itemLike, ItemLike itemLike2) {
-		threeByThreePacker(recipeOutput, recipeCategory, itemLike, itemLike2, getHasName(itemLike2));
+	protected void threeByThreePacker(RecipeCategory recipeCategory, ItemLike itemLike, ItemLike itemLike2) {
+		this.threeByThreePacker(recipeCategory, itemLike, itemLike2, getHasName(itemLike2));
 	}
 
-	protected static void planksFromLog(RecipeOutput recipeOutput, ItemLike itemLike, TagKey<Item> tagKey, int i) {
-		ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, itemLike, i)
-			.requires(tagKey)
-			.group("planks")
-			.unlockedBy("has_log", has(tagKey))
-			.save(recipeOutput);
+	protected void planksFromLog(ItemLike itemLike, TagKey<Item> tagKey, int i) {
+		this.shapeless(RecipeCategory.BUILDING_BLOCKS, itemLike, i).requires(tagKey).group("planks").unlockedBy("has_log", this.has(tagKey)).save(this.output);
 	}
 
-	protected static void planksFromLogs(RecipeOutput recipeOutput, ItemLike itemLike, TagKey<Item> tagKey, int i) {
-		ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, itemLike, i)
-			.requires(tagKey)
-			.group("planks")
-			.unlockedBy("has_logs", has(tagKey))
-			.save(recipeOutput);
+	protected void planksFromLogs(ItemLike itemLike, TagKey<Item> tagKey, int i) {
+		this.shapeless(RecipeCategory.BUILDING_BLOCKS, itemLike, i).requires(tagKey).group("planks").unlockedBy("has_logs", this.has(tagKey)).save(this.output);
 	}
 
-	protected static void woodFromLogs(RecipeOutput recipeOutput, ItemLike itemLike, ItemLike itemLike2) {
-		ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, itemLike, 3)
+	protected void woodFromLogs(ItemLike itemLike, ItemLike itemLike2) {
+		this.shaped(RecipeCategory.BUILDING_BLOCKS, itemLike, 3)
 			.define('#', itemLike2)
 			.pattern("##")
 			.pattern("##")
 			.group("bark")
-			.unlockedBy("has_log", has(itemLike2))
-			.save(recipeOutput);
+			.unlockedBy("has_log", this.has(itemLike2))
+			.save(this.output);
 	}
 
-	protected static void woodenBoat(RecipeOutput recipeOutput, ItemLike itemLike, ItemLike itemLike2) {
-		ShapedRecipeBuilder.shaped(RecipeCategory.TRANSPORTATION, itemLike)
+	protected void woodenBoat(ItemLike itemLike, ItemLike itemLike2) {
+		this.shaped(RecipeCategory.TRANSPORTATION, itemLike)
 			.define('#', itemLike2)
 			.pattern("# #")
 			.pattern("###")
 			.group("boat")
 			.unlockedBy("in_water", insideOf(Blocks.WATER))
-			.save(recipeOutput);
+			.save(this.output);
 	}
 
-	protected static void chestBoat(RecipeOutput recipeOutput, ItemLike itemLike, ItemLike itemLike2) {
-		ShapelessRecipeBuilder.shapeless(RecipeCategory.TRANSPORTATION, itemLike)
+	protected void chestBoat(ItemLike itemLike, ItemLike itemLike2) {
+		this.shapeless(RecipeCategory.TRANSPORTATION, itemLike)
 			.requires(Blocks.CHEST)
 			.requires(itemLike2)
 			.group("chest_boat")
-			.unlockedBy("has_boat", has(ItemTags.BOATS))
-			.save(recipeOutput);
+			.unlockedBy("has_boat", this.has(ItemTags.BOATS))
+			.save(this.output);
 	}
 
-	private static RecipeBuilder buttonBuilder(ItemLike itemLike, Ingredient ingredient) {
-		return ShapelessRecipeBuilder.shapeless(RecipeCategory.REDSTONE, itemLike).requires(ingredient);
+	private RecipeBuilder buttonBuilder(ItemLike itemLike, Ingredient ingredient) {
+		return this.shapeless(RecipeCategory.REDSTONE, itemLike).requires(ingredient);
 	}
 
-	protected static RecipeBuilder doorBuilder(ItemLike itemLike, Ingredient ingredient) {
-		return ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, itemLike, 3).define('#', ingredient).pattern("##").pattern("##").pattern("##");
+	protected RecipeBuilder doorBuilder(ItemLike itemLike, Ingredient ingredient) {
+		return this.shaped(RecipeCategory.REDSTONE, itemLike, 3).define('#', ingredient).pattern("##").pattern("##").pattern("##");
 	}
 
-	private static RecipeBuilder fenceBuilder(ItemLike itemLike, Ingredient ingredient) {
+	private RecipeBuilder fenceBuilder(ItemLike itemLike, Ingredient ingredient) {
 		int i = itemLike == Blocks.NETHER_BRICK_FENCE ? 6 : 3;
 		Item item = itemLike == Blocks.NETHER_BRICK_FENCE ? Items.NETHER_BRICK : Items.STICK;
-		return ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, itemLike, i).define('W', ingredient).define('#', item).pattern("W#W").pattern("W#W");
+		return this.shaped(RecipeCategory.DECORATIONS, itemLike, i).define('W', ingredient).define('#', item).pattern("W#W").pattern("W#W");
 	}
 
-	private static RecipeBuilder fenceGateBuilder(ItemLike itemLike, Ingredient ingredient) {
-		return ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, itemLike).define('#', Items.STICK).define('W', ingredient).pattern("#W#").pattern("#W#");
+	private RecipeBuilder fenceGateBuilder(ItemLike itemLike, Ingredient ingredient) {
+		return this.shaped(RecipeCategory.REDSTONE, itemLike).define('#', Items.STICK).define('W', ingredient).pattern("#W#").pattern("#W#");
 	}
 
-	protected static void pressurePlate(RecipeOutput recipeOutput, ItemLike itemLike, ItemLike itemLike2) {
-		pressurePlateBuilder(RecipeCategory.REDSTONE, itemLike, Ingredient.of(itemLike2)).unlockedBy(getHasName(itemLike2), has(itemLike2)).save(recipeOutput);
+	protected void pressurePlate(ItemLike itemLike, ItemLike itemLike2) {
+		this.pressurePlateBuilder(RecipeCategory.REDSTONE, itemLike, Ingredient.of(itemLike2))
+			.unlockedBy(getHasName(itemLike2), this.has(itemLike2))
+			.save(this.output);
 	}
 
-	private static RecipeBuilder pressurePlateBuilder(RecipeCategory recipeCategory, ItemLike itemLike, Ingredient ingredient) {
-		return ShapedRecipeBuilder.shaped(recipeCategory, itemLike).define('#', ingredient).pattern("##");
+	private RecipeBuilder pressurePlateBuilder(RecipeCategory recipeCategory, ItemLike itemLike, Ingredient ingredient) {
+		return this.shaped(recipeCategory, itemLike).define('#', ingredient).pattern("##");
 	}
 
-	protected static void slab(RecipeOutput recipeOutput, RecipeCategory recipeCategory, ItemLike itemLike, ItemLike itemLike2) {
-		slabBuilder(recipeCategory, itemLike, Ingredient.of(itemLike2)).unlockedBy(getHasName(itemLike2), has(itemLike2)).save(recipeOutput);
+	protected void slab(RecipeCategory recipeCategory, ItemLike itemLike, ItemLike itemLike2) {
+		this.slabBuilder(recipeCategory, itemLike, Ingredient.of(itemLike2)).unlockedBy(getHasName(itemLike2), this.has(itemLike2)).save(this.output);
 	}
 
-	protected static RecipeBuilder slabBuilder(RecipeCategory recipeCategory, ItemLike itemLike, Ingredient ingredient) {
-		return ShapedRecipeBuilder.shaped(recipeCategory, itemLike, 6).define('#', ingredient).pattern("###");
+	protected RecipeBuilder slabBuilder(RecipeCategory recipeCategory, ItemLike itemLike, Ingredient ingredient) {
+		return this.shaped(recipeCategory, itemLike, 6).define('#', ingredient).pattern("###");
 	}
 
-	protected static RecipeBuilder stairBuilder(ItemLike itemLike, Ingredient ingredient) {
-		return ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, itemLike, 4).define('#', ingredient).pattern("#  ").pattern("## ").pattern("###");
+	protected RecipeBuilder stairBuilder(ItemLike itemLike, Ingredient ingredient) {
+		return this.shaped(RecipeCategory.BUILDING_BLOCKS, itemLike, 4).define('#', ingredient).pattern("#  ").pattern("## ").pattern("###");
 	}
 
-	protected static RecipeBuilder trapdoorBuilder(ItemLike itemLike, Ingredient ingredient) {
-		return ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, itemLike, 2).define('#', ingredient).pattern("###").pattern("###");
+	protected RecipeBuilder trapdoorBuilder(ItemLike itemLike, Ingredient ingredient) {
+		return this.shaped(RecipeCategory.REDSTONE, itemLike, 2).define('#', ingredient).pattern("###").pattern("###");
 	}
 
-	private static RecipeBuilder signBuilder(ItemLike itemLike, Ingredient ingredient) {
-		return ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, itemLike, 3)
+	private RecipeBuilder signBuilder(ItemLike itemLike, Ingredient ingredient) {
+		return this.shaped(RecipeCategory.DECORATIONS, itemLike, 3)
 			.group("sign")
 			.define('#', ingredient)
 			.define('X', Items.STICK)
@@ -295,221 +264,213 @@ public abstract class RecipeProvider implements DataProvider {
 			.pattern(" X ");
 	}
 
-	protected static void hangingSign(RecipeOutput recipeOutput, ItemLike itemLike, ItemLike itemLike2) {
-		ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, itemLike, 6)
+	protected void hangingSign(ItemLike itemLike, ItemLike itemLike2) {
+		this.shaped(RecipeCategory.DECORATIONS, itemLike, 6)
 			.group("hanging_sign")
 			.define('#', itemLike2)
 			.define('X', Items.CHAIN)
 			.pattern("X X")
 			.pattern("###")
 			.pattern("###")
-			.unlockedBy("has_stripped_logs", has(itemLike2))
-			.save(recipeOutput);
+			.unlockedBy("has_stripped_logs", this.has(itemLike2))
+			.save(this.output);
 	}
 
-	protected static void colorBlockWithDye(RecipeOutput recipeOutput, List<Item> list, List<Item> list2, String string) {
+	protected void colorBlockWithDye(List<Item> list, List<Item> list2, String string) {
+		this.colorWithDye(list, list2, null, string, RecipeCategory.BUILDING_BLOCKS);
+	}
+
+	protected void colorWithDye(List<Item> list, List<Item> list2, @Nullable Item item, String string, RecipeCategory recipeCategory) {
 		for (int i = 0; i < list.size(); i++) {
-			Item item = (Item)list.get(i);
-			Item item2 = (Item)list2.get(i);
-			ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, item2)
-				.requires(item)
-				.requires(Ingredient.of(list2.stream().filter(item2x -> !item2x.equals(item2)).map(ItemStack::new)))
+			Item item2 = (Item)list.get(i);
+			Item item3 = (Item)list2.get(i);
+			Stream<Item> stream = list2.stream().filter(item2x -> !item2x.equals(item3));
+			if (item != null) {
+				stream = Stream.concat(stream, Stream.of(item));
+			}
+
+			this.shapeless(recipeCategory, item3)
+				.requires(item2)
+				.requires(Ingredient.of(stream))
 				.group(string)
-				.unlockedBy("has_needed_dye", has(item))
-				.save(recipeOutput, "dye_" + getItemName(item2));
+				.unlockedBy("has_needed_dye", this.has(item2))
+				.save(this.output, "dye_" + getItemName(item3));
 		}
 	}
 
-	protected static void carpet(RecipeOutput recipeOutput, ItemLike itemLike, ItemLike itemLike2) {
-		ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, itemLike, 3)
+	protected void carpet(ItemLike itemLike, ItemLike itemLike2) {
+		this.shaped(RecipeCategory.DECORATIONS, itemLike, 3)
 			.define('#', itemLike2)
 			.pattern("##")
 			.group("carpet")
-			.unlockedBy(getHasName(itemLike2), has(itemLike2))
-			.save(recipeOutput);
+			.unlockedBy(getHasName(itemLike2), this.has(itemLike2))
+			.save(this.output);
 	}
 
-	protected static void bedFromPlanksAndWool(RecipeOutput recipeOutput, ItemLike itemLike, ItemLike itemLike2) {
-		ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, itemLike)
+	protected void bedFromPlanksAndWool(ItemLike itemLike, ItemLike itemLike2) {
+		this.shaped(RecipeCategory.DECORATIONS, itemLike)
 			.define('#', itemLike2)
 			.define('X', ItemTags.PLANKS)
 			.pattern("###")
 			.pattern("XXX")
 			.group("bed")
-			.unlockedBy(getHasName(itemLike2), has(itemLike2))
-			.save(recipeOutput);
+			.unlockedBy(getHasName(itemLike2), this.has(itemLike2))
+			.save(this.output);
 	}
 
-	protected static void banner(RecipeOutput recipeOutput, ItemLike itemLike, ItemLike itemLike2) {
-		ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, itemLike)
+	protected void banner(ItemLike itemLike, ItemLike itemLike2) {
+		this.shaped(RecipeCategory.DECORATIONS, itemLike)
 			.define('#', itemLike2)
 			.define('|', Items.STICK)
 			.pattern("###")
 			.pattern("###")
 			.pattern(" | ")
 			.group("banner")
-			.unlockedBy(getHasName(itemLike2), has(itemLike2))
-			.save(recipeOutput);
+			.unlockedBy(getHasName(itemLike2), this.has(itemLike2))
+			.save(this.output);
 	}
 
-	protected static void stainedGlassFromGlassAndDye(RecipeOutput recipeOutput, ItemLike itemLike, ItemLike itemLike2) {
-		ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, itemLike, 8)
+	protected void stainedGlassFromGlassAndDye(ItemLike itemLike, ItemLike itemLike2) {
+		this.shaped(RecipeCategory.BUILDING_BLOCKS, itemLike, 8)
 			.define('#', Blocks.GLASS)
 			.define('X', itemLike2)
 			.pattern("###")
 			.pattern("#X#")
 			.pattern("###")
 			.group("stained_glass")
-			.unlockedBy("has_glass", has(Blocks.GLASS))
-			.save(recipeOutput);
+			.unlockedBy("has_glass", this.has(Blocks.GLASS))
+			.save(this.output);
 	}
 
-	protected static void stainedGlassPaneFromStainedGlass(RecipeOutput recipeOutput, ItemLike itemLike, ItemLike itemLike2) {
-		ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, itemLike, 16)
+	protected void stainedGlassPaneFromStainedGlass(ItemLike itemLike, ItemLike itemLike2) {
+		this.shaped(RecipeCategory.DECORATIONS, itemLike, 16)
 			.define('#', itemLike2)
 			.pattern("###")
 			.pattern("###")
 			.group("stained_glass_pane")
-			.unlockedBy("has_glass", has(itemLike2))
-			.save(recipeOutput);
+			.unlockedBy("has_glass", this.has(itemLike2))
+			.save(this.output);
 	}
 
-	protected static void stainedGlassPaneFromGlassPaneAndDye(RecipeOutput recipeOutput, ItemLike itemLike, ItemLike itemLike2) {
-		ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, itemLike, 8)
+	protected void stainedGlassPaneFromGlassPaneAndDye(ItemLike itemLike, ItemLike itemLike2) {
+		this.shaped(RecipeCategory.DECORATIONS, itemLike, 8)
 			.define('#', Blocks.GLASS_PANE)
 			.define('$', itemLike2)
 			.pattern("###")
 			.pattern("#$#")
 			.pattern("###")
 			.group("stained_glass_pane")
-			.unlockedBy("has_glass_pane", has(Blocks.GLASS_PANE))
-			.unlockedBy(getHasName(itemLike2), has(itemLike2))
-			.save(recipeOutput, getConversionRecipeName(itemLike, Blocks.GLASS_PANE));
+			.unlockedBy("has_glass_pane", this.has(Blocks.GLASS_PANE))
+			.unlockedBy(getHasName(itemLike2), this.has(itemLike2))
+			.save(this.output, getConversionRecipeName(itemLike, Blocks.GLASS_PANE));
 	}
 
-	protected static void coloredTerracottaFromTerracottaAndDye(RecipeOutput recipeOutput, ItemLike itemLike, ItemLike itemLike2) {
-		ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, itemLike, 8)
+	protected void coloredTerracottaFromTerracottaAndDye(ItemLike itemLike, ItemLike itemLike2) {
+		this.shaped(RecipeCategory.BUILDING_BLOCKS, itemLike, 8)
 			.define('#', Blocks.TERRACOTTA)
 			.define('X', itemLike2)
 			.pattern("###")
 			.pattern("#X#")
 			.pattern("###")
 			.group("stained_terracotta")
-			.unlockedBy("has_terracotta", has(Blocks.TERRACOTTA))
-			.save(recipeOutput);
+			.unlockedBy("has_terracotta", this.has(Blocks.TERRACOTTA))
+			.save(this.output);
 	}
 
-	protected static void concretePowder(RecipeOutput recipeOutput, ItemLike itemLike, ItemLike itemLike2) {
-		ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, itemLike, 8)
+	protected void concretePowder(ItemLike itemLike, ItemLike itemLike2) {
+		this.shapeless(RecipeCategory.BUILDING_BLOCKS, itemLike, 8)
 			.requires(itemLike2)
 			.requires(Blocks.SAND, 4)
 			.requires(Blocks.GRAVEL, 4)
 			.group("concrete_powder")
-			.unlockedBy("has_sand", has(Blocks.SAND))
-			.unlockedBy("has_gravel", has(Blocks.GRAVEL))
-			.save(recipeOutput);
+			.unlockedBy("has_sand", this.has(Blocks.SAND))
+			.unlockedBy("has_gravel", this.has(Blocks.GRAVEL))
+			.save(this.output);
 	}
 
-	protected static void candle(RecipeOutput recipeOutput, ItemLike itemLike, ItemLike itemLike2) {
-		ShapelessRecipeBuilder.shapeless(RecipeCategory.DECORATIONS, itemLike)
+	protected void candle(ItemLike itemLike, ItemLike itemLike2) {
+		this.shapeless(RecipeCategory.DECORATIONS, itemLike)
 			.requires(Blocks.CANDLE)
 			.requires(itemLike2)
 			.group("dyed_candle")
-			.unlockedBy(getHasName(itemLike2), has(itemLike2))
-			.save(recipeOutput);
+			.unlockedBy(getHasName(itemLike2), this.has(itemLike2))
+			.save(this.output);
 	}
 
-	protected static void wall(RecipeOutput recipeOutput, RecipeCategory recipeCategory, ItemLike itemLike, ItemLike itemLike2) {
-		wallBuilder(recipeCategory, itemLike, Ingredient.of(itemLike2)).unlockedBy(getHasName(itemLike2), has(itemLike2)).save(recipeOutput);
+	protected void wall(RecipeCategory recipeCategory, ItemLike itemLike, ItemLike itemLike2) {
+		this.wallBuilder(recipeCategory, itemLike, Ingredient.of(itemLike2)).unlockedBy(getHasName(itemLike2), this.has(itemLike2)).save(this.output);
 	}
 
-	private static RecipeBuilder wallBuilder(RecipeCategory recipeCategory, ItemLike itemLike, Ingredient ingredient) {
-		return ShapedRecipeBuilder.shaped(recipeCategory, itemLike, 6).define('#', ingredient).pattern("###").pattern("###");
+	private RecipeBuilder wallBuilder(RecipeCategory recipeCategory, ItemLike itemLike, Ingredient ingredient) {
+		return this.shaped(recipeCategory, itemLike, 6).define('#', ingredient).pattern("###").pattern("###");
 	}
 
-	protected static void polished(RecipeOutput recipeOutput, RecipeCategory recipeCategory, ItemLike itemLike, ItemLike itemLike2) {
-		polishedBuilder(recipeCategory, itemLike, Ingredient.of(itemLike2)).unlockedBy(getHasName(itemLike2), has(itemLike2)).save(recipeOutput);
+	protected void polished(RecipeCategory recipeCategory, ItemLike itemLike, ItemLike itemLike2) {
+		this.polishedBuilder(recipeCategory, itemLike, Ingredient.of(itemLike2)).unlockedBy(getHasName(itemLike2), this.has(itemLike2)).save(this.output);
 	}
 
-	private static RecipeBuilder polishedBuilder(RecipeCategory recipeCategory, ItemLike itemLike, Ingredient ingredient) {
-		return ShapedRecipeBuilder.shaped(recipeCategory, itemLike, 4).define('S', ingredient).pattern("SS").pattern("SS");
+	private RecipeBuilder polishedBuilder(RecipeCategory recipeCategory, ItemLike itemLike, Ingredient ingredient) {
+		return this.shaped(recipeCategory, itemLike, 4).define('S', ingredient).pattern("SS").pattern("SS");
 	}
 
-	protected static void cut(RecipeOutput recipeOutput, RecipeCategory recipeCategory, ItemLike itemLike, ItemLike itemLike2) {
-		cutBuilder(recipeCategory, itemLike, Ingredient.of(itemLike2)).unlockedBy(getHasName(itemLike2), has(itemLike2)).save(recipeOutput);
+	protected void cut(RecipeCategory recipeCategory, ItemLike itemLike, ItemLike itemLike2) {
+		this.cutBuilder(recipeCategory, itemLike, Ingredient.of(itemLike2)).unlockedBy(getHasName(itemLike2), this.has(itemLike2)).save(this.output);
 	}
 
-	private static ShapedRecipeBuilder cutBuilder(RecipeCategory recipeCategory, ItemLike itemLike, Ingredient ingredient) {
-		return ShapedRecipeBuilder.shaped(recipeCategory, itemLike, 4).define('#', ingredient).pattern("##").pattern("##");
+	private ShapedRecipeBuilder cutBuilder(RecipeCategory recipeCategory, ItemLike itemLike, Ingredient ingredient) {
+		return this.shaped(recipeCategory, itemLike, 4).define('#', ingredient).pattern("##").pattern("##");
 	}
 
-	protected static void chiseled(RecipeOutput recipeOutput, RecipeCategory recipeCategory, ItemLike itemLike, ItemLike itemLike2) {
-		chiseledBuilder(recipeCategory, itemLike, Ingredient.of(itemLike2)).unlockedBy(getHasName(itemLike2), has(itemLike2)).save(recipeOutput);
+	protected void chiseled(RecipeCategory recipeCategory, ItemLike itemLike, ItemLike itemLike2) {
+		this.chiseledBuilder(recipeCategory, itemLike, Ingredient.of(itemLike2)).unlockedBy(getHasName(itemLike2), this.has(itemLike2)).save(this.output);
 	}
 
-	protected static void mosaicBuilder(RecipeOutput recipeOutput, RecipeCategory recipeCategory, ItemLike itemLike, ItemLike itemLike2) {
-		ShapedRecipeBuilder.shaped(recipeCategory, itemLike)
+	protected void mosaicBuilder(RecipeCategory recipeCategory, ItemLike itemLike, ItemLike itemLike2) {
+		this.shaped(recipeCategory, itemLike)
 			.define('#', itemLike2)
 			.pattern("#")
 			.pattern("#")
-			.unlockedBy(getHasName(itemLike2), has(itemLike2))
-			.save(recipeOutput);
+			.unlockedBy(getHasName(itemLike2), this.has(itemLike2))
+			.save(this.output);
 	}
 
-	protected static ShapedRecipeBuilder chiseledBuilder(RecipeCategory recipeCategory, ItemLike itemLike, Ingredient ingredient) {
-		return ShapedRecipeBuilder.shaped(recipeCategory, itemLike).define('#', ingredient).pattern("#").pattern("#");
+	protected ShapedRecipeBuilder chiseledBuilder(RecipeCategory recipeCategory, ItemLike itemLike, Ingredient ingredient) {
+		return this.shaped(recipeCategory, itemLike).define('#', ingredient).pattern("#").pattern("#");
 	}
 
-	protected static void stonecutterResultFromBase(RecipeOutput recipeOutput, RecipeCategory recipeCategory, ItemLike itemLike, ItemLike itemLike2) {
-		stonecutterResultFromBase(recipeOutput, recipeCategory, itemLike, itemLike2, 1);
+	protected void stonecutterResultFromBase(RecipeCategory recipeCategory, ItemLike itemLike, ItemLike itemLike2) {
+		this.stonecutterResultFromBase(recipeCategory, itemLike, itemLike2, 1);
 	}
 
-	protected static void stonecutterResultFromBase(RecipeOutput recipeOutput, RecipeCategory recipeCategory, ItemLike itemLike, ItemLike itemLike2, int i) {
+	protected void stonecutterResultFromBase(RecipeCategory recipeCategory, ItemLike itemLike, ItemLike itemLike2, int i) {
 		SingleItemRecipeBuilder.stonecutting(Ingredient.of(itemLike2), recipeCategory, itemLike, i)
-			.unlockedBy(getHasName(itemLike2), has(itemLike2))
-			.save(recipeOutput, getConversionRecipeName(itemLike, itemLike2) + "_stonecutting");
+			.unlockedBy(getHasName(itemLike2), this.has(itemLike2))
+			.save(this.output, getConversionRecipeName(itemLike, itemLike2) + "_stonecutting");
 	}
 
-	private static void smeltingResultFromBase(RecipeOutput recipeOutput, ItemLike itemLike, ItemLike itemLike2) {
+	private void smeltingResultFromBase(ItemLike itemLike, ItemLike itemLike2) {
 		SimpleCookingRecipeBuilder.smelting(Ingredient.of(itemLike2), RecipeCategory.BUILDING_BLOCKS, itemLike, 0.1F, 200)
-			.unlockedBy(getHasName(itemLike2), has(itemLike2))
-			.save(recipeOutput);
+			.unlockedBy(getHasName(itemLike2), this.has(itemLike2))
+			.save(this.output);
 	}
 
-	protected static void nineBlockStorageRecipes(
-		RecipeOutput recipeOutput, RecipeCategory recipeCategory, ItemLike itemLike, RecipeCategory recipeCategory2, ItemLike itemLike2
+	protected void nineBlockStorageRecipes(RecipeCategory recipeCategory, ItemLike itemLike, RecipeCategory recipeCategory2, ItemLike itemLike2) {
+		this.nineBlockStorageRecipes(recipeCategory, itemLike, recipeCategory2, itemLike2, getSimpleRecipeName(itemLike2), null, getSimpleRecipeName(itemLike), null);
+	}
+
+	protected void nineBlockStorageRecipesWithCustomPacking(
+		RecipeCategory recipeCategory, ItemLike itemLike, RecipeCategory recipeCategory2, ItemLike itemLike2, String string, String string2
 	) {
-		nineBlockStorageRecipes(
-			recipeOutput, recipeCategory, itemLike, recipeCategory2, itemLike2, getSimpleRecipeName(itemLike2), null, getSimpleRecipeName(itemLike), null
-		);
+		this.nineBlockStorageRecipes(recipeCategory, itemLike, recipeCategory2, itemLike2, string, string2, getSimpleRecipeName(itemLike), null);
 	}
 
-	protected static void nineBlockStorageRecipesWithCustomPacking(
-		RecipeOutput recipeOutput,
-		RecipeCategory recipeCategory,
-		ItemLike itemLike,
-		RecipeCategory recipeCategory2,
-		ItemLike itemLike2,
-		String string,
-		String string2
+	protected void nineBlockStorageRecipesRecipesWithCustomUnpacking(
+		RecipeCategory recipeCategory, ItemLike itemLike, RecipeCategory recipeCategory2, ItemLike itemLike2, String string, String string2
 	) {
-		nineBlockStorageRecipes(recipeOutput, recipeCategory, itemLike, recipeCategory2, itemLike2, string, string2, getSimpleRecipeName(itemLike), null);
+		this.nineBlockStorageRecipes(recipeCategory, itemLike, recipeCategory2, itemLike2, getSimpleRecipeName(itemLike2), null, string, string2);
 	}
 
-	protected static void nineBlockStorageRecipesRecipesWithCustomUnpacking(
-		RecipeOutput recipeOutput,
-		RecipeCategory recipeCategory,
-		ItemLike itemLike,
-		RecipeCategory recipeCategory2,
-		ItemLike itemLike2,
-		String string,
-		String string2
-	) {
-		nineBlockStorageRecipes(recipeOutput, recipeCategory, itemLike, recipeCategory2, itemLike2, getSimpleRecipeName(itemLike2), null, string, string2);
-	}
-
-	private static void nineBlockStorageRecipes(
-		RecipeOutput recipeOutput,
+	private void nineBlockStorageRecipes(
 		RecipeCategory recipeCategory,
 		ItemLike itemLike,
 		RecipeCategory recipeCategory2,
@@ -519,148 +480,145 @@ public abstract class RecipeProvider implements DataProvider {
 		String string3,
 		@Nullable String string4
 	) {
-		ShapelessRecipeBuilder.shapeless(recipeCategory, itemLike, 9)
+		this.shapeless(recipeCategory, itemLike, 9)
 			.requires(itemLike2)
 			.group(string4)
-			.unlockedBy(getHasName(itemLike2), has(itemLike2))
-			.save(recipeOutput, ResourceLocation.parse(string3));
-		ShapedRecipeBuilder.shaped(recipeCategory2, itemLike2)
+			.unlockedBy(getHasName(itemLike2), this.has(itemLike2))
+			.save(this.output, ResourceLocation.parse(string3));
+		this.shaped(recipeCategory2, itemLike2)
 			.define('#', itemLike)
 			.pattern("###")
 			.pattern("###")
 			.pattern("###")
 			.group(string2)
-			.unlockedBy(getHasName(itemLike), has(itemLike))
-			.save(recipeOutput, ResourceLocation.parse(string));
+			.unlockedBy(getHasName(itemLike), this.has(itemLike))
+			.save(this.output, ResourceLocation.parse(string));
 	}
 
-	protected static void copySmithingTemplate(RecipeOutput recipeOutput, ItemLike itemLike, TagKey<Item> tagKey) {
-		ShapedRecipeBuilder.shaped(RecipeCategory.MISC, itemLike, 2)
-			.define('#', Items.DIAMOND)
-			.define('C', tagKey)
-			.define('S', itemLike)
-			.pattern("#S#")
-			.pattern("#C#")
-			.pattern("###")
-			.unlockedBy(getHasName(itemLike), has(itemLike))
-			.save(recipeOutput);
-	}
-
-	protected static void copySmithingTemplate(RecipeOutput recipeOutput, ItemLike itemLike, ItemLike itemLike2) {
-		ShapedRecipeBuilder.shaped(RecipeCategory.MISC, itemLike, 2)
+	protected void copySmithingTemplate(ItemLike itemLike, ItemLike itemLike2) {
+		this.shaped(RecipeCategory.MISC, itemLike, 2)
 			.define('#', Items.DIAMOND)
 			.define('C', itemLike2)
 			.define('S', itemLike)
 			.pattern("#S#")
 			.pattern("#C#")
 			.pattern("###")
-			.unlockedBy(getHasName(itemLike), has(itemLike))
-			.save(recipeOutput);
+			.unlockedBy(getHasName(itemLike), this.has(itemLike))
+			.save(this.output);
 	}
 
-	protected static void copySmithingTemplate(RecipeOutput recipeOutput, ItemLike itemLike, Ingredient ingredient) {
-		ShapedRecipeBuilder.shaped(RecipeCategory.MISC, itemLike, 2)
+	protected void copySmithingTemplate(ItemLike itemLike, Ingredient ingredient) {
+		this.shaped(RecipeCategory.MISC, itemLike, 2)
 			.define('#', Items.DIAMOND)
 			.define('C', ingredient)
 			.define('S', itemLike)
 			.pattern("#S#")
 			.pattern("#C#")
 			.pattern("###")
-			.unlockedBy(getHasName(itemLike), has(itemLike))
-			.save(recipeOutput);
+			.unlockedBy(getHasName(itemLike), this.has(itemLike))
+			.save(this.output);
 	}
 
-	protected static <T extends AbstractCookingRecipe> void cookRecipes(
-		RecipeOutput recipeOutput, String string, RecipeSerializer<T> recipeSerializer, AbstractCookingRecipe.Factory<T> factory, int i
+	protected <T extends AbstractCookingRecipe> void cookRecipes(
+		String string, RecipeSerializer<T> recipeSerializer, AbstractCookingRecipe.Factory<T> factory, int i
 	) {
-		simpleCookingRecipe(recipeOutput, string, recipeSerializer, factory, i, Items.BEEF, Items.COOKED_BEEF, 0.35F);
-		simpleCookingRecipe(recipeOutput, string, recipeSerializer, factory, i, Items.CHICKEN, Items.COOKED_CHICKEN, 0.35F);
-		simpleCookingRecipe(recipeOutput, string, recipeSerializer, factory, i, Items.COD, Items.COOKED_COD, 0.35F);
-		simpleCookingRecipe(recipeOutput, string, recipeSerializer, factory, i, Items.KELP, Items.DRIED_KELP, 0.1F);
-		simpleCookingRecipe(recipeOutput, string, recipeSerializer, factory, i, Items.SALMON, Items.COOKED_SALMON, 0.35F);
-		simpleCookingRecipe(recipeOutput, string, recipeSerializer, factory, i, Items.MUTTON, Items.COOKED_MUTTON, 0.35F);
-		simpleCookingRecipe(recipeOutput, string, recipeSerializer, factory, i, Items.PORKCHOP, Items.COOKED_PORKCHOP, 0.35F);
-		simpleCookingRecipe(recipeOutput, string, recipeSerializer, factory, i, Items.POTATO, Items.BAKED_POTATO, 0.35F);
-		simpleCookingRecipe(recipeOutput, string, recipeSerializer, factory, i, Items.RABBIT, Items.COOKED_RABBIT, 0.35F);
+		this.simpleCookingRecipe(string, recipeSerializer, factory, i, Items.BEEF, Items.COOKED_BEEF, 0.35F);
+		this.simpleCookingRecipe(string, recipeSerializer, factory, i, Items.CHICKEN, Items.COOKED_CHICKEN, 0.35F);
+		this.simpleCookingRecipe(string, recipeSerializer, factory, i, Items.COD, Items.COOKED_COD, 0.35F);
+		this.simpleCookingRecipe(string, recipeSerializer, factory, i, Items.KELP, Items.DRIED_KELP, 0.1F);
+		this.simpleCookingRecipe(string, recipeSerializer, factory, i, Items.SALMON, Items.COOKED_SALMON, 0.35F);
+		this.simpleCookingRecipe(string, recipeSerializer, factory, i, Items.MUTTON, Items.COOKED_MUTTON, 0.35F);
+		this.simpleCookingRecipe(string, recipeSerializer, factory, i, Items.PORKCHOP, Items.COOKED_PORKCHOP, 0.35F);
+		this.simpleCookingRecipe(string, recipeSerializer, factory, i, Items.POTATO, Items.BAKED_POTATO, 0.35F);
+		this.simpleCookingRecipe(string, recipeSerializer, factory, i, Items.RABBIT, Items.COOKED_RABBIT, 0.35F);
 	}
 
-	private static <T extends AbstractCookingRecipe> void simpleCookingRecipe(
-		RecipeOutput recipeOutput,
-		String string,
-		RecipeSerializer<T> recipeSerializer,
-		AbstractCookingRecipe.Factory<T> factory,
-		int i,
-		ItemLike itemLike,
-		ItemLike itemLike2,
-		float f
+	private <T extends AbstractCookingRecipe> void simpleCookingRecipe(
+		String string, RecipeSerializer<T> recipeSerializer, AbstractCookingRecipe.Factory<T> factory, int i, ItemLike itemLike, ItemLike itemLike2, float f
 	) {
 		SimpleCookingRecipeBuilder.generic(Ingredient.of(itemLike), RecipeCategory.FOOD, itemLike2, f, i, recipeSerializer, factory)
-			.unlockedBy(getHasName(itemLike), has(itemLike))
-			.save(recipeOutput, getItemName(itemLike2) + "_from_" + string);
+			.unlockedBy(getHasName(itemLike), this.has(itemLike))
+			.save(this.output, getItemName(itemLike2) + "_from_" + string);
 	}
 
-	protected static void waxRecipes(RecipeOutput recipeOutput, FeatureFlagSet featureFlagSet) {
+	protected void waxRecipes(FeatureFlagSet featureFlagSet) {
 		((BiMap)HoneycombItem.WAXABLES.get())
 			.forEach(
 				(block, block2) -> {
 					if (block2.requiredFeatures().isSubsetOf(featureFlagSet)) {
-						ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, block2)
+						this.shapeless(RecipeCategory.BUILDING_BLOCKS, block2)
 							.requires(block)
 							.requires(Items.HONEYCOMB)
 							.group(getItemName(block2))
-							.unlockedBy(getHasName(block), has(block))
-							.save(recipeOutput, getConversionRecipeName(block2, Items.HONEYCOMB));
+							.unlockedBy(getHasName(block), this.has(block))
+							.save(this.output, getConversionRecipeName(block2, Items.HONEYCOMB));
 					}
 				}
 			);
 	}
 
-	protected static void grate(RecipeOutput recipeOutput, Block block, Block block2) {
-		ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, block, 4)
+	protected void grate(Block block, Block block2) {
+		this.shaped(RecipeCategory.BUILDING_BLOCKS, block, 4)
 			.define('M', block2)
 			.pattern(" M ")
 			.pattern("M M")
 			.pattern(" M ")
-			.unlockedBy(getHasName(block2), has(block2))
-			.save(recipeOutput);
+			.unlockedBy(getHasName(block2), this.has(block2))
+			.save(this.output);
 	}
 
-	protected static void copperBulb(RecipeOutput recipeOutput, Block block, Block block2) {
-		ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, block, 4)
+	protected void copperBulb(Block block, Block block2) {
+		this.shaped(RecipeCategory.REDSTONE, block, 4)
 			.define('C', block2)
 			.define('R', Items.REDSTONE)
 			.define('B', Items.BLAZE_ROD)
 			.pattern(" C ")
 			.pattern("CBC")
 			.pattern(" R ")
-			.unlockedBy(getHasName(block2), has(block2))
-			.save(recipeOutput);
+			.unlockedBy(getHasName(block2), this.has(block2))
+			.save(this.output);
 	}
 
-	protected static void generateRecipes(RecipeOutput recipeOutput, BlockFamily blockFamily, FeatureFlagSet featureFlagSet) {
+	protected void suspiciousStew(Item item, SuspiciousEffectHolder suspiciousEffectHolder) {
+		ItemStack itemStack = new ItemStack(
+			Items.SUSPICIOUS_STEW.builtInRegistryHolder(),
+			1,
+			DataComponentPatch.builder().set(DataComponents.SUSPICIOUS_STEW_EFFECTS, suspiciousEffectHolder.getSuspiciousEffects()).build()
+		);
+		this.shapeless(RecipeCategory.FOOD, itemStack)
+			.requires(Items.BOWL)
+			.requires(Items.BROWN_MUSHROOM)
+			.requires(Items.RED_MUSHROOM)
+			.requires(item)
+			.group("suspicious_stew")
+			.unlockedBy(getHasName(item), this.has(item))
+			.save(this.output, getItemName(itemStack.getItem()) + "_from_" + getItemName(item));
+	}
+
+	protected void generateRecipes(BlockFamily blockFamily, FeatureFlagSet featureFlagSet) {
 		blockFamily.getVariants()
 			.forEach(
 				(variant, block) -> {
 					if (block.requiredFeatures().isSubsetOf(featureFlagSet)) {
-						BiFunction<ItemLike, ItemLike, RecipeBuilder> biFunction = (BiFunction<ItemLike, ItemLike, RecipeBuilder>)SHAPE_BUILDERS.get(variant);
-						ItemLike itemLike = getBaseBlock(blockFamily, variant);
-						if (biFunction != null) {
-							RecipeBuilder recipeBuilder = (RecipeBuilder)biFunction.apply(block, itemLike);
+						RecipeProvider.FamilyRecipeProvider familyRecipeProvider = (RecipeProvider.FamilyRecipeProvider)SHAPE_BUILDERS.get(variant);
+						ItemLike itemLike = this.getBaseBlock(blockFamily, variant);
+						if (familyRecipeProvider != null) {
+							RecipeBuilder recipeBuilder = familyRecipeProvider.create(this, block, itemLike);
 							blockFamily.getRecipeGroupPrefix()
 								.ifPresent(string -> recipeBuilder.group(string + (variant == BlockFamily.Variant.CUT ? "" : "_" + variant.getRecipeGroup())));
-							recipeBuilder.unlockedBy((String)blockFamily.getRecipeUnlockedBy().orElseGet(() -> getHasName(itemLike)), has(itemLike));
-							recipeBuilder.save(recipeOutput);
+							recipeBuilder.unlockedBy((String)blockFamily.getRecipeUnlockedBy().orElseGet(() -> getHasName(itemLike)), this.has(itemLike));
+							recipeBuilder.save(this.output);
 						}
 
 						if (variant == BlockFamily.Variant.CRACKED) {
-							smeltingResultFromBase(recipeOutput, block, itemLike);
+							this.smeltingResultFromBase(block, itemLike);
 						}
 					}
 				}
 			);
 	}
 
-	private static Block getBaseBlock(BlockFamily blockFamily, BlockFamily.Variant variant) {
+	private Block getBaseBlock(BlockFamily blockFamily, BlockFamily.Variant variant) {
 		if (variant == BlockFamily.Variant.CHISELED) {
 			if (!blockFamily.getVariants().containsKey(BlockFamily.Variant.SLAB)) {
 				throw new IllegalStateException("Slab is not defined for the family.");
@@ -677,16 +635,16 @@ public abstract class RecipeProvider implements DataProvider {
 			.createCriterion(new EnterBlockTrigger.TriggerInstance(Optional.empty(), Optional.of(block.builtInRegistryHolder()), Optional.empty()));
 	}
 
-	private static Criterion<InventoryChangeTrigger.TriggerInstance> has(MinMaxBounds.Ints ints, ItemLike itemLike) {
-		return inventoryTrigger(ItemPredicate.Builder.item().of(itemLike).withCount(ints));
+	private Criterion<InventoryChangeTrigger.TriggerInstance> has(MinMaxBounds.Ints ints, ItemLike itemLike) {
+		return inventoryTrigger(ItemPredicate.Builder.item().of(this.items, itemLike).withCount(ints));
 	}
 
-	protected static Criterion<InventoryChangeTrigger.TriggerInstance> has(ItemLike itemLike) {
-		return inventoryTrigger(ItemPredicate.Builder.item().of(itemLike));
+	protected Criterion<InventoryChangeTrigger.TriggerInstance> has(ItemLike itemLike) {
+		return inventoryTrigger(ItemPredicate.Builder.item().of(this.items, itemLike));
 	}
 
-	protected static Criterion<InventoryChangeTrigger.TriggerInstance> has(TagKey<Item> tagKey) {
-		return inventoryTrigger(ItemPredicate.Builder.item().of(tagKey));
+	protected Criterion<InventoryChangeTrigger.TriggerInstance> has(TagKey<Item> tagKey) {
+		return inventoryTrigger(ItemPredicate.Builder.item().of(this.items, tagKey));
 	}
 
 	private static Criterion<InventoryChangeTrigger.TriggerInstance> inventoryTrigger(ItemPredicate.Builder... builders) {
@@ -722,8 +680,93 @@ public abstract class RecipeProvider implements DataProvider {
 		return getItemName(itemLike) + "_from_blasting";
 	}
 
-	@Override
-	public final String getName() {
-		return "Recipes";
+	protected Ingredient tag(TagKey<Item> tagKey) {
+		return Ingredient.of(this.items.getOrThrow(tagKey));
+	}
+
+	protected ShapedRecipeBuilder shaped(RecipeCategory recipeCategory, ItemLike itemLike) {
+		return ShapedRecipeBuilder.shaped(this.items, recipeCategory, itemLike);
+	}
+
+	protected ShapedRecipeBuilder shaped(RecipeCategory recipeCategory, ItemLike itemLike, int i) {
+		return ShapedRecipeBuilder.shaped(this.items, recipeCategory, itemLike, i);
+	}
+
+	protected ShapelessRecipeBuilder shapeless(RecipeCategory recipeCategory, ItemStack itemStack) {
+		return ShapelessRecipeBuilder.shapeless(this.items, recipeCategory, itemStack);
+	}
+
+	protected ShapelessRecipeBuilder shapeless(RecipeCategory recipeCategory, ItemLike itemLike) {
+		return ShapelessRecipeBuilder.shapeless(this.items, recipeCategory, itemLike);
+	}
+
+	protected ShapelessRecipeBuilder shapeless(RecipeCategory recipeCategory, ItemLike itemLike, int i) {
+		return ShapelessRecipeBuilder.shapeless(this.items, recipeCategory, itemLike, i);
+	}
+
+	@FunctionalInterface
+	interface FamilyRecipeProvider {
+		RecipeBuilder create(RecipeProvider recipeProvider, ItemLike itemLike, ItemLike itemLike2);
+	}
+
+	protected abstract static class Runner implements DataProvider {
+		private final PackOutput packOutput;
+		private final CompletableFuture<HolderLookup.Provider> registries;
+
+		protected Runner(PackOutput packOutput, CompletableFuture<HolderLookup.Provider> completableFuture) {
+			this.packOutput = packOutput;
+			this.registries = completableFuture;
+		}
+
+		@Override
+		public final CompletableFuture<?> run(CachedOutput cachedOutput) {
+			return this.registries
+				.thenCompose(
+					provider -> {
+						final PackOutput.PathProvider pathProvider = this.packOutput.createRegistryElementsPathProvider(Registries.RECIPE);
+						final PackOutput.PathProvider pathProvider2 = this.packOutput.createRegistryElementsPathProvider(Registries.ADVANCEMENT);
+						final Set<ResourceLocation> set = Sets.<ResourceLocation>newHashSet();
+						final List<CompletableFuture<?>> list = new ArrayList();
+						RecipeOutput recipeOutput = new RecipeOutput() {
+							@Override
+							public void accept(ResourceLocation resourceLocation, Recipe<?> recipe, @Nullable AdvancementHolder advancementHolder) {
+								if (!set.add(resourceLocation)) {
+									throw new IllegalStateException("Duplicate recipe " + resourceLocation);
+								} else {
+									this.saveRecipe(resourceLocation, recipe);
+									if (advancementHolder != null) {
+										this.saveAdvancement(advancementHolder);
+									}
+								}
+							}
+
+							@Override
+							public Advancement.Builder advancement() {
+								return Advancement.Builder.recipeAdvancement().parent(RecipeBuilder.ROOT_RECIPE_ADVANCEMENT);
+							}
+
+							@Override
+							public void includeRootAdvancement() {
+								AdvancementHolder advancementHolder = Advancement.Builder.recipeAdvancement()
+									.addCriterion("impossible", CriteriaTriggers.IMPOSSIBLE.createCriterion(new ImpossibleTrigger.TriggerInstance()))
+									.build(RecipeBuilder.ROOT_RECIPE_ADVANCEMENT);
+								this.saveAdvancement(advancementHolder);
+							}
+
+							private void saveRecipe(ResourceLocation resourceLocation, Recipe<?> recipe) {
+								list.add(DataProvider.saveStable(cachedOutput, provider, Recipe.CODEC, recipe, pathProvider.json(resourceLocation)));
+							}
+
+							private void saveAdvancement(AdvancementHolder advancementHolder) {
+								list.add(DataProvider.saveStable(cachedOutput, provider, Advancement.CODEC, advancementHolder.value(), pathProvider2.json(advancementHolder.id())));
+							}
+						};
+						this.createRecipeProvider(provider, recipeOutput).buildRecipes();
+						return CompletableFuture.allOf((CompletableFuture[])list.toArray(CompletableFuture[]::new));
+					}
+				);
+		}
+
+		protected abstract RecipeProvider createRecipeProvider(HolderLookup.Provider provider, RecipeOutput recipeOutput);
 	}
 }

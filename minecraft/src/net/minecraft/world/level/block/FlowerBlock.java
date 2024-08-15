@@ -44,7 +44,7 @@ public class FlowerBlock extends BushBlock implements SuspiciousEffectHolder {
 
 	@Override
 	protected VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
-		Vec3 vec3 = blockState.getOffset(blockGetter, blockPos);
+		Vec3 vec3 = blockState.getOffset(blockPos);
 		return SHAPE.move(vec3.x, vec3.y, vec3.z);
 	}
 

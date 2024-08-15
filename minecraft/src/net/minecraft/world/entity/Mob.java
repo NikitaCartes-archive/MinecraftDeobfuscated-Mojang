@@ -13,6 +13,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.Vec3i;
 import net.minecraft.core.component.DataComponentMap;
@@ -39,6 +40,7 @@ import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -93,6 +95,7 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Leashab
 	private static final int MOB_FLAG_AGGRESSIVE = 4;
 	protected static final int PICKUP_REACH = 1;
 	private static final Vec3i ITEM_PICKUP_REACH = new Vec3i(1, 0, 1);
+	private static final List<EquipmentSlot> EQUIPMENT_POPULATION_ORDER = List.of(EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET);
 	public static final float MAX_WEARING_ARMOR_CHANCE = 0.15F;
 	public static final float MAX_PICKUP_LOOT_CHANCE = 0.55F;
 	public static final float MAX_ENCHANTED_ARMOR_CHANCE = 0.5F;
@@ -429,7 +432,7 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Leashab
 	@Override
 	public void readAdditionalSaveData(CompoundTag compoundTag) {
 		super.readAdditionalSaveData(compoundTag);
-		if (compoundTag.contains("CanPickUpLoot", 1)) {
+		if (compoundTag.contains("CanPickUpLoot", 99)) {
 			this.setCanPickUpLoot(compoundTag.getBoolean("CanPickUpLoot"));
 		}
 
@@ -822,13 +825,13 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Leashab
 	}
 
 	public static boolean checkMobSpawnRules(
-		EntityType<? extends Mob> entityType, LevelAccessor levelAccessor, MobSpawnType mobSpawnType, BlockPos blockPos, RandomSource randomSource
+		EntityType<? extends Mob> entityType, LevelAccessor levelAccessor, EntitySpawnReason entitySpawnReason, BlockPos blockPos, RandomSource randomSource
 	) {
 		BlockPos blockPos2 = blockPos.below();
-		return mobSpawnType == MobSpawnType.SPAWNER || levelAccessor.getBlockState(blockPos2).isValidSpawn(levelAccessor, blockPos2, entityType);
+		return EntitySpawnReason.isSpawner(entitySpawnReason) || levelAccessor.getBlockState(blockPos2).isValidSpawn(levelAccessor, blockPos2, entityType);
 	}
 
-	public boolean checkSpawnRules(LevelAccessor levelAccessor, MobSpawnType mobSpawnType) {
+	public boolean checkSpawnRules(LevelAccessor levelAccessor, EntitySpawnReason entitySpawnReason) {
 		return true;
 	}
 
@@ -1021,19 +1024,17 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Leashab
 
 			boolean bl = true;
 
-			for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
-				if (equipmentSlot.getType() == EquipmentSlot.Type.HUMANOID_ARMOR) {
-					ItemStack itemStack = this.getItemBySlot(equipmentSlot);
-					if (!bl && randomSource.nextFloat() < f) {
-						break;
-					}
+			for (EquipmentSlot equipmentSlot : EQUIPMENT_POPULATION_ORDER) {
+				ItemStack itemStack = this.getItemBySlot(equipmentSlot);
+				if (!bl && randomSource.nextFloat() < f) {
+					break;
+				}
 
-					bl = false;
-					if (itemStack.isEmpty()) {
-						Item item = getEquipmentForSlot(equipmentSlot, i);
-						if (item != null) {
-							this.setItemSlot(equipmentSlot, new ItemStack(item));
-						}
+				bl = false;
+				if (itemStack.isEmpty()) {
+					Item item = getEquipmentForSlot(equipmentSlot, i);
+					if (item != null) {
+						this.setItemSlot(equipmentSlot, new ItemStack(item));
 					}
 				}
 			}
@@ -1130,7 +1131,7 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Leashab
 
 	@Nullable
 	public SpawnGroupData finalizeSpawn(
-		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, MobSpawnType mobSpawnType, @Nullable SpawnGroupData spawnGroupData
+		ServerLevelAccessor serverLevelAccessor, DifficultyInstance difficultyInstance, EntitySpawnReason entitySpawnReason, @Nullable SpawnGroupData spawnGroupData
 	) {
 		RandomSource randomSource = serverLevelAccessor.getRandom();
 		AttributeInstance attributeInstance = (AttributeInstance)Objects.requireNonNull(this.getAttribute(Attributes.FOLLOW_RANGE));
@@ -1222,10 +1223,12 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Leashab
 					player, this, (EntityType<? extends Mob>)this.getType(), (ServerLevel)this.level(), this.position(), itemStack
 				);
 				optional.ifPresent(mob -> this.onOffspringSpawnedFromEgg(player, mob));
-				return optional.isPresent() ? InteractionResult.SUCCESS : InteractionResult.PASS;
-			} else {
-				return InteractionResult.CONSUME;
+				if (optional.isEmpty()) {
+					return InteractionResult.PASS;
+				}
 			}
+
+			return InteractionResult.SUCCESS_SERVER;
 		} else {
 			return InteractionResult.PASS;
 		}
@@ -1272,7 +1275,7 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Leashab
 		if (this.isRemoved()) {
 			return null;
 		} else {
-			T mob = (T)entityType.create(this.level());
+			T mob = (T)entityType.create(this.level(), EntitySpawnReason.CONVERSION);
 			if (mob == null) {
 				return null;
 			} else {
@@ -1417,9 +1420,10 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Leashab
 	@Override
 	public boolean doHurtTarget(Entity entity) {
 		float f = (float)this.getAttributeValue(Attributes.ATTACK_DAMAGE);
+		ItemStack itemStack = this.getWeaponItem();
 		DamageSource damageSource = this.damageSources().mobAttack(this);
 		if (this.level() instanceof ServerLevel serverLevel) {
-			f = EnchantmentHelper.modifyDamage(serverLevel, this.getWeaponItem(), entity, damageSource, f);
+			f = EnchantmentHelper.modifyDamage(serverLevel, itemStack, entity, damageSource, f);
 		}
 
 		boolean bl = entity.hurt(damageSource, f);
@@ -1433,6 +1437,10 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Leashab
 			}
 
 			if (this.level() instanceof ServerLevel serverLevel2) {
+				if (entity instanceof LivingEntity livingEntity2) {
+					itemStack.hurtEnemy(livingEntity2, this);
+				}
+
 				EnchantmentHelper.doPostAttackEffects(serverLevel2, entity, damageSource);
 			}
 
@@ -1493,5 +1501,13 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Leashab
 	public ItemStack getPickResult() {
 		SpawnEggItem spawnEggItem = SpawnEggItem.byId(this.getType());
 		return spawnEggItem == null ? null : new ItemStack(spawnEggItem);
+	}
+
+	@Override
+	protected void onAttributeUpdated(Holder<Attribute> holder) {
+		super.onAttributeUpdated(holder);
+		if (holder.is(Attributes.FOLLOW_RANGE) || holder.is(Attributes.TEMPT_RANGE)) {
+			this.getNavigation().updatePathfinderMaxVisitedNodes();
+		}
 	}
 }

@@ -27,6 +27,7 @@ import net.minecraft.client.particle.FireworkParticles;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.BiomeColors;
 import net.minecraft.client.renderer.DimensionSpecialEffects;
+import net.minecraft.client.renderer.LevelEventHandler;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.resources.sounds.EntityBoundSoundInstance;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
@@ -45,12 +46,14 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.CubicSampler;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.TickRateManager;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.flag.FeatureFlagSet;
@@ -63,14 +66,15 @@ import net.minecraft.world.item.component.FireworkExplosion;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.ColorResolver;
+import net.minecraft.world.level.ExplosionDamageCalculator;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.FuelValues;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.dimension.DimensionType;
@@ -101,13 +105,14 @@ public class ClientLevel extends Level {
 	private final TransientEntitySectionManager<Entity> entityStorage = new TransientEntitySectionManager<>(Entity.class, new ClientLevel.EntityCallbacks());
 	private final ClientPacketListener connection;
 	private final LevelRenderer levelRenderer;
+	private final LevelEventHandler levelEventHandler;
 	private final ClientLevel.ClientLevelData clientLevelData;
 	private final DimensionSpecialEffects effects;
 	private final TickRateManager tickRateManager;
 	private final Minecraft minecraft = Minecraft.getInstance();
 	final List<AbstractClientPlayer> players = Lists.<AbstractClientPlayer>newArrayList();
 	private final Map<MapId, MapItemSavedData> mapData = Maps.<MapId, MapItemSavedData>newHashMap();
-	private static final long CLOUD_COLOR = 16777215L;
+	private static final int CLOUD_COLOR = -1;
 	private int skyFlashTime;
 	private final Object2ObjectArrayMap<ColorResolver, BlockTintCache> tintCaches = Util.make(
 		new Object2ObjectArrayMap<>(3),
@@ -127,6 +132,7 @@ public class ClientLevel extends Level {
 	private final Deque<Runnable> lightUpdateQueue = Queues.<Runnable>newArrayDeque();
 	private int serverSimulationDistance;
 	private final BlockStatePredictionHandler blockStatePredictionHandler = new BlockStatePredictionHandler();
+	private final int seaLevel;
 	private static final Set<Item> MARKER_PARTICLE_ITEMS = Set.of(Items.BARRIER, Items.LIGHT);
 
 	public void handleBlockChangedAck(int i) {
@@ -179,7 +185,8 @@ public class ClientLevel extends Level {
 		Supplier<ProfilerFiller> supplier,
 		LevelRenderer levelRenderer,
 		boolean bl,
-		long l
+		long l,
+		int k
 	) {
 		super(clientLevelData, resourceKey, clientPacketListener.registryAccess(), holder, supplier, true, bl, l, 1000000);
 		this.connection = clientPacketListener;
@@ -187,6 +194,8 @@ public class ClientLevel extends Level {
 		this.tickRateManager = new TickRateManager();
 		this.clientLevelData = clientLevelData;
 		this.levelRenderer = levelRenderer;
+		this.seaLevel = k;
+		this.levelEventHandler = new LevelEventHandler(this.minecraft, this, levelRenderer);
 		this.effects = DimensionSpecialEffects.forType(holder.value());
 		this.setDefaultSpawnPos(new BlockPos(8, 64, 8), 0.0F);
 		this.serverSimulationDistance = j;
@@ -210,10 +219,6 @@ public class ClientLevel extends Level {
 
 			runnable.run();
 		}
-	}
-
-	public boolean isLightUpdateQueueEmpty() {
-		return this.lightUpdateQueue.isEmpty();
 	}
 
 	public DimensionSpecialEffects effects() {
@@ -271,6 +276,10 @@ public class ClientLevel extends Level {
 		});
 		profilerFiller.pop();
 		this.tickBlockEntities();
+	}
+
+	public boolean isTickingEntity(Entity entity) {
+		return this.tickingEntities.contains(entity);
 	}
 
 	@Override
@@ -596,6 +605,10 @@ public class ClientLevel extends Level {
 		this.levelRenderer.setSectionDirtyWithNeighbors(i, j, k);
 	}
 
+	public void setSectionRangeDirty(int i, int j, int k, int l, int m, int n) {
+		this.levelRenderer.setSectionRangeDirty(i, j, k, l, m, n);
+	}
+
 	@Override
 	public void destroyBlockProgress(int i, BlockPos blockPos, int j) {
 		this.levelRenderer.destroyBlockProgress(i, blockPos, j);
@@ -603,13 +616,13 @@ public class ClientLevel extends Level {
 
 	@Override
 	public void globalLevelEvent(int i, BlockPos blockPos, int j) {
-		this.levelRenderer.globalLevelEvent(i, blockPos, j);
+		this.levelEventHandler.globalLevelEvent(i, blockPos, j);
 	}
 
 	@Override
 	public void levelEvent(@Nullable Player player, int i, BlockPos blockPos, int j) {
 		try {
-			this.levelRenderer.levelEvent(i, blockPos, j);
+			this.levelEventHandler.levelEvent(i, blockPos, j);
 		} catch (Throwable var8) {
 			CrashReport crashReport = CrashReport.forThrowable(var8, "Playing level event");
 			CrashReportCategory crashReportCategory = crashReport.addCategory("Level event being played");
@@ -661,79 +674,61 @@ public class ClientLevel extends Level {
 		return h * 0.8F + 0.2F;
 	}
 
-	public Vec3 getSkyColor(Vec3 vec3, float f) {
+	public int getSkyColor(Vec3 vec3, float f) {
 		float g = this.getTimeOfDay(f);
 		Vec3 vec32 = vec3.subtract(2.0, 2.0, 2.0).scale(0.25);
-		BiomeManager biomeManager = this.getBiomeManager();
-		Vec3 vec33 = CubicSampler.gaussianSampleVec3(vec32, (ix, jx, kx) -> Vec3.fromRGB24(biomeManager.getNoiseBiomeAtQuart(ix, jx, kx).value().getSkyColor()));
+		Vec3 vec33 = CubicSampler.gaussianSampleVec3(
+			vec32, (ix, jx, kx) -> Vec3.fromRGB24(this.getBiomeManager().getNoiseBiomeAtQuart(ix, jx, kx).value().getSkyColor())
+		);
 		float h = Mth.cos(g * (float) (Math.PI * 2)) * 2.0F + 0.5F;
 		h = Mth.clamp(h, 0.0F, 1.0F);
-		float i = (float)vec33.x * h;
-		float j = (float)vec33.y * h;
-		float k = (float)vec33.z * h;
-		float l = this.getRainLevel(f);
-		if (l > 0.0F) {
-			float m = (i * 0.3F + j * 0.59F + k * 0.11F) * 0.6F;
-			float n = 1.0F - l * 0.75F;
-			i = i * n + m * (1.0F - n);
-			j = j * n + m * (1.0F - n);
-			k = k * n + m * (1.0F - n);
+		vec33 = vec33.scale((double)h);
+		int i = ARGB.color(vec33);
+		float j = this.getRainLevel(f);
+		if (j > 0.0F) {
+			float k = 0.6F;
+			float l = j * 0.75F;
+			int m = ARGB.scaleRGB(ARGB.greyscale(i), 0.6F);
+			i = ARGB.lerp(l, i, m);
 		}
 
-		float m = this.getThunderLevel(f);
-		if (m > 0.0F) {
-			float n = (i * 0.3F + j * 0.59F + k * 0.11F) * 0.2F;
-			float o = 1.0F - m * 0.75F;
-			i = i * o + n * (1.0F - o);
-			j = j * o + n * (1.0F - o);
-			k = k * o + n * (1.0F - o);
+		float k = this.getThunderLevel(f);
+		if (k > 0.0F) {
+			float l = 0.2F;
+			float n = k * 0.75F;
+			int o = ARGB.scaleRGB(ARGB.greyscale(i), 0.2F);
+			i = ARGB.lerp(n, i, o);
 		}
 
 		int p = this.getSkyFlashTime();
 		if (p > 0) {
-			float o = (float)p - f;
-			if (o > 1.0F) {
-				o = 1.0F;
-			}
-
-			o *= 0.45F;
-			i = i * (1.0F - o) + 0.8F * o;
-			j = j * (1.0F - o) + 0.8F * o;
-			k = k * (1.0F - o) + 1.0F * o;
+			float n = Math.min((float)p - f, 1.0F);
+			n *= 0.45F;
+			i = ARGB.lerp(n, i, ARGB.color(204, 204, 255));
 		}
 
-		return new Vec3((double)i, (double)j, (double)k);
+		return i;
 	}
 
-	public Vec3 getCloudColor(float f) {
-		float g = this.getTimeOfDay(f);
-		float h = Mth.cos(g * (float) (Math.PI * 2)) * 2.0F + 0.5F;
-		h = Mth.clamp(h, 0.0F, 1.0F);
-		float i = 1.0F;
-		float j = 1.0F;
-		float k = 1.0F;
-		float l = this.getRainLevel(f);
+	public int getCloudColor(float f) {
+		int i = -1;
+		float g = this.getRainLevel(f);
+		if (g > 0.0F) {
+			int j = ARGB.scaleRGB(ARGB.greyscale(i), 0.6F);
+			i = ARGB.lerp(g * 0.95F, i, j);
+		}
+
+		float h = this.getTimeOfDay(f);
+		float k = Mth.cos(h * (float) (Math.PI * 2)) * 2.0F + 0.5F;
+		k = Mth.clamp(k, 0.0F, 1.0F);
+		i = ARGB.multiply(i, ARGB.colorFromFloat(1.0F, k * 0.9F + 0.1F, k * 0.9F + 0.1F, k * 0.85F + 0.15F));
+		float l = this.getThunderLevel(f);
 		if (l > 0.0F) {
-			float m = (i * 0.3F + j * 0.59F + k * 0.11F) * 0.6F;
-			float n = 1.0F - l * 0.95F;
-			i = i * n + m * (1.0F - n);
-			j = j * n + m * (1.0F - n);
-			k = k * n + m * (1.0F - n);
+			int m = ARGB.scaleRGB(ARGB.greyscale(i), 0.2F);
+			i = ARGB.lerp(l * 0.95F, i, m);
 		}
 
-		i *= h * 0.9F + 0.1F;
-		j *= h * 0.9F + 0.1F;
-		k *= h * 0.85F + 0.15F;
-		float m = this.getThunderLevel(f);
-		if (m > 0.0F) {
-			float n = (i * 0.3F + j * 0.59F + k * 0.11F) * 0.2F;
-			float o = 1.0F - m * 0.95F;
-			i = i * o + n * (1.0F - o);
-			j = j * o + n * (1.0F - o);
-			k = k * o + n * (1.0F - o);
-		}
-
-		return new Vec3((double)i, (double)j, (double)k);
+		return i;
 	}
 
 	public float getStarBrightness(float f) {
@@ -862,6 +857,33 @@ public class ClientLevel extends Level {
 		return this.connection.potionBrewing();
 	}
 
+	@Override
+	public FuelValues fuelValues() {
+		return this.connection.fuelValues();
+	}
+
+	@Override
+	public void explode(
+		@Nullable Entity entity,
+		@Nullable DamageSource damageSource,
+		@Nullable ExplosionDamageCalculator explosionDamageCalculator,
+		double d,
+		double e,
+		double f,
+		float g,
+		boolean bl,
+		Level.ExplosionInteraction explosionInteraction,
+		ParticleOptions particleOptions,
+		ParticleOptions particleOptions2,
+		Holder<SoundEvent> holder
+	) {
+	}
+
+	@Override
+	public int getSeaLevel() {
+		return this.seaLevel;
+	}
+
 	@Environment(EnvType.CLIENT)
 	public static class ClientLevelData implements WritableLevelData {
 		private final boolean hardcore;
@@ -875,11 +897,11 @@ public class ClientLevel extends Level {
 		private Difficulty difficulty;
 		private boolean difficultyLocked;
 
-		public ClientLevelData(Difficulty difficulty, boolean bl, boolean bl2) {
+		public ClientLevelData(FeatureFlagSet featureFlagSet, Difficulty difficulty, boolean bl, boolean bl2) {
 			this.difficulty = difficulty;
 			this.hardcore = bl;
 			this.isFlat = bl2;
-			this.gameRules = new GameRules();
+			this.gameRules = new GameRules(featureFlagSet);
 		}
 
 		@Override

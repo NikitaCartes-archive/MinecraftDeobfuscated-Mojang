@@ -13,4 +13,5 @@ public class DimensionDefaults {
 	public static final int END_LEVEL_HEIGHT = 256;
 	public static final int END_GENERATION_HEIGHT = 128;
 	public static final int END_LOGICAL_HEIGHT = 256;
+	public static final int END_ISLAND_BASE_Y = 63;
 }

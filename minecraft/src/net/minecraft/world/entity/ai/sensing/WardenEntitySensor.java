@@ -38,14 +38,4 @@ public class WardenEntitySensor extends NearestLivingEntitySensor<Warden> {
 			.filter(predicate)
 			.findFirst();
 	}
-
-	@Override
-	protected int radiusXZ() {
-		return 24;
-	}
-
-	@Override
-	protected int radiusY() {
-		return 24;
-	}
 }

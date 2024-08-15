@@ -21,7 +21,7 @@ public class SaddleItem extends Item {
 				livingEntity.level().gameEvent(livingEntity, GameEvent.EQUIP, livingEntity.position());
 			}
 
-			return InteractionResult.sidedSuccess(player.level().isClientSide);
+			return InteractionResult.SUCCESS;
 		}
 
 		return InteractionResult.PASS;

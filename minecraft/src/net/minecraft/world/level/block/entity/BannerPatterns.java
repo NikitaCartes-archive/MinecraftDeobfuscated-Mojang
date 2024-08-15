@@ -86,10 +86,10 @@ public class BannerPatterns {
 		register(bootstrapContext, HALF_VERTICAL_MIRROR);
 		register(bootstrapContext, HALF_HORIZONTAL_MIRROR);
 		register(bootstrapContext, BORDER);
-		register(bootstrapContext, CURLY_BORDER);
 		register(bootstrapContext, GRADIENT);
 		register(bootstrapContext, GRADIENT_UP);
 		register(bootstrapContext, BRICKS);
+		register(bootstrapContext, CURLY_BORDER);
 		register(bootstrapContext, GLOBE);
 		register(bootstrapContext, CREEPER);
 		register(bootstrapContext, SKULL);

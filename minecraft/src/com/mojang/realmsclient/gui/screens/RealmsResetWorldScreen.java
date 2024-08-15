@@ -28,10 +28,12 @@ import net.minecraft.client.gui.layouts.LayoutSettings;
 import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.client.gui.layouts.SpacerElement;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.realms.RealmsScreen;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.ARGB;
 import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
@@ -273,17 +275,17 @@ public class RealmsResetWorldScreen extends RealmsScreen {
 		@Override
 		public void renderWidget(GuiGraphics guiGraphics, int i, int j, float f) {
 			boolean bl = this.isHoveredOrFocused();
+			int k = -1;
 			if (bl) {
-				guiGraphics.setColor(0.56F, 0.56F, 0.56F, 1.0F);
+				k = ARGB.colorFromFloat(1.0F, 0.56F, 0.56F, 0.56F);
 			}
 
-			int k = this.getX();
-			int l = this.getY();
-			guiGraphics.blit(this.image, k + 2, l + 2, 0.0F, 0.0F, 56, 56, 56, 56);
-			guiGraphics.blitSprite(SLOT_FRAME_SPRITE, k, l, 60, 60);
-			guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
-			int m = bl ? -6250336 : -1;
-			guiGraphics.drawCenteredString(RealmsResetWorldScreen.this.font, this.getMessage(), k + 28, l - 14, m);
+			int l = this.getX();
+			int m = this.getY();
+			guiGraphics.blit(RenderType::guiTextured, this.image, l + 2, m + 2, 0.0F, 0.0F, 56, 56, 56, 56, 56, 56, k);
+			guiGraphics.blitSprite(RenderType::guiTextured, SLOT_FRAME_SPRITE, l, m, 60, 60, k);
+			int n = bl ? -6250336 : -1;
+			guiGraphics.drawCenteredString(RealmsResetWorldScreen.this.font, this.getMessage(), l + 28, m - 14, n);
 		}
 	}
 }

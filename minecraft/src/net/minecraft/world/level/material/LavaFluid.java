@@ -45,7 +45,7 @@ public abstract class LavaFluid extends FlowingFluid {
 	@Override
 	public void animateTick(Level level, BlockPos blockPos, FluidState fluidState, RandomSource randomSource) {
 		BlockPos blockPos2 = blockPos.above();
-		if (level.getBlockState(blockPos2).isAir() && !level.getBlockState(blockPos2).isSolidRender(level, blockPos2)) {
+		if (level.getBlockState(blockPos2).isAir() && !level.getBlockState(blockPos2).isSolidRender()) {
 			if (randomSource.nextInt(100) == 0) {
 				double d = (double)blockPos.getX() + randomSource.nextDouble();
 				double e = (double)blockPos.getY() + 1.0;

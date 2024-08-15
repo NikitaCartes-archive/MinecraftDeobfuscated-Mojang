@@ -273,47 +273,56 @@ public class EntitySelectorOptions {
 					entitySelectorParser.setHasTeamEquals(true);
 				}
 			}, entitySelectorParser -> !entitySelectorParser.hasTeamEquals(), Component.translatable("argument.entity.options.team.description"));
-			register("type", entitySelectorParser -> {
-				entitySelectorParser.setSuggestions((suggestionsBuilder, consumer) -> {
-					SharedSuggestionProvider.suggestResource(BuiltInRegistries.ENTITY_TYPE.keySet(), suggestionsBuilder, String.valueOf('!'));
-					SharedSuggestionProvider.suggestResource(BuiltInRegistries.ENTITY_TYPE.getTagNames().map(TagKey::location), suggestionsBuilder, "!#");
-					if (!entitySelectorParser.isTypeLimitedInversely()) {
-						SharedSuggestionProvider.suggestResource(BuiltInRegistries.ENTITY_TYPE.keySet(), suggestionsBuilder);
-						SharedSuggestionProvider.suggestResource(BuiltInRegistries.ENTITY_TYPE.getTagNames().map(TagKey::location), suggestionsBuilder, String.valueOf('#'));
-					}
+			register(
+				"type",
+				entitySelectorParser -> {
+					entitySelectorParser.setSuggestions(
+						(suggestionsBuilder, consumer) -> {
+							SharedSuggestionProvider.suggestResource(BuiltInRegistries.ENTITY_TYPE.keySet(), suggestionsBuilder, String.valueOf('!'));
+							SharedSuggestionProvider.suggestResource(BuiltInRegistries.ENTITY_TYPE.getTags().map(named -> named.key().location()), suggestionsBuilder, "!#");
+							if (!entitySelectorParser.isTypeLimitedInversely()) {
+								SharedSuggestionProvider.suggestResource(BuiltInRegistries.ENTITY_TYPE.keySet(), suggestionsBuilder);
+								SharedSuggestionProvider.suggestResource(
+									BuiltInRegistries.ENTITY_TYPE.getTags().map(named -> named.key().location()), suggestionsBuilder, String.valueOf('#')
+								);
+							}
 
-					return suggestionsBuilder.buildFuture();
-				});
-				int i = entitySelectorParser.getReader().getCursor();
-				boolean bl = entitySelectorParser.shouldInvertValue();
-				if (entitySelectorParser.isTypeLimitedInversely() && !bl) {
-					entitySelectorParser.getReader().setCursor(i);
-					throw ERROR_INAPPLICABLE_OPTION.createWithContext(entitySelectorParser.getReader(), "type");
-				} else {
-					if (bl) {
-						entitySelectorParser.setTypeLimitedInversely();
-					}
-
-					if (entitySelectorParser.isTag()) {
-						TagKey<EntityType<?>> tagKey = TagKey.create(Registries.ENTITY_TYPE, ResourceLocation.read(entitySelectorParser.getReader()));
-						entitySelectorParser.addPredicate(entity -> entity.getType().is(tagKey) != bl);
+							return suggestionsBuilder.buildFuture();
+						}
+					);
+					int i = entitySelectorParser.getReader().getCursor();
+					boolean bl = entitySelectorParser.shouldInvertValue();
+					if (entitySelectorParser.isTypeLimitedInversely() && !bl) {
+						entitySelectorParser.getReader().setCursor(i);
+						throw ERROR_INAPPLICABLE_OPTION.createWithContext(entitySelectorParser.getReader(), "type");
 					} else {
-						ResourceLocation resourceLocation = ResourceLocation.read(entitySelectorParser.getReader());
-						EntityType<?> entityType = (EntityType<?>)BuiltInRegistries.ENTITY_TYPE.getOptional(resourceLocation).orElseThrow(() -> {
-							entitySelectorParser.getReader().setCursor(i);
-							return ERROR_ENTITY_TYPE_INVALID.createWithContext(entitySelectorParser.getReader(), resourceLocation.toString());
-						});
-						if (Objects.equals(EntityType.PLAYER, entityType) && !bl) {
-							entitySelectorParser.setIncludesEntities(false);
+						if (bl) {
+							entitySelectorParser.setTypeLimitedInversely();
 						}
 
-						entitySelectorParser.addPredicate(entity -> Objects.equals(entityType, entity.getType()) != bl);
-						if (!bl) {
-							entitySelectorParser.limitToType(entityType);
+						if (entitySelectorParser.isTag()) {
+							TagKey<EntityType<?>> tagKey = TagKey.create(Registries.ENTITY_TYPE, ResourceLocation.read(entitySelectorParser.getReader()));
+							entitySelectorParser.addPredicate(entity -> entity.getType().is(tagKey) != bl);
+						} else {
+							ResourceLocation resourceLocation = ResourceLocation.read(entitySelectorParser.getReader());
+							EntityType<?> entityType = (EntityType<?>)BuiltInRegistries.ENTITY_TYPE.getOptional(resourceLocation).orElseThrow(() -> {
+								entitySelectorParser.getReader().setCursor(i);
+								return ERROR_ENTITY_TYPE_INVALID.createWithContext(entitySelectorParser.getReader(), resourceLocation.toString());
+							});
+							if (Objects.equals(EntityType.PLAYER, entityType) && !bl) {
+								entitySelectorParser.setIncludesEntities(false);
+							}
+
+							entitySelectorParser.addPredicate(entity -> Objects.equals(entityType, entity.getType()) != bl);
+							if (!bl) {
+								entitySelectorParser.limitToType(entityType);
+							}
 						}
 					}
-				}
-			}, entitySelectorParser -> !entitySelectorParser.isTypeLimited(), Component.translatable("argument.entity.options.type.description"));
+				},
+				entitySelectorParser -> !entitySelectorParser.isTypeLimited(),
+				Component.translatable("argument.entity.options.type.description")
+			);
 			register("tag", entitySelectorParser -> {
 				boolean bl = entitySelectorParser.shouldInvertValue();
 				String string = entitySelectorParser.getReader().readUnquotedString();

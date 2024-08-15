@@ -38,7 +38,7 @@ import net.minecraft.world.level.chunk.storage.RegionStorageInfo;
 import net.minecraft.world.level.chunk.storage.SectionStorage;
 import net.minecraft.world.level.chunk.storage.SimpleRegionStorage;
 
-public class PoiManager extends SectionStorage<PoiSection> {
+public class PoiManager extends SectionStorage<PoiSection, PoiSection.Packed> {
 	public static final int MAX_VILLAGE_DISTANCE = 6;
 	public static final int VILLAGE_SECTION_SIZE = 1;
 	private final PoiManager.DistanceTracker distanceTracker;
@@ -55,7 +55,9 @@ public class PoiManager extends SectionStorage<PoiSection> {
 	) {
 		super(
 			new SimpleRegionStorage(regionStorageInfo, path, dataFixer, bl, DataFixTypes.POI_CHUNK),
-			PoiSection::codec,
+			PoiSection.Packed.CODEC,
+			PoiSection::pack,
+			PoiSection.Packed::unpack,
 			PoiSection::new,
 			registryAccess,
 			chunkIOErrorReporter,
