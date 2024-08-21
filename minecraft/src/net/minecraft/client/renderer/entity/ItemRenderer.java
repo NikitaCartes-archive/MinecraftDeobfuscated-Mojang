@@ -34,16 +34,12 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.BundleItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.HalfTransparentBlock;
-import net.minecraft.world.level.block.StainedGlassPaneBlock;
 
 @Environment(EnvType.CLIENT)
 public class ItemRenderer implements ResourceManagerReloadListener {
@@ -175,15 +171,7 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 		boolean bl
 	) {
 		if (!bakedModel.isCustomRenderer() && (!itemStack.is(Items.TRIDENT) || bl)) {
-			boolean bl2;
-			if (itemDisplayContext != ItemDisplayContext.GUI && !itemDisplayContext.firstPerson() && itemStack.getItem() instanceof BlockItem blockItem) {
-				Block block = blockItem.getBlock();
-				bl2 = !(block instanceof HalfTransparentBlock) && !(block instanceof StainedGlassPaneBlock);
-			} else {
-				bl2 = true;
-			}
-
-			RenderType renderType = ItemBlockRenderTypes.getRenderType(itemStack, bl2);
+			RenderType renderType = ItemBlockRenderTypes.getRenderType(itemStack);
 			VertexConsumer vertexConsumer;
 			if (hasAnimatedTexture(itemStack) && itemStack.hasFoil()) {
 				PoseStack.Pose pose = poseStack.last().copy();
@@ -194,8 +182,6 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 				}
 
 				vertexConsumer = getCompassFoilBuffer(multiBufferSource, renderType, pose);
-			} else if (bl2) {
-				vertexConsumer = getFoilBufferDirect(multiBufferSource, renderType, true, itemStack.hasFoil());
 			} else {
 				vertexConsumer = getFoilBuffer(multiBufferSource, renderType, true, itemStack.hasFoil());
 			}
@@ -230,12 +216,6 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 		} else {
 			return multiBufferSource.getBuffer(renderType);
 		}
-	}
-
-	public static VertexConsumer getFoilBufferDirect(MultiBufferSource multiBufferSource, RenderType renderType, boolean bl, boolean bl2) {
-		return bl2
-			? VertexMultiConsumer.create(multiBufferSource.getBuffer(bl ? RenderType.glint() : RenderType.entityGlintDirect()), multiBufferSource.getBuffer(renderType))
-			: multiBufferSource.getBuffer(renderType);
 	}
 
 	private void renderQuadList(PoseStack poseStack, VertexConsumer vertexConsumer, List<BakedQuad> list, ItemStack itemStack, int i, int j) {

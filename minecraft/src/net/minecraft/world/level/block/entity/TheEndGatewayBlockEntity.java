@@ -202,7 +202,7 @@ public class TheEndGatewayBlockEntity extends TheEndPortalBlockEntity {
 		for (int j = -i; j <= i; j++) {
 			for (int k = -i; k <= i; k++) {
 				if (j != 0 || k != 0 || bl) {
-					for (int l = blockGetter.getMaxBuildHeight() - 1; l > (blockPos2 == null ? blockGetter.getMinBuildHeight() : blockPos2.getY()); l--) {
+					for (int l = blockGetter.getMaxY(); l > (blockPos2 == null ? blockGetter.getMinY() : blockPos2.getY()); l--) {
 						BlockPos blockPos3 = new BlockPos(blockPos.getX() + j, l, blockPos.getZ() + k);
 						BlockState blockState = blockGetter.getBlockState(blockPos3);
 						if (blockState.isCollisionShapeFullBlock(blockGetter, blockPos3) && (bl || !blockState.is(Blocks.BEDROCK))) {

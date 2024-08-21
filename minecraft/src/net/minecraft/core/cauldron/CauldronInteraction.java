@@ -238,24 +238,22 @@ public interface CauldronInteraction {
 	private static InteractionResult fillWaterInteraction(
 		BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, ItemStack itemStack
 	) {
-		return (InteractionResult)(isUnderWater(level, blockPos)
-			? InteractionResult.SUCCESS
-			: emptyBucket(
-				level,
-				blockPos,
-				player,
-				interactionHand,
-				itemStack,
-				Blocks.WATER_CAULDRON.defaultBlockState().setValue(LayeredCauldronBlock.LEVEL, Integer.valueOf(3)),
-				SoundEvents.BUCKET_EMPTY
-			));
+		return emptyBucket(
+			level,
+			blockPos,
+			player,
+			interactionHand,
+			itemStack,
+			Blocks.WATER_CAULDRON.defaultBlockState().setValue(LayeredCauldronBlock.LEVEL, Integer.valueOf(3)),
+			SoundEvents.BUCKET_EMPTY
+		);
 	}
 
 	private static InteractionResult fillLavaInteraction(
 		BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, ItemStack itemStack
 	) {
 		return (InteractionResult)(isUnderWater(level, blockPos)
-			? InteractionResult.SUCCESS
+			? InteractionResult.CONSUME
 			: emptyBucket(level, blockPos, player, interactionHand, itemStack, Blocks.LAVA_CAULDRON.defaultBlockState(), SoundEvents.BUCKET_EMPTY_LAVA));
 	}
 
@@ -263,7 +261,7 @@ public interface CauldronInteraction {
 		BlockState blockState, Level level, BlockPos blockPos, Player player, InteractionHand interactionHand, ItemStack itemStack
 	) {
 		return (InteractionResult)(isUnderWater(level, blockPos)
-			? InteractionResult.SUCCESS
+			? InteractionResult.CONSUME
 			: emptyBucket(
 				level,
 				blockPos,

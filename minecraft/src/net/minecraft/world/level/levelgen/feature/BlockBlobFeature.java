@@ -19,7 +19,7 @@ public class BlockBlobFeature extends Feature<BlockStateConfiguration> {
 		RandomSource randomSource = featurePlaceContext.random();
 
 		BlockStateConfiguration blockStateConfiguration;
-		for (blockStateConfiguration = featurePlaceContext.config(); blockPos.getY() > worldGenLevel.getMinBuildHeight() + 3; blockPos = blockPos.below()) {
+		for (blockStateConfiguration = featurePlaceContext.config(); blockPos.getY() > worldGenLevel.getMinY() + 3; blockPos = blockPos.below()) {
 			if (!worldGenLevel.isEmptyBlock(blockPos.below())) {
 				BlockState blockState = worldGenLevel.getBlockState(blockPos.below());
 				if (isDirt(blockState) || isStone(blockState)) {
@@ -28,7 +28,7 @@ public class BlockBlobFeature extends Feature<BlockStateConfiguration> {
 			}
 		}
 
-		if (blockPos.getY() <= worldGenLevel.getMinBuildHeight() + 3) {
+		if (blockPos.getY() <= worldGenLevel.getMinY() + 3) {
 			return false;
 		} else {
 			for (int i = 0; i < 3; i++) {

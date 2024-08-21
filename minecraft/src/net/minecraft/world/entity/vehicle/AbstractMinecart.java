@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.mojang.datafixers.util.Pair;
-import java.util.List;
 import java.util.Map;
 import javax.annotation.Nullable;
 import net.minecraft.BlockUtil;
@@ -18,17 +17,14 @@ import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
-import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.Pose;
-import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.npc.WanderingTrader;
 import net.minecraft.world.entity.player.Player;
@@ -98,18 +94,24 @@ public abstract class AbstractMinecart extends VehicleEntity {
 	}
 
 	public static AbstractMinecart createMinecart(
-		ServerLevel serverLevel, double d, double e, double f, AbstractMinecart.Type type, ItemStack itemStack, @Nullable Player player
+		Level level, double d, double e, double f, AbstractMinecart.Type type, ItemStack itemStack, @Nullable Player player
 	) {
 		AbstractMinecart abstractMinecart = (AbstractMinecart)(switch (type) {
-			case CHEST -> new MinecartChest(serverLevel, d, e, f);
-			case FURNACE -> new MinecartFurnace(serverLevel, d, e, f);
-			case TNT -> new MinecartTNT(serverLevel, d, e, f);
-			case SPAWNER -> new MinecartSpawner(serverLevel, d, e, f);
-			case HOPPER -> new MinecartHopper(serverLevel, d, e, f);
-			case COMMAND_BLOCK -> new MinecartCommandBlock(serverLevel, d, e, f);
-			default -> new Minecart(serverLevel, d, e, f);
+			case CHEST -> new MinecartChest(level, d, e, f);
+			case FURNACE -> new MinecartFurnace(level, d, e, f);
+			case TNT -> new MinecartTNT(level, d, e, f);
+			case SPAWNER -> new MinecartSpawner(level, d, e, f);
+			case HOPPER -> new MinecartHopper(level, d, e, f);
+			case COMMAND_BLOCK -> new MinecartCommandBlock(level, d, e, f);
+			default -> new Minecart(level, d, e, f);
 		});
-		EntityType.createDefaultStackConfig(serverLevel, itemStack, player).accept(abstractMinecart);
+		EntityType.createDefaultStackConfig(level, itemStack, player).accept(abstractMinecart);
+		if (abstractMinecart.getBehavior() instanceof NewMinecartBehavior newMinecartBehavior) {
+			BlockPos blockPos = abstractMinecart.getCurrentBlockPosOrRailBelow();
+			BlockState blockState = level.getBlockState(blockPos);
+			newMinecartBehavior.adjustToRails(blockPos, blockState, true);
+		}
+
 		return abstractMinecart;
 	}
 
@@ -256,40 +258,24 @@ public abstract class AbstractMinecart extends VehicleEntity {
 		this.firstTick = false;
 	}
 
-	public BlockPos getCurrentBlockPos() {
+	public boolean isFirstTick() {
+		return this.firstTick;
+	}
+
+	public BlockPos getCurrentBlockPosOrRailBelow() {
 		int i = Mth.floor(this.getX());
 		int j = Mth.floor(this.getY());
 		int k = Mth.floor(this.getZ());
-		if (this.level().getBlockState(new BlockPos(i, j - 1, k)).is(BlockTags.RAILS)) {
+		if (useExperimentalMovement(this.level())) {
+			double d = this.getY() - 0.1 - 1.0E-5F;
+			if (this.level().getBlockState(BlockPos.containing((double)i, d, (double)k)).is(BlockTags.RAILS)) {
+				j = Mth.floor(d);
+			}
+		} else if (this.level().getBlockState(new BlockPos(i, j - 1, k)).is(BlockTags.RAILS)) {
 			j--;
 		}
 
 		return new BlockPos(i, j, k);
-	}
-
-	public boolean pushOrPickUpEntities(AABB aABB, double d) {
-		boolean bl = false;
-		if (this.getMinecartType() == AbstractMinecart.Type.RIDEABLE && this.getDeltaMovement().horizontalDistanceSqr() >= d) {
-			List<Entity> list = this.level().getEntities(this, aABB, EntitySelector.pushableBy(this));
-			if (!list.isEmpty()) {
-				for (Entity entity : list) {
-					if (!(entity instanceof Player) && !(entity instanceof IronGolem) && !(entity instanceof AbstractMinecart) && !this.isVehicle() && !entity.isPassenger()) {
-						entity.startRiding(this);
-						bl = true;
-					} else {
-						entity.push(this);
-					}
-				}
-			}
-		} else {
-			for (Entity entity2 : this.level().getEntities(this, aABB)) {
-				if (!this.hasPassenger(entity2) && entity2.isPushable() && entity2 instanceof AbstractMinecart) {
-					entity2.push(this);
-				}
-			}
-		}
-
-		return bl;
 	}
 
 	protected double getMaxSpeed() {
@@ -386,11 +372,13 @@ public abstract class AbstractMinecart extends VehicleEntity {
 		if (useExperimentalMovement(this.level())) {
 			Vec3 vec32 = this.position().add(vec3);
 			super.move(moverType, vec3);
-			if (this.horizontalCollision || this.verticalCollision) {
-				boolean bl = this.pushOrPickUpEntities(this.getBoundingBox().inflate(1.0E-7), 0.0);
-				if (bl) {
-					super.move(moverType, vec32.subtract(this.position()));
-				}
+			boolean bl = this.behavior.pushAndPickupEntities();
+			if (bl) {
+				super.move(moverType, vec32.subtract(this.position()));
+			}
+
+			if (moverType.equals(MoverType.PISTON)) {
+				this.onRails = false;
 			}
 		} else {
 			super.move(moverType, vec3);
@@ -406,7 +394,7 @@ public abstract class AbstractMinecart extends VehicleEntity {
 		this.onRails = bl;
 	}
 
-	public boolean isflipped() {
+	public boolean isFlipped() {
 		return this.flipped;
 	}
 
@@ -464,6 +452,7 @@ public abstract class AbstractMinecart extends VehicleEntity {
 		}
 
 		this.flipped = compoundTag.getBoolean("FlippedRotation");
+		this.firstTick = compoundTag.getBoolean("HasTicked");
 	}
 
 	@Override
@@ -475,6 +464,7 @@ public abstract class AbstractMinecart extends VehicleEntity {
 		}
 
 		compoundTag.putBoolean("FlippedRotation", this.flipped);
+		compoundTag.putBoolean("HasTicked", this.firstTick);
 	}
 
 	@Override
@@ -501,13 +491,21 @@ public abstract class AbstractMinecart extends VehicleEntity {
 						d *= 0.5;
 						e *= 0.5;
 						if (entity instanceof AbstractMinecart) {
-							double h = entity.getX() - this.getX();
-							double i = entity.getZ() - this.getZ();
+							double h;
+							double i;
+							if (useExperimentalMovement(this.level())) {
+								h = this.getDeltaMovement().x;
+								i = this.getDeltaMovement().z;
+							} else {
+								h = entity.getX() - this.getX();
+								i = entity.getZ() - this.getZ();
+							}
+
 							Vec3 vec3 = new Vec3(h, 0.0, i).normalize();
 							Vec3 vec32 = new Vec3((double)Mth.cos(this.getYRot() * (float) (Math.PI / 180.0)), 0.0, (double)Mth.sin(this.getYRot() * (float) (Math.PI / 180.0)))
 								.normalize();
 							double j = Math.abs(vec3.dot(vec32));
-							if (j < 0.8F) {
+							if (j < 0.8F && !useExperimentalMovement(this.level())) {
 								return;
 							}
 

@@ -45,10 +45,10 @@ public class CrashReportCategory {
 			int p = j & 15;
 			int q = k & 15;
 			int r = SectionPos.sectionToBlockCoord(l);
-			int s = levelHeightAccessor.getMinBuildHeight();
+			int s = levelHeightAccessor.getMinY();
 			int t = SectionPos.sectionToBlockCoord(n);
 			int u = SectionPos.sectionToBlockCoord(l + 1) - 1;
-			int v = levelHeightAccessor.getMaxBuildHeight() - 1;
+			int v = levelHeightAccessor.getMaxY();
 			int w = SectionPos.sectionToBlockCoord(n + 1) - 1;
 			stringBuilder.append(
 				String.format(Locale.ROOT, "Section: (at %d,%d,%d in %d,%d,%d; chunk contains blocks %d,%d,%d to %d,%d,%d)", o, p, q, l, m, n, r, s, t, u, v, w)
@@ -67,10 +67,10 @@ public class CrashReportCategory {
 			int p = (l + 1 << 5) - 1;
 			int q = (m + 1 << 5) - 1;
 			int r = l << 9;
-			int s = levelHeightAccessor.getMinBuildHeight();
+			int s = levelHeightAccessor.getMinY();
 			int t = m << 9;
 			int u = (l + 1 << 9) - 1;
-			int v = levelHeightAccessor.getMaxBuildHeight() - 1;
+			int v = levelHeightAccessor.getMaxY();
 			int w = (m + 1 << 9) - 1;
 			stringBuilder.append(
 				String.format(Locale.ROOT, "Region: (%d,%d; contains chunks %d,%d to %d,%d, blocks %d,%d,%d to %d,%d,%d)", l, m, n, o, p, q, r, s, t, u, v, w)

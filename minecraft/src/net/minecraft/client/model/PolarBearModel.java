@@ -14,6 +14,7 @@ import net.minecraft.client.renderer.entity.state.PolarBearRenderState;
 
 @Environment(EnvType.CLIENT)
 public class PolarBearModel extends QuadrupedModel<PolarBearRenderState> {
+	private static final float BABY_HEAD_SCALE = 2.25F;
 	public static final MeshTransformer BABY_TRANSFORMER = new BabyModelTransform(true, 16.0F, 4.0F, 2.25F, 2.0F, 24.0F, Set.of("head"));
 
 	public PolarBearModel(ModelPart modelPart) {
@@ -53,25 +54,21 @@ public class PolarBearModel extends QuadrupedModel<PolarBearRenderState> {
 	}
 
 	public void setupAnim(PolarBearRenderState polarBearRenderState) {
+		this.root().getAllParts().forEach(ModelPart::resetPose);
 		super.setupAnim(polarBearRenderState);
 		float f = polarBearRenderState.standScale * polarBearRenderState.standScale;
-		float g = 1.0F - f;
-		this.body.xRot = (float) (Math.PI / 2) - f * (float) Math.PI * 0.35F;
-		this.body.y = 9.0F * g + 11.0F * f;
-		this.rightFrontLeg.y = 14.0F * g - 6.0F * f;
-		this.rightFrontLeg.z = -8.0F * g - 4.0F * f;
+		float g = polarBearRenderState.ageScale;
+		float h = polarBearRenderState.isBaby ? 0.44444445F : 1.0F;
+		this.body.xRot -= f * (float) Math.PI * 0.35F;
+		this.body.y += f * g * 2.0F;
+		this.rightFrontLeg.y -= f * g * 20.0F;
+		this.rightFrontLeg.z += f * g * 4.0F;
 		this.rightFrontLeg.xRot -= f * (float) Math.PI * 0.45F;
 		this.leftFrontLeg.y = this.rightFrontLeg.y;
 		this.leftFrontLeg.z = this.rightFrontLeg.z;
 		this.leftFrontLeg.xRot -= f * (float) Math.PI * 0.45F;
-		if (polarBearRenderState.isBaby) {
-			this.head.y = 10.0F * g - 9.0F * f;
-			this.head.z = -16.0F * g - 7.0F * f;
-		} else {
-			this.head.y = 10.0F * g - 14.0F * f;
-			this.head.z = -16.0F * g - 3.0F * f;
-		}
-
+		this.head.y -= f * h * 24.0F;
+		this.head.z += f * h * 13.0F;
 		this.head.xRot += f * (float) Math.PI * 0.15F;
 	}
 }

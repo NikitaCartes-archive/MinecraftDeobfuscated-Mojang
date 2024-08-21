@@ -22,7 +22,7 @@ import org.joml.Matrix4fStack;
 import org.joml.Vector3f;
 
 @Environment(EnvType.CLIENT)
-public class SkyRenderer {
+public class SkyRenderer implements AutoCloseable {
 	private static final ResourceLocation SUN_LOCATION = ResourceLocation.withDefaultNamespace("textures/environment/sun.png");
 	private static final ResourceLocation MOON_LOCATION = ResourceLocation.withDefaultNamespace("textures/environment/moon_phases.png");
 	private static final ResourceLocation END_SKY_LOCATION = ResourceLocation.withDefaultNamespace("textures/environment/end_sky.png");
@@ -95,9 +95,10 @@ public class SkyRenderer {
 
 	public void renderSkyDisc(float f, float g, float h) {
 		RenderSystem.depthMask(false);
+		RenderSystem.setShader(CoreShaders.POSITION);
 		RenderSystem.setShaderColor(f, g, h, 1.0F);
 		this.topSkyBuffer.bind();
-		this.topSkyBuffer.drawWithShader(RenderSystem.getModelViewMatrix(), RenderSystem.getProjectionMatrix(), GameRenderer.getPositionShader());
+		this.topSkyBuffer.drawWithShader(RenderSystem.getModelViewMatrix(), RenderSystem.getProjectionMatrix(), RenderSystem.getShader());
 		VertexBuffer.unbind();
 		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 		RenderSystem.depthMask(true);
@@ -105,11 +106,12 @@ public class SkyRenderer {
 
 	public void renderDarkDisc(PoseStack poseStack) {
 		RenderSystem.depthMask(false);
+		RenderSystem.setShader(CoreShaders.POSITION);
 		RenderSystem.setShaderColor(0.0F, 0.0F, 0.0F, 1.0F);
 		poseStack.pushPose();
 		poseStack.translate(0.0F, 12.0F, 0.0F);
 		this.bottomSkyBuffer.bind();
-		this.bottomSkyBuffer.drawWithShader(RenderSystem.getModelViewMatrix(), RenderSystem.getProjectionMatrix(), GameRenderer.getPositionShader());
+		this.bottomSkyBuffer.drawWithShader(RenderSystem.getModelViewMatrix(), RenderSystem.getProjectionMatrix(), RenderSystem.getShader());
 		VertexBuffer.unbind();
 		poseStack.popPose();
 		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
@@ -136,7 +138,7 @@ public class SkyRenderer {
 		Matrix4f matrix4f = poseStack.last().pose();
 		RenderSystem.depthMask(false);
 		RenderSystem.overlayBlendFunc();
-		RenderSystem.setShader(GameRenderer::getPositionTexShader);
+		RenderSystem.setShader(CoreShaders.POSITION_TEX);
 		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, f);
 		RenderSystem.setShaderTexture(0, SUN_LOCATION);
 		RenderSystem.enableBlend();
@@ -163,7 +165,7 @@ public class SkyRenderer {
 		BufferBuilder bufferBuilder = tesselator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
 		RenderSystem.depthMask(false);
 		RenderSystem.overlayBlendFunc();
-		RenderSystem.setShader(GameRenderer::getPositionTexShader);
+		RenderSystem.setShader(CoreShaders.POSITION_TEX);
 		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, f);
 		RenderSystem.setShaderTexture(0, MOON_LOCATION);
 		RenderSystem.enableBlend();
@@ -185,11 +187,12 @@ public class SkyRenderer {
 		matrix4fStack.mul(poseStack.last().pose());
 		RenderSystem.depthMask(false);
 		RenderSystem.overlayBlendFunc();
+		RenderSystem.setShader(CoreShaders.POSITION);
 		RenderSystem.setShaderColor(f, f, f, f);
 		RenderSystem.enableBlend();
 		RenderSystem.setShaderFog(FogParameters.NO_FOG);
 		this.starBuffer.bind();
-		this.starBuffer.drawWithShader(matrix4fStack, RenderSystem.getProjectionMatrix(), GameRenderer.getPositionShader());
+		this.starBuffer.drawWithShader(matrix4fStack, RenderSystem.getProjectionMatrix(), RenderSystem.getShader());
 		VertexBuffer.unbind();
 		RenderSystem.setShaderFog(fogParameters);
 		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
@@ -200,7 +203,7 @@ public class SkyRenderer {
 	}
 
 	public void renderSunriseAndSunset(PoseStack poseStack, Tesselator tesselator, float f, int i) {
-		RenderSystem.setShader(GameRenderer::getPositionColorShader);
+		RenderSystem.setShader(CoreShaders.POSITION_COLOR);
 		RenderSystem.depthMask(false);
 		RenderSystem.enableBlend();
 		poseStack.pushPose();
@@ -231,7 +234,7 @@ public class SkyRenderer {
 	public void renderEndSky(PoseStack poseStack) {
 		RenderSystem.enableBlend();
 		RenderSystem.depthMask(false);
-		RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
+		RenderSystem.setShader(CoreShaders.POSITION_TEX_COLOR);
 		RenderSystem.setShaderTexture(0, END_SKY_LOCATION);
 		Tesselator tesselator = Tesselator.getInstance();
 
@@ -269,5 +272,11 @@ public class SkyRenderer {
 
 		RenderSystem.depthMask(true);
 		RenderSystem.disableBlend();
+	}
+
+	public void close() {
+		this.starBuffer.close();
+		this.topSkyBuffer.close();
+		this.bottomSkyBuffer.close();
 	}
 }

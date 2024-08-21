@@ -20,12 +20,14 @@ import net.minecraft.world.food.Foods;
 import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.component.BundleContents;
 import net.minecraft.world.item.component.ChargedProjectiles;
+import net.minecraft.world.item.component.Consumables;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.component.DebugStickState;
 import net.minecraft.world.item.component.Fireworks;
 import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.item.component.MapDecorations;
 import net.minecraft.world.item.component.MapItemColor;
+import net.minecraft.world.item.component.OminousBottleAmplifier;
 import net.minecraft.world.item.component.SuspiciousStewEffects;
 import net.minecraft.world.item.component.WritableBookContent;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
@@ -904,7 +906,12 @@ public class Items {
 	public static final Item STRUCTURE_BLOCK = registerBlock(new GameMasterBlockItem(Blocks.STRUCTURE_BLOCK, new Item.Properties().rarity(Rarity.EPIC)));
 	public static final Item JIGSAW = registerBlock(new GameMasterBlockItem(Blocks.JIGSAW, new Item.Properties().rarity(Rarity.EPIC)));
 	public static final Item TURTLE_HELMET = registerItem(
-		"turtle_helmet", new ArmorItem(ArmorMaterials.TURTLE, ArmorItem.Type.HELMET, new Item.Properties().durability(ArmorItem.Type.HELMET.getDurability(25)))
+		"turtle_helmet",
+		new ArmorItem(
+			ArmorMaterials.TURTLE,
+			ArmorItem.Type.HELMET,
+			new Item.Properties().durability(ArmorItem.Type.HELMET.getDurability(25)).enchantable(ArmorMaterials.TURTLE_ENCHANTMENT_VALUE)
+		)
 	);
 	public static final Item TURTLE_SCUTE = registerItem("turtle_scute", new Item(new Item.Properties()));
 	public static final Item ARMADILLO_SCUTE = registerItem("armadillo_scute", new Item(new Item.Properties()));
@@ -969,7 +976,9 @@ public class Items {
 	public static final Item NETHERITE_AXE = registerItem("netherite_axe", new AxeItem(ToolMaterial.NETHERITE, 5.0F, -3.0F, new Item.Properties().fireResistant()));
 	public static final Item NETHERITE_HOE = registerItem("netherite_hoe", new HoeItem(ToolMaterial.NETHERITE, -4.0F, 0.0F, new Item.Properties().fireResistant()));
 	public static final Item STICK = registerItem("stick", new Item(new Item.Properties()));
-	public static final Item MUSHROOM_STEW = registerItem("mushroom_stew", new Item(new Item.Properties().stacksTo(1).food(Foods.MUSHROOM_STEW)));
+	public static final Item MUSHROOM_STEW = registerItem(
+		"mushroom_stew", new Item(new Item.Properties().stacksTo(1).food(Foods.MUSHROOM_STEW).usingConvertsTo(BOWL))
+	);
 	public static final Item STRING = registerItem("string", new ItemNameBlockItem(Blocks.TRIPWIRE, new Item.Properties()));
 	public static final Item FEATHER = registerItem("feather", new Item(new Item.Properties()));
 	public static final Item GUNPOWDER = registerItem("gunpowder", new Item(new Item.Properties()));
@@ -977,105 +986,210 @@ public class Items {
 	public static final Item WHEAT = registerItem("wheat", new Item(new Item.Properties()));
 	public static final Item BREAD = registerItem("bread", new Item(new Item.Properties().food(Foods.BREAD)));
 	public static final Item LEATHER_HELMET = registerItem(
-		"leather_helmet", new ArmorItem(ArmorMaterials.LEATHER, ArmorItem.Type.HELMET, new Item.Properties().durability(ArmorItem.Type.HELMET.getDurability(5)))
+		"leather_helmet",
+		new ArmorItem(
+			ArmorMaterials.LEATHER,
+			ArmorItem.Type.HELMET,
+			new Item.Properties().durability(ArmorItem.Type.HELMET.getDurability(5)).enchantable(ArmorMaterials.LEATHER_ENCHANTMENT_VALUE)
+		)
 	);
 	public static final Item LEATHER_CHESTPLATE = registerItem(
 		"leather_chestplate",
-		new ArmorItem(ArmorMaterials.LEATHER, ArmorItem.Type.CHESTPLATE, new Item.Properties().durability(ArmorItem.Type.CHESTPLATE.getDurability(5)))
+		new ArmorItem(
+			ArmorMaterials.LEATHER,
+			ArmorItem.Type.CHESTPLATE,
+			new Item.Properties().durability(ArmorItem.Type.CHESTPLATE.getDurability(5)).enchantable(ArmorMaterials.LEATHER_ENCHANTMENT_VALUE)
+		)
 	);
 	public static final Item LEATHER_LEGGINGS = registerItem(
 		"leather_leggings",
-		new ArmorItem(ArmorMaterials.LEATHER, ArmorItem.Type.LEGGINGS, new Item.Properties().durability(ArmorItem.Type.LEGGINGS.getDurability(5)))
+		new ArmorItem(
+			ArmorMaterials.LEATHER,
+			ArmorItem.Type.LEGGINGS,
+			new Item.Properties().durability(ArmorItem.Type.LEGGINGS.getDurability(5)).enchantable(ArmorMaterials.LEATHER_ENCHANTMENT_VALUE)
+		)
 	);
 	public static final Item LEATHER_BOOTS = registerItem(
-		"leather_boots", new ArmorItem(ArmorMaterials.LEATHER, ArmorItem.Type.BOOTS, new Item.Properties().durability(ArmorItem.Type.BOOTS.getDurability(5)))
+		"leather_boots",
+		new ArmorItem(
+			ArmorMaterials.LEATHER,
+			ArmorItem.Type.BOOTS,
+			new Item.Properties().durability(ArmorItem.Type.BOOTS.getDurability(5)).enchantable(ArmorMaterials.LEATHER_ENCHANTMENT_VALUE)
+		)
 	);
 	public static final Item CHAINMAIL_HELMET = registerItem(
 		"chainmail_helmet",
-		new ArmorItem(ArmorMaterials.CHAIN, ArmorItem.Type.HELMET, new Item.Properties().rarity(Rarity.UNCOMMON).durability(ArmorItem.Type.HELMET.getDurability(15)))
+		new ArmorItem(
+			ArmorMaterials.CHAIN,
+			ArmorItem.Type.HELMET,
+			new Item.Properties().rarity(Rarity.UNCOMMON).durability(ArmorItem.Type.HELMET.getDurability(15)).enchantable(ArmorMaterials.CHAIN_ENCHANTMENT_VALUE)
+		)
 	);
 	public static final Item CHAINMAIL_CHESTPLATE = registerItem(
 		"chainmail_chestplate",
 		new ArmorItem(
-			ArmorMaterials.CHAIN, ArmorItem.Type.CHESTPLATE, new Item.Properties().rarity(Rarity.UNCOMMON).durability(ArmorItem.Type.CHESTPLATE.getDurability(15))
+			ArmorMaterials.CHAIN,
+			ArmorItem.Type.CHESTPLATE,
+			new Item.Properties().rarity(Rarity.UNCOMMON).durability(ArmorItem.Type.CHESTPLATE.getDurability(15)).enchantable(ArmorMaterials.CHAIN_ENCHANTMENT_VALUE)
 		)
 	);
 	public static final Item CHAINMAIL_LEGGINGS = registerItem(
 		"chainmail_leggings",
 		new ArmorItem(
-			ArmorMaterials.CHAIN, ArmorItem.Type.LEGGINGS, new Item.Properties().rarity(Rarity.UNCOMMON).durability(ArmorItem.Type.LEGGINGS.getDurability(15))
+			ArmorMaterials.CHAIN,
+			ArmorItem.Type.LEGGINGS,
+			new Item.Properties().rarity(Rarity.UNCOMMON).durability(ArmorItem.Type.LEGGINGS.getDurability(15)).enchantable(ArmorMaterials.CHAIN_ENCHANTMENT_VALUE)
 		)
 	);
 	public static final Item CHAINMAIL_BOOTS = registerItem(
 		"chainmail_boots",
-		new ArmorItem(ArmorMaterials.CHAIN, ArmorItem.Type.BOOTS, new Item.Properties().rarity(Rarity.UNCOMMON).durability(ArmorItem.Type.BOOTS.getDurability(15)))
+		new ArmorItem(
+			ArmorMaterials.CHAIN,
+			ArmorItem.Type.BOOTS,
+			new Item.Properties().rarity(Rarity.UNCOMMON).durability(ArmorItem.Type.BOOTS.getDurability(15)).enchantable(ArmorMaterials.CHAIN_ENCHANTMENT_VALUE)
+		)
 	);
 	public static final Item IRON_HELMET = registerItem(
-		"iron_helmet", new ArmorItem(ArmorMaterials.IRON, ArmorItem.Type.HELMET, new Item.Properties().durability(ArmorItem.Type.HELMET.getDurability(15)))
+		"iron_helmet",
+		new ArmorItem(
+			ArmorMaterials.IRON,
+			ArmorItem.Type.HELMET,
+			new Item.Properties().durability(ArmorItem.Type.HELMET.getDurability(15)).enchantable(ArmorMaterials.IRON_ENCHANTMENT_VALUE)
+		)
 	);
 	public static final Item IRON_CHESTPLATE = registerItem(
 		"iron_chestplate",
-		new ArmorItem(ArmorMaterials.IRON, ArmorItem.Type.CHESTPLATE, new Item.Properties().durability(ArmorItem.Type.CHESTPLATE.getDurability(15)))
+		new ArmorItem(
+			ArmorMaterials.IRON,
+			ArmorItem.Type.CHESTPLATE,
+			new Item.Properties().durability(ArmorItem.Type.CHESTPLATE.getDurability(15)).enchantable(ArmorMaterials.IRON_ENCHANTMENT_VALUE)
+		)
 	);
 	public static final Item IRON_LEGGINGS = registerItem(
-		"iron_leggings", new ArmorItem(ArmorMaterials.IRON, ArmorItem.Type.LEGGINGS, new Item.Properties().durability(ArmorItem.Type.LEGGINGS.getDurability(15)))
+		"iron_leggings",
+		new ArmorItem(
+			ArmorMaterials.IRON,
+			ArmorItem.Type.LEGGINGS,
+			new Item.Properties().durability(ArmorItem.Type.LEGGINGS.getDurability(15)).enchantable(ArmorMaterials.IRON_ENCHANTMENT_VALUE)
+		)
 	);
 	public static final Item IRON_BOOTS = registerItem(
-		"iron_boots", new ArmorItem(ArmorMaterials.IRON, ArmorItem.Type.BOOTS, new Item.Properties().durability(ArmorItem.Type.BOOTS.getDurability(15)))
+		"iron_boots",
+		new ArmorItem(
+			ArmorMaterials.IRON,
+			ArmorItem.Type.BOOTS,
+			new Item.Properties().durability(ArmorItem.Type.BOOTS.getDurability(15)).enchantable(ArmorMaterials.IRON_ENCHANTMENT_VALUE)
+		)
 	);
 	public static final Item DIAMOND_HELMET = registerItem(
-		"diamond_helmet", new ArmorItem(ArmorMaterials.DIAMOND, ArmorItem.Type.HELMET, new Item.Properties().durability(ArmorItem.Type.HELMET.getDurability(33)))
+		"diamond_helmet",
+		new ArmorItem(
+			ArmorMaterials.DIAMOND,
+			ArmorItem.Type.HELMET,
+			new Item.Properties().durability(ArmorItem.Type.HELMET.getDurability(33)).enchantable(ArmorMaterials.DIAMOND_ENCHANTMENT_VALUE)
+		)
 	);
 	public static final Item DIAMOND_CHESTPLATE = registerItem(
 		"diamond_chestplate",
-		new ArmorItem(ArmorMaterials.DIAMOND, ArmorItem.Type.CHESTPLATE, new Item.Properties().durability(ArmorItem.Type.CHESTPLATE.getDurability(33)))
+		new ArmorItem(
+			ArmorMaterials.DIAMOND,
+			ArmorItem.Type.CHESTPLATE,
+			new Item.Properties().durability(ArmorItem.Type.CHESTPLATE.getDurability(33)).enchantable(ArmorMaterials.DIAMOND_ENCHANTMENT_VALUE)
+		)
 	);
 	public static final Item DIAMOND_LEGGINGS = registerItem(
 		"diamond_leggings",
-		new ArmorItem(ArmorMaterials.DIAMOND, ArmorItem.Type.LEGGINGS, new Item.Properties().durability(ArmorItem.Type.LEGGINGS.getDurability(33)))
+		new ArmorItem(
+			ArmorMaterials.DIAMOND,
+			ArmorItem.Type.LEGGINGS,
+			new Item.Properties().durability(ArmorItem.Type.LEGGINGS.getDurability(33)).enchantable(ArmorMaterials.DIAMOND_ENCHANTMENT_VALUE)
+		)
 	);
 	public static final Item DIAMOND_BOOTS = registerItem(
-		"diamond_boots", new ArmorItem(ArmorMaterials.DIAMOND, ArmorItem.Type.BOOTS, new Item.Properties().durability(ArmorItem.Type.BOOTS.getDurability(33)))
+		"diamond_boots",
+		new ArmorItem(
+			ArmorMaterials.DIAMOND,
+			ArmorItem.Type.BOOTS,
+			new Item.Properties().durability(ArmorItem.Type.BOOTS.getDurability(33)).enchantable(ArmorMaterials.DIAMOND_ENCHANTMENT_VALUE)
+		)
 	);
 	public static final Item GOLDEN_HELMET = registerItem(
-		"golden_helmet", new ArmorItem(ArmorMaterials.GOLD, ArmorItem.Type.HELMET, new Item.Properties().durability(ArmorItem.Type.HELMET.getDurability(7)))
+		"golden_helmet",
+		new ArmorItem(
+			ArmorMaterials.GOLD,
+			ArmorItem.Type.HELMET,
+			new Item.Properties().durability(ArmorItem.Type.HELMET.getDurability(7)).enchantable(ArmorMaterials.GOLD_ENCHANTMENT_VALUE)
+		)
 	);
 	public static final Item GOLDEN_CHESTPLATE = registerItem(
 		"golden_chestplate",
-		new ArmorItem(ArmorMaterials.GOLD, ArmorItem.Type.CHESTPLATE, new Item.Properties().durability(ArmorItem.Type.CHESTPLATE.getDurability(7)))
+		new ArmorItem(
+			ArmorMaterials.GOLD,
+			ArmorItem.Type.CHESTPLATE,
+			new Item.Properties().durability(ArmorItem.Type.CHESTPLATE.getDurability(7)).enchantable(ArmorMaterials.GOLD_ENCHANTMENT_VALUE)
+		)
 	);
 	public static final Item GOLDEN_LEGGINGS = registerItem(
-		"golden_leggings", new ArmorItem(ArmorMaterials.GOLD, ArmorItem.Type.LEGGINGS, new Item.Properties().durability(ArmorItem.Type.LEGGINGS.getDurability(7)))
+		"golden_leggings",
+		new ArmorItem(
+			ArmorMaterials.GOLD,
+			ArmorItem.Type.LEGGINGS,
+			new Item.Properties().durability(ArmorItem.Type.LEGGINGS.getDurability(7)).enchantable(ArmorMaterials.GOLD_ENCHANTMENT_VALUE)
+		)
 	);
 	public static final Item GOLDEN_BOOTS = registerItem(
-		"golden_boots", new ArmorItem(ArmorMaterials.GOLD, ArmorItem.Type.BOOTS, new Item.Properties().durability(ArmorItem.Type.BOOTS.getDurability(7)))
+		"golden_boots",
+		new ArmorItem(
+			ArmorMaterials.GOLD,
+			ArmorItem.Type.BOOTS,
+			new Item.Properties().durability(ArmorItem.Type.BOOTS.getDurability(7)).enchantable(ArmorMaterials.GOLD_ENCHANTMENT_VALUE)
+		)
 	);
 	public static final Item NETHERITE_HELMET = registerItem(
 		"netherite_helmet",
-		new ArmorItem(ArmorMaterials.NETHERITE, ArmorItem.Type.HELMET, new Item.Properties().fireResistant().durability(ArmorItem.Type.HELMET.getDurability(37)))
+		new ArmorItem(
+			ArmorMaterials.NETHERITE,
+			ArmorItem.Type.HELMET,
+			new Item.Properties().fireResistant().durability(ArmorItem.Type.HELMET.getDurability(37)).enchantable(ArmorMaterials.NETHERITE_ENCHANTMENT_VALUE)
+		)
 	);
 	public static final Item NETHERITE_CHESTPLATE = registerItem(
 		"netherite_chestplate",
 		new ArmorItem(
-			ArmorMaterials.NETHERITE, ArmorItem.Type.CHESTPLATE, new Item.Properties().fireResistant().durability(ArmorItem.Type.CHESTPLATE.getDurability(37))
+			ArmorMaterials.NETHERITE,
+			ArmorItem.Type.CHESTPLATE,
+			new Item.Properties().fireResistant().durability(ArmorItem.Type.CHESTPLATE.getDurability(37)).enchantable(ArmorMaterials.NETHERITE_ENCHANTMENT_VALUE)
 		)
 	);
 	public static final Item NETHERITE_LEGGINGS = registerItem(
 		"netherite_leggings",
-		new ArmorItem(ArmorMaterials.NETHERITE, ArmorItem.Type.LEGGINGS, new Item.Properties().fireResistant().durability(ArmorItem.Type.LEGGINGS.getDurability(37)))
+		new ArmorItem(
+			ArmorMaterials.NETHERITE,
+			ArmorItem.Type.LEGGINGS,
+			new Item.Properties().fireResistant().durability(ArmorItem.Type.LEGGINGS.getDurability(37)).enchantable(ArmorMaterials.NETHERITE_ENCHANTMENT_VALUE)
+		)
 	);
 	public static final Item NETHERITE_BOOTS = registerItem(
 		"netherite_boots",
-		new ArmorItem(ArmorMaterials.NETHERITE, ArmorItem.Type.BOOTS, new Item.Properties().fireResistant().durability(ArmorItem.Type.BOOTS.getDurability(37)))
+		new ArmorItem(
+			ArmorMaterials.NETHERITE,
+			ArmorItem.Type.BOOTS,
+			new Item.Properties().fireResistant().durability(ArmorItem.Type.BOOTS.getDurability(37)).enchantable(ArmorMaterials.NETHERITE_ENCHANTMENT_VALUE)
+		)
 	);
 	public static final Item FLINT = registerItem("flint", new Item(new Item.Properties()));
 	public static final Item PORKCHOP = registerItem("porkchop", new Item(new Item.Properties().food(Foods.PORKCHOP)));
 	public static final Item COOKED_PORKCHOP = registerItem("cooked_porkchop", new Item(new Item.Properties().food(Foods.COOKED_PORKCHOP)));
 	public static final Item PAINTING = registerItem("painting", new HangingEntityItem(EntityType.PAINTING, new Item.Properties()));
-	public static final Item GOLDEN_APPLE = registerItem("golden_apple", new Item(new Item.Properties().food(Foods.GOLDEN_APPLE)));
+	public static final Item GOLDEN_APPLE = registerItem("golden_apple", new Item(new Item.Properties().food(Foods.GOLDEN_APPLE, Consumables.GOLDEN_APPLE)));
 	public static final Item ENCHANTED_GOLDEN_APPLE = registerItem(
 		"enchanted_golden_apple",
-		new Item(new Item.Properties().rarity(Rarity.RARE).food(Foods.ENCHANTED_GOLDEN_APPLE).component(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true))
+		new Item(
+			new Item.Properties()
+				.rarity(Rarity.RARE)
+				.food(Foods.ENCHANTED_GOLDEN_APPLE, Consumables.ENCHANTED_GOLDEN_APPLE)
+				.component(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true)
+		)
 	);
 	public static final Item OAK_SIGN = registerItem("oak_sign", new SignItem(new Item.Properties().stacksTo(16), Blocks.OAK_SIGN, Blocks.OAK_WALL_SIGN));
 	public static final Item SPRUCE_SIGN = registerItem(
@@ -1147,7 +1261,10 @@ public class Items {
 	);
 	public static final Item SNOWBALL = registerItem("snowball", new SnowballItem(new Item.Properties().stacksTo(16)));
 	public static final Item LEATHER = registerItem("leather", new Item(new Item.Properties()));
-	public static final Item MILK_BUCKET = registerItem("milk_bucket", new MilkBucketItem(new Item.Properties().craftRemainder(BUCKET).stacksTo(1)));
+	public static final Item MILK_BUCKET = registerItem(
+		"milk_bucket",
+		new Item(new Item.Properties().craftRemainder(BUCKET).component(DataComponents.CONSUMABLE, Consumables.MILK_BUCKET).usingConvertsTo(BUCKET).stacksTo(1))
+	);
 	public static final Item PUFFERFISH_BUCKET = registerItem(
 		"pufferfish_bucket",
 		new MobBucketItem(
@@ -1226,7 +1343,7 @@ public class Items {
 	public static final Item COD = registerItem("cod", new Item(new Item.Properties().food(Foods.COD)));
 	public static final Item SALMON = registerItem("salmon", new Item(new Item.Properties().food(Foods.SALMON)));
 	public static final Item TROPICAL_FISH = registerItem("tropical_fish", new Item(new Item.Properties().food(Foods.TROPICAL_FISH)));
-	public static final Item PUFFERFISH = registerItem("pufferfish", new Item(new Item.Properties().food(Foods.PUFFERFISH)));
+	public static final Item PUFFERFISH = registerItem("pufferfish", new Item(new Item.Properties().food(Foods.PUFFERFISH, Consumables.PUFFERFISH)));
 	public static final Item COOKED_COD = registerItem("cooked_cod", new Item(new Item.Properties().food(Foods.COOKED_COD)));
 	public static final Item COOKED_SALMON = registerItem("cooked_salmon", new Item(new Item.Properties().food(Foods.COOKED_SALMON)));
 	public static final Item INK_SAC = registerItem("ink_sac", new InkSacItem(new Item.Properties()));
@@ -1278,7 +1395,7 @@ public class Items {
 		"shears", new ShearsItem(new Item.Properties().durability(238).component(DataComponents.TOOL, ShearsItem.createToolProperties()))
 	);
 	public static final Item MELON_SLICE = registerItem("melon_slice", new Item(new Item.Properties().food(Foods.MELON_SLICE)));
-	public static final Item DRIED_KELP = registerItem("dried_kelp", new Item(new Item.Properties().food(Foods.DRIED_KELP)));
+	public static final Item DRIED_KELP = registerItem("dried_kelp", new Item(new Item.Properties().food(Foods.DRIED_KELP, Consumables.DRIED_KELP)));
 	public static final Item PUMPKIN_SEEDS = registerItem(
 		net.minecraft.references.Items.PUMPKIN_SEEDS, new ItemNameBlockItem(Blocks.PUMPKIN_STEM, new Item.Properties())
 	);
@@ -1287,19 +1404,26 @@ public class Items {
 	);
 	public static final Item BEEF = registerItem("beef", new Item(new Item.Properties().food(Foods.BEEF)));
 	public static final Item COOKED_BEEF = registerItem("cooked_beef", new Item(new Item.Properties().food(Foods.COOKED_BEEF)));
-	public static final Item CHICKEN = registerItem("chicken", new Item(new Item.Properties().food(Foods.CHICKEN)));
+	public static final Item CHICKEN = registerItem("chicken", new Item(new Item.Properties().food(Foods.CHICKEN, Consumables.CHICKEN)));
 	public static final Item COOKED_CHICKEN = registerItem("cooked_chicken", new Item(new Item.Properties().food(Foods.COOKED_CHICKEN)));
-	public static final Item ROTTEN_FLESH = registerItem("rotten_flesh", new Item(new Item.Properties().food(Foods.ROTTEN_FLESH)));
+	public static final Item ROTTEN_FLESH = registerItem("rotten_flesh", new Item(new Item.Properties().food(Foods.ROTTEN_FLESH, Consumables.ROTTEN_FLESH)));
 	public static final Item ENDER_PEARL = registerItem("ender_pearl", new EnderpearlItem(new Item.Properties().stacksTo(16)));
 	public static final Item BLAZE_ROD = registerItem("blaze_rod", new Item(new Item.Properties()));
 	public static final Item GHAST_TEAR = registerItem("ghast_tear", new Item(new Item.Properties()));
 	public static final Item GOLD_NUGGET = registerItem("gold_nugget", new Item(new Item.Properties()));
 	public static final Item NETHER_WART = registerItem("nether_wart", new ItemNameBlockItem(Blocks.NETHER_WART, new Item.Properties()));
-	public static final Item POTION = registerItem(
-		"potion", new PotionItem(new Item.Properties().stacksTo(1).component(DataComponents.POTION_CONTENTS, PotionContents.EMPTY))
-	);
 	public static final Item GLASS_BOTTLE = registerItem("glass_bottle", new BottleItem(new Item.Properties()));
-	public static final Item SPIDER_EYE = registerItem("spider_eye", new Item(new Item.Properties().food(Foods.SPIDER_EYE)));
+	public static final Item POTION = registerItem(
+		"potion",
+		new PotionItem(
+			new Item.Properties()
+				.stacksTo(1)
+				.component(DataComponents.POTION_CONTENTS, PotionContents.EMPTY)
+				.component(DataComponents.CONSUMABLE, Consumables.DEFAULT_DRINK)
+				.usingConvertsTo(GLASS_BOTTLE)
+		)
+	);
+	public static final Item SPIDER_EYE = registerItem("spider_eye", new Item(new Item.Properties().food(Foods.SPIDER_EYE, Consumables.SPIDER_EYE)));
 	public static final Item FERMENTED_SPIDER_EYE = registerItem("fermented_spider_eye", new Item(new Item.Properties()));
 	public static final Item BLAZE_POWDER = registerItem("blaze_powder", new Item(new Item.Properties()));
 	public static final Item MAGMA_CREAM = registerItem("magma_cream", new Item(new Item.Properties()));
@@ -1473,7 +1597,9 @@ public class Items {
 	public static final Item CARROT = registerItem("carrot", new ItemNameBlockItem(Blocks.CARROTS, new Item.Properties().food(Foods.CARROT)));
 	public static final Item POTATO = registerItem("potato", new ItemNameBlockItem(Blocks.POTATOES, new Item.Properties().food(Foods.POTATO)));
 	public static final Item BAKED_POTATO = registerItem("baked_potato", new Item(new Item.Properties().food(Foods.BAKED_POTATO)));
-	public static final Item POISONOUS_POTATO = registerItem("poisonous_potato", new Item(new Item.Properties().food(Foods.POISONOUS_POTATO)));
+	public static final Item POISONOUS_POTATO = registerItem(
+		"poisonous_potato", new Item(new Item.Properties().food(Foods.POISONOUS_POTATO, Consumables.POISONOUS_POTATO))
+	);
 	public static final Item MAP = registerItem("map", new EmptyMapItem(new Item.Properties()));
 	public static final Item GOLDEN_CARROT = registerItem("golden_carrot", new Item(new Item.Properties().food(Foods.GOLDEN_CARROT)));
 	public static final Item SKELETON_SKULL = registerBlock(
@@ -1520,7 +1646,7 @@ public class Items {
 	public static final Item PRISMARINE_CRYSTALS = registerItem("prismarine_crystals", new Item(new Item.Properties()));
 	public static final Item RABBIT = registerItem("rabbit", new Item(new Item.Properties().food(Foods.RABBIT)));
 	public static final Item COOKED_RABBIT = registerItem("cooked_rabbit", new Item(new Item.Properties().food(Foods.COOKED_RABBIT)));
-	public static final Item RABBIT_STEW = registerItem("rabbit_stew", new Item(new Item.Properties().stacksTo(1).food(Foods.RABBIT_STEW)));
+	public static final Item RABBIT_STEW = registerItem("rabbit_stew", new Item(new Item.Properties().stacksTo(1).food(Foods.RABBIT_STEW).usingConvertsTo(BOWL)));
 	public static final Item RABBIT_FOOT = registerItem("rabbit_foot", new Item(new Item.Properties()));
 	public static final Item RABBIT_HIDE = registerItem("rabbit_hide", new Item(new Item.Properties()));
 	public static final Item ARMOR_STAND = registerItem("armor_stand", new ArmorStandItem(new Item.Properties().stacksTo(16)));
@@ -1646,13 +1772,17 @@ public class Items {
 	public static final Item END_CRYSTAL = registerItem(
 		"end_crystal", new EndCrystalItem(new Item.Properties().component(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true))
 	);
-	public static final Item CHORUS_FRUIT = registerItem("chorus_fruit", new ChorusFruitItem(new Item.Properties().food(Foods.CHORUS_FRUIT)));
+	public static final Item CHORUS_FRUIT = registerItem(
+		"chorus_fruit", new Item(new Item.Properties().food(Foods.CHORUS_FRUIT, Consumables.CHORUS_FRUIT).useCooldown(1.0F))
+	);
 	public static final Item POPPED_CHORUS_FRUIT = registerItem("popped_chorus_fruit", new Item(new Item.Properties()));
 	public static final Item TORCHFLOWER_SEEDS = registerItem("torchflower_seeds", new ItemNameBlockItem(Blocks.TORCHFLOWER_CROP, new Item.Properties()));
 	public static final Item PITCHER_POD = registerItem("pitcher_pod", new ItemNameBlockItem(Blocks.PITCHER_CROP, new Item.Properties()));
 	public static final Item BEETROOT = registerItem("beetroot", new Item(new Item.Properties().food(Foods.BEETROOT)));
 	public static final Item BEETROOT_SEEDS = registerItem("beetroot_seeds", new ItemNameBlockItem(Blocks.BEETROOTS, new Item.Properties()));
-	public static final Item BEETROOT_SOUP = registerItem("beetroot_soup", new Item(new Item.Properties().stacksTo(1).food(Foods.BEETROOT_SOUP)));
+	public static final Item BEETROOT_SOUP = registerItem(
+		"beetroot_soup", new Item(new Item.Properties().stacksTo(1).food(Foods.BEETROOT_SOUP).usingConvertsTo(BOWL))
+	);
 	public static final Item DRAGON_BREATH = registerItem("dragon_breath", new Item(new Item.Properties().craftRemainder(GLASS_BOTTLE).rarity(Rarity.UNCOMMON)));
 	public static final Item SPLASH_POTION = registerItem(
 		"splash_potion", new SplashPotionItem(new Item.Properties().stacksTo(1).component(DataComponents.POTION_CONTENTS, PotionContents.EMPTY))
@@ -1763,8 +1893,12 @@ public class Items {
 	);
 	public static final Item SUSPICIOUS_STEW = registerItem(
 		"suspicious_stew",
-		new SuspiciousStewItem(
-			new Item.Properties().stacksTo(1).food(Foods.SUSPICIOUS_STEW).component(DataComponents.SUSPICIOUS_STEW_EFFECTS, SuspiciousStewEffects.EMPTY)
+		new Item(
+			new Item.Properties()
+				.stacksTo(1)
+				.food(Foods.SUSPICIOUS_STEW)
+				.component(DataComponents.SUSPICIOUS_STEW_EFFECTS, SuspiciousStewEffects.EMPTY)
+				.usingConvertsTo(BOWL)
 		)
 	);
 	public static final Item LOOM = registerBlock(Blocks.LOOM);
@@ -1828,7 +1962,8 @@ public class Items {
 	public static final Item BEE_NEST = registerBlock(new BlockItem(Blocks.BEE_NEST, new Item.Properties().component(DataComponents.BEES, List.of())));
 	public static final Item BEEHIVE = registerBlock(new BlockItem(Blocks.BEEHIVE, new Item.Properties().component(DataComponents.BEES, List.of())));
 	public static final Item HONEY_BOTTLE = registerItem(
-		"honey_bottle", new HoneyBottleItem(new Item.Properties().craftRemainder(GLASS_BOTTLE).food(Foods.HONEY_BOTTLE).stacksTo(16))
+		"honey_bottle",
+		new Item(new Item.Properties().craftRemainder(GLASS_BOTTLE).food(Foods.HONEY_BOTTLE, Consumables.HONEY_BOTTLE).usingConvertsTo(GLASS_BOTTLE).stacksTo(16))
 	);
 	public static final Item HONEYCOMB_BLOCK = registerBlock(Blocks.HONEYCOMB_BLOCK);
 	public static final Item LODESTONE = registerBlock(Blocks.LODESTONE);
@@ -1976,7 +2111,12 @@ public class Items {
 	public static final Item VAULT = registerBlock(Blocks.VAULT);
 	public static final Item OMINOUS_BOTTLE = registerItem(
 		"ominous_bottle",
-		new OminousBottleItem(new Item.Properties().rarity(Rarity.UNCOMMON).food(Foods.OMINOUS_BOTTLE).component(DataComponents.OMINOUS_BOTTLE_AMPLIFIER, 0))
+		new Item(
+			new Item.Properties()
+				.rarity(Rarity.UNCOMMON)
+				.component(DataComponents.CONSUMABLE, Consumables.OMINOUS_BOTTLE)
+				.component(DataComponents.OMINOUS_BOTTLE_AMPLIFIER, new OminousBottleAmplifier(0))
+		)
 	);
 
 	public static Item registerBlock(Block block) {

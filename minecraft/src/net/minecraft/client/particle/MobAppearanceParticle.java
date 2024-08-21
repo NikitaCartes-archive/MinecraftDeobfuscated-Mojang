@@ -44,8 +44,9 @@ public class MobAppearanceParticle extends Particle {
 		PoseStack poseStack = new PoseStack();
 		poseStack.mulPose(camera.rotation());
 		poseStack.mulPose(Axis.XP.rotationDegrees(60.0F - 150.0F * g));
-		poseStack.scale(1.0F, -1.0F, -1.0F);
-		poseStack.translate(0.0F, -1.101F, 1.5F);
+		float j = 0.42553192F;
+		poseStack.scale(0.42553192F, -0.42553192F, -0.42553192F);
+		poseStack.translate(0.0F, -0.56F, 3.5F);
 		MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
 		VertexConsumer vertexConsumer2 = bufferSource.getBuffer(this.renderType);
 		this.model.renderToBuffer(poseStack, vertexConsumer2, 15728880, OverlayTexture.NO_OVERLAY, i);

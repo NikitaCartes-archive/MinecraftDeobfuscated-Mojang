@@ -1,8 +1,12 @@
 package net.minecraft.world.phys.shapes;
 
+import java.util.Objects;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.level.CollisionGetter;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 
 public interface CollisionContext {
@@ -11,7 +15,14 @@ public interface CollisionContext {
 	}
 
 	static CollisionContext of(Entity entity) {
-		return new EntityCollisionContext(entity, false);
+		Objects.requireNonNull(entity);
+
+		return (CollisionContext)(switch (entity) {
+			case AbstractMinecart abstractMinecart -> AbstractMinecart.useExperimentalMovement(abstractMinecart.level())
+			? new MinecartCollisionContext(abstractMinecart, false)
+			: new EntityCollisionContext(entity, false);
+			default -> new EntityCollisionContext(entity, false);
+		});
 	}
 
 	static CollisionContext of(Entity entity, boolean bl) {
@@ -25,4 +36,6 @@ public interface CollisionContext {
 	boolean isHoldingItem(Item item);
 
 	boolean canStandOnFluid(FluidState fluidState, FluidState fluidState2);
+
+	VoxelShape getCollisionShape(BlockState blockState, CollisionGetter collisionGetter, BlockPos blockPos);
 }

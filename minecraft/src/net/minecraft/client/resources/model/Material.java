@@ -52,7 +52,7 @@ public class Material {
 	}
 
 	public VertexConsumer buffer(MultiBufferSource multiBufferSource, Function<ResourceLocation, RenderType> function, boolean bl, boolean bl2) {
-		return this.sprite().wrap(ItemRenderer.getFoilBufferDirect(multiBufferSource, this.renderType(function), bl, bl2));
+		return this.sprite().wrap(ItemRenderer.getFoilBuffer(multiBufferSource, this.renderType(function), bl, bl2));
 	}
 
 	public boolean equals(Object object) {

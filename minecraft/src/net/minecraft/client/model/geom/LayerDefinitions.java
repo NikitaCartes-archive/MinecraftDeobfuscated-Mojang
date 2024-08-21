@@ -135,7 +135,7 @@ public class LayerDefinitions {
 		LayerDefinition layerDefinition10 = AxolotlModel.createBodyLayer();
 		LayerDefinition layerDefinition11 = BeeModel.createBodyLayer();
 		LayerDefinition layerDefinition12 = CowModel.createBodyLayer();
-		LayerDefinition layerDefinition13 = CowModel.createBodyLayer().apply(CowModel.BABY_TRANSFORMER);
+		LayerDefinition layerDefinition13 = layerDefinition12.apply(CowModel.BABY_TRANSFORMER);
 		LayerDefinition layerDefinition14 = ElytraModel.createLayer();
 		LayerDefinition layerDefinition15 = LayerDefinition.create(OcelotModel.createBodyMesh(CubeDeformation.NONE), 64, 32);
 		LayerDefinition layerDefinition16 = layerDefinition15.apply(CatModel.CAT_TRANSFORMER);
@@ -290,6 +290,7 @@ public class LayerDefinitions {
 		builder.put(ModelLayers.MAGMA_CUBE, LavaSlimeModel.createBodyLayer());
 		builder.put(ModelLayers.MINECART, layerDefinition5);
 		builder.put(ModelLayers.MOOSHROOM, layerDefinition12);
+		builder.put(ModelLayers.MOOSHROOM_BABY, layerDefinition13);
 		builder.put(ModelLayers.MULE, DonkeyModel.createBodyLayer());
 		builder.put(ModelLayers.MULE_BABY, DonkeyModel.createBabyLayer());
 		builder.put(ModelLayers.OCELOT, layerDefinition15);

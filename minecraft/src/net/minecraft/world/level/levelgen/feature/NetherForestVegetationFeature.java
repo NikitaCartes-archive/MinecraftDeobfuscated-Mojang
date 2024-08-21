@@ -24,7 +24,7 @@ public class NetherForestVegetationFeature extends Feature<NetherForestVegetatio
 			return false;
 		} else {
 			int i = blockPos.getY();
-			if (i >= worldGenLevel.getMinBuildHeight() + 1 && i + 1 < worldGenLevel.getMaxBuildHeight()) {
+			if (i >= worldGenLevel.getMinY() + 1 && i + 1 <= worldGenLevel.getMaxY()) {
 				int j = 0;
 
 				for (int k = 0; k < netherForestVegetationConfig.spreadWidth * netherForestVegetationConfig.spreadWidth; k++) {
@@ -34,7 +34,7 @@ public class NetherForestVegetationFeature extends Feature<NetherForestVegetatio
 						randomSource.nextInt(netherForestVegetationConfig.spreadWidth) - randomSource.nextInt(netherForestVegetationConfig.spreadWidth)
 					);
 					BlockState blockState2 = netherForestVegetationConfig.stateProvider.getState(randomSource, blockPos2);
-					if (worldGenLevel.isEmptyBlock(blockPos2) && blockPos2.getY() > worldGenLevel.getMinBuildHeight() && blockState2.canSurvive(worldGenLevel, blockPos2)) {
+					if (worldGenLevel.isEmptyBlock(blockPos2) && blockPos2.getY() > worldGenLevel.getMinY() && blockState2.canSurvive(worldGenLevel, blockPos2)) {
 						worldGenLevel.setBlock(blockPos2, blockState2, 2);
 						j++;
 					}

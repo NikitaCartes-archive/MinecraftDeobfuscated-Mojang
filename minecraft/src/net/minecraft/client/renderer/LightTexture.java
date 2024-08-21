@@ -6,21 +6,17 @@ import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import com.mojang.logging.LogUtils;
-import java.io.IOException;
-import javax.annotation.Nullable;
+import java.util.Objects;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.server.packs.resources.ResourceProvider;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.dimension.DimensionType;
 import org.joml.Vector3f;
-import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class LightTexture implements AutoCloseable {
@@ -28,9 +24,6 @@ public class LightTexture implements AutoCloseable {
 	public static final int FULL_SKY = 15728640;
 	public static final int FULL_BLOCK = 240;
 	private static final int TEXTURE_SIZE = 16;
-	private static final Logger LOGGER = LogUtils.getLogger();
-	@Nullable
-	private ShaderInstance shader;
 	private final TextureTarget target;
 	private boolean updateLightTexture;
 	private float blockLightRedFlicker;
@@ -46,25 +39,7 @@ public class LightTexture implements AutoCloseable {
 		this.target.clear();
 	}
 
-	public void loadShader(ResourceProvider resourceProvider) {
-		if (this.shader != null) {
-			this.shader.close();
-		}
-
-		try {
-			this.shader = new ShaderInstance(resourceProvider, "lightmap", DefaultVertexFormat.BLIT_SCREEN);
-		} catch (IOException var3) {
-			LOGGER.error("Failed to load lightmap shader", (Throwable)var3);
-			this.shader = null;
-		}
-	}
-
 	public void close() {
-		if (this.shader != null) {
-			this.shader.close();
-			this.shader = null;
-		}
-
 		this.target.destroyBuffers();
 	}
 
@@ -93,7 +68,7 @@ public class LightTexture implements AutoCloseable {
 	}
 
 	public void updateLightTexture(float f) {
-		if (this.updateLightTexture && this.shader != null) {
+		if (this.updateLightTexture) {
 			this.updateLightTexture = false;
 			this.minecraft.getProfiler().push("lightTex");
 			ClientLevel clientLevel = this.minecraft.level;
@@ -124,24 +99,25 @@ public class LightTexture implements AutoCloseable {
 				float o = clientLevel.dimensionType().ambientLight();
 				boolean bl = clientLevel.effects().forceBrightLightmap();
 				float p = this.minecraft.options.gamma().get().floatValue();
-				this.shader.safeGetUniform("AmbientLightFactor").set(o);
-				this.shader.safeGetUniform("SkyFactor").set(h);
-				this.shader.safeGetUniform("BlockFactor").set(n);
-				this.shader.safeGetUniform("UseBrightLightmap").set(bl ? 1 : 0);
-				this.shader.safeGetUniform("SkyLightColor").set(vector3f);
-				this.shader.safeGetUniform("NightVisionFactor").set(m);
-				this.shader.safeGetUniform("DarknessScale").set(k);
-				this.shader.safeGetUniform("DarkenWorldFactor").set(this.renderer.getDarkenWorldAmount(f));
-				this.shader.safeGetUniform("BrightnessFactor").set(Math.max(0.0F, p - j));
-				this.shader.apply();
+				CompiledShaderProgram compiledShaderProgram = (CompiledShaderProgram)Objects.requireNonNull(
+					RenderSystem.setShader(CoreShaders.LIGHTMAP), "Lightmap shader not loaded"
+				);
+				compiledShaderProgram.safeGetUniform("AmbientLightFactor").set(o);
+				compiledShaderProgram.safeGetUniform("SkyFactor").set(h);
+				compiledShaderProgram.safeGetUniform("BlockFactor").set(n);
+				compiledShaderProgram.safeGetUniform("UseBrightLightmap").set(bl ? 1 : 0);
+				compiledShaderProgram.safeGetUniform("SkyLightColor").set(vector3f);
+				compiledShaderProgram.safeGetUniform("NightVisionFactor").set(m);
+				compiledShaderProgram.safeGetUniform("DarknessScale").set(k);
+				compiledShaderProgram.safeGetUniform("DarkenWorldFactor").set(this.renderer.getDarkenWorldAmount(f));
+				compiledShaderProgram.safeGetUniform("BrightnessFactor").set(Math.max(0.0F, p - j));
 				this.target.bindWrite(true);
 				BufferBuilder bufferBuilder = RenderSystem.renderThreadTesselator().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLIT_SCREEN);
 				bufferBuilder.addVertex(0.0F, 0.0F, 0.0F);
 				bufferBuilder.addVertex(1.0F, 0.0F, 0.0F);
 				bufferBuilder.addVertex(1.0F, 1.0F, 0.0F);
 				bufferBuilder.addVertex(0.0F, 1.0F, 0.0F);
-				BufferUploader.draw(bufferBuilder.buildOrThrow());
-				this.shader.clear();
+				BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
 				this.target.unbindWrite();
 				this.minecraft.getProfiler().pop();
 			}
@@ -171,8 +147,12 @@ public class LightTexture implements AutoCloseable {
 	}
 
 	public static int lightCoordsWithEmission(int i, int j) {
-		int k = Math.max(sky(i), j);
-		int l = Math.max(block(i), j);
-		return pack(l, k);
+		if (j == 0) {
+			return i;
+		} else {
+			int k = Math.max(sky(i), j);
+			int l = Math.max(block(i), j);
+			return pack(l, k);
+		}
 	}
 }

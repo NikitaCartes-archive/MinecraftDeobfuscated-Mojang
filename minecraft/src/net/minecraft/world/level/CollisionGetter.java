@@ -106,7 +106,7 @@ public interface CollisionGetter extends BlockGetter {
 			Vec3 vec3 = hitResult.getLocation().subtract(clipContext.getFrom());
 			Direction direction = Direction.getApproximateNearest(vec3.x, vec3.y, vec3.z);
 			Vec3 vec32 = worldBorder.clampVec3ToBound(hitResult.getLocation());
-			return new BlockHitResult(vec32, direction, BlockPos.containing(vec32), false);
+			return new BlockHitResult(vec32, direction, BlockPos.containing(vec32), false, true);
 		} else {
 			return hitResult;
 		}

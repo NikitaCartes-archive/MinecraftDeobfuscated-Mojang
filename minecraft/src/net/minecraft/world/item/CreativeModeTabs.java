@@ -34,6 +34,7 @@ import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.component.Fireworks;
+import net.minecraft.world.item.component.OminousBottleAmplifier;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.EnchantmentInstance;
@@ -1488,7 +1489,7 @@ public class CreativeModeTabs {
 						generateSuspiciousStews(output, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
 						output.accept(Items.MILK_BUCKET);
 						output.accept(Items.HONEY_BOTTLE);
-						generateOminousVials(output, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
+						generateOminousBottles(output, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
 						itemDisplayParameters.holders()
 							.lookup(Registries.POTION)
 							.ifPresent(
@@ -1878,10 +1879,10 @@ public class CreativeModeTabs {
 		output.acceptAll(set, tabVisibility);
 	}
 
-	private static void generateOminousVials(CreativeModeTab.Output output, CreativeModeTab.TabVisibility tabVisibility) {
+	private static void generateOminousBottles(CreativeModeTab.Output output, CreativeModeTab.TabVisibility tabVisibility) {
 		for (int i = 0; i <= 4; i++) {
 			ItemStack itemStack = new ItemStack(Items.OMINOUS_BOTTLE);
-			itemStack.set(DataComponents.OMINOUS_BOTTLE_AMPLIFIER, i);
+			itemStack.set(DataComponents.OMINOUS_BOTTLE_AMPLIFIER, new OminousBottleAmplifier(i));
 			output.accept(itemStack, tabVisibility);
 		}
 	}

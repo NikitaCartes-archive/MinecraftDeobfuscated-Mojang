@@ -6,6 +6,7 @@ import java.util.function.Supplier;
 import java.util.function.ToDoubleFunction;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.PathfinderMob;
@@ -41,13 +42,13 @@ public class RandomPos {
 		if (!predicate.test(blockPos)) {
 			return blockPos;
 		} else {
-			BlockPos blockPos2 = blockPos.above();
+			BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable().move(Direction.UP);
 
-			while (blockPos2.getY() < i && predicate.test(blockPos2)) {
-				blockPos2 = blockPos2.above();
+			while (mutableBlockPos.getY() <= i && predicate.test(mutableBlockPos)) {
+				mutableBlockPos.move(Direction.UP);
 			}
 
-			return blockPos2;
+			return mutableBlockPos.immutable();
 		}
 	}
 
@@ -58,24 +59,23 @@ public class RandomPos {
 		} else if (!predicate.test(blockPos)) {
 			return blockPos;
 		} else {
-			BlockPos blockPos2 = blockPos.above();
+			BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable().move(Direction.UP);
 
-			while (blockPos2.getY() < j && predicate.test(blockPos2)) {
-				blockPos2 = blockPos2.above();
+			while (mutableBlockPos.getY() <= j && predicate.test(mutableBlockPos)) {
+				mutableBlockPos.move(Direction.UP);
 			}
 
-			BlockPos blockPos3 = blockPos2;
+			int k = mutableBlockPos.getY();
 
-			while (blockPos3.getY() < j && blockPos3.getY() - blockPos2.getY() < i) {
-				BlockPos blockPos4 = blockPos3.above();
-				if (predicate.test(blockPos4)) {
+			while (mutableBlockPos.getY() <= j && mutableBlockPos.getY() - k < i) {
+				mutableBlockPos.move(Direction.UP);
+				if (predicate.test(mutableBlockPos)) {
+					mutableBlockPos.move(Direction.DOWN);
 					break;
 				}
-
-				blockPos3 = blockPos4;
 			}
 
-			return blockPos3;
+			return mutableBlockPos.immutable();
 		}
 	}
 

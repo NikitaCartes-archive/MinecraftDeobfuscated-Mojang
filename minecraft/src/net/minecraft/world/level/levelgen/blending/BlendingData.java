@@ -93,7 +93,9 @@ public class BlendingData {
 		}
 
 		return new BlendingData.Packed(
-			this.areaWithOldGeneration.getMinSection(), this.areaWithOldGeneration.getMaxSection(), bl ? Optional.of(DoubleArrays.copy(this.heights)) : Optional.empty()
+			this.areaWithOldGeneration.getMinSectionY(),
+			this.areaWithOldGeneration.getMaxSectionY() + 1,
+			bl ? Optional.of(DoubleArrays.copy(this.heights)) : Optional.empty()
 		);
 	}
 
@@ -177,19 +179,20 @@ public class BlendingData {
 	private int getHeightAtXZ(ChunkAccess chunkAccess, int i, int j) {
 		int k;
 		if (chunkAccess.hasPrimedHeightmap(Heightmap.Types.WORLD_SURFACE_WG)) {
-			k = Math.min(chunkAccess.getHeight(Heightmap.Types.WORLD_SURFACE_WG, i, j) + 1, this.areaWithOldGeneration.getMaxBuildHeight());
+			k = Math.min(chunkAccess.getHeight(Heightmap.Types.WORLD_SURFACE_WG, i, j), this.areaWithOldGeneration.getMaxY());
 		} else {
-			k = this.areaWithOldGeneration.getMaxBuildHeight();
+			k = this.areaWithOldGeneration.getMaxY();
 		}
 
-		int l = this.areaWithOldGeneration.getMinBuildHeight();
+		int l = this.areaWithOldGeneration.getMinY();
 		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(i, k, j);
 
 		while (mutableBlockPos.getY() > l) {
-			mutableBlockPos.move(Direction.DOWN);
 			if (SURFACE_BLOCKS.contains(chunkAccess.getBlockState(mutableBlockPos).getBlock())) {
 				return mutableBlockPos.getY();
 			}
+
+			mutableBlockPos.move(Direction.DOWN);
 		}
 
 		return l;
@@ -212,7 +215,7 @@ public class BlendingData {
 	private double[] getDensityColumn(ChunkAccess chunkAccess, int i, int j, int k) {
 		double[] ds = new double[this.cellCountPerColumn()];
 		Arrays.fill(ds, -1.0);
-		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(i, this.areaWithOldGeneration.getMaxBuildHeight(), j);
+		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(i, this.areaWithOldGeneration.getMaxY() + 1, j);
 		double d = read7(chunkAccess, mutableBlockPos);
 
 		for (int l = ds.length - 2; l >= 0; l--) {
@@ -239,7 +242,7 @@ public class BlendingData {
 		objectArrayList.size(this.quartCountPerColumn());
 
 		for (int k = 0; k < objectArrayList.size(); k++) {
-			int l = k + QuartPos.fromBlock(this.areaWithOldGeneration.getMinBuildHeight());
+			int l = k + QuartPos.fromBlock(this.areaWithOldGeneration.getMinY());
 			objectArrayList.set(k, chunkAccess.getNoiseBiome(QuartPos.fromBlock(i), l, QuartPos.fromBlock(j)));
 		}
 
@@ -289,8 +292,8 @@ public class BlendingData {
 	}
 
 	protected void iterateBiomes(int i, int j, int k, BlendingData.BiomeConsumer biomeConsumer) {
-		if (j >= QuartPos.fromBlock(this.areaWithOldGeneration.getMinBuildHeight()) && j < QuartPos.fromBlock(this.areaWithOldGeneration.getMaxBuildHeight())) {
-			int l = j - QuartPos.fromBlock(this.areaWithOldGeneration.getMinBuildHeight());
+		if (j >= QuartPos.fromBlock(this.areaWithOldGeneration.getMinY()) && j <= QuartPos.fromBlock(this.areaWithOldGeneration.getMaxY())) {
+			int l = j - QuartPos.fromBlock(this.areaWithOldGeneration.getMinY());
 
 			for (int m = 0; m < this.biomes.size(); m++) {
 				if (this.biomes.get(m) != null) {
@@ -343,7 +346,7 @@ public class BlendingData {
 	}
 
 	private int getMinY() {
-		return this.areaWithOldGeneration.getMinSection() * 2;
+		return this.areaWithOldGeneration.getMinSectionY() * 2;
 	}
 
 	private int getCellYIndex(int i) {

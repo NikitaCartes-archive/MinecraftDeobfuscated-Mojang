@@ -601,7 +601,7 @@ public class GuiGraphics {
 			LocalPlayer localPlayer = this.minecraft.player;
 			float f = localPlayer == null
 				? 0.0F
-				: localPlayer.getCooldowns().getCooldownPercent(itemStack.getItem(), this.minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(true));
+				: localPlayer.getCooldowns().getCooldownPercent(itemStack, this.minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(true));
 			if (f > 0.0F) {
 				int m = j + Mth.floor(16.0F * (1.0F - f));
 				int n = m + Mth.ceil(16.0F * f);

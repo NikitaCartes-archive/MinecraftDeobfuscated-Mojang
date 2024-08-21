@@ -152,18 +152,6 @@ public abstract class RenderType extends RenderStateShard {
 			return create("item_entity_translucent_cull", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 1536, true, true, compositeState);
 		})
 	);
-	private static final Function<ResourceLocation, RenderType> ENTITY_TRANSLUCENT_CULL = Util.memoize(
-		(Function<ResourceLocation, RenderType>)(resourceLocation -> {
-			RenderType.CompositeState compositeState = RenderType.CompositeState.builder()
-				.setShaderState(RENDERTYPE_ENTITY_TRANSLUCENT_CULL_SHADER)
-				.setTextureState(new RenderStateShard.TextureStateShard(resourceLocation, TriState.FALSE, false))
-				.setTransparencyState(TRANSLUCENT_TRANSPARENCY)
-				.setLightmapState(LIGHTMAP)
-				.setOverlayState(OVERLAY)
-				.createCompositeState(true);
-			return create("entity_translucent_cull", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 1536, true, true, compositeState);
-		})
-	);
 	private static final BiFunction<ResourceLocation, Boolean, RenderType> ENTITY_TRANSLUCENT = Util.memoize(
 		(BiFunction<ResourceLocation, Boolean, RenderType>)((resourceLocation, boolean_) -> {
 			RenderType.CompositeState compositeState = RenderType.CompositeState.builder()
@@ -367,21 +355,6 @@ public abstract class RenderType extends RenderStateShard {
 			.setDepthTestState(EQUAL_DEPTH_TEST)
 			.setTransparencyState(GLINT_TRANSPARENCY)
 			.setOutputState(ITEM_ENTITY_TARGET)
-			.setTexturingState(ENTITY_GLINT_TEXTURING)
-			.createCompositeState(false)
-	);
-	private static final RenderType ENTITY_GLINT_DIRECT = create(
-		"entity_glint_direct",
-		DefaultVertexFormat.POSITION_TEX,
-		VertexFormat.Mode.QUADS,
-		1536,
-		RenderType.CompositeState.builder()
-			.setShaderState(RENDERTYPE_ENTITY_GLINT_DIRECT_SHADER)
-			.setTextureState(new RenderStateShard.TextureStateShard(ItemRenderer.ENCHANTED_GLINT_ENTITY, TriState.DEFAULT, false))
-			.setWriteMaskState(COLOR_WRITE)
-			.setCullState(NO_CULL)
-			.setDepthTestState(EQUAL_DEPTH_TEST)
-			.setTransparencyState(GLINT_TRANSPARENCY)
 			.setTexturingState(ENTITY_GLINT_TEXTURING)
 			.createCompositeState(false)
 	);
@@ -968,10 +941,6 @@ public abstract class RenderType extends RenderStateShard {
 		return (RenderType)ITEM_ENTITY_TRANSLUCENT_CULL.apply(resourceLocation);
 	}
 
-	public static RenderType entityTranslucentCull(ResourceLocation resourceLocation) {
-		return (RenderType)ENTITY_TRANSLUCENT_CULL.apply(resourceLocation);
-	}
-
 	public static RenderType entityTranslucent(ResourceLocation resourceLocation, boolean bl) {
 		return (RenderType)ENTITY_TRANSLUCENT.apply(resourceLocation, bl);
 	}
@@ -1086,10 +1055,6 @@ public abstract class RenderType extends RenderStateShard {
 
 	public static RenderType entityGlint() {
 		return ENTITY_GLINT;
-	}
-
-	public static RenderType entityGlintDirect() {
-		return ENTITY_GLINT_DIRECT;
 	}
 
 	public static RenderType crumbling(ResourceLocation resourceLocation) {

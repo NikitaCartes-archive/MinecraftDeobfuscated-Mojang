@@ -120,6 +120,7 @@ import net.minecraft.util.datafix.fixes.FeatureFlagRemoveFix;
 import net.minecraft.util.datafix.fixes.FilteredBooksFix;
 import net.minecraft.util.datafix.fixes.FilteredSignsFix;
 import net.minecraft.util.datafix.fixes.FixProjectileStoredItem;
+import net.minecraft.util.datafix.fixes.FoodToConsumableFix;
 import net.minecraft.util.datafix.fixes.ForcePoiRebuild;
 import net.minecraft.util.datafix.fixes.FurnaceRecipeFix;
 import net.minecraft.util.datafix.fixes.GoatHornIdFix;
@@ -217,6 +218,7 @@ import net.minecraft.util.datafix.fixes.VariantRenameFix;
 import net.minecraft.util.datafix.fixes.VillagerDataFix;
 import net.minecraft.util.datafix.fixes.VillagerFollowRangeFix;
 import net.minecraft.util.datafix.fixes.VillagerRebuildLevelAndXpFix;
+import net.minecraft.util.datafix.fixes.VillagerSetCanPickUpLootFix;
 import net.minecraft.util.datafix.fixes.VillagerTradeFix;
 import net.minecraft.util.datafix.fixes.WallPropertyFix;
 import net.minecraft.util.datafix.fixes.WeaponSmithChestLootTableFix;
@@ -305,6 +307,7 @@ import net.minecraft.util.datafix.schemas.V3818_4;
 import net.minecraft.util.datafix.schemas.V3818_5;
 import net.minecraft.util.datafix.schemas.V3825;
 import net.minecraft.util.datafix.schemas.V3938;
+import net.minecraft.util.datafix.schemas.V4059;
 import net.minecraft.util.datafix.schemas.V501;
 import net.minecraft.util.datafix.schemas.V700;
 import net.minecraft.util.datafix.schemas.V701;
@@ -349,6 +352,7 @@ public class DataFixers {
 		dataFixerBuilder.addFixer(new EntityEquipmentToArmorAndHandFix(schema, true));
 		Schema schema2 = dataFixerBuilder.addSchema(101, SAME);
 		dataFixerBuilder.addFixer(new BlockEntitySignTextStrictJsonFix(schema2, false));
+		dataFixerBuilder.addFixer(new VillagerSetCanPickUpLootFix(schema2));
 		Schema schema3 = dataFixerBuilder.addSchema(102, V102::new);
 		dataFixerBuilder.addFixer(new ItemIdFix(schema3, true));
 		dataFixerBuilder.addFixer(new ItemPotionFix(schema3, false));
@@ -1331,6 +1335,8 @@ public class DataFixers {
 		dataFixerBuilder.addFixer(new AttributeIdPrefixFix(schema228));
 		Schema schema229 = dataFixerBuilder.addSchema(4057, SAME_NAMESPACED);
 		dataFixerBuilder.addFixer(new CarvingStepRemoveFix(schema229));
+		Schema schema230 = dataFixerBuilder.addSchema(4059, V4059::new);
+		dataFixerBuilder.addFixer(new FoodToConsumableFix(schema230));
 	}
 
 	private static UnaryOperator<String> createRenamerNoNamespace(Map<String, String> map) {

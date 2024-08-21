@@ -84,11 +84,6 @@ public class ArmorItem extends Item implements Equipable {
 		return this.type;
 	}
 
-	@Override
-	public int getEnchantmentValue() {
-		return this.material.value().enchantmentValue();
-	}
-
 	public Holder<ArmorMaterial> getMaterial() {
 		return this.material;
 	}

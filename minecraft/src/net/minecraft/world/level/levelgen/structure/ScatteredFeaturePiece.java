@@ -70,7 +70,7 @@ public abstract class ScatteredFeaturePiece extends StructurePiece {
 		if (this.heightPosition >= 0) {
 			return true;
 		} else {
-			int j = levelAccessor.getMaxBuildHeight();
+			int j = levelAccessor.getMaxY() + 1;
 			boolean bl = false;
 			BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 

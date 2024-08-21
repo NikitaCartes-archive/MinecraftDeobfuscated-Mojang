@@ -119,6 +119,9 @@ public class ExtraCodecs {
 		);
 	public static final Codec<Integer> NON_NEGATIVE_INT = intRangeWithMessage(0, Integer.MAX_VALUE, integer -> "Value must be non-negative: " + integer);
 	public static final Codec<Integer> POSITIVE_INT = intRangeWithMessage(1, Integer.MAX_VALUE, integer -> "Value must be positive: " + integer);
+	public static final Codec<Float> NON_NEGATIVE_FLOAT = floatRangeMinInclusiveWithMessage(
+		0.0F, Float.MAX_VALUE, float_ -> "Value must be non-negative: " + float_
+	);
 	public static final Codec<Float> POSITIVE_FLOAT = floatRangeMinExclusiveWithMessage(0.0F, Float.MAX_VALUE, float_ -> "Value must be positive: " + float_);
 	public static final Codec<Pattern> PATTERN = Codec.STRING.comapFlatMap(string -> {
 		try {
@@ -340,6 +343,13 @@ public class ExtraCodecs {
 
 	public static Codec<Integer> intRange(int i, int j) {
 		return intRangeWithMessage(i, j, integer -> "Value must be within range [" + i + ";" + j + "]: " + integer);
+	}
+
+	private static Codec<Float> floatRangeMinInclusiveWithMessage(float f, float g, Function<Float, String> function) {
+		return Codec.FLOAT
+			.validate(
+				float_ -> float_.compareTo(f) >= 0 && float_.compareTo(g) <= 0 ? DataResult.success(float_) : DataResult.error(() -> (String)function.apply(float_))
+			);
 	}
 
 	private static Codec<Float> floatRangeMinExclusiveWithMessage(float f, float g, Function<Float, String> function) {

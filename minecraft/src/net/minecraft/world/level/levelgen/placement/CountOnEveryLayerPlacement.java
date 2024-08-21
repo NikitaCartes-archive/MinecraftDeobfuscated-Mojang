@@ -66,7 +66,7 @@ public class CountOnEveryLayerPlacement extends PlacementModifier {
 		int m = 0;
 		BlockState blockState = placementContext.getBlockState(mutableBlockPos);
 
-		for (int n = j; n >= placementContext.getMinBuildHeight() + 1; n--) {
+		for (int n = j; n >= placementContext.getMinY() + 1; n--) {
 			mutableBlockPos.setY(n - 1);
 			BlockState blockState2 = placementContext.getBlockState(mutableBlockPos);
 			if (!isEmpty(blockState2) && isEmpty(blockState) && !blockState2.is(Blocks.BEDROCK)) {

@@ -18,16 +18,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
-import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
-import net.minecraft.client.GraphicsStatus;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.OptionInstance;
+import net.minecraft.client.renderer.CompiledShaderProgram;
 import net.minecraft.client.renderer.FogParameters;
-import net.minecraft.client.renderer.ShaderInstance;
+import net.minecraft.client.renderer.ShaderProgram;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.ResourceLocation;
@@ -84,7 +82,7 @@ public class RenderSystem {
 	private static float shaderLineWidth = 1.0F;
 	private static String apiDescription = "Unknown";
 	@Nullable
-	private static ShaderInstance shader;
+	private static CompiledShaderProgram shader;
 	private static final AtomicLong pollEventsWaitStart = new AtomicLong();
 	private static final AtomicBoolean pollingEvents = new AtomicBoolean(false);
 
@@ -366,14 +364,14 @@ public class RenderSystem {
 		shaderLightDirections[1] = vector3f2;
 	}
 
-	public static void setupShaderLights(ShaderInstance shaderInstance) {
+	public static void setupShaderLights(CompiledShaderProgram compiledShaderProgram) {
 		assertOnRenderThread();
-		if (shaderInstance.LIGHT0_DIRECTION != null) {
-			shaderInstance.LIGHT0_DIRECTION.set(shaderLightDirections[0]);
+		if (compiledShaderProgram.LIGHT0_DIRECTION != null) {
+			compiledShaderProgram.LIGHT0_DIRECTION.set(shaderLightDirections[0]);
 		}
 
-		if (shaderInstance.LIGHT1_DIRECTION != null) {
-			shaderInstance.LIGHT1_DIRECTION.set(shaderLightDirections[1]);
+		if (compiledShaderProgram.LIGHT1_DIRECTION != null) {
+			compiledShaderProgram.LIGHT1_DIRECTION.set(shaderLightDirections[1]);
 		}
 	}
 
@@ -620,27 +618,26 @@ public class RenderSystem {
 		blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
 	}
 
-	@Deprecated
-	public static void runAsFancy(Runnable runnable) {
-		boolean bl = Minecraft.useShaderTransparency();
-		if (!bl) {
-			runnable.run();
-		} else {
-			OptionInstance<GraphicsStatus> optionInstance = Minecraft.getInstance().options.graphicsMode();
-			GraphicsStatus graphicsStatus = optionInstance.get();
-			optionInstance.set(GraphicsStatus.FANCY);
-			runnable.run();
-			optionInstance.set(graphicsStatus);
-		}
+	@Nullable
+	public static CompiledShaderProgram setShader(ShaderProgram shaderProgram) {
+		assertOnRenderThread();
+		CompiledShaderProgram compiledShaderProgram = Minecraft.getInstance().getShaderManager().getProgram(shaderProgram);
+		shader = compiledShaderProgram;
+		return compiledShaderProgram;
 	}
 
-	public static void setShader(Supplier<ShaderInstance> supplier) {
+	public static void setShader(CompiledShaderProgram compiledShaderProgram) {
 		assertOnRenderThread();
-		shader = (ShaderInstance)supplier.get();
+		shader = compiledShaderProgram;
+	}
+
+	public static void clearShader() {
+		assertOnRenderThread();
+		shader = null;
 	}
 
 	@Nullable
-	public static ShaderInstance getShader() {
+	public static CompiledShaderProgram getShader() {
 		assertOnRenderThread();
 		return shader;
 	}

@@ -8,6 +8,8 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.CollisionGetter;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 
 public class EntityCollisionContext implements CollisionContext {
@@ -51,6 +53,11 @@ public class EntityCollisionContext implements CollisionContext {
 	@Override
 	public boolean canStandOnFluid(FluidState fluidState, FluidState fluidState2) {
 		return this.canStandOnFluid.test(fluidState2) && !fluidState.getType().isSame(fluidState2.getType());
+	}
+
+	@Override
+	public VoxelShape getCollisionShape(BlockState blockState, CollisionGetter collisionGetter, BlockPos blockPos) {
+		return blockState.getCollisionShape(collisionGetter, blockPos, this);
 	}
 
 	@Override

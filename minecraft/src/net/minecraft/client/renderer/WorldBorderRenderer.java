@@ -46,7 +46,7 @@ public class WorldBorderRenderer {
 			float p = (float)ARGB.green(n) / 255.0F;
 			float q = (float)ARGB.blue(n) / 255.0F;
 			RenderSystem.setShaderColor(o, p, q, (float)j);
-			RenderSystem.setShader(GameRenderer::getPositionTexShader);
+			RenderSystem.setShader(CoreShaders.POSITION_TEX);
 			RenderSystem.polygonOffset(-3.0F, -3.0F);
 			RenderSystem.enablePolygonOffset();
 			RenderSystem.disableCull();

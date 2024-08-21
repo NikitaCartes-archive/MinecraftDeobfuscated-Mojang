@@ -74,7 +74,7 @@ public class StructureManager {
 
 		while (var4.hasNext()) {
 			long l = (Long)var4.next();
-			SectionPos sectionPos = SectionPos.of(new ChunkPos(l), this.level.getMinSection());
+			SectionPos sectionPos = SectionPos.of(new ChunkPos(l), this.level.getMinSectionY());
 			StructureStart structureStart = this.getStartForStructure(
 				sectionPos, structure, this.level.getChunk(sectionPos.x(), sectionPos.z(), ChunkStatus.STRUCTURE_STARTS)
 			);

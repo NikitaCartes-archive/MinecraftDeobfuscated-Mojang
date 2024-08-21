@@ -484,7 +484,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 	}
 
 	public void checkBelowWorld() {
-		if (this.getY() < (double)(this.level().getMinBuildHeight() - 64)) {
+		if (this.getY() < (double)(this.level().getMinY() - 64)) {
 			this.onBelowWorld();
 		}
 	}

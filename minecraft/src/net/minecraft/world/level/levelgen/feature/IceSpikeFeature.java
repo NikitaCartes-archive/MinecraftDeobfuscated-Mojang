@@ -20,7 +20,7 @@ public class IceSpikeFeature extends Feature<NoneFeatureConfiguration> {
 		RandomSource randomSource = featurePlaceContext.random();
 		WorldGenLevel worldGenLevel = featurePlaceContext.level();
 
-		while (worldGenLevel.isEmptyBlock(blockPos) && blockPos.getY() > worldGenLevel.getMinBuildHeight() + 2) {
+		while (worldGenLevel.isEmptyBlock(blockPos) && blockPos.getY() > worldGenLevel.getMinY() + 2) {
 			blockPos = blockPos.below();
 		}
 

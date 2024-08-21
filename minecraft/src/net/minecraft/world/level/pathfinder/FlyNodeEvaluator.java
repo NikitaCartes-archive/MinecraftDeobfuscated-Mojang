@@ -291,7 +291,7 @@ public class FlyNodeEvaluator extends WalkNodeEvaluator {
 	@Override
 	public PathType getPathType(PathfindingContext pathfindingContext, int i, int j, int k) {
 		PathType pathType = pathfindingContext.getPathTypeFromState(i, j, k);
-		if (pathType == PathType.OPEN && j >= pathfindingContext.level().getMinBuildHeight() + 1) {
+		if (pathType == PathType.OPEN && j >= pathfindingContext.level().getMinY() + 1) {
 			BlockPos blockPos = new BlockPos(i, j - 1, k);
 			PathType pathType2 = pathfindingContext.getPathTypeFromState(blockPos.getX(), blockPos.getY(), blockPos.getZ());
 			if (pathType2 == PathType.DAMAGE_FIRE || pathType2 == PathType.LAVA) {

@@ -40,22 +40,17 @@ public class VertexFormat {
 		return new VertexFormat.Builder();
 	}
 
-	public String toString() {
-		StringBuilder stringBuilder = new StringBuilder("Vertex format (").append(this.vertexSize).append(" bytes):\n");
+	public void bindAttributes(int i) {
+		int j = 0;
 
-		for (int i = 0; i < this.elements.size(); i++) {
-			VertexFormatElement vertexFormatElement = (VertexFormatElement)this.elements.get(i);
-			stringBuilder.append(i)
-				.append(". ")
-				.append((String)this.names.get(i))
-				.append(": ")
-				.append(vertexFormatElement)
-				.append(" @ ")
-				.append(this.getOffset(vertexFormatElement))
-				.append('\n');
+		for (String string : this.getElementAttributeNames()) {
+			GlStateManager._glBindAttribLocation(i, j, string);
+			j++;
 		}
+	}
 
-		return stringBuilder.toString();
+	public String toString() {
+		return "VertexFormat" + this.names;
 	}
 
 	public int getVertexSize() {

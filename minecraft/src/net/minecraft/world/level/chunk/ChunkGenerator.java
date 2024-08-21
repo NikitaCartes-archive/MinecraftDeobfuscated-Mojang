@@ -304,7 +304,7 @@ public abstract class ChunkGenerator {
 	public void applyBiomeDecoration(WorldGenLevel worldGenLevel, ChunkAccess chunkAccess, StructureManager structureManager) {
 		ChunkPos chunkPos = chunkAccess.getPos();
 		if (!SharedConstants.debugVoidTerrain(chunkPos)) {
-			SectionPos sectionPos = SectionPos.of(chunkPos, worldGenLevel.getMinSection());
+			SectionPos sectionPos = SectionPos.of(chunkPos, worldGenLevel.getMinSectionY());
 			BlockPos blockPos = sectionPos.origin();
 			Registry<Structure> registry = worldGenLevel.registryAccess().registryOrThrow(Registries.STRUCTURE);
 			Map<Integer, List<Structure>> map = (Map<Integer, List<Structure>>)registry.stream().collect(Collectors.groupingBy(structure -> structure.step().ordinal()));
@@ -396,8 +396,8 @@ public abstract class ChunkGenerator {
 		int i = chunkPos.getMinBlockX();
 		int j = chunkPos.getMinBlockZ();
 		LevelHeightAccessor levelHeightAccessor = chunkAccess.getHeightAccessorForGeneration();
-		int k = levelHeightAccessor.getMinBuildHeight() + 1;
-		int l = levelHeightAccessor.getMaxBuildHeight() - 1;
+		int k = levelHeightAccessor.getMinY() + 1;
+		int l = levelHeightAccessor.getMaxY();
 		return new BoundingBox(i, k, j, i + 15, l, j + 15);
 	}
 

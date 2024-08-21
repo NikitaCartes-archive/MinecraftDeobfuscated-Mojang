@@ -17,7 +17,7 @@ public class PlayerRespawnLogic {
 		boolean bl = serverLevel.dimensionType().hasCeiling();
 		LevelChunk levelChunk = serverLevel.getChunk(SectionPos.blockToSectionCoord(i), SectionPos.blockToSectionCoord(j));
 		int k = bl ? serverLevel.getChunkSource().getGenerator().getSpawnHeight(serverLevel) : levelChunk.getHeight(Heightmap.Types.MOTION_BLOCKING, i & 15, j & 15);
-		if (k < serverLevel.getMinBuildHeight()) {
+		if (k < serverLevel.getMinY()) {
 			return null;
 		} else {
 			int l = levelChunk.getHeight(Heightmap.Types.WORLD_SURFACE, i & 15, j & 15);
@@ -26,7 +26,7 @@ public class PlayerRespawnLogic {
 			} else {
 				BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 
-				for (int m = k + 1; m >= serverLevel.getMinBuildHeight(); m--) {
+				for (int m = k + 1; m >= serverLevel.getMinY(); m--) {
 					mutableBlockPos.set(i, m, j);
 					BlockState blockState = serverLevel.getBlockState(mutableBlockPos);
 					if (!blockState.getFluidState().isEmpty()) {

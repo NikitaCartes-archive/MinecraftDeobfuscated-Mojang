@@ -44,8 +44,12 @@ import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
+import net.minecraft.world.item.component.Consumable;
+import net.minecraft.world.item.component.Consumables;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.item.component.Tool;
+import net.minecraft.world.item.component.UseCooldown;
+import net.minecraft.world.item.component.UseRemainder;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.item.enchantment.Enchantable;
 import net.minecraft.world.item.enchantment.Repairable;
@@ -143,22 +147,13 @@ public class Item implements FeatureElement, ItemLike {
 
 	public InteractionResult use(Level level, Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
-		FoodProperties foodProperties = itemStack.get(DataComponents.FOOD);
-		if (foodProperties != null) {
-			if (player.canEat(foodProperties.canAlwaysEat())) {
-				player.startUsingItem(interactionHand);
-				return InteractionResult.CONSUME;
-			} else {
-				return InteractionResult.FAIL;
-			}
-		} else {
-			return InteractionResult.PASS;
-		}
+		Consumable consumable = itemStack.get(DataComponents.CONSUMABLE);
+		return (InteractionResult)(consumable != null ? consumable.startConsuming(player, itemStack, interactionHand) : InteractionResult.PASS);
 	}
 
 	public ItemStack finishUsingItem(ItemStack itemStack, Level level, LivingEntity livingEntity) {
-		FoodProperties foodProperties = itemStack.get(DataComponents.FOOD);
-		return foodProperties != null ? livingEntity.eat(level, itemStack, foodProperties) : itemStack;
+		Consumable consumable = itemStack.get(DataComponents.CONSUMABLE);
+		return consumable != null ? consumable.onConsume(level, livingEntity, itemStack) : itemStack;
 	}
 
 	public boolean isBarVisible(ItemStack itemStack) {
@@ -263,13 +258,14 @@ public class Item implements FeatureElement, ItemLike {
 		return false;
 	}
 
-	public UseAnim getUseAnimation(ItemStack itemStack) {
-		return itemStack.has(DataComponents.FOOD) ? UseAnim.EAT : UseAnim.NONE;
+	public ItemUseAnimation getUseAnimation(ItemStack itemStack) {
+		Consumable consumable = itemStack.get(DataComponents.CONSUMABLE);
+		return consumable != null ? consumable.animation() : ItemUseAnimation.NONE;
 	}
 
 	public int getUseDuration(ItemStack itemStack, LivingEntity livingEntity) {
-		FoodProperties foodProperties = itemStack.get(DataComponents.FOOD);
-		return foodProperties != null ? foodProperties.eatDurationTicks() : 0;
+		Consumable consumable = itemStack.get(DataComponents.CONSUMABLE);
+		return consumable != null ? consumable.consumeTicks() : 0;
 	}
 
 	public void releaseUsing(ItemStack itemStack, Level level, LivingEntity livingEntity, int i) {
@@ -290,21 +286,10 @@ public class Item implements FeatureElement, ItemLike {
 		return itemStack.isEnchanted();
 	}
 
-	public boolean isEnchantable(ItemStack itemStack) {
-		return itemStack.getMaxStackSize() == 1 && itemStack.has(DataComponents.MAX_DAMAGE);
-	}
-
 	protected static BlockHitResult getPlayerPOVHitResult(Level level, Player player, ClipContext.Fluid fluid) {
 		Vec3 vec3 = player.getEyePosition();
 		Vec3 vec32 = vec3.add(player.calculateViewVector(player.getXRot(), player.getYRot()).scale(player.blockInteractionRange()));
 		return level.clip(new ClipContext(vec3, vec32, ClipContext.Block.OUTLINE, fluid, player));
-	}
-
-	@Deprecated(
-		forRemoval = true
-	)
-	public int getEnchantmentValue() {
-		return 0;
 	}
 
 	@Deprecated(
@@ -325,14 +310,6 @@ public class Item implements FeatureElement, ItemLike {
 
 	public ItemStack getDefaultInstance() {
 		return new ItemStack(this);
-	}
-
-	public SoundEvent getDrinkingSound() {
-		return SoundEvents.GENERIC_DRINK;
-	}
-
-	public SoundEvent getEatingSound() {
-		return SoundEvents.GENERIC_EAT;
 	}
 
 	public SoundEvent getBreakingSound() {
@@ -357,7 +334,19 @@ public class Item implements FeatureElement, ItemLike {
 		FeatureFlagSet requiredFeatures = FeatureFlags.VANILLA_SET;
 
 		public Item.Properties food(FoodProperties foodProperties) {
-			return this.component(DataComponents.FOOD, foodProperties);
+			return this.food(foodProperties, Consumables.DEFAULT_FOOD);
+		}
+
+		public Item.Properties food(FoodProperties foodProperties, Consumable consumable) {
+			return this.component(DataComponents.FOOD, foodProperties).component(DataComponents.CONSUMABLE, consumable);
+		}
+
+		public Item.Properties usingConvertsTo(Item item) {
+			return this.component(DataComponents.USE_REMAINDER, new UseRemainder(new ItemStack(item)));
+		}
+
+		public Item.Properties useCooldown(float f) {
+			return this.component(DataComponents.USE_COOLDOWN, new UseCooldown(f));
 		}
 
 		public Item.Properties stacksTo(int i) {

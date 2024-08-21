@@ -112,7 +112,7 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 
 	@Override
 	public int getBaseHeight(int i, int j, Heightmap.Types types, LevelHeightAccessor levelHeightAccessor, RandomState randomState) {
-		return this.iterateNoiseColumn(levelHeightAccessor, randomState, i, j, null, types.isOpaque()).orElse(levelHeightAccessor.getMinBuildHeight());
+		return this.iterateNoiseColumn(levelHeightAccessor, randomState, i, j, null, types.isOpaque()).orElse(levelHeightAccessor.getMinY());
 	}
 
 	@Override
@@ -439,7 +439,7 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 	public void spawnOriginalMobs(WorldGenRegion worldGenRegion) {
 		if (!this.settings.value().disableMobGeneration()) {
 			ChunkPos chunkPos = worldGenRegion.getCenter();
-			Holder<Biome> holder = worldGenRegion.getBiome(chunkPos.getWorldPosition().atY(worldGenRegion.getMaxBuildHeight() - 1));
+			Holder<Biome> holder = worldGenRegion.getBiome(chunkPos.getWorldPosition().atY(worldGenRegion.getMaxY()));
 			WorldgenRandom worldgenRandom = new WorldgenRandom(new LegacyRandomSource(RandomSupport.generateUniqueSeed()));
 			worldgenRandom.setDecorationSeed(worldGenRegion.getSeed(), chunkPos.getMinBlockX(), chunkPos.getMinBlockZ());
 			NaturalSpawner.spawnMobsForChunkGeneration(worldGenRegion, holder, chunkPos, worldgenRandom);

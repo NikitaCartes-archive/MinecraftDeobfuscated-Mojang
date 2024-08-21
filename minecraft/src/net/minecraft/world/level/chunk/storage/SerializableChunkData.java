@@ -190,7 +190,7 @@ public record SerializableChunkData(
 				CompoundTag compoundTag4 = listTag3.getCompound(k);
 				int n = compoundTag4.getByte("Y");
 				LevelChunkSection levelChunkSection;
-				if (n >= levelHeightAccessor.getMinSection() && n < levelHeightAccessor.getMaxSection()) {
+				if (n >= levelHeightAccessor.getMinSectionY() && n <= levelHeightAccessor.getMaxSectionY()) {
 					PalettedContainer<BlockState> palettedContainer;
 					if (compoundTag4.contains("block_states", 10)) {
 						palettedContainer = BLOCK_STATE_CODEC.parse(NbtOps.INSTANCE, compoundTag4.getCompound("block_states"))
@@ -224,7 +224,7 @@ public record SerializableChunkData(
 			return new SerializableChunkData(
 				registry,
 				chunkPos,
-				levelHeightAccessor.getMinSection(),
+				levelHeightAccessor.getMinSectionY(),
 				l,
 				m,
 				chunkStatus,
@@ -351,7 +351,7 @@ public record SerializableChunkData(
 			}
 
 			if (this.carvingMask != null) {
-				protoChunk2.setCarvingMask(new CarvingMask(this.carvingMask, chunkAccess.getMinBuildHeight()));
+				protoChunk2.setCarvingMask(new CarvingMask(this.carvingMask, chunkAccess.getMinY()));
 			}
 
 			return protoChunk2;
@@ -426,7 +426,7 @@ public record SerializableChunkData(
 		return new SerializableChunkData(
 			serverLevel.registryAccess().registryOrThrow(Registries.BIOME),
 			chunkPos,
-			chunkAccess.getMinSection(),
+			chunkAccess.getMinSectionY(),
 			serverLevel.getGameTime(),
 			chunkAccess.getInhabitedTime(),
 			chunkAccess.getPersistedStatus(),

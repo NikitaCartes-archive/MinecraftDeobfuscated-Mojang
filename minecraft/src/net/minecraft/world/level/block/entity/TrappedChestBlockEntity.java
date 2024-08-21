@@ -18,7 +18,7 @@ public class TrappedChestBlockEntity extends ChestBlockEntity {
 	protected void signalOpenCount(Level level, BlockPos blockPos, BlockState blockState, int i, int j) {
 		super.signalOpenCount(level, blockPos, blockState, i, j);
 		if (i != j) {
-			Orientation orientation = ExperimentalRedstoneUtils.randomOrientation(
+			Orientation orientation = ExperimentalRedstoneUtils.initialOrientation(
 				level, ((Direction)blockState.getValue(TrappedChestBlock.FACING)).getOpposite(), Direction.UP
 			);
 			Block block = blockState.getBlock();

@@ -16,7 +16,6 @@ import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.block.BlockColors;
 import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
@@ -153,7 +152,7 @@ public class ModelBlockRenderer {
 	) {
 		for (BakedQuad bakedQuad : list) {
 			this.calculateShape(blockAndTintGetter, blockState, blockPos, bakedQuad.getVertices(), bakedQuad.getDirection(), fs, bitSet);
-			ambientOcclusionFace.calculate(blockAndTintGetter, blockState, blockPos, fs, bitSet, bakedQuad);
+			ambientOcclusionFace.calculate(blockAndTintGetter, blockState, blockPos, bakedQuad.getDirection(), fs, bitSet, bakedQuad.isShade());
 			this.putQuadData(
 				blockAndTintGetter,
 				blockState,
@@ -288,19 +287,14 @@ public class ModelBlockRenderer {
 		BitSet bitSet
 	) {
 		for (BakedQuad bakedQuad : list) {
-			int k = i;
 			if (bl) {
 				this.calculateShape(blockAndTintGetter, blockState, blockPos, bakedQuad.getVertices(), bakedQuad.getDirection(), null, bitSet);
 				BlockPos blockPos2 = bitSet.get(0) ? blockPos.relative(bakedQuad.getDirection()) : blockPos;
-				k = LevelRenderer.getLightColor(blockAndTintGetter, blockState, blockPos2);
-			}
-
-			if (bakedQuad.emitsLight()) {
-				k = LightTexture.lightCoordsWithEmission(k, bakedQuad.getLightEmission());
+				i = LevelRenderer.getLightColor(blockAndTintGetter, blockState, blockPos2);
 			}
 
 			float f = blockAndTintGetter.getShade(bakedQuad.getDirection(), bakedQuad.isShade());
-			this.putQuadData(blockAndTintGetter, blockState, blockPos, vertexConsumer, poseStack.last(), bakedQuad, f, f, f, f, k, k, k, k, j);
+			this.putQuadData(blockAndTintGetter, blockState, blockPos, vertexConsumer, poseStack.last(), bakedQuad, f, f, f, f, i, i, i, i, j);
 		}
 	}
 
@@ -664,8 +658,9 @@ public class ModelBlockRenderer {
 		public AmbientOcclusionFace() {
 		}
 
-		public void calculate(BlockAndTintGetter blockAndTintGetter, BlockState blockState, BlockPos blockPos, float[] fs, BitSet bitSet, BakedQuad bakedQuad) {
-			Direction direction = bakedQuad.getDirection();
+		public void calculate(
+			BlockAndTintGetter blockAndTintGetter, BlockState blockState, BlockPos blockPos, Direction direction, float[] fs, BitSet bitSet, boolean bl
+		) {
 			BlockPos blockPos2 = bitSet.get(0) ? blockPos.relative(direction) : blockPos;
 			ModelBlockRenderer.AdjacencyInfo adjacencyInfo = ModelBlockRenderer.AdjacencyInfo.fromFacing(direction);
 			BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
@@ -687,16 +682,16 @@ public class ModelBlockRenderer {
 			int l = cache.getLightColor(blockState5, blockAndTintGetter, mutableBlockPos);
 			float m = cache.getShadeBrightness(blockState5, blockAndTintGetter, mutableBlockPos);
 			BlockState blockState6 = blockAndTintGetter.getBlockState(mutableBlockPos.setWithOffset(blockPos2, adjacencyInfo.corners[0]).move(direction));
-			boolean bl = !blockState6.isViewBlocking(blockAndTintGetter, mutableBlockPos) || blockState6.getLightBlock() == 0;
+			boolean bl2 = !blockState6.isViewBlocking(blockAndTintGetter, mutableBlockPos) || blockState6.getLightBlock() == 0;
 			BlockState blockState7 = blockAndTintGetter.getBlockState(mutableBlockPos.setWithOffset(blockPos2, adjacencyInfo.corners[1]).move(direction));
-			boolean bl2 = !blockState7.isViewBlocking(blockAndTintGetter, mutableBlockPos) || blockState7.getLightBlock() == 0;
+			boolean bl3 = !blockState7.isViewBlocking(blockAndTintGetter, mutableBlockPos) || blockState7.getLightBlock() == 0;
 			BlockState blockState8 = blockAndTintGetter.getBlockState(mutableBlockPos.setWithOffset(blockPos2, adjacencyInfo.corners[2]).move(direction));
-			boolean bl3 = !blockState8.isViewBlocking(blockAndTintGetter, mutableBlockPos) || blockState8.getLightBlock() == 0;
+			boolean bl4 = !blockState8.isViewBlocking(blockAndTintGetter, mutableBlockPos) || blockState8.getLightBlock() == 0;
 			BlockState blockState9 = blockAndTintGetter.getBlockState(mutableBlockPos.setWithOffset(blockPos2, adjacencyInfo.corners[3]).move(direction));
-			boolean bl4 = !blockState9.isViewBlocking(blockAndTintGetter, mutableBlockPos) || blockState9.getLightBlock() == 0;
+			boolean bl5 = !blockState9.isViewBlocking(blockAndTintGetter, mutableBlockPos) || blockState9.getLightBlock() == 0;
 			float n;
 			int o;
-			if (!bl3 && !bl) {
+			if (!bl4 && !bl2) {
 				n = f;
 				o = i;
 			} else {
@@ -708,7 +703,7 @@ public class ModelBlockRenderer {
 
 			float p;
 			int q;
-			if (!bl4 && !bl) {
+			if (!bl5 && !bl2) {
 				p = f;
 				q = i;
 			} else {
@@ -720,7 +715,7 @@ public class ModelBlockRenderer {
 
 			float r;
 			int s;
-			if (!bl3 && !bl2) {
+			if (!bl4 && !bl3) {
 				r = f;
 				s = i;
 			} else {
@@ -732,7 +727,7 @@ public class ModelBlockRenderer {
 
 			float t;
 			int u;
-			if (!bl4 && !bl2) {
+			if (!bl5 && !bl3) {
 				t = f;
 				u = i;
 			} else {
@@ -801,18 +796,10 @@ public class ModelBlockRenderer {
 				this.brightness[ambientVertexRemap.vert3] = aa;
 			}
 
-			if (bakedQuad.emitsLight()) {
-				int av = bakedQuad.getLightEmission();
+			float x = blockAndTintGetter.getShade(direction, bl);
 
-				for (int aw = 0; aw < this.lightmap.length; aw++) {
-					this.lightmap[aw] = LightTexture.lightCoordsWithEmission(this.lightmap[aw], av);
-				}
-			}
-
-			float x = blockAndTintGetter.getShade(direction, bakedQuad.isShade());
-
-			for (int aw = 0; aw < this.brightness.length; aw++) {
-				this.brightness[aw] = this.brightness[aw] * x;
+			for (int av = 0; av < this.brightness.length; av++) {
+				this.brightness[av] = this.brightness[av] * x;
 			}
 		}
 

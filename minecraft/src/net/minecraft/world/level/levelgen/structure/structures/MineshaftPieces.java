@@ -458,7 +458,7 @@ public class MineshaftPieces {
 			if (boundingBox.isInside(mutableBlockPos)) {
 				int l = mutableBlockPos.getY();
 
-				while (this.isReplaceableByStructures(worldGenLevel.getBlockState(mutableBlockPos)) && mutableBlockPos.getY() > worldGenLevel.getMinBuildHeight() + 1) {
+				while (this.isReplaceableByStructures(worldGenLevel.getBlockState(mutableBlockPos)) && mutableBlockPos.getY() > worldGenLevel.getMinY() + 1) {
 					mutableBlockPos.move(Direction.DOWN);
 				}
 
@@ -488,7 +488,7 @@ public class MineshaftPieces {
 							return;
 						}
 
-						bl = m <= 20 && bl3 && mutableBlockPos.getY() > worldGenLevel.getMinBuildHeight() + 1;
+						bl = m <= 20 && bl3 && mutableBlockPos.getY() > worldGenLevel.getMinY() + 1;
 					}
 
 					if (bl2) {
@@ -501,7 +501,7 @@ public class MineshaftPieces {
 							return;
 						}
 
-						bl2 = m <= 50 && bl3 && mutableBlockPos.getY() < worldGenLevel.getMaxBuildHeight() - 1;
+						bl2 = m <= 50 && bl3 && mutableBlockPos.getY() < worldGenLevel.getMaxY();
 					}
 				}
 			}

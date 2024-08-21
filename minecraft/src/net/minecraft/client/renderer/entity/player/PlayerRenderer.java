@@ -40,8 +40,8 @@ import net.minecraft.world.entity.animal.Parrot;
 import net.minecraft.world.entity.player.PlayerModelPart;
 import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemUseAnimation;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.DisplaySlot;
 import net.minecraft.world.scores.Objective;
@@ -85,32 +85,32 @@ public class PlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer, P
 			return HumanoidModel.ArmPose.EMPTY;
 		} else {
 			if (playerRenderState.useItemHand == interactionHand && playerRenderState.useItemRemainingTicks > 0) {
-				UseAnim useAnim = handState.useAnimation;
-				if (useAnim == UseAnim.BLOCK) {
+				ItemUseAnimation itemUseAnimation = handState.useAnimation;
+				if (itemUseAnimation == ItemUseAnimation.BLOCK) {
 					return HumanoidModel.ArmPose.BLOCK;
 				}
 
-				if (useAnim == UseAnim.BOW) {
+				if (itemUseAnimation == ItemUseAnimation.BOW) {
 					return HumanoidModel.ArmPose.BOW_AND_ARROW;
 				}
 
-				if (useAnim == UseAnim.SPEAR) {
+				if (itemUseAnimation == ItemUseAnimation.SPEAR) {
 					return HumanoidModel.ArmPose.THROW_SPEAR;
 				}
 
-				if (useAnim == UseAnim.CROSSBOW) {
+				if (itemUseAnimation == ItemUseAnimation.CROSSBOW) {
 					return HumanoidModel.ArmPose.CROSSBOW_CHARGE;
 				}
 
-				if (useAnim == UseAnim.SPYGLASS) {
+				if (itemUseAnimation == ItemUseAnimation.SPYGLASS) {
 					return HumanoidModel.ArmPose.SPYGLASS;
 				}
 
-				if (useAnim == UseAnim.TOOT_HORN) {
+				if (itemUseAnimation == ItemUseAnimation.TOOT_HORN) {
 					return HumanoidModel.ArmPose.TOOT_HORN;
 				}
 
-				if (useAnim == UseAnim.BRUSH) {
+				if (itemUseAnimation == ItemUseAnimation.BRUSH) {
 					return HumanoidModel.ArmPose.BRUSH;
 				}
 			} else if (!playerRenderState.swinging && handState.holdsChargedCrossbow) {
@@ -153,7 +153,6 @@ public class PlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer, P
 		playerRenderState.stingerCount = abstractClientPlayer.getStingerCount();
 		playerRenderState.useItemRemainingTicks = abstractClientPlayer.getUseItemRemainingTicks();
 		playerRenderState.swinging = abstractClientPlayer.swinging;
-		playerRenderState.isVisuallySwimming = abstractClientPlayer.isVisuallySwimming();
 		playerRenderState.isSpectator = abstractClientPlayer.isSpectator();
 		playerRenderState.showHat = abstractClientPlayer.isModelPartShown(PlayerModelPart.HAT);
 		playerRenderState.showJacket = abstractClientPlayer.isModelPartShown(PlayerModelPart.JACKET);
@@ -239,18 +238,20 @@ public class PlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer, P
 			: null;
 	}
 
-	public void renderRightHand(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, ResourceLocation resourceLocation) {
-		this.renderHand(poseStack, multiBufferSource, i, resourceLocation, this.model.rightArm);
+	public void renderRightHand(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, ResourceLocation resourceLocation, boolean bl) {
+		this.renderHand(poseStack, multiBufferSource, i, resourceLocation, this.model.rightArm, bl);
 	}
 
-	public void renderLeftHand(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, ResourceLocation resourceLocation) {
-		this.renderHand(poseStack, multiBufferSource, i, resourceLocation, this.model.leftArm);
+	public void renderLeftHand(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, ResourceLocation resourceLocation, boolean bl) {
+		this.renderHand(poseStack, multiBufferSource, i, resourceLocation, this.model.leftArm, bl);
 	}
 
-	private void renderHand(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, ResourceLocation resourceLocation, ModelPart modelPart) {
+	private void renderHand(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, ResourceLocation resourceLocation, ModelPart modelPart, boolean bl) {
 		PlayerModel playerModel = this.getModel();
-		playerModel.leftArm.resetPose();
-		playerModel.rightArm.resetPose();
+		modelPart.resetPose();
+		modelPart.visible = true;
+		playerModel.leftSleeve.visible = bl;
+		playerModel.rightSleeve.visible = bl;
 		playerModel.leftArm.zRot = -0.1F;
 		playerModel.rightArm.zRot = 0.1F;
 		modelPart.render(poseStack, multiBufferSource.getBuffer(RenderType.entityTranslucent(resourceLocation)), i, OverlayTexture.NO_OVERLAY);

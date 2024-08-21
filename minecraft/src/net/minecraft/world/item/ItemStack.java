@@ -75,9 +75,12 @@ import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
+import net.minecraft.world.item.component.Consumable;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.item.component.TooltipProvider;
+import net.minecraft.world.item.component.UseCooldown;
+import net.minecraft.world.item.component.UseRemainder;
 import net.minecraft.world.item.component.WrittenBookContent;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.item.enchantment.Enchantable;
@@ -365,11 +368,34 @@ public final class ItemStack implements DataComponentHolder {
 	}
 
 	public InteractionResult use(Level level, Player player, InteractionHand interactionHand) {
-		return this.getItem().use(level, player, interactionHand);
+		ItemStack itemStack = this.copy();
+		boolean bl = this.getUseDuration(player) <= 0;
+		InteractionResult interactionResult = this.getItem().use(level, player, interactionHand);
+		return (InteractionResult)(bl && interactionResult instanceof InteractionResult.Success success
+			? success.heldItemTransformedTo(this.applyAfterUseComponentSideEffects(player, itemStack))
+			: interactionResult);
 	}
 
 	public ItemStack finishUsingItem(Level level, LivingEntity livingEntity) {
-		return this.getItem().finishUsingItem(this, level, livingEntity);
+		ItemStack itemStack = this.copy();
+		ItemStack itemStack2 = this.getItem().finishUsingItem(this, level, livingEntity);
+		return itemStack2.applyAfterUseComponentSideEffects(livingEntity, itemStack);
+	}
+
+	private ItemStack applyAfterUseComponentSideEffects(LivingEntity livingEntity, ItemStack itemStack) {
+		UseRemainder useRemainder = itemStack.get(DataComponents.USE_REMAINDER);
+		UseCooldown useCooldown = itemStack.get(DataComponents.USE_COOLDOWN);
+		int i = itemStack.getCount();
+		ItemStack itemStack2 = this;
+		if (useRemainder != null) {
+			itemStack2 = useRemainder.convertIntoRemainder(livingEntity, this, i);
+		}
+
+		if (useCooldown != null) {
+			useCooldown.apply(itemStack, livingEntity);
+		}
+
+		return itemStack2;
 	}
 
 	public Tag save(HolderLookup.Provider provider, Tag tag) {
@@ -664,12 +690,17 @@ public final class ItemStack implements DataComponentHolder {
 		return this.getItem().getUseDuration(this, livingEntity);
 	}
 
-	public UseAnim getUseAnimation() {
+	public ItemUseAnimation getUseAnimation() {
 		return this.getItem().getUseAnimation(this);
 	}
 
 	public void releaseUsing(Level level, LivingEntity livingEntity, int i) {
+		ItemStack itemStack = this.copy();
 		this.getItem().releaseUsing(this, level, livingEntity, i);
+		ItemStack itemStack2 = this.applyAfterUseComponentSideEffects(livingEntity, itemStack);
+		if (itemStack2 != this) {
+			livingEntity.setItemInHand(livingEntity.getUsedItemHand(), itemStack2);
+		}
 	}
 
 	public boolean useOnRelease() {
@@ -720,18 +751,18 @@ public final class ItemStack implements DataComponentHolder {
 	}
 
 	public Component getHoverName() {
-		WrittenBookContent writtenBookContent = this.get(DataComponents.WRITTEN_BOOK_CONTENT);
-		if (writtenBookContent != null) {
-			String string = writtenBookContent.title().raw();
-			if (!StringUtil.isBlank(string)) {
-				return Component.literal(string);
-			}
-		}
-
 		Component component = this.get(DataComponents.CUSTOM_NAME);
 		if (component != null) {
 			return component;
 		} else {
+			WrittenBookContent writtenBookContent = this.get(DataComponents.WRITTEN_BOOK_CONTENT);
+			if (writtenBookContent != null) {
+				String string = writtenBookContent.title().raw();
+				if (!StringUtil.isBlank(string)) {
+					return Component.literal(string);
+				}
+			}
+
 			Component component2 = this.get(DataComponents.ITEM_NAME);
 			return component2 != null ? component2 : this.getItem().getName(this);
 		}
@@ -777,6 +808,8 @@ public final class ItemStack implements DataComponentHolder {
 			this.addToTooltip(DataComponents.LORE, tooltipContext, consumer, tooltipFlag);
 			this.addAttributeTooltips(consumer, player);
 			this.addToTooltip(DataComponents.UNBREAKABLE, tooltipContext, consumer, tooltipFlag);
+			this.addToTooltip(DataComponents.OMINOUS_BOTTLE_AMPLIFIER, tooltipContext, consumer, tooltipFlag);
+			this.addToTooltip(DataComponents.SUSPICIOUS_STEW_EFFECTS, tooltipContext, consumer, tooltipFlag);
 			AdventureModePredicate adventureModePredicate = this.get(DataComponents.CAN_BREAK);
 			if (adventureModePredicate != null && adventureModePredicate.showInTooltip()) {
 				consumer.accept(CommonComponents.EMPTY);
@@ -906,8 +939,6 @@ public final class ItemStack implements DataComponentHolder {
 	public boolean isEnchantable() {
 		if (!this.has(DataComponents.ENCHANTABLE)) {
 			return false;
-		} else if (!this.getItem().isEnchantable(this)) {
-			return false;
 		} else {
 			ItemEnchantments itemEnchantments = this.get(DataComponents.ENCHANTMENTS);
 			return itemEnchantments != null && itemEnchantments.isEmpty();
@@ -1036,19 +1067,16 @@ public final class ItemStack implements DataComponentHolder {
 	}
 
 	public void onUseTick(Level level, LivingEntity livingEntity, int i) {
+		Consumable consumable = this.get(DataComponents.CONSUMABLE);
+		if (consumable != null && consumable.shouldEmitParticlesAndSounds(i)) {
+			consumable.emitParticlesAndSounds(livingEntity.getRandom(), livingEntity, this, 5);
+		}
+
 		this.getItem().onUseTick(level, livingEntity, this, i);
 	}
 
 	public void onDestroyed(ItemEntity itemEntity) {
 		this.getItem().onDestroyed(itemEntity);
-	}
-
-	public SoundEvent getDrinkingSound() {
-		return this.getItem().getDrinkingSound();
-	}
-
-	public SoundEvent getEatingSound() {
-		return this.getItem().getEatingSound();
 	}
 
 	public SoundEvent getBreakingSound() {
@@ -1066,6 +1094,6 @@ public final class ItemStack implements DataComponentHolder {
 
 	public int getEnchantmentValue() {
 		Enchantable enchantable = this.get(DataComponents.ENCHANTABLE);
-		return enchantable != null ? enchantable.value() : this.getItem().getEnchantmentValue();
+		return enchantable != null ? enchantable.value() : 0;
 	}
 }

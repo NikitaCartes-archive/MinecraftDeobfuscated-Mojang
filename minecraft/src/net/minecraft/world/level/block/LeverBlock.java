@@ -174,7 +174,9 @@ public class LeverBlock extends FaceAttachedHorizontalDirectionalBlock {
 
 	private void updateNeighbours(BlockState blockState, Level level, BlockPos blockPos) {
 		Direction direction = getConnectedDirection(blockState).getOpposite();
-		Orientation orientation = ExperimentalRedstoneUtils.randomOrientation(level, direction, direction.getAxis().isHorizontal() ? Direction.UP : null);
+		Orientation orientation = ExperimentalRedstoneUtils.initialOrientation(
+			level, direction, direction.getAxis().isHorizontal() ? Direction.UP : blockState.getValue(FACING)
+		);
 		level.updateNeighborsAt(blockPos, this, orientation);
 		level.updateNeighborsAt(blockPos.relative(direction), this, orientation);
 	}

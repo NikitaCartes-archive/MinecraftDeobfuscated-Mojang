@@ -6,22 +6,26 @@ import net.minecraft.core.SectionPos;
 public interface LevelHeightAccessor {
 	int getHeight();
 
-	int getMinBuildHeight();
+	int getMinY();
 
-	default int getMaxBuildHeight() {
-		return this.getMinBuildHeight() + this.getHeight();
+	default int getMaxY() {
+		return this.getMinY() + this.getHeight() - 1;
 	}
 
 	default int getSectionsCount() {
-		return this.getMaxSection() - this.getMinSection();
+		return this.getMaxSectionY() - this.getMinSectionY() + 1;
 	}
 
-	default int getMinSection() {
-		return SectionPos.blockToSectionCoord(this.getMinBuildHeight());
+	default int getMinSectionY() {
+		return SectionPos.blockToSectionCoord(this.getMinY());
 	}
 
-	default int getMaxSection() {
-		return SectionPos.blockToSectionCoord(this.getMaxBuildHeight() - 1) + 1;
+	default int getMaxSectionY() {
+		return SectionPos.blockToSectionCoord(this.getMaxY());
+	}
+
+	default boolean isInsideBuildHeight(int i) {
+		return i >= this.getMinY() && i <= this.getMaxY();
 	}
 
 	default boolean isOutsideBuildHeight(BlockPos blockPos) {
@@ -29,7 +33,7 @@ public interface LevelHeightAccessor {
 	}
 
 	default boolean isOutsideBuildHeight(int i) {
-		return i < this.getMinBuildHeight() || i >= this.getMaxBuildHeight();
+		return i < this.getMinY() || i > this.getMaxY();
 	}
 
 	default int getSectionIndex(int i) {
@@ -37,11 +41,11 @@ public interface LevelHeightAccessor {
 	}
 
 	default int getSectionIndexFromSectionY(int i) {
-		return i - this.getMinSection();
+		return i - this.getMinSectionY();
 	}
 
 	default int getSectionYFromSectionIndex(int i) {
-		return i + this.getMinSection();
+		return i + this.getMinSectionY();
 	}
 
 	static LevelHeightAccessor create(int i, int j) {
@@ -52,7 +56,7 @@ public interface LevelHeightAccessor {
 			}
 
 			@Override
-			public int getMinBuildHeight() {
+			public int getMinY() {
 				return i;
 			}
 		};

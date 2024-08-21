@@ -12,7 +12,6 @@ import net.minecraft.sounds.SoundEvent;
 
 public record ArmorMaterial(
 	Map<ArmorItem.Type, Integer> defense,
-	int enchantmentValue,
 	Holder<SoundEvent> equipSound,
 	Predicate<ItemStack> repairIngredient,
 	List<ArmorMaterial.Layer> layers,

@@ -36,7 +36,6 @@ import net.minecraft.client.gui.components.debugchart.PingDebugChart;
 import net.minecraft.client.gui.components.debugchart.ProfilerPieChart;
 import net.minecraft.client.gui.components.debugchart.TpsDebugChart;
 import net.minecraft.client.multiplayer.ClientPacketListener;
-import net.minecraft.client.renderer.PostChain;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -44,6 +43,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.Connection;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.ServerTickRateManager;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
@@ -377,7 +377,7 @@ public class DebugScreenOverlay {
 				}
 
 				list.add(stringBuilder.toString());
-				if (blockPos.getY() >= this.minecraft.level.getMinBuildHeight() && blockPos.getY() < this.minecraft.level.getMaxBuildHeight()) {
+				if (this.minecraft.level.isInsideBuildHeight(blockPos.getY())) {
 					list.add("Biome: " + printBiome(this.minecraft.level.getBiome(blockPos)));
 					if (levelChunk2 != null) {
 						float h = level.getMoonBrightness();
@@ -428,9 +428,9 @@ public class DebugScreenOverlay {
 				}
 			}
 
-			PostChain postChain = this.minecraft.gameRenderer.currentEffect();
-			if (postChain != null) {
-				list.add("Shader: " + postChain.getId());
+			ResourceLocation resourceLocation = this.minecraft.gameRenderer.currentPostEffect();
+			if (resourceLocation != null) {
+				list.add("Post: " + resourceLocation);
 			}
 
 			list.add(

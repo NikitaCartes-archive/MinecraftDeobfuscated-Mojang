@@ -342,11 +342,11 @@ public class ServerPlayer extends Player {
 			blockPos2 = blockPos;
 		}
 
-		while (!this.noCollisionNoLiquid(serverLevel, aABB.move(blockPos2.getBottomCenter())) && blockPos2.getY() < serverLevel.getMaxBuildHeight() - 1) {
+		while (!this.noCollisionNoLiquid(serverLevel, aABB.move(blockPos2.getBottomCenter())) && blockPos2.getY() < serverLevel.getMaxY()) {
 			blockPos2 = blockPos2.above();
 		}
 
-		while (this.noCollisionNoLiquid(serverLevel, aABB.move(blockPos2.below().getBottomCenter())) && blockPos2.getY() > serverLevel.getMinBuildHeight() + 1) {
+		while (this.noCollisionNoLiquid(serverLevel, aABB.move(blockPos2.below().getBottomCenter())) && blockPos2.getY() > serverLevel.getMinY() + 1) {
 			blockPos2 = blockPos2.below();
 		}
 
@@ -1403,11 +1403,14 @@ public class ServerPlayer extends Player {
 	}
 
 	@Override
-	protected void onEffectRemoved(MobEffectInstance mobEffectInstance) {
-		super.onEffectRemoved(mobEffectInstance);
-		this.connection.send(new ClientboundRemoveMobEffectPacket(this.getId(), mobEffectInstance.getEffect()));
-		if (mobEffectInstance.is(MobEffects.LEVITATION)) {
-			this.levitationStartPos = null;
+	protected void onEffectsRemoved(Collection<MobEffectInstance> collection) {
+		super.onEffectsRemoved(collection);
+
+		for (MobEffectInstance mobEffectInstance : collection) {
+			this.connection.send(new ClientboundRemoveMobEffectPacket(this.getId(), mobEffectInstance.getEffect()));
+			if (mobEffectInstance.is(MobEffects.LEVITATION)) {
+				this.levitationStartPos = null;
+			}
 		}
 
 		CriteriaTriggers.EFFECTS_CHANGED.trigger(this, null);

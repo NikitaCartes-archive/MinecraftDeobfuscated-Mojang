@@ -6,7 +6,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
-import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.IntStream;
 import javax.annotation.Nullable;
@@ -143,15 +142,9 @@ public class GlStateManager {
 		return GL20.glCreateShader(i);
 	}
 
-	public static void glShaderSource(int i, List<String> list) {
+	public static void glShaderSource(int i, String string) {
 		RenderSystem.assertOnRenderThread();
-		StringBuilder stringBuilder = new StringBuilder();
-
-		for (String string : list) {
-			stringBuilder.append(string);
-		}
-
-		byte[] bs = stringBuilder.toString().getBytes(Charsets.UTF_8);
+		byte[] bs = string.getBytes(Charsets.UTF_8);
 		ByteBuffer byteBuffer = MemoryUtil.memAlloc(bs.length + 1);
 		byteBuffer.put(bs);
 		byteBuffer.put((byte)0);

@@ -585,14 +585,14 @@ public class ServerLevel extends Level implements WorldGenLevel {
 		if (optional.isPresent()) {
 			return (BlockPos)optional.get();
 		} else {
-			AABB aABB = AABB.encapsulatingFullBlocks(blockPos2, new BlockPos(blockPos2.atY(this.getMaxBuildHeight()))).inflate(3.0);
+			AABB aABB = AABB.encapsulatingFullBlocks(blockPos2, blockPos2.atY(this.getMaxY() + 1)).inflate(3.0);
 			List<LivingEntity> list = this.getEntitiesOfClass(
 				LivingEntity.class, aABB, livingEntity -> livingEntity != null && livingEntity.isAlive() && this.canSeeSky(livingEntity.blockPosition())
 			);
 			if (!list.isEmpty()) {
 				return ((LivingEntity)list.get(this.random.nextInt(list.size()))).blockPosition();
 			} else {
-				if (blockPos2.getY() == this.getMinBuildHeight() - 1) {
+				if (blockPos2.getY() == this.getMinY() - 1) {
 					blockPos2 = blockPos2.above(2);
 				}
 
@@ -1040,7 +1040,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 
 	@Override
 	public void updateNeighborsAt(BlockPos blockPos, Block block) {
-		this.updateNeighborsAt(blockPos, block, ExperimentalRedstoneUtils.randomOrientation(this, null, null));
+		this.updateNeighborsAt(blockPos, block, ExperimentalRedstoneUtils.initialOrientation(this, null, null));
 	}
 
 	@Override

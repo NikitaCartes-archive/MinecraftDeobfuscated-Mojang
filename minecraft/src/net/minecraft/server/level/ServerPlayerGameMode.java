@@ -132,7 +132,7 @@ public class ServerPlayerGameMode {
 	public void handleBlockBreakAction(BlockPos blockPos, ServerboundPlayerActionPacket.Action action, Direction direction, int i, int j) {
 		if (!this.player.canInteractWithBlock(blockPos, 1.0)) {
 			this.debugLogging(blockPos, false, j, "too far");
-		} else if (blockPos.getY() >= i) {
+		} else if (blockPos.getY() > i) {
 			this.player.connection.send(new ClientboundBlockUpdatePacket(blockPos, this.level.getBlockState(blockPos)));
 			this.debugLogging(blockPos, false, j, "too high");
 		} else {
@@ -272,7 +272,7 @@ public class ServerPlayerGameMode {
 	public InteractionResult useItem(ServerPlayer serverPlayer, Level level, ItemStack itemStack, InteractionHand interactionHand) {
 		if (this.gameModeForPlayer == GameType.SPECTATOR) {
 			return InteractionResult.PASS;
-		} else if (serverPlayer.getCooldowns().isOnCooldown(itemStack.getItem())) {
+		} else if (serverPlayer.getCooldowns().isOnCooldown(itemStack)) {
 			return InteractionResult.PASS;
 		} else {
 			int i = itemStack.getCount();
@@ -342,7 +342,7 @@ public class ServerPlayerGameMode {
 				}
 			}
 
-			if (!itemStack.isEmpty() && !serverPlayer.getCooldowns().isOnCooldown(itemStack.getItem())) {
+			if (!itemStack.isEmpty() && !serverPlayer.getCooldowns().isOnCooldown(itemStack)) {
 				UseOnContext useOnContext = new UseOnContext(serverPlayer, interactionHand, blockHitResult);
 				InteractionResult interactionResult2;
 				if (this.isCreative()) {

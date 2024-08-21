@@ -131,7 +131,7 @@ public final class NaturalSpawner {
 		NaturalSpawner.AfterSpawnCallback afterSpawnCallback
 	) {
 		BlockPos blockPos = getRandomPosWithin(serverLevel, levelChunk);
-		if (blockPos.getY() >= serverLevel.getMinBuildHeight() + 1) {
+		if (blockPos.getY() >= serverLevel.getMinY() + 1) {
 			spawnCategoryForPosition(mobCategory, serverLevel, levelChunk, blockPos, spawnPredicate, afterSpawnCallback);
 		}
 	}
@@ -337,7 +337,7 @@ public final class NaturalSpawner {
 		int i = chunkPos.getMinBlockX() + level.random.nextInt(16);
 		int j = chunkPos.getMinBlockZ() + level.random.nextInt(16);
 		int k = levelChunk.getHeight(Heightmap.Types.WORLD_SURFACE, i, j) + 1;
-		int l = Mth.randomBetweenInclusive(level.random, level.getMinBuildHeight(), k);
+		int l = Mth.randomBetweenInclusive(level.random, level.getMinY(), k);
 		return new BlockPos(i, l, j);
 	}
 
@@ -442,7 +442,7 @@ public final class NaturalSpawner {
 
 			do {
 				mutableBlockPos.move(Direction.DOWN);
-			} while (levelReader.getBlockState(mutableBlockPos).isAir() && mutableBlockPos.getY() > levelReader.getMinBuildHeight());
+			} while (levelReader.getBlockState(mutableBlockPos).isAir() && mutableBlockPos.getY() > levelReader.getMinY());
 		}
 
 		return SpawnPlacements.getPlacementType(entityType).adjustSpawnPosition(levelReader, mutableBlockPos.immutable());

@@ -12,7 +12,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
-import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.VideoMode;
 import com.mojang.blaze3d.platform.Window;
@@ -161,12 +160,6 @@ public class Options {
 		),
 		CloudStatus.FANCY,
 		cloudStatus -> {
-			if (Minecraft.useShaderTransparency()) {
-				RenderTarget renderTarget = Minecraft.getInstance().levelRenderer.getCloudsTarget();
-				if (renderTarget != null) {
-					renderTarget.clear();
-				}
-			}
 		}
 	);
 	private static final Component GRAPHICS_TOOLTIP_FAST = Component.translatable("options.graphics.fast.tooltip");

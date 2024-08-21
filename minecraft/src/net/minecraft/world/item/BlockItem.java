@@ -43,7 +43,7 @@ public class BlockItem extends Item {
 	@Override
 	public InteractionResult useOn(UseOnContext useOnContext) {
 		InteractionResult interactionResult = this.place(new BlockPlaceContext(useOnContext));
-		return !interactionResult.consumesAction() && useOnContext.getItemInHand().has(DataComponents.FOOD)
+		return !interactionResult.consumesAction() && useOnContext.getItemInHand().has(DataComponents.CONSUMABLE)
 			? super.use(useOnContext.getLevel(), useOnContext.getPlayer(), useOnContext.getHand())
 			: interactionResult;
 	}

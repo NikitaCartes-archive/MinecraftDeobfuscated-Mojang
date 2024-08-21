@@ -28,7 +28,7 @@ public enum RailShape implements StringRepresentable {
 		return this.name;
 	}
 
-	public boolean isAscending() {
+	public boolean isSlope() {
 		return this == ASCENDING_NORTH || this == ASCENDING_EAST || this == ASCENDING_SOUTH || this == ASCENDING_WEST;
 	}
 

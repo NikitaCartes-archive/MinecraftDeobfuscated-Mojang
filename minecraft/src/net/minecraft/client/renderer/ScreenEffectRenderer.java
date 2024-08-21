@@ -67,7 +67,7 @@ public class ScreenEffectRenderer {
 
 	private static void renderTex(TextureAtlasSprite textureAtlasSprite, PoseStack poseStack) {
 		RenderSystem.setShaderTexture(0, textureAtlasSprite.atlasLocation());
-		RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
+		RenderSystem.setShader(CoreShaders.POSITION_TEX_COLOR);
 		float f = 0.1F;
 		float g = -1.0F;
 		float h = 1.0F;
@@ -88,7 +88,7 @@ public class ScreenEffectRenderer {
 	}
 
 	private static void renderWater(Minecraft minecraft, PoseStack poseStack) {
-		RenderSystem.setShader(GameRenderer::getPositionTexShader);
+		RenderSystem.setShader(CoreShaders.POSITION_TEX);
 		RenderSystem.setShaderTexture(0, UNDERWATER_LOCATION);
 		BlockPos blockPos = BlockPos.containing(minecraft.player.getX(), minecraft.player.getEyeY(), minecraft.player.getZ());
 		float f = LightTexture.getBrightness(minecraft.player.level().dimensionType(), minecraft.player.level().getMaxLocalRawBrightness(blockPos));
@@ -114,7 +114,7 @@ public class ScreenEffectRenderer {
 	}
 
 	private static void renderFire(Minecraft minecraft, PoseStack poseStack) {
-		RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
+		RenderSystem.setShader(CoreShaders.POSITION_TEX_COLOR);
 		RenderSystem.depthFunc(519);
 		RenderSystem.depthMask(false);
 		RenderSystem.enableBlend();

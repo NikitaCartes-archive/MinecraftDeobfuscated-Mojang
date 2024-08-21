@@ -2,7 +2,6 @@ package net.minecraft.client.renderer;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.google.gson.JsonSyntaxException;
 import com.mojang.blaze3d.framegraph.FrameGraphBuilder;
 import com.mojang.blaze3d.framegraph.FramePass;
 import com.mojang.blaze3d.pipeline.RenderTarget;
@@ -30,7 +29,6 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap.Entry;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectListIterator;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -102,6 +100,8 @@ import org.slf4j.Logger;
 @Environment(EnvType.CLIENT)
 public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseable {
 	private static final Logger LOGGER = LogUtils.getLogger();
+	private static final ResourceLocation TRANSPARENCY_POST_CHAIN_ID = ResourceLocation.withDefaultNamespace("transparency");
+	private static final ResourceLocation ENTITY_OUTLINE_POST_CHAIN_ID = ResourceLocation.withDefaultNamespace("entity_outline");
 	public static final int SECTION_SIZE = 16;
 	public static final int HALF_SECTION_SIZE = 8;
 	private static final int TRANSPARENT_SORT_COUNT = 15;
@@ -124,11 +124,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 	private final Int2ObjectMap<BlockDestructionProgress> destroyingBlocks = new Int2ObjectOpenHashMap<>();
 	private final Long2ObjectMap<SortedSet<BlockDestructionProgress>> destructionProgress = new Long2ObjectOpenHashMap<>();
 	@Nullable
-	private PostChain entityOutlineChain;
-	@Nullable
 	private RenderTarget entityOutlineTarget;
-	@Nullable
-	private PostChain transparencyChain;
 	private final LevelTargetBundle targets = new LevelTargetBundle();
 	private int lastCameraSectionX = Integer.MIN_VALUE;
 	private int lastCameraSectionY = Integer.MIN_VALUE;
@@ -164,94 +160,55 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 	}
 
 	public void close() {
-		if (this.entityOutlineChain != null) {
-			this.entityOutlineChain.close();
-		}
-
 		if (this.entityOutlineTarget != null) {
 			this.entityOutlineTarget.destroyBuffers();
 		}
 
-		if (this.transparencyChain != null) {
-			this.transparencyChain.close();
-		}
-
+		this.skyRenderer.close();
 		this.cloudRenderer.close();
 	}
 
 	@Override
 	public void onResourceManagerReload(ResourceManager resourceManager) {
 		this.initOutline();
-		if (Minecraft.useShaderTransparency()) {
-			this.initTransparency();
-		}
 	}
 
 	public void initOutline() {
-		if (this.entityOutlineChain != null) {
-			this.entityOutlineChain.close();
-		}
-
 		if (this.entityOutlineTarget != null) {
 			this.entityOutlineTarget.destroyBuffers();
 		}
 
-		ResourceLocation resourceLocation = ResourceLocation.withDefaultNamespace("shaders/post/entity_outline.json");
-
-		try {
-			this.entityOutlineChain = PostChain.load(
-				this.minecraft.getResourceManager(),
-				this.minecraft.getTextureManager(),
-				resourceLocation,
-				Set.of(LevelTargetBundle.MAIN_TARGET_ID, LevelTargetBundle.ENTITY_OUTLINE_TARGET_ID)
-			);
-			this.entityOutlineTarget = new TextureTarget(this.minecraft.getWindow().getWidth(), this.minecraft.getWindow().getHeight(), true);
-			this.entityOutlineTarget.setClearColor(0.0F, 0.0F, 0.0F, 0.0F);
-		} catch (IOException var3) {
-			LOGGER.warn("Failed to load shader: {}", resourceLocation, var3);
-			this.entityOutlineChain = null;
-			this.entityOutlineTarget = null;
-		} catch (JsonSyntaxException var4) {
-			LOGGER.warn("Failed to parse shader: {}", resourceLocation, var4);
-			this.entityOutlineChain = null;
-			this.entityOutlineTarget = null;
-		}
+		this.entityOutlineTarget = new TextureTarget(this.minecraft.getWindow().getWidth(), this.minecraft.getWindow().getHeight(), true);
+		this.entityOutlineTarget.setClearColor(0.0F, 0.0F, 0.0F, 0.0F);
 	}
 
-	private void initTransparency() {
-		this.deinitTransparency();
-		ResourceLocation resourceLocation = ResourceLocation.withDefaultNamespace("shaders/post/transparency.json");
-
-		try {
-			this.transparencyChain = PostChain.load(
-				this.minecraft.getResourceManager(), this.minecraft.getTextureManager(), resourceLocation, LevelTargetBundle.SORTING_TARGETS
-			);
-		} catch (Exception var7) {
-			String string = var7 instanceof JsonSyntaxException ? "parse" : "load";
-			String string2 = "Failed to " + string + " shader: " + resourceLocation;
-			LevelRenderer.TransparencyShaderException transparencyShaderException = new LevelRenderer.TransparencyShaderException(string2, var7);
-			if (this.minecraft.getResourcePackRepository().getSelectedIds().size() > 1) {
-				Component component = (Component)this.minecraft
-					.getResourceManager()
-					.listPacks()
-					.findFirst()
-					.map(packResources -> Component.literal(packResources.packId()))
-					.orElse(null);
-				this.minecraft.options.graphicsMode().set(GraphicsStatus.FANCY);
-				this.minecraft.clearResourcePacksOnError(transparencyShaderException, component, null);
-			} else {
-				this.minecraft.options.graphicsMode().set(GraphicsStatus.FANCY);
-				this.minecraft.options.save();
-				LOGGER.error(LogUtils.FATAL_MARKER, string2, (Throwable)transparencyShaderException);
-				this.minecraft.emergencySaveAndCrash(new CrashReport(string2, transparencyShaderException));
+	@Nullable
+	private PostChain getTransparencyChain() {
+		if (!Minecraft.useShaderTransparency()) {
+			return null;
+		} else {
+			PostChain postChain = this.minecraft.getShaderManager().getPostChain(TRANSPARENCY_POST_CHAIN_ID, LevelTargetBundle.SORTING_TARGETS);
+			if (postChain == null) {
+				String string = "Failed to load shader: " + TRANSPARENCY_POST_CHAIN_ID;
+				LevelRenderer.TransparencyShaderException transparencyShaderException = new LevelRenderer.TransparencyShaderException(string);
+				if (this.minecraft.getResourcePackRepository().getSelectedIds().size() > 1) {
+					Component component = (Component)this.minecraft
+						.getResourceManager()
+						.listPacks()
+						.findFirst()
+						.map(packResources -> Component.literal(packResources.packId()))
+						.orElse(null);
+					this.minecraft.options.graphicsMode().set(GraphicsStatus.FANCY);
+					this.minecraft.clearResourcePacksOnError(transparencyShaderException, component, null);
+				} else {
+					this.minecraft.options.graphicsMode().set(GraphicsStatus.FANCY);
+					this.minecraft.options.save();
+					LOGGER.error(LogUtils.FATAL_MARKER, string, (Throwable)transparencyShaderException);
+					this.minecraft.emergencySaveAndCrash(new CrashReport(string, transparencyShaderException));
+				}
 			}
-		}
-	}
 
-	private void deinitTransparency() {
-		if (this.transparencyChain != null) {
-			this.transparencyChain.close();
-			this.transparencyChain = null;
+			return postChain;
 		}
 	}
 
@@ -261,14 +218,14 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 			RenderSystem.blendFuncSeparate(
 				GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE
 			);
-			this.entityOutlineTarget.blitToScreen(this.minecraft.getWindow().getWidth(), this.minecraft.getWindow().getHeight(), false);
+			this.entityOutlineTarget.blitAndBlendToScreen(this.minecraft.getWindow().getWidth(), this.minecraft.getWindow().getHeight());
 			RenderSystem.disableBlend();
 			RenderSystem.defaultBlendFunc();
 		}
 	}
 
 	protected boolean shouldShowEntityOutlines() {
-		return !this.minecraft.gameRenderer.isPanoramicMode() && this.entityOutlineTarget != null && this.entityOutlineChain != null && this.minecraft.player != null;
+		return !this.minecraft.gameRenderer.isPanoramicMode() && this.entityOutlineTarget != null && this.minecraft.player != null;
 	}
 
 	public void setLevel(@Nullable ClientLevel clientLevel) {
@@ -296,17 +253,8 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 		}
 	}
 
-	public void graphicsChanged() {
-		if (Minecraft.useShaderTransparency()) {
-			this.initTransparency();
-		} else {
-			this.deinitTransparency();
-		}
-	}
-
 	public void allChanged() {
 		if (this.level != null) {
-			this.graphicsChanged();
 			this.level.clearTintCaches();
 			if (this.sectionRenderDispatcher == null) {
 				this.sectionRenderDispatcher = new SectionRenderDispatcher(
@@ -333,7 +281,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 			this.visibleSections.clear();
 			Entity entity = this.minecraft.getCameraEntity();
 			if (entity != null) {
-				this.viewArea.repositionCamera(entity.getX(), entity.getZ());
+				this.viewArea.repositionCamera(SectionPos.of(entity));
 			}
 		}
 	}
@@ -375,7 +323,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 		int i = 0;
 
 		for (SectionRenderDispatcher.RenderSection renderSection : this.visibleSections) {
-			if (!renderSection.getCompiled().hasNoRenderableLayers()) {
+			if (renderSection.getCompiled().hasRenderableLayers()) {
 				i++;
 			}
 		}
@@ -405,7 +353,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 			this.lastCameraSectionX = i;
 			this.lastCameraSectionY = j;
 			this.lastCameraSectionZ = k;
-			this.viewArea.repositionCamera(d, f);
+			this.viewArea.repositionCamera(SectionPos.of(this.minecraft.player));
 		}
 
 		this.sectionRenderDispatcher.setCamera(vec3);
@@ -428,7 +376,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 			}
 
 			profilerFiller.push("section_occlusion_graph");
-			this.sectionOcclusionGraph.update(bl3, camera, frustum, this.visibleSections);
+			this.sectionOcclusionGraph.update(bl3, camera, frustum, this.visibleSections, this.level.getChunkSource().getLoadedEmptySections());
 			profilerFiller.pop();
 			double m = Math.floor((double)(camera.getXRot() / 2.0F));
 			double n = Math.floor((double)(camera.getYRot() / 2.0F));
@@ -458,7 +406,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 	}
 
 	public void addRecentlyCompiledSection(SectionRenderDispatcher.RenderSection renderSection) {
-		this.sectionOcclusionGraph.onSectionCompiled(renderSection);
+		this.sectionOcclusionGraph.schedulePropagationFrom(renderSection);
 	}
 
 	public void prepareCullFrustum(Vec3 vec3, Matrix4f matrix4f, Matrix4f matrix4f2) {
@@ -522,7 +470,8 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 		int i = this.minecraft.getMainRenderTarget().width;
 		int j = this.minecraft.getMainRenderTarget().height;
 		RenderTargetDescriptor renderTargetDescriptor = new RenderTargetDescriptor(i, j, true);
-		if (this.transparencyChain != null) {
+		PostChain postChain = this.getTransparencyChain();
+		if (postChain != null) {
 			this.targets.translucent = frameGraphBuilder.createInternal("translucent", renderTargetDescriptor);
 			this.targets.itemEntity = frameGraphBuilder.createInternal("item_entity", renderTargetDescriptor);
 			this.targets.particles = frameGraphBuilder.createInternal("particles", renderTargetDescriptor);
@@ -544,9 +493,10 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 			this.addSkyPass(frameGraphBuilder, camera, f, fogParameters2);
 		}
 
-		this.addMainPass(frameGraphBuilder, camera, matrix4f, matrix4f2, fogParameters, bl, bl4, deltaTracker, profilerFiller);
-		if (bl4 && this.entityOutlineChain != null) {
-			this.entityOutlineChain.addToFrame(frameGraphBuilder, deltaTracker, i, j, this.targets);
+		this.addMainPass(frameGraphBuilder, frustum, camera, matrix4f, matrix4f2, fogParameters, bl, bl4, deltaTracker, profilerFiller);
+		PostChain postChain2 = this.minecraft.getShaderManager().getPostChain(ENTITY_OUTLINE_POST_CHAIN_ID, LevelTargetBundle.OUTLINE_TARGETS);
+		if (bl4 && postChain2 != null) {
+			postChain2.addToFrame(frameGraphBuilder, i, j, this.targets);
 		}
 
 		this.addParticlesPass(frameGraphBuilder, camera, lightTexture, f, fogParameters);
@@ -561,8 +511,8 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 		}
 
 		this.addWeatherPass(frameGraphBuilder, lightTexture, camera.getPosition(), f, fogParameters);
-		if (this.transparencyChain != null) {
-			this.transparencyChain.addToFrame(frameGraphBuilder, this.minecraft.getDeltaTracker(), i, j, this.targets);
+		if (postChain != null) {
+			postChain.addToFrame(frameGraphBuilder, i, j, this.targets);
 		}
 
 		this.addLateDebugPass(frameGraphBuilder, vec3, fogParameters);
@@ -589,6 +539,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 
 	private void addMainPass(
 		FrameGraphBuilder frameGraphBuilder,
+		Frustum frustum,
 		Camera camera,
 		Matrix4f matrix4f,
 		Matrix4f matrix4f2,
@@ -683,22 +634,21 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 			}
 
 			profilerFiller.popPush("debug");
-			this.minecraft.debugRenderer.render(poseStack, bufferSource, d, e, g);
+			this.minecraft.debugRenderer.render(poseStack, frustum, bufferSource, d, e, g);
 			bufferSource.endLastBatch();
 			this.checkPoseStack(poseStack);
+			bufferSource.endBatch(Sheets.translucentItemSheet());
 			bufferSource.endBatch(Sheets.bannerSheet());
 			bufferSource.endBatch(Sheets.shieldSheet());
 			bufferSource.endBatch(RenderType.armorEntityGlint());
 			bufferSource.endBatch(RenderType.glint());
 			bufferSource.endBatch(RenderType.glintTranslucent());
 			bufferSource.endBatch(RenderType.entityGlint());
-			bufferSource.endBatch(RenderType.entityGlintDirect());
 			profilerFiller.popPush("destroyProgress");
 			this.renderBlockDestroyAnimation(poseStack, camera, bufferSource2);
 			bufferSource2.endBatch();
 			this.checkPoseStack(poseStack);
 			bufferSource.endBatch(RenderType.waterMask());
-			bufferSource.endBatch(Sheets.translucentCullBlockSheet());
 			bufferSource.endBatch();
 			if (resourceHandle2 != null) {
 				resourceHandle2.get().setClearColor(0.0F, 0.0F, 0.0F, 0.0F);
@@ -992,10 +942,10 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 		boolean bl = renderType != RenderType.translucent();
 		ObjectListIterator<SectionRenderDispatcher.RenderSection> objectListIterator = this.visibleSections.listIterator(bl ? 0 : this.visibleSections.size());
 		renderType.setupRenderState();
-		ShaderInstance shaderInstance = RenderSystem.getShader();
-		shaderInstance.setDefaultUniforms(VertexFormat.Mode.QUADS, matrix4f, matrix4f2, this.minecraft.getWindow());
-		shaderInstance.apply();
-		Uniform uniform = shaderInstance.MODEL_OFFSET;
+		CompiledShaderProgram compiledShaderProgram = RenderSystem.getShader();
+		compiledShaderProgram.setDefaultUniforms(VertexFormat.Mode.QUADS, matrix4f, matrix4f2, this.minecraft.getWindow());
+		compiledShaderProgram.apply();
+		Uniform uniform = compiledShaderProgram.MODEL_OFFSET;
 
 		while (bl ? objectListIterator.hasNext() : objectListIterator.hasPrevious()) {
 			SectionRenderDispatcher.RenderSection renderSection = bl ? (SectionRenderDispatcher.RenderSection)objectListIterator.next() : objectListIterator.previous();
@@ -1016,7 +966,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 			uniform.set(0.0F, 0.0F, 0.0F);
 		}
 
-		shaderInstance.clear();
+		compiledShaderProgram.clear();
 		VertexBuffer.unbind();
 		this.minecraft.getProfiler().pop();
 		renderType.clearRenderState();
@@ -1117,8 +1067,8 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 		List<SectionRenderDispatcher.RenderSection> list = Lists.<SectionRenderDispatcher.RenderSection>newArrayList();
 
 		for (SectionRenderDispatcher.RenderSection renderSection : this.visibleSections) {
-			SectionPos sectionPos = SectionPos.of(renderSection.getOrigin());
-			if (renderSection.isDirty() && levelLightEngine.lightOnInSection(sectionPos)) {
+			long l = renderSection.getSectionNode();
+			if (renderSection.isDirty() && renderSection.hasAllNeighbors() && isLightOnInSectionAndNeighbors(levelLightEngine, l)) {
 				boolean bl = false;
 				if (this.minecraft.options.prioritizeChunkUpdates().get() == PrioritizeChunkUpdates.NEARBY) {
 					BlockPos blockPos2 = renderSection.getOrigin().offset(8, 8, 8);
@@ -1149,6 +1099,21 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 
 		this.minecraft.getProfiler().pop();
 		this.scheduleTranslucentSectionResort(camera.getPosition(), RenderType.translucent());
+	}
+
+	private static boolean isLightOnInSectionAndNeighbors(LevelLightEngine levelLightEngine, long l) {
+		int i = SectionPos.z(l);
+		int j = SectionPos.x(l);
+
+		for (int k = i - 1; k <= i + 1; k++) {
+			for (int m = j - 1; m <= j + 1; m++) {
+				if (!levelLightEngine.lightOnInColumn(SectionPos.getZeroNode(m, k))) {
+					return false;
+				}
+			}
+		}
+
+		return true;
 	}
 
 	private void renderHitOutline(
@@ -1218,6 +1183,13 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 
 	private void setSectionDirty(int i, int j, int k, boolean bl) {
 		this.viewArea.setDirty(i, j, k, bl);
+	}
+
+	public void onSectionBecomingNonEmpty(long l) {
+		SectionRenderDispatcher.RenderSection renderSection = this.viewArea.getRenderSection(l);
+		if (renderSection != null) {
+			this.sectionOcclusionGraph.schedulePropagationFrom(renderSection);
+		}
 	}
 
 	public void addParticle(ParticleOptions particleOptions, boolean bl, double d, double e, double f, double g, double h, double i) {
@@ -1403,8 +1375,8 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 
 	@Environment(EnvType.CLIENT)
 	public static class TransparencyShaderException extends RuntimeException {
-		public TransparencyShaderException(String string, Throwable throwable) {
-			super(string, throwable);
+		public TransparencyShaderException(String string) {
+			super(string);
 		}
 	}
 }

@@ -778,7 +778,7 @@ public class ServerGamePacketListenerImpl
 			List<String> list = Lists.<String>newArrayList();
 			Optional<String> optional = serverboundEditBookPacket.title();
 			optional.ifPresent(list::add);
-			serverboundEditBookPacket.pages().stream().limit(100L).forEach(list::add);
+			list.addAll(serverboundEditBookPacket.pages());
 			Consumer<List<FilteredText>> consumer = optional.isPresent()
 				? listx -> this.signBook((FilteredText)listx.get(0), listx.subList(1, listx.size()), i)
 				: listx -> this.updateBookContents(listx, i);
@@ -1061,7 +1061,7 @@ public class ServerGamePacketListenerImpl
 				this.player
 					.gameMode
 					.handleBlockBreakAction(
-						blockPos, action, serverboundPlayerActionPacket.getDirection(), this.player.level().getMaxBuildHeight(), serverboundPlayerActionPacket.getSequence()
+						blockPos, action, serverboundPlayerActionPacket.getDirection(), this.player.level().getMaxY(), serverboundPlayerActionPacket.getSequence()
 					);
 				this.player.connection.ackBlockChangesUpTo(serverboundPlayerActionPacket.getSequence());
 				return;
@@ -1075,7 +1075,7 @@ public class ServerGamePacketListenerImpl
 			return false;
 		} else {
 			Item item = itemStack.getItem();
-			return (item instanceof BlockItem || item instanceof BucketItem) && !serverPlayer.getCooldowns().isOnCooldown(item);
+			return (item instanceof BlockItem || item instanceof BucketItem) && !serverPlayer.getCooldowns().isOnCooldown(itemStack);
 		}
 	}
 
@@ -1096,23 +1096,23 @@ public class ServerGamePacketListenerImpl
 				if (Math.abs(vec32.x()) < 1.0000001 && Math.abs(vec32.y()) < 1.0000001 && Math.abs(vec32.z()) < 1.0000001) {
 					Direction direction = blockHitResult.getDirection();
 					this.player.resetLastActionTime();
-					int i = this.player.level().getMaxBuildHeight();
-					if (blockPos.getY() < i) {
+					int i = this.player.level().getMaxY();
+					if (blockPos.getY() <= i) {
 						if (this.awaitingPositionFromClient == null && serverLevel.mayInteract(this.player, blockPos)) {
 							InteractionResult interactionResult = this.player.gameMode.useItemOn(this.player, serverLevel, itemStack, interactionHand, blockHitResult);
 							if (interactionResult.consumesAction()) {
 								CriteriaTriggers.ANY_BLOCK_USE.trigger(this.player, blockHitResult.getBlockPos(), itemStack.copy());
 							}
 
-							if (direction == Direction.UP && !interactionResult.consumesAction() && blockPos.getY() >= i - 1 && wasBlockPlacementAttempt(this.player, itemStack)) {
-								Component component = Component.translatable("build.tooHigh", i - 1).withStyle(ChatFormatting.RED);
+							if (direction == Direction.UP && !interactionResult.consumesAction() && blockPos.getY() >= i && wasBlockPlacementAttempt(this.player, itemStack)) {
+								Component component = Component.translatable("build.tooHigh", i).withStyle(ChatFormatting.RED);
 								this.player.sendSystemMessage(component, true);
 							} else if (interactionResult instanceof InteractionResult.Success success && success.swingSource() == InteractionResult.SwingSource.SERVER) {
 								this.player.swing(interactionHand, true);
 							}
 						}
 					} else {
-						Component component2 = Component.translatable("build.tooHigh", i - 1).withStyle(ChatFormatting.RED);
+						Component component2 = Component.translatable("build.tooHigh", i).withStyle(ChatFormatting.RED);
 						this.player.sendSystemMessage(component2, true);
 					}
 

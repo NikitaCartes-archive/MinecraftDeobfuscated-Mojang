@@ -44,8 +44,8 @@ public class BrushItem extends Item {
 	}
 
 	@Override
-	public UseAnim getUseAnimation(ItemStack itemStack) {
-		return UseAnim.BRUSH;
+	public ItemUseAnimation getUseAnimation(ItemStack itemStack) {
+		return ItemUseAnimation.BRUSH;
 	}
 
 	@Override

@@ -1,12 +1,12 @@
 package net.minecraft.client.renderer;
 
 import com.google.common.collect.ImmutableList;
+import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalDouble;
-import java.util.function.Supplier;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
@@ -140,154 +140,126 @@ public abstract class RenderStateShard {
 	);
 	protected static final RenderStateShard.ShaderStateShard NO_SHADER = new RenderStateShard.ShaderStateShard();
 	protected static final RenderStateShard.ShaderStateShard POSITION_COLOR_LIGHTMAP_SHADER = new RenderStateShard.ShaderStateShard(
-		GameRenderer::getPositionColorLightmapShader
+		CoreShaders.POSITION_COLOR_LIGHTMAP
 	);
-	protected static final RenderStateShard.ShaderStateShard POSITION_SHADER = new RenderStateShard.ShaderStateShard(GameRenderer::getPositionShader);
-	protected static final RenderStateShard.ShaderStateShard POSITION_TEX_SHADER = new RenderStateShard.ShaderStateShard(GameRenderer::getPositionTexShader);
+	protected static final RenderStateShard.ShaderStateShard POSITION_SHADER = new RenderStateShard.ShaderStateShard(CoreShaders.POSITION);
+	protected static final RenderStateShard.ShaderStateShard POSITION_TEX_SHADER = new RenderStateShard.ShaderStateShard(CoreShaders.POSITION_TEX);
 	protected static final RenderStateShard.ShaderStateShard POSITION_COLOR_TEX_LIGHTMAP_SHADER = new RenderStateShard.ShaderStateShard(
-		GameRenderer::getPositionColorTexLightmapShader
+		CoreShaders.POSITION_COLOR_TEX_LIGHTMAP
 	);
-	protected static final RenderStateShard.ShaderStateShard POSITION_COLOR_SHADER = new RenderStateShard.ShaderStateShard(GameRenderer::getPositionColorShader);
-	protected static final RenderStateShard.ShaderStateShard POSITION_TEXTURE_COLOR_SHADER = new RenderStateShard.ShaderStateShard(
-		GameRenderer::getPositionTexColorShader
-	);
-	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_SOLID_SHADER = new RenderStateShard.ShaderStateShard(
-		GameRenderer::getRendertypeSolidShader
-	);
+	protected static final RenderStateShard.ShaderStateShard POSITION_COLOR_SHADER = new RenderStateShard.ShaderStateShard(CoreShaders.POSITION_COLOR);
+	protected static final RenderStateShard.ShaderStateShard POSITION_TEXTURE_COLOR_SHADER = new RenderStateShard.ShaderStateShard(CoreShaders.POSITION_TEX_COLOR);
+	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_SOLID_SHADER = new RenderStateShard.ShaderStateShard(CoreShaders.RENDERTYPE_SOLID);
 	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_CUTOUT_MIPPED_SHADER = new RenderStateShard.ShaderStateShard(
-		GameRenderer::getRendertypeCutoutMippedShader
+		CoreShaders.RENDERTYPE_CUTOUT_MIPPED
 	);
-	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_CUTOUT_SHADER = new RenderStateShard.ShaderStateShard(
-		GameRenderer::getRendertypeCutoutShader
-	);
+	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_CUTOUT_SHADER = new RenderStateShard.ShaderStateShard(CoreShaders.RENDERTYPE_CUTOUT);
 	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_TRANSLUCENT_SHADER = new RenderStateShard.ShaderStateShard(
-		GameRenderer::getRendertypeTranslucentShader
+		CoreShaders.RENDERTYPE_TRANSLUCENT
 	);
 	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_TRANSLUCENT_MOVING_BLOCK_SHADER = new RenderStateShard.ShaderStateShard(
-		GameRenderer::getRendertypeTranslucentMovingBlockShader
+		CoreShaders.RENDERTYPE_TRANSLUCENT_MOVING_BLOCK
 	);
 	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_ARMOR_CUTOUT_NO_CULL_SHADER = new RenderStateShard.ShaderStateShard(
-		GameRenderer::getRendertypeArmorCutoutNoCullShader
+		CoreShaders.RENDERTYPE_ARMOR_CUTOUT_NO_CULL
 	);
 	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_ENTITY_SOLID_SHADER = new RenderStateShard.ShaderStateShard(
-		GameRenderer::getRendertypeEntitySolidShader
+		CoreShaders.RENDERTYPE_ENTITY_SOLID
 	);
 	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_ENTITY_CUTOUT_SHADER = new RenderStateShard.ShaderStateShard(
-		GameRenderer::getRendertypeEntityCutoutShader
+		CoreShaders.RENDERTYPE_ENTITY_CUTOUT
 	);
 	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_ENTITY_CUTOUT_NO_CULL_SHADER = new RenderStateShard.ShaderStateShard(
-		GameRenderer::getRendertypeEntityCutoutNoCullShader
+		CoreShaders.RENDERTYPE_ENTITY_CUTOUT_NO_CULL
 	);
 	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_ENTITY_CUTOUT_NO_CULL_Z_OFFSET_SHADER = new RenderStateShard.ShaderStateShard(
-		GameRenderer::getRendertypeEntityCutoutNoCullZOffsetShader
+		CoreShaders.RENDERTYPE_ENTITY_CUTOUT_NO_CULL_Z_OFFSET
 	);
 	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_ITEM_ENTITY_TRANSLUCENT_CULL_SHADER = new RenderStateShard.ShaderStateShard(
-		GameRenderer::getRendertypeItemEntityTranslucentCullShader
-	);
-	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_ENTITY_TRANSLUCENT_CULL_SHADER = new RenderStateShard.ShaderStateShard(
-		GameRenderer::getRendertypeEntityTranslucentCullShader
+		CoreShaders.RENDERTYPE_ITEM_ENTITY_TRANSLUCENT_CULL
 	);
 	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_ENTITY_TRANSLUCENT_SHADER = new RenderStateShard.ShaderStateShard(
-		GameRenderer::getRendertypeEntityTranslucentShader
+		CoreShaders.RENDERTYPE_ENTITY_TRANSLUCENT
 	);
 	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_ENTITY_TRANSLUCENT_EMISSIVE_SHADER = new RenderStateShard.ShaderStateShard(
-		GameRenderer::getRendertypeEntityTranslucentEmissiveShader
+		CoreShaders.RENDERTYPE_ENTITY_TRANSLUCENT_EMISSIVE
 	);
 	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_ENTITY_SMOOTH_CUTOUT_SHADER = new RenderStateShard.ShaderStateShard(
-		GameRenderer::getRendertypeEntitySmoothCutoutShader
+		CoreShaders.RENDERTYPE_ENTITY_SMOOTH_CUTOUT
 	);
 	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_BEACON_BEAM_SHADER = new RenderStateShard.ShaderStateShard(
-		GameRenderer::getRendertypeBeaconBeamShader
+		CoreShaders.RENDERTYPE_BEACON_BEAM
 	);
 	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_ENTITY_DECAL_SHADER = new RenderStateShard.ShaderStateShard(
-		GameRenderer::getRendertypeEntityDecalShader
+		CoreShaders.RENDERTYPE_ENTITY_DECAL
 	);
 	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_ENTITY_NO_OUTLINE_SHADER = new RenderStateShard.ShaderStateShard(
-		GameRenderer::getRendertypeEntityNoOutlineShader
+		CoreShaders.RENDERTYPE_ENTITY_NO_OUTLINE
 	);
 	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_ENTITY_SHADOW_SHADER = new RenderStateShard.ShaderStateShard(
-		GameRenderer::getRendertypeEntityShadowShader
+		CoreShaders.RENDERTYPE_ENTITY_SHADOW
 	);
 	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_ENTITY_ALPHA_SHADER = new RenderStateShard.ShaderStateShard(
-		GameRenderer::getRendertypeEntityAlphaShader
+		CoreShaders.RENDERTYPE_ENTITY_ALPHA
 	);
-	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_EYES_SHADER = new RenderStateShard.ShaderStateShard(GameRenderer::getRendertypeEyesShader);
+	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_EYES_SHADER = new RenderStateShard.ShaderStateShard(CoreShaders.RENDERTYPE_EYES);
 	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_ENERGY_SWIRL_SHADER = new RenderStateShard.ShaderStateShard(
-		GameRenderer::getRendertypeEnergySwirlShader
+		CoreShaders.RENDERTYPE_ENERGY_SWIRL
 	);
-	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_LEASH_SHADER = new RenderStateShard.ShaderStateShard(
-		GameRenderer::getRendertypeLeashShader
-	);
+	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_LEASH_SHADER = new RenderStateShard.ShaderStateShard(CoreShaders.RENDERTYPE_LEASH);
 	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_WATER_MASK_SHADER = new RenderStateShard.ShaderStateShard(
-		GameRenderer::getRendertypeWaterMaskShader
+		CoreShaders.RENDERTYPE_WATER_MASK
 	);
-	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_OUTLINE_SHADER = new RenderStateShard.ShaderStateShard(
-		GameRenderer::getRendertypeOutlineShader
-	);
+	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_OUTLINE_SHADER = new RenderStateShard.ShaderStateShard(CoreShaders.RENDERTYPE_OUTLINE);
 	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_ARMOR_ENTITY_GLINT_SHADER = new RenderStateShard.ShaderStateShard(
-		GameRenderer::getRendertypeArmorEntityGlintShader
+		CoreShaders.RENDERTYPE_ARMOR_ENTITY_GLINT
 	);
 	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_GLINT_TRANSLUCENT_SHADER = new RenderStateShard.ShaderStateShard(
-		GameRenderer::getRendertypeGlintTranslucentShader
+		CoreShaders.RENDERTYPE_GLINT_TRANSLUCENT
 	);
-	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_GLINT_SHADER = new RenderStateShard.ShaderStateShard(
-		GameRenderer::getRendertypeGlintShader
-	);
+	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_GLINT_SHADER = new RenderStateShard.ShaderStateShard(CoreShaders.RENDERTYPE_GLINT);
 	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_ENTITY_GLINT_SHADER = new RenderStateShard.ShaderStateShard(
-		GameRenderer::getRendertypeEntityGlintShader
+		CoreShaders.RENDERTYPE_ENTITY_GLINT
 	);
-	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_ENTITY_GLINT_DIRECT_SHADER = new RenderStateShard.ShaderStateShard(
-		GameRenderer::getRendertypeEntityGlintDirectShader
-	);
-	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_CRUMBLING_SHADER = new RenderStateShard.ShaderStateShard(
-		GameRenderer::getRendertypeCrumblingShader
-	);
-	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_TEXT_SHADER = new RenderStateShard.ShaderStateShard(GameRenderer::getRendertypeTextShader);
+	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_CRUMBLING_SHADER = new RenderStateShard.ShaderStateShard(CoreShaders.RENDERTYPE_CRUMBLING);
+	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_TEXT_SHADER = new RenderStateShard.ShaderStateShard(CoreShaders.RENDERTYPE_TEXT);
 	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_TEXT_BACKGROUND_SHADER = new RenderStateShard.ShaderStateShard(
-		GameRenderer::getRendertypeTextBackgroundShader
+		CoreShaders.RENDERTYPE_TEXT_BACKGROUND
 	);
 	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_TEXT_INTENSITY_SHADER = new RenderStateShard.ShaderStateShard(
-		GameRenderer::getRendertypeTextIntensityShader
+		CoreShaders.RENDERTYPE_TEXT_INTENSITY
 	);
 	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_TEXT_SEE_THROUGH_SHADER = new RenderStateShard.ShaderStateShard(
-		GameRenderer::getRendertypeTextSeeThroughShader
+		CoreShaders.RENDERTYPE_TEXT_SEE_THROUGH
 	);
 	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_TEXT_BACKGROUND_SEE_THROUGH_SHADER = new RenderStateShard.ShaderStateShard(
-		GameRenderer::getRendertypeTextBackgroundSeeThroughShader
+		CoreShaders.RENDERTYPE_TEXT_BACKGROUND_SEE_THROUGH
 	);
 	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_TEXT_INTENSITY_SEE_THROUGH_SHADER = new RenderStateShard.ShaderStateShard(
-		GameRenderer::getRendertypeTextIntensitySeeThroughShader
+		CoreShaders.RENDERTYPE_TEXT_INTENSITY_SEE_THROUGH
 	);
-	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_LIGHTNING_SHADER = new RenderStateShard.ShaderStateShard(
-		GameRenderer::getRendertypeLightningShader
-	);
-	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_TRIPWIRE_SHADER = new RenderStateShard.ShaderStateShard(
-		GameRenderer::getRendertypeTripwireShader
-	);
+	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_LIGHTNING_SHADER = new RenderStateShard.ShaderStateShard(CoreShaders.RENDERTYPE_LIGHTNING);
+	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_TRIPWIRE_SHADER = new RenderStateShard.ShaderStateShard(CoreShaders.RENDERTYPE_TRIPWIRE);
 	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_END_PORTAL_SHADER = new RenderStateShard.ShaderStateShard(
-		GameRenderer::getRendertypeEndPortalShader
+		CoreShaders.RENDERTYPE_END_PORTAL
 	);
 	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_END_GATEWAY_SHADER = new RenderStateShard.ShaderStateShard(
-		GameRenderer::getRendertypeEndGatewayShader
+		CoreShaders.RENDERTYPE_END_GATEWAY
 	);
-	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_CLOUDS_SHADER = new RenderStateShard.ShaderStateShard(
-		GameRenderer::getRendertypeCloudsShader
-	);
-	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_LINES_SHADER = new RenderStateShard.ShaderStateShard(
-		GameRenderer::getRendertypeLinesShader
-	);
-	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_GUI_SHADER = new RenderStateShard.ShaderStateShard(GameRenderer::getRendertypeGuiShader);
+	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_CLOUDS_SHADER = new RenderStateShard.ShaderStateShard(CoreShaders.RENDERTYPE_CLOUDS);
+	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_LINES_SHADER = new RenderStateShard.ShaderStateShard(CoreShaders.RENDERTYPE_LINES);
+	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_GUI_SHADER = new RenderStateShard.ShaderStateShard(CoreShaders.RENDERTYPE_GUI);
 	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_GUI_OVERLAY_SHADER = new RenderStateShard.ShaderStateShard(
-		GameRenderer::getRendertypeGuiOverlayShader
+		CoreShaders.RENDERTYPE_GUI_OVERLAY
 	);
 	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_GUI_TEXT_HIGHLIGHT_SHADER = new RenderStateShard.ShaderStateShard(
-		GameRenderer::getRendertypeGuiTextHighlightShader
+		CoreShaders.RENDERTYPE_GUI_TEXT_HIGHLIGHT
 	);
 	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_GUI_GHOST_RECIPE_OVERLAY_SHADER = new RenderStateShard.ShaderStateShard(
-		GameRenderer::getRendertypeGuiGhostRecipeOverlayShader
+		CoreShaders.RENDERTYPE_GUI_GHOST_RECIPE_OVERLAY
 	);
 	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_BREEZE_WIND_SHADER = new RenderStateShard.ShaderStateShard(
-		GameRenderer::getRendertypeBreezeWindShader
+		CoreShaders.RENDERTYPE_BREEZE_WIND
 	);
 	protected static final RenderStateShard.TextureStateShard BLOCK_SHEET_MIPPED = new RenderStateShard.TextureStateShard(
 		TextureAtlas.LOCATION_BLOCKS, TriState.FALSE, true
@@ -358,60 +330,45 @@ public abstract class RenderStateShard {
 		() -> Minecraft.getInstance().getMainRenderTarget().bindWrite(false)
 	);
 	protected static final RenderStateShard.OutputStateShard TRANSLUCENT_TARGET = new RenderStateShard.OutputStateShard("translucent_target", () -> {
-		if (Minecraft.useShaderTransparency()) {
-			Minecraft.getInstance().levelRenderer.getTranslucentTarget().bindWrite(false);
+		RenderTarget renderTarget = Minecraft.getInstance().levelRenderer.getTranslucentTarget();
+		if (renderTarget != null) {
+			renderTarget.bindWrite(false);
 		} else {
 			Minecraft.getInstance().getMainRenderTarget().bindWrite(false);
 		}
-	}, () -> {
-		if (Minecraft.useShaderTransparency()) {
-			Minecraft.getInstance().getMainRenderTarget().bindWrite(false);
-		}
-	});
+	}, () -> Minecraft.getInstance().getMainRenderTarget().bindWrite(false));
 	protected static final RenderStateShard.OutputStateShard PARTICLES_TARGET = new RenderStateShard.OutputStateShard("particles_target", () -> {
-		if (Minecraft.useShaderTransparency()) {
-			Minecraft.getInstance().levelRenderer.getParticlesTarget().bindWrite(false);
+		RenderTarget renderTarget = Minecraft.getInstance().levelRenderer.getParticlesTarget();
+		if (renderTarget != null) {
+			renderTarget.bindWrite(false);
 		} else {
 			Minecraft.getInstance().getMainRenderTarget().bindWrite(false);
 		}
-	}, () -> {
-		if (Minecraft.useShaderTransparency()) {
-			Minecraft.getInstance().getMainRenderTarget().bindWrite(false);
-		}
-	});
+	}, () -> Minecraft.getInstance().getMainRenderTarget().bindWrite(false));
 	protected static final RenderStateShard.OutputStateShard WEATHER_TARGET = new RenderStateShard.OutputStateShard("weather_target", () -> {
-		if (Minecraft.useShaderTransparency()) {
-			Minecraft.getInstance().levelRenderer.getWeatherTarget().bindWrite(false);
+		RenderTarget renderTarget = Minecraft.getInstance().levelRenderer.getWeatherTarget();
+		if (renderTarget != null) {
+			renderTarget.bindWrite(false);
 		} else {
 			Minecraft.getInstance().getMainRenderTarget().bindWrite(false);
 		}
-	}, () -> {
-		if (Minecraft.useShaderTransparency()) {
-			Minecraft.getInstance().getMainRenderTarget().bindWrite(false);
-		}
-	});
+	}, () -> Minecraft.getInstance().getMainRenderTarget().bindWrite(false));
 	protected static final RenderStateShard.OutputStateShard CLOUDS_TARGET = new RenderStateShard.OutputStateShard("clouds_target", () -> {
-		if (Minecraft.useShaderTransparency()) {
-			Minecraft.getInstance().levelRenderer.getCloudsTarget().bindWrite(false);
+		RenderTarget renderTarget = Minecraft.getInstance().levelRenderer.getCloudsTarget();
+		if (renderTarget != null) {
+			renderTarget.bindWrite(false);
 		} else {
 			Minecraft.getInstance().getMainRenderTarget().bindWrite(false);
 		}
-	}, () -> {
-		if (Minecraft.useShaderTransparency()) {
-			Minecraft.getInstance().getMainRenderTarget().bindWrite(false);
-		}
-	});
+	}, () -> Minecraft.getInstance().getMainRenderTarget().bindWrite(false));
 	protected static final RenderStateShard.OutputStateShard ITEM_ENTITY_TARGET = new RenderStateShard.OutputStateShard("item_entity_target", () -> {
-		if (Minecraft.useShaderTransparency()) {
-			Minecraft.getInstance().levelRenderer.getItemEntityTarget().bindWrite(false);
+		RenderTarget renderTarget = Minecraft.getInstance().levelRenderer.getItemEntityTarget();
+		if (renderTarget != null) {
+			renderTarget.bindWrite(false);
 		} else {
 			Minecraft.getInstance().getMainRenderTarget().bindWrite(false);
 		}
-	}, () -> {
-		if (Minecraft.useShaderTransparency()) {
-			Minecraft.getInstance().getMainRenderTarget().bindWrite(false);
-		}
-	});
+	}, () -> Minecraft.getInstance().getMainRenderTarget().bindWrite(false));
 	protected static final RenderStateShard.LineStateShard DEFAULT_LINE = new RenderStateShard.LineStateShard(OptionalDouble.of(1.0));
 	protected static final RenderStateShard.ColorLogicStateShard NO_COLOR_LOGIC = new RenderStateShard.ColorLogicStateShard(
 		"no_color_logic", () -> RenderSystem.disableColorLogicOp(), () -> {
@@ -650,16 +607,16 @@ public abstract class RenderStateShard {
 
 	@Environment(EnvType.CLIENT)
 	protected static class ShaderStateShard extends RenderStateShard {
-		private final Optional<Supplier<ShaderInstance>> shader;
+		private final Optional<ShaderProgram> shader;
 
-		public ShaderStateShard(Supplier<ShaderInstance> supplier) {
-			super("shader", () -> RenderSystem.setShader(supplier), () -> {
+		public ShaderStateShard(ShaderProgram shaderProgram) {
+			super("shader", () -> RenderSystem.setShader(shaderProgram), () -> {
 			});
-			this.shader = Optional.of(supplier);
+			this.shader = Optional.of(shaderProgram);
 		}
 
 		public ShaderStateShard() {
-			super("shader", () -> RenderSystem.setShader(() -> null), () -> {
+			super("shader", RenderSystem::clearShader, () -> {
 			});
 			this.shader = Optional.empty();
 		}

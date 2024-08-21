@@ -276,7 +276,7 @@ public class PistonMovingBlockEntity extends BlockEntity {
 
 				this.level.setBlock(this.worldPosition, blockState, 3);
 				this.level
-					.neighborChanged(this.worldPosition, blockState.getBlock(), ExperimentalRedstoneUtils.randomOrientation(this.level, this.getPushDirection(), null));
+					.neighborChanged(this.worldPosition, blockState.getBlock(), ExperimentalRedstoneUtils.initialOrientation(this.level, this.getPushDirection(), null));
 			}
 		}
 	}
@@ -306,7 +306,7 @@ public class PistonMovingBlockEntity extends BlockEntity {
 
 						level.setBlock(blockPos, blockState2, 67);
 						level.neighborChanged(
-							blockPos, blockState2.getBlock(), ExperimentalRedstoneUtils.randomOrientation(level, pistonMovingBlockEntity.getPushDirection(), null)
+							blockPos, blockState2.getBlock(), ExperimentalRedstoneUtils.initialOrientation(level, pistonMovingBlockEntity.getPushDirection(), null)
 						);
 					}
 				}

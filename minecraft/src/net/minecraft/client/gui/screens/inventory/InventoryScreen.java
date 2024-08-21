@@ -1,7 +1,6 @@
 package net.minecraft.client.gui.screens.inventory;
 
 import com.mojang.blaze3d.platform.Lighting;
-import com.mojang.blaze3d.systems.RenderSystem;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -149,7 +148,7 @@ public class InventoryScreen extends EffectRenderingInventoryScreen<InventoryMen
 		}
 
 		entityRenderDispatcher.setRenderShadow(false);
-		RenderSystem.runAsFancy(() -> entityRenderDispatcher.render(livingEntity, 0.0, 0.0, 0.0, 1.0F, guiGraphics.pose(), guiGraphics.bufferSource(), 15728880));
+		entityRenderDispatcher.render(livingEntity, 0.0, 0.0, 0.0, 1.0F, guiGraphics.pose(), guiGraphics.bufferSource(), 15728880);
 		guiGraphics.flush();
 		entityRenderDispatcher.setRenderShadow(true);
 		guiGraphics.pose().popPose();

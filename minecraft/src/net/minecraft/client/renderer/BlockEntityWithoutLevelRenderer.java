@@ -141,7 +141,7 @@ public class BlockEntityWithoutLevelRenderer implements ResourceManagerReloadLis
 				poseStack.scale(1.0F, -1.0F, -1.0F);
 				Material material = bl ? ModelBakery.SHIELD_BASE : ModelBakery.NO_PATTERN_SHIELD;
 				VertexConsumer vertexConsumer = material.sprite()
-					.wrap(ItemRenderer.getFoilBufferDirect(multiBufferSource, this.shieldModel.renderType(material.atlasLocation()), false, itemStack.hasFoil()));
+					.wrap(ItemRenderer.getFoilBuffer(multiBufferSource, this.shieldModel.renderType(material.atlasLocation()), false, itemStack.hasFoil()));
 				this.shieldModel.handle().render(poseStack, vertexConsumer, i, j);
 				if (bl) {
 					BannerRenderer.renderPatterns(
@@ -165,7 +165,7 @@ public class BlockEntityWithoutLevelRenderer implements ResourceManagerReloadLis
 			} else if (itemStack.is(Items.TRIDENT)) {
 				poseStack.pushPose();
 				poseStack.scale(1.0F, -1.0F, -1.0F);
-				VertexConsumer vertexConsumer2 = ItemRenderer.getFoilBufferDirect(
+				VertexConsumer vertexConsumer2 = ItemRenderer.getFoilBuffer(
 					multiBufferSource, this.tridentModel.renderType(TridentModel.TEXTURE), false, itemStack.hasFoil()
 				);
 				this.tridentModel.renderToBuffer(poseStack, vertexConsumer2, i, j);

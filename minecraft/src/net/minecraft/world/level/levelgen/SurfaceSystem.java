@@ -86,7 +86,7 @@ public class SurfaceSystem {
 			@Override
 			public void setBlock(int i, BlockState blockState) {
 				LevelHeightAccessor levelHeightAccessor = chunkAccess.getHeightAccessorForGeneration();
-				if (i >= levelHeightAccessor.getMinBuildHeight() && i < levelHeightAccessor.getMaxBuildHeight()) {
+				if (levelHeightAccessor.isInsideBuildHeight(i)) {
 					chunkAccess.setBlockState(mutableBlockPos.setY(i), blockState, false);
 					if (!blockState.getFluidState().isEmpty()) {
 						chunkAccess.markPosForPostprocessing(mutableBlockPos);
@@ -118,7 +118,7 @@ public class SurfaceSystem {
 				int q = 0;
 				int r = Integer.MIN_VALUE;
 				int s = Integer.MAX_VALUE;
-				int t = chunkAccess.getMinBuildHeight();
+				int t = chunkAccess.getMinY();
 
 				for (int u = p; u >= t; u--) {
 					BlockState blockState = blockColumn.getBlock(u);
@@ -214,7 +214,7 @@ public class SurfaceSystem {
 			double l = 64.0 + Math.min(e * e * 2.5, Math.ceil(h * 50.0) + 24.0);
 			int m = Mth.floor(l);
 			if (k <= m) {
-				for (int n = m; n >= levelHeightAccessor.getMinBuildHeight(); n--) {
+				for (int n = m; n >= levelHeightAccessor.getMinY(); n--) {
 					BlockState blockState = blockColumn.getBlock(n);
 					if (blockState.is(this.defaultBlock.getBlock())) {
 						break;
@@ -225,7 +225,7 @@ public class SurfaceSystem {
 					}
 				}
 
-				for (int n = m; n >= levelHeightAccessor.getMinBuildHeight() && blockColumn.getBlock(n).isAir(); n--) {
+				for (int n = m; n >= levelHeightAccessor.getMinY() && blockColumn.getBlock(n).isAir(); n--) {
 					blockColumn.setBlock(n, this.defaultBlock);
 				}
 			}

@@ -107,19 +107,23 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 		super.render(guiGraphics, i, j, f);
 		guiGraphics.pose().pushPose();
 		guiGraphics.pose().translate((float)k, (float)l, 0.0F);
-		this.resetHoveredSlot((double)i, (double)j);
+		Slot slot = this.hoveredSlot;
+		this.hoveredSlot = null;
 
-		for (Slot slot : this.menu.slots) {
-			if (slot.isActive()) {
-				this.renderSlot(guiGraphics, slot);
-			}
-
-			if (this.isHovering(slot, (double)i, (double)j) && slot.isActive()) {
-				this.hoveredSlot = slot;
-				if (this.hoveredSlot.isHighlightable()) {
-					renderSlotHighlight(guiGraphics, slot.x, slot.y, 0);
+		for (Slot slot2 : this.menu.slots) {
+			if (slot2.isActive()) {
+				this.renderSlot(guiGraphics, slot2);
+				if (this.isHovering(slot2, (double)i, (double)j)) {
+					this.hoveredSlot = slot2;
+					if (this.hoveredSlot.isHighlightable()) {
+						renderSlotHighlight(guiGraphics, slot2.x, slot2.y, 0);
+					}
 				}
 			}
+		}
+
+		if (slot != null && slot != this.hoveredSlot) {
+			this.onStopHovering(slot);
 		}
 
 		this.renderLabels(guiGraphics, i, j);
@@ -197,7 +201,7 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 		return getTooltipFromItem(this.minecraft, itemStack);
 	}
 
-	private void renderFloatingItem(GuiGraphics guiGraphics, ItemStack itemStack, int i, int j, String string) {
+	private void renderFloatingItem(GuiGraphics guiGraphics, ItemStack itemStack, int i, int j, @Nullable String string) {
 		guiGraphics.pose().pushPose();
 		guiGraphics.pose().translate(0.0F, 0.0F, 232.0F);
 		guiGraphics.renderItem(itemStack, i, j);
@@ -575,18 +579,11 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 		return d >= (double)(i - 1) && d < (double)(i + k + 1) && e >= (double)(j - 1) && e < (double)(j + l + 1);
 	}
 
-	private void resetHoveredSlot(double d, double e) {
-		if (this.hoveredSlot != null && this.hoveredSlot.hasItem() && !this.isHovering(this.hoveredSlot, d, e)) {
-			this.onStopHovering();
-			this.hoveredSlot = null;
-		}
-	}
-
-	private void onStopHovering() {
-		if (this.hoveredSlot != null && this.hoveredSlot.hasItem()) {
+	private void onStopHovering(Slot slot) {
+		if (slot.hasItem()) {
 			for (ItemSlotMouseAction itemSlotMouseAction : this.itemSlotMouseActions) {
-				if (itemSlotMouseAction.matches(this.hoveredSlot)) {
-					itemSlotMouseAction.onStopHovering(this.hoveredSlot);
+				if (itemSlotMouseAction.matches(slot)) {
+					itemSlotMouseAction.onStopHovering(slot);
 				}
 			}
 		}
@@ -690,7 +687,10 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 	@Override
 	public void onClose() {
 		this.minecraft.player.closeContainer();
-		this.onStopHovering();
+		if (this.hoveredSlot != null) {
+			this.onStopHovering(this.hoveredSlot);
+		}
+
 		super.onClose();
 	}
 }

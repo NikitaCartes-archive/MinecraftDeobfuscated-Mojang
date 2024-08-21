@@ -38,9 +38,11 @@ public class EndCrystalModel extends EntityModel<EndCrystalRenderState> {
 		PartDefinition partDefinition = meshDefinition.getRoot();
 		float f = 0.875F;
 		CubeListBuilder cubeListBuilder = CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -4.0F, -4.0F, 8.0F, 8.0F, 8.0F);
-		PartDefinition partDefinition2 = partDefinition.addOrReplaceChild("outer_glass", cubeListBuilder, PartPose.offset(0.0F, 24.0F, 0.0F).withScale(0.875F));
-		PartDefinition partDefinition3 = partDefinition2.addOrReplaceChild("inner_glass", cubeListBuilder, PartPose.ZERO.withScale(0.765625F));
-		partDefinition3.addOrReplaceChild("cube", CubeListBuilder.create().texOffs(32, 0).addBox(-4.0F, -4.0F, -4.0F, 8.0F, 8.0F, 8.0F), PartPose.ZERO);
+		PartDefinition partDefinition2 = partDefinition.addOrReplaceChild("outer_glass", cubeListBuilder, PartPose.offset(0.0F, 24.0F, 0.0F));
+		PartDefinition partDefinition3 = partDefinition2.addOrReplaceChild("inner_glass", cubeListBuilder, PartPose.ZERO.withScale(0.875F));
+		partDefinition3.addOrReplaceChild(
+			"cube", CubeListBuilder.create().texOffs(32, 0).addBox(-4.0F, -4.0F, -4.0F, 8.0F, 8.0F, 8.0F), PartPose.ZERO.withScale(0.765625F)
+		);
 		partDefinition.addOrReplaceChild("base", CubeListBuilder.create().texOffs(0, 16).addBox(-6.0F, 0.0F, -6.0F, 12.0F, 4.0F, 12.0F), PartPose.ZERO);
 		return LayerDefinition.create(meshDefinition, 64, 32);
 	}

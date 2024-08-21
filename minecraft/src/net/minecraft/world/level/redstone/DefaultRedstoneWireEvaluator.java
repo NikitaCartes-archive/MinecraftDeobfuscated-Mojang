@@ -15,7 +15,7 @@ public class DefaultRedstoneWireEvaluator extends RedstoneWireEvaluator {
 	}
 
 	@Override
-	public void updatePowerStrength(Level level, BlockPos blockPos, BlockState blockState, @Nullable Orientation orientation) {
+	public void updatePowerStrength(Level level, BlockPos blockPos, BlockState blockState, @Nullable Orientation orientation, boolean bl) {
 		int i = this.calculateTargetStrength(level, blockPos);
 		if ((Integer)blockState.getValue(RedStoneWireBlock.POWER) != i) {
 			if (level.getBlockState(blockPos) == blockState) {

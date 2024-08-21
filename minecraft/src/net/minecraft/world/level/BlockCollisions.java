@@ -84,7 +84,7 @@ public class BlockCollisions<T> extends AbstractIterator<T> {
 					if ((!this.onlySuffocatingBlocks || blockState.isSuffocating(blockGetter, this.pos))
 						&& (l != 1 || blockState.hasLargeCollisionShape())
 						&& (l != 2 || blockState.is(Blocks.MOVING_PISTON))) {
-						VoxelShape voxelShape = blockState.getCollisionShape(this.collisionGetter, this.pos, this.context);
+						VoxelShape voxelShape = this.context.getCollisionShape(blockState, this.collisionGetter, this.pos);
 						if (voxelShape == Shapes.block()) {
 							if (this.box.intersects((double)i, (double)j, (double)k, (double)i + 1.0, (double)j + 1.0, (double)k + 1.0)) {
 								return (T)this.resultProvider.apply(this.pos, voxelShape.move((double)i, (double)j, (double)k));

@@ -37,10 +37,10 @@ public class FossilFeature extends Feature<FossilFeatureConfiguration> {
 		ChunkPos chunkPos = new ChunkPos(blockPos);
 		BoundingBox boundingBox = new BoundingBox(
 			chunkPos.getMinBlockX() - 16,
-			worldGenLevel.getMinBuildHeight(),
+			worldGenLevel.getMinY(),
 			chunkPos.getMinBlockZ() - 16,
 			chunkPos.getMaxBlockX() + 16,
-			worldGenLevel.getMaxBuildHeight(),
+			worldGenLevel.getMaxY(),
 			chunkPos.getMaxBlockZ() + 16
 		);
 		StructurePlaceSettings structurePlaceSettings = new StructurePlaceSettings().setRotation(rotation).setBoundingBox(boundingBox).setRandom(randomSource);
@@ -54,7 +54,7 @@ public class FossilFeature extends Feature<FossilFeatureConfiguration> {
 			}
 		}
 
-		int k = Math.max(j - 15 - randomSource.nextInt(10), worldGenLevel.getMinBuildHeight() + 10);
+		int k = Math.max(j - 15 - randomSource.nextInt(10), worldGenLevel.getMinY() + 10);
 		BlockPos blockPos3 = structureTemplate.getZeroPositionWithTransform(blockPos2.atY(k), Mirror.NONE, rotation);
 		if (countEmptyCorners(worldGenLevel, structureTemplate.getBoundingBox(structurePlaceSettings, blockPos3)) > fossilFeatureConfiguration.maxEmptyCornersAllowed
 			)

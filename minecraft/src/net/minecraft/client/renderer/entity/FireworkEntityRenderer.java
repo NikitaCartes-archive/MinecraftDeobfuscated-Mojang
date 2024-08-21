@@ -11,6 +11,7 @@ import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.projectile.FireworkRocketEntity;
 import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.world.item.ItemStack;
 
 @Environment(EnvType.CLIENT)
 public class FireworkEntityRenderer extends EntityRenderer<FireworkRocketEntity, FireworkRocketRenderState> {
@@ -56,9 +57,10 @@ public class FireworkEntityRenderer extends EntityRenderer<FireworkRocketEntity,
 	public void extractRenderState(FireworkRocketEntity fireworkRocketEntity, FireworkRocketRenderState fireworkRocketRenderState, float f) {
 		super.extractRenderState(fireworkRocketEntity, fireworkRocketRenderState, f);
 		fireworkRocketRenderState.isShotAtAngle = fireworkRocketEntity.isShotAtAngle();
-		fireworkRocketRenderState.item = fireworkRocketEntity.getItem();
-		fireworkRocketRenderState.itemModel = !fireworkRocketRenderState.item.isEmpty()
-			? this.itemRenderer.getModel(fireworkRocketRenderState.item, fireworkRocketEntity.level(), null, fireworkRocketEntity.getId())
+		ItemStack itemStack = fireworkRocketEntity.getItem();
+		fireworkRocketRenderState.item = itemStack.copy();
+		fireworkRocketRenderState.itemModel = !itemStack.isEmpty()
+			? this.itemRenderer.getModel(itemStack, fireworkRocketEntity.level(), null, fireworkRocketEntity.getId())
 			: null;
 	}
 }

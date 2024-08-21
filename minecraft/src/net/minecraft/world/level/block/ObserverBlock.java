@@ -78,7 +78,7 @@ public class ObserverBlock extends DirectionalBlock {
 	protected void updateNeighborsInFront(Level level, BlockPos blockPos, BlockState blockState) {
 		Direction direction = blockState.getValue(FACING);
 		BlockPos blockPos2 = blockPos.relative(direction.getOpposite());
-		Orientation orientation = ExperimentalRedstoneUtils.randomOrientation(level, direction.getOpposite(), null);
+		Orientation orientation = ExperimentalRedstoneUtils.initialOrientation(level, direction.getOpposite(), null);
 		level.neighborChanged(blockPos2, this, orientation);
 		level.updateNeighborsAtExceptFromFacing(blockPos2, this, direction, orientation);
 	}

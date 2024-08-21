@@ -82,7 +82,7 @@ public class BrushableBlock extends BaseEntityBlock implements Fallable {
 			brushableBlockEntity.checkReset();
 		}
 
-		if (FallingBlock.isFree(serverLevel.getBlockState(blockPos.below())) && blockPos.getY() >= serverLevel.getMinBuildHeight()) {
+		if (FallingBlock.isFree(serverLevel.getBlockState(blockPos.below())) && blockPos.getY() >= serverLevel.getMinY()) {
 			FallingBlockEntity fallingBlockEntity = FallingBlockEntity.fall(serverLevel, blockPos, blockState);
 			fallingBlockEntity.disableDrop();
 		}

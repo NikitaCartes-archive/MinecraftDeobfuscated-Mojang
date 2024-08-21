@@ -127,6 +127,7 @@ public class ModelLayers {
 	public static final ModelLayerLocation MAGMA_CUBE = register("magma_cube");
 	public static final ModelLayerLocation MINECART = register("minecart");
 	public static final ModelLayerLocation MOOSHROOM = register("mooshroom");
+	public static final ModelLayerLocation MOOSHROOM_BABY = register("mooshroom_baby");
 	public static final ModelLayerLocation MULE = register("mule");
 	public static final ModelLayerLocation MULE_BABY = register("mule_baby");
 	public static final ModelLayerLocation OCELOT = register("ocelot");

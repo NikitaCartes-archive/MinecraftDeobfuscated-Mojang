@@ -252,7 +252,7 @@ public class WorldGenRegion implements WorldGenLevel {
 		if (k <= this.generatingStep.blockStateWriteRadius() && l <= this.generatingStep.blockStateWriteRadius()) {
 			if (this.center.isUpgrading()) {
 				LevelHeightAccessor levelHeightAccessor = this.center.getHeightAccessorForGeneration();
-				if (blockPos.getY() < levelHeightAccessor.getMinBuildHeight() || blockPos.getY() >= levelHeightAccessor.getMaxBuildHeight()) {
+				if (levelHeightAccessor.isOutsideBuildHeight(blockPos.getY())) {
 					return false;
 				}
 			}
@@ -458,8 +458,8 @@ public class WorldGenRegion implements WorldGenLevel {
 	}
 
 	@Override
-	public int getMinBuildHeight() {
-		return this.level.getMinBuildHeight();
+	public int getMinY() {
+		return this.level.getMinY();
 	}
 
 	@Override

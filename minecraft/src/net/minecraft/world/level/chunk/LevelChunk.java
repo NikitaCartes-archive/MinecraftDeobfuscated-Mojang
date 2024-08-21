@@ -264,6 +264,7 @@ public class LevelChunk extends ChunkAccess {
 				boolean bl3 = levelChunkSection.hasOnlyAir();
 				if (bl2 != bl3) {
 					this.level.getChunkSource().getLightEngine().updateSectionStatus(blockPos, bl3);
+					this.level.getChunkSource().onSectionEmptinessChanged(this.chunkPos.x, SectionPos.blockToSectionCoord(i), this.chunkPos.z, bl3);
 				}
 
 				if (LightEngine.hasDifferentLightProperties(blockState2, blockState)) {

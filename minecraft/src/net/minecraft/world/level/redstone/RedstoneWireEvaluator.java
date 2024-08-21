@@ -14,7 +14,7 @@ public abstract class RedstoneWireEvaluator {
 		this.wireBlock = redStoneWireBlock;
 	}
 
-	public abstract void updatePowerStrength(Level level, BlockPos blockPos, BlockState blockState, @Nullable Orientation orientation);
+	public abstract void updatePowerStrength(Level level, BlockPos blockPos, BlockState blockState, @Nullable Orientation orientation, boolean bl);
 
 	protected int getBlockSignal(Level level, BlockPos blockPos) {
 		return this.wireBlock.getBlockSignal(level, blockPos);

@@ -199,7 +199,7 @@ public class LecternBlock extends BaseEntityBlock {
 	}
 
 	private static void updateBelow(Level level, BlockPos blockPos, BlockState blockState) {
-		Orientation orientation = ExperimentalRedstoneUtils.randomOrientation(level, ((Direction)blockState.getValue(FACING)).getOpposite(), Direction.UP);
+		Orientation orientation = ExperimentalRedstoneUtils.initialOrientation(level, ((Direction)blockState.getValue(FACING)).getOpposite(), Direction.UP);
 		level.updateNeighborsAt(blockPos.below(), blockState.getBlock(), orientation);
 	}
 

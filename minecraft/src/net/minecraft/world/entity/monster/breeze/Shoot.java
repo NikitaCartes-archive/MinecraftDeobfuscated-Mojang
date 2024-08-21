@@ -89,7 +89,7 @@ public class Shoot extends Behavior<Breeze> {
 				brain.setMemoryWithExpiry(MemoryModuleType.BREEZE_SHOOT_RECOVERING, Unit.INSTANCE, (long)SHOOT_RECOVER_DELAY_TICKS);
 				if (isFacingTarget(breeze, livingEntity)) {
 					double d = livingEntity.getX() - breeze.getX();
-					double e = livingEntity.getY(livingEntity.isPassenger() ? 0.8 : 0.3) - breeze.getY(0.5);
+					double e = livingEntity.getY(livingEntity.isPassenger() ? 0.8 : 0.3) - breeze.getFiringYPosition();
 					double f = livingEntity.getZ() - breeze.getZ();
 					Projectile.spawnProjectileUsingShoot(
 						new BreezeWindCharge(breeze, serverLevel), serverLevel, ItemStack.EMPTY, d, e, f, 0.7F, (float)(5 - serverLevel.getDifficulty().getId() * 4)

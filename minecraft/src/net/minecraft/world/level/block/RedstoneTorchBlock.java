@@ -144,7 +144,7 @@ public class RedstoneTorchBlock extends BaseTorchBlock {
 
 	@Nullable
 	protected Orientation randomOrientation(Level level, BlockState blockState) {
-		return ExperimentalRedstoneUtils.randomOrientation(level, null, Direction.UP);
+		return ExperimentalRedstoneUtils.initialOrientation(level, null, Direction.UP);
 	}
 
 	public static class Toggle {

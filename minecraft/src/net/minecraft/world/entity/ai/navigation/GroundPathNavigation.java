@@ -1,6 +1,7 @@
 package net.minecraft.world.entity.ai.navigation;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.SectionPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
@@ -49,33 +50,35 @@ public class GroundPathNavigation extends PathNavigation {
 			return null;
 		} else {
 			if (levelChunk.getBlockState(blockPos).isAir()) {
-				BlockPos blockPos2 = blockPos.below();
+				BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable().move(Direction.DOWN);
 
-				while (blockPos2.getY() > this.level.getMinBuildHeight() && levelChunk.getBlockState(blockPos2).isAir()) {
-					blockPos2 = blockPos2.below();
+				while (mutableBlockPos.getY() > this.level.getMinY() && levelChunk.getBlockState(mutableBlockPos).isAir()) {
+					mutableBlockPos.move(Direction.DOWN);
 				}
 
-				if (blockPos2.getY() > this.level.getMinBuildHeight()) {
-					return super.createPath(blockPos2.above(), i);
+				if (mutableBlockPos.getY() > this.level.getMinY()) {
+					return super.createPath(mutableBlockPos.above(), i);
 				}
 
-				while (blockPos2.getY() < this.level.getMaxBuildHeight() && levelChunk.getBlockState(blockPos2).isAir()) {
-					blockPos2 = blockPos2.above();
+				mutableBlockPos.setY(blockPos.getY() + 1);
+
+				while (mutableBlockPos.getY() <= this.level.getMaxY() && levelChunk.getBlockState(mutableBlockPos).isAir()) {
+					mutableBlockPos.move(Direction.UP);
 				}
 
-				blockPos = blockPos2;
+				blockPos = mutableBlockPos;
 			}
 
 			if (!levelChunk.getBlockState(blockPos).isSolid()) {
 				return super.createPath(blockPos, i);
 			} else {
-				BlockPos blockPos2 = blockPos.above();
+				BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable().move(Direction.UP);
 
-				while (blockPos2.getY() < this.level.getMaxBuildHeight() && levelChunk.getBlockState(blockPos2).isSolid()) {
-					blockPos2 = blockPos2.above();
+				while (mutableBlockPos.getY() <= this.level.getMaxY() && levelChunk.getBlockState(mutableBlockPos).isSolid()) {
+					mutableBlockPos.move(Direction.UP);
 				}
 
-				return super.createPath(blockPos2, i);
+				return super.createPath(mutableBlockPos.immutable(), i);
 			}
 		}
 	}

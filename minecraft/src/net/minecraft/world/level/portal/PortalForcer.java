@@ -56,7 +56,7 @@ public class PortalForcer {
 		double e = -1.0;
 		BlockPos blockPos3 = null;
 		WorldBorder worldBorder = this.level.getWorldBorder();
-		int i = Math.min(this.level.getMaxBuildHeight(), this.level.getMinBuildHeight() + this.level.getLogicalHeight()) - 1;
+		int i = Math.min(this.level.getMaxY(), this.level.getMinY() + this.level.getLogicalHeight() - 1);
 		int j = 1;
 		BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
 
@@ -65,12 +65,12 @@ public class PortalForcer {
 			if (worldBorder.isWithinBounds(mutableBlockPos2) && worldBorder.isWithinBounds(mutableBlockPos2.move(direction, 1))) {
 				mutableBlockPos2.move(direction.getOpposite(), 1);
 
-				for (int l = k; l >= this.level.getMinBuildHeight(); l--) {
+				for (int l = k; l >= this.level.getMinY(); l--) {
 					mutableBlockPos2.setY(l);
 					if (this.canPortalReplaceBlock(mutableBlockPos2)) {
 						int m = l;
 
-						while (l > this.level.getMinBuildHeight() && this.canPortalReplaceBlock(mutableBlockPos2.move(Direction.DOWN))) {
+						while (l > this.level.getMinY() && this.canPortalReplaceBlock(mutableBlockPos2.move(Direction.DOWN))) {
 							l--;
 						}
 
@@ -105,7 +105,7 @@ public class PortalForcer {
 		}
 
 		if (d == -1.0) {
-			int o = Math.max(this.level.getMinBuildHeight() - -1, 70);
+			int o = Math.max(this.level.getMinY() - -1, 70);
 			int p = i - 9;
 			if (p < o) {
 				return Optional.empty();

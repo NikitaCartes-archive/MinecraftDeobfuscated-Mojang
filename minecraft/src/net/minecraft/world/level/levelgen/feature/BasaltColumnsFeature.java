@@ -98,7 +98,7 @@ public class BasaltColumnsFeature extends Feature<ColumnFeatureConfiguration> {
 
 	@Nullable
 	private static BlockPos findSurface(LevelAccessor levelAccessor, int i, BlockPos.MutableBlockPos mutableBlockPos, int j) {
-		while (mutableBlockPos.getY() > levelAccessor.getMinBuildHeight() + 1 && j > 0) {
+		while (mutableBlockPos.getY() > levelAccessor.getMinY() + 1 && j > 0) {
 			j--;
 			if (canPlaceAt(levelAccessor, i, mutableBlockPos)) {
 				return mutableBlockPos;
@@ -122,7 +122,7 @@ public class BasaltColumnsFeature extends Feature<ColumnFeatureConfiguration> {
 
 	@Nullable
 	private static BlockPos findAir(LevelAccessor levelAccessor, BlockPos.MutableBlockPos mutableBlockPos, int i) {
-		while (mutableBlockPos.getY() < levelAccessor.getMaxBuildHeight() && i > 0) {
+		while (mutableBlockPos.getY() <= levelAccessor.getMaxY() && i > 0) {
 			i--;
 			BlockState blockState = levelAccessor.getBlockState(mutableBlockPos);
 			if (CANNOT_PLACE_ON.contains(blockState.getBlock())) {

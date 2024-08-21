@@ -48,7 +48,7 @@ public class ItemEntityRenderer extends EntityRenderer<ItemEntity, ItemEntityRen
 		itemEntityRenderState.ageInTicks = (float)itemEntity.getAge() + f;
 		itemEntityRenderState.bobOffset = itemEntity.bobOffs;
 		ItemStack itemStack = itemEntity.getItem();
-		itemEntityRenderState.item = itemStack;
+		itemEntityRenderState.item = itemStack.copy();
 		itemEntityRenderState.itemModel = this.itemRenderer.getModel(itemStack, itemEntity.level(), null, itemEntity.getId());
 	}
 

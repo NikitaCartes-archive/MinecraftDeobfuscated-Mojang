@@ -23,7 +23,7 @@ public class RenderBuffers {
 				object2ObjectLinkedOpenHashMap.put(Sheets.solidBlockSheet(), this.fixedBufferPack.buffer(RenderType.solid()));
 				object2ObjectLinkedOpenHashMap.put(Sheets.cutoutBlockSheet(), this.fixedBufferPack.buffer(RenderType.cutout()));
 				object2ObjectLinkedOpenHashMap.put(Sheets.bannerSheet(), this.fixedBufferPack.buffer(RenderType.cutoutMipped()));
-				object2ObjectLinkedOpenHashMap.put(Sheets.translucentCullBlockSheet(), this.fixedBufferPack.buffer(RenderType.translucent()));
+				object2ObjectLinkedOpenHashMap.put(Sheets.translucentItemSheet(), this.fixedBufferPack.buffer(RenderType.translucent()));
 				put(object2ObjectLinkedOpenHashMap, Sheets.shieldSheet());
 				put(object2ObjectLinkedOpenHashMap, Sheets.bedSheet());
 				put(object2ObjectLinkedOpenHashMap, Sheets.shulkerBoxSheet());
@@ -34,7 +34,6 @@ public class RenderBuffers {
 				put(object2ObjectLinkedOpenHashMap, RenderType.glint());
 				put(object2ObjectLinkedOpenHashMap, RenderType.glintTranslucent());
 				put(object2ObjectLinkedOpenHashMap, RenderType.entityGlint());
-				put(object2ObjectLinkedOpenHashMap, RenderType.entityGlintDirect());
 				put(object2ObjectLinkedOpenHashMap, RenderType.waterMask());
 			}
 		);

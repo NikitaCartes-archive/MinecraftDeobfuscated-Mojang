@@ -11,8 +11,8 @@ import java.util.Objects;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.ShaderInstance;
+import net.minecraft.client.renderer.CompiledShaderProgram;
+import net.minecraft.client.renderer.CoreShaders;
 
 @Environment(EnvType.CLIENT)
 public abstract class RenderTarget {
@@ -186,34 +186,27 @@ public abstract class RenderTarget {
 	}
 
 	public void blitToScreen(int i, int j) {
-		this.blitToScreen(i, j, true);
+		GlStateManager._glBindFramebuffer(36008, this.frameBufferId);
+		GlStateManager._glBlitFrameBuffer(0, 0, this.width, this.height, 0, 0, i, j, 16384, 9728);
+		GlStateManager._glBindFramebuffer(36008, 0);
 	}
 
-	public void blitToScreen(int i, int j, boolean bl) {
-		this._blitToScreen(i, j, bl);
-	}
-
-	private void _blitToScreen(int i, int j, boolean bl) {
+	public void blitAndBlendToScreen(int i, int j) {
 		RenderSystem.assertOnRenderThread();
 		GlStateManager._colorMask(true, true, true, false);
 		GlStateManager._disableDepthTest();
 		GlStateManager._depthMask(false);
 		GlStateManager._viewport(0, 0, i, j);
-		if (bl) {
-			GlStateManager._disableBlend();
-		}
-
-		Minecraft minecraft = Minecraft.getInstance();
-		ShaderInstance shaderInstance = (ShaderInstance)Objects.requireNonNull(minecraft.gameRenderer.blitShader, "Blit shader not loaded");
-		shaderInstance.setSampler("InSampler", this.colorTextureId);
-		shaderInstance.apply();
+		CompiledShaderProgram compiledShaderProgram = (CompiledShaderProgram)Objects.requireNonNull(
+			RenderSystem.setShader(CoreShaders.BLIT_SCREEN), "Blit shader not loaded"
+		);
+		compiledShaderProgram.bindSampler("InSampler", this.colorTextureId);
 		BufferBuilder bufferBuilder = RenderSystem.renderThreadTesselator().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.BLIT_SCREEN);
 		bufferBuilder.addVertex(0.0F, 0.0F, 0.0F);
 		bufferBuilder.addVertex(1.0F, 0.0F, 0.0F);
 		bufferBuilder.addVertex(1.0F, 1.0F, 0.0F);
 		bufferBuilder.addVertex(0.0F, 1.0F, 0.0F);
-		BufferUploader.draw(bufferBuilder.buildOrThrow());
-		shaderInstance.clear();
+		BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
 		GlStateManager._depthMask(true);
 		GlStateManager._colorMask(true, true, true, true);
 	}

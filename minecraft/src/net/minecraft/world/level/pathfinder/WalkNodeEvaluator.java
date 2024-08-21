@@ -71,7 +71,7 @@ public class WalkNodeEvaluator extends NodeEvaluator {
 			} else {
 				mutableBlockPos.set(this.mob.getX(), this.mob.getY() + 1.0, this.mob.getZ());
 
-				while (mutableBlockPos.getY() > this.currentContext.level().getMinBuildHeight()) {
+				while (mutableBlockPos.getY() > this.currentContext.level().getMinY()) {
 					i = mutableBlockPos.getY();
 					mutableBlockPos.setY(mutableBlockPos.getY() - 1);
 					BlockState blockState2 = this.currentContext.getBlockState(mutableBlockPos);
@@ -314,7 +314,7 @@ public class WalkNodeEvaluator extends NodeEvaluator {
 	private Node tryFindFirstNonWaterBelow(int i, int j, int k, @Nullable Node node) {
 		j--;
 
-		while (j > this.mob.level().getMinBuildHeight()) {
+		while (j > this.mob.level().getMinY()) {
 			PathType pathType = this.getCachedPathType(i, j, k);
 			if (pathType != PathType.WATER) {
 				return node;
@@ -328,7 +328,7 @@ public class WalkNodeEvaluator extends NodeEvaluator {
 	}
 
 	private Node tryFindFirstGroundNodeBelow(int i, int j, int k) {
-		for (int l = j - 1; l >= this.mob.level().getMinBuildHeight(); l--) {
+		for (int l = j - 1; l >= this.mob.level().getMinY(); l--) {
 			if (j - l > this.mob.getMaxFallDistance()) {
 				return this.getBlockedNode(i, l, k);
 			}
@@ -433,7 +433,7 @@ public class WalkNodeEvaluator extends NodeEvaluator {
 		int j = mutableBlockPos.getY();
 		int k = mutableBlockPos.getZ();
 		PathType pathType = pathfindingContext.getPathTypeFromState(i, j, k);
-		if (pathType == PathType.OPEN && j >= pathfindingContext.level().getMinBuildHeight() + 1) {
+		if (pathType == PathType.OPEN && j >= pathfindingContext.level().getMinY() + 1) {
 			return switch (pathfindingContext.getPathTypeFromState(i, j - 1, k)) {
 				case OPEN, WATER, LAVA, WALKABLE -> PathType.OPEN;
 				case DAMAGE_FIRE -> PathType.DAMAGE_FIRE;

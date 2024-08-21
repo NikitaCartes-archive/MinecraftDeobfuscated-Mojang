@@ -2,6 +2,7 @@ package net.minecraft.client.renderer.culling;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.phys.AABB;
 import org.joml.FrustumIntersection;
 import org.joml.Matrix4f;
@@ -65,17 +66,29 @@ public class Frustum {
 	}
 
 	public boolean isVisible(AABB aABB) {
-		return this.cubeInFrustum(aABB.minX, aABB.minY, aABB.minZ, aABB.maxX, aABB.maxY, aABB.maxZ);
+		int i = this.cubeInFrustum(aABB.minX, aABB.minY, aABB.minZ, aABB.maxX, aABB.maxY, aABB.maxZ);
+		return i == -2 || i == -1;
 	}
 
-	private boolean cubeInFrustum(double d, double e, double f, double g, double h, double i) {
+	public int cubeInFrustum(BoundingBox boundingBox) {
+		return this.cubeInFrustum(
+			(double)boundingBox.minX(),
+			(double)boundingBox.minY(),
+			(double)boundingBox.minZ(),
+			(double)(boundingBox.maxX() + 1),
+			(double)(boundingBox.maxY() + 1),
+			(double)(boundingBox.maxZ() + 1)
+		);
+	}
+
+	private int cubeInFrustum(double d, double e, double f, double g, double h, double i) {
 		float j = (float)(d - this.camX);
 		float k = (float)(e - this.camY);
 		float l = (float)(f - this.camZ);
 		float m = (float)(g - this.camX);
 		float n = (float)(h - this.camY);
 		float o = (float)(i - this.camZ);
-		return this.intersection.testAab(j, k, l, m, n, o);
+		return this.intersection.intersectAab(j, k, l, m, n, o);
 	}
 
 	public Vector4f[] getFrustumPoints() {

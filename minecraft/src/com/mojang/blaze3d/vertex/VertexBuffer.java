@@ -7,7 +7,7 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.ShaderInstance;
+import net.minecraft.client.renderer.CompiledShaderProgram;
 import org.joml.Matrix4f;
 
 @Environment(EnvType.CLIENT)
@@ -167,12 +167,12 @@ public class VertexBuffer implements AutoCloseable {
 		return autoStorageIndexBuffer != null ? autoStorageIndexBuffer.type() : this.indexType;
 	}
 
-	public void drawWithShader(Matrix4f matrix4f, Matrix4f matrix4f2, ShaderInstance shaderInstance) {
+	public void drawWithShader(Matrix4f matrix4f, Matrix4f matrix4f2, CompiledShaderProgram compiledShaderProgram) {
 		RenderSystem.assertOnRenderThread();
-		shaderInstance.setDefaultUniforms(this.mode, matrix4f, matrix4f2, Minecraft.getInstance().getWindow());
-		shaderInstance.apply();
+		compiledShaderProgram.setDefaultUniforms(this.mode, matrix4f, matrix4f2, Minecraft.getInstance().getWindow());
+		compiledShaderProgram.apply();
 		this.draw();
-		shaderInstance.clear();
+		compiledShaderProgram.clear();
 	}
 
 	public void close() {

@@ -1,34 +1,19 @@
 package net.minecraft.client.renderer;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.gson.JsonSyntaxException;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.resource.CrossFrameResourcePool;
-import com.mojang.blaze3d.shaders.Program;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexSorting;
-import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import com.mojang.math.Axis;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -51,14 +36,10 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.PreparableReloadListener;
-import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceProvider;
-import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
-import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
@@ -89,13 +70,13 @@ import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class GameRenderer implements AutoCloseable {
-	private static final ResourceLocation BLUR_LOCATION = ResourceLocation.withDefaultNamespace("shaders/post/blur.json");
+	private static final ResourceLocation BLUR_POST_CHAIN_ID = ResourceLocation.withDefaultNamespace("blur");
 	public static final int MAX_BLUR_RADIUS = 10;
-	static final Logger LOGGER = LogUtils.getLogger();
+	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final boolean DEPTH_BUFFER_DEBUG = false;
 	public static final float PROJECTION_Z_NEAR = 0.05F;
 	private static final float GUI_Z_NEAR = 1000.0F;
-	final Minecraft minecraft;
+	private final Minecraft minecraft;
 	private final ResourceManager resourceManager;
 	private final RandomSource random = RandomSource.create();
 	private float renderDistance;
@@ -125,128 +106,9 @@ public class GameRenderer implements AutoCloseable {
 	private float itemActivationOffY;
 	private final CrossFrameResourcePool resourcePool = new CrossFrameResourcePool(3);
 	@Nullable
-	PostChain postEffect;
-	@Nullable
-	private PostChain blurEffect;
+	private ResourceLocation postEffectId;
 	private boolean effectActive;
 	private final Camera mainCamera = new Camera();
-	@Nullable
-	public ShaderInstance blitShader;
-	private final Map<String, ShaderInstance> shaders = Maps.<String, ShaderInstance>newHashMap();
-	@Nullable
-	private static ShaderInstance positionShader;
-	@Nullable
-	private static ShaderInstance positionColorShader;
-	@Nullable
-	private static ShaderInstance positionTexShader;
-	@Nullable
-	private static ShaderInstance positionTexColorShader;
-	@Nullable
-	private static ShaderInstance particleShader;
-	@Nullable
-	private static ShaderInstance positionColorLightmapShader;
-	@Nullable
-	private static ShaderInstance positionColorTexLightmapShader;
-	@Nullable
-	private static ShaderInstance rendertypeSolidShader;
-	@Nullable
-	private static ShaderInstance rendertypeCutoutMippedShader;
-	@Nullable
-	private static ShaderInstance rendertypeCutoutShader;
-	@Nullable
-	private static ShaderInstance rendertypeTranslucentShader;
-	@Nullable
-	private static ShaderInstance rendertypeTranslucentMovingBlockShader;
-	@Nullable
-	private static ShaderInstance rendertypeArmorCutoutNoCullShader;
-	@Nullable
-	private static ShaderInstance rendertypeEntitySolidShader;
-	@Nullable
-	private static ShaderInstance rendertypeEntityCutoutShader;
-	@Nullable
-	private static ShaderInstance rendertypeEntityCutoutNoCullShader;
-	@Nullable
-	private static ShaderInstance rendertypeEntityCutoutNoCullZOffsetShader;
-	@Nullable
-	private static ShaderInstance rendertypeItemEntityTranslucentCullShader;
-	@Nullable
-	private static ShaderInstance rendertypeEntityTranslucentCullShader;
-	@Nullable
-	private static ShaderInstance rendertypeEntityTranslucentShader;
-	@Nullable
-	private static ShaderInstance rendertypeEntityTranslucentEmissiveShader;
-	@Nullable
-	private static ShaderInstance rendertypeEntitySmoothCutoutShader;
-	@Nullable
-	private static ShaderInstance rendertypeBeaconBeamShader;
-	@Nullable
-	private static ShaderInstance rendertypeEntityDecalShader;
-	@Nullable
-	private static ShaderInstance rendertypeEntityNoOutlineShader;
-	@Nullable
-	private static ShaderInstance rendertypeEntityShadowShader;
-	@Nullable
-	private static ShaderInstance rendertypeEntityAlphaShader;
-	@Nullable
-	private static ShaderInstance rendertypeEyesShader;
-	@Nullable
-	private static ShaderInstance rendertypeEnergySwirlShader;
-	@Nullable
-	private static ShaderInstance rendertypeBreezeWindShader;
-	@Nullable
-	private static ShaderInstance rendertypeLeashShader;
-	@Nullable
-	private static ShaderInstance rendertypeWaterMaskShader;
-	@Nullable
-	private static ShaderInstance rendertypeOutlineShader;
-	@Nullable
-	private static ShaderInstance rendertypeArmorGlintShader;
-	@Nullable
-	private static ShaderInstance rendertypeArmorEntityGlintShader;
-	@Nullable
-	private static ShaderInstance rendertypeGlintTranslucentShader;
-	@Nullable
-	private static ShaderInstance rendertypeGlintShader;
-	@Nullable
-	private static ShaderInstance rendertypeGlintDirectShader;
-	@Nullable
-	private static ShaderInstance rendertypeEntityGlintShader;
-	@Nullable
-	private static ShaderInstance rendertypeEntityGlintDirectShader;
-	@Nullable
-	private static ShaderInstance rendertypeTextShader;
-	@Nullable
-	private static ShaderInstance rendertypeTextBackgroundShader;
-	@Nullable
-	private static ShaderInstance rendertypeTextIntensityShader;
-	@Nullable
-	private static ShaderInstance rendertypeTextSeeThroughShader;
-	@Nullable
-	private static ShaderInstance rendertypeTextBackgroundSeeThroughShader;
-	@Nullable
-	private static ShaderInstance rendertypeTextIntensitySeeThroughShader;
-	@Nullable
-	private static ShaderInstance rendertypeLightningShader;
-	@Nullable
-	private static ShaderInstance rendertypeTripwireShader;
-	@Nullable
-	private static ShaderInstance rendertypeEndPortalShader;
-	@Nullable
-	private static ShaderInstance rendertypeEndGatewayShader;
-	@Nullable
-	private static ShaderInstance rendertypeCloudsShader;
-	@Nullable
-	private static ShaderInstance rendertypeLinesShader;
-	@Nullable
-	private static ShaderInstance rendertypeCrumblingShader;
-	@Nullable
-	private static ShaderInstance rendertypeGuiShader;
-	@Nullable
-	private static ShaderInstance rendertypeGuiOverlayShader;
-	@Nullable
-	private static ShaderInstance rendertypeGuiTextHighlightShader;
-	@Nullable
-	private static ShaderInstance rendertypeGuiGhostRecipeOverlayShader;
 
 	public GameRenderer(Minecraft minecraft, ItemInHandRenderer itemInHandRenderer, ResourceManager resourceManager, RenderBuffers renderBuffers) {
 		this.minecraft = minecraft;
@@ -254,22 +116,12 @@ public class GameRenderer implements AutoCloseable {
 		this.itemInHandRenderer = itemInHandRenderer;
 		this.lightTexture = new LightTexture(this, minecraft);
 		this.renderBuffers = renderBuffers;
-		this.postEffect = null;
 	}
 
 	public void close() {
 		this.lightTexture.close();
 		this.overlayTexture.close();
 		this.resourcePool.close();
-		this.shutdownEffect();
-		this.shutdownShaders();
-		if (this.blurEffect != null) {
-			this.blurEffect.close();
-		}
-
-		if (this.blitShader != null) {
-			this.blitShader.close();
-		}
 	}
 
 	public void setRenderHand(boolean bl) {
@@ -288,12 +140,8 @@ public class GameRenderer implements AutoCloseable {
 		return this.panoramicMode;
 	}
 
-	public void shutdownEffect() {
-		if (this.postEffect != null) {
-			this.postEffect.close();
-		}
-
-		this.postEffect = null;
+	public void clearPostEffect() {
+		this.postEffectId = null;
 	}
 
 	public void togglePostEffect() {
@@ -301,476 +149,40 @@ public class GameRenderer implements AutoCloseable {
 	}
 
 	public void checkEntityPostEffect(@Nullable Entity entity) {
-		if (this.postEffect != null) {
-			this.postEffect.close();
-		}
-
-		this.postEffect = null;
+		this.postEffectId = null;
 		if (entity instanceof Creeper) {
-			this.loadEffect(ResourceLocation.withDefaultNamespace("shaders/post/creeper.json"));
+			this.setPostEffect(ResourceLocation.withDefaultNamespace("creeper"));
 		} else if (entity instanceof Spider) {
-			this.loadEffect(ResourceLocation.withDefaultNamespace("shaders/post/spider.json"));
+			this.setPostEffect(ResourceLocation.withDefaultNamespace("spider"));
 		} else if (entity instanceof EnderMan) {
-			this.loadEffect(ResourceLocation.withDefaultNamespace("shaders/post/invert.json"));
+			this.setPostEffect(ResourceLocation.withDefaultNamespace("invert"));
 		}
 	}
 
-	private void loadEffect(ResourceLocation resourceLocation) {
-		if (this.postEffect != null) {
-			this.postEffect.close();
-		}
-
-		try {
-			this.postEffect = PostChain.load(this.resourceManager, this.minecraft.getTextureManager(), resourceLocation, Set.of(PostChain.MAIN_TARGET_ID));
-			this.effectActive = true;
-		} catch (IOException var3) {
-			LOGGER.warn("Failed to load shader: {}", resourceLocation, var3);
-			this.effectActive = false;
-		} catch (JsonSyntaxException var4) {
-			LOGGER.warn("Failed to parse shader: {}", resourceLocation, var4);
-			this.effectActive = false;
-		}
-	}
-
-	private void loadBlurEffect(ResourceProvider resourceProvider) {
-		if (this.blurEffect != null) {
-			this.blurEffect.close();
-		}
-
-		try {
-			this.blurEffect = PostChain.load(resourceProvider, this.minecraft.getTextureManager(), BLUR_LOCATION, Set.of(PostChain.MAIN_TARGET_ID));
-		} catch (IOException var3) {
-			LOGGER.warn("Failed to load shader: {}", BLUR_LOCATION, var3);
-		} catch (JsonSyntaxException var4) {
-			LOGGER.warn("Failed to parse shader: {}", BLUR_LOCATION, var4);
-		}
+	private void setPostEffect(ResourceLocation resourceLocation) {
+		this.postEffectId = resourceLocation;
+		this.effectActive = true;
 	}
 
 	public void processBlurEffect() {
 		float f = (float)this.minecraft.options.getMenuBackgroundBlurriness();
-		if (this.blurEffect != null && f >= 1.0F) {
-			this.blurEffect.setUniform("Radius", f);
-			this.blurEffect.process(this.minecraft.getMainRenderTarget(), this.resourcePool, this.minecraft.getDeltaTracker());
+		if (!(f < 1.0F)) {
+			PostChain postChain = this.minecraft.getShaderManager().getPostChain(BLUR_POST_CHAIN_ID, LevelTargetBundle.MAIN_TARGETS);
+			if (postChain != null) {
+				postChain.setUniform("Radius", f);
+				postChain.process(this.minecraft.getMainRenderTarget(), this.resourcePool);
+			}
 		}
-	}
-
-	public PreparableReloadListener createReloadListener() {
-		return new SimplePreparableReloadListener<GameRenderer.ResourceCache>() {
-			protected GameRenderer.ResourceCache prepare(ResourceManager resourceManager, ProfilerFiller profilerFiller) {
-				Map<ResourceLocation, Resource> map = resourceManager.listResources(
-					"shaders",
-					resourceLocation -> {
-						String string = resourceLocation.getPath();
-						return string.endsWith(".json")
-							|| string.endsWith(Program.Type.FRAGMENT.getExtension())
-							|| string.endsWith(Program.Type.VERTEX.getExtension())
-							|| string.endsWith(".glsl");
-					}
-				);
-				Map<ResourceLocation, Resource> map2 = new HashMap();
-				map.forEach((resourceLocation, resource) -> {
-					try {
-						InputStream inputStream = resource.open();
-
-						try {
-							byte[] bs = inputStream.readAllBytes();
-							map2.put(resourceLocation, new Resource(resource.source(), () -> new ByteArrayInputStream(bs)));
-						} catch (Throwable var7) {
-							if (inputStream != null) {
-								try {
-									inputStream.close();
-								} catch (Throwable var6) {
-									var7.addSuppressed(var6);
-								}
-							}
-
-							throw var7;
-						}
-
-						if (inputStream != null) {
-							inputStream.close();
-						}
-					} catch (Exception var8) {
-						GameRenderer.LOGGER.warn("Failed to read resource {}", resourceLocation, var8);
-					}
-				});
-				return new GameRenderer.ResourceCache(resourceManager, map2);
-			}
-
-			protected void apply(GameRenderer.ResourceCache resourceCache, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
-				GameRenderer.this.reloadShaders(resourceCache);
-				if (GameRenderer.this.postEffect != null) {
-					GameRenderer.this.postEffect.close();
-				}
-
-				GameRenderer.this.postEffect = null;
-				GameRenderer.this.checkEntityPostEffect(GameRenderer.this.minecraft.getCameraEntity());
-			}
-
-			@Override
-			public String getName() {
-				return "Shader Loader";
-			}
-		};
 	}
 
 	public void preloadUiShader(ResourceProvider resourceProvider) {
-		if (this.blitShader != null) {
-			throw new RuntimeException("Blit shader already preloaded");
-		} else {
-			try {
-				this.blitShader = new ShaderInstance(resourceProvider, "blit_screen", DefaultVertexFormat.BLIT_SCREEN);
-			} catch (IOException var3) {
-				throw new RuntimeException("could not preload blit shader", var3);
-			}
-
-			rendertypeGuiShader = this.preloadShader(resourceProvider, "rendertype_gui", DefaultVertexFormat.POSITION_COLOR);
-			rendertypeGuiOverlayShader = this.preloadShader(resourceProvider, "rendertype_gui_overlay", DefaultVertexFormat.POSITION_COLOR);
-			positionShader = this.preloadShader(resourceProvider, "position", DefaultVertexFormat.POSITION);
-			positionColorShader = this.preloadShader(resourceProvider, "position_color", DefaultVertexFormat.POSITION_COLOR);
-			positionTexShader = this.preloadShader(resourceProvider, "position_tex", DefaultVertexFormat.POSITION_TEX);
-			positionTexColorShader = this.preloadShader(resourceProvider, "position_tex_color", DefaultVertexFormat.POSITION_TEX_COLOR);
-			rendertypeTextShader = this.preloadShader(resourceProvider, "rendertype_text", DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP);
-		}
-	}
-
-	private ShaderInstance preloadShader(ResourceProvider resourceProvider, String string, VertexFormat vertexFormat) {
 		try {
-			ShaderInstance shaderInstance = new ShaderInstance(resourceProvider, string, vertexFormat);
-			this.shaders.put(string, shaderInstance);
-			return shaderInstance;
-		} catch (Exception var5) {
-			throw new IllegalStateException("could not preload shader " + string, var5);
+			this.minecraft
+				.getShaderManager()
+				.preloadForStartup(resourceProvider, CoreShaders.RENDERTYPE_GUI, CoreShaders.RENDERTYPE_GUI_OVERLAY, CoreShaders.POSITION_TEX_COLOR);
+		} catch (ShaderManager.CompilationException | IOException var3) {
+			throw new RuntimeException("Could not preload shaders for loading UI", var3);
 		}
-	}
-
-	void reloadShaders(ResourceProvider resourceProvider) {
-		RenderSystem.assertOnRenderThread();
-		List<Program> list = Lists.<Program>newArrayList();
-		list.addAll(Program.Type.FRAGMENT.getPrograms().values());
-		list.addAll(Program.Type.VERTEX.getPrograms().values());
-		list.forEach(Program::close);
-		List<Pair<ShaderInstance, Consumer<ShaderInstance>>> list2 = Lists.<Pair<ShaderInstance, Consumer<ShaderInstance>>>newArrayListWithCapacity(
-			this.shaders.size()
-		);
-
-		try {
-			list2.add(Pair.of(new ShaderInstance(resourceProvider, "particle", DefaultVertexFormat.PARTICLE), shaderInstance -> particleShader = shaderInstance));
-			list2.add(Pair.of(new ShaderInstance(resourceProvider, "position", DefaultVertexFormat.POSITION), shaderInstance -> positionShader = shaderInstance));
-			list2.add(
-				Pair.of(new ShaderInstance(resourceProvider, "position_color", DefaultVertexFormat.POSITION_COLOR), shaderInstance -> positionColorShader = shaderInstance)
-			);
-			list2.add(
-				Pair.of(
-					new ShaderInstance(resourceProvider, "position_color_lightmap", DefaultVertexFormat.POSITION_COLOR_LIGHTMAP),
-					shaderInstance -> positionColorLightmapShader = shaderInstance
-				)
-			);
-			list2.add(
-				Pair.of(
-					new ShaderInstance(resourceProvider, "position_color_tex_lightmap", DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP),
-					shaderInstance -> positionColorTexLightmapShader = shaderInstance
-				)
-			);
-			list2.add(
-				Pair.of(new ShaderInstance(resourceProvider, "position_tex", DefaultVertexFormat.POSITION_TEX), shaderInstance -> positionTexShader = shaderInstance)
-			);
-			list2.add(
-				Pair.of(
-					new ShaderInstance(resourceProvider, "position_tex_color", DefaultVertexFormat.POSITION_TEX_COLOR),
-					shaderInstance -> positionTexColorShader = shaderInstance
-				)
-			);
-			list2.add(
-				Pair.of(new ShaderInstance(resourceProvider, "rendertype_solid", DefaultVertexFormat.BLOCK), shaderInstance -> rendertypeSolidShader = shaderInstance)
-			);
-			list2.add(
-				Pair.of(
-					new ShaderInstance(resourceProvider, "rendertype_cutout_mipped", DefaultVertexFormat.BLOCK),
-					shaderInstance -> rendertypeCutoutMippedShader = shaderInstance
-				)
-			);
-			list2.add(
-				Pair.of(new ShaderInstance(resourceProvider, "rendertype_cutout", DefaultVertexFormat.BLOCK), shaderInstance -> rendertypeCutoutShader = shaderInstance)
-			);
-			list2.add(
-				Pair.of(
-					new ShaderInstance(resourceProvider, "rendertype_translucent", DefaultVertexFormat.BLOCK), shaderInstance -> rendertypeTranslucentShader = shaderInstance
-				)
-			);
-			list2.add(
-				Pair.of(
-					new ShaderInstance(resourceProvider, "rendertype_translucent_moving_block", DefaultVertexFormat.BLOCK),
-					shaderInstance -> rendertypeTranslucentMovingBlockShader = shaderInstance
-				)
-			);
-			list2.add(
-				Pair.of(
-					new ShaderInstance(resourceProvider, "rendertype_armor_cutout_no_cull", DefaultVertexFormat.NEW_ENTITY),
-					shaderInstance -> rendertypeArmorCutoutNoCullShader = shaderInstance
-				)
-			);
-			list2.add(
-				Pair.of(
-					new ShaderInstance(resourceProvider, "rendertype_entity_solid", DefaultVertexFormat.NEW_ENTITY),
-					shaderInstance -> rendertypeEntitySolidShader = shaderInstance
-				)
-			);
-			list2.add(
-				Pair.of(
-					new ShaderInstance(resourceProvider, "rendertype_entity_cutout", DefaultVertexFormat.NEW_ENTITY),
-					shaderInstance -> rendertypeEntityCutoutShader = shaderInstance
-				)
-			);
-			list2.add(
-				Pair.of(
-					new ShaderInstance(resourceProvider, "rendertype_entity_cutout_no_cull", DefaultVertexFormat.NEW_ENTITY),
-					shaderInstance -> rendertypeEntityCutoutNoCullShader = shaderInstance
-				)
-			);
-			list2.add(
-				Pair.of(
-					new ShaderInstance(resourceProvider, "rendertype_entity_cutout_no_cull_z_offset", DefaultVertexFormat.NEW_ENTITY),
-					shaderInstance -> rendertypeEntityCutoutNoCullZOffsetShader = shaderInstance
-				)
-			);
-			list2.add(
-				Pair.of(
-					new ShaderInstance(resourceProvider, "rendertype_item_entity_translucent_cull", DefaultVertexFormat.NEW_ENTITY),
-					shaderInstance -> rendertypeItemEntityTranslucentCullShader = shaderInstance
-				)
-			);
-			list2.add(
-				Pair.of(
-					new ShaderInstance(resourceProvider, "rendertype_entity_translucent_cull", DefaultVertexFormat.NEW_ENTITY),
-					shaderInstance -> rendertypeEntityTranslucentCullShader = shaderInstance
-				)
-			);
-			list2.add(
-				Pair.of(
-					new ShaderInstance(resourceProvider, "rendertype_entity_translucent", DefaultVertexFormat.NEW_ENTITY),
-					shaderInstance -> rendertypeEntityTranslucentShader = shaderInstance
-				)
-			);
-			list2.add(
-				Pair.of(
-					new ShaderInstance(resourceProvider, "rendertype_entity_translucent_emissive", DefaultVertexFormat.NEW_ENTITY),
-					shaderInstance -> rendertypeEntityTranslucentEmissiveShader = shaderInstance
-				)
-			);
-			list2.add(
-				Pair.of(
-					new ShaderInstance(resourceProvider, "rendertype_entity_smooth_cutout", DefaultVertexFormat.NEW_ENTITY),
-					shaderInstance -> rendertypeEntitySmoothCutoutShader = shaderInstance
-				)
-			);
-			list2.add(
-				Pair.of(
-					new ShaderInstance(resourceProvider, "rendertype_beacon_beam", DefaultVertexFormat.BLOCK), shaderInstance -> rendertypeBeaconBeamShader = shaderInstance
-				)
-			);
-			list2.add(
-				Pair.of(
-					new ShaderInstance(resourceProvider, "rendertype_entity_decal", DefaultVertexFormat.NEW_ENTITY),
-					shaderInstance -> rendertypeEntityDecalShader = shaderInstance
-				)
-			);
-			list2.add(
-				Pair.of(
-					new ShaderInstance(resourceProvider, "rendertype_entity_no_outline", DefaultVertexFormat.NEW_ENTITY),
-					shaderInstance -> rendertypeEntityNoOutlineShader = shaderInstance
-				)
-			);
-			list2.add(
-				Pair.of(
-					new ShaderInstance(resourceProvider, "rendertype_entity_shadow", DefaultVertexFormat.NEW_ENTITY),
-					shaderInstance -> rendertypeEntityShadowShader = shaderInstance
-				)
-			);
-			list2.add(
-				Pair.of(
-					new ShaderInstance(resourceProvider, "rendertype_entity_alpha", DefaultVertexFormat.NEW_ENTITY),
-					shaderInstance -> rendertypeEntityAlphaShader = shaderInstance
-				)
-			);
-			list2.add(
-				Pair.of(new ShaderInstance(resourceProvider, "rendertype_eyes", DefaultVertexFormat.NEW_ENTITY), shaderInstance -> rendertypeEyesShader = shaderInstance)
-			);
-			list2.add(
-				Pair.of(
-					new ShaderInstance(resourceProvider, "rendertype_energy_swirl", DefaultVertexFormat.NEW_ENTITY),
-					shaderInstance -> rendertypeEnergySwirlShader = shaderInstance
-				)
-			);
-			list2.add(
-				Pair.of(
-					new ShaderInstance(resourceProvider, "rendertype_leash", DefaultVertexFormat.POSITION_COLOR_LIGHTMAP),
-					shaderInstance -> rendertypeLeashShader = shaderInstance
-				)
-			);
-			list2.add(
-				Pair.of(
-					new ShaderInstance(resourceProvider, "rendertype_water_mask", DefaultVertexFormat.POSITION), shaderInstance -> rendertypeWaterMaskShader = shaderInstance
-				)
-			);
-			list2.add(
-				Pair.of(
-					new ShaderInstance(resourceProvider, "rendertype_outline", DefaultVertexFormat.POSITION_TEX_COLOR),
-					shaderInstance -> rendertypeOutlineShader = shaderInstance
-				)
-			);
-			list2.add(
-				Pair.of(
-					new ShaderInstance(resourceProvider, "rendertype_armor_entity_glint", DefaultVertexFormat.POSITION_TEX),
-					shaderInstance -> rendertypeArmorEntityGlintShader = shaderInstance
-				)
-			);
-			list2.add(
-				Pair.of(
-					new ShaderInstance(resourceProvider, "rendertype_glint_translucent", DefaultVertexFormat.POSITION_TEX),
-					shaderInstance -> rendertypeGlintTranslucentShader = shaderInstance
-				)
-			);
-			list2.add(
-				Pair.of(
-					new ShaderInstance(resourceProvider, "rendertype_glint", DefaultVertexFormat.POSITION_TEX), shaderInstance -> rendertypeGlintShader = shaderInstance
-				)
-			);
-			list2.add(
-				Pair.of(
-					new ShaderInstance(resourceProvider, "rendertype_entity_glint", DefaultVertexFormat.POSITION_TEX),
-					shaderInstance -> rendertypeEntityGlintShader = shaderInstance
-				)
-			);
-			list2.add(
-				Pair.of(
-					new ShaderInstance(resourceProvider, "rendertype_entity_glint_direct", DefaultVertexFormat.POSITION_TEX),
-					shaderInstance -> rendertypeEntityGlintDirectShader = shaderInstance
-				)
-			);
-			list2.add(
-				Pair.of(
-					new ShaderInstance(resourceProvider, "rendertype_text", DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP),
-					shaderInstance -> rendertypeTextShader = shaderInstance
-				)
-			);
-			list2.add(
-				Pair.of(
-					new ShaderInstance(resourceProvider, "rendertype_text_background", DefaultVertexFormat.POSITION_COLOR_LIGHTMAP),
-					shaderInstance -> rendertypeTextBackgroundShader = shaderInstance
-				)
-			);
-			list2.add(
-				Pair.of(
-					new ShaderInstance(resourceProvider, "rendertype_text_intensity", DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP),
-					shaderInstance -> rendertypeTextIntensityShader = shaderInstance
-				)
-			);
-			list2.add(
-				Pair.of(
-					new ShaderInstance(resourceProvider, "rendertype_text_see_through", DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP),
-					shaderInstance -> rendertypeTextSeeThroughShader = shaderInstance
-				)
-			);
-			list2.add(
-				Pair.of(
-					new ShaderInstance(resourceProvider, "rendertype_text_background_see_through", DefaultVertexFormat.POSITION_COLOR_LIGHTMAP),
-					shaderInstance -> rendertypeTextBackgroundSeeThroughShader = shaderInstance
-				)
-			);
-			list2.add(
-				Pair.of(
-					new ShaderInstance(resourceProvider, "rendertype_text_intensity_see_through", DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP),
-					shaderInstance -> rendertypeTextIntensitySeeThroughShader = shaderInstance
-				)
-			);
-			list2.add(
-				Pair.of(
-					new ShaderInstance(resourceProvider, "rendertype_lightning", DefaultVertexFormat.POSITION_COLOR),
-					shaderInstance -> rendertypeLightningShader = shaderInstance
-				)
-			);
-			list2.add(
-				Pair.of(new ShaderInstance(resourceProvider, "rendertype_tripwire", DefaultVertexFormat.BLOCK), shaderInstance -> rendertypeTripwireShader = shaderInstance)
-			);
-			list2.add(
-				Pair.of(
-					new ShaderInstance(resourceProvider, "rendertype_end_portal", DefaultVertexFormat.POSITION), shaderInstance -> rendertypeEndPortalShader = shaderInstance
-				)
-			);
-			list2.add(
-				Pair.of(
-					new ShaderInstance(resourceProvider, "rendertype_end_gateway", DefaultVertexFormat.POSITION),
-					shaderInstance -> rendertypeEndGatewayShader = shaderInstance
-				)
-			);
-			list2.add(
-				Pair.of(
-					new ShaderInstance(resourceProvider, "rendertype_clouds", DefaultVertexFormat.POSITION_COLOR), shaderInstance -> rendertypeCloudsShader = shaderInstance
-				)
-			);
-			list2.add(
-				Pair.of(
-					new ShaderInstance(resourceProvider, "rendertype_lines", DefaultVertexFormat.POSITION_COLOR_NORMAL),
-					shaderInstance -> rendertypeLinesShader = shaderInstance
-				)
-			);
-			list2.add(
-				Pair.of(
-					new ShaderInstance(resourceProvider, "rendertype_crumbling", DefaultVertexFormat.BLOCK), shaderInstance -> rendertypeCrumblingShader = shaderInstance
-				)
-			);
-			list2.add(
-				Pair.of(new ShaderInstance(resourceProvider, "rendertype_gui", DefaultVertexFormat.POSITION_COLOR), shaderInstance -> rendertypeGuiShader = shaderInstance)
-			);
-			list2.add(
-				Pair.of(
-					new ShaderInstance(resourceProvider, "rendertype_gui_overlay", DefaultVertexFormat.POSITION_COLOR),
-					shaderInstance -> rendertypeGuiOverlayShader = shaderInstance
-				)
-			);
-			list2.add(
-				Pair.of(
-					new ShaderInstance(resourceProvider, "rendertype_gui_text_highlight", DefaultVertexFormat.POSITION_COLOR),
-					shaderInstance -> rendertypeGuiTextHighlightShader = shaderInstance
-				)
-			);
-			list2.add(
-				Pair.of(
-					new ShaderInstance(resourceProvider, "rendertype_gui_ghost_recipe_overlay", DefaultVertexFormat.POSITION_COLOR),
-					shaderInstance -> rendertypeGuiGhostRecipeOverlayShader = shaderInstance
-				)
-			);
-			list2.add(
-				Pair.of(
-					new ShaderInstance(resourceProvider, "rendertype_breeze_wind", DefaultVertexFormat.NEW_ENTITY),
-					shaderInstance -> rendertypeBreezeWindShader = shaderInstance
-				)
-			);
-			this.loadBlurEffect(resourceProvider);
-		} catch (IOException var5) {
-			list2.forEach(pair -> ((ShaderInstance)pair.getFirst()).close());
-			throw new RuntimeException("could not reload shaders", var5);
-		}
-
-		this.shutdownShaders();
-		list2.forEach(pair -> {
-			ShaderInstance shaderInstance = (ShaderInstance)pair.getFirst();
-			this.shaders.put(shaderInstance.getName(), shaderInstance);
-			((Consumer)pair.getSecond()).accept(shaderInstance);
-		});
-		this.lightTexture.loadShader(resourceProvider);
-	}
-
-	private void shutdownShaders() {
-		RenderSystem.assertOnRenderThread();
-		this.shaders.values().forEach(ShaderInstance::close);
-		this.shaders.clear();
-	}
-
-	@Nullable
-	public ShaderInstance getShader(@Nullable String string) {
-		return string == null ? null : (ShaderInstance)this.shaders.get(string);
 	}
 
 	public void tick() {
@@ -805,8 +217,8 @@ public class GameRenderer implements AutoCloseable {
 	}
 
 	@Nullable
-	public PostChain currentEffect() {
-		return this.postEffect;
+	public ResourceLocation currentPostEffect() {
+		return this.postEffectId;
 	}
 
 	public void resize(int i, int j) {
@@ -867,7 +279,7 @@ public class GameRenderer implements AutoCloseable {
 			Options options = this.minecraft.options;
 			boolean bl = options.getCameraType().isFirstPerson();
 			float f = options.fovEffectScale().get().floatValue();
-			g = Mth.lerp(f, 1.0F, abstractClientPlayer.getFieldOfViewModifier(bl));
+			g = abstractClientPlayer.getFieldOfViewModifier(bl, f);
 		} else {
 			g = 1.0F;
 		}
@@ -1030,11 +442,14 @@ public class GameRenderer implements AutoCloseable {
 				this.renderLevel(deltaTracker);
 				this.tryTakeScreenshotIfNeeded();
 				this.minecraft.levelRenderer.doEntityOutline();
-				if (this.postEffect != null && this.effectActive) {
+				if (this.postEffectId != null && this.effectActive) {
 					RenderSystem.disableBlend();
 					RenderSystem.disableDepthTest();
 					RenderSystem.resetTextureMatrix();
-					this.postEffect.process(this.minecraft.getMainRenderTarget(), this.resourcePool, deltaTracker);
+					PostChain postChain = this.minecraft.getShaderManager().getPostChain(this.postEffectId, LevelTargetBundle.MAIN_TARGETS);
+					if (postChain != null) {
+						postChain.process(this.minecraft.getMainRenderTarget(), this.resourcePool);
+					}
 				}
 
 				this.minecraft.getMainRenderTarget().bindWrite(true);
@@ -1322,299 +737,5 @@ public class GameRenderer implements AutoCloseable {
 
 	public OverlayTexture overlayTexture() {
 		return this.overlayTexture;
-	}
-
-	@Nullable
-	public static ShaderInstance getPositionShader() {
-		return positionShader;
-	}
-
-	@Nullable
-	public static ShaderInstance getPositionColorShader() {
-		return positionColorShader;
-	}
-
-	@Nullable
-	public static ShaderInstance getPositionTexShader() {
-		return positionTexShader;
-	}
-
-	@Nullable
-	public static ShaderInstance getPositionTexColorShader() {
-		return positionTexColorShader;
-	}
-
-	@Nullable
-	public static ShaderInstance getParticleShader() {
-		return particleShader;
-	}
-
-	@Nullable
-	public static ShaderInstance getPositionColorLightmapShader() {
-		return positionColorLightmapShader;
-	}
-
-	@Nullable
-	public static ShaderInstance getPositionColorTexLightmapShader() {
-		return positionColorTexLightmapShader;
-	}
-
-	@Nullable
-	public static ShaderInstance getRendertypeSolidShader() {
-		return rendertypeSolidShader;
-	}
-
-	@Nullable
-	public static ShaderInstance getRendertypeCutoutMippedShader() {
-		return rendertypeCutoutMippedShader;
-	}
-
-	@Nullable
-	public static ShaderInstance getRendertypeCutoutShader() {
-		return rendertypeCutoutShader;
-	}
-
-	@Nullable
-	public static ShaderInstance getRendertypeTranslucentShader() {
-		return rendertypeTranslucentShader;
-	}
-
-	@Nullable
-	public static ShaderInstance getRendertypeTranslucentMovingBlockShader() {
-		return rendertypeTranslucentMovingBlockShader;
-	}
-
-	@Nullable
-	public static ShaderInstance getRendertypeArmorCutoutNoCullShader() {
-		return rendertypeArmorCutoutNoCullShader;
-	}
-
-	@Nullable
-	public static ShaderInstance getRendertypeEntitySolidShader() {
-		return rendertypeEntitySolidShader;
-	}
-
-	@Nullable
-	public static ShaderInstance getRendertypeEntityCutoutShader() {
-		return rendertypeEntityCutoutShader;
-	}
-
-	@Nullable
-	public static ShaderInstance getRendertypeEntityCutoutNoCullShader() {
-		return rendertypeEntityCutoutNoCullShader;
-	}
-
-	@Nullable
-	public static ShaderInstance getRendertypeEntityCutoutNoCullZOffsetShader() {
-		return rendertypeEntityCutoutNoCullZOffsetShader;
-	}
-
-	@Nullable
-	public static ShaderInstance getRendertypeItemEntityTranslucentCullShader() {
-		return rendertypeItemEntityTranslucentCullShader;
-	}
-
-	@Nullable
-	public static ShaderInstance getRendertypeEntityTranslucentCullShader() {
-		return rendertypeEntityTranslucentCullShader;
-	}
-
-	@Nullable
-	public static ShaderInstance getRendertypeEntityTranslucentShader() {
-		return rendertypeEntityTranslucentShader;
-	}
-
-	@Nullable
-	public static ShaderInstance getRendertypeEntityTranslucentEmissiveShader() {
-		return rendertypeEntityTranslucentEmissiveShader;
-	}
-
-	@Nullable
-	public static ShaderInstance getRendertypeEntitySmoothCutoutShader() {
-		return rendertypeEntitySmoothCutoutShader;
-	}
-
-	@Nullable
-	public static ShaderInstance getRendertypeBeaconBeamShader() {
-		return rendertypeBeaconBeamShader;
-	}
-
-	@Nullable
-	public static ShaderInstance getRendertypeEntityDecalShader() {
-		return rendertypeEntityDecalShader;
-	}
-
-	@Nullable
-	public static ShaderInstance getRendertypeEntityNoOutlineShader() {
-		return rendertypeEntityNoOutlineShader;
-	}
-
-	@Nullable
-	public static ShaderInstance getRendertypeEntityShadowShader() {
-		return rendertypeEntityShadowShader;
-	}
-
-	@Nullable
-	public static ShaderInstance getRendertypeEntityAlphaShader() {
-		return rendertypeEntityAlphaShader;
-	}
-
-	@Nullable
-	public static ShaderInstance getRendertypeEyesShader() {
-		return rendertypeEyesShader;
-	}
-
-	@Nullable
-	public static ShaderInstance getRendertypeEnergySwirlShader() {
-		return rendertypeEnergySwirlShader;
-	}
-
-	@Nullable
-	public static ShaderInstance getRendertypeBreezeWindShader() {
-		return rendertypeBreezeWindShader;
-	}
-
-	@Nullable
-	public static ShaderInstance getRendertypeLeashShader() {
-		return rendertypeLeashShader;
-	}
-
-	@Nullable
-	public static ShaderInstance getRendertypeWaterMaskShader() {
-		return rendertypeWaterMaskShader;
-	}
-
-	@Nullable
-	public static ShaderInstance getRendertypeOutlineShader() {
-		return rendertypeOutlineShader;
-	}
-
-	@Nullable
-	public static ShaderInstance getRendertypeArmorGlintShader() {
-		return rendertypeArmorGlintShader;
-	}
-
-	@Nullable
-	public static ShaderInstance getRendertypeArmorEntityGlintShader() {
-		return rendertypeArmorEntityGlintShader;
-	}
-
-	@Nullable
-	public static ShaderInstance getRendertypeGlintTranslucentShader() {
-		return rendertypeGlintTranslucentShader;
-	}
-
-	@Nullable
-	public static ShaderInstance getRendertypeGlintShader() {
-		return rendertypeGlintShader;
-	}
-
-	@Nullable
-	public static ShaderInstance getRendertypeGlintDirectShader() {
-		return rendertypeGlintDirectShader;
-	}
-
-	@Nullable
-	public static ShaderInstance getRendertypeEntityGlintShader() {
-		return rendertypeEntityGlintShader;
-	}
-
-	@Nullable
-	public static ShaderInstance getRendertypeEntityGlintDirectShader() {
-		return rendertypeEntityGlintDirectShader;
-	}
-
-	@Nullable
-	public static ShaderInstance getRendertypeTextShader() {
-		return rendertypeTextShader;
-	}
-
-	@Nullable
-	public static ShaderInstance getRendertypeTextBackgroundShader() {
-		return rendertypeTextBackgroundShader;
-	}
-
-	@Nullable
-	public static ShaderInstance getRendertypeTextIntensityShader() {
-		return rendertypeTextIntensityShader;
-	}
-
-	@Nullable
-	public static ShaderInstance getRendertypeTextSeeThroughShader() {
-		return rendertypeTextSeeThroughShader;
-	}
-
-	@Nullable
-	public static ShaderInstance getRendertypeTextBackgroundSeeThroughShader() {
-		return rendertypeTextBackgroundSeeThroughShader;
-	}
-
-	@Nullable
-	public static ShaderInstance getRendertypeTextIntensitySeeThroughShader() {
-		return rendertypeTextIntensitySeeThroughShader;
-	}
-
-	@Nullable
-	public static ShaderInstance getRendertypeLightningShader() {
-		return rendertypeLightningShader;
-	}
-
-	@Nullable
-	public static ShaderInstance getRendertypeTripwireShader() {
-		return rendertypeTripwireShader;
-	}
-
-	@Nullable
-	public static ShaderInstance getRendertypeEndPortalShader() {
-		return rendertypeEndPortalShader;
-	}
-
-	@Nullable
-	public static ShaderInstance getRendertypeEndGatewayShader() {
-		return rendertypeEndGatewayShader;
-	}
-
-	@Nullable
-	public static ShaderInstance getRendertypeCloudsShader() {
-		return rendertypeCloudsShader;
-	}
-
-	@Nullable
-	public static ShaderInstance getRendertypeLinesShader() {
-		return rendertypeLinesShader;
-	}
-
-	@Nullable
-	public static ShaderInstance getRendertypeCrumblingShader() {
-		return rendertypeCrumblingShader;
-	}
-
-	@Nullable
-	public static ShaderInstance getRendertypeGuiShader() {
-		return rendertypeGuiShader;
-	}
-
-	@Nullable
-	public static ShaderInstance getRendertypeGuiOverlayShader() {
-		return rendertypeGuiOverlayShader;
-	}
-
-	@Nullable
-	public static ShaderInstance getRendertypeGuiTextHighlightShader() {
-		return rendertypeGuiTextHighlightShader;
-	}
-
-	@Nullable
-	public static ShaderInstance getRendertypeGuiGhostRecipeOverlayShader() {
-		return rendertypeGuiGhostRecipeOverlayShader;
-	}
-
-	@Environment(EnvType.CLIENT)
-	public static record ResourceCache(ResourceProvider original, Map<ResourceLocation, Resource> cache) implements ResourceProvider {
-		@Override
-		public Optional<Resource> getResource(ResourceLocation resourceLocation) {
-			Resource resource = (Resource)this.cache.get(resourceLocation);
-			return resource != null ? Optional.of(resource) : this.original.getResource(resourceLocation);
-		}
 	}
 }

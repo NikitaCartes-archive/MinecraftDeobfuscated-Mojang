@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.StringWriter;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -21,6 +22,10 @@ import java.util.Map.Entry;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import net.minecraft.CrashReport;
+import net.minecraft.CrashReportCategory;
+import net.minecraft.CrashReportDetail;
+import net.minecraft.ReportedException;
 import net.minecraft.Util;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.MappedRegistry;
@@ -69,6 +74,7 @@ import org.slf4j.Logger;
 
 public class RegistryDataLoader {
 	private static final Logger LOGGER = LogUtils.getLogger();
+	private static final Comparator<ResourceKey<?>> ERROR_KEY_COMPARATOR = Comparator.comparing(ResourceKey::registry).thenComparing(ResourceKey::location);
 	private static final RegistrationInfo NETWORK_REGISTRATION_INFO = new RegistrationInfo(Optional.empty(), Lifecycle.experimental());
 	private static final Function<Optional<KnownPack>, RegistrationInfo> REGISTRATION_INFO_CACHE = Util.memoize(
 		(Function<Optional<KnownPack>, RegistrationInfo>)(optional -> {
@@ -160,8 +166,7 @@ public class RegistryDataLoader {
 			}
 		});
 		if (!map.isEmpty()) {
-			logErrors(map);
-			throw new IllegalStateException("Failed to load registries due to above errors");
+			throw logErrors(map);
 		} else {
 			return new RegistryAccess.ImmutableRegistryAccess(list3.stream().map(RegistryDataLoader.Loader::registry).toList()).freeze();
 		}
@@ -187,7 +192,12 @@ public class RegistryDataLoader {
 		return new RegistryOps.RegistryInfo<>(registryLookup, registryLookup, registryLookup.registryLifecycle());
 	}
 
-	private static void logErrors(Map<ResourceKey<?>, Exception> map) {
+	private static ReportedException logErrors(Map<ResourceKey<?>, Exception> map) {
+		printFullDetailsToLog(map);
+		return createReportWithBriefInfo(map);
+	}
+
+	private static void printFullDetailsToLog(Map<ResourceKey<?>, Exception> map) {
 		StringWriter stringWriter = new StringWriter();
 		PrintWriter printWriter = new PrintWriter(stringWriter);
 		Map<ResourceLocation, Map<ResourceLocation, Exception>> map2 = (Map<ResourceLocation, Map<ResourceLocation, Exception>>)map.entrySet()
@@ -206,6 +216,30 @@ public class RegistryDataLoader {
 		});
 		printWriter.flush();
 		LOGGER.error("Registry loading errors:\n{}", stringWriter);
+	}
+
+	private static ReportedException createReportWithBriefInfo(Map<ResourceKey<?>, Exception> map) {
+		CrashReport crashReport = CrashReport.forThrowable(new IllegalStateException("Failed to load registries due to errors"), "Registry Loading");
+		CrashReportCategory crashReportCategory = crashReport.addCategory("Loading info");
+		crashReportCategory.setDetail(
+			"Errors",
+			(CrashReportDetail<String>)(() -> {
+				StringBuilder stringBuilder = new StringBuilder();
+				map.entrySet()
+					.stream()
+					.sorted(Entry.comparingByKey(ERROR_KEY_COMPARATOR))
+					.forEach(
+						entry -> stringBuilder.append("\n\t\t")
+								.append(((ResourceKey)entry.getKey()).registry())
+								.append("/")
+								.append(((ResourceKey)entry.getKey()).location())
+								.append(": ")
+								.append(((Exception)entry.getValue()).getMessage())
+					);
+				return stringBuilder.toString();
+			})
+		);
+		return new ReportedException(crashReport);
 	}
 
 	private static <E> void loadElementFromResource(

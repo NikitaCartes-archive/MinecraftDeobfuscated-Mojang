@@ -1,6 +1,7 @@
 package net.minecraft.client.multiplayer;
 
 import com.mojang.logging.LogUtils;
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -23,6 +24,7 @@ import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.chunk.ChunkSource;
 import net.minecraft.world.level.chunk.EmptyLevelChunk;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 import org.slf4j.Logger;
@@ -63,7 +65,7 @@ public class ClientChunkCache extends ChunkSource {
 			int i = this.storage.getIndex(chunkPos.x, chunkPos.z);
 			LevelChunk levelChunk = this.storage.getChunk(i);
 			if (isValidChunk(levelChunk, chunkPos.x, chunkPos.z)) {
-				this.storage.replace(i, levelChunk, null);
+				this.storage.drop(i, levelChunk);
 			}
 		}
 	}
@@ -173,9 +175,19 @@ public class ClientChunkCache extends ChunkSource {
 		Minecraft.getInstance().levelRenderer.setSectionDirty(sectionPos.x(), sectionPos.y(), sectionPos.z());
 	}
 
+	public LongOpenHashSet getLoadedEmptySections() {
+		return this.storage.loadedEmptySections;
+	}
+
+	@Override
+	public void onSectionEmptinessChanged(int i, int j, int k, boolean bl) {
+		this.storage.onSectionEmptinessChanged(i, j, k, bl);
+	}
+
 	@Environment(EnvType.CLIENT)
 	final class Storage {
 		final AtomicReferenceArray<LevelChunk> chunks;
+		final LongOpenHashSet loadedEmptySections = new LongOpenHashSet();
 		final int chunkRadius;
 		private final int viewRange;
 		volatile int viewCenterX;
@@ -192,25 +204,59 @@ public class ClientChunkCache extends ChunkSource {
 			return Math.floorMod(j, this.viewRange) * this.viewRange + Math.floorMod(i, this.viewRange);
 		}
 
-		protected void replace(int i, @Nullable LevelChunk levelChunk) {
+		void replace(int i, @Nullable LevelChunk levelChunk) {
 			LevelChunk levelChunk2 = (LevelChunk)this.chunks.getAndSet(i, levelChunk);
 			if (levelChunk2 != null) {
 				this.chunkCount--;
+				this.dropEmptySections(levelChunk2);
 				ClientChunkCache.this.level.unload(levelChunk2);
 			}
 
 			if (levelChunk != null) {
 				this.chunkCount++;
+				this.addEmptySections(levelChunk);
 			}
 		}
 
-		protected LevelChunk replace(int i, LevelChunk levelChunk, @Nullable LevelChunk levelChunk2) {
-			if (this.chunks.compareAndSet(i, levelChunk, levelChunk2) && levelChunk2 == null) {
+		void drop(int i, LevelChunk levelChunk) {
+			if (this.chunks.compareAndSet(i, levelChunk, null)) {
 				this.chunkCount--;
+				this.dropEmptySections(levelChunk);
 			}
 
 			ClientChunkCache.this.level.unload(levelChunk);
-			return levelChunk;
+		}
+
+		public void onSectionEmptinessChanged(int i, int j, int k, boolean bl) {
+			if (this.inRange(i, k)) {
+				long l = SectionPos.asLong(i, j, k);
+				if (bl) {
+					this.loadedEmptySections.add(l);
+				} else if (this.loadedEmptySections.remove(l)) {
+					ClientChunkCache.this.level.onSectionBecomingNonEmpty(l);
+				}
+			}
+		}
+
+		private void dropEmptySections(LevelChunk levelChunk) {
+			LevelChunkSection[] levelChunkSections = levelChunk.getSections();
+
+			for (int i = 0; i < levelChunkSections.length; i++) {
+				ChunkPos chunkPos = levelChunk.getPos();
+				this.loadedEmptySections.remove(SectionPos.asLong(chunkPos.x, levelChunk.getSectionYFromSectionIndex(i), chunkPos.z));
+			}
+		}
+
+		private void addEmptySections(LevelChunk levelChunk) {
+			LevelChunkSection[] levelChunkSections = levelChunk.getSections();
+
+			for (int i = 0; i < levelChunkSections.length; i++) {
+				LevelChunkSection levelChunkSection = levelChunkSections[i];
+				if (levelChunkSection.hasOnlyAir()) {
+					ChunkPos chunkPos = levelChunk.getPos();
+					this.loadedEmptySections.add(SectionPos.asLong(chunkPos.x, levelChunk.getSectionYFromSectionIndex(i), chunkPos.z));
+				}
+			}
 		}
 
 		boolean inRange(int i, int j) {

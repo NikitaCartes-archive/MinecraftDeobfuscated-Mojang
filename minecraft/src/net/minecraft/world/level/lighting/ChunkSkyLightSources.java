@@ -24,8 +24,8 @@ public class ChunkSkyLightSources {
 	private final BlockPos.MutableBlockPos mutablePos2 = new BlockPos.MutableBlockPos();
 
 	public ChunkSkyLightSources(LevelHeightAccessor levelHeightAccessor) {
-		this.minY = levelHeightAccessor.getMinBuildHeight() - 1;
-		int i = levelHeightAccessor.getMaxBuildHeight();
+		this.minY = levelHeightAccessor.getMinY() - 1;
+		int i = levelHeightAccessor.getMaxY() + 1;
 		int j = Mth.ceillog2(i - this.minY + 1);
 		this.heightmap = new SimpleBitStorage(j, 256);
 	}

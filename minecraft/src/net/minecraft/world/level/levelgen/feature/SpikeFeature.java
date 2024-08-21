@@ -71,7 +71,7 @@ public class SpikeFeature extends Feature<SpikeConfiguration> {
 		int i = endSpike.getRadius();
 
 		for (BlockPos blockPos : BlockPos.betweenClosed(
-			new BlockPos(endSpike.getCenterX() - i, serverLevelAccessor.getMinBuildHeight(), endSpike.getCenterZ() - i),
+			new BlockPos(endSpike.getCenterX() - i, serverLevelAccessor.getMinY(), endSpike.getCenterZ() - i),
 			new BlockPos(endSpike.getCenterX() + i, endSpike.getHeight() + 10, endSpike.getCenterZ() + i)
 		)) {
 			if (blockPos.distToLowCornerSqr((double)endSpike.getCenterX(), (double)blockPos.getY(), (double)endSpike.getCenterZ()) <= (double)(i * i + 1)

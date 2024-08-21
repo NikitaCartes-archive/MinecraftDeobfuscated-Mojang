@@ -144,9 +144,7 @@ public final class Biome {
 		if (this.warmEnoughToRain(blockPos, levelReader.getSeaLevel())) {
 			return false;
 		} else {
-			if (blockPos.getY() >= levelReader.getMinBuildHeight()
-				&& blockPos.getY() < levelReader.getMaxBuildHeight()
-				&& levelReader.getBrightness(LightLayer.BLOCK, blockPos) < 10) {
+			if (levelReader.isInsideBuildHeight(blockPos.getY()) && levelReader.getBrightness(LightLayer.BLOCK, blockPos) < 10) {
 				BlockState blockState = levelReader.getBlockState(blockPos);
 				FluidState fluidState = levelReader.getFluidState(blockPos);
 				if (fluidState.getType() == Fluids.WATER && blockState.getBlock() instanceof LiquidBlock) {
@@ -184,9 +182,7 @@ public final class Biome {
 		if (this.warmEnoughToRain(blockPos, levelReader.getSeaLevel())) {
 			return false;
 		} else {
-			if (blockPos.getY() >= levelReader.getMinBuildHeight()
-				&& blockPos.getY() < levelReader.getMaxBuildHeight()
-				&& levelReader.getBrightness(LightLayer.BLOCK, blockPos) < 10) {
+			if (levelReader.isInsideBuildHeight(blockPos.getY()) && levelReader.getBrightness(LightLayer.BLOCK, blockPos) < 10) {
 				BlockState blockState = levelReader.getBlockState(blockPos);
 				if ((blockState.isAir() || blockState.is(Blocks.SNOW)) && Blocks.SNOW.defaultBlockState().canSurvive(levelReader, blockPos)) {
 					return true;

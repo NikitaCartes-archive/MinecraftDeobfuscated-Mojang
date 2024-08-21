@@ -53,7 +53,7 @@ public class WoodlandMansionStructure extends Structure {
 		PiecesContainer piecesContainer
 	) {
 		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
-		int i = worldGenLevel.getMinBuildHeight();
+		int i = worldGenLevel.getMinY();
 		BoundingBox boundingBox2 = piecesContainer.calculateBoundingBox();
 		int j = boundingBox2.minY();
 

@@ -22,6 +22,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.player.PlayerModelPart;
 import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
@@ -166,9 +167,9 @@ public class ItemInHandRenderer {
 		poseStack.translate(f * 0.3F, -1.1F, 0.45F);
 		ResourceLocation resourceLocation = this.minecraft.player.getSkin().texture();
 		if (humanoidArm == HumanoidArm.RIGHT) {
-			playerRenderer.renderRightHand(poseStack, multiBufferSource, i, resourceLocation);
+			playerRenderer.renderRightHand(poseStack, multiBufferSource, i, resourceLocation, this.minecraft.player.isModelPartShown(PlayerModelPart.RIGHT_SLEEVE));
 		} else {
-			playerRenderer.renderLeftHand(poseStack, multiBufferSource, i, resourceLocation);
+			playerRenderer.renderLeftHand(poseStack, multiBufferSource, i, resourceLocation, this.minecraft.player.isModelPartShown(PlayerModelPart.LEFT_SLEEVE));
 		}
 
 		poseStack.popPose();
@@ -265,9 +266,9 @@ public class ItemInHandRenderer {
 		PlayerRenderer playerRenderer = (PlayerRenderer)this.entityRenderDispatcher.<AbstractClientPlayer>getRenderer(abstractClientPlayer);
 		ResourceLocation resourceLocation = abstractClientPlayer.getSkin().texture();
 		if (bl) {
-			playerRenderer.renderRightHand(poseStack, multiBufferSource, i, resourceLocation);
+			playerRenderer.renderRightHand(poseStack, multiBufferSource, i, resourceLocation, abstractClientPlayer.isModelPartShown(PlayerModelPart.RIGHT_SLEEVE));
 		} else {
-			playerRenderer.renderLeftHand(poseStack, multiBufferSource, i, resourceLocation);
+			playerRenderer.renderLeftHand(poseStack, multiBufferSource, i, resourceLocation, abstractClientPlayer.isModelPartShown(PlayerModelPart.LEFT_SLEEVE));
 		}
 	}
 

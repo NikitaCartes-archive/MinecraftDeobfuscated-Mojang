@@ -287,11 +287,11 @@ public class RedStoneWireBlock extends Block {
 		return blockState.isFaceSturdy(blockGetter, blockPos, Direction.UP) || blockState.is(Blocks.HOPPER);
 	}
 
-	private void updatePowerStrength(Level level, BlockPos blockPos, BlockState blockState, @Nullable Orientation orientation) {
+	private void updatePowerStrength(Level level, BlockPos blockPos, BlockState blockState, @Nullable Orientation orientation, boolean bl) {
 		if (useExperimentalEvaluator(level)) {
-			new ExperimentalRedstoneWireEvaluator(this).updatePowerStrength(level, blockPos, blockState, orientation);
+			new ExperimentalRedstoneWireEvaluator(this).updatePowerStrength(level, blockPos, blockState, orientation, bl);
 		} else {
-			this.evaluator.updatePowerStrength(level, blockPos, blockState, orientation);
+			this.evaluator.updatePowerStrength(level, blockPos, blockState, orientation, bl);
 		}
 	}
 
@@ -315,7 +315,7 @@ public class RedStoneWireBlock extends Block {
 	@Override
 	protected void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
 		if (!blockState2.is(blockState.getBlock()) && !level.isClientSide) {
-			this.updatePowerStrength(level, blockPos, blockState, null);
+			this.updatePowerStrength(level, blockPos, blockState, null, true);
 
 			for (Direction direction : Direction.Plane.VERTICAL) {
 				level.updateNeighborsAt(blockPos.relative(direction), this);
@@ -334,7 +334,7 @@ public class RedStoneWireBlock extends Block {
 					level.updateNeighborsAt(blockPos.relative(direction), this);
 				}
 
-				this.updatePowerStrength(level, blockPos, blockState, null);
+				this.updatePowerStrength(level, blockPos, blockState, null, false);
 				this.updateNeighborsOfNeighboringWires(level, blockPos);
 			}
 		}
@@ -360,7 +360,7 @@ public class RedStoneWireBlock extends Block {
 		if (!level.isClientSide) {
 			if (block != this || !useExperimentalEvaluator(level)) {
 				if (blockState.canSurvive(level, blockPos)) {
-					this.updatePowerStrength(level, blockPos, blockState, orientation);
+					this.updatePowerStrength(level, blockPos, blockState, orientation, false);
 				} else {
 					dropResources(blockState, level, blockPos);
 					level.removeBlock(blockPos, false);
@@ -518,7 +518,7 @@ public class RedStoneWireBlock extends Block {
 	}
 
 	private void updatesOnShapeChange(Level level, BlockPos blockPos, BlockState blockState, BlockState blockState2) {
-		Orientation orientation = ExperimentalRedstoneUtils.randomOrientation(level, null, Direction.UP);
+		Orientation orientation = ExperimentalRedstoneUtils.initialOrientation(level, null, Direction.UP);
 
 		for (Direction direction : Direction.Plane.HORIZONTAL) {
 			BlockPos blockPos2 = blockPos.relative(direction);

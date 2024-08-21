@@ -21,10 +21,7 @@ public class HoverRandomPos {
 						return null;
 					} else {
 						blockPos2 = RandomPos.moveUpToAboveSolid(
-							blockPos2,
-							pathfinderMob.getRandom().nextInt(k - l + 1) + l,
-							pathfinderMob.level().getMaxBuildHeight(),
-							blockPosx -> GoalUtils.isSolid(pathfinderMob, blockPosx)
+							blockPos2, pathfinderMob.getRandom().nextInt(k - l + 1) + l, pathfinderMob.level().getMaxY(), blockPosx -> GoalUtils.isSolid(pathfinderMob, blockPosx)
 						);
 						return !GoalUtils.isWater(pathfinderMob, blockPos2) && !GoalUtils.hasMalus(pathfinderMob, blockPos2) ? blockPos2 : null;
 					}

@@ -213,13 +213,13 @@ public class SectionStorage<R, P> implements AutoCloseable {
 
 	private void unpackChunk(ChunkPos chunkPos, @Nullable SectionStorage.PackedChunk<P> packedChunk) {
 		if (packedChunk == null) {
-			for (int i = this.levelHeightAccessor.getMinSection(); i < this.levelHeightAccessor.getMaxSection(); i++) {
+			for (int i = this.levelHeightAccessor.getMinSectionY(); i <= this.levelHeightAccessor.getMaxSectionY(); i++) {
 				this.storage.put(getKey(chunkPos, i), Optional.empty());
 			}
 		} else {
 			boolean bl = packedChunk.versionChanged();
 
-			for (int j = this.levelHeightAccessor.getMinSection(); j < this.levelHeightAccessor.getMaxSection(); j++) {
+			for (int j = this.levelHeightAccessor.getMinSectionY(); j <= this.levelHeightAccessor.getMaxSectionY(); j++) {
 				long l = getKey(chunkPos, j);
 				Optional<R> optional = Optional.ofNullable(packedChunk.sectionsByY.get(j)).map(object -> this.unpacker.apply(object, (Runnable)() -> this.setDirty(l)));
 				this.storage.put(l, optional);
@@ -250,7 +250,7 @@ public class SectionStorage<R, P> implements AutoCloseable {
 	private <T> Dynamic<T> writeChunk(ChunkPos chunkPos, DynamicOps<T> dynamicOps) {
 		Map<T, T> map = Maps.<T, T>newHashMap();
 
-		for (int i = this.levelHeightAccessor.getMinSection(); i < this.levelHeightAccessor.getMaxSection(); i++) {
+		for (int i = this.levelHeightAccessor.getMinSectionY(); i <= this.levelHeightAccessor.getMaxSectionY(); i++) {
 			long l = getKey(chunkPos, i);
 			Optional<R> optional = this.storage.get(l);
 			if (optional != null && !optional.isEmpty()) {
@@ -316,7 +316,7 @@ public class SectionStorage<R, P> implements AutoCloseable {
 			OptionalDynamic<Tag> optionalDynamic = dynamic2.get("Sections");
 			Int2ObjectMap<T> int2ObjectMap = new Int2ObjectOpenHashMap<>();
 
-			for (int k = levelHeightAccessor.getMinSection(); k < levelHeightAccessor.getMaxSection(); k++) {
+			for (int k = levelHeightAccessor.getMinSectionY(); k <= levelHeightAccessor.getMaxSectionY(); k++) {
 				Optional<T> optional = optionalDynamic.get(Integer.toString(k))
 					.result()
 					.flatMap(dynamicx -> codec.parse(dynamicx).resultOrPartial(SectionStorage.LOGGER::error));

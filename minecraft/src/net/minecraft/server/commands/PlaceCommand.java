@@ -293,10 +293,10 @@ public class PlaceCommand {
 							serverLevel.getRandom(),
 							new BoundingBox(
 								chunkPosx.getMinBlockX(),
-								serverLevel.getMinBuildHeight(),
+								serverLevel.getMinY(),
 								chunkPosx.getMinBlockZ(),
 								chunkPosx.getMaxBlockX(),
-								serverLevel.getMaxBuildHeight(),
+								serverLevel.getMaxY() + 1,
 								chunkPosx.getMaxBlockZ()
 							),
 							chunkPosx

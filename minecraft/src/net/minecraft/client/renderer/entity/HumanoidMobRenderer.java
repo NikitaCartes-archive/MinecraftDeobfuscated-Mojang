@@ -39,7 +39,7 @@ public abstract class HumanoidMobRenderer<T extends Mob, S extends HumanoidRende
 	public static void extractHumanoidRenderState(LivingEntity livingEntity, HumanoidRenderState humanoidRenderState, float f) {
 		humanoidRenderState.isCrouching = livingEntity.isCrouching();
 		humanoidRenderState.isFallFlying = livingEntity.isFallFlying();
-		humanoidRenderState.isSwimming = livingEntity.isSwimming();
+		humanoidRenderState.isVisuallySwimming = livingEntity.isVisuallySwimming();
 		humanoidRenderState.isPassenger = livingEntity.isPassenger();
 		humanoidRenderState.speedValue = 1.0F;
 		if (humanoidRenderState.isFallFlying) {

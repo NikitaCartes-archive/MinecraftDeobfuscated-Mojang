@@ -42,24 +42,6 @@ public class TextureManager implements PreparableReloadListener, Tickable, AutoC
 		this.resourceManager = resourceManager;
 	}
 
-	public void bindForSetup(ResourceLocation resourceLocation) {
-		if (!RenderSystem.isOnRenderThread()) {
-			RenderSystem.recordRenderCall(() -> this._bind(resourceLocation));
-		} else {
-			this._bind(resourceLocation);
-		}
-	}
-
-	private void _bind(ResourceLocation resourceLocation) {
-		AbstractTexture abstractTexture = (AbstractTexture)this.byPath.get(resourceLocation);
-		if (abstractTexture == null) {
-			abstractTexture = new SimpleTexture(resourceLocation);
-			this.register(resourceLocation, abstractTexture);
-		}
-
-		abstractTexture.bind();
-	}
-
 	public void register(ResourceLocation resourceLocation, AbstractTexture abstractTexture) {
 		abstractTexture = this.loadTexture(resourceLocation, abstractTexture);
 		AbstractTexture abstractTexture2 = (AbstractTexture)this.byPath.put(resourceLocation, abstractTexture);

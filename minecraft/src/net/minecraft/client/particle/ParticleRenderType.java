@@ -8,7 +8,7 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.CoreShaders;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureManager;
 
@@ -20,7 +20,7 @@ public interface ParticleRenderType {
 			RenderSystem.enableBlend();
 			RenderSystem.defaultBlendFunc();
 			RenderSystem.depthMask(true);
-			RenderSystem.setShader(GameRenderer::getParticleShader);
+			RenderSystem.setShader(CoreShaders.PARTICLE);
 			RenderSystem.setShaderTexture(0, TextureAtlas.LOCATION_BLOCKS);
 			return tesselator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.PARTICLE);
 		}
@@ -34,7 +34,7 @@ public interface ParticleRenderType {
 		public BufferBuilder begin(Tesselator tesselator, TextureManager textureManager) {
 			RenderSystem.disableBlend();
 			RenderSystem.depthMask(true);
-			RenderSystem.setShader(GameRenderer::getParticleShader);
+			RenderSystem.setShader(CoreShaders.PARTICLE);
 			RenderSystem.setShaderTexture(0, TextureAtlas.LOCATION_PARTICLES);
 			return tesselator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.PARTICLE);
 		}
@@ -47,7 +47,7 @@ public interface ParticleRenderType {
 		@Override
 		public BufferBuilder begin(Tesselator tesselator, TextureManager textureManager) {
 			RenderSystem.depthMask(true);
-			RenderSystem.setShader(GameRenderer::getParticleShader);
+			RenderSystem.setShader(CoreShaders.PARTICLE);
 			RenderSystem.setShaderTexture(0, TextureAtlas.LOCATION_PARTICLES);
 			RenderSystem.enableBlend();
 			RenderSystem.defaultBlendFunc();

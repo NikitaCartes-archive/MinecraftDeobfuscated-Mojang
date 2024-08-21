@@ -855,15 +855,13 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 		return this.spawn(serverLevel, consumer, blockPos, entitySpawnReason, bl, bl2);
 	}
 
-	public static <T extends Entity> Consumer<T> createDefaultStackConfig(ServerLevel serverLevel, ItemStack itemStack, @Nullable Player player) {
+	public static <T extends Entity> Consumer<T> createDefaultStackConfig(Level level, ItemStack itemStack, @Nullable Player player) {
 		return appendDefaultStackConfig(entity -> {
-		}, serverLevel, itemStack, player);
+		}, level, itemStack, player);
 	}
 
-	public static <T extends Entity> Consumer<T> appendDefaultStackConfig(
-		Consumer<T> consumer, ServerLevel serverLevel, ItemStack itemStack, @Nullable Player player
-	) {
-		return appendCustomEntityStackConfig(appendCustomNameConfig(consumer, itemStack), serverLevel, itemStack, player);
+	public static <T extends Entity> Consumer<T> appendDefaultStackConfig(Consumer<T> consumer, Level level, ItemStack itemStack, @Nullable Player player) {
+		return appendCustomEntityStackConfig(appendCustomNameConfig(consumer, itemStack), level, itemStack, player);
 	}
 
 	public static <T extends Entity> Consumer<T> appendCustomNameConfig(Consumer<T> consumer, ItemStack itemStack) {
@@ -871,11 +869,9 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 		return component != null ? consumer.andThen(entity -> entity.setCustomName(component)) : consumer;
 	}
 
-	public static <T extends Entity> Consumer<T> appendCustomEntityStackConfig(
-		Consumer<T> consumer, ServerLevel serverLevel, ItemStack itemStack, @Nullable Player player
-	) {
+	public static <T extends Entity> Consumer<T> appendCustomEntityStackConfig(Consumer<T> consumer, Level level, ItemStack itemStack, @Nullable Player player) {
 		CustomData customData = itemStack.getOrDefault(DataComponents.ENTITY_DATA, CustomData.EMPTY);
-		return !customData.isEmpty() ? consumer.andThen(entity -> updateCustomEntityTag(serverLevel, player, entity, customData)) : consumer;
+		return !customData.isEmpty() ? consumer.andThen(entity -> updateCustomEntityTag(level, player, entity, customData)) : consumer;
 	}
 
 	@Nullable

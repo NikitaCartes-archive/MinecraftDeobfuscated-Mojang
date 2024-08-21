@@ -118,15 +118,15 @@ public class MapItem extends ComplexItem {
 											mutableBlockPos.set(r + u, 0, s + v);
 											int w = levelChunk.getHeight(Heightmap.Types.WORLD_SURFACE, mutableBlockPos.getX(), mutableBlockPos.getZ()) + 1;
 											BlockState blockState;
-											if (w <= level.getMinBuildHeight() + 1) {
+											if (w <= level.getMinY() + 1) {
 												blockState = Blocks.BEDROCK.defaultBlockState();
 											} else {
 												do {
 													mutableBlockPos.setY(--w);
 													blockState = levelChunk.getBlockState(mutableBlockPos);
-												} while (blockState.getMapColor(level, mutableBlockPos) == MapColor.NONE && w > level.getMinBuildHeight());
+												} while (blockState.getMapColor(level, mutableBlockPos) == MapColor.NONE && w > level.getMinY());
 
-												if (w > level.getMinBuildHeight() && !blockState.getFluidState().isEmpty()) {
+												if (w > level.getMinY() && !blockState.getFluidState().isEmpty()) {
 													int x = w - 1;
 													mutableBlockPos2.set(mutableBlockPos);
 
@@ -135,7 +135,7 @@ public class MapItem extends ComplexItem {
 														mutableBlockPos2.setY(x--);
 														blockState2 = levelChunk.getBlockState(mutableBlockPos2);
 														t++;
-													} while (x > level.getMinBuildHeight() && !blockState2.getFluidState().isEmpty());
+													} while (x > level.getMinY() && !blockState2.getFluidState().isEmpty());
 
 													blockState = this.getCorrectStateForFluidBlock(level, blockState, mutableBlockPos);
 												}

@@ -7,7 +7,7 @@ import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.client.resources.PlayerSkin;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.animal.Parrot;
-import net.minecraft.world.item.UseAnim;
+import net.minecraft.world.item.ItemUseAnimation;
 
 @Environment(EnvType.CLIENT)
 public class PlayerRenderState extends HumanoidRenderState {
@@ -26,7 +26,6 @@ public class PlayerRenderState extends HumanoidRenderState {
 	public boolean showLeftSleeve = true;
 	public boolean showRightSleeve = true;
 	public boolean showCape = true;
-	public boolean isVisuallySwimming;
 	public float fallFlyingTimeInTicks;
 	public boolean shouldApplyFlyingYRot;
 	public float flyingYRot;
@@ -46,7 +45,7 @@ public class PlayerRenderState extends HumanoidRenderState {
 	public static class HandState {
 		public boolean isEmpty = true;
 		@Nullable
-		public UseAnim useAnimation;
+		public ItemUseAnimation useAnimation;
 		public boolean holdsChargedCrossbow;
 	}
 }

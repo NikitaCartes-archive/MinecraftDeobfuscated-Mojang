@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.core.Vec3i;
 import net.minecraft.util.ARGB;
@@ -66,39 +67,40 @@ public interface VertexConsumer {
 		int k = 8;
 		int l = js.length / 8;
 		int m = (int)(i * 255.0F);
+		int n = bakedQuad.getLightEmission();
 
 		try (MemoryStack memoryStack = MemoryStack.stackPush()) {
 			ByteBuffer byteBuffer = memoryStack.malloc(DefaultVertexFormat.BLOCK.getVertexSize());
 			IntBuffer intBuffer = byteBuffer.asIntBuffer();
 
-			for (int n = 0; n < l; n++) {
+			for (int o = 0; o < l; o++) {
 				intBuffer.clear();
-				intBuffer.put(js, n * 8, 8);
-				float o = byteBuffer.getFloat(0);
-				float p = byteBuffer.getFloat(4);
-				float q = byteBuffer.getFloat(8);
-				float u;
+				intBuffer.put(js, o * 8, 8);
+				float p = byteBuffer.getFloat(0);
+				float q = byteBuffer.getFloat(4);
+				float r = byteBuffer.getFloat(8);
 				float v;
 				float w;
+				float x;
 				if (bl) {
-					float r = (float)(byteBuffer.get(12) & 255);
-					float s = (float)(byteBuffer.get(13) & 255);
-					float t = (float)(byteBuffer.get(14) & 255);
-					u = r * fs[n] * f;
-					v = s * fs[n] * g;
-					w = t * fs[n] * h;
+					float s = (float)(byteBuffer.get(12) & 255);
+					float t = (float)(byteBuffer.get(13) & 255);
+					float u = (float)(byteBuffer.get(14) & 255);
+					v = s * fs[o] * f;
+					w = t * fs[o] * g;
+					x = u * fs[o] * h;
 				} else {
-					u = fs[n] * f * 255.0F;
-					v = fs[n] * g * 255.0F;
-					w = fs[n] * h * 255.0F;
+					v = fs[o] * f * 255.0F;
+					w = fs[o] * g * 255.0F;
+					x = fs[o] * h * 255.0F;
 				}
 
-				int x = ARGB.color(m, (int)u, (int)v, (int)w);
-				int y = is[n];
-				float t = byteBuffer.getFloat(16);
-				float z = byteBuffer.getFloat(20);
-				Vector3f vector3f2 = matrix4f.transformPosition(o, p, q, new Vector3f());
-				this.addVertex(vector3f2.x(), vector3f2.y(), vector3f2.z(), x, t, z, j, y, vector3f.x(), vector3f.y(), vector3f.z());
+				int y = ARGB.color(m, (int)v, (int)w, (int)x);
+				int z = LightTexture.lightCoordsWithEmission(is[o], n);
+				float u = byteBuffer.getFloat(16);
+				float aa = byteBuffer.getFloat(20);
+				Vector3f vector3f2 = matrix4f.transformPosition(p, q, r, new Vector3f());
+				this.addVertex(vector3f2.x(), vector3f2.y(), vector3f2.z(), y, u, aa, j, z, vector3f.x(), vector3f.y(), vector3f.z());
 			}
 		}
 	}

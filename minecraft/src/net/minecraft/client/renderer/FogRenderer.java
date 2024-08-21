@@ -139,7 +139,7 @@ public class FogRenderer {
 			biomeChangedTime = -1L;
 		}
 
-		float xx = ((float)camera.getPosition().y - (float)clientLevel.getMinBuildHeight()) * clientLevel.getLevelData().getClearColorScale();
+		float xx = ((float)camera.getPosition().y - (float)clientLevel.getMinY()) * clientLevel.getLevelData().getClearColorScale();
 		FogRenderer.MobEffectFogFunction mobEffectFogFunction = getPriorityFogFunction(entity, f);
 		if (mobEffectFogFunction != null) {
 			LivingEntity livingEntity = (LivingEntity)entity;

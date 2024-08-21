@@ -631,8 +631,9 @@ public class FriendlyByteBuf extends ByteBuf {
 		float g = this.readFloat();
 		float h = this.readFloat();
 		boolean bl = this.readBoolean();
+		boolean bl2 = this.readBoolean();
 		return new BlockHitResult(
-			new Vec3((double)blockPos.getX() + (double)f, (double)blockPos.getY() + (double)g, (double)blockPos.getZ() + (double)h), direction, blockPos, bl
+			new Vec3((double)blockPos.getX() + (double)f, (double)blockPos.getY() + (double)g, (double)blockPos.getZ() + (double)h), direction, blockPos, bl, bl2
 		);
 	}
 
@@ -645,6 +646,7 @@ public class FriendlyByteBuf extends ByteBuf {
 		this.writeFloat((float)(vec3.y - (double)blockPos.getY()));
 		this.writeFloat((float)(vec3.z - (double)blockPos.getZ()));
 		this.writeBoolean(blockHitResult.isInside());
+		this.writeBoolean(blockHitResult.isWorldBorderHit());
 	}
 
 	public BitSet readBitSet() {

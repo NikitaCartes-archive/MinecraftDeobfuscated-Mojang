@@ -23,13 +23,19 @@ import net.minecraft.util.ARGB;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffectUtil;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.Consumable;
+import net.minecraft.world.item.component.ConsumableListener;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
+import net.minecraft.world.level.Level;
 
-public record PotionContents(Optional<Holder<Potion>> potion, Optional<Integer> customColor, List<MobEffectInstance> customEffects) {
+public record PotionContents(Optional<Holder<Potion>> potion, Optional<Integer> customColor, List<MobEffectInstance> customEffects)
+	implements ConsumableListener {
 	public static final PotionContents EMPTY = new PotionContents(Optional.empty(), Optional.empty(), List.of());
 	private static final Component NO_EFFECT = Component.translatable("effect.none").withStyle(ChatFormatting.GRAY);
 	private static final int BASE_POTION_COLOR = -13083194;
@@ -140,6 +146,19 @@ public record PotionContents(Optional<Holder<Potion>> potion, Optional<Integer> 
 		addPotionTooltip(this.getAllEffects(), consumer, f, g);
 	}
 
+	public void applyToLivingEntity(LivingEntity livingEntity) {
+		if (!livingEntity.level().isClientSide) {
+			Player player2 = livingEntity instanceof Player player ? player : null;
+			this.forEachEffect(mobEffectInstance -> {
+				if (mobEffectInstance.getEffect().value().isInstantenous()) {
+					mobEffectInstance.getEffect().value().applyInstantenousEffect(player2, player2, livingEntity, mobEffectInstance.getAmplifier(), 1.0);
+				} else {
+					livingEntity.addEffect(mobEffectInstance);
+				}
+			});
+		}
+	}
+
 	public static void addPotionTooltip(Iterable<MobEffectInstance> iterable, Consumer<Component> consumer, float f, float g) {
 		List<Pair<Holder<Attribute>, AttributeModifier>> list = Lists.<Pair<Holder<Attribute>, AttributeModifier>>newArrayList();
 		boolean bl = true;
@@ -203,5 +222,10 @@ public record PotionContents(Optional<Holder<Potion>> potion, Optional<Integer> 
 				}
 			}
 		}
+	}
+
+	@Override
+	public void onConsume(Level level, LivingEntity livingEntity, ItemStack itemStack, Consumable consumable) {
+		this.applyToLivingEntity(livingEntity);
 	}
 }

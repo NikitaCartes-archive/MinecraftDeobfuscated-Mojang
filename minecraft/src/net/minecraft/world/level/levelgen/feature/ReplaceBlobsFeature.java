@@ -23,9 +23,7 @@ public class ReplaceBlobsFeature extends Feature<ReplaceSphereConfiguration> {
 		RandomSource randomSource = featurePlaceContext.random();
 		Block block = replaceSphereConfiguration.targetState.getBlock();
 		BlockPos blockPos = findTarget(
-			worldGenLevel,
-			featurePlaceContext.origin().mutable().clamp(Direction.Axis.Y, worldGenLevel.getMinBuildHeight() + 1, worldGenLevel.getMaxBuildHeight() - 1),
-			block
+			worldGenLevel, featurePlaceContext.origin().mutable().clamp(Direction.Axis.Y, worldGenLevel.getMinY() + 1, worldGenLevel.getMaxY()), block
 		);
 		if (blockPos == null) {
 			return false;
@@ -54,7 +52,7 @@ public class ReplaceBlobsFeature extends Feature<ReplaceSphereConfiguration> {
 
 	@Nullable
 	private static BlockPos findTarget(LevelAccessor levelAccessor, BlockPos.MutableBlockPos mutableBlockPos, Block block) {
-		while (mutableBlockPos.getY() > levelAccessor.getMinBuildHeight() + 1) {
+		while (mutableBlockPos.getY() > levelAccessor.getMinY() + 1) {
 			BlockState blockState = levelAccessor.getBlockState(mutableBlockPos);
 			if (blockState.is(block)) {
 				return mutableBlockPos;

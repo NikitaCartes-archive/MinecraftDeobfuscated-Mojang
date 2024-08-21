@@ -48,7 +48,7 @@ public abstract class AbstractHugeMushroomFeature extends Feature<HugeMushroomFe
 		HugeMushroomFeatureConfiguration hugeMushroomFeatureConfiguration
 	) {
 		int j = blockPos.getY();
-		if (j >= levelAccessor.getMinBuildHeight() + 1 && j + i + 1 < levelAccessor.getMaxBuildHeight()) {
+		if (j >= levelAccessor.getMinY() + 1 && j + i + 1 <= levelAccessor.getMaxY()) {
 			BlockState blockState = levelAccessor.getBlockState(blockPos.below());
 			if (!isDirt(blockState) && !blockState.is(BlockTags.MUSHROOM_GROW_BLOCK)) {
 				return false;

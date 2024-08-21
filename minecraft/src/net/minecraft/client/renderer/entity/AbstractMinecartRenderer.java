@@ -133,8 +133,8 @@ public abstract class AbstractMinecartRenderer<T extends AbstractMinecart, S ext
 			minecartRenderState.yRot = newMinecartBehavior.getCartLerpYRot(f);
 		} else {
 			minecartRenderState.renderPos = null;
-			minecartRenderState.xRot = abstractMinecart.getXRot(f);
-			minecartRenderState.yRot = abstractMinecart.getYRot(f);
+			minecartRenderState.xRot = abstractMinecart.getXRot();
+			minecartRenderState.yRot = abstractMinecart.getYRot();
 		}
 	}
 

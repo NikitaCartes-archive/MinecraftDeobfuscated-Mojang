@@ -26,7 +26,7 @@ public class LakeFeature extends Feature<LakeFeature.Configuration> {
 		WorldGenLevel worldGenLevel = featurePlaceContext.level();
 		RandomSource randomSource = featurePlaceContext.random();
 		LakeFeature.Configuration configuration = featurePlaceContext.config();
-		if (blockPos.getY() <= worldGenLevel.getMinBuildHeight() + 4) {
+		if (blockPos.getY() <= worldGenLevel.getMinY() + 4) {
 			return false;
 		} else {
 			blockPos = blockPos.below(4);

@@ -84,7 +84,7 @@ public class ItemProperties {
 		registerGeneric(
 			ResourceLocation.withDefaultNamespace("cooldown"),
 			(itemStack, clientLevel, livingEntity, i) -> livingEntity instanceof Player
-					? ((Player)livingEntity).getCooldowns().getCooldownPercent(itemStack.getItem(), 0.0F)
+					? ((Player)livingEntity).getCooldowns().getCooldownPercent(itemStack, 0.0F)
 					: 0.0F
 		);
 		ClampedItemPropertyFunction clampedItemPropertyFunction = (itemStack, clientLevel, livingEntity, i) -> {

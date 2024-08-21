@@ -159,13 +159,14 @@ public class ItemFrameRenderer<T extends ItemFrame> extends EntityRenderer<T, It
 	public void extractRenderState(T itemFrame, ItemFrameRenderState itemFrameRenderState, float f) {
 		super.extractRenderState(itemFrame, itemFrameRenderState, f);
 		itemFrameRenderState.direction = itemFrame.getDirection();
-		itemFrameRenderState.itemStack = itemFrame.getItem().copy();
+		ItemStack itemStack = itemFrame.getItem();
+		itemFrameRenderState.itemStack = itemStack.copy();
 		itemFrameRenderState.rotation = itemFrame.getRotation();
 		itemFrameRenderState.isGlowFrame = itemFrame.getType() == EntityType.GLOW_ITEM_FRAME;
 		itemFrameRenderState.itemModel = null;
 		itemFrameRenderState.mapId = null;
 		if (!itemFrameRenderState.itemStack.isEmpty()) {
-			MapId mapId = itemFrame.getFramedMapId(itemFrameRenderState.itemStack);
+			MapId mapId = itemFrame.getFramedMapId(itemStack);
 			if (mapId != null) {
 				MapItemSavedData mapItemSavedData = itemFrame.level().getMapData(mapId);
 				if (mapItemSavedData != null) {
@@ -173,7 +174,7 @@ public class ItemFrameRenderer<T extends ItemFrame> extends EntityRenderer<T, It
 					itemFrameRenderState.mapId = mapId;
 				}
 			} else {
-				itemFrameRenderState.itemModel = this.itemRenderer.getModel(itemFrameRenderState.itemStack, itemFrame.level(), null, itemFrame.getId());
+				itemFrameRenderState.itemModel = this.itemRenderer.getModel(itemStack, itemFrame.level(), null, itemFrame.getId());
 			}
 		}
 	}

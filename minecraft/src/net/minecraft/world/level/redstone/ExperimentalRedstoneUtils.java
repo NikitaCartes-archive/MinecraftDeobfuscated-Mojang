@@ -7,9 +7,9 @@ import net.minecraft.world.level.Level;
 
 public class ExperimentalRedstoneUtils {
 	@Nullable
-	public static Orientation randomOrientation(Level level, @Nullable Direction direction, @Nullable Direction direction2) {
+	public static Orientation initialOrientation(Level level, @Nullable Direction direction, @Nullable Direction direction2) {
 		if (level.enabledFeatures().contains(FeatureFlags.REDSTONE_EXPERIMENTS)) {
-			Orientation orientation = Orientation.random(level.random);
+			Orientation orientation = Orientation.random(level.random).withSideBias(Orientation.SideBias.LEFT);
 			if (direction2 != null) {
 				orientation = orientation.withUp(direction2);
 			}

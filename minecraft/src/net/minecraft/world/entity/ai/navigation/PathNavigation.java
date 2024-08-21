@@ -145,7 +145,7 @@ public abstract class PathNavigation {
 	protected Path createPath(Set<BlockPos> set, int i, boolean bl, int j, float f) {
 		if (set.isEmpty()) {
 			return null;
-		} else if (this.mob.getY() < (double)this.level.getMinBuildHeight()) {
+		} else if (this.mob.getY() < (double)this.level.getMinY()) {
 			return null;
 		} else if (!this.canUpdatePath()) {
 			return null;

@@ -41,21 +41,21 @@ public class MinecartSoundInstance extends AbstractTickableSoundInstance {
 
 	@Override
 	public void tick() {
-		boolean bl = !this.minecart.isOnRails() && this.minecart.getBehavior() instanceof NewMinecartBehavior;
-		if (!this.minecart.isRemoved() && !bl) {
+		if (this.minecart.isRemoved()) {
+			this.stop();
+		} else {
 			this.x = (double)((float)this.minecart.getX());
 			this.y = (double)((float)this.minecart.getY());
 			this.z = (double)((float)this.minecart.getZ());
 			float f = (float)this.minecart.getDeltaMovement().horizontalDistance();
-			if (f >= 0.01F && this.minecart.level().tickRateManager().runsNormally()) {
+			boolean bl = !this.minecart.isOnRails() && this.minecart.getBehavior() instanceof NewMinecartBehavior;
+			if (f >= 0.01F && this.minecart.level().tickRateManager().runsNormally() && !bl) {
 				this.pitch = Mth.clamp(this.pitch + 0.0025F, 0.0F, 1.0F);
 				this.volume = Mth.lerp(Mth.clamp(f, 0.0F, 0.5F), 0.0F, 0.7F);
 			} else {
 				this.pitch = 0.0F;
 				this.volume = 0.0F;
 			}
-		} else {
-			this.stop();
 		}
 	}
 }

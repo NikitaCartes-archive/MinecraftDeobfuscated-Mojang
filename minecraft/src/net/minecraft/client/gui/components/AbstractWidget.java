@@ -200,6 +200,10 @@ public abstract class AbstractWidget implements Renderable, GuiEventListener, La
 	}
 
 	public void playDownSound(SoundManager soundManager) {
+		playButtonClickSound(soundManager);
+	}
+
+	public static void playButtonClickSound(SoundManager soundManager) {
 		soundManager.play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
 	}
 

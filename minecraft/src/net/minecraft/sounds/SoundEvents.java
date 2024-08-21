@@ -583,8 +583,8 @@ public class SoundEvents {
 	public static final SoundEvent GENERIC_BIG_FALL = register("entity.generic.big_fall");
 	public static final SoundEvent GENERIC_BURN = register("entity.generic.burn");
 	public static final SoundEvent GENERIC_DEATH = register("entity.generic.death");
-	public static final SoundEvent GENERIC_DRINK = register("entity.generic.drink");
-	public static final SoundEvent GENERIC_EAT = register("entity.generic.eat");
+	public static final Holder.Reference<SoundEvent> GENERIC_DRINK = registerForHolder("entity.generic.drink");
+	public static final Holder.Reference<SoundEvent> GENERIC_EAT = registerForHolder("entity.generic.eat");
 	public static final Holder.Reference<SoundEvent> GENERIC_EXPLODE = registerForHolder("entity.generic.explode");
 	public static final SoundEvent GENERIC_EXTINGUISH_FIRE = register("entity.generic.extinguish_fire");
 	public static final SoundEvent GENERIC_HURT = register("entity.generic.hurt");
@@ -714,7 +714,7 @@ public class SoundEvents {
 	public static final SoundEvent HONEY_BLOCK_SLIDE = register("block.honey_block.slide");
 	public static final SoundEvent HONEY_BLOCK_STEP = register("block.honey_block.step");
 	public static final SoundEvent HONEYCOMB_WAX_ON = register("item.honeycomb.wax_on");
-	public static final SoundEvent HONEY_DRINK = register("item.honey_bottle.drink");
+	public static final Holder.Reference<SoundEvent> HONEY_DRINK = registerForHolder("item.honey_bottle.drink");
 	public static final int GOAT_HORN_VARIANT_COUNT = 8;
 	public static final ImmutableList<Holder.Reference<SoundEvent>> GOAT_HORN_SOUND_VARIANTS = registerGoatHornSoundVariants();
 	public static final SoundEvent HORSE_AMBIENT = register("entity.horse.ambient");
@@ -1014,7 +1014,7 @@ public class SoundEvents {
 	public static final SoundEvent OCELOT_HURT = register("entity.ocelot.hurt");
 	public static final SoundEvent OCELOT_AMBIENT = register("entity.ocelot.ambient");
 	public static final SoundEvent OCELOT_DEATH = register("entity.ocelot.death");
-	public static final SoundEvent OMINOUS_BOTTLE_DISPOSE = register("item.ominous_bottle.dispose");
+	public static final Holder.Reference<SoundEvent> OMINOUS_BOTTLE_DISPOSE = registerForHolder("item.ominous_bottle.dispose");
 	public static final SoundEvent PAINTING_BREAK = register("entity.painting.break");
 	public static final SoundEvent PAINTING_PLACE = register("entity.painting.place");
 	public static final SoundEvent PANDA_PRE_SNEEZE = register("entity.panda.pre_sneeze");

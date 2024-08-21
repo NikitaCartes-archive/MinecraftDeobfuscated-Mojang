@@ -66,9 +66,28 @@ public class KeyboardHandler {
 				this.minecraft.sectionPath = !this.minecraft.sectionPath;
 				this.debugFeedback("SectionPath: {0}", this.minecraft.sectionPath ? "shown" : "hidden");
 				return true;
+			case 70:
+			case 71:
+			case 72:
+			case 73:
+			case 74:
+			case 75:
+			case 77:
+			case 78:
+			case 80:
+			case 81:
+			case 82:
+			case 83:
+			case 84:
+			default:
+				return false;
 			case 76:
 				this.minecraft.smartCull = !this.minecraft.smartCull;
 				this.debugFeedback("SmartCull: {0}", this.minecraft.smartCull ? "enabled" : "disabled");
+				return true;
+			case 79:
+				boolean bl = this.minecraft.debugRenderer.toggleRenderOctree();
+				this.debugFeedback("Frustum culling Octree: {0}", bl ? "enabled" : "disabled");
 				return true;
 			case 85:
 				if (Screen.hasShiftDown()) {
@@ -88,8 +107,6 @@ public class KeyboardHandler {
 				this.minecraft.wireframe = !this.minecraft.wireframe;
 				this.debugFeedback("WireFrame: {0}", this.minecraft.wireframe ? "enabled" : "disabled");
 				return true;
-			default:
-				return false;
 		}
 	}
 

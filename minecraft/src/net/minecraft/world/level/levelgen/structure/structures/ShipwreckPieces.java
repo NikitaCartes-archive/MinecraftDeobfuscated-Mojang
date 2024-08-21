@@ -135,7 +135,7 @@ public class ShipwreckPieces {
 			if (this.isTooBigToFitInWorldGenRegion()) {
 				super.postProcess(worldGenLevel, structureManager, chunkGenerator, randomSource, boundingBox, chunkPos, blockPos);
 			} else {
-				int i = worldGenLevel.getMaxBuildHeight();
+				int i = worldGenLevel.getMaxY() + 1;
 				int j = 0;
 				Vec3i vec3i = this.template.getSize();
 				Heightmap.Types types = this.isBeached ? Heightmap.Types.WORLD_SURFACE_WG : Heightmap.Types.OCEAN_FLOOR_WG;

@@ -127,10 +127,10 @@ public class JigsawPlacement {
 						if (i > 0) {
 							AABB aABB = new AABB(
 								(double)(k - j),
-								(double)Math.max(o - j, levelHeightAccessor.getMinBuildHeight() + dimensionPadding.bottom()),
+								(double)Math.max(o - j, levelHeightAccessor.getMinY() + dimensionPadding.bottom()),
 								(double)(l - j),
 								(double)(k + j + 1),
-								(double)Math.min(o + j + 1, levelHeightAccessor.getMaxBuildHeight() - dimensionPadding.top()),
+								(double)Math.min(o + j + 1, levelHeightAccessor.getMaxY() + 1 - dimensionPadding.top()),
 								(double)(l + j + 1)
 							);
 							VoxelShape voxelShape = Shapes.join(Shapes.create(aABB), Shapes.create(AABB.of(boundingBox)), BooleanOp.ONLY_FIRST);

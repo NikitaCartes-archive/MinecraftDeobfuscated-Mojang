@@ -320,7 +320,7 @@ public class MultiPlayerGameMode {
 				}
 			}
 
-			if (!itemStack.isEmpty() && !localPlayer.getCooldowns().isOnCooldown(itemStack.getItem())) {
+			if (!itemStack.isEmpty() && !localPlayer.getCooldowns().isOnCooldown(itemStack)) {
 				UseOnContext useOnContext = new UseOnContext(localPlayer, interactionHand, blockHitResult);
 				InteractionResult interactionResult3;
 				if (this.localPlayerMode.isCreative()) {
@@ -347,7 +347,7 @@ public class MultiPlayerGameMode {
 			this.startPrediction(this.minecraft.level, i -> {
 				ServerboundUseItemPacket serverboundUseItemPacket = new ServerboundUseItemPacket(interactionHand, i, player.getYRot(), player.getXRot());
 				ItemStack itemStack = player.getItemInHand(interactionHand);
-				if (player.getCooldowns().isOnCooldown(itemStack.getItem())) {
+				if (player.getCooldowns().isOnCooldown(itemStack)) {
 					mutableObject.setValue(InteractionResult.PASS);
 					return serverboundUseItemPacket;
 				} else {

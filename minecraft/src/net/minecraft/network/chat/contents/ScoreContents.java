@@ -45,13 +45,15 @@ public record ScoreContents(Either<SelectorPattern, String> name, String objecti
 			if (!list.isEmpty()) {
 				if (list.size() != 1) {
 					throw EntityArgument.ERROR_NOT_SINGLE_ENTITY.create();
+				} else {
+					return (ScoreHolder)list.getFirst();
 				}
-
-				return (ScoreHolder)list.getFirst();
+			} else {
+				return ScoreHolder.forNameOnly(((SelectorPattern)optional.get()).pattern());
 			}
+		} else {
+			return ScoreHolder.forNameOnly((String)this.name.right().orElseThrow());
 		}
-
-		return ScoreHolder.forNameOnly((String)this.name.right().orElseThrow());
 	}
 
 	private MutableComponent getScore(ScoreHolder scoreHolder, CommandSourceStack commandSourceStack) {

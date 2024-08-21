@@ -17,7 +17,7 @@ public class HumanoidRenderState extends LivingEntityRenderState {
 	public InteractionHand useItemHand = InteractionHand.MAIN_HAND;
 	public boolean isCrouching;
 	public boolean isFallFlying;
-	public boolean isSwimming;
+	public boolean isVisuallySwimming;
 	public boolean isPassenger;
 	public boolean isUsingItem;
 	public float elytraRotX;

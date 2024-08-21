@@ -150,7 +150,7 @@ public class Bat extends AmbientCreature {
 				}
 			}
 		} else {
-			if (this.targetPosition != null && (!this.level().isEmptyBlock(this.targetPosition) || this.targetPosition.getY() <= this.level().getMinBuildHeight())) {
+			if (this.targetPosition != null && (!this.level().isEmptyBlock(this.targetPosition) || this.targetPosition.getY() <= this.level().getMinY())) {
 				this.targetPosition = null;
 			}
 

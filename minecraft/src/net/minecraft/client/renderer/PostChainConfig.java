@@ -76,7 +76,7 @@ public record PostChainConfig(Map<ResourceLocation, PostChainConfig.InternalTarg
 	}
 
 	@Environment(EnvType.CLIENT)
-	public static record Pass(String name, List<PostChainConfig.Input> inputs, ResourceLocation outputTarget, List<PostChainConfig.Uniform> uniforms) {
+	public static record Pass(ResourceLocation program, List<PostChainConfig.Input> inputs, ResourceLocation outputTarget, List<PostChainConfig.Uniform> uniforms) {
 		private static final Codec<List<PostChainConfig.Input>> INPUTS_CODEC = PostChainConfig.Input.CODEC.listOf().validate(list -> {
 			Set<String> set = new ObjectArraySet<>(list.size());
 
@@ -90,7 +90,7 @@ public record PostChainConfig(Map<ResourceLocation, PostChainConfig.InternalTarg
 		});
 		public static final Codec<PostChainConfig.Pass> CODEC = RecordCodecBuilder.create(
 			instance -> instance.group(
-						Codec.STRING.fieldOf("name").forGetter(PostChainConfig.Pass::name),
+						ResourceLocation.CODEC.fieldOf("program").forGetter(PostChainConfig.Pass::program),
 						INPUTS_CODEC.optionalFieldOf("inputs", List.of()).forGetter(PostChainConfig.Pass::inputs),
 						ResourceLocation.CODEC.fieldOf("output").forGetter(PostChainConfig.Pass::outputTarget),
 						PostChainConfig.Uniform.CODEC.listOf().optionalFieldOf("uniforms", List.of()).forGetter(PostChainConfig.Pass::uniforms)

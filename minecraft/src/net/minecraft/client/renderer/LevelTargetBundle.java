@@ -17,6 +17,8 @@ public class LevelTargetBundle implements PostChain.TargetBundle {
 	public static final ResourceLocation WEATHER_TARGET_ID = ResourceLocation.withDefaultNamespace("weather");
 	public static final ResourceLocation CLOUDS_TARGET_ID = ResourceLocation.withDefaultNamespace("clouds");
 	public static final ResourceLocation ENTITY_OUTLINE_TARGET_ID = ResourceLocation.withDefaultNamespace("entity_outline");
+	public static final Set<ResourceLocation> MAIN_TARGETS = Set.of(MAIN_TARGET_ID);
+	public static final Set<ResourceLocation> OUTLINE_TARGETS = Set.of(MAIN_TARGET_ID, ENTITY_OUTLINE_TARGET_ID);
 	public static final Set<ResourceLocation> SORTING_TARGETS = Set.of(
 		MAIN_TARGET_ID, TRANSLUCENT_TARGET_ID, ITEM_ENTITY_TARGET_ID, PARTICLES_TARGET_ID, WEATHER_TARGET_ID, CLOUDS_TARGET_ID
 	);

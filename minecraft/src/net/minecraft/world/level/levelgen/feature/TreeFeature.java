@@ -69,7 +69,7 @@ public class TreeFeature extends Feature<TreeConfiguration> {
 		BlockPos blockPos2 = (BlockPos)treeConfiguration.rootPlacer.map(rootPlacer -> rootPlacer.getTrunkOrigin(blockPos, randomSource)).orElse(blockPos);
 		int m = Math.min(blockPos.getY(), blockPos2.getY());
 		int n = Math.max(blockPos.getY(), blockPos2.getY()) + i + 1;
-		if (m >= worldGenLevel.getMinBuildHeight() + 1 && n <= worldGenLevel.getMaxBuildHeight()) {
+		if (m >= worldGenLevel.getMinY() + 1 && n <= worldGenLevel.getMaxY() + 1) {
 			OptionalInt optionalInt = treeConfiguration.minimumSize.minClippedHeight();
 			int o = this.getMaxFreeTreeHeight(worldGenLevel, i, blockPos2, treeConfiguration);
 			if (o >= i || !optionalInt.isEmpty() && o >= optionalInt.getAsInt()) {

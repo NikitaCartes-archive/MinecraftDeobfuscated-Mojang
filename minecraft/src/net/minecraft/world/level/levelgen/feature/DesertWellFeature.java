@@ -31,7 +31,7 @@ public class DesertWellFeature extends Feature<NoneFeatureConfiguration> {
 		BlockPos blockPos = featurePlaceContext.origin();
 		blockPos = blockPos.above();
 
-		while (worldGenLevel.isEmptyBlock(blockPos) && blockPos.getY() > worldGenLevel.getMinBuildHeight() + 2) {
+		while (worldGenLevel.isEmptyBlock(blockPos) && blockPos.getY() > worldGenLevel.getMinY() + 2) {
 			blockPos = blockPos.below();
 		}
 

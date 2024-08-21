@@ -447,7 +447,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 			ServerChunkCache serverChunkCache = serverLevel.getChunkSource();
 			ChunkPos chunkPos = new ChunkPos(serverChunkCache.randomState().sampler().findSpawnPosition());
 			int i = serverChunkCache.getGenerator().getSpawnHeight(serverLevel);
-			if (i < serverLevel.getMinBuildHeight()) {
+			if (i < serverLevel.getMinY()) {
 				BlockPos blockPos = chunkPos.getWorldPosition();
 				i = serverLevel.getHeight(Heightmap.Types.WORLD_SURFACE, blockPos.getX() + 8, blockPos.getZ() + 8);
 			}

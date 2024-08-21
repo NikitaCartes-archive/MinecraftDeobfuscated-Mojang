@@ -149,7 +149,7 @@ public abstract class AbstractWindCharge extends AbstractHurtingProjectile imple
 
 	@Override
 	public void tick() {
-		if (!this.level().isClientSide && this.getBlockY() > this.level().getMaxBuildHeight() + 30) {
+		if (!this.level().isClientSide && this.getBlockY() > this.level().getMaxY() + 30) {
 			this.explode(this.position());
 			this.discard();
 		} else {

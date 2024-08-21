@@ -5,9 +5,7 @@ import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
-import net.minecraft.client.Minecraft;
 import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -365,26 +363,17 @@ public class ItemBlockRenderTypes {
 		}
 	}
 
-	public static RenderType getRenderType(BlockState blockState, boolean bl) {
+	public static RenderType getRenderType(BlockState blockState) {
 		RenderType renderType = getChunkRenderType(blockState);
-		if (renderType == RenderType.translucent()) {
-			if (!Minecraft.useShaderTransparency()) {
-				return Sheets.translucentCullBlockSheet();
-			} else {
-				return bl ? Sheets.translucentCullBlockSheet() : Sheets.translucentItemSheet();
-			}
-		} else {
-			return Sheets.cutoutBlockSheet();
-		}
+		return renderType == RenderType.translucent() ? Sheets.translucentItemSheet() : Sheets.cutoutBlockSheet();
 	}
 
-	public static RenderType getRenderType(ItemStack itemStack, boolean bl) {
-		Item item = itemStack.getItem();
-		if (item instanceof BlockItem) {
-			Block block = ((BlockItem)item).getBlock();
-			return getRenderType(block.defaultBlockState(), bl);
+	public static RenderType getRenderType(ItemStack itemStack) {
+		if (itemStack.getItem() instanceof BlockItem blockItem) {
+			Block block = blockItem.getBlock();
+			return getRenderType(block.defaultBlockState());
 		} else {
-			return bl ? Sheets.translucentCullBlockSheet() : Sheets.translucentItemSheet();
+			return Sheets.translucentItemSheet();
 		}
 	}
 

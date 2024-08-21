@@ -4,18 +4,23 @@ import com.google.common.collect.Maps;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.world.item.component.UseCooldown;
 
 public class ItemCooldowns {
-	private final Map<Item, ItemCooldowns.CooldownInstance> cooldowns = Maps.<Item, ItemCooldowns.CooldownInstance>newHashMap();
+	private final Map<ResourceLocation, ItemCooldowns.CooldownInstance> cooldowns = Maps.<ResourceLocation, ItemCooldowns.CooldownInstance>newHashMap();
 	private int tickCount;
 
-	public boolean isOnCooldown(Item item) {
-		return this.getCooldownPercent(item, 0.0F) > 0.0F;
+	public boolean isOnCooldown(ItemStack itemStack) {
+		return this.getCooldownPercent(itemStack, 0.0F) > 0.0F;
 	}
 
-	public float getCooldownPercent(Item item, float f) {
-		ItemCooldowns.CooldownInstance cooldownInstance = (ItemCooldowns.CooldownInstance)this.cooldowns.get(item);
+	public float getCooldownPercent(ItemStack itemStack, float f) {
+		ResourceLocation resourceLocation = this.getCooldownGroup(itemStack);
+		ItemCooldowns.CooldownInstance cooldownInstance = (ItemCooldowns.CooldownInstance)this.cooldowns.get(resourceLocation);
 		if (cooldownInstance != null) {
 			float g = (float)(cooldownInstance.endTime - cooldownInstance.startTime);
 			float h = (float)cooldownInstance.endTime - ((float)this.tickCount + f);
@@ -28,41 +33,44 @@ public class ItemCooldowns {
 	public void tick() {
 		this.tickCount++;
 		if (!this.cooldowns.isEmpty()) {
-			Iterator<Entry<Item, ItemCooldowns.CooldownInstance>> iterator = this.cooldowns.entrySet().iterator();
+			Iterator<Entry<ResourceLocation, ItemCooldowns.CooldownInstance>> iterator = this.cooldowns.entrySet().iterator();
 
 			while (iterator.hasNext()) {
-				Entry<Item, ItemCooldowns.CooldownInstance> entry = (Entry<Item, ItemCooldowns.CooldownInstance>)iterator.next();
+				Entry<ResourceLocation, ItemCooldowns.CooldownInstance> entry = (Entry<ResourceLocation, ItemCooldowns.CooldownInstance>)iterator.next();
 				if (((ItemCooldowns.CooldownInstance)entry.getValue()).endTime <= this.tickCount) {
 					iterator.remove();
-					this.onCooldownEnded((Item)entry.getKey());
+					this.onCooldownEnded((ResourceLocation)entry.getKey());
 				}
 			}
 		}
 	}
 
-	public void addCooldown(Item item, int i) {
-		this.cooldowns.put(item, new ItemCooldowns.CooldownInstance(this.tickCount, this.tickCount + i));
-		this.onCooldownStarted(item, i);
+	public ResourceLocation getCooldownGroup(ItemStack itemStack) {
+		UseCooldown useCooldown = itemStack.get(DataComponents.USE_COOLDOWN);
+		ResourceLocation resourceLocation = BuiltInRegistries.ITEM.getKey(itemStack.getItem());
+		return useCooldown == null ? resourceLocation : (ResourceLocation)useCooldown.cooldownGroup().orElse(resourceLocation);
 	}
 
-	public void removeCooldown(Item item) {
-		this.cooldowns.remove(item);
-		this.onCooldownEnded(item);
+	public void addCooldown(ItemStack itemStack, int i) {
+		this.addCooldown(this.getCooldownGroup(itemStack), i);
 	}
 
-	protected void onCooldownStarted(Item item, int i) {
+	public void addCooldown(ResourceLocation resourceLocation, int i) {
+		this.cooldowns.put(resourceLocation, new ItemCooldowns.CooldownInstance(this.tickCount, this.tickCount + i));
+		this.onCooldownStarted(resourceLocation, i);
 	}
 
-	protected void onCooldownEnded(Item item) {
+	public void removeCooldown(ResourceLocation resourceLocation) {
+		this.cooldowns.remove(resourceLocation);
+		this.onCooldownEnded(resourceLocation);
 	}
 
-	static class CooldownInstance {
-		final int startTime;
-		final int endTime;
+	protected void onCooldownStarted(ResourceLocation resourceLocation, int i) {
+	}
 
-		CooldownInstance(int i, int j) {
-			this.startTime = i;
-			this.endTime = j;
-		}
+	protected void onCooldownEnded(ResourceLocation resourceLocation) {
+	}
+
+	static record CooldownInstance(int startTime, int endTime) {
 	}
 }

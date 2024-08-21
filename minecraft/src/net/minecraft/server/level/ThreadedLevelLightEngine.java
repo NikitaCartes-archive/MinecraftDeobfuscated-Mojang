@@ -75,7 +75,7 @@ public class ThreadedLevelLightEngine extends LevelLightEngine implements AutoCl
 				super.queueSectionData(LightLayer.SKY, SectionPos.of(chunkPos, i), null);
 			}
 
-			for (int i = this.levelHeightAccessor.getMinSection(); i < this.levelHeightAccessor.getMaxSection(); i++) {
+			for (int i = this.levelHeightAccessor.getMinSectionY(); i <= this.levelHeightAccessor.getMaxSectionY(); i++) {
 				super.updateSectionStatus(SectionPos.of(chunkPos, i), true);
 			}
 		}), () -> "updateChunkStatus " + chunkPos + " true"));

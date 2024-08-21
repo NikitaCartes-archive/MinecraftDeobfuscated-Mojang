@@ -293,7 +293,7 @@ public class EnderMan extends Monster implements NeutralMob {
 	private boolean teleport(double d, double e, double f) {
 		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(d, e, f);
 
-		while (mutableBlockPos.getY() > this.level().getMinBuildHeight() && !this.level().getBlockState(mutableBlockPos).blocksMotion()) {
+		while (mutableBlockPos.getY() > this.level().getMinY() && !this.level().getBlockState(mutableBlockPos).blocksMotion()) {
 			mutableBlockPos.move(Direction.DOWN);
 		}
 

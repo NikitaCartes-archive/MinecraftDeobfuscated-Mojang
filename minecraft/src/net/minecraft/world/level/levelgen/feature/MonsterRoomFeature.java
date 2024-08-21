@@ -72,7 +72,7 @@ public class MonsterRoomFeature extends Feature<NoneFeatureConfiguration> {
 						BlockPos blockPos2x = blockPos.offset(s, t, u);
 						BlockState blockState = worldGenLevel.getBlockState(blockPos2x);
 						if (s == k || t == -1 || u == p || s == l || t == 4 || u == q) {
-							if (blockPos2x.getY() >= worldGenLevel.getMinBuildHeight() && !worldGenLevel.getBlockState(blockPos2x.below()).isSolid()) {
+							if (blockPos2x.getY() >= worldGenLevel.getMinY() && !worldGenLevel.getBlockState(blockPos2x.below()).isSolid()) {
 								worldGenLevel.setBlock(blockPos2x, AIR, 2);
 							} else if (blockState.isSolid() && !blockState.is(Blocks.CHEST)) {
 								if (t == -1 && randomSource.nextInt(4) != 0) {

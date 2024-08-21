@@ -117,7 +117,7 @@ public class HumanoidModel<T extends HumanoidRenderState> extends EntityModel<T>
 		if (bl) {
 			this.head.xRot = (float) (-Math.PI / 4);
 		} else if (f > 0.0F) {
-			if (humanoidRenderState.isSwimming) {
+			if (humanoidRenderState.isVisuallySwimming) {
 				this.head.xRot = Mth.rotLerpRad(f, this.head.xRot, (float) (-Math.PI / 4));
 			} else {
 				this.head.xRot = Mth.rotLerpRad(f, this.head.xRot, humanoidRenderState.xRot * (float) (Math.PI / 180.0));
@@ -325,10 +325,11 @@ public class HumanoidModel<T extends HumanoidRenderState> extends EntityModel<T>
 				this.body.yRot *= -1.0F;
 			}
 
-			this.rightArm.z = Mth.sin(this.body.yRot) * 5.0F;
-			this.rightArm.x = -Mth.cos(this.body.yRot) * 5.0F;
-			this.leftArm.z = -Mth.sin(this.body.yRot) * 5.0F;
-			this.leftArm.x = Mth.cos(this.body.yRot) * 5.0F;
+			float i = humanoidRenderState.ageScale;
+			this.rightArm.z = Mth.sin(this.body.yRot) * 5.0F * i;
+			this.rightArm.x = -Mth.cos(this.body.yRot) * 5.0F * i;
+			this.leftArm.z = -Mth.sin(this.body.yRot) * 5.0F * i;
+			this.leftArm.x = Mth.cos(this.body.yRot) * 5.0F * i;
 			this.rightArm.yRot = this.rightArm.yRot + this.body.yRot;
 			this.leftArm.yRot = this.leftArm.yRot + this.body.yRot;
 			this.leftArm.xRot = this.leftArm.xRot + this.body.yRot;
@@ -336,9 +337,9 @@ public class HumanoidModel<T extends HumanoidRenderState> extends EntityModel<T>
 			h *= h;
 			h *= h;
 			h = 1.0F - h;
-			float i = Mth.sin(h * (float) Math.PI);
-			float j = Mth.sin(g * (float) Math.PI) * -(this.head.xRot - 0.7F) * 0.75F;
-			modelPart.xRot -= i * 1.2F + j;
+			float j = Mth.sin(h * (float) Math.PI);
+			float k = Mth.sin(g * (float) Math.PI) * -(this.head.xRot - 0.7F) * 0.75F;
+			modelPart.xRot -= j * 1.2F + k;
 			modelPart.yRot = modelPart.yRot + this.body.yRot * 2.0F;
 			modelPart.zRot = modelPart.zRot + Mth.sin(g * (float) Math.PI) * -0.4F;
 		}

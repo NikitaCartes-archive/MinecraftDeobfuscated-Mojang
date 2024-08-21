@@ -185,12 +185,12 @@ public class CloudRenderer extends SimplePreparableReloadListener<Optional<Cloud
 
 	private void drawWithRenderType(RenderType renderType, Matrix4f matrix4f, Matrix4f matrix4f2, float f, float g, float h) {
 		renderType.setupRenderState();
-		ShaderInstance shaderInstance = RenderSystem.getShader();
-		if (shaderInstance.MODEL_OFFSET != null) {
-			shaderInstance.MODEL_OFFSET.set(-f, g, -h);
+		CompiledShaderProgram compiledShaderProgram = RenderSystem.getShader();
+		if (compiledShaderProgram.MODEL_OFFSET != null) {
+			compiledShaderProgram.MODEL_OFFSET.set(-f, g, -h);
 		}
 
-		this.vertexBuffer.drawWithShader(matrix4f, matrix4f2, shaderInstance);
+		this.vertexBuffer.drawWithShader(matrix4f, matrix4f2, compiledShaderProgram);
 		renderType.clearRenderState();
 	}
 

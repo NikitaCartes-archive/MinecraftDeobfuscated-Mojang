@@ -83,7 +83,7 @@ public abstract class BiomeSource implements BiomeResolver {
 			return null;
 		} else {
 			int l = Math.floorDiv(i, j);
-			int[] is = Mth.outFromOrigin(blockPos.getY(), levelReader.getMinBuildHeight() + 1, levelReader.getMaxBuildHeight(), k).toArray();
+			int[] is = Mth.outFromOrigin(blockPos.getY(), levelReader.getMinY() + 1, levelReader.getMaxY() + 1, k).toArray();
 
 			for (BlockPos.MutableBlockPos mutableBlockPos : BlockPos.spiralAround(BlockPos.ZERO, l, Direction.EAST, Direction.SOUTH)) {
 				int m = blockPos.getX() + mutableBlockPos.getX() * j;

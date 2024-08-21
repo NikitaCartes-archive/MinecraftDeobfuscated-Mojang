@@ -1,17 +1,16 @@
 package net.minecraft.network.protocol.game;
 
-import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketType;
-import net.minecraft.world.item.Item;
+import net.minecraft.resources.ResourceLocation;
 
-public record ClientboundCooldownPacket(Item item, int duration) implements Packet<ClientGamePacketListener> {
+public record ClientboundCooldownPacket(ResourceLocation cooldownGroup, int duration) implements Packet<ClientGamePacketListener> {
 	public static final StreamCodec<RegistryFriendlyByteBuf, ClientboundCooldownPacket> STREAM_CODEC = StreamCodec.composite(
-		ByteBufCodecs.registry(Registries.ITEM),
-		ClientboundCooldownPacket::item,
+		ResourceLocation.STREAM_CODEC,
+		ClientboundCooldownPacket::cooldownGroup,
 		ByteBufCodecs.VAR_INT,
 		ClientboundCooldownPacket::duration,
 		ClientboundCooldownPacket::new

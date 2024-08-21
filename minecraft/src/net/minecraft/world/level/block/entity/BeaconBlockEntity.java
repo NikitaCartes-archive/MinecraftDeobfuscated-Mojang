@@ -178,7 +178,7 @@ public class BeaconBlockEntity extends BlockEntity implements MenuProvider, Name
 		}
 
 		if (beaconBlockEntity.lastCheckY >= l) {
-			beaconBlockEntity.lastCheckY = level.getMinBuildHeight() - 1;
+			beaconBlockEntity.lastCheckY = level.getMinY() - 1;
 			boolean bl = m > 0;
 			beaconBlockEntity.beamSections = beaconBlockEntity.checkingBeamSections;
 			if (!level.isClientSide) {
@@ -203,7 +203,7 @@ public class BeaconBlockEntity extends BlockEntity implements MenuProvider, Name
 
 		for (int m = 1; m <= 4; l = m++) {
 			int n = j - m;
-			if (n < level.getMinBuildHeight()) {
+			if (n < level.getMinY()) {
 				break;
 			}
 
@@ -367,7 +367,7 @@ public class BeaconBlockEntity extends BlockEntity implements MenuProvider, Name
 	@Override
 	public void setLevel(Level level) {
 		super.setLevel(level);
-		this.lastCheckY = level.getMinBuildHeight() - 1;
+		this.lastCheckY = level.getMinY() - 1;
 	}
 
 	public static class BeaconBeamSection {

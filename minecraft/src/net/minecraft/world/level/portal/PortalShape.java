@@ -71,7 +71,7 @@ public class PortalShape {
 
 	@Nullable
 	private BlockPos calculateBottomLeft(BlockPos blockPos) {
-		int i = Math.max(this.level.getMinBuildHeight(), blockPos.getY() - 21);
+		int i = Math.max(this.level.getMinY(), blockPos.getY() - 21);
 
 		while (blockPos.getY() > i && isEmpty(this.level.getBlockState(blockPos.below()))) {
 			blockPos = blockPos.below();

@@ -62,7 +62,7 @@ public class FallingBlockRenderState extends EntityRenderState implements BlockA
 	}
 
 	@Override
-	public int getMinBuildHeight() {
+	public int getMinY() {
 		return this.blockPos.getY();
 	}
 }

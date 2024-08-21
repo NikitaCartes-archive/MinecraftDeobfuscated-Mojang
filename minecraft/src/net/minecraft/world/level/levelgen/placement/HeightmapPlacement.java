@@ -27,7 +27,7 @@ public class HeightmapPlacement extends PlacementModifier {
 		int i = blockPos.getX();
 		int j = blockPos.getZ();
 		int k = placementContext.getHeight(this.heightmap, i, j);
-		return k > placementContext.getMinBuildHeight() ? Stream.of(new BlockPos(i, k, j)) : Stream.of();
+		return k > placementContext.getMinY() ? Stream.of(new BlockPos(i, k, j)) : Stream.of();
 	}
 
 	@Override

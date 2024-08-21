@@ -13,6 +13,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.ShapeRenderer;
+import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
@@ -50,7 +51,9 @@ public class DebugRenderer {
 	public final LightSectionDebugRenderer skyLightSectionDebugRenderer;
 	public final BreezeDebugRenderer breezeDebugRenderer;
 	public final ChunkCullingDebugRenderer chunkCullingDebugRenderer;
+	public final OctreeDebugRenderer octreeDebugRenderer;
 	private boolean renderChunkborder;
+	private boolean renderOctree;
 
 	public DebugRenderer(Minecraft minecraft) {
 		this.waterDebugRenderer = new WaterDebugRenderer(minecraft);
@@ -75,6 +78,7 @@ public class DebugRenderer {
 		this.skyLightSectionDebugRenderer = new LightSectionDebugRenderer(minecraft, LightLayer.SKY);
 		this.breezeDebugRenderer = new BreezeDebugRenderer(minecraft);
 		this.chunkCullingDebugRenderer = new ChunkCullingDebugRenderer(minecraft);
+		this.octreeDebugRenderer = new OctreeDebugRenderer(minecraft);
 	}
 
 	public void clear() {
@@ -107,9 +111,17 @@ public class DebugRenderer {
 		return this.renderChunkborder;
 	}
 
-	public void render(PoseStack poseStack, MultiBufferSource.BufferSource bufferSource, double d, double e, double f) {
+	public boolean toggleRenderOctree() {
+		return this.renderOctree = !this.renderOctree;
+	}
+
+	public void render(PoseStack poseStack, Frustum frustum, MultiBufferSource.BufferSource bufferSource, double d, double e, double f) {
 		if (this.renderChunkborder && !Minecraft.getInstance().showOnlyReducedInfo()) {
 			this.chunkBorderRenderer.render(poseStack, bufferSource, d, e, f);
+		}
+
+		if (this.renderOctree) {
+			this.octreeDebugRenderer.render(poseStack, frustum, bufferSource, d, e, f);
 		}
 
 		this.gameTestDebugRenderer.render(poseStack, bufferSource, d, e, f);

@@ -325,6 +325,10 @@ public class ClientLevel extends Level {
 		this.levelRenderer.onChunkLoaded(chunkPos);
 	}
 
+	public void onSectionBecomingNonEmpty(long l) {
+		this.levelRenderer.onSectionBecomingNonEmpty(l);
+	}
+
 	public void clearTintCaches() {
 		this.tintCaches.forEach((colorResolver, blockTintCache) -> blockTintCache.invalidateAll());
 	}
@@ -987,7 +991,7 @@ public class ClientLevel extends Level {
 		}
 
 		public double getHorizonHeight(LevelHeightAccessor levelHeightAccessor) {
-			return this.isFlat ? (double)levelHeightAccessor.getMinBuildHeight() : 63.0;
+			return this.isFlat ? (double)levelHeightAccessor.getMinY() : 63.0;
 		}
 
 		public float getClearColorScale() {

@@ -38,7 +38,7 @@ public class MinecartItem extends Item {
 				: RailShape.NORTH_SOUTH;
 			double g;
 			if (blockState.is(BlockTags.RAILS)) {
-				if (railShape.isAscending()) {
+				if (railShape.isSlope()) {
 					g = 0.6;
 				} else {
 					g = 0.1;
@@ -52,7 +52,7 @@ public class MinecartItem extends Item {
 				RailShape railShape2 = blockState2.getBlock() instanceof BaseRailBlock
 					? blockState2.getValue(((BaseRailBlock)blockState2.getBlock()).getShapeProperty())
 					: RailShape.NORTH_SOUTH;
-				if (direction != Direction.DOWN && railShape2.isAscending()) {
+				if (direction != Direction.DOWN && railShape2.isSlope()) {
 					g = -0.4;
 				} else {
 					g = -0.9;
@@ -63,14 +63,6 @@ public class MinecartItem extends Item {
 			AbstractMinecart abstractMinecart = AbstractMinecart.createMinecart(
 				serverLevel, vec32.x, vec32.y, vec32.z, ((MinecartItem)itemStack.getItem()).type, itemStack, null
 			);
-			if (AbstractMinecart.useExperimentalMovement(serverLevel)) {
-				for (Entity entity : serverLevel.getEntities(null, abstractMinecart.getBoundingBox())) {
-					if (entity instanceof AbstractMinecart) {
-						return this.defaultDispenseItemBehavior.dispense(blockSource, itemStack);
-					}
-				}
-			}
-
 			serverLevel.addFreshEntity(abstractMinecart);
 			itemStack.shrink(1);
 			return itemStack;
@@ -98,25 +90,25 @@ public class MinecartItem extends Item {
 			return InteractionResult.FAIL;
 		} else {
 			ItemStack itemStack = useOnContext.getItemInHand();
-			if (level instanceof ServerLevel serverLevel) {
-				RailShape railShape = blockState.getBlock() instanceof BaseRailBlock
-					? blockState.getValue(((BaseRailBlock)blockState.getBlock()).getShapeProperty())
-					: RailShape.NORTH_SOUTH;
-				double d = 0.0;
-				if (railShape.isAscending()) {
-					d = 0.5;
-				}
+			RailShape railShape = blockState.getBlock() instanceof BaseRailBlock
+				? blockState.getValue(((BaseRailBlock)blockState.getBlock()).getShapeProperty())
+				: RailShape.NORTH_SOUTH;
+			double d = 0.0;
+			if (railShape.isSlope()) {
+				d = 0.5;
+			}
 
-				Vec3 vec3 = new Vec3((double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.0625 + d, (double)blockPos.getZ() + 0.5);
-				AbstractMinecart abstractMinecart = AbstractMinecart.createMinecart(serverLevel, vec3.x, vec3.y, vec3.z, this.type, itemStack, useOnContext.getPlayer());
-				if (AbstractMinecart.useExperimentalMovement(level)) {
-					for (Entity entity : level.getEntities(null, abstractMinecart.getBoundingBox())) {
-						if (entity instanceof AbstractMinecart) {
-							return InteractionResult.FAIL;
-						}
+			Vec3 vec3 = new Vec3((double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.0625 + d, (double)blockPos.getZ() + 0.5);
+			AbstractMinecart abstractMinecart = AbstractMinecart.createMinecart(level, vec3.x, vec3.y, vec3.z, this.type, itemStack, useOnContext.getPlayer());
+			if (AbstractMinecart.useExperimentalMovement(level)) {
+				for (Entity entity : level.getEntities(null, abstractMinecart.getBoundingBox())) {
+					if (entity instanceof AbstractMinecart) {
+						return InteractionResult.FAIL;
 					}
 				}
+			}
 
+			if (level instanceof ServerLevel serverLevel) {
 				serverLevel.addFreshEntity(abstractMinecart);
 				serverLevel.gameEvent(GameEvent.ENTITY_PLACE, blockPos, GameEvent.Context.of(useOnContext.getPlayer(), serverLevel.getBlockState(blockPos.below())));
 			}

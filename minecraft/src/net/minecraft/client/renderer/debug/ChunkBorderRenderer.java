@@ -25,8 +25,8 @@ public class ChunkBorderRenderer implements DebugRenderer.SimpleDebugRenderer {
 	@Override
 	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f) {
 		Entity entity = this.minecraft.gameRenderer.getMainCamera().getEntity();
-		float g = (float)((double)this.minecraft.level.getMinBuildHeight() - e);
-		float h = (float)((double)this.minecraft.level.getMaxBuildHeight() - e);
+		float g = (float)((double)this.minecraft.level.getMinY() - e);
+		float h = (float)((double)(this.minecraft.level.getMaxY() + 1) - e);
 		ChunkPos chunkPos = entity.chunkPosition();
 		float i = (float)((double)chunkPos.getMinBlockX() - d);
 		float j = (float)((double)chunkPos.getMinBlockZ() - f);
@@ -66,7 +66,7 @@ public class ChunkBorderRenderer implements DebugRenderer.SimpleDebugRenderer {
 			vertexConsumer.addVertex(matrix4f, i + 16.0F, h, j + (float)k).setColor(1.0F, 1.0F, 0.0F, 0.0F);
 		}
 
-		for (int k = this.minecraft.level.getMinBuildHeight(); k <= this.minecraft.level.getMaxBuildHeight(); k += 2) {
+		for (int k = this.minecraft.level.getMinY(); k <= this.minecraft.level.getMaxY() + 1; k += 2) {
 			float m = (float)((double)k - e);
 			int n = k % 8 == 0 ? CELL_BORDER : YELLOW;
 			vertexConsumer.addVertex(matrix4f, i, m, j).setColor(1.0F, 1.0F, 0.0F, 0.0F);
@@ -89,7 +89,7 @@ public class ChunkBorderRenderer implements DebugRenderer.SimpleDebugRenderer {
 			}
 		}
 
-		for (int k = this.minecraft.level.getMinBuildHeight(); k <= this.minecraft.level.getMaxBuildHeight(); k += 16) {
+		for (int k = this.minecraft.level.getMinY(); k <= this.minecraft.level.getMaxY() + 1; k += 16) {
 			float m = (float)((double)k - e);
 			vertexConsumer.addVertex(matrix4f, i, m, j).setColor(0.25F, 0.25F, 1.0F, 0.0F);
 			vertexConsumer.addVertex(matrix4f, i, m, j).setColor(0.25F, 0.25F, 1.0F, 1.0F);

@@ -51,7 +51,7 @@ public abstract class BaseRailBlock extends Block implements SimpleWaterloggedBl
 	@Override
 	protected VoxelShape getShape(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
 		RailShape railShape = blockState.is(this) ? blockState.getValue(this.getShapeProperty()) : null;
-		return railShape != null && railShape.isAscending() ? HALF_BLOCK_AABB : FLAT_AABB;
+		return railShape != null && railShape.isSlope() ? HALF_BLOCK_AABB : FLAT_AABB;
 	}
 
 	@Override
@@ -123,7 +123,7 @@ public abstract class BaseRailBlock extends Block implements SimpleWaterloggedBl
 	protected void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
 		if (!bl) {
 			super.onRemove(blockState, level, blockPos, blockState2, bl);
-			if (((RailShape)blockState.getValue(this.getShapeProperty())).isAscending()) {
+			if (((RailShape)blockState.getValue(this.getShapeProperty())).isSlope()) {
 				level.updateNeighborsAt(blockPos.above(), this);
 			}
 

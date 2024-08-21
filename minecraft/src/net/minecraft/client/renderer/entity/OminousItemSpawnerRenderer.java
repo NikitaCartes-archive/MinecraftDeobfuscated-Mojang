@@ -36,7 +36,7 @@ public class OminousItemSpawnerRenderer extends EntityRenderer<OminousItemSpawne
 	public void extractRenderState(OminousItemSpawner ominousItemSpawner, OminousItemSpawnerRenderState ominousItemSpawnerRenderState, float f) {
 		super.extractRenderState(ominousItemSpawner, ominousItemSpawnerRenderState, f);
 		ItemStack itemStack = ominousItemSpawner.getItem();
-		ominousItemSpawnerRenderState.item = itemStack;
+		ominousItemSpawnerRenderState.item = itemStack.copy();
 		ominousItemSpawnerRenderState.itemModel = !itemStack.isEmpty() ? this.itemRenderer.getModel(itemStack, ominousItemSpawner.level(), null, 0) : null;
 	}
 

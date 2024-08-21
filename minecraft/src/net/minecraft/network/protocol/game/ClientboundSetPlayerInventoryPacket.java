@@ -11,7 +11,7 @@ public record ClientboundSetPlayerInventoryPacket(int slot, ItemStack contents) 
 	public static final StreamCodec<RegistryFriendlyByteBuf, ClientboundSetPlayerInventoryPacket> STREAM_CODEC = StreamCodec.composite(
 		ByteBufCodecs.VAR_INT,
 		ClientboundSetPlayerInventoryPacket::slot,
-		ItemStack.STREAM_CODEC,
+		ItemStack.OPTIONAL_STREAM_CODEC,
 		ClientboundSetPlayerInventoryPacket::contents,
 		ClientboundSetPlayerInventoryPacket::new
 	);

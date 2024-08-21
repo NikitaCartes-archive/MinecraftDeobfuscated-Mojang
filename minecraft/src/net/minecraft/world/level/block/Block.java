@@ -81,6 +81,7 @@ public class Block extends BlockBehaviour implements ItemLike {
 	public static final int UPDATE_KNOWN_SHAPE = 16;
 	public static final int UPDATE_SUPPRESS_DROPS = 32;
 	public static final int UPDATE_MOVE_BY_PISTON = 64;
+	public static final int UPDATE_SKIP_SHAPE_UPDATE_ON_WIRE = 128;
 	public static final int UPDATE_NONE = 4;
 	public static final int UPDATE_ALL = 3;
 	public static final int UPDATE_ALL_IMMEDIATE = 11;

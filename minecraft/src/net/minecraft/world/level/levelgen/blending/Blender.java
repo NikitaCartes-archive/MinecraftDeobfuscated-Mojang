@@ -257,8 +257,8 @@ public class Blender {
 		BlockPos blockPos = new BlockPos(chunkPos.getMinBlockX(), 0, chunkPos.getMinBlockZ());
 		BlendingData blendingData = chunkAccess.getBlendingData();
 		if (blendingData != null) {
-			int i = blendingData.getAreaWithOldGeneration().getMinBuildHeight();
-			int j = blendingData.getAreaWithOldGeneration().getMaxBuildHeight() - 1;
+			int i = blendingData.getAreaWithOldGeneration().getMinY();
+			int j = blendingData.getAreaWithOldGeneration().getMaxY();
 			if (bl) {
 				for (int k = 0; k < 16; k++) {
 					for (int l = 0; l < 16; l++) {
@@ -363,7 +363,7 @@ public class Blender {
 		double f = d;
 		double g = e;
 		double h = (double)blendingData.getAreaWithOldGeneration().getHeight() / 2.0;
-		double i = (double)blendingData.getAreaWithOldGeneration().getMinBuildHeight() + h;
+		double i = (double)blendingData.getAreaWithOldGeneration().getMinY() + h;
 		return (hx, ix, j) -> distanceToCube(hx - 8.0 - f, ix - i, j - 8.0 - g, 8.0, h, 8.0);
 	}
 

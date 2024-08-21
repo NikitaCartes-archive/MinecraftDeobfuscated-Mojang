@@ -642,7 +642,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 	public void resetPos() {
 		this.setPose(Pose.STANDING);
 		if (this.level() != null) {
-			for (double d = this.getY(); d > (double)this.level().getMinBuildHeight() && d < (double)this.level().getMaxBuildHeight(); d++) {
+			for (double d = this.getY(); d > (double)this.level().getMinY() && d <= (double)this.level().getMaxY(); d++) {
 				this.setPos(this.getX(), d, this.getZ());
 				if (this.level().noCollision(this)) {
 					break;

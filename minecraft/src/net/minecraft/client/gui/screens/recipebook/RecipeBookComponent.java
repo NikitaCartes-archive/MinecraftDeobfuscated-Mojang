@@ -13,6 +13,7 @@ import net.minecraft.client.ClientRecipeBook;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.RecipeBookCategories;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.StateSwitchingButton;
@@ -21,6 +22,7 @@ import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.gui.navigation.CommonInputs;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.renderer.RenderType;
@@ -72,6 +74,10 @@ public abstract class RecipeBookComponent<T extends RecipeBookMenu> implements R
 	private String lastSearch = "";
 	private ClientRecipeBook book;
 	private final RecipeBookPage recipeBookPage;
+	@Nullable
+	private RecipeHolder<?> lastRecipe;
+	@Nullable
+	private RecipeCollection lastRecipeCollection;
 	private final StackedItemContents stackedContents = new StackedItemContents();
 	private int timesInventoryChanged;
 	private boolean ignoreTextInput;
@@ -306,12 +312,12 @@ public abstract class RecipeBookComponent<T extends RecipeBookMenu> implements R
 				RecipeHolder<?> recipeHolder = this.recipeBookPage.getLastClickedRecipe();
 				RecipeCollection recipeCollection = this.recipeBookPage.getLastClickedRecipeCollection();
 				if (recipeHolder != null && recipeCollection != null) {
-					if (!recipeCollection.isCraftable(recipeHolder) && this.ghostRecipe == recipeHolder) {
+					if (!this.tryPlaceRecipe(recipeCollection, recipeHolder)) {
 						return false;
 					}
 
-					this.clearGhostRecipe();
-					this.minecraft.gameMode.handlePlaceRecipe(this.minecraft.player.containerMenu.containerId, recipeHolder, Screen.hasShiftDown());
+					this.lastRecipeCollection = recipeCollection;
+					this.lastRecipe = recipeHolder;
 					if (!this.isOffsetNextToMainGUI()) {
 						this.setVisible(false);
 					}
@@ -355,6 +361,16 @@ public abstract class RecipeBookComponent<T extends RecipeBookMenu> implements R
 		}
 	}
 
+	private boolean tryPlaceRecipe(RecipeCollection recipeCollection, RecipeHolder<?> recipeHolder) {
+		if (!recipeCollection.isCraftable(recipeHolder) && this.ghostRecipe == recipeHolder) {
+			return false;
+		} else {
+			this.clearGhostRecipe();
+			this.minecraft.gameMode.handlePlaceRecipe(this.minecraft.player.containerMenu.containerId, recipeHolder, Screen.hasShiftDown());
+			return true;
+		}
+	}
+
 	private boolean toggleFiltering() {
 		RecipeBookType recipeBookType = this.menu.getRecipeBookType();
 		boolean bl = !this.book.isFiltering(recipeBookType);
@@ -389,6 +405,9 @@ public abstract class RecipeBookComponent<T extends RecipeBookMenu> implements R
 			this.ignoreTextInput = true;
 			this.searchBox.setFocused(true);
 			return true;
+		} else if (CommonInputs.selected(i) && this.lastRecipeCollection != null && this.lastRecipe != null) {
+			AbstractWidget.playButtonClickSound(Minecraft.getInstance().getSoundManager());
+			return this.tryPlaceRecipe(this.lastRecipeCollection, this.lastRecipe);
 		} else {
 			return false;
 		}

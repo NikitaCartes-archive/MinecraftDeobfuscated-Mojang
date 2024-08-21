@@ -187,6 +187,10 @@ public abstract class LayerLightSectionStorage<M extends DataLayerStorageMap<M>>
 		return this.columnsWithSources.contains(m);
 	}
 
+	protected boolean lightOnInColumn(long l) {
+		return this.columnsWithSources.contains(l);
+	}
+
 	public void retainData(long l, boolean bl) {
 		if (bl) {
 			this.columnsToRetainQueuedDataFor.add(l);

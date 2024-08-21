@@ -130,6 +130,7 @@ import net.minecraft.client.renderer.GpuWarnlistManager;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MapRenderer;
 import net.minecraft.client.renderer.RenderBuffers;
+import net.minecraft.client.renderer.ShaderManager;
 import net.minecraft.client.renderer.VirtualScreen;
 import net.minecraft.client.renderer.block.BlockModelShaper;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
@@ -260,6 +261,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	private final Path resourcePackDirectory;
 	private final CompletableFuture<ProfileResult> profileFuture;
 	private final TextureManager textureManager;
+	private final ShaderManager shaderManager;
 	private final DataFixer fixerUpper;
 	private final VirtualScreen virtualScreen;
 	private final Window window;
@@ -492,6 +494,8 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		this.resourceManager.registerReloadListener(this.languageManager);
 		this.textureManager = new TextureManager(this.resourceManager);
 		this.resourceManager.registerReloadListener(this.textureManager);
+		this.shaderManager = new ShaderManager(this.textureManager);
+		this.resourceManager.registerReloadListener(this.shaderManager);
 		this.skinManager = new SkinManager(this.textureManager, file.toPath().resolve("skins"), this.minecraftSessionService, this);
 		this.levelSource = new LevelStorageSource(path.resolve("saves"), path.resolve("backups"), this.directoryValidator, this.fixerUpper);
 		this.commandHistory = new CommandHistory(path);
@@ -561,7 +565,6 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		this.guiSprites = new GuiSpriteManager(this.textureManager);
 		this.resourceManager.registerReloadListener(this.guiSprites);
 		this.gameRenderer = new GameRenderer(this, this.entityRenderDispatcher.getItemInHandRenderer(), this.resourceManager, this.renderBuffers);
-		this.resourceManager.registerReloadListener(this.gameRenderer.createReloadListener());
 		this.levelRenderer = new LevelRenderer(this, this.entityRenderDispatcher, this.blockEntityRenderDispatcher, this.renderBuffers);
 		this.resourceManager.registerReloadListener(this.levelRenderer);
 		this.resourceManager.registerReloadListener(this.levelRenderer.getCloudRenderer());
@@ -1096,6 +1099,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			this.modelManager.close();
 			this.fontManager.close();
 			this.gameRenderer.close();
+			this.shaderManager.close();
 			this.levelRenderer.close();
 			this.soundManager.destroy();
 			this.particleEngine.close();
@@ -1682,8 +1686,8 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			if (!this.pause) {
 				this.level.tickEntities();
 			}
-		} else if (this.gameRenderer.currentEffect() != null) {
-			this.gameRenderer.shutdownEffect();
+		} else if (this.gameRenderer.currentPostEffect() != null) {
+			this.gameRenderer.clearPostEffect();
 		}
 
 		if (!this.pause) {
@@ -2354,6 +2358,10 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		return this.textureManager;
 	}
 
+	public ShaderManager getShaderManager() {
+		return this.shaderManager;
+	}
+
 	public ResourceManager getResourceManager() {
 		return this.resourceManager;
 	}
@@ -2548,7 +2556,6 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		MutableComponent var12;
 		try {
 			this.gameRenderer.setPanoramicMode(true);
-			this.levelRenderer.graphicsChanged();
 			this.window.setWidth(i);
 			this.window.setHeight(j);
 
@@ -2611,7 +2618,6 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			this.window.setHeight(l);
 			renderTarget.destroyBuffers();
 			this.gameRenderer.setPanoramicMode(false);
-			this.levelRenderer.graphicsChanged();
 			this.getMainRenderTarget().bindWrite(true);
 		}
 

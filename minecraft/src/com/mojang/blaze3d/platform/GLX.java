@@ -17,7 +17,7 @@ import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.CoreShaders;
 import org.lwjgl.Version;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
@@ -110,7 +110,7 @@ public class GLX {
 			RenderSystem.assertOnRenderThread();
 			GlStateManager._depthMask(false);
 			GlStateManager._disableCull();
-			RenderSystem.setShader(GameRenderer::getRendertypeLinesShader);
+			RenderSystem.setShader(CoreShaders.RENDERTYPE_LINES);
 			Tesselator tesselator = RenderSystem.renderThreadTesselator();
 			BufferBuilder bufferBuilder = tesselator.begin(VertexFormat.Mode.LINES, DefaultVertexFormat.POSITION_COLOR_NORMAL);
 			RenderSystem.lineWidth(4.0F);

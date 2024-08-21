@@ -61,7 +61,7 @@ public class ChunkCullingDebugRenderer implements DebugRenderer.SimpleDebugRende
 						}
 					}
 
-					if (this.minecraft.sectionVisibility && !renderSection.getCompiled().hasNoRenderableLayers()) {
+					if (this.minecraft.sectionVisibility && renderSection.getCompiled().hasRenderableLayers()) {
 						VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.lines());
 						int i = 0;
 
