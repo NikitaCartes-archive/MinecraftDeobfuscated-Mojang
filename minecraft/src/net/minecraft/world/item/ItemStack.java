@@ -372,7 +372,11 @@ public final class ItemStack implements DataComponentHolder {
 		boolean bl = this.getUseDuration(player) <= 0;
 		InteractionResult interactionResult = this.getItem().use(level, player, interactionHand);
 		return (InteractionResult)(bl && interactionResult instanceof InteractionResult.Success success
-			? success.heldItemTransformedTo(this.applyAfterUseComponentSideEffects(player, itemStack))
+			? success.heldItemTransformedTo(
+				success.heldItemTransformedTo() == null
+					? this.applyAfterUseComponentSideEffects(player, itemStack)
+					: success.heldItemTransformedTo().applyAfterUseComponentSideEffects(player, itemStack)
+			)
 			: interactionResult);
 	}
 
@@ -696,10 +700,11 @@ public final class ItemStack implements DataComponentHolder {
 
 	public void releaseUsing(Level level, LivingEntity livingEntity, int i) {
 		ItemStack itemStack = this.copy();
-		this.getItem().releaseUsing(this, level, livingEntity, i);
-		ItemStack itemStack2 = this.applyAfterUseComponentSideEffects(livingEntity, itemStack);
-		if (itemStack2 != this) {
-			livingEntity.setItemInHand(livingEntity.getUsedItemHand(), itemStack2);
+		if (this.getItem().releaseUsing(this, level, livingEntity, i)) {
+			ItemStack itemStack2 = this.applyAfterUseComponentSideEffects(livingEntity, itemStack);
+			if (itemStack2 != this) {
+				livingEntity.setItemInHand(livingEntity.getUsedItemHand(), itemStack2);
+			}
 		}
 	}
 
@@ -768,6 +773,15 @@ public final class ItemStack implements DataComponentHolder {
 		}
 	}
 
+	public Component getStyledHoverName() {
+		MutableComponent mutableComponent = Component.empty().append(this.getHoverName()).withStyle(this.getRarity().color());
+		if (this.has(DataComponents.CUSTOM_NAME)) {
+			mutableComponent.withStyle(ChatFormatting.ITALIC);
+		}
+
+		return mutableComponent;
+	}
+
 	private <T extends TooltipProvider> void addToTooltip(
 		DataComponentType<T> dataComponentType, Item.TooltipContext tooltipContext, Consumer<Component> consumer, TooltipFlag tooltipFlag
 	) {
@@ -782,12 +796,7 @@ public final class ItemStack implements DataComponentHolder {
 			return List.of();
 		} else {
 			List<Component> list = Lists.<Component>newArrayList();
-			MutableComponent mutableComponent = Component.empty().append(this.getHoverName()).withStyle(this.getRarity().color());
-			if (this.has(DataComponents.CUSTOM_NAME)) {
-				mutableComponent.withStyle(ChatFormatting.ITALIC);
-			}
-
-			list.add(mutableComponent);
+			list.add(this.getStyledHoverName());
 			if (!tooltipFlag.isAdvanced() && !this.has(DataComponents.CUSTOM_NAME) && this.is(Items.FILLED_MAP)) {
 				MapId mapId = this.get(DataComponents.MAP_ID);
 				if (mapId != null) {

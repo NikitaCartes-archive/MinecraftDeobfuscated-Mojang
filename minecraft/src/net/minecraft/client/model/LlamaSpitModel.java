@@ -13,10 +13,9 @@ import net.minecraft.client.renderer.entity.state.EntityRenderState;
 @Environment(EnvType.CLIENT)
 public class LlamaSpitModel extends EntityModel<EntityRenderState> {
 	private static final String MAIN = "main";
-	private final ModelPart root;
 
 	public LlamaSpitModel(ModelPart modelPart) {
-		this.root = modelPart;
+		super(modelPart);
 	}
 
 	public static LayerDefinition createBodyLayer() {
@@ -37,14 +36,5 @@ public class LlamaSpitModel extends EntityModel<EntityRenderState> {
 			PartPose.ZERO
 		);
 		return LayerDefinition.create(meshDefinition, 64, 32);
-	}
-
-	@Override
-	public void setupAnim(EntityRenderState entityRenderState) {
-	}
-
-	@Override
-	public ModelPart root() {
-		return this.root;
 	}
 }

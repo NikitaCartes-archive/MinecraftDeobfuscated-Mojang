@@ -22,7 +22,9 @@ public class RegistryDumpReport implements DataProvider {
 	@Override
 	public CompletableFuture<?> run(CachedOutput cachedOutput) {
 		JsonObject jsonObject = new JsonObject();
-		BuiltInRegistries.REGISTRY.holders().forEach(reference -> jsonObject.add(reference.key().location().toString(), dumpRegistry((Registry)reference.value())));
+		BuiltInRegistries.REGISTRY
+			.listElements()
+			.forEach(reference -> jsonObject.add(reference.key().location().toString(), dumpRegistry((Registry)reference.value())));
 		Path path = this.output.getOutputFolder(PackOutput.Target.REPORTS).resolve("registries.json");
 		return DataProvider.saveStable(cachedOutput, jsonObject, path);
 	}
@@ -37,7 +39,7 @@ public class RegistryDumpReport implements DataProvider {
 		int i = BuiltInRegistries.REGISTRY.getId(registry);
 		jsonObject.addProperty("protocol_id", i);
 		JsonObject jsonObject2 = new JsonObject();
-		registry.holders().forEach(reference -> {
+		registry.listElements().forEach(reference -> {
 			T object = (T)reference.value();
 			int ix = registry.getId(object);
 			JsonObject jsonObject2x = new JsonObject();

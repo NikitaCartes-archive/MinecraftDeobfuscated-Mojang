@@ -4,6 +4,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketType;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 
@@ -42,7 +43,7 @@ public class ClientboundRotateHeadPacket implements Packet<ClientGamePacketListe
 		return level.getEntity(this.entityId);
 	}
 
-	public byte getYHeadRot() {
-		return this.yHeadRot;
+	public float getYHeadRot() {
+		return Mth.unpackDegrees(this.yHeadRot);
 	}
 }

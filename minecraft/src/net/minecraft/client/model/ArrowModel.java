@@ -15,11 +15,8 @@ import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
 public class ArrowModel extends EntityModel<ArrowRenderState> {
-	private final ModelPart root;
-
 	public ArrowModel(ModelPart modelPart) {
-		super(RenderType::entityCutout);
-		this.root = modelPart;
+		super(modelPart, RenderType::entityCutout);
 	}
 
 	public static LayerDefinition createBodyLayer() {
@@ -37,15 +34,10 @@ public class ArrowModel extends EntityModel<ArrowRenderState> {
 	}
 
 	public void setupAnim(ArrowRenderState arrowRenderState) {
-		this.root.resetPose();
+		super.setupAnim(arrowRenderState);
 		if (arrowRenderState.shake > 0.0F) {
 			float f = -Mth.sin(arrowRenderState.shake * 3.0F) * arrowRenderState.shake;
 			this.root.zRot += f * (float) (Math.PI / 180.0);
 		}
-	}
-
-	@Override
-	public ModelPart root() {
-		return this.root;
 	}
 }

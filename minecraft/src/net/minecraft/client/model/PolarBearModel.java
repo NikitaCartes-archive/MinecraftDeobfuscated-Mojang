@@ -54,7 +54,6 @@ public class PolarBearModel extends QuadrupedModel<PolarBearRenderState> {
 	}
 
 	public void setupAnim(PolarBearRenderState polarBearRenderState) {
-		this.root().getAllParts().forEach(ModelPart::resetPose);
 		super.setupAnim(polarBearRenderState);
 		float f = polarBearRenderState.standScale * polarBearRenderState.standScale;
 		float g = polarBearRenderState.ageScale;

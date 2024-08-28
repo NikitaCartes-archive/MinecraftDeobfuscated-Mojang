@@ -24,7 +24,6 @@ public class ArmadilloModel extends EntityModel<ArmadilloRenderState> {
 	private static final String HEAD_CUBE = "head_cube";
 	private static final String RIGHT_EAR_CUBE = "right_ear_cube";
 	private static final String LEFT_EAR_CUBE = "left_ear_cube";
-	private final ModelPart root;
 	private final ModelPart body;
 	private final ModelPart rightHindLeg;
 	private final ModelPart leftHindLeg;
@@ -33,7 +32,7 @@ public class ArmadilloModel extends EntityModel<ArmadilloRenderState> {
 	private final ModelPart tail;
 
 	public ArmadilloModel(ModelPart modelPart) {
-		this.root = modelPart;
+		super(modelPart);
 		this.body = modelPart.getChild("body");
 		this.rightHindLeg = modelPart.getChild("right_hind_leg");
 		this.leftHindLeg = modelPart.getChild("left_hind_leg");
@@ -105,13 +104,8 @@ public class ArmadilloModel extends EntityModel<ArmadilloRenderState> {
 		return LayerDefinition.create(meshDefinition, 64, 64);
 	}
 
-	@Override
-	public ModelPart root() {
-		return this.root;
-	}
-
 	public void setupAnim(ArmadilloRenderState armadilloRenderState) {
-		this.root().getAllParts().forEach(ModelPart::resetPose);
+		super.setupAnim(armadilloRenderState);
 		if (armadilloRenderState.isHidingInShell) {
 			this.body.skipDraw = true;
 			this.leftHindLeg.visible = false;

@@ -17,23 +17,15 @@ import net.minecraft.world.entity.HumanoidArm;
 
 @Environment(EnvType.CLIENT)
 public class VexModel extends EntityModel<VexRenderState> implements ArmedModel {
-	private final ModelPart root;
-	private final ModelPart body;
-	private final ModelPart rightArm;
-	private final ModelPart leftArm;
-	private final ModelPart rightWing;
-	private final ModelPart leftWing;
-	private final ModelPart head;
+	private final ModelPart body = this.root.getChild("body");
+	private final ModelPart rightArm = this.body.getChild("right_arm");
+	private final ModelPart leftArm = this.body.getChild("left_arm");
+	private final ModelPart rightWing = this.body.getChild("right_wing");
+	private final ModelPart leftWing = this.body.getChild("left_wing");
+	private final ModelPart head = this.root.getChild("head");
 
 	public VexModel(ModelPart modelPart) {
-		super(RenderType::entityTranslucent);
-		this.root = modelPart.getChild("root");
-		this.body = this.root.getChild("body");
-		this.rightArm = this.body.getChild("right_arm");
-		this.leftArm = this.body.getChild("left_arm");
-		this.rightWing = this.body.getChild("right_wing");
-		this.leftWing = this.body.getChild("left_wing");
-		this.head = this.root.getChild("head");
+		super(modelPart.getChild("root"), RenderType::entityTranslucent);
 	}
 
 	public static LayerDefinition createBodyLayer() {
@@ -76,7 +68,7 @@ public class VexModel extends EntityModel<VexRenderState> implements ArmedModel 
 	}
 
 	public void setupAnim(VexRenderState vexRenderState) {
-		this.root().getAllParts().forEach(ModelPart::resetPose);
+		super.setupAnim(vexRenderState);
 		this.head.yRot = vexRenderState.yRot * (float) (Math.PI / 180.0);
 		this.head.xRot = vexRenderState.xRot * (float) (Math.PI / 180.0);
 		float f = Mth.cos(vexRenderState.ageInTicks * 5.5F * (float) (Math.PI / 180.0)) * 0.1F;
@@ -118,11 +110,6 @@ public class VexModel extends EntityModel<VexRenderState> implements ArmedModel 
 				this.leftArm.zRot = 0.47123888F + f;
 			}
 		}
-	}
-
-	@Override
-	public ModelPart root() {
-		return this.root;
 	}
 
 	@Override

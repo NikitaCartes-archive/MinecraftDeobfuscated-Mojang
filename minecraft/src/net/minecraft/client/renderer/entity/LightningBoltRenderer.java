@@ -7,8 +7,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.state.LightningBoltRenderState;
-import net.minecraft.client.renderer.texture.TextureAtlas;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LightningBolt;
 import org.joml.Matrix4f;
@@ -109,10 +107,6 @@ public class LightningBoltRenderer extends EntityRenderer<LightningBolt, Lightni
 		vertexConsumer.addVertex(matrix4f, h + (bl ? n : -n), (float)((i + 1) * 16), j + (bl2 ? n : -n)).setColor(k, l, m, 0.3F);
 		vertexConsumer.addVertex(matrix4f, h + (bl3 ? n : -n), (float)((i + 1) * 16), j + (bl4 ? n : -n)).setColor(k, l, m, 0.3F);
 		vertexConsumer.addVertex(matrix4f, f + (bl3 ? o : -o), (float)(i * 16), g + (bl4 ? o : -o)).setColor(k, l, m, 0.3F);
-	}
-
-	public ResourceLocation getTextureLocation(LightningBoltRenderState lightningBoltRenderState) {
-		return TextureAtlas.LOCATION_BLOCKS;
 	}
 
 	public LightningBoltRenderState createRenderState() {

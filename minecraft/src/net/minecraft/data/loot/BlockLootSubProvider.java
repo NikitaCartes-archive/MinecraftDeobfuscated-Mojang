@@ -46,7 +46,6 @@ import net.minecraft.world.level.block.StemBlock;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.block.state.properties.SlabType;
-import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.level.storage.loot.IntRange;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.LootTable;
@@ -642,17 +641,21 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
 
 		for (Block block : BuiltInRegistries.BLOCK) {
 			if (block.isEnabled(this.enabledFeatures)) {
-				ResourceKey<LootTable> resourceKey = block.getLootTable();
-				if (resourceKey != BuiltInLootTables.EMPTY && set.add(resourceKey)) {
-					LootTable.Builder builder = (LootTable.Builder)this.map.remove(resourceKey);
-					if (builder == null) {
-						throw new IllegalStateException(
-							String.format(Locale.ROOT, "Missing loottable '%s' for '%s'", resourceKey.location(), BuiltInRegistries.BLOCK.getKey(block))
-						);
-					}
+				block.getLootTable()
+					.ifPresent(
+						resourceKey -> {
+							if (set.add(resourceKey)) {
+								LootTable.Builder builder = (LootTable.Builder)this.map.remove(resourceKey);
+								if (builder == null) {
+									throw new IllegalStateException(
+										String.format(Locale.ROOT, "Missing loottable '%s' for '%s'", resourceKey.location(), BuiltInRegistries.BLOCK.getKey(block))
+									);
+								}
 
-					biConsumer.accept(resourceKey, builder);
-				}
+								biConsumer.accept(resourceKey, builder);
+							}
+						}
+					);
 			}
 		}
 
@@ -701,6 +704,6 @@ public abstract class BlockLootSubProvider implements LootTableSubProvider {
 	}
 
 	protected void add(Block block, LootTable.Builder builder) {
-		this.map.put(block.getLootTable(), builder);
+		this.map.put((ResourceKey)block.getLootTable().orElseThrow(() -> new IllegalStateException("Block " + block + " does not have loot table")), builder);
 	}
 }

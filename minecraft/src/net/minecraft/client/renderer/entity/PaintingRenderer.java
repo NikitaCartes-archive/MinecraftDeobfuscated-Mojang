@@ -15,7 +15,6 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.PaintingTextureManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.decoration.Painting;
 import net.minecraft.world.entity.decoration.PaintingVariant;
@@ -32,8 +31,9 @@ public class PaintingRenderer extends EntityRenderer<Painting, PaintingRenderSta
 		if (paintingVariant != null) {
 			poseStack.pushPose();
 			poseStack.mulPose(Axis.YP.rotationDegrees((float)(180 - paintingRenderState.direction.get2DDataValue() * 90)));
-			VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entitySolidZOffsetForward(this.getTextureLocation(paintingRenderState)));
 			PaintingTextureManager paintingTextureManager = Minecraft.getInstance().getPaintingTextures();
+			TextureAtlasSprite textureAtlasSprite = paintingTextureManager.getBackSprite();
+			VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entitySolidZOffsetForward(textureAtlasSprite.atlasLocation()));
 			this.renderPainting(
 				poseStack,
 				vertexConsumer,
@@ -41,15 +41,11 @@ public class PaintingRenderer extends EntityRenderer<Painting, PaintingRenderSta
 				paintingVariant.width(),
 				paintingVariant.height(),
 				paintingTextureManager.get(paintingVariant),
-				paintingTextureManager.getBackSprite()
+				textureAtlasSprite
 			);
 			poseStack.popPose();
 			super.render(paintingRenderState, poseStack, multiBufferSource, i);
 		}
-	}
-
-	public ResourceLocation getTextureLocation(PaintingRenderState paintingRenderState) {
-		return Minecraft.getInstance().getPaintingTextures().getBackSprite().atlasLocation();
 	}
 
 	public PaintingRenderState createRenderState() {

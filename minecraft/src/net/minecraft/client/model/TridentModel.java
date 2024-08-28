@@ -14,11 +14,9 @@ import net.minecraft.resources.ResourceLocation;
 @Environment(EnvType.CLIENT)
 public class TridentModel extends Model {
 	public static final ResourceLocation TEXTURE = ResourceLocation.withDefaultNamespace("textures/entity/trident.png");
-	private final ModelPart root;
 
 	public TridentModel(ModelPart modelPart) {
-		super(RenderType::entitySolid);
-		this.root = modelPart;
+		super(modelPart, RenderType::entitySolid);
 	}
 
 	public static LayerDefinition createLayer() {
@@ -32,10 +30,5 @@ public class TridentModel extends Model {
 		partDefinition2.addOrReplaceChild("middle_spike", CubeListBuilder.create().texOffs(0, 0).addBox(-0.5F, -4.0F, -0.5F, 1.0F, 4.0F, 1.0F), PartPose.ZERO);
 		partDefinition2.addOrReplaceChild("right_spike", CubeListBuilder.create().texOffs(4, 3).mirror().addBox(1.5F, -3.0F, -0.5F, 1.0F, 4.0F, 1.0F), PartPose.ZERO);
 		return LayerDefinition.create(meshDefinition, 32, 32);
-	}
-
-	@Override
-	public ModelPart root() {
-		return this.root;
 	}
 }

@@ -14,11 +14,10 @@ import net.minecraft.client.renderer.entity.state.SlimeRenderState;
 @Environment(EnvType.CLIENT)
 public class LavaSlimeModel extends EntityModel<SlimeRenderState> {
 	private static final int SEGMENT_COUNT = 8;
-	private final ModelPart root;
 	private final ModelPart[] bodyCubes = new ModelPart[8];
 
 	public LavaSlimeModel(ModelPart modelPart) {
-		this.root = modelPart;
+		super(modelPart);
 		Arrays.setAll(this.bodyCubes, i -> modelPart.getChild(getSegmentName(i)));
 	}
 
@@ -51,15 +50,11 @@ public class LavaSlimeModel extends EntityModel<SlimeRenderState> {
 	}
 
 	public void setupAnim(SlimeRenderState slimeRenderState) {
+		super.setupAnim(slimeRenderState);
 		float f = Math.max(0.0F, slimeRenderState.squish);
 
 		for (int i = 0; i < this.bodyCubes.length; i++) {
 			this.bodyCubes[i].y = (float)(-(4 - i)) * f * 1.7F;
 		}
-	}
-
-	@Override
-	public ModelPart root() {
-		return this.root;
 	}
 }

@@ -109,7 +109,7 @@ public class GsonHelper {
 		if (jsonElement.isJsonPrimitive()) {
 			String string2 = jsonElement.getAsString();
 			return (Holder<Item>)BuiltInRegistries.ITEM
-				.getHolder(ResourceLocation.parse(string2))
+				.get(ResourceLocation.parse(string2))
 				.orElseThrow(() -> new JsonSyntaxException("Expected " + string + " to be an item, was unknown string '" + string2 + "'"));
 		} else {
 			throw new JsonSyntaxException("Expected " + string + " to be an item, was " + getType(jsonElement));

@@ -15,7 +15,6 @@ import net.minecraft.util.Mth;
 @Environment(EnvType.CLIENT)
 public class WitchModel extends EntityModel<WitchRenderState> implements HeadedModel, VillagerHeadModel {
 	protected final ModelPart nose;
-	private final ModelPart root;
 	private final ModelPart head;
 	private final ModelPart hat;
 	private final ModelPart hatRim;
@@ -23,7 +22,7 @@ public class WitchModel extends EntityModel<WitchRenderState> implements HeadedM
 	private final ModelPart leftLeg;
 
 	public WitchModel(ModelPart modelPart) {
-		this.root = modelPart;
+		super(modelPart);
 		this.head = modelPart.getChild("head");
 		this.hat = this.head.getChild("hat");
 		this.hatRim = this.hat.getChild("hat_rim");
@@ -64,17 +63,13 @@ public class WitchModel extends EntityModel<WitchRenderState> implements HeadedM
 	}
 
 	public void setupAnim(WitchRenderState witchRenderState) {
+		super.setupAnim(witchRenderState);
 		this.head.yRot = witchRenderState.yRot * (float) (Math.PI / 180.0);
 		this.head.xRot = witchRenderState.xRot * (float) (Math.PI / 180.0);
-		this.head.zRot = 0.0F;
 		this.rightLeg.xRot = Mth.cos(witchRenderState.walkAnimationPos * 0.6662F) * 1.4F * witchRenderState.walkAnimationSpeed * 0.5F;
 		this.leftLeg.xRot = Mth.cos(witchRenderState.walkAnimationPos * 0.6662F + (float) Math.PI) * 1.4F * witchRenderState.walkAnimationSpeed * 0.5F;
-		this.rightLeg.yRot = 0.0F;
-		this.leftLeg.yRot = 0.0F;
-		this.nose.setPos(0.0F, -2.0F, 0.0F);
 		float f = 0.01F * (float)(witchRenderState.entityId % 10);
 		this.nose.xRot = Mth.sin(witchRenderState.ageInTicks * f) * 4.5F * (float) (Math.PI / 180.0);
-		this.nose.yRot = 0.0F;
 		this.nose.zRot = Mth.cos(witchRenderState.ageInTicks * f) * 2.5F * (float) (Math.PI / 180.0);
 		if (witchRenderState.isHoldingItem) {
 			this.nose.setPos(0.0F, 1.0F, -1.5F);
@@ -84,11 +79,6 @@ public class WitchModel extends EntityModel<WitchRenderState> implements HeadedM
 
 	public ModelPart getNose() {
 		return this.nose;
-	}
-
-	@Override
-	public ModelPart root() {
-		return this.root;
 	}
 
 	@Override

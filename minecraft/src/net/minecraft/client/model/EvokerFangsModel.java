@@ -16,13 +16,12 @@ public class EvokerFangsModel extends EntityModel<EvokerFangsRenderState> {
 	private static final String BASE = "base";
 	private static final String UPPER_JAW = "upper_jaw";
 	private static final String LOWER_JAW = "lower_jaw";
-	private final ModelPart root;
 	private final ModelPart base;
 	private final ModelPart upperJaw;
 	private final ModelPart lowerJaw;
 
 	public EvokerFangsModel(ModelPart modelPart) {
-		this.root = modelPart;
+		super(modelPart);
 		this.base = modelPart.getChild("base");
 		this.upperJaw = this.base.getChild("upper_jaw");
 		this.lowerJaw = this.base.getChild("lower_jaw");
@@ -41,7 +40,7 @@ public class EvokerFangsModel extends EntityModel<EvokerFangsRenderState> {
 	}
 
 	public void setupAnim(EvokerFangsRenderState evokerFangsRenderState) {
-		this.root.getAllParts().forEach(ModelPart::resetPose);
+		super.setupAnim(evokerFangsRenderState);
 		float f = evokerFangsRenderState.biteProgress;
 		float g = Math.min(f * 2.0F, 1.0F);
 		g = 1.0F - g * g * g;
@@ -57,10 +56,5 @@ public class EvokerFangsModel extends EntityModel<EvokerFangsRenderState> {
 		this.root.xScale = h;
 		this.root.yScale = h;
 		this.root.zScale = h;
-	}
-
-	@Override
-	public ModelPart root() {
-		return this.root;
 	}
 }

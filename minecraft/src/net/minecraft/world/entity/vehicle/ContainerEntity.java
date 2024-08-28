@@ -38,13 +38,13 @@ public interface ContainerEntity extends Container, MenuProvider {
 	AABB getBoundingBox();
 
 	@Nullable
-	ResourceKey<LootTable> getLootTable();
+	ResourceKey<LootTable> getContainerLootTable();
 
-	void setLootTable(@Nullable ResourceKey<LootTable> resourceKey);
+	void setContainerLootTable(@Nullable ResourceKey<LootTable> resourceKey);
 
-	long getLootTableSeed();
+	long getContainerLootTableSeed();
 
-	void setLootTableSeed(long l);
+	void setContainerLootTableSeed(long l);
 
 	NonNullList<ItemStack> getItemStacks();
 
@@ -60,10 +60,10 @@ public interface ContainerEntity extends Container, MenuProvider {
 	}
 
 	default void addChestVehicleSaveData(CompoundTag compoundTag, HolderLookup.Provider provider) {
-		if (this.getLootTable() != null) {
-			compoundTag.putString("LootTable", this.getLootTable().location().toString());
-			if (this.getLootTableSeed() != 0L) {
-				compoundTag.putLong("LootTableSeed", this.getLootTableSeed());
+		if (this.getContainerLootTable() != null) {
+			compoundTag.putString("LootTable", this.getContainerLootTable().location().toString());
+			if (this.getContainerLootTableSeed() != 0L) {
+				compoundTag.putLong("LootTableSeed", this.getContainerLootTableSeed());
 			}
 		} else {
 			ContainerHelper.saveAllItems(compoundTag, this.getItemStacks(), provider);
@@ -73,8 +73,8 @@ public interface ContainerEntity extends Container, MenuProvider {
 	default void readChestVehicleSaveData(CompoundTag compoundTag, HolderLookup.Provider provider) {
 		this.clearItemStacks();
 		if (compoundTag.contains("LootTable", 8)) {
-			this.setLootTable(ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.parse(compoundTag.getString("LootTable"))));
-			this.setLootTableSeed(compoundTag.getLong("LootTableSeed"));
+			this.setContainerLootTable(ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.parse(compoundTag.getString("LootTable"))));
+			this.setContainerLootTableSeed(compoundTag.getLong("LootTableSeed"));
 		} else {
 			ContainerHelper.loadAllItems(compoundTag, this.getItemStacks(), provider);
 		}
@@ -99,19 +99,19 @@ public interface ContainerEntity extends Container, MenuProvider {
 
 	default void unpackChestVehicleLootTable(@Nullable Player player) {
 		MinecraftServer minecraftServer = this.level().getServer();
-		if (this.getLootTable() != null && minecraftServer != null) {
-			LootTable lootTable = minecraftServer.reloadableRegistries().getLootTable(this.getLootTable());
+		if (this.getContainerLootTable() != null && minecraftServer != null) {
+			LootTable lootTable = minecraftServer.reloadableRegistries().getLootTable(this.getContainerLootTable());
 			if (player != null) {
-				CriteriaTriggers.GENERATE_LOOT.trigger((ServerPlayer)player, this.getLootTable());
+				CriteriaTriggers.GENERATE_LOOT.trigger((ServerPlayer)player, this.getContainerLootTable());
 			}
 
-			this.setLootTable(null);
+			this.setContainerLootTable(null);
 			LootParams.Builder builder = new LootParams.Builder((ServerLevel)this.level()).withParameter(LootContextParams.ORIGIN, this.position());
 			if (player != null) {
 				builder.withLuck(player.getLuck()).withParameter(LootContextParams.THIS_ENTITY, player);
 			}
 
-			lootTable.fill(this, builder.create(LootContextParamSets.CHEST), this.getLootTableSeed());
+			lootTable.fill(this, builder.create(LootContextParamSets.CHEST), this.getContainerLootTableSeed());
 		}
 	}
 

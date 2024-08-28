@@ -332,11 +332,15 @@ public class Bee extends Animal implements NeutralMob, FlyingAnimal {
 
 	boolean wantsToEnterHive() {
 		if (this.stayOutOfHiveCountdown <= 0 && !this.beePollinateGoal.isPollinating() && !this.hasStung() && this.getTarget() == null) {
-			boolean bl = this.isTiredOfLookingForNectar() || this.level().isRaining() || this.level().isNight() || this.hasNectar();
+			boolean bl = this.isTiredOfLookingForNectar() || isNightOrRaining(this.level()) || this.hasNectar();
 			return bl && !this.isHiveNearFire();
 		} else {
 			return false;
 		}
+	}
+
+	public static boolean isNightOrRaining(Level level) {
+		return level.dimensionType().hasSkyLight() && (level.isNight() || level.isRaining());
 	}
 
 	public void setStayOutOfHiveCountdown(int i) {

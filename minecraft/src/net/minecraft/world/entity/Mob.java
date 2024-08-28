@@ -127,8 +127,7 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Leashab
 	private boolean canPickUpLoot;
 	private boolean persistenceRequired;
 	private final Map<PathType, Float> pathfindingMalus = Maps.newEnumMap(PathType.class);
-	@Nullable
-	private ResourceKey<LootTable> lootTable;
+	private Optional<ResourceKey<LootTable>> lootTable = Optional.empty();
 	private long lootTableSeed;
 	@Nullable
 	private Leashable.LeashData leashData;
@@ -417,8 +416,8 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Leashab
 
 		this.writeLeashData(compoundTag, this.leashData);
 		compoundTag.putBoolean("LeftHanded", this.isLeftHanded());
-		if (this.lootTable != null) {
-			compoundTag.putString("DeathLootTable", this.lootTable.location().toString());
+		if (this.lootTable.isPresent()) {
+			compoundTag.putString("DeathLootTable", ((ResourceKey)this.lootTable.get()).location().toString());
 			if (this.lootTableSeed != 0L) {
 				compoundTag.putLong("DeathLootTableSeed", this.lootTableSeed);
 			}
@@ -481,7 +480,7 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Leashab
 		this.leashData = this.readLeashData(compoundTag);
 		this.setLeftHanded(compoundTag.getBoolean("LeftHanded"));
 		if (compoundTag.contains("DeathLootTable", 8)) {
-			this.lootTable = ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.parse(compoundTag.getString("DeathLootTable")));
+			this.lootTable = Optional.of(ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.parse(compoundTag.getString("DeathLootTable"))));
 			this.lootTableSeed = compoundTag.getLong("DeathLootTableSeed");
 		}
 
@@ -491,16 +490,12 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Leashab
 	@Override
 	protected void dropFromLootTable(DamageSource damageSource, boolean bl) {
 		super.dropFromLootTable(damageSource, bl);
-		this.lootTable = null;
+		this.lootTable = Optional.empty();
 	}
 
 	@Override
-	public final ResourceKey<LootTable> getLootTable() {
-		return this.lootTable == null ? this.getDefaultLootTable() : this.lootTable;
-	}
-
-	protected ResourceKey<LootTable> getDefaultLootTable() {
-		return super.getLootTable();
+	public final Optional<ResourceKey<LootTable>> getLootTable() {
+		return this.lootTable.isPresent() ? this.lootTable : super.getLootTable();
 	}
 
 	@Override
@@ -1163,6 +1158,7 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Leashab
 		}
 	}
 
+	@Override
 	public boolean canPickUpLoot() {
 		return this.canPickUpLoot;
 	}

@@ -5,6 +5,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketType;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 
@@ -59,12 +60,12 @@ public abstract class ClientboundMoveEntityPacket implements Packet<ClientGamePa
 		return this.za;
 	}
 
-	public byte getyRot() {
-		return this.yRot;
+	public float getyRot() {
+		return Mth.unpackDegrees(this.yRot);
 	}
 
-	public byte getxRot() {
-		return this.xRot;
+	public float getxRot() {
+		return Mth.unpackDegrees(this.xRot);
 	}
 
 	public boolean hasRotation() {

@@ -236,11 +236,12 @@ public class WorldCreationUiState {
 	}
 
 	private void updatePresetLists() {
-		Registry<WorldPreset> registry = this.getSettings().worldgenLoadContext().registryOrThrow(Registries.WORLD_PRESET);
+		Registry<WorldPreset> registry = this.getSettings().worldgenLoadContext().lookupOrThrow(Registries.WORLD_PRESET);
 		this.normalPresetList.clear();
 		this.normalPresetList
 			.addAll(
-				(Collection)getNonEmptyList(registry, WorldPresetTags.NORMAL).orElseGet(() -> registry.holders().map(WorldCreationUiState.WorldTypeEntry::new).toList())
+				(Collection)getNonEmptyList(registry, WorldPresetTags.NORMAL)
+					.orElseGet(() -> registry.listElements().map(WorldCreationUiState.WorldTypeEntry::new).toList())
 			);
 		this.altPresetList.clear();
 		this.altPresetList.addAll((Collection)getNonEmptyList(registry, WorldPresetTags.EXTENDED).orElse(this.normalPresetList));
@@ -253,11 +254,11 @@ public class WorldCreationUiState {
 	}
 
 	private static Optional<Holder<WorldPreset>> findPreset(WorldCreationContext worldCreationContext, Optional<ResourceKey<WorldPreset>> optional) {
-		return optional.flatMap(resourceKey -> worldCreationContext.worldgenLoadContext().registryOrThrow(Registries.WORLD_PRESET).getHolder(resourceKey));
+		return optional.flatMap(resourceKey -> worldCreationContext.worldgenLoadContext().lookupOrThrow(Registries.WORLD_PRESET).get(resourceKey));
 	}
 
 	private static Optional<List<WorldCreationUiState.WorldTypeEntry>> getNonEmptyList(Registry<WorldPreset> registry, TagKey<WorldPreset> tagKey) {
-		return registry.getTag(tagKey).map(named -> named.stream().map(WorldCreationUiState.WorldTypeEntry::new).toList()).filter(list -> !list.isEmpty());
+		return registry.get(tagKey).map(named -> named.stream().map(WorldCreationUiState.WorldTypeEntry::new).toList()).filter(list -> !list.isEmpty());
 	}
 
 	public void setGameRules(GameRules gameRules) {

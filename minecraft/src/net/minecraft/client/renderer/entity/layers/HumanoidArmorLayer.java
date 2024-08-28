@@ -51,25 +51,49 @@ public class HumanoidArmorLayer<S extends HumanoidRenderState, M extends Humanoi
 
 	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, S humanoidRenderState, float f, float g) {
 		this.renderArmorPiece(
-			poseStack, multiBufferSource, humanoidRenderState.chestItem, EquipmentSlot.CHEST, i, this.getArmorModel(humanoidRenderState, EquipmentSlot.CHEST)
+			poseStack,
+			multiBufferSource,
+			humanoidRenderState,
+			humanoidRenderState.chestItem,
+			EquipmentSlot.CHEST,
+			i,
+			this.getArmorModel(humanoidRenderState, EquipmentSlot.CHEST)
 		);
 		this.renderArmorPiece(
-			poseStack, multiBufferSource, humanoidRenderState.legsItem, EquipmentSlot.LEGS, i, this.getArmorModel(humanoidRenderState, EquipmentSlot.LEGS)
+			poseStack,
+			multiBufferSource,
+			humanoidRenderState,
+			humanoidRenderState.legsItem,
+			EquipmentSlot.LEGS,
+			i,
+			this.getArmorModel(humanoidRenderState, EquipmentSlot.LEGS)
 		);
 		this.renderArmorPiece(
-			poseStack, multiBufferSource, humanoidRenderState.feetItem, EquipmentSlot.FEET, i, this.getArmorModel(humanoidRenderState, EquipmentSlot.FEET)
+			poseStack,
+			multiBufferSource,
+			humanoidRenderState,
+			humanoidRenderState.feetItem,
+			EquipmentSlot.FEET,
+			i,
+			this.getArmorModel(humanoidRenderState, EquipmentSlot.FEET)
 		);
 		this.renderArmorPiece(
-			poseStack, multiBufferSource, humanoidRenderState.headItem, EquipmentSlot.HEAD, i, this.getArmorModel(humanoidRenderState, EquipmentSlot.HEAD)
+			poseStack,
+			multiBufferSource,
+			humanoidRenderState,
+			humanoidRenderState.headItem,
+			EquipmentSlot.HEAD,
+			i,
+			this.getArmorModel(humanoidRenderState, EquipmentSlot.HEAD)
 		);
 	}
 
 	private void renderArmorPiece(
-		PoseStack poseStack, MultiBufferSource multiBufferSource, ItemStack itemStack, EquipmentSlot equipmentSlot, int i, A humanoidModel
+		PoseStack poseStack, MultiBufferSource multiBufferSource, S humanoidRenderState, ItemStack itemStack, EquipmentSlot equipmentSlot, int i, A humanoidModel
 	) {
 		if (itemStack.getItem() instanceof ArmorItem armorItem) {
 			if (armorItem.getEquipmentSlot() == equipmentSlot) {
-				this.getParentModel().copyPropertiesTo(humanoidModel);
+				humanoidModel.setupAnim(humanoidRenderState);
 				this.setPartVisibility(humanoidModel, equipmentSlot);
 				boolean bl = this.usesInnerModel(equipmentSlot);
 				ArmorMaterial armorMaterial = armorItem.getMaterial().value();

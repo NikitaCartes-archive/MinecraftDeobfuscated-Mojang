@@ -9,9 +9,7 @@ import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.state.FallingBlockRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.level.block.RenderShape;
@@ -55,10 +53,6 @@ public class FallingBlockRenderer extends EntityRenderer<FallingBlockEntity, Fal
 			poseStack.popPose();
 			super.render(fallingBlockRenderState, poseStack, multiBufferSource, i);
 		}
-	}
-
-	public ResourceLocation getTextureLocation(FallingBlockRenderState fallingBlockRenderState) {
-		return TextureAtlas.LOCATION_BLOCKS;
 	}
 
 	public FallingBlockRenderState createRenderState() {

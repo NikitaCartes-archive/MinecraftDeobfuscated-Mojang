@@ -73,14 +73,14 @@ public class LootTableProvider implements DataProvider {
 			}));
 		writableRegistry.freeze();
 		ProblemReporter.Collector collector = new ProblemReporter.Collector();
-		HolderGetter.Provider provider2 = new RegistryAccess.ImmutableRegistryAccess(List.of(writableRegistry)).freeze().asGetterLookup();
+		HolderGetter.Provider provider2 = new RegistryAccess.ImmutableRegistryAccess(List.of(writableRegistry)).freeze();
 		ValidationContext validationContext = new ValidationContext(collector, LootContextParamSets.ALL_PARAMS, provider2);
 
 		for (ResourceKey<LootTable> resourceKey : Sets.difference(this.requiredTables, writableRegistry.registryKeySet())) {
 			collector.report("Missing built-in table: " + resourceKey.location());
 		}
 
-		writableRegistry.holders()
+		writableRegistry.listElements()
 			.forEach(
 				reference -> ((LootTable)reference.value())
 						.validate(validationContext.setParams(((LootTable)reference.value()).getParamSet()).enterElement("{" + reference.key().location() + "}", reference.key()))

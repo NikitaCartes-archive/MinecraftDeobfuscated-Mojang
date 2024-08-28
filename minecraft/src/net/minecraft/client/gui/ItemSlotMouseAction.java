@@ -12,6 +12,4 @@ public interface ItemSlotMouseAction {
 	boolean onMouseScrolled(double d, double e, int i, ItemStack itemStack);
 
 	void onStopHovering(Slot slot);
-
-	boolean onKeyPressed(ItemStack itemStack, int i, int j, int k);
 }

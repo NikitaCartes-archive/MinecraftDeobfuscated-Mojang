@@ -92,7 +92,7 @@ public class WorldOpenFlows {
 					packConfig,
 					dataLoadContext -> {
 						WorldDimensions.Complete complete = ((WorldDimensions)function.apply(dataLoadContext.datapackWorldgen()))
-							.bake(dataLoadContext.datapackDimensions().registryOrThrow(Registries.LEVEL_STEM));
+							.bake(dataLoadContext.datapackDimensions().lookupOrThrow(Registries.LEVEL_STEM));
 						return new WorldLoader.DataLoadOutput<>(
 							new PrimaryLevelData(levelSettings, worldOptions, complete.specialWorldProperty(), complete.lifecycle()), complete.dimensionsRegistryAccess()
 						);
@@ -143,7 +143,7 @@ public class WorldOpenFlows {
 		return this.loadWorldDataBlocking(
 			packConfig,
 			dataLoadContext -> {
-				Registry<LevelStem> registry = dataLoadContext.datapackDimensions().registryOrThrow(Registries.LEVEL_STEM);
+				Registry<LevelStem> registry = dataLoadContext.datapackDimensions().lookupOrThrow(Registries.LEVEL_STEM);
 				LevelDataAndDimensions levelDataAndDimensions = LevelStorageSource.getLevelDataAndDimensions(
 					dynamic, dataLoadContext.dataConfiguration(), registry, dataLoadContext.datapackWorldgen()
 				);
@@ -334,7 +334,7 @@ public class WorldOpenFlows {
 		try {
 			worldStem = this.loadWorldStem(dynamic, bl, packRepository);
 
-			for (LevelStem levelStem : worldStem.registries().compositeAccess().registryOrThrow(Registries.LEVEL_STEM)) {
+			for (LevelStem levelStem : worldStem.registries().compositeAccess().lookupOrThrow(Registries.LEVEL_STEM)) {
 				levelStem.generator().validate();
 			}
 		} catch (Exception var9) {

@@ -139,22 +139,22 @@ public abstract class AbstractMinecartContainer extends AbstractMinecart impleme
 
 	@Nullable
 	@Override
-	public ResourceKey<LootTable> getLootTable() {
+	public ResourceKey<LootTable> getContainerLootTable() {
 		return this.lootTable;
 	}
 
 	@Override
-	public void setLootTable(@Nullable ResourceKey<LootTable> resourceKey) {
+	public void setContainerLootTable(@Nullable ResourceKey<LootTable> resourceKey) {
 		this.lootTable = resourceKey;
 	}
 
 	@Override
-	public long getLootTableSeed() {
+	public long getContainerLootTableSeed() {
 		return this.lootTableSeed;
 	}
 
 	@Override
-	public void setLootTableSeed(long l) {
+	public void setContainerLootTableSeed(long l) {
 		this.lootTableSeed = l;
 	}
 

@@ -165,7 +165,7 @@ public class TagLoader<T> {
 
 	private static <T> Optional<Registry.PendingTags<T>> loadPendingTags(ResourceManager resourceManager, Registry<T> registry) {
 		ResourceKey<? extends Registry<T>> resourceKey = registry.key();
-		TagLoader<Holder<T>> tagLoader = new TagLoader<>(registry::getHolder, Registries.tagsDirPath(resourceKey));
+		TagLoader<Holder<T>> tagLoader = new TagLoader<>(registry::get, Registries.tagsDirPath(resourceKey));
 		TagLoader.LoadResult<T> loadResult = new TagLoader.LoadResult<>(resourceKey, wrapTags(registry.key(), tagLoader.build(tagLoader.load(resourceManager))));
 		return loadResult.tags().isEmpty() ? Optional.empty() : Optional.of(registry.prepareTagReload(loadResult));
 	}
@@ -174,7 +174,7 @@ public class TagLoader<T> {
 		List<HolderLookup.RegistryLookup<?>> list2 = new ArrayList();
 		frozen.registries().forEach(registryEntry -> {
 			Registry.PendingTags<?> pendingTags = findTagsForRegistry(list, registryEntry.key());
-			list2.add(pendingTags != null ? pendingTags.lookup() : registryEntry.value().asLookup());
+			list2.add(pendingTags != null ? pendingTags.lookup() : registryEntry.value());
 		});
 		return list2;
 	}

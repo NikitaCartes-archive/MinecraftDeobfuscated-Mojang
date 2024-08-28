@@ -37,6 +37,7 @@ import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
+import net.minecraft.util.Mth;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
@@ -60,6 +61,7 @@ public interface ByteBufCodecs {
 			byteBuf.writeByte(byte_);
 		}
 	};
+	StreamCodec<ByteBuf, Float> ROTATION_BYTE = BYTE.map(Mth::unpackDegrees, Mth::packDegrees);
 	StreamCodec<ByteBuf, Short> SHORT = new StreamCodec<ByteBuf, Short>() {
 		public Short decode(ByteBuf byteBuf) {
 			return byteBuf.readShort();
@@ -467,7 +469,7 @@ public interface ByteBufCodecs {
 	) {
 		return new StreamCodec<RegistryFriendlyByteBuf, R>() {
 			private IdMap<R> getRegistryOrThrow(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
-				return (IdMap<R>)function.apply(registryFriendlyByteBuf.registryAccess().registryOrThrow(resourceKey));
+				return (IdMap<R>)function.apply(registryFriendlyByteBuf.registryAccess().lookupOrThrow(resourceKey));
 			}
 
 			public R decode(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
@@ -497,7 +499,7 @@ public interface ByteBufCodecs {
 			private static final int DIRECT_HOLDER_ID = 0;
 
 			private IdMap<Holder<T>> getRegistryOrThrow(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
-				return registryFriendlyByteBuf.registryAccess().registryOrThrow(resourceKey).asHolderIdMap();
+				return registryFriendlyByteBuf.registryAccess().lookupOrThrow(resourceKey).asHolderIdMap();
 			}
 
 			public Holder<T> decode(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
@@ -527,8 +529,8 @@ public interface ByteBufCodecs {
 			public HolderSet<T> decode(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
 				int i = VarInt.read(registryFriendlyByteBuf) - 1;
 				if (i == -1) {
-					Registry<T> registry = registryFriendlyByteBuf.registryAccess().registryOrThrow(resourceKey);
-					return (HolderSet<T>)registry.getTag(TagKey.create(resourceKey, ResourceLocation.STREAM_CODEC.decode(registryFriendlyByteBuf))).orElseThrow();
+					Registry<T> registry = registryFriendlyByteBuf.registryAccess().lookupOrThrow(resourceKey);
+					return (HolderSet<T>)registry.get(TagKey.create(resourceKey, ResourceLocation.STREAM_CODEC.decode(registryFriendlyByteBuf))).orElseThrow();
 				} else {
 					List<Holder<T>> list = new ArrayList(Math.min(i, 65536));
 

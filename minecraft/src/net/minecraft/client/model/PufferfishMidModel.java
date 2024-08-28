@@ -13,12 +13,11 @@ import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
 public class PufferfishMidModel extends EntityModel<EntityRenderState> {
-	private final ModelPart root;
 	private final ModelPart leftBlueFin;
 	private final ModelPart rightBlueFin;
 
 	public PufferfishMidModel(ModelPart modelPart) {
-		this.root = modelPart;
+		super(modelPart);
 		this.leftBlueFin = modelPart.getChild("left_blue_fin");
 		this.rightBlueFin = modelPart.getChild("right_blue_fin");
 	}
@@ -80,12 +79,8 @@ public class PufferfishMidModel extends EntityModel<EntityRenderState> {
 	}
 
 	@Override
-	public ModelPart root() {
-		return this.root;
-	}
-
-	@Override
 	public void setupAnim(EntityRenderState entityRenderState) {
+		super.setupAnim(entityRenderState);
 		this.rightBlueFin.zRot = -0.2F + 0.4F * Mth.sin(entityRenderState.ageInTicks * 0.2F);
 		this.leftBlueFin.zRot = 0.2F - 0.4F * Mth.sin(entityRenderState.ageInTicks * 0.2F);
 	}

@@ -481,11 +481,7 @@ public class EntitySelectorOptions {
 								return false;
 							} else {
 								ServerLevel serverLevel = (ServerLevel)entity.level();
-								Optional<LootItemCondition> optional = serverLevel.getServer()
-									.reloadableRegistries()
-									.lookup()
-									.get(Registries.PREDICATE, resourceKey)
-									.map(Holder::value);
+								Optional<LootItemCondition> optional = serverLevel.getServer().reloadableRegistries().lookup().get(resourceKey).map(Holder::value);
 								if (optional.isEmpty()) {
 									return false;
 								} else {

@@ -7,8 +7,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.state.FireworkRocketRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.renderer.texture.TextureAtlas;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.projectile.FireworkRocketEntity;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
@@ -44,10 +42,6 @@ public class FireworkEntityRenderer extends EntityRenderer<FireworkRocketEntity,
 			);
 		poseStack.popPose();
 		super.render(fireworkRocketRenderState, poseStack, multiBufferSource, i);
-	}
-
-	public ResourceLocation getTextureLocation(FireworkRocketRenderState fireworkRocketRenderState) {
-		return TextureAtlas.LOCATION_BLOCKS;
 	}
 
 	public FireworkRocketRenderState createRenderState() {

@@ -44,7 +44,7 @@ public class DamageSources {
 	private final DamageSource genericKill;
 
 	public DamageSources(RegistryAccess registryAccess) {
-		this.damageTypes = registryAccess.registryOrThrow(Registries.DAMAGE_TYPE);
+		this.damageTypes = registryAccess.lookupOrThrow(Registries.DAMAGE_TYPE);
 		this.inFire = this.source(DamageTypes.IN_FIRE);
 		this.campfire = this.source(DamageTypes.CAMPFIRE);
 		this.lightningBolt = this.source(DamageTypes.LIGHTNING_BOLT);
@@ -73,15 +73,15 @@ public class DamageSources {
 	}
 
 	private DamageSource source(ResourceKey<DamageType> resourceKey) {
-		return new DamageSource(this.damageTypes.getHolderOrThrow(resourceKey));
+		return new DamageSource(this.damageTypes.getOrThrow(resourceKey));
 	}
 
 	private DamageSource source(ResourceKey<DamageType> resourceKey, @Nullable Entity entity) {
-		return new DamageSource(this.damageTypes.getHolderOrThrow(resourceKey), entity);
+		return new DamageSource(this.damageTypes.getOrThrow(resourceKey), entity);
 	}
 
 	private DamageSource source(ResourceKey<DamageType> resourceKey, @Nullable Entity entity, @Nullable Entity entity2) {
-		return new DamageSource(this.damageTypes.getHolderOrThrow(resourceKey), entity, entity2);
+		return new DamageSource(this.damageTypes.getOrThrow(resourceKey), entity, entity2);
 	}
 
 	public DamageSource inFire() {
@@ -261,7 +261,7 @@ public class DamageSources {
 	}
 
 	public DamageSource badRespawnPointExplosion(Vec3 vec3) {
-		return new DamageSource(this.damageTypes.getHolderOrThrow(DamageTypes.BAD_RESPAWN_POINT), vec3);
+		return new DamageSource(this.damageTypes.getOrThrow(DamageTypes.BAD_RESPAWN_POINT), vec3);
 	}
 
 	public DamageSource outOfBorder() {

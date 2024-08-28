@@ -76,7 +76,7 @@ public class AttachedStemBlock extends BushBlock {
 		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 	) {
 		if (!blockState2.is(this.fruit) && direction == blockState.getValue(FACING)) {
-			Optional<Block> optional = levelAccessor.registryAccess().registryOrThrow(Registries.BLOCK).getOptional(this.stem);
+			Optional<Block> optional = levelAccessor.registryAccess().lookupOrThrow(Registries.BLOCK).getOptional(this.stem);
 			if (optional.isPresent()) {
 				return ((Block)optional.get()).defaultBlockState().trySetValue(StemBlock.AGE, Integer.valueOf(7));
 			}
@@ -92,7 +92,7 @@ public class AttachedStemBlock extends BushBlock {
 
 	@Override
 	public ItemStack getCloneItemStack(LevelReader levelReader, BlockPos blockPos, BlockState blockState) {
-		return new ItemStack(DataFixUtils.orElse(levelReader.registryAccess().registryOrThrow(Registries.ITEM).getOptional(this.seed), this));
+		return new ItemStack(DataFixUtils.orElse(levelReader.registryAccess().lookupOrThrow(Registries.ITEM).getOptional(this.seed), this));
 	}
 
 	@Override

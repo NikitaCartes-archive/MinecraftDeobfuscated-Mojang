@@ -32,7 +32,6 @@ public class CapeLayer extends RenderLayer<PlayerRenderState, PlayerModel> {
 			if (playerSkin.capeTexture() != null) {
 				if (!playerRenderState.chestItem.is(Items.ELYTRA)) {
 					VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entitySolid(playerSkin.capeTexture()));
-					this.getParentModel().copyPropertiesTo(this.model);
 					this.model.setupAnim(playerRenderState);
 					this.model.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY);
 				}

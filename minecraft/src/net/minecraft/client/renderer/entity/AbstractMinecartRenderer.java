@@ -67,7 +67,7 @@ public abstract class AbstractMinecartRenderer<T extends AbstractMinecart, S ext
 
 		poseStack.scale(-1.0F, -1.0F, 1.0F);
 		this.model.setupAnim(minecartRenderState);
-		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(this.model.renderType(this.getTextureLocation(minecartRenderState)));
+		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(this.model.renderType(MINECART_LOCATION));
 		this.model.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY);
 		poseStack.popPose();
 	}
@@ -99,10 +99,6 @@ public abstract class AbstractMinecartRenderer<T extends AbstractMinecart, S ext
 		poseStack.translate(0.0F, 0.375F, 0.0F);
 		poseStack.mulPose(Axis.YP.rotationDegrees(180.0F - h));
 		poseStack.mulPose(Axis.ZP.rotationDegrees(-g));
-	}
-
-	public ResourceLocation getTextureLocation(S minecartRenderState) {
-		return MINECART_LOCATION;
 	}
 
 	public void extractRenderState(T abstractMinecart, S minecartRenderState, float f) {

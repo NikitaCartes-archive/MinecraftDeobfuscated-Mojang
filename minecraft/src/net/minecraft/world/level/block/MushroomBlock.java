@@ -90,9 +90,7 @@ public class MushroomBlock extends BushBlock implements BonemealableBlock {
 	}
 
 	public boolean growMushroom(ServerLevel serverLevel, BlockPos blockPos, BlockState blockState, RandomSource randomSource) {
-		Optional<? extends Holder<ConfiguredFeature<?, ?>>> optional = serverLevel.registryAccess()
-			.registryOrThrow(Registries.CONFIGURED_FEATURE)
-			.getHolder(this.feature);
+		Optional<? extends Holder<ConfiguredFeature<?, ?>>> optional = serverLevel.registryAccess().lookupOrThrow(Registries.CONFIGURED_FEATURE).get(this.feature);
 		if (optional.isEmpty()) {
 			return false;
 		} else {

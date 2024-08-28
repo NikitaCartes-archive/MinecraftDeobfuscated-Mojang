@@ -84,7 +84,7 @@ public class BoneMealItem extends Item {
 			} else {
 				RandomSource randomSource = level.getRandom();
 
-				label78:
+				label80:
 				for (int i = 0; i < 128; i++) {
 					BlockPos blockPos2 = blockPos;
 					BlockState blockState = Blocks.SEAGRASS.defaultBlockState();
@@ -92,7 +92,7 @@ public class BoneMealItem extends Item {
 					for (int j = 0; j < i / 16; j++) {
 						blockPos2 = blockPos2.offset(randomSource.nextInt(3) - 1, (randomSource.nextInt(3) - 1) * randomSource.nextInt(3) / 2, randomSource.nextInt(3) - 1);
 						if (level.getBlockState(blockPos2).isCollisionShapeFullBlock(level, blockPos2)) {
-							continue label78;
+							continue label80;
 						}
 					}
 
@@ -124,7 +124,9 @@ public class BoneMealItem extends Item {
 						BlockState blockState2 = level.getBlockState(blockPos2);
 						if (blockState2.is(Blocks.WATER) && level.getFluidState(blockPos2).getAmount() == 8) {
 							level.setBlock(blockPos2, blockState, 3);
-						} else if (blockState2.is(Blocks.SEAGRASS) && randomSource.nextInt(10) == 0) {
+						} else if (blockState2.is(Blocks.SEAGRASS)
+							&& ((BonemealableBlock)Blocks.SEAGRASS).isValidBonemealTarget(level, blockPos2, blockState2)
+							&& randomSource.nextInt(10) == 0) {
 							((BonemealableBlock)Blocks.SEAGRASS).performBonemeal((ServerLevel)level, randomSource, blockPos2, blockState2);
 						}
 					}

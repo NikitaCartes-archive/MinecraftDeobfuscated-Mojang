@@ -20,7 +20,7 @@ public class WindChargeModel extends EntityModel<EntityRenderState> {
 	private final ModelPart wind;
 
 	public WindChargeModel(ModelPart modelPart) {
-		super(RenderType::entityTranslucent);
+		super(modelPart, RenderType::entityTranslucent);
 		this.bone = modelPart.getChild("bone");
 		this.wind = this.bone.getChild("wind");
 		this.windCharge = this.bone.getChild("wind_charge");
@@ -49,12 +49,8 @@ public class WindChargeModel extends EntityModel<EntityRenderState> {
 
 	@Override
 	public void setupAnim(EntityRenderState entityRenderState) {
+		super.setupAnim(entityRenderState);
 		this.windCharge.yRot = -entityRenderState.ageInTicks * 16.0F * (float) (Math.PI / 180.0);
 		this.wind.yRot = entityRenderState.ageInTicks * 16.0F * (float) (Math.PI / 180.0);
-	}
-
-	@Override
-	public ModelPart root() {
-		return this.bone;
 	}
 }

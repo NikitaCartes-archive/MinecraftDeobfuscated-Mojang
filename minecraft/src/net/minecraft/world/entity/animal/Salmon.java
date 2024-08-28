@@ -1,6 +1,7 @@
 package net.minecraft.world.entity.animal;
 
 import javax.annotation.Nullable;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -11,12 +12,15 @@ import net.minecraft.util.StringRepresentable;
 import net.minecraft.util.random.SimpleWeightedRandomList;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.VariantHolder;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 
@@ -25,6 +29,7 @@ public class Salmon extends AbstractSchoolingFish implements VariantHolder<Salmo
 
 	public Salmon(EntityType<? extends Salmon> entityType, Level level) {
 		super(entityType, level);
+		this.refreshDimensions();
 	}
 
 	@Override
@@ -64,6 +69,14 @@ public class Salmon extends AbstractSchoolingFish implements VariantHolder<Salmo
 	}
 
 	@Override
+	public void onSyncedDataUpdated(EntityDataAccessor<?> entityDataAccessor) {
+		super.onSyncedDataUpdated(entityDataAccessor);
+		if (DATA_TYPE.equals(entityDataAccessor)) {
+			this.refreshDimensions();
+		}
+	}
+
+	@Override
 	public void addAdditionalSaveData(CompoundTag compoundTag) {
 		super.addAdditionalSaveData(compoundTag);
 		compoundTag.putString("type", this.getVariant().getSerializedName());
@@ -72,6 +85,18 @@ public class Salmon extends AbstractSchoolingFish implements VariantHolder<Salmo
 	@Override
 	public void readAdditionalSaveData(CompoundTag compoundTag) {
 		super.readAdditionalSaveData(compoundTag);
+		this.setVariant(Salmon.Variant.byName(compoundTag.getString("type")));
+	}
+
+	@Override
+	public void saveToBucketTag(ItemStack itemStack) {
+		Bucketable.saveDefaultDataToBucketTag(this, itemStack);
+		CustomData.update(DataComponents.BUCKET_ENTITY_DATA, itemStack, compoundTag -> compoundTag.putString("type", this.getVariant().getSerializedName()));
+	}
+
+	@Override
+	public void loadFromBucketTag(CompoundTag compoundTag) {
+		Bucketable.loadDefaultDataFromBucketTag(this, compoundTag);
 		this.setVariant(Salmon.Variant.byName(compoundTag.getString("type")));
 	}
 
@@ -96,16 +121,27 @@ public class Salmon extends AbstractSchoolingFish implements VariantHolder<Salmo
 		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, entitySpawnReason, spawnGroupData);
 	}
 
+	public float getSalmonScale() {
+		return this.getVariant().boundingBoxScale;
+	}
+
+	@Override
+	protected EntityDimensions getDefaultDimensions(Pose pose) {
+		return super.getDefaultDimensions(pose).scale(this.getSalmonScale());
+	}
+
 	public static enum Variant implements StringRepresentable {
-		SMALL("small"),
-		MEDIUM("medium"),
-		LARGE("large");
+		SMALL("small", 0.5F),
+		MEDIUM("medium", 1.0F),
+		LARGE("large", 1.5F);
 
 		public static final StringRepresentable.EnumCodec<Salmon.Variant> CODEC = StringRepresentable.fromEnum(Salmon.Variant::values);
 		final String type;
+		final float boundingBoxScale;
 
-		private Variant(final String string2) {
+		private Variant(final String string2, final float f) {
 			this.type = string2;
+			this.boundingBoxScale = f;
 		}
 
 		@Override

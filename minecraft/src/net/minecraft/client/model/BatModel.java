@@ -14,7 +14,6 @@ import net.minecraft.client.renderer.entity.state.BatRenderState;
 
 @Environment(EnvType.CLIENT)
 public class BatModel extends EntityModel<BatRenderState> {
-	private final ModelPart root;
 	private final ModelPart head;
 	private final ModelPart body;
 	private final ModelPart rightWing;
@@ -24,8 +23,7 @@ public class BatModel extends EntityModel<BatRenderState> {
 	private final ModelPart feet;
 
 	public BatModel(ModelPart modelPart) {
-		super(RenderType::entityCutout);
-		this.root = modelPart;
+		super(modelPart, RenderType::entityCutout);
 		this.body = modelPart.getChild("body");
 		this.head = modelPart.getChild("head");
 		this.rightWing = this.body.getChild("right_wing");
@@ -68,13 +66,8 @@ public class BatModel extends EntityModel<BatRenderState> {
 		return LayerDefinition.create(meshDefinition, 32, 32);
 	}
 
-	@Override
-	public ModelPart root() {
-		return this.root;
-	}
-
 	public void setupAnim(BatRenderState batRenderState) {
-		this.root().getAllParts().forEach(ModelPart::resetPose);
+		super.setupAnim(batRenderState);
 		if (batRenderState.isResting) {
 			this.applyHeadRotation(batRenderState.yRot);
 		}

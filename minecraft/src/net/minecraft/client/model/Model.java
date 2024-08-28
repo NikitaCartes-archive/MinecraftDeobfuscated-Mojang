@@ -2,6 +2,7 @@ package net.minecraft.client.model;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import net.fabricmc.api.EnvType;
@@ -17,10 +18,14 @@ import org.joml.Vector3f;
 @Environment(EnvType.CLIENT)
 public abstract class Model {
 	private static final Vector3f ANIMATION_VECTOR_CACHE = new Vector3f();
+	protected final ModelPart root;
 	protected final Function<ResourceLocation, RenderType> renderType;
+	private final List<ModelPart> allParts;
 
-	public Model(Function<ResourceLocation, RenderType> function) {
+	public Model(ModelPart modelPart, Function<ResourceLocation, RenderType> function) {
+		this.root = modelPart;
 		this.renderType = function;
+		this.allParts = modelPart.getAllParts().toList();
 	}
 
 	public final RenderType renderType(ResourceLocation resourceLocation) {
@@ -35,12 +40,24 @@ public abstract class Model {
 		this.renderToBuffer(poseStack, vertexConsumer, i, j, -1);
 	}
 
-	public abstract ModelPart root();
+	public final ModelPart root() {
+		return this.root;
+	}
 
 	public Optional<ModelPart> getAnyDescendantWithName(String string) {
 		return string.equals("root")
 			? Optional.of(this.root())
 			: this.root().getAllParts().filter(modelPart -> modelPart.hasChild(string)).findFirst().map(modelPart -> modelPart.getChild(string));
+	}
+
+	public final List<ModelPart> allParts() {
+		return this.allParts;
+	}
+
+	public final void resetPose() {
+		for (ModelPart modelPart : this.allParts) {
+			modelPart.resetPose();
+		}
 	}
 
 	protected void animate(AnimationState animationState, AnimationDefinition animationDefinition, float f) {
@@ -65,16 +82,8 @@ public abstract class Model {
 
 	@Environment(EnvType.CLIENT)
 	public static class Simple extends Model {
-		private final ModelPart root;
-
 		public Simple(ModelPart modelPart, Function<ResourceLocation, RenderType> function) {
-			super(function);
-			this.root = modelPart;
-		}
-
-		@Override
-		public ModelPart root() {
-			return this.root;
+			super(modelPart, function);
 		}
 	}
 }

@@ -196,7 +196,7 @@ public class BeehiveBlockEntity extends BlockEntity {
 		BeehiveBlockEntity.BeeReleaseStatus beeReleaseStatus,
 		@Nullable BlockPos blockPos2
 	) {
-		if ((level.isNight() || level.isRaining()) && beeReleaseStatus != BeehiveBlockEntity.BeeReleaseStatus.EMERGENCY) {
+		if (Bee.isNightOrRaining(level) && beeReleaseStatus != BeehiveBlockEntity.BeeReleaseStatus.EMERGENCY) {
 			return false;
 		} else {
 			Direction direction = blockState.getValue(BeehiveBlock.FACING);

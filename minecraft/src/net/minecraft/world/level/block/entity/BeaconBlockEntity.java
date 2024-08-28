@@ -283,7 +283,7 @@ public class BeaconBlockEntity extends BlockEntity implements MenuProvider, Name
 	private static Holder<MobEffect> loadEffect(CompoundTag compoundTag, String string) {
 		if (compoundTag.contains(string, 8)) {
 			ResourceLocation resourceLocation = ResourceLocation.tryParse(compoundTag.getString(string));
-			return resourceLocation == null ? null : (Holder)BuiltInRegistries.MOB_EFFECT.getHolder(resourceLocation).map(BeaconBlockEntity::filterEffect).orElse(null);
+			return resourceLocation == null ? null : (Holder)BuiltInRegistries.MOB_EFFECT.get(resourceLocation).map(BeaconBlockEntity::filterEffect).orElse(null);
 		} else {
 			return null;
 		}

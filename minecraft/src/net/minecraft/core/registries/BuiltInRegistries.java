@@ -344,7 +344,7 @@ public class BuiltInRegistries {
 
 			if (registry2 instanceof DefaultedRegistry) {
 				ResourceLocation resourceLocation = ((DefaultedRegistry)registry2).getDefaultKey();
-				Validate.notNull(registry2.get(resourceLocation), "Missing default of DefaultedMappedRegistry: " + resourceLocation);
+				Validate.notNull(registry2.getValue(resourceLocation), "Missing default of DefaultedMappedRegistry: " + resourceLocation);
 			}
 		});
 	}

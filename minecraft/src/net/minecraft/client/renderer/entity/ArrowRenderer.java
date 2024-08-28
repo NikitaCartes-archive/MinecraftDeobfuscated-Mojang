@@ -11,6 +11,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.state.ArrowRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 
 @Environment(EnvType.CLIENT)
@@ -32,6 +33,8 @@ public abstract class ArrowRenderer<T extends AbstractArrow, S extends ArrowRend
 		poseStack.popPose();
 		super.render(arrowRenderState, poseStack, multiBufferSource, i);
 	}
+
+	protected abstract ResourceLocation getTextureLocation(S arrowRenderState);
 
 	public void extractRenderState(T abstractArrow, S arrowRenderState, float f) {
 		super.extractRenderState(abstractArrow, arrowRenderState, f);

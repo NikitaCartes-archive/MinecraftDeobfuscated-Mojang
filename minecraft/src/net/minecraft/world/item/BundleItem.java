@@ -151,11 +151,7 @@ public class BundleItem extends Item {
 	@Override
 	public int getBarColor(ItemStack itemStack) {
 		BundleContents bundleContents = itemStack.getOrDefault(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY);
-		return getBarColor(bundleContents.weight());
-	}
-
-	public static int getBarColor(Fraction fraction) {
-		return fraction.compareTo(Fraction.ONE) >= 0 ? FULL_BAR_COLOR : BAR_COLOR;
+		return bundleContents.weight().compareTo(Fraction.ONE) >= 0 ? FULL_BAR_COLOR : BAR_COLOR;
 	}
 
 	public static void toggleSelectedItem(ItemStack itemStack, int i) {

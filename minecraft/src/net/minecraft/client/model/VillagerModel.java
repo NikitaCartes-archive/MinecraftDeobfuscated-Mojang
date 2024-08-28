@@ -13,7 +13,6 @@ import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
 public class VillagerModel extends EntityModel<VillagerRenderState> implements HeadedModel, VillagerHeadModel {
-	private final ModelPart root;
 	private final ModelPart head;
 	private final ModelPart hat;
 	private final ModelPart hatRim;
@@ -21,7 +20,7 @@ public class VillagerModel extends EntityModel<VillagerRenderState> implements H
 	private final ModelPart leftLeg;
 
 	public VillagerModel(ModelPart modelPart) {
-		this.root = modelPart;
+		super(modelPart);
 		this.head = modelPart.getChild("head");
 		this.hat = this.head.getChild("hat");
 		this.hatRim = this.hat.getChild("hat_rim");
@@ -71,12 +70,8 @@ public class VillagerModel extends EntityModel<VillagerRenderState> implements H
 		return meshDefinition;
 	}
 
-	@Override
-	public ModelPart root() {
-		return this.root;
-	}
-
 	public void setupAnim(VillagerRenderState villagerRenderState) {
+		super.setupAnim(villagerRenderState);
 		this.head.yRot = villagerRenderState.yRot * (float) (Math.PI / 180.0);
 		this.head.xRot = villagerRenderState.xRot * (float) (Math.PI / 180.0);
 		if (villagerRenderState.isUnhappy) {

@@ -263,7 +263,7 @@ public final class DataComponentPatch {
 					}
 
 					ResourceLocation resourceLocation = ResourceLocation.tryParse(string);
-					DataComponentType<?> dataComponentType = BuiltInRegistries.DATA_COMPONENT_TYPE.get(resourceLocation);
+					DataComponentType<?> dataComponentType = BuiltInRegistries.DATA_COMPONENT_TYPE.getValue(resourceLocation);
 					if (dataComponentType == null) {
 						return DataResult.error(() -> "No component with type: '" + resourceLocation + "'");
 					} else {

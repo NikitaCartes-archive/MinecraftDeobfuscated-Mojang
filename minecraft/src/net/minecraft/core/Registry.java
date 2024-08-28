@@ -21,7 +21,8 @@ import net.minecraft.tags.TagLoader;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.RandomSource;
 
-public interface Registry<T> extends Keyable, IdMap<T> {
+public interface Registry<T> extends Keyable, HolderLookup.RegistryLookup<T>, IdMap<T> {
+	@Override
 	ResourceKey<? extends Registry<T>> key();
 
 	default Codec<T> byNameCodec() {
@@ -35,7 +36,7 @@ public interface Registry<T> extends Keyable, IdMap<T> {
 	private Codec<Holder.Reference<T>> referenceHolderWithLifecycle() {
 		Codec<Holder.Reference<T>> codec = ResourceLocation.CODEC
 			.comapFlatMap(
-				resourceLocation -> (DataResult)this.getHolder(resourceLocation)
+				resourceLocation -> (DataResult)this.get(resourceLocation)
 						.map(DataResult::success)
 						.orElseGet(() -> DataResult.error(() -> "Unknown registry key in " + this.key() + ": " + resourceLocation)),
 				reference -> reference.key().location()
@@ -65,27 +66,25 @@ public interface Registry<T> extends Keyable, IdMap<T> {
 	int getId(@Nullable T object);
 
 	@Nullable
-	T get(@Nullable ResourceKey<T> resourceKey);
+	T getValue(@Nullable ResourceKey<T> resourceKey);
 
 	@Nullable
-	T get(@Nullable ResourceLocation resourceLocation);
+	T getValue(@Nullable ResourceLocation resourceLocation);
 
 	Optional<RegistrationInfo> registrationInfo(ResourceKey<T> resourceKey);
 
-	Lifecycle registryLifecycle();
-
 	default Optional<T> getOptional(@Nullable ResourceLocation resourceLocation) {
-		return Optional.ofNullable(this.get(resourceLocation));
+		return Optional.ofNullable(this.getValue(resourceLocation));
 	}
 
 	default Optional<T> getOptional(@Nullable ResourceKey<T> resourceKey) {
-		return Optional.ofNullable(this.get(resourceKey));
+		return Optional.ofNullable(this.getValue(resourceKey));
 	}
 
 	Optional<Holder.Reference<T>> getAny();
 
-	default T getOrThrow(ResourceKey<T> resourceKey) {
-		T object = this.get(resourceKey);
+	default T getValueOrThrow(ResourceKey<T> resourceKey) {
+		T object = this.getValue(resourceKey);
 		if (object == null) {
 			throw new IllegalStateException("Missing key in " + this.key() + ": " + resourceKey);
 		} else {
@@ -134,28 +133,18 @@ public interface Registry<T> extends Keyable, IdMap<T> {
 
 	Holder.Reference<T> createIntrusiveHolder(T object);
 
-	Optional<Holder.Reference<T>> getHolder(int i);
+	Optional<Holder.Reference<T>> get(int i);
 
-	Optional<Holder.Reference<T>> getHolder(ResourceLocation resourceLocation);
-
-	Optional<Holder.Reference<T>> getHolder(ResourceKey<T> resourceKey);
+	Optional<Holder.Reference<T>> get(ResourceLocation resourceLocation);
 
 	Holder<T> wrapAsHolder(T object);
 
-	default Holder.Reference<T> getHolderOrThrow(ResourceKey<T> resourceKey) {
-		return (Holder.Reference<T>)this.getHolder(resourceKey).orElseThrow(() -> new IllegalStateException("Missing key in " + this.key() + ": " + resourceKey));
-	}
-
-	Stream<Holder.Reference<T>> holders();
-
-	Optional<HolderSet.Named<T>> getTag(TagKey<T> tagKey);
-
 	default Iterable<Holder<T>> getTagOrEmpty(TagKey<T> tagKey) {
-		return DataFixUtils.orElse(this.getTag(tagKey), List.of());
+		return DataFixUtils.orElse(this.get(tagKey), List.of());
 	}
 
 	default Optional<Holder<T>> getRandomElementOf(TagKey<T> tagKey, RandomSource randomSource) {
-		return this.getTag(tagKey).flatMap(named -> named.getRandomElement(randomSource));
+		return this.get(tagKey).flatMap(named -> named.getRandomElement(randomSource));
 	}
 
 	Stream<HolderSet.Named<T>> getTags();
@@ -168,7 +157,7 @@ public interface Registry<T> extends Keyable, IdMap<T> {
 
 			@Nullable
 			public Holder<T> byId(int i) {
-				return (Holder<T>)Registry.this.getHolder(i).orElse(null);
+				return (Holder<T>)Registry.this.get(i).orElse(null);
 			}
 
 			@Override
@@ -177,14 +166,10 @@ public interface Registry<T> extends Keyable, IdMap<T> {
 			}
 
 			public Iterator<Holder<T>> iterator() {
-				return Registry.this.holders().map(reference -> reference).iterator();
+				return Registry.this.listElements().map(reference -> reference).iterator();
 			}
 		};
 	}
-
-	HolderOwner<T> holderOwner();
-
-	HolderLookup.RegistryLookup<T> asLookup();
 
 	Registry.PendingTags<T> prepareTagReload(TagLoader.LoadResult<T> loadResult);
 

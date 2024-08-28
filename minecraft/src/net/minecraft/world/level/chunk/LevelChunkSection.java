@@ -40,7 +40,7 @@ public class LevelChunkSection {
 
 	public LevelChunkSection(Registry<Biome> registry) {
 		this.states = new PalettedContainer<>(Block.BLOCK_STATE_REGISTRY, Blocks.AIR.defaultBlockState(), PalettedContainer.Strategy.SECTION_STATES);
-		this.biomes = new PalettedContainer<>(registry.asHolderIdMap(), registry.getHolderOrThrow(Biomes.PLAINS), PalettedContainer.Strategy.SECTION_BIOMES);
+		this.biomes = new PalettedContainer<>(registry.asHolderIdMap(), registry.getOrThrow(Biomes.PLAINS), PalettedContainer.Strategy.SECTION_BIOMES);
 	}
 
 	public BlockState getBlockState(int i, int j, int k) {

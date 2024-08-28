@@ -251,7 +251,7 @@ public class PresetFlatWorldScreen extends Screen {
 		public PresetsList(final RegistryAccess registryAccess, final FeatureFlagSet featureFlagSet) {
 			super(PresetFlatWorldScreen.this.minecraft, PresetFlatWorldScreen.this.width, PresetFlatWorldScreen.this.height - 117, 80, 24);
 
-			for (Holder<FlatLevelGeneratorPreset> holder : registryAccess.registryOrThrow(Registries.FLAT_LEVEL_GENERATOR_PRESET)
+			for (Holder<FlatLevelGeneratorPreset> holder : registryAccess.lookupOrThrow(Registries.FLAT_LEVEL_GENERATOR_PRESET)
 				.getTagOrEmpty(FlatLevelGeneratorPresetTags.VISIBLE)) {
 				Set<Block> set = (Set<Block>)holder.value()
 					.settings()

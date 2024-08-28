@@ -14,7 +14,6 @@ import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
 public class CreeperModel extends EntityModel<CreeperRenderState> {
-	private final ModelPart root;
 	private final ModelPart head;
 	private final ModelPart rightHindLeg;
 	private final ModelPart leftHindLeg;
@@ -23,7 +22,7 @@ public class CreeperModel extends EntityModel<CreeperRenderState> {
 	private static final int Y_OFFSET = 6;
 
 	public CreeperModel(ModelPart modelPart) {
-		this.root = modelPart;
+		super(modelPart);
 		this.head = modelPart.getChild("head");
 		this.leftHindLeg = modelPart.getChild("right_hind_leg");
 		this.rightHindLeg = modelPart.getChild("left_hind_leg");
@@ -48,12 +47,8 @@ public class CreeperModel extends EntityModel<CreeperRenderState> {
 		return LayerDefinition.create(meshDefinition, 64, 32);
 	}
 
-	@Override
-	public ModelPart root() {
-		return this.root;
-	}
-
 	public void setupAnim(CreeperRenderState creeperRenderState) {
+		super.setupAnim(creeperRenderState);
 		this.head.yRot = creeperRenderState.yRot * (float) (Math.PI / 180.0);
 		this.head.xRot = creeperRenderState.xRot * (float) (Math.PI / 180.0);
 		float f = creeperRenderState.walkAnimationSpeed;

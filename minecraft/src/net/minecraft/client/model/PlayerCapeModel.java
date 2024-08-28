@@ -41,7 +41,6 @@ public class PlayerCapeModel<T extends PlayerRenderState> extends HumanoidModel<
 
 	public void setupAnim(T playerRenderState) {
 		super.setupAnim(playerRenderState);
-		this.cape.resetPose();
 		if (!playerRenderState.chestItem.isEmpty()) {
 			this.cape.z++;
 			this.cape.y -= 0.85F;

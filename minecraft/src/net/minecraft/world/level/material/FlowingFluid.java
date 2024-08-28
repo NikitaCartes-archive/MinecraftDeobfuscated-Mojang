@@ -35,15 +35,19 @@ public abstract class FlowingFluid extends Fluid {
 	public static final BooleanProperty FALLING = BlockStateProperties.FALLING;
 	public static final IntegerProperty LEVEL = BlockStateProperties.LEVEL_FLOWING;
 	private static final int CACHE_SIZE = 200;
-	private static final ThreadLocal<Object2ByteLinkedOpenHashMap<Block.BlockStatePairKey>> OCCLUSION_CACHE = ThreadLocal.withInitial(() -> {
-		Object2ByteLinkedOpenHashMap<Block.BlockStatePairKey> object2ByteLinkedOpenHashMap = new Object2ByteLinkedOpenHashMap<Block.BlockStatePairKey>(200) {
-			@Override
-			protected void rehash(int i) {
-			}
-		};
-		object2ByteLinkedOpenHashMap.defaultReturnValue((byte)127);
-		return object2ByteLinkedOpenHashMap;
-	});
+	private static final ThreadLocal<Object2ByteLinkedOpenHashMap<FlowingFluid.BlockStatePairKey>> OCCLUSION_CACHE = ThreadLocal.withInitial(
+		() -> {
+			Object2ByteLinkedOpenHashMap<FlowingFluid.BlockStatePairKey> object2ByteLinkedOpenHashMap = new Object2ByteLinkedOpenHashMap<FlowingFluid.BlockStatePairKey>(
+				200
+			) {
+				@Override
+				protected void rehash(int i) {
+				}
+			};
+			object2ByteLinkedOpenHashMap.defaultReturnValue((byte)127);
+			return object2ByteLinkedOpenHashMap;
+		}
+	);
 	private final Map<FluidState, VoxelShape> shapes = Maps.<FluidState, VoxelShape>newIdentityHashMap();
 
 	@Override
@@ -207,16 +211,16 @@ public abstract class FlowingFluid extends Fluid {
 			} else if (voxelShape2 == Shapes.empty() && voxelShape == Shapes.empty()) {
 				return true;
 			} else {
-				Object2ByteLinkedOpenHashMap<Block.BlockStatePairKey> object2ByteLinkedOpenHashMap;
+				Object2ByteLinkedOpenHashMap<FlowingFluid.BlockStatePairKey> object2ByteLinkedOpenHashMap;
 				if (!blockState.getBlock().hasDynamicShape() && !blockState2.getBlock().hasDynamicShape()) {
-					object2ByteLinkedOpenHashMap = (Object2ByteLinkedOpenHashMap<Block.BlockStatePairKey>)OCCLUSION_CACHE.get();
+					object2ByteLinkedOpenHashMap = (Object2ByteLinkedOpenHashMap<FlowingFluid.BlockStatePairKey>)OCCLUSION_CACHE.get();
 				} else {
 					object2ByteLinkedOpenHashMap = null;
 				}
 
-				Block.BlockStatePairKey blockStatePairKey;
+				FlowingFluid.BlockStatePairKey blockStatePairKey;
 				if (object2ByteLinkedOpenHashMap != null) {
-					blockStatePairKey = new Block.BlockStatePairKey(blockState, blockState2, direction);
+					blockStatePairKey = new FlowingFluid.BlockStatePairKey(blockState, blockState2, direction);
 					byte b = object2ByteLinkedOpenHashMap.getAndMoveToFirst(blockStatePairKey);
 					if (b != 127) {
 						return b != 0;
@@ -468,6 +472,25 @@ public abstract class FlowingFluid extends Fluid {
 			? Shapes.block()
 			: (VoxelShape)this.shapes
 				.computeIfAbsent(fluidState, fluidStatex -> Shapes.box(0.0, 0.0, 0.0, 1.0, (double)fluidStatex.getHeight(blockGetter, blockPos), 1.0));
+	}
+
+	static record BlockStatePairKey(BlockState first, BlockState second, Direction direction) {
+		public boolean equals(Object object) {
+			if (object instanceof FlowingFluid.BlockStatePairKey blockStatePairKey
+				&& this.first == blockStatePairKey.first
+				&& this.second == blockStatePairKey.second
+				&& this.direction == blockStatePairKey.direction) {
+				return true;
+			}
+
+			return false;
+		}
+
+		public int hashCode() {
+			int i = System.identityHashCode(this.first);
+			i = 31 * i + System.identityHashCode(this.second);
+			return 31 * i + this.direction.hashCode();
+		}
 	}
 
 	protected class SpreadContext {

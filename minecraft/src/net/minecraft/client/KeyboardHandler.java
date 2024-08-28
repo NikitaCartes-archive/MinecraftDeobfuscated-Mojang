@@ -25,6 +25,7 @@ import net.minecraft.client.gui.screens.debug.GameModeSwitcherScreen;
 import net.minecraft.client.gui.screens.options.controls.KeyBindsScreen;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.FogRenderer;
 import net.minecraft.commands.arguments.blocks.BlockStateParser;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -67,6 +68,9 @@ public class KeyboardHandler {
 				this.debugFeedback("SectionPath: {0}", this.minecraft.sectionPath ? "shown" : "hidden");
 				return true;
 			case 70:
+				boolean bl2 = FogRenderer.toggleFog();
+				this.debugFeedback("Fog: {0}", bl2 ? "enabled" : "disabled");
+				return true;
 			case 71:
 			case 72:
 			case 73:

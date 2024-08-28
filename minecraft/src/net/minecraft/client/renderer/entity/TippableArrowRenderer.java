@@ -15,7 +15,7 @@ public class TippableArrowRenderer extends ArrowRenderer<Arrow, TippableArrowRen
 		super(context);
 	}
 
-	public ResourceLocation getTextureLocation(TippableArrowRenderState tippableArrowRenderState) {
+	protected ResourceLocation getTextureLocation(TippableArrowRenderState tippableArrowRenderState) {
 		return tippableArrowRenderState.isTipped ? TIPPED_ARROW_LOCATION : NORMAL_ARROW_LOCATION;
 	}
 

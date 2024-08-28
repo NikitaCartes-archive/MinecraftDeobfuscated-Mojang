@@ -245,13 +245,17 @@ public class MerchantScreen extends AbstractContainerScreen<MerchantMenu> {
 
 	@Override
 	public boolean mouseScrolled(double d, double e, double f, double g) {
-		int i = this.menu.getOffers().size();
-		if (this.canScroll(i)) {
-			int j = i - 7;
-			this.scrollOff = Mth.clamp((int)((double)this.scrollOff - g), 0, j);
-		}
+		if (super.mouseScrolled(d, e, f, g)) {
+			return true;
+		} else {
+			int i = this.menu.getOffers().size();
+			if (this.canScroll(i)) {
+				int j = i - 7;
+				this.scrollOff = Mth.clamp((int)((double)this.scrollOff - g), 0, j);
+			}
 
-		return true;
+			return true;
+		}
 	}
 
 	@Override

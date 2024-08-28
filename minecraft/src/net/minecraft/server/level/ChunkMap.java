@@ -581,7 +581,7 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 
 	private ChunkAccess createEmptyChunk(ChunkPos chunkPos) {
 		this.markPositionReplaceable(chunkPos);
-		return new ProtoChunk(chunkPos, UpgradeData.EMPTY, this.level, this.level.registryAccess().registryOrThrow(Registries.BIOME), null);
+		return new ProtoChunk(chunkPos, UpgradeData.EMPTY, this.level, this.level.registryAccess().lookupOrThrow(Registries.BIOME), null);
 	}
 
 	private void markPositionReplaceable(ChunkPos chunkPos) {

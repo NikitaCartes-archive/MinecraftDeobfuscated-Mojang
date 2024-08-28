@@ -37,8 +37,8 @@ public class MossBlock extends Block implements BonemealableBlock {
 	@Override
 	public void performBonemeal(ServerLevel serverLevel, RandomSource randomSource, BlockPos blockPos, BlockState blockState) {
 		serverLevel.registryAccess()
-			.registry(Registries.CONFIGURED_FEATURE)
-			.flatMap(registry -> registry.getHolder(CaveFeatures.MOSS_PATCH_BONEMEAL))
+			.lookup(Registries.CONFIGURED_FEATURE)
+			.flatMap(registry -> registry.get(CaveFeatures.MOSS_PATCH_BONEMEAL))
 			.ifPresent(
 				reference -> ((ConfiguredFeature)reference.value()).place(serverLevel, serverLevel.getChunkSource().getGenerator(), randomSource, blockPos.above())
 			);

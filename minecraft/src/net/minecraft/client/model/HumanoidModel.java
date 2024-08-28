@@ -34,7 +34,6 @@ public class HumanoidModel<T extends HumanoidRenderState> extends EntityModel<T>
 	private static final float HORIZONTAL_SHIELD_MOVEMENT_LIMIT = (float) (Math.PI / 6);
 	public static final float TOOT_HORN_XROT_BASE = 1.4835298F;
 	public static final float TOOT_HORN_YROT_BASE = (float) (Math.PI / 6);
-	private final ModelPart root;
 	public final ModelPart head;
 	public final ModelPart hat;
 	public final ModelPart body;
@@ -48,8 +47,7 @@ public class HumanoidModel<T extends HumanoidRenderState> extends EntityModel<T>
 	}
 
 	public HumanoidModel(ModelPart modelPart, Function<ResourceLocation, RenderType> function) {
-		super(function);
-		this.root = modelPart;
+		super(modelPart, function);
 		this.head = modelPart.getChild("head");
 		this.hat = this.head.getChild("hat");
 		this.body = modelPart.getChild("body");
@@ -92,26 +90,15 @@ public class HumanoidModel<T extends HumanoidRenderState> extends EntityModel<T>
 		return meshDefinition;
 	}
 
-	@Override
-	public ModelPart root() {
-		return this.root;
-	}
-
 	protected HumanoidModel.ArmPose getArmPose(T humanoidRenderState, HumanoidArm humanoidArm) {
 		return HumanoidModel.ArmPose.EMPTY;
 	}
 
 	public void setupAnim(T humanoidRenderState) {
+		super.setupAnim(humanoidRenderState);
 		HumanoidModel.ArmPose armPose = this.getArmPose(humanoidRenderState, HumanoidArm.LEFT);
 		HumanoidModel.ArmPose armPose2 = this.getArmPose(humanoidRenderState, HumanoidArm.RIGHT);
 		float f = humanoidRenderState.swimAmount;
-		this.body.resetPose();
-		this.head.resetPose();
-		this.hat.resetPose();
-		this.rightLeg.resetPose();
-		this.leftLeg.resetPose();
-		this.rightArm.resetPose();
-		this.leftArm.resetPose();
 		boolean bl = humanoidRenderState.isFallFlying;
 		this.head.yRot = humanoidRenderState.yRot * (float) (Math.PI / 180.0);
 		if (bl) {
@@ -347,15 +334,6 @@ public class HumanoidModel<T extends HumanoidRenderState> extends EntityModel<T>
 
 	private float quadraticArmUpdate(float f) {
 		return -65.0F * f + f * f;
-	}
-
-	public void copyPropertiesTo(HumanoidModel<T> humanoidModel) {
-		humanoidModel.head.copyFrom(this.head);
-		humanoidModel.body.copyFrom(this.body);
-		humanoidModel.rightArm.copyFrom(this.rightArm);
-		humanoidModel.leftArm.copyFrom(this.leftArm);
-		humanoidModel.rightLeg.copyFrom(this.rightLeg);
-		humanoidModel.leftLeg.copyFrom(this.leftLeg);
 	}
 
 	public void setAllVisible(boolean bl) {

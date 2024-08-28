@@ -15,15 +15,11 @@ public interface RegistryAccess extends HolderLookup.Provider {
 	Logger LOGGER = LogUtils.getLogger();
 	RegistryAccess.Frozen EMPTY = new RegistryAccess.ImmutableRegistryAccess(Map.of()).freeze();
 
-	<E> Optional<Registry<E>> registry(ResourceKey<? extends Registry<? extends E>> resourceKey);
-
 	@Override
-	default <T> Optional<HolderLookup.RegistryLookup<T>> lookup(ResourceKey<? extends Registry<? extends T>> resourceKey) {
-		return this.registry(resourceKey).map(Registry::asLookup);
-	}
+	<E> Optional<Registry<E>> lookup(ResourceKey<? extends Registry<? extends E>> resourceKey);
 
-	default <E> Registry<E> registryOrThrow(ResourceKey<? extends Registry<? extends E>> resourceKey) {
-		return (Registry<E>)this.registry(resourceKey).orElseThrow(() -> new IllegalStateException("Missing registry: " + resourceKey));
+	default <E> Registry<E> lookupOrThrow(ResourceKey<? extends Registry<? extends E>> resourceKey) {
+		return (Registry<E>)this.lookup(resourceKey).orElseThrow(() -> new IllegalStateException("Missing registry: " + resourceKey));
 	}
 
 	Stream<RegistryAccess.RegistryEntry<?>> registries();
@@ -36,7 +32,7 @@ public interface RegistryAccess extends HolderLookup.Provider {
 	static RegistryAccess.Frozen fromRegistryOfRegistries(Registry<? extends Registry<?>> registry) {
 		return new RegistryAccess.Frozen() {
 			@Override
-			public <T> Optional<Registry<T>> registry(ResourceKey<? extends Registry<? extends T>> resourceKey) {
+			public <T> Optional<Registry<T>> lookup(ResourceKey<? extends Registry<? extends T>> resourceKey) {
 				Registry<Registry<T>> registry = (Registry<Registry<T>>)registry;
 				return registry.getOptional((ResourceKey<Registry<T>>)resourceKey);
 			}
@@ -85,7 +81,7 @@ public interface RegistryAccess extends HolderLookup.Provider {
 		}
 
 		@Override
-		public <E> Optional<Registry<E>> registry(ResourceKey<? extends Registry<? extends E>> resourceKey) {
+		public <E> Optional<Registry<E>> lookup(ResourceKey<? extends Registry<? extends E>> resourceKey) {
 			return Optional.ofNullable((Registry)this.registries.get(resourceKey)).map(registry -> registry);
 		}
 

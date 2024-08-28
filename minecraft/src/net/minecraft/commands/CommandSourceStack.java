@@ -550,7 +550,7 @@ public class CommandSourceStack implements ExecutionCommandSource<CommandSourceS
 		SuggestionsBuilder suggestionsBuilder,
 		CommandContext<?> commandContext
 	) {
-		return (CompletableFuture<Suggestions>)this.registryAccess().registry(resourceKey).map(registry -> {
+		return (CompletableFuture<Suggestions>)this.registryAccess().lookup(resourceKey).map(registry -> {
 			this.suggestRegistryElements(registry, elementSuggestionType, suggestionsBuilder);
 			return suggestionsBuilder.buildFuture();
 		}).orElseGet(Suggestions::empty);

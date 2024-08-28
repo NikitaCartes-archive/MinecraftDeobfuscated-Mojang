@@ -15,13 +15,12 @@ import net.minecraft.util.Mth;
 @Environment(EnvType.CLIENT)
 public class DolphinModel extends EntityModel<DolphinRenderState> {
 	public static final MeshTransformer BABY_TRANSFORMER = MeshTransformer.scaling(0.5F);
-	private final ModelPart root;
 	private final ModelPart body;
 	private final ModelPart tail;
 	private final ModelPart tailFin;
 
 	public DolphinModel(ModelPart modelPart) {
-		this.root = modelPart;
+		super(modelPart);
 		this.body = modelPart.getChild("body");
 		this.tail = this.body.getChild("tail");
 		this.tailFin = this.tail.getChild("tail_fin");
@@ -63,12 +62,8 @@ public class DolphinModel extends EntityModel<DolphinRenderState> {
 		return LayerDefinition.create(meshDefinition, 64, 64);
 	}
 
-	@Override
-	public ModelPart root() {
-		return this.root;
-	}
-
 	public void setupAnim(DolphinRenderState dolphinRenderState) {
+		super.setupAnim(dolphinRenderState);
 		this.body.xRot = dolphinRenderState.xRot * (float) (Math.PI / 180.0);
 		this.body.yRot = dolphinRenderState.yRot * (float) (Math.PI / 180.0);
 		if (dolphinRenderState.isMoving) {

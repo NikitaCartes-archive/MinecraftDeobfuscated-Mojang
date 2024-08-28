@@ -19,7 +19,6 @@ import net.minecraft.util.Mth;
 public class WardenModel extends EntityModel<WardenRenderState> {
 	private static final float DEFAULT_ARM_X_Y = 13.0F;
 	private static final float DEFAULT_ARM_Z = 1.0F;
-	private final ModelPart root;
 	protected final ModelPart bone;
 	protected final ModelPart body;
 	protected final ModelPart head;
@@ -37,8 +36,7 @@ public class WardenModel extends EntityModel<WardenRenderState> {
 	private final List<ModelPart> pulsatingSpotsLayerModelParts;
 
 	public WardenModel(ModelPart modelPart) {
-		super(RenderType::entityCutoutNoCull);
-		this.root = modelPart;
+		super(modelPart, RenderType::entityCutoutNoCull);
 		this.bone = modelPart.getChild("bone");
 		this.body = this.bone.getChild("body");
 		this.head = this.body.getChild("head");
@@ -96,7 +94,7 @@ public class WardenModel extends EntityModel<WardenRenderState> {
 	}
 
 	public void setupAnim(WardenRenderState wardenRenderState) {
-		this.root().getAllParts().forEach(ModelPart::resetPose);
+		super.setupAnim(wardenRenderState);
 		this.animateHeadLookTarget(wardenRenderState.yRot, wardenRenderState.xRot);
 		this.animateWalk(wardenRenderState.walkAnimationPos, wardenRenderState.walkAnimationSpeed);
 		this.animateIdlePose(wardenRenderState.ageInTicks);
@@ -158,11 +156,6 @@ public class WardenModel extends EntityModel<WardenRenderState> {
 		float g = wardenRenderState.tendrilAnimation * (float)(Math.cos((double)f * 2.25) * Math.PI * 0.1F);
 		this.leftTendril.xRot = g;
 		this.rightTendril.xRot = -g;
-	}
-
-	@Override
-	public ModelPart root() {
-		return this.root;
 	}
 
 	public List<ModelPart> getTendrilsLayerModelParts() {

@@ -659,6 +659,8 @@ public class GuiGraphics {
 				l += clientTooltipComponent.getHeight(font);
 			}
 
+			int n = k;
+			int o = l;
 			Vector2ic vector2ic = clientTooltipPositioner.positionTooltip(this.guiWidth(), this.guiHeight(), i, j, k, l);
 			int p = vector2ic.x();
 			int q = vector2ic.y();
@@ -678,7 +680,7 @@ public class GuiGraphics {
 
 			for (int t = 0; t < list.size(); t++) {
 				ClientTooltipComponent clientTooltipComponent2 = (ClientTooltipComponent)list.get(t);
-				clientTooltipComponent2.renderImage(font, p, s, this);
+				clientTooltipComponent2.renderImage(font, p, s, n, o, this);
 				s += clientTooltipComponent2.getHeight(font) + (t == 0 ? 2 : 0);
 			}
 

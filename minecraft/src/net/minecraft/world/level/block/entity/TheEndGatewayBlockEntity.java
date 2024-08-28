@@ -161,8 +161,8 @@ public class TheEndGatewayBlockEntity extends TheEndPortalBlockEntity {
 			BlockPos blockPos3 = BlockPos.containing(vec3.x + 0.5, 75.0, vec3.z + 0.5);
 			LOGGER.debug("Failed to find a suitable block to teleport to, spawning an island on {}", blockPos3);
 			serverLevel.registryAccess()
-				.registry(Registries.CONFIGURED_FEATURE)
-				.flatMap(registry -> registry.getHolder(EndFeatures.END_ISLAND))
+				.lookup(Registries.CONFIGURED_FEATURE)
+				.flatMap(registry -> registry.get(EndFeatures.END_ISLAND))
 				.ifPresent(
 					reference -> ((ConfiguredFeature)reference.value())
 							.place(serverLevel, serverLevel.getChunkSource().getGenerator(), RandomSource.create(blockPos3.asLong()), blockPos3)

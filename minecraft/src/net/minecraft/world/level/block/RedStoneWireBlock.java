@@ -239,14 +239,14 @@ public class RedStoneWireBlock extends Block {
 				BlockState blockState2 = levelAccessor.getBlockState(mutableBlockPos);
 				if (blockState2.is(this)) {
 					BlockPos blockPos2 = mutableBlockPos.relative(direction.getOpposite());
-					levelAccessor.neighborShapeChanged(direction.getOpposite(), levelAccessor.getBlockState(blockPos2), mutableBlockPos, blockPos2, i, j);
+					levelAccessor.neighborShapeChanged(direction.getOpposite(), mutableBlockPos, blockPos2, levelAccessor.getBlockState(blockPos2), i, j);
 				}
 
 				mutableBlockPos.setWithOffset(blockPos, direction).move(Direction.UP);
 				BlockState blockState3 = levelAccessor.getBlockState(mutableBlockPos);
 				if (blockState3.is(this)) {
 					BlockPos blockPos3 = mutableBlockPos.relative(direction.getOpposite());
-					levelAccessor.neighborShapeChanged(direction.getOpposite(), levelAccessor.getBlockState(blockPos3), mutableBlockPos, blockPos3, i, j);
+					levelAccessor.neighborShapeChanged(direction.getOpposite(), mutableBlockPos, blockPos3, levelAccessor.getBlockState(blockPos3), i, j);
 				}
 			}
 		}

@@ -21,6 +21,7 @@ public class SnowGolemRenderer extends MobRenderer<SnowGolem, LivingEntityRender
 		this.addLayer(new SnowGolemHeadLayer(this, context.getBlockRenderDispatcher(), context.getItemRenderer()));
 	}
 
+	@Override
 	public ResourceLocation getTextureLocation(LivingEntityRenderState livingEntityRenderState) {
 		return SNOW_GOLEM_LOCATION;
 	}

@@ -215,7 +215,7 @@ public interface LevelReader extends BlockAndTintGetter, CollisionGetter, Signal
 	FeatureFlagSet enabledFeatures();
 
 	default <T> HolderLookup<T> holderLookup(ResourceKey<? extends Registry<? extends T>> resourceKey) {
-		Registry<T> registry = this.registryAccess().registryOrThrow(resourceKey);
-		return registry.asLookup().filterFeatures(this.enabledFeatures());
+		Registry<T> registry = this.registryAccess().lookupOrThrow(resourceKey);
+		return registry.filterFeatures(this.enabledFeatures());
 	}
 }

@@ -49,10 +49,6 @@ public class ShulkerBulletRenderer extends EntityRenderer<ShulkerBullet, Shulker
 		super.render(shulkerBulletRenderState, poseStack, multiBufferSource, i);
 	}
 
-	public ResourceLocation getTextureLocation(ShulkerBulletRenderState shulkerBulletRenderState) {
-		return TEXTURE_LOCATION;
-	}
-
 	public ShulkerBulletRenderState createRenderState() {
 		return new ShulkerBulletRenderState();
 	}

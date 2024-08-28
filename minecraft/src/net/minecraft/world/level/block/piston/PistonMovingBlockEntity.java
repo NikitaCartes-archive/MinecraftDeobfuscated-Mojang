@@ -325,7 +325,7 @@ public class PistonMovingBlockEntity extends BlockEntity {
 	@Override
 	protected void loadAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
 		super.loadAdditional(compoundTag, provider);
-		HolderGetter<Block> holderGetter = (HolderGetter<Block>)(this.level != null ? this.level.holderLookup(Registries.BLOCK) : BuiltInRegistries.BLOCK.asLookup());
+		HolderGetter<Block> holderGetter = (HolderGetter<Block>)(this.level != null ? this.level.holderLookup(Registries.BLOCK) : BuiltInRegistries.BLOCK);
 		this.movedState = NbtUtils.readBlockState(holderGetter, compoundTag.getCompound("blockState"));
 		this.direction = Direction.from3DDataValue(compoundTag.getInt("facing"));
 		this.progress = compoundTag.getFloat("progress");

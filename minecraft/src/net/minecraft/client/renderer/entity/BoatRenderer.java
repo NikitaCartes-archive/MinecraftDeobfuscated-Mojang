@@ -84,10 +84,6 @@ public class BoatRenderer extends EntityRenderer<Boat, BoatRenderState> {
 		super.render(boatRenderState, poseStack, multiBufferSource, i);
 	}
 
-	public ResourceLocation getTextureLocation(BoatRenderState boatRenderState) {
-		return (ResourceLocation)((Pair)this.boatResources.get(boatRenderState.variant)).getFirst();
-	}
-
 	public BoatRenderState createRenderState() {
 		return new BoatRenderState();
 	}

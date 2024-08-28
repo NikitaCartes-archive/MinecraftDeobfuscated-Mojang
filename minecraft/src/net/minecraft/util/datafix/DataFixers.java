@@ -214,6 +214,7 @@ import net.minecraft.util.datafix.fixes.TeamDisplayNameFix;
 import net.minecraft.util.datafix.fixes.TippedArrowPotionToItemFix;
 import net.minecraft.util.datafix.fixes.TrappedChestBlockEntityFix;
 import net.minecraft.util.datafix.fixes.TrialSpawnerConfigFix;
+import net.minecraft.util.datafix.fixes.TrialSpawnerConfigInRegistryFix;
 import net.minecraft.util.datafix.fixes.VariantRenameFix;
 import net.minecraft.util.datafix.fixes.VillagerDataFix;
 import net.minecraft.util.datafix.fixes.VillagerFollowRangeFix;
@@ -1337,6 +1338,8 @@ public class DataFixers {
 		dataFixerBuilder.addFixer(new CarvingStepRemoveFix(schema229));
 		Schema schema230 = dataFixerBuilder.addSchema(4059, V4059::new);
 		dataFixerBuilder.addFixer(new FoodToConsumableFix(schema230));
+		Schema schema231 = dataFixerBuilder.addSchema(4061, SAME_NAMESPACED);
+		dataFixerBuilder.addFixer(new TrialSpawnerConfigInRegistryFix(schema231));
 	}
 
 	private static UnaryOperator<String> createRenamerNoNamespace(Map<String, String> map) {

@@ -63,10 +63,8 @@ public class ArmorStandModel extends ArmorStandArmorModel {
 
 	@Override
 	public void setupAnim(ArmorStandRenderState armorStandRenderState) {
-		this.basePlate.xRot = 0.0F;
-		this.basePlate.yRot = (float) (Math.PI / 180.0) * -armorStandRenderState.yRot;
-		this.basePlate.zRot = 0.0F;
 		super.setupAnim(armorStandRenderState);
+		this.basePlate.yRot = (float) (Math.PI / 180.0) * -armorStandRenderState.yRot;
 		this.leftArm.visible = armorStandRenderState.showArms;
 		this.rightArm.visible = armorStandRenderState.showArms;
 		this.basePlate.visible = armorStandRenderState.showBasePlate;

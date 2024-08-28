@@ -83,6 +83,7 @@ import net.minecraft.client.model.SlimeModel;
 import net.minecraft.client.model.SnifferModel;
 import net.minecraft.client.model.SnowGolemModel;
 import net.minecraft.client.model.SpiderModel;
+import net.minecraft.client.model.SpinAttackEffectModel;
 import net.minecraft.client.model.SquidModel;
 import net.minecraft.client.model.StriderModel;
 import net.minecraft.client.model.TadpoleModel;
@@ -110,7 +111,6 @@ import net.minecraft.client.renderer.blockentity.DecoratedPotRenderer;
 import net.minecraft.client.renderer.blockentity.HangingSignRenderer;
 import net.minecraft.client.renderer.blockentity.SignRenderer;
 import net.minecraft.client.renderer.entity.WitherSkullRenderer;
-import net.minecraft.client.renderer.entity.layers.SpinAttackEffectLayer;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.level.block.state.properties.WoodType;
 
@@ -323,7 +323,7 @@ public class LayerDefinitions {
 		builder.put(ModelLayers.PLAYER_SLIM, LayerDefinition.create(PlayerModel.createMesh(CubeDeformation.NONE, true), 64, 64));
 		builder.put(ModelLayers.PLAYER_SLIM_INNER_ARMOR, layerDefinition4);
 		builder.put(ModelLayers.PLAYER_SLIM_OUTER_ARMOR, layerDefinition2);
-		builder.put(ModelLayers.PLAYER_SPIN_ATTACK, SpinAttackEffectLayer.createLayer());
+		builder.put(ModelLayers.PLAYER_SPIN_ATTACK, SpinAttackEffectModel.createLayer());
 		builder.put(ModelLayers.POLAR_BEAR, layerDefinition36);
 		builder.put(ModelLayers.POLAR_BEAR_BABY, layerDefinition36.apply(PolarBearModel.BABY_TRANSFORMER));
 		builder.put(ModelLayers.PUFFERFISH_BIG, PufferfishBigModel.createBodyLayer());

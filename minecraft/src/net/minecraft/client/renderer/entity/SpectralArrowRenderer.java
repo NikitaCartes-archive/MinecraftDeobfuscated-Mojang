@@ -14,7 +14,8 @@ public class SpectralArrowRenderer extends ArrowRenderer<SpectralArrow, ArrowRen
 		super(context);
 	}
 
-	public ResourceLocation getTextureLocation(ArrowRenderState arrowRenderState) {
+	@Override
+	protected ResourceLocation getTextureLocation(ArrowRenderState arrowRenderState) {
 		return SPECTRAL_ARROW_LOCATION;
 	}
 

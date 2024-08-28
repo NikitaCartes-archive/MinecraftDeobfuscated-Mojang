@@ -14,12 +14,11 @@ import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
 public class BlazeModel extends EntityModel<LivingEntityRenderState> {
-	private final ModelPart root;
 	private final ModelPart[] upperBodyParts;
 	private final ModelPart head;
 
 	public BlazeModel(ModelPart modelPart) {
-		this.root = modelPart;
+		super(modelPart);
 		this.head = modelPart.getChild("head");
 		this.upperBodyParts = new ModelPart[12];
 		Arrays.setAll(this.upperBodyParts, i -> modelPart.getChild(getPartName(i)));
@@ -67,12 +66,8 @@ public class BlazeModel extends EntityModel<LivingEntityRenderState> {
 		return LayerDefinition.create(meshDefinition, 64, 32);
 	}
 
-	@Override
-	public ModelPart root() {
-		return this.root;
-	}
-
 	public void setupAnim(LivingEntityRenderState livingEntityRenderState) {
+		super.setupAnim(livingEntityRenderState);
 		float f = livingEntityRenderState.ageInTicks * (float) Math.PI * -0.1F;
 
 		for (int i = 0; i < 4; i++) {

@@ -61,7 +61,7 @@ public class SetContainerLootTable extends LootItemConditionalFunction {
 		if (!validationContext.allowsReferences()) {
 			validationContext.reportProblem("Uses reference to " + this.name.location() + ", but references are not allowed");
 		} else {
-			if (validationContext.resolver().get(Registries.LOOT_TABLE, this.name).isEmpty()) {
+			if (validationContext.resolver().get(this.name).isEmpty()) {
 				validationContext.reportProblem("Missing loot table used for container: " + this.name.location());
 			}
 		}

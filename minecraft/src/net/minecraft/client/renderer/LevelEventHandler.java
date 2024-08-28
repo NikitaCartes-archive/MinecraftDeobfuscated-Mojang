@@ -110,7 +110,7 @@ public class LevelEventHandler {
 				}
 				break;
 			case 1010:
-				this.level.registryAccess().registryOrThrow(Registries.JUKEBOX_SONG).getHolder(j).ifPresent(reference -> this.playJukeboxSong(reference, blockPos));
+				this.level.registryAccess().lookupOrThrow(Registries.JUKEBOX_SONG).get(j).ifPresent(reference -> this.playJukeboxSong(reference, blockPos));
 				break;
 			case 1011:
 				this.stopJukeboxSongAndNotifyNearby(blockPos);

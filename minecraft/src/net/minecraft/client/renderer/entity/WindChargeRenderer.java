@@ -36,11 +36,6 @@ public class WindChargeRenderer extends EntityRenderer<AbstractWindCharge, Entit
 	}
 
 	@Override
-	public ResourceLocation getTextureLocation(EntityRenderState entityRenderState) {
-		return TEXTURE_LOCATION;
-	}
-
-	@Override
 	public EntityRenderState createRenderState() {
 		return new EntityRenderState();
 	}

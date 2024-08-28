@@ -262,6 +262,16 @@ public record Enchantment(Component description, Enchantment.EnchantmentDefiniti
 		this.modifyDamageFilteredValue(EnchantmentEffectComponents.ARMOR_EFFECTIVENESS, serverLevel, i, itemStack, entity, damageSource, mutableFloat);
 	}
 
+	public void doPostAttack(
+		ServerLevel serverLevel, int i, EnchantedItemInUse enchantedItemInUse, EnchantmentTarget enchantmentTarget, Entity entity, DamageSource damageSource
+	) {
+		for (TargetedConditionalEffect<EnchantmentEntityEffect> targetedConditionalEffect : this.getEffects(EnchantmentEffectComponents.POST_ATTACK)) {
+			if (enchantmentTarget == targetedConditionalEffect.enchanted()) {
+				doPostAttack(targetedConditionalEffect, serverLevel, i, enchantedItemInUse, entity, damageSource);
+			}
+		}
+	}
+
 	public static void doPostAttack(
 		TargetedConditionalEffect<EnchantmentEntityEffect> targetedConditionalEffect,
 		ServerLevel serverLevel,
@@ -278,16 +288,6 @@ public record Enchantment(Component description, Enchantment.EnchantmentDefiniti
 			};
 			if (entity2 != null) {
 				targetedConditionalEffect.effect().apply(serverLevel, i, enchantedItemInUse, entity2, entity2.position());
-			}
-		}
-	}
-
-	public void doPostAttack(
-		ServerLevel serverLevel, int i, EnchantedItemInUse enchantedItemInUse, EnchantmentTarget enchantmentTarget, Entity entity, DamageSource damageSource
-	) {
-		for (TargetedConditionalEffect<EnchantmentEntityEffect> targetedConditionalEffect : this.getEffects(EnchantmentEffectComponents.POST_ATTACK)) {
-			if (enchantmentTarget == targetedConditionalEffect.enchanted()) {
-				doPostAttack(targetedConditionalEffect, serverLevel, i, enchantedItemInUse, entity, damageSource);
 			}
 		}
 	}

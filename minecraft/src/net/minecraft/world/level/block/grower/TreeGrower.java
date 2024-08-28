@@ -127,8 +127,8 @@ public final class TreeGrower {
 		ResourceKey<ConfiguredFeature<?, ?>> resourceKey = this.getConfiguredMegaFeature(randomSource);
 		if (resourceKey != null) {
 			Holder<ConfiguredFeature<?, ?>> holder = (Holder<ConfiguredFeature<?, ?>>)serverLevel.registryAccess()
-				.registryOrThrow(Registries.CONFIGURED_FEATURE)
-				.getHolder(resourceKey)
+				.lookupOrThrow(Registries.CONFIGURED_FEATURE)
+				.get(resourceKey)
 				.orElse(null);
 			if (holder != null) {
 				for (int i = 0; i >= -1; i--) {
@@ -160,8 +160,8 @@ public final class TreeGrower {
 			return false;
 		} else {
 			Holder<ConfiguredFeature<?, ?>> holder2 = (Holder<ConfiguredFeature<?, ?>>)serverLevel.registryAccess()
-				.registryOrThrow(Registries.CONFIGURED_FEATURE)
-				.getHolder(resourceKey2)
+				.lookupOrThrow(Registries.CONFIGURED_FEATURE)
+				.get(resourceKey2)
 				.orElse(null);
 			if (holder2 == null) {
 				return false;

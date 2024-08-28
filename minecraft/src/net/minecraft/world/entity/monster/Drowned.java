@@ -208,7 +208,7 @@ public class Drowned extends Zombie implements RangedAttackMob {
 
 	@Override
 	public void travel(Vec3 vec3) {
-		if (this.isControlledByLocalInstance() && this.isInWater() && this.wantsToSwim()) {
+		if (this.isControlledByLocalInstance() && this.isUnderWater() && this.wantsToSwim()) {
 			this.moveRelative(0.01F, vec3);
 			this.move(MoverType.SELF, this.getDeltaMovement());
 			this.setDeltaMovement(this.getDeltaMovement().scale(0.9));
@@ -220,7 +220,7 @@ public class Drowned extends Zombie implements RangedAttackMob {
 	@Override
 	public void updateSwimming() {
 		if (!this.level().isClientSide) {
-			if (this.isEffectiveAi() && this.isInWater() && this.wantsToSwim()) {
+			if (this.isEffectiveAi() && this.isUnderWater() && this.wantsToSwim()) {
 				this.navigation = this.waterNavigation;
 				this.setSwimming(true);
 			} else {

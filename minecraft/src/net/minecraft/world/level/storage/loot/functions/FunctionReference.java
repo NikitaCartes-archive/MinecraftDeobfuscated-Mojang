@@ -41,7 +41,7 @@ public class FunctionReference extends LootItemConditionalFunction {
 		} else {
 			super.validate(validationContext);
 			validationContext.resolver()
-				.get(Registries.ITEM_MODIFIER, this.name)
+				.get(this.name)
 				.ifPresentOrElse(
 					reference -> ((LootItemFunction)reference.value()).validate(validationContext.enterElement(".{" + this.name.location() + "}", this.name)),
 					() -> validationContext.reportProblem("Unknown function table called " + this.name.location())
@@ -51,7 +51,7 @@ public class FunctionReference extends LootItemConditionalFunction {
 
 	@Override
 	protected ItemStack run(ItemStack itemStack, LootContext lootContext) {
-		LootItemFunction lootItemFunction = (LootItemFunction)lootContext.getResolver().get(Registries.ITEM_MODIFIER, this.name).map(Holder::value).orElse(null);
+		LootItemFunction lootItemFunction = (LootItemFunction)lootContext.getResolver().get(this.name).map(Holder::value).orElse(null);
 		if (lootItemFunction == null) {
 			LOGGER.warn("Unknown function: {}", this.name.location());
 			return itemStack;

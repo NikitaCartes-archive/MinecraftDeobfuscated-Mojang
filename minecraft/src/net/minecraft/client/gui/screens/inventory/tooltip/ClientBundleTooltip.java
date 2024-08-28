@@ -10,7 +10,6 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.minecraft.world.item.BundleItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.BundleContents;
 import org.apache.commons.lang3.math.Fraction;
@@ -18,6 +17,8 @@ import org.apache.commons.lang3.math.Fraction;
 @Environment(EnvType.CLIENT)
 public class ClientBundleTooltip implements ClientTooltipComponent {
 	private static final ResourceLocation PROGRESSBAR_BORDER_SPRITE = ResourceLocation.withDefaultNamespace("container/bundle/bundle_progressbar_border");
+	private static final ResourceLocation PROGRESSBAR_FILL_SPRITE = ResourceLocation.withDefaultNamespace("container/bundle/bundle_progressbar_fill");
+	private static final ResourceLocation PROGRESSBAR_FULL_SPRITE = ResourceLocation.withDefaultNamespace("container/bundle/bundle_progressbar_full");
 	private static final int SLOT_MARGIN = 4;
 	private static final int SLOT_SIZE = 24;
 	private static final int GRID_WIDTH = 96;
@@ -62,6 +63,10 @@ public class ClientBundleTooltip implements ClientTooltipComponent {
 		return this.gridSizeY() * 24;
 	}
 
+	private int getContentXOffset(int i) {
+		return (i - 96) / 2;
+	}
+
 	private int gridSizeY() {
 		return Mth.positiveCeilDiv(this.slotCount(), 4);
 	}
@@ -71,41 +76,41 @@ public class ClientBundleTooltip implements ClientTooltipComponent {
 	}
 
 	@Override
-	public void renderImage(Font font, int i, int j, GuiGraphics guiGraphics) {
+	public void renderImage(Font font, int i, int j, int k, int l, GuiGraphics guiGraphics) {
 		if (this.contents.isEmpty()) {
-			this.renderEmptyBundleTooltip(font, i, j, guiGraphics);
+			this.renderEmptyBundleTooltip(font, i, j, k, l, guiGraphics);
 		} else {
-			this.renderBundleWithItemsTooltip(font, i, j, guiGraphics);
+			this.renderBundleWithItemsTooltip(font, i, j, k, l, guiGraphics);
 		}
 	}
 
-	private void renderEmptyBundleTooltip(Font font, int i, int j, GuiGraphics guiGraphics) {
-		drawEmptyBundleDescriptionText(i, j, font, guiGraphics);
-		this.drawProgressbar(i, j + getEmptyBundleDescriptionTextHeight(font) + 4, font, guiGraphics);
+	private void renderEmptyBundleTooltip(Font font, int i, int j, int k, int l, GuiGraphics guiGraphics) {
+		drawEmptyBundleDescriptionText(i + this.getContentXOffset(k), j, font, guiGraphics);
+		this.drawProgressbar(i + this.getContentXOffset(k), j + getEmptyBundleDescriptionTextHeight(font) + 4, font, guiGraphics);
 	}
 
-	private void renderBundleWithItemsTooltip(Font font, int i, int j, GuiGraphics guiGraphics) {
+	private void renderBundleWithItemsTooltip(Font font, int i, int j, int k, int l, GuiGraphics guiGraphics) {
 		boolean bl = this.contents.size() > 12;
 		List<ItemStack> list = this.getShownItems(this.contents.getNumberOfItemsToShow());
-		int k = i + 96;
-		int l = j + this.gridSizeY() * 24;
-		int m = 1;
+		int m = i + this.getContentXOffset(k) + 96;
+		int n = j + this.gridSizeY() * 24;
+		int o = 1;
 
-		for (int n = 1; n <= this.gridSizeY(); n++) {
-			for (int o = 1; o <= 4; o++) {
-				int p = k - o * 24;
-				int q = l - n * 24;
-				if (shouldRenderSurplusText(bl, o, n)) {
-					renderCount(p, q, this.getAmountOfHiddenItems(list), font, guiGraphics);
-				} else if (shouldRenderItemSlot(list, m)) {
-					this.renderSlot(m, p, q, list, m, font, guiGraphics);
-					m++;
+		for (int p = 1; p <= this.gridSizeY(); p++) {
+			for (int q = 1; q <= 4; q++) {
+				int r = m - q * 24;
+				int s = n - p * 24;
+				if (shouldRenderSurplusText(bl, q, p)) {
+					renderCount(r, s, this.getAmountOfHiddenItems(list), font, guiGraphics);
+				} else if (shouldRenderItemSlot(list, o)) {
+					this.renderSlot(o, r, s, list, o, font, guiGraphics);
+					o++;
 				}
 			}
 		}
 
-		this.drawSelectedItemTooltip(font, guiGraphics, i, j);
-		this.drawProgressbar(i, j + this.itemGridHeight() + 4, font, guiGraphics);
+		this.drawSelectedItemTooltip(font, guiGraphics, i, j, k);
+		this.drawProgressbar(i + this.getContentXOffset(k), j + this.itemGridHeight() + 4, font, guiGraphics);
 	}
 
 	private List<ItemStack> getShownItems(int i) {
@@ -143,18 +148,18 @@ public class ClientBundleTooltip implements ClientTooltipComponent {
 		}
 	}
 
-	private void drawSelectedItemTooltip(Font font, GuiGraphics guiGraphics, int i, int j) {
+	private void drawSelectedItemTooltip(Font font, GuiGraphics guiGraphics, int i, int j, int k) {
 		if (this.contents.hasSelectedItem()) {
 			ItemStack itemStack = this.contents.getItemUnsafe(this.contents.getSelectedItem());
-			Component component = itemStack.getHoverName();
-			int k = font.width(component.getVisualOrderText());
-			int l = i + this.getWidth(font) / 2 - 12;
-			guiGraphics.renderTooltip(font, component, l - k / 2, j - 15);
+			Component component = itemStack.getStyledHoverName();
+			int l = font.width(component.getVisualOrderText());
+			int m = i + k / 2 - 12;
+			guiGraphics.renderTooltip(font, component, m - l / 2, j - 15);
 		}
 	}
 
 	private void drawProgressbar(int i, int j, Font font, GuiGraphics guiGraphics) {
-		guiGraphics.fill(RenderType.gui(), i + 1, j, i + 1 + this.getProgressBarFill(), j + 13, BundleItem.getBarColor(this.contents.weight()) | 0xFF000000);
+		guiGraphics.blitSprite(RenderType::guiTextured, this.getProgressBarTexture(), i + 1, j, this.getProgressBarFill(), 13);
 		guiGraphics.blitSprite(RenderType::guiTextured, PROGRESSBAR_BORDER_SPRITE, i, j, 96, 13);
 		Component component = this.getProgressBarFillText();
 		if (component != null) {
@@ -171,7 +176,11 @@ public class ClientBundleTooltip implements ClientTooltipComponent {
 	}
 
 	private int getProgressBarFill() {
-		return Mth.mulAndTruncate(this.contents.weight(), 94);
+		return Mth.clamp(Mth.mulAndTruncate(this.contents.weight(), 94), 0, 94);
+	}
+
+	private ResourceLocation getProgressBarTexture() {
+		return this.contents.weight().compareTo(Fraction.ONE) >= 0 ? PROGRESSBAR_FULL_SPRITE : PROGRESSBAR_FILL_SPRITE;
 	}
 
 	@Nullable

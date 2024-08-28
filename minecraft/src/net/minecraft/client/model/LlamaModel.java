@@ -18,7 +18,6 @@ import net.minecraft.util.Mth;
 @Environment(EnvType.CLIENT)
 public class LlamaModel extends EntityModel<LlamaRenderState> {
 	public static final MeshTransformer BABY_TRANSFORMER = LlamaModel::transformToBaby;
-	private final ModelPart root;
 	private final ModelPart head;
 	private final ModelPart rightHindLeg;
 	private final ModelPart leftHindLeg;
@@ -28,7 +27,7 @@ public class LlamaModel extends EntityModel<LlamaRenderState> {
 	private final ModelPart leftChest;
 
 	public LlamaModel(ModelPart modelPart) {
-		this.root = modelPart;
+		super(modelPart);
 		this.head = modelPart.getChild("head");
 		this.rightChest = modelPart.getChild("right_chest");
 		this.leftChest = modelPart.getChild("left_chest");
@@ -104,6 +103,7 @@ public class LlamaModel extends EntityModel<LlamaRenderState> {
 	}
 
 	public void setupAnim(LlamaRenderState llamaRenderState) {
+		super.setupAnim(llamaRenderState);
 		this.head.xRot = llamaRenderState.xRot * (float) (Math.PI / 180.0);
 		this.head.yRot = llamaRenderState.yRot * (float) (Math.PI / 180.0);
 		float f = llamaRenderState.walkAnimationSpeed;
@@ -114,10 +114,5 @@ public class LlamaModel extends EntityModel<LlamaRenderState> {
 		this.leftFrontLeg.xRot = Mth.cos(g * 0.6662F) * 1.4F * f;
 		this.rightChest.visible = llamaRenderState.hasChest;
 		this.leftChest.visible = llamaRenderState.hasChest;
-	}
-
-	@Override
-	public ModelPart root() {
-		return this.root;
 	}
 }

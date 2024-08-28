@@ -59,7 +59,7 @@ public class FeatureCountTracker {
 				(serverLevel, levelData) -> {
 					String string = serverLevel.dimension().location().toString();
 					boolean bl = serverLevel.getServer().isRunning();
-					Registry<PlacedFeature> registry = serverLevel.registryAccess().registryOrThrow(Registries.PLACED_FEATURE);
+					Registry<PlacedFeature> registry = serverLevel.registryAccess().lookupOrThrow(Registries.PLACED_FEATURE);
 					String string2 = (bl ? "running" : "dead") + " " + string;
 					Integer integer = levelData.chunksWithFeatures().getValue();
 					LOGGER.debug(string2 + " total_chunks: " + integer);

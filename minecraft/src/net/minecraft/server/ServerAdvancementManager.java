@@ -65,7 +65,7 @@ public class ServerAdvancementManager extends SimpleJsonResourceReloadListener {
 
 	private void validate(ResourceLocation resourceLocation, Advancement advancement) {
 		ProblemReporter.Collector collector = new ProblemReporter.Collector();
-		advancement.validate(collector, this.registries.asGetterLookup());
+		advancement.validate(collector, this.registries);
 		collector.getReport().ifPresent(string -> LOGGER.warn("Found validation problems in advancement {}: \n{}", resourceLocation, string));
 	}
 

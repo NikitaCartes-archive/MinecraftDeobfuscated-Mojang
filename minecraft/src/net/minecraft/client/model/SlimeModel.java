@@ -12,10 +12,8 @@ import net.minecraft.client.renderer.entity.state.EntityRenderState;
 
 @Environment(EnvType.CLIENT)
 public class SlimeModel extends EntityModel<EntityRenderState> {
-	private final ModelPart root;
-
 	public SlimeModel(ModelPart modelPart) {
-		this.root = modelPart;
+		super(modelPart);
 	}
 
 	public static LayerDefinition createOuterBodyLayer() {
@@ -33,14 +31,5 @@ public class SlimeModel extends EntityModel<EntityRenderState> {
 		partDefinition.addOrReplaceChild("left_eye", CubeListBuilder.create().texOffs(32, 4).addBox(1.25F, 18.0F, -3.5F, 2.0F, 2.0F, 2.0F), PartPose.ZERO);
 		partDefinition.addOrReplaceChild("mouth", CubeListBuilder.create().texOffs(32, 8).addBox(0.0F, 21.0F, -3.5F, 1.0F, 1.0F, 1.0F), PartPose.ZERO);
 		return LayerDefinition.create(meshDefinition, 64, 32);
-	}
-
-	@Override
-	public void setupAnim(EntityRenderState entityRenderState) {
-	}
-
-	@Override
-	public ModelPart root() {
-		return this.root;
 	}
 }

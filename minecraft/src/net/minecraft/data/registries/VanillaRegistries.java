@@ -34,6 +34,7 @@ import net.minecraft.world.item.enchantment.providers.VanillaEnchantmentProvider
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.MultiNoiseBiomeSourceParameterLists;
 import net.minecraft.world.level.block.entity.BannerPatterns;
+import net.minecraft.world.level.block.entity.trialspawner.TrialSpawnerConfigs;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 import net.minecraft.world.level.levelgen.NoiseRouterData;
 import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorPresets;
@@ -61,6 +62,7 @@ public class VanillaRegistries {
 		.add(Registries.CHAT_TYPE, ChatType::bootstrap)
 		.add(Registries.TRIM_PATTERN, TrimPatterns::bootstrap)
 		.add(Registries.TRIM_MATERIAL, TrimMaterials::bootstrap)
+		.add(Registries.TRIAL_SPAWNER_CONFIG, TrialSpawnerConfigs::bootstrap)
 		.add(Registries.WOLF_VARIANT, WolfVariants::bootstrap)
 		.add(Registries.PAINTING_VARIANT, PaintingVariants::bootstrap)
 		.add(Registries.DAMAGE_TYPE, DamageTypes::bootstrap)

@@ -144,11 +144,11 @@ public class CollectingNeighborUpdater implements NeighborUpdater {
 		boolean runNext(Level level);
 	}
 
-	static record ShapeUpdate(Direction direction, BlockState state, BlockPos pos, BlockPos neighborPos, int updateFlags, int updateLimit)
+	static record ShapeUpdate(Direction direction, BlockState neighborState, BlockPos pos, BlockPos neighborPos, int updateFlags, int updateLimit)
 		implements CollectingNeighborUpdater.NeighborUpdates {
 		@Override
 		public boolean runNext(Level level) {
-			NeighborUpdater.executeShapeUpdate(level, this.direction, this.state, this.pos, this.neighborPos, this.updateFlags, this.updateLimit);
+			NeighborUpdater.executeShapeUpdate(level, this.direction, this.pos, this.neighborPos, this.neighborState, this.updateFlags, this.updateLimit);
 			return false;
 		}
 	}

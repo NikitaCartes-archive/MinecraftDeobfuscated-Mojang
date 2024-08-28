@@ -2,14 +2,17 @@ package net.minecraft.world.level.block;
 
 import com.mojang.serialization.MapCodec;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.BiConsumer;
 import javax.annotation.Nullable;
+import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -34,6 +37,7 @@ import net.minecraft.world.entity.vehicle.MinecartTNT;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.BlockItemStateProperties;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
@@ -325,5 +329,15 @@ public class BeehiveBlock extends BaseEntityBlock {
 	@Override
 	public BlockState mirror(BlockState blockState, Mirror mirror) {
 		return blockState.rotate(mirror.getRotation(blockState.getValue(FACING)));
+	}
+
+	@Override
+	public void appendHoverText(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Component> list, TooltipFlag tooltipFlag) {
+		super.appendHoverText(itemStack, tooltipContext, list, tooltipFlag);
+		BlockItemStateProperties blockItemStateProperties = itemStack.getOrDefault(DataComponents.BLOCK_STATE, BlockItemStateProperties.EMPTY);
+		int i = (Integer)Objects.requireNonNullElse((Integer)blockItemStateProperties.get(HONEY_LEVEL), 0);
+		int j = itemStack.getOrDefault(DataComponents.BEES, List.of()).size();
+		list.add(Component.translatable("container.beehive.bees", j, 3).withStyle(ChatFormatting.GRAY));
+		list.add(Component.translatable("container.beehive.honey", i, 5).withStyle(ChatFormatting.GRAY));
 	}
 }

@@ -395,6 +395,44 @@ public class Enchantments {
 				LocationPredicate.Builder.location()
 					.setBlock(net.minecraft.advancements.critereon.BlockPredicate.Builder.block().of(holderGetter4, BlockTags.SOUL_SPEED_BLOCKS))
 			);
+		AllOfCondition.Builder builder2 = AllOfCondition.allOf(
+			InvertedLootItemCondition.invert(
+				LootItemEntityPropertyCondition.hasProperties(LootContext.EntityTarget.THIS, EntityPredicate.Builder.entity().vehicle(EntityPredicate.Builder.entity()))
+			),
+			AnyOfCondition.anyOf(
+				AllOfCondition.allOf(
+					EnchantmentActiveCheck.enchantmentActiveCheck(),
+					LootItemEntityPropertyCondition.hasProperties(
+						LootContext.EntityTarget.THIS, EntityPredicate.Builder.entity().flags(EntityFlagsPredicate.Builder.flags().setIsFlying(false))
+					),
+					AnyOfCondition.anyOf(
+						LootItemEntityPropertyCondition.hasProperties(
+							LootContext.EntityTarget.THIS,
+							EntityPredicate.Builder.entity()
+								.movementAffectedBy(
+									LocationPredicate.Builder.location()
+										.setBlock(net.minecraft.advancements.critereon.BlockPredicate.Builder.block().of(holderGetter4, BlockTags.SOUL_SPEED_BLOCKS))
+								)
+						),
+						LootItemEntityPropertyCondition.hasProperties(
+							LootContext.EntityTarget.THIS, EntityPredicate.Builder.entity().flags(EntityFlagsPredicate.Builder.flags().setOnGround(false)).build()
+						)
+					)
+				),
+				AllOfCondition.allOf(
+					EnchantmentActiveCheck.enchantmentInactiveCheck(),
+					LootItemEntityPropertyCondition.hasProperties(
+						LootContext.EntityTarget.THIS,
+						EntityPredicate.Builder.entity()
+							.movementAffectedBy(
+								LocationPredicate.Builder.location()
+									.setBlock(net.minecraft.advancements.critereon.BlockPredicate.Builder.block().of(holderGetter4, BlockTags.SOUL_SPEED_BLOCKS))
+							)
+							.flags(EntityFlagsPredicate.Builder.flags().setIsFlying(false))
+					)
+				)
+			)
+		);
 		register(
 			bootstrapContext,
 			SOUL_SPEED,
@@ -411,67 +449,21 @@ public class Enchantments {
 				)
 				.withEffect(
 					EnchantmentEffectComponents.LOCATION_CHANGED,
-					new EnchantmentAttributeEffect(
-						ResourceLocation.withDefaultNamespace("enchantment.soul_speed"),
-						Attributes.MOVEMENT_SPEED,
-						LevelBasedValue.perLevel(0.0405F, 0.0105F),
-						AttributeModifier.Operation.ADD_VALUE
-					),
-					AllOfCondition.allOf(
-						InvertedLootItemCondition.invert(
-							LootItemEntityPropertyCondition.hasProperties(LootContext.EntityTarget.THIS, EntityPredicate.Builder.entity().vehicle(EntityPredicate.Builder.entity()))
+					AllOf.locationBasedEffects(
+						new EnchantmentAttributeEffect(
+							ResourceLocation.withDefaultNamespace("enchantment.soul_speed"),
+							Attributes.MOVEMENT_SPEED,
+							LevelBasedValue.perLevel(0.0405F, 0.0105F),
+							AttributeModifier.Operation.ADD_VALUE
 						),
-						AnyOfCondition.anyOf(
-							AllOfCondition.allOf(
-								EnchantmentActiveCheck.enchantmentActiveCheck(),
-								LootItemEntityPropertyCondition.hasProperties(
-									LootContext.EntityTarget.THIS, EntityPredicate.Builder.entity().flags(EntityFlagsPredicate.Builder.flags().setIsFlying(false))
-								),
-								AnyOfCondition.anyOf(
-									LootItemEntityPropertyCondition.hasProperties(
-										LootContext.EntityTarget.THIS,
-										EntityPredicate.Builder.entity()
-											.movementAffectedBy(
-												LocationPredicate.Builder.location()
-													.setBlock(net.minecraft.advancements.critereon.BlockPredicate.Builder.block().of(holderGetter4, BlockTags.SOUL_SPEED_BLOCKS))
-											)
-									),
-									LootItemEntityPropertyCondition.hasProperties(
-										LootContext.EntityTarget.THIS, EntityPredicate.Builder.entity().flags(EntityFlagsPredicate.Builder.flags().setOnGround(false)).build()
-									)
-								)
-							),
-							AllOfCondition.allOf(
-								EnchantmentActiveCheck.enchantmentInactiveCheck(),
-								LootItemEntityPropertyCondition.hasProperties(
-									LootContext.EntityTarget.THIS,
-									EntityPredicate.Builder.entity()
-										.movementAffectedBy(
-											LocationPredicate.Builder.location()
-												.setBlock(net.minecraft.advancements.critereon.BlockPredicate.Builder.block().of(holderGetter4, BlockTags.SOUL_SPEED_BLOCKS))
-										)
-										.flags(EntityFlagsPredicate.Builder.flags().setIsFlying(false))
-								)
-							)
+						new EnchantmentAttributeEffect(
+							ResourceLocation.withDefaultNamespace("enchantment.soul_speed"),
+							Attributes.MOVEMENT_EFFICIENCY,
+							LevelBasedValue.constant(1.0F),
+							AttributeModifier.Operation.ADD_VALUE
 						)
-					)
-				)
-				.withEffect(
-					EnchantmentEffectComponents.LOCATION_CHANGED,
-					new EnchantmentAttributeEffect(
-						ResourceLocation.withDefaultNamespace("enchantment.soul_speed"),
-						Attributes.MOVEMENT_EFFICIENCY,
-						LevelBasedValue.constant(1.0F),
-						AttributeModifier.Operation.ADD_VALUE
 					),
-					LootItemEntityPropertyCondition.hasProperties(
-						LootContext.EntityTarget.THIS,
-						EntityPredicate.Builder.entity()
-							.movementAffectedBy(
-								LocationPredicate.Builder.location()
-									.setBlock(net.minecraft.advancements.critereon.BlockPredicate.Builder.block().of(holderGetter4, BlockTags.SOUL_SPEED_BLOCKS))
-							)
-					)
+					builder2
 				)
 				.withEffect(
 					EnchantmentEffectComponents.LOCATION_CHANGED,

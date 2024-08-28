@@ -50,7 +50,6 @@ public class SalmonRenderer extends MobRenderer<Salmon, SalmonRenderState, Salmo
 
 		float j = h * 4.3F * Mth.sin(i * 0.6F * salmonRenderState.ageInTicks);
 		poseStack.mulPose(Axis.YP.rotationDegrees(j));
-		poseStack.translate(0.0F, 0.0F, -0.4F);
 		if (!salmonRenderState.isInWater) {
 			poseStack.translate(0.2F, 0.1F, 0.0F);
 			poseStack.mulPose(Axis.ZP.rotationDegrees(90.0F));

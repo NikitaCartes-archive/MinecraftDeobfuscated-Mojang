@@ -43,8 +43,8 @@ public final class StructureStart {
 		if ("INVALID".equals(string)) {
 			return INVALID_START;
 		} else {
-			Registry<Structure> registry = structurePieceSerializationContext.registryAccess().registryOrThrow(Registries.STRUCTURE);
-			Structure structure = registry.get(ResourceLocation.parse(string));
+			Registry<Structure> registry = structurePieceSerializationContext.registryAccess().lookupOrThrow(Registries.STRUCTURE);
+			Structure structure = registry.getValue(ResourceLocation.parse(string));
 			if (structure == null) {
 				LOGGER.error("Unknown stucture id: {}", string);
 				return null;
@@ -105,7 +105,7 @@ public final class StructureStart {
 	public CompoundTag createTag(StructurePieceSerializationContext structurePieceSerializationContext, ChunkPos chunkPos) {
 		CompoundTag compoundTag = new CompoundTag();
 		if (this.isValid()) {
-			compoundTag.putString("id", structurePieceSerializationContext.registryAccess().registryOrThrow(Registries.STRUCTURE).getKey(this.structure).toString());
+			compoundTag.putString("id", structurePieceSerializationContext.registryAccess().lookupOrThrow(Registries.STRUCTURE).getKey(this.structure).toString());
 			compoundTag.putInt("ChunkX", chunkPos.x);
 			compoundTag.putInt("ChunkZ", chunkPos.z);
 			compoundTag.putInt("references", this.references);

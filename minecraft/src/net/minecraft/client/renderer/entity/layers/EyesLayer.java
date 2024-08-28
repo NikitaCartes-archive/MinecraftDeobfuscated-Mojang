@@ -20,7 +20,7 @@ public abstract class EyesLayer<S extends EntityRenderState, M extends EntityMod
 	@Override
 	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, S entityRenderState, float f, float g) {
 		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(this.renderType());
-		this.getParentModel().renderToBuffer(poseStack, vertexConsumer, 15728640, OverlayTexture.NO_OVERLAY);
+		this.getParentModel().renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY);
 	}
 
 	public abstract RenderType renderType();

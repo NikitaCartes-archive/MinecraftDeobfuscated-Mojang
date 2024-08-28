@@ -12,7 +12,6 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import net.minecraft.SharedConstants;
-import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
@@ -90,8 +89,6 @@ public class Block extends BlockBehaviour implements ItemLike {
 	public static final int UPDATE_LIMIT = 512;
 	protected final StateDefinition<Block, BlockState> stateDefinition;
 	private BlockState defaultBlockState;
-	@Nullable
-	private String descriptionId;
 	@Nullable
 	private Item item;
 	private static final int CACHE_SIZE = 256;
@@ -369,14 +366,6 @@ public class Block extends BlockBehaviour implements ItemLike {
 		return Component.translatable(this.getDescriptionId());
 	}
 
-	public String getDescriptionId() {
-		if (this.descriptionId == null) {
-			this.descriptionId = Util.makeDescriptionId("block", BuiltInRegistries.BLOCK.getKey(this));
-		}
-
-		return this.descriptionId;
-	}
-
 	public void fallOn(Level level, BlockState blockState, BlockPos blockPos, Entity entity, float f) {
 		entity.causeFallDamage(f, 1.0F, entity.damageSources().fall());
 	}
@@ -494,34 +483,6 @@ public class Block extends BlockBehaviour implements ItemLike {
 		int i = EnchantmentHelper.processBlockExperience(serverLevel, itemStack, intProvider.sample(serverLevel.getRandom()));
 		if (i > 0) {
 			this.popExperience(serverLevel, blockPos, i);
-		}
-	}
-
-	public static final class BlockStatePairKey {
-		private final BlockState first;
-		private final BlockState second;
-		private final Direction direction;
-
-		public BlockStatePairKey(BlockState blockState, BlockState blockState2, Direction direction) {
-			this.first = blockState;
-			this.second = blockState2;
-			this.direction = direction;
-		}
-
-		public boolean equals(Object object) {
-			if (this == object) {
-				return true;
-			} else {
-				return !(object instanceof Block.BlockStatePairKey blockStatePairKey)
-					? false
-					: this.first == blockStatePairKey.first && this.second == blockStatePairKey.second && this.direction == blockStatePairKey.direction;
-			}
-		}
-
-		public int hashCode() {
-			int i = this.first.hashCode();
-			i = 31 * i + this.second.hashCode();
-			return 31 * i + this.direction.hashCode();
 		}
 	}
 

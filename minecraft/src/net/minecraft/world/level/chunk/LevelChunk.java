@@ -100,7 +100,7 @@ public class LevelChunk extends ChunkAccess {
 		@Nullable LevelChunk.PostLoadProcessor postLoadProcessor,
 		@Nullable BlendingData blendingData
 	) {
-		super(chunkPos, upgradeData, level, level.registryAccess().registryOrThrow(Registries.BIOME), l, levelChunkSections, blendingData);
+		super(chunkPos, upgradeData, level, level.registryAccess().lookupOrThrow(Registries.BIOME), l, levelChunkSections, blendingData);
 		this.level = level;
 		this.gameEventListenerRegistrySections = new Int2ObjectOpenHashMap<>();
 

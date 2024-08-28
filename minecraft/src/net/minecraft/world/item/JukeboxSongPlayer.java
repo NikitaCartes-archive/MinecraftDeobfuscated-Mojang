@@ -47,7 +47,7 @@ public class JukeboxSongPlayer {
 	public void play(LevelAccessor levelAccessor, Holder<JukeboxSong> holder) {
 		this.song = holder;
 		this.ticksSinceSongStarted = 0L;
-		int i = levelAccessor.registryAccess().registryOrThrow(Registries.JUKEBOX_SONG).getId(this.song.value());
+		int i = levelAccessor.registryAccess().lookupOrThrow(Registries.JUKEBOX_SONG).getId(this.song.value());
 		levelAccessor.levelEvent(null, 1010, this.blockPos, i);
 		this.onSongChanged.notifyChange();
 	}

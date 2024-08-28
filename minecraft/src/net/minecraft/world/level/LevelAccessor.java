@@ -86,8 +86,8 @@ public interface LevelAccessor extends CommonLevelAccessor, LevelTimeAccess {
 	default void blockUpdated(BlockPos blockPos, Block block) {
 	}
 
-	default void neighborShapeChanged(Direction direction, BlockState blockState, BlockPos blockPos, BlockPos blockPos2, int i, int j) {
-		NeighborUpdater.executeShapeUpdate(this, direction, blockState, blockPos, blockPos2, i, j - 1);
+	default void neighborShapeChanged(Direction direction, BlockPos blockPos, BlockPos blockPos2, BlockState blockState, int i, int j) {
+		NeighborUpdater.executeShapeUpdate(this, direction, blockPos, blockPos2, blockState, i, j - 1);
 	}
 
 	default void playSound(@Nullable Player player, BlockPos blockPos, SoundEvent soundEvent, SoundSource soundSource) {
@@ -119,6 +119,6 @@ public interface LevelAccessor extends CommonLevelAccessor, LevelTimeAccess {
 	}
 
 	default void gameEvent(ResourceKey<GameEvent> resourceKey, BlockPos blockPos, GameEvent.Context context) {
-		this.gameEvent(this.registryAccess().registryOrThrow(Registries.GAME_EVENT).getHolderOrThrow(resourceKey), blockPos, context);
+		this.gameEvent(this.registryAccess().lookupOrThrow(Registries.GAME_EVENT).getOrThrow(resourceKey), blockPos, context);
 	}
 }

@@ -209,7 +209,7 @@ public class ItemParser {
 			} else {
 				int i = stringReader.getCursor();
 				ResourceLocation resourceLocation = ResourceLocation.read(stringReader);
-				DataComponentType<?> dataComponentType = BuiltInRegistries.DATA_COMPONENT_TYPE.get(resourceLocation);
+				DataComponentType<?> dataComponentType = BuiltInRegistries.DATA_COMPONENT_TYPE.getValue(resourceLocation);
 				if (dataComponentType != null && !dataComponentType.isTransient()) {
 					return dataComponentType;
 				} else {

@@ -56,7 +56,7 @@ public class SessionSearchTrees {
 			RECIPE_COLLECTIONS,
 			() -> {
 				List<RecipeCollection> list = clientRecipeBook.getCollections();
-				Registry<Item> registry = frozen.registryOrThrow(Registries.ITEM);
+				Registry<Item> registry = frozen.lookupOrThrow(Registries.ITEM);
 				Item.TooltipContext tooltipContext = Item.TooltipContext.of(frozen);
 				TooltipFlag tooltipFlag = TooltipFlag.Default.NORMAL;
 				CompletableFuture<?> completableFuture = this.recipeSearch;

@@ -235,7 +235,7 @@ public final class NoiseBasedChunkGenerator extends ChunkGenerator {
 				randomState,
 				structureManager,
 				worldGenRegion.getBiomeManager(),
-				worldGenRegion.registryAccess().registryOrThrow(Registries.BIOME),
+				worldGenRegion.registryAccess().lookupOrThrow(Registries.BIOME),
 				Blender.of(worldGenRegion)
 			);
 		}

@@ -63,7 +63,7 @@ public class Sheets {
 	private static final Map<ResourceLocation, Material> BANNER_MATERIALS = new HashMap();
 	private static final Map<ResourceLocation, Material> SHIELD_MATERIALS = new HashMap();
 	public static final Map<ResourceKey<DecoratedPotPattern>, Material> DECORATED_POT_MATERIALS = (Map<ResourceKey<DecoratedPotPattern>, Material>)BuiltInRegistries.DECORATED_POT_PATTERN
-		.holders()
+		.listElements()
 		.collect(Collectors.toMap(Holder.Reference::key, reference -> createDecoratedPotMaterial(((DecoratedPotPattern)reference.value()).assetId())));
 	public static final Material DECORATED_POT_BASE = createDecoratedPotMaterial(ResourceLocation.withDefaultNamespace("decorated_pot_base"));
 	public static final Material DECORATED_POT_SIDE = createDecoratedPotMaterial(ResourceLocation.withDefaultNamespace("decorated_pot_side"));

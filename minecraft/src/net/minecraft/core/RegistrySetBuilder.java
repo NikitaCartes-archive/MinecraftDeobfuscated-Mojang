@@ -98,7 +98,7 @@ public class RegistrySetBuilder {
 		}
 
 		final Map<ResourceKey<? extends Registry<?>>, Entry<?>> map = new HashMap();
-		registryAccess.registries().forEach(registryEntry -> map.put(registryEntry.key(), Entry.createForContextRegistry(registryEntry.value().asLookup())));
+		registryAccess.registries().forEach(registryEntry -> map.put(registryEntry.key(), Entry.createForContextRegistry(registryEntry.value())));
 		stream.forEach(registryLookup -> map.put(registryLookup.key(), Entry.createForNewRegistry(universalOwner, registryLookup)));
 		return new HolderLookup.Provider() {
 			@Override
@@ -225,7 +225,7 @@ public class RegistrySetBuilder {
 			RegistrySetBuilder.UniversalLookup universalLookup = new RegistrySetBuilder.UniversalLookup(universalOwner);
 			Builder<ResourceLocation, HolderGetter<?>> builder = ImmutableMap.builder();
 			registryAccess.registries()
-				.forEach(registryEntry -> builder.put(registryEntry.key().location(), RegistrySetBuilder.wrapContextLookup(registryEntry.value().asLookup())));
+				.forEach(registryEntry -> builder.put(registryEntry.key().location(), RegistrySetBuilder.wrapContextLookup(registryEntry.value())));
 			stream.forEach(resourceKey -> builder.put(resourceKey.location(), universalLookup));
 			return new RegistrySetBuilder.BuildState(universalOwner, universalLookup, builder.build(), new HashMap(), list);
 		}

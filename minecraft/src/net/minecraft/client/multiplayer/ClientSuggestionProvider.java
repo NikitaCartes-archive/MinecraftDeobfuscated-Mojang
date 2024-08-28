@@ -103,7 +103,7 @@ public class ClientSuggestionProvider implements SharedSuggestionProvider {
 		SuggestionsBuilder suggestionsBuilder,
 		CommandContext<?> commandContext
 	) {
-		return (CompletableFuture<Suggestions>)this.registryAccess().registry(resourceKey).map(registry -> {
+		return (CompletableFuture<Suggestions>)this.registryAccess().lookup(resourceKey).map(registry -> {
 			this.suggestRegistryElements(registry, elementSuggestionType, suggestionsBuilder);
 			return suggestionsBuilder.buildFuture();
 		}).orElseGet(() -> this.customSuggestion(commandContext));

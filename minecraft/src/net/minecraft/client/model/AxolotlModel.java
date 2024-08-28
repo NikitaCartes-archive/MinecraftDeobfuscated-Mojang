@@ -17,7 +17,6 @@ import net.minecraft.util.Mth;
 public class AxolotlModel extends EntityModel<AxolotlRenderState> {
 	public static final float SWIMMING_LEG_XROT = 1.8849558F;
 	public static final MeshTransformer BABY_TRANSFORMER = MeshTransformer.scaling(0.5F);
-	private final ModelPart root;
 	private final ModelPart tail;
 	private final ModelPart leftHindLeg;
 	private final ModelPart rightHindLeg;
@@ -30,7 +29,7 @@ public class AxolotlModel extends EntityModel<AxolotlRenderState> {
 	private final ModelPart rightGills;
 
 	public AxolotlModel(ModelPart modelPart) {
-		this.root = modelPart;
+		super(modelPart);
 		this.body = modelPart.getChild("body");
 		this.head = this.body.getChild("head");
 		this.rightHindLeg = this.body.getChild("right_hind_leg");
@@ -74,7 +73,7 @@ public class AxolotlModel extends EntityModel<AxolotlRenderState> {
 	}
 
 	public void setupAnim(AxolotlRenderState axolotlRenderState) {
-		this.root().getAllParts().forEach(ModelPart::resetPose);
+		super.setupAnim(axolotlRenderState);
 		float f = axolotlRenderState.playingDeadFactor;
 		float g = axolotlRenderState.inWaterFactor;
 		float h = axolotlRenderState.onGroundFactor;
@@ -209,10 +208,5 @@ public class AxolotlModel extends EntityModel<AxolotlRenderState> {
 			var2 = this.rightFrontLeg;
 			var2.zRot = var2.zRot + -this.leftFrontLeg.zRot * f;
 		}
-	}
-
-	@Override
-	public ModelPart root() {
-		return this.root;
 	}
 }

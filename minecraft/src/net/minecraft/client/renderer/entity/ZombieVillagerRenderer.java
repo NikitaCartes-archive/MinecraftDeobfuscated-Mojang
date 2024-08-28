@@ -47,7 +47,6 @@ public class ZombieVillagerRenderer extends HumanoidMobRenderer<ZombieVillager, 
 		super.extractRenderState(zombieVillager, zombieVillagerRenderState, f);
 		zombieVillagerRenderState.isConverting = zombieVillager.isConverting();
 		zombieVillagerRenderState.villagerData = zombieVillager.getVillagerData();
-		zombieVillagerRenderState.isAggressive = zombieVillager.isAggressive();
 	}
 
 	protected boolean isShaking(ZombieVillagerRenderState zombieVillagerRenderState) {

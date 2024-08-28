@@ -690,10 +690,15 @@ public class VanillaEntityLoot extends EntityLootSubProvider {
 								.apply(EnchantedCountIncreaseFunction.lootingMultiplier(this.registries, UniformGenerator.between(0.0F, 1.0F)))
 						)
 				)
+				.withPool(createSheepDispatchPool(BuiltInLootTables.SHEEP_BY_DYE))
 		);
 		LootData.WOOL_ITEM_BY_DYE
 			.forEach(
-				(dyeColor, itemLike) -> this.add(EntityType.SHEEP, (ResourceKey<LootTable>)BuiltInLootTables.SHEEP_BY_DYE.get(dyeColor), createSheepTable(itemLike))
+				(dyeColor, itemLike) -> this.add(
+						EntityType.SHEEP,
+						(ResourceKey<LootTable>)BuiltInLootTables.SHEEP_BY_DYE.get(dyeColor),
+						LootTable.lootTable().withPool(LootPool.lootPool().add(LootItem.lootTableItem(itemLike)))
+					)
 			);
 		this.add(
 			EntityType.SHULKER,

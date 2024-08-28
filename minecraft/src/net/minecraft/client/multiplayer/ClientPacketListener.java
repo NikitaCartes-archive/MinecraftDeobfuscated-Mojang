@@ -561,8 +561,8 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 			double f = clientboundTeleportEntityPacket.getZ();
 			entity.syncPacketPositionCodec(d, e, f);
 			if (!entity.isControlledByLocalInstance()) {
-				float g = (float)(clientboundTeleportEntityPacket.getyRot() * 360) / 256.0F;
-				float h = (float)(clientboundTeleportEntityPacket.getxRot() * 360) / 256.0F;
+				float g = clientboundTeleportEntityPacket.getyRot();
+				float h = clientboundTeleportEntityPacket.getxRot();
 				if (this.level.isTickingEntity(entity)) {
 					entity.lerpTo(d, e, f, g, h, 3);
 				} else {
@@ -613,13 +613,13 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 						(long)clientboundMoveEntityPacket.getXa(), (long)clientboundMoveEntityPacket.getYa(), (long)clientboundMoveEntityPacket.getZa()
 					);
 					vecDeltaCodec.setBase(vec3);
-					float f = clientboundMoveEntityPacket.hasRotation() ? (float)(clientboundMoveEntityPacket.getyRot() * 360) / 256.0F : entity.lerpTargetYRot();
-					float g = clientboundMoveEntityPacket.hasRotation() ? (float)(clientboundMoveEntityPacket.getxRot() * 360) / 256.0F : entity.lerpTargetXRot();
+					float f = clientboundMoveEntityPacket.hasRotation() ? clientboundMoveEntityPacket.getyRot() : entity.lerpTargetYRot();
+					float g = clientboundMoveEntityPacket.hasRotation() ? clientboundMoveEntityPacket.getxRot() : entity.lerpTargetXRot();
 					entity.lerpTo(vec3.x(), vec3.y(), vec3.z(), f, g, 3);
 				} else if (clientboundMoveEntityPacket.hasRotation()) {
-					float h = (float)(clientboundMoveEntityPacket.getyRot() * 360) / 256.0F;
-					float i = (float)(clientboundMoveEntityPacket.getxRot() * 360) / 256.0F;
-					entity.lerpTo(entity.lerpTargetX(), entity.lerpTargetY(), entity.lerpTargetZ(), h, i, 3);
+					entity.lerpTo(
+						entity.lerpTargetX(), entity.lerpTargetY(), entity.lerpTargetZ(), clientboundMoveEntityPacket.getyRot(), clientboundMoveEntityPacket.getxRot(), 3
+					);
 				}
 
 				entity.setOnGround(clientboundMoveEntityPacket.isOnGround());
@@ -643,8 +643,7 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 		PacketUtils.ensureRunningOnSameThread(clientboundRotateHeadPacket, this, this.minecraft);
 		Entity entity = clientboundRotateHeadPacket.getEntity(this.level);
 		if (entity != null) {
-			float f = (float)(clientboundRotateHeadPacket.getYHeadRot() * 360) / 256.0F;
-			entity.lerpHeadTo(f, 3);
+			entity.lerpHeadTo(clientboundRotateHeadPacket.getYHeadRot(), 3);
 		}
 	}
 
@@ -1652,7 +1651,7 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 	}
 
 	private <T> Registry.PendingTags<T> updateTags(ResourceKey<? extends Registry<? extends T>> resourceKey, TagNetworkSerialization.NetworkPayload networkPayload) {
-		Registry<T> registry = this.registryAccess.registryOrThrow(resourceKey);
+		Registry<T> registry = this.registryAccess.lookupOrThrow(resourceKey);
 		return registry.prepareTagReload(networkPayload.resolve(registry));
 	}
 

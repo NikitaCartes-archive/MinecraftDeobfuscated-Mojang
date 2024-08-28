@@ -174,6 +174,14 @@ public class Mth {
 		return i % j == 0;
 	}
 
+	public static byte packDegrees(float f) {
+		return (byte)floor(f * 256.0F / 360.0F);
+	}
+
+	public static float unpackDegrees(byte b) {
+		return (float)(b * 360) / 256.0F;
+	}
+
 	public static int wrapDegrees(int i) {
 		int j = i % 360;
 		if (j >= 180) {

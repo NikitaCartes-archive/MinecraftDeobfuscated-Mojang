@@ -177,7 +177,7 @@ public class Main {
 						executor -> WorldLoader.load(
 								initConfig,
 								dataLoadContext -> {
-									Registry<LevelStem> registry = dataLoadContext.datapackDimensions().registryOrThrow(Registries.LEVEL_STEM);
+									Registry<LevelStem> registry = dataLoadContext.datapackDimensions().lookupOrThrow(Registries.LEVEL_STEM);
 									if (dynamic2 != null) {
 										LevelDataAndDimensions levelDataAndDimensions = LevelStorageSource.getLevelDataAndDimensions(
 											dynamic2, dataLoadContext.dataConfiguration(), registry, dataLoadContext.datapackWorldgen()

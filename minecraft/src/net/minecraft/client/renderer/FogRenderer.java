@@ -38,6 +38,7 @@ public class FogRenderer {
 	private static int targetBiomeFog = -1;
 	private static int previousBiomeFog = -1;
 	private static long biomeChangedTime = -1L;
+	private static boolean fogEnabled = true;
 
 	public static Vector4f computeFogColor(Camera camera, float f, ClientLevel clientLevel, int i, float g) {
 		FogType fogType = camera.getFluidInCamera();
@@ -191,6 +192,10 @@ public class FogRenderer {
 		return new Vector4f(u, v, w, 1.0F);
 	}
 
+	public static boolean toggleFog() {
+		return fogEnabled = !fogEnabled;
+	}
+
 	@Nullable
 	private static FogRenderer.MobEffectFogFunction getPriorityFogFunction(Entity entity, float f) {
 		return entity instanceof LivingEntity livingEntity
@@ -202,65 +207,69 @@ public class FogRenderer {
 	}
 
 	public static FogParameters setupFog(Camera camera, FogRenderer.FogMode fogMode, Vector4f vector4f, float f, boolean bl, float g) {
-		FogType fogType = camera.getFluidInCamera();
-		Entity entity = camera.getEntity();
-		FogRenderer.FogData fogData = new FogRenderer.FogData(fogMode);
-		FogRenderer.MobEffectFogFunction mobEffectFogFunction = getPriorityFogFunction(entity, g);
-		if (fogType == FogType.LAVA) {
-			if (entity.isSpectator()) {
-				fogData.start = -8.0F;
-				fogData.end = f * 0.5F;
-			} else if (entity instanceof LivingEntity && ((LivingEntity)entity).hasEffect(MobEffects.FIRE_RESISTANCE)) {
-				fogData.start = 0.0F;
-				fogData.end = 5.0F;
-			} else {
-				fogData.start = 0.25F;
-				fogData.end = 1.0F;
-			}
-		} else if (fogType == FogType.POWDER_SNOW) {
-			if (entity.isSpectator()) {
-				fogData.start = -8.0F;
-				fogData.end = f * 0.5F;
-			} else {
-				fogData.start = 0.0F;
-				fogData.end = 2.0F;
-			}
-		} else if (mobEffectFogFunction != null) {
-			LivingEntity livingEntity = (LivingEntity)entity;
-			MobEffectInstance mobEffectInstance = livingEntity.getEffect(mobEffectFogFunction.getMobEffect());
-			if (mobEffectInstance != null) {
-				mobEffectFogFunction.setupFog(fogData, livingEntity, mobEffectInstance, f, g);
-			}
-		} else if (fogType == FogType.WATER) {
-			fogData.start = -8.0F;
-			fogData.end = 96.0F;
-			if (entity instanceof LocalPlayer localPlayer) {
-				fogData.end = fogData.end * Math.max(0.25F, localPlayer.getWaterVision());
-				Holder<Biome> holder = localPlayer.level().getBiome(localPlayer.blockPosition());
-				if (holder.is(BiomeTags.HAS_CLOSER_WATER_FOG)) {
-					fogData.end *= 0.85F;
+		if (!fogEnabled) {
+			return FogParameters.NO_FOG;
+		} else {
+			FogType fogType = camera.getFluidInCamera();
+			Entity entity = camera.getEntity();
+			FogRenderer.FogData fogData = new FogRenderer.FogData(fogMode);
+			FogRenderer.MobEffectFogFunction mobEffectFogFunction = getPriorityFogFunction(entity, g);
+			if (fogType == FogType.LAVA) {
+				if (entity.isSpectator()) {
+					fogData.start = -8.0F;
+					fogData.end = f * 0.5F;
+				} else if (entity instanceof LivingEntity && ((LivingEntity)entity).hasEffect(MobEffects.FIRE_RESISTANCE)) {
+					fogData.start = 0.0F;
+					fogData.end = 5.0F;
+				} else {
+					fogData.start = 0.25F;
+					fogData.end = 1.0F;
 				}
-			}
+			} else if (fogType == FogType.POWDER_SNOW) {
+				if (entity.isSpectator()) {
+					fogData.start = -8.0F;
+					fogData.end = f * 0.5F;
+				} else {
+					fogData.start = 0.0F;
+					fogData.end = 2.0F;
+				}
+			} else if (mobEffectFogFunction != null) {
+				LivingEntity livingEntity = (LivingEntity)entity;
+				MobEffectInstance mobEffectInstance = livingEntity.getEffect(mobEffectFogFunction.getMobEffect());
+				if (mobEffectInstance != null) {
+					mobEffectFogFunction.setupFog(fogData, livingEntity, mobEffectInstance, f, g);
+				}
+			} else if (fogType == FogType.WATER) {
+				fogData.start = -8.0F;
+				fogData.end = 96.0F;
+				if (entity instanceof LocalPlayer localPlayer) {
+					fogData.end = fogData.end * Math.max(0.25F, localPlayer.getWaterVision());
+					Holder<Biome> holder = localPlayer.level().getBiome(localPlayer.blockPosition());
+					if (holder.is(BiomeTags.HAS_CLOSER_WATER_FOG)) {
+						fogData.end *= 0.85F;
+					}
+				}
 
-			if (fogData.end > f) {
+				if (fogData.end > f) {
+					fogData.end = f;
+					fogData.shape = FogShape.CYLINDER;
+				}
+			} else if (bl) {
+				fogData.start = f * 0.05F;
+				fogData.end = Math.min(f, 192.0F) * 0.5F;
+			} else if (fogMode == FogRenderer.FogMode.FOG_SKY) {
+				fogData.start = 0.0F;
+				fogData.end = f;
+				fogData.shape = FogShape.CYLINDER;
+			} else if (fogMode == FogRenderer.FogMode.FOG_TERRAIN) {
+				float h = Mth.clamp(f / 10.0F, 4.0F, 64.0F);
+				fogData.start = f - h;
 				fogData.end = f;
 				fogData.shape = FogShape.CYLINDER;
 			}
-		} else if (bl) {
-			fogData.start = f * 0.05F;
-			fogData.end = Math.min(f, 192.0F) * 0.5F;
-		} else if (fogMode == FogRenderer.FogMode.FOG_SKY) {
-			fogData.start = 0.0F;
-			fogData.end = f;
-			fogData.shape = FogShape.CYLINDER;
-		} else if (fogMode == FogRenderer.FogMode.FOG_TERRAIN) {
-			float h = Mth.clamp(f / 10.0F, 4.0F, 64.0F);
-			fogData.start = f - h;
-			fogData.end = f;
-			fogData.shape = FogShape.CYLINDER;
-		}
 
-		return new FogParameters(fogData.start, fogData.end, fogData.shape, vector4f.x, vector4f.y, vector4f.z, vector4f.w);
+			return new FogParameters(fogData.start, fogData.end, fogData.shape, vector4f.x, vector4f.y, vector4f.z, vector4f.w);
+		}
 	}
 
 	@Environment(EnvType.CLIENT)

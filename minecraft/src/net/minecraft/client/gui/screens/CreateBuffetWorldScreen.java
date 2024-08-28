@@ -41,8 +41,8 @@ public class CreateBuffetWorldScreen extends Screen {
 		super(Component.translatable("createWorld.customize.buffet.title"));
 		this.parent = screen;
 		this.applySettings = consumer;
-		this.biomes = worldCreationContext.worldgenLoadContext().registryOrThrow(Registries.BIOME);
-		Holder<Biome> holder = (Holder<Biome>)this.biomes.getHolder(Biomes.PLAINS).or(() -> this.biomes.holders().findAny()).orElseThrow();
+		this.biomes = worldCreationContext.worldgenLoadContext().lookupOrThrow(Registries.BIOME);
+		Holder<Biome> holder = (Holder<Biome>)this.biomes.get(Biomes.PLAINS).or(() -> this.biomes.listElements().findAny()).orElseThrow();
 		this.biome = (Holder<Biome>)worldCreationContext.selectedDimensions().overworld().getBiomeSource().possibleBiomes().stream().findFirst().orElse(holder);
 	}
 
@@ -88,7 +88,7 @@ public class CreateBuffetWorldScreen extends Screen {
 			super(CreateBuffetWorldScreen.this.minecraft, CreateBuffetWorldScreen.this.width, CreateBuffetWorldScreen.this.height - 77, 40, 16);
 			Collator collator = Collator.getInstance(Locale.getDefault());
 			CreateBuffetWorldScreen.this.biomes
-				.holders()
+				.listElements()
 				.map(reference -> new CreateBuffetWorldScreen.BiomeList.Entry(reference))
 				.sorted(Comparator.comparing(entry -> entry.name.getString(), collator))
 				.forEach(entry -> this.addEntry(entry));

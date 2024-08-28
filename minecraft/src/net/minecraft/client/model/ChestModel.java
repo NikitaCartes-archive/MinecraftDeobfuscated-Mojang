@@ -15,13 +15,11 @@ public class ChestModel extends Model {
 	private static final String BOTTOM = "bottom";
 	private static final String LID = "lid";
 	private static final String LOCK = "lock";
-	private final ModelPart root;
 	private final ModelPart lid;
 	private final ModelPart lock;
 
 	public ChestModel(ModelPart modelPart) {
-		super(RenderType::entitySolid);
-		this.root = modelPart;
+		super(modelPart, RenderType::entitySolid);
 		this.lid = modelPart.getChild("lid");
 		this.lock = modelPart.getChild("lock");
 	}
@@ -68,10 +66,5 @@ public class ChestModel extends Model {
 	public void setupAnim(float f) {
 		this.lid.xRot = -(f * (float) (Math.PI / 2));
 		this.lock.xRot = this.lid.xRot;
-	}
-
-	@Override
-	public ModelPart root() {
-		return this.root;
 	}
 }

@@ -27,16 +27,10 @@ public class ThrownTridentRenderer extends EntityRenderer<ThrownTrident, ThrownT
 		poseStack.pushPose();
 		poseStack.mulPose(Axis.YP.rotationDegrees(thrownTridentRenderState.yRot - 90.0F));
 		poseStack.mulPose(Axis.ZP.rotationDegrees(thrownTridentRenderState.xRot + 90.0F));
-		VertexConsumer vertexConsumer = ItemRenderer.getFoilBuffer(
-			multiBufferSource, this.model.renderType(this.getTextureLocation(thrownTridentRenderState)), false, thrownTridentRenderState.isFoil
-		);
+		VertexConsumer vertexConsumer = ItemRenderer.getFoilBuffer(multiBufferSource, this.model.renderType(TRIDENT_LOCATION), false, thrownTridentRenderState.isFoil);
 		this.model.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY);
 		poseStack.popPose();
 		super.render(thrownTridentRenderState, poseStack, multiBufferSource, i);
-	}
-
-	public ResourceLocation getTextureLocation(ThrownTridentRenderState thrownTridentRenderState) {
-		return TRIDENT_LOCATION;
 	}
 
 	public ThrownTridentRenderState createRenderState() {

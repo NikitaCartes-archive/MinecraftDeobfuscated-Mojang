@@ -48,11 +48,6 @@ public class WallBannerBlock extends AbstractBannerBlock {
 	}
 
 	@Override
-	public String getDescriptionId() {
-		return this.asItem().getDescriptionId();
-	}
-
-	@Override
 	protected boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
 		return levelReader.getBlockState(blockPos.relative(((Direction)blockState.getValue(FACING)).getOpposite())).isSolid();
 	}

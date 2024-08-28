@@ -19,14 +19,13 @@ public class EndCrystalModel extends EntityModel<EndCrystalRenderState> {
 	private static final String INNER_GLASS = "inner_glass";
 	private static final String BASE = "base";
 	private static final float SIN_45 = (float)Math.sin(Math.PI / 4);
-	private final ModelPart root;
 	public final ModelPart base;
 	public final ModelPart outerGlass;
 	public final ModelPart innerGlass;
 	public final ModelPart cube;
 
 	public EndCrystalModel(ModelPart modelPart) {
-		this.root = modelPart;
+		super(modelPart);
 		this.base = modelPart.getChild("base");
 		this.outerGlass = modelPart.getChild("outer_glass");
 		this.innerGlass = this.outerGlass.getChild("inner_glass");
@@ -48,7 +47,7 @@ public class EndCrystalModel extends EntityModel<EndCrystalRenderState> {
 	}
 
 	public void setupAnim(EndCrystalRenderState endCrystalRenderState) {
-		this.root.getAllParts().forEach(ModelPart::resetPose);
+		super.setupAnim(endCrystalRenderState);
 		this.base.visible = endCrystalRenderState.showsBottom;
 		float f = endCrystalRenderState.ageInTicks * 3.0F;
 		float g = EndCrystalRenderer.getY(endCrystalRenderState.ageInTicks) * 16.0F;
@@ -56,10 +55,5 @@ public class EndCrystalModel extends EntityModel<EndCrystalRenderState> {
 		this.outerGlass.rotateBy(Axis.YP.rotationDegrees(f).rotateAxis((float) (Math.PI / 3), SIN_45, 0.0F, SIN_45));
 		this.innerGlass.rotateBy(new Quaternionf().setAngleAxis((float) (Math.PI / 3), SIN_45, 0.0F, SIN_45).rotateY(f * (float) (Math.PI / 180.0)));
 		this.cube.rotateBy(new Quaternionf().setAngleAxis((float) (Math.PI / 3), SIN_45, 0.0F, SIN_45).rotateY(f * (float) (Math.PI / 180.0)));
-	}
-
-	@Override
-	public ModelPart root() {
-		return this.root;
 	}
 }

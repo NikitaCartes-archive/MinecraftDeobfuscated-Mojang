@@ -171,11 +171,7 @@ public class EnchantmentScreen extends AbstractContainerScreen<EnchantmentMenu> 
 
 		for (int l = 0; l < 3; l++) {
 			int m = this.menu.costs[l];
-			Optional<Holder.Reference<Enchantment>> optional = this.minecraft
-				.level
-				.registryAccess()
-				.registryOrThrow(Registries.ENCHANTMENT)
-				.getHolder(this.menu.enchantClue[l]);
+			Optional<Holder.Reference<Enchantment>> optional = this.minecraft.level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT).get(this.menu.enchantClue[l]);
 			if (!optional.isEmpty()) {
 				int n = this.menu.levelClue[l];
 				int o = l + 1;

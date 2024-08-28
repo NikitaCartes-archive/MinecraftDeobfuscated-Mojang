@@ -14,7 +14,6 @@ import net.minecraft.world.item.DyeColor;
 public class BuiltInLootTables {
 	private static final Set<ResourceKey<LootTable>> LOCATIONS = new HashSet();
 	private static final Set<ResourceKey<LootTable>> IMMUTABLE_LOCATIONS = Collections.unmodifiableSet(LOCATIONS);
-	public static final ResourceKey<LootTable> EMPTY = ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.withDefaultNamespace("empty"));
 	public static final ResourceKey<LootTable> SPAWN_BONUS_CHEST = register("chests/spawn_bonus_chest");
 	public static final ResourceKey<LootTable> END_CITY_TREASURE = register("chests/end_city_treasure");
 	public static final ResourceKey<LootTable> SIMPLE_DUNGEON = register("chests/simple_dungeon");
@@ -81,9 +80,6 @@ public class BuiltInLootTables {
 	public static final Map<DyeColor, ResourceKey<LootTable>> SHEEP_BY_DYE = Util.make(
 		new EnumMap(DyeColor.class), enumMap -> makeDyeKeyMap(enumMap, "entities/sheep")
 	);
-	public static final Map<DyeColor, ResourceKey<LootTable>> SHEAR_SHEEP_BY_DYE = Util.make(
-		new EnumMap(DyeColor.class), enumMap -> makeDyeKeyMap(enumMap, "shearing/sheep")
-	);
 	public static final ResourceKey<LootTable> FISHING = register("gameplay/fishing");
 	public static final ResourceKey<LootTable> FISHING_JUNK = register("gameplay/fishing/junk");
 	public static final ResourceKey<LootTable> FISHING_TREASURE = register("gameplay/fishing/treasure");
@@ -111,9 +107,14 @@ public class BuiltInLootTables {
 	public static final ResourceKey<LootTable> SPAWNER_OMINOUS_TRIAL_CHAMBER_CONSUMABLES = register("spawners/ominous/trial_chamber/consumables");
 	public static final ResourceKey<LootTable> SPAWNER_TRIAL_ITEMS_TO_DROP_WHEN_OMINOUS = register("spawners/trial_chamber/items_to_drop_when_ominous");
 	public static final ResourceKey<LootTable> BOGGED_SHEAR = register("shearing/bogged");
+	public static final ResourceKey<LootTable> SHEAR_MOOSHROOM = register("shearing/mooshroom");
 	public static final ResourceKey<LootTable> SHEAR_RED_MOOSHROOM = register("shearing/mooshroom/red");
 	public static final ResourceKey<LootTable> SHEAR_BROWN_MOOSHROOM = register("shearing/mooshroom/brown");
 	public static final ResourceKey<LootTable> SHEAR_SNOW_GOLEM = register("shearing/snow_golem");
+	public static final ResourceKey<LootTable> SHEAR_SHEEP = register("shearing/sheep");
+	public static final Map<DyeColor, ResourceKey<LootTable>> SHEAR_SHEEP_BY_DYE = Util.make(
+		new EnumMap(DyeColor.class), enumMap -> makeDyeKeyMap(enumMap, "shearing/sheep")
+	);
 	public static final ResourceKey<LootTable> DESERT_WELL_ARCHAEOLOGY = register("archaeology/desert_well");
 	public static final ResourceKey<LootTable> DESERT_PYRAMID_ARCHAEOLOGY = register("archaeology/desert_pyramid");
 	public static final ResourceKey<LootTable> TRAIL_RUINS_ARCHAEOLOGY_COMMON = register("archaeology/trail_ruins_common");

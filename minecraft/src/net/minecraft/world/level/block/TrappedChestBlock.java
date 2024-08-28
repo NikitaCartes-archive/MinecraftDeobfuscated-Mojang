@@ -24,7 +24,7 @@ public class TrappedChestBlock extends ChestBlock {
 	}
 
 	public TrappedChestBlock(BlockBehaviour.Properties properties) {
-		super(properties, () -> BlockEntityType.TRAPPED_CHEST);
+		super(() -> BlockEntityType.TRAPPED_CHEST, properties);
 	}
 
 	@Override

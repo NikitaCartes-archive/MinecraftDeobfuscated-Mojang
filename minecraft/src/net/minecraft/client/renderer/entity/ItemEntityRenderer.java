@@ -8,9 +8,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.state.ItemEntityRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -33,10 +31,6 @@ public class ItemEntityRenderer extends EntityRenderer<ItemEntity, ItemEntityRen
 		this.itemRenderer = context.getItemRenderer();
 		this.shadowRadius = 0.15F;
 		this.shadowStrength = 0.75F;
-	}
-
-	public ResourceLocation getTextureLocation(ItemEntityRenderState itemEntityRenderState) {
-		return TextureAtlas.LOCATION_BLOCKS;
 	}
 
 	public ItemEntityRenderState createRenderState() {

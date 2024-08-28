@@ -50,7 +50,7 @@ public class WitherSkullRenderer extends EntityRenderer<WitherSkull, WitherSkull
 		super.render(witherSkullRenderState, poseStack, multiBufferSource, i);
 	}
 
-	public ResourceLocation getTextureLocation(WitherSkullRenderState witherSkullRenderState) {
+	private ResourceLocation getTextureLocation(WitherSkullRenderState witherSkullRenderState) {
 		return witherSkullRenderState.isDangerous ? WITHER_INVULNERABLE_LOCATION : WITHER_LOCATION;
 	}
 

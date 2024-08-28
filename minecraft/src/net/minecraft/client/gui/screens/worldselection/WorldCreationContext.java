@@ -43,7 +43,7 @@ public record WorldCreationContext(
 	) {
 		this(
 			worldOptions,
-			layeredRegistryAccess.getLayer(RegistryLayer.DIMENSIONS).registryOrThrow(Registries.LEVEL_STEM),
+			layeredRegistryAccess.getLayer(RegistryLayer.DIMENSIONS).lookupOrThrow(Registries.LEVEL_STEM),
 			worldDimensions,
 			layeredRegistryAccess.replaceFrom(RegistryLayer.DIMENSIONS),
 			reloadableServerResources,

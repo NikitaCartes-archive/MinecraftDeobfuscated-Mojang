@@ -34,7 +34,7 @@ public class SetInstrumentFunction extends LootItemConditionalFunction {
 
 	@Override
 	public ItemStack run(ItemStack itemStack, LootContext lootContext) {
-		Registry<Instrument> registry = lootContext.getLevel().registryAccess().registryOrThrow(Registries.INSTRUMENT);
+		Registry<Instrument> registry = lootContext.getLevel().registryAccess().lookupOrThrow(Registries.INSTRUMENT);
 		Optional<Holder<Instrument>> optional = registry.getRandomElementOf(this.options, lootContext.getRandom());
 		if (optional.isPresent()) {
 			itemStack.set(DataComponents.INSTRUMENT, (Holder<Instrument>)optional.get());

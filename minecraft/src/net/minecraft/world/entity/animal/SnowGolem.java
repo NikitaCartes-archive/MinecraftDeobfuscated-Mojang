@@ -122,7 +122,9 @@ public class SnowGolem extends AbstractGolem implements Shearable, RangedAttackM
 		double h = Math.sqrt(d * d + g * g) * 0.2F;
 		if (this.level() instanceof ServerLevel serverLevel) {
 			ItemStack itemStack = new ItemStack(Items.SNOWBALL);
-			Projectile.spawnProjectileUsingShoot(Snowball::new, serverLevel, itemStack, this, d, e + h, g, 1.6F, 12.0F);
+			Projectile.spawnProjectile(
+				new Snowball(serverLevel, this, itemStack), serverLevel, itemStack, snowball -> snowball.shoot(d, e + h - snowball.getY(), g, 1.6F, 12.0F)
+			);
 		}
 
 		this.playSound(SoundEvents.SNOW_GOLEM_SHOOT, 1.0F, 0.4F / (this.getRandom().nextFloat() * 0.4F + 0.8F));

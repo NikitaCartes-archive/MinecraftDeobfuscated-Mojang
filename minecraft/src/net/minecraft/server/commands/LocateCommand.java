@@ -89,11 +89,11 @@ public class LocateCommand {
 	}
 
 	private static Optional<? extends HolderSet.ListBacked<Structure>> getHolders(ResourceOrTagKeyArgument.Result<Structure> result, Registry<Structure> registry) {
-		return result.unwrap().map(resourceKey -> registry.getHolder(resourceKey).map(holder -> HolderSet.direct(holder)), registry::getTag);
+		return result.unwrap().map(resourceKey -> registry.get(resourceKey).map(holder -> HolderSet.direct(holder)), registry::get);
 	}
 
 	private static int locateStructure(CommandSourceStack commandSourceStack, ResourceOrTagKeyArgument.Result<Structure> result) throws CommandSyntaxException {
-		Registry<Structure> registry = commandSourceStack.getLevel().registryAccess().registryOrThrow(Registries.STRUCTURE);
+		Registry<Structure> registry = commandSourceStack.getLevel().registryAccess().lookupOrThrow(Registries.STRUCTURE);
 		HolderSet<Structure> holderSet = (HolderSet<Structure>)getHolders(result, registry).orElseThrow(() -> ERROR_STRUCTURE_INVALID.create(result.asPrintable()));
 		BlockPos blockPos = BlockPos.containing(commandSourceStack.getPosition());
 		ServerLevel serverLevel = commandSourceStack.getLevel();

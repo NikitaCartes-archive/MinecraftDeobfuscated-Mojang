@@ -239,14 +239,18 @@ public class LoomScreen extends AbstractContainerScreen<LoomMenu> {
 
 	@Override
 	public boolean mouseScrolled(double d, double e, double f, double g) {
-		int i = this.totalRowCount() - 4;
-		if (this.displayPatterns && i > 0) {
-			float h = (float)g / (float)i;
-			this.scrollOffs = Mth.clamp(this.scrollOffs - h, 0.0F, 1.0F);
-			this.startRow = Math.max((int)(this.scrollOffs * (float)i + 0.5F), 0);
-		}
+		if (super.mouseScrolled(d, e, f, g)) {
+			return true;
+		} else {
+			int i = this.totalRowCount() - 4;
+			if (this.displayPatterns && i > 0) {
+				float h = (float)g / (float)i;
+				this.scrollOffs = Mth.clamp(this.scrollOffs - h, 0.0F, 1.0F);
+				this.startRow = Math.max((int)(this.scrollOffs * (float)i + 0.5F), 0);
+			}
 
-		return true;
+			return true;
+		}
 	}
 
 	@Override

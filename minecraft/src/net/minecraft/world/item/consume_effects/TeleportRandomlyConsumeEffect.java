@@ -43,13 +43,13 @@ public record TeleportRandomlyConsumeEffect(float diameter) implements ConsumeEf
 		boolean bl = false;
 
 		for (int i = 0; i < 16; i++) {
-			double d = livingEntity.getX() + (livingEntity.getRandom().nextDouble() - 0.5) * 16.0;
+			double d = livingEntity.getX() + (livingEntity.getRandom().nextDouble() - 0.5) * (double)this.diameter;
 			double e = Mth.clamp(
-				livingEntity.getY() + (double)(livingEntity.getRandom().nextInt(16) - 8),
+				livingEntity.getY() + (livingEntity.getRandom().nextDouble() - 0.5) * (double)this.diameter,
 				(double)level.getMinY(),
 				(double)(level.getMinY() + ((ServerLevel)level).getLogicalHeight() - 1)
 			);
-			double f = livingEntity.getZ() + (livingEntity.getRandom().nextDouble() - 0.5) * 16.0;
+			double f = livingEntity.getZ() + (livingEntity.getRandom().nextDouble() - 0.5) * (double)this.diameter;
 			if (livingEntity.isPassenger()) {
 				livingEntity.stopRiding();
 			}

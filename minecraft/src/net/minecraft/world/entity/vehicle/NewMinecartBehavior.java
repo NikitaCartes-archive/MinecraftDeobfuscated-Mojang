@@ -534,30 +534,20 @@ public class NewMinecartBehavior extends MinecartBehavior {
 	}
 
 	public static record MinecartStep(Vec3 position, Vec3 movement, float yRot, float xRot, float weight) {
-		public static final StreamCodec<ByteBuf, Float> ROTATION_STREAM_CODEC = ByteBufCodecs.BYTE
-			.map(NewMinecartBehavior.MinecartStep::uncompressRotation, NewMinecartBehavior.MinecartStep::compressRotation);
 		public static final StreamCodec<ByteBuf, NewMinecartBehavior.MinecartStep> STREAM_CODEC = StreamCodec.composite(
 			Vec3.STREAM_CODEC,
 			NewMinecartBehavior.MinecartStep::position,
 			Vec3.STREAM_CODEC,
 			NewMinecartBehavior.MinecartStep::movement,
-			ROTATION_STREAM_CODEC,
+			ByteBufCodecs.ROTATION_BYTE,
 			NewMinecartBehavior.MinecartStep::yRot,
-			ROTATION_STREAM_CODEC,
+			ByteBufCodecs.ROTATION_BYTE,
 			NewMinecartBehavior.MinecartStep::xRot,
 			ByteBufCodecs.FLOAT,
 			NewMinecartBehavior.MinecartStep::weight,
 			NewMinecartBehavior.MinecartStep::new
 		);
 		public static NewMinecartBehavior.MinecartStep ZERO = new NewMinecartBehavior.MinecartStep(Vec3.ZERO, Vec3.ZERO, 0.0F, 0.0F, 0.0F);
-
-		private static byte compressRotation(float f) {
-			return (byte)Mth.floor(f * 256.0F / 360.0F);
-		}
-
-		private static float uncompressRotation(byte b) {
-			return (float)b * 360.0F / 256.0F;
-		}
 	}
 
 	static record StepPartialTicks(float partialTicksInStep, NewMinecartBehavior.MinecartStep currentStep, NewMinecartBehavior.MinecartStep previousStep) {

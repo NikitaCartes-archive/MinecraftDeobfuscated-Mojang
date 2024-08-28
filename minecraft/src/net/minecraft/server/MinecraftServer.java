@@ -301,7 +301,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		super("Server");
 		this.registries = worldStem.registries();
 		this.worldData = worldStem.worldData();
-		if (!this.registries.compositeAccess().registryOrThrow(Registries.LEVEL_STEM).containsKey(LevelStem.OVERWORLD)) {
+		if (!this.registries.compositeAccess().lookupOrThrow(Registries.LEVEL_STEM).containsKey(LevelStem.OVERWORLD)) {
 			throw new IllegalStateException("Missing Overworld dimension data");
 		} else {
 			this.proxy = proxy;
@@ -319,11 +319,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 			this.playerDataStorage = levelStorageAccess.createPlayerStorage();
 			this.fixerUpper = dataFixer;
 			this.functionManager = new ServerFunctionManager(this, this.resources.managers.getFunctionLibrary());
-			HolderGetter<Block> holderGetter = this.registries
-				.compositeAccess()
-				.registryOrThrow(Registries.BLOCK)
-				.asLookup()
-				.filterFeatures(this.worldData.enabledFeatures());
+			HolderGetter<Block> holderGetter = this.registries.compositeAccess().lookupOrThrow(Registries.BLOCK).filterFeatures(this.worldData.enabledFeatures());
 			this.structureTemplateManager = new StructureTemplateManager(worldStem.resourceManager(), levelStorageAccess, dataFixer, holderGetter);
 			this.serverThread = thread;
 			this.executor = Util.backgroundExecutor();
@@ -369,14 +365,14 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 	protected void createLevels(ChunkProgressListener chunkProgressListener) {
 		ServerLevelData serverLevelData = this.worldData.overworldData();
 		boolean bl = this.worldData.isDebugWorld();
-		Registry<LevelStem> registry = this.registries.compositeAccess().registryOrThrow(Registries.LEVEL_STEM);
+		Registry<LevelStem> registry = this.registries.compositeAccess().lookupOrThrow(Registries.LEVEL_STEM);
 		WorldOptions worldOptions = this.worldData.worldGenOptions();
 		long l = worldOptions.seed();
 		long m = BiomeManager.obfuscateSeed(l);
 		List<CustomSpawner> list = ImmutableList.of(
 			new PhantomSpawner(), new PatrolSpawner(), new CatSpawner(), new VillageSiege(), new WanderingTraderSpawner(serverLevelData)
 		);
-		LevelStem levelStem = registry.get(LevelStem.OVERWORLD);
+		LevelStem levelStem = registry.getValue(LevelStem.OVERWORLD);
 		ServerLevel serverLevel = new ServerLevel(
 			this, this.executor, this.storageSource, serverLevelData, Level.OVERWORLD, levelStem, chunkProgressListener, bl, m, list, true, null
 		);
@@ -479,8 +475,8 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 
 			if (bl) {
 				serverLevel.registryAccess()
-					.registry(Registries.CONFIGURED_FEATURE)
-					.flatMap(registry -> registry.getHolder(MiscOverworldFeatures.BONUS_CHEST))
+					.lookup(Registries.CONFIGURED_FEATURE)
+					.flatMap(registry -> registry.get(MiscOverworldFeatures.BONUS_CHEST))
 					.ifPresent(
 						reference -> ((ConfiguredFeature)reference.value())
 								.place(serverLevel, serverChunkCache.getGenerator(), serverLevel.random, serverLevelData.getSpawnPos())

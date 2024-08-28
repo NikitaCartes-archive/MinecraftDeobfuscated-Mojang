@@ -15,14 +15,13 @@ import net.minecraft.util.Mth;
 @Environment(EnvType.CLIENT)
 public class SilverfishModel extends EntityModel<EntityRenderState> {
 	private static final int BODY_COUNT = 7;
-	private final ModelPart root;
 	private final ModelPart[] bodyParts = new ModelPart[7];
 	private final ModelPart[] bodyLayers = new ModelPart[3];
 	private static final int[][] BODY_SIZES = new int[][]{{3, 2, 2}, {4, 3, 2}, {6, 4, 3}, {3, 3, 3}, {2, 2, 3}, {2, 1, 2}, {1, 1, 2}};
 	private static final int[][] BODY_TEXS = new int[][]{{0, 0}, {0, 4}, {0, 9}, {0, 16}, {0, 22}, {11, 0}, {13, 4}};
 
 	public SilverfishModel(ModelPart modelPart) {
-		this.root = modelPart;
+		super(modelPart);
 		Arrays.setAll(this.bodyParts, i -> modelPart.getChild(getSegmentName(i)));
 		Arrays.setAll(this.bodyLayers, i -> modelPart.getChild(getLayerName(i)));
 	}
@@ -74,12 +73,9 @@ public class SilverfishModel extends EntityModel<EntityRenderState> {
 	}
 
 	@Override
-	public ModelPart root() {
-		return this.root;
-	}
-
-	@Override
 	public void setupAnim(EntityRenderState entityRenderState) {
+		super.setupAnim(entityRenderState);
+
 		for (int i = 0; i < this.bodyParts.length; i++) {
 			this.bodyParts[i].yRot = Mth.cos(entityRenderState.ageInTicks * 0.9F + (float)i * 0.15F * (float) Math.PI)
 				* (float) Math.PI

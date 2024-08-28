@@ -16,6 +16,7 @@ public class CowRenderer extends AgeableMobRenderer<Cow, LivingEntityRenderState
 		super(context, new CowModel(context.bakeLayer(ModelLayers.COW)), new CowModel(context.bakeLayer(ModelLayers.COW_BABY)), 0.7F);
 	}
 
+	@Override
 	public ResourceLocation getTextureLocation(LivingEntityRenderState livingEntityRenderState) {
 		return COW_LOCATION;
 	}

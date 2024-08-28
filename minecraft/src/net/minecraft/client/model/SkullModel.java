@@ -12,11 +12,10 @@ import net.minecraft.client.model.geom.builders.PartDefinition;
 
 @Environment(EnvType.CLIENT)
 public class SkullModel extends SkullModelBase {
-	private final ModelPart root;
 	protected final ModelPart head;
 
 	public SkullModel(ModelPart modelPart) {
-		this.root = modelPart;
+		super(modelPart);
 		this.head = modelPart.getChild("head");
 	}
 
@@ -44,10 +43,5 @@ public class SkullModel extends SkullModelBase {
 	public void setupAnim(float f, float g, float h) {
 		this.head.yRot = g * (float) (Math.PI / 180.0);
 		this.head.xRot = h * (float) (Math.PI / 180.0);
-	}
-
-	@Override
-	public ModelPart root() {
-		return this.root;
 	}
 }

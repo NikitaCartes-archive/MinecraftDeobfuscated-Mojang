@@ -1,7 +1,6 @@
 package net.minecraft.data.loot.packs;
 
 import java.util.function.BiConsumer;
-import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
@@ -29,19 +28,11 @@ import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 public record VanillaEquipmentLoot(HolderLookup.Provider registries) implements LootTableSubProvider {
 	@Override
 	public void generate(BiConsumer<ResourceKey<LootTable>, LootTable.Builder> biConsumer) {
-		HolderLookup.RegistryLookup<TrimPattern> registryLookup = (HolderLookup.RegistryLookup<TrimPattern>)this.registries
-			.lookup(Registries.TRIM_PATTERN)
-			.orElseThrow();
-		HolderLookup.RegistryLookup<TrimMaterial> registryLookup2 = (HolderLookup.RegistryLookup<TrimMaterial>)this.registries
-			.lookup(Registries.TRIM_MATERIAL)
-			.orElseThrow();
+		HolderLookup.RegistryLookup<TrimPattern> registryLookup = this.registries.lookupOrThrow(Registries.TRIM_PATTERN);
+		HolderLookup.RegistryLookup<TrimMaterial> registryLookup2 = this.registries.lookupOrThrow(Registries.TRIM_MATERIAL);
 		HolderLookup.RegistryLookup<Enchantment> registryLookup3 = this.registries.lookupOrThrow(Registries.ENCHANTMENT);
-		ArmorTrim armorTrim = new ArmorTrim(
-			(Holder<TrimMaterial>)registryLookup2.get(TrimMaterials.COPPER).orElseThrow(), (Holder<TrimPattern>)registryLookup.get(TrimPatterns.FLOW).orElseThrow()
-		);
-		ArmorTrim armorTrim2 = new ArmorTrim(
-			(Holder<TrimMaterial>)registryLookup2.get(TrimMaterials.COPPER).orElseThrow(), (Holder<TrimPattern>)registryLookup.get(TrimPatterns.BOLT).orElseThrow()
-		);
+		ArmorTrim armorTrim = new ArmorTrim(registryLookup2.getOrThrow(TrimMaterials.COPPER), registryLookup.getOrThrow(TrimPatterns.FLOW));
+		ArmorTrim armorTrim2 = new ArmorTrim(registryLookup2.getOrThrow(TrimMaterials.COPPER), registryLookup.getOrThrow(TrimPatterns.BOLT));
 		biConsumer.accept(
 			BuiltInLootTables.EQUIPMENT_TRIAL_CHAMBER,
 			LootTable.lootTable()

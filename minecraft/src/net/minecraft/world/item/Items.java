@@ -1407,7 +1407,7 @@ public class Items {
 	public static final Item CHICKEN = registerItem("chicken", new Item(new Item.Properties().food(Foods.CHICKEN, Consumables.CHICKEN)));
 	public static final Item COOKED_CHICKEN = registerItem("cooked_chicken", new Item(new Item.Properties().food(Foods.COOKED_CHICKEN)));
 	public static final Item ROTTEN_FLESH = registerItem("rotten_flesh", new Item(new Item.Properties().food(Foods.ROTTEN_FLESH, Consumables.ROTTEN_FLESH)));
-	public static final Item ENDER_PEARL = registerItem("ender_pearl", new EnderpearlItem(new Item.Properties().stacksTo(16)));
+	public static final Item ENDER_PEARL = registerItem("ender_pearl", new EnderpearlItem(new Item.Properties().stacksTo(16).useCooldown(1.0F)));
 	public static final Item BLAZE_ROD = registerItem("blaze_rod", new Item(new Item.Properties()));
 	public static final Item GHAST_TEAR = registerItem("ghast_tear", new Item(new Item.Properties()));
 	public static final Item GOLD_NUGGET = registerItem("gold_nugget", new Item(new Item.Properties()));
@@ -1571,7 +1571,7 @@ public class Items {
 		"experience_bottle", new ExperienceBottleItem(new Item.Properties().rarity(Rarity.UNCOMMON).component(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true))
 	);
 	public static final Item FIRE_CHARGE = registerItem("fire_charge", new FireChargeItem(new Item.Properties()));
-	public static final Item WIND_CHARGE = registerItem("wind_charge", new WindChargeItem(new Item.Properties()));
+	public static final Item WIND_CHARGE = registerItem("wind_charge", new WindChargeItem(new Item.Properties().useCooldown(0.5F)));
 	public static final Item WRITABLE_BOOK = registerItem(
 		"writable_book", new WritableBookItem(new Item.Properties().stacksTo(1).component(DataComponents.WRITABLE_BOOK_CONTENT, WritableBookContent.EMPTY))
 	);

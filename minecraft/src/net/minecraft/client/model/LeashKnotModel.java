@@ -13,11 +13,10 @@ import net.minecraft.client.renderer.entity.state.EntityRenderState;
 @Environment(EnvType.CLIENT)
 public class LeashKnotModel extends EntityModel<EntityRenderState> {
 	private static final String KNOT = "knot";
-	private final ModelPart root;
 	private final ModelPart knot;
 
 	public LeashKnotModel(ModelPart modelPart) {
-		this.root = modelPart;
+		super(modelPart);
 		this.knot = modelPart.getChild("knot");
 	}
 
@@ -26,14 +25,5 @@ public class LeashKnotModel extends EntityModel<EntityRenderState> {
 		PartDefinition partDefinition = meshDefinition.getRoot();
 		partDefinition.addOrReplaceChild("knot", CubeListBuilder.create().texOffs(0, 0).addBox(-3.0F, -8.0F, -3.0F, 6.0F, 8.0F, 6.0F), PartPose.ZERO);
 		return LayerDefinition.create(meshDefinition, 32, 32);
-	}
-
-	@Override
-	public ModelPart root() {
-		return this.root;
-	}
-
-	@Override
-	public void setupAnim(EntityRenderState entityRenderState) {
 	}
 }

@@ -110,10 +110,6 @@ public class FishingHookRenderer extends EntityRenderer<FishingHook, FishingHook
 		vertexConsumer.addVertex(pose, k, l, m).setColor(-16777216).setNormal(pose, n, o, p);
 	}
 
-	public ResourceLocation getTextureLocation(FishingHookRenderState fishingHookRenderState) {
-		return TEXTURE_LOCATION;
-	}
-
 	public FishingHookRenderState createRenderState() {
 		return new FishingHookRenderState();
 	}

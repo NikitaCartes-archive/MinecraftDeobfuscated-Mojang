@@ -319,7 +319,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 	}
 
 	@Override
-	public void neighborShapeChanged(Direction direction, BlockState blockState, BlockPos blockPos, BlockPos blockPos2, int i, int j) {
+	public void neighborShapeChanged(Direction direction, BlockPos blockPos, BlockPos blockPos2, BlockState blockState, int i, int j) {
 		this.neighborUpdater.shapeUpdate(direction, blockState, blockPos, blockPos2, i, j);
 	}
 
@@ -803,12 +803,16 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 		this.rainLevel = g;
 	}
 
+	private boolean canHaveWeather() {
+		return this.dimensionType().hasSkyLight() && !this.dimensionType().hasCeiling();
+	}
+
 	public boolean isThundering() {
-		return this.dimensionType().hasSkyLight() && !this.dimensionType().hasCeiling() ? (double)this.getThunderLevel(1.0F) > 0.9 : false;
+		return this.canHaveWeather() && (double)this.getThunderLevel(1.0F) > 0.9;
 	}
 
 	public boolean isRaining() {
-		return (double)this.getRainLevel(1.0F) > 0.2;
+		return this.canHaveWeather() && (double)this.getRainLevel(1.0F) > 0.2;
 	}
 
 	public boolean isRainingAt(BlockPos blockPos) {

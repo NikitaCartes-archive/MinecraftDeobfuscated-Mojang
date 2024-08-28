@@ -21,6 +21,7 @@ public class SilverfishRenderer extends MobRenderer<Silverfish, LivingEntityRend
 		return 180.0F;
 	}
 
+	@Override
 	public ResourceLocation getTextureLocation(LivingEntityRenderState livingEntityRenderState) {
 		return SILVERFISH_LOCATION;
 	}

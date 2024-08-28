@@ -608,8 +608,6 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 		} else if (this.minecraft.options.keyInventory.matches(i, j)) {
 			this.onClose();
 			return true;
-		} else if (this.checkItemSlotActionKeyPressed(i, j)) {
-			return true;
 		} else {
 			this.checkHotbarKeyPressed(i, j);
 			if (this.hoveredSlot != null && this.hoveredSlot.hasItem()) {
@@ -622,18 +620,6 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 
 			return true;
 		}
-	}
-
-	boolean checkItemSlotActionKeyPressed(int i, int j) {
-		if (this.hoveredSlot != null && this.hoveredSlot.hasItem()) {
-			for (ItemSlotMouseAction itemSlotMouseAction : this.itemSlotMouseActions) {
-				if (itemSlotMouseAction.matches(this.hoveredSlot) && itemSlotMouseAction.onKeyPressed(this.hoveredSlot.getItem(), this.hoveredSlot.index, i, j)) {
-					return true;
-				}
-			}
-		}
-
-		return false;
 	}
 
 	protected boolean checkHotbarKeyPressed(int i, int j) {

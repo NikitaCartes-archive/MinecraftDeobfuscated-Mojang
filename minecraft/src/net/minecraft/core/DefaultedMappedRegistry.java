@@ -42,14 +42,14 @@ public class DefaultedMappedRegistry<T> extends MappedRegistry<T> implements Def
 
 	@Nonnull
 	@Override
-	public T get(@Nullable ResourceLocation resourceLocation) {
-		T object = super.get(resourceLocation);
+	public T getValue(@Nullable ResourceLocation resourceLocation) {
+		T object = super.getValue(resourceLocation);
 		return object == null ? this.defaultValue.value() : object;
 	}
 
 	@Override
 	public Optional<T> getOptional(@Nullable ResourceLocation resourceLocation) {
-		return Optional.ofNullable(super.get(resourceLocation));
+		return Optional.ofNullable(super.getValue(resourceLocation));
 	}
 
 	@Override

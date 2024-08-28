@@ -341,6 +341,20 @@ public abstract class Player extends LivingEntity {
 		return this.wasUnderwater;
 	}
 
+	@Override
+	public void onAboveBubbleCol(boolean bl) {
+		if (!this.isCreative()) {
+			super.onAboveBubbleCol(bl);
+		}
+	}
+
+	@Override
+	public void onInsideBubbleColumn(boolean bl) {
+		if (!this.isCreative()) {
+			super.onInsideBubbleColumn(bl);
+		}
+	}
+
 	private void turtleHelmetTick() {
 		ItemStack itemStack = this.getItemBySlot(EquipmentSlot.HEAD);
 		if (itemStack.is(Items.TURTLE_HELMET) && !this.isEyeInFluid(FluidTags.WATER)) {
@@ -713,12 +727,13 @@ public abstract class Player extends LivingEntity {
 		}
 
 		if (this.hasEffect(MobEffects.DIG_SLOWDOWN)) {
-			f *= switch (this.getEffect(MobEffects.DIG_SLOWDOWN).getAmplifier()) {
+			float g = switch (this.getEffect(MobEffects.DIG_SLOWDOWN).getAmplifier()) {
 				case 0 -> 0.3F;
 				case 1 -> 0.09F;
 				case 2 -> 0.0027F;
 				default -> 8.1E-4F;
 			};
+			f *= g;
 		}
 
 		f *= (float)this.getAttributeValue(Attributes.BLOCK_BREAK_SPEED);
@@ -1655,12 +1670,7 @@ public abstract class Player extends LivingEntity {
 
 	@Override
 	protected int getBaseExperienceReward() {
-		if (!this.level().getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY) && !this.isSpectator()) {
-			int i = this.experienceLevel * 7;
-			return i > 100 ? 100 : i;
-		} else {
-			return 0;
-		}
+		return !this.level().getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY) && !this.isSpectator() ? Math.min(this.experienceLevel * 7, 100) : 0;
 	}
 
 	@Override
@@ -1695,7 +1705,7 @@ public abstract class Player extends LivingEntity {
 		if (equipmentSlot == EquipmentSlot.MAINHAND) {
 			return this.inventory.getSelected();
 		} else if (equipmentSlot == EquipmentSlot.OFFHAND) {
-			return this.inventory.offhand.get(0);
+			return (ItemStack)this.inventory.offhand.getFirst();
 		} else {
 			return equipmentSlot.getType() == EquipmentSlot.Type.HUMANOID_ARMOR ? this.inventory.armor.get(equipmentSlot.getIndex()) : ItemStack.EMPTY;
 		}

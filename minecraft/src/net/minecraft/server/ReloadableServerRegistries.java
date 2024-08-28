@@ -31,7 +31,6 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.tags.TagLoader;
 import net.minecraft.util.ProblemReporter;
-import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.level.storage.loot.LootDataType;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.ValidationContext;
@@ -91,7 +90,7 @@ public class ReloadableServerRegistries {
 
 	private static void validateLootRegistries(HolderLookup.Provider provider) {
 		ProblemReporter.Collector collector = new ProblemReporter.Collector();
-		ValidationContext validationContext = new ValidationContext(collector, LootContextParamSets.ALL_PARAMS, provider.asGetterLookup());
+		ValidationContext validationContext = new ValidationContext(collector, LootContextParamSets.ALL_PARAMS, provider);
 		LootDataType.values().forEach(lootDataType -> validateRegistry(validationContext, lootDataType, provider));
 		collector.get().forEach((string, string2) -> LOGGER.warn("Found loot table element validation problem in {}: {}", string, string2));
 	}
@@ -99,10 +98,7 @@ public class ReloadableServerRegistries {
 	private static LayeredRegistryAccess<RegistryLayer> createUpdatedRegistries(
 		LayeredRegistryAccess<RegistryLayer> layeredRegistryAccess, List<WritableRegistry<?>> list
 	) {
-		RegistryAccess registryAccess = new RegistryAccess.ImmutableRegistryAccess(list);
-		((WritableRegistry)registryAccess.<LootTable>registryOrThrow(Registries.LOOT_TABLE))
-			.register(BuiltInLootTables.EMPTY, LootTable.EMPTY, DEFAULT_REGISTRATION_INFO);
-		return layeredRegistryAccess.replaceFrom(RegistryLayer.RELOADABLE, registryAccess.freeze());
+		return layeredRegistryAccess.replaceFrom(RegistryLayer.RELOADABLE, new RegistryAccess.ImmutableRegistryAccess(list).freeze());
 	}
 
 	private static <T> void validateRegistry(ValidationContext validationContext, LootDataType<T> lootDataType, HolderLookup.Provider provider) {
@@ -118,7 +114,7 @@ public class ReloadableServerRegistries {
 		}
 
 		public HolderGetter.Provider lookup() {
-			return this.registries.asGetterLookup();
+			return this.registries;
 		}
 
 		public Collection<ResourceLocation> getKeys(ResourceKey<? extends Registry<?>> resourceKey) {

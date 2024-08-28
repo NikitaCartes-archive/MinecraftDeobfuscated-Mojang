@@ -186,7 +186,7 @@ public class CloudRenderer extends SimplePreparableReloadListener<Optional<Cloud
 	private void drawWithRenderType(RenderType renderType, Matrix4f matrix4f, Matrix4f matrix4f2, float f, float g, float h) {
 		renderType.setupRenderState();
 		CompiledShaderProgram compiledShaderProgram = RenderSystem.getShader();
-		if (compiledShaderProgram.MODEL_OFFSET != null) {
+		if (compiledShaderProgram != null && compiledShaderProgram.MODEL_OFFSET != null) {
 			compiledShaderProgram.MODEL_OFFSET.set(-f, g, -h);
 		}
 

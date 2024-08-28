@@ -19,7 +19,7 @@ import net.minecraft.world.phys.Vec3;
 
 public class WindCharge extends AbstractWindCharge {
 	private static final ExplosionDamageCalculator EXPLOSION_DAMAGE_CALCULATOR = new SimpleExplosionDamageCalculator(
-		true, false, Optional.of(1.22F), BuiltInRegistries.BLOCK.getTag(BlockTags.BLOCKS_WIND_CHARGE_EXPLOSIONS).map(Function.identity())
+		true, false, Optional.of(1.22F), BuiltInRegistries.BLOCK.get(BlockTags.BLOCKS_WIND_CHARGE_EXPLOSIONS).map(Function.identity())
 	);
 	private static final float RADIUS = 1.2F;
 	private static final float MIN_CAMERA_DISTANCE_SQUARED = Mth.square(3.5F);

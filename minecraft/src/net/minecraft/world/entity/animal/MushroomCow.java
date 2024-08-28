@@ -11,7 +11,6 @@ import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -42,7 +41,6 @@ import net.minecraft.world.level.block.SuspiciousEffectHolder;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
-import net.minecraft.world.level.storage.loot.LootTable;
 
 public class MushroomCow extends Cow implements Shearable, VariantHolder<MushroomCow.Variant> {
 	private static final EntityDataAccessor<String> DATA_TYPE = SynchedEntityData.defineId(MushroomCow.class, EntityDataSerializers.STRING);
@@ -185,7 +183,7 @@ public class MushroomCow extends Cow implements Shearable, VariantHolder<Mushroo
 
 				cow.setInvulnerable(this.isInvulnerable());
 				this.level().addFreshEntity(cow);
-				this.dropFromShearingLootTable(this.getVariant().lootTable(), itemStack -> {
+				this.dropFromShearingLootTable(BuiltInLootTables.SHEAR_MOOSHROOM, itemStack -> {
 					for (int i = 0; i < itemStack.getCount(); i++) {
 						this.level().addFreshEntity(new ItemEntity(this.level(), this.getX(), this.getY(1.0), this.getZ(), itemStack.copyWithCount(1)));
 					}
@@ -256,18 +254,16 @@ public class MushroomCow extends Cow implements Shearable, VariantHolder<Mushroo
 	}
 
 	public static enum Variant implements StringRepresentable {
-		RED("red", Blocks.RED_MUSHROOM.defaultBlockState(), BuiltInLootTables.SHEAR_RED_MOOSHROOM),
-		BROWN("brown", Blocks.BROWN_MUSHROOM.defaultBlockState(), BuiltInLootTables.SHEAR_BROWN_MOOSHROOM);
+		RED("red", Blocks.RED_MUSHROOM.defaultBlockState()),
+		BROWN("brown", Blocks.BROWN_MUSHROOM.defaultBlockState());
 
 		public static final StringRepresentable.EnumCodec<MushroomCow.Variant> CODEC = StringRepresentable.fromEnum(MushroomCow.Variant::values);
 		final String type;
 		private final BlockState blockState;
-		private final ResourceKey<LootTable> lootTable;
 
-		private Variant(final String string2, final BlockState blockState, final ResourceKey<LootTable> resourceKey) {
+		private Variant(final String string2, final BlockState blockState) {
 			this.type = string2;
 			this.blockState = blockState;
-			this.lootTable = resourceKey;
 		}
 
 		public BlockState getBlockState() {
@@ -277,10 +273,6 @@ public class MushroomCow extends Cow implements Shearable, VariantHolder<Mushroo
 		@Override
 		public String getSerializedName() {
 			return this.type;
-		}
-
-		public ResourceKey<LootTable> lootTable() {
-			return this.lootTable;
 		}
 
 		static MushroomCow.Variant byName(String string) {

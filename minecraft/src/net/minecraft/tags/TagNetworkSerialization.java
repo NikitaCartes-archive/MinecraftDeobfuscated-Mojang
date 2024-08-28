@@ -50,7 +50,7 @@ public class TagNetworkSerialization {
 		Map<TagKey<T>, List<Holder<T>>> map = new HashMap();
 		networkPayload.tags.forEach((resourceLocation, intList) -> {
 			TagKey<T> tagKey = TagKey.create(resourceKey, resourceLocation);
-			List<Holder<T>> list = (List<Holder<T>>)intList.intStream().mapToObj(registry::getHolder).flatMap(Optional::stream).collect(Collectors.toUnmodifiableList());
+			List<Holder<T>> list = (List<Holder<T>>)intList.intStream().mapToObj(registry::get).flatMap(Optional::stream).collect(Collectors.toUnmodifiableList());
 			map.put(tagKey, list);
 		});
 		return new TagLoader.LoadResult<>(resourceKey, map);

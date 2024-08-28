@@ -21,6 +21,7 @@ public class EndermiteRenderer extends MobRenderer<Endermite, LivingEntityRender
 		return 180.0F;
 	}
 
+	@Override
 	public ResourceLocation getTextureLocation(LivingEntityRenderState livingEntityRenderState) {
 		return ENDERMITE_LOCATION;
 	}

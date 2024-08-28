@@ -26,14 +26,15 @@ public interface HolderLookup<T> extends HolderGetter<T> {
 		return this.listTags().map(HolderSet.Named::key);
 	}
 
-	public interface Provider {
+	public interface Provider extends HolderGetter.Provider {
 		Stream<ResourceKey<? extends Registry<?>>> listRegistryKeys();
 
 		default Stream<HolderLookup.RegistryLookup<?>> listRegistries() {
 			return this.listRegistryKeys().map(this::lookupOrThrow);
 		}
 
-		<T> Optional<HolderLookup.RegistryLookup<T>> lookup(ResourceKey<? extends Registry<? extends T>> resourceKey);
+		@Override
+		<T> Optional<? extends HolderLookup.RegistryLookup<T>> lookup(ResourceKey<? extends Registry<? extends T>> resourceKey);
 
 		default <T> HolderLookup.RegistryLookup<T> lookupOrThrow(ResourceKey<? extends Registry<? extends T>> resourceKey) {
 			return (HolderLookup.RegistryLookup<T>)this.lookup(resourceKey)
@@ -42,15 +43,6 @@ public interface HolderLookup<T> extends HolderGetter<T> {
 
 		default <V> RegistryOps<V> createSerializationContext(DynamicOps<V> dynamicOps) {
 			return RegistryOps.create(dynamicOps, this);
-		}
-
-		default HolderGetter.Provider asGetterLookup() {
-			return new HolderGetter.Provider() {
-				@Override
-				public <T> Optional<HolderGetter<T>> lookup(ResourceKey<? extends Registry<? extends T>> resourceKey) {
-					return Provider.this.lookup(resourceKey).map(registryLookup -> registryLookup);
-				}
-			};
 		}
 
 		static HolderLookup.Provider create(Stream<HolderLookup.RegistryLookup<?>> stream) {

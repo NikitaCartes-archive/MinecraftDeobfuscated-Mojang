@@ -120,14 +120,12 @@ public class HangingSignRenderer extends SignRenderer {
 
 	@Environment(EnvType.CLIENT)
 	public static final class HangingSignModel extends Model {
-		public final ModelPart root;
 		public final ModelPart plank;
 		public final ModelPart vChains;
 		public final ModelPart normalChains;
 
 		public HangingSignModel(ModelPart modelPart) {
-			super(RenderType::entityCutoutNoCull);
-			this.root = modelPart;
+			super(modelPart, RenderType::entityCutoutNoCull);
 			this.plank = modelPart.getChild("plank");
 			this.normalChains = modelPart.getChild("normalChains");
 			this.vChains = modelPart.getChild("vChains");
@@ -143,11 +141,6 @@ public class HangingSignRenderer extends SignRenderer {
 				this.normalChains.visible = !bl2;
 				this.vChains.visible = bl2;
 			}
-		}
-
-		@Override
-		public ModelPart root() {
-			return this.root;
 		}
 	}
 }

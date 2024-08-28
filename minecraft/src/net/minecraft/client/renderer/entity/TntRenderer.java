@@ -7,8 +7,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.entity.state.TntRenderState;
-import net.minecraft.client.renderer.texture.TextureAtlas;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.item.PrimedTnt;
 
@@ -44,10 +42,6 @@ public class TntRenderer extends EntityRenderer<PrimedTnt, TntRenderState> {
 
 		poseStack.popPose();
 		super.render(tntRenderState, poseStack, multiBufferSource, i);
-	}
-
-	public ResourceLocation getTextureLocation(TntRenderState tntRenderState) {
-		return TextureAtlas.LOCATION_BLOCKS;
 	}
 
 	public TntRenderState createRenderState() {

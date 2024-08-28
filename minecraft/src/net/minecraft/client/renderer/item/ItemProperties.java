@@ -29,6 +29,7 @@ import net.minecraft.world.item.component.ChargedProjectiles;
 import net.minecraft.world.item.component.CustomModelData;
 import net.minecraft.world.item.component.LodestoneTracker;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.BeehiveBlock;
 import net.minecraft.world.level.block.LightBlock;
 
 @Environment(EnvType.CLIENT)
@@ -53,6 +54,12 @@ public class ItemProperties {
 
 	private static void register(Item item, ResourceLocation resourceLocation, ClampedItemPropertyFunction clampedItemPropertyFunction) {
 		((Map)PROPERTIES.computeIfAbsent(item, itemx -> Maps.newHashMap())).put(resourceLocation, clampedItemPropertyFunction);
+	}
+
+	private static int honeyLevelProperty(ItemStack itemStack) {
+		BlockItemStateProperties blockItemStateProperties = itemStack.getOrDefault(DataComponents.BLOCK_STATE, BlockItemStateProperties.EMPTY);
+		Integer integer = blockItemStateProperties.get(BeehiveBlock.HONEY_LEVEL);
+		return integer != null && integer == 5 ? 1 : 0;
 	}
 
 	@Nullable
@@ -238,6 +245,12 @@ public class ItemProperties {
 			Items.GOAT_HORN,
 			ResourceLocation.withDefaultNamespace("tooting"),
 			(itemStack, clientLevel, livingEntity, i) -> livingEntity != null && livingEntity.isUsingItem() && livingEntity.getUseItem() == itemStack ? 1.0F : 0.0F
+		);
+		register(
+			Items.BEE_NEST, ResourceLocation.withDefaultNamespace("honey_level"), (itemStack, clientLevel, livingEntity, i) -> (float)honeyLevelProperty(itemStack)
+		);
+		register(
+			Items.BEEHIVE, ResourceLocation.withDefaultNamespace("honey_level"), (itemStack, clientLevel, livingEntity, i) -> (float)honeyLevelProperty(itemStack)
 		);
 	}
 }

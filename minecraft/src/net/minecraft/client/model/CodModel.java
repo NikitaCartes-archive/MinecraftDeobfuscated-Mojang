@@ -13,11 +13,10 @@ import net.minecraft.util.Mth;
 
 @Environment(EnvType.CLIENT)
 public class CodModel extends EntityModel<LivingEntityRenderState> {
-	private final ModelPart root;
 	private final ModelPart tailFin;
 
 	public CodModel(ModelPart modelPart) {
-		this.root = modelPart;
+		super(modelPart);
 		this.tailFin = modelPart.getChild("tail_fin");
 	}
 
@@ -53,12 +52,8 @@ public class CodModel extends EntityModel<LivingEntityRenderState> {
 		return LayerDefinition.create(meshDefinition, 32, 32);
 	}
 
-	@Override
-	public ModelPart root() {
-		return this.root;
-	}
-
 	public void setupAnim(LivingEntityRenderState livingEntityRenderState) {
+		super.setupAnim(livingEntityRenderState);
 		float f = livingEntityRenderState.isInWater ? 1.0F : 1.5F;
 		this.tailFin.yRot = -f * 0.45F * Mth.sin(0.6F * livingEntityRenderState.ageInTicks);
 	}

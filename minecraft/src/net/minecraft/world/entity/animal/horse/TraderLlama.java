@@ -12,8 +12,11 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.PanicGoal;
+import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.TargetGoal;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
+import net.minecraft.world.entity.monster.AbstractIllager;
+import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.npc.WanderingTrader;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -56,6 +59,9 @@ public class TraderLlama extends Llama {
 		super.registerGoals();
 		this.goalSelector.addGoal(1, new PanicGoal(this, 2.0));
 		this.targetSelector.addGoal(1, new TraderLlama.TraderLlamaDefendWanderingTraderGoal(this));
+		this.targetSelector
+			.addGoal(2, new NearestAttackableTargetGoal(this, Zombie.class, true, livingEntity -> livingEntity.getType() != EntityType.ZOMBIFIED_PIGLIN));
+		this.targetSelector.addGoal(2, new NearestAttackableTargetGoal(this, AbstractIllager.class, true));
 	}
 
 	public void setDespawnDelay(int i) {

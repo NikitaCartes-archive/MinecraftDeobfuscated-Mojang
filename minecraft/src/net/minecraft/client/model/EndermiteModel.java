@@ -16,12 +16,10 @@ public class EndermiteModel extends EntityModel<EntityRenderState> {
 	private static final int BODY_COUNT = 4;
 	private static final int[][] BODY_SIZES = new int[][]{{4, 3, 2}, {6, 4, 5}, {3, 3, 1}, {1, 2, 1}};
 	private static final int[][] BODY_TEXS = new int[][]{{0, 0}, {0, 5}, {0, 14}, {0, 18}};
-	private final ModelPart root;
-	private final ModelPart[] bodyParts;
+	private final ModelPart[] bodyParts = new ModelPart[4];
 
 	public EndermiteModel(ModelPart modelPart) {
-		this.root = modelPart;
-		this.bodyParts = new ModelPart[4];
+		super(modelPart);
 
 		for (int i = 0; i < 4; i++) {
 			this.bodyParts[i] = modelPart.getChild(createSegmentName(i));
@@ -54,12 +52,9 @@ public class EndermiteModel extends EntityModel<EntityRenderState> {
 	}
 
 	@Override
-	public ModelPart root() {
-		return this.root;
-	}
-
-	@Override
 	public void setupAnim(EntityRenderState entityRenderState) {
+		super.setupAnim(entityRenderState);
+
 		for (int i = 0; i < this.bodyParts.length; i++) {
 			this.bodyParts[i].yRot = Mth.cos(entityRenderState.ageInTicks * 0.9F + (float)i * 0.15F * (float) Math.PI)
 				* (float) Math.PI

@@ -57,7 +57,7 @@ public class EnchantRandomlyFunction extends LootItemConditionalFunction {
 		boolean bl2 = !bl && this.onlyCompatible;
 		Stream<Holder<Enchantment>> stream = ((Stream)this.options
 				.map(HolderSet::stream)
-				.orElseGet(() -> lootContext.getLevel().registryAccess().registryOrThrow(Registries.ENCHANTMENT).holders().map(Function.identity())))
+				.orElseGet(() -> lootContext.getLevel().registryAccess().lookupOrThrow(Registries.ENCHANTMENT).listElements().map(Function.identity())))
 			.filter(holder -> !bl2 || ((Enchantment)holder.value()).canEnchant(itemStack));
 		List<Holder<Enchantment>> list = stream.toList();
 		Optional<Holder<Enchantment>> optional = Util.getRandomSafe(list, randomSource);

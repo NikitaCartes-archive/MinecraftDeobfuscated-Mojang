@@ -11,7 +11,7 @@ public interface DefaultedRegistry<T> extends Registry<T> {
 
 	@Nonnull
 	@Override
-	T get(@Nullable ResourceLocation resourceLocation);
+	T getValue(@Nullable ResourceLocation resourceLocation);
 
 	@Nonnull
 	@Override

@@ -27,6 +27,10 @@ public record EquipmentTable(ResourceKey<LootTable> lootTable, Map<EquipmentSlot
 				.apply(instance, EquipmentTable::new)
 	);
 
+	public EquipmentTable(ResourceKey<LootTable> resourceKey, float f) {
+		this(resourceKey, createForAllSlots(f));
+	}
+
 	private static Map<EquipmentSlot, Float> createForAllSlots(float f) {
 		return createForAllSlots(List.of(EquipmentSlot.values()), f);
 	}

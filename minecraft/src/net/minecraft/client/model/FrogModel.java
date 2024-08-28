@@ -17,28 +17,18 @@ public class FrogModel extends EntityModel<FrogRenderState> {
 	private static final float MAX_WALK_ANIMATION_SPEED = 1.5F;
 	private static final float MAX_SWIM_ANIMATION_SPEED = 1.0F;
 	private static final float WALK_ANIMATION_SCALE_FACTOR = 2.5F;
-	private final ModelPart root;
-	private final ModelPart body;
-	private final ModelPart head;
-	private final ModelPart eyes;
-	private final ModelPart tongue;
-	private final ModelPart leftArm;
-	private final ModelPart rightArm;
-	private final ModelPart leftLeg;
-	private final ModelPart rightLeg;
-	private final ModelPart croakingBody;
+	private final ModelPart body = this.root.getChild("body");
+	private final ModelPart head = this.body.getChild("head");
+	private final ModelPart eyes = this.head.getChild("eyes");
+	private final ModelPart tongue = this.body.getChild("tongue");
+	private final ModelPart leftArm = this.body.getChild("left_arm");
+	private final ModelPart rightArm = this.body.getChild("right_arm");
+	private final ModelPart leftLeg = this.root.getChild("left_leg");
+	private final ModelPart rightLeg = this.root.getChild("right_leg");
+	private final ModelPart croakingBody = this.body.getChild("croaking_body");
 
 	public FrogModel(ModelPart modelPart) {
-		this.root = modelPart.getChild("root");
-		this.body = this.root.getChild("body");
-		this.head = this.body.getChild("head");
-		this.eyes = this.head.getChild("eyes");
-		this.tongue = this.body.getChild("tongue");
-		this.leftArm = this.body.getChild("left_arm");
-		this.rightArm = this.body.getChild("right_arm");
-		this.leftLeg = this.root.getChild("left_leg");
-		this.rightLeg = this.root.getChild("right_leg");
-		this.croakingBody = this.body.getChild("croaking_body");
+		super(modelPart.getChild("root"));
 	}
 
 	public static LayerDefinition createBodyLayer() {
@@ -98,7 +88,7 @@ public class FrogModel extends EntityModel<FrogRenderState> {
 	}
 
 	public void setupAnim(FrogRenderState frogRenderState) {
-		this.root().getAllParts().forEach(ModelPart::resetPose);
+		super.setupAnim(frogRenderState);
 		this.animate(frogRenderState.jumpAnimationState, FrogAnimation.FROG_JUMP, frogRenderState.ageInTicks);
 		this.animate(frogRenderState.croakAnimationState, FrogAnimation.FROG_CROAK, frogRenderState.ageInTicks);
 		this.animate(frogRenderState.tongueAnimationState, FrogAnimation.FROG_TONGUE, frogRenderState.ageInTicks);
@@ -110,10 +100,5 @@ public class FrogModel extends EntityModel<FrogRenderState> {
 
 		this.animate(frogRenderState.swimIdleAnimationState, FrogAnimation.FROG_IDLE_WATER, frogRenderState.ageInTicks);
 		this.croakingBody.visible = frogRenderState.croakAnimationState.isStarted();
-	}
-
-	@Override
-	public ModelPart root() {
-		return this.root;
 	}
 }

@@ -306,7 +306,7 @@ public abstract class ChunkGenerator {
 		if (!SharedConstants.debugVoidTerrain(chunkPos)) {
 			SectionPos sectionPos = SectionPos.of(chunkPos, worldGenLevel.getMinSectionY());
 			BlockPos blockPos = sectionPos.origin();
-			Registry<Structure> registry = worldGenLevel.registryAccess().registryOrThrow(Registries.STRUCTURE);
+			Registry<Structure> registry = worldGenLevel.registryAccess().lookupOrThrow(Registries.STRUCTURE);
 			Map<Integer, List<Structure>> map = (Map<Integer, List<Structure>>)registry.stream().collect(Collectors.groupingBy(structure -> structure.step().ordinal()));
 			List<FeatureSorter.StepFeatureData> list = (List<FeatureSorter.StepFeatureData>)this.featuresPerStep.get();
 			WorldgenRandom worldgenRandom = new WorldgenRandom(new XoroshiroRandomSource(RandomSupport.generateUniqueSeed()));
@@ -323,7 +323,7 @@ public abstract class ChunkGenerator {
 			int i = list.size();
 
 			try {
-				Registry<PlacedFeature> registry2 = worldGenLevel.registryAccess().registryOrThrow(Registries.PLACED_FEATURE);
+				Registry<PlacedFeature> registry2 = worldGenLevel.registryAccess().lookupOrThrow(Registries.PLACED_FEATURE);
 				int j = Math.max(GenerationStep.Decoration.values().length, i);
 
 				for (int k = 0; k < j; k++) {
@@ -579,7 +579,7 @@ public abstract class ChunkGenerator {
 					} catch (Exception var21) {
 						CrashReport crashReport = CrashReport.forThrowable(var21, "Generating structure reference");
 						CrashReportCategory crashReportCategory = crashReport.addCategory("Structure");
-						Optional<? extends Registry<Structure>> optional = worldGenLevel.registryAccess().registry(Registries.STRUCTURE);
+						Optional<? extends Registry<Structure>> optional = worldGenLevel.registryAccess().lookup(Registries.STRUCTURE);
 						crashReportCategory.setDetail(
 							"Id", (CrashReportDetail<String>)(() -> (String)optional.map(registry -> registry.getKey(structureStart.getStructure()).toString()).orElse("UNKNOWN"))
 						);

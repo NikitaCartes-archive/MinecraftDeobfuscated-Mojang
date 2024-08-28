@@ -12,10 +12,8 @@ import net.minecraft.client.renderer.entity.state.MinecartRenderState;
 
 @Environment(EnvType.CLIENT)
 public class MinecartModel extends EntityModel<MinecartRenderState> {
-	private final ModelPart root;
-
 	public MinecartModel(ModelPart modelPart) {
-		this.root = modelPart;
+		super(modelPart);
 	}
 
 	public static LayerDefinition createBodyLayer() {
@@ -49,13 +47,5 @@ public class MinecartModel extends EntityModel<MinecartRenderState> {
 			"right", CubeListBuilder.create().texOffs(0, 0).addBox(-8.0F, -9.0F, -1.0F, 16.0F, 8.0F, 2.0F), PartPose.offset(0.0F, 4.0F, 7.0F)
 		);
 		return LayerDefinition.create(meshDefinition, 64, 32);
-	}
-
-	public void setupAnim(MinecartRenderState minecartRenderState) {
-	}
-
-	@Override
-	public ModelPart root() {
-		return this.root;
 	}
 }

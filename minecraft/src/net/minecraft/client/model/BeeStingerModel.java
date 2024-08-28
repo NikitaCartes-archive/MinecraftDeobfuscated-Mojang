@@ -12,11 +12,8 @@ import net.minecraft.client.renderer.RenderType;
 
 @Environment(EnvType.CLIENT)
 public class BeeStingerModel extends Model {
-	private final ModelPart root;
-
 	public BeeStingerModel(ModelPart modelPart) {
-		super(RenderType::entityCutout);
-		this.root = modelPart;
+		super(modelPart, RenderType::entityCutout);
 	}
 
 	public static LayerDefinition createBodyLayer() {
@@ -26,10 +23,5 @@ public class BeeStingerModel extends Model {
 		partDefinition.addOrReplaceChild("cross_1", cubeListBuilder, PartPose.rotation((float) (Math.PI / 4), 0.0F, 0.0F));
 		partDefinition.addOrReplaceChild("cross_2", cubeListBuilder, PartPose.rotation((float) (Math.PI * 3.0 / 4.0), 0.0F, 0.0F));
 		return LayerDefinition.create(meshDefinition, 16, 16);
-	}
-
-	@Override
-	public ModelPart root() {
-		return this.root;
 	}
 }

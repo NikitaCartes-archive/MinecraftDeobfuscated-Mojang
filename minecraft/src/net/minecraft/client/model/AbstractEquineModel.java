@@ -29,7 +29,6 @@ public abstract class AbstractEquineModel<T extends EquineRenderState> extends E
 	private static final String HEAD_SADDLE = "head_saddle";
 	private static final String MOUTH_SADDLE_WRAP = "mouth_saddle_wrap";
 	protected static final MeshTransformer BABY_TRANSFORMER = new BabyModelTransform(true, 16.2F, 1.36F, 2.7272F, 2.0F, 20.0F, Set.of("head_parts"));
-	private final ModelPart root;
 	protected final ModelPart body;
 	protected final ModelPart headParts;
 	private final ModelPart rightHindLeg;
@@ -41,7 +40,7 @@ public abstract class AbstractEquineModel<T extends EquineRenderState> extends E
 	private final ModelPart[] ridingParts;
 
 	public AbstractEquineModel(ModelPart modelPart) {
-		this.root = modelPart;
+		super(modelPart);
 		this.body = modelPart.getChild("body");
 		this.headParts = modelPart.getChild("head_parts");
 		this.rightHindLeg = modelPart.getChild("right_hind_leg");
@@ -172,21 +171,15 @@ public abstract class AbstractEquineModel<T extends EquineRenderState> extends E
 		return meshDefinition;
 	}
 
-	@Override
-	public ModelPart root() {
-		return this.root;
-	}
-
 	public void setupAnim(T equineRenderState) {
-		boolean bl = equineRenderState.isSaddled;
-		boolean bl2 = equineRenderState.isRidden;
+		super.setupAnim(equineRenderState);
 
 		for (ModelPart modelPart : this.saddleParts) {
-			modelPart.visible = bl;
+			modelPart.visible = equineRenderState.isSaddled;
 		}
 
 		for (ModelPart modelPart : this.ridingParts) {
-			modelPart.visible = bl2 && bl;
+			modelPart.visible = equineRenderState.isRidden && equineRenderState.isSaddled;
 		}
 
 		float f = Mth.clamp(equineRenderState.yRot, -20.0F, 20.0F);
@@ -201,9 +194,7 @@ public abstract class AbstractEquineModel<T extends EquineRenderState> extends E
 		float k = equineRenderState.standAnimation;
 		float l = 1.0F - k;
 		float m = equineRenderState.feedingAnimation;
-		boolean bl3 = equineRenderState.animateTail;
-		this.headParts.resetPose();
-		this.body.xRot = 0.0F;
+		boolean bl = equineRenderState.animateTail;
 		this.headParts.xRot = (float) (Math.PI / 6) + g;
 		this.headParts.yRot = f * (float) (Math.PI / 180.0);
 		float n = equineRenderState.isInWater ? 0.2F : 1.0F;
@@ -218,10 +209,8 @@ public abstract class AbstractEquineModel<T extends EquineRenderState> extends E
 		this.body.xRot = k * (float) (-Math.PI / 4) + l * this.body.xRot;
 		float s = (float) (Math.PI / 12) * k;
 		float t = Mth.cos(equineRenderState.ageInTicks * 0.6F + (float) Math.PI);
-		this.leftFrontLeg.resetPose();
 		this.leftFrontLeg.y -= 12.0F * r * k;
 		this.leftFrontLeg.z += 4.0F * r * k;
-		this.rightFrontLeg.resetPose();
 		this.rightFrontLeg.y = this.leftFrontLeg.y;
 		this.rightFrontLeg.z = this.leftFrontLeg.z;
 		float u = ((float) (-Math.PI / 3) + t) * k + p * l;
@@ -230,11 +219,10 @@ public abstract class AbstractEquineModel<T extends EquineRenderState> extends E
 		this.rightHindLeg.xRot = s + o * 0.5F * h * l;
 		this.leftFrontLeg.xRot = u;
 		this.rightFrontLeg.xRot = v;
-		this.tail.resetPose();
 		this.tail.xRot = (float) (Math.PI / 6) + h * 0.75F;
 		this.tail.y += h * r;
 		this.tail.z += h * 2.0F * r;
-		if (bl3) {
+		if (bl) {
 			this.tail.yRot = Mth.cos(equineRenderState.ageInTicks * 0.7F);
 		} else {
 			this.tail.yRot = 0.0F;

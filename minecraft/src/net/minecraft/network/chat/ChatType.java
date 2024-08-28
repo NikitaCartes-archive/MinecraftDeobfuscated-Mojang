@@ -71,8 +71,8 @@ public record ChatType(ChatTypeDecoration chat, ChatTypeDecoration narration) {
 	}
 
 	public static ChatType.Bound bind(ResourceKey<ChatType> resourceKey, RegistryAccess registryAccess, Component component) {
-		Registry<ChatType> registry = registryAccess.registryOrThrow(Registries.CHAT_TYPE);
-		return new ChatType.Bound(registry.getHolderOrThrow(resourceKey), component);
+		Registry<ChatType> registry = registryAccess.lookupOrThrow(Registries.CHAT_TYPE);
+		return new ChatType.Bound(registry.getOrThrow(resourceKey), component);
 	}
 
 	public static record Bound(Holder<ChatType> chatType, Component name, Optional<Component> targetName) {

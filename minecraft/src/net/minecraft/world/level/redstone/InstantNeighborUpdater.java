@@ -16,7 +16,7 @@ public class InstantNeighborUpdater implements NeighborUpdater {
 
 	@Override
 	public void shapeUpdate(Direction direction, BlockState blockState, BlockPos blockPos, BlockPos blockPos2, int i, int j) {
-		NeighborUpdater.executeShapeUpdate(this.level, direction, blockState, blockPos, blockPos2, i, j - 1);
+		NeighborUpdater.executeShapeUpdate(this.level, direction, blockPos, blockPos2, blockState, i, j - 1);
 	}
 
 	@Override

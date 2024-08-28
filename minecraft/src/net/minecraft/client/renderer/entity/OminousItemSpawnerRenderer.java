@@ -6,9 +6,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.state.OminousItemSpawnerRenderState;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.OminousItemSpawner;
@@ -23,10 +21,6 @@ public class OminousItemSpawnerRenderer extends EntityRenderer<OminousItemSpawne
 	protected OminousItemSpawnerRenderer(EntityRendererProvider.Context context) {
 		super(context);
 		this.itemRenderer = context.getItemRenderer();
-	}
-
-	public ResourceLocation getTextureLocation(OminousItemSpawnerRenderState ominousItemSpawnerRenderState) {
-		return TextureAtlas.LOCATION_BLOCKS;
 	}
 
 	public OminousItemSpawnerRenderState createRenderState() {

@@ -40,12 +40,12 @@ public class ClientActivePlayersTooltip implements ClientTooltipComponent {
 	}
 
 	@Override
-	public void renderImage(Font font, int i, int j, GuiGraphics guiGraphics) {
-		for (int k = 0; k < this.activePlayers.size(); k++) {
-			ProfileResult profileResult = (ProfileResult)this.activePlayers.get(k);
-			int l = j + 2 + k * 12;
-			PlayerFaceRenderer.draw(guiGraphics, Minecraft.getInstance().getSkinManager().getInsecureSkin(profileResult.profile()), i + 2, l, 10);
-			guiGraphics.drawString(font, profileResult.profile().getName(), i + 10 + 4, l + 2, -1);
+	public void renderImage(Font font, int i, int j, int k, int l, GuiGraphics guiGraphics) {
+		for (int m = 0; m < this.activePlayers.size(); m++) {
+			ProfileResult profileResult = (ProfileResult)this.activePlayers.get(m);
+			int n = j + 2 + m * 12;
+			PlayerFaceRenderer.draw(guiGraphics, Minecraft.getInstance().getSkinManager().getInsecureSkin(profileResult.profile()), i + 2, n, 10);
+			guiGraphics.drawString(font, profileResult.profile().getName(), i + 10 + 4, n + 2, -1);
 		}
 	}
 

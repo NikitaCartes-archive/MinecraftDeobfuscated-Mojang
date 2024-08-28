@@ -46,18 +46,6 @@ public class BundleMouseActions implements ItemSlotMouseAction {
 		this.unselectedBundleItem(slot.getItem(), slot.index);
 	}
 
-	@Override
-	public boolean onKeyPressed(ItemStack itemStack, int i, int j, int k) {
-		for (int l = 0; l < this.minecraft.options.keyHotbarSlots.length; l++) {
-			if (this.minecraft.options.keyHotbarSlots[l].matches(j, k)) {
-				this.setSelectedBundleItem(itemStack, i, l);
-				return true;
-			}
-		}
-
-		return false;
-	}
-
 	private void setSelectedBundleItem(ItemStack itemStack, int i, int j) {
 		if (this.minecraft.getConnection() != null && j < BundleItem.getNumberOfItemsToShow(itemStack)) {
 			ClientPacketListener clientPacketListener = this.minecraft.getConnection();

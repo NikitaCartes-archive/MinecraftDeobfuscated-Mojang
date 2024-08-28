@@ -26,12 +26,6 @@ public class ZombieRenderer extends AbstractZombieRenderer<Zombie, ZombieRenderS
 		return new ZombieRenderState();
 	}
 
-	@Override
-	public void extractRenderState(Zombie zombie, ZombieRenderState zombieRenderState, float f) {
-		super.extractRenderState(zombie, zombieRenderState, f);
-		zombieRenderState.isAggressive = zombie.isAggressive();
-	}
-
 	public ZombieRenderer(
 		EntityRendererProvider.Context context,
 		ModelLayerLocation modelLayerLocation,

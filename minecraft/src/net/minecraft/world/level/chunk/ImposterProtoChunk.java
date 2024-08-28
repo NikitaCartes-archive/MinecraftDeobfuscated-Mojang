@@ -39,7 +39,7 @@ public class ImposterProtoChunk extends ProtoChunk {
 			levelChunk.getPos(),
 			UpgradeData.EMPTY,
 			levelChunk.levelHeightAccessor,
-			levelChunk.getLevel().registryAccess().registryOrThrow(Registries.BIOME),
+			levelChunk.getLevel().registryAccess().lookupOrThrow(Registries.BIOME),
 			levelChunk.getBlendingData()
 		);
 		this.wrapped = levelChunk;

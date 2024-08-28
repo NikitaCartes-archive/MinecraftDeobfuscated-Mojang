@@ -183,7 +183,7 @@ public record SerializableChunkData(
 			CompoundTag compoundTag3 = compoundTag.getCompound("structures");
 			ListTag listTag3 = compoundTag.getList("sections", 10);
 			List<SerializableChunkData.SectionData> list5 = new ArrayList(listTag3.size());
-			Registry<Biome> registry = registryAccess.registryOrThrow(Registries.BIOME);
+			Registry<Biome> registry = registryAccess.lookupOrThrow(Registries.BIOME);
 			Codec<PalettedContainerRO<Holder<Biome>>> codec = makeBiomeCodec(registry);
 
 			for (int k = 0; k < listTag3.size(); k++) {
@@ -206,9 +206,7 @@ public record SerializableChunkData(
 							.promotePartial(string -> logErrors(chunkPos, n, string))
 							.getOrThrow(SerializableChunkData.ChunkReadException::new);
 					} else {
-						palettedContainerRO = new PalettedContainer<>(
-							registry.asHolderIdMap(), registry.getHolderOrThrow(Biomes.PLAINS), PalettedContainer.Strategy.SECTION_BIOMES
-						);
+						palettedContainerRO = new PalettedContainer<>(registry.asHolderIdMap(), registry.getOrThrow(Biomes.PLAINS), PalettedContainer.Strategy.SECTION_BIOMES);
 					}
 
 					levelChunkSection = new LevelChunkSection(palettedContainer, palettedContainerRO);
@@ -255,7 +253,7 @@ public record SerializableChunkData(
 		boolean bl = serverLevel.dimensionType().hasSkyLight();
 		ChunkSource chunkSource = serverLevel.getChunkSource();
 		LevelLightEngine levelLightEngine = chunkSource.getLightEngine();
-		Registry<Biome> registry = serverLevel.registryAccess().registryOrThrow(Registries.BIOME);
+		Registry<Biome> registry = serverLevel.registryAccess().lookupOrThrow(Registries.BIOME);
 		boolean bl2 = false;
 
 		for (SerializableChunkData.SectionData sectionData : this.sectionData) {
@@ -364,7 +362,7 @@ public record SerializableChunkData(
 
 	private static Codec<PalettedContainerRO<Holder<Biome>>> makeBiomeCodec(Registry<Biome> registry) {
 		return PalettedContainer.codecRO(
-			registry.asHolderIdMap(), registry.holderByNameCodec(), PalettedContainer.Strategy.SECTION_BIOMES, registry.getHolderOrThrow(Biomes.PLAINS)
+			registry.asHolderIdMap(), registry.holderByNameCodec(), PalettedContainer.Strategy.SECTION_BIOMES, registry.getOrThrow(Biomes.PLAINS)
 		);
 	}
 
@@ -424,7 +422,7 @@ public record SerializableChunkData(
 			StructurePieceSerializationContext.fromLevel(serverLevel), chunkPos, chunkAccess.getAllStarts(), chunkAccess.getAllReferences()
 		);
 		return new SerializableChunkData(
-			serverLevel.registryAccess().registryOrThrow(Registries.BIOME),
+			serverLevel.registryAccess().lookupOrThrow(Registries.BIOME),
 			chunkPos,
 			chunkAccess.getMinSectionY(),
 			serverLevel.getGameTime(),
@@ -570,7 +568,7 @@ public record SerializableChunkData(
 	) {
 		CompoundTag compoundTag = new CompoundTag();
 		CompoundTag compoundTag2 = new CompoundTag();
-		Registry<Structure> registry = structurePieceSerializationContext.registryAccess().registryOrThrow(Registries.STRUCTURE);
+		Registry<Structure> registry = structurePieceSerializationContext.registryAccess().lookupOrThrow(Registries.STRUCTURE);
 
 		for (Entry<Structure, StructureStart> entry : map.entrySet()) {
 			ResourceLocation resourceLocation = registry.getKey((Structure)entry.getKey());
@@ -595,12 +593,12 @@ public record SerializableChunkData(
 		StructurePieceSerializationContext structurePieceSerializationContext, CompoundTag compoundTag, long l
 	) {
 		Map<Structure, StructureStart> map = Maps.<Structure, StructureStart>newHashMap();
-		Registry<Structure> registry = structurePieceSerializationContext.registryAccess().registryOrThrow(Registries.STRUCTURE);
+		Registry<Structure> registry = structurePieceSerializationContext.registryAccess().lookupOrThrow(Registries.STRUCTURE);
 		CompoundTag compoundTag2 = compoundTag.getCompound("starts");
 
 		for (String string : compoundTag2.getAllKeys()) {
 			ResourceLocation resourceLocation = ResourceLocation.tryParse(string);
-			Structure structure = registry.get(resourceLocation);
+			Structure structure = registry.getValue(resourceLocation);
 			if (structure == null) {
 				LOGGER.error("Unknown structure start: {}", resourceLocation);
 			} else {
@@ -616,12 +614,12 @@ public record SerializableChunkData(
 
 	private static Map<Structure, LongSet> unpackStructureReferences(RegistryAccess registryAccess, ChunkPos chunkPos, CompoundTag compoundTag) {
 		Map<Structure, LongSet> map = Maps.<Structure, LongSet>newHashMap();
-		Registry<Structure> registry = registryAccess.registryOrThrow(Registries.STRUCTURE);
+		Registry<Structure> registry = registryAccess.lookupOrThrow(Registries.STRUCTURE);
 		CompoundTag compoundTag2 = compoundTag.getCompound("References");
 
 		for (String string : compoundTag2.getAllKeys()) {
 			ResourceLocation resourceLocation = ResourceLocation.tryParse(string);
-			Structure structure = registry.get(resourceLocation);
+			Structure structure = registry.getValue(resourceLocation);
 			if (structure == null) {
 				LOGGER.warn("Found reference to unknown structure '{}' in chunk {}, discarding", resourceLocation, chunkPos);
 			} else {

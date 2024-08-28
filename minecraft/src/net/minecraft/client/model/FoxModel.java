@@ -17,7 +17,6 @@ import net.minecraft.util.Mth;
 @Environment(EnvType.CLIENT)
 public class FoxModel extends EntityModel<FoxRenderState> {
 	public static final MeshTransformer BABY_TRANSFORMER = new BabyModelTransform(true, 8.0F, 3.35F, Set.of("head"));
-	private final ModelPart root;
 	public final ModelPart head;
 	private final ModelPart body;
 	private final ModelPart rightHindLeg;
@@ -31,7 +30,7 @@ public class FoxModel extends EntityModel<FoxRenderState> {
 	private float legMotionPos;
 
 	public FoxModel(ModelPart modelPart) {
-		this.root = modelPart;
+		super(modelPart);
 		this.head = modelPart.getChild("head");
 		this.body = modelPart.getChild("body");
 		this.rightHindLeg = modelPart.getChild("right_hind_leg");
@@ -70,17 +69,8 @@ public class FoxModel extends EntityModel<FoxRenderState> {
 		return LayerDefinition.create(meshDefinition, 48, 32);
 	}
 
-	@Override
-	public ModelPart root() {
-		return this.root;
-	}
-
 	public void setupAnim(FoxRenderState foxRenderState) {
-		this.body.resetPose();
-		this.head.resetPose();
-		this.tail.resetPose();
-		this.rightHindLeg.resetPose();
-		this.leftHindLeg.resetPose();
+		super.setupAnim(foxRenderState);
 		float f = foxRenderState.walkAnimationSpeed;
 		float g = foxRenderState.walkAnimationPos;
 		this.rightHindLeg.xRot = Mth.cos(g * 0.6662F) * 1.4F * f;

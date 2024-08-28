@@ -67,7 +67,7 @@ public class JigsawPlacement {
 		StructureTemplateManager structureTemplateManager = generationContext.structureTemplateManager();
 		LevelHeightAccessor levelHeightAccessor = generationContext.heightAccessor();
 		WorldgenRandom worldgenRandom = generationContext.random();
-		Registry<StructureTemplatePool> registry = registryAccess.registryOrThrow(Registries.TEMPLATE_POOL);
+		Registry<StructureTemplatePool> registry = registryAccess.lookupOrThrow(Registries.TEMPLATE_POOL);
 		Rotation rotation = Rotation.getRandom(worldgenRandom);
 		StructureTemplatePool structureTemplatePool = (StructureTemplatePool)holder.unwrapKey()
 			.flatMap(resourceKey -> registry.getOptional(poolAliasLookup.lookup(resourceKey)))
@@ -310,7 +310,7 @@ public class JigsawPlacement {
 				int k = blockPos2.getY() - j;
 				int l = Integer.MIN_VALUE;
 				ResourceKey<StructureTemplatePool> resourceKey = readPoolKey(structureBlockInfo, poolAliasLookup);
-				Optional<? extends Holder<StructureTemplatePool>> optional = this.pools.getHolder(resourceKey);
+				Optional<? extends Holder<StructureTemplatePool>> optional = this.pools.get(resourceKey);
 				if (optional.isEmpty()) {
 					JigsawPlacement.LOGGER.warn("Empty or non-existent pool: {}", resourceKey.location());
 				} else {
@@ -359,7 +359,7 @@ public class JigsawPlacement {
 												return 0;
 											} else {
 												ResourceKey<StructureTemplatePool> resourceKeyx = readPoolKey(structureBlockInfox, poolAliasLookup);
-												Optional<? extends Holder<StructureTemplatePool>> optionalx = this.pools.getHolder(resourceKeyx);
+												Optional<? extends Holder<StructureTemplatePool>> optionalx = this.pools.get(resourceKeyx);
 												Optional<Holder<StructureTemplatePool>> optional2 = optionalx.map(holderx -> ((StructureTemplatePool)holderx.value()).getFallback());
 												int ix = (Integer)optionalx.map(holderx -> ((StructureTemplatePool)holderx.value()).getMaxSize(this.structureTemplateManager)).orElse(0);
 												int jx = (Integer)optional2.map(holderx -> ((StructureTemplatePool)holderx.value()).getMaxSize(this.structureTemplateManager)).orElse(0);

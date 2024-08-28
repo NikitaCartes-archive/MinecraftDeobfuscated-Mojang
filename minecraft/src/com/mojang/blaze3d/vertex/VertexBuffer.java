@@ -167,12 +167,14 @@ public class VertexBuffer implements AutoCloseable {
 		return autoStorageIndexBuffer != null ? autoStorageIndexBuffer.type() : this.indexType;
 	}
 
-	public void drawWithShader(Matrix4f matrix4f, Matrix4f matrix4f2, CompiledShaderProgram compiledShaderProgram) {
-		RenderSystem.assertOnRenderThread();
-		compiledShaderProgram.setDefaultUniforms(this.mode, matrix4f, matrix4f2, Minecraft.getInstance().getWindow());
-		compiledShaderProgram.apply();
-		this.draw();
-		compiledShaderProgram.clear();
+	public void drawWithShader(Matrix4f matrix4f, Matrix4f matrix4f2, @Nullable CompiledShaderProgram compiledShaderProgram) {
+		if (compiledShaderProgram != null) {
+			RenderSystem.assertOnRenderThread();
+			compiledShaderProgram.setDefaultUniforms(this.mode, matrix4f, matrix4f2, Minecraft.getInstance().getWindow());
+			compiledShaderProgram.apply();
+			this.draw();
+			compiledShaderProgram.clear();
+		}
 	}
 
 	public void close() {

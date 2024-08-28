@@ -268,7 +268,8 @@ public class Item implements FeatureElement, ItemLike {
 		return consumable != null ? consumable.consumeTicks() : 0;
 	}
 
-	public void releaseUsing(ItemStack itemStack, Level level, LivingEntity livingEntity, int i) {
+	public boolean releaseUsing(ItemStack itemStack, Level level, LivingEntity livingEntity, int i) {
+		return false;
 	}
 
 	public void appendHoverText(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Component> list, TooltipFlag tooltipFlag) {

@@ -32,12 +32,11 @@ public class TrialSpawnerBlockEntity extends BlockEntity implements Spawner, Tri
 	@Override
 	protected void loadAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
 		super.loadAdditional(compoundTag, provider);
-		if (compoundTag.contains("normal_config")) {
-			CompoundTag compoundTag2 = compoundTag.getCompound("normal_config").copy();
-			compoundTag.put("ominous_config", compoundTag2.merge(compoundTag.getCompound("ominous_config")));
-		}
-
-		this.trialSpawner.codec().parse(NbtOps.INSTANCE, compoundTag).resultOrPartial(LOGGER::error).ifPresent(trialSpawner -> this.trialSpawner = trialSpawner);
+		this.trialSpawner
+			.codec()
+			.parse(provider.createSerializationContext(NbtOps.INSTANCE), compoundTag)
+			.resultOrPartial(LOGGER::error)
+			.ifPresent(trialSpawner -> this.trialSpawner = trialSpawner);
 		if (this.level != null) {
 			this.markUpdated();
 		}
@@ -48,7 +47,7 @@ public class TrialSpawnerBlockEntity extends BlockEntity implements Spawner, Tri
 		super.saveAdditional(compoundTag, provider);
 		this.trialSpawner
 			.codec()
-			.encodeStart(NbtOps.INSTANCE, this.trialSpawner)
+			.encodeStart(provider.createSerializationContext(NbtOps.INSTANCE), this.trialSpawner)
 			.ifSuccess(tag -> compoundTag.merge((CompoundTag)tag))
 			.ifError(error -> LOGGER.warn("Failed to encode TrialSpawner {}", error.message()));
 	}

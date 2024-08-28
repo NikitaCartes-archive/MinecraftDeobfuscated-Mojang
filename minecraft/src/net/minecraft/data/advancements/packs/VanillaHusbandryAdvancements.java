@@ -665,7 +665,7 @@ public class VanillaHusbandryAdvancements implements AdvancementSubProvider {
 		HolderGetter<EntityType<?>> holderGetter, HolderGetter<Item> holderGetter2, Advancement.Builder builder
 	) {
 		BuiltInRegistries.FROG_VARIANT
-			.holders()
+			.listElements()
 			.forEach(
 				reference -> builder.addCriterion(
 						reference.key().location().toString(),
@@ -734,7 +734,7 @@ public class VanillaHusbandryAdvancements implements AdvancementSubProvider {
 
 	private static Advancement.Builder addCatVariants(Advancement.Builder builder) {
 		BuiltInRegistries.CAT_VARIANT
-			.holders()
+			.listElements()
 			.sorted(Comparator.comparing(reference -> reference.key().location()))
 			.forEach(
 				reference -> builder.addCriterion(

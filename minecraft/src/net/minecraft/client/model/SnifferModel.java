@@ -18,11 +18,10 @@ public class SnifferModel extends EntityModel<SnifferRenderState> {
 	public static final MeshTransformer BABY_TRANSFORMER = MeshTransformer.scaling(0.5F);
 	private static final float WALK_ANIMATION_SPEED_MAX = 9.0F;
 	private static final float WALK_ANIMATION_SCALE_FACTOR = 100.0F;
-	private final ModelPart root;
 	private final ModelPart head;
 
 	public SnifferModel(ModelPart modelPart) {
-		this.root = modelPart;
+		super(modelPart);
 		this.head = modelPart.getChild("bone").getChild("body").getChild("head");
 	}
 
@@ -104,7 +103,7 @@ public class SnifferModel extends EntityModel<SnifferRenderState> {
 	}
 
 	public void setupAnim(SnifferRenderState snifferRenderState) {
-		this.root().getAllParts().forEach(ModelPart::resetPose);
+		super.setupAnim(snifferRenderState);
 		this.head.xRot = snifferRenderState.xRot * (float) (Math.PI / 180.0);
 		this.head.yRot = snifferRenderState.yRot * (float) (Math.PI / 180.0);
 		if (snifferRenderState.isSearching) {
@@ -121,10 +120,5 @@ public class SnifferModel extends EntityModel<SnifferRenderState> {
 		if (snifferRenderState.isBaby) {
 			this.applyStatic(SnifferAnimation.BABY_TRANSFORM);
 		}
-	}
-
-	@Override
-	public ModelPart root() {
-		return this.root;
 	}
 }

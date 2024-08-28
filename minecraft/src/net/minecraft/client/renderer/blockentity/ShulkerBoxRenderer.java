@@ -57,23 +57,16 @@ public class ShulkerBoxRenderer implements BlockEntityRenderer<ShulkerBoxBlockEn
 
 	@Environment(EnvType.CLIENT)
 	static class ShulkerBoxModel extends Model {
-		private final ModelPart root;
 		private final ModelPart lid;
 
 		public ShulkerBoxModel(ModelPart modelPart) {
-			super(RenderType::entityCutoutNoCull);
-			this.root = modelPart;
+			super(modelPart, RenderType::entityCutoutNoCull);
 			this.lid = modelPart.getChild("lid");
 		}
 
 		public void animate(ShulkerBoxBlockEntity shulkerBoxBlockEntity, float f) {
 			this.lid.setPos(0.0F, 24.0F - shulkerBoxBlockEntity.getProgress(f) * 0.5F * 16.0F, 0.0F);
 			this.lid.yRot = 270.0F * shulkerBoxBlockEntity.getProgress(f) * (float) (Math.PI / 180.0);
-		}
-
-		@Override
-		public ModelPart root() {
-			return this.root;
 		}
 	}
 }

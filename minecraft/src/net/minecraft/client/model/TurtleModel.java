@@ -64,32 +64,26 @@ public class TurtleModel extends QuadrupedModel<TurtleRenderState> {
 		super.setupAnim(turtleRenderState);
 		float f = turtleRenderState.walkAnimationPos;
 		float g = turtleRenderState.walkAnimationSpeed;
-		this.rightHindLeg.xRot = Mth.cos(f * 0.6662F * 0.6F) * 0.5F * g;
-		this.leftHindLeg.xRot = Mth.cos(f * 0.6662F * 0.6F + (float) Math.PI) * 0.5F * g;
-		this.rightFrontLeg.zRot = Mth.cos(f * 0.6662F * 0.6F + (float) Math.PI) * 0.5F * g;
-		this.leftFrontLeg.zRot = Mth.cos(f * 0.6662F * 0.6F) * 0.5F * g;
-		this.rightFrontLeg.xRot = 0.0F;
-		this.leftFrontLeg.xRot = 0.0F;
-		this.rightFrontLeg.yRot = 0.0F;
-		this.leftFrontLeg.yRot = 0.0F;
-		this.rightHindLeg.yRot = 0.0F;
-		this.leftHindLeg.yRot = 0.0F;
 		if (turtleRenderState.isOnLand) {
 			float h = turtleRenderState.isLayingEgg ? 4.0F : 1.0F;
 			float i = turtleRenderState.isLayingEgg ? 2.0F : 1.0F;
-			float j = 5.0F;
-			this.rightFrontLeg.yRot = Mth.cos(h * f * 5.0F + (float) Math.PI) * 8.0F * g * i;
-			this.rightFrontLeg.zRot = 0.0F;
-			this.leftFrontLeg.yRot = Mth.cos(h * f * 5.0F) * 8.0F * g * i;
-			this.leftFrontLeg.zRot = 0.0F;
-			this.rightHindLeg.yRot = Mth.cos(f * 5.0F + (float) Math.PI) * 3.0F * g;
-			this.rightHindLeg.xRot = 0.0F;
-			this.leftHindLeg.yRot = Mth.cos(f * 5.0F) * 3.0F * g;
-			this.leftHindLeg.xRot = 0.0F;
+			float j = f * 5.0F;
+			float k = Mth.cos(h * j);
+			float l = Mth.cos(j);
+			this.rightFrontLeg.yRot = -k * 8.0F * g * i;
+			this.leftFrontLeg.yRot = k * 8.0F * g * i;
+			this.rightHindLeg.yRot = -l * 3.0F * g;
+			this.leftHindLeg.yRot = l * 3.0F * g;
+		} else {
+			float h = 0.5F * g;
+			float i = Mth.cos(f * 0.6662F * 0.6F) * h;
+			this.rightHindLeg.xRot = i;
+			this.leftHindLeg.xRot = -i;
+			this.rightFrontLeg.zRot = -i;
+			this.leftFrontLeg.zRot = i;
 		}
 
 		this.eggBelly.visible = turtleRenderState.hasEgg;
-		this.root.resetPose();
 		if (this.eggBelly.visible) {
 			this.root.y--;
 		}

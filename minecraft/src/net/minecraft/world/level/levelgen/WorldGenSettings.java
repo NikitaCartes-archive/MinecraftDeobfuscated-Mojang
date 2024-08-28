@@ -18,6 +18,6 @@ public record WorldGenSettings(WorldOptions options, WorldDimensions dimensions)
 	}
 
 	public static <T> DataResult<T> encode(DynamicOps<T> dynamicOps, WorldOptions worldOptions, RegistryAccess registryAccess) {
-		return encode(dynamicOps, worldOptions, new WorldDimensions(registryAccess.registryOrThrow(Registries.LEVEL_STEM)));
+		return encode(dynamicOps, worldOptions, new WorldDimensions(registryAccess.lookupOrThrow(Registries.LEVEL_STEM)));
 	}
 }

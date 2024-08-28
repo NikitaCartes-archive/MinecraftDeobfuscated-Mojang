@@ -18,31 +18,18 @@ import net.minecraft.world.entity.HumanoidArm;
 
 @Environment(EnvType.CLIENT)
 public class AllayModel extends EntityModel<AllayRenderState> implements ArmedModel {
-	private final ModelPart root;
-	private final ModelPart head;
-	private final ModelPart body;
-	private final ModelPart right_arm;
-	private final ModelPart left_arm;
-	private final ModelPart right_wing;
-	private final ModelPart left_wing;
+	private final ModelPart head = this.root.getChild("head");
+	private final ModelPart body = this.root.getChild("body");
+	private final ModelPart right_arm = this.body.getChild("right_arm");
+	private final ModelPart left_arm = this.body.getChild("left_arm");
+	private final ModelPart right_wing = this.body.getChild("right_wing");
+	private final ModelPart left_wing = this.body.getChild("left_wing");
 	private static final float FLYING_ANIMATION_X_ROT = (float) (Math.PI / 4);
 	private static final float MAX_HAND_HOLDING_ITEM_X_ROT_RAD = -1.134464F;
 	private static final float MIN_HAND_HOLDING_ITEM_X_ROT_RAD = (float) (-Math.PI / 3);
 
 	public AllayModel(ModelPart modelPart) {
-		super(RenderType::entityTranslucent);
-		this.root = modelPart.getChild("root");
-		this.head = this.root.getChild("head");
-		this.body = this.root.getChild("body");
-		this.right_arm = this.body.getChild("right_arm");
-		this.left_arm = this.body.getChild("left_arm");
-		this.right_wing = this.body.getChild("right_wing");
-		this.left_wing = this.body.getChild("left_wing");
-	}
-
-	@Override
-	public ModelPart root() {
-		return this.root;
+		super(modelPart.getChild("root"), RenderType::entityTranslucent);
 	}
 
 	public static LayerDefinition createBodyLayer() {
@@ -85,7 +72,7 @@ public class AllayModel extends EntityModel<AllayRenderState> implements ArmedMo
 	}
 
 	public void setupAnim(AllayRenderState allayRenderState) {
-		this.root().getAllParts().forEach(ModelPart::resetPose);
+		super.setupAnim(allayRenderState);
 		float f = allayRenderState.walkAnimationSpeed;
 		float g = allayRenderState.walkAnimationPos;
 		float h = allayRenderState.ageInTicks * 20.0F * (float) (Math.PI / 180.0) + g;

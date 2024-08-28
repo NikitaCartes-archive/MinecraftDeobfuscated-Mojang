@@ -50,11 +50,6 @@ public class DragonFireballRenderer extends EntityRenderer<DragonFireball, Entit
 	}
 
 	@Override
-	public ResourceLocation getTextureLocation(EntityRenderState entityRenderState) {
-		return TEXTURE_LOCATION;
-	}
-
-	@Override
 	public EntityRenderState createRenderState() {
 		return new EntityRenderState();
 	}

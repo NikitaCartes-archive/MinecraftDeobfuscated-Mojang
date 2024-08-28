@@ -142,7 +142,7 @@ public class AttributeMap {
 			String string = compoundTag.getString("id");
 			ResourceLocation resourceLocation = ResourceLocation.tryParse(string);
 			if (resourceLocation != null) {
-				Util.ifElse(BuiltInRegistries.ATTRIBUTE.getHolder(resourceLocation), reference -> {
+				Util.ifElse(BuiltInRegistries.ATTRIBUTE.get(resourceLocation), reference -> {
 					AttributeInstance attributeInstance = this.getInstance(reference);
 					if (attributeInstance != null) {
 						attributeInstance.load(compoundTag);

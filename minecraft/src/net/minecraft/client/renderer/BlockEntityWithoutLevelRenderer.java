@@ -141,7 +141,11 @@ public class BlockEntityWithoutLevelRenderer implements ResourceManagerReloadLis
 				poseStack.scale(1.0F, -1.0F, -1.0F);
 				Material material = bl ? ModelBakery.SHIELD_BASE : ModelBakery.NO_PATTERN_SHIELD;
 				VertexConsumer vertexConsumer = material.sprite()
-					.wrap(ItemRenderer.getFoilBuffer(multiBufferSource, this.shieldModel.renderType(material.atlasLocation()), false, itemStack.hasFoil()));
+					.wrap(
+						ItemRenderer.getFoilBuffer(
+							multiBufferSource, this.shieldModel.renderType(material.atlasLocation()), itemDisplayContext == ItemDisplayContext.GUI, itemStack.hasFoil()
+						)
+					);
 				this.shieldModel.handle().render(poseStack, vertexConsumer, i, j);
 				if (bl) {
 					BannerRenderer.renderPatterns(

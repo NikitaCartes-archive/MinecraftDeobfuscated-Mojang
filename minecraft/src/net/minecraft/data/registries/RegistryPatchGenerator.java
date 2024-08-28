@@ -1,9 +1,9 @@
 package net.minecraft.data.registries;
 
+import com.mojang.datafixers.DataFixUtils;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import net.minecraft.core.Cloner;
-import net.minecraft.core.HolderGetter;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.RegistrySetBuilder;
@@ -24,12 +24,12 @@ public class RegistryPatchGenerator {
 				RegistryDataLoader.WORLDGEN_REGISTRIES.forEach(registryData -> registryData.runWithArguments(factory::addCodec));
 				RegistrySetBuilder.PatchedRegistries patchedRegistries = registrySetBuilder.buildPatch(frozen, provider, factory);
 				HolderLookup.Provider provider2 = patchedRegistries.full();
-				Optional<HolderLookup.RegistryLookup<Biome>> optional = provider2.lookup(Registries.BIOME);
-				Optional<HolderLookup.RegistryLookup<PlacedFeature>> optional2 = provider2.lookup(Registries.PLACED_FEATURE);
+				Optional<? extends HolderLookup.RegistryLookup<Biome>> optional = provider2.lookup(Registries.BIOME);
+				Optional<? extends HolderLookup.RegistryLookup<PlacedFeature>> optional2 = provider2.lookup(Registries.PLACED_FEATURE);
 				if (optional.isPresent() || optional2.isPresent()) {
 					VanillaRegistries.validateThatAllBiomeFeaturesHaveBiomeFilter(
-						(HolderGetter<PlacedFeature>)optional2.orElseGet(() -> provider.lookupOrThrow(Registries.PLACED_FEATURE)),
-						(HolderLookup<Biome>)optional.orElseGet(() -> provider.lookupOrThrow(Registries.BIOME))
+						DataFixUtils.orElseGet(optional2, () -> provider.lookupOrThrow(Registries.PLACED_FEATURE)),
+						DataFixUtils.orElseGet(optional, () -> provider.lookupOrThrow(Registries.BIOME))
 					);
 				}
 

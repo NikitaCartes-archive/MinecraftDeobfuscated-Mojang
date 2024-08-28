@@ -168,12 +168,12 @@ public class StructureCheck {
 					return Object2IntMaps.emptyMap();
 				} else {
 					Object2IntMap<Structure> object2IntMap = new Object2IntOpenHashMap<>();
-					Registry<Structure> registry = this.registryAccess.registryOrThrow(Registries.STRUCTURE);
+					Registry<Structure> registry = this.registryAccess.lookupOrThrow(Registries.STRUCTURE);
 
 					for (String string : compoundTag3.getAllKeys()) {
 						ResourceLocation resourceLocation = ResourceLocation.tryParse(string);
 						if (resourceLocation != null) {
-							Structure structure = registry.get(resourceLocation);
+							Structure structure = registry.getValue(resourceLocation);
 							if (structure != null) {
 								CompoundTag compoundTag4 = compoundTag3.getCompound(string);
 								if (!compoundTag4.isEmpty()) {

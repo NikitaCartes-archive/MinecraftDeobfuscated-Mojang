@@ -34,7 +34,7 @@ public class PathNavigationRegion implements CollisionGetter {
 
 	public PathNavigationRegion(Level level, BlockPos blockPos, BlockPos blockPos2) {
 		this.level = level;
-		this.plains = Suppliers.memoize(() -> level.registryAccess().registryOrThrow(Registries.BIOME).getHolderOrThrow(Biomes.PLAINS));
+		this.plains = Suppliers.memoize(() -> level.registryAccess().lookupOrThrow(Registries.BIOME).getOrThrow(Biomes.PLAINS));
 		this.centerX = SectionPos.blockToSectionCoord(blockPos.getX());
 		this.centerZ = SectionPos.blockToSectionCoord(blockPos.getZ());
 		int i = SectionPos.blockToSectionCoord(blockPos2.getX());

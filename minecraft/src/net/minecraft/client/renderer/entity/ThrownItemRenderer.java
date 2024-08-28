@@ -6,9 +6,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.state.ThrownItemRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.ItemSupplier;
 import net.minecraft.world.item.ItemDisplayContext;
@@ -60,9 +58,5 @@ public class ThrownItemRenderer<T extends Entity & ItemSupplier> extends EntityR
 		ItemStack itemStack = entity.getItem();
 		thrownItemRenderState.itemModel = !itemStack.isEmpty() ? this.itemRenderer.getModel(itemStack, entity.level(), null, entity.getId()) : null;
 		thrownItemRenderState.item = itemStack.copy();
-	}
-
-	public ResourceLocation getTextureLocation(ThrownItemRenderState thrownItemRenderState) {
-		return TextureAtlas.LOCATION_BLOCKS;
 	}
 }

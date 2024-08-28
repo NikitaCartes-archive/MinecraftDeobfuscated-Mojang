@@ -62,7 +62,7 @@ public record PiecesContainer(List<StructurePiece> pieces) {
 			String string = compoundTag.getString("id").toLowerCase(Locale.ROOT);
 			ResourceLocation resourceLocation = ResourceLocation.parse(string);
 			ResourceLocation resourceLocation2 = (ResourceLocation)RENAMES.getOrDefault(resourceLocation, resourceLocation);
-			StructurePieceType structurePieceType = BuiltInRegistries.STRUCTURE_PIECE.get(resourceLocation2);
+			StructurePieceType structurePieceType = BuiltInRegistries.STRUCTURE_PIECE.getValue(resourceLocation2);
 			if (structurePieceType == null) {
 				LOGGER.error("Unknown structure piece id: {}", resourceLocation2);
 			} else {

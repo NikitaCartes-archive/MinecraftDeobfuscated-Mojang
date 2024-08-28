@@ -17,7 +17,6 @@ public class BookModel extends Model {
 	private static final String RIGHT_PAGES = "right_pages";
 	private static final String FLIP_PAGE_1 = "flip_page1";
 	private static final String FLIP_PAGE_2 = "flip_page2";
-	private final ModelPart root;
 	private final ModelPart leftLid;
 	private final ModelPart rightLid;
 	private final ModelPart leftPages;
@@ -26,8 +25,7 @@ public class BookModel extends Model {
 	private final ModelPart flipPage2;
 
 	public BookModel(ModelPart modelPart) {
-		super(RenderType::entitySolid);
-		this.root = modelPart;
+		super(modelPart, RenderType::entitySolid);
 		this.leftLid = modelPart.getChild("left_lid");
 		this.rightLid = modelPart.getChild("right_lid");
 		this.leftPages = modelPart.getChild("left_pages");
@@ -68,10 +66,5 @@ public class BookModel extends Model {
 		this.rightPages.x = Mth.sin(j);
 		this.flipPage1.x = Mth.sin(j);
 		this.flipPage2.x = Mth.sin(j);
-	}
-
-	@Override
-	public ModelPart root() {
-		return this.root;
 	}
 }

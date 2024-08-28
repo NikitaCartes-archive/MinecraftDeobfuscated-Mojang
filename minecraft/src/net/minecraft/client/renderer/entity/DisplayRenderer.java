@@ -11,6 +11,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
@@ -19,10 +20,9 @@ import net.minecraft.client.renderer.entity.state.DisplayEntityRenderState;
 import net.minecraft.client.renderer.entity.state.ItemDisplayEntityRenderState;
 import net.minecraft.client.renderer.entity.state.TextDisplayEntityRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.Display;
 import net.minecraft.world.phys.AABB;
@@ -46,8 +46,19 @@ public abstract class DisplayRenderer<T extends Display, S, ST extends DisplayEn
 		return display.affectedByCulling();
 	}
 
-	public ResourceLocation getTextureLocation(DisplayEntityRenderState displayEntityRenderState) {
-		return TextureAtlas.LOCATION_BLOCKS;
+	private static int getBrightnessOverride(Display display) {
+		Display.RenderState renderState = display.renderState();
+		return renderState != null ? renderState.brightnessOverride() : -1;
+	}
+
+	protected int getSkyLightLevel(T display, BlockPos blockPos) {
+		int i = getBrightnessOverride(display);
+		return i != -1 ? LightTexture.sky(i) : super.getSkyLightLevel(display, blockPos);
+	}
+
+	protected int getBlockLightLevel(T display, BlockPos blockPos) {
+		int i = getBrightnessOverride(display);
+		return i != -1 ? LightTexture.block(i) : super.getBlockLightLevel(display, blockPos);
 	}
 
 	public void render(ST displayEntityRenderState, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
@@ -57,14 +68,12 @@ public abstract class DisplayRenderer<T extends Display, S, ST extends DisplayEn
 				float f = displayEntityRenderState.interpolationProgress;
 				this.shadowRadius = renderState.shadowRadius().get(f);
 				this.shadowStrength = renderState.shadowStrength().get(f);
-				int j = renderState.brightnessOverride();
-				int k = j != -1 ? j : i;
-				super.render(displayEntityRenderState, poseStack, multiBufferSource, k);
+				super.render(displayEntityRenderState, poseStack, multiBufferSource, i);
 				poseStack.pushPose();
 				poseStack.mulPose(this.calculateOrientation(renderState, displayEntityRenderState, new Quaternionf()));
 				Transformation transformation = renderState.transformation().get(f);
 				poseStack.mulPose(transformation.getMatrix());
-				this.renderInner(displayEntityRenderState, poseStack, multiBufferSource, k, f);
+				this.renderInner(displayEntityRenderState, poseStack, multiBufferSource, i, f);
 				poseStack.popPose();
 			}
 		}

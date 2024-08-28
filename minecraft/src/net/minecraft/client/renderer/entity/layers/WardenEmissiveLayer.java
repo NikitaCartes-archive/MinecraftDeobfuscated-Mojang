@@ -47,12 +47,12 @@ public class WardenEmissiveLayer extends RenderLayer<WardenRenderState, WardenMo
 
 	private void onlyDrawSelectedParts() {
 		List<ModelPart> list = this.drawSelector.getPartsToDraw(this.getParentModel());
-		this.getParentModel().root().getAllParts().forEach(modelPart -> modelPart.skipDraw = true);
+		this.getParentModel().allParts().forEach(modelPart -> modelPart.skipDraw = true);
 		list.forEach(modelPart -> modelPart.skipDraw = false);
 	}
 
 	private void resetDrawForAllParts() {
-		this.getParentModel().root().getAllParts().forEach(modelPart -> modelPart.skipDraw = false);
+		this.getParentModel().allParts().forEach(modelPart -> modelPart.skipDraw = false);
 	}
 
 	@Environment(EnvType.CLIENT)

@@ -170,7 +170,7 @@ public class HoverEvent {
 				CompoundTag compoundTag = TagParser.parseTag(component.getString());
 				DynamicOps<JsonElement> dynamicOps = (DynamicOps<JsonElement>)(registryOps != null ? registryOps.withParent(JsonOps.INSTANCE) : JsonOps.INSTANCE);
 				DataResult<Component> dataResult = ComponentSerialization.CODEC.parse(dynamicOps, JsonParser.parseString(compoundTag.getString("name")));
-				EntityType<?> entityType = BuiltInRegistries.ENTITY_TYPE.get(ResourceLocation.parse(compoundTag.getString("type")));
+				EntityType<?> entityType = BuiltInRegistries.ENTITY_TYPE.getValue(ResourceLocation.parse(compoundTag.getString("type")));
 				UUID uUID = UUID.fromString(compoundTag.getString("id"));
 				return dataResult.map(componentx -> new HoverEvent.EntityTooltipInfo(entityType, uUID, componentx));
 			} catch (Exception var7) {

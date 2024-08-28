@@ -14,14 +14,14 @@ import net.minecraft.world.phys.AABB;
 @Environment(EnvType.CLIENT)
 public class Octree {
 	private final Octree.Branch root;
-	final BlockPos playerSectionCenter;
+	final BlockPos cameraSectionCenter;
 
 	public Octree(SectionPos sectionPos, int i, int j, int k) {
 		int l = i * 2 + 1;
 		int m = Mth.smallestEncompassingPowerOfTwo(l);
 		int n = i * 16;
 		BlockPos blockPos = sectionPos.origin();
-		this.playerSectionCenter = sectionPos.center();
+		this.cameraSectionCenter = sectionPos.center();
 		int o = blockPos.getX() - n;
 		int p = o + m * 16 - 1;
 		int q = m >= j ? k : blockPos.getY() - n;
@@ -77,31 +77,31 @@ public class Octree {
 		private final int bbCenterY;
 		private final int bbCenterZ;
 		private final Octree.AxisSorting sorting;
-		private final boolean playerXDiffNegative;
-		private final boolean playerYDiffNegative;
-		private final boolean playerZDiffNegative;
+		private final boolean cameraXDiffNegative;
+		private final boolean cameraYDiffNegative;
+		private final boolean cameraZDiffNegative;
 
 		public Branch(final BoundingBox boundingBox) {
 			this.boundingBox = boundingBox;
 			this.bbCenterX = this.boundingBox.minX() + this.boundingBox.getXSpan() / 2;
 			this.bbCenterY = this.boundingBox.minY() + this.boundingBox.getYSpan() / 2;
 			this.bbCenterZ = this.boundingBox.minZ() + this.boundingBox.getZSpan() / 2;
-			int i = Octree.this.playerSectionCenter.getX() - this.bbCenterX;
-			int j = Octree.this.playerSectionCenter.getY() - this.bbCenterY;
-			int k = Octree.this.playerSectionCenter.getZ() - this.bbCenterZ;
+			int i = Octree.this.cameraSectionCenter.getX() - this.bbCenterX;
+			int j = Octree.this.cameraSectionCenter.getY() - this.bbCenterY;
+			int k = Octree.this.cameraSectionCenter.getZ() - this.bbCenterZ;
 			this.sorting = Octree.AxisSorting.getAxisSorting(Math.abs(i), Math.abs(j), Math.abs(k));
-			this.playerXDiffNegative = i < 0;
-			this.playerYDiffNegative = j < 0;
-			this.playerZDiffNegative = k < 0;
+			this.cameraXDiffNegative = i < 0;
+			this.cameraYDiffNegative = j < 0;
+			this.cameraZDiffNegative = k < 0;
 		}
 
 		public boolean add(SectionRenderDispatcher.RenderSection renderSection) {
 			boolean bl = renderSection.getOrigin().getX() - this.bbCenterX < 0;
 			boolean bl2 = renderSection.getOrigin().getY() - this.bbCenterY < 0;
 			boolean bl3 = renderSection.getOrigin().getZ() - this.bbCenterZ < 0;
-			boolean bl4 = bl != this.playerXDiffNegative;
-			boolean bl5 = bl2 != this.playerYDiffNegative;
-			boolean bl6 = bl3 != this.playerZDiffNegative;
+			boolean bl4 = bl != this.cameraXDiffNegative;
+			boolean bl5 = bl2 != this.cameraYDiffNegative;
+			boolean bl6 = bl3 != this.cameraZDiffNegative;
 			int i = getNodeIndex(this.sorting, bl4, bl5, bl6);
 			if (this.areChildrenLeaves()) {
 				boolean bl7 = this.nodes[i] != null;

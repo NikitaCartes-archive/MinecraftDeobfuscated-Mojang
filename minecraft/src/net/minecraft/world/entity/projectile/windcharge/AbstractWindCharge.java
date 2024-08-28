@@ -27,7 +27,7 @@ import net.minecraft.world.phys.Vec3;
 
 public abstract class AbstractWindCharge extends AbstractHurtingProjectile implements ItemSupplier {
 	public static final ExplosionDamageCalculator EXPLOSION_DAMAGE_CALCULATOR = new SimpleExplosionDamageCalculator(
-		true, false, Optional.empty(), BuiltInRegistries.BLOCK.getTag(BlockTags.BLOCKS_WIND_CHARGE_EXPLOSIONS).map(Function.identity())
+		true, false, Optional.empty(), BuiltInRegistries.BLOCK.get(BlockTags.BLOCKS_WIND_CHARGE_EXPLOSIONS).map(Function.identity())
 	);
 	public static final double JUMP_SCALE = 0.25;
 

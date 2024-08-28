@@ -210,6 +210,12 @@ public class EnchantmentHelper {
 	}
 
 	public static void doPostAttackEffectsWithItemSource(ServerLevel serverLevel, Entity entity, DamageSource damageSource, @Nullable ItemStack itemStack) {
+		doPostAttackEffectsWithItemSourceOnBreak(serverLevel, entity, damageSource, itemStack, null);
+	}
+
+	public static void doPostAttackEffectsWithItemSourceOnBreak(
+		ServerLevel serverLevel, Entity entity, DamageSource damageSource, @Nullable ItemStack itemStack, @Nullable Consumer<Item> consumer
+	) {
 		if (entity instanceof LivingEntity livingEntity) {
 			runIterationOnEquipment(
 				livingEntity,
@@ -217,13 +223,20 @@ public class EnchantmentHelper {
 			);
 		}
 
-		if (itemStack != null && damageSource.getEntity() instanceof LivingEntity livingEntity) {
-			runIterationOnItem(
-				itemStack,
-				EquipmentSlot.MAINHAND,
-				livingEntity,
-				(holder, i, enchantedItemInUse) -> holder.value().doPostAttack(serverLevel, i, enchantedItemInUse, EnchantmentTarget.ATTACKER, entity, damageSource)
-			);
+		if (itemStack != null) {
+			if (damageSource.getEntity() instanceof LivingEntity livingEntity) {
+				runIterationOnItem(
+					itemStack,
+					EquipmentSlot.MAINHAND,
+					livingEntity,
+					(holder, i, enchantedItemInUse) -> holder.value().doPostAttack(serverLevel, i, enchantedItemInUse, EnchantmentTarget.ATTACKER, entity, damageSource)
+				);
+			} else if (consumer != null) {
+				EnchantedItemInUse enchantedItemInUse = new EnchantedItemInUse(itemStack, null, null, consumer);
+				runIterationOnItem(
+					itemStack, (holder, i) -> holder.value().doPostAttack(serverLevel, i, enchantedItemInUse, EnchantmentTarget.ATTACKER, entity, damageSource)
+				);
+			}
 		}
 	}
 
@@ -496,7 +509,7 @@ public class EnchantmentHelper {
 			itemStack,
 			i,
 			(Stream<Holder<Enchantment>>)optional.map(HolderSet::stream)
-				.orElseGet(() -> registryAccess.registryOrThrow(Registries.ENCHANTMENT).holders().map(reference -> reference))
+				.orElseGet(() -> registryAccess.lookupOrThrow(Registries.ENCHANTMENT).listElements().map(reference -> reference))
 		);
 	}
 
@@ -581,7 +594,7 @@ public class EnchantmentHelper {
 		DifficultyInstance difficultyInstance,
 		RandomSource randomSource
 	) {
-		EnchantmentProvider enchantmentProvider = registryAccess.registryOrThrow(Registries.ENCHANTMENT_PROVIDER).get(resourceKey);
+		EnchantmentProvider enchantmentProvider = registryAccess.lookupOrThrow(Registries.ENCHANTMENT_PROVIDER).getValue(resourceKey);
 		if (enchantmentProvider != null) {
 			updateEnchantments(itemStack, mutable -> enchantmentProvider.enchant(itemStack, mutable, randomSource, difficultyInstance));
 		}

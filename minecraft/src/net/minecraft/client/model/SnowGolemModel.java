@@ -15,14 +15,13 @@ import net.minecraft.util.Mth;
 @Environment(EnvType.CLIENT)
 public class SnowGolemModel extends EntityModel<LivingEntityRenderState> {
 	private static final String UPPER_BODY = "upper_body";
-	private final ModelPart root;
 	private final ModelPart upperBody;
 	private final ModelPart head;
 	private final ModelPart leftArm;
 	private final ModelPart rightArm;
 
 	public SnowGolemModel(ModelPart modelPart) {
-		this.root = modelPart;
+		super(modelPart);
 		this.head = modelPart.getChild("head");
 		this.leftArm = modelPart.getChild("left_arm");
 		this.rightArm = modelPart.getChild("right_arm");
@@ -50,6 +49,7 @@ public class SnowGolemModel extends EntityModel<LivingEntityRenderState> {
 	}
 
 	public void setupAnim(LivingEntityRenderState livingEntityRenderState) {
+		super.setupAnim(livingEntityRenderState);
 		this.head.yRot = livingEntityRenderState.yRot * (float) (Math.PI / 180.0);
 		this.head.xRot = livingEntityRenderState.xRot * (float) (Math.PI / 180.0);
 		this.upperBody.yRot = livingEntityRenderState.yRot * (float) (Math.PI / 180.0) * 0.25F;
@@ -61,11 +61,6 @@ public class SnowGolemModel extends EntityModel<LivingEntityRenderState> {
 		this.leftArm.z = -f * 5.0F;
 		this.rightArm.x = -g * 5.0F;
 		this.rightArm.z = f * 5.0F;
-	}
-
-	@Override
-	public ModelPart root() {
-		return this.root;
 	}
 
 	public ModelPart getHead() {

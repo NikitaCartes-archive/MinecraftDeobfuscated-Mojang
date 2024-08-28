@@ -19,7 +19,6 @@ public class WolfModel extends EntityModel<WolfRenderState> {
 	private static final String REAL_HEAD = "real_head";
 	private static final String UPPER_BODY = "upper_body";
 	private static final String REAL_TAIL = "real_tail";
-	private final ModelPart root;
 	private final ModelPart head;
 	private final ModelPart realHead;
 	private final ModelPart body;
@@ -33,7 +32,7 @@ public class WolfModel extends EntityModel<WolfRenderState> {
 	private static final int LEG_SIZE = 8;
 
 	public WolfModel(ModelPart modelPart) {
-		this.root = modelPart;
+		super(modelPart);
 		this.head = modelPart.getChild("head");
 		this.realHead = this.head.getChild("real_head");
 		this.body = modelPart.getChild("body");
@@ -89,13 +88,7 @@ public class WolfModel extends EntityModel<WolfRenderState> {
 	}
 
 	public void setupAnim(WolfRenderState wolfRenderState) {
-		this.body.resetPose();
-		this.upperBody.resetPose();
-		this.tail.resetPose();
-		this.rightHindLeg.resetPose();
-		this.leftHindLeg.resetPose();
-		this.rightFrontLeg.resetPose();
-		this.leftFrontLeg.resetPose();
+		super.setupAnim(wolfRenderState);
 		float f = wolfRenderState.walkAnimationPos;
 		float g = wolfRenderState.walkAnimationSpeed;
 		if (wolfRenderState.isAngry) {
@@ -140,10 +133,5 @@ public class WolfModel extends EntityModel<WolfRenderState> {
 		this.head.xRot = wolfRenderState.xRot * (float) (Math.PI / 180.0);
 		this.head.yRot = wolfRenderState.yRot * (float) (Math.PI / 180.0);
 		this.tail.xRot = wolfRenderState.tailAngle;
-	}
-
-	@Override
-	public ModelPart root() {
-		return this.root;
 	}
 }

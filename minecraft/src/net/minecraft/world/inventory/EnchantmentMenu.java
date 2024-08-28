@@ -89,7 +89,7 @@ public class EnchantmentMenu extends AbstractContainerMenu {
 			ItemStack itemStack = container.getItem(0);
 			if (!itemStack.isEmpty() && itemStack.isEnchantable()) {
 				this.access.execute((level, blockPos) -> {
-					IdMap<Holder<Enchantment>> idMap = level.registryAccess().registryOrThrow(Registries.ENCHANTMENT).asHolderIdMap();
+					IdMap<Holder<Enchantment>> idMap = level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT).asHolderIdMap();
 					int ix = 0;
 
 					for (BlockPos blockPos2 : EnchantingTableBlock.BOOKSHELF_OFFSETS) {
@@ -185,7 +185,7 @@ public class EnchantmentMenu extends AbstractContainerMenu {
 
 	private List<EnchantmentInstance> getEnchantmentList(RegistryAccess registryAccess, ItemStack itemStack, int i, int j) {
 		this.random.setSeed((long)(this.enchantmentSeed.get() + i));
-		Optional<HolderSet.Named<Enchantment>> optional = registryAccess.registryOrThrow(Registries.ENCHANTMENT).getTag(EnchantmentTags.IN_ENCHANTING_TABLE);
+		Optional<HolderSet.Named<Enchantment>> optional = registryAccess.lookupOrThrow(Registries.ENCHANTMENT).get(EnchantmentTags.IN_ENCHANTING_TABLE);
 		if (optional.isEmpty()) {
 			return List.of();
 		} else {

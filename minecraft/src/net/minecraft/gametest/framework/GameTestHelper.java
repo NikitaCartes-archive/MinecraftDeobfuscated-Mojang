@@ -939,7 +939,7 @@ public class GameTestHelper {
 		BlockPos blockPos = BlockPos.containing(aABB.minX, aABB.minY, aABB.minZ);
 		BlockPos blockPos2 = BlockPos.containing(aABB.maxX, aABB.maxY, aABB.maxZ);
 		Either<Integer, CommandSyntaxException> either = FillBiomeCommand.fill(
-			this.getLevel(), blockPos, blockPos2, this.getLevel().registryAccess().registryOrThrow(Registries.BIOME).getHolderOrThrow(resourceKey)
+			this.getLevel(), blockPos, blockPos2, this.getLevel().registryAccess().lookupOrThrow(Registries.BIOME).getOrThrow(resourceKey)
 		);
 		if (either.right().isPresent()) {
 			this.fail("Failed to set biome for test");

@@ -77,7 +77,7 @@ public class WorldUpgrader implements AutoCloseable {
 	final DimensionDataStorage overworldDataStorage;
 
 	public WorldUpgrader(LevelStorageSource.LevelStorageAccess levelStorageAccess, DataFixer dataFixer, RegistryAccess registryAccess, boolean bl, boolean bl2) {
-		this.dimensions = registryAccess.registryOrThrow(Registries.LEVEL_STEM);
+		this.dimensions = registryAccess.lookupOrThrow(Registries.LEVEL_STEM);
 		this.levels = (Set<ResourceKey<Level>>)this.dimensions.registryKeySet().stream().map(Registries::levelStemToLevel).collect(Collectors.toUnmodifiableSet());
 		this.eraseCache = bl;
 		this.dataFixer = dataFixer;
@@ -350,7 +350,7 @@ public class WorldUpgrader implements AutoCloseable {
 			CompoundTag compoundTag = (CompoundTag)((Optional)chunkStorage.read(chunkPos).join()).orElse(null);
 			if (compoundTag != null) {
 				int i = ChunkStorage.getVersion(compoundTag);
-				ChunkGenerator chunkGenerator = WorldUpgrader.this.dimensions.getOrThrow(Registries.levelToLevelStem(resourceKey)).generator();
+				ChunkGenerator chunkGenerator = WorldUpgrader.this.dimensions.getValueOrThrow(Registries.levelToLevelStem(resourceKey)).generator();
 				CompoundTag compoundTag2 = chunkStorage.upgradeChunkTag(
 					resourceKey, () -> WorldUpgrader.this.overworldDataStorage, compoundTag, chunkGenerator.getTypeNameForDataFixer()
 				);

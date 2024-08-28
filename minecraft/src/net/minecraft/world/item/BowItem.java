@@ -23,13 +23,19 @@ public class BowItem extends ProjectileWeaponItem {
 	}
 
 	@Override
-	public void releaseUsing(ItemStack itemStack, Level level, LivingEntity livingEntity, int i) {
-		if (livingEntity instanceof Player player) {
+	public boolean releaseUsing(ItemStack itemStack, Level level, LivingEntity livingEntity, int i) {
+		if (!(livingEntity instanceof Player player)) {
+			return false;
+		} else {
 			ItemStack itemStack2 = player.getProjectile(itemStack);
-			if (!itemStack2.isEmpty()) {
+			if (itemStack2.isEmpty()) {
+				return false;
+			} else {
 				int j = this.getUseDuration(itemStack, livingEntity) - i;
 				float f = getPowerForTime(j);
-				if (!((double)f < 0.1)) {
+				if ((double)f < 0.1) {
+					return false;
+				} else {
 					List<ItemStack> list = draw(itemStack, itemStack2, player);
 					if (level instanceof ServerLevel serverLevel && !list.isEmpty()) {
 						this.shoot(serverLevel, player, player.getUsedItemHand(), itemStack, list, f * 3.0F, 1.0F, f == 1.0F, null);
@@ -46,6 +52,7 @@ public class BowItem extends ProjectileWeaponItem {
 						1.0F / (level.getRandom().nextFloat() * 0.4F + 1.2F) + f * 0.5F
 					);
 					player.awardStat(Stats.ITEM_USED.get(this));
+					return true;
 				}
 			}
 		}

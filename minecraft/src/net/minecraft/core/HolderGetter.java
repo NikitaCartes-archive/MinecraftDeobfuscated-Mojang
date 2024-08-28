@@ -18,14 +18,14 @@ public interface HolderGetter<T> {
 	}
 
 	public interface Provider {
-		<T> Optional<HolderGetter<T>> lookup(ResourceKey<? extends Registry<? extends T>> resourceKey);
+		<T> Optional<? extends HolderGetter<T>> lookup(ResourceKey<? extends Registry<? extends T>> resourceKey);
 
 		default <T> HolderGetter<T> lookupOrThrow(ResourceKey<? extends Registry<? extends T>> resourceKey) {
 			return (HolderGetter<T>)this.lookup(resourceKey).orElseThrow(() -> new IllegalStateException("Registry " + resourceKey.location() + " not found"));
 		}
 
-		default <T> Optional<Holder.Reference<T>> get(ResourceKey<? extends Registry<? extends T>> resourceKey, ResourceKey<T> resourceKey2) {
-			return this.lookup(resourceKey).flatMap(holderGetter -> holderGetter.get(resourceKey2));
+		default <T> Optional<Holder.Reference<T>> get(ResourceKey<T> resourceKey) {
+			return this.lookup(resourceKey.registryKey()).flatMap(holderGetter -> holderGetter.get(resourceKey));
 		}
 	}
 }

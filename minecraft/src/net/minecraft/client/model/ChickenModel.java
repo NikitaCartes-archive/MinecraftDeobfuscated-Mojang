@@ -17,7 +17,6 @@ import net.minecraft.util.Mth;
 public class ChickenModel extends EntityModel<ChickenRenderState> {
 	public static final String RED_THING = "red_thing";
 	public static final MeshTransformer BABY_TRANSFORMER = new BabyModelTransform(Set.of("head", "beak", "red_thing"));
-	private final ModelPart root;
 	private final ModelPart head;
 	private final ModelPart rightLeg;
 	private final ModelPart leftLeg;
@@ -27,7 +26,7 @@ public class ChickenModel extends EntityModel<ChickenRenderState> {
 	private final ModelPart redThing;
 
 	public ChickenModel(ModelPart modelPart) {
-		this.root = modelPart;
+		super(modelPart);
 		this.head = modelPart.getChild("head");
 		this.beak = modelPart.getChild("beak");
 		this.redThing = modelPart.getChild("red_thing");
@@ -67,12 +66,8 @@ public class ChickenModel extends EntityModel<ChickenRenderState> {
 		return LayerDefinition.create(meshDefinition, 64, 32);
 	}
 
-	@Override
-	public ModelPart root() {
-		return this.root;
-	}
-
 	public void setupAnim(ChickenRenderState chickenRenderState) {
+		super.setupAnim(chickenRenderState);
 		float f = (Mth.sin(chickenRenderState.flap) + 1.0F) * chickenRenderState.flapSpeed;
 		this.head.xRot = chickenRenderState.xRot * (float) (Math.PI / 180.0);
 		this.head.yRot = chickenRenderState.yRot * (float) (Math.PI / 180.0);

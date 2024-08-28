@@ -494,7 +494,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		this.resourceManager.registerReloadListener(this.languageManager);
 		this.textureManager = new TextureManager(this.resourceManager);
 		this.resourceManager.registerReloadListener(this.textureManager);
-		this.shaderManager = new ShaderManager(this.textureManager);
+		this.shaderManager = new ShaderManager(this.textureManager, this::triggerResourcePackRecovery);
 		this.resourceManager.registerReloadListener(this.shaderManager);
 		this.skinManager = new SkinManager(this.textureManager, file.toPath().resolve("skins"), this.minecraftSessionService, this);
 		this.levelSource = new LevelStorageSource(path.resolve("saves"), path.resolve("backups"), this.directoryValidator, this.fixerUpper);
@@ -777,6 +777,15 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	private void addResourcePackLoadFailToast(@Nullable Component component) {
 		ToastManager toastManager = this.getToastManager();
 		SystemToast.addOrUpdate(toastManager, SystemToast.SystemToastId.PACK_LOAD_FAILURE, Component.translatable("resourcePack.load_fail"), component);
+	}
+
+	public void triggerResourcePackRecovery(Exception exception) {
+		if (this.getResourcePackRepository().getSelectedIds().size() <= 1) {
+			LOGGER.error(LogUtils.FATAL_MARKER, exception.getMessage(), (Throwable)exception);
+			this.emergencySaveAndCrash(new CrashReport(exception.getMessage(), exception));
+		} else {
+			this.clearResourcePacksOnError(exception, Component.translatable("resourcePack.runtime_failure"), null);
+		}
 	}
 
 	public void run() {

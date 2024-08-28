@@ -61,8 +61,8 @@ public interface PresetEditor {
 
 	private static WorldCreationContext.DimensionsUpdater fixedBiomeConfigurator(Holder<Biome> holder) {
 		return (frozen, worldDimensions) -> {
-			Registry<NoiseGeneratorSettings> registry = frozen.registryOrThrow(Registries.NOISE_SETTINGS);
-			Holder<NoiseGeneratorSettings> holder2 = registry.getHolderOrThrow(NoiseGeneratorSettings.OVERWORLD);
+			Registry<NoiseGeneratorSettings> registry = frozen.lookupOrThrow(Registries.NOISE_SETTINGS);
+			Holder<NoiseGeneratorSettings> holder2 = registry.getOrThrow(NoiseGeneratorSettings.OVERWORLD);
 			BiomeSource biomeSource = new FixedBiomeSource(holder);
 			ChunkGenerator chunkGenerator = new NoiseBasedChunkGenerator(biomeSource, holder2);
 			return worldDimensions.replaceOverworldGenerator(frozen, chunkGenerator);

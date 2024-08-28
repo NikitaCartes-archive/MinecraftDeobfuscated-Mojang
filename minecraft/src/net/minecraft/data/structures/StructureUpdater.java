@@ -28,7 +28,7 @@ public class StructureUpdater implements SnbtToNbt.Filter {
 		}
 
 		CompoundTag compoundTag2 = DataFixTypes.STRUCTURE.updateToCurrentVersion(DataFixers.getDataFixer(), compoundTag, i);
-		structureTemplate.load(BuiltInRegistries.BLOCK.asLookup(), compoundTag2);
+		structureTemplate.load(BuiltInRegistries.BLOCK, compoundTag2);
 		return structureTemplate.save(new CompoundTag());
 	}
 }

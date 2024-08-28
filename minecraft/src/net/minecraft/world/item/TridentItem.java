@@ -67,52 +67,62 @@ public class TridentItem extends Item implements ProjectileItem {
 	}
 
 	@Override
-	public void releaseUsing(ItemStack itemStack, Level level, LivingEntity livingEntity, int i) {
+	public boolean releaseUsing(ItemStack itemStack, Level level, LivingEntity livingEntity, int i) {
 		if (livingEntity instanceof Player player) {
 			int j = this.getUseDuration(itemStack, livingEntity) - i;
-			if (j >= 10) {
+			if (j < 10) {
+				return false;
+			} else {
 				float f = EnchantmentHelper.getTridentSpinAttackStrength(itemStack, player);
-				if (!(f > 0.0F) || player.isInWaterOrRain()) {
-					if (!isTooDamagedToUse(itemStack)) {
-						Holder<SoundEvent> holder = (Holder<SoundEvent>)EnchantmentHelper.pickHighestLevel(itemStack, EnchantmentEffectComponents.TRIDENT_SOUND)
-							.orElse(SoundEvents.TRIDENT_THROW);
-						if (level instanceof ServerLevel serverLevel) {
-							itemStack.hurtWithoutBreaking(1, player);
-							if (f == 0.0F) {
-								ThrownTrident thrownTrident = Projectile.spawnProjectileFromRotation(ThrownTrident::new, serverLevel, itemStack, player, 0.0F, 2.5F, 1.0F);
-								if (player.hasInfiniteMaterials()) {
-									thrownTrident.pickup = AbstractArrow.Pickup.CREATIVE_ONLY;
-								} else {
-									player.getInventory().removeItem(itemStack);
-								}
-
-								level.playSound(null, thrownTrident, holder.value(), SoundSource.PLAYERS, 1.0F, 1.0F);
-							}
-						}
-
-						player.awardStat(Stats.ITEM_USED.get(this));
-						if (f > 0.0F) {
-							float g = player.getYRot();
-							float h = player.getXRot();
-							float k = -Mth.sin(g * (float) (Math.PI / 180.0)) * Mth.cos(h * (float) (Math.PI / 180.0));
-							float l = -Mth.sin(h * (float) (Math.PI / 180.0));
-							float m = Mth.cos(g * (float) (Math.PI / 180.0)) * Mth.cos(h * (float) (Math.PI / 180.0));
-							float n = Mth.sqrt(k * k + l * l + m * m);
-							k *= f / n;
-							l *= f / n;
-							m *= f / n;
-							player.push((double)k, (double)l, (double)m);
-							player.startAutoSpinAttack(20, 8.0F, itemStack);
-							if (player.onGround()) {
-								float o = 1.1999999F;
-								player.move(MoverType.SELF, new Vec3(0.0, 1.1999999F, 0.0));
+				if (f > 0.0F && !player.isInWaterOrRain()) {
+					return false;
+				} else if (isTooDamagedToUse(itemStack)) {
+					return false;
+				} else {
+					Holder<SoundEvent> holder = (Holder<SoundEvent>)EnchantmentHelper.pickHighestLevel(itemStack, EnchantmentEffectComponents.TRIDENT_SOUND)
+						.orElse(SoundEvents.TRIDENT_THROW);
+					if (level instanceof ServerLevel serverLevel) {
+						itemStack.hurtWithoutBreaking(1, player);
+						if (f == 0.0F) {
+							ThrownTrident thrownTrident = Projectile.spawnProjectileFromRotation(ThrownTrident::new, serverLevel, itemStack, player, 0.0F, 2.5F, 1.0F);
+							if (player.hasInfiniteMaterials()) {
+								thrownTrident.pickup = AbstractArrow.Pickup.CREATIVE_ONLY;
+							} else {
+								player.getInventory().removeItem(itemStack);
 							}
 
-							level.playSound(null, player, holder.value(), SoundSource.PLAYERS, 1.0F, 1.0F);
+							level.playSound(null, thrownTrident, holder.value(), SoundSource.PLAYERS, 1.0F, 1.0F);
+							return true;
 						}
+					}
+
+					player.awardStat(Stats.ITEM_USED.get(this));
+					if (f > 0.0F) {
+						float g = player.getYRot();
+						float h = player.getXRot();
+						float k = -Mth.sin(g * (float) (Math.PI / 180.0)) * Mth.cos(h * (float) (Math.PI / 180.0));
+						float l = -Mth.sin(h * (float) (Math.PI / 180.0));
+						float m = Mth.cos(g * (float) (Math.PI / 180.0)) * Mth.cos(h * (float) (Math.PI / 180.0));
+						float n = Mth.sqrt(k * k + l * l + m * m);
+						k *= f / n;
+						l *= f / n;
+						m *= f / n;
+						player.push((double)k, (double)l, (double)m);
+						player.startAutoSpinAttack(20, 8.0F, itemStack);
+						if (player.onGround()) {
+							float o = 1.1999999F;
+							player.move(MoverType.SELF, new Vec3(0.0, 1.1999999F, 0.0));
+						}
+
+						level.playSound(null, player, holder.value(), SoundSource.PLAYERS, 1.0F, 1.0F);
+						return true;
+					} else {
+						return false;
 					}
 				}
 			}
+		} else {
+			return false;
 		}
 	}
 

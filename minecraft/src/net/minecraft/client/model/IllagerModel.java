@@ -17,7 +17,6 @@ import net.minecraft.world.entity.monster.AbstractIllager;
 
 @Environment(EnvType.CLIENT)
 public class IllagerModel<S extends IllagerRenderState> extends EntityModel<S> implements ArmedModel, HeadedModel {
-	private final ModelPart root;
 	private final ModelPart head;
 	private final ModelPart hat;
 	private final ModelPart arms;
@@ -27,7 +26,7 @@ public class IllagerModel<S extends IllagerRenderState> extends EntityModel<S> i
 	private final ModelPart leftArm;
 
 	public IllagerModel(ModelPart modelPart) {
-		this.root = modelPart;
+		super(modelPart);
 		this.head = modelPart.getChild("head");
 		this.hat = this.head.getChild("hat");
 		this.hat.visible = false;
@@ -82,12 +81,8 @@ public class IllagerModel<S extends IllagerRenderState> extends EntityModel<S> i
 		return LayerDefinition.create(meshDefinition, 64, 64);
 	}
 
-	@Override
-	public ModelPart root() {
-		return this.root;
-	}
-
 	public void setupAnim(S illagerRenderState) {
+		super.setupAnim(illagerRenderState);
 		this.head.yRot = illagerRenderState.yRot * (float) (Math.PI / 180.0);
 		this.head.xRot = illagerRenderState.xRot * (float) (Math.PI / 180.0);
 		if (illagerRenderState.isRiding) {

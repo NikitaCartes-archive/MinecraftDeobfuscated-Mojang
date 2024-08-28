@@ -66,7 +66,6 @@ import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.BlockDestructionProgress;
 import net.minecraft.server.level.ParticleStatus;
@@ -189,23 +188,8 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 		} else {
 			PostChain postChain = this.minecraft.getShaderManager().getPostChain(TRANSPARENCY_POST_CHAIN_ID, LevelTargetBundle.SORTING_TARGETS);
 			if (postChain == null) {
-				String string = "Failed to load shader: " + TRANSPARENCY_POST_CHAIN_ID;
-				LevelRenderer.TransparencyShaderException transparencyShaderException = new LevelRenderer.TransparencyShaderException(string);
-				if (this.minecraft.getResourcePackRepository().getSelectedIds().size() > 1) {
-					Component component = (Component)this.minecraft
-						.getResourceManager()
-						.listPacks()
-						.findFirst()
-						.map(packResources -> Component.literal(packResources.packId()))
-						.orElse(null);
-					this.minecraft.options.graphicsMode().set(GraphicsStatus.FANCY);
-					this.minecraft.clearResourcePacksOnError(transparencyShaderException, component, null);
-				} else {
-					this.minecraft.options.graphicsMode().set(GraphicsStatus.FANCY);
-					this.minecraft.options.save();
-					LOGGER.error(LogUtils.FATAL_MARKER, string, (Throwable)transparencyShaderException);
-					this.minecraft.emergencySaveAndCrash(new CrashReport(string, transparencyShaderException));
-				}
+				this.minecraft.options.graphicsMode().set(GraphicsStatus.FANCY);
+				this.minecraft.options.save();
 			}
 
 			return postChain;
@@ -343,31 +327,28 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 
 		ProfilerFiller profilerFiller = this.level.getProfiler();
 		profilerFiller.push("camera");
-		double d = this.minecraft.player.getX();
-		double e = this.minecraft.player.getY();
-		double f = this.minecraft.player.getZ();
-		int i = SectionPos.posToSectionCoord(d);
-		int j = SectionPos.posToSectionCoord(e);
-		int k = SectionPos.posToSectionCoord(f);
+		int i = SectionPos.posToSectionCoord(vec3.x());
+		int j = SectionPos.posToSectionCoord(vec3.y());
+		int k = SectionPos.posToSectionCoord(vec3.z());
 		if (this.lastCameraSectionX != i || this.lastCameraSectionY != j || this.lastCameraSectionZ != k) {
 			this.lastCameraSectionX = i;
 			this.lastCameraSectionY = j;
 			this.lastCameraSectionZ = k;
-			this.viewArea.repositionCamera(SectionPos.of(this.minecraft.player));
+			this.viewArea.repositionCamera(SectionPos.of(vec3));
 		}
 
 		this.sectionRenderDispatcher.setCamera(vec3);
 		profilerFiller.popPush("cull");
-		double g = Math.floor(vec3.x / 8.0);
-		double h = Math.floor(vec3.y / 8.0);
-		double l = Math.floor(vec3.z / 8.0);
-		if (g != this.prevCamX || h != this.prevCamY || l != this.prevCamZ) {
+		double d = Math.floor(vec3.x / 8.0);
+		double e = Math.floor(vec3.y / 8.0);
+		double f = Math.floor(vec3.z / 8.0);
+		if (d != this.prevCamX || e != this.prevCamY || f != this.prevCamZ) {
 			this.sectionOcclusionGraph.invalidate();
 		}
 
-		this.prevCamX = g;
-		this.prevCamY = h;
-		this.prevCamZ = l;
+		this.prevCamX = d;
+		this.prevCamY = e;
+		this.prevCamZ = f;
 		profilerFiller.popPush("update");
 		if (!bl) {
 			boolean bl3 = this.minecraft.smartCull;
@@ -378,12 +359,12 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 			profilerFiller.push("section_occlusion_graph");
 			this.sectionOcclusionGraph.update(bl3, camera, frustum, this.visibleSections, this.level.getChunkSource().getLoadedEmptySections());
 			profilerFiller.pop();
-			double m = Math.floor((double)(camera.getXRot() / 2.0F));
-			double n = Math.floor((double)(camera.getYRot() / 2.0F));
-			if (this.sectionOcclusionGraph.consumeFrustumUpdate() || m != this.prevCamRotX || n != this.prevCamRotY) {
+			double g = Math.floor((double)(camera.getXRot() / 2.0F));
+			double h = Math.floor((double)(camera.getYRot() / 2.0F));
+			if (this.sectionOcclusionGraph.consumeFrustumUpdate() || g != this.prevCamRotX || h != this.prevCamRotY) {
 				this.applyFrustum(offsetFrustum(frustum));
-				this.prevCamRotX = m;
-				this.prevCamRotY = n;
+				this.prevCamRotX = g;
+				this.prevCamRotY = h;
 			}
 		}
 
@@ -943,33 +924,37 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 		ObjectListIterator<SectionRenderDispatcher.RenderSection> objectListIterator = this.visibleSections.listIterator(bl ? 0 : this.visibleSections.size());
 		renderType.setupRenderState();
 		CompiledShaderProgram compiledShaderProgram = RenderSystem.getShader();
-		compiledShaderProgram.setDefaultUniforms(VertexFormat.Mode.QUADS, matrix4f, matrix4f2, this.minecraft.getWindow());
-		compiledShaderProgram.apply();
-		Uniform uniform = compiledShaderProgram.MODEL_OFFSET;
+		if (compiledShaderProgram == null) {
+			renderType.clearRenderState();
+		} else {
+			compiledShaderProgram.setDefaultUniforms(VertexFormat.Mode.QUADS, matrix4f, matrix4f2, this.minecraft.getWindow());
+			compiledShaderProgram.apply();
+			Uniform uniform = compiledShaderProgram.MODEL_OFFSET;
 
-		while (bl ? objectListIterator.hasNext() : objectListIterator.hasPrevious()) {
-			SectionRenderDispatcher.RenderSection renderSection = bl ? (SectionRenderDispatcher.RenderSection)objectListIterator.next() : objectListIterator.previous();
-			if (!renderSection.getCompiled().isEmpty(renderType)) {
-				VertexBuffer vertexBuffer = renderSection.getBuffer(renderType);
-				BlockPos blockPos = renderSection.getOrigin();
-				if (uniform != null) {
-					uniform.set((float)((double)blockPos.getX() - d), (float)((double)blockPos.getY() - e), (float)((double)blockPos.getZ() - f));
-					uniform.upload();
+			while (bl ? objectListIterator.hasNext() : objectListIterator.hasPrevious()) {
+				SectionRenderDispatcher.RenderSection renderSection = bl ? (SectionRenderDispatcher.RenderSection)objectListIterator.next() : objectListIterator.previous();
+				if (!renderSection.getCompiled().isEmpty(renderType)) {
+					VertexBuffer vertexBuffer = renderSection.getBuffer(renderType);
+					BlockPos blockPos = renderSection.getOrigin();
+					if (uniform != null) {
+						uniform.set((float)((double)blockPos.getX() - d), (float)((double)blockPos.getY() - e), (float)((double)blockPos.getZ() - f));
+						uniform.upload();
+					}
+
+					vertexBuffer.bind();
+					vertexBuffer.draw();
 				}
-
-				vertexBuffer.bind();
-				vertexBuffer.draw();
 			}
-		}
 
-		if (uniform != null) {
-			uniform.set(0.0F, 0.0F, 0.0F);
-		}
+			if (uniform != null) {
+				uniform.set(0.0F, 0.0F, 0.0F);
+			}
 
-		compiledShaderProgram.clear();
-		VertexBuffer.unbind();
-		this.minecraft.getProfiler().pop();
-		renderType.clearRenderState();
+			compiledShaderProgram.clear();
+			VertexBuffer.unbind();
+			this.minecraft.getProfiler().pop();
+			renderType.clearRenderState();
+		}
 	}
 
 	public void captureFrustum() {
@@ -1371,12 +1356,5 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 
 	public CloudRenderer getCloudRenderer() {
 		return this.cloudRenderer;
-	}
-
-	@Environment(EnvType.CLIENT)
-	public static class TransparencyShaderException extends RuntimeException {
-		public TransparencyShaderException(String string) {
-			super(string);
-		}
 	}
 }

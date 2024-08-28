@@ -31,7 +31,7 @@ public record ConditionReference(ResourceKey<LootItemCondition> name) implements
 		} else {
 			LootItemCondition.super.validate(validationContext);
 			validationContext.resolver()
-				.get(Registries.PREDICATE, this.name)
+				.get(this.name)
 				.ifPresentOrElse(
 					reference -> ((LootItemCondition)reference.value()).validate(validationContext.enterElement(".{" + this.name.location() + "}", this.name)),
 					() -> validationContext.reportProblem("Unknown condition table called " + this.name.location())
@@ -40,10 +40,7 @@ public record ConditionReference(ResourceKey<LootItemCondition> name) implements
 	}
 
 	public boolean test(LootContext lootContext) {
-		LootItemCondition lootItemCondition = (LootItemCondition)lootContext.getResolver()
-			.get(Registries.PREDICATE, this.name)
-			.map(Holder.Reference::value)
-			.orElse(null);
+		LootItemCondition lootItemCondition = (LootItemCondition)lootContext.getResolver().get(this.name).map(Holder.Reference::value).orElse(null);
 		if (lootItemCondition == null) {
 			LOGGER.warn("Tried using unknown condition table called {}", this.name.location());
 			return false;

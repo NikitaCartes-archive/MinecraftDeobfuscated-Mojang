@@ -32,9 +32,9 @@ public interface NeighborUpdater {
 		}
 	}
 
-	static void executeShapeUpdate(LevelAccessor levelAccessor, Direction direction, BlockState blockState, BlockPos blockPos, BlockPos blockPos2, int i, int j) {
+	static void executeShapeUpdate(LevelAccessor levelAccessor, Direction direction, BlockPos blockPos, BlockPos blockPos2, BlockState blockState, int i, int j) {
 		BlockState blockState2 = levelAccessor.getBlockState(blockPos);
-		if ((i & 128) == 0 || !blockState.is(Blocks.REDSTONE_WIRE)) {
+		if ((i & 128) == 0 || !blockState2.is(Blocks.REDSTONE_WIRE)) {
 			BlockState blockState3 = blockState2.updateShape(direction, blockState, levelAccessor, blockPos, blockPos2);
 			Block.updateOrDestroy(blockState2, blockState3, levelAccessor, blockPos, i, j);
 		}

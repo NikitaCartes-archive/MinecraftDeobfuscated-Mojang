@@ -28,7 +28,6 @@ public class Deadmau5EarsLayer extends RenderLayer<PlayerRenderState, PlayerMode
 		if ("deadmau5".equals(playerRenderState.name) && !playerRenderState.isInvisible) {
 			VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entitySolid(playerRenderState.skin.texture()));
 			int j = LivingEntityRenderer.getOverlayCoords(playerRenderState, 0.0F);
-			this.getParentModel().copyPropertiesTo(this.model);
 			this.model.setupAnim(playerRenderState);
 			this.model.renderToBuffer(poseStack, vertexConsumer, i, j);
 		}

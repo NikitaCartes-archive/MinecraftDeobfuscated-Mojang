@@ -400,8 +400,8 @@ public class EndDragonFight {
 		this.level.levelEvent(3000, blockPos, 0);
 		this.level
 			.registryAccess()
-			.registry(Registries.CONFIGURED_FEATURE)
-			.flatMap(registry -> registry.getHolder(EndFeatures.END_GATEWAY_DELAYED))
+			.lookup(Registries.CONFIGURED_FEATURE)
+			.flatMap(registry -> registry.get(EndFeatures.END_GATEWAY_DELAYED))
 			.ifPresent(
 				reference -> ((ConfiguredFeature)reference.value()).place(this.level, this.level.getChunkSource().getGenerator(), RandomSource.create(), blockPos)
 			);

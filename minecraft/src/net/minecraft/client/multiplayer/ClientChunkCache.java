@@ -39,9 +39,7 @@ public class ClientChunkCache extends ChunkSource {
 
 	public ClientChunkCache(ClientLevel clientLevel, int i) {
 		this.level = clientLevel;
-		this.emptyChunk = new EmptyLevelChunk(
-			clientLevel, new ChunkPos(0, 0), clientLevel.registryAccess().registryOrThrow(Registries.BIOME).getHolderOrThrow(Biomes.PLAINS)
-		);
+		this.emptyChunk = new EmptyLevelChunk(clientLevel, new ChunkPos(0, 0), clientLevel.registryAccess().lookupOrThrow(Registries.BIOME).getOrThrow(Biomes.PLAINS));
 		this.lightEngine = new LevelLightEngine(this, true, clientLevel.dimensionType().hasSkyLight());
 		this.storage = new ClientChunkCache.Storage(calculateStorageRange(i));
 	}

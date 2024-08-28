@@ -17,8 +17,6 @@ import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.phys.Vec3;
 
 public class WindChargeItem extends Item implements ProjectileItem {
-	private static final int COOLDOWN = 10;
-
 	public WindChargeItem(Item.Properties properties) {
 		super(properties);
 	}
@@ -48,7 +46,6 @@ public class WindChargeItem extends Item implements ProjectileItem {
 			0.5F,
 			0.4F / (level.getRandom().nextFloat() * 0.4F + 0.8F)
 		);
-		player.getCooldowns().addCooldown(itemStack, 10);
 		player.awardStat(Stats.ITEM_USED.get(this));
 		itemStack.consume(1, player);
 		return InteractionResult.SUCCESS;

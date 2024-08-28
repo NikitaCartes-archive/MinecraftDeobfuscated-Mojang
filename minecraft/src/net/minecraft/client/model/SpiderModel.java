@@ -19,7 +19,6 @@ public class SpiderModel extends EntityModel<LivingEntityRenderState> {
 	private static final String LEFT_MIDDLE_FRONT_LEG = "left_middle_front_leg";
 	private static final String RIGHT_MIDDLE_HIND_LEG = "right_middle_hind_leg";
 	private static final String LEFT_MIDDLE_HIND_LEG = "left_middle_hind_leg";
-	private final ModelPart root;
 	private final ModelPart head;
 	private final ModelPart rightHindLeg;
 	private final ModelPart leftHindLeg;
@@ -31,7 +30,7 @@ public class SpiderModel extends EntityModel<LivingEntityRenderState> {
 	private final ModelPart leftFrontLeg;
 
 	public SpiderModel(ModelPart modelPart) {
-		this.root = modelPart;
+		super(modelPart);
 		this.head = modelPart.getChild("head");
 		this.rightHindLeg = modelPart.getChild("right_hind_leg");
 		this.leftHindLeg = modelPart.getChild("left_hind_leg");
@@ -87,13 +86,8 @@ public class SpiderModel extends EntityModel<LivingEntityRenderState> {
 		return LayerDefinition.create(meshDefinition, 64, 32);
 	}
 
-	@Override
-	public ModelPart root() {
-		return this.root;
-	}
-
 	public void setupAnim(LivingEntityRenderState livingEntityRenderState) {
-		this.root.getAllParts().forEach(ModelPart::resetPose);
+		super.setupAnim(livingEntityRenderState);
 		this.head.yRot = livingEntityRenderState.yRot * (float) (Math.PI / 180.0);
 		this.head.xRot = livingEntityRenderState.xRot * (float) (Math.PI / 180.0);
 		float f = livingEntityRenderState.walkAnimationPos * 0.6662F;
