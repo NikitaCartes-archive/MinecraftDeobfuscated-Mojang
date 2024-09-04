@@ -28,7 +28,6 @@ import net.minecraft.world.entity.VariantHolder;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.AnimalArmorItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
@@ -99,7 +98,7 @@ public class Horse extends AbstractHorse implements VariantHolder<Variant> {
 		ItemStack itemStack = this.getBodyArmorItem();
 		super.containerChanged(container);
 		ItemStack itemStack2 = this.getBodyArmorItem();
-		if (this.tickCount > 20 && this.isBodyArmorItem(itemStack2) && itemStack != itemStack2) {
+		if (this.tickCount > 20 && this.isEquippableInSlot(itemStack2, EquipmentSlot.BODY) && itemStack != itemStack2) {
 			this.playSound(SoundEvents.HORSE_ARMOR, 0.5F, 1.0F);
 		}
 	}
@@ -214,15 +213,6 @@ public class Horse extends AbstractHorse implements VariantHolder<Variant> {
 	@Override
 	public boolean canUseSlot(EquipmentSlot equipmentSlot) {
 		return true;
-	}
-
-	@Override
-	public boolean isBodyArmorItem(ItemStack itemStack) {
-		if (itemStack.getItem() instanceof AnimalArmorItem animalArmorItem && animalArmorItem.getBodyType() == AnimalArmorItem.BodyType.EQUESTRIAN) {
-			return true;
-		}
-
-		return false;
 	}
 
 	@Nullable

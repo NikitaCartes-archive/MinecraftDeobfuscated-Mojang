@@ -11,9 +11,9 @@ import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.layers.CustomHeadLayer;
-import net.minecraft.client.renderer.entity.layers.ElytraLayer;
 import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
 import net.minecraft.client.renderer.entity.layers.ItemInHandLayer;
+import net.minecraft.client.renderer.entity.layers.WingsLayer;
 import net.minecraft.client.renderer.entity.state.ArmorStandRenderState;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -35,11 +35,11 @@ public class ArmorStandRenderer extends LivingEntityRenderer<ArmorStand, ArmorSt
 				new ArmorStandArmorModel(context.bakeLayer(ModelLayers.ARMOR_STAND_OUTER_ARMOR)),
 				new ArmorStandArmorModel(context.bakeLayer(ModelLayers.ARMOR_STAND_SMALL_INNER_ARMOR)),
 				new ArmorStandArmorModel(context.bakeLayer(ModelLayers.ARMOR_STAND_SMALL_OUTER_ARMOR)),
-				context.getModelManager()
+				context.getEquipmentRenderer()
 			)
 		);
 		this.addLayer(new ItemInHandLayer<>(this, context.getItemRenderer()));
-		this.addLayer(new ElytraLayer<>(this, context.getModelSet()));
+		this.addLayer(new WingsLayer<>(this, context.getModelSet(), context.getEquipmentRenderer()));
 		this.addLayer(new CustomHeadLayer<>(this, context.getModelSet(), context.getItemRenderer()));
 	}
 

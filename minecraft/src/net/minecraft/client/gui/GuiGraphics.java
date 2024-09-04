@@ -1,6 +1,5 @@
 package net.minecraft.client.gui;
 
-import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -11,6 +10,7 @@ import java.util.Deque;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
@@ -35,6 +35,7 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.metadata.gui.GuiSpriteScaling;
 import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.HoverEvent;
@@ -83,10 +84,6 @@ public class GuiGraphics {
 
 	public PoseStack pose() {
 		return this.pose;
-	}
-
-	public MultiBufferSource.BufferSource bufferSource() {
-		return this.bufferSource;
 	}
 
 	public void flush() {
@@ -366,23 +363,52 @@ public class GuiGraphics {
 			this.blitSprite(function, textureAtlasSprite, nineSlice.width(), nineSlice.height(), 0, 0, i, j, k, l, m);
 		} else if (l == nineSlice.height()) {
 			this.blitSprite(function, textureAtlasSprite, nineSlice.width(), nineSlice.height(), 0, 0, i, j, n, l, m);
-			this.blitTiledSprite(
-				function, textureAtlasSprite, i + n, j, k - o - n, l, n, 0, nineSlice.width() - o - n, nineSlice.height(), nineSlice.width(), nineSlice.height(), m
+			this.blitNineSliceInnerSegment(
+				function,
+				nineSlice,
+				textureAtlasSprite,
+				i + n,
+				j,
+				k - o - n,
+				l,
+				n,
+				0,
+				nineSlice.width() - o - n,
+				nineSlice.height(),
+				nineSlice.width(),
+				nineSlice.height(),
+				m
 			);
 			this.blitSprite(function, textureAtlasSprite, nineSlice.width(), nineSlice.height(), nineSlice.width() - o, 0, i + k - o, j, o, l, m);
 		} else if (k == nineSlice.width()) {
 			this.blitSprite(function, textureAtlasSprite, nineSlice.width(), nineSlice.height(), 0, 0, i, j, k, p, m);
-			this.blitTiledSprite(
-				function, textureAtlasSprite, i, j + p, k, l - q - p, 0, p, nineSlice.width(), nineSlice.height() - q - p, nineSlice.width(), nineSlice.height(), m
+			this.blitNineSliceInnerSegment(
+				function,
+				nineSlice,
+				textureAtlasSprite,
+				i,
+				j + p,
+				k,
+				l - q - p,
+				0,
+				p,
+				nineSlice.width(),
+				nineSlice.height() - q - p,
+				nineSlice.width(),
+				nineSlice.height(),
+				m
 			);
 			this.blitSprite(function, textureAtlasSprite, nineSlice.width(), nineSlice.height(), 0, nineSlice.height() - q, i, j + l - q, k, q, m);
 		} else {
 			this.blitSprite(function, textureAtlasSprite, nineSlice.width(), nineSlice.height(), 0, 0, i, j, n, p, m);
-			this.blitTiledSprite(function, textureAtlasSprite, i + n, j, k - o - n, p, n, 0, nineSlice.width() - o - n, p, nineSlice.width(), nineSlice.height(), m);
+			this.blitNineSliceInnerSegment(
+				function, nineSlice, textureAtlasSprite, i + n, j, k - o - n, p, n, 0, nineSlice.width() - o - n, p, nineSlice.width(), nineSlice.height(), m
+			);
 			this.blitSprite(function, textureAtlasSprite, nineSlice.width(), nineSlice.height(), nineSlice.width() - o, 0, i + k - o, j, o, p, m);
 			this.blitSprite(function, textureAtlasSprite, nineSlice.width(), nineSlice.height(), 0, nineSlice.height() - q, i, j + l - q, n, q, m);
-			this.blitTiledSprite(
+			this.blitNineSliceInnerSegment(
 				function,
+				nineSlice,
 				textureAtlasSprite,
 				i + n,
 				j + l - q,
@@ -399,9 +425,12 @@ public class GuiGraphics {
 			this.blitSprite(
 				function, textureAtlasSprite, nineSlice.width(), nineSlice.height(), nineSlice.width() - o, nineSlice.height() - q, i + k - o, j + l - q, o, q, m
 			);
-			this.blitTiledSprite(function, textureAtlasSprite, i, j + p, n, l - q - p, 0, p, n, nineSlice.height() - q - p, nineSlice.width(), nineSlice.height(), m);
-			this.blitTiledSprite(
+			this.blitNineSliceInnerSegment(
+				function, nineSlice, textureAtlasSprite, i, j + p, n, l - q - p, 0, p, n, nineSlice.height() - q - p, nineSlice.width(), nineSlice.height(), m
+			);
+			this.blitNineSliceInnerSegment(
 				function,
+				nineSlice,
 				textureAtlasSprite,
 				i + n,
 				j + p,
@@ -415,8 +444,9 @@ public class GuiGraphics {
 				nineSlice.height(),
 				m
 			);
-			this.blitTiledSprite(
+			this.blitNineSliceInnerSegment(
 				function,
+				nineSlice,
 				textureAtlasSprite,
 				i + k - o,
 				j + p,
@@ -430,6 +460,43 @@ public class GuiGraphics {
 				nineSlice.height(),
 				m
 			);
+		}
+	}
+
+	private void blitNineSliceInnerSegment(
+		Function<ResourceLocation, RenderType> function,
+		GuiSpriteScaling.NineSlice nineSlice,
+		TextureAtlasSprite textureAtlasSprite,
+		int i,
+		int j,
+		int k,
+		int l,
+		int m,
+		int n,
+		int o,
+		int p,
+		int q,
+		int r,
+		int s
+	) {
+		if (k > 0 && l > 0) {
+			if (nineSlice.stretchInner()) {
+				this.innerBlit(
+					function,
+					textureAtlasSprite.atlasLocation(),
+					i,
+					i + k,
+					j,
+					j + l,
+					textureAtlasSprite.getU((float)m / (float)q),
+					textureAtlasSprite.getU((float)(m + o) / (float)q),
+					textureAtlasSprite.getV((float)n / (float)r),
+					textureAtlasSprite.getV((float)(n + p) / (float)r),
+					s
+				);
+			} else {
+				this.blitTiledSprite(function, textureAtlasSprite, i, j, k, l, m, n, o, p, q, r, s);
+			}
 		}
 	}
 
@@ -558,7 +625,7 @@ public class GuiGraphics {
 
 				this.minecraft
 					.getItemRenderer()
-					.render(itemStack, ItemDisplayContext.GUI, false, this.pose, this.bufferSource(), 15728880, OverlayTexture.NO_OVERLAY, bakedModel);
+					.render(itemStack, ItemDisplayContext.GUI, false, this.pose, this.bufferSource, 15728880, OverlayTexture.NO_OVERLAY, bakedModel);
 				this.flush();
 				if (bl) {
 					Lighting.setupFor3DItems();
@@ -613,16 +680,20 @@ public class GuiGraphics {
 	}
 
 	public void renderTooltip(Font font, ItemStack itemStack, int i, int j) {
-		this.renderTooltip(font, Screen.getTooltipFromItem(this.minecraft, itemStack), itemStack.getTooltipImage(), i, j);
+		this.renderTooltip(font, Screen.getTooltipFromItem(this.minecraft, itemStack), itemStack.getTooltipImage(), i, j, itemStack.get(DataComponents.TOOLTIP_STYLE));
 	}
 
 	public void renderTooltip(Font font, List<Component> list, Optional<TooltipComponent> optional, int i, int j) {
+		this.renderTooltip(font, list, optional, i, j, null);
+	}
+
+	public void renderTooltip(Font font, List<Component> list, Optional<TooltipComponent> optional, int i, int j, @Nullable ResourceLocation resourceLocation) {
 		List<ClientTooltipComponent> list2 = (List<ClientTooltipComponent>)list.stream()
 			.map(Component::getVisualOrderText)
 			.map(ClientTooltipComponent::create)
 			.collect(Util.toMutableList());
 		optional.ifPresent(tooltipComponent -> list2.add(list2.isEmpty() ? 0 : 1, ClientTooltipComponent.create(tooltipComponent)));
-		this.renderTooltipInternal(font, list2, i, j, DefaultTooltipPositioner.INSTANCE);
+		this.renderTooltipInternal(font, list2, i, j, DefaultTooltipPositioner.INSTANCE, resourceLocation);
 	}
 
 	public void renderTooltip(Font font, Component component, int i, int j) {
@@ -630,22 +701,40 @@ public class GuiGraphics {
 	}
 
 	public void renderComponentTooltip(Font font, List<Component> list, int i, int j) {
-		this.renderTooltip(font, Lists.transform(list, Component::getVisualOrderText), i, j);
+		this.renderComponentTooltip(font, list, i, j, null);
+	}
+
+	public void renderComponentTooltip(Font font, List<Component> list, int i, int j, @Nullable ResourceLocation resourceLocation) {
+		this.renderTooltipInternal(
+			font,
+			list.stream().map(Component::getVisualOrderText).map(ClientTooltipComponent::create).toList(),
+			i,
+			j,
+			DefaultTooltipPositioner.INSTANCE,
+			resourceLocation
+		);
 	}
 
 	public void renderTooltip(Font font, List<? extends FormattedCharSequence> list, int i, int j) {
 		this.renderTooltipInternal(
-			font, (List<ClientTooltipComponent>)list.stream().map(ClientTooltipComponent::create).collect(Collectors.toList()), i, j, DefaultTooltipPositioner.INSTANCE
+			font,
+			(List<ClientTooltipComponent>)list.stream().map(ClientTooltipComponent::create).collect(Collectors.toList()),
+			i,
+			j,
+			DefaultTooltipPositioner.INSTANCE,
+			null
 		);
 	}
 
 	public void renderTooltip(Font font, List<FormattedCharSequence> list, ClientTooltipPositioner clientTooltipPositioner, int i, int j) {
 		this.renderTooltipInternal(
-			font, (List<ClientTooltipComponent>)list.stream().map(ClientTooltipComponent::create).collect(Collectors.toList()), i, j, clientTooltipPositioner
+			font, (List<ClientTooltipComponent>)list.stream().map(ClientTooltipComponent::create).collect(Collectors.toList()), i, j, clientTooltipPositioner, null
 		);
 	}
 
-	private void renderTooltipInternal(Font font, List<ClientTooltipComponent> list, int i, int j, ClientTooltipPositioner clientTooltipPositioner) {
+	private void renderTooltipInternal(
+		Font font, List<ClientTooltipComponent> list, int i, int j, ClientTooltipPositioner clientTooltipPositioner, @Nullable ResourceLocation resourceLocation
+	) {
 		if (!list.isEmpty()) {
 			int k = 0;
 			int l = list.size() == 1 ? -2 : 0;
@@ -666,7 +755,7 @@ public class GuiGraphics {
 			int q = vector2ic.y();
 			this.pose.pushPose();
 			int r = 400;
-			TooltipRenderUtil.renderTooltipBackground(this, p, q, k, l, 400);
+			TooltipRenderUtil.renderTooltipBackground(this, p, q, k, l, 400, resourceLocation);
 			this.pose.translate(0.0F, 0.0F, 400.0F);
 			int s = q;
 
@@ -708,6 +797,11 @@ public class GuiGraphics {
 				}
 			}
 		}
+	}
+
+	public void drawSpecial(Consumer<MultiBufferSource> consumer) {
+		consumer.accept(this.bufferSource);
+		this.bufferSource.endBatch();
 	}
 
 	@Environment(EnvType.CLIENT)

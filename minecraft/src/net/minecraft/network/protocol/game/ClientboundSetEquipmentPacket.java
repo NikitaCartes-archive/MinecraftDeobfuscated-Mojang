@@ -25,13 +25,12 @@ public class ClientboundSetEquipmentPacket implements Packet<ClientGamePacketLis
 
 	private ClientboundSetEquipmentPacket(RegistryFriendlyByteBuf registryFriendlyByteBuf) {
 		this.entity = registryFriendlyByteBuf.readVarInt();
-		EquipmentSlot[] equipmentSlots = EquipmentSlot.values();
 		this.slots = Lists.<Pair<EquipmentSlot, ItemStack>>newArrayList();
 
 		int i;
 		do {
 			i = registryFriendlyByteBuf.readByte();
-			EquipmentSlot equipmentSlot = equipmentSlots[i & 127];
+			EquipmentSlot equipmentSlot = (EquipmentSlot)EquipmentSlot.VALUES.get(i & 127);
 			ItemStack itemStack = ItemStack.OPTIONAL_STREAM_CODEC.decode(registryFriendlyByteBuf);
 			this.slots.add(Pair.of(equipmentSlot, itemStack));
 		} while ((i & -128) != 0);

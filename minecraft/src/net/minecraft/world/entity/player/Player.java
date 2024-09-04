@@ -84,7 +84,6 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.PlayerEnderChestContainer;
-import net.minecraft.world.item.ElytraItem;
 import net.minecraft.world.item.ItemCooldowns;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -343,14 +342,14 @@ public abstract class Player extends LivingEntity {
 
 	@Override
 	public void onAboveBubbleCol(boolean bl) {
-		if (!this.isCreative()) {
+		if (!this.getAbilities().flying) {
 			super.onAboveBubbleCol(bl);
 		}
 	}
 
 	@Override
 	public void onInsideBubbleColumn(boolean bl) {
-		if (!this.isCreative()) {
+		if (!this.getAbilities().flying) {
 			super.onInsideBubbleColumn(bl);
 		}
 	}
@@ -1447,8 +1446,8 @@ public abstract class Player extends LivingEntity {
 	}
 
 	@Override
-	protected boolean canContinueToGlide(ItemStack itemStack) {
-		return !this.abilities.flying && super.canContinueToGlide(itemStack);
+	protected boolean canGlide() {
+		return !this.abilities.flying && super.canGlide();
 	}
 
 	@Override
@@ -1502,15 +1501,12 @@ public abstract class Player extends LivingEntity {
 	}
 
 	public boolean tryToStartFallFlying() {
-		if (!this.onGround() && !this.isFallFlying() && !this.isInWater() && !this.hasEffect(MobEffects.LEVITATION)) {
-			ItemStack itemStack = this.getItemBySlot(EquipmentSlot.CHEST);
-			if (itemStack.is(Items.ELYTRA) && ElytraItem.isFlyEnabled(itemStack)) {
-				this.startFallFlying();
-				return true;
-			}
+		if (!this.isFallFlying() && this.canGlide() && !this.isInWater()) {
+			this.startFallFlying();
+			return true;
+		} else {
+			return false;
 		}
-
-		return false;
 	}
 
 	public void startFallFlying() {
@@ -1948,12 +1944,6 @@ public abstract class Player extends LivingEntity {
 
 	public boolean canUseGameMasterBlocks() {
 		return this.abilities.instabuild && this.getPermissionLevel() >= 2;
-	}
-
-	@Override
-	public boolean canTakeItem(ItemStack itemStack) {
-		EquipmentSlot equipmentSlot = this.getEquipmentSlotForItem(itemStack);
-		return this.getItemBySlot(equipmentSlot).isEmpty();
 	}
 
 	@Override

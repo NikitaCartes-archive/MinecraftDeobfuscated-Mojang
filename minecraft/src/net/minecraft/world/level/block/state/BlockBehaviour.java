@@ -354,6 +354,10 @@ public abstract class BlockBehaviour implements FeatureElement {
 	protected void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
 	}
 
+	protected VoxelShape getEntityInsideCollisionShape(BlockState blockState, Level level, BlockPos blockPos) {
+		return Shapes.block();
+	}
+
 	protected int getDirectSignal(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos, Direction direction) {
 		return 0;
 	}
@@ -735,6 +739,10 @@ public abstract class BlockBehaviour implements FeatureElement {
 
 		public void entityInside(Level level, BlockPos blockPos, Entity entity) {
 			this.getBlock().entityInside(this.asState(), level, blockPos, entity);
+		}
+
+		public VoxelShape getEntityInsideCollisionShape(Level level, BlockPos blockPos) {
+			return this.getBlock().getEntityInsideCollisionShape(this.asState(), level, blockPos);
 		}
 
 		public void spawnAfterBreak(ServerLevel serverLevel, BlockPos blockPos, ItemStack itemStack, boolean bl) {

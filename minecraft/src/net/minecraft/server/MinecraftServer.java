@@ -843,7 +843,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 		}
 	}
 
-	protected TickTask wrapRunnable(Runnable runnable) {
+	public TickTask wrapRunnable(Runnable runnable) {
 		return new TickTask(this.tickCount, runnable);
 	}
 

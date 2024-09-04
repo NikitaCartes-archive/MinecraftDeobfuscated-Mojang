@@ -6,7 +6,6 @@ import net.minecraft.Util;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.flag.FeatureFlag;
 
 public class SmithingTemplateItem extends Item {
 	private static final ChatFormatting TITLE_FORMAT = ChatFormatting.GRAY;
@@ -75,16 +74,15 @@ public class SmithingTemplateItem extends Item {
 	private final List<ResourceLocation> additionalSlotEmptyIcons;
 
 	public SmithingTemplateItem(
-		Item.Properties properties,
 		Component component,
 		Component component2,
 		Component component3,
 		Component component4,
 		List<ResourceLocation> list,
 		List<ResourceLocation> list2,
-		FeatureFlag... featureFlags
+		Item.Properties properties
 	) {
-		super(properties.requiredFeatures(featureFlags));
+		super(properties);
 		this.appliesTo = component;
 		this.ingredients = component2;
 		this.baseSlotDescription = component3;
@@ -93,28 +91,27 @@ public class SmithingTemplateItem extends Item {
 		this.additionalSlotEmptyIcons = list2;
 	}
 
-	public static SmithingTemplateItem createArmorTrimTemplate(Item.Properties properties, FeatureFlag... featureFlags) {
+	public static SmithingTemplateItem createArmorTrimTemplate(Item.Properties properties) {
 		return new SmithingTemplateItem(
-			properties,
 			ARMOR_TRIM_APPLIES_TO,
 			ARMOR_TRIM_INGREDIENTS,
 			ARMOR_TRIM_BASE_SLOT_DESCRIPTION,
 			ARMOR_TRIM_ADDITIONS_SLOT_DESCRIPTION,
 			createTrimmableArmorIconList(),
 			createTrimmableMaterialIconList(),
-			featureFlags
+			properties
 		);
 	}
 
 	public static SmithingTemplateItem createNetheriteUpgradeTemplate(Item.Properties properties) {
 		return new SmithingTemplateItem(
-			properties,
 			NETHERITE_UPGRADE_APPLIES_TO,
 			NETHERITE_UPGRADE_INGREDIENTS,
 			NETHERITE_UPGRADE_BASE_SLOT_DESCRIPTION,
 			NETHERITE_UPGRADE_ADDITIONS_SLOT_DESCRIPTION,
 			createNetheriteUpgradeIconList(),
-			createNetheriteUpgradeMaterialList()
+			createNetheriteUpgradeMaterialList(),
+			properties
 		);
 	}
 

@@ -110,7 +110,7 @@ public class CartographyTableScreen extends AbstractContainerScreen<CartographyT
 			guiGraphics.pose().scale(f, f, 1.0F);
 			MapRenderer mapRenderer = this.minecraft.getMapRenderer();
 			mapRenderer.extractRenderState(mapId, mapItemSavedData, this.mapRenderState);
-			mapRenderer.render(this.mapRenderState, guiGraphics.pose(), guiGraphics.bufferSource(), true, 15728880);
+			guiGraphics.drawSpecial(multiBufferSource -> mapRenderer.render(this.mapRenderState, guiGraphics.pose(), multiBufferSource, true, 15728880));
 			guiGraphics.pose().popPose();
 		}
 	}

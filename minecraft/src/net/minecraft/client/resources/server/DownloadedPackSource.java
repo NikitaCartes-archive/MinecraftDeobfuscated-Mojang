@@ -84,7 +84,7 @@ public class DownloadedPackSource implements AutoCloseable {
 			throw new UncheckedIOException("Failed to open download queue in directory " + path, var5);
 		}
 
-		Executor executor = minecraft::tell;
+		Executor executor = minecraft::schedule;
 		this.manager = new ServerPackManager(this.createDownloader(this.downloadQueue, executor, userData.user, userData.proxy), new PackLoadFeedback() {
 			@Override
 			public void reportUpdate(UUID uUID, PackLoadFeedback.Update update) {

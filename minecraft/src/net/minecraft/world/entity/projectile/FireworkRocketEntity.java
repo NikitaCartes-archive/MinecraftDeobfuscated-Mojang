@@ -103,6 +103,7 @@ public class FireworkRocketEntity extends Projectile implements ItemSupplier {
 	@Override
 	public void tick() {
 		super.tick();
+		HitResult hitResult;
 		if (this.isAttachedToEntity()) {
 			if (this.attachedToEntity == null) {
 				this.entityData.get(DATA_ATTACHED_TO_TARGET).ifPresent(i -> {
@@ -132,6 +133,8 @@ public class FireworkRocketEntity extends Projectile implements ItemSupplier {
 				this.setPos(this.attachedToEntity.getX() + vec33.x, this.attachedToEntity.getY() + vec33.y, this.attachedToEntity.getZ() + vec33.z);
 				this.setDeltaMovement(this.attachedToEntity.getDeltaMovement());
 			}
+
+			hitResult = ProjectileUtil.getHitResultOnMoveVector(this, this::canHitEntity);
 		} else {
 			if (!this.isShotAtAngle()) {
 				double f = this.horizontalCollision ? 1.0 : 1.15;
@@ -139,16 +142,13 @@ public class FireworkRocketEntity extends Projectile implements ItemSupplier {
 			}
 
 			Vec3 vec33 = this.getDeltaMovement();
+			hitResult = ProjectileUtil.getHitResultOnMoveVector(this, this::canHitEntity);
 			this.move(MoverType.SELF, vec33);
-			if (!this.level().isClientSide()) {
-				this.applyEffectsFromBlocks();
-			}
-
+			this.applyEffectsFromBlocks();
 			this.setDeltaMovement(vec33);
 		}
 
-		HitResult hitResult = ProjectileUtil.getHitResultOnMoveVector(this, this::canHitEntity);
-		if (!this.noPhysics) {
+		if (!this.noPhysics && this.isAlive() && hitResult.getType() != HitResult.Type.MISS) {
 			this.hitTargetOrDeflectSelf(hitResult);
 			this.hasImpulse = true;
 		}

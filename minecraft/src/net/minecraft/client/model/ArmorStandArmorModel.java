@@ -20,13 +20,11 @@ public class ArmorStandArmorModel extends HumanoidModel<ArmorStandRenderState> {
 	public static LayerDefinition createBodyLayer(CubeDeformation cubeDeformation) {
 		MeshDefinition meshDefinition = HumanoidModel.createMesh(cubeDeformation, 0.0F);
 		PartDefinition partDefinition = meshDefinition.getRoot();
-		partDefinition.addOrReplaceChild(
+		PartDefinition partDefinition2 = partDefinition.addOrReplaceChild(
 			"head", CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, cubeDeformation), PartPose.offset(0.0F, 1.0F, 0.0F)
 		);
-		partDefinition.addOrReplaceChild(
-			"hat",
-			CubeListBuilder.create().texOffs(32, 0).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, cubeDeformation.extend(0.5F)),
-			PartPose.offset(0.0F, 1.0F, 0.0F)
+		partDefinition2.addOrReplaceChild(
+			"hat", CubeListBuilder.create().texOffs(32, 0).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, cubeDeformation.extend(0.5F)), PartPose.ZERO
 		);
 		partDefinition.addOrReplaceChild(
 			"right_leg",

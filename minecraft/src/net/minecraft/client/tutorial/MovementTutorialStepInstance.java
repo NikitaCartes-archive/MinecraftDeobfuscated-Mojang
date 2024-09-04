@@ -4,7 +4,7 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.components.toasts.TutorialToast;
-import net.minecraft.client.player.Input;
+import net.minecraft.client.player.ClientInput;
 import net.minecraft.network.chat.Component;
 
 @Environment(EnvType.CLIENT)
@@ -109,8 +109,12 @@ public class MovementTutorialStepInstance implements TutorialStepInstance {
 	}
 
 	@Override
-	public void onInput(Input input) {
-		if (input.up || input.down || input.left || input.right || input.jumping) {
+	public void onInput(ClientInput clientInput) {
+		if (clientInput.keyPresses.forward()
+			|| clientInput.keyPresses.backward()
+			|| clientInput.keyPresses.left()
+			|| clientInput.keyPresses.right()
+			|| clientInput.keyPresses.jump()) {
 			this.moved = true;
 		}
 	}

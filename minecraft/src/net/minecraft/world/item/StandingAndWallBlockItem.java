@@ -14,7 +14,7 @@ public class StandingAndWallBlockItem extends BlockItem {
 	protected final Block wallBlock;
 	private final Direction attachmentDirection;
 
-	public StandingAndWallBlockItem(Block block, Block block2, Item.Properties properties, Direction direction) {
+	public StandingAndWallBlockItem(Block block, Block block2, Direction direction, Item.Properties properties) {
 		super(block, properties);
 		this.wallBlock = block2;
 		this.attachmentDirection = direction;

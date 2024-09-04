@@ -18,7 +18,7 @@ public class LlamaRenderer extends AgeableMobRenderer<Llama, LlamaRenderState, L
 
 	public LlamaRenderer(EntityRendererProvider.Context context, ModelLayerLocation modelLayerLocation, ModelLayerLocation modelLayerLocation2) {
 		super(context, new LlamaModel(context.bakeLayer(modelLayerLocation)), new LlamaModel(context.bakeLayer(modelLayerLocation2)), 0.7F);
-		this.addLayer(new LlamaDecorLayer(this, context.getModelSet()));
+		this.addLayer(new LlamaDecorLayer(this, context.getModelSet(), context.getEquipmentRenderer()));
 	}
 
 	public ResourceLocation getTextureLocation(LlamaRenderState llamaRenderState) {
@@ -38,7 +38,7 @@ public class LlamaRenderer extends AgeableMobRenderer<Llama, LlamaRenderState, L
 		super.extractRenderState(llama, llamaRenderState, f);
 		llamaRenderState.variant = llama.getVariant();
 		llamaRenderState.hasChest = !llama.isBaby() && llama.hasChest();
-		llamaRenderState.decorColor = llama.getSwag();
+		llamaRenderState.bodyItem = llama.getBodyArmorItem();
 		llamaRenderState.isTraderLlama = llama.isTraderLlama();
 	}
 }

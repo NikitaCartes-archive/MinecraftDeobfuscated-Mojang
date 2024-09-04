@@ -1,5 +1,6 @@
 package net.minecraft.world.entity.monster;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Dynamic;
@@ -25,13 +26,13 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.ConversionParams;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.village.ReputationEventType;
-import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.npc.VillagerData;
 import net.minecraft.world.entity.npc.VillagerDataHolder;
 import net.minecraft.world.entity.npc.VillagerProfession;
@@ -207,40 +208,48 @@ public class ZombieVillager extends Zombie implements VillagerDataHolder {
 	}
 
 	private void finishConversion(ServerLevel serverLevel) {
-		Villager villager = this.convertTo(EntityType.VILLAGER, false);
-		if (villager != null) {
-			for (EquipmentSlot equipmentSlot : this.dropPreservedEquipment(
-				itemStack -> !EnchantmentHelper.has(itemStack, EnchantmentEffectComponents.PREVENT_ARMOR_CHANGE)
-			)) {
-				SlotAccess slotAccess = villager.getSlot(equipmentSlot.getIndex() + 300);
-				slotAccess.set(this.getItemBySlot(equipmentSlot));
-			}
+		this.convertTo(
+			EntityType.VILLAGER,
+			ConversionParams.single(this, false, true),
+			villager -> {
+				for (EquipmentSlot equipmentSlot : this.dropPreservedEquipment(
+					itemStack -> !EnchantmentHelper.has(itemStack, EnchantmentEffectComponents.PREVENT_ARMOR_CHANGE)
+				)) {
+					SlotAccess slotAccess = villager.getSlot(equipmentSlot.getIndex() + 300);
+					slotAccess.set(this.getItemBySlot(equipmentSlot));
+				}
 
-			villager.setVillagerData(this.getVillagerData());
-			if (this.gossips != null) {
-				villager.setGossips(this.gossips);
-			}
+				villager.setVillagerData(this.getVillagerData());
+				if (this.gossips != null) {
+					villager.setGossips(this.gossips);
+				}
 
-			if (this.tradeOffers != null) {
-				villager.setOffers(this.tradeOffers.copy());
-			}
+				if (this.tradeOffers != null) {
+					villager.setOffers(this.tradeOffers.copy());
+				}
 
-			villager.setVillagerXp(this.villagerXp);
-			villager.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(villager.blockPosition()), EntitySpawnReason.CONVERSION, null);
-			villager.refreshBrain(serverLevel);
-			if (this.conversionStarter != null) {
-				Player player = serverLevel.getPlayerByUUID(this.conversionStarter);
-				if (player instanceof ServerPlayer) {
-					CriteriaTriggers.CURED_ZOMBIE_VILLAGER.trigger((ServerPlayer)player, this, villager);
-					serverLevel.onReputationEvent(ReputationEventType.ZOMBIE_VILLAGER_CURED, player, villager);
+				villager.setVillagerXp(this.villagerXp);
+				villager.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(villager.blockPosition()), EntitySpawnReason.CONVERSION, null);
+				villager.refreshBrain(serverLevel);
+				if (this.conversionStarter != null) {
+					Player player = serverLevel.getPlayerByUUID(this.conversionStarter);
+					if (player instanceof ServerPlayer) {
+						CriteriaTriggers.CURED_ZOMBIE_VILLAGER.trigger((ServerPlayer)player, this, villager);
+						serverLevel.onReputationEvent(ReputationEventType.ZOMBIE_VILLAGER_CURED, player, villager);
+					}
+				}
+
+				villager.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 200, 0));
+				if (!this.isSilent()) {
+					serverLevel.levelEvent(null, 1027, this.blockPosition(), 0);
 				}
 			}
+		);
+	}
 
-			villager.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 200, 0));
-			if (!this.isSilent()) {
-				serverLevel.levelEvent(null, 1027, this.blockPosition(), 0);
-			}
-		}
+	@VisibleForTesting
+	public void setVillagerConversionTime(int i) {
+		this.villagerConversionTime = i;
 	}
 
 	private int getConversionProgress() {

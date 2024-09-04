@@ -17,6 +17,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Relative;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
@@ -188,9 +189,7 @@ public class NetherPortalBlock extends Block implements Portal {
 			vec3 = new Vec3(0.5, 0.0, 0.0);
 		}
 
-		return createDimensionTransition(
-			serverLevel, foundRectangle, axis, vec3, entity, entity.getDeltaMovement(), entity.getYRot(), entity.getXRot(), postDimensionTransition
-		);
+		return createDimensionTransition(serverLevel, foundRectangle, axis, vec3, entity, postDimensionTransition);
 	}
 
 	private static DimensionTransition createDimensionTransition(
@@ -199,9 +198,6 @@ public class NetherPortalBlock extends Block implements Portal {
 		Direction.Axis axis,
 		Vec3 vec3,
 		Entity entity,
-		Vec3 vec32,
-		float f,
-		float g,
 		DimensionTransition.PostDimensionTransition postDimensionTransition
 	) {
 		BlockPos blockPos = foundRectangle.minCorner;
@@ -211,14 +207,13 @@ public class NetherPortalBlock extends Block implements Portal {
 		double e = (double)foundRectangle.axis2Size;
 		EntityDimensions entityDimensions = entity.getDimensions(entity.getPose());
 		int i = axis == axis2 ? 0 : 90;
-		Vec3 vec33 = axis == axis2 ? vec32 : new Vec3(vec32.z, vec32.y, -vec32.x);
-		double h = (double)entityDimensions.width() / 2.0 + (d - (double)entityDimensions.width()) * vec3.x();
-		double j = (e - (double)entityDimensions.height()) * vec3.y();
-		double k = 0.5 + vec3.z();
+		double f = (double)entityDimensions.width() / 2.0 + (d - (double)entityDimensions.width()) * vec3.x();
+		double g = (e - (double)entityDimensions.height()) * vec3.y();
+		double h = 0.5 + vec3.z();
 		boolean bl = axis2 == Direction.Axis.X;
-		Vec3 vec34 = new Vec3((double)blockPos.getX() + (bl ? h : k), (double)blockPos.getY() + j, (double)blockPos.getZ() + (bl ? k : h));
-		Vec3 vec35 = PortalShape.findCollisionFreePosition(vec34, serverLevel, entity, entityDimensions);
-		return new DimensionTransition(serverLevel, vec35, vec33, f + (float)i, g, postDimensionTransition);
+		Vec3 vec32 = new Vec3((double)blockPos.getX() + (bl ? f : h), (double)blockPos.getY() + g, (double)blockPos.getZ() + (bl ? h : f));
+		Vec3 vec33 = PortalShape.findCollisionFreePosition(vec32, serverLevel, entity, entityDimensions);
+		return new DimensionTransition(serverLevel, vec33, Vec3.ZERO, (float)i, 0.0F, Relative.union(Relative.DELTA, Relative.ROTATION), postDimensionTransition);
 	}
 
 	@Override

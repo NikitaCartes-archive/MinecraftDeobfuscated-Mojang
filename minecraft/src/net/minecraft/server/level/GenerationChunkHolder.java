@@ -33,6 +33,7 @@ public abstract class GenerationChunkHolder {
 	private final AtomicReferenceArray<CompletableFuture<ChunkResult<ChunkAccess>>> futures = new AtomicReferenceArray(CHUNK_STATUSES.size());
 	private final AtomicReference<ChunkGenerationTask> task = new AtomicReference();
 	private final AtomicInteger generationRefCount = new AtomicInteger();
+	private volatile CompletableFuture<Void> generationSaveSyncFuture = CompletableFuture.completedFuture(null);
 
 	public GenerationChunkHolder(ChunkPos chunkPos) {
 		this.pos = chunkPos;
@@ -230,19 +231,25 @@ public abstract class GenerationChunkHolder {
 		return chunkStatus2 == null || chunkStatus.isAfter(chunkStatus2);
 	}
 
-	public void increaseGenerationRefCount() {
-		this.generationRefCount.incrementAndGet();
-	}
+	protected abstract void addSaveDependency(CompletableFuture<?> completableFuture);
 
-	public void decreaseGenerationRefCount() {
-		int i = this.generationRefCount.decrementAndGet();
-		if (i < 0) {
-			throw new IllegalStateException("More releases than claims. Count: " + i);
+	public void increaseGenerationRefCount() {
+		if (this.generationRefCount.getAndIncrement() == 0) {
+			this.generationSaveSyncFuture = new CompletableFuture();
+			this.addSaveDependency(this.generationSaveSyncFuture);
 		}
 	}
 
-	public int getGenerationRefCount() {
-		return this.generationRefCount.get();
+	public void decreaseGenerationRefCount() {
+		CompletableFuture<Void> completableFuture = this.generationSaveSyncFuture;
+		int i = this.generationRefCount.decrementAndGet();
+		if (i == 0) {
+			completableFuture.complete(null);
+		}
+
+		if (i < 0) {
+			throw new IllegalStateException("More releases than claims. Count: " + i);
+		}
 	}
 
 	@Nullable

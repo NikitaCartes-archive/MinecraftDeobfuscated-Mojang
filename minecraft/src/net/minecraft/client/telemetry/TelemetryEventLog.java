@@ -7,7 +7,7 @@ import java.util.concurrent.Executor;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.util.eventlog.JsonEventLog;
-import net.minecraft.util.thread.ProcessorMailbox;
+import net.minecraft.util.thread.ConsecutiveExecutor;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 
@@ -15,15 +15,15 @@ import org.slf4j.Logger;
 public class TelemetryEventLog implements AutoCloseable {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private final JsonEventLog<TelemetryEventInstance> log;
-	private final ProcessorMailbox<Runnable> mailbox;
+	private final ConsecutiveExecutor consecutiveExecutor;
 
 	public TelemetryEventLog(FileChannel fileChannel, Executor executor) {
 		this.log = new JsonEventLog<>(TelemetryEventInstance.CODEC, fileChannel);
-		this.mailbox = ProcessorMailbox.create(executor, "telemetry-event-log");
+		this.consecutiveExecutor = new ConsecutiveExecutor(executor, "telemetry-event-log");
 	}
 
 	public TelemetryEventLogger logger() {
-		return telemetryEventInstance -> this.mailbox.tell(() -> {
+		return telemetryEventInstance -> this.consecutiveExecutor.schedule(() -> {
 				try {
 					this.log.write(telemetryEventInstance);
 				} catch (IOException var3) {
@@ -33,7 +33,7 @@ public class TelemetryEventLog implements AutoCloseable {
 	}
 
 	public void close() {
-		this.mailbox.tell(() -> IOUtils.closeQuietly(this.log));
-		this.mailbox.close();
+		this.consecutiveExecutor.schedule(() -> IOUtils.closeQuietly(this.log));
+		this.consecutiveExecutor.close();
 	}
 }

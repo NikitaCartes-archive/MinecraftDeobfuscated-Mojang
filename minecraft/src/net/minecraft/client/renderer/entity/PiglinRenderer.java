@@ -42,7 +42,7 @@ public class PiglinRenderer extends HumanoidMobRenderer<AbstractPiglin, PiglinRe
 				new HumanoidArmorModel(context.bakeLayer(modelLayerLocation4)),
 				new HumanoidArmorModel(context.bakeLayer(modelLayerLocation5)),
 				new HumanoidArmorModel(context.bakeLayer(modelLayerLocation6)),
-				context.getModelManager()
+				context.getEquipmentRenderer()
 			)
 		);
 	}

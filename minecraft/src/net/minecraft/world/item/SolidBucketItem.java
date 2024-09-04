@@ -33,11 +33,6 @@ public class SolidBucketItem extends BlockItem implements DispensibleContainerIt
 	}
 
 	@Override
-	public String getDescriptionId() {
-		return this.getOrCreateDescriptionId();
-	}
-
-	@Override
 	protected SoundEvent getPlaceSound(BlockState blockState) {
 		return this.placeSound;
 	}

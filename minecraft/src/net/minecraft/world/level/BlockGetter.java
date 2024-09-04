@@ -21,6 +21,8 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public interface BlockGetter extends LevelHeightAccessor {
+	int MAX_BLOCK_ITERATIONS_ALONG_TRAVEL = 16;
+
 	@Nullable
 	BlockEntity getBlockEntity(BlockPos blockPos);
 
@@ -172,9 +174,8 @@ public interface BlockGetter extends LevelHeightAccessor {
 	}
 
 	static Iterable<BlockPos> boxTraverseBlocks(Vec3 vec3, Vec3 vec32, AABB aABB) {
-		AABB aABB2 = aABB.inflate(1.0E-5F);
 		Vec3 vec33 = vec32.subtract(vec3);
-		Iterable<BlockPos> iterable = BlockPos.betweenClosed(aABB2);
+		Iterable<BlockPos> iterable = BlockPos.betweenClosed(aABB);
 		if (vec33.lengthSqr() < (double)Mth.square(0.99999F)) {
 			return iterable;
 		} else {
@@ -187,7 +188,7 @@ public interface BlockGetter extends LevelHeightAccessor {
 			Vec3 vec34 = vec33.normalize().scale(1.0E-7);
 			Vec3 vec35 = aABB.getMinPosition().add(vec34);
 			Vec3 vec36 = aABB.getMinPosition().subtract(vec33).subtract(vec34);
-			addCollisionsAlongTravel(set, vec36, vec35, aABB2);
+			addCollisionsAlongTravel(set, vec36, vec35, aABB);
 			return set;
 		}
 	}
@@ -206,6 +207,7 @@ public interface BlockGetter extends LevelHeightAccessor {
 		double g = d * (l > 0 ? 1.0 - Mth.frac(vec3.x) : Mth.frac(vec3.x));
 		double h = e * (m > 0 ? 1.0 - Mth.frac(vec3.y) : Mth.frac(vec3.y));
 		double o = f * (n > 0 ? 1.0 - Mth.frac(vec3.z) : Mth.frac(vec3.z));
+		int p = 0;
 
 		while (g <= 1.0 || h <= 1.0 || o <= 1.0) {
 			if (g < h) {
@@ -224,20 +226,24 @@ public interface BlockGetter extends LevelHeightAccessor {
 				o += f;
 			}
 
+			if (p++ > 16) {
+				break;
+			}
+
 			Optional<Vec3> optional = AABB.clip((double)i, (double)j, (double)k, (double)(i + 1), (double)(j + 1), (double)(k + 1), vec3, vec32);
 			if (!optional.isEmpty()) {
 				Vec3 vec34 = (Vec3)optional.get();
-				double p = Mth.clamp(vec34.x, (double)i + 1.0E-5F, (double)i + 1.0 - 1.0E-5F);
-				double q = Mth.clamp(vec34.y, (double)j + 1.0E-5F, (double)j + 1.0 - 1.0E-5F);
-				double r = Mth.clamp(vec34.z, (double)k + 1.0E-5F, (double)k + 1.0 - 1.0E-5F);
-				int s = Mth.floor(p + aABB.getXsize());
-				int t = Mth.floor(q + aABB.getYsize());
-				int u = Mth.floor(r + aABB.getZsize());
+				double q = Mth.clamp(vec34.x, (double)i + 1.0E-5F, (double)i + 1.0 - 1.0E-5F);
+				double r = Mth.clamp(vec34.y, (double)j + 1.0E-5F, (double)j + 1.0 - 1.0E-5F);
+				double s = Mth.clamp(vec34.z, (double)k + 1.0E-5F, (double)k + 1.0 - 1.0E-5F);
+				int t = Mth.floor(q + aABB.getXsize());
+				int u = Mth.floor(r + aABB.getYsize());
+				int v = Mth.floor(s + aABB.getZsize());
 
-				for (int v = i; v <= s; v++) {
-					for (int w = j; w <= t; w++) {
-						for (int x = k; x <= u; x++) {
-							set.add(new BlockPos(v, w, x));
+				for (int w = i; w <= t; w++) {
+					for (int x = j; x <= u; x++) {
+						for (int y = k; y <= v; y++) {
+							set.add(new BlockPos(w, x, y));
 						}
 					}
 				}

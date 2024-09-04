@@ -1,6 +1,5 @@
 package net.minecraft.world.level.chunk.storage;
 
-import com.mojang.datafixers.util.Either;
 import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.longs.Long2ObjectLinkedOpenHashMap;
 import java.io.IOException;
@@ -22,7 +21,7 @@ import net.minecraft.nbt.StreamTagVisitor;
 import net.minecraft.nbt.visitors.CollectFields;
 import net.minecraft.nbt.visitors.FieldSelector;
 import net.minecraft.util.Unit;
-import net.minecraft.util.thread.ProcessorMailbox;
+import net.minecraft.util.thread.PriorityConsecutiveExecutor;
 import net.minecraft.util.thread.StrictQueue;
 import net.minecraft.world.level.ChunkPos;
 import org.slf4j.Logger;
@@ -30,7 +29,7 @@ import org.slf4j.Logger;
 public class IOWorker implements ChunkScanAccess, AutoCloseable {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private final AtomicBoolean shutdownRequested = new AtomicBoolean();
-	private final ProcessorMailbox<StrictQueue.IntRunnable> mailbox;
+	private final PriorityConsecutiveExecutor consecutiveExecutor;
 	private final RegionFileStorage storage;
 	private final SequencedMap<ChunkPos, IOWorker.PendingStore> pendingWrites = new LinkedHashMap();
 	private final Long2ObjectLinkedOpenHashMap<CompletableFuture<BitSet>> regionCacheForBlender = new Long2ObjectLinkedOpenHashMap<>();
@@ -38,9 +37,7 @@ public class IOWorker implements ChunkScanAccess, AutoCloseable {
 
 	protected IOWorker(RegionStorageInfo regionStorageInfo, Path path, boolean bl) {
 		this.storage = new RegionFileStorage(regionStorageInfo, path, bl);
-		this.mailbox = new ProcessorMailbox<>(
-			new StrictQueue.FixedPriorityQueue(IOWorker.Priority.values().length), Util.ioPool(), "IOWorker-" + regionStorageInfo.type()
-		);
+		this.consecutiveExecutor = new PriorityConsecutiveExecutor(IOWorker.Priority.values().length, Util.ioPool(), "IOWorker-" + regionStorageInfo.type());
 	}
 
 	public boolean isOldChunkAround(ChunkPos chunkPos, int i) {
@@ -127,24 +124,24 @@ public class IOWorker implements ChunkScanAccess, AutoCloseable {
 					IOWorker.PendingStore pendingStore = (IOWorker.PendingStore)this.pendingWrites
 						.computeIfAbsent(chunkPos, chunkPosxx -> new IOWorker.PendingStore(compoundTag));
 					pendingStore.data = compoundTag;
-					return Either.left(pendingStore.result);
+					return pendingStore.result;
 				}
 			)
 			.thenCompose(Function.identity());
 	}
 
 	public CompletableFuture<Optional<CompoundTag>> loadAsync(ChunkPos chunkPos) {
-		return this.submitTask(() -> {
+		return this.submitThrowingTask(() -> {
 			IOWorker.PendingStore pendingStore = (IOWorker.PendingStore)this.pendingWrites.get(chunkPos);
 			if (pendingStore != null) {
-				return Either.left(Optional.ofNullable(pendingStore.copyData()));
+				return Optional.ofNullable(pendingStore.copyData());
 			} else {
 				try {
 					CompoundTag compoundTag = this.storage.read(chunkPos);
-					return Either.left(Optional.ofNullable(compoundTag));
+					return Optional.ofNullable(compoundTag);
 				} catch (Exception var4) {
 					LOGGER.warn("Failed to read chunk {}", chunkPos, var4);
-					return Either.right(var4);
+					throw var4;
 				}
 			}
 		});
@@ -152,27 +149,25 @@ public class IOWorker implements ChunkScanAccess, AutoCloseable {
 
 	public CompletableFuture<Void> synchronize(boolean bl) {
 		CompletableFuture<Void> completableFuture = this.submitTask(
-				() -> Either.left(
-						CompletableFuture.allOf(
-							(CompletableFuture[])this.pendingWrites.values().stream().map(pendingStore -> pendingStore.result).toArray(CompletableFuture[]::new)
-						)
+				() -> CompletableFuture.allOf(
+						(CompletableFuture[])this.pendingWrites.values().stream().map(pendingStore -> pendingStore.result).toArray(CompletableFuture[]::new)
 					)
 			)
 			.thenCompose(Function.identity());
-		return bl ? completableFuture.thenCompose(void_ -> this.submitTask(() -> {
+		return bl ? completableFuture.thenCompose(void_ -> this.<Void>submitThrowingTask(() -> {
 				try {
 					this.storage.flush();
-					return Either.left(null);
+					return null;
 				} catch (Exception var2x) {
 					LOGGER.warn("Failed to synchronize chunks", (Throwable)var2x);
-					return Either.right(var2x);
+					throw var2x;
 				}
-			})) : completableFuture.thenCompose(void_ -> this.submitTask(() -> Either.left(null)));
+			})) : completableFuture.thenCompose(void_ -> this.submitTask(() -> null));
 	}
 
 	@Override
 	public CompletableFuture<Void> scanChunk(ChunkPos chunkPos, StreamTagVisitor streamTagVisitor) {
-		return this.submitTask(() -> {
+		return this.submitThrowingTask(() -> {
 			try {
 				IOWorker.PendingStore pendingStore = (IOWorker.PendingStore)this.pendingWrites.get(chunkPos);
 				if (pendingStore != null) {
@@ -183,22 +178,36 @@ public class IOWorker implements ChunkScanAccess, AutoCloseable {
 					this.storage.scanChunk(chunkPos, streamTagVisitor);
 				}
 
-				return Either.left(null);
+				return null;
 			} catch (Exception var4) {
 				LOGGER.warn("Failed to bulk scan chunk {}", chunkPos, var4);
-				return Either.right(var4);
+				throw var4;
 			}
 		});
 	}
 
-	private <T> CompletableFuture<T> submitTask(Supplier<Either<T, Exception>> supplier) {
-		return this.mailbox.askEither(processorHandle -> new StrictQueue.IntRunnable(IOWorker.Priority.FOREGROUND.ordinal(), () -> {
-				if (!this.shutdownRequested.get()) {
-					processorHandle.tell((Either)supplier.get());
+	private <T> CompletableFuture<T> submitThrowingTask(IOWorker.ThrowingSupplier<T> throwingSupplier) {
+		return this.consecutiveExecutor.scheduleWithResult(IOWorker.Priority.FOREGROUND.ordinal(), completableFuture -> {
+			if (!this.shutdownRequested.get()) {
+				try {
+					completableFuture.complete(throwingSupplier.get());
+				} catch (Exception var4) {
+					completableFuture.completeExceptionally(var4);
 				}
+			}
 
-				this.tellStorePending();
-			}));
+			this.tellStorePending();
+		});
+	}
+
+	private <T> CompletableFuture<T> submitTask(Supplier<T> supplier) {
+		return this.consecutiveExecutor.scheduleWithResult(IOWorker.Priority.FOREGROUND.ordinal(), completableFuture -> {
+			if (!this.shutdownRequested.get()) {
+				completableFuture.complete(supplier.get());
+			}
+
+			this.tellStorePending();
+		});
 	}
 
 	private void storePendingChunk() {
@@ -210,7 +219,7 @@ public class IOWorker implements ChunkScanAccess, AutoCloseable {
 	}
 
 	private void tellStorePending() {
-		this.mailbox.tell(new StrictQueue.IntRunnable(IOWorker.Priority.BACKGROUND.ordinal(), this::storePendingChunk));
+		this.consecutiveExecutor.schedule(new StrictQueue.RunnableWithPriority(IOWorker.Priority.BACKGROUND.ordinal(), this::storePendingChunk));
 	}
 
 	private void runStore(ChunkPos chunkPos, IOWorker.PendingStore pendingStore) {
@@ -225,8 +234,8 @@ public class IOWorker implements ChunkScanAccess, AutoCloseable {
 
 	public void close() throws IOException {
 		if (this.shutdownRequested.compareAndSet(false, true)) {
-			this.mailbox.ask(processorHandle -> new StrictQueue.IntRunnable(IOWorker.Priority.SHUTDOWN.ordinal(), () -> processorHandle.tell(Unit.INSTANCE))).join();
-			this.mailbox.close();
+			this.waitForShutdown();
+			this.consecutiveExecutor.close();
 
 			try {
 				this.storage.close();
@@ -234,6 +243,10 @@ public class IOWorker implements ChunkScanAccess, AutoCloseable {
 				LOGGER.error("Failed to close storage", (Throwable)var2);
 			}
 		}
+	}
+
+	private void waitForShutdown() {
+		this.consecutiveExecutor.scheduleWithResult(IOWorker.Priority.SHUTDOWN.ordinal(), completableFuture -> completableFuture.complete(Unit.INSTANCE)).join();
 	}
 
 	public RegionStorageInfo storageInfo() {
@@ -260,5 +273,11 @@ public class IOWorker implements ChunkScanAccess, AutoCloseable {
 		FOREGROUND,
 		BACKGROUND,
 		SHUTDOWN;
+	}
+
+	@FunctionalInterface
+	interface ThrowingSupplier<T> {
+		@Nullable
+		T get() throws Exception;
 	}
 }

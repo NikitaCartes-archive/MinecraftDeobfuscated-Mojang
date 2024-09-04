@@ -28,7 +28,7 @@ import net.minecraft.world.level.gameevent.GameEvent;
 public class InstrumentItem extends Item {
 	private final TagKey<Instrument> instruments;
 
-	public InstrumentItem(Item.Properties properties, TagKey<Instrument> tagKey) {
+	public InstrumentItem(TagKey<Instrument> tagKey, Item.Properties properties) {
 		super(properties);
 		this.instruments = tagKey;
 	}

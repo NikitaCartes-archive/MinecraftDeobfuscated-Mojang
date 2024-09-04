@@ -10,6 +10,7 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageSource;
@@ -231,7 +232,13 @@ public class Bat extends AmbientCreature {
 				return false;
 			}
 
-			return i > randomSource.nextInt(j) ? false : checkMobSpawnRules(entityType, levelAccessor, entitySpawnReason, blockPos, randomSource);
+			if (i > randomSource.nextInt(j)) {
+				return false;
+			} else {
+				return !levelAccessor.getBlockState(blockPos.below()).is(BlockTags.BATS_SPAWNABLE_ON)
+					? false
+					: checkMobSpawnRules(entityType, levelAccessor, entitySpawnReason, blockPos, randomSource);
+			}
 		}
 	}
 

@@ -122,12 +122,8 @@ public class BlockModel implements UnbakedModel {
 		return this.overrides;
 	}
 
-	private ItemOverrides bakeItemOverrides(ModelBaker modelBaker, BlockModel blockModel) {
-		return this.overrides.isEmpty() ? ItemOverrides.EMPTY : new ItemOverrides(modelBaker, blockModel, this.overrides);
-	}
-
 	@Override
-	public void resolveDependencies(UnbakedModel.Resolver resolver, UnbakedModel.ResolutionContext resolutionContext) {
+	public void resolveDependencies(UnbakedModel.Resolver resolver) {
 		if (this.parentLocation != null) {
 			if (!(resolver.resolve(this.parentLocation) instanceof BlockModel blockModel)) {
 				throw new IllegalStateException("BlockModel parent has to be a block model.");
@@ -135,23 +131,19 @@ public class BlockModel implements UnbakedModel {
 
 			this.parent = blockModel;
 		}
-
-		if (resolutionContext != UnbakedModel.ResolutionContext.OVERRIDE) {
-			this.overrides.forEach(itemOverride -> resolver.resolveForOverride(itemOverride.getModel()));
-		}
 	}
 
 	@Override
 	public BakedModel bake(ModelBaker modelBaker, Function<Material, TextureAtlasSprite> function, ModelState modelState) {
-		return this.bake(modelBaker, this, function, modelState, true);
+		return this.bake(function, modelState, true);
 	}
 
-	public BakedModel bake(ModelBaker modelBaker, BlockModel blockModel, Function<Material, TextureAtlasSprite> function, ModelState modelState, boolean bl) {
+	public BakedModel bake(Function<Material, TextureAtlasSprite> function, ModelState modelState, boolean bl) {
 		TextureAtlasSprite textureAtlasSprite = (TextureAtlasSprite)function.apply(this.getMaterial("particle"));
 		if (this.getRootModel() == SpecialModels.BLOCK_ENTITY_MARKER) {
-			return new BuiltInModel(this.getTransforms(), this.bakeItemOverrides(modelBaker, blockModel), textureAtlasSprite, this.getGuiLight().lightLikeBlock());
+			return new BuiltInModel(this.getTransforms(), textureAtlasSprite, this.getGuiLight().lightLikeBlock());
 		} else {
-			SimpleBakedModel.Builder builder = new SimpleBakedModel.Builder(this, this.bakeItemOverrides(modelBaker, blockModel), bl).particle(textureAtlasSprite);
+			SimpleBakedModel.Builder builder = new SimpleBakedModel.Builder(this, bl).particle(textureAtlasSprite);
 
 			for (BlockElement blockElement : this.getElements()) {
 				for (Direction direction : blockElement.faces.keySet()) {
@@ -363,13 +355,6 @@ public class BlockModel implements UnbakedModel {
 
 		public boolean lightLikeBlock() {
 			return this == SIDE;
-		}
-	}
-
-	@Environment(EnvType.CLIENT)
-	public static class LoopException extends RuntimeException {
-		public LoopException(String string) {
-			super(string);
 		}
 	}
 }

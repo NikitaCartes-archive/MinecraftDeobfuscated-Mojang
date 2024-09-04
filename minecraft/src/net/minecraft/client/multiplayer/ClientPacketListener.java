@@ -264,7 +264,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.Leashable;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.RelativeMovement;
+import net.minecraft.world.entity.PositionMoveRotation;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeMap;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -298,7 +298,6 @@ import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.entity.CommandBlockEntity;
 import net.minecraft.world.level.block.entity.FuelValues;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.chunk.DataLayer;
 import net.minecraft.world.level.chunk.LevelChunk;
@@ -657,73 +656,21 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 	public void handleMovePlayer(ClientboundPlayerPositionPacket clientboundPlayerPositionPacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundPlayerPositionPacket, this, this.minecraft);
 		Player player = this.minecraft.player;
-		Vec3 vec3 = player.getDeltaMovement();
-		boolean bl = clientboundPlayerPositionPacket.getRelativeArguments().contains(RelativeMovement.X);
-		boolean bl2 = clientboundPlayerPositionPacket.getRelativeArguments().contains(RelativeMovement.Y);
-		boolean bl3 = clientboundPlayerPositionPacket.getRelativeArguments().contains(RelativeMovement.Z);
-		double d;
-		double e;
-		if (bl) {
-			d = vec3.x();
-			e = player.getX() + clientboundPlayerPositionPacket.getX();
-			player.xOld = player.xOld + clientboundPlayerPositionPacket.getX();
-			player.xo = player.xo + clientboundPlayerPositionPacket.getX();
-		} else {
-			d = 0.0;
-			e = clientboundPlayerPositionPacket.getX();
-			player.xOld = e;
-			player.xo = e;
-		}
-
-		double f;
-		double g;
-		if (bl2) {
-			f = vec3.y();
-			g = player.getY() + clientboundPlayerPositionPacket.getY();
-			player.yOld = player.yOld + clientboundPlayerPositionPacket.getY();
-			player.yo = player.yo + clientboundPlayerPositionPacket.getY();
-		} else {
-			f = 0.0;
-			g = clientboundPlayerPositionPacket.getY();
-			player.yOld = g;
-			player.yo = g;
-		}
-
-		double h;
-		double i;
-		if (bl3) {
-			h = vec3.z();
-			i = player.getZ() + clientboundPlayerPositionPacket.getZ();
-			player.zOld = player.zOld + clientboundPlayerPositionPacket.getZ();
-			player.zo = player.zo + clientboundPlayerPositionPacket.getZ();
-		} else {
-			h = 0.0;
-			i = clientboundPlayerPositionPacket.getZ();
-			player.zOld = i;
-			player.zo = i;
-		}
-
-		player.setPos(e, g, i);
-		player.setDeltaMovement(d, f, h);
-		float j = clientboundPlayerPositionPacket.getYRot();
-		float k = clientboundPlayerPositionPacket.getXRot();
-		if (clientboundPlayerPositionPacket.getRelativeArguments().contains(RelativeMovement.X_ROT)) {
-			player.setXRot(player.getXRot() + k);
-			player.xRotO += k;
-		} else {
-			player.setXRot(k);
-			player.xRotO = k;
-		}
-
-		if (clientboundPlayerPositionPacket.getRelativeArguments().contains(RelativeMovement.Y_ROT)) {
-			player.setYRot(player.getYRot() + j);
-			player.yRotO += j;
-		} else {
-			player.setYRot(j);
-			player.yRotO = j;
-		}
-
-		this.connection.send(new ServerboundAcceptTeleportationPacket(clientboundPlayerPositionPacket.getId()));
+		PositionMoveRotation positionMoveRotation = PositionMoveRotation.of(player);
+		PositionMoveRotation positionMoveRotation2 = PositionMoveRotation.of(clientboundPlayerPositionPacket);
+		PositionMoveRotation positionMoveRotation3 = PositionMoveRotation.calculateAbsolute(
+			positionMoveRotation, positionMoveRotation2, clientboundPlayerPositionPacket.relativeArguments()
+		);
+		player.setPos(positionMoveRotation3.position());
+		player.setDeltaMovement(positionMoveRotation3.deltaMovement());
+		player.setYRot(positionMoveRotation3.yRot());
+		player.setXRot(positionMoveRotation3.xRot());
+		PositionMoveRotation positionMoveRotation4 = new PositionMoveRotation(player.oldPosition(), player.getDeltaMovement(), player.yRotO, player.xRotO);
+		PositionMoveRotation positionMoveRotation5 = PositionMoveRotation.calculateAbsolute(
+			positionMoveRotation4, positionMoveRotation2, clientboundPlayerPositionPacket.relativeArguments()
+		);
+		player.setOldPosAndRot(positionMoveRotation5.position(), positionMoveRotation5.yRot(), positionMoveRotation5.xRot());
+		this.connection.send(new ServerboundAcceptTeleportationPacket(clientboundPlayerPositionPacket.id()));
 		this.connection.send(new ServerboundMovePlayerPacket.PosRot(player.getX(), player.getY(), player.getZ(), player.getYRot(), player.getXRot(), false, false));
 	}
 
@@ -1193,6 +1140,13 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 			if (list != null) {
 				localPlayer2.getEntityData().assignValues(list);
 			}
+
+			localPlayer2.setDeltaMovement(localPlayer.getDeltaMovement());
+			localPlayer2.setYRot(localPlayer.getYRot());
+			localPlayer2.setXRot(localPlayer.getXRot());
+		} else {
+			localPlayer2.resetPos();
+			localPlayer2.setYRot(-180.0F);
 		}
 
 		if (clientboundRespawnPacket.shouldKeep((byte)1)) {
@@ -1201,9 +1155,7 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 			localPlayer2.getAttributes().assignBaseValues(localPlayer.getAttributes());
 		}
 
-		localPlayer2.resetPos();
 		this.level.addEntity(localPlayer2);
-		localPlayer2.setYRot(-180.0F);
 		localPlayer2.input = new KeyboardInput(this.minecraft.options);
 		this.minecraft.gameMode.adjustPlayer(localPlayer2);
 		localPlayer2.setReducedDebugInfo(localPlayer.isReducedDebugInfo());
@@ -1348,10 +1300,7 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 		if (this.level.getBlockEntity(blockPos) instanceof SignBlockEntity signBlockEntity) {
 			this.minecraft.player.openTextEdit(signBlockEntity, clientboundOpenSignEditorPacket.isFrontText());
 		} else {
-			BlockState blockState = this.level.getBlockState(blockPos);
-			SignBlockEntity signBlockEntity2 = new SignBlockEntity(blockPos, blockState);
-			signBlockEntity2.setLevel(this.level);
-			this.minecraft.player.openTextEdit(signBlockEntity2, clientboundOpenSignEditorPacket.isFrontText());
+			LOGGER.warn("Ignoring openTextEdit on an invalid entity: {} at pos {}", this.level.getBlockEntity(blockPos), blockPos);
 		}
 	}
 

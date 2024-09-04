@@ -229,10 +229,7 @@ public class FishingHook extends Projectile {
 			}
 
 			this.move(MoverType.SELF, this.getDeltaMovement());
-			if (!this.level().isClientSide()) {
-				this.applyEffectsFromBlocks();
-			}
-
+			this.applyEffectsFromBlocks();
 			this.updateRotation();
 			if (this.currentState == FishingHook.FishHookState.FLYING && (this.onGround() || this.horizontalCollision)) {
 				this.setDeltaMovement(Vec3.ZERO);

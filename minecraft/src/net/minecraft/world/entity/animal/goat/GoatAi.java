@@ -144,7 +144,7 @@ public class GoatAi {
 						3.0F,
 						goat -> goat.isBaby() ? 1.0 : 2.5,
 						goat -> goat.isScreamingGoat() ? SoundEvents.GOAT_SCREAMING_RAM_IMPACT : SoundEvents.GOAT_RAM_IMPACT,
-						goat -> goat.isScreamingGoat() ? SoundEvents.GOAT_SCREAMING_HORN_BREAK : SoundEvents.GOAT_HORN_BREAK
+						goat -> SoundEvents.GOAT_HORN_BREAK
 					)
 				),
 				Pair.of(

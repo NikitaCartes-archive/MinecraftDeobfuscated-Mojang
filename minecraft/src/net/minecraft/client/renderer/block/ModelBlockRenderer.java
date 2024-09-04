@@ -769,10 +769,10 @@ public class ModelBlockRenderer {
 				float ao = fs[adjacencyInfo.vert3Weights[2].shape] * fs[adjacencyInfo.vert3Weights[3].shape];
 				float ap = fs[adjacencyInfo.vert3Weights[4].shape] * fs[adjacencyInfo.vert3Weights[5].shape];
 				float aq = fs[adjacencyInfo.vert3Weights[6].shape] * fs[adjacencyInfo.vert3Weights[7].shape];
-				this.brightness[ambientVertexRemap.vert0] = x * ab + y * ac + z * ad + aa * ae;
-				this.brightness[ambientVertexRemap.vert1] = x * af + y * ag + z * ah + aa * ai;
-				this.brightness[ambientVertexRemap.vert2] = x * aj + y * ak + z * al + aa * am;
-				this.brightness[ambientVertexRemap.vert3] = x * an + y * ao + z * ap + aa * aq;
+				this.brightness[ambientVertexRemap.vert0] = Math.clamp(x * ab + y * ac + z * ad + aa * ae, 0.0F, 1.0F);
+				this.brightness[ambientVertexRemap.vert1] = Math.clamp(x * af + y * ag + z * ah + aa * ai, 0.0F, 1.0F);
+				this.brightness[ambientVertexRemap.vert2] = Math.clamp(x * aj + y * ak + z * al + aa * am, 0.0F, 1.0F);
+				this.brightness[ambientVertexRemap.vert3] = Math.clamp(x * an + y * ao + z * ap + aa * aq, 0.0F, 1.0F);
 				int ar = this.blend(l, i, q, v);
 				int as = this.blend(k, i, o, v);
 				int at = this.blend(k, j, s, v);

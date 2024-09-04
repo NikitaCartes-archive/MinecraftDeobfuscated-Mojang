@@ -296,11 +296,11 @@ public class ServerEntity {
 			consumer.accept(new ClientboundSetEntityMotionPacket(this.entity.getId(), this.lastSentMovement));
 		}
 
-		if (this.entity instanceof LivingEntity) {
+		if (this.entity instanceof LivingEntity livingEntity) {
 			List<Pair<EquipmentSlot, ItemStack>> list = Lists.<Pair<EquipmentSlot, ItemStack>>newArrayList();
 
-			for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
-				ItemStack itemStack = ((LivingEntity)this.entity).getItemBySlot(equipmentSlot);
+			for (EquipmentSlot equipmentSlot : EquipmentSlot.VALUES) {
+				ItemStack itemStack = livingEntity.getItemBySlot(equipmentSlot);
 				if (!itemStack.isEmpty()) {
 					list.add(Pair.of(equipmentSlot, itemStack.copy()));
 				}

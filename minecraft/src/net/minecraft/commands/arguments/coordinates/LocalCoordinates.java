@@ -21,7 +21,7 @@ public class LocalCoordinates implements Coordinates {
 	}
 
 	@Override
-	public Vec3 getPosition(CommandSourceStack commandSourceStack) {
+	public Vec3 getPosition(CommandSourceStack commandSourceStack, boolean bl) {
 		Vec2 vec2 = commandSourceStack.getRotation();
 		Vec3 vec3 = commandSourceStack.getAnchor().apply(commandSourceStack);
 		float f = Mth.cos((vec2.y + 90.0F) * (float) (Math.PI / 180.0));
@@ -36,12 +36,17 @@ public class LocalCoordinates implements Coordinates {
 		double d = vec32.x * this.forwards + vec33.x * this.up + vec34.x * this.left;
 		double e = vec32.y * this.forwards + vec33.y * this.up + vec34.y * this.left;
 		double l = vec32.z * this.forwards + vec33.z * this.up + vec34.z * this.left;
-		return new Vec3(vec3.x + d, vec3.y + e, vec3.z + l);
+		double m = bl ? 0.0 : vec3.x;
+		double n = bl ? 0.0 : vec3.y;
+		double o = bl ? 0.0 : vec3.z;
+		return new Vec3(m + d, n + e, o + l);
 	}
 
 	@Override
-	public Vec2 getRotation(CommandSourceStack commandSourceStack) {
-		return Vec2.ZERO;
+	public Vec2 getRotation(CommandSourceStack commandSourceStack, boolean bl) {
+		return !bl
+			? Vec2.ZERO
+			: new Vec2(this.isXRelative() ? -commandSourceStack.getRotation().x : 0.0F, this.isYRelative() ? -commandSourceStack.getRotation().y : 0.0F);
 	}
 
 	@Override

@@ -22,7 +22,7 @@ public abstract class AbstractSkeletonRenderer<T extends AbstractSkeleton, S ext
 		super(context, skeletonModel, 0.5F);
 		this.addLayer(
 			new HumanoidArmorLayer<>(
-				this, new SkeletonModel(context.bakeLayer(modelLayerLocation)), new SkeletonModel(context.bakeLayer(modelLayerLocation2)), context.getModelManager()
+				this, new SkeletonModel(context.bakeLayer(modelLayerLocation)), new SkeletonModel(context.bakeLayer(modelLayerLocation2)), context.getEquipmentRenderer()
 			)
 		);
 	}

@@ -170,6 +170,7 @@ public class VanillaItemTagsProvider extends ItemTagsProvider {
 			);
 		this.tag(ItemTags.IGNORED_BY_PIGLIN_BABIES).add(Items.LEATHER);
 		this.tag(ItemTags.PIGLIN_FOOD).add(Items.PORKCHOP, Items.COOKED_PORKCHOP);
+		this.tag(ItemTags.PIGLIN_SAFE_ARMOR).add(Items.GOLDEN_HELMET, Items.GOLDEN_CHESTPLATE, Items.GOLDEN_LEGGINGS, Items.GOLDEN_BOOTS);
 		this.tag(ItemTags.FOX_FOOD).add(Items.SWEET_BERRIES, Items.GLOW_BERRIES);
 		this.tag(ItemTags.NON_FLAMMABLE_WOOD)
 			.add(
@@ -210,6 +211,14 @@ public class VanillaItemTagsProvider extends ItemTagsProvider {
 		this.tag(ItemTags.GOLD_TOOL_MATERIALS).add(Items.GOLD_INGOT);
 		this.tag(ItemTags.DIAMOND_TOOL_MATERIALS).add(Items.DIAMOND);
 		this.tag(ItemTags.NETHERITE_TOOL_MATERIALS).add(Items.NETHERITE_INGOT);
+		this.tag(ItemTags.REPAIRS_LEATHER_ARMOR).add(Items.LEATHER);
+		this.tag(ItemTags.REPAIRS_CHAIN_ARMOR).add(Items.IRON_INGOT);
+		this.tag(ItemTags.REPAIRS_IRON_ARMOR).add(Items.IRON_INGOT);
+		this.tag(ItemTags.REPAIRS_GOLD_ARMOR).add(Items.GOLD_INGOT);
+		this.tag(ItemTags.REPAIRS_DIAMOND_ARMOR).add(Items.DIAMOND);
+		this.tag(ItemTags.REPAIRS_NETHERITE_ARMOR).add(Items.NETHERITE_INGOT);
+		this.tag(ItemTags.REPAIRS_TURTLE_HELMET).add(Items.TURTLE_SCUTE);
+		this.tag(ItemTags.REPAIRS_WOLF_ARMOR).add(Items.ARMADILLO_SCUTE);
 		this.tag(ItemTags.STONE_CRAFTING_MATERIALS).add(Items.COBBLESTONE, Items.BLACKSTONE, Items.COBBLED_DEEPSLATE);
 		this.tag(ItemTags.FREEZE_IMMUNE_WEARABLES)
 			.add(Items.LEATHER_BOOTS, Items.LEATHER_LEGGINGS, Items.LEATHER_CHESTPLATE, Items.LEATHER_HELMET, Items.LEATHER_HORSE_ARMOR);

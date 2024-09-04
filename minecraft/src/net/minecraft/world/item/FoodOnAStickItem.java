@@ -15,7 +15,7 @@ public class FoodOnAStickItem<T extends Entity & ItemSteerable> extends Item {
 	private final EntityType<T> canInteractWith;
 	private final int consumeItemDamage;
 
-	public FoodOnAStickItem(Item.Properties properties, EntityType<T> entityType, int i) {
+	public FoodOnAStickItem(EntityType<T> entityType, int i, Item.Properties properties) {
 		super(properties);
 		this.canInteractWith = entityType;
 		this.consumeItemDamage = i;

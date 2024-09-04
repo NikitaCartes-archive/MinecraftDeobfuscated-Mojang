@@ -1,6 +1,7 @@
 package net.minecraft.world.level.block;
 
 import com.mojang.serialization.MapCodec;
+import java.util.Set;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
@@ -9,6 +10,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.Relative;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -21,9 +23,7 @@ import net.minecraft.world.level.levelgen.feature.EndPlatformFeature;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.portal.DimensionTransition;
 import net.minecraft.world.phys.Vec3;
-import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.CollisionContext;
-import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class EndPortalBlock extends BaseEntityBlock implements Portal {
@@ -50,13 +50,13 @@ public class EndPortalBlock extends BaseEntityBlock implements Portal {
 	}
 
 	@Override
+	protected VoxelShape getEntityInsideCollisionShape(BlockState blockState, Level level, BlockPos blockPos) {
+		return blockState.getShape(level, blockPos);
+	}
+
+	@Override
 	protected void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
-		if (entity.canUsePortal(false)
-			&& Shapes.joinIsNotEmpty(
-				Shapes.create(entity.getBoundingBox().move((double)(-blockPos.getX()), (double)(-blockPos.getY()), (double)(-blockPos.getZ()))),
-				blockState.getShape(level, blockPos),
-				BooleanOp.AND
-			)) {
+		if (entity.canUsePortal(false)) {
 			if (!level.isClientSide && level.dimension() == Level.END && entity instanceof ServerPlayer serverPlayer && !serverPlayer.seenCredits) {
 				serverPlayer.showEndCredits();
 				return;
@@ -76,14 +76,18 @@ public class EndPortalBlock extends BaseEntityBlock implements Portal {
 			boolean bl = resourceKey == Level.END;
 			BlockPos blockPos2 = bl ? ServerLevel.END_SPAWN_POINT : serverLevel2.getSharedSpawnPos();
 			Vec3 vec3 = blockPos2.getBottomCenter();
-			float f = entity.getYRot();
+			float f;
+			Set<Relative> set;
 			if (bl) {
 				EndPlatformFeature.createEndPlatform(serverLevel2, BlockPos.containing(vec3).below(), true);
 				f = Direction.WEST.toYRot();
+				set = Relative.union(Relative.DELTA, Set.of(Relative.X_ROT));
 				if (entity instanceof ServerPlayer) {
 					vec3 = vec3.subtract(0.0, 1.0, 0.0);
 				}
 			} else {
+				f = 0.0F;
+				set = Relative.union(Relative.DELTA, Relative.ROTATION);
 				if (entity instanceof ServerPlayer serverPlayer) {
 					return serverPlayer.findRespawnPositionAndUseSpawnBlock(false, DimensionTransition.DO_NOTHING);
 				}
@@ -92,7 +96,7 @@ public class EndPortalBlock extends BaseEntityBlock implements Portal {
 			}
 
 			return new DimensionTransition(
-				serverLevel2, vec3, entity.getDeltaMovement(), f, entity.getXRot(), DimensionTransition.PLAY_PORTAL_SOUND.then(DimensionTransition.PLACE_PORTAL_TICKET)
+				serverLevel2, vec3, Vec3.ZERO, f, 0.0F, set, DimensionTransition.PLAY_PORTAL_SOUND.then(DimensionTransition.PLACE_PORTAL_TICKET)
 			);
 		}
 	}

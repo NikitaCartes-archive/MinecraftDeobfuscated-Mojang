@@ -6,6 +6,7 @@ import com.mojang.datafixers.util.Either;
 import io.netty.channel.embedded.EmbeddedChannel;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -515,7 +516,7 @@ public class GameTestHelper {
 
 		if (j != i) {
 			throw new GameTestAssertPosException(
-				"Expected " + i + " " + item.getDescription().getString() + " items to exist (found " + j + ")", blockPos2, blockPos, this.testInfo.getTick()
+				"Expected " + i + " " + item.getName().getString() + " items to exist (found " + j + ")", blockPos2, blockPos, this.testInfo.getTick()
 			);
 		}
 	}
@@ -530,7 +531,7 @@ public class GameTestHelper {
 			}
 		}
 
-		throw new GameTestAssertPosException("Expected " + item.getDescription().getString() + " item", blockPos2, blockPos, this.testInfo.getTick());
+		throw new GameTestAssertPosException("Expected " + item.getName().getString() + " item", blockPos2, blockPos, this.testInfo.getTick());
 	}
 
 	public void assertItemEntityNotPresent(Item item, BlockPos blockPos, double d) {
@@ -539,7 +540,7 @@ public class GameTestHelper {
 		for (Entity entity : this.getLevel().getEntities(EntityType.ITEM, new AABB(blockPos2).inflate(d), Entity::isAlive)) {
 			ItemEntity itemEntity = (ItemEntity)entity;
 			if (itemEntity.getItem().getItem().equals(item)) {
-				throw new GameTestAssertPosException("Did not expect " + item.getDescription().getString() + " item", blockPos2, blockPos, this.testInfo.getTick());
+				throw new GameTestAssertPosException("Did not expect " + item.getName().getString() + " item", blockPos2, blockPos, this.testInfo.getTick());
 			}
 		}
 	}
@@ -552,14 +553,14 @@ public class GameTestHelper {
 			}
 		}
 
-		throw new GameTestAssertException("Expected " + item.getDescription().getString() + " item");
+		throw new GameTestAssertException("Expected " + item.getName().getString() + " item");
 	}
 
 	public void assertItemEntityNotPresent(Item item) {
 		for (Entity entity : this.getLevel().getEntities(EntityType.ITEM, this.getBounds(), Entity::isAlive)) {
 			ItemEntity itemEntity = (ItemEntity)entity;
 			if (itemEntity.getItem().getItem().equals(item)) {
-				throw new GameTestAssertException("Did not expect " + item.getDescription().getString() + " item");
+				throw new GameTestAssertException("Did not expect " + item.getName().getString() + " item");
 			}
 		}
 	}
@@ -613,6 +614,20 @@ public class GameTestHelper {
 		}
 	}
 
+	public <E extends Entity, T> void assertEntityData(BlockPos blockPos, EntityType<E> entityType, Predicate<E> predicate) {
+		BlockPos blockPos2 = this.absolutePos(blockPos);
+		List<E> list = this.getLevel().getEntities(entityType, new AABB(blockPos2), Entity::isAlive);
+		if (list.isEmpty()) {
+			throw new GameTestAssertPosException("Expected " + entityType.toShortString(), blockPos2, blockPos, this.testInfo.getTick());
+		} else {
+			for (E entity : list) {
+				if (!predicate.test(entity)) {
+					throw new GameTestAssertException("Test failed for entity " + entity);
+				}
+			}
+		}
+	}
+
 	public <E extends Entity, T> void assertEntityData(BlockPos blockPos, EntityType<E> entityType, Function<? super E, T> function, @Nullable T object) {
 		BlockPos blockPos2 = this.absolutePos(blockPos);
 		List<E> list = this.getLevel().getEntities(entityType, new AABB(blockPos2), Entity::isAlive);
@@ -621,11 +636,7 @@ public class GameTestHelper {
 		} else {
 			for (E entity : list) {
 				T object2 = (T)function.apply(entity);
-				if (object2 == null) {
-					if (object != null) {
-						throw new GameTestAssertException("Expected entity data to be: " + object + ", but was: " + object2);
-					}
-				} else if (!object2.equals(object)) {
+				if (!Objects.equals(object2, object)) {
 					throw new GameTestAssertException("Expected entity data to be: " + object + ", but was: " + object2);
 				}
 			}

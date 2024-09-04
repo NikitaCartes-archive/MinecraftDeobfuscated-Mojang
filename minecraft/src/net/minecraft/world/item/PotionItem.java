@@ -74,8 +74,11 @@ public class PotionItem extends Item {
 	}
 
 	@Override
-	public String getDescriptionId(ItemStack itemStack) {
-		return Potion.getName(itemStack.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY).potion(), this.getDescriptionId() + ".effect.");
+	public Component getName(ItemStack itemStack) {
+		return (Component)itemStack.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY)
+			.potion()
+			.map(holder -> Component.translatable(this.descriptionId + ".effect." + ((Potion)holder.value()).name()))
+			.orElseGet(() -> Component.translatable(this.descriptionId + ".effect.empty"));
 	}
 
 	@Override

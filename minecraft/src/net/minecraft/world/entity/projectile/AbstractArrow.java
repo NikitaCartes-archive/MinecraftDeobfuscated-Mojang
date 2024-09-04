@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import javax.annotation.Nullable;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
@@ -149,7 +150,6 @@ public abstract class AbstractArrow extends Projectile {
 
 	@Override
 	public void tick() {
-		super.tick();
 		boolean bl = this.isNoPhysics();
 		Vec3 vec3 = this.getDeltaMovement();
 		if (this.xRotO == 0.0F && this.yRotO == 0.0F) {
@@ -195,88 +195,83 @@ public abstract class AbstractArrow extends Projectile {
 		} else {
 			this.inGroundTime = 0;
 			Vec3 vec33 = this.position();
-			Vec3 vec32 = vec33.add(vec3);
-			HitResult hitResult = this.level().clipIncludingBorder(new ClipContext(vec33, vec32, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this));
-			if (hitResult.getType() != HitResult.Type.MISS) {
-				vec32 = hitResult.getLocation();
-			}
-
-			while (!this.isRemoved()) {
-				EntityHitResult entityHitResult = this.findHitEntity(vec33, vec32);
-				if (entityHitResult != null) {
-					hitResult = entityHitResult;
-				}
-
-				if (hitResult != null && hitResult.getType() == HitResult.Type.ENTITY) {
-					Entity entity = ((EntityHitResult)hitResult).getEntity();
-					Entity entity2 = this.getOwner();
-					if (entity instanceof Player && entity2 instanceof Player && !((Player)entity2).canHarmPlayer((Player)entity)) {
-						hitResult = null;
-						entityHitResult = null;
-					}
-				}
-
-				if (hitResult != null && !bl) {
-					ProjectileDeflection projectileDeflection = this.hitTargetOrDeflectSelf(hitResult);
-					this.hasImpulse = true;
-					if (projectileDeflection != ProjectileDeflection.NONE) {
-						break;
-					}
-				}
-
-				if (entityHitResult == null || this.getPierceLevel() <= 0) {
-					break;
-				}
-
-				hitResult = null;
-			}
-
-			vec3 = this.getDeltaMovement();
-			double e = vec3.x;
-			double f = vec3.y;
-			double g = vec3.z;
 			if (this.isCritArrow()) {
 				for (int i = 0; i < 4; i++) {
 					this.level()
 						.addParticle(
-							ParticleTypes.CRIT, this.getX() + e * (double)i / 4.0, this.getY() + f * (double)i / 4.0, this.getZ() + g * (double)i / 4.0, -e, -f + 0.2, -g
+							ParticleTypes.CRIT,
+							vec33.x + vec3.x * (double)i / 4.0,
+							vec33.y + vec3.y * (double)i / 4.0,
+							vec33.z + vec3.z * (double)i / 4.0,
+							-vec3.x,
+							-vec3.y + 0.2,
+							-vec3.z
 						);
 				}
 			}
 
-			double h = this.getX() + e;
-			double j = this.getY() + f;
-			double k = this.getZ() + g;
-			double l = vec3.horizontalDistance();
+			float f;
 			if (bl) {
-				this.setYRot((float)(Mth.atan2(-e, -g) * 180.0F / (float)Math.PI));
+				f = (float)(Mth.atan2(-vec3.x, -vec3.z) * 180.0F / (float)Math.PI);
 			} else {
-				this.setYRot((float)(Mth.atan2(e, g) * 180.0F / (float)Math.PI));
+				f = (float)(Mth.atan2(vec3.x, vec3.z) * 180.0F / (float)Math.PI);
 			}
 
-			this.setXRot((float)(Mth.atan2(f, l) * 180.0F / (float)Math.PI));
-			this.setXRot(lerpRotation(this.xRotO, this.getXRot()));
-			this.setYRot(lerpRotation(this.yRotO, this.getYRot()));
-			float m = 0.99F;
-			if (this.isInWater()) {
-				for (int n = 0; n < 4; n++) {
-					float o = 0.25F;
-					this.level().addParticle(ParticleTypes.BUBBLE, h - e * 0.25, j - f * 0.25, k - g * 0.25, e, f, g);
-				}
-
-				m = this.getWaterInertia();
-			}
-
-			this.setDeltaMovement(vec3.scale((double)m));
+			float g = (float)(Mth.atan2(vec3.y, vec3.horizontalDistance()) * 180.0F / (float)Math.PI);
+			this.setXRot(lerpRotation(this.getXRot(), g));
+			this.setYRot(lerpRotation(this.getYRot(), f));
+			BlockHitResult blockHitResult = this.level()
+				.clipIncludingBorder(new ClipContext(vec33, vec33.add(vec3), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this));
+			this.stepMoveAndHit(blockHitResult);
+			super.tick();
+			this.applyInertia();
 			if (!bl) {
 				this.applyGravity();
 			}
+		}
+	}
 
-			this.setPos(h, j, k);
-			if (!this.level().isClientSide()) {
-				this.applyEffectsFromBlocks();
+	private void stepMoveAndHit(BlockHitResult blockHitResult) {
+		while (this.isAlive()) {
+			EntityHitResult entityHitResult = this.findHitEntity(this.position(), blockHitResult.getLocation());
+			Vec3 vec3 = ((HitResult)Objects.requireNonNullElse(entityHitResult, blockHitResult)).getLocation();
+			this.setOldPos();
+			this.setPos(vec3);
+			this.applyEffectsFromBlocks();
+			if (this.portalProcess != null && this.portalProcess.isInsidePortalThisTick()) {
+				this.handlePortal();
+			}
+
+			if (entityHitResult == null) {
+				if (this.isAlive() && blockHitResult.getType() != HitResult.Type.MISS) {
+					this.hitTargetOrDeflectSelf(blockHitResult);
+				}
+				break;
+			} else if (this.isAlive() && !this.noPhysics) {
+				ProjectileDeflection projectileDeflection = this.hitTargetOrDeflectSelf(entityHitResult);
+				this.hasImpulse = true;
+				if (projectileDeflection == ProjectileDeflection.NONE) {
+					continue;
+				}
+				break;
 			}
 		}
+	}
+
+	private void applyInertia() {
+		Vec3 vec3 = this.getDeltaMovement();
+		Vec3 vec32 = this.position();
+		float f = 0.99F;
+		if (this.isInWater()) {
+			for (int i = 0; i < 4; i++) {
+				float g = 0.25F;
+				this.level().addParticle(ParticleTypes.BUBBLE, vec32.x - vec3.x * 0.25, vec32.y - vec3.y * 0.25, vec32.z - vec3.z * 0.25, vec3.x, vec3.y, vec3.z);
+			}
+
+			f = this.getWaterInertia();
+		}
+
+		this.setDeltaMovement(vec3.scale((double)f));
 	}
 
 	@Override
@@ -442,15 +437,15 @@ public abstract class AbstractArrow extends Projectile {
 	protected void onHitBlock(BlockHitResult blockHitResult) {
 		this.lastState = this.level().getBlockState(blockHitResult.getBlockPos());
 		super.onHitBlock(blockHitResult);
-		Vec3 vec3 = blockHitResult.getLocation().subtract(this.getX(), this.getY(), this.getZ());
-		this.setDeltaMovement(vec3);
 		ItemStack itemStack = this.getWeaponItem();
 		if (this.level() instanceof ServerLevel serverLevel && itemStack != null) {
 			this.hitBlockEnchantmentEffects(serverLevel, blockHitResult, itemStack);
 		}
 
-		Vec3 vec32 = vec3.normalize().scale(0.05F);
-		this.setPosRaw(this.getX() - vec32.x, this.getY() - vec32.y, this.getZ() - vec32.z);
+		Vec3 vec3 = this.getDeltaMovement();
+		Vec3 vec32 = new Vec3(Math.signum(vec3.x), Math.signum(vec3.y), Math.signum(vec3.z));
+		Vec3 vec33 = vec32.scale(0.05F);
+		this.setPos(this.position().subtract(vec33));
 		this.playSound(this.getHitGroundSoundEvent(), 1.0F, 1.2F / (this.random.nextFloat() * 0.2F + 0.9F));
 		this.inGround = true;
 		this.shakeTime = 7;
@@ -499,7 +494,9 @@ public abstract class AbstractArrow extends Projectile {
 
 	@Override
 	protected boolean canHitEntity(Entity entity) {
-		return super.canHitEntity(entity) && (this.piercingIgnoreEntityIds == null || !this.piercingIgnoreEntityIds.contains(entity.getId()));
+		return entity instanceof Player && this.getOwner() instanceof Player player && !player.canHarmPlayer((Player)entity)
+			? false
+			: super.canHitEntity(entity) && (this.piercingIgnoreEntityIds == null || !this.piercingIgnoreEntityIds.contains(entity.getId()));
 	}
 
 	@Override

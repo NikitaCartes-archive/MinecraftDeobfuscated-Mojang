@@ -31,6 +31,7 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.resources.PlayerSkin;
+import net.minecraft.client.resources.model.EquipmentModelSet;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.core.BlockPos;
@@ -76,6 +77,7 @@ public class EntityRenderDispatcher implements ResourceManagerReloadListener {
 	private final Font font;
 	public final Options options;
 	private final EntityModelSet entityModels;
+	private final EquipmentModelSet equipmentModels;
 	private boolean shouldRenderShadow = true;
 	private boolean renderHitBoxes;
 
@@ -91,7 +93,8 @@ public class EntityRenderDispatcher implements ResourceManagerReloadListener {
 		BlockRenderDispatcher blockRenderDispatcher,
 		Font font,
 		Options options,
-		EntityModelSet entityModelSet
+		EntityModelSet entityModelSet,
+		EquipmentModelSet equipmentModelSet
 	) {
 		this.textureManager = textureManager;
 		this.itemRenderer = itemRenderer;
@@ -101,6 +104,7 @@ public class EntityRenderDispatcher implements ResourceManagerReloadListener {
 		this.font = font;
 		this.options = options;
 		this.entityModels = entityModelSet;
+		this.equipmentModels = equipmentModelSet;
 	}
 
 	public <T extends Entity> EntityRenderer<? super T, ?> getRenderer(T entity) {
@@ -437,7 +441,7 @@ public class EntityRenderDispatcher implements ResourceManagerReloadListener {
 	@Override
 	public void onResourceManagerReload(ResourceManager resourceManager) {
 		EntityRendererProvider.Context context = new EntityRendererProvider.Context(
-			this, this.itemRenderer, this.mapRenderer, this.blockRenderDispatcher, resourceManager, this.entityModels, this.font
+			this, this.itemRenderer, this.mapRenderer, this.blockRenderDispatcher, resourceManager, this.entityModels, this.equipmentModels, this.font
 		);
 		this.renderers = EntityRenderers.createEntityRenderers(context);
 		this.playerRenderers = EntityRenderers.createPlayerRenderers(context);

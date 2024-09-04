@@ -1,5 +1,6 @@
 package net.minecraft.world.phys;
 
+import java.util.List;
 import java.util.Optional;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
@@ -399,6 +400,24 @@ public class AABB {
 		}
 	}
 
+	public boolean collidedAlongVector(Vec3 vec3, List<AABB> list) {
+		Vec3 vec32 = this.getCenter();
+		Vec3 vec33 = vec32.add(vec3);
+
+		for (AABB aABB : list) {
+			AABB aABB2 = aABB.inflate(this.getXsize() * 0.5, this.getYsize() * 0.5, this.getZsize() * 0.5);
+			if (aABB2.contains(vec33) || aABB2.contains(vec32)) {
+				return true;
+			}
+
+			if (aABB2.clip(vec32, vec33).isPresent()) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	public double distanceToSqr(Vec3 vec3) {
 		double d = Math.max(Math.max(this.minX - vec3.x, vec3.x - this.maxX), 0.0);
 		double e = Math.max(Math.max(this.minY - vec3.y, vec3.y - this.maxY), 0.0);
@@ -421,6 +440,10 @@ public class AABB {
 
 	public Vec3 getCenter() {
 		return new Vec3(Mth.lerp(0.5, this.minX, this.maxX), Mth.lerp(0.5, this.minY, this.maxY), Mth.lerp(0.5, this.minZ, this.maxZ));
+	}
+
+	public Vec3 getBottomCenter() {
+		return new Vec3(Mth.lerp(0.5, this.minX, this.maxX), this.minY, Mth.lerp(0.5, this.minZ, this.maxZ));
 	}
 
 	public Vec3 getMinPosition() {

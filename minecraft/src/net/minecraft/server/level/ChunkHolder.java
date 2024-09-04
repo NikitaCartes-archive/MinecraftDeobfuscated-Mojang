@@ -109,10 +109,11 @@ public class ChunkHolder extends GenerationChunkHolder {
 	}
 
 	public boolean isReadyForSaving() {
-		return this.getGenerationRefCount() == 0 && this.saveSync.isDone();
+		return this.saveSync.isDone();
 	}
 
-	private void addSaveDependency(CompletableFuture<?> completableFuture) {
+	@Override
+	protected void addSaveDependency(CompletableFuture<?> completableFuture) {
 		if (this.saveSync.isDone()) {
 			this.saveSync = completableFuture;
 		} else {

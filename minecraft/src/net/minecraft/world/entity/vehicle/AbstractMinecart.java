@@ -52,7 +52,6 @@ public abstract class AbstractMinecart extends VehicleEntity {
 	protected static final float WATER_SLOWDOWN_FACTOR = 0.95F;
 	private boolean onRails;
 	private boolean flipped;
-	private Vec3 passengerMoveIntent = Vec3.ZERO;
 	private final MinecartBehavior behavior;
 	private static final Map<RailShape, Pair<Vec3i, Vec3i>> EXITS = Util.make(Maps.newEnumMap(RailShape.class), enumMap -> {
 		Vec3i vec3i = Direction.WEST.getUnitVec3i();
@@ -583,19 +582,6 @@ public abstract class AbstractMinecart extends VehicleEntity {
 			case HOPPER -> Items.HOPPER_MINECART;
 			case COMMAND_BLOCK -> Items.COMMAND_BLOCK_MINECART;
 		});
-	}
-
-	public void setPassengerMoveIntentFromInput(LivingEntity livingEntity, Vec3 vec3) {
-		Vec3 vec32 = getInputVector(vec3, 1.0F, livingEntity.getYRot());
-		this.setPassengerMoveIntent(vec32);
-	}
-
-	public void setPassengerMoveIntent(Vec3 vec3) {
-		this.passengerMoveIntent = vec3;
-	}
-
-	public Vec3 getPassengerMoveIntent() {
-		return this.passengerMoveIntent;
 	}
 
 	public static boolean useExperimentalMovement(Level level) {

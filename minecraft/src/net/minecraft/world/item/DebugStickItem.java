@@ -56,7 +56,7 @@ public class DebugStickItem extends Item {
 			StateDefinition<Block, BlockState> stateDefinition = holder.value().getStateDefinition();
 			Collection<Property<?>> collection = stateDefinition.getProperties();
 			if (collection.isEmpty()) {
-				message(player, Component.translatable(this.getDescriptionId() + ".empty", holder.getRegisteredName()));
+				message(player, Component.translatable(this.descriptionId + ".empty", holder.getRegisteredName()));
 				return false;
 			} else {
 				DebugStickState debugStickState = itemStack.get(DataComponents.DEBUG_STICK_STATE);
@@ -71,11 +71,11 @@ public class DebugStickItem extends Item {
 
 						BlockState blockState2 = cycleState(blockState, property, player.isSecondaryUseActive());
 						levelAccessor.setBlock(blockPos, blockState2, 18);
-						message(player, Component.translatable(this.getDescriptionId() + ".update", property.getName(), getNameHelper(blockState2, property)));
+						message(player, Component.translatable(this.descriptionId + ".update", property.getName(), getNameHelper(blockState2, property)));
 					} else {
 						property = getRelative(collection, property, player.isSecondaryUseActive());
 						itemStack.set(DataComponents.DEBUG_STICK_STATE, debugStickState.withProperty(holder, property));
-						message(player, Component.translatable(this.getDescriptionId() + ".select", property.getName(), getNameHelper(blockState, property)));
+						message(player, Component.translatable(this.descriptionId + ".select", property.getName(), getNameHelper(blockState, property)));
 					}
 
 					return true;

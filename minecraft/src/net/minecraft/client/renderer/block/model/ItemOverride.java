@@ -11,28 +11,17 @@ import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.stream.Stream;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 
 @Environment(EnvType.CLIENT)
-public class ItemOverride {
-	private final ResourceLocation model;
-	private final List<ItemOverride.Predicate> predicates;
-
-	public ItemOverride(ResourceLocation resourceLocation, List<ItemOverride.Predicate> list) {
-		this.model = resourceLocation;
-		this.predicates = ImmutableList.copyOf(list);
-	}
-
-	public ResourceLocation getModel() {
-		return this.model;
-	}
-
-	public Stream<ItemOverride.Predicate> getPredicates() {
-		return this.predicates.stream();
+public record ItemOverride(ResourceLocation model, List<ItemOverride.Predicate> predicates) {
+	public ItemOverride(ResourceLocation model, List<ItemOverride.Predicate> predicates) {
+		predicates = List.copyOf(predicates);
+		this.model = model;
+		this.predicates = predicates;
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -60,21 +49,6 @@ public class ItemOverride {
 	}
 
 	@Environment(EnvType.CLIENT)
-	public static class Predicate {
-		private final ResourceLocation property;
-		private final float value;
-
-		public Predicate(ResourceLocation resourceLocation, float f) {
-			this.property = resourceLocation;
-			this.value = f;
-		}
-
-		public ResourceLocation getProperty() {
-			return this.property;
-		}
-
-		public float getValue() {
-			return this.value;
-		}
+	public static record Predicate(ResourceLocation property, float value) {
 	}
 }

@@ -31,7 +31,7 @@ import net.minecraft.network.chat.FilterMask;
 import net.minecraft.server.dedicated.DedicatedServerProperties;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.StringUtil;
-import net.minecraft.util.thread.ProcessorMailbox;
+import net.minecraft.util.thread.ConsecutiveExecutor;
 import org.slf4j.Logger;
 
 public abstract class ServerTextFilter implements AutoCloseable {
@@ -269,8 +269,8 @@ public abstract class ServerTextFilter implements AutoCloseable {
 
 		protected PlayerContext(final GameProfile gameProfile) {
 			this.profile = gameProfile;
-			ProcessorMailbox<Runnable> processorMailbox = ProcessorMailbox.create(ServerTextFilter.this.workerPool, "chat stream for " + gameProfile.getName());
-			this.streamExecutor = processorMailbox::tell;
+			ConsecutiveExecutor consecutiveExecutor = new ConsecutiveExecutor(ServerTextFilter.this.workerPool, "chat stream for " + gameProfile.getName());
+			this.streamExecutor = consecutiveExecutor::schedule;
 		}
 
 		@Override

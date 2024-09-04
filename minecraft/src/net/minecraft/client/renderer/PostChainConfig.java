@@ -63,13 +63,13 @@ public record PostChainConfig(Map<ResourceLocation, PostChainConfig.InternalTarg
 
 	@Environment(EnvType.CLIENT)
 	public sealed interface InternalTarget permits PostChainConfig.FullScreenTarget, PostChainConfig.FixedSizedTarget {
-		Codec<PostChainConfig.InternalTarget> CODEC = Codec.xor(PostChainConfig.FullScreenTarget.CODEC, PostChainConfig.FixedSizedTarget.CODEC)
+		Codec<PostChainConfig.InternalTarget> CODEC = Codec.either(PostChainConfig.FixedSizedTarget.CODEC, PostChainConfig.FullScreenTarget.CODEC)
 			.xmap(either -> either.map(Function.identity(), Function.identity()), internalTarget -> {
 				Objects.requireNonNull(internalTarget);
 
 				return switch (internalTarget) {
-					case PostChainConfig.FullScreenTarget fullScreenTarget -> Either.left(fullScreenTarget);
-					case PostChainConfig.FixedSizedTarget fixedSizedTarget -> Either.right(fixedSizedTarget);
+					case PostChainConfig.FixedSizedTarget fixedSizedTarget -> Either.left(fixedSizedTarget);
+					case PostChainConfig.FullScreenTarget fullScreenTarget -> Either.right(fullScreenTarget);
 					default -> throw new MatchException(null, null);
 				};
 			});

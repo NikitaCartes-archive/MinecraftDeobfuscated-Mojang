@@ -61,8 +61,6 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.hoglin.Hoglin;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.schedule.Activity;
-import net.minecraft.world.item.ArmorItem;
-import net.minecraft.world.item.ArmorMaterials;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -635,10 +633,9 @@ public class PiglinAi {
 		return (List<AbstractPiglin>)abstractPiglin.getBrain().getMemory(MemoryModuleType.NEARBY_ADULT_PIGLINS).orElse(ImmutableList.of());
 	}
 
-	public static boolean isWearingGold(LivingEntity livingEntity) {
+	public static boolean isWearingSafeArmor(LivingEntity livingEntity) {
 		for (ItemStack itemStack : livingEntity.getArmorAndBodyArmorSlots()) {
-			Item item = itemStack.getItem();
-			if (item instanceof ArmorItem && ((ArmorItem)item).getMaterial().is(ArmorMaterials.GOLD)) {
+			if (itemStack.is(ItemTags.PIGLIN_SAFE_ARMOR)) {
 				return true;
 			}
 		}

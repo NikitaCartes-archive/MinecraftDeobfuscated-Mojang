@@ -35,8 +35,20 @@ public class Octree {
 		return this.root.add(renderSection);
 	}
 
-	public void visitNodes(Octree.OctreeVisitor octreeVisitor, Frustum frustum) {
-		this.root.visitNodes(octreeVisitor, false, frustum, 0);
+	public void visitNodes(Octree.OctreeVisitor octreeVisitor, Frustum frustum, int i) {
+		this.root.visitNodes(octreeVisitor, false, frustum, 0, i, true);
+	}
+
+	boolean isClose(double d, double e, double f, double g, double h, double i, int j) {
+		int k = this.cameraSectionCenter.getX();
+		int l = this.cameraSectionCenter.getY();
+		int m = this.cameraSectionCenter.getZ();
+		return (double)k > d - (double)j
+			&& (double)k < g + (double)j
+			&& (double)l > e - (double)j
+			&& (double)l < h + (double)j
+			&& (double)m > f - (double)j
+			&& (double)m < i + (double)j;
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -105,7 +117,7 @@ public class Octree {
 			int i = getNodeIndex(this.sorting, bl4, bl5, bl6);
 			if (this.areChildrenLeaves()) {
 				boolean bl7 = this.nodes[i] != null;
-				this.nodes[i] = new Octree.Leaf(renderSection);
+				this.nodes[i] = Octree.this.new Leaf(renderSection);
 				return !bl7;
 			} else if (this.nodes[i] != null) {
 				Octree.Branch branch = (Octree.Branch)this.nodes[i];
@@ -174,20 +186,30 @@ public class Octree {
 		}
 
 		@Override
-		public void visitNodes(Octree.OctreeVisitor octreeVisitor, boolean bl, Frustum frustum, int i) {
-			boolean bl2 = bl;
+		public void visitNodes(Octree.OctreeVisitor octreeVisitor, boolean bl, Frustum frustum, int i, int j, boolean bl2) {
+			boolean bl3 = bl;
 			if (!bl) {
-				int j = frustum.cubeInFrustum(this.boundingBox);
-				bl = j == -2;
-				bl2 = j == -2 || j == -1;
+				int k = frustum.cubeInFrustum(this.boundingBox);
+				bl = k == -2;
+				bl3 = k == -2 || k == -1;
 			}
 
-			if (bl2) {
-				octreeVisitor.visit(this, bl, i);
+			if (bl3) {
+				bl2 = bl2
+					&& Octree.this.isClose(
+						(double)this.boundingBox.minX(),
+						(double)this.boundingBox.minY(),
+						(double)this.boundingBox.minZ(),
+						(double)this.boundingBox.maxX(),
+						(double)this.boundingBox.maxY(),
+						(double)this.boundingBox.maxZ(),
+						j
+					);
+				octreeVisitor.visit(this, bl, i, bl2);
 
 				for (Octree.Node node : this.nodes) {
 					if (node != null) {
-						node.visitNodes(octreeVisitor, bl, frustum, i + 1);
+						node.visitNodes(octreeVisitor, bl, frustum, i + 1, j, bl2);
 					}
 				}
 			}
@@ -213,11 +235,19 @@ public class Octree {
 	}
 
 	@Environment(EnvType.CLIENT)
-	static record Leaf(SectionRenderDispatcher.RenderSection section) implements Octree.Node {
+	final class Leaf implements Octree.Node {
+		private final SectionRenderDispatcher.RenderSection section;
+
+		Leaf(final SectionRenderDispatcher.RenderSection renderSection) {
+			this.section = renderSection;
+		}
+
 		@Override
-		public void visitNodes(Octree.OctreeVisitor octreeVisitor, boolean bl, Frustum frustum, int i) {
+		public void visitNodes(Octree.OctreeVisitor octreeVisitor, boolean bl, Frustum frustum, int i, int j, boolean bl2) {
+			AABB aABB = this.section.getBoundingBox();
 			if (bl || frustum.isVisible(this.getSection().getBoundingBox())) {
-				octreeVisitor.visit(this, bl, i);
+				bl2 = bl2 && Octree.this.isClose(aABB.minX, aABB.minY, aABB.minZ, aABB.maxX, aABB.maxY, aABB.maxZ, j);
+				octreeVisitor.visit(this, bl, i, bl2);
 			}
 		}
 
@@ -234,7 +264,7 @@ public class Octree {
 
 	@Environment(EnvType.CLIENT)
 	public interface Node {
-		void visitNodes(Octree.OctreeVisitor octreeVisitor, boolean bl, Frustum frustum, int i);
+		void visitNodes(Octree.OctreeVisitor octreeVisitor, boolean bl, Frustum frustum, int i, int j, boolean bl2);
 
 		@Nullable
 		SectionRenderDispatcher.RenderSection getSection();
@@ -245,6 +275,6 @@ public class Octree {
 	@FunctionalInterface
 	@Environment(EnvType.CLIENT)
 	public interface OctreeVisitor {
-		void visit(Octree.Node node, boolean bl, int i);
+		void visit(Octree.Node node, boolean bl, int i, boolean bl2);
 	}
 }

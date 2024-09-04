@@ -16,16 +16,13 @@ import net.minecraft.tags.FluidTags;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Saddleable;
 import net.minecraft.world.entity.animal.armadillo.Armadillo;
 import net.minecraft.world.entity.animal.horse.AbstractChestedHorse;
-import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.item.PrimedTnt;
 import net.minecraft.world.entity.vehicle.Boat;
-import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.BoneMealItem;
 import net.minecraft.world.item.DispensibleContainerItem;
 import net.minecraft.world.item.DyeColor;
@@ -142,43 +139,6 @@ public interface DispenseItemBehavior {
 				}
 			}
 		);
-		DefaultDispenseItemBehavior defaultDispenseItemBehavior2 = new OptionalDispenseItemBehavior() {
-			@Override
-			protected ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
-				BlockPos blockPos = blockSource.pos().relative(blockSource.state().getValue(DispenserBlock.FACING));
-
-				for (AbstractHorse abstractHorse : blockSource.level()
-					.getEntitiesOfClass(AbstractHorse.class, new AABB(blockPos), abstractHorsex -> abstractHorsex.isAlive() && abstractHorsex.canUseSlot(EquipmentSlot.BODY))) {
-					if (abstractHorse.isBodyArmorItem(itemStack) && !abstractHorse.isWearingBodyArmor() && abstractHorse.isTamed()) {
-						abstractHorse.setBodyArmorItem(itemStack.split(1));
-						this.setSuccess(true);
-						return itemStack;
-					}
-				}
-
-				return super.execute(blockSource, itemStack);
-			}
-		};
-		DispenserBlock.registerBehavior(Items.LEATHER_HORSE_ARMOR, defaultDispenseItemBehavior2);
-		DispenserBlock.registerBehavior(Items.IRON_HORSE_ARMOR, defaultDispenseItemBehavior2);
-		DispenserBlock.registerBehavior(Items.GOLDEN_HORSE_ARMOR, defaultDispenseItemBehavior2);
-		DispenserBlock.registerBehavior(Items.DIAMOND_HORSE_ARMOR, defaultDispenseItemBehavior2);
-		DispenserBlock.registerBehavior(Items.WHITE_CARPET, defaultDispenseItemBehavior2);
-		DispenserBlock.registerBehavior(Items.ORANGE_CARPET, defaultDispenseItemBehavior2);
-		DispenserBlock.registerBehavior(Items.CYAN_CARPET, defaultDispenseItemBehavior2);
-		DispenserBlock.registerBehavior(Items.BLUE_CARPET, defaultDispenseItemBehavior2);
-		DispenserBlock.registerBehavior(Items.BROWN_CARPET, defaultDispenseItemBehavior2);
-		DispenserBlock.registerBehavior(Items.BLACK_CARPET, defaultDispenseItemBehavior2);
-		DispenserBlock.registerBehavior(Items.GRAY_CARPET, defaultDispenseItemBehavior2);
-		DispenserBlock.registerBehavior(Items.GREEN_CARPET, defaultDispenseItemBehavior2);
-		DispenserBlock.registerBehavior(Items.LIGHT_BLUE_CARPET, defaultDispenseItemBehavior2);
-		DispenserBlock.registerBehavior(Items.LIGHT_GRAY_CARPET, defaultDispenseItemBehavior2);
-		DispenserBlock.registerBehavior(Items.LIME_CARPET, defaultDispenseItemBehavior2);
-		DispenserBlock.registerBehavior(Items.MAGENTA_CARPET, defaultDispenseItemBehavior2);
-		DispenserBlock.registerBehavior(Items.PINK_CARPET, defaultDispenseItemBehavior2);
-		DispenserBlock.registerBehavior(Items.PURPLE_CARPET, defaultDispenseItemBehavior2);
-		DispenserBlock.registerBehavior(Items.RED_CARPET, defaultDispenseItemBehavior2);
-		DispenserBlock.registerBehavior(Items.YELLOW_CARPET, defaultDispenseItemBehavior2);
 		DispenserBlock.registerBehavior(
 			Items.CHEST,
 			new OptionalDispenseItemBehavior() {
@@ -321,19 +281,6 @@ public interface DispenseItemBehavior {
 				return itemStack;
 			}
 		});
-		DispenseItemBehavior dispenseItemBehavior2 = new OptionalDispenseItemBehavior() {
-			@Override
-			protected ItemStack execute(BlockSource blockSource, ItemStack itemStack) {
-				this.setSuccess(ArmorItem.dispenseArmor(blockSource, itemStack));
-				return itemStack;
-			}
-		};
-		DispenserBlock.registerBehavior(Items.CREEPER_HEAD, dispenseItemBehavior2);
-		DispenserBlock.registerBehavior(Items.ZOMBIE_HEAD, dispenseItemBehavior2);
-		DispenserBlock.registerBehavior(Items.DRAGON_HEAD, dispenseItemBehavior2);
-		DispenserBlock.registerBehavior(Items.SKELETON_SKULL, dispenseItemBehavior2);
-		DispenserBlock.registerBehavior(Items.PIGLIN_HEAD, dispenseItemBehavior2);
-		DispenserBlock.registerBehavior(Items.PLAYER_HEAD, dispenseItemBehavior2);
 		DispenserBlock.registerBehavior(
 			Items.WITHER_SKELETON_SKULL,
 			new OptionalDispenseItemBehavior() {
@@ -357,7 +304,7 @@ public interface DispenseItemBehavior {
 						itemStack.shrink(1);
 						this.setSuccess(true);
 					} else {
-						this.setSuccess(ArmorItem.dispenseArmor(blockSource, itemStack));
+						this.setSuccess(EquipmentDispenseItemBehavior.dispenseEquipment(blockSource, itemStack));
 					}
 
 					return itemStack;
@@ -379,7 +326,7 @@ public interface DispenseItemBehavior {
 					itemStack.shrink(1);
 					this.setSuccess(true);
 				} else {
-					this.setSuccess(ArmorItem.dispenseArmor(blockSource, itemStack));
+					this.setSuccess(EquipmentDispenseItemBehavior.dispenseEquipment(blockSource, itemStack));
 				}
 
 				return itemStack;

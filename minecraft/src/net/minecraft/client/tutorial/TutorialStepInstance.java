@@ -3,7 +3,7 @@ package net.minecraft.client.tutorial;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.player.Input;
+import net.minecraft.client.player.ClientInput;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
@@ -17,7 +17,7 @@ public interface TutorialStepInstance {
 	default void tick() {
 	}
 
-	default void onInput(Input input) {
+	default void onInput(ClientInput clientInput) {
 	}
 
 	default void onMouse(double d, double e) {

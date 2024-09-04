@@ -4,8 +4,8 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.renderer.entity.layers.CustomHeadLayer;
-import net.minecraft.client.renderer.entity.layers.ElytraLayer;
 import net.minecraft.client.renderer.entity.layers.ItemInHandLayer;
+import net.minecraft.client.renderer.entity.layers.WingsLayer;
 import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -27,7 +27,7 @@ public abstract class HumanoidMobRenderer<T extends Mob, S extends HumanoidRende
 	public HumanoidMobRenderer(EntityRendererProvider.Context context, M humanoidModel, M humanoidModel2, float f, CustomHeadLayer.Transforms transforms) {
 		super(context, humanoidModel, humanoidModel2, f);
 		this.addLayer(new CustomHeadLayer<>(this, context.getModelSet(), transforms, context.getItemRenderer()));
-		this.addLayer(new ElytraLayer<>(this, context.getModelSet()));
+		this.addLayer(new WingsLayer<>(this, context.getModelSet(), context.getEquipmentRenderer()));
 		this.addLayer(new ItemInHandLayer<>(this, context.getItemRenderer()));
 	}
 

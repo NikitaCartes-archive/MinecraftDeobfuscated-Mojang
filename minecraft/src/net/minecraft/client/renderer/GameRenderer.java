@@ -696,7 +696,7 @@ public class GameRenderer implements AutoCloseable {
 			float l = k * (float) Math.PI;
 			float m = this.itemActivationOffX * (float)(guiGraphics.guiWidth() / 4);
 			float n = this.itemActivationOffY * (float)(guiGraphics.guiHeight() / 4);
-			PoseStack poseStack = new PoseStack();
+			PoseStack poseStack = guiGraphics.pose();
 			poseStack.pushPose();
 			poseStack.translate(
 				(float)(guiGraphics.guiWidth() / 2) + m * Mth.abs(Mth.sin(l * 2.0F)), (float)(guiGraphics.guiHeight() / 2) + n * Mth.abs(Mth.sin(l * 2.0F)), -50.0F
@@ -706,11 +706,13 @@ public class GameRenderer implements AutoCloseable {
 			poseStack.mulPose(Axis.YP.rotationDegrees(900.0F * Mth.abs(Mth.sin(l))));
 			poseStack.mulPose(Axis.XP.rotationDegrees(6.0F * Mth.cos(g * 8.0F)));
 			poseStack.mulPose(Axis.ZP.rotationDegrees(6.0F * Mth.cos(g * 8.0F)));
-			this.minecraft
-				.getItemRenderer()
-				.renderStatic(
-					this.itemActivationItem, ItemDisplayContext.FIXED, 15728880, OverlayTexture.NO_OVERLAY, poseStack, guiGraphics.bufferSource(), this.minecraft.level, 0
-				);
+			guiGraphics.drawSpecial(
+				multiBufferSource -> this.minecraft
+						.getItemRenderer()
+						.renderStatic(
+							this.itemActivationItem, ItemDisplayContext.FIXED, 15728880, OverlayTexture.NO_OVERLAY, poseStack, multiBufferSource, this.minecraft.level, 0
+						)
+			);
 			poseStack.popPose();
 		}
 	}

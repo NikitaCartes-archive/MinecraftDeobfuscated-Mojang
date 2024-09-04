@@ -7,19 +7,22 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BundleItem;
-import net.minecraft.world.item.Items;
+import net.minecraft.world.item.Item;
 import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class ModelDiscovery {
 	static final Logger LOGGER = LogUtils.getLogger();
+	public static final String INVENTORY_MODEL_PREFIX = "item/";
 	private final Map<ResourceLocation, UnbakedModel> inputModels;
 	final UnbakedModel missingModel;
 	private final Map<ModelResourceLocation, UnbakedModel> topModels = new HashMap();
@@ -32,17 +35,22 @@ public class ModelDiscovery {
 		this.referencedModels.put(MissingBlockModel.LOCATION, unbakedModel);
 	}
 
-	private void registerItemTopModel(ResourceLocation resourceLocation) {
-		ModelResourceLocation modelResourceLocation = ModelResourceLocation.inventory(resourceLocation);
-		ResourceLocation resourceLocation2 = resourceLocation.withPrefix("item/");
-		UnbakedModel unbakedModel = this.getBlockModel(resourceLocation2);
-		this.registerTopModel(modelResourceLocation, unbakedModel);
-	}
+	private static Set<ModelResourceLocation> listMandatoryModels() {
+		Set<ModelResourceLocation> set = new HashSet();
+		BuiltInRegistries.ITEM.listElements().forEach(reference -> {
+			ResourceLocation resourceLocation = ((Item)reference.value()).components().get(DataComponents.ITEM_MODEL);
+			if (resourceLocation != null) {
+				set.add(ModelResourceLocation.inventory(resourceLocation));
+			}
 
-	private void registerSpecialItemTopModel(ModelResourceLocation modelResourceLocation) {
-		ResourceLocation resourceLocation = modelResourceLocation.id().withPrefix("item/");
-		UnbakedModel unbakedModel = this.getBlockModel(resourceLocation);
-		this.registerTopModel(modelResourceLocation, unbakedModel);
+			if (reference.value() instanceof BundleItem bundleItem) {
+				set.add(ModelResourceLocation.inventory(bundleItem.openFrontModel()));
+				set.add(ModelResourceLocation.inventory(bundleItem.openBackModel()));
+			}
+		});
+		set.add(ItemRenderer.TRIDENT_MODEL);
+		set.add(ItemRenderer.SPYGLASS_MODEL);
+		return set;
 	}
 
 	private void registerTopModel(ModelResourceLocation modelResourceLocation, UnbakedModel unbakedModel) {
@@ -52,20 +60,31 @@ public class ModelDiscovery {
 	public void registerStandardModels(BlockStateModelLoader.LoadedModels loadedModels) {
 		this.referencedModels.put(SpecialModels.BUILTIN_GENERATED, SpecialModels.GENERATED_MARKER);
 		this.referencedModels.put(SpecialModels.BUILTIN_BLOCK_ENTITY, SpecialModels.BLOCK_ENTITY_MARKER);
-		loadedModels.models().forEach((modelResourceLocation, loadedModel) -> this.registerTopModel(modelResourceLocation, loadedModel.model()));
-
-		for (ResourceLocation resourceLocation : BuiltInRegistries.ITEM.keySet()) {
-			this.registerItemTopModel(resourceLocation);
+		Set<ModelResourceLocation> set = listMandatoryModels();
+		loadedModels.models().forEach((modelResourceLocation, loadedModel) -> {
+			this.registerTopModel(modelResourceLocation, loadedModel.model());
+			set.remove(modelResourceLocation);
+		});
+		this.inputModels
+			.keySet()
+			.forEach(
+				resourceLocation -> {
+					if (resourceLocation.getPath().startsWith("item/")) {
+						ModelResourceLocation modelResourceLocation = ModelResourceLocation.inventory(
+							resourceLocation.withPath((UnaryOperator<String>)(string -> string.substring("item/".length())))
+						);
+						this.registerTopModel(modelResourceLocation, new ItemModel(resourceLocation));
+						set.remove(modelResourceLocation);
+					}
+				}
+			);
+		if (!set.isEmpty()) {
+			LOGGER.warn("Missing mandatory models: {}", set.stream().map(modelResourceLocation -> "\n\t" + modelResourceLocation).collect(Collectors.joining()));
 		}
-
-		this.registerSpecialItemTopModel(ItemRenderer.TRIDENT_IN_HAND_MODEL);
-		this.registerSpecialItemTopModel(ItemRenderer.SPYGLASS_IN_HAND_MODEL);
-		this.registerSpecialItemTopModel(ItemRenderer.getBundleOpenFrontModelLocation((BundleItem)Items.BUNDLE));
-		this.registerSpecialItemTopModel(ItemRenderer.getBundleOpenBackModelLocation((BundleItem)Items.BUNDLE));
 	}
 
 	public void discoverDependencies() {
-		this.topModels.values().forEach(unbakedModel -> unbakedModel.resolveDependencies(new ModelDiscovery.ResolverImpl(), UnbakedModel.ResolutionContext.TOP));
+		this.topModels.values().forEach(unbakedModel -> unbakedModel.resolveDependencies(new ModelDiscovery.ResolverImpl()));
 	}
 
 	public Map<ModelResourceLocation, UnbakedModel> getTopModels() {
@@ -94,47 +113,17 @@ public class ModelDiscovery {
 	class ResolverImpl implements UnbakedModel.Resolver {
 		private final List<ResourceLocation> stack = new ArrayList();
 		private final Set<ResourceLocation> resolvedModels = new HashSet();
-		private UnbakedModel.ResolutionContext context = UnbakedModel.ResolutionContext.TOP;
 
 		@Override
 		public UnbakedModel resolve(ResourceLocation resourceLocation) {
-			return this.resolve(resourceLocation, false);
-		}
-
-		@Override
-		public UnbakedModel resolveForOverride(ResourceLocation resourceLocation) {
-			if (this.context == UnbakedModel.ResolutionContext.OVERRIDE) {
-				ModelDiscovery.LOGGER.warn("Re-entrant override in {}->{}", this.stacktraceToString(), resourceLocation);
-			}
-
-			this.context = UnbakedModel.ResolutionContext.OVERRIDE;
-			UnbakedModel unbakedModel = this.resolve(resourceLocation, true);
-			this.context = UnbakedModel.ResolutionContext.TOP;
-			return unbakedModel;
-		}
-
-		private boolean isReferenceRecursive(ResourceLocation resourceLocation, boolean bl) {
-			if (this.stack.isEmpty()) {
-				return false;
-			} else if (!this.stack.contains(resourceLocation)) {
-				return false;
-			} else if (bl) {
-				ResourceLocation resourceLocation2 = (ResourceLocation)this.stack.getLast();
-				return !resourceLocation2.equals(resourceLocation);
-			} else {
-				return true;
-			}
-		}
-
-		private UnbakedModel resolve(ResourceLocation resourceLocation, boolean bl) {
-			if (this.isReferenceRecursive(resourceLocation, bl)) {
+			if (this.stack.contains(resourceLocation)) {
 				ModelDiscovery.LOGGER.warn("Detected model loading loop: {}->{}", this.stacktraceToString(), resourceLocation);
 				return ModelDiscovery.this.missingModel;
 			} else {
 				UnbakedModel unbakedModel = ModelDiscovery.this.getBlockModel(resourceLocation);
 				if (this.resolvedModels.add(resourceLocation)) {
 					this.stack.add(resourceLocation);
-					unbakedModel.resolveDependencies(this, this.context);
+					unbakedModel.resolveDependencies(this);
 					this.stack.remove(resourceLocation);
 				}
 

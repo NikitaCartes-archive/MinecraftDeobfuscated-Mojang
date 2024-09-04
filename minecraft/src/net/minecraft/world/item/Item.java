@@ -1,11 +1,10 @@
 package net.minecraft.world.item;
 
-import com.google.common.collect.Interner;
-import com.google.common.collect.Interners;
 import com.google.common.collect.Maps;
 import com.mojang.logging.LogUtils;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import javax.annotation.Nullable;
 import net.minecraft.SharedConstants;
@@ -19,7 +18,9 @@ import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.DependantName;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
@@ -53,6 +54,7 @@ import net.minecraft.world.item.component.UseRemainder;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.item.enchantment.Enchantable;
 import net.minecraft.world.item.enchantment.Repairable;
+import net.minecraft.world.item.equipment.Equippable;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.Level;
@@ -76,8 +78,7 @@ public class Item implements FeatureElement, ItemLike {
 	private final DataComponentMap components;
 	@Nullable
 	private final Item craftingRemainingItem;
-	@Nullable
-	private String descriptionId;
+	protected final String descriptionId;
 	private final FeatureFlagSet requiredFeatures;
 
 	public static int getId(Item item) {
@@ -94,7 +95,8 @@ public class Item implements FeatureElement, ItemLike {
 	}
 
 	public Item(Item.Properties properties) {
-		this.components = properties.buildAndValidateComponents();
+		this.descriptionId = properties.effectiveDescriptionId();
+		this.components = properties.buildAndValidateComponents(Component.translatable(this.descriptionId), properties.effectiveModel());
 		this.craftingRemainingItem = properties.craftingRemainingItem;
 		this.requiredFeatures = properties.requiredFeatures;
 		if (SharedConstants.IS_RUNNING_IN_IDE) {
@@ -148,7 +150,12 @@ public class Item implements FeatureElement, ItemLike {
 	public InteractionResult use(Level level, Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
 		Consumable consumable = itemStack.get(DataComponents.CONSUMABLE);
-		return (InteractionResult)(consumable != null ? consumable.startConsuming(player, itemStack, interactionHand) : InteractionResult.PASS);
+		if (consumable != null) {
+			return consumable.startConsuming(player, itemStack, interactionHand);
+		} else {
+			Equippable equippable = itemStack.get(DataComponents.EQUIPPABLE);
+			return (InteractionResult)(equippable != null ? equippable.swapWithEquipmentSlot(itemStack, player) : InteractionResult.PASS);
+		}
 	}
 
 	public ItemStack finishUsingItem(ItemStack itemStack, Level level, LivingEntity livingEntity) {
@@ -211,28 +218,8 @@ public class Item implements FeatureElement, ItemLike {
 		return InteractionResult.PASS;
 	}
 
-	public Component getDescription() {
-		return Component.translatable(this.getDescriptionId());
-	}
-
 	public String toString() {
 		return BuiltInRegistries.ITEM.wrapAsHolder(this).getRegisteredName();
-	}
-
-	protected String getOrCreateDescriptionId() {
-		if (this.descriptionId == null) {
-			this.descriptionId = Util.makeDescriptionId("item", BuiltInRegistries.ITEM.getKey(this));
-		}
-
-		return this.descriptionId;
-	}
-
-	public String getDescriptionId() {
-		return this.getOrCreateDescriptionId();
-	}
-
-	public String getDescriptionId(ItemStack itemStack) {
-		return this.getDescriptionId();
 	}
 
 	@Nullable
@@ -279,8 +266,16 @@ public class Item implements FeatureElement, ItemLike {
 		return Optional.empty();
 	}
 
+	public final String getDescriptionId() {
+		return this.descriptionId;
+	}
+
+	public final Component getName() {
+		return this.components.getOrDefault(DataComponents.ITEM_NAME, CommonComponents.EMPTY);
+	}
+
 	public Component getName(ItemStack itemStack) {
-		return Component.translatable(this.getDescriptionId(itemStack));
+		return itemStack.getComponents().getOrDefault(DataComponents.ITEM_NAME, CommonComponents.EMPTY);
 	}
 
 	public boolean isFoil(ItemStack itemStack) {
@@ -291,18 +286,6 @@ public class Item implements FeatureElement, ItemLike {
 		Vec3 vec3 = player.getEyePosition();
 		Vec3 vec32 = vec3.add(player.calculateViewVector(player.getXRot(), player.getYRot()).scale(player.blockInteractionRange()));
 		return level.clip(new ClipContext(vec3, vec32, ClipContext.Block.OUTLINE, fluid, player));
-	}
-
-	@Deprecated(
-		forRemoval = true
-	)
-	public boolean isValidRepairItem(ItemStack itemStack, ItemStack itemStack2) {
-		return false;
-	}
-
-	@Deprecated
-	public ItemAttributeModifiers getDefaultAttributeModifiers() {
-		return ItemAttributeModifiers.EMPTY;
 	}
 
 	public boolean useOnRelease(ItemStack itemStack) {
@@ -327,12 +310,16 @@ public class Item implements FeatureElement, ItemLike {
 	}
 
 	public static class Properties {
-		private static final Interner<DataComponentMap> COMPONENT_INTERNER = Interners.newStrongInterner();
-		@Nullable
-		private DataComponentMap.Builder components;
+		private static final DependantName<Item, String> BLOCK_DESCRIPTION_ID = resourceKey -> Util.makeDescriptionId("block", resourceKey.location());
+		private static final DependantName<Item, String> ITEM_DESCRIPTION_ID = resourceKey -> Util.makeDescriptionId("item", resourceKey.location());
+		private final DataComponentMap.Builder components = DataComponentMap.builder().addAll(DataComponents.COMMON_ITEM_COMPONENTS);
 		@Nullable
 		Item craftingRemainingItem;
 		FeatureFlagSet requiredFeatures = FeatureFlags.VANILLA_SET;
+		@Nullable
+		private ResourceKey<Item> id;
+		private DependantName<Item, String> descriptionId = ITEM_DESCRIPTION_ID;
+		private DependantName<Item, ResourceLocation> model = ResourceKey::location;
 
 		public Item.Properties food(FoodProperties foodProperties) {
 			return this.food(foodProperties, Consumables.DEFAULT_FOOD);
@@ -391,16 +378,53 @@ public class Item implements FeatureElement, ItemLike {
 			return this.component(DataComponents.REPAIRABLE, new Repairable(holderGetter.getOrThrow(tagKey)));
 		}
 
+		public Item.Properties equippable(EquipmentSlot equipmentSlot, Holder<SoundEvent> holder, ResourceLocation resourceLocation) {
+			return this.component(DataComponents.EQUIPPABLE, new Equippable(equipmentSlot, holder, Optional.of(resourceLocation), Optional.empty(), true));
+		}
+
+		public Item.Properties equippable(EquipmentSlot equipmentSlot) {
+			return this.component(DataComponents.EQUIPPABLE, new Equippable(equipmentSlot, SoundEvents.ARMOR_EQUIP_GENERIC, Optional.empty(), Optional.empty(), true));
+		}
+
 		public Item.Properties requiredFeatures(FeatureFlag... featureFlags) {
 			this.requiredFeatures = FeatureFlags.REGISTRY.subset(featureFlags);
 			return this;
 		}
 
-		public <T> Item.Properties component(DataComponentType<T> dataComponentType, T object) {
-			if (this.components == null) {
-				this.components = DataComponentMap.builder().addAll(DataComponents.COMMON_ITEM_COMPONENTS);
-			}
+		public Item.Properties setId(ResourceKey<Item> resourceKey) {
+			this.id = resourceKey;
+			return this;
+		}
 
+		public Item.Properties overrideDescription(String string) {
+			this.descriptionId = DependantName.fixed(string);
+			return this;
+		}
+
+		public Item.Properties useBlockDescriptionPrefix() {
+			this.descriptionId = BLOCK_DESCRIPTION_ID;
+			return this;
+		}
+
+		public Item.Properties useItemDescriptionPrefix() {
+			this.descriptionId = ITEM_DESCRIPTION_ID;
+			return this;
+		}
+
+		protected String effectiveDescriptionId() {
+			return this.descriptionId.get((ResourceKey<Item>)Objects.requireNonNull(this.id, "Item id not set"));
+		}
+
+		public Item.Properties overrideModel(ResourceLocation resourceLocation) {
+			this.model = DependantName.fixed(resourceLocation);
+			return this;
+		}
+
+		public ResourceLocation effectiveModel() {
+			return this.model.get((ResourceKey<Item>)Objects.requireNonNull(this.id, "Item id not set"));
+		}
+
+		public <T> Item.Properties component(DataComponentType<T> dataComponentType, T object) {
 			this.components.set(dataComponentType, object);
 			return this;
 		}
@@ -409,17 +433,13 @@ public class Item implements FeatureElement, ItemLike {
 			return this.component(DataComponents.ATTRIBUTE_MODIFIERS, itemAttributeModifiers);
 		}
 
-		DataComponentMap buildAndValidateComponents() {
-			DataComponentMap dataComponentMap = this.buildComponents();
+		DataComponentMap buildAndValidateComponents(Component component, ResourceLocation resourceLocation) {
+			DataComponentMap dataComponentMap = this.components.set(DataComponents.ITEM_NAME, component).set(DataComponents.ITEM_MODEL, resourceLocation).build();
 			if (dataComponentMap.has(DataComponents.DAMAGE) && dataComponentMap.getOrDefault(DataComponents.MAX_STACK_SIZE, 1) > 1) {
 				throw new IllegalStateException("Item cannot have both durability and be stackable");
 			} else {
 				return dataComponentMap;
 			}
-		}
-
-		private DataComponentMap buildComponents() {
-			return this.components == null ? DataComponents.COMMON_ITEM_COMPONENTS : COMPONENT_INTERNER.intern(this.components.build());
 		}
 	}
 

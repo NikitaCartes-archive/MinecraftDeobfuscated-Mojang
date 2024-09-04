@@ -1,5 +1,6 @@
 package net.minecraft.world.entity.monster;
 
+import com.google.common.annotations.VisibleForTesting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -8,6 +9,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.ConversionParams;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
@@ -80,16 +82,18 @@ public class Skeleton extends AbstractSkeleton {
 		}
 	}
 
-	private void startFreezeConversion(int i) {
+	@VisibleForTesting
+	public void startFreezeConversion(int i) {
 		this.conversionTime = i;
 		this.setFreezeConverting(true);
 	}
 
 	protected void doFreezeConversion() {
-		this.convertTo(EntityType.STRAY, true);
-		if (!this.isSilent()) {
-			this.level().levelEvent(null, 1048, this.blockPosition(), 0);
-		}
+		this.convertTo(EntityType.STRAY, ConversionParams.single(this, true, true), stray -> {
+			if (!this.isSilent()) {
+				this.level().levelEvent(null, 1048, this.blockPosition(), 0);
+			}
+		});
 	}
 
 	@Override

@@ -1,20 +1,20 @@
 package net.minecraft.client.renderer.block.model.multipart;
 
-import com.google.common.collect.Lists;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
+import com.google.gson.JsonSyntaxException;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.block.model.MultiVariant;
@@ -59,23 +59,20 @@ public class MultiPart implements UnbakedBlockStateModel {
 	}
 
 	@Override
-	public void resolveDependencies(UnbakedModel.Resolver resolver, UnbakedModel.ResolutionContext resolutionContext) {
-		this.selectors.forEach(instantiatedSelector -> instantiatedSelector.variant.resolveDependencies(resolver, resolutionContext));
+	public void resolveDependencies(UnbakedModel.Resolver resolver) {
+		this.selectors.forEach(instantiatedSelector -> instantiatedSelector.variant.resolveDependencies(resolver));
 	}
 
-	@Nullable
 	@Override
 	public BakedModel bake(ModelBaker modelBaker, Function<Material, TextureAtlasSprite> function, ModelState modelState) {
-		MultiPartBakedModel.Builder builder = new MultiPartBakedModel.Builder();
+		List<MultiPartBakedModel.Selector> list = new ArrayList(this.selectors.size());
 
 		for (MultiPart.InstantiatedSelector instantiatedSelector : this.selectors) {
 			BakedModel bakedModel = instantiatedSelector.variant.bake(modelBaker, function, modelState);
-			if (bakedModel != null) {
-				builder.add(instantiatedSelector.predicate, bakedModel);
-			}
+			list.add(new MultiPartBakedModel.Selector(instantiatedSelector.predicate, bakedModel));
 		}
 
-		return builder.build();
+		return new MultiPartBakedModel(list);
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -100,13 +97,16 @@ public class MultiPart implements UnbakedBlockStateModel {
 		}
 
 		private List<Selector> getSelectors(JsonDeserializationContext jsonDeserializationContext, JsonArray jsonArray) {
-			List<Selector> list = Lists.<Selector>newArrayList();
+			List<Selector> list = new ArrayList();
+			if (jsonArray.isEmpty()) {
+				throw new JsonSyntaxException("Empty selector array");
+			} else {
+				for (JsonElement jsonElement : jsonArray) {
+					list.add((Selector)jsonDeserializationContext.deserialize(jsonElement, Selector.class));
+				}
 
-			for (JsonElement jsonElement : jsonArray) {
-				list.add((Selector)jsonDeserializationContext.deserialize(jsonElement, Selector.class));
+				return list;
 			}
-
-			return list;
 		}
 	}
 

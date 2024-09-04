@@ -9,7 +9,6 @@ import com.google.gson.JsonParseException;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.function.Function;
-import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -19,34 +18,43 @@ import net.minecraft.client.resources.model.ModelBaker;
 import net.minecraft.client.resources.model.ModelState;
 import net.minecraft.client.resources.model.UnbakedModel;
 import net.minecraft.client.resources.model.WeightedBakedModel;
+import net.minecraft.util.random.SimpleWeightedRandomList;
 import net.minecraft.world.level.block.state.BlockState;
 
 @Environment(EnvType.CLIENT)
 public record MultiVariant(List<Variant> variants) implements UnbakedBlockStateModel {
+	public MultiVariant(List<Variant> variants) {
+		if (variants.isEmpty()) {
+			throw new IllegalArgumentException("Variant list must contain at least one element");
+		} else {
+			this.variants = variants;
+		}
+	}
+
 	@Override
 	public Object visualEqualityGroup(BlockState blockState) {
 		return this;
 	}
 
 	@Override
-	public void resolveDependencies(UnbakedModel.Resolver resolver, UnbakedModel.ResolutionContext resolutionContext) {
+	public void resolveDependencies(UnbakedModel.Resolver resolver) {
 		this.variants.forEach(variant -> resolver.resolve(variant.getModelLocation()));
 	}
 
-	@Nullable
 	@Override
 	public BakedModel bake(ModelBaker modelBaker, Function<Material, TextureAtlasSprite> function, ModelState modelState) {
-		if (this.variants.isEmpty()) {
-			return null;
+		if (this.variants.size() == 1) {
+			Variant variant = (Variant)this.variants.getFirst();
+			return modelBaker.bake(variant.getModelLocation(), variant);
 		} else {
-			WeightedBakedModel.Builder builder = new WeightedBakedModel.Builder();
+			SimpleWeightedRandomList.Builder<BakedModel> builder = SimpleWeightedRandomList.builder();
 
-			for (Variant variant : this.variants) {
-				BakedModel bakedModel = modelBaker.bake(variant.getModelLocation(), variant);
-				builder.add(bakedModel, variant.getWeight());
+			for (Variant variant2 : this.variants) {
+				BakedModel bakedModel = modelBaker.bake(variant2.getModelLocation(), variant2);
+				builder.add(bakedModel, variant2.getWeight());
 			}
 
-			return builder.build();
+			return new WeightedBakedModel(builder.build());
 		}
 	}
 
@@ -56,7 +64,7 @@ public record MultiVariant(List<Variant> variants) implements UnbakedBlockStateM
 			List<Variant> list = Lists.<Variant>newArrayList();
 			if (jsonElement.isJsonArray()) {
 				JsonArray jsonArray = jsonElement.getAsJsonArray();
-				if (jsonArray.size() == 0) {
+				if (jsonArray.isEmpty()) {
 					throw new JsonParseException("Empty variant array");
 				}
 

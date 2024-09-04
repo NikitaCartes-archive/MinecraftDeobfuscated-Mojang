@@ -344,7 +344,7 @@ public class StatsScreen extends Screen {
 					}
 
 					Item item = itemRow.getItem();
-					guiGraphics.renderTooltip(StatsScreen.this.font, item.getDescription(), i, j);
+					guiGraphics.renderTooltip(StatsScreen.this.font, item.getName(), i, j);
 				} else {
 					Component component = null;
 					int l = i - k;
@@ -425,7 +425,7 @@ public class StatsScreen extends Screen {
 
 			@Override
 			public Component getNarration() {
-				return Component.translatable("narrator.select", this.item.getDescription());
+				return Component.translatable("narrator.select", this.item.getName());
 			}
 		}
 

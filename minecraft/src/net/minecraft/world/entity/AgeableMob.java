@@ -1,5 +1,6 @@
 package net.minecraft.world.entity;
 
+import com.google.common.annotations.VisibleForTesting;
 import javax.annotation.Nullable;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -160,6 +161,16 @@ public abstract class AgeableMob extends PathfinderMob {
 
 	public static int getSpeedUpSecondsWhenFeeding(int i) {
 		return (int)((float)(i / 20) * 0.1F);
+	}
+
+	@VisibleForTesting
+	public int getForcedAge() {
+		return this.forcedAge;
+	}
+
+	@VisibleForTesting
+	public int getForcedAgeTimer() {
+		return this.forcedAgeTimer;
 	}
 
 	public static class AgeableMobGroupData implements SpawnGroupData {

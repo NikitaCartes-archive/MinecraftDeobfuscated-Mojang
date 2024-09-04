@@ -29,7 +29,7 @@ public final class HorseRenderer extends AbstractHorseRenderer<Horse, HorseRende
 	public HorseRenderer(EntityRendererProvider.Context context) {
 		super(context, new HorseModel(context.bakeLayer(ModelLayers.HORSE)), new HorseModel(context.bakeLayer(ModelLayers.HORSE_BABY)), 1.1F);
 		this.addLayer(new HorseMarkingLayer(this));
-		this.addLayer(new HorseArmorLayer(this, context.getModelSet()));
+		this.addLayer(new HorseArmorLayer(this, context.getModelSet(), context.getEquipmentRenderer()));
 	}
 
 	public ResourceLocation getTextureLocation(HorseRenderState horseRenderState) {

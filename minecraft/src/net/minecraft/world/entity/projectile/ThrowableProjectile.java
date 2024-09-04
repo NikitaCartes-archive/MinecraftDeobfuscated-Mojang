@@ -40,33 +40,42 @@ public abstract class ThrowableProjectile extends Projectile {
 
 	@Override
 	public void tick() {
-		super.tick();
 		HitResult hitResult = ProjectileUtil.getHitResultOnMoveVector(this, this::canHitEntity);
+		Vec3 vec3;
 		if (hitResult.getType() != HitResult.Type.MISS) {
+			vec3 = hitResult.getLocation();
+		} else {
+			vec3 = this.position().add(this.getDeltaMovement());
+		}
+
+		this.setPos(vec3);
+		this.updateRotation();
+		this.applyEffectsFromBlocks();
+		super.tick();
+		if (hitResult.getType() != HitResult.Type.MISS && this.isAlive()) {
 			this.hitTargetOrDeflectSelf(hitResult);
 		}
 
+		this.applyInertia();
+		this.applyGravity();
+	}
+
+	private void applyInertia() {
 		Vec3 vec3 = this.getDeltaMovement();
-		double d = this.getX() + vec3.x;
-		double e = this.getY() + vec3.y;
-		double f = this.getZ() + vec3.z;
-		this.updateRotation();
-		float h;
+		Vec3 vec32 = this.position();
+		float g;
 		if (this.isInWater()) {
 			for (int i = 0; i < 4; i++) {
-				float g = 0.25F;
-				this.level().addParticle(ParticleTypes.BUBBLE, d - vec3.x * 0.25, e - vec3.y * 0.25, f - vec3.z * 0.25, vec3.x, vec3.y, vec3.z);
+				float f = 0.25F;
+				this.level().addParticle(ParticleTypes.BUBBLE, vec32.x - vec3.x * 0.25, vec32.y - vec3.y * 0.25, vec32.z - vec3.z * 0.25, vec3.x, vec3.y, vec3.z);
 			}
 
-			h = 0.8F;
+			g = 0.8F;
 		} else {
-			h = 0.99F;
+			g = 0.99F;
 		}
 
-		this.setDeltaMovement(vec3.scale((double)h));
-		this.applyGravity();
-		this.setPos(d, e, f);
-		this.checkInsideBlocks();
+		this.setDeltaMovement(vec3.scale((double)g));
 	}
 
 	@Override

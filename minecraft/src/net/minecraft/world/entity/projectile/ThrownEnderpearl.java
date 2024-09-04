@@ -11,6 +11,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Relative;
 import net.minecraft.world.entity.monster.Endermite;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -21,6 +22,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.portal.DimensionTransition;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -87,6 +89,17 @@ public class ThrownEnderpearl extends ThrowableItemProjectile {
 					entity.unRide();
 				}
 
+				Vec3 vec33;
+				if (this.getDeltaMovement().lengthSqr() > 0.0) {
+					AABB aABB = entity.getBoundingBox();
+					Vec3 vec3 = new Vec3(aABB.getXsize(), aABB.getYsize(), aABB.getZsize()).scale(0.5000099999997474);
+					Vec3 vec32 = new Vec3(Math.signum(this.getDeltaMovement().x), Math.signum(this.getDeltaMovement().y), Math.signum(this.getDeltaMovement().z));
+					vec33 = vec32.multiply(vec3).add(0.0, aABB.getYsize() * 0.5, 0.0);
+				} else {
+					vec33 = Vec3.ZERO;
+				}
+
+				Vec3 vec34 = this.position().subtract(vec33);
 				if (entity instanceof ServerPlayer serverPlayer) {
 					if (serverPlayer.connection.isAcceptingMessages()) {
 						if (this.random.nextFloat() < 0.05F && serverLevel.getGameRules().getBoolean(GameRules.RULE_DOMOBSPAWNING)) {
@@ -98,7 +111,7 @@ public class ThrownEnderpearl extends ThrowableItemProjectile {
 						}
 
 						Player player = serverPlayer.changeDimension(
-							new DimensionTransition(serverLevel, this.position(), entity.getDeltaMovement(), entity.getYRot(), entity.getXRot(), DimensionTransition.DO_NOTHING)
+							new DimensionTransition(serverLevel, vec34, Vec3.ZERO, 0.0F, 0.0F, Relative.ALL, DimensionTransition.DO_NOTHING)
 						);
 						if (player != null) {
 							player.resetFallDistance();
@@ -106,17 +119,17 @@ public class ThrownEnderpearl extends ThrowableItemProjectile {
 							player.hurt(this.damageSources().enderPearl(), 5.0F);
 						}
 
-						this.playSound(serverLevel, this.position());
+						this.playSound(serverLevel, vec34);
 					}
 				} else {
 					Entity entity2 = entity.changeDimension(
-						new DimensionTransition(serverLevel, this.position(), entity.getDeltaMovement(), entity.getYRot(), entity.getXRot(), DimensionTransition.DO_NOTHING)
+						new DimensionTransition(serverLevel, vec34, entity.getDeltaMovement(), entity.getYRot(), entity.getXRot(), DimensionTransition.DO_NOTHING)
 					);
 					if (entity2 != null) {
 						entity2.resetFallDistance();
 					}
 
-					this.playSound(serverLevel, this.position());
+					this.playSound(serverLevel, vec34);
 				}
 
 				this.discard();

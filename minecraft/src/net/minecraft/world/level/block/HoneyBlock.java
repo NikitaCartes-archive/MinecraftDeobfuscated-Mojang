@@ -22,9 +22,9 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class HoneyBlock extends HalfTransparentBlock {
 	public static final MapCodec<HoneyBlock> CODEC = simpleCodec(HoneyBlock::new);
-	private static final double SLIDE_STARTS_WHEN_VERTICAL_SPEED_IS_AT_LEAST = 0.13;
-	private static final double MIN_FALL_SPEED_TO_BE_CONSIDERED_SLIDING = 0.08;
-	private static final double THROTTLE_SLIDE_SPEED_TO = 0.05;
+	private static final double SLIDE_STARTS_WHEN_VERTICAL_SPEED_IS_AT_LEAST = 0.2058;
+	private static final double MIN_FALL_SPEED_TO_BE_CONSIDERED_SLIDING = 0.1568;
+	private static final double THROTTLE_SLIDE_SPEED_TO = 0.1274;
 	private static final int SLIDE_ADVANCEMENT_CHECK_INTERVAL = 20;
 	protected static final VoxelShape SHAPE = Block.box(1.0, 0.0, 1.0, 15.0, 15.0, 15.0);
 
@@ -74,7 +74,7 @@ public class HoneyBlock extends HalfTransparentBlock {
 			return false;
 		} else if (entity.getY() > (double)blockPos.getY() + 0.9375 - 1.0E-7) {
 			return false;
-		} else if (entity.getDeltaMovement().y >= -0.08) {
+		} else if (entity.getDeltaMovement().y >= -0.1568) {
 			return false;
 		} else {
 			double d = Math.abs((double)blockPos.getX() + 0.5 - entity.getX());
@@ -92,11 +92,12 @@ public class HoneyBlock extends HalfTransparentBlock {
 
 	private void doSlideMovement(Entity entity) {
 		Vec3 vec3 = entity.getDeltaMovement();
-		if (vec3.y < -0.13) {
-			double d = -0.05 / vec3.y;
-			entity.setDeltaMovement(new Vec3(vec3.x * d, -0.05, vec3.z * d));
+		if (entity.getDeltaMovement().y < -0.2058) {
+			double d = entity.getDeltaMovement().y / 0.98F + 0.08;
+			double e = -0.1274 / d;
+			entity.setDeltaMovement(new Vec3(vec3.x * e, -0.1274, vec3.z * e));
 		} else {
-			entity.setDeltaMovement(new Vec3(vec3.x, -0.05, vec3.z));
+			entity.setDeltaMovement(new Vec3(vec3.x, -0.1274, vec3.z));
 		}
 
 		entity.resetFallDistance();

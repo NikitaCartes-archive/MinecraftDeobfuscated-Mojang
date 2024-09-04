@@ -143,14 +143,14 @@ import net.minecraft.world.entity.HasCustomInventoryScreen;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.PlayerRideableJumping;
-import net.minecraft.world.entity.RelativeMovement;
+import net.minecraft.world.entity.PositionMoveRotation;
+import net.minecraft.world.entity.Relative;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.ChatVisiblity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.ProfilePublicKey;
 import net.minecraft.world.entity.projectile.AbstractArrow;
-import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.inventory.AnvilMenu;
 import net.minecraft.world.inventory.BeaconMenu;
@@ -374,13 +374,8 @@ public class ServerGamePacketListenerImpl
 
 	@Override
 	public void handlePlayerInput(ServerboundPlayerInputPacket serverboundPlayerInputPacket) {
-		if (this.player.isPassenger()
-			&& this.player.getVehicle() instanceof AbstractMinecart abstractMinecart
-			&& ((double)serverboundPlayerInputPacket.getXxa() != 0.0 || (double)serverboundPlayerInputPacket.getZza() != 0.0)) {
-			abstractMinecart.setPassengerMoveIntentFromInput(
-				this.player, new Vec3((double)serverboundPlayerInputPacket.getXxa(), 0.0, (double)serverboundPlayerInputPacket.getZza())
-			);
-		}
+		PacketUtils.ensureRunningOnSameThread(serverboundPlayerInputPacket, this, this.player.serverLevel());
+		this.player.setLastClientInput(serverboundPlayerInputPacket.input());
 	}
 
 	private static boolean containsInvalidValues(double d, double e, double f, float g, float h) {
@@ -1005,23 +1000,28 @@ public class ServerGamePacketListenerImpl
 	}
 
 	public void teleport(double d, double e, double f, float g, float h) {
-		this.teleport(d, e, f, g, h, Collections.emptySet());
+		this.teleport(new PositionMoveRotation(new Vec3(d, e, f), Vec3.ZERO, g, h), Collections.emptySet());
 	}
 
-	public void teleport(double d, double e, double f, float g, float h, Set<RelativeMovement> set) {
-		double i = set.contains(RelativeMovement.X) ? this.player.getX() : 0.0;
-		double j = set.contains(RelativeMovement.Y) ? this.player.getY() : 0.0;
-		double k = set.contains(RelativeMovement.Z) ? this.player.getZ() : 0.0;
-		float l = set.contains(RelativeMovement.Y_ROT) ? this.player.getYRot() : 0.0F;
-		float m = set.contains(RelativeMovement.X_ROT) ? this.player.getXRot() : 0.0F;
-		this.awaitingPositionFromClient = new Vec3(d, e, f);
+	public void teleport(PositionMoveRotation positionMoveRotation, Set<Relative> set) {
+		this.awaitingTeleportTime = this.tickCount;
 		if (++this.awaitingTeleport == Integer.MAX_VALUE) {
 			this.awaitingTeleport = 0;
 		}
 
-		this.awaitingTeleportTime = this.tickCount;
-		this.player.absMoveTo(d, e, f, g, h);
-		this.player.connection.send(new ClientboundPlayerPositionPacket(d - i, e - j, f - k, g - l, h - m, set, this.awaitingTeleport));
+		PositionMoveRotation positionMoveRotation2 = PositionMoveRotation.of(this.player);
+		PositionMoveRotation positionMoveRotation3 = PositionMoveRotation.calculateAbsolute(positionMoveRotation2, positionMoveRotation, set);
+		this.awaitingPositionFromClient = positionMoveRotation3.position();
+		this.player.setDeltaMovement(positionMoveRotation3.deltaMovement());
+		this.player
+			.absMoveTo(
+				positionMoveRotation3.position().x,
+				positionMoveRotation3.position().y,
+				positionMoveRotation3.position().z,
+				positionMoveRotation3.yRot(),
+				positionMoveRotation3.xRot()
+			);
+		this.player.connection.send(ClientboundPlayerPositionPacket.of(this.awaitingTeleport, positionMoveRotation, set));
 	}
 
 	@Override
@@ -1154,7 +1154,7 @@ public class ServerGamePacketListenerImpl
 			for (ServerLevel serverLevel : this.server.getAllLevels()) {
 				Entity entity = serverboundTeleportToEntityPacket.getEntity(serverLevel);
 				if (entity != null) {
-					this.player.teleportTo(serverLevel, entity.getX(), entity.getY(), entity.getZ(), entity.getYRot(), entity.getXRot(), true);
+					this.player.teleportTo(serverLevel, entity.getX(), entity.getY(), entity.getZ(), Set.of(), entity.getYRot(), entity.getXRot(), true);
 					return;
 				}
 			}
@@ -1527,7 +1527,7 @@ public class ServerGamePacketListenerImpl
 			}
 
 			AABB aABB = entity.getBoundingBox();
-			if (this.player.canInteractWithEntity(aABB, 1.0)) {
+			if (this.player.canInteractWithEntity(aABB, 3.0)) {
 				serverboundInteractPacket.dispatch(new ServerboundInteractPacket.Handler() {
 					private void performInteraction(InteractionHand interactionHand, ServerGamePacketListenerImpl.EntityInteraction entityInteraction) {
 						ItemStack itemStack = ServerGamePacketListenerImpl.this.player.getItemInHand(interactionHand);
@@ -1718,6 +1718,7 @@ public class ServerGamePacketListenerImpl
 			boolean bl3 = itemStack.isEmpty() || itemStack.getCount() <= itemStack.getMaxStackSize();
 			if (bl2 && bl3) {
 				this.player.inventoryMenu.getSlot(serverboundSetCreativeModeSlotPacket.slotNum()).setByPlayer(itemStack);
+				this.player.inventoryMenu.setRemoteSlot(serverboundSetCreativeModeSlotPacket.slotNum(), itemStack);
 				this.player.inventoryMenu.broadcastChanges();
 			} else if (bl && bl3 && this.dropSpamTickCount < 200) {
 				this.dropSpamTickCount += 20;

@@ -106,10 +106,7 @@ public class ExperienceOrb extends Entity {
 		}
 
 		this.move(MoverType.SELF, this.getDeltaMovement());
-		if (!this.level().isClientSide()) {
-			this.applyEffectsFromBlocks();
-		}
-
+		this.applyEffectsFromBlocks();
 		float f = 0.98F;
 		if (this.onGround()) {
 			f = this.level().getBlockState(this.getBlockPosBelowThatAffectsMyMovement()).getBlock().getFriction() * 0.98F;

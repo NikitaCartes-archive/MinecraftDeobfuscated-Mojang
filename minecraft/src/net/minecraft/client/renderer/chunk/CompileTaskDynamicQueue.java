@@ -2,6 +2,7 @@ package net.minecraft.client.renderer.chunk;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.util.List;
+import java.util.ListIterator;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -23,18 +24,24 @@ public class CompileTaskDynamicQueue {
 		int j = -1;
 		double d = Double.MAX_VALUE;
 		double e = Double.MAX_VALUE;
+		ListIterator<SectionRenderDispatcher.RenderSection.CompileTask> listIterator = this.tasks.listIterator();
 
-		for (int k = 0; k < this.tasks.size(); k++) {
-			SectionRenderDispatcher.RenderSection.CompileTask compileTask = (SectionRenderDispatcher.RenderSection.CompileTask)this.tasks.get(k);
-			double f = compileTask.getOrigin().distToCenterSqr(vec3);
-			if (!compileTask.isRecompile() && f < d) {
-				d = f;
-				i = k;
-			}
+		while (listIterator.hasNext()) {
+			int k = listIterator.nextIndex();
+			SectionRenderDispatcher.RenderSection.CompileTask compileTask = (SectionRenderDispatcher.RenderSection.CompileTask)listIterator.next();
+			if (compileTask.isCancelled.get()) {
+				listIterator.remove();
+			} else {
+				double f = compileTask.getOrigin().distToCenterSqr(vec3);
+				if (!compileTask.isRecompile() && f < d) {
+					d = f;
+					i = k;
+				}
 
-			if (compileTask.isRecompile() && f < e) {
-				e = f;
-				j = k;
+				if (compileTask.isRecompile() && f < e) {
+					e = f;
+					j = k;
+				}
 			}
 		}
 

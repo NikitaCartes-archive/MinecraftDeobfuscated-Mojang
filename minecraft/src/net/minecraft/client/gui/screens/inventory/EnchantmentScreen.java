@@ -154,8 +154,10 @@ public class EnchantmentScreen extends AbstractContainerScreen<EnchantmentMenu> 
 		float m = Mth.clamp(Mth.frac(h + 0.25F) * 1.6F - 0.3F, 0.0F, 1.0F);
 		float n = Mth.clamp(Mth.frac(h + 0.75F) * 1.6F - 0.3F, 0.0F, 1.0F);
 		this.bookModel.setupAnim(0.0F, m, n, g);
-		VertexConsumer vertexConsumer = guiGraphics.bufferSource().getBuffer(this.bookModel.renderType(ENCHANTING_BOOK_LOCATION));
-		this.bookModel.renderToBuffer(guiGraphics.pose(), vertexConsumer, 15728880, OverlayTexture.NO_OVERLAY);
+		guiGraphics.drawSpecial(multiBufferSource -> {
+			VertexConsumer vertexConsumer = multiBufferSource.getBuffer(this.bookModel.renderType(ENCHANTING_BOOK_LOCATION));
+			this.bookModel.renderToBuffer(guiGraphics.pose(), vertexConsumer, 15728880, OverlayTexture.NO_OVERLAY);
+		});
 		guiGraphics.flush();
 		guiGraphics.pose().popPose();
 		Lighting.setupFor3DItems();

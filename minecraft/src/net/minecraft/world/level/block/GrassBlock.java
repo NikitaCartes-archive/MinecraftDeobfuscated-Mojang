@@ -47,20 +47,23 @@ public class GrassBlock extends SpreadingSnowyDirtBlock implements BonemealableB
 			.lookupOrThrow(Registries.PLACED_FEATURE)
 			.get(VegetationPlacements.GRASS_BONEMEAL);
 
-		label49:
+		label51:
 		for (int i = 0; i < 128; i++) {
 			BlockPos blockPos3 = blockPos2;
 
 			for (int j = 0; j < i / 16; j++) {
 				blockPos3 = blockPos3.offset(randomSource.nextInt(3) - 1, (randomSource.nextInt(3) - 1) * randomSource.nextInt(3) / 2, randomSource.nextInt(3) - 1);
 				if (!serverLevel.getBlockState(blockPos3.below()).is(this) || serverLevel.getBlockState(blockPos3).isCollisionShapeFullBlock(serverLevel, blockPos3)) {
-					continue label49;
+					continue label51;
 				}
 			}
 
 			BlockState blockState3 = serverLevel.getBlockState(blockPos3);
 			if (blockState3.is(blockState2.getBlock()) && randomSource.nextInt(10) == 0) {
-				((BonemealableBlock)blockState2.getBlock()).performBonemeal(serverLevel, randomSource, blockPos3, blockState3);
+				BonemealableBlock bonemealableBlock = (BonemealableBlock)blockState2.getBlock();
+				if (bonemealableBlock.isValidBonemealTarget(serverLevel, blockPos3, blockState3)) {
+					bonemealableBlock.performBonemeal(serverLevel, randomSource, blockPos3, blockState3);
+				}
 			}
 
 			if (blockState3.isAir()) {

@@ -131,10 +131,10 @@ public class BlockModelDefinition {
 			JsonObject jsonObject = jsonElement.getAsJsonObject();
 			Map<String, MultiVariant> map = this.getVariants(jsonDeserializationContext, jsonObject);
 			MultiPart.Definition definition = this.getMultiPart(jsonDeserializationContext, jsonObject);
-			if (!map.isEmpty() || definition != null && !definition.getMultiVariants().isEmpty()) {
-				return new BlockModelDefinition(map, definition);
-			} else {
+			if (map.isEmpty() && definition == null) {
 				throw new JsonParseException("Neither 'variants' nor 'multipart' found");
+			} else {
+				return new BlockModelDefinition(map, definition);
 			}
 		}
 

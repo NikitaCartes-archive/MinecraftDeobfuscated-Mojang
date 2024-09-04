@@ -61,17 +61,16 @@ import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.PlayerRideableJumping;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Abilities;
+import net.minecraft.world.entity.player.Input;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.inventory.ClickAction;
-import net.minecraft.world.item.ElytraItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.RecipeHolder;
@@ -117,7 +116,8 @@ public class LocalPlayer extends AbstractClientPlayer {
 	private boolean wasSprinting;
 	private int positionReminder;
 	private boolean flashOnSetHealth;
-	public Input input;
+	public ClientInput input = new ClientInput();
+	private Input lastSentInput = Input.EMPTY;
 	protected final Minecraft minecraft;
 	protected int sprintTriggerTime;
 	public float yBob;
@@ -204,9 +204,13 @@ public class LocalPlayer extends AbstractClientPlayer {
 		if (this.level().hasChunkAt(this.getBlockX(), this.getBlockZ())) {
 			super.tick();
 			this.sendShiftKeyState();
+			if (!this.lastSentInput.equals(this.input.keyPresses)) {
+				this.connection.send(new ServerboundPlayerInputPacket(this.input.keyPresses));
+				this.lastSentInput = this.input.keyPresses;
+			}
+
 			if (this.isPassenger()) {
 				this.connection.send(new ServerboundMovePlayerPacket.Rot(this.getYRot(), this.getXRot(), this.onGround(), this.horizontalCollision));
-				this.connection.send(new ServerboundPlayerInputPacket(this.xxa, this.zza, this.input.jumping, this.input.shiftKeyDown));
 				Entity entity = this.getRootVehicle();
 				if (entity != this && entity.isControlledByLocalInstance()) {
 					this.connection.send(new ServerboundMoveVehiclePacket(entity));
@@ -609,7 +613,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 
 	@Override
 	public boolean isShiftKeyDown() {
-		return this.input != null && this.input.shiftKeyDown;
+		return this.input.keyPresses.shift();
 	}
 
 	@Override
@@ -627,7 +631,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 		if (this.isControlledCamera()) {
 			this.xxa = this.input.leftImpulse;
 			this.zza = this.input.forwardImpulse;
-			this.jumping = this.input.jumping;
+			this.jumping = this.input.keyPresses.jump();
 			this.yBobO = this.yBob;
 			this.xBobO = this.xBob;
 			this.xBob = this.xBob + (this.getXRot() - this.xBob) * 0.5F;
@@ -668,8 +672,8 @@ public class LocalPlayer extends AbstractClientPlayer {
 			this.processPortalCooldown();
 		}
 
-		boolean bl = this.input.jumping;
-		boolean bl2 = this.input.shiftKeyDown;
+		boolean bl = this.input.keyPresses.jump();
+		boolean bl2 = this.input.keyPresses.shift();
 		boolean bl3 = this.hasEnoughImpulseToStartSprinting();
 		Abilities abilities = this.getAbilities();
 		this.crouching = !abilities.flying
@@ -690,7 +694,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 		if (this.autoJumpTime > 0) {
 			this.autoJumpTime--;
 			bl4 = true;
-			this.input.jumping = true;
+			this.input.makeJump();
 		}
 
 		if (!this.noPhysics) {
@@ -723,7 +727,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 			boolean bl8 = !this.input.hasForwardImpulse() || !this.hasEnoughFoodToStartSprinting();
 			boolean bl9 = bl8 || this.horizontalCollision && !this.minorHorizontalCollision || this.isInWater() && !this.isUnderWater();
 			if (this.isSwimming()) {
-				if (!this.onGround() && !this.input.shiftKeyDown && bl8 || !this.isInWater()) {
+				if (!this.onGround() && !this.input.keyPresses.shift() && bl8 || !this.isInWater()) {
 					this.setSprinting(false);
 				}
 			} else if (bl9) {
@@ -739,7 +743,7 @@ public class LocalPlayer extends AbstractClientPlayer {
 					bl8 = true;
 					this.onUpdateAbilities();
 				}
-			} else if (!bl && this.input.jumping && !bl4) {
+			} else if (!bl && this.input.keyPresses.jump() && !bl4) {
 				if (this.jumpTriggerTime == 0) {
 					this.jumpTriggerTime = 7;
 				} else if (!this.isSwimming()) {
@@ -755,15 +759,12 @@ public class LocalPlayer extends AbstractClientPlayer {
 			}
 		}
 
-		if (this.input.jumping && !bl8 && !bl && !abilities.flying && !this.isPassenger() && !this.onClimbable()) {
-			ItemStack itemStack = this.getItemBySlot(EquipmentSlot.CHEST);
-			if (itemStack.is(Items.ELYTRA) && ElytraItem.isFlyEnabled(itemStack) && this.tryToStartFallFlying()) {
-				this.connection.send(new ServerboundPlayerCommandPacket(this, ServerboundPlayerCommandPacket.Action.START_FALL_FLYING));
-			}
+		if (this.input.keyPresses.jump() && !bl8 && !bl && !this.onClimbable() && this.tryToStartFallFlying()) {
+			this.connection.send(new ServerboundPlayerCommandPacket(this, ServerboundPlayerCommandPacket.Action.START_FALL_FLYING));
 		}
 
 		this.wasFallFlying = this.isFallFlying();
-		if (this.isInWater() && this.input.shiftKeyDown && this.isAffectedByFluids()) {
+		if (this.isInWater() && this.input.keyPresses.shift() && this.isAffectedByFluids()) {
 			this.goDownInWater();
 		}
 
@@ -777,11 +778,11 @@ public class LocalPlayer extends AbstractClientPlayer {
 
 		if (abilities.flying && this.isControlledCamera()) {
 			int i = 0;
-			if (this.input.shiftKeyDown) {
+			if (this.input.keyPresses.shift()) {
 				i--;
 			}
 
-			if (this.input.jumping) {
+			if (this.input.keyPresses.jump()) {
 				i++;
 			}
 
@@ -799,11 +800,11 @@ public class LocalPlayer extends AbstractClientPlayer {
 				}
 			}
 
-			if (bl && !this.input.jumping) {
+			if (bl && !this.input.keyPresses.jump()) {
 				this.jumpRidingTicks = -10;
 				playerRideableJumping.onPlayerJump(Mth.floor(this.getJumpRidingScale() * 100.0F));
 				this.sendRidingJump();
-			} else if (!bl && this.input.jumping) {
+			} else if (!bl && this.input.keyPresses.jump()) {
 				this.jumpRidingTicks = 0;
 				this.jumpRidingScale = 0.0F;
 			} else if (bl) {
@@ -872,8 +873,9 @@ public class LocalPlayer extends AbstractClientPlayer {
 		super.rideTick();
 		this.handsBusy = false;
 		if (this.getControlledVehicle() instanceof Boat boat) {
-			boat.setInput(this.input.left, this.input.right, this.input.up, this.input.down);
-			this.handsBusy = this.handsBusy | (this.input.left || this.input.right || this.input.up || this.input.down);
+			boat.setInput(this.input.keyPresses.left(), this.input.keyPresses.right(), this.input.keyPresses.forward(), this.input.keyPresses.backward());
+			this.handsBusy = this.handsBusy
+				| (this.input.keyPresses.left() || this.input.keyPresses.right() || this.input.keyPresses.forward() || this.input.keyPresses.backward());
 		}
 	}
 

@@ -26,7 +26,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
-import net.minecraft.world.entity.RelativeMovement;
+import net.minecraft.world.entity.Relative;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
@@ -158,7 +158,7 @@ public class TeleportCommand {
 				entity.getX(),
 				entity.getY(),
 				entity.getZ(),
-				EnumSet.noneOf(RelativeMovement.class),
+				EnumSet.noneOf(Relative.class),
 				entity.getYRot(),
 				entity.getXRot(),
 				null
@@ -185,57 +185,61 @@ public class TeleportCommand {
 		@Nullable Coordinates coordinates2,
 		@Nullable TeleportCommand.LookAt lookAt
 	) throws CommandSyntaxException {
-		Vec3 vec3 = coordinates.getPosition(commandSourceStack);
-		Vec2 vec2 = coordinates2 == null ? null : coordinates2.getRotation(commandSourceStack);
-		Set<RelativeMovement> set = EnumSet.noneOf(RelativeMovement.class);
+		Vec3 vec3 = coordinates.getPosition(commandSourceStack, true);
+		Vec2 vec2 = coordinates2 == null ? null : coordinates2.getRotation(commandSourceStack, true);
+		Set<Relative> set = EnumSet.noneOf(Relative.class);
 		if (coordinates.isXRelative()) {
-			set.add(RelativeMovement.X);
+			set.add(Relative.X);
+			set.add(Relative.DELTA_X);
 		}
 
 		if (coordinates.isYRelative()) {
-			set.add(RelativeMovement.Y);
+			set.add(Relative.Y);
+			set.add(Relative.DELTA_Y);
 		}
 
 		if (coordinates.isZRelative()) {
-			set.add(RelativeMovement.Z);
+			set.add(Relative.Z);
+			set.add(Relative.DELTA_Z);
 		}
 
 		if (coordinates2 == null) {
-			set.add(RelativeMovement.X_ROT);
-			set.add(RelativeMovement.Y_ROT);
+			set.add(Relative.X_ROT);
+			set.add(Relative.Y_ROT);
 		} else {
 			if (coordinates2.isXRelative()) {
-				set.add(RelativeMovement.X_ROT);
+				set.add(Relative.X_ROT);
 			}
 
 			if (coordinates2.isYRelative()) {
-				set.add(RelativeMovement.Y_ROT);
+				set.add(Relative.Y_ROT);
 			}
 		}
 
 		for (Entity entity : collection) {
 			if (coordinates2 == null) {
-				performTeleport(commandSourceStack, entity, serverLevel, vec3.x, vec3.y, vec3.z, set, entity.getYRot(), entity.getXRot(), lookAt);
+				performTeleport(commandSourceStack, entity, serverLevel, vec3.x, vec3.y, vec3.z, set, 0.0F, 0.0F, lookAt);
 			} else {
 				performTeleport(commandSourceStack, entity, serverLevel, vec3.x, vec3.y, vec3.z, set, vec2.y, vec2.x, lookAt);
 			}
 		}
 
+		Vec3 vec32 = coordinates.getPosition(commandSourceStack);
 		if (collection.size() == 1) {
 			commandSourceStack.sendSuccess(
 				() -> Component.translatable(
 						"commands.teleport.success.location.single",
 						((Entity)collection.iterator().next()).getDisplayName(),
-						formatDouble(vec3.x),
-						formatDouble(vec3.y),
-						formatDouble(vec3.z)
+						formatDouble(vec32.x),
+						formatDouble(vec32.y),
+						formatDouble(vec32.z)
 					),
 				true
 			);
 		} else {
 			commandSourceStack.sendSuccess(
 				() -> Component.translatable(
-						"commands.teleport.success.location.multiple", collection.size(), formatDouble(vec3.x), formatDouble(vec3.y), formatDouble(vec3.z)
+						"commands.teleport.success.location.multiple", collection.size(), formatDouble(vec32.x), formatDouble(vec32.y), formatDouble(vec32.z)
 					),
 				true
 			);
@@ -255,7 +259,7 @@ public class TeleportCommand {
 		double d,
 		double e,
 		double f,
-		Set<RelativeMovement> set,
+		Set<Relative> set,
 		float g,
 		float h,
 		@Nullable TeleportCommand.LookAt lookAt

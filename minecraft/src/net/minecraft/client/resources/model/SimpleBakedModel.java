@@ -10,7 +10,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.BlockModel;
-import net.minecraft.client.renderer.block.model.ItemOverrides;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
@@ -26,7 +25,6 @@ public class SimpleBakedModel implements BakedModel {
 	protected final boolean usesBlockLight;
 	protected final TextureAtlasSprite particleIcon;
 	protected final ItemTransforms transforms;
-	protected final ItemOverrides overrides;
 
 	public SimpleBakedModel(
 		List<BakedQuad> list,
@@ -35,8 +33,7 @@ public class SimpleBakedModel implements BakedModel {
 		boolean bl2,
 		boolean bl3,
 		TextureAtlasSprite textureAtlasSprite,
-		ItemTransforms itemTransforms,
-		ItemOverrides itemOverrides
+		ItemTransforms itemTransforms
 	) {
 		this.unculledFaces = list;
 		this.culledFaces = map;
@@ -45,7 +42,6 @@ public class SimpleBakedModel implements BakedModel {
 		this.usesBlockLight = bl2;
 		this.particleIcon = textureAtlasSprite;
 		this.transforms = itemTransforms;
-		this.overrides = itemOverrides;
 	}
 
 	@Override
@@ -83,16 +79,10 @@ public class SimpleBakedModel implements BakedModel {
 		return this.transforms;
 	}
 
-	@Override
-	public ItemOverrides getOverrides() {
-		return this.overrides;
-	}
-
 	@Environment(EnvType.CLIENT)
 	public static class Builder {
 		private final ImmutableList.Builder<BakedQuad> unculledFaces = ImmutableList.builder();
 		private final EnumMap<Direction, ImmutableList.Builder<BakedQuad>> culledFaces = Maps.newEnumMap(Direction.class);
-		private final ItemOverrides overrides;
 		private final boolean hasAmbientOcclusion;
 		@Nullable
 		private TextureAtlasSprite particleIcon;
@@ -100,12 +90,11 @@ public class SimpleBakedModel implements BakedModel {
 		private final boolean isGui3d;
 		private final ItemTransforms transforms;
 
-		public Builder(BlockModel blockModel, ItemOverrides itemOverrides, boolean bl) {
-			this(blockModel.hasAmbientOcclusion(), blockModel.getGuiLight().lightLikeBlock(), bl, blockModel.getTransforms(), itemOverrides);
+		public Builder(BlockModel blockModel, boolean bl) {
+			this(blockModel.hasAmbientOcclusion(), blockModel.getGuiLight().lightLikeBlock(), bl, blockModel.getTransforms());
 		}
 
-		private Builder(boolean bl, boolean bl2, boolean bl3, ItemTransforms itemTransforms, ItemOverrides itemOverrides) {
-			this.overrides = itemOverrides;
+		private Builder(boolean bl, boolean bl2, boolean bl3, ItemTransforms itemTransforms) {
 			this.hasAmbientOcclusion = bl;
 			this.usesBlockLight = bl2;
 			this.isGui3d = bl3;
@@ -141,14 +130,7 @@ public class SimpleBakedModel implements BakedModel {
 			} else {
 				Map<Direction, List<BakedQuad>> map = Maps.transformValues(this.culledFaces, ImmutableList.Builder::build);
 				return new SimpleBakedModel(
-					this.unculledFaces.build(),
-					new EnumMap(map),
-					this.hasAmbientOcclusion,
-					this.usesBlockLight,
-					this.isGui3d,
-					this.particleIcon,
-					this.transforms,
-					this.overrides
+					this.unculledFaces.build(), new EnumMap(map), this.hasAmbientOcclusion, this.usesBlockLight, this.isGui3d, this.particleIcon, this.transforms
 				);
 			}
 		}

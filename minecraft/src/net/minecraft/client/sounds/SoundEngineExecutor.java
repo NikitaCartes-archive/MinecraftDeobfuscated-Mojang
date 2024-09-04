@@ -23,7 +23,7 @@ public class SoundEngineExecutor extends BlockableEventLoop<Runnable> {
 	}
 
 	@Override
-	protected Runnable wrapRunnable(Runnable runnable) {
+	public Runnable wrapRunnable(Runnable runnable) {
 		return runnable;
 	}
 

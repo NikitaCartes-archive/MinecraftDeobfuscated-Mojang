@@ -626,7 +626,6 @@ public class SoundEvents {
 	public static final SoundEvent GOAT_PREPARE_RAM = register("entity.goat.prepare_ram");
 	public static final SoundEvent GOAT_RAM_IMPACT = register("entity.goat.ram_impact");
 	public static final SoundEvent GOAT_HORN_BREAK = register("entity.goat.horn_break");
-	public static final SoundEvent GOAT_HORN_PLAY = register("item.goat_horn.play");
 	public static final SoundEvent GOAT_SCREAMING_AMBIENT = register("entity.goat.screaming.ambient");
 	public static final SoundEvent GOAT_SCREAMING_DEATH = register("entity.goat.screaming.death");
 	public static final SoundEvent GOAT_SCREAMING_EAT = register("entity.goat.screaming.eat");
@@ -635,7 +634,6 @@ public class SoundEvents {
 	public static final SoundEvent GOAT_SCREAMING_MILK = register("entity.goat.screaming.milk");
 	public static final SoundEvent GOAT_SCREAMING_PREPARE_RAM = register("entity.goat.screaming.prepare_ram");
 	public static final SoundEvent GOAT_SCREAMING_RAM_IMPACT = register("entity.goat.screaming.ram_impact");
-	public static final SoundEvent GOAT_SCREAMING_HORN_BREAK = register("entity.goat.screaming.horn_break");
 	public static final SoundEvent GOAT_STEP = register("entity.goat.step");
 	public static final SoundEvent GRASS_BREAK = register("block.grass.break");
 	public static final SoundEvent GRASS_FALL = register("block.grass.fall");

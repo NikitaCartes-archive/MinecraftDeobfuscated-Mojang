@@ -151,7 +151,7 @@ public class EnchantmentHelper {
 	}
 
 	private static void runIterationOnEquipment(LivingEntity livingEntity, EnchantmentHelper.EnchantmentInSlotVisitor enchantmentInSlotVisitor) {
-		for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
+		for (EquipmentSlot equipmentSlot : EquipmentSlot.VALUES) {
 			runIterationOnItem(livingEntity.getItemBySlot(equipmentSlot), equipmentSlot, livingEntity, enchantmentInSlotVisitor);
 		}
 	}
@@ -467,7 +467,7 @@ public class EnchantmentHelper {
 	public static Optional<EnchantedItemInUse> getRandomItemWith(DataComponentType<?> dataComponentType, LivingEntity livingEntity, Predicate<ItemStack> predicate) {
 		List<EnchantedItemInUse> list = new ArrayList();
 
-		for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
+		for (EquipmentSlot equipmentSlot : EquipmentSlot.VALUES) {
 			ItemStack itemStack = livingEntity.getItemBySlot(equipmentSlot);
 			if (predicate.test(itemStack)) {
 				ItemEnchantments itemEnchantments = itemStack.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY);
@@ -485,7 +485,8 @@ public class EnchantmentHelper {
 	}
 
 	public static int getEnchantmentCost(RandomSource randomSource, int i, int j, ItemStack itemStack) {
-		if (itemStack.getEnchantmentValue() <= 0) {
+		Enchantable enchantable = itemStack.get(DataComponents.ENCHANTABLE);
+		if (enchantable == null) {
 			return 0;
 		} else {
 			if (j > 15) {
@@ -528,11 +529,11 @@ public class EnchantmentHelper {
 
 	public static List<EnchantmentInstance> selectEnchantment(RandomSource randomSource, ItemStack itemStack, int i, Stream<Holder<Enchantment>> stream) {
 		List<EnchantmentInstance> list = Lists.<EnchantmentInstance>newArrayList();
-		int j = itemStack.getEnchantmentValue();
-		if (j <= 0) {
+		Enchantable enchantable = itemStack.get(DataComponents.ENCHANTABLE);
+		if (enchantable == null) {
 			return list;
 		} else {
-			i += 1 + randomSource.nextInt(j / 4 + 1) + randomSource.nextInt(j / 4 + 1);
+			i += 1 + randomSource.nextInt(enchantable.value() / 4 + 1) + randomSource.nextInt(enchantable.value() / 4 + 1);
 			float f = (randomSource.nextFloat() + randomSource.nextFloat() - 1.0F) * 0.15F;
 			i = Mth.clamp(Math.round((float)i + (float)i * f), 1, Integer.MAX_VALUE);
 			List<EnchantmentInstance> list2 = getAvailableEnchantmentResults(i, itemStack, stream);

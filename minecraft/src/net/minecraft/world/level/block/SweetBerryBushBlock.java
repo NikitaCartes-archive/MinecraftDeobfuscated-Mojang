@@ -79,9 +79,10 @@ public class SweetBerryBushBlock extends BushBlock implements BonemealableBlock 
 	protected void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
 		if (entity instanceof LivingEntity && entity.getType() != EntityType.FOX && entity.getType() != EntityType.BEE) {
 			entity.makeStuckInBlock(blockState, new Vec3(0.8F, 0.75, 0.8F));
-			if (!level.isClientSide && (Integer)blockState.getValue(AGE) > 0 && (entity.xOld != entity.getX() || entity.zOld != entity.getZ())) {
-				double d = Math.abs(entity.getX() - entity.xOld);
-				double e = Math.abs(entity.getZ() - entity.zOld);
+			Vec3 vec3 = entity.getKnownMovement();
+			if (!level.isClientSide && (Integer)blockState.getValue(AGE) > 0 && vec3.horizontalDistanceSqr() > 0.0) {
+				double d = Math.abs(vec3.x());
+				double e = Math.abs(vec3.z());
 				if (d >= 0.003F || e >= 0.003F) {
 					entity.hurt(level.damageSources().sweetBerryBush(), 1.0F);
 				}

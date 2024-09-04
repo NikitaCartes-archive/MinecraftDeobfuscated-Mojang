@@ -1,54 +1,39 @@
 package net.minecraft.client.renderer;
 
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import java.util.Map.Entry;
-import javax.annotation.Nullable;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelManager;
 import net.minecraft.client.resources.model.ModelResourceLocation;
-import net.minecraft.world.item.Item;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
 @Environment(EnvType.CLIENT)
 public class ItemModelShaper {
-	public final Int2ObjectMap<ModelResourceLocation> shapes = new Int2ObjectOpenHashMap<>(256);
-	private final Int2ObjectMap<BakedModel> shapesCache = new Int2ObjectOpenHashMap<>(256);
-	private final ModelManager modelManager;
+	private final Map<ResourceLocation, BakedModel> modelToBakedModel = new HashMap();
+	private final Supplier<BakedModel> missingModel;
+	private final Function<ResourceLocation, BakedModel> modelGetter;
 
 	public ItemModelShaper(ModelManager modelManager) {
-		this.modelManager = modelManager;
+		this.missingModel = modelManager::getMissingModel;
+		this.modelGetter = resourceLocation -> modelManager.getModel(ModelResourceLocation.inventory(resourceLocation));
 	}
 
 	public BakedModel getItemModel(ItemStack itemStack) {
-		BakedModel bakedModel = this.getItemModel(itemStack.getItem());
-		return bakedModel == null ? this.modelManager.getMissingModel() : bakedModel;
+		ResourceLocation resourceLocation = itemStack.get(DataComponents.ITEM_MODEL);
+		return resourceLocation == null ? (BakedModel)this.missingModel.get() : this.getItemModel(resourceLocation);
 	}
 
-	@Nullable
-	public BakedModel getItemModel(Item item) {
-		return this.shapesCache.get(getIndex(item));
+	public BakedModel getItemModel(ResourceLocation resourceLocation) {
+		return (BakedModel)this.modelToBakedModel.computeIfAbsent(resourceLocation, this.modelGetter);
 	}
 
-	private static int getIndex(Item item) {
-		return Item.getId(item);
-	}
-
-	public void register(Item item, ModelResourceLocation modelResourceLocation) {
-		this.shapes.put(getIndex(item), modelResourceLocation);
-	}
-
-	public ModelManager getModelManager() {
-		return this.modelManager;
-	}
-
-	public void rebuildCache() {
-		this.shapesCache.clear();
-
-		for (Entry<Integer, ModelResourceLocation> entry : this.shapes.entrySet()) {
-			this.shapesCache.put((Integer)entry.getKey(), this.modelManager.getModel((ModelResourceLocation)entry.getValue()));
-		}
+	public void invalidateCache() {
+		this.modelToBakedModel.clear();
 	}
 }

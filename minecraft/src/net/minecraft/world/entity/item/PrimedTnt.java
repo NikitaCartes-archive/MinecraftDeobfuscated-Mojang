@@ -94,10 +94,7 @@ public class PrimedTnt extends Entity implements TraceableEntity {
 		this.handlePortal();
 		this.applyGravity();
 		this.move(MoverType.SELF, this.getDeltaMovement());
-		if (!this.level().isClientSide()) {
-			this.applyEffectsFromBlocks();
-		}
-
+		this.applyEffectsFromBlocks();
 		this.setDeltaMovement(this.getDeltaMovement().scale(0.98));
 		if (this.onGround()) {
 			this.setDeltaMovement(this.getDeltaMovement().multiply(0.7, -0.5, 0.7));

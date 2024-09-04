@@ -3,7 +3,6 @@ package net.minecraft.client.renderer.chunk;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Queues;
 import com.google.common.collect.Sets;
-import com.google.common.primitives.Doubles;
 import com.mojang.blaze3d.vertex.ByteBufferBuilder;
 import com.mojang.blaze3d.vertex.MeshData;
 import com.mojang.blaze3d.vertex.VertexBuffer;
@@ -42,7 +41,8 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.SectionPos;
-import net.minecraft.util.thread.ProcessorMailbox;
+import net.minecraft.util.Mth;
+import net.minecraft.util.thread.ConsecutiveExecutor;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.phys.AABB;
@@ -56,7 +56,7 @@ public class SectionRenderDispatcher {
 	private final SectionBufferBuilderPool bufferPool;
 	private volatile int toBatchCount;
 	private volatile boolean closed;
-	private final ProcessorMailbox<Runnable> mailbox;
+	private final ConsecutiveExecutor consecutiveExecutor;
 	private final Executor executor;
 	ClientLevel level;
 	final LevelRenderer renderer;
@@ -76,8 +76,8 @@ public class SectionRenderDispatcher {
 		this.fixedBuffers = renderBuffers.fixedBufferPack();
 		this.bufferPool = renderBuffers.sectionBufferPool();
 		this.executor = executor;
-		this.mailbox = ProcessorMailbox.create(executor, "Section Renderer");
-		this.mailbox.tell(this::runTask);
+		this.consecutiveExecutor = new ConsecutiveExecutor(executor, "Section Renderer");
+		this.consecutiveExecutor.schedule(this::runTask);
 		this.sectionCompiler = new SectionCompiler(blockRenderDispatcher, blockEntityRenderDispatcher);
 	}
 
@@ -99,7 +99,8 @@ public class SectionRenderDispatcher {
 						if (throwable != null) {
 							Minecraft.getInstance().delayCrash(CrashReport.forThrowable(throwable, "Batching sections"));
 						} else {
-							this.mailbox.tell(() -> {
+							compileTask.isCompleted.set(true);
+							this.consecutiveExecutor.schedule(() -> {
 								if (sectionTaskResult == SectionRenderDispatcher.SectionTaskResult.SUCCESSFUL) {
 									sectionBufferBuilderPack.clearAll();
 								} else {
@@ -156,7 +157,7 @@ public class SectionRenderDispatcher {
 
 	public void schedule(SectionRenderDispatcher.RenderSection.CompileTask compileTask) {
 		if (!this.closed) {
-			this.mailbox.tell(() -> {
+			this.consecutiveExecutor.schedule(() -> {
 				if (!this.closed) {
 					this.compileQueue.add(compileTask);
 					this.toBatchCount = this.compileQueue.size();
@@ -247,6 +248,7 @@ public class SectionRenderDispatcher {
 		public static final int SIZE = 16;
 		public final int index;
 		public final AtomicReference<SectionRenderDispatcher.CompiledSection> compiled = new AtomicReference(SectionRenderDispatcher.CompiledSection.UNCOMPILED);
+		public final AtomicReference<SectionRenderDispatcher.TranslucencyPointOfView> pointOfView = new AtomicReference(null);
 		@Nullable
 		private SectionRenderDispatcher.RenderSection.RebuildTask lastRebuildTask;
 		@Nullable
@@ -257,7 +259,7 @@ public class SectionRenderDispatcher {
 			.collect(Collectors.toMap(renderType -> renderType, renderType -> new VertexBuffer(VertexBuffer.Usage.STATIC)));
 		private AABB bb;
 		private boolean dirty = true;
-		private long sectionNode = SectionPos.asLong(-1, -1, -1);
+		long sectionNode = SectionPos.asLong(-1, -1, -1);
 		final BlockPos.MutableBlockPos origin = new BlockPos.MutableBlockPos(-1, -1, -1);
 		private boolean playerChanged;
 
@@ -313,6 +315,7 @@ public class SectionRenderDispatcher {
 		private void reset() {
 			this.cancelTasks();
 			this.compiled.set(SectionRenderDispatcher.CompiledSection.UNCOMPILED);
+			this.pointOfView.set(null);
 			this.dirty = true;
 		}
 
@@ -352,19 +355,17 @@ public class SectionRenderDispatcher {
 			return SectionPos.offset(this.sectionNode, direction);
 		}
 
-		public boolean resortTransparency(RenderType renderType, SectionRenderDispatcher sectionRenderDispatcher) {
-			SectionRenderDispatcher.CompiledSection compiledSection = this.getCompiled();
-			if (this.lastResortTransparencyTask != null) {
-				this.lastResortTransparencyTask.cancel();
-			}
+		public void resortTransparency(SectionRenderDispatcher sectionRenderDispatcher) {
+			this.lastResortTransparencyTask = new SectionRenderDispatcher.RenderSection.ResortTransparencyTask(this.getCompiled());
+			sectionRenderDispatcher.schedule(this.lastResortTransparencyTask);
+		}
 
-			if (!compiledSection.hasBlocks.contains(renderType)) {
-				return false;
-			} else {
-				this.lastResortTransparencyTask = new SectionRenderDispatcher.RenderSection.ResortTransparencyTask(this.getDistToPlayerSqr(), compiledSection);
-				sectionRenderDispatcher.schedule(this.lastResortTransparencyTask);
-				return true;
-			}
+		public boolean hasTranslucentGeometry() {
+			return this.getCompiled().hasBlocks.contains(RenderType.translucent());
+		}
+
+		public boolean transparencyResortingScheduled() {
+			return this.lastResortTransparencyTask != null && !this.lastResortTransparencyTask.isCompleted.get();
 		}
 
 		protected void cancelTasks() {
@@ -383,7 +384,7 @@ public class SectionRenderDispatcher {
 			this.cancelTasks();
 			RenderChunkRegion renderChunkRegion = renderRegionCache.createRegion(SectionRenderDispatcher.this.level, SectionPos.of(this.sectionNode));
 			boolean bl = this.compiled.get() != SectionRenderDispatcher.CompiledSection.UNCOMPILED;
-			this.lastRebuildTask = new SectionRenderDispatcher.RenderSection.RebuildTask(this.getDistToPlayerSqr(), renderChunkRegion, bl);
+			this.lastRebuildTask = new SectionRenderDispatcher.RenderSection.RebuildTask(renderChunkRegion, bl);
 			return this.lastRebuildTask;
 		}
 
@@ -411,10 +412,6 @@ public class SectionRenderDispatcher {
 			compileTask.doTask(SectionRenderDispatcher.this.fixedBuffers);
 		}
 
-		public boolean isAxisAlignedWith(int i, int j, int k) {
-			return i == SectionPos.x(this.sectionNode) || k == SectionPos.z(this.sectionNode) || j == SectionPos.y(this.sectionNode);
-		}
-
 		void setCompiled(SectionRenderDispatcher.CompiledSection compiledSection) {
 			this.compiled.set(compiledSection);
 			SectionRenderDispatcher.this.renderer.addRecentlyCompiledSection(this);
@@ -428,13 +425,12 @@ public class SectionRenderDispatcher {
 		}
 
 		@Environment(EnvType.CLIENT)
-		public abstract class CompileTask implements Comparable<SectionRenderDispatcher.RenderSection.CompileTask> {
-			protected final double distAtCreation;
+		public abstract class CompileTask {
 			protected final AtomicBoolean isCancelled = new AtomicBoolean(false);
+			protected final AtomicBoolean isCompleted = new AtomicBoolean(false);
 			protected final boolean isRecompile;
 
-			public CompileTask(final double d, final boolean bl) {
-				this.distAtCreation = d;
+			public CompileTask(final boolean bl) {
 				this.isRecompile = bl;
 			}
 
@@ -451,10 +447,6 @@ public class SectionRenderDispatcher {
 			public BlockPos getOrigin() {
 				return RenderSection.this.origin;
 			}
-
-			public int compareTo(SectionRenderDispatcher.RenderSection.CompileTask compileTask) {
-				return Doubles.compare(this.distAtCreation, compileTask.distAtCreation);
-			}
 		}
 
 		@Environment(EnvType.CLIENT)
@@ -462,8 +454,8 @@ public class SectionRenderDispatcher {
 			@Nullable
 			protected RenderChunkRegion region;
 
-			public RebuildTask(final double d, @Nullable final RenderChunkRegion renderChunkRegion, final boolean bl) {
-				super(d, bl);
+			public RebuildTask(@Nullable final RenderChunkRegion renderChunkRegion, final boolean bl) {
+				super(bl);
 				this.region = renderChunkRegion;
 			}
 
@@ -491,6 +483,9 @@ public class SectionRenderDispatcher {
 						SectionPos sectionPos = SectionPos.of(RenderSection.this.origin);
 						SectionCompiler.Results results = SectionRenderDispatcher.this.sectionCompiler
 							.compile(sectionPos, renderChunkRegion, RenderSection.this.createVertexSorting(), sectionBufferBuilderPack);
+						SectionRenderDispatcher.TranslucencyPointOfView translucencyPointOfView = SectionRenderDispatcher.TranslucencyPointOfView.of(
+							SectionRenderDispatcher.this.getCameraPosition(), RenderSection.this.sectionNode
+						);
 						RenderSection.this.updateGlobalBlockEntities(results.globalBlockEntities);
 						if (this.isCancelled.get()) {
 							results.release();
@@ -514,6 +509,7 @@ public class SectionRenderDispatcher {
 									return SectionRenderDispatcher.SectionTaskResult.CANCELLED;
 								} else {
 									RenderSection.this.setCompiled(compiledSection);
+									RenderSection.this.pointOfView.set(translucencyPointOfView);
 									return SectionRenderDispatcher.SectionTaskResult.SUCCESSFUL;
 								}
 							});
@@ -535,8 +531,8 @@ public class SectionRenderDispatcher {
 		class ResortTransparencyTask extends SectionRenderDispatcher.RenderSection.CompileTask {
 			private final SectionRenderDispatcher.CompiledSection compiledSection;
 
-			public ResortTransparencyTask(final double d, final SectionRenderDispatcher.CompiledSection compiledSection) {
-				super(d, true);
+			public ResortTransparencyTask(final SectionRenderDispatcher.CompiledSection compiledSection) {
+				super(true);
 				this.compiledSection = compiledSection;
 			}
 
@@ -558,24 +554,36 @@ public class SectionRenderDispatcher {
 					MeshData.SortState sortState = this.compiledSection.transparencyState;
 					if (sortState != null && !this.compiledSection.isEmpty(RenderType.translucent())) {
 						VertexSorting vertexSorting = RenderSection.this.createVertexSorting();
-						ByteBufferBuilder.Result result = sortState.buildSortedIndexBuffer(sectionBufferBuilderPack.buffer(RenderType.translucent()), vertexSorting);
-						if (result == null) {
-							return CompletableFuture.completedFuture(SectionRenderDispatcher.SectionTaskResult.CANCELLED);
-						} else if (this.isCancelled.get()) {
-							result.close();
+						SectionRenderDispatcher.TranslucencyPointOfView translucencyPointOfView = SectionRenderDispatcher.TranslucencyPointOfView.of(
+							SectionRenderDispatcher.this.getCameraPosition(), RenderSection.this.sectionNode
+						);
+						if (translucencyPointOfView.equals(RenderSection.this.pointOfView.get()) && !translucencyPointOfView.isAxisAligned()) {
 							return CompletableFuture.completedFuture(SectionRenderDispatcher.SectionTaskResult.CANCELLED);
 						} else {
-							CompletableFuture<SectionRenderDispatcher.SectionTaskResult> completableFuture = SectionRenderDispatcher.this.uploadSectionIndexBuffer(
-									result, RenderSection.this.getBuffer(RenderType.translucent())
-								)
-								.thenApply(void_ -> SectionRenderDispatcher.SectionTaskResult.CANCELLED);
-							return completableFuture.handle((sectionTaskResult, throwable) -> {
-								if (throwable != null && !(throwable instanceof CancellationException) && !(throwable instanceof InterruptedException)) {
-									Minecraft.getInstance().delayCrash(CrashReport.forThrowable(throwable, "Rendering section"));
-								}
+							ByteBufferBuilder.Result result = sortState.buildSortedIndexBuffer(sectionBufferBuilderPack.buffer(RenderType.translucent()), vertexSorting);
+							if (result == null) {
+								return CompletableFuture.completedFuture(SectionRenderDispatcher.SectionTaskResult.CANCELLED);
+							} else if (this.isCancelled.get()) {
+								result.close();
+								return CompletableFuture.completedFuture(SectionRenderDispatcher.SectionTaskResult.CANCELLED);
+							} else {
+								CompletableFuture<SectionRenderDispatcher.SectionTaskResult> completableFuture = SectionRenderDispatcher.this.uploadSectionIndexBuffer(
+										result, RenderSection.this.getBuffer(RenderType.translucent())
+									)
+									.thenApply(void_ -> SectionRenderDispatcher.SectionTaskResult.CANCELLED);
+								return completableFuture.handle((sectionTaskResult, throwable) -> {
+									if (throwable != null && !(throwable instanceof CancellationException) && !(throwable instanceof InterruptedException)) {
+										Minecraft.getInstance().delayCrash(CrashReport.forThrowable(throwable, "Rendering section"));
+									}
 
-								return this.isCancelled.get() ? SectionRenderDispatcher.SectionTaskResult.CANCELLED : SectionRenderDispatcher.SectionTaskResult.SUCCESSFUL;
-							});
+									if (this.isCancelled.get()) {
+										return SectionRenderDispatcher.SectionTaskResult.CANCELLED;
+									} else {
+										RenderSection.this.pointOfView.set(translucencyPointOfView);
+										return SectionRenderDispatcher.SectionTaskResult.SUCCESSFUL;
+									}
+								});
+							}
 						}
 					} else {
 						return CompletableFuture.completedFuture(SectionRenderDispatcher.SectionTaskResult.CANCELLED);
@@ -594,5 +602,42 @@ public class SectionRenderDispatcher {
 	static enum SectionTaskResult {
 		SUCCESSFUL,
 		CANCELLED;
+	}
+
+	@Environment(EnvType.CLIENT)
+	public static final class TranslucencyPointOfView {
+		private int x;
+		private int y;
+		private int z;
+
+		public static SectionRenderDispatcher.TranslucencyPointOfView of(Vec3 vec3, long l) {
+			return new SectionRenderDispatcher.TranslucencyPointOfView().set(vec3, l);
+		}
+
+		public SectionRenderDispatcher.TranslucencyPointOfView set(Vec3 vec3, long l) {
+			this.x = getCoordinate(vec3.x(), SectionPos.x(l));
+			this.y = getCoordinate(vec3.y(), SectionPos.y(l));
+			this.z = getCoordinate(vec3.z(), SectionPos.z(l));
+			return this;
+		}
+
+		private static int getCoordinate(double d, int i) {
+			int j = SectionPos.blockToSectionCoord(d) - i;
+			return Mth.clamp(j, -1, 1);
+		}
+
+		public boolean isAxisAligned() {
+			return this.x == 0 || this.y == 0 || this.z == 0;
+		}
+
+		public boolean equals(Object object) {
+			if (object == this) {
+				return true;
+			} else {
+				return !(object instanceof SectionRenderDispatcher.TranslucencyPointOfView translucencyPointOfView)
+					? false
+					: this.x == translucencyPointOfView.x && this.y == translucencyPointOfView.y && this.z == translucencyPointOfView.z;
+			}
+		}
 	}
 }

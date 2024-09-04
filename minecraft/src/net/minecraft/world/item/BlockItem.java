@@ -167,11 +167,6 @@ public class BlockItem extends Item {
 	}
 
 	@Override
-	public String getDescriptionId() {
-		return this.getBlock().getDescriptionId();
-	}
-
-	@Override
 	public void appendHoverText(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Component> list, TooltipFlag tooltipFlag) {
 		super.appendHoverText(itemStack, tooltipContext, list, tooltipFlag);
 		this.getBlock().appendHoverText(itemStack, tooltipContext, list, tooltipFlag);

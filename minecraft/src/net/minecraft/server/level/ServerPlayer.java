@@ -107,7 +107,8 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.NeutralMob;
 import net.minecraft.world.entity.Pose;
-import net.minecraft.world.entity.RelativeMovement;
+import net.minecraft.world.entity.PositionMoveRotation;
+import net.minecraft.world.entity.Relative;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -118,6 +119,7 @@ import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.Strider;
 import net.minecraft.world.entity.monster.warden.WardenSpawnTracker;
 import net.minecraft.world.entity.player.ChatVisiblity;
+import net.minecraft.world.entity.player.Input;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
@@ -169,7 +171,8 @@ public class ServerPlayer extends Player {
 	private static final int NEUTRAL_MOB_DEATH_NOTIFICATION_RADII_XZ = 32;
 	private static final int NEUTRAL_MOB_DEATH_NOTIFICATION_RADII_Y = 10;
 	private static final int FLY_STAT_RECORDING_SPEED = 25;
-	public static final double INTERACTION_DISTANCE_VERIFICATION_BUFFER = 1.0;
+	public static final double BLOCK_INTERACTION_DISTANCE_VERIFICATION_BUFFER = 1.0;
+	public static final double ENTITY_INTERACTION_DISTANCE_VERIFICATION_BUFFER = 3.0;
 	private static final AttributeModifier CREATIVE_BLOCK_INTERACTION_RANGE_MODIFIER = new AttributeModifier(
 		ResourceLocation.withDefaultNamespace("creative_mode_block_range"), 0.5, AttributeModifier.Operation.ADD_VALUE
 	);
@@ -228,6 +231,7 @@ public class ServerPlayer extends Player {
 	@Nullable
 	private BlockPos raidOmenPosition;
 	private Vec3 lastKnownClientMovement = Vec3.ZERO;
+	private Input lastClientInput = Input.EMPTY;
 	private final ContainerSynchronizer containerSynchronizer = new ContainerSynchronizer() {
 		@Override
 		public void sendInitialData(AbstractContainerMenu abstractContainerMenu, NonNullList<ItemStack> nonNullList, ItemStack itemStack, int[] is) {
@@ -876,9 +880,9 @@ public class ServerPlayer extends Player {
 			ServerLevel serverLevel = dimensionTransition.newLevel();
 			ServerLevel serverLevel2 = this.serverLevel();
 			ResourceKey<Level> resourceKey = serverLevel2.dimension();
+			this.stopRiding();
 			if (serverLevel.dimension() == resourceKey) {
-				this.connection
-					.teleport(dimensionTransition.pos().x, dimensionTransition.pos().y, dimensionTransition.pos().z, dimensionTransition.yRot(), dimensionTransition.xRot());
+				this.connection.teleport(PositionMoveRotation.of(dimensionTransition), dimensionTransition.relatives());
 				this.connection.resetPosition();
 				dimensionTransition.postDimensionTransition().onTransition(this);
 				return this;
@@ -900,8 +904,7 @@ public class ServerPlayer extends Player {
 				serverLevel2.getProfiler().pop();
 				serverLevel2.getProfiler().push("placing");
 				this.setServerLevel(serverLevel);
-				this.connection
-					.teleport(dimensionTransition.pos().x, dimensionTransition.pos().y, dimensionTransition.pos().z, dimensionTransition.yRot(), dimensionTransition.xRot());
+				this.connection.teleport(PositionMoveRotation.of(dimensionTransition), dimensionTransition.relatives());
 				this.connection.resetPosition();
 				serverLevel.addDuringTeleport(this);
 				serverLevel2.getProfiler().pop();
@@ -1418,25 +1421,32 @@ public class ServerPlayer extends Player {
 
 	@Override
 	public void teleportTo(double d, double e, double f) {
-		this.connection.teleport(d, e, f, this.getYRot(), this.getXRot(), RelativeMovement.ROTATION);
+		this.connection.teleport(new PositionMoveRotation(new Vec3(d, e, f), Vec3.ZERO, 0.0F, 0.0F), Relative.union(Relative.DELTA, Relative.ROTATION));
 	}
 
 	@Override
 	public void teleportRelative(double d, double e, double f) {
-		this.connection.teleport(this.getX() + d, this.getY() + e, this.getZ() + f, this.getYRot(), this.getXRot(), RelativeMovement.ALL);
+		this.connection.teleport(new PositionMoveRotation(new Vec3(d, e, f), Vec3.ZERO, 0.0F, 0.0F), Relative.ALL);
 	}
 
 	@Override
-	public boolean teleportTo(ServerLevel serverLevel, double d, double e, double f, Set<RelativeMovement> set, float g, float h, boolean bl) {
+	public boolean teleportTo(ServerLevel serverLevel, double d, double e, double f, Set<Relative> set, float g, float h, boolean bl) {
 		ChunkPos chunkPos = new ChunkPos(BlockPos.containing(d, e, f));
 		serverLevel.getChunkSource().addRegionTicket(TicketType.POST_TELEPORT, chunkPos, 1, this.getId());
 		if (this.isSleeping()) {
 			this.stopSleepInBed(true, true);
 		}
 
-		this.teleportTo(serverLevel, d, e, f, g, h, bl);
-		this.setYHeadRot(g);
-		return true;
+		if (bl) {
+			this.setCamera(this);
+		}
+
+		boolean bl2 = super.teleportTo(serverLevel, d, e, f, set, g, h, bl);
+		if (bl2) {
+			this.setYHeadRot(set.contains(Relative.Y_ROT) ? this.getYHeadRot() + g : g);
+		}
+
+		return bl2;
 	}
 
 	@Override
@@ -1679,15 +1689,6 @@ public class ServerPlayer extends Player {
 		return this.advancements;
 	}
 
-	public void teleportTo(ServerLevel serverLevel, double d, double e, double f, float g, float h, boolean bl) {
-		if (bl) {
-			this.setCamera(this);
-		}
-
-		this.stopRiding();
-		this.changeDimension(new DimensionTransition(serverLevel, new Vec3(d, e, f), Vec3.ZERO, g, h, DimensionTransition.DO_NOTHING));
-	}
-
 	@Nullable
 	public BlockPos getRespawnPosition() {
 		return this.respawnPosition;
@@ -1917,7 +1918,7 @@ public class ServerPlayer extends Player {
 	public boolean startRiding(Entity entity, boolean bl) {
 		if (super.startRiding(entity, bl)) {
 			entity.positionRider(this);
-			this.connection.teleport(this.getX(), this.getY(), this.getZ(), this.getYRot(), this.getXRot());
+			this.connection.teleport(new PositionMoveRotation(this.position(), Vec3.ZERO, 0.0F, 0.0F), Relative.ROTATION);
 			if (entity instanceof LivingEntity livingEntity) {
 				this.server.getPlayerList().sendActiveEffects(livingEntity, this.connection);
 			}
@@ -1986,6 +1987,20 @@ public class ServerPlayer extends Player {
 	public void onEquippedItemBroken(Item item, EquipmentSlot equipmentSlot) {
 		super.onEquippedItemBroken(item, equipmentSlot);
 		this.awardStat(Stats.ITEM_BROKEN.get(item));
+	}
+
+	public Input getLastClientInput() {
+		return this.lastClientInput;
+	}
+
+	public void setLastClientInput(Input input) {
+		this.lastClientInput = input;
+	}
+
+	public Vec3 getLastClientMoveIntent() {
+		float f = this.lastClientInput.left() == this.lastClientInput.right() ? 0.0F : (this.lastClientInput.left() ? 1.0F : -1.0F);
+		float g = this.lastClientInput.forward() == this.lastClientInput.backward() ? 0.0F : (this.lastClientInput.forward() ? 1.0F : -1.0F);
+		return getInputVector(new Vec3((double)f, 0.0, (double)g), 1.0F, this.getYRot());
 	}
 
 	static record RespawnPosAngle(Vec3 position, float yaw) {

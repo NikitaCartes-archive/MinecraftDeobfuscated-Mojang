@@ -2,8 +2,6 @@ package net.minecraft.world.item.alchemy;
 
 import com.mojang.serialization.Codec;
 import java.util.List;
-import java.util.Optional;
-import javax.annotation.Nullable;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -19,16 +17,11 @@ import net.minecraft.world.flag.FeatureFlags;
 public class Potion implements FeatureElement {
 	public static final Codec<Holder<Potion>> CODEC = BuiltInRegistries.POTION.holderByNameCodec();
 	public static final StreamCodec<RegistryFriendlyByteBuf, Holder<Potion>> STREAM_CODEC = ByteBufCodecs.holderRegistry(Registries.POTION);
-	@Nullable
 	private final String name;
 	private final List<MobEffectInstance> effects;
 	private FeatureFlagSet requiredFeatures = FeatureFlags.VANILLA_SET;
 
-	public Potion(MobEffectInstance... mobEffectInstances) {
-		this(null, mobEffectInstances);
-	}
-
-	public Potion(@Nullable String string, MobEffectInstance... mobEffectInstances) {
+	public Potion(String string, MobEffectInstance... mobEffectInstances) {
 		this.name = string;
 		this.effects = List.of(mobEffectInstances);
 	}
@@ -43,28 +36,18 @@ public class Potion implements FeatureElement {
 		return this.requiredFeatures;
 	}
 
-	public static String getName(Optional<Holder<Potion>> optional, String string) {
-		if (optional.isPresent()) {
-			String string2 = ((Potion)((Holder)optional.get()).value()).name;
-			if (string2 != null) {
-				return string + string2;
-			}
-		}
-
-		String string2 = (String)optional.flatMap(Holder::unwrapKey).map(resourceKey -> resourceKey.location().getPath()).orElse("empty");
-		return string + string2;
-	}
-
 	public List<MobEffectInstance> getEffects() {
 		return this.effects;
 	}
 
+	public String name() {
+		return this.name;
+	}
+
 	public boolean hasInstantEffects() {
-		if (!this.effects.isEmpty()) {
-			for (MobEffectInstance mobEffectInstance : this.effects) {
-				if (mobEffectInstance.getEffect().value().isInstantenous()) {
-					return true;
-				}
+		for (MobEffectInstance mobEffectInstance : this.effects) {
+			if (mobEffectInstance.getEffect().value().isInstantenous()) {
+				return true;
 			}
 		}
 

@@ -199,6 +199,7 @@ public class ShulkerBullet extends Projectile {
 	@Override
 	public void tick() {
 		super.tick();
+		HitResult hitResult = null;
 		if (!this.level().isClientSide) {
 			if (this.finalTarget == null && this.targetId != null) {
 				this.finalTarget = ((ServerLevel)this.level()).getEntity(this.targetId);
@@ -217,16 +218,16 @@ public class ShulkerBullet extends Projectile {
 				this.setDeltaMovement(vec3.add((this.targetDeltaX - vec3.x) * 0.2, (this.targetDeltaY - vec3.y) * 0.2, (this.targetDeltaZ - vec3.z) * 0.2));
 			}
 
-			HitResult hitResult = ProjectileUtil.getHitResultOnMoveVector(this, this::canHitEntity);
-			if (hitResult.getType() != HitResult.Type.MISS) {
-				this.hitTargetOrDeflectSelf(hitResult);
-			}
-
-			this.applyEffectsFromBlocks();
+			hitResult = ProjectileUtil.getHitResultOnMoveVector(this, this::canHitEntity);
 		}
 
 		Vec3 vec3 = this.getDeltaMovement();
-		this.setPos(this.getX() + vec3.x, this.getY() + vec3.y, this.getZ() + vec3.z);
+		this.setPos(this.position().add(vec3));
+		this.applyEffectsFromBlocks();
+		if (hitResult != null && this.isAlive() && hitResult.getType() != HitResult.Type.MISS) {
+			this.hitTargetOrDeflectSelf(hitResult);
+		}
+
 		ProjectileUtil.rotateTowardsMovement(this, 0.5F);
 		if (this.level().isClientSide) {
 			this.level().addParticle(ParticleTypes.END_ROD, this.getX() - vec3.x, this.getY() - vec3.y + 0.15, this.getZ() - vec3.z, 0.0, 0.0, 0.0);

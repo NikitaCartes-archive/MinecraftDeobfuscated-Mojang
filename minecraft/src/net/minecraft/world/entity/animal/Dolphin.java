@@ -2,6 +2,7 @@ package net.minecraft.world.entity.animal;
 
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
@@ -85,7 +86,8 @@ public class Dolphin extends AgeableWaterCreature {
 	) {
 		this.setAirSupply(this.getMaxAirSupply());
 		this.setXRot(0.0F);
-		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, entitySpawnReason, new AgeableMob.AgeableMobGroupData(true, 0.1F));
+		SpawnGroupData spawnGroupData2 = (SpawnGroupData)Objects.requireNonNullElseGet(spawnGroupData, () -> new AgeableMob.AgeableMobGroupData(0.1F));
+		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, entitySpawnReason, spawnGroupData2);
 	}
 
 	@Nullable
@@ -217,9 +219,8 @@ public class Dolphin extends AgeableWaterCreature {
 	}
 
 	@Override
-	public boolean canTakeItem(ItemStack itemStack) {
-		EquipmentSlot equipmentSlot = this.getEquipmentSlotForItem(itemStack);
-		return !this.getItemBySlot(equipmentSlot).isEmpty() ? false : equipmentSlot == EquipmentSlot.MAINHAND && super.canTakeItem(itemStack);
+	protected boolean canDispenserEquipIntoSlot(EquipmentSlot equipmentSlot) {
+		return equipmentSlot == EquipmentSlot.MAINHAND && this.canPickUpLoot();
 	}
 
 	@Override
@@ -306,8 +307,14 @@ public class Dolphin extends AgeableWaterCreature {
 				this.playSound(SoundEvents.DOLPHIN_EAT, 1.0F, 1.0F);
 			}
 
-			this.setGotFish(true);
-			itemStack.consume(1, player);
+			if (this.isBaby()) {
+				itemStack.consume(1, player);
+				this.ageUp(getSpeedUpSecondsWhenFeeding(-this.age), true);
+			} else {
+				this.setGotFish(true);
+				itemStack.consume(1, player);
+			}
+
 			return InteractionResult.SUCCESS;
 		} else {
 			return super.mobInteract(player, interactionHand);

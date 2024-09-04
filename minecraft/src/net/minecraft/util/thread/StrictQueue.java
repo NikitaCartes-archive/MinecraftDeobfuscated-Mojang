@@ -6,17 +6,17 @@ import java.util.Queue;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.annotation.Nullable;
 
-public interface StrictQueue<T, F> {
+public interface StrictQueue<T extends Runnable> {
 	@Nullable
-	F pop();
+	Runnable pop();
 
-	boolean push(T object);
+	boolean push(T runnable);
 
 	boolean isEmpty();
 
 	int size();
 
-	public static final class FixedPriorityQueue implements StrictQueue<StrictQueue.IntRunnable, Runnable> {
+	public static final class FixedPriorityQueue implements StrictQueue<StrictQueue.RunnableWithPriority> {
 		private final Queue<Runnable>[] queues;
 		private final AtomicInteger size = new AtomicInteger();
 
@@ -29,6 +29,7 @@ public interface StrictQueue<T, F> {
 		}
 
 		@Nullable
+		@Override
 		public Runnable pop() {
 			for (Queue<Runnable> queue : this.queues) {
 				Runnable runnable = (Runnable)queue.poll();
@@ -41,10 +42,10 @@ public interface StrictQueue<T, F> {
 			return null;
 		}
 
-		public boolean push(StrictQueue.IntRunnable intRunnable) {
-			int i = intRunnable.priority;
+		public boolean push(StrictQueue.RunnableWithPriority runnableWithPriority) {
+			int i = runnableWithPriority.priority;
 			if (i < this.queues.length && i >= 0) {
-				this.queues[i].add(intRunnable);
+				this.queues[i].add(runnableWithPriority);
 				this.size.incrementAndGet();
 				return true;
 			} else {
@@ -63,40 +64,22 @@ public interface StrictQueue<T, F> {
 		}
 	}
 
-	public static final class IntRunnable implements Runnable {
-		final int priority;
-		private final Runnable task;
+	public static final class QueueStrictQueue implements StrictQueue<Runnable> {
+		private final Queue<Runnable> queue;
 
-		public IntRunnable(int i, Runnable runnable) {
-			this.priority = i;
-			this.task = runnable;
-		}
-
-		public void run() {
-			this.task.run();
-		}
-
-		public int getPriority() {
-			return this.priority;
-		}
-	}
-
-	public static final class QueueStrictQueue<T> implements StrictQueue<T, T> {
-		private final Queue<T> queue;
-
-		public QueueStrictQueue(Queue<T> queue) {
+		public QueueStrictQueue(Queue<Runnable> queue) {
 			this.queue = queue;
 		}
 
 		@Nullable
 		@Override
-		public T pop() {
-			return (T)this.queue.poll();
+		public Runnable pop() {
+			return (Runnable)this.queue.poll();
 		}
 
 		@Override
-		public boolean push(T object) {
-			return this.queue.add(object);
+		public boolean push(Runnable runnable) {
+			return this.queue.add(runnable);
 		}
 
 		@Override
@@ -107,6 +90,13 @@ public interface StrictQueue<T, F> {
 		@Override
 		public int size() {
 			return this.queue.size();
+		}
+	}
+
+	public static record RunnableWithPriority(int priority, Runnable task) implements Runnable {
+
+		public void run() {
+			this.task.run();
 		}
 	}
 }

@@ -120,16 +120,10 @@ public class LoomScreen extends AbstractContainerScreen<LoomMenu> {
 			this.flag.xRot = 0.0F;
 			this.flag.y = -32.0F;
 			DyeColor dyeColor = ((BannerItem)slot4.getItem().getItem()).getColor();
-			BannerRenderer.renderPatterns(
-				guiGraphics.pose(),
-				guiGraphics.bufferSource(),
-				15728880,
-				OverlayTexture.NO_OVERLAY,
-				this.flag,
-				ModelBakery.BANNER_BASE,
-				true,
-				dyeColor,
-				this.resultBannerPatterns
+			guiGraphics.drawSpecial(
+				multiBufferSource -> BannerRenderer.renderPatterns(
+						guiGraphics.pose(), multiBufferSource, 15728880, OverlayTexture.NO_OVERLAY, this.flag, ModelBakery.BANNER_BASE, true, dyeColor, this.resultBannerPatterns
+					)
 			);
 			guiGraphics.pose().popPose();
 		} else if (this.hasMaxPatterns) {
@@ -184,8 +178,10 @@ public class LoomScreen extends AbstractContainerScreen<LoomMenu> {
 		this.flag.xRot = 0.0F;
 		this.flag.y = -32.0F;
 		BannerPatternLayers bannerPatternLayers = new BannerPatternLayers.Builder().add(holder, DyeColor.WHITE).build();
-		BannerRenderer.renderPatterns(
-			poseStack, guiGraphics.bufferSource(), 15728880, OverlayTexture.NO_OVERLAY, this.flag, ModelBakery.BANNER_BASE, true, DyeColor.GRAY, bannerPatternLayers
+		guiGraphics.drawSpecial(
+			multiBufferSource -> BannerRenderer.renderPatterns(
+					poseStack, multiBufferSource, 15728880, OverlayTexture.NO_OVERLAY, this.flag, ModelBakery.BANNER_BASE, true, DyeColor.GRAY, bannerPatternLayers
+				)
 		);
 		poseStack.popPose();
 		guiGraphics.flush();

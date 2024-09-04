@@ -16,7 +16,7 @@ public abstract class AbstractZombieRenderer<T extends Zombie, S extends ZombieR
 		EntityRendererProvider.Context context, M zombieModel, M zombieModel2, M zombieModel3, M zombieModel4, M zombieModel5, M zombieModel6
 	) {
 		super(context, zombieModel, zombieModel2, 0.5F);
-		this.addLayer(new HumanoidArmorLayer<>(this, zombieModel3, zombieModel4, zombieModel5, zombieModel6, context.getModelManager()));
+		this.addLayer(new HumanoidArmorLayer<>(this, zombieModel3, zombieModel4, zombieModel5, zombieModel6, context.getEquipmentRenderer()));
 	}
 
 	public ResourceLocation getTextureLocation(S zombieRenderState) {

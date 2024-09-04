@@ -44,6 +44,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.AgeableMob;
+import net.minecraft.world.entity.ConversionParams;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
@@ -770,21 +771,12 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 	public void thunderHit(ServerLevel serverLevel, LightningBolt lightningBolt) {
 		if (serverLevel.getDifficulty() != Difficulty.PEACEFUL) {
 			LOGGER.info("Villager {} was struck by lightning {}.", this, lightningBolt);
-			Witch witch = EntityType.WITCH.create(serverLevel, EntitySpawnReason.CONVERSION);
-			if (witch != null) {
-				witch.moveTo(this.getX(), this.getY(), this.getZ(), this.getYRot(), this.getXRot());
-				witch.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(witch.blockPosition()), EntitySpawnReason.CONVERSION, null);
-				witch.setNoAi(this.isNoAi());
-				if (this.hasCustomName()) {
-					witch.setCustomName(this.getCustomName());
-					witch.setCustomNameVisible(this.isCustomNameVisible());
-				}
-
-				witch.setPersistenceRequired();
-				serverLevel.addFreshEntityWithPassengers(witch);
+			Witch witch = this.convertTo(EntityType.WITCH, ConversionParams.single(this, false, false), witchx -> {
+				witchx.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(witchx.blockPosition()), EntitySpawnReason.CONVERSION, null);
+				witchx.setPersistenceRequired();
 				this.releaseAllPois();
-				this.discard();
-			} else {
+			});
+			if (witch == null) {
 				super.thunderHit(serverLevel, lightningBolt);
 			}
 		} else {

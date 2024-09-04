@@ -48,6 +48,11 @@ public class PackRepository {
 		return ImmutableMap.copyOf(map);
 	}
 
+	public boolean isAbleToClearAnyPack() {
+		List<Pack> list = this.rebuildSelected(List.of());
+		return !this.selected.equals(list);
+	}
+
 	public void setSelected(Collection<String> collection) {
 		this.selected = this.rebuildSelected(collection);
 	}

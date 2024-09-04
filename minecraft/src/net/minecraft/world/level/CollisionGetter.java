@@ -12,7 +12,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -99,16 +98,16 @@ public interface CollisionGetter extends BlockGetter {
 		return worldBorder.isInsideCloseToBorder(entity, aABB) ? worldBorder.getCollisionShape() : null;
 	}
 
-	default HitResult clipIncludingBorder(ClipContext clipContext) {
-		HitResult hitResult = this.clip(clipContext);
+	default BlockHitResult clipIncludingBorder(ClipContext clipContext) {
+		BlockHitResult blockHitResult = this.clip(clipContext);
 		WorldBorder worldBorder = this.getWorldBorder();
-		if (worldBorder.isWithinBounds(clipContext.getFrom()) && !worldBorder.isWithinBounds(hitResult.getLocation())) {
-			Vec3 vec3 = hitResult.getLocation().subtract(clipContext.getFrom());
+		if (worldBorder.isWithinBounds(clipContext.getFrom()) && !worldBorder.isWithinBounds(blockHitResult.getLocation())) {
+			Vec3 vec3 = blockHitResult.getLocation().subtract(clipContext.getFrom());
 			Direction direction = Direction.getApproximateNearest(vec3.x, vec3.y, vec3.z);
-			Vec3 vec32 = worldBorder.clampVec3ToBound(hitResult.getLocation());
+			Vec3 vec32 = worldBorder.clampVec3ToBound(blockHitResult.getLocation());
 			return new BlockHitResult(vec32, direction, BlockPos.containing(vec32), false, true);
 		} else {
-			return hitResult;
+			return blockHitResult;
 		}
 	}
 

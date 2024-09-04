@@ -1,43 +1,17 @@
 package net.minecraft.world.item;
 
-import java.util.function.Function;
-import java.util.function.UnaryOperator;
-import javax.annotation.Nullable;
-import net.minecraft.core.Holder;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.HolderSet;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.equipment.ArmorMaterial;
 
-public class AnimalArmorItem extends ArmorItem {
-	private final ResourceLocation textureLocation;
-	@Nullable
-	private final ResourceLocation overlayTextureLocation;
+public class AnimalArmorItem extends Item {
 	private final AnimalArmorItem.BodyType bodyType;
 
-	public AnimalArmorItem(Holder<ArmorMaterial> holder, AnimalArmorItem.BodyType bodyType, boolean bl, Item.Properties properties) {
-		super(holder, ArmorItem.Type.BODY, properties);
+	public AnimalArmorItem(ArmorMaterial armorMaterial, AnimalArmorItem.BodyType bodyType, Item.Properties properties) {
+		super(armorMaterial.animalProperties(properties, bodyType.allowedEntities));
 		this.bodyType = bodyType;
-		ResourceLocation resourceLocation = (ResourceLocation)bodyType.textureLocator.apply(((ResourceKey)holder.unwrapKey().orElseThrow()).location());
-		this.textureLocation = resourceLocation.withSuffix(".png");
-		if (bl) {
-			this.overlayTextureLocation = resourceLocation.withSuffix("_overlay.png");
-		} else {
-			this.overlayTextureLocation = null;
-		}
-	}
-
-	public ResourceLocation getTexture() {
-		return this.textureLocation;
-	}
-
-	@Nullable
-	public ResourceLocation getOverlayTexture() {
-		return this.overlayTextureLocation;
-	}
-
-	public AnimalArmorItem.BodyType getBodyType() {
-		return this.bodyType;
 	}
 
 	@Override
@@ -46,18 +20,15 @@ public class AnimalArmorItem extends ArmorItem {
 	}
 
 	public static enum BodyType {
-		EQUESTRIAN(
-			resourceLocation -> resourceLocation.withPath((UnaryOperator<String>)(string -> "textures/entity/horse/armor/horse_armor_" + string)),
-			SoundEvents.ITEM_BREAK
-		),
-		CANINE(resourceLocation -> resourceLocation.withPath("textures/entity/wolf/wolf_armor"), SoundEvents.WOLF_ARMOR_BREAK);
+		EQUESTRIAN(SoundEvents.ITEM_BREAK, EntityType.HORSE),
+		CANINE(SoundEvents.WOLF_ARMOR_BREAK, EntityType.WOLF);
 
-		final Function<ResourceLocation, ResourceLocation> textureLocator;
 		final SoundEvent breakingSound;
+		final HolderSet<EntityType<?>> allowedEntities;
 
-		private BodyType(final Function<ResourceLocation, ResourceLocation> function, final SoundEvent soundEvent) {
-			this.textureLocator = function;
+		private BodyType(final SoundEvent soundEvent, final EntityType<?>... entityTypes) {
 			this.breakingSound = soundEvent;
+			this.allowedEntities = HolderSet.direct(EntityType::builtInRegistryHolder, entityTypes);
 		}
 	}
 }

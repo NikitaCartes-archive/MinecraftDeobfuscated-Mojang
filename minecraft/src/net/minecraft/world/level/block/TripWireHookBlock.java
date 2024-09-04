@@ -177,8 +177,11 @@ public class TripWireHookBlock extends Block {
 				for (int l = 1; l < j; l++) {
 					BlockPos blockPos3 = blockPos.relative(direction, l);
 					BlockState blockState5 = blockStates[l];
-					if (blockState5 != null && !level.getBlockState(blockPos3).isAir()) {
-						level.setBlock(blockPos3, blockState5.trySetValue(ATTACHED, Boolean.valueOf(bl5)), 3);
+					if (blockState5 != null) {
+						BlockState blockState6 = level.getBlockState(blockPos3);
+						if (blockState6.is(Blocks.TRIPWIRE) || blockState6.is(Blocks.TRIPWIRE_HOOK)) {
+							level.setBlock(blockPos3, blockState5.trySetValue(ATTACHED, Boolean.valueOf(bl5)), 3);
+						}
 					}
 				}
 			}

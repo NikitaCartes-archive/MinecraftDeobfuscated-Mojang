@@ -16,7 +16,7 @@ public record EquipmentTable(ResourceKey<LootTable> lootTable, Map<EquipmentSlot
 	public static final Codec<Map<EquipmentSlot, Float>> DROP_CHANCES_CODEC = Codec.either(Codec.FLOAT, Codec.unboundedMap(EquipmentSlot.CODEC, Codec.FLOAT))
 		.xmap(either -> either.map(EquipmentTable::createForAllSlots, Function.identity()), map -> {
 			boolean bl = map.values().stream().distinct().count() == 1L;
-			boolean bl2 = map.keySet().containsAll(Arrays.asList(EquipmentSlot.values()));
+			boolean bl2 = map.keySet().containsAll(Arrays.asList(EquipmentSlot.VALUES));
 			return bl && bl2 ? Either.left((Float)map.values().stream().findFirst().orElse(0.0F)) : Either.right(map);
 		});
 	public static final Codec<EquipmentTable> CODEC = RecordCodecBuilder.create(

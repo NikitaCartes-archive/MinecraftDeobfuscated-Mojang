@@ -7,6 +7,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -14,9 +15,9 @@ import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.SmithingMenu;
-import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.SmithingTemplateItem;
+import net.minecraft.world.item.equipment.Equippable;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
@@ -114,17 +115,14 @@ public class SmithingScreen extends ItemCombinerScreen<SmithingMenu> {
 
 	private void updateArmorStandPreview(ItemStack itemStack) {
 		if (this.armorStandPreview != null) {
-			for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
+			for (EquipmentSlot equipmentSlot : EquipmentSlot.VALUES) {
 				this.armorStandPreview.setItemSlot(equipmentSlot, ItemStack.EMPTY);
 			}
 
 			if (!itemStack.isEmpty()) {
-				ItemStack itemStack2 = itemStack.copy();
-				if (itemStack.getItem() instanceof ArmorItem armorItem) {
-					this.armorStandPreview.setItemSlot(armorItem.getEquipmentSlot(), itemStack2);
-				} else {
-					this.armorStandPreview.setItemSlot(EquipmentSlot.OFFHAND, itemStack2);
-				}
+				Equippable equippable = itemStack.get(DataComponents.EQUIPPABLE);
+				EquipmentSlot equipmentSlot = equippable != null ? equippable.slot() : EquipmentSlot.OFFHAND;
+				this.armorStandPreview.setItemSlot(equipmentSlot, itemStack.copy());
 			}
 		}
 	}

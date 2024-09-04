@@ -299,7 +299,7 @@ public class Allay extends PathfinderMob implements InventoryCarrier, VibrationS
 	}
 
 	@Override
-	public boolean canTakeItem(ItemStack itemStack) {
+	protected boolean canDispenserEquipIntoSlot(EquipmentSlot equipmentSlot) {
 		return false;
 	}
 

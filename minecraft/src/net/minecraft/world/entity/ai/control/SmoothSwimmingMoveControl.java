@@ -47,7 +47,7 @@ public class SmoothSwimmingMoveControl extends MoveControl {
 					if (Math.abs(e) > 1.0E-5F || Math.abs(j) > 1.0E-5F) {
 						float k = -((float)(Mth.atan2(e, j) * 180.0F / (float)Math.PI));
 						k = Mth.clamp(Mth.wrapDegrees(k), (float)(-this.maxTurnX), (float)this.maxTurnX);
-						this.mob.setXRot(this.rotlerp(this.mob.getXRot(), k, 5.0F));
+						this.mob.setXRot(this.rotateTowards(this.mob.getXRot(), k, 5.0F));
 					}
 
 					float k = Mth.cos(this.mob.getXRot() * (float) (Math.PI / 180.0));

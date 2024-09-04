@@ -75,13 +75,16 @@ public class SectionOcclusionGraph {
 		this.needsFullUpdate = true;
 	}
 
-	public void addSectionsInFrustum(Frustum frustum, List<SectionRenderDispatcher.RenderSection> list) {
-		((SectionOcclusionGraph.GraphState)this.currentGraph.get()).storage().sectionTree.visitNodes((node, bl, i) -> {
+	public void addSectionsInFrustum(Frustum frustum, List<SectionRenderDispatcher.RenderSection> list, List<SectionRenderDispatcher.RenderSection> list2) {
+		((SectionOcclusionGraph.GraphState)this.currentGraph.get()).storage().sectionTree.visitNodes((node, bl, i, bl2) -> {
 			SectionRenderDispatcher.RenderSection renderSection = node.getSection();
 			if (renderSection != null) {
 				list.add(renderSection);
+				if (bl2) {
+					list2.add(renderSection);
+				}
 			}
-		}, frustum);
+		}, frustum, 32);
 	}
 
 	public boolean consumeFrustumUpdate() {
@@ -155,7 +158,7 @@ public class SectionOcclusionGraph {
 			Frustum frustum2 = LevelRenderer.offsetFrustum(frustum);
 			Consumer<SectionRenderDispatcher.RenderSection> consumer = renderSection -> {
 				if (frustum2.isVisible(renderSection.getBoundingBox())) {
-					list.add(renderSection);
+					this.needsFrustumUpdate.set(true);
 				}
 			};
 			this.runUpdates(graphState.storage, vec3, queue, bl, consumer, longOpenHashSet);

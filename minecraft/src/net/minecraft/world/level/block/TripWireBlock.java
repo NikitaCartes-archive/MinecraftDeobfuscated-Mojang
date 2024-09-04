@@ -134,10 +134,15 @@ public class TripWireBlock extends Block {
 	}
 
 	@Override
+	protected VoxelShape getEntityInsideCollisionShape(BlockState blockState, Level level, BlockPos blockPos) {
+		return blockState.getShape(level, blockPos);
+	}
+
+	@Override
 	protected void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
 		if (!level.isClientSide) {
 			if (!(Boolean)blockState.getValue(POWERED)) {
-				this.checkPressed(level, blockPos);
+				this.checkPressed(level, blockPos, List.of(entity));
 			}
 		}
 	}
@@ -151,9 +156,14 @@ public class TripWireBlock extends Block {
 
 	private void checkPressed(Level level, BlockPos blockPos) {
 		BlockState blockState = level.getBlockState(blockPos);
+		List<? extends Entity> list = level.getEntities(null, blockState.getShape(level, blockPos).bounds().move(blockPos));
+		this.checkPressed(level, blockPos, list);
+	}
+
+	private void checkPressed(Level level, BlockPos blockPos, List<? extends Entity> list) {
+		BlockState blockState = level.getBlockState(blockPos);
 		boolean bl = (Boolean)blockState.getValue(POWERED);
 		boolean bl2 = false;
-		List<? extends Entity> list = level.getEntities(null, blockState.getShape(level, blockPos).bounds().move(blockPos));
 		if (!list.isEmpty()) {
 			for (Entity entity : list) {
 				if (!entity.isIgnoringBlockTriggers()) {

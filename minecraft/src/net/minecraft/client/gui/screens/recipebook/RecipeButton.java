@@ -79,7 +79,7 @@ public class RecipeButton extends AbstractWidget {
 		}
 
 		guiGraphics.blitSprite(RenderType::guiTextured, resourceLocation, this.getX(), this.getY(), this.width, this.height);
-		ItemStack itemStack = this.getRecipe().value().getResultItem(this.collection.registryAccess());
+		ItemStack itemStack = this.getResultItem();
 		int k = 4;
 		if (this.collection.hasSingleResultItem() && this.hasMultipleRecipes()) {
 			guiGraphics.renderItem(itemStack, this.getX() + k + 1, this.getY() + k + 1, 0, 10);
@@ -105,9 +105,12 @@ public class RecipeButton extends AbstractWidget {
 		return (RecipeHolder<?>)this.recipes.get(i);
 	}
 
+	public ItemStack getResultItem() {
+		return this.getRecipe().value().getResultItem(this.collection.registryAccess());
+	}
+
 	public List<Component> getTooltipText() {
-		ItemStack itemStack = this.getRecipe().value().getResultItem(this.collection.registryAccess());
-		List<Component> list = Lists.<Component>newArrayList(Screen.getTooltipFromItem(Minecraft.getInstance(), itemStack));
+		List<Component> list = Lists.<Component>newArrayList(Screen.getTooltipFromItem(Minecraft.getInstance(), this.getResultItem()));
 		if (this.hasMultipleRecipes()) {
 			list.add(MORE_RECIPES_TOOLTIP);
 		}
@@ -117,7 +120,7 @@ public class RecipeButton extends AbstractWidget {
 
 	@Override
 	public void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {
-		ItemStack itemStack = this.getRecipe().value().getResultItem(this.collection.registryAccess());
+		ItemStack itemStack = this.getResultItem();
 		narrationElementOutput.add(NarratedElementType.TITLE, Component.translatable("narration.recipe", itemStack.getHoverName()));
 		if (this.hasMultipleRecipes()) {
 			narrationElementOutput.add(

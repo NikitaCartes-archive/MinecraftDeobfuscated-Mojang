@@ -1,4 +1,4 @@
-package net.minecraft.world.item.armortrim;
+package net.minecraft.world.item.equipment.trim;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;

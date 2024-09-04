@@ -169,6 +169,7 @@ public final class BlockTags {
 	public static final TagKey<Block> FOXES_SPAWNABLE_ON = create("foxes_spawnable_on");
 	public static final TagKey<Block> WOLVES_SPAWNABLE_ON = create("wolves_spawnable_on");
 	public static final TagKey<Block> FROGS_SPAWNABLE_ON = create("frogs_spawnable_on");
+	public static final TagKey<Block> BATS_SPAWNABLE_ON = create("bats_spawnable_on");
 	public static final TagKey<Block> AZALEA_GROWS_ON = create("azalea_grows_on");
 	public static final TagKey<Block> CONVERTABLE_TO_MUD = create("convertable_to_mud");
 	public static final TagKey<Block> MANGROVE_LOGS_CAN_GROW_THROUGH = create("mangrove_logs_can_grow_through");

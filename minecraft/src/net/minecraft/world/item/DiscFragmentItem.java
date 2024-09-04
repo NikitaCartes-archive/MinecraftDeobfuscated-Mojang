@@ -16,6 +16,6 @@ public class DiscFragmentItem extends Item {
 	}
 
 	public MutableComponent getDisplayName() {
-		return Component.translatable(this.getDescriptionId() + ".desc");
+		return Component.translatable(this.descriptionId + ".desc");
 	}
 }

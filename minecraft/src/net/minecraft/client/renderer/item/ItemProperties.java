@@ -18,16 +18,15 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BundleItem;
 import net.minecraft.world.item.CompassItem;
 import net.minecraft.world.item.CrossbowItem;
-import net.minecraft.world.item.ElytraItem;
 import net.minecraft.world.item.FishingRodItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.armortrim.ArmorTrim;
 import net.minecraft.world.item.component.BlockItemStateProperties;
 import net.minecraft.world.item.component.ChargedProjectiles;
 import net.minecraft.world.item.component.CustomModelData;
 import net.minecraft.world.item.component.LodestoneTracker;
+import net.minecraft.world.item.equipment.trim.ArmorTrim;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BeehiveBlock;
 import net.minecraft.world.level.block.LightBlock;
@@ -99,6 +98,7 @@ public class ItemProperties {
 			return armorTrim != null ? armorTrim.material().value().itemModelIndex() : Float.NEGATIVE_INFINITY;
 		};
 		registerGeneric(ItemModelGenerators.TRIM_TYPE_PREDICATE_ID, clampedItemPropertyFunction);
+		registerGeneric(ResourceLocation.withDefaultNamespace("broken"), (itemStack, clientLevel, livingEntity, i) -> itemStack.nextDamageWillBreak() ? 1.0F : 0.0F);
 		registerCustomModelData(
 			(itemStack, clientLevel, livingEntity, i) -> (float)itemStack.getOrDefault(DataComponents.CUSTOM_MODEL_DATA, CustomModelData.DEFAULT).value()
 		);
@@ -210,9 +210,6 @@ public class ItemProperties {
 			ChargedProjectiles chargedProjectiles = itemStack.get(DataComponents.CHARGED_PROJECTILES);
 			return chargedProjectiles != null && chargedProjectiles.contains(Items.FIREWORK_ROCKET) ? 1.0F : 0.0F;
 		});
-		register(
-			Items.ELYTRA, ResourceLocation.withDefaultNamespace("broken"), (itemStack, clientLevel, livingEntity, i) -> ElytraItem.isFlyEnabled(itemStack) ? 0.0F : 1.0F
-		);
 		register(Items.FISHING_ROD, ResourceLocation.withDefaultNamespace("cast"), (itemStack, clientLevel, livingEntity, i) -> {
 			if (livingEntity == null) {
 				return 0.0F;

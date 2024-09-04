@@ -49,7 +49,6 @@ public class BlockTypes {
 		Registry.register(registry, "carpet", CarpetBlock.CODEC);
 		Registry.register(registry, "carrot", CarrotBlock.CODEC);
 		Registry.register(registry, "cartography_table", CartographyTableBlock.CODEC);
-		Registry.register(registry, "carved_pumpkin", EquipableCarvedPumpkinBlock.CODEC);
 		Registry.register(registry, "cauldron", CauldronBlock.CODEC);
 		Registry.register(registry, "cave_vines", CaveVinesBlock.CODEC);
 		Registry.register(registry, "cave_vines_plant", CaveVinesPlantBlock.CODEC);

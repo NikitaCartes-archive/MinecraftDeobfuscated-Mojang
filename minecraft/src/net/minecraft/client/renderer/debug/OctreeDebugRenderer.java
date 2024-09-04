@@ -25,11 +25,20 @@ public class OctreeDebugRenderer {
 	public void render(PoseStack poseStack, Frustum frustum, MultiBufferSource multiBufferSource, double d, double e, double f) {
 		Octree octree = this.minecraft.levelRenderer.getSectionOcclusionGraph().getOctree();
 		MutableInt mutableInt = new MutableInt(0);
-		octree.visitNodes((node, bl, i) -> this.renderNode(node, poseStack, multiBufferSource, d, e, f, i, bl, mutableInt), frustum);
+		octree.visitNodes((node, bl, i, bl2) -> this.renderNode(node, poseStack, multiBufferSource, d, e, f, i, bl, mutableInt, bl2), frustum, 32);
 	}
 
 	private void renderNode(
-		Octree.Node node, PoseStack poseStack, MultiBufferSource multiBufferSource, double d, double e, double f, int i, boolean bl, MutableInt mutableInt
+		Octree.Node node,
+		PoseStack poseStack,
+		MultiBufferSource multiBufferSource,
+		double d,
+		double e,
+		double f,
+		int i,
+		boolean bl,
+		MutableInt mutableInt,
+		boolean bl2
 	) {
 		AABB aABB = node.getAABB();
 		double g = aABB.getXsize();
@@ -39,18 +48,19 @@ public class OctreeDebugRenderer {
 			double h = aABB.getCenter().x;
 			double j = aABB.getCenter().y;
 			double k = aABB.getCenter().z;
-			DebugRenderer.renderFloatingText(poseStack, multiBufferSource, String.valueOf(mutableInt.getValue()), h, j, k, -1, 0.3F);
+			int m = bl2 ? -16711936 : -1;
+			DebugRenderer.renderFloatingText(poseStack, multiBufferSource, String.valueOf(mutableInt.getValue()), h, j, k, m, 0.3F);
 		}
 
 		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.lines());
-		long m = l + 5L;
+		long n = l + 5L;
 		ShapeRenderer.renderLineBox(
 			poseStack,
 			vertexConsumer,
 			aABB.deflate(0.1 * (double)i).move(-d, -e, -f),
-			getColorComponent(m, 0.3F),
-			getColorComponent(m, 0.8F),
-			getColorComponent(m, 0.5F),
+			getColorComponent(n, 0.3F),
+			getColorComponent(n, 0.8F),
+			getColorComponent(n, 0.5F),
 			bl ? 0.4F : 1.0F
 		);
 	}

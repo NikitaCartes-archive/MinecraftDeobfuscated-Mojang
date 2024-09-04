@@ -1,30 +1,19 @@
 package net.minecraft.client.renderer.entity.layers;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
-import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.renderer.texture.TextureAtlas;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.ModelManager;
-import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.ItemTags;
-import net.minecraft.util.ARGB;
 import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.item.ArmorItem;
-import net.minecraft.world.item.ArmorMaterial;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.armortrim.ArmorTrim;
-import net.minecraft.world.item.component.DyedItemColor;
+import net.minecraft.world.item.equipment.EquipmentModel;
+import net.minecraft.world.item.equipment.Equippable;
 
 @Environment(EnvType.CLIENT)
 public class HumanoidArmorLayer<S extends HumanoidRenderState, M extends HumanoidModel<S>, A extends HumanoidModel<S>> extends RenderLayer<S, M> {
@@ -32,21 +21,35 @@ public class HumanoidArmorLayer<S extends HumanoidRenderState, M extends Humanoi
 	private final A outerModel;
 	private final A innerModelBaby;
 	private final A outerModelBaby;
-	private final TextureAtlas armorTrimAtlas;
+	private final EquipmentLayerRenderer equipmentRenderer;
 
-	public HumanoidArmorLayer(RenderLayerParent<S, M> renderLayerParent, A humanoidModel, A humanoidModel2, ModelManager modelManager) {
-		this(renderLayerParent, humanoidModel, humanoidModel2, humanoidModel, humanoidModel2, modelManager);
+	public HumanoidArmorLayer(RenderLayerParent<S, M> renderLayerParent, A humanoidModel, A humanoidModel2, EquipmentLayerRenderer equipmentLayerRenderer) {
+		this(renderLayerParent, humanoidModel, humanoidModel2, humanoidModel, humanoidModel2, equipmentLayerRenderer);
 	}
 
 	public HumanoidArmorLayer(
-		RenderLayerParent<S, M> renderLayerParent, A humanoidModel, A humanoidModel2, A humanoidModel3, A humanoidModel4, ModelManager modelManager
+		RenderLayerParent<S, M> renderLayerParent,
+		A humanoidModel,
+		A humanoidModel2,
+		A humanoidModel3,
+		A humanoidModel4,
+		EquipmentLayerRenderer equipmentLayerRenderer
 	) {
 		super(renderLayerParent);
 		this.innerModel = humanoidModel;
 		this.outerModel = humanoidModel2;
 		this.innerModelBaby = humanoidModel3;
 		this.outerModelBaby = humanoidModel4;
-		this.armorTrimAtlas = modelManager.getAtlas(Sheets.ARMOR_TRIMS_SHEET);
+		this.equipmentRenderer = equipmentLayerRenderer;
+	}
+
+	public static boolean shouldRender(ItemStack itemStack, EquipmentSlot equipmentSlot) {
+		Equippable equippable = itemStack.get(DataComponents.EQUIPPABLE);
+		return equippable != null && shouldRender(equippable, equipmentSlot);
+	}
+
+	private static boolean shouldRender(Equippable equippable, EquipmentSlot equipmentSlot) {
+		return equippable.model().isPresent() && equippable.slot() == equipmentSlot;
 	}
 
 	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, S humanoidRenderState, float f, float g) {
@@ -91,28 +94,13 @@ public class HumanoidArmorLayer<S extends HumanoidRenderState, M extends Humanoi
 	private void renderArmorPiece(
 		PoseStack poseStack, MultiBufferSource multiBufferSource, S humanoidRenderState, ItemStack itemStack, EquipmentSlot equipmentSlot, int i, A humanoidModel
 	) {
-		if (itemStack.getItem() instanceof ArmorItem armorItem) {
-			if (armorItem.getEquipmentSlot() == equipmentSlot) {
-				humanoidModel.setupAnim(humanoidRenderState);
-				this.setPartVisibility(humanoidModel, equipmentSlot);
-				boolean bl = this.usesInnerModel(equipmentSlot);
-				ArmorMaterial armorMaterial = armorItem.getMaterial().value();
-				int j = itemStack.is(ItemTags.DYEABLE) ? ARGB.opaque(DyedItemColor.getOrDefault(itemStack, -6265536)) : -1;
-
-				for (ArmorMaterial.Layer layer : armorMaterial.layers()) {
-					int k = layer.dyeable() ? j : -1;
-					this.renderModel(poseStack, multiBufferSource, i, humanoidModel, k, layer.texture(bl));
-				}
-
-				ArmorTrim armorTrim = itemStack.get(DataComponents.TRIM);
-				if (armorTrim != null) {
-					this.renderTrim(armorItem.getMaterial(), poseStack, multiBufferSource, i, armorTrim, humanoidModel, bl);
-				}
-
-				if (itemStack.hasFoil()) {
-					this.renderGlint(poseStack, multiBufferSource, i, humanoidModel);
-				}
-			}
+		Equippable equippable = itemStack.get(DataComponents.EQUIPPABLE);
+		if (equippable != null && shouldRender(equippable, equipmentSlot)) {
+			humanoidModel.setupAnim(humanoidRenderState);
+			this.setPartVisibility(humanoidModel, equipmentSlot);
+			ResourceLocation resourceLocation = (ResourceLocation)equippable.model().orElseThrow();
+			EquipmentModel.LayerType layerType = this.usesInnerModel(equipmentSlot) ? EquipmentModel.LayerType.HUMANOID_LEGGINGS : EquipmentModel.LayerType.HUMANOID;
+			this.equipmentRenderer.renderLayers(layerType, resourceLocation, humanoidModel, itemStack, RenderType::armorCutoutNoCull, poseStack, multiBufferSource, i);
 		}
 	}
 
@@ -137,23 +125,6 @@ public class HumanoidArmorLayer<S extends HumanoidRenderState, M extends Humanoi
 				humanoidModel.rightLeg.visible = true;
 				humanoidModel.leftLeg.visible = true;
 		}
-	}
-
-	private void renderModel(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, A humanoidModel, int j, ResourceLocation resourceLocation) {
-		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.armorCutoutNoCull(resourceLocation));
-		humanoidModel.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, j);
-	}
-
-	private void renderTrim(
-		Holder<ArmorMaterial> holder, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, ArmorTrim armorTrim, A humanoidModel, boolean bl
-	) {
-		TextureAtlasSprite textureAtlasSprite = this.armorTrimAtlas.getSprite(bl ? armorTrim.innerTexture(holder) : armorTrim.outerTexture(holder));
-		VertexConsumer vertexConsumer = textureAtlasSprite.wrap(multiBufferSource.getBuffer(Sheets.armorTrimsSheet(armorTrim.pattern().value().decal())));
-		humanoidModel.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY);
-	}
-
-	private void renderGlint(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, A humanoidModel) {
-		humanoidModel.renderToBuffer(poseStack, multiBufferSource.getBuffer(RenderType.armorEntityGlint()), i, OverlayTexture.NO_OVERLAY);
 	}
 
 	private A getArmorModel(S humanoidRenderState, EquipmentSlot equipmentSlot) {

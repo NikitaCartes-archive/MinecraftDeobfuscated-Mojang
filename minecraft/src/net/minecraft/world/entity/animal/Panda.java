@@ -115,9 +115,8 @@ public class Panda extends Animal {
 	}
 
 	@Override
-	public boolean canTakeItem(ItemStack itemStack) {
-		EquipmentSlot equipmentSlot = this.getEquipmentSlotForItem(itemStack);
-		return !this.getItemBySlot(equipmentSlot).isEmpty() ? false : equipmentSlot == EquipmentSlot.MAINHAND && super.canTakeItem(itemStack);
+	protected boolean canDispenserEquipIntoSlot(EquipmentSlot equipmentSlot) {
+		return equipmentSlot == EquipmentSlot.MAINHAND && this.canPickUpLoot();
 	}
 
 	public int getUnhappyCounter() {

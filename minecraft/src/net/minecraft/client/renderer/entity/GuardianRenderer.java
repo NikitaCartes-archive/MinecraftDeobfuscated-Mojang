@@ -73,7 +73,7 @@ public class GuardianRenderer extends MobRenderer<Guardian, GuardianRenderState,
 				multiBufferSource.getBuffer(BEAM_RENDER_TYPE),
 				vec3.subtract(guardianRenderState.eyePosition),
 				guardianRenderState.attackTime,
-				guardianRenderState.scale,
+				guardianRenderState.attackScale,
 				f
 			);
 			poseStack.popPose();

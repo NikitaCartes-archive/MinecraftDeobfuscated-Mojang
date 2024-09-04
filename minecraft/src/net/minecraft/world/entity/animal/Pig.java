@@ -17,6 +17,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgeableMob;
+import net.minecraft.world.entity.ConversionParams;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -207,21 +208,14 @@ public class Pig extends Animal implements ItemSteerable, Saddleable {
 	@Override
 	public void thunderHit(ServerLevel serverLevel, LightningBolt lightningBolt) {
 		if (serverLevel.getDifficulty() != Difficulty.PEACEFUL) {
-			ZombifiedPiglin zombifiedPiglin = EntityType.ZOMBIFIED_PIGLIN.create(serverLevel, EntitySpawnReason.CONVERSION);
-			if (zombifiedPiglin != null) {
-				zombifiedPiglin.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.GOLDEN_SWORD));
-				zombifiedPiglin.moveTo(this.getX(), this.getY(), this.getZ(), this.getYRot(), this.getXRot());
-				zombifiedPiglin.setNoAi(this.isNoAi());
-				zombifiedPiglin.setBaby(this.isBaby());
-				if (this.hasCustomName()) {
-					zombifiedPiglin.setCustomName(this.getCustomName());
-					zombifiedPiglin.setCustomNameVisible(this.isCustomNameVisible());
+			ZombifiedPiglin zombifiedPiglin = this.convertTo(EntityType.ZOMBIFIED_PIGLIN, ConversionParams.single(this, false, true), zombifiedPiglinx -> {
+				if (this.getMainHandItem().isEmpty()) {
+					zombifiedPiglinx.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.GOLDEN_SWORD));
 				}
 
-				zombifiedPiglin.setPersistenceRequired();
-				serverLevel.addFreshEntity(zombifiedPiglin);
-				this.discard();
-			} else {
+				zombifiedPiglinx.setPersistenceRequired();
+			});
+			if (zombifiedPiglin == null) {
 				super.thunderHit(serverLevel, lightningBolt);
 			}
 		} else {

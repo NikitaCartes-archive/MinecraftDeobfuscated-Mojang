@@ -2,10 +2,8 @@ package net.minecraft.world.entity;
 
 import com.google.common.base.Predicates;
 import java.util.function.Predicate;
-import javax.annotation.Nullable;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.scores.Team;
 
 public final class EntitySelector {
@@ -65,21 +63,5 @@ public final class EntitySelector {
 
 			return true;
 		};
-	}
-
-	public static class MobCanWearArmorEntitySelector implements Predicate<Entity> {
-		private final ItemStack itemStack;
-
-		public MobCanWearArmorEntitySelector(ItemStack itemStack) {
-			this.itemStack = itemStack;
-		}
-
-		public boolean test(@Nullable Entity entity) {
-			if (!entity.isAlive()) {
-				return false;
-			} else {
-				return !(entity instanceof LivingEntity livingEntity) ? false : livingEntity.canTakeItem(this.itemStack);
-			}
-		}
 	}
 }

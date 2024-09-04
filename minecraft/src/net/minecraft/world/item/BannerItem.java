@@ -12,7 +12,7 @@ import org.apache.commons.lang3.Validate;
 
 public class BannerItem extends StandingAndWallBlockItem {
 	public BannerItem(Block block, Block block2, Item.Properties properties) {
-		super(block, block2, properties, Direction.DOWN);
+		super(block, block2, Direction.DOWN, properties);
 		Validate.isInstanceOf(AbstractBannerBlock.class, block);
 		Validate.isInstanceOf(AbstractBannerBlock.class, block2);
 	}

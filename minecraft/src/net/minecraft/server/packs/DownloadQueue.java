@@ -26,7 +26,7 @@ import net.minecraft.core.UUIDUtil;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.HttpUtil;
 import net.minecraft.util.eventlog.JsonEventLog;
-import net.minecraft.util.thread.ProcessorMailbox;
+import net.minecraft.util.thread.ConsecutiveExecutor;
 import org.slf4j.Logger;
 
 public class DownloadQueue implements AutoCloseable {
@@ -34,7 +34,7 @@ public class DownloadQueue implements AutoCloseable {
 	private static final int MAX_KEPT_PACKS = 20;
 	private final Path cacheDir;
 	private final JsonEventLog<DownloadQueue.LogEntry> eventLog;
-	private final ProcessorMailbox<Runnable> tasks = ProcessorMailbox.create(Util.nonCriticalIoPool(), "download-queue");
+	private final ConsecutiveExecutor tasks = new ConsecutiveExecutor(Util.nonCriticalIoPool(), "download-queue");
 
 	public DownloadQueue(Path path) throws IOException {
 		this.cacheDir = path;
@@ -98,7 +98,7 @@ public class DownloadQueue implements AutoCloseable {
 	}
 
 	public CompletableFuture<DownloadQueue.BatchResult> downloadBatch(DownloadQueue.BatchConfig batchConfig, Map<UUID, DownloadQueue.DownloadRequest> map) {
-		return CompletableFuture.supplyAsync(() -> this.runDownload(batchConfig, map), this.tasks::tell);
+		return CompletableFuture.supplyAsync(() -> this.runDownload(batchConfig, map), this.tasks::schedule);
 	}
 
 	public void close() throws IOException {

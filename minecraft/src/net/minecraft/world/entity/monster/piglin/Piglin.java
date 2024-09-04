@@ -409,11 +409,11 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob, Invento
 	protected boolean canReplaceCurrentItem(ItemStack itemStack) {
 		EquipmentSlot equipmentSlot = this.getEquipmentSlotForItem(itemStack);
 		ItemStack itemStack2 = this.getItemBySlot(equipmentSlot);
-		return this.canReplaceCurrentItem(itemStack, itemStack2);
+		return this.canReplaceCurrentItem(itemStack, itemStack2, equipmentSlot);
 	}
 
 	@Override
-	protected boolean canReplaceCurrentItem(ItemStack itemStack, ItemStack itemStack2) {
+	protected boolean canReplaceCurrentItem(ItemStack itemStack, ItemStack itemStack2, EquipmentSlot equipmentSlot) {
 		if (EnchantmentHelper.has(itemStack2, EnchantmentEffectComponents.PREVENT_ARMOR_CHANGE)) {
 			return false;
 		} else {
@@ -424,7 +424,9 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob, Invento
 			} else if (!bl && bl2) {
 				return false;
 			} else {
-				return this.isAdult() && !itemStack.is(Items.CROSSBOW) && itemStack2.is(Items.CROSSBOW) ? false : super.canReplaceCurrentItem(itemStack, itemStack2);
+				return this.isAdult() && !itemStack.is(Items.CROSSBOW) && itemStack2.is(Items.CROSSBOW)
+					? false
+					: super.canReplaceCurrentItem(itemStack, itemStack2, equipmentSlot);
 			}
 		}
 	}

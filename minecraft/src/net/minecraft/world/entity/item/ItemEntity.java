@@ -152,10 +152,7 @@ public class ItemEntity extends Entity implements TraceableEntity {
 
 			if (!this.onGround() || this.getDeltaMovement().horizontalDistanceSqr() > 1.0E-5F || (this.tickCount + this.getId()) % 4 == 0) {
 				this.move(MoverType.SELF, this.getDeltaMovement());
-				if (!this.level().isClientSide()) {
-					this.applyEffectsFromBlocks();
-				}
-
+				this.applyEffectsFromBlocks();
 				float f = 0.98F;
 				if (this.onGround()) {
 					f = this.level().getBlockState(this.getBlockPosBelowThatAffectsMyMovement()).getBlock().getFriction() * 0.98F;
@@ -369,7 +366,7 @@ public class ItemEntity extends Entity implements TraceableEntity {
 	@Override
 	public Component getName() {
 		Component component = this.getCustomName();
-		return (Component)(component != null ? component : Component.translatable(this.getItem().getDescriptionId()));
+		return component != null ? component : this.getItem().getItemName();
 	}
 
 	@Override

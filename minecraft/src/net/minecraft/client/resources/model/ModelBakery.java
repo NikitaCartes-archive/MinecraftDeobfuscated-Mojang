@@ -9,7 +9,6 @@ import java.util.function.Function;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.RenderType;
@@ -85,8 +84,7 @@ public class ModelBakery {
 			this.modelTextureGetter = material -> textureGetter.get(modelResourceLocation, material);
 		}
 
-		@Override
-		public UnbakedModel getModel(ResourceLocation resourceLocation) {
+		private UnbakedModel getModel(ResourceLocation resourceLocation) {
 			UnbakedModel unbakedModel = (UnbakedModel)ModelBakery.this.unbakedModels.get(resourceLocation);
 			if (unbakedModel == null) {
 				ModelBakery.LOGGER.warn("Requested a model that was not discovered previously: {}", resourceLocation);
@@ -110,12 +108,9 @@ public class ModelBakery {
 			}
 		}
 
-		@Nullable
 		BakedModel bakeUncached(UnbakedModel unbakedModel, ModelState modelState) {
 			if (unbakedModel instanceof BlockModel blockModel && blockModel.getRootModel() == SpecialModels.GENERATED_MARKER) {
-				return ModelBakery.ITEM_MODEL_GENERATOR
-					.generateBlockModel(this.modelTextureGetter, blockModel)
-					.bake(this, blockModel, this.modelTextureGetter, modelState, false);
+				return ModelBakery.ITEM_MODEL_GENERATOR.generateBlockModel(this.modelTextureGetter, blockModel).bake(this.modelTextureGetter, modelState, false);
 			}
 
 			return unbakedModel.bake(this, this.modelTextureGetter, modelState);

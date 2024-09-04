@@ -48,7 +48,6 @@ public class MinecartTNT extends AbstractMinecart {
 
 	@Override
 	public void tick() {
-		double d = this.getDeltaMovement().horizontalDistanceSqr();
 		super.tick();
 		if (this.fuse > 0) {
 			this.fuse--;
@@ -58,9 +57,9 @@ public class MinecartTNT extends AbstractMinecart {
 		}
 
 		if (this.horizontalCollision) {
-			double e = this.getDeltaMovement().horizontalDistanceSqr();
-			if (d >= 0.01F && e <= 0.01F) {
-				this.explode(e);
+			double d = this.getDeltaMovement().horizontalDistanceSqr();
+			if (d >= 0.01F) {
+				this.explode(d);
 			}
 		}
 	}

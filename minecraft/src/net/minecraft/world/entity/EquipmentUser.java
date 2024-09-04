@@ -4,9 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Nullable;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.item.Equipable;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.equipment.Equippable;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.LootTable;
 
@@ -52,9 +53,9 @@ public interface EquipmentUser {
 		if (itemStack.isEmpty()) {
 			return null;
 		} else {
-			Equipable equipable = Equipable.get(itemStack);
-			if (equipable != null) {
-				EquipmentSlot equipmentSlot = equipable.getEquipmentSlot();
+			Equippable equippable = itemStack.get(DataComponents.EQUIPPABLE);
+			if (equippable != null) {
+				EquipmentSlot equipmentSlot = equippable.slot();
 				if (!list.contains(equipmentSlot)) {
 					return equipmentSlot;
 				}

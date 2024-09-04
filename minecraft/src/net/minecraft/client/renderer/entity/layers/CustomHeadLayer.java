@@ -19,7 +19,6 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemDisplayContext;
@@ -53,7 +52,7 @@ public class CustomHeadLayer<S extends LivingEntityRenderState, M extends Entity
 		ItemStack itemStack = livingEntityRenderState.headItem;
 		BakedModel bakedModel = livingEntityRenderState.headItemModel;
 		if (!itemStack.isEmpty() && bakedModel != null) {
-			label26: {
+			label17: {
 				Item item = itemStack.getItem();
 				poseStack.pushPose();
 				poseStack.scale(this.transforms.horizontalScale(), 1.0F, this.transforms.horizontalScale());
@@ -69,10 +68,10 @@ public class CustomHeadLayer<S extends LivingEntityRenderState, M extends Entity
 					SkullModelBase skullModelBase = (SkullModelBase)this.skullModels.get(type);
 					RenderType renderType = SkullBlockRenderer.getRenderType(type, resolvableProfile);
 					SkullBlockRenderer.renderSkull(null, 180.0F, livingEntityRenderState.wornHeadAnimationPos, poseStack, multiBufferSource, i, skullModelBase, renderType);
-					break label26;
+					break label17;
 				}
 
-				if (!(item instanceof ArmorItem armorItem) || armorItem.getEquipmentSlot() != EquipmentSlot.HEAD) {
+				if (!HumanoidArmorLayer.shouldRender(itemStack, EquipmentSlot.HEAD)) {
 					translateToHead(poseStack, this.transforms);
 					this.itemRenderer.render(itemStack, ItemDisplayContext.HEAD, false, poseStack, multiBufferSource, i, OverlayTexture.NO_OVERLAY, bakedModel);
 				}

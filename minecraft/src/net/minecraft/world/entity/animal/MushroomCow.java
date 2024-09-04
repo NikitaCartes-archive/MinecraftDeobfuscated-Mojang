@@ -22,6 +22,7 @@ import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.AgeableMob;
+import net.minecraft.world.entity.ConversionParams;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LightningBolt;
@@ -165,30 +166,14 @@ public class MushroomCow extends Cow implements Shearable, VariantHolder<Mushroo
 	public void shear(SoundSource soundSource) {
 		this.level().playSound(null, this, SoundEvents.MOOSHROOM_SHEAR, soundSource, 1.0F, 1.0F);
 		if (!this.level().isClientSide()) {
-			Cow cow = EntityType.COW.create(this.level(), EntitySpawnReason.CONVERSION);
-			if (cow != null) {
+			this.convertTo(EntityType.COW, ConversionParams.single(this, false, false), cow -> {
 				((ServerLevel)this.level()).sendParticles(ParticleTypes.EXPLOSION, this.getX(), this.getY(0.5), this.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
-				this.discard();
-				cow.moveTo(this.getX(), this.getY(), this.getZ(), this.getYRot(), this.getXRot());
-				cow.setHealth(this.getHealth());
-				cow.yBodyRot = this.yBodyRot;
-				if (this.hasCustomName()) {
-					cow.setCustomName(this.getCustomName());
-					cow.setCustomNameVisible(this.isCustomNameVisible());
-				}
-
-				if (this.isPersistenceRequired()) {
-					cow.setPersistenceRequired();
-				}
-
-				cow.setInvulnerable(this.isInvulnerable());
-				this.level().addFreshEntity(cow);
 				this.dropFromShearingLootTable(BuiltInLootTables.SHEAR_MOOSHROOM, itemStack -> {
 					for (int i = 0; i < itemStack.getCount(); i++) {
 						this.level().addFreshEntity(new ItemEntity(this.level(), this.getX(), this.getY(1.0), this.getZ(), itemStack.copyWithCount(1)));
 					}
 				});
-			}
+			});
 		}
 	}
 

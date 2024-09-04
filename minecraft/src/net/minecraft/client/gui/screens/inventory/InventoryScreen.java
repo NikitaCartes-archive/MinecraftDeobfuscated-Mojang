@@ -148,7 +148,9 @@ public class InventoryScreen extends EffectRenderingInventoryScreen<InventoryMen
 		}
 
 		entityRenderDispatcher.setRenderShadow(false);
-		entityRenderDispatcher.render(livingEntity, 0.0, 0.0, 0.0, 1.0F, guiGraphics.pose(), guiGraphics.bufferSource(), 15728880);
+		guiGraphics.drawSpecial(
+			multiBufferSource -> entityRenderDispatcher.render(livingEntity, 0.0, 0.0, 0.0, 1.0F, guiGraphics.pose(), multiBufferSource, 15728880)
+		);
 		guiGraphics.flush();
 		entityRenderDispatcher.setRenderShadow(true);
 		guiGraphics.pose().popPose();

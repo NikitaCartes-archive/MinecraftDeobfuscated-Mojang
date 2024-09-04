@@ -1,5 +1,6 @@
 package net.minecraft.world.entity.monster;
 
+import com.google.common.annotations.VisibleForTesting;
 import java.time.LocalDate;
 import java.time.temporal.ChronoField;
 import java.util.List;
@@ -22,6 +23,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.ConversionParams;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntitySelector;
@@ -262,11 +264,32 @@ public class Zombie extends Monster {
 	}
 
 	protected void convertToZombieType(EntityType<? extends Zombie> entityType) {
-		Zombie zombie = this.convertTo(entityType, true);
-		if (zombie != null) {
-			zombie.handleAttributes(zombie.level().getCurrentDifficultyAt(zombie.blockPosition()).getSpecialMultiplier());
-			zombie.setCanBreakDoors(this.canBreakDoors());
-		}
+		this.convertTo(
+			entityType,
+			ConversionParams.single(this, true, true),
+			zombie -> zombie.handleAttributes(zombie.level().getCurrentDifficultyAt(zombie.blockPosition()).getSpecialMultiplier())
+		);
+	}
+
+	@VisibleForTesting
+	public boolean convertVillagerToZombieVillager(ServerLevel serverLevel, Villager villager) {
+		ZombieVillager zombieVillager = villager.convertTo(
+			EntityType.ZOMBIE_VILLAGER,
+			ConversionParams.single(villager, true, true),
+			zombieVillagerx -> {
+				zombieVillagerx.finalizeSpawn(
+					serverLevel, serverLevel.getCurrentDifficultyAt(zombieVillagerx.blockPosition()), EntitySpawnReason.CONVERSION, new Zombie.ZombieGroupData(false, true)
+				);
+				zombieVillagerx.setVillagerData(villager.getVillagerData());
+				zombieVillagerx.setGossips(villager.getGossips().store(NbtOps.INSTANCE));
+				zombieVillagerx.setTradeOffers(villager.getOffers().copy());
+				zombieVillagerx.setVillagerXp(villager.getVillagerXp());
+				if (!this.isSilent()) {
+					serverLevel.levelEvent(null, 1026, this.blockPosition(), 0);
+				}
+			}
+		);
+		return zombieVillager != null;
 	}
 
 	protected boolean isSunSensitive() {
@@ -412,19 +435,7 @@ public class Zombie extends Monster {
 				return bl;
 			}
 
-			ZombieVillager zombieVillager = villager.convertTo(EntityType.ZOMBIE_VILLAGER, false);
-			if (zombieVillager != null) {
-				zombieVillager.finalizeSpawn(
-					serverLevel, serverLevel.getCurrentDifficultyAt(zombieVillager.blockPosition()), EntitySpawnReason.CONVERSION, new Zombie.ZombieGroupData(false, true)
-				);
-				zombieVillager.setVillagerData(villager.getVillagerData());
-				zombieVillager.setGossips(villager.getGossips().store(NbtOps.INSTANCE));
-				zombieVillager.setTradeOffers(villager.getOffers().copy());
-				zombieVillager.setVillagerXp(villager.getVillagerXp());
-				if (!this.isSilent()) {
-					serverLevel.levelEvent(null, 1026, this.blockPosition(), 0);
-				}
-
+			if (this.convertVillagerToZombieVillager(serverLevel, villager)) {
 				bl = false;
 			}
 		}
@@ -455,7 +466,10 @@ public class Zombie extends Monster {
 		RandomSource randomSource = serverLevelAccessor.getRandom();
 		spawnGroupData = super.finalizeSpawn(serverLevelAccessor, difficultyInstance, entitySpawnReason, spawnGroupData);
 		float f = difficultyInstance.getSpecialMultiplier();
-		this.setCanPickUpLoot(randomSource.nextFloat() < 0.55F * f);
+		if (entitySpawnReason != EntitySpawnReason.CONVERSION) {
+			this.setCanPickUpLoot(randomSource.nextFloat() < 0.55F * f);
+		}
+
 		if (spawnGroupData == null) {
 			spawnGroupData = new Zombie.ZombieGroupData(getSpawnAsBabyOdds(randomSource), true);
 		}
@@ -487,8 +501,10 @@ public class Zombie extends Monster {
 			}
 
 			this.setCanBreakDoors(randomSource.nextFloat() < f * 0.1F);
-			this.populateDefaultEquipmentSlots(randomSource, difficultyInstance);
-			this.populateDefaultEquipmentEnchantments(serverLevelAccessor, randomSource, difficultyInstance);
+			if (entitySpawnReason != EntitySpawnReason.CONVERSION) {
+				this.populateDefaultEquipmentSlots(randomSource, difficultyInstance);
+				this.populateDefaultEquipmentEnchantments(serverLevelAccessor, randomSource, difficultyInstance);
+			}
 		}
 
 		if (this.getItemBySlot(EquipmentSlot.HEAD).isEmpty()) {
@@ -503,6 +519,16 @@ public class Zombie extends Monster {
 
 		this.handleAttributes(f);
 		return spawnGroupData;
+	}
+
+	@VisibleForTesting
+	public void setInWaterTime(int i) {
+		this.inWaterTime = i;
+	}
+
+	@VisibleForTesting
+	public void setConversionTime(int i) {
+		this.conversionTime = i;
 	}
 
 	public static boolean getSpawnAsBabyOdds(RandomSource randomSource) {

@@ -154,6 +154,7 @@ import net.minecraft.client.resources.SplashManager;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.language.LanguageManager;
 import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.resources.model.EquipmentModelSet;
 import net.minecraft.client.resources.model.ModelManager;
 import net.minecraft.client.resources.server.DownloadedPackSource;
 import net.minecraft.client.server.IntegratedServer;
@@ -313,6 +314,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	private final SkinManager skinManager;
 	private final ModelManager modelManager;
 	private final BlockRenderDispatcher blockRenderer;
+	private final EquipmentModelSet equipmentModels;
 	private final PaintingTextureManager paintingTextures;
 	private final MobEffectTextureManager mobEffectTextures;
 	private final MapTextureManager mapTextureManager;
@@ -520,13 +522,15 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		this.resourceManager.registerReloadListener(this.modelManager);
 		this.entityModels = new EntityModelSet();
 		this.resourceManager.registerReloadListener(this.entityModels);
+		this.equipmentModels = new EquipmentModelSet();
+		this.resourceManager.registerReloadListener(this.equipmentModels);
 		this.blockEntityRenderDispatcher = new BlockEntityRenderDispatcher(
 			this.font, this.entityModels, this::getBlockRenderer, this::getItemRenderer, this::getEntityRenderDispatcher
 		);
 		this.resourceManager.registerReloadListener(this.blockEntityRenderDispatcher);
 		BlockEntityWithoutLevelRenderer blockEntityWithoutLevelRenderer = new BlockEntityWithoutLevelRenderer(this.blockEntityRenderDispatcher, this.entityModels);
 		this.resourceManager.registerReloadListener(blockEntityWithoutLevelRenderer);
-		this.itemRenderer = new ItemRenderer(this, this.textureManager, this.modelManager, this.itemColors, blockEntityWithoutLevelRenderer);
+		this.itemRenderer = new ItemRenderer(this.modelManager, this.itemColors, blockEntityWithoutLevelRenderer);
 		this.resourceManager.registerReloadListener(this.itemRenderer);
 		this.mapTextureManager = new MapTextureManager(this.textureManager);
 		this.mapDecorationTextures = new MapDecorationTextureManager(this.textureManager);
@@ -553,7 +557,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		this.blockRenderer = new BlockRenderDispatcher(this.modelManager.getBlockModelShaper(), blockEntityWithoutLevelRenderer, this.blockColors);
 		this.resourceManager.registerReloadListener(this.blockRenderer);
 		this.entityRenderDispatcher = new EntityRenderDispatcher(
-			this, this.textureManager, this.itemRenderer, this.mapRenderer, this.blockRenderer, this.font, this.options, this.entityModels
+			this, this.textureManager, this.itemRenderer, this.mapRenderer, this.blockRenderer, this.font, this.options, this.entityModels, this.equipmentModels
 		);
 		this.resourceManager.registerReloadListener(this.entityRenderDispatcher);
 		this.particleEngine = new ParticleEngine(this.level, this.textureManager);
@@ -780,9 +784,13 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	}
 
 	public void triggerResourcePackRecovery(Exception exception) {
-		if (this.getResourcePackRepository().getSelectedIds().size() <= 1) {
-			LOGGER.error(LogUtils.FATAL_MARKER, exception.getMessage(), (Throwable)exception);
-			this.emergencySaveAndCrash(new CrashReport(exception.getMessage(), exception));
+		if (!this.resourcePackRepository.isAbleToClearAnyPack()) {
+			if (this.resourcePackRepository.getSelectedIds().size() <= 1) {
+				LOGGER.error(LogUtils.FATAL_MARKER, exception.getMessage(), (Throwable)exception);
+				this.emergencySaveAndCrash(new CrashReport(exception.getMessage(), exception));
+			} else {
+				this.schedule(this::abortResourcePackRecovery);
+			}
 		} else {
 			this.clearResourcePacksOnError(exception, Component.translatable("resourcePack.runtime_failure"), null);
 		}
@@ -974,15 +982,14 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			}
 		}
 
-		for (Item item : BuiltInRegistries.ITEM) {
-			ItemStack itemStack = item.getDefaultInstance();
-			String string = itemStack.getDescriptionId();
+		BuiltInRegistries.ITEM.listElements().forEach(reference -> {
+			Item item = (Item)reference.value();
+			String string = item.getDescriptionId();
 			String string2 = Component.translatable(string).getString();
 			if (string2.toLowerCase(Locale.ROOT).equals(item.getDescriptionId())) {
-				LOGGER.debug("Missing translation for: {} {} {}", itemStack, string, item);
+				LOGGER.debug("Missing translation for: {} {} {}", reference.key().location(), string, item);
 			}
-		}
-
+		});
 		bl |= MenuScreens.selfTest();
 		bl |= EntityRenderers.validateRegistrations();
 		if (bl) {
@@ -2462,7 +2469,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	}
 
 	@Override
-	protected Runnable wrapRunnable(Runnable runnable) {
+	public Runnable wrapRunnable(Runnable runnable) {
 		return runnable;
 	}
 
@@ -2715,6 +2722,10 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 
 	public EntityModelSet getEntityModels() {
 		return this.entityModels;
+	}
+
+	public EquipmentModelSet getEquipmentModels() {
+		return this.equipmentModels;
 	}
 
 	public boolean isTextFilteringEnabled() {

@@ -299,16 +299,18 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 					}
 				} else if (slot != null) {
 					ItemStack itemStack2x = this.menu.getSlot(slot.index).getItem();
-					this.minecraft.gameMode.handleCreativeModeItemAdd(itemStack2x, slot.index - this.menu.slots.size() + 9 + 36);
 					int l = 45 + j;
 					if (clickType == ClickType.SWAP) {
 						this.minecraft.gameMode.handleCreativeModeItemAdd(itemStackx, l - this.menu.slots.size() + 9 + 36);
 					} else if (clickType == ClickType.THROW && !itemStackx.isEmpty()) {
-						ItemStack itemStack4 = itemStackx.copyWithCount(j == 0 ? 1 : itemStackx.getMaxStackSize());
+						int n = j == 0 ? 1 : itemStackx.getCount();
+						ItemStack itemStack4 = itemStackx.copyWithCount(n);
+						itemStack2x.shrink(n);
 						this.minecraft.player.drop(itemStack4, true);
 						this.minecraft.gameMode.handleCreativeModeItemDrop(itemStack4);
 					}
 
+					this.minecraft.gameMode.handleCreativeModeItemAdd(itemStack2x, slot.index - this.menu.slots.size() + 9 + 36);
 					this.minecraft.player.inventoryMenu.broadcastChanges();
 				}
 			}

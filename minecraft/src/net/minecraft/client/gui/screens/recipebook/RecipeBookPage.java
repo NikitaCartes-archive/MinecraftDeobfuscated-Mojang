@@ -12,6 +12,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.StateSwitchingButton;
 import net.minecraft.client.gui.components.WidgetSprites;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.stats.RecipeBook;
@@ -127,7 +128,8 @@ public class RecipeBookPage {
 
 	public void renderTooltip(GuiGraphics guiGraphics, int i, int j) {
 		if (this.minecraft.screen != null && this.hoveredButton != null && !this.overlay.isVisible()) {
-			guiGraphics.renderComponentTooltip(this.minecraft.font, this.hoveredButton.getTooltipText(), i, j);
+			ResourceLocation resourceLocation = this.hoveredButton.getResultItem().get(DataComponents.TOOLTIP_STYLE);
+			guiGraphics.renderComponentTooltip(this.minecraft.font, this.hoveredButton.getTooltipText(), i, j, resourceLocation);
 		}
 	}
 

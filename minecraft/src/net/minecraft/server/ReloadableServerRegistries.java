@@ -1,7 +1,5 @@
 package net.minecraft.server;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.JsonOps;
@@ -39,7 +37,6 @@ import org.slf4j.Logger;
 
 public class ReloadableServerRegistries {
 	private static final Logger LOGGER = LogUtils.getLogger();
-	private static final Gson GSON = new GsonBuilder().create();
 	private static final RegistrationInfo DEFAULT_REGISTRATION_INFO = new RegistrationInfo(Optional.empty(), Lifecycle.experimental());
 
 	public static CompletableFuture<ReloadableServerRegistries.LoadResult> reload(
@@ -61,12 +58,13 @@ public class ReloadableServerRegistries {
 		return CompletableFuture.supplyAsync(
 			() -> {
 				WritableRegistry<T> writableRegistry = new MappedRegistry<>(lootDataType.registryKey(), Lifecycle.experimental());
-				Map<ResourceLocation, JsonElement> map = new HashMap();
+				Map<ResourceLocation, T> map = new HashMap();
 				String string = Registries.elementsDirPath(lootDataType.registryKey());
-				SimpleJsonResourceReloadListener.scanDirectory(resourceManager, string, GSON, map);
+				SimpleJsonResourceReloadListener.scanDirectory(resourceManager, string, registryOps, lootDataType.codec(), map);
 				map.forEach(
-					(resourceLocation, jsonElement) -> lootDataType.deserialize(resourceLocation, registryOps, jsonElement)
-							.ifPresent(object -> writableRegistry.register(ResourceKey.create(lootDataType.registryKey(), resourceLocation), (T)object, DEFAULT_REGISTRATION_INFO))
+					(resourceLocation, object) -> writableRegistry.register(
+							ResourceKey.create(lootDataType.registryKey(), resourceLocation), (T)object, DEFAULT_REGISTRATION_INFO
+						)
 				);
 				TagLoader.loadTagsForRegistry(resourceManager, writableRegistry);
 				return writableRegistry;

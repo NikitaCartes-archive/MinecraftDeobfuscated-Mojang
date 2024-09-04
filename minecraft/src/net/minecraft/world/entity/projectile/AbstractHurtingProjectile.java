@@ -68,46 +68,56 @@ public abstract class AbstractHurtingProjectile extends Projectile {
 	public void tick() {
 		Entity entity = this.getOwner();
 		if (this.level().isClientSide || (entity == null || !entity.isRemoved()) && this.level().hasChunkAt(this.blockPosition())) {
+			HitResult hitResult = ProjectileUtil.getHitResultOnMoveVector(this, this::canHitEntity, this.getClipType());
+			Vec3 vec3;
+			if (hitResult.getType() != HitResult.Type.MISS) {
+				vec3 = hitResult.getLocation();
+			} else {
+				vec3 = this.position().add(this.getDeltaMovement());
+			}
+
+			ProjectileUtil.rotateTowardsMovement(this, 0.2F);
+			this.setPos(vec3);
+			this.applyEffectsFromBlocks();
 			super.tick();
 			if (this.shouldBurn()) {
 				this.igniteForSeconds(1.0F);
 			}
 
-			HitResult hitResult = ProjectileUtil.getHitResultOnMoveVector(this, this::canHitEntity, this.getClipType());
-			if (hitResult.getType() != HitResult.Type.MISS) {
+			if (hitResult.getType() != HitResult.Type.MISS && this.isAlive()) {
 				this.hitTargetOrDeflectSelf(hitResult);
 			}
 
-			if (!this.level().isClientSide()) {
-				this.applyEffectsFromBlocks();
-			}
-
-			Vec3 vec3 = this.getDeltaMovement();
-			double d = this.getX() + vec3.x;
-			double e = this.getY() + vec3.y;
-			double f = this.getZ() + vec3.z;
-			ProjectileUtil.rotateTowardsMovement(this, 0.2F);
-			float h;
-			if (this.isInWater()) {
-				for (int i = 0; i < 4; i++) {
-					float g = 0.25F;
-					this.level().addParticle(ParticleTypes.BUBBLE, d - vec3.x * 0.25, e - vec3.y * 0.25, f - vec3.z * 0.25, vec3.x, vec3.y, vec3.z);
-				}
-
-				h = this.getLiquidInertia();
-			} else {
-				h = this.getInertia();
-			}
-
-			this.setDeltaMovement(vec3.add(vec3.normalize().scale(this.accelerationPower)).scale((double)h));
-			ParticleOptions particleOptions = this.getTrailParticle();
-			if (particleOptions != null) {
-				this.level().addParticle(particleOptions, d, e + 0.5, f, 0.0, 0.0, 0.0);
-			}
-
-			this.setPos(d, e, f);
+			this.applyInertia();
+			this.createParticleTrail();
 		} else {
 			this.discard();
+		}
+	}
+
+	private void applyInertia() {
+		Vec3 vec3 = this.getDeltaMovement();
+		Vec3 vec32 = this.position();
+		float g;
+		if (this.isInWater()) {
+			for (int i = 0; i < 4; i++) {
+				float f = 0.25F;
+				this.level().addParticle(ParticleTypes.BUBBLE, vec32.x - vec3.x * 0.25, vec32.y - vec3.y * 0.25, vec32.z - vec3.z * 0.25, vec3.x, vec3.y, vec3.z);
+			}
+
+			g = this.getLiquidInertia();
+		} else {
+			g = this.getInertia();
+		}
+
+		this.setDeltaMovement(vec3.add(vec3.normalize().scale(this.accelerationPower)).scale((double)g));
+	}
+
+	private void createParticleTrail() {
+		ParticleOptions particleOptions = this.getTrailParticle();
+		Vec3 vec3 = this.position();
+		if (particleOptions != null) {
+			this.level().addParticle(particleOptions, vec3.x, vec3.y + 0.5, vec3.z, 0.0, 0.0, 0.0);
 		}
 	}
 

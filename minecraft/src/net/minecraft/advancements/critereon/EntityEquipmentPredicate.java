@@ -6,6 +6,7 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.component.DataComponentPredicate;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -41,7 +42,9 @@ public record EntityEquipmentPredicate(
 			.head(
 				ItemPredicate.Builder.item()
 					.of(holderGetter, Items.WHITE_BANNER)
-					.hasComponents(DataComponentPredicate.allOf(Raid.getOminousBannerInstance(holderGetter2).getComponents()))
+					.hasComponents(
+						DataComponentPredicate.someOf(Raid.getOminousBannerInstance(holderGetter2).getComponents(), DataComponents.BANNER_PATTERNS, DataComponents.ITEM_NAME)
+					)
 			)
 			.build();
 	}

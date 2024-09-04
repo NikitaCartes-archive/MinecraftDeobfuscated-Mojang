@@ -451,7 +451,7 @@ public abstract class PlayerList {
 			serverPlayer2.addTag(string);
 		}
 
-		Vec3 vec3 = dimensionTransition.pos();
+		Vec3 vec3 = dimensionTransition.position();
 		serverPlayer2.moveTo(vec3.x, vec3.y, vec3.z, dimensionTransition.yRot(), dimensionTransition.xRot());
 		if (dimensionTransition.missingRespawnBlock()) {
 			serverPlayer2.connection.send(new ClientboundGameEventPacket(ClientboundGameEventPacket.NO_RESPAWN_BLOCK_AVAILABLE, 0.0F));

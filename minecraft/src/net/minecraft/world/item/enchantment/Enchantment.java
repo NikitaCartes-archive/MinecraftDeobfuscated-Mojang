@@ -101,7 +101,7 @@ public record Enchantment(Component description, Enchantment.EnchantmentDefiniti
 	public Map<EquipmentSlot, ItemStack> getSlotItems(LivingEntity livingEntity) {
 		Map<EquipmentSlot, ItemStack> map = Maps.newEnumMap(EquipmentSlot.class);
 
-		for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
+		for (EquipmentSlot equipmentSlot : EquipmentSlot.VALUES) {
 			if (this.matchingSlot(equipmentSlot)) {
 				ItemStack itemStack = livingEntity.getItemBySlot(equipmentSlot);
 				if (!itemStack.isEmpty()) {

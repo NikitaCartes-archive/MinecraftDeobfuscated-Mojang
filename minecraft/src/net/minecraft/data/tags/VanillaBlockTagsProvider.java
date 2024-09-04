@@ -1598,6 +1598,7 @@ public class VanillaBlockTagsProvider extends IntrinsicHolderTagsProvider<Block>
 		this.tag(BlockTags.FOXES_SPAWNABLE_ON).add(Blocks.GRASS_BLOCK, Blocks.SNOW, Blocks.SNOW_BLOCK, Blocks.PODZOL, Blocks.COARSE_DIRT);
 		this.tag(BlockTags.WOLVES_SPAWNABLE_ON).add(Blocks.GRASS_BLOCK, Blocks.SNOW, Blocks.SNOW_BLOCK, Blocks.COARSE_DIRT, Blocks.PODZOL);
 		this.tag(BlockTags.FROGS_SPAWNABLE_ON).add(Blocks.GRASS_BLOCK, Blocks.MUD, Blocks.MANGROVE_ROOTS, Blocks.MUDDY_MANGROVE_ROOTS);
+		this.tag(BlockTags.BATS_SPAWNABLE_ON).addTag(BlockTags.BASE_STONE_OVERWORLD);
 		this.tag(BlockTags.TERRACOTTA)
 			.add(
 				Blocks.TERRACOTTA,

@@ -635,15 +635,18 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 			boolean bl = !Mth.equal(vec3.x, vec32.x);
 			boolean bl2 = !Mth.equal(vec3.z, vec32.z);
 			this.horizontalCollision = bl || bl2;
-			this.verticalCollision = vec3.y != vec32.y;
-			this.verticalCollisionBelow = this.verticalCollision && vec3.y < 0.0;
+			if (Math.abs(vec3.y) > 0.0 || this.isControlledByOrIsLocalPlayer()) {
+				this.verticalCollision = vec3.y != vec32.y;
+				this.verticalCollisionBelow = this.verticalCollision && vec3.y < 0.0;
+				this.setOnGroundWithMovement(this.verticalCollisionBelow, this.horizontalCollision, vec32);
+			}
+
 			if (this.horizontalCollision) {
 				this.minorHorizontalCollision = this.isHorizontalCollisionMinor(vec32);
 			} else {
 				this.minorHorizontalCollision = false;
 			}
 
-			this.setOnGroundWithMovement(this.verticalCollisionBelow, this.horizontalCollision, vec32);
 			BlockPos blockPos = this.getOnPosLegacy();
 			BlockState blockState = this.level().getBlockState(blockPos);
 			if (!this.level().isClientSide() || this.isControlledByLocalInstance()) {
@@ -1012,8 +1015,9 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 	protected void checkInsideBlocks(@Nullable Set<BlockState> set) {
 		Vec3 vec3 = this.oldPosition();
 		Vec3 vec32 = this.position;
+		AABB aABB = this.getBoundingBox().deflate(1.0E-5F);
 
-		for (BlockPos blockPos : BlockGetter.boxTraverseBlocks(vec3, vec32, this.getBoundingBox())) {
+		for (BlockPos blockPos : BlockGetter.boxTraverseBlocks(vec3, vec32, aABB)) {
 			if (!this.isAlive()) {
 				return;
 			}
@@ -1021,10 +1025,13 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 			BlockState blockState = this.level().getBlockState(blockPos);
 			if (!blockState.isAir()) {
 				try {
-					blockState.entityInside(this.level(), blockPos, this);
-					this.onInsideBlock(blockState);
-				} catch (Throwable var11) {
-					CrashReport crashReport = CrashReport.forThrowable(var11, "Colliding entity with block");
+					VoxelShape voxelShape = blockState.getEntityInsideCollisionShape(this.level(), blockPos);
+					if (voxelShape == Shapes.block() || this.collidedWithShapeMovingFrom(vec3, blockPos, voxelShape)) {
+						blockState.entityInside(this.level(), blockPos, this);
+						this.onInsideBlock(blockState);
+					}
+				} catch (Throwable var12) {
+					CrashReport crashReport = CrashReport.forThrowable(var12, "Colliding entity with block");
 					CrashReportCategory crashReportCategory = crashReport.addCategory("Block being collided with");
 					CrashReportCategory.populateBlockDetails(crashReportCategory, this.level(), blockPos, blockState);
 					CrashReportCategory crashReportCategory2 = crashReport.addCategory("Entity being checked for collision");
@@ -1037,6 +1044,12 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 				}
 			}
 		}
+	}
+
+	private boolean collidedWithShapeMovingFrom(Vec3 vec3, BlockPos blockPos, VoxelShape voxelShape) {
+		AABB aABB = this.getBoundingBox();
+		Vec3 vec32 = vec3.subtract(aABB.getBottomCenter());
+		return this.getBoundingBox().collidedAlongVector(vec32, voxelShape.move(new Vec3(blockPos)).toAabbs());
 	}
 
 	protected void onInsideBlock(BlockState blockState) {
@@ -1430,17 +1443,32 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 	}
 
 	public final void setOldPosAndRot() {
-		double d = this.getX();
-		double e = this.getY();
-		double f = this.getZ();
-		this.xo = d;
-		this.yo = e;
-		this.zo = f;
-		this.xOld = d;
-		this.yOld = e;
-		this.zOld = f;
-		this.yRotO = this.getYRot();
-		this.xRotO = this.getXRot();
+		this.setOldPos();
+		this.setOldRot();
+	}
+
+	public final void setOldPosAndRot(Vec3 vec3, float f, float g) {
+		this.setOldPos(vec3);
+		this.setOldRot(f, g);
+	}
+
+	protected void setOldPos() {
+		this.setOldPos(this.position);
+	}
+
+	protected void setOldRot() {
+		this.setOldRot(this.getYRot(), this.getXRot());
+	}
+
+	private void setOldPos(Vec3 vec3) {
+		this.xo = this.xOld = vec3.x;
+		this.yo = this.yOld = vec3.y;
+		this.zo = this.zOld = vec3.z;
+	}
+
+	private void setOldRot(float f, float g) {
+		this.yRotO = f;
+		this.xRotO = g;
 	}
 
 	public final Vec3 oldPosition() {
@@ -2143,11 +2171,11 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 		if (this.isOnPortalCooldown()) {
 			this.setPortalCooldown();
 		} else {
-			if (this.portalProcess != null && this.portalProcess.isSamePortal(portal)) {
+			if (this.portalProcess == null || !this.portalProcess.isSamePortal(portal)) {
+				this.portalProcess = new PortalProcessor(portal, blockPos.immutable());
+			} else if (!this.portalProcess.isInsidePortalThisTick()) {
 				this.portalProcess.updateEntryPosition(blockPos.immutable());
 				this.portalProcess.setAsInsidePortalThisTick(true);
-			} else {
-				this.portalProcess = new PortalProcessor(portal, blockPos.immutable());
 			}
 		}
 	}
@@ -2561,8 +2589,11 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 			List<Entity> list2 = new ArrayList();
 
 			for (Entity entity : list) {
-				float f = dimensionTransition.yRot() + (entity.getYRot() - this.getYRot());
-				Entity entity2 = entity.changeDimension(dimensionTransition.withRotation(f, entity.xRot));
+				float f = entity.getYRot() - this.getYRot();
+				float g = entity.getXRot() - this.getXRot();
+				float h = dimensionTransition.yRot() + (dimensionTransition.relatives().contains(Relative.Y_ROT) ? 0.0F : f);
+				float i = dimensionTransition.xRot() + (dimensionTransition.relatives().contains(Relative.X_ROT) ? 0.0F : g);
+				Entity entity2 = entity.changeDimension(dimensionTransition.withRotation(h, i));
 				if (entity2 != null) {
 					list2.add(entity2);
 				}
@@ -2577,7 +2608,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 				}
 
 				entity3.teleportSetPosition(dimensionTransition);
-				this.checkInsideBlocks();
+				entity3.checkInsideBlocks();
 				if (this != entity3) {
 					serverLevel2.addDuringTeleport(entity3);
 				}
@@ -2599,12 +2630,17 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 	}
 
 	protected void teleportSetPosition(DimensionTransition dimensionTransition) {
-		this.setPosRaw(dimensionTransition.pos().x, dimensionTransition.pos().y, dimensionTransition.pos().z);
-		this.setYRot(dimensionTransition.yRot());
-		this.setXRot(dimensionTransition.xRot());
+		PositionMoveRotation positionMoveRotation = PositionMoveRotation.of(dimensionTransition);
+		PositionMoveRotation positionMoveRotation2 = PositionMoveRotation.calculateAbsolute(
+			PositionMoveRotation.of(this), positionMoveRotation, dimensionTransition.relatives()
+		);
+		this.setPosRaw(positionMoveRotation2.position().x, positionMoveRotation2.position().y, positionMoveRotation2.position().z);
+		this.setYRot(positionMoveRotation2.yRot());
+		this.setYHeadRot(positionMoveRotation2.yRot());
+		this.setXRot(positionMoveRotation2.xRot());
 		this.reapplyPosition();
 		this.setOldPosAndRot();
-		this.setDeltaMovement(dimensionTransition.speed());
+		this.setDeltaMovement(positionMoveRotation2.deltaMovement());
 	}
 
 	public void placePortalTicket(BlockPos blockPos) {
@@ -2738,9 +2774,9 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 		return this.entityData.get(DATA_CUSTOM_NAME_VISIBLE);
 	}
 
-	public boolean teleportTo(ServerLevel serverLevel, double d, double e, double f, Set<RelativeMovement> set, float g, float h, boolean bl) {
+	public boolean teleportTo(ServerLevel serverLevel, double d, double e, double f, Set<Relative> set, float g, float h, boolean bl) {
 		float i = Mth.clamp(h, -90.0F, 90.0F);
-		Entity entity = this.changeDimension(new DimensionTransition(serverLevel, new Vec3(d, e, f), this.getDeltaMovement(), g, i, DimensionTransition.DO_NOTHING));
+		Entity entity = this.changeDimension(new DimensionTransition(serverLevel, new Vec3(d, e, f), Vec3.ZERO, g, i, set, DimensionTransition.DO_NOTHING));
 		return entity != null;
 	}
 
@@ -3019,6 +3055,10 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 			Entity entity2 = entity.getVehicle();
 			return entity2 == this ? true : this.hasIndirectPassenger(entity2);
 		}
+	}
+
+	public boolean isControlledByOrIsLocalPlayer() {
+		return this instanceof Player player ? player.isLocalPlayer() : this.isControlledByLocalInstance();
 	}
 
 	public boolean isControlledByLocalInstance() {

@@ -7,7 +7,10 @@ import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.MapRenderer;
+import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
+import net.minecraft.client.renderer.entity.layers.EquipmentLayerRenderer;
+import net.minecraft.client.resources.model.EquipmentModelSet;
 import net.minecraft.client.resources.model.ModelManager;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.entity.Entity;
@@ -25,7 +28,9 @@ public interface EntityRendererProvider<T extends Entity> {
 		private final BlockRenderDispatcher blockRenderDispatcher;
 		private final ResourceManager resourceManager;
 		private final EntityModelSet modelSet;
+		private final EquipmentModelSet equipmentModels;
 		private final Font font;
+		private final EquipmentLayerRenderer equipmentRenderer;
 
 		public Context(
 			EntityRenderDispatcher entityRenderDispatcher,
@@ -34,6 +39,7 @@ public interface EntityRendererProvider<T extends Entity> {
 			BlockRenderDispatcher blockRenderDispatcher,
 			ResourceManager resourceManager,
 			EntityModelSet entityModelSet,
+			EquipmentModelSet equipmentModelSet,
 			Font font
 		) {
 			this.entityRenderDispatcher = entityRenderDispatcher;
@@ -42,7 +48,9 @@ public interface EntityRendererProvider<T extends Entity> {
 			this.blockRenderDispatcher = blockRenderDispatcher;
 			this.resourceManager = resourceManager;
 			this.modelSet = entityModelSet;
+			this.equipmentModels = equipmentModelSet;
 			this.font = font;
+			this.equipmentRenderer = new EquipmentLayerRenderer(equipmentModelSet, this.getModelManager().getAtlas(Sheets.ARMOR_TRIMS_SHEET));
 		}
 
 		public EntityRenderDispatcher getEntityRenderDispatcher() {
@@ -67,6 +75,14 @@ public interface EntityRendererProvider<T extends Entity> {
 
 		public EntityModelSet getModelSet() {
 			return this.modelSet;
+		}
+
+		public EquipmentModelSet getEquipmentModels() {
+			return this.equipmentModels;
+		}
+
+		public EquipmentLayerRenderer getEquipmentRenderer() {
+			return this.equipmentRenderer;
 		}
 
 		public ModelManager getModelManager() {

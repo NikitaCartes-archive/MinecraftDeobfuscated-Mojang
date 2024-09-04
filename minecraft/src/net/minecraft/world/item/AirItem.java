@@ -13,11 +13,6 @@ public class AirItem extends Item {
 	}
 
 	@Override
-	public String getDescriptionId() {
-		return this.block.getDescriptionId();
-	}
-
-	@Override
 	public void appendHoverText(ItemStack itemStack, Item.TooltipContext tooltipContext, List<Component> list, TooltipFlag tooltipFlag) {
 		super.appendHoverText(itemStack, tooltipContext, list, tooltipFlag);
 		this.block.appendHoverText(itemStack, tooltipContext, list, tooltipFlag);

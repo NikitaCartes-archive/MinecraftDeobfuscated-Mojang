@@ -19,12 +19,13 @@ public interface GuiSpriteScaling {
 	GuiSpriteScaling.Type type();
 
 	@Environment(EnvType.CLIENT)
-	public static record NineSlice(int width, int height, GuiSpriteScaling.NineSlice.Border border) implements GuiSpriteScaling {
+	public static record NineSlice(int width, int height, GuiSpriteScaling.NineSlice.Border border, boolean stretchInner) implements GuiSpriteScaling {
 		public static final MapCodec<GuiSpriteScaling.NineSlice> CODEC = RecordCodecBuilder.<GuiSpriteScaling.NineSlice>mapCodec(
 				instance -> instance.group(
 							ExtraCodecs.POSITIVE_INT.fieldOf("width").forGetter(GuiSpriteScaling.NineSlice::width),
 							ExtraCodecs.POSITIVE_INT.fieldOf("height").forGetter(GuiSpriteScaling.NineSlice::height),
-							GuiSpriteScaling.NineSlice.Border.CODEC.fieldOf("border").forGetter(GuiSpriteScaling.NineSlice::border)
+							GuiSpriteScaling.NineSlice.Border.CODEC.fieldOf("border").forGetter(GuiSpriteScaling.NineSlice::border),
+							Codec.BOOL.optionalFieldOf("stretch_inner", Boolean.valueOf(false)).forGetter(GuiSpriteScaling.NineSlice::stretchInner)
 						)
 						.apply(instance, GuiSpriteScaling.NineSlice::new)
 			)

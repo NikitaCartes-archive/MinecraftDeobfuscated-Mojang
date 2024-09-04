@@ -6,6 +6,7 @@ import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
@@ -185,7 +186,13 @@ public class OldMinecartBehavior extends MinecartBehavior {
 		vec32 = new Vec3(l * h / j, vec32.y, l * i / j);
 		this.setDeltaMovement(vec32);
 		Entity entity = this.minecart.getFirstPassenger();
-		Vec3 vec33 = this.minecart.getPassengerMoveIntent();
+		Vec3 vec33;
+		if (this.minecart.getFirstPassenger() instanceof ServerPlayer serverPlayer) {
+			vec33 = serverPlayer.getLastClientMoveIntent();
+		} else {
+			vec33 = Vec3.ZERO;
+		}
+
 		if (entity instanceof Player && vec33.lengthSqr() > 0.0) {
 			Vec3 vec34 = vec33.normalize();
 			double m = this.getDeltaMovement().horizontalDistanceSqr();
@@ -193,8 +200,6 @@ public class OldMinecartBehavior extends MinecartBehavior {
 				this.setDeltaMovement(this.getDeltaMovement().add(vec33.x * 0.001, 0.0, vec33.z * 0.001));
 				bl2 = false;
 			}
-		} else {
-			this.minecart.setPassengerMoveIntent(Vec3.ZERO);
 		}
 
 		if (bl2) {

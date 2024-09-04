@@ -63,141 +63,140 @@ public class PostChain {
 	// $VF: Inserted dummy exception handlers to handle obfuscated exceptions
 	private static PostPass createPass(TextureManager textureManager, ShaderManager shaderManager, PostChainConfig.Pass pass) throws ShaderManager.CompilationException {
 		ResourceLocation resourceLocation = pass.program();
-		CompiledShaderProgram compiledShaderProgram = shaderManager.getProgram(new ShaderProgram(resourceLocation, DefaultVertexFormat.POSITION, ShaderDefines.EMPTY));
-		if (compiledShaderProgram == null) {
-			throw new ShaderManager.CompilationException("Shader '" + resourceLocation + "' could not be loaded");
-		} else {
-			for (PostChainConfig.Uniform uniform : pass.uniforms()) {
-				String string = uniform.name();
-				if (compiledShaderProgram.getUniform(string) == null) {
-					throw new ShaderManager.CompilationException("Uniform '" + string + "' does not exist for " + resourceLocation);
-				}
+		CompiledShaderProgram compiledShaderProgram = shaderManager.getProgramForLoading(
+			new ShaderProgram(resourceLocation, DefaultVertexFormat.POSITION, ShaderDefines.EMPTY)
+		);
+
+		for (PostChainConfig.Uniform uniform : pass.uniforms()) {
+			String string = uniform.name();
+			if (compiledShaderProgram.getUniform(string) == null) {
+				throw new ShaderManager.CompilationException("Uniform '" + string + "' does not exist for " + resourceLocation);
 			}
-
-			String string2 = resourceLocation.toString();
-			PostPass postPass = new PostPass(string2, compiledShaderProgram, pass.outputTarget(), pass.uniforms());
-
-			for (PostChainConfig.Input input : pass.inputs()) {
-				Objects.requireNonNull(input);
-				Throwable var45;
-				switch (input) {
-					case PostChainConfig.TextureInput var11:
-						PostChainConfig.TextureInput var53 = var11;
-
-						try {
-							var54 = var53.samplerName();
-						} catch (Throwable var31) {
-							var45 = var31;
-							boolean var66 = false;
-							break;
-						}
-
-						String var36 = var54;
-						PostChainConfig.TextureInput var55 = var11;
-
-						try {
-							var56 = var55.location();
-						} catch (Throwable var30) {
-							var45 = var30;
-							boolean var67 = false;
-							break;
-						}
-
-						ResourceLocation var37 = var56;
-						PostChainConfig.TextureInput var57 = var11;
-
-						try {
-							var58 = var57.width();
-						} catch (Throwable var29) {
-							var45 = var29;
-							boolean var68 = false;
-							break;
-						}
-
-						int var38 = var58;
-						PostChainConfig.TextureInput var59 = var11;
-
-						try {
-							var60 = var59.height();
-						} catch (Throwable var28) {
-							var45 = var28;
-							boolean var69 = false;
-							break;
-						}
-
-						int var39 = var60;
-						PostChainConfig.TextureInput var61 = var11;
-
-						try {
-							var62 = var61.bilinear();
-						} catch (Throwable var27) {
-							var45 = var27;
-							boolean var70 = false;
-							break;
-						}
-
-						boolean var40 = var62;
-						AbstractTexture abstractTexturex = textureManager.getTexture(var37.withPath((UnaryOperator<String>)(stringx -> "textures/effect/" + stringx + ".png")));
-						abstractTexturex.setFilter(var40, false);
-						postPass.addInput(new PostPass.TextureInput(var36, abstractTexturex, var38, var39));
-						continue;
-					case PostChainConfig.TargetInput abstractTexture:
-						PostChainConfig.TargetInput var10000 = abstractTexture;
-
-						try {
-							var46 = var10000.samplerName();
-						} catch (Throwable var26) {
-							var45 = var26;
-							boolean var10001 = false;
-							break;
-						}
-
-						String var22 = var46;
-						PostChainConfig.TargetInput var47 = abstractTexture;
-
-						try {
-							var48 = var47.targetId();
-						} catch (Throwable var25) {
-							var45 = var25;
-							boolean var63 = false;
-							break;
-						}
-
-						ResourceLocation var42 = var48;
-						PostChainConfig.TargetInput var49 = abstractTexture;
-
-						try {
-							var50 = var49.useDepthBuffer();
-						} catch (Throwable var24) {
-							var45 = var24;
-							boolean var64 = false;
-							break;
-						}
-
-						boolean var43 = var50;
-						PostChainConfig.TargetInput var51 = abstractTexture;
-
-						try {
-							var52 = var51.bilinear();
-						} catch (Throwable var23) {
-							var45 = var23;
-							boolean var65 = false;
-							break;
-						}
-
-						boolean var44 = var52;
-						postPass.addInput(new PostPass.TargetInput(var22, var42, var43, var44));
-						continue;
-					default:
-						throw new MatchException(null, null);
-				}
-
-				Throwable var35 = var45;
-				throw new MatchException(var35.toString(), var35);
-			}
-
-			return postPass;
 		}
+
+		String string2 = resourceLocation.toString();
+		PostPass postPass = new PostPass(string2, compiledShaderProgram, pass.outputTarget(), pass.uniforms());
+
+		for (PostChainConfig.Input input : pass.inputs()) {
+			Objects.requireNonNull(input);
+			Throwable var45;
+			switch (input) {
+				case PostChainConfig.TextureInput var11:
+					PostChainConfig.TextureInput var53 = var11;
+
+					try {
+						var54 = var53.samplerName();
+					} catch (Throwable var31) {
+						var45 = var31;
+						boolean var66 = false;
+						break;
+					}
+
+					String var36 = var54;
+					PostChainConfig.TextureInput var55 = var11;
+
+					try {
+						var56 = var55.location();
+					} catch (Throwable var30) {
+						var45 = var30;
+						boolean var67 = false;
+						break;
+					}
+
+					ResourceLocation var37 = var56;
+					PostChainConfig.TextureInput var57 = var11;
+
+					try {
+						var58 = var57.width();
+					} catch (Throwable var29) {
+						var45 = var29;
+						boolean var68 = false;
+						break;
+					}
+
+					int var38 = var58;
+					PostChainConfig.TextureInput var59 = var11;
+
+					try {
+						var60 = var59.height();
+					} catch (Throwable var28) {
+						var45 = var28;
+						boolean var69 = false;
+						break;
+					}
+
+					int var39 = var60;
+					PostChainConfig.TextureInput var61 = var11;
+
+					try {
+						var62 = var61.bilinear();
+					} catch (Throwable var27) {
+						var45 = var27;
+						boolean var70 = false;
+						break;
+					}
+
+					boolean var40 = var62;
+					AbstractTexture abstractTexturex = textureManager.getTexture(var37.withPath((UnaryOperator<String>)(stringx -> "textures/effect/" + stringx + ".png")));
+					abstractTexturex.setFilter(var40, false);
+					postPass.addInput(new PostPass.TextureInput(var36, abstractTexturex, var38, var39));
+					continue;
+				case PostChainConfig.TargetInput abstractTexture:
+					PostChainConfig.TargetInput var10000 = abstractTexture;
+
+					try {
+						var46 = var10000.samplerName();
+					} catch (Throwable var26) {
+						var45 = var26;
+						boolean var10001 = false;
+						break;
+					}
+
+					String var22 = var46;
+					PostChainConfig.TargetInput var47 = abstractTexture;
+
+					try {
+						var48 = var47.targetId();
+					} catch (Throwable var25) {
+						var45 = var25;
+						boolean var63 = false;
+						break;
+					}
+
+					ResourceLocation var42 = var48;
+					PostChainConfig.TargetInput var49 = abstractTexture;
+
+					try {
+						var50 = var49.useDepthBuffer();
+					} catch (Throwable var24) {
+						var45 = var24;
+						boolean var64 = false;
+						break;
+					}
+
+					boolean var43 = var50;
+					PostChainConfig.TargetInput var51 = abstractTexture;
+
+					try {
+						var52 = var51.bilinear();
+					} catch (Throwable var23) {
+						var45 = var23;
+						boolean var65 = false;
+						break;
+					}
+
+					boolean var44 = var52;
+					postPass.addInput(new PostPass.TargetInput(var22, var42, var43, var44));
+					continue;
+				default:
+					throw new MatchException(null, null);
+			}
+
+			Throwable var35 = var45;
+			throw new MatchException(var35.toString(), var35);
+		}
+
+		return postPass;
 	}
 
 	// $VF: Inserted dummy exception handlers to handle obfuscated exceptions

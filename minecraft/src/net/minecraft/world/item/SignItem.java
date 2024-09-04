@@ -11,12 +11,12 @@ import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class SignItem extends StandingAndWallBlockItem {
-	public SignItem(Item.Properties properties, Block block, Block block2) {
-		super(block, block2, properties, Direction.DOWN);
+	public SignItem(Block block, Block block2, Item.Properties properties) {
+		super(block, block2, Direction.DOWN, properties);
 	}
 
 	public SignItem(Item.Properties properties, Block block, Block block2, Direction direction) {
-		super(block, block2, properties, direction);
+		super(block, block2, direction, properties);
 	}
 
 	@Override

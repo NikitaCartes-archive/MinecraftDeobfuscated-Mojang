@@ -7,7 +7,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -22,6 +21,8 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.ConversionParams;
+import net.minecraft.world.entity.ConversionType;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntitySpawnReason;
@@ -44,6 +45,7 @@ import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.scores.PlayerTeam;
 
 public class Slime extends Mob implements Enemy {
 	private static final EntityDataAccessor<Integer> ID_SIZE = SynchedEntityData.defineId(Slime.class, EntityDataSerializers.INT);
@@ -197,29 +199,19 @@ public class Slime extends Mob implements Enemy {
 	public void remove(Entity.RemovalReason removalReason) {
 		int i = this.getSize();
 		if (!this.level().isClientSide && i > 1 && this.isDeadOrDying()) {
-			Component component = this.getCustomName();
-			boolean bl = this.isNoAi();
 			float f = this.getDimensions(this.getPose()).width();
 			float g = f / 2.0F;
 			int j = i / 2;
 			int k = 2 + this.random.nextInt(3);
+			PlayerTeam playerTeam = this.getTeam();
 
 			for (int l = 0; l < k; l++) {
 				float h = ((float)(l % 2) - 0.5F) * g;
 				float m = ((float)(l / 2) - 0.5F) * g;
-				Slime slime = this.getType().create(this.level(), EntitySpawnReason.TRIGGERED);
-				if (slime != null) {
-					if (this.isPersistenceRequired()) {
-						slime.setPersistenceRequired();
-					}
-
-					slime.setCustomName(component);
-					slime.setNoAi(bl);
-					slime.setInvulnerable(this.isInvulnerable());
+				this.convertTo(this.getType(), new ConversionParams(ConversionType.SPLIT_ON_DEATH, false, false, playerTeam), EntitySpawnReason.TRIGGERED, slime -> {
 					slime.setSize(j, true);
 					slime.moveTo(this.getX() + (double)h, this.getY() + 0.5, this.getZ() + (double)m, this.random.nextFloat() * 360.0F, 0.0F);
-					this.level().addFreshEntity(slime);
-				}
+				});
 			}
 		}
 

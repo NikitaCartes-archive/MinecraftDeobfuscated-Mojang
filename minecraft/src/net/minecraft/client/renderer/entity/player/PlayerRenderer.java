@@ -21,11 +21,11 @@ import net.minecraft.client.renderer.entity.layers.BeeStingerLayer;
 import net.minecraft.client.renderer.entity.layers.CapeLayer;
 import net.minecraft.client.renderer.entity.layers.CustomHeadLayer;
 import net.minecraft.client.renderer.entity.layers.Deadmau5EarsLayer;
-import net.minecraft.client.renderer.entity.layers.ElytraLayer;
 import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
 import net.minecraft.client.renderer.entity.layers.ParrotOnShoulderLayer;
 import net.minecraft.client.renderer.entity.layers.PlayerItemInHandLayer;
 import net.minecraft.client.renderer.entity.layers.SpinAttackEffectLayer;
+import net.minecraft.client.renderer.entity.layers.WingsLayer;
 import net.minecraft.client.renderer.entity.state.PlayerRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.nbt.CompoundTag;
@@ -57,15 +57,15 @@ public class PlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer, P
 				this,
 				new HumanoidArmorModel(context.bakeLayer(bl ? ModelLayers.PLAYER_SLIM_INNER_ARMOR : ModelLayers.PLAYER_INNER_ARMOR)),
 				new HumanoidArmorModel(context.bakeLayer(bl ? ModelLayers.PLAYER_SLIM_OUTER_ARMOR : ModelLayers.PLAYER_OUTER_ARMOR)),
-				context.getModelManager()
+				context.getEquipmentRenderer()
 			)
 		);
 		this.addLayer(new PlayerItemInHandLayer<>(this, context.getItemRenderer()));
 		this.addLayer(new ArrowLayer<>(this, context));
 		this.addLayer(new Deadmau5EarsLayer(this, context.getModelSet()));
-		this.addLayer(new CapeLayer(this, context.getModelSet()));
+		this.addLayer(new CapeLayer(this, context.getModelSet(), context.getEquipmentModels()));
 		this.addLayer(new CustomHeadLayer<>(this, context.getModelSet(), context.getItemRenderer()));
-		this.addLayer(new ElytraLayer<>(this, context.getModelSet()));
+		this.addLayer(new WingsLayer<>(this, context.getModelSet(), context.getEquipmentRenderer()));
 		this.addLayer(new ParrotOnShoulderLayer(this, context.getModelSet()));
 		this.addLayer(new SpinAttackEffectLayer(this, context.getModelSet()));
 		this.addLayer(new BeeStingerLayer<>(this, context));
@@ -131,14 +131,14 @@ public class PlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer, P
 	}
 
 	protected void renderNameTag(PlayerRenderState playerRenderState, Component component, PoseStack poseStack, MultiBufferSource multiBufferSource, int i) {
+		poseStack.pushPose();
 		if (playerRenderState.scoreText != null) {
-			poseStack.pushPose();
 			super.renderNameTag(playerRenderState, playerRenderState.scoreText, poseStack, multiBufferSource, i);
 			poseStack.translate(0.0F, 9.0F * 1.15F * 0.025F, 0.0F);
-			poseStack.popPose();
 		}
 
 		super.renderNameTag(playerRenderState, component, poseStack, multiBufferSource, i);
+		poseStack.popPose();
 	}
 
 	public PlayerRenderState createRenderState() {

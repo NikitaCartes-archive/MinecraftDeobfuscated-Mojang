@@ -45,7 +45,8 @@ public record PlayerPredicate(
 	List<PlayerPredicate.StatMatcher<?>> stats,
 	Object2BooleanMap<ResourceLocation> recipes,
 	Map<ResourceLocation, PlayerPredicate.AdvancementPredicate> advancements,
-	Optional<EntityPredicate> lookingAt
+	Optional<EntityPredicate> lookingAt,
+	Optional<InputPredicate> input
 ) implements EntitySubPredicate {
 	public static final int LOOKING_AT_RANGE = 100;
 	public static final MapCodec<PlayerPredicate> CODEC = RecordCodecBuilder.mapCodec(
@@ -57,7 +58,8 @@ public record PlayerPredicate(
 					Codec.unboundedMap(ResourceLocation.CODEC, PlayerPredicate.AdvancementPredicate.CODEC)
 						.optionalFieldOf("advancements", Map.of())
 						.forGetter(PlayerPredicate::advancements),
-					EntityPredicate.CODEC.optionalFieldOf("looking_at").forGetter(PlayerPredicate::lookingAt)
+					EntityPredicate.CODEC.optionalFieldOf("looking_at").forGetter(PlayerPredicate::lookingAt),
+					InputPredicate.CODEC.optionalFieldOf("input").forGetter(PlayerPredicate::input)
 				)
 				.apply(instance, PlayerPredicate::new)
 	);
@@ -118,7 +120,7 @@ public record PlayerPredicate(
 				}
 			}
 
-			return true;
+			return !this.input.isPresent() || ((InputPredicate)this.input.get()).matches(serverPlayer.getLastClientInput());
 		}
 	}
 
@@ -174,6 +176,7 @@ public record PlayerPredicate(
 		private final Object2BooleanMap<ResourceLocation> recipes = new Object2BooleanOpenHashMap<>();
 		private final Map<ResourceLocation, PlayerPredicate.AdvancementPredicate> advancements = Maps.<ResourceLocation, PlayerPredicate.AdvancementPredicate>newHashMap();
 		private Optional<EntityPredicate> lookingAt = Optional.empty();
+		private Optional<InputPredicate> input = Optional.empty();
 
 		public static PlayerPredicate.Builder player() {
 			return new PlayerPredicate.Builder();
@@ -214,8 +217,13 @@ public record PlayerPredicate(
 			return this;
 		}
 
+		public PlayerPredicate.Builder hasInput(InputPredicate inputPredicate) {
+			this.input = Optional.of(inputPredicate);
+			return this;
+		}
+
 		public PlayerPredicate build() {
-			return new PlayerPredicate(this.level, this.gameType, this.stats.build(), this.recipes, this.advancements, this.lookingAt);
+			return new PlayerPredicate(this.level, this.gameType, this.stats.build(), this.recipes, this.advancements, this.lookingAt, this.input);
 		}
 	}
 

@@ -26,6 +26,7 @@ import net.minecraft.data.info.RegistryDumpReport;
 import net.minecraft.data.loot.packs.TradeRebalanceLootTableProvider;
 import net.minecraft.data.loot.packs.VanillaLootTableProvider;
 import net.minecraft.data.metadata.PackMetadataGenerator;
+import net.minecraft.data.models.EquipmentModelProvider;
 import net.minecraft.data.models.ModelProvider;
 import net.minecraft.data.recipes.packs.BundleRecipeProvider;
 import net.minecraft.data.recipes.packs.VanillaRecipeProvider;
@@ -119,6 +120,7 @@ public class Main {
 		CompletableFuture<HolderLookup.Provider> completableFuture = CompletableFuture.supplyAsync(VanillaRegistries::createLookup, Util.backgroundExecutor());
 		DataGenerator.PackGenerator packGenerator2 = dataGenerator.getVanillaPack(bl);
 		packGenerator2.addProvider(ModelProvider::new);
+		packGenerator2.addProvider(EquipmentModelProvider::new);
 		DataGenerator.PackGenerator packGenerator3 = dataGenerator.getVanillaPack(bl2);
 		packGenerator3.addProvider(bindRegistries(RegistriesDatapackGenerator::new, completableFuture));
 		packGenerator3.addProvider(bindRegistries(VanillaAdvancementProvider::create, completableFuture));

@@ -10,7 +10,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.FireworkRocketEntity;
 import net.minecraft.world.entity.projectile.Projectile;
@@ -84,20 +83,15 @@ public class FireworkRocketItem extends Item implements ProjectileItem {
 	@Override
 	public ProjectileItem.DispenseConfig createDispenseConfig() {
 		return ProjectileItem.DispenseConfig.builder()
-			.positionFunction(FireworkRocketItem::getEntityPokingOutOfBlockPos)
+			.positionFunction(FireworkRocketItem::getEntityJustOutsideOfBlockPos)
 			.uncertainty(1.0F)
 			.power(0.5F)
 			.overrideDispenseEvent(1004)
 			.build();
 	}
 
-	private static Vec3 getEntityPokingOutOfBlockPos(BlockSource blockSource, Direction direction) {
+	private static Vec3 getEntityJustOutsideOfBlockPos(BlockSource blockSource, Direction direction) {
 		return blockSource.center()
-			.add(
-				(double)direction.getStepX() * (0.5000099999997474 - (double)EntityType.FIREWORK_ROCKET.getWidth() / 2.0),
-				(double)direction.getStepY() * (0.5000099999997474 - (double)EntityType.FIREWORK_ROCKET.getHeight() / 2.0)
-					- (double)EntityType.FIREWORK_ROCKET.getHeight() / 2.0,
-				(double)direction.getStepZ() * (0.5000099999997474 - (double)EntityType.FIREWORK_ROCKET.getWidth() / 2.0)
-			);
+			.add((double)direction.getStepX() * 0.5000099999997474, (double)direction.getStepY() * 0.5000099999997474, (double)direction.getStepZ() * 0.5000099999997474);
 	}
 }

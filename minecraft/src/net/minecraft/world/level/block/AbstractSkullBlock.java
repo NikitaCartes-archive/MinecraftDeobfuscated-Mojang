@@ -3,8 +3,6 @@ package net.minecraft.world.level.block;
 import com.mojang.serialization.MapCodec;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.item.Equipable;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -19,7 +17,7 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.level.redstone.Orientation;
 
-public abstract class AbstractSkullBlock extends BaseEntityBlock implements Equipable {
+public abstract class AbstractSkullBlock extends BaseEntityBlock {
 	public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
 	private final SkullBlock.Type type;
 
@@ -60,11 +58,6 @@ public abstract class AbstractSkullBlock extends BaseEntityBlock implements Equi
 	@Override
 	protected boolean isPathfindable(BlockState blockState, PathComputationType pathComputationType) {
 		return false;
-	}
-
-	@Override
-	public EquipmentSlot getEquipmentSlot() {
-		return EquipmentSlot.HEAD;
 	}
 
 	@Override

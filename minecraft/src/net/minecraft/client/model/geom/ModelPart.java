@@ -201,7 +201,7 @@ public final class ModelPart {
 
 	@Environment(EnvType.CLIENT)
 	public static class Cube {
-		private final ModelPart.Polygon[] polygons;
+		public final ModelPart.Polygon[] polygons;
 		public final float minX;
 		public final float minY;
 		public final float minZ;
@@ -297,12 +297,10 @@ public final class ModelPart {
 	}
 
 	@Environment(EnvType.CLIENT)
-	static class Polygon {
-		public final ModelPart.Vertex[] vertices;
-		public final Vector3f normal;
+	public static record Polygon(ModelPart.Vertex[] vertices, Vector3f normal) {
 
 		public Polygon(ModelPart.Vertex[] vertexs, float f, float g, float h, float i, float j, float k, boolean bl, Direction direction) {
-			this.vertices = vertexs;
+			this(vertexs, direction.step());
 			float l = 0.0F / j;
 			float m = 0.0F / k;
 			vertexs[0] = vertexs[0].remap(h / j - l, g / k + m);
@@ -319,7 +317,6 @@ public final class ModelPart {
 				}
 			}
 
-			this.normal = direction.step();
 			if (bl) {
 				this.normal.mul(-1.0F, 1.0F, 1.0F);
 			}
@@ -327,10 +324,7 @@ public final class ModelPart {
 	}
 
 	@Environment(EnvType.CLIENT)
-	static class Vertex {
-		public final Vector3f pos;
-		public final float u;
-		public final float v;
+	public static record Vertex(Vector3f pos, float u, float v) {
 
 		public Vertex(float f, float g, float h, float i, float j) {
 			this(new Vector3f(f, g, h), i, j);
@@ -338,12 +332,6 @@ public final class ModelPart {
 
 		public ModelPart.Vertex remap(float f, float g) {
 			return new ModelPart.Vertex(this.pos, f, g);
-		}
-
-		public Vertex(Vector3f vector3f, float f, float g) {
-			this.pos = vector3f;
-			this.u = f;
-			this.v = g;
 		}
 	}
 
