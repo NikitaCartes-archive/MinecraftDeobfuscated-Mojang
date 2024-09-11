@@ -34,16 +34,17 @@ import net.minecraft.world.item.component.ConsumableListener;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.level.Level;
 
-public record PotionContents(Optional<Holder<Potion>> potion, Optional<Integer> customColor, List<MobEffectInstance> customEffects)
+public record PotionContents(Optional<Holder<Potion>> potion, Optional<Integer> customColor, List<MobEffectInstance> customEffects, Optional<String> customName)
 	implements ConsumableListener {
-	public static final PotionContents EMPTY = new PotionContents(Optional.empty(), Optional.empty(), List.of());
+	public static final PotionContents EMPTY = new PotionContents(Optional.empty(), Optional.empty(), List.of(), Optional.empty());
 	private static final Component NO_EFFECT = Component.translatable("effect.none").withStyle(ChatFormatting.GRAY);
 	private static final int BASE_POTION_COLOR = -13083194;
 	private static final Codec<PotionContents> FULL_CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
 					Potion.CODEC.optionalFieldOf("potion").forGetter(PotionContents::potion),
 					Codec.INT.optionalFieldOf("custom_color").forGetter(PotionContents::customColor),
-					MobEffectInstance.CODEC.listOf().optionalFieldOf("custom_effects", List.of()).forGetter(PotionContents::customEffects)
+					MobEffectInstance.CODEC.listOf().optionalFieldOf("custom_effects", List.of()).forGetter(PotionContents::customEffects),
+					Codec.STRING.optionalFieldOf("custom_name").forGetter(PotionContents::customName)
 				)
 				.apply(instance, PotionContents::new)
 	);
@@ -55,11 +56,13 @@ public record PotionContents(Optional<Holder<Potion>> potion, Optional<Integer> 
 		PotionContents::customColor,
 		MobEffectInstance.STREAM_CODEC.apply(ByteBufCodecs.list()),
 		PotionContents::customEffects,
+		ByteBufCodecs.STRING_UTF8.apply(ByteBufCodecs::optional),
+		PotionContents::customName,
 		PotionContents::new
 	);
 
 	public PotionContents(Holder<Potion> holder) {
-		this(Optional.of(holder), Optional.empty(), List.of());
+		this(Optional.of(holder), Optional.empty(), List.of(), Optional.empty());
 	}
 
 	public static ItemStack createItemStack(Item item, Holder<Potion> holder) {
@@ -95,11 +98,11 @@ public record PotionContents(Optional<Holder<Potion>> potion, Optional<Integer> 
 	}
 
 	public PotionContents withPotion(Holder<Potion> holder) {
-		return new PotionContents(Optional.of(holder), this.customColor, this.customEffects);
+		return new PotionContents(Optional.of(holder), this.customColor, this.customEffects, this.customName);
 	}
 
 	public PotionContents withEffectAdded(MobEffectInstance mobEffectInstance) {
-		return new PotionContents(this.potion, this.customColor, Util.copyAndAdd(this.customEffects, mobEffectInstance));
+		return new PotionContents(this.potion, this.customColor, Util.copyAndAdd(this.customEffects, mobEffectInstance), this.customName);
 	}
 
 	public int getColor() {
@@ -112,6 +115,11 @@ public record PotionContents(Optional<Holder<Potion>> potion, Optional<Integer> 
 
 	public static int getColor(Iterable<MobEffectInstance> iterable) {
 		return getColorOptional(iterable).orElse(-13083194);
+	}
+
+	public Component getName(String string) {
+		String string2 = (String)this.customName.or(() -> this.potion.map(holder -> ((Potion)holder.value()).name())).orElse("empty");
+		return Component.translatable(string + string2);
 	}
 
 	public static OptionalInt getColorOptional(Iterable<MobEffectInstance> iterable) {

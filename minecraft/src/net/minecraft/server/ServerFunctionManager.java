@@ -15,6 +15,7 @@ import net.minecraft.commands.execution.ExecutionContext;
 import net.minecraft.commands.functions.CommandFunction;
 import net.minecraft.commands.functions.InstantiatedFunction;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.profiling.Profiler;
 import net.minecraft.util.profiling.ProfilerFiller;
 import org.slf4j.Logger;
 
@@ -50,17 +51,17 @@ public class ServerFunctionManager {
 	}
 
 	private void executeTagFunctions(Collection<CommandFunction<CommandSourceStack>> collection, ResourceLocation resourceLocation) {
-		this.server.getProfiler().push(resourceLocation::toString);
+		Profiler.get().push(resourceLocation::toString);
 
 		for (CommandFunction<CommandSourceStack> commandFunction : collection) {
 			this.execute(commandFunction, this.getGameLoopSender());
 		}
 
-		this.server.getProfiler().pop();
+		Profiler.get().pop();
 	}
 
 	public void execute(CommandFunction<CommandSourceStack> commandFunction, CommandSourceStack commandSourceStack) {
-		ProfilerFiller profilerFiller = this.server.getProfiler();
+		ProfilerFiller profilerFiller = Profiler.get();
 		profilerFiller.push((Supplier<String>)(() -> "function " + commandFunction.id()));
 
 		try {

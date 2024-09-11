@@ -48,6 +48,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import org.joml.Matrix4f;
 import org.joml.Vector2ic;
@@ -623,9 +624,18 @@ public class GuiGraphics {
 					Lighting.setupForFlatItems();
 				}
 
-				this.minecraft
-					.getItemRenderer()
-					.render(itemStack, ItemDisplayContext.GUI, false, this.pose, this.bufferSource, 15728880, OverlayTexture.NO_OVERLAY, bakedModel);
+				if (itemStack.is(Items.BUNDLE)) {
+					this.minecraft
+						.getItemRenderer()
+						.renderBundleItem(
+							itemStack, ItemDisplayContext.GUI, false, this.pose, this.bufferSource, 15728880, OverlayTexture.NO_OVERLAY, bakedModel, level, livingEntity, k
+						);
+				} else {
+					this.minecraft
+						.getItemRenderer()
+						.render(itemStack, ItemDisplayContext.GUI, false, this.pose, this.bufferSource, 15728880, OverlayTexture.NO_OVERLAY, bakedModel);
+				}
+
 				this.flush();
 				if (bl) {
 					Lighting.setupFor3DItems();
@@ -697,7 +707,11 @@ public class GuiGraphics {
 	}
 
 	public void renderTooltip(Font font, Component component, int i, int j) {
-		this.renderTooltip(font, List.of(component.getVisualOrderText()), i, j);
+		this.renderTooltip(font, component, i, j, null);
+	}
+
+	public void renderTooltip(Font font, Component component, int i, int j, @Nullable ResourceLocation resourceLocation) {
+		this.renderTooltip(font, List.of(component.getVisualOrderText()), i, j, resourceLocation);
 	}
 
 	public void renderComponentTooltip(Font font, List<Component> list, int i, int j) {
@@ -716,13 +730,17 @@ public class GuiGraphics {
 	}
 
 	public void renderTooltip(Font font, List<? extends FormattedCharSequence> list, int i, int j) {
+		this.renderTooltip(font, list, i, j, null);
+	}
+
+	public void renderTooltip(Font font, List<? extends FormattedCharSequence> list, int i, int j, @Nullable ResourceLocation resourceLocation) {
 		this.renderTooltipInternal(
 			font,
 			(List<ClientTooltipComponent>)list.stream().map(ClientTooltipComponent::create).collect(Collectors.toList()),
 			i,
 			j,
 			DefaultTooltipPositioner.INSTANCE,
-			null
+			resourceLocation
 		);
 	}
 

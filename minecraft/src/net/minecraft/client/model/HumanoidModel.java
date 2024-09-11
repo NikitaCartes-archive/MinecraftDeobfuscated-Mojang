@@ -100,17 +100,12 @@ public class HumanoidModel<T extends HumanoidRenderState> extends EntityModel<T>
 		HumanoidModel.ArmPose armPose2 = this.getArmPose(humanoidRenderState, HumanoidArm.RIGHT);
 		float f = humanoidRenderState.swimAmount;
 		boolean bl = humanoidRenderState.isFallFlying;
+		this.head.xRot = humanoidRenderState.xRot * (float) (Math.PI / 180.0);
 		this.head.yRot = humanoidRenderState.yRot * (float) (Math.PI / 180.0);
 		if (bl) {
 			this.head.xRot = (float) (-Math.PI / 4);
 		} else if (f > 0.0F) {
-			if (humanoidRenderState.isVisuallySwimming) {
-				this.head.xRot = Mth.rotLerpRad(f, this.head.xRot, (float) (-Math.PI / 4));
-			} else {
-				this.head.xRot = Mth.rotLerpRad(f, this.head.xRot, humanoidRenderState.xRot * (float) (Math.PI / 180.0));
-			}
-		} else {
-			this.head.xRot = humanoidRenderState.xRot * (float) (Math.PI / 180.0);
+			this.head.xRot = Mth.rotLerpRad(f, this.head.xRot, (float) (-Math.PI / 4));
 		}
 
 		float g = humanoidRenderState.walkAnimationPos;
@@ -334,6 +329,15 @@ public class HumanoidModel<T extends HumanoidRenderState> extends EntityModel<T>
 
 	private float quadraticArmUpdate(float f) {
 		return -65.0F * f + f * f;
+	}
+
+	public void copyPropertiesTo(HumanoidModel<T> humanoidModel) {
+		humanoidModel.head.copyFrom(this.head);
+		humanoidModel.body.copyFrom(this.body);
+		humanoidModel.rightArm.copyFrom(this.rightArm);
+		humanoidModel.leftArm.copyFrom(this.leftArm);
+		humanoidModel.rightLeg.copyFrom(this.rightLeg);
+		humanoidModel.leftLeg.copyFrom(this.leftLeg);
 	}
 
 	public void setAllVisible(boolean bl) {

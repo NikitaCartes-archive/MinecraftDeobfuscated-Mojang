@@ -65,10 +65,6 @@ import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
-import net.minecraft.world.level.storage.loot.LootParams;
-import net.minecraft.world.level.storage.loot.LootTable;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.AABB;
 
 public class Cat extends TamableAnimal implements VariantHolder<Holder<CatVariant>> {
@@ -570,25 +566,21 @@ public class Cat extends TamableAnimal implements VariantHolder<Holder<CatVarian
 					false
 				);
 			mutableBlockPos.set(this.cat.blockPosition());
-			LootTable lootTable = this.cat.level().getServer().reloadableRegistries().getLootTable(BuiltInLootTables.CAT_MORNING_GIFT);
-			LootParams lootParams = new LootParams.Builder((ServerLevel)this.cat.level())
-				.withParameter(LootContextParams.ORIGIN, this.cat.position())
-				.withParameter(LootContextParams.THIS_ENTITY, this.cat)
-				.create(LootContextParamSets.GIFT);
-
-			for (ItemStack itemStack : lootTable.getRandomItems(lootParams)) {
-				this.cat
-					.level()
-					.addFreshEntity(
-						new ItemEntity(
-							this.cat.level(),
-							(double)mutableBlockPos.getX() - (double)Mth.sin(this.cat.yBodyRot * (float) (Math.PI / 180.0)),
-							(double)mutableBlockPos.getY(),
-							(double)mutableBlockPos.getZ() + (double)Mth.cos(this.cat.yBodyRot * (float) (Math.PI / 180.0)),
-							itemStack
-						)
-					);
-			}
+			this.cat
+				.dropFromGiftLootTable(
+					BuiltInLootTables.CAT_MORNING_GIFT,
+					itemStack -> this.cat
+							.level()
+							.addFreshEntity(
+								new ItemEntity(
+									this.cat.level(),
+									(double)mutableBlockPos.getX() - (double)Mth.sin(this.cat.yBodyRot * (float) (Math.PI / 180.0)),
+									(double)mutableBlockPos.getY(),
+									(double)mutableBlockPos.getZ() + (double)Mth.cos(this.cat.yBodyRot * (float) (Math.PI / 180.0)),
+									itemStack
+								)
+							)
+				);
 		}
 
 		@Override

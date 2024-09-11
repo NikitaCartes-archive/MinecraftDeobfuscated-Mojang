@@ -39,7 +39,7 @@ public class HorseArmorLayer extends RenderLayer<HorseRenderState, HorseModel> {
 			ResourceLocation resourceLocation = (ResourceLocation)equippable.model().get();
 			horseModel.setupAnim(horseRenderState);
 			this.equipmentRenderer
-				.renderLayers(EquipmentModel.LayerType.HORSE_BODY, resourceLocation, horseModel, itemStack, RenderType::armorCutoutNoCull, poseStack, multiBufferSource, i);
+				.renderLayers(EquipmentModel.LayerType.HORSE_BODY, resourceLocation, horseModel, itemStack, RenderType::entityCutoutNoCull, poseStack, multiBufferSource, i);
 		}
 	}
 }

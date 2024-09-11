@@ -13,6 +13,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BannerPatternTags;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.InstrumentTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Unit;
@@ -27,6 +28,8 @@ import net.minecraft.world.item.component.BundleContents;
 import net.minecraft.world.item.component.ChargedProjectiles;
 import net.minecraft.world.item.component.Consumables;
 import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.item.component.DamageResistant;
+import net.minecraft.world.item.component.DeathProtection;
 import net.minecraft.world.item.component.DebugStickState;
 import net.minecraft.world.item.component.Fireworks;
 import net.minecraft.world.item.component.ItemContainerContents;
@@ -382,7 +385,7 @@ public class Items {
 	public static final Item WARPED_FENCE = registerBlock(Blocks.WARPED_FENCE);
 	public static final Item PUMPKIN = registerBlock(Blocks.PUMPKIN);
 	public static final Item CARVED_PUMPKIN = registerBlock(
-		Blocks.CARVED_PUMPKIN, (UnaryOperator<Item.Properties>)(properties -> properties.equippable(EquipmentSlot.HEAD))
+		Blocks.CARVED_PUMPKIN, (UnaryOperator<Item.Properties>)(properties -> properties.equippableUnswappable(EquipmentSlot.HEAD))
 	);
 	public static final Item JACK_O_LANTERN = registerBlock(Blocks.JACK_O_LANTERN);
 	public static final Item NETHERRACK = registerBlock(Blocks.NETHERRACK);
@@ -981,7 +984,10 @@ public class Items {
 			.durability(432)
 			.rarity(Rarity.EPIC)
 			.component(DataComponents.GLIDER, Unit.INSTANCE)
-			.equippable(EquipmentSlot.CHEST, SoundEvents.ARMOR_EQUIP_ELYTRA, EquipmentModels.ELYTRA)
+			.component(
+				DataComponents.EQUIPPABLE,
+				Equippable.builder(EquipmentSlot.CHEST).setEquipSound(SoundEvents.ARMOR_EQUIP_ELYTRA).setModel(EquipmentModels.ELYTRA).setDamageOnHurt(false).build()
+			)
 			.repairable(PHANTOM_MEMBRANE)
 	);
 	public static final Item OAK_BOAT = registerItem("oak_boat", properties -> new BoatItem(false, Boat.Type.OAK, properties), new Item.Properties().stacksTo(1));
@@ -1121,16 +1127,18 @@ public class Items {
 	);
 	public static final Item LEATHER_BOOTS = registerItem("leather_boots", properties -> new ArmorItem(ArmorMaterials.LEATHER, ArmorType.BOOTS, properties));
 	public static final Item CHAINMAIL_HELMET = registerItem(
-		"chainmail_helmet", properties -> new ArmorItem(ArmorMaterials.CHAIN, ArmorType.HELMET, properties), new Item.Properties().rarity(Rarity.UNCOMMON)
+		"chainmail_helmet", properties -> new ArmorItem(ArmorMaterials.CHAINMAIL, ArmorType.HELMET, properties), new Item.Properties().rarity(Rarity.UNCOMMON)
 	);
 	public static final Item CHAINMAIL_CHESTPLATE = registerItem(
-		"chainmail_chestplate", properties -> new ArmorItem(ArmorMaterials.CHAIN, ArmorType.CHESTPLATE, properties), new Item.Properties().rarity(Rarity.UNCOMMON)
+		"chainmail_chestplate",
+		properties -> new ArmorItem(ArmorMaterials.CHAINMAIL, ArmorType.CHESTPLATE, properties),
+		new Item.Properties().rarity(Rarity.UNCOMMON)
 	);
 	public static final Item CHAINMAIL_LEGGINGS = registerItem(
-		"chainmail_leggings", properties -> new ArmorItem(ArmorMaterials.CHAIN, ArmorType.LEGGINGS, properties), new Item.Properties().rarity(Rarity.UNCOMMON)
+		"chainmail_leggings", properties -> new ArmorItem(ArmorMaterials.CHAINMAIL, ArmorType.LEGGINGS, properties), new Item.Properties().rarity(Rarity.UNCOMMON)
 	);
 	public static final Item CHAINMAIL_BOOTS = registerItem(
-		"chainmail_boots", properties -> new ArmorItem(ArmorMaterials.CHAIN, ArmorType.BOOTS, properties), new Item.Properties().rarity(Rarity.UNCOMMON)
+		"chainmail_boots", properties -> new ArmorItem(ArmorMaterials.CHAINMAIL, ArmorType.BOOTS, properties), new Item.Properties().rarity(Rarity.UNCOMMON)
 	);
 	public static final Item IRON_HELMET = registerItem("iron_helmet", properties -> new ArmorItem(ArmorMaterials.IRON, ArmorType.HELMET, properties));
 	public static final Item IRON_CHESTPLATE = registerItem("iron_chestplate", properties -> new ArmorItem(ArmorMaterials.IRON, ArmorType.CHESTPLATE, properties));
@@ -1607,40 +1615,44 @@ public class Items {
 	public static final Item SKELETON_SKULL = registerBlock(
 		Blocks.SKELETON_SKULL,
 		(block, properties) -> new StandingAndWallBlockItem(block, Blocks.SKELETON_WALL_SKULL, Direction.DOWN, properties),
-		new Item.Properties().rarity(Rarity.UNCOMMON).equippable(EquipmentSlot.HEAD)
+		new Item.Properties().rarity(Rarity.UNCOMMON).equippableUnswappable(EquipmentSlot.HEAD)
 	);
 	public static final Item WITHER_SKELETON_SKULL = registerBlock(
 		Blocks.WITHER_SKELETON_SKULL,
 		(block, properties) -> new StandingAndWallBlockItem(block, Blocks.WITHER_SKELETON_WALL_SKULL, Direction.DOWN, properties),
-		new Item.Properties().rarity(Rarity.RARE).equippable(EquipmentSlot.HEAD)
+		new Item.Properties().rarity(Rarity.RARE).equippableUnswappable(EquipmentSlot.HEAD)
 	);
 	public static final Item PLAYER_HEAD = registerBlock(
 		Blocks.PLAYER_HEAD,
 		(block, properties) -> new PlayerHeadItem(block, Blocks.PLAYER_WALL_HEAD, properties),
-		new Item.Properties().rarity(Rarity.UNCOMMON).equippable(EquipmentSlot.HEAD)
+		new Item.Properties().rarity(Rarity.UNCOMMON).equippableUnswappable(EquipmentSlot.HEAD)
 	);
 	public static final Item ZOMBIE_HEAD = registerBlock(
 		Blocks.ZOMBIE_HEAD,
 		(block, properties) -> new StandingAndWallBlockItem(block, Blocks.ZOMBIE_WALL_HEAD, Direction.DOWN, properties),
-		new Item.Properties().rarity(Rarity.UNCOMMON).equippable(EquipmentSlot.HEAD)
+		new Item.Properties().rarity(Rarity.UNCOMMON).equippableUnswappable(EquipmentSlot.HEAD)
 	);
 	public static final Item CREEPER_HEAD = registerBlock(
 		Blocks.CREEPER_HEAD,
 		(block, properties) -> new StandingAndWallBlockItem(block, Blocks.CREEPER_WALL_HEAD, Direction.DOWN, properties),
-		new Item.Properties().rarity(Rarity.UNCOMMON).equippable(EquipmentSlot.HEAD)
+		new Item.Properties().rarity(Rarity.UNCOMMON).equippableUnswappable(EquipmentSlot.HEAD)
 	);
 	public static final Item DRAGON_HEAD = registerBlock(
 		Blocks.DRAGON_HEAD,
 		(block, properties) -> new StandingAndWallBlockItem(block, Blocks.DRAGON_WALL_HEAD, Direction.DOWN, properties),
-		new Item.Properties().rarity(Rarity.EPIC).equippable(EquipmentSlot.HEAD)
+		new Item.Properties().rarity(Rarity.EPIC).equippableUnswappable(EquipmentSlot.HEAD)
 	);
 	public static final Item PIGLIN_HEAD = registerBlock(
 		Blocks.PIGLIN_HEAD,
 		(block, properties) -> new StandingAndWallBlockItem(block, Blocks.PIGLIN_WALL_HEAD, Direction.DOWN, properties),
-		new Item.Properties().rarity(Rarity.UNCOMMON).equippable(EquipmentSlot.HEAD)
+		new Item.Properties().rarity(Rarity.UNCOMMON).equippableUnswappable(EquipmentSlot.HEAD)
 	);
 	public static final Item NETHER_STAR = registerItem(
-		"nether_star", new Item.Properties().rarity(Rarity.RARE).component(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true)
+		"nether_star",
+		new Item.Properties()
+			.rarity(Rarity.RARE)
+			.component(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true)
+			.component(DataComponents.DAMAGE_RESISTANT, new DamageResistant(DamageTypeTags.IS_EXPLOSION))
 	);
 	public static final Item PUMPKIN_PIE = registerItem("pumpkin_pie", new Item.Properties().food(Foods.PUMPKIN_PIE));
 	public static final Item FIREWORK_ROCKET = registerItem(
@@ -1803,9 +1815,11 @@ public class Items {
 			.durability(336)
 			.component(DataComponents.BANNER_PATTERNS, BannerPatternLayers.EMPTY)
 			.repairable(ItemTags.WOODEN_TOOL_MATERIALS)
-			.equippable(EquipmentSlot.OFFHAND)
+			.equippableUnswappable(EquipmentSlot.OFFHAND)
 	);
-	public static final Item TOTEM_OF_UNDYING = registerItem("totem_of_undying", new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON));
+	public static final Item TOTEM_OF_UNDYING = registerItem(
+		"totem_of_undying", new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON).component(DataComponents.DEATH_PROTECTION, DeathProtection.TOTEM_OF_UNDYING)
+	);
 	public static final Item SHULKER_SHELL = registerItem("shulker_shell");
 	public static final Item IRON_NUGGET = registerItem("iron_nugget");
 	public static final Item KNOWLEDGE_BOOK = registerItem(

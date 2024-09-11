@@ -67,6 +67,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.RegistrySynchronization;
 import net.minecraft.core.SectionPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
@@ -424,7 +425,6 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 			holder,
 			this.serverChunkRadius,
 			this.serverSimulationDistance,
-			this.minecraft::getProfiler,
 			this.minecraft.levelRenderer,
 			bl,
 			commonPlayerSpawnInfo.seed(),
@@ -1014,7 +1014,7 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 	private static ItemStack findTotem(Player player) {
 		for (InteractionHand interactionHand : InteractionHand.values()) {
 			ItemStack itemStack = player.getItemInHand(interactionHand);
-			if (itemStack.is(Items.TOTEM_OF_UNDYING)) {
+			if (itemStack.has(DataComponents.DEATH_PROTECTION)) {
 				return itemStack;
 			}
 		}
@@ -1103,7 +1103,6 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 				holder,
 				this.serverChunkRadius,
 				this.serverSimulationDistance,
-				this.minecraft::getProfiler,
 				this.minecraft.levelRenderer,
 				bl2,
 				commonPlayerSpawnInfo.seed(),

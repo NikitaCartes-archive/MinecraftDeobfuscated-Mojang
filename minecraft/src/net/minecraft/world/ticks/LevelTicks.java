@@ -19,11 +19,11 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.LongPredicate;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.Vec3i;
+import net.minecraft.util.profiling.Profiler;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
@@ -32,7 +32,6 @@ public class LevelTicks<T> implements LevelTickAccess<T> {
 	private static final Comparator<LevelChunkTicks<?>> CONTAINER_DRAIN_ORDER = (levelChunkTicks, levelChunkTicks2) -> ScheduledTick.INTRA_TICK_DRAIN_ORDER
 			.compare(levelChunkTicks.peek(), levelChunkTicks2.peek());
 	private final LongPredicate tickCheck;
-	private final Supplier<ProfilerFiller> profiler;
 	private final Long2ObjectMap<LevelChunkTicks<T>> allContainers = new Long2ObjectOpenHashMap<>();
 	private final Long2LongMap nextTickForContainer = Util.make(
 		new Long2LongOpenHashMap(), long2LongOpenHashMap -> long2LongOpenHashMap.defaultReturnValue(Long.MAX_VALUE)
@@ -47,9 +46,8 @@ public class LevelTicks<T> implements LevelTickAccess<T> {
 		}
 	};
 
-	public LevelTicks(LongPredicate longPredicate, Supplier<ProfilerFiller> supplier) {
+	public LevelTicks(LongPredicate longPredicate) {
 		this.tickCheck = longPredicate;
-		this.profiler = supplier;
 	}
 
 	public void addContainer(ChunkPos chunkPos, LevelChunkTicks<T> levelChunkTicks) {
@@ -84,7 +82,7 @@ public class LevelTicks<T> implements LevelTickAccess<T> {
 	}
 
 	public void tick(long l, int i, BiConsumer<BlockPos, T> biConsumer) {
-		ProfilerFiller profilerFiller = (ProfilerFiller)this.profiler.get();
+		ProfilerFiller profilerFiller = Profiler.get();
 		profilerFiller.push("collect");
 		this.collectTicks(l, i, profilerFiller);
 		profilerFiller.popPush("run");

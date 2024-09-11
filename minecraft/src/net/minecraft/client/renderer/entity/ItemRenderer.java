@@ -84,21 +84,11 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 		BakedModel bakedModel
 	) {
 		if (!itemStack.isEmpty()) {
-			boolean bl2 = itemDisplayContext == ItemDisplayContext.GUI
-				|| itemDisplayContext == ItemDisplayContext.GROUND
-				|| itemDisplayContext == ItemDisplayContext.FIXED;
-			if (bl2 && itemStack.is(Items.BUNDLE) && itemStack.getItem() instanceof BundleItem bundleItem && BundleItem.hasSelectedItem(itemStack)) {
-				this.renderBundleWithSelectedItem(bundleItem, itemStack, itemDisplayContext, bl, poseStack, multiBufferSource, i, j, bl2);
-			} else {
-				poseStack.pushPose();
-				this.renderSimpleItemModel(itemStack, itemDisplayContext, bl, poseStack, multiBufferSource, i, j, bakedModel, bl2);
-				poseStack.popPose();
-			}
+			this.renderSimpleItemModel(itemStack, itemDisplayContext, bl, poseStack, multiBufferSource, i, j, bakedModel, shouldRenderItemFlat(itemDisplayContext));
 		}
 	}
 
-	private void renderBundleWithSelectedItem(
-		BundleItem bundleItem,
+	public void renderBundleItem(
 		ItemStack itemStack,
 		ItemDisplayContext itemDisplayContext,
 		boolean bl,
@@ -106,21 +96,25 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 		MultiBufferSource multiBufferSource,
 		int i,
 		int j,
-		boolean bl2
+		BakedModel bakedModel,
+		@Nullable Level level,
+		@Nullable LivingEntity livingEntity,
+		int k
 	) {
-		poseStack.pushPose();
-		BakedModel bakedModel = this.itemModelShaper.getItemModel(bundleItem.openBackModel());
-		this.renderItemModelRaw(itemStack, itemDisplayContext, bl, poseStack, multiBufferSource, i, j, bakedModel, bl2, -1.5F);
-		poseStack.popPose();
-		poseStack.pushPose();
-		ItemStack itemStack2 = BundleItem.getSelectedItemStack(itemStack);
-		BakedModel bakedModel2 = this.itemModelShaper.getItemModel(itemStack2);
-		this.renderSimpleItemModel(itemStack2, itemDisplayContext, bl, poseStack, multiBufferSource, i, j, bakedModel2, bl2);
-		poseStack.popPose();
-		poseStack.pushPose();
-		BakedModel bakedModel3 = this.itemModelShaper.getItemModel(bundleItem.openFrontModel());
-		this.renderItemModelRaw(itemStack, itemDisplayContext, bl, poseStack, multiBufferSource, i, j, bakedModel3, bl2, 0.5F);
-		poseStack.popPose();
+		if (itemStack.getItem() instanceof BundleItem bundleItem) {
+			if (BundleItem.hasSelectedItem(itemStack)) {
+				boolean bl2 = shouldRenderItemFlat(itemDisplayContext);
+				BakedModel bakedModel2 = this.resolveModelOverride(this.itemModelShaper.getItemModel(bundleItem.openBackModel()), itemStack, level, livingEntity, k);
+				this.renderItemModelRaw(itemStack, itemDisplayContext, bl, poseStack, multiBufferSource, i, j, bakedModel2, bl2, -1.5F);
+				ItemStack itemStack2 = BundleItem.getSelectedItemStack(itemStack);
+				BakedModel bakedModel3 = this.getModel(itemStack2, level, livingEntity, k);
+				this.renderSimpleItemModel(itemStack2, itemDisplayContext, bl, poseStack, multiBufferSource, i, j, bakedModel3, bl2);
+				BakedModel bakedModel4 = this.resolveModelOverride(this.itemModelShaper.getItemModel(bundleItem.openFrontModel()), itemStack, level, livingEntity, k);
+				this.renderItemModelRaw(itemStack, itemDisplayContext, bl, poseStack, multiBufferSource, i, j, bakedModel4, bl2, 0.5F);
+			} else {
+				this.render(itemStack, itemDisplayContext, bl, poseStack, multiBufferSource, i, j, bakedModel);
+			}
+		}
 	}
 
 	private void renderSimpleItemModel(
@@ -157,9 +151,11 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 		boolean bl2,
 		float f
 	) {
+		poseStack.pushPose();
 		bakedModel.getTransforms().getTransform(itemDisplayContext).apply(bl, poseStack);
 		poseStack.translate(-0.5F, -0.5F, f);
 		this.renderItem(itemStack, itemDisplayContext, poseStack, multiBufferSource, i, j, bakedModel, bl2);
+		poseStack.popPose();
 	}
 
 	private void renderItem(
@@ -192,6 +188,10 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 		} else {
 			this.blockEntityRenderer.renderByItem(itemStack, itemDisplayContext, poseStack, multiBufferSource, i, j);
 		}
+	}
+
+	private static boolean shouldRenderItemFlat(ItemDisplayContext itemDisplayContext) {
+		return itemDisplayContext == ItemDisplayContext.GUI || itemDisplayContext == ItemDisplayContext.GROUND || itemDisplayContext == ItemDisplayContext.FIXED;
 	}
 
 	private static boolean hasAnimatedTexture(ItemStack itemStack) {
@@ -240,9 +240,7 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 
 	public BakedModel getModel(ItemStack itemStack, @Nullable Level level, @Nullable LivingEntity livingEntity, int i) {
 		BakedModel bakedModel = this.itemModelShaper.getItemModel(itemStack);
-		ClientLevel clientLevel = level instanceof ClientLevel ? (ClientLevel)level : null;
-		BakedModel bakedModel2 = bakedModel.overrides().findOverride(itemStack, clientLevel, livingEntity, i);
-		return bakedModel2 == null ? bakedModel : bakedModel2;
+		return this.resolveModelOverride(bakedModel, itemStack, level, livingEntity, i);
 	}
 
 	public void renderStatic(
@@ -284,5 +282,11 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 	@Nullable
 	public BakedModel resolveItemModel(ItemStack itemStack, LivingEntity livingEntity, ItemDisplayContext itemDisplayContext) {
 		return itemStack.isEmpty() ? null : this.getModel(itemStack, livingEntity.level(), livingEntity, livingEntity.getId() + itemDisplayContext.ordinal());
+	}
+
+	private BakedModel resolveModelOverride(BakedModel bakedModel, ItemStack itemStack, @Nullable Level level, @Nullable LivingEntity livingEntity, int i) {
+		ClientLevel clientLevel = level instanceof ClientLevel ? (ClientLevel)level : null;
+		BakedModel bakedModel2 = bakedModel.overrides().findOverride(itemStack, clientLevel, livingEntity, i);
+		return bakedModel2 == null ? bakedModel : bakedModel2;
 	}
 }

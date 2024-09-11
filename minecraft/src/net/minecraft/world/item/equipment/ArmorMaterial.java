@@ -1,7 +1,6 @@
 package net.minecraft.world.item.equipment;
 
 import java.util.Map;
-import java.util.Optional;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.component.DataComponents;
@@ -30,7 +29,7 @@ public record ArmorMaterial(
 		return properties.durability(armorType.getDurability(this.durability))
 			.attributes(this.createAttributes(armorType))
 			.enchantable(this.enchantmentValue)
-			.equippable(armorType.getSlot(), this.equipSound, this.modelId)
+			.component(DataComponents.EQUIPPABLE, Equippable.builder(armorType.getSlot()).setEquipSound(this.equipSound).setModel(this.modelId).build())
 			.repairable(this.repairIngredient);
 	}
 
@@ -38,7 +37,10 @@ public record ArmorMaterial(
 		return properties.durability(ArmorType.BODY.getDurability(this.durability))
 			.attributes(this.createAttributes(ArmorType.BODY))
 			.repairable(this.repairIngredient)
-			.component(DataComponents.EQUIPPABLE, new Equippable(EquipmentSlot.BODY, this.equipSound, Optional.of(this.modelId), Optional.of(holderSet), true));
+			.component(
+				DataComponents.EQUIPPABLE,
+				Equippable.builder(EquipmentSlot.BODY).setEquipSound(this.equipSound).setModel(this.modelId).setAllowedEntities(holderSet).build()
+			);
 	}
 
 	private ItemAttributeModifiers createAttributes(ArmorType armorType) {

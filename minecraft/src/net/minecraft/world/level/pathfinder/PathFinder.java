@@ -12,6 +12,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.profiling.Profiler;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.util.profiling.metrics.MetricCategory;
 import net.minecraft.world.entity.Mob;
@@ -46,14 +47,15 @@ public class PathFinder {
 				.collect(
 					Collectors.toMap(blockPos -> this.nodeEvaluator.getTarget((double)blockPos.getX(), (double)blockPos.getY(), (double)blockPos.getZ()), Function.identity())
 				);
-			Path path = this.findPath(pathNavigationRegion.getProfiler(), node, map, f, i, g);
+			Path path = this.findPath(node, map, f, i, g);
 			this.nodeEvaluator.done();
 			return path;
 		}
 	}
 
 	@Nullable
-	private Path findPath(ProfilerFiller profilerFiller, Node node, Map<Target, BlockPos> map, float f, int i, float g) {
+	private Path findPath(Node node, Map<Target, BlockPos> map, float f, int i, float g) {
+		ProfilerFiller profilerFiller = Profiler.get();
 		profilerFiller.push("find_path");
 		profilerFiller.markForCharting(MetricCategory.PATH_FINDING);
 		Set<Target> set = map.keySet();

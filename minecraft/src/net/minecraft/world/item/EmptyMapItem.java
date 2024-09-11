@@ -7,7 +7,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
-public class EmptyMapItem extends ComplexItem {
+public class EmptyMapItem extends Item {
 	public EmptyMapItem(Item.Properties properties) {
 		super(properties);
 	}

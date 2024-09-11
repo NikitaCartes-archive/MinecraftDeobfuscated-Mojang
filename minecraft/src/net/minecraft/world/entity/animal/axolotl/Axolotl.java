@@ -26,6 +26,8 @@ import net.minecraft.util.ByIdMap;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringRepresentable;
+import net.minecraft.util.profiling.Profiler;
+import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -298,12 +300,13 @@ public class Axolotl extends Animal implements VariantHolder<Axolotl.Variant>, B
 
 	@Override
 	protected void customServerAiStep() {
-		this.level().getProfiler().push("axolotlBrain");
+		ProfilerFiller profilerFiller = Profiler.get();
+		profilerFiller.push("axolotlBrain");
 		this.getBrain().tick((ServerLevel)this.level(), this);
-		this.level().getProfiler().pop();
-		this.level().getProfiler().push("axolotlActivityUpdate");
+		profilerFiller.pop();
+		profilerFiller.push("axolotlActivityUpdate");
 		AxolotlAi.updateActivity(this);
-		this.level().getProfiler().pop();
+		profilerFiller.pop();
 		if (!this.isNoAi()) {
 			Optional<Integer> optional = this.getBrain().getMemory(MemoryModuleType.PLAY_DEAD_TICKS);
 			this.setPlayingDead(optional.isPresent() && (Integer)optional.get() > 0);

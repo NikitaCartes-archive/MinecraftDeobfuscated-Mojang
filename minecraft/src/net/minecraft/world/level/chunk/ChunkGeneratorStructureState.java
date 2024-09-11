@@ -131,7 +131,7 @@ public class ChunkGeneratorStructureState {
 								return new ChunkPos(o, p);
 							}
 						},
-						Util.backgroundExecutor()
+						Util.backgroundExecutor().forName("structureRings")
 					)
 				);
 				d += (Math.PI * 2) / (double)k;

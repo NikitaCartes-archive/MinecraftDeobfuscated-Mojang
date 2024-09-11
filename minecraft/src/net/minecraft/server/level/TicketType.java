@@ -15,6 +15,7 @@ public class TicketType<T> {
 	public static final TicketType<ChunkPos> PLAYER = create("player", Comparator.comparingLong(ChunkPos::toLong));
 	public static final TicketType<ChunkPos> FORCED = create("forced", Comparator.comparingLong(ChunkPos::toLong));
 	public static final TicketType<BlockPos> PORTAL = create("portal", Vec3i::compareTo, 300);
+	public static final TicketType<ChunkPos> ENDER_PEARL = create("ender_pearl", Comparator.comparingLong(ChunkPos::toLong), 40);
 	public static final TicketType<Integer> POST_TELEPORT = create("post_teleport", Integer::compareTo, 5);
 	public static final TicketType<ChunkPos> UNKNOWN = create("unknown", Comparator.comparingLong(ChunkPos::toLong), 1);
 

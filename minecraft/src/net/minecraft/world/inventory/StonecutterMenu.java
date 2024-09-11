@@ -215,6 +215,10 @@ public class StonecutterMenu extends AbstractContainerMenu {
 			}
 
 			slot.onTake(player, itemStack2);
+			if (i == 1) {
+				player.drop(itemStack2, false);
+			}
+
 			this.broadcastChanges();
 		}
 

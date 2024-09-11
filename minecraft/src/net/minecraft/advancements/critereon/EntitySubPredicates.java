@@ -22,6 +22,7 @@ import net.minecraft.world.entity.animal.FrogVariant;
 import net.minecraft.world.entity.animal.MushroomCow;
 import net.minecraft.world.entity.animal.Parrot;
 import net.minecraft.world.entity.animal.Rabbit;
+import net.minecraft.world.entity.animal.Salmon;
 import net.minecraft.world.entity.animal.TropicalFish;
 import net.minecraft.world.entity.animal.Wolf;
 import net.minecraft.world.entity.animal.WolfVariant;
@@ -97,6 +98,12 @@ public class EntitySubPredicates {
 		"parrot",
 		EntitySubPredicates.EntityVariantPredicateType.create(
 			Parrot.Variant.CODEC, entity -> entity instanceof Parrot parrot ? Optional.of(parrot.getVariant()) : Optional.empty()
+		)
+	);
+	public static final EntitySubPredicates.EntityVariantPredicateType<Salmon.Variant> SALMON = register(
+		"salmon",
+		EntitySubPredicates.EntityVariantPredicateType.create(
+			Salmon.Variant.CODEC, entity -> entity instanceof Salmon salmon ? Optional.of(salmon.getVariant()) : Optional.empty()
 		)
 	);
 	public static final EntitySubPredicates.EntityVariantPredicateType<TropicalFish.Pattern> TROPICAL_FISH = register(

@@ -234,11 +234,6 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface 
 	}
 
 	@Override
-	public boolean isHardcore() {
-		return this.getProperties().hardcore;
-	}
-
-	@Override
 	public SystemReport fillServerSystemReport(SystemReport systemReport) {
 		systemReport.setDetail("Is Modded", (Supplier<String>)(() -> this.getModdedStatus().fullDescription()));
 		systemReport.setDetail("Type", (Supplier<String>)(() -> "Dedicated Server (map_server.txt)"));

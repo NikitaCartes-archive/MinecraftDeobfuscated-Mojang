@@ -126,7 +126,7 @@ public class HttpTexture extends SimpleTexture {
 							httpURLConnection.disconnect();
 						}
 					}
-				}, Util.backgroundExecutor());
+				}, Util.backgroundExecutor().forName("downloadTexture"));
 			}
 		}
 	}

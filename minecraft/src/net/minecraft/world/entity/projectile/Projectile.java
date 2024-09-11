@@ -97,18 +97,25 @@ public abstract class Projectile extends Entity implements TraceableEntity {
 	@Override
 	protected void readAdditionalSaveData(CompoundTag compoundTag) {
 		if (compoundTag.hasUUID("Owner")) {
-			this.ownerUUID = compoundTag.getUUID("Owner");
-			this.cachedOwner = null;
+			this.setOwnerThroughUUID(compoundTag.getUUID("Owner"));
 		}
 
 		this.leftOwner = compoundTag.getBoolean("LeftOwner");
 		this.hasBeenShot = compoundTag.getBoolean("HasBeenShot");
 	}
 
+	protected void setOwnerThroughUUID(UUID uUID) {
+		if (this.ownerUUID != uUID) {
+			this.ownerUUID = uUID;
+			this.cachedOwner = this.findOwner(uUID);
+		}
+	}
+
 	@Override
 	public void restoreFrom(Entity entity) {
 		super.restoreFrom(entity);
 		if (entity instanceof Projectile projectile) {
+			this.ownerUUID = projectile.ownerUUID;
 			this.cachedOwner = projectile.cachedOwner;
 		}
 	}
@@ -247,8 +254,8 @@ public abstract class Projectile extends Entity implements TraceableEntity {
 	}
 
 	public boolean deflect(ProjectileDeflection projectileDeflection, @Nullable Entity entity, @Nullable Entity entity2, boolean bl) {
+		projectileDeflection.deflect(this, entity, this.random);
 		if (!this.level().isClientSide) {
-			projectileDeflection.deflect(this, entity, this.random);
 			this.setOwner(entity2);
 			this.onDeflection(entity, bl);
 		}

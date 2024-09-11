@@ -102,21 +102,23 @@ public final class ProjectileUtil {
 	@Nullable
 	public static EntityHitResult getEntityHitResult(Level level, Entity entity, Vec3 vec3, Vec3 vec32, AABB aABB, Predicate<Entity> predicate, float f) {
 		double d = Double.MAX_VALUE;
+		Optional<Vec3> optional = Optional.empty();
 		Entity entity2 = null;
 
 		for (Entity entity3 : level.getEntities(entity, aABB, predicate)) {
 			AABB aABB2 = entity3.getBoundingBox().inflate((double)f);
-			Optional<Vec3> optional = aABB2.clip(vec3, vec32);
-			if (optional.isPresent()) {
-				double e = vec3.distanceToSqr((Vec3)optional.get());
+			Optional<Vec3> optional2 = aABB2.clip(vec3, vec32);
+			if (optional2.isPresent()) {
+				double e = vec3.distanceToSqr((Vec3)optional2.get());
 				if (e < d) {
 					entity2 = entity3;
 					d = e;
+					optional = optional2;
 				}
 			}
 		}
 
-		return entity2 == null ? null : new EntityHitResult(entity2);
+		return entity2 == null ? null : new EntityHitResult(entity2, (Vec3)optional.get());
 	}
 
 	public static void rotateTowardsMovement(Entity entity, float f) {

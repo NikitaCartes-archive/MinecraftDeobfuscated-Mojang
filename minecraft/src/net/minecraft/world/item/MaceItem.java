@@ -2,6 +2,7 @@ package net.minecraft.world.item;
 
 import java.util.List;
 import java.util.function.Predicate;
+import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
@@ -183,5 +184,11 @@ public class MaceItem extends Item {
 
 	public static boolean canSmashAttack(LivingEntity livingEntity) {
 		return livingEntity.fallDistance > 1.5F && !livingEntity.isFallFlying();
+	}
+
+	@Nullable
+	@Override
+	public DamageSource getDamageSource(LivingEntity livingEntity) {
+		return canSmashAttack(livingEntity) ? livingEntity.damageSources().mace(livingEntity) : super.getDamageSource(livingEntity);
 	}
 }

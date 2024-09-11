@@ -170,9 +170,10 @@ public abstract class FoliagePlacer {
 		TreeConfiguration treeConfiguration,
 		BlockPos blockPos
 	) {
-		if (!TreeFeature.validTreePos(levelSimulatedReader, blockPos)) {
-			return false;
-		} else {
+		boolean bl = levelSimulatedReader.isStateAtPosition(
+			blockPos, blockStatex -> (Boolean)blockStatex.getValueOrElse(BlockStateProperties.PERSISTENT, Boolean.valueOf(false))
+		);
+		if (!bl && TreeFeature.validTreePos(levelSimulatedReader, blockPos)) {
 			BlockState blockState = treeConfiguration.foliageProvider.getState(randomSource, blockPos);
 			if (blockState.hasProperty(BlockStateProperties.WATERLOGGED)) {
 				blockState = blockState.setValue(
@@ -182,6 +183,8 @@ public abstract class FoliagePlacer {
 
 			foliageSetter.set(blockPos, blockState);
 			return true;
+		} else {
+			return false;
 		}
 	}
 

@@ -28,11 +28,11 @@ import net.minecraft.world.entity.ai.goal.TemptGoal;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.pathfinder.PathType;
+import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.phys.Vec3;
 
 public class Chicken extends Animal {
@@ -91,9 +91,11 @@ public class Chicken extends Animal {
 
 		this.flap = this.flap + this.flapping * 2.0F;
 		if (!this.level().isClientSide && this.isAlive() && !this.isBaby() && !this.isChickenJockey() && --this.eggTime <= 0) {
-			this.playSound(SoundEvents.CHICKEN_EGG, 1.0F, (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
-			this.spawnAtLocation(Items.EGG);
-			this.gameEvent(GameEvent.ENTITY_PLACE);
+			if (this.dropFromGiftLootTable(BuiltInLootTables.CHICKEN_LAY, this::spawnAtLocation)) {
+				this.playSound(SoundEvents.CHICKEN_EGG, 1.0F, (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
+				this.gameEvent(GameEvent.ENTITY_PLACE);
+			}
+
 			this.eggTime = this.random.nextInt(6000) + 6000;
 		}
 	}

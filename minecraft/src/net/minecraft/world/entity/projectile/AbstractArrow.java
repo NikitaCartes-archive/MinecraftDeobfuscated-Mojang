@@ -2,7 +2,6 @@ package net.minecraft.world.entity.projectile;
 
 import com.google.common.collect.Lists;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import javax.annotation.Nullable;
@@ -37,7 +36,6 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
@@ -220,9 +218,18 @@ public abstract class AbstractArrow extends Projectile {
 			float g = (float)(Mth.atan2(vec3.y, vec3.horizontalDistance()) * 180.0F / (float)Math.PI);
 			this.setXRot(lerpRotation(this.getXRot(), g));
 			this.setYRot(lerpRotation(this.getYRot(), f));
-			BlockHitResult blockHitResult = this.level()
-				.clipIncludingBorder(new ClipContext(vec33, vec33.add(vec3), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this));
-			this.stepMoveAndHit(blockHitResult);
+			if (!bl) {
+				BlockHitResult blockHitResult = this.level()
+					.clipIncludingBorder(new ClipContext(vec33, vec33.add(vec3), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this));
+				this.stepMoveAndHit(blockHitResult);
+			} else {
+				this.setPos(vec33.add(vec3));
+				this.applyEffectsFromBlocks();
+				if (this.portalProcess != null && this.portalProcess.isInsidePortalThisTick()) {
+					this.handlePortal();
+				}
+			}
+
 			super.tick();
 			this.applyInertia();
 			if (!bl) {
@@ -233,11 +240,11 @@ public abstract class AbstractArrow extends Projectile {
 
 	private void stepMoveAndHit(BlockHitResult blockHitResult) {
 		while (this.isAlive()) {
-			EntityHitResult entityHitResult = this.findHitEntity(this.position(), blockHitResult.getLocation());
-			Vec3 vec3 = ((HitResult)Objects.requireNonNullElse(entityHitResult, blockHitResult)).getLocation();
-			this.setOldPos();
-			this.setPos(vec3);
-			this.applyEffectsFromBlocks();
+			Vec3 vec3 = this.position();
+			EntityHitResult entityHitResult = this.findHitEntity(vec3, blockHitResult.getLocation());
+			Vec3 vec32 = ((HitResult)Objects.requireNonNullElse(entityHitResult, blockHitResult)).getLocation();
+			this.setPos(vec32);
+			this.applyEffectsFromBlocks(vec3, vec32);
 			if (this.portalProcess != null && this.portalProcess.isInsidePortalThisTick()) {
 				this.handlePortal();
 			}
@@ -245,12 +252,13 @@ public abstract class AbstractArrow extends Projectile {
 			if (entityHitResult == null) {
 				if (this.isAlive() && blockHitResult.getType() != HitResult.Type.MISS) {
 					this.hitTargetOrDeflectSelf(blockHitResult);
+					this.hasImpulse = true;
 				}
 				break;
 			} else if (this.isAlive() && !this.noPhysics) {
 				ProjectileDeflection projectileDeflection = this.hitTargetOrDeflectSelf(entityHitResult);
 				this.hasImpulse = true;
-				if (projectileDeflection == ProjectileDeflection.NONE) {
+				if (this.getPierceLevel() > 0 && projectileDeflection == ProjectileDeflection.NONE) {
 					continue;
 				}
 				break;
@@ -392,10 +400,10 @@ public abstract class AbstractArrow extends Projectile {
 				}
 
 				if (!this.level().isClientSide && entity2 instanceof ServerPlayer serverPlayer) {
-					if (this.piercedAndKilledEntities != null && this.shotFromCrossbow()) {
-						CriteriaTriggers.KILLED_BY_CROSSBOW.trigger(serverPlayer, this.piercedAndKilledEntities);
-					} else if (!entity.isAlive() && this.shotFromCrossbow()) {
-						CriteriaTriggers.KILLED_BY_CROSSBOW.trigger(serverPlayer, Arrays.asList(entity));
+					if (this.piercedAndKilledEntities != null) {
+						CriteriaTriggers.KILLED_BY_ARROW.trigger(serverPlayer, this.piercedAndKilledEntities, this.firedFromWeapon);
+					} else if (!entity.isAlive()) {
+						CriteriaTriggers.KILLED_BY_ARROW.trigger(serverPlayer, List.of(entity), this.firedFromWeapon);
 					}
 				}
 			}
@@ -446,6 +454,7 @@ public abstract class AbstractArrow extends Projectile {
 		Vec3 vec32 = new Vec3(Math.signum(vec3.x), Math.signum(vec3.y), Math.signum(vec3.z));
 		Vec3 vec33 = vec32.scale(0.05F);
 		this.setPos(this.position().subtract(vec33));
+		this.setDeltaMovement(Vec3.ZERO);
 		this.playSound(this.getHitGroundSoundEvent(), 1.0F, 1.2F / (this.random.nextFloat() * 0.2F + 0.9F));
 		this.inGround = true;
 		this.shakeTime = 7;
@@ -641,10 +650,6 @@ public abstract class AbstractArrow extends Projectile {
 	public boolean isCritArrow() {
 		byte b = this.entityData.get(ID_FLAGS);
 		return (b & 1) != 0;
-	}
-
-	public boolean shotFromCrossbow() {
-		return this.firedFromWeapon != null && this.firedFromWeapon.is(Items.CROSSBOW);
 	}
 
 	public byte getPierceLevel() {

@@ -1,6 +1,7 @@
 package net.minecraft.world.item.crafting;
 
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
@@ -17,7 +18,7 @@ public class MapCloningRecipe extends CustomRecipe {
 		for (int j = 0; j < craftingInput.size(); j++) {
 			ItemStack itemStack2 = craftingInput.getItem(j);
 			if (!itemStack2.isEmpty()) {
-				if (itemStack2.is(Items.FILLED_MAP)) {
+				if (itemStack2.has(DataComponents.MAP_ID)) {
 					if (!itemStack.isEmpty()) {
 						return false;
 					}
@@ -43,7 +44,7 @@ public class MapCloningRecipe extends CustomRecipe {
 		for (int j = 0; j < craftingInput.size(); j++) {
 			ItemStack itemStack2 = craftingInput.getItem(j);
 			if (!itemStack2.isEmpty()) {
-				if (itemStack2.is(Items.FILLED_MAP)) {
+				if (itemStack2.has(DataComponents.MAP_ID)) {
 					if (!itemStack.isEmpty()) {
 						return ItemStack.EMPTY;
 					}

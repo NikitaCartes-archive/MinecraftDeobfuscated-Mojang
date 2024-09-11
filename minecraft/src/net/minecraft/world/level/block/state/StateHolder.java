@@ -1,14 +1,11 @@
 package net.minecraft.world.level.block.state;
 
-import com.google.common.collect.ArrayTable;
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.Table;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectArrayMap;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -37,7 +34,7 @@ public abstract class StateHolder<O, S> {
 	};
 	protected final O owner;
 	private final Reference2ObjectArrayMap<Property<?>, Comparable<?>> values;
-	private Table<Property<?>, Comparable<?>, S> neighbours;
+	private Map<Property<?>, S[]> neighbours;
 	protected final MapCodec<S> propertiesCodec;
 
 	protected StateHolder(O object, Reference2ObjectArrayMap<Property<?>, Comparable<?>> reference2ObjectArrayMap, MapCodec<S> mapCodec) {
@@ -50,20 +47,9 @@ public abstract class StateHolder<O, S> {
 		return this.setValue(property, findNextInCollection(property.getPossibleValues(), this.getValue(property)));
 	}
 
-	protected static <T> T findNextInCollection(Collection<T> collection, T object) {
-		Iterator<T> iterator = collection.iterator();
-
-		while (iterator.hasNext()) {
-			if (iterator.next().equals(object)) {
-				if (iterator.hasNext()) {
-					return (T)iterator.next();
-				}
-
-				return (T)collection.iterator().next();
-			}
-		}
-
-		return (T)iterator.next();
+	protected static <T> T findNextInCollection(List<T> list, T object) {
+		int i = list.indexOf(object) + 1;
+		return (T)(i == list.size() ? list.getFirst() : list.get(i));
 	}
 
 	public String toString() {
@@ -113,29 +99,26 @@ public abstract class StateHolder<O, S> {
 		Comparable<?> comparable2 = this.values.get(property);
 		if (comparable2 == null) {
 			throw new IllegalArgumentException("Cannot set property " + property + " as it does not exist in " + this.owner);
-		} else if (comparable2.equals(comparable)) {
-			return (S)this;
 		} else {
-			S object = this.neighbours.get(property, comparable);
-			if (object == null) {
-				throw new IllegalArgumentException("Cannot set property " + property + " to " + comparable + " on " + this.owner + ", it is not an allowed value");
-			} else {
-				return object;
-			}
+			return this.setValueInternal(property, comparable, comparable2);
 		}
 	}
 
 	public <T extends Comparable<T>, V extends T> S trySetValue(Property<T> property, V comparable) {
 		Comparable<?> comparable2 = this.values.get(property);
-		if (comparable2 != null && !comparable2.equals(comparable)) {
-			S object = this.neighbours.get(property, comparable);
-			if (object == null) {
+		return (S)(comparable2 == null ? this : this.setValueInternal(property, comparable, comparable2));
+	}
+
+	private <T extends Comparable<T>, V extends T> S setValueInternal(Property<T> property, V comparable, Comparable<?> comparable2) {
+		if (comparable2.equals(comparable)) {
+			return (S)this;
+		} else {
+			int i = property.getInternalIndex((T)comparable);
+			if (i < 0) {
 				throw new IllegalArgumentException("Cannot set property " + property + " to " + comparable + " on " + this.owner + ", it is not an allowed value");
 			} else {
-				return object;
+				return (S)this.neighbours.get(property)[i];
 			}
-		} else {
-			return (S)this;
 		}
 	}
 
@@ -143,19 +126,14 @@ public abstract class StateHolder<O, S> {
 		if (this.neighbours != null) {
 			throw new IllegalStateException();
 		} else {
-			Table<Property<?>, Comparable<?>, S> table = HashBasedTable.create();
+			Map<Property<?>, S[]> map2 = new Reference2ObjectArrayMap<>(this.values.size());
 
 			for (Entry<Property<?>, Comparable<?>> entry : this.values.entrySet()) {
 				Property<?> property = (Property<?>)entry.getKey();
-
-				for (Comparable<?> comparable : property.getPossibleValues()) {
-					if (!comparable.equals(entry.getValue())) {
-						table.put(property, comparable, (S)map.get(this.makeNeighbourValues(property, comparable)));
-					}
-				}
+				map2.put(property, property.getPossibleValues().stream().map(comparable -> map.get(this.makeNeighbourValues(property, comparable))).toArray());
 			}
 
-			this.neighbours = (Table<Property<?>, Comparable<?>, S>)(table.isEmpty() ? table : ArrayTable.create(table));
+			this.neighbours = map2;
 		}
 	}
 

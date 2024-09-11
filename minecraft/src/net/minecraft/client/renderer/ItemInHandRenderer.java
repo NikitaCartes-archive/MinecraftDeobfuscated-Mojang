@@ -406,7 +406,7 @@ public class ItemInHandRenderer {
 				if (bl && !abstractClientPlayer.isInvisible()) {
 					this.renderPlayerArm(poseStack, multiBufferSource, j, i, h, humanoidArm);
 				}
-			} else if (itemStack.is(Items.FILLED_MAP)) {
+			} else if (itemStack.has(DataComponents.MAP_ID)) {
 				if (bl && this.offHandItem.isEmpty()) {
 					this.renderTwoHandedMap(poseStack, multiBufferSource, j, g, i, h);
 				} else {

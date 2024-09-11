@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
@@ -180,10 +181,16 @@ public class WorldOpenFlows {
 			},
 			(closeableResourceManager, reloadableServerResources, layeredRegistryAccess, arg) -> {
 				closeableResourceManager.close();
+				InitialWorldCreationOptions initialWorldCreationOptions = new InitialWorldCreationOptions(WorldCreationUiState.SelectedGameMode.SURVIVAL, Set.of(), null);
 				return Pair.of(
 					arg.levelSettings,
 					new WorldCreationContext(
-						arg.options, new WorldDimensions(arg.existingDimensions), layeredRegistryAccess, reloadableServerResources, arg.levelSettings.getDataConfiguration()
+						arg.options,
+						new WorldDimensions(arg.existingDimensions),
+						layeredRegistryAccess,
+						reloadableServerResources,
+						arg.levelSettings.getDataConfiguration(),
+						initialWorldCreationOptions
 					)
 				);
 			}

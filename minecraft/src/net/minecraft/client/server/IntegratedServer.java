@@ -26,6 +26,7 @@ import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.ModCheck;
 import net.minecraft.util.debugchart.LocalSampleLogger;
+import net.minecraft.util.profiling.Profiler;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.GameType;
@@ -87,7 +88,7 @@ public class IntegratedServer extends MinecraftServer {
 	public void tickServer(BooleanSupplier booleanSupplier) {
 		boolean bl = this.paused;
 		this.paused = Minecraft.getInstance().isPaused();
-		ProfilerFiller profilerFiller = this.getProfiler();
+		ProfilerFiller profilerFiller = Profiler.get();
 		if (!bl && this.paused) {
 			profilerFiller.push("autoSave");
 			LOGGER.info("Saving and pausing game...");
@@ -285,7 +286,7 @@ public class IntegratedServer extends MinecraftServer {
 	@Nullable
 	@Override
 	public GameType getForcedGameType() {
-		return this.isPublished() ? MoreObjects.firstNonNull(this.publishedGameType, this.worldData.getGameType()) : null;
+		return this.isPublished() && !this.isHardcore() ? MoreObjects.firstNonNull(this.publishedGameType, this.worldData.getGameType()) : null;
 	}
 
 	@Override

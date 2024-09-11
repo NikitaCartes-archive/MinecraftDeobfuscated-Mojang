@@ -30,6 +30,7 @@ import net.minecraft.client.gui.screens.multiplayer.SafetyScreen;
 import net.minecraft.client.gui.screens.options.AccessibilityOptionsScreen;
 import net.minecraft.client.gui.screens.options.LanguageSelectScreen;
 import net.minecraft.client.gui.screens.options.OptionsScreen;
+import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
 import net.minecraft.client.gui.screens.worldselection.SelectWorldScreen;
 import net.minecraft.client.renderer.PanoramaRenderer;
 import net.minecraft.client.renderer.texture.TextureManager;
@@ -115,29 +116,30 @@ public class TitleScreen extends Screen {
 		int k = 24;
 		int l = this.height / 4 + 48;
 		if (this.minecraft.isDemo()) {
-			this.createDemoMenuOptions(l, 24);
+			l = this.createDemoMenuOptions(l, 24);
 		} else {
-			this.createNormalMenuOptions(l, 24);
+			l = this.createNormalMenuOptions(l, 24);
 		}
 
+		l = this.createTestWorldButton(l, 24);
 		SpriteIconButton spriteIconButton = this.addRenderableWidget(
 			CommonButtons.language(
 				20, button -> this.minecraft.setScreen(new LanguageSelectScreen(this, this.minecraft.options, this.minecraft.getLanguageManager())), true
 			)
 		);
-		spriteIconButton.setPosition(this.width / 2 - 124, l + 72 + 12);
+		int var10001 = this.width / 2 - 124;
+		l += 36;
+		spriteIconButton.setPosition(var10001, l);
 		this.addRenderableWidget(
 			Button.builder(Component.translatable("menu.options"), button -> this.minecraft.setScreen(new OptionsScreen(this, this.minecraft.options)))
-				.bounds(this.width / 2 - 100, l + 72 + 12, 98, 20)
+				.bounds(this.width / 2 - 100, l, 98, 20)
 				.build()
 		);
-		this.addRenderableWidget(
-			Button.builder(Component.translatable("menu.quit"), button -> this.minecraft.stop()).bounds(this.width / 2 + 2, l + 72 + 12, 98, 20).build()
-		);
+		this.addRenderableWidget(Button.builder(Component.translatable("menu.quit"), button -> this.minecraft.stop()).bounds(this.width / 2 + 2, l, 98, 20).build());
 		SpriteIconButton spriteIconButton2 = this.addRenderableWidget(
 			CommonButtons.accessibility(20, button -> this.minecraft.setScreen(new AccessibilityOptionsScreen(this, this.minecraft.options)), true)
 		);
-		spriteIconButton2.setPosition(this.width / 2 + 104, l + 72 + 12);
+		spriteIconButton2.setPosition(this.width / 2 + 104, l);
 		this.addRenderableWidget(
 			new PlainTextButton(j, this.height - 10, i, 10, COPYRIGHT_TEXT, button -> this.minecraft.setScreen(new CreditsAndAttributionScreen(this)), this.font)
 		);
@@ -150,7 +152,19 @@ public class TitleScreen extends Screen {
 		}
 	}
 
-	private void createNormalMenuOptions(int i, int j) {
+	private int createTestWorldButton(int i, int j) {
+		if (SharedConstants.IS_RUNNING_IN_IDE) {
+			this.addRenderableWidget(
+				Button.builder(Component.literal("Create Test World"), button -> CreateWorldScreen.testWorld(this.minecraft, this))
+					.bounds(this.width / 2 - 100, i += j, 200, 20)
+					.build()
+			);
+		}
+
+		return i;
+	}
+
+	private int createNormalMenuOptions(int i, int j) {
 		this.addRenderableWidget(
 			Button.builder(Component.translatable("menu.singleplayer"), button -> this.minecraft.setScreen(new SelectWorldScreen(this)))
 				.bounds(this.width / 2 - 100, i, 200, 20)
@@ -159,17 +173,19 @@ public class TitleScreen extends Screen {
 		Component component = this.getMultiplayerDisabledReason();
 		boolean bl = component == null;
 		Tooltip tooltip = component != null ? Tooltip.create(component) : null;
+		int var6;
 		this.addRenderableWidget(Button.builder(Component.translatable("menu.multiplayer"), button -> {
 			Screen screen = (Screen)(this.minecraft.options.skipMultiplayerWarning ? new JoinMultiplayerScreen(this) : new SafetyScreen(this));
 			this.minecraft.setScreen(screen);
-		}).bounds(this.width / 2 - 100, i + j * 1, 200, 20).tooltip(tooltip).build()).active = bl;
+		}).bounds(this.width / 2 - 100, var6 = i + j, 200, 20).tooltip(tooltip).build()).active = bl;
 		this.addRenderableWidget(
 				Button.builder(Component.translatable("menu.online"), button -> this.minecraft.setScreen(new RealmsMainScreen(this)))
-					.bounds(this.width / 2 - 100, i + j * 2, 200, 20)
+					.bounds(this.width / 2 - 100, i = var6 + j, 200, 20)
 					.tooltip(tooltip)
 					.build()
 			)
 			.active = bl;
+		return i;
 	}
 
 	@Nullable
@@ -190,7 +206,7 @@ public class TitleScreen extends Screen {
 		}
 	}
 
-	private void createDemoMenuOptions(int i, int j) {
+	private int createDemoMenuOptions(int i, int j) {
 		boolean bl = this.checkDemoWorldPresence();
 		this.addRenderableWidget(
 			Button.builder(
@@ -208,6 +224,7 @@ public class TitleScreen extends Screen {
 				.bounds(this.width / 2 - 100, i, 200, 20)
 				.build()
 		);
+		int var4;
 		this.resetDemoButton = this.addRenderableWidget(
 			Button.builder(
 					Component.translatable("menu.resetdemo"),
@@ -233,10 +250,11 @@ public class TitleScreen extends Screen {
 						}
 					}
 				)
-				.bounds(this.width / 2 - 100, i + j * 1, 200, 20)
+				.bounds(this.width / 2 - 100, var4 = i + j, 200, 20)
 				.build()
 		);
 		this.resetDemoButton.active = bl;
+		return var4;
 	}
 
 	private boolean checkDemoWorldPresence() {

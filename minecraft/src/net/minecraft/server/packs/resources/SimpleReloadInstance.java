@@ -9,7 +9,6 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicInteger;
 import net.minecraft.Util;
 import net.minecraft.util.Unit;
-import net.minecraft.util.profiling.InactiveProfiler;
 
 public class SimpleReloadInstance<S> implements ReloadInstance {
 	private static final int PREPARATION_PROGRESS_WEIGHT = 2;
@@ -33,7 +32,7 @@ public class SimpleReloadInstance<S> implements ReloadInstance {
 			resourceManager,
 			list,
 			(preparationBarrier, resourceManagerx, preparableReloadListener, executor2x, executor3) -> preparableReloadListener.reload(
-					preparationBarrier, resourceManagerx, InactiveProfiler.INSTANCE, InactiveProfiler.INSTANCE, executor, executor3
+					preparationBarrier, resourceManagerx, executor, executor3
 				),
 			completableFuture
 		);

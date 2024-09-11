@@ -33,11 +33,11 @@ public class CapeLayer extends RenderLayer<PlayerRenderState, PlayerModel> {
 		this.equipmentModels = equipmentModelSet;
 	}
 
-	private boolean hasWings(ItemStack itemStack) {
+	private boolean hasLayer(ItemStack itemStack, EquipmentModel.LayerType layerType) {
 		Equippable equippable = itemStack.get(DataComponents.EQUIPPABLE);
 		if (equippable != null && !equippable.model().isEmpty()) {
 			EquipmentModel equipmentModel = this.equipmentModels.get((ResourceLocation)equippable.model().get());
-			return !equipmentModel.getLayers(EquipmentModel.LayerType.WINGS).isEmpty();
+			return !equipmentModel.getLayers(layerType).isEmpty();
 		} else {
 			return false;
 		}
@@ -47,10 +47,17 @@ public class CapeLayer extends RenderLayer<PlayerRenderState, PlayerModel> {
 		if (!playerRenderState.isInvisible && playerRenderState.showCape) {
 			PlayerSkin playerSkin = playerRenderState.skin;
 			if (playerSkin.capeTexture() != null) {
-				if (!this.hasWings(playerRenderState.chestItem)) {
+				if (!this.hasLayer(playerRenderState.chestItem, EquipmentModel.LayerType.WINGS)) {
+					poseStack.pushPose();
+					if (this.hasLayer(playerRenderState.chestItem, EquipmentModel.LayerType.HUMANOID)) {
+						poseStack.translate(0.0F, -0.053125F, 0.06875F);
+					}
+
 					VertexConsumer vertexConsumer = multiBufferSource.getBuffer(RenderType.entitySolid(playerSkin.capeTexture()));
+					this.getParentModel().copyPropertiesTo(this.model);
 					this.model.setupAnim(playerRenderState);
 					this.model.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY);
+					poseStack.popPose();
 				}
 			}
 		}

@@ -36,6 +36,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.animal.Parrot;
 import net.minecraft.world.entity.player.PlayerModelPart;
 import net.minecraft.world.item.CrossbowItem;
@@ -80,7 +81,17 @@ public class PlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer, P
 		return playerRenderState.isCrouching ? vec3.add(0.0, (double)(playerRenderState.scale * -2.0F) / 16.0, 0.0) : vec3;
 	}
 
-	public static HumanoidModel.ArmPose getArmPose(PlayerRenderState playerRenderState, PlayerRenderState.HandState handState, InteractionHand interactionHand) {
+	public static HumanoidModel.ArmPose getArmPose(PlayerRenderState playerRenderState, HumanoidArm humanoidArm) {
+		HumanoidModel.ArmPose armPose = getArmPose(playerRenderState, playerRenderState.mainHandState, InteractionHand.MAIN_HAND);
+		HumanoidModel.ArmPose armPose2 = getArmPose(playerRenderState, playerRenderState.offhandState, InteractionHand.OFF_HAND);
+		if (armPose.isTwoHanded()) {
+			armPose2 = playerRenderState.offhandState.isEmpty ? HumanoidModel.ArmPose.EMPTY : HumanoidModel.ArmPose.ITEM;
+		}
+
+		return playerRenderState.mainArm == humanoidArm ? armPose : armPose2;
+	}
+
+	private static HumanoidModel.ArmPose getArmPose(PlayerRenderState playerRenderState, PlayerRenderState.HandState handState, InteractionHand interactionHand) {
 		if (handState.isEmpty) {
 			return HumanoidModel.ArmPose.EMPTY;
 		} else {
@@ -222,6 +233,7 @@ public class PlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer, P
 		playerRenderState.capeFlap = (float)e * 10.0F;
 		playerRenderState.capeFlap = Mth.clamp(playerRenderState.capeFlap, -6.0F, 32.0F);
 		playerRenderState.capeLean = (float)(d * i + g * j) * 100.0F;
+		playerRenderState.capeLean = playerRenderState.capeLean * (1.0F - playerRenderState.fallFlyingScale());
 		playerRenderState.capeLean = Mth.clamp(playerRenderState.capeLean, 0.0F, 150.0F);
 		playerRenderState.capeLean2 = (float)(d * j - g * i) * 100.0F;
 		playerRenderState.capeLean2 = Mth.clamp(playerRenderState.capeLean2, -20.0F, 20.0F);
@@ -262,7 +274,7 @@ public class PlayerRenderer extends LivingEntityRenderer<AbstractClientPlayer, P
 		float i = playerRenderState.xRot;
 		if (playerRenderState.isFallFlying) {
 			super.setupRotations(playerRenderState, poseStack, f, g);
-			float j = Mth.clamp(playerRenderState.fallFlyingTimeInTicks * playerRenderState.fallFlyingTimeInTicks / 100.0F, 0.0F, 1.0F);
+			float j = playerRenderState.fallFlyingScale();
 			if (!playerRenderState.isAutoSpinAttack) {
 				poseStack.mulPose(Axis.XP.rotationDegrees(j * (-90.0F - i)));
 			}

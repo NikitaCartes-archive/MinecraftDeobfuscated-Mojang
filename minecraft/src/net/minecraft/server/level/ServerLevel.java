@@ -78,6 +78,7 @@ import net.minecraft.util.ProgressListener;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.Unit;
 import net.minecraft.util.datafix.DataFixTypes;
+import net.minecraft.util.profiling.Profiler;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.util.valueproviders.IntProvider;
 import net.minecraft.util.valueproviders.UniformInt;
@@ -191,8 +192,8 @@ public class ServerLevel extends Level implements WorldGenLevel {
 	private final SleepStatus sleepStatus;
 	private int emptyTime;
 	private final PortalForcer portalForcer;
-	private final LevelTicks<Block> blockTicks = new LevelTicks<>(this::isPositionTickingWithEntitiesLoaded, this.getProfilerSupplier());
-	private final LevelTicks<Fluid> fluidTicks = new LevelTicks<>(this::isPositionTickingWithEntitiesLoaded, this.getProfilerSupplier());
+	private final LevelTicks<Block> blockTicks = new LevelTicks<>(this::isPositionTickingWithEntitiesLoaded);
+	private final LevelTicks<Fluid> fluidTicks = new LevelTicks<>(this::isPositionTickingWithEntitiesLoaded);
 	private final PathTypeCache pathTypesByPosCache = new PathTypeCache();
 	final Set<Mob> navigatingMobs = new ObjectOpenHashSet<>();
 	volatile boolean isUpdatingNavigations;
@@ -223,17 +224,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 		boolean bl2,
 		@Nullable RandomSequences randomSequences
 	) {
-		super(
-			serverLevelData,
-			resourceKey,
-			minecraftServer.registryAccess(),
-			levelStem.type(),
-			minecraftServer::getProfiler,
-			false,
-			bl,
-			l,
-			minecraftServer.getMaxChainedNeighborUpdates()
-		);
+		super(serverLevelData, resourceKey, minecraftServer.registryAccess(), levelStem.type(), false, bl, l, minecraftServer.getMaxChainedNeighborUpdates());
 		this.tickTime = bl2;
 		this.server = minecraftServer;
 		this.customSpawners = list;
@@ -328,7 +319,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 	}
 
 	public void tick(BooleanSupplier booleanSupplier) {
-		ProfilerFiller profilerFiller = this.getProfiler();
+		ProfilerFiller profilerFiller = Profiler.get();
 		this.handlingTick = true;
 		TickRateManager tickRateManager = this.tickRateManager();
 		boolean bl = tickRateManager.runsNormally();
@@ -436,9 +427,9 @@ public class ServerLevel extends Level implements WorldGenLevel {
 		if (this.tickTime) {
 			long l = this.levelData.getGameTime() + 1L;
 			this.serverLevelData.setGameTime(l);
-			this.getProfiler().push("scheduledFunctions");
+			Profiler.get().push("scheduledFunctions");
 			this.serverLevelData.getScheduledEvents().tick(this.server, l);
-			this.getProfiler().pop();
+			Profiler.get().pop();
 			if (this.levelData.getGameRules().getBoolean(GameRules.RULE_DAYLIGHT)) {
 				this.setDayTime(this.levelData.getDayTime() + 1L);
 			}
@@ -466,7 +457,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 		boolean bl = this.isRaining();
 		int j = chunkPos.getMinBlockX();
 		int k = chunkPos.getMinBlockZ();
-		ProfilerFiller profilerFiller = this.getProfiler();
+		ProfilerFiller profilerFiller = Profiler.get();
 		profilerFiller.push("thunder");
 		if (bl && this.isThundering() && this.random.nextInt(100000) == 0) {
 			BlockPos blockPos = this.findLightningTargetAround(this.getBlockRandomPos(j, 0, k, 15));
@@ -750,12 +741,12 @@ public class ServerLevel extends Level implements WorldGenLevel {
 
 	public void tickNonPassenger(Entity entity) {
 		entity.setOldPosAndRot();
-		ProfilerFiller profilerFiller = this.getProfiler();
+		ProfilerFiller profilerFiller = Profiler.get();
 		entity.tickCount++;
-		this.getProfiler().push((Supplier<String>)(() -> BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).toString()));
+		profilerFiller.push((Supplier<String>)(() -> BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).toString()));
 		profilerFiller.incrementCounter("tickNonPassenger");
 		entity.tick();
-		this.getProfiler().pop();
+		profilerFiller.pop();
 
 		for (Entity entity2 : entity.getPassengers()) {
 			this.tickPassenger(entity, entity2);
@@ -768,7 +759,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 		} else if (entity2 instanceof Player || this.entityTickList.contains(entity2)) {
 			entity2.setOldPosAndRot();
 			entity2.tickCount++;
-			ProfilerFiller profilerFiller = this.getProfiler();
+			ProfilerFiller profilerFiller = Profiler.get();
 			profilerFiller.push((Supplier<String>)(() -> BuiltInRegistries.ENTITY_TYPE.getKey(entity2.getType()).toString()));
 			profilerFiller.incrementCounter("tickPassenger");
 			entity2.rideTick();

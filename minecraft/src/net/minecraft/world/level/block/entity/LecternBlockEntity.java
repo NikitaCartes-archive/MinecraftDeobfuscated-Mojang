@@ -19,7 +19,6 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.inventory.LecternMenu;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.WrittenBookItem;
 import net.minecraft.world.item.component.WritableBookContent;
 import net.minecraft.world.item.component.WrittenBookContent;
@@ -134,7 +133,7 @@ public class LecternBlockEntity extends BlockEntity implements Clearable, MenuPr
 	}
 
 	public boolean hasBook() {
-		return this.book.is(Items.WRITABLE_BOOK) || this.book.is(Items.WRITTEN_BOOK);
+		return this.book.has(DataComponents.WRITABLE_BOOK_CONTENT) || this.book.has(DataComponents.WRITTEN_BOOK_CONTENT);
 	}
 
 	public void setBook(ItemStack itemStack) {
@@ -173,14 +172,14 @@ public class LecternBlockEntity extends BlockEntity implements Clearable, MenuPr
 	}
 
 	private ItemStack resolveBook(ItemStack itemStack, @Nullable Player player) {
-		if (this.level instanceof ServerLevel && itemStack.is(Items.WRITTEN_BOOK)) {
-			WrittenBookItem.resolveBookComponents(itemStack, this.createCommandSourceStack(player), player);
+		if (this.level instanceof ServerLevel serverLevel) {
+			WrittenBookItem.resolveBookComponents(itemStack, this.createCommandSourceStack(player, serverLevel), player);
 		}
 
 		return itemStack;
 	}
 
-	private CommandSourceStack createCommandSourceStack(@Nullable Player player) {
+	private CommandSourceStack createCommandSourceStack(@Nullable Player player, ServerLevel serverLevel) {
 		String string;
 		Component component;
 		if (player == null) {
@@ -192,7 +191,7 @@ public class LecternBlockEntity extends BlockEntity implements Clearable, MenuPr
 		}
 
 		Vec3 vec3 = Vec3.atCenterOf(this.worldPosition);
-		return new CommandSourceStack(CommandSource.NULL, vec3, Vec2.ZERO, (ServerLevel)this.level, 2, string, component, this.level.getServer(), player);
+		return new CommandSourceStack(CommandSource.NULL, vec3, Vec2.ZERO, serverLevel, 2, string, component, serverLevel.getServer(), player);
 	}
 
 	@Override

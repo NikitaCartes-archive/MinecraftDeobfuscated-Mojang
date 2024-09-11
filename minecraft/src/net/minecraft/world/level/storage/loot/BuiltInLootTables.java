@@ -98,8 +98,12 @@ public class BuiltInLootTables {
 	public static final ResourceKey<LootTable> SHEPHERD_GIFT = register("gameplay/hero_of_the_village/shepherd_gift");
 	public static final ResourceKey<LootTable> TOOLSMITH_GIFT = register("gameplay/hero_of_the_village/toolsmith_gift");
 	public static final ResourceKey<LootTable> WEAPONSMITH_GIFT = register("gameplay/hero_of_the_village/weaponsmith_gift");
+	public static final ResourceKey<LootTable> UNEMPLOYED_GIFT = register("gameplay/hero_of_the_village/unemployed_gift");
+	public static final ResourceKey<LootTable> BABY_VILLAGER_GIFT = register("gameplay/hero_of_the_village/baby_gift");
 	public static final ResourceKey<LootTable> SNIFFER_DIGGING = register("gameplay/sniffer_digging");
 	public static final ResourceKey<LootTable> PANDA_SNEEZE = register("gameplay/panda_sneeze");
+	public static final ResourceKey<LootTable> CHICKEN_LAY = register("gameplay/chicken_lay");
+	public static final ResourceKey<LootTable> ARMADILLO_SHED = register("gameplay/armadillo_shed");
 	public static final ResourceKey<LootTable> PIGLIN_BARTERING = register("gameplay/piglin_bartering");
 	public static final ResourceKey<LootTable> SPAWNER_TRIAL_CHAMBER_KEY = register("spawners/trial_chamber/key");
 	public static final ResourceKey<LootTable> SPAWNER_TRIAL_CHAMBER_CONSUMABLES = register("spawners/trial_chamber/consumables");

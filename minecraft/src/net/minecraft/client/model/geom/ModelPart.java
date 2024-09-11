@@ -11,6 +11,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
+import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
@@ -126,9 +127,9 @@ public final class ModelPart {
 	}
 
 	public void rotateBy(Quaternionf quaternionf) {
-		Quaternionf quaternionf2 = new Quaternionf().rotationZYX(this.zRot, this.yRot, this.xRot);
-		Quaternionf quaternionf3 = quaternionf2.mul(quaternionf);
-		Vector3f vector3f = quaternionf3.getEulerAnglesXYZ(new Vector3f());
+		Matrix3f matrix3f = new Matrix3f().rotationZYX(this.zRot, this.yRot, this.xRot);
+		Matrix3f matrix3f2 = matrix3f.rotate(quaternionf);
+		Vector3f vector3f = matrix3f2.getEulerAnglesZYX(new Vector3f());
 		this.setRotation(vector3f.x, vector3f.y, vector3f.z);
 	}
 

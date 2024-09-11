@@ -5,6 +5,7 @@ import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
@@ -129,7 +130,7 @@ public class BrewingStandMenu extends AbstractContainerMenu {
 		}
 
 		public static boolean mayPlaceItem(ItemStack itemStack) {
-			return itemStack.is(Items.BLAZE_POWDER);
+			return itemStack.is(ItemTags.BREWING_FUEL);
 		}
 	}
 

@@ -13,7 +13,6 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.Packet;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BiomeTags;
@@ -35,7 +34,7 @@ import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.saveddata.maps.MapId;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 
-public class MapItem extends ComplexItem {
+public class MapItem extends Item {
 	public static final int IMAGE_WIDTH = 128;
 	public static final int IMAGE_HEIGHT = 128;
 
@@ -281,14 +280,6 @@ public class MapItem extends ComplexItem {
 				}
 			}
 		}
-	}
-
-	@Nullable
-	@Override
-	public Packet<?> getUpdatePacket(ItemStack itemStack, Level level, Player player) {
-		MapId mapId = itemStack.get(DataComponents.MAP_ID);
-		MapItemSavedData mapItemSavedData = getSavedData(mapId, level);
-		return mapItemSavedData != null ? mapItemSavedData.getUpdatePacket(mapId, player) : null;
 	}
 
 	@Override

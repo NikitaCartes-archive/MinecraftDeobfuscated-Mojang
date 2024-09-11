@@ -18,13 +18,13 @@ public class TooltipRenderUtil {
 	public static final int PADDING_RIGHT = 3;
 	public static final int PADDING_TOP = 3;
 	public static final int PADDING_BOTTOM = 3;
-	private static final int MARGIN = 8;
+	private static final int MARGIN = 9;
 
 	public static void renderTooltipBackground(GuiGraphics guiGraphics, int i, int j, int k, int l, int m, @Nullable ResourceLocation resourceLocation) {
-		int n = i - 3 - 8;
-		int o = j - 3 - 8;
-		int p = k + 3 + 3 + 16;
-		int q = l + 3 + 3 + 16;
+		int n = i - 3 - 9;
+		int o = j - 3 - 9;
+		int p = k + 3 + 3 + 18;
+		int q = l + 3 + 3 + 18;
 		guiGraphics.pose().pushPose();
 		guiGraphics.pose().translate(0.0F, 0.0F, (float)m);
 		guiGraphics.blitSprite(RenderType::guiTextured, getBackgroundSprite(resourceLocation), n, o, p, q);

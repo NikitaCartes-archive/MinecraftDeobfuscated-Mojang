@@ -40,6 +40,9 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceProvider;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.profiling.Profiler;
+import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.util.profiling.Zone;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
@@ -230,13 +233,13 @@ public class GameRenderer implements AutoCloseable {
 		Entity entity = this.minecraft.getCameraEntity();
 		if (entity != null) {
 			if (this.minecraft.level != null && this.minecraft.player != null) {
-				this.minecraft.getProfiler().push("pick");
+				Profiler.get().push("pick");
 				double d = this.minecraft.player.blockInteractionRange();
 				double e = this.minecraft.player.entityInteractionRange();
 				HitResult hitResult = this.pick(entity, d, e, f);
 				this.minecraft.hitResult = hitResult;
 				this.minecraft.crosshairPickEntity = hitResult instanceof EntityHitResult entityHitResult ? entityHitResult.getEntity() : null;
-				this.minecraft.getProfiler().pop();
+				Profiler.get().pop();
 			}
 		}
 	}
@@ -429,6 +432,7 @@ public class GameRenderer implements AutoCloseable {
 		}
 
 		if (!this.minecraft.noRender) {
+			ProfilerFiller profilerFiller = Profiler.get();
 			boolean bl2 = this.minecraft.isGameLoadFinished();
 			int i = (int)(
 				this.minecraft.mouseHandler.xpos() * (double)this.minecraft.getWindow().getGuiScaledWidth() / (double)this.minecraft.getWindow().getScreenWidth()
@@ -438,7 +442,7 @@ public class GameRenderer implements AutoCloseable {
 			);
 			RenderSystem.viewport(0, 0, this.minecraft.getWindow().getWidth(), this.minecraft.getWindow().getHeight());
 			if (bl2 && bl && this.minecraft.level != null) {
-				this.minecraft.getProfiler().push("level");
+				profilerFiller.push("level");
 				this.renderLevel(deltaTracker);
 				this.tryTakeScreenshotIfNeeded();
 				this.minecraft.levelRenderer.doEntityOutline();
@@ -468,7 +472,7 @@ public class GameRenderer implements AutoCloseable {
 			Lighting.setupFor3DItems();
 			GuiGraphics guiGraphics = new GuiGraphics(this.minecraft, this.renderBuffers.bufferSource());
 			if (bl2 && bl && this.minecraft.level != null) {
-				this.minecraft.getProfiler().popPush("gui");
+				profilerFiller.popPush("gui");
 				if (!this.minecraft.options.hideGui) {
 					this.renderItemActivationAnimation(guiGraphics, deltaTracker.getGameTimeDeltaPartialTick(false));
 				}
@@ -476,14 +480,14 @@ public class GameRenderer implements AutoCloseable {
 				this.minecraft.gui.render(guiGraphics, deltaTracker);
 				guiGraphics.flush();
 				RenderSystem.clear(256);
-				this.minecraft.getProfiler().pop();
+				profilerFiller.pop();
 			}
 
 			if (this.minecraft.getOverlay() != null) {
 				try {
 					this.minecraft.getOverlay().render(guiGraphics, i, j, deltaTracker.getGameTimeDeltaTicks());
-				} catch (Throwable var15) {
-					CrashReport crashReport = CrashReport.forThrowable(var15, "Rendering overlay");
+				} catch (Throwable var17) {
+					CrashReport crashReport = CrashReport.forThrowable(var17, "Rendering overlay");
 					CrashReportCategory crashReportCategory = crashReport.addCategory("Overlay render details");
 					crashReportCategory.setDetail("Overlay name", (CrashReportDetail<String>)(() -> this.minecraft.getOverlay().getClass().getCanonicalName()));
 					throw new ReportedException(crashReport);
@@ -491,8 +495,8 @@ public class GameRenderer implements AutoCloseable {
 			} else if (bl2 && this.minecraft.screen != null) {
 				try {
 					this.minecraft.screen.renderWithTooltip(guiGraphics, i, j, deltaTracker.getGameTimeDeltaTicks());
-				} catch (Throwable var14) {
-					CrashReport crashReport = CrashReport.forThrowable(var14, "Rendering screen");
+				} catch (Throwable var16) {
+					CrashReport crashReport = CrashReport.forThrowable(var16, "Rendering screen");
 					CrashReportCategory crashReportCategory = crashReport.addCategory("Screen render details");
 					crashReportCategory.setDetail("Screen name", (CrashReportDetail<String>)(() -> this.minecraft.screen.getClass().getCanonicalName()));
 					crashReportCategory.setDetail(
@@ -520,8 +524,8 @@ public class GameRenderer implements AutoCloseable {
 					if (this.minecraft.screen != null) {
 						this.minecraft.screen.handleDelayedNarration();
 					}
-				} catch (Throwable var13) {
-					CrashReport crashReport = CrashReport.forThrowable(var13, "Narrating screen");
+				} catch (Throwable var15) {
+					CrashReport crashReport = CrashReport.forThrowable(var15, "Narrating screen");
 					CrashReportCategory crashReportCategory = crashReport.addCategory("Screen details");
 					crashReportCategory.setDetail("Screen name", (CrashReportDetail<String>)(() -> this.minecraft.screen.getClass().getCanonicalName()));
 					throw new ReportedException(crashReport);
@@ -533,9 +537,9 @@ public class GameRenderer implements AutoCloseable {
 			}
 
 			if (bl2) {
-				this.minecraft.getProfiler().push("toasts");
-				this.minecraft.getToastManager().render(guiGraphics);
-				this.minecraft.getProfiler().pop();
+				try (Zone zone = profilerFiller.zone("toasts")) {
+					this.minecraft.getToastManager().render(guiGraphics);
+				}
 			}
 
 			guiGraphics.flush();
@@ -625,9 +629,10 @@ public class GameRenderer implements AutoCloseable {
 		}
 
 		this.pick(f);
-		this.minecraft.getProfiler().push("center");
+		ProfilerFiller profilerFiller = Profiler.get();
+		profilerFiller.push("center");
 		boolean bl = this.shouldRenderBlockOutline();
-		this.minecraft.getProfiler().popPush("camera");
+		profilerFiller.popPush("camera");
 		Camera camera = this.mainCamera;
 		Entity entity = (Entity)(this.minecraft.getCameraEntity() == null ? this.minecraft.player : this.minecraft.getCameraEntity());
 		float g = this.minecraft.level.tickRateManager().isEntityFrozen(entity) ? 1.0F : f;
@@ -663,13 +668,13 @@ public class GameRenderer implements AutoCloseable {
 		this.minecraft.levelRenderer.prepareCullFrustum(camera.getPosition(), matrix4f3, matrix4f2);
 		this.minecraft.getMainRenderTarget().bindWrite(true);
 		this.minecraft.levelRenderer.renderLevel(this.resourcePool, deltaTracker, bl, camera, this, this.lightTexture, matrix4f3, matrix4f);
-		this.minecraft.getProfiler().popPush("hand");
+		profilerFiller.popPush("hand");
 		if (this.renderHand) {
 			RenderSystem.clear(256);
 			this.renderItemInHand(camera, f, matrix4f3);
 		}
 
-		this.minecraft.getProfiler().pop();
+		profilerFiller.pop();
 	}
 
 	public void resetData() {

@@ -1,5 +1,6 @@
 package com.mojang.blaze3d.platform;
 
+import com.mojang.blaze3d.TracyFrameCapture;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.logging.LogUtils;
 import java.io.IOException;
@@ -288,11 +289,11 @@ public final class Window implements AutoCloseable {
 		this.iconified = bl;
 	}
 
-	public void updateDisplay() {
-		RenderSystem.flipFrame(this.window);
+	public void updateDisplay(@Nullable TracyFrameCapture tracyFrameCapture) {
+		RenderSystem.flipFrame(this.window, tracyFrameCapture);
 		if (this.fullscreen != this.actuallyFullscreen) {
 			this.actuallyFullscreen = this.fullscreen;
-			this.updateFullscreen(this.vsync);
+			this.updateFullscreen(this.vsync, tracyFrameCapture);
 		}
 	}
 
@@ -365,16 +366,16 @@ public final class Window implements AutoCloseable {
 		this.setMode();
 	}
 
-	private void updateFullscreen(boolean bl) {
+	private void updateFullscreen(boolean bl, @Nullable TracyFrameCapture tracyFrameCapture) {
 		RenderSystem.assertOnRenderThread();
 
 		try {
 			this.setMode();
 			this.eventHandler.resizeDisplay();
 			this.updateVsync(bl);
-			this.updateDisplay();
-		} catch (Exception var3) {
-			LOGGER.error("Couldn't toggle fullscreen", (Throwable)var3);
+			this.updateDisplay(tracyFrameCapture);
+		} catch (Exception var4) {
+			LOGGER.error("Couldn't toggle fullscreen", (Throwable)var4);
 		}
 	}
 

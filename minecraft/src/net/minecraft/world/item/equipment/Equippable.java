@@ -24,7 +24,13 @@ import net.minecraft.world.item.enchantment.EnchantmentEffectComponents;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 
 public record Equippable(
-	EquipmentSlot slot, Holder<SoundEvent> equipSound, Optional<ResourceLocation> model, Optional<HolderSet<EntityType<?>>> allowedEntities, boolean dispensable
+	EquipmentSlot slot,
+	Holder<SoundEvent> equipSound,
+	Optional<ResourceLocation> model,
+	Optional<HolderSet<EntityType<?>>> allowedEntities,
+	boolean dispensable,
+	boolean swappable,
+	boolean damageOnHurt
 ) {
 	public static final Codec<Equippable> CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
@@ -32,7 +38,9 @@ public record Equippable(
 					SoundEvent.CODEC.optionalFieldOf("equip_sound", SoundEvents.ARMOR_EQUIP_GENERIC).forGetter(Equippable::equipSound),
 					ResourceLocation.CODEC.optionalFieldOf("model").forGetter(Equippable::model),
 					RegistryCodecs.homogeneousList(Registries.ENTITY_TYPE).optionalFieldOf("allowed_entities").forGetter(Equippable::allowedEntities),
-					Codec.BOOL.optionalFieldOf("dispensable", Boolean.valueOf(true)).forGetter(Equippable::dispensable)
+					Codec.BOOL.optionalFieldOf("dispensable", Boolean.valueOf(true)).forGetter(Equippable::dispensable),
+					Codec.BOOL.optionalFieldOf("swappable", Boolean.valueOf(true)).forGetter(Equippable::swappable),
+					Codec.BOOL.optionalFieldOf("damage_on_hurt", Boolean.valueOf(true)).forGetter(Equippable::damageOnHurt)
 				)
 				.apply(instance, Equippable::new)
 	);
@@ -47,17 +55,23 @@ public record Equippable(
 		Equippable::allowedEntities,
 		ByteBufCodecs.BOOL,
 		Equippable::dispensable,
+		ByteBufCodecs.BOOL,
+		Equippable::swappable,
+		ByteBufCodecs.BOOL,
+		Equippable::damageOnHurt,
 		Equippable::new
 	);
 
 	public static Equippable llamaSwag(DyeColor dyeColor) {
-		return new Equippable(
-			EquipmentSlot.BODY,
-			SoundEvents.LLAMA_SWAG,
-			Optional.of((ResourceLocation)EquipmentModels.CARPETS.get(dyeColor)),
-			Optional.of(HolderSet.direct(EntityType::builtInRegistryHolder, EntityType.LLAMA, EntityType.TRADER_LLAMA)),
-			true
-		);
+		return builder(EquipmentSlot.BODY)
+			.setEquipSound(SoundEvents.LLAMA_SWAG)
+			.setModel((ResourceLocation)EquipmentModels.CARPETS.get(dyeColor))
+			.setAllowedEntities(EntityType.LLAMA, EntityType.TRADER_LLAMA)
+			.build();
+	}
+
+	public static Equippable.Builder builder(EquipmentSlot equipmentSlot) {
+		return new Equippable.Builder(equipmentSlot);
 	}
 
 	public InteractionResult swapWithEquipmentSlot(ItemStack itemStack, Player player) {
@@ -94,5 +108,57 @@ public record Equippable(
 
 	public boolean canBeEquippedBy(EntityType<?> entityType) {
 		return this.allowedEntities.isEmpty() || ((HolderSet)this.allowedEntities.get()).contains(entityType.builtInRegistryHolder());
+	}
+
+	public static class Builder {
+		private final EquipmentSlot slot;
+		private Holder<SoundEvent> equipSound = SoundEvents.ARMOR_EQUIP_GENERIC;
+		private Optional<ResourceLocation> model = Optional.empty();
+		private Optional<HolderSet<EntityType<?>>> allowedEntities = Optional.empty();
+		private boolean dispensable = true;
+		private boolean swappable = true;
+		private boolean damageOnHurt = true;
+
+		Builder(EquipmentSlot equipmentSlot) {
+			this.slot = equipmentSlot;
+		}
+
+		public Equippable.Builder setEquipSound(Holder<SoundEvent> holder) {
+			this.equipSound = holder;
+			return this;
+		}
+
+		public Equippable.Builder setModel(ResourceLocation resourceLocation) {
+			this.model = Optional.of(resourceLocation);
+			return this;
+		}
+
+		public Equippable.Builder setAllowedEntities(EntityType<?>... entityTypes) {
+			return this.setAllowedEntities(HolderSet.direct(EntityType::builtInRegistryHolder, entityTypes));
+		}
+
+		public Equippable.Builder setAllowedEntities(HolderSet<EntityType<?>> holderSet) {
+			this.allowedEntities = Optional.of(holderSet);
+			return this;
+		}
+
+		public Equippable.Builder setDispensable(boolean bl) {
+			this.dispensable = bl;
+			return this;
+		}
+
+		public Equippable.Builder setSwappable(boolean bl) {
+			this.swappable = bl;
+			return this;
+		}
+
+		public Equippable.Builder setDamageOnHurt(boolean bl) {
+			this.damageOnHurt = bl;
+			return this;
+		}
+
+		public Equippable build() {
+			return new Equippable(this.slot, this.equipSound, this.model, this.allowedEntities, this.dispensable, this.swappable, this.damageOnHurt);
+		}
 	}
 }

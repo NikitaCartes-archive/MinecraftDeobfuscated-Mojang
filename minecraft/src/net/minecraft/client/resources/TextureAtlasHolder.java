@@ -13,7 +13,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.metadata.MetadataSectionSerializer;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.util.profiling.Profiler;
+import net.minecraft.util.profiling.Zone;
 
 @Environment(EnvType.CLIENT)
 public abstract class TextureAtlasHolder implements PreparableReloadListener, AutoCloseable {
@@ -40,26 +41,19 @@ public abstract class TextureAtlasHolder implements PreparableReloadListener, Au
 
 	@Override
 	public final CompletableFuture<Void> reload(
-		PreparableReloadListener.PreparationBarrier preparationBarrier,
-		ResourceManager resourceManager,
-		ProfilerFiller profilerFiller,
-		ProfilerFiller profilerFiller2,
-		Executor executor,
-		Executor executor2
+		PreparableReloadListener.PreparationBarrier preparationBarrier, ResourceManager resourceManager, Executor executor, Executor executor2
 	) {
 		return SpriteLoader.create(this.textureAtlas)
 			.loadAndStitch(resourceManager, this.atlasInfoLocation, 0, executor, this.metadataSections)
 			.thenCompose(SpriteLoader.Preparations::waitForUpload)
 			.thenCompose(preparationBarrier::wait)
-			.thenAcceptAsync(preparations -> this.apply(preparations, profilerFiller2), executor2);
+			.thenAcceptAsync(this::apply, executor2);
 	}
 
-	private void apply(SpriteLoader.Preparations preparations, ProfilerFiller profilerFiller) {
-		profilerFiller.startTick();
-		profilerFiller.push("upload");
-		this.textureAtlas.upload(preparations);
-		profilerFiller.pop();
-		profilerFiller.endTick();
+	private void apply(SpriteLoader.Preparations preparations) {
+		try (Zone zone = Profiler.get().zone("upload")) {
+			this.textureAtlas.upload(preparations);
+		}
 	}
 
 	public void close() {

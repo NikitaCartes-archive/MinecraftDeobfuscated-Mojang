@@ -1,14 +1,34 @@
 package net.minecraft.world.level;
 
+import com.mojang.serialization.Codec;
+import io.netty.buffer.ByteBuf;
 import java.util.Spliterators.AbstractSpliterator;
 import java.util.function.Consumer;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import javax.annotation.Nullable;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 
 public class ChunkPos {
+	public static final Codec<ChunkPos> CODEC = Codec.INT_STREAM
+		.<ChunkPos>comapFlatMap(
+			intStream -> Util.fixedSize(intStream, 2).map(is -> new ChunkPos(is[0], is[1])), chunkPos -> IntStream.of(new int[]{chunkPos.x, chunkPos.z})
+		)
+		.stable();
+	public static final StreamCodec<ByteBuf, ChunkPos> STREAM_CODEC = new StreamCodec<ByteBuf, ChunkPos>() {
+		public ChunkPos decode(ByteBuf byteBuf) {
+			return FriendlyByteBuf.readChunkPos(byteBuf);
+		}
+
+		public void encode(ByteBuf byteBuf, ChunkPos chunkPos) {
+			FriendlyByteBuf.writeChunkPos(byteBuf, chunkPos);
+		}
+	};
 	private static final int SAFETY_MARGIN = 1056;
 	public static final long INVALID_CHUNK_POS = asLong(1875066, 1875066);
 	public static final ChunkPos ZERO = new ChunkPos(0, 0);

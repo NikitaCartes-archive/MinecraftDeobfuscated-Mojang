@@ -54,55 +54,56 @@ public class BrushableBlockEntity extends BlockEntity {
 		super(BlockEntityType.BRUSHABLE_BLOCK, blockPos, blockState);
 	}
 
-	public boolean brush(long l, Player player, Direction direction) {
+	public boolean brush(long l, ServerLevel serverLevel, Player player, Direction direction, ItemStack itemStack) {
 		if (this.hitDirection == null) {
 			this.hitDirection = direction;
 		}
 
 		this.brushCountResetsAtTick = l + 40L;
-		if (l >= this.coolDownEndsAtTick && this.level instanceof ServerLevel) {
+		if (l < this.coolDownEndsAtTick) {
+			return false;
+		} else {
 			this.coolDownEndsAtTick = l + 10L;
-			this.unpackLootTable(player);
+			this.unpackLootTable(serverLevel, player, itemStack);
 			int i = this.getCompletionState();
 			if (++this.brushCount >= 10) {
-				this.brushingCompleted(player);
+				this.brushingCompleted(serverLevel, player, itemStack);
 				return true;
 			} else {
-				this.level.scheduleTick(this.getBlockPos(), this.getBlockState().getBlock(), 2);
+				serverLevel.scheduleTick(this.getBlockPos(), this.getBlockState().getBlock(), 2);
 				int j = this.getCompletionState();
 				if (i != j) {
 					BlockState blockState = this.getBlockState();
 					BlockState blockState2 = blockState.setValue(BlockStateProperties.DUSTED, Integer.valueOf(j));
-					this.level.setBlock(this.getBlockPos(), blockState2, 3);
+					serverLevel.setBlock(this.getBlockPos(), blockState2, 3);
 				}
 
 				return false;
 			}
-		} else {
-			return false;
 		}
 	}
 
-	public void unpackLootTable(Player player) {
-		if (this.lootTable != null && this.level != null && !this.level.isClientSide() && this.level.getServer() != null) {
-			LootTable lootTable = this.level.getServer().reloadableRegistries().getLootTable(this.lootTable);
+	private void unpackLootTable(ServerLevel serverLevel, Player player, ItemStack itemStack) {
+		if (this.lootTable != null) {
+			LootTable lootTable = serverLevel.getServer().reloadableRegistries().getLootTable(this.lootTable);
 			if (player instanceof ServerPlayer serverPlayer) {
 				CriteriaTriggers.GENERATE_LOOT.trigger(serverPlayer, this.lootTable);
 			}
 
-			LootParams lootParams = new LootParams.Builder((ServerLevel)this.level)
+			LootParams lootParams = new LootParams.Builder(serverLevel)
 				.withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(this.worldPosition))
 				.withLuck(player.getLuck())
 				.withParameter(LootContextParams.THIS_ENTITY, player)
-				.create(LootContextParamSets.CHEST);
+				.withParameter(LootContextParams.TOOL, itemStack)
+				.create(LootContextParamSets.ARCHAEOLOGY);
 			ObjectArrayList<ItemStack> objectArrayList = lootTable.getRandomItems(lootParams, this.lootTableSeed);
 
 			this.item = switch (objectArrayList.size()) {
 				case 0 -> ItemStack.EMPTY;
-				case 1 -> (ItemStack)objectArrayList.get(0);
+				case 1 -> (ItemStack)objectArrayList.getFirst();
 				default -> {
 					LOGGER.warn("Expected max 1 loot from loot table {}, but got {}", this.lootTable.location(), objectArrayList.size());
-					yield objectArrayList.get(0);
+					yield (ItemStack)objectArrayList.getFirst();
 				}
 			};
 			this.lootTable = null;
@@ -110,63 +111,57 @@ public class BrushableBlockEntity extends BlockEntity {
 		}
 	}
 
-	private void brushingCompleted(Player player) {
-		if (this.level != null && this.level.getServer() != null) {
-			this.dropContent(player);
-			BlockState blockState = this.getBlockState();
-			this.level.levelEvent(3008, this.getBlockPos(), Block.getId(blockState));
-			Block block2;
-			if (this.getBlockState().getBlock() instanceof BrushableBlock brushableBlock) {
-				block2 = brushableBlock.getTurnsInto();
-			} else {
-				block2 = Blocks.AIR;
-			}
+	private void brushingCompleted(ServerLevel serverLevel, Player player, ItemStack itemStack) {
+		this.dropContent(serverLevel, player, itemStack);
+		BlockState blockState = this.getBlockState();
+		serverLevel.levelEvent(3008, this.getBlockPos(), Block.getId(blockState));
+		Block block2;
+		if (this.getBlockState().getBlock() instanceof BrushableBlock brushableBlock) {
+			block2 = brushableBlock.getTurnsInto();
+		} else {
+			block2 = Blocks.AIR;
+		}
 
-			this.level.setBlock(this.worldPosition, block2.defaultBlockState(), 3);
+		serverLevel.setBlock(this.worldPosition, block2.defaultBlockState(), 3);
+	}
+
+	private void dropContent(ServerLevel serverLevel, Player player, ItemStack itemStack) {
+		this.unpackLootTable(serverLevel, player, itemStack);
+		if (!this.item.isEmpty()) {
+			double d = (double)EntityType.ITEM.getWidth();
+			double e = 1.0 - d;
+			double f = d / 2.0;
+			Direction direction = (Direction)Objects.requireNonNullElse(this.hitDirection, Direction.UP);
+			BlockPos blockPos = this.worldPosition.relative(direction, 1);
+			double g = (double)blockPos.getX() + 0.5 * e + f;
+			double h = (double)blockPos.getY() + 0.5 + (double)(EntityType.ITEM.getHeight() / 2.0F);
+			double i = (double)blockPos.getZ() + 0.5 * e + f;
+			ItemEntity itemEntity = new ItemEntity(serverLevel, g, h, i, this.item.split(serverLevel.random.nextInt(21) + 10));
+			itemEntity.setDeltaMovement(Vec3.ZERO);
+			serverLevel.addFreshEntity(itemEntity);
+			this.item = ItemStack.EMPTY;
 		}
 	}
 
-	private void dropContent(Player player) {
-		if (this.level != null && this.level.getServer() != null) {
-			this.unpackLootTable(player);
-			if (!this.item.isEmpty()) {
-				double d = (double)EntityType.ITEM.getWidth();
-				double e = 1.0 - d;
-				double f = d / 2.0;
-				Direction direction = (Direction)Objects.requireNonNullElse(this.hitDirection, Direction.UP);
-				BlockPos blockPos = this.worldPosition.relative(direction, 1);
-				double g = (double)blockPos.getX() + 0.5 * e + f;
-				double h = (double)blockPos.getY() + 0.5 + (double)(EntityType.ITEM.getHeight() / 2.0F);
-				double i = (double)blockPos.getZ() + 0.5 * e + f;
-				ItemEntity itemEntity = new ItemEntity(this.level, g, h, i, this.item.split(this.level.random.nextInt(21) + 10));
-				itemEntity.setDeltaMovement(Vec3.ZERO);
-				this.level.addFreshEntity(itemEntity);
-				this.item = ItemStack.EMPTY;
+	public void checkReset(ServerLevel serverLevel) {
+		if (this.brushCount != 0 && serverLevel.getGameTime() >= this.brushCountResetsAtTick) {
+			int i = this.getCompletionState();
+			this.brushCount = Math.max(0, this.brushCount - 2);
+			int j = this.getCompletionState();
+			if (i != j) {
+				serverLevel.setBlock(this.getBlockPos(), this.getBlockState().setValue(BlockStateProperties.DUSTED, Integer.valueOf(j)), 3);
 			}
+
+			int k = 4;
+			this.brushCountResetsAtTick = serverLevel.getGameTime() + 4L;
 		}
-	}
 
-	public void checkReset() {
-		if (this.level != null) {
-			if (this.brushCount != 0 && this.level.getGameTime() >= this.brushCountResetsAtTick) {
-				int i = this.getCompletionState();
-				this.brushCount = Math.max(0, this.brushCount - 2);
-				int j = this.getCompletionState();
-				if (i != j) {
-					this.level.setBlock(this.getBlockPos(), this.getBlockState().setValue(BlockStateProperties.DUSTED, Integer.valueOf(j)), 3);
-				}
-
-				int k = 4;
-				this.brushCountResetsAtTick = this.level.getGameTime() + 4L;
-			}
-
-			if (this.brushCount == 0) {
-				this.hitDirection = null;
-				this.brushCountResetsAtTick = 0L;
-				this.coolDownEndsAtTick = 0L;
-			} else {
-				this.level.scheduleTick(this.getBlockPos(), this.getBlockState().getBlock(), 2);
-			}
+		if (this.brushCount == 0) {
+			this.hitDirection = null;
+			this.brushCountResetsAtTick = 0L;
+			this.coolDownEndsAtTick = 0L;
+		} else {
+			serverLevel.scheduleTick(this.getBlockPos(), this.getBlockState().getBlock(), 2);
 		}
 	}
 

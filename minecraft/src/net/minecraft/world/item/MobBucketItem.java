@@ -12,6 +12,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.Bucketable;
@@ -48,10 +49,16 @@ public class MobBucketItem extends BucketItem {
 	}
 
 	private void spawn(ServerLevel serverLevel, ItemStack itemStack, BlockPos blockPos) {
-		if (this.type.spawn(serverLevel, itemStack, null, blockPos, EntitySpawnReason.BUCKET, true, false) instanceof Bucketable bucketable) {
+		Entity entity = this.type
+			.create(serverLevel, EntityType.createDefaultStackConfig(serverLevel, itemStack, null), blockPos, EntitySpawnReason.BUCKET, true, false);
+		if (entity instanceof Bucketable bucketable) {
 			CustomData customData = itemStack.getOrDefault(DataComponents.BUCKET_ENTITY_DATA, CustomData.EMPTY);
 			bucketable.loadFromBucketTag(customData.copyTag());
 			bucketable.setFromBucket(true);
+		}
+
+		if (entity != null) {
+			serverLevel.addFreshEntityWithPassengers(entity);
 		}
 	}
 

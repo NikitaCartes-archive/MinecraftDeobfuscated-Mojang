@@ -1,5 +1,6 @@
 package net.minecraft.client.gui.screens.worldselection;
 
+import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.UnaryOperator;
 import net.fabricmc.api.EnvType;
@@ -23,7 +24,8 @@ public record WorldCreationContext(
 	WorldDimensions selectedDimensions,
 	LayeredRegistryAccess<RegistryLayer> worldgenRegistries,
 	ReloadableServerResources dataPackResources,
-	WorldDataConfiguration dataConfiguration
+	WorldDataConfiguration dataConfiguration,
+	InitialWorldCreationOptions initialWorldCreationOptions
 ) {
 	public WorldCreationContext(
 		WorldGenSettings worldGenSettings,
@@ -31,7 +33,14 @@ public record WorldCreationContext(
 		ReloadableServerResources reloadableServerResources,
 		WorldDataConfiguration worldDataConfiguration
 	) {
-		this(worldGenSettings.options(), worldGenSettings.dimensions(), layeredRegistryAccess, reloadableServerResources, worldDataConfiguration);
+		this(
+			worldGenSettings.options(),
+			worldGenSettings.dimensions(),
+			layeredRegistryAccess,
+			reloadableServerResources,
+			worldDataConfiguration,
+			new InitialWorldCreationOptions(WorldCreationUiState.SelectedGameMode.SURVIVAL, Set.of(), null)
+		);
 	}
 
 	public WorldCreationContext(
@@ -39,7 +48,8 @@ public record WorldCreationContext(
 		WorldDimensions worldDimensions,
 		LayeredRegistryAccess<RegistryLayer> layeredRegistryAccess,
 		ReloadableServerResources reloadableServerResources,
-		WorldDataConfiguration worldDataConfiguration
+		WorldDataConfiguration worldDataConfiguration,
+		InitialWorldCreationOptions initialWorldCreationOptions
 	) {
 		this(
 			worldOptions,
@@ -47,13 +57,20 @@ public record WorldCreationContext(
 			worldDimensions,
 			layeredRegistryAccess.replaceFrom(RegistryLayer.DIMENSIONS),
 			reloadableServerResources,
-			worldDataConfiguration
+			worldDataConfiguration,
+			initialWorldCreationOptions
 		);
 	}
 
 	public WorldCreationContext withSettings(WorldOptions worldOptions, WorldDimensions worldDimensions) {
 		return new WorldCreationContext(
-			worldOptions, this.datapackDimensions, worldDimensions, this.worldgenRegistries, this.dataPackResources, this.dataConfiguration
+			worldOptions,
+			this.datapackDimensions,
+			worldDimensions,
+			this.worldgenRegistries,
+			this.dataPackResources,
+			this.dataConfiguration,
+			this.initialWorldCreationOptions
 		);
 	}
 
@@ -64,7 +81,8 @@ public record WorldCreationContext(
 			this.selectedDimensions,
 			this.worldgenRegistries,
 			this.dataPackResources,
-			this.dataConfiguration
+			this.dataConfiguration,
+			this.initialWorldCreationOptions
 		);
 	}
 
@@ -75,7 +93,8 @@ public record WorldCreationContext(
 			(WorldDimensions)dimensionsUpdater.apply(this.worldgenLoadContext(), this.selectedDimensions),
 			this.worldgenRegistries,
 			this.dataPackResources,
-			this.dataConfiguration
+			this.dataConfiguration,
+			this.initialWorldCreationOptions
 		);
 	}
 

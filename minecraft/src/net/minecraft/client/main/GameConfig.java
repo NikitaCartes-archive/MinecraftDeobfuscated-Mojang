@@ -57,13 +57,15 @@ public class GameConfig {
 		public final String versionType;
 		public final boolean disableMultiplayer;
 		public final boolean disableChat;
+		public final boolean captureTracyImages;
 
-		public GameData(boolean bl, String string, String string2, boolean bl2, boolean bl3) {
+		public GameData(boolean bl, String string, String string2, boolean bl2, boolean bl3, boolean bl4) {
 			this.demo = bl;
 			this.launchVersion = string;
 			this.versionType = string2;
 			this.disableMultiplayer = bl2;
 			this.disableChat = bl3;
+			this.captureTracyImages = bl4;
 		}
 	}
 

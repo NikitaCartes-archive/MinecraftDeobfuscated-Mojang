@@ -45,6 +45,7 @@ import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.DependencySorter;
+import net.minecraft.util.profiling.Profiler;
 import net.minecraft.util.profiling.ProfilerFiller;
 import org.slf4j.Logger;
 
@@ -73,18 +74,11 @@ public class FontManager implements PreparableReloadListener, AutoCloseable {
 
 	@Override
 	public CompletableFuture<Void> reload(
-		PreparableReloadListener.PreparationBarrier preparationBarrier,
-		ResourceManager resourceManager,
-		ProfilerFiller profilerFiller,
-		ProfilerFiller profilerFiller2,
-		Executor executor,
-		Executor executor2
+		PreparableReloadListener.PreparationBarrier preparationBarrier, ResourceManager resourceManager, Executor executor, Executor executor2
 	) {
-		profilerFiller.startTick();
-		profilerFiller.endTick();
 		return this.prepare(resourceManager, executor)
 			.thenCompose(preparationBarrier::wait)
-			.thenAcceptAsync(preparation -> this.apply(preparation, profilerFiller2), executor2);
+			.thenAcceptAsync(preparation -> this.apply(preparation, Profiler.get()), executor2);
 	}
 
 	private CompletableFuture<FontManager.Preparation> prepare(ResourceManager resourceManager, Executor executor) {
@@ -191,7 +185,6 @@ public class FontManager implements PreparableReloadListener, AutoCloseable {
 	}
 
 	private void apply(FontManager.Preparation preparation, ProfilerFiller profilerFiller) {
-		profilerFiller.startTick();
 		profilerFiller.push("closing");
 		this.lastFontSetCache = null;
 		this.fontSets.values().forEach(FontSet::close);
@@ -207,7 +200,6 @@ public class FontManager implements PreparableReloadListener, AutoCloseable {
 		});
 		this.providersToClose.addAll(preparation.allProviders);
 		profilerFiller.pop();
-		profilerFiller.endTick();
 		if (!this.fontSets.containsKey(Minecraft.DEFAULT_FONT)) {
 			throw new IllegalStateException("Default font failed to load");
 		}

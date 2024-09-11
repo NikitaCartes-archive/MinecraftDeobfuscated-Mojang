@@ -7,6 +7,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -19,6 +20,8 @@ public class ClientBundleTooltip implements ClientTooltipComponent {
 	private static final ResourceLocation PROGRESSBAR_BORDER_SPRITE = ResourceLocation.withDefaultNamespace("container/bundle/bundle_progressbar_border");
 	private static final ResourceLocation PROGRESSBAR_FILL_SPRITE = ResourceLocation.withDefaultNamespace("container/bundle/bundle_progressbar_fill");
 	private static final ResourceLocation PROGRESSBAR_FULL_SPRITE = ResourceLocation.withDefaultNamespace("container/bundle/bundle_progressbar_full");
+	private static final ResourceLocation SLOT_HIGHLIGHT_BACK_SPRITE = ResourceLocation.withDefaultNamespace("container/bundle/slot_highlight_back");
+	private static final ResourceLocation SLOT_HIGHLIGHT_FRONT_SPRITE = ResourceLocation.withDefaultNamespace("container/bundle/slot_highlight_front");
 	private static final int SLOT_MARGIN = 4;
 	private static final int SLOT_SIZE = 24;
 	private static final int GRID_WIDTH = 96;
@@ -132,20 +135,21 @@ public class ClientBundleTooltip implements ClientTooltipComponent {
 
 	private void renderSlot(int i, int j, int k, List<ItemStack> list, int l, Font font, GuiGraphics guiGraphics) {
 		int m = list.size() - i;
+		boolean bl = m == this.contents.getSelectedItem();
 		ItemStack itemStack = (ItemStack)list.get(m);
-		this.renderSlotHighlight(m, guiGraphics, j, k);
+		if (bl) {
+			guiGraphics.blitSprite(RenderType::guiTextured, SLOT_HIGHLIGHT_BACK_SPRITE, j, k, 24, 24);
+		}
+
 		guiGraphics.renderItem(itemStack, j + 4, k + 4, l);
 		guiGraphics.renderItemDecorations(font, itemStack, j + 4, k + 4);
+		if (bl) {
+			guiGraphics.blitSprite(RenderType::guiTexturedOverlay, SLOT_HIGHLIGHT_FRONT_SPRITE, j, k, 24, 24);
+		}
 	}
 
 	private static void renderCount(int i, int j, int k, Font font, GuiGraphics guiGraphics) {
 		guiGraphics.drawCenteredString(font, "+" + k, i + 12, j + 10, 16777215);
-	}
-
-	private void renderSlotHighlight(int i, GuiGraphics guiGraphics, int j, int k) {
-		if (i != -1 && i == this.contents.getSelectedItem()) {
-			guiGraphics.fillGradient(RenderType.gui(), j, k, j + 24, k + 24, -2130706433, -2130706433, 0);
-		}
 	}
 
 	private void drawSelectedItemTooltip(Font font, GuiGraphics guiGraphics, int i, int j, int k) {
@@ -154,7 +158,7 @@ public class ClientBundleTooltip implements ClientTooltipComponent {
 			Component component = itemStack.getStyledHoverName();
 			int l = font.width(component.getVisualOrderText());
 			int m = i + k / 2 - 12;
-			guiGraphics.renderTooltip(font, component, m - l / 2, j - 15);
+			guiGraphics.renderTooltip(font, component, m - l / 2, j - 15, itemStack.get(DataComponents.TOOLTIP_STYLE));
 		}
 	}
 

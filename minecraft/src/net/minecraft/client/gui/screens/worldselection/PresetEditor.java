@@ -52,7 +52,7 @@ public interface PresetEditor {
 
 	Screen createEditScreen(CreateWorldScreen createWorldScreen, WorldCreationContext worldCreationContext);
 
-	private static WorldCreationContext.DimensionsUpdater flatWorldConfigurator(FlatLevelGeneratorSettings flatLevelGeneratorSettings) {
+	static WorldCreationContext.DimensionsUpdater flatWorldConfigurator(FlatLevelGeneratorSettings flatLevelGeneratorSettings) {
 		return (frozen, worldDimensions) -> {
 			ChunkGenerator chunkGenerator = new FlatLevelSource(flatLevelGeneratorSettings);
 			return worldDimensions.replaceOverworldGenerator(frozen, chunkGenerator);

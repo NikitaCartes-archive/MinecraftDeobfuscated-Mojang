@@ -13,13 +13,13 @@ public interface ArmorMaterials {
 		enumMap.put(ArmorType.HELMET, 1);
 		enumMap.put(ArmorType.BODY, 3);
 	}), 15, SoundEvents.ARMOR_EQUIP_LEATHER, 0.0F, 0.0F, ItemTags.REPAIRS_LEATHER_ARMOR, EquipmentModels.LEATHER);
-	ArmorMaterial CHAIN = new ArmorMaterial(15, Util.make(new EnumMap(ArmorType.class), enumMap -> {
+	ArmorMaterial CHAINMAIL = new ArmorMaterial(15, Util.make(new EnumMap(ArmorType.class), enumMap -> {
 		enumMap.put(ArmorType.BOOTS, 1);
 		enumMap.put(ArmorType.LEGGINGS, 4);
 		enumMap.put(ArmorType.CHESTPLATE, 5);
 		enumMap.put(ArmorType.HELMET, 2);
 		enumMap.put(ArmorType.BODY, 4);
-	}), 12, SoundEvents.ARMOR_EQUIP_CHAIN, 0.0F, 0.0F, ItemTags.REPAIRS_CHAIN_ARMOR, EquipmentModels.CHAIN);
+	}), 12, SoundEvents.ARMOR_EQUIP_CHAIN, 0.0F, 0.0F, ItemTags.REPAIRS_CHAIN_ARMOR, EquipmentModels.CHAINMAIL);
 	ArmorMaterial IRON = new ArmorMaterial(15, Util.make(new EnumMap(ArmorType.class), enumMap -> {
 		enumMap.put(ArmorType.BOOTS, 2);
 		enumMap.put(ArmorType.LEGGINGS, 5);
@@ -27,7 +27,7 @@ public interface ArmorMaterials {
 		enumMap.put(ArmorType.HELMET, 2);
 		enumMap.put(ArmorType.BODY, 5);
 	}), 9, SoundEvents.ARMOR_EQUIP_IRON, 0.0F, 0.0F, ItemTags.REPAIRS_IRON_ARMOR, EquipmentModels.IRON);
-	ArmorMaterial GOLD = new ArmorMaterial(15, Util.make(new EnumMap(ArmorType.class), enumMap -> {
+	ArmorMaterial GOLD = new ArmorMaterial(7, Util.make(new EnumMap(ArmorType.class), enumMap -> {
 		enumMap.put(ArmorType.BOOTS, 1);
 		enumMap.put(ArmorType.LEGGINGS, 3);
 		enumMap.put(ArmorType.CHESTPLATE, 5);

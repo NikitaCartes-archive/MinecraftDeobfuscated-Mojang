@@ -42,6 +42,7 @@ import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringUtil;
+import net.minecraft.util.profiling.Profiler;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -244,7 +245,7 @@ public class Gui {
 
 	private void renderSleepOverlay(GuiGraphics guiGraphics, DeltaTracker deltaTracker) {
 		if (this.minecraft.player.getSleepTimer() > 0) {
-			this.minecraft.getProfiler().push("sleep");
+			Profiler.get().push("sleep");
 			float f = (float)this.minecraft.player.getSleepTimer();
 			float g = f / 100.0F;
 			if (g > 1.0F) {
@@ -253,14 +254,14 @@ public class Gui {
 
 			int i = (int)(220.0F * g) << 24 | 1052704;
 			guiGraphics.fill(RenderType.guiOverlay(), 0, 0, guiGraphics.guiWidth(), guiGraphics.guiHeight(), i);
-			this.minecraft.getProfiler().pop();
+			Profiler.get().pop();
 		}
 	}
 
 	private void renderOverlayMessage(GuiGraphics guiGraphics, DeltaTracker deltaTracker) {
 		Font font = this.getFont();
 		if (this.overlayMessageString != null && this.overlayMessageTime > 0) {
-			this.minecraft.getProfiler().push("overlayMessage");
+			Profiler.get().push("overlayMessage");
 			float f = (float)this.overlayMessageTime - deltaTracker.getGameTimeDeltaPartialTick(false);
 			int i = (int)(f * 255.0F / 20.0F);
 			if (i > 255) {
@@ -282,14 +283,14 @@ public class Gui {
 				guiGraphics.pose().popPose();
 			}
 
-			this.minecraft.getProfiler().pop();
+			Profiler.get().pop();
 		}
 	}
 
 	private void renderTitle(GuiGraphics guiGraphics, DeltaTracker deltaTracker) {
 		if (this.title != null && this.titleTime > 0) {
 			Font font = this.getFont();
-			this.minecraft.getProfiler().push("titleAndSubtitle");
+			Profiler.get().push("titleAndSubtitle");
 			float f = (float)this.titleTime - deltaTracker.getGameTimeDeltaPartialTick(false);
 			int i = 255;
 			if (this.titleTime > this.titleFadeOutTime + this.titleStayTime) {
@@ -322,7 +323,7 @@ public class Gui {
 				guiGraphics.pose().popPose();
 			}
 
-			this.minecraft.getProfiler().pop();
+			Profiler.get().pop();
 		}
 	}
 
@@ -563,7 +564,7 @@ public class Gui {
 	}
 
 	private void renderJumpMeter(PlayerRideableJumping playerRideableJumping, GuiGraphics guiGraphics, int i) {
-		this.minecraft.getProfiler().push("jumpBar");
+		Profiler.get().push("jumpBar");
 		float f = this.minecraft.player.getJumpRidingScale();
 		int j = 182;
 		int k = (int)(f * 183.0F);
@@ -575,11 +576,11 @@ public class Gui {
 			guiGraphics.blitSprite(RenderType::guiTextured, JUMP_BAR_PROGRESS_SPRITE, 182, 5, 0, 0, i, l, k, 5);
 		}
 
-		this.minecraft.getProfiler().pop();
+		Profiler.get().pop();
 	}
 
 	private void renderExperienceBar(GuiGraphics guiGraphics, int i) {
-		this.minecraft.getProfiler().push("expBar");
+		Profiler.get().push("expBar");
 		int j = this.minecraft.player.getXpNeededForNextLevel();
 		if (j > 0) {
 			int k = 182;
@@ -591,13 +592,13 @@ public class Gui {
 			}
 		}
 
-		this.minecraft.getProfiler().pop();
+		Profiler.get().pop();
 	}
 
 	private void renderExperienceLevel(GuiGraphics guiGraphics, DeltaTracker deltaTracker) {
 		int i = this.minecraft.player.experienceLevel;
 		if (this.isExperienceBarVisible() && i > 0) {
-			this.minecraft.getProfiler().push("expLevel");
+			Profiler.get().push("expLevel");
 			String string = i + "";
 			int j = (guiGraphics.guiWidth() - this.getFont().width(string)) / 2;
 			int k = guiGraphics.guiHeight() - 31 - 4;
@@ -606,7 +607,7 @@ public class Gui {
 			guiGraphics.drawString(this.getFont(), string, j, k + 1, 0, false);
 			guiGraphics.drawString(this.getFont(), string, j, k - 1, 0, false);
 			guiGraphics.drawString(this.getFont(), string, j, k, 8453920, false);
-			this.minecraft.getProfiler().pop();
+			Profiler.get().pop();
 		}
 	}
 
@@ -615,7 +616,7 @@ public class Gui {
 	}
 
 	private void renderSelectedItemName(GuiGraphics guiGraphics) {
-		this.minecraft.getProfiler().push("selectedItemName");
+		Profiler.get().push("selectedItemName");
 		if (this.toolHighlightTimer > 0 && !this.lastToolHighlight.isEmpty()) {
 			MutableComponent mutableComponent = Component.empty().append(this.lastToolHighlight.getHoverName()).withStyle(this.lastToolHighlight.getRarity().color());
 			if (this.lastToolHighlight.has(DataComponents.CUSTOM_NAME)) {
@@ -639,12 +640,12 @@ public class Gui {
 			}
 		}
 
-		this.minecraft.getProfiler().pop();
+		Profiler.get().pop();
 	}
 
 	private void renderDemoOverlay(GuiGraphics guiGraphics, DeltaTracker deltaTracker) {
 		if (this.minecraft.isDemo()) {
-			this.minecraft.getProfiler().push("demo");
+			Profiler.get().push("demo");
 			Component component;
 			if (this.minecraft.level.getGameTime() >= 120500L) {
 				component = DEMO_EXPIRED_TEXT;
@@ -659,7 +660,7 @@ public class Gui {
 			int j = guiGraphics.guiWidth() - i - 10;
 			int k = 5;
 			guiGraphics.drawStringWithBackdrop(this.getFont(), component, j, 5, i, -1);
-			this.minecraft.getProfiler().pop();
+			Profiler.get().pop();
 		}
 	}
 
@@ -790,19 +791,19 @@ public class Gui {
 				s = this.tickCount % Mth.ceil(f + 5.0F);
 			}
 
-			this.minecraft.getProfiler().push("armor");
+			Profiler.get().push("armor");
 			renderArmor(guiGraphics, player, n, p, q, k);
-			this.minecraft.getProfiler().popPush("health");
+			Profiler.get().popPush("health");
 			this.renderHearts(guiGraphics, player, k, n, q, s, f, i, j, o, bl);
 			LivingEntity livingEntity = this.getPlayerVehicleWithHealth();
 			int t = this.getVehicleMaxHearts(livingEntity);
 			if (t == 0) {
-				this.minecraft.getProfiler().popPush("food");
+				Profiler.get().popPush("food");
 				this.renderFood(guiGraphics, player, n, m);
 				r -= 10;
 			}
 
-			this.minecraft.getProfiler().popPush("air");
+			Profiler.get().popPush("air");
 			int u = player.getMaxAirSupply();
 			int v = Math.min(player.getAirSupply(), u);
 			if (player.isEyeInFluid(FluidTags.WATER) || v < u) {
@@ -820,7 +821,7 @@ public class Gui {
 				}
 			}
 
-			this.minecraft.getProfiler().pop();
+			Profiler.get().pop();
 		}
 	}
 
@@ -934,7 +935,7 @@ public class Gui {
 			int i = this.getVehicleMaxHearts(livingEntity);
 			if (i != 0) {
 				int j = (int)Math.ceil((double)livingEntity.getHealth());
-				this.minecraft.getProfiler().popPush("mountHealth");
+				Profiler.get().popPush("mountHealth");
 				int k = guiGraphics.guiHeight() - 39;
 				int l = guiGraphics.guiWidth() / 2 + 91;
 				int m = k;

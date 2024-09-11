@@ -135,7 +135,7 @@ public class ActiveMetricsRecorder implements MetricsRecorder {
 
 	@Override
 	public ProfilerFiller getProfiler() {
-		return ProfilerFiller.tee(this.taskProfiler.getFiller(), this.singleTickProfiler);
+		return ProfilerFiller.combine(this.taskProfiler.getFiller(), this.singleTickProfiler);
 	}
 
 	private void verifyStarted() {

@@ -103,7 +103,7 @@ public class SkullBlockEntity extends BlockEntity {
 				ProfileResult profileResult = services.sessionService().fetchProfile(uUID, true);
 				return Optional.ofNullable(profileResult).map(ProfileResult::profile);
 			}
-		}, Util.backgroundExecutor());
+		}, Util.backgroundExecutor().forName("fetchProfile"));
 	}
 
 	public static void clear() {

@@ -2,6 +2,8 @@ package net.minecraft.world.entity.ai.sensing;
 
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
+import net.minecraft.util.profiling.Profiler;
+import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
 
@@ -26,9 +28,10 @@ public class Sensing {
 		} else if (this.unseen.contains(i)) {
 			return false;
 		} else {
-			this.mob.level().getProfiler().push("hasLineOfSight");
+			ProfilerFiller profilerFiller = Profiler.get();
+			profilerFiller.push("hasLineOfSight");
 			boolean bl = this.mob.hasLineOfSight(entity);
-			this.mob.level().getProfiler().pop();
+			profilerFiller.pop();
 			if (bl) {
 				this.seen.add(i);
 			} else {

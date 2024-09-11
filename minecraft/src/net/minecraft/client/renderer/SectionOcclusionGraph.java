@@ -14,6 +14,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -127,7 +128,7 @@ public class SectionOcclusionGraph {
 	private void scheduleFullUpdate(boolean bl, Camera camera, Vec3 vec3, LongOpenHashSet longOpenHashSet) {
 		this.needsFullUpdate = false;
 		LongOpenHashSet longOpenHashSet2 = longOpenHashSet.clone();
-		this.fullUpdateTask = Util.backgroundExecutor().submit(() -> {
+		this.fullUpdateTask = CompletableFuture.runAsync(() -> {
 			SectionOcclusionGraph.GraphState graphState = new SectionOcclusionGraph.GraphState(this.viewArea);
 			this.nextGraphEvents.set(graphState.events);
 			Queue<SectionOcclusionGraph.Node> queue = Queues.<SectionOcclusionGraph.Node>newArrayDeque();
@@ -138,7 +139,7 @@ public class SectionOcclusionGraph {
 			this.currentGraph.set(graphState);
 			this.nextGraphEvents.set(null);
 			this.needsFrustumUpdate.set(true);
-		});
+		}, Util.backgroundExecutor());
 	}
 
 	private void runPartialUpdate(boolean bl, Frustum frustum, List<SectionRenderDispatcher.RenderSection> list, Vec3 vec3, LongOpenHashSet longOpenHashSet) {

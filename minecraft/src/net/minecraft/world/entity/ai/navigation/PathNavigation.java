@@ -10,6 +10,8 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.network.protocol.game.DebugPackets;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
+import net.minecraft.util.profiling.Profiler;
+import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -152,12 +154,13 @@ public abstract class PathNavigation {
 		} else if (this.path != null && !this.path.isDone() && set.contains(this.targetPos)) {
 			return this.path;
 		} else {
-			this.level.getProfiler().push("pathfind");
+			ProfilerFiller profilerFiller = Profiler.get();
+			profilerFiller.push("pathfind");
 			BlockPos blockPos = bl ? this.mob.blockPosition().above() : this.mob.blockPosition();
 			int k = (int)(f + (float)i);
 			PathNavigationRegion pathNavigationRegion = new PathNavigationRegion(this.level, blockPos.offset(-k, -k, -k), blockPos.offset(k, k, k));
 			Path path = this.pathFinder.findPath(pathNavigationRegion, this.mob, set, f, j, this.maxVisitedNodesMultiplier);
-			this.level.getProfiler().pop();
+			profilerFiller.pop();
 			if (path != null && path.getTarget() != null) {
 				this.targetPos = path.getTarget();
 				this.reachRange = j;

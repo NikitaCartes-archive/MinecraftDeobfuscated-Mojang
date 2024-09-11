@@ -10,7 +10,7 @@ import net.minecraft.world.item.DyeColor;
 
 public interface EquipmentModels {
 	ResourceLocation LEATHER = ResourceLocation.withDefaultNamespace("leather");
-	ResourceLocation CHAIN = ResourceLocation.withDefaultNamespace("chainmail");
+	ResourceLocation CHAINMAIL = ResourceLocation.withDefaultNamespace("chainmail");
 	ResourceLocation IRON = ResourceLocation.withDefaultNamespace("iron");
 	ResourceLocation GOLD = ResourceLocation.withDefaultNamespace("gold");
 	ResourceLocation DIAMOND = ResourceLocation.withDefaultNamespace("diamond");
@@ -32,12 +32,12 @@ public interface EquipmentModels {
 				.addLayers(EquipmentModel.LayerType.HORSE_BODY, EquipmentModel.Layer.leatherDyeable(ResourceLocation.withDefaultNamespace("leather"), true))
 				.build()
 		);
-		biConsumer.accept(CHAIN, onlyHumanoid("chain"));
+		biConsumer.accept(CHAINMAIL, onlyHumanoid("chainmail"));
 		biConsumer.accept(IRON, humanoidAndHorse("iron"));
 		biConsumer.accept(GOLD, humanoidAndHorse("gold"));
 		biConsumer.accept(DIAMOND, humanoidAndHorse("diamond"));
 		biConsumer.accept(TURTLE_SCUTE, EquipmentModel.builder().addMainHumanoidLayer(ResourceLocation.withDefaultNamespace("turtle_scute"), false).build());
-		biConsumer.accept(NETHERITE, onlyHumanoid("diamond"));
+		biConsumer.accept(NETHERITE, onlyHumanoid("netherite"));
 		biConsumer.accept(
 			ARMADILLO_SCUTE,
 			EquipmentModel.builder()

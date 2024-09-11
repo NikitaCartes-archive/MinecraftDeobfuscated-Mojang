@@ -1,12 +1,8 @@
 package net.minecraft.world.entity.ai.behavior;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
@@ -17,36 +13,29 @@ import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.npc.VillagerProfession;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
-import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.LootTable;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 
 public class GiveGiftToHero extends Behavior<Villager> {
 	private static final int THROW_GIFT_AT_DISTANCE = 5;
 	private static final int MIN_TIME_BETWEEN_GIFTS = 600;
 	private static final int MAX_TIME_BETWEEN_GIFTS = 6600;
 	private static final int TIME_TO_DELAY_FOR_HEAD_TO_FINISH_TURNING = 20;
-	private static final Map<VillagerProfession, ResourceKey<LootTable>> GIFTS = Util.make(
-		Maps.<VillagerProfession, ResourceKey<LootTable>>newHashMap(), hashMap -> {
-			hashMap.put(VillagerProfession.ARMORER, BuiltInLootTables.ARMORER_GIFT);
-			hashMap.put(VillagerProfession.BUTCHER, BuiltInLootTables.BUTCHER_GIFT);
-			hashMap.put(VillagerProfession.CARTOGRAPHER, BuiltInLootTables.CARTOGRAPHER_GIFT);
-			hashMap.put(VillagerProfession.CLERIC, BuiltInLootTables.CLERIC_GIFT);
-			hashMap.put(VillagerProfession.FARMER, BuiltInLootTables.FARMER_GIFT);
-			hashMap.put(VillagerProfession.FISHERMAN, BuiltInLootTables.FISHERMAN_GIFT);
-			hashMap.put(VillagerProfession.FLETCHER, BuiltInLootTables.FLETCHER_GIFT);
-			hashMap.put(VillagerProfession.LEATHERWORKER, BuiltInLootTables.LEATHERWORKER_GIFT);
-			hashMap.put(VillagerProfession.LIBRARIAN, BuiltInLootTables.LIBRARIAN_GIFT);
-			hashMap.put(VillagerProfession.MASON, BuiltInLootTables.MASON_GIFT);
-			hashMap.put(VillagerProfession.SHEPHERD, BuiltInLootTables.SHEPHERD_GIFT);
-			hashMap.put(VillagerProfession.TOOLSMITH, BuiltInLootTables.TOOLSMITH_GIFT);
-			hashMap.put(VillagerProfession.WEAPONSMITH, BuiltInLootTables.WEAPONSMITH_GIFT);
-		}
-	);
+	private static final Map<VillagerProfession, ResourceKey<LootTable>> GIFTS = ImmutableMap.<VillagerProfession, ResourceKey<LootTable>>builder()
+		.put(VillagerProfession.ARMORER, BuiltInLootTables.ARMORER_GIFT)
+		.put(VillagerProfession.BUTCHER, BuiltInLootTables.BUTCHER_GIFT)
+		.put(VillagerProfession.CARTOGRAPHER, BuiltInLootTables.CARTOGRAPHER_GIFT)
+		.put(VillagerProfession.CLERIC, BuiltInLootTables.CLERIC_GIFT)
+		.put(VillagerProfession.FARMER, BuiltInLootTables.FARMER_GIFT)
+		.put(VillagerProfession.FISHERMAN, BuiltInLootTables.FISHERMAN_GIFT)
+		.put(VillagerProfession.FLETCHER, BuiltInLootTables.FLETCHER_GIFT)
+		.put(VillagerProfession.LEATHERWORKER, BuiltInLootTables.LEATHERWORKER_GIFT)
+		.put(VillagerProfession.LIBRARIAN, BuiltInLootTables.LIBRARIAN_GIFT)
+		.put(VillagerProfession.MASON, BuiltInLootTables.MASON_GIFT)
+		.put(VillagerProfession.SHEPHERD, BuiltInLootTables.SHEPHERD_GIFT)
+		.put(VillagerProfession.TOOLSMITH, BuiltInLootTables.TOOLSMITH_GIFT)
+		.put(VillagerProfession.WEAPONSMITH, BuiltInLootTables.WEAPONSMITH_GIFT)
+		.build();
 	private static final float SPEED_MODIFIER = 0.5F;
 	private int timeUntilNextGift = 600;
 	private boolean giftGivenDuringThisRun;
@@ -112,26 +101,15 @@ public class GiveGiftToHero extends Behavior<Villager> {
 	}
 
 	private void throwGift(Villager villager, LivingEntity livingEntity) {
-		for (ItemStack itemStack : this.getItemToThrow(villager)) {
-			BehaviorUtils.throwItem(villager, itemStack, livingEntity.position());
-		}
+		villager.dropFromGiftLootTable(getLootTableToThrow(villager), itemStack -> BehaviorUtils.throwItem(villager, itemStack, livingEntity.position()));
 	}
 
-	private List<ItemStack> getItemToThrow(Villager villager) {
+	private static ResourceKey<LootTable> getLootTableToThrow(Villager villager) {
 		if (villager.isBaby()) {
-			return ImmutableList.of(new ItemStack(Items.POPPY));
+			return BuiltInLootTables.BABY_VILLAGER_GIFT;
 		} else {
 			VillagerProfession villagerProfession = villager.getVillagerData().getProfession();
-			if (GIFTS.containsKey(villagerProfession)) {
-				LootTable lootTable = villager.level().getServer().reloadableRegistries().getLootTable((ResourceKey<LootTable>)GIFTS.get(villagerProfession));
-				LootParams lootParams = new LootParams.Builder((ServerLevel)villager.level())
-					.withParameter(LootContextParams.ORIGIN, villager.position())
-					.withParameter(LootContextParams.THIS_ENTITY, villager)
-					.create(LootContextParamSets.GIFT);
-				return lootTable.getRandomItems(lootParams);
-			} else {
-				return ImmutableList.of(new ItemStack(Items.WHEAT_SEEDS));
-			}
+			return (ResourceKey<LootTable>)GIFTS.getOrDefault(villagerProfession, BuiltInLootTables.UNEMPLOYED_GIFT);
 		}
 	}
 

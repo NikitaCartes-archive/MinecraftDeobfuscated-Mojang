@@ -15,7 +15,6 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.client.renderer.entity.state.PlayerRenderState;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
 
 @Environment(EnvType.CLIENT)
@@ -135,12 +134,6 @@ public class PlayerModel extends HumanoidModel<PlayerRenderState> {
 	}
 
 	protected HumanoidModel.ArmPose getArmPose(PlayerRenderState playerRenderState, HumanoidArm humanoidArm) {
-		HumanoidModel.ArmPose armPose = PlayerRenderer.getArmPose(playerRenderState, playerRenderState.mainHandState, InteractionHand.MAIN_HAND);
-		HumanoidModel.ArmPose armPose2 = PlayerRenderer.getArmPose(playerRenderState, playerRenderState.offhandState, InteractionHand.OFF_HAND);
-		if (armPose.isTwoHanded()) {
-			armPose2 = playerRenderState.offhandState.isEmpty ? HumanoidModel.ArmPose.EMPTY : HumanoidModel.ArmPose.ITEM;
-		}
-
-		return playerRenderState.mainArm == humanoidArm ? armPose : armPose2;
+		return PlayerRenderer.getArmPose(playerRenderState, humanoidArm);
 	}
 }

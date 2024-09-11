@@ -21,6 +21,8 @@ public class V135 extends Schema {
 			() -> DSL.optionalFields(
 					"RootVehicle",
 					DSL.optionalFields("Entity", References.ENTITY_TREE.in(schema)),
+					"ender_pearls",
+					DSL.list(References.ENTITY_TREE.in(schema)),
 					"Inventory",
 					DSL.list(References.ITEM_STACK.in(schema)),
 					"EnderItems",

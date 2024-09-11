@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import net.minecraft.core.Holder;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -61,7 +60,6 @@ public class SetEnchantmentsFunction extends LootItemConditionalFunction {
 	public ItemStack run(ItemStack itemStack, LootContext lootContext) {
 		if (itemStack.is(Items.BOOK)) {
 			itemStack = itemStack.transmuteCopy(Items.ENCHANTED_BOOK);
-			itemStack.set(DataComponents.STORED_ENCHANTMENTS, itemStack.remove(DataComponents.ENCHANTMENTS));
 		}
 
 		EnchantmentHelper.updateEnchantments(

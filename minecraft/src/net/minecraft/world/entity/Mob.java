@@ -34,6 +34,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.profiling.Profiler;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.DifficultyInstance;
@@ -136,8 +137,8 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Leashab
 
 	protected Mob(EntityType<? extends Mob> entityType, Level level) {
 		super(entityType, level);
-		this.goalSelector = new GoalSelector(level.getProfilerSupplier());
-		this.targetSelector = new GoalSelector(level.getProfilerSupplier());
+		this.goalSelector = new GoalSelector();
+		this.targetSelector = new GoalSelector();
 		this.lookControl = new LookControl(this);
 		this.moveControl = new MoveControl(this);
 		this.jumpControl = new JumpControl(this);
@@ -272,13 +273,14 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Leashab
 	@Override
 	public void baseTick() {
 		super.baseTick();
-		this.level().getProfiler().push("mobBaseTick");
+		ProfilerFiller profilerFiller = Profiler.get();
+		profilerFiller.push("mobBaseTick");
 		if (this.isAlive() && this.random.nextInt(1000) < this.ambientSoundTime++) {
 			this.resetAmbientSoundTime();
 			this.playAmbientSound();
 		}
 
-		this.level().getProfiler().pop();
+		profilerFiller.pop();
 	}
 
 	@Override
@@ -531,7 +533,8 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Leashab
 	@Override
 	public void aiStep() {
 		super.aiStep();
-		this.level().getProfiler().push("looting");
+		ProfilerFiller profilerFiller = Profiler.get();
+		profilerFiller.push("looting");
 		if (!this.level().isClientSide && this.canPickUpLoot() && this.isAlive() && !this.dead && this.level().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
 			Vec3i vec3i = this.getPickupReach();
 
@@ -543,7 +546,7 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Leashab
 			}
 		}
 
-		this.level().getProfiler().pop();
+		profilerFiller.pop();
 	}
 
 	protected Vec3i getPickupReach() {
@@ -659,8 +662,9 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Leashab
 	}
 
 	private double getApproximateAttributeWith(ItemStack itemStack, Holder<Attribute> holder, EquipmentSlot equipmentSlot) {
+		double d = this.getAttributes().hasAttribute(holder) ? this.getAttributeBaseValue(holder) : 0.0;
 		ItemAttributeModifiers itemAttributeModifiers = itemStack.getOrDefault(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY);
-		return itemAttributeModifiers.compute(this.getAttributeBaseValue(holder), equipmentSlot);
+		return itemAttributeModifiers.compute(d, equipmentSlot);
 	}
 
 	public boolean canReplaceEqualItem(ItemStack itemStack, ItemStack itemStack2) {
@@ -723,7 +727,7 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Leashab
 	@Override
 	protected final void serverAiStep() {
 		this.noActionTime++;
-		ProfilerFiller profilerFiller = this.level().getProfiler();
+		ProfilerFiller profilerFiller = Profiler.get();
 		profilerFiller.push("sensing");
 		this.sensing.tick();
 		profilerFiller.pop();
@@ -1276,7 +1280,7 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Leashab
 				conversionParams.type().convert(this, mob, conversionParams);
 				afterConversion.finalizeConversion(mob);
 				if (this.level() instanceof ServerLevel serverLevel) {
-					serverLevel.addFreshEntityWithPassengers(mob);
+					serverLevel.addFreshEntity(mob);
 				}
 
 				if (conversionParams.type().shouldDiscardAfterConversion()) {
@@ -1397,11 +1401,12 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Leashab
 	public boolean doHurtTarget(Entity entity) {
 		float f = (float)this.getAttributeValue(Attributes.ATTACK_DAMAGE);
 		ItemStack itemStack = this.getWeaponItem();
-		DamageSource damageSource = this.damageSources().mobAttack(this);
+		DamageSource damageSource = (DamageSource)Optional.ofNullable(itemStack.getItem().getDamageSource(this)).orElse(this.damageSources().mobAttack(this));
 		if (this.level() instanceof ServerLevel serverLevel) {
 			f = EnchantmentHelper.modifyDamage(serverLevel, itemStack, entity, damageSource, f);
 		}
 
+		f += itemStack.getItem().getAttackDamageBonus(entity, f, damageSource);
 		boolean bl = entity.hurt(damageSource, f);
 		if (bl) {
 			float g = this.getKnockback(entity, damageSource);
@@ -1495,13 +1500,5 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Leashab
 	@VisibleForTesting
 	public float[] getArmorDropChances() {
 		return this.armorDropChances;
-	}
-
-	public void setLootTable(Optional<ResourceKey<LootTable>> optional) {
-		this.lootTable = optional;
-	}
-
-	public void setLootTableSeed(long l) {
-		this.lootTableSeed = l;
 	}
 }

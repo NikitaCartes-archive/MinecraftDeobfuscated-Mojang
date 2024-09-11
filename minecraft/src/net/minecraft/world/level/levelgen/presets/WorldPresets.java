@@ -71,6 +71,10 @@ public class WorldPresets {
 		return (LevelStem)provider.lookupOrThrow(Registries.WORLD_PRESET).getOrThrow(NORMAL).value().overworld().orElseThrow();
 	}
 
+	public static WorldDimensions createFlatWorldDimensions(HolderLookup.Provider provider) {
+		return provider.lookupOrThrow(Registries.WORLD_PRESET).getOrThrow(FLAT).value().createWorldDimensions();
+	}
+
 	static class Bootstrap {
 		private final BootstrapContext<WorldPreset> context;
 		private final HolderGetter<NoiseGeneratorSettings> noiseSettings;

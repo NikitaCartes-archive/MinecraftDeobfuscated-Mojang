@@ -19,6 +19,13 @@ public interface CommandBuildContext extends HolderLookup.Provider {
 			public <T> Optional<HolderLookup.RegistryLookup<T>> lookup(ResourceKey<? extends Registry<? extends T>> resourceKey) {
 				return provider.lookup(resourceKey).map(registryLookup -> registryLookup.filterFeatures(featureFlagSet));
 			}
+
+			@Override
+			public FeatureFlagSet enabledFeatures() {
+				return featureFlagSet;
+			}
 		};
 	}
+
+	FeatureFlagSet enabledFeatures();
 }

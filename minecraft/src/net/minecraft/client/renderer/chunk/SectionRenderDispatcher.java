@@ -18,15 +18,14 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.CrashReport;
+import net.minecraft.TracingExecutor;
 import net.minecraft.Util;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -42,6 +41,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.SectionPos;
 import net.minecraft.util.Mth;
+import net.minecraft.util.profiling.Profiler;
+import net.minecraft.util.profiling.Zone;
 import net.minecraft.util.thread.ConsecutiveExecutor;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
@@ -57,7 +58,7 @@ public class SectionRenderDispatcher {
 	private volatile int toBatchCount;
 	private volatile boolean closed;
 	private final ConsecutiveExecutor consecutiveExecutor;
-	private final Executor executor;
+	private final TracingExecutor executor;
 	ClientLevel level;
 	final LevelRenderer renderer;
 	private Vec3 camera = Vec3.ZERO;
@@ -66,7 +67,7 @@ public class SectionRenderDispatcher {
 	public SectionRenderDispatcher(
 		ClientLevel clientLevel,
 		LevelRenderer levelRenderer,
-		Executor executor,
+		TracingExecutor tracingExecutor,
 		RenderBuffers renderBuffers,
 		BlockRenderDispatcher blockRenderDispatcher,
 		BlockEntityRenderDispatcher blockEntityRenderDispatcher
@@ -75,8 +76,8 @@ public class SectionRenderDispatcher {
 		this.renderer = levelRenderer;
 		this.fixedBuffers = renderBuffers.fixedBufferPack();
 		this.bufferPool = renderBuffers.sectionBufferPool();
-		this.executor = executor;
-		this.consecutiveExecutor = new ConsecutiveExecutor(executor, "Section Renderer");
+		this.executor = tracingExecutor;
+		this.consecutiveExecutor = new ConsecutiveExecutor(tracingExecutor, "Section Renderer");
 		this.consecutiveExecutor.schedule(this::runTask);
 		this.sectionCompiler = new SectionCompiler(blockRenderDispatcher, blockEntityRenderDispatcher);
 	}
@@ -91,9 +92,7 @@ public class SectionRenderDispatcher {
 			if (compileTask != null) {
 				SectionBufferBuilderPack sectionBufferBuilderPack = (SectionBufferBuilderPack)Objects.requireNonNull(this.bufferPool.acquire());
 				this.toBatchCount = this.compileQueue.size();
-				CompletableFuture.supplyAsync(
-						Util.wrapThreadWithTaskName(compileTask.name(), (Supplier)(() -> compileTask.doTask(sectionBufferBuilderPack))), this.executor
-					)
+				CompletableFuture.supplyAsync(() -> compileTask.doTask(sectionBufferBuilderPack), this.executor.forName(compileTask.name()))
 					.thenCompose(completableFuture -> completableFuture)
 					.whenComplete((sectionTaskResult, throwable) -> {
 						if (throwable != null) {
@@ -172,9 +171,11 @@ public class SectionRenderDispatcher {
 			if (vertexBuffer.isInvalid()) {
 				meshData.close();
 			} else {
-				vertexBuffer.bind();
-				vertexBuffer.upload(meshData);
-				VertexBuffer.unbind();
+				try (Zone zone = Profiler.get().zone("Upload Section Layer")) {
+					vertexBuffer.bind();
+					vertexBuffer.upload(meshData);
+					VertexBuffer.unbind();
+				}
 			}
 		}, this.toUpload::add);
 	}
@@ -184,9 +185,11 @@ public class SectionRenderDispatcher {
 			if (vertexBuffer.isInvalid()) {
 				result.close();
 			} else {
-				vertexBuffer.bind();
-				vertexBuffer.uploadIndexBuffer(result);
-				VertexBuffer.unbind();
+				try (Zone zone = Profiler.get().zone("Upload Section Indices")) {
+					vertexBuffer.bind();
+					vertexBuffer.uploadIndexBuffer(result);
+					VertexBuffer.unbind();
+				}
 			}
 		}, this.toUpload::add);
 	}
@@ -452,7 +455,7 @@ public class SectionRenderDispatcher {
 		@Environment(EnvType.CLIENT)
 		class RebuildTask extends SectionRenderDispatcher.RenderSection.CompileTask {
 			@Nullable
-			protected RenderChunkRegion region;
+			protected volatile RenderChunkRegion region;
 
 			public RebuildTask(@Nullable final RenderChunkRegion renderChunkRegion, final boolean bl) {
 				super(bl);
@@ -481,38 +484,46 @@ public class SectionRenderDispatcher {
 						return CompletableFuture.completedFuture(SectionRenderDispatcher.SectionTaskResult.SUCCESSFUL);
 					} else {
 						SectionPos sectionPos = SectionPos.of(RenderSection.this.origin);
-						SectionCompiler.Results results = SectionRenderDispatcher.this.sectionCompiler
-							.compile(sectionPos, renderChunkRegion, RenderSection.this.createVertexSorting(), sectionBufferBuilderPack);
-						SectionRenderDispatcher.TranslucencyPointOfView translucencyPointOfView = SectionRenderDispatcher.TranslucencyPointOfView.of(
-							SectionRenderDispatcher.this.getCameraPosition(), RenderSection.this.sectionNode
-						);
-						RenderSection.this.updateGlobalBlockEntities(results.globalBlockEntities);
 						if (this.isCancelled.get()) {
-							results.release();
 							return CompletableFuture.completedFuture(SectionRenderDispatcher.SectionTaskResult.CANCELLED);
 						} else {
-							SectionRenderDispatcher.CompiledSection compiledSection = new SectionRenderDispatcher.CompiledSection();
-							compiledSection.visibilitySet = results.visibilitySet;
-							compiledSection.renderableBlockEntities.addAll(results.blockEntities);
-							compiledSection.transparencyState = results.transparencyState;
-							List<CompletableFuture<Void>> list = new ArrayList(results.renderedLayers.size());
-							results.renderedLayers.forEach((renderType, meshData) -> {
-								list.add(SectionRenderDispatcher.this.uploadSectionLayer(meshData, RenderSection.this.getBuffer(renderType)));
-								compiledSection.hasBlocks.add(renderType);
-							});
-							return Util.sequenceFailFast(list).handle((listx, throwable) -> {
-								if (throwable != null && !(throwable instanceof CancellationException) && !(throwable instanceof InterruptedException)) {
-									Minecraft.getInstance().delayCrash(CrashReport.forThrowable(throwable, "Rendering section"));
-								}
+							SectionCompiler.Results results;
+							try (Zone zone = Profiler.get().zone("Compile Section")) {
+								results = SectionRenderDispatcher.this.sectionCompiler
+									.compile(sectionPos, renderChunkRegion, RenderSection.this.createVertexSorting(), sectionBufferBuilderPack);
+							}
 
-								if (this.isCancelled.get()) {
-									return SectionRenderDispatcher.SectionTaskResult.CANCELLED;
-								} else {
-									RenderSection.this.setCompiled(compiledSection);
-									RenderSection.this.pointOfView.set(translucencyPointOfView);
-									return SectionRenderDispatcher.SectionTaskResult.SUCCESSFUL;
-								}
-							});
+							SectionRenderDispatcher.TranslucencyPointOfView translucencyPointOfView = SectionRenderDispatcher.TranslucencyPointOfView.of(
+								SectionRenderDispatcher.this.getCameraPosition(), RenderSection.this.sectionNode
+							);
+							RenderSection.this.updateGlobalBlockEntities(results.globalBlockEntities);
+							if (this.isCancelled.get()) {
+								results.release();
+								return CompletableFuture.completedFuture(SectionRenderDispatcher.SectionTaskResult.CANCELLED);
+							} else {
+								SectionRenderDispatcher.CompiledSection compiledSection = new SectionRenderDispatcher.CompiledSection();
+								compiledSection.visibilitySet = results.visibilitySet;
+								compiledSection.renderableBlockEntities.addAll(results.blockEntities);
+								compiledSection.transparencyState = results.transparencyState;
+								List<CompletableFuture<Void>> list = new ArrayList(results.renderedLayers.size());
+								results.renderedLayers.forEach((renderType, meshData) -> {
+									list.add(SectionRenderDispatcher.this.uploadSectionLayer(meshData, RenderSection.this.getBuffer(renderType)));
+									compiledSection.hasBlocks.add(renderType);
+								});
+								return Util.sequenceFailFast(list).handle((listx, throwable) -> {
+									if (throwable != null && !(throwable instanceof CancellationException) && !(throwable instanceof InterruptedException)) {
+										Minecraft.getInstance().delayCrash(CrashReport.forThrowable(throwable, "Rendering section"));
+									}
+
+									if (this.isCancelled.get()) {
+										return SectionRenderDispatcher.SectionTaskResult.CANCELLED;
+									} else {
+										RenderSection.this.setCompiled(compiledSection);
+										RenderSection.this.pointOfView.set(translucencyPointOfView);
+										return SectionRenderDispatcher.SectionTaskResult.SUCCESSFUL;
+									}
+								});
+							}
 						}
 					}
 				}

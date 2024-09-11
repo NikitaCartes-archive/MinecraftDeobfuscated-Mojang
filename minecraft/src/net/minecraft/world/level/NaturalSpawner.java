@@ -23,6 +23,8 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.VisibleForDebug;
+import net.minecraft.util.profiling.Profiler;
+import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.util.random.WeightedRandomList;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
@@ -112,7 +114,8 @@ public final class NaturalSpawner {
 	}
 
 	public static void spawnForChunk(ServerLevel serverLevel, LevelChunk levelChunk, NaturalSpawner.SpawnState spawnState, List<MobCategory> list) {
-		serverLevel.getProfiler().push("spawner");
+		ProfilerFiller profilerFiller = Profiler.get();
+		profilerFiller.push("spawner");
 
 		for (MobCategory mobCategory : list) {
 			if (spawnState.canSpawnForCategoryLocal(mobCategory, levelChunk.getPos())) {
@@ -120,7 +123,7 @@ public final class NaturalSpawner {
 			}
 		}
 
-		serverLevel.getProfiler().pop();
+		profilerFiller.pop();
 	}
 
 	public static void spawnCategoryForChunk(

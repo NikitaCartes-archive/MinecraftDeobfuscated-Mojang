@@ -23,6 +23,8 @@ import net.minecraft.util.ByIdMap;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.util.TimeUtil;
+import net.minecraft.util.profiling.Profiler;
+import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
@@ -44,6 +46,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 
 public class Armadillo extends Animal {
 	public static final float BABY_SCALE = 0.6F;
@@ -130,16 +133,19 @@ public class Armadillo extends Animal {
 
 	@Override
 	protected void customServerAiStep() {
-		this.level().getProfiler().push("armadilloBrain");
+		ProfilerFiller profilerFiller = Profiler.get();
+		profilerFiller.push("armadilloBrain");
 		((Brain<Armadillo>)this.brain).tick((ServerLevel)this.level(), this);
-		this.level().getProfiler().pop();
-		this.level().getProfiler().push("armadilloActivityUpdate");
+		profilerFiller.pop();
+		profilerFiller.push("armadilloActivityUpdate");
 		ArmadilloAi.updateActivity(this);
-		this.level().getProfiler().pop();
+		profilerFiller.pop();
 		if (this.isAlive() && !this.isBaby() && --this.scuteTime <= 0) {
-			this.playSound(SoundEvents.ARMADILLO_SCUTE_DROP, 1.0F, (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
-			this.spawnAtLocation(Items.ARMADILLO_SCUTE);
-			this.gameEvent(GameEvent.ENTITY_PLACE);
+			if (this.dropFromGiftLootTable(BuiltInLootTables.ARMADILLO_SHED, this::spawnAtLocation)) {
+				this.playSound(SoundEvents.ARMADILLO_SCUTE_DROP, 1.0F, (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
+				this.gameEvent(GameEvent.ENTITY_PLACE);
+			}
+
 			this.scuteTime = this.pickNextScuteDropTime();
 		}
 

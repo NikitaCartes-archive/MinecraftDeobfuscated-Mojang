@@ -3,7 +3,6 @@ package net.minecraft.world.entity.animal;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.function.IntFunction;
-import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ItemParticleOption;
@@ -65,10 +64,6 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
-import net.minecraft.world.level.storage.loot.LootParams;
-import net.minecraft.world.level.storage.loot.LootTable;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.Vec3;
 
 public class Panda extends Animal {
@@ -101,10 +96,6 @@ public class Panda extends Animal {
 	private float rollAmount;
 	private float rollAmountO;
 	Panda.PandaLookAtPlayerGoal lookAtPlayerGoal;
-	static final Predicate<ItemEntity> PANDA_ITEMS = itemEntity -> {
-		ItemStack itemStack = itemEntity.getItem();
-		return (itemStack.is(Blocks.BAMBOO.asItem()) || itemStack.is(Blocks.CAKE.asItem())) && itemEntity.isAlive() && !itemEntity.hasPickUpDelay();
-	};
 
 	public Panda(EntityType<? extends Panda> entityType, Level level) {
 		super(entityType, level);
@@ -406,7 +397,7 @@ public class Panda extends Animal {
 		if (this.isEating()) {
 			this.addEatingParticles();
 			if (!this.level().isClientSide && this.getEatCounter() > 80 && this.random.nextInt(20) == 1) {
-				if (this.getEatCounter() > 100 && this.isFoodOrCake(this.getItemBySlot(EquipmentSlot.MAINHAND))) {
+				if (this.getEatCounter() > 100 && this.getItemBySlot(EquipmentSlot.MAINHAND).is(ItemTags.PANDA_EATS_FROM_GROUND)) {
 					if (!this.level().isClientSide) {
 						this.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
 						this.gameEvent(GameEvent.EAT);
@@ -524,22 +515,13 @@ public class Panda extends Animal {
 		}
 
 		if (!level.isClientSide() && level.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
-			ServerLevel serverLevel = (ServerLevel)level;
-			LootTable lootTable = serverLevel.getServer().reloadableRegistries().getLootTable(BuiltInLootTables.PANDA_SNEEZE);
-			LootParams lootParams = new LootParams.Builder(serverLevel)
-				.withParameter(LootContextParams.ORIGIN, this.position())
-				.withParameter(LootContextParams.THIS_ENTITY, this)
-				.create(LootContextParamSets.GIFT);
-
-			for (ItemStack itemStack : lootTable.getRandomItems(lootParams)) {
-				this.spawnAtLocation(itemStack);
-			}
+			this.dropFromGiftLootTable(BuiltInLootTables.PANDA_SNEEZE, this::spawnAtLocation);
 		}
 	}
 
 	@Override
 	protected void pickUpItem(ItemEntity itemEntity) {
-		if (this.getItemBySlot(EquipmentSlot.MAINHAND).isEmpty() && PANDA_ITEMS.test(itemEntity)) {
+		if (this.getItemBySlot(EquipmentSlot.MAINHAND).isEmpty() && canPickUpAndEat(itemEntity)) {
 			this.onItemPickup(itemEntity);
 			ItemStack itemStack = itemEntity.getItem();
 			this.setItemSlot(EquipmentSlot.MAINHAND, itemStack);
@@ -683,10 +665,6 @@ public class Panda extends Animal {
 		return itemStack.is(ItemTags.PANDA_FOOD);
 	}
 
-	private boolean isFoodOrCake(ItemStack itemStack) {
-		return this.isFood(itemStack) || itemStack.is(Blocks.CAKE.asItem());
-	}
-
 	@Nullable
 	@Override
 	protected SoundEvent getDeathSound() {
@@ -706,6 +684,10 @@ public class Panda extends Animal {
 	@Override
 	public EntityDimensions getDefaultDimensions(Pose pose) {
 		return this.isBaby() ? BABY_DIMENSIONS : super.getDefaultDimensions(pose);
+	}
+
+	private static boolean canPickUpAndEat(ItemEntity itemEntity) {
+		return itemEntity.getItem().is(ItemTags.PANDA_EATS_FROM_GROUND) && itemEntity.isAlive() && !itemEntity.hasPickUpDelay();
 	}
 
 	public static enum Gene implements StringRepresentable {
@@ -1059,15 +1041,16 @@ public class Panda extends Animal {
 
 		@Override
 		public boolean canUse() {
-			if (this.cooldown <= Panda.this.tickCount
-				&& !Panda.this.isBaby()
-				&& !Panda.this.isInWater()
-				&& Panda.this.canPerformAction()
-				&& Panda.this.getUnhappyCounter() <= 0) {
-				List<ItemEntity> list = Panda.this.level().getEntitiesOfClass(ItemEntity.class, Panda.this.getBoundingBox().inflate(6.0, 6.0, 6.0), Panda.PANDA_ITEMS);
-				return !list.isEmpty() || !Panda.this.getItemBySlot(EquipmentSlot.MAINHAND).isEmpty();
-			} else {
+			if (this.cooldown > Panda.this.tickCount
+				|| Panda.this.isBaby()
+				|| Panda.this.isInWater()
+				|| !Panda.this.canPerformAction()
+				|| Panda.this.getUnhappyCounter() > 0) {
 				return false;
+			} else {
+				return !Panda.this.getItemBySlot(EquipmentSlot.MAINHAND).isEmpty()
+					? true
+					: !Panda.this.level().getEntitiesOfClass(ItemEntity.class, Panda.this.getBoundingBox().inflate(6.0, 6.0, 6.0), Panda::canPickUpAndEat).isEmpty();
 			}
 		}
 
@@ -1087,10 +1070,12 @@ public class Panda extends Animal {
 
 		@Override
 		public void start() {
-			List<ItemEntity> list = Panda.this.level().getEntitiesOfClass(ItemEntity.class, Panda.this.getBoundingBox().inflate(8.0, 8.0, 8.0), Panda.PANDA_ITEMS);
-			if (!list.isEmpty() && Panda.this.getItemBySlot(EquipmentSlot.MAINHAND).isEmpty()) {
-				Panda.this.getNavigation().moveTo((Entity)list.get(0), 1.2F);
-			} else if (!Panda.this.getItemBySlot(EquipmentSlot.MAINHAND).isEmpty()) {
+			if (Panda.this.getItemBySlot(EquipmentSlot.MAINHAND).isEmpty()) {
+				List<ItemEntity> list = Panda.this.level().getEntitiesOfClass(ItemEntity.class, Panda.this.getBoundingBox().inflate(8.0, 8.0, 8.0), Panda::canPickUpAndEat);
+				if (!list.isEmpty()) {
+					Panda.this.getNavigation().moveTo((Entity)list.getFirst(), 1.2F);
+				}
+			} else {
 				Panda.this.tryToSit();
 			}
 

@@ -22,7 +22,7 @@ public class ShearsDispenseItemBehavior extends OptionalDispenseItemBehavior {
 		ServerLevel serverLevel = blockSource.level();
 		if (!serverLevel.isClientSide()) {
 			BlockPos blockPos = blockSource.pos().relative(blockSource.state().getValue(DispenserBlock.FACING));
-			this.setSuccess(tryShearBeehive(serverLevel, blockPos) || tryShearLivingEntity(serverLevel, blockPos));
+			this.setSuccess(tryShearBeehive(serverLevel, blockPos) || tryShearLivingEntity(serverLevel, blockPos, itemStack));
 			if (this.isSuccess()) {
 				itemStack.hurtAndBreak(1, serverLevel, null, item -> {
 				});
@@ -51,10 +51,10 @@ public class ShearsDispenseItemBehavior extends OptionalDispenseItemBehavior {
 		return false;
 	}
 
-	private static boolean tryShearLivingEntity(ServerLevel serverLevel, BlockPos blockPos) {
+	private static boolean tryShearLivingEntity(ServerLevel serverLevel, BlockPos blockPos, ItemStack itemStack) {
 		for (LivingEntity livingEntity : serverLevel.getEntitiesOfClass(LivingEntity.class, new AABB(blockPos), EntitySelector.NO_SPECTATORS)) {
 			if (livingEntity instanceof Shearable shearable && shearable.readyForShearing()) {
-				shearable.shear(SoundSource.BLOCKS);
+				shearable.shear(SoundSource.BLOCKS, itemStack);
 				serverLevel.gameEvent(null, GameEvent.SHEAR, blockPos);
 				return true;
 			}

@@ -54,6 +54,8 @@ public final class ItemTags {
 	public static final TagKey<Item> PIGLIN_LOVED = bind("piglin_loved");
 	public static final TagKey<Item> IGNORED_BY_PIGLIN_BABIES = bind("ignored_by_piglin_babies");
 	public static final TagKey<Item> PIGLIN_SAFE_ARMOR = bind("piglin_safe_armor");
+	public static final TagKey<Item> DUPLICATES_ALLAYS = bind("duplicates_allays");
+	public static final TagKey<Item> BREWING_FUEL = bind("brewing_fuel");
 	public static final TagKey<Item> MEAT = bind("meat");
 	public static final TagKey<Item> SNIFFER_FOOD = bind("sniffer_food");
 	public static final TagKey<Item> PIGLIN_FOOD = bind("piglin_food");
@@ -75,6 +77,7 @@ public final class ItemTags {
 	public static final TagKey<Item> LLAMA_TEMPT_ITEMS = bind("llama_tempt_items");
 	public static final TagKey<Item> OCELOT_FOOD = bind("ocelot_food");
 	public static final TagKey<Item> PANDA_FOOD = bind("panda_food");
+	public static final TagKey<Item> PANDA_EATS_FROM_GROUND = bind("panda_eats_from_ground");
 	public static final TagKey<Item> PIG_FOOD = bind("pig_food");
 	public static final TagKey<Item> RABBIT_FOOD = bind("rabbit_food");
 	public static final TagKey<Item> STRIDER_FOOD = bind("strider_food");

@@ -221,7 +221,7 @@ public class NewMinecartBehavior extends MinecartBehavior {
 	@Override
 	public void moveAlongTrack() {
 		for (NewMinecartBehavior.TrackIteration trackIteration = new NewMinecartBehavior.TrackIteration();
-			trackIteration.shouldIterate();
+			trackIteration.shouldIterate() && this.minecart.isAlive();
 			trackIteration.firstIteration = false
 		) {
 			Vec3 vec3 = this.getDeltaMovement();
@@ -273,9 +273,10 @@ public class NewMinecartBehavior extends MinecartBehavior {
 					this.setRotation(f, g);
 				}
 
-				this.lerpSteps.add(new NewMinecartBehavior.MinecartStep(vec33, this.getDeltaMovement(), this.getYRot(), this.getXRot(), (float)d));
+				this.lerpSteps
+					.add(new NewMinecartBehavior.MinecartStep(vec33, this.getDeltaMovement(), this.getYRot(), this.getXRot(), (float)Math.min(d, this.getMaxSpeed())));
 			} else if (vec3.horizontalDistanceSqr() > 0.0) {
-				this.lerpSteps.add(new NewMinecartBehavior.MinecartStep(vec33, this.getDeltaMovement(), this.getYRot(), this.getXRot(), (float)vec3.length()));
+				this.lerpSteps.add(new NewMinecartBehavior.MinecartStep(vec33, this.getDeltaMovement(), this.getYRot(), this.getXRot(), 1.0F));
 			}
 
 			if (d > 1.0E-5F || trackIteration.firstIteration) {

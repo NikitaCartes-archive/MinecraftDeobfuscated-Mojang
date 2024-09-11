@@ -12,6 +12,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundBossEventPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.util.profiling.Profiler;
+import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.BossEvent;
 
 @Environment(EnvType.CLIENT)
@@ -57,7 +59,8 @@ public class BossHealthOverlay {
 
 	public void render(GuiGraphics guiGraphics) {
 		if (!this.events.isEmpty()) {
-			this.minecraft.getProfiler().push("bossHealth");
+			ProfilerFiller profilerFiller = Profiler.get();
+			profilerFiller.push("bossHealth");
 			int i = guiGraphics.guiWidth();
 			int j = 12;
 
@@ -75,7 +78,7 @@ public class BossHealthOverlay {
 				}
 			}
 
-			this.minecraft.getProfiler().pop();
+			profilerFiller.pop();
 		}
 	}
 

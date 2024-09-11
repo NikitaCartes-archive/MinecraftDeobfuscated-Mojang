@@ -24,6 +24,7 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.progress.ChunkProgressListener;
 import net.minecraft.util.VisibleForDebug;
+import net.minecraft.util.profiling.Profiler;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.util.thread.BlockableEventLoop;
 import net.minecraft.world.entity.Entity;
@@ -53,7 +54,7 @@ import org.slf4j.Logger;
 public class ServerChunkCache extends ChunkSource {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private final DistanceManager distanceManager;
-	final ServerLevel level;
+	private final ServerLevel level;
 	final Thread mainThread;
 	final ThreadedLevelLightEngine lightEngine;
 	private final ServerChunkCache.MainThreadExecutor mainThreadProcessor;
@@ -150,7 +151,7 @@ public class ServerChunkCache extends ChunkSource {
 		if (Thread.currentThread() != this.mainThread) {
 			return (ChunkAccess)CompletableFuture.supplyAsync(() -> this.getChunk(i, j, chunkStatus, bl), this.mainThreadProcessor).join();
 		} else {
-			ProfilerFiller profilerFiller = this.level.getProfiler();
+			ProfilerFiller profilerFiller = Profiler.get();
 			profilerFiller.incrementCounter("getChunk");
 			long l = ChunkPos.asLong(i, j);
 
@@ -183,7 +184,7 @@ public class ServerChunkCache extends ChunkSource {
 		if (Thread.currentThread() != this.mainThread) {
 			return null;
 		} else {
-			this.level.getProfiler().incrementCounter("getChunkNow");
+			Profiler.get().incrementCounter("getChunkNow");
 			long l = ChunkPos.asLong(i, j);
 
 			for (int k = 0; k < 4; k++) {
@@ -238,7 +239,7 @@ public class ServerChunkCache extends ChunkSource {
 		if (bl) {
 			this.distanceManager.addTicket(TicketType.UNKNOWN, chunkPos, k, chunkPos);
 			if (this.chunkAbsent(chunkHolder, k)) {
-				ProfilerFiller profilerFiller = this.level.getProfiler();
+				ProfilerFiller profilerFiller = Profiler.get();
 				profilerFiller.push("chunkLoad");
 				this.runDistanceManagerUpdates();
 				chunkHolder = this.getVisibleChunkIfPresent(l);
@@ -315,21 +316,22 @@ public class ServerChunkCache extends ChunkSource {
 
 	@Override
 	public void tick(BooleanSupplier booleanSupplier, boolean bl) {
-		this.level.getProfiler().push("purge");
+		ProfilerFiller profilerFiller = Profiler.get();
+		profilerFiller.push("purge");
 		if (this.level.tickRateManager().runsNormally() || !bl) {
 			this.distanceManager.purgeStaleTickets();
 		}
 
 		this.runDistanceManagerUpdates();
-		this.level.getProfiler().popPush("chunks");
+		profilerFiller.popPush("chunks");
 		if (bl) {
 			this.tickChunks();
 			this.chunkMap.tick();
 		}
 
-		this.level.getProfiler().popPush("unload");
+		profilerFiller.popPush("unload");
 		this.chunkMap.tick(booleanSupplier);
-		this.level.getProfiler().pop();
+		profilerFiller.pop();
 		this.clearCache();
 	}
 
@@ -338,7 +340,7 @@ public class ServerChunkCache extends ChunkSource {
 		long m = l - this.lastInhabitedUpdate;
 		this.lastInhabitedUpdate = l;
 		if (!this.level.isDebug()) {
-			ProfilerFiller profilerFiller = this.level.getProfiler();
+			ProfilerFiller profilerFiller = Profiler.get();
 			profilerFiller.push("pollingChunks");
 			if (this.level.tickRateManager().runsNormally()) {
 				List<LevelChunk> list = this.tickingChunks;
@@ -582,7 +584,7 @@ public class ServerChunkCache extends ChunkSource {
 
 		@Override
 		protected void doRunTask(Runnable runnable) {
-			ServerChunkCache.this.level.getProfiler().incrementCounter("runTask");
+			Profiler.get().incrementCounter("runTask");
 			super.doRunTask(runnable);
 		}
 

@@ -98,14 +98,18 @@ public class MinecartTNT extends AbstractMinecart {
 
 	protected void explode(@Nullable DamageSource damageSource, double d) {
 		if (!this.level().isClientSide) {
-			double e = Math.sqrt(d);
-			if (e > 5.0) {
-				e = 5.0;
-			}
-
+			double e = Math.min(Math.sqrt(d), 5.0);
 			this.level()
 				.explode(
-					this, damageSource, null, this.getX(), this.getY(), this.getZ(), (float)(4.0 + this.random.nextDouble() * 1.5 * e), false, Level.ExplosionInteraction.TNT
+					this,
+					damageSource,
+					null,
+					this.getX(),
+					this.getY(),
+					this.getZ(),
+					(float)((double)this.explosionPowerBase + this.random.nextDouble() * 1.5 * e),
+					false,
+					Level.ExplosionInteraction.TNT
 				);
 			this.discard();
 		}

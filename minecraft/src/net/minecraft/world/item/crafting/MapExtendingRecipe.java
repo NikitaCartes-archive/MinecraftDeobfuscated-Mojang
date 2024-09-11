@@ -49,7 +49,7 @@ public class MapExtendingRecipe extends ShapedRecipe {
 	private static ItemStack findFilledMap(CraftingInput craftingInput) {
 		for (int i = 0; i < craftingInput.size(); i++) {
 			ItemStack itemStack = craftingInput.getItem(i);
-			if (itemStack.is(Items.FILLED_MAP)) {
+			if (itemStack.has(DataComponents.MAP_ID)) {
 				return itemStack;
 			}
 		}

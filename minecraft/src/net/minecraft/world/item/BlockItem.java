@@ -83,7 +83,7 @@ public class BlockItem extends Item {
 					level.playSound(player, blockPos, this.getPlaceSound(blockState2), SoundSource.BLOCKS, (soundType.getVolume() + 1.0F) / 2.0F, soundType.getPitch() * 0.8F);
 					level.gameEvent(GameEvent.BLOCK_PLACE, blockPos, GameEvent.Context.of(player, blockState2));
 					itemStack.consume(1, player);
-					return InteractionResult.SUCCESS_SERVER;
+					return InteractionResult.SUCCESS;
 				}
 			}
 		}

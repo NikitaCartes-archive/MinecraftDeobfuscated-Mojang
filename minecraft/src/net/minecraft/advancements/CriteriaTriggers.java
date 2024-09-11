@@ -23,7 +23,7 @@ import net.minecraft.advancements.critereon.ImpossibleTrigger;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
 import net.minecraft.advancements.critereon.ItemDurabilityTrigger;
 import net.minecraft.advancements.critereon.ItemUsedOnLocationTrigger;
-import net.minecraft.advancements.critereon.KilledByCrossbowTrigger;
+import net.minecraft.advancements.critereon.KilledByArrowTrigger;
 import net.minecraft.advancements.critereon.KilledTrigger;
 import net.minecraft.advancements.critereon.LevitationTrigger;
 import net.minecraft.advancements.critereon.LightningStrikeTrigger;
@@ -81,7 +81,7 @@ public class CriteriaTriggers {
 	public static final FishingRodHookedTrigger FISHING_ROD_HOOKED = register("fishing_rod_hooked", new FishingRodHookedTrigger());
 	public static final ChanneledLightningTrigger CHANNELED_LIGHTNING = register("channeled_lightning", new ChanneledLightningTrigger());
 	public static final ShotCrossbowTrigger SHOT_CROSSBOW = register("shot_crossbow", new ShotCrossbowTrigger());
-	public static final KilledByCrossbowTrigger KILLED_BY_CROSSBOW = register("killed_by_crossbow", new KilledByCrossbowTrigger());
+	public static final KilledByArrowTrigger KILLED_BY_ARROW = register("killed_by_arrow", new KilledByArrowTrigger());
 	public static final PlayerTrigger RAID_WIN = register("hero_of_the_village", new PlayerTrigger());
 	public static final PlayerTrigger RAID_OMEN = register("voluntary_exile", new PlayerTrigger());
 	public static final SlideDownBlockTrigger HONEY_BLOCK_SLIDE = register("slide_down_block", new SlideDownBlockTrigger());

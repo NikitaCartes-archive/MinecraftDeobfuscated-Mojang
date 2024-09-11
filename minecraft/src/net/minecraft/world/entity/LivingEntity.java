@@ -24,6 +24,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.Map.Entry;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -69,6 +70,8 @@ import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
+import net.minecraft.util.profiling.Profiler;
+import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.CombatRules;
@@ -100,6 +103,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemUseAnimation;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.DeathProtection;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.effects.EnchantmentLocationBasedEffect;
@@ -383,7 +387,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		}
 
 		super.baseTick();
-		this.level().getProfiler().push("livingEntityBaseTick");
+		ProfilerFiller profilerFiller = Profiler.get();
+		profilerFiller.push("livingEntityBaseTick");
 		if (this.fireImmune() || this.level().isClientSide) {
 			this.clearFire();
 		}
@@ -480,7 +485,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		this.yHeadRotO = this.yHeadRot;
 		this.yRotO = this.getYRot();
 		this.xRotO = this.getXRot();
-		this.level().getProfiler().pop();
+		profilerFiller.pop();
 	}
 
 	@Override
@@ -1237,10 +1242,12 @@ public abstract class LivingEntity extends Entity implements Attackable {
 			return false;
 		} else {
 			ItemStack itemStack = null;
+			DeathProtection deathProtection = null;
 
 			for (InteractionHand interactionHand : InteractionHand.values()) {
 				ItemStack itemStack2 = this.getItemInHand(interactionHand);
-				if (itemStack2.is(Items.TOTEM_OF_UNDYING)) {
+				deathProtection = itemStack2.get(DataComponents.DEATH_PROTECTION);
+				if (deathProtection != null) {
 					itemStack = itemStack2.copy();
 					itemStack2.shrink(1);
 					break;
@@ -1249,20 +1256,17 @@ public abstract class LivingEntity extends Entity implements Attackable {
 
 			if (itemStack != null) {
 				if (this instanceof ServerPlayer serverPlayer) {
-					serverPlayer.awardStat(Stats.ITEM_USED.get(Items.TOTEM_OF_UNDYING));
+					serverPlayer.awardStat(Stats.ITEM_USED.get(itemStack.getItem()));
 					CriteriaTriggers.USED_TOTEM.trigger(serverPlayer, itemStack);
 					this.gameEvent(GameEvent.ITEM_INTERACT_FINISH);
 				}
 
 				this.setHealth(1.0F);
-				this.removeAllEffects();
-				this.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 900, 1));
-				this.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, 100, 1));
-				this.addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, 800, 0));
+				deathProtection.applyEffects(itemStack, this);
 				this.level().broadcastEntityEvent(this, (byte)35);
 			}
 
-			return itemStack != null;
+			return deathProtection != null;
 		}
 	}
 
@@ -1427,17 +1431,41 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		}
 	}
 
-	protected void dropFromShearingLootTable(ResourceKey<LootTable> resourceKey, Consumer<ItemStack> consumer) {
-		if (this.level() instanceof ServerLevel serverLevel) {
+	public boolean dropFromGiftLootTable(ResourceKey<LootTable> resourceKey, Consumer<ItemStack> consumer) {
+		return this.dropFromLootTable(
+			resourceKey,
+			builder -> builder.withParameter(LootContextParams.ORIGIN, this.position())
+					.withParameter(LootContextParams.THIS_ENTITY, this)
+					.create(LootContextParamSets.GIFT),
+			consumer
+		);
+	}
+
+	protected void dropFromShearingLootTable(ResourceKey<LootTable> resourceKey, ItemStack itemStack, Consumer<ItemStack> consumer) {
+		this.dropFromLootTable(
+			resourceKey,
+			builder -> builder.withParameter(LootContextParams.ORIGIN, this.position())
+					.withParameter(LootContextParams.THIS_ENTITY, this)
+					.withParameter(LootContextParams.TOOL, itemStack)
+					.create(LootContextParamSets.SHEARING),
+			consumer
+		);
+	}
+
+	protected boolean dropFromLootTable(ResourceKey<LootTable> resourceKey, Function<LootParams.Builder, LootParams> function, Consumer<ItemStack> consumer) {
+		if (!(this.level() instanceof ServerLevel serverLevel)) {
+			return false;
+		} else {
 			LootTable lootTable = serverLevel.getServer().reloadableRegistries().getLootTable(resourceKey);
-			LootParams lootParams = new LootParams.Builder(serverLevel)
-				.withParameter(LootContextParams.ORIGIN, this.position())
-				.withParameter(LootContextParams.THIS_ENTITY, this)
-				.create(LootContextParamSets.SHEARING);
+			LootParams lootParams = (LootParams)function.apply(new LootParams.Builder(serverLevel));
+			boolean bl = false;
 
 			for (ItemStack itemStack : lootTable.getRandomItems(lootParams)) {
 				consumer.accept(itemStack);
+				bl = true;
 			}
+
+			return bl;
 		}
 	}
 
@@ -1613,7 +1641,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
 
 			for (EquipmentSlot equipmentSlot : equipmentSlots) {
 				ItemStack itemStack = this.getItemBySlot(equipmentSlot);
-				if (itemStack.isDamageableItem() && itemStack.canBeHurtBy(damageSource)) {
+				Equippable equippable = itemStack.get(DataComponents.EQUIPPABLE);
+				if (equippable != null && equippable.damageOnHurt() && itemStack.isDamageableItem() && itemStack.canBeHurtBy(damageSource)) {
 					itemStack.hurtAndBreak(i, this, equipmentSlot);
 				}
 			}
@@ -2409,10 +2438,11 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		}
 
 		this.run = this.run + (k - this.run) * 0.3F;
-		this.level().getProfiler().push("headTurn");
+		ProfilerFiller profilerFiller = Profiler.get();
+		profilerFiller.push("headTurn");
 		h = this.tickHeadTurn(g, h);
-		this.level().getProfiler().pop();
-		this.level().getProfiler().push("rangeChecks");
+		profilerFiller.pop();
+		profilerFiller.push("rangeChecks");
 
 		while (this.getYRot() - this.yRotO < -180.0F) {
 			this.yRotO -= 360.0F;
@@ -2446,7 +2476,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 			this.yHeadRotO += 360.0F;
 		}
 
-		this.level().getProfiler().pop();
+		profilerFiller.pop();
 		this.animStep += h;
 		if (this.isFallFlying()) {
 			this.fallFlyTicks++;
@@ -2459,9 +2489,9 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		}
 
 		this.refreshDirtyAttributes();
-		float l = this.getScale();
-		if (l != this.appliedScale) {
-			this.appliedScale = l;
+		float m = this.getScale();
+		if (m != this.appliedScale) {
+			this.appliedScale = m;
 			this.refreshDimensions();
 		}
 
@@ -2638,19 +2668,20 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		}
 
 		this.setDeltaMovement(d, e, f);
-		this.level().getProfiler().push("ai");
+		ProfilerFiller profilerFiller = Profiler.get();
+		profilerFiller.push("ai");
 		if (this.isImmobile()) {
 			this.jumping = false;
 			this.xxa = 0.0F;
 			this.zza = 0.0F;
 		} else if (this.isEffectiveAi()) {
-			this.level().getProfiler().push("newAi");
+			profilerFiller.push("newAi");
 			this.serverAiStep();
-			this.level().getProfiler().pop();
+			profilerFiller.pop();
 		}
 
-		this.level().getProfiler().pop();
-		this.level().getProfiler().push("jump");
+		profilerFiller.pop();
+		profilerFiller.push("jump");
 		if (this.jumping && this.isAffectedByFluids()) {
 			double g;
 			if (this.isInLava()) {
@@ -2677,8 +2708,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
 			this.noJumpDelay = 0;
 		}
 
-		this.level().getProfiler().pop();
-		this.level().getProfiler().push("travel");
+		profilerFiller.pop();
+		profilerFiller.push("travel");
 		this.xxa *= 0.98F;
 		this.zza *= 0.98F;
 		if (this.isFallFlying()) {
@@ -2705,8 +2736,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		}
 
 		this.calculateEntityAnimation(this instanceof FlyingAnimal);
-		this.level().getProfiler().pop();
-		this.level().getProfiler().push("freezing");
+		profilerFiller.pop();
+		profilerFiller.push("freezing");
 		if (!this.level().isClientSide && !this.isDeadOrDying()) {
 			int i = this.getTicksFrozen();
 			if (this.isInPowderSnow && this.canFreeze()) {
@@ -2722,15 +2753,15 @@ public abstract class LivingEntity extends Entity implements Attackable {
 			this.hurt(this.damageSources().freeze(), 1.0F);
 		}
 
-		this.level().getProfiler().pop();
-		this.level().getProfiler().push("push");
+		profilerFiller.pop();
+		profilerFiller.push("push");
 		if (this.autoSpinAttackTicks > 0) {
 			this.autoSpinAttackTicks--;
 			this.checkAutoSpinAttack(aABB, this.getBoundingBox());
 		}
 
 		this.pushEntities();
-		this.level().getProfiler().pop();
+		profilerFiller.pop();
 		if (!this.level().isClientSide && this.isSensitiveToWater() && this.isInWaterRainOrBubble()) {
 			this.hurt(this.damageSources().drown(), 1.0F);
 		}

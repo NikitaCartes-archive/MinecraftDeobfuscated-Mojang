@@ -74,7 +74,9 @@ import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 import net.minecraft.util.VisibleForDebug;
+import net.minecraft.util.profiling.Profiler;
 import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.util.profiling.Zone;
 import net.minecraft.world.TickRateManager;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
@@ -333,7 +335,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 			this.allChanged();
 		}
 
-		ProfilerFiller profilerFiller = this.level.getProfiler();
+		ProfilerFiller profilerFiller = Profiler.get();
 		profilerFiller.push("camera");
 		int i = SectionPos.posToSectionCoord(vec3.x());
 		int j = SectionPos.posToSectionCoord(vec3.y());
@@ -387,10 +389,10 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 		if (!Minecraft.getInstance().isSameThread()) {
 			throw new IllegalStateException("applyFrustum called from wrong thread: " + Thread.currentThread().getName());
 		} else {
-			this.minecraft.getProfiler().push("apply_frustum");
+			Profiler.get().push("apply_frustum");
 			this.clearVisibleSections();
 			this.sectionOcclusionGraph.addSectionsInFrustum(frustum, this.visibleSections, this.nearbyVisibleSections);
-			this.minecraft.getProfiler().pop();
+			Profiler.get().pop();
 		}
 	}
 
@@ -417,7 +419,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 		RenderSystem.setShaderGameTime(this.level.getGameTime(), f);
 		this.blockEntityRenderDispatcher.prepare(this.level, camera, this.minecraft.hitResult);
 		this.entityRenderDispatcher.prepare(this.level, camera, this.minecraft.crosshairPickEntity);
-		final ProfilerFiller profilerFiller = this.level.getProfiler();
+		final ProfilerFiller profilerFiller = Profiler.get();
 		profilerFiller.popPush("light_update_queue");
 		this.level.pollLightUpdates();
 		profilerFiller.popPush("light_updates");
@@ -429,7 +431,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 		profilerFiller.popPush("culling");
 		boolean bl2 = this.capturedFrustum != null;
 		Frustum frustum = bl2 ? this.capturedFrustum : this.cullingFrustum;
-		this.minecraft.getProfiler().popPush("captureFrustum");
+		Profiler.get().popPush("captureFrustum");
 		if (this.captureFrustum) {
 			this.capturedFrustum = bl2 ? new Frustum(matrix4f, matrix4f2) : frustum;
 			this.capturedFrustum.prepare(d, e, g);
@@ -906,7 +908,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 		if (!this.visibleSections.isEmpty()) {
 			BlockPos blockPos = BlockPos.containing(vec3);
 			boolean bl = !blockPos.equals(this.lastTranslucentSortBlockPos);
-			this.minecraft.getProfiler().push("translucent_sort");
+			Profiler.get().push("translucent_sort");
 			SectionRenderDispatcher.TranslucencyPointOfView translucencyPointOfView = new SectionRenderDispatcher.TranslucencyPointOfView();
 
 			for (SectionRenderDispatcher.RenderSection renderSection : this.nearbyVisibleSections) {
@@ -922,7 +924,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 			}
 
 			this.lastTranslucentSortBlockPos = blockPos;
-			this.minecraft.getProfiler().pop();
+			Profiler.get().pop();
 		}
 	}
 
@@ -943,13 +945,15 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 
 	private void renderSectionLayer(RenderType renderType, double d, double e, double f, Matrix4f matrix4f, Matrix4f matrix4f2) {
 		RenderSystem.assertOnRenderThread();
-		this.minecraft.getProfiler().push((Supplier<String>)(() -> "render_" + renderType));
+		Zone zone = Profiler.get().zone((Supplier<String>)(() -> "render_" + renderType.name));
+		zone.addText(renderType::toString);
 		boolean bl = renderType != RenderType.translucent();
 		ObjectListIterator<SectionRenderDispatcher.RenderSection> objectListIterator = this.visibleSections.listIterator(bl ? 0 : this.visibleSections.size());
 		renderType.setupRenderState();
 		CompiledShaderProgram compiledShaderProgram = RenderSystem.getShader();
 		if (compiledShaderProgram == null) {
 			renderType.clearRenderState();
+			zone.close();
 		} else {
 			compiledShaderProgram.setDefaultUniforms(VertexFormat.Mode.QUADS, matrix4f, matrix4f2, this.minecraft.getWindow());
 			compiledShaderProgram.apply();
@@ -976,7 +980,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 
 			compiledShaderProgram.clear();
 			VertexBuffer.unbind();
-			this.minecraft.getProfiler().pop();
+			zone.close();
 			renderType.clearRenderState();
 		}
 	}
@@ -1069,7 +1073,8 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 	}
 
 	private void compileSections(Camera camera) {
-		this.minecraft.getProfiler().push("populate_sections_to_compile");
+		ProfilerFiller profilerFiller = Profiler.get();
+		profilerFiller.push("populate_sections_to_compile");
 		LevelLightEngine levelLightEngine = this.level.getLightEngine();
 		RenderRegionCache renderRegionCache = new RenderRegionCache();
 		BlockPos blockPos = camera.getBlockPosition();
@@ -1087,26 +1092,26 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 				}
 
 				if (bl) {
-					this.minecraft.getProfiler().push("build_near_sync");
+					profilerFiller.push("build_near_sync");
 					this.sectionRenderDispatcher.rebuildSectionSync(renderSection, renderRegionCache);
 					renderSection.setNotDirty();
-					this.minecraft.getProfiler().pop();
+					profilerFiller.pop();
 				} else {
 					list.add(renderSection);
 				}
 			}
 		}
 
-		this.minecraft.getProfiler().popPush("upload");
+		profilerFiller.popPush("upload");
 		this.sectionRenderDispatcher.uploadAllPendingUploads();
-		this.minecraft.getProfiler().popPush("schedule_async_compile");
+		profilerFiller.popPush("schedule_async_compile");
 
 		for (SectionRenderDispatcher.RenderSection renderSectionx : list) {
 			renderSectionx.rebuildSectionAsync(this.sectionRenderDispatcher, renderRegionCache);
 			renderSectionx.setNotDirty();
 		}
 
-		this.minecraft.getProfiler().pop();
+		profilerFiller.pop();
 		this.scheduleTranslucentSectionResort(camera.getPosition());
 	}
 

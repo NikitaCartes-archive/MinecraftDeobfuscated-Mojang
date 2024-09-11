@@ -7,7 +7,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
@@ -34,6 +33,7 @@ import net.minecraft.util.AbortableIterationConsumer;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringRepresentable;
+import net.minecraft.util.profiling.Profiler;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.TickRateManager;
@@ -109,7 +109,6 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 	private final RandomSource threadSafeRandom = RandomSource.createThreadSafe();
 	private final Holder<DimensionType> dimensionTypeRegistration;
 	protected final WritableLevelData levelData;
-	private final Supplier<ProfilerFiller> profiler;
 	public final boolean isClientSide;
 	private final WorldBorder worldBorder;
 	private final BiomeManager biomeManager;
@@ -123,13 +122,11 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 		ResourceKey<Level> resourceKey,
 		RegistryAccess registryAccess,
 		Holder<DimensionType> holder,
-		Supplier<ProfilerFiller> supplier,
 		boolean bl,
 		boolean bl2,
 		long l,
 		int i
 	) {
-		this.profiler = supplier;
 		this.levelData = writableLevelData;
 		this.dimensionTypeRegistration = holder;
 		final DimensionType dimensionType = holder.value();
@@ -440,7 +437,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 	}
 
 	protected void tickBlockEntities() {
-		ProfilerFiller profilerFiller = this.getProfiler();
+		ProfilerFiller profilerFiller = Profiler.get();
 		profilerFiller.push("blockEntities");
 		this.tickingBlockEntities = true;
 		if (!this.pendingBlockEntityTickers.isEmpty()) {
@@ -683,7 +680,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 
 	@Override
 	public List<Entity> getEntities(@Nullable Entity entity, AABB aABB, Predicate<? super Entity> predicate) {
-		this.getProfiler().incrementCounter("getEntities");
+		Profiler.get().incrementCounter("getEntities");
 		List<Entity> list = Lists.<Entity>newArrayList();
 		this.getEntities().get(aABB, entity2 -> {
 			if (entity2 != entity && predicate.test(entity2)) {
@@ -713,7 +710,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 	}
 
 	public <T extends Entity> void getEntities(EntityTypeTest<Entity, T> entityTypeTest, AABB aABB, Predicate<? super T> predicate, List<? super T> list, int i) {
-		this.getProfiler().incrementCounter("getEntities");
+		Profiler.get().incrementCounter("getEntities");
 		this.getEntities().get(entityTypeTest, aABB, entity -> {
 			if (predicate.test(entity)) {
 				list.add(entity);
@@ -945,14 +942,6 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 
 	public boolean noSave() {
 		return false;
-	}
-
-	public ProfilerFiller getProfiler() {
-		return (ProfilerFiller)this.profiler.get();
-	}
-
-	public Supplier<ProfilerFiller> getProfilerSupplier() {
-		return this.profiler;
 	}
 
 	@Override

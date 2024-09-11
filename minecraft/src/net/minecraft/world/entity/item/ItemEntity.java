@@ -4,7 +4,6 @@ import java.util.Objects;
 import java.util.UUID;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -13,7 +12,6 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
-import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Mth;
@@ -27,7 +25,6 @@ import net.minecraft.world.entity.TraceableEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
@@ -264,7 +261,7 @@ public class ItemEntity extends Entity implements TraceableEntity {
 
 	@Override
 	public boolean fireImmune() {
-		return this.getItem().has(DataComponents.FIRE_RESISTANT) || super.fireImmune();
+		return !this.getItem().canBeHurtBy(this.damageSources().inFire()) || super.fireImmune();
 	}
 
 	@Override
@@ -272,8 +269,6 @@ public class ItemEntity extends Entity implements TraceableEntity {
 		if (this.isInvulnerableTo(damageSource)) {
 			return false;
 		} else if (!this.level().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) && damageSource.getEntity() instanceof Mob) {
-			return false;
-		} else if (!this.getItem().isEmpty() && this.getItem().is(Items.NETHER_STAR) && damageSource.is(DamageTypeTags.IS_EXPLOSION)) {
 			return false;
 		} else if (!this.getItem().canBeHurtBy(damageSource)) {
 			return false;

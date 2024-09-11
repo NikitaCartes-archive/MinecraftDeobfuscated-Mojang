@@ -33,25 +33,21 @@ public class PlayerCapeModel<T extends PlayerRenderState> extends HumanoidModel<
 		partDefinition.clearChild("right_leg");
 		partDefinition3.addOrReplaceChild(
 			"cape",
-			CubeListBuilder.create().texOffs(0, 0).addBox(-5.0F, 0.0F, 0.0F, 10.0F, 16.0F, 1.0F, CubeDeformation.NONE, 1.0F, 0.5F),
-			PartPose.offsetAndRotation(0.0F, 0.0F, 3.0F, 0.0F, (float) Math.PI, 0.0F)
+			CubeListBuilder.create().texOffs(0, 0).addBox(-5.0F, 0.0F, -1.0F, 10.0F, 16.0F, 1.0F, CubeDeformation.NONE, 1.0F, 0.5F),
+			PartPose.offsetAndRotation(0.0F, 0.0F, 2.0F, 0.0F, (float) Math.PI, 0.0F)
 		);
 		return LayerDefinition.create(meshDefinition, 64, 64);
 	}
 
 	public void setupAnim(T playerRenderState) {
 		super.setupAnim(playerRenderState);
-		if (!playerRenderState.chestItem.isEmpty()) {
-			this.cape.z++;
-			this.cape.y -= 0.85F;
-		}
-
 		this.cape
 			.rotateBy(
 				new Quaternionf()
-					.rotationX((6.0F + playerRenderState.capeLean / 2.0F + playerRenderState.capeFlap) * (float) (Math.PI / 180.0))
+					.rotateY((float) -Math.PI)
+					.rotateX((6.0F + playerRenderState.capeLean / 2.0F + playerRenderState.capeFlap) * (float) (Math.PI / 180.0))
 					.rotateZ(playerRenderState.capeLean2 / 2.0F * (float) (Math.PI / 180.0))
-					.rotateY(-playerRenderState.capeLean2 / 2.0F * (float) (Math.PI / 180.0))
+					.rotateY((180.0F - playerRenderState.capeLean2 / 2.0F) * (float) (Math.PI / 180.0))
 			);
 	}
 }

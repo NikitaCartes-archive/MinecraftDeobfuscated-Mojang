@@ -1,6 +1,8 @@
 package com.mojang.blaze3d.platform;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.jtracy.MemoryPool;
+import com.mojang.jtracy.TracyClient;
 import com.mojang.logging.LogUtils;
 import java.io.File;
 import java.io.IOException;
@@ -38,6 +40,7 @@ import org.slf4j.Logger;
 @Environment(EnvType.CLIENT)
 public final class NativeImage implements AutoCloseable {
 	private static final Logger LOGGER = LogUtils.getLogger();
+	private static final MemoryPool MEMORY_POOL = TracyClient.createMemoryPool("NativeImage");
 	private static final Set<StandardOpenOption> OPEN_OPTIONS = EnumSet.of(
 		StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING
 	);
@@ -65,6 +68,7 @@ public final class NativeImage implements AutoCloseable {
 				this.pixels = MemoryUtil.nmemAlloc(this.size);
 			}
 
+			MEMORY_POOL.malloc(this.pixels, (int)this.size);
 			if (this.pixels == 0L) {
 				throw new IllegalStateException("Unable to allocate texture of size " + i + "x" + j + " (" + format.components() + " channels)");
 			}
@@ -138,7 +142,7 @@ public final class NativeImage implements AutoCloseable {
 		} else {
 			PngInfo.validateHeader(byteBuffer);
 
-			NativeImage var7;
+			NativeImage var9;
 			try (MemoryStack memoryStack = MemoryStack.stackPush()) {
 				IntBuffer intBuffer = memoryStack.mallocInt(1);
 				IntBuffer intBuffer2 = memoryStack.mallocInt(1);
@@ -148,16 +152,12 @@ public final class NativeImage implements AutoCloseable {
 					throw new IOException("Could not load image: " + STBImage.stbi_failure_reason());
 				}
 
-				var7 = new NativeImage(
-					format == null ? NativeImage.Format.getStbFormat(intBuffer3.get(0)) : format,
-					intBuffer.get(0),
-					intBuffer2.get(0),
-					true,
-					MemoryUtil.memAddress(byteBuffer2)
-				);
+				long l = MemoryUtil.memAddress(byteBuffer2);
+				MEMORY_POOL.malloc(l, byteBuffer2.limit());
+				var9 = new NativeImage(format == null ? NativeImage.Format.getStbFormat(intBuffer3.get(0)) : format, intBuffer.get(0), intBuffer2.get(0), true, l);
 			}
 
-			return var7;
+			return var9;
 		}
 	}
 
@@ -185,6 +185,8 @@ public final class NativeImage implements AutoCloseable {
 			} else {
 				MemoryUtil.nmemFree(this.pixels);
 			}
+
+			MEMORY_POOL.free(this.pixels);
 		}
 
 		this.pixels = 0L;

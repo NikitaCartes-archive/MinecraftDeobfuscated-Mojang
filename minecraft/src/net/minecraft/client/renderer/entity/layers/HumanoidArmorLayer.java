@@ -54,49 +54,25 @@ public class HumanoidArmorLayer<S extends HumanoidRenderState, M extends Humanoi
 
 	public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, S humanoidRenderState, float f, float g) {
 		this.renderArmorPiece(
-			poseStack,
-			multiBufferSource,
-			humanoidRenderState,
-			humanoidRenderState.chestItem,
-			EquipmentSlot.CHEST,
-			i,
-			this.getArmorModel(humanoidRenderState, EquipmentSlot.CHEST)
+			poseStack, multiBufferSource, humanoidRenderState.chestItem, EquipmentSlot.CHEST, i, this.getArmorModel(humanoidRenderState, EquipmentSlot.CHEST)
 		);
 		this.renderArmorPiece(
-			poseStack,
-			multiBufferSource,
-			humanoidRenderState,
-			humanoidRenderState.legsItem,
-			EquipmentSlot.LEGS,
-			i,
-			this.getArmorModel(humanoidRenderState, EquipmentSlot.LEGS)
+			poseStack, multiBufferSource, humanoidRenderState.legsItem, EquipmentSlot.LEGS, i, this.getArmorModel(humanoidRenderState, EquipmentSlot.LEGS)
 		);
 		this.renderArmorPiece(
-			poseStack,
-			multiBufferSource,
-			humanoidRenderState,
-			humanoidRenderState.feetItem,
-			EquipmentSlot.FEET,
-			i,
-			this.getArmorModel(humanoidRenderState, EquipmentSlot.FEET)
+			poseStack, multiBufferSource, humanoidRenderState.feetItem, EquipmentSlot.FEET, i, this.getArmorModel(humanoidRenderState, EquipmentSlot.FEET)
 		);
 		this.renderArmorPiece(
-			poseStack,
-			multiBufferSource,
-			humanoidRenderState,
-			humanoidRenderState.headItem,
-			EquipmentSlot.HEAD,
-			i,
-			this.getArmorModel(humanoidRenderState, EquipmentSlot.HEAD)
+			poseStack, multiBufferSource, humanoidRenderState.headItem, EquipmentSlot.HEAD, i, this.getArmorModel(humanoidRenderState, EquipmentSlot.HEAD)
 		);
 	}
 
 	private void renderArmorPiece(
-		PoseStack poseStack, MultiBufferSource multiBufferSource, S humanoidRenderState, ItemStack itemStack, EquipmentSlot equipmentSlot, int i, A humanoidModel
+		PoseStack poseStack, MultiBufferSource multiBufferSource, ItemStack itemStack, EquipmentSlot equipmentSlot, int i, A humanoidModel
 	) {
 		Equippable equippable = itemStack.get(DataComponents.EQUIPPABLE);
 		if (equippable != null && shouldRender(equippable, equipmentSlot)) {
-			humanoidModel.setupAnim(humanoidRenderState);
+			this.getParentModel().copyPropertiesTo(humanoidModel);
 			this.setPartVisibility(humanoidModel, equipmentSlot);
 			ResourceLocation resourceLocation = (ResourceLocation)equippable.model().orElseThrow();
 			EquipmentModel.LayerType layerType = this.usesInnerModel(equipmentSlot) ? EquipmentModel.LayerType.HUMANOID_LEGGINGS : EquipmentModel.LayerType.HUMANOID;

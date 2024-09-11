@@ -50,7 +50,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.stats.Stats;
-import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.Mth;
@@ -76,6 +75,7 @@ import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.component.Consumable;
+import net.minecraft.world.item.component.DamageResistant;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.item.component.TooltipProvider;
@@ -799,7 +799,7 @@ public final class ItemStack implements DataComponentHolder {
 		} else {
 			List<Component> list = Lists.<Component>newArrayList();
 			list.add(this.getStyledHoverName());
-			if (!tooltipFlag.isAdvanced() && !this.has(DataComponents.CUSTOM_NAME) && this.is(Items.FILLED_MAP)) {
+			if (!tooltipFlag.isAdvanced() && !this.has(DataComponents.CUSTOM_NAME)) {
 				MapId mapId = this.get(DataComponents.MAP_ID);
 				if (mapId != null) {
 					list.add(MapItem.getTooltipForId(mapId));
@@ -1085,7 +1085,8 @@ public final class ItemStack implements DataComponentHolder {
 	}
 
 	public boolean canBeHurtBy(DamageSource damageSource) {
-		return !this.has(DataComponents.FIRE_RESISTANT) || !damageSource.is(DamageTypeTags.IS_FIRE);
+		DamageResistant damageResistant = this.get(DataComponents.DAMAGE_RESISTANT);
+		return damageResistant == null || !damageResistant.isResistantTo(damageSource);
 	}
 
 	public boolean isValidRepairItem(ItemStack itemStack) {

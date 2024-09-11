@@ -45,6 +45,6 @@ public class SingleTickProfiler {
 	}
 
 	public static ProfilerFiller decorateFiller(ProfilerFiller profilerFiller, @Nullable SingleTickProfiler singleTickProfiler) {
-		return singleTickProfiler != null ? ProfilerFiller.tee(singleTickProfiler.startTick(), profilerFiller) : profilerFiller;
+		return singleTickProfiler != null ? ProfilerFiller.combine(singleTickProfiler.startTick(), profilerFiller) : profilerFiller;
 	}
 }

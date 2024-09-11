@@ -49,7 +49,7 @@ public class CartographyTableMenu extends AbstractContainerMenu {
 		this.addSlot(new Slot(this.container, 0, 15, 15) {
 			@Override
 			public boolean mayPlace(ItemStack itemStack) {
-				return itemStack.is(Items.FILLED_MAP);
+				return itemStack.has(DataComponents.MAP_ID);
 			}
 		});
 		this.addSlot(new Slot(this.container, 1, 15, 52) {
@@ -153,7 +153,7 @@ public class CartographyTableMenu extends AbstractContainerMenu {
 
 				slot.onQuickCraft(itemStack2, itemStack);
 			} else if (i != 1 && i != 0) {
-				if (itemStack2.is(Items.FILLED_MAP)) {
+				if (itemStack2.has(DataComponents.MAP_ID)) {
 					if (!this.moveItemStackTo(itemStack2, 0, 1, false)) {
 						return ItemStack.EMPTY;
 					}

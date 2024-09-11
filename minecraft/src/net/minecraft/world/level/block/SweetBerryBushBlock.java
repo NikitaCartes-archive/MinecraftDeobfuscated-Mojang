@@ -3,6 +3,7 @@ package net.minecraft.world.level.block;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
@@ -79,12 +80,14 @@ public class SweetBerryBushBlock extends BushBlock implements BonemealableBlock 
 	protected void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
 		if (entity instanceof LivingEntity && entity.getType() != EntityType.FOX && entity.getType() != EntityType.BEE) {
 			entity.makeStuckInBlock(blockState, new Vec3(0.8F, 0.75, 0.8F));
-			Vec3 vec3 = entity.getKnownMovement();
-			if (!level.isClientSide && (Integer)blockState.getValue(AGE) > 0 && vec3.horizontalDistanceSqr() > 0.0) {
-				double d = Math.abs(vec3.x());
-				double e = Math.abs(vec3.z());
-				if (d >= 0.003F || e >= 0.003F) {
-					entity.hurt(level.damageSources().sweetBerryBush(), 1.0F);
+			if (!level.isClientSide && (Integer)blockState.getValue(AGE) != 0) {
+				Vec3 vec3 = entity instanceof ServerPlayer ? entity.getKnownMovement() : entity.oldPosition().subtract(entity.position());
+				if (vec3.horizontalDistanceSqr() > 0.0) {
+					double d = Math.abs(vec3.x());
+					double e = Math.abs(vec3.z());
+					if (d >= 0.003F || e >= 0.003F) {
+						entity.hurt(level.damageSources().sweetBerryBush(), 1.0F);
+					}
 				}
 			}
 		}

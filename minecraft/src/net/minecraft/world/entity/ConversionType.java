@@ -12,9 +12,17 @@ public enum ConversionType {
 		@Override
 		void convert(Mob mob, Mob mob2, ConversionParams conversionParams) {
 			Entity entity = mob.getFirstPassenger();
+			mob2.copyPosition(mob);
+			mob2.setDeltaMovement(mob.getDeltaMovement());
 			if (entity != null) {
 				entity.stopRiding();
 				entity.boardingCooldown = 0;
+
+				for (Entity entity2 : mob2.getPassengers()) {
+					entity2.stopRiding();
+					entity2.remove(Entity.RemovalReason.DISCARDED);
+				}
+
 				entity.startRiding(mob2);
 			}
 
@@ -28,21 +36,16 @@ public enum ConversionType {
 				}
 			}
 
-			mob2.getAttributes().assignAllValues(mob.getAttributes());
 			mob2.fallDistance = mob.fallDistance;
 			mob2.setSharedFlag(7, mob.isFallFlying());
-			float f = mob.getHealth() / mob.getMaxHealth();
-			mob2.setHealth(mob2.getMaxHealth() * f);
 			mob2.lastHurtByPlayerTime = mob.lastHurtByPlayerTime;
 			mob2.hurtTime = mob.hurtTime;
 			mob2.yBodyRot = mob.yBodyRot;
-			mob2.copyPosition(mob);
-			mob2.setDeltaMovement(mob.getDeltaMovement());
 			mob2.setOnGround(mob.onGround());
 			mob.getSleepingPos().ifPresent(mob2::setSleepingPos);
-			Entity entity2 = mob.getLeashHolder();
-			if (entity2 != null) {
-				mob2.setLeashedTo(entity2, true);
+			Entity entity3 = mob.getLeashHolder();
+			if (entity3 != null) {
+				mob2.setLeashedTo(entity3, true);
 			}
 
 			this.convertCommon(mob, mob2, conversionParams);
@@ -110,8 +113,6 @@ public enum ConversionType {
 			mob2.setPersistenceRequired();
 		}
 
-		mob2.setLootTable(mob.getLootTable());
-		mob2.setLootTableSeed(mob.getLootTableSeed());
 		if (mob.hasCustomName()) {
 			mob2.setCustomName(mob.getCustomName());
 			mob2.setCustomNameVisible(mob.isCustomNameVisible());

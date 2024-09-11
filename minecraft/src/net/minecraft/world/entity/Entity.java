@@ -1,7 +1,6 @@
 package net.minecraft.world.entity;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.collect.ImmutableList.Builder;
@@ -11,16 +10,18 @@ import it.unimi.dsi.fastutil.floats.FloatArrays;
 import it.unimi.dsi.fastutil.floats.FloatSet;
 import it.unimi.dsi.fastutil.objects.Object2DoubleArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
-import it.unimi.dsi.fastutil.objects.ReferenceArraySet;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.Predicate;
@@ -76,6 +77,8 @@ import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.profiling.Profiler;
+import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.Nameable;
@@ -243,7 +246,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 	private boolean hasVisualFire;
 	@Nullable
 	private BlockState inBlockState = null;
-	private final Set<BlockState> blocksInside = new ReferenceArraySet<>();
+	private final Map<BlockPos, BlockState> blocksInside = new HashMap();
 
 	public Entity(EntityType<?> entityType, Level level) {
 		this.type = entityType;
@@ -419,7 +422,8 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 	}
 
 	public void baseTick() {
-		this.level().getProfiler().push("entityBaseTick");
+		ProfilerFiller profilerFiller = Profiler.get();
+		profilerFiller.push("entityBaseTick");
 		this.inBlockState = null;
 		if (this.isPassenger() && this.getVehicle().isRemoved()) {
 			this.stopRiding();
@@ -478,7 +482,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 			Leashable.tickLeash((Entity)((Leashable)this));
 		}
 
-		this.level().getProfiler().pop();
+		profilerFiller.pop();
 	}
 
 	public void setSharedFlagOnFire(boolean bl) {
@@ -608,7 +612,8 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 				}
 			}
 
-			this.level().getProfiler().push("move");
+			ProfilerFiller profilerFiller = Profiler.get();
+			profilerFiller.push("move");
 			if (this.stuckSpeedMultiplier.lengthSqr() > 1.0E-7) {
 				vec3 = vec3.multiply(this.stuckSpeedMultiplier);
 				this.stuckSpeedMultiplier = Vec3.ZERO;
@@ -630,8 +635,8 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 				this.setPos(this.getX() + vec32.x, this.getY() + vec32.y, this.getZ() + vec32.z);
 			}
 
-			this.level().getProfiler().pop();
-			this.level().getProfiler().push("rest");
+			profilerFiller.pop();
+			profilerFiller.push("rest");
 			boolean bl = !Mth.equal(vec3.x, vec32.x);
 			boolean bl2 = !Mth.equal(vec3.z, vec32.z);
 			this.horizontalCollision = bl || bl2;
@@ -654,7 +659,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 			}
 
 			if (this.isRemoved()) {
-				this.level().getProfiler().pop();
+				profilerFiller.pop();
 			} else {
 				if (this.horizontalCollision) {
 					Vec3 vec33 = this.getDeltaMovement();
@@ -677,7 +682,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 
 				float f = this.getBlockSpeedFactor();
 				this.setDeltaMovement(this.getDeltaMovement().multiply((double)f, 1.0, (double)f));
-				this.level().getProfiler().pop();
+				profilerFiller.pop();
 			}
 		}
 	}
@@ -716,6 +721,10 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 	}
 
 	public void applyEffectsFromBlocks() {
+		this.applyEffectsFromBlocks(this.oldPosition(), this.position);
+	}
+
+	public void applyEffectsFromBlocks(Vec3 vec3, Vec3 vec32) {
 		if (this.isAffectedByBlocks()) {
 			boolean bl = this.isOnFire();
 			if (this.onGround()) {
@@ -724,8 +733,17 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 				blockState.getBlock().stepOn(this.level(), blockPos, blockState, this);
 			}
 
-			this.checkInsideBlocks(this.blocksInside);
-			boolean bl2 = Iterables.any(this.blocksInside, blockStatex -> blockStatex.is(BlockTags.FIRE) || blockStatex.is(Blocks.LAVA));
+			this.collectBlockCollidedWith(this.blocksInside, vec3, vec32);
+			boolean bl2 = false;
+
+			for (Entry<BlockPos, BlockState> entry : this.blocksInside.entrySet()) {
+				((BlockState)entry.getValue()).entityInside(this.level(), (BlockPos)entry.getKey(), this);
+				this.onInsideBlock((BlockState)entry.getValue());
+				if (((BlockState)entry.getValue()).is(BlockTags.FIRE) || ((BlockState)entry.getValue()).is(Blocks.LAVA)) {
+					bl2 = true;
+				}
+			}
+
 			this.blocksInside.clear();
 			if (!bl2) {
 				if (this.remainingFireTicks <= 0) {
@@ -1008,13 +1026,11 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 		return SoundEvents.GENERIC_SPLASH;
 	}
 
-	protected void checkInsideBlocks() {
-		this.checkInsideBlocks(null);
+	public void recordMovementThroughBlocks(Vec3 vec3, Vec3 vec32) {
+		this.collectBlockCollidedWith(this.blocksInside, vec3, vec32);
 	}
 
-	protected void checkInsideBlocks(@Nullable Set<BlockState> set) {
-		Vec3 vec3 = this.oldPosition();
-		Vec3 vec32 = this.position;
+	private void collectBlockCollidedWith(Map<BlockPos, BlockState> map, Vec3 vec3, Vec3 vec32) {
 		AABB aABB = this.getBoundingBox().deflate(1.0E-5F);
 
 		for (BlockPos blockPos : BlockGetter.boxTraverseBlocks(vec3, vec32, aABB)) {
@@ -1023,12 +1039,11 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 			}
 
 			BlockState blockState = this.level().getBlockState(blockPos);
-			if (!blockState.isAir()) {
+			if (!blockState.isAir() && !map.containsKey(blockPos)) {
 				try {
 					VoxelShape voxelShape = blockState.getEntityInsideCollisionShape(this.level(), blockPos);
-					if (voxelShape == Shapes.block() || this.collidedWithShapeMovingFrom(vec3, blockPos, voxelShape)) {
-						blockState.entityInside(this.level(), blockPos, this);
-						this.onInsideBlock(blockState);
+					if (voxelShape == Shapes.block() || this.collidedWithShapeMovingFrom(vec3, vec32, blockPos, voxelShape)) {
+						map.put(blockPos.immutable(), blockState);
 					}
 				} catch (Throwable var12) {
 					CrashReport crashReport = CrashReport.forThrowable(var12, "Colliding entity with block");
@@ -1038,18 +1053,14 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 					this.fillCrashReportCategory(crashReportCategory2);
 					throw new ReportedException(crashReport);
 				}
-
-				if (set != null) {
-					set.add(blockState);
-				}
 			}
 		}
 	}
 
-	private boolean collidedWithShapeMovingFrom(Vec3 vec3, BlockPos blockPos, VoxelShape voxelShape) {
-		AABB aABB = this.getBoundingBox();
-		Vec3 vec32 = vec3.subtract(aABB.getBottomCenter());
-		return this.getBoundingBox().collidedAlongVector(vec32, voxelShape.move(new Vec3(blockPos)).toAabbs());
+	private boolean collidedWithShapeMovingFrom(Vec3 vec3, Vec3 vec32, BlockPos blockPos, VoxelShape voxelShape) {
+		AABB aABB = this.getBoundingBox().move(this.getBoundingBox().getCenter().scale(-1.0)).move(vec32);
+		Vec3 vec33 = vec3.subtract(aABB.getBottomCenter());
+		return this.getBoundingBox().collidedAlongVector(vec33, voxelShape.move(new Vec3(blockPos)).toAabbs());
 	}
 
 	protected void onInsideBlock(BlockState blockState) {
@@ -1774,6 +1785,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 			double e = listTag2.getDouble(1);
 			double f = listTag2.getDouble(2);
 			this.setDeltaMovement(Math.abs(d) > 10.0 ? 0.0 : d, Math.abs(e) > 10.0 ? 0.0 : e, Math.abs(f) > 10.0 ? 0.0 : f);
+			this.hasImpulse = true;
 			double g = 3.0000512E7;
 			this.setPosRaw(
 				Mth.clamp(listTag.getDouble(0), -3.0000512E7, 3.0000512E7),
@@ -2185,7 +2197,8 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 			this.processPortalCooldown();
 			if (this.portalProcess != null) {
 				if (this.portalProcess.processPortalTeleportation(serverLevel, this, this.canUsePortal(false))) {
-					serverLevel.getProfiler().push("portal");
+					ProfilerFiller profilerFiller = Profiler.get();
+					profilerFiller.push("portal");
 					this.setPortalCooldown();
 					DimensionTransition dimensionTransition = this.portalProcess.getPortalDestination(serverLevel, this);
 					if (dimensionTransition != null) {
@@ -2196,7 +2209,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 						}
 					}
 
-					serverLevel.getProfiler().pop();
+					profilerFiller.pop();
 				} else if (this.portalProcess.hasExpired()) {
 					this.portalProcess = null;
 				}
@@ -2599,31 +2612,31 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 				}
 			}
 
-			serverLevel.getProfiler().push("changeDimension");
-			Entity entity3 = serverLevel2.dimension() == serverLevel.dimension() ? this : this.getType().create(serverLevel2, EntitySpawnReason.DIMENSION_TRAVEL);
-			if (entity3 != null) {
-				if (this != entity3) {
-					entity3.restoreFrom(this);
+			ProfilerFiller profilerFiller = Profiler.get();
+			profilerFiller.push("changeDimension");
+			Entity entityx = serverLevel2.dimension() == serverLevel.dimension() ? this : this.getType().create(serverLevel2, EntitySpawnReason.DIMENSION_TRAVEL);
+			if (entityx != null) {
+				if (this != entityx) {
+					entityx.restoreFrom(this);
 					this.removeAfterChangingDimensions();
 				}
 
-				entity3.teleportSetPosition(dimensionTransition);
-				entity3.checkInsideBlocks();
-				if (this != entity3) {
-					serverLevel2.addDuringTeleport(entity3);
+				entityx.teleportSetPosition(dimensionTransition);
+				if (this != entityx) {
+					serverLevel2.addDuringTeleport(entityx);
 				}
 
-				for (Entity entity4 : list2) {
-					entity4.startRiding(entity3, true);
+				for (Entity entity3 : list2) {
+					entity3.startRiding(entityx, true);
 				}
 
 				serverLevel.resetEmptyTime();
 				serverLevel2.resetEmptyTime();
-				dimensionTransition.postDimensionTransition().onTransition(entity3);
+				dimensionTransition.postDimensionTransition().onTransition(entityx);
 			}
 
-			serverLevel.getProfiler().pop();
-			return entity3;
+			profilerFiller.pop();
+			return entityx;
 		}
 
 		return null;
@@ -2641,6 +2654,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 		this.reapplyPosition();
 		this.setOldPosAndRot();
 		this.setDeltaMovement(positionMoveRotation2.deltaMovement());
+		this.blocksInside.clear();
 	}
 
 	public void placePortalTicket(BlockPos blockPos) {

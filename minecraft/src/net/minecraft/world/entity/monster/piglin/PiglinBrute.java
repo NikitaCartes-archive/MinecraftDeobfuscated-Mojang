@@ -8,6 +8,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.profiling.Profiler;
+import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntitySpawnReason;
@@ -113,9 +115,10 @@ public class PiglinBrute extends AbstractPiglin {
 
 	@Override
 	protected void customServerAiStep() {
-		this.level().getProfiler().push("piglinBruteBrain");
+		ProfilerFiller profilerFiller = Profiler.get();
+		profilerFiller.push("piglinBruteBrain");
 		this.getBrain().tick((ServerLevel)this.level(), this);
-		this.level().getProfiler().pop();
+		profilerFiller.pop();
 		PiglinBruteAi.updateActivity(this);
 		PiglinBruteAi.maybePlayActivitySound(this);
 		super.customServerAiStep();

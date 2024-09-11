@@ -19,6 +19,7 @@ import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.GlobalPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -84,14 +85,15 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.PlayerEnderChestContainer;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemCooldowns;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.MaceItem;
 import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.enchantment.EnchantmentEffectComponents;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.equipment.Equippable;
 import net.minecraft.world.item.trading.MerchantOffers;
 import net.minecraft.world.level.BaseCommandBlock;
 import net.minecraft.world.level.GameRules;
@@ -310,7 +312,10 @@ public abstract class Player extends LivingEntity {
 			this.lastItemInMainHand = itemStack.copy();
 		}
 
-		this.turtleHelmetTick();
+		if (!this.isEyeInFluid(FluidTags.WATER) && this.isEquipped(Items.TURTLE_HELMET)) {
+			this.turtleHelmetTick();
+		}
+
 		this.cooldowns.tick();
 		this.updatePlayerPose();
 		if (this.currentImpulseContextResetGraceTime > 0) {
@@ -355,10 +360,19 @@ public abstract class Player extends LivingEntity {
 	}
 
 	private void turtleHelmetTick() {
-		ItemStack itemStack = this.getItemBySlot(EquipmentSlot.HEAD);
-		if (itemStack.is(Items.TURTLE_HELMET) && !this.isEyeInFluid(FluidTags.WATER)) {
-			this.addEffect(new MobEffectInstance(MobEffects.WATER_BREATHING, 200, 0, false, false, true));
+		this.addEffect(new MobEffectInstance(MobEffects.WATER_BREATHING, 200, 0, false, false, true));
+	}
+
+	private boolean isEquipped(Item item) {
+		for (EquipmentSlot equipmentSlot : EquipmentSlot.VALUES) {
+			ItemStack itemStack = this.getItemBySlot(equipmentSlot);
+			Equippable equippable = itemStack.get(DataComponents.EQUIPPABLE);
+			if (itemStack.is(item) && equippable != null && equippable.slot() == equipmentSlot) {
+				return true;
+			}
 		}
+
+		return false;
 	}
 
 	protected ItemCooldowns createItemCooldowns() {
@@ -1116,13 +1130,7 @@ public abstract class Player extends LivingEntity {
 			if (!entity.skipAttackInteraction(this)) {
 				float f = this.isAutoSpinAttack() ? this.autoSpinAttackDmg : (float)this.getAttributeValue(Attributes.ATTACK_DAMAGE);
 				ItemStack itemStack = this.getWeaponItem();
-				DamageSource damageSource;
-				if (itemStack.getItem() == Items.MACE && MaceItem.canSmashAttack(this)) {
-					damageSource = this.damageSources().mace(this);
-				} else {
-					damageSource = this.damageSources().playerAttack(this);
-				}
-
+				DamageSource damageSource = (DamageSource)Optional.ofNullable(itemStack.getItem().getDamageSource(this)).orElse(this.damageSources().playerAttack(this));
 				float g = this.getEnchantedDamage(entity, f, damageSource) - f;
 				float h = this.getAttackStrengthScale(0.5F);
 				f *= 0.2F + h * h * 0.8F;

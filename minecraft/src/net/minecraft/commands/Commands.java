@@ -132,7 +132,10 @@ import net.minecraft.server.commands.WorldBorderCommand;
 import net.minecraft.server.commands.data.DataCommands;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.TagKey;
+import net.minecraft.util.profiling.Profiler;
 import net.minecraft.util.profiling.jfr.JvmProfiler;
+import net.minecraft.world.flag.FeatureFlagSet;
+import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.level.GameRules;
 import org.slf4j.Logger;
 
@@ -168,7 +171,7 @@ public class Commands {
 		ForceLoadCommand.register(this.dispatcher);
 		FunctionCommand.register(this.dispatcher);
 		GameModeCommand.register(this.dispatcher);
-		GameRuleCommand.register(this.dispatcher);
+		GameRuleCommand.register(this.dispatcher, commandBuildContext);
 		GiveCommand.register(this.dispatcher, commandBuildContext);
 		HelpCommand.register(this.dispatcher);
 		ItemCommands.register(this.dispatcher, commandBuildContext);
@@ -263,7 +266,7 @@ public class Commands {
 
 	public void performCommand(ParseResults<CommandSourceStack> parseResults, String string) {
 		CommandSourceStack commandSourceStack = parseResults.getContext().getSource();
-		commandSourceStack.getServer().getProfiler().push((Supplier<String>)(() -> "/" + string));
+		Profiler.get().push((Supplier<String>)(() -> "/" + string));
 		ContextChain<CommandSourceStack> contextChain = finishParsing(parseResults, string, commandSourceStack);
 
 		try {
@@ -297,7 +300,7 @@ public class Commands {
 				LOGGER.error("'/{}' threw an exception", string, var12);
 			}
 		} finally {
-			commandSourceStack.getServer().getProfiler().pop();
+			Profiler.get().pop();
 		}
 	}
 
@@ -342,7 +345,7 @@ public class Commands {
 			int i = Math.max(1, minecraftServer.getGameRules().getInt(GameRules.RULE_MAX_COMMAND_CHAIN_LENGTH));
 			int j = minecraftServer.getGameRules().getInt(GameRules.RULE_MAX_COMMAND_FORK_COUNT);
 
-			try (ExecutionContext<CommandSourceStack> executionContext2 = new ExecutionContext<>(i, j, minecraftServer.getProfiler())) {
+			try (ExecutionContext<CommandSourceStack> executionContext2 = new ExecutionContext<>(i, j, Profiler.get())) {
 				CURRENT_EXECUTION_CONTEXT.set(executionContext2);
 				consumer.accept(executionContext2);
 				executionContext2.runCommandQueue();
@@ -442,6 +445,11 @@ public class Commands {
 
 	public static CommandBuildContext createValidationContext(HolderLookup.Provider provider) {
 		return new CommandBuildContext() {
+			@Override
+			public FeatureFlagSet enabledFeatures() {
+				return FeatureFlags.REGISTRY.allFlags();
+			}
+
 			@Override
 			public Stream<ResourceKey<? extends Registry<?>>> listRegistryKeys() {
 				return provider.listRegistryKeys();

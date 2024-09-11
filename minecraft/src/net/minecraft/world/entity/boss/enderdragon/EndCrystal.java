@@ -51,7 +51,7 @@ public class EndCrystal extends Entity {
 	@Override
 	public void tick() {
 		this.time++;
-		this.checkInsideBlocks();
+		this.applyEffectsFromBlocks();
 		this.handlePortal();
 		if (this.level() instanceof ServerLevel) {
 			BlockPos blockPos = this.blockPosition();

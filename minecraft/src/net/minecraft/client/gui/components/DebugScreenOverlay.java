@@ -51,6 +51,9 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.debugchart.LocalSampleLogger;
 import net.minecraft.util.debugchart.RemoteDebugSampleType;
 import net.minecraft.util.debugchart.TpsDebugDimensions;
+import net.minecraft.util.profiling.Profiler;
+import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.util.profiling.Zone;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.TickRateManager;
 import net.minecraft.world.entity.Entity;
@@ -130,7 +133,8 @@ public class DebugScreenOverlay {
 	}
 
 	public void render(GuiGraphics guiGraphics) {
-		this.minecraft.getProfiler().push("debug");
+		ProfilerFiller profilerFiller = Profiler.get();
+		profilerFiller.push("debug");
 		Entity entity = this.minecraft.getCameraEntity();
 		this.block = entity.pick(20.0, 0.0F, false);
 		this.liquid = entity.pick(20.0, 0.0F, true);
@@ -161,10 +165,11 @@ public class DebugScreenOverlay {
 			this.profilerPieChart.setBottomOffset(this.pingChart.getFullHeight());
 		}
 
-		this.minecraft.getProfiler().push("profilerPie");
-		this.profilerPieChart.render(guiGraphics);
-		this.minecraft.getProfiler().pop();
-		this.minecraft.getProfiler().pop();
+		try (Zone zone = profilerFiller.zone("profilerPie")) {
+			this.profilerPieChart.render(guiGraphics);
+		}
+
+		profilerFiller.pop();
 	}
 
 	protected void drawGameInformation(GuiGraphics guiGraphics) {

@@ -198,6 +198,7 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 
 		boolean bl = clickType == ClickType.QUICK_MOVE;
 		clickType = i == -999 && clickType == ClickType.PICKUP ? ClickType.THROW : clickType;
+		this.onMouseClickAction(slot, clickType);
 		if (slot == null && selectedTab.getType() != CreativeModeTab.Type.INVENTORY && clickType != ClickType.QUICK_CRAFT) {
 			if (!this.menu.getCarried().isEmpty() && this.hasClickedOutside) {
 				if (j == 0) {

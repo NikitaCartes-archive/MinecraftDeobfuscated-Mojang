@@ -198,7 +198,7 @@ public class SectionStorage<R, P> implements AutoCloseable {
 				optional -> optional.map(
 						compoundTag -> SectionStorage.PackedChunk.parse(this.codec, registryOps, compoundTag, this.simpleRegionStorage, this.levelHeightAccessor)
 					),
-				Util.backgroundExecutor()
+				Util.backgroundExecutor().forName("parseSection")
 			)
 			.exceptionally(throwable -> {
 				if (throwable instanceof IOException iOException) {

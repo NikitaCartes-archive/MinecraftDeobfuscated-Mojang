@@ -16,8 +16,10 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalLong;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
@@ -73,6 +75,7 @@ import net.minecraft.world.level.WorldDataConfiguration;
 import net.minecraft.world.level.levelgen.WorldDimensions;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.levelgen.WorldOptions;
+import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorPresets;
 import net.minecraft.world.level.levelgen.presets.WorldPreset;
 import net.minecraft.world.level.levelgen.presets.WorldPresets;
 import net.minecraft.world.level.storage.LevelResource;
@@ -112,31 +115,58 @@ public class CreateWorldScreen extends Screen {
 	private TabNavigationBar tabNavigationBar;
 
 	public static void openFresh(Minecraft minecraft, @Nullable Screen screen) {
+		WorldCreationContextMapper worldCreationContextMapper = (reloadableServerResources, layeredRegistryAccess, dataPackReloadCookie) -> new WorldCreationContext(
+				dataPackReloadCookie.worldGenSettings(), layeredRegistryAccess, reloadableServerResources, dataPackReloadCookie.dataConfiguration()
+			);
+		Function<WorldLoader.DataLoadContext, WorldGenSettings> function = dataLoadContext -> new WorldGenSettings(
+				WorldOptions.defaultWithRandomSeed(), WorldPresets.createNormalWorldDimensions(dataLoadContext.datapackWorldgen())
+			);
+		openCreateWorldScreen(minecraft, screen, function, worldCreationContextMapper, WorldPresets.NORMAL);
+	}
+
+	public static void testWorld(Minecraft minecraft, @Nullable Screen screen) {
+		WorldCreationContextMapper worldCreationContextMapper = (reloadableServerResources, layeredRegistryAccess, dataPackReloadCookie) -> new WorldCreationContext(
+				dataPackReloadCookie.worldGenSettings().options(),
+				dataPackReloadCookie.worldGenSettings().dimensions(),
+				layeredRegistryAccess,
+				reloadableServerResources,
+				dataPackReloadCookie.dataConfiguration(),
+				new InitialWorldCreationOptions(
+					WorldCreationUiState.SelectedGameMode.CREATIVE,
+					Set.of(GameRules.RULE_DAYLIGHT, GameRules.RULE_WEATHER_CYCLE, GameRules.RULE_DOMOBSPAWNING),
+					FlatLevelGeneratorPresets.REDSTONE_READY
+				)
+			);
+		Function<WorldLoader.DataLoadContext, WorldGenSettings> function = dataLoadContext -> new WorldGenSettings(
+				WorldOptions.testWorldWithRandomSeed(), WorldPresets.createFlatWorldDimensions(dataLoadContext.datapackWorldgen())
+			);
+		openCreateWorldScreen(minecraft, screen, function, worldCreationContextMapper, WorldPresets.FLAT);
+	}
+
+	private static void openCreateWorldScreen(
+		Minecraft minecraft,
+		@Nullable Screen screen,
+		Function<WorldLoader.DataLoadContext, WorldGenSettings> function,
+		WorldCreationContextMapper worldCreationContextMapper,
+		ResourceKey<WorldPreset> resourceKey
+	) {
 		queueLoadScreen(minecraft, PREPARING_WORLD_DATA);
 		PackRepository packRepository = new PackRepository(new ServerPacksSource(minecraft.directoryValidator()));
 		WorldLoader.InitConfig initConfig = createDefaultLoadConfig(packRepository, WorldDataConfiguration.DEFAULT);
 		CompletableFuture<WorldCreationContext> completableFuture = WorldLoader.load(
 			initConfig,
 			dataLoadContext -> new WorldLoader.DataLoadOutput<>(
-					new CreateWorldScreen.DataPackReloadCookie(
-						new WorldGenSettings(WorldOptions.defaultWithRandomSeed(), WorldPresets.createNormalWorldDimensions(dataLoadContext.datapackWorldgen())),
-						dataLoadContext.dataConfiguration()
-					),
-					dataLoadContext.datapackDimensions()
+					new DataPackReloadCookie((WorldGenSettings)function.apply(dataLoadContext), dataLoadContext.dataConfiguration()), dataLoadContext.datapackDimensions()
 				),
 			(closeableResourceManager, reloadableServerResources, layeredRegistryAccess, dataPackReloadCookie) -> {
 				closeableResourceManager.close();
-				return new WorldCreationContext(
-					dataPackReloadCookie.worldGenSettings(), layeredRegistryAccess, reloadableServerResources, dataPackReloadCookie.dataConfiguration()
-				);
+				return worldCreationContextMapper.apply(reloadableServerResources, layeredRegistryAccess, dataPackReloadCookie);
 			},
 			Util.backgroundExecutor(),
 			minecraft
 		);
 		minecraft.managedBlock(completableFuture::isDone);
-		minecraft.setScreen(
-			new CreateWorldScreen(minecraft, screen, (WorldCreationContext)completableFuture.join(), Optional.of(WorldPresets.NORMAL), OptionalLong.empty())
-		);
+		minecraft.setScreen(new CreateWorldScreen(minecraft, screen, (WorldCreationContext)completableFuture.join(), Optional.of(resourceKey), OptionalLong.empty()));
 	}
 
 	public static CreateWorldScreen createFromExisting(
@@ -388,7 +418,7 @@ public class CreateWorldScreen extends Screen {
 	private void applyNewPackConfig(PackRepository packRepository, WorldDataConfiguration worldDataConfiguration, Consumer<WorldDataConfiguration> consumer) {
 		this.minecraft.forceSetScreen(new GenericMessageScreen(Component.translatable("dataPack.validation.working")));
 		WorldLoader.InitConfig initConfig = createDefaultLoadConfig(packRepository, worldDataConfiguration);
-		WorldLoader.<CreateWorldScreen.DataPackReloadCookie, WorldCreationContext>load(
+		WorldLoader.<DataPackReloadCookie, WorldCreationContext>load(
 				initConfig,
 				dataLoadContext -> {
 					if (dataLoadContext.datapackWorldgen().lookupOrThrow(Registries.WORLD_PRESET).listElements().findAny().isEmpty()) {
@@ -404,7 +434,7 @@ public class CreateWorldScreen extends Screen {
 						WorldGenSettings worldGenSettings = dataResult.<WorldGenSettings>flatMap(jsonElement -> WorldGenSettings.CODEC.parse(dynamicOps2, jsonElement))
 							.getOrThrow(string -> new IllegalStateException("Error parsing worldgen settings after loading data packs: " + string));
 						return new WorldLoader.DataLoadOutput<>(
-							new CreateWorldScreen.DataPackReloadCookie(worldGenSettings, dataLoadContext.dataConfiguration()), dataLoadContext.datapackDimensions()
+							new DataPackReloadCookie(worldGenSettings, dataLoadContext.dataConfiguration()), dataLoadContext.datapackDimensions()
 						);
 					}
 				},
@@ -611,10 +641,6 @@ public class CreateWorldScreen extends Screen {
 		} else {
 			return null;
 		}
-	}
-
-	@Environment(EnvType.CLIENT)
-	static record DataPackReloadCookie(WorldGenSettings worldGenSettings, WorldDataConfiguration dataConfiguration) {
 	}
 
 	@Environment(EnvType.CLIENT)

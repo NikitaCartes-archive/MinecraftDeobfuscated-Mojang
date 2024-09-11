@@ -122,6 +122,7 @@ public class BundleItem extends Item {
 					itemStack.set(DataComponents.BUNDLE_CONTENTS, mutable.toImmutable());
 					return true;
 				} else {
+					toggleSelectedItem(itemStack, -1);
 					return false;
 				}
 			}

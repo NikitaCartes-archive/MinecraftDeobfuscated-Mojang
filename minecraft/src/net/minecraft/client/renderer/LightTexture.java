@@ -12,6 +12,8 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.util.Mth;
+import net.minecraft.util.profiling.Profiler;
+import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
@@ -70,7 +72,8 @@ public class LightTexture implements AutoCloseable {
 	public void updateLightTexture(float f) {
 		if (this.updateLightTexture) {
 			this.updateLightTexture = false;
-			this.minecraft.getProfiler().push("lightTex");
+			ProfilerFiller profilerFiller = Profiler.get();
+			profilerFiller.push("lightTex");
 			ClientLevel clientLevel = this.minecraft.level;
 			if (clientLevel != null) {
 				float g = clientLevel.getSkyDarken(1.0F);
@@ -119,7 +122,7 @@ public class LightTexture implements AutoCloseable {
 				bufferBuilder.addVertex(0.0F, 1.0F, 0.0F);
 				BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
 				this.target.unbindWrite();
-				this.minecraft.getProfiler().pop();
+				profilerFiller.pop();
 			}
 		}
 	}

@@ -37,6 +37,7 @@ import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.GsonHelper;
+import net.minecraft.util.profiling.Profiler;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -98,14 +99,8 @@ public class ModelManager implements PreparableReloadListener, AutoCloseable {
 
 	@Override
 	public final CompletableFuture<Void> reload(
-		PreparableReloadListener.PreparationBarrier preparationBarrier,
-		ResourceManager resourceManager,
-		ProfilerFiller profilerFiller,
-		ProfilerFiller profilerFiller2,
-		Executor executor,
-		Executor executor2
+		PreparableReloadListener.PreparationBarrier preparationBarrier, ResourceManager resourceManager, Executor executor, Executor executor2
 	) {
-		profilerFiller.startTick();
 		UnbakedModel unbakedModel = MissingBlockModel.missingModel();
 		BlockStateModelLoader blockStateModelLoader = new BlockStateModelLoader(unbakedModel);
 		CompletableFuture<Map<ResourceLocation, UnbakedModel>> completableFuture = loadBlockModels(resourceManager, executor);
@@ -128,14 +123,14 @@ public class ModelManager implements PreparableReloadListener, AutoCloseable {
 					ModelDiscovery modelDiscovery = (ModelDiscovery)completableFuture3.join();
 					Object2IntMap<BlockState> object2IntMap = (Object2IntMap<BlockState>)completableFuture4.join();
 					return this.loadModels(
-						profilerFiller, map2, new ModelBakery(modelDiscovery.getTopModels(), modelDiscovery.getReferencedModels(), unbakedModel), object2IntMap
+						Profiler.get(), map2, new ModelBakery(modelDiscovery.getTopModels(), modelDiscovery.getReferencedModels(), unbakedModel), object2IntMap
 					);
 				},
 				executor
 			)
 			.thenCompose(reloadState -> reloadState.readyForUpload.thenApply(void_ -> reloadState))
 			.thenCompose(preparationBarrier::wait)
-			.thenAcceptAsync(reloadState -> this.apply(reloadState, profilerFiller2), executor2);
+			.thenAcceptAsync(reloadState -> this.apply(reloadState, Profiler.get()), executor2);
 	}
 
 	private static CompletableFuture<Map<ResourceLocation, UnbakedModel>> loadBlockModels(ResourceManager resourceManager, Executor executor) {
@@ -268,8 +263,7 @@ public class ModelManager implements PreparableReloadListener, AutoCloseable {
 	private ModelManager.ReloadState loadModels(
 		ProfilerFiller profilerFiller, Map<ResourceLocation, AtlasSet.StitchResult> map, ModelBakery modelBakery, Object2IntMap<BlockState> object2IntMap
 	) {
-		profilerFiller.push("load");
-		profilerFiller.popPush("baking");
+		profilerFiller.push("baking");
 		Multimap<ModelResourceLocation, Material> multimap = HashMultimap.create();
 		modelBakery.bakeModels((modelResourceLocation, material) -> {
 			AtlasSet.StitchResult stitchResult = (AtlasSet.StitchResult)map.get(material.atlasLocation());
@@ -309,7 +303,6 @@ public class ModelManager implements PreparableReloadListener, AutoCloseable {
 			(CompletableFuture[])map.values().stream().map(AtlasSet.StitchResult::readyForUpload).toArray(CompletableFuture[]::new)
 		);
 		profilerFiller.pop();
-		profilerFiller.endTick();
 		return new ModelManager.ReloadState(modelBakery, object2IntMap, bakedModel, map3, map, completableFuture);
 	}
 
@@ -318,7 +311,6 @@ public class ModelManager implements PreparableReloadListener, AutoCloseable {
 	}
 
 	private void apply(ModelManager.ReloadState reloadState, ProfilerFiller profilerFiller) {
-		profilerFiller.startTick();
 		profilerFiller.push("upload");
 		reloadState.atlasPreparations.values().forEach(AtlasSet.StitchResult::upload);
 		ModelBakery modelBakery = reloadState.modelBakery;
@@ -328,7 +320,6 @@ public class ModelManager implements PreparableReloadListener, AutoCloseable {
 		profilerFiller.popPush("cache");
 		this.blockModelShaper.replaceCache(reloadState.modelCache);
 		profilerFiller.pop();
-		profilerFiller.endTick();
 	}
 
 	public boolean requiresRender(BlockState blockState, BlockState blockState2) {

@@ -35,6 +35,8 @@ import net.minecraft.stats.Stats;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.SpawnUtil;
+import net.minecraft.util.profiling.Profiler;
+import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
@@ -257,9 +259,10 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 
 	@Override
 	protected void customServerAiStep() {
-		this.level().getProfiler().push("villagerBrain");
+		ProfilerFiller profilerFiller = Profiler.get();
+		profilerFiller.push("villagerBrain");
 		this.getBrain().tick((ServerLevel)this.level(), this);
-		this.level().getProfiler().pop();
+		profilerFiller.pop();
 		if (this.assignProfessionWhenSpawned) {
 			this.assignProfessionWhenSpawned = false;
 		}

@@ -15,6 +15,8 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.profiling.Profiler;
+import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
@@ -247,9 +249,10 @@ public class Zoglin extends Monster implements HoglinBase {
 
 	@Override
 	protected void customServerAiStep() {
-		this.level().getProfiler().push("zoglinBrain");
+		ProfilerFiller profilerFiller = Profiler.get();
+		profilerFiller.push("zoglinBrain");
 		this.getBrain().tick((ServerLevel)this.level(), this);
-		this.level().getProfiler().pop();
+		profilerFiller.pop();
 		this.updateActivity();
 	}
 

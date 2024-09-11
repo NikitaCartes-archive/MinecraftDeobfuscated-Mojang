@@ -76,7 +76,7 @@ public class NbtToSnbt implements DataProvider {
 								return CompletableFuture.completedFuture(null);
 							}
 						},
-						Util.backgroundExecutor()
+						Util.backgroundExecutor().forName("NbtToSnbt")
 					)
 					.thenCompose(completableFuture -> completableFuture)
 			);

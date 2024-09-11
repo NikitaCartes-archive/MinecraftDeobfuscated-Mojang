@@ -156,7 +156,9 @@ public class GameProfileCache {
 			if (completableFuture != null) {
 				return completableFuture;
 			} else {
-				CompletableFuture<Optional<GameProfile>> completableFuture2 = CompletableFuture.supplyAsync(() -> this.get(string), Util.backgroundExecutor())
+				CompletableFuture<Optional<GameProfile>> completableFuture2 = CompletableFuture.supplyAsync(
+						() -> this.get(string), Util.backgroundExecutor().forName("getProfile")
+					)
 					.whenCompleteAsync((optional, throwable) -> this.requests.remove(string), this.executor);
 				this.requests.put(string, completableFuture2);
 				return completableFuture2;

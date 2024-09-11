@@ -129,7 +129,7 @@ public class ClientHandshakePacketListenerImpl implements ClientLoginPacketListe
 		}
 
 		if (clientboundHelloPacket.shouldAuthenticate()) {
-			Util.ioPool().submit(() -> {
+			Util.ioPool().execute(() -> {
 				Component component = this.authenticateServer(string);
 				if (component != null) {
 					if (this.serverData == null || !this.serverData.isLan()) {

@@ -26,7 +26,6 @@ import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.util.profiling.ProfilerFiller;
 import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
@@ -154,12 +153,7 @@ public class TextureManager implements PreparableReloadListener, Tickable, AutoC
 
 	@Override
 	public CompletableFuture<Void> reload(
-		PreparableReloadListener.PreparationBarrier preparationBarrier,
-		ResourceManager resourceManager,
-		ProfilerFiller profilerFiller,
-		ProfilerFiller profilerFiller2,
-		Executor executor,
-		Executor executor2
+		PreparableReloadListener.PreparationBarrier preparationBarrier, ResourceManager resourceManager, Executor executor, Executor executor2
 	) {
 		CompletableFuture<Void> completableFuture = new CompletableFuture();
 		TitleScreen.preloadResources(this, executor).thenCompose(preparationBarrier::wait).thenAcceptAsync(void_ -> {

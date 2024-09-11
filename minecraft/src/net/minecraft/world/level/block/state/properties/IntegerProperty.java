@@ -1,13 +1,12 @@
 package net.minecraft.world.level.block.state.properties;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
-import java.util.Collection;
+import it.unimi.dsi.fastutil.ints.IntImmutableList;
+import java.util.List;
 import java.util.Optional;
-import java.util.Set;
+import java.util.stream.IntStream;
 
 public class IntegerProperty extends Property<Integer> {
-	private final ImmutableSet<Integer> values;
+	private final IntImmutableList values;
 	private final int min;
 	private final int max;
 
@@ -20,18 +19,12 @@ public class IntegerProperty extends Property<Integer> {
 		} else {
 			this.min = i;
 			this.max = j;
-			Set<Integer> set = Sets.<Integer>newHashSet();
-
-			for (int k = i; k <= j; k++) {
-				set.add(k);
-			}
-
-			this.values = ImmutableSet.copyOf(set);
+			this.values = IntImmutableList.toList(IntStream.range(i, j + 1));
 		}
 	}
 
 	@Override
-	public Collection<Integer> getPossibleValues() {
+	public List<Integer> getPossibleValues() {
 		return this.values;
 	}
 
@@ -69,5 +62,9 @@ public class IntegerProperty extends Property<Integer> {
 
 	public String getName(Integer integer) {
 		return integer.toString();
+	}
+
+	public int getInternalIndex(Integer integer) {
+		return integer <= this.max ? integer - this.min : -1;
 	}
 }

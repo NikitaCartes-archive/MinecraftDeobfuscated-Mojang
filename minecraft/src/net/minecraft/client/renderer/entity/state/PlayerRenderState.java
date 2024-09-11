@@ -6,6 +6,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.client.resources.PlayerSkin;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.animal.Parrot;
 import net.minecraft.world.item.ItemUseAnimation;
 
@@ -40,6 +41,10 @@ public class PlayerRenderState extends HumanoidRenderState {
 	public Parrot.Variant parrotOnRightShoulder;
 	public int id;
 	public String name = "Steve";
+
+	public float fallFlyingScale() {
+		return Mth.clamp(this.fallFlyingTimeInTicks * this.fallFlyingTimeInTicks / 100.0F, 0.0F, 1.0F);
+	}
 
 	@Environment(EnvType.CLIENT)
 	public static class HandState {

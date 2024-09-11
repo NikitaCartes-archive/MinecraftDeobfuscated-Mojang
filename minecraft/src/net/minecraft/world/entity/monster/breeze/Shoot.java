@@ -15,7 +15,6 @@ import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.windcharge.BreezeWindCharge;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.phys.Vec3;
 
 public class Shoot extends Behavior<Breeze> {
 	private static final int ATTACK_RANGE_MAX_SQRT = 256;
@@ -87,24 +86,15 @@ public class Shoot extends Behavior<Breeze> {
 			breeze.lookAt(EntityAnchorArgument.Anchor.EYES, livingEntity.position());
 			if (!brain.getMemory(MemoryModuleType.BREEZE_SHOOT_CHARGING).isPresent() && !brain.getMemory(MemoryModuleType.BREEZE_SHOOT_RECOVERING).isPresent()) {
 				brain.setMemoryWithExpiry(MemoryModuleType.BREEZE_SHOOT_RECOVERING, Unit.INSTANCE, (long)SHOOT_RECOVER_DELAY_TICKS);
-				if (isFacingTarget(breeze, livingEntity)) {
-					double d = livingEntity.getX() - breeze.getX();
-					double e = livingEntity.getY(livingEntity.isPassenger() ? 0.8 : 0.3) - breeze.getFiringYPosition();
-					double f = livingEntity.getZ() - breeze.getZ();
-					Projectile.spawnProjectileUsingShoot(
-						new BreezeWindCharge(breeze, serverLevel), serverLevel, ItemStack.EMPTY, d, e, f, 0.7F, (float)(5 - serverLevel.getDifficulty().getId() * 4)
-					);
-					breeze.playSound(SoundEvents.BREEZE_SHOOT, 1.5F, 1.0F);
-				}
+				double d = livingEntity.getX() - breeze.getX();
+				double e = livingEntity.getY(livingEntity.isPassenger() ? 0.8 : 0.3) - breeze.getFiringYPosition();
+				double f = livingEntity.getZ() - breeze.getZ();
+				Projectile.spawnProjectileUsingShoot(
+					new BreezeWindCharge(breeze, serverLevel), serverLevel, ItemStack.EMPTY, d, e, f, 0.7F, (float)(5 - serverLevel.getDifficulty().getId() * 4)
+				);
+				breeze.playSound(SoundEvents.BREEZE_SHOOT, 1.5F, 1.0F);
 			}
 		}
-	}
-
-	@VisibleForTesting
-	public static boolean isFacingTarget(Breeze breeze, LivingEntity livingEntity) {
-		Vec3 vec3 = breeze.getViewVector(1.0F);
-		Vec3 vec32 = livingEntity.position().subtract(breeze.position()).normalize();
-		return vec3.dot(vec32) > 0.5;
 	}
 
 	private static boolean isTargetWithinRange(Breeze breeze, LivingEntity livingEntity) {

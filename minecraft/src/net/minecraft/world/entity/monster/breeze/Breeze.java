@@ -12,6 +12,8 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.EntityTypeTags;
+import net.minecraft.util.profiling.Profiler;
+import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AnimationState;
 import net.minecraft.world.entity.Entity;
@@ -229,11 +231,12 @@ public class Breeze extends Monster {
 
 	@Override
 	protected void customServerAiStep() {
-		this.level().getProfiler().push("breezeBrain");
+		ProfilerFiller profilerFiller = Profiler.get();
+		profilerFiller.push("breezeBrain");
 		this.getBrain().tick((ServerLevel)this.level(), this);
-		this.level().getProfiler().popPush("breezeActivityUpdate");
+		profilerFiller.popPush("breezeActivityUpdate");
 		BreezeAi.updateActivity(this);
-		this.level().getProfiler().pop();
+		profilerFiller.pop();
 		super.customServerAiStep();
 	}
 

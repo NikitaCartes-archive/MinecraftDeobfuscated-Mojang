@@ -23,6 +23,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Container;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -573,29 +574,36 @@ public abstract class AbstractContainerMenu {
 		if (player instanceof ServerPlayer) {
 			ItemStack itemStack = this.getCarried();
 			if (!itemStack.isEmpty()) {
-				if (player.isAlive() && !((ServerPlayer)player).hasDisconnected()) {
-					player.getInventory().placeItemBackInInventory(itemStack);
-				} else {
-					player.drop(itemStack, false);
-				}
-
+				dropOrPlaceInInventory(player, itemStack);
 				this.setCarried(ItemStack.EMPTY);
 			}
 		}
 	}
 
+	private static void dropOrPlaceInInventory(Player player, ItemStack itemStack) {
+		boolean bl;
+		boolean var10000;
+		label27: {
+			bl = player.isRemoved() && player.getRemovalReason() != Entity.RemovalReason.CHANGED_DIMENSION;
+			if (player instanceof ServerPlayer serverPlayer && serverPlayer.hasDisconnected()) {
+				var10000 = true;
+				break label27;
+			}
+
+			var10000 = false;
+		}
+
+		boolean bl2 = var10000;
+		if (bl || bl2) {
+			player.drop(itemStack, false);
+		} else if (player instanceof ServerPlayer) {
+			player.getInventory().placeItemBackInInventory(itemStack);
+		}
+	}
+
 	protected void clearContainer(Player player, Container container) {
-		if (!player.isAlive() || player instanceof ServerPlayer && ((ServerPlayer)player).hasDisconnected()) {
-			for (int i = 0; i < container.getContainerSize(); i++) {
-				player.drop(container.removeItemNoUpdate(i), false);
-			}
-		} else {
-			for (int i = 0; i < container.getContainerSize(); i++) {
-				Inventory inventory = player.getInventory();
-				if (inventory.player instanceof ServerPlayer) {
-					inventory.placeItemBackInInventory(container.removeItemNoUpdate(i));
-				}
-			}
+		for (int i = 0; i < container.getContainerSize(); i++) {
+			dropOrPlaceInInventory(player, container.removeItemNoUpdate(i));
 		}
 	}
 

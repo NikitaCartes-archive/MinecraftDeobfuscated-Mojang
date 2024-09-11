@@ -25,9 +25,9 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
-import net.minecraft.util.Unit;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
@@ -47,6 +47,7 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.component.Consumable;
 import net.minecraft.world.item.component.Consumables;
+import net.minecraft.world.item.component.DamageResistant;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.item.component.Tool;
 import net.minecraft.world.item.component.UseCooldown;
@@ -154,7 +155,7 @@ public class Item implements FeatureElement, ItemLike {
 			return consumable.startConsuming(player, itemStack, interactionHand);
 		} else {
 			Equippable equippable = itemStack.get(DataComponents.EQUIPPABLE);
-			return (InteractionResult)(equippable != null ? equippable.swapWithEquipmentSlot(itemStack, player) : InteractionResult.PASS);
+			return (InteractionResult)(equippable != null && equippable.swappable() ? equippable.swapWithEquipmentSlot(itemStack, player) : InteractionResult.PASS);
 		}
 	}
 
@@ -187,6 +188,11 @@ public class Item implements FeatureElement, ItemLike {
 
 	public float getAttackDamageBonus(Entity entity, float f, DamageSource damageSource) {
 		return 0.0F;
+	}
+
+	@Nullable
+	public DamageSource getDamageSource(LivingEntity livingEntity) {
+		return null;
 	}
 
 	public boolean hurtEnemy(ItemStack itemStack, LivingEntity livingEntity, LivingEntity livingEntity2) {
@@ -239,10 +245,6 @@ public class Item implements FeatureElement, ItemLike {
 	}
 
 	public void onCraftedPostProcess(ItemStack itemStack, Level level) {
-	}
-
-	public boolean isComplex() {
-		return false;
 	}
 
 	public ItemUseAnimation getUseAnimation(ItemStack itemStack) {
@@ -358,7 +360,7 @@ public class Item implements FeatureElement, ItemLike {
 		}
 
 		public Item.Properties fireResistant() {
-			return this.component(DataComponents.FIRE_RESISTANT, Unit.INSTANCE);
+			return this.component(DataComponents.DAMAGE_RESISTANT, new DamageResistant(DamageTypeTags.IS_FIRE));
 		}
 
 		public Item.Properties jukeboxPlayable(ResourceKey<JukeboxSong> resourceKey) {
@@ -378,12 +380,12 @@ public class Item implements FeatureElement, ItemLike {
 			return this.component(DataComponents.REPAIRABLE, new Repairable(holderGetter.getOrThrow(tagKey)));
 		}
 
-		public Item.Properties equippable(EquipmentSlot equipmentSlot, Holder<SoundEvent> holder, ResourceLocation resourceLocation) {
-			return this.component(DataComponents.EQUIPPABLE, new Equippable(equipmentSlot, holder, Optional.of(resourceLocation), Optional.empty(), true));
+		public Item.Properties equippable(EquipmentSlot equipmentSlot) {
+			return this.component(DataComponents.EQUIPPABLE, Equippable.builder(equipmentSlot).build());
 		}
 
-		public Item.Properties equippable(EquipmentSlot equipmentSlot) {
-			return this.component(DataComponents.EQUIPPABLE, new Equippable(equipmentSlot, SoundEvents.ARMOR_EQUIP_GENERIC, Optional.empty(), Optional.empty(), true));
+		public Item.Properties equippableUnswappable(EquipmentSlot equipmentSlot) {
+			return this.component(DataComponents.EQUIPPABLE, Equippable.builder(equipmentSlot).setSwappable(false).build());
 		}
 
 		public Item.Properties requiredFeatures(FeatureFlag... featureFlags) {

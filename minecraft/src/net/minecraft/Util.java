@@ -11,6 +11,8 @@ import com.mojang.datafixers.Typed;
 import com.mojang.datafixers.DSL.TypeReference;
 import com.mojang.datafixers.types.Type;
 import com.mojang.datafixers.util.Pair;
+import com.mojang.jtracy.TracyClient;
+import com.mojang.jtracy.Zone;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Dynamic;
@@ -90,9 +92,9 @@ public class Util {
 	private static final int DEFAULT_MAX_THREADS = 255;
 	private static final int DEFAULT_SAFE_FILE_OPERATION_RETRIES = 10;
 	private static final String MAX_THREADS_SYSTEM_PROPERTY = "max.bg.threads";
-	private static final ExecutorService BACKGROUND_EXECUTOR = makeExecutor("Main");
-	private static final ExecutorService IO_POOL = makeIoExecutor("IO-Worker-", false);
-	private static final ExecutorService DOWNLOAD_POOL = makeIoExecutor("Download-", true);
+	private static final TracingExecutor BACKGROUND_EXECUTOR = makeExecutor("Main");
+	private static final TracingExecutor IO_POOL = makeIoExecutor("IO-Worker-", false);
+	private static final TracingExecutor DOWNLOAD_POOL = makeIoExecutor("Download-", true);
 	private static final DateTimeFormatter FILENAME_DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH.mm.ss", Locale.ROOT);
 	public static final int LINEAR_LOOKUP_THRESHOLD = 8;
 	private static final Set<String> ALLOWED_UNTRUSTED_LINK_PROTOCOLS = Set.of("http", "https");
@@ -147,7 +149,7 @@ public class Util {
 		return FILENAME_DATE_TIME_FORMATTER.format(ZonedDateTime.now());
 	}
 
-	private static ExecutorService makeExecutor(String string) {
+	private static TracingExecutor makeExecutor(String string) {
 		int i = Mth.clamp(Runtime.getRuntime().availableProcessors() - 1, 1, getMaxThreads());
 		ExecutorService executorService;
 		if (i <= 0) {
@@ -155,7 +157,13 @@ public class Util {
 		} else {
 			AtomicInteger atomicInteger = new AtomicInteger(1);
 			executorService = new ForkJoinPool(i, forkJoinPool -> {
+				final String string2 = "Worker-" + string + "-" + atomicInteger.getAndIncrement();
 				ForkJoinWorkerThread forkJoinWorkerThread = new ForkJoinWorkerThread(forkJoinPool) {
+					protected void onStart() {
+						TracyClient.setThreadName(string2, string.hashCode());
+						super.onStart();
+					}
+
 					protected void onTermination(Throwable throwable) {
 						if (throwable != null) {
 							Util.LOGGER.warn("{} died", this.getName(), throwable);
@@ -166,12 +174,12 @@ public class Util {
 						super.onTermination(throwable);
 					}
 				};
-				forkJoinWorkerThread.setName("Worker-" + string + "-" + atomicInteger.getAndIncrement());
+				forkJoinWorkerThread.setName(string2);
 				return forkJoinWorkerThread;
 			}, Util::onThreadException, true);
 		}
 
-		return executorService;
+		return new TracingExecutor(executorService);
 	}
 
 	private static int getMaxThreads() {
@@ -192,47 +200,34 @@ public class Util {
 		return 255;
 	}
 
-	public static ExecutorService backgroundExecutor() {
+	public static TracingExecutor backgroundExecutor() {
 		return BACKGROUND_EXECUTOR;
 	}
 
-	public static ExecutorService ioPool() {
+	public static TracingExecutor ioPool() {
 		return IO_POOL;
 	}
 
-	public static ExecutorService nonCriticalIoPool() {
+	public static TracingExecutor nonCriticalIoPool() {
 		return DOWNLOAD_POOL;
 	}
 
 	public static void shutdownExecutors() {
-		shutdownExecutor(BACKGROUND_EXECUTOR);
-		shutdownExecutor(IO_POOL);
+		BACKGROUND_EXECUTOR.shutdownAndAwait(3L, TimeUnit.SECONDS);
+		IO_POOL.shutdownAndAwait(3L, TimeUnit.SECONDS);
 	}
 
-	private static void shutdownExecutor(ExecutorService executorService) {
-		executorService.shutdown();
-
-		boolean bl;
-		try {
-			bl = executorService.awaitTermination(3L, TimeUnit.SECONDS);
-		} catch (InterruptedException var3) {
-			bl = false;
-		}
-
-		if (!bl) {
-			executorService.shutdownNow();
-		}
-	}
-
-	private static ExecutorService makeIoExecutor(String string, boolean bl) {
+	private static TracingExecutor makeIoExecutor(String string, boolean bl) {
 		AtomicInteger atomicInteger = new AtomicInteger(1);
-		return Executors.newCachedThreadPool(runnable -> {
+		return new TracingExecutor(Executors.newCachedThreadPool(runnable -> {
 			Thread thread = new Thread(runnable);
-			thread.setName(string + atomicInteger.getAndIncrement());
+			String string2 = string + atomicInteger.getAndIncrement();
+			TracyClient.setThreadName(string2, string.hashCode());
+			thread.setName(string2);
 			thread.setDaemon(bl);
 			thread.setUncaughtExceptionHandler(Util::onThreadException);
 			return thread;
-		});
+		}));
 	}
 
 	public static void throwAsRuntime(Throwable throwable) {
@@ -276,35 +271,22 @@ public class Util {
 		return type;
 	}
 
-	public static Runnable wrapThreadWithTaskName(String string, Runnable runnable) {
-		return SharedConstants.IS_RUNNING_IN_IDE ? () -> {
+	public static void runNamed(Runnable runnable, String string) {
+		if (SharedConstants.IS_RUNNING_IN_IDE) {
 			Thread thread = Thread.currentThread();
 			String string2 = thread.getName();
 			thread.setName(string);
 
-			try {
+			try (Zone zone = TracyClient.beginZone(string, SharedConstants.IS_RUNNING_IN_IDE)) {
 				runnable.run();
 			} finally {
 				thread.setName(string2);
 			}
-		} : runnable;
-	}
-
-	public static <V> Supplier<V> wrapThreadWithTaskName(String string, Supplier<V> supplier) {
-		return SharedConstants.IS_RUNNING_IN_IDE ? () -> {
-			Thread thread = Thread.currentThread();
-			String string2 = thread.getName();
-			thread.setName(string);
-
-			Object var4;
-			try {
-				var4 = supplier.get();
-			} finally {
-				thread.setName(string2);
+		} else {
+			try (Zone zone2 = TracyClient.beginZone(string, SharedConstants.IS_RUNNING_IN_IDE)) {
+				runnable.run();
 			}
-
-			return var4;
-		} : supplier;
+		}
 	}
 
 	public static <T> String getRegisteredName(Registry<T> registry, T object) {

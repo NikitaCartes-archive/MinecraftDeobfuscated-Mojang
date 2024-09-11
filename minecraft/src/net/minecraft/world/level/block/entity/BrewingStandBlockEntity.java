@@ -8,6 +8,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.Containers;
 import net.minecraft.world.WorldlyContainer;
@@ -91,7 +92,7 @@ public class BrewingStandBlockEntity extends BaseContainerBlockEntity implements
 
 	public static void serverTick(Level level, BlockPos blockPos, BlockState blockState, BrewingStandBlockEntity brewingStandBlockEntity) {
 		ItemStack itemStack = brewingStandBlockEntity.items.get(4);
-		if (brewingStandBlockEntity.fuel <= 0 && itemStack.is(Items.BLAZE_POWDER)) {
+		if (brewingStandBlockEntity.fuel <= 0 && itemStack.is(ItemTags.BREWING_FUEL)) {
 			brewingStandBlockEntity.fuel = 20;
 			itemStack.shrink(1);
 			setChanged(level, blockPos, blockState);
@@ -213,7 +214,7 @@ public class BrewingStandBlockEntity extends BaseContainerBlockEntity implements
 			return potionBrewing.isIngredient(itemStack);
 		} else {
 			return i == 4
-				? itemStack.is(Items.BLAZE_POWDER)
+				? itemStack.is(ItemTags.BREWING_FUEL)
 				: (itemStack.is(Items.POTION) || itemStack.is(Items.SPLASH_POTION) || itemStack.is(Items.LINGERING_POTION) || itemStack.is(Items.GLASS_BOTTLE))
 					&& this.getItem(i).isEmpty();
 		}

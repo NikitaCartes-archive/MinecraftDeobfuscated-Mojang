@@ -18,6 +18,7 @@ public class GlConst {
 	public static final int GL_TRIANGLE_FAN = 6;
 	public static final int GL_TRIANGLES = 4;
 	public static final int GL_WRITE_ONLY = 35001;
+	public static final int GL_READ_ONLY = 35000;
 	public static final int GL_EQUAL = 514;
 	public static final int GL_LEQUAL = 515;
 	public static final int GL_GREATER = 516;
@@ -69,6 +70,9 @@ public class GlConst {
 	public static final int GL_DEPTH_COMPONENT24 = 33190;
 	public static final int GL_STATIC_DRAW = 35044;
 	public static final int GL_DYNAMIC_DRAW = 35048;
+	public static final int GL_STREAM_READ = 35041;
+	public static final int GL_SYNC_GPU_COMMANDS_COMPLETE = 37143;
+	public static final int GL_TIMEOUT_EXPIRED = 37147;
 	public static final int GL_UNPACK_SWAP_BYTES = 3312;
 	public static final int GL_UNPACK_LSB_FIRST = 3313;
 	public static final int GL_UNPACK_ROW_LENGTH = 3314;
@@ -101,6 +105,7 @@ public class GlConst {
 	public static final int GL_TEXTURE_COMPARE_MODE = 34892;
 	public static final int GL_ARRAY_BUFFER = 34962;
 	public static final int GL_ELEMENT_ARRAY_BUFFER = 34963;
+	public static final int GL_PIXEL_PACK_BUFFER = 35051;
 	public static final int GL_ALPHA_BIAS = 3357;
 	public static final int GL_RGB = 6407;
 	public static final int GL_RG = 33319;

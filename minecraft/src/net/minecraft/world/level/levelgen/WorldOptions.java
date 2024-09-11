@@ -32,6 +32,10 @@ public class WorldOptions {
 		return new WorldOptions(randomSeed(), true, false);
 	}
 
+	public static WorldOptions testWorldWithRandomSeed() {
+		return new WorldOptions(randomSeed(), false, false);
+	}
+
 	private WorldOptions(long l, boolean bl, boolean bl2, Optional<String> optional) {
 		this.seed = l;
 		this.generateStructures = bl;

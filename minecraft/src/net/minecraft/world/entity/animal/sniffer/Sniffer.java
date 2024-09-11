@@ -29,6 +29,8 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.ByIdMap;
 import net.minecraft.util.Mth;
+import net.minecraft.util.profiling.Profiler;
+import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
@@ -55,10 +57,6 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
-import net.minecraft.world.level.storage.loot.LootParams;
-import net.minecraft.world.level.storage.loot.LootTable;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.Vec3;
 
 public class Sniffer extends Animal {
@@ -265,21 +263,12 @@ public class Sniffer extends Animal {
 
 	private void dropSeed() {
 		if (!this.level().isClientSide() && this.entityData.get(DATA_DROP_SEED_AT_TICK) == this.tickCount) {
-			ServerLevel serverLevel = (ServerLevel)this.level();
-			LootTable lootTable = serverLevel.getServer().reloadableRegistries().getLootTable(BuiltInLootTables.SNIFFER_DIGGING);
-			LootParams lootParams = new LootParams.Builder(serverLevel)
-				.withParameter(LootContextParams.ORIGIN, this.getHeadPosition())
-				.withParameter(LootContextParams.THIS_ENTITY, this)
-				.create(LootContextParamSets.GIFT);
-			List<ItemStack> list = lootTable.getRandomItems(lootParams);
 			BlockPos blockPos = this.getHeadBlock();
-
-			for (ItemStack itemStack : list) {
-				ItemEntity itemEntity = new ItemEntity(serverLevel, (double)blockPos.getX(), (double)blockPos.getY(), (double)blockPos.getZ(), itemStack);
+			this.dropFromGiftLootTable(BuiltInLootTables.SNIFFER_DIGGING, itemStack -> {
+				ItemEntity itemEntity = new ItemEntity(this.level(), (double)blockPos.getX(), (double)blockPos.getY(), (double)blockPos.getZ(), itemStack);
 				itemEntity.setDefaultPickUpDelay();
-				serverLevel.addFreshEntity(itemEntity);
-			}
-
+				this.level().addFreshEntity(itemEntity);
+			});
 			this.playSound(SoundEvents.SNIFFER_DROP_SEED, 1.0F, 1.0F);
 		}
 	}
@@ -450,11 +439,12 @@ public class Sniffer extends Animal {
 
 	@Override
 	protected void customServerAiStep() {
-		this.level().getProfiler().push("snifferBrain");
+		ProfilerFiller profilerFiller = Profiler.get();
+		profilerFiller.push("snifferBrain");
 		this.getBrain().tick((ServerLevel)this.level(), this);
-		this.level().getProfiler().popPush("snifferActivityUpdate");
+		profilerFiller.popPush("snifferActivityUpdate");
 		SnifferAi.updateActivity(this);
-		this.level().getProfiler().pop();
+		profilerFiller.pop();
 		super.customServerAiStep();
 	}
 

@@ -22,6 +22,8 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.util.ArrayListDeque;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
+import net.minecraft.util.profiling.Profiler;
+import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.entity.player.ChatVisiblity;
 import org.slf4j.Logger;
 
@@ -59,7 +61,8 @@ public class ChatComponent {
 			int l = this.getLinesPerPage();
 			int m = this.trimmedMessages.size();
 			if (m > 0) {
-				this.minecraft.getProfiler().push("chat");
+				ProfilerFiller profilerFiller = Profiler.get();
+				profilerFiller.push("chat");
 				float f = (float)this.getScale();
 				int n = Mth.ceil((float)this.getWidth() / f);
 				int o = guiGraphics.guiHeight();
@@ -138,7 +141,7 @@ public class ChatComponent {
 				}
 
 				guiGraphics.pose().popPose();
-				this.minecraft.getProfiler().pop();
+				profilerFiller.pop();
 			}
 		}
 	}

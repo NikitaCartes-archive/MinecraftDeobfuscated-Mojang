@@ -6,6 +6,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.ScrollWheelHandler;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.network.protocol.game.ServerboundSelectBundleItemPacket;
+import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.BundleItem;
 import net.minecraft.world.item.ItemStack;
@@ -29,21 +30,32 @@ public class BundleMouseActions implements ItemSlotMouseAction {
 
 	@Override
 	public boolean onMouseScrolled(double d, double e, int i, ItemStack itemStack) {
-		Vector2i vector2i = this.scrollWheelHandler.onMouseScroll(d, e);
-		int j = vector2i.y == 0 ? -vector2i.x : vector2i.y;
-		int k = BundleItem.getNumberOfItemsToShow(itemStack);
-		if (j != 0 && k != 0) {
-			int l = BundleItem.getSelectedItem(itemStack);
-			l = ScrollWheelHandler.getNextScrollWheelSelection((double)j, l, k);
-			this.setSelectedBundleItem(itemStack, i, l);
-		}
+		int j = BundleItem.getNumberOfItemsToShow(itemStack);
+		if (j == 0) {
+			return false;
+		} else {
+			Vector2i vector2i = this.scrollWheelHandler.onMouseScroll(d, e);
+			int k = vector2i.y == 0 ? -vector2i.x : vector2i.y;
+			if (k != 0) {
+				int l = BundleItem.getSelectedItem(itemStack);
+				l = ScrollWheelHandler.getNextScrollWheelSelection((double)k, l, j);
+				this.setSelectedBundleItem(itemStack, i, l);
+			}
 
-		return true;
+			return true;
+		}
 	}
 
 	@Override
 	public void onStopHovering(Slot slot) {
 		this.unselectedBundleItem(slot.getItem(), slot.index);
+	}
+
+	@Override
+	public void onSlotClicked(Slot slot, ClickType clickType) {
+		if (clickType == ClickType.QUICK_MOVE) {
+			this.unselectedBundleItem(slot.getItem(), slot.index);
+		}
 	}
 
 	private void setSelectedBundleItem(ItemStack itemStack, int i, int j) {

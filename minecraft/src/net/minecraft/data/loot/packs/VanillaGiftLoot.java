@@ -221,6 +221,14 @@ public record VanillaGiftLoot(HolderLookup.Provider registries) implements LootT
 				)
 		);
 		biConsumer.accept(
+			BuiltInLootTables.UNEMPLOYED_GIFT,
+			LootTable.lootTable().withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F)).add(LootItem.lootTableItem(Items.WHEAT_SEEDS)))
+		);
+		biConsumer.accept(
+			BuiltInLootTables.BABY_VILLAGER_GIFT,
+			LootTable.lootTable().withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F)).add(LootItem.lootTableItem(Items.POPPY)))
+		);
+		biConsumer.accept(
 			BuiltInLootTables.SNIFFER_DIGGING,
 			LootTable.lootTable()
 				.withPool(
@@ -239,6 +247,14 @@ public record VanillaGiftLoot(HolderLookup.Provider registries) implements LootT
 						.add(LootItem.lootTableItem(Items.SLIME_BALL).setWeight(1))
 						.add(EmptyLootItem.emptyItem().setWeight(699))
 				)
+		);
+		biConsumer.accept(
+			BuiltInLootTables.CHICKEN_LAY,
+			LootTable.lootTable().withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F)).add(LootItem.lootTableItem(Items.EGG)))
+		);
+		biConsumer.accept(
+			BuiltInLootTables.ARMADILLO_SHED,
+			LootTable.lootTable().withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F)).add(LootItem.lootTableItem(Items.ARMADILLO_SCUTE)))
 		);
 	}
 }

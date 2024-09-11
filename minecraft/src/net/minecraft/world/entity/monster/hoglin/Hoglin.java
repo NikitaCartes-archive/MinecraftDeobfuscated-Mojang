@@ -16,6 +16,8 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.profiling.Profiler;
+import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -160,9 +162,10 @@ public class Hoglin extends Animal implements Enemy, HoglinBase {
 
 	@Override
 	protected void customServerAiStep() {
-		this.level().getProfiler().push("hoglinBrain");
+		ProfilerFiller profilerFiller = Profiler.get();
+		profilerFiller.push("hoglinBrain");
 		this.getBrain().tick((ServerLevel)this.level(), this);
-		this.level().getProfiler().pop();
+		profilerFiller.pop();
 		HoglinAi.updateActivity(this);
 		if (this.isConverting()) {
 			this.timeInOverworld++;

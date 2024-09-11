@@ -25,6 +25,7 @@ import net.minecraft.network.protocol.cookie.ServerboundCookieResponsePacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ClientInformation;
 import net.minecraft.util.VisibleForDebug;
+import net.minecraft.util.profiling.Profiler;
 import org.slf4j.Logger;
 
 public abstract class ServerCommonPacketListenerImpl implements ServerCommonPacketListener {
@@ -107,7 +108,7 @@ public abstract class ServerCommonPacketListenerImpl implements ServerCommonPack
 	}
 
 	protected void keepConnectionAlive() {
-		this.server.getProfiler().push("keepAlive");
+		Profiler.get().push("keepAlive");
 		long l = Util.getMillis();
 		if (!this.isSingleplayerOwner() && l - this.keepAliveTime >= 15000L) {
 			if (this.keepAlivePending) {
@@ -120,7 +121,7 @@ public abstract class ServerCommonPacketListenerImpl implements ServerCommonPack
 			}
 		}
 
-		this.server.getProfiler().pop();
+		Profiler.get().pop();
 	}
 
 	private boolean checkIfClosed(long l) {

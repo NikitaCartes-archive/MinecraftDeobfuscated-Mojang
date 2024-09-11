@@ -57,6 +57,7 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.profiling.Profiler;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.RenderShape;
@@ -230,12 +231,7 @@ public class ParticleEngine implements PreparableReloadListener {
 
 	@Override
 	public CompletableFuture<Void> reload(
-		PreparableReloadListener.PreparationBarrier preparationBarrier,
-		ResourceManager resourceManager,
-		ProfilerFiller profilerFiller,
-		ProfilerFiller profilerFiller2,
-		Executor executor,
-		Executor executor2
+		PreparableReloadListener.PreparationBarrier preparationBarrier, ResourceManager resourceManager, Executor executor, Executor executor2
 	) {
 		@Environment(EnvType.CLIENT)
 		record ParticleDefinition(ResourceLocation id, Optional<List<ResourceLocation>> sprites) {
@@ -263,11 +259,11 @@ public class ParticleEngine implements PreparableReloadListener {
 			.thenCompose(SpriteLoader.Preparations::waitForUpload);
 		return CompletableFuture.allOf(completableFuture2, completableFuture).thenCompose(preparationBarrier::wait).thenAcceptAsync(void_ -> {
 			this.clearParticles();
-			profilerFiller2.startTick();
-			profilerFiller2.push("upload");
+			ProfilerFiller profilerFiller = Profiler.get();
+			profilerFiller.push("upload");
 			SpriteLoader.Preparations preparations = (SpriteLoader.Preparations)completableFuture2.join();
 			this.textureAtlas.upload(preparations);
-			profilerFiller2.popPush("bindSpriteSets");
+			profilerFiller.popPush("bindSpriteSets");
 			Set<ResourceLocation> set = new HashSet();
 			TextureAtlasSprite textureAtlasSprite = preparations.missing();
 			((List)completableFuture.join()).forEach(arg -> {
@@ -296,8 +292,7 @@ public class ParticleEngine implements PreparableReloadListener {
 				LOGGER.warn("Missing particle sprites: {}", set.stream().sorted().map(ResourceLocation::toString).collect(Collectors.joining(",")));
 			}
 
-			profilerFiller2.pop();
-			profilerFiller2.endTick();
+			profilerFiller.pop();
 		}, executor2);
 	}
 
@@ -379,9 +374,9 @@ public class ParticleEngine implements PreparableReloadListener {
 
 	public void tick() {
 		this.particles.forEach((particleRenderType, queue) -> {
-			this.level.getProfiler().push(particleRenderType.toString());
+			Profiler.get().push(particleRenderType.toString());
 			this.tickParticleList(queue);
-			this.level.getProfiler().pop();
+			Profiler.get().pop();
 		});
 		if (!this.trackingEmitters.isEmpty()) {
 			List<TrackingEmitter> list = Lists.<TrackingEmitter>newArrayList();

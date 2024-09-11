@@ -185,21 +185,18 @@ public class TeleportCommand {
 		@Nullable Coordinates coordinates2,
 		@Nullable TeleportCommand.LookAt lookAt
 	) throws CommandSyntaxException {
-		Vec3 vec3 = coordinates.getPosition(commandSourceStack, true);
-		Vec2 vec2 = coordinates2 == null ? null : coordinates2.getRotation(commandSourceStack, true);
+		Vec3 vec3 = coordinates.getPosition(commandSourceStack);
+		Vec2 vec2 = coordinates2 == null ? null : coordinates2.getRotation(commandSourceStack);
 		Set<Relative> set = EnumSet.noneOf(Relative.class);
 		if (coordinates.isXRelative()) {
-			set.add(Relative.X);
 			set.add(Relative.DELTA_X);
 		}
 
 		if (coordinates.isYRelative()) {
-			set.add(Relative.Y);
 			set.add(Relative.DELTA_Y);
 		}
 
 		if (coordinates.isZRelative()) {
-			set.add(Relative.Z);
 			set.add(Relative.DELTA_Z);
 		}
 
@@ -218,28 +215,27 @@ public class TeleportCommand {
 
 		for (Entity entity : collection) {
 			if (coordinates2 == null) {
-				performTeleport(commandSourceStack, entity, serverLevel, vec3.x, vec3.y, vec3.z, set, 0.0F, 0.0F, lookAt);
+				performTeleport(commandSourceStack, entity, serverLevel, vec3.x, vec3.y, vec3.z, set, entity.getYRot(), entity.getXRot(), lookAt);
 			} else {
 				performTeleport(commandSourceStack, entity, serverLevel, vec3.x, vec3.y, vec3.z, set, vec2.y, vec2.x, lookAt);
 			}
 		}
 
-		Vec3 vec32 = coordinates.getPosition(commandSourceStack);
 		if (collection.size() == 1) {
 			commandSourceStack.sendSuccess(
 				() -> Component.translatable(
 						"commands.teleport.success.location.single",
 						((Entity)collection.iterator().next()).getDisplayName(),
-						formatDouble(vec32.x),
-						formatDouble(vec32.y),
-						formatDouble(vec32.z)
+						formatDouble(vec3.x),
+						formatDouble(vec3.y),
+						formatDouble(vec3.z)
 					),
 				true
 			);
 		} else {
 			commandSourceStack.sendSuccess(
 				() -> Component.translatable(
-						"commands.teleport.success.location.multiple", collection.size(), formatDouble(vec32.x), formatDouble(vec32.y), formatDouble(vec32.z)
+						"commands.teleport.success.location.multiple", collection.size(), formatDouble(vec3.x), formatDouble(vec3.y), formatDouble(vec3.z)
 					),
 				true
 			);
@@ -268,9 +264,11 @@ public class TeleportCommand {
 		if (!Level.isInSpawnableBounds(blockPos)) {
 			throw INVALID_POSITION.create();
 		} else {
-			float i = Mth.wrapDegrees(g);
-			float j = Mth.wrapDegrees(h);
-			if (entity.teleportTo(serverLevel, d, e, f, set, i, j, true)) {
+			float i = set.contains(Relative.Y_ROT) ? g - entity.getYRot() : g;
+			float j = set.contains(Relative.X_ROT) ? h - entity.getXRot() : h;
+			float k = Mth.wrapDegrees(i);
+			float l = Mth.wrapDegrees(j);
+			if (entity.teleportTo(serverLevel, d, e, f, set, k, l, true)) {
 				if (lookAt != null) {
 					lookAt.perform(commandSourceStack, entity);
 				}

@@ -3,6 +3,7 @@ package net.minecraft.world.entity.vehicle;
 import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.function.IntFunction;
+import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import net.minecraft.BlockUtil;
 import net.minecraft.core.BlockPos;
@@ -38,7 +39,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.WaterlilyBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -773,27 +773,6 @@ public class Boat extends VehicleEntity implements Leashable, VariantHolder<Boat
 		this.lastYd = this.getDeltaMovement().y;
 		if (!this.isPassenger()) {
 			if (bl) {
-				if (this.fallDistance > 3.0F) {
-					if (this.status != Boat.Status.ON_LAND) {
-						this.resetFallDistance();
-						return;
-					}
-
-					this.causeFallDamage(this.fallDistance, 1.0F, this.damageSources().fall());
-					if (!this.level().isClientSide && !this.isRemoved()) {
-						this.kill();
-						if (this.level().getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
-							for (int i = 0; i < 3; i++) {
-								this.spawnAtLocation(this.getVariant().getPlanks());
-							}
-
-							for (int i = 0; i < 2; i++) {
-								this.spawnAtLocation(Items.STICK);
-							}
-						}
-					}
-				}
-
 				this.resetFallDistance();
 			} else if (!this.level().getFluidState(this.blockPosition().below()).is(FluidTags.WATER) && d < 0.0) {
 				this.fallDistance -= (float)d;
@@ -871,27 +850,25 @@ public class Boat extends VehicleEntity implements Leashable, VariantHolder<Boat
 	}
 
 	public static enum Type implements StringRepresentable {
-		OAK(Items.OAK_PLANKS, Items.OAK_BOAT, "oak", "item.minecraft.oak_boat"),
-		SPRUCE(Items.SPRUCE_PLANKS, Items.SPRUCE_BOAT, "spruce", "item.minecaft.spruce_boat"),
-		BIRCH(Items.BIRCH_PLANKS, Items.BIRCH_BOAT, "birch", "item.minecraft.birch_boat"),
-		JUNGLE(Items.JUNGLE_PLANKS, Items.JUNGLE_BOAT, "jungle", "item.minecraft.jungle_boat"),
-		ACACIA(Items.ACACIA_PLANKS, Items.ACACIA_BOAT, "acacia", "item.minecraft.acacia_boat"),
-		CHERRY(Items.CHERRY_PLANKS, Items.CHERRY_BOAT, "cherry", "item.minecraft.cherry_boat"),
-		DARK_OAK(Items.DARK_OAK_PLANKS, Items.DARK_OAK_BOAT, "dark_oak", "item.minecraft.dark_oak_boat"),
-		MANGROVE(Items.MANGROVE_PLANKS, Items.MANGROVE_BOAT, "mangrove", "item.minecraft.mangrove_boat"),
-		BAMBOO(Items.BAMBOO_PLANKS, Items.BAMBOO_RAFT, "bamboo", "item.minecraft.bamboo_raft");
+		OAK(() -> Items.OAK_BOAT, "oak", "item.minecraft.oak_boat"),
+		SPRUCE(() -> Items.SPRUCE_BOAT, "spruce", "item.minecaft.spruce_boat"),
+		BIRCH(() -> Items.BIRCH_BOAT, "birch", "item.minecraft.birch_boat"),
+		JUNGLE(() -> Items.JUNGLE_BOAT, "jungle", "item.minecraft.jungle_boat"),
+		ACACIA(() -> Items.ACACIA_BOAT, "acacia", "item.minecraft.acacia_boat"),
+		CHERRY(() -> Items.CHERRY_BOAT, "cherry", "item.minecraft.cherry_boat"),
+		DARK_OAK(() -> Items.DARK_OAK_BOAT, "dark_oak", "item.minecraft.dark_oak_boat"),
+		MANGROVE(() -> Items.MANGROVE_BOAT, "mangrove", "item.minecraft.mangrove_boat"),
+		BAMBOO(() -> Items.BAMBOO_RAFT, "bamboo", "item.minecraft.bamboo_raft");
 
 		private final String name;
-		private final Item planks;
-		private final Item boat;
+		private final Supplier<Item> boat;
 		final Component description;
 		public static final StringRepresentable.EnumCodec<Boat.Type> CODEC = StringRepresentable.fromEnum(Boat.Type::values);
 		private static final IntFunction<Boat.Type> BY_ID = ByIdMap.continuous(Enum::ordinal, values(), ByIdMap.OutOfBoundsStrategy.ZERO);
 
-		private Type(final Item item, final Item item2, final String string2, final String string3) {
+		private Type(final Supplier<Item> supplier, final String string2, final String string3) {
 			this.name = string2;
-			this.planks = item;
-			this.boat = item2;
+			this.boat = supplier;
 			this.description = Component.translatable(string3);
 		}
 
@@ -904,12 +881,8 @@ public class Boat extends VehicleEntity implements Leashable, VariantHolder<Boat
 			return this.name;
 		}
 
-		public Item getPlanks() {
-			return this.planks;
-		}
-
 		public Item getBoat() {
-			return this.boat;
+			return (Item)this.boat.get();
 		}
 
 		public String toString() {

@@ -79,10 +79,9 @@ import net.minecraft.stats.Stats;
 import net.minecraft.tags.TagNetworkSerialization;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntitySpawnReason;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.ThrownEnderpearl;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -151,7 +150,7 @@ public abstract class PlayerList {
 
 		Optional<CompoundTag> optional = this.load(serverPlayer);
 		ResourceKey<Level> resourceKey = (ResourceKey<Level>)optional.flatMap(
-				compoundTagx -> DimensionType.parseLegacy(new Dynamic<>(NbtOps.INSTANCE, compoundTagx.get("Dimension"))).resultOrPartial(LOGGER::error)
+				compoundTag -> DimensionType.parseLegacy(new Dynamic<>(NbtOps.INSTANCE, compoundTag.get("Dimension"))).resultOrPartial(LOGGER::error)
 			)
 			.orElse(Level.OVERWORLD);
 		ServerLevel serverLevel = this.server.getLevel(resourceKey);
@@ -230,41 +229,8 @@ public abstract class PlayerList {
 		serverLevel2.addNewPlayer(serverPlayer);
 		this.server.getCustomBossEvents().onPlayerConnect(serverPlayer);
 		this.sendActivePlayerEffects(serverPlayer);
-		if (optional.isPresent() && ((CompoundTag)optional.get()).contains("RootVehicle", 10)) {
-			CompoundTag compoundTag = ((CompoundTag)optional.get()).getCompound("RootVehicle");
-			Entity entity = EntityType.loadEntityRecursive(
-				compoundTag.getCompound("Entity"), serverLevel2, EntitySpawnReason.LOAD, entityx -> !serverLevel2.addWithUUID(entityx) ? null : entityx
-			);
-			if (entity != null) {
-				UUID uUID;
-				if (compoundTag.hasUUID("Attach")) {
-					uUID = compoundTag.getUUID("Attach");
-				} else {
-					uUID = null;
-				}
-
-				if (entity.getUUID().equals(uUID)) {
-					serverPlayer.startRiding(entity, true);
-				} else {
-					for (Entity entity2 : entity.getIndirectPassengers()) {
-						if (entity2.getUUID().equals(uUID)) {
-							serverPlayer.startRiding(entity2, true);
-							break;
-						}
-					}
-				}
-
-				if (!serverPlayer.isPassenger()) {
-					LOGGER.warn("Couldn't reattach entity to player");
-					entity.discard();
-
-					for (Entity entity2x : entity.getIndirectPassengers()) {
-						entity2x.discard();
-					}
-				}
-			}
-		}
-
+		serverPlayer.loadAndSpawnEnderpearls(optional);
+		serverPlayer.loadAndSpawnParentVehicle(optional);
 		serverPlayer.initInventoryMenu();
 	}
 
@@ -365,6 +331,11 @@ public abstract class PlayerList {
 		}
 
 		serverPlayer.unRide();
+
+		for (ThrownEnderpearl thrownEnderpearl : serverPlayer.getEnderPearls()) {
+			thrownEnderpearl.setRemoved(Entity.RemovalReason.UNLOADED_WITH_PLAYER);
+		}
+
 		serverLevel.removePlayerImmediately(serverPlayer, Entity.RemovalReason.UNLOADED_WITH_PLAYER);
 		serverPlayer.getAdvancements().stopListening();
 		this.players.remove(serverPlayer);

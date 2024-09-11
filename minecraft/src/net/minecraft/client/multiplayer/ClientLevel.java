@@ -50,7 +50,9 @@ import net.minecraft.util.ARGB;
 import net.minecraft.util.CubicSampler;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.profiling.Profiler;
 import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.util.profiling.Zone;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.TickRateManager;
 import net.minecraft.world.damagesource.DamageSource;
@@ -182,13 +184,12 @@ public class ClientLevel extends Level {
 		Holder<DimensionType> holder,
 		int i,
 		int j,
-		Supplier<ProfilerFiller> supplier,
 		LevelRenderer levelRenderer,
 		boolean bl,
 		long l,
 		int k
 	) {
-		super(clientLevelData, resourceKey, clientPacketListener.registryAccess(), holder, supplier, true, bl, l, 1000000);
+		super(clientLevelData, resourceKey, clientPacketListener.registryAccess(), holder, true, bl, l, 1000000);
 		this.connection = clientPacketListener;
 		this.chunkSource = new ClientChunkCache(this, i);
 		this.tickRateManager = new TickRateManager();
@@ -235,9 +236,9 @@ public class ClientLevel extends Level {
 			this.setSkyFlashTime(this.skyFlashTime - 1);
 		}
 
-		this.getProfiler().push("blocks");
-		this.chunkSource.tick(booleanSupplier, true);
-		this.getProfiler().pop();
+		try (Zone zone = Profiler.get().zone("blocks")) {
+			this.chunkSource.tick(booleanSupplier, true);
+		}
 	}
 
 	private void tickTime() {
@@ -267,7 +268,7 @@ public class ClientLevel extends Level {
 	}
 
 	public void tickEntities() {
-		ProfilerFiller profilerFiller = this.getProfiler();
+		ProfilerFiller profilerFiller = Profiler.get();
 		profilerFiller.push("entities");
 		this.tickingEntities.forEach(entity -> {
 			if (!entity.isRemoved() && !entity.isPassenger() && !this.tickRateManager.isEntityFrozen(entity)) {
@@ -290,9 +291,9 @@ public class ClientLevel extends Level {
 	public void tickNonPassenger(Entity entity) {
 		entity.setOldPosAndRot();
 		entity.tickCount++;
-		this.getProfiler().push((Supplier<String>)(() -> BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).toString()));
+		Profiler.get().push((Supplier<String>)(() -> BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).toString()));
 		entity.tick();
-		this.getProfiler().pop();
+		Profiler.get().pop();
 
 		for (Entity entity2 : entity.getPassengers()) {
 			this.tickPassenger(entity, entity2);

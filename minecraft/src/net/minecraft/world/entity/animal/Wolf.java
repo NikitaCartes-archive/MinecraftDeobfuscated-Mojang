@@ -383,7 +383,7 @@ public class Wolf extends TamableAnimal implements NeutralMob, VariantHolder<Hol
 	}
 
 	private boolean canArmorAbsorb(DamageSource damageSource) {
-		return this.hasArmor() && !damageSource.is(DamageTypeTags.BYPASSES_WOLF_ARMOR);
+		return this.getBodyArmorItem().is(Items.WOLF_ARMOR) && !damageSource.is(DamageTypeTags.BYPASSES_WOLF_ARMOR);
 	}
 
 	@Override
@@ -424,13 +424,13 @@ public class Wolf extends TamableAnimal implements NeutralMob, VariantHolder<Hol
 					return super.mobInteract(player, interactionHand);
 				}
 
-				if (itemStack.is(Items.WOLF_ARMOR) && this.isOwnedBy(player) && this.getBodyArmorItem().isEmpty() && !this.isBaby()) {
+				if (this.isEquippableInSlot(itemStack, EquipmentSlot.BODY) && !this.isWearingBodyArmor() && this.isOwnedBy(player) && !this.isBaby()) {
 					this.setBodyArmorItem(itemStack.copyWithCount(1));
 					itemStack.consume(1, player);
 					return InteractionResult.SUCCESS;
 				} else if (itemStack.is(Items.SHEARS)
 					&& this.isOwnedBy(player)
-					&& this.hasArmor()
+					&& this.isWearingBodyArmor()
 					&& (!EnchantmentHelper.has(this.getBodyArmorItem(), EnchantmentEffectComponents.PREVENT_ARMOR_CHANGE) || player.isCreative())) {
 					itemStack.hurtAndBreak(1, player, getSlotForHand(interactionHand));
 					this.playSound(SoundEvents.ARMOR_UNEQUIP_WOLF);
@@ -439,7 +439,7 @@ public class Wolf extends TamableAnimal implements NeutralMob, VariantHolder<Hol
 					this.spawnAtLocation(itemStack2);
 					return InteractionResult.SUCCESS;
 				} else if (this.isInSittingPose()
-					&& this.hasArmor()
+					&& this.isWearingBodyArmor()
 					&& this.isOwnedBy(player)
 					&& this.getBodyArmorItem().isDamaged()
 					&& this.getBodyArmorItem().isValidRepairItem(itemStack)) {
@@ -546,10 +546,6 @@ public class Wolf extends TamableAnimal implements NeutralMob, VariantHolder<Hol
 
 	public DyeColor getCollarColor() {
 		return DyeColor.byId(this.entityData.get(DATA_COLLAR_COLOR));
-	}
-
-	public boolean hasArmor() {
-		return this.getBodyArmorItem().is(Items.WOLF_ARMOR);
 	}
 
 	private void setCollarColor(DyeColor dyeColor) {

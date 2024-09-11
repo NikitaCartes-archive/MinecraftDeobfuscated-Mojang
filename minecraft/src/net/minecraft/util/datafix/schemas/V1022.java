@@ -22,6 +22,7 @@ public class V1022 extends Schema {
 			References.PLAYER,
 			() -> DSL.optionalFields(
 					Pair.of("RootVehicle", DSL.optionalFields("Entity", References.ENTITY_TREE.in(schema))),
+					Pair.of("ender_pearls", DSL.list(References.ENTITY_TREE.in(schema))),
 					Pair.of("Inventory", DSL.list(References.ITEM_STACK.in(schema))),
 					Pair.of("EnderItems", DSL.list(References.ITEM_STACK.in(schema))),
 					Pair.of("ShoulderEntityLeft", References.ENTITY_TREE.in(schema)),

@@ -1,5 +1,7 @@
 package com.mojang.blaze3d.vertex;
 
+import com.mojang.jtracy.MemoryPool;
+import com.mojang.jtracy.TracyClient;
 import com.mojang.logging.LogUtils;
 import java.nio.ByteBuffer;
 import javax.annotation.Nullable;
@@ -11,6 +13,7 @@ import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
 public class ByteBufferBuilder implements AutoCloseable {
+	private static final MemoryPool MEMORY_POOL = TracyClient.createMemoryPool("ByteBufferBuilder");
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final MemoryAllocator ALLOCATOR = MemoryUtil.getAllocator(false);
 	private static final int MAX_GROWTH_SIZE = 2097152;
@@ -25,6 +28,7 @@ public class ByteBufferBuilder implements AutoCloseable {
 	public ByteBufferBuilder(int i) {
 		this.capacity = i;
 		this.pointer = ALLOCATOR.malloc((long)i);
+		MEMORY_POOL.malloc(this.pointer, i);
 		if (this.pointer == 0L) {
 			throw new OutOfMemoryError("Failed to allocate " + i + " bytes");
 		}
@@ -47,7 +51,9 @@ public class ByteBufferBuilder implements AutoCloseable {
 	}
 
 	private void resize(int i) {
+		MEMORY_POOL.free(this.pointer);
 		this.pointer = ALLOCATOR.realloc(this.pointer, (long)i);
+		MEMORY_POOL.malloc(this.pointer, i);
 		LOGGER.debug("Needed to grow BufferBuilder buffer: Old size {} bytes, new size {} bytes.", this.capacity, i);
 		if (this.pointer == 0L) {
 			throw new OutOfMemoryError("Failed to resize buffer from " + this.capacity + " bytes to " + i + " bytes");
@@ -109,6 +115,7 @@ public class ByteBufferBuilder implements AutoCloseable {
 
 	public void close() {
 		if (this.pointer != 0L) {
+			MEMORY_POOL.free(this.pointer);
 			ALLOCATOR.free(this.pointer);
 			this.pointer = 0L;
 			this.generation = -1;

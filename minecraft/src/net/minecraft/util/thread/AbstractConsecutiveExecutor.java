@@ -44,7 +44,7 @@ public abstract class AbstractConsecutiveExecutor<T extends Runnable> implements
 			if (runnable == null) {
 				return false;
 			} else {
-				Util.wrapThreadWithTaskName(this.name, runnable).run();
+				Util.runNamed(runnable, this.name);
 				return true;
 			}
 		}

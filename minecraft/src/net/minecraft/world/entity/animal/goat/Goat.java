@@ -20,6 +20,8 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.profiling.Profiler;
+import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -182,12 +184,13 @@ public class Goat extends Animal {
 
 	@Override
 	protected void customServerAiStep() {
-		this.level().getProfiler().push("goatBrain");
+		ProfilerFiller profilerFiller = Profiler.get();
+		profilerFiller.push("goatBrain");
 		this.getBrain().tick((ServerLevel)this.level(), this);
-		this.level().getProfiler().pop();
-		this.level().getProfiler().push("goatActivityUpdate");
+		profilerFiller.pop();
+		profilerFiller.push("goatActivityUpdate");
 		GoatAi.updateActivity(this);
-		this.level().getProfiler().pop();
+		profilerFiller.pop();
 		super.customServerAiStep();
 	}
 

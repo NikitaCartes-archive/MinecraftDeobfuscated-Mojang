@@ -7,10 +7,12 @@ import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Dynamic;
 import java.net.InetSocketAddress;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
@@ -26,10 +28,12 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.SectionPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.PacketSendListener;
@@ -91,6 +95,8 @@ import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.Unit;
+import net.minecraft.util.profiling.Profiler;
+import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.Container;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.MenuProvider;
@@ -100,6 +106,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySelector;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.HumanoidArm;
@@ -123,6 +130,7 @@ import net.minecraft.world.entity.player.Input;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.ThrownEnderpearl;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -131,11 +139,10 @@ import net.minecraft.world.inventory.ContainerSynchronizer;
 import net.minecraft.world.inventory.HorseInventoryMenu;
 import net.minecraft.world.inventory.ResultSlot;
 import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.ComplexItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemCooldowns;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
+import net.minecraft.world.item.MapItem;
 import net.minecraft.world.item.ServerItemCooldowns;
 import net.minecraft.world.item.WrittenBookItem;
 import net.minecraft.world.item.crafting.RecipeHolder;
@@ -156,6 +163,8 @@ import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.portal.DimensionTransition;
+import net.minecraft.world.level.saveddata.maps.MapId;
+import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -173,6 +182,9 @@ public class ServerPlayer extends Player {
 	private static final int FLY_STAT_RECORDING_SPEED = 25;
 	public static final double BLOCK_INTERACTION_DISTANCE_VERIFICATION_BUFFER = 1.0;
 	public static final double ENTITY_INTERACTION_DISTANCE_VERIFICATION_BUFFER = 3.0;
+	public static final int ENDER_PEARL_TICKET_RADIUS = 2;
+	public static final String ENDER_PEARLS_TAG = "ender_pearls";
+	public static final String ENDER_PEARL_DIMENSION_TAG = "ender_pearl_dimension";
 	private static final AttributeModifier CREATIVE_BLOCK_INTERACTION_RANGE_MODIFIER = new AttributeModifier(
 		ResourceLocation.withDefaultNamespace("creative_mode_block_range"), 0.5, AttributeModifier.Operation.ADD_VALUE
 	);
@@ -232,6 +244,7 @@ public class ServerPlayer extends Player {
 	private BlockPos raidOmenPosition;
 	private Vec3 lastKnownClientMovement = Vec3.ZERO;
 	private Input lastClientInput = Input.EMPTY;
+	private final Set<ThrownEnderpearl> enderPearls = new HashSet();
 	private final ContainerSynchronizer containerSynchronizer = new ContainerSynchronizer() {
 		@Override
 		public void sendInitialData(AbstractContainerMenu abstractContainerMenu, NonNullList<ItemStack> nonNullList, ItemStack itemStack, int[] is) {
@@ -425,17 +438,7 @@ public class ServerPlayer extends Player {
 			compoundTag.put("enteredNetherPosition", compoundTag2);
 		}
 
-		Entity entity = this.getRootVehicle();
-		Entity entity2 = this.getVehicle();
-		if (entity2 != null && entity != this && entity.hasExactlyOnePlayerPassenger()) {
-			CompoundTag compoundTag3 = new CompoundTag();
-			CompoundTag compoundTag4 = new CompoundTag();
-			entity.save(compoundTag4);
-			compoundTag3.putUUID("Attach", entity2.getUUID());
-			compoundTag3.put("Entity", compoundTag4);
-			compoundTag.put("RootVehicle", compoundTag3);
-		}
-
+		this.saveParentVehicle(compoundTag);
 		compoundTag.put("recipeBook", this.recipeBook.toNbt());
 		compoundTag.putString("Dimension", this.level().dimension().location().toString());
 		if (this.respawnPosition != null) {
@@ -456,6 +459,114 @@ public class ServerPlayer extends Player {
 				.encodeStart(NbtOps.INSTANCE, this.raidOmenPosition)
 				.resultOrPartial(LOGGER::error)
 				.ifPresent(tag -> compoundTag.put("raid_omen_position", tag));
+		}
+
+		this.saveEnderPearls(compoundTag);
+	}
+
+	private void saveParentVehicle(CompoundTag compoundTag) {
+		Entity entity = this.getRootVehicle();
+		Entity entity2 = this.getVehicle();
+		if (entity2 != null && entity != this && entity.hasExactlyOnePlayerPassenger()) {
+			CompoundTag compoundTag2 = new CompoundTag();
+			CompoundTag compoundTag3 = new CompoundTag();
+			entity.save(compoundTag3);
+			compoundTag2.putUUID("Attach", entity2.getUUID());
+			compoundTag2.put("Entity", compoundTag3);
+			compoundTag.put("RootVehicle", compoundTag2);
+		}
+	}
+
+	public void loadAndSpawnParentVehicle(Optional<CompoundTag> optional) {
+		if (optional.isPresent() && ((CompoundTag)optional.get()).contains("RootVehicle", 10) && this.level() instanceof ServerLevel serverLevel) {
+			CompoundTag compoundTag = ((CompoundTag)optional.get()).getCompound("RootVehicle");
+			Entity entity = EntityType.loadEntityRecursive(
+				compoundTag.getCompound("Entity"), serverLevel, EntitySpawnReason.LOAD, entityx -> !serverLevel.addWithUUID(entityx) ? null : entityx
+			);
+			if (entity != null) {
+				UUID uUID;
+				if (compoundTag.hasUUID("Attach")) {
+					uUID = compoundTag.getUUID("Attach");
+				} else {
+					uUID = null;
+				}
+
+				if (entity.getUUID().equals(uUID)) {
+					this.startRiding(entity, true);
+				} else {
+					for (Entity entity2 : entity.getIndirectPassengers()) {
+						if (entity2.getUUID().equals(uUID)) {
+							this.startRiding(entity2, true);
+							break;
+						}
+					}
+				}
+
+				if (!this.isPassenger()) {
+					LOGGER.warn("Couldn't reattach entity to player");
+					entity.discard();
+
+					for (Entity entity2x : entity.getIndirectPassengers()) {
+						entity2x.discard();
+					}
+				}
+			}
+		}
+	}
+
+	private void saveEnderPearls(CompoundTag compoundTag) {
+		if (!this.enderPearls.isEmpty()) {
+			ListTag listTag = new ListTag();
+
+			for (ThrownEnderpearl thrownEnderpearl : this.enderPearls) {
+				if (thrownEnderpearl.isRemoved()) {
+					LOGGER.warn("Trying to save removed ender pearl, skipping");
+				} else {
+					CompoundTag compoundTag2 = new CompoundTag();
+					thrownEnderpearl.save(compoundTag2);
+					ResourceLocation.CODEC
+						.encodeStart(NbtOps.INSTANCE, thrownEnderpearl.level().dimension().location())
+						.resultOrPartial(LOGGER::error)
+						.ifPresent(tag -> compoundTag2.put("ender_pearl_dimension", tag));
+					listTag.add(compoundTag2);
+				}
+			}
+
+			compoundTag.put("ender_pearls", listTag);
+		}
+	}
+
+	public void loadAndSpawnEnderpearls(Optional<CompoundTag> optional) {
+		if (optional.isPresent()
+			&& ((CompoundTag)optional.get()).contains("ender_pearls", 9)
+			&& ((CompoundTag)optional.get()).get("ender_pearls") instanceof ListTag listTag) {
+			listTag.forEach(
+				tag -> {
+					if (tag instanceof CompoundTag compoundTag && compoundTag.contains("ender_pearl_dimension")) {
+						Optional<ResourceKey<Level>> optionalx = Level.RESOURCE_KEY_CODEC
+							.parse(NbtOps.INSTANCE, compoundTag.get("ender_pearl_dimension"))
+							.resultOrPartial(LOGGER::error);
+						if (optionalx.isEmpty()) {
+							LOGGER.warn("No dimension defined for ender pearl, skipping");
+							return;
+						}
+
+						ServerLevel serverLevel = this.level().getServer().getLevel((ResourceKey<Level>)optionalx.get());
+						if (serverLevel != null) {
+							Entity entity = EntityType.loadEntityRecursive(
+								compoundTag, serverLevel, EntitySpawnReason.LOAD, entityx -> !serverLevel.addWithUUID(entityx) ? null : entityx
+							);
+							if (entity != null) {
+								placeEnderPearlTicket(serverLevel, entity.chunkPosition());
+							} else {
+								LOGGER.warn("Failed to spawn player ender pearl in level ({}), skipping", optionalx.get());
+							}
+						} else {
+							LOGGER.warn("Trying to load ender pearl without level ({}) being loaded, skipping", optionalx.get());
+						}
+					}
+				}
+			);
 		}
 	}
 
@@ -581,11 +692,8 @@ public class ServerPlayer extends Player {
 
 			for (int i = 0; i < this.getInventory().getContainerSize(); i++) {
 				ItemStack itemStack = this.getInventory().getItem(i);
-				if (itemStack.getItem().isComplex()) {
-					Packet<?> packet = ((ComplexItem)itemStack.getItem()).getUpdatePacket(itemStack, this.level(), this);
-					if (packet != null) {
-						this.connection.send(packet);
-					}
+				if (!itemStack.isEmpty()) {
+					this.synchronizeSpecialItemUpdates(itemStack);
 				}
 			}
 
@@ -641,6 +749,17 @@ public class ServerPlayer extends Player {
 			CrashReportCategory crashReportCategory = crashReport.addCategory("Player being ticked");
 			this.fillCrashReportCategory(crashReportCategory);
 			throw new ReportedException(crashReport);
+		}
+	}
+
+	private void synchronizeSpecialItemUpdates(ItemStack itemStack) {
+		MapId mapId = itemStack.get(DataComponents.MAP_ID);
+		MapItemSavedData mapItemSavedData = MapItem.getSavedData(mapId, this.level());
+		if (mapItemSavedData != null) {
+			Packet<?> packet = mapItemSavedData.getUpdatePacket(mapId, this);
+			if (packet != null) {
+				this.connection.send(packet);
+			}
 		}
 	}
 
@@ -882,6 +1001,7 @@ public class ServerPlayer extends Player {
 			ResourceKey<Level> resourceKey = serverLevel2.dimension();
 			this.stopRiding();
 			if (serverLevel.dimension() == resourceKey) {
+				this.teleportSetPosition(dimensionTransition);
 				this.connection.teleport(PositionMoveRotation.of(dimensionTransition), dimensionTransition.relatives());
 				this.connection.resetPosition();
 				dimensionTransition.postDimensionTransition().onTransition(this);
@@ -895,19 +1015,20 @@ public class ServerPlayer extends Player {
 				playerList.sendPlayerPermissionLevel(this);
 				serverLevel2.removePlayerImmediately(this, Entity.RemovalReason.CHANGED_DIMENSION);
 				this.unsetRemoved();
-				serverLevel2.getProfiler().push("moving");
+				ProfilerFiller profilerFiller = Profiler.get();
+				profilerFiller.push("moving");
 				if (resourceKey == Level.OVERWORLD && serverLevel.dimension() == Level.NETHER) {
 					this.enteredNetherPosition = this.position();
 				}
 
 				this.teleportSetPosition(dimensionTransition);
-				serverLevel2.getProfiler().pop();
-				serverLevel2.getProfiler().push("placing");
+				profilerFiller.pop();
+				profilerFiller.push("placing");
 				this.setServerLevel(serverLevel);
 				this.connection.teleport(PositionMoveRotation.of(dimensionTransition), dimensionTransition.relatives());
 				this.connection.resetPosition();
 				serverLevel.addDuringTeleport(this);
-				serverLevel2.getProfiler().pop();
+				profilerFiller.pop();
 				this.triggerDimensionChangeTriggers(serverLevel2);
 				this.stopUsingItem();
 				this.connection.send(new ClientboundPlayerAbilitiesPacket(this.getAbilities()));
@@ -1137,7 +1258,7 @@ public class ServerPlayer extends Player {
 
 	@Override
 	public void openItemGui(ItemStack itemStack, InteractionHand interactionHand) {
-		if (itemStack.is(Items.WRITTEN_BOOK)) {
+		if (itemStack.has(DataComponents.WRITTEN_BOOK_CONTENT)) {
 			if (WrittenBookItem.resolveBookComponents(itemStack, this.createCommandSourceStack(), this)) {
 				this.containerMenu.broadcastChanges();
 			}
@@ -2001,6 +2122,34 @@ public class ServerPlayer extends Player {
 		float f = this.lastClientInput.left() == this.lastClientInput.right() ? 0.0F : (this.lastClientInput.left() ? 1.0F : -1.0F);
 		float g = this.lastClientInput.forward() == this.lastClientInput.backward() ? 0.0F : (this.lastClientInput.forward() ? 1.0F : -1.0F);
 		return getInputVector(new Vec3((double)f, 0.0, (double)g), 1.0F, this.getYRot());
+	}
+
+	public void registerEnderPearl(ThrownEnderpearl thrownEnderpearl) {
+		this.enderPearls.add(thrownEnderpearl);
+	}
+
+	public void deregisterEnderPearl(ThrownEnderpearl thrownEnderpearl) {
+		this.enderPearls.remove(thrownEnderpearl);
+	}
+
+	public Set<ThrownEnderpearl> getEnderPearls() {
+		return this.enderPearls;
+	}
+
+	public long registerAndUpdateEnderPearlTicket(ThrownEnderpearl thrownEnderpearl) {
+		if (thrownEnderpearl.level() instanceof ServerLevel serverLevel) {
+			ChunkPos chunkPos = thrownEnderpearl.chunkPosition();
+			this.registerEnderPearl(thrownEnderpearl);
+			serverLevel.resetEmptyTime();
+			return placeEnderPearlTicket(serverLevel, chunkPos) - 1L;
+		} else {
+			return 0L;
+		}
+	}
+
+	public static long placeEnderPearlTicket(ServerLevel serverLevel, ChunkPos chunkPos) {
+		serverLevel.getChunkSource().addRegionTicket(TicketType.ENDER_PEARL, chunkPos, 2, chunkPos);
+		return TicketType.ENDER_PEARL.timeout();
 	}
 
 	static record RespawnPosAngle(Vec3 position, float yaw) {

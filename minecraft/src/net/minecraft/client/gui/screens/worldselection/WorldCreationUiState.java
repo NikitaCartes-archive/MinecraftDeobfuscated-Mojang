@@ -24,6 +24,7 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.WorldDataConfiguration;
 import net.minecraft.world.level.levelgen.WorldOptions;
+import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorPreset;
 import net.minecraft.world.level.levelgen.presets.WorldPreset;
 import net.minecraft.world.level.levelgen.presets.WorldPresets;
 
@@ -56,7 +57,15 @@ public class WorldCreationUiState {
 		this.generateStructures = worldCreationContext.options().generateStructures();
 		this.bonusChest = worldCreationContext.options().generateBonusChest();
 		this.targetFolder = this.findResultFolder(this.name);
+		this.gameMode = worldCreationContext.initialWorldCreationOptions().selectedGameMode();
 		this.gameRules = new GameRules(worldCreationContext.dataConfiguration().enabledFeatures());
+		worldCreationContext.initialWorldCreationOptions().disabledGameRules().forEach(key -> this.gameRules.<GameRules.BooleanValue>getRule(key).set(false, null));
+		Optional.ofNullable(worldCreationContext.initialWorldCreationOptions().flatLevelPreset())
+			.flatMap(
+				resourceKey -> worldCreationContext.worldgenLoadContext().lookup(Registries.FLAT_LEVEL_GENERATOR_PRESET).flatMap(registry -> registry.get(resourceKey))
+			)
+			.map(reference -> ((FlatLevelGeneratorPreset)reference.value()).settings())
+			.ifPresent(flatLevelGeneratorSettings -> this.updateDimensions(PresetEditor.flatWorldConfigurator(flatLevelGeneratorSettings)));
 	}
 
 	public void addListener(Consumer<WorldCreationUiState> consumer) {
@@ -197,7 +206,8 @@ public class WorldCreationUiState {
 				this.settings.selectedDimensions(),
 				this.settings.worldgenRegistries(),
 				this.settings.dataPackResources(),
-				worldDataConfiguration
+				worldDataConfiguration,
+				this.settings.initialWorldCreationOptions()
 			);
 			return true;
 		} else {

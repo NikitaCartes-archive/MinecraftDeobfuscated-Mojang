@@ -37,6 +37,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.util.profiling.Zone;
 import net.minecraft.util.valueproviders.ConstantFloat;
 import net.minecraft.util.valueproviders.MultipliedFloats;
 import org.slf4j.Logger;
@@ -68,15 +69,13 @@ public class SoundManager extends SimplePreparableReloadListener<SoundManager.Pr
 
 	protected SoundManager.Preparations prepare(ResourceManager resourceManager, ProfilerFiller profilerFiller) {
 		SoundManager.Preparations preparations = new SoundManager.Preparations();
-		profilerFiller.startTick();
-		profilerFiller.push("list");
-		preparations.listResources(resourceManager);
-		profilerFiller.pop();
+
+		try (Zone zone = profilerFiller.zone("list")) {
+			preparations.listResources(resourceManager);
+		}
 
 		for (String string : resourceManager.getNamespaces()) {
-			profilerFiller.push(string);
-
-			try {
+			try (Zone zone2 = profilerFiller.zone(string)) {
 				for (Resource resource : resourceManager.getResourceStack(ResourceLocation.fromNamespaceAndPath(string, "sounds.json"))) {
 					profilerFiller.push(resource.sourcePackId());
 
@@ -93,34 +92,31 @@ public class SoundManager extends SimplePreparableReloadListener<SoundManager.Pr
 							}
 
 							profilerFiller.pop();
-						} catch (Throwable var14) {
+						} catch (Throwable var18) {
 							if (reader != null) {
 								try {
 									reader.close();
-								} catch (Throwable var13) {
-									var14.addSuppressed(var13);
+								} catch (Throwable var16) {
+									var18.addSuppressed(var16);
 								}
 							}
 
-							throw var14;
+							throw var18;
 						}
 
 						if (reader != null) {
 							reader.close();
 						}
-					} catch (RuntimeException var15) {
-						LOGGER.warn("Invalid {} in resourcepack: '{}'", "sounds.json", resource.sourcePackId(), var15);
+					} catch (RuntimeException var19) {
+						LOGGER.warn("Invalid {} in resourcepack: '{}'", "sounds.json", resource.sourcePackId(), var19);
 					}
 
 					profilerFiller.pop();
 				}
-			} catch (IOException var16) {
+			} catch (IOException var21) {
 			}
-
-			profilerFiller.pop();
 		}
 
-		profilerFiller.endTick();
 		return preparations;
 	}
 

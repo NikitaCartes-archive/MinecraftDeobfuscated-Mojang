@@ -61,7 +61,7 @@ public class SkinManager {
 
 									return minecraftProfileTextures;
 								}
-							}, Util.backgroundExecutor())
+							}, Util.backgroundExecutor().forName("unpackSkinTextures"))
 							.thenComposeAsync(minecraftProfileTextures -> SkinManager.this.registerTextures(cacheKey.profileId(), minecraftProfileTextures), executor);
 					}
 				}

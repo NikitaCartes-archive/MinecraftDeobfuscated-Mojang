@@ -3,26 +3,22 @@ package net.minecraft.server.commands;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.level.GameRules;
 
 public class GameRuleCommand {
-	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
+	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher, CommandBuildContext commandBuildContext) {
 		final LiteralArgumentBuilder<CommandSourceStack> literalArgumentBuilder = Commands.literal("gamerule")
 			.requires(commandSourceStack -> commandSourceStack.hasPermission(2));
-		new GameRules(FeatureFlags.REGISTRY.allFlags())
+		new GameRules(commandBuildContext.enabledFeatures())
 			.visitGameRuleTypes(
 				new GameRules.GameRuleTypeVisitor() {
 					@Override
 					public <T extends GameRules.Value<T>> void visit(GameRules.Key<T> key, GameRules.Type<T> type) {
 						LiteralArgumentBuilder<CommandSourceStack> literalArgumentBuilder = Commands.literal(key.getId());
-						if (!type.requiredFeatures().isEmpty()) {
-							literalArgumentBuilder.requires(commandSourceStack -> type.requiredFeatures().isSubsetOf(commandSourceStack.enabledFeatures()));
-						}
-
 						literalArgumentBuilder.then(
 							literalArgumentBuilder.executes(commandContext -> GameRuleCommand.queryRule(commandContext.getSource(), key))
 								.then(type.createArgument("value").executes(commandContext -> GameRuleCommand.setRule(commandContext, key)))
